@@ -800,7 +800,7 @@ pub enum ChangeOp {
         entry: LedgerEntry,
     },
     /// Remove the last ledger entry (inverse of `push_ledger`).
-    PopLedger,
+    PopLedger {},
     /// Insert or replace a narrative.
     PutNarrative {
         /// The narrative.
@@ -955,7 +955,7 @@ pub enum Reduce {
 pub enum Query {
     /// What this protocol endpoint offers: operations, queries, topics, principals,
     /// and the asker's own role and permissions.
-    Describe,
+    Describe {},
     /// One item by id, from any collection.
     Get {
         /// Item id.
@@ -970,7 +970,7 @@ pub enum Query {
         state: Option<ProposalState>,
     },
     /// The whole document and its log position (a snapshot, e.g. for hand-over).
-    Document,
+    Document {},
     /// Log entries. Filters combine with AND.
     Log {
         /// Entries with `seq` greater than this.
@@ -1311,7 +1311,7 @@ pub enum Topic {
         condition: Condition,
     },
     /// Proposals created and decided.
-    Proposals,
+    Proposals {},
     /// Attention directives addressed to a principal (default: the subscriber) and
     /// that principal's reported viewport.
     Attention {
@@ -1320,7 +1320,7 @@ pub enum Topic {
         principal: Option<String>,
     },
     /// Active intents whose trigger becomes true.
-    Intents,
+    Intents {},
 }
 
 /// A pushed event.

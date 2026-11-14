@@ -22,7 +22,7 @@ prop_compose! {
             id,
             instrument: symbol.map(|symbol| Instrument { symbol, exchange: None, calendar: None }),
             interval: Some("1d".into()),
-            source: SeriesSource::Inline,
+            source: SeriesSource::Inline {},
             data: Some(SeriesData::Bars { bars }),
         }
     }

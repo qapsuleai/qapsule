@@ -3,8 +3,8 @@
 mod common;
 
 use qp_schema::{
-    Author, Capsule, CapsuleState, Command, Document, Op, Provenance, Series, SeriesSource,
-    SCHEMA_VERSION,
+    Author, Capsule, CapsuleState, Command, Document, Instrument, Op, Provenance, Series,
+    SeriesSource, SCHEMA_VERSION,
 };
 use serde::{de::DeserializeOwned, Serialize};
 
@@ -76,7 +76,11 @@ fn command_roundtrips() {
         op: Op::PutSeries {
             series: Series {
                 id: "garan-5m".into(),
-                symbol: Some("GARAN".into()),
+                instrument: Some(Instrument {
+                    symbol: "GARAN".into(),
+                    exchange: Some("BIST".into()),
+                    calendar: Some("XIST".into()),
+                }),
                 interval: Some("5m".into()),
                 source: SeriesSource::Matriks {
                     symbol: "GARAN".into(),

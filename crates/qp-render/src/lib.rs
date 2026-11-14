@@ -18,7 +18,8 @@ pub mod scene;
 #[cfg(any(feature = "spike-vello-cpu", feature = "spike-vello-gpu"))]
 pub mod spikes;
 
-pub use bars::{parse_bars, synthetic_bars, Bar, BarsFile};
+pub use bars::{parse_bars, synthetic_bars};
+pub use qp_schema::{Bar, Series};
 
 /// Default output width in pixels.
 pub const DEFAULT_WIDTH: u32 = 1200;
@@ -46,8 +47,9 @@ impl std::error::Error for RenderError {}
 /// Renders `bars` and returns straight (non-premultiplied) RGBA8 pixels.
 ///
 /// # Errors
-/// Fails for sizes outside `200x120 ..= 16384x16384` or an empty bar list.
-pub fn render_rgba(bars: &BarsFile, width: u32, height: u32) -> Result<Vec<u8>, RenderError> {
+/// Fails for sizes outside `200x120 ..= 16384x16384`, a series without bars or an empty
+/// bar list.
+pub fn render_rgba(bars: &Series, width: u32, height: u32) -> Result<Vec<u8>, RenderError> {
     let scene = scene::build_scene(bars, width, height)?;
     let pm = cpu::rasterize(&scene)?;
     Ok(cpu::demultiply(pm.data()))
@@ -58,7 +60,7 @@ pub fn render_rgba(bars: &BarsFile, width: u32, height: u32) -> Result<Vec<u8>, 
 ///
 /// # Errors
 /// Same as [`render_rgba`], plus PNG encoding failures.
-pub fn render_png(bars: &BarsFile, width: u32, height: u32) -> Result<Vec<u8>, RenderError> {
+pub fn render_png(bars: &Series, width: u32, height: u32) -> Result<Vec<u8>, RenderError> {
     let rgba = render_rgba(bars, width, height)?;
     encode_png(&rgba, width, height)
 }

@@ -118,39 +118,34 @@ fn schema_validate(
     type_name: &str,
     schema_dir: Option<&Path>,
 ) -> Result<Outcome, String> {
-    let schema = match schema_dir {
-        Some(dir) => read_json(&dir.join(format!("{type_name}.schema.json")))?,
-        None => qp_schema::json_schemas()
-            .into_iter()
-            .find(|(name, _)| *name == type_name)
-            .map(|(_, schema)| schema)
-            .ok_or_else(|| {
-                let names: Vec<&str> = qp_schema::json_schemas()
-                    .into_iter()
-                    .map(|(n, _)| n)
-                    .collect();
-                format!(
-                    "unknown type `{type_name}`; expected one of: {}",
-                    names.join(", ")
-                )
-            })?,
-    };
     let instance = read_json(file)?;
-    let validator = jsonschema::validator_for(&schema)
-        .map_err(|e| format!("schema `{type_name}` does not compile: {e}"))?;
-    let errors: Vec<String> = validator
-        .iter_errors(&instance)
-        .map(|e| format!("{} at {}", e, e.instance_path()))
-        .collect();
-    if errors.is_empty() {
-        println!("valid");
-        Ok(Outcome::Ok)
-    } else {
-        for err in &errors {
-            println!("error: {err}");
+    let result = match schema_dir {
+        Some(dir) => {
+            let schema = read_json(&dir.join(format!("{type_name}.schema.json")))?;
+            qp_schema::validate_with_schema(&schema, &instance)
         }
-        println!("invalid ({} error(s))", errors.len());
-        Ok(Outcome::Invalid)
+        None => {
+            if qp_schema::json_schema(type_name).is_none() {
+                return Err(format!(
+                    "unknown type `{type_name}`; expected one of: {}",
+                    qp_schema::root_type_names().join(", ")
+                ));
+            }
+            qp_schema::validate(type_name, &instance)
+        }
+    };
+    match result {
+        Ok(()) => {
+            println!("valid");
+            Ok(Outcome::Ok)
+        }
+        Err(errors) => {
+            for err in &errors {
+                println!("error: {err}");
+            }
+            println!("invalid ({} error(s))", errors.len());
+            Ok(Outcome::Invalid)
+        }
     }
 }
 

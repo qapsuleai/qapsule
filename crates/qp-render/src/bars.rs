@@ -1,66 +1,27 @@
-//! Bar fixture format and a deterministic synthetic bar generator.
+//! Bar fixture parsing and a deterministic synthetic bar generator.
 //!
-//! R0 note: this is a private, minimal format owned by `qp-render`. Unifying it with
-//! `qp-schema`'s series type is a later-round job (see `SPIKE.md`).
+//! Since R1 the bar type and the fixture format are `qp-schema`'s (`Bar`, `Series`).
 
-use serde::{Deserialize, Serialize};
+use qp_schema::{Bar, Instrument, Series, SeriesData, SeriesSource};
 
 use crate::RenderError;
 
-/// One OHLCV bar. `t` is the bar open time in epoch milliseconds (UTC).
-#[derive(Debug, Clone, Copy, PartialEq, Serialize, Deserialize)]
-pub struct Bar {
-    pub t: i64,
-    pub o: f64,
-    pub h: f64,
-    pub l: f64,
-    pub c: f64,
-    pub v: f64,
-}
-
-/// The `fixtures/bars/*.json` file format.
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-pub struct BarsFile {
-    pub symbol: String,
-    pub interval: String,
-    pub bars: Vec<Bar>,
-}
-
-/// Parses a bars JSON document and validates it.
+/// Parses a bar series document (`fixtures/bars/*.json`: a `qp_schema::Series` with
+/// embedded bars) and validates it with `qp_schema::validate_bars`.
 ///
 /// # Errors
-/// Returns an error for malformed JSON, an empty bar list, non-finite values,
-/// `h < max(o, c)` / `l > min(o, c)`, or timestamps that are not strictly increasing.
-pub fn parse_bars(json: &str) -> Result<BarsFile, RenderError> {
-    let file: BarsFile = serde_json::from_str(json)
-        .map_err(|e| RenderError::new(format!("invalid bars JSON: {e}")))?;
-    validate(&file)?;
-    Ok(file)
+/// Returns an error for malformed JSON, a series without bars, an empty bar list,
+/// non-finite values, `h < max(o, c)` / `l > min(o, c)`, or timestamps that are not
+/// strictly increasing.
+pub fn parse_bars(json: &str) -> Result<Series, RenderError> {
+    qp_schema::parse_bar_series(json).map_err(RenderError::new)
 }
 
-fn validate(file: &BarsFile) -> Result<(), RenderError> {
-    if file.bars.is_empty() {
-        return Err(RenderError::new("bars file has no bars"));
-    }
-    let mut prev_t: Option<i64> = None;
-    for (i, b) in file.bars.iter().enumerate() {
-        let vals = [b.o, b.h, b.l, b.c, b.v];
-        if vals.iter().any(|v| !v.is_finite()) {
-            return Err(RenderError::new(format!("bar {i}: non-finite value")));
-        }
-        if b.h < b.o.max(b.c) || b.l > b.o.min(b.c) || b.l > b.h {
-            return Err(RenderError::new(format!("bar {i}: inconsistent OHLC")));
-        }
-        if let Some(p) = prev_t {
-            if b.t <= p {
-                return Err(RenderError::new(format!(
-                    "bar {i}: timestamp not increasing"
-                )));
-            }
-        }
-        prev_t = Some(b.t);
-    }
-    Ok(())
+/// The bars of a series, or an error if it carries none.
+pub(crate) fn bars_of(series: &Series) -> Result<&[Bar], RenderError> {
+    series
+        .bars()
+        .ok_or_else(|| RenderError::new("series has no embedded bars"))
 }
 
 /// Minimal 64-bit LCG (Knuth MMIX constants). Integer-only, so identical on every target.
@@ -95,7 +56,7 @@ const START_MS: i64 = 1_735_776_000_000;
 /// Uses only integer arithmetic and IEEE basic float operations (`+ - * /`, `round`),
 /// which are correctly rounded on every target, so the output is identical everywhere.
 #[must_use]
-pub fn synthetic_bars(n: usize, seed: u64) -> BarsFile {
+pub fn synthetic_bars(n: usize, seed: u64) -> Series {
     let mut rng = Lcg(seed);
     let mut bars = Vec::with_capacity(n);
     let mut close = 100.0_f64;
@@ -122,10 +83,16 @@ pub fn synthetic_bars(n: usize, seed: u64) -> BarsFile {
         close = c;
         day += 1;
     }
-    BarsFile {
-        symbol: "SAMPLE".to_owned(),
-        interval: "1d".to_owned(),
-        bars,
+    Series {
+        id: "sample".to_owned(),
+        instrument: Some(Instrument {
+            symbol: "SAMPLE".to_owned(),
+            exchange: None,
+            calendar: None,
+        }),
+        interval: Some("1d".to_owned()),
+        source: SeriesSource::Inline,
+        data: Some(SeriesData::Bars { bars }),
     }
 }
 
@@ -138,15 +105,17 @@ mod tests {
         let a = synthetic_bars(500, 7);
         let b = synthetic_bars(500, 7);
         assert_eq!(a, b);
-        validate(&a).unwrap();
+        qp_schema::validate_bars(a.bars().unwrap()).unwrap();
     }
 
     #[test]
     fn rejects_bad_input() {
         assert!(parse_bars("{").is_err());
-        assert!(parse_bars(r#"{"symbol":"X","interval":"1d","bars":[]}"#).is_err());
-        let bad =
-            r#"{"symbol":"X","interval":"1d","bars":[{"t":1,"o":1,"h":0.5,"l":0.4,"c":1,"v":1}]}"#;
+        let empty = r#"{"id":"x","source":{"kind":"inline"},"data":{"kind":"bars","bars":[]}}"#;
+        assert!(parse_bars(empty).is_err());
+        let bad = r#"{"id":"x","source":{"kind":"inline"},"data":{"kind":"bars","bars":[{"t":1,"o":1,"h":0.5,"l":0.4,"c":1,"v":1}]}}"#;
         assert!(parse_bars(bad).is_err());
+        let no_bars = r#"{"id":"x","source":{"kind":"inline"}}"#;
+        assert!(parse_bars(no_bars).is_err());
     }
 }

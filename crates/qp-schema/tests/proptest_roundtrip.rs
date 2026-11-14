@@ -3,7 +3,8 @@
 mod common;
 
 use proptest::prelude::*;
-use qp_schema::{Bar, Series, SeriesData, SeriesSource};
+use proptest::test_runner::RngSeed;
+use qp_schema::{Bar, Instrument, Series, SeriesData, SeriesSource};
 
 fn finite() -> impl Strategy<Value = f64> {
     prop::num::f64::NORMAL | prop::num::f64::SUBNORMAL | prop::num::f64::ZERO
@@ -19,7 +20,7 @@ prop_compose! {
     fn series()(id in "[a-z0-9-]{1,16}", symbol in proptest::option::of("[A-Z]{3,6}"), bars in prop::collection::vec(bar(), 0..32)) -> Series {
         Series {
             id,
-            symbol,
+            instrument: symbol.map(|symbol| Instrument { symbol, exchange: None, calendar: None }),
             interval: Some("1d".into()),
             source: SeriesSource::Inline,
             data: Some(SeriesData::Bars { bars }),
@@ -36,6 +37,14 @@ fn same_bits(a: &Bar, b: &Bar) -> bool {
 }
 
 proptest! {
+    // Reproducible in CI: fixed seed, no failure-persistence files. `PROPTEST_CASES`
+    // still overrides the case count.
+    #![proptest_config(ProptestConfig {
+        rng_seed: RngSeed::Fixed(0x5172_2026),
+        failure_persistence: None,
+        ..ProptestConfig::default()
+    })]
+
     #[test]
     fn bar_roundtrips_exactly(b in bar()) {
         let json = serde_json::to_string(&b).unwrap();

@@ -55,11 +55,51 @@ impl Sma {
     /// Commits a bar with input `x`.
     #[inline]
     pub fn commit1(&mut self, x: f64) {
+        self.commit_evict(x);
+    }
+
+    /// Commits `x` and returns the value that left the `period - 1` window, if any.
+    #[inline]
+    pub(crate) fn commit_evict(&mut self, x: f64) -> Option<f64> {
         self.sum += x;
-        if let Some(old) = self.ring.push(x) {
+        let old = self.ring.push(x);
+        if let Some(old) = old {
             self.sum -= old;
         }
         self.n += 1;
+        old
+    }
+
+    /// Whether the committed window is full and non-empty (`period >= 2`, at least
+    /// `period - 1` bars committed).
+    #[inline]
+    pub(crate) fn is_steady(&self) -> bool {
+        self.ring.is_full_nonempty()
+    }
+
+    /// Steady-state peek + commit in one step (requires [`Sma::is_steady`]): returns the
+    /// bar's value and the evicted input. Same operations, same order as
+    /// `peek1(x)` followed by `commit1(x)`.
+    #[inline]
+    pub(crate) fn step_steady(&mut self, x: f64) -> (f64, f64) {
+        let s = self.sum + x;
+        let value = s / self.pf;
+        let old = self.ring.push_full(x);
+        self.sum = s - old;
+        self.n += 1;
+        (value, old)
+    }
+
+    /// Sum of the committed window (the last `window_len()` inputs).
+    #[inline]
+    pub(crate) fn window_sum(&self) -> f64 {
+        self.sum
+    }
+
+    /// Number of inputs in the committed window (`<= period - 1`).
+    #[inline]
+    pub(crate) fn window_len(&self) -> usize {
+        self.ring.len()
     }
 }
 

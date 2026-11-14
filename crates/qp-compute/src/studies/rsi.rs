@@ -22,13 +22,14 @@ pub struct Rsi {
     avg_loss: f64,
 }
 
+/// `(gain, loss)` of a change; written as two selects so it compiles without a
+/// data-dependent branch (prices go up and down unpredictably).
 #[inline]
 fn split(change: f64) -> (f64, f64) {
-    if change > 0.0 {
-        (change, 0.0)
-    } else {
-        (0.0, change.abs())
-    }
+    let up = change > 0.0;
+    let gain = if up { change } else { 0.0 };
+    let loss = if up { 0.0 } else { change.abs() };
+    (gain, loss)
 }
 
 /// RSI from average gain and loss.

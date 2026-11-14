@@ -114,11 +114,13 @@ impl<C: Core> Study for Streaming<C> {
     }
 }
 
-/// Fixed-capacity FIFO of the last `cap` committed values.
+/// Fixed-capacity FIFO of the last `cap` committed values (no integer division on the
+/// hot path: indices wrap with a compare).
 #[derive(Debug, Clone)]
 pub(crate) struct Ring {
     buf: Vec<f64>,
-    head: usize,
+    /// Next write position (== oldest value once full).
+    pos: usize,
     len: usize,
 }
 
@@ -126,7 +128,7 @@ impl Ring {
     pub(crate) fn new(cap: usize) -> Self {
         Self {
             buf: vec![0.0; cap],
-            head: 0,
+            pos: 0,
             len: 0,
         }
     }
@@ -137,26 +139,50 @@ impl Ring {
 
     /// Appends `x`; returns the evicted value when the ring was full. With capacity 0
     /// `x` itself is "evicted".
+    #[inline]
     pub(crate) fn push(&mut self, x: f64) -> Option<f64> {
         let cap = self.buf.len();
-        if cap == 0 {
-            return Some(x);
-        }
-        if self.len < cap {
-            let idx = (self.head + self.len) % cap;
-            self.buf[idx] = x;
+        if self.len == cap {
+            // Steady state (also the capacity-0 case: `x` itself is evicted).
+            if cap == 0 {
+                return Some(x);
+            }
+            let old = std::mem::replace(&mut self.buf[self.pos], x);
+            self.pos += 1;
+            if self.pos == cap {
+                self.pos = 0;
+            }
+            Some(old)
+        } else {
+            self.buf[self.pos] = x;
+            self.pos += 1;
+            if self.pos == cap {
+                self.pos = 0;
+            }
             self.len += 1;
             None
-        } else {
-            let old = self.buf[self.head];
-            self.buf[self.head] = x;
-            self.head = (self.head + 1) % cap;
-            Some(old)
         }
     }
 
+    /// Whether the ring holds `cap > 0` values.
+    #[inline]
+    pub(crate) fn is_full_nonempty(&self) -> bool {
+        self.len == self.buf.len() && self.len > 0
+    }
+
+    /// [`Ring::push`] for a full, non-empty ring: returns the evicted value.
+    #[inline]
+    pub(crate) fn push_full(&mut self, x: f64) -> f64 {
+        let old = std::mem::replace(&mut self.buf[self.pos], x);
+        self.pos += 1;
+        if self.pos == self.buf.len() {
+            self.pos = 0;
+        }
+        old
+    }
+
     pub(crate) fn clear(&mut self) {
-        self.head = 0;
+        self.pos = 0;
         self.len = 0;
     }
 }

@@ -216,7 +216,7 @@ impl Soa {
 // Too many lanes spill vector registers (16 on x86_64 SSE2, 32 on aarch64); wasm32 in V8
 // gains little from lanes for the wide-state studies.
 #[cfg(target_arch = "x86_64")]
-const SOA_LANES: [usize; 5] = [4, 4, 4, 2, 1];
+const SOA_LANES: [usize; 5] = [2, 4, 4, 2, 2];
 #[cfg(target_arch = "wasm32")]
 const SOA_LANES: [usize; 5] = [1, 2, 2, 1, 1];
 #[cfg(not(any(target_arch = "x86_64", target_arch = "wasm32")))]

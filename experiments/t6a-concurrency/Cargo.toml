@@ -1,0 +1,22 @@
+[package]
+name = "t6a-concurrency"
+version = "0.0.0"
+edition = "2021"
+publish = false
+description = "RD1/T6a experiment: single authority + ordered log vs CRDT (Automerge, Loro)."
+
+# Not a member of the main workspace: CI and `cargo test --workspace` ignore it.
+[workspace]
+
+[dependencies]
+qp-schema = { path = "../../crates/qp-schema" }
+serde = { version = "1.0.229", features = ["derive"] }
+serde_json = { version = "1.0.154", features = ["float_roundtrip"] }
+automerge = "=0.12.0"
+loro = "=1.17.1"
+sha2 = "0.10"
+flate2 = "1"
+
+[profile.release]
+lto = "thin"
+codegen-units = 1

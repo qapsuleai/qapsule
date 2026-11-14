@@ -1509,6 +1509,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "qp-source"
+version = "0.0.0"
+dependencies = [
+ "qp-compute",
+ "qp-schema",
+ "serde_json",
+]
+
+[[package]]
 name = "qp-wasm"
 version = "0.0.0"
 dependencies = [

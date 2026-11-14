@@ -1,0 +1,13 @@
+[package]
+name = "qp-schema"
+description = "Qapsule schema v0: Rust types are the single source of truth."
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[dependencies]
+
+[lints]
+workspace = true

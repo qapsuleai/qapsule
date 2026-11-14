@@ -1,0 +1,23 @@
+# Build
+/target/
+**/*.rs.bk
+/pkg/
+**/pkg/
+node_modules/
+
+# Secrets — never commit
+.env
+.env.*
+*.env
+*.pem
+*.key
+*.p12
+secrets/
+*token*
+
+# Local outputs
+/out/
+*.out.png
+.DS_Store
+.idea/
+.vscode/

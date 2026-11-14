@@ -1,0 +1,17 @@
+[package]
+name = "qp-cli"
+description = "`qp` command line for agents and tests."
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[[bin]]
+name = "qp"
+path = "src/main.rs"
+
+[dependencies]
+
+[lints]
+workspace = true

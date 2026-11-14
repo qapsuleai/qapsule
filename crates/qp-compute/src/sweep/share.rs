@@ -501,7 +501,7 @@ fn rsi_lanes<const L: usize>(
     let (mut ag, mut al) = (st.map(|s| s[2]), st.map(|s| s[3]));
     // Blocks of bars: the dependent smoothing chains run lane-interleaved into small
     // local buffers, then `rsi_from_avg` (two of the four divisions per bar) runs as a
-    // dependency-free pass per lane, which vectorizes, and each lane's output is written
+    // dependency-free pass per lane, off the chains, and each lane's output is written
     // as one sequential stream (2 * L interleaved write streams thrash at L = 8).
     const B: usize = 128;
     let mut tg = [[0.0; B]; L];

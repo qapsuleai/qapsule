@@ -132,18 +132,20 @@ impl Bollinger {
 
     /// The bands of one bar from its middle and standard deviation. A pure function of
     /// `(k, middle, std)`: the sweep shares `middle`/`std` across `k` values and calls this
-    /// per `k`. The bandwidth quotient is computed unconditionally and selected (same
-    /// value as a branch, but lets a column pass vectorize).
+    /// per `k`.
     #[inline]
     #[must_use]
     pub(crate) fn bands(k: f64, middle: f64, std: f64) -> BollingerValue {
         let band = k * std;
-        let q = (2.0 * band) / middle;
         BollingerValue {
             middle,
             upper: middle + band,
             lower: middle - band,
-            bandwidth: if middle == 0.0 { 0.0 } else { q },
+            bandwidth: if middle == 0.0 {
+                0.0
+            } else {
+                (2.0 * band) / middle
+            },
         }
     }
 

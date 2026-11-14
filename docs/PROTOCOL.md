@@ -357,7 +357,10 @@ ve son bar `>=` sağ taraf (önceki değer boşsa yanlış); `cross_below` simet
 `put_series`, `put_view`, `insert_layer`, `delete_layer`, `set_x_domain`, `put_fact`,
 `put_finding`, `put_capsule`, `set_capsule_state`, `put_intent`, `push_ledger`,
 `pop_ledger`, `put_narrative`, `put_proposal`, `delete`, `append_bars`, `truncate_bars`,
-`set_last_bar`. Her biri tam öğe taşır; köken (`provenance`) otorite tarafından damgalanır
+`set_last_bar`. Her biri tam öğe taşır; `put_*` değişimlerinin isteğe bağlı `index` alanı
+yeni öğenin koleksiyondaki yeridir (yoksa sona; var olan öğe yerinde değiştirilir) —
+silmenin tersi öğeyi eski yerine koyar, böylece sil + geri al dokümanı bayt düzeyinde
+aynı bırakır; köken (`provenance`) otorite tarafından damgalanır
 (istemci köken yazmaz). İstemcinin `Op`'ları değişimlere açılır; örneğin
 `reject_finding` → `set_capsule_state` + `push_ledger`; `add_study` (+`show`) →
 `put_series` + `insert_layer`.
@@ -432,8 +435,10 @@ uygulanır, çakışanlar bu hatayla döner ve istemci okuyup yeniden gönderir 
 
 `undo` hedef girdinin `inverse` değişimlerini yeni bir girdi olarak yazar (günlük yalnızca
 büyür; köken korunur). Yeni girdinin `undoes` alanı hedefi gösterir. Hedef verilmezse:
-konuşanın (yazar ya da onaylayan olduğu) en son, geri alınmamış ve kendisi geri alma
-olmayan girdisi. Başkasının girdisini geri almak `owner` rolü ister. Hedeften sonra
+konuşanın **yazarı olduğu** en son, geri alınmamış ve kendisi geri alma olmayan girdisi.
+Geri alma `write` yetkisi ister (öneri olamaz). Başkasının girdisini (onayladığı girdiler
+dahil) geri almak `owner` rolü ister. Karar içeren bir girdiyi (kapsül onay/ret, karne
+kaydı, öneri durumu) geri almak ayrıca `decide` yetkisi ister. Hedeften sonra
 gelen, geri alınmamış bir girdi aynı kimliklerden birine dokunduysa `undo_conflict`
 (`conflicts` ile) döner; böylece başka bir yazarın sonraki işi sessizce ezilmez.
 Bir geri almayı geri almak yeniden yapmaktır (redo).
@@ -466,8 +471,8 @@ istemci yalnızca kimliğini söyler (kimlik doğrulama taşımanın işidir; v0
 - Köken: değişimlerdeki her öğenin `provenance.author`'u otoritenin bildiği yazardır;
   `at` son `clock`'tur; kabul edilen önerilerde `approved_by` karar verendir. İstemcinin
   gönderdiği öğelerde köken alanı yoktur (işlemler köken taşımaz).
-- Denetim izi: günlüğün kendisi. Her girdide yazar, onaylayan, istek, değişimler, ters
-  değişimler, zaman; `log` sorgusuyla okunur.
+- Denetim izi: günlüğün kendisi. Her girdide yazar, onaylayan, neden (`reason`), istek,
+  değişimler, ters değişimler, zaman; `log` sorgusuyla okunur.
 
 ## 10. Yetenek uzlaşması ve sunum derinliği
 

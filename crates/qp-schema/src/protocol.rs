@@ -708,11 +708,21 @@ pub enum ChangeOp {
     PutSeries {
         /// The series.
         series: Series,
+        /// Position in its collection when inserting a new item (default: the end).
+        /// Used by inverses so that undoing a delete restores the item in place;
+        /// ignored when replacing an existing item.
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        index: Option<u32>,
     },
     /// Insert or replace a view.
     PutView {
         /// The view.
         view: View,
+        /// Position in its collection when inserting a new item (default: the end).
+        /// Used by inverses so that undoing a delete restores the item in place;
+        /// ignored when replacing an existing item.
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        index: Option<u32>,
     },
     /// Insert a layer into a view at `index`.
     InsertLayer {
@@ -741,16 +751,31 @@ pub enum ChangeOp {
     PutFact {
         /// The fact.
         fact: Fact,
+        /// Position in its collection when inserting a new item (default: the end).
+        /// Used by inverses so that undoing a delete restores the item in place;
+        /// ignored when replacing an existing item.
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        index: Option<u32>,
     },
     /// Insert or replace a finding.
     PutFinding {
         /// The finding.
         finding: Finding,
+        /// Position in its collection when inserting a new item (default: the end).
+        /// Used by inverses so that undoing a delete restores the item in place;
+        /// ignored when replacing an existing item.
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        index: Option<u32>,
     },
     /// Insert or replace a capsule.
     PutCapsule {
         /// The capsule.
         capsule: crate::types::Capsule,
+        /// Position in its collection when inserting a new item (default: the end).
+        /// Used by inverses so that undoing a delete restores the item in place;
+        /// ignored when replacing an existing item.
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        index: Option<u32>,
     },
     /// Set a capsule's state.
     SetCapsuleState {
@@ -763,6 +788,11 @@ pub enum ChangeOp {
     PutIntent {
         /// The intent.
         intent: Intent,
+        /// Position in its collection when inserting a new item (default: the end).
+        /// Used by inverses so that undoing a delete restores the item in place;
+        /// ignored when replacing an existing item.
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        index: Option<u32>,
     },
     /// Append a ledger entry.
     PushLedger {
@@ -775,11 +805,21 @@ pub enum ChangeOp {
     PutNarrative {
         /// The narrative.
         narrative: Narrative,
+        /// Position in its collection when inserting a new item (default: the end).
+        /// Used by inverses so that undoing a delete restores the item in place;
+        /// ignored when replacing an existing item.
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        index: Option<u32>,
     },
     /// Insert or replace a proposal.
     PutProposal {
         /// The proposal.
         proposal: Proposal,
+        /// Position in its collection when inserting a new item (default: the end).
+        /// Used by inverses so that undoing a delete restores the item in place;
+        /// ignored when replacing an existing item.
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        index: Option<u32>,
     },
     /// Delete an item (any collection) by id.
     Delete {
@@ -825,6 +865,9 @@ pub struct LogEntry {
     /// Request id of the command that caused it, if any.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub cause: Option<String>,
+    /// The command's `reason`, if given.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub reason: Option<String>,
     /// The operations as requested.
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
     pub request: Vec<Op>,

@@ -302,6 +302,8 @@ pub fn cache_probe(reps: usize) {
         cache.len(),
         (cache.len() * x.len() * 8) as f64 / 1e6
     );
+}
+
 /// Thread scaling of the reducing parallel sweep (RP1/E3), profile A, median ms.
 pub fn thread_table(reps: usize) {
     use qp_compute::par::sweep_reduce_par;

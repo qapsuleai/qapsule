@@ -12,7 +12,7 @@ karşılık kullanılır; dokümanda Türkçesi.
 | Bulgu | `Finding` | Olgulardan çıkarılan iddia. İddia + dayandığı olgular + güven + geçersizlik koşulu + yazar (ajan/insan). |
 | Kapsül | `Capsule` | Tek bir bulgunun insana sunulan, canlı, açılabilir, taşınabilir hali. |
 | Anlam işareti | `Glyph` | Kapsülün tek bakışlık görseli. Veriyi değil anlamı çizer. Bir kez öğrenilir, her yerde aynı okunur. |
-| Görünüm | `View` | Görsel gramerle yazılmış gösterim tarifi: işaret, ölçek, katman, kodlama. |
+| Görünüm | `View` | Görsel gramerle yazılmış gösterim tarifi: paneller, katmanlar (işaret + veri + kodlama), ölçekler, vurgu. |
 | Görsel gramer | `grammar` | Görünümleri kuran yapı taşları kümesi. |
 | Derinlik | `Depth` | Anlam zoom'unun seviyesi: 0 cümle, 1 kapsül, 2 işaretli grafik, 3 tam çalışma alanı. |
 | Doküman | `Document` | Seri bağları, görünümler, bulgular, kapsüller, çizimler ve niyetlerin tamamı. |
@@ -47,6 +47,33 @@ karşılık kullanılır; dokümanda Türkçesi.
 | Sunucu | presenter | Bulgudan görünümü deterministik olarak kuran motor parçası; ajan anlam düzeyinde konuşur, sunucu gramere çevirir (K21-1). |
 | Devir | hand-over / `epoch` | Otoritenin bir yerden başka yere (sunucu ↔ cihaz) taşınması; her devirde `epoch` artar. |
 | Uygunluk dökümü | `Transcript` | Dilden ve taşımadan bağımsız "girdi mesajları → beklenen çıktı mesajları" senaryosu. |
+
+### Görsel gramer (R2)
+
+Ayrıntı ve örnekler `docs/GRAMMAR.md`.
+
+| Kavram | Kodda | Tanım |
+|--------|-------|-------|
+| Panel | `Panel` | Görünümün yatay bir şeridi. Paneller üstten alta yığılır, zaman eksenini paylaşır; her birinin kendi değer ölçeği var. Kalıcı bir **numara kimliği** taşır (konum değildir). |
+| Katman | `Layer` | Bir işaret + veri + kodlama kanalları. Görünüm içinde kalıcı kimliği var (`id`); çizim sırası katman sırasıdır. |
+| İşaret (gramer) | `Mark` | Katmanın çizim biçimi: `candle`, `bar`, `line`, `area`, `band`, `rule`, `point`, `text`. (Anlam işareti `Glyph` ile karıştırılmamalı.) |
+| Ölçek | `Scale` | Veri değerini eksene eşleyen kural: zaman (bar sırası, seans boşlukları kapalı), doğrusal, logaritmik. Kimliği var (`x`, `y<panel>`). |
+| Kodlama kanalı | `Encoding` | Kapalı ve tipli kanal kümesi: `x`, `y`, `y2`, `color`, `opacity`, `width`, `size`, `text`. Bilinmeyen kanal reddedilir. |
+| Veri başvurusu | `DataRef` | Bir katmanın ya da kanalın verisi: seri alanı (`c`, `upper`), başka bir serinin alanı, olgu ya da bulgu. Gramer veriye her zaman başvuruyla ulaşır, veriyi taşımaz. |
+| Köken bağı | `Origin` | Bir katmandaki sayısal sabitin (kural seviyesi, koşul eşiği) nereden geldiği: olgu alanı, adlandırılmış eşik ya da seri değeri. Kökeni olmayan sabit otoritede reddedilir (ilke 6). |
+| Adlandırılmış eşik | threshold | Bir hesabın motorca bilinen geleneksel seviyesi (`rsi.overbought` = 70, `macd.zero` = 0). Köken olarak kullanılır; liste `describe`'da. |
+| Vurgu | `Emphasis` | Görünümün bir parçasını (bulgu, katman, bar aralığı) öne çıkarma, odaklama ya da karartma. Kalıcısı görünümde; dikkat yönergesi ve anlatım adımı aynı hedefle geçici olarak çizilir. |
+| Kalıcı aralık | `x.domain` | Görünümün herkes için sabit yatay aralığı; komutla değişir, günlüğe girer. Bağlantının geçici bakışı (viewport) varlık durumudur. |
+| Tema | `theme` | Renklerin ve yazı boyutlarının motor tarafındaki tanımı (`dark`, `light`). Görünüm yalnızca tema adını ve tema renk adlarını (`up`, `down`, `accent`…) taşır. |
+| Sahne tarifi | `SceneDesc` | Görünüm + veri derlendikten sonraki, çizimden bağımsız ara biçim: paneller, ölçek eşlemeleri, katmanlar, veri öğeleri ve çizim ilkelleri. Çizici ve anlamsal okuma aynı tarifi okur (tek doğruluk kaynağı). |
+| Gramer derleyicisi | `qp-grammar` | Görünüm + veri sağlayıcı → sahne tarifi. Hesap yapmaz; değerleri otoriteden (`qp-compute`) alır. |
+| Sahne öğesi | `Item` | Sahne tarifinde veriye bağlı tek eleman (bir mum, bir çizgi noktası, bir çubuk): bar, zaman, değerler, piksel kutusu. |
+| Nokta sorgusu | `hit` | Bir pikselde hangi öğenin çizildiğini (panel, katman, bar, zaman, değerler, veri başvurusu) sahne tarifinden veren sorgu. |
+| Ayrıntı düzeyi | LOD | Görünen bar sayısı piksel sütunlarını aştığında barların sütun kovalarında birleştirilmesi (mumda ilk/en yüksek/en düşük/son; çizgide kova içi en küçük/en büyük). |
+| Derinlik kuralı | depth rule | Bir bulgunun `sentence`, `capsule`, `chart` derinliklerinde ne gösterdiğini belirleyen gramer kuralı; sunucu (presenter) bu kuralları uygular. |
+| Yüzey indirgemesi | profile reduction | Yüzey profilinin (`max_points`, `max_glyphs`, `series_data`) derinlik kuralının çıktısını kısması. |
+| Doküman özeti | `DocSummary` | `welcome`'da gelen kısa doküman özeti: seriler, görünümler/paneller/katmanlar, olgular, bulgular; ajanın ilk mesajında başvurabilmesi için. |
+| Anlamla başvuru | semantic reference | Bir öğeye kimlik yerine anlamıyla başvurmak ("RSI(14)'ün paneli", "en son kırılım bulgusu"). Otorite deterministik çözer; belirsizse seçenekleri sıralayan `ambiguous` hatası döner; günlükte çözülmüş kimlik saklanır. |
 
 ## Kapsülün yaşam döngüsü
 

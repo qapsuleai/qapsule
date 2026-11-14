@@ -1,0 +1,3588 @@
+{
+  "01 add_study sma20 (+show)": {
+    "A1": [
+      {
+        "op": "add",
+        "path": "/series/4",
+        "value": {
+          "id": "sma20",
+          "source": {
+            "inputs": [
+              "px"
+            ],
+            "kind": "study",
+            "params": {
+              "period": 20.0
+            },
+            "study": "sma"
+          }
+        }
+      },
+      {
+        "op": "add",
+        "path": "/views/0/layers/5",
+        "value": {
+          "encoding": {},
+          "mark": "line",
+          "panel": 0,
+          "series": "sma20"
+        }
+      }
+    ],
+    "A2": [
+      {
+        "op": "add",
+        "path": "/series/4",
+        "value": {
+          "id": "sma20",
+          "source": {
+            "inputs": [
+              "px"
+            ],
+            "kind": "study",
+            "params": {
+              "period": 20.0
+            },
+            "study": "sma"
+          }
+        }
+      },
+      {
+        "op": "add",
+        "path": "/views/0/layers/5",
+        "value": {
+          "encoding": {},
+          "mark": "line",
+          "panel": 0,
+          "series": "sma20"
+        }
+      }
+    ],
+    "A3": [
+      {
+        "op": "add",
+        "path": "/series/-",
+        "value": {
+          "id": "sma20",
+          "source": {
+            "inputs": [
+              "px"
+            ],
+            "kind": "study",
+            "params": {
+              "period": 20.0
+            },
+            "study": "sma"
+          }
+        }
+      },
+      {
+        "op": "add",
+        "path": "/views/0/layers/5",
+        "value": {
+          "encoding": {},
+          "mark": "line",
+          "panel": 0,
+          "series": "sma20"
+        }
+      }
+    ],
+    "B": [
+      {
+        "op": "put_series",
+        "series": {
+          "id": "sma20",
+          "source": {
+            "inputs": [
+              "px"
+            ],
+            "kind": "study",
+            "params": {
+              "period": 20.0
+            },
+            "study": "sma"
+          }
+        }
+      },
+      {
+        "index": 5,
+        "layer": {
+          "encoding": {},
+          "mark": "line",
+          "panel": 0,
+          "series": "sma20"
+        },
+        "op": "insert_layer",
+        "view": "main"
+      }
+    ],
+    "Bop": [
+      {
+        "id": "sma20",
+        "inputs": [
+          "px"
+        ],
+        "op": "add_study",
+        "params": {
+          "period": 20.0
+        },
+        "show": {
+          "panel": 0,
+          "view": "main"
+        },
+        "study": "sma"
+      }
+    ],
+    "M": "<16731 bytes, truncated> {\"series\":[{\"data\":{\"bars\":[{\"c\":98.93,\"h\":101.88,\"l\":98.16,\"o\":100.29,\"t\":1735776000000,\"v\":1888233.71},{\"c\":98.77,\"h\":99.66,\"l\":98.19,\"o\":98.72,\"t\":1735862400000,\"v\":605167.66},{\"c\":96.97,\"h\":99.18,\"l\":96.89,\"o\":98.56,\"t\":1736121600000,\"v\":2269085.45},{\"c\":96.24,\"h\":97.57,\"l\":95.74,\"o\":96.69,\"t\":1736208000000,\"v\":2037521.24},{\"c\":96.87,\"h\":97.97,\"l\":95.69,\"o\":96.27,\"t\":1736294400000,\"v\":2412471."
+  },
+  "02 add_study ema50 (+show)": {
+    "A1": [
+      {
+        "op": "add",
+        "path": "/series/5",
+        "value": {
+          "id": "ema50",
+          "source": {
+            "inputs": [
+              "px"
+            ],
+            "kind": "study",
+            "params": {
+              "period": 50.0
+            },
+            "study": "ema"
+          }
+        }
+      },
+      {
+        "op": "add",
+        "path": "/views/0/layers/6",
+        "value": {
+          "encoding": {},
+          "mark": "line",
+          "panel": 0,
+          "series": "ema50"
+        }
+      }
+    ],
+    "A2": [
+      {
+        "op": "add",
+        "path": "/series/5",
+        "value": {
+          "id": "ema50",
+          "source": {
+            "inputs": [
+              "px"
+            ],
+            "kind": "study",
+            "params": {
+              "period": 50.0
+            },
+            "study": "ema"
+          }
+        }
+      },
+      {
+        "op": "add",
+        "path": "/views/0/layers/6",
+        "value": {
+          "encoding": {},
+          "mark": "line",
+          "panel": 0,
+          "series": "ema50"
+        }
+      }
+    ],
+    "A3": [
+      {
+        "op": "add",
+        "path": "/series/-",
+        "value": {
+          "id": "ema50",
+          "source": {
+            "inputs": [
+              "px"
+            ],
+            "kind": "study",
+            "params": {
+              "period": 50.0
+            },
+            "study": "ema"
+          }
+        }
+      },
+      {
+        "op": "add",
+        "path": "/views/0/layers/6",
+        "value": {
+          "encoding": {},
+          "mark": "line",
+          "panel": 0,
+          "series": "ema50"
+        }
+      }
+    ],
+    "B": [
+      {
+        "op": "put_series",
+        "series": {
+          "id": "ema50",
+          "source": {
+            "inputs": [
+              "px"
+            ],
+            "kind": "study",
+            "params": {
+              "period": 50.0
+            },
+            "study": "ema"
+          }
+        }
+      },
+      {
+        "index": 6,
+        "layer": {
+          "encoding": {},
+          "mark": "line",
+          "panel": 0,
+          "series": "ema50"
+        },
+        "op": "insert_layer",
+        "view": "main"
+      }
+    ],
+    "Bop": [
+      {
+        "id": "ema50",
+        "inputs": [
+          "px"
+        ],
+        "op": "add_study",
+        "params": {
+          "period": 50.0
+        },
+        "show": {
+          "panel": 0,
+          "view": "main"
+        },
+        "study": "ema"
+      }
+    ],
+    "M": "<16884 bytes, truncated> {\"series\":[{\"data\":{\"bars\":[{\"c\":98.93,\"h\":101.88,\"l\":98.16,\"o\":100.29,\"t\":1735776000000,\"v\":1888233.71},{\"c\":98.77,\"h\":99.66,\"l\":98.19,\"o\":98.72,\"t\":1735862400000,\"v\":605167.66},{\"c\":96.97,\"h\":99.18,\"l\":96.89,\"o\":98.56,\"t\":1736121600000,\"v\":2269085.45},{\"c\":96.24,\"h\":97.57,\"l\":95.74,\"o\":96.69,\"t\":1736208000000,\"v\":2037521.24},{\"c\":96.87,\"h\":97.97,\"l\":95.69,\"o\":96.27,\"t\":1736294400000,\"v\":2412471."
+  },
+  "03 add_study rsi7 (+show with rsi14)": {
+    "A1": [
+      {
+        "op": "add",
+        "path": "/series/6",
+        "value": {
+          "id": "rsi7",
+          "source": {
+            "inputs": [
+              "px"
+            ],
+            "kind": "study",
+            "params": {
+              "period": 7.0
+            },
+            "study": "rsi"
+          }
+        }
+      },
+      {
+        "op": "add",
+        "path": "/views/0/layers/7",
+        "value": {
+          "encoding": {},
+          "mark": "line",
+          "panel": 1,
+          "series": "rsi7"
+        }
+      }
+    ],
+    "A2": [
+      {
+        "op": "add",
+        "path": "/series/6",
+        "value": {
+          "id": "rsi7",
+          "source": {
+            "inputs": [
+              "px"
+            ],
+            "kind": "study",
+            "params": {
+              "period": 7.0
+            },
+            "study": "rsi"
+          }
+        }
+      },
+      {
+        "op": "add",
+        "path": "/views/0/layers/7",
+        "value": {
+          "encoding": {},
+          "mark": "line",
+          "panel": 1,
+          "series": "rsi7"
+        }
+      }
+    ],
+    "A3": [
+      {
+        "op": "add",
+        "path": "/series/-",
+        "value": {
+          "id": "rsi7",
+          "source": {
+            "inputs": [
+              "px"
+            ],
+            "kind": "study",
+            "params": {
+              "period": 7.0
+            },
+            "study": "rsi"
+          }
+        }
+      },
+      {
+        "op": "add",
+        "path": "/views/0/layers/7",
+        "value": {
+          "encoding": {},
+          "mark": "line",
+          "panel": 1,
+          "series": "rsi7"
+        }
+      }
+    ],
+    "B": [
+      {
+        "op": "put_series",
+        "series": {
+          "id": "rsi7",
+          "source": {
+            "inputs": [
+              "px"
+            ],
+            "kind": "study",
+            "params": {
+              "period": 7.0
+            },
+            "study": "rsi"
+          }
+        }
+      },
+      {
+        "index": 7,
+        "layer": {
+          "encoding": {},
+          "mark": "line",
+          "panel": 1,
+          "series": "rsi7"
+        },
+        "op": "insert_layer",
+        "view": "main"
+      }
+    ],
+    "Bop": [
+      {
+        "id": "rsi7",
+        "inputs": [
+          "px"
+        ],
+        "op": "add_study",
+        "params": {
+          "period": 7.0
+        },
+        "show": {
+          "view": "main",
+          "with": "rsi14"
+        },
+        "study": "rsi"
+      }
+    ],
+    "M": "<17034 bytes, truncated> {\"series\":[{\"data\":{\"bars\":[{\"c\":98.93,\"h\":101.88,\"l\":98.16,\"o\":100.29,\"t\":1735776000000,\"v\":1888233.71},{\"c\":98.77,\"h\":99.66,\"l\":98.19,\"o\":98.72,\"t\":1735862400000,\"v\":605167.66},{\"c\":96.97,\"h\":99.18,\"l\":96.89,\"o\":98.56,\"t\":1736121600000,\"v\":2269085.45},{\"c\":96.24,\"h\":97.57,\"l\":95.74,\"o\":96.69,\"t\":1736208000000,\"v\":2037521.24},{\"c\":96.87,\"h\":97.97,\"l\":95.69,\"o\":96.27,\"t\":1736294400000,\"v\":2412471."
+  },
+  "04 set_params ema50 period=34": {
+    "A1": [
+      {
+        "op": "replace",
+        "path": "/series/5/source/params/period",
+        "value": 34.0
+      }
+    ],
+    "A2": [
+      {
+        "op": "replace",
+        "path": "/series/5/source/params/period",
+        "value": 34.0
+      }
+    ],
+    "A3": [
+      {
+        "op": "replace",
+        "path": "/series/5/source/params/period",
+        "value": 34.0
+      }
+    ],
+    "B": [
+      {
+        "op": "put_series",
+        "series": {
+          "id": "ema50",
+          "source": {
+            "inputs": [
+              "px"
+            ],
+            "kind": "study",
+            "params": {
+              "period": 34.0
+            },
+            "study": "ema"
+          }
+        }
+      }
+    ],
+    "Bop": [
+      {
+        "op": "set_params",
+        "params": {
+          "period": 34.0
+        },
+        "series": "ema50"
+      }
+    ],
+    "M": "<16374 bytes, truncated> {\"series\":[{\"data\":{\"bars\":[{\"c\":98.93,\"h\":101.88,\"l\":98.16,\"o\":100.29,\"t\":1735776000000,\"v\":1888233.71},{\"c\":98.77,\"h\":99.66,\"l\":98.19,\"o\":98.72,\"t\":1735862400000,\"v\":605167.66},{\"c\":96.97,\"h\":99.18,\"l\":96.89,\"o\":98.56,\"t\":1736121600000,\"v\":2269085.45},{\"c\":96.24,\"h\":97.57,\"l\":95.74,\"o\":96.69,\"t\":1736208000000,\"v\":2037521.24},{\"c\":96.87,\"h\":97.97,\"l\":95.69,\"o\":96.27,\"t\":1736294400000,\"v\":2412471."
+  },
+  "05 set_params rsi14 period=21": {
+    "A1": [
+      {
+        "op": "replace",
+        "path": "/series/1/source/params/period",
+        "value": 21.0
+      }
+    ],
+    "A2": [
+      {
+        "op": "replace",
+        "path": "/series/1/source/params/period",
+        "value": 21.0
+      }
+    ],
+    "A3": [
+      {
+        "op": "replace",
+        "path": "/series/1/source/params/period",
+        "value": 21.0
+      }
+    ],
+    "B": [
+      {
+        "op": "put_series",
+        "series": {
+          "id": "rsi14",
+          "instrument": {
+            "calendar": "XIST",
+            "exchange": "BIST",
+            "symbol": "THYAO"
+          },
+          "interval": "1d",
+          "source": {
+            "inputs": [
+              "px"
+            ],
+            "kind": "study",
+            "params": {
+              "period": 21.0
+            },
+            "study": "rsi"
+          }
+        }
+      }
+    ],
+    "Bop": [
+      {
+        "op": "set_params",
+        "params": {
+          "period": 21.0
+        },
+        "series": "rsi14"
+      }
+    ],
+    "M": "<16374 bytes, truncated> {\"series\":[{\"data\":{\"bars\":[{\"c\":98.93,\"h\":101.88,\"l\":98.16,\"o\":100.29,\"t\":1735776000000,\"v\":1888233.71},{\"c\":98.77,\"h\":99.66,\"l\":98.19,\"o\":98.72,\"t\":1735862400000,\"v\":605167.66},{\"c\":96.97,\"h\":99.18,\"l\":96.89,\"o\":98.56,\"t\":1736121600000,\"v\":2269085.45},{\"c\":96.24,\"h\":97.57,\"l\":95.74,\"o\":96.69,\"t\":1736208000000,\"v\":2037521.24},{\"c\":96.87,\"h\":97.97,\"l\":95.69,\"o\":96.27,\"t\":1736294400000,\"v\":2412471."
+  },
+  "06 set_view_range main last 120": {
+    "A1": [
+      {
+        "op": "add",
+        "path": "/views/0/x/domain",
+        "value": [
+          1745452800000.0,
+          1759881600000.0
+        ]
+      }
+    ],
+    "A2": [
+      {
+        "op": "add",
+        "path": "/views/0/x/domain",
+        "value": [
+          1745452800000.0,
+          1759881600000.0
+        ]
+      }
+    ],
+    "A3": [
+      {
+        "op": "add",
+        "path": "/views/0/x/domain",
+        "value": [
+          1745452800000.0,
+          1759881600000.0
+        ]
+      }
+    ],
+    "B": [
+      {
+        "domain": [
+          1745452800000.0,
+          1759881600000.0
+        ],
+        "op": "set_x_domain",
+        "view": "main"
+      }
+    ],
+    "Bop": [
+      {
+        "from_bar": 80,
+        "op": "set_view_range",
+        "to_bar": 199,
+        "view": "main"
+      }
+    ],
+    "M": {
+      "views": [
+        {
+          "id": "main",
+          "layers": [
+            {
+              "encoding": {},
+              "mark": "candle",
+              "panel": 0,
+              "series": "px"
+            },
+            {
+              "encoding": {
+                "color": "#90a4ae"
+              },
+              "mark": "line",
+              "panel": 0,
+              "series": "bb20"
+            },
+            {
+              "encoding": {
+                "color": "#7e57c2",
+                "y": "rsi"
+              },
+              "mark": "line",
+              "panel": 1,
+              "series": "rsi14"
+            },
+            {
+              "encoding": {
+                "color": "#9e9e9e",
+                "y": "70"
+              },
+              "mark": "rule",
+              "panel": 1
+            },
+            {
+              "encoding": {},
+              "mark": "line",
+              "panel": 2,
+              "series": "macd"
+            },
+            {
+              "encoding": {},
+              "mark": "line",
+              "panel": 0,
+              "series": "sma20"
+            },
+            {
+              "encoding": {},
+              "mark": "line",
+              "panel": 0,
+              "series": "ema50"
+            },
+            {
+              "encoding": {},
+              "mark": "line",
+              "panel": 1,
+              "series": "rsi7"
+            }
+          ],
+          "title": "THYAO 1G",
+          "x": {
+            "domain": [
+              1745452800000.0,
+              1759881600000.0
+            ],
+            "kind": "time"
+          },
+          "y": [
+            {
+              "kind": "linear"
+            },
+            {
+              "domain": [
+                0.0,
+                100.0
+              ],
+              "kind": "linear"
+            },
+            {
+              "kind": "linear"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "07 add_layer rule30 at index 4": {
+    "A1": [
+      {
+        "op": "add",
+        "path": "/views/0/layers/4/encoding/color",
+        "value": "#9e9e9e"
+      },
+      {
+        "op": "add",
+        "path": "/views/0/layers/4/encoding/y",
+        "value": "30"
+      },
+      {
+        "op": "replace",
+        "path": "/views/0/layers/4/mark",
+        "value": "rule"
+      },
+      {
+        "op": "replace",
+        "path": "/views/0/layers/4/panel",
+        "value": 1
+      },
+      {
+        "op": "remove",
+        "path": "/views/0/layers/4/series"
+      },
+      {
+        "op": "replace",
+        "path": "/views/0/layers/5/panel",
+        "value": 2
+      },
+      {
+        "op": "replace",
+        "path": "/views/0/layers/5/series",
+        "value": "macd"
+      },
+      {
+        "op": "replace",
+        "path": "/views/0/layers/6/series",
+        "value": "sma20"
+      },
+      {
+        "op": "replace",
+        "path": "/views/0/layers/7/panel",
+        "value": 0
+      },
+      {
+        "op": "replace",
+        "path": "/views/0/layers/7/series",
+        "value": "ema50"
+      },
+      {
+        "op": "add",
+        "path": "/views/0/layers/8",
+        "value": {
+          "encoding": {},
+          "mark": "line",
+          "panel": 1,
+          "series": "rsi7"
+        }
+      }
+    ],
+    "A2": [
+      {
+        "op": "add",
+        "path": "/views/0/layers/4",
+        "value": {
+          "encoding": {
+            "color": "#9e9e9e",
+            "y": "30"
+          },
+          "mark": "rule",
+          "panel": 1
+        }
+      }
+    ],
+    "A3": [
+      {
+        "op": "add",
+        "path": "/views/0/layers/4",
+        "value": {
+          "encoding": {
+            "color": "#9e9e9e",
+            "y": "30"
+          },
+          "mark": "rule",
+          "panel": 1
+        }
+      }
+    ],
+    "B": [
+      {
+        "index": 4,
+        "layer": {
+          "encoding": {
+            "color": "#9e9e9e",
+            "y": "30"
+          },
+          "mark": "rule",
+          "panel": 1
+        },
+        "op": "insert_layer",
+        "view": "main"
+      }
+    ],
+    "Bop": [
+      {
+        "index": 4,
+        "layer": {
+          "encoding": {
+            "color": "#9e9e9e",
+            "y": "30"
+          },
+          "mark": "rule",
+          "panel": 1
+        },
+        "op": "add_layer",
+        "view": "main"
+      }
+    ],
+    "M": {
+      "views": [
+        {
+          "id": "main",
+          "layers": [
+            {
+              "encoding": {},
+              "mark": "candle",
+              "panel": 0,
+              "series": "px"
+            },
+            {
+              "encoding": {
+                "color": "#90a4ae"
+              },
+              "mark": "line",
+              "panel": 0,
+              "series": "bb20"
+            },
+            {
+              "encoding": {
+                "color": "#7e57c2",
+                "y": "rsi"
+              },
+              "mark": "line",
+              "panel": 1,
+              "series": "rsi14"
+            },
+            {
+              "encoding": {
+                "color": "#9e9e9e",
+                "y": "70"
+              },
+              "mark": "rule",
+              "panel": 1
+            },
+            {
+              "encoding": {
+                "color": "#9e9e9e",
+                "y": "30"
+              },
+              "mark": "rule",
+              "panel": 1
+            },
+            {
+              "encoding": {},
+              "mark": "line",
+              "panel": 2,
+              "series": "macd"
+            },
+            {
+              "encoding": {},
+              "mark": "line",
+              "panel": 0,
+              "series": "sma20"
+            },
+            {
+              "encoding": {},
+              "mark": "line",
+              "panel": 0,
+              "series": "ema50"
+            },
+            {
+              "encoding": {},
+              "mark": "line",
+              "panel": 1,
+              "series": "rsi7"
+            }
+          ],
+          "title": "THYAO 1G",
+          "x": {
+            "domain": [
+              1745452800000.0,
+              1759881600000.0
+            ],
+            "kind": "time"
+          },
+          "y": [
+            {
+              "kind": "linear"
+            },
+            {
+              "domain": [
+                0.0,
+                100.0
+              ],
+              "kind": "linear"
+            },
+            {
+              "kind": "linear"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "08 remove_layer index 1 (bb20 line)": {
+    "A1": [
+      {
+        "op": "replace",
+        "path": "/views/0/layers/1/encoding/color",
+        "value": "#7e57c2"
+      },
+      {
+        "op": "add",
+        "path": "/views/0/layers/1/encoding/y",
+        "value": "rsi"
+      },
+      {
+        "op": "replace",
+        "path": "/views/0/layers/1/panel",
+        "value": 1
+      },
+      {
+        "op": "replace",
+        "path": "/views/0/layers/1/series",
+        "value": "rsi14"
+      },
+      {
+        "op": "replace",
+        "path": "/views/0/layers/2/encoding/color",
+        "value": "#9e9e9e"
+      },
+      {
+        "op": "replace",
+        "path": "/views/0/layers/2/encoding/y",
+        "value": "70"
+      },
+      {
+        "op": "replace",
+        "path": "/views/0/layers/2/mark",
+        "value": "rule"
+      },
+      {
+        "op": "remove",
+        "path": "/views/0/layers/2/series"
+      },
+      {
+        "op": "replace",
+        "path": "/views/0/layers/3/encoding/y",
+        "value": "30"
+      },
+      {
+        "op": "remove",
+        "path": "/views/0/layers/4/encoding/color"
+      },
+      {
+        "op": "remove",
+        "path": "/views/0/layers/4/encoding/y"
+      },
+      {
+        "op": "replace",
+        "path": "/views/0/layers/4/mark",
+        "value": "line"
+      },
+      {
+        "op": "replace",
+        "path": "/views/0/layers/4/panel",
+        "value": 2
+      },
+      {
+        "op": "add",
+        "path": "/views/0/layers/4/series",
+        "value": "macd"
+      },
+      {
+        "op": "replace",
+        "path": "/views/0/layers/5/panel",
+        "value": 0
+      },
+      {
+        "op": "replace",
+        "path": "/views/0/layers/5/series",
+        "value": "sma20"
+      },
+      {
+        "op": "replace",
+        "path": "/views/0/layers/6/series",
+        "value": "ema50"
+      },
+      {
+        "op": "replace",
+        "path": "/views/0/layers/7/panel",
+        "value": 1
+      },
+      {
+        "op": "replace",
+        "path": "/views/0/layers/7/series",
+        "value": "rsi7"
+      },
+      {
+        "op": "remove",
+        "path": "/views/0/layers/8"
+      }
+    ],
+    "A2": [
+      {
+        "op": "remove",
+        "path": "/views/0/layers/1"
+      }
+    ],
+    "A3": [
+      {
+        "op": "remove",
+        "path": "/views/0/layers/1"
+      }
+    ],
+    "B": [
+      {
+        "index": 1,
+        "op": "delete_layer",
+        "view": "main"
+      }
+    ],
+    "Bop": [
+      {
+        "index": 1,
+        "op": "remove_layer",
+        "view": "main"
+      }
+    ],
+    "M": {
+      "views": [
+        {
+          "id": "main",
+          "layers": [
+            {
+              "encoding": {},
+              "mark": "candle",
+              "panel": 0,
+              "series": "px"
+            },
+            {
+              "encoding": {
+                "color": "#7e57c2",
+                "y": "rsi"
+              },
+              "mark": "line",
+              "panel": 1,
+              "series": "rsi14"
+            },
+            {
+              "encoding": {
+                "color": "#9e9e9e",
+                "y": "70"
+              },
+              "mark": "rule",
+              "panel": 1
+            },
+            {
+              "encoding": {
+                "color": "#9e9e9e",
+                "y": "30"
+              },
+              "mark": "rule",
+              "panel": 1
+            },
+            {
+              "encoding": {},
+              "mark": "line",
+              "panel": 2,
+              "series": "macd"
+            },
+            {
+              "encoding": {},
+              "mark": "line",
+              "panel": 0,
+              "series": "sma20"
+            },
+            {
+              "encoding": {},
+              "mark": "line",
+              "panel": 0,
+              "series": "ema50"
+            },
+            {
+              "encoding": {},
+              "mark": "line",
+              "panel": 1,
+              "series": "rsi7"
+            }
+          ],
+          "title": "THYAO 1G",
+          "x": {
+            "domain": [
+              1745452800000.0,
+              1759881600000.0
+            ],
+            "kind": "time"
+          },
+          "y": [
+            {
+              "kind": "linear"
+            },
+            {
+              "domain": [
+                0.0,
+                100.0
+              ],
+              "kind": "linear"
+            },
+            {
+              "kind": "linear"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "09 add_fact sma cross": {
+    "A1": [
+      {
+        "op": "add",
+        "path": "/facts/1",
+        "value": {
+          "bar": 195,
+          "evidence": {
+            "left": 121.4,
+            "right": 121.1
+          },
+          "id": "fact-sma-cross",
+          "kind": "cross_above",
+          "provenance": {
+            "at": 1760000540000,
+            "author": {
+              "kind": "agent",
+              "name": "scout"
+            },
+            "based_on": [
+              "sma20"
+            ]
+          },
+          "series": "sma20",
+          "t": 1759363200000,
+          "text": "SMA(20) EMA(34)'ü yukarı kesti."
+        }
+      }
+    ],
+    "A2": [
+      {
+        "op": "add",
+        "path": "/facts/1",
+        "value": {
+          "bar": 195,
+          "evidence": {
+            "left": 121.4,
+            "right": 121.1
+          },
+          "id": "fact-sma-cross",
+          "kind": "cross_above",
+          "provenance": {
+            "at": 1760000540000,
+            "author": {
+              "kind": "agent",
+              "name": "scout"
+            },
+            "based_on": [
+              "sma20"
+            ]
+          },
+          "series": "sma20",
+          "t": 1759363200000,
+          "text": "SMA(20) EMA(34)'ü yukarı kesti."
+        }
+      }
+    ],
+    "A3": [
+      {
+        "op": "add",
+        "path": "/facts/-",
+        "value": {
+          "bar": 195,
+          "evidence": {
+            "left": 121.4,
+            "right": 121.1
+          },
+          "id": "fact-sma-cross",
+          "kind": "cross_above",
+          "provenance": {
+            "at": 1760000540000,
+            "author": {
+              "kind": "agent",
+              "name": "scout"
+            },
+            "based_on": [
+              "sma20"
+            ]
+          },
+          "series": "sma20",
+          "t": 1759363200000,
+          "text": "SMA(20) EMA(34)'ü yukarı kesti."
+        }
+      }
+    ],
+    "B": [
+      {
+        "fact": {
+          "bar": 195,
+          "evidence": {
+            "left": 121.4,
+            "right": 121.1
+          },
+          "id": "fact-sma-cross",
+          "kind": "cross_above",
+          "provenance": {
+            "at": 1760000540000,
+            "author": {
+              "kind": "agent",
+              "name": "scout"
+            },
+            "based_on": [
+              "sma20"
+            ]
+          },
+          "series": "sma20",
+          "t": 1759363200000,
+          "text": "SMA(20) EMA(34)'ü yukarı kesti."
+        },
+        "op": "put_fact"
+      }
+    ],
+    "Bop": [
+      {
+        "bar": 195,
+        "evidence": {
+          "left": 121.4,
+          "right": 121.1
+        },
+        "id": "fact-sma-cross",
+        "kind": "cross_above",
+        "op": "add_fact",
+        "series": "sma20",
+        "text": "SMA(20) EMA(34)'ü yukarı kesti."
+      }
+    ],
+    "M": {
+      "facts": [
+        {
+          "bar": 150,
+          "evidence": {
+            "level": 70.0,
+            "prev": 69.35847609603053,
+            "value": 72.83959265032422
+          },
+          "id": "fact-rsi-cross70",
+          "kind": "cross_above",
+          "provenance": {
+            "at": 1760000000000,
+            "author": {
+              "kind": "engine",
+              "name": "qp-facts",
+              "version": "0.0.0"
+            },
+            "based_on": [
+              "rsi14"
+            ]
+          },
+          "series": "rsi14",
+          "t": 1753920000000,
+          "text": "RSI(14) 70'i yukarı kesti, bar 150."
+        },
+        {
+          "bar": 195,
+          "evidence": {
+            "left": 121.4,
+            "right": 121.1
+          },
+          "id": "fact-sma-cross",
+          "kind": "cross_above",
+          "provenance": {
+            "at": 1760000540000,
+            "author": {
+              "kind": "agent",
+              "name": "scout"
+            },
+            "based_on": [
+              "sma20"
+            ]
+          },
+          "series": "sma20",
+          "t": 1759363200000,
+          "text": "SMA(20) EMA(34)'ü yukarı kesti."
+        }
+      ]
+    }
+  },
+  "10 add_finding + capsule": {
+    "A1": [
+      {
+        "op": "add",
+        "path": "/capsules/1",
+        "value": {
+          "depth": "capsule",
+          "finding": "fnd-trend",
+          "glyphs": [],
+          "headline": "THYAO: SMA20, EMA34'ün üstüne çıktı.",
+          "id": "cap-10-0",
+          "provenance": {
+            "at": 1760000600000,
+            "author": {
+              "kind": "agent",
+              "name": "scout"
+            },
+            "based_on": [
+              "fact-sma-cross"
+            ]
+          },
+          "revision": 0,
+          "state": "live"
+        }
+      },
+      {
+        "op": "add",
+        "path": "/findings/1",
+        "value": {
+          "claim": "THYAO kısa vadeli yükseliş trendine girdi.",
+          "confidence": 0.6,
+          "facts": [
+            "fact-sma-cross"
+          ],
+          "id": "fnd-trend",
+          "invalidation": {
+            "kind": "compare",
+            "left": "sma20",
+            "op": "cross_below",
+            "right": "ema50"
+          },
+          "provenance": {
+            "at": 1760000600000,
+            "author": {
+              "kind": "agent",
+              "name": "scout"
+            },
+            "based_on": [
+              "fact-sma-cross"
+            ]
+          }
+        }
+      }
+    ],
+    "A2": [
+      {
+        "op": "add",
+        "path": "/capsules/1",
+        "value": {
+          "depth": "capsule",
+          "finding": "fnd-trend",
+          "glyphs": [],
+          "headline": "THYAO: SMA20, EMA34'ün üstüne çıktı.",
+          "id": "cap-10-0",
+          "provenance": {
+            "at": 1760000600000,
+            "author": {
+              "kind": "agent",
+              "name": "scout"
+            },
+            "based_on": [
+              "fact-sma-cross"
+            ]
+          },
+          "revision": 0,
+          "state": "live"
+        }
+      },
+      {
+        "op": "add",
+        "path": "/findings/1",
+        "value": {
+          "claim": "THYAO kısa vadeli yükseliş trendine girdi.",
+          "confidence": 0.6,
+          "facts": [
+            "fact-sma-cross"
+          ],
+          "id": "fnd-trend",
+          "invalidation": {
+            "kind": "compare",
+            "left": "sma20",
+            "op": "cross_below",
+            "right": "ema50"
+          },
+          "provenance": {
+            "at": 1760000600000,
+            "author": {
+              "kind": "agent",
+              "name": "scout"
+            },
+            "based_on": [
+              "fact-sma-cross"
+            ]
+          }
+        }
+      }
+    ],
+    "A3": [
+      {
+        "op": "add",
+        "path": "/findings/-",
+        "value": {
+          "claim": "THYAO kısa vadeli yükseliş trendine girdi.",
+          "confidence": 0.6,
+          "facts": [
+            "fact-sma-cross"
+          ],
+          "id": "fnd-trend",
+          "invalidation": {
+            "kind": "compare",
+            "left": "sma20",
+            "op": "cross_below",
+            "right": "ema50"
+          },
+          "provenance": {
+            "at": 1760000600000,
+            "author": {
+              "kind": "agent",
+              "name": "scout"
+            },
+            "based_on": [
+              "fact-sma-cross"
+            ]
+          }
+        }
+      },
+      {
+        "op": "add",
+        "path": "/capsules/-",
+        "value": {
+          "depth": "capsule",
+          "finding": "fnd-trend",
+          "glyphs": [],
+          "headline": "THYAO: SMA20, EMA34'ün üstüne çıktı.",
+          "id": "cap-10-0",
+          "provenance": {
+            "at": 1760000600000,
+            "author": {
+              "kind": "agent",
+              "name": "scout"
+            },
+            "based_on": [
+              "fact-sma-cross"
+            ]
+          },
+          "revision": 0,
+          "state": "live"
+        }
+      }
+    ],
+    "B": [
+      {
+        "finding": {
+          "claim": "THYAO kısa vadeli yükseliş trendine girdi.",
+          "confidence": 0.6,
+          "facts": [
+            "fact-sma-cross"
+          ],
+          "id": "fnd-trend",
+          "invalidation": {
+            "kind": "compare",
+            "left": "sma20",
+            "op": "cross_below",
+            "right": "ema50"
+          },
+          "provenance": {
+            "at": 1760000600000,
+            "author": {
+              "kind": "agent",
+              "name": "scout"
+            },
+            "based_on": [
+              "fact-sma-cross"
+            ]
+          }
+        },
+        "op": "put_finding"
+      },
+      {
+        "capsule": {
+          "depth": "capsule",
+          "finding": "fnd-trend",
+          "glyphs": [],
+          "headline": "THYAO: SMA20, EMA34'ün üstüne çıktı.",
+          "id": "cap-10-0",
+          "provenance": {
+            "at": 1760000600000,
+            "author": {
+              "kind": "agent",
+              "name": "scout"
+            },
+            "based_on": [
+              "fact-sma-cross"
+            ]
+          },
+          "revision": 0,
+          "state": "live"
+        },
+        "op": "put_capsule"
+      }
+    ],
+    "Bop": [
+      {
+        "capsule": "THYAO: SMA20, EMA34'ün üstüne çıktı.",
+        "claim": "THYAO kısa vadeli yükseliş trendine girdi.",
+        "confidence": 0.6,
+        "facts": [
+          "fact-sma-cross"
+        ],
+        "id": "fnd-trend",
+        "invalidation": {
+          "kind": "compare",
+          "left": "sma20",
+          "op": "cross_below",
+          "right": "ema50"
+        },
+        "op": "add_finding"
+      }
+    ],
+    "M": {
+      "capsules": [
+        {
+          "depth": "capsule",
+          "finding": "fnd-overbought",
+          "glyphs": [
+            {
+              "kind": "direction",
+              "value": 0.6
+            },
+            {
+              "kind": "extremity",
+              "value": 0.8
+            },
+            {
+              "kind": "uncertainty",
+              "value": 0.35
+            }
+          ],
+          "headline": "THYAO aşırı alımda: RSI 70'in üstünde.",
+          "id": "cap-overbought",
+          "provenance": {
+            "at": 1760000000000,
+            "author": {
+              "kind": "agent",
+              "name": "scout"
+            },
+            "based_on": [
+              "fact-rsi-cross70"
+            ]
+          },
+          "revision": 0,
+          "state": "live"
+        },
+        {
+          "depth": "capsule",
+          "finding": "fnd-trend",
+          "glyphs": [],
+          "headline": "THYAO: SMA20, EMA34'ün üstüne çıktı.",
+          "id": "cap-10-0",
+          "provenance": {
+            "at": 1760000600000,
+            "author": {
+              "kind": "agent",
+              "name": "scout"
+            },
+            "based_on": [
+              "fact-sma-cross"
+            ]
+          },
+          "revision": 0,
+          "state": "live"
+        }
+      ],
+      "findings": [
+        {
+          "claim": "THYAO günlükte RSI(14) aşırı alım bölgesine girdi; momentum güçlü.",
+          "confidence": 0.65,
+          "facts": [
+            "fact-rsi-cross70"
+          ],
+          "id": "fnd-overbought",
+          "invalidation": {
+            "kind": "threshold",
+            "op": "cross_below",
+            "series": "rsi14",
+            "value": 70.0
+          },
+          "provenance": {
+            "at": 1760000000000,
+            "author": {
+              "kind": "agent",
+              "name": "scout"
+            },
+            "based_on": [
+              "fact-rsi-cross70"
+            ]
+          }
+        },
+        {
+          "claim": "THYAO kısa vadeli yükseliş trendine girdi.",
+          "confidence": 0.6,
+          "facts": [
+            "fact-sma-cross"
+          ],
+          "id": "fnd-trend",
+          "invalidation": {
+            "kind": "compare",
+            "left": "sma20",
+            "op": "cross_below",
+            "right": "ema50"
+          },
+          "provenance": {
+            "at": 1760000600000,
+            "author": {
+              "kind": "agent",
+              "name": "scout"
+            },
+            "based_on": [
+              "fact-sma-cross"
+            ]
+          }
+        }
+      ]
+    }
+  },
+  "11 update_finding invalidation+confidence": {
+    "A1": [
+      {
+        "op": "replace",
+        "path": "/findings/1/confidence",
+        "value": 0.7
+      },
+      {
+        "op": "replace",
+        "path": "/findings/1/invalidation/kind",
+        "value": "threshold"
+      },
+      {
+        "op": "replace",
+        "path": "/findings/1/invalidation/op",
+        "value": "lt"
+      },
+      {
+        "op": "add",
+        "path": "/findings/1/invalidation/series",
+        "value": "px"
+      },
+      {
+        "op": "add",
+        "path": "/findings/1/invalidation/value",
+        "value": 110.0
+      },
+      {
+        "op": "remove",
+        "path": "/findings/1/invalidation/left"
+      },
+      {
+        "op": "remove",
+        "path": "/findings/1/invalidation/right"
+      }
+    ],
+    "A2": [
+      {
+        "op": "replace",
+        "path": "/findings/1/confidence",
+        "value": 0.7
+      },
+      {
+        "op": "replace",
+        "path": "/findings/1/invalidation/kind",
+        "value": "threshold"
+      },
+      {
+        "op": "replace",
+        "path": "/findings/1/invalidation/op",
+        "value": "lt"
+      },
+      {
+        "op": "add",
+        "path": "/findings/1/invalidation/series",
+        "value": "px"
+      },
+      {
+        "op": "add",
+        "path": "/findings/1/invalidation/value",
+        "value": 110.0
+      },
+      {
+        "op": "remove",
+        "path": "/findings/1/invalidation/left"
+      },
+      {
+        "op": "remove",
+        "path": "/findings/1/invalidation/right"
+      }
+    ],
+    "A3": [
+      {
+        "op": "replace",
+        "path": "/findings/1/confidence",
+        "value": 0.7
+      },
+      {
+        "op": "replace",
+        "path": "/findings/1/invalidation/kind",
+        "value": "threshold"
+      },
+      {
+        "op": "replace",
+        "path": "/findings/1/invalidation/op",
+        "value": "lt"
+      },
+      {
+        "op": "add",
+        "path": "/findings/1/invalidation/series",
+        "value": "px"
+      },
+      {
+        "op": "add",
+        "path": "/findings/1/invalidation/value",
+        "value": 110.0
+      },
+      {
+        "op": "remove",
+        "path": "/findings/1/invalidation/left"
+      },
+      {
+        "op": "remove",
+        "path": "/findings/1/invalidation/right"
+      }
+    ],
+    "B": [
+      {
+        "finding": {
+          "claim": "THYAO kısa vadeli yükseliş trendine girdi.",
+          "confidence": 0.7,
+          "facts": [
+            "fact-sma-cross"
+          ],
+          "id": "fnd-trend",
+          "invalidation": {
+            "kind": "threshold",
+            "op": "lt",
+            "series": "px",
+            "value": 110.0
+          },
+          "provenance": {
+            "at": 1760000600000,
+            "author": {
+              "kind": "agent",
+              "name": "scout"
+            },
+            "based_on": [
+              "fact-sma-cross"
+            ]
+          }
+        },
+        "op": "put_finding"
+      }
+    ],
+    "Bop": [
+      {
+        "confidence": 0.7,
+        "finding": "fnd-trend",
+        "invalidation": {
+          "kind": "threshold",
+          "op": "lt",
+          "series": "px",
+          "value": 110.0
+        },
+        "op": "update_finding"
+      }
+    ],
+    "M": {
+      "findings": [
+        {
+          "claim": "THYAO günlükte RSI(14) aşırı alım bölgesine girdi; momentum güçlü.",
+          "confidence": 0.65,
+          "facts": [
+            "fact-rsi-cross70"
+          ],
+          "id": "fnd-overbought",
+          "invalidation": {
+            "kind": "threshold",
+            "op": "cross_below",
+            "series": "rsi14",
+            "value": 70.0
+          },
+          "provenance": {
+            "at": 1760000000000,
+            "author": {
+              "kind": "agent",
+              "name": "scout"
+            },
+            "based_on": [
+              "fact-rsi-cross70"
+            ]
+          }
+        },
+        {
+          "claim": "THYAO kısa vadeli yükseliş trendine girdi.",
+          "confidence": 0.7,
+          "facts": [
+            "fact-sma-cross"
+          ],
+          "id": "fnd-trend",
+          "invalidation": {
+            "kind": "threshold",
+            "op": "lt",
+            "series": "px",
+            "value": 110.0
+          },
+          "provenance": {
+            "at": 1760000600000,
+            "author": {
+              "kind": "agent",
+              "name": "scout"
+            },
+            "based_on": [
+              "fact-sma-cross"
+            ]
+          }
+        }
+      ]
+    }
+  },
+  "12 reject_finding fnd-overbought": {
+    "A1": [
+      {
+        "op": "replace",
+        "path": "/capsules/0/state",
+        "value": "rejected"
+      },
+      {
+        "op": "add",
+        "path": "/ledger/entries/0",
+        "value": {
+          "finding": "fnd-overbought",
+          "note": "RSI(21) ile aşırı alım teyit edilmedi.",
+          "outcome": "pending",
+          "recorded_at": 1760000720000,
+          "state": "rejected"
+        }
+      }
+    ],
+    "A2": [
+      {
+        "op": "replace",
+        "path": "/capsules/0/state",
+        "value": "rejected"
+      },
+      {
+        "op": "add",
+        "path": "/ledger/entries/0",
+        "value": {
+          "finding": "fnd-overbought",
+          "note": "RSI(21) ile aşırı alım teyit edilmedi.",
+          "outcome": "pending",
+          "recorded_at": 1760000720000,
+          "state": "rejected"
+        }
+      }
+    ],
+    "A3": [
+      {
+        "op": "replace",
+        "path": "/capsules/0/state",
+        "value": "rejected"
+      },
+      {
+        "op": "add",
+        "path": "/ledger/entries/-",
+        "value": {
+          "finding": "fnd-overbought",
+          "note": "RSI(21) ile aşırı alım teyit edilmedi.",
+          "outcome": "pending",
+          "recorded_at": 1760000720000,
+          "state": "rejected"
+        }
+      }
+    ],
+    "B": [
+      {
+        "capsule": "cap-overbought",
+        "op": "set_capsule_state",
+        "state": "rejected"
+      },
+      {
+        "entry": {
+          "finding": "fnd-overbought",
+          "note": "RSI(21) ile aşırı alım teyit edilmedi.",
+          "outcome": "pending",
+          "recorded_at": 1760000720000,
+          "state": "rejected"
+        },
+        "op": "push_ledger"
+      }
+    ],
+    "Bop": [
+      {
+        "finding": "fnd-overbought",
+        "note": "RSI(21) ile aşırı alım teyit edilmedi.",
+        "op": "reject_finding"
+      }
+    ],
+    "M": {
+      "capsules": [
+        {
+          "depth": "capsule",
+          "finding": "fnd-overbought",
+          "glyphs": [
+            {
+              "kind": "direction",
+              "value": 0.6
+            },
+            {
+              "kind": "extremity",
+              "value": 0.8
+            },
+            {
+              "kind": "uncertainty",
+              "value": 0.35
+            }
+          ],
+          "headline": "THYAO aşırı alımda: RSI 70'in üstünde.",
+          "id": "cap-overbought",
+          "provenance": {
+            "at": 1760000000000,
+            "author": {
+              "kind": "agent",
+              "name": "scout"
+            },
+            "based_on": [
+              "fact-rsi-cross70"
+            ]
+          },
+          "revision": 0,
+          "state": "rejected"
+        },
+        {
+          "depth": "capsule",
+          "finding": "fnd-trend",
+          "glyphs": [],
+          "headline": "THYAO: SMA20, EMA34'ün üstüne çıktı.",
+          "id": "cap-10-0",
+          "provenance": {
+            "at": 1760000600000,
+            "author": {
+              "kind": "agent",
+              "name": "scout"
+            },
+            "based_on": [
+              "fact-sma-cross"
+            ]
+          },
+          "revision": 0,
+          "state": "live"
+        }
+      ],
+      "ledger": {
+        "entries": [
+          {
+            "finding": "fnd-overbought",
+            "note": "RSI(21) ile aşırı alım teyit edilmedi.",
+            "outcome": "pending",
+            "recorded_at": 1760000720000,
+            "state": "rejected"
+          }
+        ]
+      }
+    }
+  },
+  "13 append_bars px (1 bar)": {
+    "A1": [
+      {
+        "op": "add",
+        "path": "/series/0/data/bars/200",
+        "value": {
+          "c": 124.13,
+          "h": 125.49,
+          "l": 123.63,
+          "o": 124.69,
+          "t": 1759968000000,
+          "v": 1751914.1
+        }
+      }
+    ],
+    "A2": [
+      {
+        "op": "add",
+        "path": "/series/0/data/bars/200",
+        "value": {
+          "c": 124.13,
+          "h": 125.49,
+          "l": 123.63,
+          "o": 124.69,
+          "t": 1759968000000,
+          "v": 1751914.1
+        }
+      }
+    ],
+    "A3": [
+      {
+        "op": "add",
+        "path": "/series/0/data/bars/-",
+        "value": {
+          "c": 124.13,
+          "h": 125.49,
+          "l": 123.63,
+          "o": 124.69,
+          "t": 1759968000000,
+          "v": 1751914.1
+        }
+      }
+    ],
+    "B": [
+      {
+        "bars": [
+          {
+            "c": 124.13,
+            "h": 125.49,
+            "l": 123.63,
+            "o": 124.69,
+            "t": 1759968000000,
+            "v": 1751914.1
+          }
+        ],
+        "op": "append_bars",
+        "series": "px"
+      }
+    ],
+    "Bop": [
+      {
+        "bars": [
+          {
+            "c": 124.13,
+            "h": 125.49,
+            "l": 123.63,
+            "o": 124.69,
+            "t": 1759968000000,
+            "v": 1751914.1
+          }
+        ],
+        "op": "append_bars",
+        "series": "px"
+      }
+    ],
+    "M": "<16452 bytes, truncated> {\"series\":[{\"data\":{\"bars\":[{\"c\":98.93,\"h\":101.88,\"l\":98.16,\"o\":100.29,\"t\":1735776000000,\"v\":1888233.71},{\"c\":98.77,\"h\":99.66,\"l\":98.19,\"o\":98.72,\"t\":1735862400000,\"v\":605167.66},{\"c\":96.97,\"h\":99.18,\"l\":96.89,\"o\":98.56,\"t\":1736121600000,\"v\":2269085.45},{\"c\":96.24,\"h\":97.57,\"l\":95.74,\"o\":96.69,\"t\":1736208000000,\"v\":2037521.24},{\"c\":96.87,\"h\":97.97,\"l\":95.69,\"o\":96.27,\"t\":1736294400000,\"v\":2412471."
+  },
+  "14 update_last_bar px": {
+    "A1": [
+      {
+        "op": "replace",
+        "path": "/series/0/data/bars/200/c",
+        "value": 126.86
+      },
+      {
+        "op": "replace",
+        "path": "/series/0/data/bars/200/h",
+        "value": 127.85
+      },
+      {
+        "op": "replace",
+        "path": "/series/0/data/bars/200/l",
+        "value": 123.55
+      },
+      {
+        "op": "replace",
+        "path": "/series/0/data/bars/200/v",
+        "value": 1871914.1
+      }
+    ],
+    "A2": [
+      {
+        "op": "replace",
+        "path": "/series/0/data/bars/200/c",
+        "value": 126.86
+      },
+      {
+        "op": "replace",
+        "path": "/series/0/data/bars/200/h",
+        "value": 127.85
+      },
+      {
+        "op": "replace",
+        "path": "/series/0/data/bars/200/l",
+        "value": 123.55
+      },
+      {
+        "op": "replace",
+        "path": "/series/0/data/bars/200/v",
+        "value": 1871914.1
+      }
+    ],
+    "A3": [
+      {
+        "op": "replace",
+        "path": "/series/0/data/bars/200",
+        "value": {
+          "c": 126.86,
+          "h": 127.85,
+          "l": 123.55,
+          "o": 124.69,
+          "t": 1759968000000,
+          "v": 1871914.1
+        }
+      }
+    ],
+    "B": [
+      {
+        "bar": {
+          "c": 126.86,
+          "h": 127.85,
+          "l": 123.55,
+          "o": 124.69,
+          "t": 1759968000000,
+          "v": 1871914.1
+        },
+        "op": "set_last_bar",
+        "series": "px"
+      }
+    ],
+    "Bop": [
+      {
+        "bar": {
+          "c": 126.86,
+          "h": 127.85,
+          "l": 123.55,
+          "o": 124.69,
+          "t": 1759968000000,
+          "v": 1871914.1
+        },
+        "op": "update_last_bar",
+        "series": "px"
+      }
+    ],
+    "M": "<16452 bytes, truncated> {\"series\":[{\"data\":{\"bars\":[{\"c\":98.93,\"h\":101.88,\"l\":98.16,\"o\":100.29,\"t\":1735776000000,\"v\":1888233.71},{\"c\":98.77,\"h\":99.66,\"l\":98.19,\"o\":98.72,\"t\":1735862400000,\"v\":605167.66},{\"c\":96.97,\"h\":99.18,\"l\":96.89,\"o\":98.56,\"t\":1736121600000,\"v\":2269085.45},{\"c\":96.24,\"h\":97.57,\"l\":95.74,\"o\":96.69,\"t\":1736208000000,\"v\":2037521.24},{\"c\":96.87,\"h\":97.97,\"l\":95.69,\"o\":96.27,\"t\":1736294400000,\"v\":2412471."
+  },
+  "15 update_last_bar px": {
+    "A1": [
+      {
+        "op": "replace",
+        "path": "/series/0/data/bars/200/c",
+        "value": 124.14
+      },
+      {
+        "op": "replace",
+        "path": "/series/0/data/bars/200/h",
+        "value": 125.87
+      },
+      {
+        "op": "replace",
+        "path": "/series/0/data/bars/200/l",
+        "value": 123.1
+      },
+      {
+        "op": "replace",
+        "path": "/series/0/data/bars/200/v",
+        "value": 1951914.1
+      }
+    ],
+    "A2": [
+      {
+        "op": "replace",
+        "path": "/series/0/data/bars/200/c",
+        "value": 124.14
+      },
+      {
+        "op": "replace",
+        "path": "/series/0/data/bars/200/h",
+        "value": 125.87
+      },
+      {
+        "op": "replace",
+        "path": "/series/0/data/bars/200/l",
+        "value": 123.1
+      },
+      {
+        "op": "replace",
+        "path": "/series/0/data/bars/200/v",
+        "value": 1951914.1
+      }
+    ],
+    "A3": [
+      {
+        "op": "replace",
+        "path": "/series/0/data/bars/200",
+        "value": {
+          "c": 124.14,
+          "h": 125.87,
+          "l": 123.1,
+          "o": 124.69,
+          "t": 1759968000000,
+          "v": 1951914.1
+        }
+      }
+    ],
+    "B": [
+      {
+        "bar": {
+          "c": 124.14,
+          "h": 125.87,
+          "l": 123.1,
+          "o": 124.69,
+          "t": 1759968000000,
+          "v": 1951914.1
+        },
+        "op": "set_last_bar",
+        "series": "px"
+      }
+    ],
+    "Bop": [
+      {
+        "bar": {
+          "c": 124.14,
+          "h": 125.87,
+          "l": 123.1,
+          "o": 124.69,
+          "t": 1759968000000,
+          "v": 1951914.1
+        },
+        "op": "update_last_bar",
+        "series": "px"
+      }
+    ],
+    "M": "<16451 bytes, truncated> {\"series\":[{\"data\":{\"bars\":[{\"c\":98.93,\"h\":101.88,\"l\":98.16,\"o\":100.29,\"t\":1735776000000,\"v\":1888233.71},{\"c\":98.77,\"h\":99.66,\"l\":98.19,\"o\":98.72,\"t\":1735862400000,\"v\":605167.66},{\"c\":96.97,\"h\":99.18,\"l\":96.89,\"o\":98.56,\"t\":1736121600000,\"v\":2269085.45},{\"c\":96.24,\"h\":97.57,\"l\":95.74,\"o\":96.69,\"t\":1736208000000,\"v\":2037521.24},{\"c\":96.87,\"h\":97.97,\"l\":95.69,\"o\":96.27,\"t\":1736294400000,\"v\":2412471."
+  },
+  "16 add_intent": {
+    "A1": [
+      {
+        "op": "add",
+        "path": "/intents/0",
+        "value": {
+          "active": true,
+          "id": "intent-break",
+          "provenance": {
+            "at": 1760000960000,
+            "author": {
+              "kind": "human",
+              "name": "arkin"
+            },
+            "based_on": []
+          },
+          "text": "THYAO 110'un altına inerse haber ver.",
+          "trigger": {
+            "kind": "threshold",
+            "op": "lt",
+            "series": "px",
+            "value": 110.0
+          }
+        }
+      }
+    ],
+    "A2": [
+      {
+        "op": "add",
+        "path": "/intents/0",
+        "value": {
+          "active": true,
+          "id": "intent-break",
+          "provenance": {
+            "at": 1760000960000,
+            "author": {
+              "kind": "human",
+              "name": "arkin"
+            },
+            "based_on": []
+          },
+          "text": "THYAO 110'un altına inerse haber ver.",
+          "trigger": {
+            "kind": "threshold",
+            "op": "lt",
+            "series": "px",
+            "value": 110.0
+          }
+        }
+      }
+    ],
+    "A3": [
+      {
+        "op": "add",
+        "path": "/intents/-",
+        "value": {
+          "active": true,
+          "id": "intent-break",
+          "provenance": {
+            "at": 1760000960000,
+            "author": {
+              "kind": "human",
+              "name": "arkin"
+            },
+            "based_on": []
+          },
+          "text": "THYAO 110'un altına inerse haber ver.",
+          "trigger": {
+            "kind": "threshold",
+            "op": "lt",
+            "series": "px",
+            "value": 110.0
+          }
+        }
+      }
+    ],
+    "B": [
+      {
+        "intent": {
+          "active": true,
+          "id": "intent-break",
+          "provenance": {
+            "at": 1760000960000,
+            "author": {
+              "kind": "human",
+              "name": "arkin"
+            },
+            "based_on": []
+          },
+          "text": "THYAO 110'un altına inerse haber ver.",
+          "trigger": {
+            "kind": "threshold",
+            "op": "lt",
+            "series": "px",
+            "value": 110.0
+          }
+        },
+        "op": "put_intent"
+      }
+    ],
+    "Bop": [
+      {
+        "id": "intent-break",
+        "op": "add_intent",
+        "text": "THYAO 110'un altına inerse haber ver.",
+        "trigger": {
+          "kind": "threshold",
+          "op": "lt",
+          "series": "px",
+          "value": 110.0
+        }
+      }
+    ],
+    "M": {
+      "intents": [
+        {
+          "active": true,
+          "id": "intent-break",
+          "provenance": {
+            "at": 1760000960000,
+            "author": {
+              "kind": "human",
+              "name": "arkin"
+            },
+            "based_on": []
+          },
+          "text": "THYAO 110'un altına inerse haber ver.",
+          "trigger": {
+            "kind": "threshold",
+            "op": "lt",
+            "series": "px",
+            "value": 110.0
+          }
+        }
+      ]
+    }
+  },
+  "17 remove macd (cascade layer)": {
+    "A1": [
+      {
+        "op": "replace",
+        "path": "/series/2/id",
+        "value": "bb20"
+      },
+      {
+        "op": "add",
+        "path": "/series/2/source/params/k",
+        "value": 2.0
+      },
+      {
+        "op": "add",
+        "path": "/series/2/source/params/period",
+        "value": 20.0
+      },
+      {
+        "op": "remove",
+        "path": "/series/2/source/params/fast"
+      },
+      {
+        "op": "remove",
+        "path": "/series/2/source/params/signal"
+      },
+      {
+        "op": "remove",
+        "path": "/series/2/source/params/slow"
+      },
+      {
+        "op": "replace",
+        "path": "/series/2/source/study",
+        "value": "bollinger"
+      },
+      {
+        "op": "replace",
+        "path": "/series/3/id",
+        "value": "sma20"
+      },
+      {
+        "op": "remove",
+        "path": "/series/3/source/params/k"
+      },
+      {
+        "op": "replace",
+        "path": "/series/3/source/study",
+        "value": "sma"
+      },
+      {
+        "op": "remove",
+        "path": "/series/3/instrument"
+      },
+      {
+        "op": "remove",
+        "path": "/series/3/interval"
+      },
+      {
+        "op": "replace",
+        "path": "/series/4/id",
+        "value": "ema50"
+      },
+      {
+        "op": "replace",
+        "path": "/series/4/source/params/period",
+        "value": 34.0
+      },
+      {
+        "op": "replace",
+        "path": "/series/4/source/study",
+        "value": "ema"
+      },
+      {
+        "op": "replace",
+        "path": "/series/5/id",
+        "value": "rsi7"
+      },
+      {
+        "op": "replace",
+        "path": "/series/5/source/params/period",
+        "value": 7.0
+      },
+      {
+        "op": "replace",
+        "path": "/series/5/source/study",
+        "value": "rsi"
+      },
+      {
+        "op": "remove",
+        "path": "/series/6"
+      },
+      {
+        "op": "replace",
+        "path": "/views/0/layers/4/panel",
+        "value": 0
+      },
+      {
+        "op": "replace",
+        "path": "/views/0/layers/4/series",
+        "value": "sma20"
+      },
+      {
+        "op": "replace",
+        "path": "/views/0/layers/5/series",
+        "value": "ema50"
+      },
+      {
+        "op": "replace",
+        "path": "/views/0/layers/6/panel",
+        "value": 1
+      },
+      {
+        "op": "replace",
+        "path": "/views/0/layers/6/series",
+        "value": "rsi7"
+      },
+      {
+        "op": "remove",
+        "path": "/views/0/layers/7"
+      }
+    ],
+    "A2": [
+      {
+        "op": "remove",
+        "path": "/series/2"
+      },
+      {
+        "op": "remove",
+        "path": "/views/0/layers/4"
+      }
+    ],
+    "A3": [
+      {
+        "op": "remove",
+        "path": "/views/0/layers/4"
+      },
+      {
+        "op": "remove",
+        "path": "/series/2"
+      }
+    ],
+    "B": [
+      {
+        "index": 4,
+        "op": "delete_layer",
+        "view": "main"
+      },
+      {
+        "id": "macd",
+        "op": "delete"
+      }
+    ],
+    "Bop": [
+      {
+        "id": "macd",
+        "op": "remove"
+      }
+    ],
+    "M": "<16888 bytes, truncated> {\"series\":[{\"data\":{\"bars\":[{\"c\":98.93,\"h\":101.88,\"l\":98.16,\"o\":100.29,\"t\":1735776000000,\"v\":1888233.71},{\"c\":98.77,\"h\":99.66,\"l\":98.19,\"o\":98.72,\"t\":1735862400000,\"v\":605167.66},{\"c\":96.97,\"h\":99.18,\"l\":96.89,\"o\":98.56,\"t\":1736121600000,\"v\":2269085.45},{\"c\":96.24,\"h\":97.57,\"l\":95.74,\"o\":96.69,\"t\":1736208000000,\"v\":2037521.24},{\"c\":96.87,\"h\":97.97,\"l\":95.69,\"o\":96.27,\"t\":1736294400000,\"v\":2412471."
+  },
+  "18 undo #4 (set_params ema50)": {
+    "A1": [
+      {
+        "op": "replace",
+        "path": "/series/4/source/params/period",
+        "value": 50.0
+      }
+    ],
+    "A2": [
+      {
+        "op": "replace",
+        "path": "/series/4/source/params/period",
+        "value": 50.0
+      }
+    ],
+    "A3": [
+      {
+        "op": "replace",
+        "path": "/series/4/source/params/period",
+        "value": 50.0
+      }
+    ],
+    "B": [
+      {
+        "op": "put_series",
+        "series": {
+          "id": "ema50",
+          "source": {
+            "inputs": [
+              "px"
+            ],
+            "kind": "study",
+            "params": {
+              "period": 50.0
+            },
+            "study": "ema"
+          }
+        }
+      }
+    ],
+    "Bop": [
+      {
+        "op": "undo",
+        "seq": 4
+      }
+    ],
+    "M": "<16248 bytes, truncated> {\"series\":[{\"data\":{\"bars\":[{\"c\":98.93,\"h\":101.88,\"l\":98.16,\"o\":100.29,\"t\":1735776000000,\"v\":1888233.71},{\"c\":98.77,\"h\":99.66,\"l\":98.19,\"o\":98.72,\"t\":1735862400000,\"v\":605167.66},{\"c\":96.97,\"h\":99.18,\"l\":96.89,\"o\":98.56,\"t\":1736121600000,\"v\":2269085.45},{\"c\":96.24,\"h\":97.57,\"l\":95.74,\"o\":96.69,\"t\":1736208000000,\"v\":2037521.24},{\"c\":96.87,\"h\":97.97,\"l\":95.69,\"o\":96.27,\"t\":1736294400000,\"v\":2412471."
+  },
+  "19 add_study bb10 (+show)": {
+    "A1": [
+      {
+        "op": "add",
+        "path": "/series/6",
+        "value": {
+          "id": "bb10",
+          "source": {
+            "inputs": [
+              "px"
+            ],
+            "kind": "study",
+            "params": {
+              "k": 2.0,
+              "period": 10.0
+            },
+            "study": "bollinger"
+          }
+        }
+      },
+      {
+        "op": "add",
+        "path": "/views/0/layers/7",
+        "value": {
+          "encoding": {},
+          "mark": "line",
+          "panel": 0,
+          "series": "bb10"
+        }
+      }
+    ],
+    "A2": [
+      {
+        "op": "add",
+        "path": "/series/6",
+        "value": {
+          "id": "bb10",
+          "source": {
+            "inputs": [
+              "px"
+            ],
+            "kind": "study",
+            "params": {
+              "k": 2.0,
+              "period": 10.0
+            },
+            "study": "bollinger"
+          }
+        }
+      },
+      {
+        "op": "add",
+        "path": "/views/0/layers/7",
+        "value": {
+          "encoding": {},
+          "mark": "line",
+          "panel": 0,
+          "series": "bb10"
+        }
+      }
+    ],
+    "A3": [
+      {
+        "op": "add",
+        "path": "/series/-",
+        "value": {
+          "id": "bb10",
+          "source": {
+            "inputs": [
+              "px"
+            ],
+            "kind": "study",
+            "params": {
+              "k": 2.0,
+              "period": 10.0
+            },
+            "study": "bollinger"
+          }
+        }
+      },
+      {
+        "op": "add",
+        "path": "/views/0/layers/7",
+        "value": {
+          "encoding": {},
+          "mark": "line",
+          "panel": 0,
+          "series": "bb10"
+        }
+      }
+    ],
+    "B": [
+      {
+        "op": "put_series",
+        "series": {
+          "id": "bb10",
+          "source": {
+            "inputs": [
+              "px"
+            ],
+            "kind": "study",
+            "params": {
+              "k": 2.0,
+              "period": 10.0
+            },
+            "study": "bollinger"
+          }
+        }
+      },
+      {
+        "index": 7,
+        "layer": {
+          "encoding": {},
+          "mark": "line",
+          "panel": 0,
+          "series": "bb10"
+        },
+        "op": "insert_layer",
+        "view": "main"
+      }
+    ],
+    "Bop": [
+      {
+        "id": "bb10",
+        "inputs": [
+          "px"
+        ],
+        "op": "add_study",
+        "params": {
+          "period": 10.0
+        },
+        "show": {
+          "panel": 0,
+          "view": "main"
+        },
+        "study": "bollinger"
+      }
+    ],
+    "M": "<17053 bytes, truncated> {\"series\":[{\"data\":{\"bars\":[{\"c\":98.93,\"h\":101.88,\"l\":98.16,\"o\":100.29,\"t\":1735776000000,\"v\":1888233.71},{\"c\":98.77,\"h\":99.66,\"l\":98.19,\"o\":98.72,\"t\":1735862400000,\"v\":605167.66},{\"c\":96.97,\"h\":99.18,\"l\":96.89,\"o\":98.56,\"t\":1736121600000,\"v\":2269085.45},{\"c\":96.24,\"h\":97.57,\"l\":95.74,\"o\":96.69,\"t\":1736208000000,\"v\":2037521.24},{\"c\":96.87,\"h\":97.97,\"l\":95.69,\"o\":96.27,\"t\":1736294400000,\"v\":2412471."
+  },
+  "21 undo #12 (reject_finding)": {
+    "A1": [
+      {
+        "op": "replace",
+        "path": "/capsules/0/state",
+        "value": "live"
+      },
+      {
+        "op": "remove",
+        "path": "/ledger/entries/0"
+      }
+    ],
+    "A2": [
+      {
+        "op": "replace",
+        "path": "/capsules/0/state",
+        "value": "live"
+      },
+      {
+        "op": "remove",
+        "path": "/ledger/entries/0"
+      }
+    ],
+    "A3": [
+      {
+        "op": "remove",
+        "path": "/ledger/entries/0"
+      },
+      {
+        "op": "replace",
+        "path": "/capsules/0/state",
+        "value": "live"
+      }
+    ],
+    "B": [
+      {
+        "op": "pop_ledger"
+      },
+      {
+        "capsule": "cap-overbought",
+        "op": "set_capsule_state",
+        "state": "live"
+      }
+    ],
+    "Bop": [
+      {
+        "op": "undo",
+        "seq": 12
+      }
+    ],
+    "M": {
+      "capsules": [
+        {
+          "depth": "capsule",
+          "finding": "fnd-overbought",
+          "glyphs": [
+            {
+              "kind": "direction",
+              "value": 0.6
+            },
+            {
+              "kind": "extremity",
+              "value": 0.8
+            },
+            {
+              "kind": "uncertainty",
+              "value": 0.35
+            }
+          ],
+          "headline": "THYAO aşırı alımda: RSI 70'in üstünde.",
+          "id": "cap-overbought",
+          "provenance": {
+            "at": 1760000000000,
+            "author": {
+              "kind": "agent",
+              "name": "scout"
+            },
+            "based_on": [
+              "fact-rsi-cross70"
+            ]
+          },
+          "revision": 0,
+          "state": "live"
+        },
+        {
+          "depth": "capsule",
+          "finding": "fnd-trend",
+          "glyphs": [],
+          "headline": "THYAO: SMA20, EMA34'ün üstüne çıktı.",
+          "id": "cap-10-0",
+          "provenance": {
+            "at": 1760000600000,
+            "author": {
+              "kind": "agent",
+              "name": "scout"
+            },
+            "based_on": [
+              "fact-sma-cross"
+            ]
+          },
+          "revision": 0,
+          "state": "live"
+        }
+      ],
+      "ledger": {
+        "entries": []
+      }
+    }
+  },
+  "22 append_bars px (3 bars)": {
+    "A1": [
+      {
+        "op": "add",
+        "path": "/series/0/data/bars/201",
+        "value": {
+          "c": 122.06,
+          "h": 124.78,
+          "l": 121.67,
+          "o": 124.14,
+          "t": 1760054400000,
+          "v": 585225.48
+        }
+      },
+      {
+        "op": "add",
+        "path": "/series/0/data/bars/202",
+        "value": {
+          "c": 120.93,
+          "h": 123.03,
+          "l": 120.6,
+          "o": 122.06,
+          "t": 1760140800000,
+          "v": 614416.62
+        }
+      },
+      {
+        "op": "add",
+        "path": "/series/0/data/bars/203",
+        "value": {
+          "c": 119.07,
+          "h": 121.01,
+          "l": 118.3,
+          "o": 120.93,
+          "t": 1760227200000,
+          "v": 611489.17
+        }
+      }
+    ],
+    "A2": [
+      {
+        "op": "add",
+        "path": "/series/0/data/bars/201",
+        "value": {
+          "c": 122.06,
+          "h": 124.78,
+          "l": 121.67,
+          "o": 124.14,
+          "t": 1760054400000,
+          "v": 585225.48
+        }
+      },
+      {
+        "op": "add",
+        "path": "/series/0/data/bars/202",
+        "value": {
+          "c": 120.93,
+          "h": 123.03,
+          "l": 120.6,
+          "o": 122.06,
+          "t": 1760140800000,
+          "v": 614416.62
+        }
+      },
+      {
+        "op": "add",
+        "path": "/series/0/data/bars/203",
+        "value": {
+          "c": 119.07,
+          "h": 121.01,
+          "l": 118.3,
+          "o": 120.93,
+          "t": 1760227200000,
+          "v": 611489.17
+        }
+      }
+    ],
+    "A3": [
+      {
+        "op": "add",
+        "path": "/series/0/data/bars/-",
+        "value": {
+          "c": 122.06,
+          "h": 124.78,
+          "l": 121.67,
+          "o": 124.14,
+          "t": 1760054400000,
+          "v": 585225.48
+        }
+      },
+      {
+        "op": "add",
+        "path": "/series/0/data/bars/-",
+        "value": {
+          "c": 120.93,
+          "h": 123.03,
+          "l": 120.6,
+          "o": 122.06,
+          "t": 1760140800000,
+          "v": 614416.62
+        }
+      },
+      {
+        "op": "add",
+        "path": "/series/0/data/bars/-",
+        "value": {
+          "c": 119.07,
+          "h": 121.01,
+          "l": 118.3,
+          "o": 120.93,
+          "t": 1760227200000,
+          "v": 611489.17
+        }
+      }
+    ],
+    "B": [
+      {
+        "bars": [
+          {
+            "c": 122.06,
+            "h": 124.78,
+            "l": 121.67,
+            "o": 124.14,
+            "t": 1760054400000,
+            "v": 585225.48
+          },
+          {
+            "c": 120.93,
+            "h": 123.03,
+            "l": 120.6,
+            "o": 122.06,
+            "t": 1760140800000,
+            "v": 614416.62
+          },
+          {
+            "c": 119.07,
+            "h": 121.01,
+            "l": 118.3,
+            "o": 120.93,
+            "t": 1760227200000,
+            "v": 611489.17
+          }
+        ],
+        "op": "append_bars",
+        "series": "px"
+      }
+    ],
+    "Bop": [
+      {
+        "bars": [
+          {
+            "c": 122.06,
+            "h": 124.78,
+            "l": 121.67,
+            "o": 124.14,
+            "t": 1760054400000,
+            "v": 585225.48
+          },
+          {
+            "c": 120.93,
+            "h": 123.03,
+            "l": 120.6,
+            "o": 122.06,
+            "t": 1760140800000,
+            "v": 614416.62
+          },
+          {
+            "c": 119.07,
+            "h": 121.01,
+            "l": 118.3,
+            "o": 120.93,
+            "t": 1760227200000,
+            "v": 611489.17
+          }
+        ],
+        "op": "append_bars",
+        "series": "px"
+      }
+    ],
+    "M": "<16589 bytes, truncated> {\"series\":[{\"data\":{\"bars\":[{\"c\":98.93,\"h\":101.88,\"l\":98.16,\"o\":100.29,\"t\":1735776000000,\"v\":1888233.71},{\"c\":98.77,\"h\":99.66,\"l\":98.19,\"o\":98.72,\"t\":1735862400000,\"v\":605167.66},{\"c\":96.97,\"h\":99.18,\"l\":96.89,\"o\":98.56,\"t\":1736121600000,\"v\":2269085.45},{\"c\":96.24,\"h\":97.57,\"l\":95.74,\"o\":96.69,\"t\":1736208000000,\"v\":2037521.24},{\"c\":96.87,\"h\":97.97,\"l\":95.69,\"o\":96.27,\"t\":1736294400000,\"v\":2412471."
+  },
+  "23 remove rsi7 (cascade layer)": {
+    "A1": [
+      {
+        "op": "replace",
+        "path": "/series/5/id",
+        "value": "bb10"
+      },
+      {
+        "op": "add",
+        "path": "/series/5/source/params/k",
+        "value": 2.0
+      },
+      {
+        "op": "replace",
+        "path": "/series/5/source/params/period",
+        "value": 10.0
+      },
+      {
+        "op": "replace",
+        "path": "/series/5/source/study",
+        "value": "bollinger"
+      },
+      {
+        "op": "remove",
+        "path": "/series/6"
+      },
+      {
+        "op": "replace",
+        "path": "/views/0/layers/6/panel",
+        "value": 0
+      },
+      {
+        "op": "replace",
+        "path": "/views/0/layers/6/series",
+        "value": "bb10"
+      },
+      {
+        "op": "remove",
+        "path": "/views/0/layers/7"
+      }
+    ],
+    "A2": [
+      {
+        "op": "remove",
+        "path": "/series/5"
+      },
+      {
+        "op": "remove",
+        "path": "/views/0/layers/6"
+      }
+    ],
+    "A3": [
+      {
+        "op": "remove",
+        "path": "/views/0/layers/6"
+      },
+      {
+        "op": "remove",
+        "path": "/series/5"
+      }
+    ],
+    "B": [
+      {
+        "index": 6,
+        "op": "delete_layer",
+        "view": "main"
+      },
+      {
+        "id": "rsi7",
+        "op": "delete"
+      }
+    ],
+    "Bop": [
+      {
+        "id": "rsi7",
+        "op": "remove"
+      }
+    ],
+    "M": "<17135 bytes, truncated> {\"series\":[{\"data\":{\"bars\":[{\"c\":98.93,\"h\":101.88,\"l\":98.16,\"o\":100.29,\"t\":1735776000000,\"v\":1888233.71},{\"c\":98.77,\"h\":99.66,\"l\":98.19,\"o\":98.72,\"t\":1735862400000,\"v\":605167.66},{\"c\":96.97,\"h\":99.18,\"l\":96.89,\"o\":98.56,\"t\":1736121600000,\"v\":2269085.45},{\"c\":96.24,\"h\":97.57,\"l\":95.74,\"o\":96.69,\"t\":1736208000000,\"v\":2037521.24},{\"c\":96.87,\"h\":97.97,\"l\":95.69,\"o\":96.27,\"t\":1736294400000,\"v\":2412471."
+  },
+  "24 remove bb20 (no layer left)": {
+    "A1": [
+      {
+        "op": "replace",
+        "path": "/series/2/id",
+        "value": "sma20"
+      },
+      {
+        "op": "remove",
+        "path": "/series/2/source/params/k"
+      },
+      {
+        "op": "replace",
+        "path": "/series/2/source/study",
+        "value": "sma"
+      },
+      {
+        "op": "remove",
+        "path": "/series/2/instrument"
+      },
+      {
+        "op": "remove",
+        "path": "/series/2/interval"
+      },
+      {
+        "op": "replace",
+        "path": "/series/3/id",
+        "value": "ema50"
+      },
+      {
+        "op": "replace",
+        "path": "/series/3/source/params/period",
+        "value": 50.0
+      },
+      {
+        "op": "replace",
+        "path": "/series/3/source/study",
+        "value": "ema"
+      },
+      {
+        "op": "replace",
+        "path": "/series/4/id",
+        "value": "bb10"
+      },
+      {
+        "op": "add",
+        "path": "/series/4/source/params/k",
+        "value": 2.0
+      },
+      {
+        "op": "replace",
+        "path": "/series/4/source/params/period",
+        "value": 10.0
+      },
+      {
+        "op": "replace",
+        "path": "/series/4/source/study",
+        "value": "bollinger"
+      },
+      {
+        "op": "remove",
+        "path": "/series/5"
+      }
+    ],
+    "A2": [
+      {
+        "op": "remove",
+        "path": "/series/2"
+      }
+    ],
+    "A3": [
+      {
+        "op": "remove",
+        "path": "/series/2"
+      }
+    ],
+    "B": [
+      {
+        "id": "bb20",
+        "op": "delete"
+      }
+    ],
+    "Bop": [
+      {
+        "id": "bb20",
+        "op": "remove"
+      }
+    ],
+    "M": "<16302 bytes, truncated> {\"series\":[{\"data\":{\"bars\":[{\"c\":98.93,\"h\":101.88,\"l\":98.16,\"o\":100.29,\"t\":1735776000000,\"v\":1888233.71},{\"c\":98.77,\"h\":99.66,\"l\":98.19,\"o\":98.72,\"t\":1735862400000,\"v\":605167.66},{\"c\":96.97,\"h\":99.18,\"l\":96.89,\"o\":98.56,\"t\":1736121600000,\"v\":2269085.45},{\"c\":96.24,\"h\":97.57,\"l\":95.74,\"o\":96.69,\"t\":1736208000000,\"v\":2037521.24},{\"c\":96.87,\"h\":97.97,\"l\":95.69,\"o\":96.27,\"t\":1736294400000,\"v\":2412471."
+  },
+  "26 set_params bb10 k=2.5": {
+    "A1": [
+      {
+        "op": "replace",
+        "path": "/series/4/source/params/k",
+        "value": 2.5
+      }
+    ],
+    "A2": [
+      {
+        "op": "replace",
+        "path": "/series/4/source/params/k",
+        "value": 2.5
+      }
+    ],
+    "A3": [
+      {
+        "op": "replace",
+        "path": "/series/4/source/params/k",
+        "value": 2.5
+      }
+    ],
+    "B": [
+      {
+        "op": "put_series",
+        "series": {
+          "id": "bb10",
+          "source": {
+            "inputs": [
+              "px"
+            ],
+            "kind": "study",
+            "params": {
+              "k": 2.5,
+              "period": 10.0
+            },
+            "study": "bollinger"
+          }
+        }
+      }
+    ],
+    "Bop": [
+      {
+        "op": "set_params",
+        "params": {
+          "k": 2.5
+        },
+        "series": "bb10"
+      }
+    ],
+    "M": "<16302 bytes, truncated> {\"series\":[{\"data\":{\"bars\":[{\"c\":98.93,\"h\":101.88,\"l\":98.16,\"o\":100.29,\"t\":1735776000000,\"v\":1888233.71},{\"c\":98.77,\"h\":99.66,\"l\":98.19,\"o\":98.72,\"t\":1735862400000,\"v\":605167.66},{\"c\":96.97,\"h\":99.18,\"l\":96.89,\"o\":98.56,\"t\":1736121600000,\"v\":2269085.45},{\"c\":96.24,\"h\":97.57,\"l\":95.74,\"o\":96.69,\"t\":1736208000000,\"v\":2037521.24},{\"c\":96.87,\"h\":97.97,\"l\":95.69,\"o\":96.27,\"t\":1736294400000,\"v\":2412471."
+  },
+  "27 approve_finding fnd-trend": {
+    "A1": [
+      {
+        "op": "replace",
+        "path": "/capsules/1/state",
+        "value": "approved"
+      },
+      {
+        "op": "add",
+        "path": "/ledger/entries/0",
+        "value": {
+          "finding": "fnd-trend",
+          "note": "Hacimle teyitli.",
+          "outcome": "pending",
+          "recorded_at": 1760001620000,
+          "state": "approved"
+        }
+      }
+    ],
+    "A2": [
+      {
+        "op": "replace",
+        "path": "/capsules/1/state",
+        "value": "approved"
+      },
+      {
+        "op": "add",
+        "path": "/ledger/entries/0",
+        "value": {
+          "finding": "fnd-trend",
+          "note": "Hacimle teyitli.",
+          "outcome": "pending",
+          "recorded_at": 1760001620000,
+          "state": "approved"
+        }
+      }
+    ],
+    "A3": [
+      {
+        "op": "replace",
+        "path": "/capsules/1/state",
+        "value": "approved"
+      },
+      {
+        "op": "add",
+        "path": "/ledger/entries/-",
+        "value": {
+          "finding": "fnd-trend",
+          "note": "Hacimle teyitli.",
+          "outcome": "pending",
+          "recorded_at": 1760001620000,
+          "state": "approved"
+        }
+      }
+    ],
+    "B": [
+      {
+        "capsule": "cap-10-0",
+        "op": "set_capsule_state",
+        "state": "approved"
+      },
+      {
+        "entry": {
+          "finding": "fnd-trend",
+          "note": "Hacimle teyitli.",
+          "outcome": "pending",
+          "recorded_at": 1760001620000,
+          "state": "approved"
+        },
+        "op": "push_ledger"
+      }
+    ],
+    "Bop": [
+      {
+        "finding": "fnd-trend",
+        "note": "Hacimle teyitli.",
+        "op": "approve_finding"
+      }
+    ],
+    "M": {
+      "capsules": [
+        {
+          "depth": "capsule",
+          "finding": "fnd-overbought",
+          "glyphs": [
+            {
+              "kind": "direction",
+              "value": 0.6
+            },
+            {
+              "kind": "extremity",
+              "value": 0.8
+            },
+            {
+              "kind": "uncertainty",
+              "value": 0.35
+            }
+          ],
+          "headline": "THYAO aşırı alımda: RSI 70'in üstünde.",
+          "id": "cap-overbought",
+          "provenance": {
+            "at": 1760000000000,
+            "author": {
+              "kind": "agent",
+              "name": "scout"
+            },
+            "based_on": [
+              "fact-rsi-cross70"
+            ]
+          },
+          "revision": 0,
+          "state": "live"
+        },
+        {
+          "depth": "capsule",
+          "finding": "fnd-trend",
+          "glyphs": [],
+          "headline": "THYAO: SMA20, EMA34'ün üstüne çıktı.",
+          "id": "cap-10-0",
+          "provenance": {
+            "at": 1760000600000,
+            "author": {
+              "kind": "agent",
+              "name": "scout"
+            },
+            "based_on": [
+              "fact-sma-cross"
+            ]
+          },
+          "revision": 0,
+          "state": "approved"
+        }
+      ],
+      "ledger": {
+        "entries": [
+          {
+            "finding": "fnd-trend",
+            "note": "Hacimle teyitli.",
+            "outcome": "pending",
+            "recorded_at": 1760001620000,
+            "state": "approved"
+          }
+        ]
+      }
+    }
+  },
+  "28 add_study sma200 (+show)": {
+    "A1": [
+      {
+        "op": "add",
+        "path": "/series/5",
+        "value": {
+          "id": "sma200",
+          "source": {
+            "inputs": [
+              "px"
+            ],
+            "kind": "study",
+            "params": {
+              "period": 200.0
+            },
+            "study": "sma"
+          }
+        }
+      },
+      {
+        "op": "add",
+        "path": "/views/0/layers/7",
+        "value": {
+          "encoding": {},
+          "mark": "line",
+          "panel": 0,
+          "series": "sma200"
+        }
+      }
+    ],
+    "A2": [
+      {
+        "op": "add",
+        "path": "/series/5",
+        "value": {
+          "id": "sma200",
+          "source": {
+            "inputs": [
+              "px"
+            ],
+            "kind": "study",
+            "params": {
+              "period": 200.0
+            },
+            "study": "sma"
+          }
+        }
+      },
+      {
+        "op": "add",
+        "path": "/views/0/layers/7",
+        "value": {
+          "encoding": {},
+          "mark": "line",
+          "panel": 0,
+          "series": "sma200"
+        }
+      }
+    ],
+    "A3": [
+      {
+        "op": "add",
+        "path": "/series/-",
+        "value": {
+          "id": "sma200",
+          "source": {
+            "inputs": [
+              "px"
+            ],
+            "kind": "study",
+            "params": {
+              "period": 200.0
+            },
+            "study": "sma"
+          }
+        }
+      },
+      {
+        "op": "add",
+        "path": "/views/0/layers/7",
+        "value": {
+          "encoding": {},
+          "mark": "line",
+          "panel": 0,
+          "series": "sma200"
+        }
+      }
+    ],
+    "B": [
+      {
+        "op": "put_series",
+        "series": {
+          "id": "sma200",
+          "source": {
+            "inputs": [
+              "px"
+            ],
+            "kind": "study",
+            "params": {
+              "period": 200.0
+            },
+            "study": "sma"
+          }
+        }
+      },
+      {
+        "index": 7,
+        "layer": {
+          "encoding": {},
+          "mark": "line",
+          "panel": 0,
+          "series": "sma200"
+        },
+        "op": "insert_layer",
+        "view": "main"
+      }
+    ],
+    "Bop": [
+      {
+        "id": "sma200",
+        "inputs": [
+          "px"
+        ],
+        "op": "add_study",
+        "params": {
+          "period": 200.0
+        },
+        "show": {
+          "panel": 0,
+          "view": "main"
+        },
+        "study": "sma"
+      }
+    ],
+    "M": "<17098 bytes, truncated> {\"series\":[{\"data\":{\"bars\":[{\"c\":98.93,\"h\":101.88,\"l\":98.16,\"o\":100.29,\"t\":1735776000000,\"v\":1888233.71},{\"c\":98.77,\"h\":99.66,\"l\":98.19,\"o\":98.72,\"t\":1735862400000,\"v\":605167.66},{\"c\":96.97,\"h\":99.18,\"l\":96.89,\"o\":98.56,\"t\":1736121600000,\"v\":2269085.45},{\"c\":96.24,\"h\":97.57,\"l\":95.74,\"o\":96.69,\"t\":1736208000000,\"v\":2037521.24},{\"c\":96.87,\"h\":97.97,\"l\":95.69,\"o\":96.27,\"t\":1736294400000,\"v\":2412471."
+  },
+  "29 undo #24 (remove bb20)": {
+    "A1": [
+      {
+        "op": "add",
+        "path": "/series/6",
+        "value": {
+          "id": "bb20",
+          "instrument": {
+            "calendar": "XIST",
+            "exchange": "BIST",
+            "symbol": "THYAO"
+          },
+          "interval": "1d",
+          "source": {
+            "inputs": [
+              "px"
+            ],
+            "kind": "study",
+            "params": {
+              "k": 2.0,
+              "period": 20.0
+            },
+            "study": "bollinger"
+          }
+        }
+      }
+    ],
+    "A2": [
+      {
+        "op": "add",
+        "path": "/series/6",
+        "value": {
+          "id": "bb20",
+          "instrument": {
+            "calendar": "XIST",
+            "exchange": "BIST",
+            "symbol": "THYAO"
+          },
+          "interval": "1d",
+          "source": {
+            "inputs": [
+              "px"
+            ],
+            "kind": "study",
+            "params": {
+              "k": 2.0,
+              "period": 20.0
+            },
+            "study": "bollinger"
+          }
+        }
+      }
+    ],
+    "A3": [
+      {
+        "op": "add",
+        "path": "/series/-",
+        "value": {
+          "id": "bb20",
+          "instrument": {
+            "calendar": "XIST",
+            "exchange": "BIST",
+            "symbol": "THYAO"
+          },
+          "interval": "1d",
+          "source": {
+            "inputs": [
+              "px"
+            ],
+            "kind": "study",
+            "params": {
+              "k": 2.0,
+              "period": 20.0
+            },
+            "study": "bollinger"
+          }
+        }
+      }
+    ],
+    "B": [
+      {
+        "op": "put_series",
+        "series": {
+          "id": "bb20",
+          "instrument": {
+            "calendar": "XIST",
+            "exchange": "BIST",
+            "symbol": "THYAO"
+          },
+          "interval": "1d",
+          "source": {
+            "inputs": [
+              "px"
+            ],
+            "kind": "study",
+            "params": {
+              "k": 2.0,
+              "period": 20.0
+            },
+            "study": "bollinger"
+          }
+        }
+      }
+    ],
+    "Bop": [
+      {
+        "op": "undo",
+        "seq": 23
+      }
+    ],
+    "M": "<16593 bytes, truncated> {\"series\":[{\"data\":{\"bars\":[{\"c\":98.93,\"h\":101.88,\"l\":98.16,\"o\":100.29,\"t\":1735776000000,\"v\":1888233.71},{\"c\":98.77,\"h\":99.66,\"l\":98.19,\"o\":98.72,\"t\":1735862400000,\"v\":605167.66},{\"c\":96.97,\"h\":99.18,\"l\":96.89,\"o\":98.56,\"t\":1736121600000,\"v\":2269085.45},{\"c\":96.24,\"h\":97.57,\"l\":95.74,\"o\":96.69,\"t\":1736208000000,\"v\":2037521.24},{\"c\":96.87,\"h\":97.97,\"l\":95.69,\"o\":96.27,\"t\":1736294400000,\"v\":2412471."
+  }
+}

@@ -1,0 +1,21 @@
+[package]
+name = "t6c-changes"
+version = "0.0.0"
+edition = "2021"
+publish = false
+description = "RD1/T6c experiment: how changes are expressed on the wire and in the log (JSON Patch vs semantic ops). Not a workspace member."
+
+# Own workspace: this crate is deliberately NOT a member of the qapsule workspace.
+[workspace]
+
+[dependencies]
+qp-schema = { path = "../../crates/qp-schema", features = ["validate"] }
+json-patch = "5.0.0"
+serde = { version = "1.0.229", features = ["derive"] }
+serde_json = { version = "1.0.154", features = ["float_roundtrip"] }
+flate2 = "1.1.11"
+jsonschema = { version = "0.61.2", default-features = false }
+
+[profile.release]
+opt-level = 3
+codegen-units = 1

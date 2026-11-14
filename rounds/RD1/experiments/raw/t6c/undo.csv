@@ -1,0 +1,6 @@
+undo_step,target,B,A1_inverse,A2_inverse,A2_guarded,A2_guarded_id,B_exact_bytes,inv_bytes_B,inv_bytes_A2,inv_bytes_A2_guarded
+"18 undo #4 (set_params ema50)",4,correct,WRONG,WRONG,refused,refused,true,126,71,138
+"20 undo #7 (add_layer rule30)",7,refused (undo_conflict),refused,WRONG,refused,refused,false,47,44,159
+"21 undo #12 (reject_finding)",12,correct,correct,correct,correct,correct,true,90,103,360
+"25 undo #6 (set_view_range)",6,refused (undo_conflict),correct,correct,correct,correct,false,51,44,127
+"29 undo #24 (remove bb20)",24,correct,WRONG,correct,correct,correct,false,223,234,234

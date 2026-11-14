@@ -1,0 +1,217 @@
+t6c-changes: start doc 17803 bytes (200 bars); big doc 767680 bytes (10000 bars)
+
+== workload N200: totals over 29 steps ==
+alt   sum_bytes  sum_gz(per-msg)  stream_gz
+A1          9808            4649       1823
+A2          5528            3945       1429
+A3          5250            3964       1388
+M         290267           88331      11385
+B           5171            4073       1326
+Bop         2757            2798        986
+C           8574            4943       1762
+median-of-21 total times (us):
+  B_expand           10.5
+  B_inverse           2.3
+  B_ser               7.9
+  A3_emit            21.4
+  auth_apply          6.7
+  to_value          819.9
+  A1_diff          2015.7
+  A2_diff           361.8
+  M_diff            416.4
+  B_parse            23.7
+  B_apply             7.4
+  A1_parse           32.3
+  A1_apply           46.5
+  A3_parse           19.2
+  A3_apply           18.5
+  M_parse           829.1
+  M_apply           505.7
+
+== workload N10000: totals over 29 steps ==
+alt   sum_bytes  sum_gz(per-msg)  stream_gz
+A1          9814            4649       1809
+A2          5534            3945       1415
+A3          5234            3951       1372
+M       13038079         3611655    3609303
+B           5151            4061       1311
+Bop         2740            2781        969
+C           8541            4931       1743
+median-of-7 total times (us):
+  B_expand           40.4
+  B_inverse           8.9
+  B_ser              17.9
+  A3_emit            97.0
+  auth_apply         36.1
+  to_value        33870.4
+  A1_diff         84833.0
+  A2_diff         12019.5
+  M_diff          16784.6
+  B_parse            97.1
+  B_apply            25.7
+  A1_parse           57.0
+  A1_apply           88.4
+  A3_parse           22.4
+  A3_apply           41.2
+  M_parse         36244.9
+  M_apply         22741.4
+
+per-step outcome (N200): 
+  01 add_study sma20 (+show) -> applied
+  02 add_study ema50 (+show) -> applied
+  03 add_study rsi7 (+show with rsi14) -> applied
+  04 set_params ema50 period=34 -> applied
+  05 set_params rsi14 period=21 -> applied
+  06 set_view_range main last 120 -> applied
+  07 add_layer rule30 at index 4 -> applied
+  08 remove_layer index 1 (bb20 line) -> applied
+  09 add_fact sma cross -> applied
+  10 add_finding + capsule -> applied
+  11 update_finding invalidation+confidence -> applied
+  12 reject_finding fnd-overbought -> applied
+  13 append_bars px (1 bar) -> applied
+  14 update_last_bar px -> applied
+  15 update_last_bar px -> applied
+  16 add_intent -> applied
+  17 remove macd (cascade layer) -> applied
+  18 undo #4 (set_params ema50) -> applied
+  19 add_study bb10 (+show) -> applied
+  20 undo #7 (add_layer rule30) -> REFUSED: undo_conflict: [8, 17, 19]
+  21 undo #12 (reject_finding) -> applied
+  22 append_bars px (3 bars) -> applied
+  23 remove rsi7 (cascade layer) -> applied
+  24 remove bb20 (no layer left) -> applied
+  25 undo #6 (set_view_range) -> REFUSED: undo_conflict: [7, 8, 17, 19, 22]
+  26 set_params bb10 k=2.5 -> applied
+  27 approve_finding fnd-trend -> applied
+  28 add_study sma200 (+show) -> applied
+  29 undo #24 (remove bb20) -> applied
+
+== replay determinism (start doc + log -> bytes) ==
+B  ChangeOp log: bytes equal = true (78 us)
+A1  patch log: raw Value bytes equal = false; via typed Document = true (150 us)
+A2  patch log: raw Value bytes equal = false; via typed Document = true (80 us)
+A3  patch log: raw Value bytes equal = false; via typed Document = true (71 us)
+M   patch log: raw Value bytes equal = false; via typed Document = true (1682 us)
+Bop Op log replayed with expansion v1: bytes equal = true; entries with different changes = 0; failed = 0 (43 us)
+Bop Op log replayed with expansion v2: bytes equal = false; entries with different changes = 6; failed = 0 (24 us)
+
+== replay determinism (start doc + log -> bytes) ==
+B  ChangeOp log: bytes equal = true (56 us)
+A1  patch log: raw Value bytes equal = false; via typed Document = true (1387 us)
+A2  patch log: raw Value bytes equal = false; via typed Document = true (1310 us)
+A3  patch log: raw Value bytes equal = false; via typed Document = true (1354 us)
+M   patch log: raw Value bytes equal = false; via typed Document = true (72016 us)
+Bop Op log replayed with expansion v1: bytes equal = true; entries with different changes = 0; failed = 0 (55 us)
+Bop Op log replayed with expansion v2: bytes equal = false; entries with different changes = 6; failed = 0 (27 us)
+
+== undo of earlier entries (outcome vs ideal 'as if target never happened') ==
+"18 undo #4 (set_params ema50)",4,correct,WRONG,WRONG,refused,refused,true,126,71,138
+   A2 inverse: [{"op":"replace","path":"/series/5/source/params/period","value":50.0}]
+   B  inverse: [{"op":"put_series","series":{"id":"ema50","source":{"kind":"study","study":"ema","inputs":["px"],"params":{"period":50.0}}}}]
+"20 undo #7 (add_layer rule30)",7,refused (undo_conflict),refused,WRONG,refused,refused,false,47,44,159
+   A2 inverse: [{"op":"remove","path":"/views/0/layers/4"}]
+   B  inverse: [{"op":"delete_layer","view":"main","index":4}]
+"21 undo #12 (reject_finding)",12,correct,correct,correct,correct,correct,true,90,103,360
+   A2 inverse: [{"op":"replace","path":"/capsules/0/state","value":"live"},{"op":"remove","path":"/ledger/entries/0"}]
+   B  inverse: [{"op":"pop_ledger"},{"op":"set_capsule_state","capsule":"cap-overbought","state":"live"}]
+"25 undo #6 (set_view_range)",6,refused (undo_conflict),correct,correct,correct,correct,false,51,44,127
+   A2 inverse: [{"op":"remove","path":"/views/0/x/domain"}]
+   B  inverse: [{"op":"set_x_domain","view":"main","domain":null}]
+"29 undo #24 (remove bb20)",24,correct,WRONG,correct,correct,correct,false,223,234,234
+   A2 inverse: [{"op":"add","path":"/series/2","value":{"id":"bb20","instrument":{"calendar":"XIST","exchange":"BIST","symbol":"THYAO"},"interval":"1d","source":{"inputs":["px"],"kind":"study","params":{"k":2.0,"period":20.0},"study":"bollinger"}}}]
+   B  inverse: [{"op":"put_series","series":{"id":"bb20","instrument":{"symbol":"THYAO","exchange":"BIST","calendar":"XIST"},"interval":"1d","source":{"kind":"study","study":"bollinger","inputs":["px"],"params":{"k":2.0,"period":20.0}}}}]
+
+== concurrency: base layers = ["Candle:px", "Line:bb20", "Line:rsi14", "Rule:-", "Line:macd", "Line:sma20", "Line:ema50", "Line:rsi7"]; series = ["px", "rsi14", "macd", "bb20", "sma20", "ema50", "rsi7"]
+"S1 two remove_layer by index (bb20=1, rule70=3)",X,Y,WRONG,refused,refused,WRONG,refused,refused,WRONG,refused,correct
+   X patch: [{"op":"remove","path":"/views/0/layers/1"}]
+   Y patch: [{"op":"remove","path":"/views/0/layers/3"}]
+"S1 two remove_layer by index (bb20=1, rule70=3)",Y,X,correct,correct,correct,correct,correct,correct,correct,refused,correct
+"S2 both remove the same layer (bb20=1)",X,Y,WRONG,correct,correct,WRONG,correct,correct,WRONG,correct,correct
+   X patch: [{"op":"remove","path":"/views/0/layers/1"}]
+   Y patch: [{"op":"remove","path":"/views/0/layers/1"}]
+"S2 both remove the same layer (bb20=1)",Y,X,WRONG,correct,correct,WRONG,correct,correct,WRONG,correct,correct
+"S3 add_layer at 0 vs remove_layer rsi14=2",X,Y,WRONG,refused,refused,WRONG,refused,refused,WRONG,refused,correct
+   X patch: [{"op":"add","path":"/views/0/layers/0","value":{"encoding":{},"mark":"area","panel":0,"series":"px"}}]
+   Y patch: [{"op":"remove","path":"/views/0/layers/2"}]
+"S3 add_layer at 0 vs remove_layer rsi14=2",Y,X,correct,correct,correct,correct,correct,correct,correct,refused,correct
+"S4 remove series macd vs set_params bb20",X,Y,WRONG,WRONG,refused,WRONG,WRONG,refused,correct,correct,correct
+   X patch: [{"op":"remove","path":"/views/0/layers/4"},{"op":"remove","path":"/series/2"}]
+   Y patch: [{"op":"replace","path":"/series/3/source/params/period","value":30.0}]
+"S4 remove series macd vs set_params bb20",Y,X,correct,correct,correct,correct,correct,correct,correct,correct,correct
+"S5 set_params ema50 vs remove series sma20",X,Y,correct,correct,correct,correct,correct,correct,correct,correct,correct
+   X patch: [{"op":"replace","path":"/series/5/source/params/period","value":34.0}]
+   Y patch: [{"op":"remove","path":"/views/0/layers/5"},{"op":"remove","path":"/series/4"}]
+"S5 set_params ema50 vs remove series sma20",Y,X,WRONG,refused,refused,WRONG,refused,refused,correct,correct,correct
+"S6 two feeds append the same bar",X,Y,WRONG,WRONG,WRONG,correct,correct,correct,correct,correct,correct
+   X patch: [{"op":"add","path":"/series/0/data/bars/-","value":{"c":126.1,"h":126.2,"l":124.47,"o":124.69,"t":1759968000000,"v":1700003.45}}]
+   Y patch: [{"op":"add","path":"/series/0/data/bars/-","value":{"c":126.1,"h":126.2,"l":124.47,"o":124.69,"t":1759968000000,"v":1700003.45}}]
+"S6 two feeds append the same bar",Y,X,WRONG,WRONG,WRONG,correct,correct,correct,correct,correct,correct
+"S7 reject_finding vs update_finding confidence",X,Y,correct,correct,correct,correct,correct,correct,correct,correct,correct
+   X patch: [{"op":"replace","path":"/capsules/0/state","value":"rejected"},{"op":"add","path":"/ledger/entries/-","value":{"finding":"fnd-overbought","note":"no","outcome":"pending","recorded_at":1760006000000,"state":"rejected"}}]
+   Y patch: [{"op":"replace","path":"/findings/0/confidence","value":0.4}]
+"S7 reject_finding vs update_finding confidence",Y,X,correct,correct,correct,correct,correct,correct,correct,correct,correct
+"S8 reject_finding vs approve_finding",X,Y,WRONG,correct,correct,WRONG,correct,correct,correct,correct,correct
+   X patch: [{"op":"replace","path":"/capsules/0/state","value":"rejected"},{"op":"add","path":"/ledger/entries/-","value":{"finding":"fnd-overbought","note":"no","outcome":"pending","recorded_at":1760006000000,"state":"rejected"}}]
+   Y patch: [{"op":"replace","path":"/capsules/0/state","value":"approved"},{"op":"add","path":"/ledger/entries/-","value":{"finding":"fnd-overbought","note":"yes","outcome":"pending","recorded_at":1760006060000,"state":"approved"}}]
+"S8 reject_finding vs approve_finding",Y,X,WRONG,correct,correct,WRONG,correct,correct,correct,correct,correct
+"S9 update_finding vs remove rsi7 (disjoint control)",X,Y,correct,correct,correct,correct,correct,correct,correct,correct,correct
+   X patch: [{"op":"replace","path":"/findings/0/invalidation/op","value":"lt"},{"op":"replace","path":"/findings/0/invalidation/series","value":"px"},{"op":"replace","path":"/findings/0/invalidation/value","value":100.0}]
+   Y patch: [{"op":"remove","path":"/views/0/layers/7"},{"op":"remove","path":"/series/6"}]
+"S9 update_finding vs remove rsi7 (disjoint control)",Y,X,correct,correct,correct,correct,correct,correct,correct,correct,correct
+totals (correct, refused, WRONG) over 18 runs:
+  A-blind             8  0 10
+  A-test             12  3  3
+  A-test-id          12  4  2
+  A-blind+validate   10  0  8
+  A-test+validate    14  3  1
+  A-test-id+validate 14  4  0
+  B-op               14  0  4
+  B-op+base          14  4  0
+  B-id               18  0  0
+
+== validation of invalid requests (caught = true) ==
+"V1 layer refers to missing series",true,false,false,false,true,false,true
+"V2 remove series in use (rsi14)",true,false,false,false,true,false,true
+"V3 set_params on a bar series",true,false,false,true,false,false,true
+"V4 finding refers to missing fact",true,false,false,false,true,false,true
+"V5 confidence 1.5",true,false,false,true,true,false,true
+"V6 appended bar not after last",true,false,false,false,true,false,true
+"V7 update_last_bar changes t",true,false,false,false,false,false,false
+"V8 approve an already rejected finding",true,false,false,false,false,false,false
+"V9 unknown study param",true,false,false,false,true,false,true
+"V10 feed writes a finding",true,false,false,false,false,true,true
+"V11 remove layer index 99",true,true,false,false,false,false,true
+"V12 reversed view range",true,false,false,false,true,false,true
+"V13 negative period",true,false,false,false,true,false,true
+totals: B=13 | A: patch_err=1 serde=0 schema=2 domain=8 acl=1 any=11 (of 13)
+post-state validation cost per change (median of 21):
+  200 bars   typed from_value(clone)=54 us, JSON Schema (precompiled)=13 us, domain=1 us
+  10000 bars typed from_value(clone)=2377 us, JSON Schema (precompiled)=457 us, domain=13 us
+
+== hot path: 600 update_last_bar on 10001 bars ==
+  B expand+validate+inverse,0.83,3.29,0.005
+  B serialize,0.83,1.88,0.005
+  B client parse+apply,3.62,7.38,0.022
+  A3 emit+serialize,9.75,16.46,0.059
+  A3 client parse+apply,4.29,7.58,0.026
+  A1 to_value+diff (crate),4583.33,5061.67,27.500
+  A1 clone(prev)+diff,4597.62,5023.08,27.586
+  A1 client parse+apply,1.67,2.38,0.010
+  A2 to_value+diff (LCS),3054.12,3355.92,18.325
+  M to_value+merge_diff,3045.33,3352.79,18.272
+  A1 diff,127,101,7620
+  A2 diff,127,101,7620
+  A3 replace bar,135,127,8100
+  B set_last_bar,117,111,7020
+  M merge,766039,212128,45962340
+  example A1 diff: [{"op":"replace","path":"/series/0/data/bars/10000/c","value":21.13},{"op":"replace","path":"/series/0/data/bars/10000/v","value":1942487.19}]
+  example A2 diff: [{"op":"replace","path":"/series/0/data/bars/10000/c","value":21.13},{"op":"replace","path":"/series/0/data/bars/10000/v","value":1942487.19}]
+  example A3 replace bar: [{"op":"replace","path":"/series/0/data/bars/10000","value":{"c":21.13,"h":21.31,"l":20.93,"o":21.05,"t":2606688000000,"v":1942487.19}}]
+  example B set_last_bar: [{"op":"set_last_bar","series":"px","bar":{"t":2606688000000,"o":21.05,"h":21.31,"l":20.93,"c":21.13,"v":1942487.19}}]
+  example M merge: {"series":[{"data":{"bars":[{"c":98.93,"h":101.88,"l":98.16,"o":100.29,"t":1735776000000,"v":1888233.71},{"c":98.77,"h":99.66,"l":98.19,"o":98.72,"t":1735862400000,"v":605167.66},{"c":96.97,"h":99.18,"l":96.89,"o":98.56,"t":1736121600000,"v":2269085.45},{"c":96.24,"h":97.57,"l":95.74,"o":96.69,"t":1… (766040 bytes)
+
+== agent-writability (sum over applied steps): bytes / index refs / provenance+timestamp fields ==
+  Bop (Op request)     2757 /   2 /   0
+  A3 (JSON Patch)      5250 /  45 /   6
+  B (ChangeOp)         5171 /   9 /   7

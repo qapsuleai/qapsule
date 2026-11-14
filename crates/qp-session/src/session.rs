@@ -1009,6 +1009,18 @@ impl Session {
     /// `base` that is not undone (undo pairs both after `base` cancel out).
     fn base_check(&self, base: Option<Seq>, changes: &[ChangeOp], origin: &[usize]) -> PResult<()> {
         let Some(b) = base else { return Ok(()) };
+        if b > self.seq() {
+            // A base from the future cannot be checked; accepting it would silently
+            // switch conflict detection off (audit O2), e.g. for a stale epoch (§8.4).
+            return Err(E::new(
+                ErrorCode::Invalid,
+                format!("base {b} is after the current log position {}", self.seq()),
+            )
+            .at("/base")
+            .expected([format!("0..={}", self.seq())])
+            .hint("Use the seq from `welcome` or from a `result`; after a hand-over, reconnect.")
+            .build());
+        }
         let undone = undone_set(&self.log);
         let mut conflicts = Vec::new();
         let mut first: Option<(String, Seq, String, usize)> = None;

@@ -238,6 +238,39 @@
     }
    ],
    "note": "G14: editor writes directly"
+  },
+  {
+   "send": {
+    "conn": "e",
+    "msg": {
+     "type": "command",
+     "id": "c5",
+     "ops": [
+      {
+       "op": "set_params",
+       "series": "macd",
+       "params": {
+        "fast": 9
+       }
+      }
+     ],
+     "base": 99
+    }
+   },
+   "expect": [
+    {
+     "conn": "e",
+     "msg": {
+      "type": "error",
+      "error": {
+       "code": "invalid",
+       "path": "/base"
+      },
+      "id": "c5"
+     }
+    }
+   ],
+   "note": "a base from the future is refused (audit O2)"
   }
  ],
  "final": {

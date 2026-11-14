@@ -1,5 +1,7 @@
 # T6b — Protokol kodlaması: JSON kanonik mi kalmalı?
 
+> **Yeniden üretim (denetim O1):** bu ölçüm `50eb96d` (dal `rd1/t6b-exp`) üzerinde yapıldı. Deney crate'i, ölçümden sonra değişen protokol tiplerine (`now`, `ack.undoes`, boş yapı varyantları, `put_*.index`) taşınmadığı için güncel `main`'de derlenmez; yeniden üretmek için o commit kullanılır: `git checkout 50eb96d` ve rapordaki yöntem.
+
 Tarih: 2026-11-14. Dal: `rd1/t6b-exp`. Kod: `experiments/t6b-encoding/` (workspace üyesi değil).
 Ham çıktılar: `rounds/RD1/experiments/raw/t6b/`.
 

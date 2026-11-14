@@ -1,7 +1,8 @@
 # RD1 — Rapor
 
-- **Durum:** Tamamlandı. On üç kabul ölçütünün on üçü kanıtlarıyla karşılandı (aşağıda).
-  Bağımsız denetim: `AUDIT.md` (sonucu "Denetim" bölümünde).
+- **Durum:** Tamamlandı. Kabul ölçütleri: 10 ✅, 3 ⚠️ (8, 9, 13; bağımsız denetimin
+  değerlendirmesi, aşağıda). Bağımsız denetim: **koşullu kabul** (`AUDIT.md`); dört koşul
+  denetimden sonra giderildi ("Denetim" bölümü).
 - **Tarih:** 2026-11-14
 - **Alt ajanlar:** Bu round'da alt ajanlar **başlatılabildi** (R1 ve RP1'deki engel yoktu;
   ilk iş olarak bir deneme alt ajanı koşuldu). Bütün alt görevler, deneyler, ajan
@@ -45,12 +46,12 @@ yürütüldü; her biri hipotezini ölçümden önce ayrı bir commit'te kaydett
 | 5 | ≥ 12 dilden bağımsız döküm | ✅ | `fixtures/protocol/conformance/` **17** döküm (`Transcript` şemasıyla doğrulanıyor), şartnameden yazıldı, uygulamadan değil. |
 | 6 | Referans oturum dökümlerin hepsini geçiyor; yeniden oynatma bayt-eşit; geri alma; öneri karneye ve kökene işleniyor | ✅ | `qp conform … --transport inproc` 17/17; koşucu her dökümden sonra günlüğü baştan oynatıp dokümanın baytlarını karşılaştırıyor. Geri alma: döküm 07 (kendi son girdisi, `undo_conflict`, yeniden yapma), sil+geri al bayt-eşit testi. Öneri: döküm 05 (kabul: yazar `scout`, `approved_by` `arkin`), 06 (ret, süre aşımı), 04 (ret → karne). |
 | 7 | Aynı dökümler süreç içi ve `qp serve` üzerinden | ✅ | `verify.sh` adım 13: inproc 17/17, serve 17/17 (ayrıca mcp 17/17). |
-| 8 | Çelişkili kararlar alternatifleriyle ölçülmüş (a–e) | ✅ | Aşağıda "Çelişkili kararlar"; beş deney raporu. |
-| 9 | ≥ 20 görev, taze alt ajanlar, yalnız şartname+şema; ilk deneme, düzeltme, mesaj/belirteç; tasarım değişikliği ve yeniden ölçüm; önce/sonra tablosu | ✅ | `ergonomics/RESULTS.md`: v1 ilk 15/20, sonunda 17/20 → tasarım değişikliği (5 madde) → v2 ilk 14/20, sonunda 18/20; sızıntı denetimi v2r ilk 6/20, sonunda 19/20, düzeltme 13/14. Ham kayıtlar `ergonomics/raw/`. |
+| 8 | Çelişkili kararlar alternatifleriyle ölçülmüş (a–e) | ✅ (denetim ⚠️: T6a–c deney kodu güncel `main`'de derlenmiyor; raporlara yeniden üretim commit'i eklendi) | Aşağıda "Çelişkili kararlar"; beş deney raporu. |
+| 9 | ≥ 20 görev, taze alt ajanlar, yalnız şartname+şema; ilk deneme, düzeltme, mesaj/belirteç; tasarım değişikliği ve yeniden ölçüm; önce/sonra tablosu | ✅ (denetim ⚠️: "yalnız şartname+şema" kısıtı yönergeyle konuldu, teknik olarak zorlanmadı; yönerge sonradan `raw/*/AGENTS.md`'ye birebir eklendi; yeniden puanlama birebir aynı sayıları verdi) | `ergonomics/RESULTS.md`: v1 ilk 15/20, sonunda 17/20 → tasarım değişikliği (5 madde) → v2 ilk 14/20, sonunda 18/20; sızıntı denetimi v2r ilk 6/20, sonunda 19/20, düzeltme 13/14. Ham kayıtlar `ergonomics/raw/`. |
 | 10 | Yetenek uzlaşması: saat, telefon, masaüstü üç derinlik; anlatım çizelgesi şartnamede ve dökümde | ✅ | Döküm 11: aynı bulgu saat → `sentence`, telefon → `capsule` (işaretler, `spark`), masaüstü → `chart` (görünüm, olgular), ses → `sentence`. Anlatım: §11 ve döküm 13. |
-| 11 | MCP uyarlayıcısı: araçlar şemadan; ≥ 3 döküm MCP üzerinden; A2UI ve MCP Apps analizi | ✅ | `crates/qp-mcp`: 37 araç şemadan üretiliyor; `qp conform --transport mcp` **17/17**; `qp mcp` stdio duman testi. `EMBEDDING.md` §2 (MCP Apps), §3 (A2UI). |
+| 11 | MCP uyarlayıcısı: araçlar şemadan; ≥ 3 döküm MCP üzerinden; A2UI ve MCP Apps analizi | ✅ | `crates/qp-mcp`: 37 araç şemadan üretiliyor; `qp conform --transport mcp` 17/17 geçiyor — **11'i tamamen MCP araçlarıyla, 6'sı kısmen** (14 adım MCP'de karşılığı olmayan `input`/`clock`/ham satır olarak doğrudan oturuma gidiyor); MCP koşucusu süreç içi JSON-RPC (stdio değil); stdio `qp mcp` ayrıca duman testiyle sınandı; `qp mcp` stdio duman testi. `EMBEDDING.md` §2 (MCP Apps), §3 (A2UI). |
 | 12 | `R2_INPUT.md` | ✅ | Gramerin protokole karşı 10 gereksinimi, önerilen R2 kapsamı, ana akış kararları. |
-| 13 | `REPORT.md`, `AUDIT.md`; `STATUS.md`, `ROADMAP.md`, `CONCEPTS.md`, `ARCHITECTURE.md`; önerilen karar satırları `DECISIONS.md`'de | ✅ | Bu dosya, `AUDIT.md`; `docs/CONCEPTS.md` (+21 kavram), `docs/ARCHITECTURE.md` (protokol katmanı, `qp-session`, `qp-mcp`); `DECISIONS.md` "Önerilen (RD1)" bölümü; `STATUS.md`, `ROADMAP.md`. |
+| 13 | `REPORT.md`, `AUDIT.md`; `STATUS.md`, `ROADMAP.md`, `CONCEPTS.md`, `ARCHITECTURE.md`; önerilen karar satırları `DECISIONS.md`'de | ✅ (denetim ⚠️: denetlenen commit'te `AUDIT.md` yoktu ve rapor 13/13 diyordu; düzeltildi) | Bu dosya, `AUDIT.md`; `docs/CONCEPTS.md` (+21 kavram), `docs/ARCHITECTURE.md` (protokol katmanı, `qp-session`, `qp-mcp`); `DECISIONS.md` "Önerilen (RD1)" bölümü; `STATUS.md`, `ROADMAP.md`. |
 
 ## Çelişkili kararlar (K21) — bulgular ve öneriler
 
@@ -90,11 +91,11 @@ Ayrıntı ve tablolar `ergonomics/RESULTS.md`.
 | Ölçüm | Değer |
 |-------|-------|
 | `QP_VERIFY_BROWSER=1 scripts/verify.sh` | 13/13 PASS (adım 12 `protocol`, 13 `conform` eklendi) |
-| Uygunluk dökümleri | 17; inproc 17/17, serve 17/17, mcp 17/17 |
+| Uygunluk dökümleri | 17; inproc 17/17, serve 17/17, mcp 17/17 (11 tamamen MCP, 6 kısmen) |
 | `cargo test --workspace` | yeşil (qp-session ve qp-mcp testleri dahil) |
 | Hesap özeti | `7b1e99d40889f83c` (aarch64, x86_64 Rosetta, wasm32) — değişmedi |
 | Altın görsel, tarayıcı | bayt-eşit, 0 px — değişmedi |
-| WASM modülü | 475.126 B gzip (RP1: 475.519) — protokol `qp-wasm`'a girmedi |
+| WASM modülü | 475.126 B gzip yerel, 475.242 B denetçinin temiz kopyasında (RP1: 475.519) — protokol `qp-wasm`'a girmedi |
 | `qp-compute`, `qp-render`, `fixtures/golden` | `git diff main` boş |
 | Protokol şemaları | 22 kök şema (`qp schema export`), iki dışa aktarım aynı |
 | MCP araçları | 37, şemadan üretilir |
@@ -173,4 +174,35 @@ Ayrıntı ve tablolar `ergonomics/RESULTS.md`.
 
 ## Denetim
 
-(Denetçi alt ajan tamamlandığında dolduruldu.)
+Bağımsız denetçi alt ajan `2265a04`'ü temiz kopyada denetledi (`AUDIT.md`). **Sonuç: koşullu
+kabul.** VERIFY: 12 PASS, 2 koşullu PASS (8, 9), 0 FAIL. Ölçütler: 10 ✅, 3 ⚠️ (8, 9, 13).
+
+Denetçinin bağımsız doğruladıkları: temiz kopyada `verify.sh` 13/13; CI 43640428929 başarılı;
+17 döküm üç taşımada; **kendi Python yeniden oynatıcısıyla** (yalnız şartname ve şemadan) 7/7
+günlük bayt-eşit; şema örnekleri bağımsız `jsonschema` ile aynı sonuç; yalnız şartnameden
+yazdığı **üç yeni görev** ilk gerçek denemede geçti (9 belirsizlik `AUDIT.md`'de); T6d ve T6e
+±20 % içinde (T6e ±2 %), T6b kendi commit'inde ±12 %; ajan yazabilirlik yeniden puanlaması
+birebir aynı, v2r'nin 35 denemesi bugünkü ikiliyle bayt bayt aynı; kurallar (NORTH_STAR,
+qp-compute/render/altın görsel değişmedi, hesap/oturum kodunda saat/rastgelelik/ağ/LLM yok);
+düşmanca mesajların hepsi doğru karşılandı.
+
+**Koşullar ve giderilmeleri (denetimden sonra, `rd1/fix-viewport-clamp` dalında):**
+
+| Koşul | Giderme |
+|-------|---------|
+| O1: T6a–c deney kodu güncel `main`'de derlenmiyor, raporlar yeniden üretim commit'i vermiyor | Üç raporun başına yeniden üretim commit'i (`7776abb`, `50eb96d`, `ade29fd`) ve komut eklendi. Kod taşınmadı. |
+| O2: `base` > mevcut `seq` sessizce kabul ediliyor (çakışma denetimi kapanıyor) | `invalid` (`path: /base`, `expected: 0..=seq`); şartname §8.2; döküm 08'e adım eklendi. |
+| O3: T7 alt ajan yönergesi kayıtlarda yok; kısıt yalnız yönergeyle | Yönerge birebir `ergonomics/raw/*/AGENTS.md`'ye eklendi; sınır orada ve bu raporda yazılı. |
+| Rapor/STATUS/ROADMAP abartıları; "Denetim" boş | Bu bölüm ve ölçüt tablosu düzeltildi; STATUS ve ROADMAP denetim sonucunu söylüyor. |
+
+Düşük önemdeki bulgular: D1 (bayt eşitliği kanonik başlangıç dokümanına göre) → şartname §2'ye
+yazıldı; D2 (MCP 17/17 abartılı) → yukarıda düzeltildi; D3 (`period: 1e18` için yanıltıcı
+ileti) → `qp-compute`'a dokunmamak için yapılmadı, öneri; D4 (izlenen `.pyc`) → kaldırıldı,
+`.gitignore`'a eklendi; D5 (T6e ham çıktıları `now` alanından önce) → bilgi; D6 (`tempfile` ve
+süreç başlatma otorite crate'inde) → öneri (koşucuyu ayrı crate'e almak); D7 (WASM boyutu
++116 B) → ölçümler tablosunda.
+
+**Denetimden sonra ayrıca:** otomatik güvenlik incelemesi `qp-session`'da bir taşma buldu
+(kayıtlı bakış aralığı, kısalan bir seride `pan`'de `last - width` taşması). Düzeltildi
+(bakış aralıkları okunurken seriye kırpılıyor), regresyon testi düzeltmesiz sürümde
+paniği yeniden üretiyor. Bu düzeltme denetlenen commit'ten sonradır.

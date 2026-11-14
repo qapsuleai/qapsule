@@ -68,7 +68,9 @@ Otoritenin durumu üç parçadır:
    abone olunabilir. (Vega'nın sinyalleri ve Yjs'nin "awareness" durumu gibi.)
 
 **Değişmez:** başlangıç dokümanı + günlükteki `changes` sırayla uygulanırsa, otoritenin
-dokümanı **bayt düzeyinde** aynen elde edilir. Yeniden oynatma için hesap kodu, sunucu
+dokümanı **bayt düzeyinde** aynen elde edilir. "Başlangıç dokümanı" otoritenin yüklediği
+**kanonik** biçimdir (ör. hesap parametreleri varsayılanlarla tamamlanıp sıralanmış);
+`seq` 0'daki `{"kind":"document"}` sorgusu bu biçimi verir. Yeniden oynatma için hesap kodu, sunucu
 (presenter), saat ya da rastgelelik gerekmez; değişimler tam öğeleri taşır.
 
 Hesap serileri (`source.kind = "study"`) dokümanda veri taşımaz; değerleri girdilerinden
@@ -453,7 +455,8 @@ olaylarındaki `seq`, koşulu doğru yapan girdinin konumudur; `bar` son bardır
 ### 8.2 İyimser eşzamanlılık (`base`)
 
 Her girdi dokunduğu kimlikleri kaydeder (seri, görünüm, bulgu…; karne için `ledger`).
-`base` verilen bir komutun dokunacağı kimliklerden biri, `seq > base` olan ve geri
+`base` mevcut günlük konumundan büyükse komut `invalid` döner (`path: /base`); böyle bir
+taban denetlenemez. `base` verilen bir komutun dokunacağı kimliklerden biri, `seq > base` olan ve geri
 alınmamış bir girdide değiştiyse komut uygulanmaz:
 
 ```json

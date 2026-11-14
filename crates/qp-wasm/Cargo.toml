@@ -11,6 +11,14 @@ publish.workspace = true
 crate-type = ["cdylib", "rlib"]
 
 [dependencies]
+qp-render = { path = "../qp-render" }
+wasm-bindgen = "=0.2.130"
+
+[package.metadata.wasm-pack.profile.release]
+# Size is measured on the raw rustc output and on wasm-opt output separately (see
+# crates/qp-render/SPIKE.md); wasm-pack's own wasm-opt step is disabled so builds do not
+# depend on downloading binaryen.
+wasm-opt = false
 
 [lints]
 workspace = true

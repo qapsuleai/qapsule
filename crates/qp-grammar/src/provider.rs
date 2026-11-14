@@ -36,15 +36,16 @@ pub trait DataProvider {
     fn input_bars(&self, series: &str) -> Option<String>;
     /// Field names of a values series, e.g. `["upper","middle","lower","bandwidth"]`.
     fn fields(&self, series: &str) -> Vec<String>;
-    /// Main field of a values series (`rsi`, `middle` for Bollinger, `source.output`).
+    /// Main field of a values series (the output named like the study, a chosen
+    /// `source.output`, or the middle line of a band study).
     fn main_field(&self, series: &str) -> Option<String>;
-    /// Default plot outputs of a values series (`upper middle lower`; `macd signal`).
+    /// Default plot outputs of a values series (e.g. the three lines of a band study).
     fn plot_fields(&self, series: &str) -> Vec<String>;
     /// Values of `field` of a values series, one per bar slot (`None` = warmup).
     fn values(&self, series: &str, field: &str) -> Option<Cow<'_, [Option<f64>]>>;
     /// Points of a point series, ascending by time (may extend past the last bar).
     fn points(&self, series: &str) -> Option<Cow<'_, [Point]>>;
-    /// Legend label of a series, e.g. `SMA20`, `RSI14`, `MACD(12,26,9)`.
+    /// Legend label of a series, e.g. a study name with its parameters.
     fn label(&self, series: &str) -> Option<String>;
     /// Instrument symbol of a bar series (title).
     fn symbol(&self, series: &str) -> Option<String>;
@@ -56,22 +57,8 @@ pub trait DataProvider {
     fn finding(&self, id: &str) -> Option<Finding>;
     /// Headline of the capsule presenting `finding`, if there is one.
     fn headline(&self, finding: &str) -> Option<String>;
-    /// Value of a named threshold, e.g. `rsi.overbought` → 70.
+    /// Value of a named threshold (`<study>.<name>`), e.g. the overbought level → 70.
     fn threshold(&self, name: &str) -> Option<f64>;
-}
-
-/// The v0 named thresholds (`docs/GRAMMAR.md` §10).
-#[must_use]
-pub fn default_thresholds() -> BTreeMap<String, f64> {
-    [
-        ("rsi.overbought", 70.0),
-        ("rsi.oversold", 30.0),
-        ("rsi.mid", 50.0),
-        ("macd.zero", 0.0),
-    ]
-    .into_iter()
-    .map(|(k, v)| (k.to_owned(), v))
-    .collect()
 }
 
 #[derive(Debug, Clone, Default)]
@@ -110,7 +97,8 @@ impl Default for MemProvider {
 }
 
 impl MemProvider {
-    /// Empty provider with the v0 named thresholds.
+    /// Empty provider (no series, no named thresholds: the threshold list is the
+    /// engine's, see `with_threshold`).
     #[must_use]
     pub fn new() -> Self {
         Self {
@@ -121,7 +109,7 @@ impl MemProvider {
             facts: BTreeMap::new(),
             findings: BTreeMap::new(),
             headlines: BTreeMap::new(),
-            thresholds: default_thresholds(),
+            thresholds: BTreeMap::new(),
         }
     }
 

@@ -60,7 +60,13 @@ fn add(
 
 /// `px` (sample bars) with `sma20`, `sma50`, `rsi14`, `macd`, `bb`.
 pub fn provider_with(bars: Vec<Bar>, symbol: &str) -> MemProvider {
-    let mut p = MemProvider::new().with_bars("px", bars.clone(), Some(symbol), Some("1d"));
+    // The v0 named thresholds (docs/GRAMMAR.md §10); the authority supplies the real list.
+    let mut p = MemProvider::new()
+        .with_threshold("rsi.overbought", 70.0)
+        .with_threshold("rsi.oversold", 30.0)
+        .with_threshold("rsi.mid", 50.0)
+        .with_threshold("macd.zero", 0.0)
+        .with_bars("px", bars.clone(), Some(symbol), Some("1d"));
     p = add(
         p,
         "sma20",

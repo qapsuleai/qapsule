@@ -682,7 +682,7 @@ pub fn compile(
     fr.k = k;
     let lod = (k >= 2).then(|| Lod {
         bars_per_bucket: k,
-        buckets: count.div_ceil(k),
+        buckets: crate::frame::bucket_count(count, k),
     });
     let xmap = XMap {
         from_bar: fr.from,

@@ -53,6 +53,15 @@ pub(crate) struct Row {
     pub texts: BTreeMap<String, String>,
 }
 
+/// Number of LOD buckets for `count` slots of `k` (the remainder joins the last one).
+pub(crate) fn bucket_count(count: u64, k: u64) -> u64 {
+    if k <= 1 {
+        count
+    } else {
+        (count / k).max(1)
+    }
+}
+
 pub(crate) struct Frame<'a> {
     pub p: &'a dyn DataProvider,
     pub theme: Theme,
@@ -101,14 +110,16 @@ impl<'a> Frame<'a> {
         }
     }
 
-    /// Visible LOD buckets: `(first slot, slot count)`.
+    /// Visible LOD buckets: `(first slot, slot count)`. Buckets hold `k` slots; the
+    /// remainder joins the last bucket, so every bucket is at least one pixel wide and
+    /// its centre column lies inside it.
     pub(crate) fn buckets(&self) -> impl Iterator<Item = (u64, u64)> + '_ {
         let k = self.k.max(1);
         let end = self.to + 1;
-        let n = (end - self.from).div_ceil(k);
+        let n = bucket_count(end - self.from, k);
         (0..n).map(move |b| {
             let s = self.from + b * k;
-            (s, (s + k).min(end) - s)
+            (s, if b + 1 == n { end - s } else { k })
         })
     }
 

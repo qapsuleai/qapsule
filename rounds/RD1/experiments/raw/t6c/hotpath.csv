@@ -1,0 +1,18 @@
+metric,p50_us,p99_us,cpu_at_60hz_pct
+B expand+validate+inverse,0.83,3.29,0.005
+B serialize,0.83,1.88,0.005
+B client parse+apply,3.62,7.38,0.022
+A3 emit+serialize,9.75,16.46,0.059
+A3 client parse+apply,4.29,7.58,0.026
+A1 to_value+diff (crate),4583.33,5061.67,27.500
+A1 clone(prev)+diff,4597.62,5023.08,27.586
+A1 client parse+apply,1.67,2.38,0.010
+A2 to_value+diff (LCS),3054.12,3355.92,18.325
+M to_value+merge_diff,3045.33,3352.79,18.272
+
+alt,avg_bytes,avg_gz_bytes,bytes_per_s_at_60hz
+A1 diff,127,101,7620
+A2 diff,127,101,7620
+A3 replace bar,135,127,8100
+B set_last_bar,117,111,7020
+M merge,766039,212128,45962340

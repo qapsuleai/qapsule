@@ -1,0 +1,1 @@
+machine: Apple M4 Max, 16 cores, macOS 27.0.1; rustc 1.92.0; json-patch 5.0.0; flate2 1.1.11 (default level)

@@ -1,0 +1,19 @@
+scenario,order,A-blind,A-test,A-test-id,A-blind+validate,A-test+validate,A-test-id+validate,B-op,B-op+base,B-id
+"S1 two remove_layer by index (bb20=1, rule70=3)",X,Y,WRONG,refused,refused,WRONG,refused,refused,WRONG,refused,correct
+"S1 two remove_layer by index (bb20=1, rule70=3)",Y,X,correct,correct,correct,correct,correct,correct,correct,refused,correct
+"S2 both remove the same layer (bb20=1)",X,Y,WRONG,correct,correct,WRONG,correct,correct,WRONG,correct,correct
+"S2 both remove the same layer (bb20=1)",Y,X,WRONG,correct,correct,WRONG,correct,correct,WRONG,correct,correct
+"S3 add_layer at 0 vs remove_layer rsi14=2",X,Y,WRONG,refused,refused,WRONG,refused,refused,WRONG,refused,correct
+"S3 add_layer at 0 vs remove_layer rsi14=2",Y,X,correct,correct,correct,correct,correct,correct,correct,refused,correct
+"S4 remove series macd vs set_params bb20",X,Y,WRONG,WRONG,refused,WRONG,WRONG,refused,correct,correct,correct
+"S4 remove series macd vs set_params bb20",Y,X,correct,correct,correct,correct,correct,correct,correct,correct,correct
+"S5 set_params ema50 vs remove series sma20",X,Y,correct,correct,correct,correct,correct,correct,correct,correct,correct
+"S5 set_params ema50 vs remove series sma20",Y,X,WRONG,refused,refused,WRONG,refused,refused,correct,correct,correct
+"S6 two feeds append the same bar",X,Y,WRONG,WRONG,WRONG,correct,correct,correct,correct,correct,correct
+"S6 two feeds append the same bar",Y,X,WRONG,WRONG,WRONG,correct,correct,correct,correct,correct,correct
+"S7 reject_finding vs update_finding confidence",X,Y,correct,correct,correct,correct,correct,correct,correct,correct,correct
+"S7 reject_finding vs update_finding confidence",Y,X,correct,correct,correct,correct,correct,correct,correct,correct,correct
+"S8 reject_finding vs approve_finding",X,Y,WRONG,correct,correct,WRONG,correct,correct,correct,correct,correct
+"S8 reject_finding vs approve_finding",Y,X,WRONG,correct,correct,WRONG,correct,correct,correct,correct,correct
+"S9 update_finding vs remove rsi7 (disjoint control)",X,Y,correct,correct,correct,correct,correct,correct,correct,correct,correct
+"S9 update_finding vs remove rsi7 (disjoint control)",Y,X,correct,correct,correct,correct,correct,correct,correct,correct,correct

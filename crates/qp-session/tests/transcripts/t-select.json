@@ -1,0 +1,399 @@
+{
+ "name": "t-select",
+ "description": "Reference by meaning with structured selectors (docs/PROTOCOL.md §17): resolution in queries, commands and proposals, ack/result.resolved, ids in the log, ambiguous with ranked candidates, first/latest, not_found with candidates and did_you_mean, unknown selector keys.",
+ "covers": [
+  "select",
+  "command",
+  "query",
+  "error"
+ ],
+ "init": "fixtures/protocol/init/thyao.json",
+ "steps": [
+  {
+   "send": {
+    "conn": "a",
+    "msg": {
+     "type": "hello",
+     "protocol": "qp/0",
+     "principal": "arkin",
+     "surface": {
+      "kind": "desktop"
+     }
+    }
+   },
+   "expect": [
+    {
+     "conn": "a",
+     "msg": {
+      "type": "welcome",
+      "principal": "arkin",
+      "summary": {
+       "select": {
+        "views": {
+         "main": {}
+        },
+        "panels": {
+         "main/0": {
+          "mark": "candle"
+         },
+         "main/1": {
+          "shows": {
+           "study": "rsi"
+          }
+         },
+         "main/2": {
+          "shows": {
+           "study": "macd"
+          }
+         }
+        },
+        "findings": {
+         "fnd-overbought": {
+          "kind": "cross_above"
+         }
+        }
+       }
+      }
+     }
+    }
+   ]
+  },
+  {
+   "send_raw": {
+    "conn": "a",
+    "line": "{\"type\": \"query\", \"id\": \"q1\", \"query\": {\"kind\": \"study\", \"series\": {\"study\": \"rsi\", \"params\": {\"period\": 14}}, \"range\": {\"last\": 50}, \"reduce\": \"max\"}}"
+   },
+   "expect": [
+    {
+     "conn": "a",
+     "msg": {
+      "type": "result",
+      "id": "q1",
+      "resolved": {
+       "/query/series": "rsi14"
+      },
+      "data": {
+       "kind": "reduced",
+       "series": "rsi14",
+       "reduce": "max",
+       "bars": 50
+      }
+     }
+    }
+   ]
+  },
+  {
+   "send_raw": {
+    "conn": "a",
+    "line": "{\"type\": \"command\", \"id\": \"c1\", \"ops\": [{\"op\": \"set_encoding\", \"view\": {}, \"layer\": {\"shows\": {\"study\": \"bollinger\"}, \"output\": \"upper\"}, \"encoding\": {\"color\": \"down\"}}]}"
+   },
+   "expect": [
+    {
+     "conn": "a",
+     "msg": {
+      "type": "ack",
+      "id": "c1",
+      "status": "applied",
+      "seq": 1,
+      "resolved": {
+       "/ops/0/view": "main",
+       "/ops/0/layer": "l1"
+      }
+     }
+    }
+   ]
+  },
+  {
+   "send_raw": {
+    "conn": "a",
+    "line": "{\"type\": \"query\", \"id\": \"q2\", \"query\": {\"kind\": \"log\", \"limit\": 1}}"
+   },
+   "expect": [
+    {
+     "conn": "a",
+     "msg": {
+      "type": "result",
+      "id": "q2",
+      "resolved": "$absent",
+      "data": {
+       "kind": "log",
+       "entries": [
+        {
+         "seq": 1,
+         "request": [
+          {
+           "op": "set_encoding",
+           "view": "main",
+           "layer": "l1",
+           "encoding": {
+            "color": "down"
+           }
+          }
+         ]
+        }
+       ]
+      }
+     }
+    }
+   ]
+  },
+  {
+   "send_raw": {
+    "conn": "a",
+    "line": "{\"type\": \"command\", \"id\": \"c2\", \"ops\": [{\"op\": \"set_encoding\", \"view\": {}, \"layer\": {\"mark\": \"line\"}, \"encoding\": {\"width\": 2}}]}"
+   },
+   "expect": [
+    {
+     "conn": "a",
+     "msg": {
+      "type": "error",
+      "id": "c2",
+      "error": {
+       "code": "ambiguous",
+       "path": "/ops/0/layer",
+       "candidates": [
+        {
+         "id": "l1",
+         "about": "$any"
+        },
+        {
+         "id": "l2",
+         "about": "$any"
+        },
+        {
+         "id": "l4",
+         "about": "$any"
+        }
+       ]
+      }
+     }
+    }
+   ]
+  },
+  {
+   "send_raw": {
+    "conn": "a",
+    "line": "{\"type\": \"command\", \"id\": \"c3\", \"ops\": [{\"op\": \"set_encoding\", \"view\": {}, \"layer\": {\"mark\": \"line\", \"panel\": {\"shows\": {\"study\": \"rsi\"}}}, \"encoding\": {\"width\": 2}}]}"
+   },
+   "expect": [
+    {
+     "conn": "a",
+     "msg": {
+      "type": "ack",
+      "id": "c3",
+      "status": "applied",
+      "seq": 2,
+      "resolved": {
+       "/ops/0/view": "main",
+       "/ops/0/layer": "l2"
+      }
+     }
+    }
+   ]
+  },
+  {
+   "send_raw": {
+    "conn": "a",
+    "line": "{\"type\": \"command\", \"id\": \"c4\", \"ops\": [{\"op\": \"set_encoding\", \"view\": {}, \"layer\": {\"mark\": \"line\", \"latest\": true}, \"encoding\": {\"width\": 1}}]}"
+   },
+   "expect": [
+    {
+     "conn": "a",
+     "msg": {
+      "type": "ack",
+      "id": "c4",
+      "status": "applied",
+      "seq": 3,
+      "resolved": {
+       "/ops/0/view": "main",
+       "/ops/0/layer": "l4"
+      }
+     }
+    }
+   ]
+  },
+  {
+   "send_raw": {
+    "conn": "a",
+    "line": "{\"type\": \"command\", \"id\": \"c5\", \"ops\": [{\"op\": \"delete_panel\", \"view\": {}, \"panel\": {\"shows\": {\"study\": \"bolinger\"}}}]}"
+   },
+   "expect": [
+    {
+     "conn": "a",
+     "msg": {
+      "type": "error",
+      "id": "c5",
+      "error": {
+       "code": "not_found",
+       "path": "/ops/0/panel/shows",
+       "did_you_mean": [
+        "bollinger"
+       ]
+      }
+     }
+    }
+   ]
+  },
+  {
+   "send_raw": {
+    "conn": "a",
+    "line": "{\"type\": \"query\", \"id\": \"q3\", \"query\": {\"kind\": \"present\", \"finding\": {\"kind\": \"cross_above\", \"state\": \"approved\"}}}"
+   },
+   "expect": [
+    {
+     "conn": "a",
+     "msg": {
+      "type": "error",
+      "id": "q3",
+      "error": {
+       "code": "not_found",
+       "path": "/query/finding",
+       "candidates": [
+        {
+         "id": "fnd-overbought",
+         "about": "$any"
+        }
+       ]
+      }
+     }
+    }
+   ]
+  },
+  {
+   "send_raw": {
+    "conn": "a",
+    "line": "{\"type\": \"command\", \"id\": \"c6\", \"ops\": [{\"op\": \"delete_layer\", \"view\": {}, \"layer\": {\"shows\": {\"stdy\": \"rsi\"}}}]}"
+   },
+   "expect": [
+    {
+     "conn": "a",
+     "msg": {
+      "type": "error",
+      "id": "c6",
+      "error": {
+       "code": "schema",
+       "path": "/ops/0/layer/shows/stdy",
+       "did_you_mean": [
+        "study"
+       ]
+      }
+     }
+    }
+   ]
+  },
+  {
+   "send_raw": {
+    "conn": "a",
+    "line": "{\"type\": \"query\", \"id\": \"q4\", \"query\": {\"kind\": \"get\", \"id\": {\"finding\": {\"kind\": \"cross_above\"}}}}"
+   },
+   "expect": [
+    {
+     "conn": "a",
+     "msg": {
+      "type": "result",
+      "id": "q4",
+      "resolved": {
+       "/query/id": "fnd-overbought"
+      },
+      "data": {
+       "kind": "item",
+       "collection": "findings",
+       "item": {
+        "id": "fnd-overbought"
+       }
+      }
+     }
+    }
+   ]
+  },
+  {
+   "send": {
+    "conn": "s",
+    "msg": {
+     "type": "hello",
+     "protocol": "qp/0",
+     "principal": "scout",
+     "surface": {
+      "kind": "headless"
+     }
+    }
+   },
+   "expect": [
+    {
+     "conn": "s",
+     "msg": {
+      "type": "welcome",
+      "principal": "scout"
+     }
+    }
+   ]
+  },
+  {
+   "send_raw": {
+    "conn": "s",
+    "line": "{\"type\": \"command\", \"id\": \"p1\", \"reason\": \"log scale for the price panel\", \"ops\": [{\"op\": \"set_scale\", \"view\": {}, \"scale\": {\"panel\": {\"mark\": \"candle\"}}, \"kind\": \"log\"}]}"
+   },
+   "expect": [
+    {
+     "conn": "s",
+     "msg": {
+      "type": "ack",
+      "id": "p1",
+      "status": "proposed",
+      "proposal": "prop-4",
+      "resolved": {
+       "/ops/0/view": "main",
+       "/ops/0/scale": "y0"
+      }
+     }
+    }
+   ]
+  }
+ ],
+ "final": {
+  "document": {
+   "views": [
+    {
+     "id": "main",
+     "layers": [
+      {},
+      {
+       "id": "l1",
+       "encoding": {
+        "color": "down"
+       }
+      },
+      {
+       "id": "l2",
+       "encoding": {
+        "width": 2.0
+       }
+      },
+      {},
+      {
+       "id": "l4",
+       "encoding": {
+        "width": 1.0
+       }
+      }
+     ]
+    }
+   ],
+   "proposals": [
+    {
+     "id": "prop-4",
+     "state": "pending",
+     "ops": [
+      {
+       "op": "set_scale",
+       "view": "main",
+       "scale": "y0",
+       "kind": "log"
+      }
+     ]
+    }
+   ]
+  },
+  "log_len": 4
+ }
+}

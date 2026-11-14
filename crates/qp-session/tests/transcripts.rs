@@ -22,7 +22,7 @@ fn run_dir(rel: &str) -> usize {
 
 #[test]
 fn own_transcripts_pass_inproc() {
-    assert_eq!(run_dir("crates/qp-session/tests/transcripts"), 3);
+    assert_eq!(run_dir("crates/qp-session/tests/transcripts"), 4);
 }
 
 #[test]

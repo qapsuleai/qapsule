@@ -249,9 +249,14 @@ fn soa_prepare(kind: Soa, job: &Job, n: usize, buf: &mut SweepColumns) {
     buf.names = kind.outputs();
     kind.warmup(job, &mut buf.warmup);
     buf.columns.resize_with(buf.names.len(), Vec::new);
+    // The kernels write every slot of a column (NaN in warmup, then values), so a reused
+    // column of the right length is not cleared again (RP1/E6: the zero fill was up to a
+    // third of a sweep).
     for col in &mut buf.columns {
-        col.clear();
-        col.resize(n, 0.0);
+        if col.len() != n {
+            col.clear();
+            col.resize(n, 0.0);
+        }
     }
 }
 

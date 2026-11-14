@@ -1517,8 +1517,10 @@ version = "0.0.0"
 dependencies = [
  "assert_cmd",
  "clap",
+ "qp-compute",
  "qp-render",
  "qp-schema",
+ "qp-source",
  "serde_json",
  "tempfile",
 ]

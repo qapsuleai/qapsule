@@ -173,3 +173,129 @@ fn bad_input_fails_without_panic() {
     let stderr = String::from_utf8(assert.get_output().stderr.clone()).unwrap();
     assert!(!stderr.contains("panicked"), "{stderr}");
 }
+
+fn compute_json(args: &[&str]) -> serde_json::Value {
+    let out = qp().arg("compute").args(args).assert().success();
+    serde_json::from_slice(&out.get_output().stdout).unwrap()
+}
+
+fn nulls_then_numbers(col: &serde_json::Value) -> (usize, usize) {
+    let a = col.as_array().unwrap();
+    let warm = a.iter().take_while(|v| v.is_null()).count();
+    assert!(
+        a[warm..].iter().all(serde_json::Value::is_f64),
+        "null after warmup"
+    );
+    (warm, a.len())
+}
+
+#[test]
+fn compute_rsi_and_macd_from_a_series_file() {
+    let sample = fixtures().join("bars/sample.json");
+    let s = sample.to_str().unwrap();
+
+    let rsi = compute_json(&[s, "--study", "rsi", "--param", "period=14"]);
+    qp_schema::validate("StudyOutput", &rsi).unwrap();
+    assert_eq!(rsi["t"].as_array().unwrap().len(), 200);
+    assert_eq!(nulls_then_numbers(&rsi["outputs"]["rsi"]), (14, 200));
+    assert_eq!(rsi["warmup"]["rsi"], 14);
+
+    let macd = compute_json(&[s, "--study", "macd"]);
+    qp_schema::validate("StudyOutput", &macd).unwrap();
+    let outs = macd["outputs"].as_object().unwrap();
+    assert_eq!(outs.len(), 3);
+    assert_eq!(nulls_then_numbers(&outs["macd"]), (25, 200));
+    assert_eq!(nulls_then_numbers(&outs["signal"]), (33, 200));
+    assert_eq!(nulls_then_numbers(&outs["histogram"]), (33, 200));
+    assert_eq!(macd["params"]["slow"], 26.0);
+
+    // Same numbers as the library.
+    let bars = qp_schema::parse_bar_series(&std::fs::read_to_string(&sample).unwrap()).unwrap();
+    let lib = qp_compute::compute_bars(
+        "rsi",
+        &std::collections::BTreeMap::from([("period".to_owned(), 14.0)]),
+        qp_compute::Field::Close,
+        bars.bars().unwrap(),
+    )
+    .unwrap();
+    assert_eq!(serde_json::to_value(&lib).unwrap(), rsi);
+}
+
+#[test]
+fn compute_from_a_document_series() {
+    let doc = fixtures().join("schema/document.example.json");
+    let v = compute_json(&[
+        doc.to_str().unwrap(),
+        "--study",
+        "sma",
+        "--param",
+        "period=2",
+        "--series",
+        "thyao-1d",
+    ]);
+    assert_eq!(
+        v["outputs"]["sma"],
+        serde_json::json!([null, 320.125, 326.5])
+    );
+    // A matriks binding without data is not available offline.
+    qp().args([
+        "compute",
+        doc.to_str().unwrap(),
+        "--study",
+        "sma",
+        "--series",
+        "thyao-1d-rsi14",
+    ])
+    .assert()
+    .code(2);
+}
+
+#[test]
+fn compute_sweep_equals_single_runs() {
+    let tmp = tempfile::tempdir().unwrap();
+    let sets = tmp.path().join("sets.json");
+    std::fs::write(
+        &sets,
+        r#"[{"period":10,"k":2},{"period":20,"k":1.5},{"period":5}]"#,
+    )
+    .unwrap();
+    let sample = fixtures().join("bars/sample.json");
+    let s = sample.to_str().unwrap();
+    let all = compute_json(&[s, "--study", "bollinger", "--sweep", sets.to_str().unwrap()]);
+    let all = all.as_array().unwrap();
+    assert_eq!(all.len(), 3);
+    let single = compute_json(&[
+        s,
+        "--study",
+        "bollinger",
+        "--param",
+        "period=20",
+        "--param",
+        "k=1.5",
+    ]);
+    assert_eq!(all[1], single);
+    assert_eq!(all[2]["params"]["k"], 2.0); // default filled in
+}
+
+#[test]
+fn compute_errors_are_reported() {
+    let s = fixtures().join("bars/sample.json");
+    let s = s.to_str().unwrap();
+    qp().args(["compute", s, "--study", "nope"])
+        .assert()
+        .code(2);
+    qp().args(["compute", s, "--study", "rsi", "--param", "period=0"])
+        .assert()
+        .code(2);
+    qp().args(["compute", s, "--study", "rsi", "--param", "length=3"])
+        .assert()
+        .code(2);
+    qp().args(["compute", s, "--study", "rsi", "--field", "vwap"])
+        .assert()
+        .code(2);
+    qp().args(["compute", s, "--study", "rsi", "--series", "x"])
+        .assert()
+        .code(2);
+    let list = compute_json(&["--list"]);
+    assert_eq!(list.as_array().unwrap().len(), 5);
+}

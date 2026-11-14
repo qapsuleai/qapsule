@@ -1,0 +1,19 @@
+[package]
+name = "qp-mcp"
+description = "MCP server adapter over the qp/0 reference authority: tools generated from the protocol schema, JSON-RPC handling, conformance over MCP."
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[dependencies]
+qp-schema = { version = "0.0.0", path = "../qp-schema" }
+qp-session = { version = "0.0.0", path = "../qp-session" }
+serde_json = { version = "1.0.154", features = ["float_roundtrip"] }
+
+[dev-dependencies]
+qp-schema = { path = "../qp-schema", features = ["validate"] }
+
+[lints]
+workspace = true

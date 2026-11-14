@@ -11,16 +11,21 @@
 #   4 schema     qp schema export (>= 7 *.schema.json, two exports identical)
 #   5 fixtures   fixtures/schema/*.example.json validate against the exported schema
 #   6 golden     qp render twice: byte-identical, and identical to fixtures/golden/sample.png
-#   7 wasm       cargo build -p qp-wasm --target wasm32-unknown-unknown --profile wasm (+ sizes)
-#   8 hygiene    no secret-looking tracked files; .gitignore has a .env rule
-#   9 browser    shells/web-spike/run.sh (headless Chromium vs golden), optional
-#  10 compute    qp compute: RSI(14) and MACD on the sample, outputs valid StudyOutput
-#  11 digest     cross-target compute digest == fixtures/compute/digest.txt on the host
+#   7 views      R2 views (fixtures/views/*.json, built only from protocol messages): the
+#                transcripts pass `qp conform`; each view is rendered twice from its
+#                transcript, byte-identical and equal to its golden (V0:
+#                fixtures/golden/sample.png, others: fixtures/golden/views/*.png);
+#                `qp explain` output equals fixtures/views/*.explain.txt
+#   8 wasm       cargo build -p qp-wasm --target wasm32-unknown-unknown --profile wasm (+ sizes)
+#   9 hygiene    no secret-looking tracked files; .gitignore has a .env rule
+#  10 browser    shells/web-spike/run.sh (headless Chromium vs golden), optional
+#  11 compute    qp compute: RSI(14) and MACD on the sample, outputs valid StudyOutput
+#  12 digest     cross-target compute digest == fixtures/compute/digest.txt on the host
 #                (aarch64 or x86_64), x86_64 via Rosetta on Apple silicon if available,
 #                and wasm32 in Node (same tool rule as the browser step)
-#  12 protocol   fixtures/protocol/valid/* validate and fixtures/protocol/invalid/* are
+#  13 protocol   fixtures/protocol/valid/* validate and fixtures/protocol/invalid/* are
 #                rejected by the generated protocol schemas; transcripts and init validate
-#  13 conform    qp/0 conformance transcripts pass in-process, over `qp serve` and over MCP
+#  14 conform    qp/0 conformance transcripts pass in-process, over `qp serve` and over MCP
 #
 # Environment:
 #   QP_VERIFY_BROWSER=1  force the browser step (fails if tools are missing)
@@ -165,6 +170,69 @@ step_golden() {
   fi
   echo "render matches fixtures/golden/sample.png"
   note "byte-identical to golden"
+}
+
+# R2 views: one line per view, "<transcript stem> <qp render/explain view selection>".
+VIEWS_LIST='v0-r0 --view r0
+v1-three-panels --view three
+v2-bollinger-band --view boll
+v3-fan --view fan
+v4-log --view logv
+v5-conditional --view cond
+d1-capsule --present fnd-overbought --surface phone --width 390 --height 300
+d2-chart --present fnd-overbought --surface desktop'
+
+step_views() {
+  build_qp
+  if ! "$qp" conform fixtures/views >"$tmp/views-conform.txt"; then
+    cat "$tmp/views-conform.txt" >&2
+    fail "a view transcript fails qp conform"
+  fi
+  echo "view transcripts pass qp conform"
+  local f stem sel golden d="$tmp/views" n=0 bad=0
+  for f in fixtures/views/*.json; do
+    "$qp" schema validate "$f" --type Transcript >/dev/null || fail "$f is not a valid Transcript"
+  done
+  for f in fixtures/views/docs/*.json; do
+    "$qp" schema validate "$f" --type Document >/dev/null || fail "$f is not a valid Document"
+  done
+  echo "view transcripts and documents validate"
+  mkdir -p "$d"
+  while read -r stem sel; do
+    [ -n "$stem" ] || continue
+    n=$((n + 1))
+    if [ "$stem" = v0-r0 ]; then
+      golden=fixtures/golden/sample.png
+    else
+      golden="fixtures/golden/views/$stem.png"
+    fi
+    # $sel is a list of arguments (no spaces inside any of them): split on purpose.
+    # shellcheck disable=SC2086
+    "$qp" render --transcript "fixtures/views/$stem.json" $sel --out "$d/$stem.a.png"
+    # shellcheck disable=SC2086
+    "$qp" render --transcript "fixtures/views/$stem.json" $sel --out "$d/$stem.b.png"
+    # shellcheck disable=SC2086
+    "$qp" explain --transcript "fixtures/views/$stem.json" $sel >"$d/$stem.explain.txt"
+    if ! cmp -s "$d/$stem.a.png" "$d/$stem.b.png"; then
+      echo "$stem: two renders differ" >&2
+      bad=$((bad + 1))
+    elif ! cmp -s "$d/$stem.a.png" "$golden"; then
+      mkdir -p "$target_dir/golden-actual"
+      cp "$d/$stem.a.png" "$target_dir/golden-actual/$stem.png"
+      echo "$stem: render differs from $golden (actual: $target_dir/golden-actual/$stem.png)" >&2
+      bad=$((bad + 1))
+    elif ! cmp -s "$d/$stem.explain.txt" "fixtures/views/$stem.explain.txt"; then
+      diff "fixtures/views/$stem.explain.txt" "$d/$stem.explain.txt" >&2 || true
+      echo "$stem: explain differs from fixtures/views/$stem.explain.txt" >&2
+      bad=$((bad + 1))
+    else
+      echo "$stem: two renders byte-identical and equal to $golden; explain matches"
+    fi
+  done <<EOF
+$VIEWS_LIST
+EOF
+  [ "$bad" -eq 0 ] || fail "$bad of $n view(s) failed"
+  note "$n views x2 byte-identical to goldens (V0 = sample.png)"
 }
 
 step_wasm() {
@@ -320,6 +388,7 @@ run_step test step_test
 run_step schema step_schema
 run_step fixtures step_fixtures
 run_step golden step_golden
+run_step views step_views
 run_step wasm step_wasm
 run_step hygiene step_hygiene
 run_step browser step_browser

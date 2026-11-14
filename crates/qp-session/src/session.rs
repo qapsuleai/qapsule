@@ -443,9 +443,11 @@ impl Session {
             for (i, op) in ops.iter().enumerate() {
                 let (n, path) = match op {
                     Op::AppendBars { bars, .. } => (bars.len(), "bars"),
-                    Op::PutSeries { series } => {
-                        (series.bars().map_or(0, <[qp_schema::Bar]>::len), "series")
-                    }
+                    Op::PutSeries { series } => match &series.data {
+                        Some(qp_schema::SeriesData::Bars { bars }) => (bars.len(), "series"),
+                        Some(qp_schema::SeriesData::Points { points }) => (points.len(), "series"),
+                        None => continue,
+                    },
                     _ => continue,
                 };
                 if n > self.limits.max_bars as usize {

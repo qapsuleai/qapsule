@@ -1,0 +1,75 @@
+{
+  "covers": [
+    "presenter",
+    "present",
+    "depth"
+  ],
+  "description": "D1: the presenter at capsule depth (phone): one panel, the fact's series over the last max_points (60) bars as a line, a rule at the fact's level (origin: the fact), a point at the fact bar. Rendered with `qp render --present fnd-overbought --surface phone`.",
+  "final": {
+    "document": {
+      "views": [
+        {
+          "id": "main"
+        }
+      ]
+    }
+  },
+  "init": "fixtures/protocol/init/thyao.json",
+  "name": "d1-capsule",
+  "steps": [
+    {
+      "expect": [
+        {
+          "conn": "a",
+          "msg": {
+            "principal": "arkin",
+            "role": "owner",
+            "type": "welcome"
+          }
+        }
+      ],
+      "send": {
+        "conn": "a",
+        "msg": {
+          "principal": "arkin",
+          "protocol": "qp/0",
+          "surface": {
+            "kind": "phone"
+          },
+          "type": "hello"
+        }
+      }
+    },
+    {
+      "expect": [
+        {
+          "conn": "a",
+          "msg": {
+            "data": {
+              "kind": "presentation",
+              "presentation": {
+                "capsule_view": "$any",
+                "depth": "capsule",
+                "finding": "fnd-overbought",
+                "surface": "phone"
+              }
+            },
+            "id": "q1",
+            "type": "result"
+          }
+        }
+      ],
+      "send": {
+        "conn": "a",
+        "msg": {
+          "id": "q1",
+          "query": {
+            "finding": "fnd-overbought",
+            "kind": "present"
+          },
+          "type": "query"
+        }
+      }
+    }
+  ]
+}

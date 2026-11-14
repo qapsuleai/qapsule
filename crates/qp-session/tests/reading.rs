@@ -547,11 +547,22 @@ fn round_trip_data_pixel_data_through_hit() {
                         same_layer += 1;
                         let vals: BTreeMap<String, f64> =
                             serde_json::from_value(r["item"]["values"].clone()).unwrap();
-                        assert!(
-                            vals.values().any(|x| *x == v),
-                            "{view}/{}: {v} not in {vals:?}",
-                            l.id
-                        );
+                        // One item per (slot, output) (GRAMMAR §16): the topmost item
+                        // is this output's, or another output of the same layer drawn
+                        // later whose ±4 px box also covers the pixel.
+                        if let Some(x) = vals.get(field) {
+                            assert!(*x == v, "{view}/{}: {v} vs {x}", l.id);
+                        } else {
+                            assert_eq!(vals.len(), 1, "{view}/{}: {vals:?}", l.id);
+                            let other = vals.values().next().copied().unwrap();
+                            let oy = value_y(&p.y, other).unwrap();
+                            assert!(
+                                (oy - py).abs() <= 5.0,
+                                "{view}/{}: {v} hit {vals:?} {} px away",
+                                l.id,
+                                (oy - py).abs()
+                            );
+                        }
                     }
                     trips += 1;
                 }

@@ -8,7 +8,7 @@ use qp_schema::grammar::{
     View,
 };
 use qp_schema::scene::{
-    Align, Lod, PixelRect, Prim, Rgba, SceneDesc, SceneEmphasis, ScenePanel, XMap, YMap,
+    Align, DataSource, Lod, PixelRect, Prim, Rgba, SceneDesc, SceneEmphasis, ScenePanel, XMap, YMap,
 };
 
 use crate::detmath::{self, nice_step, px, year_month};
@@ -779,8 +779,28 @@ pub fn compile(
         }
     }
 
+    // Last-value tags: the first data layer of each panel (pixel row, value, colour).
+    // Computed before the grid so a value label under a tag can be left out.
+    let tags: Vec<Option<(i32, f64, Rgba)>> = rects
+        .iter()
+        .enumerate()
+        .map(|(pi, rc)| {
+            let pl = prepared
+                .iter()
+                .filter(|pl| pl.panel == panel_ids[pi] && pl.has_data)
+                .find(|pl| {
+                    matches!(
+                        pl.geom,
+                        Geom::Candle | Geom::Line | Geom::Area | Geom::Band | Geom::Bar
+                    )
+                })?;
+            let (v, color) = last_value(pl)?;
+            let ly = px(value_y(&ymaps[pi], v)?);
+            (ly >= rc.top && ly <= rc.bottom).then_some((ly, v, color))
+        })
+        .collect();
     // Horizontal grid and value labels (R0 order: line, label, line, label...).
-    for (rc, y) in rects.iter().zip(&ymaps) {
+    for ((rc, y), tag) in rects.iter().zip(&ymaps).zip(&tags) {
         let divs = (f64::from(rc.bottom - rc.top) / 90.0)
             .round()
             .clamp(2.0, 6.0);
@@ -789,6 +809,13 @@ pub fn compile(
             let yy = px(yy);
             if yy > rc.top && yy < rc.bottom {
                 under.push(rect(rc.left, yy, rc.right - rc.left, 1, theme.grid));
+                // The label's box (baseline yy + 4, LABEL_PX tall) under the tag's box
+                // (ly - 8 .. ly + 8): the tag wins, the label is left out.
+                #[allow(clippy::cast_possible_truncation)]
+                let label_top = yy + 4 - LABEL_PX as i32;
+                if tag.is_some_and(|(ly, _, _)| label_top < ly + 8 && yy + 4 > ly - 8) {
+                    continue;
+                }
                 under.push(Prim::Text {
                     x: rc.right + 6,
                     baseline: yy + 4,
@@ -864,30 +891,11 @@ pub fn compile(
         scene_panels[pi].layers.push(draw(pl, &g));
     }
 
-    // Last-value tags: the first data layer of each panel.
-    for (pi, rc) in rects.iter().enumerate() {
-        let Some(pl) = prepared
-            .iter()
-            .filter(|pl| pl.panel == panel_ids[pi] && pl.has_data)
-            .find(|pl| {
-                matches!(
-                    pl.geom,
-                    Geom::Candle | Geom::Line | Geom::Area | Geom::Band | Geom::Bar
-                )
-            })
-        else {
+    // Last-value tags.
+    for (rc, tag) in rects.iter().zip(&tags) {
+        let Some((ly, v, color)) = *tag else {
             continue;
         };
-        let Some((v, color)) = last_value(pl) else {
-            continue;
-        };
-        let Some(ly) = value_y(&ymaps[pi], v) else {
-            continue;
-        };
-        let ly = px(ly);
-        if ly < rc.top || ly > rc.bottom {
-            continue;
-        }
         let color = [color[0], color[1], color[2], 255];
         over.push(rect(rc.right + 1, ly - 8, wi - rc.right - 1, 16, color));
         over.push(Prim::Text {
@@ -907,24 +915,42 @@ pub fn compile(
             provider.interval(&bar_series).unwrap_or_default()
         )
     });
+    // "C <close>" only when the first panel draws the bar series itself (its price).
+    let show_close = prepared.iter().any(|pl| {
+        pl.panel == panel_ids[0]
+            && matches!(&pl.data, DataSource::Series { series } if *series == bar_series)
+    });
+    let title_x = left + 4;
+    let close_x = left + 140;
+    let title_room = if show_close {
+        close_x - title_x - 8
+    } else {
+        wi - 8 - title_x
+    };
+    let title = fit_text(&title, title_room, f64::from(TITLE_PX));
+    let mut text_right = title_x + est_width(&title, f64::from(TITLE_PX));
     over.push(Prim::Text {
-        x: left + 4,
+        x: title_x,
         baseline: 23,
         px: TITLE_PX,
         text: title,
         color: theme.text,
         align: Align::Left,
     });
-    let last_bar = usize::try_from(fr.to.min(n_bars - 1)).unwrap_or(0);
-    let lb = &fr.bars[last_bar];
-    over.push(Prim::Text {
-        x: left + 140,
-        baseline: 23,
-        px: TITLE_PX,
-        text: format!("C {:.2}", lb.c),
-        color: if lb.c >= lb.o { theme.up } else { theme.down },
-        align: Align::Left,
-    });
+    if show_close {
+        let last_bar = usize::try_from(fr.to.min(n_bars - 1)).unwrap_or(0);
+        let lb = &fr.bars[last_bar];
+        let text = format!("C {:.2}", lb.c);
+        text_right = close_x + est_width(&text, f64::from(TITLE_PX));
+        over.push(Prim::Text {
+            x: close_x,
+            baseline: 23,
+            px: TITLE_PX,
+            text,
+            color: if lb.c >= lb.o { theme.up } else { theme.down },
+            align: Align::Left,
+        });
+    }
     // Legends: panel 0 right-aligned in the title row; other panels top-left inside.
     for (pi, rc) in rects.iter().enumerate() {
         let legends: Vec<(String, Rgba)> = prepared
@@ -942,14 +968,27 @@ pub fn compile(
                 Some((text, pl.traces.first().map_or(color, |t| t.base)))
             })
             .collect();
+        // Identical legend texts within a panel: the first one is kept.
+        let mut seen = BTreeSet::new();
+        let legends: Vec<(String, Rgba)> = legends
+            .into_iter()
+            .filter(|(t, _)| seen.insert(t.clone()))
+            .collect();
         if pi == 0 {
-            let mut xs = vec![0; legends.len()];
+            // Right-aligned from the right edge; the right-most are kept, and a legend
+            // that would reach the title/close text is dropped with all left of it.
+            let mut placed: Vec<(String, Rgba, i32)> = Vec::new();
             let mut x = wi - 8;
-            for (i, (text, _)) in legends.iter().enumerate().rev() {
-                xs[i] = x;
-                x -= est_width(text, f64::from(LABEL_PX)) + 12;
+            for (text, color) in legends.into_iter().rev() {
+                let w = est_width(&text, f64::from(LABEL_PX));
+                if x - w < text_right + 12 {
+                    break;
+                }
+                placed.push((text, color, x));
+                x -= w + 12;
             }
-            for ((text, color), x) in legends.into_iter().zip(xs) {
+            placed.reverse();
+            for (text, color, x) in placed {
                 over.push(Prim::Text {
                     x,
                     baseline: 23,
@@ -1064,6 +1103,25 @@ pub fn compile(
         under,
         over,
     })
+}
+
+/// `text` cut to fit `room` pixels at `size` (estimate: 0.6 · size per char), ending in
+/// "…" when cut.
+fn fit_text(text: &str, room: i32, size: f64) -> String {
+    if est_width(text, size) <= room {
+        return text.to_owned();
+    }
+    let chars: Vec<char> = text.chars().collect();
+    let mut n = chars.len();
+    while n > 0 {
+        let mut t: String = chars[..n].iter().collect::<String>().trim_end().to_owned();
+        t.push('…');
+        if est_width(&t, size) <= room {
+            return t;
+        }
+        n -= 1;
+    }
+    String::new()
 }
 
 /// Last drawn value of a layer and its colour (candle: close and direction colour).

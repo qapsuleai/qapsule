@@ -276,6 +276,25 @@ fn check_target(doc: &Document, t: &Target, path: &str) -> PResult<()> {
     Ok(())
 }
 
+/// Checks an inline point series: not empty, strictly ascending `t`, finite `v` (a
+/// `null` value is allowed, as in study output). Returns the offending index and why.
+fn check_points(points: &[qp_schema::Point]) -> Result<(), (usize, String)> {
+    if points.is_empty() {
+        return Err((0, "point list is empty".to_owned()));
+    }
+    let mut prev: Option<i64> = None;
+    for (i, pt) in points.iter().enumerate() {
+        if pt.v.is_some_and(|v| !v.is_finite()) {
+            return Err((i, format!("point {i}: non-finite value")));
+        }
+        if prev.is_some_and(|p| pt.t <= p) {
+            return Err((i, format!("point {i}: timestamp not increasing")));
+        }
+        prev = Some(pt.t);
+    }
+    Ok(())
+}
+
 /// Log positions that are undone (by an undo entry that is itself not undone).
 pub(crate) fn undone_set(log: &[LogEntry]) -> BTreeSet<Seq> {
     let mut undone = BTreeSet::new();
@@ -321,13 +340,18 @@ pub(crate) fn expand_op(
                             return Err(invalid(e, ptr(&sp, "data")));
                         }
                     }
-                    _ => {
+                    Some(SeriesData::Points { points }) => {
+                        if let Err((i, why)) = check_points(points) {
+                            return Err(invalid(why, ptr(&ptr(&ptr(&sp, "data"), "points"), i)));
+                        }
+                    }
+                    None => {
                         return Err(E::new(
                             ErrorCode::Unsupported,
-                            "an inline series must carry bars (`data.kind = \"bars\"`)",
+                            "an inline series must carry data (`data.kind = \"bars\"` or `\"points\"`)",
                         )
                         .at(ptr(&sp, "data"))
-                        .hint("v0 supports inline bar series and study series.")
+                        .hint("v0 supports inline bar series, inline point series and study series.")
                         .build())
                     }
                 },

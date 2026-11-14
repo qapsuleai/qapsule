@@ -499,14 +499,39 @@ fn rsi_lanes<const L: usize>(
     }
     let st: [[f64; 4]; L] = std::array::from_fn(|k| rs[k].steady().expect("past the seed bar"));
     let (mut ag, mut al) = (st.map(|s| s[2]), st.map(|s| s[3]));
-    for i in seeded..n {
-        let (g, l) = (gain[i], loss[i]);
-        for k in 0..L {
-            let [pm1, pf, _, _] = st[k];
-            ag[k] = Rsi::smooth(ag[k], pm1, pf, g);
-            al[k] = Rsi::smooth(al[k], pm1, pf, l);
-            cols[k][i] = rsi_from_avg(ag[k], al[k]);
+    // Blocks of bars: the dependent smoothing chains run lane-interleaved into small
+    // local buffers, then `rsi_from_avg` (two of the four divisions per bar) runs as a
+    // dependency-free pass per lane, which vectorizes, and each lane's output is written
+    // as one sequential stream (2 * L interleaved write streams thrash at L = 8).
+    const B: usize = 128;
+    let mut tg = [[0.0; B]; L];
+    let mut tl = [[0.0; B]; L];
+    let mut i0 = seeded;
+    while i0 < n {
+        let len = B.min(n - i0);
+        for (j, (&g, &l)) in gain[i0..i0 + len]
+            .iter()
+            .zip(&loss[i0..i0 + len])
+            .enumerate()
+        {
+            for k in 0..L {
+                let [pm1, pf, _, _] = st[k];
+                ag[k] = Rsi::smooth(ag[k], pm1, pf, g);
+                al[k] = Rsi::smooth(al[k], pm1, pf, l);
+                tg[k][j] = ag[k];
+                tl[k][j] = al[k];
+            }
         }
+        for k in 0..L {
+            for ((o, &g), &l) in cols[k][i0..i0 + len]
+                .iter_mut()
+                .zip(&tg[k][..len])
+                .zip(&tl[k][..len])
+            {
+                *o = rsi_from_avg(g, l);
+            }
+        }
+        i0 += len;
     }
 }
 

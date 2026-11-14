@@ -32,19 +32,19 @@ pub(crate) fn split(change: f64) -> (f64, f64) {
     (gain, loss)
 }
 
-/// RSI from average gain and loss.
+/// RSI from average gain and loss. The quotient is computed unconditionally and the
+/// result selected (same value as branching first), so a column pass over many bars
+/// compiles to vector code.
 #[inline]
 #[must_use]
 pub(crate) fn rsi_from_avg(avg_gain: f64, avg_loss: f64) -> f64 {
+    let rs = avg_gain / avg_loss;
+    let v = 100.0 - 100.0 / (1.0 + rs);
+    let flat = if avg_gain == 0.0 { 50.0 } else { 100.0 };
     if avg_loss == 0.0 {
-        if avg_gain == 0.0 {
-            50.0
-        } else {
-            100.0
-        }
+        flat
     } else {
-        let rs = avg_gain / avg_loss;
-        100.0 - 100.0 / (1.0 + rs)
+        v
     }
 }
 

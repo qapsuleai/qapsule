@@ -1,0 +1,2 @@
+attempt1: probe + guessed view id 'main' (from spec examples) -> not_found; the real view id is s5ybj (only discoverable via welcome.summary / list). The spec examples' ids are misleading.
+attempt2: set_scale s5ybj y0 log -> applied, verified via get.

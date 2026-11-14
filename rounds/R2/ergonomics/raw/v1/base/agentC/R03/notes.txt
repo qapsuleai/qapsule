@@ -1,0 +1,2 @@
+attempt1: discovery-only run (screen/list queries; same file as R13 attempt1, run once) to learn real ids (view xep2d, last breakout fact bjgte bar 185, finding ijjoh).
+attempt2: set_emphasis on view xep2d with highlight target item=bjgte; applied seq 1, emphasis visible in view. Unclear: whether to target the fact or the finding (both allowed as `item`), and set_emphasis replaces the whole list (list was empty so fine).

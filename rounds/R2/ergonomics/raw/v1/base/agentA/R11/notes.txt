@@ -1,0 +1,1 @@
+attempt1: insert_layer line on vesho panel 0, y c, conditional color gt sma50 -> up/down -> applied. screen does not show colors so unverifiable; ambiguity: added a new close-line layer rather than recoloring candles; gt vs ge unspecified. Ids learned from welcome.summary in an unrecorded exploratory run.

@@ -1,0 +1,2 @@
+attempt1: discovery-only run (same file as R13 attempt1) to learn ids (view xep2d, bar series ly9ux, panels 0-2).
+attempt2: insert_panel after panel 0 with id 3 name volume and a bar layer {series ly9ux, encoding y:"v"}; applied, panel 3 sits right below price. Unclear: insert_panel's `panel` is a full Panel object (not just an id) — inferred from the schema-less spec text/examples; worked first time. Also ack.created gave "3","l0".

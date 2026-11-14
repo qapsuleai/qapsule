@@ -1,0 +1,24 @@
+# sandbox-exec -f isotest_base_agentA.sb <cmd>
+$ head -c 40 /Users/arkns/Works/Mchart/qapsule/.claude/worktrees/agent-a5b26c09c61ccd65b/CLAUDE.md
+head: /Users/arkns/Works/Mchart/qapsule/.claude/worktrees/agent-a5b26c09c61ccd65b/CLAUDE.md: Operation not permitted
+
+$ head -c 40 /Users/arkns/Works/Mchart/qapsule/.claude/worktrees/agent-a5b26c09c61ccd65b/rounds/R2/tasks/TASKS.md
+head: /Users/arkns/Works/Mchart/qapsule/.claude/worktrees/agent-a5b26c09c61ccd65b/rounds/R2/tasks/TASKS.md: Operation not permitted
+
+$ head -c 40 /Users/arkns/Works/Mchart/qapsule/.claude/worktrees/agent-a5b26c09c61ccd65b/rounds/R2/ergonomics/harness/setup.py
+head: /Users/arkns/Works/Mchart/qapsule/.claude/worktrees/agent-a5b26c09c61ccd65b/rounds/R2/ergonomics/harness/setup.py: Operation not permitted
+
+$ head -c 40 /private/tmp/claude-501/-Users-arkns-Works-Mchart-qapsule/e6910705-d032-4e80-bf66-0a30bb080f3b/scratchpad/t9/docs/isotest/base/agentA/doc.json
+head: /private/tmp/claude-501/-Users-arkns-Works-Mchart-qapsule/e6910705-d032-4e80-bf66-0a30bb080f3b/scratchpad/t9/docs/isotest/base/agentA/doc.json: Operation not permitted
+
+$ head -c 40 /private/tmp/claude-501/-Users-arkns-Works-Mchart-qapsule/e6910705-d032-4e80-bf66-0a30bb080f3b/scratchpad/t9/packet/base/../../target-base/release/qp
+head: /private/tmp/claude-501/-Users-arkns-Works-Mchart-qapsule/e6910705-d032-4e80-bf66-0a30bb080f3b/scratchpad/t9/packet/base/../../target-base/release/qp: Operation not permitted
+
+$ head -c 40 /private/tmp/claude-501/-Users-arkns-Works-Mchart-qapsule/e6910705-d032-4e80-bf66-0a30bb080f3b/scratchpad/t9/packet/base/PROTOCOL.md
+# Qapsule Alan Protokolü — `qp/0`
+
+
+$ ls /Users/arkns/.claude/projects/-Users-arkns-Works-Mchart-qapsule
+ls: /Users/arkns/.claude/projects/-Users-arkns-Works-Mchart-qapsule: Operation not permitted
+$ ls /Users/arkns/Works/Mchart/qapsule/.claude/worktrees/agent-a5b26c09c61ccd65b
+ls: /Users/arkns/Works/Mchart/qapsule/.claude/worktrees/agent-a5b26c09c61ccd65b: Operation not permitted

@@ -1,0 +1,1 @@
+Ekranda tek görünüm (THYAO 1G) ve 3 panel var: 1) fiyat paneli (mumlar + Bollinger 20,2 bantları), 2) RSI14 paneli (70 aşırı alım kuralıyla), 3) MACD(12,26,9) paneli (macd ve signal çizgileri). Görünen aralık bar 80–199; SMA50 dokümanda var ama ekranda çizilmiyor.

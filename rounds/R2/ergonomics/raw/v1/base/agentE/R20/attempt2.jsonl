@@ -1,0 +1,3 @@
+{"conn":"a","msg":{"type":"hello","protocol":"qp/0","principal":"editor","surface":{"kind":"headless"}}}
+{"conn":"a","msg":{"type":"command","id":"c1","ops":[{"op":"insert_panel","view":"s5ybj","panel":{"id":3,"name":"bandwidth","y":{"kind":"linear"}},"layers":[{"id":"bw","mark":"line","series":"idfgo","panel":3,"encoding":{"y":"bandwidth"}}]}]}}
+{"conn":"a","msg":{"type":"query","id":"q2","query":{"kind":"get","id":"s5ybj"}}}

@@ -1,0 +1,2 @@
+attempt1: discovery-only run (shared with R02; file not duplicated here), no change.
+attempt2: delete_panel panel 2 (MACD) in view isc5l; applied, the MACD layer went with it; series eiz2t kept. Ambiguity: "paneli kaldır" = panel only, not removing the series.

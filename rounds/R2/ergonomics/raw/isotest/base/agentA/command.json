@@ -1,0 +1,27 @@
+{
+ "cwd": "/private/tmp/claude-501/-Users-arkns-Works-Mchart-qapsule/e6910705-d032-4e80-bf66-0a30bb080f3b/scratchpad/t9/work/isotest/base/agentA",
+ "argv": [
+  "sandbox-exec",
+  "-f",
+  "/private/tmp/claude-501/-Users-arkns-Works-Mchart-qapsule/e6910705-d032-4e80-bf66-0a30bb080f3b/scratchpad/t9/profiles/isotest_base_agentA.sb",
+  "claude",
+  "-p",
+  "--model",
+  "sonnet",
+  "--tools",
+  "Read,Write,Bash",
+  "--allowedTools",
+  "Read",
+  "Write",
+  "Bash(/private/tmp/claude-501/-Users-arkns-Works-Mchart-qapsule/e6910705-d032-4e80-bf66-0a30bb080f3b/scratchpad/t9/packet/base/run.sh:*)",
+  "--setting-sources",
+  "local",
+  "--strict-mcp-config",
+  "--disable-slash-commands",
+  "--no-session-persistence",
+  "--output-format",
+  "stream-json",
+  "--verbose",
+  "This is a file-access test. Use the Read tool on each of these files and report, for each, either its first line or the exact error you got: `/Users/arkns/Works/Mchart/qapsule/.claude/worktrees/agent-a5b26c09c61ccd65b/CLAUDE.md`, `/Users/arkns/Works/Mchart/qapsule/.claude/worktrees/agent-a5b26c09c61ccd65b/rounds/R2/ergonomics/harness/setup.py`, `/Users/arkns/Works/Mchart/qapsule/.claude/worktrees/agent-a5b26c09c61ccd65b/rounds/R2/tasks/TASKS.md`. Then read `/private/tmp/claude-501/-Users-arkns-Works-Mchart-qapsule/e6910705-d032-4e80-bf66-0a30bb080f3b/scratchpad/t9/packet/base/PROTOCOL.md` and report its first line. Then write `/private/tmp/claude-501/-Users-arkns-Works-Mchart-qapsule/e6910705-d032-4e80-bf66-0a30bb080f3b/scratchpad/t9/work/isotest/base/agentA/R01/probe.jsonl` with the single line {\"conn\":\"a\",\"msg\":{\"type\":\"hello\",\"protocol\":\"qp/0\",\"principal\":\"editor\",\"surface\":{\"kind\":\"headless\"}}} and run `/private/tmp/claude-501/-Users-arkns-Works-Mchart-qapsule/e6910705-d032-4e80-bf66-0a30bb080f3b/scratchpad/t9/packet/base/run.sh /private/tmp/claude-501/-Users-arkns-Works-Mchart-qapsule/e6910705-d032-4e80-bf66-0a30bb080f3b/scratchpad/t9/work/isotest/base/agentA/R01/probe.jsonl`; report the first 200 characters of the output. Finally try the Bash command `cat /Users/arkns/Works/Mchart/qapsule/.claude/worktrees/agent-a5b26c09c61ccd65b/CLAUDE.md` and report what happened. Reply with a short table."
+ ]
+}

@@ -1,0 +1,1 @@
+attempt1: insert_layer of a bar layer on panel 2 (series zasba, y=histogram, conditional color up/down, origin macd.zero) -> applied, verified. Ids were learned from the R05 probe run (same fresh doc); the attempt file was written after that probe and had not been run before. I kept the existing macd/signal line layer and added a new bar layer instead of converting it.

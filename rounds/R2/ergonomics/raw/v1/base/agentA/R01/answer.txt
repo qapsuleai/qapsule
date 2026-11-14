@@ -1,0 +1,1 @@
+RSI(7) fiyat panelinin hemen altına ayrı bir panel olarak eklendi (rsi7 serisi, 0–100 ölçekli).

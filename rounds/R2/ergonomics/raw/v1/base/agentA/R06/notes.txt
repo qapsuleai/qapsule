@@ -1,0 +1,1 @@
+attempt1: insert_layer rule on panel 1, y '30', color copied from the 70 rule, after t1nui -> applied; origin auto-bound to rsi.oversold. No issues. (Ids are random; I learned them from welcome.summary in an unrecorded exploratory run.)

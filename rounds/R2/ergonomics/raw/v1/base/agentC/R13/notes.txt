@@ -1,0 +1,1 @@
+attempt1: hello + screen(arkin) + list queries; answered the question in one shot. Spec note: ids in the spec examples (px, main, rsi14) differ from the real doc (random ids), had to discover via welcome.summary/screen.

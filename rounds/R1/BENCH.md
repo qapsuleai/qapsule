@@ -55,9 +55,49 @@ macd            1000     69.44     71.00     72.09  d5a6c407256992e6
 bollinger       1000     63.81     64.18     64.68  7e683c082fb95dc9
 ```
 
-Hedeflerin hepsi tutuyor. **Sınırda olanlar:** yerel MACD (41 ms) ve Bollinger (44 ms; en büyük
-koşu 50,3 ms) hedefin %80–90'ında. Yük altında ya da daha yavaş bir çekirdekte 50 ms'yi
-aşabilirler. Gerçek Linux x86_64 sayıları CI'da bilgi amaçlı basılır (`ci.yml`, kapı değil).
+Referans makinede (M4 Max) hedeflerin hepsi tutuyor. **Sınırda olanlar:** yerel MACD (41 ms)
+ve Bollinger (44 ms; en büyük koşu 50,3 ms) hedefin %80–90'ında.
+
+### Gerçek Linux x86_64: GitHub Actions koşucusu (bilgi amaçlı, kapı değil)
+
+CI çalışması https://github.com/qapsuleai/qapsule/actions/runs/43614904957 (commit `96023c0`).
+Koşucu `ubuntu-latest` (ubuntu-26.04), paylaşımlı sanal çekirdek; işlemci modeli günlüğe
+basılmadı. Yerel 7 koşu, WASM Node 22.23.4 (V8 12.4) 15 koşu, medyan ms:
+
+| İndikatör | Linux x86_64 yerel | Hedef < 50 | WASM (Node 22) | Hedef < 150 |
+|-----------|-------------------:|:----------:|---------------:|:-----------:|
+| SMA       | 17,5 | ✅ | 26,9 | ✅ |
+| EMA       | 21,5 | ✅ | 37,3 | ✅ |
+| RSI       | 62,8 | ❌ | 118,3 | ✅ |
+| MACD      | 69,4 | ❌ | **156,6** | ❌ |
+| Bollinger | 72,5 | ❌ | 120,0 | ✅ |
+
+Özetler (son sütun) burada da aarch64 ile birebir aynı.
+
+**Tutmayanlar ve nedenleri:** CI koşucusunda RSI, MACD ve Bollinger yerel 50 ms'yi, MACD ise
+WASM 150 ms'yi aşıyor. Hedefler test olarak gevşetilmedi.
+
+1. Koşucu çekirdeği M4 Max'ten belirgin biçimde yavaş. SMA ve EMA gibi basit hesaplar bile
+   1,2–2,7 kat yavaş; paylaşımlı sanal çekirdek ve bilinmeyen model.
+2. Şerit sayıları yalnızca Apple M4 üzerinde ölçülerek seçildi. x86_64 temel hedefinde
+   (SSE2) 16 vektör yazmacı var, M4'te 32. 4 şeritli RSI ve 2 şeritli MACD/Bollinger
+   x86'da yazmaç taşmasına girebilir. Rosetta ölçümü gerçek x86'yı temsil etmiyor.
+3. MACD ve Bollinger ızgaralarında iş tekrar ediyor:
+   - MACD'de her (fast, slow) çifti için 10 signal değeri var; fast/slow EMA'ları 10 kez
+     hesaplanıyor.
+   - Bollinger'de her periyot için 10 k değeri var; SMA ve std 10 kez hesaplanıyor.
+
+**Öneriler (sırayla):**
+
+- **(a) Ortak alt hesap paylaşımı (bit-eşit):**
+  - MACD'de macd çizgisi (fast, slow) başına bir kez hesaplanır, yalnızca signal EMA'sı
+    varyasyon başına çalışır.
+  - Bollinger'de middle/std periyot başına bir kez hesaplanır, k en sonda uygulanır.
+  - Tek çalıştırmayla aynı işlemler aynı sırada yapıldığından sonuçlar bit-eşit kalır.
+  - Beklenen kazanç: MACD'de işin ~2/3'ü, Bollinger'de ~9/10'u ortadan kalkar.
+- **(b) Hedef mimariye göre şerit ayarı** (`cfg(target_arch)`), x86_64 için gerçek
+  donanımda ölçülerek.
+- **(c)** CI ölçüm adımına `lscpu` çıktısı eklenmeli; sayılar donanıma bağlanabilsin.
 
 ## Bit-eşitlik
 

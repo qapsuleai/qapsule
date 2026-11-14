@@ -60,7 +60,9 @@ persona ve dağıtım ayrı sistemlerdir ve Qapsule'ı tüketir.
 qapsule/
   crates/
     qp-schema/     tipler + JSON Schema üretimi
-    qp-compute/    hesap çekirdeği
+    qp-compute/    hesap çekirdeği (Study, tarama)
+    qp-source/     seri kaynakları (SeriesSource: dosya, sentetik; R6'da canlı)
+    qp-calendar/   borsa takvimleri, saat dilimi tabloları, bar hizası (K14, K16)
     qp-facts/      olgu dedektörleri
     qp-grammar/    görsel gramer
     qp-render/     çizim (headless + GPU)

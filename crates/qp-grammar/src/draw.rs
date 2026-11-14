@@ -60,7 +60,10 @@ impl Geo<'_> {
     }
 
     fn y(&self, v: Option<f64>) -> Option<f64> {
+        let lim = crate::detmath::PX_LIMIT;
         value_y(self.y, v?)
+            .filter(|y| !y.is_nan())
+            .map(|y| y.clamp(-lim, lim))
     }
 
     /// Half width of a slot column (bucket of `k`) for hit boxes.

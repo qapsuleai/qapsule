@@ -39,6 +39,9 @@ const LABEL_PX: f32 = 11.0;
 /// Alpha of emphasis strips (accent) and veils (background).
 const STRIP_ALPHA: u8 = 56;
 const VEIL_ALPHA: u8 = 160;
+/// Hard cap on grid lines per panel, and the largest tick index that is still exact.
+const MAX_TICKS: u32 = 64;
+const MAX_EXACT_TICK: f64 = 4_503_599_627_370_496.0; // 2^52
 
 /// Transient inputs of one compile: frame size, a connection's viewport, transient
 /// emphasis (attention directives, narration steps) and a theme override.
@@ -294,7 +297,7 @@ fn panel_rects(
 fn domain(scale: &Scale, values: &[f64], i: usize) -> Result<(f64, f64), GrammarError> {
     let log = scale.kind == ScaleKind::Log;
     if let Some([a, b]) = scale.domain {
-        if !(a.is_finite() && b.is_finite() && a < b) || (log && a <= 0.0) {
+        if !(a.is_finite() && b.is_finite() && a < b && (b - a).is_finite()) || (log && a <= 0.0) {
             return Err(GrammarError::new(
                 ErrorKind::Invalid,
                 format!("/panels/{i}/y/domain"),
@@ -329,8 +332,18 @@ fn domain(scale: &Scale, values: &[f64], i: usize) -> Result<(f64, f64), Grammar
             detmath::pow10(lhi + span * 0.05),
         ))
     } else {
-        let span = (hi - lo).max(1e-9);
-        Ok((lo - span * 0.05, hi + span * 0.05))
+        // Spans that overflow (values near ±f64::MAX) are clamped so the domain stays
+        // finite; ordinary data takes R0's exact formula.
+        let span = (hi - lo).clamp(1e-9, f64::MAX);
+        let (a, b) = (
+            (lo - span * 0.05).max(-f64::MAX),
+            (hi + span * 0.05).min(f64::MAX),
+        );
+        if a < b && (b - a).is_finite() {
+            return Ok((a, b));
+        }
+        let (a, b) = (a.max(-f64::MAX / 2.0), b.min(f64::MAX / 2.0));
+        Ok(if a < b { (a, b) } else { (0.0, 1.0) })
     }
 }
 
@@ -349,11 +362,22 @@ fn domain_values(pl: &Prepared, out: &mut Vec<f64>) {
 /// Grid values of a panel: linear nice steps (R0), or 1-2-5 × 10^k on a log scale.
 fn ticks(y: &YMap, divs: f64) -> Vec<f64> {
     let linear = |out: &mut Vec<f64>| {
+        // Bounded integer loop (security review): `k += 1.0` stops advancing once
+        // |k| >= 2^53, so the tick index is an integer with a hard cap.
         let step = nice_step((y.max - y.min) / divs);
-        let mut k = (y.min / step).ceil();
-        while k * step <= y.max {
-            out.push(k * step);
-            k += 1.0;
+        if !(step.is_finite() && step > 0.0) {
+            return;
+        }
+        let k0 = (y.min / step).ceil();
+        if !k0.is_finite() || k0.abs() >= MAX_EXACT_TICK {
+            return;
+        }
+        for i in 0..MAX_TICKS {
+            let v = (k0 + f64::from(i)) * step;
+            if v > y.max {
+                break;
+            }
+            out.push(v);
         }
     };
     let mut out = Vec::new();

@@ -103,6 +103,11 @@ pub fn pow10_int(n: i32) -> f64 {
 /// `qp_render::scene::nice_step`).
 #[must_use]
 pub fn nice_step(raw: f64) -> f64 {
+    // Guard (security review): +inf would never leave the first loop; NaN, <= 0 and
+    // subnormal inputs would end with a zero or non-finite step. Callers check the result.
+    if !raw.is_finite() || raw < f64::MIN_POSITIVE * 1e16 {
+        return f64::NAN;
+    }
     let mut mag = 1.0_f64;
     while mag * 10.0 <= raw {
         mag *= 10.0;
@@ -120,7 +125,12 @@ pub fn nice_step(raw: f64) -> f64 {
     } else {
         10.0
     };
-    m * mag
+    let step = m * mag;
+    if step.is_finite() {
+        step
+    } else {
+        f64::NAN
+    }
 }
 
 /// Days since 1970-01-01 to (year, month). Howard Hinnant's `civil_from_days`, integer-only
@@ -141,10 +151,15 @@ pub fn year_month(days: i64) -> (i64, i64) {
 /// Saturating `f64 -> i32` after rounding (Rust `as` saturates; NaN maps to 0).
 #[must_use]
 pub fn px(v: f64) -> i32 {
+    // Clamped to ±2^24 so that the small offsets added to pixel coordinates (labels, hit
+    // boxes) can never overflow `i32`, whatever the data (security review).
     #[allow(clippy::cast_possible_truncation)]
-    let r = v.round() as i32;
+    let r = v.round().clamp(-PX_LIMIT, PX_LIMIT) as i32;
     r
 }
+
+/// Largest pixel coordinate magnitude the compiler emits.
+pub const PX_LIMIT: f64 = 16_777_216.0;
 
 /// A number as the shortest string that parses back to it (`70`, `0.5`), as `qp/0`
 /// writes numeric constants.

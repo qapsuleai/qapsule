@@ -96,4 +96,29 @@ doküman protokolü A2UI'ye taşınmaz. Ajanın A2UI bileşen ağacını yazmas�
 
 ## 4. Uyarlayıcı sonuçları
 
-(Uyarlayıcı tamamlandığında dolduruldu; bkz. aşağıdaki bölüm.)
+`crates/qp-mcp` (T9 alt ajanı; ayrıntı `crates/qp-mcp/NOTES.md`):
+
+- **Araç üretimi:** `qp_schema::json_schema("ClientMsg")`'den, elle tanım olmadan, sabit
+  sırada 37 araç: 22 `op_<işlem>` (işlem şeması `op` etiketi olmadan + `mode`, `base`,
+  `reason`), 10 `query_<tür>`, 5 genel (`command`, `query`, `subscribe`, `unsubscribe`,
+  `attend`). Her girdi şeması yalnızca eriştiği `$defs`'i taşır. Testler: her `Op` ve
+  `Query` türünün bir aracı var; araç şemaları `fixtures/protocol/valid/` örneklerini kabul
+  ediyor. Şemaya yeni bir işlem eklenince araç kendiliğinden çıkar.
+- **MCP sürümü:** 2026-07-28 (araçlar, temel, sürümleme, keşif, stdio, kayıt sayfaları bu
+  oturumda okundu); `initialize` 2025-11-25 yaşam döngüsüne göre de kabul edilir.
+- **Uygunluk:** `qp conform fixtures/protocol/conformance --transport mcp` → **17/17**
+  (her döküm bağlantısı aynı süreç içi oturum üzerinde ayrı bir MCP uyarlayıcısı). Aynı
+  dökümler `inproc` 17/17, `serve` 17/17. T9 ölçümünde 19 döküm (16 resmî + 3 iç) için
+  46 `hello`, 90 `tools/call`, 17 doğrudan adım.
+- **MCP üzerinden taşınmayanlar** (doğrudan oturuma gider): `input` (ham etkileşim
+  çekirdekte), `clock` (yalnızca host), `send_raw` (JSON değil), `hello`'dan önceki
+  mesajlar, kimliği dizge olmayan mesajlar.
+- **Kararlar ve sapmalar:** `_meta` olmayan istekler kabul ediliyor (2026-07-28 `-32602`
+  ile reddetmeyi öngörür; eski ve basit istemciler için gevşek). Olaylar
+  `notifications/message` ile gidiyor; bu yöntem 2026-07-28'de **kullanımdan kalkmış**
+  (yalnızca istemci kayıt düzeyi istediğinde) — doğal yol `subscriptions/listen` + `log`
+  sorgusu, öneri olarak bırakıldı. Protokolün istek kimliği
+  `params._meta["dev.qapsule/id"]`'de; olaylar `_meta["dev.qapsule/order"]` ile
+  otoritenin sırasına geri dizilebilir. `outputSchema` ince tutuldu (`tools/list` ~110 KB).
+- **Sınır:** uyarlayıcı tek iş parçacıklı (`Rc<RefCell<…>>`); HTTP barındırıcısı için
+  `Arc<Mutex<…>>` gerekir.

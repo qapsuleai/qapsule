@@ -5,7 +5,7 @@
 //! ```
 //! Prints one line per study: min / median / max wall time over `reps` runs (after one
 //! warm-up run) and the output digest (identical on every target). Then the RP1 load
-//! profiles B, C and D (`--profiles b,c,d` by default, `--profiles none` to skip).
+//! lane table and profiles B, C and D (`--profiles lanes,b,c,d` by default, `--profiles none` to skip).
 
 use std::time::Instant;
 
@@ -67,7 +67,7 @@ fn main() {
         );
         std::hint::black_box(sink);
     }
-    let profiles = driver::arg("--profiles").unwrap_or_else(|| "b,c,d".to_owned());
+    let profiles = driver::arg("--profiles").unwrap_or_else(|| "lanes,b,c,d".to_owned());
     for p in profiles.split(',') {
         println!();
         match p.trim() {
@@ -75,6 +75,7 @@ fn main() {
             "b" => driver::profile_b(reps),
             "c" => driver::profile_c(reps),
             "d" => driver::profile_d(reps),
+            "lanes" => driver::lane_table(reps),
             _ => {}
         }
     }

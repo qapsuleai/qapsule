@@ -22,17 +22,17 @@ use crate::{ComputeError, Core};
 #[derive(Debug, Clone)]
 pub struct Bollinger {
     /// Holds the committed window (last `period - 1` inputs) and its sum.
-    sma: Sma,
-    k: f64,
-    period: usize,
-    pf: f64,
-    inv_p: f64,
-    inv_pm1: f64,
+    pub(crate) sma: Sma,
+    pub(crate) k: f64,
+    pub(crate) period: usize,
+    pub(crate) pf: f64,
+    pub(crate) inv_p: f64,
+    pub(crate) inv_pm1: f64,
     /// M2 of the committed window.
-    m2: f64,
+    pub(crate) m2: f64,
     /// Last committed input and how many trailing committed inputs equal it.
-    last: f64,
-    run: usize,
+    pub(crate) last: f64,
+    pub(crate) run: usize,
 }
 
 /// One bar of Bollinger output.

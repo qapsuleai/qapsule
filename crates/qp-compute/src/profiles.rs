@@ -61,7 +61,21 @@ pub fn b_series() -> Vec<Vec<f64>> {
 ///
 /// # Panics
 /// Unknown study.
-pub fn b_run(name: &str, series: &[Vec<f64>], mut visit: impl FnMut(usize, &SweepColumns)) {
+pub fn b_run(name: &str, series: &[Vec<f64>], visit: impl FnMut(usize, &SweepColumns)) {
+    let p = default_params(name).expect("known study");
+    let xs: Vec<&[f64]> = series.iter().map(Vec::as_slice).collect();
+    crate::sweep::sweep_series_each(name, &p, &xs, visit).expect("defaults are valid");
+}
+
+/// Profile B as in RP1/T1: one [`sweep_each`] call per series (no series lanes).
+///
+/// # Panics
+/// Unknown study.
+pub fn b_run_baseline(
+    name: &str,
+    series: &[Vec<f64>],
+    mut visit: impl FnMut(usize, &SweepColumns),
+) {
     let p = [default_params(name).expect("known study")];
     for (si, x) in series.iter().enumerate() {
         sweep_each(name, &p, x, |_, c| visit(si, c)).expect("defaults are valid");

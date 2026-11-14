@@ -9,12 +9,12 @@ use crate::{ComputeError, Core};
 /// of the first `period` inputs; after that `x * a + prev * (1 - a)`.
 #[derive(Debug, Clone)]
 pub struct Ema {
-    period: usize,
-    pf: f64,
-    a: f64,
+    pub(crate) period: usize,
+    pub(crate) pf: f64,
+    pub(crate) a: f64,
     n: usize,
     seed_sum: f64,
-    prev: f64,
+    pub(crate) prev: f64,
 }
 
 impl Ema {

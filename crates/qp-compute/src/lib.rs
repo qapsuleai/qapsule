@@ -30,6 +30,7 @@
 
 mod chain;
 mod core;
+mod lanes;
 #[doc(hidden)]
 pub mod profiles;
 pub mod studies;

@@ -22,6 +22,7 @@ mod canon;
 pub mod conform;
 mod error;
 mod expand;
+mod explain;
 mod gops;
 mod locate;
 mod present;
@@ -38,6 +39,7 @@ pub use apply::{
     touched_keys,
 };
 pub use canon::{canon_document, thresholds};
+pub use explain::explain_scene;
 pub use present::profile_for;
 pub use provider::DocProvider;
 pub use qp_grammar::CompileOptions;

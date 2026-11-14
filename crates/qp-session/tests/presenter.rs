@@ -126,7 +126,13 @@ fn show_finding_stores_the_grammar_chart_view() {
         json!([{"op":"show_finding","finding":"fnd-overbought","view":"vp"}]),
     );
     assert_eq!(r["status"], "applied");
-    let stored = h.s.document().views.iter().find(|v| v.id == "vp").unwrap().clone();
+    let stored =
+        h.s.document()
+            .views
+            .iter()
+            .find(|v| v.id == "vp")
+            .unwrap()
+            .clone();
     let prov = h.s.provider();
     let mut rule = depth::chart_view("fnd-overbought", &prov, "vp").unwrap();
     for (i, l) in rule.layers.iter_mut().enumerate() {
@@ -169,10 +175,14 @@ fn presenter_timing() {
         std::hint::black_box(depth::chart_view("fnd-overbought", &prov, "v").unwrap());
     });
     bench("depth::present sentence (watch)", 100_000, &mut || {
-        std::hint::black_box(depth::present("fnd-overbought", Depth::Chart, &watch, &prov).unwrap());
+        std::hint::black_box(
+            depth::present("fnd-overbought", Depth::Chart, &watch, &prov).unwrap(),
+        );
     });
     bench("depth::present capsule (phone)", 100_000, &mut || {
-        std::hint::black_box(depth::present("fnd-overbought", Depth::Chart, &phone, &prov).unwrap());
+        std::hint::black_box(
+            depth::present("fnd-overbought", Depth::Chart, &phone, &prov).unwrap(),
+        );
     });
     bench("depth::present chart (desktop)", 100_000, &mut || {
         std::hint::black_box(
@@ -193,13 +203,16 @@ fn presenter_timing() {
         }
     }
     let (m, p99) = median(t);
-    rows.push(format!("| show_finding end to end (session) | 3000 | {m} | {p99} |"));
+    rows.push(format!(
+        "| show_finding end to end (session) | 3000 | {m} | {p99} |"
+    ));
     let mut q = H::new();
     q.hello("d", "arkin", "desktop");
     q.hello("p", "arkin", "phone");
     for (conn, name) in [("d", "desktop chart"), ("p", "phone capsule")] {
-        let line = json!({"type":"query","id":"q","query":{"kind":"present","finding":"fnd-overbought"}})
-            .to_string();
+        let line =
+            json!({"type":"query","id":"q","query":{"kind":"present","finding":"fnd-overbought"}})
+                .to_string();
         let mut t = Vec::new();
         for i in 0..20_000 + 1000 {
             let st = Instant::now();

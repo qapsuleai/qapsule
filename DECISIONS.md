@@ -15,12 +15,13 @@
 | K9 | 2026-11-14 | Önce kapsül, sonra profesyonel çalışma alanı. | Çekirdeği en az arayüzle sınar; boş alanda başlar. |
 | K10 | 2026-11-14 | Geliştirme Claude Code'da round'lar halinde yürür; ana akış ve round tasarımı ayrı oturumda takip edilir. Süreklilik bu repodaki dosyalardadır. | Oturumlar arası hafıza yok. |
 | K11 | 2026-11-14 | Proje adı **Qapsule**; paket öneki `qp-`, komut satırı `qp`. Birim adı dokümanda "kapsül", kodda `Capsule`. | Q ailesine uyumlu, uluslararası kullanıma uygun, icadın kendisini adlandırıyor. Marka ön taraması ve alan adı alımı bekliyor; sonuç olumsuzsa ad değişir. |
+| K12 | 2026-11-14 | **A1 kapandı — çizim yığını.** (1) Referans/headless çizici: tiny-skia 0.12 + fontdue 0.9 + tamsayı metin birleştirici + gömülü OFL font (IBM Plex Mono); `qp render`, altın görseller ve tarayıcıdaki wasm aynı kod. (2) Etkileşimli GPU yolu: vello 0.12 (wgpu) + WebGPU, **yalnızca MSAA** kipinde, R2'de etkileşimle birlikte eklenir; GPU çıktısı referansa karşı toleransla test edilir, bayt eşitliğiyle değil. (3) Yedek zinciri: WebGPU → CPU wasm; ayrı WebGL2 katmanı yok. (4) vello_cpu alınmadı. | Ölçüm (R0/T3, `crates/qp-render/SPIKE.md`, Apple M4 Max): A yolu aarch64, x86_64 (Rosetta; SSE2 ve AVX2/FMA), wasm32 skaler/simd128'de bit-eşit, tarayıcı canvas ↔ altın 0 px, PNG baytları aynı; 100k bar yerel 38 ms / tarayıcı 80 ms; wasm 363 KB gzip. vello_cpu 100k bar 16,7 ms ama mimariler arası ±1 kayma (stres sahnesi 8 px). vello GPU 100k bar 8–9 ms yerel / 37 ms tarayıcı, ama Area AA çalıştırmalar arası deterministik değil (31'de 3 farklı çıktı), MSAA8/16 deterministik ve Metal ↔ WebGPU 0 px; soğuk boru hattı ~1,5 sn. Açık risk: gerçek x86/Linux donanımında ilk ölçüm CI'da yapılacak. |
 
 ## Açık kararlar
 
 | # | Konu | Ne zaman | Not |
 |---|------|----------|-----|
-| A1 | Çizim yığını (GPU kütüphanesi, referans yazılım çizici, WebGPU + yedek) | R0 denemesi | Karar kanıtla verilir, varsayımla değil. |
+| A1 | Çizim yığını — **KAPANDI** | R0 | K12'ye taşındı; kanıt `crates/qp-render/SPIKE.md`. |
 | A2 | Qapsule adı için marka ön taraması (TÜRKPATENT, EUIPO, USPTO) ve `qapsule.com` alımı | R1 öncesi | Alan adı 2026-11-14 itibarıyla Afternic'te satılık, hemen al fiyatı 4.995 USD. Önce tarama, sonra alım. |
 | A3 | Ajanın yazacağı hesap/görünüm dili (kendi küçük dilimiz mi, sandbox'ta WASM mı) | R5 öncesi | Pine uyumluluğu hedef değil. |
 | A4 | Yatırım tavsiyesi sınırı ve denetim izi gereksinimleri | R3 öncesi | Hukuk ekibiyle netleştirilecek. |

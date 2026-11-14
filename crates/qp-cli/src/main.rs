@@ -1,5 +1,5 @@
-//! `qp` command line: a thin shell over `qp-schema`, `qp-source`, `qp-compute` and
-//! `qp-render`.
+//! `qp` command line: a thin shell over `qp-schema`, `qp-source`, `qp-compute`,
+//! `qp-render` and `qp-session`.
 //!
 //! It only parses arguments, reads/writes files and calls the libraries.
 
@@ -38,6 +38,31 @@ enum Command {
         /// Image height in pixels.
         #[arg(long, default_value_t = qp_render::DEFAULT_HEIGHT)]
         height: u32,
+    },
+    /// Run the protocol authority (`qp/0`) over stdin/stdout: one JSON line per message,
+    /// `{"conn":…,"msg":…}` in and out (docs/PROTOCOL.md §3).
+    Serve {
+        /// Session init (`SessionInit` JSON).
+        #[arg(long)]
+        init: PathBuf,
+        /// Directory that document paths in the init are relative to (and confined to).
+        #[arg(long, default_value = ".")]
+        root: PathBuf,
+        /// After the outputs of each input line, write `{"batch_end":true}`.
+        #[arg(long)]
+        batch_end: bool,
+    },
+    /// Run protocol conformance transcripts (docs/PROTOCOL.md §15).
+    Conform {
+        /// Transcript files or directories of `*.json` transcripts.
+        #[arg(required = true)]
+        inputs: Vec<PathBuf>,
+        /// Transport: `inproc` (default) or `serve` (spawns `qp serve`).
+        #[arg(long, default_value = "inproc")]
+        transport: String,
+        /// Repository root (paths in transcripts are relative to it).
+        #[arg(long, default_value = ".")]
+        root: PathBuf,
     },
 }
 
@@ -134,6 +159,16 @@ fn run(command: Command) -> Result<Outcome, String> {
             width,
             height,
         } => render(&input, &out, width, height),
+        Command::Serve {
+            init,
+            root,
+            batch_end,
+        } => serve(&init, &root, batch_end),
+        Command::Conform {
+            inputs,
+            transport,
+            root,
+        } => conform(&inputs, &transport, &root),
     }
 }
 
@@ -340,4 +375,68 @@ fn render(input: &Path, out: &Path, width: u32, height: u32) -> Result<Outcome, 
     let png = qp_render::render_png(&bars, width, height).map_err(|e| e.to_string())?;
     std::fs::write(out, png).map_err(|e| format!("cannot write {}: {e}", out.display()))?;
     Ok(Outcome::Ok)
+}
+
+fn serve(init: &Path, root: &Path, batch_end: bool) -> Result<Outcome, String> {
+    use std::io::{BufRead, Write};
+    let init: qp_schema::protocol::SessionInit = qp_session::read_json(init)?;
+    let mut session = qp_session::Session::new(init, root)?;
+    let stdin = std::io::stdin();
+    let stdout = std::io::stdout();
+    let mut out = stdout.lock();
+    for line in stdin.lock().lines() {
+        let line = line.map_err(|e| format!("stdin: {e}"))?;
+        if line.trim().is_empty() {
+            continue;
+        }
+        for o in session.handle_frame(&line) {
+            let text = serde_json::to_string(&o).map_err(|e| e.to_string())?;
+            writeln!(out, "{text}").map_err(|e| format!("stdout: {e}"))?;
+        }
+        if batch_end {
+            writeln!(out, "{{\"batch_end\":true}}").map_err(|e| format!("stdout: {e}"))?;
+        }
+        out.flush().map_err(|e| format!("stdout: {e}"))?;
+    }
+    Ok(Outcome::Ok)
+}
+
+fn conform(inputs: &[PathBuf], transport: &str, root: &Path) -> Result<Outcome, String> {
+    use qp_session::conform::{collect_files, run_file, TransportKind};
+    let kind = match transport {
+        "inproc" => TransportKind::InProc,
+        "serve" => TransportKind::Serve(
+            std::env::current_exe().map_err(|e| format!("cannot locate qp: {e}"))?,
+        ),
+        other => {
+            return Err(format!(
+                "unknown transport `{other}`; expected inproc or serve"
+            ))
+        }
+    };
+    let files = collect_files(inputs)?;
+    if files.is_empty() {
+        return Err("no transcripts found".to_owned());
+    }
+    let mut failed = 0;
+    for f in &files {
+        let o = run_file(f, root, &kind);
+        match &o.failure {
+            None => println!("PASS {}", o.name),
+            Some(why) => {
+                failed += 1;
+                println!("FAIL {}: {why}", o.name);
+            }
+        }
+    }
+    println!(
+        "{} transcript(s), {} passed, {failed} failed ({transport})",
+        files.len(),
+        files.len() - failed
+    );
+    Ok(if failed == 0 {
+        Outcome::Ok
+    } else {
+        Outcome::Invalid
+    })
 }

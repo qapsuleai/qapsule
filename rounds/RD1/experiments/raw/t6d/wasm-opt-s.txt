@@ -1,0 +1,75 @@
+# T6d hand-over experiment
+target = wasm32
+config = bars 10000 live_secs 60 ticks/s 60 reps 15
+doc.digest = bac5776765c047fb
+doc.last_bar_t = 2606601600000
+feed.ticks = 3600
+
+## 1. snapshot (server)
+snapshot.query_and_serialize_ms = median 3.134 min 3.111
+snapshot.serialize_doc_only_ms = median 2.971 min 2.943
+snapshot.vs_max_message_bytes = 749600 / 1048576 (fits)
+snapshot.rows_json.bytes = 749600 raw, 210638 gzip (28.1%), gzip_ms 32.65
+snapshot.columnar_json.bytes = 489554 raw, 170289 gzip (34.8%), gzip_ms 26.63
+snapshot.columnar_dt_json.bytes = 439602 raw, 136241 gzip (31.0%), gzip_ms 21.44
+snapshot.px_bars_only_json.bytes = 747067 raw, 209159 gzip (28.0%), gzip_ms 31.26
+snapshot.doc_without_bars_json.bytes = 2459 raw, 928 gzip (37.7%), gzip_ms 0.04
+snapshot.precomputed_study_outputs_json.bytes = 1942518 raw, 768955 gzip (39.6%), gzip_ms 83.90
+
+## 2. device ready (A)
+ready.parse_snapshot_ms = median 3.371
+ready.session_new_ms = median 0.257 (incl. doc clone 0.041, schema build, 2 hellos)
+ready.attach_studies_extend_ms = median 0.146 (3 studies, state only)
+ready.attach_studies_run_all_outputs_ms = median 0.452 (3 studies, all outputs kept)
+ready.C_parse_precomputed_outputs_ms = median 2.979
+ready.total_A_ms = 3.814 (parse + session + extend) ; with all outputs 4.121
+ready.total_B_mirror_ms = 3.371 (parse only; values come from the server)
+
+## 3. live on the device (A)
+liveA.feed_upstream_bytes_per_tick = 159 (feed -> authority, same in A and B)
+liveA.ref_session.per_tick_us = mean 184.6 p50 182.8 p99 205.2 max 2290.0
+liveA.ref_session.append_vs_update_us = append mean 225.5 ; update mean 183.9
+liveA.ref_session.cpu_share_at_60_per_s = 1.11% of one core (total 665.5 ms for 60 s of feed)
+liveA.ref_session.log_entries = 3600
+liveA.incremental.per_tick_us = mean 0.27 (best of runs, no parse) ; with parse: mean 1.26 p50 1.17 p99 2.21 max 120.17
+liveA.incremental.cpu_share_at_60_per_s = 0.0016% of one core
+liveA.speedup_incremental_vs_ref = 696x
+det.A.doc_digest.ref_session = 82c59895ce97b470
+det.A.doc_digest.incremental = 82c59895ce97b470 (equal: true)
+det.A.log_digest = ref 717b9f1a76c97b67 incremental 717b9f1a76c97b67 (equal: true)
+det.A.study_values = streaming af779fd08f6f97a4 batch af779fd08f6f97a4 (bit-equal over all 10060 bars x 8 outputs: true)
+liveA.capsules_after = cap-overbought:Live
+liveA.engine_entries = 0
+
+## 4. live via the server (B)
+liveB.fanout_serialize_notify_us = 0.74 per device per tick
+liveB.down_change_bytes = 249/tick, 14945 B/s
+liveB.v0_values_by_query = down 672/tick + up 272/tick ; total B/s down 55236 up 16320
+liveB.push_values_hypothetical = 544/tick ; total down B/s 47556
+liveB.mirror_with_local_compute = down B/s 14945 (change events only)
+liveB.server_us_per_tick_per_device = feed 188.9 + 3 study queries 366.6 = 555.5 ; 3.33% of a core per device
+liveB.device_us_per_tick = mean 7.17 p99 12.38 (parse + apply change + parse 3 results)
+det.B.doc_digest = server 82c59895ce97b470 mirror 82c59895ce97b470 A-device 82c59895ce97b470 (all equal: true)
+det.B.last_values_server_vs_A_device = 8 values bit-equal: true
+
+## 5. offline and reconnect
+handback.edits_only.entries = 20
+handback.edits_only.log_json.bytes = 12571 raw, 1070 gzip (8.5%), gzip_ms 0.09
+handback.edits_only.final_snapshot_json.bytes = 750939 raw, 210668 gzip (28.1%), gzip_ms 31.61
+handback.edits_only.server_replay_ms = median 0.048 min 0.048 ; digest equal to device: true
+handback.edits_only.server_parse_log_ms = median 0.069
+handback.edits_and_local_feed.entries = 3620
+handback.edits_and_local_feed.log_json.bytes = 1759367 raw, 95204 gzip (5.4%), gzip_ms 14.10
+handback.edits_and_local_feed.final_snapshot_json.bytes = 755496 raw, 211925 gzip (28.1%), gzip_ms 32.18
+handback.edits_and_local_feed.server_replay_ms = median 0.307 min 0.297 ; digest equal to device: true
+handback.edits_and_local_feed.server_parse_log_ms = median 7.838
+handback.edits_and_local_feed.compacted.entries = 140
+handback.edits_and_local_feed.compacted.log_json.bytes = 66357 raw, 5695 gzip (8.6%), gzip_ms 0.61
+handback.edits_and_local_feed.compacted.replay_digest_equal = true
+handback.rebase_buffered_feed.device_had_no_feed = naive re-apply of 3600 buffered ticks: 0 errors, 668.1 ms
+handback.rebase_buffered_feed.device_had_no_feed.dedupe_by_t = skipped 0, errors 0
+handback.rebase_buffered_feed.device_had_same_feed = naive re-apply of 3600 buffered ticks: 3541 errors, 186.5 ms
+handback.rebase_buffered_feed.device_had_same_feed.dedupe_by_t = skipped 3541, errors 0
+fork.server_epoch0_vs_device_epoch1 = doc digests 7ef11778743ecb41 vs 01dba2171c08872b ; ids touched by both lineages: ["macd", "px"]
+offlineB.queue_with_base.single_base = 20 queued (2601 bytes): applied 1, conflict 11, other errors 8, 5.16 ms
+offlineB.queue_with_base.per_item_base = 20 queued (2655 bytes): applied 19, conflict 1, other errors 0, 4.33 ms

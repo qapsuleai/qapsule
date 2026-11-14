@@ -1,0 +1,27 @@
+[package]
+name = "t6d-handover"
+description = "RD1/T6d experiment: hand-over of authority (K21-3) vs server authority with a thin mirror."
+version = "0.0.0"
+edition = "2021"
+publish = false
+
+# Not a member of the main workspace.
+[workspace]
+
+[dependencies]
+qp-schema = { path = "../../crates/qp-schema" }
+qp-session = { path = "../../crates/qp-session" }
+qp-compute = { path = "../../crates/qp-compute" }
+serde = "1.0.229"
+serde_json = { version = "1.0.154", features = ["float_roundtrip"] }
+flate2 = { version = "1", default-features = false, features = ["rust_backend"] }
+
+[profile.release]
+lto = "thin"
+codegen-units = 1
+
+# Same as the main workspace's `wasm` profile.
+[profile.wasm]
+inherits = "release"
+opt-level = "s"
+lto = "fat"

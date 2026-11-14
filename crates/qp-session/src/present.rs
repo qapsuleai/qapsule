@@ -1,7 +1,8 @@
 //! The deterministic presenter (`docs/PROTOCOL.md` §10.2, §10.3).
 
-use qp_schema::protocol::{Presentation, Profile, SeriesValues, SurfaceKind};
-use qp_schema::{Depth, Document, Finding, Layer, Mark, Scale, ScaleKind, View};
+use qp_schema::grammar::{Emphasis, EmphasisKind, Origin, Position};
+use qp_schema::protocol::{Presentation, Profile, SeriesValues, SurfaceKind, Target};
+use qp_schema::{Depth, Document, Finding, Layer, Mark, Panel, Scale, ScaleKind, View};
 
 use crate::error::num;
 use crate::values::{bar_series, values, Cache};
@@ -38,9 +39,12 @@ pub(crate) fn rank(d: Depth) -> u8 {
     }
 }
 
-/// The view the presenter builds for a finding: panel 0 candles of the first fact's bar
-/// series; if the fact is on a study series, panel 1 its line and a rule at
-/// `evidence.level`; `x.domain = [t(max(0, bar - 30)), t(last bar)]`; linear y scales.
+/// The view the presenter builds for a finding (`docs/GRAMMAR.md` §13, `chart` row), in
+/// canonical form: panel 0 candles of the first fact's bar series; if the fact is on a
+/// study series, panel 1 its line and a rule at `evidence.level` whose origin is the
+/// fact (`y` keeps the `qp/0` string form, `"70"`); `x.domain = [t(max(0, bar - 30)),
+/// t(last bar)]`; a `highlight` emphasis on the fact; linear value scales; layer ids
+/// `l0`, `l1`, `l2`.
 ///
 /// # Errors
 /// The finding has no facts, or its first fact's series has no bars.
@@ -63,18 +67,37 @@ pub(crate) fn presenter_view(doc: &Document, finding: &Finding, id: &str) -> Res
     let from = usize::try_from(fact.bar.saturating_sub(30))
         .unwrap_or(0)
         .min(bars.len() - 1);
+    let panel = |pid: u32| Panel {
+        id: Some(pid),
+        name: None,
+        weight: None,
+        y: Scale {
+            id: Some(format!("y{pid}")),
+            ..Scale::new(ScaleKind::Linear)
+        },
+    };
     let mut candles = Layer::new(Mark::Candle, 0);
+    candles.id = Some("l0".to_owned());
     candles.series = Some(bs.id.clone());
     let mut layers = vec![candles];
-    let mut panels = 1;
+    let mut panels = vec![panel(0)];
     if fact.series != bs.id {
-        panels = 2;
+        panels.push(panel(1));
         let mut line = Layer::new(Mark::Line, 1);
+        line.id = Some("l1".to_owned());
         line.series = Some(fact.series.clone());
         layers.push(line);
         if let Some(level) = fact.evidence.get("level") {
             let mut rule = Layer::new(Mark::Rule, 1);
-            rule.encoding.y = Some(qp_schema::grammar::Position::Name(num(*level)));
+            rule.id = Some("l2".to_owned());
+            rule.encoding.y = Some(Position::Name(num(*level)));
+            rule.origin.insert(
+                "/encoding/y".to_owned(),
+                Origin::Fact {
+                    fact: fact.id.clone(),
+                    field: "level".to_owned(),
+                },
+            );
             layers.push(rule);
         }
     }
@@ -86,13 +109,20 @@ pub(crate) fn presenter_view(doc: &Document, finding: &Finding, id: &str) -> Res
         display_tz: None,
         x: Scale {
             domain: Some(domain),
+            id: Some("x".to_owned()),
             ..Scale::new(ScaleKind::Time)
         },
-        y: (0..panels).map(|_| Scale::new(ScaleKind::Linear)).collect(),
+        y: Vec::new(),
         layers,
         theme: None,
-        panels: Vec::new(),
-        emphasis: Vec::new(),
+        panels,
+        emphasis: vec![Emphasis {
+            target: Target {
+                item: Some(fact.id.clone()),
+                ..Target::default()
+            },
+            kind: EmphasisKind::Highlight,
+        }],
     })
 }
 

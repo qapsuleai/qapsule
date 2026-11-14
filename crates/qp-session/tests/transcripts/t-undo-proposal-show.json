@@ -136,12 +136,20 @@
        "collection": "views",
        "item": {
         "id": "view-1-0",
-        "y": [
+        "panels": [
          {
-          "kind": "linear"
+          "id": 0,
+          "y": {
+           "kind": "linear",
+           "id": "y0"
+          }
          },
          {
-          "kind": "linear"
+          "id": 1,
+          "y": {
+           "kind": "linear",
+           "id": "y1"
+          }
          }
         ]
        }

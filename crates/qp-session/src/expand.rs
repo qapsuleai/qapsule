@@ -5,6 +5,7 @@
 
 use std::collections::{BTreeMap, BTreeSet};
 
+use qp_schema::grammar::{ColorSpec, Operand, Origin, Panel, Position};
 use qp_schema::protocol::{
     ChangeOp, ErrorCode, LogEntry, Narrative, Op, ProposalState, Seq, Show, Target,
 };
@@ -14,8 +15,10 @@ use qp_schema::{
     View,
 };
 
-use crate::apply::{all_ids, apply_all, find_collection, touched_ids};
+use crate::apply::{all_ids, apply_all, find_collection, first_overlap, touched_keys};
+use crate::canon::{canon_view, limit_panels};
 use crate::error::{invalid, num, ptr, PResult, E};
+use crate::gops::{expand_grammar, layer_in_use, new_layer};
 use crate::values::{bar_series, bars_of, condition_series, find_series, study_outputs};
 
 /// Who writes, when, and how ids are numbered.
@@ -251,33 +254,11 @@ fn check_study(
     }
 }
 
-/// The change that puts `layer` into `view` at `index` (appended if absent): an
-/// `insert_layer`, or a `put_view` when the layer's panel needs new y scales.
-fn layer_change(view: &View, index: Option<u32>, layer: Layer) -> ChangeOp {
-    let idx = index.unwrap_or(u32::try_from(view.layers.len()).unwrap_or(u32::MAX));
-    if (layer.panel as usize) < view.y.len() {
-        ChangeOp::InsertLayer {
-            view: view.id.clone(),
-            index: idx,
-            layer,
-        }
-    } else {
-        let mut v = view.clone();
-        while v.y.len() <= layer.panel as usize {
-            v.y.push(Scale::new(ScaleKind::Linear));
-        }
-        v.layers.insert(idx as usize, layer);
-        ChangeOp::PutView {
-            view: v,
-            index: None,
-        }
-    }
-}
-
 fn check_target(doc: &Document, t: &Target, path: &str) -> PResult<()> {
     if let Some(v) = &t.view {
         need_view(doc, v, &ptr(path, "view"))?;
     }
+    check_target_layer(doc, t, path)?;
     if let Some(s) = &t.series {
         need_series(doc, s, &ptr(path, "series"))?;
     }
@@ -433,10 +414,36 @@ pub(crate) fn expand_op(
                 series,
                 index: None,
             }];
-            if let Some((view, panel)) = show_view {
+            if let Some((view, panel, new_panel)) = show_view {
+                let mut scratch = doc.clone();
+                apply_all(&mut scratch, &out).map_err(|m| invalid(m, p))?;
+                let mut v = view.clone();
+                if new_panel {
+                    let pn = Panel {
+                        id: Some(panel),
+                        name: None,
+                        weight: None,
+                        y: Scale {
+                            id: Some(format!("y{panel}")),
+                            ..Scale::new(ScaleKind::Linear)
+                        },
+                    };
+                    out.push(ChangeOp::PutPanel {
+                        view: v.id.clone(),
+                        index: u32::try_from(v.panels.len()).unwrap_or(u32::MAX),
+                        panel: pn.clone(),
+                    });
+                    v.panels.push(pn);
+                }
                 let mut layer = Layer::new(Mark::Line, panel);
                 layer.series = Some(sid);
-                out.push(layer_change(view, None, layer));
+                let index = v.layers.len();
+                let l = new_layer(&scratch, &v, &layer, index, &ptr(p, "show"))?;
+                out.push(ChangeOp::InsertLayer {
+                    view: v.id.clone(),
+                    index: u32::try_from(index).unwrap_or(u32::MAX),
+                    layer: l,
+                });
             }
             Ok(out)
         }
@@ -507,37 +514,17 @@ pub(crate) fn expand_op(
                     .build())
                 }
             }
-            for (j, l) in view.layers.iter().enumerate() {
-                let lp = ptr(&ptr(&vp, "layers"), j);
-                if let Some(s) = &l.series {
-                    need_series(doc, s, &ptr(&lp, "series"))?;
-                }
-                if l.panel as usize >= view.y.len() {
-                    return Err(E::new(
-                        ErrorCode::Invalid,
-                        format!(
-                            "panel {} has no y scale (the view has {})",
-                            l.panel,
-                            view.y.len()
-                        ),
-                    )
-                    .at(ptr(&lp, "panel"))
-                    .build());
-                }
-            }
+            let canonical = canon_view(doc, view, &vp)?;
             if !doc.views.iter().any(|v| v.id == view.id) {
                 ctx.note_created(&view.id);
             }
             Ok(vec![ChangeOp::PutView {
-                view: view.clone(),
+                view: canonical,
                 index: None,
             }])
         }
         Op::AddLayer { view, layer, index } => {
             let v = need_view(doc, view, &ptr(p, "view"))?;
-            if let Some(s) = &layer.series {
-                need_series(doc, s, &ptr(&ptr(p, "layer"), "series"))?;
-            }
             if let Some(i) = index {
                 if *i as usize > v.layers.len() {
                     return Err(E::new(
@@ -549,7 +536,13 @@ pub(crate) fn expand_op(
                     .build());
                 }
             }
-            Ok(vec![layer_change(v, *index, layer.clone())])
+            let at = index.map_or(v.layers.len(), |i| i as usize);
+            let l = new_layer(doc, v, layer, at, &ptr(p, "layer"))?;
+            Ok(vec![ChangeOp::InsertLayer {
+                view: view.clone(),
+                index: u32::try_from(at).unwrap_or(u32::MAX),
+                layer: l,
+            }])
         }
         Op::RemoveLayer { view, index } => {
             let v = need_view(doc, view, &ptr(p, "view"))?;
@@ -562,8 +555,12 @@ pub(crate) fn expand_op(
                 .expected([format!("0..={}", v.layers.len().saturating_sub(1))])
                 .build());
             }
+            let l = &v.layers[*index as usize];
+            if let Some(id) = &l.id {
+                layer_in_use(v, id, &ptr(p, "index"))?;
+            }
             Ok(vec![ChangeOp::DeleteLayer {
-                layer: None,
+                layer: l.id.clone(),
                 view: view.clone(),
                 index: *index,
             }])
@@ -870,6 +867,7 @@ pub(crate) fn expand_op(
             };
             let built = crate::present::presenter_view(doc, f, &vid)
                 .map_err(|m| invalid(m, ptr(p, "finding")))?;
+            let built = canon_view(doc, &built, &ptr(p, "finding"))?;
             let mut out = vec![ChangeOp::PutView {
                 view: built,
                 index: None,
@@ -952,7 +950,7 @@ pub(crate) fn expand_op(
                 bar: bar.clone(),
             }])
         }
-        Op::Undo { seq } => expand_undo(*seq, p, ctx),
+        Op::Undo { seq } => expand_undo(doc, *seq, p, ctx),
         Op::InsertLayer { .. }
         | Op::DeleteLayer { .. }
         | Op::MoveLayer { .. }
@@ -962,12 +960,7 @@ pub(crate) fn expand_op(
         | Op::MovePanel { .. }
         | Op::SetPanel { .. }
         | Op::SetScale { .. }
-        | Op::SetEmphasis { .. } => Err(E::new(
-            ErrorCode::Unsupported,
-            "grammar operations are not implemented yet (R2/T5)",
-        )
-        .at(p.to_owned())
-        .build()),
+        | Op::SetEmphasis { .. } => expand_grammar(doc, op, p, ctx),
         Op::RejectProposal { proposal, note } => {
             let pr = need_proposal(doc, proposal, &ptr(p, "proposal"))?;
             let mut np = pr.clone();
@@ -1041,10 +1034,15 @@ fn inline_bars(s: &Series) -> Option<&[qp_schema::Bar]> {
     }
 }
 
-/// Validates `show` and returns the view and the panel.
-fn check_show<'a>(doc: &'a Document, sh: &Show, p: &str) -> PResult<(&'a View, u32)> {
+/// Validates `show` and returns the view, the panel id and whether the panel is new
+/// (`with`: that series' panel; `panel`: an existing panel id, or the next id to add a
+/// panel; neither: a new panel with the next id, at the bottom).
+fn check_show<'a>(doc: &'a Document, sh: &Show, p: &str) -> PResult<(&'a View, u32, bool)> {
     let v = need_view(doc, &sh.view, &ptr(p, "view"))?;
-    let max_panel = v.layers.iter().map(|l| l.panel).max();
+    let next = match v.panels.iter().filter_map(|x| x.id).max() {
+        None => Some(0),
+        Some(m) => m.checked_add(1),
+    };
     if let Some(w) = &sh.with {
         need_series(doc, w, &ptr(p, "with"))?;
         let Some(l) = v.layers.iter().find(|l| l.series.as_deref() == Some(w)) else {
@@ -1061,22 +1059,111 @@ fn check_show<'a>(doc: &'a Document, sh: &Show, p: &str) -> PResult<(&'a View, u
             )
             .build());
         };
-        return Ok((v, l.panel));
+        return Ok((v, l.panel, false));
     }
+    let new_panel = |id: Option<u32>, path: &str| -> PResult<(&'a View, u32, bool)> {
+        let id = id.ok_or_else(|| invalid("no panel id is left above the largest one", path))?;
+        limit_panels(v, 1, path)?;
+        Ok((v, id, true))
+    };
     if let Some(panel) = sh.panel {
-        let limit = max_panel.map_or(0, |m| m + 1);
-        if panel > limit {
-            return Err(E::new(
-                ErrorCode::Invalid,
-                format!("panel {panel} does not exist; the next new panel is {limit}"),
-            )
-            .at(ptr(p, "panel"))
-            .expected([format!("0..={limit}")])
-            .build());
+        if v.panel(panel).is_some() {
+            return Ok((v, panel, false));
         }
-        return Ok((v, panel));
+        if Some(panel) == next {
+            return new_panel(next, &ptr(p, "panel"));
+        }
+        let mut expected: Vec<String> = v
+            .panels
+            .iter()
+            .filter_map(|x| x.id)
+            .map(|i| i.to_string())
+            .collect();
+        if let Some(n) = next {
+            expected.push(format!("{n} (new panel)"));
+        }
+        return Err(E::new(
+            ErrorCode::Invalid,
+            format!(
+                "panel {panel} does not exist in view `{}`; the next new panel is {}",
+                sh.view,
+                next.map_or_else(|| "none".to_owned(), |n| n.to_string())
+            ),
+        )
+        .at(ptr(p, "panel"))
+        .expected(expected)
+        .build());
     }
-    Ok((v, max_panel.map_or(0, |m| m + 1)))
+    new_panel(next, p)
+}
+
+/// Whether a layer refers to series `id` other than through its `series` field (a field
+/// of another series in a channel, or a `series` origin).
+fn layer_refs_series(l: &Layer, id: &str) -> bool {
+    let pos = |p: &Option<Position>| matches!(p, Some(Position::Ref(r)) if r.series.as_deref() == Some(id));
+    let e = &l.encoding;
+    pos(&e.x)
+        || pos(&e.y)
+        || pos(&e.y2)
+        || matches!(&e.color, Some(ColorSpec::When(w))
+            if matches!(&w.when.than, Operand::Ref(r) if r.series.as_deref() == Some(id)))
+        || l.origin
+            .values()
+            .any(|o| matches!(o, Origin::Series { series, .. } if series == id))
+}
+
+/// Views whose layers or emphasis depend on item `id` (beyond layers drawing series
+/// `id`, which are removed with it).
+fn view_deps(doc: &Document, id: &str) -> BTreeSet<String> {
+    let mut out = BTreeSet::new();
+    for v in &doc.views {
+        let layer_dep = v.layers.iter().any(|l| {
+            l.fact.as_deref() == Some(id)
+                || l.finding.as_deref() == Some(id)
+                || layer_refs_series(l, id)
+                || l.origin
+                    .values()
+                    .any(|o| matches!(o, Origin::Fact { fact, .. } if fact == id))
+        });
+        let drawn: BTreeSet<&str> = v
+            .layers
+            .iter()
+            .filter(|l| l.series.as_deref() == Some(id))
+            .filter_map(|l| l.id.as_deref())
+            .collect();
+        let emph_dep = v.emphasis.iter().any(|e| {
+            e.target.item.as_deref() == Some(id)
+                || e.target.series.as_deref() == Some(id)
+                || e.target.layer.as_deref().is_some_and(|l| drawn.contains(l))
+        });
+        if layer_dep || emph_dep {
+            out.insert(v.id.clone());
+        }
+    }
+    out
+}
+
+/// Checks a target's `layer` against its view (or any view when no view is given).
+fn check_target_layer(doc: &Document, t: &Target, path: &str) -> PResult<()> {
+    let Some(l) = &t.layer else { return Ok(()) };
+    let views: Vec<&View> = match &t.view {
+        Some(v) => doc.views.iter().filter(|x| &x.id == v).collect(),
+        None => doc.views.iter().collect(),
+    };
+    if views.iter().any(|v| v.layer(l).is_some()) {
+        return Ok(());
+    }
+    Err(
+        E::new(ErrorCode::NotFound, format!("layer `{l}` does not exist"))
+            .at(ptr(path, "layer"))
+            .dym(
+                l,
+                views
+                    .iter()
+                    .flat_map(|v| v.layers.iter().filter_map(|x| x.id.as_deref())),
+            )
+            .build(),
+    )
 }
 
 fn expand_remove(doc: &Document, id: &str, p: &str) -> PResult<Vec<ChangeOp>> {
@@ -1146,6 +1233,9 @@ fn expand_remove(doc: &Document, id: &str, p: &str) -> PResult<Vec<ChangeOp>> {
         }
         C::Capsules | C::Intents | C::Narratives => {}
     }
+    if matches!(coll, C::Series | C::Facts | C::Findings) {
+        deps.extend(view_deps(doc, id));
+    }
     if !deps.is_empty() {
         return Err(E::new(
             ErrorCode::InUse,
@@ -1165,7 +1255,7 @@ fn expand_remove(doc: &Document, id: &str, p: &str) -> PResult<Vec<ChangeOp>> {
             for (i, l) in v.layers.iter().enumerate().rev() {
                 if l.series.as_deref() == Some(id) {
                     out.push(ChangeOp::DeleteLayer {
-                        layer: None,
+                        layer: l.id.clone(),
                         view: v.id.clone(),
                         index: u32::try_from(i).unwrap_or(u32::MAX),
                     });
@@ -1189,7 +1279,12 @@ fn has_decision(e: &LogEntry) -> bool {
     })
 }
 
-fn expand_undo(seq: Option<Seq>, p: &str, ctx: &mut Ctx<'_>) -> PResult<Vec<ChangeOp>> {
+fn expand_undo(
+    doc: &Document,
+    seq: Option<Seq>,
+    p: &str,
+    ctx: &mut Ctx<'_>,
+) -> PResult<Vec<ChangeOp>> {
     let undone = undone_set(ctx.log);
     let speaker = ctx.speaker;
     // Only entries the speaker authored are theirs; approving an entry does not make it
@@ -1266,7 +1361,7 @@ fn expand_undo(seq: Option<Seq>, p: &str, ctx: &mut Ctx<'_>) -> PResult<Vec<Chan
         .hint("Ask a principal who may decide.")
         .build());
     }
-    let touched = touched_ids(&target.changes);
+    let touched = touched_keys(&target.changes);
     let mut conflicts = Vec::new();
     let mut by = String::new();
     for e in &ctx.log[usize::try_from(target.seq)
@@ -1276,8 +1371,8 @@ fn expand_undo(seq: Option<Seq>, p: &str, ctx: &mut Ctx<'_>) -> PResult<Vec<Chan
         if undone.contains(&e.seq) || e.undoes.is_some() {
             continue;
         }
-        let t = touched_ids(&e.changes);
-        if let Some(id) = t.intersection(&touched).next() {
+        let t = touched_keys(&e.changes);
+        if let Some(id) = first_overlap(&t, &touched) {
             if by.is_empty() {
                 by = format!("`{id}` changed at seq {} by {}", e.seq, e.author);
             }
@@ -1295,7 +1390,92 @@ fn expand_undo(seq: Option<Seq>, p: &str, ctx: &mut Ctx<'_>) -> PResult<Vec<Chan
         .build());
     }
     ctx.undoes = Some(target.seq);
-    Ok(target.inverse.clone())
+    Ok(rebase_positions(doc, &target.inverse))
+}
+
+/// Re-anchors the positions of layer and panel changes of an inverse on the current
+/// document: later entries that touched *other* layers of the same view may have
+/// shifted positions (conflicts are per layer, `docs/PROTOCOL.md` §5.3). A deletion
+/// follows its layer id; an insertion keeps its old position, clamped to the list.
+fn rebase_positions(doc: &Document, changes: &[ChangeOp]) -> Vec<ChangeOp> {
+    let positional = changes.iter().any(|c| {
+        matches!(
+            c,
+            ChangeOp::InsertLayer { .. }
+                | ChangeOp::DeleteLayer { .. }
+                | ChangeOp::PutLayer { .. }
+                | ChangeOp::PutPanel { .. }
+        )
+    });
+    if !positional {
+        return changes.to_vec();
+    }
+    let u = |i: usize| u32::try_from(i).unwrap_or(u32::MAX);
+    let mut d = doc.clone();
+    let mut out = Vec::with_capacity(changes.len());
+    for c in changes {
+        let view = |id: &str| d.views.iter().find(|v| v.id == id);
+        let c2 = match c {
+            ChangeOp::DeleteLayer {
+                view: vid,
+                layer: Some(id),
+                index,
+            } => {
+                let i = view(vid)
+                    .and_then(|v| v.layers.iter().position(|l| l.id.as_deref() == Some(id)))
+                    .map_or(*index, u);
+                ChangeOp::DeleteLayer {
+                    view: vid.clone(),
+                    index: i,
+                    layer: Some(id.clone()),
+                }
+            }
+            ChangeOp::InsertLayer {
+                view: vid,
+                index,
+                layer,
+            } => {
+                let n = view(vid).map_or(0, |v| v.layers.len());
+                ChangeOp::InsertLayer {
+                    view: vid.clone(),
+                    index: (*index).min(u(n)),
+                    layer: layer.clone(),
+                }
+            }
+            ChangeOp::PutLayer {
+                view: vid,
+                index,
+                layer,
+            } => {
+                let n = view(vid).map_or(0, |v| {
+                    v.layers.len() - usize::from(v.layers.iter().any(|l| l.id == layer.id))
+                });
+                ChangeOp::PutLayer {
+                    view: vid.clone(),
+                    index: (*index).min(u(n)),
+                    layer: layer.clone(),
+                }
+            }
+            ChangeOp::PutPanel {
+                view: vid,
+                index,
+                panel,
+            } => {
+                let n = view(vid).map_or(0, |v| {
+                    v.panels.len() - usize::from(v.panels.iter().any(|x| x.id == panel.id))
+                });
+                ChangeOp::PutPanel {
+                    view: vid.clone(),
+                    index: (*index).min(u(n)),
+                    panel: panel.clone(),
+                }
+            }
+            other => other.clone(),
+        };
+        let _ = crate::apply::apply_change(&mut d, &c2);
+        out.push(c2);
+    }
+    out
 }
 
 /// Expands all ops on a scratch copy of `doc`. Returns the new document, the changes,
@@ -1392,7 +1572,21 @@ pub(crate) fn summarize(op: &Op) -> String {
         },
         Op::AcceptProposal { proposal, .. } => format!("accept_proposal {proposal}"),
         Op::RejectProposal { proposal, .. } => format!("reject_proposal {proposal}"),
-        other => format!("{other:?}"),
+        Op::InsertLayer { view, layer, .. } => match &layer.id {
+            Some(id) => format!("insert_layer {view} {id}"),
+            None => format!("insert_layer {view}"),
+        },
+        Op::DeleteLayer { view, layer } => format!("delete_layer {view} {layer}"),
+        Op::MoveLayer { view, layer, .. } => format!("move_layer {view} {layer}"),
+        Op::SetEncoding { view, layer, .. } => format!("set_encoding {view} {layer}"),
+        Op::InsertPanel { view, .. } => format!("insert_panel {view}"),
+        Op::DeletePanel { view, panel } => format!("delete_panel {view} {panel}"),
+        Op::MovePanel { view, panel, .. } => format!("move_panel {view} {panel}"),
+        Op::SetPanel { view, panel, .. } => format!("set_panel {view} {panel}"),
+        Op::SetScale { view, scale, .. } => format!("set_scale {view} {scale}"),
+        Op::SetEmphasis { view, emphasis } => {
+            format!("set_emphasis {view} ({})", emphasis.len())
+        }
     }
 }
 

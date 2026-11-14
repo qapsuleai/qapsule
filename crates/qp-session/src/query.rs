@@ -216,7 +216,7 @@ impl Session {
                 let role = self.conns[ci].role;
                 Ok(QueryResult::Description {
                     description: Description {
-                        thresholds: std::collections::BTreeMap::new(),
+                        thresholds: crate::canon::thresholds(),
                         protocol: PROTOCOL_VERSION.to_owned(),
                         doc: self.doc.id.clone(),
                         ops: variant_names(&op_schema, "op"),
@@ -789,15 +789,18 @@ impl Session {
                 if *bar > last {
                     return Err(past("bar", *bar));
                 }
-                let has_panel = (*panel as usize) < view.y.len()
-                    || view.layers.iter().any(|l| l.panel == *panel);
-                if !has_panel {
+                if view.panel(*panel).is_none() {
                     return Err(E::new(
                         ErrorCode::Invalid,
                         format!("view `{view_id}` has no panel {panel}"),
                     )
                     .at(ptr(gp, "panel"))
-                    .expected([format!("0..={}", view.y.len().saturating_sub(1))])
+                    .expected(
+                        view.panels
+                            .iter()
+                            .filter_map(|p| p.id)
+                            .map(|i| i.to_string()),
+                    )
                     .build());
                 }
                 self.input_counter += 1;

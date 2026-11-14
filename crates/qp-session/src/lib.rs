@@ -15,17 +15,24 @@
 #![allow(clippy::result_large_err)]
 
 mod apply;
+mod canon;
 pub mod conform;
 mod error;
 mod expand;
+mod gops;
 mod locate;
 mod present;
 mod query;
 mod session;
 mod suggest;
+mod summary;
 mod values;
 
-pub use apply::{apply_all, apply_change, find_collection, replay, touched_ids};
+pub use apply::{
+    apply_all, apply_change, find_collection, keys_overlap, replay, touched_ids, touched_key,
+    touched_keys,
+};
+pub use canon::{canon_document, thresholds};
 pub use present::profile_for;
 pub use session::{confine, default_limits, permissions, read_json, Session, ENGINE_PRINCIPAL};
 pub use suggest::{did_you_mean, edit_distance};

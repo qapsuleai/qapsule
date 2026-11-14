@@ -12,6 +12,8 @@
 use std::collections::BTreeMap;
 
 use crate::lanes;
+
+mod share;
 use crate::studies::{Bollinger, Ema, Macd, Rsi, Sma};
 use crate::{create, period_param, ComputeError, Core, Field};
 
@@ -102,6 +104,16 @@ pub fn sweep_each_lanes(
         })
         .collect();
     let v = &mut visit;
+    // Grids with consecutive variants sharing a sub-computation (E1): the shared paths;
+    // everything else runs the lane kernels (E2) via `soa_plain`.
+    match name {
+        "macd" => return share::macd(&full, x, lanes, &mut bufs, v),
+        "bollinger" => return share::bollinger(&full, x, lanes, &mut bufs, v),
+        "rsi" if full.len() >= share::RSI_MIN_VARIANTS => {
+            return share::rsi(&full, x, lanes, &mut bufs, v)
+        }
+        _ => {}
+    }
     if let Some(kind) = Soa::of(name) {
         let jobs: Vec<Job> = full.iter().map(Job::of).collect::<Result<_, _>>()?;
         let lanes = lanes.map_or(kind.default_lanes(), |l| l.clamp(1, MAX_LANES));
@@ -111,6 +123,28 @@ pub fn sweep_each_lanes(
     }
     unreachable!("every built-in study has a lane kernel")
 }
+
+/// The variants `full` (input positions `base..`) of `kind` through the lane kernels; the
+/// fallback of the shared paths in [`share`] for stretches that share nothing.
+fn soa_plain(
+    kind: Soa,
+    full: &[BTreeMap<String, f64>],
+    x: &[f64],
+    lanes: Option<usize>,
+    bufs: &mut [SweepColumns],
+    base: usize,
+    visit: &mut impl FnMut(usize, &SweepColumns),
+) -> Result<(), ComputeError> {
+    let jobs: Vec<Job> = full.iter().map(Job::of).collect::<Result<_, _>>()?;
+    let lanes = lanes.map_or(kind.default_lanes(), |l| l.clamp(1, MAX_LANES));
+    let xs: Vec<&[f64]> = vec![x; jobs.len()];
+    soa_run(kind, &jobs, &xs, lanes, bufs, &mut |i, c| {
+        visit(base + i, c)
+    });
+    Ok(())
+}
+
+const NAN: f64 = f64::NAN;
 
 /// Built-in studies with a structure-of-arrays lane kernel ([`crate::lanes`]).
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]

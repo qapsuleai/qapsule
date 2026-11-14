@@ -25,17 +25,34 @@ pub struct Rsi {
 /// `(gain, loss)` of a change; written as two selects so it compiles without a
 /// data-dependent branch (prices go up and down unpredictably).
 #[inline]
-fn split(change: f64) -> (f64, f64) {
+pub(crate) fn split(change: f64) -> (f64, f64) {
     let up = change > 0.0;
     let gain = if up { change } else { 0.0 };
     let loss = if up { 0.0 } else { change.abs() };
     (gain, loss)
 }
 
-/// RSI from average gain and loss.
+/// RSI from average gain and loss. The quotient is computed unconditionally and the
+/// result selected (same value as branching first): measured (RP1/E1), the branch form
+/// made chained runs (profile C) up to 15% slower on wasm in this build.
 #[inline]
 #[must_use]
 pub(crate) fn rsi_from_avg(avg_gain: f64, avg_loss: f64) -> f64 {
+    let rs = avg_gain / avg_loss;
+    let v = 100.0 - 100.0 / (1.0 + rs);
+    let flat = if avg_gain == 0.0 { 50.0 } else { 100.0 };
+    if avg_loss == 0.0 {
+        flat
+    } else {
+        v
+    }
+}
+
+/// [`rsi_from_avg`] for the sweep's column pass, in branch form (same value): measured
+/// (RP1/E1) 20% faster than the select form in that pass on wasm, equal natively.
+#[inline]
+#[must_use]
+pub(crate) fn rsi_from_avg_pass(avg_gain: f64, avg_loss: f64) -> f64 {
     if avg_loss == 0.0 {
         if avg_gain == 0.0 {
             50.0
@@ -93,6 +110,50 @@ impl Rsi {
             )
         };
         Some(rsi_from_avg(ag, al))
+    }
+
+    /// Peek + commit of the next bar from its precomputed change split
+    /// `(g, l) = split(x - previous x)` (ignored on the first bar); returns the bar's
+    /// value or `NaN` in warmup. The same operations as `peek1(x)` then `commit1(x)`
+    /// (the peeked averages *are* the committed ones), for the sweep, which computes the
+    /// split once for every period. Does not track the previous input, so after it only
+    /// `step_split` may be used on this state.
+    #[inline]
+    pub(crate) fn step_split(&mut self, g: f64, l: f64) -> f64 {
+        let i = self.n;
+        self.n = i + 1;
+        if i < self.period {
+            if i > 0 {
+                self.gain_sum += g;
+                self.loss_sum += l;
+            }
+            return f64::NAN;
+        }
+        let (ag, al) = if i == self.period {
+            ((self.gain_sum + g) / self.pf, (self.loss_sum + l) / self.pf)
+        } else {
+            (
+                Self::smooth(self.avg_gain, self.pm1, self.pf, g),
+                Self::smooth(self.avg_loss, self.pm1, self.pf, l),
+            )
+        };
+        self.avg_gain = ag;
+        self.avg_loss = al;
+        rsi_from_avg(ag, al)
+    }
+
+    /// Wilder smoothing step past the seed: `(avg * (p - 1) + v) / p`.
+    #[inline]
+    #[must_use]
+    pub(crate) fn smooth(avg: f64, pm1: f64, pf: f64, v: f64) -> f64 {
+        (avg * pm1 + v) / pf
+    }
+
+    /// `[p - 1, p, avg_gain, avg_loss]` once past the seed bar (every later bar is
+    /// [`Rsi::smooth`] on both averages); `None` before.
+    #[inline]
+    pub(crate) fn steady(&self) -> Option<[f64; 4]> {
+        (self.n > self.period).then_some([self.pm1, self.pf, self.avg_gain, self.avg_loss])
     }
 
     /// Commits a bar with input `x`.

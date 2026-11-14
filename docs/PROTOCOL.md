@@ -89,6 +89,8 @@ Protokol taşımadan bağımsızdır. Tanımlı iki taşıma:
 ```
 
   Çerçeve okunamazsa (`conn` yok, satır JSON değil) çıktı `conn: ""` ile bir `error`dur.
+  Ayrıştırılamayan bir mesajı test etmek için `msg` bir JSON **dizgesi** olabilir; dizge
+  ham mesaj metni olarak otoriteye verilir (`{"conn":"a","msg":"{not json"}`).
   Test koşucuları için `qp serve --batch-end`: her giriş satırının çıktıları bittiğinde
   `{"batch_end":true}` satırı yazılır (taşıma düzeyi; protokolün parçası değil).
 
@@ -141,6 +143,8 @@ Dokümanı değiştirmenin **tek** yolu. İnsan hareketi de ajan çağrısı da 
 ```
 
 - `ops`: sırayla, **ya hep ya hiç** uygulanır. Biri hata verirse hiçbiri uygulanmaz.
+  `accept_proposal` ve `undo` komuttaki **tek** işlem olmalıdır (bir girdinin tek yazarı
+  ve tek `undoes`'u vardır); değilse `invalid`.
 - `mode`: `auto` (varsayılan) — yetki varsa doğrudan yaz, yoksa öneri oluştur (§6);
   `direct` — doğrudan yaz ya da `forbidden`; `propose` — her zaman öneri.
 - `base`: iyimser eşzamanlılık. Komutun dokunduğu öğelerden biri `base`'den sonra
@@ -165,7 +169,7 @@ Yalnızca değişen kısım taşınır; sıralı ve yeniden oynatılabilirdir.
  "author":"arkin","cause":"c1","changes":[
    {"op":"put_series","series":{"id":"series-5-0","source":{"kind":"study","study":"rsi",
      "inputs":["px"],"params":{"period":7.0}}}},
-   {"op":"insert_layer","view":"main","index":4,
+   {"op":"insert_layer","view":"main","index":5,
     "layer":{"mark":"line","series":"series-5-0","panel":1,"encoding":{}}}]}}
 ```
 
@@ -319,7 +323,7 @@ Kalıcı, adım adım bir **anlatım çizelgesi** dikkat değil, dokümandır: `
 | `set_intent_active` | `intent`, `active` | Niyeti açar/kapatır. |
 | `add_narrative` | `id?`, `about`, `steps` | Anlatım çizelgesi ekler (§11). |
 | `show_finding` | `finding`, `view?` | **Sunucu (presenter)** bulgu için deterministik bir görünüm kurar ve kapsüle bağlar (§10.3). |
-| `remove` | `id` | Öğeyi siler. Seri silinirse onu çizen katmanlar da silinir (değişimler: önce `delete_layer`'lar en büyük sıradan küçüğe, sonra `delete`); başka öğe (hesap girdisi, olgu, bulgu/niyet koşulu) ona dayanıyorsa `in_use` ve `expected` = dayanan öğelerin kimlikleri, alfabe sırasıyla. |
+| `remove` | `id` | Öğeyi siler. Seri silinirse onu çizen katmanlar da silinir (değişimler: önce `delete_layer`'lar en büyük sıradan küçüğe, sonra `delete`); başka öğe ona dayanıyorsa `in_use` (seri: hesap girdisi, olgu, bulgu/niyet koşulu; olgu: bulgu; bulgu: kapsül, anlatım; görünüm: kapsül; öneriler silinemez) ve `expected` = dayanan öğelerin kimlikleri, alfabe sırasıyla. |
 | `append_bars` | `series`, `bars` | Bar ekler (zamanlar son bardan sonra, artan). Yetki: `feed` ya da `write`. |
 | `update_last_bar` | `series`, `bar` | Son barı değiştirir (aynı `t`). |
 | `undo` | `seq?` | Bir girdiyi tersini yeni girdi olarak yazarak geri alır (§8.3). |
@@ -412,7 +416,8 @@ parametrelerini ya da bir bulgunun geçersizlik koşulunu değiştiren her girdi
 otorite canlı (`live`) kapsüllü bulguların geçersizlik koşullarını değerlendirir; koşul
 doğruysa yazarı `qp` olan ayrı bir girdi kapsülü `invalidated` yapar. Etkin niyetlerin
 tetikleyicileri ve `condition` abonelikleri de her girdiden sonra değerlendirilir; kenar
-tetiklemelidir (önce yanlış, şimdi doğru). `condition_met` ve `intent_triggered`
+tetiklemelidir (önce yanlış, şimdi doğru); bir abonelik ya da niyet oluştuğu anda koşul
+zaten doğruysa, o an başlangıç kabul edilir ve olay üretilmez. `condition_met` ve `intent_triggered`
 olaylarındaki `seq`, koşulu doğru yapan girdinin konumudur; `bar` son bardır.
 
 ### 8.2 İyimser eşzamanlılık (`base`)
@@ -448,7 +453,9 @@ Bir geri almayı geri almak yeniden yapmaktır (redo).
 Doküman sunucudan cihaza (ya da geri) devredilebilir: eski otorite `document` anlık
 görüntüsünü ve `seq`'i verir, yazmayı durdurur; yeni otorite aynı dokümanla ve
 `epoch + 1` ile başlar. `welcome.epoch` istemcilerin hangi otorite soyunda olduğunu
-bildirir; farklı epoch'tan gelen `base` değerleri `conflict` sayılır. Ölçüm ve
+bildirir. Devirde eski otoritenin bütün bağlantıları kapanır; istemciler yeni otoriteye
+`hello` ile yeniden bağlanır ve `seq`'i `welcome`'dan alır. Böylece bir `base` değeri her
+zaman bağlantının kendi epoch'una aittir; komutta ayrıca epoch taşınmaz. Ölçüm ve
 alternatifler: `rounds/RD1/experiments/` (K21-3).
 
 ## 9. Kimlik, yetki, köken ve denetim izi

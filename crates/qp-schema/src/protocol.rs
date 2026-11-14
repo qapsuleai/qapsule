@@ -112,6 +112,9 @@ pub enum ClientMsg {
 }
 
 /// A message from the authority to a client.
+// The `result` variant is large; boxing it would change the public API for no gain in
+// this message-at-a-time protocol.
+#[allow(clippy::large_enum_variant)]
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
 #[serde(tag = "type", rename_all = "snake_case", deny_unknown_fields)]
 pub enum ServerMsg {

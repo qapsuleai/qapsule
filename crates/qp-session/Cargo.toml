@@ -1,0 +1,19 @@
+[package]
+name = "qp-session"
+description = "Qapsule reference authority for protocol qp/0: commands, changes, queries, subscriptions, proposals, log, undo, replay, conformance runner."
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[dependencies]
+qp-compute = { version = "0.0.0", path = "../qp-compute" }
+qp-schema = { version = "0.0.0", path = "../qp-schema" }
+schemars = "1.2.3"
+serde = { version = "1.0.229", features = ["derive"] }
+serde_json = { version = "1.0.154", features = ["float_roundtrip"] }
+serde_path_to_error = "0.1.20"
+
+[lints]
+workspace = true

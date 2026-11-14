@@ -1,11 +1,12 @@
 //! Qapsule render core.
 //!
-//! R0 state: a deterministic headless *reference renderer* (tiny-skia + fontdue, scalar
-//! paths only) that draws axes, candlesticks, one line series and text from a bars file.
+//! A deterministic headless *reference renderer* (tiny-skia + fontdue, scalar paths only)
+//! that rasterizes a scene description ([`SceneDesc`], produced by the grammar compiler
+//! `qp-grammar`) and nothing else: no layout, no data access, no study computation here.
 //! The same code is compiled to wasm32 by `qp-wasm`. See `SPIKE.md` for the render-stack
-//! experiment and measurements.
+//! experiment and its determinism rules.
 //!
-//! Output pixel format of [`render_rgba`]: **straight (non-premultiplied) RGBA8**,
+//! Output pixel format of [`render_scene_rgba`]: **straight (non-premultiplied) RGBA8**,
 //! row-major, top-left origin, `width * height * 4` bytes — exactly what
 //! `ImageData`/`putImageData` expects. (The background is opaque, so every pixel currently
 //! has alpha 255 and straight == premultiplied, but callers must not rely on that.)
@@ -19,6 +20,7 @@ pub mod scene;
 pub mod spikes;
 
 pub use bars::{parse_bars, synthetic_bars};
+pub use qp_schema::scene::SceneDesc;
 pub use qp_schema::{Bar, Series};
 
 /// Default output width in pixels.
@@ -44,25 +46,25 @@ impl fmt::Display for RenderError {
 
 impl std::error::Error for RenderError {}
 
-/// Renders `bars` and returns straight (non-premultiplied) RGBA8 pixels.
+/// Rasterizes `scene` (its primitives, in paint order: `SceneDesc::prims()`) and returns
+/// straight (non-premultiplied) RGBA8 pixels, `width * height * 4` bytes.
 ///
 /// # Errors
-/// Fails for sizes outside `200x120 ..= 16384x16384`, a series without bars or an empty
-/// bar list.
-pub fn render_rgba(bars: &Series, width: u32, height: u32) -> Result<Vec<u8>, RenderError> {
-    let scene = scene::build_scene(bars, width, height)?;
-    let pm = cpu::rasterize(&scene)?;
+/// Fails for a size outside `1x1 ..= 16384x16384`, a text size outside `(0, 512]`, or an
+/// allocation failure (see [`cpu::rasterize`]).
+pub fn render_scene_rgba(scene: &SceneDesc) -> Result<Vec<u8>, RenderError> {
+    let pm = cpu::rasterize(scene)?;
     Ok(cpu::demultiply(pm.data()))
 }
 
-/// Renders `bars` and returns deterministic PNG bytes (8-bit RGBA, no ancillary chunks,
-/// fixed filter and compression settings).
+/// Rasterizes `scene` and returns deterministic PNG bytes (8-bit RGBA, no ancillary
+/// chunks, fixed filter and compression settings; see [`encode_png`]).
 ///
 /// # Errors
-/// Same as [`render_rgba`], plus PNG encoding failures.
-pub fn render_png(bars: &Series, width: u32, height: u32) -> Result<Vec<u8>, RenderError> {
-    let rgba = render_rgba(bars, width, height)?;
-    encode_png(&rgba, width, height)
+/// Same as [`render_scene_rgba`], plus PNG encoding failures.
+pub fn render_scene_png(scene: &SceneDesc) -> Result<Vec<u8>, RenderError> {
+    let rgba = render_scene_rgba(scene)?;
+    encode_png(&rgba, scene.width, scene.height)
 }
 
 /// Encodes straight RGBA8 pixels as PNG with fixed settings.
@@ -93,6 +95,5 @@ pub fn encode_png(rgba: &[u8], width: u32, height: u32) -> Result<Vec<u8>, Rende
 /// Fails if the pixmap cannot be allocated.
 #[doc(hidden)]
 pub fn render_stress_rgba(width: u32, height: u32) -> Result<Vec<u8>, RenderError> {
-    let pm = cpu::rasterize(&scene::stress_scene(width, height))?;
-    Ok(cpu::demultiply(pm.data()))
+    render_scene_rgba(&scene::stress_scene(width, height))
 }

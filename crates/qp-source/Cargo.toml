@@ -1,0 +1,19 @@
+[package]
+name = "qp-source"
+description = "Qapsule series sources (SeriesSource): file and synthetic sources, as bar events."
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[dependencies]
+qp-schema = { path = "../qp-schema" }
+serde_json = { version = "1.0.154", features = ["float_roundtrip"] }
+
+[dev-dependencies]
+qp-compute = { path = "../qp-compute" }
+serde_json = "1.0.154"
+
+[lints]
+workspace = true

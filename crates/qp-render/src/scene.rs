@@ -12,8 +12,8 @@
 //!
 //! This module is public only so the spike examples can reuse it; it is not a stable API.
 
-use crate::bars::BarsFile;
 use crate::RenderError;
+use qp_schema::Series;
 
 /// Straight (non-premultiplied) RGBA8 colour.
 pub type Rgba = [u8; 4];
@@ -151,13 +151,13 @@ fn rect(x: i32, y: i32, w: i32, h: i32, color: Rgba) -> Prim {
 /// # Errors
 /// Returns an error if the size is outside `200x120 ..= 16384x16384` or there are no bars.
 #[allow(clippy::too_many_lines)]
-pub fn build_scene(bars: &BarsFile, width: u32, height: u32) -> Result<Scene, RenderError> {
+pub fn build_scene(bars: &Series, width: u32, height: u32) -> Result<Scene, RenderError> {
     if !(MIN_W..=MAX_DIM).contains(&width) || !(MIN_H..=MAX_DIM).contains(&height) {
         return Err(RenderError::new(format!(
             "size {width}x{height} out of range ({MIN_W}x{MIN_H} ..= {MAX_DIM}x{MAX_DIM})"
         )));
     }
-    let data = &bars.bars;
+    let data = crate::bars::bars_of(bars)?;
     let Some(last) = data.last() else {
         return Err(RenderError::new("bars file has no bars"));
     };
@@ -310,7 +310,11 @@ pub fn build_scene(bars: &BarsFile, width: u32, height: u32) -> Result<Scene, Re
         x: plot.left + 4,
         baseline: 23,
         px: TITLE_PX,
-        text: format!("{} {}", bars.symbol, bars.interval),
+        text: format!(
+            "{} {}",
+            bars.symbol().unwrap_or(""),
+            bars.interval.as_deref().unwrap_or("")
+        ),
         color: TEXT,
         align: Align::Left,
     });

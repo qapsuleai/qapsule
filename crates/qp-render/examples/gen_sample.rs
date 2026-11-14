@@ -11,17 +11,21 @@ use std::path::PathBuf;
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let file = qp_render::synthetic_bars(200, 20_251_114);
     let mut s = String::new();
+    let bars = file.bars().ok_or("synthetic series has no bars")?;
+    // A `qp_schema::Series` document, one bar per line.
     writeln!(
         s,
-        "{{\"symbol\":{},\"interval\":{},\"bars\":[",
-        serde_json::to_string(&file.symbol)?,
-        serde_json::to_string(&file.interval)?
+        "{{\"id\":{},\"instrument\":{},\"interval\":{},\"source\":{},\"data\":{{\"kind\":\"bars\",\"bars\":[",
+        serde_json::to_string(&file.id)?,
+        serde_json::to_string(&file.instrument)?,
+        serde_json::to_string(&file.interval)?,
+        serde_json::to_string(&file.source)?,
     )?;
-    for (i, b) in file.bars.iter().enumerate() {
-        let sep = if i + 1 == file.bars.len() { "" } else { "," };
+    for (i, b) in bars.iter().enumerate() {
+        let sep = if i + 1 == bars.len() { "" } else { "," };
         writeln!(s, "{}{sep}", serde_json::to_string(b)?)?;
     }
-    s.push_str("]}\n");
+    s.push_str("]}}\n");
     // Round-trip check before writing.
     let back = qp_render::parse_bars(&s)?;
     assert_eq!(back, file, "sample.json must round-trip exactly");

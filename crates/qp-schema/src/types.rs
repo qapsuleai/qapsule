@@ -41,13 +41,119 @@ pub struct Bar {
 }
 
 /// One point of a single-valued series (e.g. an indicator output).
+///
+/// Warmup rule (K13): a study output always has one point per input bar, at the same
+/// `t`. Points inside the warmup period have `v: null`; nothing is trimmed.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
 #[serde(deny_unknown_fields)]
 pub struct Point {
-    /// Point time, epoch milliseconds UTC.
+    /// Point time, epoch milliseconds UTC (the time of the bar it belongs to).
     pub t: TimestampMs,
-    /// Value.
-    pub v: f64,
+    /// Value; `null` during warmup.
+    pub v: Option<f64>,
+}
+
+/// The result of running one study over a bar series (K13).
+///
+/// `t` has one entry per input bar; every vector in `outputs` has exactly the same
+/// length as `t`. Warmup values are `null`.
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
+#[serde(deny_unknown_fields)]
+pub struct StudyOutput {
+    /// Study name, e.g. `rsi`, `macd`.
+    pub study: String,
+    /// Numeric parameters, e.g. `{"period": 14}`.
+    #[serde(default)]
+    pub params: BTreeMap<String, f64>,
+    /// Bar times, epoch milliseconds UTC; same length as every output.
+    pub t: Vec<TimestampMs>,
+    /// Named outputs, e.g. `macd`, `signal`, `histogram`. `null` during warmup.
+    pub outputs: BTreeMap<String, Vec<Option<f64>>>,
+    /// Number of leading `null` values per output (warmup length).
+    #[serde(default)]
+    pub warmup: BTreeMap<String, u32>,
+}
+
+/// A traded asset: where it trades and which calendar aligns its bars (K14).
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
+#[serde(deny_unknown_fields)]
+pub struct Instrument {
+    /// Exchange symbol, e.g. `THYAO`.
+    pub symbol: String,
+    /// Exchange code, e.g. `BIST`, `NYSE`.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub exchange: Option<String>,
+    /// Calendar id, e.g. `XIST`, `XNYS`. Bars are aligned to this calendar.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub calendar: Option<String>,
+}
+
+/// Weekday, ISO numbering order.
+#[derive(
+    Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Serialize, Deserialize, JsonSchema,
+)]
+#[serde(rename_all = "snake_case")]
+pub enum Weekday {
+    /// Monday.
+    Mon,
+    /// Tuesday.
+    Tue,
+    /// Wednesday.
+    Wed,
+    /// Thursday.
+    Thu,
+    /// Friday.
+    Fri,
+    /// Saturday.
+    Sat,
+    /// Sunday.
+    Sun,
+}
+
+/// One trading session in exchange local time (`HH:MM`, 24h). `close` is exclusive.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
+#[serde(deny_unknown_fields)]
+pub struct Session {
+    /// Local open time, `HH:MM`.
+    #[schemars(regex(pattern = r"^([01][0-9]|2[0-3]):[0-5][0-9]$"))]
+    pub open: String,
+    /// Local close time, `HH:MM`.
+    #[schemars(regex(pattern = r"^([01][0-9]|2[0-3]):[0-5][0-9]$"))]
+    pub close: String,
+}
+
+/// A trading day that closes early.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
+#[serde(deny_unknown_fields)]
+pub struct HalfDay {
+    /// Local date, `YYYY-MM-DD`.
+    #[schemars(regex(pattern = r"^[0-9]{4}-[0-9]{2}-[0-9]{2}$"))]
+    pub date: String,
+    /// Local early close time, `HH:MM`.
+    #[schemars(regex(pattern = r"^([01][0-9]|2[0-3]):[0-5][0-9]$"))]
+    pub close: String,
+}
+
+/// An exchange calendar: time zone, sessions and holidays (K14). Data only; bar
+/// boundary logic lives in `qp-calendar`.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
+#[serde(deny_unknown_fields)]
+pub struct Calendar {
+    /// Calendar id, e.g. `XIST`.
+    pub id: String,
+    /// IANA time zone of the exchange, e.g. `Europe/Istanbul`.
+    pub tz: String,
+    /// Regular sessions of a trading day, in local time, ascending.
+    pub sessions: Vec<Session>,
+    /// Non-trading weekdays.
+    #[serde(default)]
+    pub weekend: Vec<Weekday>,
+    /// Full holidays, local dates `YYYY-MM-DD`.
+    #[serde(default)]
+    pub holidays: Vec<String>,
+    /// Early-close days.
+    #[serde(default)]
+    pub half_days: Vec<HalfDay>,
 }
 
 /// Materialized series data.
@@ -113,9 +219,10 @@ pub enum SeriesSource {
 pub struct Series {
     /// Unique id within the document.
     pub id: String,
-    /// Instrument symbol, if the series belongs to one.
+    /// The instrument the series belongs to, if any. Its symbol lives here (there is no
+    /// separate `symbol` field), so exchange and calendar travel with it (K14).
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub symbol: Option<String>,
+    pub instrument: Option<Instrument>,
     /// Bar interval, e.g. `1d`, `5m`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub interval: Option<String>,
@@ -124,6 +231,23 @@ pub struct Series {
     /// Materialized data, if present.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub data: Option<SeriesData>,
+}
+
+impl Series {
+    /// The embedded bars, if `data` is `bars`.
+    #[must_use]
+    pub fn bars(&self) -> Option<&[Bar]> {
+        match &self.data {
+            Some(SeriesData::Bars { bars }) => Some(bars),
+            _ => None,
+        }
+    }
+
+    /// The instrument symbol, if any.
+    #[must_use]
+    pub fn symbol(&self) -> Option<&str> {
+        self.instrument.as_ref().map(|i| i.symbol.as_str())
+    }
 }
 
 // ---------------------------------------------------------------------------
@@ -418,6 +542,9 @@ pub struct View {
     /// Optional title.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub title: Option<String>,
+    /// Display time zone override (IANA); display only, see [`Document::display_tz`].
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub display_tz: Option<String>,
     /// Horizontal scale.
     pub x: Scale,
     /// Vertical scale per panel, indexed by `Layer::panel`.
@@ -501,6 +628,10 @@ pub struct Document {
     /// Optional title.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub title: Option<String>,
+    /// Time zone (IANA) in which times are *shown* to the user. Display only: it never
+    /// affects bar alignment or computation (K14); views may override it.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub display_tz: Option<String>,
     /// Series bindings.
     #[serde(default)]
     pub series: Vec<Series>,

@@ -2,10 +2,11 @@
   "schema_version": "0",
   "id": "doc-thyao-daily",
   "title": "THYAO gunluk",
+  "display_tz": "Europe/Istanbul",
   "series": [
     {
       "id": "thyao-1d",
-      "symbol": "THYAO",
+      "instrument": { "symbol": "THYAO", "exchange": "BIST", "calendar": "XIST" },
       "interval": "1d",
       "source": { "kind": "matriks", "symbol": "THYAO", "interval": "1d" },
       "data": {
@@ -19,7 +20,7 @@
     },
     {
       "id": "thyao-1d-rsi14",
-      "symbol": "THYAO",
+      "instrument": { "symbol": "THYAO", "exchange": "BIST", "calendar": "XIST" },
       "interval": "1d",
       "source": {
         "kind": "study",

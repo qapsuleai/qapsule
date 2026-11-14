@@ -13,9 +13,8 @@ path = "src/main.rs"
 
 [dependencies]
 clap = { version = "4.6.7", features = ["derive"] }
-jsonschema = { version = "0.61.2", default-features = false }
 qp-render = { version = "0.0.0", path = "../qp-render" }
-qp-schema = { version = "0.0.0", path = "../qp-schema" }
+qp-schema = { version = "0.0.0", path = "../qp-schema", features = ["validate"] }
 serde_json = "1.0.154"
 
 [lints]

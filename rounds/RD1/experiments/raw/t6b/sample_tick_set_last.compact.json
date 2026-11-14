@@ -1,0 +1,1 @@
+{"type":"notify","sub":"sub-px","event":{"kind":"change","seq":100030,"at":2606601600000,"author":"feed","changes":[{"op":"set_last_bar","series":"px","bar":{"t":2606601600000,"o":57.38,"h":57.79,"l":57.38,"c":57.46,"v":604460.41}}]}}

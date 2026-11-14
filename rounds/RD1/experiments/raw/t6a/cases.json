@@ -1,0 +1,6094 @@
+[
+  {
+    "case": "C1",
+    "what": "editor offline sets MACD fast=8; arkin sets MACD fast=10, slow=30; editor returns",
+    "results": [
+      {
+        "model": "A-log(base,own-excl)",
+        "experiences": [
+          [
+            "editor",
+            "set_params",
+            "Queued"
+          ],
+          [
+            "arkin",
+            "set_params",
+            "Applied"
+          ]
+        ],
+        "reconnect": {
+          "queued": 1,
+          "applied": 0,
+          "applied_after_retry": 1,
+          "refused": 0,
+          "codes": {
+            "Conflict": 1
+          },
+          "bytes_up": 206,
+          "bytes_down": 1622,
+          "round_trips": 3,
+          "time_us": 0.0,
+          "details": [
+            "set_params: AppliedAfterRetry([Conflict])"
+          ]
+        },
+        "converged": true,
+        "final_snap": {
+          "series": {
+            "bb20": {
+              "kind": "study",
+              "study": "bollinger",
+              "inputs": [
+                "px"
+              ],
+              "params": {
+                "k": 2.0,
+                "period": 20.0
+              }
+            },
+            "macd": {
+              "kind": "study",
+              "study": "macd",
+              "inputs": [
+                "px"
+              ],
+              "params": {
+                "fast": 8.0,
+                "signal": 9.0,
+                "slow": 30.0
+              }
+            },
+            "px": {
+              "kind": "inline",
+              "study": "",
+              "inputs": [],
+              "params": {}
+            },
+            "rsi14": {
+              "kind": "study",
+              "study": "rsi",
+              "inputs": [
+                "px"
+              ],
+              "params": {
+                "period": 14.0
+              }
+            }
+          },
+          "layers": [
+            {
+              "mark": "candle",
+              "series": "px",
+              "panel": 0
+            },
+            {
+              "mark": "line",
+              "series": "bb20",
+              "panel": 0
+            },
+            {
+              "mark": "line",
+              "series": "rsi14",
+              "panel": 1
+            },
+            {
+              "mark": "rule",
+              "series": null,
+              "panel": 1
+            },
+            {
+              "mark": "line",
+              "series": "macd",
+              "panel": 2
+            }
+          ],
+          "facts": {
+            "fact-rsi-cross70": "rsi14"
+          },
+          "findings": {
+            "fnd-overbought": {
+              "claim": "THYAO günlükte RSI(14) aşırı alım bölgesine girdi; momentum güçlü.",
+              "confidence": 0.65,
+              "inval_series": "rsi14",
+              "facts": [
+                "fact-rsi-cross70"
+              ]
+            }
+          },
+          "capsules": {
+            "cap-overbought": {
+              "finding": "fnd-overbought",
+              "state": "live"
+            }
+          },
+          "intents": {},
+          "ledger": []
+        },
+        "anomalies": {
+          "dangling_layer": 0,
+          "dangling_ref": 0,
+          "orphan": 0,
+          "decision_mismatch": 0,
+          "stale_decision": 0,
+          "invalid_item": 0
+        },
+        "undo": {
+          "attempted": 0,
+          "applied": 0,
+          "refused_conflict": 0,
+          "nothing_or_unsupported": 0,
+          "clobbered_others": 0
+        },
+        "extra": {
+          "blind_overwrites": 0,
+          "conflicts": 1,
+          "conflicts:set_params vs set_params": 1,
+          "log_entries": 2,
+          "reconnect_final_catchup_changes_only_bytes": 360,
+          "reconnect_final_catchup_log_query_bytes": 726,
+          "reconnect_final_catchup_snapshot_bytes": 17802
+        }
+      },
+      {
+        "model": "A-log(no-base)",
+        "experiences": [
+          [
+            "editor",
+            "set_params",
+            "Queued"
+          ],
+          [
+            "arkin",
+            "set_params",
+            "Applied"
+          ]
+        ],
+        "reconnect": {
+          "queued": 1,
+          "applied": 1,
+          "applied_after_retry": 0,
+          "refused": 0,
+          "codes": {},
+          "bytes_up": 94,
+          "bytes_down": 1439,
+          "round_trips": 2,
+          "time_us": 0.0,
+          "details": [
+            "set_params: Applied"
+          ]
+        },
+        "converged": true,
+        "final_snap": {
+          "series": {
+            "bb20": {
+              "kind": "study",
+              "study": "bollinger",
+              "inputs": [
+                "px"
+              ],
+              "params": {
+                "k": 2.0,
+                "period": 20.0
+              }
+            },
+            "macd": {
+              "kind": "study",
+              "study": "macd",
+              "inputs": [
+                "px"
+              ],
+              "params": {
+                "fast": 8.0,
+                "signal": 9.0,
+                "slow": 30.0
+              }
+            },
+            "px": {
+              "kind": "inline",
+              "study": "",
+              "inputs": [],
+              "params": {}
+            },
+            "rsi14": {
+              "kind": "study",
+              "study": "rsi",
+              "inputs": [
+                "px"
+              ],
+              "params": {
+                "period": 14.0
+              }
+            }
+          },
+          "layers": [
+            {
+              "mark": "candle",
+              "series": "px",
+              "panel": 0
+            },
+            {
+              "mark": "line",
+              "series": "bb20",
+              "panel": 0
+            },
+            {
+              "mark": "line",
+              "series": "rsi14",
+              "panel": 1
+            },
+            {
+              "mark": "rule",
+              "series": null,
+              "panel": 1
+            },
+            {
+              "mark": "line",
+              "series": "macd",
+              "panel": 2
+            }
+          ],
+          "facts": {
+            "fact-rsi-cross70": "rsi14"
+          },
+          "findings": {
+            "fnd-overbought": {
+              "claim": "THYAO günlükte RSI(14) aşırı alım bölgesine girdi; momentum güçlü.",
+              "confidence": 0.65,
+              "inval_series": "rsi14",
+              "facts": [
+                "fact-rsi-cross70"
+              ]
+            }
+          },
+          "capsules": {
+            "cap-overbought": {
+              "finding": "fnd-overbought",
+              "state": "live"
+            }
+          },
+          "intents": {},
+          "ledger": []
+        },
+        "anomalies": {
+          "dangling_layer": 0,
+          "dangling_ref": 0,
+          "orphan": 0,
+          "decision_mismatch": 0,
+          "stale_decision": 0,
+          "invalid_item": 0
+        },
+        "undo": {
+          "attempted": 0,
+          "applied": 0,
+          "refused_conflict": 0,
+          "nothing_or_unsupported": 0,
+          "clobbered_others": 0
+        },
+        "extra": {
+          "blind_overwrites": 1,
+          "log_entries": 2,
+          "reconnect_final_catchup_changes_only_bytes": 720,
+          "reconnect_final_catchup_log_query_bytes": 1388,
+          "reconnect_final_catchup_snapshot_bytes": 17802
+        }
+      },
+      {
+        "model": "B-automerge",
+        "experiences": [
+          [
+            "editor",
+            "set_params",
+            "Applied"
+          ],
+          [
+            "arkin",
+            "set_params",
+            "Applied"
+          ]
+        ],
+        "reconnect": {
+          "queued": 1,
+          "applied": 1,
+          "applied_after_retry": 0,
+          "refused": 0,
+          "codes": {},
+          "bytes_up": 263,
+          "bytes_down": 5879,
+          "round_trips": 2,
+          "time_us": 0.0,
+          "details": [
+            "all changes merged silently; no errors"
+          ]
+        },
+        "converged": true,
+        "final_snap": {
+          "series": {
+            "bb20": {
+              "kind": "study",
+              "study": "bollinger",
+              "inputs": [
+                "px"
+              ],
+              "params": {
+                "k": 2.0,
+                "period": 20.0
+              }
+            },
+            "macd": {
+              "kind": "study",
+              "study": "macd",
+              "inputs": [
+                "px"
+              ],
+              "params": {
+                "fast": 8.0,
+                "signal": 9.0,
+                "slow": 30.0
+              }
+            },
+            "px": {
+              "kind": "inline",
+              "study": "",
+              "inputs": [],
+              "params": {}
+            },
+            "rsi14": {
+              "kind": "study",
+              "study": "rsi",
+              "inputs": [
+                "px"
+              ],
+              "params": {
+                "period": 14.0
+              }
+            }
+          },
+          "layers": [
+            {
+              "mark": "candle",
+              "series": "px",
+              "panel": 0
+            },
+            {
+              "mark": "line",
+              "series": "bb20",
+              "panel": 0
+            },
+            {
+              "mark": "line",
+              "series": "rsi14",
+              "panel": 1
+            },
+            {
+              "mark": "rule",
+              "series": null,
+              "panel": 1
+            },
+            {
+              "mark": "line",
+              "series": "macd",
+              "panel": 2
+            }
+          ],
+          "facts": {
+            "fact-rsi-cross70": "rsi14"
+          },
+          "findings": {
+            "fnd-overbought": {
+              "claim": "THYAO günlükte RSI(14) aşırı alım bölgesine girdi; momentum güçlü.",
+              "confidence": 0.65,
+              "inval_series": "rsi14",
+              "facts": [
+                "fact-rsi-cross70"
+              ]
+            }
+          },
+          "capsules": {
+            "cap-overbought": {
+              "finding": "fnd-overbought",
+              "state": "live"
+            }
+          },
+          "intents": {},
+          "ledger": []
+        },
+        "anomalies": {
+          "dangling_layer": 0,
+          "dangling_ref": 0,
+          "orphan": 0,
+          "decision_mismatch": 0,
+          "stale_decision": 0,
+          "invalid_item": 0
+        },
+        "undo": {
+          "attempted": 0,
+          "applied": 0,
+          "refused_conflict": 0,
+          "nothing_or_unsupported": 0,
+          "clobbered_others": 0
+        },
+        "extra": {
+          "relay_sync_bytes": 540,
+          "visible_multi_value_conflicts_in_series": 1
+        }
+      },
+      {
+        "model": "C-loro",
+        "experiences": [
+          [
+            "editor",
+            "set_params",
+            "Applied"
+          ],
+          [
+            "arkin",
+            "set_params",
+            "Applied"
+          ]
+        ],
+        "reconnect": {
+          "queued": 1,
+          "applied": 1,
+          "applied_after_retry": 0,
+          "refused": 0,
+          "codes": {},
+          "bytes_up": 132,
+          "bytes_down": 147,
+          "round_trips": 2,
+          "time_us": 0.0,
+          "details": [
+            "all changes merged silently; no errors"
+          ]
+        },
+        "converged": true,
+        "final_snap": {
+          "series": {
+            "bb20": {
+              "kind": "study",
+              "study": "bollinger",
+              "inputs": [
+                "px"
+              ],
+              "params": {
+                "k": 2.0,
+                "period": 20.0
+              }
+            },
+            "macd": {
+              "kind": "study",
+              "study": "macd",
+              "inputs": [
+                "px"
+              ],
+              "params": {
+                "fast": 8.0,
+                "signal": 9.0,
+                "slow": 30.0
+              }
+            },
+            "px": {
+              "kind": "inline",
+              "study": "",
+              "inputs": [],
+              "params": {}
+            },
+            "rsi14": {
+              "kind": "study",
+              "study": "rsi",
+              "inputs": [
+                "px"
+              ],
+              "params": {
+                "period": 14.0
+              }
+            }
+          },
+          "layers": [
+            {
+              "mark": "candle",
+              "series": "px",
+              "panel": 0
+            },
+            {
+              "mark": "line",
+              "series": "bb20",
+              "panel": 0
+            },
+            {
+              "mark": "line",
+              "series": "rsi14",
+              "panel": 1
+            },
+            {
+              "mark": "rule",
+              "series": null,
+              "panel": 1
+            },
+            {
+              "mark": "line",
+              "series": "macd",
+              "panel": 2
+            }
+          ],
+          "facts": {
+            "fact-rsi-cross70": "rsi14"
+          },
+          "findings": {
+            "fnd-overbought": {
+              "claim": "THYAO günlükte RSI(14) aşırı alım bölgesine girdi; momentum güçlü.",
+              "confidence": 0.65,
+              "inval_series": "rsi14",
+              "facts": [
+                "fact-rsi-cross70"
+              ]
+            }
+          },
+          "capsules": {
+            "cap-overbought": {
+              "finding": "fnd-overbought",
+              "state": "live"
+            }
+          },
+          "intents": {},
+          "ledger": []
+        },
+        "anomalies": {
+          "dangling_layer": 0,
+          "dangling_ref": 0,
+          "orphan": 0,
+          "decision_mismatch": 0,
+          "stale_decision": 0,
+          "invalid_item": 0
+        },
+        "undo": {
+          "attempted": 0,
+          "applied": 0,
+          "refused_conflict": 0,
+          "nothing_or_unsupported": 0,
+          "clobbered_others": 0
+        },
+        "extra": {
+          "relay_sync_bytes": 127
+        }
+      }
+    ],
+    "facts": {
+      "A-log(base,own-excl)": {
+        "macd.params": "{\"fast\": 8.0, \"signal\": 9.0, \"slow\": 30.0}",
+        "writer(macd.fast)": "editor @seq 2",
+        "writer(macd.slow)": "arkin @seq 1"
+      },
+      "A-log(no-base)": {
+        "macd.params": "{\"fast\": 8.0, \"signal\": 9.0, \"slow\": 30.0}",
+        "writer(macd.fast)": "editor @seq 2",
+        "writer(macd.slow)": "arkin @seq 1"
+      },
+      "B-automerge": {
+        "macd.params": "{\"fast\": 8.0, \"signal\": 9.0, \"slow\": 30.0}",
+        "writer(macd.fast)": "arkin|editor",
+        "writer(macd.slow)": "arkin"
+      },
+      "C-loro": {
+        "macd.params": "{\"fast\": 8.0, \"signal\": 9.0, \"slow\": 30.0}",
+        "writer(macd.fast)": "editor",
+        "writer(macd.slow)": "arkin"
+      }
+    }
+  },
+  {
+    "case": "C2",
+    "what": "same round: arkin removes layer 1 (bb20); scout inserts a macd layer at index 2 (before rsi14)",
+    "results": [
+      {
+        "model": "A-log(base,own-excl)",
+        "experiences": [
+          [
+            "arkin",
+            "remove_layer",
+            "Applied"
+          ],
+          [
+            "scout",
+            "add_layer",
+            "AppliedAfterRetry([Conflict])"
+          ]
+        ],
+        "reconnect": {
+          "queued": 0,
+          "applied": 0,
+          "applied_after_retry": 0,
+          "refused": 0,
+          "codes": {},
+          "bytes_up": 0,
+          "bytes_down": 0,
+          "round_trips": 0,
+          "time_us": 0.0,
+          "details": []
+        },
+        "converged": true,
+        "final_snap": {
+          "series": {
+            "bb20": {
+              "kind": "study",
+              "study": "bollinger",
+              "inputs": [
+                "px"
+              ],
+              "params": {
+                "k": 2.0,
+                "period": 20.0
+              }
+            },
+            "macd": {
+              "kind": "study",
+              "study": "macd",
+              "inputs": [
+                "px"
+              ],
+              "params": {
+                "fast": 12.0,
+                "signal": 9.0,
+                "slow": 26.0
+              }
+            },
+            "px": {
+              "kind": "inline",
+              "study": "",
+              "inputs": [],
+              "params": {}
+            },
+            "rsi14": {
+              "kind": "study",
+              "study": "rsi",
+              "inputs": [
+                "px"
+              ],
+              "params": {
+                "period": 14.0
+              }
+            }
+          },
+          "layers": [
+            {
+              "mark": "candle",
+              "series": "px",
+              "panel": 0
+            },
+            {
+              "mark": "line",
+              "series": "macd",
+              "panel": 1
+            },
+            {
+              "mark": "line",
+              "series": "rsi14",
+              "panel": 1
+            },
+            {
+              "mark": "rule",
+              "series": null,
+              "panel": 1
+            },
+            {
+              "mark": "line",
+              "series": "macd",
+              "panel": 2
+            }
+          ],
+          "facts": {
+            "fact-rsi-cross70": "rsi14"
+          },
+          "findings": {
+            "fnd-overbought": {
+              "claim": "THYAO günlükte RSI(14) aşırı alım bölgesine girdi; momentum güçlü.",
+              "confidence": 0.65,
+              "inval_series": "rsi14",
+              "facts": [
+                "fact-rsi-cross70"
+              ]
+            }
+          },
+          "capsules": {
+            "cap-overbought": {
+              "finding": "fnd-overbought",
+              "state": "live"
+            }
+          },
+          "intents": {},
+          "ledger": []
+        },
+        "anomalies": {
+          "dangling_layer": 0,
+          "dangling_ref": 0,
+          "orphan": 0,
+          "decision_mismatch": 0,
+          "stale_decision": 0,
+          "invalid_item": 0
+        },
+        "undo": {
+          "attempted": 0,
+          "applied": 0,
+          "refused_conflict": 0,
+          "nothing_or_unsupported": 0,
+          "clobbered_others": 0
+        },
+        "extra": {
+          "blind_overwrites": 0,
+          "conflicts": 1,
+          "conflicts:add_layer vs remove_layer": 1,
+          "log_entries": 2
+        }
+      },
+      {
+        "model": "A-log(no-base)",
+        "experiences": [
+          [
+            "arkin",
+            "remove_layer",
+            "Applied"
+          ],
+          [
+            "scout",
+            "add_layer",
+            "Applied"
+          ]
+        ],
+        "reconnect": {
+          "queued": 0,
+          "applied": 0,
+          "applied_after_retry": 0,
+          "refused": 0,
+          "codes": {},
+          "bytes_up": 0,
+          "bytes_down": 0,
+          "round_trips": 0,
+          "time_us": 0.0,
+          "details": []
+        },
+        "converged": true,
+        "final_snap": {
+          "series": {
+            "bb20": {
+              "kind": "study",
+              "study": "bollinger",
+              "inputs": [
+                "px"
+              ],
+              "params": {
+                "k": 2.0,
+                "period": 20.0
+              }
+            },
+            "macd": {
+              "kind": "study",
+              "study": "macd",
+              "inputs": [
+                "px"
+              ],
+              "params": {
+                "fast": 12.0,
+                "signal": 9.0,
+                "slow": 26.0
+              }
+            },
+            "px": {
+              "kind": "inline",
+              "study": "",
+              "inputs": [],
+              "params": {}
+            },
+            "rsi14": {
+              "kind": "study",
+              "study": "rsi",
+              "inputs": [
+                "px"
+              ],
+              "params": {
+                "period": 14.0
+              }
+            }
+          },
+          "layers": [
+            {
+              "mark": "candle",
+              "series": "px",
+              "panel": 0
+            },
+            {
+              "mark": "line",
+              "series": "rsi14",
+              "panel": 1
+            },
+            {
+              "mark": "line",
+              "series": "macd",
+              "panel": 1
+            },
+            {
+              "mark": "rule",
+              "series": null,
+              "panel": 1
+            },
+            {
+              "mark": "line",
+              "series": "macd",
+              "panel": 2
+            }
+          ],
+          "facts": {
+            "fact-rsi-cross70": "rsi14"
+          },
+          "findings": {
+            "fnd-overbought": {
+              "claim": "THYAO günlükte RSI(14) aşırı alım bölgesine girdi; momentum güçlü.",
+              "confidence": 0.65,
+              "inval_series": "rsi14",
+              "facts": [
+                "fact-rsi-cross70"
+              ]
+            }
+          },
+          "capsules": {
+            "cap-overbought": {
+              "finding": "fnd-overbought",
+              "state": "live"
+            }
+          },
+          "intents": {},
+          "ledger": []
+        },
+        "anomalies": {
+          "dangling_layer": 0,
+          "dangling_ref": 0,
+          "orphan": 0,
+          "decision_mismatch": 0,
+          "stale_decision": 0,
+          "invalid_item": 0
+        },
+        "undo": {
+          "attempted": 0,
+          "applied": 0,
+          "refused_conflict": 0,
+          "nothing_or_unsupported": 0,
+          "clobbered_others": 0
+        },
+        "extra": {
+          "blind_overwrites": 0,
+          "log_entries": 2
+        }
+      },
+      {
+        "model": "B-automerge",
+        "experiences": [
+          [
+            "arkin",
+            "remove_layer",
+            "Applied"
+          ],
+          [
+            "scout",
+            "add_layer",
+            "Applied"
+          ]
+        ],
+        "reconnect": {
+          "queued": 0,
+          "applied": 0,
+          "applied_after_retry": 0,
+          "refused": 0,
+          "codes": {},
+          "bytes_up": 0,
+          "bytes_down": 0,
+          "round_trips": 0,
+          "time_us": 0.0,
+          "details": []
+        },
+        "converged": true,
+        "final_snap": {
+          "series": {
+            "bb20": {
+              "kind": "study",
+              "study": "bollinger",
+              "inputs": [
+                "px"
+              ],
+              "params": {
+                "k": 2.0,
+                "period": 20.0
+              }
+            },
+            "macd": {
+              "kind": "study",
+              "study": "macd",
+              "inputs": [
+                "px"
+              ],
+              "params": {
+                "fast": 12.0,
+                "signal": 9.0,
+                "slow": 26.0
+              }
+            },
+            "px": {
+              "kind": "inline",
+              "study": "",
+              "inputs": [],
+              "params": {}
+            },
+            "rsi14": {
+              "kind": "study",
+              "study": "rsi",
+              "inputs": [
+                "px"
+              ],
+              "params": {
+                "period": 14.0
+              }
+            }
+          },
+          "layers": [
+            {
+              "mark": "candle",
+              "series": "px",
+              "panel": 0
+            },
+            {
+              "mark": "line",
+              "series": "macd",
+              "panel": 1
+            },
+            {
+              "mark": "line",
+              "series": "rsi14",
+              "panel": 1
+            },
+            {
+              "mark": "rule",
+              "series": null,
+              "panel": 1
+            },
+            {
+              "mark": "line",
+              "series": "macd",
+              "panel": 2
+            }
+          ],
+          "facts": {
+            "fact-rsi-cross70": "rsi14"
+          },
+          "findings": {
+            "fnd-overbought": {
+              "claim": "THYAO günlükte RSI(14) aşırı alım bölgesine girdi; momentum güçlü.",
+              "confidence": 0.65,
+              "inval_series": "rsi14",
+              "facts": [
+                "fact-rsi-cross70"
+              ]
+            }
+          },
+          "capsules": {
+            "cap-overbought": {
+              "finding": "fnd-overbought",
+              "state": "live"
+            }
+          },
+          "intents": {},
+          "ledger": []
+        },
+        "anomalies": {
+          "dangling_layer": 0,
+          "dangling_ref": 0,
+          "orphan": 0,
+          "decision_mismatch": 0,
+          "stale_decision": 0,
+          "invalid_item": 0
+        },
+        "undo": {
+          "attempted": 0,
+          "applied": 0,
+          "refused_conflict": 0,
+          "nothing_or_unsupported": 0,
+          "clobbered_others": 0
+        },
+        "extra": {
+          "visible_multi_value_conflicts_in_series": 0
+        }
+      },
+      {
+        "model": "C-loro",
+        "experiences": [
+          [
+            "arkin",
+            "remove_layer",
+            "Applied"
+          ],
+          [
+            "scout",
+            "add_layer",
+            "Applied"
+          ]
+        ],
+        "reconnect": {
+          "queued": 0,
+          "applied": 0,
+          "applied_after_retry": 0,
+          "refused": 0,
+          "codes": {},
+          "bytes_up": 0,
+          "bytes_down": 0,
+          "round_trips": 0,
+          "time_us": 0.0,
+          "details": []
+        },
+        "converged": true,
+        "final_snap": {
+          "series": {
+            "bb20": {
+              "kind": "study",
+              "study": "bollinger",
+              "inputs": [
+                "px"
+              ],
+              "params": {
+                "k": 2.0,
+                "period": 20.0
+              }
+            },
+            "macd": {
+              "kind": "study",
+              "study": "macd",
+              "inputs": [
+                "px"
+              ],
+              "params": {
+                "fast": 12.0,
+                "signal": 9.0,
+                "slow": 26.0
+              }
+            },
+            "px": {
+              "kind": "inline",
+              "study": "",
+              "inputs": [],
+              "params": {}
+            },
+            "rsi14": {
+              "kind": "study",
+              "study": "rsi",
+              "inputs": [
+                "px"
+              ],
+              "params": {
+                "period": 14.0
+              }
+            }
+          },
+          "layers": [
+            {
+              "mark": "candle",
+              "series": "px",
+              "panel": 0
+            },
+            {
+              "mark": "line",
+              "series": "macd",
+              "panel": 1
+            },
+            {
+              "mark": "line",
+              "series": "rsi14",
+              "panel": 1
+            },
+            {
+              "mark": "rule",
+              "series": null,
+              "panel": 1
+            },
+            {
+              "mark": "line",
+              "series": "macd",
+              "panel": 2
+            }
+          ],
+          "facts": {
+            "fact-rsi-cross70": "rsi14"
+          },
+          "findings": {
+            "fnd-overbought": {
+              "claim": "THYAO günlükte RSI(14) aşırı alım bölgesine girdi; momentum güçlü.",
+              "confidence": 0.65,
+              "inval_series": "rsi14",
+              "facts": [
+                "fact-rsi-cross70"
+              ]
+            }
+          },
+          "capsules": {
+            "cap-overbought": {
+              "finding": "fnd-overbought",
+              "state": "live"
+            }
+          },
+          "intents": {},
+          "ledger": []
+        },
+        "anomalies": {
+          "dangling_layer": 0,
+          "dangling_ref": 0,
+          "orphan": 0,
+          "decision_mismatch": 0,
+          "stale_decision": 0,
+          "invalid_item": 0
+        },
+        "undo": {
+          "attempted": 0,
+          "applied": 0,
+          "refused_conflict": 0,
+          "nothing_or_unsupported": 0,
+          "clobbered_others": 0
+        },
+        "extra": {}
+      }
+    ],
+    "facts": {
+      "A-log(base,own-excl)": {
+        "layers": "candle:px, line:macd, line:rsi14, rule:-, line:macd"
+      },
+      "A-log(no-base)": {
+        "layers": "candle:px, line:rsi14, line:macd, rule:-, line:macd"
+      },
+      "B-automerge": {
+        "layers": "candle:px, line:macd, line:rsi14, rule:-, line:macd"
+      },
+      "C-loro": {
+        "layers": "candle:px, line:macd, line:rsi14, rule:-, line:macd"
+      }
+    }
+  },
+  {
+    "case": "C3",
+    "what": "same round: arkin rejects fnd-overbought; scout updates its claim",
+    "results": [
+      {
+        "model": "A-log(base,own-excl)",
+        "experiences": [
+          [
+            "arkin",
+            "decide",
+            "Applied"
+          ],
+          [
+            "scout",
+            "update_finding",
+            "Refused([Invalid, Invalid])"
+          ]
+        ],
+        "reconnect": {
+          "queued": 0,
+          "applied": 0,
+          "applied_after_retry": 0,
+          "refused": 0,
+          "codes": {},
+          "bytes_up": 0,
+          "bytes_down": 0,
+          "round_trips": 0,
+          "time_us": 0.0,
+          "details": []
+        },
+        "converged": true,
+        "final_snap": {
+          "series": {
+            "bb20": {
+              "kind": "study",
+              "study": "bollinger",
+              "inputs": [
+                "px"
+              ],
+              "params": {
+                "k": 2.0,
+                "period": 20.0
+              }
+            },
+            "macd": {
+              "kind": "study",
+              "study": "macd",
+              "inputs": [
+                "px"
+              ],
+              "params": {
+                "fast": 12.0,
+                "signal": 9.0,
+                "slow": 26.0
+              }
+            },
+            "px": {
+              "kind": "inline",
+              "study": "",
+              "inputs": [],
+              "params": {}
+            },
+            "rsi14": {
+              "kind": "study",
+              "study": "rsi",
+              "inputs": [
+                "px"
+              ],
+              "params": {
+                "period": 14.0
+              }
+            }
+          },
+          "layers": [
+            {
+              "mark": "candle",
+              "series": "px",
+              "panel": 0
+            },
+            {
+              "mark": "line",
+              "series": "bb20",
+              "panel": 0
+            },
+            {
+              "mark": "line",
+              "series": "rsi14",
+              "panel": 1
+            },
+            {
+              "mark": "rule",
+              "series": null,
+              "panel": 1
+            },
+            {
+              "mark": "line",
+              "series": "macd",
+              "panel": 2
+            }
+          ],
+          "facts": {
+            "fact-rsi-cross70": "rsi14"
+          },
+          "findings": {
+            "fnd-overbought": {
+              "claim": "THYAO günlükte RSI(14) aşırı alım bölgesine girdi; momentum güçlü.",
+              "confidence": 0.65,
+              "inval_series": "rsi14",
+              "facts": [
+                "fact-rsi-cross70"
+              ]
+            }
+          },
+          "capsules": {
+            "cap-overbought": {
+              "finding": "fnd-overbought",
+              "state": "rejected"
+            }
+          },
+          "intents": {},
+          "ledger": [
+            {
+              "finding": "fnd-overbought",
+              "state": "rejected",
+              "decided_claim": "THYAO günlükte RSI(14) aşırı alım bölgesine girdi; momentum güçlü."
+            }
+          ]
+        },
+        "anomalies": {
+          "dangling_layer": 0,
+          "dangling_ref": 0,
+          "orphan": 0,
+          "decision_mismatch": 0,
+          "stale_decision": 0,
+          "invalid_item": 0
+        },
+        "undo": {
+          "attempted": 0,
+          "applied": 0,
+          "refused_conflict": 0,
+          "nothing_or_unsupported": 0,
+          "clobbered_others": 0
+        },
+        "extra": {
+          "blind_overwrites": 0,
+          "log_entries": 1,
+          "validation_errors": 1
+        }
+      },
+      {
+        "model": "A-log(no-base)",
+        "experiences": [
+          [
+            "arkin",
+            "decide",
+            "Applied"
+          ],
+          [
+            "scout",
+            "update_finding",
+            "Refused([Invalid, Invalid])"
+          ]
+        ],
+        "reconnect": {
+          "queued": 0,
+          "applied": 0,
+          "applied_after_retry": 0,
+          "refused": 0,
+          "codes": {},
+          "bytes_up": 0,
+          "bytes_down": 0,
+          "round_trips": 0,
+          "time_us": 0.0,
+          "details": []
+        },
+        "converged": true,
+        "final_snap": {
+          "series": {
+            "bb20": {
+              "kind": "study",
+              "study": "bollinger",
+              "inputs": [
+                "px"
+              ],
+              "params": {
+                "k": 2.0,
+                "period": 20.0
+              }
+            },
+            "macd": {
+              "kind": "study",
+              "study": "macd",
+              "inputs": [
+                "px"
+              ],
+              "params": {
+                "fast": 12.0,
+                "signal": 9.0,
+                "slow": 26.0
+              }
+            },
+            "px": {
+              "kind": "inline",
+              "study": "",
+              "inputs": [],
+              "params": {}
+            },
+            "rsi14": {
+              "kind": "study",
+              "study": "rsi",
+              "inputs": [
+                "px"
+              ],
+              "params": {
+                "period": 14.0
+              }
+            }
+          },
+          "layers": [
+            {
+              "mark": "candle",
+              "series": "px",
+              "panel": 0
+            },
+            {
+              "mark": "line",
+              "series": "bb20",
+              "panel": 0
+            },
+            {
+              "mark": "line",
+              "series": "rsi14",
+              "panel": 1
+            },
+            {
+              "mark": "rule",
+              "series": null,
+              "panel": 1
+            },
+            {
+              "mark": "line",
+              "series": "macd",
+              "panel": 2
+            }
+          ],
+          "facts": {
+            "fact-rsi-cross70": "rsi14"
+          },
+          "findings": {
+            "fnd-overbought": {
+              "claim": "THYAO günlükte RSI(14) aşırı alım bölgesine girdi; momentum güçlü.",
+              "confidence": 0.65,
+              "inval_series": "rsi14",
+              "facts": [
+                "fact-rsi-cross70"
+              ]
+            }
+          },
+          "capsules": {
+            "cap-overbought": {
+              "finding": "fnd-overbought",
+              "state": "rejected"
+            }
+          },
+          "intents": {},
+          "ledger": [
+            {
+              "finding": "fnd-overbought",
+              "state": "rejected",
+              "decided_claim": "THYAO günlükte RSI(14) aşırı alım bölgesine girdi; momentum güçlü."
+            }
+          ]
+        },
+        "anomalies": {
+          "dangling_layer": 0,
+          "dangling_ref": 0,
+          "orphan": 0,
+          "decision_mismatch": 0,
+          "stale_decision": 0,
+          "invalid_item": 0
+        },
+        "undo": {
+          "attempted": 0,
+          "applied": 0,
+          "refused_conflict": 0,
+          "nothing_or_unsupported": 0,
+          "clobbered_others": 0
+        },
+        "extra": {
+          "blind_overwrites": 0,
+          "log_entries": 1,
+          "validation_errors": 1
+        }
+      },
+      {
+        "model": "B-automerge",
+        "experiences": [
+          [
+            "arkin",
+            "decide",
+            "Applied"
+          ],
+          [
+            "scout",
+            "update_finding",
+            "Applied"
+          ]
+        ],
+        "reconnect": {
+          "queued": 0,
+          "applied": 0,
+          "applied_after_retry": 0,
+          "refused": 0,
+          "codes": {},
+          "bytes_up": 0,
+          "bytes_down": 0,
+          "round_trips": 0,
+          "time_us": 0.0,
+          "details": []
+        },
+        "converged": true,
+        "final_snap": {
+          "series": {
+            "bb20": {
+              "kind": "study",
+              "study": "bollinger",
+              "inputs": [
+                "px"
+              ],
+              "params": {
+                "k": 2.0,
+                "period": 20.0
+              }
+            },
+            "macd": {
+              "kind": "study",
+              "study": "macd",
+              "inputs": [
+                "px"
+              ],
+              "params": {
+                "fast": 12.0,
+                "signal": 9.0,
+                "slow": 26.0
+              }
+            },
+            "px": {
+              "kind": "inline",
+              "study": "",
+              "inputs": [],
+              "params": {}
+            },
+            "rsi14": {
+              "kind": "study",
+              "study": "rsi",
+              "inputs": [
+                "px"
+              ],
+              "params": {
+                "period": 14.0
+              }
+            }
+          },
+          "layers": [
+            {
+              "mark": "candle",
+              "series": "px",
+              "panel": 0
+            },
+            {
+              "mark": "line",
+              "series": "bb20",
+              "panel": 0
+            },
+            {
+              "mark": "line",
+              "series": "rsi14",
+              "panel": 1
+            },
+            {
+              "mark": "rule",
+              "series": null,
+              "panel": 1
+            },
+            {
+              "mark": "line",
+              "series": "macd",
+              "panel": 2
+            }
+          ],
+          "facts": {
+            "fact-rsi-cross70": "rsi14"
+          },
+          "findings": {
+            "fnd-overbought": {
+              "claim": "Momentum çok güçlü, hedef 120.",
+              "confidence": 0.9,
+              "inval_series": "rsi14",
+              "facts": [
+                "fact-rsi-cross70"
+              ]
+            }
+          },
+          "capsules": {
+            "cap-overbought": {
+              "finding": "fnd-overbought",
+              "state": "rejected"
+            }
+          },
+          "intents": {},
+          "ledger": [
+            {
+              "finding": "fnd-overbought",
+              "state": "rejected",
+              "decided_claim": "THYAO günlükte RSI(14) aşırı alım bölgesine girdi; momentum güçlü."
+            }
+          ]
+        },
+        "anomalies": {
+          "dangling_layer": 0,
+          "dangling_ref": 0,
+          "orphan": 0,
+          "decision_mismatch": 0,
+          "stale_decision": 1,
+          "invalid_item": 0
+        },
+        "undo": {
+          "attempted": 0,
+          "applied": 0,
+          "refused_conflict": 0,
+          "nothing_or_unsupported": 0,
+          "clobbered_others": 0
+        },
+        "extra": {
+          "visible_multi_value_conflicts_in_series": 0
+        }
+      },
+      {
+        "model": "C-loro",
+        "experiences": [
+          [
+            "arkin",
+            "decide",
+            "Applied"
+          ],
+          [
+            "scout",
+            "update_finding",
+            "Applied"
+          ]
+        ],
+        "reconnect": {
+          "queued": 0,
+          "applied": 0,
+          "applied_after_retry": 0,
+          "refused": 0,
+          "codes": {},
+          "bytes_up": 0,
+          "bytes_down": 0,
+          "round_trips": 0,
+          "time_us": 0.0,
+          "details": []
+        },
+        "converged": true,
+        "final_snap": {
+          "series": {
+            "bb20": {
+              "kind": "study",
+              "study": "bollinger",
+              "inputs": [
+                "px"
+              ],
+              "params": {
+                "k": 2.0,
+                "period": 20.0
+              }
+            },
+            "macd": {
+              "kind": "study",
+              "study": "macd",
+              "inputs": [
+                "px"
+              ],
+              "params": {
+                "fast": 12.0,
+                "signal": 9.0,
+                "slow": 26.0
+              }
+            },
+            "px": {
+              "kind": "inline",
+              "study": "",
+              "inputs": [],
+              "params": {}
+            },
+            "rsi14": {
+              "kind": "study",
+              "study": "rsi",
+              "inputs": [
+                "px"
+              ],
+              "params": {
+                "period": 14.0
+              }
+            }
+          },
+          "layers": [
+            {
+              "mark": "candle",
+              "series": "px",
+              "panel": 0
+            },
+            {
+              "mark": "line",
+              "series": "bb20",
+              "panel": 0
+            },
+            {
+              "mark": "line",
+              "series": "rsi14",
+              "panel": 1
+            },
+            {
+              "mark": "rule",
+              "series": null,
+              "panel": 1
+            },
+            {
+              "mark": "line",
+              "series": "macd",
+              "panel": 2
+            }
+          ],
+          "facts": {
+            "fact-rsi-cross70": "rsi14"
+          },
+          "findings": {
+            "fnd-overbought": {
+              "claim": "Momentum çok güçlü, hedef 120.",
+              "confidence": 0.9,
+              "inval_series": "rsi14",
+              "facts": [
+                "fact-rsi-cross70"
+              ]
+            }
+          },
+          "capsules": {
+            "cap-overbought": {
+              "finding": "fnd-overbought",
+              "state": "rejected"
+            }
+          },
+          "intents": {},
+          "ledger": [
+            {
+              "finding": "fnd-overbought",
+              "state": "rejected",
+              "decided_claim": "THYAO günlükte RSI(14) aşırı alım bölgesine girdi; momentum güçlü."
+            }
+          ]
+        },
+        "anomalies": {
+          "dangling_layer": 0,
+          "dangling_ref": 0,
+          "orphan": 0,
+          "decision_mismatch": 0,
+          "stale_decision": 1,
+          "invalid_item": 0
+        },
+        "undo": {
+          "attempted": 0,
+          "applied": 0,
+          "refused_conflict": 0,
+          "nothing_or_unsupported": 0,
+          "clobbered_others": 0
+        },
+        "extra": {}
+      }
+    ],
+    "facts": {
+      "A-log(base,own-excl)": {
+        "capsule": "rejected",
+        "claim": "THYAO günlükte RSI(14) aşırı alım bölgesine girdi; momentum güçlü.",
+        "ledger": "[(\"rejected\", \"THYAO günlükte RSI(14) aşırı alım bölgesine girdi; momentum güçlü.\")]",
+        "writer(capsule.state)": "arkin @seq 1",
+        "writer(finding.claim)": "initial document"
+      },
+      "A-log(no-base)": {
+        "capsule": "rejected",
+        "claim": "THYAO günlükte RSI(14) aşırı alım bölgesine girdi; momentum güçlü.",
+        "ledger": "[(\"rejected\", \"THYAO günlükte RSI(14) aşırı alım bölgesine girdi; momentum güçlü.\")]",
+        "writer(capsule.state)": "arkin @seq 1",
+        "writer(finding.claim)": "initial document"
+      },
+      "B-automerge": {
+        "capsule": "rejected",
+        "claim": "Momentum çok güçlü, hedef 120.",
+        "ledger": "[(\"rejected\", \"THYAO günlükte RSI(14) aşırı alım bölgesine girdi; momentum güçlü.\")]",
+        "writer(capsule.state)": "arkin",
+        "writer(finding.claim)": "scout"
+      },
+      "C-loro": {
+        "capsule": "rejected",
+        "claim": "Momentum çok güçlü, hedef 120.",
+        "ledger": "[(\"rejected\", \"THYAO günlükte RSI(14) aşırı alım bölgesine girdi; momentum güçlü.\")]",
+        "writer(capsule.state)": "arkin",
+        "writer(finding.claim)": "scout"
+      }
+    }
+  },
+  {
+    "case": "C3b",
+    "what": "same round, reverse order: scout updates the claim first, then arkin rejects",
+    "results": [
+      {
+        "model": "A-log(base,own-excl)",
+        "experiences": [
+          [
+            "scout",
+            "update_finding",
+            "Applied"
+          ],
+          [
+            "arkin",
+            "decide",
+            "AppliedAfterRetry([Conflict])"
+          ]
+        ],
+        "reconnect": {
+          "queued": 0,
+          "applied": 0,
+          "applied_after_retry": 0,
+          "refused": 0,
+          "codes": {},
+          "bytes_up": 0,
+          "bytes_down": 0,
+          "round_trips": 0,
+          "time_us": 0.0,
+          "details": []
+        },
+        "converged": true,
+        "final_snap": {
+          "series": {
+            "bb20": {
+              "kind": "study",
+              "study": "bollinger",
+              "inputs": [
+                "px"
+              ],
+              "params": {
+                "k": 2.0,
+                "period": 20.0
+              }
+            },
+            "macd": {
+              "kind": "study",
+              "study": "macd",
+              "inputs": [
+                "px"
+              ],
+              "params": {
+                "fast": 12.0,
+                "signal": 9.0,
+                "slow": 26.0
+              }
+            },
+            "px": {
+              "kind": "inline",
+              "study": "",
+              "inputs": [],
+              "params": {}
+            },
+            "rsi14": {
+              "kind": "study",
+              "study": "rsi",
+              "inputs": [
+                "px"
+              ],
+              "params": {
+                "period": 14.0
+              }
+            }
+          },
+          "layers": [
+            {
+              "mark": "candle",
+              "series": "px",
+              "panel": 0
+            },
+            {
+              "mark": "line",
+              "series": "bb20",
+              "panel": 0
+            },
+            {
+              "mark": "line",
+              "series": "rsi14",
+              "panel": 1
+            },
+            {
+              "mark": "rule",
+              "series": null,
+              "panel": 1
+            },
+            {
+              "mark": "line",
+              "series": "macd",
+              "panel": 2
+            }
+          ],
+          "facts": {
+            "fact-rsi-cross70": "rsi14"
+          },
+          "findings": {
+            "fnd-overbought": {
+              "claim": "Momentum çok güçlü, hedef 120.",
+              "confidence": 0.9,
+              "inval_series": "rsi14",
+              "facts": [
+                "fact-rsi-cross70"
+              ]
+            }
+          },
+          "capsules": {
+            "cap-overbought": {
+              "finding": "fnd-overbought",
+              "state": "rejected"
+            }
+          },
+          "intents": {},
+          "ledger": [
+            {
+              "finding": "fnd-overbought",
+              "state": "rejected",
+              "decided_claim": "Momentum çok güçlü, hedef 120."
+            }
+          ]
+        },
+        "anomalies": {
+          "dangling_layer": 0,
+          "dangling_ref": 0,
+          "orphan": 0,
+          "decision_mismatch": 0,
+          "stale_decision": 0,
+          "invalid_item": 0
+        },
+        "undo": {
+          "attempted": 0,
+          "applied": 0,
+          "refused_conflict": 0,
+          "nothing_or_unsupported": 0,
+          "clobbered_others": 0
+        },
+        "extra": {
+          "blind_overwrites": 0,
+          "conflicts": 1,
+          "conflicts:reject_finding vs update_finding": 1,
+          "log_entries": 2
+        }
+      },
+      {
+        "model": "A-log(no-base)",
+        "experiences": [
+          [
+            "scout",
+            "update_finding",
+            "Applied"
+          ],
+          [
+            "arkin",
+            "decide",
+            "Applied"
+          ]
+        ],
+        "reconnect": {
+          "queued": 0,
+          "applied": 0,
+          "applied_after_retry": 0,
+          "refused": 0,
+          "codes": {},
+          "bytes_up": 0,
+          "bytes_down": 0,
+          "round_trips": 0,
+          "time_us": 0.0,
+          "details": []
+        },
+        "converged": true,
+        "final_snap": {
+          "series": {
+            "bb20": {
+              "kind": "study",
+              "study": "bollinger",
+              "inputs": [
+                "px"
+              ],
+              "params": {
+                "k": 2.0,
+                "period": 20.0
+              }
+            },
+            "macd": {
+              "kind": "study",
+              "study": "macd",
+              "inputs": [
+                "px"
+              ],
+              "params": {
+                "fast": 12.0,
+                "signal": 9.0,
+                "slow": 26.0
+              }
+            },
+            "px": {
+              "kind": "inline",
+              "study": "",
+              "inputs": [],
+              "params": {}
+            },
+            "rsi14": {
+              "kind": "study",
+              "study": "rsi",
+              "inputs": [
+                "px"
+              ],
+              "params": {
+                "period": 14.0
+              }
+            }
+          },
+          "layers": [
+            {
+              "mark": "candle",
+              "series": "px",
+              "panel": 0
+            },
+            {
+              "mark": "line",
+              "series": "bb20",
+              "panel": 0
+            },
+            {
+              "mark": "line",
+              "series": "rsi14",
+              "panel": 1
+            },
+            {
+              "mark": "rule",
+              "series": null,
+              "panel": 1
+            },
+            {
+              "mark": "line",
+              "series": "macd",
+              "panel": 2
+            }
+          ],
+          "facts": {
+            "fact-rsi-cross70": "rsi14"
+          },
+          "findings": {
+            "fnd-overbought": {
+              "claim": "Momentum çok güçlü, hedef 120.",
+              "confidence": 0.9,
+              "inval_series": "rsi14",
+              "facts": [
+                "fact-rsi-cross70"
+              ]
+            }
+          },
+          "capsules": {
+            "cap-overbought": {
+              "finding": "fnd-overbought",
+              "state": "rejected"
+            }
+          },
+          "intents": {},
+          "ledger": [
+            {
+              "finding": "fnd-overbought",
+              "state": "rejected",
+              "decided_claim": "Momentum çok güçlü, hedef 120."
+            }
+          ]
+        },
+        "anomalies": {
+          "dangling_layer": 0,
+          "dangling_ref": 0,
+          "orphan": 0,
+          "decision_mismatch": 0,
+          "stale_decision": 0,
+          "invalid_item": 0
+        },
+        "undo": {
+          "attempted": 0,
+          "applied": 0,
+          "refused_conflict": 0,
+          "nothing_or_unsupported": 0,
+          "clobbered_others": 0
+        },
+        "extra": {
+          "blind_overwrites": 0,
+          "log_entries": 2
+        }
+      },
+      {
+        "model": "B-automerge",
+        "experiences": [
+          [
+            "scout",
+            "update_finding",
+            "Applied"
+          ],
+          [
+            "arkin",
+            "decide",
+            "Applied"
+          ]
+        ],
+        "reconnect": {
+          "queued": 0,
+          "applied": 0,
+          "applied_after_retry": 0,
+          "refused": 0,
+          "codes": {},
+          "bytes_up": 0,
+          "bytes_down": 0,
+          "round_trips": 0,
+          "time_us": 0.0,
+          "details": []
+        },
+        "converged": true,
+        "final_snap": {
+          "series": {
+            "bb20": {
+              "kind": "study",
+              "study": "bollinger",
+              "inputs": [
+                "px"
+              ],
+              "params": {
+                "k": 2.0,
+                "period": 20.0
+              }
+            },
+            "macd": {
+              "kind": "study",
+              "study": "macd",
+              "inputs": [
+                "px"
+              ],
+              "params": {
+                "fast": 12.0,
+                "signal": 9.0,
+                "slow": 26.0
+              }
+            },
+            "px": {
+              "kind": "inline",
+              "study": "",
+              "inputs": [],
+              "params": {}
+            },
+            "rsi14": {
+              "kind": "study",
+              "study": "rsi",
+              "inputs": [
+                "px"
+              ],
+              "params": {
+                "period": 14.0
+              }
+            }
+          },
+          "layers": [
+            {
+              "mark": "candle",
+              "series": "px",
+              "panel": 0
+            },
+            {
+              "mark": "line",
+              "series": "bb20",
+              "panel": 0
+            },
+            {
+              "mark": "line",
+              "series": "rsi14",
+              "panel": 1
+            },
+            {
+              "mark": "rule",
+              "series": null,
+              "panel": 1
+            },
+            {
+              "mark": "line",
+              "series": "macd",
+              "panel": 2
+            }
+          ],
+          "facts": {
+            "fact-rsi-cross70": "rsi14"
+          },
+          "findings": {
+            "fnd-overbought": {
+              "claim": "Momentum çok güçlü, hedef 120.",
+              "confidence": 0.9,
+              "inval_series": "rsi14",
+              "facts": [
+                "fact-rsi-cross70"
+              ]
+            }
+          },
+          "capsules": {
+            "cap-overbought": {
+              "finding": "fnd-overbought",
+              "state": "rejected"
+            }
+          },
+          "intents": {},
+          "ledger": [
+            {
+              "finding": "fnd-overbought",
+              "state": "rejected",
+              "decided_claim": "THYAO günlükte RSI(14) aşırı alım bölgesine girdi; momentum güçlü."
+            }
+          ]
+        },
+        "anomalies": {
+          "dangling_layer": 0,
+          "dangling_ref": 0,
+          "orphan": 0,
+          "decision_mismatch": 0,
+          "stale_decision": 1,
+          "invalid_item": 0
+        },
+        "undo": {
+          "attempted": 0,
+          "applied": 0,
+          "refused_conflict": 0,
+          "nothing_or_unsupported": 0,
+          "clobbered_others": 0
+        },
+        "extra": {
+          "visible_multi_value_conflicts_in_series": 0
+        }
+      },
+      {
+        "model": "C-loro",
+        "experiences": [
+          [
+            "scout",
+            "update_finding",
+            "Applied"
+          ],
+          [
+            "arkin",
+            "decide",
+            "Applied"
+          ]
+        ],
+        "reconnect": {
+          "queued": 0,
+          "applied": 0,
+          "applied_after_retry": 0,
+          "refused": 0,
+          "codes": {},
+          "bytes_up": 0,
+          "bytes_down": 0,
+          "round_trips": 0,
+          "time_us": 0.0,
+          "details": []
+        },
+        "converged": true,
+        "final_snap": {
+          "series": {
+            "bb20": {
+              "kind": "study",
+              "study": "bollinger",
+              "inputs": [
+                "px"
+              ],
+              "params": {
+                "k": 2.0,
+                "period": 20.0
+              }
+            },
+            "macd": {
+              "kind": "study",
+              "study": "macd",
+              "inputs": [
+                "px"
+              ],
+              "params": {
+                "fast": 12.0,
+                "signal": 9.0,
+                "slow": 26.0
+              }
+            },
+            "px": {
+              "kind": "inline",
+              "study": "",
+              "inputs": [],
+              "params": {}
+            },
+            "rsi14": {
+              "kind": "study",
+              "study": "rsi",
+              "inputs": [
+                "px"
+              ],
+              "params": {
+                "period": 14.0
+              }
+            }
+          },
+          "layers": [
+            {
+              "mark": "candle",
+              "series": "px",
+              "panel": 0
+            },
+            {
+              "mark": "line",
+              "series": "bb20",
+              "panel": 0
+            },
+            {
+              "mark": "line",
+              "series": "rsi14",
+              "panel": 1
+            },
+            {
+              "mark": "rule",
+              "series": null,
+              "panel": 1
+            },
+            {
+              "mark": "line",
+              "series": "macd",
+              "panel": 2
+            }
+          ],
+          "facts": {
+            "fact-rsi-cross70": "rsi14"
+          },
+          "findings": {
+            "fnd-overbought": {
+              "claim": "Momentum çok güçlü, hedef 120.",
+              "confidence": 0.9,
+              "inval_series": "rsi14",
+              "facts": [
+                "fact-rsi-cross70"
+              ]
+            }
+          },
+          "capsules": {
+            "cap-overbought": {
+              "finding": "fnd-overbought",
+              "state": "rejected"
+            }
+          },
+          "intents": {},
+          "ledger": [
+            {
+              "finding": "fnd-overbought",
+              "state": "rejected",
+              "decided_claim": "THYAO günlükte RSI(14) aşırı alım bölgesine girdi; momentum güçlü."
+            }
+          ]
+        },
+        "anomalies": {
+          "dangling_layer": 0,
+          "dangling_ref": 0,
+          "orphan": 0,
+          "decision_mismatch": 0,
+          "stale_decision": 1,
+          "invalid_item": 0
+        },
+        "undo": {
+          "attempted": 0,
+          "applied": 0,
+          "refused_conflict": 0,
+          "nothing_or_unsupported": 0,
+          "clobbered_others": 0
+        },
+        "extra": {}
+      }
+    ],
+    "facts": {
+      "A-log(base,own-excl)": {
+        "capsule": "rejected",
+        "claim": "Momentum çok güçlü, hedef 120.",
+        "ledger": "[(\"rejected\", \"Momentum çok güçlü, hedef 120.\")]"
+      },
+      "A-log(no-base)": {
+        "capsule": "rejected",
+        "claim": "Momentum çok güçlü, hedef 120.",
+        "ledger": "[(\"rejected\", \"Momentum çok güçlü, hedef 120.\")]"
+      },
+      "B-automerge": {
+        "capsule": "rejected",
+        "claim": "Momentum çok güçlü, hedef 120.",
+        "ledger": "[(\"rejected\", \"THYAO günlükte RSI(14) aşırı alım bölgesine girdi; momentum güçlü.\")]"
+      },
+      "C-loro": {
+        "capsule": "rejected",
+        "claim": "Momentum çok güçlü, hedef 120.",
+        "ledger": "[(\"rejected\", \"THYAO günlükte RSI(14) aşırı alım bölgesine girdi; momentum güçlü.\")]"
+      }
+    }
+  },
+  {
+    "case": "C4",
+    "what": "editor offline adds sma20 (period 50, shown); arkin adds sma20 (period 20, shown); editor returns",
+    "results": [
+      {
+        "model": "A-log(base,own-excl)",
+        "experiences": [
+          [
+            "editor",
+            "add_study",
+            "Queued"
+          ],
+          [
+            "arkin",
+            "add_study",
+            "Applied"
+          ]
+        ],
+        "reconnect": {
+          "queued": 1,
+          "applied": 0,
+          "applied_after_retry": 0,
+          "refused": 1,
+          "codes": {
+            "Duplicate": 2
+          },
+          "bytes_up": 165,
+          "bytes_down": 887,
+          "round_trips": 4,
+          "time_us": 0.0,
+          "details": [
+            "add_study: Refused([Duplicate, Duplicate])"
+          ]
+        },
+        "converged": true,
+        "final_snap": {
+          "series": {
+            "bb20": {
+              "kind": "study",
+              "study": "bollinger",
+              "inputs": [
+                "px"
+              ],
+              "params": {
+                "k": 2.0,
+                "period": 20.0
+              }
+            },
+            "macd": {
+              "kind": "study",
+              "study": "macd",
+              "inputs": [
+                "px"
+              ],
+              "params": {
+                "fast": 12.0,
+                "signal": 9.0,
+                "slow": 26.0
+              }
+            },
+            "px": {
+              "kind": "inline",
+              "study": "",
+              "inputs": [],
+              "params": {}
+            },
+            "rsi14": {
+              "kind": "study",
+              "study": "rsi",
+              "inputs": [
+                "px"
+              ],
+              "params": {
+                "period": 14.0
+              }
+            },
+            "sma20": {
+              "kind": "study",
+              "study": "sma",
+              "inputs": [
+                "px"
+              ],
+              "params": {
+                "period": 20.0
+              }
+            }
+          },
+          "layers": [
+            {
+              "mark": "candle",
+              "series": "px",
+              "panel": 0
+            },
+            {
+              "mark": "line",
+              "series": "bb20",
+              "panel": 0
+            },
+            {
+              "mark": "line",
+              "series": "rsi14",
+              "panel": 1
+            },
+            {
+              "mark": "rule",
+              "series": null,
+              "panel": 1
+            },
+            {
+              "mark": "line",
+              "series": "macd",
+              "panel": 2
+            },
+            {
+              "mark": "line",
+              "series": "sma20",
+              "panel": 0
+            }
+          ],
+          "facts": {
+            "fact-rsi-cross70": "rsi14"
+          },
+          "findings": {
+            "fnd-overbought": {
+              "claim": "THYAO günlükte RSI(14) aşırı alım bölgesine girdi; momentum güçlü.",
+              "confidence": 0.65,
+              "inval_series": "rsi14",
+              "facts": [
+                "fact-rsi-cross70"
+              ]
+            }
+          },
+          "capsules": {
+            "cap-overbought": {
+              "finding": "fnd-overbought",
+              "state": "live"
+            }
+          },
+          "intents": {},
+          "ledger": []
+        },
+        "anomalies": {
+          "dangling_layer": 0,
+          "dangling_ref": 0,
+          "orphan": 0,
+          "decision_mismatch": 0,
+          "stale_decision": 0,
+          "invalid_item": 0
+        },
+        "undo": {
+          "attempted": 0,
+          "applied": 0,
+          "refused_conflict": 0,
+          "nothing_or_unsupported": 0,
+          "clobbered_others": 0
+        },
+        "extra": {
+          "blind_overwrites": 0,
+          "log_entries": 1,
+          "reconnect_final_catchup_changes_only_bytes": 0,
+          "reconnect_final_catchup_log_query_bytes": 77,
+          "reconnect_final_catchup_snapshot_bytes": 18040,
+          "validation_errors": 1
+        }
+      },
+      {
+        "model": "A-log(no-base)",
+        "experiences": [
+          [
+            "editor",
+            "add_study",
+            "Queued"
+          ],
+          [
+            "arkin",
+            "add_study",
+            "Applied"
+          ]
+        ],
+        "reconnect": {
+          "queued": 1,
+          "applied": 0,
+          "applied_after_retry": 0,
+          "refused": 1,
+          "codes": {
+            "Duplicate": 2
+          },
+          "bytes_up": 156,
+          "bytes_down": 887,
+          "round_trips": 4,
+          "time_us": 0.0,
+          "details": [
+            "add_study: Refused([Duplicate, Duplicate])"
+          ]
+        },
+        "converged": true,
+        "final_snap": {
+          "series": {
+            "bb20": {
+              "kind": "study",
+              "study": "bollinger",
+              "inputs": [
+                "px"
+              ],
+              "params": {
+                "k": 2.0,
+                "period": 20.0
+              }
+            },
+            "macd": {
+              "kind": "study",
+              "study": "macd",
+              "inputs": [
+                "px"
+              ],
+              "params": {
+                "fast": 12.0,
+                "signal": 9.0,
+                "slow": 26.0
+              }
+            },
+            "px": {
+              "kind": "inline",
+              "study": "",
+              "inputs": [],
+              "params": {}
+            },
+            "rsi14": {
+              "kind": "study",
+              "study": "rsi",
+              "inputs": [
+                "px"
+              ],
+              "params": {
+                "period": 14.0
+              }
+            },
+            "sma20": {
+              "kind": "study",
+              "study": "sma",
+              "inputs": [
+                "px"
+              ],
+              "params": {
+                "period": 20.0
+              }
+            }
+          },
+          "layers": [
+            {
+              "mark": "candle",
+              "series": "px",
+              "panel": 0
+            },
+            {
+              "mark": "line",
+              "series": "bb20",
+              "panel": 0
+            },
+            {
+              "mark": "line",
+              "series": "rsi14",
+              "panel": 1
+            },
+            {
+              "mark": "rule",
+              "series": null,
+              "panel": 1
+            },
+            {
+              "mark": "line",
+              "series": "macd",
+              "panel": 2
+            },
+            {
+              "mark": "line",
+              "series": "sma20",
+              "panel": 0
+            }
+          ],
+          "facts": {
+            "fact-rsi-cross70": "rsi14"
+          },
+          "findings": {
+            "fnd-overbought": {
+              "claim": "THYAO günlükte RSI(14) aşırı alım bölgesine girdi; momentum güçlü.",
+              "confidence": 0.65,
+              "inval_series": "rsi14",
+              "facts": [
+                "fact-rsi-cross70"
+              ]
+            }
+          },
+          "capsules": {
+            "cap-overbought": {
+              "finding": "fnd-overbought",
+              "state": "live"
+            }
+          },
+          "intents": {},
+          "ledger": []
+        },
+        "anomalies": {
+          "dangling_layer": 0,
+          "dangling_ref": 0,
+          "orphan": 0,
+          "decision_mismatch": 0,
+          "stale_decision": 0,
+          "invalid_item": 0
+        },
+        "undo": {
+          "attempted": 0,
+          "applied": 0,
+          "refused_conflict": 0,
+          "nothing_or_unsupported": 0,
+          "clobbered_others": 0
+        },
+        "extra": {
+          "blind_overwrites": 0,
+          "log_entries": 1,
+          "reconnect_final_catchup_changes_only_bytes": 0,
+          "reconnect_final_catchup_log_query_bytes": 77,
+          "reconnect_final_catchup_snapshot_bytes": 18040,
+          "validation_errors": 1
+        }
+      },
+      {
+        "model": "B-automerge",
+        "experiences": [
+          [
+            "editor",
+            "add_study",
+            "Applied"
+          ],
+          [
+            "arkin",
+            "add_study",
+            "Applied"
+          ]
+        ],
+        "reconnect": {
+          "queued": 1,
+          "applied": 1,
+          "applied_after_retry": 0,
+          "refused": 0,
+          "codes": {},
+          "bytes_up": 393,
+          "bytes_down": 5915,
+          "round_trips": 2,
+          "time_us": 0.0,
+          "details": [
+            "all changes merged silently; no errors"
+          ]
+        },
+        "converged": true,
+        "final_snap": {
+          "series": {
+            "bb20": {
+              "kind": "study",
+              "study": "bollinger",
+              "inputs": [
+                "px"
+              ],
+              "params": {
+                "k": 2.0,
+                "period": 20.0
+              }
+            },
+            "macd": {
+              "kind": "study",
+              "study": "macd",
+              "inputs": [
+                "px"
+              ],
+              "params": {
+                "fast": 12.0,
+                "signal": 9.0,
+                "slow": 26.0
+              }
+            },
+            "px": {
+              "kind": "inline",
+              "study": "",
+              "inputs": [],
+              "params": {}
+            },
+            "rsi14": {
+              "kind": "study",
+              "study": "rsi",
+              "inputs": [
+                "px"
+              ],
+              "params": {
+                "period": 14.0
+              }
+            },
+            "sma20": {
+              "kind": "study",
+              "study": "sma",
+              "inputs": [
+                "px"
+              ],
+              "params": {
+                "period": 50.0
+              }
+            }
+          },
+          "layers": [
+            {
+              "mark": "candle",
+              "series": "px",
+              "panel": 0
+            },
+            {
+              "mark": "line",
+              "series": "bb20",
+              "panel": 0
+            },
+            {
+              "mark": "line",
+              "series": "rsi14",
+              "panel": 1
+            },
+            {
+              "mark": "rule",
+              "series": null,
+              "panel": 1
+            },
+            {
+              "mark": "line",
+              "series": "macd",
+              "panel": 2
+            },
+            {
+              "mark": "line",
+              "series": "sma20",
+              "panel": 0
+            },
+            {
+              "mark": "line",
+              "series": "sma20",
+              "panel": 0
+            }
+          ],
+          "facts": {
+            "fact-rsi-cross70": "rsi14"
+          },
+          "findings": {
+            "fnd-overbought": {
+              "claim": "THYAO günlükte RSI(14) aşırı alım bölgesine girdi; momentum güçlü.",
+              "confidence": 0.65,
+              "inval_series": "rsi14",
+              "facts": [
+                "fact-rsi-cross70"
+              ]
+            }
+          },
+          "capsules": {
+            "cap-overbought": {
+              "finding": "fnd-overbought",
+              "state": "live"
+            }
+          },
+          "intents": {},
+          "ledger": []
+        },
+        "anomalies": {
+          "dangling_layer": 0,
+          "dangling_ref": 0,
+          "orphan": 0,
+          "decision_mismatch": 0,
+          "stale_decision": 0,
+          "invalid_item": 0
+        },
+        "undo": {
+          "attempted": 0,
+          "applied": 0,
+          "refused_conflict": 0,
+          "nothing_or_unsupported": 0,
+          "clobbered_others": 0
+        },
+        "extra": {
+          "relay_sync_bytes": 670,
+          "visible_multi_value_conflicts_in_series": 1
+        }
+      },
+      {
+        "model": "C-loro",
+        "experiences": [
+          [
+            "editor",
+            "add_study",
+            "Applied"
+          ],
+          [
+            "arkin",
+            "add_study",
+            "Applied"
+          ]
+        ],
+        "reconnect": {
+          "queued": 1,
+          "applied": 1,
+          "applied_after_retry": 0,
+          "refused": 0,
+          "codes": {},
+          "bytes_up": 315,
+          "bytes_down": 314,
+          "round_trips": 2,
+          "time_us": 0.0,
+          "details": [
+            "all changes merged silently; no errors"
+          ]
+        },
+        "converged": true,
+        "final_snap": {
+          "series": {
+            "bb20": {
+              "kind": "study",
+              "study": "bollinger",
+              "inputs": [
+                "px"
+              ],
+              "params": {
+                "k": 2.0,
+                "period": 20.0
+              }
+            },
+            "macd": {
+              "kind": "study",
+              "study": "macd",
+              "inputs": [
+                "px"
+              ],
+              "params": {
+                "fast": 12.0,
+                "signal": 9.0,
+                "slow": 26.0
+              }
+            },
+            "px": {
+              "kind": "inline",
+              "study": "",
+              "inputs": [],
+              "params": {}
+            },
+            "rsi14": {
+              "kind": "study",
+              "study": "rsi",
+              "inputs": [
+                "px"
+              ],
+              "params": {
+                "period": 14.0
+              }
+            },
+            "sma20": {
+              "kind": "study",
+              "study": "sma",
+              "inputs": [
+                "px"
+              ],
+              "params": {
+                "period": 50.0
+              }
+            }
+          },
+          "layers": [
+            {
+              "mark": "candle",
+              "series": "px",
+              "panel": 0
+            },
+            {
+              "mark": "line",
+              "series": "bb20",
+              "panel": 0
+            },
+            {
+              "mark": "line",
+              "series": "rsi14",
+              "panel": 1
+            },
+            {
+              "mark": "rule",
+              "series": null,
+              "panel": 1
+            },
+            {
+              "mark": "line",
+              "series": "macd",
+              "panel": 2
+            },
+            {
+              "mark": "line",
+              "series": "sma20",
+              "panel": 0
+            },
+            {
+              "mark": "line",
+              "series": "sma20",
+              "panel": 0
+            }
+          ],
+          "facts": {
+            "fact-rsi-cross70": "rsi14"
+          },
+          "findings": {
+            "fnd-overbought": {
+              "claim": "THYAO günlükte RSI(14) aşırı alım bölgesine girdi; momentum güçlü.",
+              "confidence": 0.65,
+              "inval_series": "rsi14",
+              "facts": [
+                "fact-rsi-cross70"
+              ]
+            }
+          },
+          "capsules": {
+            "cap-overbought": {
+              "finding": "fnd-overbought",
+              "state": "live"
+            }
+          },
+          "intents": {},
+          "ledger": []
+        },
+        "anomalies": {
+          "dangling_layer": 0,
+          "dangling_ref": 0,
+          "orphan": 0,
+          "decision_mismatch": 0,
+          "stale_decision": 0,
+          "invalid_item": 0
+        },
+        "undo": {
+          "attempted": 0,
+          "applied": 0,
+          "refused_conflict": 0,
+          "nothing_or_unsupported": 0,
+          "clobbered_others": 0
+        },
+        "extra": {
+          "relay_sync_bytes": 310
+        }
+      }
+    ],
+    "facts": {
+      "A-log(base,own-excl)": {
+        "layers drawing sma20": "1",
+        "sma20": "Some({\"period\": 20.0})",
+        "writer(sma20.period)": "arkin @seq 1"
+      },
+      "A-log(no-base)": {
+        "layers drawing sma20": "1",
+        "sma20": "Some({\"period\": 20.0})",
+        "writer(sma20.period)": "arkin @seq 1"
+      },
+      "B-automerge": {
+        "layers drawing sma20": "2",
+        "sma20": "Some({\"period\": 50.0})",
+        "writer(sma20.period)": "editor"
+      },
+      "C-loro": {
+        "layers drawing sma20": "2",
+        "sma20": "Some({\"period\": 50.0})",
+        "writer(sma20.period)": "editor"
+      }
+    }
+  },
+  {
+    "case": "C5",
+    "what": "rsi7 exists; editor offline adds a layer and an intent on rsi7; arkin removes rsi7; editor returns",
+    "results": [
+      {
+        "model": "A-log(base,own-excl)",
+        "experiences": [
+          [
+            "arkin",
+            "add_study",
+            "Applied"
+          ],
+          [
+            "editor",
+            "add_layer",
+            "Queued"
+          ],
+          [
+            "editor",
+            "add_intent",
+            "Queued"
+          ],
+          [
+            "arkin",
+            "remove_series",
+            "Applied"
+          ]
+        ],
+        "reconnect": {
+          "queued": 2,
+          "applied": 0,
+          "applied_after_retry": 0,
+          "refused": 2,
+          "codes": {
+            "NotFound": 4
+          },
+          "bytes_up": 344,
+          "bytes_down": 800,
+          "round_trips": 7,
+          "time_us": 0.0,
+          "details": [
+            "add_layer: Refused([NotFound, NotFound])",
+            "add_intent: Refused([NotFound, NotFound])"
+          ]
+        },
+        "converged": true,
+        "final_snap": {
+          "series": {
+            "bb20": {
+              "kind": "study",
+              "study": "bollinger",
+              "inputs": [
+                "px"
+              ],
+              "params": {
+                "k": 2.0,
+                "period": 20.0
+              }
+            },
+            "macd": {
+              "kind": "study",
+              "study": "macd",
+              "inputs": [
+                "px"
+              ],
+              "params": {
+                "fast": 12.0,
+                "signal": 9.0,
+                "slow": 26.0
+              }
+            },
+            "px": {
+              "kind": "inline",
+              "study": "",
+              "inputs": [],
+              "params": {}
+            },
+            "rsi14": {
+              "kind": "study",
+              "study": "rsi",
+              "inputs": [
+                "px"
+              ],
+              "params": {
+                "period": 14.0
+              }
+            }
+          },
+          "layers": [
+            {
+              "mark": "candle",
+              "series": "px",
+              "panel": 0
+            },
+            {
+              "mark": "line",
+              "series": "bb20",
+              "panel": 0
+            },
+            {
+              "mark": "line",
+              "series": "rsi14",
+              "panel": 1
+            },
+            {
+              "mark": "rule",
+              "series": null,
+              "panel": 1
+            },
+            {
+              "mark": "line",
+              "series": "macd",
+              "panel": 2
+            }
+          ],
+          "facts": {
+            "fact-rsi-cross70": "rsi14"
+          },
+          "findings": {
+            "fnd-overbought": {
+              "claim": "THYAO günlükte RSI(14) aşırı alım bölgesine girdi; momentum güçlü.",
+              "confidence": 0.65,
+              "inval_series": "rsi14",
+              "facts": [
+                "fact-rsi-cross70"
+              ]
+            }
+          },
+          "capsules": {
+            "cap-overbought": {
+              "finding": "fnd-overbought",
+              "state": "live"
+            }
+          },
+          "intents": {},
+          "ledger": []
+        },
+        "anomalies": {
+          "dangling_layer": 0,
+          "dangling_ref": 0,
+          "orphan": 0,
+          "decision_mismatch": 0,
+          "stale_decision": 0,
+          "invalid_item": 0
+        },
+        "undo": {
+          "attempted": 0,
+          "applied": 0,
+          "refused_conflict": 0,
+          "nothing_or_unsupported": 0,
+          "clobbered_others": 0
+        },
+        "extra": {
+          "blind_overwrites": 0,
+          "log_entries": 2,
+          "reconnect_final_catchup_changes_only_bytes": 0,
+          "reconnect_final_catchup_log_query_bytes": 77,
+          "reconnect_final_catchup_snapshot_bytes": 17803,
+          "validation_errors": 2
+        }
+      },
+      {
+        "model": "A-log(no-base)",
+        "experiences": [
+          [
+            "arkin",
+            "add_study",
+            "Applied"
+          ],
+          [
+            "editor",
+            "add_layer",
+            "Queued"
+          ],
+          [
+            "editor",
+            "add_intent",
+            "Queued"
+          ],
+          [
+            "arkin",
+            "remove_series",
+            "Applied"
+          ]
+        ],
+        "reconnect": {
+          "queued": 2,
+          "applied": 0,
+          "applied_after_retry": 0,
+          "refused": 2,
+          "codes": {
+            "NotFound": 4
+          },
+          "bytes_up": 326,
+          "bytes_down": 800,
+          "round_trips": 7,
+          "time_us": 0.0,
+          "details": [
+            "add_layer: Refused([NotFound, NotFound])",
+            "add_intent: Refused([NotFound, NotFound])"
+          ]
+        },
+        "converged": true,
+        "final_snap": {
+          "series": {
+            "bb20": {
+              "kind": "study",
+              "study": "bollinger",
+              "inputs": [
+                "px"
+              ],
+              "params": {
+                "k": 2.0,
+                "period": 20.0
+              }
+            },
+            "macd": {
+              "kind": "study",
+              "study": "macd",
+              "inputs": [
+                "px"
+              ],
+              "params": {
+                "fast": 12.0,
+                "signal": 9.0,
+                "slow": 26.0
+              }
+            },
+            "px": {
+              "kind": "inline",
+              "study": "",
+              "inputs": [],
+              "params": {}
+            },
+            "rsi14": {
+              "kind": "study",
+              "study": "rsi",
+              "inputs": [
+                "px"
+              ],
+              "params": {
+                "period": 14.0
+              }
+            }
+          },
+          "layers": [
+            {
+              "mark": "candle",
+              "series": "px",
+              "panel": 0
+            },
+            {
+              "mark": "line",
+              "series": "bb20",
+              "panel": 0
+            },
+            {
+              "mark": "line",
+              "series": "rsi14",
+              "panel": 1
+            },
+            {
+              "mark": "rule",
+              "series": null,
+              "panel": 1
+            },
+            {
+              "mark": "line",
+              "series": "macd",
+              "panel": 2
+            }
+          ],
+          "facts": {
+            "fact-rsi-cross70": "rsi14"
+          },
+          "findings": {
+            "fnd-overbought": {
+              "claim": "THYAO günlükte RSI(14) aşırı alım bölgesine girdi; momentum güçlü.",
+              "confidence": 0.65,
+              "inval_series": "rsi14",
+              "facts": [
+                "fact-rsi-cross70"
+              ]
+            }
+          },
+          "capsules": {
+            "cap-overbought": {
+              "finding": "fnd-overbought",
+              "state": "live"
+            }
+          },
+          "intents": {},
+          "ledger": []
+        },
+        "anomalies": {
+          "dangling_layer": 0,
+          "dangling_ref": 0,
+          "orphan": 0,
+          "decision_mismatch": 0,
+          "stale_decision": 0,
+          "invalid_item": 0
+        },
+        "undo": {
+          "attempted": 0,
+          "applied": 0,
+          "refused_conflict": 0,
+          "nothing_or_unsupported": 0,
+          "clobbered_others": 0
+        },
+        "extra": {
+          "blind_overwrites": 0,
+          "log_entries": 2,
+          "reconnect_final_catchup_changes_only_bytes": 0,
+          "reconnect_final_catchup_log_query_bytes": 77,
+          "reconnect_final_catchup_snapshot_bytes": 17803,
+          "validation_errors": 2
+        }
+      },
+      {
+        "model": "B-automerge",
+        "experiences": [
+          [
+            "arkin",
+            "add_study",
+            "Applied"
+          ],
+          [
+            "editor",
+            "add_layer",
+            "Applied"
+          ],
+          [
+            "editor",
+            "add_intent",
+            "Applied"
+          ],
+          [
+            "arkin",
+            "remove_series",
+            "Applied"
+          ]
+        ],
+        "reconnect": {
+          "queued": 2,
+          "applied": 2,
+          "applied_after_retry": 0,
+          "refused": 0,
+          "codes": {},
+          "bytes_up": 5986,
+          "bytes_down": 313,
+          "round_trips": 2,
+          "time_us": 0.0,
+          "details": [
+            "all changes merged silently; no errors"
+          ]
+        },
+        "converged": true,
+        "final_snap": {
+          "series": {
+            "bb20": {
+              "kind": "study",
+              "study": "bollinger",
+              "inputs": [
+                "px"
+              ],
+              "params": {
+                "k": 2.0,
+                "period": 20.0
+              }
+            },
+            "macd": {
+              "kind": "study",
+              "study": "macd",
+              "inputs": [
+                "px"
+              ],
+              "params": {
+                "fast": 12.0,
+                "signal": 9.0,
+                "slow": 26.0
+              }
+            },
+            "px": {
+              "kind": "inline",
+              "study": "",
+              "inputs": [],
+              "params": {}
+            },
+            "rsi14": {
+              "kind": "study",
+              "study": "rsi",
+              "inputs": [
+                "px"
+              ],
+              "params": {
+                "period": 14.0
+              }
+            }
+          },
+          "layers": [
+            {
+              "mark": "candle",
+              "series": "px",
+              "panel": 0
+            },
+            {
+              "mark": "line",
+              "series": "bb20",
+              "panel": 0
+            },
+            {
+              "mark": "line",
+              "series": "rsi14",
+              "panel": 1
+            },
+            {
+              "mark": "rule",
+              "series": null,
+              "panel": 1
+            },
+            {
+              "mark": "line",
+              "series": "macd",
+              "panel": 2
+            },
+            {
+              "mark": "line",
+              "series": "rsi7",
+              "panel": 1
+            }
+          ],
+          "facts": {
+            "fact-rsi-cross70": "rsi14"
+          },
+          "findings": {
+            "fnd-overbought": {
+              "claim": "THYAO günlükte RSI(14) aşırı alım bölgesine girdi; momentum güçlü.",
+              "confidence": 0.65,
+              "inval_series": "rsi14",
+              "facts": [
+                "fact-rsi-cross70"
+              ]
+            }
+          },
+          "capsules": {
+            "cap-overbought": {
+              "finding": "fnd-overbought",
+              "state": "live"
+            }
+          },
+          "intents": {
+            "intent-rsi7": "rsi7"
+          },
+          "ledger": []
+        },
+        "anomalies": {
+          "dangling_layer": 1,
+          "dangling_ref": 1,
+          "orphan": 0,
+          "decision_mismatch": 0,
+          "stale_decision": 0,
+          "invalid_item": 0
+        },
+        "undo": {
+          "attempted": 0,
+          "applied": 0,
+          "refused_conflict": 0,
+          "nothing_or_unsupported": 0,
+          "clobbered_others": 0
+        },
+        "extra": {
+          "relay_sync_bytes": 6260,
+          "visible_multi_value_conflicts_in_series": 0
+        }
+      },
+      {
+        "model": "C-loro",
+        "experiences": [
+          [
+            "arkin",
+            "add_study",
+            "Applied"
+          ],
+          [
+            "editor",
+            "add_layer",
+            "Applied"
+          ],
+          [
+            "editor",
+            "add_intent",
+            "Applied"
+          ],
+          [
+            "arkin",
+            "remove_series",
+            "Applied"
+          ]
+        ],
+        "reconnect": {
+          "queued": 2,
+          "applied": 2,
+          "applied_after_retry": 0,
+          "refused": 0,
+          "codes": {},
+          "bytes_up": 291,
+          "bytes_down": 95,
+          "round_trips": 2,
+          "time_us": 0.0,
+          "details": [
+            "all changes merged silently; no errors"
+          ]
+        },
+        "converged": true,
+        "final_snap": {
+          "series": {
+            "bb20": {
+              "kind": "study",
+              "study": "bollinger",
+              "inputs": [
+                "px"
+              ],
+              "params": {
+                "k": 2.0,
+                "period": 20.0
+              }
+            },
+            "macd": {
+              "kind": "study",
+              "study": "macd",
+              "inputs": [
+                "px"
+              ],
+              "params": {
+                "fast": 12.0,
+                "signal": 9.0,
+                "slow": 26.0
+              }
+            },
+            "px": {
+              "kind": "inline",
+              "study": "",
+              "inputs": [],
+              "params": {}
+            },
+            "rsi14": {
+              "kind": "study",
+              "study": "rsi",
+              "inputs": [
+                "px"
+              ],
+              "params": {
+                "period": 14.0
+              }
+            }
+          },
+          "layers": [
+            {
+              "mark": "candle",
+              "series": "px",
+              "panel": 0
+            },
+            {
+              "mark": "line",
+              "series": "bb20",
+              "panel": 0
+            },
+            {
+              "mark": "line",
+              "series": "rsi14",
+              "panel": 1
+            },
+            {
+              "mark": "rule",
+              "series": null,
+              "panel": 1
+            },
+            {
+              "mark": "line",
+              "series": "macd",
+              "panel": 2
+            },
+            {
+              "mark": "line",
+              "series": "rsi7",
+              "panel": 1
+            }
+          ],
+          "facts": {
+            "fact-rsi-cross70": "rsi14"
+          },
+          "findings": {
+            "fnd-overbought": {
+              "claim": "THYAO günlükte RSI(14) aşırı alım bölgesine girdi; momentum güçlü.",
+              "confidence": 0.65,
+              "inval_series": "rsi14",
+              "facts": [
+                "fact-rsi-cross70"
+              ]
+            }
+          },
+          "capsules": {
+            "cap-overbought": {
+              "finding": "fnd-overbought",
+              "state": "live"
+            }
+          },
+          "intents": {
+            "intent-rsi7": "rsi7"
+          },
+          "ledger": []
+        },
+        "anomalies": {
+          "dangling_layer": 1,
+          "dangling_ref": 1,
+          "orphan": 0,
+          "decision_mismatch": 0,
+          "stale_decision": 0,
+          "invalid_item": 0
+        },
+        "undo": {
+          "attempted": 0,
+          "applied": 0,
+          "refused_conflict": 0,
+          "nothing_or_unsupported": 0,
+          "clobbered_others": 0
+        },
+        "extra": {
+          "relay_sync_bytes": 284
+        }
+      }
+    ],
+    "facts": {
+      "A-log(base,own-excl)": {
+        "intents on rsi7": "0",
+        "layers drawing rsi7": "0",
+        "rsi7 exists": "false"
+      },
+      "A-log(no-base)": {
+        "intents on rsi7": "0",
+        "layers drawing rsi7": "0",
+        "rsi7 exists": "false"
+      },
+      "B-automerge": {
+        "intents on rsi7": "1",
+        "layers drawing rsi7": "1",
+        "rsi7 exists": "false"
+      },
+      "C-loro": {
+        "intents on rsi7": "1",
+        "layers drawing rsi7": "1",
+        "rsi7 exists": "false"
+      }
+    }
+  },
+  {
+    "case": "C6",
+    "what": "arkin sets MACD fast=10; scout (having seen it) sets MACD fast=14; arkin undoes",
+    "results": [
+      {
+        "model": "A-log(base,own-excl)",
+        "experiences": [
+          [
+            "arkin",
+            "set_params",
+            "Applied"
+          ],
+          [
+            "scout",
+            "set_params",
+            "Applied"
+          ],
+          [
+            "arkin",
+            "undo",
+            "Refused([UndoConflict])"
+          ]
+        ],
+        "reconnect": {
+          "queued": 0,
+          "applied": 0,
+          "applied_after_retry": 0,
+          "refused": 0,
+          "codes": {},
+          "bytes_up": 0,
+          "bytes_down": 0,
+          "round_trips": 0,
+          "time_us": 0.0,
+          "details": []
+        },
+        "converged": true,
+        "final_snap": {
+          "series": {
+            "bb20": {
+              "kind": "study",
+              "study": "bollinger",
+              "inputs": [
+                "px"
+              ],
+              "params": {
+                "k": 2.0,
+                "period": 20.0
+              }
+            },
+            "macd": {
+              "kind": "study",
+              "study": "macd",
+              "inputs": [
+                "px"
+              ],
+              "params": {
+                "fast": 14.0,
+                "signal": 9.0,
+                "slow": 26.0
+              }
+            },
+            "px": {
+              "kind": "inline",
+              "study": "",
+              "inputs": [],
+              "params": {}
+            },
+            "rsi14": {
+              "kind": "study",
+              "study": "rsi",
+              "inputs": [
+                "px"
+              ],
+              "params": {
+                "period": 14.0
+              }
+            }
+          },
+          "layers": [
+            {
+              "mark": "candle",
+              "series": "px",
+              "panel": 0
+            },
+            {
+              "mark": "line",
+              "series": "bb20",
+              "panel": 0
+            },
+            {
+              "mark": "line",
+              "series": "rsi14",
+              "panel": 1
+            },
+            {
+              "mark": "rule",
+              "series": null,
+              "panel": 1
+            },
+            {
+              "mark": "line",
+              "series": "macd",
+              "panel": 2
+            }
+          ],
+          "facts": {
+            "fact-rsi-cross70": "rsi14"
+          },
+          "findings": {
+            "fnd-overbought": {
+              "claim": "THYAO günlükte RSI(14) aşırı alım bölgesine girdi; momentum güçlü.",
+              "confidence": 0.65,
+              "inval_series": "rsi14",
+              "facts": [
+                "fact-rsi-cross70"
+              ]
+            }
+          },
+          "capsules": {
+            "cap-overbought": {
+              "finding": "fnd-overbought",
+              "state": "live"
+            }
+          },
+          "intents": {},
+          "ledger": []
+        },
+        "anomalies": {
+          "dangling_layer": 0,
+          "dangling_ref": 0,
+          "orphan": 0,
+          "decision_mismatch": 0,
+          "stale_decision": 0,
+          "invalid_item": 0
+        },
+        "undo": {
+          "attempted": 1,
+          "applied": 0,
+          "refused_conflict": 1,
+          "nothing_or_unsupported": 0,
+          "clobbered_others": 0
+        },
+        "extra": {
+          "blind_overwrites": 0,
+          "log_entries": 2,
+          "validation_errors": 1
+        }
+      },
+      {
+        "model": "A-log(no-base)",
+        "experiences": [
+          [
+            "arkin",
+            "set_params",
+            "Applied"
+          ],
+          [
+            "scout",
+            "set_params",
+            "Applied"
+          ],
+          [
+            "arkin",
+            "undo",
+            "Refused([UndoConflict])"
+          ]
+        ],
+        "reconnect": {
+          "queued": 0,
+          "applied": 0,
+          "applied_after_retry": 0,
+          "refused": 0,
+          "codes": {},
+          "bytes_up": 0,
+          "bytes_down": 0,
+          "round_trips": 0,
+          "time_us": 0.0,
+          "details": []
+        },
+        "converged": true,
+        "final_snap": {
+          "series": {
+            "bb20": {
+              "kind": "study",
+              "study": "bollinger",
+              "inputs": [
+                "px"
+              ],
+              "params": {
+                "k": 2.0,
+                "period": 20.0
+              }
+            },
+            "macd": {
+              "kind": "study",
+              "study": "macd",
+              "inputs": [
+                "px"
+              ],
+              "params": {
+                "fast": 14.0,
+                "signal": 9.0,
+                "slow": 26.0
+              }
+            },
+            "px": {
+              "kind": "inline",
+              "study": "",
+              "inputs": [],
+              "params": {}
+            },
+            "rsi14": {
+              "kind": "study",
+              "study": "rsi",
+              "inputs": [
+                "px"
+              ],
+              "params": {
+                "period": 14.0
+              }
+            }
+          },
+          "layers": [
+            {
+              "mark": "candle",
+              "series": "px",
+              "panel": 0
+            },
+            {
+              "mark": "line",
+              "series": "bb20",
+              "panel": 0
+            },
+            {
+              "mark": "line",
+              "series": "rsi14",
+              "panel": 1
+            },
+            {
+              "mark": "rule",
+              "series": null,
+              "panel": 1
+            },
+            {
+              "mark": "line",
+              "series": "macd",
+              "panel": 2
+            }
+          ],
+          "facts": {
+            "fact-rsi-cross70": "rsi14"
+          },
+          "findings": {
+            "fnd-overbought": {
+              "claim": "THYAO günlükte RSI(14) aşırı alım bölgesine girdi; momentum güçlü.",
+              "confidence": 0.65,
+              "inval_series": "rsi14",
+              "facts": [
+                "fact-rsi-cross70"
+              ]
+            }
+          },
+          "capsules": {
+            "cap-overbought": {
+              "finding": "fnd-overbought",
+              "state": "live"
+            }
+          },
+          "intents": {},
+          "ledger": []
+        },
+        "anomalies": {
+          "dangling_layer": 0,
+          "dangling_ref": 0,
+          "orphan": 0,
+          "decision_mismatch": 0,
+          "stale_decision": 0,
+          "invalid_item": 0
+        },
+        "undo": {
+          "attempted": 1,
+          "applied": 0,
+          "refused_conflict": 1,
+          "nothing_or_unsupported": 0,
+          "clobbered_others": 0
+        },
+        "extra": {
+          "blind_overwrites": 0,
+          "log_entries": 2,
+          "validation_errors": 1
+        }
+      },
+      {
+        "model": "B-automerge",
+        "experiences": [
+          [
+            "arkin",
+            "set_params",
+            "Applied"
+          ],
+          [
+            "scout",
+            "set_params",
+            "Applied"
+          ],
+          [
+            "arkin",
+            "undo",
+            "Refused([UndoConflict])"
+          ]
+        ],
+        "reconnect": {
+          "queued": 0,
+          "applied": 0,
+          "applied_after_retry": 0,
+          "refused": 0,
+          "codes": {},
+          "bytes_up": 0,
+          "bytes_down": 0,
+          "round_trips": 0,
+          "time_us": 0.0,
+          "details": []
+        },
+        "converged": true,
+        "final_snap": {
+          "series": {
+            "bb20": {
+              "kind": "study",
+              "study": "bollinger",
+              "inputs": [
+                "px"
+              ],
+              "params": {
+                "k": 2.0,
+                "period": 20.0
+              }
+            },
+            "macd": {
+              "kind": "study",
+              "study": "macd",
+              "inputs": [
+                "px"
+              ],
+              "params": {
+                "fast": 14.0,
+                "signal": 9.0,
+                "slow": 26.0
+              }
+            },
+            "px": {
+              "kind": "inline",
+              "study": "",
+              "inputs": [],
+              "params": {}
+            },
+            "rsi14": {
+              "kind": "study",
+              "study": "rsi",
+              "inputs": [
+                "px"
+              ],
+              "params": {
+                "period": 14.0
+              }
+            }
+          },
+          "layers": [
+            {
+              "mark": "candle",
+              "series": "px",
+              "panel": 0
+            },
+            {
+              "mark": "line",
+              "series": "bb20",
+              "panel": 0
+            },
+            {
+              "mark": "line",
+              "series": "rsi14",
+              "panel": 1
+            },
+            {
+              "mark": "rule",
+              "series": null,
+              "panel": 1
+            },
+            {
+              "mark": "line",
+              "series": "macd",
+              "panel": 2
+            }
+          ],
+          "facts": {
+            "fact-rsi-cross70": "rsi14"
+          },
+          "findings": {
+            "fnd-overbought": {
+              "claim": "THYAO günlükte RSI(14) aşırı alım bölgesine girdi; momentum güçlü.",
+              "confidence": 0.65,
+              "inval_series": "rsi14",
+              "facts": [
+                "fact-rsi-cross70"
+              ]
+            }
+          },
+          "capsules": {
+            "cap-overbought": {
+              "finding": "fnd-overbought",
+              "state": "live"
+            }
+          },
+          "intents": {},
+          "ledger": []
+        },
+        "anomalies": {
+          "dangling_layer": 0,
+          "dangling_ref": 0,
+          "orphan": 0,
+          "decision_mismatch": 0,
+          "stale_decision": 0,
+          "invalid_item": 0
+        },
+        "undo": {
+          "attempted": 1,
+          "applied": 0,
+          "refused_conflict": 1,
+          "nothing_or_unsupported": 0,
+          "clobbered_others": 0
+        },
+        "extra": {
+          "visible_multi_value_conflicts_in_series": 0
+        }
+      },
+      {
+        "model": "C-loro",
+        "experiences": [
+          [
+            "arkin",
+            "set_params",
+            "Applied"
+          ],
+          [
+            "scout",
+            "set_params",
+            "Applied"
+          ],
+          [
+            "arkin",
+            "undo",
+            "Applied"
+          ]
+        ],
+        "reconnect": {
+          "queued": 0,
+          "applied": 0,
+          "applied_after_retry": 0,
+          "refused": 0,
+          "codes": {},
+          "bytes_up": 0,
+          "bytes_down": 0,
+          "round_trips": 0,
+          "time_us": 0.0,
+          "details": []
+        },
+        "converged": true,
+        "final_snap": {
+          "series": {
+            "bb20": {
+              "kind": "study",
+              "study": "bollinger",
+              "inputs": [
+                "px"
+              ],
+              "params": {
+                "k": 2.0,
+                "period": 20.0
+              }
+            },
+            "macd": {
+              "kind": "study",
+              "study": "macd",
+              "inputs": [
+                "px"
+              ],
+              "params": {
+                "fast": 12.0,
+                "signal": 9.0,
+                "slow": 26.0
+              }
+            },
+            "px": {
+              "kind": "inline",
+              "study": "",
+              "inputs": [],
+              "params": {}
+            },
+            "rsi14": {
+              "kind": "study",
+              "study": "rsi",
+              "inputs": [
+                "px"
+              ],
+              "params": {
+                "period": 14.0
+              }
+            }
+          },
+          "layers": [
+            {
+              "mark": "candle",
+              "series": "px",
+              "panel": 0
+            },
+            {
+              "mark": "line",
+              "series": "bb20",
+              "panel": 0
+            },
+            {
+              "mark": "line",
+              "series": "rsi14",
+              "panel": 1
+            },
+            {
+              "mark": "rule",
+              "series": null,
+              "panel": 1
+            },
+            {
+              "mark": "line",
+              "series": "macd",
+              "panel": 2
+            }
+          ],
+          "facts": {
+            "fact-rsi-cross70": "rsi14"
+          },
+          "findings": {
+            "fnd-overbought": {
+              "claim": "THYAO günlükte RSI(14) aşırı alım bölgesine girdi; momentum güçlü.",
+              "confidence": 0.65,
+              "inval_series": "rsi14",
+              "facts": [
+                "fact-rsi-cross70"
+              ]
+            }
+          },
+          "capsules": {
+            "cap-overbought": {
+              "finding": "fnd-overbought",
+              "state": "live"
+            }
+          },
+          "intents": {},
+          "ledger": []
+        },
+        "anomalies": {
+          "dangling_layer": 0,
+          "dangling_ref": 0,
+          "orphan": 0,
+          "decision_mismatch": 0,
+          "stale_decision": 0,
+          "invalid_item": 0
+        },
+        "undo": {
+          "attempted": 1,
+          "applied": 1,
+          "refused_conflict": 0,
+          "nothing_or_unsupported": 0,
+          "clobbered_others": 1
+        },
+        "extra": {}
+      }
+    ],
+    "facts": {
+      "A-log(base,own-excl)": {
+        "macd.params": "{\"fast\": 14.0, \"signal\": 9.0, \"slow\": 26.0}",
+        "writer(macd.fast)": "scout @seq 2"
+      },
+      "A-log(no-base)": {
+        "macd.params": "{\"fast\": 14.0, \"signal\": 9.0, \"slow\": 26.0}",
+        "writer(macd.fast)": "scout @seq 2"
+      },
+      "B-automerge": {
+        "macd.params": "{\"fast\": 14.0, \"signal\": 9.0, \"slow\": 26.0}",
+        "writer(macd.fast)": "scout"
+      },
+      "C-loro": {
+        "macd.params": "{\"fast\": 12.0, \"signal\": 9.0, \"slow\": 26.0}",
+        "writer(macd.fast)": "arkin"
+      }
+    }
+  },
+  {
+    "case": "C6b",
+    "what": "arkin sets MACD fast=10; scout sets MACD slow=30 (same item, other field); arkin undoes",
+    "results": [
+      {
+        "model": "A-log(base,own-excl)",
+        "experiences": [
+          [
+            "arkin",
+            "set_params",
+            "Applied"
+          ],
+          [
+            "scout",
+            "set_params",
+            "Applied"
+          ],
+          [
+            "arkin",
+            "undo",
+            "Refused([UndoConflict])"
+          ]
+        ],
+        "reconnect": {
+          "queued": 0,
+          "applied": 0,
+          "applied_after_retry": 0,
+          "refused": 0,
+          "codes": {},
+          "bytes_up": 0,
+          "bytes_down": 0,
+          "round_trips": 0,
+          "time_us": 0.0,
+          "details": []
+        },
+        "converged": true,
+        "final_snap": {
+          "series": {
+            "bb20": {
+              "kind": "study",
+              "study": "bollinger",
+              "inputs": [
+                "px"
+              ],
+              "params": {
+                "k": 2.0,
+                "period": 20.0
+              }
+            },
+            "macd": {
+              "kind": "study",
+              "study": "macd",
+              "inputs": [
+                "px"
+              ],
+              "params": {
+                "fast": 10.0,
+                "signal": 9.0,
+                "slow": 30.0
+              }
+            },
+            "px": {
+              "kind": "inline",
+              "study": "",
+              "inputs": [],
+              "params": {}
+            },
+            "rsi14": {
+              "kind": "study",
+              "study": "rsi",
+              "inputs": [
+                "px"
+              ],
+              "params": {
+                "period": 14.0
+              }
+            }
+          },
+          "layers": [
+            {
+              "mark": "candle",
+              "series": "px",
+              "panel": 0
+            },
+            {
+              "mark": "line",
+              "series": "bb20",
+              "panel": 0
+            },
+            {
+              "mark": "line",
+              "series": "rsi14",
+              "panel": 1
+            },
+            {
+              "mark": "rule",
+              "series": null,
+              "panel": 1
+            },
+            {
+              "mark": "line",
+              "series": "macd",
+              "panel": 2
+            }
+          ],
+          "facts": {
+            "fact-rsi-cross70": "rsi14"
+          },
+          "findings": {
+            "fnd-overbought": {
+              "claim": "THYAO günlükte RSI(14) aşırı alım bölgesine girdi; momentum güçlü.",
+              "confidence": 0.65,
+              "inval_series": "rsi14",
+              "facts": [
+                "fact-rsi-cross70"
+              ]
+            }
+          },
+          "capsules": {
+            "cap-overbought": {
+              "finding": "fnd-overbought",
+              "state": "live"
+            }
+          },
+          "intents": {},
+          "ledger": []
+        },
+        "anomalies": {
+          "dangling_layer": 0,
+          "dangling_ref": 0,
+          "orphan": 0,
+          "decision_mismatch": 0,
+          "stale_decision": 0,
+          "invalid_item": 0
+        },
+        "undo": {
+          "attempted": 1,
+          "applied": 0,
+          "refused_conflict": 1,
+          "nothing_or_unsupported": 0,
+          "clobbered_others": 0
+        },
+        "extra": {
+          "blind_overwrites": 0,
+          "log_entries": 2,
+          "validation_errors": 1
+        }
+      },
+      {
+        "model": "A-log(no-base)",
+        "experiences": [
+          [
+            "arkin",
+            "set_params",
+            "Applied"
+          ],
+          [
+            "scout",
+            "set_params",
+            "Applied"
+          ],
+          [
+            "arkin",
+            "undo",
+            "Refused([UndoConflict])"
+          ]
+        ],
+        "reconnect": {
+          "queued": 0,
+          "applied": 0,
+          "applied_after_retry": 0,
+          "refused": 0,
+          "codes": {},
+          "bytes_up": 0,
+          "bytes_down": 0,
+          "round_trips": 0,
+          "time_us": 0.0,
+          "details": []
+        },
+        "converged": true,
+        "final_snap": {
+          "series": {
+            "bb20": {
+              "kind": "study",
+              "study": "bollinger",
+              "inputs": [
+                "px"
+              ],
+              "params": {
+                "k": 2.0,
+                "period": 20.0
+              }
+            },
+            "macd": {
+              "kind": "study",
+              "study": "macd",
+              "inputs": [
+                "px"
+              ],
+              "params": {
+                "fast": 10.0,
+                "signal": 9.0,
+                "slow": 30.0
+              }
+            },
+            "px": {
+              "kind": "inline",
+              "study": "",
+              "inputs": [],
+              "params": {}
+            },
+            "rsi14": {
+              "kind": "study",
+              "study": "rsi",
+              "inputs": [
+                "px"
+              ],
+              "params": {
+                "period": 14.0
+              }
+            }
+          },
+          "layers": [
+            {
+              "mark": "candle",
+              "series": "px",
+              "panel": 0
+            },
+            {
+              "mark": "line",
+              "series": "bb20",
+              "panel": 0
+            },
+            {
+              "mark": "line",
+              "series": "rsi14",
+              "panel": 1
+            },
+            {
+              "mark": "rule",
+              "series": null,
+              "panel": 1
+            },
+            {
+              "mark": "line",
+              "series": "macd",
+              "panel": 2
+            }
+          ],
+          "facts": {
+            "fact-rsi-cross70": "rsi14"
+          },
+          "findings": {
+            "fnd-overbought": {
+              "claim": "THYAO günlükte RSI(14) aşırı alım bölgesine girdi; momentum güçlü.",
+              "confidence": 0.65,
+              "inval_series": "rsi14",
+              "facts": [
+                "fact-rsi-cross70"
+              ]
+            }
+          },
+          "capsules": {
+            "cap-overbought": {
+              "finding": "fnd-overbought",
+              "state": "live"
+            }
+          },
+          "intents": {},
+          "ledger": []
+        },
+        "anomalies": {
+          "dangling_layer": 0,
+          "dangling_ref": 0,
+          "orphan": 0,
+          "decision_mismatch": 0,
+          "stale_decision": 0,
+          "invalid_item": 0
+        },
+        "undo": {
+          "attempted": 1,
+          "applied": 0,
+          "refused_conflict": 1,
+          "nothing_or_unsupported": 0,
+          "clobbered_others": 0
+        },
+        "extra": {
+          "blind_overwrites": 0,
+          "log_entries": 2,
+          "validation_errors": 1
+        }
+      },
+      {
+        "model": "B-automerge",
+        "experiences": [
+          [
+            "arkin",
+            "set_params",
+            "Applied"
+          ],
+          [
+            "scout",
+            "set_params",
+            "Applied"
+          ],
+          [
+            "arkin",
+            "undo",
+            "Applied"
+          ]
+        ],
+        "reconnect": {
+          "queued": 0,
+          "applied": 0,
+          "applied_after_retry": 0,
+          "refused": 0,
+          "codes": {},
+          "bytes_up": 0,
+          "bytes_down": 0,
+          "round_trips": 0,
+          "time_us": 0.0,
+          "details": []
+        },
+        "converged": true,
+        "final_snap": {
+          "series": {
+            "bb20": {
+              "kind": "study",
+              "study": "bollinger",
+              "inputs": [
+                "px"
+              ],
+              "params": {
+                "k": 2.0,
+                "period": 20.0
+              }
+            },
+            "macd": {
+              "kind": "study",
+              "study": "macd",
+              "inputs": [
+                "px"
+              ],
+              "params": {
+                "fast": 12.0,
+                "signal": 9.0,
+                "slow": 30.0
+              }
+            },
+            "px": {
+              "kind": "inline",
+              "study": "",
+              "inputs": [],
+              "params": {}
+            },
+            "rsi14": {
+              "kind": "study",
+              "study": "rsi",
+              "inputs": [
+                "px"
+              ],
+              "params": {
+                "period": 14.0
+              }
+            }
+          },
+          "layers": [
+            {
+              "mark": "candle",
+              "series": "px",
+              "panel": 0
+            },
+            {
+              "mark": "line",
+              "series": "bb20",
+              "panel": 0
+            },
+            {
+              "mark": "line",
+              "series": "rsi14",
+              "panel": 1
+            },
+            {
+              "mark": "rule",
+              "series": null,
+              "panel": 1
+            },
+            {
+              "mark": "line",
+              "series": "macd",
+              "panel": 2
+            }
+          ],
+          "facts": {
+            "fact-rsi-cross70": "rsi14"
+          },
+          "findings": {
+            "fnd-overbought": {
+              "claim": "THYAO günlükte RSI(14) aşırı alım bölgesine girdi; momentum güçlü.",
+              "confidence": 0.65,
+              "inval_series": "rsi14",
+              "facts": [
+                "fact-rsi-cross70"
+              ]
+            }
+          },
+          "capsules": {
+            "cap-overbought": {
+              "finding": "fnd-overbought",
+              "state": "live"
+            }
+          },
+          "intents": {},
+          "ledger": []
+        },
+        "anomalies": {
+          "dangling_layer": 0,
+          "dangling_ref": 0,
+          "orphan": 0,
+          "decision_mismatch": 0,
+          "stale_decision": 0,
+          "invalid_item": 0
+        },
+        "undo": {
+          "attempted": 1,
+          "applied": 1,
+          "refused_conflict": 0,
+          "nothing_or_unsupported": 0,
+          "clobbered_others": 0
+        },
+        "extra": {
+          "visible_multi_value_conflicts_in_series": 0
+        }
+      },
+      {
+        "model": "C-loro",
+        "experiences": [
+          [
+            "arkin",
+            "set_params",
+            "Applied"
+          ],
+          [
+            "scout",
+            "set_params",
+            "Applied"
+          ],
+          [
+            "arkin",
+            "undo",
+            "Applied"
+          ]
+        ],
+        "reconnect": {
+          "queued": 0,
+          "applied": 0,
+          "applied_after_retry": 0,
+          "refused": 0,
+          "codes": {},
+          "bytes_up": 0,
+          "bytes_down": 0,
+          "round_trips": 0,
+          "time_us": 0.0,
+          "details": []
+        },
+        "converged": true,
+        "final_snap": {
+          "series": {
+            "bb20": {
+              "kind": "study",
+              "study": "bollinger",
+              "inputs": [
+                "px"
+              ],
+              "params": {
+                "k": 2.0,
+                "period": 20.0
+              }
+            },
+            "macd": {
+              "kind": "study",
+              "study": "macd",
+              "inputs": [
+                "px"
+              ],
+              "params": {
+                "fast": 12.0,
+                "signal": 9.0,
+                "slow": 30.0
+              }
+            },
+            "px": {
+              "kind": "inline",
+              "study": "",
+              "inputs": [],
+              "params": {}
+            },
+            "rsi14": {
+              "kind": "study",
+              "study": "rsi",
+              "inputs": [
+                "px"
+              ],
+              "params": {
+                "period": 14.0
+              }
+            }
+          },
+          "layers": [
+            {
+              "mark": "candle",
+              "series": "px",
+              "panel": 0
+            },
+            {
+              "mark": "line",
+              "series": "bb20",
+              "panel": 0
+            },
+            {
+              "mark": "line",
+              "series": "rsi14",
+              "panel": 1
+            },
+            {
+              "mark": "rule",
+              "series": null,
+              "panel": 1
+            },
+            {
+              "mark": "line",
+              "series": "macd",
+              "panel": 2
+            }
+          ],
+          "facts": {
+            "fact-rsi-cross70": "rsi14"
+          },
+          "findings": {
+            "fnd-overbought": {
+              "claim": "THYAO günlükte RSI(14) aşırı alım bölgesine girdi; momentum güçlü.",
+              "confidence": 0.65,
+              "inval_series": "rsi14",
+              "facts": [
+                "fact-rsi-cross70"
+              ]
+            }
+          },
+          "capsules": {
+            "cap-overbought": {
+              "finding": "fnd-overbought",
+              "state": "live"
+            }
+          },
+          "intents": {},
+          "ledger": []
+        },
+        "anomalies": {
+          "dangling_layer": 0,
+          "dangling_ref": 0,
+          "orphan": 0,
+          "decision_mismatch": 0,
+          "stale_decision": 0,
+          "invalid_item": 0
+        },
+        "undo": {
+          "attempted": 1,
+          "applied": 1,
+          "refused_conflict": 0,
+          "nothing_or_unsupported": 0,
+          "clobbered_others": 0
+        },
+        "extra": {}
+      }
+    ],
+    "facts": {
+      "A-log(base,own-excl)": {
+        "macd.params": "{\"fast\": 10.0, \"signal\": 9.0, \"slow\": 30.0}"
+      },
+      "A-log(no-base)": {
+        "macd.params": "{\"fast\": 10.0, \"signal\": 9.0, \"slow\": 30.0}"
+      },
+      "B-automerge": {
+        "macd.params": "{\"fast\": 12.0, \"signal\": 9.0, \"slow\": 30.0}"
+      },
+      "C-loro": {
+        "macd.params": "{\"fast\": 12.0, \"signal\": 9.0, \"slow\": 30.0}"
+      }
+    }
+  },
+  {
+    "case": "C6c",
+    "what": "arkin sets MACD fast=10; scout sets RSI14 period=7 (other item); arkin undoes",
+    "results": [
+      {
+        "model": "A-log(base,own-excl)",
+        "experiences": [
+          [
+            "arkin",
+            "set_params",
+            "Applied"
+          ],
+          [
+            "scout",
+            "set_params",
+            "Applied"
+          ],
+          [
+            "arkin",
+            "undo",
+            "Applied"
+          ]
+        ],
+        "reconnect": {
+          "queued": 0,
+          "applied": 0,
+          "applied_after_retry": 0,
+          "refused": 0,
+          "codes": {},
+          "bytes_up": 0,
+          "bytes_down": 0,
+          "round_trips": 0,
+          "time_us": 0.0,
+          "details": []
+        },
+        "converged": true,
+        "final_snap": {
+          "series": {
+            "bb20": {
+              "kind": "study",
+              "study": "bollinger",
+              "inputs": [
+                "px"
+              ],
+              "params": {
+                "k": 2.0,
+                "period": 20.0
+              }
+            },
+            "macd": {
+              "kind": "study",
+              "study": "macd",
+              "inputs": [
+                "px"
+              ],
+              "params": {
+                "fast": 12.0,
+                "signal": 9.0,
+                "slow": 26.0
+              }
+            },
+            "px": {
+              "kind": "inline",
+              "study": "",
+              "inputs": [],
+              "params": {}
+            },
+            "rsi14": {
+              "kind": "study",
+              "study": "rsi",
+              "inputs": [
+                "px"
+              ],
+              "params": {
+                "period": 7.0
+              }
+            }
+          },
+          "layers": [
+            {
+              "mark": "candle",
+              "series": "px",
+              "panel": 0
+            },
+            {
+              "mark": "line",
+              "series": "bb20",
+              "panel": 0
+            },
+            {
+              "mark": "line",
+              "series": "rsi14",
+              "panel": 1
+            },
+            {
+              "mark": "rule",
+              "series": null,
+              "panel": 1
+            },
+            {
+              "mark": "line",
+              "series": "macd",
+              "panel": 2
+            }
+          ],
+          "facts": {
+            "fact-rsi-cross70": "rsi14"
+          },
+          "findings": {
+            "fnd-overbought": {
+              "claim": "THYAO günlükte RSI(14) aşırı alım bölgesine girdi; momentum güçlü.",
+              "confidence": 0.65,
+              "inval_series": "rsi14",
+              "facts": [
+                "fact-rsi-cross70"
+              ]
+            }
+          },
+          "capsules": {
+            "cap-overbought": {
+              "finding": "fnd-overbought",
+              "state": "live"
+            }
+          },
+          "intents": {},
+          "ledger": []
+        },
+        "anomalies": {
+          "dangling_layer": 0,
+          "dangling_ref": 0,
+          "orphan": 0,
+          "decision_mismatch": 0,
+          "stale_decision": 0,
+          "invalid_item": 0
+        },
+        "undo": {
+          "attempted": 1,
+          "applied": 1,
+          "refused_conflict": 0,
+          "nothing_or_unsupported": 0,
+          "clobbered_others": 0
+        },
+        "extra": {
+          "blind_overwrites": 0,
+          "log_entries": 3
+        }
+      },
+      {
+        "model": "A-log(no-base)",
+        "experiences": [
+          [
+            "arkin",
+            "set_params",
+            "Applied"
+          ],
+          [
+            "scout",
+            "set_params",
+            "Applied"
+          ],
+          [
+            "arkin",
+            "undo",
+            "Applied"
+          ]
+        ],
+        "reconnect": {
+          "queued": 0,
+          "applied": 0,
+          "applied_after_retry": 0,
+          "refused": 0,
+          "codes": {},
+          "bytes_up": 0,
+          "bytes_down": 0,
+          "round_trips": 0,
+          "time_us": 0.0,
+          "details": []
+        },
+        "converged": true,
+        "final_snap": {
+          "series": {
+            "bb20": {
+              "kind": "study",
+              "study": "bollinger",
+              "inputs": [
+                "px"
+              ],
+              "params": {
+                "k": 2.0,
+                "period": 20.0
+              }
+            },
+            "macd": {
+              "kind": "study",
+              "study": "macd",
+              "inputs": [
+                "px"
+              ],
+              "params": {
+                "fast": 12.0,
+                "signal": 9.0,
+                "slow": 26.0
+              }
+            },
+            "px": {
+              "kind": "inline",
+              "study": "",
+              "inputs": [],
+              "params": {}
+            },
+            "rsi14": {
+              "kind": "study",
+              "study": "rsi",
+              "inputs": [
+                "px"
+              ],
+              "params": {
+                "period": 7.0
+              }
+            }
+          },
+          "layers": [
+            {
+              "mark": "candle",
+              "series": "px",
+              "panel": 0
+            },
+            {
+              "mark": "line",
+              "series": "bb20",
+              "panel": 0
+            },
+            {
+              "mark": "line",
+              "series": "rsi14",
+              "panel": 1
+            },
+            {
+              "mark": "rule",
+              "series": null,
+              "panel": 1
+            },
+            {
+              "mark": "line",
+              "series": "macd",
+              "panel": 2
+            }
+          ],
+          "facts": {
+            "fact-rsi-cross70": "rsi14"
+          },
+          "findings": {
+            "fnd-overbought": {
+              "claim": "THYAO günlükte RSI(14) aşırı alım bölgesine girdi; momentum güçlü.",
+              "confidence": 0.65,
+              "inval_series": "rsi14",
+              "facts": [
+                "fact-rsi-cross70"
+              ]
+            }
+          },
+          "capsules": {
+            "cap-overbought": {
+              "finding": "fnd-overbought",
+              "state": "live"
+            }
+          },
+          "intents": {},
+          "ledger": []
+        },
+        "anomalies": {
+          "dangling_layer": 0,
+          "dangling_ref": 0,
+          "orphan": 0,
+          "decision_mismatch": 0,
+          "stale_decision": 0,
+          "invalid_item": 0
+        },
+        "undo": {
+          "attempted": 1,
+          "applied": 1,
+          "refused_conflict": 0,
+          "nothing_or_unsupported": 0,
+          "clobbered_others": 0
+        },
+        "extra": {
+          "blind_overwrites": 0,
+          "log_entries": 3
+        }
+      },
+      {
+        "model": "B-automerge",
+        "experiences": [
+          [
+            "arkin",
+            "set_params",
+            "Applied"
+          ],
+          [
+            "scout",
+            "set_params",
+            "Applied"
+          ],
+          [
+            "arkin",
+            "undo",
+            "Applied"
+          ]
+        ],
+        "reconnect": {
+          "queued": 0,
+          "applied": 0,
+          "applied_after_retry": 0,
+          "refused": 0,
+          "codes": {},
+          "bytes_up": 0,
+          "bytes_down": 0,
+          "round_trips": 0,
+          "time_us": 0.0,
+          "details": []
+        },
+        "converged": true,
+        "final_snap": {
+          "series": {
+            "bb20": {
+              "kind": "study",
+              "study": "bollinger",
+              "inputs": [
+                "px"
+              ],
+              "params": {
+                "k": 2.0,
+                "period": 20.0
+              }
+            },
+            "macd": {
+              "kind": "study",
+              "study": "macd",
+              "inputs": [
+                "px"
+              ],
+              "params": {
+                "fast": 12.0,
+                "signal": 9.0,
+                "slow": 26.0
+              }
+            },
+            "px": {
+              "kind": "inline",
+              "study": "",
+              "inputs": [],
+              "params": {}
+            },
+            "rsi14": {
+              "kind": "study",
+              "study": "rsi",
+              "inputs": [
+                "px"
+              ],
+              "params": {
+                "period": 7.0
+              }
+            }
+          },
+          "layers": [
+            {
+              "mark": "candle",
+              "series": "px",
+              "panel": 0
+            },
+            {
+              "mark": "line",
+              "series": "bb20",
+              "panel": 0
+            },
+            {
+              "mark": "line",
+              "series": "rsi14",
+              "panel": 1
+            },
+            {
+              "mark": "rule",
+              "series": null,
+              "panel": 1
+            },
+            {
+              "mark": "line",
+              "series": "macd",
+              "panel": 2
+            }
+          ],
+          "facts": {
+            "fact-rsi-cross70": "rsi14"
+          },
+          "findings": {
+            "fnd-overbought": {
+              "claim": "THYAO günlükte RSI(14) aşırı alım bölgesine girdi; momentum güçlü.",
+              "confidence": 0.65,
+              "inval_series": "rsi14",
+              "facts": [
+                "fact-rsi-cross70"
+              ]
+            }
+          },
+          "capsules": {
+            "cap-overbought": {
+              "finding": "fnd-overbought",
+              "state": "live"
+            }
+          },
+          "intents": {},
+          "ledger": []
+        },
+        "anomalies": {
+          "dangling_layer": 0,
+          "dangling_ref": 0,
+          "orphan": 0,
+          "decision_mismatch": 0,
+          "stale_decision": 0,
+          "invalid_item": 0
+        },
+        "undo": {
+          "attempted": 1,
+          "applied": 1,
+          "refused_conflict": 0,
+          "nothing_or_unsupported": 0,
+          "clobbered_others": 0
+        },
+        "extra": {
+          "visible_multi_value_conflicts_in_series": 0
+        }
+      },
+      {
+        "model": "C-loro",
+        "experiences": [
+          [
+            "arkin",
+            "set_params",
+            "Applied"
+          ],
+          [
+            "scout",
+            "set_params",
+            "Applied"
+          ],
+          [
+            "arkin",
+            "undo",
+            "Applied"
+          ]
+        ],
+        "reconnect": {
+          "queued": 0,
+          "applied": 0,
+          "applied_after_retry": 0,
+          "refused": 0,
+          "codes": {},
+          "bytes_up": 0,
+          "bytes_down": 0,
+          "round_trips": 0,
+          "time_us": 0.0,
+          "details": []
+        },
+        "converged": true,
+        "final_snap": {
+          "series": {
+            "bb20": {
+              "kind": "study",
+              "study": "bollinger",
+              "inputs": [
+                "px"
+              ],
+              "params": {
+                "k": 2.0,
+                "period": 20.0
+              }
+            },
+            "macd": {
+              "kind": "study",
+              "study": "macd",
+              "inputs": [
+                "px"
+              ],
+              "params": {
+                "fast": 12.0,
+                "signal": 9.0,
+                "slow": 26.0
+              }
+            },
+            "px": {
+              "kind": "inline",
+              "study": "",
+              "inputs": [],
+              "params": {}
+            },
+            "rsi14": {
+              "kind": "study",
+              "study": "rsi",
+              "inputs": [
+                "px"
+              ],
+              "params": {
+                "period": 7.0
+              }
+            }
+          },
+          "layers": [
+            {
+              "mark": "candle",
+              "series": "px",
+              "panel": 0
+            },
+            {
+              "mark": "line",
+              "series": "bb20",
+              "panel": 0
+            },
+            {
+              "mark": "line",
+              "series": "rsi14",
+              "panel": 1
+            },
+            {
+              "mark": "rule",
+              "series": null,
+              "panel": 1
+            },
+            {
+              "mark": "line",
+              "series": "macd",
+              "panel": 2
+            }
+          ],
+          "facts": {
+            "fact-rsi-cross70": "rsi14"
+          },
+          "findings": {
+            "fnd-overbought": {
+              "claim": "THYAO günlükte RSI(14) aşırı alım bölgesine girdi; momentum güçlü.",
+              "confidence": 0.65,
+              "inval_series": "rsi14",
+              "facts": [
+                "fact-rsi-cross70"
+              ]
+            }
+          },
+          "capsules": {
+            "cap-overbought": {
+              "finding": "fnd-overbought",
+              "state": "live"
+            }
+          },
+          "intents": {},
+          "ledger": []
+        },
+        "anomalies": {
+          "dangling_layer": 0,
+          "dangling_ref": 0,
+          "orphan": 0,
+          "decision_mismatch": 0,
+          "stale_decision": 0,
+          "invalid_item": 0
+        },
+        "undo": {
+          "attempted": 1,
+          "applied": 1,
+          "refused_conflict": 0,
+          "nothing_or_unsupported": 0,
+          "clobbered_others": 0
+        },
+        "extra": {}
+      }
+    ],
+    "facts": {
+      "A-log(base,own-excl)": {
+        "macd.params": "{\"fast\": 12.0, \"signal\": 9.0, \"slow\": 26.0}",
+        "rsi14.params": "{\"period\": 7.0}"
+      },
+      "A-log(no-base)": {
+        "macd.params": "{\"fast\": 12.0, \"signal\": 9.0, \"slow\": 26.0}",
+        "rsi14.params": "{\"period\": 7.0}"
+      },
+      "B-automerge": {
+        "macd.params": "{\"fast\": 12.0, \"signal\": 9.0, \"slow\": 26.0}",
+        "rsi14.params": "{\"period\": 7.0}"
+      },
+      "C-loro": {
+        "macd.params": "{\"fast\": 12.0, \"signal\": 9.0, \"slow\": 26.0}",
+        "rsi14.params": "{\"period\": 7.0}"
+      }
+    }
+  },
+  {
+    "case": "C6d",
+    "what": "arkin sets MACD fast=10; editor OFFLINE sets MACD fast=14 (never saw arkin's); arkin undoes; editor returns",
+    "results": [
+      {
+        "model": "A-log(base,own-excl)",
+        "experiences": [
+          [
+            "editor",
+            "set_params",
+            "Queued"
+          ],
+          [
+            "arkin",
+            "set_params",
+            "Applied"
+          ],
+          [
+            "arkin",
+            "undo",
+            "Applied"
+          ]
+        ],
+        "reconnect": {
+          "queued": 1,
+          "applied": 0,
+          "applied_after_retry": 1,
+          "refused": 0,
+          "codes": {
+            "Conflict": 1
+          },
+          "bytes_up": 208,
+          "bytes_down": 2224,
+          "round_trips": 3,
+          "time_us": 0.0,
+          "details": [
+            "set_params: AppliedAfterRetry([Conflict])"
+          ]
+        },
+        "converged": true,
+        "final_snap": {
+          "series": {
+            "bb20": {
+              "kind": "study",
+              "study": "bollinger",
+              "inputs": [
+                "px"
+              ],
+              "params": {
+                "k": 2.0,
+                "period": 20.0
+              }
+            },
+            "macd": {
+              "kind": "study",
+              "study": "macd",
+              "inputs": [
+                "px"
+              ],
+              "params": {
+                "fast": 14.0,
+                "signal": 9.0,
+                "slow": 26.0
+              }
+            },
+            "px": {
+              "kind": "inline",
+              "study": "",
+              "inputs": [],
+              "params": {}
+            },
+            "rsi14": {
+              "kind": "study",
+              "study": "rsi",
+              "inputs": [
+                "px"
+              ],
+              "params": {
+                "period": 14.0
+              }
+            }
+          },
+          "layers": [
+            {
+              "mark": "candle",
+              "series": "px",
+              "panel": 0
+            },
+            {
+              "mark": "line",
+              "series": "bb20",
+              "panel": 0
+            },
+            {
+              "mark": "line",
+              "series": "rsi14",
+              "panel": 1
+            },
+            {
+              "mark": "rule",
+              "series": null,
+              "panel": 1
+            },
+            {
+              "mark": "line",
+              "series": "macd",
+              "panel": 2
+            }
+          ],
+          "facts": {
+            "fact-rsi-cross70": "rsi14"
+          },
+          "findings": {
+            "fnd-overbought": {
+              "claim": "THYAO günlükte RSI(14) aşırı alım bölgesine girdi; momentum güçlü.",
+              "confidence": 0.65,
+              "inval_series": "rsi14",
+              "facts": [
+                "fact-rsi-cross70"
+              ]
+            }
+          },
+          "capsules": {
+            "cap-overbought": {
+              "finding": "fnd-overbought",
+              "state": "live"
+            }
+          },
+          "intents": {},
+          "ledger": []
+        },
+        "anomalies": {
+          "dangling_layer": 0,
+          "dangling_ref": 0,
+          "orphan": 0,
+          "decision_mismatch": 0,
+          "stale_decision": 0,
+          "invalid_item": 0
+        },
+        "undo": {
+          "attempted": 1,
+          "applied": 1,
+          "refused_conflict": 0,
+          "nothing_or_unsupported": 0,
+          "clobbered_others": 0
+        },
+        "extra": {
+          "blind_overwrites": 0,
+          "conflicts": 1,
+          "conflicts:set_params vs undo": 1,
+          "log_entries": 3,
+          "reconnect_final_catchup_changes_only_bytes": 361,
+          "reconnect_final_catchup_log_query_bytes": 728,
+          "reconnect_final_catchup_snapshot_bytes": 17803
+        }
+      },
+      {
+        "model": "A-log(no-base)",
+        "experiences": [
+          [
+            "editor",
+            "set_params",
+            "Queued"
+          ],
+          [
+            "arkin",
+            "set_params",
+            "Applied"
+          ],
+          [
+            "arkin",
+            "undo",
+            "Applied"
+          ]
+        ],
+        "reconnect": {
+          "queued": 1,
+          "applied": 1,
+          "applied_after_retry": 0,
+          "refused": 0,
+          "codes": {},
+          "bytes_up": 95,
+          "bytes_down": 2041,
+          "round_trips": 2,
+          "time_us": 0.0,
+          "details": [
+            "set_params: Applied"
+          ]
+        },
+        "converged": true,
+        "final_snap": {
+          "series": {
+            "bb20": {
+              "kind": "study",
+              "study": "bollinger",
+              "inputs": [
+                "px"
+              ],
+              "params": {
+                "k": 2.0,
+                "period": 20.0
+              }
+            },
+            "macd": {
+              "kind": "study",
+              "study": "macd",
+              "inputs": [
+                "px"
+              ],
+              "params": {
+                "fast": 14.0,
+                "signal": 9.0,
+                "slow": 26.0
+              }
+            },
+            "px": {
+              "kind": "inline",
+              "study": "",
+              "inputs": [],
+              "params": {}
+            },
+            "rsi14": {
+              "kind": "study",
+              "study": "rsi",
+              "inputs": [
+                "px"
+              ],
+              "params": {
+                "period": 14.0
+              }
+            }
+          },
+          "layers": [
+            {
+              "mark": "candle",
+              "series": "px",
+              "panel": 0
+            },
+            {
+              "mark": "line",
+              "series": "bb20",
+              "panel": 0
+            },
+            {
+              "mark": "line",
+              "series": "rsi14",
+              "panel": 1
+            },
+            {
+              "mark": "rule",
+              "series": null,
+              "panel": 1
+            },
+            {
+              "mark": "line",
+              "series": "macd",
+              "panel": 2
+            }
+          ],
+          "facts": {
+            "fact-rsi-cross70": "rsi14"
+          },
+          "findings": {
+            "fnd-overbought": {
+              "claim": "THYAO günlükte RSI(14) aşırı alım bölgesine girdi; momentum güçlü.",
+              "confidence": 0.65,
+              "inval_series": "rsi14",
+              "facts": [
+                "fact-rsi-cross70"
+              ]
+            }
+          },
+          "capsules": {
+            "cap-overbought": {
+              "finding": "fnd-overbought",
+              "state": "live"
+            }
+          },
+          "intents": {},
+          "ledger": []
+        },
+        "anomalies": {
+          "dangling_layer": 0,
+          "dangling_ref": 0,
+          "orphan": 0,
+          "decision_mismatch": 0,
+          "stale_decision": 0,
+          "invalid_item": 0
+        },
+        "undo": {
+          "attempted": 1,
+          "applied": 1,
+          "refused_conflict": 0,
+          "nothing_or_unsupported": 0,
+          "clobbered_others": 0
+        },
+        "extra": {
+          "blind_overwrites": 1,
+          "log_entries": 3,
+          "reconnect_final_catchup_changes_only_bytes": 1081,
+          "reconnect_final_catchup_log_query_bytes": 1990,
+          "reconnect_final_catchup_snapshot_bytes": 17803
+        }
+      },
+      {
+        "model": "B-automerge",
+        "experiences": [
+          [
+            "editor",
+            "set_params",
+            "Applied"
+          ],
+          [
+            "arkin",
+            "set_params",
+            "Applied"
+          ],
+          [
+            "arkin",
+            "undo",
+            "Applied"
+          ]
+        ],
+        "reconnect": {
+          "queued": 1,
+          "applied": 1,
+          "applied_after_retry": 0,
+          "refused": 0,
+          "codes": {},
+          "bytes_up": 263,
+          "bytes_down": 5872,
+          "round_trips": 2,
+          "time_us": 0.0,
+          "details": [
+            "all changes merged silently; no errors"
+          ]
+        },
+        "converged": true,
+        "final_snap": {
+          "series": {
+            "bb20": {
+              "kind": "study",
+              "study": "bollinger",
+              "inputs": [
+                "px"
+              ],
+              "params": {
+                "k": 2.0,
+                "period": 20.0
+              }
+            },
+            "macd": {
+              "kind": "study",
+              "study": "macd",
+              "inputs": [
+                "px"
+              ],
+              "params": {
+                "fast": 12.0,
+                "signal": 9.0,
+                "slow": 26.0
+              }
+            },
+            "px": {
+              "kind": "inline",
+              "study": "",
+              "inputs": [],
+              "params": {}
+            },
+            "rsi14": {
+              "kind": "study",
+              "study": "rsi",
+              "inputs": [
+                "px"
+              ],
+              "params": {
+                "period": 14.0
+              }
+            }
+          },
+          "layers": [
+            {
+              "mark": "candle",
+              "series": "px",
+              "panel": 0
+            },
+            {
+              "mark": "line",
+              "series": "bb20",
+              "panel": 0
+            },
+            {
+              "mark": "line",
+              "series": "rsi14",
+              "panel": 1
+            },
+            {
+              "mark": "rule",
+              "series": null,
+              "panel": 1
+            },
+            {
+              "mark": "line",
+              "series": "macd",
+              "panel": 2
+            }
+          ],
+          "facts": {
+            "fact-rsi-cross70": "rsi14"
+          },
+          "findings": {
+            "fnd-overbought": {
+              "claim": "THYAO günlükte RSI(14) aşırı alım bölgesine girdi; momentum güçlü.",
+              "confidence": 0.65,
+              "inval_series": "rsi14",
+              "facts": [
+                "fact-rsi-cross70"
+              ]
+            }
+          },
+          "capsules": {
+            "cap-overbought": {
+              "finding": "fnd-overbought",
+              "state": "live"
+            }
+          },
+          "intents": {},
+          "ledger": []
+        },
+        "anomalies": {
+          "dangling_layer": 0,
+          "dangling_ref": 0,
+          "orphan": 0,
+          "decision_mismatch": 0,
+          "stale_decision": 0,
+          "invalid_item": 0
+        },
+        "undo": {
+          "attempted": 1,
+          "applied": 1,
+          "refused_conflict": 0,
+          "nothing_or_unsupported": 0,
+          "clobbered_others": 0
+        },
+        "extra": {
+          "relay_sync_bytes": 541,
+          "visible_multi_value_conflicts_in_series": 1
+        }
+      },
+      {
+        "model": "C-loro",
+        "experiences": [
+          [
+            "editor",
+            "set_params",
+            "Applied"
+          ],
+          [
+            "arkin",
+            "set_params",
+            "Applied"
+          ],
+          [
+            "arkin",
+            "undo",
+            "Applied"
+          ]
+        ],
+        "reconnect": {
+          "queued": 1,
+          "applied": 1,
+          "applied_after_retry": 0,
+          "refused": 0,
+          "codes": {},
+          "bytes_up": 132,
+          "bytes_down": 141,
+          "round_trips": 2,
+          "time_us": 0.0,
+          "details": [
+            "all changes merged silently; no errors"
+          ]
+        },
+        "converged": true,
+        "final_snap": {
+          "series": {
+            "bb20": {
+              "kind": "study",
+              "study": "bollinger",
+              "inputs": [
+                "px"
+              ],
+              "params": {
+                "k": 2.0,
+                "period": 20.0
+              }
+            },
+            "macd": {
+              "kind": "study",
+              "study": "macd",
+              "inputs": [
+                "px"
+              ],
+              "params": {
+                "fast": 12.0,
+                "signal": 9.0,
+                "slow": 26.0
+              }
+            },
+            "px": {
+              "kind": "inline",
+              "study": "",
+              "inputs": [],
+              "params": {}
+            },
+            "rsi14": {
+              "kind": "study",
+              "study": "rsi",
+              "inputs": [
+                "px"
+              ],
+              "params": {
+                "period": 14.0
+              }
+            }
+          },
+          "layers": [
+            {
+              "mark": "candle",
+              "series": "px",
+              "panel": 0
+            },
+            {
+              "mark": "line",
+              "series": "bb20",
+              "panel": 0
+            },
+            {
+              "mark": "line",
+              "series": "rsi14",
+              "panel": 1
+            },
+            {
+              "mark": "rule",
+              "series": null,
+              "panel": 1
+            },
+            {
+              "mark": "line",
+              "series": "macd",
+              "panel": 2
+            }
+          ],
+          "facts": {
+            "fact-rsi-cross70": "rsi14"
+          },
+          "findings": {
+            "fnd-overbought": {
+              "claim": "THYAO günlükte RSI(14) aşırı alım bölgesine girdi; momentum güçlü.",
+              "confidence": 0.65,
+              "inval_series": "rsi14",
+              "facts": [
+                "fact-rsi-cross70"
+              ]
+            }
+          },
+          "capsules": {
+            "cap-overbought": {
+              "finding": "fnd-overbought",
+              "state": "live"
+            }
+          },
+          "intents": {},
+          "ledger": []
+        },
+        "anomalies": {
+          "dangling_layer": 0,
+          "dangling_ref": 0,
+          "orphan": 0,
+          "decision_mismatch": 0,
+          "stale_decision": 0,
+          "invalid_item": 0
+        },
+        "undo": {
+          "attempted": 1,
+          "applied": 1,
+          "refused_conflict": 0,
+          "nothing_or_unsupported": 0,
+          "clobbered_others": 0
+        },
+        "extra": {
+          "relay_sync_bytes": 127
+        }
+      }
+    ],
+    "facts": {
+      "A-log(base,own-excl)": {
+        "macd.params": "{\"fast\": 14.0, \"signal\": 9.0, \"slow\": 26.0}",
+        "writer(macd.fast)": "editor @seq 3"
+      },
+      "A-log(no-base)": {
+        "macd.params": "{\"fast\": 14.0, \"signal\": 9.0, \"slow\": 26.0}",
+        "writer(macd.fast)": "editor @seq 3"
+      },
+      "B-automerge": {
+        "macd.params": "{\"fast\": 12.0, \"signal\": 9.0, \"slow\": 26.0}",
+        "writer(macd.fast)": "editor|arkin"
+      },
+      "C-loro": {
+        "macd.params": "{\"fast\": 12.0, \"signal\": 9.0, \"slow\": 26.0}",
+        "writer(macd.fast)": "arkin"
+      }
+    }
+  }
+]

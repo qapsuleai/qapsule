@@ -1,0 +1,6 @@
+   100 ops win    10 C-loro                 conv=true anom=   1 applied=   94 retried=   0 refused=   0 up_med=  450B down_med=  528B hist=    28787B gz=   15921B rc_up=   1682B rc_down=    2220B t=      6469us
+  1000 ops win    10 C-loro                 conv=true anom=   3 applied=  918 retried=   0 refused=   0 up_med=  530B down_med=  531B hist=    88433B gz=   60750B rc_up=    988B rc_down=    2292B t=     83449us
+  1000 ops win   100 C-loro                 conv=true anom=   7 applied=  914 retried=   0 refused=   0 up_med=  442B down_med=  514B hist=    87102B gz=   59314B rc_up=   6404B rc_down=   15602B t=     62336us
+ 10000 ops win    10 C-loro                 conv=true anom=  10 applied= 8996 retried=   0 refused=   0 up_med=  531B down_med=  531B hist=   685906B gz=  506645B rc_up=   1215B rc_down=    2041B t=   6393499us
+ 10000 ops win   100 C-loro                 conv=true anom=  18 applied= 8989 retried=   0 refused=   0 up_med=  523B down_med=  528B hist=   683139B gz=  505010B rc_up=   7246B rc_down=   15985B t=   6119421us
+ 10000 ops win  1000 C-loro                 conv=true anom=  50 applied= 8936 retried=   0 refused=   0 up_med=  443B down_med=  504B hist=   663371B gz=  489061B rc_up=  62813B rc_down=  148210B t=   4247626us

@@ -341,6 +341,35 @@ pub fn build_scene(bars: &BarsFile, width: u32, height: u32) -> Result<Scene, Re
     })
 }
 
+/// Glyph layout identical to the reference renderer's (fontdue advances on the embedded
+/// font, pen rounded to whole pixels). Returns `(glyph id, x)`; y is the baseline.
+/// Used by the spike backends so their text differs from the reference only by rasterizer.
+///
+/// # Errors
+/// Only if the embedded font is unusable.
+pub fn layout_glyphs(
+    text: &str,
+    px: f32,
+    x: i32,
+    align: Align,
+) -> Result<Vec<(u32, f32)>, RenderError> {
+    let font = crate::cpu::font()?;
+    let advance: f32 = text
+        .chars()
+        .map(|c| font.metrics(c, px).advance_width)
+        .sum();
+    let mut pen = match align {
+        Align::Left => x as f32,
+        Align::Right => x as f32 - advance,
+    };
+    let mut out = Vec::with_capacity(text.len());
+    for c in text.chars() {
+        out.push((u32::from(font.lookup_glyph_index(c)), pen.round()));
+        pen += font.metrics(c, px).advance_width;
+    }
+    Ok(out)
+}
+
 /// Determinism stress scene (spike only): anti-aliased strokes at fractional coordinates and
 /// widths, translucent colours, overlapping fills and text at many fractional sizes. Used by
 /// the `stress` golden and the browser comparison to exercise paths the chart barely touches.

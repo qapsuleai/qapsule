@@ -12,6 +12,10 @@ default = []
 # Enables tiny-skia's SIMD pipelines. Off by default: the reference renderer
 # favours the scalar path for cross-target determinism (see SPIKE.md).
 simd = ["tiny-skia/simd"]
+# R0 render-stack spikes (comparison only; not used by the library API or tests).
+spike-vello-cpu = ["dep:vello_cpu"]
+spike-vello-cpu-mt = ["spike-vello-cpu", "vello_cpu/multithreading"]
+spike-vello-gpu = ["dep:vello", "dep:pollster"]
 
 [dependencies]
 tiny-skia = { version = "0.12.0", default-features = false, features = ["std"] }
@@ -19,6 +23,17 @@ fontdue = { version = "0.9.5", default-features = false }
 png = "0.18.1"
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
+vello_cpu = { version = "0.4.0", optional = true, default-features = false, features = ["std", "text", "u8_pipeline", "f32_pipeline"] }
+vello = { version = "0.12.0", optional = true }
+pollster = { version = "0.4", optional = true }
+
+[[example]]
+name = "spike_vello_cpu"
+required-features = ["spike-vello-cpu"]
+
+[[example]]
+name = "spike_vello_gpu"
+required-features = ["spike-vello-gpu"]
 
 [lints]
 workspace = true

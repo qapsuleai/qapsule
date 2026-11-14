@@ -14,10 +14,15 @@ crate-type = ["cdylib", "rlib"]
 default = []
 # Spike variant: tiny-skia SIMD pipelines (build with RUSTFLAGS="-C target-feature=+simd128").
 simd = ["qp-render/simd"]
+# Spike variant: also export the vello_cpu backend for the browser comparison.
+spike-vello-cpu = ["qp-render/spike-vello-cpu"]
+# Spike variant: also export the vello (WebGPU) backend.
+spike-vello-gpu = ["qp-render/spike-vello-gpu", "dep:wasm-bindgen-futures"]
 
 [dependencies]
 qp-render = { path = "../qp-render" }
 wasm-bindgen = "=0.2.130"
+wasm-bindgen-futures = { version = "0.4", optional = true }
 
 [package.metadata.wasm-pack.profile.release]
 # Size is measured on the raw rustc output and on wasm-opt output separately (see

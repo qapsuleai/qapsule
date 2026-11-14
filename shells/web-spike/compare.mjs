@@ -62,9 +62,18 @@ fs.mkdirSync(outDir, { recursive: true });
 const server = await serve();
 const port = server.address().port;
 const tLaunch = performance.now();
-const browser = await chromium.launch({ headless: true });
+// QP_WEB_WEBGPU=1: use the full Chromium build (headless) with WebGPU enabled; the default
+// headless shell has no WebGPU adapter.
+const webgpu = process.env.QP_WEB_WEBGPU === '1';
+const browser = await chromium.launch(webgpu
+  ? { headless: true, channel: 'chromium', args: ['--enable-unsafe-webgpu'] }
+  : { headless: true });
 const page = await browser.newPage({ deviceScaleFactor: 1, viewport: { width: 1300, height: 800 } });
 const launchMs = performance.now() - tLaunch;
+if (process.env.QP_WEB_DEBUG === '1') {
+  page.on('console', (m) => console.error('[page]', m.type(), m.text()));
+  page.on('pageerror', (e) => console.error('[pageerror]', e));
+}
 let exitCode = 0;
 try {
   const tNav = performance.now();
@@ -107,6 +116,43 @@ try {
     pkg,
     threshold: { maxDiffPixels },
   };
+  // Spike: vello_cpu in the browser vs the same backend natively (informational; produce the
+  // native PNGs with `cargo run --release -p qp-render --example spike_vello_cpu --features spike-vello-cpu`).
+  if (qp.spike && qp.spike.velloCpuSampleB64) {
+    const nat = (f) => {
+      const p = path.join(root, 'target/spikes', f);
+      return fs.existsSync(p) ? PNG.sync.read(fs.readFileSync(p)).data : null;
+    };
+    const arch = process.arch === 'arm64' ? 'aarch64' : 'x86_64';
+    const cmp = (b64, f) => {
+      const n = nat(f);
+      return n ? diff(Buffer.from(b64, 'base64'), n) : { missing: f };
+    };
+    result.spikeVelloCpu = {
+      sampleVsNative: cmp(qp.spike.velloCpuSampleB64, `vello_cpu_${arch}_speed-u8_1T_sample.png`),
+      stressVsNative: cmp(qp.spike.velloCpuStressB64, `vello_cpu_${arch}_speed-u8_1T_stress.png`),
+      sampleF32VsNative: cmp(qp.spike.velloCpuSampleF32B64, `vello_cpu_${arch}_quality-f32_1T_sample.png`),
+      sampleVsReferenceGolden: diff(Buffer.from(qp.spike.velloCpuSampleB64, 'base64'), golden.data),
+    };
+  }
+  if (qp.spike && (qp.spike.velloGpu_area_SampleB64 || qp.spike.velloGpuError)) {
+    const out = { error: qp.spike.velloGpuError };
+    for (const aa of ['area', 'msaa8', 'msaa16']) {
+      if (!qp.spike[`velloGpu_${aa}_SampleB64`]) continue;
+      const nat = (f) => {
+        const p = path.join(root, 'target/spikes', f);
+        return fs.existsSync(p) ? PNG.sync.read(fs.readFileSync(p)).data : null;
+      };
+      const cmp = (b64, f) => { const n = nat(f); return n ? diff(Buffer.from(b64, 'base64'), n) : { missing: f }; };
+      out[aa] = {
+        browserRunToRunDistinctOf16: qp.spike[`velloGpu_${aa}_distinctOf16`],
+        sampleVsNativeMetal: cmp(qp.spike[`velloGpu_${aa}_SampleB64`], `vello_gpu_${aa}_sample.png`),
+        stressVsNativeMetal: cmp(qp.spike[`velloGpu_${aa}_StressB64`], `vello_gpu_${aa}_stress.png`),
+        sampleVsReferenceGolden: diff(Buffer.from(qp.spike[`velloGpu_${aa}_SampleB64`], 'base64'), golden.data),
+      };
+    }
+    result.spikeVelloGpu = out;
+  }
   console.log(JSON.stringify(result, null, 2));
   for (const key of ['canvasVsGolden', 'stressWasmVsGolden']) {
     const c = result[key];

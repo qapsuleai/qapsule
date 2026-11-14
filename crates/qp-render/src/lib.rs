@@ -15,6 +15,8 @@ use std::fmt;
 mod bars;
 pub mod cpu;
 pub mod scene;
+#[cfg(any(feature = "spike-vello-cpu", feature = "spike-vello-gpu"))]
+pub mod spikes;
 
 pub use bars::{parse_bars, synthetic_bars, Bar, BarsFile};
 

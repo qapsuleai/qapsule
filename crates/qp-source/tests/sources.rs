@@ -125,3 +125,27 @@ fn ordering_rules_and_bindings() {
     let mut src = open_binding(&file_binding, &repo("fixtures")).unwrap();
     assert_eq!(collect_bars(src.as_mut()).unwrap().len(), 200);
 }
+
+#[test]
+fn file_bindings_cannot_escape_the_base_dir() {
+    let base = repo("fixtures");
+    for bad in [
+        "../Cargo.toml",
+        "/etc/hosts",
+        "bars/../../Cargo.toml",
+        "",
+        "./bars/sample.json",
+    ] {
+        let b = qp_schema::Series {
+            id: "s".into(),
+            instrument: None,
+            interval: None,
+            source: qp_schema::SeriesSource::File { path: bad.into() },
+            data: None,
+        };
+        assert!(open_binding(&b, &base).is_err(), "{bad:?} must be rejected");
+    }
+    // A directory is not a regular file.
+    assert!(FileSource::open(&repo("fixtures/bars")).is_err());
+    assert!(qp_source::resolve_binding_path(&base, "bars/sample.json").is_ok());
+}

@@ -238,13 +238,68 @@ impl SeriesSource for FileSource {
     }
 }
 
+/// Largest series file a source reads (bytes).
+pub const MAX_FILE_BYTES: u64 = 256 * 1024 * 1024;
+
 fn read(path: &Path) -> Result<String, SourceError> {
-    std::fs::read_to_string(path)
-        .map_err(|e| SourceError::new(format!("cannot read {}: {e}", path.display())))
+    use std::io::Read as _;
+    let err = |e: std::io::Error| SourceError::new(format!("cannot read {}: {e}", path.display()));
+    let meta = std::fs::metadata(path).map_err(err)?;
+    if !meta.is_file() {
+        return Err(SourceError::new(format!(
+            "{} is not a regular file",
+            path.display()
+        )));
+    }
+    if meta.len() > MAX_FILE_BYTES {
+        return Err(SourceError::new(format!(
+            "{} is larger than {MAX_FILE_BYTES} bytes",
+            path.display()
+        )));
+    }
+    let mut text = String::new();
+    std::fs::File::open(path)
+        .map_err(err)?
+        .take(MAX_FILE_BYTES)
+        .read_to_string(&mut text)
+        .map_err(err)?;
+    Ok(text)
+}
+
+/// Resolves a document's relative `file` binding under `base_dir`. Documents can be
+/// written by agents, so the path must stay inside `base_dir`: absolute paths and any
+/// `..`, root or prefix component are rejected, and the canonical result (symlinks
+/// resolved) must still lie under the canonical `base_dir`.
+///
+/// # Errors
+/// A path that is not a plain relative path or that escapes `base_dir`.
+pub fn resolve_binding_path(base_dir: &Path, rel: &str) -> Result<PathBuf, SourceError> {
+    use std::path::Component;
+    let p = Path::new(rel);
+    if rel.is_empty() || !p.components().all(|c| matches!(c, Component::Normal(_))) {
+        return Err(SourceError::new(format!(
+            "file binding path `{rel}` must be a plain relative path (no `..`, no root)"
+        )));
+    }
+    let base = base_dir
+        .canonicalize()
+        .map_err(|e| SourceError::new(format!("cannot resolve {}: {e}", base_dir.display())))?;
+    let full = base
+        .join(p)
+        .canonicalize()
+        .map_err(|e| SourceError::new(format!("cannot resolve `{rel}`: {e}")))?;
+    if !full.starts_with(&base) {
+        return Err(SourceError::new(format!(
+            "file binding path `{rel}` resolves outside {}",
+            base.display()
+        )));
+    }
+    Ok(full)
 }
 
 /// Opens the runtime source for a document's series binding. Supported in R1: `inline`
-/// (embedded bars) and `file` (`path` relative to `base_dir`). `matriks`, `nats` and
+/// (embedded bars) and `file` (`path` relative to `base_dir`, confined to it, see
+/// [`resolve_binding_path`]). `matriks`, `nats` and
 /// `study` bindings are reported as not available yet (R6 / computed by the caller).
 ///
 /// # Errors

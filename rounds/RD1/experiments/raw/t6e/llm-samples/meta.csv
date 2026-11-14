@@ -1,0 +1,11 @@
+file,model,temperature,input_tokens,output_tokens,duration_ms,note
+small-01.txt,claude-haiku-5-5 (Claude Code alias haiku),default,,,11576,"subagent total tokens 50592 (includes agent system prompt + 1 Read tool round trip); output tokens not reported separately"
+small-02.txt,claude-haiku-5-5 (alias haiku),default,,,9159,"subagent total tokens 49981"
+small-03.txt,claude-haiku-5-5 (alias haiku),default,,,6979,"subagent total tokens 49459"
+small-04.txt,claude-haiku-5-5 (alias haiku),default,,,11264,"subagent total tokens 50553"
+small-05.txt,claude-haiku-5-5 (alias haiku),default,,,7764,"subagent total tokens 49538"
+large-01.txt,claude-sonnet-5-5 (alias sonnet),default,,,9293,"subagent total tokens 49312"
+large-02.txt,claude-sonnet-5-5 (alias sonnet),default,,,10313,"subagent total tokens 49391"
+large-03.txt,claude-sonnet-5-5 (alias sonnet),default,,,9551,"subagent total tokens 49294"
+large-04.txt,claude-sonnet-5-5 (alias sonnet),default,,,9797,"subagent total tokens 49316"
+large-05.txt,claude-sonnet-5-5 (alias sonnet),default,,,8515,"subagent total tokens 49196"

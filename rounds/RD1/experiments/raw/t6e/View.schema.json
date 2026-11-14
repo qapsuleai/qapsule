@@ -1,0 +1,176 @@
+{
+  "$defs": {
+    "Layer": {
+      "additionalProperties": false,
+      "description": "One layer of a view: a mark bound to a series.",
+      "properties": {
+        "encoding": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "default": {},
+          "description": "Encoding: visual channel -> field or constant, e.g. `{\"y\": \"v\", \"color\": \"#888\"}`.",
+          "type": "object"
+        },
+        "mark": {
+          "$ref": "#/$defs/Mark",
+          "description": "Visual mark."
+        },
+        "panel": {
+          "default": 0,
+          "description": "Panel index (0 = main price panel).",
+          "format": "uint32",
+          "minimum": 0,
+          "type": "integer"
+        },
+        "series": {
+          "description": "Series id; absent for constant marks (e.g. a rule).",
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "mark"
+      ],
+      "type": "object"
+    },
+    "Mark": {
+      "description": "Visual mark of a layer.",
+      "oneOf": [
+        {
+          "const": "candle",
+          "description": "Candlesticks (needs bars).",
+          "type": "string"
+        },
+        {
+          "const": "line",
+          "description": "Polyline.",
+          "type": "string"
+        },
+        {
+          "const": "area",
+          "description": "Filled area.",
+          "type": "string"
+        },
+        {
+          "const": "bar",
+          "description": "Vertical bars.",
+          "type": "string"
+        },
+        {
+          "const": "rule",
+          "description": "Horizontal or vertical reference line.",
+          "type": "string"
+        },
+        {
+          "const": "point",
+          "description": "Points.",
+          "type": "string"
+        },
+        {
+          "const": "text",
+          "description": "Text label.",
+          "type": "string"
+        }
+      ]
+    },
+    "Scale": {
+      "additionalProperties": false,
+      "description": "A scale mapping data values to a visual axis.",
+      "properties": {
+        "domain": {
+          "description": "Fixed domain `[min, max]`; automatic when absent.",
+          "items": {
+            "format": "double",
+            "type": "number"
+          },
+          "maxItems": 2,
+          "minItems": 2,
+          "type": [
+            "array",
+            "null"
+          ]
+        },
+        "kind": {
+          "$ref": "#/$defs/ScaleKind",
+          "description": "Scale type."
+        }
+      },
+      "required": [
+        "kind"
+      ],
+      "type": "object"
+    },
+    "ScaleKind": {
+      "description": "Scale type.",
+      "oneOf": [
+        {
+          "const": "time",
+          "description": "Time axis.",
+          "type": "string"
+        },
+        {
+          "const": "linear",
+          "description": "Linear numeric.",
+          "type": "string"
+        },
+        {
+          "const": "log",
+          "description": "Logarithmic numeric.",
+          "type": "string"
+        }
+      ]
+    }
+  },
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "A presentation recipe written in the visual grammar.",
+  "properties": {
+    "display_tz": {
+      "description": "Display time zone override (IANA); display only, see [`Document::display_tz`].",
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "id": {
+      "description": "Unique id within the document.",
+      "type": "string"
+    },
+    "layers": {
+      "description": "Layers, drawn in order.",
+      "items": {
+        "$ref": "#/$defs/Layer"
+      },
+      "type": "array"
+    },
+    "title": {
+      "description": "Optional title.",
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "x": {
+      "$ref": "#/$defs/Scale",
+      "description": "Horizontal scale."
+    },
+    "y": {
+      "description": "Vertical scale per panel, indexed by `Layer::panel`.",
+      "items": {
+        "$ref": "#/$defs/Scale"
+      },
+      "type": "array"
+    }
+  },
+  "required": [
+    "id",
+    "x",
+    "y",
+    "layers"
+  ],
+  "title": "View",
+  "type": "object"
+}

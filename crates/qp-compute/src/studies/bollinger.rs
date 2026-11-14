@@ -182,6 +182,7 @@ impl Bollinger {
         self.m2 = m2 - (old - mean) * (old - mean_after);
         Some(v)
     }
+
     /// Population standard deviation from `M2`, as in `value` (sweep only).
     #[inline]
     fn std_of(&self, m2: f64) -> f64 {
@@ -228,9 +229,7 @@ impl Bollinger {
     #[inline]
     pub(crate) fn step_std(&mut self, x: f64) -> Option<(f64, f64)> {
         if !self.sma.is_steady() || self.run >= self.period - 1 {
-            let v = self.peek_std(x);
-            self.commit1(x);
-            return v;
+            return self.step_std_slow(x);
         }
         let s = self.sma.window_sum();
         let mean_c = s * self.inv_pm1;
@@ -242,6 +241,26 @@ impl Bollinger {
         let mean_after = self.sma.window_sum() * self.inv_pm1;
         self.m2 = m2 - (old - mean) * (old - mean_after);
         Some((middle, std))
+    }
+
+    /// Warmup / flat-window path of [`Bollinger::step_std`]: `peek_std(x)` then a copy of
+    /// `commit1(x)` (same operations). A copy, out of line, so `commit1` keeps exactly its
+    /// baseline call sites: one more made LLVM outline it from the streaming `push`
+    /// (profile D attach ~5% slower, RP1/E1).
+    #[inline(never)]
+    fn step_std_slow(&mut self, x: f64) -> Option<(f64, f64)> {
+        let v = self.peek_std(x);
+        let (mean, m2) = self.add(x);
+        self.track_run(x);
+        self.m2 = match self.sma.commit_evict(x) {
+            None => m2,
+            Some(_) if self.period == 1 => 0.0,
+            Some(old) => {
+                let mean_after = self.sma.window_sum() * self.inv_pm1;
+                m2 - (old - mean) * (old - mean_after)
+            }
+        };
+        v
     }
 }
 

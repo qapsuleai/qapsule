@@ -1,0 +1,18 @@
+[package]
+name = "t6e-presenter"
+version = "0.0.0"
+edition = "2021"
+publish = false
+description = "RD1/T6e experiment: deterministic presenter vs LLM-written View grammar."
+
+# Not a member of the qapsule workspace.
+[workspace]
+
+[dependencies]
+qp-schema = { path = "../../crates/qp-schema", features = ["validate"] }
+qp-session = { path = "../../crates/qp-session" }
+serde_json = { version = "1.0.154", features = ["float_roundtrip"] }
+
+[profile.release]
+lto = "thin"
+codegen-units = 1

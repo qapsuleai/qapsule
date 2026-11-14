@@ -1,0 +1,68 @@
+{
+  "determinism": {
+    "copy_equals_session_view": true,
+    "distinct_documents": 1,
+    "distinct_outputs": 1,
+    "distinct_views": 1,
+    "distinct_views_fn_alone": 1,
+    "present_query_desktop_bytes": 7318,
+    "present_query_phone_bytes": 2352,
+    "runs": 1000,
+    "show_finding_out_bytes": 94,
+    "view_bytes_compact": 294,
+    "view_bytes_pretty": 523,
+    "view_hash": "b6566f6d79eeff63"
+  },
+  "latency": [
+    {
+      "max_ns": 1875,
+      "mean_ns": 129.0,
+      "median_ns": 125,
+      "min_ns": 42,
+      "n": 100000,
+      "name": "presenter_fn",
+      "p90_ns": 167,
+      "p99_ns": 167
+    },
+    {
+      "max_ns": 6792,
+      "mean_ns": 479.0,
+      "median_ns": 459,
+      "min_ns": 375,
+      "n": 100000,
+      "name": "presenter_fn+serialize",
+      "p90_ns": 500,
+      "p99_ns": 542
+    },
+    {
+      "max_ns": 936542,
+      "mean_ns": 7022.0,
+      "median_ns": 6583,
+      "min_ns": 4958,
+      "n": 3000,
+      "name": "show_finding_e2e(parse+auth+expand+apply+log+serialize out)",
+      "p90_ns": 7750,
+      "p99_ns": 12666
+    },
+    {
+      "max_ns": 15833,
+      "mean_ns": 5996.0,
+      "median_ns": 6000,
+      "min_ns": 5750,
+      "n": 20000,
+      "name": "present_query_chart_desktop_e2e",
+      "p90_ns": 6083,
+      "p99_ns": 6250
+    },
+    {
+      "max_ns": 23625,
+      "mean_ns": 2843.0,
+      "median_ns": 2833,
+      "min_ns": 2625,
+      "n": 20000,
+      "name": "present_query_capsule_phone_e2e",
+      "p90_ns": 2916,
+      "p99_ns": 3542
+    }
+  ]
+}

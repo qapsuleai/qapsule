@@ -1512,7 +1512,10 @@ dependencies = [
 name = "qp-wasm"
 version = "0.0.0"
 dependencies = [
+ "qp-compute",
  "qp-render",
+ "qp-schema",
+ "serde_json",
  "wasm-bindgen",
  "wasm-bindgen-futures",
 ]

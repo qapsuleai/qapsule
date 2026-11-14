@@ -29,6 +29,13 @@ jobs:
           npx playwright install --with-deps chromium
       - name: Verify
         run: scripts/verify.sh
+      # Informational only (shared runners are noisy): R1 sweep timings and digests on
+      # real Linux x86_64, native and wasm (Node). Not a gate.
+      - name: Sweep benchmark (informational)
+        continue-on-error: true
+        run: |
+          cargo run --release -p qp-compute --example sweep_bench -- --reps 7
+          scripts/wasm-sweep-bench.sh
       - name: Upload golden diff artifacts
         if: failure()
         uses: actions/upload-artifact@v4

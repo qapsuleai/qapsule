@@ -3,27 +3,36 @@
 use std::collections::BTreeMap;
 
 use super::{pf, Sma};
-use crate::core::Ring;
 use crate::{ComputeError, Core};
 
 /// `bollinger(period, k)`. `middle = sma(period)`; `std` is the population standard
 /// deviation of the last `period` inputs; `upper/lower = middle ± k * std`;
 /// `bandwidth = (2 * k * std) / middle` (0 when `middle` is 0).
 ///
-/// The variance uses a windowed Welford update (mean and sum of squared deviations,
-/// add-then-remove), which stays accurate when prices are far from zero; no O(period)
-/// recomputation, so a new bar is O(1).
+/// Variance: a windowed Welford update of `M2` (sum of squared deviations), add-then-
+/// remove, which stays accurate far from zero. The window means it needs come from the
+/// SMA's rolling sum (`sum / count`), so the only per-bar dependency chain is the two
+/// additions on `M2`; a new bar is O(1) with no O(period) recomputation. With a full
+/// window, divisions by the window size are multiplications by precomputed reciprocals.
+///
+/// Flat windows are exact: a counter of trailing equal inputs (O(1)) detects a committed
+/// window whose values are all equal; its M2 is then exactly 0 (a rolling M2 would
+/// otherwise keep a ~1e-15 residue that `sqrt` turns into a visible ~1e-7 band width).
+/// This also clears any rounding residue accumulated before the flat stretch.
 #[derive(Debug, Clone)]
 pub struct Bollinger {
+    /// Holds the committed window (last `period - 1` inputs) and its sum.
     sma: Sma,
     k: f64,
     period: usize,
     pf: f64,
-    /// Last `period - 1` inputs.
-    ring: Ring,
-    /// Mean and M2 of the values in `ring`.
-    mean: f64,
+    inv_p: f64,
+    inv_pm1: f64,
+    /// M2 of the committed window.
     m2: f64,
+    /// Last committed input and how many trailing committed inputs equal it.
+    last: f64,
+    run: usize,
 }
 
 /// One bar of Bollinger output.
@@ -56,31 +65,66 @@ impl Bollinger {
             k,
             period,
             pf: pf(period),
-            ring: Ring::new(period - 1),
-            mean: 0.0,
+            inv_p: 1.0 / pf(period),
+            inv_pm1: if period > 1 {
+                1.0 / pf(period - 1)
+            } else {
+                0.0
+            },
             m2: 0.0,
+            last: 0.0,
+            run: 0,
         })
     }
 
-    /// Mean and M2 of the window `ring + [x]` (`n = ring.len() + 1` values).
+    /// Mean of the committed window (`w` values summing to `s`).
+    #[inline]
+    fn mean_of(&self, s: f64, w: usize) -> f64 {
+        if w == 0 {
+            0.0
+        } else if w + 1 == self.period {
+            s * self.inv_pm1
+        } else {
+            s / pf(w)
+        }
+    }
+
+    /// `(mean, M2)` of the committed window plus `x`.
     #[inline]
     fn add(&self, x: f64) -> (f64, f64) {
-        let n = pf(self.ring.len() + 1);
-        let delta = x - self.mean;
-        let mean = self.mean + delta / n;
+        let w = self.sma.window_len();
+        let s = self.sma.window_sum();
+        let mean = if w + 1 == self.period {
+            (s + x) * self.inv_p
+        } else {
+            (s + x) / pf(w + 1)
+        };
+        if self.run >= w {
+            // Committed window is flat (all equal to `last`): exact M2 = 0.
+            let delta = x - self.last;
+            return (mean, delta * (x - mean));
+        }
+        let delta = x - self.mean_of(s, w);
         (mean, self.m2 + delta * (x - mean))
     }
 
-    /// Value of a bar with input `x` on top of the committed state.
+    /// Updates the trailing-equal counter with a committed input.
     #[inline]
-    #[must_use]
-    pub fn peek1(&self, x: f64) -> Option<BollingerValue> {
-        let middle = self.sma.peek1(x)?;
-        let (_, m2) = self.add(x);
-        let var = m2 / self.pf;
+    fn track_run(&mut self, x: f64) {
+        if self.run > 0 && x == self.last {
+            self.run += 1;
+        } else {
+            self.run = 1;
+            self.last = x;
+        }
+    }
+
+    #[inline]
+    fn value(&self, middle: f64, m2: f64) -> BollingerValue {
+        let var = m2 * self.inv_p;
         let std = if var > 0.0 { var.sqrt() } else { 0.0 };
         let band = self.k * std;
-        Some(BollingerValue {
+        BollingerValue {
             middle,
             upper: middle + band,
             lower: middle - band,
@@ -89,33 +133,54 @@ impl Bollinger {
             } else {
                 (2.0 * band) / middle
             },
-        })
+        }
+    }
+
+    /// Value of a bar with input `x` on top of the committed state.
+    #[inline]
+    #[must_use]
+    pub fn peek1(&self, x: f64) -> Option<BollingerValue> {
+        let middle = self.sma.peek1(x)?;
+        let (_, m2) = self.add(x);
+        Some(self.value(middle, m2))
     }
 
     /// Commits a bar with input `x`.
     #[inline]
     pub fn commit1(&mut self, x: f64) {
-        self.sma.commit1(x);
         let (mean, m2) = self.add(x);
-        match self.ring.push(x) {
-            None => {
-                self.mean = mean;
-                self.m2 = m2;
-            }
+        self.track_run(x);
+        self.m2 = match self.sma.commit_evict(x) {
+            None => m2,
+            Some(_) if self.period == 1 => 0.0,
             Some(old) => {
-                // Remove `old` from a window of `ring.len() + 1` values.
-                let n_after = self.ring.len();
-                if n_after == 0 {
-                    self.mean = 0.0;
-                    self.m2 = 0.0;
-                } else {
-                    let delta = old - mean;
-                    let mean_after = mean - delta / pf(n_after);
-                    self.m2 = m2 - delta * (old - mean_after);
-                    self.mean = mean_after;
-                }
+                // Remove `old` from the full window: M2 -= (old - mean) * (old - mean_after).
+                let mean_after = self.sma.window_sum() * self.inv_pm1;
+                m2 - (old - mean) * (old - mean_after)
             }
+        };
+    }
+
+    /// Peek + commit in one step. With a full window this is a fused path performing
+    /// exactly the operations of `peek1(x)` followed by `commit1(x)`, once each and
+    /// without warmup branches; results are bit-identical (tested).
+    #[inline]
+    pub(crate) fn step1(&mut self, x: f64) -> Option<BollingerValue> {
+        if !self.sma.is_steady() || self.run >= self.period - 1 {
+            let v = self.peek1(x);
+            self.commit1(x);
+            return v;
         }
+        let s = self.sma.window_sum();
+        let mean_c = s * self.inv_pm1;
+        let mean = (s + x) * self.inv_p;
+        let m2 = self.m2 + (x - mean_c) * (x - mean);
+        self.track_run(x);
+        let (middle, old) = self.sma.step_steady(x);
+        let v = self.value(middle, m2);
+        let mean_after = self.sma.window_sum() * self.inv_pm1;
+        self.m2 = m2 - (old - mean) * (old - mean_after);
+        Some(v)
     }
 }
 
@@ -142,8 +207,8 @@ impl Core for Bollinger {
     }
     fn reset(&mut self) {
         self.sma.reset();
-        self.ring.clear();
-        self.mean = 0.0;
         self.m2 = 0.0;
+        self.last = 0.0;
+        self.run = 0;
     }
 }

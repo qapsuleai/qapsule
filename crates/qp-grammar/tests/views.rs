@@ -711,3 +711,69 @@ fn deprecated_y_list_is_read_as_panels() {
         .collect();
     assert_eq!(ids, vec!["l0", "l1"]);
 }
+
+fn texts(s: &SceneDesc) -> Vec<(String, i32, i32)> {
+    s.under
+        .iter()
+        .chain(&s.over)
+        .filter_map(|p| match p {
+            Prim::Text {
+                text, x, baseline, ..
+            } => Some((text.clone(), *x, *baseline)),
+            _ => None,
+        })
+        .collect()
+}
+
+/// Title row: "C <close>" only when panel 0 draws the bar series; a long title is cut
+/// with "…" to the frame; legends that would reach the title are dropped; identical
+/// legends in a panel are shown once; a value label under a last-value tag is left out.
+#[test]
+fn title_row_close_legends_and_tag_labels() {
+    let p = common::provider();
+    // An RSI-only view with a long title at phone width: no close, title cut, no legend.
+    let v = common::view(
+        r#"{"id":"cap","title":"A very long capsule headline that cannot fit a phone frame at all",
+          "x":{"kind":"time"},"panels":[{"id":0,"y":{"kind":"linear"}}],
+          "layers":[{"id":"rsi","mark":"line","series":"rsi14","panel":0}]}"#,
+    );
+    let s = compile(&v, &p, &CompileOptions::new(390, 300)).unwrap();
+    let t = texts(&s);
+    assert!(!t.iter().any(|(x, _, _)| x.starts_with("C ")), "{t:?}");
+    let title = &t.iter().find(|(_, _, b)| *b == 23).unwrap().0;
+    assert!(
+        title.ends_with('…') && title.starts_with("A very long"),
+        "{title}"
+    );
+    assert!(title.chars().count() * 96 <= (390 - 8 - 12) * 10, "{title}");
+    assert!(
+        !t.iter().any(|(x, _, _)| x.starts_with("RSI14")),
+        "legend dropped: {t:?}"
+    );
+    // Two layers on px in panel 0: close shown, one legend for the identical texts.
+    let v = common::view(
+        r#"{"id":"dup","x":{"kind":"time"},"panels":[{"id":0,"y":{"kind":"linear"}}],
+          "layers":[{"id":"a","mark":"line","series":"px","panel":0,"encoding":{"y":"c"}},
+                    {"id":"b","mark":"line","series":"px","panel":0,"encoding":{"y":"c"}}]}"#,
+    );
+    let s = compile(&v, &p, &opts()).unwrap();
+    let t = texts(&s);
+    assert!(t.iter().any(|(x, _, _)| x == "C 124.69"), "{t:?}");
+    assert_eq!(
+        t.iter().filter(|(x, _, _)| x == "px 124.69").count(),
+        1,
+        "{t:?}"
+    );
+    // RSI 55.10 tag in a 0..100 panel: the 50.00 label under it is left out.
+    let s = compile(&common::view(V1), &p, &opts()).unwrap();
+    let rsi = &s.panels[1];
+    let labels: Vec<String> = texts(&s)
+        .into_iter()
+        .filter(|(_, x, b)| {
+            *x == rsi.rect.right + 6 && *b > rsi.rect.top && *b < rsi.rect.bottom + 8
+        })
+        .map(|(t, _, _)| t)
+        .collect();
+    assert!(labels.contains(&"55.10".to_owned()), "{labels:?}");
+    assert!(!labels.contains(&"50.00".to_owned()), "{labels:?}");
+}

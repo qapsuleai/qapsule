@@ -19,8 +19,8 @@ pub(crate) enum Column<'f> {
     Bars(Cow<'f, [Bar]>, usize),
     /// Values aligned to slots.
     Values(Cow<'f, [Option<f64>]>),
-    /// Values by slot built from a point series.
-    Dense(Vec<Option<f64>>),
+    /// Values by slot built from a point series, and whether a slot has a point.
+    Dense(Vec<Option<f64>>, Vec<bool>),
 }
 
 impl Column<'_> {
@@ -39,9 +39,22 @@ impl Column<'_> {
                 }
             }
             Column::Values(v) => (*v.get(i)?)?,
-            Column::Dense(v) => (*v.get(i)?)?,
+            Column::Dense(v, _) => (*v.get(i)?)?,
         };
         v.is_finite().then_some(v)
+    }
+
+    /// Whether the source has an entry at `slot` (a bar, a study value slot or a point),
+    /// even a `null` one: only such slots count as "not drawn".
+    pub(crate) fn has(&self, slot: u64) -> bool {
+        let Ok(i) = usize::try_from(slot) else {
+            return false;
+        };
+        match self {
+            Column::Bars(b, _) => i < b.len(),
+            Column::Values(v) => i < v.len(),
+            Column::Dense(_, has) => has.get(i).copied().unwrap_or(false),
+        }
     }
 }
 
@@ -218,6 +231,7 @@ impl<'a> Frame<'a> {
                     .ok_or_else(|| not_found(format!("series `{series}` has no points")))?;
                 let total = usize::try_from(self.total_slots()).unwrap_or(0);
                 let mut dense = vec![None; total];
+                let mut has = vec![false; total];
                 let last_t = self.bars.last().map(|b| b.t);
                 let mut k = 0usize;
                 for pt in pts.iter() {
@@ -234,10 +248,11 @@ impl<'a> Frame<'a> {
                     if let Some(s) = slot {
                         if let Some(d) = dense.get_mut(s) {
                             *d = pt.v;
+                            has[s] = true;
                         }
                     }
                 }
-                Ok(Column::Dense(dense))
+                Ok(Column::Dense(dense, has))
             }
         }
     }

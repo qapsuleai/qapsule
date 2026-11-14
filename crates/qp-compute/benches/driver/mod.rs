@@ -287,6 +287,42 @@ pub fn cache_probe(reps: usize) {
         cache.len(),
         (cache.len() * x.len() * 8) as f64 / 1e6
     );
+/// Thread scaling of the reducing parallel sweep (RP1/E3), profile A, median ms.
+pub fn thread_table(reps: usize) {
+    use qp_compute::par::sweep_reduce_par;
+    let x = pr::a_series();
+    let n = x.len();
+    let counts = [1usize, 2, 4, 8, 12, 16];
+    for (label, heavy) in [
+        ("reduce = last value", false),
+        ("reduce = read every output", true),
+    ] {
+        println!("threads, profile A, {label} (median ms)");
+        println!(
+            "{:<10} {}",
+            "study",
+            counts.map(|c| format!("{c:>8}")).join("")
+        );
+        for name in STUDY_NAMES {
+            let grid = qp_compute::sweep::bench_grid(name);
+            let mut row = format!("{name:<10}");
+            for &t in &counts {
+                let (_, md, _) = time_reps(reps, || {
+                    let r = sweep_reduce_par(name, &grid, &x, t, |c| {
+                        if heavy {
+                            fnv1a_columns(FNV_OFFSET, c) as f64
+                        } else {
+                            c.columns[0][n - 1]
+                        }
+                    })
+                    .unwrap();
+                    r[r.len() - 1]
+                });
+                row.push_str(&format!("{md:>8.2}"));
+            }
+            println!("{row}");
+        }
+    }
 }
 
 /// Runs the profiles selected by `--only` (default `a,b,c,d`), `--reps` times each.
@@ -304,6 +340,7 @@ pub fn run(default_only: &str, default_reps: usize) {
             "d" => profile_d(reps),
             "lanes" => lane_table(reps),
             "cache" => cache_probe(reps),
+            "threads" => thread_table(reps),
             "" => {}
             other => println!("unknown profile {other}"),
         }

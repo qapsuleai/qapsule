@@ -102,3 +102,48 @@ fn extreme_and_non_finite_values() {
         );
     }
 }
+
+#[test]
+fn huge_and_tiny_panel_weights() {
+    let p = common::provider();
+    let o = CompileOptions::new(1200, 600);
+    let mk = |w: [f64; 3]| {
+        let mut v = common::view(
+            r#"{"id":"w","x":{"kind":"time"},
+              "panels":[{"id":0,"y":{"kind":"linear"}},{"id":1,"y":{"kind":"linear"}},{"id":2,"y":{"kind":"linear"}}],
+              "layers":[{"id":"c","mark":"candle","series":"px","panel":0},
+                        {"id":"r","mark":"line","series":"rsi14","panel":1},
+                        {"id":"m","mark":"line","series":"macd","panel":2}]}"#,
+        );
+        for (p, w) in v.panels.iter_mut().zip(w) {
+            p.weight = Some(w);
+        }
+        v
+    };
+    // Two weights of 1.7e308 would sum to +inf without normalisation.
+    let s = timed(|| compile(&mk([1.7e308, 1.7e308, 1.7e308]), &p, &o)).unwrap();
+    let h: Vec<i32> = s
+        .panels
+        .iter()
+        .map(|p| p.rect.bottom - p.rect.top)
+        .collect();
+    assert_eq!(h, vec![175, 175, 176]);
+    // Extreme ratios: every panel keeps at least 10 px and the plot is filled exactly.
+    for w in [
+        [1.7e308, 5e-324, 1.0],
+        [5e-324, 5e-324, 1.7e308],
+        [1.0, 1e300, 1e-300],
+    ] {
+        let s = timed(|| compile(&mk(w), &p, &o)).unwrap();
+        let h: Vec<i32> = s
+            .panels
+            .iter()
+            .map(|p| p.rect.bottom - p.rect.top)
+            .collect();
+        assert!(h.iter().all(|x| *x >= 10), "{w:?}: {h:?}");
+        assert_eq!(h.iter().sum::<i32>() + 16, 542, "{w:?}: {h:?}");
+        for p in &s.panels {
+            assert!(p.y.min.is_finite() && p.y.max.is_finite() && p.y.top < p.y.bottom);
+        }
+    }
+}

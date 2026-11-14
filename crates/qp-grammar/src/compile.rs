@@ -34,6 +34,8 @@ const TOP: i32 = 34;
 const BOTTOM_MARGIN: i32 = 24;
 /// Gap between stacked panels.
 const PANEL_GAP: i32 = 8;
+/// Smallest panel height.
+const MIN_PANEL_H: i32 = 10;
 const TITLE_PX: f32 = 16.0;
 const LABEL_PX: f32 = 11.0;
 /// Alpha of emphasis strips (accent) and veils (background).
@@ -263,23 +265,30 @@ fn panel_rects(
         weights.push(w);
     }
     let avail = bottom - top - PANEL_GAP * (n - 1);
-    if avail < 10 * n {
+    if avail < MIN_PANEL_H * n {
         return Err(GrammarError::new(
             ErrorKind::Invalid,
             "/panels",
             format!("{n} panels do not fit in a {}-pixel plot", bottom - top),
         ));
     }
+    // Normalised by the largest weight so the sum cannot overflow (any finite weight > 0
+    // is accepted, e.g. 1.7e308); every panel keeps at least MIN_PANEL_H pixels.
+    let wmax = weights.iter().copied().fold(0.0_f64, f64::max);
+    let weights: Vec<f64> = weights.iter().map(|w| w / wmax).collect();
     let total: f64 = weights.iter().sum();
     let mut rects = Vec::with_capacity(panels.len());
     let mut y = top;
     let mut used = 0;
     for (i, w) in weights.iter().enumerate() {
+        let after = i32::try_from(panels.len() - i - 1).unwrap_or(0) * MIN_PANEL_H;
         #[allow(clippy::cast_possible_truncation)]
         let h = if i + 1 == panels.len() {
             avail - used
         } else {
-            (f64::from(avail) * w / total).floor() as i32
+            ((f64::from(avail) * w / total).floor() as i32)
+                .max(MIN_PANEL_H)
+                .min(avail - used - after)
         };
         rects.push(PixelRect {
             left,

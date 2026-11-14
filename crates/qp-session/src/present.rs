@@ -1,11 +1,12 @@
-//! The deterministic presenter (`docs/PROTOCOL.md` §10.2, §10.3).
+//! The deterministic presenter (`docs/PROTOCOL.md` §10.2, §10.3): the authority applies
+//! the grammar's depth rules (`qp_grammar::depth`, `docs/GRAMMAR.md` §13).
 
-use qp_schema::grammar::{Emphasis, EmphasisKind, Origin, Position};
-use qp_schema::protocol::{Presentation, Profile, SeriesValues, SurfaceKind, Target};
-use qp_schema::{Depth, Document, Finding, Layer, Mark, Panel, Scale, ScaleKind, View};
+use qp_grammar::depth;
+use qp_schema::protocol::{Presentation, Profile, SeriesValues, SurfaceKind};
+use qp_schema::{Depth, Document, Finding, View};
 
-use crate::error::num;
-use crate::values::{bar_series, values, Cache};
+use crate::provider::DocProvider;
+use crate::values::{values, Cache};
 
 /// Profile for a surface kind (§10.1), optionally capped at `max_depth`.
 #[must_use]
@@ -39,94 +40,35 @@ pub(crate) fn rank(d: Depth) -> u8 {
     }
 }
 
-/// The view the presenter builds for a finding (`docs/GRAMMAR.md` §13, `chart` row), in
-/// canonical form: panel 0 candles of the first fact's bar series; if the fact is on a
-/// study series, panel 1 its line and a rule at `evidence.level` whose origin is the
-/// fact (`y` keeps the `qp/0` string form, `"70"`); `x.domain = [t(max(0, bar - 30)),
-/// t(last bar)]`; a `highlight` emphasis on the fact; linear value scales; layer ids
-/// `l0`, `l1`, `l2`.
+/// The view the presenter builds for a finding: the grammar's `chart` depth rule
+/// ([`qp_grammar::depth::chart_view`], `docs/GRAMMAR.md` §13): panel 0 candles of the
+/// first fact's bar series; if the fact is on a study series, panel 1 its line and a rule
+/// at `evidence.level` whose origin is the fact (`y` keeps the `qp/0` string form,
+/// `"70"`); `x.domain = [t(max(0, bar - 30)), t(last bar)]`; a `highlight` emphasis on
+/// the fact; linear value scales. Layer ids are the canonical `l0`, `l1`, `l2`
+/// (`docs/GRAMMAR.md` §11 rule 3), as in RD1 documents.
 ///
 /// # Errors
 /// The finding has no facts, or its first fact's series has no bars.
 pub(crate) fn presenter_view(doc: &Document, finding: &Finding, id: &str) -> Result<View, String> {
-    let fact_id = finding
-        .facts
-        .first()
-        .ok_or_else(|| format!("finding `{}` has no facts to present", finding.id))?;
-    let fact = doc
-        .facts
-        .iter()
-        .find(|f| &f.id == fact_id)
-        .ok_or_else(|| format!("fact `{fact_id}` does not exist"))?;
-    let bs = bar_series(doc, &fact.series)
-        .ok_or_else(|| format!("series `{}` has no bars", fact.series))?;
-    let bars = bs.bars().unwrap_or_default();
-    let last = bars
-        .last()
-        .ok_or_else(|| format!("series `{}` has no bars", bs.id))?;
-    let from = usize::try_from(fact.bar.saturating_sub(30))
-        .unwrap_or(0)
-        .min(bars.len() - 1);
-    let panel = |pid: u32| Panel {
-        id: Some(pid),
-        name: None,
-        weight: None,
-        y: Scale {
-            id: Some(format!("y{pid}")),
-            ..Scale::new(ScaleKind::Linear)
-        },
-    };
-    let mut candles = Layer::new(Mark::Candle, 0);
-    candles.id = Some("l0".to_owned());
-    candles.series = Some(bs.id.clone());
-    let mut layers = vec![candles];
-    let mut panels = vec![panel(0)];
-    if fact.series != bs.id {
-        panels.push(panel(1));
-        let mut line = Layer::new(Mark::Line, 1);
-        line.id = Some("l1".to_owned());
-        line.series = Some(fact.series.clone());
-        layers.push(line);
-        if let Some(level) = fact.evidence.get("level") {
-            let mut rule = Layer::new(Mark::Rule, 1);
-            rule.id = Some("l2".to_owned());
-            rule.encoding.y = Some(Position::Name(num(*level)));
-            rule.origin.insert(
-                "/encoding/y".to_owned(),
-                Origin::Fact {
-                    fact: fact.id.clone(),
-                    field: "level".to_owned(),
-                },
-            );
-            layers.push(rule);
-        }
-    }
-    #[allow(clippy::cast_precision_loss)]
-    let domain = [bars[from].t as f64, last.t as f64];
-    Ok(View {
-        id: id.to_owned(),
-        title: None,
-        display_tz: None,
-        x: Scale {
-            domain: Some(domain),
-            id: Some("x".to_owned()),
-            ..Scale::new(ScaleKind::Time)
-        },
-        y: Vec::new(),
-        layers,
-        theme: None,
-        panels,
-        emphasis: vec![Emphasis {
-            target: Target {
-                item: Some(fact.id.clone()),
-                ..Target::default()
-            },
-            kind: EmphasisKind::Highlight,
-        }],
-    })
+    // The chart rule reads no study values: an empty cache is enough.
+    let cache = Cache::default();
+    let p = DocProvider::new(doc, &cache);
+    let mut v = depth::chart_view(&finding.id, &p, id).map_err(|e| e.reason)?;
+    canonical_layer_ids(&mut v);
+    Ok(v)
 }
 
-/// Presents a finding for a profile.
+fn canonical_layer_ids(v: &mut View) {
+    for (i, l) in v.layers.iter_mut().enumerate() {
+        l.id = Some(format!("l{i}"));
+    }
+}
+
+/// Presents a finding for a profile with the grammar's depth rules
+/// ([`qp_grammar::depth`]): `sentence` → text (+ capsule state); `capsule` → + glyphs,
+/// confidence, spark and `capsule_view` (one panel; only if the profile allows series
+/// data); `chart` → + the capsule's stored view or the presenter's view, and the facts.
 pub(crate) fn present(
     doc: &Document,
     cache: &mut Cache,
@@ -135,21 +77,25 @@ pub(crate) fn present(
     profile: &Profile,
 ) -> Presentation {
     let capsule = doc.capsules.iter().find(|c| c.finding == finding.id);
-    let depth = if rank(profile.depth) > rank(Depth::Chart) {
-        Depth::Chart
+    let depth = depth::effective_depth(profile.depth, profile);
+    let series_data = profile.series_data && profile.max_points > 0;
+    let spark = if rank(depth) >= rank(Depth::Capsule) && series_data {
+        spark(doc, cache, finding, profile.max_points as usize)
     } else {
-        profile.depth
+        None
     };
+    let prov = DocProvider::new(doc, cache);
     let mut p = Presentation {
         finding: finding.id.clone(),
         depth,
         surface,
-        text: capsule.map_or_else(|| finding.claim.clone(), |c| c.headline.clone()),
+        text: depth::sentence(&finding.id, &prov).unwrap_or_else(|_| finding.claim.clone()),
         state: capsule.map(|c| c.state),
         glyphs: Vec::new(),
         confidence: None,
-        spark: None,
+        spark,
         view: None,
+        capsule_view: None,
         facts: Vec::new(),
     };
     if rank(depth) >= rank(Depth::Capsule) {
@@ -162,20 +108,35 @@ pub(crate) fn present(
                 .collect();
         }
         p.confidence = Some(finding.confidence);
-        if profile.series_data && profile.max_points > 0 {
-            p.spark = spark(doc, cache, finding, profile.max_points as usize);
-        }
     }
-    if rank(depth) >= rank(Depth::Chart) {
-        p.view = capsule
-            .and_then(|c| c.view.as_ref())
-            .and_then(|v| doc.views.iter().find(|x| &x.id == v).cloned())
-            .or_else(|| presenter_view(doc, finding, &format!("present-{}", finding.id)).ok());
-        p.facts = finding
-            .facts
-            .iter()
-            .filter_map(|f| doc.facts.iter().find(|x| &x.id == f).cloned())
-            .collect();
+    match depth {
+        Depth::Capsule if series_data => {
+            p.capsule_view = depth::capsule_view(
+                &finding.id,
+                profile.max_points,
+                &prov,
+                &format!("capsule-{}", finding.id),
+            )
+            .ok()
+            .map(Box::new);
+        }
+        Depth::Chart | Depth::Workspace => {
+            p.view = capsule
+                .and_then(|c| c.view.as_ref())
+                .and_then(|v| doc.views.iter().find(|x| &x.id == v).cloned())
+                .or_else(|| {
+                    let id = format!("present-{}", finding.id);
+                    let mut v = depth::chart_view(&finding.id, &prov, &id).ok()?;
+                    canonical_layer_ids(&mut v);
+                    Some(v)
+                });
+            p.facts = finding
+                .facts
+                .iter()
+                .filter_map(|f| doc.facts.iter().find(|x| &x.id == f).cloned())
+                .collect();
+        }
+        Depth::Sentence | Depth::Capsule => {}
     }
     p
 }

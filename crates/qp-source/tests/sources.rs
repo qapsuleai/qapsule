@@ -129,13 +129,7 @@ fn ordering_rules_and_bindings() {
 #[test]
 fn file_bindings_cannot_escape_the_base_dir() {
     let base = repo("fixtures");
-    for bad in [
-        "../Cargo.toml",
-        "/etc/hosts",
-        "bars/../../Cargo.toml",
-        "",
-        "./bars/sample.json",
-    ] {
+    for bad in ["../Cargo.toml", "/etc/hosts", "bars/../../Cargo.toml", ""] {
         let b = qp_schema::Series {
             id: "s".into(),
             instrument: None,

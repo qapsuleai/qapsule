@@ -127,6 +127,16 @@ pub fn profile_c(reps: usize) {
             sink
         });
         line("C", fam, 1000, s, d);
+        if arg("--baseline").is_some() {
+            let mut d = FNV_OFFSET;
+            pr::c_run_baseline(fam, &x, |_, c| d = fnv1a_columns(d, c));
+            let s = time_reps(reps, || {
+                let mut sink = 0.0;
+                pr::c_run_baseline(fam, &x, |_, c| sink += c.columns[0][n - 1]);
+                sink
+            });
+            line("C", &format!("{fam} (T1)"), 1000, s, d);
+        }
     }
 }
 
@@ -180,6 +190,78 @@ pub fn profile_d(reps: usize) {
     );
 }
 
+/// Content-addressed cache costs (RP1/E4): hashing, hit, miss, repeated sweep.
+pub fn cache_probe(reps: usize) {
+    use qp_compute::graph::{content_hash, ResultCache};
+    println!("cache: content-addressed results (10,000-bar input; times in microseconds)");
+    let x = pr::a_series();
+    let per = |f: &mut dyn FnMut(), k: usize| {
+        let mut t = Vec::new();
+        for _ in 0..reps {
+            let t0 = Instant::now();
+            for _ in 0..k {
+                f();
+            }
+            t.push(t0.elapsed().as_secs_f64() * 1e6 / k as f64);
+        }
+        stats(&mut t).1
+    };
+    let hash = per(
+        &mut || {
+            std::hint::black_box(content_hash(std::hint::black_box(&x)));
+        },
+        100,
+    );
+    let h = content_hash(&x);
+    let p14 = std::collections::BTreeMap::from([("period".to_owned(), 14.0)]);
+    let miss = per(
+        &mut || {
+            let mut c = ResultCache::new();
+            std::hint::black_box(c.get_or_compute(h, "rsi", &p14, &x).unwrap());
+        },
+        20,
+    );
+    let mut cache = ResultCache::new();
+    let _ = cache.get_or_compute(h, "rsi", &p14, &x).unwrap();
+    let hit = per(
+        &mut || {
+            std::hint::black_box(cache.get_or_compute(h, "rsi", &p14, &x).unwrap());
+        },
+        1000,
+    );
+    let grid = qp_compute::sweep::bench_grid("rsi");
+    for p in &grid {
+        let _ = cache.get_or_compute(h, "rsi", p, &x).unwrap();
+    }
+    let rehit = per(
+        &mut || {
+            let h2 = content_hash(&x);
+            for p in &grid {
+                std::hint::black_box(cache.get_or_compute(h2, "rsi", p, &x).unwrap());
+            }
+        },
+        1,
+    );
+    let fresh = per(
+        &mut || {
+            pr::a_run("rsi", &x, |_, c| {
+                std::hint::black_box(c.columns[0][0]);
+            });
+        },
+        1,
+    );
+    println!("hash 10k bars       {hash:>10.2}");
+    println!("rsi(14) miss        {miss:>10.2}  (compute + insert)");
+    println!("rsi(14) hit         {hit:>10.2}");
+    println!("rsi sweep, 1000 hits {rehit:>9.2}  (rehash + 1,000 lookups)");
+    println!("rsi sweep, fresh    {fresh:>10.2}");
+    println!(
+        "cached entries: {}, memory ~ {:.1} MB",
+        cache.len(),
+        (cache.len() * x.len() * 8) as f64 / 1e6
+    );
+}
+
 /// Runs the profiles selected by `--only` (default `a,b,c,d`), `--reps` times each.
 pub fn run(default_only: &str, default_reps: usize) {
     let reps = arg_usize("--reps", default_reps).max(1);
@@ -193,6 +275,7 @@ pub fn run(default_only: &str, default_reps: usize) {
             "b" => profile_b(reps),
             "c" => profile_c(reps),
             "d" => profile_d(reps),
+            "cache" => cache_probe(reps),
             "" => {}
             other => println!("unknown profile {other}"),
         }

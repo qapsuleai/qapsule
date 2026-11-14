@@ -154,8 +154,25 @@ pub fn c_build(spec: &ChainSpec) -> Box<dyn Study> {
     s
 }
 
-/// Profile C, one family: every variant's outputs as columns (`NaN` in warmup).
-pub fn c_run(family: &str, x: &[f64], mut visit: impl FnMut(usize, &SweepColumns)) {
+/// Profile C, one family, with the computation graph ([`crate::graph::sweep_chains`]):
+/// every distinct prefix once, the last stage as a lane sweep.
+///
+/// # Panics
+/// Unknown family.
+pub fn c_run(family: &str, x: &[f64], visit: impl FnMut(usize, &SweepColumns)) {
+    let chains: Vec<Vec<crate::graph::Stage>> = c_grid(family)
+        .iter()
+        .map(|spec| {
+            spec.iter()
+                .map(|(n, p)| crate::graph::Stage::new(n, p.clone()))
+                .collect()
+        })
+        .collect();
+    crate::graph::sweep_chains(&chains, x, visit).expect("valid chains");
+}
+
+/// Profile C as in RP1/T1: one nested [`Chain`] per variant, bar by bar.
+pub fn c_run_baseline(family: &str, x: &[f64], mut visit: impl FnMut(usize, &SweepColumns)) {
     let grid = c_grid(family);
     let mut buf = SweepColumns {
         names: &[],

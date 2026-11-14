@@ -22,7 +22,7 @@ pub use bollinger::Bollinger;
 pub use ema::Ema;
 pub use macd::Macd;
 pub use rsi::Rsi;
-pub(crate) use rsi::{rsi_from_avg, split as rsi_split};
+pub(crate) use rsi::{rsi_from_avg_pass, split as rsi_split};
 pub use sma::Sma;
 
 /// `usize -> f64` for periods (validated `<= 1e9`, so exact).

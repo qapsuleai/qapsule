@@ -21,7 +21,7 @@
 use std::collections::BTreeMap;
 
 use super::{sweep_kernel, SweepColumns, MAX_LANES, NAN};
-use crate::studies::{rsi_from_avg, rsi_split, Bollinger, Ema, Macd, Rsi};
+use crate::studies::{rsi_from_avg_pass, rsi_split, Bollinger, Ema, Macd, Rsi};
 use crate::{period_param, ComputeError, Core};
 
 type Params = BTreeMap<String, f64>;
@@ -501,7 +501,7 @@ fn rsi_lanes<const L: usize>(
     let st: [[f64; 4]; L] = std::array::from_fn(|k| rs[k].steady().expect("past the seed bar"));
     let (mut ag, mut al) = (st.map(|s| s[2]), st.map(|s| s[3]));
     // Blocks of bars: the dependent smoothing chains run lane-interleaved into small
-    // local buffers, then `rsi_from_avg` (two of the four divisions per bar) runs as a
+    // local buffers, then `rsi_from_avg_pass` (two of the four divisions per bar) runs as a
     // dependency-free pass per lane, off the chains, and each lane's output is written
     // as one sequential stream (2 * L interleaved write streams thrash at L = 8).
     const B: usize = 128;
@@ -529,7 +529,7 @@ fn rsi_lanes<const L: usize>(
                 .zip(&tg[k][..len])
                 .zip(&tl[k][..len])
             {
-                *o = rsi_from_avg(g, l);
+                *o = rsi_from_avg_pass(g, l);
             }
         }
         i0 += len;

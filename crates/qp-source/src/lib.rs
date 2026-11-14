@@ -122,7 +122,7 @@ pub fn collect_series(source: &mut dyn SeriesSource) -> Result<Series, SourceErr
         id: meta.id,
         instrument: meta.instrument,
         interval: meta.interval,
-        source: qp_schema::SeriesSource::Inline,
+        source: qp_schema::SeriesSource::Inline {},
         data: Some(SeriesData::Bars { bars }),
     })
 }
@@ -309,7 +309,9 @@ pub fn open_binding(
     base_dir: &Path,
 ) -> Result<Box<dyn SeriesSource>, SourceError> {
     match &series.source {
-        qp_schema::SeriesSource::Inline => Ok(Box::new(MemorySource::from_series(series.clone())?)),
+        qp_schema::SeriesSource::Inline {} => {
+            Ok(Box::new(MemorySource::from_series(series.clone())?))
+        }
         qp_schema::SeriesSource::File { path } => {
             let full = resolve_binding_path(base_dir, path)?;
             Ok(Box::new(FileSource::open(&full)?))

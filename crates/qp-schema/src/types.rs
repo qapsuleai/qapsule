@@ -177,7 +177,7 @@ pub enum SeriesData {
 #[serde(tag = "kind", rename_all = "snake_case", deny_unknown_fields)]
 pub enum SeriesSource {
     /// Data is embedded in the series itself (`data`).
-    Inline,
+    Inline {},
     /// A local file.
     File {
         /// Path to the file.

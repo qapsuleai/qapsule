@@ -33,6 +33,7 @@ mod core;
 mod lanes;
 pub mod graph;
 pub mod par;
+pub mod late;
 #[doc(hidden)]
 pub mod profiles;
 pub mod studies;

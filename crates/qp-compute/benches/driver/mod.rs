@@ -340,6 +340,101 @@ pub fn thread_table(reps: usize) {
     }
 }
 
+/// Certified late start (RP1/E8): the last `window` bars of every period, vs a full sweep.
+/// Hybrid: periods whose typical meeting distance fits before the window use the late
+/// start; the rest run in one full lane sweep. Both parts are bit-identical to full runs.
+pub fn late_probe(reps: usize) {
+    use qp_compute::late::{
+        ema_tail_with, rsi_tail_with, Bounds, EMA_LOOKBACK_PER_PERIOD, RSI_LOOKBACK_PER_PERIOD,
+    };
+    println!("late start: last 500 bars, certified bit-identical (sandwich) vs full sweep");
+    println!(
+        "{:<4} {:>9} {:>8} {:>10} {:>10} {:>8} {:>12} {:>10}",
+        "", "bars", "periods", "full ms", "hybrid ms", "speed", "late/cert", "full part"
+    );
+    let window = 500;
+    let grid_of = |ps: &[usize]| -> Vec<std::collections::BTreeMap<String, f64>> {
+        ps.iter()
+            .map(|&p| std::collections::BTreeMap::from([("period".to_owned(), p as f64)]))
+            .collect()
+    };
+    for (bars, step) in [(10_000usize, 1usize), (1_000_000, 10)] {
+        let x = if bars == pr::A_BARS {
+            pr::a_series()
+        } else {
+            qp_compute::sweep::bench_closes(bars, 99)
+        };
+        let periods: Vec<usize> = (2..=1001).step_by(step).collect();
+        let from = bars - window;
+        let grid = grid_of(&periods);
+        for name in ["ema", "rsi"] {
+            let factor = if name == "ema" {
+                EMA_LOOKBACK_PER_PERIOD
+            } else {
+                RSI_LOOKBACK_PER_PERIOD
+            };
+            let (late_p, full_p): (Vec<usize>, Vec<usize>) =
+                periods.iter().partition(|&&p| factor * p + p + 2 <= from);
+            let full_grid = grid_of(&full_p);
+            let r = if bars > 100_000 { reps.min(3) } else { reps };
+            let (_, full, _) = time_reps(r, || {
+                let mut sink = 0.0;
+                qp_compute::sweep::sweep_each(name, &grid, &x, |_, c| {
+                    sink += c.columns[0][bars - 1]
+                })
+                .unwrap();
+                sink
+            });
+            let mut out = vec![0.0; window];
+            let mut cert = 0;
+            let (_, hybrid, _) = time_reps(r, || {
+                cert = 0;
+                let b = Bounds::new(&x, from);
+                for &p in &late_p {
+                    let c = if name == "ema" {
+                        ema_tail_with(&x, p, &b, &mut out)
+                    } else {
+                        rsi_tail_with(&x, p, &b, &mut out)
+                    };
+                    cert += usize::from(c.met.is_some());
+                }
+                let mut sink = out[window - 1];
+                if !full_grid.is_empty() {
+                    qp_compute::sweep::sweep_each(name, &full_grid, &x, |_, c| {
+                        sink += c.columns[0][bars - 1];
+                    })
+                    .unwrap();
+                }
+                sink
+            });
+            println!(
+                "{name:<4} {bars:>9} {:>8} {full:>10.2} {hybrid:>10.2} {:>7.1}x {:>6}/{:<5} {:>10}",
+                periods.len(),
+                full / hybrid,
+                late_p.len(),
+                cert,
+                full_p.len()
+            );
+        }
+    }
+    // Bars needed until the bounds meet, by period (10k series, last 500 bars).
+    let x = pr::a_series();
+    let from = x.len() - window;
+    let b = Bounds::new(&x, from);
+    let mut out = vec![0.0; window];
+    let mut row = String::from("meet after (bars) ema/rsi:");
+    for p in [2, 5, 14, 20, 50, 100, 200, 500, 1000] {
+        let e = ema_tail_with(&x, p, &b, &mut out);
+        let r = rsi_tail_with(&x, p, &b, &mut out);
+        let d = |c: qp_compute::late::Certificate| {
+            c.met
+                .map_or("full".to_owned(), |m| (m + 1 - c.start).to_string())
+        };
+        row.push_str(&format!(" p{p}={}/{}", d(e), d(r)));
+    }
+    println!("{row}");
+}
+
 /// Runs the profiles selected by `--only` (default `a,b,c,d`), `--reps` times each.
 pub fn run(default_only: &str, default_reps: usize) {
     let reps = arg_usize("--reps", default_reps).max(1);
@@ -356,6 +451,7 @@ pub fn run(default_only: &str, default_reps: usize) {
             "lanes" => lane_table(reps),
             "cache" => cache_probe(reps),
             "threads" => thread_table(reps),
+            "late" => late_probe(reps),
             "" => {}
             other => println!("unknown profile {other}"),
         }

@@ -1,6 +1,6 @@
 # Mimari
 
-Durum: taslak v0. R0'daki denemelerin sonucuna göre güncellenir.
+Durum: taslak v0. R0'daki denemelerin sonucuna göre güncellenir; RD1'de protokol katmanı eklendi.
 
 ## Sınır
 
@@ -46,6 +46,32 @@ persona ve dağıtım ayrı sistemlerdir ve Qapsule'ı tüketir.
 | Uzantı | Derlenmiş hesaplar | Sandbox'ta ajan yazımı hesap/görünüm |
 | Tahmin | Yok | Takılabilir tahmin sağlayıcı |
 
+## Alan protokolü (RD1)
+
+Motor, arayüzler ve ajanlar aynı protokolle konuşur: `qp/0` (`docs/PROTOCOL.md`). Arayüz
+yalnızca bir istemcidir (AI-native testi 5).
+
+```
+  insan arayüzü (web/telefon/saat/ses)      ajan (MCP, satır akışı, süreç içi)
+              │  hello · command · query · subscribe · input · attend
+              ▼
+  ┌──────────────── otorite (qp-session) ────────────────┐
+  │ yetki ve öneri ─► işlem açılımı ─► değişim ─► günlük │  ← saat bir girdidir (clock)
+  │ sorgular (qp-compute ile)   sunucu (presenter)       │
+  │ abonelik ve olaylar         varlık durumu (presence) │
+  └──────────────────────────────────────────────────────┘
+              │  welcome · ack · result · notify · error
+              ▼
+     yansılar (cihazdaki kabuk, başka ajanlar)
+```
+
+- **Tek otorite, sıralı günlük.** Her komut bir günlük girdisi; girdide istek (anlamsal
+  `Op`), değişim (ilkel `ChangeOp`, tam öğeli), ters değişim ve köken. Başlangıç dokümanı +
+  değişimler = doküman, bayt düzeyinde (yeniden oynatma hesap kodu istemez).
+- **Varlık durumu** (bakılan aralık, odak, dikkat yönergeleri) günlüğe girmez.
+- **Taşımalar:** süreç içi (`Session::handle_raw`), satır akışı (`qp serve`), MCP
+  (`qp mcp`, araçlar şemadan üretilir). Uygunluk dökümleri üçünde de aynı.
+
 ## Hesap nerede yapılır
 
 - **Ortak ve yaygın olan** sunucuda bir kez hesaplanır ve akış olarak gelir.
@@ -59,15 +85,16 @@ persona ve dağıtım ayrı sistemlerdir ve Qapsule'ı tüketir.
 ```
 qapsule/
   crates/
-    qp-schema/     tipler + JSON Schema üretimi
+    qp-schema/     tipler + JSON Schema üretimi; protokol mesajları (`protocol`)
     qp-compute/    hesap çekirdeği (Study, tarama)
     qp-source/     seri kaynakları (SeriesSource: dosya, sentetik; R6'da canlı)
     qp-calendar/   borsa takvimleri, saat dilimi tabloları, bar hizası (K14, K16)
     qp-facts/      olgu dedektörleri
     qp-grammar/    görsel gramer
     qp-render/     çizim (headless + GPU)
-    qp-doc/        doküman + komut yolu
-    qp-cli/        ajanların ve testlerin kullandığı komut satırı
+    qp-session/    otorite: komut yolu, günlük, sorgu, abonelik, öneri, sunucu (RD1)
+    qp-mcp/        MCP uyarlayıcısı; araçlar şemadan üretilir (RD1)
+    qp-cli/        ajanların ve testlerin kullandığı komut satırı (`serve`, `conform`, `mcp`)
     qp-wasm/       web bağlaması
   shells/          web, ios, android (ince kabuklar)
   fixtures/        örnek veri, örnek doküman, altın görseller

@@ -1,0 +1,131 @@
+{
+  "schema_version": "0",
+  "id": "doc-thyao-daily",
+  "title": "THYAO gunluk",
+  "series": [
+    {
+      "id": "thyao-1d",
+      "symbol": "THYAO",
+      "interval": "1d",
+      "source": { "kind": "matriks", "symbol": "THYAO", "interval": "1d" },
+      "data": {
+        "kind": "bars",
+        "bars": [
+          { "t": 1794380400000, "o": 312.25, "h": 318.5, "l": 310.0, "c": 317.75, "v": 41250310.0 },
+          { "t": 1794466800000, "o": 318.0, "h": 324.0, "l": 316.5, "c": 322.5, "v": 48977120.0 },
+          { "t": 1794553200000, "o": 323.0, "h": 331.25, "l": 321.75, "c": 330.5, "v": 63104455.0 }
+        ]
+      }
+    },
+    {
+      "id": "thyao-1d-rsi14",
+      "symbol": "THYAO",
+      "interval": "1d",
+      "source": {
+        "kind": "study",
+        "study": "rsi",
+        "inputs": ["thyao-1d"],
+        "params": { "period": 14.0 }
+      },
+      "data": {
+        "kind": "points",
+        "points": [
+          { "t": 1794380400000, "v": 63.42 },
+          { "t": 1794466800000, "v": 68.91 },
+          { "t": 1794553200000, "v": 71.37 }
+        ]
+      }
+    }
+  ],
+  "views": [
+    {
+      "id": "view-thyao-daily",
+      "title": "THYAO 1G + RSI(14)",
+      "x": { "kind": "time" },
+      "y": [
+        { "kind": "linear" },
+        { "kind": "linear", "domain": [0.0, 100.0] }
+      ],
+      "layers": [
+        { "mark": "candle", "series": "thyao-1d", "panel": 0, "encoding": {} },
+        { "mark": "line", "series": "thyao-1d-rsi14", "panel": 1, "encoding": { "color": "#7e57c2", "y": "v" } },
+        { "mark": "rule", "panel": 1, "encoding": { "color": "#9e9e9e", "y": "70" } }
+      ]
+    }
+  ],
+  "facts": [
+    {
+      "id": "fact-thyao-rsi14-cross70",
+      "kind": "cross_above",
+      "series": "thyao-1d-rsi14",
+      "bar": 1842,
+      "t": 1794553200000,
+      "text": "RSI(14) 70'i yukari kesti, bar #1842.",
+      "evidence": { "level": 70.0, "prev": 68.91, "value": 71.37 },
+      "provenance": {
+        "author": { "kind": "engine", "name": "qp-study", "version": "0.0.0" },
+        "at": 1794582600000,
+        "based_on": ["thyao-1d-rsi14"]
+      }
+    }
+  ],
+  "findings": [
+    {
+      "id": "fnd-thyao-rsi-overbought",
+      "claim": "THYAO gunlukte momentum guclu; RSI(14) asiri alim bolgesine girdi.",
+      "facts": ["fact-thyao-rsi14-cross70"],
+      "confidence": 0.65,
+      "invalidation": { "kind": "threshold", "series": "thyao-1d-rsi14", "op": "cross_below", "value": 70.0 },
+      "provenance": {
+        "author": { "kind": "agent", "name": "scout", "model": "claude-opus-5-5" },
+        "at": 1794646800000,
+        "based_on": ["fact-thyao-rsi14-cross70"]
+      }
+    }
+  ],
+  "capsules": [
+    {
+      "id": "cap-thyao-rsi-overbought",
+      "finding": "fnd-thyao-rsi-overbought",
+      "state": "live",
+      "revision": 2,
+      "headline": "THYAO: RSI(14) 70'i yukari kesti; momentum guclu ama asiri alim bolgesinde.",
+      "glyphs": [
+        { "kind": "direction", "value": 0.8 },
+        { "kind": "strength", "value": 0.65 },
+        { "kind": "extremity", "value": 0.72 },
+        { "kind": "uncertainty", "value": 0.35 }
+      ],
+      "view": "view-thyao-daily",
+      "depth": "capsule",
+      "expires_at": 1795792200000,
+      "provenance": {
+        "author": { "kind": "agent", "name": "scout", "model": "claude-opus-5-5" },
+        "at": 1794646800000,
+        "based_on": ["fnd-thyao-rsi-overbought", "fact-thyao-rsi14-cross70"]
+      }
+    }
+  ],
+  "intents": [
+    {
+      "id": "int-thyao-trend-break",
+      "text": "Yukselis bozulursa haber ver.",
+      "trigger": { "kind": "threshold", "series": "thyao-1d", "op": "cross_below", "value": 310.0 },
+      "active": true,
+      "provenance": {
+        "author": { "kind": "human", "name": "analyst" },
+        "at": 1794646800000,
+        "based_on": []
+      }
+    }
+  ],
+  "ledger": {
+    "entries": [
+      {
+        "finding": "fnd-thyao-rsi-overbought",
+        "outcome": "pending",
+        "recorded_at": 1794646800000
+      }
+    ]
+  }
+}

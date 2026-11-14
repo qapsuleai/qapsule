@@ -1,0 +1,21 @@
+{
+  "id": "cap-thyao-rsi-overbought",
+  "finding": "fnd-thyao-rsi-overbought",
+  "state": "live",
+  "revision": 2,
+  "headline": "THYAO: RSI(14) 70'i yukari kesti; momentum guclu ama asiri alim bolgesinde.",
+  "glyphs": [
+    { "kind": "direction", "value": 0.8 },
+    { "kind": "strength", "value": 0.65 },
+    { "kind": "extremity", "value": 0.72 },
+    { "kind": "uncertainty", "value": 0.35 }
+  ],
+  "view": "view-thyao-daily",
+  "depth": "capsule",
+  "expires_at": 1795792200000,
+  "provenance": {
+    "author": { "kind": "agent", "name": "scout", "model": "claude-opus-5-5" },
+    "at": 1794646800000,
+    "based_on": ["fnd-thyao-rsi-overbought", "fact-thyao-rsi14-cross70"]
+  }
+}

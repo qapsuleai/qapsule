@@ -659,7 +659,10 @@ impl Session {
         vec![out(
             conn,
             ServerMsg::Welcome {
-                summary: Some(crate::summary::summarize_doc(&self.doc)),
+                // Only principals that may read get the summary (a feed may not).
+                summary: permissions(p.role)
+                    .read
+                    .then(|| crate::summary::summarize_doc(&self.doc)),
                 protocol: PROTOCOL_VERSION.to_owned(),
                 doc: self.doc.id.clone(),
                 principal: p.id,

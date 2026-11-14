@@ -148,6 +148,16 @@ pub fn apply_change(doc: &mut Document, change: &ChangeOp) -> Result<ChangeOp, S
                     return Err(format!("layer at index {i} of view `{view}` is not `{id}`"));
                 }
             }
+            if let Some(id) = &v.layers[i].id {
+                if v.emphasis
+                    .iter()
+                    .any(|e| e.target.layer.as_deref() == Some(id))
+                {
+                    return Err(format!(
+                        "layer `{id}` of view `{view}` is targeted by an emphasis"
+                    ));
+                }
+            }
             let layer = v.layers.remove(i);
             ChangeOp::InsertLayer {
                 view: view.clone(),
@@ -222,6 +232,11 @@ pub fn apply_change(doc: &mut Document, change: &ChangeOp) -> Result<ChangeOp, S
             if v.layers.iter().any(|l| l.panel == *panel) {
                 return Err(format!("panel {panel} of view `{view}` still has layers"));
             }
+            if v.emphasis.iter().any(|e| e.target.panel == Some(*panel)) {
+                return Err(format!(
+                    "panel {panel} of view `{view}` is targeted by an emphasis"
+                ));
+            }
             let i = v
                 .panels
                 .iter()
@@ -236,6 +251,18 @@ pub fn apply_change(doc: &mut Document, change: &ChangeOp) -> Result<ChangeOp, S
         }
         ChangeOp::SetEmphasis { view, emphasis } => {
             let v = view_mut(doc, view)?;
+            for e in emphasis {
+                if let Some(l) = &e.target.layer {
+                    if v.layer(l).is_none() {
+                        return Err(format!("emphasis targets missing layer `{l}` of `{view}`"));
+                    }
+                }
+                if let Some(p) = e.target.panel {
+                    if v.panel(p).is_none() {
+                        return Err(format!("emphasis targets missing panel {p} of `{view}`"));
+                    }
+                }
+            }
             let old = std::mem::replace(&mut v.emphasis, emphasis.clone());
             ChangeOp::SetEmphasis {
                 view: view.clone(),
@@ -429,8 +456,8 @@ pub fn touched_ids(changes: &[ChangeOp]) -> BTreeSet<String> {
 
 /// The key a change touches, for conflict detection (`base`, `undo`): the item id,
 /// except inside a view where layer changes touch `view/<layer id>` and panel structure
-/// `view/panels` (emphasis: `view/emphasis`); `put_view` and `set_x_domain` touch the
-/// whole view (`docs/PROTOCOL.md` §5.3).
+/// `view/panels`; `put_view`, `set_x_domain` and `set_emphasis` (whose targets are
+/// layers and panels) touch the whole view (`docs/PROTOCOL.md` §5.3).
 #[must_use]
 pub fn touched_key(change: &ChangeOp) -> String {
     let sub = |view: &str, rest: &str| format!("{view}/{rest}");
@@ -446,7 +473,8 @@ pub fn touched_key(change: &ChangeOp) -> String {
             None => view.clone(),
         },
         ChangeOp::PutPanel { view, .. } | ChangeOp::DeletePanel { view, .. } => sub(view, "panels"),
-        ChangeOp::SetEmphasis { view, .. } => sub(view, "emphasis"),
+        // Emphasis targets layers and panels of its view: it conflicts with all of them.
+        ChangeOp::SetEmphasis { view, .. } => view.clone(),
         other => touched(other).to_owned(),
     }
 }

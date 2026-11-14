@@ -11,6 +11,7 @@
 
 use std::collections::BTreeMap;
 
+use crate::lanes;
 use crate::studies::{Bollinger, Ema, Macd, Rsi, Sma};
 use crate::{create, period_param, ComputeError, Core, Field};
 
@@ -43,167 +44,8 @@ impl SweepColumns {
     }
 }
 
-/// A single-input study that can produce one bar's outputs as plain `f64` (NaN = none).
-trait Kernel: Core {
-    /// Variants stepped together (tuned per study by measurement, see BENCH.md).
-    const LANES: usize;
-    /// Peek then commit: the outputs of bar `x` (first `OUTPUTS.len()` slots used).
-    fn step(&mut self, x: f64) -> [f64; 4];
-}
-
-const NAN: f64 = f64::NAN;
-
-impl Kernel for Sma {
-    const LANES: usize = SMA_LANES;
-    #[inline]
-    fn step(&mut self, x: f64) -> [f64; 4] {
-        let v = self.peek1(x).unwrap_or(NAN);
-        self.commit1(x);
-        [v, 0.0, 0.0, 0.0]
-    }
-}
-
-impl Kernel for Ema {
-    const LANES: usize = EMA_LANES;
-    #[inline]
-    fn step(&mut self, x: f64) -> [f64; 4] {
-        let v = self.peek1(x).unwrap_or(NAN);
-        self.commit1(x);
-        [v, 0.0, 0.0, 0.0]
-    }
-}
-
-impl Kernel for Rsi {
-    const LANES: usize = RSI_LANES;
-    #[inline]
-    fn step(&mut self, x: f64) -> [f64; 4] {
-        let v = self.peek1(x).unwrap_or(NAN);
-        self.commit1(x);
-        [v, 0.0, 0.0, 0.0]
-    }
-}
-
-impl Kernel for Macd {
-    const LANES: usize = MACD_LANES;
-    #[inline]
-    fn step(&mut self, x: f64) -> [f64; 4] {
-        let v = self.peek1(x);
-        self.commit1(x);
-        [
-            v.macd.unwrap_or(NAN),
-            v.signal.unwrap_or(NAN),
-            v.histogram.unwrap_or(NAN),
-            0.0,
-        ]
-    }
-}
-
-impl Kernel for Bollinger {
-    const LANES: usize = BOLLINGER_LANES;
-    #[inline]
-    fn step(&mut self, x: f64) -> [f64; 4] {
-        match self.step1(x) {
-            Some(v) => [v.middle, v.upper, v.lower, v.bandwidth],
-            None => [NAN; 4],
-        }
-    }
-}
-
-// Variants stepped together per study. Each study's per-bar update is a short chain of
-// dependent operations; stepping several independent variants in the same loop lets the
-// CPU overlap those chains. Each lane runs exactly the arithmetic of a single run, so
-// results stay bit-identical. Values chosen by measurement (rounds/R1/BENCH.md).
-const SMA_LANES: usize = 1;
-const EMA_LANES: usize = 2;
-const RSI_LANES: usize = 4;
-const MACD_LANES: usize = 2;
-const BOLLINGER_LANES: usize = 1;
-
-/// Largest lane count any study uses (buffer pool size).
+/// Largest lane count (buffer pool size).
 const MAX_LANES: usize = 8;
-
-fn prepare<K: Kernel>(k: &K, n: usize, buf: &mut SweepColumns) {
-    buf.names = K::OUTPUTS;
-    buf.warmup = k.warmup();
-    buf.columns.resize_with(K::OUTPUTS.len(), Vec::new);
-    for col in &mut buf.columns {
-        col.clear();
-        col.resize(n, 0.0);
-    }
-}
-
-/// Steps `L` kernels over `x` together; lane `l` writes its `N` outputs into
-/// `bufs[l].columns`.
-fn step_lanes<K: Kernel, const L: usize, const N: usize>(
-    ks: &mut [K],
-    x: &[f64],
-    bufs: &mut [SweepColumns],
-) {
-    let ks: &mut [K; L] = ks.try_into().expect("L kernels");
-    let n = x.len();
-    // Flat list of output slices, lane-major: cols[l * N + j].
-    let mut cols: Vec<&mut [f64]> = bufs[..L]
-        .iter_mut()
-        .flat_map(|b| b.columns.iter_mut().map(|c| &mut c[..n]))
-        .collect();
-    assert_eq!(cols.len(), L * N);
-    for (i, &xi) in x.iter().enumerate() {
-        let mut outs = [[0.0; 4]; L];
-        for l in 0..L {
-            outs[l] = ks[l].step(xi);
-        }
-        for l in 0..L {
-            for j in 0..N {
-                cols[l * N + j][i] = outs[l][j];
-            }
-        }
-    }
-}
-
-fn step_lanes_n<K: Kernel, const L: usize>(ks: &mut [K], x: &[f64], bufs: &mut [SweepColumns]) {
-    match K::OUTPUTS.len() {
-        1 => step_lanes::<K, L, 1>(ks, x, bufs),
-        3 => step_lanes::<K, L, 3>(ks, x, bufs),
-        4 => step_lanes::<K, L, 4>(ks, x, bufs),
-        n => unreachable!("no kernel with {n} outputs"),
-    }
-}
-
-/// Steps `ks` (1, 2, 4 or 8 kernels; any other count runs one by one) over `x`.
-fn run_lanes<K: Kernel>(ks: &mut [K], x: &[f64], bufs: &mut [SweepColumns]) {
-    for (k, b) in ks.iter().zip(bufs.iter_mut()) {
-        prepare(k, x.len(), b);
-    }
-    match ks.len() {
-        8 => step_lanes_n::<K, 8>(ks, x, bufs),
-        4 => step_lanes_n::<K, 4>(ks, x, bufs),
-        2 => step_lanes_n::<K, 2>(ks, x, bufs),
-        _ => {
-            for (k, b) in ks.iter_mut().zip(bufs.iter_mut()) {
-                step_lanes_n::<K, 1>(std::slice::from_mut(k), x, std::slice::from_mut(b));
-            }
-        }
-    }
-}
-
-fn sweep_kernel<K: Kernel>(
-    build: impl Fn(&BTreeMap<String, f64>) -> Result<K, ComputeError>,
-    full: &[BTreeMap<String, f64>],
-    x: &[f64],
-    lanes: Option<usize>,
-    bufs: &mut [SweepColumns],
-    visit: &mut impl FnMut(usize, &SweepColumns),
-) -> Result<(), ComputeError> {
-    let lanes = lanes.unwrap_or(K::LANES).clamp(1, MAX_LANES);
-    for (ci, chunk) in full.chunks(lanes).enumerate() {
-        let mut ks: Vec<K> = chunk.iter().map(&build).collect::<Result<_, _>>()?;
-        run_lanes(&mut ks, x, &mut bufs[..chunk.len()]);
-        for (l, b) in bufs[..chunk.len()].iter().enumerate() {
-            visit(ci * lanes + l, b);
-        }
-    }
-    Ok(())
-}
 
 /// Full parameter map for `name` (defaults filled in, unknown keys rejected) — the same
 /// validation as [`create`].
@@ -260,54 +102,281 @@ pub fn sweep_each_lanes(
         })
         .collect();
     let v = &mut visit;
-    match name {
-        "sma" => sweep_kernel(
-            |p| Sma::new(period_param(p, "period")?),
-            &full,
-            x,
-            lanes,
-            &mut bufs,
-            v,
-        ),
-        "ema" => sweep_kernel(
-            |p| Ema::new(period_param(p, "period")?),
-            &full,
-            x,
-            lanes,
-            &mut bufs,
-            v,
-        ),
-        "rsi" => sweep_kernel(
-            |p| Rsi::new(period_param(p, "period")?),
-            &full,
-            x,
-            lanes,
-            &mut bufs,
-            v,
-        ),
-        "macd" => sweep_kernel(
-            |p| {
-                Macd::new(
-                    period_param(p, "fast")?,
-                    period_param(p, "slow")?,
-                    period_param(p, "signal")?,
-                )
-            },
-            &full,
-            x,
-            lanes,
-            &mut bufs,
-            v,
-        ),
-        "bollinger" => sweep_kernel(
-            |p| Bollinger::new(period_param(p, "period")?, p["k"]),
-            &full,
-            x,
-            lanes,
-            &mut bufs,
-            v,
-        ),
-        _ => unreachable!("validated by create"),
+    if let Some(kind) = Soa::of(name) {
+        let jobs: Vec<Job> = full.iter().map(Job::of).collect::<Result<_, _>>()?;
+        let lanes = lanes.map_or(kind.default_lanes(), |l| l.clamp(1, MAX_LANES));
+        let xs: Vec<&[f64]> = vec![x; jobs.len()];
+        soa_run(kind, &jobs, &xs, lanes, &mut bufs, &mut |i, c| v(i, c));
+        return Ok(());
+    }
+    unreachable!("every built-in study has a lane kernel")
+}
+
+/// Built-in studies with a structure-of-arrays lane kernel ([`crate::lanes`]).
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+enum Soa {
+    Sma,
+    Ema,
+    Rsi,
+    Macd,
+    Bollinger,
+}
+
+/// One run's parameters: periods (`period`, or `fast, slow, signal`) and `k`.
+#[derive(Debug, Clone, Copy, Default)]
+struct Job {
+    p: [usize; 3],
+    k: f64,
+}
+
+impl Job {
+    fn of(params: &BTreeMap<String, f64>) -> Result<Self, ComputeError> {
+        let get = |key: &str| params.get(key).map(|_| period_param(params, key));
+        let mut j = Self::default();
+        if let Some(p) = get("period") {
+            j.p[0] = p?;
+        } else {
+            j.p = [
+                period_param(params, "fast")?,
+                period_param(params, "slow")?,
+                period_param(params, "signal")?,
+            ];
+        }
+        j.k = params.get("k").copied().unwrap_or(0.0);
+        Ok(j)
+    }
+}
+
+impl Soa {
+    fn of(name: &str) -> Option<Self> {
+        match name {
+            "sma" => Some(Self::Sma),
+            "ema" => Some(Self::Ema),
+            "rsi" => Some(Self::Rsi),
+            "macd" => Some(Self::Macd),
+            "bollinger" => Some(Self::Bollinger),
+            _ => None,
+        }
+    }
+
+    /// Lanes per kernel call, chosen by measurement (RP1 E2).
+    fn default_lanes(self) -> usize {
+        match self {
+            Self::Sma => SOA_SMA_LANES,
+            Self::Ema => SOA_EMA_LANES,
+            Self::Rsi => SOA_RSI_LANES,
+            Self::Macd => SOA_MACD_LANES,
+            Self::Bollinger => SOA_BOLLINGER_LANES,
+        }
+    }
+
+    fn outputs(self) -> &'static [&'static str] {
+        match self {
+            Self::Sma => Sma::OUTPUTS,
+            Self::Ema => Ema::OUTPUTS,
+            Self::Rsi => Rsi::OUTPUTS,
+            Self::Macd => Macd::OUTPUTS,
+            Self::Bollinger => Bollinger::OUTPUTS,
+        }
+    }
+
+    fn warmup(self, j: &Job, w: &mut Vec<usize>) {
+        w.clear();
+        match self {
+            Self::Sma | Self::Ema => w.push(j.p[0] - 1),
+            Self::Rsi => w.push(j.p[0]),
+            Self::Macd => {
+                let m = j.p[1] - 1;
+                let s = m + j.p[2] - 1;
+                w.extend([m, s, s]);
+            }
+            Self::Bollinger => w.extend([j.p[0] - 1; 4]),
+        }
+    }
+
+    fn run<const L: usize>(self, xs: &[&[f64]; L], jobs: &[Job; L], outs: &mut [&mut [f64]]) {
+        let p0: [usize; L] = std::array::from_fn(|l| jobs[l].p[0]);
+        match self {
+            Self::Sma => lanes::sma::<L>(xs, &p0, outs),
+            Self::Ema => lanes::ema::<L>(xs, &p0, outs),
+            Self::Rsi => lanes::rsi::<L>(xs, &p0, outs),
+            Self::Macd => {
+                let p = std::array::from_fn(|l| (jobs[l].p[0], jobs[l].p[1], jobs[l].p[2]));
+                lanes::macd::<L>(xs, &p, outs);
+            }
+            Self::Bollinger => {
+                let p = std::array::from_fn(|l| (jobs[l].p[0], jobs[l].k));
+                lanes::bollinger::<L>(xs, &p, outs);
+            }
+        }
+    }
+}
+
+// Lanes per study and target, chosen by measurement (rounds/RP1/experiments/E2-simd.md).
+// Too many lanes spill vector registers (16 on x86_64 SSE2, 32 on aarch64); wasm32 in V8
+// gains little from lanes for the wide-state studies.
+#[cfg(target_arch = "x86_64")]
+const SOA_LANES: [usize; 5] = [2, 4, 4, 2, 2];
+#[cfg(target_arch = "wasm32")]
+const SOA_LANES: [usize; 5] = [1, 2, 2, 1, 1];
+#[cfg(not(any(target_arch = "x86_64", target_arch = "wasm32")))]
+const SOA_LANES: [usize; 5] = [4, 4, 4, 2, 2];
+const SOA_SMA_LANES: usize = SOA_LANES[0];
+const SOA_EMA_LANES: usize = SOA_LANES[1];
+const SOA_RSI_LANES: usize = SOA_LANES[2];
+const SOA_MACD_LANES: usize = SOA_LANES[3];
+const SOA_BOLLINGER_LANES: usize = SOA_LANES[4];
+
+/// Runs `kind` for job `j` = (`xs[j]`, `jobs[j]`), up to `lanes` jobs per kernel call,
+/// and calls `visit(j, columns)` in job order.
+fn soa_run(
+    kind: Soa,
+    jobs: &[Job],
+    xs: &[&[f64]],
+    lanes: usize,
+    bufs: &mut [SweepColumns],
+    visit: &mut dyn FnMut(usize, &SweepColumns),
+) {
+    match lanes {
+        8.. => soa_chunks::<8>(kind, jobs, xs, bufs, visit),
+        4..=7 => soa_chunks::<4>(kind, jobs, xs, bufs, visit),
+        2 | 3 => soa_chunks::<2>(kind, jobs, xs, bufs, visit),
+        _ => soa_chunks::<1>(kind, jobs, xs, bufs, visit),
+    }
+}
+
+fn soa_prepare(kind: Soa, job: &Job, n: usize, buf: &mut SweepColumns) {
+    buf.names = kind.outputs();
+    kind.warmup(job, &mut buf.warmup);
+    buf.columns.resize_with(buf.names.len(), Vec::new);
+    // The kernels write every slot of a column (NaN in warmup, then values), so a reused
+    // column of the right length is not cleared again (RP1/E6: the zero fill was up to a
+    // third of a sweep).
+    for col in &mut buf.columns {
+        if col.len() != n {
+            col.clear();
+            col.resize(n, 0.0);
+        }
+    }
+}
+
+fn soa_chunks<const L: usize>(
+    kind: Soa,
+    jobs: &[Job],
+    xs: &[&[f64]],
+    bufs: &mut [SweepColumns],
+    visit: &mut dyn FnMut(usize, &SweepColumns),
+) {
+    // Full chunks of L; the tail (< L jobs) runs with fewer lanes instead of padding.
+    let full = jobs.len() / L * L;
+    let tail = jobs.len() - full;
+    if L > 1 {
+        let mut j0 = 0;
+        while j0 < full {
+            soa_chunk::<L>(kind, &jobs[j0..j0 + L], &xs[j0..j0 + L], bufs, j0, visit);
+            j0 += L;
+        }
+        if tail > 0 {
+            let (jt, xt) = (&jobs[full..], &xs[full..]);
+            let mut shifted = |j: usize, c: &SweepColumns| visit(full + j, c);
+            match tail {
+                4.. => soa_chunks::<4>(kind, jt, xt, bufs, &mut shifted),
+                2 | 3 => soa_chunks::<2>(kind, jt, xt, bufs, &mut shifted),
+                _ => soa_chunks::<1>(kind, jt, xt, bufs, &mut shifted),
+            }
+        }
+    } else {
+        for j in 0..jobs.len() {
+            soa_chunk::<1>(kind, &jobs[j..=j], &xs[j..=j], bufs, j, visit);
+        }
+    }
+}
+
+/// Exactly `L` jobs in one kernel call.
+fn soa_chunk<const L: usize>(
+    kind: Soa,
+    jobs: &[Job],
+    xs: &[&[f64]],
+    bufs: &mut [SweepColumns],
+    j0: usize,
+    visit: &mut dyn FnMut(usize, &SweepColumns),
+) {
+    let js: [Job; L] = std::array::from_fn(|l| jobs[l]);
+    let lane_xs: [&[f64]; L] = std::array::from_fn(|l| xs[l]);
+    let n = lane_xs[0].len();
+    for (l, b) in bufs[..L].iter_mut().enumerate() {
+        soa_prepare(kind, &js[l], n, b);
+    }
+    {
+        let mut outs: Vec<&mut [f64]> = bufs[..L]
+            .iter_mut()
+            .flat_map(|b| b.columns.iter_mut().map(|c| &mut c[..]))
+            .collect();
+        kind.run::<L>(&lane_xs, &js, &mut outs);
+    }
+    for (l, b) in bufs[..L].iter().enumerate() {
+        visit(j0 + l, b);
+    }
+}
+
+/// Runs one study with one parameter set over many series (e.g. every symbol and
+/// timeframe of a market) and calls `visit(series_index, &columns)` in series order.
+/// Outputs are bit-identical to running each series alone.
+///
+/// Series of equal length are stepped together in lanes (sma, ema, rsi); to keep the
+/// visiting order, up to [`SERIES_WINDOW`] series are computed before they are visited
+/// (memory: that many series' outputs).
+///
+/// # Errors
+/// Unknown study or invalid parameters (nothing is computed in that case).
+pub fn sweep_series_each(
+    name: &str,
+    params: &BTreeMap<String, f64>,
+    series: &[&[f64]],
+    mut visit: impl FnMut(usize, &SweepColumns),
+) -> Result<(), ComputeError> {
+    let full = full_params(name, params)?;
+    let kind = Soa::of(name).expect("validated by full_params");
+    let job = Job::of(&full)?;
+    let lanes = kind.default_lanes();
+    let mut held: Vec<SweepColumns> = Vec::new();
+    let mut scratch: Vec<SweepColumns> = (0..MAX_LANES).map(|_| empty_columns()).collect();
+    for (w, win) in series.chunks(SERIES_WINDOW).enumerate() {
+        let base = w * SERIES_WINDOW;
+        // Group the window's series by length (stable), run each group in lanes.
+        let mut order: Vec<usize> = (0..win.len()).collect();
+        order.sort_by_key(|&i| (std::cmp::Reverse(win[i].len()), i));
+        held.resize_with(win.len(), empty_columns);
+        let mut g0 = 0;
+        while g0 < order.len() {
+            let len = win[order[g0]].len();
+            let mut g1 = g0;
+            while g1 < order.len() && win[order[g1]].len() == len {
+                g1 += 1;
+            }
+            let idx = &order[g0..g1];
+            let xs: Vec<&[f64]> = idx.iter().map(|&i| win[i]).collect();
+            let jobs = vec![job; idx.len()];
+            soa_run(kind, &jobs, &xs, lanes, &mut scratch, &mut |j, c| {
+                held[idx[j]].clone_from(c);
+            });
+            g0 = g1;
+        }
+        for (i, c) in held.iter().enumerate() {
+            visit(base + i, c);
+        }
+    }
+    Ok(())
+}
+
+/// Series computed before being visited by [`sweep_series_each`].
+pub const SERIES_WINDOW: usize = 64;
+
+fn empty_columns() -> SweepColumns {
+    SweepColumns {
+        names: &[],
+        columns: Vec::new(),
+        warmup: Vec::new(),
     }
 }
 

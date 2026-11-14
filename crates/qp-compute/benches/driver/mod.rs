@@ -95,6 +95,33 @@ pub fn profile_a(reps: usize) {
     }
 }
 
+/// Profile A per lane count (median ms), to tune the lane constants per target.
+pub fn lane_table(reps: usize) {
+    println!("profile A by lane count (median ms; 'default' = the target's tuned value)");
+    println!(
+        "{:<10} {:>8} {:>8} {:>8} {:>8} {:>8}",
+        "study", "default", "1", "2", "4", "8"
+    );
+    let x = pr::a_series();
+    let n = x.len();
+    for name in STUDY_NAMES {
+        let grid = qp_compute::sweep::bench_grid(name);
+        let mut row = format!("{name:<10}");
+        for lanes in [None, Some(1), Some(2), Some(4), Some(8)] {
+            let (_, md, _) = time_reps(reps, || {
+                let mut sink = 0.0;
+                qp_compute::sweep::sweep_each_lanes(name, &grid, &x, lanes, |_, c| {
+                    sink += c.columns[0][n - 1];
+                })
+                .expect("valid grid");
+                sink
+            });
+            row.push_str(&format!(" {md:>8.2}"));
+        }
+        println!("{row}");
+    }
+}
+
 /// Profile B (2,500 series, one study each).
 pub fn profile_b(reps: usize) {
     header("profile B: 2,500 series (500 symbols x 5 timeframes, 9.25M bars), one study");
@@ -193,6 +220,7 @@ pub fn run(default_only: &str, default_reps: usize) {
             "b" => profile_b(reps),
             "c" => profile_c(reps),
             "d" => profile_d(reps),
+            "lanes" => lane_table(reps),
             "" => {}
             other => println!("unknown profile {other}"),
         }

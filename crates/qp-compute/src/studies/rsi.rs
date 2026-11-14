@@ -12,14 +12,14 @@ use crate::{ComputeError, Core};
 #[derive(Debug, Clone)]
 pub struct Rsi {
     period: usize,
-    pf: f64,
-    pm1: f64,
+    pub(crate) pf: f64,
+    pub(crate) pm1: f64,
     n: usize,
-    prev_x: f64,
+    pub(crate) prev_x: f64,
     gain_sum: f64,
     loss_sum: f64,
-    avg_gain: f64,
-    avg_loss: f64,
+    pub(crate) avg_gain: f64,
+    pub(crate) avg_loss: f64,
 }
 
 /// `(gain, loss)` of a change; written as two selects so it compiles without a

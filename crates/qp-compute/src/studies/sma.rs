@@ -13,7 +13,7 @@ use crate::{ComputeError, Core};
 #[derive(Debug, Clone)]
 pub struct Sma {
     period: usize,
-    pf: f64,
+    pub(crate) pf: f64,
     ring: Ring,
     sum: f64,
     n: usize,

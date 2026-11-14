@@ -108,6 +108,11 @@ impl<C: Core> Study for Streaming<C> {
         self.core.peek(input, out);
     }
 
+    fn discard_last(&mut self) {
+        // The pending bar never reached the committed state; forgetting it is enough.
+        self.has_pending = false;
+    }
+
     fn reset(&mut self) {
         self.core.reset();
         self.has_pending = false;

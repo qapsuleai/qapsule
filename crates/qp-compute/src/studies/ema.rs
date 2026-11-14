@@ -19,11 +19,9 @@ pub struct Ema {
 
 impl Ema {
     /// # Errors
-    /// `period == 0`.
+    /// `period` of 0 or above [`crate::MAX_PERIOD`].
     pub fn new(period: usize) -> Result<Self, ComputeError> {
-        if period == 0 {
-            return Err(ComputeError::new("ema: period must be >= 1"));
-        }
+        crate::check_period("ema", "period", period)?;
         let p = pf(period);
         Ok(Self {
             period,

@@ -5,11 +5,15 @@ use std::collections::BTreeMap;
 use crate::Study;
 
 /// `second(first.output[which])`: `second` (single input) reads output `which` of
-/// `first`. While `first` is warming up, `second` receives nothing and outputs `None`; its
-/// own warmup starts at `first`'s first value. All three run modes stay bit-identical.
+/// `first`. Wherever `first` outputs `None`, `second` receives nothing and the chain
+/// outputs `None`; `second` sees exactly the sequence of `first`'s defined values. All
+/// three run modes stay bit-identical, also when a revision of the last bar turns
+/// `first`'s value into `None` or back (the bar is then taken out of `second` with
+/// [`Study::discard_last`]).
 ///
-/// Assumes `first`'s warmup is index-based (true for every built-in study): revising the
-/// last bar never turns a defined value into `None`.
+/// [`Study::warmup`] is `first`'s warmup plus `second`'s. It is exact when `first`'s
+/// `None`s are index-based (every built-in study); for a `first` whose `None` depends on
+/// the value it is a lower bound.
 pub struct Chain {
     first: Box<dyn Study>,
     second: Box<dyn Study>,
@@ -83,7 +87,20 @@ impl Study for Chain {
                 self.second.push(&[v], out);
                 self.second_has_last = true;
             }
-            None => Self::none(out),
+            None => {
+                if self.second_has_last {
+                    self.second.discard_last();
+                    self.second_has_last = false;
+                }
+                Self::none(out);
+            }
+        }
+    }
+    fn discard_last(&mut self) {
+        self.first.discard_last();
+        if self.second_has_last {
+            self.second.discard_last();
+            self.second_has_last = false;
         }
     }
     fn reset(&mut self) {

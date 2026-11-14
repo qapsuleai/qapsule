@@ -1,0 +1,14 @@
+{
+ "op": "put_layer",
+ "view": "main",
+ "index": 2,
+ "layer": {
+  "id": "l2",
+  "mark": "line",
+  "series": "rsi14",
+  "panel": 1,
+  "encoding": {
+   "width": 2.0
+  }
+ }
+}

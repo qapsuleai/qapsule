@@ -1,0 +1,22 @@
+{
+ "op": "insert_layer",
+ "view": "main",
+ "after": "l2",
+ "layer": {
+  "mark": "bar",
+  "series": "macd",
+  "panel": 2,
+  "encoding": {
+   "y": "histogram",
+   "color": {
+    "when": {
+     "field": "histogram",
+     "op": "ge",
+     "than": 0
+    },
+    "then": "up",
+    "else": "down"
+   }
+  }
+ }
+}

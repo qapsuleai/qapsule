@@ -1,0 +1,22 @@
+{
+ "op": "insert_panel",
+ "view": "main",
+ "after": 0,
+ "panel": {
+  "name": "volume",
+  "weight": 1,
+  "y": {
+   "kind": "linear"
+  }
+ },
+ "layers": [
+  {
+   "mark": "bar",
+   "series": "px",
+   "encoding": {
+    "y": "v",
+    "color": "muted"
+   }
+  }
+ ]
+}

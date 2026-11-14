@@ -24,3 +24,8 @@ Her dosya kendi tipinin üretilen şemasına göre **reddedilmelidir**.
 | `log_entry.no_changes.json` | changes required |
 | `inbound_line.no_conn.json` | conn required |
 | `outbound_line.client_msg.json` | outbound carries server messages |
+| `op.layer_unknown_channel.json` | unknown encoding channel `colour` (closed channel set) (R2) |
+| `op.insert_layer_bad_mark.json` | unknown mark (R2) |
+| `op.set_scale_no_scale.json` | scale id required (R2) |
+| `op.origin_bad_kind.json` | unknown origin kind (R2) |
+| `query.hit_no_x.json` | pixel x required (R2) |

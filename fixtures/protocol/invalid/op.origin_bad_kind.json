@@ -1,0 +1,16 @@
+{
+ "op": "insert_layer",
+ "view": "main",
+ "layer": {
+  "mark": "rule",
+  "panel": 1,
+  "encoding": {
+   "y": 70
+  },
+  "origin": {
+   "/encoding/y": {
+    "kind": "guess"
+   }
+  }
+ }
+}

@@ -1,0 +1,12 @@
+{
+ "op": "insert_layer",
+ "view": "main",
+ "layer": {
+  "mark": "line",
+  "series": "rsi14",
+  "panel": 1,
+  "encoding": {
+   "colour": "#ff0000"
+  }
+ }
+}

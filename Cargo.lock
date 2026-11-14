@@ -1518,6 +1518,7 @@ dependencies = [
  "assert_cmd",
  "clap",
  "qp-compute",
+ "qp-grammar",
  "qp-mcp",
  "qp-render",
  "qp-schema",

@@ -74,7 +74,10 @@ fn flat_windows_are_exact_at_real_price_levels() {
             // The band width is exactly zero; the middle (a rolling-sum SMA, like the
             // legacy one) may carry a ~1e-13 residue from earlier bars.
             let m = out[0][i].unwrap();
-            assert!(common::close(m, level, 1e-12), "middle p={p} i={i}: {m}");
+            assert!(
+                common::close(m, level, common::REL_TOL),
+                "middle p={p} i={i}: {m}"
+            );
             assert_eq!(out[1][i], Some(m), "upper p={p} i={i}");
             assert_eq!(out[2][i], Some(m), "lower p={p} i={i}");
             assert_eq!(out[3][i], Some(0.0), "bandwidth p={p} i={i}");
@@ -131,7 +134,72 @@ fn rolling_variance_accuracy_on_long_series() {
     println!(
         "std error vs two-pass over 10k bars: ours max abs {worst_abs:e} (rel. to price {worst_rel_price:e}); textbook Welford max abs {worst_welford:e}"
     );
-    // Project tolerance: 1e-9 relative to the output value (the bands are price-sized).
+    // Relative to the price level (the bands are price-sized), see `common::BAND_REL_TOL`.
+    // The rolled M2 drifts with the series length, hence the looser bound for 10k bars.
     assert!(worst_rel_price < 1e-9, "{worst_rel_price:e}");
-    assert!(worst_abs < 1e-8, "{worst_abs:e}");
+}
+
+/// Random walk in cents around `level` (deterministic LCG, steps up to ±0.2%).
+fn walk(n: usize, level: f64, seed: u64) -> Vec<f64> {
+    let mut s = seed;
+    let mut x = level;
+    (0..n)
+        .map(|_| {
+            s = s
+                .wrapping_mul(6_364_136_223_846_793_005)
+                .wrapping_add(1_442_695_040_888_963_407);
+            let u = f64::from(u32::try_from(s >> 32).unwrap()) / 2_147_483_648.0 - 1.0;
+            x = ((x * (1.0 + 0.002 * u)) * 100.0).round() / 100.0;
+            x
+        })
+        .collect()
+}
+
+/// R1 audit finding 5: at BTC-like prices an absolute 1e-9 is a statement about the price
+/// scale, not about accuracy. 2,000 bars at ~50,000 and ~100,000: the SMA / middle band
+/// meet `REL_TOL`, the outer bands `BAND_REL_TOL`, while their absolute error is well
+/// above the old 1e-9 (asserted, so the case keeps demonstrating it).
+#[test]
+fn high_price_levels_meet_the_relative_tolerance() {
+    for (level, seed) in [(50_000.0, 7u64), (100_000.0, 11)] {
+        let x = walk(2_000, level, seed);
+        let (mut mid_abs, mut mid_rel, mut band_abs, mut band_rel) = (0.0_f64, 0.0, 0.0, 0.0);
+        for p in [2usize, 3, 5, 20, 50, 101] {
+            let sma = common::batch("sma", &[("period", p as f64)], &x);
+            let bb = common::batch("bollinger", &[("period", p as f64), ("k", 2.0)], &x);
+            for i in p - 1..x.len() {
+                let w = &x[i + 1 - p..=i];
+                let n = p as f64;
+                let mean = w.iter().sum::<f64>() / n;
+                let sd = (w.iter().map(|v| (v - mean) * (v - mean)).sum::<f64>() / n).sqrt();
+                let rel = |a: f64, b: f64| (a - b).abs() / a.abs().max(b.abs()).max(1.0);
+                for ours in [sma[0][i].unwrap(), bb[0][i].unwrap()] {
+                    assert!(
+                        common::close(ours, mean, common::REL_TOL),
+                        "middle, level {level} p={p} i={i}: {ours} vs {mean}"
+                    );
+                    mid_abs = f64::max(mid_abs, (ours - mean).abs());
+                    mid_rel = f64::max(mid_rel, rel(ours, mean));
+                }
+                for (ours, want) in [
+                    (bb[1][i].unwrap(), mean + 2.0 * sd),
+                    (bb[2][i].unwrap(), mean - 2.0 * sd),
+                ] {
+                    assert!(
+                        common::close(ours, want, common::BAND_REL_TOL),
+                        "band, level {level} p={p} i={i}: {ours} vs {want}"
+                    );
+                    band_abs = f64::max(band_abs, (ours - want).abs());
+                    band_rel = f64::max(band_rel, rel(ours, want));
+                }
+            }
+        }
+        println!(
+            "level {level}: middle max abs {mid_abs:e} rel {mid_rel:e}; bands max abs {band_abs:e} rel {band_rel:e}"
+        );
+        assert!(
+            band_abs > 1e-9,
+            "the old absolute 1e-9 check would pass: {band_abs:e}"
+        );
+    }
 }

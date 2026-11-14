@@ -149,8 +149,9 @@ proptest! {
         ..ProptestConfig::default()
     })]
 
-    /// Rolling sums (SMA) and the windowed Welford variance (Bollinger) stay within 1e-9
-    /// of a from-scratch computation, also on long series far from zero.
+    /// Rolling sums (SMA) and the windowed Welford variance (Bollinger) match a
+    /// from-scratch computation within a *relative* tolerance (`common::REL_TOL`,
+    /// `common::BAND_REL_TOL`), also on long series far from zero (levels up to 1e6).
     #[test]
     fn rolling_state_matches_naive_reference(
         steps in prop::collection::vec(-300i32..300, 1..1500),
@@ -173,11 +174,14 @@ proptest! {
                 None => prop_assert!(sma[0][i].is_none() && bb[1][i].is_none()),
                 Some((m, sd)) => {
                     let s = sma[0][i].unwrap();
-                    prop_assert!(common::close(s, m, 1e-9), "sma[{}] {} vs {}", i, s, m);
-                    let ours_sd = bb[1][i].unwrap() - bb[0][i].unwrap();
-                    // std itself is O(level * 1e-16) noisy in absolute terms; compare with
-                    // a tolerance relative to the price level.
-                    prop_assert!((ours_sd - sd).abs() <= 1e-10 * level.max(1.0), "std[{}] {} vs {}", i, ours_sd, sd);
+                    prop_assert!(common::close(s, m, common::REL_TOL), "sma[{}] {} vs {}", i, s, m);
+                    let mid = bb[0][i].unwrap();
+                    prop_assert!(common::close(mid, m, common::REL_TOL), "middle[{}] {} vs {}", i, mid, m);
+                    // The std itself is tiny next to the price; its error is relative to
+                    // the price level, so compare the price-sized bands (k = 1).
+                    let (up, lo) = (bb[1][i].unwrap(), bb[2][i].unwrap());
+                    prop_assert!(common::close(up, m + sd, common::BAND_REL_TOL), "upper[{}] {} vs {}", i, up, m + sd);
+                    prop_assert!(common::close(lo, m - sd, common::BAND_REL_TOL), "lower[{}] {} vs {}", i, lo, m - sd);
                 }
             }
         }

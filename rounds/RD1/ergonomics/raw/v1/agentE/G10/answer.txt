@@ -1,0 +1,1 @@
+Son değişikliğin olan EMA 50 göstergesinin eklenmesi (seq 2) geri alındı; ema50 serisi ve grafikteki çizgisi kaldırıldı. Not: Daha sonraki kayıtlar başka yazarlara aitti, onlara dokunulmadı.

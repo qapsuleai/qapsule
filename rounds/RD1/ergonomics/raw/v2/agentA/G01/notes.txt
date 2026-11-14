@@ -1,0 +1,1 @@
+attempt1: add_study rsi7 period 7 show with rsi14 -> applied, layer in panel 1. Unclear: spec doesn't say new layer lacks color/y encoding that rsi14 has; guessed series id bb20/rsi14/px/main from examples (worked).

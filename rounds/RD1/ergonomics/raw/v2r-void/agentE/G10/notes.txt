@@ -1,0 +1,1 @@
+attempt1: undo without seq -> applied, undoes seq 2. Clear spec. Could not verify beforehand that seq 2 was arkin's (default rule per spec 8.3).

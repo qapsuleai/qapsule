@@ -18,6 +18,9 @@
 #  11 digest     cross-target compute digest == fixtures/compute/digest.txt on the host
 #                (aarch64 or x86_64), x86_64 via Rosetta on Apple silicon if available,
 #                and wasm32 in Node (same tool rule as the browser step)
+#  12 protocol   fixtures/protocol/valid/* validate and fixtures/protocol/invalid/* are
+#                rejected by the generated protocol schemas; transcripts and init validate
+#  13 conform    qp/0 conformance transcripts pass in-process, over `qp serve` and over MCP
 #
 # Environment:
 #   QP_VERIFY_BROWSER=1  force the browser step (fails if tools are missing)
@@ -180,7 +183,15 @@ step_hygiene() {
     skip "not a git repository"
   fi
   local hits
-  hits="$(git ls-files | grep -i -E '\.env$|token|secret' || true)"
+  # scripts/qapsule-gh.env is tracked on purpose (.gitignore exception, decided by Arkin):
+  # account settings for qgh/preflight. It is allowed only while it holds exactly the
+  # known non-secret keys.
+  if git ls-files --error-unmatch scripts/qapsule-gh.env >/dev/null 2>&1; then
+    if grep -v -E '^(#.*|QAPSULE_GH_USER=[A-Za-z0-9_-]+|QAPSULE_GH_REPO=[A-Za-z0-9_./-]+|QAPSULE_SSH_ALIAS=[A-Za-z0-9_.-]+|QAPSULE_REMOTE_URL=git@[A-Za-z0-9_.-]+:[A-Za-z0-9_./-]+\.git|)$' scripts/qapsule-gh.env; then
+      fail "scripts/qapsule-gh.env has unexpected content"
+    fi
+  fi
+  hits="$(git ls-files | grep -v -x 'scripts/qapsule-gh.env' | grep -i -E '\.env$|token|secret' || true)"
   if [ -n "$hits" ]; then
     echo "tracked files that look like secrets:" >&2
     printf '%s\n' "$hits" >&2
@@ -260,6 +271,46 @@ step_digest() {
   note "$ran, wasm32: $want"
 }
 
+step_protocol() {
+  build_qp
+  [ -d "$tmp/schema" ] || "$qp" schema export --out "$tmp/schema"
+  local f b ty good=0 bad=0
+  for f in fixtures/protocol/valid/*.json; do
+    b="$(basename "$f")"; ty="$(type_name_for "${b%%.*}")"
+    if "$qp" schema validate "$f" --type "$ty" --schema-dir "$tmp/schema" >/dev/null; then
+      good=$((good + 1))
+    else
+      echo "valid example rejected: $f ($ty)" >&2; bad=$((bad + 1))
+    fi
+  done
+  for f in fixtures/protocol/invalid/*.json; do
+    b="$(basename "$f")"; ty="$(type_name_for "${b%%.*}")"
+    if "$qp" schema validate "$f" --type "$ty" --schema-dir "$tmp/schema" >/dev/null 2>&1; then
+      echo "invalid example accepted: $f ($ty)" >&2; bad=$((bad + 1))
+    else
+      good=$((good + 1))
+    fi
+  done
+  for f in fixtures/protocol/conformance/*.json; do
+    "$qp" schema validate "$f" --type Transcript --schema-dir "$tmp/schema" >/dev/null \
+      || { echo "transcript invalid: $f" >&2; bad=$((bad + 1)); }
+  done
+  "$qp" schema validate fixtures/protocol/init/thyao.json --type SessionInit --schema-dir "$tmp/schema" >/dev/null \
+    || { echo "init invalid" >&2; bad=$((bad + 1)); }
+  [ "$bad" -eq 0 ] || fail "$bad protocol fixture check(s) failed"
+  note "$good examples as expected; transcripts and init valid"
+}
+
+step_conform() {
+  build_qp
+  local t n
+  n="$(find fixtures/protocol/conformance -name '*.json' | wc -l | tr -d ' ')"
+  for t in inproc serve mcp; do
+    "$qp" conform fixtures/protocol/conformance --transport "$t" || fail "conformance failed over $t"
+  done
+  note "$n transcripts x inproc, serve, mcp"
+}
+
 # --- run -------------------------------------------------------------------
 
 total_start=$SECONDS
@@ -274,6 +325,8 @@ run_step hygiene step_hygiene
 run_step browser step_browser
 run_step compute step_compute
 run_step digest step_digest
+run_step protocol step_protocol
+run_step conform step_conform
 total=$((SECONDS - total_start))
 
 failed=0

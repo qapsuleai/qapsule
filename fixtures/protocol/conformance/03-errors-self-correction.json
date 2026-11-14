@@ -1,0 +1,271 @@
+{
+ "name": "03-errors-self-correction",
+ "description": "Errors carry enough to fix the message: parse, unknown field with did_you_mean, unknown id with did_you_mean, invalid parameter; a failing command applies nothing.",
+ "covers": [
+  "error",
+  "command"
+ ],
+ "init": "fixtures/protocol/init/thyao.json",
+ "steps": [
+  {
+   "send": {
+    "conn": "s",
+    "msg": {
+     "type": "hello",
+     "protocol": "qp/0",
+     "principal": "editor",
+     "surface": {
+      "kind": "headless"
+     }
+    }
+   },
+   "expect": [
+    {
+     "conn": "s",
+     "msg": {
+      "type": "welcome",
+      "protocol": "qp/0",
+      "doc": "doc-thyao",
+      "principal": "editor",
+      "role": "editor",
+      "permissions": {
+       "read": true,
+       "write": true,
+       "propose": true,
+       "decide": false,
+       "attend": true,
+       "feed": false
+      },
+      "seq": 0,
+      "epoch": 0,
+      "profile": {
+       "depth": "chart",
+       "series_data": true,
+       "max_points": 10000,
+       "max_glyphs": 6,
+       "speech": false
+      },
+      "limits": {
+       "max_message_bytes": 1048576,
+       "max_ops": 64,
+       "max_bars": 10000,
+       "max_subscriptions": 32,
+       "max_string": 4096
+      }
+     }
+    }
+   ]
+  },
+  {
+   "send_raw": {
+    "conn": "s",
+    "line": "{not json"
+   },
+   "expect": [
+    {
+     "conn": "s",
+     "msg": {
+      "type": "error",
+      "error": {
+       "code": "parse"
+      }
+     }
+    }
+   ]
+  },
+  {
+   "send_raw": {
+    "conn": "s",
+    "line": "{\"type\": \"command\", \"id\": \"c1\", \"ops\": [{\"op\": \"add_study\", \"study\": \"rsi\", \"inputs\": [\"px\"], \"parms\": {\"period\": 7}}]}"
+   },
+   "expect": [
+    {
+     "conn": "s",
+     "msg": {
+      "type": "error",
+      "error": {
+       "code": "schema",
+       "did_you_mean": [
+        "params"
+       ]
+      },
+      "id": "c1"
+     }
+    }
+   ],
+   "note": "typo in field name (sent raw: not schema-valid)"
+  },
+  {
+   "send_raw": {
+    "conn": "s",
+    "line": "{\"type\": \"command\", \"id\": \"c1b\", \"ops\": [{\"op\": \"add_indicator\", \"study\": \"rsi\"}]}"
+   },
+   "expect": [
+    {
+     "conn": "s",
+     "msg": {
+      "type": "error",
+      "error": {
+       "code": "schema"
+      },
+      "id": "c1b"
+     }
+    }
+   ],
+   "note": "unknown op"
+  },
+  {
+   "send": {
+    "conn": "s",
+    "msg": {
+     "type": "command",
+     "id": "c2",
+     "ops": [
+      {
+       "op": "add_study",
+       "study": "rsi",
+       "inputs": [
+        "px"
+       ],
+       "params": {
+        "period": 7
+       },
+       "show": {
+        "view": "main",
+        "with": "rsi"
+       }
+      }
+     ]
+    }
+   },
+   "expect": [
+    {
+     "conn": "s",
+     "msg": {
+      "type": "error",
+      "error": {
+       "code": "not_found",
+       "path": "/ops/0/show/with",
+       "did_you_mean": [
+        "rsi14",
+        "px"
+       ]
+      },
+      "id": "c2"
+     }
+    }
+   ],
+   "note": "unknown series id"
+  },
+  {
+   "send": {
+    "conn": "s",
+    "msg": {
+     "type": "command",
+     "id": "c3",
+     "ops": [
+      {
+       "op": "add_study",
+       "study": "rsi",
+       "inputs": [
+        "px"
+       ],
+       "params": {
+        "period": 0
+       }
+      }
+     ]
+    }
+   },
+   "expect": [
+    {
+     "conn": "s",
+     "msg": {
+      "type": "error",
+      "error": {
+       "code": "invalid"
+      },
+      "id": "c3"
+     }
+    }
+   ],
+   "note": "period must be >= 1"
+  },
+  {
+   "send": {
+    "conn": "s",
+    "msg": {
+     "type": "command",
+     "id": "c4",
+     "ops": [
+      {
+       "op": "set_params",
+       "series": "macd",
+       "params": {
+        "fast": 8
+       }
+      },
+      {
+       "op": "remove",
+       "id": "nope"
+      }
+     ]
+    }
+   },
+   "expect": [
+    {
+     "conn": "s",
+     "msg": {
+      "type": "error",
+      "error": {
+       "code": "not_found",
+       "path": "/ops/1/id"
+      },
+      "id": "c4"
+     }
+    }
+   ],
+   "note": "all or nothing"
+  },
+  {
+   "send": {
+    "conn": "s",
+    "msg": {
+     "type": "query",
+     "id": "q1",
+     "query": {
+      "kind": "get",
+      "id": "macd"
+     }
+    }
+   },
+   "expect": [
+    {
+     "conn": "s",
+     "msg": {
+      "type": "result",
+      "id": "q1",
+      "seq": 0,
+      "data": {
+       "kind": "item",
+       "collection": "series",
+       "item": {
+        "id": "macd",
+        "source": {
+         "params": {
+          "fast": 12.0,
+          "slow": 26.0,
+          "signal": 9.0
+         }
+        }
+       }
+      }
+     }
+    }
+   ]
+  }
+ ],
+ "final": {
+  "log_len": 0
+ }
+}

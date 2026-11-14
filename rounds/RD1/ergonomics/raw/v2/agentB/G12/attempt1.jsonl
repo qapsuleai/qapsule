@@ -1,0 +1,5 @@
+{"conn":"a","msg":{"type":"hello","protocol":"qp/0","principal":"scout","surface":{"kind":"headless"}}}
+{"conn":"a","msg":{"type":"query","id":"q1","query":{"kind":"list","collection":"series"}}}
+{"conn":"a","msg":{"type":"query","id":"q2","query":{"kind":"study","series":"rsi14","range":{"last":120}}}}
+{"conn":"a","msg":{"type":"query","id":"q3","query":{"kind":"at","series":"px","bar":199}}}
+{"conn":"a","msg":{"type":"query","id":"q4","query":{"kind":"attention","principal":"arkin"}}}

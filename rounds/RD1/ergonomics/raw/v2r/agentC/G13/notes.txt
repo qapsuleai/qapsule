@@ -1,0 +1,1 @@
+attempt1/2: wrong ids (fnd-overbought; view main) -> not_found. attempt3 with real ids chart-1/thy-d/osc-a/band-b. Note: scout is proposer so result is a proposal, not applied. Spec examples' ids differ from doc.

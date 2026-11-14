@@ -1,0 +1,4 @@
+{"conn":"a","msg":{"type":"hello","protocol":"qp/0","principal":"scout","surface":{"kind":"headless"}}}
+{"conn":"a","msg":{"type":"query","id":"l1","query":{"kind":"list","collection":"facts"}}}
+{"conn":"a","msg":{"type":"query","id":"l2","query":{"kind":"list","collection":"findings"}}}
+{"conn":"a","msg":{"type":"command","id":"c1","reason":"RSI 70 yukarı kesti","ops":[{"op":"add_finding","claim":"Momentum güçlü.","facts":["fact-rsi-cross70"],"confidence":0.6,"invalidation":{"kind":"threshold","series":"rsi14","op":"cross_below","value":70.0},"capsule":"Momentum güçlü"}]}}

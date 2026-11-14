@@ -1,0 +1,20 @@
+{
+ "type": "command",
+ "id": "c1",
+ "ops": [
+  {
+   "op": "add_study",
+   "study": "rsi",
+   "inputs": [
+    "px"
+   ],
+   "params": {
+    "period": 7
+   },
+   "show": {
+    "view": "main",
+    "with": "rsi14"
+   }
+  }
+ ]
+}

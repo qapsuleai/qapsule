@@ -1,0 +1,3 @@
+{"conn":"a","msg":{"type":"hello","protocol":"qp/0","principal":"arkin","surface":{"kind":"desktop"}}}
+{"conn":"a","msg":{"type":"query","id":"q0","query":{"kind":"list","collection":"series"}}}
+{"conn":"a","msg":{"type":"command","id":"c1","ops":[{"op":"add_study","id":"sma20","study":"sma","inputs":["px"],"params":{"period":20},"show":{"view":"main","panel":0}},{"op":"add_study","id":"sma50","study":"sma","inputs":["px"],"params":{"period":50},"show":{"view":"main","panel":0}},{"op":"add_intent","text":"SMA20 SMA50'yi yukarı keserse haber ver","trigger":{"kind":"compare","left":"sma20","op":"cross_above","right":"sma50"}}]}}

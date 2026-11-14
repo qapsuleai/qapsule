@@ -1,0 +1,245 @@
+{
+ "name": "02-add-study-same-panel",
+ "description": "G01: add RSI(7) in the panel where RSI(14) is drawn; subscribers get the change.",
+ "covers": [
+  "command",
+  "change",
+  "subscription"
+ ],
+ "init": "fixtures/protocol/init/thyao.json",
+ "steps": [
+  {
+   "send": {
+    "conn": "a",
+    "msg": {
+     "type": "hello",
+     "protocol": "qp/0",
+     "principal": "arkin",
+     "surface": {
+      "kind": "desktop"
+     }
+    }
+   },
+   "expect": [
+    {
+     "conn": "a",
+     "msg": {
+      "type": "welcome",
+      "protocol": "qp/0",
+      "doc": "doc-thyao",
+      "principal": "arkin",
+      "role": "owner",
+      "permissions": {
+       "read": true,
+       "write": true,
+       "propose": true,
+       "decide": true,
+       "attend": true,
+       "feed": false
+      },
+      "seq": 0,
+      "epoch": 0,
+      "profile": {
+       "depth": "chart",
+       "series_data": true,
+       "max_points": 500,
+       "max_glyphs": 6,
+       "speech": false
+      },
+      "limits": {
+       "max_message_bytes": 1048576,
+       "max_ops": 64,
+       "max_bars": 10000,
+       "max_subscriptions": 32,
+       "max_string": 4096
+      }
+     }
+    }
+   ]
+  },
+  {
+   "send": {
+    "conn": "s",
+    "msg": {
+     "type": "hello",
+     "protocol": "qp/0",
+     "principal": "scout",
+     "surface": {
+      "kind": "headless"
+     }
+    }
+   },
+   "expect": [
+    {
+     "conn": "s",
+     "msg": {
+      "type": "welcome",
+      "protocol": "qp/0",
+      "doc": "doc-thyao",
+      "principal": "scout",
+      "role": "proposer",
+      "permissions": {
+       "read": true,
+       "write": false,
+       "propose": true,
+       "decide": false,
+       "attend": true,
+       "feed": false
+      },
+      "seq": 0,
+      "epoch": 0,
+      "profile": {
+       "depth": "chart",
+       "series_data": true,
+       "max_points": 10000,
+       "max_glyphs": 6,
+       "speech": false
+      },
+      "limits": {
+       "max_message_bytes": 1048576,
+       "max_ops": 64,
+       "max_bars": 10000,
+       "max_subscriptions": 32,
+       "max_string": 4096
+      }
+     }
+    }
+   ]
+  },
+  {
+   "send": {
+    "conn": "s",
+    "msg": {
+     "type": "subscribe",
+     "id": "s1",
+     "topic": {
+      "kind": "changes"
+     }
+    }
+   },
+   "expect": [
+    {
+     "conn": "s",
+     "msg": {
+      "type": "ack",
+      "id": "s1",
+      "status": "subscribed"
+     }
+    }
+   ]
+  },
+  {
+   "send": {
+    "conn": "a",
+    "msg": {
+     "type": "command",
+     "id": "c1",
+     "ops": [
+      {
+       "op": "add_study",
+       "study": "rsi",
+       "inputs": [
+        "px"
+       ],
+       "params": {
+        "period": 7
+       },
+       "show": {
+        "view": "main",
+        "with": "rsi14"
+       }
+      }
+     ]
+    }
+   },
+   "expect": [
+    {
+     "conn": "a",
+     "msg": {
+      "type": "ack",
+      "id": "c1",
+      "status": "applied",
+      "seq": 1,
+      "created": [
+       "series-1-0"
+      ]
+     }
+    },
+    {
+     "conn": "s",
+     "msg": {
+      "type": "notify",
+      "sub": "s1",
+      "event": {
+       "kind": "change",
+       "seq": 1,
+       "at": 1760000000000,
+       "author": "arkin",
+       "cause": "c1",
+       "changes": [
+        {
+         "op": "put_series",
+         "series": {
+          "id": "series-1-0",
+          "source": {
+           "kind": "study",
+           "study": "rsi",
+           "inputs": [
+            "px"
+           ],
+           "params": {
+            "period": 7.0
+           }
+          }
+         }
+        },
+        {
+         "op": "insert_layer",
+         "view": "main",
+         "index": 5,
+         "layer": {
+          "mark": "line",
+          "series": "series-1-0",
+          "panel": 1
+         }
+        }
+       ]
+      }
+     }
+    }
+   ]
+  }
+ ],
+ "final": {
+  "log_len": 1,
+  "document": {
+   "views": [
+    {
+     "id": "main",
+     "layers": [
+      {
+       "series": "px"
+      },
+      {
+       "series": "bb20"
+      },
+      {
+       "series": "rsi14"
+      },
+      {
+       "mark": "rule"
+      },
+      {
+       "series": "macd"
+      },
+      {
+       "mark": "line",
+       "series": "series-1-0",
+       "panel": 1
+      }
+     ]
+    }
+   ]
+  }
+ }
+}

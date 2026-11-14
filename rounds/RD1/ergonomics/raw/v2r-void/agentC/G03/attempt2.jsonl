@@ -1,0 +1,2 @@
+{"conn":"a","msg":{"type":"hello","protocol":"qp/0","principal":"arkin","surface":{"kind":"desktop"}}}
+{"conn":"a","msg":{"type":"command","id":"c1","ops":[{"op":"reject_finding","finding":"fnd-9e1","note":"hacim teyidi yok"}],"reason":"hacim teyidi yok"}}

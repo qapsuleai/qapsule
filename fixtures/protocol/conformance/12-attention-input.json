@@ -1,0 +1,576 @@
+{
+ "name": "12-attention-input",
+ "description": "G11, G12: the user's viewport follows input; an agent reads where the user looks and sends an ordered two-step attention directive; the document does not change.",
+ "covers": [
+  "input",
+  "attention",
+  "subscription"
+ ],
+ "init": "fixtures/protocol/init/thyao.json",
+ "steps": [
+  {
+   "send": {
+    "conn": "a",
+    "msg": {
+     "type": "hello",
+     "protocol": "qp/0",
+     "principal": "arkin",
+     "surface": {
+      "kind": "desktop"
+     }
+    }
+   },
+   "expect": [
+    {
+     "conn": "a",
+     "msg": {
+      "type": "welcome",
+      "protocol": "qp/0",
+      "doc": "doc-thyao",
+      "principal": "arkin",
+      "role": "owner",
+      "permissions": {
+       "read": true,
+       "write": true,
+       "propose": true,
+       "decide": true,
+       "attend": true,
+       "feed": false
+      },
+      "seq": 0,
+      "epoch": 0,
+      "profile": {
+       "depth": "chart",
+       "series_data": true,
+       "max_points": 500,
+       "max_glyphs": 6,
+       "speech": false
+      },
+      "limits": {
+       "max_message_bytes": 1048576,
+       "max_ops": 64,
+       "max_bars": 10000,
+       "max_subscriptions": 32,
+       "max_string": 4096
+      }
+     }
+    }
+   ]
+  },
+  {
+   "send": {
+    "conn": "s",
+    "msg": {
+     "type": "hello",
+     "protocol": "qp/0",
+     "principal": "scout",
+     "surface": {
+      "kind": "headless"
+     }
+    }
+   },
+   "expect": [
+    {
+     "conn": "s",
+     "msg": {
+      "type": "welcome",
+      "protocol": "qp/0",
+      "doc": "doc-thyao",
+      "principal": "scout",
+      "role": "proposer",
+      "permissions": {
+       "read": true,
+       "write": false,
+       "propose": true,
+       "decide": false,
+       "attend": true,
+       "feed": false
+      },
+      "seq": 0,
+      "epoch": 0,
+      "profile": {
+       "depth": "chart",
+       "series_data": true,
+       "max_points": 10000,
+       "max_glyphs": 6,
+       "speech": false
+      },
+      "limits": {
+       "max_message_bytes": 1048576,
+       "max_ops": 64,
+       "max_bars": 10000,
+       "max_subscriptions": 32,
+       "max_string": 4096
+      }
+     }
+    }
+   ]
+  },
+  {
+   "send": {
+    "conn": "a",
+    "msg": {
+     "type": "subscribe",
+     "id": "me",
+     "topic": {
+      "kind": "attention"
+     }
+    }
+   },
+   "expect": [
+    {
+     "conn": "a",
+     "msg": {
+      "type": "ack",
+      "id": "me",
+      "status": "subscribed"
+     }
+    }
+   ]
+  },
+  {
+   "send": {
+    "conn": "s",
+    "msg": {
+     "type": "subscribe",
+     "id": "watch",
+     "topic": {
+      "kind": "attention",
+      "principal": "arkin"
+     }
+    }
+   },
+   "expect": [
+    {
+     "conn": "s",
+     "msg": {
+      "type": "ack",
+      "id": "watch",
+      "status": "subscribed"
+     }
+    }
+   ]
+  },
+  {
+   "send": {
+    "conn": "s",
+    "msg": {
+     "type": "query",
+     "id": "q0",
+     "query": {
+      "kind": "attention",
+      "principal": "arkin"
+     }
+    }
+   },
+   "expect": [
+    {
+     "conn": "s",
+     "msg": {
+      "type": "result",
+      "id": "q0",
+      "seq": 0,
+      "data": {
+       "kind": "attention",
+       "attention": {
+        "principal": "arkin",
+        "viewport": {
+         "view": "main",
+         "from_bar": 80,
+         "to_bar": 199
+        }
+       }
+      }
+     }
+    }
+   ],
+   "note": "initial viewport: last 120 bars on desktop"
+  },
+  {
+   "send": {
+    "conn": "a",
+    "msg": {
+     "type": "input",
+     "id": "i1",
+     "gesture": {
+      "kind": "look",
+      "view": "main",
+      "from_bar": 100,
+      "to_bar": 199
+     }
+    }
+   },
+   "expect": [
+    {
+     "conn": "a",
+     "msg": {
+      "type": "result",
+      "id": "i1",
+      "seq": 0,
+      "data": {
+       "kind": "viewport",
+       "viewport": {
+        "view": "main",
+        "from_bar": 100,
+        "to_bar": 199
+       }
+      }
+     }
+    },
+    {
+     "conn": "a",
+     "msg": {
+      "type": "notify",
+      "sub": "me",
+      "event": {
+       "kind": "viewport",
+       "principal": "arkin",
+       "viewport": {
+        "view": "main",
+        "from_bar": 100,
+        "to_bar": 199
+       }
+      }
+     }
+    },
+    {
+     "conn": "s",
+     "msg": {
+      "type": "notify",
+      "sub": "watch",
+      "event": {
+       "kind": "viewport",
+       "principal": "arkin",
+       "viewport": {
+        "view": "main",
+        "from_bar": 100,
+        "to_bar": 199
+       }
+      }
+     }
+    }
+   ]
+  },
+  {
+   "send": {
+    "conn": "a",
+    "msg": {
+     "type": "input",
+     "id": "i2",
+     "gesture": {
+      "kind": "zoom",
+      "view": "main",
+      "factor": 2.0
+     }
+    }
+   },
+   "expect": [
+    {
+     "conn": "a",
+     "msg": {
+      "type": "result",
+      "id": "i2",
+      "seq": 0,
+      "data": {
+       "kind": "viewport",
+       "viewport": {
+        "view": "main",
+        "from_bar": 150,
+        "to_bar": 199
+       }
+      }
+     }
+    },
+    {
+     "conn": "a",
+     "msg": {
+      "type": "notify",
+      "sub": "me",
+      "event": {
+       "kind": "viewport",
+       "principal": "arkin",
+       "viewport": {
+        "from_bar": 150,
+        "to_bar": 199
+       }
+      }
+     }
+    },
+    {
+     "conn": "s",
+     "msg": {
+      "type": "notify",
+      "sub": "watch",
+      "event": {
+       "kind": "viewport",
+       "principal": "arkin",
+       "viewport": {
+        "from_bar": 150,
+        "to_bar": 199
+       }
+      }
+     }
+    }
+   ]
+  },
+  {
+   "send": {
+    "conn": "a",
+    "msg": {
+     "type": "input",
+     "id": "i3",
+     "gesture": {
+      "kind": "pan",
+      "view": "main",
+      "bars": 30
+     }
+    }
+   },
+   "expect": [
+    {
+     "conn": "a",
+     "msg": {
+      "type": "result",
+      "id": "i3",
+      "seq": 0,
+      "data": {
+       "kind": "viewport",
+       "viewport": {
+        "from_bar": 150,
+        "to_bar": 199
+       }
+      }
+     }
+    },
+    {
+     "conn": "a",
+     "msg": {
+      "type": "notify",
+      "sub": "me",
+      "event": {
+       "kind": "viewport",
+       "principal": "arkin",
+       "viewport": {
+        "from_bar": 150
+       }
+      }
+     }
+    },
+    {
+     "conn": "s",
+     "msg": {
+      "type": "notify",
+      "sub": "watch",
+      "event": {
+       "kind": "viewport",
+       "principal": "arkin",
+       "viewport": {
+        "from_bar": 150
+       }
+      }
+     }
+    }
+   ],
+   "note": "clamped at the last bar"
+  },
+  {
+   "send": {
+    "conn": "a",
+    "msg": {
+     "type": "input",
+     "id": "i4",
+     "gesture": {
+      "kind": "tap",
+      "view": "main",
+      "panel": 1,
+      "bar": 150
+     }
+    }
+   },
+   "expect": [
+    {
+     "conn": "a",
+     "msg": {
+      "type": "result",
+      "id": "i4",
+      "seq": 0,
+      "data": {
+       "kind": "at",
+       "at": {
+        "series": "px",
+        "bar": 150,
+        "studies": {
+         "rsi14": {
+          "rsi": 72.83959265032422
+         }
+        }
+       }
+      }
+     }
+    }
+   ]
+  },
+  {
+   "send": {
+    "conn": "s",
+    "msg": {
+     "type": "query",
+     "id": "q1",
+     "query": {
+      "kind": "attention",
+      "principal": "arkin"
+     }
+    }
+   },
+   "expect": [
+    {
+     "conn": "s",
+     "msg": {
+      "type": "result",
+      "id": "q1",
+      "seq": 0,
+      "data": {
+       "kind": "attention",
+       "attention": {
+        "principal": "arkin",
+        "viewport": {
+         "view": "main",
+         "from_bar": 150,
+         "to_bar": 199
+        },
+        "focus": {
+         "view": "main",
+         "panel": 1,
+         "from_bar": 150,
+         "to_bar": 150
+        },
+        "directives": []
+       }
+      }
+     }
+    }
+   ],
+   "note": "G11"
+  },
+  {
+   "send": {
+    "conn": "s",
+    "msg": {
+     "type": "attend",
+     "id": "a1",
+     "directive": {
+      "to": "arkin",
+      "steps": [
+       {
+        "target": {
+         "view": "main",
+         "panel": 1,
+         "series": "rsi14",
+         "from_bar": 150,
+         "to_bar": 150
+        },
+        "say": "RSI burada 70'i kesti."
+       },
+       {
+        "target": {
+         "view": "main",
+         "panel": 0,
+         "series": "px",
+         "from_bar": 199,
+         "to_bar": 199
+        },
+        "say": "Son barın hacmi."
+       }
+      ]
+     }
+    }
+   },
+   "expect": [
+    {
+     "conn": "s",
+     "msg": {
+      "type": "ack",
+      "id": "a1",
+      "status": "delivered",
+      "created": [
+       "att-1"
+      ]
+     }
+    },
+    {
+     "conn": "a",
+     "msg": {
+      "type": "notify",
+      "sub": "me",
+      "event": {
+       "kind": "attention",
+       "directive": {
+        "id": "att-1",
+        "to": "arkin",
+        "from": "scout",
+        "at": 1760000000000,
+        "steps": [
+         {
+          "target": {
+           "series": "rsi14",
+           "from_bar": 150
+          }
+         },
+         {
+          "target": {
+           "series": "px",
+           "from_bar": 199
+          }
+         }
+        ]
+       }
+      }
+     }
+    },
+    {
+     "conn": "s",
+     "msg": {
+      "type": "notify",
+      "sub": "watch",
+      "event": {
+       "kind": "attention",
+       "directive": {
+        "id": "att-1",
+        "from": "scout"
+       }
+      }
+     }
+    }
+   ],
+   "note": "G12"
+  },
+  {
+   "send": {
+    "conn": "s",
+    "msg": {
+     "type": "attend",
+     "id": "a2",
+     "directive": {
+      "to": "nobody",
+      "steps": []
+     }
+    }
+   },
+   "expect": [
+    {
+     "conn": "s",
+     "msg": {
+      "type": "error",
+      "error": {
+       "code": "not_found"
+      },
+      "id": "a2"
+     }
+    }
+   ]
+  }
+ ],
+ "final": {
+  "log_len": 0
+ }
+}

@@ -1,0 +1,7 @@
+{
+ "type": "query",
+ "id": "q",
+ "query": {
+  "kind": "pixels"
+ }
+}

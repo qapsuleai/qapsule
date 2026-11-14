@@ -1,0 +1,1 @@
+attempt1: my heredoc had multi-line JSON, not valid JSONL (my error; parse errors, nothing sent). attempt2: single-line add_narrative about fnd-overbought, 3 steps; proposed prop-5. Guessed view main/panels/bb20 from spec example; not validated by authority error.

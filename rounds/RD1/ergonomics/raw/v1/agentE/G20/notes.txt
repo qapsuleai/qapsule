@@ -1,0 +1,1 @@
+attempt1: hello voice + present query without finding; returned sentence-depth text of top live finding fnd-overbought. Worked first time; 'present' semantic (most important = highest confidence live) matched the request.

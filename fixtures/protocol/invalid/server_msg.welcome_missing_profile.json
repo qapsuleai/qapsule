@@ -1,0 +1,24 @@
+{
+ "type": "welcome",
+ "protocol": "qp/0",
+ "doc": "d",
+ "principal": "a",
+ "role": "owner",
+ "permissions": {
+  "read": true,
+  "write": true,
+  "propose": true,
+  "decide": true,
+  "attend": true,
+  "feed": false
+ },
+ "seq": 0,
+ "epoch": 0,
+ "limits": {
+  "max_message_bytes": 1048576,
+  "max_ops": 64,
+  "max_bars": 10000,
+  "max_subscriptions": 32,
+  "max_string": 4096
+ }
+}

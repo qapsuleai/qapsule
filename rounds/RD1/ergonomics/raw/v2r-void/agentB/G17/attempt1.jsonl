@@ -1,0 +1,3 @@
+{"conn":"s","msg":{"type":"hello","protocol":"qp/0","principal":"scout","surface":{"kind":"headless"}}}
+{"conn":"s","msg":{"type":"query","id":"q1","query":{"kind":"screen","principal":"arkin"}}}
+{"conn":"s","msg":{"type":"query","id":"q2","query":{"kind":"attention","principal":"arkin"}}}

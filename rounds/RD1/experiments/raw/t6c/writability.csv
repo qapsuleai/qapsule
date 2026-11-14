@@ -1,0 +1,28 @@
+step,Bop_bytes,Bop_idx,Bop_stamps,A3_bytes,A3_ops,A3_idx,A3_stamps,B_bytes,B_idx,B_stamps
+"01 add_study sma20 (+show)",121,0,0,242,2,2,0,237,1,0
+"02 add_study ema50 (+show)",121,0,0,242,2,2,0,237,1,0
+"03 add_study rsi7 (+show with rsi14)",124,0,0,239,2,2,0,234,1,0
+"04 set_params ema50 period=34",63,0,0,71,1,1,0,126,0,0
+"05 set_params rsi14 period=21",63,0,0,71,1,1,0,210,0,0
+"06 set_view_range main last 120",66,0,0,83,1,1,0,80,0,0
+"07 add_layer rule30 at index 4",118,1,0,115,1,2,0,121,1,0
+"08 remove_layer index 1 (bb20 line)",47,1,0,44,1,2,0,47,1,0
+"09 add_fact sma cross",172,0,0,309,1,0,1,295,0,1
+"10 add_finding + capsule",278,0,0,652,2,0,2,630,0,2
+"11 update_finding invalidation+confidence",138,0,0,450,7,7,0,330,0,1
+"12 reject_finding fnd-overbought",104,0,0,260,2,1,1,251,0,1
+"13 append_bars px (1 bar)",123,0,0,131,1,1,0,123,0,0
+"14 update_last_bar px",124,0,0,137,1,2,0,121,0,0
+"15 update_last_bar px",123,0,0,136,1,2,0,120,0,0
+"16 add_intent",158,0,0,284,1,0,1,272,0,1
+"17 remove macd (cascade layer)",29,0,0,79,2,3,0,75,1,0
+"18 undo #4 (set_params ema50)",23,0,0,71,1,1,0,126,0,0
+"19 add_study bb10 (+show)",126,0,0,254,2,2,0,249,1,0
+"21 undo #12 (reject_finding)",24,0,0,103,2,2,0,90,0,0
+"22 append_bars px (3 bars)",277,0,0,389,3,3,0,277,0,0
+"23 remove rsi7 (cascade layer)",29,0,0,79,2,3,0,75,1,0
+"24 remove bb20 (no layer left)",29,0,0,36,1,1,0,29,0,0
+"26 set_params bb10 k=2.5",56,0,0,65,1,1,0,139,0,0
+"27 approve_finding fnd-trend",74,0,0,229,2,1,1,214,0,1
+"28 add_study sma200 (+show)",123,0,0,245,2,2,0,240,1,0
+"29 undo #24 (remove bb20)",24,0,0,234,1,0,0,223,0,0

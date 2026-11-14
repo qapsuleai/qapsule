@@ -1,0 +1,4 @@
+{"conn":"s","msg":{"type":"hello","protocol":"qp/0","principal":"scout","surface":{"kind":"headless"}}}
+{"conn":"s","msg":{"type":"query","id":"q1","query":{"kind":"list","collection":"series"}}}
+{"conn":"s","msg":{"type":"query","id":"q2","query":{"kind":"study","series":"rsi14","range":{"last":120}}}}
+{"conn":"s","msg":{"type":"query","id":"q3","query":{"kind":"list","collection":"views"}}}

@@ -1,0 +1,3 @@
+{"conn":"a","msg":{"type":"hello","protocol":"qp/0","principal":"scout","surface":{"kind":"headless"}}}
+{"conn":"a","msg":{"type":"query","id":"q0","query":{"kind":"list","collection":"findings"}}}
+{"conn":"a","msg":{"type":"query","id":"q1","query":{"kind":"present","finding":"fnd-overbought","surface":"watch"}}}

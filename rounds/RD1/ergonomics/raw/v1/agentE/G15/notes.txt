@@ -1,0 +1,1 @@
+attempt1: 'at' query series px bar 150; worked. Ambiguity: '150. bar' could be ordinal 150th (index 149); spec says bars are 0-based so I used index 150 and stated it in the answer. Studies auto-included, no extra query needed.

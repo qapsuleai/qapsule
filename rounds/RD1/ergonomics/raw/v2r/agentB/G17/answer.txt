@@ -1,0 +1,1 @@
+Arkin'in ekranında THYAO 1G grafiği (chart-1) görünüyor: 120–199 arası barlar, fiyat paneli (mum + Bollinger + EMA50), RSI paneli (70/30 çizgileri), MACD paneli ve 'cap-9e1' kapsülü; son kapanış 124,69.

@@ -1,0 +1,1 @@
+attempt1: listed pending proposals (blind; needed id). attempt2: accept_proposal prop-3 -> applied. Cost an attempt only because proposal id unknown before the run; spec could say list-then-accept needs two runs.

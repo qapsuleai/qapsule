@@ -76,7 +76,7 @@ pub fn synthetic_series(n: usize, seed: u64) -> Series {
             calendar: None,
         }),
         interval: Some("1d".to_owned()),
-        source: Binding::Inline,
+        source: Binding::Inline {},
         data: Some(SeriesData::Bars {
             bars: synthetic_bars(n, seed),
         }),

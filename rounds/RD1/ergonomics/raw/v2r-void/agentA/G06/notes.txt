@@ -1,0 +1,1 @@
+attempt1: used spec example id rsi14 -> not_found. attempt2: osc-a (found from G01/G16 listings; I had not listed series in this task). Spec examples use ids that don't exist in live doc.

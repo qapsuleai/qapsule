@@ -1,0 +1,1 @@
+attempt1: list findings + present with surface "watch" (with a guessed finding id fnd-overbought -> not_found, and one without id -> OK sentence text). Succeeded; guessed id was wrong because ids are opaque (fnd-9e1); spec examples use fnd-overbought misleadingly. present's surface field was found only in the query table, no example. hello max_depth also set to sentence.

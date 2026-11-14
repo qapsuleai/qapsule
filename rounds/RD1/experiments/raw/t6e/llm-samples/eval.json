@@ -1,0 +1,331 @@
+{
+  "rows": [
+    {
+      "bytes": 954,
+      "file": "large-01.txt",
+      "format_clean": true,
+      "group": "large",
+      "json": "ok",
+      "put_view": "applied",
+      "schema_valid": true,
+      "semantics": {
+        "candles_px_panel0": true,
+        "extra_series": [
+          "bb20",
+          "bb20"
+        ],
+        "fact_bar_marked": true,
+        "id_ok": true,
+        "layers": 9,
+        "level70_rule_in_rsi_panel": true,
+        "panels": 2,
+        "panels_have_scales": true,
+        "rsi_in_own_panel": true,
+        "series_exist": true,
+        "unknown_series": [],
+        "x_domain": [
+          1749000000000.0,
+          1759881600000.0
+        ],
+        "x_domain_contains_fact_ms": true,
+        "x_domain_reaches_last_bar": true,
+        "x_time": true
+      },
+      "structure": "x=Time* y=[Linear,Linear*] title=true layers=[Line:bb20:p0:[color,y] Line:bb20:p0:[color,y] Candle:px:p0:[] Rule:-:p0:[color,x] Line:rsi14:p1:[color,y] Rule:-:p1:[color,y] Rule:-:p1:[color,y] Rule:-:p1:[color,x] Point:rsi14:p1:[color,x,y]]",
+      "typed": "ok"
+    },
+    {
+      "bytes": 1046,
+      "file": "large-02.txt",
+      "format_clean": true,
+      "group": "large",
+      "json": "ok",
+      "put_view": "applied",
+      "schema_valid": true,
+      "semantics": {
+        "candles_px_panel0": true,
+        "extra_series": [
+          "bb20",
+          "bb20"
+        ],
+        "fact_bar_marked": true,
+        "id_ok": true,
+        "layers": 10,
+        "level70_rule_in_rsi_panel": true,
+        "panels": 2,
+        "panels_have_scales": true,
+        "rsi_in_own_panel": true,
+        "series_exist": true,
+        "unknown_series": [],
+        "x_domain": [
+          1747872000000.0,
+          1759881600000.0
+        ],
+        "x_domain_contains_fact_ms": true,
+        "x_domain_reaches_last_bar": true,
+        "x_time": true
+      },
+      "structure": "x=Time* y=[Linear,Linear*] title=true layers=[Candle:px:p0:[] Line:bb20:p0:[color,y] Line:bb20:p0:[color,y] Rule:-:p0:[color,x] Line:rsi14:p1:[color,y] Rule:-:p1:[color,y] Rule:-:p1:[color,y] Rule:-:p1:[color,x] Point:rsi14:p1:[color,x,y] Text:-:p1:[color,text,x,y]]",
+      "typed": "ok"
+    },
+    {
+      "bytes": 1006,
+      "file": "large-03.txt",
+      "format_clean": true,
+      "group": "large",
+      "json": "ok",
+      "put_view": "applied",
+      "schema_valid": true,
+      "semantics": {
+        "candles_px_panel0": true,
+        "extra_series": [
+          "bb20",
+          "bb20"
+        ],
+        "fact_bar_marked": true,
+        "id_ok": true,
+        "layers": 10,
+        "level70_rule_in_rsi_panel": true,
+        "panels": 2,
+        "panels_have_scales": true,
+        "rsi_in_own_panel": true,
+        "series_exist": true,
+        "unknown_series": [],
+        "x_domain": [
+          1748736000000.0,
+          1759881600000.0
+        ],
+        "x_domain_contains_fact_ms": true,
+        "x_domain_reaches_last_bar": true,
+        "x_time": true
+      },
+      "structure": "x=Time* y=[Linear,Linear*] title=true layers=[Candle:px:p0:[] Line:bb20:p0:[color,y] Line:bb20:p0:[color,y] Rule:-:p0:[color,x] Line:rsi14:p1:[color,y] Rule:-:p1:[color,y] Rule:-:p1:[color,y] Rule:-:p1:[color,x] Point:-:p1:[color,x,y] Text:-:p1:[color,text,x,y]]",
+      "typed": "ok"
+    },
+    {
+      "bytes": 949,
+      "file": "large-04.txt",
+      "format_clean": true,
+      "group": "large",
+      "json": "ok",
+      "put_view": "applied",
+      "schema_valid": true,
+      "semantics": {
+        "candles_px_panel0": true,
+        "extra_series": [],
+        "fact_bar_marked": true,
+        "id_ok": true,
+        "layers": 8,
+        "level70_rule_in_rsi_panel": true,
+        "panels": 2,
+        "panels_have_scales": true,
+        "rsi_in_own_panel": true,
+        "series_exist": true,
+        "unknown_series": [],
+        "x_domain": [
+          1750291200000.0,
+          1759968000000.0
+        ],
+        "x_domain_contains_fact_ms": true,
+        "x_domain_reaches_last_bar": true,
+        "x_time": true
+      },
+      "structure": "x=Time* y=[Linear,Linear*] title=true layers=[Candle:px:p0:[] Rule:-:p0:[color,x] Line:rsi14:p1:[color,y] Rule:-:p1:[color,y] Rule:-:p1:[color,y] Rule:-:p1:[color,x] Point:-:p1:[color,x,y] Text:-:p1:[color,text,x,y]]",
+      "typed": "ok"
+    },
+    {
+      "bytes": 1016,
+      "file": "large-05.txt",
+      "format_clean": true,
+      "group": "large",
+      "json": "ok",
+      "put_view": "applied",
+      "schema_valid": true,
+      "semantics": {
+        "candles_px_panel0": true,
+        "extra_series": [
+          "bb20",
+          "bb20"
+        ],
+        "fact_bar_marked": true,
+        "id_ok": true,
+        "layers": 10,
+        "level70_rule_in_rsi_panel": true,
+        "panels": 2,
+        "panels_have_scales": true,
+        "rsi_in_own_panel": true,
+        "series_exist": true,
+        "unknown_series": [],
+        "x_domain": null,
+        "x_domain_contains_fact_ms": true,
+        "x_domain_reaches_last_bar": true,
+        "x_time": true
+      },
+      "structure": "x=Time y=[Linear,Linear*] title=true layers=[Candle:px:p0:[] Line:bb20:p0:[color,y] Line:bb20:p0:[color,y] Rule:-:p0:[color,x] Line:rsi14:p1:[color,y] Rule:-:p1:[color,y] Rule:-:p1:[color,y] Rule:-:p1:[color,x] Point:-:p1:[color,x,y] Text:-:p1:[color,text,x,y]]",
+      "typed": "ok"
+    },
+    {
+      "bytes": 520,
+      "file": "small-01.txt",
+      "format_clean": true,
+      "group": "small",
+      "json": "ok",
+      "put_view": "applied",
+      "schema_valid": true,
+      "semantics": {
+        "candles_px_panel0": true,
+        "extra_series": [],
+        "fact_bar_marked": true,
+        "id_ok": true,
+        "layers": 5,
+        "level70_rule_in_rsi_panel": true,
+        "panels": 2,
+        "panels_have_scales": true,
+        "rsi_in_own_panel": true,
+        "series_exist": true,
+        "unknown_series": [],
+        "x_domain": null,
+        "x_domain_contains_fact_ms": true,
+        "x_domain_reaches_last_bar": true,
+        "x_time": true
+      },
+      "structure": "x=Time y=[Linear,Linear*] title=true layers=[Candle:px:p0:[] Rule:-:p0:[color,x] Line:rsi14:p1:[color,y] Rule:-:p1:[color,y] Rule:-:p1:[color,x]]",
+      "typed": "ok"
+    },
+    {
+      "bytes": 485,
+      "file": "small-02.txt",
+      "format_clean": true,
+      "group": "small",
+      "json": "ok",
+      "put_view": "applied",
+      "schema_valid": true,
+      "semantics": {
+        "candles_px_panel0": true,
+        "extra_series": [],
+        "fact_bar_marked": false,
+        "id_ok": true,
+        "layers": 4,
+        "level70_rule_in_rsi_panel": true,
+        "panels": 2,
+        "panels_have_scales": true,
+        "rsi_in_own_panel": true,
+        "series_exist": true,
+        "unknown_series": [],
+        "x_domain": null,
+        "x_domain_contains_fact_ms": true,
+        "x_domain_reaches_last_bar": true,
+        "x_time": true
+      },
+      "structure": "x=Time y=[Linear,Linear*] title=true layers=[Candle:px:p0:[close,high,low,open] Line:rsi14:p1:[color,y] Rule:-:p1:[color,y] Rule:-:p1:[color,y]]",
+      "typed": "ok"
+    },
+    {
+      "bytes": 451,
+      "file": "small-03.txt",
+      "format_clean": true,
+      "group": "small",
+      "json": "ok",
+      "put_view": "applied",
+      "schema_valid": true,
+      "semantics": {
+        "candles_px_panel0": true,
+        "extra_series": [],
+        "fact_bar_marked": false,
+        "id_ok": true,
+        "layers": 4,
+        "level70_rule_in_rsi_panel": true,
+        "panels": 2,
+        "panels_have_scales": true,
+        "rsi_in_own_panel": true,
+        "series_exist": true,
+        "unknown_series": [],
+        "x_domain": null,
+        "x_domain_contains_fact_ms": true,
+        "x_domain_reaches_last_bar": true,
+        "x_time": true
+      },
+      "structure": "x=Time y=[Linear,Linear*] title=true layers=[Candle:px:p0:[] Rule:-:p1:[color,y] Rule:-:p1:[color,y] Line:rsi14:p1:[color,y]]",
+      "typed": "ok"
+    },
+    {
+      "bytes": 533,
+      "file": "small-04.txt",
+      "format_clean": true,
+      "group": "small",
+      "json": "ok",
+      "put_view": "applied",
+      "schema_valid": true,
+      "semantics": {
+        "candles_px_panel0": true,
+        "extra_series": [],
+        "fact_bar_marked": true,
+        "id_ok": true,
+        "layers": 5,
+        "level70_rule_in_rsi_panel": true,
+        "panels": 2,
+        "panels_have_scales": true,
+        "rsi_in_own_panel": true,
+        "series_exist": true,
+        "unknown_series": [],
+        "x_domain": null,
+        "x_domain_contains_fact_ms": true,
+        "x_domain_reaches_last_bar": true,
+        "x_time": true
+      },
+      "structure": "x=Time y=[Linear,Linear*] title=true layers=[Candle:px:p0:[] Rule:-:p0:[color,x] Line:rsi14:p1:[color,y] Rule:-:p1:[color,y] Rule:-:p1:[color,x]]",
+      "typed": "ok"
+    },
+    {
+      "bytes": 448,
+      "file": "small-05.txt",
+      "format_clean": true,
+      "group": "small",
+      "json": "ok",
+      "put_view": "applied",
+      "schema_valid": true,
+      "semantics": {
+        "candles_px_panel0": true,
+        "extra_series": [],
+        "fact_bar_marked": true,
+        "id_ok": true,
+        "layers": 4,
+        "level70_rule_in_rsi_panel": true,
+        "panels": 2,
+        "panels_have_scales": true,
+        "rsi_in_own_panel": true,
+        "series_exist": true,
+        "unknown_series": [],
+        "x_domain": null,
+        "x_domain_contains_fact_ms": true,
+        "x_domain_reaches_last_bar": true,
+        "x_time": true
+      },
+      "structure": "x=Time y=[Linear,Linear*] title=true layers=[Candle:px:p0:[] Line:rsi14:p1:[color,y] Rule:-:p1:[color,y] Rule:-:p1:[color,x]]",
+      "typed": "ok"
+    }
+  ],
+  "summary": {
+    "large": {
+      "distinct_canonical": 5,
+      "distinct_structures": 5,
+      "structures": [
+        "x=Time y=[Linear,Linear*] title=true layers=[Candle:px:p0:[] Line:bb20:p0:[color,y] Line:bb20:p0:[color,y] Rule:-:p0:[color,x] Line:rsi14:p1:[color,y] Rule:-:p1:[color,y] Rule:-:p1:[color,y] Rule:-:p1:[color,x] Point:-:p1:[color,x,y] Text:-:p1:[color,text,x,y]]",
+        "x=Time* y=[Linear,Linear*] title=true layers=[Candle:px:p0:[] Line:bb20:p0:[color,y] Line:bb20:p0:[color,y] Rule:-:p0:[color,x] Line:rsi14:p1:[color,y] Rule:-:p1:[color,y] Rule:-:p1:[color,y] Rule:-:p1:[color,x] Point:-:p1:[color,x,y] Text:-:p1:[color,text,x,y]]",
+        "x=Time* y=[Linear,Linear*] title=true layers=[Candle:px:p0:[] Line:bb20:p0:[color,y] Line:bb20:p0:[color,y] Rule:-:p0:[color,x] Line:rsi14:p1:[color,y] Rule:-:p1:[color,y] Rule:-:p1:[color,y] Rule:-:p1:[color,x] Point:rsi14:p1:[color,x,y] Text:-:p1:[color,text,x,y]]",
+        "x=Time* y=[Linear,Linear*] title=true layers=[Candle:px:p0:[] Rule:-:p0:[color,x] Line:rsi14:p1:[color,y] Rule:-:p1:[color,y] Rule:-:p1:[color,y] Rule:-:p1:[color,x] Point:-:p1:[color,x,y] Text:-:p1:[color,text,x,y]]",
+        "x=Time* y=[Linear,Linear*] title=true layers=[Line:bb20:p0:[color,y] Line:bb20:p0:[color,y] Candle:px:p0:[] Rule:-:p0:[color,x] Line:rsi14:p1:[color,y] Rule:-:p1:[color,y] Rule:-:p1:[color,y] Rule:-:p1:[color,x] Point:rsi14:p1:[color,x,y]]"
+      ]
+    },
+    "small": {
+      "distinct_canonical": 5,
+      "distinct_structures": 4,
+      "structures": [
+        "x=Time y=[Linear,Linear*] title=true layers=[Candle:px:p0:[] Line:rsi14:p1:[color,y] Rule:-:p1:[color,y] Rule:-:p1:[color,x]]",
+        "x=Time y=[Linear,Linear*] title=true layers=[Candle:px:p0:[] Rule:-:p0:[color,x] Line:rsi14:p1:[color,y] Rule:-:p1:[color,y] Rule:-:p1:[color,x]]",
+        "x=Time y=[Linear,Linear*] title=true layers=[Candle:px:p0:[] Rule:-:p1:[color,y] Rule:-:p1:[color,y] Line:rsi14:p1:[color,y]]",
+        "x=Time y=[Linear,Linear*] title=true layers=[Candle:px:p0:[close,high,low,open] Line:rsi14:p1:[color,y] Rule:-:p1:[color,y] Rule:-:p1:[color,y]]"
+      ]
+    }
+  }
+}

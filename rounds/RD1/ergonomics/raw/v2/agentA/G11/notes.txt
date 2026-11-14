@@ -1,0 +1,1 @@
+attempt1: attention + screen queries on arkin -> viewport bars 120-199 on main. Both worked; had to assume arkin had a desktop connection (it did).

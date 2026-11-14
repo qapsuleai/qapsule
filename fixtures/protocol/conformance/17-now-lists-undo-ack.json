@@ -1,0 +1,255 @@
+{
+ "name": "17-now-lists-undo-ack",
+ "description": "v2 (from the agent-writability measurement): welcome and results carry the authority's `now`; `log` takes `within_ms`; `list` of series omits bar data unless `full`; an applied undo's ack says which entry it undid.",
+ "covers": [
+  "capability",
+  "query",
+  "time",
+  "undo"
+ ],
+ "init": "fixtures/protocol/init/thyao.json",
+ "steps": [
+  {
+   "send": {
+    "conn": "h",
+    "msg": {
+     "type": "hello",
+     "protocol": "qp/0",
+     "principal": "host",
+     "surface": {
+      "kind": "headless"
+     }
+    }
+   },
+   "expect": [
+    {
+     "conn": "h",
+     "msg": {
+      "type": "welcome",
+      "now": 1760000000000
+     }
+    }
+   ]
+  },
+  {
+   "send": {
+    "conn": "a",
+    "msg": {
+     "type": "hello",
+     "protocol": "qp/0",
+     "principal": "arkin",
+     "surface": {
+      "kind": "desktop"
+     }
+    }
+   },
+   "expect": [
+    {
+     "conn": "a",
+     "msg": {
+      "type": "welcome",
+      "protocol": "qp/0",
+      "doc": "doc-thyao",
+      "principal": "arkin",
+      "role": "owner",
+      "permissions": {
+       "read": true,
+       "write": true,
+       "propose": true,
+       "decide": true,
+       "attend": true,
+       "feed": false
+      },
+      "seq": 0,
+      "epoch": 0,
+      "profile": {
+       "depth": "chart",
+       "series_data": true,
+       "max_points": 500,
+       "max_glyphs": 6,
+       "speech": false
+      },
+      "limits": {
+       "max_message_bytes": 1048576,
+       "max_ops": 64,
+       "max_bars": 10000,
+       "max_subscriptions": 32,
+       "max_string": 4096
+      }
+     }
+    }
+   ]
+  },
+  {
+   "send": {
+    "conn": "a",
+    "msg": {
+     "type": "command",
+     "id": "c1",
+     "ops": [
+      {
+       "op": "set_params",
+       "series": "rsi14",
+       "params": {
+        "period": 10
+       }
+      }
+     ]
+    }
+   },
+   "expect": [
+    {
+     "conn": "a",
+     "msg": {
+      "type": "ack",
+      "id": "c1",
+      "status": "applied",
+      "seq": 1
+     }
+    }
+   ]
+  },
+  {
+   "send": {
+    "conn": "h",
+    "msg": {
+     "type": "clock",
+     "now": 1760002700000
+    }
+   },
+   "expect": []
+  },
+  {
+   "send": {
+    "conn": "a",
+    "msg": {
+     "type": "command",
+     "id": "c2",
+     "ops": [
+      {
+       "op": "set_params",
+       "series": "macd",
+       "params": {
+        "fast": 10
+       }
+      }
+     ]
+    }
+   },
+   "expect": [
+    {
+     "conn": "a",
+     "msg": {
+      "type": "ack",
+      "id": "c2",
+      "status": "applied",
+      "seq": 2
+     }
+    }
+   ]
+  },
+  {
+   "send": {
+    "conn": "a",
+    "msg": {
+     "type": "query",
+     "id": "q1",
+     "query": {
+      "kind": "log",
+      "within_ms": 1800000
+     }
+    }
+   },
+   "expect": [
+    {
+     "conn": "a",
+     "msg": {
+      "type": "result",
+      "id": "q1",
+      "seq": 2,
+      "now": 1760002700000,
+      "data": {
+       "kind": "log",
+       "entries": [
+        {
+         "seq": 2
+        }
+       ]
+      }
+     }
+    }
+   ]
+  },
+  {
+   "send": {
+    "conn": "a",
+    "msg": {
+     "type": "query",
+     "id": "q2",
+     "query": {
+      "kind": "list",
+      "collection": "series"
+     }
+    }
+   },
+   "expect": [
+    {
+     "conn": "a",
+     "msg": {
+      "type": "result",
+      "id": "q2",
+      "seq": "$any",
+      "data": {
+       "kind": "items",
+       "collection": "series",
+       "items": [
+        {
+         "id": "px",
+         "data": "$absent"
+        },
+        {
+         "id": "rsi14"
+        },
+        {
+         "id": "macd"
+        },
+        {
+         "id": "bb20"
+        }
+       ]
+      }
+     }
+    }
+   ]
+  },
+  {
+   "send": {
+    "conn": "a",
+    "msg": {
+     "type": "command",
+     "id": "c3",
+     "ops": [
+      {
+       "op": "undo"
+      }
+     ]
+    }
+   },
+   "expect": [
+    {
+     "conn": "a",
+     "msg": {
+      "type": "ack",
+      "id": "c3",
+      "status": "applied",
+      "seq": 3,
+      "undoes": 2
+     }
+    }
+   ]
+  }
+ ],
+ "final": {
+  "log_len": 3
+ }
+}

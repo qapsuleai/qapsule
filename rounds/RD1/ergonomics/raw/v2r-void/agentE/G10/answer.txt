@@ -1,0 +1,1 @@
+Son değişikliğin (günlükteki 2 numaralı girdi, senin son yazdığın) geri alındı; geri alma 5 numaralı yeni girdi olarak kaydedildi.

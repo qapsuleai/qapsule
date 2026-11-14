@@ -1,0 +1,1 @@
+attempt1: update_finding fnd-overbought invalidation threshold px cross_below 100 -> applied, verified. Ambiguity: 'altına inerse' could be lt (state) or cross_below (event); chose cross_below, series px (price series id guessed from spec examples); did not check nothing else depended on it.

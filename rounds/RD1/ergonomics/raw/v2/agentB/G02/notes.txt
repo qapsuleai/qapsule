@@ -1,0 +1,1 @@
+attempt1: log query within_ms=1800000 as scout; worked. Note: result lists 3 entries (seq 2-4), all within 30 min of now=1760003900000.

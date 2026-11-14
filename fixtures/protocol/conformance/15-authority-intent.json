@@ -1,0 +1,371 @@
+{
+ "name": "15-authority-intent",
+ "description": "G05 and roles: SMA20/SMA50 with a crossing intent in one command; a viewer cannot write or propose; a proposer in direct mode is refused with a hint; ids are unique.",
+ "covers": [
+  "command",
+  "authority",
+  "error"
+ ],
+ "init": "fixtures/protocol/init/thyao.json",
+ "steps": [
+  {
+   "send": {
+    "conn": "a",
+    "msg": {
+     "type": "hello",
+     "protocol": "qp/0",
+     "principal": "arkin",
+     "surface": {
+      "kind": "desktop"
+     }
+    }
+   },
+   "expect": [
+    {
+     "conn": "a",
+     "msg": {
+      "type": "welcome",
+      "protocol": "qp/0",
+      "doc": "doc-thyao",
+      "principal": "arkin",
+      "role": "owner",
+      "permissions": {
+       "read": true,
+       "write": true,
+       "propose": true,
+       "decide": true,
+       "attend": true,
+       "feed": false
+      },
+      "seq": 0,
+      "epoch": 0,
+      "profile": {
+       "depth": "chart",
+       "series_data": true,
+       "max_points": 500,
+       "max_glyphs": 6,
+       "speech": false
+      },
+      "limits": {
+       "max_message_bytes": 1048576,
+       "max_ops": 64,
+       "max_bars": 10000,
+       "max_subscriptions": 32,
+       "max_string": 4096
+      }
+     }
+    }
+   ]
+  },
+  {
+   "send": {
+    "conn": "s",
+    "msg": {
+     "type": "hello",
+     "protocol": "qp/0",
+     "principal": "scout",
+     "surface": {
+      "kind": "headless"
+     }
+    }
+   },
+   "expect": [
+    {
+     "conn": "s",
+     "msg": {
+      "type": "welcome",
+      "protocol": "qp/0",
+      "doc": "doc-thyao",
+      "principal": "scout",
+      "role": "proposer",
+      "permissions": {
+       "read": true,
+       "write": false,
+       "propose": true,
+       "decide": false,
+       "attend": true,
+       "feed": false
+      },
+      "seq": 0,
+      "epoch": 0,
+      "profile": {
+       "depth": "chart",
+       "series_data": true,
+       "max_points": 10000,
+       "max_glyphs": 6,
+       "speech": false
+      },
+      "limits": {
+       "max_message_bytes": 1048576,
+       "max_ops": 64,
+       "max_bars": 10000,
+       "max_subscriptions": 32,
+       "max_string": 4096
+      }
+     }
+    }
+   ]
+  },
+  {
+   "send": {
+    "conn": "v",
+    "msg": {
+     "type": "hello",
+     "protocol": "qp/0",
+     "principal": "viewer",
+     "surface": {
+      "kind": "phone"
+     }
+    }
+   },
+   "expect": [
+    {
+     "conn": "v",
+     "msg": {
+      "type": "welcome",
+      "protocol": "qp/0",
+      "doc": "doc-thyao",
+      "principal": "viewer",
+      "role": "viewer",
+      "permissions": {
+       "read": true,
+       "write": false,
+       "propose": false,
+       "decide": false,
+       "attend": false,
+       "feed": false
+      },
+      "seq": 0,
+      "epoch": 0,
+      "profile": {
+       "depth": "capsule",
+       "series_data": true,
+       "max_points": 60,
+       "max_glyphs": 3,
+       "speech": false
+      },
+      "limits": {
+       "max_message_bytes": 1048576,
+       "max_ops": 64,
+       "max_bars": 10000,
+       "max_subscriptions": 32,
+       "max_string": 4096
+      }
+     }
+    }
+   ]
+  },
+  {
+   "send": {
+    "conn": "a",
+    "msg": {
+     "type": "command",
+     "id": "c1",
+     "ops": [
+      {
+       "op": "add_study",
+       "id": "sma20",
+       "study": "sma",
+       "inputs": [
+        "px"
+       ],
+       "params": {
+        "period": 20
+       },
+       "show": {
+        "view": "main",
+        "panel": 0
+       }
+      },
+      {
+       "op": "add_study",
+       "id": "sma50",
+       "study": "sma",
+       "inputs": [
+        "px"
+       ],
+       "params": {
+        "period": 50
+       },
+       "show": {
+        "view": "main",
+        "panel": 0
+       }
+      },
+      {
+       "op": "add_intent",
+       "text": "SMA20 SMA50'yi yukarı keserse haber ver",
+       "trigger": {
+        "kind": "compare",
+        "left": "sma20",
+        "op": "cross_above",
+        "right": "sma50"
+       }
+      }
+     ]
+    }
+   },
+   "expect": [
+    {
+     "conn": "a",
+     "msg": {
+      "type": "ack",
+      "id": "c1",
+      "status": "applied",
+      "seq": 1,
+      "created": [
+       "sma20",
+       "sma50",
+       "intent-1-2"
+      ]
+     }
+    }
+   ]
+  },
+  {
+   "send": {
+    "conn": "v",
+    "msg": {
+     "type": "command",
+     "id": "c2",
+     "ops": [
+      {
+       "op": "remove",
+       "id": "sma20"
+      }
+     ]
+    }
+   },
+   "expect": [
+    {
+     "conn": "v",
+     "msg": {
+      "type": "error",
+      "error": {
+       "code": "forbidden"
+      },
+      "id": "c2"
+     }
+    }
+   ]
+  },
+  {
+   "send": {
+    "conn": "s",
+    "msg": {
+     "type": "command",
+     "id": "c3",
+     "ops": [
+      {
+       "op": "remove",
+       "id": "sma20"
+      }
+     ],
+     "mode": "direct"
+    }
+   },
+   "expect": [
+    {
+     "conn": "s",
+     "msg": {
+      "type": "error",
+      "error": {
+       "code": "forbidden",
+       "hint": "$any"
+      },
+      "id": "c3"
+     }
+    }
+   ]
+  },
+  {
+   "send": {
+    "conn": "a",
+    "msg": {
+     "type": "command",
+     "id": "c4",
+     "ops": [
+      {
+       "op": "add_study",
+       "id": "macd",
+       "study": "ema",
+       "inputs": [
+        "px"
+       ]
+      }
+     ]
+    }
+   },
+   "expect": [
+    {
+     "conn": "a",
+     "msg": {
+      "type": "error",
+      "error": {
+       "code": "duplicate",
+       "path": "/ops/0/id"
+      },
+      "id": "c4"
+     }
+    }
+   ]
+  },
+  {
+   "send": {
+    "conn": "a",
+    "msg": {
+     "type": "command",
+     "id": "c5",
+     "ops": [
+      {
+       "op": "add_intent",
+       "text": "x",
+       "trigger": {
+        "kind": "compare",
+        "left": "sma20",
+        "op": "gt",
+        "right": "sma100"
+       }
+      }
+     ]
+    }
+   },
+   "expect": [
+    {
+     "conn": "a",
+     "msg": {
+      "type": "error",
+      "error": {
+       "code": "not_found",
+       "path": "/ops/0/trigger/right"
+      },
+      "id": "c5"
+     }
+    }
+   ]
+  }
+ ],
+ "final": {
+  "log_len": 1,
+  "document": {
+   "intents": [
+    {
+     "id": "intent-1-2",
+     "active": true,
+     "trigger": {
+      "kind": "compare",
+      "left": "sma20",
+      "op": "cross_above",
+      "right": "sma50"
+     },
+     "provenance": {
+      "author": {
+       "kind": "human",
+       "name": "arkin"
+      }
+     }
+    }
+   ]
+  }
+ }
+}

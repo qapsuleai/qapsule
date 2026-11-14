@@ -1,0 +1,14 @@
+case,B_expand,A_patch_error,A_typed_serde,A_json_schema,A_post_state_domain,A_feed_acl,A_any
+"V1 layer refers to missing series",true,false,false,false,true,false,true
+"V2 remove series in use (rsi14)",true,false,false,false,true,false,true
+"V3 set_params on a bar series",true,false,false,true,false,false,true
+"V4 finding refers to missing fact",true,false,false,false,true,false,true
+"V5 confidence 1.5",true,false,false,true,true,false,true
+"V6 appended bar not after last",true,false,false,false,true,false,true
+"V7 update_last_bar changes t",true,false,false,false,false,false,false
+"V8 approve an already rejected finding",true,false,false,false,false,false,false
+"V9 unknown study param",true,false,false,false,true,false,true
+"V10 feed writes a finding",true,false,false,false,false,true,true
+"V11 remove layer index 99",true,true,false,false,false,false,true
+"V12 reversed view range",true,false,false,false,true,false,true
+"V13 negative period",true,false,false,false,true,false,true

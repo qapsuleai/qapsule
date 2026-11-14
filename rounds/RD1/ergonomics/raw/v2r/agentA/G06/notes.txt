@@ -1,0 +1,1 @@
+a1: used rsi14 from spec example; not_found, real id is osc-a (no discovery step in my file). a2: ok, max 78.115 at bar 154.

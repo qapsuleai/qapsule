@@ -1,0 +1,1 @@
+attempt1: log query without filters (no way to know 'now'); returned 4 entries, used 'at' values to decide. Unclear: no way to learn current time (clock is host-only); since_t needs absolute time.

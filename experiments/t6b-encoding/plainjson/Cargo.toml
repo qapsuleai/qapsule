@@ -1,0 +1,19 @@
+[package]
+name = "t6b-plainjson"
+version = "0.0.0"
+edition = "2021"
+publish = false
+description = "RD1/T6b: the same qp-schema types (compiled from source via #[path]) with serde_json WITHOUT float_roundtrip, for reference."
+
+# Own workspace and resolution: qp-schema enables float_roundtrip unconditionally, so the
+# schema source files are compiled here directly instead of depending on the crate.
+[workspace]
+
+[dependencies]
+schemars = "1.2.3"
+serde = { version = "1.0.229", features = ["derive"] }
+serde_json = "1.0.154"
+
+[profile.release]
+lto = "thin"
+codegen-units = 1

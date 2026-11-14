@@ -1,0 +1,3 @@
+attempt1: list series/views + study rsi14 -> rsi14 not found (spec examples use rsi14; real id is osc-a); learned views id chart-1.
+attempt2: study osc-a values -> found 10 cross_above-70 bars (118,124,131,134,143,147,150,156,183,189); request ambiguous, chose latest (189). Last bar 199.
+attempt3: attend with 2 steps -> ack delivered. Spec example ids (main, rsi14, px) do not exist in this doc; unclear whether attend validates targets (it did not complain).

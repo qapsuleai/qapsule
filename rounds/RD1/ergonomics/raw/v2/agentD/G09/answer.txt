@@ -1,0 +1,1 @@
+Bekleyen tek öneri prop-3 ("Hacim güçlü" bulgusu, scout'tan) vardı; kabul ettim, bulgu fnd-3-0 ve kapsül cap-3-1 oluştu.

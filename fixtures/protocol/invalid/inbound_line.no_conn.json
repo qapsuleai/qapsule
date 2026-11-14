@@ -1,0 +1,18 @@
+{
+ "msg": {
+  "type": "hello",
+  "protocol": "qp/0",
+  "principal": "arkin",
+  "surface": {
+   "kind": "watch",
+   "screen": [
+    198,
+    242
+   ],
+   "input": [
+    "touch",
+    "crown"
+   ]
+  }
+ }
+}

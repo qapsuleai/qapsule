@@ -1,0 +1,1 @@
+attempt1: log query (author arkin) + undo with no seq; applied, undoes seq 2 (his ema50 addition). Spec clear; 'son yaptığım' resolved by undo default target.

@@ -1,0 +1,424 @@
+{
+ "name": "11-capability-depths",
+ "description": "Criterion 10, G04, G20: the same finding presented to watch, phone, desktop and voice surfaces comes back at three different depths.",
+ "covers": [
+  "capability",
+  "query"
+ ],
+ "init": "fixtures/protocol/init/thyao.json",
+ "steps": [
+  {
+   "send": {
+    "conn": "w",
+    "msg": {
+     "type": "hello",
+     "protocol": "qp/0",
+     "principal": "arkin",
+     "surface": {
+      "kind": "watch",
+      "screen": [
+       198,
+       242
+      ],
+      "input": [
+       "touch",
+       "crown"
+      ]
+     }
+    }
+   },
+   "expect": [
+    {
+     "conn": "w",
+     "msg": {
+      "type": "welcome",
+      "protocol": "qp/0",
+      "doc": "doc-thyao",
+      "principal": "arkin",
+      "role": "owner",
+      "permissions": {
+       "read": true,
+       "write": true,
+       "propose": true,
+       "decide": true,
+       "attend": true,
+       "feed": false
+      },
+      "seq": 0,
+      "epoch": 0,
+      "profile": {
+       "depth": "sentence",
+       "series_data": false,
+       "max_points": 0,
+       "max_glyphs": 1,
+       "speech": false
+      },
+      "limits": {
+       "max_message_bytes": 1048576,
+       "max_ops": 64,
+       "max_bars": 10000,
+       "max_subscriptions": 32,
+       "max_string": 4096
+      }
+     }
+    }
+   ]
+  },
+  {
+   "send": {
+    "conn": "p",
+    "msg": {
+     "type": "hello",
+     "protocol": "qp/0",
+     "principal": "arkin",
+     "surface": {
+      "kind": "phone",
+      "screen": [
+       390,
+       844
+      ],
+      "input": [
+       "touch"
+      ]
+     }
+    }
+   },
+   "expect": [
+    {
+     "conn": "p",
+     "msg": {
+      "type": "welcome",
+      "protocol": "qp/0",
+      "doc": "doc-thyao",
+      "principal": "arkin",
+      "role": "owner",
+      "permissions": {
+       "read": true,
+       "write": true,
+       "propose": true,
+       "decide": true,
+       "attend": true,
+       "feed": false
+      },
+      "seq": 0,
+      "epoch": 0,
+      "profile": {
+       "depth": "capsule",
+       "series_data": true,
+       "max_points": 60,
+       "max_glyphs": 3,
+       "speech": false
+      },
+      "limits": {
+       "max_message_bytes": 1048576,
+       "max_ops": 64,
+       "max_bars": 10000,
+       "max_subscriptions": 32,
+       "max_string": 4096
+      }
+     }
+    }
+   ]
+  },
+  {
+   "send": {
+    "conn": "d",
+    "msg": {
+     "type": "hello",
+     "protocol": "qp/0",
+     "principal": "arkin",
+     "surface": {
+      "kind": "desktop",
+      "screen": [
+       1600,
+       1000
+      ],
+      "input": [
+       "pointer",
+       "keyboard"
+      ]
+     }
+    }
+   },
+   "expect": [
+    {
+     "conn": "d",
+     "msg": {
+      "type": "welcome",
+      "protocol": "qp/0",
+      "doc": "doc-thyao",
+      "principal": "arkin",
+      "role": "owner",
+      "permissions": {
+       "read": true,
+       "write": true,
+       "propose": true,
+       "decide": true,
+       "attend": true,
+       "feed": false
+      },
+      "seq": 0,
+      "epoch": 0,
+      "profile": {
+       "depth": "chart",
+       "series_data": true,
+       "max_points": 500,
+       "max_glyphs": 6,
+       "speech": false
+      },
+      "limits": {
+       "max_message_bytes": 1048576,
+       "max_ops": 64,
+       "max_bars": 10000,
+       "max_subscriptions": 32,
+       "max_string": 4096
+      }
+     }
+    }
+   ]
+  },
+  {
+   "send": {
+    "conn": "v",
+    "msg": {
+     "type": "hello",
+     "protocol": "qp/0",
+     "principal": "scout",
+     "surface": {
+      "kind": "voice",
+      "input": [
+       "voice"
+      ]
+     }
+    }
+   },
+   "expect": [
+    {
+     "conn": "v",
+     "msg": {
+      "type": "welcome",
+      "protocol": "qp/0",
+      "doc": "doc-thyao",
+      "principal": "scout",
+      "role": "proposer",
+      "permissions": {
+       "read": true,
+       "write": false,
+       "propose": true,
+       "decide": false,
+       "attend": true,
+       "feed": false
+      },
+      "seq": 0,
+      "epoch": 0,
+      "profile": {
+       "depth": "sentence",
+       "series_data": false,
+       "max_points": 0,
+       "max_glyphs": 0,
+       "speech": true
+      },
+      "limits": {
+       "max_message_bytes": 1048576,
+       "max_ops": 64,
+       "max_bars": 10000,
+       "max_subscriptions": 32,
+       "max_string": 4096
+      }
+     }
+    }
+   ]
+  },
+  {
+   "send": {
+    "conn": "w",
+    "msg": {
+     "type": "query",
+     "id": "q1",
+     "query": {
+      "kind": "present",
+      "finding": "fnd-overbought"
+     }
+    }
+   },
+   "expect": [
+    {
+     "conn": "w",
+     "msg": {
+      "type": "result",
+      "id": "q1",
+      "seq": 0,
+      "data": {
+       "kind": "presentation",
+       "presentation": {
+        "finding": "fnd-overbought",
+        "depth": "sentence",
+        "surface": "watch",
+        "text": "THYAO aşırı alımda: RSI 70'in üstünde.",
+        "state": "live"
+       }
+      }
+     }
+    }
+   ]
+  },
+  {
+   "send": {
+    "conn": "p",
+    "msg": {
+     "type": "query",
+     "id": "q2",
+     "query": {
+      "kind": "present",
+      "finding": "fnd-overbought"
+     }
+    }
+   },
+   "expect": [
+    {
+     "conn": "p",
+     "msg": {
+      "type": "result",
+      "id": "q2",
+      "seq": 0,
+      "data": {
+       "kind": "presentation",
+       "presentation": {
+        "finding": "fnd-overbought",
+        "depth": "capsule",
+        "surface": "phone",
+        "confidence": 0.65,
+        "glyphs": [
+         {
+          "kind": "direction",
+          "value": 0.6
+         },
+         {
+          "kind": "extremity",
+          "value": 0.8
+         },
+         {
+          "kind": "uncertainty",
+          "value": 0.35
+         }
+        ],
+        "spark": {
+         "series": "rsi14",
+         "from_bar": 140
+        }
+       }
+      }
+     }
+    }
+   ]
+  },
+  {
+   "send": {
+    "conn": "d",
+    "msg": {
+     "type": "query",
+     "id": "q3",
+     "query": {
+      "kind": "present",
+      "finding": "fnd-overbought"
+     }
+    }
+   },
+   "expect": [
+    {
+     "conn": "d",
+     "msg": {
+      "type": "result",
+      "id": "q3",
+      "seq": 0,
+      "data": {
+       "kind": "presentation",
+       "presentation": {
+        "finding": "fnd-overbought",
+        "depth": "chart",
+        "surface": "desktop",
+        "facts": [
+         {
+          "id": "fact-rsi-cross70"
+         }
+        ],
+        "view": "$any",
+        "spark": {
+         "series": "rsi14",
+         "from_bar": 0
+        }
+       }
+      }
+     }
+    }
+   ]
+  },
+  {
+   "send": {
+    "conn": "v",
+    "msg": {
+     "type": "query",
+     "id": "q4",
+     "query": {
+      "kind": "present"
+     }
+    }
+   },
+   "expect": [
+    {
+     "conn": "v",
+     "msg": {
+      "type": "result",
+      "id": "q4",
+      "seq": 0,
+      "data": {
+       "kind": "presentation",
+       "presentation": {
+        "finding": "fnd-overbought",
+        "depth": "sentence",
+        "surface": "voice",
+        "text": "THYAO aşırı alımda: RSI 70'in üstünde."
+       }
+      }
+     }
+    }
+   ],
+   "note": "G20: no finding given -> most important live finding"
+  },
+  {
+   "send": {
+    "conn": "d",
+    "msg": {
+     "type": "query",
+     "id": "q5",
+     "query": {
+      "kind": "present",
+      "finding": "fnd-overbought",
+      "surface": "watch"
+     }
+    }
+   },
+   "expect": [
+    {
+     "conn": "d",
+     "msg": {
+      "type": "result",
+      "id": "q5",
+      "seq": 0,
+      "data": {
+       "kind": "presentation",
+       "presentation": {
+        "depth": "sentence",
+        "surface": "watch"
+       }
+      }
+     }
+    }
+   ],
+   "note": "present for another surface"
+  }
+ ],
+ "final": {
+  "log_len": 0
+ }
+}

@@ -1,5 +1,5 @@
-//! `qp` command line: a thin shell over `qp-schema`, `qp-source`, `qp-compute` and
-//! `qp-render`.
+//! `qp` command line: a thin shell over `qp-schema`, `qp-source`, `qp-compute`,
+//! `qp-render`, `qp-session` and `qp-mcp`.
 //!
 //! It only parses arguments, reads/writes files and calls the libraries.
 
@@ -38,6 +38,48 @@ enum Command {
         /// Image height in pixels.
         #[arg(long, default_value_t = qp_render::DEFAULT_HEIGHT)]
         height: u32,
+    },
+    /// Run the protocol authority (`qp/0`) over stdin/stdout: one JSON line per message,
+    /// `{"conn":…,"msg":…}` in and out (docs/PROTOCOL.md §3).
+    Serve {
+        /// Session init (`SessionInit` JSON).
+        #[arg(long)]
+        init: PathBuf,
+        /// Directory that document paths in the init are relative to (and confined to).
+        #[arg(long, default_value = ".")]
+        root: PathBuf,
+        /// After the outputs of each input line, write `{"batch_end":true}`.
+        #[arg(long)]
+        batch_end: bool,
+    },
+    /// Run an MCP server over stdin/stdout (newline-delimited JSON-RPC, MCP stdio
+    /// transport), speaking `qp/0` as one principal (rounds/RD1/EMBEDDING.md §1).
+    Mcp {
+        /// Session init (`SessionInit` JSON).
+        #[arg(long)]
+        init: PathBuf,
+        /// Principal the adapter speaks as (sent in its `hello`).
+        #[arg(long)]
+        principal: String,
+        /// Surface kind: desktop, phone, watch, voice or headless.
+        #[arg(long, default_value = "headless")]
+        surface: String,
+        /// Directory that document paths in the init are relative to (and confined to).
+        #[arg(long, default_value = ".")]
+        root: PathBuf,
+    },
+    /// Run protocol conformance transcripts (docs/PROTOCOL.md §15).
+    Conform {
+        /// Transcript files or directories of `*.json` transcripts.
+        #[arg(required = true)]
+        inputs: Vec<PathBuf>,
+        /// Transport: `inproc` (default), `serve` (spawns `qp serve`) or `mcp` (one MCP
+        /// adapter per connection over an in-process session).
+        #[arg(long, default_value = "inproc")]
+        transport: String,
+        /// Repository root (paths in transcripts are relative to it).
+        #[arg(long, default_value = ".")]
+        root: PathBuf,
     },
 }
 
@@ -134,6 +176,22 @@ fn run(command: Command) -> Result<Outcome, String> {
             width,
             height,
         } => render(&input, &out, width, height),
+        Command::Serve {
+            init,
+            root,
+            batch_end,
+        } => serve(&init, &root, batch_end),
+        Command::Mcp {
+            init,
+            principal,
+            surface,
+            root,
+        } => mcp(&init, &principal, &surface, &root),
+        Command::Conform {
+            inputs,
+            transport,
+            root,
+        } => conform(&inputs, &transport, &root),
     }
 }
 
@@ -340,4 +398,105 @@ fn render(input: &Path, out: &Path, width: u32, height: u32) -> Result<Outcome, 
     let png = qp_render::render_png(&bars, width, height).map_err(|e| e.to_string())?;
     std::fs::write(out, png).map_err(|e| format!("cannot write {}: {e}", out.display()))?;
     Ok(Outcome::Ok)
+}
+
+fn serve(init: &Path, root: &Path, batch_end: bool) -> Result<Outcome, String> {
+    use std::io::{BufRead, Write};
+    let init: qp_schema::protocol::SessionInit = qp_session::read_json(init)?;
+    let mut session = qp_session::Session::new(init, root)?;
+    let stdin = std::io::stdin();
+    let stdout = std::io::stdout();
+    let mut out = stdout.lock();
+    for line in stdin.lock().lines() {
+        let line = line.map_err(|e| format!("stdin: {e}"))?;
+        if line.trim().is_empty() {
+            continue;
+        }
+        for o in session.handle_frame(&line) {
+            let text = serde_json::to_string(&o).map_err(|e| e.to_string())?;
+            writeln!(out, "{text}").map_err(|e| format!("stdout: {e}"))?;
+        }
+        if batch_end {
+            writeln!(out, "{{\"batch_end\":true}}").map_err(|e| format!("stdout: {e}"))?;
+        }
+        out.flush().map_err(|e| format!("stdout: {e}"))?;
+    }
+    Ok(Outcome::Ok)
+}
+
+fn mcp(init: &Path, principal: &str, surface: &str, root: &Path) -> Result<Outcome, String> {
+    use std::io::{BufRead, Write};
+    let init: qp_schema::protocol::SessionInit = qp_session::read_json(init)?;
+    let session = qp_session::Session::new(init, root)?;
+    let surface: qp_schema::protocol::Surface =
+        serde_json::from_value(serde_json::json!({ "kind": surface }))
+            .map_err(|e| format!("--surface `{surface}`: {e}"))?;
+    let config = qp_mcp::Config::new(principal, surface);
+    let mut server = qp_mcp::McpServer::connect(qp_mcp::Hub::shared(session), "mcp", config)
+        .map_err(|e| format!("hello refused: {e}"))?;
+    let stdin = std::io::stdin();
+    let stdout = std::io::stdout();
+    let mut out = stdout.lock();
+    for line in stdin.lock().lines() {
+        let line = line.map_err(|e| format!("stdin: {e}"))?;
+        if line.trim().is_empty() {
+            continue;
+        }
+        for o in server.handle_line(&line) {
+            writeln!(out, "{o}").map_err(|e| format!("stdout: {e}"))?;
+        }
+        out.flush().map_err(|e| format!("stdout: {e}"))?;
+    }
+    Ok(Outcome::Ok)
+}
+
+fn conform(inputs: &[PathBuf], transport: &str, root: &Path) -> Result<Outcome, String> {
+    use qp_session::conform::{collect_files, run_file, TransportKind};
+    let kind = match transport {
+        "inproc" => Some(TransportKind::InProc),
+        "serve" => Some(TransportKind::Serve(
+            std::env::current_exe().map_err(|e| format!("cannot locate qp: {e}"))?,
+        )),
+        "mcp" => None,
+        other => {
+            return Err(format!(
+                "unknown transport `{other}`; expected inproc, serve or mcp"
+            ))
+        }
+    };
+    let files = collect_files(inputs)?;
+    if files.is_empty() {
+        return Err("no transcripts found".to_owned());
+    }
+    let mut failed = 0;
+    for f in &files {
+        let (o, carried) = match &kind {
+            Some(k) => (run_file(f, root, k), String::new()),
+            None => {
+                let (o, s) = qp_mcp::conform::run_file(f, root);
+                let note = format!(
+                    " (mcp: {} hello, {} tool call(s), {} direct)",
+                    s.hellos, s.tool_calls, s.direct
+                );
+                (o, note)
+            }
+        };
+        match &o.failure {
+            None => println!("PASS {}{carried}", o.name),
+            Some(why) => {
+                failed += 1;
+                println!("FAIL {}: {why}", o.name);
+            }
+        }
+    }
+    println!(
+        "{} transcript(s), {} passed, {failed} failed ({transport})",
+        files.len(),
+        files.len() - failed
+    );
+    Ok(if failed == 0 {
+        Outcome::Ok
+    } else {
+        Outcome::Invalid
+    })
 }

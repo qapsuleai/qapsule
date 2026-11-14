@@ -1,0 +1,406 @@
+{
+ "name": "05-proposal-accept",
+ "description": "G08+G09: an agent without write permission writes a finding; it becomes a proposal; the owner lists and accepts it; provenance shows proposer and approver.",
+ "covers": [
+  "proposal",
+  "command",
+  "provenance",
+  "subscription"
+ ],
+ "init": "fixtures/protocol/init/thyao.json",
+ "steps": [
+  {
+   "send": {
+    "conn": "a",
+    "msg": {
+     "type": "hello",
+     "protocol": "qp/0",
+     "principal": "arkin",
+     "surface": {
+      "kind": "desktop"
+     }
+    }
+   },
+   "expect": [
+    {
+     "conn": "a",
+     "msg": {
+      "type": "welcome",
+      "protocol": "qp/0",
+      "doc": "doc-thyao",
+      "principal": "arkin",
+      "role": "owner",
+      "permissions": {
+       "read": true,
+       "write": true,
+       "propose": true,
+       "decide": true,
+       "attend": true,
+       "feed": false
+      },
+      "seq": 0,
+      "epoch": 0,
+      "profile": {
+       "depth": "chart",
+       "series_data": true,
+       "max_points": 500,
+       "max_glyphs": 6,
+       "speech": false
+      },
+      "limits": {
+       "max_message_bytes": 1048576,
+       "max_ops": 64,
+       "max_bars": 10000,
+       "max_subscriptions": 32,
+       "max_string": 4096
+      }
+     }
+    }
+   ]
+  },
+  {
+   "send": {
+    "conn": "s",
+    "msg": {
+     "type": "hello",
+     "protocol": "qp/0",
+     "principal": "scout",
+     "surface": {
+      "kind": "headless"
+     }
+    }
+   },
+   "expect": [
+    {
+     "conn": "s",
+     "msg": {
+      "type": "welcome",
+      "protocol": "qp/0",
+      "doc": "doc-thyao",
+      "principal": "scout",
+      "role": "proposer",
+      "permissions": {
+       "read": true,
+       "write": false,
+       "propose": true,
+       "decide": false,
+       "attend": true,
+       "feed": false
+      },
+      "seq": 0,
+      "epoch": 0,
+      "profile": {
+       "depth": "chart",
+       "series_data": true,
+       "max_points": 10000,
+       "max_glyphs": 6,
+       "speech": false
+      },
+      "limits": {
+       "max_message_bytes": 1048576,
+       "max_ops": 64,
+       "max_bars": 10000,
+       "max_subscriptions": 32,
+       "max_string": 4096
+      }
+     }
+    }
+   ]
+  },
+  {
+   "send": {
+    "conn": "a",
+    "msg": {
+     "type": "subscribe",
+     "id": "p",
+     "topic": {
+      "kind": "proposals"
+     }
+    }
+   },
+   "expect": [
+    {
+     "conn": "a",
+     "msg": {
+      "type": "ack",
+      "id": "p",
+      "status": "subscribed"
+     }
+    }
+   ]
+  },
+  {
+   "send": {
+    "conn": "s",
+    "msg": {
+     "type": "command",
+     "id": "c1",
+     "ops": [
+      {
+       "op": "add_finding",
+       "claim": "Momentum güçlü: RSI 70'i yukarı kesti.",
+       "facts": [
+        "fact-rsi-cross70"
+       ],
+       "confidence": 0.6,
+       "invalidation": {
+        "kind": "threshold",
+        "series": "rsi14",
+        "op": "cross_below",
+        "value": 70.0
+       },
+       "capsule": "Momentum güçlü"
+      }
+     ],
+     "reason": "RSI 70'i yukarı kesti"
+    }
+   },
+   "expect": [
+    {
+     "conn": "s",
+     "msg": {
+      "type": "ack",
+      "id": "c1",
+      "status": "proposed",
+      "seq": 1,
+      "proposal": "prop-1",
+      "created": [
+       "fnd-1-0",
+       "cap-1-1"
+      ]
+     }
+    },
+    {
+     "conn": "a",
+     "msg": {
+      "type": "notify",
+      "sub": "p",
+      "event": {
+       "kind": "proposal",
+       "proposal": "prop-1",
+       "state": "pending",
+       "author": "scout",
+       "seq": 1
+      }
+     }
+    }
+   ]
+  },
+  {
+   "send": {
+    "conn": "a",
+    "msg": {
+     "type": "query",
+     "id": "q1",
+     "query": {
+      "kind": "list",
+      "collection": "proposals",
+      "state": "pending"
+     }
+    }
+   },
+   "expect": [
+    {
+     "conn": "a",
+     "msg": {
+      "type": "result",
+      "id": "q1",
+      "seq": 1,
+      "data": {
+       "kind": "items",
+       "collection": "proposals",
+       "items": [
+        {
+         "id": "prop-1",
+         "state": "pending",
+         "reason": "RSI 70'i yukarı kesti",
+         "provenance": {
+          "author": {
+           "kind": "agent",
+           "name": "scout"
+          }
+         }
+        }
+       ]
+      }
+     }
+    }
+   ]
+  },
+  {
+   "send": {
+    "conn": "a",
+    "msg": {
+     "type": "query",
+     "id": "q2",
+     "query": {
+      "kind": "get",
+      "id": "fnd-1-0"
+     }
+    }
+   },
+   "expect": [
+    {
+     "conn": "a",
+     "msg": {
+      "type": "error",
+      "error": {
+       "code": "not_found"
+      },
+      "id": "q2"
+     }
+    }
+   ],
+   "note": "not in the document yet"
+  },
+  {
+   "send": {
+    "conn": "a",
+    "msg": {
+     "type": "command",
+     "id": "c2",
+     "ops": [
+      {
+       "op": "accept_proposal",
+       "proposal": "prop-1"
+      }
+     ]
+    }
+   },
+   "expect": [
+    {
+     "conn": "a",
+     "msg": {
+      "type": "ack",
+      "id": "c2",
+      "status": "applied",
+      "seq": 2,
+      "created": [
+       "fnd-1-0",
+       "cap-1-1"
+      ]
+     }
+    },
+    {
+     "conn": "a",
+     "msg": {
+      "type": "notify",
+      "sub": "p",
+      "event": {
+       "kind": "proposal",
+       "proposal": "prop-1",
+       "state": "accepted",
+       "author": "scout",
+       "seq": 2
+      }
+     }
+    }
+   ]
+  },
+  {
+   "send": {
+    "conn": "a",
+    "msg": {
+     "type": "query",
+     "id": "q3",
+     "query": {
+      "kind": "log",
+      "after_seq": 1
+     }
+    }
+   },
+   "expect": [
+    {
+     "conn": "a",
+     "msg": {
+      "type": "result",
+      "id": "q3",
+      "seq": 2,
+      "data": {
+       "kind": "log",
+       "entries": [
+        {
+         "seq": 2,
+         "author": "scout",
+         "approved_by": "arkin"
+        }
+       ]
+      }
+     }
+    }
+   ]
+  },
+  {
+   "send": {
+    "conn": "a",
+    "msg": {
+     "type": "command",
+     "id": "c3",
+     "ops": [
+      {
+       "op": "accept_proposal",
+       "proposal": "prop-1"
+      }
+     ]
+    }
+   },
+   "expect": [
+    {
+     "conn": "a",
+     "msg": {
+      "type": "error",
+      "error": {
+       "code": "not_pending"
+      },
+      "id": "c3"
+     }
+    }
+   ]
+  }
+ ],
+ "final": {
+  "log_len": 2,
+  "document": {
+   "findings": [
+    {
+     "id": "fnd-overbought"
+    },
+    {
+     "id": "fnd-1-0",
+     "provenance": {
+      "author": {
+       "kind": "agent",
+       "name": "scout"
+      },
+      "approved_by": {
+       "kind": "human",
+       "name": "arkin"
+      }
+     }
+    }
+   ],
+   "capsules": [
+    {
+     "id": "cap-overbought"
+    },
+    {
+     "id": "cap-1-1",
+     "finding": "fnd-1-0",
+     "state": "live",
+     "headline": "Momentum güçlü"
+    }
+   ],
+   "proposals": [
+    {
+     "id": "prop-1",
+     "state": "accepted",
+     "decided_by": {
+      "kind": "human",
+      "name": "arkin"
+     },
+     "decided_seq": 2
+    }
+   ]
+  }
+ }
+}

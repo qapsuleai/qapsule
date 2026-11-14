@@ -1,0 +1,13 @@
+{
+ "type": "subscribe",
+ "id": "s1",
+ "topic": {
+  "kind": "condition",
+  "condition": {
+   "kind": "compare",
+   "left": "sma20",
+   "op": "cross_above",
+   "right": "sma50"
+  }
+ }
+}

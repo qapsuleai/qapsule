@@ -1,0 +1,1 @@
+attempt1: guessed fact id from spec example -> not_found. attempt2: proposed (prop-5), as proposer; invalidation series osc-a. Spec ids misleading vs real doc ids.

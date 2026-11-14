@@ -47,6 +47,7 @@ fn serialized_command_is_valid() {
             },
             at: 1_794_646_800_000,
             based_on: vec!["fnd-thyao-rsi-overbought".into()],
+            approved_by: None,
         },
         op: Op::SetCapsuleState {
             capsule: "cap-thyao-rsi-overbought".into(),

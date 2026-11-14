@@ -1,0 +1,2 @@
+{"conn":"s","msg":{"type":"hello","protocol":"qp/0","principal":"scout","surface":{"kind":"headless"}}}
+{"conn":"s","msg":{"type":"query","id":"q1","query":{"kind":"log","within_ms":1800000}}}

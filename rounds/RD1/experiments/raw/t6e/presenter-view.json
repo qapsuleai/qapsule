@@ -1,0 +1,39 @@
+{
+  "id": "view-1-0",
+  "layers": [
+    {
+      "encoding": {},
+      "mark": "candle",
+      "panel": 0,
+      "series": "px"
+    },
+    {
+      "encoding": {},
+      "mark": "line",
+      "panel": 1,
+      "series": "rsi14"
+    },
+    {
+      "encoding": {
+        "y": "70"
+      },
+      "mark": "rule",
+      "panel": 1
+    }
+  ],
+  "x": {
+    "domain": [
+      1750291200000.0,
+      1759881600000.0
+    ],
+    "kind": "time"
+  },
+  "y": [
+    {
+      "kind": "linear"
+    },
+    {
+      "kind": "linear"
+    }
+  ]
+}

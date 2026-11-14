@@ -1,0 +1,1 @@
+{"conn":"a","msg":{"type":"ack","id":"c1","status":"applied","seq":1,"created":["view-1-0"]}}

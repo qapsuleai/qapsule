@@ -1,0 +1,4 @@
+{"conn":"a","msg":{"type":"hello","protocol":"qp/0","principal":"scout","surface":{"kind":"headless"}}}
+{"conn":"a","msg":{"type":"query","id":"q3","query":{"kind":"list","collection":"series"}}}
+{"conn":"a","msg":{"type":"query","id":"q4","query":{"kind":"list","collection":"views"}}}
+{"conn":"a","msg":{"type":"command","id":"c1","ops":[{"op":"add_narrative","about":"fnd-9e1","steps":[{"at_ms":0,"target":{"view":"main","panel":0,"series":"px"},"say":"Fiyat yükseldi."},{"at_ms":4000,"target":{"view":"main","panel":1,"series":"osc-a"},"say":"RSI aşırı alım bölgesinde."},{"at_ms":8000,"target":{"view":"main","panel":0,"series":"bb20"},"say":"Fiyat Bollinger üst bandına yakın."}]}]}}

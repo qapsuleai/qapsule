@@ -1,0 +1,2 @@
+a1: fnd-overbought -> not_found (real id fnd-9e1).
+a2: subscribe finding fnd-9e1 -> subscribed; notify finding_state invalidated seq 6 came right away (so the finding is/becomes invalidated in this run). Unclear whether the existing state was already invalid or the harness triggers it.

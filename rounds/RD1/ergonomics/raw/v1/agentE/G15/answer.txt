@@ -1,0 +1,1 @@
+150. barda (0 tabanlı sıra, t=1753920000000) THYAO açılış 115,97, yüksek 118,24, düşük 115,76, kapanış 117,66, hacim 2.081.564; göstergeler: RSI14 72,84 (aşırı alım bölgesi), EMA50 108,77, MACD 2,48 (sinyal 2,23, histogram 0,25), Bollinger üst 117,52 / orta 112,58 / alt 107,63.

@@ -1,0 +1,12 @@
+{
+ "type": "query",
+ "id": "q1",
+ "query": {
+  "kind": "study",
+  "series": "rsi14",
+  "range": {
+   "last": 50
+  },
+  "reduce": "max"
+ }
+}

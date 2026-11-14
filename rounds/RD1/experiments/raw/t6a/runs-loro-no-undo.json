@@ -1,0 +1,434 @@
+[
+  {
+    "result": {
+      "anomalies": {
+        "dangling_layer": 0,
+        "dangling_ref": 0,
+        "decision_mismatch": 0,
+        "invalid_item": 0,
+        "orphan": 0,
+        "stale_decision": 1
+      },
+      "anomaly_total": 1,
+      "applied": 94,
+      "applied_after_retry": 0,
+      "concurrency": {
+        "concurrent_decide_vs_update": 2,
+        "concurrent_same_field_pairs": 1,
+        "concurrent_same_id_creates": 0
+      },
+      "converged": true,
+      "extra": {
+        "relay_sync_bytes": 1672
+      },
+      "final_findings": 14,
+      "final_layers": 15,
+      "final_series": 7,
+      "final_snap_sha": "9577c5579f3e25d100056e858f69216672cab63c7bc3269eb6ac1b5b4fa6eb3c",
+      "history_bytes": 28787,
+      "history_gzip": 15921,
+      "history_sha": "ae70aecee6050dd3475188db9f73704bbe18611b926381eedf44914b875a6960",
+      "idle": 3,
+      "locally_invalid": 3,
+      "model": "C-loro",
+      "ops": 100,
+      "reconnect": {
+        "applied": 10,
+        "applied_after_retry": 0,
+        "bytes_down": 2220,
+        "bytes_up": 1682,
+        "codes": {},
+        "details": [
+          "all changes merged silently; no errors"
+        ],
+        "queued": 10,
+        "refused": 0,
+        "round_trips": 2,
+        "time_us": 0.0
+      },
+      "refused": 0,
+      "refused_codes": {},
+      "replicate_time_us": 6468.879,
+      "replies_total": 0,
+      "state_bytes": 13856,
+      "undo": {
+        "applied": 0,
+        "attempted": 5,
+        "clobbered_others": 0,
+        "nothing_or_unsupported": 5,
+        "refused_conflict": 0
+      },
+      "window": 10,
+      "wire_down_mean": 578.1933333333334,
+      "wire_down_median": 528,
+      "wire_down_total": 86729,
+      "wire_up_mean": 524.8191489361702,
+      "wire_up_median": 450,
+      "wire_up_total": 49333
+    },
+    "times_us": [
+      5592.294,
+      6468.879,
+      12243.207
+    ]
+  },
+  {
+    "result": {
+      "anomalies": {
+        "dangling_layer": 1,
+        "dangling_ref": 0,
+        "decision_mismatch": 0,
+        "invalid_item": 0,
+        "orphan": 1,
+        "stale_decision": 1
+      },
+      "anomaly_total": 3,
+      "applied": 918,
+      "applied_after_retry": 0,
+      "concurrency": {
+        "concurrent_decide_vs_update": 2,
+        "concurrent_same_field_pairs": 14,
+        "concurrent_same_id_creates": 0
+      },
+      "converged": true,
+      "extra": {
+        "relay_sync_bytes": 976
+      },
+      "final_findings": 65,
+      "final_layers": 92,
+      "final_series": 40,
+      "final_snap_sha": "beb2278b3a1461ee99dde30c2d2babcc9e2dca3d543e92dc5eb9ba314e8219f4",
+      "history_bytes": 88433,
+      "history_gzip": 60750,
+      "history_sha": "0c456fa9bbe71b1c7d34970e64cc6ad4999b89807d46aaa5030668d13286e1e6",
+      "idle": 13,
+      "locally_invalid": 69,
+      "model": "C-loro",
+      "ops": 1000,
+      "reconnect": {
+        "applied": 10,
+        "applied_after_retry": 0,
+        "bytes_down": 2292,
+        "bytes_up": 988,
+        "codes": {},
+        "details": [
+          "all changes merged silently; no errors"
+        ],
+        "queued": 10,
+        "refused": 0,
+        "round_trips": 2,
+        "time_us": 0.0
+      },
+      "refused": 0,
+      "refused_codes": {},
+      "replicate_time_us": 83448.87199999999,
+      "replies_total": 0,
+      "state_bytes": 37462,
+      "undo": {
+        "applied": 0,
+        "attempted": 32,
+        "clobbered_others": 0,
+        "nothing_or_unsupported": 32,
+        "refused_conflict": 0
+      },
+      "window": 10,
+      "wire_down_mean": 551.0622222222222,
+      "wire_down_median": 531,
+      "wire_down_total": 991912,
+      "wire_up_mean": 546.3398692810457,
+      "wire_up_median": 530,
+      "wire_up_total": 501540
+    },
+    "times_us": [
+      83257.046,
+      83448.87199999999,
+      87321.72
+    ]
+  },
+  {
+    "result": {
+      "anomalies": {
+        "dangling_layer": 1,
+        "dangling_ref": 1,
+        "decision_mismatch": 0,
+        "invalid_item": 0,
+        "orphan": 1,
+        "stale_decision": 4
+      },
+      "anomaly_total": 7,
+      "applied": 914,
+      "applied_after_retry": 0,
+      "concurrency": {
+        "concurrent_decide_vs_update": 10,
+        "concurrent_same_field_pairs": 110,
+        "concurrent_same_id_creates": 2
+      },
+      "converged": true,
+      "extra": {
+        "relay_sync_bytes": 6392
+      },
+      "final_findings": 65,
+      "final_layers": 97,
+      "final_series": 40,
+      "final_snap_sha": "1a3871b9106fc810dffba3b368e9be5eb876f9aea7e2dcdb22df2d71335da4c5",
+      "history_bytes": 87102,
+      "history_gzip": 59314,
+      "history_sha": "9b6484942189bb00d20d8b1e3f9cc39776f98aaff02634240cac57ec7b2ef863",
+      "idle": 15,
+      "locally_invalid": 71,
+      "model": "C-loro",
+      "ops": 1000,
+      "reconnect": {
+        "applied": 98,
+        "applied_after_retry": 0,
+        "bytes_down": 15602,
+        "bytes_up": 6404,
+        "codes": {},
+        "details": [
+          "all changes merged silently; no errors"
+        ],
+        "queued": 98,
+        "refused": 0,
+        "round_trips": 2,
+        "time_us": 0.0
+      },
+      "refused": 0,
+      "refused_codes": {},
+      "replicate_time_us": 62336.08,
+      "replies_total": 0,
+      "state_bytes": 37635,
+      "undo": {
+        "applied": 0,
+        "attempted": 32,
+        "clobbered_others": 0,
+        "nothing_or_unsupported": 32,
+        "refused_conflict": 0
+      },
+      "window": 100,
+      "wire_down_mean": 546.3289564616448,
+      "wire_down_median": 514,
+      "wire_down_total": 790538,
+      "wire_up_mean": 485.57877461706784,
+      "wire_up_median": 442,
+      "wire_up_total": 443819
+    },
+    "times_us": [
+      61472.551,
+      62336.08,
+      62777.893000000004
+    ]
+  },
+  {
+    "result": {
+      "anomalies": {
+        "dangling_layer": 0,
+        "dangling_ref": 2,
+        "decision_mismatch": 0,
+        "invalid_item": 0,
+        "orphan": 2,
+        "stale_decision": 6
+      },
+      "anomaly_total": 10,
+      "applied": 8996,
+      "applied_after_retry": 0,
+      "concurrency": {
+        "concurrent_decide_vs_update": 11,
+        "concurrent_same_field_pairs": 56,
+        "concurrent_same_id_creates": 1
+      },
+      "converged": true,
+      "extra": {
+        "relay_sync_bytes": 1203
+      },
+      "final_findings": 487,
+      "final_layers": 564,
+      "final_series": 157,
+      "final_snap_sha": "9a2395012216232686a0171eaa401ad38887212a4582924551ffe879d74df813",
+      "history_bytes": 685906,
+      "history_gzip": 506645,
+      "history_sha": "38d9a314e4bc298b9c844f528f52007b16cd9f00b2079410a4238edb786a6a67",
+      "idle": 39,
+      "locally_invalid": 965,
+      "model": "C-loro",
+      "ops": 10000,
+      "reconnect": {
+        "applied": 9,
+        "applied_after_retry": 0,
+        "bytes_down": 2041,
+        "bytes_up": 1215,
+        "codes": {},
+        "details": [
+          "all changes merged silently; no errors"
+        ],
+        "queued": 9,
+        "refused": 0,
+        "round_trips": 2,
+        "time_us": 0.0
+      },
+      "refused": 0,
+      "refused_codes": {},
+      "replicate_time_us": 6393499.216,
+      "replies_total": 0,
+      "state_bytes": 249915,
+      "undo": {
+        "applied": 0,
+        "attempted": 327,
+        "clobbered_others": 0,
+        "nothing_or_unsupported": 327,
+        "refused_conflict": 0
+      },
+      "window": 10,
+      "wire_down_mean": 545.0638226776565,
+      "wire_down_median": 531,
+      "wire_down_total": 9787166,
+      "wire_up_mean": 544.5962650066697,
+      "wire_up_median": 531,
+      "wire_up_total": 4899188
+    },
+    "times_us": [
+      6393499.216
+    ]
+  },
+  {
+    "result": {
+      "anomalies": {
+        "dangling_layer": 2,
+        "dangling_ref": 3,
+        "decision_mismatch": 0,
+        "invalid_item": 0,
+        "orphan": 2,
+        "stale_decision": 11
+      },
+      "anomaly_total": 18,
+      "applied": 8989,
+      "applied_after_retry": 0,
+      "concurrency": {
+        "concurrent_decide_vs_update": 22,
+        "concurrent_same_field_pairs": 178,
+        "concurrent_same_id_creates": 0
+      },
+      "converged": true,
+      "extra": {
+        "relay_sync_bytes": 7234
+      },
+      "final_findings": 487,
+      "final_layers": 568,
+      "final_series": 153,
+      "final_snap_sha": "1a4c7e7c10b37b59d74b41bd2a23e3b9f2dd2a1be8ff0a35c76e1366e3efd753",
+      "history_bytes": 683139,
+      "history_gzip": 505010,
+      "history_sha": "15c6c6bb708f13bb0f5530547b894089047fdb0818778c1063418702118261ae",
+      "idle": 41,
+      "locally_invalid": 970,
+      "model": "C-loro",
+      "ops": 10000,
+      "reconnect": {
+        "applied": 92,
+        "applied_after_retry": 0,
+        "bytes_down": 15985,
+        "bytes_up": 7246,
+        "codes": {},
+        "details": [
+          "all changes merged silently; no errors"
+        ],
+        "queued": 92,
+        "refused": 0,
+        "round_trips": 2,
+        "time_us": 0.0
+      },
+      "refused": 0,
+      "refused_codes": {},
+      "replicate_time_us": 6119420.571,
+      "replies_total": 0,
+      "state_bytes": 250214,
+      "undo": {
+        "applied": 0,
+        "attempted": 327,
+        "clobbered_others": 0,
+        "nothing_or_unsupported": 327,
+        "refused_conflict": 0
+      },
+      "window": 100,
+      "wire_down_mean": 545.0197648662464,
+      "wire_down_median": 528,
+      "wire_down_total": 9596163,
+      "wire_up_mean": 539.0497274446545,
+      "wire_up_median": 523,
+      "wire_up_total": 4845518
+    },
+    "times_us": [
+      6119420.571
+    ]
+  },
+  {
+    "result": {
+      "anomalies": {
+        "dangling_layer": 8,
+        "dangling_ref": 19,
+        "decision_mismatch": 0,
+        "invalid_item": 0,
+        "orphan": 4,
+        "stale_decision": 19
+      },
+      "anomaly_total": 50,
+      "applied": 8936,
+      "applied_after_retry": 0,
+      "concurrency": {
+        "concurrent_decide_vs_update": 70,
+        "concurrent_same_field_pairs": 10390,
+        "concurrent_same_id_creates": 10
+      },
+      "converged": true,
+      "extra": {
+        "relay_sync_bytes": 62801
+      },
+      "final_findings": 489,
+      "final_layers": 604,
+      "final_series": 162,
+      "final_snap_sha": "18982cfda11aa771893d83daae46329cdf006ba19e661c60cf30378aafcbc400",
+      "history_bytes": 663371,
+      "history_gzip": 489061,
+      "history_sha": "dc612ac20b1032fa36c9456d4af96041447f11ea3ffb5634e1353849f4f7e2a8",
+      "idle": 100,
+      "locally_invalid": 964,
+      "model": "C-loro",
+      "ops": 10000,
+      "reconnect": {
+        "applied": 894,
+        "applied_after_retry": 0,
+        "bytes_down": 148210,
+        "bytes_up": 62813,
+        "codes": {},
+        "details": [
+          "all changes merged silently; no errors"
+        ],
+        "queued": 894,
+        "refused": 0,
+        "round_trips": 2,
+        "time_us": 0.0
+      },
+      "refused": 0,
+      "refused_codes": {},
+      "replicate_time_us": 4247625.766,
+      "replies_total": 0,
+      "state_bytes": 249336,
+      "undo": {
+        "applied": 0,
+        "attempted": 327,
+        "clobbered_others": 0,
+        "nothing_or_unsupported": 327,
+        "refused_conflict": 0
+      },
+      "window": 1000,
+      "wire_down_mean": 543.1733156646674,
+      "wire_down_median": 504,
+      "wire_down_total": 7788019,
+      "wire_up_mean": 484.9563563115488,
+      "wire_up_median": 443,
+      "wire_up_total": 4333570
+    },
+    "times_us": [
+      4247625.766
+    ]
+  }
+]

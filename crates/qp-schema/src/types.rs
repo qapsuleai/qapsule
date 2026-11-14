@@ -177,7 +177,7 @@ pub enum SeriesData {
 #[serde(tag = "kind", rename_all = "snake_case", deny_unknown_fields)]
 pub enum SeriesSource {
     /// Data is embedded in the series itself (`data`).
-    Inline,
+    Inline {},
     /// A local file.
     File {
         /// Path to the file.
@@ -291,6 +291,10 @@ pub struct Provenance {
     /// Ids of the items this one is based on.
     #[serde(default)]
     pub based_on: Vec<String>,
+    /// Who approved it, when it entered the document through an accepted proposal
+    /// (protocol: `accept_proposal`). Absent for direct writes.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub approved_by: Option<Author>,
 }
 
 // ---------------------------------------------------------------------------
@@ -350,6 +354,18 @@ pub enum Condition {
         op: CompareOp,
         /// Constant to compare against.
         value: f64,
+    },
+    /// One series compared against another, both at the last bar (and the bar before,
+    /// for crossings). E.g. SMA(20) crosses above SMA(50):
+    /// `{"kind":"compare","left":"sma20","op":"cross_above","right":"sma50"}`.
+    /// For a bar series the compared value is the close.
+    Compare {
+        /// Left series id.
+        left: String,
+        /// Comparison.
+        op: CompareOp,
+        /// Right series id.
+        right: String,
     },
     /// Free text; evaluated by a person.
     Text {
@@ -653,6 +669,12 @@ pub struct Document {
     /// Ledger.
     #[serde(default)]
     pub ledger: Ledger,
+    /// Narration timelines (protocol v0).
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub narratives: Vec<crate::protocol::Narrative>,
+    /// Proposals: writes waiting for approval, and their outcome (protocol v0).
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub proposals: Vec<crate::protocol::Proposal>,
 }
 
 /// The operation a command performs on a document.

@@ -1,0 +1,1 @@
+Aşırı alım bulgusuna abone oldum; geçersiz olursa bildirim gelecek. Not: abonelikten hemen sonra bulgunun zaten geçersizleştiği bildirimi (seq 6) geldi.

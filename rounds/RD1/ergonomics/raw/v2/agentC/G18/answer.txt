@@ -1,0 +1,1 @@
+Abonelik kuruldu; bulgu geçersiz hale gelirse bildirim gelecek. (Bu çalıştırmada bulgu zaten seq 6'da geçersizleşti ve bildirim alındı.)

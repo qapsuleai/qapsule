@@ -1,0 +1,2 @@
+attempt1: list pending proposals -> prop-3 (could not know id beforehand in a one-shot file).
+attempt2: accept_proposal prop-3 -> applied. Spec examples used prop-6 style ids; fine.

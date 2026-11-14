@@ -72,6 +72,7 @@ fn command_roundtrips() {
             },
             at: 1_794_646_800_000,
             based_on: vec![],
+            approved_by: None,
         },
         op: Op::PutSeries {
             series: Series {

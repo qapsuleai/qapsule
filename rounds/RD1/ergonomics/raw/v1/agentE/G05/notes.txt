@@ -1,0 +1,1 @@
+attempt1: queries + add_study sma20/sma50 (inputs px, panel 0) + add_intent cross_above trigger; applied, seq 5. Spec example almost exactly fits; note 'px' as bar series id had to be guessed (confirmed by list). Notify delivery to user is only via intent_triggered/subscription - unclear who is notified.

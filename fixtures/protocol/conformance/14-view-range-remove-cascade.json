@@ -1,0 +1,336 @@
+{
+ "name": "14-view-range-remove-cascade",
+ "description": "G07, G16: persistent view range by bars; removing a series removes its layers (highest index first) then the series; removing a series others depend on is refused.",
+ "covers": [
+  "command",
+  "change",
+  "error"
+ ],
+ "init": "fixtures/protocol/init/thyao.json",
+ "steps": [
+  {
+   "send": {
+    "conn": "a",
+    "msg": {
+     "type": "hello",
+     "protocol": "qp/0",
+     "principal": "arkin",
+     "surface": {
+      "kind": "desktop"
+     }
+    }
+   },
+   "expect": [
+    {
+     "conn": "a",
+     "msg": {
+      "type": "welcome",
+      "protocol": "qp/0",
+      "doc": "doc-thyao",
+      "principal": "arkin",
+      "role": "owner",
+      "permissions": {
+       "read": true,
+       "write": true,
+       "propose": true,
+       "decide": true,
+       "attend": true,
+       "feed": false
+      },
+      "seq": 0,
+      "epoch": 0,
+      "profile": {
+       "depth": "chart",
+       "series_data": true,
+       "max_points": 500,
+       "max_glyphs": 6,
+       "speech": false
+      },
+      "limits": {
+       "max_message_bytes": 1048576,
+       "max_ops": 64,
+       "max_bars": 10000,
+       "max_subscriptions": 32,
+       "max_string": 4096
+      }
+     }
+    }
+   ]
+  },
+  {
+   "send": {
+    "conn": "s",
+    "msg": {
+     "type": "hello",
+     "protocol": "qp/0",
+     "principal": "scout",
+     "surface": {
+      "kind": "headless"
+     }
+    }
+   },
+   "expect": [
+    {
+     "conn": "s",
+     "msg": {
+      "type": "welcome",
+      "protocol": "qp/0",
+      "doc": "doc-thyao",
+      "principal": "scout",
+      "role": "proposer",
+      "permissions": {
+       "read": true,
+       "write": false,
+       "propose": true,
+       "decide": false,
+       "attend": true,
+       "feed": false
+      },
+      "seq": 0,
+      "epoch": 0,
+      "profile": {
+       "depth": "chart",
+       "series_data": true,
+       "max_points": 10000,
+       "max_glyphs": 6,
+       "speech": false
+      },
+      "limits": {
+       "max_message_bytes": 1048576,
+       "max_ops": 64,
+       "max_bars": 10000,
+       "max_subscriptions": 32,
+       "max_string": 4096
+      }
+     }
+    }
+   ]
+  },
+  {
+   "send": {
+    "conn": "s",
+    "msg": {
+     "type": "subscribe",
+     "id": "c",
+     "topic": {
+      "kind": "changes",
+      "ids": [
+       "main"
+      ]
+     }
+    }
+   },
+   "expect": [
+    {
+     "conn": "s",
+     "msg": {
+      "type": "ack",
+      "id": "c",
+      "status": "subscribed"
+     }
+    }
+   ]
+  },
+  {
+   "send": {
+    "conn": "a",
+    "msg": {
+     "type": "command",
+     "id": "c1",
+     "ops": [
+      {
+       "op": "set_view_range",
+       "view": "main",
+       "from_bar": 140,
+       "to_bar": 199
+      }
+     ]
+    }
+   },
+   "expect": [
+    {
+     "conn": "a",
+     "msg": {
+      "type": "ack",
+      "id": "c1",
+      "status": "applied",
+      "seq": 1
+     }
+    },
+    {
+     "conn": "s",
+     "msg": {
+      "type": "notify",
+      "sub": "c",
+      "event": {
+       "kind": "change",
+       "seq": 1,
+       "author": "arkin",
+       "changes": [
+        {
+         "op": "set_x_domain",
+         "view": "main",
+         "domain": [
+          1752710400000.0,
+          1759881600000.0
+         ]
+        }
+       ]
+      }
+     }
+    }
+   ]
+  },
+  {
+   "send": {
+    "conn": "a",
+    "msg": {
+     "type": "command",
+     "id": "c2",
+     "ops": [
+      {
+       "op": "remove",
+       "id": "bb20"
+      }
+     ]
+    }
+   },
+   "expect": [
+    {
+     "conn": "a",
+     "msg": {
+      "type": "ack",
+      "id": "c2",
+      "status": "applied",
+      "seq": 2
+     }
+    },
+    {
+     "conn": "s",
+     "msg": {
+      "type": "notify",
+      "sub": "c",
+      "event": {
+       "kind": "change",
+       "seq": 2,
+       "changes": [
+        {
+         "op": "delete_layer",
+         "view": "main",
+         "index": 1
+        },
+        {
+         "op": "delete",
+         "id": "bb20"
+        }
+       ]
+      }
+     }
+    }
+   ]
+  },
+  {
+   "send": {
+    "conn": "a",
+    "msg": {
+     "type": "command",
+     "id": "c3",
+     "ops": [
+      {
+       "op": "remove",
+       "id": "px"
+      }
+     ]
+    }
+   },
+   "expect": [
+    {
+     "conn": "a",
+     "msg": {
+      "type": "error",
+      "error": {
+       "code": "in_use",
+       "expected": [
+        "macd",
+        "rsi14"
+       ]
+      },
+      "id": "c3"
+     }
+    }
+   ]
+  },
+  {
+   "send": {
+    "conn": "a",
+    "msg": {
+     "type": "command",
+     "id": "c4",
+     "ops": [
+      {
+       "op": "set_view_range",
+       "view": "main",
+       "from_bar": 150,
+       "to_bar": 400
+      }
+     ]
+    }
+   },
+   "expect": [
+    {
+     "conn": "a",
+     "msg": {
+      "type": "error",
+      "error": {
+       "code": "invalid",
+       "path": "/ops/0/to_bar"
+      },
+      "id": "c4"
+     }
+    }
+   ]
+  }
+ ],
+ "final": {
+  "log_len": 2,
+  "document": {
+   "series": [
+    {
+     "id": "px"
+    },
+    {
+     "id": "rsi14"
+    },
+    {
+     "id": "macd"
+    }
+   ],
+   "views": [
+    {
+     "id": "main",
+     "x": {
+      "kind": "time",
+      "domain": [
+       1752710400000.0,
+       1759881600000.0
+      ]
+     },
+     "layers": [
+      {
+       "series": "px"
+      },
+      {
+       "series": "rsi14"
+      },
+      {
+       "mark": "rule"
+      },
+      {
+       "series": "macd"
+      }
+     ]
+    }
+   ]
+  }
+ }
+}

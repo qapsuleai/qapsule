@@ -1,0 +1,7 @@
+{
+ "op": "set_params",
+ "series": "rsi14",
+ "params": {
+  "period": "14"
+ }
+}

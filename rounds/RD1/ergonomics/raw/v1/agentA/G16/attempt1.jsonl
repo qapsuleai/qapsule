@@ -1,0 +1,4 @@
+{"conn":"a","msg":{"type":"hello","protocol":"qp/0","principal":"arkin","surface":{"kind":"desktop"}}}
+{"conn":"a","msg":{"type":"query","id":"q1","query":{"kind":"list","collection":"series"}}}
+{"conn":"a","msg":{"type":"command","id":"c1","ops":[{"op":"remove","id":"bb20"}]}}
+{"conn":"a","msg":{"type":"query","id":"q2","query":{"kind":"list","collection":"series"}}}

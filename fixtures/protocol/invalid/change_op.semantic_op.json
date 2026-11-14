@@ -1,0 +1,7 @@
+{
+ "op": "add_study",
+ "study": "rsi",
+ "inputs": [
+  "px"
+ ]
+}

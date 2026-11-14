@@ -1,0 +1,2 @@
+attempt1: used series px from spec examples -> not_found; list series showed thy-d (bar series), osc-a, trend-m, band-b, ema50.
+attempt2: at thy-d bar 150 -> OHLCV + studies. Spec ambiguity: bar series id examples ("px") misleading; trend-m (macd) absent from studies at bar 150 (unexplained).

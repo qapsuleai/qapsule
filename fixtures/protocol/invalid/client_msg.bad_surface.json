@@ -1,0 +1,8 @@
+{
+ "type": "hello",
+ "protocol": "qp/0",
+ "principal": "arkin",
+ "surface": {
+  "kind": "fridge"
+ }
+}

@@ -1,0 +1,4 @@
+{"conn":"c","msg":{"type":"hello","protocol":"qp/0","principal":"scout","surface":{"kind":"headless"}}}
+{"conn":"c","msg":{"type":"query","id":"q1","query":{"kind":"get","id":"fact-rsi-cross70"}}}
+{"conn":"c","msg":{"type":"query","id":"q2","query":{"kind":"study","series":"rsi14","range":{"from_bar":145,"to_bar":155}}}}
+{"conn":"c","msg":{"type":"query","id":"q3","query":{"kind":"study","series":"rsi14","reduce":"count"}}}

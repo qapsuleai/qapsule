@@ -1,0 +1,1 @@
+Bekleyen tek öneri prop-3 idi (scout: «Hacim son 20 günün ortalamasının üstünde», güven 0.5); kabul ettim, fnd-3-0 bulgusu ve cap-3-1 kapsülü oluştu.

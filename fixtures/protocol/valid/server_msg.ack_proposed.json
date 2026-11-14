@@ -1,0 +1,11 @@
+{
+ "type": "ack",
+ "id": "c7",
+ "status": "proposed",
+ "seq": 6,
+ "proposal": "prop-6",
+ "created": [
+  "fnd-6-0",
+  "cap-6-1"
+ ]
+}

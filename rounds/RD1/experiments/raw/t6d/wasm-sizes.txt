@@ -1,0 +1,2 @@
+3994941 target/wasm32-wasip1/release/t6d-handover.wasm
+2596074 target/wasm32-wasip1/wasm/t6d-handover.wasm

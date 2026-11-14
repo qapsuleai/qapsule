@@ -1,0 +1,296 @@
+{
+ "name": "t-intent-trigger",
+ "description": "An intent fires once when the feed pushes the close above its threshold; subscribers in connection order.",
+ "covers": [
+  "intents",
+  "live"
+ ],
+ "init": "fixtures/protocol/init/thyao.json",
+ "steps": [
+  {
+   "send": {
+    "conn": "a",
+    "msg": {
+     "type": "hello",
+     "protocol": "qp/0",
+     "principal": "arkin",
+     "surface": {
+      "kind": "desktop"
+     }
+    }
+   },
+   "expect": [
+    {
+     "conn": "a",
+     "msg": {
+      "type": "welcome",
+      "principal": "arkin"
+     }
+    }
+   ]
+  },
+  {
+   "send": {
+    "conn": "s",
+    "msg": {
+     "type": "hello",
+     "protocol": "qp/0",
+     "principal": "scout",
+     "surface": {
+      "kind": "headless"
+     }
+    }
+   },
+   "expect": [
+    {
+     "conn": "s",
+     "msg": {
+      "type": "welcome",
+      "principal": "scout"
+     }
+    }
+   ]
+  },
+  {
+   "send": {
+    "conn": "f",
+    "msg": {
+     "type": "hello",
+     "protocol": "qp/0",
+     "principal": "feed",
+     "surface": {
+      "kind": "headless"
+     }
+    }
+   },
+   "expect": [
+    {
+     "conn": "f",
+     "msg": {
+      "type": "welcome",
+      "principal": "feed"
+     }
+    }
+   ]
+  },
+  {
+   "send": {
+    "conn": "a",
+    "msg": {
+     "type": "command",
+     "id": "c1",
+     "ops": [
+      {
+       "op": "add_intent",
+       "id": "up",
+       "text": "close > 130",
+       "trigger": {
+        "kind": "threshold",
+        "series": "px",
+        "op": "gt",
+        "value": 130.0
+       }
+      }
+     ]
+    }
+   },
+   "expect": [
+    {
+     "conn": "a",
+     "msg": {
+      "type": "ack",
+      "id": "c1",
+      "status": "applied",
+      "seq": 1,
+      "created": [
+       "up"
+      ]
+     }
+    }
+   ]
+  },
+  {
+   "send": {
+    "conn": "a",
+    "msg": {
+     "type": "subscribe",
+     "id": "ia",
+     "topic": {
+      "kind": "intents"
+     }
+    }
+   },
+   "expect": [
+    {
+     "conn": "a",
+     "msg": {
+      "type": "ack",
+      "id": "ia",
+      "status": "subscribed"
+     }
+    }
+   ]
+  },
+  {
+   "send": {
+    "conn": "s",
+    "msg": {
+     "type": "subscribe",
+     "id": "is",
+     "topic": {
+      "kind": "intents"
+     }
+    }
+   },
+   "expect": [
+    {
+     "conn": "s",
+     "msg": {
+      "type": "ack",
+      "id": "is",
+      "status": "subscribed"
+     }
+    }
+   ]
+  },
+  {
+   "send": {
+    "conn": "f",
+    "msg": {
+     "type": "command",
+     "id": "b1",
+     "ops": [
+      {
+       "op": "append_bars",
+       "series": "px",
+       "bars": [
+        {
+         "t": 1759968000000,
+         "o": 125.0,
+         "h": 131.0,
+         "l": 124.0,
+         "c": 130.5,
+         "v": 1.0
+        }
+       ]
+      }
+     ]
+    }
+   },
+   "expect": [
+    {
+     "conn": "f",
+     "msg": {
+      "type": "ack",
+      "id": "b1",
+      "status": "applied",
+      "seq": 2
+     }
+    },
+    {
+     "conn": "a",
+     "msg": {
+      "type": "notify",
+      "sub": "ia",
+      "event": {
+       "kind": "intent_triggered",
+       "intent": "up",
+       "bar": 200,
+       "t": 1759968000000,
+       "seq": 2
+      }
+     }
+    },
+    {
+     "conn": "s",
+     "msg": {
+      "type": "notify",
+      "sub": "is",
+      "event": {
+       "kind": "intent_triggered",
+       "intent": "up",
+       "bar": 200,
+       "t": 1759968000000,
+       "seq": 2
+      }
+     }
+    }
+   ]
+  },
+  {
+   "send": {
+    "conn": "f",
+    "msg": {
+     "type": "command",
+     "id": "b2",
+     "ops": [
+      {
+       "op": "update_last_bar",
+       "series": "px",
+       "bar": {
+        "t": 1759968000000,
+        "o": 125.0,
+        "h": 132.0,
+        "l": 124.0,
+        "c": 131.5,
+        "v": 2.0
+       }
+      }
+     ]
+    }
+   },
+   "expect": [
+    {
+     "conn": "f",
+     "msg": {
+      "type": "ack",
+      "id": "b2",
+      "status": "applied",
+      "seq": 3
+     }
+    }
+   ]
+  },
+  {
+   "send": {
+    "conn": "f",
+    "msg": {
+     "type": "command",
+     "id": "b3",
+     "ops": [
+      {
+       "op": "set_params",
+       "series": "rsi14",
+       "params": {
+        "period": 3
+       }
+      }
+     ]
+    }
+   },
+   "expect": [
+    {
+     "conn": "f",
+     "msg": {
+      "type": "error",
+      "id": "b3",
+      "error": {
+       "code": "forbidden"
+      }
+     }
+    }
+   ]
+  }
+ ],
+ "final": {
+  "log_len": 3,
+  "document": {
+   "intents": [
+    {
+     "id": "up",
+     "active": true
+    }
+   ]
+  }
+ }
+}

@@ -1,0 +1,1 @@
+attempt1: guessed finding id -> not_found. attempt2: subscribe finding fnd-9e1 -> subscribed. Unclear whether an intent/condition was wanted; subscription seems the notify mechanism.

@@ -1,0 +1,1 @@
+Kullanıcı (arkin) masaüstünde 'main' görünümünde 120-199. barlara (son 80 bar, THYAO 1g) bakıyor; ekranda fiyat, Bollinger, EMA50, RSI14 ve MACD panelleri ile cap-overbought kapsülü var, son kapanış 124,69. Odak/yönerge yok.

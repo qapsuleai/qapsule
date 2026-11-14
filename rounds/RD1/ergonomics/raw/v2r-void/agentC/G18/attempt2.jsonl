@@ -1,0 +1,2 @@
+{"conn":"a","msg":{"type":"hello","protocol":"qp/0","principal":"scout","surface":{"kind":"headless"}}}
+{"conn":"a","msg":{"type":"subscribe","id":"s1","topic":{"kind":"finding","finding":"fnd-9e1"}}}

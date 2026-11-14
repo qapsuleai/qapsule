@@ -1,0 +1,2 @@
+attempt1: discovery only (views, screen); learned last bar=199 from screen.
+attempt2: set_view_range 140-199 plus input look 140-199 (ambiguous whether persistent doc change or presence-only was wanted, did both). Applied. Note: arkin already had two desktop connections in fresh state, screen shows both; mine is the second.

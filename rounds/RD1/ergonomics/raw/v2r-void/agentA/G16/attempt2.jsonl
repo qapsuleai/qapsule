@@ -1,0 +1,3 @@
+{"conn":"a","msg":{"type":"hello","protocol":"qp/0","principal":"arkin","surface":{"kind":"desktop"}}}
+{"conn":"a","msg":{"type":"command","id":"c1","ops":[{"op":"remove","id":"band-b"}]}}
+{"conn":"a","msg":{"type":"query","id":"q1","query":{"kind":"get","id":"chart-1"}}}

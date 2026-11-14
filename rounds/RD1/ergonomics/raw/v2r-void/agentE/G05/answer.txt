@@ -1,0 +1,1 @@
+SMA 20 ve SMA 50 grafiğe eklendi ve "SMA20, SMA50'yi yukarı keserse" niyeti kuruldu; kesişim olunca bildirim gelecek (niyet aboneliği açık).

@@ -1,0 +1,1 @@
+attempt1: subscribe finding topic fnd-overbought; got subscribed ack, then an immediate finding_state invalidated notify (seq 6) - unexpected, spec says it fires when invalidated later; the run apparently has a scripted event after. Unclear whether the user's 'notify me' should also require something durable (subscription dies with connection); spec silent.

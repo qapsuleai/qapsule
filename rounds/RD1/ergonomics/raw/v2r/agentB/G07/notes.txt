@@ -1,0 +1,2 @@
+attempt1: guessed view id 'main' (from spec examples) and zoom factor 2; failed not_found since the doc view is 'chart-1'; also my hello opens a new connection with its own viewport (80-199), so factor-based zoom is ambiguous. Spec example ids misleading.
+attempt2: input look view chart-1 140..199 (60 bars); ok. Unclear whether 'zoom' should be persistent (set_view_range) vs presence-only; chose presence input.

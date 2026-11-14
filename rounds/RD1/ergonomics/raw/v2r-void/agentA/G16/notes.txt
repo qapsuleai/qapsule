@@ -1,0 +1,1 @@
+attempt1: listed series first, guessed bb20 -> not_found (real id band-b), command had failed. attempt2: remove band-b succeeded, layers removed automatically, verified via get view.

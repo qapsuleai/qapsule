@@ -1,0 +1,7 @@
+{
+ "protocol": "qp/0",
+ "principal": "arkin",
+ "surface": {
+  "kind": "desktop"
+ }
+}

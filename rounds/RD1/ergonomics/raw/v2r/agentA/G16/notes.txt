@@ -1,0 +1,1 @@
+a1: removed bb20 from spec example; not_found (real id band-b). a2: remove band-b applied, layers auto-removed (verified via get chart-1). Spec examples ids misleading vs live doc; I should have listed series first.

@@ -1,0 +1,1 @@
+Son yarım saatte 3 değişiklik oldu: arkin EMA50 çalışması ekledi (seq 2), scout 'Hacim güçlü' bulgusunu öneri olarak yazdı (prop-3, bekliyor; seq 3) ve editor 'RSI 30'un altına inerse haber ver' niyetini ekledi (seq 4).

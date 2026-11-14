@@ -1,0 +1,32 @@
+{
+ "type": "welcome",
+ "protocol": "qp/0",
+ "doc": "doc-thyao",
+ "principal": "arkin",
+ "role": "owner",
+ "permissions": {
+  "read": true,
+  "write": true,
+  "propose": true,
+  "decide": true,
+  "attend": true,
+  "feed": false
+ },
+ "seq": 4,
+ "now": 1760000000000,
+ "epoch": 0,
+ "profile": {
+  "depth": "sentence",
+  "series_data": false,
+  "max_points": 0,
+  "max_glyphs": 1,
+  "speech": false
+ },
+ "limits": {
+  "max_message_bytes": 1048576,
+  "max_ops": 64,
+  "max_bars": 10000,
+  "max_subscriptions": 32,
+  "max_string": 4096
+ }
+}

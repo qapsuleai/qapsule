@@ -1,0 +1,3 @@
+{"conn":"c","msg":{"type":"hello","protocol":"qp/0","principal":"scout","surface":{"kind":"headless"}}}
+{"conn":"c","msg":{"type":"attend","id":"a1","directive":{"to":"arkin","steps":[{"target":{"view":"main","panel":1,"series":"rsi14","from_bar":150,"to_bar":150},"say":"RSI burada 70'i yukarı kesti."},{"target":{"view":"main","panel":0,"series":"px","from_bar":199,"to_bar":199},"say":"Son barın hacmi."}]}}}
+{"conn":"c","msg":{"type":"query","id":"q1","query":{"kind":"attention","principal":"arkin"}}}

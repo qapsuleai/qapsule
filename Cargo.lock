@@ -1518,6 +1518,7 @@ dependencies = [
  "assert_cmd",
  "clap",
  "qp-compute",
+ "qp-mcp",
  "qp-render",
  "qp-schema",
  "qp-session",
@@ -1532,6 +1533,15 @@ version = "0.0.0"
 dependencies = [
  "proptest",
  "qp-schema",
+ "serde_json",
+]
+
+[[package]]
+name = "qp-mcp"
+version = "0.0.0"
+dependencies = [
+ "qp-schema",
+ "qp-session",
  "serde_json",
 ]
 

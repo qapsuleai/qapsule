@@ -531,8 +531,24 @@ fn multi_output_line_and_palette() {
             [0xab, 0x47, 0xbc, 255]
         ]
     );
-    // Items merge the outputs of one slot.
-    assert_eq!(bb.items[0].values.len(), 3);
+    // One item per (slot, output), slot-major then output order, each with its own box
+    // (GRAMMAR §16: a line point is ±4 px), so a pixel between two bands hits nothing.
+    assert_eq!(bb.items.len() % 3, 0);
+    for (i, key) in ["upper", "middle", "lower"].iter().enumerate() {
+        let it = &bb.items[i];
+        assert_eq!(it.bar, bb.items[0].bar);
+        assert_eq!(it.values.keys().collect::<Vec<_>>(), vec![*key]);
+    }
+    let last = bb.items.len() - 3;
+    let (up, mid) = (&bb.items[last].hit, &bb.items[last + 1].hit);
+    assert!(up.bottom - up.top <= 10 && mid.bottom - mid.top <= 10);
+    let gap_y = (up.bottom + mid.top) / 2;
+    assert!(up.bottom < mid.top, "bands are apart at the last bar");
+    let x = (up.left + up.right) / 2;
+    assert!(!bb.items.iter().any(|it| {
+        let h = &it.hit;
+        h.left <= x && x < h.right && h.top <= gap_y && gap_y < h.bottom
+    }));
     let m = layer(&s, "m");
     assert_eq!(m.fields, vec!["macd", "signal"]);
     // Palette restarts per panel.

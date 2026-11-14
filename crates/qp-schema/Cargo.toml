@@ -8,6 +8,15 @@ license.workspace = true
 publish.workspace = true
 
 [dependencies]
+schemars = "1.2.3"
+serde = { version = "1.0.229", features = ["derive"] }
+# float_roundtrip: f64 must survive JSON round-trip bit-for-bit (dev-deps also enable it,
+# which would hide its absence in tests, so it is set explicitly here).
+serde_json = { version = "1.0.154", features = ["float_roundtrip"] }
 
 [lints]
 workspace = true
+
+[dev-dependencies]
+jsonschema = { version = "0.61.2", default-features = false }
+proptest = "1.12.0"

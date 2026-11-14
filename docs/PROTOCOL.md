@@ -711,11 +711,223 @@ sonunda koşucu günlüğü baştan oynatır ve dokümanın baytlarının aynı 
   yol `subscriptions/listen` + `log` sorgusu). Ayrıntı: `rounds/RD1/EMBEDDING.md`.
 - **A2UI ve MCP Apps:** analiz `rounds/RD1/EMBEDDING.md`.
 
-## 17. Anlamla başvuru (R2)
+## 17. Anlamla başvuru (R2) — yapılandırılmış seçiciler
 
-Bu bölüm R2/T9 ölçümünden sonra seçilen tasarımla doldurulur (`rounds/R2/REPORT.md`).
-Alt sınır: başvuru deterministik çözülür; belirsizse `ambiguous` + sıralı `candidates`;
-çözülen kimlik `ack.resolved`'da döner; günlükte kimlik saklanır.
+> Tasarım T8a (`rounds/R2/experiments/T8a.md`). Bu bölüm, tasarım seçilmiş gibi tam
+> şartnamedir; seçim R2/T9 ölçümüyle yapılır (`rounds/R2/REPORT.md`).
+
+Bir mesajda **kimlik alan her yere** (seri, görünüm, panel, katman, olgu, bulgu, öneri,
+ölçek, herhangi bir öğe) kimlik yerine bir **seçici** (selector) yazılabilir: öğeyi
+nitelikleriyle tarif eden küçük bir nesne. Otorite seçiciyi o anki dokümana karşı
+deterministik olarak çözer, yerine kimliği yazar, çözümü cevapta geri verir ve günlüğe
+yalnızca kimlikli isteği yazar.
+
+```json
+{"op":"set_encoding","view":{},"layer":{"shows":{"study":"bollinger"},"output":"upper"},
+ "encoding":{"color":"down"}}
+```
+
+"Tek görünümdeki, Bollinger'i çizen ve `upper`'ı çizen katmanın rengini `down` yap."
+Kimlik bir dizge (panelde sayı), seçici bir **nesnedir**; ikisi aynı alanda yazılabilir.
+
+### 17.1 Sözlük
+
+Kapalı ve tiplidir (`qp-schema`: `SeriesSel`, `ViewSel`, `PanelSel`, `LayerSel`,
+`FactSel`, `FindingSel`, `ProposalSel`, `ScaleSel`, `ItemSel`); bilinmeyen anahtar
+`schema` hatasıdır (`did_you_mean` ile). Her seçicide ayrıca `first` ve `latest`
+(§17.3) vardır.
+
+| Tür | Anahtarlar | Örnek ("…") |
+|-----|------------|-------------|
+| seri | `kind` (`bars`/`study`/`points`), `study`, `params` {ad: sayı}, `on` (seri), `symbol`, `label` | `{"study":"rsi","params":{"period":14}}` "RSI(14)"; `{"kind":"bars"}` "fiyat serisi"; `{"study":"sma","params":{"period":50}}` |
+| görünüm | `title`, `shows` (seri) | `{}` "tek görünüm"; `{"shows":{"study":"macd"}}` |
+| panel | `name`, `shows` (seri), `mark` | `{"mark":"candle"}` "fiyat paneli"; `{"shows":{"study":"rsi"}}` "RSI'ın paneli"; `{"name":"macd"}` |
+| katman | `shows` (seri), `output`, `mark`, `panel` (panel), `value`, `fact` (olgu), `finding` (bulgu), `label` | `{"shows":{"study":"bollinger"},"output":"upper"}` "üst bant"; `{"mark":"rule","value":70}` "70 çizgisi" |
+| olgu | `kind`, `on` (seri), `bar` | `{"kind":"breakout","first":true}` "eski kırılımın olgusu" |
+| bulgu | `kind` (olgularından birinin türü), `on` (seri), `fact` (olgu), `state` (kapsül durumu) | `{"kind":"breakout","latest":true}` "son kırılım" |
+| öneri | `state` | `{"state":"pending","latest":true}` |
+| ölçek | `panel` (panel; zorunlu) | `{"panel":{"mark":"candle"}}` → `"y0"` |
+| öğe | tek anahtar, türün adı: `series`, `view`, `fact`, `finding`, `proposal` | `{"finding":{"kind":"breakout","latest":true}}` |
+
+Anahtarların anlamı:
+
+- `study`, `kind`, `name`, `title`, `symbol`, `label`, `output`: metin; **büyük/küçük
+  harf duyarsız** tam eşitlik (benzerlik yok). `label`, `welcome.summary`'deki açıklama
+  metnidir (`RSI14`, `MACD(12,26,9)`; katmanda verilmişse katmanın `label`'ı).
+- `params`: verilen her parametre eşit olmalı (`f64` tam eşitlik); verilmeyenler serbest.
+  Dokümandaki parametreler varsayılanlarla tamdır: `{"period":14}` varsayılan RSI'a uyar.
+- `on` (seri): hesabın girdilerinden biri o seri. `on` (olgu/bulgu): olgu o seri hakkında.
+- `shows`: görünümde/panelde bir katman ya da katmanın kendisi o seriyi çizer
+  (`layer.series`).
+- `mark`: panelde o işaretli bir katman var; katmanda işaret odur.
+- `output`: katman o alanı çizer — `y` ya da `y2` onu adlandırır; ya da `y` yoktur ve alan
+  katmanın varsayılan olarak çizdiklerindendir (`line` + Bollinger: `upper`, `middle`,
+  `lower`; `line` + MACD: `macd`, `signal`; mum: `o h l c`; diğerleri: ana çıktı).
+- `value`: katmanın `y` ya da `x` sabiti bu sayıya tam eşit (kuralın seviyesi).
+- `bar`: olgunun bar numarası. `state`: kapsül/öneri durumu (şema adları).
+
+### 17.2 Nerede yazılır
+
+| Mesaj | Alanlar |
+|-------|---------|
+| `add_study` | `inputs[]`, `show.view`, `show.with`, `show.panel` |
+| `set_params`, `add_fact`, `append_bars`, `update_last_bar` | `series` |
+| `add_layer`, `insert_layer` | `view`, `layer` (aşağıda), `after`, `before` |
+| `delete_layer`, `move_layer`, `set_encoding` | `view`, `layer`, `panel`, `after`, `before`, `encoding` (aşağıda) |
+| `insert_panel` | `view`, `layers[]`, `after`, `before` |
+| `delete_panel`, `move_panel`, `set_panel` | `view`, `panel`, `after`, `before` |
+| `set_scale` | `view`, `scale` |
+| `set_emphasis` | `view`, `emphasis[].target` |
+| `remove_layer`, `set_view_range` | `view` |
+| `add_finding`, `update_finding` | `facts[]`, `finding`, `invalidation` (koşul) |
+| `approve_finding`, `reject_finding`, `show_finding` | `finding` |
+| `add_intent` | `trigger` (koşul) |
+| `add_narrative` | `about` (öğe), `steps[].target` |
+| `remove` | `id` (öğe) |
+| `accept_proposal`, `reject_proposal` | `proposal` |
+| sorgu `get` / `study`, `at` / `hit` / `present` | `id` (öğe) / `series` / `view` / `finding` |
+| `subscribe` | `changes.ids[]` (öğe), `finding.finding`, `condition.condition` |
+| `attend` | `directive.steps[].target` |
+
+- **Katman nesnesi** (`insert_layer.layer`, `add_layer.layer`, `insert_panel.layers[]`):
+  `series`, `fact`, `finding`, `panel` ve kodlamadaki seri başvuruları
+  (`encoding.{x,y,y2}.series`, `encoding.color.when.than.series`).
+- **Hedef** (`Target`): `view`, `panel`, `layer`, `series`, `item` (öğe seçicisi).
+- **Koşul** (`Condition`): `threshold.series`, `compare.left`, `compare.right`.
+- `put_view`, `put_series`, `input` hareketleri ve kökenler (`origin`) seçici almaz
+  (bütün öğe yazılır ya da arayüz kimlikle konuşur).
+
+**Panel ve katman hangi görünümde aranır?** İşlemin `view` alanındaki görünümde
+(`show.panel` için `show.view`; hedefte `target.view`, yoksa `set_emphasis`'in görünümü).
+Görünüm adı verilmemişse (dikkat ve anlatım hedefleri) bütün görünümlerde, görünüm sırası
+ve görünüm içi sırayla aranır. Görünüm alanı bir seçiciyse önce o çözülür. Var olmayan
+bir görünüm `not_found` (görünüm alanının yolunda).
+
+### 17.3 Eşleşme ve sıralama kuralları
+
+1. Verilen **her** anahtar tutmalıdır (VE). `{}` o türün bütün öğelerine uyar.
+2. İç içe seçici (`shows`, `on`, `panel`, `fact`, `finding`) uyduğu öğelerin **kümesidir**
+   (kendi `first`/`latest`'i uygulandıktan sonra); tek olması gerekmez. Yerine kimlik
+   de yazılabilir (`{"shows":"rsi14"}`). İç içe seçici hiçbir öğeye uymuyorsa hata onun
+   yolunda `not_found` olur.
+3. **Türün sırası** (adaylar hep bu sırada tutulur):
+   seri, görünüm, öneri → doküman sırası (eklenme); panel → yığın sırası (üstten alta);
+   katman → çizim sırası; olgu → bar, eşitlikte doküman sırası; bulgu → olgularının en
+   büyük barı, eşitlikte doküman sırası. Görünüm verilmemişse önce görünüm sırası.
+4. **Tek eşleşme** → çözülür. **Birden çok** → `first: true` ilkini, `latest: true`
+   sonuncusunu seçer (bulguda "en son", panelde "en alttaki", katmanda "en üstteki");
+   ikisi yoksa `ambiguous`. İkisi birden → `invalid`. **Hiç** → `not_found`.
+5. Bulanık eşleşme, ağırlık, olasılık yoktur. Aynı doküman + aynı mesaj = aynı çözüm.
+
+### 17.4 Çözüm, cevap ve günlük
+
+- Seçiciler mesaj tipli biçime ayrıştırılmadan **önce** çözülür (`Session::handle_raw`):
+  her seçici yerinde kimliğe (panelde sayıya, ölçekte `"y<id>"`'e) çevrilir, sonra mesaj
+  her zamanki gibi denetlenir ve uygulanır. Böylece tipli mesaj, günlük (`request`) ve
+  öneriler (`proposal.ops`) **yalnız kimlik** taşır; yeniden oynatma ve bayt eşitliği
+  değişmez.
+- Komutta işlemler **sırayla** çözülür: n'inci işlemin seçicileri, önceki işlemlerin
+  uygulanmış olduğu taslak dokümana karşı çözülür (aynı komutta eklenen bir katmana
+  seçiciyle başvurulabilir). Önceki işlem hata veriyorsa taslak ilerlemez; hatayı komutun
+  kendisi bildirir (ya hep ya hiç değişmez).
+- `ack.resolved` ve `result.resolved`: `{mesajdaki JSON göstericisi: kimlik}` — yalnız
+  en dıştaki seçiciler (iç içe olanlar değil); panel kimliği ondalık dizge (`"0"`).
+  `subscribe` ve `attend` ack'leri de taşır. Sorgu cevabının kendisi de kimliği verir
+  (ör. `reduced.series`, `presentation.finding`, `item.id`).
+- Öneri: seçiciler öneri anında çözülür; öneri çözülmüş kimlikleri saklar; kabulde
+  yeniden çözülmez.
+- Seçici kullanmak `read` yetkisi ister (çözüm dokümanı okur); `feed` rolü kimlik
+  kullanır (`forbidden`, seçicinin yolunda).
+- Hata sırası: önce seçicilerin şeması ve çözümü, sonra mesajın geri kalanının şeması,
+  sonra yetki ve uygulama.
+
+### 17.5 Hatalar
+
+| Durum | Kod | Ek bilgi |
+|-------|-----|----------|
+| Bilinmeyen seçici anahtarı / yanlış tip | `schema` | `path` anahtarın yolu, `expected`, `did_you_mean` |
+| Birden çok eşleşme | `ambiguous` | `path`, `candidates` (eşleşenler, türün sırasıyla, en çok 10), `hint` |
+| Eşleşme yok | `not_found` | `path`, `candidates` (en yakınlar, en çok 5), `did_you_mean` (metin değerinde yazım hatası), `hint` |
+| `first` ve `latest` birlikte | `invalid` | `path` |
+
+`ambiguous` adaylarının sırası **türün sırasıdır**; yani `first: true` adayların ilkini,
+`latest: true` sonuncusunu seçer — ajan ya bir anahtar ekler, ya `first`/`latest` ekler,
+ya da adayın kimliğini kullanır. `not_found` adayları: en çok anahtarı tutan öğeler önce,
+eşitlikte türün sırası; hiçbir anahtar tutmuyorsa türün ilk beş öğesi. Bir metin
+anahtarının değeri dokümanda hiç yoksa ileti bunu söyler ve `did_you_mean` dokümandaki
+değerlerden önerir (`bolinger` → `bollinger`).
+
+### 17.6 İlk mesajda neye başvurulabilir
+
+- `welcome.summary.select` (`SelectHints`): özetteki her öğe için **şu an ona çözülen**
+  bir seçici; anahtar öğe kimliği (panel `"<görünüm>/<panel>"`, katman
+  `"<görünüm>/<katman>"`, o görünüm içinde çözülür). Sıra: en kısa anlamlı seçici
+  (`{"study":"rsi"}`), gerekiyorsa parametreler, sonra `first`/`latest`, sonra bar.
+  Hiçbir seçici tek değilse öğe listede yoktur (kimliği kullanılır).
+- `screen` cevabında her panelin `select`'i (o görünüm içinde).
+
+### 17.7 Örnekler (`thyao` örnek dokümanı)
+
+```json
+→ {"type":"query","id":"q1","query":{"kind":"study",
+   "series":{"study":"rsi","params":{"period":14}},"range":{"last":50},"reduce":"max"}}
+← {"type":"result","id":"q1","seq":0,"now":1760000000000,
+   "data":{"kind":"reduced","series":"rsi14","reduce":"max","bars":50,"values":{"rsi":{"value":78.115,"bar":154,"t":1754438400000}}},
+   "resolved":{"/query/series":"rsi14"}}
+
+→ {"type":"command","id":"c1","ops":[{"op":"set_scale","view":{},
+   "scale":{"panel":{"mark":"candle"}},"kind":"log"}]}
+← {"type":"ack","id":"c1","status":"applied","seq":1,
+   "resolved":{"/ops/0/scale":"y0","/ops/0/view":"main"}}
+   (günlükte: {"op":"set_scale","view":"main","scale":"y0","kind":"log"})
+
+→ {"type":"command","id":"c2","ops":[{"op":"set_encoding","view":{},
+   "layer":{"mark":"line"},"encoding":{"width":2}}]}
+← {"type":"error","id":"c2","error":{"code":"ambiguous",
+   "message":"3 layers match {\"mark\":\"line\"}; the authority does not pick one",
+   "path":"/ops/0/layer",
+   "hint":"Add a key that tells them apart, add \"first\":true or \"latest\":true (candidates are in paint order), or use one of the candidate ids.",
+   "candidates":[{"id":"l1","about":"bb20.upper/middle/lower line (panel 0 of view main)"},
+                 {"id":"l2","about":"rsi14.rsi line (panel 1 of view main)"},
+                 {"id":"l4","about":"macd.macd/signal line (panel 2 of view main)"}]}}
+
+→ {"type":"command","id":"c3","ops":[
+   {"op":"add_study","id":"rsi7","study":"rsi","inputs":[{"kind":"bars"}],"params":{"period":7}},
+   {"op":"insert_panel","view":{},"panel":{"name":"rsi7","y":{"kind":"linear"}},
+    "after":{"mark":"candle"},"layers":[{"mark":"line","series":"rsi7"}]}]}
+← {"type":"ack","id":"c3","status":"applied","seq":2,"created":["rsi7","3","l5"],
+   "resolved":{"/ops/0/inputs/0":"px","/ops/1/after":"0","/ops/1/view":"main"}}
+
+→ {"type":"command","id":"c4","ops":[{"op":"set_emphasis","view":{},"emphasis":[
+   {"target":{"item":{"finding":{"kind":"cross_above","latest":true}}},"kind":"highlight"}]}]}
+← {"type":"ack","id":"c4","status":"applied","seq":3,
+   "resolved":{"/ops/0/emphasis/0/target/item":"fnd-overbought","/ops/0/view":"main"}}
+
+→ {"type":"command","id":"c5","ops":[{"op":"delete_panel","view":{},
+   "panel":{"shows":{"study":"bolinger"}}}]}
+← {"type":"error","id":"c5","error":{"code":"not_found",
+   "message":"no series matches {\"study\":\"bolinger\"}; no series has study `bolinger`",
+   "path":"/ops/0/panel/shows","did_you_mean":["bollinger"],
+   "candidates":[{"id":"px","about":"THYAO 1d: bars"}, "…"]}}
+```
+
+Uygunluk dökümü: `crates/qp-session/tests/transcripts/t-select.json` (başarı, belirsizlik,
+`first`/`latest`, bulunamama, şema, öneri). Yirmi R2 görevinin kimliksiz yazımı:
+`crates/qp-session/tests/selectors.rs` (`r_tasks`).
+
+### 17.8 Şema
+
+Seçici türleri ve kimlik-ya-da-seçici türleri (`SeriesRef`, `ViewRef`, `PanelRef`,
+`LayerRef`, `FactRef`, `FindingRef`, `ProposalRef`, `ScaleRef`, `ItemRef`) `qp-schema`'dadır.
+İşlem/sorgu alanları Rust'ta kimlik tipinde (`String`, `u32`) kalır; JSON Schema'ları
+`#[schemars(with = …)]` ile "kimlik ya da seçici"dir. İç içe yapılar için tel biçimleri
+(`LayerIn`, `EncodingIn`, `TargetIn`, `ConditionIn`, `EmphasisIn`, `NarrativeStepIn`,
+`AttentionDirectiveIn` …) yalnız şemayı tarif eder; alan adlarının saklanan tiplerle aynı
+kaldığını bir test denetler. Saklanan görünüm (`View`) şeması seçici içermez. Bilinen
+uzlaşma: `Op` tipi hem istek hem saklanan istek (`LogEntry.request`, `Proposal.ops`)
+olduğundan saklanan isteğin şeması da seçiciye izin verir görünür; otorite oraya yalnız
+kimlik yazar. MCP araçları bu şemadan üretildiği için her `op_*`/`query_*` aracı seçici
+kabul eder.
 
 ## Ek A — Eski `Command` tipi
 

@@ -112,13 +112,14 @@ fn macd_cached(
         .collect();
     let segs = segments(&keys);
     let emas = ema_cache(&segs, full, x, cache_bytes)?;
-    let mut line = vec![0.0; x.len()];
+    let mut line = Vec::new();
     for seg in segs {
         match seg {
             Seg::Plain(a, b) => sweep_kernel(macd_build, &full[a..b], x, lanes, bufs, a, visit)?,
             Seg::Shared(a, b) => {
                 let fast = period_param(&full[a], "fast")?;
                 let slow = period_param(&full[a], "slow")?;
+                line.resize(x.len(), 0.0);
                 fill_line(fast, slow, x, &emas, &mut line)?;
                 macd_run(&full[a..b], &line, slow, lanes, bufs, a, visit)?;
             }

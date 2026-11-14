@@ -2,6 +2,7 @@
  "type": "result",
  "id": "q1",
  "seq": 0,
+ "now": 1760000000000,
  "data": {
   "kind": "reduced",
   "series": "rsi14",

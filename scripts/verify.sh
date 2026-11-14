@@ -183,7 +183,15 @@ step_hygiene() {
     skip "not a git repository"
   fi
   local hits
-  hits="$(git ls-files | grep -i -E '\.env$|token|secret' || true)"
+  # scripts/qapsule-gh.env is tracked on purpose (.gitignore exception, decided by Arkin):
+  # account settings for qgh/preflight. It is allowed only while it holds exactly the
+  # known non-secret keys.
+  if git ls-files --error-unmatch scripts/qapsule-gh.env >/dev/null 2>&1; then
+    if grep -v -E '^(#.*|QAPSULE_GH_USER=[A-Za-z0-9_-]+|QAPSULE_GH_REPO=[A-Za-z0-9_./-]+|QAPSULE_SSH_ALIAS=[A-Za-z0-9_.-]+|QAPSULE_REMOTE_URL=git@[A-Za-z0-9_.-]+:[A-Za-z0-9_./-]+\.git|)$' scripts/qapsule-gh.env; then
+      fail "scripts/qapsule-gh.env has unexpected content"
+    fi
+  fi
+  hits="$(git ls-files | grep -v -x 'scripts/qapsule-gh.env' | grep -i -E '\.env$|token|secret' || true)"
   if [ -n "$hits" ]; then
     echo "tracked files that look like secrets:" >&2
     printf '%s\n' "$hits" >&2

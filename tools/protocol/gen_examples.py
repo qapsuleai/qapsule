@@ -35,9 +35,9 @@ i("client_msg","clock_string",{"type":"clock","now":"2026-11-14"},"time is epoch
 prof={"depth":"sentence","series_data":False,"max_points":0,"max_glyphs":1,"speech":False}
 lim={"max_message_bytes":1048576,"max_ops":64,"max_bars":10000,"max_subscriptions":32,"max_string":4096}
 perm={"read":True,"write":True,"propose":True,"decide":True,"attend":True,"feed":False}
-v("server_msg","welcome",{"type":"welcome","protocol":"qp/0","doc":"doc-thyao","principal":"arkin","role":"owner","permissions":perm,"seq":4,"epoch":0,"profile":prof,"limits":lim})
+v("server_msg","welcome",{"type":"welcome","protocol":"qp/0","doc":"doc-thyao","principal":"arkin","role":"owner","permissions":perm,"seq":4,"now":T0,"epoch":0,"profile":prof,"limits":lim})
 v("server_msg","ack_proposed",{"type":"ack","id":"c7","status":"proposed","seq":6,"proposal":"prop-6","created":["fnd-6-0","cap-6-1"]})
-v("server_msg","result_reduced",{"type":"result","id":"q1","seq":0,"data":{"kind":"reduced","series":"rsi14","reduce":"max","bars":50,"values":{"rsi":{"value":78.11504477458953,"bar":154,"t":1754265600000}}}})
+v("server_msg","result_reduced",{"type":"result","id":"q1","seq":0,"now":T0,"data":{"kind":"reduced","series":"rsi14","reduce":"max","bars":50,"values":{"rsi":{"value":78.11504477458953,"bar":154,"t":1754265600000}}}})
 v("server_msg","notify_change",{"type":"notify","sub":"s1","event":{"kind":"change","seq":5,"at":T0,"author":"arkin","cause":"c1","changes":[{"op":"set_capsule_state","capsule":"cap-overbought","state":"rejected"}]}})
 v("server_msg","notify_attention",{"type":"notify","sub":"me","event":{"kind":"attention","directive":{"id":"att-1","to":"arkin","from":"scout","at":T0,"steps":[{"target":{"series":"rsi14","from_bar":150,"to_bar":150}}]}}})
 v("server_msg","error",{"type":"error","id":"c4","error":{"code":"not_found","message":"series `rsi` does not exist","path":"/ops/0/show/with","did_you_mean":["rsi14"],"hint":"Use an existing series id."}})

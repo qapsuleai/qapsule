@@ -48,6 +48,11 @@ const MIN_LOOKBACK: usize = 64;
 
 /// State bounds valid for every late start before `from`, computed once per input and
 /// shared by all periods (looser bounds only cost a few more bars).
+///
+/// Preconditions of the guarantee: the bounds must be built from the **same** series that
+/// is later passed to `*_tail_with` (they are not checked against it), and the period must
+/// be at most ~1e8 (the 1e-6 widening covers the seed mean's rounding drift up to there;
+/// periods are validated up to 1e9 elsewhere, far beyond practical use).
 #[derive(Debug, Clone, Copy)]
 pub struct Bounds {
     from: usize,

@@ -120,8 +120,9 @@ koşu. CI: GitHub `ubuntu-latest`, aynı commit için **5 çalışma**
 ([43625622117](https://github.com/qapsuleai/qapsule/actions/runs/43625622117), deneme 1–5);
 koşucu CPU'su çalışmadan çalışmaya değişti: AMD EPYC 9V74 (deneme 2, 4, 5) ve AMD EPYC 7763
 (deneme 1, 3). Taban CI ölçümü 9V74'te (çalışma 43618730149); aynı CPU ile karşılaştırma
-yapıldı, 7763 ayrıca verildi. CI'da her satır 7 koşunun medyanı; çalışmalar arası yayılım
-9V74'te %2'nin altında (ör. A RSI 38,5 / 39,3 / 38,6). Ham çıktılar `rounds/RP1/raw/`
+yapıldı, 7763 ayrıca verildi. CI'da her satır 7 koşunun medyanı; tabloda üç 9V74 çalışmasının
+medyanı. Çalışmalar arası yayılım A'da %2'nin altında (ör. RSI 38,5 / 39,3 / 38,6), B
+Bollinger'de ≈ %11 (60,8–67,5). Taban CI ölçümü tek çalışma (denetim L8). Ham çıktılar `rounds/RP1/raw/`
 (yerel) ve CI günlükleri.
 
 ### A — tek seri, 1.000 parametre (10.000 bar)
@@ -160,11 +161,16 @@ MACD 72,56 → 8,70 · Bollinger 64,43 → 10,74.
 | Ölçüm | M4 Max önce → sonra | WASM (M4) önce → sonra | CI 9V74 önce → sonra | CI 7763 sonra |
 |-------|--------------------:|-----------------------:|---------------------:|--------------:|
 | tik (500 hesabın hepsi), medyan µs | 1,79 → 1,75 | 4,25 → 4,17 | 3,50 → 3,53 | 4,70 / 4,66 |
-| yeni bar, medyan µs | 2,67 → 2,67 | 5,12 → 6,00 | 5,18 → 5,18 | 7,07 / 7,15 |
-| attach (kur + 10k bar), ms | 26,28 → **13,78** (`extend`) | 51,11 → **18,11** | 51,82 → **17,25** | 20,07 / 19,77 |
+| yeni bar, medyan µs | 2,67 → 2,67 | 5,12 → 6,00 | 5,18 → 5,38 | 7,49 / 7,45 |
+| attach (kur + 10k bar), ms | 26,28 → **13,78** (`extend`) | 51,11 → **18,11** | 51,82 → **17,33** | 20,11 / 19,81 |
 
-D'nin tik ve yeni bar yolu bilinçli olarak değiştirilmedi (sınır değil, BASELINE); WASM
-"yeni bar"daki +0,9 µs ölçüm gürültüsü sınırında, aynı kod.
+D'nin tik ve yeni bar yolu bilinçli olarak değiştirilmedi (sınır değil, BASELINE).
+
+**Gerilemeler (denetim L3):** aynı kaynakta olmasına rağmen WASM'da D "yeni bar" 5,1 → 6,0 µs
+ve eski attach yolu (`push` döngüsü) 51,1 → 60,3 ms (+%18) yavaşladı — kod yerleşimi
+etkisi (bkz. §8); yeni attach yolu `extend` 18,1 ms. Rosetta'da B Bollinger 61,9 → 123,7 ms
+(2×); gerçek x86'da (CI) aynı satır 114,0 → 66,5 ms iyileşti, yani Rosetta'ya özgü (2 şeritli
+SoA Bollinger çekirdeğinin Rosetta çevirisi).
 
 ## 5. K17 dizüstü hedefleri GitHub Linux koşucusunda (kriter 2)
 

@@ -1,0 +1,482 @@
+{
+  "$defs": {
+    "Collection": {
+      "description": "Item collections of a document.",
+      "oneOf": [
+        {
+          "const": "series",
+          "description": "Series.",
+          "type": "string"
+        },
+        {
+          "const": "views",
+          "description": "Views.",
+          "type": "string"
+        },
+        {
+          "const": "facts",
+          "description": "Facts.",
+          "type": "string"
+        },
+        {
+          "const": "findings",
+          "description": "Findings.",
+          "type": "string"
+        },
+        {
+          "const": "capsules",
+          "description": "Capsules.",
+          "type": "string"
+        },
+        {
+          "const": "intents",
+          "description": "Intents.",
+          "type": "string"
+        },
+        {
+          "const": "narratives",
+          "description": "Narratives.",
+          "type": "string"
+        },
+        {
+          "const": "proposals",
+          "description": "Proposals.",
+          "type": "string"
+        }
+      ]
+    },
+    "ProposalState": {
+      "description": "State of a proposal.",
+      "oneOf": [
+        {
+          "const": "pending",
+          "description": "Waiting for a decision.",
+          "type": "string"
+        },
+        {
+          "const": "accepted",
+          "description": "Accepted and applied.",
+          "type": "string"
+        },
+        {
+          "const": "rejected",
+          "description": "Rejected.",
+          "type": "string"
+        },
+        {
+          "const": "expired",
+          "description": "Not decided before `expires_at`.",
+          "type": "string"
+        }
+      ]
+    },
+    "Range": {
+      "additionalProperties": false,
+      "description": "A bar range. Exactly one form: `last` (the last n bars) or `from_bar`/`to_bar`\n(0-based, inclusive) or `from_t`/`to_t` (epoch ms, inclusive).",
+      "properties": {
+        "from_bar": {
+          "description": "First bar index.",
+          "format": "uint64",
+          "minimum": 0,
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "from_t": {
+          "description": "From time (inclusive).",
+          "format": "int64",
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "last": {
+          "description": "The last n bars.",
+          "format": "uint64",
+          "minimum": 0,
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "to_bar": {
+          "description": "Last bar index (inclusive).",
+          "format": "uint64",
+          "minimum": 0,
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "to_t": {
+          "description": "To time (inclusive).",
+          "format": "int64",
+          "type": [
+            "integer",
+            "null"
+          ]
+        }
+      },
+      "type": "object"
+    },
+    "Reduce": {
+      "description": "Reduction applied over a range (warmup `null`s are skipped).",
+      "oneOf": [
+        {
+          "const": "min",
+          "description": "Smallest value (and its bar).",
+          "type": "string"
+        },
+        {
+          "const": "max",
+          "description": "Largest value (and its bar).",
+          "type": "string"
+        },
+        {
+          "const": "mean",
+          "description": "Arithmetic mean.",
+          "type": "string"
+        },
+        {
+          "const": "first",
+          "description": "First non-null value.",
+          "type": "string"
+        },
+        {
+          "const": "last",
+          "description": "Last non-null value.",
+          "type": "string"
+        },
+        {
+          "const": "count",
+          "description": "Number of non-null values.",
+          "type": "string"
+        }
+      ]
+    },
+    "SurfaceKind": {
+      "description": "Kind of surface a connection presents on.",
+      "oneOf": [
+        {
+          "const": "desktop",
+          "description": "Large screen, pointer and keyboard.",
+          "type": "string"
+        },
+        {
+          "const": "phone",
+          "description": "Phone: small touch screen.",
+          "type": "string"
+        },
+        {
+          "const": "watch",
+          "description": "Watch: glance-sized screen.",
+          "type": "string"
+        },
+        {
+          "const": "voice",
+          "description": "Voice only: no screen; answers are spoken.",
+          "type": "string"
+        },
+        {
+          "const": "headless",
+          "description": "No presentation at all (an agent, a batch job).",
+          "type": "string"
+        }
+      ]
+    }
+  },
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "description": "A read request.",
+  "oneOf": [
+    {
+      "additionalProperties": false,
+      "description": "What this protocol endpoint offers: operations, queries, topics, principals,\nand the asker's own role and permissions.",
+      "properties": {
+        "kind": {
+          "const": "describe",
+          "type": "string"
+        }
+      },
+      "required": [
+        "kind"
+      ],
+      "type": "object"
+    },
+    {
+      "additionalProperties": false,
+      "description": "One item by id, from any collection.",
+      "properties": {
+        "id": {
+          "description": "Item id.",
+          "type": "string"
+        },
+        "kind": {
+          "const": "get",
+          "type": "string"
+        }
+      },
+      "required": [
+        "kind",
+        "id"
+      ],
+      "type": "object"
+    },
+    {
+      "additionalProperties": false,
+      "description": "All items of a collection. For proposals, `state` filters (e.g. `pending`).",
+      "properties": {
+        "collection": {
+          "$ref": "#/$defs/Collection",
+          "description": "Collection."
+        },
+        "kind": {
+          "const": "list",
+          "type": "string"
+        },
+        "state": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ProposalState"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Proposal state filter (proposals only)."
+        }
+      },
+      "required": [
+        "kind",
+        "collection"
+      ],
+      "type": "object"
+    },
+    {
+      "additionalProperties": false,
+      "description": "The whole document and its log position (a snapshot, e.g. for hand-over).",
+      "properties": {
+        "kind": {
+          "const": "document",
+          "type": "string"
+        }
+      },
+      "required": [
+        "kind"
+      ],
+      "type": "object"
+    },
+    {
+      "additionalProperties": false,
+      "description": "Log entries. Filters combine with AND.",
+      "properties": {
+        "after_seq": {
+          "description": "Entries with `seq` greater than this.",
+          "format": "uint64",
+          "minimum": 0,
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "author": {
+          "description": "Only entries by this principal.",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "kind": {
+          "const": "log",
+          "type": "string"
+        },
+        "limit": {
+          "description": "Return at most this many (the latest ones).",
+          "format": "uint32",
+          "minimum": 0,
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "since_t": {
+          "description": "Entries at or after this time (epoch ms).",
+          "format": "int64",
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "until_t": {
+          "description": "Entries at or before this time.",
+          "format": "int64",
+          "type": [
+            "integer",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "kind"
+      ],
+      "type": "object"
+    },
+    {
+      "additionalProperties": false,
+      "description": "Values of a series over a range, aligned with its bars (K13/K20), optionally\nreduced to one number. For a bar series, outputs are `o`,`h`,`l`,`c`,`v`.",
+      "properties": {
+        "kind": {
+          "const": "study",
+          "type": "string"
+        },
+        "output": {
+          "description": "Only this output (e.g. `\"signal\"` of MACD); all if absent.",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "range": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Range"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Range; the whole series if absent."
+        },
+        "reduce": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Reduce"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Reduce to one value per output."
+        },
+        "series": {
+          "description": "Series id (a study series or a bar series).",
+          "type": "string"
+        }
+      },
+      "required": [
+        "kind",
+        "series"
+      ],
+      "type": "object"
+    },
+    {
+      "additionalProperties": false,
+      "description": "Everything at one bar: OHLCV and the value of every study on that bar series.",
+      "properties": {
+        "bar": {
+          "description": "Bar index (0-based). Give `bar` or `t`.",
+          "format": "uint64",
+          "minimum": 0,
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "kind": {
+          "const": "at",
+          "type": "string"
+        },
+        "series": {
+          "description": "Bar series id.",
+          "type": "string"
+        },
+        "t": {
+          "description": "Bar time (epoch ms); the bar with exactly this `t`.",
+          "format": "int64",
+          "type": [
+            "integer",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "kind",
+        "series"
+      ],
+      "type": "object"
+    },
+    {
+      "additionalProperties": false,
+      "description": "What a principal's surfaces show right now, semantically (views, panels, series,\nvisible bar range, capsules). The asker's own if `principal` is absent.",
+      "properties": {
+        "kind": {
+          "const": "screen",
+          "type": "string"
+        },
+        "principal": {
+          "description": "Principal id.",
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "kind"
+      ],
+      "type": "object"
+    },
+    {
+      "additionalProperties": false,
+      "description": "Where a principal is looking (last viewport and focus) and the attention\ndirectives addressed to them.",
+      "properties": {
+        "kind": {
+          "const": "attention",
+          "type": "string"
+        },
+        "principal": {
+          "description": "Principal id.",
+          "type": "string"
+        }
+      },
+      "required": [
+        "kind",
+        "principal"
+      ],
+      "type": "object"
+    },
+    {
+      "additionalProperties": false,
+      "description": "A finding presented for a surface. Depth follows the asker's negotiated profile\nunless `surface` names another surface kind.",
+      "properties": {
+        "finding": {
+          "description": "Finding id. If absent: the most important live finding (highest confidence).",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "kind": {
+          "const": "present",
+          "type": "string"
+        },
+        "surface": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/SurfaceKind"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Present for this surface kind instead of the asker's."
+        }
+      },
+      "required": [
+        "kind"
+      ],
+      "type": "object"
+    }
+  ],
+  "title": "Query"
+}

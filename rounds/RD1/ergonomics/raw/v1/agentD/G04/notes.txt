@@ -1,0 +1,1 @@
+attempt1: list findings + present(finding=fnd-overbought, surface=watch) -> sentence-depth text returned. Unclear: whether headless profile would force chart depth; the query-level 'surface' field (a plain string) is only visible in the schema, the spec table does not state its type. Guessed the finding id; omitting it would also work.

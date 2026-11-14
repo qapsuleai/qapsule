@@ -1,0 +1,1 @@
+attempt1: add_narrative about fnd-overbought, 3 steps px/rsi14/bb20 (ids taken from spec example, not verified by query; accepted); proposed prop-5. Spec example convenient; could not verify series bb20 exists beforehand.

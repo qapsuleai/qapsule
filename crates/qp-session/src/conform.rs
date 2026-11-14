@@ -3,7 +3,7 @@
 //! A transcript is run against a [`Transport`]: in-process ([`InProc`], a [`Session`])
 //! or line-based ([`Serve`], a `qp serve --batch-end` child process). Every step's
 //! outputs must match `expect` exactly in number and order, each message as a subset
-//! pattern (`"$any"` matches any value; arrays have the same length; numbers are equal
+//! pattern (`"$any"` matches any value; `"$absent"` as an object value requires the key to be absent; arrays have the same length; numbers are equal
 //! as numbers). After the last step the `final` checks run and the log is replayed from
 //! the initial document; the replayed document's bytes must equal the authority's.
 
@@ -204,6 +204,12 @@ pub fn subset(expected: &Value, actual: &Value, path: &str) -> Result<(), (Strin
         (Value::Object(e), Value::Object(a)) => {
             for (k, ev) in e {
                 let p = crate::error::ptr(path, k);
+                if ev.as_str() == Some("$absent") {
+                    if let Some(av) = a.get(k) {
+                        return Err((p, format!("key must be absent, got {}", trunc(av))));
+                    }
+                    continue;
+                }
                 match a.get(k) {
                     None => {
                         return Err((p, format!("missing key (expected {})", trunc(ev))));

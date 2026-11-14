@@ -1,0 +1,4 @@
+{"conn":"a","msg":{"type":"hello","protocol":"qp/0","principal":"arkin","surface":{"kind":"desktop"}}}
+{"conn":"a","msg":{"type":"query","id":"q0","query":{"kind":"list","collection":"findings"}}}
+{"conn":"a","msg":{"type":"command","id":"c1","ops":[{"op":"update_finding","finding":"fnd-overbought","invalidation":{"kind":"threshold","series":"px","op":"cross_below","value":100.0}}]}}
+{"conn":"a","msg":{"type":"query","id":"q1","query":{"kind":"get","id":"fnd-overbought"}}}

@@ -664,6 +664,33 @@ T.append(transcript(
     final={"log_len": 1, "document": {"capsules": [{"id": "cap-overbought", "view": "v-overbought"}]}},
 ))
 
+# 17 -------------------------------------------------------------------------
+T.append(transcript(
+    "17-now-lists-undo-ack",
+    "v2 (from the agent-writability measurement): welcome and results carry the "
+    "authority's `now`; `log` takes `within_ms`; `list` of series omits bar data unless "
+    "`full`; an applied undo's ack says which entry it undid.",
+    ["capability", "query", "time", "undo"],
+    [
+        send("h", {"type": "hello", "protocol": "qp/0", "principal": "host", "surface": {"kind": "headless"}},
+             [ex("h", {"type": "welcome", "now": T0})]),
+        hello("a", "arkin", "desktop"),
+        send("a", cmd("c1", [{"op": "set_params", "series": "rsi14", "params": {"period": 10}}]),
+             [ex("a", ack("c1", seq=1))]),
+        send("h", {"type": "clock", "now": T0 + 45 * 60000}, []),
+        send("a", cmd("c2", [{"op": "set_params", "series": "macd", "params": {"fast": 10}}]),
+             [ex("a", ack("c2", seq=2))]),
+        send("a", query("q1", {"kind": "log", "within_ms": 30 * 60000}),
+             [ex("a", {"type": "result", "id": "q1", "seq": 2, "now": T0 + 45 * 60000,
+                       "data": {"kind": "log", "entries": [{"seq": 2}]}})]),
+        send("a", query("q2", {"kind": "list", "collection": "series"}),
+             [ex("a", result("q2", {"kind": "items", "collection": "series", "items": [
+                 {"id": "px", "data": "$absent"}, {"id": "rsi14"}, {"id": "macd"}, {"id": "bb20"}]}))]),
+        send("a", cmd("c3", [{"op": "undo"}]), [ex("a", ack("c3", seq=3, undoes=2))]),
+    ],
+    final={"log_len": 3},
+))
+
 
 def main():
     os.makedirs(OUT, exist_ok=True)

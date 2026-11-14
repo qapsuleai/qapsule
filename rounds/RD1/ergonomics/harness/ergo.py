@@ -198,8 +198,11 @@ def results(c, kind):
 
 
 def answer_text(answer):
+    """The agent's answer, with Turkish decimal commas normalized (117,66 -> 117.66)."""
+    import re
     if answer and os.path.exists(answer):
-        return open(answer, encoding="utf-8").read()
+        text = open(answer, encoding="utf-8").read()
+        return re.sub(r"(\d),(\d)", r"\1.\2", text)
     return ""
 
 

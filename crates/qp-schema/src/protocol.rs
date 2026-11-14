@@ -132,6 +132,9 @@ pub enum ServerMsg {
         permissions: Permissions,
         /// Current log position.
         seq: Seq,
+        /// The authority's current time (from the last `clock`), epoch ms. Use it for
+        /// relative questions ("in the last 30 minutes").
+        now: TimestampMs,
         /// Authority epoch: increases every time the document is handed over to a new
         /// authority (server -> device or back). Log positions are only comparable
         /// within one epoch lineage; see `docs/PROTOCOL.md` §8.4.
@@ -159,6 +162,9 @@ pub enum ServerMsg {
         /// The proposal id, when `status` is `proposed`.
         #[serde(default, skip_serializing_if = "Option::is_none")]
         proposal: Option<String>,
+        /// For an applied `undo`: the log position that was undone.
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        undoes: Option<Seq>,
     },
     /// Reply to `query` and `input`.
     Result {
@@ -166,6 +172,8 @@ pub enum ServerMsg {
         id: String,
         /// Log position the answer reflects.
         seq: Seq,
+        /// The authority's current time, epoch ms.
+        now: TimestampMs,
         /// The answer.
         data: QueryResult,
     },
@@ -397,6 +405,9 @@ pub struct Target {
     /// Series id (e.g. the series whose value matters).
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub series: Option<String>,
+    /// Output or field of the series, e.g. `"v"` (volume of a bar series), `"signal"`.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub output: Option<String>,
     /// Document item id (finding, fact, capsule...).
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub item: Option<String>,
@@ -971,6 +982,10 @@ pub enum Query {
         /// Proposal state filter (proposals only).
         #[serde(default, skip_serializing_if = "Option::is_none")]
         state: Option<ProposalState>,
+        /// Include bulky data (the bars of bar series). Default false: series are listed
+        /// without `data`; read values with the `study` or `at` query, or `get` one item.
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        full: Option<bool>,
     },
     /// The whole document and its log position (a snapshot, e.g. for hand-over).
     Document {},
@@ -985,6 +1000,10 @@ pub enum Query {
         /// Entries at or before this time.
         #[serde(default, skip_serializing_if = "Option::is_none")]
         until_t: Option<TimestampMs>,
+        /// Entries from the last this-many milliseconds (relative to `now`), e.g.
+        /// `1800000` for "the last 30 minutes".
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        within_ms: Option<u64>,
         /// Only entries by this principal.
         #[serde(default, skip_serializing_if = "Option::is_none")]
         author: Option<String>,

@@ -1,0 +1,1 @@
+attempt1: direct set_params on macd {fast:8,slow:21,signal:5} -> applied, verified with get. Assumed series id 'macd' from spec example and order fast/slow/signal; worked. Spec clear.

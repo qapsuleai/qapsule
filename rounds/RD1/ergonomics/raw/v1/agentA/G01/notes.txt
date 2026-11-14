@@ -1,0 +1,1 @@
+attempt1: list series/views, add_study id rsi7 (rsi, px, period 7) show view main with rsi14 -> applied, layer added in panel 1 (verified with get). Minor: new layer has no color/y encoding unlike rsi14. Spec clear.

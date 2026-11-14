@@ -1,0 +1,1 @@
+Üç adımlı anlatım (fiyat, RSI, Bollinger) doğrudan eklenemedi; prop-5 numaralı öneri olarak onayınızı bekliyor.

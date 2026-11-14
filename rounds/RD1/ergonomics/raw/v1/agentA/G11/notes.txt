@@ -1,0 +1,1 @@
+attempt1: attention + screen queries for arkin from scout -> viewport 120-199 (default initial range, no input yet, no tap focus). Unclear whether 'now looking' should be flagged as default rather than reported; spec §4.6 explains default.

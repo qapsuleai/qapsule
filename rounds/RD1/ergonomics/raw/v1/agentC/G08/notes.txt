@@ -1,0 +1,1 @@
+attempt1: list facts/findings + add_finding with fact-rsi-cross70, capsule; proposed (prop-5) as expected for proposer. Unclear: whether a duplicate-claim finding already exists (fnd-overbought has similar claim) - spec silent; finding ids/facts had to be discovered by query.

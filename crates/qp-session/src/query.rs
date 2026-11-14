@@ -254,7 +254,11 @@ impl Session {
                     item,
                 })
             }
-            Query::List { collection, state } => {
+            Query::List {
+                collection,
+                state,
+                full,
+            } => {
                 if state.is_some() && *collection != Collection::Proposals {
                     return Err(invalid("`state` filters proposals only", ptr(qp, "state")));
                 }
@@ -268,6 +272,21 @@ impl Session {
                 } else {
                     collection_items(&self.doc, *collection)
                 };
+                let items = if full.unwrap_or(false) || *collection != Collection::Series {
+                    items
+                } else {
+                    // Bars are bulky: list series without their data (v2, from the
+                    // agent-writability measurement); `get` or `full: true` returns them.
+                    items
+                        .into_iter()
+                        .map(|mut v| {
+                            if let Some(o) = v.as_object_mut() {
+                                o.remove("data");
+                            }
+                            v
+                        })
+                        .collect()
+                };
                 Ok(QueryResult::Items {
                     collection: *collection,
                     items,
@@ -280,15 +299,21 @@ impl Session {
                 after_seq,
                 since_t,
                 until_t,
+                within_ms,
                 author,
                 limit,
             } => {
+                let from_rel = within_ms.map(|w| {
+                    self.clock
+                        .saturating_sub(i64::try_from(w).unwrap_or(i64::MAX))
+                });
                 let mut entries: Vec<_> = self
                     .log
                     .iter()
                     .filter(|e| after_seq.is_none_or(|s| e.seq > s))
                     .filter(|e| since_t.is_none_or(|t| e.at >= t))
                     .filter(|e| until_t.is_none_or(|t| e.at <= t))
+                    .filter(|e| from_rel.is_none_or(|t| e.at >= t))
                     .filter(|e| author.as_ref().is_none_or(|a| &e.author == a))
                     .cloned()
                     .collect();
@@ -749,6 +774,7 @@ impl Session {
                         view: Some(view.id.clone()),
                         panel: Some(*panel),
                         series: None,
+                        output: None,
                         item: None,
                         from_bar: Some(*bar),
                         to_bar: Some(*bar),

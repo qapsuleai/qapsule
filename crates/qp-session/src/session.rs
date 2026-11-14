@@ -524,6 +524,7 @@ impl Session {
                         ServerMsg::Result {
                             id,
                             seq: self.seq(),
+                            now: self.clock(),
                             data,
                         },
                     )],
@@ -558,6 +559,7 @@ impl Session {
                             ServerMsg::Result {
                                 id,
                                 seq: self.seq(),
+                                now: self.clock(),
                                 data,
                             },
                         )];
@@ -577,6 +579,7 @@ impl Session {
                             seq: None,
                             created: vec![did],
                             proposal: None,
+                            undoes: None,
                         },
                     )];
                     v.append(&mut events);
@@ -659,6 +662,7 @@ impl Session {
                 role: p.role,
                 permissions: permissions(p.role),
                 seq: self.seq(),
+                now: self.clock(),
                 epoch: self.epoch,
                 profile,
                 features: granted,
@@ -825,6 +829,7 @@ impl Session {
                     seq: Some(seq),
                     created,
                     proposal: None,
+                    undoes,
                 },
             )];
             lines.extend(self.settle(seq));
@@ -898,6 +903,7 @@ impl Session {
                 seq: Some(seq),
                 created,
                 proposal: Some(pid),
+                undoes: None,
             },
         )];
         lines.extend(self.settle(seq));
@@ -992,6 +998,7 @@ impl Session {
                 seq: Some(seq),
                 created,
                 proposal: None,
+                undoes: None,
             },
         )];
         lines.extend(self.settle(seq));
@@ -1535,6 +1542,7 @@ fn ack(id: String, status: AckStatus) -> ServerMsg {
         seq: None,
         created: Vec::new(),
         proposal: None,
+        undoes: None,
     }
 }
 

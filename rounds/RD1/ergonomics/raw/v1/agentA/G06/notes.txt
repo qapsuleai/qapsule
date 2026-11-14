@@ -1,0 +1,1 @@
+attempt1: list series then study query rsi14 last 50 reduce max -> 78.115 at bar 154. Series ids unknown beforehand (guessed rsi14 from examples); clear spec.

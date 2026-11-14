@@ -1,0 +1,3 @@
+attempt1: discovery queries (list series dumps all bar data, too verbose; views; attention). 
+attempt2: get fact-rsi-cross70 -> bar 150; study values to check. Note bar 147 also crosses 70 by the §5.1 definition (66.3 -> 71.7), but fact says 150 (latest cross); I used 150. Last bar 199 (count 200).
+attempt3: attend with two steps (rsi14 panel1 bar150; px panel0 bar199 for volume); ack delivered, directive visible in attention query. Unclear: no 'volume' series/panel; volume is the v field of px so target is px, as in spec example.

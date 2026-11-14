@@ -1,0 +1,4 @@
+{"conn":"c","msg":{"type":"hello","protocol":"qp/0","principal":"arkin","surface":{"kind":"desktop"}}}
+{"conn":"c","msg":{"type":"query","id":"q0","query":{"kind":"screen"}}}
+{"conn":"c","msg":{"type":"input","id":"i1","gesture":{"kind":"zoom","view":"main","factor":2.0}}}
+{"conn":"c","msg":{"type":"query","id":"q1","query":{"kind":"screen"}}}

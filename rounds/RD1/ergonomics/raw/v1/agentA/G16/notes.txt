@@ -1,0 +1,1 @@
+attempt1: remove id bb20 (guessed id from spec examples, confirmed via list) -> applied, series gone; layer removal automatic per spec. No problems.

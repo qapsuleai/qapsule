@@ -1,0 +1,1 @@
+attempt1: reject_finding fnd-overbought with note (id guessed from spec example, confirmed by list); applied seq 5. Spec fine; unclear whether 'reason' vs 'note' both needed (used both).

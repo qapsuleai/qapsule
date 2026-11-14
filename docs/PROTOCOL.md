@@ -116,12 +116,14 @@ Her bağlantının ilk mesajı `hello`dur. Yüzey kendini tanıtır; otorite pro
 ```json
 {"type":"welcome","protocol":"qp/0","doc":"doc-thyao","principal":"arkin","role":"owner",
  "permissions":{"read":true,"write":true,"propose":true,"decide":true,"attend":true,"feed":false},
- "seq":4,"epoch":0,
+ "seq":4,"now":1760003900000,"epoch":0,
  "profile":{"depth":"sentence","series_data":false,"max_points":0,"max_glyphs":1,"speech":false},
  "limits":{"max_message_bytes":1048576,"max_ops":64,"max_bars":10000,"max_subscriptions":32,"max_string":4096}}
 ```
 
 - `surface.kind`: `desktop` | `phone` | `watch` | `voice` | `headless`.
+- `welcome.now`: otoritenin şimdiki zamanı (son `clock`). "Son yarım saat" gibi göreli
+  sorular için buradan ya da her `result`'taki `now`'dan başlanır.
 - `surface.max_depth`: yüzey türünün izin verdiğinden daha sığ bir üst sınır istemek için.
 - `features`: isteğe bağlı özellikler (`"attention"`, `"narrative"`). v0 otoritesi ikisini de
   destekler; tanımadığı özelliği sessizce dışarıda bırakır.
@@ -156,6 +158,7 @@ Dokümanı değiştirmenin **tek** yolu. İnsan hareketi de ajan çağrısı da 
 - Bir komut ayrıştırılamasa da (`schema` hatası) mesajda okunabilen bir `id` varsa hata
   o `id` ile döner.
 - `ack.status = "proposed"` ise `ack.proposal` öneri kimliğidir ve doküman değişmemiştir.
+- Uygulanan bir `undo` için `ack.undoes` geri alınan girdinin konumudur.
 
 İşlemler (`Op`, alan `"op"`) — ayrıntı §5.
 
@@ -180,7 +183,8 @@ yükler. Değişim türleri (`ChangeOp`) §5.3'te.
 ### 4.4 Sorgu — `query` → `result`
 
 Anlamsal okuma; dokümanı asla değiştirmez. Cevap `result.data` içinde, `kind` ile
-etiketli; `result.seq` cevabın yansıttığı günlük konumudur.
+etiketli; `result.seq` cevabın yansıttığı günlük konumu, `result.now` otoritenin
+şimdiki zamanıdır.
 
 ```json
 {"type":"query","id":"q2","query":{"kind":"at","series":"px","bar":150}}
@@ -346,6 +350,19 @@ ya da serinin `source.output`'u. Bar serisinde koşul değeri kapanıştır (`c`
 `cross_below`. `lt…ge` son barda değerlendirilir; `cross_above`: önceki bar `< ` sağ taraf
 ve son bar `>=` sağ taraf (önceki değer boşsa yanlış); `cross_below` simetriği.
 
+**Durum mu, kesişim mi?** `lt`/`le`/`gt`/`ge` bir **durumdur** (son barda doğru mu);
+`cross_*` bir **olaydır** (yalnızca kesişimin olduğu barda doğru). Geçersizlik koşulu ve
+niyet tetikleyicisi her girdiden sonra yeniden değerlendirilir; bu yüzden:
+
+| Doğal dil | Koşul |
+|-----------|-------|
+| "fiyat 100'ün altına inerse geçersiz say" / "100'ün altındaysa" | `{"kind":"threshold","series":"px","op":"lt","value":100}` |
+| "RSI 70'i aşağı keserse" | `{"kind":"threshold","series":"rsi14","op":"cross_below","value":70}` |
+| "SMA20, SMA50'yi yukarı keserse haber ver" | `{"kind":"compare","left":"sma20","op":"cross_above","right":"sma50"}` |
+
+Bir durum koşulu, olay kaçırılsa bile (ör. fiyat boşlukla 100'ün altında açılırsa)
+yakalanır; bir kesişim koşulu yalnızca kesişim barında tetiklenir.
+
 ### 5.2 Örnek: üç işlem tek komutta
 
 ```json
@@ -375,14 +392,18 @@ aynı bırakır; köken (`provenance`) otorite tarafından damgalanır
 |--------|---------|---------------------|
 | `describe` | — | `description`: işlemler, sorgular, konular, hesaplar ve varsayılan parametreleri, kişiler ve rolleri, sorananın yetkileri. |
 | `get` | `id` | `item`: öğe ve koleksiyonu. |
-| `list` | `collection`, `state?` | `items`. Koleksiyonlar: `series`, `views`, `facts`, `findings`, `capsules`, `intents`, `narratives`, `proposals`; `state` yalnızca öneriler için. |
+| `list` | `collection`, `state?`, `full?` | `items`. Koleksiyonlar: `series`, `views`, `facts`, `findings`, `capsules`, `intents`, `narratives`, `proposals`; `state` yalnızca öneriler için. Seriler varsayılan olarak **verisiz** listelenir (barlar büyüktür); `full: true` ya da `get` veriyi de verir; değerler için `study`/`at`. |
 | `document` | — | `document`: dokümanın tamamı (anlık görüntü; devir için). |
-| `log` | `after_seq?`, `since_t?`, `until_t?`, `author?`, `limit?` | `log`: girdiler, `seq` artan. `limit` en son n girdiyi verir. |
+| `log` | `after_seq?`, `since_t?`, `until_t?`, `within_ms?`, `author?`, `limit?` | `log`: girdiler, `seq` artan. `within_ms`: `now`'dan geriye bu kadar milisaniye ("son 30 dakika" = `1800000`). `limit` en son n girdiyi verir. |
 | `study` | `series`, `range?`, `output?`, `reduce?` | `values` (barlarla hizalı, ısınma `null`; K13/K20) ya da `reduced` (`min`, `max`, `mean`, `first`, `last`, `count`; `null`lar atlanır; `min`/`max`/`first`/`last` bar ve zamanı da verir). Bar serisinde çıktılar `o`,`h`,`l`,`c`,`v`. |
 | `at` | `series`, `bar?` ya da `t?` | `at`: OHLCV ve o bar serisine dayanan her hesabın o bardaki değerleri. |
 | `screen` | `principal?` | `screen`: kişinin ekranlı (`desktop`, `phone`, `watch`) her bağlantısı için, bağlantı açılış sırasıyla: görünüm, görünen aralık, sembol ve aralık (görünümün ilk bar serisinden), paneller (panel numarası artan; `series` = o paneldeki katmanların serileri, katman sırasıyla, tekrarsız; `marks` = bütün katmanların işaretleri, katman sırasıyla), olgu barı görünen aralıkta olan bulguların kapsülleri, görünen son barın kapanışı. |
 | `attention` | `principal` | `attention`: kişinin en son etkin ekranlı bağlantısının bakış aralığı (girdi yoksa başlangıç aralığı), son odak (`tap`: görünüm, panel, bar), zamanı, yönergeler. |
 | `present` | `finding?`, `surface?` | `presentation` (§10). `finding` yoksa en önemli canlı bulgu (en yüksek güven; eşitlikte kimlik sırası). |
+
+**Hedef** (`Target`; dikkat ve anlatım adımlarında): `view`, `panel`, `series`, `output`
+(serinin çıktısı ya da bar alanı: hacim için `"v"`), `item` (bulgu, olgu…), `from_bar`,
+`to_bar`. Hepsi isteğe bağlıdır; olabildiğince belirli yazılır.
 
 **Aralık** (`range`): tam olarak bir biçim — `{"last": n}` ya da
 `{"from_bar": a, "to_bar": b}` (kapsayıcı) ya da `{"from_t": …, "to_t": …}`. Barlarla
@@ -614,7 +635,7 @@ kimlikleri, alan adları… Bir komutta hata varsa **hiçbir** işlem uygulanmaz
 Kurallar: her adımın çıktıları **tam olarak** `expect` uzunluğunda ve sırasında olmalıdır;
 her beklenen mesaj gerçek mesajın **alt kümesi** olarak eşleşir (nesnelerde beklenen her
 anahtar eşleşmeli, fazla anahtar serbest; diziler aynı uzunlukta ve öğe öğe; sayılar tam
-eşit; `"$any"` her değerle eşleşir). `final.document` da alt küme eşleşmesidir. Her döküm
+eşit; `"$any"` her değerle eşleşir; bir nesnede değeri `"$absent"` olan anahtar gerçek mesajda **bulunmamalıdır**). `final.document` da alt küme eşleşmesidir. Her döküm
 sonunda koşucu günlüğü baştan oynatır ve dokümanın baytlarının aynı olduğunu denetler.
 
 **Çıktı sırası** (deterministik): önce gönderene cevap; sonra oluşan her girdi için sırayla

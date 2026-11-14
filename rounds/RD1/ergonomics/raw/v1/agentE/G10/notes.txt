@@ -1,0 +1,1 @@
+attempt1: log query (limit 5) + undo with no seq; applied seq 5. Log shows arkin's own latest entry is seq 2 (ema50 add; later entries are by editor/scout), so default-undo targets the user's own change, matching 'my last change'. Ack does not say which seq was undone - had to infer.

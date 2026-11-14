@@ -1,0 +1,2 @@
+attempt1: list pending proposals + (no accept, id unknown) -> saw prop-3.
+attempt2: accept prop-3 -> see result; ids cannot be known before a query, so two shots needed. Spec clear.

@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Qapsule verification harness (R0/T6).
+# Qapsule verification harness (R0/T6, extended in R1/T7).
 #
 # One command, from a clean clone: runs every check, prints a PASS/FAIL/SKIP summary
 # and exits 0 iff no step failed. All steps run even if an earlier one fails.
@@ -14,6 +14,10 @@
 #   7 wasm       cargo build -p qp-wasm --target wasm32-unknown-unknown --profile wasm (+ sizes)
 #   8 hygiene    no secret-looking tracked files; .gitignore has a .env rule
 #   9 browser    shells/web-spike/run.sh (headless Chromium vs golden), optional
+#  10 compute    qp compute: RSI(14) and MACD on the sample, outputs valid StudyOutput
+#  11 digest     cross-target compute digest == fixtures/compute/digest.txt on the host
+#                (aarch64 or x86_64), x86_64 via Rosetta on Apple silicon if available,
+#                and wasm32 in Node (same tool rule as the browser step)
 #
 # Environment:
 #   QP_VERIFY_BROWSER=1  force the browser step (fails if tools are missing)
@@ -204,6 +208,58 @@ step_browser() {
   note "headless Chromium matches golden"
 }
 
+step_compute() {
+  build_qp
+  local out="$tmp/compute"
+  mkdir -p "$out"
+  [ -d "$tmp/schema" ] || "$qp" schema export --out "$tmp/schema"
+  "$qp" compute fixtures/bars/sample.json --study rsi --param period=14 -o "$out/rsi.json"
+  "$qp" compute fixtures/bars/sample.json --study macd -o "$out/macd.json"
+  local f
+  for f in rsi macd; do
+    "$qp" schema validate "$out/$f.json" --type StudyOutput --schema-dir "$tmp/schema" \
+      || fail "$f output is not a valid StudyOutput"
+  done
+  # Warmup is null (K13): RSI(14) starts with exactly 14 nulls; MACD has 3 outputs.
+  grep -q '"rsi":\[\(null,\)\{14\}[0-9]' "$out/rsi.json" || fail "RSI(14) warmup is not 14 nulls"
+  for k in macd signal histogram; do
+    grep -q "\"$k\":\[" "$out/macd.json" || fail "MACD output $k missing"
+  done
+  note "rsi(14), macd: valid StudyOutput"
+}
+
+step_digest() {
+  local want got ran="" mode="${QP_VERIFY_BROWSER:-}"
+  want="$(tr -d '[:space:]' <fixtures/compute/digest.txt)"
+  got="$(cargo run -q --release -p qp-compute --example digest)"
+  echo "host $(uname -m): $got (expected $want)"
+  [ "$got" = "$want" ] || fail "host digest $got != $want"
+  ran="$(uname -m)"
+  if [ "$(uname -s)" = Darwin ] && [ "$(uname -m)" = arm64 ] \
+    && rustup target list --installed 2>/dev/null | grep -q '^x86_64-apple-darwin$' \
+    && arch -x86_64 /usr/bin/true 2>/dev/null; then
+    got="$(cargo run -q --release -p qp-compute --example digest --target x86_64-apple-darwin)"
+    echo "x86_64 (Rosetta): $got"
+    [ "$got" = "$want" ] || fail "x86_64 digest $got != $want"
+    ran="$ran, x86_64"
+  fi
+  local have_tools=1
+  command -v node >/dev/null 2>&1 || have_tools=0
+  if ! command -v wasm-pack >/dev/null 2>&1 && [ ! -x "$HOME/.cargo/bin/wasm-pack" ]; then have_tools=0; fi
+  if [ "$mode" = 0 ] || { [ "$mode" != 1 ] && [ "$have_tools" = 0 ]; }; then
+    echo "wasm32: skipped (QP_VERIFY_BROWSER=${mode:-unset}, tools: $have_tools)"
+    note "$ran: $want; wasm32 skipped"
+    return 0
+  fi
+  local wp pkg="$target_dir/wasm-bench/pkg"
+  wp="$(command -v wasm-pack || echo "$HOME/.cargo/bin/wasm-pack")"
+  "$wp" build crates/qp-wasm --target nodejs --profile wasm --no-opt --out-dir "$pkg"
+  got="$(node -e "console.log(require('$pkg/qp_wasm.js').compute_digest())")"
+  echo "wasm32 (node $(node --version)): $got"
+  [ "$got" = "$want" ] || fail "wasm32 digest $got != $want"
+  note "$ran, wasm32: $want"
+}
+
 # --- run -------------------------------------------------------------------
 
 total_start=$SECONDS
@@ -216,6 +272,8 @@ run_step golden step_golden
 run_step wasm step_wasm
 run_step hygiene step_hygiene
 run_step browser step_browser
+run_step compute step_compute
+run_step digest step_digest
 total=$((SECONDS - total_start))
 
 failed=0

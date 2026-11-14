@@ -1,0 +1,11 @@
+[package]
+name = "probe_jiff_bundle"
+version = "0.0.0"
+edition = "2021"
+publish = false
+
+[lib]
+crate-type = ["cdylib"]
+
+[dependencies]
+jiff = { version = "0.2.43", default-features = false, features = ["alloc", "tzdb-bundle-always"] }

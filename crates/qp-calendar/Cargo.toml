@@ -1,0 +1,22 @@
+[package]
+name = "qp-calendar"
+description = "Qapsule exchange calendars: bar boundaries aligned to the exchange's time zone and sessions (K14)."
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[dependencies]
+qp-schema = { path = "../qp-schema" }
+
+[dev-dependencies]
+# Generator and oracle for the embedded transition tables (src/tzdata.rs) only; the
+# library itself does not depend on jiff. The bundled tzdb (jiff-tzdb) is pinned by
+# Cargo.lock, so regeneration is reproducible.
+jiff = { version = "0.2.43", default-features = false, features = ["std", "tzdb-bundle-always"] }
+qp-schema = { path = "../qp-schema", features = ["validate"] }
+serde_json = "1.0.154"
+
+[lints]
+workspace = true

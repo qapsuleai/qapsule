@@ -17,7 +17,7 @@ use crate::common::{
 use crate::sim::{Exp, Model, Reconnect, UndoStats, Wire};
 
 #[derive(Clone)]
-struct Roots {
+pub struct Roots {
     series: ExId,
     layers: ExId,
     facts: ExId,

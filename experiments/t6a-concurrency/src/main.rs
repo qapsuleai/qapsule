@@ -80,13 +80,25 @@ fn main() {
             } else {
                 reps
             };
-            let rs = vec![
-                timed::<ABase>(&w, &doc, reps),
-                timed::<AStrict>(&w, &doc, reps),
-                timed::<ANoBase>(&w, &doc, reps),
-                timed::<AmModel>(&w, &doc, reps),
-                timed::<LoroModel>(&w, &doc, reps),
-            ];
+            // ONLY=<substring> restricts the run to matching models (side measurements).
+            let only = std::env::var("ONLY").unwrap_or_default();
+            let want = |n: &str| only.is_empty() || n.contains(&only);
+            let mut rs = Vec::new();
+            if want(ABase::NAME) {
+                rs.push(timed::<ABase>(&w, &doc, reps));
+            }
+            if want(AStrict::NAME) {
+                rs.push(timed::<AStrict>(&w, &doc, reps));
+            }
+            if want(ANoBase::NAME) {
+                rs.push(timed::<ANoBase>(&w, &doc, reps));
+            }
+            if want(AmModel::NAME) {
+                rs.push(timed::<AmModel>(&w, &doc, reps));
+            }
+            if want(LoroModel::NAME) {
+                rs.push(timed::<LoroModel>(&w, &doc, reps));
+            }
             for (r, times) in rs {
                 println!(
                     "{:>6} ops win {:>5} {:<22} conv={} anom={:>4} applied={:>5} retried={:>4} refused={:>4} up_med={:>5}B down_med={:>5}B hist={:>9}B gz={:>8}B rc_up={:>7}B rc_down={:>8}B t={:>10.0}us",
@@ -98,7 +110,8 @@ fn main() {
                 all.push(serde_json::json!({"result": r, "times_us": times}));
             }
         }
-        std::fs::write(dir.join("runs.json"), serde_json::to_string_pretty(&all).expect("j"))
+        let name = std::env::var("RUNS_OUT").unwrap_or_else(|_| "runs.json".into());
+        std::fs::write(dir.join(name), serde_json::to_string_pretty(&all).expect("j"))
             .expect("write");
     }
 }

@@ -1,0 +1,302 @@
+== C1 — editor offline sets MACD fast=8; arkin sets MACD fast=10, slow=30; editor returns
+  [A-log(base,own-excl)] conv=true anomalies=0 undo=(0, 0, 0)
+     editor set_params     -> Queued
+     arkin  set_params     -> Applied
+     reconnect: set_params: AppliedAfterRetry([Conflict])
+     macd.params = {"fast": 8.0, "signal": 9.0, "slow": 30.0}
+     writer(macd.fast) = editor @seq 2
+     writer(macd.slow) = arkin @seq 1
+  [A-log(no-base)] conv=true anomalies=0 undo=(0, 0, 0)
+     editor set_params     -> Queued
+     arkin  set_params     -> Applied
+     reconnect: set_params: Applied
+     macd.params = {"fast": 8.0, "signal": 9.0, "slow": 30.0}
+     writer(macd.fast) = editor @seq 2
+     writer(macd.slow) = arkin @seq 1
+  [B-automerge] conv=true anomalies=0 undo=(0, 0, 0)
+     editor set_params     -> Applied
+     arkin  set_params     -> Applied
+     reconnect: all changes merged silently; no errors
+     macd.params = {"fast": 8.0, "signal": 9.0, "slow": 30.0}
+     writer(macd.fast) = arkin|editor
+     writer(macd.slow) = arkin
+  [C-loro] conv=true anomalies=0 undo=(0, 0, 0)
+     editor set_params     -> Applied
+     arkin  set_params     -> Applied
+     reconnect: all changes merged silently; no errors
+     macd.params = {"fast": 8.0, "signal": 9.0, "slow": 30.0}
+     writer(macd.fast) = editor
+     writer(macd.slow) = arkin
+== C2 — same round: arkin removes layer 1 (bb20); scout inserts a macd layer at index 2 (before rsi14)
+  [A-log(base,own-excl)] conv=true anomalies=0 undo=(0, 0, 0)
+     arkin  remove_layer   -> Applied
+     scout  add_layer      -> AppliedAfterRetry([Conflict])
+     layers = candle:px, line:macd, line:rsi14, rule:-, line:macd
+  [A-log(no-base)] conv=true anomalies=0 undo=(0, 0, 0)
+     arkin  remove_layer   -> Applied
+     scout  add_layer      -> Applied
+     layers = candle:px, line:rsi14, line:macd, rule:-, line:macd
+  [B-automerge] conv=true anomalies=0 undo=(0, 0, 0)
+     arkin  remove_layer   -> Applied
+     scout  add_layer      -> Applied
+     layers = candle:px, line:macd, line:rsi14, rule:-, line:macd
+  [C-loro] conv=true anomalies=0 undo=(0, 0, 0)
+     arkin  remove_layer   -> Applied
+     scout  add_layer      -> Applied
+     layers = candle:px, line:macd, line:rsi14, rule:-, line:macd
+== C3 — same round: arkin rejects fnd-overbought; scout updates its claim
+  [A-log(base,own-excl)] conv=true anomalies=0 undo=(0, 0, 0)
+     arkin  decide         -> Applied
+     scout  update_finding -> Refused([Invalid, Invalid])
+     capsule = rejected
+     claim = THYAO günlükte RSI(14) aşırı alım bölgesine girdi; momentum güçlü.
+     ledger = [("rejected", "THYAO günlükte RSI(14) aşırı alım bölgesine girdi; momentum güçlü.")]
+     writer(capsule.state) = arkin @seq 1
+     writer(finding.claim) = initial document
+  [A-log(no-base)] conv=true anomalies=0 undo=(0, 0, 0)
+     arkin  decide         -> Applied
+     scout  update_finding -> Refused([Invalid, Invalid])
+     capsule = rejected
+     claim = THYAO günlükte RSI(14) aşırı alım bölgesine girdi; momentum güçlü.
+     ledger = [("rejected", "THYAO günlükte RSI(14) aşırı alım bölgesine girdi; momentum güçlü.")]
+     writer(capsule.state) = arkin @seq 1
+     writer(finding.claim) = initial document
+  [B-automerge] conv=true anomalies=1 undo=(0, 0, 0)
+     arkin  decide         -> Applied
+     scout  update_finding -> Applied
+     capsule = rejected
+     claim = Momentum çok güçlü, hedef 120.
+     ledger = [("rejected", "THYAO günlükte RSI(14) aşırı alım bölgesine girdi; momentum güçlü.")]
+     writer(capsule.state) = arkin
+     writer(finding.claim) = scout
+  [C-loro] conv=true anomalies=1 undo=(0, 0, 0)
+     arkin  decide         -> Applied
+     scout  update_finding -> Applied
+     capsule = rejected
+     claim = Momentum çok güçlü, hedef 120.
+     ledger = [("rejected", "THYAO günlükte RSI(14) aşırı alım bölgesine girdi; momentum güçlü.")]
+     writer(capsule.state) = arkin
+     writer(finding.claim) = scout
+== C3b — same round, reverse order: scout updates the claim first, then arkin rejects
+  [A-log(base,own-excl)] conv=true anomalies=0 undo=(0, 0, 0)
+     scout  update_finding -> Applied
+     arkin  decide         -> AppliedAfterRetry([Conflict])
+     capsule = rejected
+     claim = Momentum çok güçlü, hedef 120.
+     ledger = [("rejected", "Momentum çok güçlü, hedef 120.")]
+  [A-log(no-base)] conv=true anomalies=0 undo=(0, 0, 0)
+     scout  update_finding -> Applied
+     arkin  decide         -> Applied
+     capsule = rejected
+     claim = Momentum çok güçlü, hedef 120.
+     ledger = [("rejected", "Momentum çok güçlü, hedef 120.")]
+  [B-automerge] conv=true anomalies=1 undo=(0, 0, 0)
+     scout  update_finding -> Applied
+     arkin  decide         -> Applied
+     capsule = rejected
+     claim = Momentum çok güçlü, hedef 120.
+     ledger = [("rejected", "THYAO günlükte RSI(14) aşırı alım bölgesine girdi; momentum güçlü.")]
+  [C-loro] conv=true anomalies=1 undo=(0, 0, 0)
+     scout  update_finding -> Applied
+     arkin  decide         -> Applied
+     capsule = rejected
+     claim = Momentum çok güçlü, hedef 120.
+     ledger = [("rejected", "THYAO günlükte RSI(14) aşırı alım bölgesine girdi; momentum güçlü.")]
+== C4 — editor offline adds sma20 (period 50, shown); arkin adds sma20 (period 20, shown); editor returns
+  [A-log(base,own-excl)] conv=true anomalies=0 undo=(0, 0, 0)
+     editor add_study      -> Queued
+     arkin  add_study      -> Applied
+     reconnect: add_study: Refused([Duplicate, Duplicate])
+     layers drawing sma20 = 1
+     sma20 = Some({"period": 20.0})
+     writer(sma20.period) = arkin @seq 1
+  [A-log(no-base)] conv=true anomalies=0 undo=(0, 0, 0)
+     editor add_study      -> Queued
+     arkin  add_study      -> Applied
+     reconnect: add_study: Refused([Duplicate, Duplicate])
+     layers drawing sma20 = 1
+     sma20 = Some({"period": 20.0})
+     writer(sma20.period) = arkin @seq 1
+  [B-automerge] conv=true anomalies=0 undo=(0, 0, 0)
+     editor add_study      -> Applied
+     arkin  add_study      -> Applied
+     reconnect: all changes merged silently; no errors
+     layers drawing sma20 = 2
+     sma20 = Some({"period": 50.0})
+     writer(sma20.period) = editor
+  [C-loro] conv=true anomalies=0 undo=(0, 0, 0)
+     editor add_study      -> Applied
+     arkin  add_study      -> Applied
+     reconnect: all changes merged silently; no errors
+     layers drawing sma20 = 2
+     sma20 = Some({"period": 50.0})
+     writer(sma20.period) = editor
+== C5 — rsi7 exists; editor offline adds a layer and an intent on rsi7; arkin removes rsi7; editor returns
+  [A-log(base,own-excl)] conv=true anomalies=0 undo=(0, 0, 0)
+     arkin  add_study      -> Applied
+     editor add_layer      -> Queued
+     editor add_intent     -> Queued
+     arkin  remove_series  -> Applied
+     reconnect: add_layer: Refused([NotFound, NotFound])
+     reconnect: add_intent: Refused([NotFound, NotFound])
+     intents on rsi7 = 0
+     layers drawing rsi7 = 0
+     rsi7 exists = false
+  [A-log(no-base)] conv=true anomalies=0 undo=(0, 0, 0)
+     arkin  add_study      -> Applied
+     editor add_layer      -> Queued
+     editor add_intent     -> Queued
+     arkin  remove_series  -> Applied
+     reconnect: add_layer: Refused([NotFound, NotFound])
+     reconnect: add_intent: Refused([NotFound, NotFound])
+     intents on rsi7 = 0
+     layers drawing rsi7 = 0
+     rsi7 exists = false
+  [B-automerge] conv=true anomalies=2 undo=(0, 0, 0)
+     arkin  add_study      -> Applied
+     editor add_layer      -> Applied
+     editor add_intent     -> Applied
+     arkin  remove_series  -> Applied
+     reconnect: all changes merged silently; no errors
+     intents on rsi7 = 1
+     layers drawing rsi7 = 1
+     rsi7 exists = false
+  [C-loro] conv=true anomalies=2 undo=(0, 0, 0)
+     arkin  add_study      -> Applied
+     editor add_layer      -> Applied
+     editor add_intent     -> Applied
+     arkin  remove_series  -> Applied
+     reconnect: all changes merged silently; no errors
+     intents on rsi7 = 1
+     layers drawing rsi7 = 1
+     rsi7 exists = false
+== C6 — arkin sets MACD fast=10; scout (having seen it) sets MACD fast=14; arkin undoes
+  [A-log(base,own-excl)] conv=true anomalies=0 undo=(0, 1, 0)
+     arkin  set_params     -> Applied
+     scout  set_params     -> Applied
+     arkin  undo           -> Refused([UndoConflict])
+     macd.params = {"fast": 14.0, "signal": 9.0, "slow": 26.0}
+     writer(macd.fast) = scout @seq 2
+  [A-log(no-base)] conv=true anomalies=0 undo=(0, 1, 0)
+     arkin  set_params     -> Applied
+     scout  set_params     -> Applied
+     arkin  undo           -> Refused([UndoConflict])
+     macd.params = {"fast": 14.0, "signal": 9.0, "slow": 26.0}
+     writer(macd.fast) = scout @seq 2
+  [B-automerge] conv=true anomalies=0 undo=(0, 1, 0)
+     arkin  set_params     -> Applied
+     scout  set_params     -> Applied
+     arkin  undo           -> Refused([UndoConflict])
+     macd.params = {"fast": 14.0, "signal": 9.0, "slow": 26.0}
+     writer(macd.fast) = scout
+  [C-loro] conv=true anomalies=0 undo=(1, 0, 1)
+     arkin  set_params     -> Applied
+     scout  set_params     -> Applied
+     arkin  undo           -> Applied
+     macd.params = {"fast": 12.0, "signal": 9.0, "slow": 26.0}
+     writer(macd.fast) = arkin
+== C6b — arkin sets MACD fast=10; scout sets MACD slow=30 (same item, other field); arkin undoes
+  [A-log(base,own-excl)] conv=true anomalies=0 undo=(0, 1, 0)
+     arkin  set_params     -> Applied
+     scout  set_params     -> Applied
+     arkin  undo           -> Refused([UndoConflict])
+     macd.params = {"fast": 10.0, "signal": 9.0, "slow": 30.0}
+  [A-log(no-base)] conv=true anomalies=0 undo=(0, 1, 0)
+     arkin  set_params     -> Applied
+     scout  set_params     -> Applied
+     arkin  undo           -> Refused([UndoConflict])
+     macd.params = {"fast": 10.0, "signal": 9.0, "slow": 30.0}
+  [B-automerge] conv=true anomalies=0 undo=(1, 0, 0)
+     arkin  set_params     -> Applied
+     scout  set_params     -> Applied
+     arkin  undo           -> Applied
+     macd.params = {"fast": 12.0, "signal": 9.0, "slow": 30.0}
+  [C-loro] conv=true anomalies=0 undo=(1, 0, 0)
+     arkin  set_params     -> Applied
+     scout  set_params     -> Applied
+     arkin  undo           -> Applied
+     macd.params = {"fast": 12.0, "signal": 9.0, "slow": 30.0}
+== C6c — arkin sets MACD fast=10; scout sets RSI14 period=7 (other item); arkin undoes
+  [A-log(base,own-excl)] conv=true anomalies=0 undo=(1, 0, 0)
+     arkin  set_params     -> Applied
+     scout  set_params     -> Applied
+     arkin  undo           -> Applied
+     macd.params = {"fast": 12.0, "signal": 9.0, "slow": 26.0}
+     rsi14.params = {"period": 7.0}
+  [A-log(no-base)] conv=true anomalies=0 undo=(1, 0, 0)
+     arkin  set_params     -> Applied
+     scout  set_params     -> Applied
+     arkin  undo           -> Applied
+     macd.params = {"fast": 12.0, "signal": 9.0, "slow": 26.0}
+     rsi14.params = {"period": 7.0}
+  [B-automerge] conv=true anomalies=0 undo=(1, 0, 0)
+     arkin  set_params     -> Applied
+     scout  set_params     -> Applied
+     arkin  undo           -> Applied
+     macd.params = {"fast": 12.0, "signal": 9.0, "slow": 26.0}
+     rsi14.params = {"period": 7.0}
+  [C-loro] conv=true anomalies=0 undo=(1, 0, 0)
+     arkin  set_params     -> Applied
+     scout  set_params     -> Applied
+     arkin  undo           -> Applied
+     macd.params = {"fast": 12.0, "signal": 9.0, "slow": 26.0}
+     rsi14.params = {"period": 7.0}
+== C6d — arkin sets MACD fast=10; editor OFFLINE sets MACD fast=14 (never saw arkin's); arkin undoes; editor returns
+  [A-log(base,own-excl)] conv=true anomalies=0 undo=(1, 0, 0)
+     editor set_params     -> Queued
+     arkin  set_params     -> Applied
+     arkin  undo           -> Applied
+     reconnect: set_params: AppliedAfterRetry([Conflict])
+     macd.params = {"fast": 14.0, "signal": 9.0, "slow": 26.0}
+     writer(macd.fast) = editor @seq 3
+  [A-log(no-base)] conv=true anomalies=0 undo=(1, 0, 0)
+     editor set_params     -> Queued
+     arkin  set_params     -> Applied
+     arkin  undo           -> Applied
+     reconnect: set_params: Applied
+     macd.params = {"fast": 14.0, "signal": 9.0, "slow": 26.0}
+     writer(macd.fast) = editor @seq 3
+  [B-automerge] conv=true anomalies=0 undo=(1, 0, 0)
+     editor set_params     -> Applied
+     arkin  set_params     -> Applied
+     arkin  undo           -> Applied
+     reconnect: all changes merged silently; no errors
+     macd.params = {"fast": 12.0, "signal": 9.0, "slow": 26.0}
+     writer(macd.fast) = editor|arkin
+  [C-loro] conv=true anomalies=0 undo=(1, 0, 0)
+     editor set_params     -> Applied
+     arkin  set_params     -> Applied
+     arkin  undo           -> Applied
+     reconnect: all changes merged silently; no errors
+     macd.params = {"fast": 12.0, "signal": 9.0, "slow": 26.0}
+     writer(macd.fast) = arkin
+   100 ops win    10 A-log(base,own-excl)   conv=true anom=   0 applied=   82 retried=   7 refused=   6 up_med=  134B down_med=  361B hist=    75480B gz=   10041B rc_up=   2324B rc_down=   19924B t=      1137us
+   100 ops win    10 A-log(base,strict)     conv=true anom=   0 applied=   82 retried=   7 refused=   6 up_med=  134B down_med=  361B hist=    75480B gz=   10041B rc_up=   2324B rc_down=   19933B t=       994us
+   100 ops win    10 A-log(no-base)         conv=true anom=   0 applied=   89 retried=   0 refused=   6 up_med=  120B down_med=  361B hist=    75472B gz=   10037B rc_up=   1815B rc_down=   19330B t=       895us
+   100 ops win    10 B-automerge            conv=true anom=   1 applied=   92 retried=   0 refused=   2 up_med=  186B down_med=  199B hist=     8906B gz=    8528B rc_up=   2407B rc_down=    7767B t=     11027us
+   100 ops win    10 C-loro                 conv=true anom=   1 applied=   96 retried=   0 refused=   0 up_med=  509B down_med=  549B hist=    28778B gz=   16067B rc_up=   1704B rc_down=    2269B t=      5113us
+  1000 ops win    10 A-log(base,own-excl)   conv=true anom=   0 applied=  788 retried= 102 refused=  20 up_med=  133B down_med=  349B hist=   570196B gz=   42431B rc_up=   1616B rc_down=   15780B t=     10170us
+  1000 ops win    10 A-log(base,strict)     conv=true anom=   0 applied=  788 retried= 102 refused=  20 up_med=  133B down_med=  349B hist=   570196B gz=   42431B rc_up=   1616B rc_down=   15784B t=      9823us
+  1000 ops win    10 A-log(no-base)         conv=true anom=   0 applied=  891 retried=   0 refused=  19 up_med=  116B down_med=  349B hist=   570908B gz=   42454B rc_up=   1228B rc_down=   15355B t=      7616us
+  1000 ops win    10 B-automerge            conv=true anom=   3 applied=  905 retried=   0 refused=   6 up_med=  193B down_med=  195B hist=    22965B gz=   22993B rc_up=   2019B rc_down=    3816B t=    127756us
+  1000 ops win    10 C-loro                 conv=true anom=   1 applied=  913 retried=   0 refused=   0 up_med=  538B down_med=  544B hist=    89159B gz=   60961B rc_up=    986B rc_down=    1975B t=    113580us
+  1000 ops win   100 A-log(base,own-excl)   conv=true anom=   0 applied=  812 retried=  86 refused=  18 up_med=  142B down_med=  349B hist=   561293B gz=   41761B rc_up=  20569B rc_down=  183388B t=     12253us
+  1000 ops win   100 A-log(base,strict)     conv=true anom=   0 applied=  812 retried=  86 refused=  18 up_med=  143B down_med=  349B hist=   561301B gz=   41774B rc_up=  21440B rc_down=  187156B t=     12247us
+  1000 ops win   100 A-log(no-base)         conv=true anom=   0 applied=  898 retried=   0 refused=  18 up_med=  115B down_med=  349B hist=   561821B gz=   41792B rc_up=  12730B rc_down=  165162B t=      8209us
+  1000 ops win   100 B-automerge            conv=true anom=   8 applied=  910 retried=   0 refused=   6 up_med=  181B down_med=  189B hist=    23041B gz=   23069B rc_up=  15046B rc_down=   16588B t=    124037us
+  1000 ops win   100 C-loro                 conv=true anom=   6 applied=  918 retried=   0 refused=   0 up_med=  456B down_med=  526B hist=    87711B gz=   59899B rc_up=   6470B rc_down=   15131B t=     88056us
+ 10000 ops win    10 A-log(base,own-excl)   conv=true anom=   0 applied= 7885 retried= 997 refused= 106 up_med=  132B down_med=  354B hist=  5585299B gz=  391282B rc_up=   1997B rc_down=   18837B t=    253796us
+ 10000 ops win    10 A-log(base,strict)     conv=true anom=   0 applied= 7885 retried= 997 refused= 106 up_med=  132B down_med=  354B hist=  5585299B gz=  391282B rc_up=   1997B rc_down=   18852B t=    249938us
+ 10000 ops win    10 A-log(no-base)         conv=true anom=   0 applied= 8883 retried=   0 refused= 105 up_med=  117B down_med=  354B hist=  5586639B gz=  391324B rc_up=   1402B rc_down=   17972B t=    100881us
+ 10000 ops win    10 B-automerge            conv=true anom=   3 applied= 8944 retried=   0 refused=  28 up_med=  189B down_med=  189B hist=   157649B gz=  157717B rc_up=   5603B rc_down=    7851B t=   2658864us
+ 10000 ops win    10 C-loro                 conv=true anom=   5 applied= 8984 retried=   0 refused=   0 up_med=  541B down_med=  541B hist=   698719B gz=  517533B rc_up=   1245B rc_down=    2032B t=  10224816us
+ 10000 ops win   100 A-log(base,own-excl)   conv=true anom=   0 applied= 7907 retried= 973 refused= 104 up_med=  133B down_med=  354B hist=  5572609B gz=  389122B rc_up=  20095B rc_down=  189833B t=    255297us
+ 10000 ops win   100 A-log(base,strict)     conv=true anom=   0 applied= 7907 retried= 973 refused= 104 up_med=  133B down_med=  354B hist=  5572611B gz=  389111B rc_up=  20330B rc_down=  193252B t=    253100us
+ 10000 ops win   100 A-log(no-base)         conv=true anom=   0 applied= 8880 retried=   0 refused= 104 up_med=  117B down_med=  354B hist=  5573350B gz=  389222B rc_up=  12418B rc_down=  167835B t=    102140us
+ 10000 ops win   100 B-automerge            conv=true anom=  12 applied= 8944 retried=   0 refused=  28 up_med=  189B down_med=  189B hist=   157731B gz=  157799B rc_up=  18219B rc_down=   41039B t=   2359075us
+ 10000 ops win   100 C-loro                 conv=true anom=  13 applied= 8986 retried=   0 refused=   0 up_med=  535B down_med=  539B hist=   697696B gz=  516382B rc_up=   7340B rc_down=   16044B t=   9590300us
+ 10000 ops win  1000 A-log(base,own-excl)   conv=true anom=   0 applied= 8081 retried= 816 refused=  92 up_med=  142B down_med=  354B hist=  5452651B gz=  376599B rc_up= 197096B rc_down= 2748387B t=    400515us
+ 10000 ops win  1000 A-log(base,strict)     conv=true anom=   0 applied= 8081 retried= 816 refused=  92 up_med=  144B down_med=  354B hist=  5452706B gz=  376626B rc_up= 204526B rc_down= 3050097B t=    425356us
+ 10000 ops win  1000 A-log(no-base)         conv=true anom=   0 applied= 8898 retried=   0 refused=  91 up_med=  117B down_med=  354B hist=  5454437B gz=  376898B rc_up= 119910B rc_down= 1605990B t=    121829us
+ 10000 ops win  1000 B-automerge            conv=true anom=  50 applied= 8950 retried=   0 refused=  25 up_med=  181B down_med=  187B hist=   156792B gz=  156860B rc_up= 137173B rc_down=   94163B t=   2119782us
+ 10000 ops win  1000 C-loro                 conv=true anom=  33 applied= 8988 retried=   0 refused=   0 up_med=  450B down_med=  519B hist=   676222B gz=  499660B rc_up=  62725B rc_down=  156428B t=   7300631us

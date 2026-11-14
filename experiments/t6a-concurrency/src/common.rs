@@ -31,12 +31,6 @@ impl Who {
     pub fn idx(self) -> usize {
         self as usize
     }
-    pub fn from_idx(i: usize) -> Who {
-        ALL[i]
-    }
-    pub fn from_name(s: &str) -> Option<Who> {
-        ALL.iter().copied().find(|w| w.name() == s)
-    }
     /// Only the human may decide (approve/reject) and undo in this scenario.
     pub fn may_decide(self) -> bool {
         self == Who::Arkin
@@ -569,7 +563,7 @@ fn params_for(study: &str, r: u64) -> BTreeMap<String, f64> {
             }
         }
         "bollinger" => {
-            if r % 2 == 0 {
+            if r.is_multiple_of(2) {
                 p.insert("period".into(), (10 + (r >> 8) % 30) as f64);
             } else {
                 p.insert("k".into(), 1.5 + ((r >> 8) % 4) as f64 * 0.5);

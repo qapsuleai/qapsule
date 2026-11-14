@@ -23,6 +23,7 @@ mod gops;
 mod locate;
 mod present;
 mod query;
+mod select;
 mod session;
 mod suggest;
 mod summary;

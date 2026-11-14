@@ -662,6 +662,11 @@ impl Session {
             panels: panels
                 .into_iter()
                 .map(|(panel, (series, marks))| PanelInfo {
+                    select: crate::select::Resolver {
+                        doc: &self.doc,
+                        root: None,
+                    }
+                    .panel_hint(view, panel),
                     name: None,
                     scale: None,
                     layers: Vec::new(),

@@ -1651,6 +1651,14 @@ impl<'a> Resolver<'a> {
         let cands = vec![
             kind.clone(),
             FactSel {
+                latest: true,
+                ..kind.clone()
+            },
+            FactSel {
+                first: true,
+                ..kind.clone()
+            },
+            FactSel {
                 bar: Some(f.bar),
                 ..kind.clone()
             },
@@ -1672,7 +1680,17 @@ impl<'a> Resolver<'a> {
             kind: Some(latest.kind.clone()),
             ..FindingSel::default()
         };
-        let mut cands = vec![kind.clone()];
+        let mut cands = vec![
+            kind.clone(),
+            FindingSel {
+                latest: true,
+                ..kind.clone()
+            },
+            FindingSel {
+                first: true,
+                ..kind.clone()
+            },
+        ];
         if let Some(h) = self.fact_hint(latest) {
             cands.push(FindingSel {
                 fact: Some(Box::new(FactRef::Select(h))),

@@ -102,6 +102,7 @@ pub enum ClientMsg {
         /// Client-chosen request id.
         id: String,
         /// The directive.
+        /// Ids inside also take selectors (§17).
         #[schemars(with = "AttentionDirectiveIn")]
         directive: AttentionDirective,
     },
@@ -396,15 +397,18 @@ pub struct Principal {
 #[serde(deny_unknown_fields)]
 pub struct Show {
     /// View id.
+    /// Also takes a selector (§17).
     #[schemars(with = "ViewRef")]
     pub view: String,
     /// Put it in the panel where this series is drawn (e.g. `"rsi14"`). Takes precedence
     /// over `panel`. If neither is given, a new panel is added below the others.
+    /// Also takes a selector (§17).
     #[serde(default, skip_serializing_if = "Option::is_none")]
     #[schemars(with = "Option<SeriesRef>")]
     pub with: Option<String>,
     /// Panel id (R2: the panel's stable id, not its position; in a view loaded from a
     /// `qp/0` document the ids equal the old positions).
+    /// Also takes a selector (§17).
     #[serde(default, skip_serializing_if = "Option::is_none")]
     #[schemars(with = "Option<PanelRef>")]
     pub panel: Option<u32>,
@@ -531,6 +535,7 @@ pub enum Op {
         /// Study name: `sma`, `ema`, `rsi`, `macd`, `bollinger`.
         study: String,
         /// Input series ids (one bar series for the built-in studies).
+        /// Also takes a selector (§17).
         #[schemars(with = "Vec<SeriesRef>")]
         inputs: Vec<String>,
         /// Parameters; missing ones take defaults (sma/ema/rsi: `period`; macd: `fast`,
@@ -544,6 +549,7 @@ pub enum Op {
     /// Change parameters of an existing study series (merged into the current ones).
     SetParams {
         /// Study series id.
+        /// Also takes a selector (§17).
         #[schemars(with = "SeriesRef")]
         series: String,
         /// Parameters to change.
@@ -557,9 +563,11 @@ pub enum Op {
     /// Add a layer to a view. Prefer `insert_layer` (placement by id).
     AddLayer {
         /// View id.
+        /// Also takes a selector (§17).
         #[schemars(with = "ViewRef")]
         view: String,
         /// The layer.
+        /// Ids inside also take selectors (§17).
         #[schemars(with = "LayerIn")]
         layer: Layer,
         /// **Deprecated (`qp/0`).** Position in the layer list; appended if absent.
@@ -574,6 +582,7 @@ pub enum Op {
     #[schemars(extend("deprecated" = true))]
     RemoveLayer {
         /// View id.
+        /// Also takes a selector (§17).
         #[schemars(with = "ViewRef")]
         view: String,
         /// Position in the layer list.
@@ -583,6 +592,7 @@ pub enum Op {
     /// `input`). Bars are 0-based indexes into the view's first bar series, inclusive.
     SetViewRange {
         /// View id.
+        /// Also takes a selector (§17).
         #[schemars(with = "ViewRef")]
         view: String,
         /// First visible bar index.
@@ -598,6 +608,7 @@ pub enum Op {
         /// Event kind, e.g. `cross_above`.
         kind: String,
         /// Series id.
+        /// Also takes a selector (§17).
         #[schemars(with = "SeriesRef")]
         series: String,
         /// Bar index (0-based).
@@ -616,11 +627,13 @@ pub enum Op {
         /// The claim, one sentence.
         claim: String,
         /// Fact ids it rests on (must exist).
+        /// Also takes a selector (§17).
         #[schemars(with = "Vec<FactRef>")]
         facts: Vec<String>,
         /// Confidence in `[0, 1]`.
         confidence: f64,
         /// When this holds, the finding is invalid.
+        /// Ids inside also take selectors (§17).
         #[schemars(with = "ConditionIn")]
         invalidation: Condition,
         /// Also create a live capsule with this headline.
@@ -630,6 +643,7 @@ pub enum Op {
     /// Change fields of a finding; absent fields stay as they are.
     UpdateFinding {
         /// Finding id.
+        /// Also takes a selector (§17).
         #[schemars(with = "FindingRef")]
         finding: String,
         /// New claim.
@@ -639,6 +653,7 @@ pub enum Op {
         #[serde(default, skip_serializing_if = "Option::is_none")]
         confidence: Option<f64>,
         /// New invalidation condition.
+        /// Ids inside also take selectors (§17).
         #[serde(default, skip_serializing_if = "Option::is_none")]
         #[schemars(with = "Option<ConditionIn>")]
         invalidation: Option<Condition>,
@@ -647,6 +662,7 @@ pub enum Op {
     /// records it.
     ApproveFinding {
         /// Finding id.
+        /// Also takes a selector (§17).
         #[schemars(with = "FindingRef")]
         finding: String,
         /// Optional note (recorded in the ledger).
@@ -657,6 +673,7 @@ pub enum Op {
     /// records it with the note.
     RejectFinding {
         /// Finding id.
+        /// Also takes a selector (§17).
         #[schemars(with = "FindingRef")]
         finding: String,
         /// Why (recorded in the ledger).
@@ -671,6 +688,7 @@ pub enum Op {
         /// The request in words.
         text: String,
         /// Machine-checkable trigger. Series it names must exist.
+        /// Ids inside also take selectors (§17).
         #[serde(default, skip_serializing_if = "Option::is_none")]
         #[schemars(with = "Option<ConditionIn>")]
         trigger: Option<Condition>,
@@ -688,9 +706,11 @@ pub enum Op {
         #[serde(default, skip_serializing_if = "Option::is_none")]
         id: Option<String>,
         /// Item id it narrates (usually a finding).
+        /// Also takes a selector (§17).
         #[schemars(with = "ItemRef")]
         about: String,
         /// Steps, ascending by `at_ms`.
+        /// Ids inside also take selectors (§17).
         #[schemars(with = "Vec<NarrativeStepIn>")]
         steps: Vec<NarrativeStep>,
     },
@@ -699,6 +719,7 @@ pub enum Op {
     /// finding's capsule.
     ShowFinding {
         /// Finding id.
+        /// Also takes a selector (§17).
         #[schemars(with = "FindingRef")]
         finding: String,
         /// Id of the view to create or replace; assigned if absent.
@@ -709,16 +730,20 @@ pub enum Op {
     /// `before`, or at the end. The layer's `panel` must name an existing panel (R2).
     InsertLayer {
         /// View id.
+        /// Also takes a selector (§17).
         #[schemars(with = "ViewRef")]
         view: String,
         /// The layer (id assigned if absent).
+        /// Ids inside also take selectors (§17).
         #[schemars(with = "LayerIn")]
         layer: Layer,
         /// Place it right after this layer.
+        /// Also takes a selector (§17).
         #[serde(default, skip_serializing_if = "Option::is_none")]
         #[schemars(with = "Option<LayerRef>")]
         after: Option<String>,
         /// Place it right before this layer.
+        /// Also takes a selector (§17).
         #[serde(default, skip_serializing_if = "Option::is_none")]
         #[schemars(with = "Option<LayerRef>")]
         before: Option<String>,
@@ -726,29 +751,36 @@ pub enum Op {
     /// Delete a layer by id.
     DeleteLayer {
         /// View id.
+        /// Also takes a selector (§17).
         #[schemars(with = "ViewRef")]
         view: String,
         /// Layer id.
+        /// Also takes a selector (§17).
         #[schemars(with = "LayerRef")]
         layer: String,
     },
     /// Move a layer: to another panel, and/or to another place in the paint order.
     MoveLayer {
         /// View id.
+        /// Also takes a selector (§17).
         #[schemars(with = "ViewRef")]
         view: String,
         /// Layer id.
+        /// Also takes a selector (§17).
         #[schemars(with = "LayerRef")]
         layer: String,
         /// Target panel id.
+        /// Also takes a selector (§17).
         #[serde(default, skip_serializing_if = "Option::is_none")]
         #[schemars(with = "Option<PanelRef>")]
         panel: Option<u32>,
         /// Place it right after this layer.
+        /// Also takes a selector (§17).
         #[serde(default, skip_serializing_if = "Option::is_none")]
         #[schemars(with = "Option<LayerRef>")]
         after: Option<String>,
         /// Place it right before this layer.
+        /// Also takes a selector (§17).
         #[serde(default, skip_serializing_if = "Option::is_none")]
         #[schemars(with = "Option<LayerRef>")]
         before: Option<String>,
@@ -757,12 +789,15 @@ pub enum Op {
     /// channels in `unset` are removed; `origin` entries are merged. Other channels stay.
     SetEncoding {
         /// View id.
+        /// Also takes a selector (§17).
         #[schemars(with = "ViewRef")]
         view: String,
         /// Layer id.
+        /// Also takes a selector (§17).
         #[schemars(with = "LayerRef")]
         layer: String,
         /// Channels to set.
+        /// Ids inside also take selectors (§17).
         #[serde(default)]
         #[schemars(with = "EncodingIn")]
         encoding: crate::grammar::Encoding,
@@ -781,19 +816,23 @@ pub enum Op {
     /// the bottom. `ack.created`: the panel id (decimal), then the layer ids.
     InsertPanel {
         /// View id.
+        /// Also takes a selector (§17).
         #[schemars(with = "ViewRef")]
         view: String,
         /// The panel (id assigned if absent: largest id + 1).
         panel: crate::grammar::Panel,
         /// Layers to create in it (their `panel` field is set to the new panel).
+        /// Ids inside also take selectors (§17).
         #[serde(default, skip_serializing_if = "Vec::is_empty")]
         #[schemars(with = "Vec<LayerIn>")]
         layers: Vec<Layer>,
         /// Place it right below this panel.
+        /// Also takes a selector (§17).
         #[serde(default, skip_serializing_if = "Option::is_none")]
         #[schemars(with = "Option<PanelRef>")]
         after: Option<u32>,
         /// Place it right above this panel.
+        /// Also takes a selector (§17).
         #[serde(default, skip_serializing_if = "Option::is_none")]
         #[schemars(with = "Option<PanelRef>")]
         before: Option<u32>,
@@ -801,25 +840,31 @@ pub enum Op {
     /// Delete a panel and every layer drawn in it.
     DeletePanel {
         /// View id.
+        /// Also takes a selector (§17).
         #[schemars(with = "ViewRef")]
         view: String,
         /// Panel id.
+        /// Also takes a selector (§17).
         #[schemars(with = "PanelRef")]
         panel: u32,
     },
     /// Move a panel up or down the stack.
     MovePanel {
         /// View id.
+        /// Also takes a selector (§17).
         #[schemars(with = "ViewRef")]
         view: String,
         /// Panel id.
+        /// Also takes a selector (§17).
         #[schemars(with = "PanelRef")]
         panel: u32,
         /// Place it right below this panel.
+        /// Also takes a selector (§17).
         #[serde(default, skip_serializing_if = "Option::is_none")]
         #[schemars(with = "Option<PanelRef>")]
         after: Option<u32>,
         /// Place it right above this panel.
+        /// Also takes a selector (§17).
         #[serde(default, skip_serializing_if = "Option::is_none")]
         #[schemars(with = "Option<PanelRef>")]
         before: Option<u32>,
@@ -827,9 +872,11 @@ pub enum Op {
     /// Rename a panel or change its relative height.
     SetPanel {
         /// View id.
+        /// Also takes a selector (§17).
         #[schemars(with = "ViewRef")]
         view: String,
         /// Panel id.
+        /// Also takes a selector (§17).
         #[schemars(with = "PanelRef")]
         panel: u32,
         /// New name.
@@ -842,9 +889,11 @@ pub enum Op {
     /// Change a scale by id (`"x"`, `"y<panel>"`): kind and/or fixed domain.
     SetScale {
         /// View id.
+        /// Also takes a selector (§17).
         #[schemars(with = "ViewRef")]
         view: String,
         /// Scale id.
+        /// Also takes a selector (§17).
         #[schemars(with = "ScaleRef")]
         scale: String,
         /// New kind (`linear`/`log` for value scales; the time axis stays `time`).
@@ -860,9 +909,11 @@ pub enum Op {
     /// Replace a view's persistent emphasis list (empty clears it).
     SetEmphasis {
         /// View id.
+        /// Also takes a selector (§17).
         #[schemars(with = "ViewRef")]
         view: String,
         /// The emphasis list.
+        /// Ids inside also take selectors (§17).
         #[schemars(with = "Vec<EmphasisIn>")]
         emphasis: Vec<crate::grammar::Emphasis>,
     },
@@ -870,12 +921,14 @@ pub enum Op {
     /// it fails with `in_use` if other items (studies, facts, conditions) depend on it.
     Remove {
         /// Item id.
+        /// Also takes a selector (§17).
         #[schemars(with = "ItemRef")]
         id: String,
     },
     /// Append bars to a bar series (data feeds).
     AppendBars {
         /// Bar series id.
+        /// Also takes a selector (§17).
         #[schemars(with = "SeriesRef")]
         series: String,
         /// Bars, strictly after the last bar.
@@ -884,6 +937,7 @@ pub enum Op {
     /// Replace the last bar of a bar series (a live, still-forming bar).
     UpdateLastBar {
         /// Bar series id.
+        /// Also takes a selector (§17).
         #[schemars(with = "SeriesRef")]
         series: String,
         /// The bar; same `t` as the current last bar.
@@ -900,6 +954,7 @@ pub enum Op {
     /// with the decider recorded as approver.
     AcceptProposal {
         /// Proposal id.
+        /// Also takes a selector (§17).
         #[schemars(with = "ProposalRef")]
         proposal: String,
         /// Optional note.
@@ -909,6 +964,7 @@ pub enum Op {
     /// Reject a pending proposal.
     RejectProposal {
         /// Proposal id.
+        /// Also takes a selector (§17).
         #[schemars(with = "ProposalRef")]
         proposal: String,
         /// Optional note.
@@ -1220,6 +1276,7 @@ pub enum Query {
     /// One item by id, from any collection.
     Get {
         /// Item id.
+        /// Also takes a selector (§17).
         #[schemars(with = "ItemRef")]
         id: String,
     },
@@ -1263,6 +1320,7 @@ pub enum Query {
     /// reduced to one number. For a bar series, outputs are `o`,`h`,`l`,`c`,`v`.
     Study {
         /// Series id (a study series or a bar series).
+        /// Also takes a selector (§17).
         #[schemars(with = "SeriesRef")]
         series: String,
         /// Range; the whole series if absent.
@@ -1278,6 +1336,7 @@ pub enum Query {
     /// Everything at one bar: OHLCV and the value of every study on that bar series.
     At {
         /// Bar series id.
+        /// Also takes a selector (§17).
         #[schemars(with = "SeriesRef")]
         series: String,
         /// Bar index (0-based). Give `bar` or `t`.
@@ -1300,6 +1359,7 @@ pub enum Query {
     /// view's persistent range, otherwise all bars.
     Hit {
         /// View id; the asker's current view if absent.
+        /// Also takes a selector (§17).
         #[serde(default, skip_serializing_if = "Option::is_none")]
         #[schemars(with = "Option<ViewRef>")]
         view: Option<String>,
@@ -1324,6 +1384,7 @@ pub enum Query {
     /// unless `surface` names another surface kind.
     Present {
         /// Finding id. If absent: the most important live finding (highest confidence).
+        /// Also takes a selector (§17).
         #[serde(default, skip_serializing_if = "Option::is_none")]
         #[schemars(with = "Option<FindingRef>")]
         finding: Option<String>,
@@ -1696,6 +1757,7 @@ pub enum Topic {
     /// Every applied log entry (optionally only those touching these item ids).
     Changes {
         /// Only entries touching any of these ids.
+        /// Also takes a selector (§17).
         #[serde(default, skip_serializing_if = "Vec::is_empty")]
         #[schemars(with = "Vec<ItemRef>")]
         ids: Vec<String>,
@@ -1703,12 +1765,14 @@ pub enum Topic {
     /// State changes of one finding's capsule (live -> invalidated, approved, ...).
     Finding {
         /// Finding id.
+        /// Also takes a selector (§17).
         #[schemars(with = "FindingRef")]
         finding: String,
     },
     /// A condition becoming true (edge-triggered: notified when it turns true).
     Condition {
         /// The condition.
+        /// Ids inside also take selectors (§17).
         #[schemars(with = "ConditionIn")]
         condition: Condition,
     },

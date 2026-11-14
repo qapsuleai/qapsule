@@ -349,7 +349,7 @@ pub fn stress_scene(width: u32, height: u32) -> Scene {
     let mut rng = crate::bars::Lcg(0x5EED);
     let (wf, hf) = (f64::from(width), f64::from(height));
     let mut prims = Vec::new();
-    let mut col = |rng: &mut crate::bars::Lcg, a: u8| -> Rgba {
+    let col = |rng: &mut crate::bars::Lcg, a: u8| -> Rgba {
         let v = rng.next_u32().to_le_bytes();
         [v[0], v[1], v[2], a]
     };

@@ -5,9 +5,9 @@ Her round sonunda güncellenir.
 
 ## Şu an
 
-- **Aktif round:** yok. R0 tamamlandı; R1 tasarımı bekliyor.
+- **Aktif round:** R1 (koşulmayı bekliyor)
 - **Son güncelleme:** 2026-11-14
-- **Sıradaki adım:** Ana akışta `rounds/R0/REPORT.md` okunur, R1 dosyaları yazılır.
+- **Sıradaki adım:** Arkin GitHub deposunu açar; `rounds/R1/PROMPT.md` içeriği Claude Code'a verilir.
 
 ## Round geçmişi
 
@@ -29,6 +29,8 @@ Her round sonunda güncellenir.
 
 ## Arkin'den beklenenler
 
+- R1 öncesi: depo açıldı (https://github.com/qapsuleai/qapsule). Bu makinede SSH takma adı `github-qapsule` ve `gh` oturumu kurulacak.
+- K14 (bar hizası borsaya göre, gösterim kullanıcıya göre) onayı.
 - A2: Qapsule adı için marka ön taraması ve alan adı kararı.
 - A4 (hukuk) ve A5 (ajan ortamı) kararları.
 - R6 öncesi: NATS akışlarından birkaç örnek mesaj (konu adı ve içerik biçimi).

@@ -34,6 +34,20 @@ round'un `rounds/Rn/` klasörü.
 - `../Docs` ve `../Services` salt okunurdur; oradan yalnızca okunur, oraya yazılmaz.
 - Commit'ler küçük ve anlamlı olur; her alt görev kendi dalında veya worktree'sinde çalışır.
 
+## GitHub hesabı
+
+Bu makinede birden fazla GitHub hesabı var ve etkin `gh` hesabı başka klasörlerdeki
+işler tarafından değiştirilebilir. Bu yüzden:
+
+- `gh` doğrudan çağrılmaz; her zaman `scripts/qgh` kullanılır. `qgh`, etkin hesaba
+  dokunmadan yalnızca o çağrı için doğru hesabı ve depoyu kullanır.
+- `gh auth switch`, `gh auth login`, `gh auth logout` ve `gh auth setup-git` çalıştırılmaz.
+- Her `git push`, uzak dal birleştirme, PR, sürüm ve CI işleminden hemen önce
+  `scripts/preflight.sh` çalıştırılır. Başarısızsa işlem yapılmaz, durum rapora yazılır
+  ve Arkin'e sorulur; sorunu kendi başına hesap değiştirerek çözmeye çalışma.
+- `origin` adresi `scripts/qapsule-gh.env` içindekiyle aynı kalır; HTTPS adresine çevrilmez.
+- Başka bir depoya, çatala ya da hesaba gönderim yapılmaz.
+
 ## Round kapanışı
 
 1. `scripts/verify.sh` yeşil.

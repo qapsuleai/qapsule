@@ -19,6 +19,10 @@ karşılık kullanılır; dokümanda Türkçesi.
 | Komut | `Command` | Dokümanı değiştiren tek yol. İnsan ve ajan aynı komutları kullanır. |
 | Niyet | `Intent` | Kullanıcının bıraktığı kalıcı istek. "Yükseliş bozulursa haber ver." |
 | Karne | `Ledger` | Bulguların sonradan gerçekle karşılaştırılmış kaydı. |
+| Enstrüman | `Instrument` | İşlem gören varlık. Hangi borsada, hangi takvimle işlem gördüğünü taşır. |
+| Takvim | `Calendar` | Borsanın saat dilimi, seans saatleri ve tatilleri. Bar hizası buna göre yapılır. |
+| Gösterim saat dilimi | `display_tz` | Zamanın kullanıcıya hangi saat diliminde gösterileceği. Bar hizasını etkilemez. |
+| Isınma | `warmup` | Bir hesabın ilk geçerli değerini üretmesi için gereken bar sayısı. Bu barlarda çıktı boştur (`null`); çıktı uzunluğu her zaman bar sayısına eşittir. |
 | Köken | `Provenance` | Bir öğeyi kimin, neye dayanarak, ne zaman ürettiği. |
 
 ## Kapsülün yaşam döngüsü

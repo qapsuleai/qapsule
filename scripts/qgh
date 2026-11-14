@@ -1,0 +1,28 @@
+#!/usr/bin/env bash
+# qgh — bu depoda `gh` yerine kullanılır.
+# Makinedeki etkin gh hesabına dokunmaz (gh auth switch yapmaz); yalnızca bu çağrı
+# için QAPSULE_GH_USER hesabının belirtecini ve QAPSULE_GH_REPO deposunu kullanır.
+set -euo pipefail
+here="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# shellcheck disable=SC1091
+. "$here/qapsule-gh.env"
+
+if ! command -v gh >/dev/null 2>&1; then
+  echo "qgh: gh bulunamadı" >&2; exit 127
+fi
+token="$(gh auth token -h github.com -u "$QAPSULE_GH_USER" 2>/dev/null || true)"
+if [ -z "$token" ]; then
+  echo "qgh: '$QAPSULE_GH_USER' hesabı bu makinede gh'a kayıtlı değil." >&2
+  echo "     Çözüm: gh auth login -h github.com -p ssh -w  (bu hesapla)" >&2
+  exit 1
+fi
+export GH_TOKEN="$token"
+export GH_REPO="$QAPSULE_GH_REPO"
+export GH_PROMPT_DISABLED=1
+
+who="$(gh api user -q .login 2>/dev/null || true)"
+if [ "$who" != "$QAPSULE_GH_USER" ]; then
+  echo "qgh: beklenen hesap '$QAPSULE_GH_USER', bulunan '${who:-yok}'. İşlem yapılmadı." >&2
+  exit 1
+fi
+exec gh "$@"

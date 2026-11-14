@@ -1473,6 +1473,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "qp-compute"
+version = "0.0.0"
+dependencies = [
+ "proptest",
+ "qp-schema",
+ "serde_json",
+]
+
+[[package]]
 name = "qp-render"
 version = "0.0.0"
 dependencies = [

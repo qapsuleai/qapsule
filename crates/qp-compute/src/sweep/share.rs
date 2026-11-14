@@ -385,7 +385,9 @@ pub(super) fn bollinger(
     Ok(())
 }
 
-/// One run of variants with equal `period` (input positions `base..`).
+/// One run of variants with equal `period` (input positions `base..`). Kept out of line:
+/// inlined into a large caller it compiled 3–4× slower on wasm32 (RP1 integration).
+#[inline(never)]
 fn bollinger_run(
     run: &[Params],
     x: &[f64],

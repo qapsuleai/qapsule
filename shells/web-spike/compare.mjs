@@ -5,8 +5,9 @@
 //   (b) a screenshot of the <canvas> element (goes through the compositor)
 //   (c) the raw RGBA returned by wasm, and the PNG bytes produced by wasm render_png
 // Prints differing-pixel counts, max channel diff and timings as JSON.
-// Exit code 1 if (a) differs from the golden in more than QP_WEB_MAX_DIFF_PIXELS pixels
-// (default 0: the same Rust code must give identical pixels in the browser).
+//   (d) the wasm render of the stress scene vs fixtures/golden/stress.png
+// Exit code 1 if (a) or (d) differ from their golden in more than QP_WEB_MAX_DIFF_PIXELS
+// pixels (default 0: the same Rust code must give identical pixels in the browser).
 import http from 'node:http';
 import fs from 'node:fs';
 import path from 'node:path';
@@ -20,6 +21,7 @@ const goldenPath = path.join(root, 'fixtures/golden/sample.png');
 const outDir = path.join(root, 'target/web-spike');
 const maxDiffPixels = Number(process.env.QP_WEB_MAX_DIFF_PIXELS ?? '0');
 const bench = process.env.QP_WEB_BENCH_BARS ?? '100000';
+const pkg = process.env.QP_WEB_PKG ?? './pkg';
 
 const MIME = {
   '.html': 'text/html', '.js': 'text/javascript', '.mjs': 'text/javascript',
@@ -54,6 +56,7 @@ function diff(a, b) {
 
 const golden = PNG.sync.read(fs.readFileSync(goldenPath));
 const goldenBytes = fs.readFileSync(goldenPath);
+const stressGolden = PNG.sync.read(fs.readFileSync(path.join(root, 'fixtures/golden/stress.png')));
 fs.mkdirSync(outDir, { recursive: true });
 
 const server = await serve();
@@ -65,7 +68,7 @@ const launchMs = performance.now() - tLaunch;
 let exitCode = 0;
 try {
   const tNav = performance.now();
-  await page.goto(`http://127.0.0.1:${port}/shells/web-spike/index.html?bench=${bench}`);
+  await page.goto(`http://127.0.0.1:${port}/shells/web-spike/index.html?bench=${bench}&pkg=${encodeURIComponent(pkg)}`);
   await page.waitForFunction(() => window.__qp && window.__qp.done, null, { timeout: 120000 });
   const pageMs = performance.now() - tNav;
   const qp = await page.evaluate(() => window.__qp);
@@ -97,18 +100,22 @@ try {
       ? diff(shotPx.data, golden.data)
       : { comparable: false, screenshot: `${shotPx.width}x${shotPx.height}` },
     wasmRgbaVsGolden: diff(wasmRgba, golden.data),
+    stressWasmVsGolden: diff(Buffer.from(qp.stressB64, 'base64'), stressGolden.data),
     wasmPngBytesEqualGolden: Buffer.compare(wasmPng, goldenBytes) === 0,
     timingsMs: { browserLaunch: launchMs, pageLoadToDone: pageMs, ...qp.timings },
     browser: browser.version(),
+    pkg,
     threshold: { maxDiffPixels },
   };
   console.log(JSON.stringify(result, null, 2));
-  const c = result.canvasVsGolden;
-  if (!c.comparable || c.differingPixels > maxDiffPixels) {
-    console.error(`FAIL: canvas differs from golden (${JSON.stringify(c)}), threshold ${maxDiffPixels} px`);
-    exitCode = 1;
-  } else {
-    console.error('OK: canvas pixels match golden within threshold');
+  for (const key of ['canvasVsGolden', 'stressWasmVsGolden']) {
+    const c = result[key];
+    if (!c.comparable || c.differingPixels > maxDiffPixels) {
+      console.error(`FAIL: ${key} ${JSON.stringify(c)}, threshold ${maxDiffPixels} px`);
+      exitCode = 1;
+    } else {
+      console.error(`OK: ${key} within threshold (${c.differingPixels} px)`);
+    }
   }
 } catch (e) {
   console.error(e);

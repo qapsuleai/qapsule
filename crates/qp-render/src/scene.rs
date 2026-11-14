@@ -341,6 +341,76 @@ pub fn build_scene(bars: &BarsFile, width: u32, height: u32) -> Result<Scene, Re
     })
 }
 
+/// Determinism stress scene (spike only): anti-aliased strokes at fractional coordinates and
+/// widths, translucent colours, overlapping fills and text at many fractional sizes. Used by
+/// the `stress` golden and the browser comparison to exercise paths the chart barely touches.
+#[must_use]
+pub fn stress_scene(width: u32, height: u32) -> Scene {
+    let mut rng = crate::bars::Lcg(0x5EED);
+    let (wf, hf) = (f64::from(width), f64::from(height));
+    let mut prims = Vec::new();
+    let mut col = |rng: &mut crate::bars::Lcg, a: u8| -> Rgba {
+        let v = rng.next_u32().to_le_bytes();
+        [v[0], v[1], v[2], a]
+    };
+    for i in 0..40 {
+        let a = col(&mut rng, 255);
+        let x = (rng.unit() + 1.0) * 0.5 * wf;
+        let y = (rng.unit() + 1.0) * 0.5 * hf;
+        let side = (8.0 + 30.0 * (rng.unit() + 1.0)).floor() as i32;
+        prims.push(rect(
+            x as i32,
+            y as i32,
+            side,
+            side,
+            if i % 2 == 0 {
+                a
+            } else {
+                [a[0], a[1], a[2], 128]
+            },
+        ));
+    }
+    for _ in 0..30 {
+        let n = 2 + (rng.next_u32() % 12) as usize;
+        let points = (0..n)
+            .map(|_| {
+                (
+                    ((rng.unit() + 1.0) * 0.5 * wf) as f32,
+                    ((rng.unit() + 1.0) * 0.5 * hf) as f32,
+                )
+            })
+            .collect();
+        let width = (0.25 + 4.0 * (rng.unit() + 1.0)) as f32;
+        let alpha = (64 + rng.next_u32() % 192) as u8;
+        prims.push(Prim::Polyline {
+            points,
+            width,
+            color: col(&mut rng, alpha),
+        });
+    }
+    let mut y = 14;
+    let mut size = 7.0_f32;
+    while y < height.cast_signed() && size < 40.0 {
+        let alpha = (128 + rng.next_u32() % 128) as u8;
+        prims.push(Prim::Text {
+            x: 4 + (rng.next_u32() % 40).cast_signed(),
+            baseline: y,
+            px: size,
+            text: format!("Qapsule {size:.2}px 0123456789 +-.,:%$ AaBbGgQqWw"),
+            color: col(&mut rng, alpha),
+            align: Align::Left,
+        });
+        y += size as i32 + 4;
+        size += 1.37;
+    }
+    Scene {
+        width,
+        height,
+        background: [250, 250, 248, 255],
+        prims,
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

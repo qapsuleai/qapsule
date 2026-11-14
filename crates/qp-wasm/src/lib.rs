@@ -58,3 +58,12 @@ pub fn render_synthetic_rgba(
     let bars = qp_render::synthetic_bars(n as usize, u64::from(seed));
     qp_render::render_rgba(&bars, width, height).map_err(js_err)
 }
+
+/// Renders the determinism stress scene (spike only; golden `fixtures/golden/stress.png`).
+///
+/// # Errors
+/// Allocation failure.
+#[wasm_bindgen]
+pub fn render_stress_rgba(width: u32, height: u32) -> Result<Vec<u8>, JsError> {
+    qp_render::render_stress_rgba(width, height).map_err(js_err)
+}

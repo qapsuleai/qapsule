@@ -81,3 +81,14 @@ pub fn encode_png(rgba: &[u8], width: u32, height: u32) -> Result<Vec<u8>, Rende
     w.finish().map_err(enc_err)?;
     Ok(out)
 }
+
+/// Renders the determinism stress scene (spike only, see [`scene::stress_scene`]) as
+/// straight RGBA8. Golden: `fixtures/golden/stress.png`.
+///
+/// # Errors
+/// Fails if the pixmap cannot be allocated.
+#[doc(hidden)]
+pub fn render_stress_rgba(width: u32, height: u32) -> Result<Vec<u8>, RenderError> {
+    let pm = cpu::rasterize(&scene::stress_scene(width, height))?;
+    Ok(cpu::demultiply(pm.data()))
+}

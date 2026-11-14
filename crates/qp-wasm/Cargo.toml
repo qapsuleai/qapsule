@@ -10,6 +10,11 @@ publish.workspace = true
 [lib]
 crate-type = ["cdylib", "rlib"]
 
+[features]
+default = []
+# Spike variant: tiny-skia SIMD pipelines (build with RUSTFLAGS="-C target-feature=+simd128").
+simd = ["qp-render/simd"]
+
 [dependencies]
 qp-render = { path = "../qp-render" }
 wasm-bindgen = "=0.2.130"

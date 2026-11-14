@@ -51,21 +51,32 @@ fn pixel_diff(a: &[u8], b: &[u8]) -> (usize, u8) {
     (n, max)
 }
 
-fn write_actual(bytes: &[u8]) -> PathBuf {
+fn write_actual(name: &str, bytes: &[u8]) -> PathBuf {
     let dir = root().join("target/golden-actual");
     std::fs::create_dir_all(&dir).unwrap();
-    let p = dir.join("sample.png");
+    let p = dir.join(name);
     std::fs::write(&p, bytes).unwrap();
     p
 }
 
 #[test]
 fn golden_sample_png() {
-    let golden_path = root().join("fixtures/golden/sample.png");
     let actual = render_png(&sample(), DEFAULT_WIDTH, DEFAULT_HEIGHT).unwrap();
+    check_golden("sample.png", &actual);
+}
 
+/// Spike-only stress scene (fractional AA strokes, translucency, many text sizes), 600x300.
+#[test]
+fn golden_stress_png() {
+    let rgba = qp_render::render_stress_rgba(600, 300).unwrap();
+    let actual = qp_render::encode_png(&rgba, 600, 300).unwrap();
+    check_golden("stress.png", &actual);
+}
+
+fn check_golden(name: &str, actual: &[u8]) {
+    let golden_path = root().join("fixtures/golden").join(name);
     if std::env::var_os("QP_UPDATE_GOLDEN").is_some_and(|v| v == "1") {
-        std::fs::write(&golden_path, &actual).unwrap();
+        std::fs::write(&golden_path, actual).unwrap();
         eprintln!("updated {}", golden_path.display());
         return;
     }
@@ -76,10 +87,10 @@ fn golden_sample_png() {
             golden_path.display()
         )
     });
-    if actual != golden {
-        let p = write_actual(&actual);
+    if actual != golden.as_slice() {
+        let p = write_actual(name, actual);
         let (gw, gh, gpx) = decode_png(&golden);
-        let (aw, ah, apx) = decode_png(&actual);
+        let (aw, ah, apx) = decode_png(actual);
         let stats = if (gw, gh) == (aw, ah) {
             let (n, max) = pixel_diff(&gpx, &apx);
             format!(

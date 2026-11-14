@@ -64,10 +64,10 @@ fn validate(file: &BarsFile) -> Result<(), RenderError> {
 }
 
 /// Minimal 64-bit LCG (Knuth MMIX constants). Integer-only, so identical on every target.
-struct Lcg(u64);
+pub(crate) struct Lcg(pub(crate) u64);
 
 impl Lcg {
-    fn next_u32(&mut self) -> u32 {
+    pub(crate) fn next_u32(&mut self) -> u32 {
         self.0 = self
             .0
             .wrapping_mul(6_364_136_223_846_793_005)
@@ -77,7 +77,7 @@ impl Lcg {
     }
 
     /// Uniform in [-1, 1). Built from an integer, then one exact division.
-    fn unit(&mut self) -> f64 {
+    pub(crate) fn unit(&mut self) -> f64 {
         f64::from(self.next_u32()) / 2_147_483_648.0 - 1.0
     }
 }

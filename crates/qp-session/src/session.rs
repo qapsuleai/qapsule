@@ -773,7 +773,7 @@ impl Session {
 
         if direct {
             if let [Op::AcceptProposal { proposal, note }] = ops {
-                return self.accept(&conn, id, proposal, note.clone(), &principal, base);
+                return self.accept(&conn, id, proposal, note.clone(), &principal, base, reason);
             }
             let mut ctx = Ctx {
                 author,
@@ -785,6 +785,7 @@ impl Session {
                 created: Vec::new(),
                 speaker: &principal,
                 is_owner: role == Role::Owner,
+                can_decide: perms.decide,
                 log: &self.log,
                 undoes: None,
             };
@@ -793,6 +794,7 @@ impl Session {
             let undoes = ctx.undoes;
             self.base_check(base, &ex.changes, &ex.origin)?;
             let entry = LogEntry {
+                reason: reason.clone(),
                 seq,
                 at: self.clock,
                 author: principal.clone(),
@@ -833,6 +835,7 @@ impl Session {
             created: Vec::new(),
             speaker: &principal,
             is_owner: role == Role::Owner,
+            can_decide: perms.decide,
             log: &self.log,
             undoes: None,
         };
@@ -843,7 +846,7 @@ impl Session {
         let proposal = Proposal {
             id: pid.clone(),
             ops: ops.to_vec(),
-            reason,
+            reason: reason.clone(),
             state: ProposalState::Pending,
             provenance: qp_schema::Provenance {
                 author,
@@ -859,11 +862,15 @@ impl Session {
             note: None,
             decided_seq: None,
         };
-        let changes = vec![ChangeOp::PutProposal { proposal }];
+        let changes = vec![ChangeOp::PutProposal {
+            proposal,
+            index: None,
+        }];
         let mut doc = self.doc.clone();
         let inverse = apply_all(&mut doc, &changes)
             .map_err(|m| invalid(format!("cannot store proposal: {m}"), "/ops"))?;
         let entry = LogEntry {
+            reason: reason.clone(),
             seq,
             at: self.clock,
             author: principal,
@@ -898,6 +905,7 @@ impl Session {
         note: Option<String>,
         decider: &str,
         base: Option<Seq>,
+        reason: Option<String>,
     ) -> PResult<Vec<OutboundLine>> {
         let pr = need_proposal(&self.doc, pid, "/ops/0/proposal")?.clone();
         let seq = self.seq() + 1;
@@ -923,6 +931,7 @@ impl Session {
             created: Vec::new(),
             speaker: &proposer,
             is_owner: proposer_owner,
+            can_decide: false,
             log: &self.log,
             undoes: None,
         };
@@ -945,7 +954,10 @@ impl Session {
         decided.decided_seq = Some(seq);
         let mut doc = ex.doc;
         let mut changes = ex.changes;
-        let tail = vec![ChangeOp::PutProposal { proposal: decided }];
+        let tail = vec![ChangeOp::PutProposal {
+            proposal: decided,
+            index: None,
+        }];
         let mut inverse = apply_all(&mut doc, &tail)
             .map_err(|m| invalid(format!("cannot store proposal: {m}"), "/ops/0"))?;
         inverse.extend(ex.inverse);
@@ -953,6 +965,7 @@ impl Session {
         let origin = vec![0; changes.len()];
         self.base_check(base, &changes, &origin)?;
         let entry = LogEntry {
+            reason: reason.or_else(|| pr.reason.clone()),
             seq,
             at: self.clock,
             author: proposer,
@@ -1044,6 +1057,7 @@ impl Session {
         let seq = self.seq() + 1;
         self.commit(
             LogEntry {
+                reason: None,
                 seq,
                 at: self.clock,
                 author: ENGINE_PRINCIPAL.to_owned(),
@@ -1099,7 +1113,7 @@ impl Session {
             .changes
             .iter()
             .filter_map(|c| match c {
-                ChangeOp::PutFinding { finding } => Some(finding.id.clone()),
+                ChangeOp::PutFinding { finding, .. } => Some(finding.id.clone()),
                 _ => None,
             })
             .collect();
@@ -1272,7 +1286,7 @@ impl Session {
             }
         }
         for ch in &e.changes {
-            let ChangeOp::PutProposal { proposal } = ch else {
+            let ChangeOp::PutProposal { proposal, .. } = ch else {
                 continue;
             };
             let author = self.principal_of(&proposal.provenance.author);
@@ -1395,7 +1409,10 @@ impl Session {
             p.decided_seq = Some(seq);
             let pid = p.id.clone();
             if let Some(s) = self.engine_entry(
-                vec![ChangeOp::PutProposal { proposal: p }],
+                vec![ChangeOp::PutProposal {
+                    proposal: p,
+                    index: None,
+                }],
                 format!("expire {pid}"),
             ) {
                 lines.extend(self.settle(s));

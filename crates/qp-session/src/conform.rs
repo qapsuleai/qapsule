@@ -239,29 +239,47 @@ pub fn subset(expected: &Value, actual: &Value, path: &str) -> Result<(), (Strin
     }
 }
 
-/// Loads a transcript's init: the `SessionInit` and the path of a file holding it
-/// (written to the temp directory for inline inits).
+/// A transcript's init, and a file holding it for `qp serve`.
+pub struct LoadedInit {
+    /// The init.
+    pub init: SessionInit,
+    /// Path of a file with the init.
+    pub path: PathBuf,
+    /// For inline inits: the securely created temporary file (removed on drop).
+    _temp: Option<tempfile::NamedTempFile>,
+}
+
+/// Loads a transcript's init. Inline inits are written to a temporary file created
+/// with an unpredictable name and owner-only permissions (`tempfile`).
 ///
 /// # Errors
 /// Unreadable init.
-pub fn load_init(init: &InitRef, root: &Path) -> Result<(SessionInit, PathBuf), String> {
+pub fn load_init(init: &InitRef, root: &Path) -> Result<LoadedInit, String> {
     match init {
         InitRef::Path(p) => {
             let path = confine(root, p)?;
-            Ok((read_json(&path)?, path))
+            Ok(LoadedInit {
+                init: read_json(&path)?,
+                path,
+                _temp: None,
+            })
         }
         InitRef::Inline(i) => {
-            let n = INLINE_COUNTER.fetch_add(1, std::sync::atomic::Ordering::Relaxed);
-            let path =
-                std::env::temp_dir().join(format!("qp-conform-{}-{n}.json", std::process::id()));
-            let text = serde_json::to_string(i).map_err(|e| e.to_string())?;
-            std::fs::write(&path, text).map_err(|e| format!("{}: {e}", path.display()))?;
-            Ok(((**i).clone(), path))
+            let mut f = tempfile::Builder::new()
+                .prefix("qp-conform-")
+                .suffix(".json")
+                .tempfile()
+                .map_err(|e| format!("temporary init file: {e}"))?;
+            serde_json::to_writer(f.as_file_mut(), i).map_err(|e| e.to_string())?;
+            f.as_file_mut().flush().map_err(|e| e.to_string())?;
+            Ok(LoadedInit {
+                init: (**i).clone(),
+                path: f.path().to_owned(),
+                _temp: Some(f),
+            })
         }
     }
 }
-
-static INLINE_COUNTER: std::sync::atomic::AtomicU64 = std::sync::atomic::AtomicU64::new(0);
 
 /// Runs a transcript's steps and final checks on `transport`; `initial` is the initial
 /// document (for the replay check).
@@ -382,12 +400,12 @@ pub fn run_file(file: &Path, root: &Path, kind: &TransportKind) -> TranscriptOut
     let r = (|| -> Result<(), String> {
         let t: Transcript = read_json(file)?;
         outcome.name.clone_from(&t.name);
-        let (init, init_path) = load_init(&t.init, root)?;
-        let mut session = Session::new(init.clone(), root)?;
+        let loaded = load_init(&t.init, root)?;
+        let init = &loaded.init;
+        let session = Session::new(init.clone(), root)?;
         let initial = session.initial_document().clone();
         match kind {
             TransportKind::InProc => {
-                let _ = &mut session;
                 let mut tr = InProc { session };
                 run_steps(&t, &mut tr, &initial)
             }
@@ -398,12 +416,8 @@ pub fn run_file(file: &Path, root: &Path, kind: &TransportKind) -> TranscriptOut
                     .find(|p| permissions(p.role).read && p.role != Role::Feed)
                     .map(|p| p.id.clone())
                     .ok_or("the init has no principal that may read")?;
-                let mut tr = Serve::spawn(qp, &init_path, root, &reader)?;
-                let r = run_steps(&t, &mut tr, &initial);
-                if matches!(t.init, InitRef::Inline(_)) {
-                    let _ = std::fs::remove_file(&init_path);
-                }
-                r
+                let mut tr = Serve::spawn(qp, &loaded.path, root, &reader)?;
+                run_steps(&t, &mut tr, &initial)
             }
         }
     })();

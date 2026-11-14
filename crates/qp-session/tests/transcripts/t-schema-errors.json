@@ -144,7 +144,9 @@
        "code": "invalid",
        "path": "/ops/0/study",
        "did_you_mean": [
-        "rsi"
+        "rsi",
+        "ema",
+        "sma"
        ]
       }
      }

@@ -48,22 +48,35 @@ pub fn all_ids(doc: &Document) -> Vec<&str> {
     v
 }
 
-/// Upsert `item` into `items` by id; returns the replaced item.
-fn upsert<T: Clone>(items: &mut Vec<T>, item: &T, id: impl Fn(&T) -> &str) -> Option<T> {
+/// Upsert `item` into `items` by id (a new item goes to `index`, default the end);
+/// returns the replaced item.
+fn upsert<T: Clone>(
+    items: &mut Vec<T>,
+    item: &T,
+    index: Option<u32>,
+    id: impl Fn(&T) -> &str,
+) -> Result<Option<T>, String> {
     let key = id(item).to_owned();
     match items.iter().position(|x| id(x) == key) {
-        Some(i) => Some(std::mem::replace(&mut items[i], item.clone())),
+        Some(i) => Ok(Some(std::mem::replace(&mut items[i], item.clone()))),
         None => {
-            items.push(item.clone());
-            None
+            let at = index.map_or(items.len(), |i| i as usize);
+            if at > items.len() {
+                return Err(format!("index {at} out of range for `{key}`"));
+            }
+            items.insert(at, item.clone());
+            Ok(None)
         }
     }
 }
 
 macro_rules! put {
-    ($doc:expr, $coll:ident, $item:expr, $variant:ident, $field:ident) => {{
-        match upsert(&mut $doc.$coll, $item, |x| x.id.as_str()) {
-            Some(old) => ChangeOp::$variant { $field: old },
+    ($doc:expr, $coll:ident, $item:expr, $index:expr, $variant:ident, $field:ident) => {{
+        match upsert(&mut $doc.$coll, $item, *$index, |x| x.id.as_str())? {
+            Some(old) => ChangeOp::$variant {
+                $field: old,
+                index: None,
+            },
             None => ChangeOp::Delete {
                 id: $item.id.clone(),
             },
@@ -71,11 +84,11 @@ macro_rules! put {
     }};
 }
 
-fn take<T>(items: &mut Vec<T>, id: &str, f: impl Fn(&T) -> &str) -> Option<T> {
+fn take<T>(items: &mut Vec<T>, id: &str, f: impl Fn(&T) -> &str) -> Option<(T, Option<u32>)> {
     items
         .iter()
         .position(|x| f(x) == id)
-        .map(|i| items.remove(i))
+        .map(|i| (items.remove(i), u32::try_from(i).ok()))
 }
 
 /// Applies one change and returns the change that undoes it.
@@ -85,16 +98,26 @@ fn take<T>(items: &mut Vec<T>, id: &str, f: impl Fn(&T) -> &str) -> Option<T> {
 #[allow(clippy::too_many_lines)]
 pub fn apply_change(doc: &mut Document, change: &ChangeOp) -> Result<ChangeOp, String> {
     Ok(match change {
-        ChangeOp::PutSeries { series } => put!(doc, series, series, PutSeries, series),
-        ChangeOp::PutView { view } => put!(doc, views, view, PutView, view),
-        ChangeOp::PutFact { fact } => put!(doc, facts, fact, PutFact, fact),
-        ChangeOp::PutFinding { finding } => put!(doc, findings, finding, PutFinding, finding),
-        ChangeOp::PutCapsule { capsule } => put!(doc, capsules, capsule, PutCapsule, capsule),
-        ChangeOp::PutIntent { intent } => put!(doc, intents, intent, PutIntent, intent),
-        ChangeOp::PutNarrative { narrative } => {
-            put!(doc, narratives, narrative, PutNarrative, narrative)
+        ChangeOp::PutSeries { series, index } => {
+            put!(doc, series, series, index, PutSeries, series)
         }
-        ChangeOp::PutProposal { proposal } => put!(doc, proposals, proposal, PutProposal, proposal),
+        ChangeOp::PutView { view, index } => put!(doc, views, view, index, PutView, view),
+        ChangeOp::PutFact { fact, index } => put!(doc, facts, fact, index, PutFact, fact),
+        ChangeOp::PutFinding { finding, index } => {
+            put!(doc, findings, finding, index, PutFinding, finding)
+        }
+        ChangeOp::PutCapsule { capsule, index } => {
+            put!(doc, capsules, capsule, index, PutCapsule, capsule)
+        }
+        ChangeOp::PutIntent { intent, index } => {
+            put!(doc, intents, intent, index, PutIntent, intent)
+        }
+        ChangeOp::PutNarrative { narrative, index } => {
+            put!(doc, narratives, narrative, index, PutNarrative, narrative)
+        }
+        ChangeOp::PutProposal { proposal, index } => {
+            put!(doc, proposals, proposal, index, PutProposal, proposal)
+        }
         ChangeOp::InsertLayer { view, index, layer } => {
             let v = view_mut(doc, view)?;
             let i = *index as usize;
@@ -153,22 +176,22 @@ pub fn apply_change(doc: &mut Document, change: &ChangeOp) -> Result<ChangeOp, S
             ChangeOp::PushLedger { entry }
         }
         ChangeOp::Delete { id } => {
-            if let Some(series) = take(&mut doc.series, id, |x| &x.id) {
-                ChangeOp::PutSeries { series }
-            } else if let Some(view) = take(&mut doc.views, id, |x| &x.id) {
-                ChangeOp::PutView { view }
-            } else if let Some(fact) = take(&mut doc.facts, id, |x| &x.id) {
-                ChangeOp::PutFact { fact }
-            } else if let Some(finding) = take(&mut doc.findings, id, |x| &x.id) {
-                ChangeOp::PutFinding { finding }
-            } else if let Some(capsule) = take(&mut doc.capsules, id, |x| &x.id) {
-                ChangeOp::PutCapsule { capsule }
-            } else if let Some(intent) = take(&mut doc.intents, id, |x| &x.id) {
-                ChangeOp::PutIntent { intent }
-            } else if let Some(narrative) = take(&mut doc.narratives, id, |x| &x.id) {
-                ChangeOp::PutNarrative { narrative }
-            } else if let Some(proposal) = take(&mut doc.proposals, id, |x| &x.id) {
-                ChangeOp::PutProposal { proposal }
+            if let Some((series, index)) = take(&mut doc.series, id, |x| &x.id) {
+                ChangeOp::PutSeries { series, index }
+            } else if let Some((view, index)) = take(&mut doc.views, id, |x| &x.id) {
+                ChangeOp::PutView { view, index }
+            } else if let Some((fact, index)) = take(&mut doc.facts, id, |x| &x.id) {
+                ChangeOp::PutFact { fact, index }
+            } else if let Some((finding, index)) = take(&mut doc.findings, id, |x| &x.id) {
+                ChangeOp::PutFinding { finding, index }
+            } else if let Some((capsule, index)) = take(&mut doc.capsules, id, |x| &x.id) {
+                ChangeOp::PutCapsule { capsule, index }
+            } else if let Some((intent, index)) = take(&mut doc.intents, id, |x| &x.id) {
+                ChangeOp::PutIntent { intent, index }
+            } else if let Some((narrative, index)) = take(&mut doc.narratives, id, |x| &x.id) {
+                ChangeOp::PutNarrative { narrative, index }
+            } else if let Some((proposal, index)) = take(&mut doc.proposals, id, |x| &x.id) {
+                ChangeOp::PutProposal { proposal, index }
             } else {
                 return Err(format!("no item `{id}`"));
             }
@@ -275,19 +298,19 @@ pub fn replay(initial: &Document, log: &[LogEntry]) -> Result<Document, String> 
 #[must_use]
 pub fn touched(change: &ChangeOp) -> &str {
     match change {
-        ChangeOp::PutSeries { series } => &series.id,
-        ChangeOp::PutView { view } => &view.id,
+        ChangeOp::PutSeries { series, .. } => &series.id,
+        ChangeOp::PutView { view, .. } => &view.id,
         ChangeOp::InsertLayer { view, .. }
         | ChangeOp::DeleteLayer { view, .. }
         | ChangeOp::SetXDomain { view, .. } => view,
-        ChangeOp::PutFact { fact } => &fact.id,
-        ChangeOp::PutFinding { finding } => &finding.id,
-        ChangeOp::PutCapsule { capsule } => &capsule.id,
+        ChangeOp::PutFact { fact, .. } => &fact.id,
+        ChangeOp::PutFinding { finding, .. } => &finding.id,
+        ChangeOp::PutCapsule { capsule, .. } => &capsule.id,
         ChangeOp::SetCapsuleState { capsule, .. } => capsule,
-        ChangeOp::PutIntent { intent } => &intent.id,
+        ChangeOp::PutIntent { intent, .. } => &intent.id,
         ChangeOp::PushLedger { .. } | ChangeOp::PopLedger => "ledger",
-        ChangeOp::PutNarrative { narrative } => &narrative.id,
-        ChangeOp::PutProposal { proposal } => &proposal.id,
+        ChangeOp::PutNarrative { narrative, .. } => &narrative.id,
+        ChangeOp::PutProposal { proposal, .. } => &proposal.id,
         ChangeOp::Delete { id } => id,
         ChangeOp::AppendBars { series, .. }
         | ChangeOp::TruncateBars { series, .. }

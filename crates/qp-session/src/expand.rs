@@ -32,6 +32,8 @@ pub(crate) struct Ctx<'a> {
     /// Principal id of the speaker (for `undo`).
     pub speaker: &'a str,
     pub is_owner: bool,
+    /// Whether the speaker may decide (needed to undo decisions).
+    pub can_decide: bool,
     pub log: &'a [LogEntry],
     /// Set when the command is an undo.
     pub undoes: Option<Seq>,
@@ -268,7 +270,10 @@ fn layer_change(view: &View, index: Option<u32>, layer: Layer) -> ChangeOp {
             });
         }
         v.layers.insert(idx as usize, layer);
-        ChangeOp::PutView { view: v }
+        ChangeOp::PutView {
+            view: v,
+            index: None,
+        }
     }
 }
 
@@ -395,7 +400,10 @@ pub(crate) fn expand_op(
             if find_series(doc, &s.id).is_none() {
                 ctx.note_created(&s.id);
             }
-            Ok(vec![ChangeOp::PutSeries { series: s }])
+            Ok(vec![ChangeOp::PutSeries {
+                series: s,
+                index: None,
+            }])
         }
         Op::AddStudy {
             id,
@@ -424,7 +432,10 @@ pub(crate) fn expand_op(
                 },
                 data: None,
             };
-            let mut out = vec![ChangeOp::PutSeries { series }];
+            let mut out = vec![ChangeOp::PutSeries {
+                series,
+                index: None,
+            }];
             if let Some((view, panel)) = show_view {
                 let layer = Layer {
                     mark: Mark::Line,
@@ -484,7 +495,10 @@ pub(crate) fn expand_op(
                 params: full,
                 output: output.clone(),
             };
-            Ok(vec![ChangeOp::PutSeries { series: ns }])
+            Ok(vec![ChangeOp::PutSeries {
+                series: ns,
+                index: None,
+            }])
         }
         Op::PutView { view } => {
             let vp = ptr(p, "view");
@@ -521,7 +535,10 @@ pub(crate) fn expand_op(
             if !doc.views.iter().any(|v| v.id == view.id) {
                 ctx.note_created(&view.id);
             }
-            Ok(vec![ChangeOp::PutView { view: view.clone() }])
+            Ok(vec![ChangeOp::PutView {
+                view: view.clone(),
+                index: None,
+            }])
         }
         Op::AddLayer { view, layer, index } => {
             let v = need_view(doc, view, &ptr(p, "view"))?;
@@ -636,7 +653,7 @@ pub(crate) fn expand_op(
                 evidence: evidence.clone(),
                 provenance: ctx.prov(vec![series.clone()]),
             };
-            Ok(vec![ChangeOp::PutFact { fact }])
+            Ok(vec![ChangeOp::PutFact { fact, index: None }])
         }
         Op::AddFinding {
             id,
@@ -673,10 +690,14 @@ pub(crate) fn expand_op(
                 invalidation: invalidation.clone(),
                 provenance: ctx.prov(facts.clone()),
             };
-            let mut out = vec![ChangeOp::PutFinding { finding }];
+            let mut out = vec![ChangeOp::PutFinding {
+                finding,
+                index: None,
+            }];
             if let Some(headline) = capsule {
                 let cid = ctx.new_id(doc, "cap", None, &ptr(p, "capsule"))?;
                 out.push(ChangeOp::PutCapsule {
+                    index: None,
                     capsule: Capsule {
                         id: cid,
                         finding: fid.clone(),
@@ -718,7 +739,10 @@ pub(crate) fn expand_op(
                 check_condition(doc, c, &ptr(p, "invalidation"))?;
                 nf.invalidation = c.clone();
             }
-            Ok(vec![ChangeOp::PutFinding { finding: nf }])
+            Ok(vec![ChangeOp::PutFinding {
+                finding: nf,
+                index: None,
+            }])
         }
         Op::ApproveFinding { finding, note } | Op::RejectFinding { finding, note } => {
             need_finding(doc, finding, &ptr(p, "finding"))?;
@@ -753,6 +777,7 @@ pub(crate) fn expand_op(
             }
             let iid = ctx.new_id(doc, "intent", id.as_ref(), &ptr(p, "id"))?;
             Ok(vec![ChangeOp::PutIntent {
+                index: None,
                 intent: Intent {
                     id: iid,
                     text: text.clone(),
@@ -783,7 +808,10 @@ pub(crate) fn expand_op(
                 })?;
             let mut ni = i.clone();
             ni.active = *active;
-            Ok(vec![ChangeOp::PutIntent { intent: ni }])
+            Ok(vec![ChangeOp::PutIntent {
+                intent: ni,
+                index: None,
+            }])
         }
         Op::AddNarrative { id, about, steps } => {
             need_item(doc, about, &ptr(p, "about"))?;
@@ -814,6 +842,7 @@ pub(crate) fn expand_op(
             }
             let nid = ctx.new_id(doc, "narr", id.as_ref(), &ptr(p, "id"))?;
             Ok(vec![ChangeOp::PutNarrative {
+                index: None,
                 narrative: Narrative {
                     id: nid,
                     about: about.clone(),
@@ -847,12 +876,18 @@ pub(crate) fn expand_op(
             };
             let built = crate::present::presenter_view(doc, f, &vid)
                 .map_err(|m| invalid(m, ptr(p, "finding")))?;
-            let mut out = vec![ChangeOp::PutView { view: built }];
+            let mut out = vec![ChangeOp::PutView {
+                view: built,
+                index: None,
+            }];
             if let Some(c) = doc.capsules.iter().find(|c| &c.finding == finding) {
                 if c.view.as_deref() != Some(vid.as_str()) {
                     let mut nc = c.clone();
                     nc.view = Some(vid);
-                    out.push(ChangeOp::PutCapsule { capsule: nc });
+                    out.push(ChangeOp::PutCapsule {
+                        capsule: nc,
+                        index: None,
+                    });
                 }
             }
             Ok(out)
@@ -931,7 +966,10 @@ pub(crate) fn expand_op(
             np.decided_by = Some(ctx.author.clone());
             np.note.clone_from(note);
             np.decided_seq = Some(ctx.seq);
-            Ok(vec![ChangeOp::PutProposal { proposal: np }])
+            Ok(vec![ChangeOp::PutProposal {
+                proposal: np,
+                index: None,
+            }])
         }
         Op::AcceptProposal { .. } => Err(invalid(
             "accept_proposal must be the only op of its command",
@@ -1129,10 +1167,24 @@ fn expand_remove(doc: &Document, id: &str, p: &str) -> PResult<Vec<ChangeOp>> {
     Ok(out)
 }
 
+/// Whether an entry carries decision effects: capsule approved/rejected, ledger
+/// records, proposal state changes.
+fn has_decision(e: &LogEntry) -> bool {
+    let decided = |s: &CapsuleState| matches!(s, CapsuleState::Approved | CapsuleState::Rejected);
+    e.changes.iter().chain(&e.inverse).any(|c| match c {
+        ChangeOp::SetCapsuleState { state, .. } => decided(state),
+        ChangeOp::PushLedger { .. } | ChangeOp::PopLedger => true,
+        ChangeOp::PutProposal { proposal, .. } => proposal.state != ProposalState::Pending,
+        _ => false,
+    })
+}
+
 fn expand_undo(seq: Option<Seq>, p: &str, ctx: &mut Ctx<'_>) -> PResult<Vec<ChangeOp>> {
     let undone = undone_set(ctx.log);
     let speaker = ctx.speaker;
-    let mine = |e: &LogEntry| e.author == speaker || e.approved_by.as_deref() == Some(speaker);
+    // Only entries the speaker authored are theirs; approving an entry does not make it
+    // the approver's to undo (PROTOCOL.md §8.3).
+    let mine = |e: &LogEntry| e.author == speaker;
     let target: &LogEntry = match seq {
         Some(s) => {
             let Some(e) = s
@@ -1180,6 +1232,30 @@ fn expand_undo(seq: Option<Seq>, p: &str, ctx: &mut Ctx<'_>) -> PResult<Vec<Chan
                 .build()
             })?,
     };
+    if !mine(target) && !ctx.is_owner {
+        return Err(E::new(
+            ErrorCode::Forbidden,
+            format!(
+                "entry {} was written by `{}`; only an owner may undo someone else's entry",
+                target.seq, target.author
+            ),
+        )
+        .at(p)
+        .hint("Undo your own entries, or ask an owner.")
+        .build());
+    }
+    if has_decision(target) && !ctx.can_decide {
+        return Err(E::new(
+            ErrorCode::Forbidden,
+            format!(
+                "entry {} records a decision (capsule approval/rejection, ledger or proposal state); undoing it needs the decide permission",
+                target.seq
+            ),
+        )
+        .at(p)
+        .hint("Ask a principal who may decide.")
+        .build());
+    }
     let touched = touched_ids(&target.changes);
     let mut conflicts = Vec::new();
     let mut by = String::new();

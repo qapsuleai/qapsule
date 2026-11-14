@@ -1,0 +1,1 @@
+attempt1: present query with selector {kind:breakout,latest:true}, surface watch -> sentence-depth text returned. Succeeded; nothing misleading.

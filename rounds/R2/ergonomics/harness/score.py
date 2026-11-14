@@ -495,14 +495,23 @@ def transcript_stats(adir, tasks):
         o["t0"] = a if o["t0"] is None else min(o["t0"], a)
         o["t1"] = b if o["t1"] is None else max(o["t1"], b)
     ov = per.pop("_overhead")
+    # Agents interleave their four tasks (all attempt1 files are often written in one burst),
+    # so a per-task split of tokens/time is not meaningful: each task gets an equal share of
+    # its agent's total; the heuristic attribution is kept for reference only.
+    # Agent totals come from the final `result` event's usage (authoritative; the per-message
+    # usage in the stream under-reports output tokens); fallback: sum over messages.
     out = {}
+    fu = final.get("usage", {})
+    agent_tok = tot(fu) if fu else sum(tot(u) for u in usage.values())
+    agent_out = (fu.get("output_tokens", 0) if fu else sum((u.get("output_tokens", 0) or 0) for u in usage.values()))
+    dur = (final.get("duration_ms") or 0) / 1000
     for t in tasks:
         o = per[t]
-        out[t] = {"tokens": o["tokens"] + round(ov["tokens"] / len(tasks)),
-                  "tokens_task_only": o["tokens"], "output_tokens": o["output_tokens"],
-                  "wall_s": round(o["t1"] - o["t0"], 1) if o["t0"] is not None else 0.0}
-    fu = final.get("usage", {})
-    agent = {"tokens_sum_messages": sum(tot(u) for u in usage.values()), "overhead_tokens": ov["tokens"],
+        out[t] = {"tokens": round(agent_tok / len(tasks)), "output_tokens": round(agent_out / len(tasks)),
+                  "wall_s": round(dur / len(tasks), 1),
+                  "attributed_tokens_heuristic": o["tokens"] + round(ov["tokens"] / len(tasks))}
+    agent = {"tokens": agent_tok, "output_tokens": agent_out,
+             "tokens_sum_messages": sum(tot(u) for u in usage.values()), "overhead_tokens": ov["tokens"],
              "result_usage_total": tot(fu) if fu else None, "cost_usd": final.get("total_cost_usd"),
              "num_turns": final.get("num_turns"), "duration_ms": final.get("duration_ms"),
              "tool_calls": len(files), "tool_inputs": files}
@@ -599,10 +608,10 @@ def score_variant(label, variant):
             "any": sum(r["any"] for r in rows),
             "recovered": sum(r["final"] for r in ff), "failed_first": len(ff),
             "first_error": len(errd), "recovered_after_error": sum(r["final"] for r in errd),
-            "attempts": sum(r["attempts"] for r in rows),
+            "attempts": sum(r["attempts"] for r in rows), "unnumbered_runs": sum(len(r["other_runs"]) for r in rows), "reruns": sum(r["reruns"] for r in rows),
             "msgs_first": sum(r["msgs_first"] for r in rows), "msgs_total": sum(r["msgs_total"] for r in rows),
-            "tokens": sum(a.get("tokens_sum_messages", 0) for a in agents.values()),
-            "output_tokens": sum(r.get("output_tokens", 0) for r in rows),
+            "tokens": sum(a.get("tokens", 0) for a in agents.values()),
+            "output_tokens": sum(a.get("output_tokens", 0) for a in agents.values()),
             "wall_s": round(sum((a.get("duration_ms") or 0) for a in agents.values()) / 1000, 1),
             "cost_usd": round(sum((a.get("cost_usd") or 0) for a in agents.values()), 4)}
     json.dump({"summary": summ, "agents": agents, "rows": rows},

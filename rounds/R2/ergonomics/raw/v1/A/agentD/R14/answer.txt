@@ -1,0 +1,1 @@
+Fiyat panelinde (900,200) pikselinde mum/öğe yok (boş alan): panel 0, bar 159, değer yaklaşık 108,81.

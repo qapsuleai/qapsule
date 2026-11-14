@@ -1,0 +1,1 @@
+attempt1: set_scale via selectors (candle panel -> y0, kind log); applied. Used an extra discovery run (disc.jsonl, list views/series) to learn the real ids; not counted. Unclear: run.sh only accepts files in task work dirs, so the discovery file had to live there.

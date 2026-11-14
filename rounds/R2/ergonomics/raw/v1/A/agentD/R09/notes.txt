@@ -1,0 +1,1 @@
+attempt1: insert_layer band (y upper, y2 lower; selectors for series/panel) then delete_layer of old line layer via selector; applied. Note: set_encoding cannot change mark, so layer was replaced; new layer is drawn last (above candles), spec doesn't say how to preserve order (could use before/after).

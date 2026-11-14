@@ -1,0 +1,1 @@
+attempt1: screen query for arkin -> 3 panels (price+bollinger, rsi14+rule70, macd). Succeeded. welcome.summary already had the info.

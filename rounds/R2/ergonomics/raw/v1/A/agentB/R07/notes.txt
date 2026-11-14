@@ -1,0 +1,1 @@
+Attempt1: delete_panel with selector panel {shows:{study:macd}} -> applied; panel 2 and its layer gone. No issues.

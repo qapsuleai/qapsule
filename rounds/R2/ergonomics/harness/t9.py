@@ -93,10 +93,18 @@ RUN_SH = r"""#!/bin/sh
 case "$1" in /*) f="$1" ;; *) f="$(pwd)/$1" ;; esac
 cd "$(dirname "$0")" || exit 2
 exec /usr/bin/python3 -I -S -c '
-import socket, sys
+import json, os, socket, sys
+f = sys.argv[1]
+d, tok = os.path.dirname(f), ""
+while d and d != "/":
+    try:
+        tok = open(os.path.join(d, ".qp-token")).read().strip()
+        break
+    except OSError:
+        d = os.path.dirname(d)
 s = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
 s.connect("qp.sock")
-s.sendall((sys.argv[1] + "\n").encode())
+s.sendall((json.dumps({"path": f, "token": tok}) + "\n").encode())
 s.shutdown(socket.SHUT_WR)
 out = b""
 while True:
@@ -116,6 +124,10 @@ SB = """(version 1)
 (allow file-read* (subpath "{P}"))
 (allow file-read* (subpath "{W}"))
 (allow file-read-metadata)
+(deny file-write* (subpath "/Users/arkns/Works"))
+(deny file-write* (subpath "/private/tmp/claude-501/-Users-arkns-Works-Mchart-qapsule"))
+(deny file-write* (subpath "/Users/arkns/.claude/projects/-Users-arkns-Works-Mchart-qapsule"))
+(allow file-write* (subpath "{W}"))
 """
 
 
@@ -212,13 +224,25 @@ LOCK = threading.Lock()
 SETUPS = {}
 
 
-def handle_attempt(variant, path):
+def token_dir():
+    return os.path.join(SCR, "tokens")
+
+
+def handle_attempt(variant, path, token):
     real = os.path.realpath(path)
     rel = os.path.relpath(real, os.path.realpath(SCR))
     m = WORK_RE.match(rel)
     if not m or m.group(2) != variant:
         return "error: the file must be a .jsonl file inside one of your task work dirs\n"
     label, _, agent, task, name = m.groups()
+    # per-agent binding: the token (readable only from the agent's own work dir) must belong
+    # to the agent whose work dir holds the attempt
+    tf = os.path.join(token_dir(), re.sub(r"[^0-9a-f]", "", token or "") + ".json")
+    owner = json.load(open(tf)) if token and os.path.exists(tf) else None
+    if owner != {"label": label, "variant": variant, "agent": agent}:
+        with LOCK, open(os.path.join(SCR, "rejected.log"), "a") as f:
+            f.write(json.dumps({"t": time.time(), "variant": variant, "path": path, "owner": owner}) + "\n")
+        return "error: this file is not in your own work dir\n"
     ap = agent_paths(label, variant, agent)
     key = (label, variant, agent)
     with LOCK:
@@ -264,9 +288,9 @@ def cmd_serve(variant):
 
     class H(socketserver.StreamRequestHandler):
         def handle(self):
-            path = self.rfile.readline().decode().strip()
             try:
-                out = handle_attempt(variant, path)
+                req = json.loads(self.rfile.readline().decode())
+                out = handle_attempt(variant, req.get("path", ""), req.get("token", ""))
             except Exception as e:  # report, keep serving
                 out = f"error: harness failure: {e}\n"
             self.wfile.write(out.encode())
@@ -279,10 +303,10 @@ def cmd_serve(variant):
 
 # --------------------------------------------------------------------------- launch
 
-def claude_cmd(prompt, p):
+def claude_cmd(prompt, p, w):
     return ["claude", "-p", "--model", "sonnet",
             "--tools", "Read,Write,Bash",
-            "--allowedTools", "Read", "Write", f"Bash({p}/run.sh:*)",
+            "--allowedTools", "Read", f"Edit(/{w}/**)", f"Bash({p}/run.sh:*)",
             "--setting-sources", "local", "--strict-mcp-config", "--disable-slash-commands", "--no-session-persistence",
             "--output-format", "stream-json", "--verbose", prompt]
 
@@ -295,7 +319,7 @@ def run_sandboxed(prompt, p, work, raw, profile_extra=""):
     with open(prof, "w") as f:
         f.write(SB.format(P=os.path.realpath(p), W=os.path.realpath(work)) + profile_extra)
     shutil.copy(prof, os.path.join(raw, "sandbox.sb"))
-    cmd = ["sandbox-exec", "-f", prof] + claude_cmd(prompt, p)
+    cmd = ["sandbox-exec", "-f", prof] + claude_cmd(prompt, p, os.path.realpath(work))
     with open(os.path.join(raw, "command.json"), "w") as f:
         json.dump({"cwd": work, "argv": cmd}, f, ensure_ascii=False, indent=1)
     t0 = time.time()
@@ -316,6 +340,16 @@ def run_sandboxed(prompt, p, work, raw, profile_extra=""):
     return rc
 
 
+def issue_token(label, variant, agent, work):
+    import secrets
+    tok = secrets.token_hex(16)
+    os.makedirs(token_dir(), exist_ok=True)
+    json.dump({"label": label, "variant": variant, "agent": agent},
+              open(os.path.join(token_dir(), tok + ".json"), "w"))
+    with open(os.path.join(work, ".qp-token"), "w") as f:
+        f.write(tok + "\n")
+
+
 def cmd_launch(variant, agent, label):
     ap = agent_paths(label, variant, agent)
     if os.path.exists(ap["work"]):
@@ -330,6 +364,7 @@ def cmd_launch(variant, agent, label):
         lines.append(f"- **{t}** — {ROLE} Request: «{REQUESTS[t]}» Work dir: `{d}/`")
     with open(os.path.join(ap["work"], "TASKS.txt"), "w") as f:
         f.write("\n".join(lines) + "\n")
+    issue_token(label, variant, agent, ap["work"])
     prompt = PROMPT.format(P=p, W=ap["work"])
     with open(os.path.join(ap["raw"], "prompt.txt"), "w") as f:
         f.write(prompt + "\n")
@@ -343,7 +378,7 @@ def cmd_launch(variant, agent, label):
             if os.path.isfile(os.path.join(src, f)):
                 shutil.copy(os.path.join(src, f), os.path.join(dst, f))
     shutil.copy(os.path.join(ap["work"], "TASKS.txt"), os.path.join(ap["raw"], "TASKS.txt"))
-    extra = sorted(set(os.listdir(ap["work"])) - set(AGENTS[agent]) - {"TASKS.txt"})
+    extra = sorted(set(os.listdir(ap["work"])) - set(AGENTS[agent]) - {"TASKS.txt", ".qp-token"})
     if extra:
         os.makedirs(os.path.join(ap["raw"], "_extra"), exist_ok=True)
         for f in extra:
@@ -361,15 +396,21 @@ def cmd_isotest(variant, label="isotest"):
             shutil.rmtree(d)
     prepare_setup(label, variant, "A")
     os.makedirs(os.path.join(ap["work"], "R01"))
+    issue_token(label, variant, "A", ap["work"])
     probe = os.path.join(ap["work"], "R01", "probe.jsonl")
     targets = [os.path.join(REPO, "CLAUDE.md"), os.path.join(HERE, "setup.py"),
                os.path.join(REPO, "rounds/R2/tasks/TASKS.md")]
+    other = os.path.join(SCR, "work", "v1", "base", "agentB", "R02", "attempt2.jsonl")
+    wtargets = [os.path.join(REPO, "rounds/R2/ergonomics/PWNED.txt"),
+                os.path.join(SCR, "work", "v1", "base", "agentB", "PWNED.txt")]
     prompt = ("This is a file-access test. Use the Read tool on each of these files and report, for each, "
               "either its first line or the exact error you got: "
               + ", ".join(f"`{t}`" for t in targets)
               + f". Then read `{p}/PROTOCOL.md` and report its first line. Then write `{probe}` with the single "
               'line {"conn":"a","msg":{"type":"hello","protocol":"qp/0","principal":"editor","surface":{"kind":"headless"}}}'
               f" and run `{p}/run.sh {probe}`; report the first 200 characters of the output. "
+              f"Then use the Write tool to create each of {', '.join(f'`{t}`' for t in wtargets)} with the text `x` "
+              f"and report the result. Then run `{p}/run.sh {other}` (a file of another agent) and report the output. "
               f"Finally try the Bash command `cat {targets[0]}` and report what happened. Reply with a short table.")
     with open(os.path.join(ap["raw"], "prompt.txt"), "w") as f:
         f.write(prompt + "\n")

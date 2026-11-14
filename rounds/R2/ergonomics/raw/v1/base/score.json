@@ -4,9 +4,11 @@
    "cost_usd": 0.4467338999999999,
    "duration_ms": 94918,
    "num_turns": 28,
+   "output_tokens": 11500,
    "overhead_tokens": 51385,
    "result_usage_total": 806334,
    "seed": 2469876565,
+   "tokens": 806334,
    "tokens_sum_messages": 795721,
    "tool_calls": 27
   },
@@ -14,9 +16,11 @@
    "cost_usd": 0.46749339999999995,
    "duration_ms": 69420,
    "num_turns": 23,
+   "output_tokens": 7919,
    "overhead_tokens": 123546,
    "result_usage_total": 683876,
    "seed": 3018547601,
+   "tokens": 683876,
    "tokens_sum_messages": 676770,
    "tool_calls": 22
   },
@@ -24,9 +28,11 @@
    "cost_usd": 0.3619799,
    "duration_ms": 72397,
    "num_turns": 26,
+   "output_tokens": 9006,
    "overhead_tokens": 51348,
    "result_usage_total": 481893,
    "seed": 788201321,
+   "tokens": 481893,
    "tokens_sum_messages": 473678,
    "tool_calls": 25
   },
@@ -34,9 +40,11 @@
    "cost_usd": 0.3934152,
    "duration_ms": 74669,
    "num_turns": 29,
+   "output_tokens": 9460,
    "overhead_tokens": 97329,
    "result_usage_total": 515467,
    "seed": 1513621296,
+   "tokens": 515467,
    "tokens_sum_messages": 506606,
    "tool_calls": 28
   },
@@ -44,9 +52,11 @@
    "cost_usd": 0.38658439999999994,
    "duration_ms": 75923,
    "num_turns": 30,
+   "output_tokens": 9239,
    "overhead_tokens": 51366,
    "result_usage_total": 702106,
    "seed": 282036296,
+   "tokens": 702106,
    "tokens_sum_messages": 693667,
    "tool_calls": 29
   }
@@ -56,6 +66,7 @@
    "agent": "A",
    "any": true,
    "attempts": 3,
+   "attributed_tokens_heuristic": 462377,
    "detail": [
     {
      "error_codes": [],
@@ -99,17 +110,17 @@
    "msgs_total": 12,
    "notes": "attempt1: NOTE: I first ran an exploratory query-only file as R01/attempt1.jsonl, then overwrote it with the real command (violated never-edit rule); the real command used insert_panel with panel:3 as integer -> schema error (panel must be a Panel object; spec says 'panel' id, misleading).\nattempt2: add_study rsi7 + insert_panel with panel object {id:3,...} after:0 -> applied; but screen listed panel 3 last, so I doubted placement (screen seems to list by id, not stack order).\nattempt3: same with before:1 -> applied; views list shows panels order 0,3,1,2 => RSI7 directly under price. Probably attempt2 was already fine; spec does not say screen panel order differs from stack order. Unclear: insert_panel.panel type, client must choose panel id.",
    "other_runs": [],
-   "output_tokens": 101,
+   "output_tokens": 2875,
    "reruns": 2,
    "task": "R01",
-   "tokens": 462377,
-   "tokens_task_only": 449531,
-   "wall_s": 64.5
+   "tokens": 201584,
+   "wall_s": 23.7
   },
   {
    "agent": "B",
    "any": true,
    "attempts": 2,
+   "attributed_tokens_heuristic": 177404,
    "detail": [
     {
      "error_codes": [],
@@ -141,17 +152,17 @@
    "msgs_total": 7,
    "notes": "attempt1: discovery-only run (list views/series, screen arkin) since ids are random; no change made.\nattempt2: set_encoding on Bollinger layer w78lu (y=upper, color #ff0000) + two new line layers for middle/lower keeping the old grey. Applied. Unclear: no semantic reference (\"üst bant\") exists in ops (§17 empty); the single line layer draws three outputs so I had to split it. \"Kırmızı\" has no theme token; used #ff0000 (theme \"down\" is reddish but also means bearish).",
    "other_runs": [],
-   "output_tokens": 19,
+   "output_tokens": 1980,
    "reruns": 0,
    "task": "R02",
-   "tokens": 177404,
-   "tokens_task_only": 146518,
-   "wall_s": 4.0
+   "tokens": 170969,
+   "wall_s": 17.4
   },
   {
    "agent": "C",
    "any": true,
    "attempts": 2,
+   "attributed_tokens_heuristic": 12837,
    "detail": [
     {
      "error_codes": [],
@@ -183,17 +194,17 @@
    "msgs_total": 9,
    "notes": "attempt1: discovery-only run (screen/list queries; same file as R13 attempt1, run once) to learn real ids (view xep2d, last breakout fact bjgte bar 185, finding ijjoh).\nattempt2: set_emphasis on view xep2d with highlight target item=bjgte; applied seq 1, emphasis visible in view. Unclear: whether to target the fact or the finding (both allowed as `item`), and set_emphasis replaces the whole list (list was empty so fine).",
    "other_runs": [],
-   "output_tokens": 0,
+   "output_tokens": 2252,
    "reruns": 0,
    "task": "R03",
-   "tokens": 12837,
-   "tokens_task_only": 0,
-   "wall_s": 0.0
+   "tokens": 120473,
+   "wall_s": 18.1
   },
   {
    "agent": "D",
    "any": true,
    "attempts": 2,
+   "attributed_tokens_heuristic": 24332,
    "detail": [
     {
      "error_codes": [],
@@ -226,17 +237,17 @@
    "msgs_total": 5,
    "notes": "attempt1: list findings + present(surface=watch) without finding; default picked the RSI finding (highest confidence), not the breakout. attempt2: present with finding f7b4v (latest breakout, bar 185) worked. Unclear: present's default choice is highest confidence, so findings must be listed first to pick the right one (welcome.summary also has ids).",
    "other_runs": [],
-   "output_tokens": 0,
+   "output_tokens": 2365,
    "reruns": 0,
    "task": "R04",
-   "tokens": 24332,
-   "tokens_task_only": 0,
-   "wall_s": 0.0
+   "tokens": 128867,
+   "wall_s": 18.7
   },
   {
    "agent": "E",
    "any": true,
    "attempts": 2,
+   "attributed_tokens_heuristic": 180916,
    "detail": [
     {
      "error_codes": [
@@ -270,17 +281,17 @@
    "msgs_total": 7,
    "notes": "attempt1: probe + guessed view id 'main' (from spec examples) -> not_found; the real view id is s5ybj (only discoverable via welcome.summary / list). The spec examples' ids are misleading.\nattempt2: set_scale s5ybj y0 log -> applied, verified via get.",
    "other_runs": [],
-   "output_tokens": 595,
+   "output_tokens": 2310,
    "reruns": 0,
    "task": "R05",
-   "tokens": 180916,
-   "tokens_task_only": 168074,
-   "wall_s": 51.5
+   "tokens": 175526,
+   "wall_s": 19.0
   },
   {
    "agent": "A",
    "any": true,
    "attempts": 1,
+   "attributed_tokens_heuristic": 12846,
    "detail": [
     {
      "error_codes": [],
@@ -300,17 +311,17 @@
    "msgs_total": 3,
    "notes": "attempt1: insert_layer rule on panel 1, y '30', color copied from the 70 rule, after t1nui -> applied; origin auto-bound to rsi.oversold. No issues. (Ids are random; I learned them from welcome.summary in an unrecorded exploratory run.)",
    "other_runs": [],
-   "output_tokens": 0,
+   "output_tokens": 2875,
    "reruns": 0,
    "task": "R06",
-   "tokens": 12846,
-   "tokens_task_only": 0,
-   "wall_s": 0.0
+   "tokens": 201584,
+   "wall_s": 23.7
   },
   {
    "agent": "B",
    "any": true,
    "attempts": 2,
+   "attributed_tokens_heuristic": 30886,
    "detail": [
     {
      "error_codes": [],
@@ -342,17 +353,17 @@
    "msgs_total": 3,
    "notes": "attempt1: discovery-only run (shared with R02; file not duplicated here), no change.\nattempt2: delete_panel panel 2 (MACD) in view isc5l; applied, the MACD layer went with it; series eiz2t kept. Ambiguity: \"paneli kaldır\" = panel only, not removing the series.",
    "other_runs": [],
-   "output_tokens": 0,
+   "output_tokens": 1980,
    "reruns": 0,
    "task": "R07",
-   "tokens": 30886,
-   "tokens_task_only": 0,
-   "wall_s": 0.0
+   "tokens": 170969,
+   "wall_s": 17.4
   },
   {
    "agent": "C",
    "any": true,
    "attempts": 2,
+   "attributed_tokens_heuristic": 12837,
    "detail": [
     {
      "error_codes": [],
@@ -386,17 +397,17 @@
    "msgs_total": 9,
    "notes": "attempt1: discovery-only run (same file as R13 attempt1) to learn ids (view xep2d, bar series ly9ux, panels 0-2).\nattempt2: insert_panel after panel 0 with id 3 name volume and a bar layer {series ly9ux, encoding y:\"v\"}; applied, panel 3 sits right below price. Unclear: insert_panel's `panel` is a full Panel object (not just an id) — inferred from the schema-less spec text/examples; worked first time. Also ack.created gave \"3\",\"l0\".",
    "other_runs": [],
-   "output_tokens": 0,
+   "output_tokens": 2252,
    "reruns": 0,
    "task": "R08",
-   "tokens": 12837,
-   "tokens_task_only": 0,
-   "wall_s": 0.0
+   "tokens": 120473,
+   "wall_s": 18.1
   },
   {
    "agent": "D",
    "any": true,
    "attempts": 2,
+   "attributed_tokens_heuristic": 338145,
    "detail": [
     {
      "error_codes": [],
@@ -428,17 +439,17 @@
    "msgs_total": 6,
    "notes": "attempt1: only listed views/series to learn ids (welcome.summary already had them, so unnecessary as a separate step). attempt2: delete_layer line mc7qp + insert_layer band (y=upper, y2=lower, after aao5y), mode direct; applied, view verified with get. Unclear: whether 'filled area' means mark area or band; chose band because area fills to a single edge and the grammar names band for Bollinger.",
    "other_runs": [],
-   "output_tokens": 528,
+   "output_tokens": 2365,
    "reruns": 0,
    "task": "R09",
-   "tokens": 338145,
-   "tokens_task_only": 313813,
-   "wall_s": 34.7
+   "tokens": 128867,
+   "wall_s": 18.7
   },
   {
    "agent": "E",
    "any": true,
    "attempts": 1,
+   "attributed_tokens_heuristic": 12842,
    "detail": [
     {
      "error_codes": [],
@@ -458,17 +469,17 @@
    "msgs_total": 3,
    "notes": "attempt1: insert_layer of a bar layer on panel 2 (series zasba, y=histogram, conditional color up/down, origin macd.zero) -> applied, verified. Ids were learned from the R05 probe run (same fresh doc); the attempt file was written after that probe and had not been run before. I kept the existing macd/signal line layer and added a new bar layer instead of converting it.",
    "other_runs": [],
-   "output_tokens": 0,
+   "output_tokens": 2310,
    "reruns": 0,
    "task": "R10",
-   "tokens": 12842,
-   "tokens_task_only": 0,
-   "wall_s": 0.0
+   "tokens": 175526,
+   "wall_s": 19.0
   },
   {
    "agent": "A",
    "any": true,
    "attempts": 1,
+   "attributed_tokens_heuristic": 12846,
    "detail": [
     {
      "error_codes": [],
@@ -488,17 +499,17 @@
    "msgs_total": 3,
    "notes": "attempt1: insert_layer line on vesho panel 0, y c, conditional color gt sma50 -> up/down -> applied. screen does not show colors so unverifiable; ambiguity: added a new close-line layer rather than recoloring candles; gt vs ge unspecified. Ids learned from welcome.summary in an unrecorded exploratory run.",
    "other_runs": [],
-   "output_tokens": 0,
+   "output_tokens": 2875,
    "reruns": 0,
    "task": "R11",
-   "tokens": 12846,
-   "tokens_task_only": 0,
-   "wall_s": 0.0
+   "tokens": 201584,
+   "wall_s": 23.7
   },
   {
    "agent": "B",
    "any": true,
    "attempts": 2,
+   "attributed_tokens_heuristic": 30886,
    "detail": [
     {
      "error_codes": [],
@@ -530,17 +541,17 @@
    "msgs_total": 3,
    "notes": "attempt1: discovery-only run (shared with R02), no change.\nattempt2: set_view_range from_bar 140 to_bar 199 (200 bars, so last 60), applied; x.domain set. Persistent command (not input) because of \"böyle kalsın\". Needed discovery to know the bar count and view id.",
    "other_runs": [],
-   "output_tokens": 0,
+   "output_tokens": 1980,
    "reruns": 0,
    "task": "R12",
-   "tokens": 30886,
-   "tokens_task_only": 0,
-   "wall_s": 0.0
+   "tokens": 170969,
+   "wall_s": 17.4
   },
   {
    "agent": "C",
    "any": true,
    "attempts": 1,
+   "attributed_tokens_heuristic": 152374,
    "detail": [
     {
      "error_codes": [],
@@ -560,17 +571,17 @@
    "msgs_total": 6,
    "notes": "attempt1: hello + screen(arkin) + list queries; answered the question in one shot. Spec note: ids in the spec examples (px, main, rsi14) differ from the real doc (random ids), had to discover via welcome.summary/screen.",
    "other_runs": [],
-   "output_tokens": 70,
+   "output_tokens": 2252,
    "reruns": 0,
    "task": "R13",
-   "tokens": 152374,
-   "tokens_task_only": 139537,
-   "wall_s": 10.3
+   "tokens": 120473,
+   "wall_s": 18.1
   },
   {
    "agent": "D",
    "any": true,
    "attempts": 1,
+   "attributed_tokens_heuristic": 24332,
    "detail": [
     {
      "error_codes": [],
@@ -590,17 +601,17 @@
    "msgs_total": 2,
    "notes": "attempt1: hit query x=900,y=200,width=1200,height=600, view omitted; result had panel 0, bar 159, value 108.81 and no item (empty area). Succeeded first try. Note: the result gives no explicit 'empty' flag, only the absence of item.",
    "other_runs": [],
-   "output_tokens": 0,
+   "output_tokens": 2365,
    "reruns": 0,
    "task": "R14",
-   "tokens": 24332,
-   "tokens_task_only": 0,
-   "wall_s": 0.0
+   "tokens": 128867,
+   "wall_s": 18.7
   },
   {
    "agent": "E",
    "any": true,
    "attempts": 1,
+   "attributed_tokens_heuristic": 12842,
    "detail": [
     {
      "error_codes": [],
@@ -620,17 +631,17 @@
    "msgs_total": 3,
    "notes": "attempt1: set_encoding width 2 on RSI layer e0aox -> applied, verified. Ids came from the R05 probe run; this file had not been run before.",
    "other_runs": [],
-   "output_tokens": 0,
+   "output_tokens": 2310,
    "reruns": 0,
    "task": "R15",
-   "tokens": 12842,
-   "tokens_task_only": 0,
-   "wall_s": 0.0
+   "tokens": 175526,
+   "wall_s": 19.0
   },
   {
    "agent": "A",
    "any": true,
    "attempts": 1,
+   "attributed_tokens_heuristic": 307651,
    "detail": [
     {
      "error_codes": [],
@@ -650,17 +661,17 @@
    "msgs_total": 3,
    "notes": "attempt1: insert_layer point with fact fn2kv (older breakout, bar 120, vs necr0 bar 185) on panel 0 -> applied. Point y uses fact level 103.9 (not bar close). 'Eski' interpreted as older by bar.",
    "other_runs": [],
-   "output_tokens": 762,
+   "output_tokens": 2875,
    "reruns": 0,
    "task": "R16",
-   "tokens": 307651,
-   "tokens_task_only": 294805,
-   "wall_s": 63.1
+   "tokens": 201584,
+   "wall_s": 23.7
   },
   {
    "agent": "B",
    "any": true,
    "attempts": 2,
+   "attributed_tokens_heuristic": 437592,
    "detail": [
     {
      "error_codes": [],
@@ -692,17 +703,17 @@
    "msgs_total": 3,
    "notes": "attempt1: discovery-only run (shared with R02), no change.\nattempt2: add_fact (level evidence 123.45, series ugd5d bar 199) + insert_layer rule panel 0 y=123.45 with origin pointing at the fact, in one command; applied. Spec point: a bare constant gets no_origin, so a fact has to be created first; this is in GRAMMAR §10 but easy to miss. Side effect: an extra fact is added to the document; the bar choice (last) was arbitrary.",
    "other_runs": [],
-   "output_tokens": 764,
+   "output_tokens": 1980,
    "reruns": 0,
    "task": "R17",
-   "tokens": 437592,
-   "tokens_task_only": 406706,
-   "wall_s": 39.1
+   "tokens": 170969,
+   "wall_s": 17.4
   },
   {
    "agent": "C",
    "any": true,
    "attempts": 2,
+   "attributed_tokens_heuristic": 295630,
    "detail": [
     {
      "error_codes": [],
@@ -734,17 +745,17 @@
    "msgs_total": 9,
    "notes": "attempt1: discovery-only run (same file as R13 attempt1) to learn that MACD is panel id 2 and RSI is panel id 1 in view xep2d.\nattempt2: move_panel panel 2 before 1; applied, panel order now 0,2,1. Spec note: panel ids are not positions, so the request must be mapped via layers' series (ct8vs = macd) to panel id.",
    "other_runs": [],
-   "output_tokens": 697,
+   "output_tokens": 2252,
    "reruns": 0,
    "task": "R18",
-   "tokens": 295630,
-   "tokens_task_only": 282793,
-   "wall_s": 42.3
+   "tokens": 120473,
+   "wall_s": 18.1
   },
   {
    "agent": "D",
    "any": true,
    "attempts": 2,
+   "attributed_tokens_heuristic": 119796,
    "detail": [
     {
      "error_codes": [],
@@ -776,17 +787,17 @@
    "msgs_total": 5,
    "notes": "attempt1: list findings + present(surface=phone) without finding; default was the RSI finding, wrong one. attempt2: present f7b4v phone: capsule depth, spark from_bar 140 (60 bars), 3 glyphs. Same ambiguity as R04.",
    "other_runs": [],
-   "output_tokens": 19,
+   "output_tokens": 2365,
    "reruns": 0,
    "task": "R19",
-   "tokens": 119796,
-   "tokens_task_only": 95464,
-   "wall_s": 12.1
+   "tokens": 128867,
+   "wall_s": 18.7
   },
   {
    "agent": "E",
    "any": true,
    "attempts": 2,
+   "attributed_tokens_heuristic": 487069,
    "detail": [
     {
      "error_codes": [
@@ -820,12 +831,11 @@
    "msgs_total": 6,
    "notes": "attempt1: insert_panel with panel:3 (integer) -> schema error: panel must be an object. PROTOCOL.md's op table lists only `panel`, so the type is unclear; GRAMMAR.md §2 shows the Panel object.\nattempt2: panel object {id:3,name:bandwidth,y:{kind:linear}} + line layer bw (idfgo, y=bandwidth) -> applied, verified.",
    "other_runs": [],
-   "output_tokens": 182,
+   "output_tokens": 2310,
    "reruns": 0,
    "task": "R20",
-   "tokens": 487069,
-   "tokens_task_only": 474227,
-   "wall_s": 49.4
+   "tokens": 175526,
+   "wall_s": 19.0
   }
  ],
  "summary": {
@@ -839,11 +849,13 @@
   "label": "v1",
   "msgs_first": 66,
   "msgs_total": 107,
-  "output_tokens": 3737,
+  "output_tokens": 47124,
   "recovered": 13,
   "recovered_after_error": 2,
+  "reruns": 2,
   "tasks": 20,
-  "tokens": 3146442,
+  "tokens": 3189676,
+  "unnumbered_runs": 0,
   "variant": "base",
   "wall_s": 387.3
  }

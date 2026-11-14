@@ -17,5 +17,8 @@ serde_path_to_error = "0.1.20"
 # Inline transcript inits handed to `qp serve` (securely created temp files).
 tempfile = "3.27.0"
 
+[dev-dependencies]
+tempfile = "3.27.0"
+
 [lints]
 workspace = true

@@ -337,7 +337,7 @@ pub(crate) fn expand_op(
             let mut s = series.clone();
             let src = ptr(&sp, "source");
             match &series.source {
-                SeriesSource::Inline => match &series.data {
+                SeriesSource::Inline {} => match &series.data {
                     Some(SeriesData::Bars { bars }) => {
                         if let Err(e) = qp_schema::validate_bars(bars) {
                             return Err(invalid(e, ptr(&sp, "data")));
@@ -1025,7 +1025,7 @@ fn check_confidence(c: f64, path: &str) -> PResult<()> {
 }
 
 fn inline_bars(s: &Series) -> Option<&[qp_schema::Bar]> {
-    if matches!(s.source, SeriesSource::Inline) {
+    if matches!(s.source, SeriesSource::Inline {}) {
         s.bars()
     } else {
         None
@@ -1173,7 +1173,7 @@ fn has_decision(e: &LogEntry) -> bool {
     let decided = |s: &CapsuleState| matches!(s, CapsuleState::Approved | CapsuleState::Rejected);
     e.changes.iter().chain(&e.inverse).any(|c| match c {
         ChangeOp::SetCapsuleState { state, .. } => decided(state),
-        ChangeOp::PushLedger { .. } | ChangeOp::PopLedger => true,
+        ChangeOp::PushLedger { .. } | ChangeOp::PopLedger {} => true,
         ChangeOp::PutProposal { proposal, .. } => proposal.state != ProposalState::Pending,
         _ => false,
     })

@@ -773,7 +773,14 @@ impl Session {
 
         if direct {
             if let [Op::AcceptProposal { proposal, note }] = ops {
-                return self.accept(&conn, id, proposal, note.clone(), &principal, base, reason);
+                return self.accept(
+                    &conn,
+                    id,
+                    (proposal, note.clone()),
+                    &principal,
+                    base,
+                    reason,
+                );
             }
             let mut ctx = Ctx {
                 author,
@@ -901,8 +908,7 @@ impl Session {
         &mut self,
         conn: &str,
         id: &str,
-        pid: &str,
-        note: Option<String>,
+        (pid, note): (&str, Option<String>),
         decider: &str,
         base: Option<Seq>,
         reason: Option<String>,
@@ -1179,7 +1185,7 @@ impl Session {
         for ev in fired {
             for c in &self.conns {
                 for s in &c.subs {
-                    if matches!(s.topic, Topic::Intents) {
+                    if matches!(s.topic, Topic::Intents {}) {
                         intents.push(out(
                             &c.id,
                             ServerMsg::Notify {
@@ -1292,7 +1298,7 @@ impl Session {
             let author = self.principal_of(&proposal.provenance.author);
             for c in &self.conns {
                 for s in &c.subs {
-                    if matches!(s.topic, Topic::Proposals) {
+                    if matches!(s.topic, Topic::Proposals {}) {
                         lines.push(out(
                             &c.id,
                             ServerMsg::Notify {
@@ -1367,9 +1373,9 @@ impl Session {
                 }
             }
             Topic::Changes { .. }
-            | Topic::Proposals
+            | Topic::Proposals {}
             | Topic::Attention { principal: None }
-            | Topic::Intents => {}
+            | Topic::Intents {} => {}
         }
         self.conns[ci].subs.push(Sub {
             id: id.to_owned(),

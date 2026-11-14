@@ -352,9 +352,73 @@ fn frames() {
     let mut h = H::new();
     let r = h.s.handle_frame(r#"{"conn":"z","msg":"{oops"}"#);
     assert_eq!(r[0].conn, "z");
-    let r = serde_json::to_value(&h.s.handle_frame("nope")).unwrap();
+    let r = serde_json::to_value(h.s.handle_frame("nope")).unwrap();
     assert_eq!(r[0]["conn"], "");
     assert_eq!(r[0]["msg"]["error"]["code"], "parse");
-    let r = serde_json::to_value(&h.s.handle_frame(r#"{"conn":"z","msg":{},"x":1}"#)).unwrap();
+    let r = serde_json::to_value(h.s.handle_frame(r#"{"conn":"z","msg":{},"x":1}"#)).unwrap();
     assert_eq!(r[0]["msg"]["error"]["code"], "schema");
+}
+
+#[test]
+fn delete_then_undo_is_byte_identical() {
+    let mut h = H::new();
+    h.hello("a", "arkin", "desktop");
+    let before = serde_json::to_vec(h.s.document()).unwrap();
+    // A series in the middle of its collection, with a layer in the middle of a view.
+    assert_eq!(
+        h.cmd("a", "c1", json!([{"op":"remove","id":"bb20"}]))["seq"],
+        1
+    );
+    assert_eq!(
+        h.cmd("a", "c2", json!([{"op":"remove","id":"cap-overbought"}]))["seq"],
+        2
+    );
+    assert_eq!(h.cmd("a", "c3", json!([{"op":"undo"}]))["seq"], 3);
+    assert_eq!(h.cmd("a", "c4", json!([{"op":"undo"}]))["seq"], 4);
+    assert_eq!(before, serde_json::to_vec(h.s.document()).unwrap());
+    h.assert_replay();
+}
+
+#[test]
+fn undo_authorization() {
+    let mut h = H::new();
+    h.hello("a", "arkin", "desktop");
+    h.hello("s", "scout", "headless");
+    h.hello("e", "editor", "headless");
+    // An editor's proposal accepted by the owner: the owner approved it, but did not
+    // author it, so a bare `undo` does not pick it.
+    let r = h.one("e", json!({"type":"command","id":"p","mode":"propose","reason":"why","ops":[{"op":"add_intent","id":"i","text":"x"}]}));
+    assert_eq!(r["status"], "proposed");
+    h.cmd(
+        "a",
+        "c",
+        json!([{"op":"accept_proposal","proposal":"prop-1"}]),
+    );
+    assert_eq!(h.s.log()[0].reason.as_deref(), Some("why"));
+    assert_eq!(h.s.log()[1].reason.as_deref(), Some("why"));
+    assert_eq!(
+        code(&h.cmd("a", "u", json!([{"op":"undo"}]))),
+        "undo_conflict"
+    );
+    // The proposer has no write permission: undo is never proposable.
+    assert_eq!(code(&h.cmd("s", "u", json!([{"op":"undo"}]))), "forbidden");
+    // The editor authored the accepted entry, but it carries a proposal decision.
+    let r = h.cmd("e", "u", json!([{"op":"undo","seq":2}]));
+    assert_eq!(code(&r), "forbidden");
+    // The owner may undo it (owner and decide).
+    assert_eq!(
+        h.cmd("a", "u", json!([{"op":"undo","seq":2}]))["status"],
+        "applied"
+    );
+    // An editor rejecting nothing it may decide: approve via owner, editor cannot undo it.
+    h.cmd(
+        "a",
+        "r",
+        json!([{"op":"reject_finding","finding":"fnd-overbought","note":"n"}]),
+    );
+    assert_eq!(
+        code(&h.cmd("e", "u", json!([{"op":"undo","seq":4}]))),
+        "forbidden"
+    );
+    h.assert_replay();
 }

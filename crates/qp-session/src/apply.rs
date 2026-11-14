@@ -165,9 +165,9 @@ pub fn apply_change(doc: &mut Document, change: &ChangeOp) -> Result<ChangeOp, S
         }
         ChangeOp::PushLedger { entry } => {
             doc.ledger.entries.push(entry.clone());
-            ChangeOp::PopLedger
+            ChangeOp::PopLedger {}
         }
-        ChangeOp::PopLedger => {
+        ChangeOp::PopLedger {} => {
             let entry = doc
                 .ledger
                 .entries
@@ -308,7 +308,7 @@ pub fn touched(change: &ChangeOp) -> &str {
         ChangeOp::PutCapsule { capsule, .. } => &capsule.id,
         ChangeOp::SetCapsuleState { capsule, .. } => capsule,
         ChangeOp::PutIntent { intent, .. } => &intent.id,
-        ChangeOp::PushLedger { .. } | ChangeOp::PopLedger => "ledger",
+        ChangeOp::PushLedger { .. } | ChangeOp::PopLedger {} => "ledger",
         ChangeOp::PutNarrative { narrative, .. } => &narrative.id,
         ChangeOp::PutProposal { proposal, .. } => &proposal.id,
         ChangeOp::Delete { id } => id,

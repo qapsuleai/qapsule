@@ -209,7 +209,7 @@ impl Session {
     pub(crate) fn query(&mut self, ci: usize, q: &Query) -> PResult<QueryResult> {
         let qp = "/query";
         match q {
-            Query::Describe => {
+            Query::Describe {} => {
                 let op_schema = schemars::schema_for!(Op).to_value();
                 let q_schema = schemars::schema_for!(Query).to_value();
                 let t_schema = schemars::schema_for!(Topic).to_value();
@@ -273,7 +273,7 @@ impl Session {
                     items,
                 })
             }
-            Query::Document => Ok(QueryResult::Document {
+            Query::Document {} => Ok(QueryResult::Document {
                 document: Box::new(self.doc.clone()),
             }),
             Query::Log {

@@ -279,6 +279,14 @@ impl Bank {
         Self { studies, outs }
     }
 
+    /// Attaches every study to a history in one call (commit-only, no outputs), leaving
+    /// the same state as pushing each bar ([`Study::extend`]).
+    pub fn warm(&mut self, history: &[f64]) {
+        for s in &mut self.studies {
+            s.extend(&[history]);
+        }
+    }
+
     /// A new bar with price `x` on every study.
     pub fn push(&mut self, x: f64) {
         for (s, o) in self.studies.iter_mut().zip(&mut self.outs) {
@@ -333,9 +341,11 @@ pub fn d_digest() -> u64 {
     let (hist, ticks, new_bars) = d_prices();
     let mut bank = Bank::new(&d_specs());
     let mut h = crate::sweep::FNV_OFFSET;
-    for &x in &hist {
-        bank.push(x);
-    }
+    // Attach with the commit-only path, then reproduce the outputs of the last history bar
+    // (as the push loop would have left them) by revising it with its own price: the
+    // digest below is the T1 digest, so this also proves `warm` = pushes, bit for bit.
+    bank.warm(&hist);
+    bank.update_last(hist[hist.len() - 1]);
     h = bank.digest(h);
     for &t in &ticks {
         bank.update_last(t);

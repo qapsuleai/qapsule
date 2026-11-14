@@ -210,9 +210,24 @@ pub fn profile_d(reps: usize) {
     }
     let (mn, md, mx) = stats(&mut warm_t);
     println!(
-        "D   {:<14} {:>8} {mn:>9.2} {md:>9.2} {:>9} {mx:>9.2}  (ms: build + 10,000 bars)",
+        "D   {:<14} {:>8} {mn:>9.2} {md:>9.2} {:>9} {mx:>9.2}  (ms: build + 10,000 bars, push)",
         "attach",
         warm_t.len(),
+        ""
+    );
+    let mut fast_t = Vec::new();
+    for _ in 0..reps.max(1) {
+        let t0 = Instant::now();
+        let mut bank = Bank::new(&specs);
+        bank.warm(&hist);
+        fast_t.push(t0.elapsed().as_secs_f64() * 1e3);
+        std::hint::black_box(&bank);
+    }
+    let (mn, md, mx) = stats(&mut fast_t);
+    println!(
+        "D   {:<14} {:>8} {mn:>9.2} {md:>9.2} {:>9} {mx:>9.2}  (ms: build + 10,000 bars, extend)",
+        "attach (warm)",
+        fast_t.len(),
         ""
     );
 }

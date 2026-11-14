@@ -30,6 +30,8 @@
 
 mod chain;
 mod core;
+#[doc(hidden)]
+pub mod profiles;
 pub mod studies;
 pub mod sweep;
 

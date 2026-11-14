@@ -11,8 +11,12 @@ publish.workspace = true
 qp-schema = { path = "../qp-schema" }
 
 [dev-dependencies]
-proptest = "1.12.0"
+proptest = { version = "1.12.0", default-features = false, features = ["std", "bit-set"] }
 serde_json = { version = "1.0.154", features = ["float_roundtrip"] }
 
 [lints]
 workspace = true
+
+[[bench]]
+name = "profiles"
+harness = false

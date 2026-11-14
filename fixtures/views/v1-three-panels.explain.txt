@@ -1,0 +1,13 @@
+view three (1200x600)
+x: slots 0..199 of 200 bar(s), 2025-01-02 .. 2025-10-08, 5.6 px per slot
+panel 0 "price": y0 linear [87.3255, 132.74450000000002], 1 layer(s)
+  candles candle px "SAMPLE 1d" fields o h l c: 200 item(s); last c=124.69 h=126.61 l=124.47 o=125.26 (bar 199, 2025-10-08)
+panel 1 "rsi": y1 linear [0, 100], 3 layer(s)
+  rsi line rsi14 "RSI14" fields rsi: 186 item(s), 14 value(s) not drawn; last rsi=55.09991178461079 (bar 199, 2025-10-08)
+  ob rule constant: 1 item(s); last y=70
+    /encoding/y = 70 from rsi.overbought
+  os rule constant: 1 item(s); last y=30
+    /encoding/y = 30 from rsi.oversold
+panel 2 "macd": y2 linear [-0.9277554876919165, 0.8594029739877431], 1 layer(s)
+  hist bar macd "MACD(12,26,9)" fields histogram: 167 item(s), 33 value(s) not drawn; last base=0 histogram=-0.41273431546556605 (bar 199, 2025-10-08)
+    /encoding/color/when/than = 0 from macd.zero

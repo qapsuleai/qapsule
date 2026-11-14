@@ -85,7 +85,7 @@ impl Interval {
 
 /// A bar's time span, UTC milliseconds, `[open, close)`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
-pub struct BarSpan {
+pub struct Span {
     /// Bar open (the bar's `t`).
     pub open: i64,
     /// Bar close (exclusive).
@@ -283,7 +283,7 @@ impl ExchangeCalendar {
     /// The sessions of local `day` as UTC spans (half days cut at their early close);
     /// empty for non-trading days.
     #[must_use]
-    pub fn sessions_on(&self, day: i64) -> Vec<BarSpan> {
+    pub fn sessions_on(&self, day: i64) -> Vec<Span> {
         if !self.is_trading_day(day) {
             return Vec::new();
         }
@@ -292,7 +292,7 @@ impl ExchangeCalendar {
             .iter()
             .filter_map(|&(o, c)| {
                 let c = cut.map_or(c, |cut| c.min(cut));
-                (o < c).then(|| BarSpan {
+                (o < c).then(|| Span {
                     open: self.at_local(day, o),
                     close: self.at_local(day, c),
                 })
@@ -302,9 +302,9 @@ impl ExchangeCalendar {
 
     /// The full trading-day span `[first open, last close)` of local `day`, if trading.
     #[must_use]
-    pub fn day_span(&self, day: i64) -> Option<BarSpan> {
+    pub fn day_span(&self, day: i64) -> Option<Span> {
         let s = self.sessions_on(day);
-        Some(BarSpan {
+        Some(Span {
             open: s.first()?.open,
             close: s.last()?.close,
         })
@@ -321,7 +321,7 @@ impl ExchangeCalendar {
     /// The bar of `interval` containing UTC instant `t_ms`, or `None` if `t_ms` is outside
     /// every session.
     #[must_use]
-    pub fn bar_at(&self, interval: Interval, t_ms: i64) -> Option<BarSpan> {
+    pub fn bar_at(&self, interval: Interval, t_ms: i64) -> Option<Span> {
         let day = self.local_day(t_ms);
         let sessions = self.sessions_on(day);
         let session = *sessions.iter().find(|s| s.open <= t_ms && t_ms < s.close)?;
@@ -329,7 +329,7 @@ impl ExchangeCalendar {
             Interval::Minutes(n) => {
                 let len = i64::from(n) * MS_PER_MIN;
                 let open = session.open + (t_ms - session.open) / len * len;
-                Some(BarSpan {
+                Some(Span {
                     open,
                     close: (open + len).min(session.close),
                 })
@@ -349,10 +349,10 @@ impl ExchangeCalendar {
     }
 
     /// `[first open, last close)` over the trading days in `[from_day, to_day)`.
-    fn span_of_days(&self, from_day: i64, to_day: i64) -> Option<BarSpan> {
+    fn span_of_days(&self, from_day: i64, to_day: i64) -> Option<Span> {
         let first = (from_day..to_day).find_map(|d| self.day_span(d))?;
         let last = (from_day..to_day).rev().find_map(|d| self.day_span(d))?;
-        Some(BarSpan {
+        Some(Span {
             open: first.open,
             close: last.close,
         })
@@ -360,8 +360,8 @@ impl ExchangeCalendar {
 
     /// All bars of `interval` whose open lies in `[from_ms, to_ms)`, ascending.
     #[must_use]
-    pub fn bars_between(&self, interval: Interval, from_ms: i64, to_ms: i64) -> Vec<BarSpan> {
-        let mut out: Vec<BarSpan> = Vec::new();
+    pub fn bars_between(&self, interval: Interval, from_ms: i64, to_ms: i64) -> Vec<Span> {
+        let mut out: Vec<Span> = Vec::new();
         if from_ms >= to_ms {
             return out;
         }
@@ -369,13 +369,13 @@ impl ExchangeCalendar {
         let (d0, d1) = (self.local_day(from_ms) - 1, self.local_day(to_ms) + 1);
         for day in d0..=d1 {
             for s in self.sessions_on(day) {
-                let spans: Vec<BarSpan> = match interval {
+                let spans: Vec<Span> = match interval {
                     Interval::Minutes(n) => {
                         let len = i64::from(n) * MS_PER_MIN;
                         let mut v = Vec::new();
                         let mut o = s.open;
                         while o < s.close {
-                            v.push(BarSpan {
+                            v.push(Span {
                                 open: o,
                                 close: (o + len).min(s.close),
                             });

@@ -1,7 +1,7 @@
 //! BIST and NYSE bar boundaries: intraday, daily, weekly, monthly; daylight-saving
 //! transitions, half days, holidays; display time zone does not change alignment.
 
-use qp_calendar::{builtin, days_from_civil, format_display, BarSpan, ExchangeCalendar, Interval};
+use qp_calendar::{builtin, days_from_civil, format_display, ExchangeCalendar, Interval, Span};
 use qp_schema::Bar;
 
 const H: i64 = 3_600_000;
@@ -16,8 +16,8 @@ fn cal(id: &str) -> ExchangeCalendar {
     ExchangeCalendar::new(&builtin(id).unwrap()).unwrap()
 }
 
-fn span(o: i64, c: i64) -> BarSpan {
-    BarSpan { open: o, close: c }
+fn span(o: i64, c: i64) -> Span {
+    Span { open: o, close: c }
 }
 
 #[test]

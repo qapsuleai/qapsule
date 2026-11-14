@@ -69,12 +69,15 @@ const TEXT: Rgba = [200, 205, 215, 255];
 const MUTED: Rgba = [130, 136, 150, 255];
 const UP: Rgba = [38, 166, 154, 255];
 const DOWN: Rgba = [239, 83, 80, 255];
-const SMA: Rgba = [255, 183, 77, 230];
+const OVERLAY: Rgba = [255, 183, 77, 230];
 
 const MIN_W: u32 = 200;
 const MIN_H: u32 = 120;
 const MAX_DIM: u32 = 16_384;
-const SMA_PERIOD: usize = 20;
+/// The overlay study (computed by `qp-compute`) and its title label.
+const OVERLAY_STUDY: &str = "sma";
+const OVERLAY_PERIOD: f64 = 20.0;
+const OVERLAY_LABEL: &str = "SMA20";
 
 const TITLE_PX: f32 = 16.0;
 const LABEL_PX: f32 = 11.0;
@@ -144,6 +147,14 @@ fn rect(x: i32, y: i32, w: i32, h: i32, color: Rgba) -> Prim {
         h: h.max(0).unsigned_abs(),
         color,
     }
+}
+
+/// Overlay values (one per bar, `None` during warmup) from the compute core.
+fn overlay_values(data: &[qp_schema::Bar]) -> Result<Vec<Option<f64>>, RenderError> {
+    let params = std::collections::BTreeMap::from([("period".to_owned(), OVERLAY_PERIOD)]);
+    let out = qp_compute::compute_bars(OVERLAY_STUDY, &params, qp_compute::Field::Close, data)
+        .map_err(|e| RenderError::new(e.to_string()))?;
+    Ok(out.outputs.into_values().next().unwrap_or_default())
 }
 
 /// Lays out the chart for `bars` at `width` x `height`.
@@ -266,23 +277,24 @@ pub fn build_scene(bars: &Series, width: u32, height: u32) -> Result<Scene, Rend
         ));
     }
 
-    // Simple moving average of close (visual stand-in only; not the compute core).
-    let mut sma_last = None;
-    if n >= SMA_PERIOD {
-        let mut points = Vec::with_capacity(n - SMA_PERIOD + 1);
-        let mut sum: f64 = data[..SMA_PERIOD].iter().map(|b| b.c).sum();
-        for i in (SMA_PERIOD - 1)..n {
-            if i >= SMA_PERIOD {
-                sum += data[i].c - data[i - SMA_PERIOD].c;
-            }
-            let avg = sum / SMA_PERIOD as f64;
-            sma_last = Some(avg);
-            points.push(((cx_of(i) + 0.5) as f32, y_of(avg) as f32));
-        }
+    // Overlay line: SMA(20) of close, computed by the compute core (`qp-compute`). One
+    // value per bar; warmup bars (None) get no point.
+    let overlay = overlay_values(data)?;
+    let mut overlay_last = None;
+    let points: Vec<(f32, f32)> = overlay
+        .iter()
+        .enumerate()
+        .filter_map(|(i, v)| v.map(|v| (i, v)))
+        .map(|(i, v)| {
+            overlay_last = Some(v);
+            ((cx_of(i) + 0.5) as f32, y_of(v) as f32)
+        })
+        .collect();
+    if !points.is_empty() {
         prims.push(Prim::Polyline {
             points,
             width: 1.5,
-            color: SMA,
+            color: OVERLAY,
         });
     }
 
@@ -326,13 +338,13 @@ pub fn build_scene(bars: &Series, width: u32, height: u32) -> Result<Scene, Rend
         color: last_color,
         align: Align::Left,
     });
-    if let Some(s) = sma_last {
+    if let Some(s) = overlay_last {
         prims.push(Prim::Text {
             x: wi - 8,
             baseline: 23,
             px: LABEL_PX,
-            text: format!("SMA{SMA_PERIOD} {s:.2}"),
-            color: SMA,
+            text: format!("{OVERLAY_LABEL} {s:.2}"),
+            color: OVERLAY,
             align: Align::Right,
         });
     }

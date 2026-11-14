@@ -1,0 +1,11 @@
+# WASM size probe for time-zone options (R1/T6). Not part of the main workspace.
+#   cd tools/tz-size-probe && ./measure.sh
+[workspace]
+resolver = "2"
+members = ["base", "chrono_tz", "jiff_bundle", "jiff_static", "rules", "table"]
+
+[profile.release]
+opt-level = "s"
+lto = "fat"
+codegen-units = 1
+panic = "abort"

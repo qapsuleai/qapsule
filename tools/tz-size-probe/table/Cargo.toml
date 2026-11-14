@@ -1,0 +1,11 @@
+[package]
+name = "probe_table"
+version = "0.0.0"
+edition = "2021"
+publish = false
+
+[lib]
+crate-type = ["cdylib"]
+
+[dependencies]
+qp-calendar = { path = "../../../crates/qp-calendar" }

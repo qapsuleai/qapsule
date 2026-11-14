@@ -30,6 +30,12 @@
 
 mod chain;
 mod core;
+pub mod graph;
+mod lanes;
+pub mod late;
+pub mod par;
+#[doc(hidden)]
+pub mod profiles;
 pub mod studies;
 pub mod sweep;
 
@@ -145,6 +151,30 @@ pub trait Study {
     fn update_last(&mut self, input: &[f64], out: &mut [Option<f64>]);
     /// Forgets all bars.
     fn reset(&mut self);
+
+    /// Adds many bars at once without producing their outputs (e.g. attaching a study to
+    /// a live chart's history). `columns[i]` is input `i`; all columns have one value per
+    /// bar. Afterwards the study is in exactly the state that `push`ing the same bars would
+    /// leave (the last bar is the revisable one). The default pushes bar by bar.
+    ///
+    /// # Panics
+    /// Wrong number of columns or columns of different lengths.
+    fn extend(&mut self, columns: &[&[f64]]) {
+        assert_eq!(columns.len(), self.inputs().len(), "one column per input");
+        let len = columns.first().map_or(0, |c| c.len());
+        assert!(
+            columns.iter().all(|c| c.len() == len),
+            "columns differ in length"
+        );
+        let mut x = vec![0.0; columns.len()];
+        let mut o = vec![None; self.outputs().len()];
+        for i in 0..len {
+            for (slot, col) in x.iter_mut().zip(columns) {
+                *slot = col[i];
+            }
+            self.push(&x, &mut o);
+        }
+    }
 }
 
 /// Runs `study` (after a reset) over input columns in batch mode.

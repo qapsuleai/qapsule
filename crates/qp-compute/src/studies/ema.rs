@@ -9,12 +9,12 @@ use crate::{ComputeError, Core};
 /// of the first `period` inputs; after that `x * a + prev * (1 - a)`.
 #[derive(Debug, Clone)]
 pub struct Ema {
-    period: usize,
-    pf: f64,
-    a: f64,
+    pub(crate) period: usize,
+    pub(crate) pf: f64,
+    pub(crate) a: f64,
     n: usize,
     seed_sum: f64,
-    prev: f64,
+    pub(crate) prev: f64,
 }
 
 impl Ema {
@@ -53,6 +53,21 @@ impl Ema {
         } else {
             Some(x * self.a + self.prev * (1.0 - self.a))
         }
+    }
+
+    /// `(a, last value)` once the seed bar is committed (every later bar is
+    /// [`Ema::steady_next`]); `None` before.
+    #[inline]
+    pub(crate) fn steady(&self) -> Option<(f64, f64)> {
+        (self.n >= self.period).then_some((self.a, self.prev))
+    }
+
+    /// A bar after the seed: the expression of `peek1`/`commit1`, with the state
+    /// `(a, prev)` held by the caller (e.g. in registers across several lanes).
+    #[inline]
+    #[must_use]
+    pub(crate) fn steady_next(a: f64, prev: f64, x: f64) -> f64 {
+        x * a + prev * (1.0 - a)
     }
 
     /// Commits a bar with input `x`.

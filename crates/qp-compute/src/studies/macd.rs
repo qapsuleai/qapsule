@@ -10,9 +10,9 @@ use crate::{ComputeError, Core};
 /// `histogram = macd - signal`.
 #[derive(Debug, Clone)]
 pub struct Macd {
-    fast: Ema,
-    slow: Ema,
-    signal: Ema,
+    pub(crate) fast: Ema,
+    pub(crate) slow: Ema,
+    pub(crate) signal: Ema,
 }
 
 /// One bar of MACD output.

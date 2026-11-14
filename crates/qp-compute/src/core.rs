@@ -112,6 +112,40 @@ impl<C: Core> Study for Streaming<C> {
         self.core.reset();
         self.has_pending = false;
     }
+
+    /// Commit-only fast path (RP1/E5): the same `commit`s as `push`ing each bar, in the
+    /// same order, without computing the history's outputs (`peek`).
+    fn extend(&mut self, columns: &[&[f64]]) {
+        assert_eq!(columns.len(), C::N_IN, "one column per input");
+        let len = columns.first().map_or(0, |c| c.len());
+        assert!(
+            columns.iter().all(|c| c.len() == len),
+            "columns differ in length"
+        );
+        if len == 0 {
+            return;
+        }
+        if self.has_pending {
+            self.core.commit(&self.pending);
+        }
+        if C::N_IN == 1 {
+            for &x in &columns[0][..len - 1] {
+                self.core.commit(&[x]);
+            }
+        } else {
+            let mut x = vec![0.0; C::N_IN];
+            for i in 0..len - 1 {
+                for (slot, col) in x.iter_mut().zip(columns) {
+                    *slot = col[i];
+                }
+                self.core.commit(&x);
+            }
+        }
+        for (slot, col) in self.pending.iter_mut().zip(columns) {
+            *slot = col[len - 1];
+        }
+        self.has_pending = true;
+    }
 }
 
 /// Fixed-capacity FIFO of the last `cap` committed values (no integer division on the

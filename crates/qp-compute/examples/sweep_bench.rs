@@ -4,7 +4,8 @@
 //! cargo run --release -p qp-compute --example sweep_bench [-- --bars 10000 --reps 15]
 //! ```
 //! Prints one line per study: min / median / max wall time over `reps` runs (after one
-//! warm-up run) and the output digest (identical on every target).
+//! warm-up run) and the output digest (identical on every target). Then the RP1 load
+//! lane table and profiles B, C and D (`--profiles lanes,b,c,d` by default, `--profiles none` to skip).
 
 use std::time::Instant;
 
@@ -12,6 +13,9 @@ use qp_compute::sweep::{
     bench_closes, bench_grid, fnv1a_columns, sweep_each, sweep_each_lanes, FNV_OFFSET,
 };
 use qp_compute::STUDY_NAMES;
+
+#[path = "../benches/driver/mod.rs"]
+mod driver;
 
 fn arg(name: &str, default: usize) -> usize {
     let args: Vec<String> = std::env::args().collect();
@@ -31,6 +35,7 @@ fn main() {
         l => Some(l),
     };
     let x = bench_closes(bars, 20_261_114);
+    println!("machine: {}", driver::machine());
     println!("bars={bars} reps={reps} (single thread, release)");
     println!(
         "{:<10} {:>9} {:>9} {:>9} {:>9}  digest",
@@ -61,5 +66,17 @@ fn main() {
             times[reps - 1]
         );
         std::hint::black_box(sink);
+    }
+    let profiles = driver::arg("--profiles").unwrap_or_else(|| "lanes,b,c,d".to_owned());
+    for p in profiles.split(',') {
+        println!();
+        match p.trim() {
+            "a" => driver::profile_a(reps),
+            "b" => driver::profile_b(reps),
+            "c" => driver::profile_c(reps),
+            "d" => driver::profile_d(reps),
+            "lanes" => driver::lane_table(reps),
+            _ => {}
+        }
     }
 }

@@ -1,0 +1,156 @@
+{
+ "name": "04-reject-finding",
+ "description": "G03: a person rejects a finding with a reason; capsule becomes rejected and the ledger records it with the note and author.",
+ "covers": [
+  "command",
+  "change",
+  "provenance"
+ ],
+ "init": "fixtures/protocol/init/thyao.json",
+ "steps": [
+  {
+   "send": {
+    "conn": "a",
+    "msg": {
+     "type": "hello",
+     "protocol": "qp/0",
+     "principal": "arkin",
+     "surface": {
+      "kind": "desktop"
+     }
+    }
+   },
+   "expect": [
+    {
+     "conn": "a",
+     "msg": {
+      "type": "welcome",
+      "protocol": "qp/0",
+      "doc": "doc-thyao",
+      "principal": "arkin",
+      "role": "owner",
+      "permissions": {
+       "read": true,
+       "write": true,
+       "propose": true,
+       "decide": true,
+       "attend": true,
+       "feed": false
+      },
+      "seq": 0,
+      "epoch": 0,
+      "profile": {
+       "depth": "chart",
+       "series_data": true,
+       "max_points": 500,
+       "max_glyphs": 6,
+       "speech": false
+      },
+      "limits": {
+       "max_message_bytes": 1048576,
+       "max_ops": 64,
+       "max_bars": 10000,
+       "max_subscriptions": 32,
+       "max_string": 4096
+      }
+     }
+    }
+   ]
+  },
+  {
+   "send": {
+    "conn": "a",
+    "msg": {
+     "type": "command",
+     "id": "c1",
+     "ops": [
+      {
+       "op": "reject_finding",
+       "finding": "fnd-overbought",
+       "note": "hacim teyidi yok"
+      }
+     ]
+    }
+   },
+   "expect": [
+    {
+     "conn": "a",
+     "msg": {
+      "type": "ack",
+      "id": "c1",
+      "status": "applied",
+      "seq": 1
+     }
+    }
+   ]
+  },
+  {
+   "send": {
+    "conn": "a",
+    "msg": {
+     "type": "query",
+     "id": "q1",
+     "query": {
+      "kind": "log"
+     }
+    }
+   },
+   "expect": [
+    {
+     "conn": "a",
+     "msg": {
+      "type": "result",
+      "id": "q1",
+      "seq": 1,
+      "data": {
+       "kind": "log",
+       "entries": [
+        {
+         "seq": 1,
+         "author": "arkin",
+         "changes": [
+          {
+           "op": "set_capsule_state",
+           "capsule": "cap-overbought",
+           "state": "rejected"
+          },
+          {
+           "op": "push_ledger",
+           "entry": {
+            "finding": "fnd-overbought",
+            "state": "rejected",
+            "outcome": "pending",
+            "recorded_at": 1760000000000,
+            "note": "hacim teyidi yok"
+           }
+          }
+         ]
+        }
+       ]
+      }
+     }
+    }
+   ]
+  }
+ ],
+ "final": {
+  "log_len": 1,
+  "document": {
+   "capsules": [
+    {
+     "id": "cap-overbought",
+     "state": "rejected"
+    }
+   ],
+   "ledger": {
+    "entries": [
+     {
+      "finding": "fnd-overbought",
+      "state": "rejected",
+      "note": "hacim teyidi yok"
+     }
+    ]
+   }
+  }
+ }
+}

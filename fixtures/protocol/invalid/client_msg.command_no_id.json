@@ -1,0 +1,9 @@
+{
+ "type": "command",
+ "ops": [
+  {
+   "op": "remove",
+   "id": "bb20"
+  }
+ ]
+}

@@ -1,0 +1,13 @@
+{
+ "type": "error",
+ "id": "c4",
+ "error": {
+  "code": "not_found",
+  "message": "series `rsi` does not exist",
+  "path": "/ops/0/show/with",
+  "did_you_mean": [
+   "rsi14"
+  ],
+  "hint": "Use an existing series id."
+ }
+}

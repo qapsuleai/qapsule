@@ -1,0 +1,18 @@
+{
+ "type": "notify",
+ "sub": "s1",
+ "event": {
+  "kind": "change",
+  "seq": 5,
+  "at": 1760000000000,
+  "author": "arkin",
+  "cause": "c1",
+  "changes": [
+   {
+    "op": "set_capsule_state",
+    "capsule": "cap-overbought",
+    "state": "rejected"
+   }
+  ]
+ }
+}

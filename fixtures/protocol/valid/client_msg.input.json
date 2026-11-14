@@ -1,0 +1,10 @@
+{
+ "type": "input",
+ "id": "i1",
+ "gesture": {
+  "kind": "zoom",
+  "view": "main",
+  "factor": 2.0,
+  "anchor_bar": 199
+ }
+}

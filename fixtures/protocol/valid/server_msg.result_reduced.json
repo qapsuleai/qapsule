@@ -1,0 +1,18 @@
+{
+ "type": "result",
+ "id": "q1",
+ "seq": 0,
+ "data": {
+  "kind": "reduced",
+  "series": "rsi14",
+  "reduce": "max",
+  "bars": 50,
+  "values": {
+   "rsi": {
+    "value": 78.11504477458953,
+    "bar": 154,
+    "t": 1754265600000
+   }
+  }
+ }
+}

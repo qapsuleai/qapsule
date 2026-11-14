@@ -1,0 +1,19 @@
+{
+ "type": "attend",
+ "id": "a1",
+ "directive": {
+  "to": "arkin",
+  "steps": [
+   {
+    "target": {
+     "view": "main",
+     "panel": 1,
+     "series": "rsi14",
+     "from_bar": 150,
+     "to_bar": 150
+    },
+    "say": "RSI burada 70'i kesti."
+   }
+  ]
+ }
+}

@@ -1,0 +1,399 @@
+{
+ "name": "10-live-invalidation",
+ "description": "G19 then G18: invalidation changed to close < 100; a subscriber waits; the feed appends a bar closing at 99; the engine invalidates the capsule in its own entry; finding and condition subscribers are notified in order.",
+ "covers": [
+  "subscription",
+  "command",
+  "live",
+  "engine"
+ ],
+ "init": "fixtures/protocol/init/thyao.json",
+ "steps": [
+  {
+   "send": {
+    "conn": "a",
+    "msg": {
+     "type": "hello",
+     "protocol": "qp/0",
+     "principal": "arkin",
+     "surface": {
+      "kind": "desktop"
+     }
+    }
+   },
+   "expect": [
+    {
+     "conn": "a",
+     "msg": {
+      "type": "welcome",
+      "protocol": "qp/0",
+      "doc": "doc-thyao",
+      "principal": "arkin",
+      "role": "owner",
+      "permissions": {
+       "read": true,
+       "write": true,
+       "propose": true,
+       "decide": true,
+       "attend": true,
+       "feed": false
+      },
+      "seq": 0,
+      "epoch": 0,
+      "profile": {
+       "depth": "chart",
+       "series_data": true,
+       "max_points": 500,
+       "max_glyphs": 6,
+       "speech": false
+      },
+      "limits": {
+       "max_message_bytes": 1048576,
+       "max_ops": 64,
+       "max_bars": 10000,
+       "max_subscriptions": 32,
+       "max_string": 4096
+      }
+     }
+    }
+   ]
+  },
+  {
+   "send": {
+    "conn": "s",
+    "msg": {
+     "type": "hello",
+     "protocol": "qp/0",
+     "principal": "scout",
+     "surface": {
+      "kind": "headless"
+     }
+    }
+   },
+   "expect": [
+    {
+     "conn": "s",
+     "msg": {
+      "type": "welcome",
+      "protocol": "qp/0",
+      "doc": "doc-thyao",
+      "principal": "scout",
+      "role": "proposer",
+      "permissions": {
+       "read": true,
+       "write": false,
+       "propose": true,
+       "decide": false,
+       "attend": true,
+       "feed": false
+      },
+      "seq": 0,
+      "epoch": 0,
+      "profile": {
+       "depth": "chart",
+       "series_data": true,
+       "max_points": 10000,
+       "max_glyphs": 6,
+       "speech": false
+      },
+      "limits": {
+       "max_message_bytes": 1048576,
+       "max_ops": 64,
+       "max_bars": 10000,
+       "max_subscriptions": 32,
+       "max_string": 4096
+      }
+     }
+    }
+   ]
+  },
+  {
+   "send": {
+    "conn": "f",
+    "msg": {
+     "type": "hello",
+     "protocol": "qp/0",
+     "principal": "feed",
+     "surface": {
+      "kind": "headless"
+     }
+    }
+   },
+   "expect": [
+    {
+     "conn": "f",
+     "msg": {
+      "type": "welcome",
+      "protocol": "qp/0",
+      "doc": "doc-thyao",
+      "principal": "feed",
+      "role": "feed",
+      "permissions": {
+       "read": false,
+       "write": false,
+       "propose": false,
+       "decide": false,
+       "attend": false,
+       "feed": true
+      },
+      "seq": 0,
+      "epoch": 0,
+      "profile": {
+       "depth": "chart",
+       "series_data": true,
+       "max_points": 10000,
+       "max_glyphs": 6,
+       "speech": false
+      },
+      "limits": {
+       "max_message_bytes": 1048576,
+       "max_ops": 64,
+       "max_bars": 10000,
+       "max_subscriptions": 32,
+       "max_string": 4096
+      }
+     }
+    }
+   ]
+  },
+  {
+   "send": {
+    "conn": "a",
+    "msg": {
+     "type": "command",
+     "id": "c1",
+     "ops": [
+      {
+       "op": "update_finding",
+       "finding": "fnd-overbought",
+       "invalidation": {
+        "kind": "threshold",
+        "series": "px",
+        "op": "lt",
+        "value": 100.0
+       }
+      }
+     ]
+    }
+   },
+   "expect": [
+    {
+     "conn": "a",
+     "msg": {
+      "type": "ack",
+      "id": "c1",
+      "status": "applied",
+      "seq": 1
+     }
+    }
+   ],
+   "note": "close is 124.69: still live"
+  },
+  {
+   "send": {
+    "conn": "s",
+    "msg": {
+     "type": "subscribe",
+     "id": "w",
+     "topic": {
+      "kind": "finding",
+      "finding": "fnd-overbought"
+     }
+    }
+   },
+   "expect": [
+    {
+     "conn": "s",
+     "msg": {
+      "type": "ack",
+      "id": "w",
+      "status": "subscribed"
+     }
+    }
+   ]
+  },
+  {
+   "send": {
+    "conn": "s",
+    "msg": {
+     "type": "subscribe",
+     "id": "k",
+     "topic": {
+      "kind": "condition",
+      "condition": {
+       "kind": "threshold",
+       "series": "px",
+       "op": "lt",
+       "value": 100.0
+      }
+     }
+    }
+   },
+   "expect": [
+    {
+     "conn": "s",
+     "msg": {
+      "type": "ack",
+      "id": "k",
+      "status": "subscribed"
+     }
+    }
+   ]
+  },
+  {
+   "send": {
+    "conn": "f",
+    "msg": {
+     "type": "command",
+     "id": "b1",
+     "ops": [
+      {
+       "op": "append_bars",
+       "series": "px",
+       "bars": [
+        {
+         "t": 1759968000000,
+         "o": 124.0,
+         "h": 124.5,
+         "l": 98.0,
+         "c": 99.0,
+         "v": 3000000.0
+        }
+       ]
+      }
+     ]
+    }
+   },
+   "expect": [
+    {
+     "conn": "f",
+     "msg": {
+      "type": "ack",
+      "id": "b1",
+      "status": "applied",
+      "seq": 2
+     }
+    },
+    {
+     "conn": "s",
+     "msg": {
+      "type": "notify",
+      "sub": "w",
+      "event": {
+       "kind": "finding_state",
+       "finding": "fnd-overbought",
+       "capsule": "cap-overbought",
+       "state": "invalidated",
+       "seq": 3
+      }
+     }
+    },
+    {
+     "conn": "s",
+     "msg": {
+      "type": "notify",
+      "sub": "k",
+      "event": {
+       "kind": "condition_met",
+       "bar": 200,
+       "t": 1759968000000,
+       "seq": 2
+      }
+     }
+    }
+   ]
+  },
+  {
+   "send": {
+    "conn": "s",
+    "msg": {
+     "type": "query",
+     "id": "q1",
+     "query": {
+      "kind": "log",
+      "after_seq": 2
+     }
+    }
+   },
+   "expect": [
+    {
+     "conn": "s",
+     "msg": {
+      "type": "result",
+      "id": "q1",
+      "seq": 3,
+      "data": {
+       "kind": "log",
+       "entries": [
+        {
+         "seq": 3,
+         "author": "qp",
+         "changes": [
+          {
+           "op": "set_capsule_state",
+           "capsule": "cap-overbought",
+           "state": "invalidated"
+          }
+         ]
+        }
+       ]
+      }
+     }
+    }
+   ]
+  },
+  {
+   "send": {
+    "conn": "f",
+    "msg": {
+     "type": "command",
+     "id": "b2",
+     "ops": [
+      {
+       "op": "set_params",
+       "series": "rsi14",
+       "params": {
+        "period": 9
+       }
+      }
+     ]
+    }
+   },
+   "expect": [
+    {
+     "conn": "f",
+     "msg": {
+      "type": "error",
+      "error": {
+       "code": "forbidden"
+      },
+      "id": "b2"
+     }
+    }
+   ],
+   "note": "a feed only appends data"
+  }
+ ],
+ "final": {
+  "log_len": 3,
+  "document": {
+   "capsules": [
+    {
+     "id": "cap-overbought",
+     "state": "invalidated"
+    }
+   ],
+   "findings": [
+    {
+     "id": "fnd-overbought",
+     "invalidation": {
+      "kind": "threshold",
+      "series": "px",
+      "op": "lt",
+      "value": 100.0
+     }
+    }
+   ]
+  }
+ }
+}

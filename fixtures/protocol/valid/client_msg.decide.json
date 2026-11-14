@@ -1,0 +1,11 @@
+{
+ "type": "command",
+ "id": "c3",
+ "ops": [
+  {
+   "op": "accept_proposal",
+   "proposal": "prop-6",
+   "note": "ok"
+  }
+ ]
+}

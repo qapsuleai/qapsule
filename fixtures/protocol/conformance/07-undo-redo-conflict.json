@@ -1,0 +1,483 @@
+{
+ "name": "07-undo-redo-conflict",
+ "description": "G10: undo the speaker's own last change without touching others' work; undo refuses when a later entry by someone else touched the same item; undoing an undo redoes.",
+ "covers": [
+  "command",
+  "undo",
+  "error"
+ ],
+ "init": "fixtures/protocol/init/thyao.json",
+ "steps": [
+  {
+   "send": {
+    "conn": "a",
+    "msg": {
+     "type": "hello",
+     "protocol": "qp/0",
+     "principal": "arkin",
+     "surface": {
+      "kind": "desktop"
+     }
+    }
+   },
+   "expect": [
+    {
+     "conn": "a",
+     "msg": {
+      "type": "welcome",
+      "protocol": "qp/0",
+      "doc": "doc-thyao",
+      "principal": "arkin",
+      "role": "owner",
+      "permissions": {
+       "read": true,
+       "write": true,
+       "propose": true,
+       "decide": true,
+       "attend": true,
+       "feed": false
+      },
+      "seq": 0,
+      "epoch": 0,
+      "profile": {
+       "depth": "chart",
+       "series_data": true,
+       "max_points": 500,
+       "max_glyphs": 6,
+       "speech": false
+      },
+      "limits": {
+       "max_message_bytes": 1048576,
+       "max_ops": 64,
+       "max_bars": 10000,
+       "max_subscriptions": 32,
+       "max_string": 4096
+      }
+     }
+    }
+   ]
+  },
+  {
+   "send": {
+    "conn": "e",
+    "msg": {
+     "type": "hello",
+     "protocol": "qp/0",
+     "principal": "editor",
+     "surface": {
+      "kind": "headless"
+     }
+    }
+   },
+   "expect": [
+    {
+     "conn": "e",
+     "msg": {
+      "type": "welcome",
+      "protocol": "qp/0",
+      "doc": "doc-thyao",
+      "principal": "editor",
+      "role": "editor",
+      "permissions": {
+       "read": true,
+       "write": true,
+       "propose": true,
+       "decide": false,
+       "attend": true,
+       "feed": false
+      },
+      "seq": 0,
+      "epoch": 0,
+      "profile": {
+       "depth": "chart",
+       "series_data": true,
+       "max_points": 10000,
+       "max_glyphs": 6,
+       "speech": false
+      },
+      "limits": {
+       "max_message_bytes": 1048576,
+       "max_ops": 64,
+       "max_bars": 10000,
+       "max_subscriptions": 32,
+       "max_string": 4096
+      }
+     }
+    }
+   ]
+  },
+  {
+   "send": {
+    "conn": "a",
+    "msg": {
+     "type": "command",
+     "id": "c1",
+     "ops": [
+      {
+       "op": "add_study",
+       "id": "sma20",
+       "study": "sma",
+       "inputs": [
+        "px"
+       ],
+       "params": {
+        "period": 20
+       },
+       "show": {
+        "view": "main",
+        "panel": 0
+       }
+      }
+     ]
+    }
+   },
+   "expect": [
+    {
+     "conn": "a",
+     "msg": {
+      "type": "ack",
+      "id": "c1",
+      "status": "applied",
+      "seq": 1,
+      "created": [
+       "sma20"
+      ]
+     }
+    }
+   ]
+  },
+  {
+   "send": {
+    "conn": "e",
+    "msg": {
+     "type": "command",
+     "id": "c2",
+     "ops": [
+      {
+       "op": "set_params",
+       "series": "macd",
+       "params": {
+        "fast": 8
+       }
+      }
+     ]
+    }
+   },
+   "expect": [
+    {
+     "conn": "e",
+     "msg": {
+      "type": "ack",
+      "id": "c2",
+      "status": "applied",
+      "seq": 2
+     }
+    }
+   ]
+  },
+  {
+   "send": {
+    "conn": "a",
+    "msg": {
+     "type": "command",
+     "id": "c3",
+     "ops": [
+      {
+       "op": "undo"
+      }
+     ]
+    }
+   },
+   "expect": [
+    {
+     "conn": "a",
+     "msg": {
+      "type": "ack",
+      "id": "c3",
+      "status": "applied",
+      "seq": 3
+     }
+    }
+   ],
+   "note": "undoes seq 1, not seq 2"
+  },
+  {
+   "send": {
+    "conn": "a",
+    "msg": {
+     "type": "query",
+     "id": "q1",
+     "query": {
+      "kind": "get",
+      "id": "sma20"
+     }
+    }
+   },
+   "expect": [
+    {
+     "conn": "a",
+     "msg": {
+      "type": "error",
+      "error": {
+       "code": "not_found"
+      },
+      "id": "q1"
+     }
+    }
+   ]
+  },
+  {
+   "send": {
+    "conn": "a",
+    "msg": {
+     "type": "query",
+     "id": "q2",
+     "query": {
+      "kind": "get",
+      "id": "macd"
+     }
+    }
+   },
+   "expect": [
+    {
+     "conn": "a",
+     "msg": {
+      "type": "result",
+      "id": "q2",
+      "seq": 3,
+      "data": {
+       "kind": "item",
+       "collection": "series",
+       "item": {
+        "source": {
+         "params": {
+          "fast": 8.0
+         }
+        }
+       }
+      }
+     }
+    }
+   ]
+  },
+  {
+   "send": {
+    "conn": "a",
+    "msg": {
+     "type": "command",
+     "id": "c4",
+     "ops": [
+      {
+       "op": "set_params",
+       "series": "rsi14",
+       "params": {
+        "period": 10
+       }
+      }
+     ]
+    }
+   },
+   "expect": [
+    {
+     "conn": "a",
+     "msg": {
+      "type": "ack",
+      "id": "c4",
+      "status": "applied",
+      "seq": 4
+     }
+    }
+   ]
+  },
+  {
+   "send": {
+    "conn": "e",
+    "msg": {
+     "type": "command",
+     "id": "c5",
+     "ops": [
+      {
+       "op": "set_params",
+       "series": "rsi14",
+       "params": {
+        "period": 12
+       }
+      }
+     ]
+    }
+   },
+   "expect": [
+    {
+     "conn": "e",
+     "msg": {
+      "type": "ack",
+      "id": "c5",
+      "status": "applied",
+      "seq": 5
+     }
+    }
+   ]
+  },
+  {
+   "send": {
+    "conn": "a",
+    "msg": {
+     "type": "command",
+     "id": "c6",
+     "ops": [
+      {
+       "op": "undo"
+      }
+     ]
+    }
+   },
+   "expect": [
+    {
+     "conn": "a",
+     "msg": {
+      "type": "error",
+      "error": {
+       "code": "undo_conflict",
+       "conflicts": [
+        5
+       ]
+      },
+      "id": "c6"
+     }
+    }
+   ],
+   "note": "editor changed rsi14 after seq 4"
+  },
+  {
+   "send": {
+    "conn": "a",
+    "msg": {
+     "type": "command",
+     "id": "c7",
+     "ops": [
+      {
+       "op": "undo",
+       "seq": 3
+      }
+     ]
+    }
+   },
+   "expect": [
+    {
+     "conn": "a",
+     "msg": {
+      "type": "ack",
+      "id": "c7",
+      "status": "applied",
+      "seq": 6
+     }
+    }
+   ],
+   "note": "redo the sma20"
+  },
+  {
+   "send": {
+    "conn": "e",
+    "msg": {
+     "type": "command",
+     "id": "c8",
+     "ops": [
+      {
+       "op": "undo",
+       "seq": 1
+      }
+     ]
+    }
+   },
+   "expect": [
+    {
+     "conn": "e",
+     "msg": {
+      "type": "error",
+      "error": {
+       "code": "forbidden"
+      },
+      "id": "c8"
+     }
+    }
+   ],
+   "note": "only the owner may undo someone else's entry"
+  },
+  {
+   "send": {
+    "conn": "a",
+    "msg": {
+     "type": "query",
+     "id": "q3",
+     "query": {
+      "kind": "log",
+      "after_seq": 2
+     }
+    }
+   },
+   "expect": [
+    {
+     "conn": "a",
+     "msg": {
+      "type": "result",
+      "id": "q3",
+      "seq": 6,
+      "data": {
+       "kind": "log",
+       "entries": [
+        {
+         "seq": 3,
+         "author": "arkin",
+         "undoes": 1
+        },
+        {
+         "seq": 4
+        },
+        {
+         "seq": 5
+        },
+        {
+         "seq": 6,
+         "author": "arkin",
+         "undoes": 3
+        }
+       ]
+      }
+     }
+    }
+   ]
+  }
+ ],
+ "final": {
+  "log_len": 6,
+  "document": {
+   "series": [
+    {
+     "id": "px"
+    },
+    {
+     "id": "rsi14",
+     "source": {
+      "params": {
+       "period": 12.0
+      }
+     }
+    },
+    {
+     "id": "macd",
+     "source": {
+      "params": {
+       "fast": 8.0
+      }
+     }
+    },
+    {
+     "id": "bb20"
+    },
+    {
+     "id": "sma20"
+    }
+   ]
+  }
+ }
+}

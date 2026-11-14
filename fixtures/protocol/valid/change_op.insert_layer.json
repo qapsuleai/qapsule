@@ -1,0 +1,11 @@
+{
+ "op": "insert_layer",
+ "view": "main",
+ "index": 5,
+ "layer": {
+  "mark": "line",
+  "series": "series-1-0",
+  "panel": 1,
+  "encoding": {}
+ }
+}

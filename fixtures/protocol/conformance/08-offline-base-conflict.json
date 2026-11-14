@@ -1,0 +1,269 @@
+{
+ "name": "08-offline-base-conflict",
+ "description": "K21-2 scenario: an agent edits offline from base 0 and comes back; its write to an item changed meanwhile is refused with the conflicting seq; a non-conflicting write from the same base applies; resending with the new base applies.",
+ "covers": [
+  "command",
+  "concurrency",
+  "error"
+ ],
+ "init": "fixtures/protocol/init/thyao.json",
+ "steps": [
+  {
+   "send": {
+    "conn": "a",
+    "msg": {
+     "type": "hello",
+     "protocol": "qp/0",
+     "principal": "arkin",
+     "surface": {
+      "kind": "desktop"
+     }
+    }
+   },
+   "expect": [
+    {
+     "conn": "a",
+     "msg": {
+      "type": "welcome",
+      "protocol": "qp/0",
+      "doc": "doc-thyao",
+      "principal": "arkin",
+      "role": "owner",
+      "permissions": {
+       "read": true,
+       "write": true,
+       "propose": true,
+       "decide": true,
+       "attend": true,
+       "feed": false
+      },
+      "seq": 0,
+      "epoch": 0,
+      "profile": {
+       "depth": "chart",
+       "series_data": true,
+       "max_points": 500,
+       "max_glyphs": 6,
+       "speech": false
+      },
+      "limits": {
+       "max_message_bytes": 1048576,
+       "max_ops": 64,
+       "max_bars": 10000,
+       "max_subscriptions": 32,
+       "max_string": 4096
+      }
+     }
+    }
+   ]
+  },
+  {
+   "send": {
+    "conn": "e",
+    "msg": {
+     "type": "hello",
+     "protocol": "qp/0",
+     "principal": "editor",
+     "surface": {
+      "kind": "headless"
+     }
+    }
+   },
+   "expect": [
+    {
+     "conn": "e",
+     "msg": {
+      "type": "welcome",
+      "protocol": "qp/0",
+      "doc": "doc-thyao",
+      "principal": "editor",
+      "role": "editor",
+      "permissions": {
+       "read": true,
+       "write": true,
+       "propose": true,
+       "decide": false,
+       "attend": true,
+       "feed": false
+      },
+      "seq": 0,
+      "epoch": 0,
+      "profile": {
+       "depth": "chart",
+       "series_data": true,
+       "max_points": 10000,
+       "max_glyphs": 6,
+       "speech": false
+      },
+      "limits": {
+       "max_message_bytes": 1048576,
+       "max_ops": 64,
+       "max_bars": 10000,
+       "max_subscriptions": 32,
+       "max_string": 4096
+      }
+     }
+    }
+   ]
+  },
+  {
+   "send": {
+    "conn": "a",
+    "msg": {
+     "type": "command",
+     "id": "c1",
+     "ops": [
+      {
+       "op": "set_params",
+       "series": "macd",
+       "params": {
+        "fast": 10
+       }
+      }
+     ]
+    }
+   },
+   "expect": [
+    {
+     "conn": "a",
+     "msg": {
+      "type": "ack",
+      "id": "c1",
+      "status": "applied",
+      "seq": 1
+     }
+    }
+   ]
+  },
+  {
+   "send": {
+    "conn": "e",
+    "msg": {
+     "type": "command",
+     "id": "c2",
+     "ops": [
+      {
+       "op": "set_params",
+       "series": "macd",
+       "params": {
+        "fast": 8,
+        "slow": 21,
+        "signal": 5
+       }
+      }
+     ],
+     "base": 0
+    }
+   },
+   "expect": [
+    {
+     "conn": "e",
+     "msg": {
+      "type": "error",
+      "error": {
+       "code": "conflict",
+       "conflicts": [
+        1
+       ]
+      },
+      "id": "c2"
+     }
+    }
+   ]
+  },
+  {
+   "send": {
+    "conn": "e",
+    "msg": {
+     "type": "command",
+     "id": "c3",
+     "ops": [
+      {
+       "op": "add_layer",
+       "view": "main",
+       "layer": {
+        "mark": "rule",
+        "panel": 1,
+        "encoding": {
+         "y": "30"
+        }
+       }
+      }
+     ],
+     "base": 0
+    }
+   },
+   "expect": [
+    {
+     "conn": "e",
+     "msg": {
+      "type": "ack",
+      "id": "c3",
+      "status": "applied",
+      "seq": 2
+     }
+    }
+   ],
+   "note": "view `main` unchanged since base 0"
+  },
+  {
+   "send": {
+    "conn": "e",
+    "msg": {
+     "type": "command",
+     "id": "c4",
+     "ops": [
+      {
+       "op": "set_params",
+       "series": "macd",
+       "params": {
+        "fast": 8,
+        "slow": 21,
+        "signal": 5
+       }
+      }
+     ],
+     "base": 1
+    }
+   },
+   "expect": [
+    {
+     "conn": "e",
+     "msg": {
+      "type": "ack",
+      "id": "c4",
+      "status": "applied",
+      "seq": 3
+     }
+    }
+   ],
+   "note": "G14: editor writes directly"
+  }
+ ],
+ "final": {
+  "log_len": 3,
+  "document": {
+   "series": [
+    {
+     "id": "px"
+    },
+    {
+     "id": "rsi14"
+    },
+    {
+     "id": "macd",
+     "source": {
+      "params": {
+       "fast": 8.0,
+       "slow": 21.0,
+       "signal": 5.0
+      }
+     }
+    },
+    {
+     "id": "bb20"
+    }
+   ]
+  }
+ }
+}

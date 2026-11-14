@@ -1,0 +1,24 @@
+{
+ "type": "command",
+ "id": "c2",
+ "mode": "propose",
+ "reason": "RSI 70'i kesti",
+ "base": 4,
+ "ops": [
+  {
+   "op": "add_finding",
+   "claim": "Momentum güçlü.",
+   "facts": [
+    "fact-rsi-cross70"
+   ],
+   "confidence": 0.6,
+   "invalidation": {
+    "kind": "threshold",
+    "series": "rsi14",
+    "op": "cross_below",
+    "value": 70.0
+   },
+   "capsule": "Momentum güçlü"
+  }
+ ]
+}

@@ -1,0 +1,19 @@
+{
+ "seq": 3,
+ "at": 1760000000000,
+ "author": "arkin",
+ "cause": "c3",
+ "request": [
+  {
+   "op": "undo"
+  }
+ ],
+ "changes": [
+  {
+   "op": "delete",
+   "id": "sma20"
+  }
+ ],
+ "undoes": 1,
+ "summary": "undo 1"
+}

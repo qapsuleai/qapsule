@@ -1,0 +1,8 @@
+{
+ "type": "input",
+ "id": "i",
+ "gesture": {
+  "kind": "pinch",
+  "view": "main"
+ }
+}

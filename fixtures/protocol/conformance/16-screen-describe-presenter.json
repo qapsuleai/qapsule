@@ -1,0 +1,389 @@
+{
+ "name": "16-screen-describe-presenter",
+ "description": "G17: an agent reads what is on the user's screen semantically; describe lists what the endpoint offers; the presenter builds a view for a finding deterministically.",
+ "covers": [
+  "query",
+  "capability",
+  "presenter"
+ ],
+ "init": "fixtures/protocol/init/thyao.json",
+ "steps": [
+  {
+   "send": {
+    "conn": "a",
+    "msg": {
+     "type": "hello",
+     "protocol": "qp/0",
+     "principal": "arkin",
+     "surface": {
+      "kind": "desktop"
+     }
+    }
+   },
+   "expect": [
+    {
+     "conn": "a",
+     "msg": {
+      "type": "welcome",
+      "protocol": "qp/0",
+      "doc": "doc-thyao",
+      "principal": "arkin",
+      "role": "owner",
+      "permissions": {
+       "read": true,
+       "write": true,
+       "propose": true,
+       "decide": true,
+       "attend": true,
+       "feed": false
+      },
+      "seq": 0,
+      "epoch": 0,
+      "profile": {
+       "depth": "chart",
+       "series_data": true,
+       "max_points": 500,
+       "max_glyphs": 6,
+       "speech": false
+      },
+      "limits": {
+       "max_message_bytes": 1048576,
+       "max_ops": 64,
+       "max_bars": 10000,
+       "max_subscriptions": 32,
+       "max_string": 4096
+      }
+     }
+    }
+   ]
+  },
+  {
+   "send": {
+    "conn": "s",
+    "msg": {
+     "type": "hello",
+     "protocol": "qp/0",
+     "principal": "scout",
+     "surface": {
+      "kind": "headless"
+     }
+    }
+   },
+   "expect": [
+    {
+     "conn": "s",
+     "msg": {
+      "type": "welcome",
+      "protocol": "qp/0",
+      "doc": "doc-thyao",
+      "principal": "scout",
+      "role": "proposer",
+      "permissions": {
+       "read": true,
+       "write": false,
+       "propose": true,
+       "decide": false,
+       "attend": true,
+       "feed": false
+      },
+      "seq": 0,
+      "epoch": 0,
+      "profile": {
+       "depth": "chart",
+       "series_data": true,
+       "max_points": 10000,
+       "max_glyphs": 6,
+       "speech": false
+      },
+      "limits": {
+       "max_message_bytes": 1048576,
+       "max_ops": 64,
+       "max_bars": 10000,
+       "max_subscriptions": 32,
+       "max_string": 4096
+      }
+     }
+    }
+   ]
+  },
+  {
+   "send": {
+    "conn": "e",
+    "msg": {
+     "type": "hello",
+     "protocol": "qp/0",
+     "principal": "editor",
+     "surface": {
+      "kind": "headless"
+     }
+    }
+   },
+   "expect": [
+    {
+     "conn": "e",
+     "msg": {
+      "type": "welcome",
+      "protocol": "qp/0",
+      "doc": "doc-thyao",
+      "principal": "editor",
+      "role": "editor",
+      "permissions": {
+       "read": true,
+       "write": true,
+       "propose": true,
+       "decide": false,
+       "attend": true,
+       "feed": false
+      },
+      "seq": 0,
+      "epoch": 0,
+      "profile": {
+       "depth": "chart",
+       "series_data": true,
+       "max_points": 10000,
+       "max_glyphs": 6,
+       "speech": false
+      },
+      "limits": {
+       "max_message_bytes": 1048576,
+       "max_ops": 64,
+       "max_bars": 10000,
+       "max_subscriptions": 32,
+       "max_string": 4096
+      }
+     }
+    }
+   ]
+  },
+  {
+   "send": {
+    "conn": "s",
+    "msg": {
+     "type": "query",
+     "id": "q1",
+     "query": {
+      "kind": "screen",
+      "principal": "arkin"
+     }
+    }
+   },
+   "expect": [
+    {
+     "conn": "s",
+     "msg": {
+      "type": "result",
+      "id": "q1",
+      "seq": 0,
+      "data": {
+       "kind": "screen",
+       "screens": [
+        {
+         "principal": "arkin",
+         "surface": "desktop",
+         "viewport": {
+          "view": "main",
+          "from_bar": 80,
+          "to_bar": 199
+         },
+         "symbol": "THYAO",
+         "interval": "1d",
+         "panels": [
+          {
+           "panel": 0,
+           "series": [
+            "px",
+            "bb20"
+           ],
+           "marks": [
+            "candle",
+            "line"
+           ]
+          },
+          {
+           "panel": 1,
+           "series": [
+            "rsi14"
+           ],
+           "marks": [
+            "line",
+            "rule"
+           ]
+          },
+          {
+           "panel": 2,
+           "series": [
+            "macd"
+           ],
+           "marks": [
+            "line"
+           ]
+          }
+         ],
+         "capsules": [
+          "cap-overbought"
+         ],
+         "last_close": 124.69
+        }
+       ]
+      }
+     }
+    }
+   ]
+  },
+  {
+   "send": {
+    "conn": "s",
+    "msg": {
+     "type": "query",
+     "id": "q2",
+     "query": {
+      "kind": "describe"
+     }
+    }
+   },
+   "expect": [
+    {
+     "conn": "s",
+     "msg": {
+      "type": "result",
+      "id": "q2",
+      "seq": 0,
+      "data": {
+       "kind": "description",
+       "description": {
+        "protocol": "qp/0",
+        "doc": "doc-thyao",
+        "role": "proposer",
+        "permissions": {
+         "read": true,
+         "write": false,
+         "propose": true,
+         "decide": false,
+         "attend": true,
+         "feed": false
+        },
+        "studies": {
+         "rsi": {
+          "period": 14.0
+         },
+         "macd": {
+          "fast": 12.0,
+          "slow": 26.0,
+          "signal": 9.0
+         },
+         "sma": {
+          "period": 20.0
+         },
+         "ema": {
+          "period": 20.0
+         },
+         "bollinger": {
+          "period": 20.0,
+          "k": 2.0
+         }
+        }
+       }
+      }
+     }
+    }
+   ]
+  },
+  {
+   "send": {
+    "conn": "e",
+    "msg": {
+     "type": "command",
+     "id": "c1",
+     "ops": [
+      {
+       "op": "show_finding",
+       "finding": "fnd-overbought",
+       "view": "v-overbought"
+      }
+     ]
+    }
+   },
+   "expect": [
+    {
+     "conn": "e",
+     "msg": {
+      "type": "ack",
+      "id": "c1",
+      "status": "applied",
+      "seq": 1,
+      "created": [
+       "v-overbought"
+      ]
+     }
+    }
+   ]
+  },
+  {
+   "send": {
+    "conn": "e",
+    "msg": {
+     "type": "query",
+     "id": "q3",
+     "query": {
+      "kind": "get",
+      "id": "v-overbought"
+     }
+    }
+   },
+   "expect": [
+    {
+     "conn": "e",
+     "msg": {
+      "type": "result",
+      "id": "q3",
+      "seq": 1,
+      "data": {
+       "kind": "item",
+       "collection": "views",
+       "item": {
+        "id": "v-overbought",
+        "x": {
+         "kind": "time",
+         "domain": [
+          1750291200000.0,
+          1759881600000.0
+         ]
+        },
+        "layers": [
+         {
+          "mark": "candle",
+          "series": "px",
+          "panel": 0
+         },
+         {
+          "mark": "line",
+          "series": "rsi14",
+          "panel": 1
+         },
+         {
+          "mark": "rule",
+          "panel": 1,
+          "encoding": {
+           "y": "70"
+          }
+         }
+        ]
+       }
+      }
+     }
+    }
+   ]
+  }
+ ],
+ "final": {
+  "log_len": 1,
+  "document": {
+   "capsules": [
+    {
+     "id": "cap-overbought",
+     "view": "v-overbought"
+    }
+   ]
+  }
+ }
+}

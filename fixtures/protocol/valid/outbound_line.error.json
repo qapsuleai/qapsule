@@ -1,0 +1,10 @@
+{
+ "conn": "",
+ "msg": {
+  "type": "error",
+  "error": {
+   "code": "parse",
+   "message": "line is not JSON"
+  }
+ }
+}

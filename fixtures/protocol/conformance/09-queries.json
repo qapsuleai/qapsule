@@ -1,0 +1,433 @@
+{
+ "name": "09-queries",
+ "description": "G06, G15, G02: reduced study query, everything at one bar, log by time.",
+ "covers": [
+  "query",
+  "time"
+ ],
+ "init": "fixtures/protocol/init/thyao.json",
+ "steps": [
+  {
+   "send": {
+    "conn": "a",
+    "msg": {
+     "type": "hello",
+     "protocol": "qp/0",
+     "principal": "arkin",
+     "surface": {
+      "kind": "desktop"
+     }
+    }
+   },
+   "expect": [
+    {
+     "conn": "a",
+     "msg": {
+      "type": "welcome",
+      "protocol": "qp/0",
+      "doc": "doc-thyao",
+      "principal": "arkin",
+      "role": "owner",
+      "permissions": {
+       "read": true,
+       "write": true,
+       "propose": true,
+       "decide": true,
+       "attend": true,
+       "feed": false
+      },
+      "seq": 0,
+      "epoch": 0,
+      "profile": {
+       "depth": "chart",
+       "series_data": true,
+       "max_points": 500,
+       "max_glyphs": 6,
+       "speech": false
+      },
+      "limits": {
+       "max_message_bytes": 1048576,
+       "max_ops": 64,
+       "max_bars": 10000,
+       "max_subscriptions": 32,
+       "max_string": 4096
+      }
+     }
+    }
+   ]
+  },
+  {
+   "send": {
+    "conn": "s",
+    "msg": {
+     "type": "hello",
+     "protocol": "qp/0",
+     "principal": "scout",
+     "surface": {
+      "kind": "headless"
+     }
+    }
+   },
+   "expect": [
+    {
+     "conn": "s",
+     "msg": {
+      "type": "welcome",
+      "protocol": "qp/0",
+      "doc": "doc-thyao",
+      "principal": "scout",
+      "role": "proposer",
+      "permissions": {
+       "read": true,
+       "write": false,
+       "propose": true,
+       "decide": false,
+       "attend": true,
+       "feed": false
+      },
+      "seq": 0,
+      "epoch": 0,
+      "profile": {
+       "depth": "chart",
+       "series_data": true,
+       "max_points": 10000,
+       "max_glyphs": 6,
+       "speech": false
+      },
+      "limits": {
+       "max_message_bytes": 1048576,
+       "max_ops": 64,
+       "max_bars": 10000,
+       "max_subscriptions": 32,
+       "max_string": 4096
+      }
+     }
+    }
+   ]
+  },
+  {
+   "send": {
+    "conn": "h",
+    "msg": {
+     "type": "hello",
+     "protocol": "qp/0",
+     "principal": "host",
+     "surface": {
+      "kind": "headless"
+     }
+    }
+   },
+   "expect": [
+    {
+     "conn": "h",
+     "msg": {
+      "type": "welcome",
+      "protocol": "qp/0",
+      "doc": "doc-thyao",
+      "principal": "host",
+      "role": "host",
+      "permissions": {
+       "read": true,
+       "write": true,
+       "propose": false,
+       "decide": false,
+       "attend": false,
+       "feed": true
+      },
+      "seq": 0,
+      "epoch": 0,
+      "profile": {
+       "depth": "chart",
+       "series_data": true,
+       "max_points": 10000,
+       "max_glyphs": 6,
+       "speech": false
+      },
+      "limits": {
+       "max_message_bytes": 1048576,
+       "max_ops": 64,
+       "max_bars": 10000,
+       "max_subscriptions": 32,
+       "max_string": 4096
+      }
+     }
+    }
+   ]
+  },
+  {
+   "send": {
+    "conn": "s",
+    "msg": {
+     "type": "query",
+     "id": "q1",
+     "query": {
+      "kind": "study",
+      "series": "rsi14",
+      "range": {
+       "last": 50
+      },
+      "reduce": "max"
+     }
+    }
+   },
+   "expect": [
+    {
+     "conn": "s",
+     "msg": {
+      "type": "result",
+      "id": "q1",
+      "seq": 0,
+      "data": {
+       "kind": "reduced",
+       "series": "rsi14",
+       "reduce": "max",
+       "bars": 50,
+       "values": {
+        "rsi": {
+         "value": 78.11504477458953,
+         "bar": 154
+        }
+       }
+      }
+     }
+    }
+   ]
+  },
+  {
+   "send": {
+    "conn": "s",
+    "msg": {
+     "type": "query",
+     "id": "q2",
+     "query": {
+      "kind": "at",
+      "series": "px",
+      "bar": 150
+     }
+    }
+   },
+   "expect": [
+    {
+     "conn": "s",
+     "msg": {
+      "type": "result",
+      "id": "q2",
+      "seq": 0,
+      "data": {
+       "kind": "at",
+       "at": {
+        "series": "px",
+        "bar": 150,
+        "ohlcv": {
+         "t": 1753920000000,
+         "o": 115.97,
+         "h": 118.24,
+         "l": 115.76,
+         "c": 117.66,
+         "v": 2081563.81
+        },
+        "studies": {
+         "rsi14": {
+          "rsi": 72.83959265032422
+         },
+         "macd": {
+          "histogram": 0.24850564697777333,
+          "macd": 2.476200324624031,
+          "signal": 2.227694677646258
+         },
+         "bb20": {
+          "bandwidth": 0.0878235386233608,
+          "lower": 107.63450083442969,
+          "middle": 112.57800000000005,
+          "upper": 117.5214991655704
+         }
+        }
+       }
+      }
+     }
+    }
+   ]
+  },
+  {
+   "send": {
+    "conn": "s",
+    "msg": {
+     "type": "query",
+     "id": "q3",
+     "query": {
+      "kind": "study",
+      "series": "px",
+      "range": {
+       "from_bar": 198,
+       "to_bar": 199
+      },
+      "output": "c"
+     }
+    }
+   },
+   "expect": [
+    {
+     "conn": "s",
+     "msg": {
+      "type": "result",
+      "id": "q3",
+      "seq": 0,
+      "data": {
+       "kind": "values",
+       "values": {
+        "series": "px",
+        "from_bar": 198,
+        "outputs": {
+         "c": [
+          "$any",
+          124.69
+         ]
+        }
+       }
+      }
+     }
+    }
+   ]
+  },
+  {
+   "send": {
+    "conn": "a",
+    "msg": {
+     "type": "command",
+     "id": "c1",
+     "ops": [
+      {
+       "op": "set_view_range",
+       "view": "main",
+       "from_bar": 140,
+       "to_bar": 199
+      }
+     ]
+    }
+   },
+   "expect": [
+    {
+     "conn": "a",
+     "msg": {
+      "type": "ack",
+      "id": "c1",
+      "status": "applied",
+      "seq": 1
+     }
+    }
+   ]
+  },
+  {
+   "send": {
+    "conn": "h",
+    "msg": {
+     "type": "clock",
+     "now": 1760001200000
+    }
+   },
+   "expect": []
+  },
+  {
+   "send": {
+    "conn": "a",
+    "msg": {
+     "type": "command",
+     "id": "c2",
+     "ops": [
+      {
+       "op": "remove",
+       "id": "bb20"
+      }
+     ]
+    }
+   },
+   "expect": [
+    {
+     "conn": "a",
+     "msg": {
+      "type": "ack",
+      "id": "c2",
+      "status": "applied",
+      "seq": 2
+     }
+    }
+   ]
+  },
+  {
+   "send": {
+    "conn": "h",
+    "msg": {
+     "type": "clock",
+     "now": 1760002400000
+    }
+   },
+   "expect": []
+  },
+  {
+   "send": {
+    "conn": "s",
+    "msg": {
+     "type": "query",
+     "id": "q4",
+     "query": {
+      "kind": "log",
+      "since_t": 1760000600000
+     }
+    }
+   },
+   "expect": [
+    {
+     "conn": "s",
+     "msg": {
+      "type": "result",
+      "id": "q4",
+      "seq": 2,
+      "data": {
+       "kind": "log",
+       "entries": [
+        {
+         "seq": 2,
+         "at": 1760001200000,
+         "author": "arkin"
+        }
+       ]
+      }
+     }
+    }
+   ],
+   "note": "G02: what changed in the last 30 minutes"
+  },
+  {
+   "send": {
+    "conn": "s",
+    "msg": {
+     "type": "query",
+     "id": "q5",
+     "query": {
+      "kind": "study",
+      "series": "rsi14",
+      "range": {
+       "from_bar": 10,
+       "to_bar": 5
+      }
+     }
+    }
+   },
+   "expect": [
+    {
+     "conn": "s",
+     "msg": {
+      "type": "error",
+      "error": {
+       "code": "invalid"
+      },
+      "id": "q5"
+     }
+    }
+   ]
+  }
+ ],
+ "final": {
+  "log_len": 2
+ }
+}

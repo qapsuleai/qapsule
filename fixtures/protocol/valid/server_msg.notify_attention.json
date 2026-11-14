@@ -1,0 +1,22 @@
+{
+ "type": "notify",
+ "sub": "me",
+ "event": {
+  "kind": "attention",
+  "directive": {
+   "id": "att-1",
+   "to": "arkin",
+   "from": "scout",
+   "at": 1760000000000,
+   "steps": [
+    {
+     "target": {
+      "series": "rsi14",
+      "from_bar": 150,
+      "to_bar": 150
+     }
+    }
+   ]
+  }
+ }
+}

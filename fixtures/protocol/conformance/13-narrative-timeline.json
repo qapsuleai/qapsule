@@ -1,0 +1,325 @@
+{
+ "name": "13-narrative-timeline",
+ "description": "G13: a three-step narration about a finding, proposed by an agent and accepted; steps out of order are refused when the proposal is made.",
+ "covers": [
+  "narrative",
+  "proposal",
+  "time"
+ ],
+ "init": "fixtures/protocol/init/thyao.json",
+ "steps": [
+  {
+   "send": {
+    "conn": "a",
+    "msg": {
+     "type": "hello",
+     "protocol": "qp/0",
+     "principal": "arkin",
+     "surface": {
+      "kind": "desktop"
+     }
+    }
+   },
+   "expect": [
+    {
+     "conn": "a",
+     "msg": {
+      "type": "welcome",
+      "protocol": "qp/0",
+      "doc": "doc-thyao",
+      "principal": "arkin",
+      "role": "owner",
+      "permissions": {
+       "read": true,
+       "write": true,
+       "propose": true,
+       "decide": true,
+       "attend": true,
+       "feed": false
+      },
+      "seq": 0,
+      "epoch": 0,
+      "profile": {
+       "depth": "chart",
+       "series_data": true,
+       "max_points": 500,
+       "max_glyphs": 6,
+       "speech": false
+      },
+      "limits": {
+       "max_message_bytes": 1048576,
+       "max_ops": 64,
+       "max_bars": 10000,
+       "max_subscriptions": 32,
+       "max_string": 4096
+      }
+     }
+    }
+   ]
+  },
+  {
+   "send": {
+    "conn": "s",
+    "msg": {
+     "type": "hello",
+     "protocol": "qp/0",
+     "principal": "scout",
+     "surface": {
+      "kind": "headless"
+     }
+    }
+   },
+   "expect": [
+    {
+     "conn": "s",
+     "msg": {
+      "type": "welcome",
+      "protocol": "qp/0",
+      "doc": "doc-thyao",
+      "principal": "scout",
+      "role": "proposer",
+      "permissions": {
+       "read": true,
+       "write": false,
+       "propose": true,
+       "decide": false,
+       "attend": true,
+       "feed": false
+      },
+      "seq": 0,
+      "epoch": 0,
+      "profile": {
+       "depth": "chart",
+       "series_data": true,
+       "max_points": 10000,
+       "max_glyphs": 6,
+       "speech": false
+      },
+      "limits": {
+       "max_message_bytes": 1048576,
+       "max_ops": 64,
+       "max_bars": 10000,
+       "max_subscriptions": 32,
+       "max_string": 4096
+      }
+     }
+    }
+   ]
+  },
+  {
+   "send": {
+    "conn": "s",
+    "msg": {
+     "type": "command",
+     "id": "c0",
+     "ops": [
+      {
+       "op": "add_narrative",
+       "about": "fnd-overbought",
+       "steps": [
+        {
+         "at_ms": 0,
+         "target": {
+          "view": "main",
+          "panel": 0,
+          "series": "px",
+          "from_bar": 130,
+          "to_bar": 150
+         },
+         "say": "Fiyat yükseliyor."
+        },
+        {
+         "at_ms": 4000,
+         "target": {
+          "view": "main",
+          "panel": 1,
+          "series": "rsi14",
+          "from_bar": 150,
+          "to_bar": 150
+         },
+         "say": "RSI 70'i kesti."
+        },
+        {
+         "at_ms": 1000,
+         "target": {
+          "view": "main",
+          "panel": 0,
+          "series": "bb20",
+          "from_bar": 150,
+          "to_bar": 150
+         },
+         "say": "Fiyat üst banda yakın."
+        }
+       ]
+      }
+     ]
+    }
+   },
+   "expect": [
+    {
+     "conn": "s",
+     "msg": {
+      "type": "error",
+      "error": {
+       "code": "invalid",
+       "path": "/ops/0/steps/2/at_ms"
+      },
+      "id": "c0"
+     }
+    }
+   ],
+   "note": "validated before the proposal exists"
+  },
+  {
+   "send": {
+    "conn": "s",
+    "msg": {
+     "type": "command",
+     "id": "c1",
+     "ops": [
+      {
+       "op": "add_narrative",
+       "about": "fnd-overbought",
+       "steps": [
+        {
+         "at_ms": 0,
+         "target": {
+          "view": "main",
+          "panel": 0,
+          "series": "px",
+          "from_bar": 130,
+          "to_bar": 150
+         },
+         "say": "Fiyat yükseliyor."
+        },
+        {
+         "at_ms": 4000,
+         "target": {
+          "view": "main",
+          "panel": 1,
+          "series": "rsi14",
+          "from_bar": 150,
+          "to_bar": 150
+         },
+         "say": "RSI 70'i kesti."
+        },
+        {
+         "at_ms": 8000,
+         "target": {
+          "view": "main",
+          "panel": 0,
+          "series": "bb20",
+          "from_bar": 150,
+          "to_bar": 150
+         },
+         "say": "Fiyat üst banda yakın."
+        }
+       ]
+      }
+     ]
+    }
+   },
+   "expect": [
+    {
+     "conn": "s",
+     "msg": {
+      "type": "ack",
+      "id": "c1",
+      "status": "proposed",
+      "seq": 1,
+      "proposal": "prop-1",
+      "created": [
+       "narr-1-0"
+      ]
+     }
+    }
+   ]
+  },
+  {
+   "send": {
+    "conn": "a",
+    "msg": {
+     "type": "command",
+     "id": "c2",
+     "ops": [
+      {
+       "op": "accept_proposal",
+       "proposal": "prop-1"
+      }
+     ]
+    }
+   },
+   "expect": [
+    {
+     "conn": "a",
+     "msg": {
+      "type": "ack",
+      "id": "c2",
+      "status": "applied",
+      "seq": 2,
+      "created": [
+       "narr-1-0"
+      ]
+     }
+    }
+   ]
+  },
+  {
+   "send": {
+    "conn": "s",
+    "msg": {
+     "type": "query",
+     "id": "q1",
+     "query": {
+      "kind": "list",
+      "collection": "narratives"
+     }
+    }
+   },
+   "expect": [
+    {
+     "conn": "s",
+     "msg": {
+      "type": "result",
+      "id": "q1",
+      "seq": 2,
+      "data": {
+       "kind": "items",
+       "collection": "narratives",
+       "items": [
+        {
+         "id": "narr-1-0",
+         "about": "fnd-overbought",
+         "steps": [
+          {
+           "at_ms": 0
+          },
+          {
+           "at_ms": 4000
+          },
+          {
+           "at_ms": 8000
+          }
+         ],
+         "provenance": {
+          "author": {
+           "kind": "agent",
+           "name": "scout"
+          },
+          "approved_by": {
+           "kind": "human",
+           "name": "arkin"
+          }
+         }
+        }
+       ]
+      }
+     }
+    }
+   ]
+  }
+ ],
+ "final": {
+  "log_len": 2
+ }
+}

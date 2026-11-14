@@ -146,7 +146,11 @@ Dokümanı değiştirmenin **tek** yolu. İnsan hareketi de ajan çağrısı da 
 - `base`: iyimser eşzamanlılık. Komutun dokunduğu öğelerden biri `base`'den sonra
   değiştiyse `conflict` döner (§8.2). Verilmezse komut o anki durumun üstüne uygulanır.
 - `reason`: neden; günlüğe ve öneriye yazılır.
-- `ack.created`: otoritenin oluşturduğu ya da atadığı kimlikler, işlem sırasıyla.
+- `ack.created`: komutun oluşturduğu öğelerin kimlikleri (istemcinin verdiği ya da
+  otoritenin atadığı), işlem sırasıyla. `accept_proposal` için: önerinin işlemlerinin
+  oluşturduğu kimlikler.
+- Bir komut ayrıştırılamasa da (`schema` hatası) mesajda okunabilen bir `id` varsa hata
+  o `id` ile döner.
 - `ack.status = "proposed"` ise `ack.proposal` öneri kimliğidir ve doküman değişmemiştir.
 
 İşlemler (`Op`, alan `"op"`) — ayrıntı §5.
@@ -229,6 +233,10 @@ için komut `set_view_range` kullanılır.
 | `zoom` | `view`, `factor` (>1 yakınlaştırır), `anchor_bar?` | Genişlik = round(genişlik / factor), en az 2 bar; `anchor_bar` (varsayılan: son görünen bar) ekranda aynı göreli konumda kalır. |
 | `tap` | `view`, `panel`, `bar` | Odak o bar olur; cevap `at` sonucudur. |
 
+Her `look`, `pan` ve `zoom`, aralık değişmese bile kişinin `attention` abonelerine
+`viewport` olayı üretir. `tap` olay üretmez (cevabı `at`'tir; odağı günceller). `tap` ve
+görünümle ilgili bar numaraları görünümün **ilk bar serisine** göredir.
+
 Bağlantının başlangıç aralığı: görünümün `x.domain`'i varsa ona düşen barlar; yoksa son
 N bar (masaüstü 120, telefon 60, saat 20; ekransız yüzeylerde de aynı kural, N = 120).
 
@@ -247,6 +255,10 @@ rolündeki bir ajanın `mode: auto` komutu otomatik olarak öneriye dönüşür:
 ```
 
 Kimlikler öneri anında atanır (yukarıda `fnd-6-0`), kabul edilirse aynen kullanılır.
+Öneri oluşturulmadan önce işlemler o anki dokümana karşı **denetlenir** (uygulanmadan);
+hata varsa öneri oluşmaz ve hata hemen döner. Şu işlemler öneri olamaz; yetkisi olmayan
+için her kipte `forbidden` döner: `accept_proposal`, `reject_proposal`, `undo`,
+`append_bars`, `update_last_bar`.
 Karar, `decide` yetkisi olan birinin komutudur:
 
 ```json
@@ -293,7 +305,7 @@ Kalıcı, adım adım bir **anlatım çizelgesi** dikkat değil, dokümandır: `
 |------|----------------------------|---------------|
 | `put_series` | `series` | Seriyi ekle/değiştir. |
 | `add_study` | `id?`, `study`, `inputs`, `params?`, `show?{view, with?, panel?}` | Hesap serisi ekler; `show` varsa görünüme `line` katmanı ekler. `with`: o serinin çizildiği panel; `panel`: panel numarası; ikisi de yoksa yeni panel (en büyük panel + 1). |
-| `set_params` | `series`, `params` | Hesap serisinin parametrelerini birleştirerek değiştirir; kimlik ve katmanlar korunur. |
+| `set_params` | `series`, `params` | Hesap serisinin parametrelerini birleştirerek değiştirir; kimlik ve katmanlar korunur. Değişim: serinin tamamıyla `put_series`. |
 | `put_view` | `view` | Görünümü ekle/değiştir (Görünüm v0 tipi; R2'de gramer). |
 | `add_layer` | `view`, `layer`, `index?` | Katman ekler (yoksa sona). |
 | `remove_layer` | `view`, `index` | Katmanı siler. |
@@ -302,12 +314,12 @@ Kalıcı, adım adım bir **anlatım çizelgesi** dikkat değil, dokümandır: `
 | `add_finding` | `id?`, `claim`, `facts`, `confidence`, `invalidation`, `capsule?` | Bulgu ekler; `capsule` (başlık) verilirse canlı kapsül de. |
 | `update_finding` | `finding`, `claim?`, `confidence?`, `invalidation?` | Verilen alanları değiştirir. |
 | `approve_finding` | `finding`, `note?` | Kapsül `approved`; karneye kayıt (`state: approved`, `outcome: pending`, not). |
-| `reject_finding` | `finding`, `note?` | Kapsül `rejected`; karneye kayıt (`state: rejected`, `outcome: pending`, not). |
+| `reject_finding` | `finding`, `note?` | Kapsül `rejected`; karneye kayıt (`state: rejected`, `outcome: pending`, `recorded_at` = saat, not). |
 | `add_intent` | `id?`, `text`, `trigger?` | Etkin niyet ekler. |
 | `set_intent_active` | `intent`, `active` | Niyeti açar/kapatır. |
 | `add_narrative` | `id?`, `about`, `steps` | Anlatım çizelgesi ekler (§11). |
 | `show_finding` | `finding`, `view?` | **Sunucu (presenter)** bulgu için deterministik bir görünüm kurar ve kapsüle bağlar (§10.3). |
-| `remove` | `id` | Öğeyi siler. Seri silinirse onu çizen katmanlar da silinir; başka öğe (hesap girdisi, olgu, koşul, niyet) ona dayanıyorsa `in_use`. |
+| `remove` | `id` | Öğeyi siler. Seri silinirse onu çizen katmanlar da silinir (değişimler: önce `delete_layer`'lar en büyük sıradan küçüğe, sonra `delete`); başka öğe (hesap girdisi, olgu, bulgu/niyet koşulu) ona dayanıyorsa `in_use` ve `expected` = dayanan öğelerin kimlikleri, alfabe sırasıyla. |
 | `append_bars` | `series`, `bars` | Bar ekler (zamanlar son bardan sonra, artan). Yetki: `feed` ya da `write`. |
 | `update_last_bar` | `series`, `bar` | Son barı değiştirir (aynı `t`). |
 | `undo` | `seq?` | Bir girdiyi tersini yeni girdi olarak yazarak geri alır (§8.3). |
@@ -361,8 +373,8 @@ ve son bar `>=` sağ taraf (önceki değer boşsa yanlış); `cross_below` simet
 | `log` | `after_seq?`, `since_t?`, `until_t?`, `author?`, `limit?` | `log`: girdiler, `seq` artan. `limit` en son n girdiyi verir. |
 | `study` | `series`, `range?`, `output?`, `reduce?` | `values` (barlarla hizalı, ısınma `null`; K13/K20) ya da `reduced` (`min`, `max`, `mean`, `first`, `last`, `count`; `null`lar atlanır; `min`/`max`/`first`/`last` bar ve zamanı da verir). Bar serisinde çıktılar `o`,`h`,`l`,`c`,`v`. |
 | `at` | `series`, `bar?` ya da `t?` | `at`: OHLCV ve o bar serisine dayanan her hesabın o bardaki değerleri. |
-| `screen` | `principal?` | `screen`: kişinin ekranlı her bağlantısı için görünüm, paneller (seriler, işaretler), görünen aralık, sembol, aralıktaki kapsüller, son kapanış. |
-| `attention` | `principal` | `attention`: son bakış aralığı, odak, zamanı, yönergeler. |
+| `screen` | `principal?` | `screen`: kişinin ekranlı (`desktop`, `phone`, `watch`) her bağlantısı için, bağlantı açılış sırasıyla: görünüm, görünen aralık, sembol ve aralık (görünümün ilk bar serisinden), paneller (panel numarası artan; `series` = o paneldeki katmanların serileri, katman sırasıyla, tekrarsız; `marks` = bütün katmanların işaretleri, katman sırasıyla), olgu barı görünen aralıkta olan bulguların kapsülleri, görünen son barın kapanışı. |
+| `attention` | `principal` | `attention`: kişinin en son etkin ekranlı bağlantısının bakış aralığı (girdi yoksa başlangıç aralığı), son odak (`tap`: görünüm, panel, bar), zamanı, yönergeler. |
 | `present` | `finding?`, `surface?` | `presentation` (§10). `finding` yoksa en önemli canlı bulgu (en yüksek güven; eşitlikte kimlik sırası). |
 
 **Aralık** (`range`): tam olarak bir biçim — `{"last": n}` ya da
@@ -391,10 +403,14 @@ Belge başına tek otorite; komutlar geliş sırasıyla tek tek uygulanır; her 
 girdisi olur. Değişimler `seq` sırasıyla yayılır. Çakışan yazılar sunucu sırasıyla, öğe
 düzeyinde "son yazan kazanır"; ama `base` ile istemci bunu bilerek reddettirebilir.
 
-Motorun kendisi de yazar olabilir: bar verisi değiştikten sonra otorite canlı bulguların
-geçersizlik koşullarını değerlendirir; koşul doğruysa yazarı `qp` olan ayrı bir girdi
-kapsülü `invalidated` yapar. Etkin niyetlerin tetikleyicileri ve `condition`
-abonelikleri de her girdiden sonra değerlendirilir (kenar tetiklemeli).
+Motorun kendisi de yazar olabilir (yazar kimliği `qp`, köken yazarı
+`{"kind":"engine","name":"qp","version":…}`). Bir seri verisini, bir hesap serisinin
+parametrelerini ya da bir bulgunun geçersizlik koşulunu değiştiren her girdiden sonra
+otorite canlı (`live`) kapsüllü bulguların geçersizlik koşullarını değerlendirir; koşul
+doğruysa yazarı `qp` olan ayrı bir girdi kapsülü `invalidated` yapar. Etkin niyetlerin
+tetikleyicileri ve `condition` abonelikleri de her girdiden sonra değerlendirilir; kenar
+tetiklemelidir (önce yanlış, şimdi doğru). `condition_met` ve `intent_triggered`
+olaylarındaki `seq`, koşulu doğru yapan girdinin konumudur; `bar` son bardır.
 
 ### 8.2 İyimser eşzamanlılık (`base`)
 
@@ -481,7 +497,9 @@ istemci yalnızca kimliğini söyler (kimlik doğrulama taşımanın işidir; v0
 `show_finding` ajanın anlam düzeyinde konuşmasıdır: "bu bulguyu göster". Motordaki
 deterministik sunucu görünümü kurar: panel 0'da olgunun bar serisinin mumları; olgu bir
 hesap serisindeyse panel 1'de o serinin çizgisi ve olgunun `evidence.level` değerinde bir
-kural; yatay aralık olgu barından 30 bar önceden son bara. Aynı doküman her zaman aynı
+kural (`encoding.y` = değerin en kısa yazımı, tamsayıysa ondalıksız: `"70"`); yatay aralık
+`x.domain = [t(max(0, olgu barı − 30)), t(son bar)]`; `y` her panel için `linear`.
+Görünüm kimliği verilmezse `view-<seq>-0`. Aynı doküman her zaman aynı
 görünümü üretir. Ajan grameri doğrudan da yazabilir (`put_view`, `add_layer`); ikisi aynı
 komut yolundadır (K21-1, ölçüm `rounds/RD1/experiments/`).
 
@@ -546,8 +564,10 @@ Her hata, ajanın yardım almadan düzeltebileceği kadar bilgi taşır:
 | `unsupported` | Bu otoritede desteklenmiyor | `hint` |
 
 `path`, gelen mesajın içine JSON göstericisidir (`/ops/1/params/period`). `did_you_mean`
-en çok 5 öneri verir (düzenleme uzaklığı ≤ 3 ya da alt dizge eşleşmesi; uzaklık, sonra
-alfabe sırası). Bir komutta hata varsa **hiçbir** işlem uygulanmaz.
+en çok 5 öneri verir: adaylar, düzenleme uzaklığı ≤ 3 olanlar ve verilen adı içeren ya da
+onun içinde geçenler; sıralama düzenleme uzaklığı (alt dizge adayları için de gerçek
+uzaklık), sonra alfabe sırası. Adaylar ilgili ad uzayıdır: seri kimlikleri, görünüm
+kimlikleri, alan adları… Bir komutta hata varsa **hiçbir** işlem uygulanmaz.
 
 ## 14. Güvenlik ve sınırlar
 

@@ -1,0 +1,515 @@
+{
+ "name": "06-proposal-reject-expire",
+ "description": "Proposal rejected with a note; another one expires when the host clock passes its TTL; deciding an expired proposal fails; a proposer cannot decide.",
+ "covers": [
+  "proposal",
+  "time",
+  "error"
+ ],
+ "init": {
+  "document": "fixtures/protocol/docs/thyao.json",
+  "clock": 1760000000000,
+  "epoch": 0,
+  "proposal_ttl_ms": 60000,
+  "principals": [
+   {
+    "id": "arkin",
+    "author": {
+     "kind": "human",
+     "name": "arkin"
+    },
+    "role": "owner"
+   },
+   {
+    "id": "scout",
+    "author": {
+     "kind": "agent",
+     "name": "scout"
+    },
+    "role": "proposer"
+   },
+   {
+    "id": "editor",
+    "author": {
+     "kind": "agent",
+     "name": "editor"
+    },
+    "role": "editor"
+   },
+   {
+    "id": "viewer",
+    "author": {
+     "kind": "human",
+     "name": "viewer"
+    },
+    "role": "viewer"
+   },
+   {
+    "id": "feed",
+    "author": {
+     "kind": "engine",
+     "name": "feed",
+     "version": "0"
+    },
+    "role": "feed"
+   },
+   {
+    "id": "host",
+    "author": {
+     "kind": "engine",
+     "name": "host",
+     "version": "0"
+    },
+    "role": "host"
+   }
+  ]
+ },
+ "steps": [
+  {
+   "send": {
+    "conn": "a",
+    "msg": {
+     "type": "hello",
+     "protocol": "qp/0",
+     "principal": "arkin",
+     "surface": {
+      "kind": "desktop"
+     }
+    }
+   },
+   "expect": [
+    {
+     "conn": "a",
+     "msg": {
+      "type": "welcome",
+      "protocol": "qp/0",
+      "doc": "doc-thyao",
+      "principal": "arkin",
+      "role": "owner",
+      "permissions": {
+       "read": true,
+       "write": true,
+       "propose": true,
+       "decide": true,
+       "attend": true,
+       "feed": false
+      },
+      "seq": 0,
+      "epoch": 0,
+      "profile": {
+       "depth": "chart",
+       "series_data": true,
+       "max_points": 500,
+       "max_glyphs": 6,
+       "speech": false
+      },
+      "limits": {
+       "max_message_bytes": 1048576,
+       "max_ops": 64,
+       "max_bars": 10000,
+       "max_subscriptions": 32,
+       "max_string": 4096
+      }
+     }
+    }
+   ]
+  },
+  {
+   "send": {
+    "conn": "s",
+    "msg": {
+     "type": "hello",
+     "protocol": "qp/0",
+     "principal": "scout",
+     "surface": {
+      "kind": "headless"
+     }
+    }
+   },
+   "expect": [
+    {
+     "conn": "s",
+     "msg": {
+      "type": "welcome",
+      "protocol": "qp/0",
+      "doc": "doc-thyao",
+      "principal": "scout",
+      "role": "proposer",
+      "permissions": {
+       "read": true,
+       "write": false,
+       "propose": true,
+       "decide": false,
+       "attend": true,
+       "feed": false
+      },
+      "seq": 0,
+      "epoch": 0,
+      "profile": {
+       "depth": "chart",
+       "series_data": true,
+       "max_points": 10000,
+       "max_glyphs": 6,
+       "speech": false
+      },
+      "limits": {
+       "max_message_bytes": 1048576,
+       "max_ops": 64,
+       "max_bars": 10000,
+       "max_subscriptions": 32,
+       "max_string": 4096
+      }
+     }
+    }
+   ]
+  },
+  {
+   "send": {
+    "conn": "h",
+    "msg": {
+     "type": "hello",
+     "protocol": "qp/0",
+     "principal": "host",
+     "surface": {
+      "kind": "headless"
+     }
+    }
+   },
+   "expect": [
+    {
+     "conn": "h",
+     "msg": {
+      "type": "welcome",
+      "protocol": "qp/0",
+      "doc": "doc-thyao",
+      "principal": "host",
+      "role": "host",
+      "permissions": {
+       "read": true,
+       "write": true,
+       "propose": false,
+       "decide": false,
+       "attend": false,
+       "feed": true
+      },
+      "seq": 0,
+      "epoch": 0,
+      "profile": {
+       "depth": "chart",
+       "series_data": true,
+       "max_points": 10000,
+       "max_glyphs": 6,
+       "speech": false
+      },
+      "limits": {
+       "max_message_bytes": 1048576,
+       "max_ops": 64,
+       "max_bars": 10000,
+       "max_subscriptions": 32,
+       "max_string": 4096
+      }
+     }
+    }
+   ]
+  },
+  {
+   "send": {
+    "conn": "s",
+    "msg": {
+     "type": "subscribe",
+     "id": "p",
+     "topic": {
+      "kind": "proposals"
+     }
+    }
+   },
+   "expect": [
+    {
+     "conn": "s",
+     "msg": {
+      "type": "ack",
+      "id": "p",
+      "status": "subscribed"
+     }
+    }
+   ]
+  },
+  {
+   "send": {
+    "conn": "s",
+    "msg": {
+     "type": "command",
+     "id": "c1",
+     "ops": [
+      {
+       "op": "set_params",
+       "series": "rsi14",
+       "params": {
+        "period": 21
+       }
+      }
+     ]
+    }
+   },
+   "expect": [
+    {
+     "conn": "s",
+     "msg": {
+      "type": "ack",
+      "id": "c1",
+      "status": "proposed",
+      "seq": 1,
+      "proposal": "prop-1"
+     }
+    },
+    {
+     "conn": "s",
+     "msg": {
+      "type": "notify",
+      "sub": "p",
+      "event": {
+       "kind": "proposal",
+       "proposal": "prop-1",
+       "state": "pending",
+       "author": "scout",
+       "seq": 1
+      }
+     }
+    }
+   ]
+  },
+  {
+   "send": {
+    "conn": "s",
+    "msg": {
+     "type": "command",
+     "id": "c2",
+     "ops": [
+      {
+       "op": "accept_proposal",
+       "proposal": "prop-1"
+      }
+     ]
+    }
+   },
+   "expect": [
+    {
+     "conn": "s",
+     "msg": {
+      "type": "error",
+      "error": {
+       "code": "forbidden"
+      },
+      "id": "c2"
+     }
+    }
+   ],
+   "note": "proposers cannot decide, and deciding is not proposable"
+  },
+  {
+   "send": {
+    "conn": "a",
+    "msg": {
+     "type": "command",
+     "id": "c3",
+     "ops": [
+      {
+       "op": "reject_proposal",
+       "proposal": "prop-1",
+       "note": "14 kalsın"
+      }
+     ]
+    }
+   },
+   "expect": [
+    {
+     "conn": "a",
+     "msg": {
+      "type": "ack",
+      "id": "c3",
+      "status": "applied",
+      "seq": 2
+     }
+    },
+    {
+     "conn": "s",
+     "msg": {
+      "type": "notify",
+      "sub": "p",
+      "event": {
+       "kind": "proposal",
+       "proposal": "prop-1",
+       "state": "rejected",
+       "author": "scout",
+       "seq": 2
+      }
+     }
+    }
+   ]
+  },
+  {
+   "send": {
+    "conn": "s",
+    "msg": {
+     "type": "command",
+     "id": "c4",
+     "ops": [
+      {
+       "op": "set_params",
+       "series": "rsi14",
+       "params": {
+        "period": 9
+       }
+      }
+     ]
+    }
+   },
+   "expect": [
+    {
+     "conn": "s",
+     "msg": {
+      "type": "ack",
+      "id": "c4",
+      "status": "proposed",
+      "seq": 3,
+      "proposal": "prop-3"
+     }
+    },
+    {
+     "conn": "s",
+     "msg": {
+      "type": "notify",
+      "sub": "p",
+      "event": {
+       "kind": "proposal",
+       "proposal": "prop-3",
+       "state": "pending",
+       "author": "scout",
+       "seq": 3
+      }
+     }
+    }
+   ]
+  },
+  {
+   "send": {
+    "conn": "h",
+    "msg": {
+     "type": "clock",
+     "now": 1760000030000
+    }
+   },
+   "expect": [],
+   "note": "not yet expired"
+  },
+  {
+   "send": {
+    "conn": "h",
+    "msg": {
+     "type": "clock",
+     "now": 1760000061000
+    }
+   },
+   "expect": [
+    {
+     "conn": "s",
+     "msg": {
+      "type": "notify",
+      "sub": "p",
+      "event": {
+       "kind": "proposal",
+       "proposal": "prop-3",
+       "state": "expired",
+       "author": "scout",
+       "seq": 4
+      }
+     }
+    }
+   ]
+  },
+  {
+   "send": {
+    "conn": "a",
+    "msg": {
+     "type": "command",
+     "id": "c5",
+     "ops": [
+      {
+       "op": "accept_proposal",
+       "proposal": "prop-3"
+      }
+     ]
+    }
+   },
+   "expect": [
+    {
+     "conn": "a",
+     "msg": {
+      "type": "error",
+      "error": {
+       "code": "not_pending"
+      },
+      "id": "c5"
+     }
+    }
+   ]
+  },
+  {
+   "send": {
+    "conn": "h",
+    "msg": {
+     "type": "clock",
+     "now": 1760000000000
+    }
+   },
+   "expect": [
+    {
+     "conn": "h",
+     "msg": {
+      "type": "error",
+      "error": {
+       "code": "invalid"
+      }
+     }
+    }
+   ],
+   "note": "clock must not go back"
+  }
+ ],
+ "final": {
+  "log_len": 4,
+  "document": {
+   "series": [
+    {
+     "id": "px"
+    },
+    {
+     "id": "rsi14",
+     "source": {
+      "params": {
+       "period": 14.0
+      }
+     }
+    },
+    {
+     "id": "macd"
+    },
+    {
+     "id": "bb20"
+    }
+   ],
+   "proposals": [
+    {
+     "id": "prop-1",
+     "state": "rejected",
+     "note": "14 kalsın"
+    },
+    {
+     "id": "prop-3",
+     "state": "expired",
+     "decided_seq": 4
+    }
+   ]
+  }
+ }
+}

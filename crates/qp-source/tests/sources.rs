@@ -2,7 +2,7 @@
 //! as a batch run over the final bars.
 
 use std::collections::BTreeMap;
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 
 use qp_compute::{create, run, Field};
 use qp_source::{
@@ -128,18 +128,54 @@ fn ordering_rules_and_bindings() {
 
 #[test]
 fn file_bindings_cannot_escape_the_base_dir() {
-    let base = repo("fixtures");
-    for bad in ["../Cargo.toml", "/etc/hosts", "bars/../../Cargo.toml", ""] {
-        let b = qp_schema::Series {
-            id: "s".into(),
-            instrument: None,
-            interval: None,
-            source: qp_schema::SeriesSource::File { path: bad.into() },
-            data: None,
-        };
-        assert!(open_binding(&b, &base).is_err(), "{bad:?} must be rejected");
+    let binding = |path: &str| qp_schema::Series {
+        id: "s".into(),
+        instrument: None,
+        interval: None,
+        source: qp_schema::SeriesSource::File { path: path.into() },
+        data: None,
+    };
+    // Base `fixtures/schema`; every target below is a *valid* series file, so only the
+    // path rule can reject it.
+    let base = repo("fixtures/schema");
+    let abs = repo("fixtures/bars/sample.json").canonicalize().unwrap();
+    let abs = abs.to_str().unwrap();
+    assert!(
+        FileSource::open(Path::new(abs)).is_ok(),
+        "target itself is valid"
+    );
+    for bad in [
+        "../bars/sample.json",
+        "../schema/../bars/sample.json",
+        abs,
+        "",
+    ] {
+        let err = open_binding(&binding(bad), &base).err();
+        let msg = err.map(|e| e.to_string()).unwrap_or_default();
+        assert!(
+            msg.contains("plain relative path") || msg.contains("outside"),
+            "{bad:?} must be rejected by the path rule, got {msg:?}"
+        );
     }
+    // Inside the base it works.
+    let mut ok = open_binding(&binding("bars/sample.json"), &repo("fixtures")).unwrap();
+    assert_eq!(collect_bars(ok.as_mut()).unwrap().len(), 200);
     // A directory is not a regular file.
     assert!(FileSource::open(&repo("fixtures/bars")).is_err());
-    assert!(qp_source::resolve_binding_path(&base, "bars/sample.json").is_ok());
+    assert!(qp_source::resolve_binding_path(&repo("fixtures"), "bars/sample.json").is_ok());
+}
+
+/// A symlink inside the base dir that points outside it is rejected (canonical check).
+#[cfg(unix)]
+#[test]
+fn symlink_escape_is_rejected() {
+    let dir = std::env::temp_dir().join(format!("qp-source-symlink-{}", std::process::id()));
+    std::fs::create_dir_all(&dir).unwrap();
+    let link = dir.join("link.json");
+    let _ = std::fs::remove_file(&link);
+    std::os::unix::fs::symlink(repo("fixtures/bars/sample.json"), &link).unwrap();
+    let r = qp_source::resolve_binding_path(&dir, "link.json");
+    std::fs::remove_dir_all(&dir).unwrap();
+    let msg = r.err().map(|e| e.to_string()).unwrap_or_default();
+    assert!(msg.contains("outside"), "{msg:?}");
 }

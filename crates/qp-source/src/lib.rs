@@ -311,7 +311,8 @@ pub fn open_binding(
     match &series.source {
         qp_schema::SeriesSource::Inline => Ok(Box::new(MemorySource::from_series(series.clone())?)),
         qp_schema::SeriesSource::File { path } => {
-            Ok(Box::new(FileSource::open(&base_dir.join(path))?))
+            let full = resolve_binding_path(base_dir, path)?;
+            Ok(Box::new(FileSource::open(&full)?))
         }
         other => Err(SourceError::new(format!(
             "series `{}`: source kind `{}` is not available in this build",

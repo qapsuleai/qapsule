@@ -1,0 +1,18 @@
+# Generates fixtures/oracle/legacy_indicators.json from the legacy Q-Charts indicator code.
+#
+# NOT a workspace member and never built in CI: it needs the read-only legacy tree at
+# ../Services/quantex-charts-core (outside this repository). The legacy code is used as
+# an oracle only; nothing from it is copied into Qapsule. Run (from the repo root):
+#
+#   CARGO_TARGET_DIR=target/legacy-oracle cargo run --manifest-path tools/legacy-oracle/Cargo.toml
+[package]
+name = "legacy-oracle"
+version = "0.0.0"
+edition = "2021"
+publish = false
+
+[workspace]
+
+[dependencies]
+qcharts-core = { path = "../../../Services/quantex-charts-core/core" }
+serde_json = { version = "1", features = ["float_roundtrip"] }

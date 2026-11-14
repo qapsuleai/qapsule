@@ -149,6 +149,12 @@ pub trait Study {
     /// Replaces the inputs of the last pushed bar and writes its revised outputs. O(1).
     /// Without a previous bar it behaves like [`Study::push`].
     fn update_last(&mut self, input: &[f64], out: &mut [Option<f64>]);
+    /// Takes the last pushed bar back out, as if it had never been pushed. O(1). Only the
+    /// last bar can be discarded: afterwards there is no revisable bar, and the next
+    /// [`Study::push`] (or [`Study::update_last`]) adds a bar on top of the bars before
+    /// it. Without a revisable bar it does nothing. Used by [`Chain`] when a revision
+    /// turns the first study's output into `None`.
+    fn discard_last(&mut self);
     /// Forgets all bars.
     fn reset(&mut self);
 

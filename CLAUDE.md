@@ -23,6 +23,12 @@ round'un `rounds/Rn/` klasörü.
 - Alt görevleri alt ajanlara ver; her alt ajan yalnızca kendi crate'ine veya klasörüne yazar.
 - Bir alt görev, `VERIFY.md` içindeki ilgili adımlar geçmeden bitmiş sayılmaz.
 - Doğrulamayı işi yapan ajan değil, ayrı bir denetçi alt ajan çalıştırır.
+- Testleri kırık bir dal `main`'e birleştirilmez. Birleştirmeden önce o dalda `scripts/verify.sh`
+  (en azından fmt, clippy, test adımları) yeşil olmalıdır.
+- Alt ajan başlatılamıyorsa bunu round'un başında `REPORT.md`'ye yaz ve Arkin'e bildir;
+  işe tek başına devam edebilirsin, ama denetim yine bağımsız bir alt ajanla yapılmalıdır.
+- Yeni altın görsel yalnızca yeni bir görünüm için eklenir; var olan altın görsel
+  kendiliğinden güncellenmez.
 - Mimari bir seçim yaptığında `DECISIONS.md` içine satır ekle; "Açık" bir kararı
   kapatıyorsan kanıtını (ölçüm, deneme sonucu) yaz.
 - Emin olmadığın kütüphane davranışını varsayma; dokümantasyonuna bak ve küçük bir

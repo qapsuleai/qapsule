@@ -24,3 +24,6 @@ secrets/
 
 # Claude Code local state / worktrees
 /.claude/
+
+# Hesap ayarı; gizli bilgi içermez, qgh ve preflight buna bağlı
+!scripts/qapsule-gh.env

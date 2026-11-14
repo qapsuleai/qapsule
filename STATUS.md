@@ -5,9 +5,9 @@ Her round sonunda güncellenir.
 
 ## Şu an
 
-- **Aktif round:** R2 (koşulmayı bekliyor). RP1 tamamlandı.
+- **Aktif round:** RD1 (koşulmayı bekliyor). R2 beklemede; RD1 sonrası yeniden yazılacak.
 - **Son güncelleme:** 2026-11-14
-- **Sıradaki adım:** Ana akışta `rounds/RP1/REPORT.md` (açık sorular, önerilen karar satırları) okunur; `scripts/preflight.sh`, sonra `rounds/R2/PROMPT.md` Claude Code'a verilir.
+- **Sıradaki adım:** alt ajanları engelleyen eklenti kapatılır; `scripts/preflight.sh`; `rounds/RD1/PROMPT.md` yeni bir Claude Code oturumuna verilir.
 
 ## Round geçmişi
 

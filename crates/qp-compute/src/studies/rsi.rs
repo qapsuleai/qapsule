@@ -25,7 +25,7 @@ pub struct Rsi {
 /// `(gain, loss)` of a change; written as two selects so it compiles without a
 /// data-dependent branch (prices go up and down unpredictably).
 #[inline]
-fn split(change: f64) -> (f64, f64) {
+pub(crate) fn split(change: f64) -> (f64, f64) {
     let up = change > 0.0;
     let gain = if up { change } else { 0.0 };
     let loss = if up { 0.0 } else { change.abs() };
@@ -93,6 +93,36 @@ impl Rsi {
             )
         };
         Some(rsi_from_avg(ag, al))
+    }
+
+    /// Peek + commit of the next bar from its precomputed change split
+    /// `(g, l) = split(x - previous x)` (ignored on the first bar); returns the bar's
+    /// value or `NaN` in warmup. The same operations as `peek1(x)` then `commit1(x)`
+    /// (the peeked averages *are* the committed ones), for the sweep, which computes the
+    /// split once for every period. Does not track the previous input, so after it only
+    /// `step_split` may be used on this state.
+    #[inline]
+    pub(crate) fn step_split(&mut self, g: f64, l: f64) -> f64 {
+        let i = self.n;
+        self.n = i + 1;
+        if i < self.period {
+            if i > 0 {
+                self.gain_sum += g;
+                self.loss_sum += l;
+            }
+            return f64::NAN;
+        }
+        let (ag, al) = if i == self.period {
+            ((self.gain_sum + g) / self.pf, (self.loss_sum + l) / self.pf)
+        } else {
+            (
+                (self.avg_gain * self.pm1 + g) / self.pf,
+                (self.avg_loss * self.pm1 + l) / self.pf,
+            )
+        };
+        self.avg_gain = ag;
+        self.avg_loss = al;
+        rsi_from_avg(ag, al)
     }
 
     /// Commits a bar with input `x`.

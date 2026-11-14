@@ -21,7 +21,7 @@
 use std::collections::BTreeMap;
 
 use super::{sweep_kernel, SweepColumns, MAX_LANES, NAN};
-use crate::studies::{Bollinger, Ema, Macd};
+use crate::studies::{rsi_split, Bollinger, Ema, Macd, Rsi};
 use crate::{period_param, ComputeError, Core};
 
 type Params = BTreeMap<String, f64>;
@@ -31,6 +31,9 @@ const MIN_RUN: usize = 2;
 
 /// Signal EMAs stepped together over one shared macd line.
 const MACD_SIGNAL_LANES: usize = 2;
+
+/// RSIs stepped together over the shared split (measured: 8 beats 4 on this path).
+const RSI_SPLIT_LANES: usize = 8;
 
 /// A stretch of input positions `start..end`.
 #[derive(Debug, PartialEq)]
@@ -91,37 +94,150 @@ pub(super) fn macd(
     bufs: &mut [SweepColumns],
     visit: &mut impl FnMut(usize, &SweepColumns),
 ) -> Result<(), ComputeError> {
+    macd_cached(full, x, lanes, bufs, EMA_CACHE_BYTES, visit)
+}
+
+/// [`macd`] with an explicit EMA cache budget (tests use 0 to cover the uncached path).
+fn macd_cached(
+    full: &[Params],
+    x: &[f64],
+    lanes: Option<usize>,
+    bufs: &mut [SweepColumns],
+    cache_bytes: usize,
+    visit: &mut impl FnMut(usize, &SweepColumns),
+) -> Result<(), ComputeError> {
     let keys: Vec<(u64, u64)> = full
         .iter()
         .map(|p| (p["fast"].to_bits(), p["slow"].to_bits()))
         .collect();
-    let mut line = Vec::new();
-    for seg in segments(&keys) {
+    let segs = segments(&keys);
+    let emas = ema_cache(&segs, full, x, cache_bytes)?;
+    let mut line = vec![0.0; x.len()];
+    for seg in segs {
         match seg {
             Seg::Plain(a, b) => sweep_kernel(macd_build, &full[a..b], x, lanes, bufs, a, visit)?,
-            Seg::Shared(a, b) => macd_run(&full[a..b], x, lanes, bufs, &mut line, a, visit)?,
+            Seg::Shared(a, b) => {
+                let fast = period_param(&full[a], "fast")?;
+                let slow = period_param(&full[a], "slow")?;
+                fill_line(fast, slow, x, &emas, &mut line)?;
+                macd_run(&full[a..b], &line, slow, lanes, bufs, a, visit)?;
+            }
         }
     }
     Ok(())
 }
 
-/// One run of variants with equal `(fast, slow)` (input positions `base..`).
+/// The macd line `ema(fast) - ema(slow)` of `x` into `line` (`NaN` before bar
+/// `slow - 1`), from the cached EMA columns when present.
+fn fill_line(
+    fast: usize,
+    slow: usize,
+    x: &[f64],
+    emas: &BTreeMap<usize, Vec<f64>>,
+    line: &mut [f64],
+) -> Result<(), ComputeError> {
+    let w = (slow - 1).min(x.len());
+    if let (Some(f), Some(s)) = (emas.get(&fast), emas.get(&slow)) {
+        line[..w].fill(NAN);
+        for ((m, &f), &s) in line[w..].iter_mut().zip(&f[w..]).zip(&s[w..]) {
+            *m = f - s;
+        }
+    } else {
+        macd_line(Ema::new(fast)?, Ema::new(slow)?, x, line);
+    }
+    Ok(())
+}
+
+/// Upper bound on the memory of cached EMA columns (bytes).
+const EMA_CACHE_BYTES: usize = 16 << 20;
+
+/// EMA lanes when filling the cache.
+const EMA_CACHE_LANES: usize = 4;
+
+/// The EMA column of every fast and slow period used by a shared run, each period
+/// computed once (several macd lines share their fast or slow EMA). Empty when they
+/// would not fit in [`EMA_CACHE_BYTES`]; the runs then compute their EMAs themselves.
+fn ema_cache(
+    segs: &[Seg],
+    full: &[Params],
+    x: &[f64],
+    cache_bytes: usize,
+) -> Result<BTreeMap<usize, Vec<f64>>, ComputeError> {
+    let mut periods = std::collections::BTreeSet::new();
+    for seg in segs {
+        if let Seg::Shared(a, _) = *seg {
+            periods.insert(period_param(&full[a], "fast")?);
+            periods.insert(period_param(&full[a], "slow")?);
+        }
+    }
+    let mut cache = BTreeMap::new();
+    if periods.len().saturating_mul(x.len()).saturating_mul(8) > cache_bytes {
+        return Ok(cache);
+    }
+    let periods: Vec<usize> = periods.into_iter().collect();
+    for chunk in periods.chunks(EMA_CACHE_LANES) {
+        let mut emas: Vec<Ema> = chunk
+            .iter()
+            .map(|&p| Ema::new(p))
+            .collect::<Result<_, _>>()?;
+        let mut cols: Vec<Vec<f64>> = chunk.iter().map(|_| vec![0.0; x.len()]).collect();
+        match chunk.len() {
+            4 => ema_lanes::<4>(&mut emas, x, &mut cols),
+            2 => ema_lanes::<2>(&mut emas, x, &mut cols),
+            _ => {
+                for (e, c) in emas.iter_mut().zip(cols.iter_mut()) {
+                    ema_lanes::<1>(std::slice::from_mut(e), x, std::slice::from_mut(c));
+                }
+            }
+        }
+        cache.extend(chunk.iter().copied().zip(cols));
+    }
+    Ok(cache)
+}
+
+/// Steps `L` EMAs over `x` into `cols` (`NaN` in warmup): `peek1`/`commit1` until every
+/// lane is past its seed bar, then the steady expression with the states in registers.
+fn ema_lanes<const L: usize>(emas: &mut [Ema], x: &[f64], cols: &mut [Vec<f64>]) {
+    let emas: &mut [Ema; L] = emas.try_into().expect("L EMAs");
+    let n = x.len();
+    let cols: &mut [Vec<f64>; L] = cols.try_into().expect("L columns");
+    let seeded = emas.iter().map(Ema::period).max().unwrap_or(0).min(n);
+    for i in 0..seeded {
+        for l in 0..L {
+            cols[l][i] = emas[l].peek1(x[i]).unwrap_or(NAN);
+            emas[l].commit1(x[i]);
+        }
+    }
+    if seeded == n {
+        return;
+    }
+    let mut a = [0.0; L];
+    let mut prev = [0.0; L];
+    for l in 0..L {
+        (a[l], prev[l]) = emas[l].steady().expect("past the seed bar");
+    }
+    for i in seeded..n {
+        let xi = x[i];
+        for l in 0..L {
+            prev[l] = Ema::steady_next(a[l], prev[l], xi);
+            cols[l][i] = prev[l];
+        }
+    }
+}
+
+/// One run of variants with equal `(fast, slow)` (input positions `base..`) over their
+/// shared macd `line`.
 fn macd_run(
     run: &[Params],
-    x: &[f64],
+    line: &[f64],
+    slow: usize,
     lanes: Option<usize>,
     bufs: &mut [SweepColumns],
-    line: &mut Vec<f64>,
     base: usize,
     visit: &mut impl FnMut(usize, &SweepColumns),
 ) -> Result<(), ComputeError> {
     let ms: Vec<Macd> = run.iter().map(macd_build).collect::<Result<_, _>>()?;
-    let fast = period_param(&run[0], "fast")?;
-    let slow = period_param(&run[0], "slow")?;
-    let n = x.len();
-    // The macd line: the operations of `Macd::peek1`/`commit1` on the fast/slow EMAs.
-    line.resize(n, 0.0);
-    macd_line(Ema::new(fast)?, Ema::new(slow)?, x, line);
+    let n = line.len();
     // First bar with a macd value.
     let w = (slow - 1).min(n);
     let lanes = lanes.unwrap_or(MACD_SIGNAL_LANES).clamp(1, MAX_LANES);
@@ -309,9 +425,113 @@ fn bollinger_run(
     Ok(())
 }
 
+/// RSI sweep with the per-bar change split `(gain, loss)` computed once for all periods.
+pub(super) fn rsi(
+    full: &[Params],
+    x: &[f64],
+    lanes: Option<usize>,
+    bufs: &mut [SweepColumns],
+    visit: &mut impl FnMut(usize, &SweepColumns),
+) -> Result<(), ComputeError> {
+    let n = x.len();
+    let mut gain = vec![0.0; n];
+    let mut loss = vec![0.0; n];
+    for i in 1..n {
+        (gain[i], loss[i]) = rsi_split(x[i] - x[i - 1]);
+    }
+    let lanes = lanes.unwrap_or(RSI_SPLIT_LANES).clamp(1, MAX_LANES);
+    for (ci, chunk) in full.chunks(lanes).enumerate() {
+        let mut rs: Vec<Rsi> = chunk
+            .iter()
+            .map(|p| Rsi::new(period_param(p, "period")?))
+            .collect::<Result<_, _>>()?;
+        for (r, b) in rs.iter().zip(bufs.iter_mut()) {
+            shape(b, Rsi::OUTPUTS, n);
+            b.warmup = r.warmup();
+        }
+        let bufs = &mut bufs[..chunk.len()];
+        match chunk.len() {
+            8 => rsi_lanes::<8>(&mut rs, &gain, &loss, bufs),
+            4 => rsi_lanes::<4>(&mut rs, &gain, &loss, bufs),
+            2 => rsi_lanes::<2>(&mut rs, &gain, &loss, bufs),
+            _ => {
+                for (r, b) in rs.iter_mut().zip(bufs.iter_mut()) {
+                    rsi_lanes::<1>(
+                        std::slice::from_mut(r),
+                        &gain,
+                        &loss,
+                        std::slice::from_mut(b),
+                    );
+                }
+            }
+        }
+        for (l, b) in bufs.iter().enumerate() {
+            visit(ci * lanes + l, b);
+        }
+    }
+    Ok(())
+}
+
+/// Steps `L` RSIs over the precomputed split into column 0 of `bufs[l]`.
+fn rsi_lanes<const L: usize>(
+    rs: &mut [Rsi],
+    gain: &[f64],
+    loss: &[f64],
+    bufs: &mut [SweepColumns],
+) {
+    let rs: &mut [Rsi; L] = rs.try_into().expect("L RSIs");
+    let n = gain.len();
+    let cols: Vec<&mut [f64]> = bufs[..L]
+        .iter_mut()
+        .map(|b| &mut b.columns[0][..n])
+        .collect();
+    let cols: [&mut [f64]; L] = cols.try_into().expect("L lanes");
+    for (i, (&g, &l)) in gain.iter().zip(&loss[..n]).enumerate() {
+        for k in 0..L {
+            cols[k][i] = rs[k].step_split(g, l);
+        }
+    }
+}
+
 #[cfg(test)]
 mod tests {
-    use super::{segments, Seg};
+    use super::{macd_cached, segments, Params, Seg, SweepColumns, MAX_LANES};
+    use crate::sweep::{bench_closes, bench_grid};
+    use crate::{create, run, Field};
+
+    #[test]
+    fn macd_without_ema_cache_equals_single_runs() {
+        let x = bench_closes(300, 5);
+        let full: Vec<Params> = bench_grid("macd")[..60]
+            .iter()
+            .map(|p| create("macd", p, Field::Close).unwrap().params())
+            .collect();
+        let mut bufs: Vec<SweepColumns> = (0..MAX_LANES)
+            .map(|_| SweepColumns {
+                names: &[],
+                columns: Vec::new(),
+                warmup: Vec::new(),
+            })
+            .collect();
+        let mut seen = 0;
+        macd_cached(&full, &x, None, &mut bufs, 0, &mut |vi, c| {
+            let mut s = create("macd", &full[vi], Field::Close).unwrap();
+            let single = run(s.as_mut(), &[&x]).unwrap();
+            for (j, col) in single.iter().enumerate() {
+                let a: Vec<Option<u64>> = c
+                    .to_options(j)
+                    .iter()
+                    .map(|v| v.map(f64::to_bits))
+                    .collect();
+                let b: Vec<Option<u64>> = col.iter().map(|v| v.map(f64::to_bits)).collect();
+                assert_eq!(a, b, "variant {vi} output {j}");
+            }
+            assert_eq!(vi, seen);
+            seen += 1;
+        })
+        .unwrap();
+        assert_eq!(seen, full.len());
+    }
 
     #[test]
     fn segments_split_runs_and_plain_stretches() {

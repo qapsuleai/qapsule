@@ -157,3 +157,35 @@ fn shared_paths_on_series_shorter_than_periods() {
         }
     }
 }
+
+fn rsi_lists() -> Vec<Vec<P>> {
+    let grid = bench_grid("rsi");
+    let per = |v: f64| p(&[("period", v)]);
+    let mut mixed: Vec<P> = [1.0, 1.0, 14.0, 3.0, 3.0, 3.0, 2.0, 600.0, 9.0]
+        .iter()
+        .map(|&v| per(v))
+        .collect();
+    mixed.push(p(&[]));
+    vec![
+        grid[..37].to_vec(),
+        shuffled(grid[..200].to_vec(), 5),
+        mixed,
+    ]
+}
+
+#[test]
+fn rsi_shared_split_equals_single_runs() {
+    let mut x = bench_closes(400, 24);
+    // No move (50) and no loss (100) stretches.
+    x.extend(std::iter::repeat_n(80.0, 30));
+    x.extend((0..30).map(|i| 80.0 + f64::from(i)));
+    for list in rsi_lists() {
+        check("rsi", &list, &x);
+    }
+    for n in [0, 1, 2, 5, 15] {
+        let x = bench_closes(n, 70 + n as u64);
+        for list in rsi_lists() {
+            check("rsi", &list, &x);
+        }
+    }
+}

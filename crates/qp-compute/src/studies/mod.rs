@@ -21,6 +21,7 @@ mod sma;
 pub use bollinger::Bollinger;
 pub use ema::Ema;
 pub use macd::Macd;
+pub(crate) use rsi::split as rsi_split;
 pub use rsi::Rsi;
 pub use sma::Sma;
 

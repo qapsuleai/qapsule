@@ -1,0 +1,14 @@
+{
+  "name": "qapsule-web-spike",
+  "private": true,
+  "type": "module",
+  "description": "R0/T3 render spike: loads qp-wasm in headless Chromium and compares against the native golden image.",
+  "scripts": {
+    "compare": "node compare.mjs"
+  },
+  "devDependencies": {
+    "binaryen": "132.0.0",
+    "playwright": "1.62.0",
+    "pngjs": "7.0.0"
+  }
+}

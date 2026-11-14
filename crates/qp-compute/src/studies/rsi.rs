@@ -116,13 +116,27 @@ impl Rsi {
             ((self.gain_sum + g) / self.pf, (self.loss_sum + l) / self.pf)
         } else {
             (
-                (self.avg_gain * self.pm1 + g) / self.pf,
-                (self.avg_loss * self.pm1 + l) / self.pf,
+                Self::smooth(self.avg_gain, self.pm1, self.pf, g),
+                Self::smooth(self.avg_loss, self.pm1, self.pf, l),
             )
         };
         self.avg_gain = ag;
         self.avg_loss = al;
         rsi_from_avg(ag, al)
+    }
+
+    /// Wilder smoothing step past the seed: `(avg * (p - 1) + v) / p`.
+    #[inline]
+    #[must_use]
+    pub(crate) fn smooth(avg: f64, pm1: f64, pf: f64, v: f64) -> f64 {
+        (avg * pm1 + v) / pf
+    }
+
+    /// `[p - 1, p, avg_gain, avg_loss]` once past the seed bar (every later bar is
+    /// [`Rsi::smooth`] on both averages); `None` before.
+    #[inline]
+    pub(crate) fn steady(&self) -> Option<[f64; 4]> {
+        (self.n > self.period).then_some([self.pm1, self.pf, self.avg_gain, self.avg_loss])
     }
 
     /// Commits a bar with input `x`.

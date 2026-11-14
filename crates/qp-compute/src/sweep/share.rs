@@ -21,7 +21,7 @@
 use std::collections::BTreeMap;
 
 use super::{sweep_kernel, SweepColumns, MAX_LANES, NAN};
-use crate::studies::{rsi_split, Bollinger, Ema, Macd, Rsi};
+use crate::studies::{rsi_from_avg, rsi_split, Bollinger, Ema, Macd, Rsi};
 use crate::{period_param, ComputeError, Core};
 
 type Params = BTreeMap<String, f64>;
@@ -486,9 +486,26 @@ fn rsi_lanes<const L: usize>(
         .map(|b| &mut b.columns[0][..n])
         .collect();
     let cols: [&mut [f64]; L] = cols.try_into().expect("L lanes");
-    for (i, (&g, &l)) in gain.iter().zip(&loss[..n]).enumerate() {
+    // Through the latest seed bar (bar `period`), then the steady expressions with the
+    // lane states in registers.
+    let seeded = rs.iter().map(Rsi::period).max().map_or(0, |p| p + 1).min(n);
+    for i in 0..seeded {
         for k in 0..L {
-            cols[k][i] = rs[k].step_split(g, l);
+            cols[k][i] = rs[k].step_split(gain[i], loss[i]);
+        }
+    }
+    if seeded == n {
+        return;
+    }
+    let st: [[f64; 4]; L] = std::array::from_fn(|k| rs[k].steady().expect("past the seed bar"));
+    let (mut ag, mut al) = (st.map(|s| s[2]), st.map(|s| s[3]));
+    for i in seeded..n {
+        let (g, l) = (gain[i], loss[i]);
+        for k in 0..L {
+            let [pm1, pf, _, _] = st[k];
+            ag[k] = Rsi::smooth(ag[k], pm1, pf, g);
+            al[k] = Rsi::smooth(al[k], pm1, pf, l);
+            cols[k][i] = rsi_from_avg(ag[k], al[k]);
         }
     }
 }

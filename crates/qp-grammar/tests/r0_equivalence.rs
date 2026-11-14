@@ -1,12 +1,13 @@
 //! Criterion 3: the R0 scene (candles + SMA(20) over the sample, 1200x600) compiled from a
-//! grammar view equals, primitive for primitive and value for value, what
-//! `qp_render::scene::build_scene` produces.
+//! grammar view equals, primitive for primitive and value for value, what the R0 layout
+//! (`qp_render::scene::build_scene` at 761cca9, frozen in `r0_oracle/`) produces.
 
 mod common;
+mod r0_oracle;
 
 use qp_grammar::{compile, CompileOptions};
-use qp_render::scene as r0;
 use qp_schema::scene::{Align, Prim};
+use r0_oracle as r0;
 
 /// A comparable form of both primitive types.
 #[derive(Debug, PartialEq)]

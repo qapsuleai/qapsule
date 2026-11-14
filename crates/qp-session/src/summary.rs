@@ -92,7 +92,7 @@ fn series_summary(doc: &Document, s: &Series) -> SeriesSummary {
 }
 
 /// Outputs a `line` draws by default (`docs/GRAMMAR.md` §5).
-fn drawing_outputs(s: &Series) -> Vec<String> {
+pub(crate) fn drawing_outputs(s: &Series) -> Vec<String> {
     match &s.source {
         SeriesSource::Study { study, output, .. } if output.is_none() => match study.as_str() {
             "bollinger" => vec!["upper".into(), "middle".into(), "lower".into()],

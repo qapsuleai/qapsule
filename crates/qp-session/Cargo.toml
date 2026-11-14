@@ -9,6 +9,7 @@ publish.workspace = true
 
 [dependencies]
 qp-compute = { version = "0.0.0", path = "../qp-compute" }
+qp-grammar = { version = "0.0.0", path = "../qp-grammar" }
 qp-schema = { version = "0.0.0", path = "../qp-schema" }
 schemars = "1.2.3"
 serde = { version = "1.0.229", features = ["derive"] }

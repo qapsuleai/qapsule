@@ -56,7 +56,7 @@ fn put_series_inline_and_study_and_unsupported() {
 }
 
 #[test]
-fn add_study_new_panel_extends_y_scales() {
+fn add_study_new_panel_adds_a_panel() {
     let mut h = owner();
     let r = h.cmd(
         "a",
@@ -65,10 +65,17 @@ fn add_study_new_panel_extends_y_scales() {
     );
     assert_eq!(r["created"], json!(["series-1-0"]));
     let ch = last_changes(&h);
-    assert_eq!(ch[1]["op"], "put_view");
+    assert_eq!(ch[1]["op"], "put_panel");
+    assert_eq!(
+        ch[1]["panel"],
+        json!({"id":3,"y":{"kind":"linear","id":"y3"}})
+    );
+    assert_eq!(ch[2]["op"], "insert_layer");
     let v = &h.s.document().views[0];
-    assert_eq!(v.y.len(), 4);
+    assert!(v.y.is_empty());
+    assert_eq!(v.panels.len(), 4);
     assert_eq!(v.layers.last().unwrap().panel, 3);
+    assert_eq!(v.layers.last().unwrap().id.as_deref(), Some("l5"));
     let params = &h.s.document().series.last().unwrap().source;
     assert_eq!(
         serde_json::to_value(params).unwrap()["params"],
@@ -241,7 +248,7 @@ fn show_finding_assigns_view_id_and_attaches_capsule() {
     assert_eq!(d.capsules[0].view.as_deref(), Some("view-1-0"));
     let v = d.views.iter().find(|v| v.id == "view-1-0").unwrap();
     assert_eq!(v.layers.len(), 3);
-    assert_eq!(v.y.len(), 2);
+    assert_eq!(v.panels.len(), 2);
     // Deterministic: the same document gives the same view.
     let mut h2 = owner();
     h2.cmd(
@@ -269,7 +276,7 @@ fn remove_cascade_and_in_use() {
     assert_eq!(r["status"], "applied");
     assert_eq!(
         last_changes(&h),
-        json!([{"op":"delete_layer","view":"main","index":4},{"op":"delete","id":"macd"}])
+        json!([{"op":"delete_layer","view":"main","index":4,"layer":"l4"},{"op":"delete","id":"macd"}])
     );
     let r = h.cmd("a", "c3", json!([{"op":"remove","id":"cap-overbought"}]));
     assert_eq!(r["status"], "applied");
@@ -384,7 +391,7 @@ fn log_entries_carry_request_inverse_and_summary() {
     assert_eq!(e["request"][0]["op"], "add_study");
     assert_eq!(
         e["inverse"],
-        json!([{"op":"delete_layer","view":"main","index":5},{"op":"delete","id":"series-1-0"}])
+        json!([{"op":"delete_layer","view":"main","index":5,"layer":"l5"},{"op":"delete","id":"series-1-0"}])
     );
     assert_eq!(e["summary"], "add_study rsi(period=7) -> series-1-0");
 }

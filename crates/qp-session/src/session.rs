@@ -13,7 +13,7 @@ use qp_schema::protocol::{
 use qp_schema::{Author, CapsuleState, Document};
 use serde_json::Value;
 
-use crate::apply::{apply_all, touched, touched_ids};
+use crate::apply::{apply_all, first_overlap, touched_ids, touched_key, touched_keys};
 use crate::error::{invalid, ptr, PResult, E};
 use crate::expand::{
     check_condition, expand_ops, need_finding, need_proposal, summarize_ops, undone_set, Ctx,
@@ -208,6 +208,8 @@ impl Session {
             DocumentRef::Inline(d) => (**d).clone(),
             DocumentRef::Path(p) => read_json(&confine(repo_root, p)?)?,
         };
+        // Canonical form of every view (GRAMMAR.md §11); the log replays from it.
+        let doc = crate::canon::canon_document(&doc)?;
         let schema = schemars::schema_for!(ClientMsg).to_value();
         let mut s = Self {
             initial: doc.clone(),
@@ -657,7 +659,10 @@ impl Session {
         vec![out(
             conn,
             ServerMsg::Welcome {
-                summary: None,
+                // Only principals that may read get the summary (a feed may not).
+                summary: permissions(p.role)
+                    .read
+                    .then(|| crate::summary::summarize_doc(&self.doc)),
                 protocol: PROTOCOL_VERSION.to_owned(),
                 doc: self.doc.id.clone(),
                 principal: p.id,
@@ -1033,12 +1038,12 @@ impl Session {
             if undone.contains(&e.seq) || e.undoes.is_some_and(|x| x > b) {
                 continue;
             }
-            let t = touched_ids(&e.changes);
+            let t = touched_keys(&e.changes);
             for (k, c) in changes.iter().enumerate() {
-                let id = touched(c);
-                if t.contains(id) {
+                let key = std::iter::once(touched_key(c)).collect();
+                if let Some(id) = first_overlap(&key, &t) {
                     if first.is_none() {
-                        first = Some((id.to_owned(), e.seq, e.author.clone(), origin[k]));
+                        first = Some((id, e.seq, e.author.clone(), origin[k]));
                     }
                     conflicts.push(e.seq);
                     break;

@@ -1,0 +1,1 @@
+attempt1: study query reduce max last 50 -> 78.115 at bar 154. No issues.

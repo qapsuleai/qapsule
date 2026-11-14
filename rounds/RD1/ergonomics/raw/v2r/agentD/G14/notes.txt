@@ -1,0 +1,2 @@
+attempt1: list series to find macd id (trend-m, not 'macd').
+attempt2: set_params trend-m {fast:8,slow:21,signal:5} -> applied, verified via get. Param order in request (8,21,5) mapped to fast/slow/signal per spec.

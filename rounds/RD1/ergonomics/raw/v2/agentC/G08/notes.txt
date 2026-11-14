@@ -1,0 +1,1 @@
+attempt1: list facts + add_finding citing fact-rsi-cross70 (from spec example, confirmed by list), cross_below 70 invalidation; proposed (prop-5) since scout is proposer; needs approval. Spec example was directly usable.

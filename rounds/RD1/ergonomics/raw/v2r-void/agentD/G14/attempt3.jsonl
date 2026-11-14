@@ -1,0 +1,3 @@
+{"conn":"a","msg":{"type":"hello","protocol":"qp/0","principal":"editor","surface":{"kind":"headless"}}}
+{"conn":"a","msg":{"type":"command","id":"c1","ops":[{"op":"put_series","series":{"id":"trend-m","instrument":{"calendar":"XIST","exchange":"BIST","symbol":"THYAO"},"interval":"1d","source":{"kind":"study","study":"macd","inputs":["thy-d"],"params":{"fast":8,"slow":21,"signal":5}}}}]}}
+{"conn":"a","msg":{"type":"query","id":"q2","query":{"kind":"get","id":"trend-m"}}}

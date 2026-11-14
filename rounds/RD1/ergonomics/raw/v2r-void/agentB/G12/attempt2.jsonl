@@ -1,0 +1,3 @@
+{"conn":"s","msg":{"type":"hello","protocol":"qp/0","principal":"scout","surface":{"kind":"headless"}}}
+{"conn":"s","msg":{"type":"query","id":"q2","query":{"kind":"study","series":"osc-a","range":{"last":200},"reduce":"count"}}}
+{"conn":"s","msg":{"type":"query","id":"q3","query":{"kind":"study","series":"osc-a","range":{"last":200}}}}

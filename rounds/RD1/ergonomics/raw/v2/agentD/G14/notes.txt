@@ -1,0 +1,1 @@
+attempt1: list series + set_params macd {fast:8,slow:21,signal:5} -> applied. Guessed series id 'macd' from spec examples; confirmed by list. Params are numbers; stored as floats.

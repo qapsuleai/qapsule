@@ -1,0 +1,2 @@
+{"conn":"s","msg":{"type":"hello","protocol":"qp/0","principal":"scout","surface":{"kind":"headless"}}}
+{"conn":"s","msg":{"type":"attend","id":"a1","directive":{"to":"arkin","steps":[{"target":{"view":"chart-1","panel":1,"series":"osc-a","output":"rsi","from_bar":189,"to_bar":189},"say":"RSI burada 70'i yukarı kesti."},{"target":{"view":"chart-1","panel":0,"series":"thy-d","output":"v","from_bar":199,"to_bar":199},"say":"Son barın hacmi."}]}}}

@@ -1,0 +1,1 @@
+attempt1: hello + list series/intents + add_study sma20, sma50 (show main panel 0) + add_intent compare cross_above in one command; applied (sma20, sma50, intent-5-2). Spec clear (the §5.1 table example matched exactly). Note: unclear whether sma20/sma50 would already exist, so I put list queries first.

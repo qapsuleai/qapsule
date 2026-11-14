@@ -1,0 +1,2 @@
+attempt1: list pending proposals (to learn id), no accept.
+attempt2: list + accept_proposal prop-3 in the same file (id learned from run 1) -> applied. Unclear: no way to chain query results into command in one shot.

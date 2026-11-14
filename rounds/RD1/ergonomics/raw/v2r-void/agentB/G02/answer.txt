@@ -1,0 +1,1 @@
+Son 30 dakikada (now=1760003900000'dan geriye) 3 değişiklik oldu: arkin ema50 ekledi (seq 2), scout 'Hacim güçlü' bulgusu için öneri yazdı (prop-3, hâlâ beklemede, seq 3), editor 'RSI 30'un altına inerse haber ver' niyetini ekledi (seq 4).

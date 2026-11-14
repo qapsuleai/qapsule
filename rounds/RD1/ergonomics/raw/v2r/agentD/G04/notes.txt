@@ -1,0 +1,2 @@
+attempt1: list findings + present with guessed id fnd-overbought (from spec example) -> not_found; real id fnd-9e1. Spec example ids misleading.
+attempt2: present finding fnd-9e1 surface=watch -> sentence-depth text. OK.

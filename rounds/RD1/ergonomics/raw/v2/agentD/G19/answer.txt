@@ -1,0 +1,1 @@
+Geçersizlik koşulunu 'fiyat (px) 100'ün altındaysa' (lt 100) olarak güncelledim; önceki RSI 70 aşağı kesme koşulunun yerini aldı.

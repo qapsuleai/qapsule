@@ -1,0 +1,2 @@
+attempt1: discovery queries; I guessed series 'rsi14' (from spec examples) which does not exist; real ids: osc-a (RSI), thy-d (price), view chart-1. fact f-0042 gave bar 150.
+attempt2: attend with two steps (osc-a bar 150 panel 1; thy-d output v bar 199 panel 0); delivered. Assumed last bar = 199 from screen viewport. Spec examples use ids not in the doc (main, rsi14, px) which is misleading.

@@ -1,0 +1,3 @@
+{"conn":"a","msg":{"type":"hello","protocol":"qp/0","principal":"arkin","surface":{"kind":"desktop","screen":[1440,900],"input":["mouse"]}}}
+{"conn":"a","msg":{"type":"query","id":"q0","query":{"kind":"list","collection":"views"}}}
+{"conn":"a","msg":{"type":"input","id":"i1","gesture":{"kind":"zoom","view":"main","factor":2.0}}}

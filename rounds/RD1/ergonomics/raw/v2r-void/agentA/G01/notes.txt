@@ -1,0 +1,1 @@
+attempt1: guessed ids px/rsi14/main from spec examples -> not_found (real ids: thy-d, osc-a, chart-1; spec examples misleading). attempt2: ok, rsi7 added on panel 1 via with=osc-a (list queries first would have avoided the failure).

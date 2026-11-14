@@ -1,0 +1,3 @@
+a1: about fnd-overbought -> not_found (real: fnd-9e1).
+a2: queried series/views only (needed real ids: thy-d, osc-a, band-b, chart-1) - spent an attempt on discovery.
+a3: add_narrative with 3 steps -> proposed (narr-5-0, prop-5). Note: spec example ids (px, rsi14, bb20, main) do not match the doc.

@@ -1,0 +1,1 @@
+attempt1: listed findings (blind, to learn id). attempt2: update_finding fnd-overbought invalidation threshold px lt 100 -> applied; capsule still live. Ambiguity: it replaces the old RSI cross_below 70 invalidation (single condition, no OR); spec table of state vs crossing was helpful.

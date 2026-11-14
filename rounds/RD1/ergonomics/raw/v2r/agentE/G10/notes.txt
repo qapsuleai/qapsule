@@ -1,0 +1,1 @@
+attempt1: log query + undo without seq; undid seq 2 (my own last entry, ema50 add; others' entries seq 3,4 by scout/editor were skipped as spec says). Succeeded first try. Slight ambiguity: 'last change I made' resolved by author rule, fine.

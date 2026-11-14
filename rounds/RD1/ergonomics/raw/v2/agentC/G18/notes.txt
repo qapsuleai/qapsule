@@ -1,0 +1,1 @@
+attempt1: subscribe finding topic on fnd-overbought; got subscribed ack and then a finding_state invalidated notify (seq 6) within the run. Unclear: why the event appears in the run without any command from me; spec does not say how/when scenario triggers it.

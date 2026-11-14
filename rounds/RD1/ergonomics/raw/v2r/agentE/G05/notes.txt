@@ -1,0 +1,2 @@
+attempt1: added only add_intent (sma20/sma50 assumed to exist) -> not_found; series list showed only thy-d, osc-a, trend-m, band-b, ema50. Spec example in 5.2 assumed px/sma20 exist; document uses different ids.
+attempt2: add_study sma20, sma50 on thy-d (no show) + add_intent compare cross_above in one command -> see output. Unclear: whether user wanted studies drawn on a view (did not ask; skipped).

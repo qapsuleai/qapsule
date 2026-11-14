@@ -1,0 +1,3 @@
+{"conn":"a","msg":{"type":"hello","protocol":"qp/0","principal":"scout","surface":{"kind":"headless"}}}
+{"conn":"a","msg":{"type":"query","id":"q1","query":{"kind":"list","collection":"facts"}}}
+{"conn":"a","msg":{"type":"command","id":"c1","reason":"RSI 70'i yukarı kesti","ops":[{"op":"add_fact","id":"fact-rsi-cross70-up","kind":"cross_above","series":"rsi14","bar":150,"text":"RSI 70'i yukarı kesti.","evidence":{"level":70.0}},{"op":"add_finding","claim":"Momentum güçlü.","facts":["fact-rsi-cross70-up"],"confidence":0.6,"invalidation":{"kind":"threshold","series":"rsi14","op":"cross_below","value":70.0},"capsule":"momentum güçlü"}]}}

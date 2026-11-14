@@ -1,0 +1,3 @@
+attempt1: discovery queries (series, rsi14 values, at px 199, attention); learned RSI crossed 70 at bar 150 only via values.
+attempt2: list facts - found fact-rsi-cross70 bar 150 (wasted attempt on discovery; could have been in attempt1).
+attempt3: attend with two steps (rsi14 bar150, px output v bar199); delivered and visible in attention query. Unclear: spec does not say which RSI cross (many crosses exist; fact says bar 150), nor whether 'output' needed.

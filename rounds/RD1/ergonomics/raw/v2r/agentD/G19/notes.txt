@@ -1,0 +1,2 @@
+attempt1: list findings+series to learn ids (fnd-9e1, price series thy-d).
+attempt2: update_finding invalidation threshold thy-d lt 100 (state condition, not cross_below, per spec table) -> applied, verified. Ambiguity: price series id is thy-d (not px).

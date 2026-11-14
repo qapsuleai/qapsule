@@ -1,0 +1,2 @@
+a1: guessed id fnd-overbought from spec example -> not_found; real id fnd-9e1 (found via list query).
+a2: reject_finding fnd-9e1 with note -> applied. Spec examples use ids (fnd-overbought) that do not exist in the live doc; had to discover via list.

@@ -1,0 +1,1 @@
+attempt1: at query series px bar 150 (guessed series id px from spec example); got OHLCV + all studies. Succeeded. Spec: 'bar 150' as 0-based index is stated clearly; user might mean 150th = index 149, ambiguity not covered.

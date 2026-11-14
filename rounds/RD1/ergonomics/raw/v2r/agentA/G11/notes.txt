@@ -1,0 +1,1 @@
+a1: screen + attention queries for arkin; worked first time. Screen shows viewport chart-1 120-199; no tap focus. Unclear whether "now" means most recent; attention at=1760003300000 (600s before now).

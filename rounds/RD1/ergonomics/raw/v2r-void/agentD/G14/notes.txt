@@ -1,0 +1,3 @@
+attempt1: set_params on series "macd" -> not_found (spec examples use ids like macd; real id is trend-m).
+attempt2: set_params on trend-m -> invalid "unknown parameter fast for trend-m": the series' study name is "trend-m", not "macd" (a misleading name), so params are unknown.
+attempt3: put_series replacing trend-m with study "macd", params 8/21/5 -> applied. Side effect: study kind changed from trend-m to macd; spec does not say whether that is acceptable, and set_params docs don't mention unknown study names.

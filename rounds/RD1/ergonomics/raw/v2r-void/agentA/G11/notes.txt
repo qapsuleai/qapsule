@@ -1,0 +1,1 @@
+attempt1: attention + screen queries as scout; worked first try. Note no tap/input yet so viewport is the initial range, no focus.

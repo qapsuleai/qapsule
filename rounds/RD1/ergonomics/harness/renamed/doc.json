@@ -1650,7 +1650,7 @@
    "interval": "1d",
    "source": {
     "kind": "study",
-    "study": "trend-m",
+    "study": "macd",
     "inputs": [
      "thy-d"
     ],

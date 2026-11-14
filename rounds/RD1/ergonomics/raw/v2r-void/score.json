@@ -1,0 +1,579 @@
+[
+ {
+  "task": "G01",
+  "agent": "agentA",
+  "attempts": 2,
+  "first": false,
+  "eventually": true,
+  "detail": [
+   {
+    "file": "attempt1.jsonl",
+    "pass": false,
+    "why": [
+     "exactly one RSI(7) on px",
+     "nothing else added",
+     "one layer added"
+    ],
+    "msgs": 3,
+    "bytes": 368,
+    "tokens_est": 92,
+    "errors": 1
+   },
+   {
+    "file": "attempt2.jsonl",
+    "pass": true,
+    "why": [],
+    "msgs": 3,
+    "bytes": 367,
+    "tokens_est": 92,
+    "errors": 0
+   }
+  ]
+ },
+ {
+  "task": "G06",
+  "agent": "agentA",
+  "attempts": 2,
+  "first": false,
+  "eventually": false,
+  "detail": [
+   {
+    "file": "attempt1.jsonl",
+    "pass": false,
+    "why": [
+     "a study query was made",
+     "answer contains 78.115..."
+    ],
+    "msgs": 2,
+    "bytes": 225,
+    "tokens_est": 56,
+    "errors": 1
+   },
+   {
+    "file": "attempt2.jsonl",
+    "pass": false,
+    "why": [
+     "answer contains 78.115..."
+    ],
+    "msgs": 2,
+    "bytes": 225,
+    "tokens_est": 56,
+    "errors": 0
+   }
+  ]
+ },
+ {
+  "task": "G11",
+  "agent": "agentA",
+  "attempts": 1,
+  "first": true,
+  "eventually": true,
+  "detail": [
+   {
+    "file": "attempt1.jsonl",
+    "pass": true,
+    "why": [],
+    "msgs": 3,
+    "bytes": 288,
+    "tokens_est": 72,
+    "errors": 0
+   }
+  ]
+ },
+ {
+  "task": "G16",
+  "agent": "agentA",
+  "attempts": 2,
+  "first": false,
+  "eventually": true,
+  "detail": [
+   {
+    "file": "attempt1.jsonl",
+    "pass": false,
+    "why": [
+     "bb20 removed",
+     "its layer removed",
+     "nothing else removed"
+    ],
+    "msgs": 4,
+    "bytes": 366,
+    "tokens_est": 92,
+    "errors": 1
+   },
+   {
+    "file": "attempt2.jsonl",
+    "pass": true,
+    "why": [],
+    "msgs": 3,
+    "bytes": 270,
+    "tokens_est": 68,
+    "errors": 0
+   }
+  ]
+ },
+ {
+  "task": "G02",
+  "agent": "agentB",
+  "attempts": 1,
+  "first": true,
+  "eventually": true,
+  "detail": [
+   {
+    "file": "attempt1.jsonl",
+    "pass": true,
+    "why": [],
+    "msgs": 2,
+    "bytes": 191,
+    "tokens_est": 48,
+    "errors": 0
+   }
+  ]
+ },
+ {
+  "task": "G07",
+  "agent": "agentB",
+  "attempts": 2,
+  "first": false,
+  "eventually": true,
+  "detail": [
+   {
+    "file": "attempt1.jsonl",
+    "pass": false,
+    "why": [
+     "main shows bars 140..199 (persistent domain or arkin's viewport)"
+    ],
+    "msgs": 3,
+    "bytes": 328,
+    "tokens_est": 82,
+    "errors": 3
+   },
+   {
+    "file": "attempt2.jsonl",
+    "pass": true,
+    "why": [],
+    "msgs": 3,
+    "bytes": 349,
+    "tokens_est": 87,
+    "errors": 0
+   }
+  ]
+ },
+ {
+  "task": "G12",
+  "agent": "agentB",
+  "attempts": 3,
+  "first": false,
+  "eventually": false,
+  "detail": [
+   {
+    "file": "attempt1.jsonl",
+    "pass": false,
+    "why": [
+     "delivered two-step directive: RSI@150 then last bar"
+    ],
+    "msgs": 4,
+    "bytes": 392,
+    "tokens_est": 98,
+    "errors": 1
+   },
+   {
+    "file": "attempt2.jsonl",
+    "pass": false,
+    "why": [
+     "delivered two-step directive: RSI@150 then last bar"
+    ],
+    "msgs": 3,
+    "bytes": 336,
+    "tokens_est": 84,
+    "errors": 0
+   },
+   {
+    "file": "attempt3.jsonl",
+    "pass": false,
+    "why": [
+     "delivered two-step directive: RSI@150 then last bar"
+    ],
+    "msgs": 2,
+    "bytes": 449,
+    "tokens_est": 112,
+    "errors": 0
+   }
+  ]
+ },
+ {
+  "task": "G17",
+  "agent": "agentB",
+  "attempts": 1,
+  "first": true,
+  "eventually": true,
+  "detail": [
+   {
+    "file": "attempt1.jsonl",
+    "pass": true,
+    "why": [],
+    "msgs": 3,
+    "bytes": 288,
+    "tokens_est": 72,
+    "errors": 0
+   }
+  ]
+ },
+ {
+  "task": "G03",
+  "agent": "agentC",
+  "attempts": 2,
+  "first": false,
+  "eventually": true,
+  "detail": [
+   {
+    "file": "attempt1.jsonl",
+    "pass": false,
+    "why": [
+     "capsule rejected",
+     "ledger entry with the reason",
+     "written by arkin"
+    ],
+    "msgs": 3,
+    "bytes": 355,
+    "tokens_est": 89,
+    "errors": 1
+   },
+   {
+    "file": "attempt2.jsonl",
+    "pass": true,
+    "why": [],
+    "msgs": 2,
+    "bytes": 255,
+    "tokens_est": 64,
+    "errors": 0
+   }
+  ]
+ },
+ {
+  "task": "G08",
+  "agent": "agentC",
+  "attempts": 2,
+  "first": false,
+  "eventually": true,
+  "detail": [
+   {
+    "file": "attempt1.jsonl",
+    "pass": false,
+    "why": [
+     "a new pending proposal with the finding (besides the setup one)"
+    ],
+    "msgs": 3,
+    "bytes": 648,
+    "tokens_est": 162,
+    "errors": 1
+   },
+   {
+    "file": "attempt2.jsonl",
+    "pass": true,
+    "why": [],
+    "msgs": 2,
+    "bytes": 393,
+    "tokens_est": 98,
+    "errors": 0
+   }
+  ]
+ },
+ {
+  "task": "G13",
+  "agent": "agentC",
+  "attempts": 3,
+  "first": false,
+  "eventually": true,
+  "detail": [
+   {
+    "file": "attempt1.jsonl",
+    "pass": false,
+    "why": [
+     "three-step narrative px -> rsi14 -> bb20 about the finding"
+    ],
+    "msgs": 3,
+    "bytes": 716,
+    "tokens_est": 179,
+    "errors": 1
+   },
+   {
+    "file": "attempt2.jsonl",
+    "pass": false,
+    "why": [
+     "three-step narrative px -> rsi14 -> bb20 about the finding"
+    ],
+    "msgs": 3,
+    "bytes": 284,
+    "tokens_est": 71,
+    "errors": 0
+   },
+   {
+    "file": "attempt3.jsonl",
+    "pass": true,
+    "why": [],
+    "msgs": 2,
+    "bytes": 678,
+    "tokens_est": 170,
+    "errors": 0
+   }
+  ]
+ },
+ {
+  "task": "G18",
+  "agent": "agentC",
+  "attempts": 2,
+  "first": false,
+  "eventually": true,
+  "detail": [
+   {
+    "file": "attempt1.jsonl",
+    "pass": false,
+    "why": [
+     "subscribed to the finding",
+     "notified on invalidation"
+    ],
+    "msgs": 3,
+    "bytes": 299,
+    "tokens_est": 75,
+    "errors": 1
+   },
+   {
+    "file": "attempt2.jsonl",
+    "pass": true,
+    "why": [],
+    "msgs": 2,
+    "bytes": 199,
+    "tokens_est": 50,
+    "errors": 0
+   }
+  ]
+ },
+ {
+  "task": "G04",
+  "agent": "agentD",
+  "attempts": 1,
+  "first": true,
+  "eventually": true,
+  "detail": [
+   {
+    "file": "attempt1.jsonl",
+    "pass": true,
+    "why": [],
+    "msgs": 4,
+    "bytes": 426,
+    "tokens_est": 106,
+    "errors": 1
+   }
+  ]
+ },
+ {
+  "task": "G09",
+  "agent": "agentD",
+  "attempts": 2,
+  "first": false,
+  "eventually": false,
+  "detail": [
+   {
+    "file": "attempt1.jsonl",
+    "pass": false,
+    "why": [
+     "first pending proposal accepted",
+     "finding by scout approved by arkin"
+    ],
+    "msgs": 2,
+    "bytes": 214,
+    "tokens_est": 54,
+    "errors": 0
+   },
+   {
+    "file": "attempt2.jsonl",
+    "pass": false,
+    "why": [
+     "pending proposals were listed"
+    ],
+    "msgs": 2,
+    "bytes": 202,
+    "tokens_est": 50,
+    "errors": 0
+   }
+  ]
+ },
+ {
+  "task": "G14",
+  "agent": "agentD",
+  "attempts": 3,
+  "first": false,
+  "eventually": true,
+  "detail": [
+   {
+    "file": "attempt1.jsonl",
+    "pass": false,
+    "why": [
+     "macd 8/21/5",
+     "editor wrote directly"
+    ],
+    "msgs": 3,
+    "bytes": 327,
+    "tokens_est": 82,
+    "errors": 1
+   },
+   {
+    "file": "attempt2.jsonl",
+    "pass": false,
+    "why": [
+     "macd 8/21/5",
+     "editor wrote directly"
+    ],
+    "msgs": 3,
+    "bytes": 322,
+    "tokens_est": 80,
+    "errors": 1
+   },
+   {
+    "file": "attempt3.jsonl",
+    "pass": true,
+    "why": [],
+    "msgs": 3,
+    "bytes": 473,
+    "tokens_est": 118,
+    "errors": 0
+   }
+  ]
+ },
+ {
+  "task": "G19",
+  "agent": "agentD",
+  "attempts": 2,
+  "first": false,
+  "eventually": true,
+  "detail": [
+   {
+    "file": "attempt1.jsonl",
+    "pass": false,
+    "why": [
+     "invalidation: px close < 100"
+    ],
+    "msgs": 3,
+    "bytes": 373,
+    "tokens_est": 93,
+    "errors": 1
+   },
+   {
+    "file": "attempt2.jsonl",
+    "pass": true,
+    "why": [],
+    "msgs": 2,
+    "bytes": 276,
+    "tokens_est": 69,
+    "errors": 0
+   }
+  ]
+ },
+ {
+  "task": "G05",
+  "agent": "agentE",
+  "attempts": 3,
+  "first": false,
+  "eventually": true,
+  "detail": [
+   {
+    "file": "attempt1.jsonl",
+    "pass": false,
+    "why": [
+     "SMA20 and SMA50 exist",
+     "active intent: SMA20 cross_above SMA50"
+    ],
+    "msgs": 3,
+    "bytes": 633,
+    "tokens_est": 158,
+    "errors": 1
+   },
+   {
+    "file": "attempt2.jsonl",
+    "pass": false,
+    "why": [
+     "SMA20 and SMA50 exist",
+     "active intent: SMA20 cross_above SMA50"
+    ],
+    "msgs": 4,
+    "bytes": 714,
+    "tokens_est": 178,
+    "errors": 1
+   },
+   {
+    "file": "attempt3.jsonl",
+    "pass": true,
+    "why": [],
+    "msgs": 3,
+    "bytes": 630,
+    "tokens_est": 158,
+    "errors": 0
+   }
+  ]
+ },
+ {
+  "task": "G10",
+  "agent": "agentE",
+  "attempts": 1,
+  "first": true,
+  "eventually": true,
+  "detail": [
+   {
+    "file": "attempt1.jsonl",
+    "pass": true,
+    "why": [],
+    "msgs": 2,
+    "bytes": 171,
+    "tokens_est": 43,
+    "errors": 0
+   }
+  ]
+ },
+ {
+  "task": "G15",
+  "agent": "agentE",
+  "attempts": 2,
+  "first": false,
+  "eventually": true,
+  "detail": [
+   {
+    "file": "attempt1.jsonl",
+    "pass": false,
+    "why": [
+     "an `at` query for bar 150"
+    ],
+    "msgs": 3,
+    "bytes": 285,
+    "tokens_est": 71,
+    "errors": 1
+   },
+   {
+    "file": "attempt2.jsonl",
+    "pass": true,
+    "why": [],
+    "msgs": 2,
+    "bytes": 197,
+    "tokens_est": 49,
+    "errors": 0
+   }
+  ]
+ },
+ {
+  "task": "G20",
+  "agent": "agentE",
+  "attempts": 1,
+  "first": true,
+  "eventually": true,
+  "detail": [
+   {
+    "file": "attempt1.jsonl",
+    "pass": true,
+    "why": [],
+    "msgs": 2,
+    "bytes": 172,
+    "tokens_est": 43,
+    "errors": 0
+   }
+  ]
+ }
+]

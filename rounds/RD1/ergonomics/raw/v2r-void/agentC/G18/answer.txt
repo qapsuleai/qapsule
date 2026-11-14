@@ -1,0 +1,1 @@
+Aşırı alım bulgusu için abonelik açtım; geçersiz hale geldiğinde bildirim gelecek (bu çalıştırmada zaten 'invalidated' bildirimi geldi).

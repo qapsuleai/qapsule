@@ -1,0 +1,4419 @@
+{
+  "$defs": {
+    "AckStatus": {
+      "description": "Status carried by an `ack`.",
+      "oneOf": [
+        {
+          "const": "applied",
+          "description": "The command changed the document.",
+          "type": "string"
+        },
+        {
+          "const": "proposed",
+          "description": "The command became a pending proposal.",
+          "type": "string"
+        },
+        {
+          "const": "subscribed",
+          "description": "The subscription is active.",
+          "type": "string"
+        },
+        {
+          "const": "unsubscribed",
+          "description": "The subscription is cancelled.",
+          "type": "string"
+        },
+        {
+          "const": "delivered",
+          "description": "The attention directive was delivered.",
+          "type": "string"
+        }
+      ]
+    },
+    "AtBar": {
+      "additionalProperties": false,
+      "description": "Everything at one bar.",
+      "properties": {
+        "bar": {
+          "description": "Bar index.",
+          "format": "uint64",
+          "minimum": 0,
+          "type": "integer"
+        },
+        "ohlcv": {
+          "$ref": "#/$defs/Bar",
+          "description": "The bar."
+        },
+        "series": {
+          "description": "Bar series id.",
+          "type": "string"
+        },
+        "studies": {
+          "additionalProperties": {
+            "additionalProperties": {
+              "format": "double",
+              "type": [
+                "number",
+                "null"
+              ]
+            },
+            "type": "object"
+          },
+          "description": "Study series id -> output name -> value at this bar.",
+          "type": "object"
+        }
+      },
+      "required": [
+        "series",
+        "bar",
+        "ohlcv",
+        "studies"
+      ],
+      "type": "object"
+    },
+    "AttentionDirective": {
+      "additionalProperties": false,
+      "description": "Where someone wants a person to look, in order.",
+      "properties": {
+        "at": {
+          "description": "Time sent (filled in by the authority).",
+          "format": "int64",
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "from": {
+          "description": "Who sent it (filled in by the authority; ignored if sent).",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "id": {
+          "description": "Id; assigned if absent.",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "steps": {
+          "description": "Steps, in the order to show them.",
+          "items": {
+            "$ref": "#/$defs/AttentionStep"
+          },
+          "type": "array"
+        },
+        "to": {
+          "description": "Principal who should look.",
+          "type": "string"
+        }
+      },
+      "required": [
+        "to",
+        "steps"
+      ],
+      "type": "object"
+    },
+    "AttentionState": {
+      "additionalProperties": false,
+      "description": "Where a principal looks, and what they are asked to look at.",
+      "properties": {
+        "at": {
+          "description": "Time of the last report.",
+          "format": "int64",
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "directives": {
+          "default": [],
+          "description": "Directives addressed to this principal, latest last.",
+          "items": {
+            "$ref": "#/$defs/AttentionDirective"
+          },
+          "type": "array"
+        },
+        "focus": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Target"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Last focused point (tap or hover), if any."
+        },
+        "principal": {
+          "description": "Principal id.",
+          "type": "string"
+        },
+        "viewport": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Viewport"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Last reported viewport, if any."
+        }
+      },
+      "required": [
+        "principal"
+      ],
+      "type": "object"
+    },
+    "AttentionStep": {
+      "additionalProperties": false,
+      "description": "One step of an attention directive.",
+      "properties": {
+        "say": {
+          "description": "Optional short caption.",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "target": {
+          "$ref": "#/$defs/Target",
+          "description": "What to look at."
+        }
+      },
+      "required": [
+        "target"
+      ],
+      "type": "object"
+    },
+    "Author": {
+      "description": "Who produced an item.",
+      "oneOf": [
+        {
+          "additionalProperties": false,
+          "description": "A person.",
+          "properties": {
+            "kind": {
+              "const": "human",
+              "type": "string"
+            },
+            "name": {
+              "description": "Display name or user id.",
+              "type": "string"
+            }
+          },
+          "required": [
+            "kind",
+            "name"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "description": "An AI agent.",
+          "properties": {
+            "kind": {
+              "const": "agent",
+              "type": "string"
+            },
+            "model": {
+              "description": "Model identifier, if known.",
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "name": {
+              "description": "Agent name.",
+              "type": "string"
+            }
+          },
+          "required": [
+            "kind",
+            "name"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "description": "The deterministic engine.",
+          "properties": {
+            "kind": {
+              "const": "engine",
+              "type": "string"
+            },
+            "name": {
+              "description": "Engine component name.",
+              "type": "string"
+            },
+            "version": {
+              "description": "Engine version.",
+              "type": "string"
+            }
+          },
+          "required": [
+            "kind",
+            "name",
+            "version"
+          ],
+          "type": "object"
+        }
+      ]
+    },
+    "Bar": {
+      "additionalProperties": false,
+      "description": "One OHLCV bar.",
+      "properties": {
+        "c": {
+          "description": "Close price.",
+          "format": "double",
+          "type": "number"
+        },
+        "h": {
+          "description": "High price.",
+          "format": "double",
+          "type": "number"
+        },
+        "l": {
+          "description": "Low price.",
+          "format": "double",
+          "type": "number"
+        },
+        "o": {
+          "description": "Open price.",
+          "format": "double",
+          "type": "number"
+        },
+        "t": {
+          "description": "Bar open time, epoch milliseconds UTC.",
+          "format": "int64",
+          "type": "integer"
+        },
+        "v": {
+          "description": "Volume.",
+          "format": "double",
+          "type": "number"
+        }
+      },
+      "required": [
+        "t",
+        "o",
+        "h",
+        "l",
+        "c",
+        "v"
+      ],
+      "type": "object"
+    },
+    "Capsule": {
+      "additionalProperties": false,
+      "description": "The live, openable, portable presentation of a single finding.",
+      "properties": {
+        "depth": {
+          "$ref": "#/$defs/Depth",
+          "description": "Depth the capsule is shown at by default."
+        },
+        "expires_at": {
+          "description": "Expiry time, epoch milliseconds UTC.",
+          "format": "int64",
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "finding": {
+          "description": "Id of the finding it presents.",
+          "type": "string"
+        },
+        "glyphs": {
+          "default": [],
+          "description": "Glyphs shown at a glance.",
+          "items": {
+            "$ref": "#/$defs/Glyph"
+          },
+          "type": "array"
+        },
+        "headline": {
+          "description": "Depth-0 sentence.",
+          "type": "string"
+        },
+        "id": {
+          "description": "Unique id within the document.",
+          "type": "string"
+        },
+        "provenance": {
+          "$ref": "#/$defs/Provenance",
+          "description": "Who made it and when."
+        },
+        "revision": {
+          "default": 0,
+          "description": "Number of live updates so far.",
+          "format": "uint32",
+          "minimum": 0,
+          "type": "integer"
+        },
+        "state": {
+          "$ref": "#/$defs/CapsuleState",
+          "description": "Lifecycle state."
+        },
+        "view": {
+          "description": "Id of the view used when the capsule is opened.",
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "id",
+        "finding",
+        "state",
+        "headline",
+        "depth",
+        "provenance"
+      ],
+      "type": "object"
+    },
+    "CapsuleState": {
+      "description": "Lifecycle state of a capsule:\n`draft -> live -> (updated)* -> invalidated | expired | approved | rejected`.",
+      "oneOf": [
+        {
+          "const": "draft",
+          "description": "Not yet shown as live.",
+          "type": "string"
+        },
+        {
+          "const": "live",
+          "description": "Updates itself as its series change.",
+          "type": "string"
+        },
+        {
+          "const": "invalidated",
+          "description": "The invalidation condition happened.",
+          "type": "string"
+        },
+        {
+          "const": "expired",
+          "description": "Validity window elapsed.",
+          "type": "string"
+        },
+        {
+          "const": "approved",
+          "description": "A person approved it.",
+          "type": "string"
+        },
+        {
+          "const": "rejected",
+          "description": "A person rejected it.",
+          "type": "string"
+        }
+      ]
+    },
+    "ChangeOp": {
+      "description": "A primitive, replayable change to the document. Changes carry complete items\n(with provenance stamped by the authority), so replaying them needs no presenter,\nno study code and no clock: the same changes always give the same document bytes.",
+      "oneOf": [
+        {
+          "additionalProperties": false,
+          "description": "Insert or replace a series.",
+          "properties": {
+            "index": {
+              "description": "Position in its collection when inserting a new item (default: the end).\nUsed by inverses so that undoing a delete restores the item in place;\nignored when replacing an existing item.",
+              "format": "uint32",
+              "minimum": 0,
+              "type": [
+                "integer",
+                "null"
+              ]
+            },
+            "op": {
+              "const": "put_series",
+              "type": "string"
+            },
+            "series": {
+              "$ref": "#/$defs/Series",
+              "description": "The series."
+            }
+          },
+          "required": [
+            "op",
+            "series"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "description": "Insert or replace a view.",
+          "properties": {
+            "index": {
+              "description": "Position in its collection when inserting a new item (default: the end).\nUsed by inverses so that undoing a delete restores the item in place;\nignored when replacing an existing item.",
+              "format": "uint32",
+              "minimum": 0,
+              "type": [
+                "integer",
+                "null"
+              ]
+            },
+            "op": {
+              "const": "put_view",
+              "type": "string"
+            },
+            "view": {
+              "$ref": "#/$defs/View",
+              "description": "The view."
+            }
+          },
+          "required": [
+            "op",
+            "view"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "description": "Insert a layer into a view at `index`.",
+          "properties": {
+            "index": {
+              "description": "Position.",
+              "format": "uint32",
+              "minimum": 0,
+              "type": "integer"
+            },
+            "layer": {
+              "$ref": "#/$defs/Layer",
+              "description": "The layer."
+            },
+            "op": {
+              "const": "insert_layer",
+              "type": "string"
+            },
+            "view": {
+              "description": "View id.",
+              "type": "string"
+            }
+          },
+          "required": [
+            "op",
+            "view",
+            "index",
+            "layer"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "description": "Delete the layer at `index`.",
+          "properties": {
+            "index": {
+              "description": "Position.",
+              "format": "uint32",
+              "minimum": 0,
+              "type": "integer"
+            },
+            "op": {
+              "const": "delete_layer",
+              "type": "string"
+            },
+            "view": {
+              "description": "View id.",
+              "type": "string"
+            }
+          },
+          "required": [
+            "op",
+            "view",
+            "index"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "description": "Set (or clear) a view's horizontal domain, epoch ms `[from, to]`.",
+          "properties": {
+            "domain": {
+              "description": "New domain; `null` = automatic.",
+              "items": {
+                "format": "double",
+                "type": "number"
+              },
+              "maxItems": 2,
+              "minItems": 2,
+              "type": [
+                "array",
+                "null"
+              ]
+            },
+            "op": {
+              "const": "set_x_domain",
+              "type": "string"
+            },
+            "view": {
+              "description": "View id.",
+              "type": "string"
+            }
+          },
+          "required": [
+            "op",
+            "view"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "description": "Insert or replace a fact.",
+          "properties": {
+            "fact": {
+              "$ref": "#/$defs/Fact",
+              "description": "The fact."
+            },
+            "index": {
+              "description": "Position in its collection when inserting a new item (default: the end).\nUsed by inverses so that undoing a delete restores the item in place;\nignored when replacing an existing item.",
+              "format": "uint32",
+              "minimum": 0,
+              "type": [
+                "integer",
+                "null"
+              ]
+            },
+            "op": {
+              "const": "put_fact",
+              "type": "string"
+            }
+          },
+          "required": [
+            "op",
+            "fact"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "description": "Insert or replace a finding.",
+          "properties": {
+            "finding": {
+              "$ref": "#/$defs/Finding",
+              "description": "The finding."
+            },
+            "index": {
+              "description": "Position in its collection when inserting a new item (default: the end).\nUsed by inverses so that undoing a delete restores the item in place;\nignored when replacing an existing item.",
+              "format": "uint32",
+              "minimum": 0,
+              "type": [
+                "integer",
+                "null"
+              ]
+            },
+            "op": {
+              "const": "put_finding",
+              "type": "string"
+            }
+          },
+          "required": [
+            "op",
+            "finding"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "description": "Insert or replace a capsule.",
+          "properties": {
+            "capsule": {
+              "$ref": "#/$defs/Capsule",
+              "description": "The capsule."
+            },
+            "index": {
+              "description": "Position in its collection when inserting a new item (default: the end).\nUsed by inverses so that undoing a delete restores the item in place;\nignored when replacing an existing item.",
+              "format": "uint32",
+              "minimum": 0,
+              "type": [
+                "integer",
+                "null"
+              ]
+            },
+            "op": {
+              "const": "put_capsule",
+              "type": "string"
+            }
+          },
+          "required": [
+            "op",
+            "capsule"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "description": "Set a capsule's state.",
+          "properties": {
+            "capsule": {
+              "description": "Capsule id.",
+              "type": "string"
+            },
+            "op": {
+              "const": "set_capsule_state",
+              "type": "string"
+            },
+            "state": {
+              "$ref": "#/$defs/CapsuleState",
+              "description": "New state."
+            }
+          },
+          "required": [
+            "op",
+            "capsule",
+            "state"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "description": "Insert or replace an intent.",
+          "properties": {
+            "index": {
+              "description": "Position in its collection when inserting a new item (default: the end).\nUsed by inverses so that undoing a delete restores the item in place;\nignored when replacing an existing item.",
+              "format": "uint32",
+              "minimum": 0,
+              "type": [
+                "integer",
+                "null"
+              ]
+            },
+            "intent": {
+              "$ref": "#/$defs/Intent",
+              "description": "The intent."
+            },
+            "op": {
+              "const": "put_intent",
+              "type": "string"
+            }
+          },
+          "required": [
+            "op",
+            "intent"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "description": "Append a ledger entry.",
+          "properties": {
+            "entry": {
+              "$ref": "#/$defs/LedgerEntry",
+              "description": "The entry."
+            },
+            "op": {
+              "const": "push_ledger",
+              "type": "string"
+            }
+          },
+          "required": [
+            "op",
+            "entry"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "description": "Remove the last ledger entry (inverse of `push_ledger`).",
+          "properties": {
+            "op": {
+              "const": "pop_ledger",
+              "type": "string"
+            }
+          },
+          "required": [
+            "op"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "description": "Insert or replace a narrative.",
+          "properties": {
+            "index": {
+              "description": "Position in its collection when inserting a new item (default: the end).\nUsed by inverses so that undoing a delete restores the item in place;\nignored when replacing an existing item.",
+              "format": "uint32",
+              "minimum": 0,
+              "type": [
+                "integer",
+                "null"
+              ]
+            },
+            "narrative": {
+              "$ref": "#/$defs/Narrative",
+              "description": "The narrative."
+            },
+            "op": {
+              "const": "put_narrative",
+              "type": "string"
+            }
+          },
+          "required": [
+            "op",
+            "narrative"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "description": "Insert or replace a proposal.",
+          "properties": {
+            "index": {
+              "description": "Position in its collection when inserting a new item (default: the end).\nUsed by inverses so that undoing a delete restores the item in place;\nignored when replacing an existing item.",
+              "format": "uint32",
+              "minimum": 0,
+              "type": [
+                "integer",
+                "null"
+              ]
+            },
+            "op": {
+              "const": "put_proposal",
+              "type": "string"
+            },
+            "proposal": {
+              "$ref": "#/$defs/Proposal",
+              "description": "The proposal."
+            }
+          },
+          "required": [
+            "op",
+            "proposal"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "description": "Delete an item (any collection) by id.",
+          "properties": {
+            "id": {
+              "description": "Item id.",
+              "type": "string"
+            },
+            "op": {
+              "const": "delete",
+              "type": "string"
+            }
+          },
+          "required": [
+            "op",
+            "id"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "description": "Append bars to a bar series.",
+          "properties": {
+            "bars": {
+              "description": "Bars.",
+              "items": {
+                "$ref": "#/$defs/Bar"
+              },
+              "type": "array"
+            },
+            "op": {
+              "const": "append_bars",
+              "type": "string"
+            },
+            "series": {
+              "description": "Series id.",
+              "type": "string"
+            }
+          },
+          "required": [
+            "op",
+            "series",
+            "bars"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "description": "Remove the last `count` bars (inverse of `append_bars`).",
+          "properties": {
+            "count": {
+              "description": "Number of bars removed from the end.",
+              "format": "uint32",
+              "minimum": 0,
+              "type": "integer"
+            },
+            "op": {
+              "const": "truncate_bars",
+              "type": "string"
+            },
+            "series": {
+              "description": "Series id.",
+              "type": "string"
+            }
+          },
+          "required": [
+            "op",
+            "series",
+            "count"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "description": "Replace the last bar.",
+          "properties": {
+            "bar": {
+              "$ref": "#/$defs/Bar",
+              "description": "The bar."
+            },
+            "op": {
+              "const": "set_last_bar",
+              "type": "string"
+            },
+            "series": {
+              "description": "Series id.",
+              "type": "string"
+            }
+          },
+          "required": [
+            "op",
+            "series",
+            "bar"
+          ],
+          "type": "object"
+        }
+      ]
+    },
+    "Collection": {
+      "description": "Item collections of a document.",
+      "oneOf": [
+        {
+          "const": "series",
+          "description": "Series.",
+          "type": "string"
+        },
+        {
+          "const": "views",
+          "description": "Views.",
+          "type": "string"
+        },
+        {
+          "const": "facts",
+          "description": "Facts.",
+          "type": "string"
+        },
+        {
+          "const": "findings",
+          "description": "Findings.",
+          "type": "string"
+        },
+        {
+          "const": "capsules",
+          "description": "Capsules.",
+          "type": "string"
+        },
+        {
+          "const": "intents",
+          "description": "Intents.",
+          "type": "string"
+        },
+        {
+          "const": "narratives",
+          "description": "Narratives.",
+          "type": "string"
+        },
+        {
+          "const": "proposals",
+          "description": "Proposals.",
+          "type": "string"
+        }
+      ]
+    },
+    "CompareOp": {
+      "description": "Comparison operator used in conditions.",
+      "oneOf": [
+        {
+          "const": "lt",
+          "description": "Strictly less than.",
+          "type": "string"
+        },
+        {
+          "const": "le",
+          "description": "Less than or equal.",
+          "type": "string"
+        },
+        {
+          "const": "gt",
+          "description": "Strictly greater than.",
+          "type": "string"
+        },
+        {
+          "const": "ge",
+          "description": "Greater than or equal.",
+          "type": "string"
+        },
+        {
+          "const": "cross_above",
+          "description": "Crosses the value upwards.",
+          "type": "string"
+        },
+        {
+          "const": "cross_below",
+          "description": "Crosses the value downwards.",
+          "type": "string"
+        }
+      ]
+    },
+    "Condition": {
+      "description": "A condition evaluated over series (invalidation, intent trigger).",
+      "oneOf": [
+        {
+          "additionalProperties": false,
+          "description": "Last value of a series compared against a constant.",
+          "properties": {
+            "kind": {
+              "const": "threshold",
+              "type": "string"
+            },
+            "op": {
+              "$ref": "#/$defs/CompareOp",
+              "description": "Comparison."
+            },
+            "series": {
+              "description": "Series id.",
+              "type": "string"
+            },
+            "value": {
+              "description": "Constant to compare against.",
+              "format": "double",
+              "type": "number"
+            }
+          },
+          "required": [
+            "kind",
+            "series",
+            "op",
+            "value"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "description": "One series compared against another, both at the last bar (and the bar before,\nfor crossings). E.g. SMA(20) crosses above SMA(50):\n`{\"kind\":\"compare\",\"left\":\"sma20\",\"op\":\"cross_above\",\"right\":\"sma50\"}`.\nFor a bar series the compared value is the close.",
+          "properties": {
+            "kind": {
+              "const": "compare",
+              "type": "string"
+            },
+            "left": {
+              "description": "Left series id.",
+              "type": "string"
+            },
+            "op": {
+              "$ref": "#/$defs/CompareOp",
+              "description": "Comparison."
+            },
+            "right": {
+              "description": "Right series id.",
+              "type": "string"
+            }
+          },
+          "required": [
+            "kind",
+            "left",
+            "op",
+            "right"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "description": "Free text; evaluated by a person.",
+          "properties": {
+            "kind": {
+              "const": "text",
+              "type": "string"
+            },
+            "text": {
+              "description": "Condition statement.",
+              "type": "string"
+            }
+          },
+          "required": [
+            "kind",
+            "text"
+          ],
+          "type": "object"
+        }
+      ]
+    },
+    "Depth": {
+      "description": "Semantic zoom level: 0 sentence, 1 capsule, 2 marked chart, 3 full workspace.",
+      "oneOf": [
+        {
+          "const": "sentence",
+          "description": "Depth 0: one sentence.",
+          "type": "string"
+        },
+        {
+          "const": "capsule",
+          "description": "Depth 1: the capsule.",
+          "type": "string"
+        },
+        {
+          "const": "chart",
+          "description": "Depth 2: chart with marks.",
+          "type": "string"
+        },
+        {
+          "const": "workspace",
+          "description": "Depth 3: full workspace.",
+          "type": "string"
+        }
+      ]
+    },
+    "Description": {
+      "additionalProperties": false,
+      "description": "A protocol self-description (`describe`).",
+      "properties": {
+        "doc": {
+          "description": "Document id.",
+          "type": "string"
+        },
+        "ops": {
+          "description": "Operation names accepted in commands.",
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "permissions": {
+          "$ref": "#/$defs/Permissions",
+          "description": "The asker's permissions."
+        },
+        "principals": {
+          "description": "Known principals and roles.",
+          "items": {
+            "$ref": "#/$defs/Principal"
+          },
+          "type": "array"
+        },
+        "protocol": {
+          "description": "Protocol version.",
+          "type": "string"
+        },
+        "queries": {
+          "description": "Query kinds.",
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "role": {
+          "$ref": "#/$defs/Role",
+          "description": "The asker's role."
+        },
+        "studies": {
+          "additionalProperties": {
+            "additionalProperties": {
+              "format": "double",
+              "type": "number"
+            },
+            "type": "object"
+          },
+          "description": "Study names and their default parameters.",
+          "type": "object"
+        },
+        "topics": {
+          "description": "Topic kinds.",
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        }
+      },
+      "required": [
+        "protocol",
+        "doc",
+        "ops",
+        "queries",
+        "topics",
+        "studies",
+        "principals",
+        "role",
+        "permissions"
+      ],
+      "type": "object"
+    },
+    "Document": {
+      "additionalProperties": false,
+      "description": "Everything: series bindings, views, facts, findings, capsules, intents and the ledger.",
+      "properties": {
+        "capsules": {
+          "default": [],
+          "description": "Capsules.",
+          "items": {
+            "$ref": "#/$defs/Capsule"
+          },
+          "type": "array"
+        },
+        "display_tz": {
+          "description": "Time zone (IANA) in which times are *shown* to the user. Display only: it never\naffects bar alignment or computation (K14); views may override it.",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "facts": {
+          "default": [],
+          "description": "Facts.",
+          "items": {
+            "$ref": "#/$defs/Fact"
+          },
+          "type": "array"
+        },
+        "findings": {
+          "default": [],
+          "description": "Findings.",
+          "items": {
+            "$ref": "#/$defs/Finding"
+          },
+          "type": "array"
+        },
+        "id": {
+          "description": "Document id.",
+          "type": "string"
+        },
+        "intents": {
+          "default": [],
+          "description": "Intents.",
+          "items": {
+            "$ref": "#/$defs/Intent"
+          },
+          "type": "array"
+        },
+        "ledger": {
+          "$ref": "#/$defs/Ledger",
+          "default": {
+            "entries": []
+          },
+          "description": "Ledger."
+        },
+        "narratives": {
+          "description": "Narration timelines (protocol v0).",
+          "items": {
+            "$ref": "#/$defs/Narrative"
+          },
+          "type": "array"
+        },
+        "proposals": {
+          "description": "Proposals: writes waiting for approval, and their outcome (protocol v0).",
+          "items": {
+            "$ref": "#/$defs/Proposal"
+          },
+          "type": "array"
+        },
+        "schema_version": {
+          "description": "Schema version; `\"0\"` for this schema.",
+          "type": "string"
+        },
+        "series": {
+          "default": [],
+          "description": "Series bindings.",
+          "items": {
+            "$ref": "#/$defs/Series"
+          },
+          "type": "array"
+        },
+        "title": {
+          "description": "Optional title.",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "views": {
+          "default": [],
+          "description": "Views.",
+          "items": {
+            "$ref": "#/$defs/View"
+          },
+          "type": "array"
+        }
+      },
+      "required": [
+        "schema_version",
+        "id"
+      ],
+      "type": "object"
+    },
+    "ErrorCode": {
+      "description": "Error codes. Each has a fixed meaning; see `docs/PROTOCOL.md` §13.",
+      "oneOf": [
+        {
+          "const": "parse",
+          "description": "The message is not valid JSON.",
+          "type": "string"
+        },
+        {
+          "const": "schema",
+          "description": "The message does not match the schema (unknown field, wrong type, missing field).",
+          "type": "string"
+        },
+        {
+          "const": "handshake",
+          "description": "`hello` missing, repeated, or unknown principal / protocol version.",
+          "type": "string"
+        },
+        {
+          "const": "forbidden",
+          "description": "The principal may not do this.",
+          "type": "string"
+        },
+        {
+          "const": "not_found",
+          "description": "A referenced id does not exist.",
+          "type": "string"
+        },
+        {
+          "const": "duplicate",
+          "description": "An id to be created already exists.",
+          "type": "string"
+        },
+        {
+          "const": "invalid",
+          "description": "A value is out of range or inconsistent (bad parameter, bad bar, bad range).",
+          "type": "string"
+        },
+        {
+          "const": "in_use",
+          "description": "The item is used by other items and cannot be removed.",
+          "type": "string"
+        },
+        {
+          "const": "conflict",
+          "description": "An item touched by the command changed after `base`.",
+          "type": "string"
+        },
+        {
+          "const": "undo_conflict",
+          "description": "Undo is not possible (nothing to undo, or later entries touched the same items).",
+          "type": "string"
+        },
+        {
+          "const": "not_pending",
+          "description": "The proposal is not pending.",
+          "type": "string"
+        },
+        {
+          "const": "limit",
+          "description": "A size limit was exceeded.",
+          "type": "string"
+        },
+        {
+          "const": "unsupported",
+          "description": "Recognized but not supported here (e.g. a feature not negotiated).",
+          "type": "string"
+        }
+      ]
+    },
+    "Event": {
+      "description": "A pushed event.",
+      "oneOf": [
+        {
+          "additionalProperties": false,
+          "description": "A log entry was applied (the Change message).",
+          "properties": {
+            "approved_by": {
+              "description": "Approver principal (accepted proposals).",
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "at": {
+              "description": "Time.",
+              "format": "int64",
+              "type": "integer"
+            },
+            "author": {
+              "description": "Author principal.",
+              "type": "string"
+            },
+            "cause": {
+              "description": "Causing request id.",
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "changes": {
+              "description": "The changes.",
+              "items": {
+                "$ref": "#/$defs/ChangeOp"
+              },
+              "type": "array"
+            },
+            "kind": {
+              "const": "change",
+              "type": "string"
+            },
+            "seq": {
+              "description": "Log position.",
+              "format": "uint64",
+              "minimum": 0,
+              "type": "integer"
+            }
+          },
+          "required": [
+            "kind",
+            "seq",
+            "at",
+            "author",
+            "changes"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "description": "A finding's capsule changed state.",
+          "properties": {
+            "capsule": {
+              "description": "Capsule id.",
+              "type": "string"
+            },
+            "finding": {
+              "description": "Finding id.",
+              "type": "string"
+            },
+            "kind": {
+              "const": "finding_state",
+              "type": "string"
+            },
+            "seq": {
+              "description": "Log position.",
+              "format": "uint64",
+              "minimum": 0,
+              "type": "integer"
+            },
+            "state": {
+              "$ref": "#/$defs/CapsuleState",
+              "description": "New state."
+            }
+          },
+          "required": [
+            "kind",
+            "finding",
+            "capsule",
+            "state",
+            "seq"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "description": "A watched condition became true at a bar.",
+          "properties": {
+            "bar": {
+              "description": "Bar index.",
+              "format": "uint64",
+              "minimum": 0,
+              "type": "integer"
+            },
+            "kind": {
+              "const": "condition_met",
+              "type": "string"
+            },
+            "seq": {
+              "description": "Log position.",
+              "format": "uint64",
+              "minimum": 0,
+              "type": "integer"
+            },
+            "t": {
+              "description": "Bar time.",
+              "format": "int64",
+              "type": "integer"
+            }
+          },
+          "required": [
+            "kind",
+            "bar",
+            "t",
+            "seq"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "description": "A proposal was created, accepted, rejected or expired.",
+          "properties": {
+            "author": {
+              "description": "Proposer principal.",
+              "type": "string"
+            },
+            "kind": {
+              "const": "proposal",
+              "type": "string"
+            },
+            "proposal": {
+              "description": "Proposal id.",
+              "type": "string"
+            },
+            "seq": {
+              "description": "Log position.",
+              "format": "uint64",
+              "minimum": 0,
+              "type": "integer"
+            },
+            "state": {
+              "$ref": "#/$defs/ProposalState",
+              "description": "New state."
+            }
+          },
+          "required": [
+            "kind",
+            "proposal",
+            "state",
+            "author",
+            "seq"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "description": "An attention directive for the watched principal.",
+          "properties": {
+            "directive": {
+              "$ref": "#/$defs/AttentionDirective",
+              "description": "The directive."
+            },
+            "kind": {
+              "const": "attention",
+              "type": "string"
+            }
+          },
+          "required": [
+            "kind",
+            "directive"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "description": "The watched principal's viewport changed.",
+          "properties": {
+            "kind": {
+              "const": "viewport",
+              "type": "string"
+            },
+            "principal": {
+              "description": "Principal id.",
+              "type": "string"
+            },
+            "viewport": {
+              "$ref": "#/$defs/Viewport",
+              "description": "New viewport."
+            }
+          },
+          "required": [
+            "kind",
+            "principal",
+            "viewport"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "description": "An intent's trigger became true.",
+          "properties": {
+            "bar": {
+              "description": "Bar index.",
+              "format": "uint64",
+              "minimum": 0,
+              "type": "integer"
+            },
+            "intent": {
+              "description": "Intent id.",
+              "type": "string"
+            },
+            "kind": {
+              "const": "intent_triggered",
+              "type": "string"
+            },
+            "seq": {
+              "description": "Log position.",
+              "format": "uint64",
+              "minimum": 0,
+              "type": "integer"
+            },
+            "t": {
+              "description": "Bar time.",
+              "format": "int64",
+              "type": "integer"
+            }
+          },
+          "required": [
+            "kind",
+            "intent",
+            "bar",
+            "t",
+            "seq"
+          ],
+          "type": "object"
+        }
+      ]
+    },
+    "Fact": {
+      "additionalProperties": false,
+      "description": "An indisputable numeric event detected by the engine. Carries its evidence.",
+      "properties": {
+        "bar": {
+          "description": "Bar index within the series.",
+          "format": "uint64",
+          "minimum": 0,
+          "type": "integer"
+        },
+        "evidence": {
+          "additionalProperties": {
+            "format": "double",
+            "type": "number"
+          },
+          "default": {},
+          "description": "Evidence values, e.g. `{\"level\": 70, \"prev\": 68.9, \"value\": 71.4}`.",
+          "type": "object"
+        },
+        "id": {
+          "description": "Unique id within the document.",
+          "type": "string"
+        },
+        "kind": {
+          "description": "Event kind, e.g. `cross_above`.",
+          "type": "string"
+        },
+        "provenance": {
+          "$ref": "#/$defs/Provenance",
+          "description": "Who detected it."
+        },
+        "series": {
+          "description": "Id of the series the event happened on.",
+          "type": "string"
+        },
+        "t": {
+          "description": "Bar time, epoch milliseconds UTC.",
+          "format": "int64",
+          "type": "integer"
+        },
+        "text": {
+          "description": "Short human-readable statement.",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "kind",
+        "series",
+        "bar",
+        "t",
+        "text",
+        "provenance"
+      ],
+      "type": "object"
+    },
+    "Finding": {
+      "additionalProperties": false,
+      "description": "A claim derived from facts.",
+      "properties": {
+        "claim": {
+          "description": "The claim, in one sentence.",
+          "type": "string"
+        },
+        "confidence": {
+          "description": "Confidence in `[0, 1]`.",
+          "format": "double",
+          "maximum": 1.0,
+          "minimum": 0.0,
+          "type": "number"
+        },
+        "facts": {
+          "description": "Ids of the facts the claim rests on.",
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "id": {
+          "description": "Unique id within the document.",
+          "type": "string"
+        },
+        "invalidation": {
+          "$ref": "#/$defs/Condition",
+          "description": "When this condition holds, the finding is invalid."
+        },
+        "provenance": {
+          "$ref": "#/$defs/Provenance",
+          "description": "Author and basis."
+        }
+      },
+      "required": [
+        "id",
+        "claim",
+        "facts",
+        "confidence",
+        "invalidation",
+        "provenance"
+      ],
+      "type": "object"
+    },
+    "Glyph": {
+      "additionalProperties": false,
+      "description": "A one-glance visual of meaning, not data.",
+      "properties": {
+        "kind": {
+          "$ref": "#/$defs/GlyphKind",
+          "description": "Which glyph."
+        },
+        "value": {
+          "description": "Normalized magnitude; `[-1, 1]` for direction, `[0, 1]` otherwise.",
+          "format": "double",
+          "maximum": 1.0,
+          "minimum": -1.0,
+          "type": "number"
+        }
+      },
+      "required": [
+        "kind",
+        "value"
+      ],
+      "type": "object"
+    },
+    "GlyphKind": {
+      "description": "Kind of meaning glyph (initial candidate set; finalized in R3).",
+      "oneOf": [
+        {
+          "const": "direction",
+          "description": "Where is it going?",
+          "type": "string"
+        },
+        {
+          "const": "strength",
+          "description": "How strong is the move?",
+          "type": "string"
+        },
+        {
+          "const": "uncertainty",
+          "description": "How sure are we?",
+          "type": "string"
+        },
+        {
+          "const": "extremity",
+          "description": "Is it unusual?",
+          "type": "string"
+        },
+        {
+          "const": "similarity",
+          "description": "Has it happened before, and what followed?",
+          "type": "string"
+        },
+        {
+          "const": "change",
+          "description": "What changed since the last look?",
+          "type": "string"
+        }
+      ]
+    },
+    "Instrument": {
+      "additionalProperties": false,
+      "description": "A traded asset: where it trades and which calendar aligns its bars (K14).",
+      "properties": {
+        "calendar": {
+          "description": "Calendar id, e.g. `XIST`, `XNYS`. Bars are aligned to this calendar.",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "exchange": {
+          "description": "Exchange code, e.g. `BIST`, `NYSE`.",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "symbol": {
+          "description": "Exchange symbol, e.g. `THYAO`.",
+          "type": "string"
+        }
+      },
+      "required": [
+        "symbol"
+      ],
+      "type": "object"
+    },
+    "Intent": {
+      "additionalProperties": false,
+      "description": "A persistent request left by the user, e.g. \"tell me if the uptrend breaks\".",
+      "properties": {
+        "active": {
+          "description": "Whether the intent is still active.",
+          "type": "boolean"
+        },
+        "id": {
+          "description": "Unique id within the document.",
+          "type": "string"
+        },
+        "provenance": {
+          "$ref": "#/$defs/Provenance",
+          "description": "Who left it and when."
+        },
+        "text": {
+          "description": "The request as the user said it.",
+          "type": "string"
+        },
+        "trigger": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Condition"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Machine-checkable trigger, if one could be derived."
+        }
+      },
+      "required": [
+        "id",
+        "text",
+        "active",
+        "provenance"
+      ],
+      "type": "object"
+    },
+    "Layer": {
+      "additionalProperties": false,
+      "description": "One layer of a view: a mark bound to a series.",
+      "properties": {
+        "encoding": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "default": {},
+          "description": "Encoding: visual channel -> field or constant, e.g. `{\"y\": \"v\", \"color\": \"#888\"}`.",
+          "type": "object"
+        },
+        "mark": {
+          "$ref": "#/$defs/Mark",
+          "description": "Visual mark."
+        },
+        "panel": {
+          "default": 0,
+          "description": "Panel index (0 = main price panel).",
+          "format": "uint32",
+          "minimum": 0,
+          "type": "integer"
+        },
+        "series": {
+          "description": "Series id; absent for constant marks (e.g. a rule).",
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "mark"
+      ],
+      "type": "object"
+    },
+    "Ledger": {
+      "additionalProperties": false,
+      "description": "The record of findings compared with reality afterwards.",
+      "properties": {
+        "entries": {
+          "default": [],
+          "description": "Entries, in record order.",
+          "items": {
+            "$ref": "#/$defs/LedgerEntry"
+          },
+          "type": "array"
+        }
+      },
+      "type": "object"
+    },
+    "LedgerEntry": {
+      "additionalProperties": false,
+      "description": "One record in the ledger.",
+      "properties": {
+        "finding": {
+          "description": "Finding id.",
+          "type": "string"
+        },
+        "note": {
+          "description": "Optional note.",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "outcome": {
+          "$ref": "#/$defs/Outcome",
+          "description": "Outcome against reality."
+        },
+        "recorded_at": {
+          "description": "Record time, epoch milliseconds UTC.",
+          "format": "int64",
+          "type": "integer"
+        },
+        "state": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/CapsuleState"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Final capsule state, if any (e.g. approved / rejected by a person)."
+        }
+      },
+      "required": [
+        "finding",
+        "outcome",
+        "recorded_at"
+      ],
+      "type": "object"
+    },
+    "Limits": {
+      "additionalProperties": false,
+      "description": "Limits enforced by the authority on incoming messages.",
+      "properties": {
+        "max_bars": {
+          "description": "Maximum bars in one `append_bars`.",
+          "format": "uint32",
+          "minimum": 0,
+          "type": "integer"
+        },
+        "max_message_bytes": {
+          "description": "Maximum size of one incoming message, bytes.",
+          "format": "uint64",
+          "minimum": 0,
+          "type": "integer"
+        },
+        "max_ops": {
+          "description": "Maximum operations in one command.",
+          "format": "uint32",
+          "minimum": 0,
+          "type": "integer"
+        },
+        "max_string": {
+          "description": "Maximum length of any string, bytes.",
+          "format": "uint32",
+          "minimum": 0,
+          "type": "integer"
+        },
+        "max_subscriptions": {
+          "description": "Maximum active subscriptions per connection.",
+          "format": "uint32",
+          "minimum": 0,
+          "type": "integer"
+        }
+      },
+      "required": [
+        "max_message_bytes",
+        "max_ops",
+        "max_bars",
+        "max_subscriptions",
+        "max_string"
+      ],
+      "type": "object"
+    },
+    "LogEntry": {
+      "additionalProperties": false,
+      "description": "One entry of the operation log.",
+      "properties": {
+        "approved_by": {
+          "description": "Principal id that approved it (accepted proposals only).",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "at": {
+          "description": "Time, from the last `clock`.",
+          "format": "int64",
+          "type": "integer"
+        },
+        "author": {
+          "description": "Principal id that wrote it (for an accepted proposal: the proposer).",
+          "type": "string"
+        },
+        "cause": {
+          "description": "Request id of the command that caused it, if any.",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "changes": {
+          "description": "The replayable changes.",
+          "items": {
+            "$ref": "#/$defs/ChangeOp"
+          },
+          "type": "array"
+        },
+        "inverse": {
+          "description": "The changes that undo this entry.",
+          "items": {
+            "$ref": "#/$defs/ChangeOp"
+          },
+          "type": "array"
+        },
+        "reason": {
+          "description": "The command's `reason`, if given.",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "request": {
+          "description": "The operations as requested.",
+          "items": {
+            "$ref": "#/$defs/Op"
+          },
+          "type": "array"
+        },
+        "seq": {
+          "description": "Log position (1-based, gapless).",
+          "format": "uint64",
+          "minimum": 0,
+          "type": "integer"
+        },
+        "summary": {
+          "description": "Short deterministic summary, e.g. `\"add_study rsi(period=7) -> rsi-3-0\"`.",
+          "type": "string"
+        },
+        "undoes": {
+          "description": "If this entry is an undo: the entry it undoes.",
+          "format": "uint64",
+          "minimum": 0,
+          "type": [
+            "integer",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "seq",
+        "at",
+        "author",
+        "changes",
+        "summary"
+      ],
+      "type": "object"
+    },
+    "Mark": {
+      "description": "Visual mark of a layer.",
+      "oneOf": [
+        {
+          "const": "candle",
+          "description": "Candlesticks (needs bars).",
+          "type": "string"
+        },
+        {
+          "const": "line",
+          "description": "Polyline.",
+          "type": "string"
+        },
+        {
+          "const": "area",
+          "description": "Filled area.",
+          "type": "string"
+        },
+        {
+          "const": "bar",
+          "description": "Vertical bars.",
+          "type": "string"
+        },
+        {
+          "const": "rule",
+          "description": "Horizontal or vertical reference line.",
+          "type": "string"
+        },
+        {
+          "const": "point",
+          "description": "Points.",
+          "type": "string"
+        },
+        {
+          "const": "text",
+          "description": "Text label.",
+          "type": "string"
+        }
+      ]
+    },
+    "Narrative": {
+      "additionalProperties": false,
+      "description": "A narration timeline about a finding: ordered steps, each pointing at something.",
+      "properties": {
+        "about": {
+          "description": "The item it narrates (usually a finding id).",
+          "type": "string"
+        },
+        "id": {
+          "description": "Unique id within the document.",
+          "type": "string"
+        },
+        "provenance": {
+          "$ref": "#/$defs/Provenance",
+          "description": "Who made it and when."
+        },
+        "steps": {
+          "description": "Steps, ascending by `at_ms`.",
+          "items": {
+            "$ref": "#/$defs/NarrativeStep"
+          },
+          "type": "array"
+        }
+      },
+      "required": [
+        "id",
+        "about",
+        "steps",
+        "provenance"
+      ],
+      "type": "object"
+    },
+    "NarrativeStep": {
+      "additionalProperties": false,
+      "description": "One step of a narration timeline.",
+      "properties": {
+        "at_ms": {
+          "description": "Start of the step, milliseconds from the start of the narration.",
+          "format": "uint32",
+          "minimum": 0,
+          "type": "integer"
+        },
+        "say": {
+          "description": "What to say (one or two sentences).",
+          "type": "string"
+        },
+        "target": {
+          "$ref": "#/$defs/Target",
+          "description": "What to show."
+        }
+      },
+      "required": [
+        "at_ms",
+        "target",
+        "say"
+      ],
+      "type": "object"
+    },
+    "Op": {
+      "description": "An operation in a command: what a human or an agent asks for, at the level of\nmeaning. The authority expands it into [`ChangeOp`]s (the replayable form).\nIds are optional where marked; the authority then assigns one (returned in\n`ack.created`). All ids in a document are unique across all collections.",
+      "oneOf": [
+        {
+          "additionalProperties": false,
+          "description": "Add or replace a series binding (by id).",
+          "properties": {
+            "op": {
+              "const": "put_series",
+              "type": "string"
+            },
+            "series": {
+              "$ref": "#/$defs/Series",
+              "description": "The series."
+            }
+          },
+          "required": [
+            "op",
+            "series"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "description": "Add a study (computed series) on input series, optionally showing it in a view.\nE.g. `{\"op\":\"add_study\",\"study\":\"rsi\",\"inputs\":[\"px\"],\"params\":{\"period\":7},\n\"show\":{\"view\":\"main\",\"with\":\"rsi14\"}}`.",
+          "properties": {
+            "id": {
+              "description": "Id of the new series; assigned if absent.",
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "inputs": {
+              "description": "Input series ids (one bar series for the built-in studies).",
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "op": {
+              "const": "add_study",
+              "type": "string"
+            },
+            "params": {
+              "additionalProperties": {
+                "format": "double",
+                "type": "number"
+              },
+              "default": {},
+              "description": "Parameters; missing ones take defaults (sma/ema/rsi: `period`; macd: `fast`,\n`slow`, `signal`; bollinger: `period`, `k`).",
+              "type": "object"
+            },
+            "show": {
+              "anyOf": [
+                {
+                  "$ref": "#/$defs/Show"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Show it in a view."
+            },
+            "study": {
+              "description": "Study name: `sma`, `ema`, `rsi`, `macd`, `bollinger`.",
+              "type": "string"
+            }
+          },
+          "required": [
+            "op",
+            "study",
+            "inputs"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "description": "Change parameters of an existing study series (merged into the current ones).",
+          "properties": {
+            "op": {
+              "const": "set_params",
+              "type": "string"
+            },
+            "params": {
+              "additionalProperties": {
+                "format": "double",
+                "type": "number"
+              },
+              "description": "Parameters to change.",
+              "type": "object"
+            },
+            "series": {
+              "description": "Study series id.",
+              "type": "string"
+            }
+          },
+          "required": [
+            "op",
+            "series",
+            "params"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "description": "Add or replace a whole view (by id).",
+          "properties": {
+            "op": {
+              "const": "put_view",
+              "type": "string"
+            },
+            "view": {
+              "$ref": "#/$defs/View",
+              "description": "The view."
+            }
+          },
+          "required": [
+            "op",
+            "view"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "description": "Add a layer to a view.",
+          "properties": {
+            "index": {
+              "description": "Position in the layer list; appended if absent.",
+              "format": "uint32",
+              "minimum": 0,
+              "type": [
+                "integer",
+                "null"
+              ]
+            },
+            "layer": {
+              "$ref": "#/$defs/Layer",
+              "description": "The layer."
+            },
+            "op": {
+              "const": "add_layer",
+              "type": "string"
+            },
+            "view": {
+              "description": "View id.",
+              "type": "string"
+            }
+          },
+          "required": [
+            "op",
+            "view",
+            "layer"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "description": "Remove a layer from a view by position.",
+          "properties": {
+            "index": {
+              "description": "Position in the layer list.",
+              "format": "uint32",
+              "minimum": 0,
+              "type": "integer"
+            },
+            "op": {
+              "const": "remove_layer",
+              "type": "string"
+            },
+            "view": {
+              "description": "View id.",
+              "type": "string"
+            }
+          },
+          "required": [
+            "op",
+            "view",
+            "index"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "description": "Set the visible bar range of a view (persistent; for a transient viewport use\n`input`). Bars are 0-based indexes into the view's first bar series, inclusive.",
+          "properties": {
+            "from_bar": {
+              "description": "First visible bar index.",
+              "format": "uint64",
+              "minimum": 0,
+              "type": "integer"
+            },
+            "op": {
+              "const": "set_view_range",
+              "type": "string"
+            },
+            "to_bar": {
+              "description": "Last visible bar index (inclusive).",
+              "format": "uint64",
+              "minimum": 0,
+              "type": "integer"
+            },
+            "view": {
+              "description": "View id.",
+              "type": "string"
+            }
+          },
+          "required": [
+            "op",
+            "view",
+            "from_bar",
+            "to_bar"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "description": "Record a fact (normally the engine's job).",
+          "properties": {
+            "bar": {
+              "description": "Bar index (0-based).",
+              "format": "uint64",
+              "minimum": 0,
+              "type": "integer"
+            },
+            "evidence": {
+              "additionalProperties": {
+                "format": "double",
+                "type": "number"
+              },
+              "default": {},
+              "description": "Evidence values.",
+              "type": "object"
+            },
+            "id": {
+              "description": "Id; assigned if absent.",
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "kind": {
+              "description": "Event kind, e.g. `cross_above`.",
+              "type": "string"
+            },
+            "op": {
+              "const": "add_fact",
+              "type": "string"
+            },
+            "series": {
+              "description": "Series id.",
+              "type": "string"
+            },
+            "text": {
+              "description": "One-sentence statement.",
+              "type": "string"
+            }
+          },
+          "required": [
+            "op",
+            "kind",
+            "series",
+            "bar",
+            "text"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "description": "Write a finding (a claim resting on facts), optionally with its capsule.",
+          "properties": {
+            "capsule": {
+              "description": "Also create a live capsule with this headline.",
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "claim": {
+              "description": "The claim, one sentence.",
+              "type": "string"
+            },
+            "confidence": {
+              "description": "Confidence in `[0, 1]`.",
+              "format": "double",
+              "type": "number"
+            },
+            "facts": {
+              "description": "Fact ids it rests on (must exist).",
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "id": {
+              "description": "Id; assigned if absent.",
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "invalidation": {
+              "$ref": "#/$defs/Condition",
+              "description": "When this holds, the finding is invalid."
+            },
+            "op": {
+              "const": "add_finding",
+              "type": "string"
+            }
+          },
+          "required": [
+            "op",
+            "claim",
+            "facts",
+            "confidence",
+            "invalidation"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "description": "Change fields of a finding; absent fields stay as they are.",
+          "properties": {
+            "claim": {
+              "description": "New claim.",
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "confidence": {
+              "description": "New confidence.",
+              "format": "double",
+              "type": [
+                "number",
+                "null"
+              ]
+            },
+            "finding": {
+              "description": "Finding id.",
+              "type": "string"
+            },
+            "invalidation": {
+              "anyOf": [
+                {
+                  "$ref": "#/$defs/Condition"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "New invalidation condition."
+            },
+            "op": {
+              "const": "update_finding",
+              "type": "string"
+            }
+          },
+          "required": [
+            "op",
+            "finding"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "description": "A person approves a finding: its capsule becomes `approved` and the ledger\nrecords it.",
+          "properties": {
+            "finding": {
+              "description": "Finding id.",
+              "type": "string"
+            },
+            "note": {
+              "description": "Optional note (recorded in the ledger).",
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "op": {
+              "const": "approve_finding",
+              "type": "string"
+            }
+          },
+          "required": [
+            "op",
+            "finding"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "description": "A person rejects a finding: its capsule becomes `rejected` and the ledger\nrecords it with the note.",
+          "properties": {
+            "finding": {
+              "description": "Finding id.",
+              "type": "string"
+            },
+            "note": {
+              "description": "Why (recorded in the ledger).",
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "op": {
+              "const": "reject_finding",
+              "type": "string"
+            }
+          },
+          "required": [
+            "op",
+            "finding"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "description": "Leave a persistent request (\"tell me if ...\").",
+          "properties": {
+            "id": {
+              "description": "Id; assigned if absent.",
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "op": {
+              "const": "add_intent",
+              "type": "string"
+            },
+            "text": {
+              "description": "The request in words.",
+              "type": "string"
+            },
+            "trigger": {
+              "anyOf": [
+                {
+                  "$ref": "#/$defs/Condition"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Machine-checkable trigger. Series it names must exist."
+            }
+          },
+          "required": [
+            "op",
+            "text"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "description": "Switch an intent on or off.",
+          "properties": {
+            "active": {
+              "description": "Active or not.",
+              "type": "boolean"
+            },
+            "intent": {
+              "description": "Intent id.",
+              "type": "string"
+            },
+            "op": {
+              "const": "set_intent_active",
+              "type": "string"
+            }
+          },
+          "required": [
+            "op",
+            "intent",
+            "active"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "description": "Add a narration timeline about an item.",
+          "properties": {
+            "about": {
+              "description": "Item id it narrates (usually a finding).",
+              "type": "string"
+            },
+            "id": {
+              "description": "Id; assigned if absent.",
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "op": {
+              "const": "add_narrative",
+              "type": "string"
+            },
+            "steps": {
+              "description": "Steps, ascending by `at_ms`.",
+              "items": {
+                "$ref": "#/$defs/NarrativeStep"
+              },
+              "type": "array"
+            }
+          },
+          "required": [
+            "op",
+            "about",
+            "steps"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "description": "Ask the engine's presenter to build a view for a finding (the agent speaks at the\nlevel of meaning; the presenter writes the grammar). The view is attached to the\nfinding's capsule.",
+          "properties": {
+            "finding": {
+              "description": "Finding id.",
+              "type": "string"
+            },
+            "op": {
+              "const": "show_finding",
+              "type": "string"
+            },
+            "view": {
+              "description": "Id of the view to create or replace; assigned if absent.",
+              "type": [
+                "string",
+                "null"
+              ]
+            }
+          },
+          "required": [
+            "op",
+            "finding"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "description": "Remove an item by id. Removing a series also removes the layers that draw it;\nit fails with `in_use` if other items (studies, facts, conditions) depend on it.",
+          "properties": {
+            "id": {
+              "description": "Item id.",
+              "type": "string"
+            },
+            "op": {
+              "const": "remove",
+              "type": "string"
+            }
+          },
+          "required": [
+            "op",
+            "id"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "description": "Append bars to a bar series (data feeds).",
+          "properties": {
+            "bars": {
+              "description": "Bars, strictly after the last bar.",
+              "items": {
+                "$ref": "#/$defs/Bar"
+              },
+              "type": "array"
+            },
+            "op": {
+              "const": "append_bars",
+              "type": "string"
+            },
+            "series": {
+              "description": "Bar series id.",
+              "type": "string"
+            }
+          },
+          "required": [
+            "op",
+            "series",
+            "bars"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "description": "Replace the last bar of a bar series (a live, still-forming bar).",
+          "properties": {
+            "bar": {
+              "$ref": "#/$defs/Bar",
+              "description": "The bar; same `t` as the current last bar."
+            },
+            "op": {
+              "const": "update_last_bar",
+              "type": "string"
+            },
+            "series": {
+              "description": "Bar series id.",
+              "type": "string"
+            }
+          },
+          "required": [
+            "op",
+            "series",
+            "bar"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "description": "Undo a log entry by writing its inverse as a new entry. Without `seq`: the\nspeaker's own latest entry that is not yet undone.",
+          "properties": {
+            "op": {
+              "const": "undo",
+              "type": "string"
+            },
+            "seq": {
+              "description": "Log position to undo.",
+              "format": "uint64",
+              "minimum": 0,
+              "type": [
+                "integer",
+                "null"
+              ]
+            }
+          },
+          "required": [
+            "op"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "description": "Accept a pending proposal: its operations are applied now, in the proposer's name\nwith the decider recorded as approver.",
+          "properties": {
+            "note": {
+              "description": "Optional note.",
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "op": {
+              "const": "accept_proposal",
+              "type": "string"
+            },
+            "proposal": {
+              "description": "Proposal id.",
+              "type": "string"
+            }
+          },
+          "required": [
+            "op",
+            "proposal"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "description": "Reject a pending proposal.",
+          "properties": {
+            "note": {
+              "description": "Optional note.",
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "op": {
+              "const": "reject_proposal",
+              "type": "string"
+            },
+            "proposal": {
+              "description": "Proposal id.",
+              "type": "string"
+            }
+          },
+          "required": [
+            "op",
+            "proposal"
+          ],
+          "type": "object"
+        }
+      ]
+    },
+    "Outcome": {
+      "description": "Outcome of a finding compared against what actually happened.",
+      "oneOf": [
+        {
+          "const": "pending",
+          "description": "Not yet decided.",
+          "type": "string"
+        },
+        {
+          "const": "confirmed",
+          "description": "Reality agreed with the claim.",
+          "type": "string"
+        },
+        {
+          "const": "refuted",
+          "description": "Reality contradicted the claim.",
+          "type": "string"
+        }
+      ]
+    },
+    "PanelInfo": {
+      "additionalProperties": false,
+      "description": "One panel as seen on screen.",
+      "properties": {
+        "marks": {
+          "description": "Marks used, in layer order.",
+          "items": {
+            "$ref": "#/$defs/Mark"
+          },
+          "type": "array"
+        },
+        "panel": {
+          "description": "Panel index.",
+          "format": "uint32",
+          "minimum": 0,
+          "type": "integer"
+        },
+        "series": {
+          "description": "Series drawn in it, in layer order (e.g. `[\"px\",\"bb20\"]`).",
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        }
+      },
+      "required": [
+        "panel",
+        "series",
+        "marks"
+      ],
+      "type": "object"
+    },
+    "Permissions": {
+      "additionalProperties": false,
+      "description": "What a principal may do.",
+      "properties": {
+        "attend": {
+          "description": "May send attention directives.",
+          "type": "boolean"
+        },
+        "decide": {
+          "description": "May accept or reject proposals.",
+          "type": "boolean"
+        },
+        "feed": {
+          "description": "May append market data.",
+          "type": "boolean"
+        },
+        "propose": {
+          "description": "May create proposals.",
+          "type": "boolean"
+        },
+        "read": {
+          "description": "May read and subscribe.",
+          "type": "boolean"
+        },
+        "write": {
+          "description": "May write directly.",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "read",
+        "write",
+        "propose",
+        "decide",
+        "attend",
+        "feed"
+      ],
+      "type": "object"
+    },
+    "Point": {
+      "additionalProperties": false,
+      "description": "One point of a single-valued series (e.g. an indicator output).\n\nWarmup rule (K13): a study output always has one point per input bar, at the same\n`t`. Points inside the warmup period have `v: null`; nothing is trimmed.",
+      "properties": {
+        "t": {
+          "description": "Point time, epoch milliseconds UTC (the time of the bar it belongs to).",
+          "format": "int64",
+          "type": "integer"
+        },
+        "v": {
+          "description": "Value; `null` during warmup.",
+          "format": "double",
+          "type": [
+            "number",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "t"
+      ],
+      "type": "object"
+    },
+    "Presentation": {
+      "additionalProperties": false,
+      "description": "A finding presented at a depth.",
+      "properties": {
+        "confidence": {
+          "description": "Confidence of the finding (depth >= capsule).",
+          "format": "double",
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "depth": {
+          "$ref": "#/$defs/Depth",
+          "description": "Depth chosen."
+        },
+        "facts": {
+          "description": "Evidence: the facts (depth >= chart).",
+          "items": {
+            "$ref": "#/$defs/Fact"
+          },
+          "type": "array"
+        },
+        "finding": {
+          "description": "Finding id.",
+          "type": "string"
+        },
+        "glyphs": {
+          "description": "Glyphs (depth >= capsule; at most `profile.max_glyphs`).",
+          "items": {
+            "$ref": "#/$defs/Glyph"
+          },
+          "type": "array"
+        },
+        "spark": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/SeriesValues"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Small series excerpt (depth >= capsule, if the profile allows series data)."
+        },
+        "state": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/CapsuleState"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Capsule state, if the finding has a capsule."
+        },
+        "surface": {
+          "$ref": "#/$defs/SurfaceKind",
+          "description": "Surface kind it was made for."
+        },
+        "text": {
+          "description": "One sentence (always present).",
+          "type": "string"
+        },
+        "view": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/View"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "The view (depth >= chart)."
+        }
+      },
+      "required": [
+        "finding",
+        "depth",
+        "surface",
+        "text"
+      ],
+      "type": "object"
+    },
+    "Principal": {
+      "additionalProperties": false,
+      "description": "A principal known to the authority (host configuration, not sent by clients).",
+      "properties": {
+        "author": {
+          "$ref": "#/$defs/Author",
+          "description": "How it appears in provenance."
+        },
+        "id": {
+          "description": "Principal id.",
+          "type": "string"
+        },
+        "role": {
+          "$ref": "#/$defs/Role",
+          "description": "Its role."
+        }
+      },
+      "required": [
+        "id",
+        "author",
+        "role"
+      ],
+      "type": "object"
+    },
+    "Profile": {
+      "additionalProperties": false,
+      "description": "The presentation profile the authority chose for a surface.",
+      "properties": {
+        "depth": {
+          "$ref": "#/$defs/Depth",
+          "description": "Deepest presentation sent to this surface."
+        },
+        "max_glyphs": {
+          "description": "Maximum glyphs per presentation.",
+          "format": "uint32",
+          "minimum": 0,
+          "type": "integer"
+        },
+        "max_points": {
+          "description": "Maximum data points per series in a presentation (0 when `series_data` is false).",
+          "format": "uint32",
+          "minimum": 0,
+          "type": "integer"
+        },
+        "series_data": {
+          "description": "Whether presentations may carry series data.",
+          "type": "boolean"
+        },
+        "speech": {
+          "description": "Whether text should be phrased for speech.",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "depth",
+        "series_data",
+        "max_points",
+        "max_glyphs",
+        "speech"
+      ],
+      "type": "object"
+    },
+    "Proposal": {
+      "additionalProperties": false,
+      "description": "A write waiting for approval.",
+      "properties": {
+        "decided_by": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Author"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Who decided, once decided."
+        },
+        "decided_seq": {
+          "description": "Log position at which it was decided or expired.",
+          "format": "uint64",
+          "minimum": 0,
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "expires_at": {
+          "description": "Expiry time; absent means no expiry.",
+          "format": "int64",
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "id": {
+          "description": "Unique id within the document.",
+          "type": "string"
+        },
+        "note": {
+          "description": "Decision note.",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "ops": {
+          "description": "The operations, exactly as proposed.",
+          "items": {
+            "$ref": "#/$defs/Op"
+          },
+          "type": "array"
+        },
+        "provenance": {
+          "$ref": "#/$defs/Provenance",
+          "description": "Proposer and time."
+        },
+        "reason": {
+          "description": "Why, as given by the proposer.",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "state": {
+          "$ref": "#/$defs/ProposalState",
+          "description": "Current state."
+        }
+      },
+      "required": [
+        "id",
+        "ops",
+        "state",
+        "provenance"
+      ],
+      "type": "object"
+    },
+    "ProposalState": {
+      "description": "State of a proposal.",
+      "oneOf": [
+        {
+          "const": "pending",
+          "description": "Waiting for a decision.",
+          "type": "string"
+        },
+        {
+          "const": "accepted",
+          "description": "Accepted and applied.",
+          "type": "string"
+        },
+        {
+          "const": "rejected",
+          "description": "Rejected.",
+          "type": "string"
+        },
+        {
+          "const": "expired",
+          "description": "Not decided before `expires_at`.",
+          "type": "string"
+        }
+      ]
+    },
+    "ProtocolError": {
+      "additionalProperties": false,
+      "description": "A protocol error. Written so that an agent can correct its message without help.",
+      "properties": {
+        "code": {
+          "$ref": "#/$defs/ErrorCode",
+          "description": "Error code."
+        },
+        "conflicts": {
+          "description": "For `conflict` / `undo_conflict`: the log positions that conflict.",
+          "items": {
+            "format": "uint64",
+            "minimum": 0,
+            "type": "integer"
+          },
+          "type": "array"
+        },
+        "did_you_mean": {
+          "description": "Existing ids or names close to the one given (edit distance).",
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "expected": {
+          "description": "Accepted values or forms at `path`, when they are a short list.",
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "hint": {
+          "description": "How to fix it, in one sentence.",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "message": {
+          "description": "What went wrong, in one sentence.",
+          "type": "string"
+        },
+        "path": {
+          "description": "JSON pointer into the offending message, e.g. `/ops/0/params/period`.",
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "code",
+        "message"
+      ],
+      "type": "object"
+    },
+    "Provenance": {
+      "additionalProperties": false,
+      "description": "Who produced an item, based on what, and when.",
+      "properties": {
+        "approved_by": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Author"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Who approved it, when it entered the document through an accepted proposal\n(protocol: `accept_proposal`). Absent for direct writes."
+        },
+        "at": {
+          "description": "Production time, epoch milliseconds UTC.",
+          "format": "int64",
+          "type": "integer"
+        },
+        "author": {
+          "$ref": "#/$defs/Author",
+          "description": "Producer."
+        },
+        "based_on": {
+          "default": [],
+          "description": "Ids of the items this one is based on.",
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        }
+      },
+      "required": [
+        "author",
+        "at"
+      ],
+      "type": "object"
+    },
+    "QueryResult": {
+      "description": "The answer to a query or input.",
+      "oneOf": [
+        {
+          "additionalProperties": false,
+          "description": "Answer to `describe`.",
+          "properties": {
+            "description": {
+              "$ref": "#/$defs/Description",
+              "description": "The description."
+            },
+            "kind": {
+              "const": "description",
+              "type": "string"
+            }
+          },
+          "required": [
+            "kind",
+            "description"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "description": "Answer to `get`: the item, tagged with its collection.",
+          "properties": {
+            "collection": {
+              "$ref": "#/$defs/Collection",
+              "description": "Collection the item belongs to."
+            },
+            "item": {
+              "description": "The item."
+            },
+            "kind": {
+              "const": "item",
+              "type": "string"
+            }
+          },
+          "required": [
+            "kind",
+            "collection",
+            "item"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "description": "Answer to `list`.",
+          "properties": {
+            "collection": {
+              "$ref": "#/$defs/Collection",
+              "description": "Collection."
+            },
+            "items": {
+              "description": "Items.",
+              "items": true,
+              "type": "array"
+            },
+            "kind": {
+              "const": "items",
+              "type": "string"
+            }
+          },
+          "required": [
+            "kind",
+            "collection",
+            "items"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "description": "Answer to `document`.",
+          "properties": {
+            "document": {
+              "$ref": "#/$defs/Document",
+              "description": "The whole document."
+            },
+            "kind": {
+              "const": "document",
+              "type": "string"
+            }
+          },
+          "required": [
+            "kind",
+            "document"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "description": "Answer to `log`.",
+          "properties": {
+            "entries": {
+              "description": "Entries, ascending by seq.",
+              "items": {
+                "$ref": "#/$defs/LogEntry"
+              },
+              "type": "array"
+            },
+            "kind": {
+              "const": "log",
+              "type": "string"
+            }
+          },
+          "required": [
+            "kind",
+            "entries"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "description": "Answer to `study` without `reduce`.",
+          "properties": {
+            "kind": {
+              "const": "values",
+              "type": "string"
+            },
+            "values": {
+              "$ref": "#/$defs/SeriesValues",
+              "description": "The values."
+            }
+          },
+          "required": [
+            "kind",
+            "values"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "description": "Answer to `study` with `reduce`: output name -> reduced value.",
+          "properties": {
+            "bars": {
+              "description": "Number of bars in the range.",
+              "format": "uint64",
+              "minimum": 0,
+              "type": "integer"
+            },
+            "kind": {
+              "const": "reduced",
+              "type": "string"
+            },
+            "reduce": {
+              "$ref": "#/$defs/Reduce",
+              "description": "The reduction."
+            },
+            "series": {
+              "description": "Series id.",
+              "type": "string"
+            },
+            "values": {
+              "additionalProperties": {
+                "$ref": "#/$defs/Reduced"
+              },
+              "description": "Output name -> value.",
+              "type": "object"
+            }
+          },
+          "required": [
+            "kind",
+            "series",
+            "reduce",
+            "bars",
+            "values"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "description": "Answer to `at` (and to a `tap`).",
+          "properties": {
+            "at": {
+              "$ref": "#/$defs/AtBar",
+              "description": "The bar and studies."
+            },
+            "kind": {
+              "const": "at",
+              "type": "string"
+            }
+          },
+          "required": [
+            "kind",
+            "at"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "description": "Answer to `screen`.",
+          "properties": {
+            "kind": {
+              "const": "screen",
+              "type": "string"
+            },
+            "screens": {
+              "description": "One entry per connected surface of the principal.",
+              "items": {
+                "$ref": "#/$defs/ScreenInfo"
+              },
+              "type": "array"
+            }
+          },
+          "required": [
+            "kind",
+            "screens"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "description": "Answer to `attention`.",
+          "properties": {
+            "attention": {
+              "$ref": "#/$defs/AttentionState",
+              "description": "The state."
+            },
+            "kind": {
+              "const": "attention",
+              "type": "string"
+            }
+          },
+          "required": [
+            "kind",
+            "attention"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "description": "Answer to `present`.",
+          "properties": {
+            "kind": {
+              "const": "presentation",
+              "type": "string"
+            },
+            "presentation": {
+              "$ref": "#/$defs/Presentation",
+              "description": "The presentation."
+            }
+          },
+          "required": [
+            "kind",
+            "presentation"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "description": "Answer to a viewport-changing input.",
+          "properties": {
+            "kind": {
+              "const": "viewport",
+              "type": "string"
+            },
+            "viewport": {
+              "$ref": "#/$defs/Viewport",
+              "description": "The new viewport."
+            }
+          },
+          "required": [
+            "kind",
+            "viewport"
+          ],
+          "type": "object"
+        }
+      ]
+    },
+    "Reduce": {
+      "description": "Reduction applied over a range (warmup `null`s are skipped).",
+      "oneOf": [
+        {
+          "const": "min",
+          "description": "Smallest value (and its bar).",
+          "type": "string"
+        },
+        {
+          "const": "max",
+          "description": "Largest value (and its bar).",
+          "type": "string"
+        },
+        {
+          "const": "mean",
+          "description": "Arithmetic mean.",
+          "type": "string"
+        },
+        {
+          "const": "first",
+          "description": "First non-null value.",
+          "type": "string"
+        },
+        {
+          "const": "last",
+          "description": "Last non-null value.",
+          "type": "string"
+        },
+        {
+          "const": "count",
+          "description": "Number of non-null values.",
+          "type": "string"
+        }
+      ]
+    },
+    "Reduced": {
+      "additionalProperties": false,
+      "description": "One reduced value.",
+      "properties": {
+        "bar": {
+          "description": "Bar index where it occurs (min, max, first, last).",
+          "format": "uint64",
+          "minimum": 0,
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "t": {
+          "description": "Bar time where it occurs.",
+          "format": "int64",
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "value": {
+          "description": "The value (`null` when the range has no non-null value).",
+          "format": "double",
+          "type": [
+            "number",
+            "null"
+          ]
+        }
+      },
+      "type": "object"
+    },
+    "Role": {
+      "description": "Role of a principal; decides what it may do (see `docs/PROTOCOL.md` §9).",
+      "oneOf": [
+        {
+          "const": "owner",
+          "description": "Everything, including deciding proposals.",
+          "type": "string"
+        },
+        {
+          "const": "editor",
+          "description": "Direct writes; may not decide proposals.",
+          "type": "string"
+        },
+        {
+          "const": "proposer",
+          "description": "Writes become proposals (the default for agents).",
+          "type": "string"
+        },
+        {
+          "const": "viewer",
+          "description": "Read and subscribe only.",
+          "type": "string"
+        },
+        {
+          "const": "feed",
+          "description": "Market data only (`append_bars`, `update_last_bar`).",
+          "type": "string"
+        },
+        {
+          "const": "host",
+          "description": "The process hosting the authority: `clock` and data.",
+          "type": "string"
+        }
+      ]
+    },
+    "Scale": {
+      "additionalProperties": false,
+      "description": "A scale mapping data values to a visual axis.",
+      "properties": {
+        "domain": {
+          "description": "Fixed domain `[min, max]`; automatic when absent.",
+          "items": {
+            "format": "double",
+            "type": "number"
+          },
+          "maxItems": 2,
+          "minItems": 2,
+          "type": [
+            "array",
+            "null"
+          ]
+        },
+        "kind": {
+          "$ref": "#/$defs/ScaleKind",
+          "description": "Scale type."
+        }
+      },
+      "required": [
+        "kind"
+      ],
+      "type": "object"
+    },
+    "ScaleKind": {
+      "description": "Scale type.",
+      "oneOf": [
+        {
+          "const": "time",
+          "description": "Time axis.",
+          "type": "string"
+        },
+        {
+          "const": "linear",
+          "description": "Linear numeric.",
+          "type": "string"
+        },
+        {
+          "const": "log",
+          "description": "Logarithmic numeric.",
+          "type": "string"
+        }
+      ]
+    },
+    "ScreenInfo": {
+      "additionalProperties": false,
+      "description": "What one surface shows.",
+      "properties": {
+        "capsules": {
+          "description": "Capsules whose fact bar is in the visible range.",
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "interval": {
+          "description": "Bar interval, if any.",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "last_close": {
+          "description": "Last close in the visible range.",
+          "format": "double",
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "panels": {
+          "description": "Panels.",
+          "items": {
+            "$ref": "#/$defs/PanelInfo"
+          },
+          "type": "array"
+        },
+        "principal": {
+          "description": "Principal id.",
+          "type": "string"
+        },
+        "surface": {
+          "$ref": "#/$defs/SurfaceKind",
+          "description": "Surface kind."
+        },
+        "symbol": {
+          "description": "Instrument symbol of the view's main series, if any.",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "viewport": {
+          "$ref": "#/$defs/Viewport",
+          "description": "The visible region."
+        }
+      },
+      "required": [
+        "principal",
+        "surface",
+        "viewport",
+        "panels",
+        "capsules"
+      ],
+      "type": "object"
+    },
+    "Series": {
+      "additionalProperties": false,
+      "description": "Time-based numeric data: bars, an indicator output or a stream.\n\nIn a [`Document`] a series acts as a binding: `source` says where data comes\nfrom and `data` may be omitted.",
+      "properties": {
+        "data": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/SeriesData"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Materialized data, if present."
+        },
+        "id": {
+          "description": "Unique id within the document.",
+          "type": "string"
+        },
+        "instrument": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Instrument"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "The instrument the series belongs to, if any. Its symbol lives here (there is no\nseparate `symbol` field), so exchange and calendar travel with it (K14)."
+        },
+        "interval": {
+          "description": "Bar interval, e.g. `1d`, `5m`.",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "source": {
+          "$ref": "#/$defs/SeriesSource",
+          "description": "Where the data comes from."
+        }
+      },
+      "required": [
+        "id",
+        "source"
+      ],
+      "type": "object"
+    },
+    "SeriesData": {
+      "description": "Materialized series data.",
+      "oneOf": [
+        {
+          "additionalProperties": false,
+          "description": "OHLCV bars, ascending by `t`.",
+          "properties": {
+            "bars": {
+              "description": "Bars, ascending by time.",
+              "items": {
+                "$ref": "#/$defs/Bar"
+              },
+              "type": "array"
+            },
+            "kind": {
+              "const": "bars",
+              "type": "string"
+            }
+          },
+          "required": [
+            "kind",
+            "bars"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "description": "Single-valued points, ascending by `t`.",
+          "properties": {
+            "kind": {
+              "const": "points",
+              "type": "string"
+            },
+            "points": {
+              "description": "Points, ascending by time.",
+              "items": {
+                "$ref": "#/$defs/Point"
+              },
+              "type": "array"
+            }
+          },
+          "required": [
+            "kind",
+            "points"
+          ],
+          "type": "object"
+        }
+      ]
+    },
+    "SeriesSource": {
+      "description": "Where a series comes from. The core does not depend on the kind of source.",
+      "oneOf": [
+        {
+          "additionalProperties": false,
+          "description": "Data is embedded in the series itself (`data`).",
+          "properties": {
+            "kind": {
+              "const": "inline",
+              "type": "string"
+            }
+          },
+          "required": [
+            "kind"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "description": "A local file.",
+          "properties": {
+            "kind": {
+              "const": "file",
+              "type": "string"
+            },
+            "path": {
+              "description": "Path to the file.",
+              "type": "string"
+            }
+          },
+          "required": [
+            "kind",
+            "path"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "description": "A Matriks market data feed.",
+          "properties": {
+            "interval": {
+              "description": "Bar interval, e.g. `1d`, `5m`.",
+              "type": "string"
+            },
+            "kind": {
+              "const": "matriks",
+              "type": "string"
+            },
+            "symbol": {
+              "description": "Exchange symbol, e.g. `THYAO`.",
+              "type": "string"
+            }
+          },
+          "required": [
+            "kind",
+            "symbol",
+            "interval"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "description": "A NATS subject.",
+          "properties": {
+            "kind": {
+              "const": "nats",
+              "type": "string"
+            },
+            "subject": {
+              "description": "Subject name.",
+              "type": "string"
+            }
+          },
+          "required": [
+            "kind",
+            "subject"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "description": "Local computation: a study applied to other series.",
+          "properties": {
+            "inputs": {
+              "description": "Input series ids.",
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "kind": {
+              "const": "study",
+              "type": "string"
+            },
+            "output": {
+              "description": "Which output of a multi-output study, if any.",
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "params": {
+              "additionalProperties": {
+                "format": "double",
+                "type": "number"
+              },
+              "default": {},
+              "description": "Numeric study parameters, e.g. `{\"period\": 14}`.",
+              "type": "object"
+            },
+            "study": {
+              "description": "Study name, e.g. `rsi`.",
+              "type": "string"
+            }
+          },
+          "required": [
+            "kind",
+            "study",
+            "inputs"
+          ],
+          "type": "object"
+        }
+      ]
+    },
+    "SeriesValues": {
+      "additionalProperties": false,
+      "description": "Values of a series over a range.",
+      "properties": {
+        "from_bar": {
+          "description": "First bar index in the answer.",
+          "format": "uint64",
+          "minimum": 0,
+          "type": "integer"
+        },
+        "outputs": {
+          "additionalProperties": {
+            "items": {
+              "format": "double",
+              "type": [
+                "number",
+                "null"
+              ]
+            },
+            "type": "array"
+          },
+          "description": "Output name -> one value per bar (`null` during warmup).",
+          "type": "object"
+        },
+        "series": {
+          "description": "Series id.",
+          "type": "string"
+        },
+        "t": {
+          "description": "Bar times, one per bar in the range.",
+          "items": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "type": "array"
+        }
+      },
+      "required": [
+        "series",
+        "from_bar",
+        "t",
+        "outputs"
+      ],
+      "type": "object"
+    },
+    "Show": {
+      "additionalProperties": false,
+      "description": "Where a new study is shown.",
+      "properties": {
+        "panel": {
+          "description": "Panel index (0 = price panel).",
+          "format": "uint32",
+          "minimum": 0,
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "view": {
+          "description": "View id.",
+          "type": "string"
+        },
+        "with": {
+          "description": "Put it in the panel where this series is drawn (e.g. `\"rsi14\"`). Takes precedence\nover `panel`. If neither is given, a new panel is added below the others.",
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "view"
+      ],
+      "type": "object"
+    },
+    "SurfaceKind": {
+      "description": "Kind of surface a connection presents on.",
+      "oneOf": [
+        {
+          "const": "desktop",
+          "description": "Large screen, pointer and keyboard.",
+          "type": "string"
+        },
+        {
+          "const": "phone",
+          "description": "Phone: small touch screen.",
+          "type": "string"
+        },
+        {
+          "const": "watch",
+          "description": "Watch: glance-sized screen.",
+          "type": "string"
+        },
+        {
+          "const": "voice",
+          "description": "Voice only: no screen; answers are spoken.",
+          "type": "string"
+        },
+        {
+          "const": "headless",
+          "description": "No presentation at all (an agent, a batch job).",
+          "type": "string"
+        }
+      ]
+    },
+    "Target": {
+      "additionalProperties": false,
+      "description": "A step of a narration or an attention directive points at something.",
+      "properties": {
+        "from_bar": {
+          "description": "First bar index (0-based) of the region.",
+          "format": "uint64",
+          "minimum": 0,
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "item": {
+          "description": "Document item id (finding, fact, capsule...).",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "output": {
+          "description": "Output or field of the series, e.g. `\"v\"` (volume of a bar series), `\"signal\"`.",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "panel": {
+          "description": "Panel index.",
+          "format": "uint32",
+          "minimum": 0,
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "series": {
+          "description": "Series id (e.g. the series whose value matters).",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "to_bar": {
+          "description": "Last bar index (inclusive) of the region; equal to `from_bar` for one bar.",
+          "format": "uint64",
+          "minimum": 0,
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "view": {
+          "description": "View id.",
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      },
+      "type": "object"
+    },
+    "View": {
+      "additionalProperties": false,
+      "description": "A presentation recipe written in the visual grammar.",
+      "properties": {
+        "display_tz": {
+          "description": "Display time zone override (IANA); display only, see [`Document::display_tz`].",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "id": {
+          "description": "Unique id within the document.",
+          "type": "string"
+        },
+        "layers": {
+          "description": "Layers, drawn in order.",
+          "items": {
+            "$ref": "#/$defs/Layer"
+          },
+          "type": "array"
+        },
+        "title": {
+          "description": "Optional title.",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "x": {
+          "$ref": "#/$defs/Scale",
+          "description": "Horizontal scale."
+        },
+        "y": {
+          "description": "Vertical scale per panel, indexed by `Layer::panel`.",
+          "items": {
+            "$ref": "#/$defs/Scale"
+          },
+          "type": "array"
+        }
+      },
+      "required": [
+        "id",
+        "x",
+        "y",
+        "layers"
+      ],
+      "type": "object"
+    },
+    "Viewport": {
+      "additionalProperties": false,
+      "description": "A visible region.",
+      "properties": {
+        "from_bar": {
+          "description": "First visible bar index.",
+          "format": "uint64",
+          "minimum": 0,
+          "type": "integer"
+        },
+        "to_bar": {
+          "description": "Last visible bar index (inclusive).",
+          "format": "uint64",
+          "minimum": 0,
+          "type": "integer"
+        },
+        "view": {
+          "description": "View id.",
+          "type": "string"
+        }
+      },
+      "required": [
+        "view",
+        "from_bar",
+        "to_bar"
+      ],
+      "type": "object"
+    }
+  },
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "description": "A message from the authority to a client.",
+  "oneOf": [
+    {
+      "additionalProperties": false,
+      "description": "Reply to `hello`.",
+      "properties": {
+        "doc": {
+          "description": "Document id.",
+          "type": "string"
+        },
+        "epoch": {
+          "description": "Authority epoch: increases every time the document is handed over to a new\nauthority (server -> device or back). Log positions are only comparable\nwithin one epoch lineage; see `docs/PROTOCOL.md` §8.4.",
+          "format": "uint64",
+          "minimum": 0,
+          "type": "integer"
+        },
+        "features": {
+          "description": "Features granted (subset of those requested).",
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "limits": {
+          "$ref": "#/$defs/Limits",
+          "description": "Limits the authority enforces."
+        },
+        "now": {
+          "description": "The authority's current time (from the last `clock`), epoch ms. Use it for\nrelative questions (\"in the last 30 minutes\").",
+          "format": "int64",
+          "type": "integer"
+        },
+        "permissions": {
+          "$ref": "#/$defs/Permissions",
+          "description": "What the principal may do."
+        },
+        "principal": {
+          "description": "The principal, as authenticated.",
+          "type": "string"
+        },
+        "profile": {
+          "$ref": "#/$defs/Profile",
+          "description": "Negotiated presentation profile for the declared surface."
+        },
+        "protocol": {
+          "description": "Protocol version in use.",
+          "type": "string"
+        },
+        "role": {
+          "$ref": "#/$defs/Role",
+          "description": "The principal's role."
+        },
+        "seq": {
+          "description": "Current log position.",
+          "format": "uint64",
+          "minimum": 0,
+          "type": "integer"
+        },
+        "type": {
+          "const": "welcome",
+          "type": "string"
+        }
+      },
+      "required": [
+        "type",
+        "protocol",
+        "doc",
+        "principal",
+        "role",
+        "permissions",
+        "seq",
+        "now",
+        "epoch",
+        "profile",
+        "limits"
+      ],
+      "type": "object"
+    },
+    {
+      "additionalProperties": false,
+      "description": "Positive reply to `command`, `subscribe`, `unsubscribe`, `attend`.",
+      "properties": {
+        "created": {
+          "description": "Ids the authority assigned or created (in op order).",
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "id": {
+          "description": "The request id.",
+          "type": "string"
+        },
+        "proposal": {
+          "description": "The proposal id, when `status` is `proposed`.",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "seq": {
+          "description": "Log position of the applied (or proposal-creating) entry.",
+          "format": "uint64",
+          "minimum": 0,
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "status": {
+          "$ref": "#/$defs/AckStatus",
+          "description": "`applied`, `proposed`, `subscribed`, `unsubscribed` or `delivered`."
+        },
+        "type": {
+          "const": "ack",
+          "type": "string"
+        },
+        "undoes": {
+          "description": "For an applied `undo`: the log position that was undone.",
+          "format": "uint64",
+          "minimum": 0,
+          "type": [
+            "integer",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "type",
+        "id",
+        "status"
+      ],
+      "type": "object"
+    },
+    {
+      "additionalProperties": false,
+      "description": "Reply to `query` and `input`.",
+      "properties": {
+        "data": {
+          "$ref": "#/$defs/QueryResult",
+          "description": "The answer."
+        },
+        "id": {
+          "description": "The request id.",
+          "type": "string"
+        },
+        "now": {
+          "description": "The authority's current time, epoch ms.",
+          "format": "int64",
+          "type": "integer"
+        },
+        "seq": {
+          "description": "Log position the answer reflects.",
+          "format": "uint64",
+          "minimum": 0,
+          "type": "integer"
+        },
+        "type": {
+          "const": "result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "type",
+        "id",
+        "seq",
+        "now",
+        "data"
+      ],
+      "type": "object"
+    },
+    {
+      "additionalProperties": false,
+      "description": "A pushed event for a subscription.",
+      "properties": {
+        "event": {
+          "$ref": "#/$defs/Event",
+          "description": "What happened."
+        },
+        "sub": {
+          "description": "Subscription id.",
+          "type": "string"
+        },
+        "type": {
+          "const": "notify",
+          "type": "string"
+        }
+      },
+      "required": [
+        "type",
+        "sub",
+        "event"
+      ],
+      "type": "object"
+    },
+    {
+      "additionalProperties": false,
+      "description": "Negative reply to any request (or a connection-level problem when `id` is absent).",
+      "properties": {
+        "error": {
+          "$ref": "#/$defs/ProtocolError",
+          "description": "What went wrong and how to fix it."
+        },
+        "id": {
+          "description": "The request id, if the request could be parsed far enough to read it.",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "type": {
+          "const": "error",
+          "type": "string"
+        }
+      },
+      "required": [
+        "type",
+        "error"
+      ],
+      "type": "object"
+    }
+  ],
+  "title": "ServerMsg"
+}

@@ -1,0 +1,1 @@
+Son yarım saatte 3 değişiklik oldu: arkin ema50 göstergesini ekledi (seq 2), scout hacimle ilgili bir bulgu önerdi (prop-3, bekliyor; seq 3) ve editor 'RSI 30'un altına inerse haber ver' niyetini ekledi (seq 4).

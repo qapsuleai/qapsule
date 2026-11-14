@@ -1,0 +1,2 @@
+a1: guessed ids px/rsi14/main from the spec examples; not_found (real ids: thy-d, osc-a, chart-1). Spec examples use ids that do not exist in the live doc; had to discover them. Should have listed series first.
+a2: used real ids; applied, rsi7 on panel 1 with osc-a.

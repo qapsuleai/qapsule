@@ -1,0 +1,4 @@
+{"conn":"a","msg":{"type":"hello","protocol":"qp/0","principal":"arkin","surface":{"kind":"desktop"}}}
+{"conn":"a","msg":{"type":"query","id":"q1","query":{"kind":"list","collection":"findings"}}}
+{"conn":"a","msg":{"type":"query","id":"q2","query":{"kind":"list","collection":"facts"}}}
+{"conn":"a","msg":{"type":"command","id":"c1","reason":"hacim teyidi yok","ops":[{"op":"reject_finding","finding":"fnd-overbought","note":"hacim teyidi yok"}]}}

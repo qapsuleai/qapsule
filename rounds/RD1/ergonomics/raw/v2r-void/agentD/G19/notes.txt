@@ -1,0 +1,2 @@
+attempt1: update_finding on guessed id fnd-overbought and series px -> not_found (ids opaque; spec examples misleading).
+attempt2: update_finding fnd-9e1, invalidation threshold series thy-d (the bar series; "px" in spec table is just an example id) op lt value 100 -> applied. lt chosen per spec's state-vs-crossing table.

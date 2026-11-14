@@ -1,0 +1,2 @@
+a1: used spec-example series rsi14 -> not_found (live id osc-a, fact f-0042 found via list facts).
+a2: add_finding on f-0042, invalidation cross_below 70 on osc-a -> proposed (prop-5; scout is proposer, needs approval). Spec examples use non-existent ids.

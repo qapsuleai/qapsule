@@ -6,6 +6,9 @@
 //! - [`replay`]: rebuilds a document from the initial document and a log, applying
 //!   only the recorded changes (no study code, no presenter, no clock).
 //! - [`conform`]: the conformance transcript runner, in-process and over `qp serve`.
+//! - Semantic reading (R2): [`Session::scene`] compiles a view with `qp-grammar` over
+//!   the document ([`DocProvider`]); `screen` and `hit` answer from that scene; the
+//!   presenter applies the grammar's depth rules.
 //!
 //! Determinism: no clock (time arrives as `clock` messages), no randomness, no hash
 //! maps in outputs. Studies are computed with `qp-compute`.
@@ -19,10 +22,13 @@ mod canon;
 pub mod conform;
 mod error;
 mod expand;
+mod explain;
 mod gops;
 mod locate;
 mod present;
+mod provider;
 mod query;
+mod reading;
 mod select;
 mod session;
 mod suggest;
@@ -34,6 +40,10 @@ pub use apply::{
     touched_keys,
 };
 pub use canon::{canon_document, thresholds};
+pub use explain::explain_scene;
 pub use present::profile_for;
+pub use provider::DocProvider;
+pub use qp_grammar::CompileOptions;
+pub use reading::{hit_scene, screen_frame, HIT_HEIGHT, HIT_WIDTH};
 pub use session::{confine, default_limits, permissions, read_json, Session, ENGINE_PRINCIPAL};
 pub use suggest::{did_you_mean, edit_distance};

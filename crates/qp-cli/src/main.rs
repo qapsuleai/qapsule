@@ -68,6 +68,12 @@ enum Command {
         #[arg(long, default_value = ".")]
         root: PathBuf,
     },
+    /// Print a plain-text semantic summary of a view, read from its compiled scene
+    /// (panels, scales and visible domains, layers with data, origins and last values,
+    /// emphasis). Headless: nothing is rendered.
+    Explain(SceneArgs),
+    /// Print the compiled scene description (`SceneDesc` JSON) of a view.
+    Scene(SceneArgs),
     /// Run protocol conformance transcripts (docs/PROTOCOL.md §15).
     Conform {
         /// Transcript files or directories of `*.json` transcripts.
@@ -81,6 +87,32 @@ enum Command {
         #[arg(long, default_value = ".")]
         root: PathBuf,
     },
+}
+
+#[derive(Debug, clap::Args)]
+struct SceneArgs {
+    /// Session init (`SessionInit` JSON). Default: the transcript's init.
+    #[arg(long, required_unless_present = "transcript")]
+    init: Option<PathBuf>,
+    /// A conformance transcript whose messages are sent first (its expectations are not
+    /// checked), e.g. one that builds the view with grammar operations.
+    #[arg(long)]
+    transcript: Option<PathBuf>,
+    /// View id.
+    #[arg(long)]
+    view: String,
+    /// Frame width in pixels.
+    #[arg(long, default_value_t = qp_session::HIT_WIDTH)]
+    width: u32,
+    /// Frame height in pixels.
+    #[arg(long, default_value_t = qp_session::HIT_HEIGHT)]
+    height: u32,
+    /// Directory that paths in the init and transcript are relative to (and confined to).
+    #[arg(long, default_value = ".")]
+    root: PathBuf,
+    /// Pretty-print the JSON (`qp scene`).
+    #[arg(long)]
+    pretty: bool,
 }
 
 #[derive(Debug, clap::Args)]
@@ -192,7 +224,65 @@ fn run(command: Command) -> Result<Outcome, String> {
             transport,
             root,
         } => conform(&inputs, &transport, &root),
+        Command::Explain(args) => scene_cmd(&args, true),
+        Command::Scene(args) => scene_cmd(&args, false),
     }
+}
+
+/// A session from `--init` (or the transcript's init), after the transcript's messages.
+fn scene_session(args: &SceneArgs) -> Result<qp_session::Session, String> {
+    let transcript: Option<qp_schema::protocol::Transcript> = args
+        .transcript
+        .as_deref()
+        .map(qp_session::read_json)
+        .transpose()?;
+    let init: qp_schema::protocol::SessionInit = match (&args.init, &transcript) {
+        (Some(p), _) => qp_session::read_json(p)?,
+        (None, Some(t)) => qp_session::conform::load_init(&t.init, &args.root)?.init,
+        (None, None) => return Err("give --init or --transcript".to_owned()),
+    };
+    let mut session = qp_session::Session::new(init, &args.root)?;
+    for step in transcript.iter().flat_map(|t| &t.steps) {
+        if let Some(line) = &step.send {
+            let text = serde_json::to_string(&line.msg).map_err(|e| e.to_string())?;
+            session.handle_raw(&line.conn, &text);
+        } else if let Some(raw) = &step.send_raw {
+            session.handle_raw(&raw.conn, &raw.line);
+        }
+    }
+    Ok(session)
+}
+
+fn scene_cmd(args: &SceneArgs, explain: bool) -> Result<Outcome, String> {
+    let mut session = scene_session(args)?;
+    let opts = qp_session::CompileOptions::new(args.width, args.height);
+    let fail = |e: qp_schema::protocol::ProtocolError| {
+        eprintln!(
+            "qp: {}",
+            serde_json::to_string(&e).unwrap_or_else(|_| e.message.clone())
+        );
+        Ok(Outcome::Invalid)
+    };
+    if explain {
+        match session.explain(&args.view, &opts) {
+            Ok(text) => print!("{text}"),
+            Err(e) => return fail(e),
+        }
+    } else {
+        match session.scene(&args.view, &opts) {
+            Ok(scene) => {
+                let text = if args.pretty {
+                    serde_json::to_string_pretty(&scene)
+                } else {
+                    serde_json::to_string(&scene)
+                }
+                .map_err(|e| e.to_string())?;
+                println!("{text}");
+            }
+            Err(e) => return fail(e),
+        }
+    }
+    Ok(Outcome::Ok)
 }
 
 fn parse_param(s: &str) -> Result<(String, f64), String> {
@@ -395,9 +485,43 @@ fn render(input: &Path, out: &Path, width: u32, height: u32) -> Result<Outcome, 
     let text = std::fs::read_to_string(input)
         .map_err(|e| format!("cannot read {}: {e}", input.display()))?;
     let bars = qp_render::parse_bars(&text).map_err(|e| format!("{}: {e}", input.display()))?;
-    let png = qp_render::render_png(&bars, width, height).map_err(|e| e.to_string())?;
+    let scene = r0_scene(&bars, width, height)?;
+    let png = qp_render::render_scene_png(&scene).map_err(|e| e.to_string())?;
     std::fs::write(out, png).map_err(|e| format!("cannot write {}: {e}", out.display()))?;
     Ok(Outcome::Ok)
+}
+
+/// The R0 chart (candles + SMA(20) of close, one linear panel) of a bar series: study
+/// values from the compute core, layout from the grammar compiler; the renderer only
+/// rasterizes the resulting scene.
+fn r0_scene(
+    series: &qp_schema::Series,
+    width: u32,
+    height: u32,
+) -> Result<qp_schema::scene::SceneDesc, String> {
+    const R0_VIEW: &str = r#"{"id":"r0","x":{"kind":"time"},
+      "panels":[{"id":0,"y":{"kind":"linear"}}],
+      "layers":[{"id":"candles","mark":"candle","series":"px","panel":0},
+                {"id":"sma","mark":"line","series":"sma20","panel":0}]}"#;
+    let bars = series.bars().ok_or("series has no embedded bars")?.to_vec();
+    let params = std::collections::BTreeMap::from([("period".to_owned(), 20.0)]);
+    let line = qp_compute::compute_bars("sma", &params, qp_compute::Field::Close, &bars)
+        .map_err(|e| e.to_string())?
+        .outputs
+        .into_values()
+        .next()
+        .unwrap_or_default();
+    let provider = qp_grammar::MemProvider::new()
+        .with_bars("px", bars, series.symbol(), series.interval.as_deref())
+        .with_values("sma20", "px", vec![("sma", line)], "sma", &["sma"])
+        .with_label("sma20", "SMA20");
+    let view = serde_json::from_str(R0_VIEW).map_err(|e| e.to_string())?;
+    qp_grammar::compile(
+        &view,
+        &provider,
+        &qp_grammar::CompileOptions::new(width, height),
+    )
+    .map_err(|e| e.to_string())
 }
 
 fn serve(init: &Path, root: &Path, batch_end: bool) -> Result<Outcome, String> {

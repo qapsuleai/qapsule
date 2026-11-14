@@ -1630,6 +1630,12 @@ pub struct Presentation {
     /// The view (depth >= chart).
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub view: Option<View>,
+    /// The capsule view (R2; depth `capsule`, only if the profile allows series data):
+    /// one panel with the main output of the fact's series over the last `max_points`
+    /// bars, a rule at the fact's level and a point at the fact bar
+    /// (`docs/GRAMMAR.md` §13). Not written to the document.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub capsule_view: Option<Box<View>>,
     /// Evidence: the facts (depth >= chart).
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
     pub facts: Vec<Fact>,

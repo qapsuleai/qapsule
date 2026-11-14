@@ -1,4 +1,4 @@
-//! Spike backend (feature `spike-vello-cpu`): draws a [`Scene`] with vello_cpu.
+//! Spike backend (feature `spike-vello-cpu`): draws a [`SceneDesc`] with vello_cpu.
 //! Comparison-only; the reference renderer is [`crate::cpu`].
 //!
 //! Text uses vello_cpu's outline rasterizer (glifo/skrifa) on the same embedded font, with
@@ -8,13 +8,14 @@
 use std::sync::{Arc, OnceLock};
 
 use vello_cpu::color::{AlphaColor, Srgb};
-use vello_cpu::kurbo::{BezPath, Rect, Stroke};
+use vello_cpu::kurbo::{BezPath, Circle, Rect, Shape, Stroke};
 use vello_cpu::peniko::{Blob, FontData};
 use vello_cpu::{Glyph, Level, Pixmap, RasterizerSettings, RenderContext, RenderMode};
 use vello_cpu::{RenderSettings, Resources};
 
-use crate::scene::{Prim, Rgba, Scene};
+use crate::scene::{Prim, Rgba};
 use crate::RenderError;
+use crate::SceneDesc;
 
 /// vello_cpu configuration knobs measured by the spike.
 #[derive(Debug, Clone, Copy, Default)]
@@ -36,11 +37,27 @@ fn rgba(c: Rgba) -> AlphaColor<Srgb> {
     AlphaColor::from_rgba8(c[0], c[1], c[2], c[3])
 }
 
+fn path_of(points: &[[f32; 2]], close: bool) -> BezPath {
+    let mut bp = BezPath::new();
+    for (i, &[x, y]) in points.iter().enumerate() {
+        let pt = (f64::from(x), f64::from(y));
+        if i == 0 {
+            bp.move_to(pt);
+        } else {
+            bp.line_to(pt);
+        }
+    }
+    if close {
+        bp.close_path();
+    }
+    bp
+}
+
 /// Rasterizes `scene`; returns straight RGBA8.
 ///
 /// # Errors
 /// Size beyond `u16`, or a glyph-run failure.
-pub fn rasterize(scene: &Scene, cfg: Config) -> Result<Vec<u8>, RenderError> {
+pub fn rasterize(scene: &SceneDesc, cfg: Config) -> Result<Vec<u8>, RenderError> {
     let to16 = |v: u32| u16::try_from(v).map_err(|_| RenderError::new("size exceeds u16"));
     let (w, h) = (to16(scene.width)?, to16(scene.height)?);
     let settings = RenderSettings {
@@ -55,7 +72,7 @@ pub fn rasterize(scene: &Scene, cfg: Config) -> Result<Vec<u8>, RenderError> {
     let mut res = Resources::new();
     ctx.set_paint(rgba(scene.background));
     ctx.fill_rect(&Rect::new(0.0, 0.0, f64::from(w), f64::from(h)));
-    for p in &scene.prims {
+    for p in scene.prims() {
         match p {
             Prim::Rect { x, y, w, h, color } => {
                 ctx.set_paint(rgba(*color));
@@ -68,7 +85,7 @@ pub fn rasterize(scene: &Scene, cfg: Config) -> Result<Vec<u8>, RenderError> {
                 color,
             } => {
                 let mut bp = BezPath::new();
-                for (i, &(x, y)) in points.iter().enumerate() {
+                for (i, &[x, y]) in points.iter().enumerate() {
                     let pt = (f64::from(x), f64::from(y));
                     if i == 0 {
                         bp.move_to(pt);
@@ -79,6 +96,15 @@ pub fn rasterize(scene: &Scene, cfg: Config) -> Result<Vec<u8>, RenderError> {
                 ctx.set_paint(rgba(*color));
                 ctx.set_stroke(Stroke::new(f64::from(*width)));
                 ctx.stroke_path(&bp);
+            }
+            Prim::Fill { points, color } => {
+                ctx.set_paint(rgba(*color));
+                ctx.fill_path(&path_of(points, true));
+            }
+            Prim::Circle { cx, cy, r, color } => {
+                ctx.set_paint(rgba(*color));
+                let c = Circle::new((f64::from(*cx), f64::from(*cy)), f64::from(*r));
+                ctx.fill_path(&c.to_path(0.1));
             }
             Prim::Text {
                 x,

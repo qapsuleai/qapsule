@@ -1,12 +1,57 @@
 //! Qapsule web binding.
 //!
-//! A thin wasm-bindgen wrapper: every function calls the same `qp-render` / `qp-compute`
-//! code that the native CLI and the tests use. No drawing or compute logic lives here.
+//! A thin wasm-bindgen wrapper: every function calls the same core code (`qp-compute`,
+//! `qp-grammar`, `qp-render`) that the native CLI and the tests use. No drawing, layout or
+//! compute logic lives here: the binding only wires the R0 view together (study values
+//! from the compute core -> scene description from the grammar compiler -> pixels from
+//! the reference renderer, which draws the scene and nothing else).
 
+use std::collections::BTreeMap;
+
+use qp_grammar::{compile, CompileOptions, MemProvider};
+use qp_schema::scene::SceneDesc;
+use qp_schema::Series;
 use wasm_bindgen::prelude::*;
 
 fn js_err(e: qp_render::RenderError) -> JsError {
     JsError::new(&e.to_string())
+}
+
+/// The R0 view (`rounds/R2/tasks/VIEWS.md` V0): candles of `px` and the SMA(20) line of
+/// `sma20` in one linear panel.
+const R0_VIEW: &str = r#"{"id":"r0","x":{"kind":"time"},
+  "panels":[{"id":0,"y":{"kind":"linear"}}],
+  "layers":[{"id":"candles","mark":"candle","series":"px","panel":0},
+            {"id":"sma","mark":"line","series":"sma20","panel":0}]}"#;
+
+/// Compiles the R0 view over `series` at `width` x `height` (level of detail on).
+///
+/// # Errors
+/// A series without bars, a study failure, or a compile error (e.g. size out of range).
+fn r0_scene(series: &Series, width: u32, height: u32) -> Result<SceneDesc, JsError> {
+    let bars = series
+        .bars()
+        .ok_or_else(|| JsError::new("series has no embedded bars"))?
+        .to_vec();
+    let params = BTreeMap::from([("period".to_owned(), 20.0)]);
+    let line = qp_compute::compute_bars("sma", &params, qp_compute::Field::Close, &bars)
+        .map_err(compute_err)?
+        .outputs
+        .into_values()
+        .next()
+        .unwrap_or_default();
+    let provider = MemProvider::new()
+        .with_bars("px", bars, series.symbol(), series.interval.as_deref())
+        .with_values("sma20", "px", vec![("sma", line)], "sma", &["sma"])
+        .with_label("sma20", "SMA20");
+    let view = serde_json::from_str(R0_VIEW).map_err(|e| JsError::new(&e.to_string()))?;
+    compile(&view, &provider, &CompileOptions::new(width, height))
+        .map_err(|e| JsError::new(&e.to_string()))
+}
+
+fn r0_scene_json(json: &str, width: u32, height: u32) -> Result<SceneDesc, JsError> {
+    let series = qp_render::parse_bars(json).map_err(js_err)?;
+    r0_scene(&series, width, height)
 }
 
 fn compute_err(e: qp_compute::ComputeError) -> JsError {
@@ -93,25 +138,23 @@ pub fn default_height() -> u32 {
     qp_render::DEFAULT_HEIGHT
 }
 
-/// Renders a bars JSON document to straight (non-premultiplied) RGBA8 pixels, ready for
+/// Renders a bars JSON document (the R0 view: candles + SMA(20)) to straight (non-premultiplied) RGBA8 pixels, ready for
 /// `new ImageData(new Uint8ClampedArray(bytes), width, height)`.
 ///
 /// # Errors
 /// Invalid JSON/bars or an out-of-range size.
 #[wasm_bindgen]
 pub fn render_rgba(json: &str, width: u32, height: u32) -> Result<Vec<u8>, JsError> {
-    let bars = qp_render::parse_bars(json).map_err(js_err)?;
-    qp_render::render_rgba(&bars, width, height).map_err(js_err)
+    qp_render::render_scene_rgba(&r0_scene_json(json, width, height)?).map_err(js_err)
 }
 
-/// Renders a bars JSON document to PNG bytes (same encoder settings as native).
+/// Renders a bars JSON document (the R0 view) to PNG bytes (same encoder settings as native).
 ///
 /// # Errors
 /// Invalid JSON/bars or an out-of-range size.
 #[wasm_bindgen]
 pub fn render_png(json: &str, width: u32, height: u32) -> Result<Vec<u8>, JsError> {
-    let bars = qp_render::parse_bars(json).map_err(js_err)?;
-    qp_render::render_png(&bars, width, height).map_err(js_err)
+    qp_render::render_scene_png(&r0_scene_json(json, width, height)?).map_err(js_err)
 }
 
 /// Renders `n` deterministic synthetic bars (benchmark helper; see `SPIKE.md`).
@@ -126,7 +169,7 @@ pub fn render_synthetic_rgba(
     height: u32,
 ) -> Result<Vec<u8>, JsError> {
     let bars = qp_render::synthetic_bars(n as usize, u64::from(seed));
-    qp_render::render_rgba(&bars, width, height).map_err(js_err)
+    qp_render::render_scene_rgba(&r0_scene(&bars, width, height)?).map_err(js_err)
 }
 
 /// Renders the determinism stress scene (spike only; golden `fixtures/golden/stress.png`).
@@ -151,8 +194,7 @@ pub fn render_rgba_vello_cpu(
     quality: bool,
 ) -> Result<Vec<u8>, JsError> {
     use qp_render::spikes::vello_cpu::{rasterize, Config};
-    let bars = qp_render::parse_bars(json).map_err(js_err)?;
-    let scene = qp_render::scene::build_scene(&bars, width, height).map_err(js_err)?;
+    let scene = r0_scene_json(json, width, height)?;
     rasterize(
         &scene,
         Config {
@@ -200,7 +242,7 @@ pub fn render_synthetic_rgba_vello_cpu(
 ) -> Result<Vec<u8>, JsError> {
     use qp_render::spikes::vello_cpu::{rasterize, Config};
     let bars = qp_render::synthetic_bars(n as usize, u64::from(seed));
-    let scene = qp_render::scene::build_scene(&bars, width, height).map_err(js_err)?;
+    let scene = r0_scene(&bars, width, height)?;
     rasterize(&scene, Config::default()).map_err(js_err)
 }
 
@@ -234,7 +276,7 @@ mod vello_gpu_spike {
         Ok(())
     }
 
-    async fn with_gpu(scene: qp_render::scene::Scene, mode: u8) -> Result<Vec<u8>, JsError> {
+    async fn with_gpu(scene: qp_schema::scene::SceneDesc, mode: u8) -> Result<Vec<u8>, JsError> {
         // Take the renderer out for the duration of the await (no RefCell borrow held).
         let mut r = GPU
             .with(|g| g.borrow_mut().take())
@@ -255,8 +297,7 @@ mod vello_gpu_spike {
         height: u32,
         aa: u8,
     ) -> Result<Vec<u8>, JsError> {
-        let bars = qp_render::parse_bars(&json).map_err(super::js_err)?;
-        let scene = qp_render::scene::build_scene(&bars, width, height).map_err(super::js_err)?;
+        let scene = super::r0_scene_json(&json, width, height)?;
         with_gpu(scene, aa).await
     }
 
@@ -286,7 +327,25 @@ mod vello_gpu_spike {
         aa: u8,
     ) -> Result<Vec<u8>, JsError> {
         let bars = qp_render::synthetic_bars(n as usize, u64::from(seed));
-        let scene = qp_render::scene::build_scene(&bars, width, height).map_err(super::js_err)?;
+        let scene = super::r0_scene(&bars, width, height)?;
         with_gpu(scene, aa).await
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    /// The binding's R0 wiring (compute -> grammar -> render) reproduces the golden PNG
+    /// natively; the browser step checks the same in wasm32.
+    #[test]
+    fn render_png_matches_golden() {
+        let root = concat!(env!("CARGO_MANIFEST_DIR"), "/../..");
+        let json = std::fs::read_to_string(format!("{root}/fixtures/bars/sample.json")).unwrap();
+        let golden = std::fs::read(format!("{root}/fixtures/golden/sample.png")).unwrap();
+        let png = super::render_png(&json, super::default_width(), super::default_height())
+            .unwrap_or_else(|_| panic!("render failed"));
+        assert!(
+            png == golden,
+            "binding render differs from fixtures/golden/sample.png"
+        );
     }
 }

@@ -238,12 +238,9 @@ fn r_tasks() {
         "a",
         json!({"kind":"hit","view":{},"x":900,"y":200,"width":1200,"height":600}),
     );
-    // (The point query itself is another R2 task; until it lands the authority answers
-    // `unsupported` after resolving the view.)
-    assert!(
-        r["data"]["kind"] == "hit" || code(&r) == "unsupported",
-        "{r}"
-    );
+    assert_eq!(r["data"]["kind"], "hit", "{r}");
+    assert_eq!(r["data"]["hit"]["view"], "main");
+    assert_eq!(r["resolved"]["/query/view"], "main");
 
     // R15: thicker RSI line.
     let mut h = setup();

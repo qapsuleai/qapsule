@@ -307,6 +307,30 @@
    ]
   },
   {
+   "send_raw": {
+    "conn": "a",
+    "line": "{\"type\": \"query\", \"id\": \"q5\", \"query\": {\"kind\": \"hit\", \"view\": {\"shows\": {\"study\": \"macd\"}}, \"x\": 600, \"y\": 300}}"
+   },
+   "expect": [
+    {
+     "conn": "a",
+     "msg": {
+      "type": "result",
+      "id": "q5",
+      "resolved": {
+       "/query/view": "main"
+      },
+      "data": {
+       "kind": "hit",
+       "hit": {
+        "view": "main"
+       }
+      }
+     }
+    }
+   ]
+  },
+  {
    "send": {
     "conn": "s",
     "msg": {

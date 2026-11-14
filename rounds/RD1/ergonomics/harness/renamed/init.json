@@ -1,0 +1,58 @@
+{
+ "document": "rounds/RD1/ergonomics/harness/renamed/doc.json",
+ "clock": 1760000000000,
+ "epoch": 0,
+ "proposal_ttl_ms": null,
+ "principals": [
+  {
+   "id": "arkin",
+   "author": {
+    "kind": "human",
+    "name": "arkin"
+   },
+   "role": "owner"
+  },
+  {
+   "id": "scout",
+   "author": {
+    "kind": "agent",
+    "name": "scout"
+   },
+   "role": "proposer"
+  },
+  {
+   "id": "editor",
+   "author": {
+    "kind": "agent",
+    "name": "editor"
+   },
+   "role": "editor"
+  },
+  {
+   "id": "viewer",
+   "author": {
+    "kind": "human",
+    "name": "viewer"
+   },
+   "role": "viewer"
+  },
+  {
+   "id": "feed",
+   "author": {
+    "kind": "engine",
+    "name": "feed",
+    "version": "0"
+   },
+   "role": "feed"
+  },
+  {
+   "id": "host",
+   "author": {
+    "kind": "engine",
+    "name": "host",
+    "version": "0"
+   },
+   "role": "host"
+  }
+ ]
+}

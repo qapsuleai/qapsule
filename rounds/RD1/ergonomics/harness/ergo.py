@@ -29,6 +29,19 @@ MIN = 60000
 NOW = C + 65 * MIN
 T140, T199 = 1752710400000, 1759881600000
 
+# Variant "renamed": the same document with different ids, so that the ids used in the
+# examples of docs/PROTOCOL.md (which come from the base document) cannot be copied; the
+# agent has to discover them through the protocol.
+VARIANT = os.environ.get("QP_ERGO_VARIANT", "base")
+RENAME = {"px": "thy-d", "rsi14": "osc-a", "macd": "trend-m", "bb20": "band-b", "main": "chart-1",
+          "fact-rsi-cross70": "f-0042", "fnd-overbought": "fnd-9e1", "cap-overbought": "cap-9e1"}
+if VARIANT == "renamed":
+    INIT = os.path.join(HERE, "renamed", "init.json")
+
+
+def N(x):
+    return RENAME.get(x, x) if VARIANT == "renamed" else x
+
 
 def h(conn, principal, kind="headless"):
     return {"conn": conn, "msg": {"type": "hello", "protocol": "qp/0", "principal": principal,
@@ -46,29 +59,29 @@ def cmd(conn, cid, ops):
 SETUP = [
     h("zz-host", "host"), h("zz-ed", "editor"), h("zz-ark", "arkin", "desktop"), h("zz-sc", "scout"),
     h("zz-feed", "feed"),
-    cmd("zz-ed", "s1", [{"op": "add_layer", "view": "main",
+    cmd("zz-ed", "s1", [{"op": "add_layer", "view": N("main"),
                          "layer": {"mark": "rule", "panel": 1, "encoding": {"y": "30", "color": "#9e9e9e"}}}]),
     clock(C + 40 * MIN),
-    cmd("zz-ark", "s2", [{"op": "add_study", "id": "ema50", "study": "ema", "inputs": ["px"],
-                          "params": {"period": 50}, "show": {"view": "main", "panel": 0}}]),
+    cmd("zz-ark", "s2", [{"op": "add_study", "id": "ema50", "study": "ema", "inputs": [N("px")],
+                          "params": {"period": 50}, "show": {"view": N("main"), "panel": 0}}]),
     clock(C + 50 * MIN),
     cmd("zz-sc", "s3", [{"op": "add_finding", "claim": "Hacim son 20 günün ortalamasının üstünde.",
-                         "facts": ["fact-rsi-cross70"], "confidence": 0.5,
-                         "invalidation": {"kind": "threshold", "series": "px", "op": "lt", "value": 110.0},
+                         "facts": [N("fact-rsi-cross70")], "confidence": 0.5,
+                         "invalidation": {"kind": "threshold", "series": N("px"), "op": "lt", "value": 110.0},
                          "capsule": "Hacim güçlü"}]),
     clock(C + 55 * MIN),
     cmd("zz-ed", "s4", [{"op": "add_intent", "text": "RSI 30'un altına inerse haber ver",
-                         "trigger": {"kind": "threshold", "series": "rsi14", "op": "lt", "value": 30.0}}]),
+                         "trigger": {"kind": "threshold", "series": N("rsi14"), "op": "lt", "value": 30.0}}]),
     {"conn": "zz-ark", "msg": {"type": "input", "id": "s5",
-                               "gesture": {"kind": "look", "view": "main", "from_bar": 120, "to_bar": 199}}},
+                               "gesture": {"kind": "look", "view": N("main"), "from_bar": 120, "to_bar": 199}}},
     clock(NOW),
 ]
 SETUP_LOG_LEN = 4  # entries 1..4; the proposal (s3) is entry 3
 
 EPILOGUE = [
     # G18: make the overbought finding's invalidation true so a subscriber is notified.
-    cmd("zz-ark", "e1", [{"op": "update_finding", "finding": "fnd-overbought",
-                          "invalidation": {"kind": "threshold", "series": "px", "op": "lt", "value": 1000.0}}]),
+    cmd("zz-ark", "e1", [{"op": "update_finding", "finding": N("fnd-overbought"),
+                          "invalidation": {"kind": "threshold", "series": N("px"), "op": "lt", "value": 1000.0}}]),
     {"conn": "zz-host", "msg": {"type": "query", "id": "e-doc", "query": {"kind": "document"}}},
     {"conn": "zz-host", "msg": {"type": "query", "id": "e-log", "query": {"kind": "log"}}},
     {"conn": "zz-host", "msg": {"type": "query", "id": "e-att", "query": {"kind": "attention", "principal": "arkin"}}},
@@ -177,7 +190,7 @@ def series(doc, sid):
     return next((s for s in doc.get("series", []) if s["id"] == sid), None)
 
 
-def layers(doc, view="main"):
+def layers(doc, view=N("main")):
     v = next((v for v in doc.get("views", []) if v["id"] == view), None)
     return v["layers"] if v else []
 
@@ -186,7 +199,7 @@ def studies(doc, name, **params):
     out = []
     for s in doc.get("series", []):
         src = s.get("source", {})
-        if src.get("kind") == "study" and src.get("study") == name and src.get("inputs") == ["px"]:
+        if src.get("kind") == "study" and src.get("study") == name and src.get("inputs") == [N("px")]:
             p = src.get("params", {})
             if all(p.get(k) == float(v) for k, v in params.items()):
                 out.append(s)
@@ -233,15 +246,15 @@ def chk(task, c, ans):
         need(ok, "a log result with exactly the entries of the last 30 minutes (seq 2,3,4)")
         need(unchanged, "document must not change")
     elif task == "G03":
-        cap = next((x for x in d.get("capsules", []) if x["id"] == "cap-overbought"), {})
+        cap = next((x for x in d.get("capsules", []) if x["id"] == N("cap-overbought")), {})
         need(cap.get("state") == "rejected", "capsule rejected")
-        ents = [e for e in d.get("ledger", {}).get("entries", []) if e.get("finding") == "fnd-overbought"]
+        ents = [e for e in d.get("ledger", {}).get("entries", []) if e.get("finding") == N("fnd-overbought")]
         need(any(e.get("state") == "rejected" and "hacim" in (e.get("note") or "").lower() for e in ents),
              "ledger entry with the reason")
         need(any(e.get("author") == "arkin" for e in c["agent_log"]), "written by arkin")
     elif task == "G04":
         ps = [r["presentation"] for r in results(c, "presentation")]
-        need(any(p["finding"] == "fnd-overbought" and p["depth"] == "sentence" and p["surface"] == "watch"
+        need(any(p["finding"] == N("fnd-overbought") and p["depth"] == "sentence" and p["surface"] == "watch"
                  and "view" not in p and "spark" not in p for p in ps), "sentence-depth presentation for watch")
         need(unchanged, "document must not change")
     elif task == "G05":
@@ -259,7 +272,7 @@ def chk(task, c, ans):
         need("78.11" in ans, "answer contains 78.115...")
         need(unchanged, "document must not change")
     elif task == "G07":
-        v = next((v for v in d.get("views", []) if v["id"] == "main"), {})
+        v = next((v for v in d.get("views", []) if v["id"] == N("main")), {})
         dom = v.get("x", {}).get("domain")
         vp = c["att"].get("viewport") or {}
         need(dom == [float(T140), float(T199)] or (vp.get("from_bar") == 140 and vp.get("to_bar") == 199),
@@ -269,7 +282,7 @@ def chk(task, c, ans):
     elif task == "G08":
         props = [p for p in d.get("proposals", []) if p["state"] == "pending"
                  and p["provenance"]["author"].get("name") == "scout"
-                 and any(o.get("op") == "add_finding" and "fact-rsi-cross70" in o.get("facts", [])
+                 and any(o.get("op") == "add_finding" and N("fact-rsi-cross70") in o.get("facts", [])
                          for o in p["ops"])]
         need(len(props) >= 2, "a new pending proposal with the finding (besides the setup one)")
         need(len(d.get("findings", [])) == 1, "finding not in the document")
@@ -298,7 +311,7 @@ def chk(task, c, ans):
             r = next((x for x in c["seen"] if x.get("id") == m.get("id")), {})
             if r.get("type") == "ack" and m["directive"].get("to") == "arkin" and len(st) == 2:
                 t1, t2 = st[0]["target"], st[1]["target"]
-                s1 = t1.get("series") == "rsi14" or t1.get("panel") == 1
+                s1 = t1.get("series") == N("rsi14") or t1.get("panel") == 1
                 b1 = 150 in (t1.get("from_bar"), t1.get("to_bar"))
                 b2 = 199 in (t2.get("from_bar"), t2.get("to_bar"))
                 ok = ok or (s1 and b1 and b2)
@@ -308,28 +321,28 @@ def chk(task, c, ans):
         ok = False
         for p in d.get("proposals", []) + [{"ops": [], "state": "x"}]:
             for o in p["ops"]:
-                if o.get("op") == "add_narrative" and o.get("about") == "fnd-overbought":
+                if o.get("op") == "add_narrative" and o.get("about") == N("fnd-overbought"):
                     st = o["steps"]
                     ser = [s["target"].get("series") for s in st]
-                    ok = ok or (len(st) == 3 and ser == ["px", "rsi14", "bb20"])
+                    ok = ok or (len(st) == 3 and ser == [N("px"), N("rsi14"), N("bb20")])
         for n in d.get("narratives", []):
             ser = [s["target"].get("series") for s in n["steps"]]
-            ok = ok or (n["about"] == "fnd-overbought" and ser == ["px", "rsi14", "bb20"])
+            ok = ok or (n["about"] == N("fnd-overbought") and ser == [N("px"), N("rsi14"), N("bb20")])
         need(ok, "three-step narrative px -> rsi14 -> bb20 about the finding")
     elif task == "G14":
-        m = series(d, "macd") or {}
+        m = series(d, N("macd")) or {}
         need(m.get("source", {}).get("params") == {"fast": 8.0, "slow": 21.0, "signal": 5.0}, "macd 8/21/5")
-        need(any(l.get("series") == "macd" for l in layers(d)), "macd layer kept")
+        need(any(l.get("series") == N("macd") for l in layers(d)), "macd layer kept")
         need(any(e.get("author") == "editor" and not e.get("approved_by") for e in c["agent_log"]),
              "editor wrote directly")
     elif task == "G15":
         ats = [r["at"] for r in results(c, "at")]
-        need(any(a["bar"] in (149, 150) and a["series"] == "px" for a in ats), "an `at` query for bar 150")
+        need(any(a["bar"] in (149, 150) and a["series"] == N("px") for a in ats), "an `at` query for bar 150")
         need(("117.66" in ans) or ("116.06" in ans), "answer contains the bar close (bar 150, or 149 if 1-based)")
         need(unchanged, "document must not change")
     elif task == "G16":
-        need(series(d, "bb20") is None, "bb20 removed")
-        need(not any(l.get("series") == "bb20" for l in layers(d)), "its layer removed")
+        need(series(d, N("bb20")) is None, "bb20 removed")
+        need(not any(l.get("series") == N("bb20") for l in layers(d)), "its layer removed")
         need(len(d.get("series", [])) == BASE_SERIES - 1, "nothing else removed")
     elif task == "G17":
         need(any(r["screens"] for r in results(c, "screen")), "screen of the user read")
@@ -337,20 +350,20 @@ def chk(task, c, ans):
         need(unchanged, "document must not change")
     elif task == "G18":
         subs = [m for conn, m in c["sent"] if m.get("type") == "subscribe"
-                and m.get("topic", {}).get("kind") == "finding" and m["topic"].get("finding") == "fnd-overbought"]
+                and m.get("topic", {}).get("kind") == "finding" and m["topic"].get("finding") == N("fnd-overbought")]
         need(bool(subs), "subscribed to the finding")
         need(any(m.get("type") == "notify" and m.get("event", {}).get("kind") == "finding_state"
                  and m["event"].get("state") == "invalidated" for m in c["seen"]), "notified on invalidation")
     elif task == "G19":
-        f = next((f for f in d.get("findings", []) if f["id"] == "fnd-overbought"), {})
+        f = next((f for f in d.get("findings", []) if f["id"] == N("fnd-overbought")), {})
         inv = f.get("invalidation", {})
         # The epilogue overwrites the invalidation; check the agent's own log entries instead.
         ok = False
         for e in c["agent_log"]:
             for ch in e["changes"]:
-                if ch.get("op") == "put_finding" and ch["finding"]["id"] == "fnd-overbought":
+                if ch.get("op") == "put_finding" and ch["finding"]["id"] == N("fnd-overbought"):
                     i = ch["finding"]["invalidation"]
-                    ok = ok or (i.get("kind") == "threshold" and i.get("series") == "px" and i.get("op") == "lt"
+                    ok = ok or (i.get("kind") == "threshold" and i.get("series") == N("px") and i.get("op") == "lt"
                                 and i.get("value") == 100.0)
         need(ok, "invalidation: px close < 100")
         need(f.get("claim", "").startswith("THYAO"), "finding kept")

@@ -1,0 +1,38 @@
+21:15  up 38 days,  8:59, 7 users, load averages: 2.85 4.72 4.41
+machine: aarch64-macos, cpu: Apple M4 Max, threads: 16
+bars=10000 reps=11 (single thread, release)
+study       variants    min ms    med ms    max ms  digest
+sma             1000      4.30      4.34      4.46  d9a393c2f397ae9e
+ema             1000      3.70      3.80      3.94  f9be271e91103539
+rsi             1000      8.64      8.97      9.04  9515526d5288453b
+macd            1000      7.33      7.50      7.55  d5a6c407256992e6
+bollinger       1000      8.22      8.56      8.98  7e683c082fb95dc9
+
+profile A by lane count (median ms; 'default' = the target's tuned value)
+study       default        1        2        4        8
+sma            4.25     9.56     7.17     4.23     8.17
+ema            3.74    11.96     6.56     3.77     7.53
+rsi            8.97    36.29    20.77    12.57     9.09
+macd           8.25    13.35     7.43     8.73    44.63
+bollinger      8.44     8.50     8.51     8.52     8.53
+
+profile B: 2,500 series (500 symbols x 5 timeframes, 9.25M bars), one study
+    case              items    min ms    med ms    max ms  digest
+B   sma                2500      5.52      6.28      6.56  4deca6b358b56f6c
+B   ema                2500      5.12      5.40      5.42  858efc3a7829a6ab
+B   rsi                2500     18.46     18.52     18.54  23d1bb6754b8ccae
+B   macd               2500     11.76     12.41     12.67  25dca317a156c644
+B   bollinger          2500     31.63     32.37     33.12  2aee14ef015f0228
+
+profile C: chained studies, 1,000 variants per family (10,000 bars)
+    case              items    min ms    med ms    max ms  digest
+C   ema>rsi            1000     11.29     11.56     12.23  d60c4040e327df75
+C   rsi>bollinger      1000     14.01     14.35     14.57  51d10314ec252891
+C   sma>ema>rsi        1000     15.75     16.02     16.17  8c536220fb4398a5
+
+profile D: live bank of 500 studies on 10,000 bars; latency per operation (all 500)
+    case                ops    min us    med us    p99 us    max us  digest
+D   tick              22000      1.50      1.75      2.17     12.00  4db86a7246f733bf
+D   new bar           11000      2.25      2.67      2.96    817.25  4db86a7246f733bf
+D   attach               11     25.93     26.68               27.23  (ms: build + 10,000 bars, push)
+D   attach (warm)        11     12.73     13.78               14.59  (ms: build + 10,000 bars, extend)

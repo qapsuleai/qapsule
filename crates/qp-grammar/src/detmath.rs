@@ -99,8 +99,8 @@ pub fn pow10_int(n: i32) -> f64 {
     }
 }
 
-/// Picks a 1/2/5 × 10^k step `>= raw` without `log10`/`powf` (identical to R0's
-/// `qp_render::scene::nice_step`).
+/// Picks a 1/2/5 × 10^k step `>= raw` without `log10`/`powf` (identical to the
+/// R0 layout's `nice_step`, frozen in `tests/r0_oracle`).
 #[must_use]
 pub fn nice_step(raw: f64) -> f64 {
     // Guard (security review): +inf would never leave the first loop; NaN, <= 0 and

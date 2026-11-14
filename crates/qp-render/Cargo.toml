@@ -21,14 +21,19 @@ spike-vello-gpu = ["dep:vello", "dep:pollster"]
 tiny-skia = { version = "0.12.0", default-features = false, features = ["std"] }
 fontdue = { version = "0.9.5", default-features = false }
 png = "0.18.1"
-qp-compute = { path = "../qp-compute" }
 qp-schema = { path = "../qp-schema" }
 qp-source = { path = "../qp-source" }
-serde = { version = "1", features = ["derive"] }
-serde_json = "1"
 vello_cpu = { version = "0.4.0", optional = true, default-features = false, features = ["std", "text", "u8_pipeline", "f32_pipeline"] }
 vello = { version = "0.12.0", optional = true }
 pollster = { version = "0.4", optional = true }
+
+[dev-dependencies]
+# Tests and examples only: the golden test and the 100k-bar example build their scenes
+# with the grammar compiler, fed with study values from the compute core. The renderer
+# itself never computes (no qp-compute in [dependencies]).
+qp-compute = { path = "../qp-compute" }
+qp-grammar = { path = "../qp-grammar" }
+serde_json = "1"
 
 [[example]]
 name = "spike_vello_cpu"

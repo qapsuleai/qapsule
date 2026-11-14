@@ -395,9 +395,43 @@ fn render(input: &Path, out: &Path, width: u32, height: u32) -> Result<Outcome, 
     let text = std::fs::read_to_string(input)
         .map_err(|e| format!("cannot read {}: {e}", input.display()))?;
     let bars = qp_render::parse_bars(&text).map_err(|e| format!("{}: {e}", input.display()))?;
-    let png = qp_render::render_png(&bars, width, height).map_err(|e| e.to_string())?;
+    let scene = r0_scene(&bars, width, height)?;
+    let png = qp_render::render_scene_png(&scene).map_err(|e| e.to_string())?;
     std::fs::write(out, png).map_err(|e| format!("cannot write {}: {e}", out.display()))?;
     Ok(Outcome::Ok)
+}
+
+/// The R0 chart (candles + SMA(20) of close, one linear panel) of a bar series: study
+/// values from the compute core, layout from the grammar compiler; the renderer only
+/// rasterizes the resulting scene.
+fn r0_scene(
+    series: &qp_schema::Series,
+    width: u32,
+    height: u32,
+) -> Result<qp_schema::scene::SceneDesc, String> {
+    const R0_VIEW: &str = r#"{"id":"r0","x":{"kind":"time"},
+      "panels":[{"id":0,"y":{"kind":"linear"}}],
+      "layers":[{"id":"candles","mark":"candle","series":"px","panel":0},
+                {"id":"sma","mark":"line","series":"sma20","panel":0}]}"#;
+    let bars = series.bars().ok_or("series has no embedded bars")?.to_vec();
+    let params = std::collections::BTreeMap::from([("period".to_owned(), 20.0)]);
+    let line = qp_compute::compute_bars("sma", &params, qp_compute::Field::Close, &bars)
+        .map_err(|e| e.to_string())?
+        .outputs
+        .into_values()
+        .next()
+        .unwrap_or_default();
+    let provider = qp_grammar::MemProvider::new()
+        .with_bars("px", bars, series.symbol(), series.interval.as_deref())
+        .with_values("sma20", "px", vec![("sma", line)], "sma", &["sma"])
+        .with_label("sma20", "SMA20");
+    let view = serde_json::from_str(R0_VIEW).map_err(|e| e.to_string())?;
+    qp_grammar::compile(
+        &view,
+        &provider,
+        &qp_grammar::CompileOptions::new(width, height),
+    )
+    .map_err(|e| e.to_string())
 }
 
 fn serve(init: &Path, root: &Path, batch_end: bool) -> Result<Outcome, String> {

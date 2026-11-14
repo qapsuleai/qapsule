@@ -28,11 +28,11 @@ pub struct MacdValue {
 
 impl Macd {
     /// # Errors
-    /// A zero period or `fast >= slow`.
+    /// A period of 0 or above [`crate::MAX_PERIOD`], or `fast >= slow`.
     pub fn new(fast: usize, slow: usize, signal: usize) -> Result<Self, ComputeError> {
-        if fast == 0 || slow == 0 || signal == 0 {
-            return Err(ComputeError::new("macd: periods must be >= 1"));
-        }
+        crate::check_period("macd", "fast", fast)?;
+        crate::check_period("macd", "slow", slow)?;
+        crate::check_period("macd", "signal", signal)?;
         if fast >= slow {
             return Err(ComputeError::new(format!(
                 "macd: fast ({fast}) must be < slow ({slow})"

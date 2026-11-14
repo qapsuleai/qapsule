@@ -50,11 +50,9 @@ pub struct BollingerValue {
 
 impl Bollinger {
     /// # Errors
-    /// `period == 0`, or `k` not finite and `> 0`.
+    /// `period` of 0 or above [`crate::MAX_PERIOD`], or `k` not finite and `> 0`.
     pub fn new(period: usize, k: f64) -> Result<Self, ComputeError> {
-        if period == 0 {
-            return Err(ComputeError::new("bollinger: period must be >= 1"));
-        }
+        crate::check_period("bollinger", "period", period)?;
         if !(k.is_finite() && k > 0.0) {
             return Err(ComputeError::new(format!(
                 "bollinger: k must be finite and > 0, got {k}"

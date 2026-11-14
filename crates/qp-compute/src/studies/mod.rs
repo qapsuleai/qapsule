@@ -26,7 +26,7 @@ pub use rsi::Rsi;
 pub(crate) use rsi::{rsi_from_avg_pass, split as rsi_split};
 pub use sma::Sma;
 
-/// `usize -> f64` for periods (validated `<= 1e9`, so exact).
+/// `usize -> f64` for periods (validated `<= MAX_PERIOD`, so exact).
 #[allow(clippy::cast_precision_loss)]
 pub(crate) fn pf(p: usize) -> f64 {
     p as f64

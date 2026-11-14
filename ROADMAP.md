@@ -7,7 +7,8 @@ Sıra, "önce boş olan yerde başla" ilkesine göredir: önce kapsül, sonra pr
 |-------|-------|---------------------|-------|
 | R0 | Temel: repo, şema v0, doğrulama düzeneği, çizim denemesi, eski koddan envanter | Sabit veriden deterministik PNG; aynı kod tarayıcıda da çiziyor; şema gidiş-dönüş testleri yeşil | Tamamlandı (2026-11-14, `rounds/R0/REPORT.md`) |
 | R1 | Hesap çekirdeği: akışkan, çok çıktılı, `f64`; seri kaynağı arayüzü; parametre taraması | Eski 5 indikatör yeni çekirdekte; 1.000 parametre varyasyonu hedef sürede | Tamamlandı (2026-11-14, `rounds/R1/REPORT.md`) |
-| R2 | Görsel gramer v0 ve headless çizim | Mum grafiği gramerle ifade ediliyor; altın görseller | Planlandı |
+| R2 | Görsel gramer v0 ve headless çizim | Mum grafiği gramerle ifade ediliyor; altın görseller | Hazır, koşulacak |
+| RP1 | Ara araştırma round'u: hesap çekirdeği performansı. Bilinen yöntemlerin ötesinde yaklaşımlar denenir | Dizüstü sınıfı hedefleri CI koşucusunda da tutuyor; denenen her yaklaşım ölçümüyle kayıtlı; bit-eşitlik korunuyor | Tamamlandı (2026-11-14, `rounds/RP1/REPORT.md`) |
 | R3 | Kapsül v0: şema, yaşam döngüsü, ilk olgu dedektörleri, anlam işaretleri v0 | Sahte akışta kapsül doğuyor, güncelleniyor, kendini geçersiz kılıyor | Planlandı |
 | R4 | Anlam zoom'u ve web görüntüleyici | Kapsülden tam grafiğe kesintisiz açılma | Planlandı |
 | R5 | Ajan yüzeyi: komut yolu, anlamsal okuma, MCP, karne | Ajan ekransız kapsül üretiyor; her öğe olguya izlenebiliyor | Planlandı |

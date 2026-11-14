@@ -1,0 +1,158 @@
+{
+ "name": "t-schema-errors",
+ "description": "Schema errors carry a JSON pointer, expected names and suggestions; framing of raw text.",
+ "covers": [
+  "error"
+ ],
+ "init": "fixtures/protocol/init/thyao.json",
+ "steps": [
+  {
+   "send": {
+    "conn": "e",
+    "msg": {
+     "type": "hello",
+     "protocol": "qp/0",
+     "principal": "editor",
+     "surface": {
+      "kind": "headless"
+     }
+    }
+   },
+   "expect": [
+    {
+     "conn": "e",
+     "msg": {
+      "type": "welcome",
+      "principal": "editor"
+     }
+    }
+   ]
+  },
+  {
+   "send_raw": {
+    "conn": "e",
+    "line": "{\"type\": \"command\", \"id\": \"c1\", \"ops\": [{\"op\": \"add_study\", \"study\": \"rsi\", \"inputs\": [\"px\"], \"show\": {\"view\": \"main\", \"wiht\": \"rsi14\"}}]}"
+   },
+   "expect": [
+    {
+     "conn": "e",
+     "msg": {
+      "type": "error",
+      "id": "c1",
+      "error": {
+       "code": "schema",
+       "path": "/ops/0/show/wiht",
+       "did_you_mean": [
+        "with",
+        "view"
+       ]
+      }
+     }
+    }
+   ]
+  },
+  {
+   "send_raw": {
+    "conn": "e",
+    "line": "{\"type\": \"query\", \"id\": \"q1\", \"query\": {\"kind\": \"lst\", \"collection\": \"series\"}}"
+   },
+   "expect": [
+    {
+     "conn": "e",
+     "msg": {
+      "type": "error",
+      "id": "q1",
+      "error": {
+       "code": "schema",
+       "path": "/query/kind",
+       "did_you_mean": [
+        "list",
+        "at",
+        "get",
+        "log"
+       ]
+      }
+     }
+    }
+   ]
+  },
+  {
+   "send_raw": {
+    "conn": "e",
+    "line": "{\"type\": \"command\", \"id\": \"c2\", \"ops\": [{\"op\": \"undo\", \"seq\": -1}]}"
+   },
+   "expect": [
+    {
+     "conn": "e",
+     "msg": {
+      "type": "error",
+      "id": "c2",
+      "error": {
+       "code": "schema",
+       "path": "/ops/0/seq"
+      }
+     }
+    }
+   ]
+  },
+  {
+   "send_raw": {
+    "conn": "e",
+    "line": "{\"type\": \"command\", \"id\": \"c3\", \"ops\": [{\"op\": \"remove\"}]}"
+   },
+   "expect": [
+    {
+     "conn": "e",
+     "msg": {
+      "type": "error",
+      "id": "c3",
+      "error": {
+       "code": "schema",
+       "path": "/ops/0",
+       "expected": [
+        "id"
+       ]
+      }
+     }
+    }
+   ]
+  },
+  {
+   "send": {
+    "conn": "e",
+    "msg": {
+     "type": "command",
+     "id": "c4",
+     "ops": [
+      {
+       "op": "add_study",
+       "study": "rs",
+       "inputs": [
+        "px"
+       ]
+      }
+     ]
+    }
+   },
+   "expect": [
+    {
+     "conn": "e",
+     "msg": {
+      "type": "error",
+      "id": "c4",
+      "error": {
+       "code": "invalid",
+       "path": "/ops/0/study",
+       "did_you_mean": [
+        "rsi"
+       ]
+      }
+     }
+    }
+   ]
+  }
+ ],
+ "final": {
+  "log_len": 0
+ }
+}

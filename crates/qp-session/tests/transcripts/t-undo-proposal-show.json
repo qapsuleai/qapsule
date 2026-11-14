@@ -1,0 +1,229 @@
+{
+ "name": "t-undo-proposal-show",
+ "description": "Proposed show_finding is accepted with the proposal's ids; the owner undoes the accepted entry; replay holds.",
+ "covers": [
+  "proposal",
+  "undo",
+  "presenter"
+ ],
+ "init": "fixtures/protocol/init/thyao.json",
+ "steps": [
+  {
+   "send": {
+    "conn": "a",
+    "msg": {
+     "type": "hello",
+     "protocol": "qp/0",
+     "principal": "arkin",
+     "surface": {
+      "kind": "desktop"
+     }
+    }
+   },
+   "expect": [
+    {
+     "conn": "a",
+     "msg": {
+      "type": "welcome",
+      "principal": "arkin"
+     }
+    }
+   ]
+  },
+  {
+   "send": {
+    "conn": "s",
+    "msg": {
+     "type": "hello",
+     "protocol": "qp/0",
+     "principal": "scout",
+     "surface": {
+      "kind": "headless"
+     }
+    }
+   },
+   "expect": [
+    {
+     "conn": "s",
+     "msg": {
+      "type": "welcome",
+      "principal": "scout"
+     }
+    }
+   ]
+  },
+  {
+   "send": {
+    "conn": "s",
+    "msg": {
+     "type": "command",
+     "id": "c1",
+     "ops": [
+      {
+       "op": "show_finding",
+       "finding": "fnd-overbought"
+      }
+     ]
+    }
+   },
+   "expect": [
+    {
+     "conn": "s",
+     "msg": {
+      "type": "ack",
+      "id": "c1",
+      "status": "proposed",
+      "seq": 1,
+      "proposal": "prop-1",
+      "created": [
+       "view-1-0"
+      ]
+     }
+    }
+   ]
+  },
+  {
+   "send": {
+    "conn": "a",
+    "msg": {
+     "type": "command",
+     "id": "c2",
+     "ops": [
+      {
+       "op": "accept_proposal",
+       "proposal": "prop-1",
+       "note": "ok"
+      }
+     ]
+    }
+   },
+   "expect": [
+    {
+     "conn": "a",
+     "msg": {
+      "type": "ack",
+      "id": "c2",
+      "status": "applied",
+      "seq": 2,
+      "created": [
+       "view-1-0"
+      ]
+     }
+    }
+   ]
+  },
+  {
+   "send": {
+    "conn": "a",
+    "msg": {
+     "type": "query",
+     "id": "q1",
+     "query": {
+      "kind": "get",
+      "id": "view-1-0"
+     }
+    }
+   },
+   "expect": [
+    {
+     "conn": "a",
+     "msg": {
+      "type": "result",
+      "id": "q1",
+      "seq": 2,
+      "data": {
+       "kind": "item",
+       "collection": "views",
+       "item": {
+        "id": "view-1-0",
+        "y": [
+         {
+          "kind": "linear"
+         },
+         {
+          "kind": "linear"
+         }
+        ]
+       }
+      }
+     }
+    }
+   ]
+  },
+  {
+   "send": {
+    "conn": "a",
+    "msg": {
+     "type": "command",
+     "id": "c3",
+     "ops": [
+      {
+       "op": "undo",
+       "seq": 2
+      }
+     ]
+    }
+   },
+   "expect": [
+    {
+     "conn": "a",
+     "msg": {
+      "type": "ack",
+      "id": "c3",
+      "status": "applied",
+      "seq": 3
+     }
+    }
+   ]
+  },
+  {
+   "send": {
+    "conn": "a",
+    "msg": {
+     "type": "query",
+     "id": "q2",
+     "query": {
+      "kind": "list",
+      "collection": "proposals",
+      "state": "pending"
+     }
+    }
+   },
+   "expect": [
+    {
+     "conn": "a",
+     "msg": {
+      "type": "result",
+      "id": "q2",
+      "seq": 3,
+      "data": {
+       "kind": "items",
+       "collection": "proposals",
+       "items": [
+        {
+         "id": "prop-1",
+         "state": "pending"
+        }
+       ]
+      }
+     }
+    }
+   ]
+  }
+ ],
+ "final": {
+  "log_len": 3,
+  "document": {
+   "capsules": [
+    {
+     "id": "cap-overbought"
+    }
+   ],
+   "views": [
+    {
+     "id": "main"
+    }
+   ]
+  }
+ }
+}

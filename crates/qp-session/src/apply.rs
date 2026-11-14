@@ -126,11 +126,12 @@ pub fn apply_change(doc: &mut Document, change: &ChangeOp) -> Result<ChangeOp, S
             }
             v.layers.insert(i, layer.clone());
             ChangeOp::DeleteLayer {
+                layer: None,
                 view: view.clone(),
                 index: *index,
             }
         }
-        ChangeOp::DeleteLayer { view, index } => {
+        ChangeOp::DeleteLayer { view, index, .. } => {
             let v = view_mut(doc, view)?;
             let i = *index as usize;
             if i >= v.layers.len() {
@@ -228,6 +229,12 @@ pub fn apply_change(doc: &mut Document, change: &ChangeOp) -> Result<ChangeOp, S
                 bars: removed,
             }
         }
+        ChangeOp::PutLayer { .. }
+        | ChangeOp::PutPanel { .. }
+        | ChangeOp::DeletePanel { .. }
+        | ChangeOp::SetEmphasis { .. } => {
+            return Err("grammar changes are not implemented yet (R2/T5)".to_owned())
+        }
         ChangeOp::SetLastBar { series, bar } => {
             let b = bars_mut(doc, series)?;
             let last = b
@@ -315,6 +322,10 @@ pub fn touched(change: &ChangeOp) -> &str {
         ChangeOp::AppendBars { series, .. }
         | ChangeOp::TruncateBars { series, .. }
         | ChangeOp::SetLastBar { series, .. } => series,
+        ChangeOp::PutLayer { view, .. }
+        | ChangeOp::PutPanel { view, .. }
+        | ChangeOp::DeletePanel { view, .. }
+        | ChangeOp::SetEmphasis { view, .. } => view,
     }
 }
 

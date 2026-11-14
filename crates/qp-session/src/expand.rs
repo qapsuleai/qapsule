@@ -264,10 +264,7 @@ fn layer_change(view: &View, index: Option<u32>, layer: Layer) -> ChangeOp {
     } else {
         let mut v = view.clone();
         while v.y.len() <= layer.panel as usize {
-            v.y.push(Scale {
-                kind: ScaleKind::Linear,
-                domain: None,
-            });
+            v.y.push(Scale::new(ScaleKind::Linear));
         }
         v.layers.insert(idx as usize, layer);
         ChangeOp::PutView {
@@ -437,12 +434,8 @@ pub(crate) fn expand_op(
                 index: None,
             }];
             if let Some((view, panel)) = show_view {
-                let layer = Layer {
-                    mark: Mark::Line,
-                    series: Some(sid),
-                    panel,
-                    encoding: BTreeMap::new(),
-                };
+                let mut layer = Layer::new(Mark::Line, panel);
+                layer.series = Some(sid);
                 out.push(layer_change(view, None, layer));
             }
             Ok(out)
@@ -570,6 +563,7 @@ pub(crate) fn expand_op(
                 .build());
             }
             Ok(vec![ChangeOp::DeleteLayer {
+                layer: None,
                 view: view.clone(),
                 index: *index,
             }])
@@ -959,6 +953,21 @@ pub(crate) fn expand_op(
             }])
         }
         Op::Undo { seq } => expand_undo(*seq, p, ctx),
+        Op::InsertLayer { .. }
+        | Op::DeleteLayer { .. }
+        | Op::MoveLayer { .. }
+        | Op::SetEncoding { .. }
+        | Op::InsertPanel { .. }
+        | Op::DeletePanel { .. }
+        | Op::MovePanel { .. }
+        | Op::SetPanel { .. }
+        | Op::SetScale { .. }
+        | Op::SetEmphasis { .. } => Err(E::new(
+            ErrorCode::Unsupported,
+            "grammar operations are not implemented yet (R2/T5)",
+        )
+        .at(p.to_owned())
+        .build()),
         Op::RejectProposal { proposal, note } => {
             let pr = need_proposal(doc, proposal, &ptr(p, "proposal"))?;
             let mut np = pr.clone();
@@ -1156,6 +1165,7 @@ fn expand_remove(doc: &Document, id: &str, p: &str) -> PResult<Vec<ChangeOp>> {
             for (i, l) in v.layers.iter().enumerate().rev() {
                 if l.series.as_deref() == Some(id) {
                     out.push(ChangeOp::DeleteLayer {
+                        layer: None,
                         view: v.id.clone(),
                         index: u32::try_from(i).unwrap_or(u32::MAX),
                     });
@@ -1382,6 +1392,7 @@ pub(crate) fn summarize(op: &Op) -> String {
         },
         Op::AcceptProposal { proposal, .. } => format!("accept_proposal {proposal}"),
         Op::RejectProposal { proposal, .. } => format!("reject_proposal {proposal}"),
+        other => format!("{other:?}"),
     }
 }
 

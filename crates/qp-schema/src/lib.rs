@@ -5,9 +5,12 @@
 
 use std::path::{Path, PathBuf};
 
+pub mod grammar;
 pub mod protocol;
+pub mod scene;
 mod types;
 
+pub use grammar::{Encoding, Layer, Mark, Panel, Scale, ScaleKind, View};
 pub use types::*;
 
 fn schema_of<T: schemars::JsonSchema>() -> serde_json::Value {
@@ -23,6 +26,7 @@ pub fn json_schemas() -> Vec<(&'static str, serde_json::Value)> {
         ("Fact", schema_of::<Fact>()),
         ("Finding", schema_of::<Finding>()),
         ("View", schema_of::<View>()),
+        ("SceneDesc", schema_of::<scene::SceneDesc>()),
         ("Command", schema_of::<Command>()),
         ("Intent", schema_of::<Intent>()),
         ("Ledger", schema_of::<Ledger>()),

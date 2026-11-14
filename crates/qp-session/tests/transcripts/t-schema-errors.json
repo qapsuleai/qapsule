@@ -69,6 +69,7 @@
         "list",
         "at",
         "get",
+        "hit",
         "log"
        ]
       }

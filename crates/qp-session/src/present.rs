@@ -1,7 +1,5 @@
 //! The deterministic presenter (`docs/PROTOCOL.md` §10.2, §10.3).
 
-use std::collections::BTreeMap;
-
 use qp_schema::protocol::{Presentation, Profile, SeriesValues, SurfaceKind};
 use qp_schema::{Depth, Document, Finding, Layer, Mark, Scale, ScaleKind, View};
 
@@ -65,28 +63,19 @@ pub(crate) fn presenter_view(doc: &Document, finding: &Finding, id: &str) -> Res
     let from = usize::try_from(fact.bar.saturating_sub(30))
         .unwrap_or(0)
         .min(bars.len() - 1);
-    let mut layers = vec![Layer {
-        mark: Mark::Candle,
-        series: Some(bs.id.clone()),
-        panel: 0,
-        encoding: BTreeMap::new(),
-    }];
+    let mut candles = Layer::new(Mark::Candle, 0);
+    candles.series = Some(bs.id.clone());
+    let mut layers = vec![candles];
     let mut panels = 1;
     if fact.series != bs.id {
         panels = 2;
-        layers.push(Layer {
-            mark: Mark::Line,
-            series: Some(fact.series.clone()),
-            panel: 1,
-            encoding: BTreeMap::new(),
-        });
+        let mut line = Layer::new(Mark::Line, 1);
+        line.series = Some(fact.series.clone());
+        layers.push(line);
         if let Some(level) = fact.evidence.get("level") {
-            layers.push(Layer {
-                mark: Mark::Rule,
-                series: None,
-                panel: 1,
-                encoding: [("y".to_owned(), num(*level))].into_iter().collect(),
-            });
+            let mut rule = Layer::new(Mark::Rule, 1);
+            rule.encoding.y = Some(qp_schema::grammar::Position::Name(num(*level)));
+            layers.push(rule);
         }
     }
     #[allow(clippy::cast_precision_loss)]
@@ -96,16 +85,14 @@ pub(crate) fn presenter_view(doc: &Document, finding: &Finding, id: &str) -> Res
         title: None,
         display_tz: None,
         x: Scale {
-            kind: ScaleKind::Time,
             domain: Some(domain),
+            ..Scale::new(ScaleKind::Time)
         },
-        y: (0..panels)
-            .map(|_| Scale {
-                kind: ScaleKind::Linear,
-                domain: None,
-            })
-            .collect(),
+        y: (0..panels).map(|_| Scale::new(ScaleKind::Linear)).collect(),
         layers,
+        theme: None,
+        panels: Vec::new(),
+        emphasis: Vec::new(),
     })
 }
 

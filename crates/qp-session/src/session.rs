@@ -574,6 +574,7 @@ impl Session {
                     let mut v = vec![out(
                         conn,
                         ServerMsg::Ack {
+                            resolved: std::collections::BTreeMap::new(),
                             id,
                             status: AckStatus::Delivered,
                             seq: None,
@@ -656,6 +657,7 @@ impl Session {
         vec![out(
             conn,
             ServerMsg::Welcome {
+                summary: None,
                 protocol: PROTOCOL_VERSION.to_owned(),
                 doc: self.doc.id.clone(),
                 principal: p.id,
@@ -824,6 +826,7 @@ impl Session {
             let mut lines = vec![out(
                 &conn,
                 ServerMsg::Ack {
+                    resolved: std::collections::BTreeMap::new(),
                     id: id.to_owned(),
                     status: AckStatus::Applied,
                     seq: Some(seq),
@@ -898,6 +901,7 @@ impl Session {
         let mut lines = vec![out(
             &conn,
             ServerMsg::Ack {
+                resolved: std::collections::BTreeMap::new(),
                 id: id.to_owned(),
                 status: AckStatus::Proposed,
                 seq: Some(seq),
@@ -993,6 +997,7 @@ impl Session {
         let mut lines = vec![out(
             conn,
             ServerMsg::Ack {
+                resolved: std::collections::BTreeMap::new(),
                 id: id.to_owned(),
                 status: AckStatus::Applied,
                 seq: Some(seq),
@@ -1549,6 +1554,7 @@ impl Session {
 
 fn ack(id: String, status: AckStatus) -> ServerMsg {
     ServerMsg::Ack {
+        resolved: std::collections::BTreeMap::new(),
         id,
         status,
         seq: None,

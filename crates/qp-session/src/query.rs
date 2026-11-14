@@ -216,6 +216,7 @@ impl Session {
                 let role = self.conns[ci].role;
                 Ok(QueryResult::Description {
                     description: Description {
+                        thresholds: std::collections::BTreeMap::new(),
                         protocol: PROTOCOL_VERSION.to_owned(),
                         doc: self.doc.id.clone(),
                         ops: variant_names(&op_schema, "op"),
@@ -445,6 +446,12 @@ impl Session {
                     },
                 })
             }
+            Query::Hit { .. } => Err(E::new(
+                ErrorCode::Unsupported,
+                "the point query is not implemented yet (R2/T6)",
+            )
+            .at(qp.to_owned())
+            .build()),
             Query::Present { finding, surface } => {
                 let f = match finding {
                     Some(id) => need_finding(&self.doc, id, &ptr(qp, "finding"))?.clone(),
@@ -655,6 +662,9 @@ impl Session {
             panels: panels
                 .into_iter()
                 .map(|(panel, (series, marks))| PanelInfo {
+                    name: None,
+                    scale: None,
+                    layers: Vec::new(),
                     panel,
                     series,
                     marks,
@@ -798,6 +808,7 @@ impl Session {
                 self.focus.insert(
                     principal,
                     Target {
+                        layer: None,
                         view: Some(view.id.clone()),
                         panel: Some(*panel),
                         series: None,

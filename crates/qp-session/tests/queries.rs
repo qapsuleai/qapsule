@@ -129,7 +129,7 @@ fn describe_lists_everything() {
     let mut h = two();
     let r = h.query("a", json!({"kind":"describe"}));
     let d = &r["data"]["description"];
-    assert_eq!(d["ops"].as_array().unwrap().len(), 22);
+    assert_eq!(d["ops"].as_array().unwrap().len(), 32); // 22 in qp/0 (RD1) + 10 grammar ops (R2)
     assert!(d["queries"].as_array().unwrap().contains(&json!("present")));
     assert_eq!(d["topics"].as_array().unwrap().len(), 6);
     assert_eq!(d["role"], "owner");

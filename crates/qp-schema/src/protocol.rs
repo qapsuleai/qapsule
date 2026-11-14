@@ -15,9 +15,10 @@ use std::collections::BTreeMap;
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 
+use crate::grammar::{Layer, View};
 use crate::types::{
-    Author, Bar, CapsuleState, Condition, Depth, Document, Fact, Finding, Glyph, Intent, Layer,
-    LedgerEntry, Series, TimestampMs, View,
+    Author, Bar, CapsuleState, Condition, Depth, Document, Fact, Finding, Glyph, Intent,
+    LedgerEntry, Series, TimestampMs,
 };
 
 /// The protocol version string of this module.
@@ -146,6 +147,10 @@ pub enum ServerMsg {
         features: Vec<String>,
         /// Limits the authority enforces.
         limits: Limits,
+        /// What the document contains, compactly, so the first message can already
+        /// refer to it (R2).
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        summary: Option<DocSummary>,
     },
     /// Positive reply to `command`, `subscribe`, `unsubscribe`, `attend`.
     Ack {
@@ -165,6 +170,10 @@ pub enum ServerMsg {
         /// For an applied `undo`: the log position that was undone.
         #[serde(default, skip_serializing_if = "Option::is_none")]
         undoes: Option<Seq>,
+        /// References by meaning resolved in this command (R2): JSON pointer in the
+        /// command → the id it resolved to. The log stores the ids.
+        #[serde(default, skip_serializing_if = "BTreeMap::is_empty")]
+        resolved: BTreeMap<String, String>,
     },
     /// Reply to `query` and `input`.
     Result {
@@ -387,7 +396,8 @@ pub struct Show {
     /// over `panel`. If neither is given, a new panel is added below the others.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub with: Option<String>,
-    /// Panel index (0 = price panel).
+    /// Panel id (R2: the panel's stable id, not its position; in a view loaded from a
+    /// `qp/0` document the ids equal the old positions).
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub panel: Option<u32>,
 }
@@ -399,9 +409,12 @@ pub struct Target {
     /// View id.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub view: Option<String>,
-    /// Panel index.
+    /// Panel id.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub panel: Option<u32>,
+    /// Layer id (R2).
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub layer: Option<String>,
     /// Series id (e.g. the series whose value matters).
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub series: Option<String>,
@@ -531,17 +544,22 @@ pub enum Op {
         /// The view.
         view: View,
     },
-    /// Add a layer to a view.
+    /// Add a layer to a view. Prefer `insert_layer` (placement by id).
     AddLayer {
         /// View id.
         view: String,
         /// The layer.
         layer: Layer,
-        /// Position in the layer list; appended if absent.
+        /// **Deprecated (`qp/0`).** Position in the layer list; appended if absent.
+        /// Positions shift under concurrent writes; use `insert_layer` with
+        /// `after`/`before`.
         #[serde(default, skip_serializing_if = "Option::is_none")]
+        #[schemars(extend("deprecated" = true))]
         index: Option<u32>,
     },
-    /// Remove a layer from a view by position.
+    /// **Deprecated (`qp/0`).** Remove a layer from a view by position; use
+    /// `delete_layer` (by id).
+    #[schemars(extend("deprecated" = true))]
     RemoveLayer {
         /// View id.
         view: String,
@@ -662,6 +680,137 @@ pub enum Op {
         #[serde(default, skip_serializing_if = "Option::is_none")]
         view: Option<String>,
     },
+    /// Insert a layer into a view, placed by id: after layer `after`, before layer
+    /// `before`, or at the end. The layer's `panel` must name an existing panel (R2).
+    InsertLayer {
+        /// View id.
+        view: String,
+        /// The layer (id assigned if absent).
+        layer: Layer,
+        /// Place it right after this layer.
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        after: Option<String>,
+        /// Place it right before this layer.
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        before: Option<String>,
+    },
+    /// Delete a layer by id.
+    DeleteLayer {
+        /// View id.
+        view: String,
+        /// Layer id.
+        layer: String,
+    },
+    /// Move a layer: to another panel, and/or to another place in the paint order.
+    MoveLayer {
+        /// View id.
+        view: String,
+        /// Layer id.
+        layer: String,
+        /// Target panel id.
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        panel: Option<u32>,
+        /// Place it right after this layer.
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        after: Option<String>,
+        /// Place it right before this layer.
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        before: Option<String>,
+    },
+    /// Change a layer's encoding: the channels given replace the current ones, the
+    /// channels in `unset` are removed; `origin` entries are merged. Other channels stay.
+    SetEncoding {
+        /// View id.
+        view: String,
+        /// Layer id.
+        layer: String,
+        /// Channels to set.
+        #[serde(default)]
+        encoding: crate::grammar::Encoding,
+        /// Channel names to remove (`x`, `y`, `y2`, `color`, `opacity`, `width`,
+        /// `size`, `text`).
+        #[serde(default, skip_serializing_if = "Vec::is_empty")]
+        unset: Vec<String>,
+        /// Origins to add or replace (JSON pointer inside the layer → origin).
+        #[serde(default, skip_serializing_if = "BTreeMap::is_empty")]
+        origin: BTreeMap<String, crate::grammar::Origin>,
+        /// New legend text.
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        label: Option<String>,
+    },
+    /// Insert a panel (with its layers, optionally) after/before another panel, or at
+    /// the bottom. `ack.created`: the panel id (decimal), then the layer ids.
+    InsertPanel {
+        /// View id.
+        view: String,
+        /// The panel (id assigned if absent: largest id + 1).
+        panel: crate::grammar::Panel,
+        /// Layers to create in it (their `panel` field is set to the new panel).
+        #[serde(default, skip_serializing_if = "Vec::is_empty")]
+        layers: Vec<Layer>,
+        /// Place it right below this panel.
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        after: Option<u32>,
+        /// Place it right above this panel.
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        before: Option<u32>,
+    },
+    /// Delete a panel and every layer drawn in it.
+    DeletePanel {
+        /// View id.
+        view: String,
+        /// Panel id.
+        panel: u32,
+    },
+    /// Move a panel up or down the stack.
+    MovePanel {
+        /// View id.
+        view: String,
+        /// Panel id.
+        panel: u32,
+        /// Place it right below this panel.
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        after: Option<u32>,
+        /// Place it right above this panel.
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        before: Option<u32>,
+    },
+    /// Rename a panel or change its relative height.
+    SetPanel {
+        /// View id.
+        view: String,
+        /// Panel id.
+        panel: u32,
+        /// New name.
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        name: Option<String>,
+        /// New relative height (> 0).
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        weight: Option<f64>,
+    },
+    /// Change a scale by id (`"x"`, `"y<panel>"`): kind and/or fixed domain.
+    SetScale {
+        /// View id.
+        view: String,
+        /// Scale id.
+        scale: String,
+        /// New kind (`linear`/`log` for value scales; the time axis stays `time`).
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        kind: Option<crate::grammar::ScaleKind>,
+        /// New fixed domain `[min, max]` (on `x`: epoch ms).
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        domain: Option<[f64; 2]>,
+        /// Clear the fixed domain (automatic again).
+        #[serde(default, skip_serializing_if = "std::ops::Not::not")]
+        auto_domain: bool,
+    },
+    /// Replace a view's persistent emphasis list (empty clears it).
+    SetEmphasis {
+        /// View id.
+        view: String,
+        /// The emphasis list.
+        emphasis: Vec<crate::grammar::Emphasis>,
+    },
     /// Remove an item by id. Removing a series also removes the layers that draw it;
     /// it fails with `in_use` if other items (studies, facts, conditions) depend on it.
     Remove {
@@ -753,6 +902,44 @@ pub enum ChangeOp {
         view: String,
         /// Position.
         index: u32,
+        /// Id of the layer at `index` (R2; informational, checked on apply when present).
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        layer: Option<String>,
+    },
+    /// Put a layer at `index`: a layer with the same id is removed first (so this both
+    /// replaces and moves); otherwise it is inserted (R2).
+    PutLayer {
+        /// View id.
+        view: String,
+        /// Final position in the layer list.
+        index: u32,
+        /// The complete layer.
+        layer: Layer,
+    },
+    /// Put a panel at `index` in the panel list: a panel with the same id is removed
+    /// first; otherwise it is inserted (R2).
+    PutPanel {
+        /// View id.
+        view: String,
+        /// Final position in the panel list.
+        index: u32,
+        /// The complete panel.
+        panel: crate::grammar::Panel,
+    },
+    /// Delete a panel by id (its layers are deleted by earlier `delete_layer` changes)
+    /// (R2).
+    DeletePanel {
+        /// View id.
+        view: String,
+        /// Panel id.
+        panel: u32,
+    },
+    /// Replace a view's emphasis list (R2).
+    SetEmphasis {
+        /// View id.
+        view: String,
+        /// The emphasis list.
+        emphasis: Vec<crate::grammar::Emphasis>,
     },
     /// Set (or clear) a view's horizontal domain, epoch ms `[from, to]`.
     SetXDomain {
@@ -1044,6 +1231,25 @@ pub enum Query {
         #[serde(default, skip_serializing_if = "Option::is_none")]
         principal: Option<String>,
     },
+    /// Point query (R2): what is drawn at pixel (`x`, `y`) of a view rendered at
+    /// `width` x `height`. Answered from the scene description, without rendering. The
+    /// visible range is the asker's viewport of that view if it has one, otherwise the
+    /// view's persistent range, otherwise all bars.
+    Hit {
+        /// View id; the asker's current view if absent.
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        view: Option<String>,
+        /// Pixel x (0 = left edge).
+        x: f64,
+        /// Pixel y (0 = top edge).
+        y: f64,
+        /// Frame width in pixels (default 1200).
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        width: Option<u32>,
+        /// Frame height in pixels (default 600).
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        height: Option<u32>,
+    },
     /// Where a principal is looking (last viewport and focus) and the attention
     /// directives addressed to them.
     Attention {
@@ -1120,12 +1326,104 @@ pub struct Viewport {
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
 #[serde(deny_unknown_fields)]
 pub struct PanelInfo {
-    /// Panel index.
+    /// Panel id (R2: stable id; equals the old position in `qp/0` documents).
     pub panel: u32,
     /// Series drawn in it, in layer order (e.g. `["px","bb20"]`).
     pub series: Vec<String>,
     /// Marks used, in layer order.
-    pub marks: Vec<crate::types::Mark>,
+    pub marks: Vec<crate::grammar::Mark>,
+    /// Panel name, if any (R2).
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub name: Option<String>,
+    /// Value scale kind and visible domain `[min, max]` (R2).
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub scale: Option<ScaleInfo>,
+    /// Layers in paint order (R2).
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub layers: Vec<LayerInfo>,
+}
+
+/// A value scale as drawn (R2).
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
+#[serde(deny_unknown_fields)]
+pub struct ScaleInfo {
+    /// Scale id.
+    pub id: String,
+    /// Kind.
+    pub kind: crate::grammar::ScaleKind,
+    /// Visible domain `[min, max]`.
+    pub domain: [f64; 2],
+}
+
+/// One layer as drawn, semantically (R2).
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
+#[serde(deny_unknown_fields)]
+pub struct LayerInfo {
+    /// Layer id.
+    pub id: String,
+    /// Mark.
+    pub mark: crate::grammar::Mark,
+    /// Data source.
+    pub data: crate::scene::DataSource,
+    /// Fields drawn.
+    pub fields: Vec<String>,
+    /// Legend text.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub label: Option<String>,
+    /// Constants and their origins.
+    #[serde(default, skip_serializing_if = "BTreeMap::is_empty")]
+    pub constants: BTreeMap<String, crate::scene::ResolvedConstant>,
+    /// Number of drawn elements in the visible range.
+    pub items: u64,
+    /// Last drawn values (field → value) in the visible range, if any.
+    #[serde(default, skip_serializing_if = "BTreeMap::is_empty")]
+    pub last: BTreeMap<String, f64>,
+}
+
+/// Answer to the point query (R2).
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
+#[serde(deny_unknown_fields)]
+pub struct HitInfo {
+    /// View id.
+    pub view: String,
+    /// Panel under the pixel, if any.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub panel: Option<u32>,
+    /// Bar slot under the pixel, if inside the plot.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub bar: Option<u64>,
+    /// Time of that bar, if it exists.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub t: Option<TimestampMs>,
+    /// The panel's scale value at the pixel's y.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub value: Option<f64>,
+    /// The topmost element at the pixel, if any ("no item" when absent).
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub item: Option<HitItem>,
+}
+
+/// The element found by a point query (R2).
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
+#[serde(deny_unknown_fields)]
+pub struct HitItem {
+    /// Layer id.
+    pub layer: String,
+    /// Mark.
+    pub mark: crate::grammar::Mark,
+    /// Data source.
+    pub data: crate::scene::DataSource,
+    /// Bar of the element, if it has one.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub bar: Option<u64>,
+    /// Time of the element, if it has one.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub t: Option<TimestampMs>,
+    /// Values drawn by the element.
+    pub values: BTreeMap<String, f64>,
+    /// Origins of constants the element draws, if any.
+    #[serde(default, skip_serializing_if = "BTreeMap::is_empty")]
+    pub constants: BTreeMap<String, crate::scene::ResolvedConstant>,
 }
 
 /// What one surface shows.
@@ -1221,6 +1519,9 @@ pub struct Description {
     pub topics: Vec<String>,
     /// Study names and their default parameters.
     pub studies: BTreeMap<String, BTreeMap<String, f64>>,
+    /// Named thresholds usable as origins (R2), e.g. `rsi.overbought` → 70.
+    #[serde(default, skip_serializing_if = "BTreeMap::is_empty")]
+    pub thresholds: BTreeMap<String, f64>,
     /// Known principals and roles.
     pub principals: Vec<Principal>,
     /// The asker's role.
@@ -1295,6 +1596,11 @@ pub enum QueryResult {
     Attention {
         /// The state.
         attention: AttentionState,
+    },
+    /// Answer to the point query `hit` (R2).
+    Hit {
+        /// What is at the pixel.
+        hit: HitInfo,
     },
     /// Answer to `present`.
     Presentation {
@@ -1532,6 +1838,22 @@ pub enum ErrorCode {
     Limit,
     /// Recognized but not supported here (e.g. a feature not negotiated).
     Unsupported,
+    /// A numeric constant of a layer has no origin (fact, named threshold or series
+    /// value) (R2). `path` points at the constant; `candidates` lists origins to use.
+    NoOrigin,
+    /// A reference by meaning matches more than one item (R2). `candidates` lists them,
+    /// best first; the authority never picks one at random.
+    Ambiguous,
+}
+
+/// One option offered by an error (R2): an id (or an origin, as JSON) and what it is.
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
+#[serde(deny_unknown_fields)]
+pub struct Candidate {
+    /// The id to use, or the value to write (e.g. an origin object as JSON text).
+    pub id: String,
+    /// What it is, in a few words.
+    pub about: String,
 }
 
 /// A protocol error. Written so that an agent can correct its message without help.
@@ -1557,6 +1879,150 @@ pub struct ProtocolError {
     /// How to fix it, in one sentence.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub hint: Option<String>,
+    /// For `no_origin` and `ambiguous` (R2): the options, best first.
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub candidates: Vec<Candidate>,
+}
+
+// ---------------------------------------------------------------------------
+// Document summary (R2)
+// ---------------------------------------------------------------------------
+
+/// A compact summary of a document: enough to refer to its items in the first message.
+#[derive(Debug, Clone, Default, PartialEq, Serialize, Deserialize, JsonSchema)]
+#[serde(deny_unknown_fields)]
+pub struct DocSummary {
+    /// Series.
+    pub series: Vec<SeriesSummary>,
+    /// Views.
+    pub views: Vec<ViewSummary>,
+    /// Facts, latest bar last.
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub facts: Vec<FactSummary>,
+    /// Findings, latest fact last.
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub findings: Vec<FindingSummary>,
+    /// Pending proposals.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub pending_proposals: Option<u32>,
+    /// True when lists were cut to fit the summary limit.
+    #[serde(default, skip_serializing_if = "std::ops::Not::not")]
+    pub truncated: bool,
+}
+
+/// One series in a summary.
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
+#[serde(deny_unknown_fields)]
+pub struct SeriesSummary {
+    /// Series id.
+    pub id: String,
+    /// `bars`, `points` or `study`.
+    pub kind: String,
+    /// Study name, for a study series.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub study: Option<String>,
+    /// Study parameters (complete, with defaults).
+    #[serde(default, skip_serializing_if = "BTreeMap::is_empty")]
+    pub params: BTreeMap<String, f64>,
+    /// Input series ids.
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub inputs: Vec<String>,
+    /// Fields / outputs (`o h l c v`, `upper middle lower bandwidth`...).
+    pub fields: Vec<String>,
+    /// Instrument symbol.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub symbol: Option<String>,
+    /// Interval.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub interval: Option<String>,
+    /// Number of bars (or points).
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub len: Option<u64>,
+    /// Legend text (e.g. `RSI14`).
+    pub label: String,
+}
+
+/// One view in a summary.
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
+#[serde(deny_unknown_fields)]
+pub struct ViewSummary {
+    /// View id.
+    pub id: String,
+    /// Title, if any.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub title: Option<String>,
+    /// Panels, top to bottom.
+    pub panels: Vec<PanelSummary>,
+    /// Number of emphasis entries.
+    #[serde(default, skip_serializing_if = "is_zero_u32")]
+    pub emphasis: u32,
+}
+
+#[allow(clippy::trivially_copy_pass_by_ref)]
+fn is_zero_u32(v: &u32) -> bool {
+    *v == 0
+}
+
+/// One panel in a summary.
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
+#[serde(deny_unknown_fields)]
+pub struct PanelSummary {
+    /// Panel id.
+    pub id: u32,
+    /// Name, if any.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub name: Option<String>,
+    /// Scale id and kind, e.g. `y0 linear`.
+    pub scale: String,
+    /// Layers in paint order.
+    pub layers: Vec<LayerSummary>,
+}
+
+/// One layer in a summary.
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
+#[serde(deny_unknown_fields)]
+pub struct LayerSummary {
+    /// Layer id.
+    pub id: String,
+    /// Mark.
+    pub mark: crate::grammar::Mark,
+    /// What it draws, in a few words: `px candles`, `rsi14.rsi line`, `rule 70
+    /// (rsi.overbought)`.
+    pub about: String,
+}
+
+/// One fact in a summary.
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
+#[serde(deny_unknown_fields)]
+pub struct FactSummary {
+    /// Fact id.
+    pub id: String,
+    /// Kind.
+    pub kind: String,
+    /// Series id.
+    pub series: String,
+    /// Bar index.
+    pub bar: u64,
+    /// Text.
+    pub text: String,
+}
+
+/// One finding in a summary.
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
+#[serde(deny_unknown_fields)]
+pub struct FindingSummary {
+    /// Finding id.
+    pub id: String,
+    /// Claim.
+    pub claim: String,
+    /// Fact ids.
+    pub facts: Vec<String>,
+    /// Latest bar among its facts.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub bar: Option<u64>,
+    /// Capsule id and state, if any (e.g. `cap-9 live`).
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub capsule: Option<String>,
 }
 
 // ---------------------------------------------------------------------------

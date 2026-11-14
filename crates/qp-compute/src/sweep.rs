@@ -14,6 +14,8 @@ use std::collections::BTreeMap;
 use crate::studies::{Bollinger, Ema, Macd, Rsi, Sma};
 use crate::{create, period_param, ComputeError, Core, Field};
 
+mod share;
+
 /// One variant's outputs: `columns[j][i]` is output `j` at bar `i`; `NaN` during warmup.
 #[derive(Debug, Clone)]
 pub struct SweepColumns {
@@ -186,12 +188,14 @@ fn run_lanes<K: Kernel>(ks: &mut [K], x: &[f64], bufs: &mut [SweepColumns]) {
     }
 }
 
+/// Runs the variants `full` (input positions `base..`) through the lane kernels.
 fn sweep_kernel<K: Kernel>(
     build: impl Fn(&BTreeMap<String, f64>) -> Result<K, ComputeError>,
     full: &[BTreeMap<String, f64>],
     x: &[f64],
     lanes: Option<usize>,
     bufs: &mut [SweepColumns],
+    base: usize,
     visit: &mut impl FnMut(usize, &SweepColumns),
 ) -> Result<(), ComputeError> {
     let lanes = lanes.unwrap_or(K::LANES).clamp(1, MAX_LANES);
@@ -199,7 +203,7 @@ fn sweep_kernel<K: Kernel>(
         let mut ks: Vec<K> = chunk.iter().map(&build).collect::<Result<_, _>>()?;
         run_lanes(&mut ks, x, &mut bufs[..chunk.len()]);
         for (l, b) in bufs[..chunk.len()].iter().enumerate() {
-            visit(ci * lanes + l, b);
+            visit(base + ci * lanes + l, b);
         }
     }
     Ok(())
@@ -267,6 +271,7 @@ pub fn sweep_each_lanes(
             x,
             lanes,
             &mut bufs,
+            0,
             v,
         ),
         "ema" => sweep_kernel(
@@ -275,6 +280,7 @@ pub fn sweep_each_lanes(
             x,
             lanes,
             &mut bufs,
+            0,
             v,
         ),
         "rsi" => sweep_kernel(
@@ -283,30 +289,11 @@ pub fn sweep_each_lanes(
             x,
             lanes,
             &mut bufs,
+            0,
             v,
         ),
-        "macd" => sweep_kernel(
-            |p| {
-                Macd::new(
-                    period_param(p, "fast")?,
-                    period_param(p, "slow")?,
-                    period_param(p, "signal")?,
-                )
-            },
-            &full,
-            x,
-            lanes,
-            &mut bufs,
-            v,
-        ),
-        "bollinger" => sweep_kernel(
-            |p| Bollinger::new(period_param(p, "period")?, p["k"]),
-            &full,
-            x,
-            lanes,
-            &mut bufs,
-            v,
-        ),
+        "macd" => share::macd(&full, x, lanes, &mut bufs, v),
+        "bollinger" => share::bollinger(&full, x, lanes, &mut bufs, v),
         _ => unreachable!("validated by create"),
     }
 }

@@ -119,20 +119,31 @@ impl Bollinger {
         }
     }
 
+    /// Population standard deviation from `M2` (0 for a non-positive variance).
     #[inline]
-    fn value(&self, middle: f64, m2: f64) -> BollingerValue {
+    fn std_of(&self, m2: f64) -> f64 {
         let var = m2 * self.inv_p;
-        let std = if var > 0.0 { var.sqrt() } else { 0.0 };
-        let band = self.k * std;
+        if var > 0.0 {
+            var.sqrt()
+        } else {
+            0.0
+        }
+    }
+
+    /// The bands of one bar from its middle and standard deviation. A pure function of
+    /// `(k, middle, std)`: the sweep shares `middle`/`std` across `k` values and calls this
+    /// per `k`. The bandwidth quotient is computed unconditionally and selected (same
+    /// value as a branch, but lets a column pass vectorize).
+    #[inline]
+    #[must_use]
+    pub(crate) fn bands(k: f64, middle: f64, std: f64) -> BollingerValue {
+        let band = k * std;
+        let q = (2.0 * band) / middle;
         BollingerValue {
             middle,
             upper: middle + band,
             lower: middle - band,
-            bandwidth: if middle == 0.0 {
-                0.0
-            } else {
-                (2.0 * band) / middle
-            },
+            bandwidth: if middle == 0.0 { 0.0 } else { q },
         }
     }
 
@@ -140,9 +151,16 @@ impl Bollinger {
     #[inline]
     #[must_use]
     pub fn peek1(&self, x: f64) -> Option<BollingerValue> {
+        self.peek_std(x)
+            .map(|(middle, std)| Self::bands(self.k, middle, std))
+    }
+
+    /// `(middle, std)` of a bar with input `x` on top of the committed state.
+    #[inline]
+    fn peek_std(&self, x: f64) -> Option<(f64, f64)> {
         let middle = self.sma.peek1(x)?;
         let (_, m2) = self.add(x);
-        Some(self.value(middle, m2))
+        Some((middle, self.std_of(m2)))
     }
 
     /// Commits a bar with input `x`.
@@ -166,8 +184,17 @@ impl Bollinger {
     /// without warmup branches; results are bit-identical (tested).
     #[inline]
     pub(crate) fn step1(&mut self, x: f64) -> Option<BollingerValue> {
+        let k = self.k;
+        self.step_std(x)
+            .map(|(middle, std)| Self::bands(k, middle, std))
+    }
+
+    /// [`Bollinger::step1`] up to the `k`-independent part: the bar's `(middle, std)`.
+    /// `bands(k, middle, std)` of the result equals `step1(x)` bit for bit.
+    #[inline]
+    pub(crate) fn step_std(&mut self, x: f64) -> Option<(f64, f64)> {
         if !self.sma.is_steady() || self.run >= self.period - 1 {
-            let v = self.peek1(x);
+            let v = self.peek_std(x);
             self.commit1(x);
             return v;
         }
@@ -177,10 +204,10 @@ impl Bollinger {
         let m2 = self.m2 + (x - mean_c) * (x - mean);
         self.track_run(x);
         let (middle, old) = self.sma.step_steady(x);
-        let v = self.value(middle, m2);
+        let std = self.std_of(m2);
         let mean_after = self.sma.window_sum() * self.inv_pm1;
         self.m2 = m2 - (old - mean) * (old - mean_after);
-        Some(v)
+        Some((middle, std))
     }
 }
 

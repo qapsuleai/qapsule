@@ -55,6 +55,21 @@ impl Ema {
         }
     }
 
+    /// `(a, last value)` once the seed bar is committed (every later bar is
+    /// [`Ema::steady_next`]); `None` before.
+    #[inline]
+    pub(crate) fn steady(&self) -> Option<(f64, f64)> {
+        (self.n >= self.period).then_some((self.a, self.prev))
+    }
+
+    /// A bar after the seed: the expression of `peek1`/`commit1`, with the state
+    /// `(a, prev)` held by the caller (e.g. in registers across several lanes).
+    #[inline]
+    #[must_use]
+    pub(crate) fn steady_next(a: f64, prev: f64, x: f64) -> f64 {
+        x * a + prev * (1.0 - a)
+    }
+
     /// Commits a bar with input `x`.
     #[inline]
     pub fn commit1(&mut self, x: f64) {

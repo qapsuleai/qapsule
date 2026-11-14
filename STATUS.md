@@ -5,9 +5,9 @@ Her round sonunda güncellenir.
 
 ## Şu an
 
-- **Aktif round:** yok. RD1 tamamlandı. R2 beklemede; RD1 girdisiyle (`rounds/RD1/R2_INPUT.md`) yeniden yazılacak.
+- **Aktif round:** R2 (yeniden yazıldı, koşulmayı bekliyor).
 - **Son güncelleme:** 2026-11-14
-- **Sıradaki adım:** Ana akışta `rounds/RD1/REPORT.md` ve `DECISIONS.md` "Önerilen (RD1)" (Ö1–Ö9, A10–A12) okunur, kararlar verilir; R2 yeniden yazılır.
+- **Sıradaki adım:** `scripts/preflight.sh`; `rounds/R2/PROMPT.md` yeni bir Claude Code oturumuna verilir.
 
 ## Round geçmişi
 

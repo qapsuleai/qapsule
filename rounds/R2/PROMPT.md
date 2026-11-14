@@ -1,37 +1,39 @@
-> **BEKLEMEDE.** RD1 sonrası yeniden yazılacak. Bu metni Claude Code'a verme.
-
 # R2 — Claude Code Goal Metni
 
-Çalışma dizini `qapsule/`. Başlatmadan önce:
-1. `scripts/preflight.sh` çalıştır; "preflight: TAMAM" görmeden başlatma.
-2. R1'de alt ajan çağrılarını engelleyen eklentiyi (raporda "context-mode") kapat ya da düzelt.
+Çalışma dizini `qapsule/`. Yeni bir Claude Code oturumunda. Başlatmadan önce
+`scripts/preflight.sh` çalıştır; "preflight: TAMAM" görmeden başlatma.
 
 ---
 
 Bu depoda Qapsule projesinin R2 round'unu yürüteceksin.
 
 Önce şunları oku: `CLAUDE.md`, `NORTH_STAR.md`, `docs/CONCEPTS.md`,
-`docs/ARCHITECTURE.md`, `DECISIONS.md` (özellikle K12–K18), `STATUS.md`,
-`rounds/R1/REPORT.md`, `rounds/R1/AUDIT.md`, `docs/LEGACY.md` ve `rounds/R2/` içindeki
-`GOAL.md`, `TASKS.md`, `VERIFY.md`.
+`docs/ARCHITECTURE.md`, `docs/PROTOCOL.md`, `DECISIONS.md` (özellikle K12, K18, K20–K23),
+`STATUS.md`, `rounds/RD1/REPORT.md`, `rounds/RD1/R2_INPUT.md`,
+`rounds/RD1/ergonomics/RESULTS.md` ve `rounds/R2/` içindeki `GOAL.md`, `TASKS.md`,
+`VERIFY.md`.
 
-Hedef: `rounds/R2/GOAL.md` içindeki on bir kabul ölçütünü karşılamak.
+Hedef: `rounds/R2/GOAL.md` içindeki on dört kabul ölçütünü karşılamak. Görsel gramer bu
+projenin kalıcı çekirdeğidir ve RD1'de tasarlanan protokolün kelime dağarcığıdır.
 
 Nasıl çalışacaksın:
 - İlk iş: çalışma ağacında bekleyen doküman değişikliklerini tek bir commit olarak kaydet.
-- Sen orkestratörsün; `TASKS.md` içindeki sırayı ve yazma alanlarını uygula. Alt ajan
-  başlatılamıyorsa bunu hemen `REPORT.md`'nin başına yaz.
-- T1'e orantısız zaman ayır. Gramer bu projenin kalıcı çekirdeğidir; aceleyle
-  tasarlanmış bir gramer sonraki her round'u pahalılaştırır. Altı görünümün JSON'unu
-  önce yazıp grameri onlarla sına.
-- `NORTH_STAR.md` içindeki 6. ve 8. ilkeler bu round'un ölçüsüdür: her görsel öğe bir
-  olguya bağlı, ve sabit grafik tipleri yerine gramer.
-- Ölç, varsayma. Hedefe ulaşamazsan sayıyı olduğu gibi raporla; testi gevşetme.
-- Var olan altın görselleri güncelleme. Kırık testle birleştirme yapma.
-- Bitince T8 için bağımsız bir denetçi alt ajan başlat; denetçi görselleri gözle incelesin.
+- Hemen ardından küçük bir deneme alt ajanı başlat. Başlatılamıyorsa dur ve bana bildir.
+- `TASKS.md` sırasını ve yazma alanlarını uygula. T1'e orantısız zaman ayır: önce altı
+  görünümü ve yirmi görevi yaz, grameri onlarla sına, sonra tipleri yaz.
+- Görünümleri protokol mesaj dizileriyle kur, elle yazılmış görünüm dosyasıyla değil.
+- Anlamla başvuru için iki tasarımı ayrı alt ajanlara, ayrı dallarda ver; birbirlerini
+  görmesinler. Hangisinin daha iyi olduğuna ajan yazabilirlik ölçümüyle karar ver.
+- Ölçümde alt ajanların yalnızca şartname ve şemayı görmesini dosya erişimiyle sağla;
+  kimlikler kopyalanamaz olsun. Sonuçları olduğu gibi raporla.
+- Bilinen yöntemlerle sınırlı değilsin; ihtiyaç karşılanmıyorsa yenisini tasarla ve
+  gerekçesini yaz. Değişmezler: belirleyicilik, her işaretin kökeni, tek şema kaynağı.
+- Ölç, varsayma. Kırık testle birleştirme yapma. Var olan altın görselleri güncelleme.
+- Mimari kararları kendin kesinleştirme; `DECISIONS.md`'ye "Önerilen (R2)" bölümü olarak yaz.
+- Bitince bağımsız bir denetçi alt ajan başlat; denetçi görselleri gözle incelesin.
 - `../Docs` ve `../Services` salt okunur. `.env` dosyalarını okuma.
-- Kapsam dışı: etkileşim, kapsül, anlam işareti tasarımı, çizim araçları, canlı veri,
-  hesap performansı (RP1).
+- Kapsam dışı: etkileşimin uygulanması, GPU, anlam işareti ve kapsül tasarımı, oturumun
+  artımlı canlı yolu, veri bağı, canlı veri.
 
-Bitiş koşulu: `rounds/R2/REPORT.md` ve `AUDIT.md` yazılmış; `STATUS.md` ve `ROADMAP.md`
-güncellenmiş; kabul ölçütleri tablosu kanıtlarıyla doldurulmuş. Sonraki round'u başlatma.
+Bitiş koşulu: kabul ölçütleri tablosu kanıtlarıyla doldurulmuş; `REPORT.md` ve `AUDIT.md`
+yazılmış; `STATUS.md` ve `ROADMAP.md` güncellenmiş. Başka round başlatma.

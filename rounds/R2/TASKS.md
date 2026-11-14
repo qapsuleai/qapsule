@@ -1,33 +1,37 @@
 # R2 — Alt Görevler
 
-T1 önce. T2 ardından. T3, T4, T5, T6 T2'den sonra paralel yürüyebilir. T7 bağımsız.
+T1 önce; T2 ve T3 ardından; T4–T8 paralel yürüyebilir; T9 ölçüm ve düzeltme; T11 en sonda.
 
 | # | Görev | Yazdığı yer | Bağımlılık |
 |---|-------|-------------|------------|
-| T1 | Gramer tasarımı ve şema: tipler, JSON Schema, `docs/GRAMMAR.md`, sözlük eklemeleri. Altı görünümün JSON taslağı tasarımı sınamak için önce yazılır | `crates/qp-schema/`, `docs/`, `fixtures/views/` | — |
-| T2 | `qp-grammar`: Görünüm + veri → sahne tarifi (çizimden bağımsız ara biçim). Doğrulama ve hata iletileri | `crates/qp-grammar/` | T1 |
-| T3 | Referans çizici sahne tarifinden çizer; R0 sahnesi gramer yoluna taşınır; altı altın görsel | `crates/qp-render/`, `fixtures/golden/` | T2 |
-| T4 | Görüş alanı ve LOD; 100k bar ölçümü; eski viewport/LOD matematiğinin değerlendirmesi | `crates/qp-grammar/` (viewport, lod) | T2 |
-| T5 | İsabet testi ve `qp explain`; `qp render` görünüm dosyası kabul eder | `crates/qp-grammar/` (hit), `crates/qp-cli/` | T2 |
-| T6 | GPU çizim yolu (K12: vello + WebGPU, MSAA), tolerans karşılaştırması, web gösterimi | `crates/qp-render-gpu/` ya da özellik bayrağı (karar raporda), `crates/qp-wasm/`, `shells/web/` | T2 |
-| T7 | R1 denetim bulguları | `crates/qp-compute/` | — |
-| T8 | Denetim: bağımsız alt ajan, temiz kopya; altın görselleri gözle inceler | `rounds/R2/AUDIT.md` | hepsi |
+| T1 | Gramer tasarımı: önce altı görünümün ve yirmi görevin taslağı, sonra tipler, `docs/GRAMMAR.md`, sözlük | `docs/`, `crates/qp-schema/`, `rounds/R2/tasks/` | — |
+| T2 | Protokol eki: kimlikli gramer işlemleri, kullanımdan kalkan indeksli alanlar, `welcome`/`screen` doküman özeti; şartname ve örnekler | `crates/qp-schema/src/protocol.rs`, `docs/PROTOCOL.md`, `fixtures/protocol/` | T1 |
+| T3 | `qp-grammar`: Görünüm + veri → sahne tarifi; doğrulama ve hata iletileri | `crates/qp-grammar/` | T1 |
+| T4 | Referans çizici sahne tarifinden çizer; altı görünüm ve derinlik altın görselleri | `crates/qp-render/`, `fixtures/golden/`, `fixtures/views/` | T3 |
+| T5 | Oturum: gramer işlemleri, köken denetimi, sunucunun gramer kurallarına taşınması, derinlik indirgemesi | `crates/qp-session/` | T2, T3 |
+| T6 | Anlamsal okuma: `screen` ve nokta sorgusu sahne tarifinden; `qp explain` | `crates/qp-grammar/` (hit), `crates/qp-session/`, `crates/qp-cli/` | T3 |
+| T7 | Görüş alanı ve LOD; 100k bar ölçümü | `crates/qp-grammar/` (viewport, lod) | T3 |
+| T8a, T8b | Anlamla başvuru: iki tasarım, ayrı dallarda, ayrı alt ajanlarla, birbirini görmeden | dal başına `crates/qp-session/`, `rounds/R2/experiments/` | T5 |
+| T9 | Ajan yazabilirlik ölçümü (gramer görevleri), tasarım düzeltmesi, yeniden ölçüm; T8'in iki tasarımı bu düzenekle karşılaştırılır | `rounds/R2/ergonomics/` | T5, T6, T8 |
+| T10 | Uygunluk dökümleri; MCP araçlarının yeniden üretimi; R1/RD1 denetim kalanları | `fixtures/protocol/conformance/`, `crates/qp-mcp/`, `crates/qp-compute/` | T5 |
+| T11 | Denetim: bağımsız alt ajan, temiz kopya. Altın görselleri gözle inceler, sayısal noktaları veriyle karşılaştırır; yalnızca şartnameyi okuyarak yeni bir görünüm kurar | `rounds/R2/AUDIT.md` | hepsi |
 
 ## Notlar
 
-- **T1 en önemli görev.** Gramerin amacı bugün bildiğimiz grafikleri çizmek değil, ajanın
-  bugün aklımıza gelmeyenleri kurabilmesi. Var olan gramerleri (Vega-Lite, grafik grameri
-  literatürü) incele, ama kopyalama; finans zaman serisinin ihtiyaçları (seans boşlukları,
-  canlı son bar, çok panel, `null` ısınma) birinci sınıf olmalı. Tasarım kararlarını ve
-  elediğin seçenekleri `docs/GRAMMAR.md` sonuna yaz.
-- **Sahne tarifi** çizicilerin ortak girdisidir: hem referans çizici hem GPU aynısını
-  okur. İsabet testi de sahne tarifinden çalışır; böylece "ekranda ne var" sorusunun tek
-  bir doğru cevabı olur.
-- **Altın görseller:** var olanlar güncellenmez. Yeni beş görünümün altın görselleri
-  eklenir; doğrulukları denetçinin göz incelemesi ve sayısal nokta kontrolüyle sağlanır.
-- **GPU:** K12'deki ölçümlere dayan, ama sürümler değişmiş olabilir; kütüphane
-  belgelerine bak ve küçük denemeyle doğrula. CI koşucusunda GPU yoksa yazılım
-  rasterleştiriciyle çalıştırmayı dene; olmuyorsa açık SKIP.
-- **Hesap:** görünümlerdeki RSI, MACD, Bollinger `qp-compute`'tan gelir; çizicide ya da
-  gramerde hesap kodu olmaz.
+- **T1 bu round'un en önemli görevi.** Gramer kalıcı çekirdektir. Var olan gramerleri
+  (RD1 araştırmasındaki Vega-Lite notları dahil) incele, ama kopyalama: seans boşlukları,
+  canlı son bar, çok panel, `null` ısınma, köken ve derinlik burada birinci sınıftır.
+  Bilinen yöntemlerle sınırlı değilsin (K18).
+- **Sınav protokolden geçer.** Altı görünüm elle yazılmış JSON dosyasından değil,
+  bir protokol mesaj dizisinden (döküm) kurulur. Böylece "ajan bunu kurabilir mi"
+  sorusu baştan cevaplanır.
+- **Sahne tarifi tek doğruluk kaynağıdır:** çizici ve anlamsal okuma aynısını okur.
+- **Ölçüm düzeneği (T9):** RD1'in düzeneğini kullan (`rounds/RD1/ergonomics/harness`),
+  iki düzeltmeyle: kimlikler her koşuda kopyalanamaz; alt ajanların yalnızca şartname ve
+  şemayı görmesi dosya erişimiyle sağlanır (RD1 denetim koşulu O3).
+- **Veri (K23):** doküman içinde bar taşıyan test verileri bu round'da olduğu gibi kalır;
+  gramer seriye her zaman başvuruyla ulaşır, böylece RP2'de veri bağına geçiş grameri
+  etkilemez. Protokolden büyük bar dizileri geçirme.
+- **Altın görseller:** var olanlar güncellenmez; yeni görünümler için yenileri eklenir.
+- **Hesap:** çizicide ya da gramerde hesap kodu olmaz; değerler `qp-compute`'tan gelir.
 - **GitHub:** `CLAUDE.md` kuralları geçerli (`scripts/qgh`, `scripts/preflight.sh`).

@@ -1537,6 +1537,17 @@ dependencies = [
 ]
 
 [[package]]
+name = "qp-grammar"
+version = "0.0.0"
+dependencies = [
+ "proptest",
+ "qp-compute",
+ "qp-render",
+ "qp-schema",
+ "serde_json",
+]
+
+[[package]]
 name = "qp-mcp"
 version = "0.0.0"
 dependencies = [

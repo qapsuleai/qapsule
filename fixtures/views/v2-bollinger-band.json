@@ -1,0 +1,134 @@
+{
+  "covers": [
+    "grammar",
+    "add_study",
+    "put_view"
+  ],
+  "description": "V2 (b): Bollinger band as a filled band between two outputs, under the candles; middle line; theme colour accent.",
+  "final": {
+    "document": {
+      "views": [
+        {
+          "id": "boll"
+        }
+      ]
+    }
+  },
+  "init": {
+    "clock": 1760000000000,
+    "document": "fixtures/views/docs/base.json",
+    "epoch": 0,
+    "principals": [
+      {
+        "author": {
+          "kind": "human",
+          "name": "arkin"
+        },
+        "id": "arkin",
+        "role": "owner"
+      }
+    ]
+  },
+  "name": "v2-bollinger-band",
+  "steps": [
+    {
+      "expect": [
+        {
+          "conn": "a",
+          "msg": {
+            "principal": "arkin",
+            "role": "owner",
+            "type": "welcome"
+          }
+        }
+      ],
+      "send": {
+        "conn": "a",
+        "msg": {
+          "principal": "arkin",
+          "protocol": "qp/0",
+          "surface": {
+            "kind": "desktop"
+          },
+          "type": "hello"
+        }
+      }
+    },
+    {
+      "expect": [
+        {
+          "conn": "a",
+          "msg": {
+            "id": "c1",
+            "status": "applied",
+            "type": "ack"
+          }
+        }
+      ],
+      "send": {
+        "conn": "a",
+        "msg": {
+          "id": "c1",
+          "ops": [
+            {
+              "id": "bb",
+              "inputs": [
+                "px"
+              ],
+              "op": "add_study",
+              "study": "bollinger"
+            },
+            {
+              "op": "put_view",
+              "view": {
+                "id": "boll",
+                "layers": [
+                  {
+                    "encoding": {
+                      "color": "accent",
+                      "opacity": 0.18,
+                      "y": "upper",
+                      "y2": "lower"
+                    },
+                    "id": "band",
+                    "mark": "band",
+                    "panel": 0,
+                    "series": "bb"
+                  },
+                  {
+                    "encoding": {
+                      "color": "accent",
+                      "y": "middle"
+                    },
+                    "id": "mid",
+                    "mark": "line",
+                    "panel": 0,
+                    "series": "bb"
+                  },
+                  {
+                    "id": "candles",
+                    "mark": "candle",
+                    "panel": 0,
+                    "series": "px"
+                  }
+                ],
+                "panels": [
+                  {
+                    "id": 0,
+                    "y": {
+                      "kind": "linear"
+                    }
+                  }
+                ],
+                "x": {
+                  "kind": "time"
+                }
+              }
+            }
+          ],
+          "type": "command"
+        }
+      }
+    }
+  ]
+}

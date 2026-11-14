@@ -1,0 +1,121 @@
+{
+  "covers": [
+    "grammar",
+    "add_study",
+    "put_view"
+  ],
+  "description": "V0: the R0 scene (candles + SMA(20)) built only from protocol messages; renders byte-identical to fixtures/golden/sample.png at 1200x600.",
+  "final": {
+    "document": {
+      "views": [
+        {
+          "id": "r0"
+        }
+      ]
+    }
+  },
+  "init": {
+    "clock": 1760000000000,
+    "document": "fixtures/views/docs/base.json",
+    "epoch": 0,
+    "principals": [
+      {
+        "author": {
+          "kind": "human",
+          "name": "arkin"
+        },
+        "id": "arkin",
+        "role": "owner"
+      }
+    ]
+  },
+  "name": "v0-r0",
+  "steps": [
+    {
+      "expect": [
+        {
+          "conn": "a",
+          "msg": {
+            "principal": "arkin",
+            "role": "owner",
+            "type": "welcome"
+          }
+        }
+      ],
+      "send": {
+        "conn": "a",
+        "msg": {
+          "principal": "arkin",
+          "protocol": "qp/0",
+          "surface": {
+            "kind": "desktop"
+          },
+          "type": "hello"
+        }
+      }
+    },
+    {
+      "expect": [
+        {
+          "conn": "a",
+          "msg": {
+            "id": "c1",
+            "status": "applied",
+            "type": "ack"
+          }
+        }
+      ],
+      "send": {
+        "conn": "a",
+        "msg": {
+          "id": "c1",
+          "ops": [
+            {
+              "id": "sma20",
+              "inputs": [
+                "px"
+              ],
+              "op": "add_study",
+              "params": {
+                "period": 20
+              },
+              "study": "sma"
+            },
+            {
+              "op": "put_view",
+              "view": {
+                "id": "r0",
+                "layers": [
+                  {
+                    "id": "candles",
+                    "mark": "candle",
+                    "panel": 0,
+                    "series": "px"
+                  },
+                  {
+                    "id": "sma",
+                    "mark": "line",
+                    "panel": 0,
+                    "series": "sma20"
+                  }
+                ],
+                "panels": [
+                  {
+                    "id": 0,
+                    "y": {
+                      "kind": "linear"
+                    }
+                  }
+                ],
+                "x": {
+                  "kind": "time"
+                }
+              }
+            }
+          ],
+          "type": "command"
+        }
+      }
+    }
+  ]
+}

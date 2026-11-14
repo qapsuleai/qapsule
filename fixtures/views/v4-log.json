@@ -1,0 +1,131 @@
+{
+  "covers": [
+    "grammar",
+    "put_view",
+    "set_scale"
+  ],
+  "description": "V4 (d): log value scale on the synthetic growth document (~10 -> ~400); the view is put with a linear scale and switched to log by id with set_scale.",
+  "final": {
+    "document": {
+      "views": [
+        {
+          "id": "logv"
+        }
+      ]
+    }
+  },
+  "init": {
+    "clock": 1760000000000,
+    "document": "fixtures/views/docs/growth.json",
+    "epoch": 0,
+    "principals": [
+      {
+        "author": {
+          "kind": "human",
+          "name": "arkin"
+        },
+        "id": "arkin",
+        "role": "owner"
+      }
+    ]
+  },
+  "name": "v4-log",
+  "steps": [
+    {
+      "expect": [
+        {
+          "conn": "a",
+          "msg": {
+            "principal": "arkin",
+            "role": "owner",
+            "type": "welcome"
+          }
+        }
+      ],
+      "send": {
+        "conn": "a",
+        "msg": {
+          "principal": "arkin",
+          "protocol": "qp/0",
+          "surface": {
+            "kind": "desktop"
+          },
+          "type": "hello"
+        }
+      }
+    },
+    {
+      "expect": [
+        {
+          "conn": "a",
+          "msg": {
+            "id": "c1",
+            "status": "applied",
+            "type": "ack"
+          }
+        }
+      ],
+      "send": {
+        "conn": "a",
+        "msg": {
+          "id": "c1",
+          "ops": [
+            {
+              "op": "put_view",
+              "view": {
+                "id": "logv",
+                "layers": [
+                  {
+                    "id": "candles",
+                    "mark": "candle",
+                    "panel": 0,
+                    "series": "px"
+                  }
+                ],
+                "panels": [
+                  {
+                    "id": 0,
+                    "y": {
+                      "kind": "linear"
+                    }
+                  }
+                ],
+                "x": {
+                  "kind": "time"
+                }
+              }
+            }
+          ],
+          "type": "command"
+        }
+      }
+    },
+    {
+      "expect": [
+        {
+          "conn": "a",
+          "msg": {
+            "id": "c2",
+            "status": "applied",
+            "type": "ack"
+          }
+        }
+      ],
+      "send": {
+        "conn": "a",
+        "msg": {
+          "id": "c2",
+          "ops": [
+            {
+              "kind": "log",
+              "op": "set_scale",
+              "scale": "y0",
+              "view": "logv"
+            }
+          ],
+          "type": "command"
+        }
+      }
+    }
+  ]
+}

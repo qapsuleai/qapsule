@@ -1,0 +1,107 @@
+{
+  "covers": [
+    "presenter",
+    "show_finding",
+    "present",
+    "depth"
+  ],
+  "description": "D2: the presenter at chart depth (desktop): show_finding builds the presenter's view (candles, RSI panel, level rule, highlight on the fact bar) and binds it to the capsule; present returns it. Rendered with `qp render --present fnd-overbought --surface desktop`.",
+  "final": {
+    "document": {
+      "views": [
+        {
+          "id": "main"
+        },
+        {
+          "id": "v-overbought"
+        }
+      ]
+    }
+  },
+  "init": "fixtures/protocol/init/thyao.json",
+  "name": "d2-chart",
+  "steps": [
+    {
+      "expect": [
+        {
+          "conn": "a",
+          "msg": {
+            "principal": "arkin",
+            "role": "owner",
+            "type": "welcome"
+          }
+        }
+      ],
+      "send": {
+        "conn": "a",
+        "msg": {
+          "principal": "arkin",
+          "protocol": "qp/0",
+          "surface": {
+            "kind": "desktop"
+          },
+          "type": "hello"
+        }
+      }
+    },
+    {
+      "expect": [
+        {
+          "conn": "a",
+          "msg": {
+            "id": "c1",
+            "status": "applied",
+            "type": "ack"
+          }
+        }
+      ],
+      "send": {
+        "conn": "a",
+        "msg": {
+          "id": "c1",
+          "ops": [
+            {
+              "finding": "fnd-overbought",
+              "op": "show_finding",
+              "view": "v-overbought"
+            }
+          ],
+          "type": "command"
+        }
+      }
+    },
+    {
+      "expect": [
+        {
+          "conn": "a",
+          "msg": {
+            "data": {
+              "kind": "presentation",
+              "presentation": {
+                "depth": "chart",
+                "finding": "fnd-overbought",
+                "surface": "desktop",
+                "view": {
+                  "id": "v-overbought"
+                }
+              }
+            },
+            "id": "q1",
+            "type": "result"
+          }
+        }
+      ],
+      "send": {
+        "conn": "a",
+        "msg": {
+          "id": "q1",
+          "query": {
+            "finding": "fnd-overbought",
+            "kind": "present"
+          },
+          "type": "query"
+        }
+      }
+    }
+  ]
+}

@@ -569,16 +569,33 @@ impl Session {
     }
 
     fn range_of(&self, c: &Conn, view: &View) -> Option<(u64, u64)> {
-        c.viewports
-            .get(&view.id)
-            .copied()
-            .or_else(|| self.initial_range(view, c.surface.kind))
+        let saved = c.viewports.get(&view.id).copied().and_then(|(a, b)| {
+            // A saved viewport can outlive data that got shorter (an undone
+            // `append_bars`): clamp it to the current bar series.
+            let n = view_bar_series(&self.doc, view)
+                .and_then(Series::bars)
+                .map_or(0, <[qp_schema::Bar]>::len) as u64;
+            let last = n.checked_sub(1)?;
+            let b = b.min(last);
+            Some((a.min(b), b))
+        });
+        saved.or_else(|| self.initial_range(view, c.surface.kind))
     }
 
     /// The connection's current viewport: the last one set by input, else the initial
     /// range of the document's first view.
     fn conn_viewport(&self, c: &Conn) -> Option<Viewport> {
         if let Some(v) = &c.current {
+            // Re-clamp through `range_of` (the data may have shrunk since).
+            if let Some(view) = self.doc.views.iter().find(|x| x.id == v.view) {
+                if let Some((a, b)) = self.range_of(c, view) {
+                    return Some(Viewport {
+                        view: v.view.clone(),
+                        from_bar: a,
+                        to_bar: b,
+                    });
+                }
+            }
             return Some(v.clone());
         }
         let view = self.doc.views.first()?;
@@ -679,8 +696,18 @@ impl Session {
             .find(|s| s.id == bar_series)
             .and_then(Series::bars)
             .map_or(0, <[qp_schema::Bar]>::len) as u64;
+        if n == 0 {
+            return Err(invalid(
+                format!("series `{bar_series}` has no bars"),
+                ptr(gp, "view"),
+            ));
+        }
         let last = n - 1;
+        // A saved viewport can outlive data that got shorter (e.g. an undone
+        // `append_bars`): clamp it to the current series before using it.
         let (from, to) = self.range_of(&self.conns[ci], &view).unwrap_or((0, last));
+        let to = to.min(last);
+        let from = from.min(to);
         let past = |field: &str, v: u64| {
             E::new(
                 ErrorCode::Invalid,
@@ -707,7 +734,7 @@ impl Session {
             }
             Gesture::Pan { bars, .. } => {
                 let width = to - from;
-                let max_from = last - width;
+                let max_from = last.saturating_sub(width);
                 let target = i128::from(from) + i128::from(*bars);
                 let nf = u64::try_from(target.clamp(0, i128::from(max_from))).unwrap_or(0);
                 (nf, nf + width)

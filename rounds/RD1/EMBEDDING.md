@@ -106,8 +106,10 @@ doküman protokolü A2UI'ye taşınmaz. Ajanın A2UI bileşen ağacını yazmas�
   ediyor. Şemaya yeni bir işlem eklenince araç kendiliğinden çıkar.
 - **MCP sürümü:** 2026-07-28 (araçlar, temel, sürümleme, keşif, stdio, kayıt sayfaları bu
   oturumda okundu); `initialize` 2025-11-25 yaşam döngüsüne göre de kabul edilir.
-- **Uygunluk:** `qp conform fixtures/protocol/conformance --transport mcp` → **17/17**
-  (her döküm bağlantısı aynı süreç içi oturum üzerinde ayrı bir MCP uyarlayıcısı). Aynı
+- **Uygunluk:** `qp conform fixtures/protocol/conformance --transport mcp` → 17/17 geçiyor:
+  **11'i tamamen MCP araçlarıyla, 6'sı kısmen** (MCP karşılığı olmayan `input`/`clock`/ham
+  satır adımları doğrudan oturuma gider). Koşucu süreç içi JSON-RPC kullanır (her döküm
+  bağlantısı aynı oturum üzerinde ayrı bir uyarlayıcı); stdio `qp mcp` duman testiyle sınandı. Aynı
   dökümler `inproc` 17/17, `serve` 17/17. T9 ölçümünde 19 döküm (16 resmî + 3 iç) için
   46 `hello`, 90 `tools/call`, 17 doğrudan adım.
 - **MCP üzerinden taşınmayanlar** (doğrudan oturuma gider): `input` (ham etkileşim

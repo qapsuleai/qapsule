@@ -349,6 +349,8 @@ T.append(transcript(
         send("e", cmd("c4", [{"op": "set_params", "series": "macd", "params": {"fast": 8, "slow": 21, "signal": 5}}],
                       base=1),
              [ex("e", ack("c4", seq=3))], "G14: editor writes directly"),
+        send("e", cmd("c5", [{"op": "set_params", "series": "macd", "params": {"fast": 9}}], base=99),
+             [ex("e", err("c5", "invalid", path="/base"))], "a base from the future is refused (audit O2)"),
     ],
     final={"log_len": 3, "document": {"series": [
         {"id": "px"}, {"id": "rsi14"}, {"id": "macd", "source": {"params": {"fast": 8.0, "slow": 21.0, "signal": 5.0}}},

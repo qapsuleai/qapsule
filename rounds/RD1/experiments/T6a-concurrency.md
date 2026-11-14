@@ -1,5 +1,7 @@
 # T6a — Eşzamanlı yazma: tek otorite + sıralı günlük mü, CRDT mi?
 
+> **Yeniden üretim (denetim O1):** bu ölçüm `7776abb` (dal `rd1/t6a-exp`; kod `58de8e3`) üzerinde yapıldı. Deney crate'i, ölçümden sonra değişen protokol tiplerine (`now`, `ack.undoes`, boş yapı varyantları, `put_*.index`) taşınmadığı için güncel `main`'de derlenmez; yeniden üretmek için o commit kullanılır: `git checkout 7776abb && cd experiments/t6a-concurrency && cargo run --release -- all`.
+
 Round: RD1. Sınanan çalışma kararı: **K21-2** — "belge başına tek otorite ve sıralı işlem
 günlüğü; her yazı kökeniyle kaydedilir". Bu deneyin amacı kararı savunmak değil; her
 alternatifi en iyi savunucusunun kuracağı biçimde kurup dürüstçe ölçmek.

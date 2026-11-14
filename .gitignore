@@ -27,3 +27,7 @@ secrets/
 
 # Hesap ayarı; gizli bilgi içermez, qgh ve preflight buna bağlı
 !scripts/qapsule-gh.env
+
+# Python bytecode
+__pycache__/
+*.pyc

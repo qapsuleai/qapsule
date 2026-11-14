@@ -1,5 +1,7 @@
 # T6c — Değişimlerin telde ve günlükte ifadesi
 
+> **Yeniden üretim (denetim O1):** bu ölçüm `ade29fd` (dal `rd1/t6c-exp`) üzerinde yapıldı. Deney crate'i, ölçümden sonra değişen protokol tiplerine (`now`, `ack.undoes`, boş yapı varyantları, `put_*.index`) taşınmadığı için güncel `main`'de derlenmez; yeniden üretmek için o commit kullanılır: `git checkout ade29fd` ve rapordaki yöntem.
+
 Soru: dokümandaki bir değişim telde (`notify` / `event.kind = "change"`) ve günlükte
 (`LogEntry`) nasıl ifade edilmeli?
 

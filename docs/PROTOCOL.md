@@ -50,6 +50,10 @@ Her mesaj tek bir JSON nesnesidir; türü `"type"` alanıdır. Örnek bir konuş
 Bar numaraları her yerde **0 tabanlı sıra numarasıdır** (`bar: 0` ilk bar). Zamanlar
 epoch milisaniye, UTC.
 
+Bu belgedeki örnekler `doc-thyao` örnek dokümanının kimliklerini (`px`, `rsi14`, `main`,
+`fnd-overbought`…) kullanır. Gerçek bir dokümanın kimlikleri farklıdır: önce
+`{"kind":"list","collection":"series"}` (ve `views`, `findings`) ile öğrenin.
+
 ## 2. Durum modeli
 
 Otoritenin durumu üç parçadır:
@@ -240,6 +244,11 @@ için komut `set_view_range` kullanılır.
 | `pan` | `view`, `bars` (+ yeniye) | Aralığı kaydırır; sınırlara kırpılır. |
 | `zoom` | `view`, `factor` (>1 yakınlaştırır), `anchor_bar?` | Genişlik = round(genişlik / factor), en az 2 bar; `anchor_bar` (varsayılan: son görünen bar) ekranda aynı göreli konumda kalır. |
 | `tap` | `view`, `panel`, `bar` | Odak o bar olur; cevap `at` sonucudur. |
+
+**Geçici mi kalıcı mı?** Kullanıcının kendi ekranındaki hareketi (kaydırma, yakınlaştırma,
+"grafiği yakınlaştır") `input`tur ve yalnız o bağlantının bakışını değiştirir. Herkesin
+gördüğü kalıcı aralık ("görünümü son 60 bara ayarla, böyle kalsın") `set_view_range`
+komutudur ve günlüğe girer.
 
 Her `look`, `pan` ve `zoom`, aralık değişmese bile kişinin `attention` abonelerine
 `viewport` olayı üretir. `tap` olay üretmez (cevabı `at`'tir; odağı günceller). `tap` ve
@@ -457,6 +466,11 @@ alınmamış bir girdide değiştiyse komut uygulanmaz:
 uygulanır, çakışanlar bu hatayla döner ve istemci okuyup yeniden gönderir (ya da öneriye
 çevirir). Yakınsama otoritenin sırasıyla garanti edilir.
 
+Bilinen sınır (T6d): `base` komut başına tektir. Çevrimdışı biriken komutlar aynı öğeye
+art arda dokunursa, istemcinin **kendi** önceki yazısı sonrakini `conflict` yapar (20
+komutta 1 uygulandı). Öğe başına `base` (ya da "kendi girdilerimi sayma" kuralı) ile 19'u
+uygulandı; v1 için önerilir.
+
 ### 8.3 Geri alma
 
 `undo` hedef girdinin `inverse` değişimlerini yeni bir girdi olarak yazar (günlük yalnızca
@@ -476,7 +490,17 @@ görüntüsünü ve `seq`'i verir, yazmayı durdurur; yeni otorite aynı doküma
 `epoch + 1` ile başlar. `welcome.epoch` istemcilerin hangi otorite soyunda olduğunu
 bildirir. Devirde eski otoritenin bütün bağlantıları kapanır; istemciler yeni otoriteye
 `hello` ile yeniden bağlanır ve `seq`'i `welcome`'dan alır. Böylece bir `base` değeri her
-zaman bağlantının kendi epoch'una aittir; komutta ayrıca epoch taşınmaz. Ölçüm ve
+zaman bağlantının kendi epoch'una aittir; komutta ayrıca epoch taşınmaz.
+
+**v0 durumu ve ölçüm (T6d, `rounds/RD1/experiments/T6d-handover.md`).** Motor iki uçta aynı
+baytları ve bitleri üretiyor (yerel = WASM); 10.000 barlı bir dokümanın anlık görüntüsü 750 KB
+(gzip 211 KB), cihazda hazır olma 2,6 ms (yerel) / 3,2 ms (WASM). Önerilen varsayılan:
+**otorite sunucuda kalır, cihaz hesapları kendisi yapan bir yansıdır** (yalnızca `change`
+olayları akar). Tam devir yalnızca başka yazar ve canlı ajan yokken (açık "çevrimdışı al" ya
+da yalnız yerel doküman), süreli bir kira (lease) ile. Bu epoch kuralı bölünmeyi **tespit
+eder, birleştirmez**; devir sırasında gelen besleme/ajan yazıları, kira ve geri alma
+(reclaim), eski otoritenin durduğunun kanıtı (fencing), `(epoch, seq)` süreklilik ve büyük
+dokümanlar için parçalı anlık görüntü v0'da tanımlı değildir (açık konu, `REPORT.md`). Ölçüm ve
 alternatifler: `rounds/RD1/experiments/` (K21-3).
 
 ## 9. Kimlik, yetki, köken ve denetim izi
@@ -647,8 +671,9 @@ sonunda koşucu günlüğü baştan oynatır ve dokümanın baytlarının aynı 
 - **MCP:** komutlar ve sorgular şemadan üretilen MCP araçlarıdır (her `Op` ve her `Query`
   türü için bir araç, girdi şeması o türün JSON Schema'sı; ayrıca genel `command` ve
   `query` araçları). Araç sonucu `structuredContent` olarak protokolün `ack`/`result`/
-  `error` mesajıdır; hata `isError: true`. Abonelikler ve dikkat için bkz.
-  `rounds/RD1/EMBEDDING.md`.
+  `error` mesajıdır; hata `isError: true`. Olaylar v0 uyarlayıcısında
+  `notifications/message` ile gider (MCP 2026-07-28'de kullanımdan kalkmış bir yöntem; doğal
+  yol `subscriptions/listen` + `log` sorgusu). Ayrıntı: `rounds/RD1/EMBEDDING.md`.
 - **A2UI ve MCP Apps:** analiz `rounds/RD1/EMBEDDING.md`.
 
 ## Ek A — Eski `Command` tipi

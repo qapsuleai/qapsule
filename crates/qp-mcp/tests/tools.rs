@@ -279,9 +279,10 @@ fn conformance_transcripts_pass_over_mcp() {
     assert!(calls > 50);
 }
 
-/// R2/T10: the MCP tools are regenerated from the schema, so the ten grammar
-/// operations and the point query `hit` appear without hand-written tools. RD1 had
-/// 37 tools (22 ops + 10 queries + 5 generic); R2 adds these 11 (48).
+/// R2/T10: the MCP tools are regenerated from the schema, so the grammar operations
+/// and the point query `hit` appear without hand-written tools. RD1 had 37 tools
+/// (22 ops + 10 queries + 5 generic); R2 adds 10 grammar ops, `split_layer` (design A
+/// fix, T9) and `hit` (49).
 #[test]
 fn grammar_ops_and_hit_are_generated_tools() {
     let grammar = [
@@ -295,6 +296,7 @@ fn grammar_ops_and_hit_are_generated_tools() {
         "set_panel",
         "set_scale",
         "set_emphasis",
+        "split_layer",
     ];
     for op in grammar {
         let name = format!("op_{op}");

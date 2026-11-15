@@ -1849,6 +1849,12 @@ olgu ileri sürülmez (geçmiş yeniden yazılmaz). Karar: geri çekildiyse `uph
 `rejected` (kanıt: seri, `t`, kesin, çapa, beslemeler). Aynı itiraz `duplicate`; görünmeyen
 kapsül ya da bar yetkisi yok: `unknown`.
 
+
+> **Mühür anahtarları (R3, güvenlik incelemesi):** makbuz ve denetim günlüğü anahtarları
+> barındırıcının gizli anahtarlarıdır; barındırıcı `Session::set_trust_keys(makbuz, denetim)`
+> ile verir (belgeye ve günlüğe girmez). Verilmezse otorite herkese açık **demo** anahtarlarını
+> kullanır; bu yalnız sentetik test beslemesi (`init.capsules.flow`) ve dökümler içindir.
+
 ## Ek A — Eski `Command` tipi
 
 `qp-schema` v0'daki `Command {provenance, op}` ve `Op` (doküman şeması) bu protokolden

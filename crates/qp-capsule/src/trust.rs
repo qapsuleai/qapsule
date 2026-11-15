@@ -53,6 +53,7 @@ pub const KEY_NET: &str = "net";
 /// Demo stand-in for the server's receipt key. In production a secret held by the
 /// authority (HSM); here a constant so runs are reproducible. The leakage bound does
 /// **not** depend on its secrecy (receipts are a function of the statements).
+/// Public demo key (not a secret): tests and the synthetic test host only.
 pub const DEMO_RECEIPT_KEY: &[u8] = b"qapsule/m6/muhur/demo-receipt-key";
 /// Demo stand-in for the audit-commitment key (separate from the receipt key).
 pub const DEMO_AUDIT_KEY: &[u8] = b"qapsule/m6/muhur/demo-audit-key";
@@ -187,9 +188,11 @@ pub struct Muhur {
 }
 
 impl Muhur {
-    /// A fresh path with `p` and the demo keys.
+    /// A fresh path with `p` and the **demo keys** — for tests, the measurement harness and
+    /// the synthetic test-host flow only. A real host supplies its own secret keys
+    /// ([`Muhur::with_keys`]; in the authority `Session::set_trust_keys`), never these.
     #[must_use]
-    pub fn new(p: Params) -> Self {
+    pub fn demo(p: Params) -> Self {
         Self::with_keys(p, DEMO_RECEIPT_KEY, DEMO_AUDIT_KEY)
     }
 
@@ -333,13 +336,13 @@ impl TrustPath for Muhur {
 /// The M6 entry point: a fresh path with the default parameters.
 #[must_use]
 pub fn trust_path() -> Box<dyn TrustPath> {
-    Box::new(Muhur::new(Params::default()))
+    Box::new(Muhur::demo(Params::default()))
 }
 
 /// A fresh path with explicit parameters (studies).
 #[must_use]
 pub fn trust_path_with(p: Params) -> Box<dyn TrustPath> {
-    Box::new(Muhur::new(p))
+    Box::new(Muhur::demo(p))
 }
 
 /// Verification of a served message sequence (one instrument, in order) against the
@@ -373,7 +376,7 @@ pub fn verify_receipts(messages: &[QualMessage], key: &[u8]) -> Option<usize> {
 /// with the audit log's evidence commitments.
 #[must_use]
 pub fn replay(observations: &[FlowObservation], p: Params) -> (Vec<QualMessage>, Vec<AuditEntry>) {
-    let mut path = Muhur::new(p);
+    let mut path = Muhur::demo(p);
     let mut out = Vec::new();
     for o in observations {
         out.extend(path.observe(o, &[]));

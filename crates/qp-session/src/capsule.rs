@@ -122,7 +122,7 @@ impl std::fmt::Debug for Runner {
 
 impl Runner {
     /// A runner for `init` over `doc` (series without a symbol are skipped).
-    pub(crate) fn new(init: &CapsuleInit, doc: &Document) -> Self {
+    pub(crate) fn new(init: &CapsuleInit, doc: &Document, keys: Option<(&[u8], &[u8])>) -> Self {
         let mut watched = Vec::new();
         for id in &init.series {
             let Some(s) = find_series(doc, id) else {
@@ -147,9 +147,14 @@ impl Runner {
                 interval,
                 done: 0,
                 dets: qp_facts::default_detectors(),
-                muhur: flow
-                    .as_ref()
-                    .map(|_| qp_capsule::trust::Muhur::new(qp_capsule::trust::Params::default())),
+                muhur: flow.as_ref().map(|_| match keys {
+                    Some((r, a)) => qp_capsule::trust::Muhur::with_keys(
+                        qp_capsule::trust::Params::default(),
+                        r,
+                        a,
+                    ),
+                    None => qp_capsule::trust::Muhur::demo(qp_capsule::trust::Params::default()),
+                }),
                 flow,
             });
         }
@@ -378,7 +383,21 @@ fn project_story(story: &Story, hidden: &BTreeSet<String>, facts: &[Fact]) -> St
 impl Session {
     /// Starts the runner (`init.capsules`), before the first settle.
     pub(crate) fn start_capsules(&mut self, init: Option<&CapsuleInit>) {
-        self.runner = init.map(|i| Runner::new(i, &self.doc));
+        let keys = self
+            .trust_keys
+            .as_ref()
+            .map(|(r, a)| (r.as_slice(), a.as_slice()));
+        self.runner = init.map(|i| Runner::new(i, &self.doc, keys));
+    }
+
+    /// (R3, §20) Host-supplied secret keys of the server-fact trust path (mühür): the
+    /// receipt key and the audit-log key. Call before the session starts its capsule
+    /// runner. Without it the authority uses the public demo keys, which is only for the
+    /// synthetic test-host flow (`init.capsules.flow`) and transcripts; a real host with
+    /// real licensed data must set its own keys (kept in its secret store, never in the
+    /// document or the log).
+    pub fn set_trust_keys(&mut self, receipt_key: Vec<u8>, audit_key: Vec<u8>) {
+        self.trust_keys = Some((receipt_key, audit_key));
     }
 
     /// `true` when `principal` may read the licensed flow of `instrument` (or there is

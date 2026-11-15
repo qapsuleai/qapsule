@@ -63,7 +63,7 @@ fn product_muhur_equals_measured_crate() {
     let mut said = 0;
     for seed in [1_u64, 2, 3] {
         for obs in observations(seed, 400) {
-            let mut a = Muhur::new(Params::default());
+            let mut a = Muhur::demo(Params::default());
             let mut b = experiment::MuhurPath::new(experiment::Params::default());
             for o in &obs {
                 let ma = a.observe(o, &[]);
@@ -80,4 +80,38 @@ fn product_muhur_equals_measured_crate() {
         }
     }
     assert!(said > 20, "the path spoke ({said} messages)");
+}
+
+/// Host keys (security review): a path built with host-supplied keys says the same thing
+/// as the demo path but its receipts differ, so the demo keys never stand in for a real
+/// host's secret once it calls `with_keys` (`Session::set_trust_keys`).
+#[test]
+fn host_keys_change_receipts_not_statements() {
+    use qp_capsule::trust::{Muhur, Params};
+    let mut demo = Muhur::demo(Params::default());
+    let mut host = Muhur::with_keys(
+        Params::default(),
+        b"host-receipt-secret",
+        b"host-audit-secret",
+    );
+    let (mut said, mut differ) = (0, 0);
+    for inst in observations(7, 300) {
+        for o in &inst {
+            let a = demo.observe(o, &[]);
+            let b = host.observe(o, &[]);
+            assert_eq!(a.len(), b.len());
+            for (x, y) in a.iter().zip(&b) {
+                assert_eq!(
+                    (&x.codes, &x.tr, &x.en, x.shown_bar),
+                    (&y.codes, &y.tr, &y.en, y.shown_bar)
+                );
+                said += 1;
+                if x.attachments.get("receipt") != y.attachments.get("receipt") {
+                    differ += 1;
+                }
+            }
+        }
+    }
+    assert!(said > 0);
+    assert_eq!(said, differ, "every receipt depends on the key");
 }

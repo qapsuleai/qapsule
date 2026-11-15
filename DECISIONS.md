@@ -158,5 +158,5 @@ R3 bu satırları **önerir**; kesinleştirmedi. Kanıt `rounds/R3/REPORT.md`,
 | A22 | Pozisyon/niyet geçişi `important` seviyesini dolduruyor (sentetik %57, gerçek %84 geçen doğum yalnız bu yoldan) | R4/R9 | Yalnız bazı aşamalar (geçersizleşme, zayıflama) ya da kademeler geçsin mi? Ölçülmedi. |
 | A23 | Karne anahtarında yön yok (gerçek günlükte kırılım yukarı ~0,60, aşağı ~0,40) | R5 öncesi | Anahtara yön eklemek karnenin örneklemini böler. |
 | A24 | `CapsuleState`'e `retracted` eklenmesi (bugün `invalidated` + hikâye aşaması `retracted`) | `qp/1` | M7 RESULTS §8. |
-| A25 | Mühür makbuzu simetrik anahtarlı; kullanıcı tek başına doğrulayamıyor | R6 (A19 ile) | Belirleyici Ed25519 önerisi. |
+| A25 | Mühür makbuzu simetrik anahtarlı; kullanıcı tek başına doğrulayamıyor. Anahtarlar barındırıcıdan (`Session::set_trust_keys`); verilmezse demo anahtarları (yalnız sentetik test beslemesi) | R6 (A19 ile) | Belirleyici Ed25519 önerisi; gerçek barındırıcının anahtar saklama yolu R6'da. |
 | A26 | Kesin bar hijyeninin REST kotası (bağ × bar başına bir çekme) | R6 (A17 ile) | Şüpheli barlarla sınırlama. |

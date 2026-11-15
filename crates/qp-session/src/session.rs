@@ -162,6 +162,8 @@ pub struct Session {
     pub(crate) settle: crate::dispute::Settle,
     /// (R3, §20) The capsule engine (`init.capsules`); `None`: no engine.
     pub(crate) runner: Option<crate::capsule::Runner>,
+    /// Host-supplied mühür keys (R3, `set_trust_keys`).
+    pub(crate) trust_keys: Option<(Vec<u8>, Vec<u8>)>,
     /// (R3, §20) Inside [`Session::as_reader`]: the reader's projection.
     pub(crate) proj: Option<crate::capsule::Proj>,
     /// (R3, §20) Inside [`Session::as_reader`]: the real document's facts.
@@ -362,6 +364,7 @@ impl Session {
             intent_epoch: 1,
             settle: crate::dispute::Settle::default(),
             runner: None,
+            trust_keys: None,
             proj: None,
             real_facts: Vec::new(),
             headlines: BTreeMap::new(),

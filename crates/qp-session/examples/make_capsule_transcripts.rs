@@ -1,4 +1,4 @@
-//! Generates the R3 capsule conformance transcripts 38–43
+//! Generates the R3 capsule conformance transcripts 38–44
 //! (`fixtures/protocol/conformance/38-*.json` …, `docs/PROTOCOL.md` §15, §20).
 //!
 //! Each scenario is written as messages and data events; the expected outputs are what
@@ -75,6 +75,7 @@ fn init(k: usize, settled: Option<Vec<Bar>>) -> Value {
 
 enum In {
     Send(&'static str, Value, Option<&'static str>),
+    Raw(&'static str, Value, Option<&'static str>),
     Data(Value, Option<&'static str>),
 }
 
@@ -84,6 +85,11 @@ fn send(conn: &'static str, msg: Value) -> In {
 
 fn send_n(conn: &'static str, msg: Value, note: &'static str) -> In {
     In::Send(conn, msg, Some(note))
+}
+
+/// A message the schema rejects, sent as a raw line (`send_raw`).
+fn send_raw_n(conn: &'static str, msg: Value, note: &'static str) -> In {
+    In::Raw(conn, msg, Some(note))
 }
 
 fn hello(conn: &'static str, who: &str, lang: Option<&str>) -> In {
@@ -136,6 +142,15 @@ fn run(
             In::Send(conn, msg, note) => {
                 let lines = s.handle_raw(conn, &msg.to_string());
                 let mut step = json!({"send": {"conn": conn, "msg": msg}});
+                if let Some(n) = note {
+                    step["note"] = json!(n);
+                }
+                (step, lines)
+            }
+            In::Raw(conn, msg, note) => {
+                let line = msg.to_string();
+                let lines = s.handle_raw(conn, &line);
+                let mut step = json!({"send_raw": {"conn": conn, "line": line}});
                 if let Some(n) = note {
                     step["note"] = json!(n);
                 }
@@ -407,6 +422,59 @@ fn t43() -> Value {
     )
 }
 
+fn t44() -> Value {
+    let b = bars();
+    let k = 121;
+    let mut steps = vec![hello("a", "ana", None)];
+    for (i, bar) in b.iter().enumerate().take(128 + 1).skip(k) {
+        steps.push(bar_ev(k, i, bar, None));
+    }
+    steps.push(send_n(
+        "a",
+        json!({"type":"query","id":"v1","query":{"kind":"verify_evidence","item":{"finding":{"kind":"breakout.range.down","latest":true}}}}),
+        "`verify_evidence.item` takes an item selector (§17.2): the latest breakout finding, resolved and named in `resolved`.",
+    ));
+    steps.push(query(
+        "a",
+        "v2",
+        json!({"kind":"verify_evidence","item":{"fact":{"kind":"breakout.range.down","bar":126}}}),
+    ));
+    steps.push(send_n(
+        "a",
+        json!({"type":"query","id":"v3","query":{"kind":"verify_evidence","item":{"finding":{"kind":"breakout.range.down"}}}}),
+        "Several matches: `ambiguous` at the selector's path with the candidates in latest-fact-bar order.",
+    ));
+    steps.push(send_raw_n(
+        "a",
+        json!({"type":"query","id":"v4","query":{"kind":"verify_evidence","item":{"finding":{"knd":"breakout.range.down"}}}}),
+        "An unknown selector key: `schema` at its path, with the keys a finding selector takes.",
+    ));
+    steps.push(hello("o", "arkin", None));
+    steps.push(send_n(
+        "o",
+        json!({"type":"command","id":"c1","ops":[{"op":"show_finding","finding":{"kind":"breakout.range.down","latest":true},"view":"brk"}]}),
+        "`show_finding` on the bound series: the command's scratch document has no bars; the presenter reads the bound bars as of the command's start (as `add_fact` and `set_view_range` do).",
+    ));
+    steps.push(send_n(
+        "o",
+        json!({"type":"query","id":"g1","query":{"kind":"get","id":"brk"}}),
+        "The stored view: the breakout levels with their fact origins; the finding's licensed flow fact leaves no constant in it.",
+    ));
+    steps.push(send_n(
+        "o",
+        json!({"type":"query","id":"g2","query":{"kind":"log","after_seq":10}}),
+        "The log stores the resolved finding id, not the selector.",
+    ));
+    run(
+        "44-capsule-selectors-bound",
+        "R3/E fixes (§17.2, §18.5, §20.5): on the bound THYAO series of transcript 38, `verify_evidence.item` takes an item selector (finding `latest`, fact by bar) resolved like every selector field (`resolved`; several matches `ambiguous` with candidates; an unknown key `schema` at its path), and `show_finding` on a finding of the bound series stores the chart view built from the bound bars (no licensed constant in it; the log keeps the resolved id).",
+        &["selectors", "verify_evidence", "show_finding", "binding", "capsule"],
+        init(k, None),
+        steps,
+        None,
+    )
+}
+
 fn pretty(v: &Value) -> String {
     let mut s = serde_json::to_string_pretty(v).expect("json");
     s.push('\n');
@@ -417,7 +485,7 @@ fn main() {
     let write = std::env::args().any(|a| a == "--write");
     let dir = root().join("fixtures/protocol/conformance");
     let mut stale = 0;
-    for t in [t38(), t39(), t40(), t41(), t42(), t43()] {
+    for t in [t38(), t39(), t40(), t41(), t42(), t43(), t44()] {
         let name = t["name"].as_str().unwrap().to_owned();
         let path = dir.join(format!("{name}.json"));
         let text = pretty(&t);

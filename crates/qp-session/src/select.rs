@@ -315,6 +315,8 @@ pub(crate) fn sites(msg: &Value) -> Vec<Vec<Site>> {
                     Some("study" | "at") => push(&mut out, q, p, "series", Kind::Series, None),
                     Some("hit") => push(&mut out, q, p, "view", Kind::View, None),
                     Some("present") => push(&mut out, q, p, "finding", Kind::Finding, None),
+                    Some("verify_evidence") => push(&mut out, q, p, "item", Kind::Item, None),
+                    Some("binding") => push(&mut out, q, p, "series", Kind::Series, None),
                     _ => {}
                 }
             }

@@ -647,7 +647,10 @@ kural (`encoding.y` = değerin en kısa yazımı, tamsayıysa ondalıksız: `"70
 `x.domain = [t(max(0, olgu barı − 30)), t(son bar)]`; `y` her panel için `linear`.
 Katman kimlikleri gramerin kendi adlarıdır (K25; `docs/GRAMMAR.md` §11): `candles`, `line`,
 `level` (kapsül görünümünde `line`, `level`, `fact`). Görünüm kimliği verilmezse `view-<seq>-0`. Aynı doküman her zaman aynı
-görünümü üretir. Ajan grameri doğrudan da yazabilir (`put_view`, `add_layer`); ikisi aynı
+görünümü üretir. Bağlı seride (§18) barlar komutun başındaki okuma dokümanından okunur
+(`add_fact`, `set_view_range` gibi); görünüm bar zamanlarını okuduğu için konuşanın bulgunun
+olgularının serilerine veri yetkisi olmalıdır, yoksa `no_entitlement` (`/ops/i/finding`).
+Ajan grameri doğrudan da yazabilir (`put_view`, `add_layer`); ikisi aynı
 komut yolundadır (K21-1, ölçüm `rounds/RD1/experiments/`).
 
 ## 11. Zaman: saat, canlı güncelleme, anlatım çizelgesi
@@ -803,7 +806,9 @@ doğdu → teyit edildi → güçlendi → gerçekleşti, geçersiz; `capsules`,
 39 yetki (yetkili / yalnız bar yetkili / yetkisiz okuyucu: lisanslı hikâye, sunucu yorumu,
 "gerektirir"), 40 K26 cümlesi (geçmiş + "artık … değil" / "no longer", TR ve EN; süresi
 doldu), 41 hassasiyet ve pozisyon geçişi (`set_audience`, `set_sensitivity`), 42 adayın
-iz bırakmaması, 43 geri çekme (kapsül itirazı haklı → `retracted`, karnede yok). 38–43
+iz bırakmaması, 43 geri çekme (kapsül itirazı haklı → `retracted`, karnede yok), 44 bağlı
+seride `verify_evidence.item` seçicisi (çözüm, `ambiguous`, `schema`) ve `show_finding`
+(R3/E düzeltmeleri). 38–44
 `cargo run -p qp-session --example make_capsule_transcripts -- --write` ile üretilir.
 
 ## 16. Gömme
@@ -903,6 +908,7 @@ Anahtarların anlamı:
 | `remove` | `id` (öğe) |
 | `accept_proposal`, `reject_proposal` | `proposal` |
 | sorgu `get` / `study`, `at` / `hit` / `present` | `id` (öğe) / `series` / `view` / `finding` |
+| sorgu `verify_evidence` / `binding` | `item` (öğe: `{"fact":…}` ya da `{"finding":…}`) / `series` |
 | `subscribe` | `changes.ids[]` (öğe), `finding.finding`, `condition.condition` |
 | `attend` | `directive.steps[].target` |
 
@@ -1350,7 +1356,8 @@ Otorite bir olguyu eklerken (`add_fact`; R3'te dedektörler) olguya **kanıt ba�
   gömülü ikili ek kararıyla birlikte).
 - Belge içi serilerde de damgalanır (`binding` yok).
 
-**`verify_evidence`** (`item`: olgu ya da bulgu) her olgu için:
+**`verify_evidence`** (`item`: olgu ya da bulgu; kimlik ya da öğe seçicisi, §17.2 —
+`{"finding":{"kind":"breakout.range.down","latest":true}}`) her olgu için:
 
 1. Bar serisinin bugünkü barlarında `from_t`…`to_t` aralığını **zamana göre** bulur, bar
    sayısını ve özeti hesaplar (`current`).

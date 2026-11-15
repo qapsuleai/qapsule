@@ -22,6 +22,9 @@ pub struct DocProvider<'a> {
     /// (R3) Finding id → the sentence written for this reader (language, entitlement),
     /// used instead of the stored capsule headline.
     headlines: Option<&'a std::collections::BTreeMap<String, String>>,
+    /// The data plane during a command (§18): a bound bar series' bars come from the
+    /// reading document when the scratch document `doc` has none ([`crate::plane::bars_for`]).
+    reader: Option<crate::plane::Reader<'a>>,
 }
 
 impl<'a> DocProvider<'a> {
@@ -30,7 +33,15 @@ impl<'a> DocProvider<'a> {
             doc,
             cache,
             headlines: None,
+            reader: None,
         }
+    }
+
+    /// The same provider reading bound bars through the data plane's `reader` (command
+    /// expansion: `doc` is the command's scratch document, without bound bars).
+    pub(crate) fn with_reader(mut self, reader: Option<crate::plane::Reader<'a>>) -> Self {
+        self.reader = reader;
+        self
     }
 
     /// The same provider speaking with `headlines` (finding → sentence for the reader).
@@ -61,12 +72,20 @@ impl DataProvider for DocProvider<'_> {
             (Some(SeriesData::Bars { .. }), _) => Some(SeriesKind::Bars),
             (Some(SeriesData::Points { .. }), _) => Some(SeriesKind::Points),
             (None, SeriesSource::Study { .. }) => Some(SeriesKind::Values),
+            (None, SeriesSource::Bind { .. }) if self.reader.is_some() => Some(SeriesKind::Bars),
             _ => None,
         }
     }
 
     fn bars(&self, series: &str) -> Option<Cow<'_, [Bar]>> {
-        find_series(self.doc, series)?.bars().map(Cow::Borrowed)
+        let s = find_series(self.doc, series)?;
+        match (s.bars(), &s.source, &self.reader) {
+            (Some(b), _, _) => Some(Cow::Borrowed(b)),
+            (None, SeriesSource::Bind { .. }, Some(r)) => {
+                crate::plane::bars_for(self.doc, Some(r), series).map(|(_, b)| Cow::Borrowed(b))
+            }
+            _ => None,
+        }
     }
 
     fn input_bars(&self, series: &str) -> Option<String> {

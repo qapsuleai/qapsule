@@ -37,6 +37,11 @@ round'un `rounds/Rn/` klasörü.
 ## Güvenlik ve hijyen
 
 - `.env`, token, anahtar hiçbir zaman commit edilmez. `../Services/**/.env` okunmaz, kopyalanmaz.
+- Depo kökündeki `.env.local` Arkin'in girdiği belirteç ve anahtarları tutar (`docs/MODELS.md`,
+  `docs/DATA_ACCESS.md`). Bu dosyayı açma, içeriğini yazdırma, değerlerini komut satırına ya da
+  günlüğe koyma. Betikler değeri ortamdan okur. Eksikse hangi değişkenin gerektiğini söyle ve bekle.
+- Gerçek piyasa verisi yalnızca `fixtures/local/` altında durur; içeriği, türevleri ve ondan
+  üretilen görseller commit edilmez, rapora yalnızca toplu istatistik girer.
 - `../Docs` ve `../Services` salt okunurdur; oradan yalnızca okunur, oraya yazılmaz.
 - Commit'ler küçük ve anlamlı olur; her alt görev kendi dalında veya worktree'sinde çalışır.
 

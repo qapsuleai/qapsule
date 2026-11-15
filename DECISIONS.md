@@ -38,6 +38,12 @@
 | K32 | 2026-11-15 | A4 kapandı: nicel olarak ifade edilebilen her şey gösterilebilir (istatistik, geçmiş sıklık, gösterge sinyalleri). Kapsülün dili sayıya dayanır. | Arkin'in kararı. Bu bir hukuki görüş değildir; kurumun hukuk ve uyum değerlendirmesi Arkin'in sorumluluğundadır. |
 | K33 | 2026-11-15 | Veri lisansı iki kullanım ayırır: gösterim ve gösterimsiz kullanımdan hesaplanmış yorum. Her olgu verisinin lisans sınıfını taşır; kanıt kullanıcının yetkisinin izin verdiği derinliğe kadar açılır; kısıtlama otoritede uygulanır, yetkisiz cihaza ham veri gönderilmez. Lisanslı veriden türeyen olgular yalnız sunucuda hesaplanır (**sunucu olgusu**) ve rakamsız yorum olarak gelir. Karne lisanstan bağımsızdır. | Arkin: örn. kurumsal akış lisansı olmayana akış rakamı gösterilemez, ama rakamsız yorum gösterilebilir. `docs/CAPSULE.md` §7. RP2'nin tutarlılık yaklaşımları yansının yeniden hesaplayamadığı bu olgu türünü de kapsamalı. |
 | K34 | 2026-11-15 | `NORTH_STAR.md` vazgeçilmezi güncellendi: "Kapsül her zaman kanıtına açılır. Kullanıcının veri yetkisi yetmiyorsa kanıtın var olduğu, neye dayandığı ve hangi yetkiyi gerektirdiği söylenir." | Arkin onayı; K33'ün sonucu. |
+| K35 | 2026-11-15 | RP2 önerileri Ö18–Ö28 kabul edildi (aşağıdaki "RP2 kararları" tablosu): veri bağı, kalıcı çapa, alan düzeyinde veri olayı, veri yetkisi modeli, dondurulmuş kanıt, artımlı canlı yol, `view` konusu, tutarlılık kuralı (B + §18.5), yansı ayrı WASM paketi, K25 uygulaması. | Arkin onayı. Kanıt `rounds/RP2/REPORT.md`. |
+| K36 | 2026-11-15 | RP2 açık sorularının cevapları: **A15 kapandı** (K33 ile): sayısal kanıt değerleri ve veri özeti yetkisize gitmez; durum, olgunluk ve zaman yorumdur, gider. **A16 kapandı** (K28 ile): canlı barda geçici iddia sunucudan gelmez; "aday" cihazın kendi verisinden hesaplanır; kesin kapsül ve geçersizleşme bar kapanışını bekler. Ölçüt paydası Ö23'teki gibi. Yansılı paket ayrı; son karar R4'te cihazda. Aynı koşul içeriği değişmeden yeniden yazılırsa sorumlu kişi değişmez. **A20:** ikisi birden; otorite kesinleştirmeden önce kesin barla doğrular ve yansıdan itiraz yolu açılır (R3). | Arkin onayı. |
+| K37 | 2026-11-15 | Kapsülün yaşam döngüsüne **geri çekildi** durumu eklenir: verinin hatalı çıkması nedeniyle iddianın düşmesi. "Geçersiz"den farklıdır; karneye yazılmaz. | RP2 denetimi O1 (otoritenin yanlış kesin iddiası). |
+| K38 | 2026-11-15 | **Sunucu olgusu için ayrı güven yolu:** yansının kendi verisinde sınayamadığı (veri lisansı nedeniyle) iddialar, tutarlılık kuralının istisnası olarak, "sunucu tarafından doğrulandı" işaretiyle gösterilir. Tasarım R3'te alternatifleriyle ölçülür; nitel yorumlardan ham değerin geri çıkarılamadığı kanıtlanır. | K33 ile Ö25 birlikte lisanssız kullanıcının yorumu hiç görememesine yol açıyordu. |
+| K39 | 2026-11-15 | Emin olunmayan her tasarım seçeneği alternatifleriyle kurulur ve ölçülür; ölçüm yöntemi round tasarımında adıyla yazılır. İnsan algısına dayanan konularda (işaret okunabilirliği gibi) hesap ve yapay zekâ ölçümü ön elemedir; son söz gerçek kullanıcı testindedir. | Arkin: alternatifler içinde emin olmadığımız hususlarda ölçüm kavramlarımızı unutmayalım. |
+| K40 | 2026-11-15 | Model ve anahtar gereksinimleri `docs/MODELS.md`'de, gerçek veriye erişim `docs/DATA_ACCESS.md`'de tutulur. Motor anahtarsız çalışır; anahtar gerektiren round bunu `PROMPT.md`'nin başında yazar. Belirteç ve anahtarlar `.env.local`'da durur, Arkin girer, ajan dosyayı açmaz. Gerçek veri yalnızca `fixtures/local/` altında, depoya girmeden kullanılır. | Arkin: token ihtiyacı doğarsa kaydedilsin; gerçek barlar Matriks servisinden çekilebilir. |
 
 ## Açık kararlar
 
@@ -97,7 +103,7 @@ R2 bu satırları **önerir**; kesinleştirmedi. Kanıt `rounds/R2/REPORT.md`, `
 | A13 | WASM boyutu: gramer derleyicisi wasm'a girince gzip 476.603 → 595.475 B (+118.872 B, +%25; RD1'e göre +120.349 B; denetçinin temiz kopyası 595.584 B) | R4 öncesi | `wasm-opt -Oz` ile 526 KB; ince bir wasm yüzeyi (yalnız tarama) ya da derleyiciyi sunucuda tutmak seçenek. |
 | A14 | Bollinger bantlarında uzun seride kayan M2 sürüklenmesi (50k barda göreli ~1,2e-9) | R3 öncesi | Her `period` barda tam yeniden hesap sınırlar ama hesap özetini değiştirir. |
 
-## Önerilen (RP2) — ana akış onayı bekliyor
+## RP2 kararları — kabul edildi (2026-11-15, K35)
 
 RP2 bu satırları **önerir**; kesinleştirmedi. Kanıt `rounds/RP2/REPORT.md`,
 `rounds/RP2/RESEARCH.md`, `rounds/RP2/experiments/` (T3, T4, T4-fixes, T5, T5-fixes, T7a–d,
@@ -119,8 +125,8 @@ T7-COMPARE, T8, T9), `docs/PROTOCOL.md` §18–§19.
 
 | # | Açık karar (RP2) | Ne zaman | Not |
 |---|------------|----------|-----|
-| A15 | Kanıt değerleri (olgunun `evidence`'i, kapsül durumu) veri lisansı kapsamında mı? Kapsamdaysa yetkisize gizlenir (bugün iddia kanıtı değerleri süzülüyor; `Fact.evidence`, `Fact.evidence_ref.digest`, kapsül durumu, `maturity` ve `t` herkese gidiyor). | R3 öncesi (A4 hukuk ile) | §18.3 açık soru; T4-fixes artık sızıntılar (kapsül durumunun bir bitlik sonucu). |
-| A16 | Canlı barda geçici iddia gösterimi: sıfır hatayla mümkün değil (yansı verisi ≥ ~80 ms geride); kapalı (varsayılan), açık ya da sıfır olmayan tolerans. Kapsül geçersizleşmesi kesinleşmeyi beklesin mi? | R3 | T7a–d ayrı ayrı ölçtü (M3p > 0); T8 Ö-T8-3, Ö-T8-6. |
+| A15 | Kanıt değerleri lisans kapsamında mı — **KAPANDI** | — | K33, K36. |
+| A16 | Canlı barda geçici iddia — **KAPANDI** | — | K28, K36. |
 | A17 | Kesin bar kaynağı (Matriks REST) her iki tarafta barındırıcı sözleşmesi; hız sınırı ve gecikmesi gerçek sistemde. | R6 | T7 düzeneği benzetti, ölçmedi. |
 | A18 | Besleme başına tek paylaşılan depo (bugün bağ başına; bağlı barlar sağlayıcı, `FeedStore` ve okuma dokümanında üç kez); geçmiş düzeltmede yalnız düzeltilen bardan yeniden hesap (`qp-compute`'ta durum anlık görüntüsü gerekir; bugün N=500'de ~40 ms). | R3/R4 | T4 D-T4-1, T5 sınırlar, T5 denetimi D5. |
 | A20 | Otoritenin yanlış kesin iddiasının onarımı: `qp/1`'de yansıdan `dispute`/`check` ve/veya otoritede kesin bar doğrulaması (B'nin hijyeni); gerçek otoriteyle düzenek yaklaşımı | R3 (dedektörlerle) | Son denetim O1; AUD1/AUD2. |

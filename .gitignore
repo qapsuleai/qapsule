@@ -31,3 +31,6 @@ secrets/
 # Python bytecode
 __pycache__/
 *.pyc
+
+# Lisanslı gerçek piyasa verisi: yalnız yerelde, depoya girmez (K23)
+fixtures/local/

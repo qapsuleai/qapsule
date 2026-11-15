@@ -28,12 +28,14 @@ olay şimdiki zamanla sunulmaz.
 
 Aynı enstrümanda aynı tema için ayrı ayrı kapsüller doğmaz; tek kapsül evrilir:
 
-`aday → doğdu → güçlendi | zayıfladı → teyit edildi → gerçekleşti | geçersiz | süresi doldu`
+`aday → doğdu → güçlendi | zayıfladı → teyit edildi → gerçekleşti | geçersiz | süresi doldu | geri çekildi`
 
 - **Aday:** bar kapanmadan görülen, fiyat dönerse kaybolabilecek oluşum. Yalnızca o anda
   o enstrümanı izleyene gösterilir; hiçbir zaman itilmez, karneye yazılmaz.
 - **Kesinleşme:** bar kapanınca otorite kimlik verir ve karneye yazar.
 - **Eskime:** türün doğal ömrü (bar sayısıyla, saatle değil), açık geçersizlik koşulu ve sonuç.
+- **Geri çekildi (K37):** dayandığı veri hatalı çıktı. Piyasanın görüşü çürütmesi değildir;
+  karneye yazılmaz.
 - **Sonuç:** her kapsül sonunda "gerçekleşti" ya da "gerçekleşmedi" olarak kapanır; karne
   buradan beslenir.
 

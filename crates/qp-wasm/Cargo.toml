@@ -1,6 +1,6 @@
 [package]
 name = "qp-wasm"
-description = "Qapsule web binding (thin wrapper over qp-compute, qp-grammar and qp-render)."
+description = "Qapsule web binding (thin wrapper over qp-compute, qp-grammar, qp-render and the qp-session replica)."
 version.workspace = true
 edition.workspace = true
 rust-version.workspace = true
@@ -12,6 +12,10 @@ crate-type = ["cdylib", "rlib"]
 
 [features]
 default = []
+# RP2/T8: the replica binding (`Replica`, qp-session). Off in the default (R0 view) build
+# so that its size stays as measured; `scripts/verify.sh` builds it for the native <-> WASM
+# replica check.
+replica = ["dep:qp-session", "dep:qp-source"]
 # Spike variant: tiny-skia SIMD pipelines (build with RUSTFLAGS="-C target-feature=+simd128").
 simd = ["qp-render/simd"]
 # Spike variant: also export the vello_cpu backend for the browser comparison.
@@ -24,6 +28,8 @@ qp-compute = { path = "../qp-compute" }
 qp-grammar = { path = "../qp-grammar" }
 qp-render = { path = "../qp-render" }
 qp-schema = { path = "../qp-schema" }
+qp-session = { path = "../qp-session", optional = true }
+qp-source = { path = "../qp-source", optional = true }
 serde_json = "1"
 wasm-bindgen = "=0.2.130"
 wasm-bindgen-futures = { version = "0.4", optional = true }

@@ -99,6 +99,26 @@ Piyasa verisi protokolün içinden akmaz (K23); kaynağından kendi biçiminde g
 | Kanıt doğrulama | `verify_evidence` | Bir olgu ya da bulgunun kanıt başvurularını bugünkü veriye karşı sınayan sorgu: veri özeti aynı mı, olgunun kanıt değerleri yeniden hesapta aynı mı; değilse farkı bildirir. |
 | Veri yetkisi | entitlement | Bir kişinin bir beslemeyi görme hakkı (borsa veri lisansı). Rol yetkisinden (`Role`) ayrıdır; veri sağlayıcı denetler. |
 
+### Tutarlılık (RP2)
+
+Otorite ile yansının aynı veriye bakıp bakmadığı ve yansının ne zaman neyi gösterdiği.
+Ayrıntı `docs/PROTOCOL.md` §19; seçimin gerekçesi `rounds/RP2/experiments/T7-COMPARE.md`.
+
+| Kavram | Kodda | Tanım |
+|--------|-------|-------|
+| Yansı | `Replica` | Otoritenin dokümanını `document` + `change` olaylarından birebir izleyen, bağlı serileri **kendi** veri sağlayıcısından ve kendi yetkisiyle çapadan çözen, otoriteyle **aynı motor kodunu** çalıştıran taraf (cihaz, tarayıcı). Dokümana yazmaz; kendi motor girdisi üretmez. |
+| İddia | claim (`ClaimRef`) | Otoritenin veriden çıkardığı anlam: bir koşulun bir barda doğru olması (`condition`), bir niyetin tetiklenmesi (`intent`), bir kapsülün geçersizleşmesi (`capsule`). Kimliği: neyin iddiası olduğu + bar zamanı `t`. |
+| İddia kanıtı | `ClaimEvidence` | Otoritenin veri kaynaklı her anlam mesajına eklediği kanıt: iddianın bar serisi, bar zamanı `t`, kanıt değerleri, olgunluk, temizlik ve çapa. Veri değildir (bar taşımaz); iddianın dayandığı birkaç sayıdır. |
+| Kanıt değeri | `EvidenceValue` | İddianın dayandığı bir işlenenin (koşuldaki serinin ana çıktısı) `t`'deki ve bir önceki bardaki değeri (`value`, `prev`). Yansı kendi verisinde aynı yüklemi bu barlarda sınar. |
+| Olgunluk | `Maturity` | İddia barının bir taraftaki durumu: `provisional` (geçici: bar o tarafın verisinde henüz kapanmadı, canlı bar) ya da `final` (kesin: bar kapandı; ondan sonra bar var ya da pencere kapalı). Yansıda gösterilen olgunluk iki tarafınkinin küçüğüdür. |
+| Temizlik | `clean` | Bir tarafın verisinin iddia barına kadar onarılmamış sıra boşluğu (kaybolmuş olay) içermemesi. Kesin gösterim için iki taraftan en az birinin temiz olması gerekir. |
+| İddia durumu | `ClaimState` | Otoritenin bir iddia hakkındaki son sözü: `asserted` (ileri sürüyor; geçici ya da kesin) ya da `withdrawn` (geri çekti: bar kapandığında ya da düzeltmeden sonra yüklem artık tutmuyor). |
+| İddia aboneliği | `claims` konusu | İddiaların yaşam döngüsünü (`claim` olayı: geçici, kesin, geri çekildi, temizlik değişti) kanıtıyla taşıyan abonelik konusu. Yansının dinlediği konu. |
+| Görüntü kuralı | display rule | Yansının bir iddiayı ne zaman gösterdiği: otorite ileri sürüyor, yansının kendi verisi `t`'yi aynı çapayla kapsıyor ve iddianın yüklemi **kendi verisinde** tutuyor; veri her değiştiğinde aynı adımda yeniden sınanır. Kesin için kendi barı kapalı + otorite kesin + iki taraftan biri temiz. Gösterilen değerler yansının kendi değerleridir. |
+| Yansı görüntü durumu | `DisplayState` | Yansının her iddia için gösterdiği: `pending` (bekliyor: otorite bir şey buldu, kendi verisi henüz kapsamıyor ya da doğrulamıyor), `shown` (gösteriliyor: geçici ya da kesin, kendi değerleriyle), `disputed` (tartışmalı: temiz ve yeniden çekilmiş kendi verisi iddiayı tutmuyor; iddia olarak gösterilmez). Belirleyicidir. |
+| Kesin bar çekme | settled fetch | Barındırıcının yansı (ya da otorite) için veri sağlayıcının kesinleşmiş barlarını (Matriks REST karşılığı) çekmesi; anlaşmazlıkta ve boşluk onarımında kullanılır. Veri düzlemindedir. |
+| Doküman özeti / görünüm özeti | `document_digest` / `view_digest` | Dokümanın kanonik JSON baytlarının ve bir görünümün sahne tarifinin (`SceneDesc`) FNV-1a 64 özeti. Otorite ile yansının aynı dokümanı ve aynı görüntüyü ürettiği bununla karşılaştırılır. |
+
 ## Kapsülün yaşam döngüsü
 
 `taslak → canlı → (güncellendi)* → geçersiz | süresi doldu | onaylandı | reddedildi`

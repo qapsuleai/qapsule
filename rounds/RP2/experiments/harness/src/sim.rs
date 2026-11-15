@@ -105,6 +105,7 @@ fn setups(spec: &ScenarioSpec, world: &World) -> (Setup, Setup) {
                         interval: world.feeds[b].interval.clone(),
                         window: BindWindow::last(n),
                         feed: None,
+                        anchor_t: None,
                     },
                     feed: world.feeds[b].clone(),
                     interval_ms: world.interval_ms,

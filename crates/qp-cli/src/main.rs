@@ -69,6 +69,18 @@ enum Command {
     Explain(SceneArgs),
     /// Print the compiled scene description (`SceneDesc` JSON) of a view.
     Scene(SceneArgs),
+    /// Authority ↔ replica check (docs/PROTOCOL.md §19.6): run the reference authority
+    /// and a replica on one tick stream (replica data `--lag` events behind), check the
+    /// display rule with an independent oracle, and write the replica's input tape with
+    /// the digests after every step (replayed by the WASM replica in Node).
+    ReplicaTape {
+        /// Replica data delay in events.
+        #[arg(long, default_value_t = 0)]
+        lag: usize,
+        /// Output tape (JSON).
+        #[arg(short, long)]
+        out: PathBuf,
+    },
     /// Run protocol conformance transcripts (docs/PROTOCOL.md §15).
     Conform {
         /// Transcript files or directories of `*.json` transcripts.
@@ -253,9 +265,39 @@ fn run(command: Command) -> Result<Outcome, String> {
             transport,
             root,
         } => conform(&inputs, &transport, &root),
+        Command::ReplicaTape { lag, out } => replica_tape(lag, &out),
         Command::Explain(args) => scene_cmd(&args, true),
         Command::Scene(args) => scene_cmd(&args, false),
     }
+}
+
+/// `qp replica-tape`: runs the check, writes the tape, prints a summary; invalid if a
+/// display-rule violation was found or (without lag) a step's digests differ.
+fn replica_tape(lag: usize, out: &std::path::Path) -> Result<Outcome, String> {
+    let o = qp_session::tape::run(lag)?;
+    let text = serde_json::to_string(&o.tape).map_err(|e| e.to_string())?;
+    std::fs::write(out, text).map_err(|e| format!("{}: {e}", out.display()))?;
+    let last = o.tape.steps.last().map(|s| &s.expect);
+    println!(
+        "lag {lag}: {} steps, {} with replica digests != authority, {} violations, final claims {} (shown final at end {}), display counts final/provisional/pending/disputed {:?}; last doc {} view {}",
+        o.tape.steps.len(),
+        o.differing_steps,
+        o.violations.len(),
+        o.final_claims,
+        o.shown_final,
+        o.shown_counts,
+        last.map_or("", |e| e.doc.as_str()),
+        last.map_or("", |e| e.view.as_str()),
+    );
+    for v in o.violations.iter().take(10) {
+        eprintln!("violation at step {}: {}", v.step, v.what);
+    }
+    let caught_up = last.is_some_and(|e| e.doc == e.authority_doc && e.view == e.authority_view);
+    let ok = o.violations.is_empty()
+        && caught_up
+        && o.shown_final == o.final_claims
+        && (lag > 0 || o.differing_steps == 0);
+    Ok(if ok { Outcome::Ok } else { Outcome::Invalid })
 }
 
 /// A session from `--init` (or the transcript's init), after the transcript's messages,

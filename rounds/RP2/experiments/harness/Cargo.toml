@@ -19,6 +19,9 @@ path = "src/lib.rs"
 [dependencies]
 qp-schema = { path = "../../../../crates/qp-schema" }
 qp-compute = { path = "../../../../crates/qp-compute" }
+# RP2/T8: the `bs` approach drives the real replica (`qp_session::replica`).
+qp-session = { path = "../../../../crates/qp-session" }
+qp-source = { path = "../../../../crates/qp-source" }
 serde = { version = "1.0.229", features = ["derive"] }
 serde_json = { version = "1.0.154", features = ["float_roundtrip"] }
 flate2 = { version = "1", default-features = false, features = ["rust_backend"] }

@@ -354,6 +354,10 @@ fn run(seed: u64, bound: bool, steps: usize, kinds: &mut BTreeMap<String, usize>
         );
     }
     sub(&mut p, "a", "in", json!({"kind":"intents"}));
+    // RP2/T8: the claim lifecycle (evidence, finalisation, withdrawal, cleanliness) is part
+    // of the compared output.
+    sub(&mut p, "a", "cl", json!({"kind":"claims"}));
+    sub(&mut p, "w", "cl", json!({"kind":"claims"}));
     let feed = json!({"symbol":"THYAO","interval":"1d"});
     let mut dseq = 0u64;
     for i in 0..steps {

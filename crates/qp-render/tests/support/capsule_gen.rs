@@ -360,7 +360,10 @@ pub fn document(sample: Sample) -> Value {
 /// The finding id of a sample (from its document).
 #[must_use]
 pub fn finding_of(doc: &Value) -> String {
-    doc["findings"][0]["id"].as_str().unwrap_or_default().to_owned()
+    doc["findings"][0]["id"]
+        .as_str()
+        .unwrap_or_default()
+        .to_owned()
 }
 
 fn owner_init(doc: &str) -> Value {
@@ -389,7 +392,13 @@ fn present(finding: &str, expect: &Value) -> Value {
     })
 }
 
-fn transcript(name: &str, description: &str, doc: &str, steps: Vec<Value>, views: &[&str]) -> Value {
+fn transcript(
+    name: &str,
+    description: &str,
+    doc: &str,
+    steps: Vec<Value>,
+    views: &[&str],
+) -> Value {
     let views: Vec<Value> = views.iter().map(|v| json!({"id": v})).collect();
     let mut final_doc = json!({"views": views});
     if views.is_empty() {
@@ -433,10 +442,20 @@ pub fn files() -> Vec<(String, String)> {
     let mut findings = Vec::new();
     for sample in [Sample::Breakout, Sample::Squeeze, Sample::Divergence] {
         let doc = document(sample);
-        findings.push((sample, finding_of(&doc), doc["capsules"][0]["headline"].clone()));
+        findings.push((
+            sample,
+            finding_of(&doc),
+            doc["capsules"][0]["headline"].clone(),
+        ));
         out.push((sample.doc().to_owned(), pretty(&doc)));
     }
-    let f = |s: Sample| findings.iter().find(|x| x.0 == s).map(|x| x.1.clone()).unwrap_or_default();
+    let f = |s: Sample| {
+        findings
+            .iter()
+            .find(|x| x.0 == s)
+            .map(|x| x.1.clone())
+            .unwrap_or_default()
+    };
     let breakout = f(Sample::Breakout);
     let headline = findings[0].2.clone();
     out.push((

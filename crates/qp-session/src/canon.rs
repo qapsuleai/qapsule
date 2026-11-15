@@ -1131,8 +1131,11 @@ pub(crate) fn check_layer(doc: &Document, l: &mut Layer, site: &Site<'_>) -> PRe
             }
         }
         Mark::Band => {
-            if l.encoding.y.is_none() || l.encoding.y2.is_none() {
-                let missing = if l.encoding.y.is_none() { "y" } else { "y2" };
+            // A channel may be given by its origin alone (the authority writes the value).
+            let has_y = l.encoding.y.is_some() || l.origin.contains_key("/encoding/y");
+            let has_y2 = l.encoding.y2.is_some() || l.origin.contains_key("/encoding/y2");
+            if !has_y || !has_y2 {
+                let missing = if has_y { "y2" } else { "y" };
                 return Err(E::new(
                     ErrorCode::Invalid,
                     format!("`band` needs `y` and `y2`; `{missing}` is missing"),

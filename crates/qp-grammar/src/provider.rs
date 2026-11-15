@@ -322,7 +322,11 @@ impl DataProvider for MemProvider {
         self.capsules
             .iter()
             .find(|c| c.id == capsule_or_finding)
-            .or_else(|| self.capsules.iter().find(|c| c.finding == capsule_or_finding))
+            .or_else(|| {
+                self.capsules
+                    .iter()
+                    .find(|c| c.finding == capsule_or_finding)
+            })
             .map(Cow::Borrowed)
     }
 

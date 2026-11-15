@@ -10,7 +10,7 @@
 use std::borrow::Cow;
 use std::collections::BTreeMap;
 
-use qp_schema::capsule::{GlyphPhase, GlyphSpec, Geometry, LedgerStat, Story, Trust};
+use qp_schema::capsule::{Geometry, GlyphPhase, GlyphSpec, LedgerStat, Story, Trust};
 use qp_schema::grammar::{
     ColorSpec, Emphasis, EmphasisKind, Layer, Mark, Origin, Panel, PanelPos, Position, Scale,
     ScaleKind, SizeSpec, View,
@@ -340,8 +340,8 @@ pub const CHART_GLYPH_PX: f64 = 32.0;
 #[must_use]
 pub fn story_glyph(story: &Story, now_bar: u64) -> GlyphSpec {
     let lab = story.ledger_at_birth;
-    let confidence = (lab.n >= GLYPH_MIN_LEDGER_N && lab.n > 0)
-        .then(|| f64::from(lab.realized) / f64::from(lab.n));
+    let confidence =
+        (lab.n >= GLYPH_MIN_LEDGER_N.max(1)).then(|| f64::from(lab.realized) / f64::from(lab.n));
     #[allow(clippy::cast_precision_loss)]
     let age = now_bar.saturating_sub(story.last_bar) as f64;
     GlyphSpec {
@@ -375,12 +375,15 @@ pub fn ledger_text(st: &LedgerStat) -> String {
 pub fn geometry_field(fact: &Fact, field: &str) -> Option<f64> {
     let rest = field.strip_prefix("geometry.")?;
     let (i, rest) = rest.split_once('.')?;
-    let g = fact.meaning.as_ref()?.geometry.get(i.parse::<usize>().ok()?)?;
+    let g = fact
+        .meaning
+        .as_ref()?
+        .geometry
+        .get(i.parse::<usize>().ok()?)?;
     let bar = match (g, rest) {
-        (
-            Geometry::Level { from_bar, .. } | Geometry::Band { from_bar, .. },
-            "from_bar",
-        ) => *from_bar,
+        (Geometry::Level { from_bar, .. } | Geometry::Band { from_bar, .. }, "from_bar") => {
+            *from_bar
+        }
         (Geometry::Level { to_bar, .. } | Geometry::Band { to_bar, .. }, "to_bar") => *to_bar,
         (Geometry::Points { points }, r) => {
             let j = r.strip_prefix("points.")?.strip_suffix(".bar")?;
@@ -529,25 +532,22 @@ fn uniq(taken: &mut Vec<String>, base: &str) -> String {
     id
 }
 
-/// A constant position `v` whose origin is `field` of `fact`.
-fn bind(l: &mut Layer, ptr: &str, v: f64, fact: &Fact, field: &str) {
-    let pos = Some(Position::Number(v));
-    match ptr {
-        "/encoding/x" => l.encoding.x = pos,
-        "/encoding/x2" => l.encoding.x2 = pos,
-        "/encoding/y" => l.encoding.y = pos,
-        _ => l.encoding.y2 = pos,
-    }
+/// Binds the channel at `ptr` to `field` of `fact` by origin only: the view never carries
+/// the value (K33). The compiler resolves it from the reader's provider at compile time,
+/// so a reader whose provider redacts the evidence gets no number from the view.
+fn bind(l: &mut Layer, ptr: &str, fact: &Fact, field: &str) {
     l.origin.insert(ptr.to_owned(), fact_origin(fact, field));
 }
 
 /// The evidence geometry of `fact` as layers in `panel` (R3, `docs/GRAMMAR.md` §18):
 /// `Level` → a rule segment (`level`), `Band` → a band over its bars (`band`), `Points`
-/// → a point per swing (`swing-point`) joined by segments (`swing`). Every constant — the
-/// values and the bars — has the fact as its origin (evidence key, `geometry.<i>.…`). A
-/// geometry whose values are absent from the evidence (redacted) is not drawn.
+/// → a point per swing (`swing-point`) joined by segments (`swing`). Every position — the
+/// values and the bars — is bound to the fact **by origin only** (evidence key,
+/// `geometry.<i>.…`): the layer carries no number; the compiler resolves each one from
+/// the reader's provider (K33: a view never carries evidence values to a reader). A
+/// geometry whose values are absent from the evidence (redacted) gets no layer at all;
+/// the chart says what the evidence needs instead ([`evidence_note`]).
 #[must_use]
-#[allow(clippy::cast_precision_loss)]
 pub fn evidence_layers(fact: &Fact, panel: u32, taken: &mut Vec<String>) -> Vec<Layer> {
     let mut out = Vec::new();
     let Some(m) = &fact.meaning else {
@@ -561,30 +561,21 @@ pub fn evidence_layers(fact: &Fact, panel: u32, taken: &mut Vec<String>) -> Vec<
         }
         let gf = |what: &str| format!("geometry.{gi}.{what}");
         match g {
-            Geometry::Level {
-                key,
-                from_bar,
-                to_bar,
-            } => {
+            Geometry::Level { key, .. } => {
                 let mut l = layer(&uniq(taken, "level"), Mark::Rule, panel);
-                bind(&mut l, "/encoding/y", ev(key).unwrap_or_default(), fact, key);
-                bind(&mut l, "/encoding/x", *from_bar as f64, fact, &gf("from_bar"));
-                bind(&mut l, "/encoding/x2", *to_bar as f64, fact, &gf("to_bar"));
+                bind(&mut l, "/encoding/y", fact, key);
+                bind(&mut l, "/encoding/x", fact, &gf("from_bar"));
+                bind(&mut l, "/encoding/x2", fact, &gf("to_bar"));
                 l.encoding.color = accent();
                 l.encoding.width = Some(2.0);
                 out.push(l);
             }
-            Geometry::Band {
-                upper,
-                lower,
-                from_bar,
-                to_bar,
-            } => {
+            Geometry::Band { upper, lower, .. } => {
                 let mut l = layer(&uniq(taken, "band"), Mark::Band, panel);
-                bind(&mut l, "/encoding/y", ev(upper).unwrap_or_default(), fact, upper);
-                bind(&mut l, "/encoding/y2", ev(lower).unwrap_or_default(), fact, lower);
-                bind(&mut l, "/encoding/x", *from_bar as f64, fact, &gf("from_bar"));
-                bind(&mut l, "/encoding/x2", *to_bar as f64, fact, &gf("to_bar"));
+                bind(&mut l, "/encoding/y", fact, upper);
+                bind(&mut l, "/encoding/y2", fact, lower);
+                bind(&mut l, "/encoding/x", fact, &gf("from_bar"));
+                bind(&mut l, "/encoding/x2", fact, &gf("to_bar"));
                 l.encoding.color = accent();
                 l.encoding.opacity = Some(0.18);
                 l.encoding.width = Some(1.0);
@@ -594,26 +585,20 @@ pub fn evidence_layers(fact: &Fact, panel: u32, taken: &mut Vec<String>) -> Vec<
                 for (j, w) in points.windows(2).enumerate() {
                     let mut l = layer(&uniq(taken, "swing"), Mark::Rule, panel);
                     let (a, b) = (&w[0], &w[1]);
-                    bind(&mut l, "/encoding/y", ev(&a.key).unwrap_or_default(), fact, &a.key);
-                    bind(&mut l, "/encoding/y2", ev(&b.key).unwrap_or_default(), fact, &b.key);
+                    bind(&mut l, "/encoding/y", fact, &a.key);
+                    bind(&mut l, "/encoding/y2", fact, &b.key);
                     let pa = gf(&format!("points.{j}.bar"));
                     let pb = gf(&format!("points.{}.bar", j + 1));
-                    bind(&mut l, "/encoding/x", a.bar as f64, fact, &pa);
-                    bind(&mut l, "/encoding/x2", b.bar as f64, fact, &pb);
+                    bind(&mut l, "/encoding/x", fact, &pa);
+                    bind(&mut l, "/encoding/x2", fact, &pb);
                     l.encoding.color = accent();
                     l.encoding.width = Some(2.0);
                     out.push(l);
                 }
                 for (j, pt) in points.iter().enumerate() {
                     let mut l = layer(&uniq(taken, "swing-point"), Mark::Point, panel);
-                    bind(&mut l, "/encoding/y", ev(&pt.key).unwrap_or_default(), fact, &pt.key);
-                    bind(
-                        &mut l,
-                        "/encoding/x",
-                        pt.bar as f64,
-                        fact,
-                        &gf(&format!("points.{j}.bar")),
-                    );
+                    bind(&mut l, "/encoding/y", fact, &pt.key);
+                    bind(&mut l, "/encoding/x", fact, &gf(&format!("points.{j}.bar")));
                     l.encoding.color = accent();
                     l.encoding.size = Some(SizeSpec::Constant(9.0));
                     out.push(l);
@@ -660,7 +645,10 @@ fn chart_view_r3(
             // Bands go under the candles, lines and points over them.
             for l in evidence_layers(f, 0, &mut taken) {
                 if l.mark == Mark::Band {
-                    let at = layers.iter().position(|x| x.mark == Mark::Candle).unwrap_or(0);
+                    let at = layers
+                        .iter()
+                        .position(|x| x.mark == Mark::Candle)
+                        .unwrap_or(0);
                     layers.insert(at, l);
                 } else {
                     layers.push(l);

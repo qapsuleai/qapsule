@@ -3167,6 +3167,8 @@ pub enum PositionIn {
     Name(String),
     /// Field of a (possibly other) series.
     Ref(DataRefIn),
+    /// Panel-relative layout position (R3).
+    Panel(crate::grammar::PanelPos),
 }
 
 /// Wire form of [`crate::grammar::Operand`].
@@ -3224,6 +3226,9 @@ pub struct EncodingIn {
     /// Horizontal position.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub x: Option<PositionIn>,
+    /// Second horizontal position (R3: last bar of an extent).
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub x2: Option<PositionIn>,
     /// Vertical position.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub y: Option<PositionIn>,

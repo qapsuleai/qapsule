@@ -1561,6 +1561,7 @@ name = "qp-grammar"
 version = "0.0.0"
 dependencies = [
  "proptest",
+ "qp-capsule",
  "qp-compute",
  "qp-schema",
  "serde_json",

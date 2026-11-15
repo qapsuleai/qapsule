@@ -525,7 +525,7 @@ impl<'f> Ctx<'f, '_> {
         );
         let slot = if by_bar {
             #[allow(clippy::cast_possible_truncation, clippy::cast_sign_loss)]
-            (v >= 0.0 && v.fract() == 0.0).then(|| v as u64)
+            (v >= 0.0 && v.fract() == 0.0).then_some(v as u64)
         } else {
             self.fr.time_slot(v)
         };
@@ -621,7 +621,9 @@ impl<'f> Ctx<'f, '_> {
 pub(crate) fn is_bar_field(field: &str) -> bool {
     field == "bar"
         || (field.starts_with("geometry.")
-            && (field.ends_with(".from_bar") || field.ends_with(".to_bar") || field.ends_with(".bar")))
+            && (field.ends_with(".from_bar")
+                || field.ends_with(".to_bar")
+                || field.ends_with(".bar")))
 }
 
 /// Whether a position is panel-relative.
@@ -707,10 +709,11 @@ pub(crate) fn prepare(
         }
         // R3 capsule texts (the capsule card): its sentence and its ledger line.
         let headline = fr.p.headline(f);
-        let ledger = fr
-            .p
-            .capsule(f)
-            .and_then(|c| c.story.as_ref().map(|s| crate::depth::ledger_text(&s.ledger_at_birth)));
+        let ledger = fr.p.capsule(f).and_then(|c| {
+            c.story
+                .as_ref()
+                .map(|s| crate::depth::ledger_text(&s.ledger_at_birth))
+        });
         for row in &mut all_rows {
             if let Some(h) = &headline {
                 row.texts.insert("headline".to_owned(), h.clone());
@@ -768,12 +771,16 @@ pub(crate) fn prepare(
         ));
     }
     let extent = if x2_given && layer.mark != Mark::Rule {
-        let a = cx.bar_const("/encoding/x", enc.x.as_ref())?.ok_or_else(|| {
-            cx.err(ErrorKind::Invalid, "/encoding/x", "`x2` needs `x` (the first bar)")
-        })?;
-        let b = cx
-            .bar_const("/encoding/x2", enc.x2.as_ref())?
-            .unwrap_or(a);
+        let a = cx
+            .bar_const("/encoding/x", enc.x.as_ref())?
+            .ok_or_else(|| {
+                cx.err(
+                    ErrorKind::Invalid,
+                    "/encoding/x",
+                    "`x2` needs `x` (the first bar)",
+                )
+            })?;
+        let b = cx.bar_const("/encoding/x2", enc.x2.as_ref())?.unwrap_or(a);
         Some((a.min(b), a.max(b)))
     } else {
         None
@@ -1005,12 +1012,16 @@ pub(crate) fn prepare(
                 // A segment from bar `x` to bar `x2` at `y` (sloped to `y2`): evidence
                 // geometry (R3). Every value is a constant with an origin.
                 geom = Geom::Segment;
-                let a = cx.bar_const("/encoding/x", enc.x.as_ref())?.ok_or_else(|| {
-                    cx.err(ErrorKind::Invalid, "/encoding/x", "`x2` needs `x` (the first bar)")
-                })?;
-                let b = cx
-                    .bar_const("/encoding/x2", enc.x2.as_ref())?
-                    .unwrap_or(a);
+                let a = cx
+                    .bar_const("/encoding/x", enc.x.as_ref())?
+                    .ok_or_else(|| {
+                        cx.err(
+                            ErrorKind::Invalid,
+                            "/encoding/x",
+                            "`x2` needs `x` (the first bar)",
+                        )
+                    })?;
+                let b = cx.bar_const("/encoding/x2", enc.x2.as_ref())?.unwrap_or(a);
                 let konst = |ptr: &str, pos: Option<&Position>, key: &str| match cx
                     .position(pos, ptr, key)?
                 {
@@ -1243,7 +1254,10 @@ pub(crate) fn prepare(
             anchor = Anchor {
                 x: panel_pos(enc.x.as_ref()),
                 y: match &enc.y {
-                    None => Some(PanelPos { panel: 0.0, px: 2.0 }),
+                    None => Some(PanelPos {
+                        panel: 0.0,
+                        px: 2.0,
+                    }),
                     p => panel_pos(p.as_ref()),
                 },
             };
@@ -1477,10 +1491,14 @@ pub(crate) fn prepare(
 /// (fact); it must exist in the layer's rows.
 fn text_field_of(cx: &Ctx<'_, '_>) -> Result<String, GrammarError> {
     let layer = cx.layer;
-    let f = layer.encoding.text.clone().or_else(|| match &layer.finding {
-        Some(_) => Some("claim".to_owned()),
-        None => layer.fact.as_ref().map(|_| "text".to_owned()),
-    });
+    let f = layer
+        .encoding
+        .text
+        .clone()
+        .or_else(|| match &layer.finding {
+            Some(_) => Some("claim".to_owned()),
+            None => layer.fact.as_ref().map(|_| "text".to_owned()),
+        });
     let f = f.ok_or_else(|| {
         cx.err(
             ErrorKind::Invalid,

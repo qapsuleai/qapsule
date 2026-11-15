@@ -14,6 +14,7 @@ use qp_schema::scene::{Align, Prim};
 /// FNV-1a 64 over a byte stream.
 pub struct Fnv(pub u64);
 
+#[allow(clippy::new_without_default)]
 impl Fnv {
     pub fn new() -> Self {
         Self(0xcbf2_9ce4_8422_2325)
@@ -34,7 +35,13 @@ pub fn digest_prims(h: &mut Fnv, prims: &[Prim]) {
     h.bytes(&(prims.len() as u64).to_le_bytes());
     for p in prims {
         match p {
-            Prim::Rect { x, y, w, h: hh, color } => {
+            Prim::Rect {
+                x,
+                y,
+                w,
+                h: hh,
+                color,
+            } => {
                 h.bytes(b"R");
                 h.bytes(&x.to_le_bytes());
                 h.bytes(&y.to_le_bytes());

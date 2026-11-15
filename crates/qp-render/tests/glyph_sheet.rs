@@ -37,7 +37,8 @@ fn sheet(theme: &Theme) -> Vec<u8> {
     let mut prims = Vec::new();
     for (j, (_, name)) in PHASES.iter().enumerate() {
         prims.push(Prim::Text {
-            x: LABEL_W + CELL * i32::try_from(j).unwrap() + 34 - i32::try_from(name.len() * 36 / 10).unwrap(),
+            x: LABEL_W + CELL * i32::try_from(j).unwrap() + 34
+                - i32::try_from(name.len() * 36 / 10).unwrap(),
             baseline: 20,
             px: 12.0,
             text: (*name).to_owned(),

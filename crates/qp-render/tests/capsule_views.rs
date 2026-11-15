@@ -86,12 +86,34 @@ fn depth_views_match_goldens_and_explain() {
         let opts = CompileOptions::new(*w, *h);
         let scene = qp_grammar::compile(&view, &s.provider(), &opts).unwrap();
         let a = qp_render::render_scene_png(&scene).unwrap();
-        let b = qp_render::render_scene_png(
-            &qp_grammar::compile(&view, &s.provider(), &opts).unwrap(),
-        )
-        .unwrap();
+        let b =
+            qp_render::render_scene_png(&qp_grammar::compile(&view, &s.provider(), &opts).unwrap())
+                .unwrap();
         assert_eq!(a, b, "{stem}: two renders differ");
         golden_check::check_file(&format!("fixtures/golden/views/{stem}.png"), &a);
+        // The point query on the glyph returns the capsule's finding.
+        let glyph = scene
+            .panels
+            .iter()
+            .flat_map(|p| &p.layers)
+            .find(|l| l.mark == qp_schema::grammar::Mark::Glyph)
+            .expect("a glyph layer");
+        let hb = glyph.items[0].hit;
+        let hit = qp_session::hit_scene(
+            &scene,
+            f64::from(hb.left + hb.right) / 2.0,
+            f64::from(hb.top + hb.bottom) / 2.0,
+            &[],
+        );
+        let item = hit.item.expect("glyph item hit");
+        assert_eq!(item.mark, qp_schema::grammar::Mark::Glyph, "{stem}");
+        assert_eq!(
+            item.data,
+            qp_schema::scene::DataSource::Finding {
+                finding: finding.clone()
+            },
+            "{stem}"
+        );
         let explain = qp_session::explain_scene(&view, &scene);
         golden_check::check_file(
             &format!("fixtures/views/{stem}.explain.txt"),

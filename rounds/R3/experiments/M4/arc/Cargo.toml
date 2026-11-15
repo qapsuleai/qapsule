@@ -1,0 +1,15 @@
+# R3/M4 aday tema kuralı "arc" (yön yayı). Bağımsız crate: çalışma alanı üyesi değil.
+[package]
+name = "m4-arc"
+version = "0.1.0"
+edition = "2021"
+publish = false
+
+[workspace]
+
+[dependencies]
+qp-capsule = { path = "../../../../../crates/qp-capsule" }
+qp-schema = { path = "../../../../../crates/qp-schema" }
+
+[lints.rust]
+unsafe_code = "forbid"

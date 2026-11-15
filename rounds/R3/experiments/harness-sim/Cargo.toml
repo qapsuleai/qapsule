@@ -19,6 +19,13 @@ serde = { version = "1.0.229", features = ["derive"] }
 serde_json = { version = "1.0.154", features = ["float_roundtrip"] }
 # --- Alternatifler (README "Alternatif ekleme"): her biri bir path bağımlılığı ---
 # m3-ornek = { path = "../M3/ornek" }
+m5_barrier = { path = "../M5/barrier" }
+m5_semantic = { path = "../M5/semantic" }
+m3-rarity = { path = "../M3/rarity" }
+m3-confirm = { path = "../M3/confirm" }
+m4-kinddir = { path = "../M4/kinddir" }
+m4-arc = { path = "../M4/arc" }
+m3_ledger = { path = "../M3/ledger" }
 
 [lints.rust]
 unsafe_code = "forbid"

@@ -29,6 +29,9 @@ pub fn rankers() -> Vec<(&'static str, RankerFactory)> {
         ("control", || Box::new(control::RoundRobinRanker)),
         // M3 alternatifleri: bir satır, ör.
         // ("a1", m3_a1::ranker),
+        ("rarity", m3_rarity::ranker),
+        ("confirm", m3_confirm::ranker),
+        ("ledger", m3_ledger::ranker),
     ]
 }
 
@@ -40,6 +43,8 @@ pub fn themes() -> Vec<(&'static str, ThemeFactory)> {
         ("control", || Box::new(control::SingletonTheme)),
         // M4 alternatifleri: bir satır, ör.
         // ("a1", m4_a1::theme),
+        ("kinddir", m4_kinddir::theme),
+        ("arc", m4_arc::theme),
     ]
 }
 
@@ -61,6 +66,10 @@ pub fn outcomes() -> Vec<(&'static str, OutcomeFactory)> {
         }),
         // M5 alternatifleri: bir satır, ör.
         // ("a1", || (m5_a1::outcome(), m5_a1::perturbations())),
+        ("barrier", || {
+            (m5_barrier::outcome(), m5_barrier::perturbations())
+        }),
+        ("semantic", || (m5_semantic::outcome(), m5_semantic::perturbations())),
     ]
 }
 
@@ -83,15 +92,24 @@ pub fn find<F: Copy>(list: &[(&'static str, F)], name: &str) -> Option<F> {
 /// Shared reference rules (the non-measured strategies of each experiment).
 #[must_use]
 pub fn reference_theme() -> Box<dyn ThemeRule> {
+    if let Ok(n) = std::env::var("QP_R3_THEME") {
+        return find(&themes(), &n).expect("QP_R3_THEME: unknown theme")();
+    }
     Box::new(reference::RefTheme)
 }
 /// Reference outcome.
 #[must_use]
 pub fn reference_outcome() -> Box<dyn OutcomeRule> {
+    if let Ok(n) = std::env::var("QP_R3_OUTCOME") {
+        return find(&outcomes(), &n).expect("QP_R3_OUTCOME: unknown outcome")().0;
+    }
     Box::new(reference::RefOutcome::default())
 }
 /// Reference ranker.
 #[must_use]
 pub fn reference_ranker() -> Box<dyn Ranker> {
+    if let Ok(n) = std::env::var("QP_R3_RANKER") {
+        return find(&rankers(), &n).expect("QP_R3_RANKER: unknown ranker")();
+    }
     Box::new(reference::RefRanker)
 }

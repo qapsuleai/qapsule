@@ -283,7 +283,7 @@ pub fn experiments_dir() -> PathBuf {
 /// `rounds/R3/experiments/<exp>/raw/<alt>/`.
 #[must_use]
 pub fn raw_dir(exp: &str, alt: &str) -> PathBuf {
-    experiments_dir().join(exp).join("raw").join(alt)
+    experiments_dir().join(exp).join(raw_name()).join(alt)
 }
 
 /// The local real-bars directory: `$QAPSULE_LOCAL_BARS`, else the first
@@ -313,7 +313,8 @@ pub fn real_bars_dir() -> Option<PathBuf> {
 pub fn real_raw_dir(exp: &str, alt: &str) -> Option<PathBuf> {
     let bars = real_bars_dir()?;
     let local = bars.parent()?.to_path_buf();
-    Some(local.join("r3-raw").join(exp).join(alt))
+    let name = if chosen_mode() { "r3-raw-chosen" } else { "r3-raw" };
+    Some(local.join(name).join(exp).join(alt))
 }
 
 /// Write `text` to `path`, creating parents.
@@ -667,4 +668,23 @@ pub fn par_map<T: Sync, R: Send>(items: &[T], f: impl Fn(&T) -> R + Sync) -> Vec
         .into_iter()
         .map(|m| m.into_inner().expect("slot").expect("filled"))
         .collect()
+}
+
+/// R3/S integrated re-run (SPEC "Ortak ilkeler": "Son bütünleştirmede seçilenlerle yeniden
+/// koşulur"): when any of `QP_R3_THEME`, `QP_R3_OUTCOME`, `QP_R3_RANKER` is set, the
+/// non-measured strategies are the named registry entries instead of the reference ones,
+/// and raw output goes to `raw-chosen/` (local: `r3-raw-chosen/`). Metric code unchanged.
+#[must_use]
+pub fn chosen_mode() -> bool {
+    ["QP_R3_THEME", "QP_R3_OUTCOME", "QP_R3_RANKER"]
+        .iter()
+        .any(|k| std::env::var_os(k).is_some())
+}
+
+fn raw_name() -> &'static str {
+    if chosen_mode() {
+        "raw-chosen"
+    } else {
+        "raw"
+    }
 }

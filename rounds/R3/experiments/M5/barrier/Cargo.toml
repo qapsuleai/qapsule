@@ -1,0 +1,21 @@
+# R3/M5 aday "barrier" (oynaklık bariyeri). Bağımsız crate: çalışma alanı üyesi değil.
+[package]
+name = "m5_barrier"
+version = "0.1.0"
+edition = "2021"
+publish = false
+description = "R3/M5 candidate outcome rule: per-kind ATR-scaled triple barrier (no look-ahead)."
+
+[workspace]
+
+[dependencies]
+qp-capsule = { path = "../../../../../crates/qp-capsule" }
+qp-compute = { path = "../../../../../crates/qp-compute" }
+qp-schema = { path = "../../../../../crates/qp-schema" }
+
+[dev-dependencies]
+qp-facts = { path = "../../../../../crates/qp-facts" }
+qp-source = { path = "../../../../../crates/qp-source" }
+
+[lints.rust]
+unsafe_code = "forbid"

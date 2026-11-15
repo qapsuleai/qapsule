@@ -1,0 +1,16 @@
+# R3 M3 adayı "nadirlik" (rarity): önem = bu türden olayın bu enstrümanda (ve piyasada)
+# ne kadar seyrek olduğu. Bağımsız crate (boş [workspace]); harness-sim'e path bağımlılığıyla girer.
+[package]
+name = "m3-rarity"
+version = "0.1.0"
+edition = "2021"
+publish = false
+
+[workspace]
+
+[dependencies]
+qp-capsule = { path = "../../../../../crates/qp-capsule" }
+qp-schema = { path = "../../../../../crates/qp-schema" }
+
+[lints.rust]
+unsafe_code = "forbid"

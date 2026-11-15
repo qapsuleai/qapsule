@@ -254,7 +254,11 @@ impl Session {
         Self::build(init, repo_root, Provider::Host(provider))
     }
 
-    fn build(init: SessionInit, repo_root: &Path, provider: Provider) -> Result<Self, String> {
+    pub(crate) fn build(
+        init: SessionInit,
+        repo_root: &Path,
+        provider: Provider,
+    ) -> Result<Self, String> {
         let doc: Document = match &init.document {
             DocumentRef::Inline(d) => (**d).clone(),
             DocumentRef::Path(p) => read_json(&confine(repo_root, p)?)?,
@@ -1518,7 +1522,7 @@ impl Session {
     /// a state change re-injects or removes the bars), the values cache follows
     /// incrementally (or is cleared on the reference path), and the change waits for
     /// `view` subscribers.
-    fn data_changed(&mut self, changed: Vec<(String, crate::values::Delta)>) {
+    pub(crate) fn data_changed(&mut self, changed: Vec<(String, crate::values::Delta)>) {
         match self.rd.as_mut() {
             Some(rd) => {
                 for (id, d) in &changed {

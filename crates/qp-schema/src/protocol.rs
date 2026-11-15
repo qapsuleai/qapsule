@@ -2126,6 +2126,11 @@ pub struct ClaimEvidence {
     /// computed from; absent for inline series.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub anchor_t: Option<TimestampMs>,
+    /// The bound feeds the evidence rests on (its bar series and every operand, through
+    /// study inputs), recorded when the claim is made; empty if it rests on inline data
+    /// only. Values go only to recipients entitled to all of them (§18.3, §19.7).
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub feeds: Vec<FeedKey>,
 }
 
 /// What a claim is about.

@@ -16,7 +16,7 @@ fn root() -> PathBuf {
 /// The init of transcript 34 with an extra viewer `guest` that has no data entitlement.
 fn init() -> (SessionInit, Vec<DataEvent>) {
     let t: Value = serde_json::from_str(
-        &std::fs::read_to_string(root().join("fixtures/protocol/conformance/34-consistency.json"))
+        &std::fs::read_to_string(root().join("fixtures/protocol/conformance/35-consistency.json"))
             .unwrap(),
     )
     .unwrap();
@@ -126,4 +126,67 @@ fn evidence_values_never_reach_an_unentitled_principal() {
         .iter()
         .filter_map(|e| e.evidence.as_ref())
         .any(|ev| ev.values[0].value.is_some()));
+}
+
+/// The `log` query gates historical evidence by the feeds recorded in it, not by the
+/// document as it is now: rebinding the series later does not let the
+/// values through (§19.7, fail closed).
+#[test]
+fn historical_evidence_is_gated_by_its_recorded_feeds() {
+    let (mut init, events) = init();
+    // The guest is entitled to ASELS only.
+    init.data
+        .as_mut()
+        .unwrap()
+        .entitlements
+        .insert("guest".to_owned(), vec!["ASELS".to_owned()]);
+    let mut s = Session::new(init, &root()).unwrap();
+    for (conn, who) in [("a", "arkin"), ("g", "guest")] {
+        s.handle_raw(
+            conn,
+            &json!({"type":"hello","protocol":"qp/0","principal":who,"surface":{"kind":"desktop"}})
+                .to_string(),
+        );
+    }
+    for ev in &events[..1] {
+        s.data_event(ev).unwrap();
+    }
+    let ev = s.log().iter().find_map(|e| e.evidence.clone()).unwrap();
+    assert_eq!(ev.feeds.len(), 1);
+    assert_eq!(ev.feeds[0].symbol, "THYAO");
+    // Rebind px to ASELS (which the guest may read).
+    for (id, op) in [(
+        "rebind",
+        json!({"op":"put_series","series":{"id":"px","instrument":{"symbol":"ASELS"},"interval":"1d",
+                   "source":{"kind":"bind","symbol":"ASELS","interval":"1d","window":{"last":5}}}}),
+    )] {
+        let r = s.handle_raw(
+            "a",
+            &json!({"type":"command","id":id,"ops":[op]}).to_string(),
+        );
+        assert_eq!(
+            msgs(&r, "a")[0]["status"],
+            "applied",
+            "{id}: {:?}",
+            msgs(&r, "a")
+        );
+        let r = s.handle_raw(
+            "g",
+            &json!({"type":"query","id":"l","query":{"kind":"log"}}).to_string(),
+        );
+        let m = &msgs(&r, "g")[0];
+        let mut evs = Vec::new();
+        evidences(m, &mut evs);
+        assert!(!evs.is_empty(), "{m}");
+        for e in &evs {
+            assert!(
+                e["values"]
+                    .as_array()
+                    .unwrap()
+                    .iter()
+                    .all(|v| v.get("value").is_none() && v.get("prev").is_none()),
+                "after {id}: {e}"
+            );
+        }
+    }
 }

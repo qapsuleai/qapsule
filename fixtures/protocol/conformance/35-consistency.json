@@ -1,5 +1,5 @@
 {
- "name": "34-consistency",
+ "name": "35-consistency",
  "description": "RP2/T8 §19: claim evidence on data-derived events (condition_met, finding_state, change of the invalidation entry) and the `claims` topic: a provisional claim on the live bar, final when the bar closes, withdrawn after a correction of the closed bar, `clean: false` after a sequence gap.",
  "covers": [
   "data",
@@ -386,7 +386,13 @@
         ],
         "maturity": "provisional",
         "clean": true,
-        "anchor_t": 1759708800000
+        "anchor_t": 1759708800000,
+        "feeds": [
+         {
+          "symbol": "THYAO",
+          "interval": "1d"
+         }
+        ]
        }
       }
      }
@@ -415,7 +421,13 @@
         ],
         "maturity": "provisional",
         "clean": true,
-        "anchor_t": 1759708800000
+        "anchor_t": 1759708800000,
+        "feeds": [
+         {
+          "symbol": "THYAO",
+          "interval": "1d"
+         }
+        ]
        }
       }
      }
@@ -443,7 +455,13 @@
         ],
         "maturity": "provisional",
         "clean": true,
-        "anchor_t": 1759708800000
+        "anchor_t": 1759708800000,
+        "feeds": [
+         {
+          "symbol": "THYAO",
+          "interval": "1d"
+         }
+        ]
        }
       }
      }
@@ -473,7 +491,13 @@
         ],
         "maturity": "provisional",
         "clean": true,
-        "anchor_t": 1759708800000
+        "anchor_t": 1759708800000,
+        "feeds": [
+         {
+          "symbol": "THYAO",
+          "interval": "1d"
+         }
+        ]
        },
        "seq": 2
       }
@@ -505,7 +529,13 @@
         ],
         "maturity": "provisional",
         "clean": true,
-        "anchor_t": 1759708800000
+        "anchor_t": 1759708800000,
+        "feeds": [
+         {
+          "symbol": "THYAO",
+          "interval": "1d"
+         }
+        ]
        },
        "seq": 2
       }
@@ -559,7 +589,13 @@
         ],
         "maturity": "final",
         "clean": true,
-        "anchor_t": 1759708800000
+        "anchor_t": 1759708800000,
+        "feeds": [
+         {
+          "symbol": "THYAO",
+          "interval": "1d"
+         }
+        ]
        },
        "seq": 2
       }
@@ -591,7 +627,13 @@
         ],
         "maturity": "final",
         "clean": true,
-        "anchor_t": 1759708800000
+        "anchor_t": 1759708800000,
+        "feeds": [
+         {
+          "symbol": "THYAO",
+          "interval": "1d"
+         }
+        ]
        },
        "seq": 2
       }
@@ -641,7 +683,13 @@
         ],
         "maturity": "final",
         "clean": true,
-        "anchor_t": 1759708800000
+        "anchor_t": 1759708800000,
+        "feeds": [
+         {
+          "symbol": "THYAO",
+          "interval": "1d"
+         }
+        ]
        },
        "seq": 2
       }
@@ -673,7 +721,13 @@
         ],
         "maturity": "final",
         "clean": true,
-        "anchor_t": 1759708800000
+        "anchor_t": 1759708800000,
+        "feeds": [
+         {
+          "symbol": "THYAO",
+          "interval": "1d"
+         }
+        ]
        },
        "seq": 2
       }
@@ -722,7 +776,13 @@
         ],
         "maturity": "provisional",
         "clean": true,
-        "anchor_t": 1759708800000
+        "anchor_t": 1759708800000,
+        "feeds": [
+         {
+          "symbol": "THYAO",
+          "interval": "1d"
+         }
+        ]
        }
       }
      }
@@ -752,7 +812,13 @@
         ],
         "maturity": "provisional",
         "clean": true,
-        "anchor_t": 1759708800000
+        "anchor_t": 1759708800000,
+        "feeds": [
+         {
+          "symbol": "THYAO",
+          "interval": "1d"
+         }
+        ]
        },
        "seq": 2
       }
@@ -802,7 +868,13 @@
         ],
         "maturity": "provisional",
         "clean": false,
-        "anchor_t": 1759708800000
+        "anchor_t": 1759708800000,
+        "feeds": [
+         {
+          "symbol": "THYAO",
+          "interval": "1d"
+         }
+        ]
        },
        "seq": 2
       }

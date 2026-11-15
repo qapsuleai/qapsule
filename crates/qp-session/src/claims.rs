@@ -168,7 +168,11 @@ pub(crate) fn assemble(
         fin &= closed(rd, &bs, v.t);
         clean &= !unclean(&bs, v.t);
     }
+    let mut ids: Vec<&str> = vec![series.as_str()];
+    ids.extend(vals.iter().map(|v| v.series.as_str()));
+    let feeds = feeds_of(rd, &ids)?;
     Some(ClaimEvidence {
+        feeds,
         anchor_t: anchor_of(rd, &series),
         series,
         t,
@@ -487,36 +491,38 @@ impl crate::session::Session {
     }
 }
 
-/// True if `principal` holds the data entitlement of every bound feed the evidence rests
-/// on (its bar series and every operand series, through study inputs).
-fn entitled_all(doc: &Document, plane: &DataPlane, principal: &str, ev: &ClaimEvidence) -> bool {
-    if plane.series.is_empty() {
-        return true;
-    }
-    let mut stack: Vec<&str> = std::iter::once(ev.series.as_str())
-        .chain(ev.values.iter().map(|v| v.series.as_str()))
-        .collect();
+/// The bound feeds series `ids` rest on in `doc` (through study inputs), sorted and
+/// unique; `None` if a series cannot be resolved (then no evidence is made: a claim whose
+/// data dependencies are unknown cannot be gated, §19.7).
+pub(crate) fn feeds_of(doc: &Document, ids: &[&str]) -> Option<Vec<qp_schema::data::FeedKey>> {
+    let mut out: Vec<qp_schema::data::FeedKey> = Vec::new();
+    let mut stack: Vec<&str> = ids.to_vec();
     let mut seen = 0usize;
     while let Some(id) = stack.pop() {
         seen += 1;
         if seen > 1024 {
-            return false;
+            return None;
         }
-        let Some(s) = find_series(doc, id) else {
-            continue;
-        };
+        let s = find_series(doc, id)?;
         match &s.source {
             SeriesSource::Bind { .. } => {
-                let Some(b) = s.binding() else { continue };
-                if !plane.entitled(principal, &b.feed_key()) {
-                    return false;
+                let k = s.binding()?.feed_key();
+                if !out.contains(&k) {
+                    out.push(k);
                 }
             }
             SeriesSource::Study { inputs, .. } => stack.extend(inputs.iter().map(String::as_str)),
             _ => {}
         }
     }
-    true
+    out.sort();
+    Some(out)
+}
+
+/// True if `principal` holds the data entitlement of every feed recorded in the evidence
+/// (fail closed: no provider, or a feed the provider does not grant, means no).
+fn entitled_all(plane: &DataPlane, principal: &str, ev: &ClaimEvidence) -> bool {
+    ev.feeds.iter().all(|k| plane.entitled(principal, k))
 }
 
 /// The evidence as `principal` may receive it (§18.3: data-plane values do not go to an
@@ -530,7 +536,8 @@ pub(crate) fn for_principal(
     ev: &ClaimEvidence,
 ) -> ClaimEvidence {
     let mut ev = ev.clone();
-    if !entitled_all(doc, plane, principal, &ev) {
+    let _ = doc;
+    if !entitled_all(plane, principal, &ev) {
         for v in &mut ev.values {
             v.value = None;
             v.prev = None;

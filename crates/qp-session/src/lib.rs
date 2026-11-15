@@ -41,10 +41,13 @@ mod present;
 mod provider;
 mod query;
 mod reading;
+pub mod replica;
 mod select;
 mod session;
 mod suggest;
 mod summary;
+#[doc(hidden)]
+pub mod tape;
 mod values;
 
 pub use apply::{
@@ -58,5 +61,6 @@ pub use present::profile_for;
 pub use provider::DocProvider;
 pub use qp_grammar::CompileOptions;
 pub use reading::{hit_scene, screen_frame, HIT_HEIGHT, HIT_WIDTH};
+pub use replica::{document_digest, view_digest, Replica, ReplicaOptions};
 pub use session::{confine, default_limits, permissions, read_json, Session, ENGINE_PRINCIPAL};
 pub use suggest::{did_you_mean, edit_distance};

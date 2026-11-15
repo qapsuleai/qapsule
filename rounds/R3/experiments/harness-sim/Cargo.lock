@@ -14,6 +14,7 @@ version = "0.1.0"
 dependencies = [
  "m3-confirm",
  "m3-rarity",
+ "m3_ledger",
  "m4-arc",
  "m4-kinddir",
  "m5_barrier",
@@ -42,6 +43,14 @@ dependencies = [
 
 [[package]]
 name = "m3-rarity"
+version = "0.1.0"
+dependencies = [
+ "qp-capsule",
+ "qp-schema",
+]
+
+[[package]]
+name = "m3_ledger"
 version = "0.1.0"
 dependencies = [
  "qp-capsule",

@@ -1,0 +1,16 @@
+# R3 M3 adayı "ledger" (karne): önem = karne anahtarının geçmişteki isabeti, örneklem
+# belirsizliğiyle. Bağımsız crate (boş [workspace]); harness-sim path bağımlılığıyla kullanır.
+[package]
+name = "m3_ledger"
+version = "0.1.0"
+edition = "2021"
+publish = false
+
+[workspace]
+
+[dependencies]
+qp-capsule = { path = "../../../../../crates/qp-capsule" }
+qp-schema = { path = "../../../../../crates/qp-schema" }
+
+[lints.rust]
+unsafe_code = "forbid"

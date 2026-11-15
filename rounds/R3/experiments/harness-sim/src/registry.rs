@@ -31,6 +31,7 @@ pub fn rankers() -> Vec<(&'static str, RankerFactory)> {
         // ("a1", m3_a1::ranker),
         ("rarity", m3_rarity::ranker),
         ("confirm", m3_confirm::ranker),
+        ("ledger", m3_ledger::ranker),
     ]
 }
 

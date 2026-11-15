@@ -225,6 +225,28 @@ fn cond_ids(c: &Condition) -> [Option<&str>; 2] {
     }
 }
 
+/// [`eval_condition`] from known cache slots (no lookups); `None` when a slot is
+/// missing (then the caller evaluates by id).
+#[allow(clippy::option_option)]
+fn eval_slots(
+    cache: &crate::values::Cache,
+    c: &Condition,
+    slots: [Option<usize>; 2],
+) -> Option<Option<(bool, u64, i64)>> {
+    match c {
+        Condition::Threshold { op, value, .. } => {
+            let l = cache.val(slots[0]?)?;
+            Some(crate::values::eval_on(*op, l, None, *value))
+        }
+        Condition::Compare { op, .. } => {
+            let l = cache.val(slots[0]?)?;
+            let r = cache.val(slots[1]?)?;
+            Some(crate::values::eval_on(*op, l, Some(r), 0.0))
+        }
+        Condition::Text { .. } => Some(None),
+    }
+}
+
 fn reads_changed(doc: &Document, c: &Condition, changed: &[&str]) -> bool {
     cond_ids(c)
         .iter()
@@ -450,14 +472,24 @@ impl Session {
                     // Not evaluated; the edge state is kept (§18.3).
                     continue;
                 }
-                let r = eval_condition(rd, cache, condition);
-                s.memo = Some((
-                    cache.gen(),
-                    [
-                        ids[0].and_then(|i| cache.slot_of(i)),
-                        ids[1].and_then(|i| cache.slot_of(i)),
-                    ],
-                ));
+                let fast = s
+                    .memo
+                    .filter(|(g, _)| *g == cache.gen())
+                    .and_then(|(_, sl)| eval_slots(cache, condition, sl));
+                let r = match fast {
+                    Some(r) => r,
+                    None => {
+                        let r = eval_condition(rd, cache, condition);
+                        s.memo = Some((
+                            cache.gen(),
+                            [
+                                ids[0].and_then(|i| cache.slot_of(i)),
+                                ids[1].and_then(|i| cache.slot_of(i)),
+                            ],
+                        ));
+                        r
+                    }
+                };
                 let now = r.is_some_and(|x| x.0);
                 let prev = s.last.replace(now);
                 if prev == Some(false) && now {

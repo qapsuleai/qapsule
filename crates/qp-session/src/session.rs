@@ -624,8 +624,21 @@ impl Session {
                 _ => None,
             }
         }
+        /// True if a string longer than `max` is anywhere in `v` (no allocation; the
+        /// path is built only when there is one).
+        fn any_long(v: &Value, max: usize) -> bool {
+            match v {
+                Value::String(s) => s.len() > max,
+                Value::Array(a) => a.iter().any(|x| any_long(x, max)),
+                Value::Object(o) => o.values().any(|x| any_long(x, max)),
+                _ => false,
+            }
+        }
         let max_string = self.limits.max_string as usize;
-        if let Some(p) = walk(value, "", max_string) {
+        if let Some(p) = any_long(value, max_string)
+            .then(|| walk(value, "", max_string))
+            .flatten()
+        {
             return Err(E::new(
                 ErrorCode::Limit,
                 format!("string longer than {max_string} bytes"),

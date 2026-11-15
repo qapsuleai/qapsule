@@ -134,7 +134,7 @@ fn scenario(seed: u64, bound: bool) -> Scenario {
             {"id":"v2","x":{"kind":"time"},"y":[{"kind":"linear"}],
              "layers":[{"mark":"line","series":"qx","panel":0,"encoding":{}}]}
         ],
-        "facts":[],"findings":[],"capsules":[],"intents":[],"ledger":[]
+        "facts":[],"findings":[],"capsules":[],"intents":[],"ledger":{"entries":[]}
     });
     let mut init = json!({
         "document": doc,
@@ -616,7 +616,7 @@ fn two_feeds() -> Session {
              "data":{"kind":"bars","bars":walk(&mut rng, 50, 10.0)}}
         ],
         "views":[view("va",&["px","rsi"]), view("vb",&["asl","asma"]), view("vi",&["idx"])],
-        "facts":[],"findings":[],"capsules":[],"intents":[],"ledger":[]
+        "facts":[],"findings":[],"capsules":[],"intents":[],"ledger":{"entries":[]}
     });
     let init: SessionInit = serde_json::from_value(json!({
         "document": doc, "clock": T0,

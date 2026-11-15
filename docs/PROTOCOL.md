@@ -245,6 +245,7 @@ Konular (`topic.kind`):
 | `proposals` | — | `proposal` (oluştu, kabul, ret, süre aşımı) |
 | `attention` | `principal?` (varsayılan: abone) | `attention` (yönerge), `viewport` (bakış değişti) |
 | `intents` | — | `intent_triggered` |
+| `view` (RP2) | `view` (seçici de olur) | `view_changed` (görünümün okuduğu bir serinin barları değişti; §18.8) |
 
 Abonelik kimliği `subscribe` mesajının `id`'sidir. `unsubscribe {"id":…, "sub":"s2"}`.
 Bir bağlantı en çok `limits.max_subscriptions` abonelik tutar.
@@ -635,8 +636,11 @@ komut yolundadır (K21-1, ölçüm `rounds/RD1/experiments/`).
 - **Saat bir girdidir.** Otoritenin saati yoktur; `host` rolündeki bağlantı `clock`
   gönderir. Günlük zamanları, öneri süre aşımları bu saate göre işler. Aynı girdiler aynı
   sonucu verir.
-- **Canlı güncelleme:** veri `append_bars`/`update_last_bar` ile gelir; değişim olarak
-  yayılır; ardından bulgular, niyetler ve koşul abonelikleri değerlendirilir.
+- **Canlı güncelleme:** veri `append_bars`/`update_last_bar` ile (belge içi seri) ya da
+  barındırıcının veri olayıyla (bağlı seri, §18.4) gelir; bar yazısı değişim olarak
+  yayılır; ardından **yalnız değişen seriye dayanan** bulgular, niyetler ve koşul
+  abonelikleri değerlendirilir ve o seriyi okuyan görünümlerin `view` abonelerine
+  `view_changed` gider (artımlı canlı yol, §18.8).
 - **Anlatım çizelgesi** (`Narrative`): bir öğe (genellikle bulgu) hakkında sıralı adımlar;
   her adımda `at_ms` (başlangıçtan milisaniye), `target` (görünüm, panel, seri, öğe, bar
   aralığı) ve `say`. Dokümanda yaşar, kökenlidir, kabukta oynatılır; ekransız yüzeyde
@@ -761,8 +765,9 @@ eşit; `"$any"` her değerle eşleşir; bir nesnede değeri `"$absent"` olan ana
 sonunda koşucu günlüğü baştan oynatır ve dokümanın baytlarının aynı olduğunu denetler.
 
 **Çıktı sırası** (deterministik): önce gönderene cevap; sonra oluşan her girdi için sırayla
-`change`, `finding_state`, `proposal` olayları; sonra `condition_met` ve
-`intent_triggered`; her olay, abonelerine bağlantı açılış sırası ve abonelik sırasıyla.
+`change`, `finding_state`, `proposal` olayları; sonra (RP2) `view_changed` (her bar
+değişimi için sırayla); sonra `condition_met` ve `intent_triggered`; her olay, abonelerine
+bağlantı açılış sırası ve abonelik sırasıyla.
 
 ## 16. Gömme
 
@@ -1275,11 +1280,52 @@ beslemesi `interval`'den bağımsız olarak günlük hafta içi barlar üretir) 
 
 Bir veri olayı ya da belge içi bar yazısı (`append_bars`, `update_last_bar`) dokümanı
 kopyalamadan uygulanır ve yalnızca etkilediklerini günceller: o beslemeye (seriye) dayanan
-hesapların akışlı durumu (`push` / son barı düzelt; geçmiş düzeltmede o bardan sonrası),
+hesapların akışlı durumu (`push` / son barı düzelt; geçmiş düzeltmede o hesaplar baştan),
 o hesaplara dayanan koşullar ve canlı kapsüller, o serileri çizen görünümler. Etkilenmeyen
 görünüme ve aboneliğe hiçbir mesaj gitmez. Sonuç baştan hesapla bayt düzeyinde aynıdır.
-Ayrıntı ve ölçüm `rounds/RP2/REPORT.md`.
 
+**Etkilenen kümesi.** Değişen bar serisi `X` olsun (veri olayında beslemesine bağlı her
+seri; bar yazısında yazılan seri).
+
+- Hesap serileri: girdisi `X` olan her hesap serisi. `X` bir kez tikledikten sonra bu
+  hesapların hepsi her tikte güncel tutulur (görünmese de); başka bar serisindeki hesaplar
+  hiç dokunulmaz.
+- Koşullar (`condition` abonelikleri, etkin niyetlerin tetikleyicileri, canlı kapsüllerin
+  geçersizlik koşulları): okuduğu serilerden biri `X`'e (hesap girdileri üzerinden,
+  geçişli) dayanıyorsa değerlendirilir; dayanmıyorsa değeri değişmemiştir, değerlendirilmez
+  ve kenar durumu korunur. Geçersizleşme motor girdisi ve bildirimleri §8.1 ve §15'teki gibi.
+- Görünümler: katmanlarının okuduğu seriler (`series`, olgu ve bulgu olgularının serileri,
+  `x`/`y`/`y2` başvuruları, renk koşulunun sağ yanı, sabitlerin `series`/`fact` kökenleri)
+  ve onların hesap girdileri (geçişli) `X`'i içeriyorsa `view` abonelerine `view_changed`.
+
+**`view` konusu ve `view_changed`.**
+
+```json
+{"type":"subscribe","id":"va","topic":{"kind":"view","view":"va"}}
+… feed 1'de son barın canlı düzeltmesi:
+{"type":"notify","sub":"va","event":{"kind":"view_changed","view":"va","series":"px",
+ "from_bar":99,"to_bar":99,"seq":1}}
+```
+
+- `series`: barları değişen bar serisi (görünüm onu ya da ona dayanan bir hesabı okur).
+  Bir değişim, bir görünüme seri başına bir olay.
+- `from_bar`: değerleri değişmiş olabilecek ilk bar (`series`'in bar dizini): yeni bar,
+  düzeltilen son bar, geçmiş düzeltmede düzeltilen bar (sonrası da değişebilir); bağ
+  durumunun değişmesinde (ör. `stale`) 0. `to_bar`: `series`'in şimdiki son barı; bar yoksa
+  yok. Kabuk `from_bar`'dan sonrasını yeniden çizer.
+- `seq`: değişimin görüldüğü günlük konumu (bar yazısında girdinin `seq`'i; veri olayı
+  girdi yazmaz: o anki konum).
+- Yalnız veri içindir: görünümün tanımındaki değişim (`put_view`, katman işlemleri,
+  `set_params`) günlük girdisidir ve `changes {ids}` ile gelir.
+- Bağlı seride olay yalnız o beslemeye veri yetkisi olan kişilere gider (zamanlama da veri
+  düzlemindendir; §18.3). Konu kimlik ya da seçici alır; görünüm yoksa `not_found`.
+
+**Uygulama (referans otorite).** Belge içi bar komutu dokümana yerinde uygulanır (başarısız
+işlem uygulananları tersleriyle geri alır); günlük girdisi kopyalayan yolunkiyle bayt bayt
+aynıdır. Motor girdileri de yerinde yazılır. Veri olayında okuma dokümanına yeni bar eklenir,
+düzeltilen bar yerine yazılır (bar dizisinin kopyası yok). Hesap değerleri seri başına akışlı
+durumla tutulur. Kaynak: `crates/qp-session/src/live.rs`, `values.rs`; ölçüm ve tasarım
+`rounds/RP2/experiments/T5.md`.
 
 ## 19. Tutarlılık: otorite ile yansının aynı veriye baktığı (RP2)
 

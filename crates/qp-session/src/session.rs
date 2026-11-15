@@ -421,8 +421,8 @@ impl Session {
         let ev = host
             .get("data")
             .ok_or("unknown host frame (expected `data`)")?;
-        let ev: qp_schema::data::DataEvent =
-            serde_json::from_value(ev.clone()).map_err(|e| format!("data event: {e}"))?;
+        let ev = <qp_schema::data::DataEvent as serde::Deserialize>::deserialize(ev)
+            .map_err(|e| format!("data event: {e}"))?;
         self.data_event(&ev).map_err(|e| e.to_string())
     }
 

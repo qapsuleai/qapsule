@@ -25,6 +25,7 @@ serde = { version = "1.0.229", features = ["derive"] }
 serde_json = { version = "1.0.154", features = ["float_roundtrip"] }
 # --- M1 alternatives: one path dependency per alphabet (README.md, "Alternatif ekleme") ---
 # --- M2 alternatives: one path dependency per realizer (README.md, "Alternatif ekleme") ---
+m2-template = { path = "../M2/template" }
 
 [lints.rust]
 unsafe_code = "forbid"

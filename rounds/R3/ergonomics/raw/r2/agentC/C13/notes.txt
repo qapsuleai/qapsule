@@ -1,0 +1,4 @@
+attempt1: capsules instrument=THYAO unfiltered -> huge, importance-ordered.
+attempt2: capsules THYAO meaning=breakout since_bar=250 -> still list sorted by importance; truncated by my cut.
+attempt3: since_bar=311 plus capsule detail for cap.THYAO.breakout.down.311 -> there are breakouts born at 309, 311, 315; the latest occurred is cap.THYAO.breakout.down.315 (born 315, stage strengthened), but I had picked 311 by importance for the detail query. attempt4.jsonl (detail for 315) was written but NOT run because of the 3-attempt limit. So the full transition history of the correct capsule was never retrieved: task NOT completed properly.
+Unclear: "en son" ambiguous (latest born vs highest importance); capsules list order is importance so recency needs scanning.

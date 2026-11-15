@@ -1,0 +1,6 @@
+bar 306: born
+bar 306: confirmed
+bar 306: confirmed
+bar 307: weakened
+bar 308: strengthened
+bar 310: realized

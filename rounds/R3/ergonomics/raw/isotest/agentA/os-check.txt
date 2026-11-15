@@ -1,0 +1,40 @@
+# sandbox-exec -f isotest_agentA.sb <cmd>
+$ head -c 40 /Users/arkns/Works/Mchart/qapsule/.claude/worktrees/agent-a95198b19bb91064e/CLAUDE.md
+head: /Users/arkns/Works/Mchart/qapsule/.claude/worktrees/agent-a95198b19bb91064e/CLAUDE.md: Operation not permitted
+
+$ head -c 40 /Users/arkns/Works/Mchart/qapsule/.claude/worktrees/agent-a95198b19bb91064e/rounds/R3/tasks/TASKS.md
+head: /Users/arkns/Works/Mchart/qapsule/.claude/worktrees/agent-a95198b19bb91064e/rounds/R3/tasks/TASKS.md: Operation not permitted
+
+$ head -c 40 /Users/arkns/Works/Mchart/qapsule/.claude/worktrees/agent-a95198b19bb91064e/rounds/R3/ergonomics/harness/setup.py
+head: /Users/arkns/Works/Mchart/qapsule/.claude/worktrees/agent-a95198b19bb91064e/rounds/R3/ergonomics/harness/setup.py: Operation not permitted
+
+$ head -c 40 /private/tmp/claude-501/-Users-arkns-Works-Mchart-qapsule/9888bcbf-bbc3-4088-87e1-bd73f855b8fc/scratchpad/e3/docs/isotest/agentA/init.json
+head: /private/tmp/claude-501/-Users-arkns-Works-Mchart-qapsule/9888bcbf-bbc3-4088-87e1-bd73f855b8fc/scratchpad/e3/docs/isotest/agentA/init.json: Operation not permitted
+
+$ head -c 40 /private/tmp/claude-501/-Users-arkns-Works-Mchart-qapsule/9888bcbf-bbc3-4088-87e1-bd73f855b8fc/scratchpad/e3/packet/../../target/release/qp
+head: /private/tmp/claude-501/-Users-arkns-Works-Mchart-qapsule/9888bcbf-bbc3-4088-87e1-bd73f855b8fc/scratchpad/e3/packet/../../target/release/qp: Operation not permitted
+
+$ head -c 40 /private/tmp/claude-501/-Users-arkns-Works-Mchart-qapsule/9888bcbf-bbc3-4088-87e1-bd73f855b8fc/scratchpad/e3/packet/PROTOCOL.md
+# Qapsule Alan Protokolü — `qp/0`
+
+
+$ ls /Users/arkns/.claude/projects/-Users-arkns-Works-Mchart-qapsule
+ls: /Users/arkns/.claude/projects/-Users-arkns-Works-Mchart-qapsule: Operation not permitted
+$ ls /Users/arkns/Works/Mchart/qapsule/.claude/worktrees/agent-a95198b19bb91064e
+ls: /Users/arkns/Works/Mchart/qapsule/.claude/worktrees/agent-a95198b19bb91064e: Operation not permitted
+
+$ touch /Users/arkns/Works/Mchart/qapsule/.claude/worktrees/agent-a95198b19bb91064e/rounds/R3/ergonomics/PWNED.txt
+touch: /Users/arkns/Works/Mchart/qapsule/.claude/worktrees/agent-a95198b19bb91064e/rounds/R3/ergonomics/PWNED.txt: Operation not permitted
+
+$ touch /private/tmp/claude-501/-Users-arkns-Works-Mchart-qapsule/9888bcbf-bbc3-4088-87e1-bd73f855b8fc/scratchpad/e3/work/selftest-ref/agentB/PWNED.txt
+touch: /private/tmp/claude-501/-Users-arkns-Works-Mchart-qapsule/9888bcbf-bbc3-4088-87e1-bd73f855b8fc/scratchpad/e3/work/selftest-ref/agentB/PWNED.txt: Operation not permitted
+
+$ touch /private/tmp/claude-501/-Users-arkns-Works-Mchart-qapsule/9888bcbf-bbc3-4088-87e1-bd73f855b8fc/scratchpad/e3/docs/isotest/agentA/PWNED.txt
+touch: /private/tmp/claude-501/-Users-arkns-Works-Mchart-qapsule/9888bcbf-bbc3-4088-87e1-bd73f855b8fc/scratchpad/e3/docs/isotest/agentA/PWNED.txt: Operation not permitted
+
+$ touch /private/tmp/claude-501/-Users-arkns-Works-Mchart-qapsule/9888bcbf-bbc3-4088-87e1-bd73f855b8fc/scratchpad/e3/packet/PWNED.txt
+touch: /private/tmp/claude-501/-Users-arkns-Works-Mchart-qapsule/9888bcbf-bbc3-4088-87e1-bd73f855b8fc/scratchpad/e3/packet/PWNED.txt: Operation not permitted
+
+$ touch /private/tmp/claude-501/-Users-arkns-Works-Mchart-qapsule/9888bcbf-bbc3-4088-87e1-bd73f855b8fc/scratchpad/e3/work/isotest/agentA/own-write-ok.txt
+(created)
+

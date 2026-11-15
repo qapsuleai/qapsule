@@ -1,0 +1,2 @@
+attempt1: verify_evidence with item as selector {"finding":{...}} -> schema error "invalid type: map, expected a string" (spec §17.2 does not list verify_evidence.item as selector-capable; the table lists only get/study/at/hit/present). Also the selector kind was wrong anyway.
+attempt2: item = id fnd.THYAO.breakout.down.314 (open breakout capsule, found via capsules list) -> evidence_check verified:true, 3 facts verified (same bar digests, same values).

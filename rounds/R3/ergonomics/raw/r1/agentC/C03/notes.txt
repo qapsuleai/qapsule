@@ -1,0 +1,4 @@
+attempt1: capsules query ASELS (invalidated, and all); output sorted by importance not recency, so I wrongly guessed the latest from a truncated view.
+attempt2: since_bar 200 + detail of cap ...287 (wrong pick; 313 with last_bar 317 was later).
+attempt3: since_bar 300 + detail of cap.ASELS.breakout.up.313: reason barrier.stop at bar 317. Done.
+Unclear: capsules sorted by importance, "latest" needs last_bar/since_bar; since_bar semantics (born vs last) unspecified; "geçersiz" could also mean expired; reason code "barrier.stop" is not explained in the spec.

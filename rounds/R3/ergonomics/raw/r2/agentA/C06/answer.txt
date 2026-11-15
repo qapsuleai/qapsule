@@ -1,0 +1,1 @@
+Kırılım türünün karnesi: toplam 74 kapanan kırılım kapsülünden 42'si beklenen sonuca ulaştı (yaklaşık %57). Karşılaştırma için: devam 13/27, aşırı uç 8/14, akış 20/55, dönüş 5/15, sıkışma 0/1.

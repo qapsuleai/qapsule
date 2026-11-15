@@ -1,0 +1,1 @@
+Hayır, geçerli değil. THYAO'daki tek sıkışma kapsülü (cap.THYAO.squeeze.neutral.138, 138. barda doğdu, yön belirsiz) 158. barda geçersiz oldu (şu an 177 bar önce başlamış, sinyal 157 bar önce geçersizleşti); sıkışma sona erdi. Henüz karnesi yok. Şu an THYAO'da açık sıkışma kapsülü yok.

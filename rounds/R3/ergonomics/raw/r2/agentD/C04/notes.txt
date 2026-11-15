@@ -1,0 +1,2 @@
+attempt1: reject_finding with selector kind=breakout,state=live -> not_found; kinds are dotted (breakout.range.down) and state live also matches old realized ones; spec example kind=breakout is misleading. Also listed findings/capsules for ids.
+attempt2: capsules query (instrument THYAO, open:true) showed the single open breakout cap.THYAO.breakout.down.310; reject_finding by id -> ack proposed prop-4 (editor lacks decide; auto mode turns it into a proposal). Unclear whether the task expects actual rejection; impossible for this role.

@@ -1,0 +1,2 @@
+{"conn":"e","msg":{"type":"hello","protocol":"qp/0","principal":"editor","surface":{"kind":"headless"}}}
+{"conn":"e","msg":{"type":"query","id":"q1","query":{"kind":"capsules","instrument":"THYAO"}}}

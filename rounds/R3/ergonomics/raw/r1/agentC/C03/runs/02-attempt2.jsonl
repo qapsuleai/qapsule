@@ -1,0 +1,3 @@
+{"conn":"a","msg":{"type":"hello","protocol":"qp/0","principal":"editor","surface":{"kind":"headless"}}}
+{"conn":"a","msg":{"type":"query","id":"q1","query":{"kind":"capsules","instrument":"ASELS","stages":["invalidated"],"open":false,"since_bar":200}}}
+{"conn":"a","msg":{"type":"query","id":"q2","query":{"kind":"capsule","capsule":"cap.ASELS.breakout.up.287"}}}

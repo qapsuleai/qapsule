@@ -1,0 +1,2 @@
+attempt1: capsules query (instrument THYAO, open true) to discover the open breakout capsule (fnd.THYAO.breakout.down.314); no render yet since id unknown.
+attempt2: present + capsule query with --png --present; level rules drawn (32.64, 32.56, 32.21). Spec unclear: id discovery requires a run first; "open" filter semantic (live states incl. strengthened) only inferable.

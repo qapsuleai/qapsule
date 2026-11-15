@@ -1,0 +1,1 @@
+THYAO'daki açık kırılım kapsülü (fnd.THYAO.breakout.down.314) için dondurulmuş kanıt bugünkü veriyle sınandı: sonuç "doğrulandı". Bulgunun üç olgusunun (bar 314, 315 ve 317) her birinde kayıtlı veri özeti ile bugünkü veri özeti aynı (aynı bar sayısı ve aynı kanıt değerleri); fark yok.

@@ -1,0 +1,1 @@
+cap.ASELS.breakout.up.309 bar 313'de geçersiz oldu; neden: barrier.stop.

@@ -1,0 +1,1 @@
+Hayır, THYAO'daki sıkışma kapsülü artık geçerli değil. Tek sıkışma kapsülü (yön belirsiz, 138. barda doğdu) geçersiz oldu (durum: invalidated); sistem "artık sürmüyor, sinyal 157 bar önce geçersiz oldu" diyor. Henüz karnesi yok.

@@ -1,0 +1,3 @@
+cap.THYAO.continuation.down.312 (devam): THYAO 4 bardır kısa ortalamanın (42,52) altında; şu an 32,15. Düşüş eğilimi sürüyor. Karnesi henüz az örnekli: 18 seferin 6'sında tuttu.
+cap.THYAO.extreme.down.311 (aşırı): THYAO'da RSI 5 bardır 30'un altında; şu an 28,1. Aşırı satım sürüyor. Karnesi henüz az örnekli: 4 seferin 1'inde tuttu.
+cap.THYAO.breakout.down.313 (kırılım): THYAO 3 bar önce 32,64'teki desteği aşağı kırdı (kapanış 32,60): aşağı kırılım. Bu barda aynı aileden yeni bir kanıtla güçlendi. Hâlâ geçerli. Geçmişte bu sinyal 24 seferin 8'inde beklendiği gibi sonuçlandı.

@@ -1,0 +1,1 @@
+Hassasiyetiniz "yalnız önemliler" (important) olarak ayarlandı (set_sensitivity uygulandı, seq 4).

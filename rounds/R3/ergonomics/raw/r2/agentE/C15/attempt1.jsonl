@@ -1,0 +1,3 @@
+{"conn":"a","msg":{"type":"hello","protocol":"qp/0","principal":"editor","surface":{"kind":"headless"}}}
+{"conn":"a","msg":{"type":"query","id":"q1","query":{"kind":"capsule","capsule":"cap.THYAO.breakout.down.312"}}}
+{"conn":"a","msg":{"type":"dispute","id":"d1","claim":{"kind":"capsule","capsule":"cap.THYAO.breakout.down.312","finding":"fnd.THYAO.breakout.down.312"},"t":1711004400000,"values":[]}}

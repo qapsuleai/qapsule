@@ -1,0 +1,2 @@
+attempt1: capsules query (THYAO, breakout, open) to discover the capsule id; returned cap.THYAO.breakout.down.314 (kesif denemesi, kimligi onceden bilemiyordum).
+attempt2: ayni sorgu + capsule {capsule: id} -> capsule_detail ile kanit acildi; basarili. Belirsiz: capsule sorgusu secici almiyor, id once ayri sorguyla ogrenilmek zorunda (tek atista zincirlenemiyor); welcome.summary kapsul listelemiyor.

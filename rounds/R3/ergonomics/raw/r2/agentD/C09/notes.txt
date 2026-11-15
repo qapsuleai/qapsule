@@ -1,0 +1,2 @@
+attempt1: only discovery (list findings, capsules open); output was huge, but showed cap.THYAO.extreme.down.308.
+attempt2: present with finding id and surface "phone" -> depth capsule OK. Unclear: headless default depth is chart, so surface must be passed to get capsule depth; the `surface` field of present is only mentioned in the query table. "aşırılık" = kind extreme was my inference.

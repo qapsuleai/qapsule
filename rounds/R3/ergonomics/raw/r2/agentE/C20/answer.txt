@@ -1,0 +1,1 @@
+THYAO'daki açık kırılım kapsülü (cap.THYAO.breakout.down.312) mum grafiği olarak, kırılan seviye çizgileri, vurgu şeridi ve kapsül işaretiyle PNG'ye çizildi: C20/out.png.

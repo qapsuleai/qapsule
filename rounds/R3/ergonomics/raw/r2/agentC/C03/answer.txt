@@ -1,0 +1,1 @@
+ASELS'te en son geçersiz olan kapsül cap.ASELS.breakout.up.314 (yukarı kırılım). Bar 314'te 32,77'deki direnci yukarı kırdı (kapanış 33,22); bar 318'de, yani en son kapanan barda, "barrier.stop" nedeniyle geçersiz oldu — fiyat sinyalin durdurma bariyerine ulaştı. Sinyal artık geçerli değil. Geçmişte bu sinyal 71 seferin 40'ında beklendiği gibi sonuçlanmıştı.

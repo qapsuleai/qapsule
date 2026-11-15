@@ -1,0 +1,1 @@
+attempt1: ledger by_kind:true -> rows per kind, breakout n=74 realized=42. Succeeded first try. Minor: "Kırılım" -> kind "breakout" mapping is a guess from English kind names; spec lists no kind names (the by_kind rows revealed them).

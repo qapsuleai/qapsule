@@ -1,0 +1,1 @@
+THYAO'da en son gerçekleşen kırılım kapsülü cap.THYAO.breakout.down.314: 314. barda 32,64'teki desteğin aşağı kırılması (kapanış 32,60). Geçmişi: (1) 314. bar, "born" (yeni hikâye, neden new_story); (2) 315. bar, "strengthened" (aynı aileden yeni olgu, neden same_family); (3) 317. bar, "strengthened" (aynı aileden yeni olgu, neden same_family). Kapsül şu an hâlâ geçerli (canlı).

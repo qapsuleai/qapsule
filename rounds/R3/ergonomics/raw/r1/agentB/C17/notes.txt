@@ -1,0 +1,2 @@
+attempt1: capsules query for THYAO only; output huge and the request names no instrument, so it did not answer the question (exploration).
+attempt2: since_bar:306 across all instruments, then counted born_bar>=306 by kind (last bar 315 from series len 316). Unclear: since_bar filters transitions, not birth, so I filtered born_bar by hand; scope (both instruments) is my assumption. No server-side count by kind for open capsules (ledger counts closed ones only).

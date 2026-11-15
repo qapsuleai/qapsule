@@ -1,0 +1,2 @@
+attempt1: document query + set_audience with placeholder group "zzz" to learn valid group values; schema error listed habituated|future (spec does not list group values). Also ran the document query (695KB output, useless).
+attempt2: set_audience {group:habituated, watchlist:[ASELS]} -> applied seq 4. Could not verify pre-existing audience/positions (set_audience replaces whole audience; `get editor` is not_found; audience is not readable via get). Unclear: no query to read own audience back; group choice (habituated = default per 20.4) is a guess.

@@ -1,0 +1,2 @@
+attempt1: capsule query with selector {"latest":true} -> schema error (capsule field takes a string id only, although PROTOCOL §17.2 suggests id/finding fields take selectors). List output was also huge.
+attempt2: capsules list (limit 4) shows non-flow capsules + server comments; capsule detail for id cap.THYAO.flow.down.301 -> not_found (hidden from unentitled). Caveat: I guessed that id from the editor's run in C01, which a viewer could not know; spec says hidden and nonexistent give the same not_found, so "latest flow capsule" is unknowable for the viewer.

@@ -1,6 +1,6 @@
 # R3 — Rapor: Kapsül
 
-- **Durum:** Tamamlandı (denetim sonucu aşağıda, "Denetim" bölümü). Kabul ölçütleri: tablo.
+- **Durum:** Tamamlandı. Bağımsız son denetim: **koşullu kabul**; koşullar giderildi ("Denetim" bölümü). Kabul ölçütleri: tablo.
 - **Tarih:** 2026-11-15 / 16
 - **Alt ajanlar:** Başlatılabildi (ilk iş deneme alt ajanı koşuldu ve cevap verdi). Bütün alt
   görevler, 16 alternatif, iki düzenek, doğrulama, ölçümler, insan testi paketi, ajan
@@ -53,8 +53,8 @@
 | 6 | Üç zaman türü; TR ve EN; K26; lisanslıda rakam yok | ✅ | Şablon dilbilgisi (M2 seçimi); K26 uçtan uca: "THYAO'da RSI 19 bar önce 70'in üstüne çıktı; şu an 52,6, artık 70'in üstünde değil" / "…19 bars ago … no longer above 70"; döküm 40; 35.640 birleşimlik rakamsızlık taraması. |
 | 7 | Alfabe M1 ile seçildi; gramere yeni işaret türü; altı tür × yön × aşama altın görsel; kapsül görünümü | ✅ (ön eleme; son söz insan testinde) | `M1/RESULTS.md`; `glyph` işareti (GRAMMAR §18); `g1-glyphs-light/dark.png` (6 tür × 3 yön × 5 aşama); `c2-capsule.png` (işaret + cümle + küçük grafik + karne). |
 | 8 | Anlam zoom'u üç derinlikte; `chart`'ta geometri olgu kanıtından | ✅ | `c1-sentence` (döküm), `c2-capsule`, `c3-chart` (kırılan seviye), `c4-band` (bant), `c5-points` (tepe/dip noktaları); geometri yalnız kökenle bağlı, değer okuyucunun sağlayıcısından. |
-| 9 | Yetkili değerleri görür; yetkisize yorum + karne + "şu yetkiyi gerektirir"; sayısal değer/özet gitmez (testle) | ✅ | `capsule` sorgusu `requires`/`rests_on`; tarama testi `entitlement_sweep_no_licensed_value_reaches_an_unentitled_reader` (her sorgu/konu/sunum yolu). |
-| 10 | Sunucu olgusu uçtan uca; güven yolu şartnamede; geri çıkarma saldırısı raporda | ✅ | Sentetik lisanslı akış → `flow.institutional` → mühür → `server_comment` (döküm 39); PROTOCOL §20; `M6/RESULTS.md`: kâhin saldırısı bit p90 1,22, yapı gereği sınır ≤ 2,81 bit/hedef bar. |
+| 9 | Yetkili değerleri görür; yetkisize yorum + karne + "şu yetkiyi gerektirir"; sayısal değer/özet gitmez (testle) | (K1 sonrası) | `capsule` sorgusu `requires`/`rests_on`; tarama testi `entitlement_sweep_no_licensed_value_reaches_an_unentitled_reader` (her sorgu/konu/sunum yolu). |
+| 10 | Sunucu olgusu uçtan uca; güven yolu şartnamede; geri çıkarma saldırısı raporda | (K1 sonrası) | Sentetik lisanslı akış → `flow.institutional` → mühür → `server_comment` (döküm 39); PROTOCOL §20; `M6/RESULTS.md`: kâhin saldırısı bit p90 1,22, yapı gereği sınır ≤ 2,81 bit/hedef bar. |
 | 11 | İtiraz ve geri çekme: M7; uygulandı; "geri çekildi" dökümde | ⚠️ | §19.9, döküm 37 ve 43; yanlış/erken/çelişkili gösterim her senaryoda 0; kaçırılan kesin iddia AUD1 7 → 0, AUD3 7 → 0, M7X 51 → 1; **AUD2 49 → 53 (iyileşmedi**: yansının REFRESH'siz 240 s kesintisi). |
 | 12 | Üç seviye, iki grup varsayılanı, pozisyon/niyet bağımsız, sistem değiştirmez; ≥250 gün × ≥30 enstrüman benzetimi | ✅ | `S/sensitivity.md` (30 × 500 × 3 tohum; belirleyici, iki koşu bayt eşit): `important` 1,59/gün, `balanced` 2,06, `all` 3,23; gerçek veri `S/sensitivity-real.md`. Bulgu: pozisyon/niyet geçişi `important`'ı dolduruyor (A22). |
 | 13 | M1–M7 düzenekler önce, alternatifler, ham, seçim; DECISIONS'ta öneri | ✅ (notlarla) | SPEC `a35d726` < bütün alternatifler; ham `experiments/M*/raw/`; DECISIONS Ö29–Ö40. Notlar aşağıda ("Sapmalar"). |
@@ -90,7 +90,7 @@ Kaynak `experiments/S/S-D.md`. Apple M4 Max; yük ortalaması ölçüm anında 5
 | Motor yalnız (30 enstrüman × 7 dedektör) | pazar tiki 215 µs (enstrüman başı 7,2 µs; adaylar 204 µs), bar kapanışı 218 µs; `ledger_stat` 13 ns (S-C dizini: 5.784 → 14 ns) |
 | Oturum, ilk ölçüm (1.000 bar geçmiş, 30 enstrüman) | düzeltme tiki 11,3 µs/olay; bar kapanışı **3,65 s** (lisanslı akışla 8,0 s); bağlanma **161 s** — maliyet motorda değil, oturumun kapsül yolunda (cümle tazeleme %50, okuyucu projeksiyonu %45, `hello` özeti) |
 | Oturum, düzeltmeden sonra (aynı ölçüm; çıktılar bayt eşit) | 1.000 bar: düzeltme tiki **2,27 µs/olay** (lisanslı akışla 2,33; motorsuz yol 2,0–2,1) → RP2 bağlı N=5'in 2,9×'i (≤ 3× hedefi, akışla sınırda), N=500'ün altında; bar kapanışı (30 enstrüman) **48 ms** (akışla 90 ms); bağlanma **133 ms** (akışla 247 ms; hedef ~100 ms aşıldı: yetkisiz okuyucunun ilk `hello`'su bütün cümleleri ilk kez rakamsız yazıyor). 100 bar: 4,9 ms kapanış, 8,1 ms bağlanma. |
-| WASM gzip -9 | varsayılan 616.021 B (+17.697, +%3,0; RP2 598.324); yansılı 1.310.330 B (+222.319, +%20,4) |
+| WASM gzip -9 | varsayılan 616.117 B (son verify; S-D ölçümü 616.021) (+17.697, +%3,0; RP2 598.324); yansılı 1.310.330 B (+222.319, +%20,4) |
 
 ## Sapmalar
 
@@ -124,7 +124,26 @@ Kaynak `experiments/S/S-D.md`. Apple M4 Max; yük ortalaması ölçüm anında 5
 
 ## Denetim
 
-(Son denetim sonucu `AUDIT.md`'den buraya özetlenir.)
+Bağımsız denetçi alt ajan `92b0d84`'ü ayrı bir kopyada denetledi (`AUDIT.md`). **Sonuç:
+koşullu kabul.** VERIFY 17/18 PASS, 1 FAIL (10). Denetçinin bağımsız yeniden ürettikleri: tam
+verify (15/15, tarayıcıyla); 44 döküm × 3 taşıma, 01–36 `main` ile bayt eşit; hesap özetleri;
+yedi dedektörün kendi formül uygulamasıyla yeniden hesabı (11.592 tespit, karar farkı 0, değer
+farkı ≤ 7,6e-11 göreli); kendi dört ileriye bakma bozması × 3 kesim (12/12 farksız); aday izsiz;
+K26 iki dilde (kendi RSI'ıyla aynı); AUD1–AUD3 100 tohum (`bs` 7/49/7 → `bs2` 0/53/0, yanlış
+gösterim 0); hassasiyet benzetimi ve M2/M5 yeniden puanlama bayt eşit; düzenek commit'leri
+alternatiflerden önce; kendi çok-bar Bayesçi geri çıkarma saldırısı (ortalama 0,51 bit/hedef
+bar, en çok 5,71; ≤ 7 farklı döküm: raporun sınırıyla tutarlı); performans ±%3.
+
+| Koşul / bulgu | Giderme |
+|---|---|
+| **K1 / Y1 (Yüksek):** lisanslı akış olgusu açık bir hikâyeye teyit olarak katılınca açık bulgunun `confidence`'ı (= hikâye gücü) gizli olgunun gücünü tam `f64` taşıyordu; önem, kademe, sıra ve karne sayıları da lisanslı veriye bağlıydı (O1). Değer taramaları göremedi; denetçinin **girişimsizlik** denemesi (aynı açık veri, farklı lisanslı akış) yakaladı. | (aşağıda doldurulur) |
+| **K2:** kapanış belgeleri | Bu bölüm; `STATUS.md`, `ROADMAP.md` güncellendi. |
+| O2 (Orta): açık kırılım hikâyesinde "Artık geçerli değil" ve kesin işaret (c2) | Açık soru 4'e işaret de eklendi; ürün kararı (durum koşulu ile beklenen çözüm ayrımı). |
+| D1: düzenek `Cargo.lock`'ları eski | Güncellendi (yalnız yol bağımlılıkları). |
+| D2: anahtar verilmezse demo anahtarı | Bilinçli: demo anahtarları yalnız sentetik test beslemesi ve dökümler için; gerçek barındırıcı `new_with_trust_keys` / `with_provider_and_trust_keys` kullanır (PROTOCOL §20); geç `set_trust_keys` reddedilir. Gerçek akış kaynağı R6'da; orada demo anahtarıyla başlamayı reddetmek önerildi. |
+| D3: insan testi eksikleri | Rakamsız cümleler yalnız akış türünden; paket yeniden üretildi; kalanlar paket README'sinde. |
+| D4: derinlikler arası küçük farklar (c1/c2 cümlesi hacim teyidini söylemiyor; c4 bandı 20 bar geriye) | Öneri. |
+
 
 ## Açık sorular (ana akış için)
 

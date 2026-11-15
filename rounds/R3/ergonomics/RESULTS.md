@@ -377,3 +377,24 @@ Yeniden üretim: `cargo build --release -p qp-cli` ve `harness/gen` (hedef klas�
 `score.py <koşu>`. Tam otorite çıktısı (koşu başına ~3 MB) depoya alınmadı; puanlama için
 gerekenler `.hidden.json` ve `truth.json.gz`'de. Çizilen PNG'ler (sentetik veri) depoda
 değil, yalnız boyut ve SHA-256.
+
+## Sonradan düzeltmeler
+
+Commit `544588d` (dal `r3/fix-e-bugs`):
+
+- **`verify_evidence.item` seçici** (§4.2, öneri 3): şema `ItemRef` diyordu ama seçici
+  yerleri listesinde (`select.rs`) `verify_evidence` yoktu; seçici çözülmeden tipli
+  ayrıştırmaya gidip `"invalid type: map, expected a string"`, `path: ""` veriyordu. Artık
+  öğe seçicisi (`{"finding":…}` / `{"fact":…}`) §17 kurallarıyla çözülüyor (`resolved`,
+  `ambiguous`, `not_found`, `schema` hep `/query/item/…` yolunda). Aynı durumdaki
+  `binding.series` de eklendi. §17.2 tablosu ve §18.5 güncellendi.
+- **`show_finding` bağlı seride** (öneri 10): sunucu görünümü komutun taslak dokümanından
+  kuruluyordu; bağlı serinin barları orada yok (yalnız okuma dokümanında), bu yüzden
+  `series … has no bars`. Sağlayıcı artık bağlı barları okuma dokümanından okuyor
+  (`add_fact`, `set_view_range` gibi); görünüm bar zamanlarını okuduğu için konuşanın
+  veri yetkisi denetleniyor (`no_entitlement`, `/ops/i/finding`). Lisanslı olgu değeri
+  görünüme sabit olarak yazılmıyor (S-C kuralı, `canon` değişmedi); yetki taraması testi
+  artık saklanan görünümle gerçekten koşuyor (önceden `show_finding` viewer'dan
+  gönderildiği için reddediliyordu).
+- Yeni döküm `44-capsule-selectors-bound.json` (üç taşımada geçiyor), 01–43 bayt eşit;
+  `capsules.rs` testi `show_finding_on_a_bound_series_and_verify_evidence_by_selector`.

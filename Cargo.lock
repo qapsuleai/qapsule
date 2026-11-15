@@ -1618,6 +1618,8 @@ dependencies = [
  "qp-grammar",
  "qp-render",
  "qp-schema",
+ "qp-session",
+ "qp-source",
  "serde_json",
  "wasm-bindgen",
  "wasm-bindgen-futures",

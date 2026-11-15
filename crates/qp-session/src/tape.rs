@@ -149,7 +149,7 @@ pub fn init() -> Value {
             "intents": [{"id":"int","text":"RSI 62'yi yukarı keserse haber ver.","active":true,
                          "trigger":{"kind":"threshold","series":"rsi14","op":"cross_above","value":62.0},
                          "provenance":prov}],
-            "ledger": []
+            "ledger": {"entries": []}
         },
         "clock": 1_760_000_000_000_i64, "epoch": 0, "proposal_ttl_ms": null,
         "principals": [

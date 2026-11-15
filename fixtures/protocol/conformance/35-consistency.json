@@ -130,7 +130,9 @@
     }
    ],
    "intents": [],
-   "ledger": []
+   "ledger": {
+    "entries": []
+   }
   },
   "clock": 1760000000000,
   "epoch": 0,

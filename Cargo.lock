@@ -1563,6 +1563,7 @@ name = "qp-grammar"
 version = "0.0.0"
 dependencies = [
  "proptest",
+ "qp-capsule",
  "qp-compute",
  "qp-schema",
  "serde_json",
@@ -1584,9 +1585,12 @@ dependencies = [
  "fontdue",
  "png",
  "pollster",
+ "qp-capsule",
  "qp-compute",
+ "qp-facts",
  "qp-grammar",
  "qp-schema",
+ "qp-session",
  "qp-source",
  "serde_json",
  "tiny-skia",

@@ -8,7 +8,8 @@
 use std::borrow::Cow;
 use std::collections::BTreeMap;
 
-use qp_schema::{Bar, Fact, Finding, Point};
+use qp_schema::capsule::GlyphSpec;
+use qp_schema::{Bar, Capsule, Fact, Finding, Point};
 
 /// What kind of rows a series has.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -59,6 +60,18 @@ pub trait DataProvider {
     fn headline(&self, finding: &str) -> Option<String>;
     /// Value of a named threshold (`<study>.<name>`), e.g. the overbought level → 70.
     fn threshold(&self, name: &str) -> Option<f64>;
+    /// The capsule `capsule_or_finding` names: a capsule id, or the id of the finding a
+    /// capsule presents (R3). Default: none (a provider without capsules).
+    fn capsule(&self, capsule_or_finding: &str) -> Option<Cow<'_, Capsule>> {
+        let _ = capsule_or_finding;
+        None
+    }
+    /// The meaning-glyph parameters of the capsule `capsule_or_finding` names (R3, the
+    /// `glyph` mark; engine-derived, see [`crate::depth::story_glyph`]). Default: none.
+    fn glyph(&self, capsule_or_finding: &str) -> Option<Cow<'_, GlyphSpec>> {
+        let _ = capsule_or_finding;
+        None
+    }
 }
 
 #[derive(Debug, Clone, Default)]
@@ -88,6 +101,8 @@ pub struct MemProvider {
     findings: BTreeMap<String, Finding>,
     headlines: BTreeMap<String, String>,
     thresholds: BTreeMap<String, f64>,
+    capsules: Vec<Capsule>,
+    glyphs: BTreeMap<String, GlyphSpec>,
 }
 
 impl Default for MemProvider {
@@ -110,6 +125,8 @@ impl MemProvider {
             findings: BTreeMap::new(),
             headlines: BTreeMap::new(),
             thresholds: BTreeMap::new(),
+            capsules: Vec::new(),
+            glyphs: BTreeMap::new(),
         }
     }
 
@@ -192,6 +209,24 @@ impl MemProvider {
     pub fn with_headline(mut self, finding: &str, headline: &str) -> Self {
         self.headlines
             .insert(finding.to_owned(), headline.to_owned());
+        self
+    }
+
+    /// Adds a capsule (R3). Its headline becomes the finding's headline; its glyph is
+    /// derived from its story ([`crate::depth::story_glyph`] at the last bar of the story's
+    /// series) unless one is set with [`MemProvider::with_glyph`].
+    #[must_use]
+    pub fn with_capsule(mut self, capsule: Capsule) -> Self {
+        self.headlines
+            .insert(capsule.finding.clone(), capsule.headline.clone());
+        self.capsules.push(capsule);
+        self
+    }
+
+    /// Sets the glyph parameters of a capsule or finding id.
+    #[must_use]
+    pub fn with_glyph(mut self, capsule_or_finding: &str, spec: GlyphSpec) -> Self {
+        self.glyphs.insert(capsule_or_finding.to_owned(), spec);
         self
     }
 
@@ -281,5 +316,30 @@ impl DataProvider for MemProvider {
 
     fn threshold(&self, name: &str) -> Option<f64> {
         self.thresholds.get(name).copied()
+    }
+
+    fn capsule(&self, capsule_or_finding: &str) -> Option<Cow<'_, Capsule>> {
+        self.capsules
+            .iter()
+            .find(|c| c.id == capsule_or_finding)
+            .or_else(|| {
+                self.capsules
+                    .iter()
+                    .find(|c| c.finding == capsule_or_finding)
+            })
+            .map(Cow::Borrowed)
+    }
+
+    fn glyph(&self, capsule_or_finding: &str) -> Option<Cow<'_, GlyphSpec>> {
+        if let Some(g) = self.glyphs.get(capsule_or_finding) {
+            return Some(Cow::Borrowed(g));
+        }
+        let c = self.capsule(capsule_or_finding)?;
+        let story = c.story.as_ref()?;
+        let n = self.bars.get(&story.series)?.bars.len() as u64;
+        Some(Cow::Owned(crate::depth::story_glyph(
+            story,
+            n.saturating_sub(1),
+        )))
     }
 }

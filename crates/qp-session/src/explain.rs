@@ -40,6 +40,7 @@ fn mark_name(m: Mark) -> &'static str {
         Mark::Point => "point",
         Mark::Text => "text",
         Mark::Band => "band",
+        Mark::Glyph => "glyph",
     }
 }
 

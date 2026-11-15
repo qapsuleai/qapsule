@@ -1,0 +1,119 @@
+{
+  "covers": [
+    "presenter",
+    "present",
+    "depth",
+    "capsule",
+    "glyph"
+  ],
+  "description": "C3: the same R3 capsule at chart depth (desktop): show_finding builds the presenter's view — candles, the broken level drawn from the fact's evidence (a rule segment over the detector's 20-bar window, origin: the fact), the meaning glyph over the fact bar, highlight on the fact. Rendered with `qp render --present <finding> --surface desktop`.",
+  "final": {
+    "document": {
+      "views": [
+        {
+          "id": "v-c3-chart"
+        }
+      ]
+    }
+  },
+  "init": {
+    "clock": 1760000000000,
+    "document": "fixtures/views/docs/r3-breakout.json",
+    "epoch": 0,
+    "principals": [
+      {
+        "author": {
+          "kind": "human",
+          "name": "arkin"
+        },
+        "id": "arkin",
+        "role": "owner"
+      }
+    ]
+  },
+  "name": "c3-chart",
+  "steps": [
+    {
+      "expect": [
+        {
+          "conn": "a",
+          "msg": {
+            "principal": "arkin",
+            "role": "owner",
+            "type": "welcome"
+          }
+        }
+      ],
+      "send": {
+        "conn": "a",
+        "msg": {
+          "principal": "arkin",
+          "protocol": "qp/0",
+          "surface": {
+            "kind": "desktop"
+          },
+          "type": "hello"
+        }
+      }
+    },
+    {
+      "expect": [
+        {
+          "conn": "a",
+          "msg": {
+            "id": "c1",
+            "status": "applied",
+            "type": "ack"
+          }
+        }
+      ],
+      "send": {
+        "conn": "a",
+        "msg": {
+          "id": "c1",
+          "ops": [
+            {
+              "finding": "fnd.SYN03.breakout-up.144",
+              "op": "show_finding",
+              "view": "v-c3-chart"
+            }
+          ],
+          "type": "command"
+        }
+      }
+    },
+    {
+      "expect": [
+        {
+          "conn": "a",
+          "msg": {
+            "data": {
+              "kind": "presentation",
+              "presentation": {
+                "depth": "chart",
+                "finding": "fnd.SYN03.breakout-up.144",
+                "surface": "desktop",
+                "view": {
+                  "id": "v-c3-chart"
+                }
+              }
+            },
+            "id": "q1",
+            "type": "result"
+          }
+        }
+      ],
+      "send": {
+        "conn": "a",
+        "msg": {
+          "id": "q1",
+          "query": {
+            "finding": "fnd.SYN03.breakout-up.144",
+            "kind": "present"
+          },
+          "type": "query"
+        }
+      }
+    }
+  ]
+}

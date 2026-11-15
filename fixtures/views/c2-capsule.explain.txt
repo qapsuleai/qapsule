@@ -1,0 +1,11 @@
+view capsule-fnd.SYN03.breakout-up.144 (390x300)
+x: slots 91..150 of 151 bar(s), 2023-05-09 .. 2023-07-31, 5.166666666666667 px per slot
+panel 0 "card": y0 linear [0, 1], 3 layer(s)
+  glyph glyph finding fnd.SYN03.breakout-up.144 fields glyph: 1 item(s); last confirmations=2 freshness=0.5555555555555556 strength=1 (bar 144, 2023-07-21)
+  sentence text finding fnd.SYN03.breakout-up.144 fields headline: 1 item(s)
+  ledger text finding fnd.SYN03.breakout-up.144 fields ledger: 1 item(s)
+panel 1 "price": y1 linear [128.778, 140.482], 3 layer(s)
+  line line px "C" fields c: 60 item(s); last c=133.95 (bar 150, 2023-07-31)
+  level rule constant: 1 item(s); last y=135.56
+    /encoding/y = 135.56 from fx.SYN03.breakout.range.up.144.level
+  fact point fact fx.SYN03.breakout.range.up.144 fields value: 1 item(s); last value=136.2 (bar 144, 2023-07-21)

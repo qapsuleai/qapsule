@@ -4,9 +4,13 @@ use std::collections::BTreeMap;
 
 use qp_schema::scene::{Item, PixelRect, Prim, Rgba, SceneLayer, XMap, YMap};
 
+use qp_schema::grammar::PanelPos;
+
 use crate::detmath::px;
+use crate::glyph::{alphabet, GlyphBox};
 use crate::layer::{step_index, Geom, PRow, Prepared, Split};
 use crate::scale::value_y;
+use crate::theme::Theme;
 
 /// Pixel-aligned rectangle primitive (negative sizes clamp to 0), as R0 builds them.
 pub(crate) fn rect(x: i32, y: i32, w: i32, h: i32, color: Rgba) -> Prim {
@@ -49,6 +53,8 @@ pub(crate) struct Geo<'a> {
     pub k: u64,
     /// Highlighted layer: strokes 1 px thicker.
     pub bold: bool,
+    /// Theme (glyph colours).
+    pub theme: &'a Theme,
 }
 
 impl Geo<'_> {
@@ -143,7 +149,12 @@ pub(crate) fn draw(pl: &Prepared, g: &Geo<'_>) -> SceneLayer {
         Geom::Area | Geom::Band => areas(pl, g, &mut out),
         Geom::Bar => bars(pl, g, &mut out),
         Geom::RuleH | Geom::RuleV => rules(pl, g, &mut out),
+        Geom::Text if pl.anchor.x.is_some() || pl.anchor.y.is_some() => {
+            anchored_text(pl, g, &mut out);
+        }
         Geom::Point | Geom::Text => points(pl, g, &mut out),
+        Geom::Segment => segments(pl, g, &mut out),
+        Geom::Glyph => glyphs(pl, g, &mut out),
     }
     out
 }
@@ -568,6 +579,249 @@ fn points(pl: &Prepared, g: &Geo<'_>, out: &mut SceneLayer) {
                 bottom: ry + half_h + 1,
             },
             bars: g.bars(r.n),
+        });
+    }
+}
+
+/// Pixel position of a panel-relative coordinate along `[lo, hi)`.
+fn panel_px(pp: PanelPos, lo: i32, hi: i32) -> f64 {
+    (f64::from(lo) + pp.panel * f64::from(hi - lo) + pp.px).floor()
+}
+
+/// Words of `text` wrapped into lines of at most `room` pixels at `size` (estimate as in
+/// [`est_width`]); a word longer than a line stands alone.
+fn wrap(text: &str, room: i32, size: f64) -> Vec<String> {
+    let mut lines: Vec<String> = Vec::new();
+    let mut cur = String::new();
+    for w in text.split_whitespace() {
+        let cand = if cur.is_empty() {
+            w.to_owned()
+        } else {
+            format!("{cur} {w}")
+        };
+        if cur.is_empty() || est_width(&cand, size) <= room {
+            cur = cand;
+        } else {
+            lines.push(std::mem::take(&mut cur));
+            cur = w.to_owned();
+        }
+    }
+    if !cur.is_empty() {
+        lines.push(cur);
+    }
+    lines
+}
+
+/// A `text` layer with a panel-relative position (R3, `docs/GRAMMAR.md` §18): left-aligned
+/// at a panel-relative `x` (else centred on the row's bar), its top at a panel-relative
+/// `y` (else on the value); with a panel-relative `x` the text wraps at the panel's right
+/// edge, and lines below the panel's bottom are dropped (the last kept one ends in "…").
+fn anchored_text(pl: &Prepared, g: &Geo<'_>, out: &mut SceneLayer) {
+    let rc = g.rect;
+    for r in &pl.traces[0].rows {
+        let size = r.size;
+        #[allow(clippy::cast_possible_truncation)]
+        let line_h = (size * 1.3).round() as i32;
+        #[allow(clippy::cast_possible_truncation)]
+        let ascent = (size * 0.8).round() as i32;
+        let top = match pl.anchor.y {
+            Some(pp) => {
+                #[allow(clippy::cast_possible_truncation)]
+                let t = panel_px(pp, rc.top, rc.bottom) as i32;
+                t
+            }
+            None => {
+                let Some(y) = g.y(r.v[0]) else {
+                    out.skipped += 1;
+                    continue;
+                };
+                px(y) - ascent / 2
+            }
+        };
+        let text = r.text.clone().unwrap_or_default();
+        let (left, lines, align_left) = match pl.anchor.x {
+            Some(pp) => {
+                #[allow(clippy::cast_possible_truncation)]
+                let x = panel_px(pp, rc.left, rc.right) as i32;
+                (x, wrap(&text, rc.right - x, size), true)
+            }
+            None => {
+                #[allow(clippy::cast_possible_truncation)]
+                let cx = g.cx(r.slot, r.n) as i32;
+                (cx, vec![text], false)
+            }
+        };
+        let mut kept: Vec<String> = Vec::new();
+        for (i, l) in lines.iter().enumerate() {
+            let bottom = top + line_h * i32::try_from(i + 1).unwrap_or(i32::MAX);
+            if align_left && i > 0 && bottom > rc.bottom + (line_h - ascent) {
+                if let Some(last) = kept.last_mut() {
+                    *last = format!("{} …", last.trim_end());
+                }
+                break;
+            }
+            kept.push(l.clone());
+        }
+        let mut right = left;
+        let mut x0 = left;
+        for (i, l) in kept.iter().enumerate() {
+            let w = est_width(l, size);
+            let x = if align_left { left } else { left - w / 2 };
+            x0 = x0.min(x);
+            right = right.max(x + w);
+            #[allow(clippy::cast_possible_truncation)]
+            out.prims.push(Prim::Text {
+                x,
+                baseline: top + ascent + line_h * i32::try_from(i).unwrap_or(0),
+                px: size as f32,
+                text: l.clone(),
+                color: r.color,
+                align: qp_schema::scene::Align::Left,
+            });
+        }
+        let n = i32::try_from(kept.len()).unwrap_or(1).max(1);
+        let vals: Vec<f64> = r.v[0].into_iter().collect();
+        out.items.push(Item {
+            bar: pl.anchor.x.is_none().then_some(r.slot),
+            t: if pl.anchor.x.is_none() { r.t } else { None },
+            values: values(&pl.keys, &vals),
+            hit: PixelRect {
+                left: x0,
+                top,
+                right: right.max(x0 + 1),
+                bottom: top + line_h * n,
+            },
+            bars: None,
+        });
+    }
+}
+
+/// Horizontal or sloped rule segments from bar `x` to bar `x2` (R3 evidence geometry).
+fn segments(pl: &Prepared, g: &Geo<'_>, out: &mut SceneLayer) {
+    let Some((a, b)) = pl.extent else { return };
+    let w = pl.width + if g.bold { 1.0 } else { 0.0 };
+    let rc = g.rect;
+    for r in &pl.traces[0].rows {
+        let (Some(y0), Some(y1)) = (g.y(r.v[0]), g.y(r.v[1].or(r.v[0]))) else {
+            out.skipped += 1;
+            continue;
+        };
+        if b < g.x.from_bar || a > g.x.to_bar {
+            continue;
+        }
+        let (xa, xb) = (g.cx(a, 1) + 0.5, g.cx(b, 1) + 0.5);
+        let (l, rr) = (f64::from(rc.left), f64::from(rc.right));
+        // Clip to the panel horizontally (linear interpolation on a sloped segment).
+        let at = |x: f64| {
+            if xb == xa {
+                y0
+            } else {
+                y0 + (y1 - y0) * (x - xa) / (xb - xa)
+            }
+        };
+        let (ca, cb) = (xa.max(l), xb.min(rr));
+        if cb < ca {
+            continue;
+        }
+        let (ya, yb) = (at(ca), at(cb));
+        if r.v[1].is_none() {
+            let ry = px(y0);
+            let wi = px(w).max(1);
+            #[allow(clippy::cast_possible_truncation)]
+            let (ia, ib) = (ca as i32, cb as i32);
+            out.prims
+                .push(rect(ia, ry - (wi - 1) / 2, (ib - ia).max(1), wi, r.color));
+            out.items.push(Item {
+                bar: None,
+                t: None,
+                values: values(&pl.keys, &[r.v[0].unwrap_or(0.0)]),
+                hit: PixelRect {
+                    left: ia,
+                    top: ry - 3,
+                    right: ib.max(ia + 1),
+                    bottom: ry + 4,
+                },
+                bars: None,
+            });
+        } else {
+            #[allow(clippy::cast_possible_truncation)]
+            out.prims.push(Prim::Polyline {
+                points: vec![pt([ca, ya]), pt([cb, yb])],
+                width: w as f32,
+                color: r.color,
+            });
+            #[allow(clippy::cast_possible_truncation)]
+            let (ia, ib) = (ca as i32, cb as i32);
+            let vals = [r.v[0].unwrap_or(0.0), r.v[1].unwrap_or(0.0)];
+            out.items.push(Item {
+                bar: None,
+                t: None,
+                values: values(&pl.keys, &vals),
+                hit: PixelRect {
+                    left: ia,
+                    top: px(ya.min(yb)) - 3,
+                    right: ib.max(ia + 1),
+                    bottom: px(ya.max(yb)) + 4,
+                },
+                bars: None,
+            });
+        }
+    }
+}
+
+/// Meaning glyphs (R3): the product alphabet draws each row's glyph into a square box —
+/// top-left at the panel-relative position, else centred on the row's bar / value — kept
+/// inside the panel.
+fn glyphs(pl: &Prepared, g: &Geo<'_>, out: &mut SceneLayer) {
+    let rc = g.rect;
+    for (r, spec) in pl.traces[0].rows.iter().zip(&pl.glyphs) {
+        let s = r.size.floor().max(1.0);
+        let left = match pl.anchor.x {
+            Some(pp) => panel_px(pp, rc.left, rc.right),
+            None => (g.cx(r.slot, r.n) + 0.5 - s / 2.0).floor(),
+        };
+        let top = match pl.anchor.y {
+            Some(pp) => panel_px(pp, rc.top, rc.bottom),
+            None => {
+                let Some(y) = g.y(r.v[0]) else {
+                    out.skipped += 1;
+                    continue;
+                };
+                (y - s / 2.0).floor()
+            }
+        };
+        let left = left.min(f64::from(rc.right) - s).max(f64::from(rc.left));
+        let top = top.min(f64::from(rc.bottom) - s).max(f64::from(rc.top));
+        #[allow(clippy::cast_possible_truncation)]
+        let bx = GlyphBox {
+            x: left as f32,
+            y: top as f32,
+            size: s as f32,
+        };
+        out.prims.extend(alphabet().draw(spec, bx, g.theme));
+        let mut vals: BTreeMap<String, f64> = BTreeMap::new();
+        vals.insert("strength".to_owned(), spec.strength);
+        vals.insert("freshness".to_owned(), spec.freshness);
+        vals.insert("confirmations".to_owned(), f64::from(spec.confirmations));
+        if let Some(c) = spec.confidence {
+            vals.insert("confidence".to_owned(), c);
+        }
+        if let (Some(k), Some(v)) = (pl.keys.first(), r.v[0]) {
+            vals.insert(k.clone(), v);
+        }
+        #[allow(clippy::cast_possible_truncation)]
+        let (l, t, side) = (left as i32, top as i32, s as i32);
+        out.items.push(Item {
+            bar: Some(r.slot),
+            t: r.t,
+            values: vals,
+            hit: PixelRect {
+                left: l,
+                top: t,
+                right: l + side,
+                bottom: t + side,
+            },
+            bars: None,
         });
     }
 }

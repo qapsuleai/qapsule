@@ -7,7 +7,8 @@
 use std::borrow::Cow;
 
 use qp_grammar::{DataProvider, SeriesKind};
-use qp_schema::{Bar, Document, Fact, Finding, Point, SeriesData, SeriesSource};
+use qp_schema::capsule::GlyphSpec;
+use qp_schema::{Bar, Capsule, Document, Fact, Finding, Point, SeriesData, SeriesSource};
 
 use crate::canon::{series_fields, series_main, threshold};
 use crate::summary::{drawing_outputs, series_label};
@@ -125,5 +126,27 @@ impl DataProvider for DocProvider<'_> {
 
     fn threshold(&self, name: &str) -> Option<f64> {
         threshold(name)
+    }
+
+    fn capsule(&self, capsule_or_finding: &str) -> Option<Cow<'_, Capsule>> {
+        let caps = &self.doc.capsules;
+        caps.iter()
+            .find(|c| c.id == capsule_or_finding)
+            .or_else(|| caps.iter().find(|c| c.finding == capsule_or_finding))
+            .map(Cow::Borrowed)
+    }
+
+    /// R3 (minimal wiring, `docs/GRAMMAR.md` §18): the glyph of a capsule with a story,
+    /// by the grammar's rule ([`qp_grammar::depth::story_glyph`], equal to the engine's
+    /// `glyph_spec`) at the last bar of the story's bar series. When the session runs the
+    /// capsule engine itself, this is where the engine's own value goes.
+    fn glyph(&self, capsule_or_finding: &str) -> Option<Cow<'_, GlyphSpec>> {
+        let c = self.capsule(capsule_or_finding)?;
+        let story = c.story.as_ref()?;
+        let n = self.bars(&story.series)?.len() as u64;
+        Some(Cow::Owned(qp_grammar::depth::story_glyph(
+            story,
+            n.saturating_sub(1),
+        )))
     }
 }

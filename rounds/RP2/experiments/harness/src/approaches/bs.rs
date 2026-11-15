@@ -303,6 +303,9 @@ struct Rep {
     /// correction).
     settled: Vec<BTreeMap<i64, Bar>>,
     feed_last: Vec<i64>,
+    /// Bindings whose host data changed since the last `after` (`None`: all).
+    dirty: Option<BTreeSet<usize>>,
+    shown_version: u64,
 }
 
 fn sane(b: &Bar) -> Bar {
@@ -355,6 +358,8 @@ impl Rep {
             work: 0,
             settled: vec![BTreeMap::new(); n],
             feed_last: vec![i64::MIN; n],
+            dirty: None,
+            shown_version: u64::MAX,
         }
     }
 
@@ -416,8 +421,18 @@ impl Rep {
         self.synced[b] = new;
     }
 
+    fn touch(&mut self, b: usize) {
+        if let Some(d) = self.dirty.as_mut() {
+            d.insert(b);
+        }
+    }
+
     fn after(&mut self, ctx: &mut Ctx) {
-        for b in 0..self.setup.bindings.len() {
+        let todo: Vec<usize> = match self.dirty.replace(BTreeSet::new()) {
+            None => (0..self.setup.bindings.len()).collect(),
+            Some(d) => d.into_iter().collect(),
+        };
+        for b in todo {
             if self.eng.bars(b) != self.synced[b].as_slice() {
                 self.sync(b);
             }
@@ -470,7 +485,10 @@ impl Rep {
             }
         }
         self.seen_pending.retain(|k, _| waiting.contains(k));
-        self.rebuild_display();
+        if self.r.display_version() != self.shown_version {
+            self.shown_version = self.r.display_version();
+            self.rebuild_display();
+        }
         let busy = !waiting.is_empty() || !self.repair_due.is_empty();
         if busy && self.timer_at.is_none_or(|t| t <= now) {
             let at = now + HOUSEKEEP;
@@ -538,6 +556,7 @@ impl ReplicaAdapter for Rep {
         let a = self.eng.apply(ev);
         if a.binding < self.setup.bindings.len() {
             let b = a.binding;
+            self.touch(b);
             match ev {
                 SourceEvent::Data(d) => {
                     let t = match &d.change {
@@ -609,6 +628,8 @@ impl ReplicaAdapter for Rep {
             }
         }
         let _ = self.r.take_outbox();
+        // A mirrored change may set an anchor: every binding is looked at.
+        self.dirty = None;
         self.after(ctx);
     }
 
@@ -634,6 +655,7 @@ impl ReplicaAdapter for Rep {
             return;
         };
         let b = reply.binding;
+        self.touch(b);
         let has = |t: i64| reply.bars.iter().any(|x| x.t == t);
         self.eng.apply_settled(b, &reply.bars);
         let fl = self.feed_last[b];

@@ -166,6 +166,10 @@ pub struct Replica {
     refetched: BTreeSet<(String, i64)>,
     outbox: Vec<serde_json::Value>,
     display: Vec<DisplayItem>,
+    /// Bar series each displayed claim was judged on (a data change re-judges only the
+    /// claims resting on a changed series).
+    roots: BTreeMap<(ClaimRef, i64), Vec<String>>,
+    display_version: u64,
     /// Capsule claims learnt from a mirrored entry's evidence (fallback).
     pending_learn: Vec<(ClaimRef, ClaimEvidence)>,
 }
@@ -253,6 +257,8 @@ impl Replica {
             refetched: BTreeSet::new(),
             outbox: Vec::new(),
             display: Vec::new(),
+            roots: BTreeMap::new(),
+            display_version: 0,
             pending_learn: Vec::new(),
         }
     }
@@ -571,11 +577,13 @@ impl Replica {
             return Ok(());
         };
         let outcome = s.plane.apply_event(ev)?;
-        if !outcome.changed.is_empty() {
-            s.data_changed(outcome.changed);
-            s.pending_views.clear();
+        if outcome.changed.is_empty() {
+            return Ok(());
         }
-        self.reconcile();
+        let ids: Vec<String> = outcome.changed.iter().map(|(id, _)| id.clone()).collect();
+        s.data_changed(outcome.changed);
+        s.pending_views.clear();
+        self.reconcile_on(Some(&ids));
         Ok(())
     }
 
@@ -600,6 +608,9 @@ impl Replica {
     /// The host declares that its data of bar series `series` from `from_t` on may lack
     /// events (a gap it has not repaired); `None` clears it.
     pub fn set_unclean(&mut self, series: &str, from_t: Option<i64>) {
+        if self.unclean.get(series).copied() == from_t {
+            return;
+        }
         match from_t {
             Some(t) => {
                 self.unclean.insert(series.to_owned(), t);
@@ -608,14 +619,17 @@ impl Replica {
                 self.unclean.remove(series);
             }
         }
-        self.reconcile();
+        self.reconcile_on(Some(&[series.to_owned()]));
     }
 
     /// The host declares that bars of `series` up to `t` hold settled values (from a
     /// settled fetch), although its chart has not closed the last of them.
     pub fn set_settled(&mut self, series: &str, t: i64) {
+        if self.settled.get(series) == Some(&t) {
+            return;
+        }
         self.settled.insert(series.to_owned(), t);
-        self.reconcile();
+        self.reconcile_on(Some(&[series.to_owned()]));
     }
 
     /// Settled refetches the replica asks the host for: (bar series, claim bar time).
@@ -651,20 +665,52 @@ impl Replica {
 
     /// The display rule (§19.4) over every claim the authority asserts.
     fn reconcile(&mut self) {
+        self.reconcile_on(None);
+    }
+
+    /// [`Replica::reconcile`] after a change of bar series `changed` only: claims not
+    /// resting on any of them keep their item (their data did not change).
+    fn reconcile_on(&mut self, changed: Option<&[String]>) {
         let keys: Vec<(ClaimRef, i64)> = self
             .claims
             .iter()
             .filter(|(_, k)| k.state == ClaimState::Asserted)
             .map(|(k, _)| k.clone())
             .collect();
+        let old: BTreeMap<(ClaimRef, i64), DisplayItem> = std::mem::take(&mut self.display)
+            .into_iter()
+            .map(|i| ((i.claim.clone(), i.t), i))
+            .collect();
         let mut out = Vec::with_capacity(keys.len());
+        let mut changed_any = old.len() != keys.len();
         for key in keys {
+            if let (Some(ch), Some(prev)) = (changed, old.get(&key)) {
+                let roots = self.roots.get(&key);
+                if roots.is_some_and(|r| !r.iter().any(|x| ch.contains(x))) {
+                    out.push(prev.clone());
+                    continue;
+                }
+            }
             let ev = self.claims[&key].ev.clone();
             let cond = self.condition_of(&key.0);
             let item = self.judge(&key.0, &ev, cond.as_ref());
+            if old.get(&key) != Some(&item) {
+                changed_any = true;
+            }
             out.push(item);
         }
+        let claims = &self.claims;
+        self.roots.retain(|k, _| claims.contains_key(k));
+        if changed_any {
+            self.display_version += 1;
+        }
         self.display = out;
+    }
+
+    /// Increases whenever the display state changes.
+    #[must_use]
+    pub fn display_version(&self) -> u64 {
+        self.display_version
     }
 
     fn judge(
@@ -703,6 +749,11 @@ impl Replica {
                 .unwrap_or_else(|| v.series.clone());
             bss.push(bs);
         }
+        let mut roots = bss.clone();
+        roots.push(ev.series.clone());
+        roots.sort();
+        roots.dedup();
+        self.roots.insert((claim.clone(), ev.t), roots);
         for bs in &bss {
             if let Some((state, _)) = s.plane.state_for(bs, None) {
                 match state {

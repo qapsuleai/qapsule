@@ -42,6 +42,7 @@ pub fn themes() -> Vec<(&'static str, ThemeFactory)> {
         ("control", || Box::new(control::SingletonTheme)),
         // M4 alternatifleri: bir satır, ör.
         // ("a1", m4_a1::theme),
+        ("kinddir", m4_kinddir::theme),
     ]
 }
 

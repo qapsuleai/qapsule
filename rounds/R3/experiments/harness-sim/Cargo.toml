@@ -23,6 +23,7 @@ m5_barrier = { path = "../M5/barrier" }
 m5_semantic = { path = "../M5/semantic" }
 m3-rarity = { path = "../M3/rarity" }
 m3-confirm = { path = "../M3/confirm" }
+m4-kinddir = { path = "../M4/kinddir" }
 
 [lints.rust]
 unsafe_code = "forbid"

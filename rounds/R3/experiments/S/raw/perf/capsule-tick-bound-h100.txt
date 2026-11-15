@@ -1,0 +1,25 @@
+# start 2026-11-15T20:57:38Z 23:57  up 39 days, 11:41, 8 users, load averages: 8.08 9.34 12.03
+# R3/S-D capsule tick bench
+config = instruments 30 history 100 market_ticks 600 runs 5 path bound per_bar 60
+bound.none.session_new_ms = median 0.389 min 0.343 max 0.462 (runs 5) engine catch-up over 100 bars x 30 series included
+bound.none.connect_ms = median 1.720 min 1.639 max 1.899 (runs 5) 4 hello + 6 subscribe after the catch-up
+bound.none.us_per_market_tick = median 59.006 min 57.487 max 63.335 (runs 5) all ticks; per event median 1.967
+bound.none.revision_tick_us = median 58.938 min 57.409 max 63.260 (runs 5) mean per run; per event median 1.965; p99 median 64.42
+bound.none.close_tick_us = median 62.975 min 61.500 max 72.075 (runs 5) mean per run over 10 closes; per instrument median 2.10
+bound.none.check = doc 7ecb1752d29525c4 same_across_runs true lines a 0 b 0 c 0 other 0
+bound.none.end = log 1 facts 0 findings 0 capsules 0 live 0 ledger 0
+bound.caps.session_new_ms = median 44.085 min 42.688 max 47.672 (runs 5) engine catch-up over 100 bars x 30 series included
+bound.caps.connect_ms = median 1070.773 min 1057.847 max 1091.721 (runs 5) 4 hello + 6 subscribe after the catch-up
+bound.caps.us_per_market_tick = median 2370.217 min 2339.592 max 2396.309 (runs 5) all ticks; per event median 79.007
+bound.caps.revision_tick_us = median 131.437 min 130.359 max 132.034 (runs 5) mean per run; per event median 4.381; p99 median 160.04
+bound.caps.close_tick_us = median 134467.296 min 132585.508 max 136004.171 (runs 5) mean per run over 10 closes; per instrument median 4482.24
+bound.caps.check = doc 9a067b6ee2fd5a7b same_across_runs true lines a 475 b 475 c 475 other 0
+bound.caps.end = log 331 facts 835 findings 505 capsules 505 live 261 ledger 474
+bound.flow.session_new_ms = median 78.876 min 75.570 max 80.630 (runs 5) engine catch-up over 100 bars x 30 series included
+bound.flow.connect_ms = median 1776.384 min 1752.333 max 1798.672 (runs 5) 4 hello + 6 subscribe after the catch-up
+bound.flow.us_per_market_tick = median 5159.463 min 5100.505 max 5298.043 (runs 5) all ticks; per event median 171.982
+bound.flow.revision_tick_us = median 140.615 min 138.381 max 142.626 (runs 5) mean per run; per event median 4.687; p99 median 295.29
+bound.flow.close_tick_us = median 301271.513 min 297750.046 max 309467.683 (runs 5) mean per run over 10 closes; per instrument median 10042.38
+bound.flow.check = doc f6eb64b45e5a01dd same_across_runs true lines a 558 b 531 c 531 other 0
+bound.flow.end = log 331 facts 1387 findings 777 capsules 777 live 361 ledger 742
+# end 2026-11-15T20:58:16Z 23:58  up 39 days, 11:42, 8 users, load averages: 6.71 8.83 11.71

@@ -1,0 +1,47 @@
+# profile close: mode caps, history 250, per_bar 60, path bound, phase loop,  0:19  up 39 days, 12:03, 8 users, load averages: 10.35 9.65 9.19
+# inclusive samples (function counted once per stack), qp_/serde frames only
+  3397 100.0% capsule_tick::main
+  3397 100.0% capsule_tick::tick
+  3394  99.9% qp_session::session::Session::host_data_event
+  3378  99.4% qp_session::live::<impl qp_session::session::Session>::settle_live
+  3313  97.5% qp_session::capsule::<impl qp_session::session::Session>::run_capsules
+  1706  50.2% qp_session::capsule::<impl qp_session::session::Session>::refresh_headlines
+  1694  49.9% qp_session::capsule::<impl qp_session::session::Session>::story_headlines
+  1665  49.0% qp_session::capsule::<impl qp_session::session::Session>::reader_sentence
+  1542  45.4% qp_session::capsule::<impl qp_session::session::Session>::proj_for
+   987  29.1% qp_session::capsule::sentence_pair
+   796  23.4% qp_session::session::Session::entry_events
+   785  23.1% qp_session::capsule::<impl qp_session::session::Session>::reader_proj
+   782  23.0% <qp_capsule::realize::Template as qp_capsule::Realizer>::sentence
+   777  22.9% qp_session::capsule::<impl qp_session::session::Session>::capsule_topic_lines
+   503  14.8% qp_capsule::realize::tr::render
+   327   9.6% qp_session::capsule::<impl qp_session::session::Session>::bars_ok
+   257   7.6% qp_capsule::realize::en::render
+   206   6.1% qp_capsule::realize::tr::event_clause
+   186   5.5% <qp_schema::types::Fact as core::clone::Clone>::clone
+   182   5.4% qp_session::capsule::story_fact_ids
+   173   5.1% <qp_source::provider::MemoryProvider as qp_source::provider::SourceProvider>::entitled
+   140   4.1% qp_source::provider::entitlement_matches
+   130   3.8% qp_session::capsule::<impl qp_session::session::Session>::flow_ok
+   120   3.5% qp_capsule::realize::num::fmt
+   112   3.3% core::ptr::drop_in_place$LT$qp_schema::types::Fact>
+    80   2.4% qp_source::provider::validate_entitlement
+    67   2.0% qp_session::capsule::<impl qp_session::session::Session>::now_bar
+    60   1.8% qp_capsule::realize::tr::thr_gen
+    58   1.7% qp_capsule::sentence::condition_now
+    48   1.4% qp_capsule::realize::morph::lower_tr
+    47   1.4% <qp_schema::data::EvidenceRef as core::clone::Clone>::clone
+    45   1.3% qp_session::live::<impl qp_session::session::Session>::take_index
+    44   1.3% qp_capsule::realize::morph::Word::join
+    37   1.1% qp_capsule::realize::morph::past
+    36   1.1% qp_capsule::realize::en::paren
+    32   0.9% qp_schema::types::Series::binding
+    32   0.9% qp_schema::data::DataBinding::feed_key
+    28   0.8% <qp_schema::data::DataBinding as core::clone::Clone>::clone
+    27   0.8% qp_capsule::realize::morph::Word::number
+    27   0.8% qp_capsule::realize::tr::when
+    23   0.7% core::ptr::drop_in_place$LT$qp_schema::data::EvidenceRef>
+    22   0.6% qp_capsule::realize::morph::Word::gen
+    21   0.6% qp_capsule::realize::Plan::new
+    18   0.5% qp_capsule::realize::en::cap
+    18   0.5% qp_capsule::realize::en::when

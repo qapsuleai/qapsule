@@ -379,14 +379,14 @@ başına ≤ 0,25 µs ekliyor ve artık geçmişle büyümüyor (100 → 1.000 b
   `flow` için "çok altında" değil. Kalan maliyet hâlâ kapsül sayısıyla doğrusal:
   ilerleyen serinin bütün kapsüllerinin cümlesi yeniden yazılıyor ("N gün önce" her
   kapanışta değişiyor; 1.000 barda seri başına ~290 kapsül), motor girdisinin okuyucu
-  başına izdüşümü ve canlı dizinin girdi başına yeniden kurulması. Profil (1.000 bar
-  `flow`, her tik kapanış): `refresh_headlines` %67 (gerçekleştirici %28), `entry_events`
-  %16, canlı dizin %7.
+  başına izdüşümü ve canlı dizinin girdi başına yeniden kurulması. Düzeltme sırasındaki
+  ara profil (1.000 bar `flow`, her tik kapanış; cümleler henüz iki dilde yazılırken):
+  `refresh_headlines` %67 (gerçekleştirici %28), `entry_events` %16, canlı dizin %7.
 - Bağlanma: 1.000 barda `caps` 133 ms, `flow` 247 ms; ~100 ms hedefinin üstünde. Kalanın
   çoğu yetkisiz okuyucunun **ilk** `hello`'su (90–120 ms): her kapsülün cümlesi rakamsız
   biçimde ilk kez yazılıyor (sonraki mesajlarda görünüm önbellekte, abone 0,1 ms) ve iki
   izdüşümlü doküman kopyası. Kısmi yetkili `flow` okuyucusu ~80 ms (lisanslı katılımlı
-  hikâyelerin yeniden yazımı). Tam yetkili `hello` ~15 ms (özet ve ipuçları ~6 ms).
+  hikâyelerin yeniden yazımı). Tam yetkili `hello` ~15 ms (ara ölçümde özet ve ipuçları ~6 ms).
 - `Session::new` (geçmiş üzerinde yetişme) hedef dışıydı; ×2,9 hızlandı ama 1.000 barda
   0,6–1,05 s.
 - Öneri 6 (büyüme sınırı) ve 8 (`capsule_tick` kısa koşusunun verify'a girmesi)

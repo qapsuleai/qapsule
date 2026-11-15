@@ -5,9 +5,9 @@ Her round sonunda güncellenir.
 
 ## Şu an
 
-- **Aktif round:** yok (R2 tamamlandı; sonraki round ana akışta tasarlanır).
+- **Aktif round:** RP2 (koşulmayı bekliyor). R3 ana akışta tasarlanıyor.
 - **Son güncelleme:** 2026-11-15
-- **Sıradaki adım:** ana akış: R2 önerilen kararları (`DECISIONS.md` Ö10–Ö17, A13–A14) ve R2 açık soruları; RP2 tasarımı.
+- **Sıradaki adım:** `scripts/preflight.sh`; `rounds/RP2/PROMPT.md` yeni bir Claude Code oturumuna verilir.
 
 ## Round geçmişi
 

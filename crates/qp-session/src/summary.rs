@@ -2,12 +2,16 @@
 //! for an agent to refer to series, views, panels, layers, facts and findings by id in
 //! its first message. Deterministic and compact (lists cut at [`MAX_ITEMS`]).
 
+use std::cell::RefCell;
+use std::collections::HashMap;
+use std::rc::Rc;
+
 use qp_schema::grammar::{Layer, Mark, Position, ScaleKind, View};
 use qp_schema::protocol::{
-    DocSummary, FactSummary, FindingSummary, LayerSummary, PanelSummary, ProposalState,
-    SelectHints, SeriesSummary, ViewSummary,
+    DocSummary, FactRef, FactSel, FactSummary, FindingSel, FindingSummary, LayerSummary,
+    PanelSummary, ProposalState, SelectHints, SeriesSummary, ViewSummary,
 };
-use qp_schema::{Document, Series, SeriesData, SeriesSource};
+use qp_schema::{Document, Fact, Finding, Series, SeriesData, SeriesSource};
 
 use crate::canon::{layer_data, position_constant, series_fields, series_main, Data};
 use crate::error::num;
@@ -303,27 +307,348 @@ fn select_hints(
             }
         }
     }
+    let fh = FastHints::new(doc);
     for f in facts {
-        if let Some(sel) = doc
-            .facts
-            .iter()
-            .find(|x| x.id == f.id)
-            .and_then(|x| r.fact_hint(x))
-        {
+        if let Some(sel) = fh.fact_pos(&f.id).and_then(|i| fh.fact_hint(&doc.facts[i])) {
             h.facts.insert(f.id.clone(), sel);
         }
     }
     for f in findings {
-        if let Some(sel) = doc
-            .findings
-            .iter()
-            .find(|x| x.id == f.id)
-            .and_then(|x| r.finding_hint(x))
+        if let Some(sel) = fh
+            .finding_pos(&f.id)
+            .and_then(|i| fh.finding_hint(&doc.findings[i]))
         {
             h.findings.insert(f.id.clone(), sel);
         }
     }
     (h != SelectHints::default()).then_some(h)
+}
+
+/// (R3/perf, S-D §6.3 item 4) The fact and finding hints of the summary
+/// ([`crate::select::Resolver::fact_hint`], [`crate::select::Resolver::finding_hint`]),
+/// computed from indexes built once instead of resolving every candidate selector over
+/// the whole document. The candidates, their order, the rows' order and the matching
+/// rules are the resolver's; a test checks both give the same hints.
+pub(crate) struct FastHints<'a> {
+    doc: &'a Document,
+    /// Fact id → its first position.
+    fact_at: HashMap<&'a str, usize>,
+    /// Finding id → its first position.
+    finding_at: HashMap<&'a str, usize>,
+    /// Finding positions in the resolver's row order (finding bar, position).
+    gorder: Vec<usize>,
+    /// Lower-case fact kind → fact positions, in row order (bar, position); on demand.
+    facts_of_kind: RefCell<HashMap<String, Rc<Vec<usize>>>>,
+    /// Lower-case fact kind → finding positions with a fact of that kind, in row order;
+    /// on demand.
+    findings_of_kind: RefCell<HashMap<String, Rc<Vec<usize>>>>,
+    /// Fact id → finding positions resting on it, in row order; on demand.
+    findings_of_fact: RefCell<HashMap<String, Rc<Vec<usize>>>>,
+}
+
+/// `a.to_lowercase() == lower` (`lower` already lower-case), without a copy for ASCII.
+fn lower_eq(a: &str, lower: &str) -> bool {
+    if a.is_ascii() {
+        a.len() == lower.len()
+            && a.bytes()
+                .zip(lower.bytes())
+                .all(|(x, y)| x.to_ascii_lowercase() == y)
+    } else {
+        a.to_lowercase() == lower
+    }
+}
+
+impl<'a> FastHints<'a> {
+    pub(crate) fn new(doc: &'a Document) -> Self {
+        let mut fact_at: HashMap<&str, usize> = HashMap::with_capacity(doc.facts.len());
+        for (i, f) in doc.facts.iter().enumerate() {
+            fact_at.entry(f.id.as_str()).or_insert(i);
+        }
+        let mut finding_at: HashMap<&str, usize> = HashMap::with_capacity(doc.findings.len());
+        for (i, f) in doc.findings.iter().enumerate() {
+            finding_at.entry(f.id.as_str()).or_insert(i);
+        }
+        let mut gorder: Vec<(Option<u64>, usize)> = doc
+            .findings
+            .iter()
+            .enumerate()
+            .map(|(i, f)| {
+                (
+                    f.facts
+                        .iter()
+                        .filter_map(|id| fact_at.get(id.as_str()))
+                        .map(|&j| doc.facts[j].bar)
+                        .max(),
+                    i,
+                )
+            })
+            .collect();
+        gorder.sort_unstable();
+        Self {
+            doc,
+            fact_at,
+            finding_at,
+            gorder: gorder.into_iter().map(|(_, i)| i).collect(),
+            facts_of_kind: RefCell::default(),
+            findings_of_kind: RefCell::default(),
+            findings_of_fact: RefCell::default(),
+        }
+    }
+
+    fn found(&self, f: &'a Finding) -> impl Iterator<Item = &'a Fact> + '_ {
+        let doc = self.doc;
+        f.facts
+            .iter()
+            .filter_map(move |id| self.fact_at.get(id.as_str()).map(|&i| &doc.facts[i]))
+    }
+
+    fn kind_facts(&self, lower: &str) -> Rc<Vec<usize>> {
+        if let Some(v) = self.facts_of_kind.borrow().get(lower) {
+            return Rc::clone(v);
+        }
+        let mut v: Vec<(u64, usize)> = self
+            .doc
+            .facts
+            .iter()
+            .enumerate()
+            .filter(|(_, f)| lower_eq(&f.kind, lower))
+            .map(|(i, f)| (f.bar, i))
+            .collect();
+        v.sort_unstable();
+        let v = Rc::new(v.into_iter().map(|(_, i)| i).collect::<Vec<_>>());
+        self.facts_of_kind
+            .borrow_mut()
+            .insert(lower.to_owned(), Rc::clone(&v));
+        v
+    }
+
+    fn kind_findings(&self, lower: &str) -> Rc<Vec<usize>> {
+        if let Some(v) = self.findings_of_kind.borrow().get(lower) {
+            return Rc::clone(v);
+        }
+        let v: Rc<Vec<usize>> = Rc::new(
+            self.gorder
+                .iter()
+                .copied()
+                .filter(|&i| {
+                    self.found(&self.doc.findings[i])
+                        .any(|x| lower_eq(&x.kind, lower))
+                })
+                .collect(),
+        );
+        self.findings_of_kind
+            .borrow_mut()
+            .insert(lower.to_owned(), Rc::clone(&v));
+        v
+    }
+
+    fn fact_findings(&self, id: &str) -> Rc<Vec<usize>> {
+        if let Some(v) = self.findings_of_fact.borrow().get(id) {
+            return Rc::clone(v);
+        }
+        let v: Rc<Vec<usize>> = Rc::new(
+            self.gorder
+                .iter()
+                .copied()
+                .filter(|&i| self.doc.findings[i].facts.iter().any(|x| x == id))
+                .collect(),
+        );
+        self.findings_of_fact
+            .borrow_mut()
+            .insert(id.to_owned(), Rc::clone(&v));
+        v
+    }
+
+    pub(crate) fn fact_pos(&self, id: &str) -> Option<usize> {
+        self.fact_at.get(id).copied()
+    }
+
+    pub(crate) fn finding_pos(&self, id: &str) -> Option<usize> {
+        self.finding_at.get(id).copied()
+    }
+
+    /// The ids a fact selector made of `kind`, `bar`, `first`, `latest` resolves to.
+    fn fact_ids(&self, s: &FactSel) -> Vec<&'a str> {
+        let doc = self.doc;
+        if s.first && s.latest {
+            return Vec::new();
+        }
+        let Some(k) = &s.kind else {
+            unreachable!("hint candidates name a kind");
+        };
+        let mut m: Vec<&str> = self
+            .kind_facts(&k.to_lowercase())
+            .iter()
+            .filter(|&&i| s.bar.is_none_or(|b| doc.facts[i].bar == b))
+            .map(|&i| doc.facts[i].id.as_str())
+            .collect();
+        pick(&mut m, s.first, s.latest);
+        m
+    }
+
+    /// The ids a finding selector made of `kind` or `fact`, `first`, `latest` resolves to.
+    fn finding_ids(&self, s: &FindingSel) -> Vec<&'a str> {
+        let doc = self.doc;
+        if s.first && s.latest {
+            return Vec::new();
+        }
+        let rows: Rc<Vec<usize>> = match (&s.kind, &s.fact) {
+            (Some(k), None) => self.kind_findings(&k.to_lowercase()),
+            (None, Some(r)) => {
+                let FactRef::Select(h) = r.as_ref() else {
+                    unreachable!("hint candidates select their fact");
+                };
+                let set = self.fact_ids(h);
+                match set.len() {
+                    0 => return Vec::new(),
+                    1 => self.fact_findings(set[0]),
+                    _ => {
+                        let mut m = self.finding_ids_slow(&set);
+                        pick(&mut m, s.first, s.latest);
+                        return m;
+                    }
+                }
+            }
+            _ => unreachable!("hint candidates: kind or fact"),
+        };
+        let mut m: Vec<&str> = rows.iter().map(|&i| doc.findings[i].id.as_str()).collect();
+        pick(&mut m, s.first, s.latest);
+        m
+    }
+
+    /// Findings resting on any of `set`, in row order (several facts: never for a hint,
+    /// which resolves to one fact).
+    fn finding_ids_slow(&self, set: &[&str]) -> Vec<&'a str> {
+        let doc = self.doc;
+        let mut order: Vec<(Option<u64>, usize)> = doc
+            .findings
+            .iter()
+            .enumerate()
+            .map(|(i, f)| {
+                (
+                    f.facts
+                        .iter()
+                        .filter_map(|id| self.fact_at.get(id.as_str()))
+                        .map(|&j| doc.facts[j].bar)
+                        .max(),
+                    i,
+                )
+            })
+            .collect();
+        order.sort_unstable();
+        order
+            .into_iter()
+            .map(|(_, i)| &doc.findings[i])
+            .filter(|f| f.facts.iter().any(|x| set.contains(&x.as_str())))
+            .map(|f| f.id.as_str())
+            .collect()
+    }
+
+    /// [`crate::select::Resolver::fact_hint`].
+    pub(crate) fn fact_hint(&self, f: &Fact) -> Option<FactSel> {
+        let kind = FactSel {
+            kind: Some(f.kind.clone()),
+            ..FactSel::default()
+        };
+        let cands = vec![
+            kind.clone(),
+            FactSel {
+                latest: true,
+                ..kind.clone()
+            },
+            FactSel {
+                first: true,
+                ..kind.clone()
+            },
+            FactSel {
+                bar: Some(f.bar),
+                ..kind.clone()
+            },
+        ];
+        choose(
+            cands,
+            &f.id,
+            |c| self.fact_ids(c),
+            |c| c.first = true,
+            |c| c.latest = true,
+        )
+    }
+
+    /// [`crate::select::Resolver::finding_hint`].
+    pub(crate) fn finding_hint(&self, f: &Finding) -> Option<FindingSel> {
+        let doc = self.doc;
+        let latest = f
+            .facts
+            .iter()
+            .filter_map(|id| self.fact_at.get(id.as_str()).map(|&i| &doc.facts[i]))
+            .max_by_key(|x| x.bar)?;
+        let kind = FindingSel {
+            kind: Some(latest.kind.clone()),
+            ..FindingSel::default()
+        };
+        let mut cands = vec![
+            kind.clone(),
+            FindingSel {
+                latest: true,
+                ..kind.clone()
+            },
+            FindingSel {
+                first: true,
+                ..kind.clone()
+            },
+        ];
+        if let Some(h) = self.fact_hint(latest) {
+            cands.push(FindingSel {
+                fact: Some(Box::new(FactRef::Select(h))),
+                ..FindingSel::default()
+            });
+        }
+        choose(
+            cands,
+            &f.id,
+            |c| self.finding_ids(c),
+            |c| c.first = true,
+            |c| c.latest = true,
+        )
+    }
+}
+
+/// `select::pick` without the error (both flags are handled by the caller).
+fn pick(m: &mut Vec<&str>, first: bool, latest: bool) {
+    if first {
+        m.truncate(1);
+    } else if latest && m.len() > 1 {
+        m.drain(..m.len() - 1);
+    }
+}
+
+/// `select::Resolver::choose`.
+fn choose<'x, S: Clone>(
+    cands: Vec<S>,
+    target: &str,
+    ids: impl Fn(&S) -> Vec<&'x str>,
+    set_first: impl Fn(&mut S),
+    set_latest: impl Fn(&mut S),
+) -> Option<S> {
+    let found: Vec<Vec<&'x str>> = cands.iter().map(&ids).collect();
+    for (c, m) in cands.iter().zip(&found) {
+        if m.len() == 1 && m[0] == target {
+            return Some(c.clone());
+        }
+    }
+    for (c, m) in cands.iter().zip(&found) {
+        if m.first().is_some_and(|x| *x == target) {
+            let mut c = c.clone();
+            set_first(&mut c);
+            return Some(c);
+        }
+        if m.last().is_some_and(|x| *x == target) {
+            let mut c = c.clone();
+            set_latest(&mut c);
+            return Some(c);
+        }
+    }
+    None
 }
 
 /// The summary of a document.
@@ -349,9 +674,17 @@ pub(crate) fn summarize_doc(doc: &Document) -> DocSummary {
         .take(MAX_ITEMS)
         .map(|v| view_summary(doc, v, &mut truncated))
         .collect();
-    let mut facts: Vec<FactSummary> = doc
-        .facts
-        .iter()
+    // (R3/perf) The last `MAX_ITEMS` by bar (stable order), chosen before their
+    // summaries are written.
+    let mut order: Vec<usize> = (0..doc.facts.len()).collect();
+    order.sort_by_key(|&i| doc.facts[i].bar);
+    if order.len() > MAX_ITEMS {
+        truncated = true;
+        order.drain(..order.len() - MAX_ITEMS);
+    }
+    let facts: Vec<FactSummary> = order
+        .into_iter()
+        .map(|i| &doc.facts[i])
         .map(|f| FactSummary {
             id: f.id.clone(),
             kind: f.kind.clone(),
@@ -360,36 +693,49 @@ pub(crate) fn summarize_doc(doc: &Document) -> DocSummary {
             text: short(&f.text),
         })
         .collect();
-    facts.sort_by_key(|f| f.bar);
-    if facts.len() > MAX_ITEMS {
-        truncated = true;
-        facts.drain(..facts.len() - MAX_ITEMS);
+    // First positions (as `iter().find` gives them).
+    let mut fact_at: HashMap<&str, usize> = HashMap::new();
+    for (i, f) in doc.facts.iter().enumerate() {
+        fact_at.entry(f.id.as_str()).or_insert(i);
     }
-    let mut findings: Vec<FindingSummary> = doc
+    let mut capsule_of: HashMap<&str, usize> = HashMap::new();
+    for (i, c) in doc.capsules.iter().enumerate() {
+        capsule_of.entry(c.finding.as_str()).or_insert(i);
+    }
+    let finding_bar = |f: &Finding| {
+        f.facts
+            .iter()
+            .filter_map(|id| fact_at.get(id.as_str()).map(|&i| &doc.facts[i]))
+            .map(|x| x.bar)
+            .max()
+    };
+    let mut order: Vec<(Option<u64>, usize)> = doc
         .findings
         .iter()
-        .map(|f| FindingSummary {
-            id: f.id.clone(),
-            claim: short(&f.claim),
-            facts: f.facts.clone(),
-            bar: f
-                .facts
-                .iter()
-                .filter_map(|id| doc.facts.iter().find(|x| &x.id == id))
-                .map(|x| x.bar)
-                .max(),
-            capsule: doc
-                .capsules
-                .iter()
-                .find(|c| c.finding == f.id)
-                .map(|c| format!("{} {}", c.id, state_name(&c.state))),
+        .enumerate()
+        .map(|(i, f)| (finding_bar(f), i))
+        .collect();
+    order.sort_by_key(|(b, _)| *b);
+    if order.len() > MAX_ITEMS {
+        truncated = true;
+        order.drain(..order.len() - MAX_ITEMS);
+    }
+    let findings: Vec<FindingSummary> = order
+        .into_iter()
+        .map(|(bar, i)| {
+            let f = &doc.findings[i];
+            FindingSummary {
+                id: f.id.clone(),
+                claim: short(&f.claim),
+                facts: f.facts.clone(),
+                bar,
+                capsule: capsule_of
+                    .get(f.id.as_str())
+                    .map(|&i| &doc.capsules[i])
+                    .map(|c| format!("{} {}", c.id, state_name(&c.state))),
+            }
         })
         .collect();
-    findings.sort_by_key(|f| f.bar);
-    if findings.len() > MAX_ITEMS {
-        truncated = true;
-        findings.drain(..findings.len() - MAX_ITEMS);
-    }
     let pending = doc
         .proposals
         .iter()
@@ -404,5 +750,42 @@ pub(crate) fn summarize_doc(doc: &Document) -> DocSummary {
         pending_proposals: Some(u32::try_from(pending).unwrap_or(u32::MAX)),
         truncated,
         select,
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::FastHints;
+    use crate::select::Resolver;
+
+    /// The summary's indexed hints are the resolver's, for every fact and finding of a
+    /// document with an engine history (many facts per kind, findings sharing facts).
+    #[test]
+    fn fast_hints_equal_the_resolvers() {
+        let root = std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("../..");
+        let t: serde_json::Value = serde_json::from_str(
+            &std::fs::read_to_string(
+                root.join("fixtures/protocol/conformance/38-capsule-lifecycle.json"),
+            )
+            .unwrap(),
+        )
+        .unwrap();
+        let mut init = t["init"].clone();
+        let bars = qp_source::synthetic_market(1, 260, 1)[0].bars.clone();
+        init["data"]["feeds"][0]["bars"] = serde_json::json!(bars);
+        let s = crate::Session::new(serde_json::from_value(init).unwrap(), &root).unwrap();
+        let doc = s.document();
+        assert!(
+            doc.facts.len() > 50 && doc.findings.len() > 20,
+            "a real history"
+        );
+        let fast = FastHints::new(doc);
+        let r = Resolver { doc, root: None };
+        for f in &doc.facts {
+            assert_eq!(fast.fact_hint(f), r.fact_hint(f), "fact {}", f.id);
+        }
+        for f in &doc.findings {
+            assert_eq!(fast.finding_hint(f), r.finding_hint(f), "finding {}", f.id);
+        }
     }
 }

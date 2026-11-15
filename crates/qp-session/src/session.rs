@@ -165,7 +165,21 @@ pub struct Session {
     /// Host-supplied mühür keys (R3, `new_with_trust_keys`, `with_provider_and_trust_keys`, `set_trust_keys`).
     pub(crate) trust_keys: Option<(Vec<u8>, Vec<u8>)>,
     /// (R3, §20) Inside [`Session::as_reader`]: the reader's projection.
-    pub(crate) proj: Option<crate::capsule::Proj>,
+    pub(crate) proj: Option<std::rc::Rc<crate::capsule::Proj>>,
+    /// (R3/perf) Fact positions by id, over the facts sentences read
+    /// ([`Session::all_facts`]).
+    pub(crate) fact_ix: std::cell::RefCell<crate::capidx::IdIndex>,
+    /// (R3/perf) Capsule positions by id and finding (the stored document only).
+    pub(crate) cap_ix: std::cell::RefCell<crate::capidx::IdIndex>,
+    /// (R3/perf) Capsule sentences by exact realizer input.
+    pub(crate) sentences: std::cell::RefCell<crate::capidx::SentenceMemo>,
+    /// (R3/perf) Readers' projections, kept per capsule.
+    pub(crate) projs:
+        std::cell::RefCell<std::collections::HashMap<String, crate::capidx::ReaderProj>>,
+    /// (R3/perf) What [`Session::as_reader`] last gave the most recent readers.
+    pub(crate) views: Vec<crate::capidx::ReaderView>,
+    /// (R3/perf) What [`Session::headlines`] were last written from.
+    pub(crate) head_state: crate::capidx::HeadState,
     /// (R3, §20) Inside [`Session::as_reader`]: the real document's facts.
     pub(crate) real_facts: Vec<qp_schema::Fact>,
     /// (R3, §20) Finding id → the capsule sentence the grammar provider speaks with
@@ -432,6 +446,12 @@ impl Session {
             runner: None,
             trust_keys,
             proj: None,
+            fact_ix: std::cell::RefCell::default(),
+            cap_ix: std::cell::RefCell::default(),
+            sentences: std::cell::RefCell::default(),
+            projs: std::cell::RefCell::default(),
+            head_state: crate::capidx::HeadState::default(),
+            views: Vec::new(),
             real_facts: Vec::new(),
             headlines: BTreeMap::new(),
             audience_seen: BTreeSet::new(),

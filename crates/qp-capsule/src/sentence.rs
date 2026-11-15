@@ -120,14 +120,73 @@ pub struct Sentences {
     pub en: String,
 }
 
+/// Study values at the last bar of one bars slice, each computed at most once. A caller
+/// that writes many sentences over the same series and `now` in one pass (the authority
+/// rewriting every capsule's sentence) shares one memo; the values are the ones
+/// [`condition_now`] computes, bit for bit.
+///
+/// Entries are keyed by the slice's address and length: a memo is valid only while every
+/// slice it has seen stays unchanged (one pass over borrowed bars). Drop it before the
+/// bars change.
+#[derive(Debug, Default)]
+pub struct StudyMemo {
+    at: Vec<((usize, usize), Studies)>,
+}
+
+#[derive(Debug, Default, Clone, Copy)]
+#[allow(clippy::option_option)]
+struct Studies {
+    rsi: Option<Option<f64>>,
+    sma20: Option<Option<f64>>,
+    sma50: Option<Option<f64>>,
+    bollinger: Option<Option<(f64, f64, f64)>>,
+}
+
+impl StudyMemo {
+    fn slot(&mut self, bars: &[Bar]) -> &mut Studies {
+        let key = (bars.as_ptr() as usize, bars.len());
+        let i = if let Some(i) = self.at.iter().rposition(|(k, _)| *k == key) {
+            i
+        } else {
+            self.at.push((key, Studies::default()));
+            self.at.len() - 1
+        };
+        &mut self.at[i].1
+    }
+
+    fn rsi(&mut self, bars: &[Bar]) -> Option<f64> {
+        *self
+            .slot(bars)
+            .rsi
+            .get_or_insert_with(|| rsi_now(bars, qp_facts::RsiExtreme::RSI))
+    }
+
+    fn sma(&mut self, bars: &[Bar], period: usize) -> Option<f64> {
+        let s = self.slot(bars);
+        let v = match period {
+            20 => &mut s.sma20,
+            50 => &mut s.sma50,
+            _ => return sma_now(bars, period),
+        };
+        *v.get_or_insert_with(|| sma_now(bars, period))
+    }
+
+    fn bollinger(&mut self, bars: &[Bar]) -> Option<(f64, f64, f64)> {
+        *self
+            .slot(bars)
+            .bollinger
+            .get_or_insert_with(|| bollinger_now(bars))
+    }
+}
+
 /// Value of a condition subject at the last bar of `bars`.
-fn subject_now(subject: &str, bars: &[Bar]) -> Option<f64> {
+fn subject_now(subject: &str, bars: &[Bar], memo: &mut StudyMemo) -> Option<f64> {
     let last = bars.last()?;
     match subject {
         "close" | "price" => Some(last.c),
-        "rsi" | "value" => rsi_now(bars, qp_facts::RsiExtreme::RSI),
-        "close_dev" => bollinger_now(bars).map(|(m, _, _)| (last.c - m).abs()),
-        "bandwidth" | "bw" => bollinger_now(bars).map(|(_, _, bw)| bw),
+        "rsi" | "value" => memo.rsi(bars),
+        "close_dev" => memo.bollinger(bars).map(|(m, _, _)| (last.c - m).abs()),
+        "bandwidth" | "bw" => memo.bollinger(bars).map(|(_, _, bw)| bw),
         _ => None,
     }
     .filter(|v: &f64| v.is_finite())
@@ -135,12 +194,12 @@ fn subject_now(subject: &str, bars: &[Bar]) -> Option<f64> {
 
 /// Threshold of a condition key at the last bar of `bars`: moving studies recomputed,
 /// everything else from the lead fact's evidence.
-fn threshold_now(key: &str, lead: &Fact, bars: &[Bar]) -> Option<f64> {
+fn threshold_now(key: &str, lead: &Fact, bars: &[Bar], memo: &mut StudyMemo) -> Option<f64> {
     match key {
-        "sma20" => sma_now(bars, 20),
-        "sma50" => sma_now(bars, 50),
-        "middle" => bollinger_now(bars).map(|(m, _, _)| m),
-        "half_width" => bollinger_now(bars).map(|(m, u, _)| u - m),
+        "sma20" => memo.sma(bars, 20),
+        "sma50" => memo.sma(bars, 50),
+        "middle" => memo.bollinger(bars).map(|(m, _, _)| m),
+        "half_width" => memo.bollinger(bars).map(|(m, u, _)| u - m),
         k => lead.evidence.get(k).copied(),
     }
     .filter(|v: &f64| v.is_finite())
@@ -189,6 +248,19 @@ fn compare(op: CompareOp, a: f64, b: f64) -> bool {
 /// detector ends a state). See the module docs.
 #[must_use]
 pub fn condition_now(lead: &Fact, facts: &[Fact], bars: &[Bar]) -> (Option<bool>, Option<f64>) {
+    let facts: Vec<&Fact> = facts.iter().collect();
+    condition_now_memo(lead, &facts, bars, &mut StudyMemo::default())
+}
+
+/// [`condition_now`] over borrowed facts, with the study values of `bars` taken from (and
+/// kept in) `memo` (see [`StudyMemo`]). Same result, bit for bit.
+#[must_use]
+pub fn condition_now_memo(
+    lead: &Fact,
+    facts: &[&Fact],
+    bars: &[Bar],
+    memo: &mut StudyMemo,
+) -> (Option<bool>, Option<f64>) {
     let Some(m) = lead.meaning.as_ref() else {
         return (None, None);
     };
@@ -208,11 +280,11 @@ pub fn condition_now(lead: &Fact, facts: &[Fact], bars: &[Bar]) -> (Option<bool>
     if m.time == TimeKind::State && c.within_bars.is_some() {
         return (Some(!exited), None);
     }
-    let cur = subject_now(&c.subject, bars);
+    let cur = subject_now(&c.subject, bars, memo);
     if exited {
         return (Some(false), cur);
     }
-    let thr = threshold_now(&c.key, lead, bars);
+    let thr = threshold_now(&c.key, lead, bars, memo);
     let holds = match (cur, thr) {
         (Some(a), Some(b)) => Some(compare(c.op, a, b)),
         _ => None,

@@ -464,7 +464,7 @@ T.append(transcript(
              [ex("v", result("q4", {"kind": "presentation", "presentation": {
                  "finding": "fnd-overbought", "depth": "sentence", "surface": "voice",
                  "text": "THYAO aşırı alımda: RSI 70'in üstünde."}}, seq=0))],
-             "G20: no finding given -> most important live finding"),
+             "G20, K25: no finding given and exactly one live finding -> that finding (several -> ambiguous, see 28)"),
         send("d", query("q5", {"kind": "present", "finding": "fnd-overbought", "surface": "watch"}),
              [ex("d", result("q5", {"kind": "presentation", "presentation": {
                  "depth": "sentence", "surface": "watch"}}, seq=0))], "present for another surface"),

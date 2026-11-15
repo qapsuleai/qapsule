@@ -275,3 +275,120 @@ dökümler 38–43 yeter.
   `caps`).
 
 Her ölçüm dosyası başında ve sonunda o anın `uptime` satırı var.
+
+## Düzeltmeden sonra
+
+Dal `r3/fix-perf` (`r3/int` `a81b5e5` üstünde). §6.3'ün 1–5. önerileri yapıldı; çıktı
+değişmedi (bayt eşitliği, aşağıda). Kod: `crates/qp-session/src/capidx.rs` (yeni: kimlik
+dizinleri, cümle belleği, okuyucu izdüşümü, okuyucu görünümleri), `capsule.rs`,
+`summary.rs`, `live.rs`, `session.rs`; `qp-capsule/src/sentence.rs` (`StudyMemo`,
+`condition_now_memo`; `condition_now` aynı sonucu verir).
+
+### Ne değişti
+
+1. **Başlıklar** (öneri 1): `run_capsules` sonunda bir kez ve yalnız girdisi
+   değişmiş olabilecek kapsüller için: son yenilemeden beri günlüğün koyduğu kapsüller ve
+   olgularını koyduğu kapsüller, ve okuduğu barlar (okuma dokümanı ve doküman, bit bit
+   anlık görüntü) değişen serinin kapsülleri. "Şimdi"ye bağlılık bu tanımın içinde: cümle
+   `sentence_pair`'in girdisinin (hikâye, olgular, `bars[..=now]`, `now`, gizlilik) saf
+   fonksiyonu; `now` ve barlar serinin anlık görüntüsüyle, hikâye ve olgular günlükle
+   izleniyor. Kapanmış hikâyenin cümlesi de değişir ("N gün önce"), bu yüzden ilerleyen
+   serinin bütün kapsülleri yeniden yazılır; ilerlemeyen serilerinkiler yazılmaz. Seri
+   konması, silme, dizinli kapsül konması ya da iki hikâyeli kapsülün aynı bulguyu
+   paylaşması: hepsi baştan (eski yol).
+2. **Cümleler:** çalışmanın (RSI/SMA/Bollinger) "şimdi"deki değeri bir geçişte seri ve
+   `now` başına bir kez (`StudyMemo`, eskiden kapsül başına bütün geçmiş baştan); gerçekleştiricinin çıktısı
+   girdinin tamamıyla (hikâye, öncü/son olgu, `now`, `now_t`, `still_holds`, `current`
+   bit bit, gizlilik) anahtarlanıp saklanıyor; yalnız bir dil okuyan yol tek dil yazıyor.
+3. **İzdüşüm önbelleği** (öneri 2): okuyucu başına, kapsül başına katkı sayaçlarıyla
+   tutulan `Proj`; günlükten izleniyor (koyulan kapsüller ve olguları koyulan
+   kapsüller), seri konması / silme / kullanılan yetki cevaplarından biri değişince baştan.
+   Yetki cevapları her kullanımda sağlayıcıya yeniden soruluyor (sağlayıcının kuşak
+   sayacı yok). `as_reader` içinde (izdüşümlü doküman) ve "bir kapsülün gizlediği kimlik
+   başka bir kapsülün kimliği" durumunda eski hesap (`proj_scratch`). Okuyucu görünümleri
+   (başlıklar, izdüşümlü doküman ve okuma dokümanı) okuyucu ve dil başına, günlük konumu,
+   izdüşüm ve okuma dokümanının barları aynıyken yeniden veriliyor (son 4 okuyucu);
+   gerçek olgular kopyalanmıyor, taşınıyor.
+4. **Doğrusal aramalar** (öneri 3): olgu ve kapsül kimlik dizinleri (günlükle izlenen,
+   her vuruşta kimlik doğrulanan, şüphede doğrusal arama); `now_bar` ve
+   `capsule_changes`'te bar kopyası yerine ödünç; `run_capsules`'ta seri kopyası yok.
+5. **`hello` özeti** (öneri 4): son 50 olgu/bulgu özetten önce seçiliyor; olgu/bulgu
+   seçici ipuçları dizinlerden (`summary::FastHints`; adaylar, satır sırası ve eşleşme
+   çözümleyicininki, birim testi her olgu ve bulgu için çözümleyiciyle aynı ipucunu
+   doğruluyor). `select.rs` değişmedi.
+6. **Açık bar denetimi** (öneri 5): izlenen serilerin okuma dokümanındaki konumu yapı
+   kuşağı başına bir kez; ikinci `find_series` yok.
+7. **Canlı dizin** (`live.rs`, ölçümde çıktı): bulgular haritayla; hiçbir seriye
+   dayanmayan geçersizlik koşulu (motor bulgularının metin koşulu) için izleyici yok
+   (`invalidate_live` onu zaten hiç değerlendirmiyordu).
+
+### Eşitlik kanıtı
+
+- `crates/qp-session/tests/capsule_perf_equality.rs` (yeni): 6 enstrüman × 150 bar
+  bağlı (3'ünde lisanslı akış, okuyucular: sahip, iki farklı kısmi yetkili, yetkisiz,
+  EN okuyucu; kitle tercihi, onay/ret, sorgular, geç `hello`'lar) ve 4 × 130 belge içi
+  senaryonun bütün giden satırları, günlüğü ve dokümanı: özetler düzeltmeden **önce**
+  (`a81b5e5`) kaydedildi, sonra aynı (`lines 3023 / 3747`, satır, günlük, doküman FNV).
+- `capsule_tick` satır özeti (`QP_LINES_DIGEST=1`, bütün bağlantıların her satırı +
+  günlük): 30 × 150 bar `none`, `caps`, `flow` bağlı ve `caps` belge içi, önce/sonra
+  aynı (`raw/perf/equality-lines-{before,after}.txt`).
+- 100/250/1.000 bar (600 tik) ve 500 bar (120 tik, S-D'nin koşusu) bağlı, 250 bar belge
+  içi: son doküman özeti, günlük uzunluğu, olgu/bulgu/kapsül/defter sayıları ve satır
+  sayıları S-D'nin ham dosyalarıyla aynı.
+- 43 döküm × inproc/serve/mcp (`verify` adım 14), bütün altınlar, `tests/capsules.rs`
+  (yeniden oynatma, yetki taraması, gizlilik) yeşil. `r3/int`'in yeni hâli (`d7c37bf`,
+  döküm 44) ile deneme birleştirmesi: 44 döküm × üç taşıma ve `qp-session` testleri yeşil.
+
+### Ölçüm
+
+Aynı komutlar (§1.1), `--release`, `CARGO_INCREMENTAL=0`; ham
+`raw/perf/after-capsule-tick-{bound-h100,bound-h250,bound-h500,bound-h1000,inline-h250}.txt`.
+Yük ortalaması (1 dk) ölçüm başında 5,4, sonunda 5,1. 100 bar 5 koşu, diğerleri 3 koşu;
+hepsi 600 piyasa tiki (10 kapanış; S-D'de 500 bar 120 tik, 1.000 bar 1 koşuydu).
+Medyan; S-D → sonra.
+
+| Geçmiş | Düzen | Kapsül | `Session::new` | Bağlanma (4 hello + 6 abone) | Düzeltme tiki, olay başına | Kapanış tiki (30 enstrüman) |
+|---:|---|---:|---:|---:|---:|---:|
+| 100 | none | 0 | 0,39 → 0,40 ms | 1,7 → 1,7 ms | 1,97 → 2,01 µs | 63 → 64 µs |
+| 100 | caps | 505 | 44 → 14 ms | 1,07 s → **8,1 ms** | 4,38 → **2,13 µs** | 134,5 → **4,9 ms** |
+| 100 | flow | 777 | 79 → 27 ms | 1,78 s → 14,6 ms | 4,69 → 2,13 µs | 301 → 9,6 ms |
+| 250 | caps | 1.483 | 181 → 57 ms | 7,10 s → 22,4 ms | 5,29 → 2,16 µs | 508 → 11,8 ms |
+| 250 | flow | 2.093 | 296 → 100 ms | 12,3 s → 45,8 ms | 6,05 → 2,17 µs | 1.056 → 20,0 ms |
+| 500 | caps | 3.129 | 536 → 184 ms | 32,7 s → 54,3 ms | 7,18 → 2,25 µs | 1.289 → 23,5 ms |
+| 500 | flow | 4.356 | 912 → 308 ms | 56,2 s → 105 ms | 8,49 → 2,27 µs | 2.645 → 40,3 ms |
+| 1.000 | none | 0 | 0,93 → 0,64 ms | 1,6 → 1,8 ms | 2,04 → 2,09 µs | 71 → 70 µs |
+| 1.000 | caps | 6.369 | 1,75 s → 0,61 s | **161,5 s → 133 ms** | **11,3 → 2,27 µs** | **3.652 → 48,2 ms** |
+| 1.000 | flow | 8.761 | 3,08 s → 1,05 s | **279,2 s → 247 ms** | 17,1 → 2,33 µs | **8.037 → 89,6 ms** |
+
+(500 bar kapsül sayısı 600 tikte; S-D'nin 120 tikli koşusunda 3.075 / 4.284.) Koşular
+arası yayılım ≤ %5 (min–maks ham dosyalarda). Bütün tikler (kapanış dahil), 1.000 bar
+`caps`, olay başına: 2.040 → 29 µs.
+
+Belge içi, 250 bar: `none` düzeltme 3,10 → 3,14 µs/olay; `caps` düzeltme **3,51 ms →
+3,35 µs**/olay (×1.050), kapanış 533 → 11,0 ms, bağlanma 14,7 ms.
+
+**RP2 tabanıyla** (§4, aynı makine): bağlı düzeltme tiki 1.000 barda `caps` 2,27 / `flow`
+2,33 µs/olay = RP2 bağlı N=5 `t6d` (0,78) karşısında ×2,9 / ×3,0, N=500 (8,78)'in
+altında. Motorsuz 30 serilik yol aynı makinede 2,09 µs (×2,7): motor açık barda olay
+başına ≤ 0,25 µs ekliyor ve artık geçmişle büyümüyor (100 → 1.000 bar: 2,13 → 2,27).
+Ö23 paydasıyla ≤ 3× hedefi bu yolda tutuyor (`flow` sınırda).
+
+### Hedefler ve kalan
+
+- Kapanış (1.000 bar, 30 enstrüman): `caps` 48 ms, `flow` 90 ms: 100 ms'nin altında;
+  `flow` için "çok altında" değil. Kalan maliyet hâlâ kapsül sayısıyla doğrusal:
+  ilerleyen serinin bütün kapsüllerinin cümlesi yeniden yazılıyor ("N gün önce" her
+  kapanışta değişiyor; 1.000 barda seri başına ~290 kapsül), motor girdisinin okuyucu
+  başına izdüşümü ve canlı dizinin girdi başına yeniden kurulması. Profil (1.000 bar
+  `flow`, her tik kapanış): `refresh_headlines` %67 (gerçekleştirici %28), `entry_events`
+  %16, canlı dizin %7.
+- Bağlanma: 1.000 barda `caps` 133 ms, `flow` 247 ms; ~100 ms hedefinin üstünde. Kalanın
+  çoğu yetkisiz okuyucunun **ilk** `hello`'su (90–120 ms): her kapsülün cümlesi rakamsız
+  biçimde ilk kez yazılıyor (sonraki mesajlarda görünüm önbellekte, abone 0,1 ms) ve iki
+  izdüşümlü doküman kopyası. Kısmi yetkili `flow` okuyucusu ~80 ms (lisanslı katılımlı
+  hikâyelerin yeniden yazımı). Tam yetkili `hello` ~15 ms (özet ve ipuçları ~6 ms).
+- `Session::new` (geçmiş üzerinde yetişme) hedef dışıydı; ×2,9 hızlandı ama 1.000 barda
+  0,6–1,05 s.
+- Öneri 6 (büyüme sınırı) ve 8 (`capsule_tick` kısa koşusunun verify'a girmesi)
+  yapılmadı; `apply.rs`'teki `upsert` hâlâ doğrusal konum araması yapıyor (kapanış
+  profilinde ~%3).

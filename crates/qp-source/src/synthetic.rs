@@ -7,10 +7,11 @@ use qp_schema::{Bar, Instrument, Series, SeriesData, SeriesSource as Binding};
 use crate::{BarEvent, SeriesMeta, SeriesSource, SourceError};
 
 /// Minimal 64-bit LCG (Knuth MMIX constants).
-struct Lcg(u64);
+#[derive(Debug, Clone)]
+pub(crate) struct Lcg(pub(crate) u64);
 
 impl Lcg {
-    fn next_u32(&mut self) -> u32 {
+    pub(crate) fn next_u32(&mut self) -> u32 {
         self.0 = self
             .0
             .wrapping_mul(6_364_136_223_846_793_005)
@@ -20,12 +21,12 @@ impl Lcg {
     }
 
     /// Uniform in [-1, 1): built from an integer, then one exact division.
-    fn unit(&mut self) -> f64 {
+    pub(crate) fn unit(&mut self) -> f64 {
         f64::from(self.next_u32()) / 2_147_483_648.0 - 1.0
     }
 }
 
-fn round2(x: f64) -> f64 {
+pub(crate) fn round2(x: f64) -> f64 {
     (x * 100.0).round() / 100.0
 }
 

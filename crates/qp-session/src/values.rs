@@ -218,6 +218,17 @@ impl Cache {
     /// current. Series on other bar series are not touched.
     pub(crate) fn apply_delta(&mut self, doc: &Document, bar: &str, delta: Delta) {
         let bars = find_series(doc, bar).and_then(Series::bars);
+        if let Delta::Rebuild { .. } = delta {
+            // Everything on `bar` is recomputed (studies that could not be computed before,
+            // e.g. while a binding was stale, may be computable now).
+            self.drop_id(bar);
+            self.deps.remove(bar);
+            for i in self.studies_on(doc, bar) {
+                self.drop_slot(i);
+            }
+            self.ensure_deps(doc, bar);
+            return;
+        }
         // The bar series' own columns.
         if let Some(i) = self.slot_of(bar) {
             let ok = bars.is_some_and(|b| update_columns(self.slot_mut(i), b, delta));
@@ -241,17 +252,7 @@ impl Cache {
         } else {
             // First tick on `bar` since a structure change: advance the cached studies on
             // it, compute the others below.
-            let on_bar: Vec<usize> = self
-                .slots
-                .iter()
-                .enumerate()
-                .filter_map(|(i, s)| {
-                    let s = s.as_ref()?;
-                    s.live.as_ref()?;
-                    study_input(doc, &s.id).filter(|inp| *inp == bar).map(|_| i)
-                })
-                .collect();
-            for i in on_bar {
+            for i in self.studies_on(doc, bar) {
                 let ok = bars.is_some_and(|b| update_study(self.slot_mut(i), b, delta));
                 if ok {
                     self.touch(i);
@@ -283,6 +284,19 @@ impl Cache {
             }
         }
         self.deps.insert(bar.to_owned(), list);
+    }
+
+    /// Slots of the cached study series whose input is `bar`.
+    fn studies_on(&self, doc: &Document, bar: &str) -> Vec<usize> {
+        self.slots
+            .iter()
+            .enumerate()
+            .filter_map(|(i, s)| {
+                let s = s.as_ref()?;
+                s.live.as_ref()?;
+                study_input(doc, &s.id).filter(|inp| *inp == bar).map(|_| i)
+            })
+            .collect()
     }
 
     fn slot_mut(&mut self, i: usize) -> &mut Slot {
@@ -492,7 +506,16 @@ pub(crate) fn values(doc: &Document, cache: &mut Cache, id: &str) -> Result<Rc<C
                 outputs,
                 main: main_output(study, output.as_ref()),
             };
-            Ok(cache.insert(id, computed, Some(live)))
+            let rc = cache.insert(id, computed, Some(live));
+            // A study computed on demand joins its bar series' kept-current list.
+            if let Some(i) = cache.slot_of(id) {
+                if let Some(list) = cache.deps.get_mut(input.as_str()) {
+                    if !list.contains(&i) {
+                        list.push(i);
+                    }
+                }
+            }
+            Ok(rc)
         }
         _ => Err(format!("series `{id}` has no data")),
     }

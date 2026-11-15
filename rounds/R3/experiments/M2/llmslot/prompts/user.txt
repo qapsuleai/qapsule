@@ -1,0 +1,3 @@
+Write the capsule sentence for these slots. Reply with only {"tr": "...", "en": "..."}.
+
+slots: {SLOTS}

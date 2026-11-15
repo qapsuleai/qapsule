@@ -1,0 +1,296 @@
+{
+ "sentences": {
+  "k26": {
+   "en": "THYAO's RSI rose above 70 into overbought territory 3 bars ago; it is now 55 and no longer above 70, so the overbought state has ended. This kind of signal realized in 87 of 140 past cases.",
+   "tr": "THYAO'da RSI 3 bar önce 70'in üstüne çıkarak aşırı alıma girdi; şu an 55 ve artık 70'in üstünde değil, aşırı alım sona erdi. Bu tür sinyal geçmişte 140 örneğin 87'sinde gerçekleşti."
+  },
+  "s01": {
+   "en": "SISE's downward trend continuation was invalidated today because the expected outcome failed, and the signal is no longer valid; this kind of signal realized in 2 of 8 past cases (small sample).",
+   "tr": "SISE'de aşağı yönlü trend devamı bugün geçersiz oldu: beklenen sonuç tutmadı, sinyal artık geçerli değil; bu tür sinyal geçmişte 8 örneğin 2'sinde gerçekleşti (örnek az)."
+  },
+  "s02": {
+   "en": "TUPRS's upward trend continuation formed yesterday with a 148.41 close above the short-term 146.93 and long-term 142.47 moving averages; today an opposite-direction signal appeared and it weakened. This kind of signal realized in 89 of 140 past cases.",
+   "tr": "TUPRS'ta yukarı yönlü trend devamı dün 148,41 kapanışla, kısa vadeli 146,93 ve uzun vadeli 142,47 ortalamaların üstünde oluştu; bugün ters yönde bir sinyal geldi ve sinyal zayıfladı. Bu tür sinyal geçmişte 140 örneğin 89'unda gerçekleşti."
+  },
+  "s03": {
+   "en": "A downward trend continuation signal formed in EREGL a week ago; the expected outcome came and the signal realized.",
+   "tr": "EREGL'de aşağı yönlü trend devamı sinyali bir hafta önce oluştu; beklenen sonuç geldi ve sinyal gerçekleşti."
+  },
+  "s04": {
+   "en": "A new upward trend continuation signal formed in PGSUS 30 bars ago, with a 57.29 close above the short-term (56.72) and long-term (55) moving averages; this kind of signal realized in 67 of 140 past cases.",
+   "tr": "PGSUS'ta yukarı yönlü trend devamı sinyali 30 bar önce oluştu: 57,29 kapanış, kısa vadeli ortalamayı (56,72) ve uzun vadeli ortalamayı (55) aştı; bu tür sinyal geçmişte 140 örneğin 67'sinde gerçekleşti."
+  },
+  "s05": {
+   "en": "THYAO's downward reversal signal based on RSI divergence formed today at 168.94, but an opposite-direction signal appeared and it weakened; this kind of signal realized in 6 of 8 past cases (small sample).",
+   "tr": "THYAO'da bugün 168,94 fiyatında aşağı yönlü dönüş sinyali (RSI uyumsuzluğu) oluştu: RSI önceki uç noktada 50,4, son uç noktada 52,1 idi; ters yönde bir sinyal geldiği için sinyal zayıfladı. Bu tür sinyal geçmişte 8 örneğin 6'sında gerçekleşti (örnek az)."
+  },
+  "s06": {
+   "en": "BIMAS formed an upward reversal signal (RSI divergence) yesterday at 21.49, with RSI going from 44.9 to 53.6; an opposite-direction signal appeared and it weakened. This kind of signal realized in 2 of 8 past cases (small sample).",
+   "tr": "BIMAS'ta dün 21,49 fiyatla yukarı yönlü dönüş sinyali (RSI uyumsuzluğu) oluştu, RSI 44,9'dan 53,6'ya çıktı; ters yönde bir sinyal geldiği için sinyal zayıfladı. Bu tür sinyal geçmişte 8 örneğin 2'sinde gerçekleşti (örnek az)."
+  },
+  "s07": {
+   "en": "A downward reversal signal (RSI divergence) appeared in PGSUS a week ago; its horizon ran out with no outcome, so the signal has expired and is no longer valid.",
+   "tr": "PGSUS'ta bir hafta önce aşağı yönlü dönüş sinyali (RSI uyumsuzluğu) oluştu; ufuk süresi doldu, sinyal ufuk içinde sonuç gelmeden süresi doldu ve artık geçerli değil."
+  },
+  "s08": {
+   "en": "THYAO formed a downward reversal signal (RSI divergence) at a price of 25.63 30 bars ago; today a volume surge confirmed it. This kind of signal realized in 4 of 8 past cases (small sample).",
+   "tr": "THYAO'da 30 bar önce 25,63 fiyatla aşağı yönlü dönüş sinyali (RSI uyumsuzluğu) oluştu; bugün hacim artışı sinyali teyit etti. Bu tür sinyal geçmişte 8 örneğin 4'ünde gerçekleşti (örnek az)."
+  },
+  "s09": {
+   "en": "The upside breakout in GARAN, a 131.01 close above the 128.48 range boundary, expired today as its horizon ran out and is no longer valid; this kind of signal realized in 51 of 140 past cases.",
+   "tr": "GARAN'da 128,48'deki aralık sınırının üstünde 131,01 kapanışla gelen yukarı kırılımın ufuk süresi bugün doldu ve sinyal artık geçerli değil; bu tür sinyal geçmişte 140 örneğin 51'inde gerçekleşti."
+  },
+  "s10": {
+   "en": "PGSUS's upside breakout above the 167.59 range boundary, made with a 172.4 close yesterday, was invalidated as the expected outcome failed and is no longer valid; this kind of signal realized in 3 of 8 past cases (small sample).",
+   "tr": "PGSUS'ta dün 172,4 kapanışla 167,59'daki aralık sınırını yukarı kıran kırılım geçersiz oldu, beklenen sonuç tutmadı ve artık geçerli değil; bu tür sinyal geçmişte 8 örneğin 3'ünde gerçekleşti (örnek az)."
+  },
+  "s11": {
+   "en": "EREGL broke above its range boundary at 42.68 with a 43.15 close 5 bars ago, and a volume surge confirmed the breakout today. This kind of signal realized in 98 of 140 past cases.",
+   "tr": "EREGL 5 bar önce 43,15 kapanışla 42,68'deki aralık sınırını yukarı kıran bir kırılım yaptı; bugün hacim artışı sinyali teyit etti. Bu tür sinyal geçmişte 140 örneğin 98'inde gerçekleşti."
+  },
+  "s12": {
+   "en": "AKBNK broke below its range boundary at 20.86 with a 20.58 close 30 bars ago; an opposite-direction signal appeared and the downside breakout weakened. This kind of signal realized in 2 of 8 past cases (small sample).",
+   "tr": "AKBNK 30 bar önce 20,58 kapanışla 20,86'daki aralık sınırını aşağı kırdı; ters yönde bir sinyal geldi ve kırılım zayıfladı. Bu tür sinyal geçmişte 8 örneğin 2'sinde gerçekleşti (örnek az)."
+  },
+  "s13": {
+   "en": "Today ASELS's Bollinger bandwidth narrowed to 0.049, below the 0.06 threshold; a new squeeze signal formed with the direction undecided. This kind of signal realized in 2 of 8 past cases (small sample).",
+   "tr": "ASELS'de bugün Bollinger bant genişliği 0,049'a inerek 0,06'lık eşiğin altına düştü; yön belirsiz sıkışma sinyali yeni oluştu. Bu tür sinyal geçmişte 8 örneğin 2'sinde gerçekleşti (örnek az)."
+  },
+  "s14": {
+   "en": "A squeeze with an undecided direction formed in THYAO's Bollinger bands yesterday; its horizon ran out and the signal is no longer valid.",
+   "tr": "THYAO'da dün Bollinger bantlarında daralma görüldü ve yön belirsiz bir sıkışma oluştu; ufuk süresi doldu, sinyal artık geçerli değil."
+  },
+  "s15": {
+   "en": "SAHOL's Bollinger bandwidth fell to 0.044, below the 0.06 threshold, 5 bars ago, forming a squeeze with an undecided direction; an opposite-direction signal appeared and it weakened. This kind of signal realized in 63 of 140 past cases.",
+   "tr": "SAHOL'da 5 bar önce Bollinger bant genişliği 0,044 ile 0,06 eşiğinin altına indi ve yön belirsiz bir sıkışma oluştu; ters yönde bir sinyal geldiği için sinyal zayıfladı. Bu tür sinyal geçmişte 140 örneğin 63'ünde gerçekleşti."
+  },
+  "s16": {
+   "en": "30 bars ago TUPRS's Bollinger bandwidth narrowed to 0.025, below 0.06, a squeeze with undecided direction; the signal was invalidated and is no longer valid. This kind of signal realized in 2 of 8 past cases (small sample).",
+   "tr": "TUPRS'ta 30 bar önce Bollinger bant genişliği 0,025'e inerek 0,06'lık eşiğin altına düştü ve yön belirsiz bir sıkışma oluştu; beklenen sonuç tutmadığı için sinyal geçersiz oldu ve artık geçerli değil. Bu tür sinyal geçmişte 8 örneğin 2'sinde gerçekleşti (örnek az)."
+  },
+  "s17": {
+   "en": "PGSUS's RSI fell below 30 to 28.8 today, entering oversold territory, and a volume surge confirmed the signal; this kind of signal realized in 99 of 140 past cases.",
+   "tr": "PGSUS'ta RSI bugün 30'un altına, 28,8'e inerek aşırı satıma girdi ve hacim artışı sinyali teyit etti; bu tür sinyal geçmişte 140 örneğin 99'unda gerçekleşti."
+  },
+  "s18": {
+   "en": "BIMAS's RSI rose above 70 to 72.6 yesterday, entering overbought territory; a volume surge confirmed the signal. This kind of signal realized in 4 of 8 past cases (small sample).",
+   "tr": "BIMAS'ta RSI dün 70'in üzerine çıkarak 72,6'ya ulaştı ve aşırı alım bölgesine girdi; sinyal hacim artışıyla teyit edildi. Bu tür sinyal geçmişte 8 örneğin 4'ünde gerçekleşti (örnek az)."
+  },
+  "s19": {
+   "en": "FROTO's RSI rose above its threshold into overbought territory a week ago; the expected outcome failed, so the signal was invalidated and is no longer valid.",
+   "tr": "FROTO'da RSI bir hafta önce eşiğin üstüne çıkarak aşırı alım bölgesine girdi; ancak beklenen sonuç tutmadığı için sinyal geçersiz oldu ve artık geçerli değil."
+  },
+  "s20": {
+   "en": "FROTO's RSI moved into overbought territory over a month ago; a new upward overbought signal formed.",
+   "tr": "FROTO'da RSI bir aydan uzun süre önce aşırı alım bölgesine girdi; yukarı yönlü aşırı alım sinyali yeni oluştu."
+  },
+  "s21": {
+   "en": "Institutional net selling in AKBNK reached 1,345,000 today, above its recent average of 563,000; a downward institutional money flow signal newly formed. This kind of signal realized in 63 of 140 past cases.",
+   "tr": "AKBNK'de bugün kurumsal net satış 1.345.000'e ulaşarak yakın dönem ortalaması olan 563.000'in üstüne çıktı; aşağı yönlü kurumsal para akışı sinyali yeni oluştu. Bu tür sinyal geçmişte 140 örneğin 63'ünde gerçekleşti."
+  },
+  "s22": {
+   "en": "Institutional net buying in FROTO rose to 1,026,000 yesterday, above its recent average of 481,000; a new upward institutional money flow signal formed. This kind of signal realized in 6 of 8 past cases (small sample).",
+   "tr": "FROTO'da dün kurumsal net alış 1.026.000'a çıkarak yakın dönem ortalaması olan 481.000'in üstüne geçti; yukarı yönlü kurumsal para akışı sinyali yeni oluştu. Bu tür sinyal geçmişte 8 örneğin 6'sında gerçekleşti (örnek az)."
+  },
+  "s23": {
+   "en": "5 bars ago, institutional net selling in AKBNK rose to 1,496,000, above its recent average of 374,000; the downward institutional money flow signal expired and is no longer valid. This kind of signal realized in 50 of 140 past cases.",
+   "tr": "AKBNK'de kurumsal net satış 5 bar önce 1.496.000 ile yakın dönem ortalaması olan 374.000'in üzerine çıktı; aşağı yönlü kurumsal para akışı sinyalinin süresi doldu ve artık geçerli değil. Bu tür sinyal geçmişte 140 örneğin 50'sinde gerçekleşti."
+  },
+  "s24": {
+   "en": "Institutional net selling in PGSUS rose to 1,280,000 30 bars ago, above its recent average of 597,000; the downward institutional money flow signal weakened as an opposite-direction signal appeared. This kind of signal realized in 54 of 140 past cases.",
+   "tr": "PGSUS'ta kurumsal net satış 30 bar önce 1.280.000 ile yakın dönem ortalaması olan 597.000'i aştı; aşağı yönlü kurumsal para akışı sinyali, ters yönde bir sinyal geldiği için zayıfladı. Bu tür sinyal geçmişte 140 örneğin 54'ünde gerçekleşti."
+  },
+  "s25": {
+   "en": "BIMAS's upward trend continuation has weakened: an opposite-direction signal appeared today, but the close is still above its long-term moving average and the signal remains valid.",
+   "tr": "BIMAS'ta yukarı yönlü trend devamı zayıfladı: bugün ters yönde bir sinyal geldi, ancak kapanış hâlâ uzun vadeli ortalamanın üstünde ve sinyal hâlâ geçerli."
+  },
+  "s26": {
+   "en": "PGSUS's close fell below its 29.19 long-term moving average yesterday, a downward trend continuation signal; now at 30.07 it is no longer below and the signal was invalidated. This signal type realized in 2 of 8 past cases (small sample).",
+   "tr": "PGSUS'ta kapanış dün 29,19'daki uzun vadeli ortalamanın altına inerek aşağı yönlü trend devamı sinyali verdi; şu an 30,07 ve artık altında değil, sinyal geçersiz oldu, artık geçerli değil. Bu tür sinyal geçmişte 8 örneğin 2'sinde gerçekleşti (örnek az)."
+  },
+  "s27": {
+   "en": "SISE's downward trend continuation is newly formed and still in place: the close has stayed below its long-term moving average (71.29) for 5 bars and is now 69.86; this kind of signal realized in 63 of 140 past cases.",
+   "tr": "SISE'de aşağı yönlü trend devamı yeni oluştu ve sürüyor: kapanış 5 bardır uzun vadeli ortalamanın (71,29) altında, şu an 69,86; bu tür sinyal geçmişte 140 örneğin 63'ünde gerçekleşti."
+  },
+  "s28": {
+   "en": "THYAO's upward trend continuation has realized and still holds: the close has stayed above its long-term moving average (57.17) for 30 bars and is now 58.31; this kind of signal realized in 2 of 8 past cases (small sample).",
+   "tr": "THYAO'da yukarı yönlü trend devamı gerçekleşti ve hâlâ geçerli: kapanış 30 bardır uzun vadeli ortalamanın (57,17) üstünde, şu an 58,31; bu tür sinyal geçmişte 8 örneğin 2'sinde gerçekleşti (örnek az)."
+  },
+  "s29": {
+   "en": "KCHOL's downward reversal signal (RSI divergence) expired today and is no longer valid; the close is now 295.17 and no longer below 286.57. This kind of signal realized in 4 of 8 past cases (small sample).",
+   "tr": "KCHOL'da aşağı yönlü dönüş sinyali (RSI uyumsuzluğu) bugün süresi doldu ve artık geçerli değil; kapanış şu an 295,17 ve artık 286,57'nin altında değil. Bu tür sinyal geçmişte 8 örneğin 4'ünde gerçekleşti (örnek az)."
+  },
+  "s30": {
+   "en": "GARAN's upward reversal signal (RSI divergence) formed yesterday; the close is now 32.26 and no longer above the 33.26 signal-bar price, so the signal was invalidated. This kind of signal realized in 4 of 8 past cases (small sample).",
+   "tr": "GARAN'da yukarı dönüş sinyali (RSI uyumsuzluğu) dün oluştu; kapanış şu an 32,26 ve artık sinyal barındaki 33,26'nın üstünde değil, sinyal geçersiz oldu. Bu tür sinyal geçmişte 8 örneğin 4'ünde gerçekleşti (örnek az)."
+  },
+  "s31": {
+   "en": "FROTO's downward reversal signal (RSI divergence) realized, as the expected outcome came; the close is still below the price at the signal bar and the signal remains valid.",
+   "tr": "FROTO'daki aşağı yönlü dönüş sinyali (RSI uyumsuzluğu) gerçekleşti, beklenen sonuç geldi; kapanış şu an sinyal barındaki fiyatın altında ve sinyal hâlâ geçerli."
+  },
+  "s32": {
+   "en": "SISE's downward reversal signal (RSI divergence) has realized and still holds: the close has remained below the 177.59 signal-bar price for 30 bars and is now 174.04; this kind of signal realized in 68 of 140 past cases.",
+   "tr": "SISE'de aşağı dönüş sinyali (RSI uyumsuzluğu) gerçekleşti ve hâlâ geçerli: kapanış 30 bardır sinyal barındaki 177,59'un altında, şu an 174,04; bu tür sinyal geçmişte 140 örneğin 68'inde gerçekleşti."
+  },
+  "s33": {
+   "en": "THYAO's close is still above the range boundary that was broken; the upward breakout is newly formed and still valid.",
+   "tr": "THYAO'da kapanış aralık sınırının üstünde kalmaya devam ediyor; yukarı yönlü kırılım yeni oluştu ve hâlâ geçerli."
+  },
+  "s34": {
+   "en": "GARAN's upside breakout above 168.43 came yesterday; the close is now 163.38, no longer above that level, and the signal realized but is no longer valid. This kind of signal realized in 2 of 8 past cases (small sample).",
+   "tr": "GARAN'da kapanış dün 168,43'teki aralık sınırının üstüne çıkarak yukarı kırılım verdi; şu an 163,38 ve artık sınırın üstünde değil, sinyal gerçekleşti ama artık geçerli değil. Bu tür sinyal geçmişte 8 örneğin 2'sinde gerçekleşti (örnek az)."
+  },
+  "s35": {
+   "en": "GARAN had an upside breakout above 109.96 5 bars ago; it is now 106.66, no longer above that level, so the signal expired and is no longer valid. This kind of signal realized in 82 of 140 past cases.",
+   "tr": "GARAN'da kapanış 5 bar önce 111,23 ile 109,96'daki aralık sınırının üstüne çıkarak yukarı kırılım verdi; şu an 106,66 ve artık sınırın üstünde değil, sinyalin süresi doldu ve artık geçerli değil. Bu tür sinyal geçmişte 140 örneğin 82'sinde gerçekleşti."
+  },
+  "s36": {
+   "en": "EREGL broke down below its 46.19 range boundary 30 bars ago; it is now 47.58, no longer below it, and the downside breakout was invalidated, no longer valid. This kind of signal realized in 81 of 140 past cases.",
+   "tr": "EREGL'de kapanış 30 bar önce 46,19'daki aralık sınırının altına inerek aşağı kırılım oluşturdu; şu an 47,58 ve artık sınırın altında değil, sinyal geçersiz oldu ve artık geçerli değil. Bu tür sinyal geçmişte 140 örneğin 81'inde gerçekleşti."
+  },
+  "s37": {
+   "en": "SAHOL's Bollinger bandwidth fell below the squeeze threshold and a squeeze with an undecided direction began; today the expected outcome failed, so the signal was invalidated and is no longer valid.",
+   "tr": "SAHOL'da Bollinger bant genişliği sıkışma eşiğinin altına indi ve yön belirsiz bir sıkışma başladı; ancak bugün beklenen sonuç tutmadığı için sinyal geçersiz oldu ve artık geçerli değil."
+  },
+  "s38": {
+   "en": "GARAN's squeeze (Bollinger band narrowing), direction undecided, still holds: bandwidth is now 0.0588, below the 0.06 squeeze threshold, and the signal realized. This kind of signal realized in 2 of 8 past cases (small sample).",
+   "tr": "GARAN'da yönü belirsiz sıkışma (Bollinger bant daralması) hâlâ sürüyor: bant genişliği şu an 0,0588 ile 0,06 eşiğinin altında ve sinyal gerçekleşti. Bu tür sinyal geçmişte 8 örneğin 2'sinde gerçekleşti (örnek az)."
+  },
+  "s39": {
+   "en": "GARAN's squeeze, direction undecided, is still in place: Bollinger bandwidth has stayed below the 0.06 threshold for 5 bars and is now 0.0588; the signal realized. This kind of signal realized in 5 of 8 past cases (small sample).",
+   "tr": "GARAN'da yön belirsiz sıkışma sürüyor: Bollinger bant genişliği 5 bardır 0,06 eşiğinin altında ve şu an 0,0588; sinyal gerçekleşti, hâlâ geçerli. Bu tür sinyal geçmişte 8 örneğin 5'inde gerçekleşti (örnek az)."
+  },
+  "s40": {
+   "en": "THYAO's undecided-direction squeeze has been in place for 30 bars: Bollinger bandwidth is now 0.0588, still below the 0.06 threshold, though an opposite-direction signal weakened it. This kind of signal realized in 3 of 8 past cases (small sample).",
+   "tr": "THYAO'da yön belirsiz sıkışma 30 bardır sürüyor: Bollinger bant genişliği şu an 0,0588 ile 0,06'lık eşiğin hâlâ altında; ters yönde bir sinyal geldiği için sinyal zayıfladı. Bu tür sinyal geçmişte 8 örneğin 3'ünde gerçekleşti (örnek az)."
+  },
+  "s41": {
+   "en": "THYAO's RSI is still above the 70 threshold, now at 71.4, so a new overbought signal has formed and remains valid; this kind of signal realized in 2 of 8 past cases (small sample).",
+   "tr": "THYAO'da RSI 70 eşiğinin üstünde, 71,4 seviyesinde; aşırı alım sinyali yeni oluştu ve hâlâ geçerli. Bu tür sinyal geçmişte 8 örneğin 2'sinde gerçekleşti (örnek az)."
+  },
+  "s42": {
+   "en": "KCHOL's RSI is still above its threshold, so the overbought state remains in place; the upward extreme signal realized and is still valid.",
+   "tr": "KCHOL'de RSI eşiğinin üstünde kaldığı için aşırı alım durumu hâlâ sürüyor; yukarı yönlü aşırılık sinyali gerçekleşti ve hâlâ geçerli."
+  },
+  "s43": {
+   "en": "BIMAS's RSI rose above its threshold into overbought territory a week ago; it is no longer above that threshold, so the overbought state has ended and the signal is no longer valid.",
+   "tr": "BIMAS'ta RSI bir hafta önce eşiğinin üstüne çıkarak aşırı alıma girdi; artık eşiğin üstünde değil, aşırı alım sona erdi ve sinyal artık geçerli değil."
+  },
+  "s44": {
+   "en": "ASELS's RSI has been above 70 for 30 bars and is now 71.4; the upward overbought state still holds and the signal realized. This kind of signal realized in 62 of 140 past cases.",
+   "tr": "ASELS'te RSI 30 bardır 70'in üstünde ve şu an 71,4; yukarı yönlü aşırı alım hâlâ geçerli, sinyal gerçekleşti. Bu tür sinyal geçmişte 140 örneğin 62'sinde gerçekleşti."
+  },
+  "s45": {
+   "en": "GARAN's upward institutional money flow still holds: net flow is now 325,380, above its recent average of 319,000, but an opposite-direction signal appeared today and weakened it. This kind of signal realized in 63 of 140 past cases.",
+   "tr": "GARAN'da yukarı yönlü kurumsal para akışı hâlâ sürüyor: net akış şu an 325.380 ile yakın dönem ortalaması 319.000'in üstünde; ancak bugün ters yönde bir sinyal geldi ve sinyal zayıfladı. Bu tür sinyal geçmişte 140 örneğin 63'ünde gerçekleşti."
+  },
+  "s46": {
+   "en": "Institutional net flow in PGSUS fell below its recent average yesterday; the downward institutional money flow signal has expired and is no longer valid.",
+   "tr": "PGSUS'ta kurumsal net akış dün yakın dönem ortalamasının altına indi; aşağı yönlü kurumsal para akışı sinyalinin süresi doldu ve artık geçerli değil."
+  },
+  "s47": {
+   "en": "Institutional net flow in BIMAS fell below its recent average a week ago, forming a new downward institutional money flow signal, but the signal is no longer valid and the flow is no longer below that average.",
+   "tr": "BIMAS'ta kurumsal net satış bir hafta önce akışın yakın dönem ortalamasının altına indi; aşağı yönlü kurumsal para akışı sinyali yeni oluşmuştu, ancak artık geçerli değil ve net akış artık ortalamanın altında değil."
+  },
+  "s48": {
+   "en": "EREGL's downward institutional money flow is still in place: net flow remains below its recent average (452,000), now 442,960; a volume surge confirmed it. This signal realized in 5 of 8 past cases (small sample).",
+   "tr": "EREGL'de aşağı yönlü kurumsal para akışı sürüyor: net akış 30 bardır yakın dönem ortalamasının (452.000) altında, şu an 442.960; hacim artışı sinyali teyit etti, sinyal hâlâ geçerli. Bu tür sinyal geçmişte 8 örneğin 5'inde gerçekleşti (örnek az)."
+  },
+  "s49": {
+   "en": "If FROTO's close stayed above its long-term moving average within a few bars, the upward trend continuation would hold; but today the expected outcome failed, the signal was invalidated and is no longer valid.",
+   "tr": "FROTO'da kapanış birkaç bar içinde uzun vadeli ortalamanın üstünde kalırsa yukarı yönlü trend devamı gerçekleşecekti; ancak bugün beklenen sonuç tutmadı, sinyal geçersiz oldu ve artık geçerli değil."
+  },
+  "s50": {
+   "en": "If EREGL's close stays above its long-term moving average (255.56) within 3 bars, the upside trend continuation holds; it weakened as an opposite signal appeared but is still valid. This signal realized in 4 of 8 past cases (small sample).",
+   "tr": "EREGL'de kapanış 3 bar içinde uzun vadeli ortalamanın (255,56) üstünde kalırsa yukarı yönlü trend devamı sürer; ters yönde bir sinyal geldiği için sinyal zayıfladı, ancak hâlâ geçerli. Bu tür sinyal geçmişte 8 örneğin 4'ünde gerçekleşti (örnek az)."
+  },
+  "s51": {
+   "en": "If KCHOL's close stays below its long-term moving average (142.99) within 3 bars, the downward trend continuation is complete; the signal is newly formed and still holds. This kind of signal realized in 60 of 140 past cases.",
+   "tr": "KCHOL'da kapanış 3 bar içinde uzun vadeli ortalamanın (142,99) altında kalırsa aşağı yönlü trend devamı tamamlanmış olur; sinyal yeni oluştu ve hâlâ geçerli. Bu tür sinyal geçmişte 140 örneğin 60'ında gerçekleşti."
+  },
+  "s52": {
+   "en": "SAHOL's upward trend continuation was expected if the close stayed above its long-term moving average within a few bars; the expected outcome failed, the signal was invalidated and is no longer valid.",
+   "tr": "SAHOL'da kapanış birkaç bar içinde uzun vadeli ortalamanın üstünde kalırsa yukarı yönlü trend devamı gerçekleşecekti; beklenen sonuç tutmadı, sinyal geçersiz oldu ve artık geçerli değil."
+  },
+  "s53": {
+   "en": "SAHOL's downward reversal signal was to be confirmed if the close fell below 161.73 within 3 bars; the outcome failed, it was invalidated and is no longer valid. This kind of signal realized in 98 of 140 past cases.",
+   "tr": "SAHOL'daki aşağı yönlü dönüş sinyali (RSI uyumsuzluğu), kapanış 3 bar içinde 161,73'ün altına inerse teyit olacaktı; beklenen sonuç tutmadı, sinyal bugün geçersiz oldu ve artık geçerli değil. Bu tür sinyal geçmişte 140 örneğin 98'inde gerçekleşti."
+  },
+  "s54": {
+   "en": "If KCHOL's close stays below 214.64 within 3 bars, the downward reversal (RSI divergence) completes; a volume surge confirmed it and it still holds. This kind of signal realized in 3 of 8 past cases (small sample).",
+   "tr": "KCHOL'da kapanış 3 bar içinde sinyal barındaki 214,64 fiyatının altında kalırsa aşağı dönüş sinyali (RSI uyumsuzluğu) tamamlanmış olur; hacim artışı sinyali teyit etti ve koşul hâlâ geçerli. Bu tür sinyal geçmişte 8 örneğin 3'ünde gerçekleşti (örnek az)."
+  },
+  "s55": {
+   "en": "If SAHOL's close stays below 277.15 within 3 bars, the downward reversal signal (RSI divergence) is complete; a volume surge confirmed the signal. This kind of signal realized in 4 of 8 past cases (small sample).",
+   "tr": "SAHOL'da kapanış 3 bar içinde 277,15'in altında kalırsa aşağı yönlü dönüş sinyali (RSI uyumsuzluğu) gerçekleşmiş olur; hacim artışı sinyali teyit etti. Bu tür sinyal geçmişte 8 örneğin 4'ünde gerçekleşti (örnek az)."
+  },
+  "s56": {
+   "en": "TUPRS's upward reversal signal was to be confirmed if the close rose above 228.51 within 3 bars; its horizon ran out and it is no longer valid. This kind of signal realized in 49 of 140 past cases.",
+   "tr": "TUPRS'taki yukarı dönüş sinyali, kapanış 3 bar içinde 228,51'in üstüne çıkarsa teyit olacaktı; ufuk süresi doldu ve sinyal artık geçerli değil. Bu tür sinyal geçmişte 140 örneğin 49'unda gerçekleşti."
+  },
+  "s57": {
+   "en": "If TUPRS's close stays above 199 within 3 bars, the upside breakout is complete; a volume surge confirmed the signal today and it still holds. This kind of signal realized in 6 of 8 past cases (small sample).",
+   "tr": "TUPRS'ta kapanış 3 bar içinde 199'un üstünde kalırsa yukarı kırılım tamamlanmış olur; sinyal bugün hacim artışıyla teyit edildi ve hâlâ geçerli. Bu tür sinyal geçmişte 8 örneğin 6'sında gerçekleşti (örnek az)."
+  },
+  "s58": {
+   "en": "EREGL's upside breakout was to be confirmed if the close stayed above the 245.84 boundary within 3 bars; the expected outcome came and the signal realized. This kind of signal realized in 6 of 8 past cases (small sample).",
+   "tr": "EREGL'de kapanış 3 bar içinde 245,84'teki aralık sınırının üstünde kalırsa yukarı yönlü kırılım teyit olacaktı; beklenen sonuç geldi ve sinyal gerçekleşti. Bu tür sinyal geçmişte 8 örneğin 6'sında gerçekleşti (örnek az)."
+  },
+  "s59": {
+   "en": "If TUPRS's close stays below the broken range boundary within a few bars, the downward breakout holds; an opposite-direction signal appeared and the signal weakened, but it is still valid.",
+   "tr": "TUPRS'ta kapanış birkaç bar içinde kırılan aralık sınırının altında kalırsa aşağı yönlü kırılım geçerliliğini korur; ters yönde bir sinyal geldiği için sinyal zayıfladı, ancak hâlâ geçerli."
+  },
+  "s60": {
+   "en": "If GARAN's close stays below the 265.33 range boundary within 3 bars, the downside breakout is complete; a volume surge confirmed the signal. This kind of signal realized in 6 of 8 past cases (small sample).",
+   "tr": "GARAN'da kapanış 3 bar içinde 265,33'teki aralık sınırının altında kalırsa aşağı kırılım tamamlanmış olur; sinyal hacim artışıyla teyit edildi. Bu tür sinyal geçmişte 8 örneğin 6'sında gerçekleşti (örnek az)."
+  },
+  "s61": {
+   "en": "If SAHOL's Bollinger bandwidth stays below the squeeze threshold within a few bars, a squeeze with an undecided direction takes shape; today a volume surge confirmed the signal.",
+   "tr": "SAHOL'da Bollinger bant genişliği birkaç bar içinde sıkışma eşiğinin altında kalırsa yön belirsiz bir sıkışma oluşmuş olur; sinyal bugün hacim artışı sinyali teyit etti ve teyit edildi aşamasında."
+  },
+  "s62": {
+   "en": "If THYAO's Bollinger bandwidth stays below the 0.06 squeeze threshold within 3 bars, a squeeze with undecided direction forms; an opposite-direction signal appeared, so the signal weakened. This kind of signal realized in 45 of 140 past cases.",
+   "tr": "THYAO'da Bollinger bant genişliği 3 bar içinde sıkışma eşiği olan 0,06'nın altında kalırsa yön belirsiz bir sıkışma oluşur; ters yönde bir sinyal geldiği için sinyal zayıfladı. Bu tür sinyal geçmişte 140 örneğin 45'inde gerçekleşti."
+  },
+  "s63": {
+   "en": "If ASELS's Bollinger bandwidth stayed below the 0.06 squeeze threshold within 3 bars, the squeeze would be confirmed, direction undecided; it expired and is no longer valid. This kind of signal realized in 3 of 8 past cases (small sample).",
+   "tr": "ASELS'te Bollinger bant genişliği 3 bar içinde sıkışma eşiğinin (0,06) altında kalırsa yön belirsiz bir sıkışma oluşacaktı; ufuk süresi doldu, sinyal artık geçerli değil. Bu tür sinyal geçmişte 8 örneğin 3'ünde gerçekleşti (örnek az)."
+  },
+  "s64": {
+   "en": "If AKBNK's Bollinger bandwidth stays below the 0.06 squeeze threshold within 3 bars, the squeeze is confirmed, direction undecided; the signal is newly formed and still holds. This kind of signal realized in 52 of 140 past cases.",
+   "tr": "AKBNK'de Bollinger bant genişliği 3 bar içinde 0,06'lık sıkışma eşiğinin altında kalırsa sıkışma tamamlanmış olur, yön belirsiz; sinyal yeni oluştu ve hâlâ geçerli. Bu tür sinyal geçmişte 140 örneğin 52'sinde gerçekleşti."
+  },
+  "s65": {
+   "en": "If THYAO's RSI stayed below 30 within 3 bars, the oversold signal was to be confirmed; the expected outcome failed, so the signal was invalidated today and is no longer valid. This kind of signal realized in 93 of 140 past cases.",
+   "tr": "THYAO'da RSI 3 bar içinde 30'un altında kalırsa aşırı satım sinyali teyit olacaktı; beklenen sonuç tutmadı, sinyal bugün geçersiz oldu ve artık geçerli değil. Bu tür sinyal geçmişte 140 örneğin 93'ünde gerçekleşti."
+  },
+  "s66": {
+   "en": "THYAO's upward overbought signal was to be confirmed if RSI rose above 70 within 3 bars; the expected outcome came and the signal realized. This kind of signal realized in 86 of 140 past cases.",
+   "tr": "THYAO'daki yukarı yönlü aşırı alım sinyali, RSI 3 bar içinde 70'in üstüne çıkarsa teyit olacaktı; beklenen sonuç geldi ve sinyal gerçekleşti. Bu tür sinyal geçmişte 140 örneğin 86'sında gerçekleşti."
+  },
+  "s67": {
+   "en": "EREGL's oversold signal was to form if RSI fell below 30 within 3 bars; the expected outcome came and the signal realized. This kind of signal realized in 42 of 140 past cases.",
+   "tr": "EREGL'de RSI 3 bar içinde 30'un altına inerse aşırı satım sinyali oluşacaktı; beklenen sonuç geldi ve sinyal gerçekleşti. Bu tür sinyal geçmişte 140 örneğin 42'sinde gerçekleşti."
+  },
+  "s68": {
+   "en": "If PGSUS's RSI falls below its RSI threshold within a few bars, the downward oversold condition would be in place; a volume surge confirmed the signal.",
+   "tr": "PGSUS'ta RSI birkaç bar içinde RSI eşiğinin altına inerse aşağı yönlü aşırı satım oluşmuş olur; hacim artışı sinyali teyit etti."
+  },
+  "s69": {
+   "en": "If FROTO's institutional net flow stays above its 484,000 average within 3 bars, the upward institutional money flow signal would be confirmed; it expired today, no longer valid. This kind of signal realized in 70 of 140 past cases.",
+   "tr": "FROTO'da kurumsal net akış 3 bar içinde ortalamanın (484.000) üstünde kalırsa yukarı yönlü kurumsal para akışı sinyali teyit olacaktı; ufuk süresi bugün doldu, sinyal artık geçerli değil. Bu tür sinyal geçmişte 140 örneğin 70'inde gerçekleşti."
+  },
+  "s70": {
+   "en": "If FROTO's institutional net flow stays below its 499,000 recent average within 3 bars, the downward institutional money flow signal still holds; a volume surge confirmed it. This kind of signal realized in 85 of 140 past cases.",
+   "tr": "FROTO'da kurumsal net akış 3 bar içinde yakın dönem ortalamasının (499.000) altında kalırsa aşağı yönlü kurumsal para akışı sinyali hâlâ geçerli; hacim artışıyla teyit edildi. Bu tür sinyal geçmişte 140 örneğin 85'inde gerçekleşti."
+  },
+  "s71": {
+   "en": "If SISE's institutional net flow fell below its recent average (334,000) within 3 bars, the downward institutional money flow signal expired and is no longer valid. This kind of signal realized in 2 of 8 past cases (small sample).",
+   "tr": "SISE'de kurumsal net akış 3 bar içinde akışın yakın dönem ortalamasının (334.000) altına inerse aşağı yönlü kurumsal para akışı sinyali gerçekleşecekti; sinyalin süresi doldu ve artık geçerli değil. Bu tür sinyal geçmişte 8 örneğin 2'sinde gerçekleşti (örnek az)."
+  },
+  "s72": {
+   "en": "If BIMAS's institutional net flow fell below its recent average within 3 bars, the downward institutional money flow signal would be confirmed; it expired and is no longer valid. It realized in 6 of 8 past cases (small sample).",
+   "tr": "BIMAS'ta kurumsal net akış 3 bar içinde yakın dönem ortalamasının (896.000) altına inerse aşağı yönlü kurumsal para akışı sinyali teyit olacaktı; ufuk süresi doldu ve sinyal artık geçerli değil. Bu tür sinyal geçmişte 8 örneğin 6'sında gerçekleşti (örnek az)."
+  }
+ }
+}

@@ -367,7 +367,7 @@ büyüklüğünü verir. Ölçüm: `rounds/R2/REPORT.md` (ölçüt 10).
 - **Nokta sorgusu (`hit`):** pikselin paneli, bar yuvası, zamanı, ölçekteki değeri ve
   oradaki en üstteki öğe (katman kimliği, işaret, veri, bar, zaman, değerler, kökenler).
   Boş alanda `item` yoktur ("öğe yok"). Öğe kutuları: mum gövde+fitil (en az 3 px geniş),
-  çizgi noktası yuva genişliğinde ±4 px, kural tam genişlik ±3 px, bant/alan yuva sütunu,
+  çizgi noktası yuva genişliğinde ±4 px (çok çıktılı çizgide her çıktı için ayrı öğe), kural tam genişlik ±3 px, bant/alan yuva sütunu,
   nokta çapı + 2 px. Birden çok öğe varsa boyama sırasında en sonuncusu.
 - **Gidiş-dönüş:** her öğe için veri → piksel (sahne) → nokta sorgusu → aynı bar ve aynı
   değerler (özellik testi).

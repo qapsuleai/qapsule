@@ -649,7 +649,7 @@ Her hata, ajanın yardım almadan düzeltebileceği kadar bilgi taşır:
 | `limit` | Boyut sınırı | `expected` (sınır) |
 | `unsupported` | Bu otoritede desteklenmiyor | `hint` |
 | `no_origin` | (R2) Katmandaki sayısal sabitin kökeni yok (olgu, adlandırılmış eşik, seri değeri) | `path` (sabitin yeri), `candidates`, `hint` |
-| `ambiguous` | (R2) Anlamla başvuru birden çok öğeye uyuyor; otorite rastgele seçmez | `path`, `candidates` (en iyisi önce) |
+| `ambiguous` | (R2) Anlamla başvuru birden çok öğeye uyuyor; otorite rastgele seçmez | `path`, `candidates` (türün sırasıyla, §17) |
 
 `candidates` (R2): `{id, about}` listesi — kullanılacak kimlik (ya da köken için JSON
 metni) ve ne olduğu. `ack.resolved` (R2): komuttaki anlamla başvuruların çözüldüğü
@@ -667,6 +667,9 @@ kimlikleri, alan adları… Bir komutta hata varsa **hiçbir** işlem uygulanmaz
 - Dışarıdan gelen her mesaj güvenilmezdir. Sınırlar `welcome.limits`'te bildirilir ve
   ayrıştırmadan **önce** (bayt sayısı) ve sonra (işlem, bar, dizge uzunluğu) denetlenir.
 - JSON iç içe derinliği serde_json'ın sınırıyla (128) sınırlıdır.
+- (R2) Satır içi **nokta serileri** de kabul edilir (`data.kind = "points"`): boş olmayan,
+  `t` kesin artan, `v` sonlu ya da `null`; nokta sayısı `limits.max_bars` ile sınırlı
+  (ör. tahmin yelpazesi bantları, `docs/GRAMMAR.md` §3).
 - v0 otoritesi seri kaynağı olarak yalnızca `inline` ve `study` kabul eder; `file`,
   `matriks`, `nats` → `unsupported`. Dosya bağları otoritenin yapılandırmasıyla, taban
   klasöre hapsedilerek açılır (R1 bulgusu; `qp_source::open_binding`), protokolden değil.

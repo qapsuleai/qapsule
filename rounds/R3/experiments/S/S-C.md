@@ -120,7 +120,15 @@ dokümanlarında motor yok, dil TR → saklanan başlık; c1–c5 metinleri ve a
 
 `cargo fmt --all`, `cargo clippy --workspace --all-targets -- -D warnings`,
 `cargo test --workspace`, `QP_VERIFY_BROWSER=0 scripts/verify.sh` (`CARGO_INCREMENTAL=0`):
-sonuç aşağıda (VERIFY_SUMMARY).
+**verify: OK** (76 s, ikinci koşu; ilk koşu yalnız `clippy`'de iki döngü indeksi uyarısıyla
+düştü, düzeltildi). Bütün adımlar PASS; `browser` SKIP. `conform` 43 döküm × inproc, serve,
+mcp; `views` 12 görünüm ×2 bayt eşit; `wasm` ham 1.943.806 / gzip 616.022 B (S-B ile aynı:
+varsayılan paket oturumu içermez); `digest` `7b1e99d40889f83c`. `git diff r3/int -- fixtures/`
+yalnız 6 yeni dosya (38–43); var olan dökümler, altınlar ve explain dosyaları değişmedi.
+
+Bağımsız denetim bu görevde yapılmadı (CLAUDE.md: denetim ayrı bir denetçi alt ajanla;
+koordinatörün güvenlik incelemesi iki ORTA bulgu verdi, ikisi de düzeltildi: kitle
+tercihlerinin başka okuyuculara gitmesi ve öneri yolu).
 
 ## 7. Açık konular ve öneriler
 

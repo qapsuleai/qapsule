@@ -12,6 +12,7 @@ publish = false
 qp-schema = { path = "../../../../crates/qp-schema" }
 qp-session = { path = "../../../../crates/qp-session" }
 qp-compute = { path = "../../../../crates/qp-compute" }
+qp-grammar = { path = "../../../../crates/qp-grammar" }
 serde = "1.0.229"
 serde_json = { version = "1.0.154", features = ["float_roundtrip"] }
 serde_path_to_error = "0.1.20"

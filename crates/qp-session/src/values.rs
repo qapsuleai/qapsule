@@ -27,21 +27,412 @@ impl Computed {
     }
 }
 
-/// Cache of study outputs by series id. Cleared whenever series or bars change.
-#[derive(Debug, Default)]
+/// How the bars of one bar series changed (the incremental live path, §18.8).
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub(crate) enum Delta {
+    /// Bars from index `from` on are new (appended at the end).
+    Appended {
+        /// Index of the first new bar.
+        from: usize,
+    },
+    /// The bar at `index` was revised in place: the last bar (live revision) or an
+    /// earlier one (correction: every value from it on may change).
+    Revised {
+        /// Index of the revised bar.
+        index: usize,
+    },
+    /// Anything else (truncation, several writes in one entry, a binding state change):
+    /// values from bar `from` on are recomputed from scratch.
+    Rebuild {
+        /// First bar index that may differ.
+        from: usize,
+    },
+}
+
+impl Delta {
+    /// First bar index whose values may differ.
+    pub(crate) fn first_bar(self) -> usize {
+        match self {
+            Self::Appended { from } | Self::Rebuild { from } => from,
+            Self::Revised { index } => index,
+        }
+    }
+}
+
+/// Streaming state of a study series (`qp-compute`): the study after every bar of its
+/// input, the last bar revisable.
+struct Live {
+    study: Box<dyn qp_compute::Study>,
+    /// For each output column in `Computed::outputs` order, its slot in `out`.
+    perm: Vec<usize>,
+    out: Vec<Option<f64>>,
+}
+
+/// One cached series.
+struct Slot {
+    id: String,
+    val: Rc<Computed>,
+    /// Study series only.
+    live: Option<Live>,
+    /// The cache's `tick` when a delta last changed this slot.
+    touched: u64,
+}
+
+/// Values of series by id: bar columns and study outputs, kept current incrementally.
+///
+/// - A study series' entry holds the study's streaming state; a new bar is `push`ed, a
+///   live revision is `update_last` (both O(1)); a correction or a truncation recomputes
+///   that study from scratch (the compute API cannot rewind; cost O(bars)).
+/// - Once a bar series ticks, every study series on it is computed and then kept
+///   current on every tick ([`Cache::apply_delta`]); series on other bar series are not
+///   touched.
+/// - Entries are dropped only for the series a structure change touches (`put_series`,
+///   `delete`) and the studies on them ([`Cache::forget`]).
+///
+/// Bit-identical to computing from scratch: streaming, revised and batch runs of a study
+/// are bit-identical by construction (`qp-compute`).
+#[derive(Default)]
 pub(crate) struct Cache {
-    map: BTreeMap<String, Rc<Computed>>,
+    slots: Vec<Option<Slot>>,
+    ids: BTreeMap<String, usize>,
+    /// Bar series id -> slots of the study series computed from it (kept current).
+    deps: BTreeMap<String, Vec<usize>>,
+    /// Bumped when a slot is dropped (slot numbers held elsewhere become invalid).
+    gen: u64,
+    /// Bumped once per live change ([`Cache::begin_tick`]).
+    tick: u64,
+}
+
+impl std::fmt::Debug for Cache {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("Cache")
+            .field("series", &self.ids.keys().collect::<Vec<_>>())
+            .field("gen", &self.gen)
+            .field("tick", &self.tick)
+            .finish_non_exhaustive()
+    }
 }
 
 impl Cache {
     pub(crate) fn clear(&mut self) {
-        self.map.clear();
+        self.slots.clear();
+        self.ids.clear();
+        self.deps.clear();
+        self.gen += 1;
     }
 
     /// Cached values of a series, if computed.
     pub(crate) fn get(&self, id: &str) -> Option<&Rc<Computed>> {
-        self.map.get(id)
+        self.slot_of(id).and_then(|i| self.val(i))
     }
+
+    /// Slot number of a cached series.
+    pub(crate) fn slot_of(&self, id: &str) -> Option<usize> {
+        self.ids.get(id).copied()
+    }
+
+    /// Values in slot `i`.
+    pub(crate) fn val(&self, i: usize) -> Option<&Rc<Computed>> {
+        self.slots.get(i)?.as_ref().map(|s| &s.val)
+    }
+
+    /// True if slot `i` changed in the current tick.
+    pub(crate) fn touched_now(&self, i: usize) -> bool {
+        self.slots
+            .get(i)
+            .and_then(Option::as_ref)
+            .is_some_and(|s| s.touched == self.tick)
+    }
+
+    /// Generation: slot numbers taken in an earlier generation are invalid.
+    pub(crate) fn gen(&self) -> u64 {
+        self.gen
+    }
+
+    fn insert(&mut self, id: &str, val: Computed, live: Option<Live>) -> Rc<Computed> {
+        let rc = Rc::new(val);
+        let slot = Slot {
+            id: id.to_owned(),
+            val: Rc::clone(&rc),
+            live,
+            touched: self.tick,
+        };
+        let i = self.slots.len();
+        self.slots.push(Some(slot));
+        self.ids.insert(id.to_owned(), i);
+        rc
+    }
+
+    fn drop_slot(&mut self, i: usize) {
+        if let Some(s) = self.slots.get_mut(i).and_then(Option::take) {
+            self.ids.remove(&s.id);
+            self.gen += 1;
+        }
+    }
+
+    fn drop_id(&mut self, id: &str) {
+        if let Some(i) = self.slot_of(id) {
+            self.drop_slot(i);
+        }
+    }
+
+    /// Drops the entries a structure change invalidates: the series `ids` and every
+    /// cached study whose input is one of them or that no longer exists in `doc` as it
+    /// was computed.
+    pub(crate) fn forget(&mut self, doc: &Document, ids: &[&str]) {
+        for id in ids {
+            self.drop_id(id);
+        }
+        let stale: Vec<usize> = self
+            .slots
+            .iter()
+            .enumerate()
+            .filter_map(|(i, s)| {
+                let s = s.as_ref()?;
+                let keep = match find_series(doc, &s.id).map(|x| &x.source) {
+                    None => false,
+                    Some(SeriesSource::Study { inputs, .. }) => inputs
+                        .first()
+                        .is_some_and(|inp| !ids.contains(&inp.as_str())),
+                    Some(_) => true,
+                };
+                (!keep).then_some(i)
+            })
+            .collect();
+        for i in stale {
+            self.drop_slot(i);
+        }
+        self.deps.clear();
+    }
+
+    /// Starts one live change: slots changed from now on count as touched by it.
+    pub(crate) fn begin_tick(&mut self) {
+        self.tick += 1;
+    }
+
+    /// Brings every value resting on bar series `bar` up to date after its bars changed
+    /// by `delta` (`doc`: the reading document after the change). Its own columns (if
+    /// cached) and every study series whose input it is: studies with state are advanced
+    /// (`push` / `update_last`) or, for a correction or a rebuild, recomputed; studies
+    /// not cached yet are computed now, so that every study on a ticking series is kept
+    /// current. Series on other bar series are not touched.
+    pub(crate) fn apply_delta(&mut self, doc: &Document, bar: &str, delta: Delta) {
+        let bars = find_series(doc, bar).and_then(Series::bars);
+        if let Delta::Rebuild { .. } = delta {
+            // Everything on `bar` is recomputed (studies that could not be computed before,
+            // e.g. while a binding was stale, may be computable now).
+            self.drop_id(bar);
+            self.deps.remove(bar);
+            for i in self.studies_on(doc, bar) {
+                self.drop_slot(i);
+            }
+            self.ensure_deps(doc, bar);
+            return;
+        }
+        // The bar series' own columns.
+        if let Some(i) = self.slot_of(bar) {
+            let ok = bars.is_some_and(|b| update_columns(self.slot_mut(i), b, delta));
+            if ok {
+                self.touch(i);
+            } else {
+                self.drop_slot(i);
+            }
+        }
+        // Study series on it, cached already: advance or drop.
+        if let Some(list) = self.deps.get(bar).cloned() {
+            for i in list {
+                let ok = bars.is_some_and(|b| update_study(self.slot_mut(i), b, delta));
+                if ok {
+                    self.touch(i);
+                } else {
+                    self.drop_slot(i);
+                    self.deps.remove(bar);
+                }
+            }
+        } else {
+            // First tick on `bar` since a structure change: advance the cached studies on
+            // it, compute the others below.
+            for i in self.studies_on(doc, bar) {
+                let ok = bars.is_some_and(|b| update_study(self.slot_mut(i), b, delta));
+                if ok {
+                    self.touch(i);
+                } else {
+                    self.drop_slot(i);
+                }
+            }
+        }
+        if !self.deps.contains_key(bar) {
+            self.ensure_deps(doc, bar);
+        }
+    }
+
+    /// Computes (if needed) every study series of `doc` whose input is `bar` and records
+    /// their slots.
+    fn ensure_deps(&mut self, doc: &Document, bar: &str) {
+        let mut list = Vec::new();
+        for s in &doc.series {
+            let SeriesSource::Study { inputs, .. } = &s.source else {
+                continue;
+            };
+            if inputs.first().map(String::as_str) != Some(bar) || s.data.is_some() {
+                continue;
+            }
+            if values(doc, self, &s.id).is_ok() {
+                if let Some(i) = self.slot_of(&s.id) {
+                    list.push(i);
+                }
+            }
+        }
+        self.deps.insert(bar.to_owned(), list);
+    }
+
+    /// Slots of the cached study series whose input is `bar`.
+    fn studies_on(&self, doc: &Document, bar: &str) -> Vec<usize> {
+        self.slots
+            .iter()
+            .enumerate()
+            .filter_map(|(i, s)| {
+                let s = s.as_ref()?;
+                s.live.as_ref()?;
+                study_input(doc, &s.id).filter(|inp| *inp == bar).map(|_| i)
+            })
+            .collect()
+    }
+
+    fn slot_mut(&mut self, i: usize) -> &mut Slot {
+        self.slots[i].as_mut().expect("live slot")
+    }
+
+    fn touch(&mut self, i: usize) {
+        let t = self.tick;
+        self.slot_mut(i).touched = t;
+    }
+}
+
+/// The input bar series of study series `id`.
+fn study_input<'a>(doc: &'a Document, id: &str) -> Option<&'a str> {
+    match &find_series(doc, id)?.source {
+        SeriesSource::Study { inputs, .. } => inputs.first().map(String::as_str),
+        _ => None,
+    }
+}
+
+/// Bar columns in `Computed::outputs` order (`c h l o v`).
+fn bar_cols(b: &Bar) -> [f64; 5] {
+    [b.c, b.h, b.l, b.o, b.v]
+}
+
+/// Updates a bar series' columns; false if they cannot be updated in place.
+fn update_columns(slot: &mut Slot, bars: &[Bar], delta: Delta) -> bool {
+    let n = bars.len();
+    let c = Rc::make_mut(&mut slot.val);
+    match delta {
+        Delta::Appended { from } if c.t.len() == from && from <= n => {
+            for b in &bars[from..] {
+                c.t.push(b.t);
+                for (col, v) in c.outputs.values_mut().zip(bar_cols(b)) {
+                    col.push(Some(v));
+                }
+            }
+            true
+        }
+        Delta::Revised { index } if c.t.len() == n && index < n => {
+            let b = &bars[index];
+            c.t[index] = b.t;
+            for (col, v) in c.outputs.values_mut().zip(bar_cols(b)) {
+                col[index] = Some(v);
+            }
+            true
+        }
+        _ => false,
+    }
+}
+
+/// Advances a study series; false if it must be recomputed (correction, rebuild, out of
+/// step).
+fn update_study(slot: &mut Slot, bars: &[Bar], delta: Delta) -> bool {
+    let n = bars.len();
+    let Some(live) = slot.live.as_mut() else {
+        return false;
+    };
+    let c = Rc::make_mut(&mut slot.val);
+    match delta {
+        Delta::Appended { from } if c.t.len() == from && from <= n => {
+            for b in &bars[from..] {
+                live.study.push(&[b.c], &mut live.out);
+                c.t.push(b.t);
+                for (col, &k) in c.outputs.values_mut().zip(&live.perm) {
+                    col.push(live.out[k]);
+                }
+            }
+            true
+        }
+        Delta::Revised { index } if c.t.len() == n && index + 1 == n => {
+            let b = &bars[index];
+            live.study.update_last(&[b.c], &mut live.out);
+            for (col, &k) in c.outputs.values_mut().zip(&live.perm) {
+                col[index] = live.out[k];
+            }
+            true
+        }
+        _ => false,
+    }
+}
+
+/// Capacity for a column of `n` bars: room for live growth, so that new bars do not
+/// reallocate every column of every study at once (a multi-millisecond tick at 500
+/// studies) until the series has grown by a quarter.
+fn room(n: usize) -> usize {
+    n + n / 4 + 64
+}
+
+fn times(bars: &[Bar]) -> Vec<i64> {
+    let mut t = Vec::with_capacity(room(bars.len()));
+    t.extend(bars.iter().map(|b| b.t));
+    t
+}
+
+/// Output name -> one value per bar.
+type Outputs = BTreeMap<String, Vec<Option<f64>>>;
+
+/// Runs a study over bars from scratch: its values and its streaming state (bit-identical
+/// to `qp_compute::compute_bars`: same study, same pushes).
+fn run_study(
+    study: &str,
+    params: &BTreeMap<String, f64>,
+    bars: &[Bar],
+) -> Result<(Outputs, Live), String> {
+    let mut st =
+        qp_compute::create(study, params, qp_compute::Field::Close).map_err(|e| e.to_string())?;
+    let names = st.outputs();
+    let mut cols: Vec<Vec<Option<f64>>> = names
+        .iter()
+        .map(|_| Vec::with_capacity(room(bars.len())))
+        .collect();
+    let mut out = vec![None; names.len()];
+    for b in bars {
+        st.push(&[b.c], &mut out);
+        for (col, v) in cols.iter_mut().zip(&out) {
+            col.push(*v);
+        }
+    }
+    let outputs: BTreeMap<String, Vec<Option<f64>>> = names
+        .iter()
+        .zip(cols)
+        .map(|(n, c)| ((*n).to_owned(), c))
+        .collect();
+    let perm = outputs
+        .keys()
+        .map(|k| names.iter().position(|n| n == k).unwrap_or(0))
+        .collect();
+    Ok((
+        outputs,
+        Live {
+            study: st,
+            perm,
+            out,
+        },
+    ))
 }
 
 pub(crate) fn find_series<'a>(doc: &'a Document, id: &str) -> Option<&'a Series> {
@@ -90,51 +481,61 @@ pub(crate) fn study_outputs(study: &str) -> Vec<String> {
 
 /// Values of a series (bar columns `o h l c v`, or study outputs).
 pub(crate) fn values(doc: &Document, cache: &mut Cache, id: &str) -> Result<Rc<Computed>, String> {
-    if let Some(c) = cache.map.get(id) {
+    if let Some(c) = cache.get(id) {
         return Ok(Rc::clone(c));
     }
     let s = find_series(doc, id).ok_or_else(|| format!("no series `{id}`"))?;
-    let computed = if let Some(bars) = s.bars() {
-        let col = |f: fn(&Bar) -> f64| bars.iter().map(|b| Some(f(b))).collect::<Vec<_>>();
+    if let Some(bars) = s.bars() {
+        let col = |f: fn(&Bar) -> f64| {
+            let mut v = Vec::with_capacity(room(bars.len()));
+            v.extend(bars.iter().map(|b| Some(f(b))));
+            v
+        };
         let mut outputs = BTreeMap::new();
         outputs.insert("o".to_owned(), col(|b| b.o));
         outputs.insert("h".to_owned(), col(|b| b.h));
         outputs.insert("l".to_owned(), col(|b| b.l));
         outputs.insert("c".to_owned(), col(|b| b.c));
         outputs.insert("v".to_owned(), col(|b| b.v));
-        Computed {
-            t: bars.iter().map(|b| b.t).collect(),
+        let computed = Computed {
+            t: times(bars),
             outputs,
             main: "c".to_owned(),
-        }
-    } else {
-        match &s.source {
-            SeriesSource::Study {
-                study,
-                inputs,
-                params,
-                output,
-            } => {
-                let input = inputs
-                    .first()
-                    .ok_or_else(|| format!("study series `{id}` has no input"))?;
-                let bars = find_series(doc, input)
-                    .and_then(Series::bars)
-                    .ok_or_else(|| format!("input `{input}` of `{id}` is not a bar series"))?;
-                let out = qp_compute::compute_bars(study, params, qp_compute::Field::Close, bars)
-                    .map_err(|e| e.to_string())?;
-                Computed {
-                    t: out.t,
-                    outputs: out.outputs,
-                    main: main_output(study, output.as_ref()),
+        };
+        return Ok(cache.insert(id, computed, None));
+    }
+    match &s.source {
+        SeriesSource::Study {
+            study,
+            inputs,
+            params,
+            output,
+        } => {
+            let input = inputs
+                .first()
+                .ok_or_else(|| format!("study series `{id}` has no input"))?;
+            let bars = find_series(doc, input)
+                .and_then(Series::bars)
+                .ok_or_else(|| format!("input `{input}` of `{id}` is not a bar series"))?;
+            let (outputs, live) = run_study(study, params, bars)?;
+            let computed = Computed {
+                t: times(bars),
+                outputs,
+                main: main_output(study, output.as_ref()),
+            };
+            let rc = cache.insert(id, computed, Some(live));
+            // A study computed on demand joins its bar series' kept-current list.
+            if let Some(i) = cache.slot_of(id) {
+                if let Some(list) = cache.deps.get_mut(input.as_str()) {
+                    if !list.contains(&i) {
+                        list.push(i);
+                    }
                 }
             }
-            _ => return Err(format!("series `{id}` has no data")),
+            Ok(rc)
         }
-    };
-    let rc = Rc::new(computed);
-    cache.map.insert(id.to_owned(), Rc::clone(&rc));
-    Ok(rc)
+        _ => Err(format!("series `{id}` has no data")),
+    }
 }
 
 /// Series ids a condition names.
@@ -174,24 +575,36 @@ pub(crate) fn eval_condition(
     cache: &mut Cache,
     c: &Condition,
 ) -> Option<(bool, u64, i64)> {
-    let (op, left, right): (CompareOp, Rc<Computed>, Option<Rc<Computed>>) = match c {
-        Condition::Threshold { series, op, .. } => (*op, values(doc, cache, series).ok()?, None),
-        Condition::Compare { left, op, right } => (
-            *op,
-            values(doc, cache, left).ok()?,
-            Some(values(doc, cache, right).ok()?),
-        ),
-        Condition::Text { .. } => return None,
-    };
+    match c {
+        Condition::Threshold { series, op, value } => {
+            let l = values(doc, cache, series).ok()?;
+            eval_on(*op, &l, None, *value)
+        }
+        Condition::Compare { left, op, right } => {
+            let l = values(doc, cache, left).ok()?;
+            let r = values(doc, cache, right).ok()?;
+            eval_on(*op, &l, Some(&r), 0.0)
+        }
+        Condition::Text { .. } => None,
+    }
+}
+
+/// [`eval_condition`] on computed values: `right` for a comparison, else the threshold
+/// `value`.
+pub(crate) fn eval_on(
+    op: CompareOp,
+    left: &Computed,
+    right: Option<&Computed>,
+    value: f64,
+) -> Option<(bool, u64, i64)> {
     let n = left.len();
     if n == 0 {
         return None;
     }
     let (lp, ll) = last_two(left.main_values());
-    let (rp, rl) = match (&right, c) {
-        (Some(r), _) => last_two(r.main_values()),
-        (None, Condition::Threshold { value, .. }) => (Some(*value), Some(*value)),
-        _ => return None,
+    let (rp, rl) = match right {
+        Some(r) => last_two(r.main_values()),
+        None => (Some(value), Some(value)),
     };
     let bar = (n - 1) as u64;
     let t = left.t[n - 1];

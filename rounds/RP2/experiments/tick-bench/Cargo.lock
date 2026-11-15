@@ -151,11 +151,20 @@ dependencies = [
  "qp-compute",
  "qp-grammar",
  "qp-schema",
+ "qp-source",
  "schemars",
  "serde",
  "serde_json",
  "serde_path_to_error",
  "tempfile",
+]
+
+[[package]]
+name = "qp-source"
+version = "0.0.0"
+dependencies = [
+ "qp-schema",
+ "serde_json",
 ]
 
 [[package]]
@@ -332,6 +341,7 @@ version = "0.0.0"
 dependencies = [
  "flate2",
  "qp-compute",
+ "qp-grammar",
  "qp-schema",
  "qp-session",
  "serde",

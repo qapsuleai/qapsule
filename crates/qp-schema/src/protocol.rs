@@ -1930,6 +1930,17 @@ pub enum Topic {
     },
     /// Active intents whose trigger becomes true.
     Intents {},
+    /// (RP2) Data changes a view draws: bars of a series it reads (directly, through a
+    /// study's input, a fact, a channel reference or an origin) were added, revised or
+    /// corrected, by a data event or a bar write, or its binding state changed. Fires
+    /// only for views that read the changed series; structure changes of the view come
+    /// through `changes`.
+    View {
+        /// View id.
+        /// Also takes a selector (§17).
+        #[schemars(with = "ViewRef")]
+        view: String,
+    },
 }
 
 /// A pushed event.
@@ -2005,6 +2016,24 @@ pub enum Event {
         /// Bar time.
         t: TimestampMs,
         /// Log position.
+        seq: Seq,
+    },
+    /// (RP2) What a watched view draws changed from bar `from_bar` on: redraw from there.
+    /// One event per changed series the view reads.
+    ViewChanged {
+        /// View id.
+        view: String,
+        /// The series whose bars changed (a bar series: inline or bound).
+        series: String,
+        /// First bar index (of `series`) whose values may differ: the new bar, the revised
+        /// last bar, the corrected bar (everything after it may change too), 0 after a
+        /// binding state change.
+        from_bar: u64,
+        /// Last bar index of `series` now; absent when it holds no bars (e.g. stale).
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        to_bar: Option<u64>,
+        /// Log position the change is visible at (data events write no entry: the
+        /// current position).
         seq: Seq,
     },
 }

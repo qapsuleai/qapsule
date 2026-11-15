@@ -232,6 +232,10 @@ fn proposable(op: &Op) -> bool {
             | Op::Undo { .. }
             | Op::AppendBars { .. }
             | Op::UpdateLastBar { .. }
+            // (R3, §20) Personal preferences: written directly by the person (or an owner),
+            // never carried in a proposal that every reader would see.
+            | Op::SetAudience { .. }
+            | Op::SetSensitivity { .. }
     )
 }
 

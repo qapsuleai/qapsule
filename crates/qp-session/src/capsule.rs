@@ -1596,8 +1596,7 @@ impl Session {
         if self.settle.seen_contains(&seen) {
             return vec![reply(self, DisputeVerdict::Duplicate, None)];
         }
-        if story.stage == Stage::Retracted || t < story.history.first().map_or(i64::MAX, |h| h.t)
-        {
+        if story.stage == Stage::Retracted || t < story.history.first().map_or(i64::MAX, |h| h.t) {
             return vec![reply(self, DisputeVerdict::Unknown, None)];
         }
         self.settle

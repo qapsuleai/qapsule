@@ -154,7 +154,9 @@ fn run(
         step["expect"] = Value::Array(
             lines
                 .iter()
-                .map(|l| json!({"conn": l.conn, "msg": trim(serde_json::to_value(&l.msg).unwrap())}))
+                .map(
+                    |l| json!({"conn": l.conn, "msg": trim(serde_json::to_value(&l.msg).unwrap())}),
+                )
                 .collect(),
         );
         out_steps.push(step);
@@ -183,17 +185,17 @@ fn t38() -> Value {
     for i in k..=128 {
         steps.push(bar_ev(k, i, &b[i], None));
     }
-    steps.push(query(
-        "a",
-        "q1",
-        json!({"kind":"capsules","since_bar":120}),
-    ));
+    steps.push(query("a", "q1", json!({"kind":"capsules","since_bar":120})));
     steps.push(query(
         "a",
         "q2",
         json!({"kind":"capsule","capsule":"cap.THYAO.breakout.down.124"}),
     ));
-    steps.push(query("a", "q3", json!({"kind":"ledger","meaning":"breakout"})));
+    steps.push(query(
+        "a",
+        "q3",
+        json!({"kind":"ledger","meaning":"breakout"}),
+    ));
     steps.push(query("a", "q4", json!({"kind":"ledger","by_kind":true})));
     run(
         "38-capsule-lifecycle",

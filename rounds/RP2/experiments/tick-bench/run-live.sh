@@ -3,11 +3,14 @@
 # BEFORE_REV, default a310186 = rp2/int before T5, i.e. T1/T4 behaviour), native and
 # wasm32-wasip1 under Node (opt-s and release). Raw outputs: ../raw/t5/.
 # Env: BARS (10000) TICKS (600) REPS (15) STUDIES (5,50,500) RUNS (2) BEFORE_REV (a310186)
+#      OUT (../raw/t5) WATCHES (t6d,base,all; RP2 T5 fixes add `ic`: base + 100 intents +
+#      100 live capsules)
 #      BEFORE (1: also measure before; the before session at N=500 `all` is slow, so the
 #      before run measures the t6d and base layouts only, as T1 did for its ratio table).
 set -euo pipefail
 cd "$(dirname "$0")"
-OUT=../raw/t5
+OUT=${OUT:-../raw/t5}
+WATCHES=${WATCHES:-t6d,base,all}
 mkdir -p "$OUT"
 BARS=${BARS:-10000}; TICKS=${TICKS:-600}; REPS=${REPS:-15}; STUDIES=${STUDIES:-5,50,500}
 RUNS=${RUNS:-2}; BEFORE_REV=${BEFORE_REV:-a310186}; BEFORE=${BEFORE:-1}
@@ -29,10 +32,10 @@ run() { # dir tag watches reps
   echo "cpu = $(sysctl -n machdep.cpu.brand_string 2>/dev/null || uname -m)"
   echo "os = $(uname -sr)"; echo "rustc = $(rustc --version)"; echo "node = $(node --version)"
   echo "date = $(date -u +%Y-%m-%dT%H:%M:%SZ)"; echo "after = $(git rev-parse --short HEAD)"
-  echo "args = bars $BARS ticks $TICKS reps $REPS studies $STUDIES runs $RUNS before $BEFORE_REV"
+  echo "args = bars $BARS ticks $TICKS reps $REPS studies $STUDIES runs $RUNS watches $WATCHES before $BEFORE_REV (measured: $BEFORE)"
 } > "$OUT/env.txt"
 build .
-run . after t6d,base,all "$REPS"
+run . after "$WATCHES" "$REPS"
 if [ "$BEFORE" = 1 ]; then
   tmp="$(mktemp -d)"
   git worktree add --detach "$tmp/before" "$BEFORE_REV" > /dev/null

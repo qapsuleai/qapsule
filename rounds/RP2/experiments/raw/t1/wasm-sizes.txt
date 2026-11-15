@@ -1,0 +1,2 @@
+21920946 target/wasm32-wasip1/release/tick-bench.wasm
+3801678 target/wasm32-wasip1/wasm/tick-bench.wasm

@@ -1,0 +1,1 @@
+profile: studies 500 ticks 30000 mean 238.5 us

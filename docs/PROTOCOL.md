@@ -1,6 +1,6 @@
 # Qapsule Alan Protokolü — `qp/0`
 
-Durum: **v0** (RD1; R2'de gramer eki — §5.1 gramer işlemleri, §5.4 `hit`, §4.1 `summary`, §13 `no_origin`/`ambiguous`, §17 anlamla başvuru; RP2'de veri düzlemi eki — §18 veri bağı, veri olayları, dondurulmuş kanıt; hepsi ek, kırıcı değil). Mesaj tiplerinin tek kaynağı `crates/qp-schema/src/protocol.rs`;
+Durum: **v0** (RD1; R2'de gramer eki — §5.1 gramer işlemleri, §5.4 `hit`, §4.1 `summary`, §13 `no_origin`/`ambiguous`, §17 anlamla başvuru; RP2'de veri düzlemi ve tutarlılık eki — §18 veri bağı, veri olayları, veri yetkisi, dondurulmuş kanıt, artımlı canlı yol; §19 iddia kanıtı, `claims` ve `view` konuları, yansının görüntü kuralı; K25 gereği `present` belirsizliği, gramer katman adları, geleceğe uzanan bakış; hepsi ek, kırıcı değil). Mesaj tiplerinin tek kaynağı `crates/qp-schema/src/protocol.rs`;
 JSON Schema oradan üretilir (`qp schema export`): `ClientMsg`, `ServerMsg`, `Op`,
 `ChangeOp`, `Query`, `LogEntry`, `InboundLine`, `OutboundLine`. Bu belge ile şema
 çelişirse şema doğrudur ve bu belge düzeltilir.
@@ -785,6 +785,14 @@ değişimi için sırayla); sonra `condition_met` ve `intent_triggered`; sonra (
 olayları (iddiaların oluşma sırasıyla: barın kapanması ve düzeltmeler, sonra koşullar,
 niyetler, geçersizleşmeler; §19.3); her olay, abonelerine bağlantı açılış sırası ve
 abonelik sırasıyla.
+
+**Dökümler (RP2'ye kadar 36):** 01–17 RD1, 18–27 R2, RP2'de: 28 belirsiz sunum (K25),
+29 geleceğe bakış (K25), 30 veri bağı, 31 yetki yok / veri yok, 32 kanıt doğrulama, 33 tikte
+yalnız etkilenenlerin uyanması, 34 koşul yazma yetkisi + çapa geri alma + boşluk, 35
+tutarlılık (iddia kanıtı, geçici → kesin → geri çekme, temizlik), 36 sorumlu kişiler ve
+yeniden canlanan kapsül. RP2'de değişen var olan fikstürler: döküm 11'in bir `note` metni ve
+`fixtures/views/d2-chart.explain.txt` (katman adları; ikisi de K25 gereği,
+`rounds/RP2/REPORT.md`).
 
 ## 16. Gömme
 

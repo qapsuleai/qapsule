@@ -1,0 +1,42 @@
+You are taking a reading test. Below are 24 numbered sentences in Turkish. Each describes one observation about a stock's chart. A "bar" is one period of the chart (for example one trading day). For every sentence answer three questions:
+
+1. What happened? `kind` (one of the six kinds below) and `direction` (up, down or neutral).
+2. When? `when` = "past" (it happened some bars ago; then give `bars_ago` as an integer, 0 = this bar / today, or null if the sentence does not say), "now" (a state that holds now) or "conditional" (an expectation that depends on a condition); `bars_ago` is null unless `when` is "past".
+3. Is it still valid now? `still_valid` = "yes", "no" or "unknown".
+
+The six kinds:
+- continuation: the move goes on
+- reversal: the move may be turning
+- breakout: a boundary was crossed
+- squeeze: the move is narrowing; direction unknown
+- extreme: an unusual stretch (overbought / oversold)
+- flow: money flowing in or out, independent of price
+
+Sentences:
+1. state breakout up stage=realized bars_ago=1 holds=no
+2. event squeeze neutral stage=expired bars_ago=1 holds=na
+3. expectation squeeze neutral stage=born bars_ago=30 holds=yes
+4. event continuation up stage=born bars_ago=30 holds=na
+5. state squeeze neutral stage=realized bars_ago=1 holds=yes
+6. expectation flow down stage=expired bars_ago=5 holds=no
+7. state extreme up stage=weakened bars_ago=3 holds=no
+8. expectation extreme down stage=realized bars_ago=5 holds=na
+9. state extreme up stage=born bars_ago=0 holds=yes
+10. event extreme down stage=confirmed bars_ago=0 holds=na
+11. expectation reversal down stage=invalidated bars_ago=0 holds=no
+12. expectation breakout up stage=realized bars_ago=1 holds=na
+13. event extreme up stage=born bars_ago=30 holds=na
+14. state reversal down stage=realized bars_ago=5 holds=yes
+15. event reversal down stage=weakened bars_ago=0 holds=na
+16. state reversal down stage=realized bars_ago=30 holds=yes
+17. event breakout up stage=expired bars_ago=0 holds=na
+18. expectation continuation up stage=weakened bars_ago=1 holds=yes
+19. expectation flow down stage=confirmed bars_ago=1 holds=yes
+20. state flow up stage=weakened bars_ago=0 holds=yes
+21. event breakout up stage=invalidated bars_ago=1 holds=na
+22. expectation reversal down stage=confirmed bars_ago=1 holds=yes
+23. expectation squeeze neutral stage=confirmed bars_ago=0 holds=na
+24. expectation flow up stage=expired bars_ago=0 holds=no
+
+Give your best guess for every sentence. Reply with a single JSON object and nothing else, keyed by sentence number, for example:
+{"1": {"kind": "breakout", "direction": "up", "when": "past", "bars_ago": 3, "still_valid": "no"}, "2": {...}, ...}

@@ -41,6 +41,11 @@ enum Command {
         /// After the outputs of each input line, write `{"batch_end":true}`.
         #[arg(long)]
         batch_end: bool,
+        /// Accept host frames `{"host":{"data":<DataEvent>}}` (data events on the host's
+        /// path, docs/PROTOCOL.md §3, §18.4). Only for a stream that belongs to the host;
+        /// without this flag such a line is a framing error.
+        #[arg(long)]
+        host_frames: bool,
     },
     /// Run an MCP server over stdin/stdout (newline-delimited JSON-RPC, MCP stdio
     /// transport), speaking `qp/0` as one principal (rounds/RD1/EMBEDDING.md §1).
@@ -64,6 +69,18 @@ enum Command {
     Explain(SceneArgs),
     /// Print the compiled scene description (`SceneDesc` JSON) of a view.
     Scene(SceneArgs),
+    /// Authority ↔ replica check (docs/PROTOCOL.md §19.6): run the reference authority
+    /// and a replica on one tick stream (replica data `--lag` events behind), check the
+    /// display rule with an independent oracle, and write the replica's input tape with
+    /// the digests after every step (replayed by the WASM replica in Node).
+    ReplicaTape {
+        /// Replica data delay in events.
+        #[arg(long, default_value_t = 0)]
+        lag: usize,
+        /// Output tape (JSON).
+        #[arg(short, long)]
+        out: PathBuf,
+    },
     /// Run protocol conformance transcripts (docs/PROTOCOL.md §15).
     Conform {
         /// Transcript files or directories of `*.json` transcripts.
@@ -235,7 +252,8 @@ fn run(command: Command) -> Result<Outcome, String> {
             init,
             root,
             batch_end,
-        } => serve(&init, &root, batch_end),
+            host_frames,
+        } => serve(&init, &root, batch_end, host_frames),
         Command::Mcp {
             init,
             principal,
@@ -247,18 +265,49 @@ fn run(command: Command) -> Result<Outcome, String> {
             transport,
             root,
         } => conform(&inputs, &transport, &root),
+        Command::ReplicaTape { lag, out } => replica_tape(lag, &out),
         Command::Explain(args) => scene_cmd(&args, true),
         Command::Scene(args) => scene_cmd(&args, false),
     }
 }
 
+/// `qp replica-tape`: runs the check, writes the tape, prints a summary; invalid if a
+/// display-rule violation was found or (without lag) a step's digests differ.
+fn replica_tape(lag: usize, out: &std::path::Path) -> Result<Outcome, String> {
+    let o = qp_session::tape::run(lag)?;
+    let text = serde_json::to_string(&o.tape).map_err(|e| e.to_string())?;
+    std::fs::write(out, text).map_err(|e| format!("{}: {e}", out.display()))?;
+    let last = o.tape.steps.last().map(|s| &s.expect);
+    println!(
+        "lag {lag}: {} steps, {} with replica digests != authority, {} violations, final claims {} (shown final at end {}), display counts final/provisional/pending/disputed {:?}; last doc {} view {}",
+        o.tape.steps.len(),
+        o.differing_steps,
+        o.violations.len(),
+        o.final_claims,
+        o.shown_final,
+        o.shown_counts,
+        last.map_or("", |e| e.doc.as_str()),
+        last.map_or("", |e| e.view.as_str()),
+    );
+    for v in o.violations.iter().take(10) {
+        eprintln!("violation at step {}: {}", v.step, v.what);
+    }
+    let caught_up = last.is_some_and(|e| e.doc == e.authority_doc && e.view == e.authority_view);
+    let ok = o.violations.is_empty()
+        && caught_up
+        && o.shown_final == o.final_claims
+        && (lag > 0 || o.differing_steps == 0);
+    Ok(if ok { Outcome::Ok } else { Outcome::Invalid })
+}
+
 /// A session from `--init` (or the transcript's init), after the transcript's messages,
 /// and the first principal of its init.
 fn scene_session(src: &ViewSource) -> Result<(qp_session::Session, String), String> {
-    let transcript: Option<qp_schema::protocol::Transcript> = src
+    // `send.msg` is forwarded raw, as the conformance runner does (selectors allowed).
+    let transcript: Option<qp_session::conform::RunTranscript> = src
         .transcript
         .as_deref()
-        .map(qp_session::read_json)
+        .map(qp_session::conform::read_transcript)
         .transpose()?;
     let init: qp_schema::protocol::SessionInit = match (&src.init, &transcript) {
         (Some(p), _) => qp_session::read_json(p)?,
@@ -642,7 +691,7 @@ fn r0_scene(
     .map_err(|e| e.to_string())
 }
 
-fn serve(init: &Path, root: &Path, batch_end: bool) -> Result<Outcome, String> {
+fn serve(init: &Path, root: &Path, batch_end: bool, host_frames: bool) -> Result<Outcome, String> {
     use std::io::{BufRead, Write};
     let init: qp_schema::protocol::SessionInit = qp_session::read_json(init)?;
     let mut session = qp_session::Session::new(init, root)?;
@@ -654,7 +703,30 @@ fn serve(init: &Path, root: &Path, batch_end: bool) -> Result<Outcome, String> {
         if line.trim().is_empty() {
             continue;
         }
-        for o in session.handle_frame(&line) {
+        let is_host = host_frames
+            && serde_json::from_str::<serde_json::Value>(&line)
+                .ok()
+                .is_some_and(|v| v.get("host").is_some());
+        let lines = if is_host {
+            match session.handle_host_frame(&line) {
+                Ok(o) => {
+                    // Notices for the host (§18.4: a gap, a binding that became stale),
+                    // before the connections' notifications.
+                    for n in &o.notices {
+                        writeln!(out, "{}", n.frame()).map_err(|e| format!("stdout: {e}"))?;
+                    }
+                    o.lines
+                }
+                Err(e) => {
+                    let text = serde_json::json!({"host": {"error": e}}).to_string();
+                    writeln!(out, "{text}").map_err(|e| format!("stdout: {e}"))?;
+                    Vec::new()
+                }
+            }
+        } else {
+            session.handle_frame(&line)
+        };
+        for o in lines {
             let text = serde_json::to_string(&o).map_err(|e| e.to_string())?;
             writeln!(out, "{text}").map_err(|e| format!("stdout: {e}"))?;
         }

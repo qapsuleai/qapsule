@@ -938,6 +938,11 @@ fn welcome_summary_of_thyao() {
         json!(["macd", "signal", "histogram"])
     );
     assert_eq!(s["series"][3]["label"], "BOLLINGER(20,2)");
+    // Documented order (PROTOCOL §7), not the engine's `middle, upper, …`.
+    assert_eq!(
+        s["series"][3]["fields"],
+        json!(["upper", "middle", "lower", "bandwidth"])
+    );
     let p = &s["views"][0]["panels"];
     assert_eq!(p[0]["scale"], "y0 linear");
     assert_eq!(p[1]["scale"], "y1 linear [0, 100]");
@@ -977,7 +982,7 @@ fn presenter_view_is_canonical_with_origin_and_emphasis() {
     let v = view(&h, "vp");
     assert_eq!(
         v["layers"][2],
-        json!({"id":"l2","mark":"rule","panel":1,"encoding":{"y":"70"},
+        json!({"id":"level","mark":"rule","panel":1,"encoding":{"y":"70"},
                "origin":{"/encoding/y":{"kind":"fact","fact":"fact-rsi-cross70","field":"level"}}})
     );
     assert_eq!(

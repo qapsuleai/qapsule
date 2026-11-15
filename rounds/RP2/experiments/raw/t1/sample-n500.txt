@@ -1,0 +1,738 @@
+Analysis of sampling tick-bench (pid 88766) every 1 millisecond
+Process:         tick-bench [88766]
+Path:            /Users/USER/*/tick-bench
+Load Address:    0x104e60000
+Identifier:      tick-bench
+Version:         0
+Code Type:       ARM64
+Platform:        macOS
+Parent Process:  bash [73440]
+Target Type:     live task
+
+Date/Time:       2026-11-15 12:10:50.858 +0300
+Launch Time:     2026-11-15 12:10:49.323 +0300
+OS Version:      macOS 27.0.1 (26A434)
+Report Version:  7
+Analysis Tool:   /usr/bin/sample
+
+Physical footprint:         157.1M
+Physical footprint (peak):  157.1M
+Idle exit:                  untracked
+----
+
+Call graph:
+    3025 Thread_258583311   DispatchQueue_1: com.apple.main-thread  (serial)
+      3025 start  (in dyld) + 6688  [0x182c9be80]
+        3025 main  (in tick-bench) + 52  [0x10528c840]
+          3025 std::rt::lang_start_internal::h1e9a2dfabf97dcbe  (in tick-bench) + 988  [0x1050af81c]  rt.rs:171
+            3025 std::rt::lang_start::_$u7b$$u7b$closure$u7d$$u7d$::h0347ee9108b29cd0  (in tick-bench) + 16  [0x10514d470]  rt.rs:206
+              3025 std::sys::backtrace::__rust_begin_short_backtrace::h64aa9026a69fc9c9  (in tick-bench) + 12  [0x10514d488]  backtrace.rs:158
+                3023 tick_bench::main::h49e1dfd2839df5b9  (in tick-bench) + 20084  [0x10511dbe4]  main.rs:478
+                + 2973 qp_session::session::Session::handle_raw::h81d965bccfad72ff  (in tick-bench) + 8840  [0x104fa07f8]  session.rs:368
+                + ! 1821 qp_session::session::Session::handle_resolved::h1e75df7459aa0d91  (in tick-bench) + 26880  [0x104fab5f4]  session.rs:617
+                + ! : 1484 qp_session::session::Session::settle::h590fab62dea47647  (in tick-bench) + 100  [0x104fb39c0]  session.rs:1227
+                + ! : | 1484 qp_session::session::Session::eval_watchers::h32aefa9b0f3e3e8d  (in tick-bench) + 728  [0x104fa3ed8]  session.rs:1306
+                + ! : |   1484 qp_session::values::eval_condition::h058d8cd272c98d74  (in tick-bench) + 144  [0x104f9ae54]  values.rs:178
+                + ! : |     1482 qp_session::values::values::h1bc904d5423d7a0b  (in tick-bench) + 1324  [0x104f9b910]  values.rs:124
+                + ! : |     + 1360 qp_compute::compute_bars::h40114c182afef936  (in tick-bench) + 136  [0x104e74e9c]  lib.rs:370
+                + ! : |     + ! 985 qp_compute::run::h288d3bcd8cc0315c  (in tick-bench) + 1204  [0x104e76d58]  lib.rs:218
+                + ! : |     + ! : 347 _$LT$qp_compute..core..Streaming$LT$C$GT$$u20$as$u20$qp_compute..Study$GT$::push::h888df3d47c4d2450  (in tick-bench) + 72  [0x104e7fa0c]  core.rs:98
+                + ! : |     + ! : | 155 qp_compute::studies::macd::Macd::commit1::h7aa9a37872c2ae9f  (in tick-bench) + 260,8,...  [0x104e79c0c,0x104e79b10,...]  macd.rs:71
+                + ! : |     + ! : | 101 qp_compute::studies::macd::Macd::commit1::h7aa9a37872c2ae9f  (in tick-bench) + 496,464,...  [0x104e79cf8,0x104e79cd8,...]  macd.rs:78
+                + ! : |     + ! : | 91 qp_compute::studies::macd::Macd::commit1::h7aa9a37872c2ae9f  (in tick-bench) + 180,44  [0x104e79bbc,0x104e79b34]  macd.rs:75
+                + ! : |     + ! : 180 _$LT$qp_compute..core..Streaming$LT$C$GT$$u20$as$u20$qp_compute..Study$GT$::push::h888df3d47c4d2450  (in tick-bench) + 100  [0x104e7fa28]  core.rs:100
+                + ! : |     + ! : | 134 _platform_memmove  (in libsystem_platform.dylib) + 428,0,...  [0x18307bf0c,0x18307bd60,...]
+                + ! : |     + ! : | 46 DYLD-STUB$$memcpy  (in tick-bench) + 4  [0x1052c0a88]
+                + ! : |     + ! : 131 _$LT$qp_compute..studies..macd..Macd$u20$as$u20$qp_compute..core..Core$GT$::peek::h14428a10490a8cac  (in tick-bench) + 180,292,...  [0x104e80960,0x104e809d0,...]  macd.rs:101
+                + ! : |     + ! : 115 _$LT$qp_compute..studies..macd..Macd$u20$as$u20$qp_compute..core..Core$GT$::peek::h14428a10490a8cac  (in tick-bench) + 0  [0x104e808ac]  macd.rs:100
+                + ! : |     + ! : 79 _$LT$qp_compute..studies..macd..Macd$u20$as$u20$qp_compute..core..Core$GT$::peek::h14428a10490a8cac  (in tick-bench) + 360,192  [0x104e80a14,0x104e8096c]  ema.rs:0
+                + ! : |     + ! : 65 _$LT$qp_compute..core..Streaming$LT$C$GT$$u20$as$u20$qp_compute..Study$GT$::push::h888df3d47c4d2450  (in tick-bench) + 40  [0x104e7f9ec]  core.rs:97
+                + ! : |     + ! : 32 _$LT$qp_compute..studies..macd..Macd$u20$as$u20$qp_compute..core..Core$GT$::peek::h14428a10490a8cac  (in tick-bench) + 244  [0x104e809a0]  macd.rs:105
+                + ! : |     + ! : 31 _$LT$qp_compute..core..Streaming$LT$C$GT$$u20$as$u20$qp_compute..Study$GT$::push::h888df3d47c4d2450  (in tick-bench) + 72  [0x104e7fa0c]  core.rs:100
+                + ! : |     + ! : 4 _$LT$qp_compute..studies..macd..Macd$u20$as$u20$qp_compute..core..Core$GT$::peek::h14428a10490a8cac  (in tick-bench) + 224  [0x104e8098c]  macd.rs:103
+                + ! : |     + ! : 1 _$LT$qp_compute..core..Streaming$LT$C$GT$$u20$as$u20$qp_compute..Study$GT$::push::h888df3d47c4d2450  (in tick-bench) + 12  [0x104e7f9d0]  core.rs:96
+                + ! : |     + ! 243 qp_compute::run::h288d3bcd8cc0315c  (in tick-bench) + 1248,1276,...  [0x104e76d84,0x104e76da0,...]  lib.rs:220
+                + ! : |     + ! 43 qp_compute::run::h288d3bcd8cc0315c  (in tick-bench) + 1172,1164  [0x104e76d38,0x104e76d30]  lib.rs:215
+                + ! : |     + ! 40 qp_compute::run::h288d3bcd8cc0315c  (in tick-bench) + 1140  [0x104e76d18]  lib.rs:216
+                + ! : |     + ! 29 qp_compute::run::h288d3bcd8cc0315c  (in tick-bench) + 1096  [0x104e76cec]  lib.rs:214
+                + ! : |     + ! 16 qp_compute::run::h288d3bcd8cc0315c  (in tick-bench) + 1188  [0x104e76d48]  lib.rs:218
+                + ! : |     + ! 2 qp_compute::run::h288d3bcd8cc0315c  (in tick-bench) + 1124  [0x104e76d08]  lib.rs:0
+                + ! : |     + ! 1 qp_compute::run::h288d3bcd8cc0315c  (in tick-bench) + 120  [0x104e7691c]  lib.rs:197
+                + ! : |     + ! : 1 _xzm_free_tc  (in libsystem_malloc.dylib) + 384  [0x182e959f8]
+                + ! : |     + ! 1 qp_compute::run::h288d3bcd8cc0315c  (in tick-bench) + 596  [0x104e76af8]  lib.rs:211
+                + ! : |     + !   1 _xzm_malloc_large_huge  (in libsystem_malloc.dylib) + 968  [0x182e8c4ac]
+                + ! : |     + !     1 xzm_segment_group_alloc_chunk  (in libsystem_malloc.dylib) + 564  [0x182e6c92c]
+                + ! : |     + !       1 _xzm_segment_group_find_and_allocate_chunk  (in libsystem_malloc.dylib) + 508  [0x182e6cf9c]
+                + ! : |     + !         1 _xzm_segment_group_span_mark_smaller  (in libsystem_malloc.dylib) + 220  [0x182e6e408]
+                + ! : |     + !           1 _xzm_reclaim_mark_used_locked  (in libsystem_malloc.dylib) + 60  [0x182e6ee24]
+                + ! : |     + !             1 mach_vm_reclaim_try_cancel  (in libsystem_kernel.dylib) + 260  [0x1830406b8]
+                + ! : |     + !               1 mach_absolute_time  (in libsystem_kernel.dylib) + 108  [0x18302d0f8]
+                + ! : |     + 56 qp_compute::compute_bars::h40114c182afef936  (in tick-bench) + 104  [0x104e74e7c]  lib.rs:369
+                + ! : |     + ! 55 qp_compute::Field::column::h352a15238f248673  (in tick-bench) + 408,396,...  [0x104e7757c,0x104e77570,...]  lib.rs:108
+                + ! : |     + ! 1 qp_compute::Field::column::h352a15238f248673  (in tick-bench) + 52  [0x104e77418]  lib.rs:108
+                + ! : |     + !   1 _xzm_malloc_large_huge  (in libsystem_malloc.dylib) + 968  [0x182e8c4ac]
+                + ! : |     + !     1 xzm_segment_group_alloc_chunk  (in libsystem_malloc.dylib) + 564  [0x182e6c92c]
+                + ! : |     + !       1 _xzm_segment_group_find_and_allocate_chunk  (in libsystem_malloc.dylib) + 508  [0x182e6cf9c]
+                + ! : |     + !         1 _xzm_segment_group_span_mark_smaller  (in libsystem_malloc.dylib) + 348  [0x182e6e488]
+                + ! : |     + 56 qp_compute::compute_bars::h40114c182afef936  (in tick-bench) + 564,552,...  [0x104e75048,0x104e7503c,...]  lib.rs:376
+                + ! : |     + 3 qp_compute::compute_bars::h40114c182afef936  (in tick-bench) + 64  [0x104e74e54]  lib.rs:368
+                + ! : |     + ! 3 qp_compute::create::h04d626555d40ee2f  (in tick-bench) + 72  [0x104e777a0]  lib.rs:313
+                + ! : |     + !   3 qp_compute::default_params::hec501cc36a024cbf  (in tick-bench) + 264  [0x104e7687c]  lib.rs:0
+                + ! : |     + !     1 _$LT$alloc..collections..btree..map..BTreeMap$LT$K$C$V$GT$$u20$as$u20$core..iter..traits..collect..FromIterator$LT$$LP$K$C$V$RP$$GT$$GT$::from_iter::h1a57e78c9f11d277  (in tick-bench) + 208  [0x104e7a248]
+                + ! : |     + !     : 1 _platform_memmove  (in libsystem_platform.dylib) + 436  [0x18307bf14]
+                + ! : |     + !     1 _$LT$alloc..collections..btree..map..BTreeMap$LT$K$C$V$GT$$u20$as$u20$core..iter..traits..collect..FromIterator$LT$$LP$K$C$V$RP$$GT$$GT$::from_iter::h1a57e78c9f11d277  (in tick-bench) + 996  [0x104e7a55c]
+                + ! : |     + !     : 1 __xzm_xzone_free_to_freelist_chunk  (in libsystem_malloc.dylib) + 424  [0x182e9182c]
+                + ! : |     + !     :   1 mach_absolute_time  (in libsystem_kernel.dylib) + 108  [0x18302d0f8]
+                + ! : |     + !     1 _$LT$alloc..collections..btree..map..BTreeMap$LT$K$C$V$GT$$u20$as$u20$core..iter..traits..collect..FromIterator$LT$$LP$K$C$V$RP$$GT$$GT$::from_iter::h1a57e78c9f11d277  (in tick-bench) + 1104  [0x104e7a5c8]
+                + ! : |     + !       1 core::slice::sort::shared::smallsort::insertion_sort_shift_left::he58e5eaa5c8a5876  (in tick-bench) + 232  [0x104e7bb0c]  smallsort.rs:608
+                + ! : |     + 2 qp_compute::compute_bars::h40114c182afef936  (in tick-bench) + 1704  [0x104e754bc]  lib.rs:381
+                + ! : |     + ! 2 core::ptr::drop_in_place$LT$alloc..collections..btree..dedup_sorted_iter..DedupSortedIter$LT$alloc..string..String$C$alloc..vec..Vec$LT$core..option..Option$LT$f64$GT$$GT$$C$alloc..vec..into_iter..IntoIter$LT$$LP$alloc..string..String$C$alloc..vec..Vec$LT$core..option..Option$LT$f64$GT$$GT$$RP$$GT$$GT$$GT$::hcbeaec911b1b04f6  (in tick-bench) + 124  [0x104e7abf4]  mod.rs:805
+                + ! : |     + !   1 __xzm_xzone_free_to_freelist_chunk  (in libsystem_malloc.dylib) + 424  [0x182e9182c]
+                + ! : |     + !   : 1 mach_absolute_time  (in libsystem_kernel.dylib) + 108  [0x18302d0f8]
+                + ! : |     + !   1 __xzm_xzone_free_to_freelist_chunk  (in libsystem_malloc.dylib) + 128  [0x182e91704]
+                + ! : |     + 1 qp_compute::compute_bars::h40114c182afef936  (in tick-bench) + 420  [0x104e74fb8]  lib.rs:375
+                + ! : |     + ! 1 _$LT$qp_compute..studies..macd..Macd$u20$as$u20$qp_compute..core..Core$GT$::params::h5276a6a908adbd22  (in tick-bench) + 292  [0x104e80b90]  macd.rs:89
+                + ! : |     + 1 qp_compute::compute_bars::h40114c182afef936  (in tick-bench) + 1016  [0x104e7520c]  lib.rs:381
+                + ! : |     + ! 1 __xzm_xzone_free_to_freelist_chunk  (in libsystem_malloc.dylib) + 424  [0x182e9182c]
+                + ! : |     + !   1 mach_absolute_time  (in libsystem_kernel.dylib) + 108  [0x18302d0f8]
+                + ! : |     + 1 qp_compute::compute_bars::h40114c182afef936  (in tick-bench) + 880  [0x104e75184]  lib.rs:381
+                + ! : |     + 1 qp_compute::compute_bars::h40114c182afef936  (in tick-bench) + 2520  [0x104e757ec]  lib.rs:386
+                + ! : |     + 1 qp_compute::compute_bars::h40114c182afef936  (in tick-bench) + 4028  [0x104e75dd0]  lib.rs:388
+                + ! : |     +   1 _xzm_free_large_huge  (in libsystem_malloc.dylib) + 104  [0x182e92ab0]
+                + ! : |     1 qp_session::values::values::h1bc904d5423d7a0b  (in tick-bench) + 3628  [0x104f9c210]  values.rs:131
+                + ! : |     + 1 __xzm_xzone_free_to_freelist_chunk  (in libsystem_malloc.dylib) + 424  [0x182e9182c]
+                + ! : |     +   1 mach_absolute_time  (in libsystem_kernel.dylib) + 108  [0x18302d0f8]
+                + ! : |     1 qp_session::values::values::h1bc904d5423d7a0b  (in tick-bench) + 3108  [0x104f9c008]  values.rs:136
+                + ! : |       1 _xzm_malloc_tc  (in libsystem_malloc.dylib) + 328  [0x182e93ad8]
+                + ! : 333 qp_session::session::Session::settle::h590fab62dea47647  (in tick-bench) + 1548  [0x104fb3f68]  session.rs:1228
+                + ! : | 333 qp_session::values::eval_condition::h058d8cd272c98d74  (in tick-bench) + 144  [0x104f9ae54]  values.rs:178
+                + ! : |   331 qp_session::values::values::h1bc904d5423d7a0b  (in tick-bench) + 1324  [0x104f9b910]  values.rs:124
+                + ! : |   + 287 qp_compute::compute_bars::h40114c182afef936  (in tick-bench) + 136  [0x104e74e9c]  lib.rs:370
+                + ! : |   + ! 181 qp_compute::run::h288d3bcd8cc0315c  (in tick-bench) + 1204  [0x104e76d58]  lib.rs:218
+                + ! : |   + ! : 60 _$LT$qp_compute..core..Streaming$LT$C$GT$$u20$as$u20$qp_compute..Study$GT$::push::h144b977831c970c9  (in tick-bench) + 448,348,...  [0x104e7f860,0x104e7f7fc,...]  core.rs:102
+                + ! : |   + ! : 48 _$LT$qp_compute..core..Streaming$LT$C$GT$$u20$as$u20$qp_compute..Study$GT$::push::h144b977831c970c9  (in tick-bench) + 132,252,...  [0x104e7f724,0x104e7f79c,...]  core.rs:98
+                + ! : |   + ! : 45 _$LT$qp_compute..core..Streaming$LT$C$GT$$u20$as$u20$qp_compute..Study$GT$::push::h144b977831c970c9  (in tick-bench) + 280  [0x104e7f7b8]  core.rs:100
+                + ! : |   + ! : | 31 _platform_memmove  (in libsystem_platform.dylib) + 428,460,...  [0x18307bf0c,0x18307bf2c,...]
+                + ! : |   + ! : | 14 DYLD-STUB$$memcpy  (in tick-bench) + 4  [0x1052c0a88]
+                + ! : |   + ! : 16 _$LT$qp_compute..core..Streaming$LT$C$GT$$u20$as$u20$qp_compute..Study$GT$::push::h144b977831c970c9  (in tick-bench) + 40,44  [0x104e7f6c8,0x104e7f6cc]  core.rs:97
+                + ! : |   + ! : 12 _$LT$qp_compute..core..Streaming$LT$C$GT$$u20$as$u20$qp_compute..Study$GT$::push::h144b977831c970c9  (in tick-bench) + 284  [0x104e7f7bc]  core.rs:101
+                + ! : |   + ! 39 qp_compute::run::h288d3bcd8cc0315c  (in tick-bench) + 1276,1248,...  [0x104e76da0,0x104e76d84,...]  lib.rs:220
+                + ! : |   + ! 22 qp_compute::run::h288d3bcd8cc0315c  (in tick-bench) + 1208,1136  [0x104e76d5c,0x104e76d14]  zip.rs:0
+                + ! : |   + ! 13 qp_compute::run::h288d3bcd8cc0315c  (in tick-bench) + 1140  [0x104e76d18]  lib.rs:216
+                + ! : |   + ! 11 qp_compute::run::h288d3bcd8cc0315c  (in tick-bench) + 1096  [0x104e76cec]  lib.rs:214
+                + ! : |   + ! 11 qp_compute::run::h288d3bcd8cc0315c  (in tick-bench) + 1188  [0x104e76d48]  lib.rs:218
+                + ! : |   + ! 5 _$LT$qp_compute..core..Streaming$LT$C$GT$$u20$as$u20$qp_compute..Study$GT$::push::h144b977831c970c9  (in tick-bench) + 488  [0x104e7f888]  core.rs:103
+                + ! : |   + ! 3 qp_compute::run::h288d3bcd8cc0315c  (in tick-bench) + 1164  [0x104e76d30]  lib.rs:215
+                + ! : |   + ! 1 qp_compute::run::h288d3bcd8cc0315c  (in tick-bench) + 596  [0x104e76af8]  lib.rs:211
+                + ! : |   + ! : 1 _xzm_malloc_large_huge  (in libsystem_malloc.dylib) + 968  [0x182e8c4ac]
+                + ! : |   + ! :   1 xzm_segment_group_alloc_chunk  (in libsystem_malloc.dylib) + 564  [0x182e6c92c]
+                + ! : |   + ! :     1 _xzm_segment_group_find_and_allocate_chunk  (in libsystem_malloc.dylib) + 508  [0x182e6cf9c]
+                + ! : |   + ! :       1 _xzm_segment_group_span_mark_smaller  (in libsystem_malloc.dylib) + 220  [0x182e6e408]
+                + ! : |   + ! :         1 _xzm_reclaim_mark_used_locked  (in libsystem_malloc.dylib) + 60  [0x182e6ee24]
+                + ! : |   + ! :           1 mach_vm_reclaim_try_cancel  (in libsystem_kernel.dylib) + 260  [0x1830406b8]
+                + ! : |   + ! :             1 mach_absolute_time  (in libsystem_kernel.dylib) + 108  [0x18302d0f8]
+                + ! : |   + ! 1 qp_compute::run::h288d3bcd8cc0315c  (in tick-bench) + 1204  [0x104e76d58]  lib.rs:219
+                + ! : |   + 22 qp_compute::compute_bars::h40114c182afef936  (in tick-bench) + 104  [0x104e74e7c]  lib.rs:369
+                + ! : |   + ! 22 qp_compute::Field::column::h352a15238f248673  (in tick-bench) + 408,392,...  [0x104e7757c,0x104e7756c,...]  lib.rs:108
+                + ! : |   + 20 qp_compute::compute_bars::h40114c182afef936  (in tick-bench) + 564,548,...  [0x104e75048,0x104e75038,...]  lib.rs:376
+                + ! : |   + 1 qp_compute::compute_bars::h40114c182afef936  (in tick-bench) + 700  [0x104e750d0]  lib.rs:381
+                + ! : |   + ! 1 _xzm_xzone_malloc_tiny  (in libsystem_malloc.dylib) + 88  [0x182e8caa4]
+                + ! : |   + 1 qp_compute::compute_bars::h40114c182afef936  (in tick-bench) + 2604  [0x104e75840]  lib.rs:386
+                + ! : |   1 qp_session::values::values::h1bc904d5423d7a0b  (in tick-bench) + 3160  [0x104f9c03c]  mod.rs:0
+                + ! : |   1 qp_session::values::values::h1bc904d5423d7a0b  (in tick-bench) + 3628  [0x104f9c210]  values.rs:131
+                + ! : |     1 __xzm_xzone_free_to_freelist_chunk  (in libsystem_malloc.dylib) + 424  [0x182e9182c]
+                + ! : |       1 mach_absolute_time  (in libsystem_kernel.dylib) + 108  [0x18302d0f8]
+                + ! : 1 qp_session::session::Session::settle::h590fab62dea47647  (in tick-bench) + 3812  [0x104fb4840]  session.rs:1236
+                + ! : | 1 _platform_memmove  (in libsystem_platform.dylib) + 168  [0x18307be08]
+                + ! : 1 qp_session::session::Session::settle::h590fab62dea47647  (in tick-bench) + 3856  [0x104fb486c]  session.rs:1236
+                + ! : | 1 alloc::raw_vec::RawVec$LT$T$C$A$GT$::grow_one::h6149533fd0e96c53  (in tick-bench) + 60  [0x10529faf8]  mod.rs:336
+                + ! : |   1 alloc::raw_vec::RawVecInner$LT$A$GT$::finish_grow::h6e80902ff06b2ef0  (in tick-bench) + 280  [0x1052a004c]  mod.rs:755
+                + ! : |     1 _xzm_malloc_tc  (in libsystem_malloc.dylib) + 92  [0x182e939ec]
+                + ! : 1 qp_session::session::Session::settle::h590fab62dea47647  (in tick-bench) + 6140  [0x104fb5158]  session.rs:1236
+                + ! : | 1 alloc::raw_vec::RawVecInner$LT$A$GT$::reserve::do_reserve_and_handle::hf62a592ee5b9dc51  (in tick-bench) + 88  [0x1052a00d4]  mod.rs:557
+                + ! : |   1 alloc::raw_vec::RawVecInner$LT$A$GT$::finish_grow::h6e80902ff06b2ef0  (in tick-bench) + 280  [0x1052a004c]  mod.rs:755
+                + ! : |     1 _xzm_xzone_malloc_freelist_outlined  (in libsystem_malloc.dylib) + 260  [0x182e8e0b8]
+                + ! : |       1 _malloc_ulock_self_owner_value  (in libsystem_malloc.dylib) + 4  [0x182e8e884]
+                + ! : 1 qp_session::session::Session::settle::h590fab62dea47647  (in tick-bench) + 2752  [0x104fb441c]  session.rs:1236
+                + ! 707 qp_session::session::Session::handle_resolved::h1e75df7459aa0d91  (in tick-bench) + 21460  [0x104faa0c8]  session.rs:617
+                + ! : 697 qp_session::expand::expand_ops::hb6aa9e261420445c  (in tick-bench) + 64  [0x104f61654]  expand.rs:1514
+                + ! : | 659 _$LT$qp_schema..types..Document$u20$as$u20$core..clone..Clone$GT$::clone::h9640fee1d89c0fda  (in tick-bench) + 532  [0x10501df98]  types.rs:573
+                + ! : | + 166 _$LT$qp_schema..types..Series$u20$as$u20$core..clone..Clone$GT$::clone::h6080423094cfb93b  (in tick-bench) + 1512,1484,...  [0x10501cab8,0x10501ca9c,...]  types.rs:235
+                + ! : | + 120 _$LT$qp_schema..types..Series$u20$as$u20$core..clone..Clone$GT$::clone::h6080423094cfb93b  (in tick-bench) + 880  [0x10501c840]  types.rs:232
+                + ! : | + ! 51 _$LT$alloc..collections..btree..map..BTreeMap$LT$K$C$V$C$A$GT$$u20$as$u20$core..clone..Clone$GT$::clone::clone_subtree::h8b7d4bc5bddd9419  (in tick-bench) + 456  [0x10507cefc]  map.rs:239
+                + ! : | + ! : 27 _xzm_xzone_malloc_tiny  (in libsystem_malloc.dylib) + 88,244,...  [0x182e8caa4,0x182e8cb40,...]
+                + ! : | + ! : 13 _xzm_malloc_tc  (in libsystem_malloc.dylib) + 92,192,...  [0x182e939ec,0x182e93a50,...]
+                + ! : | + ! : 7 _malloc_zone_malloc  (in libsystem_malloc.dylib) + 12,44,...  [0x182e984fc,0x182e9851c,...]
+                + ! : | + ! : 2 _xzm_xzone_malloc_freelist_outlined  (in libsystem_malloc.dylib) + 84,288  [0x182e8e008,0x182e8e0d4]
+                + ! : | + ! : 1 DYLD-STUB$$malloc  (in tick-bench) + 4  [0x1052c0a70]
+                + ! : | + ! : 1 _xzm_xzone_malloc_freelist_outlined  (in libsystem_malloc.dylib) + 324  [0x182e8e0f8]
+                + ! : | + ! :   1 _xzm_xzone_find_and_malloc_from_freelist_chunk  (in libsystem_malloc.dylib) + 160  [0x182e8e930]
+                + ! : | + ! :     1 _xzm_chunk_list_pop  (in libsystem_malloc.dylib) + 48  [0x182e8f204]
+                + ! : | + ! 42 _$LT$alloc..collections..btree..map..BTreeMap$LT$K$C$V$C$A$GT$$u20$as$u20$core..clone..Clone$GT$::clone::clone_subtree::h8b7d4bc5bddd9419  (in tick-bench) + 536  [0x10507cf4c]  map.rs:257
+                + ! : | + ! : 21 _xzm_malloc_tc  (in libsystem_malloc.dylib) + 360,192,...  [0x182e93af8,0x182e93a50,...]
+                + ! : | + ! : 17 _malloc_zone_malloc  (in libsystem_malloc.dylib) + 12,120,...  [0x182e984fc,0x182e98568,...]
+                + ! : | + ! : 2 DYLD-STUB$$malloc  (in tick-bench) + 4  [0x1052c0a70]
+                + ! : | + ! : 1 _xzm_xzone_thread_cache_fill_and_malloc  (in libsystem_malloc.dylib) + 128  [0x182e8ca1c]
+                + ! : | + ! : | 1 _xzm_xzone_find_and_malloc_from_freelist_chunk  (in libsystem_malloc.dylib) + 340  [0x182e8e9e4]
+                + ! : | + ! : |   1 _xzm_xzone_malloc_from_freelist_chunk  (in libsystem_malloc.dylib) + 24  [0x182e8e4b8]
+                + ! : | + ! : 1 malloc  (in libsystem_malloc.dylib) + 0  [0x182e59ce8]
+                + ! : | + ! 17 _$LT$alloc..collections..btree..map..BTreeMap$LT$K$C$V$C$A$GT$$u20$as$u20$core..clone..Clone$GT$::clone::clone_subtree::h8b7d4bc5bddd9419  (in tick-bench) + 568  [0x10507cf6c]  map.rs:257
+                + ! : | + ! : 12 _platform_memmove  (in libsystem_platform.dylib) + 452,12,...  [0x18307bf24,0x18307bd6c,...]
+                + ! : | + ! : 5 DYLD-STUB$$memcpy  (in tick-bench) + 4,8  [0x1052c0a88,0x1052c0a8c]
+                + ! : | + ! 5 _$LT$alloc..collections..btree..map..BTreeMap$LT$K$C$V$C$A$GT$$u20$as$u20$core..clone..Clone$GT$::clone::clone_subtree::h8b7d4bc5bddd9419  (in tick-bench) + 28,16,...  [0x10507cd50,0x10507cd44,...]  map.rs:228
+                + ! : | + ! 2 _$LT$alloc..collections..btree..map..BTreeMap$LT$K$C$V$C$A$GT$$u20$as$u20$core..clone..Clone$GT$::clone::clone_subtree::h8b7d4bc5bddd9419  (in tick-bench) + 568  [0x10507cf6c]  map.rs:257
+                + ! : | + ! 2 _$LT$alloc..collections..btree..map..BTreeMap$LT$K$C$V$C$A$GT$$u20$as$u20$core..clone..Clone$GT$::clone::clone_subtree::h8b7d4bc5bddd9419  (in tick-bench) + 668  [0x10507cfd0]  map.rs:262
+                + ! : | + ! 1 _$LT$alloc..collections..btree..map..BTreeMap$LT$K$C$V$C$A$GT$$u20$as$u20$core..clone..Clone$GT$::clone::clone_subtree::h8b7d4bc5bddd9419  (in tick-bench) + 624  [0x10507cfa4]  map.rs:253
+                + ! : | + 74 _$LT$qp_schema..types..Series$u20$as$u20$core..clone..Clone$GT$::clone::h6080423094cfb93b  (in tick-bench) + 852  [0x10501c824]  types.rs:232
+                + ! : | + ! 32 _$LT$alloc..vec..Vec$LT$T$C$A$GT$$u20$as$u20$core..clone..Clone$GT$::clone::hc48343ae0d2164d9  (in tick-bench) + 92  [0x10501ffac]  mod.rs:3573
+                + ! : | + ! : 21 _xzm_malloc_tc  (in libsystem_malloc.dylib) + 192,92,...  [0x182e93a50,0x182e939ec,...]
+                + ! : | + ! : 9 _malloc_zone_malloc  (in libsystem_malloc.dylib) + 120,12,...  [0x182e98568,0x182e984fc,...]
+                + ! : | + ! : 1 DYLD-STUB$$malloc  (in tick-bench) + 4  [0x1052c0a70]
+                + ! : | + ! : 1 _xzm_xzone_thread_cache_fill_and_malloc  (in libsystem_malloc.dylib) + 96  [0x182e8c9fc]
+                + ! : | + ! :   1 _xzm_xzone_malloc_from_freelist_chunk  (in libsystem_malloc.dylib) + 288  [0x182e8e5c0]
+                + ! : | + ! 27 _$LT$alloc..vec..Vec$LT$T$C$A$GT$$u20$as$u20$core..clone..Clone$GT$::clone::hc48343ae0d2164d9  (in tick-bench) + 144  [0x10501ffe0]  mod.rs:3573
+                + ! : | + ! : 16 _xzm_malloc_tc  (in libsystem_malloc.dylib) + 360,92,...  [0x182e93af8,0x182e939ec,...]
+                + ! : | + ! : 7 _malloc_zone_malloc  (in libsystem_malloc.dylib) + 64,12,...  [0x182e98530,0x182e984fc,...]
+                + ! : | + ! : 2 _xzm_xzone_malloc_from_freelist_chunk  (in libsystem_malloc.dylib) + 660,672  [0x182e8e734,0x182e8e740]
+                + ! : | + ! : 1 DYLD-STUB$$malloc  (in tick-bench) + 4  [0x1052c0a70]
+                + ! : | + ! : 1 _xzm_xzone_thread_cache_fill_and_malloc  (in libsystem_malloc.dylib) + 96  [0x182e8c9fc]
+                + ! : | + ! :   1 _xzm_xzone_malloc_from_freelist_chunk  (in libsystem_malloc.dylib) + 288  [0x182e8e5c0]
+                + ! : | + ! 8 _$LT$alloc..vec..Vec$LT$T$C$A$GT$$u20$as$u20$core..clone..Clone$GT$::clone::hc48343ae0d2164d9  (in tick-bench) + 176  [0x105020000]  mod.rs:3573
+                + ! : | + ! : 6 _platform_memmove  (in libsystem_platform.dylib) + 452,12,...  [0x18307bf24,0x18307bd6c,...]
+                + ! : | + ! : 2 DYLD-STUB$$memcpy  (in tick-bench) + 4  [0x1052c0a88]
+                + ! : | + ! 7 _$LT$alloc..vec..Vec$LT$T$C$A$GT$$u20$as$u20$core..clone..Clone$GT$::clone::hc48343ae0d2164d9  (in tick-bench) + 40,48,...  [0x10501ff78,0x10501ff80,...]  mod.rs:3573
+                + ! : | + 31 _$LT$qp_schema..types..Series$u20$as$u20$core..clone..Clone$GT$::clone::h6080423094cfb93b  (in tick-bench) + 76  [0x10501c51c]  types.rs:223
+                + ! : | + ! 14 _malloc_zone_malloc  (in libsystem_malloc.dylib) + 12,44,...  [0x182e984fc,0x182e9851c,...]
+                + ! : | + ! 12 _xzm_malloc_tc  (in libsystem_malloc.dylib) + 92,192,...  [0x182e939ec,0x182e93a50,...]
+                + ! : | + ! 3 DYLD-STUB$$malloc  (in tick-bench) + 4  [0x1052c0a70]
+                + ! : | + ! 1 _xzm_xzone_thread_cache_fill_and_malloc  (in libsystem_malloc.dylib) + 128  [0x182e8ca1c]
+                + ! : | + ! : 1 _xzm_xzone_find_and_malloc_from_freelist_chunk  (in libsystem_malloc.dylib) + 204  [0x182e8e95c]
+                + ! : | + ! 1 malloc  (in libsystem_malloc.dylib) + 8  [0x182e59cf0]
+                + ! : | + 30 _$LT$qp_schema..types..Series$u20$as$u20$core..clone..Clone$GT$::clone::h6080423094cfb93b  (in tick-bench) + 208  [0x10501c5a0]  types.rs:227
+                + ! : | + ! 21 _xzm_malloc_tc  (in libsystem_malloc.dylib) + 92,476,...  [0x182e939ec,0x182e93b6c,...]
+                + ! : | + ! 7 _malloc_zone_malloc  (in libsystem_malloc.dylib) + 12,44,...  [0x182e984fc,0x182e9851c,...]
+                + ! : | + ! 1 DYLD-STUB$$malloc  (in tick-bench) + 4  [0x1052c0a70]
+                + ! : | + ! 1 _xzm_xzone_find_and_malloc_from_freelist_chunk  (in libsystem_malloc.dylib) + 1908  [0x182e8f004]
+                + ! : | + 26 _$LT$qp_schema..types..Series$u20$as$u20$core..clone..Clone$GT$::clone::h6080423094cfb93b  (in tick-bench) + 236  [0x10501c5bc]  types.rs:230
+                + ! : | + ! 14 _malloc_zone_malloc  (in libsystem_malloc.dylib) + 12,44,...  [0x182e984fc,0x182e9851c,...]
+                + ! : | + ! 9 _xzm_malloc_tc  (in libsystem_malloc.dylib) + 92,192,...  [0x182e939ec,0x182e93a50,...]
+                + ! : | + ! 3 DYLD-STUB$$malloc  (in tick-bench) + 4  [0x1052c0a70]
+                + ! : | + 26 _$LT$qp_schema..types..Series$u20$as$u20$core..clone..Clone$GT$::clone::h6080423094cfb93b  (in tick-bench) + 552  [0x10501c6f8]  types.rs:232
+                + ! : | + ! 17 _xzm_malloc_tc  (in libsystem_malloc.dylib) + 92,192,...  [0x182e939ec,0x182e93a50,...]
+                + ! : | + ! 7 _malloc_zone_malloc  (in libsystem_malloc.dylib) + 12,120  [0x182e984fc,0x182e98568]
+                + ! : | + ! 2 DYLD-STUB$$malloc  (in tick-bench) + 4  [0x1052c0a70]
+                + ! : | + 25 _$LT$qp_schema..types..Series$u20$as$u20$core..clone..Clone$GT$::clone::h6080423094cfb93b  (in tick-bench) + 360  [0x10501c638]  types.rs:227
+                + ! : | + ! 12 _malloc_zone_malloc  (in libsystem_malloc.dylib) + 12,80,...  [0x182e984fc,0x182e98540,...]
+                + ! : | + ! 10 _xzm_malloc_tc  (in libsystem_malloc.dylib) + 92,192,...  [0x182e939ec,0x182e93a50,...]
+                + ! : | + ! 3 DYLD-STUB$$malloc  (in tick-bench) + 4,0  [0x1052c0a70,0x1052c0a6c]
+                + ! : | + 24 _$LT$qp_schema..types..Series$u20$as$u20$core..clone..Clone$GT$::clone::h6080423094cfb93b  (in tick-bench) + 700  [0x10501c78c]  types.rs:227
+                + ! : | + ! 13 _xzm_malloc_tc  (in libsystem_malloc.dylib) + 192,92,...  [0x182e93a50,0x182e939ec,...]
+                + ! : | + ! 8 _malloc_zone_malloc  (in libsystem_malloc.dylib) + 12,80,...  [0x182e984fc,0x182e98540,...]
+                + ! : | + ! 2 DYLD-STUB$$malloc  (in tick-bench) + 4  [0x1052c0a70]
+                + ! : | + ! 1 _xzm_xzone_thread_cache_fill_and_malloc  (in libsystem_malloc.dylib) + 96  [0x182e8c9fc]
+                + ! : | + !   1 _xzm_xzone_malloc_from_freelist_chunk  (in libsystem_malloc.dylib) + 76  [0x182e8e4ec]
+                + ! : | + 22 _$LT$qp_schema..types..Series$u20$as$u20$core..clone..Clone$GT$::clone::h6080423094cfb93b  (in tick-bench) + 268  [0x10501c5dc]  types.rs:227
+                + ! : | + ! 19 _platform_memmove  (in libsystem_platform.dylib) + 436,452,...  [0x18307bf14,0x18307bf24,...]
+                + ! : | + ! 3 DYLD-STUB$$memcpy  (in tick-bench) + 4  [0x1052c0a88]
+                + ! : | + 20 _$LT$qp_schema..types..Series$u20$as$u20$core..clone..Clone$GT$::clone::h6080423094cfb93b  (in tick-bench) + 840  [0x10501c818]  types.rs:232
+                + ! : | + ! 17 _platform_memmove  (in libsystem_platform.dylib) + 444,452,...  [0x18307bf1c,0x18307bf24,...]
+                + ! : | + ! 3 DYLD-STUB$$memcpy  (in tick-bench) + 4  [0x1052c0a88]
+                + ! : | + 18 _$LT$qp_schema..types..Series$u20$as$u20$core..clone..Clone$GT$::clone::h6080423094cfb93b  (in tick-bench) + 932,392,...  [0x10501c874,0x10501c658,...]  types.rs:232
+                + ! : | + 17 _$LT$qp_schema..types..Series$u20$as$u20$core..clone..Clone$GT$::clone::h6080423094cfb93b  (in tick-bench) + 392  [0x10501c658]  types.rs:230
+                + ! : | + ! 11 _platform_memmove  (in libsystem_platform.dylib) + 0,428,...  [0x18307bd60,0x18307bf0c,...]
+                + ! : | + ! 6 DYLD-STUB$$memcpy  (in tick-bench) + 4  [0x1052c0a88]
+                + ! : | + 16 _$LT$qp_schema..types..Series$u20$as$u20$core..clone..Clone$GT$::clone::h6080423094cfb93b  (in tick-bench) + 640  [0x10501c750]  types.rs:227
+                + ! : | + ! 14 _platform_memmove  (in libsystem_platform.dylib) + 452,12,...  [0x18307bf24,0x18307bd6c,...]
+                + ! : | + ! 2 DYLD-STUB$$memcpy  (in tick-bench) + 4  [0x1052c0a88]
+                + ! : | + 9 _$LT$qp_schema..types..Series$u20$as$u20$core..clone..Clone$GT$::clone::h6080423094cfb93b  (in tick-bench) + 108  [0x10501c53c]  types.rs:223
+                + ! : | + ! 7 _platform_memmove  (in libsystem_platform.dylib) + 12,436,...  [0x18307bd6c,0x18307bf14,...]
+                + ! : | + ! 2 DYLD-STUB$$memcpy  (in tick-bench) + 4,8  [0x1052c0a88,0x1052c0a8c]
+                + ! : | + 9 _$LT$qp_schema..types..Series$u20$as$u20$core..clone..Clone$GT$::clone::h6080423094cfb93b  (in tick-bench) + 108,324,...  [0x10501c53c,0x10501c614,...]  types.rs:227
+                + ! : | + 8 _$LT$qp_schema..types..Series$u20$as$u20$core..clone..Clone$GT$::clone::h6080423094cfb93b  (in tick-bench) + 996  [0x10501c8b4]  types.rs:227
+                + ! : | + ! 7 _platform_memmove  (in libsystem_platform.dylib) + 452,0,...  [0x18307bf24,0x18307bd60,...]
+                + ! : | + ! 1 DYLD-STUB$$memcpy  (in tick-bench) + 4  [0x1052c0a88]
+                + ! : | + 6 _$LT$qp_schema..types..Series$u20$as$u20$core..clone..Clone$GT$::clone::h6080423094cfb93b  (in tick-bench) + 1200,1260,...  [0x10501c980,0x10501c9bc,...]  types.rs:219
+                + ! : | + 5 _$LT$qp_schema..types..Series$u20$as$u20$core..clone..Clone$GT$::clone::h6080423094cfb93b  (in tick-bench) + 220,980  [0x10501c5ac,0x10501c8a4]  mod.rs:0
+                + ! : | + 2 _$LT$alloc..collections..btree..map..BTreeMap$LT$K$C$V$C$A$GT$$u20$as$u20$core..clone..Clone$GT$::clone::clone_subtree::h8b7d4bc5bddd9419  (in tick-bench) + 692,704  [0x10507cfe8,0x10507cff4]  map.rs:301
+                + ! : | + 2 _$LT$qp_schema..types..Series$u20$as$u20$core..clone..Clone$GT$::clone::h6080423094cfb93b  (in tick-bench) + 32,76  [0x10501c4f0,0x10501c51c]  types.rs:223
+                + ! : | + 2 _$LT$qp_schema..types..Series$u20$as$u20$core..clone..Clone$GT$::clone::h6080423094cfb93b  (in tick-bench) + 128  [0x10501c550]  types.rs:230
+                + ! : | + 1 _$LT$alloc..vec..Vec$LT$T$C$A$GT$$u20$as$u20$core..clone..Clone$GT$::clone::hc48343ae0d2164d9  (in tick-bench) + 248  [0x105020048]  mod.rs:3574
+                + ! : | 21 _$LT$qp_schema..types..Document$u20$as$u20$core..clone..Clone$GT$::clone::h9640fee1d89c0fda  (in tick-bench) + 712,652,...  [0x10501e04c,0x10501e010,...]  types.rs:573
+                + ! : | 7 _$LT$qp_schema..types..Series$u20$as$u20$core..clone..Clone$GT$::clone::h6080423094cfb93b  (in tick-bench) + 1292,1284  [0x10501c9dc,0x10501c9d4]  types.rs:219
+                + ! : | 4 _$LT$qp_schema..types..Document$u20$as$u20$core..clone..Clone$GT$::clone::h9640fee1d89c0fda  (in tick-bench) + 844  [0x10501e0d0]  types.rs:576
+                + ! : | + 4 _$LT$qp_schema..grammar..View$u20$as$u20$core..clone..Clone$GT$::clone::h9d8caec48d5ff6ff  (in tick-bench) + 776  [0x10501bbc0]  grammar.rs:450
+                + ! : | +   2 _$LT$alloc..vec..Vec$LT$T$C$A$GT$$u20$as$u20$core..clone..Clone$GT$::clone::hb7e0fb93af6b17fe  (in tick-bench) + 132  [0x10501fecc]  mod.rs:3573
+                + ! : | +   ! 1 _$LT$qp_schema..grammar..Layer$u20$as$u20$core..clone..Clone$GT$::clone::h15189abe3a7d315f  (in tick-bench) + 148  [0x10501cec4]  grammar.rs:346
+                + ! : | +   ! : 1 _xzm_malloc_tc  (in libsystem_malloc.dylib) + 156  [0x182e93a2c]
+                + ! : | +   ! 1 _$LT$qp_schema..grammar..Layer$u20$as$u20$core..clone..Clone$GT$::clone::h15189abe3a7d315f  (in tick-bench) + 244  [0x10501cf24]  grammar.rs:351
+                + ! : | +   !   1 _xzm_malloc_tc  (in libsystem_malloc.dylib) + 92  [0x182e939ec]
+                + ! : | +   1 _$LT$alloc..vec..Vec$LT$T$C$A$GT$$u20$as$u20$core..clone..Clone$GT$::clone::hb7e0fb93af6b17fe  (in tick-bench) + 156  [0x10501fee4]  mod.rs:3573
+                + ! : | +   ! 1 _platform_memmove  (in libsystem_platform.dylib) + 180  [0x18307be14]
+                + ! : | +   1 _$LT$alloc..vec..Vec$LT$T$C$A$GT$$u20$as$u20$core..clone..Clone$GT$::clone::hb7e0fb93af6b17fe  (in tick-bench) + 156  [0x10501fee4]  mod.rs:3573
+                + ! : | 2 _$LT$qp_schema..types..Document$u20$as$u20$core..clone..Clone$GT$::clone::h9640fee1d89c0fda  (in tick-bench) + 1172  [0x10501e218]  types.rs:579
+                + ! : | + 1 _$LT$qp_schema..types..Fact$u20$as$u20$core..clone..Clone$GT$::clone::h29bdafe64d665c6c  (in tick-bench) + 396  [0x10501b6f0]  types.rs:324
+                + ! : | + ! 1 _$LT$alloc..collections..btree..map..BTreeMap$LT$K$C$V$C$A$GT$$u20$as$u20$core..clone..Clone$GT$::clone::clone_subtree::h8b7d4bc5bddd9419  (in tick-bench) + 456  [0x10507cefc]  map.rs:239
+                + ! : | + !   1 _malloc_zone_malloc  (in libsystem_malloc.dylib) + 120  [0x182e98568]
+                + ! : | + 1 _$LT$qp_schema..types..Fact$u20$as$u20$core..clone..Clone$GT$::clone::h29bdafe64d665c6c  (in tick-bench) + 448  [0x10501b724]  types.rs:326
+                + ! : | +   1 _$LT$qp_schema..types..Author$u20$as$u20$core..clone..Clone$GT$::clone::h0fd281e1ffc3c658  (in tick-bench) + 192  [0x10501bf50]  types.rs:279
+                + ! : | +     1 _platform_memmove  (in libsystem_platform.dylib) + 428  [0x18307bf0c]
+                + ! : | 1 _$LT$qp_schema..types..Document$u20$as$u20$core..clone..Clone$GT$::clone::h9640fee1d89c0fda  (in tick-bench) + 484  [0x10501df68]  types.rs:573
+                + ! : | + 1 _xzm_malloc_large_huge  (in libsystem_malloc.dylib) + 968  [0x182e8c4ac]
+                + ! : | +   1 xzm_segment_group_alloc_chunk  (in libsystem_malloc.dylib) + 564  [0x182e6c92c]
+                + ! : | +     1 _xzm_segment_group_find_and_allocate_chunk  (in libsystem_malloc.dylib) + 508  [0x182e6cf9c]
+                + ! : | +       1 _xzm_segment_group_span_mark_smaller  (in libsystem_malloc.dylib) + 220  [0x182e6e408]
+                + ! : | +         1 _xzm_reclaim_mark_used_locked  (in libsystem_malloc.dylib) + 60  [0x182e6ee24]
+                + ! : | +           1 mach_vm_reclaim_try_cancel  (in libsystem_kernel.dylib) + 260  [0x1830406b8]
+                + ! : | +             1 mach_absolute_time  (in libsystem_kernel.dylib) + 112  [0x18302d0fc]
+                + ! : | 1 _$LT$qp_schema..types..Document$u20$as$u20$core..clone..Clone$GT$::clone::h9640fee1d89c0fda  (in tick-bench) + 1076  [0x10501e1b8]  types.rs:579
+                + ! : | 1 _$LT$qp_schema..types..Document$u20$as$u20$core..clone..Clone$GT$::clone::h9640fee1d89c0fda  (in tick-bench) + 1328  [0x10501e2b4]  types.rs:582
+                + ! : | + 1 _$LT$qp_schema..types..Finding$u20$as$u20$core..clone..Clone$GT$::clone::h4d2fcd58d8e77827  (in tick-bench) + 336  [0x10501d8a8]  types.rs:393
+                + ! : | +   1 _xzm_malloc_tc  (in libsystem_malloc.dylib) + 92  [0x182e939ec]
+                + ! : | 1 _$LT$qp_schema..types..Document$u20$as$u20$core..clone..Clone$GT$::clone::h9640fee1d89c0fda  (in tick-bench) + 1512  [0x10501e36c]  types.rs:585
+                + ! : |   1 _$LT$qp_schema..types..Capsule$u20$as$u20$core..clone..Clone$GT$::clone::h6463c38d9eb1ca23  (in tick-bench) + 296  [0x10501d4a0]  types.rs:474
+                + ! : |     1 _platform_memmove  (in libsystem_platform.dylib) + 452  [0x18307bf24]
+                + ! : 4 qp_session::expand::expand_ops::hb6aa9e261420445c  (in tick-bench) + 1416  [0x104f61b9c]  expand.rs:1535
+                + ! : | 4 _xzm_xzone_malloc_freelist_outlined  (in libsystem_malloc.dylib) + 768  [0x182e8e2b4]
+                + ! : 2 qp_session::expand::expand_ops::hb6aa9e261420445c  (in tick-bench) + 276  [0x104f61728]  expand.rs:1521
+                + ! : | 1 qp_session::apply::apply_all::h1f8e6e9d0be1e4c2  (in tick-bench) + 252  [0x104f3bfe0]  apply.rs:398
+                + ! : | + 1 qp_session::apply::apply_change::hee55c1332e307cc7  (in tick-bench) + 5716  [0x104f37c10]  apply.rs:364
+                + ! : | +   1 _$LT$alloc..string..String$u20$as$u20$core..clone..Clone$GT$::clone::h1f8881cf73048a3e  (in tick-bench) + 88  [0x104e626f8]  string.rs:2351
+                + ! : | +     1 _platform_memmove  (in libsystem_platform.dylib) + 444  [0x18307bf1c]
+                + ! : | 1 qp_session::apply::apply_all::h1f8e6e9d0be1e4c2  (in tick-bench) + 212  [0x104f3bfb8]  apply.rs:398
+                + ! : 2 qp_session::expand::expand_ops::hb6aa9e261420445c  (in tick-bench) + 2032  [0x104f61e04]  expand.rs:1537
+                + ! : | 2 _platform_memmove  (in libsystem_platform.dylib) + 180  [0x18307be14]
+                + ! : 1 qp_session::expand::expand_ops::hb6aa9e261420445c  (in tick-bench) + 204  [0x104f616e0]  expand.rs:1520
+                + ! : | 1 qp_session::expand::expand_op::hb2be3a3366cb6190  (in tick-bench) + 10596  [0x104f695e4]  expand.rs:913
+                + ! : |   1 qp_session::error::ptr::hb045e504fb8f0a0d  (in tick-bench) + 256  [0x104f54d90]  error.rs:78
+                + ! : |     1 alloc::fmt::format::format_inner::hfba7744daf75a2c1  (in tick-bench) + 328  [0x104e61080]  fmt.rs:649
+                + ! : |       1 core::fmt::write::h164e2e78980a3344  (in tick-bench) + 376  [0x104e64b24]  mod.rs:1469
+                + ! : |         1 _$LT$alloc..string..String$u20$as$u20$core..fmt..Write$GT$::write_str::h07f07e45209a5724  (in tick-bench) + 108  [0x104e60e44]  string.rs:3320
+                + ! : |           1 alloc::raw_vec::RawVecInner$LT$A$GT$::reserve::do_reserve_and_handle::h076dffaa2fb6fbdc  (in tick-bench) + 68  [0x10528cf18]
+                + ! : |             1 alloc::raw_vec::RawVecInner$LT$A$GT$::finish_grow::h5779540bd9d0a3cd  (in tick-bench) + 76  [0x10528cea0]
+                + ! : |               1 _xzm_malloc_tc  (in libsystem_malloc.dylib) + 476  [0x182e93b6c]
+                + ! : 1 qp_session::expand::expand_ops::hb6aa9e261420445c  (in tick-bench) + 1936  [0x104f61da4]  expand.rs:1535
+                + ! :   1 _$LT$core..iter..adapters..flatten..Flatten$LT$I$GT$$u20$as$u20$core..iter..traits..iterator..Iterator$GT$::next::h5dd922c09413e709  (in tick-bench) + 124  [0x104f02b24]  flatten.rs:226
+                + ! :     1 __xzm_xzone_free_to_freelist_chunk  (in libsystem_malloc.dylib) + 424  [0x182e9182c]
+                + ! :       1 mach_absolute_time  (in libsystem_kernel.dylib) + 0  [0x18302d08c]
+                + ! 439 qp_session::session::Session::handle_resolved::h1e75df7459aa0d91  (in tick-bench) + 26676  [0x104fab528]  session.rs:617
+                + ! : 433 qp_session::session::Session::commit::hbff7a71a6b37e289  (in tick-bench) + 136  [0x104fb3888]  session.rs:1194
+                + ! : | 416 core::ptr::drop_in_place$LT$qp_schema..types..Document$GT$::h7fe1052e6f8a2ef3  (in tick-bench) + 108  [0x104fe98a0]  mod.rs:805
+                + ! : | + 253 core::ptr::drop_in_place$LT$qp_schema..types..Series$GT$::h336b1249230a997c  (in tick-bench) + 104  [0x104fe8bc0]  mod.rs:805
+                + ! : | + ! 74 core::ptr::drop_in_place$LT$qp_schema..types..SeriesSource$GT$::hf460b29f3ff6680d  (in tick-bench) + 272  [0x104fec74c]  mod.rs:805
+                + ! : | + ! : 37 alloc::collections::btree::map::IntoIter$LT$K$C$V$C$A$GT$::dying_next::h572ecd0a115d2ff3  (in tick-bench) + 336  [0x10500f970]  map.rs:1767
+                + ! : | + ! : | 15 __xzm_xzone_free_to_freelist_chunk  (in libsystem_malloc.dylib) + 372,192,...  [0x182e917f8,0x182e91744,...]
+                + ! : | + ! : | 14 _xzm_free_tc  (in libsystem_malloc.dylib) + 260,0,...  [0x182e9597c,0x182e95878,...]
+                + ! : | + ! : | 7 _free  (in libsystem_malloc.dylib) + 0,36,...  [0x182e99110,0x182e99134,...]
+                + ! : | + ! : | 1 DYLD-STUB$$free  (in tick-bench) + 4  [0x1052c0a40]
+                + ! : | + ! : 11 alloc::collections::btree::map::IntoIter$LT$K$C$V$C$A$GT$::dying_next::h572ecd0a115d2ff3  (in tick-bench) + 32  [0x10500f840]  map.rs:1770
+                + ! : | + ! : 10 alloc::collections::btree::map::IntoIter$LT$K$C$V$C$A$GT$::dying_next::h572ecd0a115d2ff3  (in tick-bench) + 124,168,...  [0x10500f89c,0x10500f8c8,...]  map.rs:1767
+                + ! : | + ! : 9 alloc::collections::btree::map::IntoIter$LT$K$C$V$C$A$GT$::dying_next::h572ecd0a115d2ff3  (in tick-bench) + 40,64,...  [0x10500f848,0x10500f860,...]  map.rs:1771
+                + ! : | + ! : 6 alloc::collections::btree::map::IntoIter$LT$K$C$V$C$A$GT$::dying_next::h572ecd0a115d2ff3  (in tick-bench) + 24  [0x10500f838]  map.rs:1766
+                + ! : | + ! : 1 alloc::collections::btree::map::IntoIter$LT$K$C$V$C$A$GT$::dying_next::h572ecd0a115d2ff3  (in tick-bench) + 0  [0x10500f820]  map.rs:1763
+                + ! : | + ! 38 core::ptr::drop_in_place$LT$qp_schema..types..SeriesSource$GT$::hf460b29f3ff6680d  (in tick-bench) + 152  [0x104fec6d4]  mod.rs:805
+                + ! : | + ! : 17 _xzm_free_tc  (in libsystem_malloc.dylib) + 84,104,...  [0x182e958cc,0x182e958e0,...]
+                + ! : | + ! : 11 _free  (in libsystem_malloc.dylib) + 0,36,...  [0x182e99110,0x182e99134,...]
+                + ! : | + ! : 8 __xzm_xzone_free_to_freelist_chunk  (in libsystem_malloc.dylib) + 372,68,...  [0x182e917f8,0x182e916c8,...]
+                + ! : | + ! : 2 DYLD-STUB$$free  (in tick-bench) + 4  [0x1052c0a40]
+                + ! : | + ! 38 core::ptr::drop_in_place$LT$qp_schema..types..SeriesSource$GT$::hf460b29f3ff6680d  (in tick-bench) + 304  [0x104fec76c]  mod.rs:805
+                + ! : | + ! : 19 __xzm_xzone_free_to_freelist_chunk  (in libsystem_malloc.dylib) + 372,96,...  [0x182e917f8,0x182e916e4,...]
+                + ! : | + ! : 10 _xzm_free_tc  (in libsystem_malloc.dylib) + 0,160,...  [0x182e95878,0x182e95918,...]
+                + ! : | + ! : 8 _free  (in libsystem_malloc.dylib) + 0,76,...  [0x182e99110,0x182e9915c,...]
+                + ! : | + ! : 1 DYLD-STUB$$free  (in tick-bench) + 4  [0x1052c0a40]
+                + ! : | + ! 35 core::ptr::drop_in_place$LT$qp_schema..types..SeriesSource$GT$::hf460b29f3ff6680d  (in tick-bench) + 172  [0x104fec6e8]  mod.rs:805
+                + ! : | + ! : 15 _xzm_free_tc  (in libsystem_malloc.dylib) + 0,208,...  [0x182e95878,0x182e95948,...]
+                + ! : | + ! : 11 __xzm_xzone_free_to_freelist_chunk  (in libsystem_malloc.dylib) + 576,56,...  [0x182e918c4,0x182e916bc,...]
+                + ! : | + ! : 6 _free  (in libsystem_malloc.dylib) + 76,0,...  [0x182e9915c,0x182e99110,...]
+                + ! : | + ! : 3 DYLD-STUB$$free  (in tick-bench) + 4  [0x1052c0a40]
+                + ! : | + ! 24 core::ptr::drop_in_place$LT$qp_schema..types..SeriesSource$GT$::hf460b29f3ff6680d  (in tick-bench) + 24,308,...  [0x104fec654,0x104fec770,...]  mod.rs:805
+                + ! : | + ! 18 core::ptr::drop_in_place$LT$qp_schema..types..SeriesSource$GT$::hf460b29f3ff6680d  (in tick-bench) + 108  [0x104fec6a8]  mod.rs:805
+                + ! : | + ! : 13 _xzm_free_tc  (in libsystem_malloc.dylib) + 0,132,...  [0x182e95878,0x182e958fc,...]
+                + ! : | + ! : 5 __xzm_xzone_free_to_freelist_chunk  (in libsystem_malloc.dylib) + 28,372  [0x182e916a0,0x182e917f8]
+                + ! : | + ! 17 __xzm_xzone_free_to_freelist_chunk  (in libsystem_malloc.dylib) + 764,716  [0x182e91980,0x182e91950]
+                + ! : | + ! 9 alloc::collections::btree::map::IntoIter$LT$K$C$V$C$A$GT$::dying_next::h572ecd0a115d2ff3  (in tick-bench) + 352,348,...  [0x10500f980,0x10500f97c,...]  map.rs:1773
+                + ! : | + 33 core::ptr::drop_in_place$LT$qp_schema..types..Series$GT$::h336b1249230a997c  (in tick-bench) + 160  [0x104fe8bf8]  mod.rs:805
+                + ! : | + ! 17 _xzm_free_tc  (in libsystem_malloc.dylib) + 0,104,...  [0x182e95878,0x182e958e0,...]
+                + ! : | + ! 8 _free  (in libsystem_malloc.dylib) + 0,76  [0x182e99110,0x182e9915c]
+                + ! : | + ! 6 __xzm_xzone_free_to_freelist_chunk  (in libsystem_malloc.dylib) + 80,0,...  [0x182e916d4,0x182e91684,...]
+                + ! : | + ! 2 DYLD-STUB$$free  (in tick-bench) + 4  [0x1052c0a40]
+                + ! : | + 33 core::ptr::drop_in_place$LT$qp_schema..types..Series$GT$::h336b1249230a997c  (in tick-bench) + 180  [0x104fe8c0c]  mod.rs:805
+                + ! : | + ! 17 __xzm_xzone_free_to_freelist_chunk  (in libsystem_malloc.dylib) + 372,96,...  [0x182e917f8,0x182e916e4,...]
+                + ! : | + ! 8 _xzm_free_tc  (in libsystem_malloc.dylib) + 104,0,...  [0x182e958e0,0x182e95878,...]
+                + ! : | + ! 6 _free  (in libsystem_malloc.dylib) + 0,36,...  [0x182e99110,0x182e99134,...]
+                + ! : | + ! 2 DYLD-STUB$$free  (in tick-bench) + 4  [0x1052c0a40]
+                + ! : | + 31 core::ptr::drop_in_place$LT$qp_schema..types..Series$GT$::h336b1249230a997c  (in tick-bench) + 32  [0x104fe8b78]  mod.rs:805
+                + ! : | + ! 13 _xzm_free_tc  (in libsystem_malloc.dylib) + 0,104,...  [0x182e95878,0x182e958e0,...]
+                + ! : | + ! 11 __xzm_xzone_free_to_freelist_chunk  (in libsystem_malloc.dylib) + 28,372,...  [0x182e916a0,0x182e917f8,...]
+                + ! : | + ! 7 _free  (in libsystem_malloc.dylib) + 0,76,...  [0x182e99110,0x182e9915c,...]
+                + ! : | + 31 core::ptr::drop_in_place$LT$qp_schema..types..Series$GT$::h336b1249230a997c  (in tick-bench) + 60  [0x104fe8b94]  mod.rs:805
+                + ! : | + ! 14 __xzm_xzone_free_to_freelist_chunk  (in libsystem_malloc.dylib) + 372,576,...  [0x182e917f8,0x182e918c4,...]
+                + ! : | + ! 12 _xzm_free_tc  (in libsystem_malloc.dylib) + 332,0,...  [0x182e959c4,0x182e95878,...]
+                + ! : | + ! 5 _free  (in libsystem_malloc.dylib) + 0,36,...  [0x182e99110,0x182e99134,...]
+                + ! : | + 25 core::ptr::drop_in_place$LT$qp_schema..types..Series$GT$::h336b1249230a997c  (in tick-bench) + 200  [0x104fe8c20]  mod.rs:805
+                + ! : | + ! 15 _xzm_free_tc  (in libsystem_malloc.dylib) + 104,160,...  [0x182e958e0,0x182e95918,...]
+                + ! : | + ! 5 _free  (in libsystem_malloc.dylib) + 0,36,...  [0x182e99110,0x182e99134,...]
+                + ! : | + ! 3 DYLD-STUB$$free  (in tick-bench) + 4  [0x1052c0a40]
+                + ! : | + ! 2 __xzm_xzone_free_to_freelist_chunk  (in libsystem_malloc.dylib) + 28,576  [0x182e916a0,0x182e918c4]
+                + ! : | + 9 __xzm_xzone_free_to_freelist_chunk  (in libsystem_malloc.dylib) + 764  [0x182e91980]
+                + ! : | + 1 core::ptr::drop_in_place$LT$qp_schema..types..Series$GT$::h336b1249230a997c  (in tick-bench) + 180  [0x104fe8c0c]  mod.rs:805
+                + ! : | 6 core::ptr::drop_in_place$LT$qp_schema..types..Document$GT$::h7fe1052e6f8a2ef3  (in tick-bench) + 92  [0x104fe9890]  mod.rs:805
+                + ! : | 4 core::ptr::drop_in_place$LT$qp_schema..types..Document$GT$::h7fe1052e6f8a2ef3  (in tick-bench) + 160  [0x104fe98d4]  mod.rs:805
+                + ! : | + 3 core::ptr::drop_in_place$LT$qp_schema..grammar..View$GT$::h523172c66030e8af  (in tick-bench) + 368  [0x104fe8900]  mod.rs:805
+                + ! : | + ! 3 core::ptr::drop_in_place$LT$qp_schema..grammar..Layer$GT$::h79acfd5754ca7f20  (in tick-bench) + 80  [0x104fe8ed4]  mod.rs:805
+                + ! : | + !   1 __xzm_xzone_free_to_freelist_chunk  (in libsystem_malloc.dylib) + 576  [0x182e918c4]
+                + ! : | + !   1 core::ptr::drop_in_place$LT$qp_schema..grammar..Layer$GT$::h79acfd5754ca7f20  (in tick-bench) + 112  [0x104fe8ef4]  mod.rs:805
+                + ! : | + !   : 1 _xzm_free_tc  (in libsystem_malloc.dylib) + 32  [0x182e95898]
+                + ! : | + !   1 core::ptr::drop_in_place$LT$qp_schema..grammar..Layer$GT$::h79acfd5754ca7f20  (in tick-bench) + 132  [0x104fe8f08]  mod.rs:805
+                + ! : | + !     1 _xzm_free_tc  (in libsystem_malloc.dylib) + 132  [0x182e958fc]
+                + ! : | + 1 __xzm_xzone_free_to_freelist_chunk  (in libsystem_malloc.dylib) + 764  [0x182e91980]
+                + ! : | 2 core::ptr::drop_in_place$LT$qp_schema..types..Document$GT$::h7fe1052e6f8a2ef3  (in tick-bench) + 132  [0x104fe98b8]  mod.rs:805
+                + ! : | + 1 xzm_segment_group_free_chunk  (in libsystem_malloc.dylib) + 624  [0x182e6d6c8]
+                + ! : | + ! 1 _xzm_segment_group_segment_span_free_coalesce  (in libsystem_malloc.dylib) + 248  [0x182e6dccc]
+                + ! : | + !   1 _xzm_segment_group_span_mark_used  (in libsystem_malloc.dylib) + 124  [0x182e6f718]
+                + ! : | + !     1 _xzm_reclaim_mark_used  (in libsystem_malloc.dylib) + 124  [0x182e6c318]
+                + ! : | + !       1 _xzm_reclaim_mark_used_locked  (in libsystem_malloc.dylib) + 60  [0x182e6ee24]
+                + ! : | + !         1 mach_vm_reclaim_try_cancel  (in libsystem_kernel.dylib) + 260  [0x1830406b8]
+                + ! : | + !           1 mach_absolute_time  (in libsystem_kernel.dylib) + 108  [0x18302d0f8]
+                + ! : | + 1 xzm_segment_group_free_chunk  (in libsystem_malloc.dylib) + 848  [0x182e6d7a8]
+                + ! : | +   1 _xzm_segment_group_span_mark_free  (in libsystem_malloc.dylib) + 112  [0x182e6df24]
+                + ! : | +     1 _xzm_reclaim_mark_free  (in libsystem_malloc.dylib) + 112  [0x182e6c178]
+                + ! : | +       1 xzm_reclaim_mark_free_locked  (in libsystem_malloc.dylib) + 120  [0x182e6bcfc]
+                + ! : | +         1 mach_vm_reclaim_try_enter  (in libsystem_kernel.dylib) + 316  [0x18304053c]
+                + ! : | +           1 mach_absolute_time  (in libsystem_kernel.dylib) + 108  [0x18302d0f8]
+                + ! : | 2 core::ptr::drop_in_place$LT$qp_schema..types..Document$GT$::h7fe1052e6f8a2ef3  (in tick-bench) + 212  [0x104fe9908]  mod.rs:805
+                + ! : | + 1 alloc::collections::btree::map::IntoIter$LT$K$C$V$C$A$GT$::dying_next::h572ecd0a115d2ff3  (in tick-bench) + 344  [0x10500f978]  map.rs:1773
+                + ! : | + 1 core::ptr::drop_in_place$LT$qp_schema..types..Fact$GT$::h6f72f231eb6373a4  (in tick-bench) + 36  [0x104fe7a68]  mod.rs:805
+                + ! : | +   1 _xzm_free_tc  (in libsystem_malloc.dylib) + 160  [0x182e95918]
+                + ! : | 1 core::ptr::drop_in_place$LT$qp_schema..types..Document$GT$::h7fe1052e6f8a2ef3  (in tick-bench) + 236  [0x104fe9920]  mod.rs:805
+                + ! : | + 1 _xzm_free_tc  (in libsystem_malloc.dylib) + 260  [0x182e9597c]
+                + ! : | 1 core::ptr::drop_in_place$LT$qp_schema..types..Document$GT$::h7fe1052e6f8a2ef3  (in tick-bench) + 608  [0x104fe9a94]  mod.rs:805
+                + ! : | + 1 __xzm_xzone_free_to_freelist_chunk  (in libsystem_malloc.dylib) + 12  [0x182e91690]
+                + ! : | 1 core::ptr::drop_in_place$LT$qp_schema..types..Series$GT$::h336b1249230a997c  (in tick-bench) + 144  [0x104fe8be8]  mod.rs:805
+                + ! : 5 qp_session::session::Session::commit::hbff7a71a6b37e289  (in tick-bench) + 128  [0x104fb3880]  session.rs:1192
+                + ! : | 4 core::ptr::drop_in_place$LT$alloc..collections..btree..map..BTreeMap$LT$alloc..string..String$C$alloc..rc..Rc$LT$qp_session..values..Computed$GT$$GT$$GT$::h9523069c5b88ae5f  (in tick-bench) + 176  [0x104fe53ac]  mod.rs:805
+                + ! : | + 3 alloc::rc::Rc$LT$T$C$A$GT$::drop_slow::h472da42c44c003b4  (in tick-bench) + 40  [0x105018fa8]  rc.rs:394
+                + ! : | + ! 3 core::ptr::drop_in_place$LT$alloc..collections..btree..map..BTreeMap$LT$alloc..string..String$C$alloc..vec..Vec$LT$core..option..Option$LT$f64$GT$$GT$$GT$$GT$::hb72e936c5ddda3d9  (in tick-bench) + 332  [0x104fe55fc]  mod.rs:805
+                + ! : | + !   3 xzm_segment_group_free_chunk  (in libsystem_malloc.dylib) + 624  [0x182e6d6c8]
+                + ! : | + !     2 _xzm_segment_group_segment_span_free_coalesce  (in libsystem_malloc.dylib) + 460  [0x182e6dda0]
+                + ! : | + !     : 2 _xzm_segment_group_span_mark_used  (in libsystem_malloc.dylib) + 124  [0x182e6f718]
+                + ! : | + !     :   2 _xzm_reclaim_mark_used  (in libsystem_malloc.dylib) + 124  [0x182e6c318]
+                + ! : | + !     :     2 _xzm_reclaim_mark_used_locked  (in libsystem_malloc.dylib) + 60  [0x182e6ee24]
+                + ! : | + !     :       1 mach_vm_reclaim_try_cancel  (in libsystem_kernel.dylib) + 260  [0x1830406b8]
+                + ! : | + !     :       | 1 mach_absolute_time  (in libsystem_kernel.dylib) + 108  [0x18302d0f8]
+                + ! : | + !     :       1 mach_vm_reclaim_try_cancel  (in libsystem_kernel.dylib) + 244  [0x1830406a8]
+                + ! : | + !     1 _xzm_segment_group_segment_span_free_coalesce  (in libsystem_malloc.dylib) + 248  [0x182e6dccc]
+                + ! : | + !       1 _xzm_segment_group_span_mark_used  (in libsystem_malloc.dylib) + 124  [0x182e6f718]
+                + ! : | + !         1 _xzm_reclaim_mark_used  (in libsystem_malloc.dylib) + 124  [0x182e6c318]
+                + ! : | + !           1 _xzm_reclaim_mark_used_locked  (in libsystem_malloc.dylib) + 60  [0x182e6ee24]
+                + ! : | + !             1 mach_vm_reclaim_try_cancel  (in libsystem_kernel.dylib) + 260  [0x1830406b8]
+                + ! : | + !               1 mach_absolute_time  (in libsystem_kernel.dylib) + 108  [0x18302d0f8]
+                + ! : | + 1 alloc::rc::Rc$LT$T$C$A$GT$::drop_slow::h472da42c44c003b4  (in tick-bench) + 32  [0x105018fa0]  rc.rs:394
+                + ! : | +   1 _free  (in libsystem_malloc.dylib) + 76  [0x182e9915c]
+                + ! : | 1 core::ptr::drop_in_place$LT$alloc..collections..btree..map..BTreeMap$LT$alloc..string..String$C$alloc..rc..Rc$LT$qp_session..values..Computed$GT$$GT$$GT$::h9523069c5b88ae5f  (in tick-bench) + 84  [0x104fe5350]  mod.rs:805
+                + ! : |   1 alloc::collections::btree::map::IntoIter$LT$K$C$V$C$A$GT$::dying_next::h572ecd0a115d2ff3  (in tick-bench) + 0  [0x10500f820]  map.rs:1763
+                + ! : 1 qp_session::session::Session::commit::hbff7a71a6b37e289  (in tick-bench) + 176  [0x104fb38b0]  session.rs:1195
+                + ! :   1 alloc::raw_vec::RawVec$LT$T$C$A$GT$::grow_one::h8ceae6e39c861c10  (in tick-bench) + 60  [0x10529fc98]  mod.rs:336
+                + ! :     1 alloc::raw_vec::RawVecInner$LT$A$GT$::finish_grow::h6e80902ff06b2ef0  (in tick-bench) + 248  [0x1052a002c]  mod.rs:752
+                + ! :       1 _realloc  (in libsystem_malloc.dylib) + 456  [0x182e99358]
+                + ! :         1 _malloc_zone_realloc  (in libsystem_malloc.dylib) + 148  [0x182e98b2c]
+                + ! :           1 xzm_malloc_zone_malloc_type_realloc  (in libsystem_malloc.dylib) + 996  [0x182e893f4]
+                + ! :             1 _platform_memmove  (in libsystem_platform.dylib) + 104  [0x18307bdc8]
+                + ! 2 qp_session::session::Session::handle_resolved::h1e75df7459aa0d91  (in tick-bench) + 14400,27052  [0x104fa8534,0x104fab6a0]  session.rs:617
+                + ! 1 qp_session::session::Session::handle_resolved::h1e75df7459aa0d91  (in tick-bench) + 26364  [0x104fab3f0]  session.rs:617
+                + ! : 1 _$LT$alloc..string..String$u20$as$u20$core..clone..Clone$GT$::clone::h1f8881cf73048a3e  (in tick-bench) + 56  [0x104e626d8]  string.rs:2351
+                + ! :   1 _xzm_xzone_thread_cache_fill_and_malloc  (in libsystem_malloc.dylib) + 132  [0x182e8ca20]
+                + ! 1 qp_session::session::Session::handle_resolved::h1e75df7459aa0d91  (in tick-bench) + 26512  [0x104fab484]  session.rs:617
+                + ! : 1 qp_session::expand::summarize_ops::h231085ac81f04795  (in tick-bench) + 3220  [0x104f65d88]  expand.rs:1621
+                + ! :   1 _xzm_free_tc  (in libsystem_malloc.dylib) + 84  [0x182e958cc]
+                + ! 1 qp_session::session::Session::handle_resolved::h1e75df7459aa0d91  (in tick-bench) + 26832  [0x104fab5c4]  session.rs:617
+                + ! : 1 qp_session::session::out::h912828a5782816c6  (in tick-bench) + 116  [0x104f9d85c]  session.rs:162
+                + ! :   1 _platform_memmove  (in libsystem_platform.dylib) + 180  [0x18307be14]
+                + ! 1 qp_session::session::Session::handle_resolved::h1e75df7459aa0d91  (in tick-bench) + 26928  [0x104fab624]  session.rs:617
+                + !   1 _$LT$alloc..vec..Vec$LT$T$C$A$GT$$u20$as$u20$alloc..vec..spec_extend..SpecExtend$LT$T$C$alloc..vec..into_iter..IntoIter$LT$T$GT$$GT$$GT$::spec_extend::h1102c585cd3442c4  (in tick-bench) + 160  [0x104fcd044]  spec_extend.rs:33
+                + !     1 alloc::raw_vec::RawVecInner$LT$A$GT$::reserve::do_reserve_and_handle::hf62a592ee5b9dc51  (in tick-bench) + 88  [0x1052a00d4]  mod.rs:557
+                + !       1 alloc::raw_vec::RawVecInner$LT$A$GT$::finish_grow::h6e80902ff06b2ef0  (in tick-bench) + 248  [0x1052a002c]  mod.rs:752
+                + !         1 xzm_malloc_zone_size  (in libsystem_malloc.dylib) + 708  [0x182e885c8]
+                + 16 qp_session::session::Session::handle_raw::h81d965bccfad72ff  (in tick-bench) + 6616  [0x104f9ff48]  session.rs:365
+                + ! 9 qp_session::session::Session::check_limits::walk::h47c227a5aa05ff81  (in tick-bench) + 300  [0x104fa26d0]  session.rs:508
+                + ! : 8 qp_session::session::Session::check_limits::walk::h47c227a5aa05ff81  (in tick-bench) + 412  [0x104fa2740]  session.rs:507
+                + ! : | 7 qp_session::session::Session::check_limits::walk::h47c227a5aa05ff81  (in tick-bench) + 300  [0x104fa26d0]  session.rs:508
+                + ! : | + 7 qp_session::session::Session::check_limits::walk::h47c227a5aa05ff81  (in tick-bench) + 276  [0x104fa26b8]  session.rs:508
+                + ! : | +   3 qp_session::error::ptr::h13c524ecd16a2191  (in tick-bench) + 240  [0x104f5497c]  error.rs:78
+                + ! : | +   ! 3 alloc::fmt::format::format_inner::hfba7744daf75a2c1  (in tick-bench) + 328  [0x104e61080]  fmt.rs:649
+                + ! : | +   !   3 core::fmt::write::h164e2e78980a3344  (in tick-bench) + 360  [0x104e64b14]  mod.rs:1463
+                + ! : | +   !     3 _$LT$alloc..string..String$u20$as$u20$core..fmt..Write$GT$::write_str::h07f07e45209a5724  (in tick-bench) + 108  [0x104e60e44]  string.rs:3320
+                + ! : | +   !       3 alloc::raw_vec::RawVecInner$LT$A$GT$::reserve::do_reserve_and_handle::h076dffaa2fb6fbdc  (in tick-bench) + 68  [0x10528cf18]
+                + ! : | +   !         3 alloc::raw_vec::RawVecInner$LT$A$GT$::finish_grow::h5779540bd9d0a3cd  (in tick-bench) + 56  [0x10528ce8c]
+                + ! : | +   !           1 _realloc  (in libsystem_malloc.dylib) + 252  [0x182e9928c]
+                + ! : | +   !           : 1 xzm_malloc_zone_size  (in libsystem_malloc.dylib) + 92  [0x182e88360]
+                + ! : | +   !           1 _realloc  (in libsystem_malloc.dylib) + 456  [0x182e99358]
+                + ! : | +   !           : 1 _malloc_zone_realloc  (in libsystem_malloc.dylib) + 148  [0x182e98b2c]
+                + ! : | +   !           :   1 xzm_malloc_zone_malloc_type_realloc  (in libsystem_malloc.dylib) + 1028  [0x182e89414]
+                + ! : | +   !           :     1 _xzm_free  (in libsystem_malloc.dylib) + 724  [0x182e909d4]
+                + ! : | +   !           1 _realloc  (in libsystem_malloc.dylib) + 208  [0x182e99260]
+                + ! : | +   1 qp_session::error::ptr::h13c524ecd16a2191  (in tick-bench) + 84  [0x104f548e0]  error.rs:77
+                + ! : | +   ! 1 _$LT$alloc..string..String$u20$as$u20$core..fmt..Write$GT$::write_str::h07f07e45209a5724  (in tick-bench) + 0  [0x105007f20]  string.rs:3319
+                + ! : | +   1 qp_session::error::ptr::h13c524ecd16a2191  (in tick-bench) + 116  [0x104f54900]  error.rs:77
+                + ! : | +   ! 1 alloc::str::_$LT$impl$u20$str$GT$::replace::hf076c256269d0a13  (in tick-bench) + 348  [0x1050198e4]  str.rs:292
+                + ! : | +   !   1 _platform_memmove  (in libsystem_platform.dylib) + 436  [0x18307bf14]
+                + ! : | +   1 qp_session::error::ptr::h13c524ecd16a2191  (in tick-bench) + 156  [0x104f54928]  error.rs:77
+                + ! : | +   ! 1 _free  (in libsystem_malloc.dylib) + 108  [0x182e9917c]
+                + ! : | +   1 qp_session::error::ptr::h13c524ecd16a2191  (in tick-bench) + 256  [0x104f5498c]  error.rs:79
+                + ! : | +     1 _xzm_free_tc  (in libsystem_malloc.dylib) + 0  [0x182e95878]
+                + ! : | 1 qp_session::session::Session::check_limits::walk::h47c227a5aa05ff81  (in tick-bench) + 276  [0x104fa26b8]  session.rs:508
+                + ! : |   1 qp_session::error::ptr::h13c524ecd16a2191  (in tick-bench) + 240  [0x104f5497c]  error.rs:78
+                + ! : |     1 alloc::fmt::format::format_inner::hfba7744daf75a2c1  (in tick-bench) + 176  [0x104e60fe8]  fmt.rs:646
+                + ! : 1 qp_session::session::Session::check_limits::walk::h47c227a5aa05ff81  (in tick-bench) + 388  [0x104fa2728]  session.rs:507
+                + ! :   1 qp_session::error::ptr::h3ca97dfca33a906e  (in tick-bench) + 416  [0x104f54bc0]  error.rs:77
+                + ! :     1 _free  (in libsystem_malloc.dylib) + 0  [0x182e99110]
+                + ! 6 qp_session::session::Session::check_limits::walk::h47c227a5aa05ff81  (in tick-bench) + 276  [0x104fa26b8]  session.rs:508
+                + ! : 3 qp_session::error::ptr::h13c524ecd16a2191  (in tick-bench) + 240  [0x104f5497c]  error.rs:78
+                + ! : | 3 alloc::fmt::format::format_inner::hfba7744daf75a2c1  (in tick-bench) + 328  [0x104e61080]  fmt.rs:649
+                + ! : |   1 _$LT$alloc..string..String$u20$as$u20$core..fmt..Write$GT$::write_str::h07f07e45209a5724  (in tick-bench) + 80  [0x104e60e28]  string.rs:3322
+                + ! : |   1 core::fmt::write::h164e2e78980a3344  (in tick-bench) + 360  [0x104e64b14]  mod.rs:1463
+                + ! : |   + 1 _$LT$alloc..string..String$u20$as$u20$core..fmt..Write$GT$::write_str::h07f07e45209a5724  (in tick-bench) + 60  [0x104e60e14]  string.rs:3320
+                + ! : |   +   1 DYLD-STUB$$memcpy  (in tick-bench) + 4  [0x1052c0a88]
+                + ! : |   1 core::fmt::write::h164e2e78980a3344  (in tick-bench) + 376  [0x104e64b24]  mod.rs:1469
+                + ! : |     1 core::fmt::Formatter::pad::hf4614a1c20e4508e  (in tick-bench) + 32  [0x104e660fc]  mod.rs:1705
+                + ! : 1 qp_session::error::ptr::h13c524ecd16a2191  (in tick-bench) + 84  [0x104f548e0]  error.rs:77
+                + ! : | 1 _$LT$alloc..string..String$u20$as$u20$core..fmt..Write$GT$::write_str::h07f07e45209a5724  (in tick-bench) + 116  [0x105007f94]  string.rs:3320
+                + ! : |   1 alloc::raw_vec::RawVecInner$LT$A$GT$::reserve::do_reserve_and_handle::hf62a592ee5b9dc51  (in tick-bench) + 88  [0x1052a00d4]  mod.rs:557
+                + ! : |     1 alloc::raw_vec::RawVecInner$LT$A$GT$::finish_grow::h6e80902ff06b2ef0  (in tick-bench) + 280  [0x1052a004c]  mod.rs:755
+                + ! : |       1 _xzm_malloc_tc  (in libsystem_malloc.dylib) + 260  [0x182e93a94]
+                + ! : 1 qp_session::error::ptr::h13c524ecd16a2191  (in tick-bench) + 140  [0x104f54918]  error.rs:77
+                + ! : | 1 alloc::str::_$LT$impl$u20$str$GT$::replace::hf076c256269d0a13  (in tick-bench) + 316  [0x1050198c4]  str.rs:292
+                + ! : 1 qp_session::error::ptr::h13c524ecd16a2191  (in tick-bench) + 256  [0x104f5498c]  error.rs:79
+                + ! :   1 _xzm_free_tc  (in libsystem_malloc.dylib) + 160  [0x182e95918]
+                + ! 1 qp_session::session::Session::check_limits::walk::h47c227a5aa05ff81  (in tick-bench) + 316  [0x104fa26e0]  session.rs:508
+                + !   1 _free  (in libsystem_malloc.dylib) + 36  [0x182e99134]
+                + 8 qp_session::session::Session::handle_raw::h81d965bccfad72ff  (in tick-bench) + 4848  [0x104f9f860]  session.rs:361
+                + ! 6 _$LT$serde..private..de..content..ContentDeserializer$LT$E$GT$$u20$as$u20$serde_core..de..Deserializer$GT$::deserialize_any::hb3f2ddccaa34514e  (in tick-bench) + 1448  [0x104f1dea0]  de.rs:1152
+                + ! : 3 _$LT$core..marker..PhantomData$LT$T$GT$$u20$as$u20$serde_core..de..DeserializeSeed$GT$::deserialize::h491bfd806ba42680  (in tick-bench) + 2072  [0x105038a28]  mod.rs:825
+                + ! : | 2 _$LT$serde..private..de..content..ContentDeserializer$LT$E$GT$$u20$as$u20$serde_core..de..Deserializer$GT$::deserialize_any::h184aa1859fb7a770  (in tick-bench) + 856  [0x104f04e40]  de.rs:1152
+                + ! : | + 2 _$LT$core..marker..PhantomData$LT$T$GT$$u20$as$u20$serde_core..de..DeserializeSeed$GT$::deserialize::h46a763524e5da5fd  (in tick-bench) + 64,2788  [0x105035300,0x105035da4]  mod.rs:825
+                + ! : | 1 _$LT$serde..private..de..content..ContentDeserializer$LT$E$GT$$u20$as$u20$serde_core..de..Deserializer$GT$::deserialize_any::h184aa1859fb7a770  (in tick-bench) + 996  [0x104f04ecc]  de.rs:1152
+                + ! : |   1 _$LT$serde..private..de..content..ContentDeserializer$LT$E$GT$$u20$as$u20$serde_core..de..Deserializer$GT$::deserialize_any::h184aa1859fb7a770  (in tick-bench) + 1596  [0x104f05124]  de.rs:1152
+                + ! : |     1 _platform_memmove  (in libsystem_platform.dylib) + 180  [0x18307be14]
+                + ! : 1 _$LT$core..marker..PhantomData$LT$T$GT$$u20$as$u20$serde_core..de..DeserializeSeed$GT$::deserialize::h491bfd806ba42680  (in tick-bench) + 684  [0x1050384bc]  mod.rs:825
+                + ! : | 1 _xzm_malloc_tc  (in libsystem_malloc.dylib) + 432  [0x182e93b40]
+                + ! : 1 _$LT$core..marker..PhantomData$LT$T$GT$$u20$as$u20$serde_core..de..DeserializeSeed$GT$::deserialize::h491bfd806ba42680  (in tick-bench) + 1052  [0x10503862c]  mod.rs:825
+                + ! : | 1 core::ptr::drop_in_place$LT$serde_core..private..content..Content$GT$::h87ef6d4d3b329260  (in tick-bench) + 24  [0x104fedf58]  mod.rs:805
+                + ! : 1 _$LT$core..marker..PhantomData$LT$T$GT$$u20$as$u20$serde_core..de..DeserializeSeed$GT$::deserialize::h491bfd806ba42680  (in tick-bench) + 948  [0x1050385c4]  mod.rs:825
+                + ! 1 _$LT$serde..private..de..content..ContentDeserializer$LT$E$GT$$u20$as$u20$serde_core..de..Deserializer$GT$::deserialize_any::hb3f2ddccaa34514e  (in tick-bench) + 2236  [0x104f1e1b4]  de.rs:1152
+                + ! : 1 serde::private::de::content::MapDeserializer$LT$E$GT$::end::hcf09088bccb8362d  (in tick-bench) + 40  [0x10501b3e4]  de.rs:1623
+                + ! :   1 __xzm_xzone_free_to_freelist_chunk  (in libsystem_malloc.dylib) + 424  [0x182e9182c]
+                + ! :     1 mach_absolute_time  (in libsystem_kernel.dylib) + 108  [0x18302d0f8]
+                + ! 1 _$LT$serde..private..de..content..ContentDeserializer$LT$E$GT$$u20$as$u20$serde_core..de..Deserializer$GT$::deserialize_any::hb3f2ddccaa34514e  (in tick-bench) + 496  [0x104f1dae8]  de.rs:1152
+                + 6 qp_session::session::Session::handle_raw::h81d965bccfad72ff  (in tick-bench) + 456  [0x104f9e738]  session.rs:338
+                + ! 6 _$LT$$RF$mut$u20$serde_json..de..Deserializer$LT$R$GT$$u20$as$u20$serde_core..de..Deserializer$GT$::deserialize_any::h93af9ece63e8c97d  (in tick-bench) + 2192  [0x10507f1d8]  de.rs:1447
+                + !   4 _$LT$$RF$mut$u20$serde_json..de..Deserializer$LT$R$GT$$u20$as$u20$serde_core..de..Deserializer$GT$::deserialize_any::h93af9ece63e8c97d  (in tick-bench) + 484  [0x10507eb2c]  de.rs:1436
+                + !   : 4 _$LT$$RF$mut$u20$serde_json..de..Deserializer$LT$R$GT$$u20$as$u20$serde_core..de..Deserializer$GT$::deserialize_any::h93af9ece63e8c97d  (in tick-bench) + 2192  [0x10507f1d8]  de.rs:1447
+                + !   :   1 _$LT$$RF$mut$u20$serde_json..de..Deserializer$LT$R$GT$$u20$as$u20$serde_core..de..Deserializer$GT$::deserialize_any::h93af9ece63e8c97d  (in tick-bench) + 484  [0x10507eb2c]  de.rs:1436
+                + !   :   | 1 _$LT$$RF$mut$u20$serde_json..de..Deserializer$LT$R$GT$$u20$as$u20$serde_core..de..Deserializer$GT$::deserialize_any::h93af9ece63e8c97d  (in tick-bench) + 2240  [0x10507f208]  de.rs:1447
+                + !   :   |   1 alloc::collections::btree::map::BTreeMap$LT$K$C$V$C$A$GT$::insert::h8cbb68d23d33c622  (in tick-bench) + 168  [0x10500c5e8]  map.rs:1050
+                + !   :   1 _$LT$$RF$mut$u20$serde_json..de..Deserializer$LT$R$GT$$u20$as$u20$serde_core..de..Deserializer$GT$::deserialize_any::h93af9ece63e8c97d  (in tick-bench) + 2080  [0x10507f168]  de.rs:1447
+                + !   :   | 1 _$LT$serde_json..de..MapAccess$LT$R$GT$$u20$as$u20$serde_core..de..MapAccess$GT$::next_key_seed::h5341ec504888b1b6  (in tick-bench) + 208  [0x1050240c4]  de.rs:2021
+                + !   :   |   1 _xzm_malloc_tc  (in libsystem_malloc.dylib) + 92  [0x182e939ec]
+                + !   :   1 _$LT$$RF$mut$u20$serde_json..de..Deserializer$LT$R$GT$$u20$as$u20$serde_core..de..Deserializer$GT$::deserialize_any::h93af9ece63e8c97d  (in tick-bench) + 2192  [0x10507f1d8]  de.rs:1447
+                + !   :   | 1 _$LT$$RF$mut$u20$serde_json..de..Deserializer$LT$R$GT$$u20$as$u20$serde_core..de..Deserializer$GT$::deserialize_any::h93af9ece63e8c97d  (in tick-bench) + 732  [0x10507ec24]  de.rs:1424
+                + !   :   |   1 serde_json::de::Deserializer$LT$R$GT$::f64_from_parts::he1ebec4062e24258  (in tick-bench) + 6084  [0x104fc6220]  de.rs:636
+                + !   :   1 _$LT$$RF$mut$u20$serde_json..de..Deserializer$LT$R$GT$$u20$as$u20$serde_core..de..Deserializer$GT$::deserialize_any::h93af9ece63e8c97d  (in tick-bench) + 2240  [0x10507f208]  de.rs:1447
+                + !   :     1 alloc::collections::btree::map::BTreeMap$LT$K$C$V$C$A$GT$::insert::h8cbb68d23d33c622  (in tick-bench) + 332  [0x10500c68c]  map.rs:1053
+                + !   :       1 alloc::collections::btree::map::entry::VacantEntry$LT$K$C$V$C$A$GT$::insert_entry::h5b9ad8eb47c2f679  (in tick-bench) + 524  [0x1050109a4]  entry.rs:411
+                + !   :         1 _platform_memmove  (in libsystem_platform.dylib) + 460  [0x18307bf2c]
+                + !   2 _$LT$$RF$mut$u20$serde_json..de..Deserializer$LT$R$GT$$u20$as$u20$serde_core..de..Deserializer$GT$::deserialize_any::h93af9ece63e8c97d  (in tick-bench) + 556  [0x10507eb74]  de.rs:1436
+                + !     2 alloc::raw_vec::RawVec$LT$T$C$A$GT$::grow_one::hc5fc4344addcaebe  (in tick-bench) + 60  [0x1052a14dc]  mod.rs:336
+                + !       1 alloc::raw_vec::RawVecInner$LT$A$GT$::finish_grow::hd650a85b67a278b6  (in tick-bench) + 44  [0x1052a1534]  mod.rs:745
+                + !       1 alloc::raw_vec::RawVecInner$LT$A$GT$::finish_grow::hd650a85b67a278b6  (in tick-bench) + 280  [0x1052a1620]  mod.rs:755
+                + !         1 _xzm_xzone_malloc_tiny  (in libsystem_malloc.dylib) + 248  [0x182e8cb44]
+                + 5 qp_session::session::Session::handle_raw::h81d965bccfad72ff  (in tick-bench) + 4132  [0x104f9f594]  session.rs:361
+                + ! 5 _$LT$serde_path_to_error..de..TrackedSeed$LT$X$GT$$u20$as$u20$serde_core..de..DeserializeSeed$GT$::deserialize::h100f497730aeb928  (in tick-bench) + 180  [0x10507dd90]  de.rs:1421
+                + !   5 _$LT$serde..private..de..content..ContentVisitor$u20$as$u20$serde_core..de..Visitor$GT$::visit_seq::h598fc58d52a1353d  (in tick-bench) + 248  [0x105072950]  de.rs:482
+                + !     5 _$LT$serde_path_to_error..de..TrackedSeed$LT$X$GT$$u20$as$u20$serde_core..de..DeserializeSeed$GT$::deserialize::h100f497730aeb928  (in tick-bench) + 844  [0x10507e028]  de.rs:1421
+                + !       3 _$LT$serde_path_to_error..de..TrackedSeed$LT$X$GT$$u20$as$u20$serde_core..de..DeserializeSeed$GT$::deserialize::h100f497730aeb928  (in tick-bench) + 844  [0x10507e028]  de.rs:1421
+                + !       : 1 _$LT$serde_path_to_error..de..TrackedSeed$LT$X$GT$$u20$as$u20$serde_core..de..DeserializeSeed$GT$::deserialize::h100f497730aeb928  (in tick-bench) + 296  [0x10507de04]  de.rs:1423
+                + !       : | 1 _malloc_zone_malloc  (in libsystem_malloc.dylib) + 80  [0x182e98540]
+                + !       : 1 _$LT$serde_path_to_error..de..TrackedSeed$LT$X$GT$$u20$as$u20$serde_core..de..DeserializeSeed$GT$::deserialize::h100f497730aeb928  (in tick-bench) + 1364  [0x10507e230]  de.rs:1427
+                + !       : | 1 _xzm_free_tc  (in libsystem_malloc.dylib) + 84  [0x182e958cc]
+                + !       : 1 _$LT$serde_path_to_error..de..TrackedSeed$LT$X$GT$$u20$as$u20$serde_core..de..DeserializeSeed$GT$::deserialize::h100f497730aeb928  (in tick-bench) + 1448  [0x10507e284]  mod.rs:0
+                + !       1 _$LT$serde_path_to_error..de..TrackedSeed$LT$X$GT$$u20$as$u20$serde_core..de..DeserializeSeed$GT$::deserialize::h100f497730aeb928  (in tick-bench) + 1300  [0x10507e1f0]  de.rs:1421
+                + !       : 1 DYLD-STUB$$free  (in tick-bench) + 4  [0x1052c0a40]
+                + !       1 _$LT$serde_path_to_error..de..TrackedSeed$LT$X$GT$$u20$as$u20$serde_core..de..DeserializeSeed$GT$::deserialize::h100f497730aeb928  (in tick-bench) + 1284  [0x10507e1e0]  de.rs:1421
+                + 5 qp_session::session::Session::handle_raw::h81d965bccfad72ff  (in tick-bench) + 8848  [0x104fa0800]  session.rs:369
+                + ! 3 core::ptr::drop_in_place$LT$serde_json..value..Value$GT$::h11e18d9428225a45  (in tick-bench) + 280  [0x104fe8e14]  mod.rs:805
+                + ! : 2 core::ptr::drop_in_place$LT$serde_json..value..Value$GT$::h11e18d9428225a45  (in tick-bench) + 104  [0x104fe8d64]  mod.rs:805
+                + ! : | 2 core::ptr::drop_in_place$LT$serde_json..value..Value$GT$::h11e18d9428225a45  (in tick-bench) + 280  [0x104fe8e14]  mod.rs:805
+                + ! : |   1 core::ptr::drop_in_place$LT$serde_json..value..Value$GT$::h11e18d9428225a45  (in tick-bench) + 272  [0x104fe8e0c]  mod.rs:805
+                + ! : |   + 1 _xzm_free_tc  (in libsystem_malloc.dylib) + 0  [0x182e95878]
+                + ! : |   1 core::ptr::drop_in_place$LT$serde_json..value..Value$GT$::h11e18d9428225a45  (in tick-bench) + 256  [0x104fe8dfc]  mod.rs:805
+                + ! : 1 core::ptr::drop_in_place$LT$serde_json..value..Value$GT$::h11e18d9428225a45  (in tick-bench) + 60  [0x104fe8d38]  mod.rs:0
+                + ! 1 core::ptr::drop_in_place$LT$serde_json..value..Value$GT$::h11e18d9428225a45  (in tick-bench) + 232  [0x104fe8de4]  mod.rs:805
+                + ! : 1 alloc::collections::btree::map::IntoIter$LT$K$C$V$C$A$GT$::dying_next::h16009a1536f6ce7e  (in tick-bench) + 236  [0x10500f2dc]  map.rs:1771
+                + ! 1 core::ptr::drop_in_place$LT$serde_json..value..Value$GT$::h11e18d9428225a45  (in tick-bench) + 292  [0x104fe8e20]  mod.rs:805
+                + !   1 alloc::collections::btree::map::IntoIter$LT$K$C$V$C$A$GT$::dying_next::h16009a1536f6ce7e  (in tick-bench) + 336  [0x10500f340]  map.rs:1767
+                + !     1 _xzm_free_tc  (in libsystem_malloc.dylib) + 292  [0x182e9599c]
+                + 3 qp_session::session::Session::handle_raw::h81d965bccfad72ff  (in tick-bench) + 3268  [0x104f9f234]  session.rs:357
+                + ! 1 _$LT$core..iter..adapters..map..Map$LT$I$C$F$GT$$u20$as$u20$core..iter..traits..iterator..Iterator$GT$::next::h87d7a576e4f84d10  (in tick-bench) + 248  [0x104f00730]  map.rs:107
+                + ! : 1 qp_session::error::ptr::hb045e504fb8f0a0d  (in tick-bench) + 256  [0x104f54d90]  error.rs:78
+                + ! :   1 alloc::fmt::format::format_inner::hfba7744daf75a2c1  (in tick-bench) + 328  [0x104e61080]  fmt.rs:649
+                + ! :     1 core::fmt::write::h164e2e78980a3344  (in tick-bench) + 376  [0x104e64b24]  mod.rs:1469
+                + ! :       1 _$LT$alloc..string..String$u20$as$u20$core..fmt..Write$GT$::write_str::h07f07e45209a5724  (in tick-bench) + 108  [0x104e60e44]  string.rs:3320
+                + ! :         1 alloc::raw_vec::RawVecInner$LT$A$GT$::reserve::do_reserve_and_handle::h076dffaa2fb6fbdc  (in tick-bench) + 68  [0x10528cf18]
+                + ! :           1 alloc::raw_vec::RawVecInner$LT$A$GT$::finish_grow::h5779540bd9d0a3cd  (in tick-bench) + 56  [0x10528ce8c]
+                + ! :             1 _realloc  (in libsystem_malloc.dylib) + 456  [0x182e99358]
+                + ! :               1 _malloc_zone_realloc  (in libsystem_malloc.dylib) + 148  [0x182e98b2c]
+                + ! :                 1 xzm_malloc_zone_malloc_type_realloc  (in libsystem_malloc.dylib) + 280  [0x182e89128]
+                + ! 1 _$LT$core..iter..adapters..map..Map$LT$I$C$F$GT$$u20$as$u20$core..iter..traits..iterator..Iterator$GT$::next::h87d7a576e4f84d10  (in tick-bench) + 2600  [0x104f01060]  map.rs:107
+                + ! : 1 qp_session::error::ptr::hb045e504fb8f0a0d  (in tick-bench) + 64  [0x104f54cd0]  error.rs:77
+                + ! :   1 _xzm_malloc_tc  (in libsystem_malloc.dylib) + 280  [0x182e93aa8]
+                + ! 1 _$LT$core..iter..adapters..map..Map$LT$I$C$F$GT$$u20$as$u20$core..iter..traits..iterator..Iterator$GT$::next::h87d7a576e4f84d10  (in tick-bench) + 2616  [0x104f01070]  map.rs:107
+                + !   1 alloc::raw_vec::RawVec$LT$T$C$A$GT$::grow_one::h4f4dc982d04c1791  (in tick-bench) + 60  [0x10529f9c0]  mod.rs:336
+                + !     1 alloc::raw_vec::RawVecInner$LT$A$GT$::finish_grow::h6e80902ff06b2ef0  (in tick-bench) + 92  [0x10529ff90]  mod.rs:0
+                + 3 qp_session::session::Session::handle_raw::h81d965bccfad72ff  (in tick-bench) + 3324  [0x104f9f26c]  session.rs:357
+                + ! 3 core::ptr::drop_in_place$LT$alloc..vec..Vec$LT$alloc..vec..Vec$LT$qp_session..select..Site$GT$$GT$$GT$::h7d13c8e17358ea3f  (in tick-bench) + 152  [0x104ff19bc]  mod.rs:805
+                + !   2 __xzm_xzone_free_to_freelist_chunk  (in libsystem_malloc.dylib) + 424  [0x182e9182c]
+                + !   : 2 mach_absolute_time  (in libsystem_kernel.dylib) + 108  [0x18302d0f8]
+                + !   1 __xzm_xzone_free_to_freelist_chunk  (in libsystem_malloc.dylib) + 0  [0x182e91684]
+                + 2 qp_session::session::Session::handle_raw::h81d965bccfad72ff  (in tick-bench) + 10900  [0x104fa1004]  session.rs:357
+                + ! 1 alloc::str::_$LT$impl$u20$str$GT$::replace::h309e10db64d7ea90  (in tick-bench) + 972  [0x1050a580c]  str.rs:294
+                + ! 1 serde_json::value::Value::pointer::h005af4a4eb1648bd  (in tick-bench) + 356  [0x1050a27b8]  mod.rs:790
+                + !   1 DYLD-STUB$$memcmp  (in tick-bench) + 4  [0x1052c0a7c]
+                + 1 qp_session::session::Session::check_limits::walk::h47c227a5aa05ff81  (in tick-bench) + 516  [0x104fa27a8]  session.rs:511
+                + 1 qp_session::session::Session::handle_raw::h81d965bccfad72ff  (in tick-bench) + 4024  [0x104f9f528]  session.rs:361
+                +   1 _$LT$serde_path_to_error..de..TrackedSeed$LT$X$GT$$u20$as$u20$serde_core..de..DeserializeSeed$GT$::deserialize::hbe5661b0225681fe  (in tick-bench) + 48  [0x10507e4a0]  de.rs:1423
+                2 tick_bench::main::h49e1dfd2839df5b9  (in tick-bench) + 20108  [0x10511dbfc]  main.rs:478
+                  2 core::ptr::drop_in_place$LT$alloc..vec..Vec$LT$qp_schema..protocol..OutboundLine$GT$$GT$::he030005dfdbb6e24  (in tick-bench) + 52  [0x105167b84]  mod.rs:805
+                    1 __xzm_xzone_free_to_freelist_chunk  (in libsystem_malloc.dylib) + 424  [0x182e9182c]
+                    ! 1 mach_absolute_time  (in libsystem_kernel.dylib) + 108  [0x18302d0f8]
+                    1 _xzm_free_tc  (in libsystem_malloc.dylib) + 260  [0x182e9597c]
+
+Total number in stack (recursive counted multiple, when >=5):
+        22       _platform_memmove  (in libsystem_platform.dylib) + 0  [0x18307bd60]
+        22       _xzm_free_tc  (in libsystem_malloc.dylib) + 0  [0x182e95878]
+        20       _xzm_malloc_tc  (in libsystem_malloc.dylib) + 0  [0x182e93990]
+        17       __xzm_xzone_free_to_freelist_chunk  (in libsystem_malloc.dylib) + 0  [0x182e91684]
+        16       mach_absolute_time  (in libsystem_kernel.dylib) + 0  [0x18302d08c]
+        13       _free  (in libsystem_malloc.dylib) + 0  [0x182e99110]
+        12       _malloc_zone_malloc  (in libsystem_malloc.dylib) + 0  [0x182e984f0]
+        11       DYLD-STUB$$memcpy  (in tick-bench) + 0  [0x1052c0a84]
+        10       DYLD-STUB$$malloc  (in tick-bench) + 0  [0x1052c0a6c]
+        9       __xzm_xzone_free_to_freelist_chunk  (in libsystem_malloc.dylib) + 424  [0x182e9182c]
+        8       DYLD-STUB$$free  (in tick-bench) + 0  [0x1052c0a3c]
+        6       _xzm_reclaim_mark_used_locked  (in libsystem_malloc.dylib) + 60  [0x182e6ee24]
+        6       mach_vm_reclaim_try_cancel  (in libsystem_kernel.dylib) + 260  [0x1830406b8]
+        5       _xzm_xzone_malloc_from_freelist_chunk  (in libsystem_malloc.dylib) + 0  [0x182e8e4a0]
+
+Sort by top of stack, same collapsed (when >= 5):
+        qp_compute::run::h288d3bcd8cc0315c  (in tick-bench)        473
+        _$LT$qp_compute..studies..macd..Macd$u20$as$u20$qp_compute..core..Core$GT$::peek::h14428a10490a8cac  (in tick-bench)        361
+        qp_compute::studies::macd::Macd::commit1::h7aa9a37872c2ae9f  (in tick-bench)        347
+        _platform_memmove  (in libsystem_platform.dylib)        271
+        _$LT$qp_schema..types..Series$u20$as$u20$core..clone..Clone$GT$::clone::h6080423094cfb93b  (in tick-bench)        215
+        _xzm_malloc_tc  (in libsystem_malloc.dylib)        163
+        _xzm_free_tc  (in libsystem_malloc.dylib)        146
+        _$LT$qp_compute..core..Streaming$LT$C$GT$$u20$as$u20$qp_compute..Study$GT$::push::h144b977831c970c9  (in tick-bench)        141
+        __xzm_xzone_free_to_freelist_chunk  (in libsystem_malloc.dylib)        139
+        _malloc_zone_malloc  (in libsystem_malloc.dylib)        104
+        _$LT$qp_compute..core..Streaming$LT$C$GT$$u20$as$u20$qp_compute..Study$GT$::push::h888df3d47c4d2450  (in tick-bench)        97
+        DYLD-STUB$$memcpy  (in tick-bench)        85
+        qp_compute::compute_bars::h40114c182afef936  (in tick-bench)        79
+        qp_compute::Field::column::h352a15238f248673  (in tick-bench)        77
+        _free  (in libsystem_malloc.dylib)        67
+        alloc::collections::btree::map::IntoIter$LT$K$C$V$C$A$GT$::dying_next::h572ecd0a115d2ff3  (in tick-bench)        48
+        _xzm_xzone_malloc_tiny  (in libsystem_malloc.dylib)        29
+        core::ptr::drop_in_place$LT$qp_schema..types..SeriesSource$GT$::hf460b29f3ff6680d  (in tick-bench)        24
+        _$LT$qp_schema..types..Document$u20$as$u20$core..clone..Clone$GT$::clone::h9640fee1d89c0fda  (in tick-bench)        22
+        DYLD-STUB$$malloc  (in tick-bench)        19
+        mach_absolute_time  (in libsystem_kernel.dylib)        17
+        DYLD-STUB$$free  (in tick-bench)        15
+        _$LT$alloc..collections..btree..map..BTreeMap$LT$K$C$V$C$A$GT$$u20$as$u20$core..clone..Clone$GT$::clone::clone_subtree::h8b7d4bc5bddd9419  (in tick-bench)        12
+        _$LT$alloc..vec..Vec$LT$T$C$A$GT$$u20$as$u20$core..clone..Clone$GT$::clone::hc48343ae0d2164d9  (in tick-bench)        8
+        _xzm_xzone_malloc_freelist_outlined  (in libsystem_malloc.dylib)        6
+        _xzm_xzone_malloc_from_freelist_chunk  (in libsystem_malloc.dylib)        6
+        core::ptr::drop_in_place$LT$qp_schema..types..Document$GT$::h7fe1052e6f8a2ef3  (in tick-bench)        6
+
+Binary Images:
+       0x104e60000 -        0x1053af5df +tick-bench (0) <685948DC-1F93-3809-ADA8-0C76C50E4872> /Users/*/tick-bench
+       0x182be8000 -        0x182c375f7  libobjc.A.dylib (973.1) <C0680DF6-9900-3C29-A071-95A031686EF8> /usr/lib/libobjc.A.dylib
+       0x182c38000 -        0x182c4223f  libsharedcache.dylib (0) <BBF95357-BEBF-3D89-8900-2BBB14A667C5> /usr/lib/libsharedcache.dylib
+       0x182c43000 -        0x182c69d3b  libdyld.dylib (27062) <62863BCA-DD60-3D32-A9DB-89099BA6F3D7> /usr/lib/system/libdyld.dylib
+       0x182c6a000 -        0x182d296e3  dyld (1.0.0 - 27062) <D341DDCB-7969-3A9C-8E03-0CF4751398A9> /usr/lib/dyld
+       0x182d2a000 -        0x182d2d01f  libsystem_blocks.dylib (98.1) <6F304731-D95D-3501-B4AD-F2934F7F2446> /usr/lib/system/libsystem_blocks.dylib
+       0x182d2e000 -        0x182d830df  libxpc.dylib (3298.1.1) <0791121F-B5FC-3F84-BF04-115E86D2D882> /usr/lib/system/libxpc.dylib
+       0x182d84000 -        0x182da3c13  libsystem_trace.dylib (1966.1.1) <B48A8E3E-A12A-3342-8321-428B555E965E> /usr/lib/system/libsystem_trace.dylib
+       0x182da4000 -        0x182e58f27  libcorecrypto.dylib (2109.0.22) <807AA6C9-5D8A-3CA5-B4CE-FACE5296EF6A> /usr/lib/system/libcorecrypto.dylib
+       0x182e59000 -        0x182eaec5f  libsystem_malloc.dylib (886.0.8) <2339CB57-FE5A-3154-A206-A76059C749EB> /usr/lib/system/libsystem_malloc.dylib
+       0x182eaf000 -        0x182ef519f  libdispatch.dylib (1605.0.2) <022BF08F-0B3A-3225-9E65-16D1553CE90D> /usr/lib/system/libdispatch.dylib
+       0x182ef6000 -        0x182ef8d2b  libsystem_featureflags.dylib (108) <20C1CAB2-1F13-3426-8146-9CAE9FF2A33D> /usr/lib/system/libsystem_featureflags.dylib
+       0x182ef9000 -        0x182f7bca3  libsystem_c.dylib (1786.0.3) <FBA7B23E-AA60-3A90-9AA4-A7A2E0AD63EE> /usr/lib/system/libsystem_c.dylib
+       0x182f7c000 -        0x183011033  libc++.1.dylib (2200.27) <1E9BA4AA-B5DA-3CF3-80AC-4B880049573F> /usr/lib/libc++.1.dylib
+       0x183012000 -        0x18302beff  libc++abi.dylib (2200.27) <A21743EE-6E1C-3E74-97EA-7AF793DE4BDF> /usr/lib/libc++abi.dylib
+       0x18302c000 -        0x18306a9ab  libsystem_kernel.dylib (13432.1.9) <F63BF418-8F75-34A4-AAF1-8CAF2B9B6A05> /usr/lib/system/libsystem_kernel.dylib
+       0x18306b000 -        0x18307791b  libsystem_pthread.dylib (553.0.1) <5A1828C3-CBC2-3B85-BD07-C8ED10021A41> /usr/lib/system/libsystem_pthread.dylib
+       0x183078000 -        0x1830814f3  libsystem_platform.dylib (402.0.1.0.1) <080E4444-A0FB-3913-9756-4E470015F32F> /usr/lib/system/libsystem_platform.dylib
+       0x183082000 -        0x1830b0903  libsystem_info.dylib (603) <BC387AEB-1CEF-3513-92D7-D7F913596711> /usr/lib/system/libsystem_info.dylib
+       0x1871da000 -        0x1871e3b13  libsystem_darwin.dylib (1786.0.3) <4E66C888-993C-3E6A-A8DA-A949C01C5B67> /usr/lib/system/libsystem_darwin.dylib
+       0x187634000 -        0x187645b8b  libsystem_notify.dylib (368) <58FD36D8-37A7-311C-80F2-8E64DD8710CF> /usr/lib/system/libsystem_notify.dylib
+       0x189791000 -        0x1897abd93  libsystem_networkextension.dylib (2340.1.2) <22E1D190-486F-324F-ABA4-F36AB841BFE9> /usr/lib/system/libsystem_networkextension.dylib
+       0x189839000 -        0x189850247  libsystem_asl.dylib (409) <B4D449B7-A821-3A9A-8019-E917B291F10A> /usr/lib/system/libsystem_asl.dylib
+       0x18a7e4000 -        0x18a7e4f2f  libobjcMsgSend.dylib (973.1) <41179EDE-DC97-3BBE-8848-6400D12C1436> /usr/lib/objc/libobjcMsgSend.dylib
+       0x18b930000 -        0x18b937edf  libsystem_symptoms.dylib (2394.0.4) <60EE7884-9F4E-3184-A6AC-FA40A7A0297D> /usr/lib/system/libsystem_symptoms.dylib
+       0x18fcc8000 -        0x18fd02aeb  libsystem_containermanager.dylib (833.0.8.0.1) <08A57205-555D-3792-8931-9D5B585AF326> /usr/lib/system/libsystem_containermanager.dylib
+       0x19131b000 -        0x19131f317  libsystem_configuration.dylib (1446) <F3EB66A7-7A24-3AE5-B6E8-9A37BB00F119> /usr/lib/system/libsystem_configuration.dylib
+       0x191320000 -        0x191326e03  libsystem_sandbox.dylib (3051.0.52) <1E892B56-092E-3832-BDE3-DCE356D7A4FA> /usr/lib/system/libsystem_sandbox.dylib
+       0x1927e4000 -        0x1927e4f2f  libobjcMsgSend1.dylib (973.1) <B40D9B2A-E1EE-37ED-8004-711A1F263DE1> /usr/lib/objc/libobjcMsgSend1.dylib
+       0x192f04000 -        0x192f06f93  libquarantine.dylib (217.0.4) <7FD4AE22-86EF-382B-83F5-ADF9336C1160> /usr/lib/system/libquarantine.dylib
+       0x193616000 -        0x19361c1e7  libsystem_coreservices.dylib (203) <57248E07-11A5-3857-918E-4A3A63B69FE8> /usr/lib/system/libsystem_coreservices.dylib
+       0x193bde000 -        0x193c1bb27  libsystem_m.dylib (3326.0.1) <A3FB340F-3ED5-30F4-8B64-9D5860F64D35> /usr/lib/system/libsystem_m.dylib
+       0x193c1c000 -        0x193c1cb47  libcharset.1.dylib (121) <3C9B584E-740A-3664-A1B0-52E561EA4B0B> /usr/lib/libcharset.1.dylib
+       0x193c1d000 -        0x193c204f7  libmacho.dylib (27062) <50DEADEC-3E99-3519-AFC3-4A3FEB3F14C3> /usr/lib/system/libmacho.dylib
+       0x193c3a000 -        0x193c46707  libcommonCrypto.dylib (600041) <41C99F45-C5E6-39DB-B1F2-A1BEA9D242A4> /usr/lib/system/libcommonCrypto.dylib
+       0x193c47000 -        0x193c50c87  libunwind.dylib (2200.5) <3070AB81-B082-39E8-8A00-EF88DDE9AC47> /usr/lib/system/libunwind.dylib
+       0x193c58000 -        0x193c627eb  libcopyfile.dylib (260.0.3) <72D95AF9-BF5E-3A84-81A6-BCC5BDB99857> /usr/lib/system/libcopyfile.dylib
+       0x193c63000 -        0x193c668bf  libcompiler_rt.dylib (103.4) <DFB5CE7F-A36E-36AA-BECE-1392D3D43607> /usr/lib/system/libcompiler_rt.dylib
+       0x193c67000 -        0x193c6c077  libsystem_collections.dylib (1786.0.3) <1E8022D4-5A37-3A7A-8936-603E6FA88358> /usr/lib/system/libsystem_collections.dylib
+       0x193c6d000 -        0x193c6ff1f  libsystem_secinit.dylib (182) <DE037464-4C5D-3E96-A33F-2A4557CC6A20> /usr/lib/system/libsystem_secinit.dylib
+       0x193c70000 -        0x193c7297f  libremovefile.dylib (96) <E6E6DFCF-6B2C-3F30-A59D-816CAB1190CE> /usr/lib/system/libremovefile.dylib
+       0x193c73000 -        0x193c73e27  libkeymgr.dylib (31) <5EC997EF-3ADA-360B-9FCD-5F940C83FA4E> /usr/lib/system/libkeymgr.dylib
+       0x193c74000 -        0x193c7caf7  libsystem_dnssd.dylib (3111.0.5.0.1) <DE22096F-1E5B-3D6E-8164-771582DD6391> /usr/lib/system/libsystem_dnssd.dylib
+       0x193c7d000 -        0x193c81f1b  libcache.dylib (95) <80BAE197-E285-3F6E-A1EE-B77FE37D7E5D> /usr/lib/system/libcache.dylib
+       0x193c82000 -        0x193c838f3  libSystem.B.dylib (1359) <4FDC9AA6-B344-37FE-B8C6-A4C94A038F57> /usr/lib/libSystem.B.dylib
+       0x193cbc000 -        0x193cc30a3  libiconv.2.dylib (121) <C343D6F7-6932-30E8-8E8F-F756946D8413> /usr/lib/libiconv.2.dylib
+       0x19a7e4000 -        0x19a7e4f2f  libobjcMsgSend2.dylib (973.1) <BD27A84B-C9AE-3282-BBEA-3B6119837B5A> /usr/lib/objc/libobjcMsgSend2.dylib
+       0x1a27e4000 -        0x1a27e4f2f  libobjcMsgSend3.dylib (973.1) <C0860D68-DDFC-3BD7-8B06-DB0645CBBED4> /usr/lib/objc/libobjcMsgSend3.dylib
+       0x1aa7e4000 -        0x1aa7e4f2f  libobjcMsgSend4.dylib (973.1) <A6153BF5-622B-3B01-81B6-F64A365EF613> /usr/lib/objc/libobjcMsgSend4.dylib
+       0x1b27e4000 -        0x1b27e4f2f  libobjcMsgSend5.dylib (973.1) <3913A71C-B29A-3AEA-820B-BEC40AC1861A> /usr/lib/objc/libobjcMsgSend5.dylib
+       0x1ba7e4000 -        0x1ba7e4f2f  libobjcMsgSend6.dylib (973.1) <9BC523A3-E167-3F6C-8CAE-0F3EBA671791> /usr/lib/objc/libobjcMsgSend6.dylib
+       0x1c27e4000 -        0x1c27e4f2f  libobjcMsgSend7.dylib (973.1) <248B7BCE-5B4C-34C7-A340-43D5228628C5> /usr/lib/objc/libobjcMsgSend7.dylib
+       0x1ca7e4000 -        0x1ca7e4f2f  libobjcMsgSend8.dylib (973.1) <3E041BAD-A8E8-3069-B741-78CD1A45B176> /usr/lib/objc/libobjcMsgSend8.dylib
+       0x1d27e4000 -        0x1d27e4f2f  libobjcMsgSend9.dylib (973.1) <34A67969-21A0-39D6-BB81-8FDA5A2409DB> /usr/lib/objc/libobjcMsgSend9.dylib
+       0x1da7e4000 -        0x1da7e4f2f  libobjcMsgSend10.dylib (973.1) <678186C0-8EAD-3B35-8CBB-00285B41E4A0> /usr/lib/objc/libobjcMsgSend10.dylib
+       0x1e27e4000 -        0x1e27e4f2f  libobjcMsgSend11.dylib (973.1) <E05CB08C-E956-36FA-8967-AE8E346A8D2C> /usr/lib/objc/libobjcMsgSend11.dylib
+       0x20a7e4000 -        0x20a7e4f2f  libobjcMsgSend12.dylib (973.1) <10AB03AA-FF1F-3FDC-9DFB-BFC40042C501> /usr/lib/objc/libobjcMsgSend12.dylib
+       0x2127e4000 -        0x2127e4f2f  libobjcMsgSend13.dylib (973.1) <ABF53427-FA6F-3D0D-8F9D-7AD795CA5C92> /usr/lib/objc/libobjcMsgSend13.dylib
+       0x21a7e4000 -        0x21a7e4f2f  libobjcMsgSend14.dylib (973.1) <9A844C46-A6DA-34D4-8EBF-2AD775C30684> /usr/lib/objc/libobjcMsgSend14.dylib
+       0x2227e4000 -        0x2227e4f2f  libobjcMsgSend15.dylib (973.1) <7C995666-2B2D-3284-AA0A-EBF7C922838E> /usr/lib/objc/libobjcMsgSend15.dylib
+       0x22a7e4000 -        0x22a7e4f2f  libobjcMsgSend16.dylib (973.1) <B6C0E14B-53AE-3E22-9ED5-1729C49F46F2> /usr/lib/objc/libobjcMsgSend16.dylib
+       0x2327e4000 -        0x2327e4f2f  libobjcMsgSend17.dylib (973.1) <07B4CF85-251B-301B-832B-20B315A59E19> /usr/lib/objc/libobjcMsgSend17.dylib
+       0x23a7e4000 -        0x23a7e4f2f  libobjcMsgSend18.dylib (973.1) <43E575B7-04DB-3999-A633-1A3B638BA6E3> /usr/lib/objc/libobjcMsgSend18.dylib
+       0x2427e4000 -        0x2427e4f2f  libobjcMsgSend19.dylib (973.1) <736F4D85-76F7-3B28-8D87-C07E8F7A0EF4> /usr/lib/objc/libobjcMsgSend19.dylib
+       0x24a7e4000 -        0x24a7e4f2f  libobjcMsgSend20.dylib (973.1) <74E67C8B-6BCA-3184-A18E-A97F370052C6> /usr/lib/objc/libobjcMsgSend20.dylib
+       0x2527e4000 -        0x2527e4f2f  libobjcMsgSend21.dylib (973.1) <CC0D732F-98E7-3888-9E15-70984DA2FB04> /usr/lib/objc/libobjcMsgSend21.dylib
+       0x25a7e4000 -        0x25a7e4f2f  libobjcMsgSend22.dylib (973.1) <85A60286-5DE3-32BA-B18C-2A498B065C88> /usr/lib/objc/libobjcMsgSend22.dylib
+       0x2627e4000 -        0x2627e4f2f  libobjcMsgSend23.dylib (973.1) <5452A0D2-6B19-39BE-ADDD-80B7BCDE3A98> /usr/lib/objc/libobjcMsgSend23.dylib
+       0x26a7e4000 -        0x26a7e4f2f  libobjcMsgSend24.dylib (973.1) <94BBF2D6-722B-350D-8557-4D25A8E8D53A> /usr/lib/objc/libobjcMsgSend24.dylib
+       0x2727e4000 -        0x2727e4f2f  libobjcMsgSend25.dylib (973.1) <35481387-5A8E-3AE4-86A6-94CEB3CC8726> /usr/lib/objc/libobjcMsgSend25.dylib
+       0x28a7e4000 -        0x28a7e4f2f  libobjcMsgSend26.dylib (973.1) <9E0C8664-E7F4-39D1-AAFC-BD92B255E4E8> /usr/lib/objc/libobjcMsgSend26.dylib
+       0x2927e4000 -        0x2927e4f2f  libobjcMsgSend27.dylib (973.1) <FD424935-55A9-3650-955A-EED3441A1D19> /usr/lib/objc/libobjcMsgSend27.dylib
+       0x29a7e4000 -        0x29a7e4f2f  libobjcMsgSend28.dylib (973.1) <09BA7B97-7DF7-3C7F-932A-B6847662FC49> /usr/lib/objc/libobjcMsgSend28.dylib
+       0x2a27e4000 -        0x2a27e4f2f  libobjcMsgSend29.dylib (973.1) <36D5BA3F-2139-30B0-8558-556764BE9813> /usr/lib/objc/libobjcMsgSend29.dylib
+       0x2aa7e4000 -        0x2aa7e4f2f  libobjcMsgSend30.dylib (973.1) <9F05564A-9D12-372C-98FC-E9F0E6BE4F04> /usr/lib/objc/libobjcMsgSend30.dylib
+       0x2af4fe000 -        0x2af504fe5  libRosetta.dylib (385) <E359944B-D230-33F9-A04E-0C3B17C3326E> /usr/lib/libRosetta.dylib
+       0x2afeed000 -        0x2afef075b  libsystem_darwindirectory.dylib (129.0.1) <61264923-2AA5-3658-B8C4-550C71E9D4B3> /usr/lib/system/libsystem_darwindirectory.dylib
+       0x2afef1000 -        0x2afefbd9b  libsystem_eligibility.dylib (446.1.3) <EDDE8E9C-A2CF-3931-BBB3-321CB852EB30> /usr/lib/system/libsystem_eligibility.dylib
+       0x2afefc000 -        0x2aff0542b  libsystem_sanitizers.dylib (32) <7138ED99-7AA0-34EA-B35B-20EF6ADB1EED> /usr/lib/system/libsystem_sanitizers.dylib
+       0x2aff06000 -        0x2aff06a13  libsystem_trial.dylib (511) <6AE48824-EC44-3A8C-B501-BE57DBE892E7> /usr/lib/system/libsystem_trial.dylib
+       0x2b27e4000 -        0x2b27e4f2f  libobjcMsgSend31.dylib (973.1) <0985E20F-78C3-3466-A2B2-DBB95F7104A3> /usr/lib/objc/libobjcMsgSend31.dylib
+       0x2ba7e4000 -        0x2ba7e4f2f  libobjcMsgSend32.dylib (973.1) <0D309D58-D576-3E5D-AD4B-6D55AB491702> /usr/lib/objc/libobjcMsgSend32.dylib
+       0x2c27e4000 -        0x2c27e4f2f  libobjcMsgSend33.dylib (973.1) <346E0484-48FA-369B-8A64-93B5F5341CFE> /usr/lib/objc/libobjcMsgSend33.dylib
+       0x2ca7e4000 -        0x2ca7e4f2f  libobjcMsgSend34.dylib (973.1) <6A31F809-BCBE-3E01-A367-E91FDACCE324> /usr/lib/objc/libobjcMsgSend34.dylib

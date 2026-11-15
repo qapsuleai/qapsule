@@ -88,12 +88,25 @@ fn series_summary(doc: &Document, s: &Series) -> SeriesSummary {
         study,
         params,
         inputs,
-        fields: series_fields(s),
+        fields: summary_fields(s),
         symbol: s.symbol().map(str::to_owned),
         interval: s.interval.clone(),
         len,
         label: series_label(s),
+        binding: None,
     }
+}
+
+/// Fields of a series in the order `docs/PROTOCOL.md` documents them: the engine lists
+/// Bollinger outputs as `middle, upper, lower, bandwidth`; the summary gives
+/// `upper, middle, lower, bandwidth` (as §7 and the scene do).
+fn summary_fields(s: &Series) -> Vec<String> {
+    let mut f = series_fields(s);
+    if matches!(&s.source, SeriesSource::Study { study, .. } if study == "bollinger") {
+        const ORDER: [&str; 4] = ["upper", "middle", "lower", "bandwidth"];
+        f.sort_by_key(|x| ORDER.iter().position(|o| o == x).unwrap_or(ORDER.len()));
+    }
+    f
 }
 
 /// Outputs a `line` draws by default (`docs/GRAMMAR.md` §5).

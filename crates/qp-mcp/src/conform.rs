@@ -14,6 +14,8 @@
 //!   `clock` (host only), `send_raw` (not a JSON message), any message before the
 //!   connection's `hello`, and messages whose `id` is not a string (an MCP tool call
 //!   always has a request id).
+//! - `data` steps (RP2, §18.4) are host-only: they go to [`Hub::data_event`], never to
+//!   an MCP tool, so an agent cannot inject market data.
 //!
 //! Tool results are turned back into protocol messages (`structuredContent`, checked
 //! against `content[0].text` and `isError`), notifications back into `notify` messages
@@ -23,9 +25,11 @@
 use std::collections::BTreeMap;
 use std::path::Path;
 
-use qp_schema::protocol::{ClientMsg, Transcript};
-use qp_session::conform::{load_init, run_steps, FinalState, TranscriptOutcome, Transport};
-use qp_session::{read_json, Session};
+use qp_schema::protocol::ClientMsg;
+use qp_session::conform::{
+    load_init, read_transcript, run_steps, FinalState, TranscriptOutcome, Transport,
+};
+use qp_session::Session;
 use serde_json::{json, Map, Value};
 
 use crate::tools::{self, COMMAND_EXTRAS};
@@ -309,6 +313,21 @@ impl Transport for McpTransport {
         Ok(out)
     }
 
+    fn data(&mut self, event: &qp_schema::data::DataEvent) -> Result<Vec<Value>, String> {
+        // Host only: data events reach the hub directly, never through a tool.
+        self.stats.direct += 1;
+        self.hub
+            .borrow_mut()
+            .data_event(event)
+            .map_err(|e| format!("data event rejected: {e}"))?;
+        let mut notes = self.drain()?;
+        notes.sort_by_key(|(o, _, _)| *o);
+        Ok(notes
+            .into_iter()
+            .map(|(_, c, m)| json!({"conn": c, "msg": m}))
+            .collect())
+    }
+
     fn finish(&mut self) -> Result<FinalState, String> {
         let hub = self.hub.borrow();
         Ok(FinalState {
@@ -331,7 +350,7 @@ pub fn run_file(file: &Path, root: &Path) -> (TranscriptOutcome, Stats) {
     };
     let mut stats = Stats::default();
     let r = (|| -> Result<(), String> {
-        let t: Transcript = read_json(file)?;
+        let t = read_transcript(file)?;
         outcome.name.clone_from(&t.name);
         let loaded = load_init(&t.init, root)?;
         let session = Session::new(loaded.init.clone(), root)?;

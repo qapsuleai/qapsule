@@ -15,6 +15,7 @@ use std::collections::BTreeMap;
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 
+use crate::data::{BindingState, DataBinding, DataEvent, DataPosition, EvidenceRef, FeedKey};
 use crate::grammar::{Layer, View};
 use crate::types::{
     Author, Bar, CapsuleState, Condition, Depth, Document, Fact, Finding, Glyph, Intent,
@@ -333,6 +334,13 @@ pub struct Limits {
     pub max_subscriptions: u32,
     /// Maximum length of any string, bytes.
     pub max_string: u32,
+    /// Maximum bars one data binding may ask for (`window.last`) and hold (RP2, §18).
+    #[serde(default = "default_max_bind_bars")]
+    pub max_bind_bars: u32,
+}
+
+fn default_max_bind_bars() -> u32 {
+    100_000
 }
 
 // ---------------------------------------------------------------------------
@@ -1213,6 +1221,11 @@ pub struct LogEntry {
     pub undoes: Option<Seq>,
     /// Short deterministic summary, e.g. `"add_study rsi(period=7) -> rsi-3-0"`.
     pub summary: String,
+    /// (RP2/T8) For an engine entry caused by data (a live capsule's invalidation after
+    /// a data event or a bar write): the evidence of the claim (§19). Not replayed; the
+    /// document does not depend on it.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub evidence: Option<ClaimEvidence>,
 }
 
 // ---------------------------------------------------------------------------
@@ -1398,8 +1411,9 @@ pub enum Query {
     /// A finding presented for a surface. Depth follows the asker's negotiated profile
     /// unless `surface` names another surface kind.
     Present {
-        /// Finding id. If absent: the most important live finding (highest confidence).
-        /// Also takes a selector (§17).
+        /// Finding id. If absent: the only live finding; with several live findings the
+        /// authority does not pick one (`ambiguous`, every live finding as a candidate;
+        /// K25). Also takes a selector (§17), e.g. `{"latest":true}`.
         #[serde(default, skip_serializing_if = "Option::is_none")]
         #[schemars(with = "Option<FindingRef>")]
         finding: Option<String>,
@@ -1407,6 +1421,105 @@ pub enum Query {
         #[serde(default, skip_serializing_if = "Option::is_none")]
         surface: Option<SurfaceKind>,
     },
+    /// (RP2, §18.3) Data bindings and their state for the asker: resolved or not, why
+    /// not, the anchor (first bar time) and the data position. All bound series if
+    /// `series` is absent.
+    Binding {
+        /// A bound series.
+        /// Also takes a selector (§17).
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        #[schemars(with = "Option<SeriesRef>")]
+        series: Option<String>,
+    },
+    /// (RP2, §18.5) Re-checks the frozen evidence of a fact, or of every fact of a
+    /// finding, against today's data: content digest of the referenced bar range and the
+    /// fact's evidence values recomputed.
+    VerifyEvidence {
+        /// A fact or a finding.
+        /// Also takes a selector (§17).
+        #[schemars(with = "ItemRef")]
+        item: String,
+    },
+}
+
+/// One data binding and its state for the asker (§18.3).
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
+#[serde(deny_unknown_fields)]
+pub struct BindingInfo {
+    /// The bound series.
+    pub series: String,
+    /// Its binding.
+    pub binding: DataBinding,
+    /// State for the asker.
+    pub state: BindingState,
+    /// Why not ready, in words.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub reason: Option<String>,
+    /// Time of bar 0 (the anchor of bar numbers), when ready.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub anchor_t: Option<TimestampMs>,
+    /// Where the authority stands on the feed, when ready.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub position: Option<DataPosition>,
+}
+
+/// Outcome of re-checking one fact's frozen evidence.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
+#[serde(rename_all = "snake_case")]
+pub enum EvidenceStatus {
+    /// Same bars (digest equal) and same evidence values.
+    Verified,
+    /// The data or the recomputed evidence values differ.
+    Changed,
+    /// The fact has no evidence reference (written before RP2, or on a points series).
+    NoRef,
+    /// The referenced data is not available now (binding not ready, range outside).
+    Unavailable,
+    /// The asker may not read the referenced feed.
+    NoEntitlement,
+}
+
+/// An evidence value then and now.
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
+#[serde(deny_unknown_fields)]
+pub struct ValueCheck {
+    /// Value stored in the fact.
+    pub then: f64,
+    /// Value recomputed today; `null` if not computable.
+    pub now: Option<f64>,
+}
+
+/// One fact's evidence check.
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
+#[serde(deny_unknown_fields)]
+pub struct FactCheck {
+    /// Fact id.
+    pub fact: String,
+    /// Outcome.
+    pub status: EvidenceStatus,
+    /// What happened, in words (first difference when changed).
+    pub message: String,
+    /// The stored reference.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub stored: Option<EvidenceRef>,
+    /// The same range over today's data (bars and digest), when available.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub current: Option<EvidenceRef>,
+    /// Evidence values (`value`, `prev`…) stored vs recomputed, for a fact on a study.
+    #[serde(default, skip_serializing_if = "BTreeMap::is_empty")]
+    pub values: BTreeMap<String, ValueCheck>,
+}
+
+/// Answer to `verify_evidence`.
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
+#[serde(deny_unknown_fields)]
+pub struct EvidenceCheck {
+    /// The fact or finding checked.
+    pub item: String,
+    /// True iff every fact is `verified`.
+    pub verified: bool,
+    /// One check per fact, in the finding's fact order.
+    pub facts: Vec<FactCheck>,
 }
 
 /// Values of a series over a range.
@@ -1525,6 +1638,10 @@ pub struct LayerInfo {
     /// A selector that resolves to this layer in its view now (R2, §17).
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub select: Option<LayerSel>,
+    /// (RP2) If the layer's data rests on a bound series that is not ready for the asker:
+    /// that state; the layer is then not drawn (§18.3).
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub binding: Option<BindingState>,
 }
 
 /// Answer to the point query (R2).
@@ -1765,6 +1882,16 @@ pub enum QueryResult {
         /// The new viewport.
         viewport: Viewport,
     },
+    /// Answer to `binding` (RP2).
+    Bindings {
+        /// Bound series, document order.
+        bindings: Vec<BindingInfo>,
+    },
+    /// Answer to `verify_evidence` (RP2).
+    EvidenceCheck {
+        /// The check.
+        check: EvidenceCheck,
+    },
 }
 
 // ---------------------------------------------------------------------------
@@ -1808,6 +1935,22 @@ pub enum Topic {
     },
     /// Active intents whose trigger becomes true.
     Intents {},
+    /// (RP2) Data changes a view draws: bars of a series it reads (directly, through a
+    /// study's input, a fact, a channel reference or an origin) were added, revised or
+    /// corrected, by a data event or a bar write, or its binding state changed. Fires
+    /// only for views that read the changed series; structure changes of the view come
+    /// through `changes`.
+    View {
+        /// View id.
+        /// Also takes a selector (§17).
+        #[schemars(with = "ViewRef")]
+        view: String,
+    },
+    /// (RP2/T8) The authority's data-derived claims with their evidence (§19): every
+    /// capsule invalidation and intent trigger of the document and this connection's own
+    /// condition subscriptions, as they are asserted (provisional), become final at the
+    /// bar's close, are withdrawn, or change cleanliness. The topic a replica listens to.
+    Claims {},
 }
 
 /// A pushed event.
@@ -1830,6 +1973,9 @@ pub enum Event {
         cause: Option<String>,
         /// The changes.
         changes: Vec<ChangeOp>,
+        /// (RP2/T8) Evidence of the claim (§19), when data caused this entry.
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        evidence: Option<ClaimEvidence>,
     },
     /// A finding's capsule changed state.
     FindingState {
@@ -1841,6 +1987,9 @@ pub enum Event {
         state: CapsuleState,
         /// Log position.
         seq: Seq,
+        /// (RP2/T8) Evidence of the claim (§19), when data caused the change.
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        evidence: Option<ClaimEvidence>,
     },
     /// A watched condition became true at a bar.
     ConditionMet {
@@ -1850,6 +1999,9 @@ pub enum Event {
         t: TimestampMs,
         /// Log position.
         seq: Seq,
+        /// (RP2/T8) Evidence of the claim (§19): the operands' values at `t` and the bar before, maturity, cleanliness.
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        evidence: Option<ClaimEvidence>,
     },
     /// A proposal was created, accepted, rejected or expired.
     Proposal {
@@ -1884,7 +2036,135 @@ pub enum Event {
         t: TimestampMs,
         /// Log position.
         seq: Seq,
+        /// (RP2/T8) Evidence of the claim (§19): the trigger's operand values, maturity, cleanliness.
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        evidence: Option<ClaimEvidence>,
     },
+    /// (RP2) What a watched view draws changed from bar `from_bar` on: redraw from there.
+    /// One event per changed series the view reads.
+    ViewChanged {
+        /// View id.
+        view: String,
+        /// The series whose bars changed (a bar series: inline or bound).
+        series: String,
+        /// First bar index (of `series`) whose values may differ: the new bar, the revised
+        /// last bar, the corrected bar (everything after it may change too), 0 after a
+        /// binding state change.
+        from_bar: u64,
+        /// Last bar index of `series` now; absent when it holds no bars (e.g. stale).
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        to_bar: Option<u64>,
+        /// Log position the change is visible at (data events write no entry: the
+        /// current position).
+        seq: Seq,
+    },
+    /// (RP2/T8) A claim's lifecycle step (topic `claims`, §19): asserted (provisional at
+    /// the live bar, final when the bar closed and the claim still holds there, again
+    /// when a correction changed its values or its cleanliness changed) or withdrawn.
+    Claim {
+        /// What the claim is about.
+        claim: ClaimRef,
+        /// Asserted or withdrawn.
+        state: ClaimState,
+        /// The evidence (for a withdrawal: the values that no longer hold).
+        evidence: ClaimEvidence,
+        /// Log position.
+        seq: Seq,
+    },
+}
+
+// ---------------------------------------------------------------------------
+// Consistency (RP2/T8, `docs/PROTOCOL.md` §19)
+// ---------------------------------------------------------------------------
+
+/// Maturity of a claim's bar on one side's data.
+#[derive(
+    Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Serialize, Deserialize, JsonSchema,
+)]
+#[serde(rename_all = "snake_case")]
+pub enum Maturity {
+    /// The bar is the live (last, not yet closed) bar.
+    Provisional,
+    /// The bar is closed: a later bar exists, or the window is closed (`to_t`).
+    Final,
+}
+
+/// One operand value a claim rests on: the main output of a series the condition reads,
+/// at the claim's bar and at the bar before it (`null` in warmup).
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
+#[serde(deny_unknown_fields)]
+pub struct EvidenceValue {
+    /// Series id (as in the condition).
+    pub series: String,
+    /// Bar time of `value` (the claim's bar on that series' bar series).
+    pub t: TimestampMs,
+    /// Value at `t` (absent in warmup, and for a recipient without the data entitlement
+    /// of the feed it rests on: §18.3, §19.7).
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub value: Option<f64>,
+    /// Value at the bar before `t` (absent as `value`).
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub prev: Option<f64>,
+}
+
+/// The evidence an authority attaches to a data-derived claim (§19): a few numbers, never
+/// bars (K23).
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
+#[serde(deny_unknown_fields)]
+pub struct ClaimEvidence {
+    /// The bar series the claim rests on (of its first operand; bound or inline).
+    pub series: String,
+    /// The claim's bar time: the identity of the bar across the planes (§18.3).
+    pub t: TimestampMs,
+    /// Each operand's value at `t` and at the bar before, in condition order.
+    pub values: Vec<EvidenceValue>,
+    /// `final` if the bar is closed on the authority's data, else `provisional`.
+    pub maturity: Maturity,
+    /// The authority's data up to `t` has no unrepaired sequence gap.
+    pub clean: bool,
+    /// Calculation start: the bound series' anchor (bar 0 time, §18.3) the values were
+    /// computed from; absent for inline series.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub anchor_t: Option<TimestampMs>,
+    /// The bound feeds the evidence rests on (its bar series and every operand, through
+    /// study inputs), recorded when the claim is made; empty if it rests on inline data
+    /// only. Values go only to recipients entitled to all of them (§18.3, §19.7).
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub feeds: Vec<FeedKey>,
+}
+
+/// What a claim is about.
+#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Serialize, Deserialize, JsonSchema)]
+#[serde(tag = "kind", rename_all = "snake_case", deny_unknown_fields)]
+pub enum ClaimRef {
+    /// A condition subscription of the receiving connection became true.
+    Condition {
+        /// The subscription id.
+        sub: String,
+    },
+    /// An intent's trigger became true.
+    Intent {
+        /// Intent id.
+        intent: String,
+    },
+    /// A live capsule's invalidation held (the capsule was invalidated).
+    Capsule {
+        /// Capsule id.
+        capsule: String,
+        /// Its finding.
+        finding: String,
+    },
+}
+
+/// The authority's latest word on a claim.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
+#[serde(rename_all = "snake_case")]
+pub enum ClaimState {
+    /// The authority asserts the claim (see the evidence's maturity and cleanliness).
+    Asserted,
+    /// The authority no longer asserts it (it did not hold at the bar's close, or a
+    /// correction broke it).
+    Withdrawn,
 }
 
 // ---------------------------------------------------------------------------
@@ -2003,6 +2283,12 @@ pub enum ErrorCode {
     /// A reference by meaning matches more than one item (R2). `candidates` lists them,
     /// ranked (the kind's order, §17); the authority never picks one at random.
     Ambiguous,
+    /// (RP2, §18) The asker has no data entitlement for a bound series' feed (data
+    /// licence; not a role permission). `path` points at the series reference.
+    NoEntitlement,
+    /// (RP2, §18) A bound series has no data: the source does not know the binding, its
+    /// window is empty, or resolution is still pending.
+    NoData,
 }
 
 /// One option offered by an error (R2): an id (or an origin, as JSON) and what it is.
@@ -2129,6 +2415,9 @@ pub struct SeriesSummary {
     pub len: Option<u64>,
     /// Legend text (e.g. `RSI14`).
     pub label: String,
+    /// (RP2) For a bound series: its binding state for the asker.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub binding: Option<BindingState>,
 }
 
 /// One view in a summary.
@@ -2270,6 +2559,57 @@ pub struct SessionInit {
     /// Proposals expire this long after creation; never if absent.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub proposal_ttl_ms: Option<u64>,
+    /// (RP2) The host's data plane for bound series: feeds and entitlements, served by
+    /// a test source provider (`docs/PROTOCOL.md` §18.6).
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub data: Option<InitData>,
+}
+
+/// Test data plane of a session init (RP2): the feeds a test source provider serves and
+/// who is entitled to which symbols.
+#[derive(Debug, Clone, Default, PartialEq, Serialize, Deserialize, JsonSchema)]
+#[serde(deny_unknown_fields)]
+pub struct InitData {
+    /// Feeds, each with its initial bars.
+    #[serde(default)]
+    pub feeds: Vec<InitFeed>,
+    /// Principal id -> entitlements: `"SYMBOL"` (that symbol on every feed),
+    /// `"feed/SYMBOL"` (that symbol on that named feed only), `"feed/*"`, or `"*"` (all).
+    /// Principals not listed have no entitlement. The authority's own engine work uses the
+    /// entitlement of the first principal whose role is `host` (§18.3).
+    #[serde(default)]
+    pub entitlements: BTreeMap<String, Vec<String>>,
+    /// Feeds that answer `pending` (never resolved) instead of data, for tests.
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub pending: Vec<FeedKey>,
+}
+
+/// One test feed: give exactly one of `bars`, `path`, `synthetic`.
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
+#[serde(deny_unknown_fields)]
+pub struct InitFeed {
+    /// The feed.
+    pub feed: FeedKey,
+    /// Bars inline.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub bars: Option<Vec<Bar>>,
+    /// A bar series JSON file (a `Series` with bars), relative to the repository root and
+    /// confined to it.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub path: Option<String>,
+    /// Deterministic synthetic bars (`qp_source::synthetic_bars(n, seed)`).
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub synthetic: Option<SyntheticFeed>,
+}
+
+/// Parameters of a synthetic test feed.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
+#[serde(deny_unknown_fields)]
+pub struct SyntheticFeed {
+    /// Number of bars.
+    pub n: u32,
+    /// Seed.
+    pub seed: u64,
 }
 
 /// A session init given inline or as a path.
@@ -2313,6 +2653,10 @@ pub struct Step {
     /// A raw line to send instead (for parse and schema errors).
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub send_raw: Option<RawLine>,
+    /// (RP2) A data event the host delivers instead (data plane, not a protocol message;
+    /// §18.4). Outputs are the notifications it causes.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub data: Option<DataEvent>,
     /// Expected outputs, complete and in order.
     pub expect: Vec<Expect>,
     /// Optional comment.

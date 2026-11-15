@@ -45,8 +45,8 @@ pub(crate) fn rank(d: Depth) -> u8 {
 /// first fact's bar series; if the fact is on a study series, panel 1 its line and a rule
 /// at `evidence.level` whose origin is the fact (`y` keeps the `qp/0` string form,
 /// `"70"`); `x.domain = [t(max(0, bar - 30)), t(last bar)]`; a `highlight` emphasis on
-/// the fact; linear value scales. Layer ids are the canonical `l0`, `l1`, `l2`
-/// (`docs/GRAMMAR.md` §11 rule 3), as in RD1 documents.
+/// the fact; linear value scales. Layer ids are the grammar's own names (`candles`,
+/// `line`, `level`; `docs/GRAMMAR.md` §11, K25), as in the capsule view.
 ///
 /// # Errors
 /// The finding has no facts, or its first fact's series has no bars.
@@ -54,15 +54,7 @@ pub(crate) fn presenter_view(doc: &Document, finding: &Finding, id: &str) -> Res
     // The chart rule reads no study values: an empty cache is enough.
     let cache = Cache::default();
     let p = DocProvider::new(doc, &cache);
-    let mut v = depth::chart_view(&finding.id, &p, id).map_err(|e| e.reason)?;
-    canonical_layer_ids(&mut v);
-    Ok(v)
-}
-
-fn canonical_layer_ids(v: &mut View) {
-    for (i, l) in v.layers.iter_mut().enumerate() {
-        l.id = Some(format!("l{i}"));
-    }
+    depth::chart_view(&finding.id, &p, id).map_err(|e| e.reason)
 }
 
 /// Presents a finding for a profile with the grammar's depth rules
@@ -126,9 +118,7 @@ pub(crate) fn present(
                 .and_then(|v| doc.views.iter().find(|x| &x.id == v).cloned())
                 .or_else(|| {
                     let id = format!("present-{}", finding.id);
-                    let mut v = depth::chart_view(&finding.id, &prov, &id).ok()?;
-                    canonical_layer_ids(&mut v);
-                    Some(v)
+                    depth::chart_view(&finding.id, &prov, &id).ok()
                 });
             p.facts = finding
                 .facts

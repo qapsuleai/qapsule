@@ -383,7 +383,7 @@
      }
     }
    ],
-   "note": "G20: no finding given -> most important live finding"
+   "note": "G20, K25: no finding given and exactly one live finding -> that finding (several -> ambiguous, see 28)"
   },
   {
    "send": {

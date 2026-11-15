@@ -89,12 +89,16 @@ after?|before?}`, `set_panel {view, panel, name?, weight?}`.
 - **Barların ötesi:** nokta serilerinin son bardan sonraki noktaları (ör. tahmin yelpazesi)
   ardışık seanslar sayılır: son bardan sonraki k'inci nokta `son bar + k` yuvasına yerleşir.
   Görünen aralık bu yuvaları kapsayacak kadar sağa uzar (yalnız aralık belirtilmemişse).
-  **v0 sınırı (R2 denetimi K1):** ekranlı bir bağlantının (masaüstü, telefon, saat) her zaman
-  bir bakışı vardır (varsayılan: son N bar) ve `look` son barın ötesine izin vermez; bu yüzden
-  bu bağlantılar için `screen` ve `hit` gelecek yuvaları **göstermez** (yelpaze bantları yalnız
-  son bar yuvasıyla görünür). Ekransız bağlantılar, `qp render` ve `qp explain` gelecek
-  yuvaları gösterir. Bakışın gelecek yuvalara uzaması ana akış kararıdır (`rounds/R2/REPORT.md`
-  açık soru 6).
+  **Bakış gelecek yuvalara uzanır (K25):** görünümün son yuvası = son bar + gelecek yuva
+  sayısı. Bir bağlantının bakışı bu son yuvaya kadar gidebilir: `look` (ve `zoom`'un
+  `anchor_bar`'ı) son yuvaya kadar kabul edilir, sonrası `invalid`; `pan`/`zoom` son yuvaya
+  kırpılır. Ekranlı bağlantının **varsayılan bakışı** son N barı ve ardından bütün gelecek
+  yuvaları kapsar (masaüstünde 200 bar + 20 tahmin noktası → yuva 80..219); `x.domain`
+  verilmişse zamanı alana düşen yuvalar (gelecek yuvalar dahil, derleyiciyle aynı kural).
+  Böylece `screen` ve `hit` ekranlı bağlantılarda da gelecek yuvalardaki öğeleri (yelpaze
+  bantları) gösterir; ekransız bağlantılar, `qp render` ve `qp explain` zaten gösteriyordu.
+  Veri kısalırsa (geri alınan `append_bars`) kayıtlı bakış güncel son yuvaya kırpılır.
+  `tap` ve kalıcı aralık (`set_view_range`) barlarla sınırlı kalır. Döküm: `29-future-look`.
 
 ## 4. Katman (`Layer`)
 
@@ -290,6 +294,15 @@ Otorite her görünümü yüklerken ve her yazıda kanonik biçime getirir:
    → `invalid`. İkisi de yoksa: katmanların `panel` değerlerinden, artan, `linear`.
 2. Ölçek kimlikleri: `x`, `y<panel id>`.
 3. Katman kimliği yoksa en küçük kullanılmayan `l<k>` (katman sırasıyla).
+   **Tek ad kuralı (K25):** kimlikli katman kimliğini korur; otorite hiçbir katmanı yeniden
+   adlandırmaz. Sunucunun (presenter) kurduğu görünümler gramerin derinlik kurallarının
+   verdiği adları taşır (§13: grafik görünümü `candles`, `line`, `level`; kapsül görünümü
+   `line`, `level`, `fact`) — `show_finding` ile dokümana yazılan görünümde, `present`
+   cevabında, `screen`/`hit`/özet/seçici çözümünde ve dökümlerde aynı ad. `l<k>` yalnız
+   **kimliksiz eklenen** katmanlar içindir (yükleme, `add_layer`, `insert_layer`/
+   `insert_panel` kimliksiz katman, `split_layer`'ın yeni katmanları: en küçük kullanılmayan
+   `l<k>`, bölünen kimlik yeniden kullanılmaz). R2'deki `l0…l2` yeniden adlandırması
+   kaldırıldı.
 4. Sabitlerin kökeni (§10, kural 2).
 5. `layer.panel` var olan bir panel olmalı (`not_found`, `did_you_mean`: panel id'leri ve
    adları).
@@ -315,7 +328,7 @@ Sunucu (presenter) aynı bulgu için üç derinlikte deterministik çıktı üre
 |----------|-------|
 | `sentence` | Metin: kapsül başlığı, yoksa bulgunun iddiası. Görsel yok. |
 | `capsule` | Tek panelli görünüm: olgunun serisinin ana çıktısı (bar serisiyse `c`) **son `max_points` bar** çizgi; olgu seviyesi varsa kural (köken: olgu); olgu barı görünürse nokta (veri: olgu). Başlık metni ve güven. |
-| `chart` | Sunucunun görünümü: panel 0 olgunun bar serisinin mumları; olgu bir hesap serisindeyse panel 1 onun çizgisi ve olgu seviyesinde kural (köken: olgu); `x.domain = [t(max(0, olgu barı − 30)), t(son bar)]`; olgu barına `highlight` vurgusu. |
+| `chart` | Sunucunun görünümü: panel 0 olgunun bar serisinin mumları (`candles`); olgu bir hesap serisindeyse panel 1 onun çizgisi (`line`) ve olgu seviyesinde kural (`level`, köken: olgu); `x.domain = [t(max(0, olgu barı − 30)), t(son bar)]`; olgu barına `highlight` vurgusu. |
 
 **Yüzey indirgemesi:** profil (`docs/PROTOCOL.md` §10.1) derinliği seçer; `max_points`
 kapsülün bar sayısını, `max_glyphs` işaret sayısını sınırlar; `series_data: false` ise
@@ -367,7 +380,7 @@ büyüklüğünü verir. Ölçüm: `rounds/R2/REPORT.md` (ölçüt 10).
 
 ## 16. Anlamsal okuma
 
-- **`screen`:** her ekranlı bağlantı için görünüm, görünen aralık ve panel başına katmanlar
+- **`screen`:** her ekranlı bağlantı için görünüm, görünen aralık (gelecek yuvalar dahil, §3) ve panel başına katmanlar
   (kimlik, işaret, veri, alanlar, açıklama, sabitler ve kökenleri, görünen öğe sayısı, son
   değerler) — sahne tarifinden.
 - **Nokta sorgusu (`hit`):** pikselin paneli, bar yuvası, zamanı, ölçekteki değeri ve

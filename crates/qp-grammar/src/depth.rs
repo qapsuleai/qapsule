@@ -2,13 +2,14 @@
 //! for one finding at `sentence`, `capsule` and `chart` depth. Pure functions of the
 //! finding, its facts, the data and the surface profile; the authority applies them.
 
+use std::borrow::Cow;
 use std::collections::BTreeMap;
 
 use qp_schema::grammar::{
     Emphasis, EmphasisKind, Layer, Mark, Origin, Panel, Position, Scale, ScaleKind, View,
 };
 use qp_schema::protocol::{Profile, Target};
-use qp_schema::{Depth, Fact, Finding};
+use qp_schema::{Bar, Depth, Fact, Finding};
 
 use crate::detmath::num;
 use crate::error::{ErrorKind, GrammarError};
@@ -59,7 +60,10 @@ fn not_found(path: &str, why: String) -> GrammarError {
     GrammarError::new(ErrorKind::NotFound, path, why)
 }
 
-fn finding_and_fact(id: &str, p: &dyn DataProvider) -> Result<(Finding, Fact), GrammarError> {
+fn finding_and_fact<'p>(
+    id: &str,
+    p: &'p dyn DataProvider,
+) -> Result<(Cow<'p, Finding>, Cow<'p, Fact>), GrammarError> {
     let finding = p
         .finding(id)
         .ok_or_else(|| not_found("/finding", format!("finding `{id}` does not exist")))?;
@@ -75,22 +79,22 @@ fn finding_and_fact(id: &str, p: &dyn DataProvider) -> Result<(Finding, Fact), G
     Ok((finding, fact))
 }
 
-/// The bar series a fact's series sits on, and its bar times.
-fn bar_times(fact: &Fact, p: &dyn DataProvider) -> Result<(String, Vec<i64>), GrammarError> {
+/// The bar series a fact's series sits on, and its bars (borrowed from the provider;
+/// only the first/last visible bar times are read).
+fn bar_series_bars<'p>(
+    fact: &Fact,
+    p: &'p dyn DataProvider,
+) -> Result<(String, Cow<'p, [Bar]>), GrammarError> {
     let bs = match p.series_kind(&fact.series) {
         Some(SeriesKind::Bars) => Some(fact.series.clone()),
         Some(SeriesKind::Values) => p.input_bars(&fact.series),
         _ => None,
     }
     .ok_or_else(|| not_found("/finding", format!("series `{}` has no bars", fact.series)))?;
-    let times: Vec<i64> = p
-        .bars(&bs)
-        .map(|b| b.iter().map(|b| b.t).collect())
-        .unwrap_or_default();
-    if times.is_empty() {
-        return Err(not_found("/finding", format!("series `{bs}` has no bars")));
+    match p.bars(&bs) {
+        Some(bars) if !bars.is_empty() => Ok((bs, bars)),
+        _ => Err(not_found("/finding", format!("series `{bs}` has no bars"))),
     }
-    Ok((bs, times))
 }
 
 fn main_field(series: &str, p: &dyn DataProvider) -> Option<String> {
@@ -153,7 +157,7 @@ pub fn sentence(finding: &str, p: &dyn DataProvider) -> Result<String, GrammarEr
     let f = p
         .finding(finding)
         .ok_or_else(|| not_found("/finding", format!("finding `{finding}` does not exist")))?;
-    Ok(p.headline(finding).unwrap_or(f.claim))
+    Ok(p.headline(finding).unwrap_or_else(|| f.claim.clone()))
 }
 
 /// Depth 1 view: one panel; the main output of the fact's series over the last
@@ -169,8 +173,8 @@ pub fn capsule_view(
     id: &str,
 ) -> Result<View, GrammarError> {
     let (_, fact) = finding_and_fact(finding, p)?;
-    let (_, times) = bar_times(&fact, p)?;
-    let n = times.len() as u64;
+    let (_, bars) = bar_series_bars(&fact, p)?;
+    let n = bars.len() as u64;
     let from = n.saturating_sub(u64::from(max_points.max(1)));
     let main = main_field(&fact.series, p).ok_or_else(|| {
         not_found(
@@ -197,7 +201,7 @@ pub fn capsule_view(
         title: Some(sentence(finding, p)?),
         display_tz: None,
         theme: None,
-        x: time_scale(times[i(from)], times[i(n - 1)]),
+        x: time_scale(bars[i(from)].t, bars[i(n - 1)].t),
         y: Vec::new(),
         panels: vec![linear_panel(0)],
         layers,
@@ -214,8 +218,8 @@ pub fn capsule_view(
 /// Unknown finding/fact, a finding without facts, or a series without bars.
 pub fn chart_view(finding: &str, p: &dyn DataProvider, id: &str) -> Result<View, GrammarError> {
     let (_, fact) = finding_and_fact(finding, p)?;
-    let (bs, times) = bar_times(&fact, p)?;
-    let n = times.len() as u64;
+    let (bs, bars) = bar_series_bars(&fact, p)?;
+    let n = bars.len() as u64;
     let from = fact.bar.saturating_sub(CHART_LOOKBACK).min(n - 1);
     let mut candles = layer("candles", Mark::Candle, 0);
     candles.series = Some(bs.clone());
@@ -236,7 +240,7 @@ pub fn chart_view(finding: &str, p: &dyn DataProvider, id: &str) -> Result<View,
         title: None,
         display_tz: None,
         theme: None,
-        x: time_scale(times[i(from)], times[i(n - 1)]),
+        x: time_scale(bars[i(from)].t, bars[i(n - 1)].t),
         y: Vec::new(),
         panels,
         layers,

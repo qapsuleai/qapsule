@@ -7,6 +7,14 @@
 //!
 //! The events map one-to-one onto `qp_compute::Study::push` / `update_last`.
 //!
+//! The data plane (RP2, K23; `docs/PROTOCOL.md` §18) adds field-level [`DataEvent`]s
+//! (`qp_schema::data`): [`FeedStore`] applies them by the §18.4 rules and keeps an
+//! incremental digest for `DataPosition`; [`resolve_window`] resolves a binding's window;
+//! [`SourceProvider`] is the host-supplied provider ([`MemoryProvider`] for tests and
+//! simple hosts); [`SyntheticEvents`] generates a deterministic field-level stream.
+//!
+//! [`DataEvent`]: qp_schema::data::DataEvent
+//!
 //! Note on names: `qp_schema::SeriesSource` is the *description* of a binding inside a
 //! document (`{"kind": "file", "path": ...}`); this crate's [`SeriesSource`] trait is the
 //! runtime side that produces the data. [`open_binding`] turns the former into the latter.
@@ -16,9 +24,22 @@ use std::path::{Path, PathBuf};
 
 use qp_schema::{Bar, Instrument, Series, SeriesData};
 
+mod events;
+mod feed;
+mod provider;
 mod synthetic;
+mod window;
 
+pub use events::{
+    bar_patch_diff, data_events_from_bar_events, SyntheticEvents, SyntheticEventsConfig,
+};
+pub use feed::{Applied, EventError, FeedStore, StaleReason, TimeBounds};
+pub use provider::{
+    bind, entitlement_matches, validate_binding, validate_entitlement, validate_id,
+    validate_interval, Bound, MemoryProvider, Resolution, SourceProvider,
+};
 pub use synthetic::{synthetic_bars, synthetic_series, SyntheticSource};
+pub use window::{resolve_window, ResolvedWindow};
 
 /// One step of a bar stream.
 #[derive(Debug, Clone, PartialEq)]
@@ -45,7 +66,8 @@ pub struct SeriesMeta {
 pub struct SourceError(String);
 
 impl SourceError {
-    pub(crate) fn new(msg: impl Into<String>) -> Self {
+    /// An error with this message.
+    pub fn new(msg: impl Into<String>) -> Self {
         Self(msg.into())
     }
 }

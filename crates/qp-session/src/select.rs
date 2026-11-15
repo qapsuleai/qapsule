@@ -327,6 +327,7 @@ pub(crate) fn sites(msg: &Value) -> Vec<Vec<Site>> {
                 match t.get("kind").and_then(Value::as_str) {
                     Some("changes") => push_all(&mut out, t, p, "ids", Kind::Item),
                     Some("finding") => push(&mut out, t, p, "finding", Kind::Finding, None),
+                    Some("view") => push(&mut out, t, p, "view", Kind::View, None),
                     Some("condition") => {
                         if let Some(c) = t.get("condition") {
                             condition_sites(&mut out, c, "/topic/condition");
@@ -645,7 +646,7 @@ fn fact_about(f: &Fact) -> String {
     )
 }
 
-fn finding_bar(doc: &Document, f: &Finding) -> Option<u64> {
+pub(crate) fn finding_bar(doc: &Document, f: &Finding) -> Option<u64> {
     f.facts
         .iter()
         .filter_map(|id| doc.facts.iter().find(|x| &x.id == id))
@@ -659,7 +660,7 @@ fn finding_facts<'a>(doc: &'a Document, f: &'a Finding) -> impl Iterator<Item = 
         .filter_map(move |id| doc.facts.iter().find(|x| &x.id == id))
 }
 
-fn finding_about(doc: &Document, f: &Finding) -> String {
+pub(crate) fn finding_about(doc: &Document, f: &Finding) -> String {
     let kinds: BTreeSet<&str> = finding_facts(doc, f).map(|x| x.kind.as_str()).collect();
     let kinds: Vec<&str> = kinds.into_iter().collect();
     let state = doc

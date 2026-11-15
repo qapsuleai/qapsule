@@ -99,12 +99,20 @@ impl DataProvider for DocProvider<'_> {
         find_series(self.doc, series)?.interval.clone()
     }
 
-    fn fact(&self, id: &str) -> Option<Fact> {
-        self.doc.facts.iter().find(|f| f.id == id).cloned()
+    fn fact(&self, id: &str) -> Option<Cow<'_, Fact>> {
+        self.doc
+            .facts
+            .iter()
+            .find(|f| f.id == id)
+            .map(Cow::Borrowed)
     }
 
-    fn finding(&self, id: &str) -> Option<Finding> {
-        self.doc.findings.iter().find(|f| f.id == id).cloned()
+    fn finding(&self, id: &str) -> Option<Cow<'_, Finding>> {
+        self.doc
+            .findings
+            .iter()
+            .find(|f| f.id == id)
+            .map(Cow::Borrowed)
     }
 
     fn headline(&self, finding: &str) -> Option<String> {

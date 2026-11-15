@@ -26,6 +26,10 @@
 #  13 protocol   fixtures/protocol/valid/* validate and fixtures/protocol/invalid/* are
 #                rejected by the generated protocol schemas; transcripts and init validate
 #  14 conform    qp/0 conformance transcripts pass in-process, over `qp serve` and over MCP
+#  15 replica    authority <-> replica (RP2/T8, PROTOCOL §19.6): `qp replica-tape` with the
+#                replica's data in step (digests equal after every step) and 25 events
+#                behind (no wrong or early claim); the tapes replayed by the WASM replica in
+#                Node reproduce every digest (same tool rule as the browser step)
 #
 # Environment:
 #   QP_VERIFY_BROWSER=1  force the browser step (fails if tools are missing)
@@ -379,6 +383,26 @@ step_conform() {
   note "$n transcripts x inproc, serve, mcp"
 }
 
+step_replica() {
+  build_qp
+  local d="$tmp/replica" mode="${QP_VERIFY_BROWSER:-}" have_tools=1 wp pkg="$target_dir/wasm-replica/pkg"
+  mkdir -p "$d"
+  "$qp" replica-tape --lag 0 --out "$d/tape0.json" || fail "replica in step: digests differ or a claim is wrong"
+  "$qp" replica-tape --lag 25 --out "$d/tape25.json" || fail "lagging replica: a wrong or early claim"
+  command -v node >/dev/null 2>&1 || have_tools=0
+  if ! command -v wasm-pack >/dev/null 2>&1 && [ ! -x "$HOME/.cargo/bin/wasm-pack" ]; then have_tools=0; fi
+  if [ "$mode" = 0 ] || { [ "$mode" != 1 ] && [ "$have_tools" = 0 ]; }; then
+    echo "wasm32 replica: skipped (QP_VERIFY_BROWSER=${mode:-unset}, tools: $have_tools)"
+    note "native authority = native replica (lag 0, 25); wasm32 skipped"
+    return 0
+  fi
+  wp="$(command -v wasm-pack || echo "$HOME/.cargo/bin/wasm-pack")"
+  "$wp" build crates/qp-wasm --target nodejs --profile wasm --no-opt --out-dir "$pkg" -- --features replica
+  node crates/qp-wasm/tests/replica_tape.mjs "$pkg" "$d/tape0.json" "$d/tape25.json" \
+    || fail "wasm32 replica digests differ from native"
+  note "native authority = native replica = wasm32 replica (lag 0, 25)"
+}
+
 # --- run -------------------------------------------------------------------
 
 total_start=$SECONDS
@@ -396,6 +420,7 @@ run_step compute step_compute
 run_step digest step_digest
 run_step protocol step_protocol
 run_step conform step_conform
+run_step replica step_replica
 total=$((SECONDS - total_start))
 
 failed=0

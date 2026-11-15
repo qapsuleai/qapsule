@@ -50,6 +50,7 @@ fn with_facts() -> (MemProvider, u64) {
         t: bars[bar as usize].t,
         text: "RSI(14) crossed 70".into(),
         evidence: [("level".to_owned(), 70.0)].into_iter().collect(),
+        evidence_ref: None,
         provenance: prov(),
     };
     let finding = Finding {

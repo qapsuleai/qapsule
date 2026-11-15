@@ -1,0 +1,31 @@
+[package]
+name = "tick-bench"
+description = "RP2/T1 measurement baseline: per-tick cost of the reference authority (qp-session) vs the compute core alone, snapshot size, device-ready time."
+version = "0.0.0"
+edition = "2021"
+publish = false
+
+# Not a member of the main workspace (the root workspace only takes `crates/*`).
+[workspace]
+
+[dependencies]
+qp-schema = { path = "../../../../crates/qp-schema" }
+qp-session = { path = "../../../../crates/qp-session" }
+qp-compute = { path = "../../../../crates/qp-compute" }
+qp-grammar = { path = "../../../../crates/qp-grammar" }
+serde = "1.0.229"
+serde_json = { version = "1.0.154", features = ["float_roundtrip"] }
+serde_path_to_error = "0.1.20"
+flate2 = { version = "1", default-features = false, features = ["rust_backend"] }
+
+[profile.release]
+lto = "thin"
+codegen-units = 1
+debug = "line-tables-only"
+
+# Same as the main workspace's `wasm` profile.
+[profile.wasm]
+inherits = "release"
+opt-level = "s"
+lto = "fat"
+debug = false

@@ -18,6 +18,9 @@ use crate::expand::{need_view, view_bar_series};
 use crate::provider::{warm, DocProvider};
 use crate::session::{Conn, Session};
 
+/// Panel id → (name, scale if compiled, layers) of a screen.
+pub(crate) type ScreenPanels = BTreeMap<u32, (Option<String>, Option<ScaleInfo>, Vec<LayerInfo>)>;
+
 /// Default frame width of the point query (`docs/PROTOCOL.md` §5.4).
 pub const HIT_WIDTH: u32 = 1200;
 /// Default frame height of the point query.
@@ -70,6 +73,7 @@ pub(crate) fn panel_layers(view: &View, p: &ScenePanel) -> (ScaleInfo, Vec<Layer
             items: l.items.len() as u64,
             last: l.items.last().map(|i| i.values.clone()).unwrap_or_default(),
             select: None,
+            binding: None,
         })
         .collect();
     (scale, layers)
@@ -139,8 +143,8 @@ impl Session {
     /// The grammar compiler's data source over this session's document and values cache
     /// (study values computed with `qp-compute` and cached first).
     pub fn provider(&mut self) -> DocProvider<'_> {
-        warm(&self.doc, &mut self.cache);
-        DocProvider::new(&self.doc, &self.cache)
+        warm(rd!(self), &mut self.cache);
+        DocProvider::new(rd!(self), &self.cache)
     }
 
     /// Compiles view `view_id` into its scene description with `opts` (frame size,
@@ -154,9 +158,9 @@ impl Session {
         view_id: &str,
         opts: &CompileOptions,
     ) -> Result<SceneDesc, ProtocolError> {
-        warm(&self.doc, &mut self.cache);
-        let view = need_view(&self.doc, view_id, "/view")?;
-        compile(view, &DocProvider::new(&self.doc, &self.cache), opts)
+        warm(rd!(self), &mut self.cache);
+        let view = need_view(rd!(self), view_id, "/view")?;
+        compile(view, &DocProvider::new(rd!(self), &self.cache), opts)
             .map_err(|e| grammar_error(&e, "/view"))
     }
 
@@ -209,7 +213,7 @@ impl Session {
     /// viewport it set by input, else `None` (the compiler then takes the view's
     /// persistent range, else all bars).
     pub(crate) fn hit_range(&self, c: &Conn, view_id: &str) -> Option<(u64, u64)> {
-        let view = self.doc.views.iter().find(|v| v.id == view_id)?;
+        let view = rd!(self).views.iter().find(|v| v.id == view_id)?;
         if c.has_screen() || c.viewports.contains_key(view_id) {
             self.range_of(c, view)
         } else {
@@ -231,11 +235,27 @@ impl Session {
         let mut opts =
             CompileOptions::new(size.0.unwrap_or(HIT_WIDTH), size.1.unwrap_or(HIT_HEIGHT));
         opts.range = self.hit_range(&self.conns[ci], &vid);
-        warm(&self.doc, &mut self.cache);
-        let view = need_view(&self.doc, &vid, &format!("{qp}/view"))?;
-        let scene = compile(view, &DocProvider::new(&self.doc, &self.cache), &opts)
+        warm(rd!(self), &mut self.cache);
+        let view = need_view(rd!(self), &vid, &format!("{qp}/view"))?;
+        // Layers whose data the asker may not read are not drawn (§18.3); a view whose
+        // bar series is among them cannot be read at all.
+        let asker = self.conns[ci].principal.clone();
+        let blocked = self.blocked_layers(view, &asker);
+        let filtered;
+        let view = if blocked.is_empty() {
+            view
+        } else {
+            if let Some(bs) = crate::expand::view_bar_series_any(&self.doc, view) {
+                if let Some(b) = self.plane.gate(&self.doc, Some(&asker), &bs.id) {
+                    return Err(b.error(&bs.id, &format!("{qp}/view")));
+                }
+            }
+            filtered = without_layers(view, &blocked);
+            &filtered
+        };
+        let scene = compile(view, &DocProvider::new(rd!(self), &self.cache), &opts)
             .map_err(|e| grammar_error(&e, qp))?;
-        let times: Vec<i64> = view_bar_series(&self.doc, view)
+        let times: Vec<i64> = view_bar_series(rd!(self), view)
             .and_then(Series::bars)
             .map(|b| b.iter().map(|b| b.t).collect())
             .unwrap_or_default();
@@ -245,21 +265,110 @@ impl Session {
     /// The R2 panel fields of a screen (panel id → name, scale, layers), compiled at the
     /// connection's viewport and its surface's frame. Empty when the view does not
     /// compile (the RD1 fields are still answered). Call after [`warm`].
-    pub(crate) fn screen_panels(
-        &self,
-        c: &Conn,
-        vp: &Viewport,
-    ) -> BTreeMap<u32, (Option<String>, ScaleInfo, Vec<LayerInfo>)> {
+    pub(crate) fn screen_panels(&self, c: &Conn, vp: &Viewport, asker: &str) -> ScreenPanels {
         let Some(view) = self.doc.views.iter().find(|v| v.id == vp.view) else {
             return BTreeMap::new();
         };
+        let blocked = self.blocked_layers(view, asker);
+        if blocked.is_empty() {
+            return self
+                .compiled_panels(c, vp, view)
+                .into_iter()
+                .map(|(k, (n, s, l))| (k, (n, Some(s), l)))
+                .collect();
+        }
+        // §18.3: the asker's unreadable layers are not drawn; they are listed with their
+        // binding state, in paint order, and the rest of the view compiles without them.
+        let filtered = without_layers(view, &blocked);
+        let mut out: ScreenPanels = if filtered.layers.is_empty() {
+            BTreeMap::new()
+        } else {
+            self.compiled_panels(c, vp, &filtered)
+                .into_iter()
+                .map(|(k, (n, s, l))| (k, (n, Some(s), l)))
+                .collect()
+        };
+        for (i, l) in view.layers.iter().enumerate() {
+            let Some((state, series)) = blocked.get(&i) else {
+                continue;
+            };
+            let e = out.entry(l.panel).or_insert_with(|| {
+                (
+                    view.panel(l.panel).and_then(|p| p.name.clone()),
+                    None,
+                    Vec::new(),
+                )
+            });
+            let data = if let Some(f) = &l.fact {
+                qp_schema::scene::DataSource::Fact { fact: f.clone() }
+            } else if let Some(f) = &l.finding {
+                qp_schema::scene::DataSource::Finding { finding: f.clone() }
+            } else {
+                qp_schema::scene::DataSource::Series {
+                    series: series.clone(),
+                }
+            };
+            let info = LayerInfo {
+                id: l.id.clone().unwrap_or_else(|| format!("l{i}")),
+                mark: l.mark,
+                data,
+                fields: Vec::new(),
+                label: None,
+                constants: BTreeMap::new(),
+                items: 0,
+                last: BTreeMap::new(),
+                select: None,
+                binding: Some(*state),
+            };
+            // Paint order: before the first drawn layer that comes later in the view.
+            let later: Vec<String> = view.layers[i + 1..]
+                .iter()
+                .filter_map(|x| x.id.clone())
+                .collect();
+            let pos =
+                e.2.iter()
+                    .position(|x| later.contains(&x.id))
+                    .unwrap_or(e.2.len());
+            e.2.insert(pos, info);
+        }
+        out
+    }
+
+    /// Index → (state, data series) of the layers of `view` whose data `asker` may not
+    /// read now (§18.3).
+    pub(crate) fn blocked_layers(
+        &self,
+        view: &View,
+        asker: &str,
+    ) -> BTreeMap<usize, (qp_schema::data::BindingState, String)> {
+        let mut out = BTreeMap::new();
+        if self.plane.series.is_empty() {
+            return out;
+        }
+        for (i, l) in view.layers.iter().enumerate() {
+            if let Some(b) = self.plane.gate_layer(&self.doc, Some(asker), l) {
+                // The layer's data source (what `screen` names), not the series that
+                // blocked it.
+                let series = l.series.clone().unwrap_or(b.series);
+                out.insert(i, (b.state, series));
+            }
+        }
+        out
+    }
+
+    fn compiled_panels(
+        &self,
+        c: &Conn,
+        vp: &Viewport,
+        view: &View,
+    ) -> BTreeMap<u32, (Option<String>, ScaleInfo, Vec<LayerInfo>)> {
         let (w, h) = screen_frame(c.surface.kind);
         let mut opts = CompileOptions::new(w, h);
         opts.range = Some((vp.from_bar, vp.to_bar));
         if c.profile.max_points > 0 {
             opts.max_points = Some(u64::from(c.profile.max_points));
         }
-        let Ok(scene) = compile(view, &DocProvider::new(&self.doc, &self.cache), &opts) else {
+        let Ok(scene) = compile(view, &DocProvider::new(rd!(self), &self.cache), &opts) else {
             return BTreeMap::new();
         };
         scene
@@ -268,7 +377,7 @@ impl Session {
             .map(|p| {
                 let (scale, mut layers) = panel_layers(view, p);
                 let r = crate::select::Resolver {
-                    doc: &self.doc,
+                    doc: rd!(self),
                     root: None,
                 };
                 for li in &mut layers {
@@ -280,6 +389,19 @@ impl Session {
     }
 
     pub(crate) fn warm_values(&mut self) {
-        warm(&self.doc, &mut self.cache);
+        warm(rd!(self), &mut self.cache);
     }
+}
+
+/// `view` without the layers at `skip` (indexes).
+fn without_layers<T>(view: &View, skip: &BTreeMap<usize, T>) -> View {
+    let mut v = view.clone();
+    v.layers = view
+        .layers
+        .iter()
+        .enumerate()
+        .filter(|(i, _)| !skip.contains_key(i))
+        .map(|(_, l)| l.clone())
+        .collect();
+    v
 }

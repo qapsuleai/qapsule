@@ -1,0 +1,904 @@
+{
+ "name": "35-consistency",
+ "description": "RP2/T8 §19: claim evidence on data-derived events (condition_met, finding_state, change of the invalidation entry) and the `claims` topic: a provisional claim on the live bar, final when the bar closes, withdrawn after a correction of the closed bar, `clean: false` after a sequence gap.",
+ "covers": [
+  "data",
+  "live",
+  "subscription",
+  "claims",
+  "consistency"
+ ],
+ "init": {
+  "document": {
+   "schema_version": "0",
+   "id": "doc-claims",
+   "title": "İddia kanıtı",
+   "display_tz": "Europe/Istanbul",
+   "series": [
+    {
+     "id": "px",
+     "instrument": {
+      "symbol": "THYAO"
+     },
+     "interval": "1d",
+     "source": {
+      "kind": "bind",
+      "symbol": "THYAO",
+      "interval": "1d",
+      "window": {
+       "last": 5
+      }
+     }
+    }
+   ],
+   "views": [
+    {
+     "id": "v",
+     "title": "THYAO",
+     "x": {
+      "kind": "time"
+     },
+     "y": [
+      {
+       "kind": "linear"
+      }
+     ],
+     "layers": [
+      {
+       "mark": "candle",
+       "series": "px",
+       "panel": 0,
+       "encoding": {}
+      }
+     ]
+    }
+   ],
+   "facts": [
+    {
+     "id": "fact-up",
+     "kind": "threshold",
+     "series": "px",
+     "bar": 3,
+     "t": 1759968000000,
+     "text": "THYAO 103'te kapandı, bar 3.",
+     "evidence": {
+      "value": 103.0
+     },
+     "provenance": {
+      "author": {
+       "kind": "engine",
+       "name": "qp-facts",
+       "version": "0.0.0"
+      },
+      "at": 1760000000000,
+      "based_on": [
+       "px"
+      ]
+     }
+    }
+   ],
+   "findings": [
+    {
+     "id": "fnd-range",
+     "claim": "THYAO 105'in altında kalıyor; yatay bant sürüyor.",
+     "facts": [
+      "fact-up"
+     ],
+     "confidence": 0.5,
+     "invalidation": {
+      "kind": "threshold",
+      "series": "px",
+      "op": "gt",
+      "value": 105.0
+     },
+     "provenance": {
+      "author": {
+       "kind": "agent",
+       "name": "scout"
+      },
+      "at": 1760000000000,
+      "based_on": [
+       "fact-up"
+      ]
+     }
+    }
+   ],
+   "capsules": [
+    {
+     "id": "cap-range",
+     "finding": "fnd-range",
+     "state": "live",
+     "revision": 0,
+     "headline": "THYAO bantta: 105'in altında.",
+     "glyphs": [
+      {
+       "kind": "direction",
+       "value": 0.0
+      }
+     ],
+     "depth": "capsule",
+     "provenance": {
+      "author": {
+       "kind": "agent",
+       "name": "scout"
+      },
+      "at": 1760000000000,
+      "based_on": [
+       "fact-up"
+      ]
+     }
+    }
+   ],
+   "intents": [],
+   "ledger": {
+    "entries": []
+   }
+  },
+  "clock": 1760000000000,
+  "epoch": 0,
+  "proposal_ttl_ms": null,
+  "principals": [
+   {
+    "id": "arkin",
+    "author": {
+     "kind": "human",
+     "name": "arkin"
+    },
+    "role": "owner"
+   },
+   {
+    "id": "host",
+    "author": {
+     "kind": "engine",
+     "name": "host",
+     "version": "0"
+    },
+    "role": "host"
+   }
+  ],
+  "data": {
+   "feeds": [
+    {
+     "feed": {
+      "symbol": "THYAO",
+      "interval": "1d"
+     },
+     "bars": [
+      {
+       "t": 1759708800000,
+       "o": 100.0,
+       "h": 100.5,
+       "l": 99.5,
+       "c": 100.0,
+       "v": 1000.0
+      },
+      {
+       "t": 1759795200000,
+       "o": 101.0,
+       "h": 101.5,
+       "l": 100.5,
+       "c": 101.0,
+       "v": 1000.0
+      },
+      {
+       "t": 1759881600000,
+       "o": 102.0,
+       "h": 102.5,
+       "l": 101.5,
+       "c": 102.0,
+       "v": 1000.0
+      },
+      {
+       "t": 1759968000000,
+       "o": 103.0,
+       "h": 103.5,
+       "l": 102.5,
+       "c": 103.0,
+       "v": 1000.0
+      },
+      {
+       "t": 1760054400000,
+       "o": 104.0,
+       "h": 104.5,
+       "l": 103.5,
+       "c": 104.0,
+       "v": 1000.0
+      }
+     ]
+    }
+   ],
+   "entitlements": {
+    "host": [
+     "*"
+    ],
+    "arkin": [
+     "*"
+    ]
+   }
+  }
+ },
+ "steps": [
+  {
+   "note": "Owner; the binding's anchor is stamped at load (entry 1).",
+   "send": {
+    "conn": "a",
+    "msg": {
+     "type": "hello",
+     "protocol": "qp/0",
+     "principal": "arkin",
+     "surface": {
+      "kind": "desktop"
+     }
+    }
+   },
+   "expect": [
+    {
+     "conn": "a",
+     "msg": {
+      "type": "welcome",
+      "seq": 1
+     }
+    }
+   ]
+  },
+  {
+   "note": "`claims` topic (§19): the claim lifecycle with evidence.",
+   "send": {
+    "conn": "a",
+    "msg": {
+     "type": "subscribe",
+     "id": "k",
+     "topic": {
+      "kind": "claims"
+     }
+    }
+   },
+   "expect": [
+    {
+     "conn": "a",
+     "msg": {
+      "type": "ack",
+      "id": "k",
+      "status": "subscribed"
+     }
+    }
+   ]
+  },
+  {
+   "send": {
+    "conn": "a",
+    "msg": {
+     "type": "subscribe",
+     "id": "c",
+     "topic": {
+      "kind": "condition",
+      "condition": {
+       "kind": "threshold",
+       "series": "px",
+       "op": "gt",
+       "value": 105.0
+      }
+     }
+    }
+   },
+   "expect": [
+    {
+     "conn": "a",
+     "msg": {
+      "type": "ack",
+      "id": "c",
+      "status": "subscribed"
+     }
+    }
+   ]
+  },
+  {
+   "send": {
+    "conn": "a",
+    "msg": {
+     "type": "subscribe",
+     "id": "f",
+     "topic": {
+      "kind": "finding",
+      "finding": "fnd-range"
+     }
+    }
+   },
+   "expect": [
+    {
+     "conn": "a",
+     "msg": {
+      "type": "ack",
+      "id": "f",
+      "status": "subscribed"
+     }
+    }
+   ]
+  },
+  {
+   "send": {
+    "conn": "a",
+    "msg": {
+     "type": "subscribe",
+     "id": "ch",
+     "topic": {
+      "kind": "changes",
+      "ids": [
+       "cap-range"
+      ]
+     }
+    }
+   },
+   "expect": [
+    {
+     "conn": "a",
+     "msg": {
+      "type": "ack",
+      "id": "ch",
+      "status": "subscribed"
+     }
+    }
+   ]
+  },
+  {
+   "note": "Live bar t4 crosses 105: the invalidation entry, `finding_state` and `condition_met` carry the evidence (provisional: t4 is the live bar; clean); the `claims` topic asserts the condition claim and the capsule claim.",
+   "data": {
+    "feed": {
+     "symbol": "THYAO",
+     "interval": "1d"
+    },
+    "seq": 1,
+    "change": {
+     "kind": "patch",
+     "t": 1760054400000,
+     "fields": {
+      "c": 106.0,
+      "h": 106.5
+     }
+    }
+   },
+   "expect": [
+    {
+     "conn": "a",
+     "msg": {
+      "type": "notify",
+      "sub": "ch",
+      "event": {
+       "kind": "change",
+       "seq": 2,
+       "at": 1760000000000,
+       "author": "qp",
+       "changes": [
+        {
+         "op": "set_capsule_state",
+         "capsule": "cap-range",
+         "state": "invalidated"
+        }
+       ],
+       "evidence": {
+        "series": "px",
+        "t": 1760054400000,
+        "values": [
+         {
+          "series": "px",
+          "t": 1760054400000,
+          "value": 106.0,
+          "prev": 103.0
+         }
+        ],
+        "maturity": "provisional",
+        "clean": true,
+        "anchor_t": 1759708800000,
+        "feeds": [
+         {
+          "symbol": "THYAO",
+          "interval": "1d"
+         }
+        ]
+       }
+      }
+     }
+    },
+    {
+     "conn": "a",
+     "msg": {
+      "type": "notify",
+      "sub": "f",
+      "event": {
+       "kind": "finding_state",
+       "finding": "fnd-range",
+       "capsule": "cap-range",
+       "state": "invalidated",
+       "seq": 2,
+       "evidence": {
+        "series": "px",
+        "t": 1760054400000,
+        "values": [
+         {
+          "series": "px",
+          "t": 1760054400000,
+          "value": 106.0,
+          "prev": 103.0
+         }
+        ],
+        "maturity": "provisional",
+        "clean": true,
+        "anchor_t": 1759708800000,
+        "feeds": [
+         {
+          "symbol": "THYAO",
+          "interval": "1d"
+         }
+        ]
+       }
+      }
+     }
+    },
+    {
+     "conn": "a",
+     "msg": {
+      "type": "notify",
+      "sub": "c",
+      "event": {
+       "kind": "condition_met",
+       "bar": 4,
+       "t": 1760054400000,
+       "seq": 1,
+       "evidence": {
+        "series": "px",
+        "t": 1760054400000,
+        "values": [
+         {
+          "series": "px",
+          "t": 1760054400000,
+          "value": 106.0,
+          "prev": 103.0
+         }
+        ],
+        "maturity": "provisional",
+        "clean": true,
+        "anchor_t": 1759708800000,
+        "feeds": [
+         {
+          "symbol": "THYAO",
+          "interval": "1d"
+         }
+        ]
+       }
+      }
+     }
+    },
+    {
+     "conn": "a",
+     "msg": {
+      "type": "notify",
+      "sub": "k",
+      "event": {
+       "kind": "claim",
+       "claim": {
+        "kind": "condition",
+        "sub": "c"
+       },
+       "state": "asserted",
+       "evidence": {
+        "series": "px",
+        "t": 1760054400000,
+        "values": [
+         {
+          "series": "px",
+          "t": 1760054400000,
+          "value": 106.0,
+          "prev": 103.0
+         }
+        ],
+        "maturity": "provisional",
+        "clean": true,
+        "anchor_t": 1759708800000,
+        "feeds": [
+         {
+          "symbol": "THYAO",
+          "interval": "1d"
+         }
+        ]
+       },
+       "seq": 2
+      }
+     }
+    },
+    {
+     "conn": "a",
+     "msg": {
+      "type": "notify",
+      "sub": "k",
+      "event": {
+       "kind": "claim",
+       "claim": {
+        "kind": "capsule",
+        "capsule": "cap-range",
+        "finding": "fnd-range"
+       },
+       "state": "asserted",
+       "evidence": {
+        "series": "px",
+        "t": 1760054400000,
+        "values": [
+         {
+          "series": "px",
+          "t": 1760054400000,
+          "value": 106.0,
+          "prev": 103.0
+         }
+        ],
+        "maturity": "provisional",
+        "clean": true,
+        "anchor_t": 1759708800000,
+        "feeds": [
+         {
+          "symbol": "THYAO",
+          "interval": "1d"
+         }
+        ]
+       },
+       "seq": 2
+      }
+     }
+    }
+   ]
+  },
+  {
+   "note": "A new bar closes t4: both claims still hold at the closed bar → asserted again as final (same values).",
+   "data": {
+    "feed": {
+     "symbol": "THYAO",
+     "interval": "1d"
+    },
+    "seq": 2,
+    "change": {
+     "kind": "bar",
+     "bar": {
+      "t": 1760140800000,
+      "o": 104.0,
+      "h": 104.5,
+      "l": 103.5,
+      "c": 104.0,
+      "v": 1000.0
+     }
+    }
+   },
+   "expect": [
+    {
+     "conn": "a",
+     "msg": {
+      "type": "notify",
+      "sub": "k",
+      "event": {
+       "kind": "claim",
+       "claim": {
+        "kind": "condition",
+        "sub": "c"
+       },
+       "state": "asserted",
+       "evidence": {
+        "series": "px",
+        "t": 1760054400000,
+        "values": [
+         {
+          "series": "px",
+          "t": 1760054400000,
+          "value": 106.0,
+          "prev": 103.0
+         }
+        ],
+        "maturity": "final",
+        "clean": true,
+        "anchor_t": 1759708800000,
+        "feeds": [
+         {
+          "symbol": "THYAO",
+          "interval": "1d"
+         }
+        ]
+       },
+       "seq": 2
+      }
+     }
+    },
+    {
+     "conn": "a",
+     "msg": {
+      "type": "notify",
+      "sub": "k",
+      "event": {
+       "kind": "claim",
+       "claim": {
+        "kind": "capsule",
+        "capsule": "cap-range",
+        "finding": "fnd-range"
+       },
+       "state": "asserted",
+       "evidence": {
+        "series": "px",
+        "t": 1760054400000,
+        "values": [
+         {
+          "series": "px",
+          "t": 1760054400000,
+          "value": 106.0,
+          "prev": 103.0
+         }
+        ],
+        "maturity": "final",
+        "clean": true,
+        "anchor_t": 1759708800000,
+        "feeds": [
+         {
+          "symbol": "THYAO",
+          "interval": "1d"
+         }
+        ]
+       },
+       "seq": 2
+      }
+     }
+    }
+   ]
+  },
+  {
+   "note": "Correction of the closed bar t4 (106 → 104.5): the predicate no longer holds there → both claims withdrawn. The document keeps the capsule invalidated (a replica's display drops the claim).",
+   "data": {
+    "feed": {
+     "symbol": "THYAO",
+     "interval": "1d"
+    },
+    "seq": 3,
+    "change": {
+     "kind": "patch",
+     "t": 1760054400000,
+     "fields": {
+      "c": 104.5
+     }
+    }
+   },
+   "expect": [
+    {
+     "conn": "a",
+     "msg": {
+      "type": "notify",
+      "sub": "k",
+      "event": {
+       "kind": "claim",
+       "claim": {
+        "kind": "condition",
+        "sub": "c"
+       },
+       "state": "withdrawn",
+       "evidence": {
+        "series": "px",
+        "t": 1760054400000,
+        "values": [
+         {
+          "series": "px",
+          "t": 1760054400000,
+          "value": 104.5,
+          "prev": 103.0
+         }
+        ],
+        "maturity": "final",
+        "clean": true,
+        "anchor_t": 1759708800000,
+        "feeds": [
+         {
+          "symbol": "THYAO",
+          "interval": "1d"
+         }
+        ]
+       },
+       "seq": 2
+      }
+     }
+    },
+    {
+     "conn": "a",
+     "msg": {
+      "type": "notify",
+      "sub": "k",
+      "event": {
+       "kind": "claim",
+       "claim": {
+        "kind": "capsule",
+        "capsule": "cap-range",
+        "finding": "fnd-range"
+       },
+       "state": "withdrawn",
+       "evidence": {
+        "series": "px",
+        "t": 1760054400000,
+        "values": [
+         {
+          "series": "px",
+          "t": 1760054400000,
+          "value": 104.5,
+          "prev": 103.0
+         }
+        ],
+        "maturity": "final",
+        "clean": true,
+        "anchor_t": 1759708800000,
+        "feeds": [
+         {
+          "symbol": "THYAO",
+          "interval": "1d"
+         }
+        ]
+       },
+       "seq": 2
+      }
+     }
+    }
+   ]
+  },
+  {
+   "note": "Live bar t5 crosses 105: a new provisional condition claim (the capsule is already invalidated).",
+   "data": {
+    "feed": {
+     "symbol": "THYAO",
+     "interval": "1d"
+    },
+    "seq": 4,
+    "change": {
+     "kind": "patch",
+     "t": 1760140800000,
+     "fields": {
+      "c": 107.0,
+      "h": 107.5
+     }
+    }
+   },
+   "expect": [
+    {
+     "conn": "a",
+     "msg": {
+      "type": "notify",
+      "sub": "c",
+      "event": {
+       "kind": "condition_met",
+       "bar": 5,
+       "t": 1760140800000,
+       "seq": 2,
+       "evidence": {
+        "series": "px",
+        "t": 1760140800000,
+        "values": [
+         {
+          "series": "px",
+          "t": 1760140800000,
+          "value": 107.0,
+          "prev": 104.5
+         }
+        ],
+        "maturity": "provisional",
+        "clean": true,
+        "anchor_t": 1759708800000,
+        "feeds": [
+         {
+          "symbol": "THYAO",
+          "interval": "1d"
+         }
+        ]
+       }
+      }
+     }
+    },
+    {
+     "conn": "a",
+     "msg": {
+      "type": "notify",
+      "sub": "k",
+      "event": {
+       "kind": "claim",
+       "claim": {
+        "kind": "condition",
+        "sub": "c"
+       },
+       "state": "asserted",
+       "evidence": {
+        "series": "px",
+        "t": 1760140800000,
+        "values": [
+         {
+          "series": "px",
+          "t": 1760140800000,
+          "value": 107.0,
+          "prev": 104.5
+         }
+        ],
+        "maturity": "provisional",
+        "clean": true,
+        "anchor_t": 1759708800000,
+        "feeds": [
+         {
+          "symbol": "THYAO",
+          "interval": "1d"
+         }
+        ]
+       },
+       "seq": 2
+      }
+     }
+    }
+   ]
+  },
+  {
+   "note": "seq 5 is lost; seq 6 reveals the gap: the feed goes stale and the live claim at t5 is asserted again with `clean: false` (its last values).",
+   "data": {
+    "feed": {
+     "symbol": "THYAO",
+     "interval": "1d"
+    },
+    "seq": 6,
+    "change": {
+     "kind": "patch",
+     "t": 1760140800000,
+     "fields": {
+      "c": 107.25
+     }
+    }
+   },
+   "expect": [
+    {
+     "conn": "a",
+     "msg": {
+      "type": "notify",
+      "sub": "k",
+      "event": {
+       "kind": "claim",
+       "claim": {
+        "kind": "condition",
+        "sub": "c"
+       },
+       "state": "asserted",
+       "evidence": {
+        "series": "px",
+        "t": 1760140800000,
+        "values": [
+         {
+          "series": "px",
+          "t": 1760140800000,
+          "value": 107.0,
+          "prev": 104.5
+         }
+        ],
+        "maturity": "provisional",
+        "clean": false,
+        "anchor_t": 1759708800000,
+        "feeds": [
+         {
+          "symbol": "THYAO",
+          "interval": "1d"
+         }
+        ]
+       },
+       "seq": 2
+      }
+     }
+    }
+   ]
+  }
+ ],
+ "final": {
+  "document": {
+   "series": [
+    {
+     "id": "px",
+     "data": "$absent"
+    }
+   ],
+   "capsules": [
+    {
+     "id": "cap-range",
+     "state": "invalidated"
+    }
+   ]
+  }
+ }
+}

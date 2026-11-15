@@ -1,0 +1,16 @@
+key                                                           samples   share
+handle_raw (total)                                               3022  100.0%
+JSON parse (serde_json from_str to Value)                           1    0.0%
+typed parse from Value (serde_path_to_error / value::de)            6    0.2%
+resolve_selectors                                                   0    0.0%
+check_limits                                                       17    0.6%
+expand_ops (incl. doc clone)                                      707   23.4%
+Document::clone (anywhere)                                        690   22.8%
+drop of a Document (anywhere)                                     432   14.3%
+commit                                                            439   14.5%
+settle (watchers, invalidations, events)                         1821   60.3%
+eval_watchers                                                    1484   49.1%
+invalidations                                                       0    0.0%
+entry_events                                                        0    0.0%
+compute_bars (anywhere)                                          1813   60.0%
+malloc/free (anywhere)                                            693   22.9%

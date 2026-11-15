@@ -1592,6 +1592,7 @@ dependencies = [
  "qp-compute",
  "qp-grammar",
  "qp-schema",
+ "qp-source",
  "schemars",
  "serde",
  "serde_json",
@@ -1603,6 +1604,7 @@ dependencies = [
 name = "qp-source"
 version = "0.0.0"
 dependencies = [
+ "qp-calendar",
  "qp-compute",
  "qp-schema",
  "serde_json",
@@ -1616,6 +1618,8 @@ dependencies = [
  "qp-grammar",
  "qp-render",
  "qp-schema",
+ "qp-session",
+ "qp-source",
  "serde_json",
  "wasm-bindgen",
  "wasm-bindgen-futures",

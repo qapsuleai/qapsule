@@ -24,7 +24,7 @@ karşılık kullanılır; dokümanda Türkçesi.
 | Gösterim saat dilimi | `display_tz` | Zamanın kullanıcıya hangi saat diliminde gösterileceği. Bar hizasını etkilemez. |
 | Isınma | `warmup` | Bir hesabın ilk geçerli değerini üretmesi için gereken bar sayısı. Bu barlarda çıktı boştur (`null`); çıktı uzunluğu her zaman bar sayısına eşittir. |
 | Hesap çıktısı | `StudyOutput` | Bir hesabın bir bar serisi üzerindeki sonucu: bar zamanları ve adlandırılmış çıktılar, her biri bar sayısı uzunluğunda; ısınma `null`. |
-| Bar olayı | `BarEvent` | Seri kaynağının ürettiği adım: yeni bar ya da son barın düzeltilmesi (canlı bar). Hesabın akışkan ve "son barı düzelt" kiplerine birebir karşılık gelir. |
+| Bar olayı | `BarEvent` | Seri kaynağının ürettiği adım: yeni bar ya da son barın düzeltilmesi (canlı bar). Hesabın akışkan ve "son barı düzelt" kiplerine birebir karşılık gelir. Alan düzeyindeki genişlemesi veri olayıdır (`DataEvent`). |
 | Parametre taraması | `sweep` | Bir hesabın tek çağrıda çok sayıda parametre kümesiyle çalıştırılması; her sonuç tek tek çalıştırmayla bit-eşittir. |
 | Köken | `Provenance` | Bir öğeyi kimin, neye dayanarak, ne zaman ürettiği. |
 | Alan protokolü | `qp/0` | Motor, arayüzler ve ajanlar arasındaki konuşma; arayüz ve ajan aynı mesajları kullanır (`docs/PROTOCOL.md`). |
@@ -39,7 +39,7 @@ karşılık kullanılır; dokümanda Türkçesi.
 | Günlük | `LogEntry` / log | Uygulanmış girdilerin sıralı, boşluksuz listesi; her girdide yazar, onaylayan, istek, değişim ve ters değişim. Denetim izidir. |
 | Öneri | `Proposal` | Onay bekleyen yazı: `bekliyor → kabul | ret | süresi doldu`. Dokümanın içinde durur. |
 | Sorgu | `Query` | Dokümanı değiştirmeyen anlamsal okuma. |
-| Abonelik | `Topic` | Bir bulgu, koşul, öneri, dikkat ya da değişim için haber isteği. |
+| Abonelik | `Topic` | Bir bulgu, koşul, öneri, dikkat, değişim ya da bir görünümün verisi (`view`: görünümün okuduğu bir serinin barları değişti, `view_changed`) için haber isteği. |
 | Girdi | `Gesture` | Dokunma, kaydırma, yakınlaştırma; motor yorumlar, dokümanı değiştirmez. |
 | Varlık durumu | presence | Kalıcı olmayan oturum durumu: bakılan aralık, odak, dikkat yönergeleri. Günlüğe girmez. |
 | Dikkat yönergesi | `AttentionDirective` | Bir kişinin nereye, hangi sırayla bakmasının istendiği. |
@@ -76,6 +76,48 @@ Ayrıntı ve örnekler `docs/GRAMMAR.md`.
 | Anlamla başvuru | semantic reference | Bir öğeye kimlik yerine anlamıyla başvurmak ("RSI(14)'ün paneli", "en son kırılım bulgusu"). Otorite deterministik çözer; belirsizse seçenekleri sıralayan `ambiguous` hatası döner; günlükte çözülmüş kimlik saklanır. |
 | Seçici | selector (`SeriesSel`, `PanelSel`, `LayerSel`…) | Anlamla başvurunun seçilen biçimi: kimlik yazılacak alana konan, öğeyi özellikleriyle tarif eden nesne (`{"study":"rsi","params":{"period":14}}`, `{"shows":{"study":"macd"}}`, `{"kind":"breakout","latest":true}`). Tek eşleşme kullanılır; çok eşleşme `ambiguous`; günlükte kimlik saklanır (`docs/PROTOCOL.md` §17). |
 | Nokta serisi | `SeriesData::Points` | Bar olmayan, `t`/`v` noktalarından oluşan seri (ör. tahmin yelpazesinin bantları). Son bardan sonraki noktalar ardışık seans yuvalarına yerleşir (`docs/GRAMMAR.md` §3). |
+
+### Veri düzlemi (RP2)
+
+Piyasa verisi protokolün içinden akmaz (K23); kaynağından kendi biçiminde gelir. Ayrıntı
+`docs/PROTOCOL.md` §18.
+
+| Kavram | Kodda | Tanım |
+|--------|-------|-------|
+| Veri düzlemi | data plane | Bar verisinin ve canlı fiyatın aktığı yol: kaynaktan (Matriks, NATS, dosya, sentetik) motora, kendi biçiminde. Protokol mesajı değildir, günlüğe girmez. |
+| Anlam düzlemi | meaning plane | Protokolün taşıdığı her şey: komutlar, değişimler, olgular, bulgular, kapsül durumları, koşul olayları. Veri taşımaz; veriye başvurur. |
+| Veri bağı | `DataBinding` (`source.kind = "bind"`) | Bir serinin verisini taşımak yerine onu tarif eden bağ: enstrüman (sembol), periyot ve pencere; isteğe bağlı besleme adı. Dokümanda durur; her kullanıcının kendi veri yetkisiyle çözülür. |
+| Çapa | `anchor_t` | Bağlı serinin bar 0'ının zamanı. Otorite bağı ilk çözdüğünde dokümana yazar; sonra her çözüm (otorite, her yansı) oradan başlar. Bar numaraları ve hesap başlangıcı her yerde aynı olur. |
+| Pencere | `Window` | Bağın hangi barları istediği: son N bar (`{"last": n}`), bir zamandan bu yana (`{"from_t": t}`) ya da kapalı aralık (`{"from_t": a, "to_t": b}`). |
+| Besleme | feed (`FeedKey`) | Aynı sembol ve periyodun tek veri akışı. Aynı beslemeye bağlı birden çok seri veriyi paylaşır. |
+| Veri sağlayıcı | `SourceProvider` | Barındırıcının (sunucu, cihaz kabuğu) motora verdiği, bağı bir kişinin veri yetkisiyle çözen arayüz: yetki denetimi, ilk barlar, sonra veri olayları. (Gramer derleyicisinin `DataProvider`'ı başka bir şeydir: derleyiciye otoritenin değerlerini veren okuma arayüzü.) |
+| Bağ durumu | `BindingState` | Bir bağın bir kişi için çözüm sonucu: `ready` (barlar hazır), `pending` (bekleniyor), `no_entitlement` (yetki yok), `no_data` (kaynakta veri yok), `stale` (sıra boşluğu ya da boyut sınırı; yeniden çözülene kadar değer verilmez). Çözülemeyen bağ belgenin geri kalanını durdurmaz. |
+| Veri olayı | `DataEvent` | Veri kaynağının alan düzeyindeki adımı: yeni bar (`bar`) ya da var olan bir barın **yalnızca değişen alanları** (`patch`): son barda canlı güncelleme, daha eski barda düzeltme. Her olay beslemenin kaynak sıra numarasını (`seq`) taşır. `BarEvent`'in genişlemesidir. |
+| Veri konumu | `DataPosition` | Bir beslemenin bir tarafta (otorite ya da yansı) ulaştığı yer: bar sayısı, son bar zamanı, uygulanan olay sayısı ve o ana kadarki verinin özeti. İki tarafın aynı veriye bakıp bakmadığı bununla karşılaştırılır. |
+| Veri özeti | `data_digest` | Bir bar aralığının içerik özeti: barların zaman ve değerlerinin bit düzeyindeki baytları üzerinden belirleyici bir karma (v0: FNV-1a 64; kriptografik değil: düzeltmeyi yakalar, kasıtlı sahteciliği değil). |
+| Kanıt başvurusu | `EvidenceRef` | Bir olgunun dayandığı veriyi gösteren dondurulmuş başvuru: hangi seri ve bağ, hangi zaman aralığı, kaç bar ve o aralığın veri özeti. Otorite olgu eklenirken damgalar. "Bu iddia o gün şu veriye dayanıyordu" sonradan sınanabilir. |
+| Kanıt doğrulama | `verify_evidence` | Bir olgu ya da bulgunun kanıt başvurularını bugünkü veriye karşı sınayan sorgu: veri özeti aynı mı, olgunun kanıt değerleri yeniden hesapta aynı mı; değilse farkı bildirir. |
+| Veri yetkisi | entitlement | Bir kişinin bir beslemeyi görme hakkı (borsa veri lisansı). Rol yetkisinden (`Role`) ayrıdır; veri sağlayıcı denetler. |
+
+### Tutarlılık (RP2)
+
+Otorite ile yansının aynı veriye bakıp bakmadığı ve yansının ne zaman neyi gösterdiği.
+Ayrıntı `docs/PROTOCOL.md` §19; seçimin gerekçesi `rounds/RP2/experiments/T7-COMPARE.md`.
+
+| Kavram | Kodda | Tanım |
+|--------|-------|-------|
+| Yansı | `Replica` | Otoritenin dokümanını `document` + `change` olaylarından birebir izleyen, bağlı serileri **kendi** veri sağlayıcısından ve kendi yetkisiyle çapadan çözen, otoriteyle **aynı motor kodunu** çalıştıran taraf (cihaz, tarayıcı). Dokümana yazmaz; kendi motor girdisi üretmez. |
+| İddia | claim (`ClaimRef`) | Otoritenin veriden çıkardığı anlam: bir koşulun bir barda doğru olması (`condition`), bir niyetin tetiklenmesi (`intent`), bir kapsülün geçersizleşmesi (`capsule`). Kimliği: neyin iddiası olduğu + bar zamanı `t`. |
+| İddia kanıtı | `ClaimEvidence` | Otoritenin veri kaynaklı her anlam mesajına eklediği kanıt: iddianın bar serisi, bar zamanı `t`, kanıt değerleri, olgunluk, temizlik ve çapa. Veri değildir (bar taşımaz); iddianın dayandığı birkaç sayıdır. |
+| Kanıt değeri | `EvidenceValue` | İddianın dayandığı bir işlenenin (koşuldaki serinin ana çıktısı) `t`'deki ve bir önceki bardaki değeri (`value`, `prev`). Yansı kendi verisinde aynı yüklemi bu barlarda sınar. |
+| Olgunluk | `Maturity` | İddia barının bir taraftaki durumu: `provisional` (geçici: bar o tarafın verisinde henüz kapanmadı, canlı bar) ya da `final` (kesin: bar kapandı; ondan sonra bar var ya da pencere kapalı). Yansıda gösterilen olgunluk iki tarafınkinin küçüğüdür. |
+| Temizlik | `clean` | Bir tarafın verisinin iddia barına kadar onarılmamış sıra boşluğu (kaybolmuş olay) içermemesi. Kesin gösterim için iki taraftan en az birinin temiz olması gerekir. |
+| İddia durumu | `ClaimState` | Otoritenin bir iddia hakkındaki son sözü: `asserted` (ileri sürüyor; geçici ya da kesin) ya da `withdrawn` (geri çekti: bar kapandığında ya da düzeltmeden sonra yüklem artık tutmuyor). |
+| İddia aboneliği | `claims` konusu | İddiaların yaşam döngüsünü (`claim` olayı: geçici, kesin, geri çekildi, temizlik değişti) kanıtıyla taşıyan abonelik konusu. Yansının dinlediği konu. |
+| Görüntü kuralı | display rule | Yansının bir iddiayı ne zaman gösterdiği: otorite ileri sürüyor, yansının kendi verisi `t`'yi aynı çapayla kapsıyor ve iddianın yüklemi **kendi verisinde** tutuyor; veri her değiştiğinde aynı adımda yeniden sınanır. Kesin için kendi barı kapalı + otorite kesin + iki taraftan biri temiz. Gösterilen değerler yansının kendi değerleridir. |
+| Yansı görüntü durumu | `DisplayState` | Yansının her iddia için gösterdiği: `pending` (bekliyor: otorite bir şey buldu, kendi verisi henüz kapsamıyor ya da doğrulamıyor), `shown` (gösteriliyor: geçici ya da kesin, kendi değerleriyle), `disputed` (tartışmalı: temiz ve yeniden çekilmiş kendi verisi iddiayı tutmuyor; iddia olarak gösterilmez). Belirleyicidir. |
+| Kesin bar çekme | settled fetch | Barındırıcının yansı (ya da otorite) için veri sağlayıcının kesinleşmiş barlarını (Matriks REST karşılığı) çekmesi; anlaşmazlıkta ve boşluk onarımında kullanılır. Veri düzlemindedir. |
+| Doküman özeti / görünüm özeti | `document_digest` / `view_digest` | Dokümanın kanonik JSON baytlarının ve bir görünümün sahne tarifinin (`SceneDesc`) FNV-1a 64 özeti. Otorite ile yansının aynı dokümanı ve aynı görüntüyü ürettiği bununla karşılaştırılır. |
 
 ## Kapsülün yaşam döngüsü
 

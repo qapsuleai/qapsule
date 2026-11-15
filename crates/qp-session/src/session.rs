@@ -442,6 +442,12 @@ impl Session {
             .build();
             return vec![err_line(conn, None, e)];
         }
+        if let Some(msg) = self.bar_fast_parse(line) {
+            return match self.check_counts(&msg) {
+                Ok(()) => self.handle_resolved(conn, msg, BTreeMap::new()),
+                Err(e) => vec![err_line(conn, msg_id(&msg), e)],
+            };
+        }
         let value: Value = match serde_json::from_str(line) {
             Ok(v) => v,
             Err(e) => {
@@ -465,14 +471,46 @@ impl Session {
             Ok(r) => r,
             Err(e) => return vec![err_line(conn, id, e)],
         };
-        let msg: ClientMsg = match serde_path_to_error::deserialize(&value) {
+        // Plain typed parse first (the common case); the path-tracking parse runs only to
+        // report an error (same error as before).
+        let msg: ClientMsg = match <ClientMsg as serde::Deserialize>::deserialize(&value) {
             Ok(m) => m,
-            Err(e) => return vec![err_line(conn, id, self.schema_error(&value, &e))],
+            Err(_) => match serde_path_to_error::deserialize(&value) {
+                Ok(m) => m,
+                Err(e) => return vec![err_line(conn, id, self.schema_error(&value, &e))],
+            },
         };
         if let Err(e) = self.check_limits(&value, &msg) {
             return vec![err_line(conn, id, e)];
         }
         self.handle_resolved(conn, msg, resolved)
+    }
+
+    /// The live tick's fast parse (§18.8): a `command` whose ops are all bar writes
+    /// (`append_bars`, `update_last_bar`), parsed straight into the typed message. Such a
+    /// command cannot hold a selector (its id field, `series`, is a string: a selector
+    /// object fails this parse) and, when the line is not longer than `max_string`, no
+    /// string in it can break that limit; so the general path would resolve nothing and
+    /// check nothing more. Anything else (or any parse error) takes the general path,
+    /// which reports errors exactly as before.
+    fn bar_fast_parse(&self, line: &str) -> Option<ClientMsg> {
+        if line.len() > self.limits.max_string as usize
+            || !(line.contains("\"append_bars\"") || line.contains("\"update_last_bar\""))
+        {
+            return None;
+        }
+        let msg: ClientMsg = serde_json::from_str(line).ok()?;
+        match &msg {
+            ClientMsg::Command { ops, .. }
+                if !ops.is_empty()
+                    && ops
+                        .iter()
+                        .all(|o| matches!(o, Op::AppendBars { .. } | Op::UpdateLastBar { .. })) =>
+            {
+                Some(msg)
+            }
+            _ => None,
+        }
     }
 
     /// Finds the selectors of a raw message, resolves them against the document (for a
@@ -647,6 +685,11 @@ impl Session {
             .expected([max_string.to_string()])
             .build());
         }
+        self.check_counts(msg)
+    }
+
+    /// The op and bar count limits of a command.
+    fn check_counts(&self, msg: &ClientMsg) -> PResult<()> {
         if let ClientMsg::Command { ops, .. } = msg {
             if ops.len() > self.limits.max_ops as usize {
                 return Err(E::new(

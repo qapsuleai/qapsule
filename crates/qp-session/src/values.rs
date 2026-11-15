@@ -379,6 +379,19 @@ fn update_study(slot: &mut Slot, bars: &[Bar], delta: Delta) -> bool {
     }
 }
 
+/// Capacity for a column of `n` bars: room for live growth, so that new bars do not
+/// reallocate every column of every study at once (a multi-millisecond tick at 500
+/// studies) until the series has grown by a quarter.
+fn room(n: usize) -> usize {
+    n + n / 4 + 64
+}
+
+fn times(bars: &[Bar]) -> Vec<i64> {
+    let mut t = Vec::with_capacity(room(bars.len()));
+    t.extend(bars.iter().map(|b| b.t));
+    t
+}
+
 /// Output name -> one value per bar.
 type Outputs = BTreeMap<String, Vec<Option<f64>>>;
 
@@ -394,7 +407,7 @@ fn run_study(
     let names = st.outputs();
     let mut cols: Vec<Vec<Option<f64>>> = names
         .iter()
-        .map(|_| Vec::with_capacity(bars.len()))
+        .map(|_| Vec::with_capacity(room(bars.len())))
         .collect();
     let mut out = vec![None; names.len()];
     for b in bars {
@@ -473,7 +486,11 @@ pub(crate) fn values(doc: &Document, cache: &mut Cache, id: &str) -> Result<Rc<C
     }
     let s = find_series(doc, id).ok_or_else(|| format!("no series `{id}`"))?;
     if let Some(bars) = s.bars() {
-        let col = |f: fn(&Bar) -> f64| bars.iter().map(|b| Some(f(b))).collect::<Vec<_>>();
+        let col = |f: fn(&Bar) -> f64| {
+            let mut v = Vec::with_capacity(room(bars.len()));
+            v.extend(bars.iter().map(|b| Some(f(b))));
+            v
+        };
         let mut outputs = BTreeMap::new();
         outputs.insert("o".to_owned(), col(|b| b.o));
         outputs.insert("h".to_owned(), col(|b| b.h));
@@ -481,7 +498,7 @@ pub(crate) fn values(doc: &Document, cache: &mut Cache, id: &str) -> Result<Rc<C
         outputs.insert("c".to_owned(), col(|b| b.c));
         outputs.insert("v".to_owned(), col(|b| b.v));
         let computed = Computed {
-            t: bars.iter().map(|b| b.t).collect(),
+            t: times(bars),
             outputs,
             main: "c".to_owned(),
         };
@@ -502,7 +519,7 @@ pub(crate) fn values(doc: &Document, cache: &mut Cache, id: &str) -> Result<Rc<C
                 .ok_or_else(|| format!("input `{input}` of `{id}` is not a bar series"))?;
             let (outputs, live) = run_study(study, params, bars)?;
             let computed = Computed {
-                t: bars.iter().map(|b| b.t).collect(),
+                t: times(bars),
                 outputs,
                 main: main_output(study, output.as_ref()),
             };

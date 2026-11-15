@@ -1,0 +1,34 @@
+# profile revision-bound: mode caps, history 250, per_bar 100000000, path bound, phase loop,  0:19  up 39 days, 12:04, 8 users, load averages: 9.67 9.53 9.15
+# inclusive samples (function counted once per stack), qp_/serde frames only
+  2807 100.0% capsule_tick::main
+  2805  99.9% capsule_tick::tick
+  2548  90.8% qp_session::session::Session::host_data_event
+  1776  63.3% qp_session::live::<impl qp_session::session::Session>::settle_live
+  1057  37.7% qp_session::capsule::<impl qp_session::session::Session>::run_capsules
+   327  11.6% qp_schema::data::DataBinding::feed_key
+   213   7.6% <core::marker::PhantomData$LT$T> as serde_core::de::DeserializeSeed>::deserialize
+   118   4.2% <$RF$mut serde_json::de::Deserializer$LT$R> as serde_core::de::Deserializer>::deserialize_any
+   102   3.6% qp_session::session::Session::data_changed
+    48   1.7% serde_json::de::Deserializer$LT$R>::parse_number
+    45   1.6% qp_session::live::all_ready
+    41   1.5% qp_session::values::Cache::apply_delta
+    31   1.1% <serde_json::read::StrRead as serde_json::read::Read>::parse_str
+    27   1.0% qp_source::provider::MemoryProvider::apply
+    24   0.9% <serde_json::de::MapAccess$LT$R> as serde_core::de::MapAccess>::next_key_seed::has_next_key
+    23   0.8% serde_json::de::Deserializer$LT$R>::parse_integer
+    20   0.7% qp_source::feed::FeedStore::apply
+    15   0.5% qp_session::claims::<impl qp_session::session::Session>::claims_after_bars
+    14   0.5% serde_core::de::impls::<impl serde_core::de::Deserialize for alloc::string::String>::deserialize
+    11   0.4% qp_session::live::<impl qp_session::session::Session>::take_index
+    10   0.4% serde_json::de::Deserializer$LT$R>::f64_from_parts
+     9   0.3% serde::private::de::content::MapDeserializer$LT$E>::end
+     8   0.3% core::ptr::drop_in_place$LT$serde_core::private::content::Content>
+     6   0.2% qp_session::live::<impl qp_session::session::Session>::view_events
+     3   0.1% qp_source::feed::FeedStore::index_of
+     3   0.1% qp_source::feed::check_bar
+     2   0.1% qp_session::dispute::<impl qp_session::session::Session>::serve_test_source
+     2   0.1% serde_json::de::Deserializer$LT$R>::end_map
+     2   0.1% core::ptr::drop_in_place$LT$alloc::vec::into_iter::IntoIter$LT$$LP$serde_core::private::content::Content,serde_core::private::content::Content$RP$>>
+     2   0.1% serde_core::de::impls::<impl serde_core::de::Deserialize for i64>::deserialize
+     1   0.0% qp_session::session::Session::intent_lines
+     1   0.0% core::ptr::drop_in_place$LT$alloc::vec::Vec$LT$qp_schema::protocol::OutboundLine>>

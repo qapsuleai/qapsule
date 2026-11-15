@@ -61,6 +61,7 @@ pub fn outcomes() -> Vec<(&'static str, OutcomeFactory)> {
         }),
         // M5 alternatifleri: bir satır, ör.
         // ("a1", || (m5_a1::outcome(), m5_a1::perturbations())),
+        ("semantic", || (m5_semantic::outcome(), m5_semantic::perturbations())),
     ]
 }
 

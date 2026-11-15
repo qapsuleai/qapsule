@@ -12,6 +12,7 @@ checksum = "d0881ea181b1df73ff77ffaaf9c7544ecc11e82fba9b5f27b262a3c73a332555"
 name = "harness-sim"
 version = "0.1.0"
 dependencies = [
+ "m5_semantic",
  "qp-capsule",
  "qp-facts",
  "qp-schema",
@@ -25,6 +26,14 @@ name = "itoa"
 version = "1.0.19"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "3bd1574e617a9a6c1f8f8181bd7e841e1f20e4277607ef28945765188d6284d4"
+
+[[package]]
+name = "m5_semantic"
+version = "0.1.0"
+dependencies = [
+ "qp-capsule",
+ "qp-schema",
+]
 
 [[package]]
 name = "memchr"

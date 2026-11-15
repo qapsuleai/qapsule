@@ -9,81 +9,13 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "d0881ea181b1df73ff77ffaaf9c7544ecc11e82fba9b5f27b262a3c73a332555"
 
 [[package]]
-name = "harness-sim"
-version = "0.1.0"
-dependencies = [
- "m3-confirm",
- "m3-rarity",
- "m3_ledger",
- "m4-arc",
- "m4-kinddir",
- "m5_barrier",
- "m5_semantic",
- "qp-capsule",
- "qp-facts",
- "qp-schema",
- "qp-source",
- "serde",
- "serde_json",
-]
-
-[[package]]
 name = "itoa"
 version = "1.0.19"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "3bd1574e617a9a6c1f8f8181bd7e841e1f20e4277607ef28945765188d6284d4"
 
 [[package]]
-name = "m3-confirm"
-version = "0.1.0"
-dependencies = [
- "qp-capsule",
- "qp-schema",
-]
-
-[[package]]
-name = "m3-rarity"
-version = "0.1.0"
-dependencies = [
- "qp-capsule",
- "qp-schema",
-]
-
-[[package]]
-name = "m3_ledger"
-version = "0.1.0"
-dependencies = [
- "qp-capsule",
- "qp-schema",
-]
-
-[[package]]
-name = "m4-arc"
-version = "0.1.0"
-dependencies = [
- "qp-capsule",
- "qp-schema",
-]
-
-[[package]]
-name = "m4-kinddir"
-version = "0.1.0"
-dependencies = [
- "qp-capsule",
- "qp-schema",
-]
-
-[[package]]
-name = "m5_barrier"
-version = "0.1.0"
-dependencies = [
- "qp-capsule",
- "qp-compute",
- "qp-schema",
-]
-
-[[package]]
-name = "m5_semantic"
+name = "m6-coarse"
 version = "0.1.0"
 dependencies = [
  "qp-capsule",
@@ -103,13 +35,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "985e7ec9bb745e6ce6535b544d84d6cd6f7ad8bd711c398938ae983b91a766d9"
 dependencies = [
  "unicode-ident",
-]
-
-[[package]]
-name = "qp-calendar"
-version = "0.0.0"
-dependencies = [
- "qp-schema",
 ]
 
 [[package]]
@@ -142,15 +67,6 @@ version = "0.0.0"
 dependencies = [
  "schemars",
  "serde",
- "serde_json",
-]
-
-[[package]]
-name = "qp-source"
-version = "0.0.0"
-dependencies = [
- "qp-calendar",
- "qp-schema",
  "serde_json",
 ]
 

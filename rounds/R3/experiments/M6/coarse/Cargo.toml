@@ -1,0 +1,15 @@
+[package]
+name = "m6-coarse"
+version = "0.1.0"
+edition = "2021"
+publish = false
+description = "R3/M6 trust path candidate: coarse relation + persistence"
+
+[workspace]
+
+[dependencies]
+qp-capsule = { path = "../../../../../crates/qp-capsule" }
+qp-schema = { path = "../../../../../crates/qp-schema" }
+
+[lints.rust]
+unsafe_code = "forbid"

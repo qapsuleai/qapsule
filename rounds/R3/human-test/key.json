@@ -1,0 +1,493 @@
+{
+  "alphabets": {
+    "rozet": {
+      "code": "N",
+      "items": {
+        "A1": {
+          "condition": "nolegend",
+          "direction": "up",
+          "kind": "reversal",
+          "phase": "retracted",
+          "spec": "reversal.up|retracted|s0.25|c0.3|n2|f1|-",
+          "strength": "low"
+        },
+        "A2": {
+          "condition": "nolegend",
+          "direction": "down",
+          "kind": "reversal",
+          "phase": "candidate",
+          "spec": "reversal.down|candidate|s0.25|c0.8|n1|f1|-",
+          "strength": "low"
+        },
+        "A3": {
+          "condition": "nolegend",
+          "direction": "up",
+          "kind": "continuation",
+          "phase": "realized",
+          "spec": "continuation.up|realized|s0.9|c0.8|n1|f1|-",
+          "strength": "high"
+        },
+        "A4": {
+          "condition": "nolegend",
+          "direction": "neutral",
+          "kind": "flow",
+          "phase": "realized",
+          "spec": "flow.neutral|realized|s0.9|c0.3|n2|f1|-",
+          "strength": "high"
+        },
+        "B1": {
+          "condition": "nolegend",
+          "direction": "up",
+          "kind": "breakout",
+          "phase": "final",
+          "spec": "breakout.up|final|s0.9|c0.3|n2|f1|-",
+          "strength": "high"
+        },
+        "B2": {
+          "condition": "nolegend",
+          "direction": "neutral",
+          "kind": "squeeze",
+          "phase": "candidate",
+          "spec": "squeeze.neutral|candidate|s0.25|c0.3|n2|f1|-",
+          "strength": "low"
+        },
+        "B3": {
+          "condition": "nolegend",
+          "direction": "up",
+          "kind": "extreme",
+          "phase": "final",
+          "spec": "extreme.up|final|s0.9|c0.3|n3|f1|-",
+          "strength": "high"
+        },
+        "B4": {
+          "condition": "nolegend",
+          "direction": "down",
+          "kind": "flow",
+          "phase": "failed",
+          "spec": "flow.down|failed|s0.25|c0.3|n1|f1|-",
+          "strength": "low"
+        },
+        "C1": {
+          "condition": "legend",
+          "direction": "up",
+          "kind": "flow",
+          "phase": "failed",
+          "spec": "flow.up|failed|s0.9|c0.8|n3|f1|-",
+          "strength": "high"
+        },
+        "C2": {
+          "condition": "legend",
+          "direction": "up",
+          "kind": "breakout",
+          "phase": "retracted",
+          "spec": "breakout.up|retracted|s0.9|c0.8|n3|f1|-",
+          "strength": "high"
+        },
+        "C3": {
+          "condition": "legend",
+          "direction": "down",
+          "kind": "extreme",
+          "phase": "failed",
+          "spec": "extreme.down|failed|s0.25|c0.3|n1|f1|-",
+          "strength": "low"
+        },
+        "C4": {
+          "condition": "legend",
+          "direction": "up",
+          "kind": "continuation",
+          "phase": "realized",
+          "spec": "continuation.up|realized|s0.25|c0.8|n2|f1|-",
+          "strength": "low"
+        },
+        "D1": {
+          "condition": "legend",
+          "direction": "down",
+          "kind": "continuation",
+          "phase": "candidate",
+          "spec": "continuation.down|candidate|s0.9|c0.8|n3|f1|-",
+          "strength": "high"
+        },
+        "D2": {
+          "condition": "legend",
+          "direction": "down",
+          "kind": "reversal",
+          "phase": "final",
+          "spec": "reversal.down|final|s0.9|c0.3|n1|f1|-",
+          "strength": "high"
+        },
+        "D3": {
+          "condition": "legend",
+          "direction": "down",
+          "kind": "breakout",
+          "phase": "retracted",
+          "spec": "breakout.down|retracted|s0.25|c0.3|n3|f1|-",
+          "strength": "low"
+        },
+        "D4": {
+          "condition": "legend",
+          "direction": "neutral",
+          "kind": "squeeze",
+          "phase": "final",
+          "spec": "squeeze.neutral|final|s0.25|c0.8|n1|f1|-",
+          "strength": "low"
+        },
+        "L1": {
+          "condition": "learn",
+          "direction": "down",
+          "kind": "breakout",
+          "phase": "candidate",
+          "spec": "breakout.down|candidate|s0.9|c0.3|n3|f1|-",
+          "strength": "high"
+        },
+        "L2": {
+          "condition": "learn",
+          "direction": "neutral",
+          "kind": "flow",
+          "phase": "failed",
+          "spec": "flow.neutral|failed|s0.9|c0.3|n2|f1|-",
+          "strength": "high"
+        },
+        "L3": {
+          "condition": "learn",
+          "direction": "up",
+          "kind": "continuation",
+          "phase": "realized",
+          "spec": "continuation.up|realized|s0.25|c0.8|n1|f1|-",
+          "strength": "low"
+        },
+        "L4": {
+          "condition": "learn",
+          "direction": "up",
+          "kind": "extreme",
+          "phase": "final",
+          "spec": "extreme.up|final|s0.25|c0.3|n2|f1|-",
+          "strength": "low"
+        }
+      },
+      "legend": "Her işaret aynı yuvarlak rozettir. İç desen türü söyler: iki ok başı = devam; küçük aşağı ve büyük yukarı iki ok = dönüş; açık çizgiyi delen ok = kırılım; birbirine dönük iki üçgen = sıkışma; çizginin ötesindeki nokta = aşırılık; damla = akış. Desenin ucu yönü gösterir: yukarı (yeşil), aşağı (kırmızı), yana = yönsüz (koyu). Büyük desen güçlü, küçük desen zayıf. Aşama: içi boş desen ve ince gri halka = aday; dolu desen = kesin; kalın çerçeve = gerçekleşti; eğik çizgiyle üstü çizili = gerçekleşmedi; tümü gri ve çarpılı = geri çekildi. Halkanın parça sayısı = bağımsız teyit sayısı. Alttan yükselen gri dolgu = güven. Soluk = eski. Sağ üst köşede elmas = sunucu doğruladı."
+    },
+    "siluet": {
+      "code": "M",
+      "items": {
+        "A1": {
+          "condition": "nolegend",
+          "direction": "down",
+          "kind": "reversal",
+          "phase": "candidate",
+          "spec": "reversal.down|candidate|s0.25|c0.8|n1|f1|-",
+          "strength": "low"
+        },
+        "A2": {
+          "condition": "nolegend",
+          "direction": "up",
+          "kind": "reversal",
+          "phase": "retracted",
+          "spec": "reversal.up|retracted|s0.25|c0.3|n2|f1|-",
+          "strength": "low"
+        },
+        "A3": {
+          "condition": "nolegend",
+          "direction": "down",
+          "kind": "flow",
+          "phase": "failed",
+          "spec": "flow.down|failed|s0.25|c0.3|n1|f1|-",
+          "strength": "low"
+        },
+        "A4": {
+          "condition": "nolegend",
+          "direction": "up",
+          "kind": "breakout",
+          "phase": "final",
+          "spec": "breakout.up|final|s0.9|c0.3|n2|f1|-",
+          "strength": "high"
+        },
+        "B1": {
+          "condition": "nolegend",
+          "direction": "neutral",
+          "kind": "flow",
+          "phase": "realized",
+          "spec": "flow.neutral|realized|s0.9|c0.3|n2|f1|-",
+          "strength": "high"
+        },
+        "B2": {
+          "condition": "nolegend",
+          "direction": "up",
+          "kind": "extreme",
+          "phase": "final",
+          "spec": "extreme.up|final|s0.9|c0.3|n3|f1|-",
+          "strength": "high"
+        },
+        "B3": {
+          "condition": "nolegend",
+          "direction": "neutral",
+          "kind": "squeeze",
+          "phase": "candidate",
+          "spec": "squeeze.neutral|candidate|s0.25|c0.3|n2|f1|-",
+          "strength": "low"
+        },
+        "B4": {
+          "condition": "nolegend",
+          "direction": "up",
+          "kind": "continuation",
+          "phase": "realized",
+          "spec": "continuation.up|realized|s0.9|c0.8|n1|f1|-",
+          "strength": "high"
+        },
+        "C1": {
+          "condition": "legend",
+          "direction": "down",
+          "kind": "reversal",
+          "phase": "final",
+          "spec": "reversal.down|final|s0.9|c0.3|n1|f1|-",
+          "strength": "high"
+        },
+        "C2": {
+          "condition": "legend",
+          "direction": "down",
+          "kind": "continuation",
+          "phase": "candidate",
+          "spec": "continuation.down|candidate|s0.9|c0.8|n3|f1|-",
+          "strength": "high"
+        },
+        "C3": {
+          "condition": "legend",
+          "direction": "down",
+          "kind": "breakout",
+          "phase": "retracted",
+          "spec": "breakout.down|retracted|s0.25|c0.3|n3|f1|-",
+          "strength": "low"
+        },
+        "C4": {
+          "condition": "legend",
+          "direction": "up",
+          "kind": "continuation",
+          "phase": "realized",
+          "spec": "continuation.up|realized|s0.25|c0.8|n2|f1|-",
+          "strength": "low"
+        },
+        "D1": {
+          "condition": "legend",
+          "direction": "up",
+          "kind": "breakout",
+          "phase": "retracted",
+          "spec": "breakout.up|retracted|s0.9|c0.8|n3|f1|-",
+          "strength": "high"
+        },
+        "D2": {
+          "condition": "legend",
+          "direction": "neutral",
+          "kind": "squeeze",
+          "phase": "final",
+          "spec": "squeeze.neutral|final|s0.25|c0.8|n1|f1|-",
+          "strength": "low"
+        },
+        "D3": {
+          "condition": "legend",
+          "direction": "down",
+          "kind": "extreme",
+          "phase": "failed",
+          "spec": "extreme.down|failed|s0.25|c0.3|n1|f1|-",
+          "strength": "low"
+        },
+        "D4": {
+          "condition": "legend",
+          "direction": "up",
+          "kind": "flow",
+          "phase": "failed",
+          "spec": "flow.up|failed|s0.9|c0.8|n3|f1|-",
+          "strength": "high"
+        },
+        "L1": {
+          "condition": "learn",
+          "direction": "up",
+          "kind": "continuation",
+          "phase": "realized",
+          "spec": "continuation.up|realized|s0.25|c0.8|n1|f1|-",
+          "strength": "low"
+        },
+        "L2": {
+          "condition": "learn",
+          "direction": "up",
+          "kind": "extreme",
+          "phase": "final",
+          "spec": "extreme.up|final|s0.25|c0.3|n2|f1|-",
+          "strength": "low"
+        },
+        "L3": {
+          "condition": "learn",
+          "direction": "neutral",
+          "kind": "flow",
+          "phase": "failed",
+          "spec": "flow.neutral|failed|s0.9|c0.3|n2|f1|-",
+          "strength": "high"
+        },
+        "L4": {
+          "condition": "learn",
+          "direction": "down",
+          "kind": "breakout",
+          "phase": "candidate",
+          "spec": "breakout.down|candidate|s0.9|c0.3|n3|f1|-",
+          "strength": "high"
+        }
+      },
+      "legend": "Şekil türü söyler. Devam: düz çapraz ok. Dönüş: U biçiminde geri dönen ok. Kırılım: yatay çizgiyi delip geçen ok. Sıkışma: birbirine yaklaşan iki çizgi. Aşırılık: ucunda nokta olan sivri tepe. Akış: geniş ok başı altında iki dalgalı çizgi. Yön: şeklin baktığı yer; yukarı yeşil, aşağı kırmızı, yönsüz turuncu (yan yatık ya da simetrik). Güç: büyük ve kalın güçlü, küçük ve ince zayıf. Aşama: kesik çizgi ve boş ok başı aday; dolu renkli çizgi kesinleşmiş; gri şekil kapanmış: sağ altta ✓ gerçekleşti, ✗ gerçekleşmedi, üstü çizili geri çekildi. Zemindeki soluk dolgunun yüksekliği güven. Solukluk eskilik. Alttaki kısa çizgiler teyit eden kanıt ailesi sayısı. Sağ üstte koyu kıvrık köşe: sunucu doğruladı."
+    }
+  },
+  "booklets": {
+    "A": [
+      "siluet",
+      "rozet"
+    ],
+    "B": [
+      "rozet",
+      "siluet"
+    ]
+  },
+  "examples": [
+    {
+      "condition": "example",
+      "direction": "up",
+      "kind": "breakout",
+      "phase": "final",
+      "spec": "breakout.up|final|s0.9|c0.3|n3|f1|-",
+      "strength": "high"
+    },
+    {
+      "condition": "example",
+      "direction": "down",
+      "kind": "reversal",
+      "phase": "candidate",
+      "spec": "reversal.down|candidate|s0.25|c0.8|n3|f1|-",
+      "strength": "low"
+    },
+    {
+      "condition": "example",
+      "direction": "neutral",
+      "kind": "squeeze",
+      "phase": "realized",
+      "spec": "squeeze.neutral|realized|s0.9|c0.8|n3|f1|-",
+      "strength": "high"
+    },
+    {
+      "condition": "example",
+      "direction": "up",
+      "kind": "flow",
+      "phase": "failed",
+      "spec": "flow.up|failed|s0.25|c0.8|n1|f1|-",
+      "strength": "low"
+    },
+    {
+      "condition": "example",
+      "direction": "down",
+      "kind": "extreme",
+      "phase": "retracted",
+      "spec": "extreme.down|retracted|s0.9|c0.3|n1|f1|-",
+      "strength": "high"
+    }
+  ],
+  "note": "Answer key. Participants never see this file. M = siluet, N = rozet.",
+  "package": "r3-human-test/1",
+  "seed": 1,
+  "sentences": {
+    "S1": {
+      "bars_ago": 30,
+      "direction": "down",
+      "kind": "breakout",
+      "redacted": false,
+      "situation": "s12",
+      "stage": "weakened",
+      "still_valid": "unknown",
+      "text": "AKBNK 30 bar önce 20,86'daki desteği aşağı kırdı (kapanış 20,58): aşağı kırılım. Bugün ters yönde bir sinyal geldi; görünüm zayıfladı. Hâlâ geçerli olup olmadığı bilinmiyor. Karnesi henüz az örnekli: 8 seferin 2'sinde tuttu.",
+      "time": "event",
+      "when": "past"
+    },
+    "S2": {
+      "bars_ago": 3,
+      "direction": "up",
+      "kind": "extreme",
+      "redacted": false,
+      "situation": "k26",
+      "stage": "weakened",
+      "still_valid": "no",
+      "text": "THYAO'da RSI 3 bar önce 70'in üstüne çıktı, bugün yeniden altına indi; şu an 55, artık 70'in üstünde değil. Aşırı alım sona erdi. Geçmişte bu sinyal 140 seferin 87'sinde beklendiği gibi sonuçlandı.",
+      "time": "state",
+      "when": "past"
+    },
+    "S3": {
+      "bars_ago": null,
+      "direction": "up",
+      "kind": "continuation",
+      "redacted": false,
+      "situation": "s50",
+      "stage": "weakened",
+      "still_valid": "yes",
+      "text": "EREGL 3 bar içinde uzun ortalamanın (255,56) üstünde kapanırsa yükseliş eğilimi teyit olur. Bugün ters yönde bir sinyal geldi; görünüm zayıfladı. Koşul hâlâ açık. Karnesi henüz az örnekli: 8 seferin 4'ünde tuttu.",
+      "time": "expectation",
+      "when": "conditional"
+    },
+    "S4": {
+      "bars_ago": 0,
+      "direction": "down",
+      "kind": "extreme",
+      "redacted": false,
+      "situation": "s17",
+      "stage": "confirmed",
+      "still_valid": "unknown",
+      "text": "PGSUS'ta RSI bugün 30'un altına indi (28,8): aşırı satım. Bugün hacim de teyit etti; 2 bağımsız kanıt ailesi destekliyor. Hâlâ geçerli olup olmadığı bilinmiyor. Geçmişte bu sinyal 140 seferin 99'unda beklendiği gibi sonuçlandı.",
+      "time": "event",
+      "when": "past"
+    },
+    "S5": {
+      "bars_ago": null,
+      "direction": "down",
+      "kind": "flow",
+      "redacted": false,
+      "situation": "s71",
+      "stage": "expired",
+      "still_valid": "no",
+      "text": "SISE'de kurumsal net satış 3 bar içinde her zamankinden güçlü hâle gelirse (son günlerin ortalaması 334.000) para çıkışı teyit olur. Beklentinin 5 barlık ömrü bugün sonuçsuz doldu; artık geçerli değil. Karnesi henüz az örnekli: 8 seferin 2'sinde tuttu.",
+      "time": "expectation",
+      "when": "conditional"
+    },
+    "S6": {
+      "bars_ago": null,
+      "direction": "neutral",
+      "kind": "squeeze",
+      "redacted": false,
+      "situation": "s39",
+      "stage": "realized",
+      "still_valid": "yes",
+      "text": "GARAN'da bant genişliği 5 bardır eşiğin (0,06) altında; şu an 0,0588. Sıkışma (yön belirsiz) sürüyor. Beklenen sonuç bugün gerçekleşti. Karnesi henüz az örnekli: 8 seferin 5'inde tuttu.",
+      "time": "state",
+      "when": "now"
+    },
+    "S7": {
+      "bars_ago": 5,
+      "direction": "down",
+      "kind": "reversal",
+      "redacted": true,
+      "situation": "s07",
+      "stage": "expired",
+      "still_valid": "no",
+      "text": "PGSUS'ta yaklaşık bir hafta önce aşağı dönüş işareti çıktı: fiyat yeni tepe yaparken RSI daha düşük tepe yaptı. Sinyalın ömrü bugün sonuçsuz doldu; artık geçerli değil. Karnesi henüz az örnekli. Sunucu doğruladı; rakamlar kurumsal akış lisansı gerektiriyor.",
+      "time": "event",
+      "when": "past"
+    },
+    "S8": {
+      "bars_ago": 5,
+      "direction": "down",
+      "kind": "flow",
+      "redacted": true,
+      "situation": "s47",
+      "stage": "born",
+      "still_valid": "no",
+      "text": "BIMAS'ta kurumsal net satış yaklaşık bir hafta önce her zamankinden güçlü hâle geldi; artık her zamankinden güçlü değil. Para çıkışı sona erdi. Geçmişte bu tür sinyal çoğunlukla beklendiği gibi sonuçlandı. Sunucu doğruladı; rakamlar kurumsal akış lisansı gerektiriyor.",
+      "time": "state",
+      "when": "past"
+    }
+  },
+  "strength_values": {
+    "high": 0.9,
+    "low": 0.25
+  }
+}

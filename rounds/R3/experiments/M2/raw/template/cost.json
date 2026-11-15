@@ -2,8 +2,8 @@
   "alt": "template",
   "note": "wall-clock timing on this machine (release build recommended); not deterministic, not part of any byte-equality claim",
   "ns_per_sentence": {
-    "en": 1018.0,
-    "tr": 1732.0
+    "en": 1082.0,
+    "tr": 1779.0
   },
   "passes": 20,
   "llm": null

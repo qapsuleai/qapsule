@@ -110,6 +110,30 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "5d15f86d12da44cd8d4ec3c73984537eb7f4cadcb9776a575a0a8a05ca11005c"
 
 [[package]]
+name = "m1-iz"
+version = "0.0.0"
+dependencies = [
+ "qp-grammar",
+ "qp-schema",
+]
+
+[[package]]
+name = "m1-rozet"
+version = "0.0.0"
+dependencies = [
+ "qp-grammar",
+ "qp-schema",
+]
+
+[[package]]
+name = "m1-siluet"
+version = "0.0.0"
+dependencies = [
+ "qp-grammar",
+ "qp-schema",
+]
+
+[[package]]
 name = "m2-template"
 version = "0.0.0"
 dependencies = [
@@ -245,6 +269,9 @@ dependencies = [
 name = "r3-harness"
 version = "0.0.0"
 dependencies = [
+ "m1-iz",
+ "m1-rozet",
+ "m1-siluet",
  "m2-template",
  "qp-capsule",
  "qp-grammar",

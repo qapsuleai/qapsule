@@ -1,0 +1,524 @@
+{
+  "harness": "r3-h-m12/1",
+  "alt": "iz",
+  "conditions": {
+    "learn": {
+      "readers": 3,
+      "items": 36,
+      "accuracy": {
+        "direction": 0.9167,
+        "full": 0.4444,
+        "kind": 0.75,
+        "phase": 1.0,
+        "strength": 0.75
+      },
+      "chance": {
+        "direction": 0.3333,
+        "full": 0.0056,
+        "kind": 0.1667,
+        "phase": 0.2,
+        "strength": 0.5
+      },
+      "majority": {
+        "direction": 0.3889,
+        "full": 0.0833,
+        "kind": 0.25,
+        "phase": 0.2778,
+        "strength": 0.7222
+      },
+      "per_reader": [
+        {
+          "run": "learn_s1_r1",
+          "reader": "r1",
+          "seed": 1,
+          "parsed": true,
+          "items": 12,
+          "missing": 0,
+          "correct": {
+            "direction": 11,
+            "full": 4,
+            "kind": 10,
+            "phase": 12,
+            "strength": 6
+          },
+          "wrong": {
+            "A1": [
+              "strength"
+            ],
+            "A2": [
+              "strength"
+            ],
+            "A3": [
+              "kind",
+              "direction"
+            ],
+            "A4": [],
+            "B1": [
+              "kind"
+            ],
+            "B2": [
+              "strength"
+            ],
+            "B3": [],
+            "B4": [],
+            "C1": [],
+            "C2": [
+              "strength"
+            ],
+            "C3": [
+              "strength"
+            ],
+            "C4": [
+              "strength"
+            ]
+          }
+        },
+        {
+          "run": "learn_s2_r2",
+          "reader": "r2",
+          "seed": 2,
+          "parsed": true,
+          "items": 12,
+          "missing": 0,
+          "correct": {
+            "direction": 12,
+            "full": 8,
+            "kind": 9,
+            "phase": 12,
+            "strength": 11
+          },
+          "wrong": {
+            "A1": [
+              "kind"
+            ],
+            "A2": [],
+            "A3": [],
+            "A4": [],
+            "B1": [],
+            "B2": [],
+            "B3": [
+              "kind"
+            ],
+            "B4": [],
+            "C1": [
+              "strength"
+            ],
+            "C2": [],
+            "C3": [
+              "kind"
+            ],
+            "C4": []
+          }
+        },
+        {
+          "run": "learn_s3_r3",
+          "reader": "r3",
+          "seed": 3,
+          "parsed": true,
+          "items": 12,
+          "missing": 0,
+          "correct": {
+            "direction": 10,
+            "full": 4,
+            "kind": 8,
+            "phase": 12,
+            "strength": 10
+          },
+          "wrong": {
+            "A1": [],
+            "A2": [],
+            "A3": [],
+            "A4": [
+              "direction"
+            ],
+            "B1": [
+              "kind"
+            ],
+            "B2": [],
+            "B3": [
+              "kind"
+            ],
+            "B4": [
+              "kind"
+            ],
+            "C1": [
+              "kind"
+            ],
+            "C2": [
+              "strength"
+            ],
+            "C3": [
+              "direction"
+            ],
+            "C4": [
+              "strength"
+            ]
+          }
+        }
+      ]
+    },
+    "legend": {
+      "readers": 3,
+      "items": 48,
+      "accuracy": {
+        "direction": 1.0,
+        "full": 0.75,
+        "kind": 0.9167,
+        "phase": 1.0,
+        "strength": 0.8125
+      },
+      "chance": {
+        "direction": 0.3333,
+        "full": 0.0056,
+        "kind": 0.1667,
+        "phase": 0.2,
+        "strength": 0.5
+      },
+      "majority": {
+        "direction": 0.4167,
+        "full": 0.1042,
+        "kind": 0.2292,
+        "phase": 1.0,
+        "strength": 0.9792
+      },
+      "per_reader": [
+        {
+          "run": "legend_s1_r1",
+          "reader": "r1",
+          "seed": 1,
+          "parsed": true,
+          "items": 16,
+          "missing": 0,
+          "correct": {
+            "direction": 16,
+            "full": 12,
+            "kind": 15,
+            "phase": 16,
+            "strength": 13
+          },
+          "wrong": {
+            "A1": [],
+            "A2": [
+              "kind"
+            ],
+            "A3": [],
+            "A4": [],
+            "B1": [
+              "strength"
+            ],
+            "B2": [],
+            "B3": [
+              "strength"
+            ],
+            "B4": [],
+            "C1": [],
+            "C2": [],
+            "C3": [],
+            "C4": [],
+            "D1": [
+              "strength"
+            ],
+            "D2": [],
+            "D3": [],
+            "D4": []
+          }
+        },
+        {
+          "run": "legend_s2_r2",
+          "reader": "r2",
+          "seed": 2,
+          "parsed": true,
+          "items": 16,
+          "missing": 0,
+          "correct": {
+            "direction": 16,
+            "full": 13,
+            "kind": 13,
+            "phase": 16,
+            "strength": 15
+          },
+          "wrong": {
+            "A1": [],
+            "A2": [],
+            "A3": [],
+            "A4": [],
+            "B1": [],
+            "B2": [],
+            "B3": [],
+            "B4": [],
+            "C1": [],
+            "C2": [],
+            "C3": [
+              "kind",
+              "strength"
+            ],
+            "C4": [],
+            "D1": [
+              "kind"
+            ],
+            "D2": [
+              "kind"
+            ],
+            "D3": [],
+            "D4": []
+          }
+        },
+        {
+          "run": "legend_s3_r3",
+          "reader": "r3",
+          "seed": 3,
+          "parsed": true,
+          "items": 16,
+          "missing": 0,
+          "correct": {
+            "direction": 16,
+            "full": 11,
+            "kind": 16,
+            "phase": 16,
+            "strength": 11
+          },
+          "wrong": {
+            "A1": [],
+            "A2": [],
+            "A3": [],
+            "A4": [],
+            "B1": [],
+            "B2": [],
+            "B3": [],
+            "B4": [
+              "strength"
+            ],
+            "C1": [],
+            "C2": [],
+            "C3": [],
+            "C4": [],
+            "D1": [
+              "strength"
+            ],
+            "D2": [
+              "strength"
+            ],
+            "D3": [
+              "strength"
+            ],
+            "D4": [
+              "strength"
+            ]
+          }
+        }
+      ]
+    },
+    "nolegend": {
+      "readers": 3,
+      "items": 48,
+      "accuracy": {
+        "direction": 1.0,
+        "full": 0.25,
+        "kind": 0.6667,
+        "phase": 0.6875,
+        "strength": 0.6042
+      },
+      "chance": {
+        "direction": 0.3333,
+        "full": 0.0056,
+        "kind": 0.1667,
+        "phase": 0.2,
+        "strength": 0.5
+      },
+      "majority": {
+        "direction": 0.4167,
+        "full": 0.1042,
+        "kind": 0.2292,
+        "phase": 1.0,
+        "strength": 0.9792
+      },
+      "per_reader": [
+        {
+          "run": "nolegend_s1_r1",
+          "reader": "r1",
+          "seed": 1,
+          "parsed": true,
+          "items": 16,
+          "missing": 0,
+          "correct": {
+            "direction": 16,
+            "full": 2,
+            "kind": 10,
+            "phase": 8,
+            "strength": 9
+          },
+          "wrong": {
+            "A1": [
+              "phase"
+            ],
+            "A2": [
+              "kind",
+              "strength"
+            ],
+            "A3": [
+              "phase"
+            ],
+            "A4": [
+              "phase"
+            ],
+            "B1": [
+              "kind",
+              "strength"
+            ],
+            "B2": [
+              "kind",
+              "strength"
+            ],
+            "B3": [
+              "strength",
+              "phase"
+            ],
+            "B4": [],
+            "C1": [
+              "kind",
+              "strength"
+            ],
+            "C2": [],
+            "C3": [
+              "phase"
+            ],
+            "C4": [
+              "phase"
+            ],
+            "D1": [
+              "kind"
+            ],
+            "D2": [
+              "phase"
+            ],
+            "D3": [
+              "kind",
+              "strength",
+              "phase"
+            ],
+            "D4": [
+              "strength"
+            ]
+          }
+        },
+        {
+          "run": "nolegend_s2_r2",
+          "reader": "r2",
+          "seed": 2,
+          "parsed": true,
+          "items": 16,
+          "missing": 0,
+          "correct": {
+            "direction": 16,
+            "full": 2,
+            "kind": 10,
+            "phase": 12,
+            "strength": 8
+          },
+          "wrong": {
+            "A1": [
+              "strength"
+            ],
+            "A2": [],
+            "A3": [
+              "kind"
+            ],
+            "A4": [
+              "kind"
+            ],
+            "B1": [
+              "strength"
+            ],
+            "B2": [
+              "phase"
+            ],
+            "B3": [
+              "kind"
+            ],
+            "B4": [
+              "strength",
+              "phase"
+            ],
+            "C1": [
+              "strength"
+            ],
+            "C2": [],
+            "C3": [
+              "strength"
+            ],
+            "C4": [
+              "kind"
+            ],
+            "D1": [
+              "kind",
+              "strength"
+            ],
+            "D2": [
+              "kind",
+              "strength",
+              "phase"
+            ],
+            "D3": [
+              "strength"
+            ],
+            "D4": [
+              "phase"
+            ]
+          }
+        },
+        {
+          "run": "nolegend_s3_r3",
+          "reader": "r3",
+          "seed": 3,
+          "parsed": true,
+          "items": 16,
+          "missing": 0,
+          "correct": {
+            "direction": 16,
+            "full": 8,
+            "kind": 12,
+            "phase": 13,
+            "strength": 12
+          },
+          "wrong": {
+            "A1": [
+              "phase"
+            ],
+            "A2": [],
+            "A3": [],
+            "A4": [],
+            "B1": [
+              "phase"
+            ],
+            "B2": [
+              "kind",
+              "strength"
+            ],
+            "B3": [],
+            "B4": [
+              "kind"
+            ],
+            "C1": [],
+            "C2": [
+              "kind",
+              "strength"
+            ],
+            "C3": [
+              "kind"
+            ],
+            "C4": [],
+            "D1": [
+              "strength"
+            ],
+            "D2": [],
+            "D3": [
+              "strength",
+              "phase"
+            ],
+            "D4": []
+          }
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,24 @@
+[package]
+name = "m1-siluet"
+description = "R3/M1 candidate \"siluet\": each meaning kind is its own familiar silhouette; direction by orientation; the other channels plain."
+version = "0.0.0"
+edition = "2021"
+publish = false
+
+# Not a member of the main workspace (the root workspace only lists `crates/*`).
+[workspace]
+
+[lib]
+name = "m1_siluet"
+path = "src/lib.rs"
+
+[dependencies]
+qp-schema = { path = "../../../../../crates/qp-schema" }
+qp-grammar = { path = "../../../../../crates/qp-grammar" }
+
+[dev-dependencies]
+# Contact sheet example only (`cargo run --example contact`).
+qp-render = { path = "../../../../../crates/qp-render" }
+
+[lints.rust]
+unsafe_code = "forbid"

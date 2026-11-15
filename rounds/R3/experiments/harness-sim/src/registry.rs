@@ -91,15 +91,24 @@ pub fn find<F: Copy>(list: &[(&'static str, F)], name: &str) -> Option<F> {
 /// Shared reference rules (the non-measured strategies of each experiment).
 #[must_use]
 pub fn reference_theme() -> Box<dyn ThemeRule> {
+    if let Ok(n) = std::env::var("QP_R3_THEME") {
+        return find(&themes(), &n).expect("QP_R3_THEME: unknown theme")();
+    }
     Box::new(reference::RefTheme)
 }
 /// Reference outcome.
 #[must_use]
 pub fn reference_outcome() -> Box<dyn OutcomeRule> {
+    if let Ok(n) = std::env::var("QP_R3_OUTCOME") {
+        return find(&outcomes(), &n).expect("QP_R3_OUTCOME: unknown outcome")().0;
+    }
     Box::new(reference::RefOutcome::default())
 }
 /// Reference ranker.
 #[must_use]
 pub fn reference_ranker() -> Box<dyn Ranker> {
+    if let Ok(n) = std::env::var("QP_R3_RANKER") {
+        return find(&rankers(), &n).expect("QP_R3_RANKER: unknown ranker")();
+    }
     Box::new(reference::RefRanker)
 }

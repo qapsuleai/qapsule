@@ -1,0 +1,155 @@
+{
+ "schema_version": "0",
+ "id": "doc-thyao-bound",
+ "title": "THYAO günlük (bağlı)",
+ "display_tz": "Europe/Istanbul",
+ "series": [
+  {
+   "id": "px",
+   "instrument": {
+    "symbol": "THYAO",
+    "exchange": "BIST",
+    "calendar": "XIST"
+   },
+   "interval": "1d",
+   "source": {
+    "kind": "bind",
+    "symbol": "THYAO",
+    "interval": "1d",
+    "window": {
+     "last": 300
+    }
+   }
+  },
+  {
+   "id": "rsi14",
+   "instrument": {
+    "symbol": "THYAO",
+    "exchange": "BIST",
+    "calendar": "XIST"
+   },
+   "interval": "1d",
+   "source": {
+    "kind": "study",
+    "study": "rsi",
+    "inputs": [
+     "px"
+    ],
+    "params": {
+     "period": 14.0
+    }
+   }
+  },
+  {
+   "id": "macd",
+   "instrument": {
+    "symbol": "THYAO",
+    "exchange": "BIST",
+    "calendar": "XIST"
+   },
+   "interval": "1d",
+   "source": {
+    "kind": "study",
+    "study": "macd",
+    "inputs": [
+     "px"
+    ],
+    "params": {
+     "fast": 12.0,
+     "slow": 26.0,
+     "signal": 9.0
+    }
+   }
+  },
+  {
+   "id": "bb20",
+   "instrument": {
+    "symbol": "THYAO",
+    "exchange": "BIST",
+    "calendar": "XIST"
+   },
+   "interval": "1d",
+   "source": {
+    "kind": "study",
+    "study": "bollinger",
+    "inputs": [
+     "px"
+    ],
+    "params": {
+     "period": 20.0,
+     "k": 2.0
+    }
+   }
+  }
+ ],
+ "views": [
+  {
+   "id": "main",
+   "title": "THYAO 1G",
+   "x": {
+    "kind": "time"
+   },
+   "y": [
+    {
+     "kind": "linear"
+    },
+    {
+     "kind": "linear",
+     "domain": [
+      0.0,
+      100.0
+     ]
+    },
+    {
+     "kind": "linear"
+    }
+   ],
+   "layers": [
+    {
+     "mark": "candle",
+     "series": "px",
+     "panel": 0,
+     "encoding": {}
+    },
+    {
+     "mark": "line",
+     "series": "bb20",
+     "panel": 0,
+     "encoding": {
+      "color": "#90a4ae"
+     }
+    },
+    {
+     "mark": "line",
+     "series": "rsi14",
+     "panel": 1,
+     "encoding": {
+      "color": "#7e57c2",
+      "y": "rsi"
+     }
+    },
+    {
+     "mark": "rule",
+     "panel": 1,
+     "encoding": {
+      "color": "#9e9e9e",
+      "y": "70"
+     }
+    },
+    {
+     "mark": "line",
+     "series": "macd",
+     "panel": 2,
+     "encoding": {}
+    }
+   ]
+  }
+ ],
+ "facts": [],
+ "findings": [],
+ "capsules": [],
+ "intents": [],
+ "ledger": {
+  "entries": []
+ }
+}

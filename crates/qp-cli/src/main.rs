@@ -41,6 +41,11 @@ enum Command {
         /// After the outputs of each input line, write `{"batch_end":true}`.
         #[arg(long)]
         batch_end: bool,
+        /// Accept host frames `{"host":{"data":<DataEvent>}}` (data events on the host's
+        /// path, docs/PROTOCOL.md §3, §18.4). Only for a stream that belongs to the host;
+        /// without this flag such a line is a framing error.
+        #[arg(long)]
+        host_frames: bool,
     },
     /// Run an MCP server over stdin/stdout (newline-delimited JSON-RPC, MCP stdio
     /// transport), speaking `qp/0` as one principal (rounds/RD1/EMBEDDING.md §1).
@@ -235,7 +240,8 @@ fn run(command: Command) -> Result<Outcome, String> {
             init,
             root,
             batch_end,
-        } => serve(&init, &root, batch_end),
+            host_frames,
+        } => serve(&init, &root, batch_end, host_frames),
         Command::Mcp {
             init,
             principal,
@@ -643,7 +649,7 @@ fn r0_scene(
     .map_err(|e| e.to_string())
 }
 
-fn serve(init: &Path, root: &Path, batch_end: bool) -> Result<Outcome, String> {
+fn serve(init: &Path, root: &Path, batch_end: bool, host_frames: bool) -> Result<Outcome, String> {
     use std::io::{BufRead, Write};
     let init: qp_schema::protocol::SessionInit = qp_session::read_json(init)?;
     let mut session = qp_session::Session::new(init, root)?;
@@ -655,7 +661,23 @@ fn serve(init: &Path, root: &Path, batch_end: bool) -> Result<Outcome, String> {
         if line.trim().is_empty() {
             continue;
         }
-        for o in session.handle_frame(&line) {
+        let is_host = host_frames
+            && serde_json::from_str::<serde_json::Value>(&line)
+                .ok()
+                .is_some_and(|v| v.get("host").is_some());
+        let lines = if is_host {
+            match session.handle_host_frame(&line) {
+                Ok(l) => l,
+                Err(e) => {
+                    let text = serde_json::json!({"host": {"error": e}}).to_string();
+                    writeln!(out, "{text}").map_err(|e| format!("stdout: {e}"))?;
+                    Vec::new()
+                }
+            }
+        } else {
+            session.handle_frame(&line)
+        };
+        for o in lines {
             let text = serde_json::to_string(&o).map_err(|e| e.to_string())?;
             writeln!(out, "{text}").map_err(|e| format!("stdout: {e}"))?;
         }

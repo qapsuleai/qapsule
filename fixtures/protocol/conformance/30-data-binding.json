@@ -1,0 +1,686 @@
+{
+ "name": "30-data-binding",
+ "description": "RP2 §18: a bound series (THYAO 1d, last 300 of a 320-bar synthetic feed) resolved on load with the host's entitlement and anchored by an engine entry; binding query; a study over the bound series; host data events (new bar, live patch) invalidate a live capsule and meet a condition; duplicate seq ignored; the snapshot holds no bars.",
+ "covers": [
+  "data",
+  "binding",
+  "engine",
+  "live",
+  "subscription"
+ ],
+ "init": {
+  "document": "fixtures/protocol/docs/thyao-bound.json",
+  "clock": 1760000000000,
+  "epoch": 0,
+  "proposal_ttl_ms": null,
+  "principals": [
+   {
+    "id": "arkin",
+    "author": {
+     "kind": "human",
+     "name": "arkin"
+    },
+    "role": "owner"
+   },
+   {
+    "id": "scout",
+    "author": {
+     "kind": "agent",
+     "name": "scout"
+    },
+    "role": "proposer"
+   },
+   {
+    "id": "editor",
+    "author": {
+     "kind": "agent",
+     "name": "editor"
+    },
+    "role": "editor"
+   },
+   {
+    "id": "viewer",
+    "author": {
+     "kind": "human",
+     "name": "viewer"
+    },
+    "role": "viewer"
+   },
+   {
+    "id": "feed",
+    "author": {
+     "kind": "engine",
+     "name": "feed",
+     "version": "0"
+    },
+    "role": "feed"
+   },
+   {
+    "id": "host",
+    "author": {
+     "kind": "engine",
+     "name": "host",
+     "version": "0"
+    },
+    "role": "host"
+   }
+  ],
+  "data": {
+   "feeds": [
+    {
+     "feed": {
+      "symbol": "THYAO",
+      "interval": "1d"
+     },
+     "synthetic": {
+      "n": 320,
+      "seed": 7
+     }
+    }
+   ],
+   "entitlements": {
+    "host": [
+     "*"
+    ],
+    "arkin": [
+     "THYAO"
+    ],
+    "scout": [
+     "THYAO"
+    ]
+   }
+  }
+ },
+ "steps": [
+  {
+   "note": "The authority resolved px (THYAO 1d, last 300) with the host's entitlement on load and anchored it in engine entry 1; the summary gives the asker's binding state and the bars held.",
+   "send": {
+    "conn": "a",
+    "msg": {
+     "type": "hello",
+     "protocol": "qp/0",
+     "principal": "arkin",
+     "surface": {
+      "kind": "desktop"
+     }
+    }
+   },
+   "expect": [
+    {
+     "conn": "a",
+     "msg": {
+      "type": "welcome",
+      "seq": 1,
+      "summary": {
+       "series": [
+        {
+         "id": "px",
+         "kind": "bars",
+         "len": 300,
+         "binding": "ready"
+        },
+        {
+         "id": "rsi14",
+         "len": 300,
+         "binding": "$absent"
+        },
+        "$any",
+        "$any"
+       ],
+       "views": "$any"
+      }
+     }
+    }
+   ]
+  },
+  {
+   "send": {
+    "conn": "s",
+    "msg": {
+     "type": "hello",
+     "protocol": "qp/0",
+     "principal": "scout",
+     "surface": {
+      "kind": "headless"
+     }
+    }
+   },
+   "expect": [
+    {
+     "conn": "s",
+     "msg": {
+      "type": "welcome",
+      "seq": 1
+     }
+    }
+   ]
+  },
+  {
+   "note": "The anchor stamp is an ordinary engine entry: author qp, put_series with anchor_t; no bars.",
+   "send": {
+    "conn": "a",
+    "msg": {
+     "type": "query",
+     "id": "q-log",
+     "query": {
+      "kind": "log"
+     }
+    }
+   },
+   "expect": [
+    {
+     "conn": "a",
+     "msg": {
+      "type": "result",
+      "id": "q-log",
+      "data": {
+       "kind": "log",
+       "entries": [
+        {
+         "seq": 1,
+         "author": "qp",
+         "changes": [
+          {
+           "op": "put_series",
+           "series": {
+            "id": "px",
+            "data": "$absent",
+            "source": {
+             "kind": "bind",
+             "symbol": "THYAO",
+             "interval": "1d",
+             "window": {
+              "last": 300
+             },
+             "anchor_t": 1738195200000
+            }
+           }
+          }
+         ],
+         "summary": "anchor px at t=1738195200000"
+        }
+       ]
+      }
+     }
+    }
+   ]
+  },
+  {
+   "send": {
+    "conn": "a",
+    "msg": {
+     "type": "query",
+     "id": "q-b",
+     "query": {
+      "kind": "binding"
+     }
+    }
+   },
+   "expect": [
+    {
+     "conn": "a",
+     "msg": {
+      "type": "result",
+      "id": "q-b",
+      "data": {
+       "kind": "bindings",
+       "bindings": [
+        {
+         "series": "px",
+         "state": "ready",
+         "anchor_t": 1738195200000,
+         "binding": {
+          "anchor_t": 1738195200000
+         },
+         "position": {
+          "feed": {
+           "symbol": "THYAO",
+           "interval": "1d"
+          },
+          "bars": 300,
+          "last_t": 1774396800000,
+          "seq": 0,
+          "digest": "6ea617e37ddd05ec"
+         }
+        }
+       ]
+      }
+     }
+    }
+   ]
+  },
+  {
+   "note": "A study over the bound series computes like over inline bars.",
+   "send": {
+    "conn": "s",
+    "msg": {
+     "type": "query",
+     "id": "q-rsi",
+     "query": {
+      "kind": "study",
+      "series": "rsi14",
+      "range": {
+       "last": 3
+      }
+     }
+    }
+   },
+   "expect": [
+    {
+     "conn": "s",
+     "msg": {
+      "type": "result",
+      "id": "q-rsi",
+      "data": {
+       "kind": "values",
+       "values": {
+        "series": "rsi14",
+        "from_bar": 297,
+        "t": [
+         1774224000000,
+         1774310400000,
+         1774396800000
+        ],
+        "outputs": {
+         "rsi": [
+          45.85299840815828,
+          40.39825355971794,
+          36.65288105373857
+         ]
+        }
+       }
+      }
+     }
+    }
+   ]
+  },
+  {
+   "send": {
+    "conn": "a",
+    "msg": {
+     "type": "command",
+     "id": "c1",
+     "ops": [
+      {
+       "op": "add_fact",
+       "id": "fact-rsi-low",
+       "kind": "below",
+       "series": "rsi14",
+       "bar": 299,
+       "text": "RSI(14) 40'ın altında, bar 299.",
+       "evidence": {
+        "level": 40.0,
+        "value": 36.65288105373857
+       }
+      },
+      {
+       "op": "add_finding",
+       "id": "fnd-weak",
+       "claim": "THYAO zayıf; kapanış 104'ün altına inerse görüş geçersiz.",
+       "facts": [
+        "fact-rsi-low"
+       ],
+       "confidence": 0.6,
+       "invalidation": {
+        "kind": "threshold",
+        "series": "px",
+        "op": "lt",
+        "value": 104.0
+       },
+       "capsule": "THYAO zayıf: RSI 40'ın altında."
+      }
+     ]
+    }
+   },
+   "expect": [
+    {
+     "conn": "a",
+     "msg": {
+      "type": "ack",
+      "id": "c1",
+      "status": "applied",
+      "seq": 2,
+      "created": [
+       "fact-rsi-low",
+       "fnd-weak",
+       "cap-2-2"
+      ]
+     }
+    }
+   ]
+  },
+  {
+   "send": {
+    "conn": "a",
+    "msg": {
+     "type": "subscribe",
+     "id": "sub-f",
+     "topic": {
+      "kind": "finding",
+      "finding": "fnd-weak"
+     }
+    }
+   },
+   "expect": [
+    {
+     "conn": "a",
+     "msg": {
+      "type": "ack",
+      "id": "sub-f",
+      "status": "subscribed"
+     }
+    }
+   ]
+  },
+  {
+   "send": {
+    "conn": "s",
+    "msg": {
+     "type": "subscribe",
+     "id": "sub-c",
+     "topic": {
+      "kind": "condition",
+      "condition": {
+       "kind": "threshold",
+       "series": "px",
+       "op": "lt",
+       "value": 104.0
+      }
+     }
+    }
+   },
+   "expect": [
+    {
+     "conn": "s",
+     "msg": {
+      "type": "ack",
+      "id": "sub-c",
+      "status": "subscribed"
+     }
+    }
+   ]
+  },
+  {
+   "note": "Host data path: a new bar closing at 105 (not below 104): nothing to notify.",
+   "data": {
+    "feed": {
+     "symbol": "THYAO",
+     "interval": "1d"
+    },
+    "seq": 1,
+    "change": {
+     "kind": "bar",
+     "bar": {
+      "t": 1774483200000,
+      "o": 104.75,
+      "h": 105.2,
+      "l": 104.5,
+      "c": 105.0,
+      "v": 1000.0
+     }
+    }
+   },
+   "expect": []
+  },
+  {
+   "note": "A field-level live patch of the last bar to 103.5: the live capsule's invalidation holds (engine entry 3, finding_state), then the condition subscriber's condition_met (seq: the log position when the data made it true).",
+   "data": {
+    "feed": {
+     "symbol": "THYAO",
+     "interval": "1d"
+    },
+    "seq": 2,
+    "change": {
+     "kind": "patch",
+     "t": 1774483200000,
+     "fields": {
+      "c": 103.5,
+      "l": 103.5,
+      "v": 5000.0
+     }
+    }
+   },
+   "expect": [
+    {
+     "conn": "a",
+     "msg": {
+      "type": "notify",
+      "sub": "sub-f",
+      "event": {
+       "kind": "finding_state",
+       "finding": "fnd-weak",
+       "capsule": "cap-2-2",
+       "state": "invalidated",
+       "seq": 3
+      }
+     }
+    },
+    {
+     "conn": "s",
+     "msg": {
+      "type": "notify",
+      "sub": "sub-c",
+      "event": {
+       "kind": "condition_met",
+       "bar": 300,
+       "t": 1774483200000,
+       "seq": 2
+      }
+     }
+    }
+   ]
+  },
+  {
+   "note": "A repeated seq is ignored (idempotent).",
+   "data": {
+    "feed": {
+     "symbol": "THYAO",
+     "interval": "1d"
+    },
+    "seq": 2,
+    "change": {
+     "kind": "patch",
+     "t": 1774483200000,
+     "fields": {
+      "c": 90.0,
+      "l": 90.0
+     }
+    }
+   },
+   "expect": []
+  },
+  {
+   "send": {
+    "conn": "a",
+    "msg": {
+     "type": "query",
+     "id": "q-b2",
+     "query": {
+      "kind": "binding",
+      "series": "px"
+     }
+    }
+   },
+   "expect": [
+    {
+     "conn": "a",
+     "msg": {
+      "type": "result",
+      "id": "q-b2",
+      "seq": 3,
+      "data": {
+       "kind": "bindings",
+       "bindings": [
+        {
+         "series": "px",
+         "state": "ready",
+         "anchor_t": 1738195200000,
+         "position": {
+          "bars": 301,
+          "last_t": 1774483200000,
+          "seq": 2,
+          "digest": "58149eedaf6026fd"
+         }
+        }
+       ]
+      }
+     }
+    }
+   ]
+  },
+  {
+   "send": {
+    "conn": "s",
+    "msg": {
+     "type": "query",
+     "id": "q-last",
+     "query": {
+      "kind": "study",
+      "series": "rsi14",
+      "range": {
+       "last": 1
+      },
+      "reduce": "last"
+     }
+    }
+   },
+   "expect": [
+    {
+     "conn": "s",
+     "msg": {
+      "type": "result",
+      "id": "q-last",
+      "data": {
+       "kind": "reduced",
+       "values": {
+        "rsi": {
+         "value": 33.52999713219873,
+         "bar": 300,
+         "t": 1774483200000
+        }
+       }
+      }
+     }
+    }
+   ]
+  },
+  {
+   "note": "The fact carries frozen evidence (bars 0..=299 of px by digest), stamped by the authority.",
+   "send": {
+    "conn": "a",
+    "msg": {
+     "type": "query",
+     "id": "q-f",
+     "query": {
+      "kind": "get",
+      "id": "fact-rsi-low"
+     }
+    }
+   },
+   "expect": [
+    {
+     "conn": "a",
+     "msg": {
+      "type": "result",
+      "id": "q-f",
+      "data": {
+       "kind": "item",
+       "item": {
+        "id": "fact-rsi-low",
+        "evidence_ref": {
+         "series": "px",
+         "binding": {
+          "symbol": "THYAO",
+          "anchor_t": 1738195200000
+         },
+         "from_t": 1738195200000,
+         "to_t": 1774396800000,
+         "bars": 300,
+         "alg": "fnv1a64",
+         "digest": "6ea617e37ddd05ec"
+        }
+       }
+      }
+     }
+    }
+   ]
+  },
+  {
+   "note": "The snapshot carries the binding, not the bars.",
+   "send": {
+    "conn": "a",
+    "msg": {
+     "type": "query",
+     "id": "q-doc",
+     "query": {
+      "kind": "document"
+     }
+    }
+   },
+   "expect": [
+    {
+     "conn": "a",
+     "msg": {
+      "type": "result",
+      "id": "q-doc",
+      "data": {
+       "kind": "document",
+       "document": {
+        "series": [
+         {
+          "id": "px",
+          "data": "$absent",
+          "source": {
+           "kind": "bind",
+           "anchor_t": 1738195200000
+          }
+         },
+         {
+          "id": "rsi14",
+          "data": "$absent"
+         },
+         {
+          "id": "macd",
+          "data": "$absent"
+         },
+         {
+          "id": "bb20",
+          "data": "$absent"
+         }
+        ]
+       }
+      }
+     }
+    }
+   ]
+  }
+ ],
+ "final": {
+  "document": {
+   "series": [
+    {
+     "id": "px",
+     "data": "$absent"
+    },
+    "$any",
+    "$any",
+    "$any"
+   ],
+   "capsules": [
+    {
+     "id": "cap-2-2",
+     "state": "invalidated"
+    }
+   ],
+   "facts": [
+    {
+     "id": "fact-rsi-low",
+     "evidence_ref": {
+      "bars": 300
+     }
+    }
+   ]
+  },
+  "log_len": 3
+ }
+}

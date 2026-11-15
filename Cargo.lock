@@ -1592,6 +1592,7 @@ dependencies = [
  "qp-compute",
  "qp-grammar",
  "qp-schema",
+ "qp-source",
  "schemars",
  "serde",
  "serde_json",

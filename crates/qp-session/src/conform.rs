@@ -15,6 +15,7 @@ use std::io::{BufRead, BufReader, Write};
 use std::path::{Path, PathBuf};
 use std::process::{Child, ChildStdin, ChildStdout, Command, Stdio};
 
+use qp_schema::data::DataEvent;
 use qp_schema::protocol::{Expect, FinalCheck, InitRef, LogEntry, RawLine, Role, SessionInit};
 use qp_schema::Document;
 use serde_json::{json, Value};
@@ -43,12 +44,19 @@ pub struct RunStep {
     /// A raw line to send instead (for parse and schema errors).
     #[serde(default)]
     pub send_raw: Option<RawLine>,
+    /// (RP2) A data event the host delivers (data plane, not a protocol message; §18.4).
+    #[serde(default)]
+    pub data: Option<DataEvent>,
     /// Expected outputs, complete and in order.
     pub expect: Vec<Expect>,
     /// Optional comment.
     #[serde(default)]
     pub note: Option<String>,
 }
+
+/// Field names of [`RunStep`]; a test keeps them equal to those of
+/// [`qp_schema::protocol::Step`].
+pub const RUN_STEP_FIELDS: [&str; 5] = ["send", "send_raw", "data", "expect", "note"];
 
 /// A transcript as the runner reads it: the same file format as
 /// [`qp_schema::protocol::Transcript`] (which the schema step validates), with `send.msg`
@@ -96,6 +104,12 @@ pub trait Transport {
     /// # Errors
     /// Transport failure.
     fn send(&mut self, conn: &str, text: &str, raw: bool) -> Result<Vec<Value>, String>;
+    /// Delivers a data event on the host's path (§18.4; not over a connection) and
+    /// returns every output line it causes.
+    ///
+    /// # Errors
+    /// Transport failure, or the authority rejected the event.
+    fn data(&mut self, event: &DataEvent) -> Result<Vec<Value>, String>;
     /// Reads the final document and log.
     ///
     /// # Errors
@@ -118,6 +132,15 @@ impl Transport for InProc {
             .collect()
     }
 
+    fn data(&mut self, event: &DataEvent) -> Result<Vec<Value>, String> {
+        self.session
+            .data_event(event)
+            .map_err(|e| format!("data event rejected: {e}"))?
+            .iter()
+            .map(|l| serde_json::to_value(l).map_err(|e| e.to_string()))
+            .collect()
+    }
+
     fn finish(&mut self) -> Result<FinalState, String> {
         Ok(FinalState {
             document: self.session.document().clone(),
@@ -135,7 +158,8 @@ pub struct Serve {
 }
 
 impl Serve {
-    /// Spawns `qp serve --init <init> --root <root> --batch-end`. `reader` is a
+    /// Spawns `qp serve --init <init> --root <root> --batch-end --host-frames` (host
+    /// frames carry the transcript's `data` steps, §3). `reader` is a
     /// principal with read permission, used to fetch the final document and log.
     ///
     /// # Errors
@@ -148,6 +172,7 @@ impl Serve {
             .arg("--root")
             .arg(root)
             .arg("--batch-end")
+            .arg("--host-frames")
             .stdin(Stdio::piped())
             .stdout(Stdio::piped())
             .stderr(Stdio::inherit())
@@ -206,6 +231,14 @@ impl Transport for Serve {
             serde_json::from_str(text).map_err(|e| e.to_string())?
         };
         self.exchange(&json!({"conn": conn, "msg": msg}))
+    }
+
+    fn data(&mut self, event: &DataEvent) -> Result<Vec<Value>, String> {
+        let outs = self.exchange(&json!({"host": {"data": event}}))?;
+        if let Some(e) = outs.iter().find_map(|o| o.pointer("/host/error")) {
+            return Err(format!("data event rejected: {e}"));
+        }
+        Ok(outs)
     }
 
     fn finish(&mut self) -> Result<FinalState, String> {
@@ -360,22 +393,20 @@ pub fn run_steps(
     initial: &Document,
 ) -> Result<(), String> {
     for (si, step) in t.steps.iter().enumerate() {
-        let (conn, text, raw) = match (&step.send, &step.send_raw) {
-            (Some(s), None) => (
-                s.conn.clone(),
-                serde_json::to_string(&s.msg).map_err(|e| e.to_string())?,
-                false,
-            ),
-            (None, Some(r)) => (r.conn.clone(), r.line.clone(), true),
+        let outs = match (&step.send, &step.send_raw, &step.data) {
+            (Some(s), None, None) => {
+                let text = serde_json::to_string(&s.msg).map_err(|e| e.to_string())?;
+                transport.send(&s.conn, &text, false)
+            }
+            (None, Some(r), None) => transport.send(&r.conn, &r.line, true),
+            (None, None, Some(ev)) => transport.data(ev),
             _ => {
                 return Err(format!(
-                    "step {si}: give exactly one of `send` and `send_raw`"
+                    "step {si}: give exactly one of `send`, `send_raw` and `data`"
                 ))
             }
-        };
-        let outs = transport
-            .send(&conn, &text, raw)
-            .map_err(|e| format!("step {si}: {e}"))?;
+        }
+        .map_err(|e| format!("step {si}: {e}"))?;
         if outs.len() != step.expect.len() {
             let got: Vec<String> = outs.iter().map(trunc).collect();
             return Err(format!(
@@ -514,4 +545,38 @@ pub fn collect_files(inputs: &[PathBuf]) -> Result<Vec<PathBuf>, String> {
         }
     }
     Ok(out)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::RUN_STEP_FIELDS;
+
+    /// The runner's step reader and the schema's `Step` have the same fields (RP2
+    /// audit O1): a field added to one must be added to the other.
+    #[test]
+    fn run_step_fields_match_the_schema_step() {
+        let schema = schemars::schema_for!(qp_schema::protocol::Step).to_value();
+        let mut want: Vec<String> = schema["properties"]
+            .as_object()
+            .expect("Step has properties")
+            .keys()
+            .cloned()
+            .collect();
+        want.sort();
+        let mut got: Vec<String> = RUN_STEP_FIELDS.iter().map(|s| (*s).to_owned()).collect();
+        got.sort();
+        assert_eq!(got, want);
+        // And the reader accepts exactly these fields.
+        let step: super::RunStep = serde_json::from_value(serde_json::json!({
+            "data": {"feed":{"symbol":"X","interval":"1d"},"seq":1,
+                     "change":{"kind":"patch","t":1,"fields":{"c":1.0}}},
+            "expect": [], "note": "n"
+        }))
+        .expect("a data step parses");
+        assert!(step.data.is_some());
+        assert!(serde_json::from_value::<super::RunStep>(
+            serde_json::json!({"expect": [], "extra": 1})
+        )
+        .is_err());
+    }
 }

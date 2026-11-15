@@ -220,7 +220,7 @@ impl Session {
                     description: Description {
                         thresholds: crate::canon::thresholds(),
                         protocol: PROTOCOL_VERSION.to_owned(),
-                        doc: self.doc.id.clone(),
+                        doc: rd!(self).id.clone(),
                         ops: variant_names(&op_schema, "op"),
                         queries: variant_names(&q_schema, "kind"),
                         topics: variant_names(&t_schema, "kind"),
@@ -334,8 +334,9 @@ impl Session {
                 output,
                 reduce: how,
             } => {
-                need_series(&self.doc, series, &ptr(qp, "series"))?;
-                let v = values(&self.doc, &mut self.cache, series)
+                need_series(rd!(self), series, &ptr(qp, "series"))?;
+                self.gate_read(ci, series, &ptr(qp, "series"))?;
+                let v = values(rd!(self), &mut self.cache, series)
                     .map_err(|m| invalid(m, ptr(qp, "series")))?;
                 let (a, b) = resolve_range(range.as_ref(), &v.t, qp)?;
                 let mut outputs: BTreeMap<String, Vec<Option<f64>>> = BTreeMap::new();
@@ -378,7 +379,9 @@ impl Session {
                 }
             }
             Query::At { series, bar, t } => {
-                let s = need_series(&self.doc, series, &ptr(qp, "series"))?;
+                need_series(rd!(self), series, &ptr(qp, "series"))?;
+                self.gate_read(ci, series, &ptr(qp, "series"))?;
+                let s = need_series(rd!(self), series, &ptr(qp, "series"))?;
                 let bars = s.bars().ok_or_else(|| {
                     invalid(
                         format!("series `{series}` is not a bar series"),
@@ -422,11 +425,12 @@ impl Session {
                     .unwrap_or_else(|| self.conns[ci].principal.clone());
                 self.need_principal(&p, &ptr(qp, "principal"))?;
                 self.warm_values();
+                let asker = self.conns[ci].principal.clone();
                 let screens = self
                     .conns
                     .iter()
                     .filter(|c| c.principal == p && c.has_screen())
-                    .filter_map(|c| self.screen_info(c))
+                    .filter_map(|c| self.screen_info(c, &asker))
                     .collect();
                 Ok(QueryResult::Screen { screens })
             }
@@ -458,25 +462,61 @@ impl Session {
             } => Ok(QueryResult::Hit {
                 hit: self.hit(ci, view.as_deref(), *x, *y, (*width, *height))?,
             }),
-            Query::Binding { .. } | Query::VerifyEvidence { .. } => Err(E::new(
-                ErrorCode::Unsupported,
-                "data bindings are not resolved by this authority yet",
-            )
-            .at(qp)
-            .hint("Specified in docs/PROTOCOL.md §18; implemented in RP2/T4.")
-            .build()),
+            Query::Binding { series } => {
+                let asker = self.conns[ci].principal.clone();
+                Ok(QueryResult::Bindings {
+                    bindings: self.bindings(&asker, series.as_deref(), &ptr(qp, "series"))?,
+                })
+            }
+            Query::VerifyEvidence { item } => {
+                let asker = self.conns[ci].principal.clone();
+                Ok(QueryResult::EvidenceCheck {
+                    check: self.verify_evidence(&asker, item, &ptr(qp, "item"))?,
+                })
+            }
             Query::Present { finding, surface } => {
                 let f = match finding {
-                    Some(id) => need_finding(&self.doc, id, &ptr(qp, "finding"))?.clone(),
+                    Some(id) => need_finding(rd!(self), id, &ptr(qp, "finding"))?.clone(),
                     None => self.only_live_finding(qp)?,
                 };
                 let (kind, profile) = match surface {
                     Some(k) => (*k, profile_for(*k, None)),
                     None => (self.conns[ci].surface.kind, self.conns[ci].profile.clone()),
                 };
-                Ok(QueryResult::Presentation {
-                    presentation: present(&self.doc, &mut self.cache, &f, kind, &profile),
-                })
+                // A finding whose data the asker may not read: text and state, no
+                // spark and no view (§18.3).
+                let blocked = {
+                    let asker = self.conns[ci].principal.as_str();
+                    let facts_blocked = f.facts.iter().any(|id| {
+                        self.doc
+                            .facts
+                            .iter()
+                            .find(|x| &x.id == id)
+                            .is_some_and(|x| {
+                                self.plane.gate(&self.doc, Some(asker), &x.series).is_some()
+                            })
+                    });
+                    let view_blocked = self
+                        .doc
+                        .capsules
+                        .iter()
+                        .find(|c| c.finding == f.id)
+                        .and_then(|c| c.view.as_ref())
+                        .and_then(|v| self.doc.views.iter().find(|x| &x.id == v))
+                        .is_some_and(|v| {
+                            v.layers
+                                .iter()
+                                .any(|l| self.plane.gate_layer(&self.doc, Some(asker), l).is_some())
+                        });
+                    facts_blocked || view_blocked
+                };
+                let mut pr = present(rd!(self), &mut self.cache, &f, kind, &profile);
+                if blocked {
+                    pr.spark = None;
+                    pr.view = None;
+                    pr.capsule_view = None;
+                }
+                Ok(QueryResult::Presentation { presentation: pr })
             }
         }
     }
@@ -499,7 +539,7 @@ impl Session {
     /// selector order of findings (§17.3: latest fact bar, ties in document order); the
     /// authority does not pick one. None → `not_found`.
     fn only_live_finding(&self, qp: &str) -> PResult<qp_schema::Finding> {
-        let doc = &self.doc;
+        let doc = rd!(self);
         let mut live: Vec<(Option<u64>, usize, &qp_schema::Finding)> = doc
             .findings
             .iter()
@@ -529,8 +569,9 @@ impl Session {
                 .at(qp)
                 .hint(
                     "Pass `finding` with one of the candidate ids, or a selector such as \
-                     {\"latest\":true} (the finding with the latest fact bar); candidates \
-                     are in latest-fact-bar order.",
+                     {\"latest\":true}. Candidates are in ascending order of their latest \
+                     fact bar: the last candidate is the most recent, the one \
+                     {\"latest\":true} picks.",
                 )
                 .build();
                 e.candidates = live
@@ -546,16 +587,14 @@ impl Session {
     }
 
     fn at_bar(&mut self, series: &str, i: usize) -> AtBar {
-        let bars = self
-            .doc
+        let bars = rd!(self)
             .series
             .iter()
             .find(|s| s.id == series)
             .and_then(Series::bars)
             .unwrap_or_default();
         let ohlcv = bars[i].clone();
-        let deps: Vec<String> = self
-            .doc
+        let deps: Vec<String> = rd!(self)
             .series
             .iter()
             .filter(|s| {
@@ -565,7 +604,7 @@ impl Session {
             .collect();
         let mut studies = BTreeMap::new();
         for d in deps {
-            if let Ok(v) = values(&self.doc, &mut self.cache, &d) {
+            if let Ok(v) = values(rd!(self), &mut self.cache, &d) {
                 let m: BTreeMap<String, Option<f64>> = v
                     .outputs
                     .iter()
@@ -585,7 +624,7 @@ impl Session {
     /// Times of the view's future slots (after its last bar; point series such as a
     /// forecast fan, `docs/GRAMMAR.md` §3). A viewport may reach them (K25).
     pub(crate) fn future_times(&self, view: &View) -> Vec<i64> {
-        qp_grammar::compile::future_times(view, &DocProvider::new(&self.doc, &self.cache))
+        qp_grammar::compile::future_times(view, &DocProvider::new(rd!(self), &self.cache))
     }
 
     /// Initial visible range of a view for a surface (§4.6): the slots whose time falls
@@ -597,7 +636,7 @@ impl Session {
         kind: qp_schema::protocol::SurfaceKind,
     ) -> Option<(u64, u64)> {
         use qp_schema::protocol::SurfaceKind as K;
-        let bars = view_bar_series(&self.doc, view).and_then(Series::bars)?;
+        let bars = view_bar_series(rd!(self), view).and_then(Series::bars)?;
         if bars.is_empty() {
             return None;
         }
@@ -630,7 +669,7 @@ impl Session {
     /// The last slot of a view: its last bar plus its future slots (K25); `None` without
     /// bars.
     pub(crate) fn last_slot(&self, view: &View) -> Option<u64> {
-        let n = view_bar_series(&self.doc, view)
+        let n = view_bar_series(rd!(self), view)
             .and_then(Series::bars)
             .map_or(0, <[qp_schema::Bar]>::len) as u64;
         let last = n.checked_sub(1)?;
@@ -653,7 +692,7 @@ impl Session {
     pub(crate) fn conn_viewport(&self, c: &Conn) -> Option<Viewport> {
         if let Some(v) = &c.current {
             // Re-clamp through `range_of` (the data may have shrunk since).
-            if let Some(view) = self.doc.views.iter().find(|x| x.id == v.view) {
+            if let Some(view) = rd!(self).views.iter().find(|x| x.id == v.view) {
                 if let Some((a, b)) = self.range_of(c, view) {
                     return Some(Viewport {
                         view: v.view.clone(),
@@ -664,7 +703,7 @@ impl Session {
             }
             return Some(v.clone());
         }
-        let view = self.doc.views.first()?;
+        let view = rd!(self).views.first()?;
         let (a, b) = self.range_of(c, view)?;
         Some(Viewport {
             view: view.id.clone(),
@@ -673,10 +712,10 @@ impl Session {
         })
     }
 
-    fn screen_info(&self, c: &Conn) -> Option<ScreenInfo> {
+    fn screen_info(&self, c: &Conn, asker: &str) -> Option<ScreenInfo> {
         let vp = self.conn_viewport(c)?;
-        let view = self.doc.views.iter().find(|v| v.id == vp.view)?;
-        let bs = view_bar_series(&self.doc, view);
+        let view = rd!(self).views.iter().find(|v| v.id == vp.view)?;
+        let bs = view_bar_series(rd!(self), view);
         let mut panels: BTreeMap<u32, (Vec<String>, Vec<Mark>)> = BTreeMap::new();
         for l in &view.layers {
             let e = panels.entry(l.panel).or_default();
@@ -687,8 +726,7 @@ impl Session {
             }
             e.1.push(l.mark);
         }
-        let capsules = self
-            .doc
+        let capsules = rd!(self)
             .capsules
             .iter()
             .filter(|cap| {
@@ -711,6 +749,7 @@ impl Session {
         // The viewport may end in a future slot (K25): the last close shown is the
         // close of the last bar in it.
         let last_close = bs
+            .filter(|s| self.plane.gate(&self.doc, Some(asker), &s.id).is_none())
             .and_then(Series::bars)
             .and_then(|b| {
                 b.get(
@@ -721,7 +760,7 @@ impl Session {
             })
             .map(|b| b.c);
         // R2: name, scale and layers from the compiled scene (`docs/GRAMMAR.md` §16).
-        let mut compiled = self.screen_panels(c, &vp);
+        let mut compiled = self.screen_panels(c, &vp, asker);
         // Stack order (top to bottom, §5.4), not panel id order: they differ after
         // `move_panel` / `insert_panel`.
         let stack = |id: u32| {
@@ -742,12 +781,12 @@ impl Session {
                 .into_iter()
                 .map(|(panel, (series, marks))| {
                     let (name, scale, layers) = match compiled.remove(&panel) {
-                        Some((n, s, l)) => (n, Some(s), l),
+                        Some((n, s, l)) => (n, s, l),
                         None => (None, None, Vec::new()),
                     };
                     PanelInfo {
                         select: crate::select::Resolver {
-                            doc: &self.doc,
+                            doc: rd!(self),
                             root: None,
                         }
                         .panel_hint(view, panel),
@@ -779,8 +818,8 @@ impl Session {
             | Gesture::Zoom { view, .. }
             | Gesture::Tap { view, .. } => view,
         };
-        let view = need_view(&self.doc, view_id, &ptr(gp, "view"))?.clone();
-        let bar_series = view_bar_series(&self.doc, &view)
+        let view = need_view(rd!(self), view_id, &ptr(gp, "view"))?.clone();
+        let bar_series = view_bar_series(rd!(self), &view)
             .filter(|s| s.bars().is_some_and(|b| !b.is_empty()))
             .map(|s| s.id.clone())
             .ok_or_else(|| {
@@ -789,8 +828,7 @@ impl Session {
                     ptr(gp, "view"),
                 )
             })?;
-        let n = self
-            .doc
+        let n = rd!(self)
             .series
             .iter()
             .find(|s| s.id == bar_series)
@@ -896,6 +934,8 @@ impl Session {
                 (nf, nf + nw - 1)
             }
             Gesture::Tap { panel, bar, .. } => {
+                // A tap answers the bar's values (data plane, §18.3).
+                self.gate_read(ci, &bar_series, &ptr(gp, "view"))?;
                 if *bar > last {
                     return Err(past_bar("bar", *bar));
                 }

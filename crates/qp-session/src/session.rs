@@ -170,6 +170,10 @@ pub struct Session {
     /// (the realizer's, for the current reader inside [`Session::as_reader`]); empty
     /// without an engine and outside a reader with another language.
     pub(crate) headlines: BTreeMap<String, String>,
+    /// (R3, §20) Principals whose capsule preferences a change ever wrote (or the initial
+    /// document holds): other readers get documents, changes and log entries without
+    /// them.
+    pub(crate) audience_seen: BTreeSet<String>,
 }
 
 /// Resolves `rel` under `root`, refusing absolute paths and paths that leave `root`.
@@ -357,7 +361,9 @@ impl Session {
             proj: None,
             real_facts: Vec::new(),
             headlines: BTreeMap::new(),
+            audience_seen: BTreeSet::new(),
         };
+        s.audience_seen = s.doc.audiences.keys().cloned().collect();
         s.start_capsules(capsules.as_ref());
         // Resolve the bindings on load (§18.3); a first ready resolution is anchored by
         // an engine entry. No connection exists yet: its notifications go nowhere.
@@ -1597,6 +1603,11 @@ impl Session {
             self.struct_gen += 1;
         }
         self.note_writers(&entry);
+        for c in entry.changes.iter().chain(&entry.inverse) {
+            if let ChangeOp::PutAudience { principal, .. } = c {
+                self.audience_seen.insert(principal.clone());
+            }
+        }
         self.log.push(entry);
     }
 
@@ -2193,7 +2204,7 @@ impl Session {
                 .iter()
                 .any(|s| matches!(s.topic, Topic::Changes { .. }))
             {
-                self.proj_for(&c.principal)
+                self.reader_proj(&c.principal)
             } else {
                 None
             };

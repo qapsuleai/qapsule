@@ -293,6 +293,9 @@ pub(crate) fn sentence_pair(
 /// What a principal may receive (see the module docs).
 #[derive(Debug, Clone, Default)]
 pub(crate) struct Proj {
+    /// The principal it is for: only its own capsule preferences (audience) go to it
+    /// (empty: the host, which receives every audience).
+    pub principal: String,
     /// Fact, finding and capsule ids that never go.
     pub hidden: BTreeSet<String>,
     /// Fact ids sent without evidence values and `evidence_ref`.
@@ -406,7 +409,10 @@ impl Session {
     pub(crate) fn proj_for(&self, principal: &str) -> Option<Proj> {
         self.runner.as_ref()?;
         let doc = &self.doc;
-        let mut p = Proj::default();
+        let mut p = Proj {
+            principal: principal.to_owned(),
+            ..Proj::default()
+        };
         let facts: BTreeMap<&str, &Fact> = doc.facts.iter().map(|f| (f.id.as_str(), f)).collect();
         for c in &doc.capsules {
             let Some(story) = c.story.as_ref() else {
@@ -485,6 +491,37 @@ impl Session {
         } else {
             &self.doc.facts
         }
+    }
+
+    /// What `principal` may receive: [`Session::proj_for`], or — when another person's
+    /// capsule preferences exist (or ever existed) — a projection that only removes
+    /// those (positions and watch lists are personal: a reader gets its own audience
+    /// only, in every document, change and log entry, owners included). `None`: the
+    /// stored items go as they are.
+    pub(crate) fn reader_proj(&self, principal: &str) -> Option<Proj> {
+        if let Some(mut p) = self.proj_for(principal) {
+            if self.is_host(principal) {
+                p.principal = String::new();
+            }
+            return Some(p);
+        }
+        if self.is_host(principal) {
+            return None;
+        }
+        self.audience_seen
+            .iter()
+            .any(|k| k != principal)
+            .then(|| Proj {
+                principal: principal.to_owned(),
+                ..Proj::default()
+            })
+    }
+
+    /// The host (the authority's operator, which holds the store anyway) receives every
+    /// person's capsule preferences; nobody else, owners included, gets another's.
+    fn is_host(&self, principal: &str) -> bool {
+        self.principal(principal)
+            .is_some_and(|p| p.role == qp_schema::protocol::Role::Host)
     }
 
     /// The language of connection `conn`'s capsule sentences.
@@ -965,7 +1002,8 @@ impl Session {
             .get(usize::try_from(now).unwrap_or(0) + 1)
             .or_else(|| bars.get(usize::try_from(now).unwrap_or(0)))
             .map_or(i64::MAX, |b| b.t);
-        let ledger = ledger_rows(doc)
+        let ledger = self
+            .ledger_now()
             .into_iter()
             .filter(|(k, ..)| k == &story.ledger_key)
             .fold(
@@ -1044,8 +1082,41 @@ impl Session {
         }
     }
 
-    /// Answer to the `ledger` query: rows of the document's ledger with a key, the
-    /// retracted capsules left out.
+    /// The ledger rows with a key, retracted capsules left out: the engine's when the
+    /// authority runs it (license-independent, K33: the same for every reader, also
+    /// inside [`Session::as_reader`]), else the document's.
+    fn ledger_now(&self) -> Vec<(String, qp_schema::capsule::MeaningKind, i64, bool)> {
+        match self.runner.as_ref() {
+            Some(r) => {
+                let doc = Document {
+                    ledger: qp_schema::Ledger {
+                        entries: r.engine.ledger(),
+                    },
+                    ..Document {
+                        schema_version: String::new(),
+                        id: String::new(),
+                        title: None,
+                        display_tz: None,
+                        series: Vec::new(),
+                        views: Vec::new(),
+                        facts: Vec::new(),
+                        findings: Vec::new(),
+                        capsules: Vec::new(),
+                        intents: Vec::new(),
+                        ledger: qp_schema::Ledger::default(),
+                        narratives: Vec::new(),
+                        proposals: Vec::new(),
+                        audiences: BTreeMap::new(),
+                    }
+                };
+                ledger_rows(&doc)
+            }
+            None => ledger_rows(&self.doc),
+        }
+    }
+
+    /// Answer to the `ledger` query: rows of the ledger with a key, the retracted
+    /// capsules left out.
     pub(crate) fn ledger_query(
         &self,
         key: Option<&str>,
@@ -1055,7 +1126,7 @@ impl Session {
     ) -> QueryResult {
         let mut rows: BTreeMap<String, LedgerRow> = BTreeMap::new();
         let mut total = qp_schema::capsule::LedgerStat::default();
-        for (k, kind, _, real) in ledger_rows(&self.doc) {
+        for (k, kind, _, real) in self.ledger_now() {
             let det = k
                 .split_once('/')
                 .map(|(_, r)| r.split('@').next().unwrap_or(r).to_owned());
@@ -1199,6 +1270,9 @@ impl Session {
     /// `doc` as `p`'s principal may receive it.
     pub(crate) fn project_doc(&self, doc: &Document, p: &Proj, lang: Language) -> Document {
         let mut d = doc.clone();
+        if !p.principal.is_empty() {
+            d.audiences.retain(|k, _| k == &p.principal);
+        }
         d.facts.retain(|f| !p.hidden.contains(&f.id));
         for f in &mut d.facts {
             if p.redact.contains(&f.id) {
@@ -1329,6 +1403,8 @@ impl Session {
                     });
                 }
                 ChangeOp::SetCapsuleState { capsule, .. } if p.hidden.contains(capsule) => {}
+                ChangeOp::PutAudience { principal, .. }
+                    if !p.principal.is_empty() && principal != &p.principal => {}
                 ChangeOp::Delete { id } if p.hidden.contains(id) => {}
                 ChangeOp::PushLedger { entry }
                     if p.hidden.contains(&entry.finding)
@@ -1353,6 +1429,23 @@ impl Session {
         x.changes = self.project_changes(&e.changes, p, lang);
         x.inverse = self.project_changes(&e.inverse, p, lang);
         x.request.retain(|op| !p.mentions_hidden(op));
+        // Another person's capsule preferences (positions, watch list, level) never go.
+        let own = |w: &Option<String>| {
+            p.principal.is_empty() || w.as_deref().unwrap_or(e.author.as_str()) == p.principal
+        };
+        let before = x.request.len();
+        x.request.retain(|op| match op {
+            qp_schema::protocol::Op::SetAudience { principal, .. }
+            | qp_schema::protocol::Op::SetSensitivity { principal, .. } => own(principal),
+            _ => true,
+        });
+        let foreign = !p.principal.is_empty()
+            && e.changes.iter().any(
+                |c| matches!(c, ChangeOp::PutAudience { principal, .. } if principal != &p.principal),
+            );
+        if foreign || x.request.len() != before {
+            x.summary = "set_audience".to_owned();
+        }
         if p.hidden.iter().any(|h| x.summary.contains(h.as_str())) {
             x.summary = "…".to_owned();
         }
@@ -1373,7 +1466,7 @@ impl Session {
         lang: Language,
         f: impl FnOnce(&mut Self) -> R,
     ) -> R {
-        let p = self.proj_for(principal);
+        let p = self.reader_proj(principal);
         let lines = self.runner.is_some() || lang == Language::En;
         if p.is_none() && !lines {
             return f(self);
@@ -1496,15 +1589,16 @@ impl Session {
         let (Some(series), Some(story), true) = (series, story, visible) else {
             return vec![reply(self, DisputeVerdict::Unknown, None)];
         };
-        if !self.bars_ok(&principal, &series)
-            || story.stage == Stage::Retracted
-            || t < story.history.first().map_or(i64::MAX, |h| h.t)
-        {
+        if !self.bars_ok(&principal, &series) {
             return vec![reply(self, DisputeVerdict::Unknown, None)];
         }
         let seen = (conn.clone(), claim.clone(), t, digest.unwrap_or_default());
         if self.settle.seen_contains(&seen) {
             return vec![reply(self, DisputeVerdict::Duplicate, None)];
+        }
+        if story.stage == Stage::Retracted || t < story.history.first().map_or(i64::MAX, |h| h.t)
+        {
+            return vec![reply(self, DisputeVerdict::Unknown, None)];
         }
         self.settle
             .seen_insert(seen.clone(), DisputeVerdict::Pending);

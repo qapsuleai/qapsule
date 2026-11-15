@@ -63,6 +63,20 @@ pub struct EngineConfig {
     pub ranker: Box<dyn Ranker>,
 }
 
+impl EngineConfig {
+    /// The R3 choices: theme [`crate::theme::KindDir`] (M4a), outcome
+    /// [`crate::outcome::Barrier`] (M5a), ranker [`crate::rank::Confirm`] (M3c), all with
+    /// their measured defaults (`rounds/R3/experiments/M3–M5/RESULTS.md`).
+    #[must_use]
+    pub fn r3() -> Self {
+        Self {
+            theme: Box::new(crate::theme::KindDir::default()),
+            outcome: Box::new(crate::outcome::Barrier::default()),
+            ranker: Box::new(crate::rank::Confirm::default()),
+        }
+    }
+}
+
 /// One transition of one story, with the story as it is after the transition.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct StoryEvent {

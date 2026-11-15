@@ -1,0 +1,41 @@
+# R3/S-A cross-check: the productized strategies in `qp-capsule` against the measured
+# experiment crates (M2 template, M3 confirm, M4 kinddir, M5 barrier). Standalone crate
+# (empty [workspace]): the experiment crates are their own workspace roots and cannot be
+# dependencies of a root-workspace member.
+[package]
+name = "r3-s-crosscheck"
+version = "0.0.0"
+edition = "2021"
+publish = false
+description = "R3/S-A: byte-identity of qp-capsule's productized R3 strategies with the measured experiment crates."
+
+[workspace]
+
+[[bin]]
+name = "crosscheck"
+path = "src/main.rs"
+
+[lib]
+name = "crosscheck"
+path = "src/lib.rs"
+
+[dependencies]
+qp-capsule = { path = "../../../../../crates/qp-capsule" }
+qp-facts = { path = "../../../../../crates/qp-facts" }
+qp-schema = { path = "../../../../../crates/qp-schema" }
+qp-source = { path = "../../../../../crates/qp-source" }
+serde = { version = "1.0.229", features = ["derive"] }
+serde_json = { version = "1.0.154", features = ["float_roundtrip"] }
+m2-template = { path = "../../M2/template" }
+m3-confirm = { path = "../../M3/confirm" }
+m4-kinddir = { path = "../../M4/kinddir" }
+m5_barrier = { path = "../../M5/barrier" }
+
+[lints.rust]
+unsafe_code = "forbid"
+
+[profile.release]
+debug = false
+
+[profile.test]
+opt-level = 2

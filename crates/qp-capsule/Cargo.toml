@@ -10,9 +10,11 @@ publish.workspace = true
 [dependencies]
 qp-schema = { path = "../qp-schema" }
 qp-facts = { path = "../qp-facts" }
+qp-compute = { path = "../qp-compute" }
 serde = { version = "1.0.229", features = ["derive"] }
 
 [dev-dependencies]
+qp-source = { path = "../qp-source" }
 serde_json = { version = "1.0.154", features = ["float_roundtrip"] }
 
 [lints]

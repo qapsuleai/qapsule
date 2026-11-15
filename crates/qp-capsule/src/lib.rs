@@ -23,13 +23,30 @@
 //! - [`pipeline`]: headless simulation (detectors → facts → engine) in global time order.
 //! - [`audience`]: the sensitivity filter (§9.8).
 //! - [`scaffold`]: trivial strategies for tests only.
+//!
+//! The measured choices (R3/S-A, productized from `rounds/R3/experiments/`):
+//!
+//! | Module | Strategy | Experiment |
+//! |--------|----------|------------|
+//! | [`theme`] | [`theme::KindDir`] (kind + direction, flow as evidence) | M4a |
+//! | [`outcome`] | [`outcome::Barrier`] (per-kind ATR triple barrier) | M5a |
+//! | [`rank`] | [`rank::Confirm`] (confirmation-led combination) | M3c |
+//! | [`realize`] | [`realize::Template`] (template grammar, TR + EN) | M2a |
+//!
+//! [`EngineConfig::r3`] is the engine with these choices; [`sentence::sentences_at`]
+//! writes a story's sentences from engine data (K26).
 
 use std::collections::BTreeMap;
 
 pub mod audience;
 pub mod engine;
+pub mod outcome;
 pub mod pipeline;
+pub mod rank;
+pub mod realize;
 pub mod scaffold;
+pub mod sentence;
+pub mod theme;
 
 pub use audience::admits;
 pub use engine::{

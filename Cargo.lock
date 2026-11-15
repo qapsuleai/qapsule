@@ -1515,8 +1515,10 @@ dependencies = [
 name = "qp-capsule"
 version = "0.0.0"
 dependencies = [
+ "qp-compute",
  "qp-facts",
  "qp-schema",
+ "qp-source",
  "serde",
  "serde_json",
 ]

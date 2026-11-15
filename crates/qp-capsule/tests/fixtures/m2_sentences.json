@@ -1,0 +1,355 @@
+{
+  "note": "R3/S-A: `measured` = rounds/R3/experiments/M2/template (85b5b5d) on tests/fixtures/m2_inputs.json (harness m2 inputs, synthetic); `product_changes` = qp_capsule::realize::Template where it differs (rounds/R3/experiments/S/S-A.md). Regenerate: cargo run --release --manifest-path rounds/R3/experiments/S/crosscheck/Cargo.toml -- fixture",
+  "measured": {
+    "k26": {
+      "tr": "THYAO'da RSI 3 bar önce 70'in üstüne çıktı, bugün yeniden altına indi; şu an 55, artık 70'in üstünde değil. Aşırı alım sona erdi. Geçmişte bu sinyal 140 seferin 87'sinde beklendiği gibi sonuçlandı.",
+      "en": "3 bars ago, THYAO's RSI crossed above 70; it fell back below today and is now 55, no longer above 70. The overbought state has ended. Historically, this signal played out in 87 of 140 cases."
+    },
+    "s01": {
+      "tr": "SISE'de bugün hareketli ortalamalar düşüş yönünde dizildi (kapanış 196,96, uzun ortalama 204,84): düşüş eğiliminde devam sinyali. Sinyal bugün geçersiz oldu; artık geçerli değil. Karnesi henüz az örnekli: 8 seferin 2'sinde tuttu.",
+      "en": "Today, SISE's moving averages lined up for a downtrend (close 196.96, long average 204.84): a continuation of the downtrend. It was invalidated today and is no longer valid. Its record is still thin: it played out in 2 of 8 cases."
+    },
+    "s02": {
+      "tr": "TUPRS'ta dün hareketli ortalamalar yükseliş yönünde dizildi (kapanış 148,41, uzun ortalama 142,47): yükseliş eğiliminde devam sinyali. Bugün ters yönde bir sinyal geldi; görünüm zayıfladı. Hâlâ geçerli olup olmadığı bilinmiyor. Geçmişte bu sinyal 140 seferin 89'unda beklendiği gibi sonuçlandı.",
+      "en": "Yesterday, TUPRS's moving averages lined up for an uptrend (close 148.41, long average 142.47): a continuation of the uptrend. An opposite signal appeared today and weakened it. Whether it still holds is unknown. Historically, this signal played out in 89 of 140 cases."
+    },
+    "s03": {
+      "tr": "EREGL'de yaklaşık bir hafta önce hareketli ortalamalar düşüş yönünde dizildi: düşüş eğiliminde devam sinyali. Beklenen sonuç bugün gerçekleşti. Hâlâ geçerli olup olmadığı bilinmiyor. Geçmişte bu tür sinyal çoğunlukla beklendiği gibi sonuçlandı. Sunucu doğruladı; rakamlar kurumsal akış lisansı gerektiriyor.",
+      "en": "About a week ago, EREGL's moving averages lined up for a downtrend: a continuation of the downtrend. The expected outcome came true today. Whether it still holds is unknown. Historically, this kind of signal mostly played out. Server-verified; the figures require an institutional flow data license."
+    },
+    "s04": {
+      "tr": "PGSUS'ta 30 bar önce hareketli ortalamalar yükseliş yönünde dizildi (kapanış 57,29, uzun ortalama 55,00): yükseliş eğiliminde devam sinyali. Hâlâ geçerli olup olmadığı bilinmiyor. Geçmişte bu sinyal 140 seferin 67'sinde beklendiği gibi sonuçlandı.",
+      "en": "30 bars ago, PGSUS's moving averages lined up for an uptrend (close 57.29, long average 55.00): a continuation of the uptrend. Whether it still holds is unknown. Historically, this signal played out in 67 of 140 cases."
+    },
+    "s05": {
+      "tr": "THYAO'da bugün aşağı dönüş işareti çıktı: fiyat yeni tepe yaparken RSI daha düşük tepe yaptı (fiyat 168,94, RSI 52,1). Bugün ters yönde bir sinyal geldi; görünüm zayıfladı. Hâlâ geçerli olup olmadığı bilinmiyor. Karnesi henüz az örnekli: 8 seferin 6'sında tuttu.",
+      "en": "Today, THYAO showed a downward reversal signal: price made a new high while RSI made a lower high (price 168.94, RSI 52.1). An opposite signal appeared today and weakened it. Whether it still holds is unknown. Its record is still thin: it played out in 6 of 8 cases."
+    },
+    "s06": {
+      "tr": "BIMAS'ta dün yukarı dönüş işareti çıktı: fiyat yeni dip yaparken RSI daha yüksek dip yaptı (fiyat 21,49, RSI 53,6). Bugün ters yönde bir sinyal geldi; görünüm zayıfladı. Hâlâ geçerli olup olmadığı bilinmiyor. Karnesi henüz az örnekli: 8 seferin 2'sinde tuttu.",
+      "en": "Yesterday, BIMAS showed an upward reversal signal: price made a new low while RSI made a higher low (price 21.49, RSI 53.6). An opposite signal appeared today and weakened it. Whether it still holds is unknown. Its record is still thin: it played out in 2 of 8 cases."
+    },
+    "s07": {
+      "tr": "PGSUS'ta yaklaşık bir hafta önce aşağı dönüş işareti çıktı: fiyat yeni tepe yaparken RSI daha düşük tepe yaptı. Sinyalın ömrü bugün sonuçsuz doldu; artık geçerli değil. Karnesi henüz az örnekli. Sunucu doğruladı; rakamlar kurumsal akış lisansı gerektiriyor.",
+      "en": "About a week ago, PGSUS showed a downward reversal signal: price made a new high while RSI made a lower high. Its life ran out today without an outcome; it is no longer valid. Its record is still thin. Server-verified; the figures require an institutional flow data license."
+    },
+    "s08": {
+      "tr": "THYAO'da 30 bar önce aşağı dönüş işareti çıktı: fiyat yeni tepe yaparken RSI daha düşük tepe yaptı (fiyat 25,63, RSI 50,1). Bugün hacim de teyit etti; 2 bağımsız kanıt ailesi destekliyor. Hâlâ geçerli olup olmadığı bilinmiyor. Karnesi henüz az örnekli: 8 seferin 4'ünde tuttu.",
+      "en": "30 bars ago, THYAO showed a downward reversal signal: price made a new high while RSI made a lower high (price 25.63, RSI 50.1). Volume confirmed it today; 2 independent evidence families support it. Whether it still holds is unknown. Its record is still thin: it played out in 4 of 8 cases."
+    },
+    "s09": {
+      "tr": "GARAN bugün 128,48'deki direnci yukarı kırdı (kapanış 131,01): yukarı kırılım. Sinyalın 1 barlık ömrü bugün sonuçsuz doldu; artık geçerli değil. Geçmişte bu sinyal 140 seferin 51'inde beklendiği gibi sonuçlandı.",
+      "en": "Today, GARAN broke above resistance at 128.48 (close 131.01): an upside breakout. Its 1-bar life ran out today without an outcome; it is no longer valid. Historically, this signal played out in 51 of 140 cases."
+    },
+    "s10": {
+      "tr": "PGSUS dün 167,59'daki direnci yukarı kırdı (kapanış 172,40): yukarı kırılım. Sinyal bugün geçersiz oldu; artık geçerli değil. Karnesi henüz az örnekli: 8 seferin 3'ünde tuttu.",
+      "en": "Yesterday, PGSUS broke above resistance at 167.59 (close 172.40): an upside breakout. It was invalidated today and is no longer valid. Its record is still thin: it played out in 3 of 8 cases."
+    },
+    "s11": {
+      "tr": "EREGL 5 bar önce 42,68'deki direnci yukarı kırdı (kapanış 43,15): yukarı kırılım. Bugün hacim de teyit etti; 2 bağımsız kanıt ailesi destekliyor. Hâlâ geçerli olup olmadığı bilinmiyor. Geçmişte bu sinyal 140 seferin 98'inde beklendiği gibi sonuçlandı.",
+      "en": "5 bars ago, EREGL broke above resistance at 42.68 (close 43.15): an upside breakout. Volume confirmed it today; 2 independent evidence families support it. Whether it still holds is unknown. Historically, this signal played out in 98 of 140 cases."
+    },
+    "s12": {
+      "tr": "AKBNK 30 bar önce 20,86'daki desteği aşağı kırdı (kapanış 20,58): aşağı kırılım. Bugün ters yönde bir sinyal geldi; görünüm zayıfladı. Hâlâ geçerli olup olmadığı bilinmiyor. Karnesi henüz az örnekli: 8 seferin 2'sinde tuttu.",
+      "en": "30 bars ago, AKBNK broke below support at 20.86 (close 20.58): a downside breakout. An opposite signal appeared today and weakened it. Whether it still holds is unknown. Its record is still thin: it played out in 2 of 8 cases."
+    },
+    "s13": {
+      "tr": "ASELS'te bugün Bollinger bantları daraldı (bant genişliği 0,049, eşik 0,06): sıkışma, yön belirsiz. Hâlâ geçerli olup olmadığı bilinmiyor. Karnesi henüz az örnekli: 8 seferin 2'sinde tuttu.",
+      "en": "Today, ASELS's Bollinger bands narrowed (band width 0.049, threshold 0.06): a squeeze, direction open. Whether it still holds is unknown. Its record is still thin: it played out in 2 of 8 cases."
+    },
+    "s14": {
+      "tr": "THYAO'da dün Bollinger bantları daraldı: sıkışma, yön belirsiz. Sinyalın ömrü bugün sonuçsuz doldu; artık geçerli değil. Geçmişte bu tür sinyal çoğunlukla beklendiği gibi sonuçlandı. Sunucu doğruladı; rakamlar kurumsal akış lisansı gerektiriyor.",
+      "en": "Yesterday, THYAO's Bollinger bands narrowed: a squeeze, direction open. Its life ran out today without an outcome; it is no longer valid. Historically, this kind of signal mostly played out. Server-verified; the figures require an institutional flow data license."
+    },
+    "s15": {
+      "tr": "SAHOL'da 5 bar önce Bollinger bantları daraldı (bant genişliği 0,044, eşik 0,06): sıkışma, yön belirsiz. Bugün ters yönde bir sinyal geldi; görünüm zayıfladı. Hâlâ geçerli olup olmadığı bilinmiyor. Geçmişte bu sinyal 140 seferin 63'ünde beklendiği gibi sonuçlandı.",
+      "en": "5 bars ago, SAHOL's Bollinger bands narrowed (band width 0.044, threshold 0.06): a squeeze, direction open. An opposite signal appeared today and weakened it. Whether it still holds is unknown. Historically, this signal played out in 63 of 140 cases."
+    },
+    "s16": {
+      "tr": "TUPRS'ta 30 bar önce Bollinger bantları daraldı (bant genişliği 0,025, eşik 0,06): sıkışma, yön belirsiz. Sinyal bugün geçersiz oldu; artık geçerli değil. Karnesi henüz az örnekli: 8 seferin 2'sinde tuttu.",
+      "en": "30 bars ago, TUPRS's Bollinger bands narrowed (band width 0.025, threshold 0.06): a squeeze, direction open. It was invalidated today and is no longer valid. Its record is still thin: it played out in 2 of 8 cases."
+    },
+    "s17": {
+      "tr": "PGSUS'ta RSI bugün 30'un altına indi (28,8): aşırı satım. Bugün hacim de teyit etti; 2 bağımsız kanıt ailesi destekliyor. Hâlâ geçerli olup olmadığı bilinmiyor. Geçmişte bu sinyal 140 seferin 99'unda beklendiği gibi sonuçlandı.",
+      "en": "Today, PGSUS's RSI fell below 30 (to 28.8): oversold. Volume confirmed it today; 2 independent evidence families support it. Whether it still holds is unknown. Historically, this signal played out in 99 of 140 cases."
+    },
+    "s18": {
+      "tr": "BIMAS'ta RSI dün 70'in üstüne çıktı (72,6): aşırı alım. Bugün hacim de teyit etti; 2 bağımsız kanıt ailesi destekliyor. Hâlâ geçerli olup olmadığı bilinmiyor. Karnesi henüz az örnekli: 8 seferin 4'ünde tuttu.",
+      "en": "Yesterday, BIMAS's RSI rose above 70 (to 72.6): overbought. Volume confirmed it today; 2 independent evidence families support it. Whether it still holds is unknown. Its record is still thin: it played out in 4 of 8 cases."
+    },
+    "s19": {
+      "tr": "FROTO'da RSI yaklaşık bir hafta önce aşırı alım eşiğinin üstüne çıktı: aşırı alım. Sinyal bugün geçersiz oldu; artık geçerli değil. Karnesi henüz az örnekli. Sunucu doğruladı; rakamlar kurumsal akış lisansı gerektiriyor.",
+      "en": "About a week ago, FROTO's RSI rose above the overbought threshold: overbought. It was invalidated today and is no longer valid. Its record is still thin. Server-verified; the figures require an institutional flow data license."
+    },
+    "s20": {
+      "tr": "FROTO'da RSI bir aydan uzun süre önce aşırı alım eşiğinin üstüne çıktı: aşırı alım. Hâlâ geçerli olup olmadığı bilinmiyor. Geçmişte bu tür sinyal çoğunlukla beklendiği gibi sonuçlandı. Sunucu doğruladı; rakamlar kurumsal akış lisansı gerektiriyor.",
+      "en": "More than a month ago, FROTO's RSI rose above the overbought threshold: overbought. Whether it still holds is unknown. Historically, this kind of signal mostly played out. Server-verified; the figures require an institutional flow data license."
+    },
+    "s21": {
+      "tr": "AKBNK'ta bugün kurumsal net satış (1.345.000) son günlerin ortalamasını (563.000) belirgin biçimde aştı: para çıkışı. Hâlâ geçerli olup olmadığı bilinmiyor. Geçmişte bu sinyal 140 seferin 63'ünde beklendiği gibi sonuçlandı.",
+      "en": "Today, net institutional selling in AKBNK (1,345,000) clearly exceeded the recent average (563,000): money outflow. Whether it still holds is unknown. Historically, this signal played out in 63 of 140 cases."
+    },
+    "s22": {
+      "tr": "FROTO'da dün kurumsal net alış (1.026.000) son günlerin ortalamasını (481.000) belirgin biçimde aştı: para girişi. Hâlâ geçerli olup olmadığı bilinmiyor. Karnesi henüz az örnekli: 8 seferin 6'sında tuttu.",
+      "en": "Yesterday, net institutional buying in FROTO (1,026,000) clearly exceeded the recent average (481,000): money inflow. Whether it still holds is unknown. Its record is still thin: it played out in 6 of 8 cases."
+    },
+    "s23": {
+      "tr": "AKBNK'ta 5 bar önce kurumsal net satış (1.496.000) son günlerin ortalamasını (374.000) belirgin biçimde aştı: para çıkışı. Sinyalın 5 barlık ömrü bugün sonuçsuz doldu; artık geçerli değil. Geçmişte bu sinyal 140 seferin 50'sinde beklendiği gibi sonuçlandı.",
+      "en": "5 bars ago, net institutional selling in AKBNK (1,496,000) clearly exceeded the recent average (374,000): money outflow. Its 5-bar life ran out today without an outcome; it is no longer valid. Historically, this signal played out in 50 of 140 cases."
+    },
+    "s24": {
+      "tr": "PGSUS'ta 30 bar önce kurumsal net satış (1.280.000) son günlerin ortalamasını (597.000) belirgin biçimde aştı: para çıkışı. Bugün ters yönde bir sinyal geldi; görünüm zayıfladı. Hâlâ geçerli olup olmadığı bilinmiyor. Geçmişte bu sinyal 140 seferin 54'ünde beklendiği gibi sonuçlandı.",
+      "en": "30 bars ago, net institutional selling in PGSUS (1,280,000) clearly exceeded the recent average (597,000): money outflow. An opposite signal appeared today and weakened it. Whether it still holds is unknown. Historically, this signal played out in 54 of 140 cases."
+    },
+    "s25": {
+      "tr": "BIMAS bugün itibarıyla uzun ortalamanın üstünde. Yükseliş eğilimi sürüyor. Bugün ters yönde bir sinyal geldi; görünüm zayıfladı. Geçmişte bu tür sinyal çoğunlukla beklendiği gibi sonuçlandı. Sunucu doğruladı; rakamlar kurumsal akış lisansı gerektiriyor.",
+      "en": "BIMAS is above the long average as of today. The uptrend is still in place. An opposite signal appeared today and weakened it. Historically, this kind of signal mostly played out. Server-verified; the figures require an institutional flow data license."
+    },
+    "s26": {
+      "tr": "PGSUS dün uzun ortalamanın (29,19) altına indi; şu an 30,07, artık uzun ortalamanın altında değil. Düşüş eğilimi sona erdi. Sinyal bugün geçersiz oldu. Karnesi henüz az örnekli: 8 seferin 2'sinde tuttu.",
+      "en": "Yesterday, PGSUS crossed below the long average (29.19); it is now at 30.07, no longer below the long average. The downtrend has ended. The signal was invalidated today. Its record is still thin: it played out in 2 of 8 cases."
+    },
+    "s27": {
+      "tr": "SISE 5 bardır uzun ortalamanın (71,29) altında; şu an 69,86. Düşüş eğilimi sürüyor. Geçmişte bu sinyal 140 seferin 63'ünde beklendiği gibi sonuçlandı.",
+      "en": "SISE has been below the long average (71.29) for 5 bars and is now at 69.86. The downtrend is still in place. Historically, this signal played out in 63 of 140 cases."
+    },
+    "s28": {
+      "tr": "THYAO 30 bardır uzun ortalamanın (57,17) üstünde; şu an 58,31. Yükseliş eğilimi sürüyor. Beklenen sonuç bugün gerçekleşti. Karnesi henüz az örnekli: 8 seferin 2'sinde tuttu.",
+      "en": "THYAO has been above the long average (57.17) for 30 bars and is now at 58.31. The uptrend is still in place. The expected outcome came true today. Its record is still thin: it played out in 2 of 8 cases."
+    },
+    "s29": {
+      "tr": "KCHOL bugün dönüş noktasının (286,57) altına indi; şu an 295,17, artık dönüş noktasının altında değil. Aşağı dönüş sona erdi. Sinyalın 1 barlık ömrü bugün sonuçsuz doldu. Karnesi henüz az örnekli: 8 seferin 4'ünde tuttu.",
+      "en": "Today, KCHOL crossed below the reversal point (286.57); it is now at 295.17, no longer below the reversal point. The downward reversal has ended. Its 1-bar life ran out today without an outcome. Its record is still thin: it played out in 4 of 8 cases."
+    },
+    "s30": {
+      "tr": "GARAN dün dönüş noktasının (33,26) üstüne çıktı; şu an 32,26, artık dönüş noktasının üstünde değil. Yukarı dönüş sona erdi. Sinyal bugün geçersiz oldu. Karnesi henüz az örnekli: 8 seferin 4'ünde tuttu.",
+      "en": "Yesterday, GARAN crossed above the reversal point (33.26); it is now at 32.26, no longer above the reversal point. The upward reversal has ended. The signal was invalidated today. Its record is still thin: it played out in 4 of 8 cases."
+    },
+    "s31": {
+      "tr": "FROTO yaklaşık bir haftadır dönüş noktasının altında. Aşağı dönüş sürüyor. Beklenen sonuç bugün gerçekleşti. Karnesi henüz az örnekli. Sunucu doğruladı; rakamlar kurumsal akış lisansı gerektiriyor.",
+      "en": "FROTO has been below the reversal point for about a week. The downward reversal is still in place. The expected outcome came true today. Its record is still thin. Server-verified; the figures require an institutional flow data license."
+    },
+    "s32": {
+      "tr": "SISE 30 bardır dönüş noktasının (177,59) altında; şu an 174,04. Aşağı dönüş sürüyor. Beklenen sonuç bugün gerçekleşti. Geçmişte bu sinyal 140 seferin 68'inde beklendiği gibi sonuçlandı.",
+      "en": "SISE has been below the reversal point (177.59) for 30 bars and is now at 174.04. The downward reversal is still in place. The expected outcome came true today. Historically, this signal played out in 68 of 140 cases."
+    },
+    "s33": {
+      "tr": "THYAO bugün itibarıyla kırılım seviyesinin üstünde. Yukarı kırılım sürüyor. Geçmişte bu tür sinyal çoğunlukla tutmadı. Sunucu doğruladı; rakamlar kurumsal akış lisansı gerektiriyor.",
+      "en": "THYAO is above the breakout level as of today. The upside breakout is still in place. Historically, this kind of signal mostly did not play out. Server-verified; the figures require an institutional flow data license."
+    },
+    "s34": {
+      "tr": "GARAN dün 168,43'ün üstüne çıktı; şu an 163,38, artık 168,43'ün üstünde değil. Yukarı kırılım sona erdi. Beklenen sonuç bugün gerçekleşti. Karnesi henüz az örnekli: 8 seferin 2'sinde tuttu.",
+      "en": "Yesterday, GARAN crossed above 168.43; it is now at 163.38, no longer above 168.43. The upside breakout has ended. The expected outcome came true today. Its record is still thin: it played out in 2 of 8 cases."
+    },
+    "s35": {
+      "tr": "GARAN 5 bar önce 109,96'nın üstüne çıktı; şu an 106,66, artık 109,96'nın üstünde değil. Yukarı kırılım sona erdi. Sinyalın 5 barlık ömrü bugün sonuçsuz doldu. Geçmişte bu sinyal 140 seferin 82'sinde beklendiği gibi sonuçlandı.",
+      "en": "5 bars ago, GARAN crossed above 109.96; it is now at 106.66, no longer above 109.96. The upside breakout has ended. Its 5-bar life ran out today without an outcome. Historically, this signal played out in 82 of 140 cases."
+    },
+    "s36": {
+      "tr": "EREGL 30 bar önce 46,19'un altına indi; şu an 47,58, artık 46,19'un altında değil. Aşağı kırılım sona erdi. Sinyal bugün geçersiz oldu. Geçmişte bu sinyal 140 seferin 81'inde beklendiği gibi sonuçlandı.",
+      "en": "30 bars ago, EREGL crossed below 46.19; it is now at 47.58, no longer below 46.19. The downside breakout has ended. The signal was invalidated today. Historically, this signal played out in 81 of 140 cases."
+    },
+    "s37": {
+      "tr": "SAHOL'da bant genişliği bugün eşiğin altına indi; artık eşiğin altında değil. Sıkışma (yön belirsiz) sona erdi. Sinyal bugün geçersiz oldu. Geçmişte bu tür sinyal kabaca yarı yarıya tuttu. Sunucu doğruladı; rakamlar kurumsal akış lisansı gerektiriyor.",
+      "en": "Today, SAHOL's band width crossed below the threshold; it is no longer below the threshold. The squeeze (direction open) has ended. The signal was invalidated today. Historically, this kind of signal played out about as often as not. Server-verified; the figures require an institutional flow data license."
+    },
+    "s38": {
+      "tr": "GARAN'da bant genişliği dünden beri eşiğin (0,06) altında; şu an 0,0588. Sıkışma (yön belirsiz) sürüyor. Beklenen sonuç bugün gerçekleşti. Karnesi henüz az örnekli: 8 seferin 2'sinde tuttu.",
+      "en": "GARAN's band width has been below the threshold (0.06) since yesterday and is now 0.0588. The squeeze (direction open) is still in place. The expected outcome came true today. Its record is still thin: it played out in 2 of 8 cases."
+    },
+    "s39": {
+      "tr": "GARAN'da bant genişliği 5 bardır eşiğin (0,06) altında; şu an 0,0588. Sıkışma (yön belirsiz) sürüyor. Beklenen sonuç bugün gerçekleşti. Karnesi henüz az örnekli: 8 seferin 5'inde tuttu.",
+      "en": "GARAN's band width has been below the threshold (0.06) for 5 bars and is now 0.0588. The squeeze (direction open) is still in place. The expected outcome came true today. Its record is still thin: it played out in 5 of 8 cases."
+    },
+    "s40": {
+      "tr": "THYAO'da bant genişliği 30 bardır eşiğin (0,06) altında; şu an 0,0588. Sıkışma (yön belirsiz) sürüyor. Bugün ters yönde bir sinyal geldi; görünüm zayıfladı. Karnesi henüz az örnekli: 8 seferin 3'ünde tuttu.",
+      "en": "THYAO's band width has been below the threshold (0.06) for 30 bars and is now 0.0588. The squeeze (direction open) is still in place. An opposite signal appeared today and weakened it. Its record is still thin: it played out in 3 of 8 cases."
+    },
+    "s41": {
+      "tr": "THYAO'da RSI bugün itibarıyla 70'in üstünde; şu an 71,4. Aşırı alım sürüyor. Karnesi henüz az örnekli: 8 seferin 2'sinde tuttu.",
+      "en": "THYAO's RSI is above 70 as of today, now 71.4. The overbought state is still in place. Its record is still thin: it played out in 2 of 8 cases."
+    },
+    "s42": {
+      "tr": "KCHOL'da RSI dünden beri aşırı alım eşiğinin üstünde. Aşırı alım sürüyor. Beklenen sonuç bugün gerçekleşti. Karnesi henüz az örnekli. Sunucu doğruladı; rakamlar kurumsal akış lisansı gerektiriyor.",
+      "en": "KCHOL's RSI has been above the overbought threshold since yesterday. The overbought state is still in place. The expected outcome came true today. Its record is still thin. Server-verified; the figures require an institutional flow data license."
+    },
+    "s43": {
+      "tr": "BIMAS'ta RSI yaklaşık bir hafta önce aşırı alım eşiğinin üstüne çıktı; artık aşırı alım eşiğinin üstünde değil. Aşırı alım sona erdi. Karnesi henüz az örnekli. Sunucu doğruladı; rakamlar kurumsal akış lisansı gerektiriyor.",
+      "en": "About a week ago, BIMAS's RSI crossed above the overbought threshold; it is no longer above the overbought threshold. The overbought state has ended. Its record is still thin. Server-verified; the figures require an institutional flow data license."
+    },
+    "s44": {
+      "tr": "ASELS'te RSI 30 bardır 70'in üstünde; şu an 71,4. Aşırı alım sürüyor. Beklenen sonuç bugün gerçekleşti. Geçmişte bu sinyal 140 seferin 62'sinde beklendiği gibi sonuçlandı.",
+      "en": "ASELS's RSI has been above 70 for 30 bars and is now 71.4. The overbought state is still in place. The expected outcome came true today. Historically, this signal played out in 62 of 140 cases."
+    },
+    "s45": {
+      "tr": "GARAN'da kurumsal net akış bugün itibarıyla son günlerin ortalamasının (319.000) üstünde; şu an 325.380. Para girişi sürüyor. Bugün ters yönde bir sinyal geldi; görünüm zayıfladı. Geçmişte bu sinyal 140 seferin 63'ünde beklendiği gibi sonuçlandı.",
+      "en": "Net institutional flow in GARAN is above the recent average (319,000) as of today, now 325,380. The money inflow is still in place. An opposite signal appeared today and weakened it. Historically, this signal played out in 63 of 140 cases."
+    },
+    "s46": {
+      "tr": "PGSUS'ta kurumsal net akış dün son günlerin ortalamasının altına indi; artık son günlerin ortalamasının altında değil. Para çıkışı sona erdi. Sinyalın ömrü bugün sonuçsuz doldu. Geçmişte bu tür sinyal kabaca yarı yarıya tuttu. Sunucu doğruladı; rakamlar kurumsal akış lisansı gerektiriyor.",
+      "en": "Yesterday, net institutional flow in PGSUS crossed below the recent average; it is no longer below the recent average. The money outflow has ended. Its life ran out today without an outcome. Historically, this kind of signal played out about as often as not. Server-verified; the figures require an institutional flow data license."
+    },
+    "s47": {
+      "tr": "BIMAS'ta kurumsal net akış yaklaşık bir hafta önce son günlerin ortalamasının altına indi; artık son günlerin ortalamasının altında değil. Para çıkışı sona erdi. Geçmişte bu tür sinyal çoğunlukla beklendiği gibi sonuçlandı. Sunucu doğruladı; rakamlar kurumsal akış lisansı gerektiriyor.",
+      "en": "About a week ago, net institutional flow in BIMAS crossed below the recent average; it is no longer below the recent average. The money outflow has ended. Historically, this kind of signal mostly played out. Server-verified; the figures require an institutional flow data license."
+    },
+    "s48": {
+      "tr": "EREGL'de kurumsal net akış 30 bardır son günlerin ortalamasının (452.000) altında; şu an 442.960. Para çıkışı sürüyor. Bugün hacim de teyit etti; 2 bağımsız kanıt ailesi destekliyor. Karnesi henüz az örnekli: 8 seferin 5'inde tuttu.",
+      "en": "Net institutional flow in EREGL has been below the recent average (452,000) for 30 bars and is now 442,960. The money outflow is still in place. Volume confirmed it today; 2 independent evidence families support it. Its record is still thin: it played out in 5 of 8 cases."
+    },
+    "s49": {
+      "tr": "FROTO birkaç bar içinde uzun ortalamanın üstünde kapanırsa yükseliş eğilimi teyit olur. Beklenti bugün geçersiz oldu; artık geçerli değil. Geçmişte bu tür sinyal çoğunlukla tutmadı. Sunucu doğruladı; rakamlar kurumsal akış lisansı gerektiriyor.",
+      "en": "If FROTO closes above the long average within a few bars, the uptrend would be confirmed. The expectation was invalidated today and is no longer valid. Historically, this kind of signal mostly did not play out. Server-verified; the figures require an institutional flow data license."
+    },
+    "s50": {
+      "tr": "EREGL 3 bar içinde uzun ortalamanın (255,56) üstünde kapanırsa yükseliş eğilimi teyit olur. Bugün ters yönde bir sinyal geldi; görünüm zayıfladı. Koşul hâlâ açık. Karnesi henüz az örnekli: 8 seferin 4'ünde tuttu.",
+      "en": "If EREGL closes above the long average (255.56) within 3 bars, the uptrend would be confirmed. An opposite signal appeared today and weakened it. The setup is still open. Its record is still thin: it played out in 4 of 8 cases."
+    },
+    "s51": {
+      "tr": "KCHOL 3 bar içinde uzun ortalamanın (142,99) altında kapanırsa düşüş eğilimi teyit olur. Koşul hâlâ açık. Geçmişte bu sinyal 140 seferin 60'ında beklendiği gibi sonuçlandı.",
+      "en": "If KCHOL closes below the long average (142.99) within 3 bars, the downtrend would be confirmed. The setup is still open. Historically, this signal played out in 60 of 140 cases."
+    },
+    "s52": {
+      "tr": "SAHOL birkaç bar içinde uzun ortalamanın üstünde kapanırsa yükseliş eğilimi teyit olur. Beklenti bugün geçersiz oldu; artık geçerli değil. Geçmişte bu tür sinyal kabaca yarı yarıya tuttu. Sunucu doğruladı; rakamlar kurumsal akış lisansı gerektiriyor.",
+      "en": "If SAHOL closes above the long average within a few bars, the uptrend would be confirmed. The expectation was invalidated today and is no longer valid. Historically, this kind of signal played out about as often as not. Server-verified; the figures require an institutional flow data license."
+    },
+    "s53": {
+      "tr": "SAHOL 3 bar içinde dönüş noktasının (161,73) altında kapanırsa aşağı dönüş teyit olur. Beklenti bugün geçersiz oldu; artık geçerli değil. Geçmişte bu sinyal 140 seferin 98'inde beklendiği gibi sonuçlandı.",
+      "en": "If SAHOL closes below the reversal point (161.73) within 3 bars, the downward reversal would be confirmed. The expectation was invalidated today and is no longer valid. Historically, this signal played out in 98 of 140 cases."
+    },
+    "s54": {
+      "tr": "KCHOL 3 bar içinde dönüş noktasının (214,64) altında kapanırsa aşağı dönüş teyit olur. Bugün hacim de teyit etti; 2 bağımsız kanıt ailesi destekliyor. Koşul hâlâ açık. Karnesi henüz az örnekli: 8 seferin 3'ünde tuttu.",
+      "en": "If KCHOL closes below the reversal point (214.64) within 3 bars, the downward reversal would be confirmed. Volume confirmed it today; 2 independent evidence families support it. The setup is still open. Its record is still thin: it played out in 3 of 8 cases."
+    },
+    "s55": {
+      "tr": "SAHOL 3 bar içinde dönüş noktasının (277,15) altında kapanırsa aşağı dönüş teyit olur. Bugün hacim de teyit etti; 2 bağımsız kanıt ailesi destekliyor. Koşulun bugünkü durumu bilinmiyor. Karnesi henüz az örnekli: 8 seferin 4'ünde tuttu.",
+      "en": "If SAHOL closes below the reversal point (277.15) within 3 bars, the downward reversal would be confirmed. Volume confirmed it today; 2 independent evidence families support it. Whether the setup is still open is unknown. Its record is still thin: it played out in 4 of 8 cases."
+    },
+    "s56": {
+      "tr": "TUPRS 3 bar içinde dönüş noktasının (228,51) üstünde kapanırsa yukarı dönüş teyit olur. Beklentinin 30 barlık ömrü bugün sonuçsuz doldu; artık geçerli değil. Geçmişte bu sinyal 140 seferin 49'unda beklendiği gibi sonuçlandı.",
+      "en": "If TUPRS closes above the reversal point (228.51) within 3 bars, the upward reversal would be confirmed. The expectation's 30-bar life ran out today without an outcome; it is no longer valid. Historically, this signal played out in 49 of 140 cases."
+    },
+    "s57": {
+      "tr": "TUPRS 3 bar içinde 199,00'un üstünde kapanırsa yukarı kırılım teyit olur. Bugün hacim de teyit etti; 2 bağımsız kanıt ailesi destekliyor. Koşul hâlâ açık. Karnesi henüz az örnekli: 8 seferin 6'sında tuttu.",
+      "en": "If TUPRS closes above 199.00 within 3 bars, the upside breakout would be confirmed. Volume confirmed it today; 2 independent evidence families support it. The setup is still open. Its record is still thin: it played out in 6 of 8 cases."
+    },
+    "s58": {
+      "tr": "EREGL 3 bar içinde 245,84'ün üstünde kapanırsa yukarı kırılım teyit olur. Beklenti bugün gerçekleşti. Koşulun bugünkü durumu bilinmiyor. Karnesi henüz az örnekli: 8 seferin 6'sında tuttu.",
+      "en": "If EREGL closes above 245.84 within 3 bars, the upside breakout would be confirmed. The expectation came true today. Whether the setup is still open is unknown. Its record is still thin: it played out in 6 of 8 cases."
+    },
+    "s59": {
+      "tr": "TUPRS birkaç bar içinde kırılım seviyesinin altında kapanırsa aşağı kırılım teyit olur. Bugün ters yönde bir sinyal geldi; görünüm zayıfladı. Koşul hâlâ açık. Geçmişte bu tür sinyal kabaca yarı yarıya tuttu. Sunucu doğruladı; rakamlar kurumsal akış lisansı gerektiriyor.",
+      "en": "If TUPRS closes below the breakout level within a few bars, the downside breakout would be confirmed. An opposite signal appeared today and weakened it. The setup is still open. Historically, this kind of signal played out about as often as not. Server-verified; the figures require an institutional flow data license."
+    },
+    "s60": {
+      "tr": "GARAN 3 bar içinde 265,33'ün altında kapanırsa aşağı kırılım teyit olur. Bugün hacim de teyit etti; 2 bağımsız kanıt ailesi destekliyor. Koşulun bugünkü durumu bilinmiyor. Karnesi henüz az örnekli: 8 seferin 6'sında tuttu.",
+      "en": "If GARAN closes below 265.33 within 3 bars, the downside breakout would be confirmed. Volume confirmed it today; 2 independent evidence families support it. Whether the setup is still open is unknown. Its record is still thin: it played out in 6 of 8 cases."
+    },
+    "s61": {
+      "tr": "SAHOL'da bant genişliği birkaç bar içinde eşiğin altına inerse sıkışma (yön belirsiz) teyit olur. Bugün hacim de teyit etti. Koşulun bugünkü durumu bilinmiyor. Karnesi henüz az örnekli. Sunucu doğruladı; rakamlar kurumsal akış lisansı gerektiriyor.",
+      "en": "If SAHOL's band width falls below the threshold within a few bars, the squeeze (direction open) would be confirmed. Volume confirmed it today. Whether the setup is still open is unknown. Its record is still thin. Server-verified; the figures require an institutional flow data license."
+    },
+    "s62": {
+      "tr": "THYAO'da bant genişliği 3 bar içinde eşiğin (0,06) altına inerse sıkışma (yön belirsiz) teyit olur. Bugün ters yönde bir sinyal geldi; görünüm zayıfladı. Koşulun bugünkü durumu bilinmiyor. Geçmişte bu sinyal 140 seferin 45'inde beklendiği gibi sonuçlandı.",
+      "en": "If THYAO's band width falls below the threshold (0.06) within 3 bars, the squeeze (direction open) would be confirmed. An opposite signal appeared today and weakened it. Whether the setup is still open is unknown. Historically, this signal played out in 45 of 140 cases."
+    },
+    "s63": {
+      "tr": "ASELS'te bant genişliği 3 bar içinde eşiğin (0,06) altına inerse sıkışma (yön belirsiz) teyit olur. Beklentinin 5 barlık ömrü bugün sonuçsuz doldu; artık geçerli değil. Karnesi henüz az örnekli: 8 seferin 3'ünde tuttu.",
+      "en": "If ASELS's band width falls below the threshold (0.06) within 3 bars, the squeeze (direction open) would be confirmed. The expectation's 5-bar life ran out today without an outcome; it is no longer valid. Its record is still thin: it played out in 3 of 8 cases."
+    },
+    "s64": {
+      "tr": "AKBNK'ta bant genişliği 3 bar içinde eşiğin (0,06) altına inerse sıkışma (yön belirsiz) teyit olur. Koşul hâlâ açık. Geçmişte bu sinyal 140 seferin 52'sinde beklendiği gibi sonuçlandı.",
+      "en": "If AKBNK's band width falls below the threshold (0.06) within 3 bars, the squeeze (direction open) would be confirmed. The setup is still open. Historically, this signal played out in 52 of 140 cases."
+    },
+    "s65": {
+      "tr": "THYAO'da RSI 3 bar içinde 30'un altına inerse aşırı satım teyit olur. Beklenti bugün geçersiz oldu; artık geçerli değil. Geçmişte bu sinyal 140 seferin 93'ünde beklendiği gibi sonuçlandı.",
+      "en": "If THYAO's RSI falls below 30 within 3 bars, the oversold state would be confirmed. The expectation was invalidated today and is no longer valid. Historically, this signal played out in 93 of 140 cases."
+    },
+    "s66": {
+      "tr": "THYAO'da RSI 3 bar içinde 70'in üstüne çıkarsa aşırı alım teyit olur. Beklenti bugün gerçekleşti. Koşulun bugünkü durumu bilinmiyor. Geçmişte bu sinyal 140 seferin 86'sında beklendiği gibi sonuçlandı.",
+      "en": "If THYAO's RSI rises above 70 within 3 bars, the overbought state would be confirmed. The expectation came true today. Whether the setup is still open is unknown. Historically, this signal played out in 86 of 140 cases."
+    },
+    "s67": {
+      "tr": "EREGL'de RSI 3 bar içinde 30'un altına inerse aşırı satım teyit olur. Beklenti bugün gerçekleşti. Koşulun bugünkü durumu bilinmiyor. Geçmişte bu sinyal 140 seferin 42'sinde beklendiği gibi sonuçlandı.",
+      "en": "If EREGL's RSI falls below 30 within 3 bars, the oversold state would be confirmed. The expectation came true today. Whether the setup is still open is unknown. Historically, this signal played out in 42 of 140 cases."
+    },
+    "s68": {
+      "tr": "PGSUS'ta RSI birkaç bar içinde aşırı satım eşiğinin altına inerse aşırı satım teyit olur. Bugün hacim de teyit etti. Koşulun bugünkü durumu bilinmiyor. Karnesi henüz az örnekli. Sunucu doğruladı; rakamlar kurumsal akış lisansı gerektiriyor.",
+      "en": "If PGSUS's RSI falls below the oversold threshold within a few bars, the oversold state would be confirmed. Volume confirmed it today. Whether the setup is still open is unknown. Its record is still thin. Server-verified; the figures require an institutional flow data license."
+    },
+    "s69": {
+      "tr": "FROTO'da kurumsal net akış 3 bar içinde son günlerin ortalamasının (484.000) üstüne çıkarsa para girişi teyit olur. Beklentinin 1 barlık ömrü bugün sonuçsuz doldu; artık geçerli değil. Geçmişte bu sinyal 140 seferin 70'inde beklendiği gibi sonuçlandı.",
+      "en": "If net institutional flow in FROTO rises above the recent average (484,000) within 3 bars, the money inflow would be confirmed. The expectation's 1-bar life ran out today without an outcome; it is no longer valid. Historically, this signal played out in 70 of 140 cases."
+    },
+    "s70": {
+      "tr": "FROTO'da kurumsal net akış 3 bar içinde son günlerin ortalamasının (499.000) altına inerse para çıkışı teyit olur. Bugün hacim de teyit etti; 2 bağımsız kanıt ailesi destekliyor. Koşul hâlâ açık. Geçmişte bu sinyal 140 seferin 85'inde beklendiği gibi sonuçlandı.",
+      "en": "If net institutional flow in FROTO falls below the recent average (499,000) within 3 bars, the money outflow would be confirmed. Volume confirmed it today; 2 independent evidence families support it. The setup is still open. Historically, this signal played out in 85 of 140 cases."
+    },
+    "s71": {
+      "tr": "SISE'de kurumsal net akış 3 bar içinde son günlerin ortalamasının (334.000) altına inerse para çıkışı teyit olur. Beklentinin 5 barlık ömrü bugün sonuçsuz doldu; artık geçerli değil. Karnesi henüz az örnekli: 8 seferin 2'sinde tuttu.",
+      "en": "If net institutional flow in SISE falls below the recent average (334,000) within 3 bars, the money outflow would be confirmed. The expectation's 5-bar life ran out today without an outcome; it is no longer valid. Its record is still thin: it played out in 2 of 8 cases."
+    },
+    "s72": {
+      "tr": "BIMAS'ta kurumsal net akış 3 bar içinde son günlerin ortalamasının (896.000) altına inerse para çıkışı teyit olur. Beklentinin 30 barlık ömrü bugün sonuçsuz doldu; artık geçerli değil. Karnesi henüz az örnekli: 8 seferin 6'sında tuttu.",
+      "en": "If net institutional flow in BIMAS falls below the recent average (896,000) within 3 bars, the money outflow would be confirmed. The expectation's 30-bar life ran out today without an outcome; it is no longer valid. Its record is still thin: it played out in 6 of 8 cases."
+    }
+  },
+  "product_changes": {
+    "s19": {
+      "tr": "FROTO'da RSI yaklaşık bir hafta önce aşırı alım eşiğinin üstüne çıktı: aşırı alım. Uzama sürmedi: fiyat bugün geri düştü; sinyal gerçekleşmedi sayıldı; artık geçerli değil. Karnesi henüz az örnekli. Sunucu doğruladı; rakamlar kurumsal akış lisansı gerektiriyor.",
+      "en": "About a week ago, FROTO's RSI rose above the overbought threshold: overbought. The stretch did not continue: the price fell back today, so it counts as not played out; it is no longer valid. Its record is still thin. Server-verified; the figures require an institutional flow data license."
+    },
+    "s42": {
+      "tr": "KCHOL'da RSI dünden beri aşırı alım eşiğinin üstünde. Aşırı alım sürüyor. Uzama sürdü: fiyat bugün yükselmeye devam etti; sinyal gerçekleşti sayıldı. Karnesi henüz az örnekli. Sunucu doğruladı; rakamlar kurumsal akış lisansı gerektiriyor.",
+      "en": "KCHOL's RSI has been above the overbought threshold since yesterday. The overbought state is still in place. The stretch continued: the price kept rising today, so it counts as played out. Its record is still thin. Server-verified; the figures require an institutional flow data license."
+    },
+    "s44": {
+      "tr": "ASELS'te RSI 30 bardır 70'in üstünde; şu an 71,4. Aşırı alım sürüyor. Uzama sürdü: fiyat bugün yükselmeye devam etti; sinyal gerçekleşti sayıldı. Geçmişte bu sinyal 140 seferin 62'sinde beklendiği gibi sonuçlandı.",
+      "en": "ASELS's RSI has been above 70 for 30 bars and is now 71.4. The overbought state is still in place. The stretch continued: the price kept rising today, so it counts as played out. Historically, this signal played out in 62 of 140 cases."
+    },
+    "s45": {
+      "tr": "GARAN'da kurumsal net alış bugün itibarıyla her zamankinden güçlü (son günlerin ortalaması 319.000); şu an 325.380. Para girişi sürüyor. Bugün ters yönde bir sinyal geldi; görünüm zayıfladı. Geçmişte bu sinyal 140 seferin 63'ünde beklendiği gibi sonuçlandı.",
+      "en": "Net institutional buying in GARAN is stronger than usual (recent average 319,000) as of today, now 325,380. The money inflow is still in place. An opposite signal appeared today and weakened it. Historically, this signal played out in 63 of 140 cases."
+    },
+    "s46": {
+      "tr": "PGSUS'ta kurumsal net satış dün her zamankinden güçlü hâle geldi; artık her zamankinden güçlü değil. Para çıkışı sona erdi. Sinyalın ömrü bugün sonuçsuz doldu. Geçmişte bu tür sinyal kabaca yarı yarıya tuttu. Sunucu doğruladı; rakamlar kurumsal akış lisansı gerektiriyor.",
+      "en": "Yesterday, net institutional selling in PGSUS became stronger than usual; it is no longer stronger than usual. The money outflow has ended. Its life ran out today without an outcome. Historically, this kind of signal played out about as often as not. Server-verified; the figures require an institutional flow data license."
+    },
+    "s47": {
+      "tr": "BIMAS'ta kurumsal net satış yaklaşık bir hafta önce her zamankinden güçlü hâle geldi; artık her zamankinden güçlü değil. Para çıkışı sona erdi. Geçmişte bu tür sinyal çoğunlukla beklendiği gibi sonuçlandı. Sunucu doğruladı; rakamlar kurumsal akış lisansı gerektiriyor.",
+      "en": "About a week ago, net institutional selling in BIMAS became stronger than usual; it is no longer stronger than usual. The money outflow has ended. Historically, this kind of signal mostly played out. Server-verified; the figures require an institutional flow data license."
+    },
+    "s48": {
+      "tr": "EREGL'de kurumsal net satış 30 bardır her zamankinden güçlü (son günlerin ortalaması 452.000); şu an 442.960. Para çıkışı sürüyor. Bugün hacim de teyit etti; 2 bağımsız kanıt ailesi destekliyor. Karnesi henüz az örnekli: 8 seferin 5'inde tuttu.",
+      "en": "Net institutional selling in EREGL has been stronger than usual (recent average 452,000) for 30 bars and is now 442,960. The money outflow is still in place. Volume confirmed it today; 2 independent evidence families support it. Its record is still thin: it played out in 5 of 8 cases."
+    },
+    "s65": {
+      "tr": "THYAO'da RSI 3 bar içinde 30'un altına inerse aşırı satım teyit olur. Uzama sürmedi: fiyat bugün geri yükseldi; sinyal gerçekleşmedi sayıldı; artık geçerli değil. Geçmişte bu sinyal 140 seferin 93'ünde beklendiği gibi sonuçlandı.",
+      "en": "If THYAO's RSI falls below 30 within 3 bars, the oversold state would be confirmed. The stretch did not continue: the price rose back today, so it counts as not played out; it is no longer valid. Historically, this signal played out in 93 of 140 cases."
+    },
+    "s66": {
+      "tr": "THYAO'da RSI 3 bar içinde 70'in üstüne çıkarsa aşırı alım teyit olur. Uzama sürdü: fiyat bugün yükselmeye devam etti; sinyal gerçekleşti sayıldı. Koşulun bugünkü durumu bilinmiyor. Geçmişte bu sinyal 140 seferin 86'sında beklendiği gibi sonuçlandı.",
+      "en": "If THYAO's RSI rises above 70 within 3 bars, the overbought state would be confirmed. The stretch continued: the price kept rising today, so it counts as played out. Whether the setup is still open is unknown. Historically, this signal played out in 86 of 140 cases."
+    },
+    "s67": {
+      "tr": "EREGL'de RSI 3 bar içinde 30'un altına inerse aşırı satım teyit olur. Uzama sürdü: fiyat bugün düşmeye devam etti; sinyal gerçekleşti sayıldı. Koşulun bugünkü durumu bilinmiyor. Geçmişte bu sinyal 140 seferin 42'sinde beklendiği gibi sonuçlandı.",
+      "en": "If EREGL's RSI falls below 30 within 3 bars, the oversold state would be confirmed. The stretch continued: the price kept falling today, so it counts as played out. Whether the setup is still open is unknown. Historically, this signal played out in 42 of 140 cases."
+    },
+    "s69": {
+      "tr": "FROTO'da kurumsal net alış 3 bar içinde her zamankinden güçlü hâle gelirse (son günlerin ortalaması 484.000) para girişi teyit olur. Beklentinin 1 barlık ömrü bugün sonuçsuz doldu; artık geçerli değil. Geçmişte bu sinyal 140 seferin 70'inde beklendiği gibi sonuçlandı.",
+      "en": "If net institutional buying in FROTO becomes stronger than usual (recent average 484,000) within 3 bars, the money inflow would be confirmed. The expectation's 1-bar life ran out today without an outcome; it is no longer valid. Historically, this signal played out in 70 of 140 cases."
+    },
+    "s70": {
+      "tr": "FROTO'da kurumsal net satış 3 bar içinde her zamankinden güçlü hâle gelirse (son günlerin ortalaması 499.000) para çıkışı teyit olur. Bugün hacim de teyit etti; 2 bağımsız kanıt ailesi destekliyor. Koşul hâlâ açık. Geçmişte bu sinyal 140 seferin 85'inde beklendiği gibi sonuçlandı.",
+      "en": "If net institutional selling in FROTO becomes stronger than usual (recent average 499,000) within 3 bars, the money outflow would be confirmed. Volume confirmed it today; 2 independent evidence families support it. The setup is still open. Historically, this signal played out in 85 of 140 cases."
+    },
+    "s71": {
+      "tr": "SISE'de kurumsal net satış 3 bar içinde her zamankinden güçlü hâle gelirse (son günlerin ortalaması 334.000) para çıkışı teyit olur. Beklentinin 5 barlık ömrü bugün sonuçsuz doldu; artık geçerli değil. Karnesi henüz az örnekli: 8 seferin 2'sinde tuttu.",
+      "en": "If net institutional selling in SISE becomes stronger than usual (recent average 334,000) within 3 bars, the money outflow would be confirmed. The expectation's 5-bar life ran out today without an outcome; it is no longer valid. Its record is still thin: it played out in 2 of 8 cases."
+    },
+    "s72": {
+      "tr": "BIMAS'ta kurumsal net satış 3 bar içinde her zamankinden güçlü hâle gelirse (son günlerin ortalaması 896.000) para çıkışı teyit olur. Beklentinin 30 barlık ömrü bugün sonuçsuz doldu; artık geçerli değil. Karnesi henüz az örnekli: 8 seferin 6'sında tuttu.",
+      "en": "If net institutional selling in BIMAS becomes stronger than usual (recent average 896,000) within 3 bars, the money outflow would be confirmed. The expectation's 30-bar life ran out today without an outcome; it is no longer valid. Its record is still thin: it played out in 6 of 8 cases."
+    }
+  }
+}

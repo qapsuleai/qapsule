@@ -1,0 +1,22 @@
+# R3/M6 aday güven yolu "mühür" (rounds/R3/experiments/M6/muhur/NOTES.md). Bağımsız crate:
+# çalışma alanı üyesi değil (boş [workspace] tablosu).
+[package]
+name = "m6-muhur"
+version = "0.1.0"
+edition = "2021"
+rust-version = "1.92"
+publish = false
+description = "R3/M6 trust path 'muhur': binary-lattice quantization at ingestion, clipped frozen-epoch reference, chained statement receipts."
+
+[workspace]
+
+[dependencies]
+qp-capsule = { path = "../../../../../crates/qp-capsule" }
+qp-schema = { path = "../../../../../crates/qp-schema" }
+
+[dev-dependencies]
+qp-facts = { path = "../../../../../crates/qp-facts" }
+qp-source = { path = "../../../../../crates/qp-source" }
+
+[lints.rust]
+unsafe_code = "forbid"

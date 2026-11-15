@@ -1,0 +1,422 @@
+{
+ "name": "27-inline-point-series",
+ "description": "R2 inline point series via put_series (data kind points) drawn by an insert_layer line; listed in welcome.summary with field v; remove cascades to the layer; undo restores both.",
+ "covers": [
+  "command",
+  "change",
+  "put_series",
+  "points",
+  "summary",
+  "remove",
+  "undo"
+ ],
+ "init": "fixtures/protocol/init/thyao.json",
+ "steps": [
+  {
+   "send": {
+    "conn": "a",
+    "msg": {
+     "type": "hello",
+     "protocol": "qp/0",
+     "principal": "arkin",
+     "surface": {
+      "kind": "desktop"
+     }
+    }
+   },
+   "expect": [
+    {
+     "conn": "a",
+     "msg": {
+      "type": "welcome",
+      "protocol": "qp/0",
+      "principal": "arkin",
+      "role": "owner",
+      "seq": "$any"
+     }
+    }
+   ]
+  },
+  {
+   "send": {
+    "conn": "w",
+    "msg": {
+     "type": "hello",
+     "protocol": "qp/0",
+     "principal": "viewer",
+     "surface": {
+      "kind": "headless"
+     }
+    }
+   },
+   "expect": [
+    {
+     "conn": "w",
+     "msg": {
+      "type": "welcome",
+      "protocol": "qp/0",
+      "principal": "viewer",
+      "role": "viewer",
+      "seq": "$any"
+     }
+    }
+   ]
+  },
+  {
+   "send": {
+    "conn": "w",
+    "msg": {
+     "type": "subscribe",
+     "id": "s1",
+     "topic": {
+      "kind": "changes"
+     }
+    }
+   },
+   "expect": [
+    {
+     "conn": "w",
+     "msg": {
+      "type": "ack",
+      "id": "s1",
+      "status": "subscribed"
+     }
+    }
+   ]
+  },
+  {
+   "send": {
+    "conn": "a",
+    "msg": {
+     "type": "command",
+     "id": "c1",
+     "ops": [
+      {
+       "op": "put_series",
+       "series": {
+        "id": "q50",
+        "source": {
+         "kind": "inline"
+        },
+        "data": {
+         "kind": "points",
+         "points": [
+          {
+           "t": 1759968000000,
+           "v": 125.0
+          },
+          {
+           "t": 1760054400000,
+           "v": 126.5
+          },
+          {
+           "t": 1760140800000,
+           "v": 127.0
+          }
+         ]
+        }
+       }
+      },
+      {
+       "op": "insert_layer",
+       "view": "main",
+       "layer": {
+        "id": "fc",
+        "mark": "line",
+        "series": "q50",
+        "panel": 0
+       }
+      }
+     ]
+    }
+   },
+   "expect": [
+    {
+     "conn": "a",
+     "msg": {
+      "type": "ack",
+      "id": "c1",
+      "status": "applied",
+      "seq": 1,
+      "created": [
+       "q50",
+       "fc"
+      ]
+     }
+    },
+    {
+     "conn": "w",
+     "msg": {
+      "type": "notify",
+      "sub": "s1",
+      "event": {
+       "kind": "change",
+       "seq": 1,
+       "author": "arkin",
+       "cause": "c1",
+       "changes": [
+        {
+         "op": "put_series",
+         "series": {
+          "id": "q50",
+          "source": {
+           "kind": "inline"
+          },
+          "data": {
+           "kind": "points",
+           "points": [
+            {
+             "t": 1759968000000,
+             "v": 125.0
+            },
+            {
+             "t": 1760054400000,
+             "v": 126.5
+            },
+            {
+             "t": 1760140800000,
+             "v": 127.0
+            }
+           ]
+          }
+         }
+        },
+        {
+         "op": "insert_layer",
+         "view": "main",
+         "index": 5,
+         "layer": {
+          "id": "fc",
+          "mark": "line",
+          "series": "q50",
+          "panel": 0
+         }
+        }
+       ]
+      }
+     }
+    }
+   ],
+   "note": "An inline point series (e.g. a forecast after the last bar) drawn as a line."
+  },
+  {
+   "send": {
+    "conn": "a",
+    "msg": {
+     "type": "query",
+     "id": "q1",
+     "query": {
+      "kind": "get",
+      "id": "q50"
+     }
+    }
+   },
+   "expect": [
+    {
+     "conn": "a",
+     "msg": {
+      "type": "result",
+      "id": "q1",
+      "data": {
+       "kind": "item",
+       "collection": "series",
+       "item": {
+        "id": "q50",
+        "data": {
+         "kind": "points",
+         "points": [
+          {
+           "t": 1759968000000,
+           "v": 125.0
+          },
+          {
+           "t": 1760054400000,
+           "v": 126.5
+          },
+          {
+           "t": 1760140800000,
+           "v": 127.0
+          }
+         ]
+        }
+       }
+      }
+     }
+    }
+   ]
+  },
+  {
+   "send": {
+    "conn": "v",
+    "msg": {
+     "type": "hello",
+     "protocol": "qp/0",
+     "principal": "viewer",
+     "surface": {
+      "kind": "headless"
+     }
+    }
+   },
+   "expect": [
+    {
+     "conn": "v",
+     "msg": {
+      "type": "welcome",
+      "protocol": "qp/0",
+      "principal": "viewer",
+      "role": "viewer",
+      "seq": "$any",
+      "summary": {
+       "series": [
+        {
+         "id": "px"
+        },
+        {
+         "id": "rsi14"
+        },
+        {
+         "id": "macd"
+        },
+        {
+         "id": "bb20"
+        },
+        {
+         "id": "q50",
+         "kind": "points",
+         "fields": [
+          "v"
+         ],
+         "len": 3
+        }
+       ]
+      }
+     }
+    }
+   ],
+   "note": "Point series rows have the field v (GRAMMAR §6)."
+  },
+  {
+   "send": {
+    "conn": "a",
+    "msg": {
+     "type": "command",
+     "id": "c2",
+     "ops": [
+      {
+       "op": "remove",
+       "id": "q50"
+      }
+     ]
+    }
+   },
+   "expect": [
+    {
+     "conn": "a",
+     "msg": {
+      "type": "ack",
+      "id": "c2",
+      "status": "applied",
+      "seq": 2
+     }
+    },
+    {
+     "conn": "w",
+     "msg": {
+      "type": "notify",
+      "sub": "s1",
+      "event": {
+       "kind": "change",
+       "seq": 2,
+       "author": "arkin",
+       "cause": "c2",
+       "changes": [
+        {
+         "op": "delete_layer",
+         "view": "main",
+         "index": 5,
+         "layer": "fc"
+        },
+        {
+         "op": "delete",
+         "id": "q50"
+        }
+       ]
+      }
+     }
+    }
+   ],
+   "note": "Removing a series removes the layers that draw it first (§5.1 remove)."
+  },
+  {
+   "send": {
+    "conn": "a",
+    "msg": {
+     "type": "command",
+     "id": "c3",
+     "ops": [
+      {
+       "op": "undo"
+      }
+     ]
+    }
+   },
+   "expect": [
+    {
+     "conn": "a",
+     "msg": {
+      "type": "ack",
+      "id": "c3",
+      "status": "applied",
+      "seq": 3,
+      "undoes": 2
+     }
+    },
+    {
+     "conn": "w",
+     "msg": {
+      "type": "notify",
+      "sub": "s1",
+      "event": {
+       "kind": "change",
+       "seq": 3,
+       "author": "arkin",
+       "cause": "c3",
+       "changes": "$any"
+      }
+     }
+    }
+   ]
+  }
+ ],
+ "final": {
+  "log_len": 3,
+  "document": {
+   "views": [
+    {
+     "id": "main",
+     "layers": [
+      {
+       "id": "l0"
+      },
+      {
+       "id": "l1"
+      },
+      {
+       "id": "l2"
+      },
+      {
+       "id": "l3"
+      },
+      {
+       "id": "l4"
+      },
+      {
+       "id": "fc",
+       "series": "q50"
+      }
+     ]
+    }
+   ]
+  }
+ }
+}

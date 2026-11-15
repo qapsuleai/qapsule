@@ -1,0 +1,404 @@
+{
+ "name": "23-grammar-layer-concurrency",
+ "description": "R2 optimistic concurrency at layer granularity: two writers with base touching different layers of the same view both apply; the same layer conflicts; structural panel changes share view/panels.",
+ "covers": [
+  "command",
+  "concurrency",
+  "base",
+  "conflict",
+  "grammar"
+ ],
+ "init": "fixtures/protocol/init/thyao.json",
+ "steps": [
+  {
+   "send": {
+    "conn": "a",
+    "msg": {
+     "type": "hello",
+     "protocol": "qp/0",
+     "principal": "arkin",
+     "surface": {
+      "kind": "desktop"
+     }
+    }
+   },
+   "expect": [
+    {
+     "conn": "a",
+     "msg": {
+      "type": "welcome",
+      "protocol": "qp/0",
+      "principal": "arkin",
+      "role": "owner",
+      "seq": "$any"
+     }
+    }
+   ]
+  },
+  {
+   "send": {
+    "conn": "e",
+    "msg": {
+     "type": "hello",
+     "protocol": "qp/0",
+     "principal": "editor",
+     "surface": {
+      "kind": "headless"
+     }
+    }
+   },
+   "expect": [
+    {
+     "conn": "e",
+     "msg": {
+      "type": "welcome",
+      "protocol": "qp/0",
+      "principal": "editor",
+      "role": "editor",
+      "seq": "$any"
+     }
+    }
+   ]
+  },
+  {
+   "send": {
+    "conn": "e",
+    "msg": {
+     "type": "command",
+     "id": "c1",
+     "ops": [
+      {
+       "op": "set_encoding",
+       "view": "main",
+       "layer": "l1",
+       "encoding": {
+        "color": "s2"
+       }
+      }
+     ],
+     "base": 0
+    }
+   },
+   "expect": [
+    {
+     "conn": "e",
+     "msg": {
+      "type": "ack",
+      "id": "c1",
+      "status": "applied",
+      "seq": 1
+     }
+    }
+   ]
+  },
+  {
+   "send": {
+    "conn": "a",
+    "msg": {
+     "type": "command",
+     "id": "c2",
+     "ops": [
+      {
+       "op": "set_encoding",
+       "view": "main",
+       "layer": "l2",
+       "encoding": {
+        "width": 2
+       }
+      }
+     ],
+     "base": 0
+    }
+   },
+   "expect": [
+    {
+     "conn": "a",
+     "msg": {
+      "type": "ack",
+      "id": "c2",
+      "status": "applied",
+      "seq": 2
+     }
+    }
+   ],
+   "note": "Same view, different layer: keys main/l1 vs main/l2 do not conflict (§5.3)."
+  },
+  {
+   "send": {
+    "conn": "a",
+    "msg": {
+     "type": "command",
+     "id": "c3",
+     "ops": [
+      {
+       "op": "set_encoding",
+       "view": "main",
+       "layer": "l1",
+       "encoding": {
+        "color": "s3"
+       }
+      }
+     ],
+     "base": 0
+    }
+   },
+   "expect": [
+    {
+     "conn": "a",
+     "msg": {
+      "type": "error",
+      "id": "c3",
+      "error": {
+       "code": "conflict",
+       "conflicts": [
+        1
+       ],
+       "path": "/ops/0"
+      }
+     }
+    }
+   ],
+   "note": "Same layer changed after base 0 by editor (seq 1)."
+  },
+  {
+   "send": {
+    "conn": "e",
+    "msg": {
+     "type": "command",
+     "id": "c4",
+     "ops": [
+      {
+       "op": "move_layer",
+       "view": "main",
+       "layer": "l4",
+       "after": "l0"
+      }
+     ],
+     "base": 2
+    }
+   },
+   "expect": [
+    {
+     "conn": "e",
+     "msg": {
+      "type": "ack",
+      "id": "c4",
+      "status": "applied",
+      "seq": 3
+     }
+    }
+   ]
+  },
+  {
+   "send": {
+    "conn": "a",
+    "msg": {
+     "type": "command",
+     "id": "c5",
+     "ops": [
+      {
+       "op": "delete_layer",
+       "view": "main",
+       "layer": "l3"
+      }
+     ],
+     "base": 2
+    }
+   },
+   "expect": [
+    {
+     "conn": "a",
+     "msg": {
+      "type": "ack",
+      "id": "c5",
+      "status": "applied",
+      "seq": 4
+     }
+    }
+   ],
+   "note": "Another layer of the same view: applies."
+  },
+  {
+   "send": {
+    "conn": "a",
+    "msg": {
+     "type": "command",
+     "id": "c6",
+     "ops": [
+      {
+       "op": "insert_panel",
+       "view": "main",
+       "panel": {
+        "y": {
+         "kind": "linear"
+        }
+       }
+      }
+     ],
+     "base": 4
+    }
+   },
+   "expect": [
+    {
+     "conn": "a",
+     "msg": {
+      "type": "ack",
+      "id": "c6",
+      "status": "applied",
+      "seq": 5,
+      "created": [
+       "3"
+      ]
+     }
+    }
+   ]
+  },
+  {
+   "send": {
+    "conn": "e",
+    "msg": {
+     "type": "command",
+     "id": "c7",
+     "ops": [
+      {
+       "op": "set_panel",
+       "view": "main",
+       "panel": 1,
+       "name": "rsi"
+      }
+     ],
+     "base": 4
+    }
+   },
+   "expect": [
+    {
+     "conn": "e",
+     "msg": {
+      "type": "error",
+      "id": "c7",
+      "error": {
+       "code": "conflict",
+       "conflicts": [
+        5
+       ]
+      }
+     }
+    }
+   ],
+   "note": "Structural changes share the key main/panels."
+  },
+  {
+   "send": {
+    "conn": "e",
+    "msg": {
+     "type": "command",
+     "id": "c8",
+     "ops": [
+      {
+       "op": "set_encoding",
+       "view": "main",
+       "layer": "l0",
+       "encoding": {
+        "opacity": 0.5
+       }
+      }
+     ],
+     "base": 4
+    }
+   },
+   "expect": [
+    {
+     "conn": "e",
+     "msg": {
+      "type": "ack",
+      "id": "c8",
+      "status": "applied",
+      "seq": 6
+     }
+    }
+   ],
+   "note": "A layer write is not structural: no conflict with the panel insert."
+  },
+  {
+   "send": {
+    "conn": "e",
+    "msg": {
+     "type": "command",
+     "id": "c9",
+     "ops": [
+      {
+       "op": "set_encoding",
+       "view": "main",
+       "layer": "l0",
+       "encoding": {
+        "width": 1
+       }
+      }
+     ],
+     "base": 99
+    }
+   },
+   "expect": [
+    {
+     "conn": "e",
+     "msg": {
+      "type": "error",
+      "id": "c9",
+      "error": {
+       "code": "invalid",
+       "path": "/base"
+      }
+     }
+    }
+   ]
+  }
+ ],
+ "final": {
+  "log_len": 6,
+  "document": {
+   "views": [
+    {
+     "id": "main",
+     "panels": [
+      {
+       "id": 0
+      },
+      {
+       "id": 1,
+       "name": "$absent"
+      },
+      {
+       "id": 2
+      },
+      {
+       "id": 3
+      }
+     ],
+     "layers": [
+      {
+       "id": "l0",
+       "encoding": {
+        "opacity": 0.5
+       }
+      },
+      {
+       "id": "l4"
+      },
+      {
+       "id": "l1",
+       "encoding": {
+        "color": "s2"
+       }
+      },
+      {
+       "id": "l2",
+       "encoding": {
+        "width": 2
+       }
+      }
+     ]
+    }
+   ]
+  }
+ }
+}

@@ -278,3 +278,37 @@ fn conformance_transcripts_pass_over_mcp() {
     }
     assert!(calls > 50);
 }
+
+/// R2/T10: the MCP tools are regenerated from the schema, so the ten grammar
+/// operations and the point query `hit` appear without hand-written tools. RD1 had
+/// 37 tools (22 ops + 10 queries + 5 generic); R2 adds these 11 (48).
+#[test]
+fn grammar_ops_and_hit_are_generated_tools() {
+    let grammar = [
+        "insert_layer",
+        "delete_layer",
+        "move_layer",
+        "set_encoding",
+        "insert_panel",
+        "delete_panel",
+        "move_panel",
+        "set_panel",
+        "set_scale",
+        "set_emphasis",
+    ];
+    for op in grammar {
+        let name = format!("op_{op}");
+        let t = tools::find(&name).unwrap_or_else(|| panic!("missing tool {name}"));
+        assert!(matches!(t.kind, ToolKind::Op(_)), "{name}");
+        let props = t.input_schema["properties"].as_object().unwrap();
+        assert!(props.contains_key("view"), "{name} lacks view");
+    }
+    let hit = tools::find("query_hit").expect("missing tool query_hit");
+    assert!(matches!(hit.kind, ToolKind::Query(_)));
+    let props = hit.input_schema["properties"].as_object().unwrap();
+    for k in ["view", "x", "y", "width", "height"] {
+        assert!(props.contains_key(k), "query_hit lacks {k}");
+    }
+    let names: Vec<&str> = tools::tools().iter().map(|t| t.name.as_str()).collect();
+    assert_eq!(names.len(), 37 + grammar.len() + 1, "{names:?}");
+}

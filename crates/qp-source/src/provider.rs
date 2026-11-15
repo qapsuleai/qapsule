@@ -247,14 +247,19 @@ pub fn bind(
                     store: None,
                 });
             }
-            let mut reason = w.capped;
             if w.anchor_missing {
-                reason = Some(format!(
-                    "the source has no bar at the anchor t={}; bar 0 is t={}",
-                    binding.anchor_t.unwrap_or_default(),
-                    w.anchor_t.unwrap_or_default()
-                ));
+                // Bar numbers would not match the authority's (§18.3): stale, no values.
+                return Ok(Bound {
+                    state: BindingState::Stale,
+                    reason: Some(format!(
+                        "the source has no bar at the anchor t={}",
+                        binding.anchor_t.unwrap_or_default()
+                    )),
+                    anchor_t: binding.anchor_t,
+                    store: None,
+                });
             }
+            let reason = w.capped;
             bars.truncate(w.range.end);
             bars.drain(..w.range.start);
             let max_bars = usize::try_from(max_bind_bars)

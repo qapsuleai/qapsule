@@ -94,10 +94,13 @@ pub fn resolve_window(
     };
     let mut capped = None;
     let mut limit = None;
-    if anchor.is_some() && range.len() > max {
+    // Anchored: the same 2 x max_bind_bars bound as live growth (§18.7), so a restart
+    // never turns a ready binding stale.
+    if anchor.is_some() && range.len() > max.saturating_mul(2) {
         limit = Some(format!(
-            "limit: {} bars since the anchor exceed limits.max_bind_bars ({max_bind_bars}); the anchor stays bar 0, re-anchor by rewriting the binding",
-            range.len()
+            "limit: {} bars since the anchor exceed 2 x limits.max_bind_bars ({}); the anchor stays bar 0, re-anchor by rewriting the binding",
+            range.len(),
+            max.saturating_mul(2)
         ));
     } else if range.len() > max {
         let selected = range.len();

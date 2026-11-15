@@ -935,10 +935,13 @@ fn anchored_window_resolution() {
     let r = resolve_window(&b, &win(None, Some(10), Some(40)), Some(20), 100).unwrap();
     assert_eq!(r.range, 1..4);
     assert!(!r.accepts_live);
-    // More than max_bind_bars since the anchor: not trimmed, limit set.
-    let r = resolve_window(&b, &Window::last(2), Some(10), 3).unwrap();
+    // More than 2 x max_bind_bars since the anchor: not trimmed, limit set.
+    let r = resolve_window(&b, &Window::last(2), Some(10), 2).unwrap();
     assert_eq!((r.range.clone(), r.anchor_t), (0..5, Some(10)));
     assert!(r.limit.unwrap().starts_with("limit"));
+    // Up to 2 x max_bind_bars since the anchor: ready (same bound as live growth).
+    let r = resolve_window(&b, &Window::last(2), Some(10), 3).unwrap();
+    assert!(r.limit.is_none());
     assert!(r.capped.is_none());
     // The source lost the anchor bar: bar 0 is the next one, flagged.
     let r = resolve_window(&b, &Window::last(2), Some(15), 100).unwrap();
@@ -970,7 +973,7 @@ fn bind_with_anchor_keeps_bar_0_or_goes_stale_at_the_limit() {
         &p,
         "host",
         &anchored("THYAO", Window::last(10), all[20].t),
-        50,
+        30,
     )
     .unwrap();
     assert_eq!(b.state, BindingState::Stale);
@@ -986,8 +989,9 @@ fn bind_with_anchor_keeps_bar_0_or_goes_stale_at_the_limit() {
         50,
     )
     .unwrap();
-    assert_eq!(b.state, BindingState::Ready);
-    assert_eq!(b.anchor_t, Some(all[61].t));
+    // The source lost the anchor bar: bar numbers would differ → stale (§18.3).
+    assert_eq!(b.state, BindingState::Stale);
+    assert!(b.store.is_none());
     assert!(b.reason.unwrap().contains("no bar at the anchor"));
 }
 

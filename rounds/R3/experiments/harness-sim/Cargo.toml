@@ -1,0 +1,27 @@
+# R3 ölçüm düzeneği M3–M6 (rounds/R3/experiments/harness/SPEC.md). Bağımsız crate:
+# çalışma alanı üyesi değil (boş [workspace] tablosu), kendi Cargo.lock'u var.
+[package]
+name = "harness-sim"
+version = "0.1.0"
+edition = "2021"
+rust-version = "1.92"
+publish = false
+description = "R3 measurement harness for M3 (ranking), M4 (theme), M5 (outcome), M6 (trust path). Deterministic."
+
+[workspace]
+
+[dependencies]
+qp-capsule = { path = "../../../../crates/qp-capsule" }
+qp-facts = { path = "../../../../crates/qp-facts" }
+qp-schema = { path = "../../../../crates/qp-schema" }
+qp-source = { path = "../../../../crates/qp-source" }
+serde = { version = "1.0.229", features = ["derive"] }
+serde_json = { version = "1.0.154", features = ["float_roundtrip"] }
+# --- Alternatifler (README "Alternatif ekleme"): her biri bir path bağımlılığı ---
+# m3-ornek = { path = "../M3/ornek" }
+
+[lints.rust]
+unsafe_code = "forbid"
+
+[profile.release]
+debug = false

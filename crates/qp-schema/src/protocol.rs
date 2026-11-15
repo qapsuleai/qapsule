@@ -1632,6 +1632,10 @@ pub struct LayerInfo {
     /// A selector that resolves to this layer in its view now (R2, §17).
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub select: Option<LayerSel>,
+    /// (RP2) If the layer's data rests on a bound series that is not ready for the asker:
+    /// that state; the layer is then not drawn (§18.3).
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub binding: Option<BindingState>,
 }
 
 /// Answer to the point query (R2).
@@ -2410,8 +2414,10 @@ pub struct InitData {
     /// Feeds, each with its initial bars.
     #[serde(default)]
     pub feeds: Vec<InitFeed>,
-    /// Principal id -> entitled symbols (`"*"` = all). Principals not listed have no
-    /// entitlement; the authority's own engine work uses the `host` principal's.
+    /// Principal id -> entitlements: `"SYMBOL"` (that symbol on every feed),
+    /// `"feed/SYMBOL"` (that symbol on that named feed only), `"feed/*"`, or `"*"` (all).
+    /// Principals not listed have no entitlement. The authority's own engine work uses the
+    /// entitlement of the first principal whose role is `host` (§18.3).
     #[serde(default)]
     pub entitlements: BTreeMap<String, Vec<String>>,
     /// Feeds that answer `pending` (never resolved) instead of data, for tests.

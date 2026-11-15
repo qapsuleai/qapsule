@@ -88,6 +88,12 @@ pub struct DataBinding {
     /// (same id pattern as the symbol).
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub feed: Option<String>,
+    /// Time of bar 0 as fixed by the authority on first resolution (§18.3). Written by the
+    /// authority (an engine entry), never by clients; once set, every resolution (the
+    /// authority's after a restart, each replica's) starts at this bar, so bar numbers and
+    /// the calculation start are the same everywhere.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub anchor_t: Option<TimestampMs>,
 }
 
 impl DataBinding {
@@ -233,12 +239,18 @@ pub enum BindingState {
     NoEntitlement,
     /// The source has no data for this binding (unknown symbol, empty window).
     NoData,
+    /// Data was held but the feed is no longer trustworthy: a `seq` gap was detected, or
+    /// the window reached its size limit (§18.4, §18.7). Values are withheld until the
+    /// host re-resolves the binding.
+    Stale,
 }
 
 /// Name of the digest algorithm of [`data_digest`].
 pub const DATA_DIGEST_ALG: &str = "fnv1a64";
 
-const FNV_OFFSET: u64 = 0xcbf2_9ce4_8422_2325;
+/// Start state of [`data_digest_u64`] (the FNV-1a 64 offset basis).
+pub const DATA_DIGEST_OFFSET: u64 = 0xcbf2_9ce4_8422_2325;
+const FNV_OFFSET: u64 = DATA_DIGEST_OFFSET;
 const FNV_PRIME: u64 = 0x0100_0000_01b3;
 
 fn fnv(mut h: u64, v: u64) -> u64 {
@@ -251,7 +263,8 @@ fn fnv(mut h: u64, v: u64) -> u64 {
 
 /// Content digest of bars (`docs/PROTOCOL.md` §18.5): FNV-1a 64 from the standard offset
 /// basis over, for each bar in order, the 8 little-endian bytes of `t` (as `i64`) and of
-/// the IEEE-754 bits of `o`, `h`, `l`, `c`, `v`; written as 16 lowercase hex digits.
+/// the IEEE-754 bits of `o`, `h`, `l`, `c`, `v` (`-0.0` digested as `0.0`); written as 16
+/// lowercase hex digits.
 /// Deterministic on every target. Not cryptographic: it detects corrections, not forgery.
 #[must_use]
 pub fn data_digest(bars: &[Bar]) -> String {
@@ -261,12 +274,18 @@ pub fn data_digest(bars: &[Bar]) -> String {
 /// [`data_digest`] as a number.
 #[must_use]
 pub fn data_digest_u64(bars: &[Bar]) -> u64 {
-    let mut h = FNV_OFFSET;
-    for b in bars {
-        h = fnv(h, u64::from_le_bytes(b.t.to_le_bytes()));
-        for v in [b.o, b.h, b.l, b.c, b.v] {
-            h = fnv(h, v.to_bits());
-        }
+    bars.iter().fold(DATA_DIGEST_OFFSET, data_digest_extend)
+}
+
+/// One bar step of [`data_digest_u64`]: running digests (append, prefix) start at
+/// [`DATA_DIGEST_OFFSET`] and fold this over the bars in order.
+#[must_use]
+pub fn data_digest_extend(h: u64, b: &Bar) -> u64 {
+    let mut h = fnv(h, u64::from_le_bytes(b.t.to_le_bytes()));
+    for v in [b.o, b.h, b.l, b.c, b.v] {
+        // -0.0 and 0.0 are the same price/volume: digest them alike.
+        let v = if v == 0.0 { 0.0 } else { v };
+        h = fnv(h, v.to_bits());
     }
     h
 }
@@ -319,6 +338,53 @@ mod tests {
         b[0].c = 10.000_000_000_000_002;
         assert_ne!(d, data_digest(&b));
         assert_eq!(d, data_digest(&a.clone()));
+        let mut z = a.clone();
+        z[0].v = -0.0;
+        let mut z2 = a.clone();
+        z2[0].v = 0.0;
+        assert_eq!(data_digest(&z), data_digest(&z2));
+    }
+
+    /// Vectors cross-checked with an independent Python FNV-1a 64 (RP2 T2 audit).
+    #[test]
+    fn digest_vectors_are_pinned() {
+        let b1 = Bar {
+            t: 1_700_000_000_000,
+            o: 100.0,
+            h: 101.5,
+            l: 99.25,
+            c: 100.75,
+            v: 12_345.0,
+        };
+        let b2 = Bar {
+            t: 1_700_000_060_000,
+            o: 100.75,
+            h: 102.0,
+            l: 100.5,
+            c: 101.0,
+            v: 0.0,
+        };
+        let b3 = Bar {
+            t: -1,
+            o: 1e-300,
+            h: 1e300,
+            l: -5.5,
+            c: 0.1,
+            v: 3.0,
+        };
+        let got: Vec<String> = [vec![], vec![b1.clone()], vec![b1, b2], vec![b3]]
+            .iter()
+            .map(|v| data_digest(v))
+            .collect();
+        assert_eq!(
+            got,
+            [
+                "cbf29ce484222325",
+                "9f8403dfb08a2464",
+                "c870db4da9b49625",
+                "029b32219aabf4f9"
+            ]
+        );
     }
 
     #[test]

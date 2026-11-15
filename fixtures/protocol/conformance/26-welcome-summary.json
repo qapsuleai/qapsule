@@ -1,0 +1,276 @@
+{
+ "name": "26-welcome-summary",
+ "description": "R2 welcome.summary (DocSummary): series with study params/fields/labels, views -> panels -> layers with what they draw, facts, findings with latest bar and capsule; absent for a feed principal; pending proposals counted.",
+ "covers": [
+  "handshake",
+  "welcome",
+  "summary"
+ ],
+ "init": "fixtures/protocol/init/thyao.json",
+ "steps": [
+  {
+   "send": {
+    "conn": "s",
+    "msg": {
+     "type": "hello",
+     "protocol": "qp/0",
+     "principal": "scout",
+     "surface": {
+      "kind": "headless"
+     }
+    }
+   },
+   "expect": [
+    {
+     "conn": "s",
+     "msg": {
+      "type": "welcome",
+      "protocol": "qp/0",
+      "principal": "scout",
+      "role": "proposer",
+      "seq": "$any",
+      "summary": {
+       "series": [
+        {
+         "id": "px",
+         "kind": "bars",
+         "fields": [
+          "o",
+          "h",
+          "l",
+          "c",
+          "v"
+         ],
+         "symbol": "THYAO",
+         "interval": "1d",
+         "len": 200,
+         "label": "$any"
+        },
+        {
+         "id": "rsi14",
+         "kind": "study",
+         "study": "rsi",
+         "params": {
+          "period": 14
+         },
+         "inputs": [
+          "px"
+         ],
+         "fields": [
+          "rsi"
+         ],
+         "label": "RSI14"
+        },
+        {
+         "id": "macd",
+         "kind": "study",
+         "study": "macd",
+         "params": {
+          "fast": 12,
+          "slow": 26,
+          "signal": 9
+         },
+         "inputs": [
+          "px"
+         ],
+         "fields": [
+          "macd",
+          "signal",
+          "histogram"
+         ],
+         "label": "MACD(12,26,9)"
+        },
+        {
+         "id": "bb20",
+         "kind": "study",
+         "study": "bollinger",
+         "params": {
+          "period": 20,
+          "k": 2
+         },
+         "inputs": [
+          "px"
+         ],
+         "fields": "$any",
+         "label": "$any"
+        }
+       ],
+       "views": [
+        {
+         "id": "main",
+         "title": "THYAO 1G",
+         "panels": [
+          {
+           "id": 0,
+           "scale": "y0 linear",
+           "layers": [
+            {
+             "id": "l0",
+             "mark": "candle",
+             "about": "px candles"
+            },
+            {
+             "id": "l1",
+             "mark": "line",
+             "about": "$any"
+            }
+           ]
+          },
+          {
+           "id": 1,
+           "scale": "$any",
+           "layers": [
+            {
+             "id": "l2",
+             "mark": "line",
+             "about": "rsi14.rsi line"
+            },
+            {
+             "id": "l3",
+             "mark": "rule",
+             "about": "rule 70 (rsi.overbought)"
+            }
+           ]
+          },
+          {
+           "id": 2,
+           "scale": "y2 linear",
+           "layers": [
+            {
+             "id": "l4",
+             "mark": "line",
+             "about": "$any"
+            }
+           ]
+          }
+         ]
+        }
+       ],
+       "facts": [
+        {
+         "id": "fact-rsi-cross70",
+         "kind": "cross_above",
+         "series": "rsi14",
+         "bar": 150,
+         "text": "RSI(14) 70'i yukarı kesti, bar 150."
+        }
+       ],
+       "findings": [
+        {
+         "id": "fnd-overbought",
+         "claim": "THYAO günlükte RSI(14) aşırı alım bölgesine girdi; momentum güçlü.",
+         "facts": [
+          "fact-rsi-cross70"
+         ],
+         "bar": 150,
+         "capsule": "cap-overbought live"
+        }
+       ],
+       "truncated": "$absent"
+      }
+     }
+    }
+   ],
+   "note": "Examples in GRAMMAR §12 / schema docs: `px candles`, `rsi14.rsi line`, `rule 70 (rsi.overbought)`, `cap-9 live`."
+  },
+  {
+   "send": {
+    "conn": "f",
+    "msg": {
+     "type": "hello",
+     "protocol": "qp/0",
+     "principal": "feed",
+     "surface": {
+      "kind": "headless"
+     }
+    }
+   },
+   "expect": [
+    {
+     "conn": "f",
+     "msg": {
+      "type": "welcome",
+      "protocol": "qp/0",
+      "principal": "feed",
+      "role": "feed",
+      "seq": "$any",
+      "summary": "$absent"
+     }
+    }
+   ],
+   "note": "A feed principal has no read permission: no summary."
+  },
+  {
+   "send": {
+    "conn": "s",
+    "msg": {
+     "type": "command",
+     "id": "c1",
+     "ops": [
+      {
+       "op": "add_fact",
+       "id": "f-low",
+       "kind": "level",
+       "series": "px",
+       "bar": 199,
+       "text": "close",
+       "evidence": {
+        "level": 124.69
+       }
+      }
+     ]
+    }
+   },
+   "expect": [
+    {
+     "conn": "s",
+     "msg": {
+      "type": "ack",
+      "id": "c1",
+      "status": "proposed",
+      "seq": 1,
+      "proposal": "$any"
+     }
+    }
+   ],
+   "note": "A proposer's auto command becomes a proposal."
+  },
+  {
+   "send": {
+    "conn": "v",
+    "msg": {
+     "type": "hello",
+     "protocol": "qp/0",
+     "principal": "viewer",
+     "surface": {
+      "kind": "headless"
+     }
+    }
+   },
+   "expect": [
+    {
+     "conn": "v",
+     "msg": {
+      "type": "welcome",
+      "protocol": "qp/0",
+      "principal": "viewer",
+      "role": "viewer",
+      "seq": "$any",
+      "summary": {
+       "pending_proposals": 1,
+       "facts": [
+        {
+         "id": "fact-rsi-cross70"
+        }
+       ]
+      }
+     }
+    }
+   ],
+   "note": "The pending proposal is counted; the proposed fact is not in the document yet."
+  }
+ ],
+ "final": {
+  "log_len": 1
+ }
+}

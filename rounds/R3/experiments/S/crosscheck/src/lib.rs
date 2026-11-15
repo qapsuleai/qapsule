@@ -25,9 +25,11 @@ pub mod support;
 /// Situations whose sentences the product deliberately changed (S-A.md): flow
 /// state/expectation on net institutional flow (M2b finding) and extreme stories closed
 /// as realized / invalidated (M5 RESULTS). Every other situation must be byte-identical.
+// S-A fixes (flow wording, extreme under the barrier outcome) + S-C fix (TR vowel harmony,
+// "Sinyalın" → "Sinyalin": s07 s09 s14 s23 s29 s35 s46).
 pub const CHANGED: &[&str] = &[
-    "s19", "s42", "s44", "s45", "s46", "s47", "s48", "s65", "s66", "s67", "s69", "s70", "s71",
-    "s72",
+    "s07", "s09", "s14", "s19", "s23", "s29", "s35", "s42", "s44", "s45", "s46", "s47", "s48",
+    "s65", "s66", "s67", "s69", "s70", "s71", "s72",
 ];
 
 /// One M2 harness situation as exported by `harness m2 inputs`.

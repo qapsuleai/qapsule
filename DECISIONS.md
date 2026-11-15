@@ -111,7 +111,7 @@ T7-COMPARE, T8, T9), `docs/PROTOCOL.md` §18–§19.
 
 | # | Açık karar (RP2) | Ne zaman | Not |
 |---|------------|----------|-----|
-| A15 | Kanıt değerleri (olgunun `evidence`'i, kapsül durumu) veri lisansı kapsamında mı? Kapsamdaysa yetkisize gizlenir (bugün iddia kanıtı değerleri süzülüyor, `Fact.evidence` ve kapsül durumu gitmiyor değil). | R3 öncesi (A4 hukuk ile) | §18.3 açık soru; T4-fixes artık sızıntılar (kapsül durumunun bir bitlik sonucu). |
+| A15 | Kanıt değerleri (olgunun `evidence`'i, kapsül durumu) veri lisansı kapsamında mı? Kapsamdaysa yetkisize gizlenir (bugün iddia kanıtı değerleri süzülüyor; `Fact.evidence` ve kapsül durumu herkese gidiyor). | R3 öncesi (A4 hukuk ile) | §18.3 açık soru; T4-fixes artık sızıntılar (kapsül durumunun bir bitlik sonucu). |
 | A16 | Canlı barda geçici iddia gösterimi: sıfır hatayla mümkün değil (yansı verisi ≥ ~80 ms geride); kapalı (varsayılan), açık ya da sıfır olmayan tolerans. Kapsül geçersizleşmesi kesinleşmeyi beklesin mi? | R3 | T7a–d ayrı ayrı ölçtü (M3p > 0); T8 Ö-T8-3, Ö-T8-6. |
 | A17 | Kesin bar kaynağı (Matriks REST) her iki tarafta barındırıcı sözleşmesi; hız sınırı ve gecikmesi gerçek sistemde. | R6 | T7 düzeneği benzetti, ölçmedi. |
 | A18 | Besleme başına tek paylaşılan depo (bugün bağ başına; bağlı barlar sağlayıcı, `FeedStore` ve okuma dokümanında üç kez); geçmiş düzeltmede yalnız düzeltilen bardan yeniden hesap (`qp-compute`'ta durum anlık görüntüsü gerekir; bugün N=500'de ~40 ms). | R3/R4 | T4 D-T4-1, T5 sınırlar, T5 denetimi D5. |

@@ -1512,6 +1512,14 @@ dependencies = [
 ]
 
 [[package]]
+name = "qp-capsule"
+version = "0.0.0"
+dependencies = [
+ "qp-facts",
+ "qp-schema",
+]
+
+[[package]]
 name = "qp-cli"
 version = "0.0.0"
 dependencies = [
@@ -1535,6 +1543,14 @@ dependencies = [
  "proptest",
  "qp-schema",
  "serde_json",
+]
+
+[[package]]
+name = "qp-facts"
+version = "0.0.0"
+dependencies = [
+ "qp-compute",
+ "qp-schema",
 ]
 
 [[package]]

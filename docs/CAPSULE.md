@@ -119,3 +119,95 @@ Tasarıma etkisi:
 Nicel olarak ifade edilebilen her şey gösterilebilir: istatistik, geçmiş sıklık,
 göstergelerin ürettiği sinyaller. Kapsülün dili sayıya dayanır; sayıya dayanmayan öznel
 öneri kapsül olmaz.
+
+---
+
+## 9. Uygulama ayrıntısı (R3)
+
+Bu bölüm yukarıdaki çerçeveyi değiştirmez; uygulanabilir ayrıntıya indirir. Kavramlar
+`docs/CONCEPTS.md` "Kapsül (R3)"; şema `qp-schema::capsule`; sözleşme
+`crates/qp-facts/src/lib.rs`, `crates/qp-capsule/src/lib.rs`, `crates/qp-grammar/src/glyph.rs`.
+Ölçümle seçilen noktalar (M1–M7) "seçim" diye işaretlidir; seçimler `rounds/R3/experiments/`.
+
+### 9.1 Katmanlar ve crate'ler
+
+| Katman | Crate | Girdi → çıktı |
+|--------|-------|---------------|
+| Olgu | `qp-facts` | barlar (+ lisanslı akış) → `Fact` (`meaning` dolu). Toplu = akışkan, bit düzeyinde. |
+| Bulgu + kapsül + karne | `qp-capsule` | kesin olgular + barlar → hikâye geçişleri (`Story`), karne, önem, cümle, hassasiyet süzgeci, sunucu olgusu yorumu |
+| Otorite | `qp-session` | `qp-capsule`'ü bar kapanışında koşturur, sonucu komut yolundan dokümana ve günlüğe yazar; sorgular, abonelik, itiraz, geri çekme |
+| İşaret | `qp-grammar` (`glyph`), `qp-render` | `GlyphSpec` → sahne ilkelleri → piksel |
+
+Bulgu (`Finding`) ile hikâye bire birdir: her hikâye bir bulgu ve bir kapsül olarak
+dokümana girer; bulgunun `facts` listesi hikâyeye katılan olgulardır.
+
+### 9.2 Olgu: zaman, kenar, aday
+
+- Dedektör her barda "bar şimdi kapansaydı" sonucunu verir (`qp-compute`'un bekleyen bar
+  modeli). Açık barda verilen sonuç **adaydır**; bar kesinleşince (sonraki bar geldi ya da
+  pencere kapandı: RP2 `Maturity::final`) olgu olur.
+- Dedektör seviye değil **kenar** bildirir: anlık olay (`point`), durumun başlaması
+  (`enter`) ya da bitmesi (`exit`). "Hâlâ doğru" her barda tekrar edilmez.
+- Olgu kimliği belirleyicidir: `fx.<enstrüman>.<dedektör>.<kod>.<bar>`.
+- Lisanslı veriden türeyen olgu `meaning.server = true`, `license.class = licensed` taşır;
+  yalnız otoritede hesaplanır.
+
+### 9.3 Yaşam döngüsü kuralları (sabit; deney değil)
+
+Her kesin olgu, tema kuralının (M4, seçim) kararıyla bir hikâyeye katılır, yeni hikâye
+başlatır ya da yok sayılır. Bir barda olaylar şu sırayla işlenir: (1) açık hikâyelerin
+sonuç kuralı (M5, seçim) bu barla; (2) ufuk dolanlar `expired`; (3) bu barın olguları
+katılır/doğar; (4) önem (M3, seçim) yeniden hesaplanır. Aynı barda birden çok olgu
+`(dedektör, kod)` sırasıyla işlenir.
+
+| Olay | Geçiş | Neden kodu |
+|------|-------|------------|
+| Yeni hikâye | `born` | `new_story` |
+| Aynı yönde, hikâyede zaten olan aileden olgu | `strengthened` | `same_family` |
+| Aynı yönde, yeni aileden olgu | `confirmed` (aile sayısı +1) | `new_family` |
+| Ters yönde olgu | `weakened` | `opposite_fact` |
+| Hikâyenin kendi durumunun bittiği (`exit`) olgu | `weakened` | `state_ended` |
+| Sonuç kuralı: gerçekleşti | `realized` (kapanır, karne: isabet) | kuralın kodu |
+| Sonuç kuralı: geçersiz | `invalidated` (kapanır, karne: ıska) | kuralın kodu |
+| Ufuk (bar sayısı) doldu | `expired` (kapanır, karne: ıska) | `horizon` |
+| Dayandığı veri düzeltildi / itiraz haklı çıktı | `retracted` (kapanır, karne **yok**) | `data_corrected`, `dispute_upheld` |
+
+Kapanmış hikâyeye olgu katılmaz; aynı temada yeni olgu yeni hikâye başlatır.
+
+### 9.4 Karne
+
+- Anahtar: `<tür>/<dedektör>@<sürüm>` (hikâyeyi doğuran olgunun dedektörü).
+- Her kapanış (geri çekilme hariç) karneye bir satır yazar: kapsül, anahtar, aşama, bar.
+- **İleriye bakma yok:** bir hikâyenin `ledger_at_birth`'i yalnız doğum barının zamanından
+  **kesin olarak önce** kapanmış hikâyeleri sayar (çok enstrümanda zaman sırası `t`).
+  Sonuç kuralı yalnız `bars[..=now]` görür. Test: doğum anından sonraki veri karıştırılınca
+  o ana kadarki karne ve hikâye geçmişi değişmez.
+- Karne lisanstan bağımsızdır; herkese gider.
+
+### 9.5 Dil (zaman türleri)
+
+| Zaman türü | Cümle | Örnek (TR) |
+|------------|-------|------------|
+| Olay | Geçmiş zaman + ne zaman ("bugün", "3 bar önce", tarih) | "THYAO 3 bar önce son 20 barın en yükseğini yukarı kırdı." |
+| Durum | Durum sürüyorsa şimdiki zaman; bittiyse geçmiş zaman + "artık geçerli değil" | "RSI 3 bar önce 70'in üstüne çıktı; şu an 55, artık 70'in üstünde değil." |
+| Beklenti | Koşullu | "148 üzerinde iki kapanış olursa kırılım teyit olur." |
+
+Karne cümlenin parçası olabilir ("bu durum geçmişte 100 seferin 62'sinde …"); lisanslı
+olgunun cümlesi **hiç rakam içermez** (karne ayrı alanda gider). Üretim yöntemi M2 (seçim).
+
+### 9.6 İşaret
+
+`GlyphSpec` kanalları §4'teki tablodur; alfabe (çizim kuralları) M1 ile seçilir ve gramere
+`glyph` işareti olarak girer (T7). Kapsül görünümü: işaret + cümle + küçük grafik + karne.
+
+### 9.7 Sunucu olgusu ve güven yolu
+
+Yetkisiz kullanıcıya lisanslı olgudan yalnız güven yolunun (M6, seçim) ürettiği nitel
+iletiler (`QualMessage`) gider: rakam yok, `trust = server` işareti, gösterim barı. Saldırı
+ölçüsü: art arda gelen iletilerden ham değer aralığının daraltılması.
+
+### 9.8 Hassasiyet
+
+`Sensitivity` → kademe süzgeci: `important` kademe 1, `balanced` 1–2, `all` hepsi.
+Kişinin pozisyonu ya da etkin niyetiyle ilgili enstrümanın kapsülü (özellikle `weakened`,
+`invalidated`) kademeden bağımsız geçer. Varsayılan gruptan gelir; sistem değiştirmez.

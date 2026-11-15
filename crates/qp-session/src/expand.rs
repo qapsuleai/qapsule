@@ -712,6 +712,7 @@ pub(crate) fn expand_op(
                 text: text.clone(),
                 evidence: evidence.clone(),
                 evidence_ref,
+                meaning: None,
                 provenance: ctx.prov(vec![series.clone()]),
             };
             Ok(vec![ChangeOp::PutFact { fact, index: None }])
@@ -768,6 +769,7 @@ pub(crate) fn expand_op(
                         headline: headline.clone(),
                         glyphs: Vec::new(),
                         view: None,
+                        story: None,
                         depth: Depth::Capsule,
                         expires_at: None,
                         provenance: ctx.prov(vec![fid]),
@@ -830,6 +832,10 @@ pub(crate) fn expand_op(
                     outcome: Outcome::Pending,
                     recorded_at: ctx.at,
                     note: note.clone(),
+                    capsule: None,
+                    key: None,
+                    stage: None,
+                    bar: None,
                 },
             });
             Ok(out)

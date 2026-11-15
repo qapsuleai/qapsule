@@ -119,7 +119,54 @@ Ayrıntı `docs/PROTOCOL.md` §19; seçimin gerekçesi `rounds/RP2/experiments/T
 | Kesin bar çekme | settled fetch | Barındırıcının yansı (ya da otorite) için veri sağlayıcının kesinleşmiş barlarını (Matriks REST karşılığı) çekmesi; anlaşmazlıkta ve boşluk onarımında kullanılır. Veri düzlemindedir. |
 | Doküman özeti / görünüm özeti | `document_digest` / `view_digest` | Dokümanın kanonik JSON baytlarının ve bir görünümün sahne tarifinin (`SceneDesc`) FNV-1a 64 özeti. Otorite ile yansının aynı dokümanı ve aynı görüntüyü ürettiği bununla karşılaştırılır. |
 
+### Kapsül (R3)
+
+Çerçeve `docs/CAPSULE.md`; uygulama ayrıntısı aynı dosyanın §9'u; şema `qp-schema::capsule`.
+
+| Kavram | Kodda | Tanım |
+|--------|-------|-------|
+| Olgu dedektörü | `Detector` (`qp-facts`) | Bar serisinden (ve varsa lisanslı akıştan) tipli olgu üreten deterministik akışkan fonksiyon. Toplu ve akışkan çalıştırma bit düzeyinde aynıdır; açık barda `peek` aday üretir, kapanışta `push` kesin olgu. |
+| Anlam türü | `MeaningKind` | Olgunun altı anlamından biri: devam (`continuation`), dönüş (`reversal`), kırılım (`breakout`), sıkışma (`squeeze`), aşırılık (`extreme`), akış (`flow`). İşaretin şekli bunu kodlar. |
+| Yön | `Direction` | `up`, `down`, `neutral` (belirsiz). |
+| Olgu anlamı | `FactMeaning` | Olgunun `meaning` alanı: tür, yön, kanıt ailesi, zaman türü, dedektör ve sürümü, enstrüman, güç, lisans, geometri, koşul, sunucu olgusu bayrağı. |
+| Kanıt ailesi | `EvidenceFamily` | Olgunun dayandığı veri ailesi: fiyat, hacim, akış, türev, haber/temel. Aynı aileden birden çok olgu tek teyit sayılır. |
+| Teyit sayısı | `confirmations` | Bir hikâyeyi destekleyen **farklı** kanıt ailesi sayısı. Bulguda ve işarette görünür. |
+| Lisans sınıfı | `License`, `LicenseClass` | Olgunun dayandığı verinin sınıfı: `public` (kullanıcının kendi bar yetkisiyle yansıda yeniden hesaplanır) ya da `licensed` (yalnız sunucuda hesaplanır; yetkisize rakamsız yorum). Gereken veri yetkisinin adını taşır. |
+| Zaman türü | `TimeKind` | Kapsülün dili ve ömrü: olay (`event`, geçmiş zaman + ne zaman), durum (`state`, şimdiki zaman, koşul sürdükçe), beklenti (`expectation`, koşullu). |
+| Geometri | `Geometry` | Olgunun `chart` derinliğinde çizilen kanıtı: seviye, bant, işaretli noktalar. Değer taşımaz, olgunun kanıt anahtarlarına başvurur; kanıt gizlenince geometrinin sayıları da gizlenir. |
+| Anlam koşulu | `MeaningCondition` | Beklentinin ya da durumun makinece sınanabilir koşulu (konu, karşılaştırma, kanıt anahtarı, kaç bar içinde). Cümlenin yuvasıdır, serbest metin değildir. |
+| Hikâye | `Story` | Kapsülün `story` alanı: aynı enstrüman ve tema için tek kapsülün evrilen kaydı: tema, tür, yön, aşama, aileler, güç, önem ve kademe, doğum barı, ömür (bar), karne anahtarı, doğumdaki karne, güven yolu, geçişler. |
+| Tema | `theme` | Hangi olguların aynı hikâyeye ait olduğunu belirleyen anahtar (tema kimliği kuralı, M4). |
+| Aşama | `Stage` | Hikâyenin yaşam döngüsündeki yeri: `candidate` (aday), `born` (doğdu), `strengthened` (güçlendi), `weakened` (zayıfladı), `confirmed` (teyit edildi), `realized` (gerçekleşti), `invalidated` (geçersiz), `expired` (süresi doldu), `retracted` (geri çekildi). Son dördü kapatır. |
+| Geçiş | `Transition` | Hikâyede bir aşamaya giriş: bar, zaman, neden olan olgular, makinece okunur neden (`new_family`, `outcome_hit`, `horizon`, `data_corrected`…). Dökümde görünür. |
+| Aday | `Stage::Candidate` | Açık barda yerel veriden görülen oluşum. Yalnız o enstrümanı izleyen yansıda; otorite günlüğüne ve karneye girmez; bar kapanınca kesinleşir ya da kaybolur. |
+| Kesinleşme | finalize | Bar kapanınca otoritenin hikâyeye kimlik vermesi ve günlüğe yazması. |
+| Eskime | aging | Hikâyenin bar sayısıyla ölçülen doğal ömrü (`horizon_bars`), açık geçersizlik koşulu ve sonuç. Saatle ölçülmez. |
+| Sonuç kuralı | outcome rule (M5) | Tür başına "gerçekleşti" tanımı ve ufku (bar). Yalnız hikâyenin kapanış barına kadarki veriyi okur. |
+| Karne istatistiği | `LedgerStat` | Bir karne anahtarı (tür + dedektör + sürüm) için kapanmış kapsül sayısı ve gerçekleşenler. "Geri çekildi" sayılmaz. |
+| Doğumdaki karne | `ledger_at_birth` | Kapsülün doğduğu barda görünen karne: yalnız o bardan **önce** kapanmış kapsüllerden (ileriye bakma yok). |
+| İleriye bakma | look-ahead | Bir değerin, ait olduğu andan sonraki veriye bağlı olması. Karne ve sonuç kuralında yasaktır; test: gelecek veri karıştırılınca geçmiş karne değişmez. |
+| Önem | `importance`, `tier` | Sıralama kuralının (M3) hikâyeye verdiği puan ve kademe (1 en önemli … 3). Hassasiyet kademeye göre süzer. |
+| Hassasiyet | `Sensitivity` | Kullanıcının seçtiği dikkat bütçesi: `important` (yalnız önemliler, kademe 1), `balanced` (dengeli, 1–2), `all` (hepsi). Sistem kendiliğinden değiştirmez. |
+| Kullanıcı grubu | `UserGroup` | `habituated` (alışkın; varsayılan `all`) ya da `future` (geleceğin yatırımcısı; varsayılan `important`). |
+| Kitle | `Audience` | Dokümandaki kişi başına kapsül tercihleri: grup, hassasiyet, izleme listesi, pozisyonlar. Pozisyon ve niyetle ilgili kapsüller hassasiyetten bağımsız gelir. |
+| Sunucu olgusu | server fact (`FactMeaning::server`) | Lisanslı veriden yalnız sunucuda hesaplanan olgu. Yansı kendi verisinde sınayamaz. |
+| Güven yolu | `Trust` | Kapsülün kullanıcıya nasıl doğrulanarak geldiği: `replica` (yansı kendi verisinde sınar, §19) ya da `server` ("sunucu tarafından doğrulandı" işaretiyle, K38; tasarım M6). |
+| Nitel yorum | qualitative comment | Lisanslı olgunun yetkisize giden rakamsız cümlesi (üstünde, altında, arttı, azaldı). Ham değerin geri çıkarılamayacağı biçimde kurulur. |
+| Geri çıkarma saldırısı | inversion attack | Art arda gelen nitel yorumlardan ham değerin aralığını daraltma denemesi. Güven yolunun ölçüsüdür (M6). |
+| İtiraz | `dispute` | Yansının, otoritenin kesin iddiasını kendi temiz ve yeniden çekilmiş verisinde tutmadığını otoriteye bildirmesi (A20, M7). |
+| Geri çekme | retraction | Otoritenin, dayandığı veri hatalı çıktığı için bir iddiayı/kapsülü düşürmesi (K37). Karneye yazılmaz. |
+| İşaret alfabesi | glyph alphabet (M1) | Anlam işaretlerinin çizim kuralları: şekil = tür, yön, büyüklük = güç, doluluk = karne, çizgi biçimi = aşama, solukluk = tazelik, teyit işaretleri = aile sayısı, sunucu işareti. |
+| İşaret tarifi | `GlyphSpec` | Bir anlam işaretinin motorca üretilmiş parametreleri (yukarıdaki kanallar). Gramerde `glyph` işaretinin verisidir. |
+| İşaret aşaması | `GlyphPhase` | Çizgi biçiminin kodladığı aşama: aday, kesin, gerçekleşti, gerçekleşmedi, geri çekildi. |
+| Gerçekleştirici | realizer (M2) | Hikâyeden cümleyi üreten deterministik dil parçası (şablon dilbilgisi; Türkçe ve İngilizce). |
+
 ## Kapsülün yaşam döngüsü
+
+R3'ten itibaren kapsülün hikâye aşamaları `Stage`'dir (yukarıda; `docs/CAPSULE.md` §3).
+Eski `CapsuleState` (aşağıdaki) protokol uyumu için kalır: `born…confirmed` → `live`,
+`realized` → `live` kapanışı karnede, `invalidated` → `invalidated`, `expired` → `expired`,
+`retracted` → `invalidated` + karne yok.
 
 `taslak → canlı → (güncellendi)* → geçersiz | süresi doldu | onaylandı | reddedildi`
 

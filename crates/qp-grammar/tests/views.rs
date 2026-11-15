@@ -51,6 +51,7 @@ fn with_facts() -> (MemProvider, u64) {
         text: "RSI(14) crossed 70".into(),
         evidence: [("level".to_owned(), 70.0)].into_iter().collect(),
         evidence_ref: None,
+        meaning: None,
         provenance: prov(),
     };
     let finding = Finding {

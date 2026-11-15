@@ -1,0 +1,40 @@
+21:55  up 39 days,  9:39, 8 users, load averages: 134.69 167.42 166.70
+engine_cost: 30 instruments x 7 detectors, 500 bars, 20 ticks/bar, 7 runs (median), bars >= 60 timed
+| Quantity | Market (30 instr.) | Per instrument |
+|---|---:|---:|
+| Tick: detectors + facts + candidates (ns) | 1774816 | 59161 |
+| — detectors (7 × update_last) + to_fact (ns) | 63586 | 2120 |
+| — Engine::candidates on the open bar (ns) | 1698115 | 56604 |
+| Tick, bars 60–199 (ns) | 1342729 | 44758 |
+| Tick, bars 360–499 (ns) | 2131064 | 71035 |
+| Tick p99 (ns) | 33055209 | 1101840 |
+| Bar close: Engine::on_bar (ns) | 1743356 | 58112 |
+candidates per market tick (mean): 11.14; open stories at end: 43; events: 11951; ledger rows at end: 4240
+run 0: tick 1960196 ns (det 83072, cand 1877123), close 2889142 ns
+run 1: tick 1543157 ns (det 48068, cand 1495089), close 1743356 ns
+run 2: tick 1607623 ns (det 63586, cand 1544037), close 1649779 ns
+run 3: tick 1370608 ns (det 33240, cand 1337368), close 1416376 ns
+run 4: tick 1774816 ns (det 76700, cand 1698115), close 2234653 ns
+run 5: tick 2013404 ns (det 41352, cand 1972052), close 2185750 ns
+run 6: tick 2593881 ns (det 91697, cand 2502184), close 1714693 ns
+
+21:59  up 39 days,  9:43, 8 users, load averages: 231.39 190.61 175.72
+engine_cost: 30 instruments x 7 detectors, 500 bars, 20 ticks/bar, 5 runs (median), bars >= 60 timed
+| Quantity | Market (30 instr.) | Per instrument |
+|---|---:|---:|
+| Tick: detectors + facts + candidates (ns) | 2508930 | 83631 |
+| — detectors (7 × update_last) + to_fact (ns) | 84644 | 2821 |
+| — Engine::candidates on the open bar (ns) | 2411773 | 80392 |
+| Tick, bars 60–199 (ns) | 1710133 | 57004 |
+| Tick, bars 360–499 (ns) | 3342770 | 111426 |
+| Tick p99 (ns) | 66810125 | 2227004 |
+| One ledger_stat over the final ledger (ns) | 7940 | — |
+| Bar close: Engine::on_bar (ns) | 3046752 | 101558 |
+candidates per market tick (mean): 11.14; open stories at end: 43; events: 11951; ledger rows at end: 4240
+run 0: tick 2508930 ns (det 97158, cand 2411773), close 2702759 ns
+run 1: tick 2957894 ns (det 84644, cand 2873250), close 3676679 ns
+run 2: tick 2491085 ns (det 81512, cand 2409573), close 3046752 ns
+run 3: tick 2603530 ns (det 149982, cand 2453549), close 1792768 ns
+run 4: tick 2137557 ns (det 48902, cand 2088655), close 3345977 ns
+22:02  up 39 days,  9:46, 8 users, load averages: 323.94 245.67 200.38
+

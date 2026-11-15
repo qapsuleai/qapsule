@@ -1,0 +1,38 @@
+[package]
+name = "r3-harness"
+description = "R3/H: deterministic measurement harness for M1 (meaning-glyph alphabet) and M2 (sentence realizer). Written before any alternative existed; the only implementations inside are the `control`s (not candidates)."
+version = "0.0.0"
+edition = "2021"
+publish = false
+
+# Not a member of the main workspace (the root workspace only lists `crates/*`).
+[workspace]
+
+[[bin]]
+name = "harness"
+path = "src/main.rs"
+
+[lib]
+name = "harness"
+path = "src/lib.rs"
+
+[dependencies]
+qp-schema = { path = "../../../../crates/qp-schema" }
+qp-grammar = { path = "../../../../crates/qp-grammar" }
+qp-render = { path = "../../../../crates/qp-render" }
+qp-capsule = { path = "../../../../crates/qp-capsule" }
+serde = { version = "1.0.229", features = ["derive"] }
+serde_json = { version = "1.0.154", features = ["float_roundtrip"] }
+# --- M1 alternatives: one path dependency per alphabet (README.md, "Alternatif ekleme") ---
+# --- M2 alternatives: one path dependency per realizer (README.md, "Alternatif ekleme") ---
+
+[lints.rust]
+unsafe_code = "forbid"
+
+[profile.release]
+lto = "thin"
+codegen-units = 1
+debug = false
+
+[profile.test]
+opt-level = 2

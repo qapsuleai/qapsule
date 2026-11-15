@@ -259,13 +259,25 @@ impl Session {
         repo_root: &Path,
         provider: Provider,
     ) -> Result<Self, String> {
+        let schema = schemars::schema_for!(ClientMsg).to_value();
+        Self::build_with(init, repo_root, provider, schema)
+    }
+
+    /// [`Session::build`] with the inbound schema given (`Null` for a follower that never
+    /// handles inbound messages: the replica, so that a WASM build does not carry the
+    /// schema generator).
+    pub(crate) fn build_with(
+        init: SessionInit,
+        repo_root: &Path,
+        provider: Provider,
+        schema: Value,
+    ) -> Result<Self, String> {
         let doc: Document = match &init.document {
             DocumentRef::Inline(d) => (**d).clone(),
             DocumentRef::Path(p) => read_json(&confine(repo_root, p)?)?,
         };
         // Canonical form of every view (GRAMMAR.md §11); the log replays from it.
         let doc = crate::canon::canon_document(&doc)?;
-        let schema = schemars::schema_for!(ClientMsg).to_value();
         let limits = default_limits();
         let host = init
             .principals

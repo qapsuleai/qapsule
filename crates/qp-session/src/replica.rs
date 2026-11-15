@@ -198,7 +198,12 @@ fn follower(doc: Document, principal: &str, provider: Provider) -> Result<Sessio
         data: None,
     };
     // Built without a provider: every binding is pending, so nothing is stamped.
-    let mut s = Session::build(init, Path::new("."), Provider::None)?;
+    let mut s = Session::build_with(
+        init,
+        Path::new("."),
+        Provider::None,
+        serde_json::Value::Null,
+    )?;
     s.doc = doc.clone();
     s.initial = doc;
     s.log.clear();

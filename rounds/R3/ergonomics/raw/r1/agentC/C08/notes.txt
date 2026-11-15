@@ -1,0 +1,3 @@
+attempt1: set_audience {group:"habituated", watchlist:["ASELS"]} -> ack applied (seq 4). Group value guessed from spec (§20.4 "habituated"); schema not checked.
+attempt2: same command wrapped with document queries to verify; ack applied again (output of document truncated, so not inspected - audience is private/projected out of document anyway).
+Unclear: valid group names not listed in PROTOCOL; set_audience replaces whole audience (may overwrite existing positions/sensitivity); no easy read-back of own audience. Attempt 2 was only verification.

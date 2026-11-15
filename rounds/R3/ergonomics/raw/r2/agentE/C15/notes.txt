@@ -1,0 +1,3 @@
+attempt1: capsule detail + dispute with t=capsule last-transition t, values []. Verdict rejected (claim holds on settled data).
+attempt2: t=born-bar t, anchor_t added. Same verdict rejected.
+Unclear: which t identifies the claim; what "values" to send when the user gives no mirror values (sent empty); dispute is described as a replica/host message, not clear an agent should send it; spec silent on what to do when rejected. Could not make the objection upheld; reported honestly.

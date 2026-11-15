@@ -1,0 +1,3 @@
+attempt1: capsules THYAO + list findings as viewer. Flow capsules absent from the viewer's list; findings list was huge. Did not find the flow capsule id.
+attempt2: capsules meaning:flow comments:true -> schema error (`comments` is not a query field; PROTOCOL §5.4 table says `comments` is the response part, but the query-field list in the table is misleading). capsule detail of cap.THYAO.flow.down.295 (id guessed from the capsule list of the first run) -> not_found (hidden).
+attempt3: capsules meaning:flow -> capsules [] plus `comments` (server comments), ledger meaning flow -> 55/20. Done. Unclear: spec text says `comments` in the capsules row as if a parameter; it is only the response.

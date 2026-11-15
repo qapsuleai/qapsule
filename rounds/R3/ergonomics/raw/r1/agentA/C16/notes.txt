@@ -1,0 +1,1 @@
+attempt1: capsules instrument=THYAO; found the single squeeze capsule cap.THYAO.squeeze.neutral.138, stage/state invalidated. Succeeded. The capsules query has no kind filter (only meaning?/stages?/open?), so I had to scan the whole unfiltered list; output was huge.

@@ -1,0 +1,6 @@
+{"t": 1794776524.984294, "task": "C02", "file": "attempt1.jsonl", "run": 1, "msgs": 2, "shown": 2, "png": null, "png_rc": null, "stderr": ""}
+{"t": 1794776525.554393, "task": "C07", "file": "attempt1.jsonl", "run": 1, "msgs": 2, "shown": 2, "png": null, "png_rc": null, "stderr": ""}
+{"t": 1794776526.8098218, "task": "C12", "file": "attempt1.jsonl", "run": 1, "msgs": 2, "shown": 2, "png": null, "png_rc": null, "stderr": ""}
+{"t": 1794776528.028208, "task": "C17", "file": "attempt1.jsonl", "run": 1, "msgs": 2, "shown": 2, "png": null, "png_rc": null, "stderr": ""}
+{"t": 1794776548.350349, "task": "C02", "file": "attempt2.jsonl", "run": 2, "msgs": 3, "shown": 3, "png": null, "png_rc": null, "stderr": ""}
+{"t": 1794776549.314135, "task": "C17", "file": "attempt2.jsonl", "run": 2, "msgs": 2, "shown": 2, "png": null, "png_rc": null, "stderr": ""}

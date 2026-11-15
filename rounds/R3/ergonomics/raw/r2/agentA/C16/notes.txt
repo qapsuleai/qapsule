@@ -1,0 +1,2 @@
+attempt1: capsules THYAO + list findings. Large output; no squeeze capsule visible in the truncated output.
+attempt2: capsules meaning:squeeze (with and without instrument). Found cap.THYAO.squeeze.neutral.138, state invalidated. Unclear: the spec does not say meaning values (the "squeeze" kind name was guessed from the ledger output of another task).

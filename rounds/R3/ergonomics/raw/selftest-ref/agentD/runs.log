@@ -1,0 +1,8 @@
+{"t": 1794776225.014399, "task": "C04", "file": "probe.jsonl", "run": 1, "msgs": 2, "shown": 2, "png": null, "png_rc": null, "stderr": ""}
+{"t": 1794776225.522518, "task": "C04", "file": "attempt1.jsonl", "run": 2, "msgs": 2, "shown": 2, "png": null, "png_rc": null, "stderr": ""}
+{"t": 1794776226.0429041, "task": "C09", "file": "probe.jsonl", "run": 1, "msgs": 2, "shown": 2, "png": null, "png_rc": null, "stderr": ""}
+{"t": 1794776226.535273, "task": "C09", "file": "attempt1.jsonl", "run": 2, "msgs": 2, "shown": 2, "png": null, "png_rc": null, "stderr": ""}
+{"t": 1794776227.044363, "task": "C14", "file": "probe.jsonl", "run": 1, "msgs": 2, "shown": 2, "png": null, "png_rc": null, "stderr": ""}
+{"t": 1794776227.5381372, "task": "C14", "file": "attempt1.jsonl", "run": 2, "msgs": 2, "shown": 2, "png": null, "png_rc": null, "stderr": ""}
+{"t": 1794776228.043325, "task": "C19", "file": "probe.jsonl", "run": 1, "msgs": 2, "shown": 2, "png": null, "png_rc": null, "stderr": ""}
+{"t": 1794776228.540294, "task": "C19", "file": "attempt1.jsonl", "run": 2, "msgs": 2, "shown": 2, "png": null, "png_rc": null, "stderr": ""}

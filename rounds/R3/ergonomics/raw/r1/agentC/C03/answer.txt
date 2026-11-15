@@ -1,0 +1,1 @@
+ASELS'te en son geçersiz olan kapsül cap.ASELS.breakout.up.313: 313. barda 32,77'deki direncin yukarı kırılması (kapanış 33,22). 317. barda (son bar) "barrier.stop" nedeniyle, yani koruyucu stop bariyeri tetiklendiği için geçersiz oldu. Sinyal artık geçerli değil. Geçmişte bu sinyal 71 seferin 40'ında beklendiği gibi sonuçlandı.

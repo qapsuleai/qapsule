@@ -1,0 +1,2 @@
+{"conn":"a","msg":{"type":"hello","protocol":"qp/0","principal":"editor","surface":{"kind":"headless"}}}
+{"conn":"a","msg":{"type":"command","id":"c1","ops":[{"op":"set_audience","audience":{"group":"habituated","positions":[{"instrument":"THYAO","qty":100}]}}]}}

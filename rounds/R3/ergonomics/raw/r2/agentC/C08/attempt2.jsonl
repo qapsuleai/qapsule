@@ -1,0 +1,4 @@
+{"conn":"e","msg":{"type":"hello","protocol":"qp/0","principal":"editor","surface":{"kind":"headless"}}}
+{"conn":"e","msg":{"type":"query","id":"g1","query":{"kind":"get","id":"editor"}}}
+{"conn":"e","msg":{"type":"command","id":"c1","ops":[{"op":"set_audience","audience":{"group":"habituated","watchlist":["ASELS"]}}]}}
+{"conn":"e","msg":{"type":"query","id":"g2","query":{"kind":"get","id":"editor"}}}

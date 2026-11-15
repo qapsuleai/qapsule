@@ -1,0 +1,3 @@
+{"conn":"a","msg":{"type":"hello","protocol":"qp/0","principal":"editor","surface":{"kind":"headless"}}}
+{"conn":"a","msg":{"type":"query","id":"q0","query":{"kind":"capsules","instrument":"THYAO","open":true}}}
+{"conn":"a","msg":{"type":"query","id":"q1","query":{"kind":"present","finding":"fnd.THYAO.extreme.down.308","surface":"phone"}}}

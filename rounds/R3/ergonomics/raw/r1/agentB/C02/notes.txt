@@ -1,0 +1,2 @@
+attempt1: capsules query (THYAO, breakout, open) to find the id -> cap.THYAO.breakout.down.311 (cannot chain queries in one shot).
+attempt2: capsule detail query on that id; worked. Unclear: what "açık" maps to (I used open:true); evidence lives in capsule_detail.evidence.

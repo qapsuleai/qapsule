@@ -1,0 +1,3 @@
+{"conn":"a","msg":{"type":"hello","protocol":"qp/0","principal":"editor","surface":{"kind":"headless"}}}
+{"conn":"a","msg":{"type":"query","id":"q0","query":{"kind":"capsules","instrument":"THYAO","open":true}}}
+{"conn":"a","msg":{"type":"command","id":"c1","ops":[{"op":"reject_finding","finding":"fnd.THYAO.breakout.down.310"}]}}

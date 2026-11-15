@@ -1,0 +1,26 @@
+{
+ "argv": [
+  "render",
+  "--init",
+  "/private/tmp/claude-501/-Users-arkns-Works-Mchart-qapsule/9888bcbf-bbc3-4088-87e1-bd73f855b8fc/scratchpad/e3/docs/r1/agentE/init.json",
+  "--transcript",
+  "/Users/arkns/Works/Mchart/qapsule/.claude/worktrees/agent-a95198b19bb91064e/rounds/R3/ergonomics/raw/r1/agentE/C10/runs/02-attempt2.transcript.json",
+  "--root",
+  "/private/tmp/claude-501/-Users-arkns-Works-Mchart-qapsule/9888bcbf-bbc3-4088-87e1-bd73f855b8fc/scratchpad/e3/docs/r1/agentE",
+  "--out",
+  "/Users/arkns/Works/Mchart/qapsule/.claude/worktrees/agent-a95198b19bb91064e/rounds/R3/ergonomics/raw/r1/agentE/C10/runs/02-attempt2.png",
+  "--present",
+  "fnd.THYAO.breakout.down.314"
+ ],
+ "rc": 0,
+ "stdout": "",
+ "stderr": "",
+ "out": "/private/tmp/claude-501/-Users-arkns-Works-Mchart-qapsule/9888bcbf-bbc3-4088-87e1-bd73f855b8fc/scratchpad/e3/work/r1/agentE/C10/out.png",
+ "png": {
+  "out": "/private/tmp/claude-501/-Users-arkns-Works-Mchart-qapsule/9888bcbf-bbc3-4088-87e1-bd73f855b8fc/scratchpad/e3/work/r1/agentE/C10/out.png",
+  "view": "",
+  "present": "fnd.THYAO.breakout.down.314",
+  "surface": ""
+ },
+ "bytes": 12898
+}

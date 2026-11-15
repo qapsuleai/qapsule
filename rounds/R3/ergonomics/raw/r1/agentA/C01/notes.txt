@@ -1,0 +1,2 @@
+attempt1: capsules query instrument=THYAO (no filter) -> ~100 capsules, too broad for "bugün"; not an error but not a focused answer.
+attempt2: since_t=today 00:00Z -> empty; open:true -> 3 live capsules (used for answer); since_bar=312 also. Unclear: spec does not define "bugün" vs bar time (daily bars, last bar earlier than now), nor whether since_bar means birth or last transition; need welcome.now before choosing since_t but cannot chain within one shot.

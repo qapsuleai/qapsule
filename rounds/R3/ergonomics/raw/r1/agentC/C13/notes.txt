@@ -1,0 +1,3 @@
+attempt1: capsules THYAO meaning=breakout since_bar 300/270 to find ids; output order is by importance so latest unclear and output truncated by my own cut.
+attempt2: since_bar 315 to confirm no later one + capsule detail of cap.THYAO.breakout.down.314: story.history gave full transitions. Done.
+Unclear: "latest" = highest born_bar assumed (last_bar is also 317 for it); no sort-by-recency option; history lives only in capsule detail, not in capsules list.

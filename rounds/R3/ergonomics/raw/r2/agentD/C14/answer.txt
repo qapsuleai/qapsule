@@ -1,0 +1,1 @@
+THYAO'daki açık kırılım kapsülünün (fnd.THYAO.breakout.down.310) üç olgusunun (fx.THYAO.breakout.range.down.310, .311, .313) dondurulmuş kanıtı bugünkü veriyle sınandı: üçü de "doğrulandı". Bar sayısı ve veri özeti (digest) saklanan kanıtla aynı, kanıt değerleri de aynı; yani veride bir değişiklik yok.

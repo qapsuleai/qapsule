@@ -1,0 +1,4 @@
+{"conn":"a","msg":{"type":"hello","protocol":"qp/0","principal":"editor","surface":{"kind":"headless"}}}
+{"conn":"a","msg":{"type":"query","id":"q1","query":{"kind":"capsules","instrument":"THYAO","since_t":1711152000000}}}
+{"conn":"a","msg":{"type":"query","id":"q2","query":{"kind":"capsules","instrument":"THYAO","since_bar":312}}}
+{"conn":"a","msg":{"type":"query","id":"q3","query":{"kind":"capsules","instrument":"THYAO","open":true,"limit":20}}}

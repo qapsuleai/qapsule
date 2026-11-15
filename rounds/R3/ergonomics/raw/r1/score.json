@@ -1,0 +1,876 @@
+{
+ "agents": {
+  "agentA": {
+   "cost_usd": 0.8750644999999999,
+   "duration_ms": 127784,
+   "num_turns": 33,
+   "off": 3,
+   "output_tokens": 12967,
+   "seed": 1889963904,
+   "tokens": 1532492,
+   "tool_calls": 32
+  },
+  "agentB": {
+   "cost_usd": 0.6071311,
+   "duration_ms": 87510,
+   "num_turns": 31,
+   "off": 4,
+   "output_tokens": 9895,
+   "seed": 3492579545,
+   "tokens": 936658,
+   "tool_calls": 30
+  },
+  "agentC": {
+   "cost_usd": 0.6660907,
+   "duration_ms": 124235,
+   "num_turns": 37,
+   "off": 1,
+   "output_tokens": 12514,
+   "seed": 3908843561,
+   "tokens": 1708580,
+   "tool_calls": 36
+  },
+  "agentD": {
+   "cost_usd": 1.0679321000000002,
+   "duration_ms": 139494,
+   "num_turns": 40,
+   "off": 1,
+   "output_tokens": 13061,
+   "seed": 1716278250,
+   "tokens": 1714765,
+   "tool_calls": 39
+  },
+  "agentE": {
+   "cost_usd": 0.6404801,
+   "duration_ms": 94236,
+   "num_turns": 30,
+   "off": 1,
+   "output_tokens": 9255,
+   "seed": 1233753909,
+   "tokens": 1274894,
+   "tool_calls": 29
+  }
+ },
+ "rows": [
+  {
+   "agent": "A",
+   "answer": "Bugün (şimdi = 23 Mart 2024) THYAO'da yeni doğan kapsül yok. Şu an açık (canlı) üç kapsül var: (1) aşağı yönlü kırılım — 32,64 desteği kırıldı, son barda aynı aileden yeni kanıtla güçlendi, hâlâ geçerli (karnesi 24 seferin 8'i); (2) RSI aşırı satım bölgesinde (28,1), 5 bardır 30'un altında, sürüyor; (3) fiyat 4 bardır kısa ortalamanın altında, düşüş eğilimi sürüyor. Genel görünüm: zayıf/düşüş eğilimli.",
+   "attempts": 2,
+   "c13_alt_reading": null,
+   "detail": [
+    {
+     "error_codes": [],
+     "errors": 0,
+     "file": "attempt1.jsonl",
+     "how": "run",
+     "ids": [],
+     "msgs": 2,
+     "pass": true,
+     "run": "C01/runs/01-attempt1.jsonl",
+     "why": []
+    },
+    {
+     "error_codes": [],
+     "errors": 0,
+     "file": "attempt2.jsonl",
+     "how": "run",
+     "ids": [],
+     "msgs": 4,
+     "pass": true,
+     "run": "C01/runs/02-attempt2.jsonl",
+     "why": []
+    }
+   ],
+   "final": true,
+   "final_idfree": true,
+   "final_lenient": true,
+   "first": true,
+   "first_error": false,
+   "first_idfree": true,
+   "msgs_first": 2,
+   "msgs_total": 6,
+   "notes": "attempt1: capsules query instrument=THYAO (no filter) -> ~100 capsules, too broad for \"bugün\"; not an error but not a focused answer.\nattempt2: since_t=today 00:00Z -> empty; open:true -> 3 live capsules (used for answer); since_bar=312 also. Unclear: spec does not define \"bugün\" vs bar time (daily bars, last bar earlier than now), nor whether since_bar means birth or last transition; need welcome.now before choosing since_t but cannot chain within one shot.",
+   "other_runs": [],
+   "task": "C01"
+  },
+  {
+   "agent": "B",
+   "answer": "THYAO'daki tek açık kırılım kapsülü cap.THYAO.breakout.down.311 (aşağı kırılım, 311. barda doğdu, şu an \"güçlendi\" aşamasında, hâlâ geçerli). Kanıtı açtım: üç olgu (bar 311, 312, 314), hepsi kamuya açık fiyat ailesinden; kapanışlar 32,60 / 32,47 / 32,15, kırılan destek seviyeleri 32,64 / 32,56 / 32,21 (ATR ~2,40 / 2,25 / 1,98). Her olgunun dondurulmuş kanıt referansı (bist THYAO 1d, fnv1a64 özeti) var. Karne: 73 kapanıştan 42'si gerçekleşmiş.",
+   "attempts": 2,
+   "c13_alt_reading": null,
+   "detail": [
+    {
+     "error_codes": [],
+     "errors": 0,
+     "file": "attempt1.jsonl",
+     "how": "run",
+     "ids": [],
+     "msgs": 2,
+     "pass": false,
+     "run": "C02/runs/01-attempt1.jsonl",
+     "why": [
+      "capsule query on the open THYAO breakout with evidence values returned"
+     ]
+    },
+    {
+     "error_codes": [],
+     "errors": 0,
+     "file": "attempt2.jsonl",
+     "how": "run",
+     "ids": [
+      "cap.THYAO.breakout.down.311"
+     ],
+     "msgs": 2,
+     "pass": true,
+     "run": "C02/runs/02-attempt2.jsonl",
+     "why": []
+    }
+   ],
+   "final": true,
+   "final_idfree": false,
+   "final_lenient": true,
+   "first": false,
+   "first_error": false,
+   "first_idfree": false,
+   "msgs_first": 2,
+   "msgs_total": 4,
+   "notes": "attempt1: capsules query (THYAO, breakout, open) to find the id -> cap.THYAO.breakout.down.311 (cannot chain queries in one shot).\nattempt2: capsule detail query on that id; worked. Unclear: what \"açık\" maps to (I used open:true); evidence lives in capsule_detail.evidence.",
+   "other_runs": [],
+   "task": "C02"
+  },
+  {
+   "agent": "C",
+   "answer": "ASELS'te en son geçersiz olan kapsül cap.ASELS.breakout.up.313: 313. barda 32,77'deki direncin yukarı kırılması (kapanış 33,22). 317. barda (son bar) \"barrier.stop\" nedeniyle, yani koruyucu stop bariyeri tetiklendiği için geçersiz oldu. Sinyal artık geçerli değil. Geçmişte bu sinyal 71 seferin 40'ında beklendiği gibi sonuçlandı.",
+   "attempts": 3,
+   "c13_alt_reading": null,
+   "detail": [
+    {
+     "error_codes": [],
+     "errors": 0,
+     "file": "attempt1.jsonl",
+     "how": "run",
+     "ids": [],
+     "msgs": 3,
+     "pass": false,
+     "run": "C03/runs/01-attempt1.jsonl",
+     "why": [
+      "capsule query on cap.ASELS.breakout.up.313",
+      "answer gives the reason (None)"
+     ]
+    },
+    {
+     "error_codes": [],
+     "errors": 0,
+     "file": "attempt2.jsonl",
+     "how": "run",
+     "ids": [
+      "cap.ASELS.breakout.up.287"
+     ],
+     "msgs": 3,
+     "pass": false,
+     "run": "C03/runs/02-attempt2.jsonl",
+     "why": [
+      "capsule query on cap.ASELS.breakout.up.313",
+      "answer gives the reason (None)"
+     ]
+    },
+    {
+     "error_codes": [],
+     "errors": 0,
+     "file": "attempt3.jsonl",
+     "how": "run",
+     "ids": [
+      "cap.ASELS.breakout.up.313"
+     ],
+     "msgs": 3,
+     "pass": true,
+     "run": "C03/runs/03-attempt3.jsonl",
+     "why": []
+    }
+   ],
+   "final": true,
+   "final_idfree": false,
+   "final_lenient": true,
+   "first": false,
+   "first_error": false,
+   "first_idfree": false,
+   "msgs_first": 3,
+   "msgs_total": 9,
+   "notes": "attempt1: capsules query ASELS (invalidated, and all); output sorted by importance not recency, so I wrongly guessed the latest from a truncated view.\nattempt2: since_bar 200 + detail of cap ...287 (wrong pick; 313 with last_bar 317 was later).\nattempt3: since_bar 300 + detail of cap.ASELS.breakout.up.313: reason barrier.stop at bar 317. Done.\nUnclear: capsules sorted by importance, \"latest\" needs last_bar/since_bar; since_bar semantics (born vs last) unspecified; \"geçersiz\" could also mean expired; reason code \"barrier.stop\" is not explained in the spec.",
+   "other_runs": [],
+   "task": "C03"
+  },
+  {
+   "agent": "D",
+   "answer": "THYAO'daki tek açık (aşaması \"güçlendi\", canlı) kırılım kapsülü cap.THYAO.breakout.down.314 (bulgu fnd.THYAO.breakout.down.314, aşağı kırılım) idi. Editör rolünün karar (decide) yetkisi olmadığı için ret doğrudan uygulanmadı; otorite bunu bekleyen bir öneri olarak kaydetti (prop-4, durum \"proposed\"). Kapsül, karar yetkisi olan biri öneriyi kabul edene kadar reddedilmiş sayılmaz.",
+   "attempts": 2,
+   "c13_alt_reading": null,
+   "detail": [
+    {
+     "error_codes": [
+      "not_found"
+     ],
+     "errors": 1,
+     "file": "attempt1.jsonl",
+     "how": "run",
+     "ids": [],
+     "msgs": 3,
+     "pass": false,
+     "run": "C04/runs/01-attempt1.jsonl",
+     "why": [
+      "reject_finding on the open THYAO breakout's finding, in the log (applied or proposed)"
+     ]
+    },
+    {
+     "error_codes": [],
+     "errors": 0,
+     "file": "attempt2.jsonl",
+     "how": "run",
+     "ids": [
+      "fnd.THYAO.breakout.down.314"
+     ],
+     "msgs": 2,
+     "pass": true,
+     "run": "C04/runs/02-attempt2.jsonl",
+     "why": []
+    }
+   ],
+   "final": true,
+   "final_idfree": false,
+   "final_lenient": true,
+   "first": false,
+   "first_error": true,
+   "first_idfree": false,
+   "msgs_first": 3,
+   "msgs_total": 5,
+   "notes": "attempt1: capsules query + reject_finding with selector {\"kind\":\"breakout\",\"state\":\"live\"} -> not_found: selector `kind` is the full dotted fact kind (breakout.range.down), and \"state: live\" also matches realized capsules, so it can't mean \"open\". Spec does not say what \"açık\" maps to (it is the stage: born/strengthened vs realized/invalidated). Found the only open THYAO breakout: fnd.THYAO.breakout.down.314 (stage strengthened).\nattempt2: reject_finding on that id -> ack status \"proposed\" (prop-4), because editor has no `decide`; the finding is not rejected until an owner accepts the proposal. Unclear in spec whether reject_finding turns into a proposal (the non-proposable list doesn't include it) - it did.",
+   "other_runs": [],
+   "task": "C04"
+  },
+  {
+   "agent": "E",
+   "answer": "Önem sırasına göre en önemli üç kapsül: (1) cap.ASELS.breakout.down.235 — ASELS aşağı kırılım (önem 3,676; süresi doldu); (2) cap.THYAO.breakout.up.173 — THYAO yukarı kırılım (önem 3,675; gerçekleşti); (3) cap.ASELS.breakout.down.229 — ASELS aşağı kırılım (önem 3,675; gerçekleşti). Üçü de kırılım türünde. Not: sıralama yalnızca önem puanına göredir; üçünün de sinyali artık geçerli değil, açık olanlar daha düşük önemde.",
+   "attempts": 1,
+   "c13_alt_reading": null,
+   "detail": [
+    {
+     "error_codes": [],
+     "errors": 0,
+     "file": "attempt1.jsonl",
+     "how": "run",
+     "ids": [],
+     "msgs": 3,
+     "pass": true,
+     "run": "C05/runs/01-attempt1.jsonl",
+     "why": []
+    }
+   ],
+   "final": true,
+   "final_idfree": true,
+   "final_lenient": true,
+   "first": true,
+   "first_error": false,
+   "first_idfree": true,
+   "msgs_first": 3,
+   "msgs_total": 3,
+   "notes": "attempt1: capsules query with limit 3 (plus unlimited); worked. Unclear: \"en önemli\" = importance order only, closed/expired capsules included; spec doesn't say whether open ones should be preferred.",
+   "other_runs": [],
+   "task": "C05"
+  },
+  {
+   "agent": "A",
+   "answer": "Kırılım (breakout) türünün karnesi: kapanan 74 kapsülün 42'si gerçekleşti (yaklaşık %57). Karşılaştırma için genel toplamda 186 kapanıştan 88'i gerçekleşti.",
+   "attempts": 1,
+   "c13_alt_reading": null,
+   "detail": [
+    {
+     "error_codes": [],
+     "errors": 0,
+     "file": "attempt1.jsonl",
+     "how": "run",
+     "ids": [],
+     "msgs": 2,
+     "pass": true,
+     "run": "C06/runs/01-attempt1.jsonl",
+     "why": []
+    }
+   ],
+   "final": true,
+   "final_idfree": true,
+   "final_lenient": true,
+   "first": true,
+   "first_error": false,
+   "first_idfree": true,
+   "msgs_first": 2,
+   "msgs_total": 2,
+   "notes": "attempt1: ledger by_kind:true -> rows per kind, breakout n=74 realized=42. Succeeded first try. Minor: \"Kırılım\" -> kind \"breakout\" mapping is a guess from English kind names; spec lists no kind names (the by_kind rows revealed them).",
+   "other_runs": [],
+   "task": "C06"
+  },
+  {
+   "agent": "B",
+   "answer": "Hassasiyetiniz \"yalnız önemliler\" (important) olarak ayarlandı (set_sensitivity uygulandı, seq 4).",
+   "attempts": 1,
+   "c13_alt_reading": null,
+   "detail": [
+    {
+     "error_codes": [],
+     "errors": 0,
+     "file": "attempt1.jsonl",
+     "how": "run",
+     "ids": [],
+     "msgs": 2,
+     "pass": true,
+     "run": "C07/runs/01-attempt1.jsonl",
+     "why": []
+    }
+   ],
+   "final": true,
+   "final_idfree": true,
+   "final_lenient": true,
+   "first": true,
+   "first_error": false,
+   "first_idfree": true,
+   "msgs_first": 2,
+   "msgs_total": 2,
+   "notes": "attempt1: set_sensitivity with sensitivity \"important\", no principal (= self); applied. No issues. Not verified by readback (no query exposes the audience).",
+   "other_runs": [],
+   "task": "C07"
+  },
+  {
+   "agent": "C",
+   "answer": "",
+   "attempts": 2,
+   "c13_alt_reading": null,
+   "detail": [
+    {
+     "error_codes": [],
+     "errors": 0,
+     "file": "attempt1.jsonl",
+     "how": "run",
+     "ids": [],
+     "msgs": 3,
+     "pass": true,
+     "run": "C08/runs/01-attempt1.jsonl",
+     "why": []
+    },
+    {
+     "error_codes": [],
+     "errors": 0,
+     "file": "attempt2.jsonl",
+     "how": "run",
+     "ids": [],
+     "msgs": 4,
+     "pass": true,
+     "run": "C08/runs/02-attempt2.jsonl",
+     "why": []
+    }
+   ],
+   "final": true,
+   "final_idfree": true,
+   "final_lenient": true,
+   "first": true,
+   "first_error": false,
+   "first_idfree": true,
+   "msgs_first": 3,
+   "msgs_total": 7,
+   "notes": "attempt1: set_audience {group:\"habituated\", watchlist:[\"ASELS\"]} -> ack applied (seq 4). Group value guessed from spec (§20.4 \"habituated\"); schema not checked.\nattempt2: same command wrapped with document queries to verify; ack applied again (output of document truncated, so not inspected - audience is private/projected out of document anyway).\nUnclear: valid group names not listed in PROTOCOL; set_audience replaces whole audience (may overwrite existing positions/sensitivity); no easy read-back of own audience. Attempt 2 was only verification.",
+   "other_runs": [],
+   "task": "C08"
+  },
+  {
+   "agent": "D",
+   "answer": "THYAO'daki açık aşırılık kapsülü fnd.THYAO.extreme.down.312 (RSI aşırı satım, canlı, aşaması \"doğdu\"). Kapsül derinliğinde sunum: \"THYAO'da RSI 5 bardır 30'un altında; şu an 28,1. Aşırı satım sürüyor. Karnesi henüz az örnekli: 4 seferin 1'inde tuttu.\" Güven 0,008. Sunum, son 60 barlık kapanış çizgisi (spark), 30 seviyesinde bir kural ve olgu noktasından oluşan kapsül kartı görünümünü de içeriyor.",
+   "attempts": 2,
+   "c13_alt_reading": null,
+   "detail": [
+    {
+     "error_codes": [
+      "not_found"
+     ],
+     "errors": 1,
+     "file": "attempt1.jsonl",
+     "how": "run",
+     "ids": [],
+     "msgs": 2,
+     "pass": false,
+     "run": "C09/runs/01-attempt1.jsonl",
+     "why": [
+      "present of the open THYAO extreme capsule at capsule depth"
+     ]
+    },
+    {
+     "error_codes": [],
+     "errors": 0,
+     "file": "attempt2.jsonl",
+     "how": "run",
+     "ids": [
+      "fnd.THYAO.extreme.down.312"
+     ],
+     "msgs": 2,
+     "pass": true,
+     "run": "C09/runs/02-attempt2.jsonl",
+     "why": []
+    }
+   ],
+   "final": true,
+   "final_idfree": false,
+   "final_lenient": true,
+   "first": false,
+   "first_error": true,
+   "first_idfree": false,
+   "msgs_first": 2,
+   "msgs_total": 4,
+   "notes": "attempt1: present with selector {\"kind\":\"extreme\",\"state\":\"live\"}, surface phone -> not_found (kind must be dotted full kind e.g. extreme.rsi.oversold; \"live\" is not \"open\"). Identified the open extreme capsule from the capsules list of C04 run (stage born): fnd.THYAO.extreme.down.312.\nattempt2: present finding=fnd.THYAO.extreme.down.312, surface \"phone\" (capsule depth) -> presentation depth capsule with text, spark, capsule_view. OK.\nUnclear: \"kapsül derinliği\" -> which surface; had to infer phone from the profile table. \"açık\" mapping to stage also inferred.",
+   "other_runs": [],
+   "task": "C09"
+  },
+  {
+   "agent": "E",
+   "answer": "THYAO'daki açık kırılım kapsülü cap.THYAO.breakout.down.314 (aşağı kırılım, güçlenmiş, hâlâ geçerli). Grafik derinliğinde gösterdim: mum paneli, olgu barına vurgu ve kapsül işareti var. Kırılan seviye çiziliyor: 32,64'teki destek, 'level' kuralı olarak olgudan kökenlenmiş şekilde çiziliyor (ayrıca güçlendiren olguların 32,56 ve 32,21 seviyeleri için iki kural daha var). PNG'de seviyeler en altta turuncu yatay çizgiler olarak görünüyor; fiyat çok düştüğü için mumlara yakın.",
+   "attempts": 2,
+   "c13_alt_reading": null,
+   "detail": [
+    {
+     "error_codes": [],
+     "errors": 0,
+     "file": "attempt1.jsonl",
+     "how": "run",
+     "ids": [],
+     "msgs": 2,
+     "pass": false,
+     "run": "C10/runs/01-attempt1.jsonl",
+     "why": [
+      "present of the open THYAO breakout at chart depth",
+      "answer says the broken level is not drawn"
+     ]
+    },
+    {
+     "error_codes": [],
+     "errors": 0,
+     "file": "attempt2.jsonl",
+     "how": "run",
+     "ids": [
+      "cap.THYAO.breakout.down.314",
+      "fnd.THYAO.breakout.down.314"
+     ],
+     "msgs": 3,
+     "pass": true,
+     "run": "C10/runs/02-attempt2.jsonl",
+     "why": []
+    }
+   ],
+   "final": true,
+   "final_idfree": false,
+   "final_lenient": true,
+   "first": false,
+   "first_error": false,
+   "first_idfree": false,
+   "msgs_first": 2,
+   "msgs_total": 5,
+   "notes": "attempt1: capsules query (instrument THYAO, open true) to discover the open breakout capsule (fnd.THYAO.breakout.down.314); no render yet since id unknown.\nattempt2: present + capsule query with --png --present; level rules drawn (32.64, 32.56, 32.21). Spec unclear: id discovery requires a run first; \"open\" filter semantic (live states incl. strengthened) only inferable.",
+   "other_runs": [],
+   "task": "C10"
+  },
+  {
+   "agent": "A",
+   "answer": "THYAO'daki en son akış kapsülünün kanıtını açamıyorum: akış (flow) verisi lisanslı ve sizin akış veri yetkiniz yok, bu yüzden sunucu bu kapsülü size hiç göstermiyor (kapsül sorgusu \"bulunamadı\" döndü). Bunun yerine yalnızca sunucunun mühürlü yorumları geliyor: \"kurumsal net satış/alış hissenin olağan düzeyinin belirgin biçimde üzerinde; ham rakamlar akış veri yetkisi (flow/*) gerektirir\". Kanıtı görmek için bu yetkinin verilmesi gerekir.",
+   "attempts": 2,
+   "c13_alt_reading": null,
+   "detail": [
+    {
+     "error_codes": [
+      "schema"
+     ],
+     "errors": 1,
+     "file": "attempt1.jsonl",
+     "how": "run",
+     "ids": [],
+     "msgs": 3,
+     "pass": true,
+     "run": "C11/runs/01-attempt1.jsonl",
+     "why": []
+    },
+    {
+     "error_codes": [
+      "not_found"
+     ],
+     "errors": 1,
+     "file": "attempt2.jsonl",
+     "how": "run",
+     "ids": [
+      "cap.THYAO.flow.down.301"
+     ],
+     "msgs": 3,
+     "pass": true,
+     "run": "C11/runs/02-attempt2.jsonl",
+     "why": []
+    }
+   ],
+   "final": true,
+   "final_idfree": false,
+   "final_lenient": true,
+   "first": true,
+   "first_error": true,
+   "first_idfree": true,
+   "msgs_first": 3,
+   "msgs_total": 6,
+   "notes": "attempt1: capsule query with selector {\"latest\":true} -> schema error (capsule field takes a string id only, although PROTOCOL §17.2 suggests id/finding fields take selectors). List output was also huge.\nattempt2: capsules list (limit 4) shows non-flow capsules + server comments; capsule detail for id cap.THYAO.flow.down.301 -> not_found (hidden from unentitled). Caveat: I guessed that id from the editor's run in C01, which a viewer could not know; spec says hidden and nonexistent give the same not_found, so \"latest flow capsule\" is unknowable for the viewer.",
+   "other_runs": [],
+   "task": "C11"
+  },
+  {
+   "agent": "B",
+   "answer": "THYAO kapsüllerine abone oldunuz (capsules konusu, enstrüman THYAO, süzgeçsiz); yeni geçişler bildirim olarak gelecek.",
+   "attempts": 1,
+   "c13_alt_reading": null,
+   "detail": [
+    {
+     "error_codes": [],
+     "errors": 0,
+     "file": "attempt1.jsonl",
+     "how": "run",
+     "ids": [],
+     "msgs": 2,
+     "pass": true,
+     "run": "C12/runs/01-attempt1.jsonl",
+     "why": []
+    }
+   ],
+   "final": true,
+   "final_idfree": true,
+   "final_lenient": true,
+   "first": true,
+   "first_error": false,
+   "first_idfree": true,
+   "msgs_first": 2,
+   "msgs_total": 2,
+   "notes": "attempt1: subscribe, topic capsules, instrument THYAO, all:true; ack subscribed. Ambiguity: all:true skips the audience filter; I chose it so every transition is reported. No notifications seen since the run has no data events.",
+   "other_runs": [],
+   "task": "C12"
+  },
+  {
+   "agent": "C",
+   "answer": "THYAO'da en son gerçekleşen kırılım kapsülü cap.THYAO.breakout.down.314: 314. barda 32,64'teki desteğin aşağı kırılması (kapanış 32,60). Geçmişi: (1) 314. bar, \"born\" (yeni hikâye, neden new_story); (2) 315. bar, \"strengthened\" (aynı aileden yeni olgu, neden same_family); (3) 317. bar, \"strengthened\" (aynı aileden yeni olgu, neden same_family). Kapsül şu an hâlâ geçerli (canlı).",
+   "attempts": 2,
+   "c13_alt_reading": true,
+   "detail": [
+    {
+     "error_codes": [],
+     "errors": 0,
+     "file": "attempt1.jsonl",
+     "how": "run",
+     "ids": [],
+     "msgs": 3,
+     "pass": false,
+     "run": "C13/runs/01-attempt1.jsonl",
+     "why": [
+      "capsule query on cap.THYAO.breakout.down.310"
+     ]
+    },
+    {
+     "error_codes": [],
+     "errors": 0,
+     "file": "attempt2.jsonl",
+     "how": "run",
+     "ids": [
+      "cap.THYAO.breakout.down.314"
+     ],
+     "msgs": 3,
+     "pass": false,
+     "run": "C13/runs/02-attempt2.jsonl",
+     "why": [
+      "capsule query on cap.THYAO.breakout.down.310"
+     ]
+    }
+   ],
+   "final": false,
+   "final_idfree": false,
+   "final_lenient": true,
+   "first": false,
+   "first_error": false,
+   "first_idfree": false,
+   "msgs_first": 3,
+   "msgs_total": 6,
+   "notes": "attempt1: capsules THYAO meaning=breakout since_bar 300/270 to find ids; output order is by importance so latest unclear and output truncated by my own cut.\nattempt2: since_bar 315 to confirm no later one + capsule detail of cap.THYAO.breakout.down.314: story.history gave full transitions. Done.\nUnclear: \"latest\" = highest born_bar assumed (last_bar is also 317 for it); no sort-by-recency option; history lives only in capsule detail, not in capsules list.",
+   "other_runs": [],
+   "task": "C13"
+  },
+  {
+   "agent": "D",
+   "answer": "THYAO'daki açık kırılım kapsülü (fnd.THYAO.breakout.down.314) için dondurulmuş kanıt bugünkü veriyle sınandı: sonuç \"doğrulandı\". Bulgunun üç olgusunun (bar 314, 315 ve 317) her birinde kayıtlı veri özeti ile bugünkü veri özeti aynı (aynı bar sayısı ve aynı kanıt değerleri); fark yok.",
+   "attempts": 2,
+   "c13_alt_reading": null,
+   "detail": [
+    {
+     "error_codes": [
+      "schema"
+     ],
+     "errors": 1,
+     "file": "attempt1.jsonl",
+     "how": "run",
+     "ids": [],
+     "msgs": 2,
+     "pass": false,
+     "run": "C14/runs/01-attempt1.jsonl",
+     "why": [
+      "verify_evidence on the open THYAO breakout's fact (or its finding)"
+     ]
+    },
+    {
+     "error_codes": [],
+     "errors": 0,
+     "file": "attempt2.jsonl",
+     "how": "run",
+     "ids": [
+      "fnd.THYAO.breakout.down.314"
+     ],
+     "msgs": 2,
+     "pass": true,
+     "run": "C14/runs/02-attempt2.jsonl",
+     "why": []
+    }
+   ],
+   "final": true,
+   "final_idfree": false,
+   "final_lenient": true,
+   "first": false,
+   "first_error": true,
+   "first_idfree": false,
+   "msgs_first": 2,
+   "msgs_total": 4,
+   "notes": "attempt1: verify_evidence with item as selector {\"finding\":{...}} -> schema error \"invalid type: map, expected a string\" (spec §17.2 does not list verify_evidence.item as selector-capable; the table lists only get/study/at/hit/present). Also the selector kind was wrong anyway.\nattempt2: item = id fnd.THYAO.breakout.down.314 (open breakout capsule, found via capsules list) -> evidence_check verified:true, 3 facts verified (same bar digests, same values).",
+   "other_runs": [],
+   "task": "C14"
+  },
+  {
+   "agent": "E",
+   "answer": "THYAO'daki açık kırılım kapsülü (cap.THYAO.breakout.down.314) için kesin iddiaya itiraz gönderdim. Otorite kesin veriyle yeniden sınadı ve itirazı reddetti (verdict: rejected): iddia kesin veride de tutuyor, kanıtı (final, temiz) bana döndü. Yani iddia geri çekilmedi; yansınızdaki verinin kesin kaynaktan farklı olması muhtemel.",
+   "attempts": 1,
+   "c13_alt_reading": null,
+   "detail": [
+    {
+     "error_codes": [],
+     "errors": 0,
+     "file": "attempt1.jsonl",
+     "how": "run",
+     "ids": [
+      "cap.THYAO.breakout.down.314",
+      "fnd.THYAO.breakout.down.314"
+     ],
+     "msgs": 2,
+     "pass": true,
+     "run": "C15/runs/01-attempt1.jsonl",
+     "why": []
+    }
+   ],
+   "final": true,
+   "final_idfree": false,
+   "final_lenient": true,
+   "first": true,
+   "first_error": false,
+   "first_idfree": false,
+   "msgs_first": 2,
+   "msgs_total": 2,
+   "notes": "attempt1: dispute for capsule claim, t = capsule last_bar t (1711004400000), values [], anchor_t from fact evidence_ref; accepted, verdict rejected (claim holds on settled data). Unclear: which t to use (birth vs last bar), what 'values' to give since I cannot see the replica's data; values/digest not validated against the replica. Task states replica data contradicts but I have no replica data, so could not supply real values.",
+   "other_runs": [],
+   "task": "C15"
+  },
+  {
+   "agent": "A",
+   "answer": "Hayır, THYAO'daki sıkışma kapsülü artık geçerli değil. Tek sıkışma kapsülü (yön belirsiz, 138. barda doğdu) geçersiz oldu (durum: invalidated); sistem \"artık sürmüyor, sinyal 157 bar önce geçersiz oldu\" diyor. Henüz karnesi yok.",
+   "attempts": 1,
+   "c13_alt_reading": null,
+   "detail": [
+    {
+     "error_codes": [],
+     "errors": 0,
+     "file": "attempt1.jsonl",
+     "how": "run",
+     "ids": [],
+     "msgs": 2,
+     "pass": true,
+     "run": "C16/runs/01-attempt1.jsonl",
+     "why": []
+    }
+   ],
+   "final": true,
+   "final_idfree": true,
+   "final_lenient": true,
+   "first": true,
+   "first_error": false,
+   "first_idfree": true,
+   "msgs_first": 2,
+   "msgs_total": 2,
+   "notes": "attempt1: capsules instrument=THYAO; found the single squeeze capsule cap.THYAO.squeeze.neutral.138, stage/state invalidated. Succeeded. The capsules query has no kind filter (only meaning?/stages?/open?), so I had to scan the whole unfiltered list; output was huge.",
+   "other_runs": [],
+   "task": "C16"
+  },
+  {
+   "agent": "B",
+   "answer": "Son on barda (bar 306-315) doğan 7 kapsül var: 4 kırılım (THYAO 307 ve 311, ASELS 308 ve 310), 1 akış (ASELS 312), 1 devam (THYAO 310), 1 aşırılık (THYAO 309). Dönüş ve sıkışma yok. İki enstrüman birlikte sayıldı.",
+   "attempts": 2,
+   "c13_alt_reading": null,
+   "detail": [
+    {
+     "error_codes": [],
+     "errors": 0,
+     "file": "attempt1.jsonl",
+     "how": "run",
+     "ids": [],
+     "msgs": 2,
+     "pass": true,
+     "run": "C17/runs/01-attempt1.jsonl",
+     "why": []
+    },
+    {
+     "error_codes": [],
+     "errors": 0,
+     "file": "attempt2.jsonl",
+     "how": "run",
+     "ids": [],
+     "msgs": 2,
+     "pass": true,
+     "run": "C17/runs/02-attempt2.jsonl",
+     "why": []
+    }
+   ],
+   "final": true,
+   "final_idfree": true,
+   "final_lenient": true,
+   "first": true,
+   "first_error": false,
+   "first_idfree": true,
+   "msgs_first": 2,
+   "msgs_total": 4,
+   "notes": "attempt1: capsules query for THYAO only; output huge and the request names no instrument, so it did not answer the question (exploration).\nattempt2: since_bar:306 across all instruments, then counted born_bar>=306 by kind (last bar 315 from series len 316). Unclear: since_bar filters transitions, not birth, so I filtered born_bar by hand; scope (both instruments) is my assumption. No server-side count by kind for open capsules (ledger counts closed ones only).",
+   "other_runs": [],
+   "task": "C17"
+  },
+  {
+   "agent": "C",
+   "answer": "",
+   "attempts": 2,
+   "c13_alt_reading": null,
+   "detail": [
+    {
+     "error_codes": [
+      "schema"
+     ],
+     "errors": 1,
+     "file": "attempt1.jsonl",
+     "how": "run",
+     "ids": [],
+     "msgs": 2,
+     "pass": false,
+     "run": "C18/runs/01-attempt1.jsonl",
+     "why": [
+      "editor's position THYAO = 100 (got None)"
+     ]
+    },
+    {
+     "error_codes": [],
+     "errors": 0,
+     "file": "attempt2.jsonl",
+     "how": "run",
+     "ids": [],
+     "msgs": 2,
+     "pass": true,
+     "run": "C18/runs/02-attempt2.jsonl",
+     "why": []
+    }
+   ],
+   "final": true,
+   "final_idfree": true,
+   "final_lenient": true,
+   "first": false,
+   "first_error": true,
+   "first_idfree": false,
+   "msgs_first": 2,
+   "msgs_total": 4,
+   "notes": "attempt1: set_audience with positions as an array of {instrument,qty} -> schema error: positions must be an object.\nattempt2: positions {\"THYAO\":100} (symbol -> quantity), group \"habituated\" -> applied (seq 4).\nUnclear: PROTOCOL §20.3 does not give the shape of positions (nor valid group names); had to guess from the error. Whether the value 100 means quantity/shares was not verified. set_audience replaces the whole audience.",
+   "other_runs": [],
+   "task": "C18"
+  },
+  {
+   "agent": "D",
+   "answer": "Aşaması \"gerçekleşti\" olan kapsüller listelendi: THYAO ve ASELS için toplam yaklaşık 90 kapsül, önem sırasıyla. En önemlileri: THYAO yukarı kırılım (cap.THYAO.breakout.up.173), ASELS aşağı kırılım (cap.ASELS.breakout.down.229), ASELS yukarı kırılım (cap.ASELS.breakout.up.65, .263, .300) ve THYAO aşağı kırılım (cap.THYAO.breakout.down.310). Geri kalanlar kırılım, kurumsal akış, devam, dönüş ve aşırılık türlerinde; hepsinin beklenen sonucu gerçekleşmiş durumda.",
+   "attempts": 1,
+   "c13_alt_reading": null,
+   "detail": [
+    {
+     "error_codes": [],
+     "errors": 0,
+     "file": "attempt1.jsonl",
+     "how": "run",
+     "ids": [],
+     "msgs": 2,
+     "pass": true,
+     "run": "C19/runs/01-attempt1.jsonl",
+     "why": []
+    }
+   ],
+   "final": true,
+   "final_idfree": true,
+   "final_lenient": true,
+   "first": true,
+   "first_error": false,
+   "first_idfree": true,
+   "msgs_first": 2,
+   "msgs_total": 2,
+   "notes": "attempt1: capsules query with stages:[\"realized\"] -> worked first time; returned all realized capsules (THYAO and ASELS, ~90, ordered by importance). No instrument filter requested so none applied. Note \"stage realized\" has state \"live\" in the doc, so \"gerçekleşen\" had to be mapped to stage, not state. Output is huge (welcome summary + full list); no limit used.",
+   "other_runs": [],
+   "task": "C19"
+  },
+  {
+   "agent": "E",
+   "answer": "",
+   "attempts": 1,
+   "c13_alt_reading": null,
+   "detail": [
+    {
+     "error_codes": [],
+     "errors": 0,
+     "file": "attempt1.jsonl",
+     "how": "run",
+     "ids": [
+      "fnd.THYAO.breakout.down.314"
+     ],
+     "msgs": 2,
+     "pass": true,
+     "run": "C20/runs/01-attempt1.jsonl",
+     "why": []
+    }
+   ],
+   "final": true,
+   "final_idfree": false,
+   "final_lenient": true,
+   "first": true,
+   "first_error": false,
+   "first_idfree": false,
+   "msgs_first": 2,
+   "msgs_total": 2,
+   "notes": "attempt1: reused id from C10 discovery; --png --present fnd.THYAO.breakout.down.314 (chart depth: candles, level rules, glyph, highlight). PNG written. Unclear: \"işaretli\" interpreted as the presenter chart with glyph/highlight marks.",
+   "other_runs": [],
+   "task": "C20"
+  }
+ ],
+ "summary": {
+  "attempts": 33,
+  "cost_usd": 3.8567,
+  "final": 19,
+  "final_idfree": 10,
+  "final_lenient": 20,
+  "first": 12,
+  "first_error": 5,
+  "first_idfree": 10,
+  "label": "r1",
+  "msgs_first": 46,
+  "msgs_total": 81,
+  "output_tokens": 57692,
+  "tasks": 20,
+  "tokens": 7167389,
+  "unnumbered_runs": 0,
+  "wall_s": 573.3
+ }
+}

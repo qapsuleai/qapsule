@@ -50,3 +50,17 @@ fn tape_is_deterministic() {
     let b = serde_json::to_string(&run(3).unwrap().tape).unwrap();
     assert_eq!(a, b);
 }
+
+/// A replica whose own provider does not entitle its principal cannot verify anything:
+/// every claim stays pending with reason `no_entitlement` (§19.7), nothing is shown.
+#[test]
+fn unentitled_replica_shows_only_pending() {
+    let p = serde_json::json!({"feeds":[{"feed":{"symbol":"THYAO","interval":"1d"},
+        "synthetic":{"n":qp_session::tape::START,"seed":qp_session::tape::SEED}}],
+        "entitlements":{}});
+    let o = qp_session::tape::run_with(0, &p).unwrap();
+    assert!(o.violations.is_empty(), "{:?}", o.violations);
+    assert_eq!(o.shown_counts.0 + o.shown_counts.1 + o.shown_counts.3, 0);
+    assert!(o.shown_counts.2 > 0, "claims arrive and stay pending");
+    assert_eq!(o.shown_final, 0);
+}

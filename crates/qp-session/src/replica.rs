@@ -257,6 +257,13 @@ impl Replica {
         }
     }
 
+    /// Starts from a document the host already holds (a snapshot, e.g. after a hand-over
+    /// or from local storage) at log position `seq`; later `change` events continue it.
+    pub fn start(&mut self, doc: Document, seq: Seq) {
+        self.load(doc, seq);
+        self.reconcile();
+    }
+
     /// Sets the display policy.
     pub fn set_options(&mut self, opts: ReplicaOptions) {
         self.opts = opts;

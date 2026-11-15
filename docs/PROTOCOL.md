@@ -251,6 +251,7 @@ Konular (`topic.kind`):
 | `attention` | `principal?` (varsayılan: abone) | `attention` (yönerge), `viewport` (bakış değişti) |
 | `intents` | — | `intent_triggered` |
 | `view` (RP2) | `view` (seçici de olur) | `view_changed` (görünümün okuduğu bir serinin barları değişti; §18.8) |
+| `claims` (RP2/T8) | — | `claim` (otoritenin veri kaynaklı iddiası, kanıtıyla: geçici, kesin, geri çekildi, temizlik değişti; §19.3). Veri kaynaklı `condition_met`, `intent_triggered`, `finding_state` ve motor girdisinin `change`'i de isteğe bağlı `evidence` (`ClaimEvidence`) taşır |
 
 Abonelik kimliği `subscribe` mesajının `id`'sidir. `unsubscribe {"id":…, "sub":"s2"}`.
 Bir bağlantı en çok `limits.max_subscriptions` abonelik tutar.
@@ -772,8 +773,10 @@ sonunda koşucu günlüğü baştan oynatır ve dokümanın baytlarının aynı 
 
 **Çıktı sırası** (deterministik): önce gönderene cevap; sonra oluşan her girdi için sırayla
 `change`, `finding_state`, `proposal` olayları; sonra (RP2) `view_changed` (her bar
-değişimi için sırayla); sonra `condition_met` ve `intent_triggered`; her olay, abonelerine
-bağlantı açılış sırası ve abonelik sırasıyla.
+değişimi için sırayla); sonra `condition_met` ve `intent_triggered`; sonra (RP2/T8) `claim`
+olayları (iddiaların oluşma sırasıyla: barın kapanması ve düzeltmeler, sonra koşullar,
+niyetler, geçersizleşmeler; §19.3); her olay, abonelerine bağlantı açılış sırası ve
+abonelik sırasıyla.
 
 ## 16. Gömme
 
@@ -1103,6 +1106,7 @@ gider.**
 | `study`, `at`, `hit` değerleri, `screen` katman `last` ve `last_close`, `present` kıvılcımı ve görünümü, `list full` | verilmez (`no_entitlement` ya da alan boş; `screen`'de katman `binding: no_entitlement`) |
 | `summary.series[].len`, bağın kendisi, `binding` sorgusunda durum ve çapa | verilir (veri değil) |
 | olgular, bulgular, kapsül durumları ve onların metinleri, kanıt değerleri (`evidence`), `finding_state` | verilir (anlam düzlemi; dokümanın parçası). **Açık soru** (Arkin): olgunun kanıt değerleri (ör. "RSI 71,4") veri lisansı kapsamında mı? Kapsamdaysa yetkisiz kişiye `evidence` değerleri gizlenir; v0 göstermektedir. |
+| iddia kanıtının değerleri (`ClaimEvidence.values[].value`/`prev`; §19.7) | `change`, `finding_state`, `claim` (kapsül) ve `log` sorgusunda kanıt **değerleri çıkarılır**; `t`, seri kimlikleri, olgunluk, temizlik, çapa ve beslemeler kalır. Süzgeç kanıtın oluşturulurken kaydettiği beslemelere (`feeds`) göre yapılır, bugünkü dokümana göre değil |
 | `condition_met`, `intent_triggered` | **verilmez**: koşulun okuduğu (hesap girdileri üzerinden) her bağlı beslemeye yetkili olmayan aboneye gitmez; o abone için koşul değerlendirilmez, kenar durumu korunur (RP2 T4 denetimi Y1) |
 | `verify_evidence` | `no_entitlement` |
 
@@ -1401,8 +1405,176 @@ durumla tutulur. Kaynak: `crates/qp-session/src/live.rs`, `values.rs`; ölçüm 
 
 ## 19. Tutarlılık: otorite ile yansının aynı veriye baktığı (RP2)
 
-> Bu bölüm RP2/T8'de, ölçülen yaklaşımlar arasından seçilenle yazılır
-> (`rounds/RP2/RESEARCH.md`, `rounds/RP2/experiments/`).
+> Seçilen tasarım (RP2/T7, `rounds/RP2/experiments/T7-COMPARE.md`): **B + §18.5**. Otorite
+> veri kaynaklı her iddiasına kanıt değerlerini ekler; yansı bir iddiayı yalnız **kendi
+> verisinde** aynı yüklem tuttuğunda gösterir. Dondurulmuş kanıt (`EvidenceRef`,
+> `verify_evidence`, §18.5) olduğu gibi kalır. Kavramlar `docs/CONCEPTS.md` "Tutarlılık".
+> Referans: `crates/qp-session/src/claims.rs` (otorite), `replica.rs` (yansı).
+
+### 19.1 Sorun ve kural
+
+Veri protokolün dışından akar (K23): otorite ile yansı aynı beslemeyi farklı anlarda,
+farklı kayıplarla, bazen farklı kaynaklardan görür. Otorite "koşul t'de doğru oldu" dediğinde
+yansının verisi henüz o barı görmemiş, aynı barı başka değerle görmüş ya da hiç
+görmeyecek olabilir. **Kural:**
+
+1. Otoritenin veri kaynaklı her anlam mesajı **iddianın kanıtını** taşır (§19.2).
+2. Yansı bir iddiayı yalnız şu üçü birlikte doğruyken **iddia olarak** gösterir: otorite onu
+   ileri sürüyor (`asserted`); yansının kendi verisi `t`'yi **aynı çapadan** çözülmüş
+   olarak kapsıyor; iddianın yüklemi (koşulun kendisi) **yansının kendi verisinde** `t`'de
+   tutuyor. Veri her değiştiğinde aynı adımda yeniden sınanır; tutmadığı anda gizlenir.
+3. Gösterilen değerler **yansının kendi değerleridir** (ekrandaki kanıt iddiayla çelişemez).
+4. **Kesin** (`final`) etiketi: yansıda bar kapalı **ve** otorite kesin dedi **ve** iki
+   taraftan en az biri temiz (§19.4). Hiçbir şey erken gösterilmez.
+
+Bu, yanlış (M2/M3) ve erken (M1) gösterimi yapı gereği sıfırlar (RP2/T7 ölçümü; T8'de
+gerçek yansıyla yeniden ölçüldü, `rounds/RP2/experiments/T8.md`).
+
+### 19.2 Mesaj alanları: `ClaimEvidence`
+
+Şu olaylar isteğe bağlı `evidence` alanı taşır (eklemelidir; eski istemci yok sayar):
+`condition_met`, `intent_triggered`, veri kaynaklı `finding_state` ve onu yazan motor
+girdisinin `change`'i (günlük girdisinde `LogEntry.evidence`; `log` sorgusuyla yetişen
+yansı da alır). Ayrıca yeni `claim` olayı (§19.3) her zaman taşır.
+
+```json
+"evidence":{"series":"px","t":1760054400000,
+  "values":[{"series":"px","t":1760054400000,"value":106.0,"prev":103.0}],
+  "maturity":"provisional","clean":true,"anchor_t":1759708800000,
+  "feeds":[{"symbol":"THYAO","interval":"1d"}]}
+```
+
+| Alan | Anlam |
+|------|-------|
+| `series` | İddianın bar serisi (koşulun ilk işleneninin bar serisi; bağlı ya da belge içi) |
+| `t` | İddianın bar zamanı: düzlemler arası kimlik (§18.3). İddia kimliği = neyin iddiası + `t` |
+| `values` | Koşulun her işleneni için (koşul sırasıyla) ana çıktının `t`'deki (`value`) ve bir önceki bardaki (`prev`) değeri; ısınmada yok. İşlenen başka bir bar serisindeyse kendi `t`'si |
+| `maturity` | `final`: bar otoritenin verisinde kapalı (sonrasında bar var ya da pencere kapalı, `to_t`); `provisional`: canlı bar. Koşullar son barda değerlendirildiğinden kenar anında hep `provisional`'dır; kesinlik `claim` ile gelir |
+| `clean` | Otoritenin verisi `t`'ye kadar onarılmamış sıra boşluğu içermiyor. Boşluk (§18.4) beslemeyi `stale` yapar; o anki son bar ve sonrası "kirli"dir; yeniden çözüm kayıp olayı kapsarsa (çözümün `seq`'i ≥ beklenen) ya da kayıp olay sonradan sırayla gelirse temizlenir |
+| `anchor_t` | Hesap başlangıcı: bar serisinin çapası (§18.3). Belge içi seride yok |
+| `feeds` | Kanıtın dayandığı bağlı beslemeler (bar serisi ve işlenenler, hesap girdileri üzerinden), iddia **oluşturulurken** kaydedilir; veri yetkisi süzgeci bunlara bakar (§19.7) |
+
+Değerler **hesap önbelleğinin sütunlarındandır**: kenarı bulan değerlendirme onları zaten
+okumuştur; ek hesap yoktur. Kanıt bar taşımaz (K23): birkaç sayıdır.
+
+### 19.3 `claims` konusu ve `claim` olayı
+
+```json
+{"type":"subscribe","id":"k","topic":{"kind":"claims"}}
+{"type":"notify","sub":"k","event":{"kind":"claim",
+  "claim":{"kind":"condition","sub":"c"},"state":"asserted",
+  "evidence":{"series":"px","t":1760054400000,"values":[…],"maturity":"final","clean":true,…},
+  "seq":2}}
+```
+
+- `claim` (`ClaimRef`): `{"kind":"condition","sub":…}` (alıcı bağlantının kendi koşul
+  aboneliği), `{"kind":"intent","intent":…}`, `{"kind":"capsule","capsule":…,"finding":…}`.
+  Koşul iddiaları yalnız aboneliğin bağlantısına, diğerleri bütün `claims` abonelerine gider.
+- `state`: `asserted` ya da `withdrawn`. Olgunluk ve temizlik `evidence`'tadır.
+- Yaşam döngüsü (otorite, `Claims::after_bars`):
+  1. **Kenar** (koşul doğru oldu, niyet tetiklendi, kapsül geçersizleşti): `asserted`,
+     `provisional`.
+  2. **Bar kapandı** (o seriye yeni bar geldi): iddia kapanan barda yeniden sınanır (önbellek
+     değerleriyle). Tutuyor → `asserted`, `final` (kapanış değerleriyle); tutmuyor →
+     `withdrawn`.
+  3. **Düzeltme** (kapalı bir bar düzeltildi): o bardan sonraki kayıtlı iddialar yeniden
+     sınanır; değerleri değiştiyse yeniden `asserted`, tutmuyorsa `withdrawn`.
+  4. **Boşluk** (besleme `stale`): kirlenen iddialar son değerleriyle `clean:false` olarak
+     yeniden `asserted`. **Yeniden çözüm**: yeniden sınanır (temizlik yeniden hesaplanır).
+  5. Canlı barın kendi tikleri iddiayı yeniden göndermez (gürültü); bar kapanınca 2. adım.
+- Doküman `withdrawn` ile değişmez: geçersizleşen kapsül geçersiz kalır (motor girdisi
+  günlükte); yansının görüntüsü iddiayı düşürür. (Öneri: kapsül geçersizleşmesinin
+  kesinleşmeyi beklemesi, `T8.md` §8.)
+- Otorite en çok 4096 iddiayı izler (en eskisi düşer).
+
+Döküm: `fixtures/protocol/conformance/35-consistency.json` (canlı barda geçici → bar
+kapanınca kesin → kapalı barın düzeltmesiyle geri çekildi → yeni geçici → sıra boşluğundan
+sonra `clean:false`; `condition_met`, `finding_state` ve motor girdisinin `change`'i kanıtlı).
+
+### 19.4 Yansının algoritması ve görüntü kuralı
+
+Yansı (`qp_session::Replica`) otoriteyle **aynı motor kodunu** çalıştırır: dokümanı aynı
+uygulama yoluyla izler, veri düzlemi aynı `FeedStore` kurallarıyla (§18.4), hesaplar aynı
+önbellek ve canlı yolla (§18.8), yüklem aynı koşul anlamıyla, görünüm aynı gramer
+derleyicisiyle. Kendi motor girdisi yazmaz, çapa damgalamaz, izleyici değerlendirmez.
+
+1. `welcome` → `subscribe changes`, `subscribe claims`, `query document`. Doküman `seq`
+   S'de yüklenir; `change` olayları `seq` sırasıyla uygulanır (S'den küçükler yok sayılır,
+   delik varsa `{"kind":"log","after_seq":…}` ile yetişilir).
+2. Bağlı seriler **kendi** sağlayıcısından, kendi kişisinin yetkisiyle, dokümandaki
+   `anchor_t`'den çözülür (§18.3). Barındırıcı kendi beslemesinin olaylarını verir.
+3. Her `claim` (ve yedek olarak kanıtlı `change`) iddia başına son sözü günceller.
+4. Her girdiden sonra (mesaj, veri olayı, barındırıcı işareti) her `asserted` iddia için:
+
+| Durum (kendi verisinde) | Görüntü |
+|---|---|
+| koşul bilinmiyor; bağ hazır değil (`no_entitlement`, `stale`, `no_data`); çapa farklı ya da yok; `t` kendi verisinde yok | `pending` (nedeniyle) |
+| yüklem tutuyor, otorite `final`, kendi barı kapalı, (otorite temiz ∨ kendisi temiz) | `shown`, `final` |
+| yüklem tutuyor, otorite `final`, barındırıcı barı kesinleşmiş değerle verdi (`set_settled`) ama grafik kapatmadı | `shown`, `provisional` |
+| yüklem tutuyor, otorite `provisional`, kendi barı canlı, **canlı gösterim açık** | `shown`, `provisional` |
+| yüklem tutuyor, başka her durum (otoritenin kesinini ya da kendi kapanışını bekliyor; iki taraf da kirli) | `pending` |
+| yüklem tutmuyor, otorite `final`, kendi barı kapalı ve temiz | barındırıcıdan kesin bar çekme ister (`take_refetch`); çekildikten (`refetched`) sonra hâlâ tutmuyorsa `disputed` ("kaynaklar farklı"; iddia olarak gösterilmez) |
+| yüklem tutmuyor, başka durum | `pending` |
+
+`withdrawn` iddia görüntüden çıkar. Görüntü durumu belirleyicidir (iddia ve `t` sırasıyla).
+
+**Canlı bar gösterimi (ürün kararı).** Varsayılan **kapalı** (`ReplicaOptions.live`):
+yansının verisi gerçeğin en az bir ağ gecikmesi gerisindedir; canlı barda geçici iddia sıfır
+hatayla gösterilemez (`T7-COMPARE.md` ortak bulgu 3). Açıldığında yalnız otoritenin geçici
+iddiası ve kendi canlı barında yüklem tutarken `provisional` gösterilir.
+
+### 19.5 Barındırıcının görevleri (yansı tarafı)
+
+Veri düzlemi barındırıcınındır (§18.4); yansı şunları ister ya da kabul eder:
+
+- **Kendi beslemesi:** olayları sırayla, boşluksuz `seq` ile verir (kaynak boşluğunu kendi
+  veri katmanında onarabilir ya da boşlukta `Replica::resync` ile yeniden çözer).
+- **Kesin bar çekme** (settled fetch, Matriks REST karşılığı): `take_refetch()` istekleri
+  için `[çapa, t]` aralığını kesinleşmiş kaynaktan çeker, verisine uygular (olay ya da
+  `resync`), `refetched(series, t)` der.
+- **Kirli işareti:** kendi beslemesinde bir barın kapanış olayları kaybolmuş olabilirse
+  `set_unclean(series, from_t)`; onarınca `None`.
+- **Kesinleşmiş değer işareti:** beslemesi geride kaldığı için bir iddianın barını kesin
+  kaynaktan doldurduysa `set_settled(series, t)`.
+- **Çapa:** sağlayıcısının geçmişi çapaya kadar uzanmıyorsa eksik aralığı kesin kaynaktan
+  tamamlar (yoksa bağ `stale`, iddialar `pending`).
+
+### 19.6 Doküman ve görünüm özetleri; yerel ↔ WASM
+
+- `document_digest`: dokümanın JSON baytlarının FNV-1a 64'ü (16 onaltılık).
+- `view_digest`: görünümün sahne tarifinin (`SceneDesc`, verilen boyutta, tarafın kendi
+  verisiyle derlenmiş) JSON baytlarının FNV-1a 64'ü.
+- Aynı tik akışında otorite ile yansının özetleri her adımda aynıdır; yansı ister yerel
+  ister WASM olsun (`qp replica-tape`, `crates/qp-wasm/tests/replica_tape.mjs`,
+  `scripts/verify.sh` adım `replica`). Yansının verisi geride kaldığında görünüm özeti
+  farklıdır (doğru: farklı veri), doküman özeti aynıdır; veri yetişince ikisi de aynıdır.
+
+### 19.7 Veri yetkisi
+
+Kanıt değerleri veri düzlemi değeridir (§18.3). `feeds`'teki **her** beslemeye yetkisi
+olmayan alıcıya `values[].value` ve `prev` gönderilmez (`change`, `finding_state`, kapsül
+`claim`'i, `log` sorgusu); anlam (`t`, seri kimlikleri, olgunluk, temizlik) gider. Koşul ve
+niyet iddiaları, `condition_met` / `intent_triggered` gibi, yetkisiz aboneye hiç gitmez
+(§18.3, T4 Y1). Süzgeç kanıtın oluşturulurken kaydettiği beslemelere bakar (sonradan bağ
+değişse ya da silinse de; bilinmeyen → değer yok). Saklanan günlük girdisi değerlerle
+kalır (yeniden oynatma ve yetkili okurlar). **Yetkisiz yansı** kendi verisini çözemez
+(`no_entitlement`): iddiaları doğrulayamaz, hepsini `pending` (`reason: no_entitlement`)
+gösterir; değer göstermez.
+
+### 19.8 Dondurulmuş kanıtla ilişki ve sınırlar
+
+- `ClaimEvidence` canlı tutarlılık içindir (bu an, bu bar). Sonradan sınanabilirlik
+  `EvidenceRef` ve `verify_evidence`'tadır (§18.5): bit eşit değerler aynı veriyi kanıtlamaz
+  (iki farklı geçmiş aynı RSI'yı verebilir); veri özeti bunu yakalar.
+- Koşullar son barda değerlendirilir: geçmişte bir düzeltmenin **yeni** doğurduğu iddia
+  (eski bir barda kesişim) iddia edilmez; yalnız kayıtlı iddialar yeniden sınanır.
+- Yansıdan otoriteye "itiraz" (`dispute`) ve "sen söylemiyorsun" (`check`) mesajları v0'da
+  yok (öneri); `disputed` yalnız yansıda görünür.
+- Kanal sırası: `qp/0` bağlantısı sıralı bir akıştır (§3). Sırasız taşımada çerçeve numarası
+  taşıma düzeyinde sırayı kurar (düzenekte `bs` böyle yapar).
+- İki uç aynı kapanış tikini kaybetmiş ve ikisi de temiz sanıyorsa aynı yanlışta
+  anlaşabilirler; buna karşı kesinlik sağlayıcının kesin barına dayanır (barındırıcının
+  kirli işareti ve kesin bar çekmesi).
 
 ## Ek A — Eski `Command` tipi
 

@@ -261,11 +261,19 @@ fn holds(op: &str, prev: Option<f64>, v: Option<f64>, k: f64) -> bool {
 ///
 /// # Errors
 /// The scenario cannot be set up.
-#[allow(clippy::too_many_lines)]
 pub fn run(lag: usize) -> Result<Outcome, String> {
+    run_with(lag, &provider_init())
+}
+
+/// [`run`] with another replica provider (e.g. one that does not entitle `dev`).
+///
+/// # Errors
+/// The scenario cannot be set up.
+#[allow(clippy::too_many_lines)]
+pub fn run_with(lag: usize, provider: &Value) -> Result<Outcome, String> {
     let init: SessionInit = serde_json::from_value(init()).map_err(|e| e.to_string())?;
     let a = Session::new(init, Path::new("."))?;
-    let r = Replica::with_memory("dev", memory_provider(&provider_init())?);
+    let r = Replica::with_memory("dev", memory_provider(provider)?);
     let mut d = Driver {
         a,
         r,
@@ -299,7 +307,10 @@ pub fn run(lag: usize) -> Result<Outcome, String> {
             authority_doc: document_digest(d.a.document()),
             authority_view: view_digest(&mut d.a, VIEW.0, VIEW.1, VIEW.2).map_err(|e| e.message)?,
             doc: d.r.document_digest().unwrap_or_default(),
-            view: d.r.view_digest(VIEW.0, VIEW.1, VIEW.2)?,
+            view: d
+                .r
+                .view_digest(VIEW.0, VIEW.1, VIEW.2)
+                .unwrap_or_else(|e| format!("error: {e}")),
             display: d.r.display_digest(),
         };
         if dg.doc != dg.authority_doc || dg.view != dg.authority_view {
@@ -404,7 +415,7 @@ pub fn run(lag: usize) -> Result<Outcome, String> {
     Ok(Outcome {
         tape: Tape {
             principal: "dev".to_owned(),
-            provider: provider_init(),
+            provider: provider.clone(),
             watches: watches(),
             lag,
             steps,

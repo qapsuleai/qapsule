@@ -1,0 +1,75 @@
+# RP2/T5 live bench
+target = aarch64
+config = bars 10000 ticks 600 reps 15 studies [5, 500] paths ["inline", "bound"]
+n5.inline.msg = bytes_per_msg 159
+n5.inline.core_parse_direct.loop_us = median 0.665 best 0.643
+n5.inline.core_parse_via_value.loop_us = median 1.025 best 0.995
+n5.inline.core_parse.loop_us = median 0.665 best 0.643 (reps 15, decode direct; full columns)
+n5.inline.core.loop_us = median 0.064 best 0.057 (full columns, no decode)
+n5.inline.core_lean.loop_us = median 0.040 best 0.035 (stream-only columns as T1, no decode); with decode 0.642
+n5.inline.t6d.session.per_tick_us = mean 2.66 p50 2.29 p99 4.46 max 61.88 append_mean 8.56 (n 600)
+n5.inline.t6d.check = session_eq_core true lines 1200 doc 3d554391f7003300
+n5.inline.t6d.session.loop_us = median 2.069 best 2.047
+n5.inline.t6d.ratio = overhead/core_parse 2.11 (target <= 3) ; overhead/core_lean_parse 2.22 ; overhead/core(no parse) 31.6 ; overhead/core_lean(no parse) 50.4
+n5.inline.base.session.per_tick_us = mean 2.09 p50 2.04 p99 2.42 max 13.54 append_mean 3.44 (n 600)
+n5.inline.base.check = session_eq_core true lines 1204 doc 3d554391f7003300
+n5.inline.base.session.loop_us = median 2.044 best 2.035
+n5.inline.base.ratio = overhead/core_parse 2.07 (target <= 3) ; overhead/core_lean_parse 2.18 ; overhead/core(no parse) 31.2 ; overhead/core_lean(no parse) 49.8
+n5.inline.all.session.per_tick_us = mean 2.16 p50 2.12 p99 2.54 max 10.50 append_mean 3.20 (n 600)
+n5.inline.all.check = session_eq_core true lines 1204 doc 3d554391f7003300
+n5.inline.all.session.loop_us = median 2.111 best 2.097
+n5.inline.all.ratio = overhead/core_parse 2.17 (target <= 3) ; overhead/core_lean_parse 2.29 ; overhead/core(no parse) 32.2 ; overhead/core_lean(no parse) 51.5
+n5.bound.msg = bytes_per_msg 134
+n5.bound.core_parse_direct.loop_us = median 0.387 best 0.384
+n5.bound.core_parse_via_value.loop_us = median 0.659 best 0.650
+n5.bound.core_parse.loop_us = median 0.387 best 0.384 (reps 15, decode direct; full columns)
+n5.bound.core.loop_us = median 0.053 best 0.046 (full columns, no decode)
+n5.bound.core_lean.loop_us = median 0.028 best 0.027 (stream-only columns as T1, no decode); with decode 0.362
+n5.bound.t6d.session.per_tick_us = mean 1.02 p50 0.96 p99 1.21 max 23.21 append_mean 3.36 (n 600)
+n5.bound.t6d.check = session_eq_core true lines 0 doc 8e9d5e71d59028f5
+n5.bound.t6d.session.loop_us = median 0.986 best 0.917
+n5.bound.t6d.ratio = overhead/core_parse 1.55 (target <= 3) ; overhead/core_lean_parse 1.73 ; overhead/core(no parse) 17.5 ; overhead/core_lean(no parse) 34.6
+n5.bound.base.session.per_tick_us = mean 1.16 p50 1.12 p99 1.33 max 30.79 append_mean 4.30 (n 600)
+n5.bound.base.check = session_eq_core true lines 4 doc 8e9d5e71d59028f5
+n5.bound.base.session.loop_us = median 1.156 best 1.150
+n5.bound.base.ratio = overhead/core_parse 1.99 (target <= 3) ; overhead/core_lean_parse 2.20 ; overhead/core(no parse) 20.7 ; overhead/core_lean(no parse) 40.7
+n5.bound.all.session.per_tick_us = mean 2.06 p50 2.00 p99 2.25 max 22.04 append_mean 4.23 (n 600)
+n5.bound.all.check = session_eq_core true lines 4 doc 8e9d5e71d59028f5
+n5.bound.all.session.loop_us = median 2.038 best 1.951
+n5.bound.all.ratio = overhead/core_parse 4.27 (target <= 3) ; overhead/core_lean_parse 4.64 ; overhead/core(no parse) 37.3 ; overhead/core_lean(no parse) 72.6
+n500.inline.msg = bytes_per_msg 159
+n500.inline.core_parse_direct.loop_us = median 8.069 best 7.780
+n500.inline.core_parse_via_value.loop_us = median 8.472 best 8.102
+n500.inline.core_parse.loop_us = median 8.069 best 7.780 (reps 15, decode direct; full columns)
+n500.inline.core.loop_us = median 7.462 best 6.874 (full columns, no decode)
+n500.inline.core_lean.loop_us = median 2.876 best 2.839 (stream-only columns as T1, no decode); with decode 3.484
+n500.inline.t6d.session.per_tick_us = mean 9.93 p50 9.21 p99 12.38 max 335.04 append_mean 44.22 (n 600)
+n500.inline.t6d.check = session_eq_core true lines 1200 doc db50769bc4152be4
+n500.inline.t6d.session.loop_us = median 9.914 best 9.809
+n500.inline.t6d.ratio = overhead/core_parse 0.23 (target <= 3) ; overhead/core_lean_parse 1.85 ; overhead/core(no parse) 0.3 ; overhead/core_lean(no parse) 2.4
+n500.inline.base.session.per_tick_us = mean 9.88 p50 9.25 p99 12.12 max 329.12 append_mean 43.79 (n 600)
+n500.inline.base.check = session_eq_core true lines 1204 doc db50769bc4152be4
+n500.inline.base.session.loop_us = median 9.945 best 9.855
+n500.inline.base.ratio = overhead/core_parse 0.23 (target <= 3) ; overhead/core_lean_parse 1.85 ; overhead/core(no parse) 0.3 ; overhead/core_lean(no parse) 2.5
+n500.inline.all.session.per_tick_us = mean 19.68 p50 19.12 p99 23.12 max 422.12 append_mean 61.83 (n 600)
+n500.inline.all.check = session_eq_core true lines 1204 doc db50769bc4152be4
+n500.inline.all.session.loop_us = median 19.371 best 19.091
+n500.inline.all.ratio = overhead/core_parse 1.40 (target <= 3) ; overhead/core_lean_parse 4.56 ; overhead/core(no parse) 1.6 ; overhead/core_lean(no parse) 5.7
+n500.bound.msg = bytes_per_msg 134
+n500.bound.core_parse_direct.loop_us = median 7.848 best 7.430
+n500.bound.core_parse_via_value.loop_us = median 8.207 best 7.846
+n500.bound.core_parse.loop_us = median 7.848 best 7.430 (reps 15, decode direct; full columns)
+n500.bound.core.loop_us = median 7.622 best 7.012 (full columns, no decode)
+n500.bound.core_lean.loop_us = median 2.981 best 2.836 (stream-only columns as T1, no decode); with decode 3.207
+n500.bound.t6d.session.per_tick_us = mean 8.64 p50 8.04 p99 10.21 max 334.12 append_mean 42.75 (n 600)
+n500.bound.t6d.check = session_eq_core true lines 0 doc 4e92585aa4f54e2f
+n500.bound.t6d.session.loop_us = median 8.682 best 8.612
+n500.bound.t6d.ratio = overhead/core_parse 0.11 (target <= 3) ; overhead/core_lean_parse 1.71 ; overhead/core(no parse) 0.1 ; overhead/core_lean(no parse) 1.9
+n500.bound.base.session.per_tick_us = mean 8.59 p50 8.00 p99 10.29 max 321.21 append_mean 41.63 (n 600)
+n500.bound.base.check = session_eq_core true lines 4 doc 4e92585aa4f54e2f
+n500.bound.base.session.loop_us = median 8.878 best 8.763
+n500.bound.base.ratio = overhead/core_parse 0.13 (target <= 3) ; overhead/core_lean_parse 1.77 ; overhead/core(no parse) 0.2 ; overhead/core_lean(no parse) 2.0
+n500.bound.all.session.per_tick_us = mean 319.41 p50 312.17 p99 399.08 max 727.00 append_mean 353.49 (n 600)
+n500.bound.all.check = session_eq_core true lines 4 doc 4e92585aa4f54e2f
+n500.bound.all.session.loop_us = median 330.665 best 324.703
+n500.bound.all.ratio = overhead/core_parse 41.13 (target <= 3) ; overhead/core_lean_parse 102.10 ; overhead/core(no parse) 42.4 ; overhead/core_lean(no parse) 109.9

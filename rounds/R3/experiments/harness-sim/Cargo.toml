@@ -21,6 +21,7 @@ serde_json = { version = "1.0.154", features = ["float_roundtrip"] }
 # m3-ornek = { path = "../M3/ornek" }
 m5_barrier = { path = "../M5/barrier" }
 m5_semantic = { path = "../M5/semantic" }
+m3-rarity = { path = "../M3/rarity" }
 
 [lints.rust]
 unsafe_code = "forbid"

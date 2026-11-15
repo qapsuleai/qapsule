@@ -29,6 +29,7 @@ pub fn rankers() -> Vec<(&'static str, RankerFactory)> {
         ("control", || Box::new(control::RoundRobinRanker)),
         // M3 alternatifleri: bir satır, ör.
         // ("a1", m3_a1::ranker),
+        ("rarity", m3_rarity::ranker),
     ]
 }
 

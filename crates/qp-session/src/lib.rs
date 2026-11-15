@@ -29,6 +29,7 @@ mod present;
 mod provider;
 mod query;
 mod reading;
+mod select;
 mod session;
 mod suggest;
 mod summary;

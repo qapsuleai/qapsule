@@ -977,6 +977,7 @@ pub(crate) fn expand_op(
         Op::Undo { seq } => expand_undo(doc, *seq, p, ctx),
         Op::InsertLayer { .. }
         | Op::DeleteLayer { .. }
+        | Op::SplitLayer { .. }
         | Op::MoveLayer { .. }
         | Op::SetEncoding { .. }
         | Op::InsertPanel { .. }
@@ -1601,6 +1602,7 @@ pub(crate) fn summarize(op: &Op) -> String {
             None => format!("insert_layer {view}"),
         },
         Op::DeleteLayer { view, layer } => format!("delete_layer {view} {layer}"),
+        Op::SplitLayer { view, layer } => format!("split_layer {view} {layer}"),
         Op::MoveLayer { view, layer, .. } => format!("move_layer {view} {layer}"),
         Op::SetEncoding { view, layer, .. } => format!("set_encoding {view} {layer}"),
         Op::InsertPanel { view, .. } => format!("insert_panel {view}"),

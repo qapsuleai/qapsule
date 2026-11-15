@@ -110,7 +110,8 @@ after?|before?}`, `set_panel {view, panel, name?, weight?}`.
 | `label` | Açıklama metni; yoksa veriden (`SMA20`, `RSI14`, `MACD(12,26,9)`). |
 
 Katman işlemleri kimlikle: `insert_layer {view, layer, after?|before?}`,
-`delete_layer {view, layer}`, `move_layer {view, layer, panel?, after?|before?}`,
+`delete_layer {view, layer}`, `split_layer {view, layer}` (çok çıktılı `line`'ı çıktı başına
+katmana böler; tek bandı ayrı boyamak için), `move_layer {view, layer, panel?, after?|before?}`,
 `set_encoding {view, layer, encoding, unset?, origin?, label?}` (verilen kanallar
 değişir, ötekiler kalır). `add_layer.index` ve `remove_layer` kullanımdan kalktı.
 

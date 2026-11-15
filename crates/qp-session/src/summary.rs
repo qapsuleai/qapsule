@@ -5,13 +5,18 @@
 use qp_schema::grammar::{Layer, Mark, Position, ScaleKind, View};
 use qp_schema::protocol::{
     DocSummary, FactSummary, FindingSummary, LayerSummary, PanelSummary, ProposalState,
-    SeriesSummary, ViewSummary,
+    SelectHints, SeriesSummary, ViewSummary,
 };
 use qp_schema::{Document, Series, SeriesData, SeriesSource};
 
 use crate::canon::{layer_data, position_constant, series_fields, series_main, Data};
 use crate::error::num;
 use crate::values::bars_of;
+
+/// Resolver used for the `select` hints (§17): a selector that resolves to the item now.
+fn hints(doc: &Document) -> crate::select::Resolver<'_> {
+    crate::select::Resolver { doc, root: None }
+}
 
 /// Lists longer than this are cut (`truncated: true`).
 pub(crate) const MAX_ITEMS: usize = 50;
@@ -239,6 +244,64 @@ fn state_name<T: serde::Serialize>(s: &T) -> String {
         .unwrap_or_default()
 }
 
+/// A selector per listed item that resolves to it now (§17).
+fn select_hints(
+    doc: &Document,
+    series: &[SeriesSummary],
+    views: &[ViewSummary],
+    facts: &[FactSummary],
+    findings: &[FindingSummary],
+) -> Option<SelectHints> {
+    let r = hints(doc);
+    let mut h = SelectHints::default();
+    for s in series {
+        if let Some(x) = doc.series.iter().find(|x| x.id == s.id) {
+            if let Some(sel) = r.series_hint(x) {
+                h.series.insert(s.id.clone(), sel);
+            }
+        }
+    }
+    for vs in views {
+        let Some(v) = doc.views.iter().find(|x| x.id == vs.id) else {
+            continue;
+        };
+        if let Some(sel) = r.view_hint(v) {
+            h.views.insert(v.id.clone(), sel);
+        }
+        for p in &vs.panels {
+            if let Some(sel) = r.panel_hint(v, p.id) {
+                h.panels.insert(format!("{}/{}", v.id, p.id), sel);
+            }
+            for l in &p.layers {
+                if let Some(sel) = v.layer(&l.id).and_then(|x| r.layer_hint(v, x)) {
+                    h.layers.insert(format!("{}/{}", v.id, l.id), sel);
+                }
+            }
+        }
+    }
+    for f in facts {
+        if let Some(sel) = doc
+            .facts
+            .iter()
+            .find(|x| x.id == f.id)
+            .and_then(|x| r.fact_hint(x))
+        {
+            h.facts.insert(f.id.clone(), sel);
+        }
+    }
+    for f in findings {
+        if let Some(sel) = doc
+            .findings
+            .iter()
+            .find(|x| x.id == f.id)
+            .and_then(|x| r.finding_hint(x))
+        {
+            h.findings.insert(f.id.clone(), sel);
+        }
+    }
+    (h != SelectHints::default()).then_some(h)
+}
+
 /// The summary of a document.
 #[must_use]
 pub(crate) fn summarize_doc(doc: &Document) -> DocSummary {
@@ -256,7 +319,7 @@ pub(crate) fn summarize_doc(doc: &Document) -> DocSummary {
     if doc.views.len() > MAX_ITEMS {
         truncated = true;
     }
-    let views = doc
+    let views: Vec<ViewSummary> = doc
         .views
         .iter()
         .take(MAX_ITEMS)
@@ -308,6 +371,7 @@ pub(crate) fn summarize_doc(doc: &Document) -> DocSummary {
         .iter()
         .filter(|p| p.state == ProposalState::Pending)
         .count();
+    let select = select_hints(doc, &series, &views, &facts, &findings);
     DocSummary {
         series,
         views,
@@ -315,5 +379,6 @@ pub(crate) fn summarize_doc(doc: &Document) -> DocSummary {
         findings,
         pending_proposals: Some(u32::try_from(pending).unwrap_or(u32::MAX)),
         truncated,
+        select,
     }
 }

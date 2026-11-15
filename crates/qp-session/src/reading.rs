@@ -69,6 +69,7 @@ pub(crate) fn panel_layers(view: &View, p: &ScenePanel) -> (ScaleInfo, Vec<Layer
             constants: l.constants.clone(),
             items: l.items.len() as u64,
             last: l.items.last().map(|i| i.values.clone()).unwrap_or_default(),
+            select: None,
         })
         .collect();
     (scale, layers)
@@ -265,7 +266,14 @@ impl Session {
             .panels
             .iter()
             .map(|p| {
-                let (scale, layers) = panel_layers(view, p);
+                let (scale, mut layers) = panel_layers(view, p);
+                let r = crate::select::Resolver {
+                    doc: &self.doc,
+                    root: None,
+                };
+                for li in &mut layers {
+                    li.select = view.layer(&li.id).and_then(|l| r.layer_hint(view, l));
+                }
                 (p.id, (p.name.clone(), scale, layers))
             })
             .collect()

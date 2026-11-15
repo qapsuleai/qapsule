@@ -102,6 +102,8 @@ pub enum ClientMsg {
         /// Client-chosen request id.
         id: String,
         /// The directive.
+        /// Ids inside also take selectors (§17).
+        #[schemars(with = "AttentionDirectiveIn")]
         directive: AttentionDirective,
     },
     /// Host only: the current time. The authority has no clock of its own; time is an
@@ -185,6 +187,10 @@ pub enum ServerMsg {
         now: TimestampMs,
         /// The answer.
         data: QueryResult,
+        /// Selectors resolved in the query (R2, §17): JSON pointer in the message → the
+        /// id it resolved to (e.g. `{"/query/series": "rsi14"}`).
+        #[serde(default, skip_serializing_if = "BTreeMap::is_empty")]
+        resolved: BTreeMap<String, String>,
     },
     /// A pushed event for a subscription.
     Notify {
@@ -391,14 +397,20 @@ pub struct Principal {
 #[serde(deny_unknown_fields)]
 pub struct Show {
     /// View id.
+    /// Also takes a selector (§17).
+    #[schemars(with = "ViewRef")]
     pub view: String,
     /// Put it in the panel where this series is drawn (e.g. `"rsi14"`). Takes precedence
     /// over `panel`. If neither is given, a new panel is added below the others.
+    /// Also takes a selector (§17).
     #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[schemars(with = "Option<SeriesRef>")]
     pub with: Option<String>,
     /// Panel id (R2: the panel's stable id, not its position; in a view loaded from a
     /// `qp/0` document the ids equal the old positions).
+    /// Also takes a selector (§17).
     #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[schemars(with = "Option<PanelRef>")]
     pub panel: Option<u32>,
 }
 
@@ -523,6 +535,8 @@ pub enum Op {
         /// Study name: `sma`, `ema`, `rsi`, `macd`, `bollinger`.
         study: String,
         /// Input series ids (one bar series for the built-in studies).
+        /// Also takes a selector (§17).
+        #[schemars(with = "Vec<SeriesRef>")]
         inputs: Vec<String>,
         /// Parameters; missing ones take defaults (sma/ema/rsi: `period`; macd: `fast`,
         /// `slow`, `signal`; bollinger: `period`, `k`).
@@ -535,6 +549,8 @@ pub enum Op {
     /// Change parameters of an existing study series (merged into the current ones).
     SetParams {
         /// Study series id.
+        /// Also takes a selector (§17).
+        #[schemars(with = "SeriesRef")]
         series: String,
         /// Parameters to change.
         params: BTreeMap<String, f64>,
@@ -547,8 +563,12 @@ pub enum Op {
     /// Add a layer to a view. Prefer `insert_layer` (placement by id).
     AddLayer {
         /// View id.
+        /// Also takes a selector (§17).
+        #[schemars(with = "ViewRef")]
         view: String,
         /// The layer.
+        /// Ids inside also take selectors (§17).
+        #[schemars(with = "LayerIn")]
         layer: Layer,
         /// **Deprecated (`qp/0`).** Position in the layer list; appended if absent.
         /// Positions shift under concurrent writes; use `insert_layer` with
@@ -562,6 +582,8 @@ pub enum Op {
     #[schemars(extend("deprecated" = true))]
     RemoveLayer {
         /// View id.
+        /// Also takes a selector (§17).
+        #[schemars(with = "ViewRef")]
         view: String,
         /// Position in the layer list.
         index: u32,
@@ -570,6 +592,8 @@ pub enum Op {
     /// `input`). Bars are 0-based indexes into the view's first bar series, inclusive.
     SetViewRange {
         /// View id.
+        /// Also takes a selector (§17).
+        #[schemars(with = "ViewRef")]
         view: String,
         /// First visible bar index.
         from_bar: u64,
@@ -584,6 +608,8 @@ pub enum Op {
         /// Event kind, e.g. `cross_above`.
         kind: String,
         /// Series id.
+        /// Also takes a selector (§17).
+        #[schemars(with = "SeriesRef")]
         series: String,
         /// Bar index (0-based).
         bar: u64,
@@ -601,10 +627,14 @@ pub enum Op {
         /// The claim, one sentence.
         claim: String,
         /// Fact ids it rests on (must exist).
+        /// Also takes a selector (§17).
+        #[schemars(with = "Vec<FactRef>")]
         facts: Vec<String>,
         /// Confidence in `[0, 1]`.
         confidence: f64,
         /// When this holds, the finding is invalid.
+        /// Ids inside also take selectors (§17).
+        #[schemars(with = "ConditionIn")]
         invalidation: Condition,
         /// Also create a live capsule with this headline.
         #[serde(default, skip_serializing_if = "Option::is_none")]
@@ -613,6 +643,8 @@ pub enum Op {
     /// Change fields of a finding; absent fields stay as they are.
     UpdateFinding {
         /// Finding id.
+        /// Also takes a selector (§17).
+        #[schemars(with = "FindingRef")]
         finding: String,
         /// New claim.
         #[serde(default, skip_serializing_if = "Option::is_none")]
@@ -621,13 +653,17 @@ pub enum Op {
         #[serde(default, skip_serializing_if = "Option::is_none")]
         confidence: Option<f64>,
         /// New invalidation condition.
+        /// Ids inside also take selectors (§17).
         #[serde(default, skip_serializing_if = "Option::is_none")]
+        #[schemars(with = "Option<ConditionIn>")]
         invalidation: Option<Condition>,
     },
     /// A person approves a finding: its capsule becomes `approved` and the ledger
     /// records it.
     ApproveFinding {
         /// Finding id.
+        /// Also takes a selector (§17).
+        #[schemars(with = "FindingRef")]
         finding: String,
         /// Optional note (recorded in the ledger).
         #[serde(default, skip_serializing_if = "Option::is_none")]
@@ -637,6 +673,8 @@ pub enum Op {
     /// records it with the note.
     RejectFinding {
         /// Finding id.
+        /// Also takes a selector (§17).
+        #[schemars(with = "FindingRef")]
         finding: String,
         /// Why (recorded in the ledger).
         #[serde(default, skip_serializing_if = "Option::is_none")]
@@ -650,7 +688,9 @@ pub enum Op {
         /// The request in words.
         text: String,
         /// Machine-checkable trigger. Series it names must exist.
+        /// Ids inside also take selectors (§17).
         #[serde(default, skip_serializing_if = "Option::is_none")]
+        #[schemars(with = "Option<ConditionIn>")]
         trigger: Option<Condition>,
     },
     /// Switch an intent on or off.
@@ -666,8 +706,12 @@ pub enum Op {
         #[serde(default, skip_serializing_if = "Option::is_none")]
         id: Option<String>,
         /// Item id it narrates (usually a finding).
+        /// Also takes a selector (§17).
+        #[schemars(with = "ItemRef")]
         about: String,
         /// Steps, ascending by `at_ms`.
+        /// Ids inside also take selectors (§17).
+        #[schemars(with = "Vec<NarrativeStepIn>")]
         steps: Vec<NarrativeStep>,
     },
     /// Ask the engine's presenter to build a view for a finding (the agent speaks at the
@@ -675,6 +719,8 @@ pub enum Op {
     /// finding's capsule.
     ShowFinding {
         /// Finding id.
+        /// Also takes a selector (§17).
+        #[schemars(with = "FindingRef")]
         finding: String,
         /// Id of the view to create or replace; assigned if absent.
         #[serde(default, skip_serializing_if = "Option::is_none")]
@@ -684,48 +730,91 @@ pub enum Op {
     /// `before`, or at the end. The layer's `panel` must name an existing panel (R2).
     InsertLayer {
         /// View id.
+        /// Also takes a selector (§17).
+        #[schemars(with = "ViewRef")]
         view: String,
         /// The layer (id assigned if absent).
+        /// Ids inside also take selectors (§17).
+        #[schemars(with = "LayerIn")]
         layer: Layer,
         /// Place it right after this layer.
+        /// Also takes a selector (§17).
         #[serde(default, skip_serializing_if = "Option::is_none")]
+        #[schemars(with = "Option<LayerRef>")]
         after: Option<String>,
         /// Place it right before this layer.
+        /// Also takes a selector (§17).
         #[serde(default, skip_serializing_if = "Option::is_none")]
+        #[schemars(with = "Option<LayerRef>")]
         before: Option<String>,
     },
     /// Delete a layer by id.
     DeleteLayer {
         /// View id.
+        /// Also takes a selector (§17).
+        #[schemars(with = "ViewRef")]
         view: String,
         /// Layer id.
+        /// Also takes a selector (§17).
+        #[schemars(with = "LayerRef")]
+        layer: String,
+    },
+    /// Split a multi-output `line` layer (e.g. one Bollinger line drawing `upper`,
+    /// `middle`, `lower`) into one layer per drawn output, each with an explicit `y`, at
+    /// the same place in the paint order, in the same panel, with the same encoding.
+    /// `ack.created`: the new layer ids, in output order. Then each output can be styled
+    /// alone (`set_encoding` with `layer: {"output": "upper"}`).
+    SplitLayer {
+        /// View id.
+        /// Also takes a selector (§17).
+        #[schemars(with = "ViewRef")]
+        view: String,
+        /// Layer id.
+        /// Also takes a selector (§17).
+        #[schemars(with = "LayerRef")]
         layer: String,
     },
     /// Move a layer: to another panel, and/or to another place in the paint order.
     MoveLayer {
         /// View id.
+        /// Also takes a selector (§17).
+        #[schemars(with = "ViewRef")]
         view: String,
         /// Layer id.
+        /// Also takes a selector (§17).
+        #[schemars(with = "LayerRef")]
         layer: String,
         /// Target panel id.
+        /// Also takes a selector (§17).
         #[serde(default, skip_serializing_if = "Option::is_none")]
+        #[schemars(with = "Option<PanelRef>")]
         panel: Option<u32>,
         /// Place it right after this layer.
+        /// Also takes a selector (§17).
         #[serde(default, skip_serializing_if = "Option::is_none")]
+        #[schemars(with = "Option<LayerRef>")]
         after: Option<String>,
         /// Place it right before this layer.
+        /// Also takes a selector (§17).
         #[serde(default, skip_serializing_if = "Option::is_none")]
+        #[schemars(with = "Option<LayerRef>")]
         before: Option<String>,
     },
     /// Change a layer's encoding: the channels given replace the current ones, the
     /// channels in `unset` are removed; `origin` entries are merged. Other channels stay.
     SetEncoding {
         /// View id.
+        /// Also takes a selector (§17).
+        #[schemars(with = "ViewRef")]
         view: String,
         /// Layer id.
+        /// Also takes a selector (§17).
+        #[schemars(with = "LayerRef")]
         layer: String,
         /// Channels to set.
+        /// Ids inside also take selectors (§17).
         #[serde(default)]
+        #[schemars(with = "EncodingIn")]
         encoding: crate::grammar::Encoding,
         /// Channel names to remove (`x`, `y`, `y2`, `color`, `opacity`, `width`,
         /// `size`, `text`).
@@ -742,44 +831,68 @@ pub enum Op {
     /// the bottom. `ack.created`: the panel id (decimal), then the layer ids.
     InsertPanel {
         /// View id.
+        /// Also takes a selector (§17).
+        #[schemars(with = "ViewRef")]
         view: String,
         /// The panel (id assigned if absent: largest id + 1).
         panel: crate::grammar::Panel,
         /// Layers to create in it (their `panel` field is set to the new panel).
+        /// Ids inside also take selectors (§17).
         #[serde(default, skip_serializing_if = "Vec::is_empty")]
+        #[schemars(with = "Vec<LayerIn>")]
         layers: Vec<Layer>,
         /// Place it right below this panel.
+        /// Also takes a selector (§17).
         #[serde(default, skip_serializing_if = "Option::is_none")]
+        #[schemars(with = "Option<PanelRef>")]
         after: Option<u32>,
         /// Place it right above this panel.
+        /// Also takes a selector (§17).
         #[serde(default, skip_serializing_if = "Option::is_none")]
+        #[schemars(with = "Option<PanelRef>")]
         before: Option<u32>,
     },
     /// Delete a panel and every layer drawn in it.
     DeletePanel {
         /// View id.
+        /// Also takes a selector (§17).
+        #[schemars(with = "ViewRef")]
         view: String,
         /// Panel id.
+        /// Also takes a selector (§17).
+        #[schemars(with = "PanelRef")]
         panel: u32,
     },
     /// Move a panel up or down the stack.
     MovePanel {
         /// View id.
+        /// Also takes a selector (§17).
+        #[schemars(with = "ViewRef")]
         view: String,
         /// Panel id.
+        /// Also takes a selector (§17).
+        #[schemars(with = "PanelRef")]
         panel: u32,
         /// Place it right below this panel.
+        /// Also takes a selector (§17).
         #[serde(default, skip_serializing_if = "Option::is_none")]
+        #[schemars(with = "Option<PanelRef>")]
         after: Option<u32>,
         /// Place it right above this panel.
+        /// Also takes a selector (§17).
         #[serde(default, skip_serializing_if = "Option::is_none")]
+        #[schemars(with = "Option<PanelRef>")]
         before: Option<u32>,
     },
     /// Rename a panel or change its relative height.
     SetPanel {
         /// View id.
+        /// Also takes a selector (§17).
+        #[schemars(with = "ViewRef")]
         view: String,
         /// Panel id.
+        /// Also takes a selector (§17).
+        #[schemars(with = "PanelRef")]
         panel: u32,
         /// New name.
         #[serde(default, skip_serializing_if = "Option::is_none")]
@@ -791,8 +904,12 @@ pub enum Op {
     /// Change a scale by id (`"x"`, `"y<panel>"`): kind and/or fixed domain.
     SetScale {
         /// View id.
+        /// Also takes a selector (§17).
+        #[schemars(with = "ViewRef")]
         view: String,
         /// Scale id.
+        /// Also takes a selector (§17).
+        #[schemars(with = "ScaleRef")]
         scale: String,
         /// New kind (`linear`/`log` for value scales; the time axis stays `time`).
         #[serde(default, skip_serializing_if = "Option::is_none")]
@@ -807,19 +924,27 @@ pub enum Op {
     /// Replace a view's persistent emphasis list (empty clears it).
     SetEmphasis {
         /// View id.
+        /// Also takes a selector (§17).
+        #[schemars(with = "ViewRef")]
         view: String,
         /// The emphasis list.
+        /// Ids inside also take selectors (§17).
+        #[schemars(with = "Vec<EmphasisIn>")]
         emphasis: Vec<crate::grammar::Emphasis>,
     },
     /// Remove an item by id. Removing a series also removes the layers that draw it;
     /// it fails with `in_use` if other items (studies, facts, conditions) depend on it.
     Remove {
         /// Item id.
+        /// Also takes a selector (§17).
+        #[schemars(with = "ItemRef")]
         id: String,
     },
     /// Append bars to a bar series (data feeds).
     AppendBars {
         /// Bar series id.
+        /// Also takes a selector (§17).
+        #[schemars(with = "SeriesRef")]
         series: String,
         /// Bars, strictly after the last bar.
         bars: Vec<Bar>,
@@ -827,6 +952,8 @@ pub enum Op {
     /// Replace the last bar of a bar series (a live, still-forming bar).
     UpdateLastBar {
         /// Bar series id.
+        /// Also takes a selector (§17).
+        #[schemars(with = "SeriesRef")]
         series: String,
         /// The bar; same `t` as the current last bar.
         bar: Bar,
@@ -842,6 +969,8 @@ pub enum Op {
     /// with the decider recorded as approver.
     AcceptProposal {
         /// Proposal id.
+        /// Also takes a selector (§17).
+        #[schemars(with = "ProposalRef")]
         proposal: String,
         /// Optional note.
         #[serde(default, skip_serializing_if = "Option::is_none")]
@@ -850,6 +979,8 @@ pub enum Op {
     /// Reject a pending proposal.
     RejectProposal {
         /// Proposal id.
+        /// Also takes a selector (§17).
+        #[schemars(with = "ProposalRef")]
         proposal: String,
         /// Optional note.
         #[serde(default, skip_serializing_if = "Option::is_none")]
@@ -1160,6 +1291,8 @@ pub enum Query {
     /// One item by id, from any collection.
     Get {
         /// Item id.
+        /// Also takes a selector (§17).
+        #[schemars(with = "ItemRef")]
         id: String,
     },
     /// All items of a collection. For proposals, `state` filters (e.g. `pending`).
@@ -1202,6 +1335,8 @@ pub enum Query {
     /// reduced to one number. For a bar series, outputs are `o`,`h`,`l`,`c`,`v`.
     Study {
         /// Series id (a study series or a bar series).
+        /// Also takes a selector (§17).
+        #[schemars(with = "SeriesRef")]
         series: String,
         /// Range; the whole series if absent.
         #[serde(default, skip_serializing_if = "Option::is_none")]
@@ -1216,6 +1351,8 @@ pub enum Query {
     /// Everything at one bar: OHLCV and the value of every study on that bar series.
     At {
         /// Bar series id.
+        /// Also takes a selector (§17).
+        #[schemars(with = "SeriesRef")]
         series: String,
         /// Bar index (0-based). Give `bar` or `t`.
         #[serde(default, skip_serializing_if = "Option::is_none")]
@@ -1237,7 +1374,9 @@ pub enum Query {
     /// view's persistent range, otherwise all bars.
     Hit {
         /// View id; the asker's current view if absent.
+        /// Also takes a selector (§17).
         #[serde(default, skip_serializing_if = "Option::is_none")]
+        #[schemars(with = "Option<ViewRef>")]
         view: Option<String>,
         /// Pixel x (0 = left edge).
         x: f64,
@@ -1260,7 +1399,9 @@ pub enum Query {
     /// unless `surface` names another surface kind.
     Present {
         /// Finding id. If absent: the most important live finding (highest confidence).
+        /// Also takes a selector (§17).
         #[serde(default, skip_serializing_if = "Option::is_none")]
+        #[schemars(with = "Option<FindingRef>")]
         finding: Option<String>,
         /// Present for this surface kind instead of the asker's.
         #[serde(default, skip_serializing_if = "Option::is_none")]
@@ -1341,6 +1482,9 @@ pub struct PanelInfo {
     /// Layers in paint order (R2).
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
     pub layers: Vec<LayerInfo>,
+    /// A selector that resolves to this panel in its view now (R2, §17).
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub select: Option<PanelSel>,
 }
 
 /// A value scale as drawn (R2).
@@ -1378,6 +1522,9 @@ pub struct LayerInfo {
     /// Last drawn values (field → value) in the visible range, if any.
     #[serde(default, skip_serializing_if = "BTreeMap::is_empty")]
     pub last: BTreeMap<String, f64>,
+    /// A selector that resolves to this layer in its view now (R2, §17).
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub select: Option<LayerSel>,
 }
 
 /// Answer to the point query (R2).
@@ -1631,17 +1778,23 @@ pub enum Topic {
     /// Every applied log entry (optionally only those touching these item ids).
     Changes {
         /// Only entries touching any of these ids.
+        /// Also takes a selector (§17).
         #[serde(default, skip_serializing_if = "Vec::is_empty")]
+        #[schemars(with = "Vec<ItemRef>")]
         ids: Vec<String>,
     },
     /// State changes of one finding's capsule (live -> invalidated, approved, ...).
     Finding {
         /// Finding id.
+        /// Also takes a selector (§17).
+        #[schemars(with = "FindingRef")]
         finding: String,
     },
     /// A condition becoming true (edge-triggered: notified when it turns true).
     Condition {
         /// The condition.
+        /// Ids inside also take selectors (§17).
+        #[schemars(with = "ConditionIn")]
         condition: Condition,
     },
     /// Proposals created and decided.
@@ -1848,7 +2001,7 @@ pub enum ErrorCode {
     /// value) (R2). `path` points at the constant; `candidates` lists origins to use.
     NoOrigin,
     /// A reference by meaning matches more than one item (R2). `candidates` lists them,
-    /// best first; the authority never picks one at random.
+    /// ranked (the kind's order, §17); the authority never picks one at random.
     Ambiguous,
 }
 
@@ -1914,6 +2067,36 @@ pub struct DocSummary {
     /// True when lists were cut to fit the summary limit.
     #[serde(default, skip_serializing_if = "std::ops::Not::not")]
     pub truncated: bool,
+    /// How to refer to the listed items by meaning (R2, §17): for each item, a selector
+    /// that resolves to it now. An agent can copy these instead of ids.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub select: Option<SelectHints>,
+}
+
+/// Selectors that resolve to the items of a summary (R2, §17), keyed by item id
+/// (panels: `"<view>/<panel id>"`, layers: `"<view>/<layer id>"`; resolved within that
+/// view). Items for which no selector of the vocabulary is unique are left out.
+#[derive(Debug, Clone, Default, PartialEq, Serialize, Deserialize, JsonSchema)]
+#[serde(deny_unknown_fields)]
+pub struct SelectHints {
+    /// Series id → selector.
+    #[serde(default, skip_serializing_if = "BTreeMap::is_empty")]
+    pub series: BTreeMap<String, SeriesSel>,
+    /// View id → selector.
+    #[serde(default, skip_serializing_if = "BTreeMap::is_empty")]
+    pub views: BTreeMap<String, ViewSel>,
+    /// `"<view>/<panel id>"` → selector (within that view).
+    #[serde(default, skip_serializing_if = "BTreeMap::is_empty")]
+    pub panels: BTreeMap<String, PanelSel>,
+    /// `"<view>/<layer id>"` → selector (within that view).
+    #[serde(default, skip_serializing_if = "BTreeMap::is_empty")]
+    pub layers: BTreeMap<String, LayerSel>,
+    /// Fact id → selector.
+    #[serde(default, skip_serializing_if = "BTreeMap::is_empty")]
+    pub facts: BTreeMap<String, FactSel>,
+    /// Finding id → selector.
+    #[serde(default, skip_serializing_if = "BTreeMap::is_empty")]
+    pub findings: BTreeMap<String, FindingSel>,
 }
 
 /// One series in a summary.
@@ -2168,4 +2351,670 @@ pub struct Transcript {
     /// Final checks. Replay byte-equality is always checked.
     #[serde(default, rename = "final")]
     pub final_check: FinalCheck,
+}
+
+// ---------------------------------------------------------------------------
+// Reference by meaning (R2, `docs/PROTOCOL.md` §17): selectors
+// ---------------------------------------------------------------------------
+//
+// Every message field that takes an item id also accepts a *selector*: an object that
+// describes the item by its attributes. The authority resolves each selector against
+// the current document (deterministically, `docs/PROTOCOL.md` §17), substitutes the id,
+// returns `{pointer -> id}` in `ack.resolved` / `result.resolved`, and logs the request
+// with ids only. The types below are the closed vocabulary; message fields name them
+// through `#[schemars(with = ...)]`, so the generated JSON Schema of those fields is
+// "id or selector" while the stored form (log, proposals, documents) is an id.
+//
+// Common to every selector: all given keys must hold (AND); `{}` matches every item of
+// the kind; `first` / `latest` pick the first / last match in the kind's order (the same
+// order in which an `ambiguous` error lists its candidates). Without them, more than one
+// match is `ambiguous` and none is `not_found`.
+
+#[allow(clippy::trivially_copy_pass_by_ref)]
+fn is_false(b: &bool) -> bool {
+    !*b
+}
+
+/// Kind of a series, as in `welcome.summary` (`SeriesSummary::kind`).
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
+#[serde(rename_all = "snake_case")]
+pub enum SeriesKind {
+    /// A bar series (OHLCV).
+    Bars,
+    /// A computed (study) series.
+    Study,
+    /// A point series (e.g. a forecast).
+    Points,
+}
+
+/// Selects a series by meaning, e.g. `{"study":"rsi","params":{"period":14}}` ("RSI(14)"),
+/// `{"kind":"bars"}` ("the price series"), `{"study":"sma","params":{"period":50}}`.
+#[derive(Debug, Clone, Default, PartialEq, Serialize, Deserialize, JsonSchema)]
+#[serde(deny_unknown_fields)]
+pub struct SeriesSel {
+    /// `bars`, `study` or `points`.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub kind: Option<SeriesKind>,
+    /// Study name (`sma`, `ema`, `rsi`, `macd`, `bollinger`), exact.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub study: Option<String>,
+    /// Study parameters that must be equal (each one given; others free). Parameters
+    /// are complete with defaults in the document, so `{"period":14}` matches a default
+    /// RSI.
+    #[serde(default, skip_serializing_if = "BTreeMap::is_empty")]
+    pub params: BTreeMap<String, f64>,
+    /// A study computed on this series (one of its inputs matches).
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub on: Option<Box<SeriesRef>>,
+    /// Instrument symbol, case-insensitive (e.g. `"THYAO"`).
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub symbol: Option<String>,
+    /// Legend text, case-insensitive (as in `welcome.summary`: `RSI14`, `MACD(12,26,9)`).
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub label: Option<String>,
+    /// Pick the first match (document order).
+    #[serde(default, skip_serializing_if = "is_false")]
+    pub first: bool,
+    /// Pick the last match (document order: the most recently added).
+    #[serde(default, skip_serializing_if = "is_false")]
+    pub latest: bool,
+}
+
+/// Selects a view, e.g. `{}` (the only view), `{"shows":{"study":"macd"}}`.
+#[derive(Debug, Clone, Default, PartialEq, Serialize, Deserialize, JsonSchema)]
+#[serde(deny_unknown_fields)]
+pub struct ViewSel {
+    /// Title, case-insensitive (the given title, or the derived `SYMBOL interval`).
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub title: Option<String>,
+    /// A layer of the view draws this series.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub shows: Option<Box<SeriesRef>>,
+    /// Pick the first match (document order).
+    #[serde(default, skip_serializing_if = "is_false")]
+    pub first: bool,
+    /// Pick the last match (document order).
+    #[serde(default, skip_serializing_if = "is_false")]
+    pub latest: bool,
+}
+
+/// Selects a panel of the view named by the same op (or target), e.g.
+/// `{"shows":{"study":"rsi"}}` ("RSI's panel"), `{"mark":"candle"}` ("the price panel"),
+/// `{"name":"macd"}`.
+#[derive(Debug, Clone, Default, PartialEq, Serialize, Deserialize, JsonSchema)]
+#[serde(deny_unknown_fields)]
+pub struct PanelSel {
+    /// Panel name, case-insensitive.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub name: Option<String>,
+    /// A layer in the panel draws this series.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub shows: Option<Box<SeriesRef>>,
+    /// A layer in the panel has this mark.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub mark: Option<crate::grammar::Mark>,
+    /// Pick the first match (stack order: the top panel).
+    #[serde(default, skip_serializing_if = "is_false")]
+    pub first: bool,
+    /// Pick the last match (stack order: the bottom panel).
+    #[serde(default, skip_serializing_if = "is_false")]
+    pub latest: bool,
+}
+
+/// Selects a layer of the view named by the same op (or target), e.g.
+/// `{"shows":{"study":"bollinger"},"output":"upper"}` ("the upper band"),
+/// `{"mark":"rule","value":70}` ("the 70 line").
+#[derive(Debug, Clone, Default, PartialEq, Serialize, Deserialize, JsonSchema)]
+#[serde(deny_unknown_fields)]
+pub struct LayerSel {
+    /// The layer's data series matches.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub shows: Option<Box<SeriesRef>>,
+    /// The layer draws this field: its `y` or `y2` names it, or `y` is absent and the
+    /// field is one the layer draws by default (a `line` on Bollinger draws `upper`,
+    /// `middle`, `lower`; otherwise the main output).
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub output: Option<String>,
+    /// Mark.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub mark: Option<crate::grammar::Mark>,
+    /// The layer is in this panel.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub panel: Option<Box<PanelRef>>,
+    /// A constant of the layer (`y` or `x`) equals this number exactly (a rule's level).
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub value: Option<f64>,
+    /// The layer's data is this fact.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub fact: Option<Box<FactRef>>,
+    /// The layer's data is this finding.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub finding: Option<Box<FindingRef>>,
+    /// Legend text, case-insensitive (the given label or the derived one, `RSI14`).
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub label: Option<String>,
+    /// Pick the first match (paint order).
+    #[serde(default, skip_serializing_if = "is_false")]
+    pub first: bool,
+    /// Pick the last match (paint order: the topmost).
+    #[serde(default, skip_serializing_if = "is_false")]
+    pub latest: bool,
+}
+
+/// Selects a fact, e.g. `{"kind":"breakout","latest":true}`.
+#[derive(Debug, Clone, Default, PartialEq, Serialize, Deserialize, JsonSchema)]
+#[serde(deny_unknown_fields)]
+pub struct FactSel {
+    /// Fact kind, exact (`cross_above`, `breakout`...).
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub kind: Option<String>,
+    /// The fact is about this series.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub on: Option<Box<SeriesRef>>,
+    /// Bar index.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub bar: Option<u64>,
+    /// Pick the first match (by bar: the oldest).
+    #[serde(default, skip_serializing_if = "is_false")]
+    pub first: bool,
+    /// Pick the last match (by bar: the most recent).
+    #[serde(default, skip_serializing_if = "is_false")]
+    pub latest: bool,
+}
+
+/// Selects a finding, e.g. `{"kind":"breakout","latest":true}` ("the latest breakout").
+#[derive(Debug, Clone, Default, PartialEq, Serialize, Deserialize, JsonSchema)]
+#[serde(deny_unknown_fields)]
+pub struct FindingSel {
+    /// One of its facts has this kind.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub kind: Option<String>,
+    /// One of its facts is about this series.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub on: Option<Box<SeriesRef>>,
+    /// It rests on this fact.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub fact: Option<Box<FactRef>>,
+    /// State of its capsule (a finding without a capsule has none).
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub state: Option<CapsuleState>,
+    /// Pick the first match (by its latest fact bar: the oldest).
+    #[serde(default, skip_serializing_if = "is_false")]
+    pub first: bool,
+    /// Pick the last match (by its latest fact bar: the most recent).
+    #[serde(default, skip_serializing_if = "is_false")]
+    pub latest: bool,
+}
+
+/// Selects a proposal, e.g. `{"state":"pending","latest":true}`.
+#[derive(Debug, Clone, Default, PartialEq, Serialize, Deserialize, JsonSchema)]
+#[serde(deny_unknown_fields)]
+pub struct ProposalSel {
+    /// State.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub state: Option<ProposalState>,
+    /// Pick the first match (document order).
+    #[serde(default, skip_serializing_if = "is_false")]
+    pub first: bool,
+    /// Pick the last match (document order: the most recent).
+    #[serde(default, skip_serializing_if = "is_false")]
+    pub latest: bool,
+}
+
+/// Selects a value scale of the op's view by its panel: `{"panel":{"mark":"candle"}}`
+/// is `"y<id of the price panel>"`.
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
+#[serde(deny_unknown_fields)]
+pub struct ScaleSel {
+    /// The panel whose value scale is meant.
+    pub panel: PanelRef,
+}
+
+/// Selects any item, naming its kind: `{"finding":{"kind":"breakout","latest":true}}`,
+/// `{"fact":{"bar":120}}`. Used where a field takes an id of any collection
+/// (`target.item`, `add_narrative.about`, `remove.id`, `get.id`, `changes.ids`).
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
+#[serde(rename_all = "snake_case", deny_unknown_fields)]
+pub enum ItemSel {
+    /// A series.
+    Series(SeriesSel),
+    /// A view.
+    View(ViewSel),
+    /// A fact.
+    Fact(FactSel),
+    /// A finding.
+    Finding(FindingSel),
+    /// A proposal.
+    Proposal(ProposalSel),
+}
+
+/// A series id or a [`SeriesSel`].
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
+#[serde(untagged)]
+pub enum SeriesRef {
+    /// Series id.
+    Id(String),
+    /// Selector.
+    Select(SeriesSel),
+}
+
+/// A view id or a [`ViewSel`].
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
+#[serde(untagged)]
+pub enum ViewRef {
+    /// View id.
+    Id(String),
+    /// Selector.
+    Select(ViewSel),
+}
+
+/// A panel id (number) or a [`PanelSel`].
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
+#[serde(untagged)]
+pub enum PanelRef {
+    /// Panel id.
+    Id(u32),
+    /// Selector.
+    Select(PanelSel),
+}
+
+impl Default for PanelRef {
+    fn default() -> Self {
+        Self::Id(0)
+    }
+}
+
+/// A layer id or a [`LayerSel`].
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
+#[serde(untagged)]
+pub enum LayerRef {
+    /// Layer id.
+    Id(String),
+    /// Selector.
+    Select(LayerSel),
+}
+
+/// A fact id or a [`FactSel`].
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
+#[serde(untagged)]
+pub enum FactRef {
+    /// Fact id.
+    Id(String),
+    /// Selector.
+    Select(FactSel),
+}
+
+/// A finding id or a [`FindingSel`].
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
+#[serde(untagged)]
+pub enum FindingRef {
+    /// Finding id.
+    Id(String),
+    /// Selector.
+    Select(FindingSel),
+}
+
+/// A proposal id or a [`ProposalSel`].
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
+#[serde(untagged)]
+pub enum ProposalRef {
+    /// Proposal id.
+    Id(String),
+    /// Selector.
+    Select(ProposalSel),
+}
+
+/// A scale id (`"x"`, `"y<panel>"`) or a [`ScaleSel`].
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
+#[serde(untagged)]
+pub enum ScaleRef {
+    /// Scale id.
+    Id(String),
+    /// Selector.
+    Select(ScaleSel),
+}
+
+/// An item id (any collection) or an [`ItemSel`].
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
+#[serde(untagged)]
+pub enum ItemRef {
+    /// Item id.
+    Id(String),
+    /// Selector.
+    Select(ItemSel),
+}
+
+// Input shapes of composite fields that accept selectors inside. They describe the
+// *wire* form of these fields (schema only, through `#[schemars(with = ...)]`); the
+// authority resolves the selectors and then parses the stored types (`Target`,
+// `grammar::Layer`, `Condition`, ...). A test keeps their field names equal to the
+// stored types' (unit test `wire_forms_mirror_stored_types` below).
+
+/// Wire form of [`Target`]: every id field also takes a selector.
+#[derive(Debug, Clone, Default, PartialEq, Serialize, Deserialize, JsonSchema)]
+#[serde(deny_unknown_fields)]
+pub struct TargetIn {
+    /// View id or selector.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub view: Option<ViewRef>,
+    /// Panel id or selector (in `view`, or in the op's view).
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub panel: Option<PanelRef>,
+    /// Layer id or selector (in `view`, the op's view, or any view).
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub layer: Option<LayerRef>,
+    /// Series id or selector.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub series: Option<SeriesRef>,
+    /// Output or field of the series, e.g. `"v"`, `"signal"`.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub output: Option<String>,
+    /// Item id or selector (`{"finding":{...}}`, `{"fact":{...}}`).
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub item: Option<ItemRef>,
+    /// First bar index (0-based) of the region.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub from_bar: Option<u64>,
+    /// Last bar index (inclusive) of the region.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub to_bar: Option<u64>,
+}
+
+/// Wire form of [`crate::grammar::Emphasis`].
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
+#[serde(deny_unknown_fields)]
+pub struct EmphasisIn {
+    /// What is emphasised.
+    pub target: TargetIn,
+    /// How.
+    pub kind: crate::grammar::EmphasisKind,
+}
+
+/// Wire form of [`NarrativeStep`].
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
+#[serde(deny_unknown_fields)]
+pub struct NarrativeStepIn {
+    /// Start of the step, milliseconds from the start of the narration.
+    pub at_ms: u32,
+    /// What to show.
+    pub target: TargetIn,
+    /// What to say.
+    pub say: String,
+}
+
+/// Wire form of [`AttentionDirective`].
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
+#[serde(deny_unknown_fields)]
+pub struct AttentionDirectiveIn {
+    /// Id; assigned if absent.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub id: Option<String>,
+    /// Principal who should look.
+    pub to: String,
+    /// Steps, in the order to show them.
+    pub steps: Vec<AttentionStepIn>,
+    /// Filled in by the authority; ignored if sent.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub from: Option<String>,
+    /// Filled in by the authority.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub at: Option<TimestampMs>,
+}
+
+/// Wire form of [`AttentionStep`].
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
+#[serde(deny_unknown_fields)]
+pub struct AttentionStepIn {
+    /// What to look at.
+    pub target: TargetIn,
+    /// Optional short caption.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub say: Option<String>,
+}
+
+/// Wire form of [`Condition`]: series fields also take selectors.
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
+#[serde(tag = "kind", rename_all = "snake_case", deny_unknown_fields)]
+pub enum ConditionIn {
+    /// Last value of a series compared against a constant.
+    Threshold {
+        /// Series id or selector.
+        series: SeriesRef,
+        /// Comparison.
+        op: crate::types::CompareOp,
+        /// Constant to compare against.
+        value: f64,
+    },
+    /// One series compared against another.
+    Compare {
+        /// Left series id or selector.
+        left: SeriesRef,
+        /// Comparison.
+        op: crate::types::CompareOp,
+        /// Right series id or selector.
+        right: SeriesRef,
+    },
+    /// Free text; evaluated by a person.
+    Text {
+        /// Condition statement.
+        text: String,
+    },
+}
+
+/// Wire form of [`crate::grammar::DataRef`].
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
+#[serde(deny_unknown_fields)]
+pub struct DataRefIn {
+    /// Series id or selector; the layer's own series when absent.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub series: Option<SeriesRef>,
+    /// Field name.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub field: Option<String>,
+}
+
+/// Wire form of [`crate::grammar::Position`].
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
+#[serde(untagged)]
+pub enum PositionIn {
+    /// Numeric constant.
+    Number(f64),
+    /// Field name, or a numeric constant written as a string.
+    Name(String),
+    /// Field of a (possibly other) series.
+    Ref(DataRefIn),
+}
+
+/// Wire form of [`crate::grammar::Operand`].
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
+#[serde(untagged)]
+pub enum OperandIn {
+    /// Numeric constant.
+    Number(f64),
+    /// A field of the layer's data or of another series.
+    Ref(DataRefIn),
+}
+
+/// Wire form of [`crate::grammar::Predicate`].
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
+#[serde(deny_unknown_fields)]
+pub struct PredicateIn {
+    /// Left-hand field of the layer's data.
+    pub field: String,
+    /// Comparison.
+    pub op: crate::grammar::Cmp,
+    /// Right-hand side.
+    pub than: OperandIn,
+}
+
+/// Wire form of [`crate::grammar::ColorWhen`].
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
+#[serde(deny_unknown_fields)]
+pub struct ColorWhenIn {
+    /// The condition.
+    pub when: PredicateIn,
+    /// Colour where it holds.
+    pub then: String,
+    /// Colour where it does not.
+    #[serde(rename = "else")]
+    pub otherwise: String,
+}
+
+/// Wire form of [`crate::grammar::ColorSpec`].
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
+#[serde(untagged)]
+pub enum ColorSpecIn {
+    /// One colour.
+    Constant(String),
+    /// Colour by condition.
+    When(ColorWhenIn),
+    /// Colour by value steps.
+    Steps(crate::grammar::ColorSteps),
+}
+
+/// Wire form of [`crate::grammar::Encoding`]: series references inside channels also
+/// take selectors.
+#[derive(Debug, Clone, Default, PartialEq, Serialize, Deserialize, JsonSchema)]
+#[serde(deny_unknown_fields)]
+pub struct EncodingIn {
+    /// Horizontal position.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub x: Option<PositionIn>,
+    /// Vertical position.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub y: Option<PositionIn>,
+    /// Second vertical position.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub y2: Option<PositionIn>,
+    /// Colour.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub color: Option<ColorSpecIn>,
+    /// Opacity `0..=1`.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub opacity: Option<f64>,
+    /// Stroke width in pixels.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub width: Option<f64>,
+    /// Size in pixels.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub size: Option<crate::grammar::SizeSpec>,
+    /// Text field of a `text` mark.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub text: Option<String>,
+}
+
+/// Wire form of [`crate::grammar::Layer`]: `series`, `fact`, `finding`, `panel` and
+/// series references in the encoding also take selectors.
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
+#[serde(deny_unknown_fields)]
+pub struct LayerIn {
+    /// Stable id, unique within the view. Assigned when absent.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub id: Option<String>,
+    /// Visual mark.
+    pub mark: crate::grammar::Mark,
+    /// Data: a series id or selector.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub series: Option<SeriesRef>,
+    /// Data: a fact id or selector.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub fact: Option<FactRef>,
+    /// Data: a finding id or selector.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub finding: Option<FindingRef>,
+    /// Panel id or selector (in the op's view).
+    #[serde(default)]
+    pub panel: PanelRef,
+    /// Encoding channels.
+    #[serde(default)]
+    pub encoding: EncodingIn,
+    /// Origins of the layer's numeric constants (JSON pointer inside the layer).
+    #[serde(default, skip_serializing_if = "BTreeMap::is_empty")]
+    pub origin: BTreeMap<String, crate::grammar::Origin>,
+    /// Legend text.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub label: Option<String>,
+}
+
+#[cfg(test)]
+mod selector_tests {
+    use super::*;
+
+    /// Property names of a type's generated schema (object variants merged).
+    fn props<T: JsonSchema>() -> Vec<String> {
+        fn collect(v: &serde_json::Value, out: &mut Vec<String>) {
+            if let Some(p) = v.get("properties").and_then(serde_json::Value::as_object) {
+                out.extend(p.keys().cloned());
+            }
+            for k in ["oneOf", "anyOf"] {
+                if let Some(bs) = v.get(k).and_then(serde_json::Value::as_array) {
+                    bs.iter().for_each(|b| collect(b, out));
+                }
+            }
+        }
+        let mut out = Vec::new();
+        collect(&schemars::schema_for!(T).to_value(), &mut out);
+        out.sort();
+        out.dedup();
+        out
+    }
+
+    #[test]
+    fn wire_forms_mirror_stored_types() {
+        use crate::grammar as g;
+        assert_eq!(props::<TargetIn>(), props::<Target>());
+        assert_eq!(props::<EmphasisIn>(), props::<g::Emphasis>());
+        assert_eq!(props::<NarrativeStepIn>(), props::<NarrativeStep>());
+        assert_eq!(
+            props::<AttentionDirectiveIn>(),
+            props::<AttentionDirective>()
+        );
+        assert_eq!(props::<AttentionStepIn>(), props::<AttentionStep>());
+        assert_eq!(props::<ConditionIn>(), props::<Condition>());
+        assert_eq!(props::<LayerIn>(), props::<g::Layer>());
+        assert_eq!(props::<EncodingIn>(), props::<g::Encoding>());
+        assert_eq!(props::<DataRefIn>(), props::<g::DataRef>());
+        assert_eq!(props::<PredicateIn>(), props::<g::Predicate>());
+        assert_eq!(props::<ColorWhenIn>(), props::<g::ColorWhen>());
+    }
+
+    #[test]
+    fn id_fields_accept_selectors_in_the_schema() {
+        let s = schemars::schema_for!(ClientMsg).to_value();
+        let text = s.to_string();
+        for def in [
+            "SeriesSel",
+            "ViewSel",
+            "PanelSel",
+            "LayerSel",
+            "FactSel",
+            "FindingSel",
+            "ProposalSel",
+            "ScaleSel",
+            "ItemSel",
+            "LayerIn",
+            "TargetIn",
+            "ConditionIn",
+        ] {
+            assert!(
+                s.pointer(&format!("/$defs/{def}")).is_some(),
+                "{def} missing from the ClientMsg schema"
+            );
+        }
+        assert!(text.contains("\"deprecated\":true"));
+        // Stored views keep plain ids. (The stored `Op`s of proposals and log requests
+        // share the input schema; the authority only ever stores them resolved.)
+        let d = schemars::schema_for!(View).to_value();
+        assert!(d.pointer("/$defs/SeriesSel").is_none());
+        assert!(d.pointer("/$defs/LayerIn").is_none());
+        assert!(d.pointer("/$defs/TargetIn").is_none());
+    }
+
+    #[test]
+    fn selectors_reject_unknown_keys() {
+        let r: Result<SeriesSel, _> = serde_json::from_str(r#"{"stdy":"rsi"}"#);
+        assert!(r.is_err());
+        let r: Result<ItemSel, _> = serde_json::from_str(r#"{"finding":{"kind":"x"}}"#);
+        assert!(r.is_ok());
+    }
 }

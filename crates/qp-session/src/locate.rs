@@ -376,17 +376,52 @@ fn walk_branches(
         };
         return walk(v, &branches[i], root, path, depth + 1);
     }
-    // Untagged: valid if any branch accepts it; otherwise report the first branch's error.
+    // Untagged: valid if any branch accepts it; otherwise report the error of the first
+    // branch that accepts the value's JSON type (an object given where "id or selector"
+    // is expected gets the selector's error, e.g. its unknown key), else the first error.
     let mut first = None;
+    let mut typed = None;
     for b in branches {
         match walk(v, b, root, path, depth + 1) {
             None => return None,
             Some(viol) => {
+                if typed.is_none() && accepts_type(b, v, root, 0) {
+                    typed = Some(viol.clone());
+                }
                 if first.is_none() {
                     first = Some(viol);
                 }
             }
         }
     }
-    first
+    typed.or(first)
+}
+
+/// Whether a schema branch can accept a value of `v`'s JSON type at all.
+fn accepts_type(schema: &Value, v: &Value, root: &Value, depth: u32) -> bool {
+    let s = resolve(schema, root);
+    if let Some(t) = s.get("type") {
+        return match t {
+            Value::String(x) => type_matches(x, v),
+            Value::Array(xs) => xs
+                .iter()
+                .filter_map(Value::as_str)
+                .any(|x| type_matches(x, v)),
+            _ => true,
+        };
+    }
+    if let Some(bs) = s
+        .get("oneOf")
+        .or_else(|| s.get("anyOf"))
+        .and_then(Value::as_array)
+    {
+        return depth > 4 || bs.iter().any(|b| accepts_type(b, v, root, depth + 1));
+    }
+    if s.get("properties").is_some() {
+        return v.is_object();
+    }
+    if let Some(c) = s.get("const") {
+        return type_name(c) == type_name(v);
+    }
+    true
 }

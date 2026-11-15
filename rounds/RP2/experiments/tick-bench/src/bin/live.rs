@@ -18,8 +18,8 @@
 //! `provider`), so the same file builds against the T1/T4 code for the "before" column
 //! (`run-live.sh`).
 //!
-//! Usage: `live [bars] [ticks] [reps] [studies,...] [paths]` (defaults
-//! `10000 600 15 5,50,500 inline,bound`); `live profile <inline|bound> <t6d|base|all> <n> <ticks>`.
+//! Usage: `live [bars] [ticks] [reps] [studies,...] [paths] [watches]` (defaults
+//! `10000 600 15 5,50,500 inline,bound t6d,base,all`); `live profile <inline|bound> <t6d|base|all> <n> <ticks>`.
 
 use std::collections::BTreeMap;
 use std::path::Path;
@@ -414,7 +414,7 @@ struct Cfg {
     reps: usize,
 }
 
-fn section(cfg: &Cfg, n: usize, bound: bool) {
+fn section(cfg: &Cfg, n: usize, bound: bool, watches: &[Watch]) {
     let path = if bound { "bound" } else { "inline" };
     let (doc, bars) = gen_doc(cfg.bars, n, bound);
     let feed = gen_feed(bars.last().unwrap(), cfg.ticks);
@@ -472,7 +472,7 @@ fn section(cfg: &Cfg, n: usize, bound: bool) {
     for m in &msgs {
         cref.tick_msg(bound, false, m);
     }
-    for w in [Watch::T6d, Watch::Base, Watch::All] {
+    for &w in watches {
         let kw = format!("{k}.{}", w.name());
         // Per-tick distribution (one run, timer per tick).
         let mut s = live_session(&doc, &bars, bound, w);
@@ -560,13 +560,23 @@ fn main() {
     };
     let counts: Vec<usize> = a.get(4).map_or("5,50,500", String::as_str).split(',').map(|x| x.parse().unwrap()).collect();
     let paths: Vec<String> = a.get(5).map_or("inline,bound", String::as_str).split(',').map(str::to_owned).collect();
+    let watches: Vec<Watch> = a
+        .get(6)
+        .map_or("t6d,base,all", String::as_str)
+        .split(',')
+        .map(|w| match w {
+            "t6d" => Watch::T6d,
+            "base" => Watch::Base,
+            _ => Watch::All,
+        })
+        .collect();
     let target = if cfg!(target_arch = "wasm32") { "wasm32" } else { std::env::consts::ARCH };
     println!("# RP2/T5 live bench");
     kv!("target", "{target}");
     kv!("config", "bars {} ticks {} reps {} studies {:?} paths {:?}", cfg.bars, cfg.ticks, cfg.reps, counts, paths);
     for n in counts {
         for p in &paths {
-            section(&cfg, n, p == "bound");
+            section(&cfg, n, p == "bound", &watches);
         }
     }
 }

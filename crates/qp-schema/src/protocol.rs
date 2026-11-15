@@ -1406,8 +1406,9 @@ pub enum Query {
     /// A finding presented for a surface. Depth follows the asker's negotiated profile
     /// unless `surface` names another surface kind.
     Present {
-        /// Finding id. If absent: the most important live finding (highest confidence).
-        /// Also takes a selector (§17).
+        /// Finding id. If absent: the only live finding; with several live findings the
+        /// authority does not pick one (`ambiguous`, every live finding as a candidate;
+        /// K25). Also takes a selector (§17), e.g. `{"latest":true}`.
         #[serde(default, skip_serializing_if = "Option::is_none")]
         #[schemars(with = "Option<FindingRef>")]
         finding: Option<String>,

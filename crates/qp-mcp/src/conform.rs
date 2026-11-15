@@ -23,9 +23,11 @@
 use std::collections::BTreeMap;
 use std::path::Path;
 
-use qp_schema::protocol::{ClientMsg, Transcript};
-use qp_session::conform::{load_init, run_steps, FinalState, TranscriptOutcome, Transport};
-use qp_session::{read_json, Session};
+use qp_schema::protocol::ClientMsg;
+use qp_session::conform::{
+    load_init, read_transcript, run_steps, FinalState, TranscriptOutcome, Transport,
+};
+use qp_session::Session;
 use serde_json::{json, Map, Value};
 
 use crate::tools::{self, COMMAND_EXTRAS};
@@ -331,7 +333,7 @@ pub fn run_file(file: &Path, root: &Path) -> (TranscriptOutcome, Stats) {
     };
     let mut stats = Stats::default();
     let r = (|| -> Result<(), String> {
-        let t: Transcript = read_json(file)?;
+        let t = read_transcript(file)?;
         outcome.name.clone_from(&t.name);
         let loaded = load_init(&t.init, root)?;
         let session = Session::new(loaded.init.clone(), root)?;

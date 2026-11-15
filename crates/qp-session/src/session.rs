@@ -443,15 +443,20 @@ impl Session {
             log: &self.log,
             undoes: None,
         };
-        let mut scratch = self.doc.clone();
+        // The live document is used until an op before the last selector changes it;
+        // only then is one scratch copy made, and later ops change that copy in place
+        // (a failing op is rolled back with the inverses of its applied changes). No
+        // copy at all for a message whose selectors are all in its first op that
+        // changes nothing before them, e.g. a one-op command.
+        let mut scratch: Option<Document> = None;
         let last = groups
             .iter()
             .rposition(|g| g.iter().any(|s| select::is_selector(msg, s)))
             .unwrap_or(0);
         for (i, g) in groups.iter().enumerate().take(last + 1) {
-            {
+            if g.iter().any(|s| select::is_selector(msg, s)) {
                 let r = select::Resolver {
-                    doc: &scratch,
+                    doc: scratch.as_ref().unwrap_or(&self.doc),
                     root: Some(&self.schema),
                 };
                 select::resolve_group(&r, msg, g, &mut out)?;
@@ -466,11 +471,13 @@ impl Session {
             else {
                 continue;
             };
-            if let Ok(cs) = crate::expand::expand_op(&scratch, &op, &p, &mut ctx) {
-                let mut next = scratch.clone();
-                if apply_all(&mut next, &cs).is_ok() {
-                    scratch = next;
+            let cur = scratch.as_ref().unwrap_or(&self.doc);
+            if let Ok(cs) = crate::expand::expand_op(cur, &op, &p, &mut ctx) {
+                if cs.is_empty() {
+                    continue;
                 }
+                let doc = scratch.get_or_insert_with(|| self.doc.clone());
+                apply_or_roll_back(doc, &cs);
             }
         }
         Ok(out)
@@ -1665,6 +1672,24 @@ impl Session {
             }
         }
         Ok((id, lines))
+    }
+}
+
+/// Applies `changes` to `doc` in place; if one does not fit, the ones applied before it
+/// are undone with their inverses, so `doc` is left as it was (the same bytes, as undo
+/// guarantees).
+fn apply_or_roll_back(doc: &mut Document, changes: &[ChangeOp]) {
+    let mut inverses = Vec::with_capacity(changes.len());
+    for c in changes {
+        match crate::apply::apply_change(doc, c) {
+            Ok(inv) => inverses.push(inv),
+            Err(_) => {
+                for inv in inverses.iter().rev() {
+                    let _ = crate::apply::apply_change(doc, inv);
+                }
+                return;
+            }
+        }
     }
 }
 

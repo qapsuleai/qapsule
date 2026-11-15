@@ -65,7 +65,8 @@ fn three_surfaces_three_depths() {
         .iter()
         .map(|l| l["id"].as_str().unwrap())
         .collect();
-    assert_eq!(ids, ["l0", "l1", "l2"]);
+    // K25: the grammar's own layer names, as in the capsule view.
+    assert_eq!(ids, ["candles", "line", "level"]);
     assert_eq!(d["facts"][0]["id"], "fact-rsi-cross70");
 
     // Both views compile against the document (the capsule view at the phone frame).
@@ -134,10 +135,8 @@ fn show_finding_stores_the_grammar_chart_view() {
             .unwrap()
             .clone();
     let prov = h.s.provider();
-    let mut rule = depth::chart_view("fnd-overbought", &prov, "vp").unwrap();
-    for (i, l) in rule.layers.iter_mut().enumerate() {
-        l.id = Some(format!("l{i}"));
-    }
+    // K25: stored as the grammar rule builds it, with the grammar's layer names.
+    let rule = depth::chart_view("fnd-overbought", &prov, "vp").unwrap();
     assert_eq!(stored, rule);
 }
 

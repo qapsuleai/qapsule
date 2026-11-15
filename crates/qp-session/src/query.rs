@@ -3,9 +3,9 @@
 use std::collections::BTreeMap;
 
 use qp_schema::protocol::{
-    AtBar, AttentionState, Collection, Description, ErrorCode, Gesture, Op, OutboundLine,
-    PanelInfo, Query, QueryResult, Range, Reduce, Reduced, ScreenInfo, SeriesValues, Target, Topic,
-    Viewport, PROTOCOL_VERSION,
+    AtBar, AttentionState, Candidate, Collection, Description, ErrorCode, Gesture, Op,
+    OutboundLine, PanelInfo, Query, QueryResult, Range, Reduce, Reduced, ScreenInfo, SeriesValues,
+    Target, Topic, Viewport, PROTOCOL_VERSION,
 };
 use qp_schema::{CapsuleState, Document, Mark, Series, SeriesSource, View};
 use serde_json::Value;
@@ -14,6 +14,8 @@ use crate::apply::{all_ids, find_collection};
 use crate::error::{invalid, ptr, PResult, E};
 use crate::expand::{need_finding, need_series, need_view, view_bar_series};
 use crate::present::{present, profile_for};
+use crate::provider::DocProvider;
+use crate::select::{finding_about, finding_bar};
 use crate::session::{permissions, Conn, Session};
 use crate::values::values;
 
@@ -466,12 +468,7 @@ impl Session {
             Query::Present { finding, surface } => {
                 let f = match finding {
                     Some(id) => need_finding(&self.doc, id, &ptr(qp, "finding"))?.clone(),
-                    None => self.most_important().ok_or_else(|| {
-                        E::new(ErrorCode::NotFound, "there is no live finding")
-                            .at(qp)
-                            .hint("Name a finding with `finding`.")
-                            .build()
-                    })?,
+                    None => self.only_live_finding(qp)?,
                 };
                 let (kind, profile) = match surface {
                     Some(k) => (*k, profile_for(*k, None)),
@@ -497,25 +494,55 @@ impl Session {
         }
     }
 
-    /// The live finding with the highest confidence (ties: smallest id).
-    fn most_important(&self) -> Option<qp_schema::Finding> {
-        let mut live: Vec<&qp_schema::Finding> = self
-            .doc
+    /// The finding `present` uses when none is named (K25): the only live finding.
+    /// Several live findings → `ambiguous` with all of them as candidates, in the
+    /// selector order of findings (§17.3: latest fact bar, ties in document order); the
+    /// authority does not pick one. None → `not_found`.
+    fn only_live_finding(&self, qp: &str) -> PResult<qp_schema::Finding> {
+        let doc = &self.doc;
+        let mut live: Vec<(Option<u64>, usize, &qp_schema::Finding)> = doc
             .findings
             .iter()
-            .filter(|f| {
-                self.doc
-                    .capsules
+            .enumerate()
+            .filter(|(_, f)| {
+                doc.capsules
                     .iter()
                     .any(|c| c.finding == f.id && c.state == CapsuleState::Live)
             })
+            .map(|(i, f)| (finding_bar(doc, f), i, f))
             .collect();
-        live.sort_by(|a, b| {
-            b.confidence
-                .total_cmp(&a.confidence)
-                .then_with(|| a.id.cmp(&b.id))
-        });
-        live.first().map(|f| (*f).clone())
+        live.sort_by_key(|(b, i, _)| (*b, *i));
+        match live.as_slice() {
+            [] => Err(E::new(ErrorCode::NotFound, "there is no live finding")
+                .at(qp)
+                .hint("Name a finding with `finding`.")
+                .build()),
+            [(_, _, f)] => Ok((*f).clone()),
+            _ => {
+                let mut e = E::new(
+                    ErrorCode::Ambiguous,
+                    format!(
+                        "{} live findings and no `finding`; the authority does not pick one",
+                        live.len()
+                    ),
+                )
+                .at(qp)
+                .hint(
+                    "Pass `finding` with one of the candidate ids, or a selector such as \
+                     {\"latest\":true} (the finding with the latest fact bar); candidates \
+                     are in latest-fact-bar order.",
+                )
+                .build();
+                e.candidates = live
+                    .iter()
+                    .map(|(_, _, f)| Candidate {
+                        id: f.id.clone(),
+                        about: finding_about(doc, f),
+                    })
+                    .collect();
+                Err(e)
+            }
+        }
     }
 
     fn at_bar(&mut self, series: &str, i: usize) -> AtBar {
@@ -555,7 +582,15 @@ impl Session {
         }
     }
 
-    /// Initial visible range of a view for a surface (§4.6).
+    /// Times of the view's future slots (after its last bar; point series such as a
+    /// forecast fan, `docs/GRAMMAR.md` §3). A viewport may reach them (K25).
+    pub(crate) fn future_times(&self, view: &View) -> Vec<i64> {
+        qp_grammar::compile::future_times(view, &DocProvider::new(&self.doc, &self.cache))
+    }
+
+    /// Initial visible range of a view for a surface (§4.6): the slots whose time falls
+    /// in `x.domain`, else the surface's last N bars and every future slot after them
+    /// (K25: the default viewport covers the future points).
     fn initial_range(
         &self,
         view: &View,
@@ -566,12 +601,18 @@ impl Session {
         if bars.is_empty() {
             return None;
         }
-        let last = bars.len() - 1;
+        let future = self.future_times(view);
+        let last_slot = bars.len() - 1 + future.len();
         if let Some([a, b]) = view.x.domain {
+            let times: Vec<i64> = bars
+                .iter()
+                .map(|x| x.t)
+                .chain(future.iter().copied())
+                .collect();
             #[allow(clippy::cast_precision_loss)]
-            let from = bars.iter().position(|x| x.t as f64 >= a);
+            let from = times.iter().position(|t| *t as f64 >= a);
             #[allow(clippy::cast_precision_loss)]
-            let to = bars.iter().rposition(|x| x.t as f64 <= b);
+            let to = times.iter().rposition(|t| *t as f64 <= b);
             if let (Some(f), Some(t)) = (from, to) {
                 if f <= t {
                     return Some((f as u64, t as u64));
@@ -583,17 +624,24 @@ impl Session {
             K::Watch => 20,
             K::Desktop | K::Voice | K::Headless => 120,
         };
-        Some((bars.len().saturating_sub(n) as u64, last as u64))
+        Some((bars.len().saturating_sub(n) as u64, last_slot as u64))
+    }
+
+    /// The last slot of a view: its last bar plus its future slots (K25); `None` without
+    /// bars.
+    pub(crate) fn last_slot(&self, view: &View) -> Option<u64> {
+        let n = view_bar_series(&self.doc, view)
+            .and_then(Series::bars)
+            .map_or(0, <[qp_schema::Bar]>::len) as u64;
+        let last = n.checked_sub(1)?;
+        Some(last + self.future_times(view).len() as u64)
     }
 
     pub(crate) fn range_of(&self, c: &Conn, view: &View) -> Option<(u64, u64)> {
         let saved = c.viewports.get(&view.id).copied().and_then(|(a, b)| {
             // A saved viewport can outlive data that got shorter (an undone
-            // `append_bars`): clamp it to the current bar series.
-            let n = view_bar_series(&self.doc, view)
-                .and_then(Series::bars)
-                .map_or(0, <[qp_schema::Bar]>::len) as u64;
-            let last = n.checked_sub(1)?;
+            // `append_bars`): clamp it to the current slots (bars + future slots).
+            let last = self.last_slot(view)?;
             let b = b.min(last);
             Some((a.min(b), b))
         });
@@ -660,9 +708,17 @@ impl Session {
             })
             .map(|cap| cap.id.clone())
             .collect();
+        // The viewport may end in a future slot (K25): the last close shown is the
+        // close of the last bar in it.
         let last_close = bs
             .and_then(Series::bars)
-            .and_then(|b| b.get(usize::try_from(vp.to_bar).ok()?))
+            .and_then(|b| {
+                b.get(
+                    usize::try_from(vp.to_bar)
+                        .ok()?
+                        .min(b.len().checked_sub(1)?),
+                )
+            })
             .map(|b| b.c);
         // R2: name, scale and layers from the compiled scene (`docs/GRAMMAR.md` §16).
         let mut compiled = self.screen_panels(c, &vp);
@@ -747,12 +803,18 @@ impl Session {
             ));
         }
         let last = n - 1;
+        // K25: a viewport may reach the future slots (points after the last bar).
+        let future = self.future_times(&view).len() as u64;
+        let last_slot = last + future;
+        let slots = n + future;
         // A saved viewport can outlive data that got shorter (e.g. an undone
-        // `append_bars`): clamp it to the current series before using it.
-        let (from, to) = self.range_of(&self.conns[ci], &view).unwrap_or((0, last));
-        let to = to.min(last);
+        // `append_bars`): clamp it to the current slots before using it.
+        let (from, to) = self
+            .range_of(&self.conns[ci], &view)
+            .unwrap_or((0, last_slot));
+        let to = to.min(last_slot);
         let from = from.min(to);
-        let past = |field: &str, v: u64| {
+        let past_bar = |field: &str, v: u64| {
             E::new(
                 ErrorCode::Invalid,
                 format!("bar {v} is past the last bar {last}"),
@@ -761,12 +823,26 @@ impl Session {
             .expected([format!("0..={last}")])
             .build()
         };
+        let past_slot = |field: &str, v: u64| {
+            if future == 0 {
+                return past_bar(field, v);
+            }
+            E::new(
+                ErrorCode::Invalid,
+                format!(
+                    "slot {v} is past the last slot {last_slot} (last bar {last} + {future} future slot(s))"
+                ),
+            )
+            .at(ptr(gp, field))
+            .expected([format!("0..={last_slot}")])
+            .build()
+        };
         let (nf, nt) = match g {
             Gesture::Look {
                 from_bar, to_bar, ..
             } => {
-                if *to_bar > last {
-                    return Err(past("to_bar", *to_bar));
+                if *to_bar > last_slot {
+                    return Err(past_slot("to_bar", *to_bar));
                 }
                 if from_bar > to_bar {
                     return Err(invalid(
@@ -778,7 +854,7 @@ impl Session {
             }
             Gesture::Pan { bars, .. } => {
                 let width = to - from;
-                let max_from = last.saturating_sub(width);
+                let max_from = last_slot.saturating_sub(width);
                 let target = i128::from(from) + i128::from(*bars);
                 let nf = u64::try_from(target.clamp(0, i128::from(max_from))).unwrap_or(0);
                 (nf, nf + width)
@@ -793,8 +869,8 @@ impl Session {
                     ));
                 }
                 let anchor = anchor_bar.unwrap_or(to);
-                if anchor > last {
-                    return Err(past("anchor_bar", anchor));
+                if anchor > last_slot {
+                    return Err(past_slot("anchor_bar", anchor));
                 }
                 let width = to - from + 1;
                 #[allow(
@@ -805,7 +881,7 @@ impl Session {
                 let nw = {
                     let w = (width as f64 / factor).round();
                     let w = if w.is_finite() { w.max(2.0) } else { 2.0 };
-                    (w.min(n as f64) as u64).max(1)
+                    (w.min(slots as f64) as u64).max(1)
                 };
                 #[allow(clippy::cast_precision_loss)]
                 let r = if width > 1 {
@@ -815,13 +891,13 @@ impl Session {
                 };
                 #[allow(clippy::cast_precision_loss, clippy::cast_possible_truncation)]
                 let off = (r * (nw - 1) as f64).round() as i128;
-                let max_from = i128::from(n - nw);
+                let max_from = i128::from(slots - nw);
                 let nf = u64::try_from((i128::from(anchor) - off).clamp(0, max_from)).unwrap_or(0);
                 (nf, nf + nw - 1)
             }
             Gesture::Tap { panel, bar, .. } => {
                 if *bar > last {
-                    return Err(past("bar", *bar));
+                    return Err(past_bar("bar", *bar));
                 }
                 if view.panel(*panel).is_none() {
                     return Err(E::new(

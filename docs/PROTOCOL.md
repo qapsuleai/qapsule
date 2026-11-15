@@ -254,8 +254,8 @@ için komut `set_view_range` kullanılır.
 
 | Hareket | Alanlar | Etki |
 |---------|---------|------|
-| `look` | `view`, `from_bar`, `to_bar` | Yüzey görünen aralığı bildirir. |
-| `pan` | `view`, `bars` (+ yeniye) | Aralığı kaydırır; sınırlara kırpılır. |
+| `look` | `view`, `from_bar`, `to_bar` | Yüzey görünen aralığı bildirir. `to_bar` son barın ötesine, görünümün **son gelecek yuvasına** kadar gidebilir (K25; aşağıda). |
+| `pan` | `view`, `bars` (+ yeniye) | Aralığı kaydırır; sınırlara (ilk bar, son yuva) kırpılır. |
 | `zoom` | `view`, `factor` (>1 yakınlaştırır), `anchor_bar?` | Genişlik = round(genişlik / factor), en az 2 bar; `anchor_bar` (varsayılan: son görünen bar) ekranda aynı göreli konumda kalır. |
 | `tap` | `view`, `panel`, `bar` | Odak o bar olur; cevap `at` sonucudur. |
 
@@ -268,8 +268,18 @@ Her `look`, `pan` ve `zoom`, aralık değişmese bile kişinin `attention` abone
 `viewport` olayı üretir. `tap` olay üretmez (cevabı `at`'tir; odağı günceller). `tap` ve
 görünümle ilgili bar numaraları görünümün **ilk bar serisine** göredir.
 
-Bağlantının başlangıç aralığı: görünümün `x.domain`'i varsa ona düşen barlar; yoksa son
-N bar (masaüstü 120, telefon 60, saat 20; ekransız yüzeylerde de aynı kural, N = 120).
+Bağlantının başlangıç aralığı: görünümün `x.domain`'i varsa ona düşen yuvalar; yoksa son
+N bar (masaüstü 120, telefon 60, saat 20; ekransız yüzeylerde de aynı kural, N = 120)
+**ve ardından görünümün bütün gelecek yuvaları**.
+
+**Gelecek yuvaları (K25).** Görünümün çizdiği nokta serilerinin son bardan sonraki
+noktaları (ör. tahmin yelpazesi) son barın ardından yuvalar kaplar (`docs/GRAMMAR.md` §3):
+son bardan sonraki k'inci nokta `son bar + k` yuvasıdır. Bakış bu yuvalara uzanabilir:
+`look`/`zoom` (`anchor_bar`) son yuvaya kadar kabul edilir, sonrası `invalid`
+(`expected: ["0..=<son yuva>"]`); `pan` ve `zoom` son yuvaya kırpılır; `tap` yalnız barlar
+içindir (`bar` ≤ son bar). `screen` ve `hit` görünen gelecek yuvalardaki öğeleri gösterir;
+`screen.last_close` görünen son **barın** kapanışıdır. Kalıcı aralık (`set_view_range`) yine
+barlarla sınırlıdır. Döküm: `29-future-look`.
 
 ### 4.7 Öneri — `command` (öneri kipi) ve karar işlemleri
 
@@ -443,9 +453,9 @@ böylece aynı görünümün farklı katmanlarına eşzamanlı yazılar çakış
 | `at` | `series`, `bar?` ya da `t?` | `at`: OHLCV ve o bar serisine dayanan her hesabın o bardaki değerleri. |
 | `screen` | `principal?` | `screen`: kişinin ekranlı (`desktop`, `phone`, `watch`) her bağlantısı için, bağlantı açılış sırasıyla: görünüm, görünen aralık, sembol ve aralık (görünümün ilk bar serisinden), paneller (yığın sırasıyla; `panel` = panel id'si; R2'de ayrıca `name`, `scale` {id, tür, görünen alan} ve `layers` — kimlik, işaret, veri, alanlar, açıklama, sabitler ve kökenleri, görünen öğe sayısı, son değerler, sahne tarifinden; `series` = o paneldeki katmanların serileri, katman sırasıyla, tekrarsız; `marks` = bütün katmanların işaretleri, katman sırasıyla), olgu barı görünen aralıkta olan bulguların kapsülleri, görünen son barın kapanışı. |
 | `attention` | `principal` | `attention`: kişinin en son etkin ekranlı bağlantısının bakış aralığı (girdi yoksa başlangıç aralığı), son odak (`tap`: görünüm, panel, bar), zamanı, yönergeler. |
-| `hit` | `view?`, `x`, `y`, `width?`, `height?` | (R2) `hit`: görünüm `width`×`height` (varsayılan 1200×600) çizildiğinde (`x`,`y`) pikselinde ne olduğu — panel, bar, zaman, ölçekteki değer ve en üstteki öğe (katman, işaret, veri, bar, zaman, değerler, kökenler); boş alanda `item` yok. Görünen aralık: soranın o görünümdeki bakışı, yoksa kalıcı aralık, yoksa bütün barlar. Sahne tarifinden cevaplanır, çizim yapılmaz (`docs/GRAMMAR.md` §16). |
-| `present` | `finding?`, `surface?` | `presentation` (§10). `finding` yoksa en önemli canlı bulgu (en yüksek güven; eşitlikte kimlik sırası). |
-| `binding` | `series?` | (RP2) `bindings`: bağlı serilerin soran için durumu (`ready`, `pending`, `no_entitlement`, `no_data`), nedeni, çapa (`anchor_t`, bar 0'ın zamanı) ve otoritenin veri konumu (§18.3). |
+| `hit` | `view?`, `x`, `y`, `width?`, `height?` | (R2) `hit`: görünüm `width`×`height` (varsayılan 1200×600) çizildiğinde (`x`,`y`) pikselinde ne olduğu — panel, bar, zaman, ölçekteki değer ve en üstteki öğe (katman, işaret, veri, bar, zaman, değerler, kökenler); boş alanda `item` yok. Görünen aralık: soranın o görünümdeki bakışı (ekranlı bağlantıda varsayılan bakış; gelecek yuvalar dahil, §4.6), yoksa kalıcı aralık, yoksa bütün yuvalar. Sahne tarifinden cevaplanır, çizim yapılmaz (`docs/GRAMMAR.md` §16). |
+| `present` | `finding?`, `surface?` | `presentation` (§10). `finding` yoksa (K25): tek canlı bulgu varsa o; **birden çok canlı bulgu varsa otorite seçmez**, `ambiguous` döner — `candidates` bütün canlı bulgular, seçicinin bulgu sırasıyla (§17.3: olgularının en büyük barı, eşitlikte doküman sırası), `hint` `finding` ya da bir seçici (`{"latest":true}`) yazmayı söyler; hiç canlı bulgu yoksa `not_found`. |
+| `binding` | `series?` | (RP2) `bindings`: bağlı serilerin soran için durumu (`ready`, `pending`, `no_entitlement`, `no_data`, `stale`), nedeni, çapa (`anchor_t`, bar 0'ın zamanı) ve otoritenin veri konumu (§18.3). |
 | `verify_evidence` | `item` (olgu ya da bulgu) | (RP2) `evidence_check`: olgunun (bulguda her olgunun) dondurulmuş kanıtının bugünkü veriye karşı sınaması — veri özeti ve kanıt değerleri; fark varsa bildirir (§18.5). |
 
 **Hedef** (`Target`; dikkat, anlatım adımları ve R2'de görünüm vurgusu): `view`, `panel` (panel id'si), `layer` (R2), `series`, `output`
@@ -582,6 +592,18 @@ istemci yalnızca kimliğini söyler (kimlik doğrulama taşımanın işidir; v0
 
 ### 10.2 `present` cevabı
 
+**Hangi bulgu (K25).** `finding` verilmişse o (kimlik ya da seçici, §17). Verilmemişse:
+tek canlı bulgu (kapsülü `live`) → o; birden çok → `ambiguous` (§5.4; "otorite rastgele
+seçmez", güven ya da kimlik sırasıyla seçim yapılmaz); hiç → `not_found`. Döküm:
+`28-present-ambiguous`.
+
+```json
+{"type":"query","id":"q2","query":{"kind":"present"}}
+{"type":"error","id":"q2","error":{"code":"ambiguous","message":"2 live findings and no `finding`; the authority does not pick one","path":"/query",
+ "hint":"Pass `finding` with one of the candidate ids, or a selector such as {\"latest\":true} …",
+ "candidates":[{"id":"fnd-overbought","about":"… (cross_above at bar 150, live)"},{"id":"fnd-momentum","about":"… (cross_above at bar 180, live)"}]}}
+```
+
 - **`sentence`**: `text` (kapsül başlığı, yoksa bulgunun iddiası) ve `state`. Görsel yok.
 - **`capsule`**: + `glyphs` (en çok `max_glyphs`), `confidence`, `spark` (bulgunun ilk
   olgusunun serisinden, son `max_points` bar).
@@ -595,7 +617,8 @@ deterministik sunucu görünümü kurar: panel 0'da olgunun bar serisinin mumlar
 hesap serisindeyse panel 1'de o serinin çizgisi ve olgunun `evidence.level` değerinde bir
 kural (`encoding.y` = değerin en kısa yazımı, tamsayıysa ondalıksız: `"70"`); yatay aralık
 `x.domain = [t(max(0, olgu barı − 30)), t(son bar)]`; `y` her panel için `linear`.
-Görünüm kimliği verilmezse `view-<seq>-0`. Aynı doküman her zaman aynı
+Katman kimlikleri gramerin kendi adlarıdır (K25; `docs/GRAMMAR.md` §11): `candles`, `line`,
+`level` (kapsül görünümünde `line`, `level`, `fact`). Görünüm kimliği verilmezse `view-<seq>-0`. Aynı doküman her zaman aynı
 görünümü üretir. Ajan grameri doğrudan da yazabilir (`put_view`, `add_layer`); ikisi aynı
 komut yolundadır (K21-1, ölçüm `rounds/RD1/experiments/`).
 
@@ -713,10 +736,11 @@ Bir adım `send`, `send_raw` ya da (RP2) `data` taşır. `data` bir veri olayıd
 koşucu onu bağlantıdan değil barındırıcı yolundan motora verir; `expect` olayın yol açtığı
 bildirimlerdir (çoğu zaman boş). Veri düzlemi `init.data` ile kurulur (§18.6).
 
-`send.msg` tipli bir `ClientMsg` olarak çözülür; bu yüzden **anlamla başvuru (§17) seçici
-nesneleri** içeren ya da tipli biçimin taşıyamadığı bir mesaj `send_raw` ile yazılmalıdır
-(ham satır olduğu gibi otoriteye gider). Şema doğrulaması (`Transcript`) seçicili `send.msg`'i
-kabul eder ama koşucu reddeder (R2 denetimi K2; öneri: koşucu `send.msg`'i ham iletsin).
+Koşucu `send.msg`'i **yazıldığı haliyle, ham JSON olarak** iletir (RP2; R2 denetimi K2):
+tipli bir `ClientMsg`'e çevirmez. Bu yüzden **anlamla başvuru (§17) seçici nesneleri** içeren
+mesajlar da `send` ile yazılır; üç taşıma (süreç içi, `qp serve`, MCP) aynı JSON'u otoriteye
+ulaştırır (MCP'de araç argümanı olarak). `send_raw` yalnız JSON olmayan ya da biçimi bozuk
+satırlar içindir (`parse`, `schema` hataları).
 
 Kurallar: her adımın çıktıları **tam olarak** `expect` uzunluğunda ve sırasında olmalıdır;
 her beklenen mesaj gerçek mesajın **alt kümesi** olarak eşleşir (nesnelerde beklenen her

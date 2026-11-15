@@ -6,17 +6,79 @@
 //! pattern (`"$any"` matches any value; `"$absent"` as an object value requires the key to be absent; arrays have the same length; numbers are equal
 //! as numbers). After the last step the `final` checks run and the log is replayed from
 //! the initial document; the replayed document's bytes must equal the authority's.
+//!
+//! `send.msg` is forwarded as the raw JSON the transcript holds (R2 audit K2): it is not
+//! parsed as a typed `ClientMsg` first, so a message may use selectors (§17) and reaches
+//! the authority exactly as written on every transport.
 
 use std::io::{BufRead, BufReader, Write};
 use std::path::{Path, PathBuf};
 use std::process::{Child, ChildStdin, ChildStdout, Command, Stdio};
 
-use qp_schema::protocol::{InitRef, LogEntry, Role, SessionInit, Transcript};
+use qp_schema::protocol::{Expect, FinalCheck, InitRef, LogEntry, RawLine, Role, SessionInit};
 use qp_schema::Document;
 use serde_json::{json, Value};
 
 use crate::apply::replay;
 use crate::session::{confine, permissions, read_json, Session};
+
+/// A message to send, kept as raw JSON (`send` of a transcript step).
+#[derive(Debug, Clone, PartialEq, serde::Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct RawSend {
+    /// Logical connection id.
+    pub conn: String,
+    /// The message, forwarded as written (it may hold selectors, §17).
+    pub msg: Value,
+}
+
+/// One step of a transcript as the runner reads it: like
+/// [`qp_schema::protocol::Step`], but `send.msg` is raw JSON.
+#[derive(Debug, Clone, PartialEq, serde::Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct RunStep {
+    /// A message to send, as raw JSON.
+    #[serde(default)]
+    pub send: Option<RawSend>,
+    /// A raw line to send instead (for parse and schema errors).
+    #[serde(default)]
+    pub send_raw: Option<RawLine>,
+    /// Expected outputs, complete and in order.
+    pub expect: Vec<Expect>,
+    /// Optional comment.
+    #[serde(default)]
+    pub note: Option<String>,
+}
+
+/// A transcript as the runner reads it: the same file format as
+/// [`qp_schema::protocol::Transcript`] (which the schema step validates), with `send.msg`
+/// kept as raw JSON instead of a typed `ClientMsg`.
+#[derive(Debug, Clone, PartialEq, serde::Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct RunTranscript {
+    /// Short name (file stem).
+    pub name: String,
+    /// What it shows.
+    pub description: String,
+    /// Message kinds and features it covers.
+    #[serde(default)]
+    pub covers: Vec<String>,
+    /// How the authority starts.
+    pub init: InitRef,
+    /// Steps, in order.
+    pub steps: Vec<RunStep>,
+    /// Final checks. Replay byte-equality is always checked.
+    #[serde(default, rename = "final")]
+    pub final_check: FinalCheck,
+}
+
+/// Reads a transcript file for running (`send.msg` raw).
+///
+/// # Errors
+/// Unreadable file or not a transcript.
+pub fn read_transcript(path: &Path) -> Result<RunTranscript, String> {
+    read_json(path)
+}
 
 /// The authority's final state as seen through a transport.
 pub struct FinalState {
@@ -293,7 +355,7 @@ pub fn load_init(init: &InitRef, root: &Path) -> Result<LoadedInit, String> {
 /// # Errors
 /// A precise description of the first mismatch.
 pub fn run_steps(
-    t: &Transcript,
+    t: &RunTranscript,
     transport: &mut dyn Transport,
     initial: &Document,
 ) -> Result<(), String> {
@@ -404,7 +466,7 @@ pub fn run_file(file: &Path, root: &Path, kind: &TransportKind) -> TranscriptOut
         failure: None,
     };
     let r = (|| -> Result<(), String> {
-        let t: Transcript = read_json(file)?;
+        let t = read_transcript(file)?;
         outcome.name.clone_from(&t.name);
         let loaded = load_init(&t.init, root)?;
         let init = &loaded.init;

@@ -645,7 +645,7 @@ fn fact_about(f: &Fact) -> String {
     )
 }
 
-fn finding_bar(doc: &Document, f: &Finding) -> Option<u64> {
+pub(crate) fn finding_bar(doc: &Document, f: &Finding) -> Option<u64> {
     f.facts
         .iter()
         .filter_map(|id| doc.facts.iter().find(|x| &x.id == id))
@@ -659,7 +659,7 @@ fn finding_facts<'a>(doc: &'a Document, f: &'a Finding) -> impl Iterator<Item = 
         .filter_map(move |id| doc.facts.iter().find(|x| &x.id == id))
 }
 
-fn finding_about(doc: &Document, f: &Finding) -> String {
+pub(crate) fn finding_about(doc: &Document, f: &Finding) -> String {
     let kinds: BTreeSet<&str> = finding_facts(doc, f).map(|x| x.kind.as_str()).collect();
     let kinds: Vec<&str> = kinds.into_iter().collect();
     let state = doc

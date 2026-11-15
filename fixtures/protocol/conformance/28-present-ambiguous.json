@@ -1,0 +1,221 @@
+{
+ "name": "28-present-ambiguous",
+ "description": "K25 (PROTOCOL §5.4, §10.2): present without `finding` uses the only live finding; with two live findings the authority does not pick one: `ambiguous` with every live finding as a candidate, in the selector order of findings (latest fact bar, ties in document order) and a hint; a selector ({\"latest\":true}) or an id then resolves it.",
+ "covers": [
+  "query",
+  "present",
+  "ambiguous",
+  "selector",
+  "add_finding"
+ ],
+ "init": "fixtures/protocol/init/thyao.json",
+ "steps": [
+  {
+   "send": {
+    "conn": "a",
+    "msg": {
+     "type": "hello",
+     "protocol": "qp/0",
+     "principal": "arkin",
+     "surface": {
+      "kind": "desktop"
+     }
+    }
+   },
+   "expect": [
+    {
+     "conn": "a",
+     "msg": {
+      "type": "welcome",
+      "protocol": "qp/0",
+      "principal": "arkin",
+      "role": "owner",
+      "seq": "$any"
+     }
+    }
+   ]
+  },
+  {
+   "send": {
+    "conn": "a",
+    "msg": {
+     "type": "query",
+     "id": "q1",
+     "query": {
+      "kind": "present"
+     }
+    }
+   },
+   "expect": [
+    {
+     "conn": "a",
+     "msg": {
+      "type": "result",
+      "id": "q1",
+      "data": {
+       "kind": "presentation",
+       "presentation": {
+        "finding": "fnd-overbought",
+        "depth": "chart"
+       }
+      }
+     }
+    }
+   ],
+   "note": "One live finding: present uses it."
+  },
+  {
+   "send": {
+    "conn": "a",
+    "msg": {
+     "type": "command",
+     "id": "c1",
+     "ops": [
+      {
+       "op": "add_fact",
+       "id": "fact-macd-cross",
+       "kind": "cross_above",
+       "series": "macd",
+       "bar": 180,
+       "text": "MACD sinyali yukarı kesti."
+      },
+      {
+       "op": "add_finding",
+       "id": "fnd-momentum",
+       "claim": "Momentum dönüyor: MACD sinyali yukarı kesti.",
+       "facts": [
+        "fact-macd-cross"
+       ],
+       "confidence": 0.6,
+       "invalidation": {
+        "kind": "threshold",
+        "series": "rsi14",
+        "op": "cross_below",
+        "value": 50.0
+       },
+       "capsule": "Momentum dönüyor"
+      }
+     ]
+    }
+   },
+   "expect": [
+    {
+     "conn": "a",
+     "msg": {
+      "type": "ack",
+      "id": "c1",
+      "status": "applied",
+      "seq": 1,
+      "created": [
+       "fact-macd-cross",
+       "fnd-momentum",
+       "$any"
+      ]
+     }
+    }
+   ],
+   "note": "A second live finding (lower confidence, later fact bar)."
+  },
+  {
+   "send": {
+    "conn": "a",
+    "msg": {
+     "type": "query",
+     "id": "q2",
+     "query": {
+      "kind": "present"
+     }
+    }
+   },
+   "expect": [
+    {
+     "conn": "a",
+     "msg": {
+      "type": "error",
+      "id": "q2",
+      "error": {
+       "code": "ambiguous",
+       "path": "/query",
+       "hint": "$any",
+       "candidates": [
+        {
+         "id": "fnd-overbought",
+         "about": "$any"
+        },
+        {
+         "id": "fnd-momentum",
+         "about": "$any"
+        }
+       ]
+      }
+     }
+    }
+   ],
+   "note": "Two live findings, no `finding`: ambiguous; candidates by latest fact bar (150, 180). Before K25 the authority picked the most confident one."
+  },
+  {
+   "send": {
+    "conn": "a",
+    "msg": {
+     "type": "query",
+     "id": "q3",
+     "query": {
+      "kind": "present",
+      "finding": {
+       "latest": true
+      }
+     }
+    }
+   },
+   "expect": [
+    {
+     "conn": "a",
+     "msg": {
+      "type": "result",
+      "id": "q3",
+      "data": {
+       "kind": "presentation",
+       "presentation": {
+        "finding": "fnd-momentum",
+        "depth": "chart",
+        "text": "Momentum dönüyor"
+       }
+      }
+     }
+    }
+   ],
+   "note": "A selector resolves it (send.msg is forwarded raw, PROTOCOL §15)."
+  },
+  {
+   "send": {
+    "conn": "a",
+    "msg": {
+     "type": "query",
+     "id": "q4",
+     "query": {
+      "kind": "present",
+      "finding": "fnd-overbought"
+     }
+    }
+   },
+   "expect": [
+    {
+     "conn": "a",
+     "msg": {
+      "type": "result",
+      "id": "q4",
+      "data": {
+       "kind": "presentation",
+       "presentation": {
+        "finding": "fnd-overbought"
+       }
+      }
+     }
+    }
+   ]
+  }
+ ],
+ "final": {
+  "log_len": 1
+ }
+}

@@ -202,7 +202,7 @@ fn first_bar_series(view: &View, p: &dyn DataProvider) -> Option<String> {
                     _ => None,
                 }?;
                 match p.series_kind(&fact.series)? {
-                    SeriesKind::Bars => Some(fact.series),
+                    SeriesKind::Bars => Some(fact.series.clone()),
                     SeriesKind::Values => p.input_bars(&fact.series).filter(|b| bars(b)),
                     SeriesKind::Points => None,
                 }
@@ -211,6 +211,42 @@ fn first_bar_series(view: &View, p: &dyn DataProvider) -> Option<String> {
 }
 
 /// Every point series the view reads (layer data and channel references).
+/// Times of the slots after the last bar (`last_t`): the k-th point after the last bar
+/// of any point series the view draws sits in slot `last bar + k` (`docs/GRAMMAR.md` §3);
+/// the first series to reach a slot gives its time.
+fn ext_times(view: &View, provider: &dyn DataProvider, last_t: i64) -> Vec<i64> {
+    let mut out: Vec<i64> = Vec::new();
+    for s in point_series(view, provider) {
+        if let Some(pts) = provider.points(&s) {
+            for (k, pt) in pts.iter().filter(|pt| pt.t > last_t).enumerate() {
+                if k >= out.len() {
+                    out.push(pt.t);
+                }
+            }
+        }
+    }
+    out
+}
+
+/// Times of the view's future slots (slots after the last bar of its bar series, taken
+/// by point series such as a forecast fan; `docs/GRAMMAR.md` §3), in slot order. Empty
+/// when the view has no bar series, no bars or no point after the last bar. The
+/// authority uses it to let a connection's viewport reach the future slots (K25).
+#[must_use]
+pub fn future_times(view: &View, provider: &dyn DataProvider) -> Vec<i64> {
+    let Some(bs) = first_bar_series(view, provider) else {
+        return Vec::new();
+    };
+    match provider
+        .bars(&bs)
+        .as_deref()
+        .and_then(<[qp_schema::Bar]>::last)
+    {
+        Some(last) => ext_times(view, provider, last.t),
+        None => Vec::new(),
+    }
+}
+
 fn point_series(view: &View, p: &dyn DataProvider) -> Vec<String> {
     let mut out: Vec<String> = Vec::new();
     let mut add = |s: &str| {
@@ -612,17 +648,7 @@ pub fn compile(
         ));
     }
     // Slots after the last bar (point series, `docs/GRAMMAR.md` §3).
-    let last_t = bars[bars.len() - 1].t;
-    let mut ext_times: Vec<i64> = Vec::new();
-    for s in point_series(view, provider) {
-        if let Some(pts) = provider.points(&s) {
-            for (k, pt) in pts.iter().filter(|pt| pt.t > last_t).enumerate() {
-                if k >= ext_times.len() {
-                    ext_times.push(pt.t);
-                }
-            }
-        }
-    }
+    let ext_times = ext_times(view, provider, bars[bars.len() - 1].t);
     let n_bars = bars.len() as u64;
     let total = n_bars + ext_times.len() as u64;
 

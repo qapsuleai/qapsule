@@ -1148,7 +1148,9 @@ Veri olayı (`DataEvent`) alan düzeyindedir; yalnızca değişen alanlar gelir 
   `patch`) yok sayılır ve `seq`'i **ilerletir** (pencereyle ilgisi olmayan veri sahte boşluk
   doğurmasın).
 - Kontrol sırası: besleme, yineleme (`seq` ≤ son: içeriğe bakılmadan yok sayılır), boşluk /
-  `stale`, sonra olayın kendi kuralları.
+  `stale`, olayın biçim kuralları (boş `patch`, sonlu olmayan değer), sonra pencere (pencere
+  dışı → yok say, `seq` ilerler), sonra bar kuralları. Yani pencere dışı ama biçimi bozuk olay
+  reddedilir (`seq` ilerlemez).
 
 **Olay protokol mesajı değildir.** Barındırıcı onu motora doğrudan verir (referans otoritede
 `Session::data_event`); bağlantılardan gelmez, günlüğe girmez, `change` olayı üretmez.

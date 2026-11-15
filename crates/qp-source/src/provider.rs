@@ -233,6 +233,18 @@ pub fn bind(
         Resolution::NoData { reason } => Ok(not_ready(BindingState::NoData, reason)),
         Resolution::Ready { mut bars, seq } => {
             let w = resolve_window(&bars, &binding.window, binding.anchor_t, max_bind_bars)?;
+            if w.anchor_missing {
+                // Bar numbers would not match the authority's (§18.3): stale, no values.
+                return Ok(Bound {
+                    state: BindingState::Stale,
+                    reason: Some(format!(
+                        "the source has no bar at the anchor t={}",
+                        binding.anchor_t.unwrap_or_default()
+                    )),
+                    anchor_t: binding.anchor_t,
+                    store: None,
+                });
+            }
             if w.is_empty() {
                 return Ok(not_ready(
                     BindingState::NoData,
@@ -243,18 +255,6 @@ pub fn bind(
                 return Ok(Bound {
                     state: BindingState::Stale,
                     reason: Some(reason),
-                    anchor_t: binding.anchor_t,
-                    store: None,
-                });
-            }
-            if w.anchor_missing {
-                // Bar numbers would not match the authority's (§18.3): stale, no values.
-                return Ok(Bound {
-                    state: BindingState::Stale,
-                    reason: Some(format!(
-                        "the source has no bar at the anchor t={}",
-                        binding.anchor_t.unwrap_or_default()
-                    )),
                     anchor_t: binding.anchor_t,
                     store: None,
                 });

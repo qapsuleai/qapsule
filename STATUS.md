@@ -48,7 +48,7 @@ Her round sonunda güncellenir.
 - RD1 önerilen karar satırları (`DECISIONS.md` Ö1–Ö9) ve açık kararlar A10–A12; RD1 açık soruları (`rounds/RD1/REPORT.md`): bar verisi biçimi, anlamsal referans, devir protokolü, MCP olay kanalı, öğe başına `base`.
 - Agent alt görevleri için: context-mode hook'u Agent çağrılarını değiştirdiği için auto mode onları denetleyemiyor; hook'un Agent'ı muaf tutması ya da R2'de auto mode dışında onay.
 - A2: Qapsule adı için marka ön taraması ve alan adı kararı.
-- A4 (hukuk) ve A5 (ajan ortamı) kararları.
+- A5 (ajan ortamı) kararı.
 - R6 öncesi: NATS akışlarından birkaç örnek mesaj (konu adı ve içerik biçimi).
 - Eski `ts/.env` içindeki token'ın iptali ve yenilenmesi (eski `.gitignore` onu dışlamıyor).
 - R6 öncesi: Matriks protobuf (`.proto`) tanımlarının kaynağı.

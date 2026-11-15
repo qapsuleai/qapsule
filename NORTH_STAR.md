@@ -80,10 +80,11 @@ Görsel dilimiz bu sorulara cevap verecek şekilde tasarlanır:
 - TradingView kopyası değiliz. Manuel çizim aracı sayısında yarışmıyoruz.
 - Sohbet penceresi eklenmiş grafik değiliz.
 - Fiyat tahmin ürünü değiliz. Tahmin, takılabilir/eklenebilir bir sağlayıcıdır; merkez değildir.
-- Yatırım tavsiyesi motoru değiliz. Her kapsül kanıtına açılır ve karnesini taşır.
+- Yatırım tavsiyesi motoru değiliz. Her kapsül sayıya dayanır, kanıtına açılır ve karnesini taşır.
 
 ## Vazgeçilmezler
 
-- Kapsül her zaman kanıtına açılabilir.
+- Kapsül her zaman kanıtına açılır. Kullanıcının veri yetkisi yetmiyorsa kanıtın var
+  olduğu, neye dayandığı ve hangi yetkiyi gerektirdiği söylenir.
 - Karne her zaman görünürdür.
 - Hesap her zaman deterministik ve yeniden üretilebilirdir.

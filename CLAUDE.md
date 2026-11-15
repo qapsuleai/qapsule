@@ -54,6 +54,19 @@ işler tarafından değiştirilebilir. Bu yüzden:
 - `origin` adresi `scripts/qapsule-gh.env` içindekiyle aynı kalır; HTTPS adresine çevrilmez.
 - Başka bir depoya, çatala ya da hesaba gönderim yapılmaz.
 
+## Ana akış değişiklikleri
+
+Round koşarken ana akış oturumu aynı çalışma ağacında doküman yazabilir (`NORTH_STAR.md`,
+`DECISIONS.md`, `STATUS.md`, `ROADMAP.md`, `CLAUDE.md`, `docs/`, `rounds/`). Bunlar commit
+edilmemiş olarak durur.
+
+- Birleştirmeden önce ana ağaçta senin yapmadığın, commit edilmemiş doküman değişikliği
+  varsa bunları değiştirmeden tek bir commit olarak kaydet (ileti: "ana akış: ..."), sonra
+  birleştir. Çakışmada iki tarafın satırlarını da koru.
+- `NORTH_STAR.md` değişikliği yalnızca `DECISIONS.md`'de onu açıkça anan bir karar satırı
+  varsa bu yolla commit edilir. Yoksa dur ve Arkin'e sor.
+- Doküman dışındaki (kod, betik, test verisi) sahipsiz değişiklikleri commit etme; sor.
+
 ## Round kapanışı
 
 1. `scripts/verify.sh` yeşil.

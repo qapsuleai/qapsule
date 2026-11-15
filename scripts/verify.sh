@@ -321,6 +321,12 @@ step_digest() {
   got="$(cargo run -q --release -p qp-compute --example digest)"
   echo "host $(uname -m): $got (expected $want)"
   [ "$got" = "$want" ] || fail "host digest $got != $want"
+  # R3: the new studies (Highest, Lowest, Atr) have their own digest; the old one is unchanged.
+  local want3 got3
+  want3="$(tr -d '[:space:]' <fixtures/compute/digest-r3.txt)"
+  got3="$(cargo run -q --release -p qp-compute --example digest -- r3)"
+  echo "host $(uname -m) r3 studies: $got3 (expected $want3)"
+  [ "$got3" = "$want3" ] || fail "host r3 digest $got3 != $want3"
   ran="$(uname -m)"
   if [ "$(uname -s)" = Darwin ] && [ "$(uname -m)" = arm64 ] \
     && rustup target list --installed 2>/dev/null | grep -q '^x86_64-apple-darwin$' \

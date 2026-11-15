@@ -1257,7 +1257,7 @@
                 "direction": "down",
                 "finding": "fnd.THYAO.reversal.down.76",
                 "id": "cap.THYAO.reversal.down.76",
-                "importance": 1.490984232487973,
+                "importance": 1.485307504871258,
                 "instrument": "THYAO",
                 "kind": "reversal",
                 "last_bar": 91,
@@ -1334,7 +1334,7 @@
                 "direction": "down",
                 "finding": "fnd.THYAO.reversal.down.76",
                 "id": "cap.THYAO.reversal.down.76",
-                "importance": 1.490984232487973,
+                "importance": 1.485307504871258,
                 "instrument": "THYAO",
                 "kind": "reversal",
                 "last_bar": 91,
@@ -1923,6 +1923,9 @@
           "msg": {
             "error": {
               "code": "not_found",
+              "did_you_mean": [
+                "cap.THYAO.flow.up.57"
+              ],
               "message": "no capsule with a story `cap.THYAO.flow.up.90`",
               "path": "/query/capsule"
             },
@@ -1957,7 +1960,7 @@
                   "direction": "down",
                   "finding": "fnd.THYAO.reversal.down.76",
                   "id": "cap.THYAO.reversal.down.76",
-                  "importance": 1.490984232487973,
+                  "importance": 1.485307504871258,
                   "instrument": "THYAO",
                   "kind": "reversal",
                   "last_bar": 91,
@@ -2140,7 +2143,7 @@
                   "direction": "down",
                   "finding": "fnd.THYAO.continuation.down.84",
                   "id": "cap.THYAO.continuation.down.84",
-                  "importance": 1.4547551366227212,
+                  "importance": 1.4528441332653954,
                   "instrument": "THYAO",
                   "kind": "continuation",
                   "last_bar": 84,
@@ -2184,7 +2187,7 @@
                     }
                   ],
                   "horizon_bars": 20,
-                  "importance": 1.4547551366227212,
+                  "importance": 1.4528441332653954,
                   "instrument": "THYAO",
                   "kind": "continuation",
                   "last_bar": 84,
@@ -2253,8 +2256,8 @@
                 {
                   "key": "flow",
                   "kind": "flow",
-                  "n": 7,
-                  "realized": 5
+                  "n": 2,
+                  "realized": 1
                 },
                 {
                   "key": "reversal",
@@ -2264,8 +2267,8 @@
                 }
               ],
               "total": {
-                "n": 17,
-                "realized": 8
+                "n": 12,
+                "realized": 4
               }
             },
             "id": "e5",

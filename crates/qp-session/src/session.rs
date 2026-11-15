@@ -190,6 +190,16 @@ pub struct Session {
     /// document holds): other readers get documents, changes and log entries without
     /// them.
     pub(crate) audience_seen: BTreeSet<String>,
+    /// (R3/K1, §20) The other capsule world ([`crate::public::World`]): with a licensed
+    /// flow, the **public world** (its document and log follow the public-only engine)
+    /// while the fields above hold the authority's; inside
+    /// [`Session::in_world`]`(true, …)` the two are swapped. `None`: no licensed flow.
+    pub(crate) other: Option<Box<crate::public::World>>,
+    /// (R3/K1) The fields above hold the public world (see `other`).
+    pub(crate) in_public: bool,
+    /// (R3/K1) The public world's version of the entry being committed, when the writer
+    /// made one itself (the engine's look, a command of a public-view reader).
+    pub(crate) pending_pub: Option<crate::public::PubPending>,
 }
 
 /// Resolves `rel` under `root`, refusing absolute paths and paths that leave `root`.
@@ -455,6 +465,9 @@ impl Session {
             real_facts: Vec::new(),
             headlines: BTreeMap::new(),
             audience_seen: BTreeSet::new(),
+            other: None,
+            in_public: false,
+            pending_pub: None,
         };
         s.audience_seen = s.doc.audiences.keys().cloned().collect();
         s.start_capsules(capsules.as_ref());
@@ -462,6 +475,9 @@ impl Session {
         // an engine entry. No connection exists yet: its notifications go nowhere.
         s.pending_stamps = s.plane.sync(&s.doc);
         s.rd = reading_doc(&s.doc, &s.plane);
+        if let Some(w) = s.other.as_mut() {
+            w.rd = reading_doc(&w.doc, &s.plane);
+        }
         if let Some(seq) = s.stamp_anchors() {
             let _ = s.invalidations(seq);
         }
@@ -1286,7 +1302,8 @@ impl Session {
         let conn = self.conns[ci].id.clone();
         // (R3, §20) A principal that may not see some engine items gets the errors the
         // document it sees would give (no existence oracle): a dry run on it first.
-        if self.runner.is_some() && self.proj_for(&principal).is_some() {
+        let public = self.public_view(&principal);
+        if self.runner.is_some() && (public || self.proj_for(&principal).is_some()) {
             let lang = self.lang_of(ci);
             let author = author.clone();
             let pr = principal.clone();
@@ -1335,6 +1352,39 @@ impl Session {
                     resolved,
                 );
             }
+            // (R3/K1) With a public world, the command is expanded there too: that world
+            // takes these changes (a function of the ops and the public world only, not a
+            // translation of the authority's; nothing when they do not apply there), and a
+            // public-view reader's op on an item only that world has is not refused.
+            let pub_ex = if self.other.is_some() {
+                let author = author.clone();
+                let pr = principal.clone();
+                self.in_world(true, |s| {
+                    let mut ctx = Ctx {
+                        author,
+                        approved_by: None,
+                        at: s.clock,
+                        seq,
+                        id_seq: seq,
+                        n: 0,
+                        created: Vec::new(),
+                        speaker: &pr,
+                        is_owner: role == Role::Owner,
+                        can_decide: perms.decide,
+                        log: &s.log,
+                        undoes: None,
+                        data: s.reader(),
+                        plane: &s.plane,
+                    };
+                    Some(
+                        expand_ops(&s.doc, ops, "/ops", &mut ctx)
+                            .ok()
+                            .map(|ex| (ex.changes, ctx.created, ctx.undoes)),
+                    )
+                })
+            } else {
+                None
+            };
             let mut ctx = Ctx {
                 author,
                 approved_by: None,
@@ -1351,10 +1401,33 @@ impl Session {
                 data: self.reader(),
                 plane: &self.plane,
             };
-            let ex = expand_ops(&self.doc, ops, "/ops", &mut ctx)?;
-            let created = ctx.created;
-            let undoes = ctx.undoes;
+            let full = expand_ops(&self.doc, ops, "/ops", &mut ctx);
+            let (ex, created, undoes, pending) = match (full, pub_ex) {
+                (Ok(ex), p) => (
+                    ex,
+                    ctx.created,
+                    ctx.undoes,
+                    p.map(|p| p.map(|(c, ..)| c).unwrap_or_default()),
+                ),
+                // Only the public world has the item: the authority's world takes nothing.
+                (Err(_), Some(Some((changes, created, undoes)))) if public => (
+                    crate::expand::Expanded {
+                        doc: self.doc.clone(),
+                        changes: Vec::new(),
+                        inverse: Vec::new(),
+                        origin: Vec::new(),
+                    },
+                    created,
+                    undoes,
+                    Some(changes),
+                ),
+                (Err(e), _) => return Err(e),
+            };
             self.base_check(base, &ex.changes, &ex.origin)?;
+            self.pending_pub = pending.map(|changes| crate::public::PubPending {
+                changes,
+                summary: None,
+            });
             let entry = LogEntry {
                 reason: reason.clone(),
                 seq,
@@ -1701,7 +1774,16 @@ impl Session {
                 self.audience_seen.insert(principal.clone());
             }
         }
+        // (R3/K1) The public world takes its own version of the entry (same seq).
+        debug_assert!(
+            !self.in_public,
+            "entries are committed in the authority's world"
+        );
+        let public = self.other.is_some().then(|| self.public_entry(&entry));
         self.log.push(entry);
+        if let Some(pe) = public {
+            self.commit_public(pe);
+        }
     }
 
     /// Notes who wrote the series and finding invalidations `entry` puts (§18.3: the
@@ -1879,6 +1961,18 @@ impl Session {
                 }
             }
             None => self.rd = reading_doc(&self.doc, &self.plane),
+        }
+        // (R3/K1) The public world reads the same bars.
+        debug_assert!(!self.in_public);
+        if let Some(w) = self.other.as_mut() {
+            match w.rd.as_mut() {
+                Some(rd) => {
+                    for (id, d) in &changed {
+                        crate::live::mirror(rd, &self.plane, id, *d);
+                    }
+                }
+                None => w.rd = reading_doc(&w.doc, &self.plane),
+            }
         }
         if self.incremental {
             self.cache.begin_tick();
@@ -2285,12 +2379,37 @@ impl Session {
         fired
     }
 
-    /// Notifications for one log entry.
-    pub(crate) fn entry_events(&self, seq: Seq) -> Vec<OutboundLine> {
+    /// Notifications for one log entry: those of the authority's world to the readers
+    /// that see it, and (R3/K1) those of the public world's version of the entry to the
+    /// public-view readers ([`Session::public_view`]). Each connection's lines come from
+    /// one world, in the order of one world.
+    pub(crate) fn entry_events(&mut self, seq: Seq) -> Vec<OutboundLine> {
+        let mut parts = self.entry_events_in(seq, false);
+        if self.other.is_some() && self.conns.iter().any(|c| self.public_view(&c.principal)) {
+            let pubs = self.in_world(true, |s| s.entry_events_in(seq, true));
+            for (k, p) in pubs.into_iter().enumerate() {
+                parts[k].extend(p);
+            }
+            // Change events in connection order, as one world gives them.
+            parts[0].sort_by_key(|(ci, _)| *ci);
+        }
+        parts.into_iter().flatten().map(|(_, l)| l).collect()
+    }
+
+    /// [`Session::entry_events`] of the world the fields hold, for the connections of
+    /// that world (`public`; without a public world, every connection), in three groups
+    /// (changes, finding states, proposals), each line with its connection index.
+    fn entry_events_in(&self, seq: Seq, public: bool) -> [Vec<(usize, OutboundLine)>; 3] {
         let e = &self.log[usize::try_from(seq - 1).unwrap_or(0)];
         let mut lines = Vec::new();
+        let mut states = Vec::new();
+        let mut props = Vec::new();
+        let mine = |c: &Conn| self.other.is_none() || self.public_view(&c.principal) == public;
         let touched = touched_ids(&e.changes);
         for (ci, c) in self.conns.iter().enumerate() {
+            if !mine(c) {
+                continue;
+            }
             // (R3, §20) What this subscriber may receive of the engine's items.
             let proj = if c
                 .subs
@@ -2314,27 +2433,30 @@ impl Session {
                                 continue;
                             }
                         }
-                        lines.push(out(
-                            &c.id,
-                            ServerMsg::Notify {
-                                sub: s.id.clone(),
-                                event: Event::Change {
-                                    seq,
-                                    at: e.at,
-                                    author: e.author.clone(),
-                                    approved_by: e.approved_by.clone(),
-                                    cause: shown.cause.clone(),
-                                    changes: shown.changes.clone(),
-                                    evidence: e.evidence.as_ref().map(|ev| {
-                                        crate::claims::for_principal(
-                                            &self.doc,
-                                            &self.plane,
-                                            &c.principal,
-                                            ev,
-                                        )
-                                    }),
+                        lines.push((
+                            ci,
+                            out(
+                                &c.id,
+                                ServerMsg::Notify {
+                                    sub: s.id.clone(),
+                                    event: Event::Change {
+                                        seq,
+                                        at: e.at,
+                                        author: e.author.clone(),
+                                        approved_by: e.approved_by.clone(),
+                                        cause: shown.cause.clone(),
+                                        changes: shown.changes.clone(),
+                                        evidence: e.evidence.as_ref().map(|ev| {
+                                            crate::claims::for_principal(
+                                                &self.doc,
+                                                &self.plane,
+                                                &c.principal,
+                                                ev,
+                                            )
+                                        }),
+                                    },
                                 },
-                            },
+                            ),
                         ));
                     }
                 }
@@ -2353,7 +2475,10 @@ impl Session {
             else {
                 continue;
             };
-            for c in &self.conns {
+            for (ci, c) in self.conns.iter().enumerate() {
+                if !mine(c) {
+                    continue;
+                }
                 for s in &c.subs {
                     if matches!(&s.topic, Topic::Finding { finding: f } if *f == finding) {
                         if self
@@ -2362,25 +2487,28 @@ impl Session {
                         {
                             continue;
                         }
-                        lines.push(out(
-                            &c.id,
-                            ServerMsg::Notify {
-                                sub: s.id.clone(),
-                                event: Event::FindingState {
-                                    finding: finding.clone(),
-                                    capsule: capsule.clone(),
-                                    state: *state,
-                                    seq,
-                                    evidence: e.evidence.as_ref().map(|ev| {
-                                        crate::claims::for_principal(
-                                            &self.doc,
-                                            &self.plane,
-                                            &c.principal,
-                                            ev,
-                                        )
-                                    }),
+                        states.push((
+                            ci,
+                            out(
+                                &c.id,
+                                ServerMsg::Notify {
+                                    sub: s.id.clone(),
+                                    event: Event::FindingState {
+                                        finding: finding.clone(),
+                                        capsule: capsule.clone(),
+                                        state: *state,
+                                        seq,
+                                        evidence: e.evidence.as_ref().map(|ev| {
+                                            crate::claims::for_principal(
+                                                &self.doc,
+                                                &self.plane,
+                                                &c.principal,
+                                                ev,
+                                            )
+                                        }),
+                                    },
                                 },
-                            },
+                            ),
                         ));
                     }
                 }
@@ -2391,26 +2519,32 @@ impl Session {
                 continue;
             };
             let author = self.principal_of(&proposal.provenance.author);
-            for c in &self.conns {
+            for (ci, c) in self.conns.iter().enumerate() {
+                if !mine(c) {
+                    continue;
+                }
                 for s in &c.subs {
                     if matches!(s.topic, Topic::Proposals {}) {
-                        lines.push(out(
-                            &c.id,
-                            ServerMsg::Notify {
-                                sub: s.id.clone(),
-                                event: Event::Proposal {
-                                    proposal: proposal.id.clone(),
-                                    state: proposal.state,
-                                    author: author.clone(),
-                                    seq,
+                        props.push((
+                            ci,
+                            out(
+                                &c.id,
+                                ServerMsg::Notify {
+                                    sub: s.id.clone(),
+                                    event: Event::Proposal {
+                                        proposal: proposal.id.clone(),
+                                        state: proposal.state,
+                                        author: author.clone(),
+                                        seq,
+                                    },
                                 },
-                            },
+                            ),
                         ));
                     }
                 }
             }
         }
-        lines
+        [lines, states, props]
     }
 
     // -----------------------------------------------------------------------

@@ -4,6 +4,8 @@
 //! preferences, approvals, queries and late `hello`s) is run and every outbound line, the
 //! log and the document are digested. The expected digests were recorded on the code
 //! before the fixes (`r3/int` a81b5e5); the fixes must reproduce them byte for byte.
+//! (R3/K1 changed the lines of the readers without every licensed flow on purpose: they
+//! read the public world; see `bound_with_flow_and_readers_unchanged`.)
 
 use std::fmt::Write as _;
 use std::path::{Path, PathBuf};
@@ -34,6 +36,8 @@ struct Dig {
     lines: u64,
     n: usize,
     bytes: usize,
+    /// Per connection: (lines, bytes, digest) of its own lines.
+    per: std::collections::BTreeMap<String, (usize, usize, u64)>,
     /// `QP_PERF_DUMP=<dir>`: every line also written there (for a byte diff).
     dump: Option<std::fs::File>,
 }
@@ -53,6 +57,10 @@ impl Dig {
         for l in ls {
             let s = format!("{}|{}\n", l.conn, serde_json::to_string(&l.msg).unwrap());
             self.lines = fnv(s.as_bytes(), self.lines);
+            let e = self.per.entry(l.conn.clone()).or_insert((0, 0, FNV0));
+            e.0 += 1;
+            e.1 += s.len();
+            e.2 = fnv(s.as_bytes(), e.2);
             if let Some(f) = self.dump.as_mut() {
                 std::io::Write::write_all(f, s.as_bytes()).unwrap();
             }
@@ -81,6 +89,15 @@ impl Dig {
             fnv(&doc, FNV0)
         )
         .unwrap();
+        out
+    }
+
+    /// Per connection: `conn lines bytes digest`, one per line.
+    fn per_conn(&self) -> String {
+        let mut out = String::new();
+        for (c, (n, b, h)) in &self.per {
+            writeln!(out, "{c} {n} {b} {h:016x}").unwrap();
+        }
         out
     }
 }
@@ -215,9 +232,9 @@ fn queries(s: &mut Session, conn: &str, d: &mut Dig) {
     }
 }
 
-/// Runs the scenario; returns its digest line.
+/// Runs the scenario; returns its digest line and the per-connection digests.
 #[allow(clippy::too_many_lines)]
-fn run(name: &str, sc: &Scenario) -> String {
+fn run(name: &str, sc: &Scenario) -> (String, String) {
     let m = qp_source::synthetic_market(sc.n, sc.total, 1);
     let mut s = Session::new(init(sc, &m), &root()).unwrap();
     let mut d = Dig::new(name);
@@ -331,12 +348,13 @@ fn run(name: &str, sc: &Scenario) -> String {
     }
     hello(&mut s, "h", "ana", Some("en"), &mut d);
     hello(&mut s, "i", "arkin", None, &mut d);
-    d.finish(&s)
+    let all = d.finish(&s);
+    (all, d.per_conn())
 }
 
 #[test]
 fn bound_with_flow_and_readers_unchanged() {
-    let got = run(
+    let (got, per) = run(
         "bound",
         &Scenario {
             n: 6,
@@ -346,16 +364,29 @@ fn bound_with_flow_and_readers_unchanged() {
             flow: 3,
         },
     );
-    println!("bound: {got}");
+    println!("bound: {got}\n{per}");
+    // R3/K1: the readers without every licensed flow (bora b/g, can c/e, ana d/h: ana
+    // reads one of the three flows) read the public world, so their lines changed; the
+    // fully entitled connections (arkin a/i, feed f), the log and the document are those
+    // recorded before the perf fixes (a81b5e5) and before K1 (ee75ba3), byte for byte:
+    // before K1 the whole line was
+    // "lines 3023 21183036 923f2ecc80daa91b log 1177744 e38025b8f0d9a037 doc 661323 01db88a5bab1d57f".
+    for entitled in [
+        "a 652 4905590 6fc394fb0c83b846",
+        "f 1 33827 7b5ca00a33059c69",
+        "i 1 33382 3803d7e72efd9cce",
+    ] {
+        assert!(per.lines().any(|l| l == entitled), "{entitled}\n{per}");
+    }
     assert_eq!(
         got,
-        "lines 3023 21183036 923f2ecc80daa91b log 1177744 e38025b8f0d9a037 doc 661323 01db88a5bab1d57f"
+        "lines 3017 21188765 5d85e68b720ce155 log 1177744 e38025b8f0d9a037 doc 661323 01db88a5bab1d57f"
     );
 }
 
 #[test]
 fn inline_unchanged() {
-    let got = run(
+    let (got, per) = run(
         "inline",
         &Scenario {
             n: 4,
@@ -365,7 +396,7 @@ fn inline_unchanged() {
             flow: 0,
         },
     );
-    println!("inline: {got}");
+    println!("inline: {got}\n{per}");
     assert_eq!(
         got,
         "lines 3747 12944829 9ae44424a6d56893 log 601548 3ef7a6effb39fab4 doc 282007 8a407794a0085f28"

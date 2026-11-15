@@ -42,6 +42,7 @@ mod locate;
 mod plane;
 mod present;
 mod provider;
+mod public;
 mod query;
 mod reading;
 pub mod replica;

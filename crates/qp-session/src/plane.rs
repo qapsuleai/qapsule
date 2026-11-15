@@ -82,6 +82,15 @@ pub(crate) fn state_str(s: BindingState) -> &'static str {
 }
 
 impl Blocked {
+    /// `principal` has no data entitlement for `key`, the feed of bound series `series`.
+    pub(crate) fn unentitled(series: &str, principal: &str, key: &FeedKey) -> Self {
+        Self {
+            series: series.to_owned(),
+            state: BindingState::NoEntitlement,
+            reason: no_entitlement_reason(principal, key),
+        }
+    }
+
     /// The protocol error for a read that needs this data, at `path` (§18.3):
     /// `no_entitlement` for a missing entitlement, `no_data` otherwise (pending, no data,
     /// stale).

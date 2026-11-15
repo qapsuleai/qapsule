@@ -1,0 +1,17 @@
+# Bağımsız denetçi düzeneği (R3 Evre 1). Çalışma alanının üyesi değildir.
+# Derleme: CARGO_TARGET_DIR=<geçici> cargo run --release --manifest-path rounds/R3/experiments/verify-e1/Cargo.toml --bin <ad>
+[package]
+name = "verify-e1"
+version = "0.0.0"
+edition = "2021"
+publish = false
+
+[workspace]
+
+[dependencies]
+qp-schema = { path = "../../../../crates/qp-schema" }
+qp-source = { path = "../../../../crates/qp-source" }
+qp-facts = { path = "../../../../crates/qp-facts" }
+qp-capsule = { path = "../../../../crates/qp-capsule" }
+serde_json = { version = "1.0.154", features = ["float_roundtrip"] }
+serde = "1"

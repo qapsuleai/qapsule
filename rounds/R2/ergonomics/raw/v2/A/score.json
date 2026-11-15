@@ -1,0 +1,752 @@
+{
+ "agents": {
+  "agentA": {
+   "cost_usd": 0.34885079999999996,
+   "duration_ms": 54051,
+   "num_turns": 20,
+   "output_tokens": 6454,
+   "overhead_tokens": 103591,
+   "result_usage_total": 409184,
+   "seed": 2928032534,
+   "tokens": 409184,
+   "tokens_sum_messages": 403257,
+   "tool_calls": 19
+  },
+  "agentB": {
+   "cost_usd": 0.34520270000000003,
+   "duration_ms": 51295,
+   "num_turns": 17,
+   "output_tokens": 6251,
+   "overhead_tokens": 103495,
+   "result_usage_total": 409570,
+   "seed": 3883057667,
+   "tokens": 409570,
+   "tokens_sum_messages": 404086,
+   "tool_calls": 16
+  },
+  "agentC": {
+   "cost_usd": 0.3702299,
+   "duration_ms": 66937,
+   "num_turns": 23,
+   "output_tokens": 6995,
+   "overhead_tokens": 158143,
+   "result_usage_total": 585526,
+   "seed": 2547448683,
+   "tokens": 585526,
+   "tokens_sum_messages": 579240,
+   "tool_calls": 22
+  },
+  "agentD": {
+   "cost_usd": 0.3214072,
+   "duration_ms": 67735,
+   "num_turns": 26,
+   "output_tokens": 7084,
+   "overhead_tokens": 50190,
+   "result_usage_total": 452747,
+   "seed": 1898493853,
+   "tokens": 452747,
+   "tokens_sum_messages": 445792,
+   "tool_calls": 25
+  },
+  "agentE": {
+   "cost_usd": 0.37924990000000003,
+   "duration_ms": 65576,
+   "num_turns": 22,
+   "output_tokens": 6827,
+   "overhead_tokens": 213403,
+   "result_usage_total": 527894,
+   "seed": 1503153544,
+   "tokens": 527894,
+   "tokens_sum_messages": 521658,
+   "tool_calls": 21
+  }
+ },
+ "rows": [
+  {
+   "agent": "A",
+   "any": true,
+   "attempts": 1,
+   "attributed_tokens_heuristic": 25898,
+   "detail": [
+    {
+     "doc_ids_used": [],
+     "error_codes": [],
+     "errors": 0,
+     "file": "attempt1.jsonl",
+     "how": "run",
+     "msgs": 2,
+     "pass": true,
+     "run": "R01/runs/01-attempt1.jsonl",
+     "why": []
+    }
+   ],
+   "final": true,
+   "first": true,
+   "first_blind": true,
+   "first_error": false,
+   "msgs_first": 2,
+   "msgs_total": 2,
+   "notes": "attempt1: add_study rsi period 7 (inputs selector {\"kind\":\"bars\"}) + insert_panel after {\"mark\":\"candle\"} with line layer; applied (created rsi7, panel 3, l0). No problems. Unclear: whether insert_panel needs explicit panel id (omitting worked); layer id in ack.created 'l0' looked odd but fine.",
+   "other_runs": [],
+   "output_tokens": 1614,
+   "reruns": 0,
+   "task": "R01",
+   "tokens": 102296,
+   "wall_s": 13.5
+  },
+  {
+   "agent": "B",
+   "any": true,
+   "attempts": 1,
+   "attributed_tokens_heuristic": 25874,
+   "detail": [
+    {
+     "doc_ids_used": [],
+     "error_codes": [],
+     "errors": 0,
+     "file": "attempt1.jsonl",
+     "how": "run",
+     "msgs": 2,
+     "pass": true,
+     "run": "R02/runs/01-attempt1.jsonl",
+     "why": []
+    }
+   ],
+   "final": true,
+   "first": true,
+   "first_blind": true,
+   "first_error": false,
+   "msgs_first": 2,
+   "msgs_total": 2,
+   "notes": "attempt1: split_layer on bollinger layer + set_encoding color #ef5350 on output upper via selectors; applied (created l0,l1,l2). Unclear: 'red' value (used hex, not theme 'down'); 'üst bant' = upper band assumed.",
+   "other_runs": [],
+   "output_tokens": 1563,
+   "reruns": 0,
+   "task": "R02",
+   "tokens": 102392,
+   "wall_s": 12.8
+  },
+  {
+   "agent": "C",
+   "any": true,
+   "attempts": 1,
+   "attributed_tokens_heuristic": 39536,
+   "detail": [
+    {
+     "doc_ids_used": [],
+     "error_codes": [],
+     "errors": 0,
+     "file": "attempt1.jsonl",
+     "how": "run",
+     "msgs": 2,
+     "pass": true,
+     "run": "R03/runs/01-attempt1.jsonl",
+     "why": []
+    }
+   ],
+   "final": true,
+   "first": true,
+   "first_blind": true,
+   "first_error": false,
+   "msgs_first": 2,
+   "msgs_total": 2,
+   "notes": "attempt1: set_emphasis highlight on finding selector {kind:breakout,latest:true} (resolved to o85i1, bar 185); applied. Ambiguity: \"son kırılım\" could mean fact (p7274) or finding; I chose the finding. set_emphasis replaces the whole list (view had none). I did not verify afterwards with a query.",
+   "other_runs": [],
+   "output_tokens": 1749,
+   "reruns": 0,
+   "task": "R03",
+   "tokens": 146382,
+   "wall_s": 16.7
+  },
+  {
+   "agent": "D",
+   "any": true,
+   "attempts": 2,
+   "attributed_tokens_heuristic": 101552,
+   "detail": [
+    {
+     "doc_ids_used": [],
+     "error_codes": [],
+     "errors": 0,
+     "file": "attempt1.jsonl",
+     "how": "run",
+     "msgs": 3,
+     "pass": false,
+     "run": "R04/runs/01-attempt1.jsonl",
+     "why": [
+      "a sentence-depth presentation of the new breakout finding",
+      "answer contains the presentation text (capsule headline)"
+     ]
+    },
+    {
+     "doc_ids_used": [
+      "ezqmd"
+     ],
+     "error_codes": [],
+     "errors": 0,
+     "file": "attempt2.jsonl",
+     "how": "run",
+     "msgs": 2,
+     "pass": true,
+     "run": "R04/runs/02-attempt2.jsonl",
+     "why": []
+    }
+   ],
+   "final": true,
+   "first": false,
+   "first_blind": false,
+   "first_error": false,
+   "msgs_first": 3,
+   "msgs_total": 5,
+   "notes": "attempt1: list findings + present without finding (default = highest confidence, which was the RSI finding, not the breakout); used it to learn ids. Latest breakout = ezqmd (bar 185).\nattempt2: present finding=ezqmd surface=watch -> sentence text. Worked. Unclear: \"son kırılım\" has no direct selector; had to find via list/welcome.summary (select.latest hint).",
+   "other_runs": [],
+   "output_tokens": 1771,
+   "reruns": 0,
+   "task": "R04",
+   "tokens": 113187,
+   "wall_s": 16.9
+  },
+  {
+   "agent": "E",
+   "any": true,
+   "attempts": 1,
+   "attributed_tokens_heuristic": 53351,
+   "detail": [
+    {
+     "doc_ids_used": [],
+     "error_codes": [],
+     "errors": 0,
+     "file": "attempt1.jsonl",
+     "how": "run",
+     "msgs": 3,
+     "pass": true,
+     "run": "R05/runs/01-attempt1.jsonl",
+     "why": []
+    }
+   ],
+   "final": true,
+   "first": true,
+   "first_blind": true,
+   "first_error": false,
+   "msgs_first": 3,
+   "msgs_total": 3,
+   "notes": "attempt1: set_scale with selectors (view {}, scale {panel:{mark:candle}}, kind log) -> applied, resolved y0 on view hc7b9. Success. Unclear: screen query returned no screens because arkin's desktop connection doesn't exist in my run; run.sh only accepts files inside task dirs so no separate discovery run was possible (I used selectors blind).",
+   "other_runs": [],
+   "output_tokens": 1707,
+   "reruns": 0,
+   "task": "R05",
+   "tokens": 131974,
+   "wall_s": 16.4
+  },
+  {
+   "agent": "A",
+   "any": true,
+   "attempts": 1,
+   "attributed_tokens_heuristic": 25898,
+   "detail": [
+    {
+     "doc_ids_used": [],
+     "error_codes": [],
+     "errors": 0,
+     "file": "attempt1.jsonl",
+     "how": "run",
+     "msgs": 2,
+     "pass": true,
+     "run": "R06/runs/01-attempt1.jsonl",
+     "why": []
+    }
+   ],
+   "final": true,
+   "first": true,
+   "first_blind": true,
+   "first_error": false,
+   "msgs_first": 2,
+   "msgs_total": 2,
+   "notes": "attempt1: insert_layer rule with panel selector {\"shows\":{\"study\":\"rsi\"}} and encoding y:30 (no origin; auto-bound to rsi.oversold); applied, panel resolved to 1. No problems. I did not verify the stored origin since I issued no query.",
+   "other_runs": [],
+   "output_tokens": 1614,
+   "reruns": 0,
+   "task": "R06",
+   "tokens": 102296,
+   "wall_s": 13.5
+  },
+  {
+   "agent": "B",
+   "any": true,
+   "attempts": 1,
+   "attributed_tokens_heuristic": 25874,
+   "detail": [
+    {
+     "doc_ids_used": [],
+     "error_codes": [],
+     "errors": 0,
+     "file": "attempt1.jsonl",
+     "how": "run",
+     "msgs": 2,
+     "pass": true,
+     "run": "R07/runs/01-attempt1.jsonl",
+     "why": []
+    }
+   ],
+   "final": true,
+   "first": true,
+   "first_blind": true,
+   "first_error": false,
+   "msgs_first": 2,
+   "msgs_total": 2,
+   "notes": "attempt1: delete_panel with selector shows study macd; applied (resolved panel 2). No issues.",
+   "other_runs": [],
+   "output_tokens": 1563,
+   "reruns": 0,
+   "task": "R07",
+   "tokens": 102392,
+   "wall_s": 12.8
+  },
+  {
+   "agent": "C",
+   "any": true,
+   "attempts": 1,
+   "attributed_tokens_heuristic": 39536,
+   "detail": [
+    {
+     "doc_ids_used": [],
+     "error_codes": [],
+     "errors": 0,
+     "file": "attempt1.jsonl",
+     "how": "run",
+     "msgs": 3,
+     "pass": true,
+     "run": "R08/runs/01-attempt1.jsonl",
+     "why": []
+    }
+   ],
+   "final": true,
+   "first": true,
+   "first_blind": true,
+   "first_error": false,
+   "msgs_first": 3,
+   "msgs_total": 3,
+   "notes": "attempt1: insert_panel (name volume) after {mark:candle} with a bar layer, series {kind:bars}, encoding y:\"v\"; applied, created panel 3 and layer l0; screen query confirmed panel 3 sits right under panel 0. Unclear: layer.panel not needed in insert_panel layers (worked). Volume bars' auto domain starts below 0 (-124k) because of the 5% pad, which looks odd.",
+   "other_runs": [],
+   "output_tokens": 1749,
+   "reruns": 0,
+   "task": "R08",
+   "tokens": 146382,
+   "wall_s": 16.7
+  },
+  {
+   "agent": "D",
+   "any": true,
+   "attempts": 1,
+   "attributed_tokens_heuristic": 159348,
+   "detail": [
+    {
+     "doc_ids_used": [
+      "munk2",
+      "rlokc",
+      "zzsof"
+     ],
+     "error_codes": [],
+     "errors": 0,
+     "file": "attempt1.jsonl",
+     "how": "run",
+     "msgs": 3,
+     "pass": true,
+     "run": "R09/runs/01-attempt1.jsonl",
+     "why": []
+    }
+   ],
+   "final": true,
+   "first": true,
+   "first_blind": false,
+   "first_error": false,
+   "msgs_first": 3,
+   "msgs_total": 3,
+   "notes": "attempt1: insert_layer band (y=upper,y2=lower, series zzsof, panel 0) after the Bollinger line layer rlokc, then delete_layer rlokc, in one command; applied. Ids came from welcome.summary. Unclear: whether \"filled area\" should replace or keep the lines; I replaced them. No set-mark op exists, so replace was needed.",
+   "other_runs": [],
+   "output_tokens": 1771,
+   "reruns": 0,
+   "task": "R09",
+   "tokens": 113187,
+   "wall_s": 16.9
+  },
+  {
+   "agent": "E",
+   "any": true,
+   "attempts": 1,
+   "attributed_tokens_heuristic": 53351,
+   "detail": [
+    {
+     "doc_ids_used": [],
+     "error_codes": [],
+     "errors": 0,
+     "file": "attempt1.jsonl",
+     "how": "run",
+     "msgs": 3,
+     "pass": true,
+     "run": "R10/runs/01-attempt1.jsonl",
+     "why": []
+    }
+   ],
+   "final": true,
+   "first": true,
+   "first_blind": true,
+   "first_error": false,
+   "msgs_first": 3,
+   "msgs_total": 3,
+   "notes": "attempt1: insert_layer mark bar, series {study:macd}, panel selector shows macd, y histogram, conditional color (histogram ge 0 -> up else down) with origin macd.zero -> applied, created l0 in panel 2. Existing macd/signal line layer left as is (histogram was not drawn before). Success. Unclear: whether \"çubuk yap\" implies replacing an existing histogram layer; none existed. \"up\"/\"down\" are theme names for green/red.",
+   "other_runs": [],
+   "output_tokens": 1707,
+   "reruns": 0,
+   "task": "R10",
+   "tokens": 131974,
+   "wall_s": 16.4
+  },
+  {
+   "agent": "A",
+   "any": true,
+   "attempts": 1,
+   "attributed_tokens_heuristic": 25898,
+   "detail": [
+    {
+     "doc_ids_used": [],
+     "error_codes": [],
+     "errors": 0,
+     "file": "attempt1.jsonl",
+     "how": "run",
+     "msgs": 2,
+     "pass": true,
+     "run": "R11/runs/01-attempt1.jsonl",
+     "why": []
+    }
+   ],
+   "final": true,
+   "first": true,
+   "first_blind": true,
+   "first_error": false,
+   "msgs_first": 2,
+   "msgs_total": 2,
+   "notes": "attempt1: insert_layer line on price panel, series {\"kind\":\"bars\"}, y \"c\", conditional color (c ge sma50.sma then up else down) with than.series selector {\"study\":\"sma\",\"params\":{\"period\":50}} -> resolved to existing f88a4; applied. No problems. Ambiguity: the request could also mean recoloring the candles; I added a new close line layer instead.",
+   "other_runs": [],
+   "output_tokens": 1614,
+   "reruns": 0,
+   "task": "R11",
+   "tokens": 102296,
+   "wall_s": 13.5
+  },
+  {
+   "agent": "B",
+   "any": true,
+   "attempts": 1,
+   "attributed_tokens_heuristic": 25874,
+   "detail": [
+    {
+     "doc_ids_used": [],
+     "error_codes": [],
+     "errors": 0,
+     "file": "attempt1.jsonl",
+     "how": "run",
+     "msgs": 4,
+     "pass": true,
+     "run": "R12/runs/01-attempt1.jsonl",
+     "why": []
+    }
+   ],
+   "final": true,
+   "first": true,
+   "first_blind": true,
+   "first_error": false,
+   "msgs_first": 4,
+   "msgs_total": 4,
+   "notes": "attempt1: set_view_range 140..199 (guessed 200 bars from spec example; verified via count query = 200). Applied. Guessing before seeing the data was lucky; spec never states bar count.",
+   "other_runs": [],
+   "output_tokens": 1563,
+   "reruns": 0,
+   "task": "R12",
+   "tokens": 102392,
+   "wall_s": 12.8
+  },
+  {
+   "agent": "C",
+   "any": true,
+   "attempts": 1,
+   "attributed_tokens_heuristic": 150053,
+   "detail": [
+    {
+     "doc_ids_used": [],
+     "error_codes": [],
+     "errors": 0,
+     "file": "attempt1.jsonl",
+     "how": "run",
+     "msgs": 3,
+     "pass": true,
+     "run": "R13/runs/01-attempt1.jsonl",
+     "why": []
+    }
+   ],
+   "final": true,
+   "first": true,
+   "first_blind": true,
+   "first_error": false,
+   "msgs_first": 3,
+   "msgs_total": 3,
+   "notes": "attempt1: hello + screen(arkin) + list views; worked first try. welcome.summary alone already answered it. Unclear: screen only works because arkin's desktop connection pre-exists; spec doesn't say so for a fresh run.",
+   "other_runs": [],
+   "output_tokens": 1749,
+   "reruns": 0,
+   "task": "R13",
+   "tokens": 146382,
+   "wall_s": 16.7
+  },
+  {
+   "agent": "D",
+   "any": true,
+   "attempts": 1,
+   "attributed_tokens_heuristic": 12548,
+   "detail": [
+    {
+     "doc_ids_used": [
+      "munk2"
+     ],
+     "error_codes": [],
+     "errors": 0,
+     "file": "attempt1.jsonl",
+     "how": "run",
+     "msgs": 2,
+     "pass": true,
+     "run": "R14/runs/01-attempt1.jsonl",
+     "why": []
+    }
+   ],
+   "final": true,
+   "first": true,
+   "first_blind": false,
+   "first_error": false,
+   "msgs_first": 2,
+   "msgs_total": 2,
+   "notes": "attempt1: hit query view=munk2 x=900 y=200 width=1200 height=600 (view id from welcome.summary of an earlier probe). Result: panel 0, bar 159, value 108.81, no item (empty area). Worked first time. Note: hit uses the asker's viewport, headless default = last 120 bars.",
+   "other_runs": [],
+   "output_tokens": 1771,
+   "reruns": 0,
+   "task": "R14",
+   "tokens": 113187,
+   "wall_s": 16.9
+  },
+  {
+   "agent": "E",
+   "any": true,
+   "attempts": 1,
+   "attributed_tokens_heuristic": 53351,
+   "detail": [
+    {
+     "doc_ids_used": [],
+     "error_codes": [],
+     "errors": 0,
+     "file": "attempt1.jsonl",
+     "how": "run",
+     "msgs": 3,
+     "pass": true,
+     "run": "R15/runs/01-attempt1.jsonl",
+     "why": []
+    }
+   ],
+   "final": true,
+   "first": true,
+   "first_blind": true,
+   "first_error": false,
+   "msgs_first": 3,
+   "msgs_total": 3,
+   "notes": "attempt1: set_encoding with layer selector {shows:{study:rsi}}, encoding width 2 -> applied, resolved to layer yirpe; list views confirms width 2.0. Success. No difficulties.",
+   "other_runs": [],
+   "output_tokens": 1707,
+   "reruns": 0,
+   "task": "R15",
+   "tokens": 131974,
+   "wall_s": 16.4
+  },
+  {
+   "agent": "A",
+   "any": true,
+   "attempts": 1,
+   "attributed_tokens_heuristic": 325564,
+   "detail": [
+    {
+     "doc_ids_used": [],
+     "error_codes": [],
+     "errors": 0,
+     "file": "attempt1.jsonl",
+     "how": "run",
+     "msgs": 2,
+     "pass": true,
+     "run": "R16/runs/01-attempt1.jsonl",
+     "why": []
+    }
+   ],
+   "final": true,
+   "first": true,
+   "first_blind": true,
+   "first_error": false,
+   "msgs_first": 2,
+   "msgs_total": 2,
+   "notes": "attempt1: insert_layer mark point, fact selector {\"kind\":\"breakout\",\"first\":true} (resolved woyc7, bar 120), panel {\"mark\":\"candle\"} (panel 0); applied. No problems. Interpreted \"eski\" as the earliest of two breakout facts (first:true); no y given, default main field used.",
+   "other_runs": [],
+   "output_tokens": 1614,
+   "reruns": 0,
+   "task": "R16",
+   "tokens": 102296,
+   "wall_s": 13.5
+  },
+  {
+   "agent": "B",
+   "any": true,
+   "attempts": 1,
+   "attributed_tokens_heuristic": 326465,
+   "detail": [
+    {
+     "doc_ids_used": [],
+     "error_codes": [],
+     "errors": 0,
+     "file": "attempt1.jsonl",
+     "how": "run",
+     "msgs": 2,
+     "pass": true,
+     "run": "R17/runs/01-attempt1.jsonl",
+     "why": []
+    }
+   ],
+   "final": true,
+   "first": true,
+   "first_blind": true,
+   "first_error": false,
+   "msgs_first": 2,
+   "msgs_total": 2,
+   "notes": "attempt1: add_fact (level evidence 123.45) + insert_layer rule on candle panel with layer.origin fact; applied. Unclear: origin sits inside the layer object for insert_layer (worked); needing a fabricated fact for a user constant is awkward; fact bar 199 arbitrary.",
+   "other_runs": [],
+   "output_tokens": 1563,
+   "reruns": 0,
+   "task": "R17",
+   "tokens": 102392,
+   "wall_s": 12.8
+  },
+  {
+   "agent": "C",
+   "any": true,
+   "attempts": 1,
+   "attributed_tokens_heuristic": 350116,
+   "detail": [
+    {
+     "doc_ids_used": [],
+     "error_codes": [],
+     "errors": 0,
+     "file": "attempt1.jsonl",
+     "how": "run",
+     "msgs": 2,
+     "pass": true,
+     "run": "R18/runs/01-attempt1.jsonl",
+     "why": []
+    }
+   ],
+   "final": true,
+   "first": true,
+   "first_blind": true,
+   "first_error": false,
+   "msgs_first": 2,
+   "msgs_total": 2,
+   "notes": "attempt1: move_panel panel {shows:{study:macd}} before {shows:{study:rsi}} (resolved to panel 2 before panel 1); applied. Not verified with a follow-up query. \"Üstüne\" read as: MACD directly above RSI.",
+   "other_runs": [],
+   "output_tokens": 1749,
+   "reruns": 0,
+   "task": "R18",
+   "tokens": 146382,
+   "wall_s": 16.7
+  },
+  {
+   "agent": "D",
+   "any": true,
+   "attempts": 1,
+   "attributed_tokens_heuristic": 172346,
+   "detail": [
+    {
+     "doc_ids_used": [
+      "ezqmd"
+     ],
+     "error_codes": [],
+     "errors": 0,
+     "file": "attempt1.jsonl",
+     "how": "run",
+     "msgs": 2,
+     "pass": true,
+     "run": "R19/runs/01-attempt1.jsonl",
+     "why": []
+    }
+   ],
+   "final": true,
+   "first": true,
+   "first_blind": false,
+   "first_error": false,
+   "msgs_first": 2,
+   "msgs_total": 2,
+   "notes": "attempt1: present finding=ezqmd surface=phone (id known from probe in R04 run). Got capsule depth, 3 glyphs, spark of 60 bars (from_bar 140), confidence 0.55. Worked first time.",
+   "other_runs": [],
+   "output_tokens": 1771,
+   "reruns": 0,
+   "task": "R19",
+   "tokens": 113187,
+   "wall_s": 16.9
+  },
+  {
+   "agent": "E",
+   "any": true,
+   "attempts": 1,
+   "attributed_tokens_heuristic": 361606,
+   "detail": [
+    {
+     "doc_ids_used": [],
+     "error_codes": [],
+     "errors": 0,
+     "file": "attempt1.jsonl",
+     "how": "run",
+     "msgs": 3,
+     "pass": true,
+     "run": "R20/runs/01-attempt1.jsonl",
+     "why": []
+    }
+   ],
+   "final": true,
+   "first": true,
+   "first_blind": true,
+   "first_error": false,
+   "msgs_first": 3,
+   "msgs_total": 3,
+   "notes": "attempt1: insert_panel (name bandwidth, linear) with a line layer on series {study:bollinger}, y bandwidth -> applied, created panel 3 + layer l0; list views confirms. Success. Minor unclear: insert_panel.panel needs no id (auto max+1) and layers need no panel field; worked.",
+   "other_runs": [],
+   "output_tokens": 1707,
+   "reruns": 0,
+   "task": "R20",
+   "tokens": 131974,
+   "wall_s": 16.4
+  }
+ ],
+ "summary": {
+  "any": 20,
+  "attempts": 21,
+  "cost_usd": 1.7649,
+  "failed_first": 1,
+  "final": 20,
+  "first": 19,
+  "first_blind": 16,
+  "first_error": 0,
+  "label": "v2",
+  "msgs_first": 50,
+  "msgs_total": 52,
+  "output_tokens": 33611,
+  "recovered": 1,
+  "recovered_after_error": 0,
+  "reruns": 0,
+  "tasks": 20,
+  "tokens": 2384921,
+  "unnumbered_runs": 0,
+  "variant": "A",
+  "wall_s": 305.6
+ }
+}

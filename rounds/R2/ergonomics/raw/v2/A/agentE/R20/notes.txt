@@ -1,0 +1,1 @@
+attempt1: insert_panel (name bandwidth, linear) with a line layer on series {study:bollinger}, y bandwidth -> applied, created panel 3 + layer l0; list views confirms. Success. Minor unclear: insert_panel.panel needs no id (auto max+1) and layers need no panel field; worked.

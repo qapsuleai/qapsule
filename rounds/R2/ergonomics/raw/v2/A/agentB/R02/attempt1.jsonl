@@ -1,0 +1,2 @@
+{"conn":"a","msg":{"type":"hello","protocol":"qp/0","principal":"editor","surface":{"kind":"headless"}}}
+{"conn":"a","msg":{"type":"command","id":"c1","ops":[{"op":"split_layer","view":{},"layer":{"shows":{"study":"bollinger"}}},{"op":"set_encoding","view":{},"layer":{"output":"upper"},"encoding":{"color":"#ef5350"}}]}}

@@ -1,0 +1,2 @@
+{"conn":"a","msg":{"type":"hello","protocol":"qp/0","principal":"editor","surface":{"kind":"headless"}}}
+{"conn":"a","msg":{"type":"command","id":"c1","ops":[{"op":"insert_layer","view":{},"layer":{"mark":"point","fact":{"kind":"breakout","first":true},"panel":{"mark":"candle"}}}]}}

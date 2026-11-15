@@ -1,0 +1,1 @@
+attempt1: insert_layer line on price panel, series {"kind":"bars"}, y "c", conditional color (c ge sma50.sma then up else down) with than.series selector {"study":"sma","params":{"period":50}} -> resolved to existing f88a4; applied. No problems. Ambiguity: the request could also mean recoloring the candles; I added a new close line layer instead.

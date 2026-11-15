@@ -1,0 +1,1 @@
+attempt1: hello + screen(arkin) + list views; worked first try. welcome.summary alone already answered it. Unclear: screen only works because arkin's desktop connection pre-exists; spec doesn't say so for a fresh run.

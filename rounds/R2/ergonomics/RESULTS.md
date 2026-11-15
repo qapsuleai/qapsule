@@ -304,3 +304,46 @@ adına da uygulanabilir. Yeniden ölçüm: A değişkeni `v2` olarak (aynı düz
   sınır içinde kaldı).
 - Puanlama: ajanlar dört görevin keşfini tek koşuda paylaşıyor; ileride "görev başına ayrı
   süreç" ilk deneme ölçüsünü daha temiz yapar (maliyet ×4).
+
+## 8. Yeniden ölçüm: A `v2` (düzeltme sonrası)
+
+Düzeltme `r2/t8a-selectors` 9673902'de (r2/int d2d960e birleştirilmiş): `output` yalnız o
+çıktıyı tek başına çizen katmana uyar; çok çıktılı eşleşme `invalid` + hazır ipucu dizisi;
+yeni işlem `split_layer`; `screen` panelleri yığın sırasıyla. A'nın ikilisi ve paketi
+9673902'den yeniden kuruldu (`setup.json` `commit` alanı). Düzenek, yönerge, görev bölümü,
+model ve sertleştirilmiş profil v1 ile aynı; kimlikler yeni tohumlarla
+(`r2-t9/v2/A/<ajan>`) yeniden rastgele. Ham kayıtlar `raw/v2/A/`, tablo `raw/v2/SCORE.md`.
+`score.py v2 A` iki kez koşuldu: `score.json` md5 `d8b79b75…` iki koşuda da aynı; `score.py v1`
+de `raw/v1/SCORE.md`'yi bayt aynı yeniden üretiyor. Öz-denetim (`selftest.py A`) yeni ikilide
+20/20.
+
+| Değişke | İlk denemede | Kimliksiz ilk deneme | Sonunda | İlki başarısız → sonunda | Hata yanıtı | Deneme | Mesaj (ilk / hepsi) | Belirteç | Maliyet |
+|---|---|---|---|---|---|---|---|---|---|
+| base v1 (başvuru için) | 7/20 | 2/20 | 20/20 | 13/13 | 3 | 34 | 66 / 107 | 3 189 676 | 2,06 $ |
+| B v1 (başvuru için) | 17/20 | 10/20 | 20/20 | 3/3 | 1 | 25 | 53 / 67 | 2 642 064 | 1,87 $ |
+| A v1 | 19/20 | 19/20 | 19/20 | 0/1 | 0 | 20 | 55 / 55 | 2 506 378 | 1,89 $ |
+| **A v2** | **19/20** | **16/20** | **20/20** | 1/1 | 0 | 21 | 50 / 52 | **2 384 921** | 1,76 $ |
+
+**Görev değişiklikleri (A v1 → v2):**
+
+| Görev | v1 | v2 | Neden |
+|---|---|---|---|
+| R02 üst bant kırmızı | ✗ / ✗ | **✓ / ✓ (1)** | Ajan şartnamedeki yolu doğrudan yazdı: *"split_layer on bollinger layer + set_encoding color #ef5350 on output upper via selectors; applied (created l0,l1,l2)."* Düzeltme hedeflediği başarısızlığı kaldırdı. |
+| R04 saat: ne söylenir | ✓ / ✓ | ✗ / ✓ (2) | Düzeltmeyle ilgisiz. Ajan D `attempt1`'i keşfe harcadı (bulgusuz `present` RSI bulgusunu seçti) ve şöyle yazdı: *"'son kırılım' has no direct selector; had to find via list/welcome.summary"*. Bu yanlış; `{"kind":"breakout","latest":true}` §17.1'de var. Aynı ajan R09/R14/R19'u keşiften öğrendiği kimliklerle yazdı (ilk denemede geçti, ama kimliksiz değil). "Kimliksiz ilk deneme" 19 → 16 düşüşünün tamamı bu ajandan. |
+| diğer 18 | ✓ / ✓ | ✓ / ✓ (1) | — |
+
+A v2'de R08/R18 tek denemede bitti; v1'de `screen` sırası yüzünden fazladan deneme harcanan
+durum (B R08/R18, base R01) görülmedi.
+
+**Denetim (`raw/v2/audit.txt`):** 103 araç çağrısı, 85'i yürütüldü (okuma 19, yazma 43,
+`run.sh` 22), 18'i reddedildi. Katı shlex kuralı 14 çağrıyı işaretliyor; hepsi elle
+incelendi: 13'ü `run.sh <kendi dosyası> | cut -c…` (ya da `| tail -n +2 | cut`), biri
+`cd <kendi klasörü>` + `echo … > R02/notes.txt`. Kendi klasörü dışında okuma, yazma ya da
+gönderim yok; daemon v2 boyunca hiçbir gönderimi reddetmedi (`rejected.log`'da yalnız
+yalıtım testinin bilinçli yoklaması var).
+
+**Sonuç:** A v2 20/20 bitirdi, ilk denemede 19/20, v1'den daha az belirteç harcadı. Kalan
+ilk deneme kaybı bir ajanın keşfe yönelmesi: seçicinin bulunabilirliğiyle ilgili, çözümüyle
+değil. Öneri (kapsam dışı): §17'nin başına "kimlik keşfi gerekmez; ilk mesajda seçici yazın"
+cümlesi ve `welcome.summary.select` örneği. Bulgusuz `present`'in en yüksek güvenli bulguyu
+seçmesi ajanı iki kez yanılttı (base v1 D, A v2 D).

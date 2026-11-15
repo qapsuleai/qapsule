@@ -1,0 +1,1 @@
+attempt1: insert_layer mark point, fact selector {"kind":"breakout","first":true} (resolved woyc7, bar 120), panel {"mark":"candle"} (panel 0); applied. No problems. Interpreted "eski" as the earliest of two breakout facts (first:true); no y given, default main field used.

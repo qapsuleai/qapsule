@@ -1,0 +1,1 @@
+Fiyat panelinde (900, 200) pikselinde boş alan var, öğe yok; bu nokta bar 159'a (t=1755043200000) denk geliyor ve ölçekteki değer yaklaşık 108,81.

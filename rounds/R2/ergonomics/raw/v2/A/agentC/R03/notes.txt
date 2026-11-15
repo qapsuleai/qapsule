@@ -1,0 +1,1 @@
+attempt1: set_emphasis highlight on finding selector {kind:breakout,latest:true} (resolved to o85i1, bar 185); applied. Ambiguity: "son kırılım" could mean fact (p7274) or finding; I chose the finding. set_emphasis replaces the whole list (view had none). I did not verify afterwards with a query.

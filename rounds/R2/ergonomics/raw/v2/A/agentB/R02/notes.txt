@@ -1,0 +1,1 @@
+attempt1: split_layer on bollinger layer + set_encoding color #ef5350 on output upper via selectors; applied (created l0,l1,l2). Unclear: 'red' value (used hex, not theme 'down'); 'üst bant' = upper band assumed.

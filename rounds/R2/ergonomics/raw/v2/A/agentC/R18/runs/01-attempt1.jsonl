@@ -1,0 +1,2 @@
+{"conn":"e","msg":{"type":"hello","protocol":"qp/0","principal":"editor","surface":{"kind":"headless"}}}
+{"conn":"e","msg":{"type":"command","id":"c1","ops":[{"op":"move_panel","view":{},"panel":{"shows":{"study":"macd"}},"before":{"shows":{"study":"rsi"}}}]}}

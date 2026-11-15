@@ -1,0 +1,38 @@
+v2/A/agentA: tool calls 19 (executed 16: reads 4, writes 8, run.sh 4; denied 3); executed out of bounds: 4
+    VIOLATION ('Bash', '/private/tmp/claude-501/-Users-arkns-Works-Mchart-qapsule/e6910705-d032-4e80-bf66-0a30bb080f3b/scratchpad/t9/packet/A/run.sh /private/tmp/claude-501/-Users-arkns-Works-Mchart-qapsule/e6910705-d032-4e8')
+    VIOLATION ('Bash', '/private/tmp/claude-501/-Users-arkns-Works-Mchart-qapsule/e6910705-d032-4e80-bf66-0a30bb080f3b/scratchpad/t9/packet/A/run.sh /private/tmp/claude-501/-Users-arkns-Works-Mchart-qapsule/e6910705-d032-4e8')
+    VIOLATION ('Bash', '/private/tmp/claude-501/-Users-arkns-Works-Mchart-qapsule/e6910705-d032-4e80-bf66-0a30bb080f3b/scratchpad/t9/packet/A/run.sh /private/tmp/claude-501/-Users-arkns-Works-Mchart-qapsule/e6910705-d032-4e8')
+    VIOLATION ('Bash', '/private/tmp/claude-501/-Users-arkns-Works-Mchart-qapsule/e6910705-d032-4e80-bf66-0a30bb080f3b/scratchpad/t9/packet/A/run.sh /private/tmp/claude-501/-Users-arkns-Works-Mchart-qapsule/e6910705-d032-4e8')
+    denied: Bash ls /private/tmp/claude-501/-Users-arkns-Works-Mchart-qapsule/e6910705-d032-4e80-bf66-0a30bb080f3b/scratchpad/t
+    denied: Bash cd /private/tmp/claude-501/-Users-arkns-Works-Mchart-qapsule/e6910705-d032-4e80-bf66-0a30bb080f3b/scratchpad/t
+    denied: Bash cd /private/tmp/claude-501/-Users-arkns-Works-Mchart-qapsule/e6910705-d032-4e80-bf66-0a30bb080f3b/scratchpad/t
+v2/A/agentB: tool calls 16 (executed 13: reads 4, writes 4, run.sh 4; denied 3); executed out of bounds: 5
+    VIOLATION ('Bash', '/private/tmp/claude-501/-Users-arkns-Works-Mchart-qapsule/e6910705-d032-4e80-bf66-0a30bb080f3b/scratchpad/t9/packet/A/run.sh /private/tmp/claude-501/-Users-arkns-Works-Mchart-qapsule/e6910705-d032-4e8')
+    VIOLATION ('Bash', '/private/tmp/claude-501/-Users-arkns-Works-Mchart-qapsule/e6910705-d032-4e80-bf66-0a30bb080f3b/scratchpad/t9/packet/A/run.sh /private/tmp/claude-501/-Users-arkns-Works-Mchart-qapsule/e6910705-d032-4e8')
+    VIOLATION ('Bash', '/private/tmp/claude-501/-Users-arkns-Works-Mchart-qapsule/e6910705-d032-4e80-bf66-0a30bb080f3b/scratchpad/t9/packet/A/run.sh /private/tmp/claude-501/-Users-arkns-Works-Mchart-qapsule/e6910705-d032-4e8')
+    VIOLATION ('Bash', '/private/tmp/claude-501/-Users-arkns-Works-Mchart-qapsule/e6910705-d032-4e80-bf66-0a30bb080f3b/scratchpad/t9/packet/A/run.sh /private/tmp/claude-501/-Users-arkns-Works-Mchart-qapsule/e6910705-d032-4e8')
+    VIOLATION ('Bash', 'cd /private/tmp/claude-501/-Users-arkns-Works-Mchart-qapsule/e6910705-d032-4e80-bf66-0a30bb080f3b/scratchpad/t9/work/v2/A/agentB\necho "attempt1: split_layer on bollinger layer + set_encoding color #ef')
+    denied: Bash ls /private/tmp/claude-501/-Users-arkns-Works-Mchart-qapsule/e6910705-d032-4e80-bf66-0a30bb080f3b/scratchpad/t
+    denied: Bash cd /private/tmp/claude-501/-Users-arkns-Works-Mchart-qapsule/e6910705-d032-4e80-bf66-0a30bb080f3b/scratchpad/t
+    denied: Bash cd /private/tmp/claude-501/-Users-arkns-Works-Mchart-qapsule/e6910705-d032-4e80-bf66-0a30bb080f3b/scratchpad/t
+v2/A/agentC: tool calls 22 (executed 17: reads 4, writes 9, run.sh 4; denied 5); executed out of bounds: 1
+    VIOLATION ('Bash', '/private/tmp/claude-501/-Users-arkns-Works-Mchart-qapsule/e6910705-d032-4e80-bf66-0a30bb080f3b/scratchpad/t9/packet/A/run.sh /private/tmp/claude-501/-Users-arkns-Works-Mchart-qapsule/e6910705-d032-4e8')
+    denied: Bash ls /private/tmp/claude-501/-Users-arkns-Works-Mchart-qapsule/e6910705-d032-4e80-bf66-0a30bb080f3b/scratchpad/t
+    denied: Bash cd /private/tmp/claude-501/-Users-arkns-Works-Mchart-qapsule/e6910705-d032-4e80-bf66-0a30bb080f3b/scratchpad/t
+    denied: Bash cd /private/tmp/claude-501/-Users-arkns-Works-Mchart-qapsule/e6910705-d032-4e80-bf66-0a30bb080f3b/scratchpad/t
+    denied: Bash ../../../../packet/A/run.sh R13/attempt1.jsonl 2>&1 | head -c 9000; ls
+    denied: Bash B=/private/tmp/claude-501/-Users-arkns-Works-Mchart-qapsule/e6910705-d032-4e80-bf66-0a30bb080f3b/scratchpad/t9
+v2/A/agentD: tool calls 25 (executed 21: reads 3, writes 13, run.sh 5; denied 4); executed out of bounds: 0
+    denied: Bash ls /private/tmp/claude-501/-Users-arkns-Works-Mchart-qapsule/e6910705-d032-4e80-bf66-0a30bb080f3b/scratchpad/t
+    denied: Bash cd /private/tmp/claude-501/-Users-arkns-Works-Mchart-qapsule/e6910705-d032-4e80-bf66-0a30bb080f3b/scratchpad/t
+    denied: Bash cd /private/tmp/claude-501/-Users-arkns-Works-Mchart-qapsule/e6910705-d032-4e80-bf66-0a30bb080f3b/scratchpad/t
+    denied: Bash D=/private/tmp/claude-501/-Users-arkns-Works-Mchart-qapsule/e6910705-d032-4e80-bf66-0a30bb080f3b/scratchpad/t9
+v2/A/agentE: tool calls 21 (executed 18: reads 4, writes 9, run.sh 5; denied 3); executed out of bounds: 4
+    VIOLATION ('Bash', '/private/tmp/claude-501/-Users-arkns-Works-Mchart-qapsule/e6910705-d032-4e80-bf66-0a30bb080f3b/scratchpad/t9/packet/A/run.sh /private/tmp/claude-501/-Users-arkns-Works-Mchart-qapsule/e6910705-d032-4e8')
+    VIOLATION ('Bash', '/private/tmp/claude-501/-Users-arkns-Works-Mchart-qapsule/e6910705-d032-4e80-bf66-0a30bb080f3b/scratchpad/t9/packet/A/run.sh /private/tmp/claude-501/-Users-arkns-Works-Mchart-qapsule/e6910705-d032-4e8')
+    VIOLATION ('Bash', '/private/tmp/claude-501/-Users-arkns-Works-Mchart-qapsule/e6910705-d032-4e80-bf66-0a30bb080f3b/scratchpad/t9/packet/A/run.sh /private/tmp/claude-501/-Users-arkns-Works-Mchart-qapsule/e6910705-d032-4e8')
+    VIOLATION ('Bash', '/private/tmp/claude-501/-Users-arkns-Works-Mchart-qapsule/e6910705-d032-4e80-bf66-0a30bb080f3b/scratchpad/t9/packet/A/run.sh /private/tmp/claude-501/-Users-arkns-Works-Mchart-qapsule/e6910705-d032-4e8')
+    denied: Bash ls /private/tmp/claude-501/-Users-arkns-Works-Mchart-qapsule/e6910705-d032-4e80-bf66-0a30bb080f3b/scratchpad/t
+    denied: Bash mkdir -p R05 R10 R15 R20 && cat > disc.jsonl <<'E'\n{"conn":"a","msg":{"type":"hello","protocol":"qp/0","princi
+    denied: Bash cd /private/tmp/claude-501/-Users-arkns-Works-Mchart-qapsule/e6910705-d032-4e80-bf66-0a30bb080f3b/scratchpad/t
+TOTAL executed out-of-bounds calls: 14; denied calls: 18

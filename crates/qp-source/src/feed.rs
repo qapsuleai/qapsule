@@ -8,34 +8,11 @@
 
 use std::fmt;
 
-use qp_schema::data::{data_digest_u64, DataChange, DataEvent, DataPosition, FeedKey};
+use qp_schema::data::{
+    data_digest_extend, BindingState, DataChange, DataEvent, DataPosition, FeedKey,
+    DATA_DIGEST_OFFSET,
+};
 use qp_schema::{Bar, TimestampMs};
-
-const FNV_PRIME: u64 = 0x0100_0000_01b3;
-
-fn fnv_word(mut h: u64, v: u64) -> u64 {
-    for b in v.to_le_bytes() {
-        h ^= u64::from(b);
-        h = h.wrapping_mul(FNV_PRIME);
-    }
-    h
-}
-
-/// FNV-1a 64 offset basis, taken from `qp_schema` (digest of no bars).
-fn fnv_offset() -> u64 {
-    data_digest_u64(&[])
-}
-
-/// Folds one bar into a running [`qp_schema::data::data_digest_u64`] state. Folding all
-/// bars in order from the offset basis gives exactly `data_digest_u64(bars)` (tested).
-#[must_use]
-pub fn digest_extend(h: u64, b: &Bar) -> u64 {
-    let mut h = fnv_word(h, u64::from_le_bytes(b.t.to_le_bytes()));
-    for v in [b.o, b.h, b.l, b.c, b.v] {
-        h = fnv_word(h, v.to_bits());
-    }
-    h
-}
 
 /// What applying one event did.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -58,14 +35,18 @@ pub enum Applied {
     },
     /// `seq` was not after the last applied one: ignored (idempotent).
     Duplicate,
-    /// `seq` skipped numbers: not applied; the store is stale until [`FeedStore::reset`].
-    /// While stale every further (non-duplicate) event is reported as the same gap.
+    /// `seq` skipped numbers: not applied; the store is stale
+    /// ([`StaleReason::Gap`]) until [`FeedStore::reset`].
     Gap {
         /// The sequence number the store waited for.
         expected: u64,
         /// The sequence number that arrived.
         got: u64,
     },
+    /// The store is stale (after a gap, or because this event's new bar would exceed
+    /// the live growth cap, [`FeedStore::with_max_bars`]): not applied, `seq` unchanged,
+    /// until [`FeedStore::reset`] (the host re-resolves).
+    Stale(StaleReason),
     /// The event concerns a time outside the store's window bounds (a closed window's
     /// live bars, a correction before the window's anchor): `seq` advances, no bar
     /// changes.
@@ -146,6 +127,39 @@ impl fmt::Display for EventError {
 
 impl std::error::Error for EventError {}
 
+/// Why a store is stale (`BindingState::Stale`, §18.4, §18.7).
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum StaleReason {
+    /// A `seq` gap: the store waited for `expected` and got `got`.
+    Gap {
+        /// The sequence number the store waited for.
+        expected: u64,
+        /// The sequence number that arrived.
+        got: u64,
+    },
+    /// The store holds its maximum number of bars (`2 × max_bind_bars`, §18.7) and a new
+    /// bar arrived.
+    Limit {
+        /// The cap.
+        max_bars: usize,
+    },
+}
+
+impl StaleReason {
+    /// Text for the `binding` query's `reason`.
+    #[must_use]
+    pub fn reason(&self) -> String {
+        match self {
+            Self::Gap { expected, got } => {
+                format!("gap: expected seq {expected}, got {got}; re-resolve the binding")
+            }
+            Self::Limit { max_bars } => format!(
+                "limit: the binding holds {max_bars} bars (2 × limits.max_bind_bars); re-anchor by rewriting the binding"
+            ),
+        }
+    }
+}
+
 /// Optional time bounds of a store holding a resolved window (§18.2): events concerning
 /// `t < from` or `t > to` are [`Applied::OutsideWindow`]. Without bounds such events are
 /// errors (`UnknownT`) or new bars.
@@ -183,8 +197,9 @@ pub struct FeedStore {
     feed: FeedKey,
     bars: Vec<Bar>,
     seq: u64,
-    stale: Option<(u64, u64)>,
+    stale: Option<StaleReason>,
     bounds: TimeBounds,
+    max_bars: Option<usize>,
     prefix: Vec<u64>,
 }
 
@@ -210,7 +225,8 @@ impl FeedStore {
             seq: 0,
             stale: None,
             bounds: TimeBounds::default(),
-            prefix: vec![fnv_offset()],
+            max_bars: None,
+            prefix: vec![DATA_DIGEST_OFFSET],
         }
     }
 
@@ -228,6 +244,15 @@ impl FeedStore {
     #[must_use]
     pub fn with_bounds(mut self, bounds: TimeBounds) -> Self {
         self.bounds = bounds;
+        self
+    }
+
+    /// Caps live growth (§18.7): when the store holds `max_bars` bars, a further new bar
+    /// is not applied and the store becomes stale ([`StaleReason::Limit`]). The engine
+    /// uses `2 × max_bind_bars`.
+    #[must_use]
+    pub fn with_max_bars(mut self, max_bars: usize) -> Self {
+        self.max_bars = Some(max_bars);
         self
     }
 
@@ -288,10 +313,20 @@ impl FeedStore {
         self.bounds
     }
 
-    /// `Some((expected, got))` of the first gap if the store is stale.
+    /// Why the store is stale, if it is.
     #[must_use]
-    pub fn stale(&self) -> Option<(u64, u64)> {
+    pub fn stale(&self) -> Option<StaleReason> {
         self.stale
+    }
+
+    /// `Ready`, or `Stale` after a gap or at the size limit.
+    #[must_use]
+    pub fn state(&self) -> BindingState {
+        if self.stale.is_some() {
+            BindingState::Stale
+        } else {
+            BindingState::Ready
+        }
     }
 
     /// Index of the bar at time `t`. O(log n).
@@ -314,15 +349,15 @@ impl FeedStore {
         if ev.seq <= self.seq {
             return Ok(Applied::Duplicate);
         }
-        if let Some((expected, _)) = self.stale {
-            return Ok(Applied::Gap {
-                expected,
-                got: ev.seq,
-            });
+        if let Some(reason) = self.stale {
+            return Ok(Applied::Stale(reason));
         }
         let expected = self.seq + 1;
         if ev.seq != expected {
-            self.stale = Some((expected, ev.seq));
+            self.stale = Some(StaleReason::Gap {
+                expected,
+                got: ev.seq,
+            });
             return Ok(Applied::Gap {
                 expected,
                 got: ev.seq,
@@ -363,7 +398,9 @@ impl FeedStore {
                 }
             }
         };
-        self.seq = ev.seq;
+        if !matches!(applied, Applied::Stale(_)) {
+            self.seq = ev.seq;
+        }
         Ok(applied)
     }
 
@@ -380,6 +417,11 @@ impl FeedStore {
         if !self.bounds.contains(bar.t) {
             return Ok(Applied::OutsideWindow { t: bar.t });
         }
+        if let Some(max_bars) = self.max_bars.filter(|&m| self.bars.len() >= m) {
+            let reason = StaleReason::Limit { max_bars };
+            self.stale = Some(reason);
+            return Ok(Applied::Stale(reason));
+        }
         self.bars.push(bar.clone());
         Ok(Applied::NewBar {
             index: self.bars.len() - 1,
@@ -394,7 +436,7 @@ impl FeedStore {
         assert!(k <= self.bars.len(), "prefix longer than the bars");
         while self.prefix.len() <= k {
             let i = self.prefix.len() - 1;
-            let h = digest_extend(self.prefix[i], &self.bars[i]);
+            let h = data_digest_extend(self.prefix[i], &self.bars[i]);
             self.prefix.push(h);
         }
         self.prefix[k]

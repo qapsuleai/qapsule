@@ -7,16 +7,17 @@ use std::path::PathBuf;
 
 use qp_compute::{create, run, Field};
 use qp_schema::data::{
-    data_digest, data_digest_u64, BarPatch, BindingState, DataBinding, DataChange, DataEvent,
-    FeedKey, Window,
+    data_digest, data_digest_extend, data_digest_u64, BarPatch, BindingState, DataBinding,
+    DataChange, DataEvent, FeedKey, Window, DATA_DIGEST_OFFSET,
 };
 use qp_schema::protocol::InitData;
 use qp_schema::Bar;
 use qp_source::{
-    bind, collect_bars, data_events_from_bar_events, digest_extend, resolve_window, synthetic_bars,
-    validate_binding, validate_id, validate_interval, Applied, BarEvent, EventError, FeedStore,
-    MemoryProvider, Resolution, SeriesSource, SourceProvider, SyntheticEvents,
-    SyntheticEventsConfig, SyntheticSource, TimeBounds,
+    bind, collect_bars, data_events_from_bar_events, entitlement_matches, resolve_window,
+    synthetic_bars, validate_binding, validate_entitlement, validate_id, validate_interval,
+    Applied, BarEvent, EventError, FeedStore, MemoryProvider, Resolution, SeriesSource,
+    SourceProvider, StaleReason, SyntheticEvents, SyntheticEventsConfig, SyntheticSource,
+    TimeBounds,
 };
 
 fn repo(p: &str) -> PathBuf {
@@ -138,15 +139,24 @@ fn gap_marks_stale_until_reset() {
         }
     );
     assert_eq!(s.len(), 4, "gap event not applied");
-    assert_eq!(s.stale(), Some((2, 3)));
+    assert_eq!(
+        s.stale(),
+        Some(StaleReason::Gap {
+            expected: 2,
+            got: 3
+        })
+    );
+    assert_eq!(s.state(), BindingState::Stale);
+    assert!(s.stale().unwrap().reason().starts_with("gap"));
     // Even the missing seq is not applied once stale: the host must re-resolve.
     assert_eq!(
         s.apply(&new_bar(2, 50, 9.0)).unwrap(),
-        Applied::Gap {
+        Applied::Stale(StaleReason::Gap {
             expected: 2,
-            got: 2
-        }
+            got: 3
+        })
     );
+    assert_eq!(s.seq(), 1);
     assert_eq!(s.apply(&new_bar(1, 50, 9.0)).unwrap(), Applied::Duplicate);
     s.reset(synthetic_bars(5, 1), 7).unwrap();
     assert_eq!(s.stale(), None);
@@ -282,9 +292,9 @@ fn window_bounds_turn_outside_events_into_no_ops() {
 // Digest
 
 #[test]
-fn digest_extend_folds_to_the_schema_digest() {
+fn incremental_store_uses_the_schema_digest_step() {
     let bars = synthetic_bars(300, 4);
-    let h = bars.iter().fold(data_digest_u64(&[]), digest_extend);
+    let h = bars.iter().fold(DATA_DIGEST_OFFSET, data_digest_extend);
     assert_eq!(h, data_digest_u64(&bars));
 }
 
@@ -366,18 +376,18 @@ fn win(last: Option<u32>, from_t: Option<i64>, to_t: Option<i64>) -> Window {
 #[test]
 fn window_resolution_rules() {
     let b = tbars(&[10, 20, 30, 40, 50]);
-    let r = resolve_window(&b, &Window::last(2), 100).unwrap();
+    let r = resolve_window(&b, &Window::last(2), None, 100).unwrap();
     assert_eq!(r.range, 3..5);
     assert_eq!(r.anchor_t, Some(40));
     assert!(r.accepts_live && r.capped.is_none());
     assert_eq!(r.bounds.from, Some(40));
-    let r = resolve_window(&b, &Window::last(99), 100).unwrap();
+    let r = resolve_window(&b, &Window::last(99), None, 100).unwrap();
     assert_eq!(r.range, 0..5);
 
-    let r = resolve_window(&b, &win(None, Some(25), None), 100).unwrap();
+    let r = resolve_window(&b, &win(None, Some(25), None), None, 100).unwrap();
     assert_eq!((r.range.clone(), r.anchor_t), (2..5, Some(30)));
     assert_eq!(r.slice(&b).len(), 3);
-    let r = resolve_window(&b, &win(None, Some(20), Some(40)), 100).unwrap();
+    let r = resolve_window(&b, &win(None, Some(20), Some(40)), None, 100).unwrap();
     assert_eq!(r.range, 1..4);
     assert!(!r.accepts_live, "closed windows take no live bars");
     assert_eq!(
@@ -387,17 +397,17 @@ fn window_resolution_rules() {
             to: Some(40)
         }
     );
-    let r = resolve_window(&b, &win(None, Some(41), Some(49)), 100).unwrap();
+    let r = resolve_window(&b, &win(None, Some(41), Some(49)), None, 100).unwrap();
     assert!(r.is_empty() && r.anchor_t.is_none());
     assert_eq!(r.bounds.from, Some(41));
-    let r = resolve_window(&b, &win(None, Some(60), None), 100).unwrap();
+    let r = resolve_window(&b, &win(None, Some(60), None), None, 100).unwrap();
     assert!(r.is_empty());
 
     // Cap to the latest max_bind_bars bars, with a reason.
-    let r = resolve_window(&b, &win(None, Some(0), None), 2).unwrap();
+    let r = resolve_window(&b, &win(None, Some(0), None), None, 2).unwrap();
     assert_eq!((r.range.clone(), r.anchor_t), (3..5, Some(40)));
     assert!(r.capped.unwrap().contains("max_bind_bars"));
-    let r = resolve_window(&b, &win(None, Some(10), Some(40)), 3).unwrap();
+    let r = resolve_window(&b, &win(None, Some(10), Some(40)), None, 3).unwrap();
     assert_eq!(r.range, 1..4);
     assert!(r.capped.is_some());
 
@@ -410,7 +420,7 @@ fn window_resolution_rules() {
         win(None, None, Some(4)),
         win(None, None, None),
     ] {
-        assert!(resolve_window(&b, &bad, 100).is_err(), "{bad:?}");
+        assert!(resolve_window(&b, &bad, None, 100).is_err(), "{bad:?}");
     }
 }
 
@@ -463,6 +473,7 @@ fn id_and_binding_rules() {
         interval: "1d".into(),
         window: Window::last(10),
         feed: Some("delayed".into()),
+        anchor_t: None,
     };
     assert!(validate_binding(&b, 100).is_ok());
     b.feed = Some("bad feed".into());
@@ -488,6 +499,7 @@ fn binding(symbol: &str, window: Window) -> DataBinding {
         interval: "1d".into(),
         window,
         feed: None,
+        anchor_t: None,
     }
 }
 
@@ -587,7 +599,7 @@ fn provider_takes_events_and_bind_applies_window_and_cap() {
     let mut p = MemoryProvider::new();
     p.add_feed(key(), synthetic_bars(100, 3)).unwrap();
     assert!(p.add_feed(key(), vec![]).is_err());
-    p.entitle("host", ["THYAO".to_owned()]);
+    p.entitle("host", ["THYAO".to_owned()]).unwrap();
     let stream = SyntheticEvents::new(
         key(),
         SyntheticEventsConfig {
@@ -898,4 +910,214 @@ fn corrections_replayed_from_their_bar_equal_batch() {
         out[0].map(f64::to_bits),
         batch[0].last().copied().flatten().map(f64::to_bits)
     );
+}
+
+// ---------------------------------------------------------------------------
+// After the T2 audit: anchor, stale, entitlement forms, live growth cap
+
+fn anchored(symbol: &str, window: Window, anchor_t: i64) -> DataBinding {
+    DataBinding {
+        anchor_t: Some(anchor_t),
+        ..binding(symbol, window)
+    }
+}
+
+#[test]
+fn anchored_window_resolution() {
+    let b = tbars(&[10, 20, 30, 40, 50]);
+    // `last` is only the first resolution's size: the anchor keeps the start.
+    let r = resolve_window(&b, &Window::last(2), Some(20), 100).unwrap();
+    assert_eq!((r.range.clone(), r.anchor_t), (1..5, Some(20)));
+    assert!(r.limit.is_none() && r.capped.is_none() && !r.anchor_missing);
+    assert_eq!(r.bounds.from, Some(20));
+    assert!(r.accepts_live);
+    // Closed window with an anchor.
+    let r = resolve_window(&b, &win(None, Some(10), Some(40)), Some(20), 100).unwrap();
+    assert_eq!(r.range, 1..4);
+    assert!(!r.accepts_live);
+    // More than max_bind_bars since the anchor: not trimmed, limit set.
+    let r = resolve_window(&b, &Window::last(2), Some(10), 3).unwrap();
+    assert_eq!((r.range.clone(), r.anchor_t), (0..5, Some(10)));
+    assert!(r.limit.unwrap().starts_with("limit"));
+    assert!(r.capped.is_none());
+    // The source lost the anchor bar: bar 0 is the next one, flagged.
+    let r = resolve_window(&b, &Window::last(2), Some(15), 100).unwrap();
+    assert_eq!((r.range.clone(), r.anchor_t), (1..5, Some(20)));
+    assert!(r.anchor_missing);
+    assert_eq!(r.bounds.from, Some(15));
+}
+
+#[test]
+fn bind_with_anchor_keeps_bar_0_or_goes_stale_at_the_limit() {
+    let mut p = MemoryProvider::new();
+    p.add_feed(key(), synthetic_bars(100, 3)).unwrap();
+    p.entitle("host", ["*".to_owned()]).unwrap();
+    let all = synthetic_bars(100, 3);
+
+    let b = bind(
+        &p,
+        "host",
+        &anchored("THYAO", Window::last(10), all[60].t),
+        50,
+    )
+    .unwrap();
+    assert_eq!(b.state, BindingState::Ready);
+    assert_eq!(b.anchor_t, Some(all[60].t));
+    assert!(b.reason.is_none());
+    assert_eq!(b.store.as_ref().unwrap().bars(), &all[60..]);
+
+    let b = bind(
+        &p,
+        "host",
+        &anchored("THYAO", Window::last(10), all[20].t),
+        50,
+    )
+    .unwrap();
+    assert_eq!(b.state, BindingState::Stale);
+    assert_eq!(b.current_state(), BindingState::Stale);
+    assert!(b.reason.unwrap().starts_with("limit"));
+    assert_eq!(b.anchor_t, Some(all[20].t));
+    assert!(b.store.is_none());
+
+    let b = bind(
+        &p,
+        "host",
+        &anchored("THYAO", Window::last(10), all[60].t + 1),
+        50,
+    )
+    .unwrap();
+    assert_eq!(b.state, BindingState::Ready);
+    assert_eq!(b.anchor_t, Some(all[61].t));
+    assert!(b.reason.unwrap().contains("no bar at the anchor"));
+}
+
+#[test]
+fn live_growth_cap_makes_the_binding_stale() {
+    let mut p = MemoryProvider::new();
+    p.add_feed(key(), synthetic_bars(3, 3)).unwrap();
+    p.entitle("host", ["THYAO".to_owned()]).unwrap();
+    // max_bind_bars 3 → cap 6 bars held.
+    let mut b = bind(&p, "host", &binding("THYAO", Window::last(3)), 3).unwrap();
+    assert_eq!(b.current_state(), BindingState::Ready);
+    let more = synthetic_bars(10, 3);
+    let store = b.store.as_mut().unwrap();
+    for (i, bar) in more[3..6].iter().enumerate() {
+        let e = ev(i as u64 + 1, DataChange::Bar { bar: bar.clone() });
+        assert_eq!(store.apply(&e).unwrap(), Applied::NewBar { index: 3 + i });
+    }
+    let e = ev(
+        4,
+        DataChange::Bar {
+            bar: more[6].clone(),
+        },
+    );
+    assert_eq!(
+        store.apply(&e).unwrap(),
+        Applied::Stale(StaleReason::Limit { max_bars: 6 })
+    );
+    assert_eq!(store.len(), 6);
+    assert_eq!(store.seq(), 3, "the refused bar does not advance seq");
+    // Everything after is refused the same way.
+    let t = more[5].t;
+    assert_eq!(
+        store.apply(&patch(4, t, c(more[5].l))).unwrap(),
+        Applied::Stale(StaleReason::Limit { max_bars: 6 })
+    );
+    assert_eq!(b.current_state(), BindingState::Stale);
+    assert!(b.current_reason().unwrap().starts_with("limit"));
+    // A bare store without the cap grows freely; with it, the same rule.
+    let mut s = FeedStore::new(key()).with_max_bars(1);
+    s.apply(&new_bar(1, 10, 5.0)).unwrap();
+    assert!(matches!(
+        s.apply(&new_bar(2, 20, 5.0)).unwrap(),
+        Applied::Stale(StaleReason::Limit { max_bars: 1 })
+    ));
+    assert_eq!(s.state(), BindingState::Stale);
+    s.reset(vec![], 0).unwrap();
+    assert_eq!(s.state(), BindingState::Ready);
+}
+
+#[test]
+fn gap_turns_a_bound_store_stale() {
+    let mut p = MemoryProvider::new();
+    p.add_feed(key(), synthetic_bars(5, 3)).unwrap();
+    p.entitle("host", ["*".to_owned()]).unwrap();
+    let mut b = bind(&p, "host", &binding("THYAO", Window::last(5)), 100).unwrap();
+    let t = synthetic_bars(6, 3)[5].t;
+    let store = b.store.as_mut().unwrap();
+    assert!(matches!(
+        store.apply(&new_bar(2, t, 5.0)).unwrap(),
+        Applied::Gap {
+            expected: 1,
+            got: 2
+        }
+    ));
+    assert_eq!(b.current_state(), BindingState::Stale);
+    assert!(b.current_reason().unwrap().starts_with("gap"));
+}
+
+#[test]
+fn entitlement_forms() {
+    let named = |feed: Option<&str>, sym: &str| FeedKey {
+        symbol: sym.into(),
+        interval: "1d".into(),
+        feed: feed.map(str::to_owned),
+    };
+    let cases = [
+        ("*", named(None, "A"), true),
+        ("*", named(Some("delayed"), "A"), true),
+        ("A", named(None, "A"), true),
+        ("A", named(Some("delayed"), "A"), true),
+        ("A", named(None, "B"), false),
+        ("delayed/A", named(Some("delayed"), "A"), true),
+        ("delayed/A", named(None, "A"), false),
+        ("delayed/A", named(Some("matriks"), "A"), false),
+        ("delayed/A", named(Some("delayed"), "B"), false),
+        ("delayed/*", named(Some("delayed"), "B"), true),
+        ("delayed/*", named(None, "B"), false),
+        ("delayed/*", named(Some("matriks"), "B"), false),
+        ("bad entry", named(None, "bad entry"), false),
+    ];
+    for (entry, key, want) in cases {
+        assert_eq!(entitlement_matches(entry, &key), want, "{entry} {key:?}");
+    }
+    for ok in ["*", "A", "delayed/A", "delayed/*"] {
+        assert!(validate_entitlement(ok).is_ok(), "{ok}");
+    }
+    for bad in [
+        "",
+        "*/A",
+        "/A",
+        "delayed/",
+        "a/b/c",
+        "delayed/**",
+        "A B",
+        "-A",
+    ] {
+        assert!(validate_entitlement(bad).is_err(), "{bad}");
+    }
+    let mut p = MemoryProvider::new();
+    assert!(p
+        .entitle("x", ["ok".to_owned(), "a/b/c".to_owned()])
+        .is_err());
+    assert!(
+        !p.entitled("x", &named(None, "ok")),
+        "nothing granted on error"
+    );
+    p.entitle("x", ["delayed/*".to_owned()]).unwrap();
+    assert!(p.entitled("x", &named(Some("delayed"), "Z")));
+    assert!(!p.entitled("x", &named(None, "Z")));
+    let bad = init(r#"{"entitlements": {"x": ["a/b/c"]}}"#);
+    assert!(MemoryProvider::from_init(&bad, &repo("")).is_err());
+}
+
+#[test]
+fn negative_zero_digests_like_zero() {
+    let mut a = bar(10, 5.0);
+    a.v = -0.0;
+    let mut b = a.clone();
+    b.v = 0.0;
+    let mut sa = FeedStore::with_bars(key(), vec![a], 0).unwrap();
+    let mut sb = FeedStore::with_bars(key(), vec![b], 0).unwrap();
+    assert_eq!(sa.position().digest, sb.position().digest);
 }

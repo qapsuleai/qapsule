@@ -115,6 +115,43 @@ pub fn validate_interval(s: &str) -> Result<(), String> {
     }
 }
 
+/// Checks an entitlement entry (§18.3): `*` (everything), `SYMBOL` (that symbol on any
+/// feed), `feed/SYMBOL` (that symbol on that named feed only) or `feed/*` (every symbol
+/// of that named feed).
+///
+/// # Errors
+/// A message naming the entry.
+pub fn validate_entitlement(entry: &str) -> Result<(), String> {
+    let bad = |_| format!("entitlement `{entry}` must be `*`, `SYMBOL`, `feed/SYMBOL` or `feed/*`");
+    match entry.split_once('/') {
+        _ if entry == "*" => Ok(()),
+        None => validate_id("symbol", entry).map_err(bad),
+        Some((feed, sym)) => {
+            validate_id("feed", feed).map_err(bad)?;
+            if sym == "*" {
+                Ok(())
+            } else {
+                validate_id("symbol", sym).map_err(bad)
+            }
+        }
+    }
+}
+
+/// True if entitlement `entry` covers `feed` (§18.3). A plain `SYMBOL` covers that symbol
+/// on every feed, the host's default feed included; `feed/…` entries cover only bindings
+/// that name that feed. Entries that fail [`validate_entitlement`] cover nothing.
+#[must_use]
+pub fn entitlement_matches(entry: &str, feed: &FeedKey) -> bool {
+    if validate_entitlement(entry).is_err() {
+        return false;
+    }
+    match entry.split_once('/') {
+        _ if entry == "*" => true,
+        None => entry == feed.symbol,
+        Some((f, sym)) => feed.feed.as_deref() == Some(f) && (sym == "*" || sym == feed.symbol),
+    }
+}
+
 /// Validates a binding from outside (§18.7): symbol and feed pattern, interval set,
 /// window rules with `last <= max_bind_bars`.
 ///
@@ -132,7 +169,7 @@ pub fn validate_binding(b: &DataBinding, max_bind_bars: u32) -> Result<(), Strin
 /// A binding resolved for one principal, ready for the engine.
 #[derive(Debug, Clone)]
 pub struct Bound {
-    /// The state.
+    /// The state at resolution (see [`Bound::current_state`] afterwards).
     pub state: BindingState,
     /// Why it is not ready, or that the window was capped.
     pub reason: Option<String>,
@@ -142,10 +179,32 @@ pub struct Bound {
     pub store: Option<FeedStore>,
 }
 
+impl Bound {
+    /// The state now: the store's (`ready`, or `stale` after a gap or at the live growth
+    /// cap) when there is one, else the resolution's.
+    #[must_use]
+    pub fn current_state(&self) -> BindingState {
+        self.store.as_ref().map_or(self.state, FeedStore::state)
+    }
+
+    /// The `reason` now (the store's staleness, else the resolution's).
+    #[must_use]
+    pub fn current_reason(&self) -> Option<String> {
+        self.store
+            .as_ref()
+            .and_then(FeedStore::stale)
+            .map(|r| r.reason())
+            .or_else(|| self.reason.clone())
+    }
+}
+
 /// Validates `binding`, asks `provider` for it on behalf of `principal` and applies the
-/// engine's own window rules to the answer: bars outside the window are dropped, a
-/// selection over `max_bind_bars` keeps the latest ones (`reason` says so), an empty
-/// result is `no_data`.
+/// engine's own window rules to the answer ([`resolve_window`] with the binding's
+/// `anchor_t`): bars outside the window are dropped; without an anchor a selection over
+/// `max_bind_bars` keeps the latest ones (`reason` says so); with an anchor such a
+/// selection is `stale` (reason: limit) because the anchor must stay bar 0; an empty
+/// result is `no_data`. The store is capped at `2 × max_bind_bars` bars for live growth
+/// (§18.7).
 ///
 /// # Errors
 /// An invalid binding (message names the field), or provider bars that break the bar
@@ -173,21 +232,41 @@ pub fn bind(
         Resolution::NoEntitlement { reason } => Ok(not_ready(BindingState::NoEntitlement, reason)),
         Resolution::NoData { reason } => Ok(not_ready(BindingState::NoData, reason)),
         Resolution::Ready { mut bars, seq } => {
-            let w = resolve_window(&bars, &binding.window, max_bind_bars)?;
+            let w = resolve_window(&bars, &binding.window, binding.anchor_t, max_bind_bars)?;
             if w.is_empty() {
                 return Ok(not_ready(
                     BindingState::NoData,
                     "the window selects no bars".to_owned(),
                 ));
             }
+            if let Some(reason) = w.limit {
+                return Ok(Bound {
+                    state: BindingState::Stale,
+                    reason: Some(reason),
+                    anchor_t: binding.anchor_t,
+                    store: None,
+                });
+            }
+            let mut reason = w.capped;
+            if w.anchor_missing {
+                reason = Some(format!(
+                    "the source has no bar at the anchor t={}; bar 0 is t={}",
+                    binding.anchor_t.unwrap_or_default(),
+                    w.anchor_t.unwrap_or_default()
+                ));
+            }
             bars.truncate(w.range.end);
             bars.drain(..w.range.start);
+            let max_bars = usize::try_from(max_bind_bars)
+                .unwrap_or(usize::MAX)
+                .saturating_mul(2);
             let store = FeedStore::with_bars(binding.feed_key(), bars, seq)
                 .map_err(|e| format!("provider data: {e}"))?
-                .with_bounds(w.bounds);
+                .with_bounds(w.bounds)
+                .with_max_bars(max_bars);
             Ok(Bound {
                 state: BindingState::Ready,
-                reason: w.capped,
+                reason,
                 anchor_t: w.anchor_t,
                 store: Some(store),
             })
@@ -239,7 +318,7 @@ impl MemoryProvider {
                 .map_err(|e| SourceError::new(format!("{name}: {e}")))?;
         }
         for (principal, symbols) in &init.entitlements {
-            p.entitle(principal, symbols.iter().cloned());
+            p.entitle(principal, symbols.iter().cloned())?;
         }
         for k in &init.pending {
             p.set_pending(k.clone());
@@ -261,13 +340,26 @@ impl MemoryProvider {
         Ok(())
     }
 
-    /// Entitles `principal` to `symbols` (`"*"` = every symbol), in addition to earlier
-    /// grants.
-    pub fn entitle(&mut self, principal: &str, symbols: impl IntoIterator<Item = String>) {
+    /// Grants `principal` these entitlement entries (see [`entitlement_matches`]), in
+    /// addition to earlier grants.
+    ///
+    /// # Errors
+    /// An entry that is not `*`, `SYMBOL`, `feed/SYMBOL` or `feed/*`; nothing is granted.
+    pub fn entitle(
+        &mut self,
+        principal: &str,
+        entries: impl IntoIterator<Item = String>,
+    ) -> Result<(), SourceError> {
+        let entries: Vec<String> = entries.into_iter().collect();
+        for e in &entries {
+            validate_entitlement(e)
+                .map_err(|m| SourceError::new(format!("principal `{principal}`: {m}")))?;
+        }
         self.entitlements
             .entry(principal.to_owned())
             .or_default()
-            .extend(symbols);
+            .extend(entries);
+        Ok(())
     }
 
     /// Makes `feed` answer `Pending` (never resolved).
@@ -307,7 +399,7 @@ impl SourceProvider for MemoryProvider {
     fn entitled(&self, principal: &str, feed: &FeedKey) -> bool {
         self.entitlements
             .get(principal)
-            .is_some_and(|s| s.contains("*") || s.contains(&feed.symbol))
+            .is_some_and(|s| s.iter().any(|e| entitlement_matches(e, feed)))
     }
 
     fn resolve(&self, principal: &str, binding: &DataBinding) -> Resolution {
@@ -328,7 +420,7 @@ impl SourceProvider for MemoryProvider {
                 reason: format!("no feed {}/{}", key.symbol, key.interval),
             };
         };
-        match resolve_window(store.bars(), &binding.window, u32::MAX) {
+        match resolve_window(store.bars(), &binding.window, binding.anchor_t, u32::MAX) {
             Ok(w) if !w.is_empty() => Resolution::Ready {
                 bars: w.slice(store.bars()).to_vec(),
                 seq: store.seq(),

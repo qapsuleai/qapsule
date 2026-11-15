@@ -33,10 +33,10 @@ mod window;
 pub use events::{
     bar_patch_diff, data_events_from_bar_events, SyntheticEvents, SyntheticEventsConfig,
 };
-pub use feed::{digest_extend, Applied, EventError, FeedStore, TimeBounds};
+pub use feed::{Applied, EventError, FeedStore, StaleReason, TimeBounds};
 pub use provider::{
-    bind, validate_binding, validate_id, validate_interval, Bound, MemoryProvider, Resolution,
-    SourceProvider,
+    bind, entitlement_matches, validate_binding, validate_entitlement, validate_id,
+    validate_interval, Bound, MemoryProvider, Resolution, SourceProvider,
 };
 pub use synthetic::{synthetic_bars, synthetic_series, SyntheticSource};
 pub use window::{resolve_window, ResolvedWindow};

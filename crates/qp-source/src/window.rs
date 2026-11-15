@@ -18,6 +18,14 @@ pub struct ResolvedWindow {
     /// Set when the selection was cut to the latest `max_bind_bars` bars (§18.7); the
     /// text goes to the `binding` query's `reason`.
     pub capped: Option<String>,
+    /// Set when the binding is anchored and more than `max_bind_bars` bars lie since the
+    /// anchor: the anchor must stay bar 0, so nothing is trimmed and the binding is
+    /// `stale` (reason: limit; §18.3, §18.7). `range` still covers all bars since the
+    /// anchor.
+    pub limit: Option<String>,
+    /// True if the binding is anchored but the source has no bar at exactly `anchor_t`
+    /// (bar 0 is then the first bar after it; bar numbers may differ from the authority's).
+    pub anchor_missing: bool,
     /// Bounds for a [`crate::FeedStore`] holding the window: `from` = anchor (or `from_t`
     /// while empty), `to` = `to_t` of a closed window.
     pub bounds: TimeBounds,
@@ -39,14 +47,23 @@ impl ResolvedWindow {
     }
 }
 
-/// Resolves `window` over `bars` (strictly increasing `t`):
+/// Resolves `window` over `bars` (strictly increasing `t`).
+///
+/// Without an anchor (first resolution):
 ///
 /// - `{"last": n}`: the last `min(n, len)` bars;
 /// - `{"from_t": t}`: bars with `t >= from_t`;
 /// - `{"from_t": a, "to_t": b}`: bars with `a <= t <= b` (closed; no live bars).
 ///
 /// A selection longer than `max_bind_bars` keeps its latest `max_bind_bars` bars and says
-/// so in `capped`. Lookups are O(log n).
+/// so in `capped` (the anchor is that first kept bar, §18.7).
+///
+/// With `anchor_t` (the binding's anchor, §18.3): bars with `t >= anchor_t` (and
+/// `<= to_t` for a closed window); `last` was only the first resolution's size and does
+/// not trim the start. More than `max_bind_bars` bars since the anchor are not trimmed:
+/// `limit` is set and the binding is `stale`.
+///
+/// Lookups are O(log n).
 ///
 /// # Errors
 /// The window breaks [`Window::validate`] (one-of rule, `last` in `1..=max_bind_bars`,
@@ -54,14 +71,20 @@ impl ResolvedWindow {
 pub fn resolve_window(
     bars: &[Bar],
     window: &Window,
+    anchor: Option<TimestampMs>,
     max_bind_bars: u32,
 ) -> Result<ResolvedWindow, String> {
     window.validate(max_bind_bars)?;
     let len = bars.len();
     let max = usize::try_from(max_bind_bars).unwrap_or(usize::MAX);
-    let mut range = match (window.last, window.from_t, window.to_t) {
-        (Some(n), _, _) => len.saturating_sub(usize::try_from(n).unwrap_or(usize::MAX))..len,
-        (None, Some(a), to) => {
+    let mut range = match (anchor, window.last, window.from_t, window.to_t) {
+        (Some(a), _, _, to) => {
+            let lo = bars.partition_point(|b| b.t < a);
+            let hi = to.map_or(len, |b| bars.partition_point(|x| x.t <= b));
+            lo..hi.max(lo)
+        }
+        (None, Some(n), _, _) => len.saturating_sub(usize::try_from(n).unwrap_or(usize::MAX))..len,
+        (None, None, Some(a), to) => {
             let lo = bars.partition_point(|b| b.t < a);
             let hi = to.map_or(len, |b| bars.partition_point(|x| x.t <= b));
             lo..hi.max(lo)
@@ -70,7 +93,13 @@ pub fn resolve_window(
         _ => 0..0,
     };
     let mut capped = None;
-    if range.len() > max {
+    let mut limit = None;
+    if anchor.is_some() && range.len() > max {
+        limit = Some(format!(
+            "limit: {} bars since the anchor exceed limits.max_bind_bars ({max_bind_bars}); the anchor stays bar 0, re-anchor by rewriting the binding",
+            range.len()
+        ));
+    } else if range.len() > max {
         let selected = range.len();
         range.start = range.end - max;
         capped = Some(format!(
@@ -81,14 +110,17 @@ pub fn resolve_window(
         .get(range.start)
         .filter(|_| !range.is_empty())
         .map(|b| b.t);
+    let anchor_missing = anchor.is_some_and(|a| anchor_t != Some(a));
     let bounds = TimeBounds {
-        from: anchor_t.or(window.from_t),
+        from: anchor.or(anchor_t).or(window.from_t),
         to: window.to_t,
     };
     Ok(ResolvedWindow {
         range,
         anchor_t,
         capped,
+        limit,
+        anchor_missing,
         bounds,
         accepts_live: window.is_open(),
     })

@@ -31,14 +31,21 @@ impl Computed {
         }
     }
 
+    #[inline]
     pub(crate) fn len(&self) -> usize {
         self.t.len()
     }
 
+    #[inline]
     pub(crate) fn main_values(&self) -> &[Option<f64>] {
-        self.main_ix
-            .and_then(|i| self.outputs.values().nth(i))
-            .map_or(&[], Vec::as_slice)
+        // The main output first in key order (bar columns: `c`; one-output studies): no
+        // key comparison; else a lookup by name (faster than walking the map in WASM).
+        let v = match self.main_ix {
+            Some(0) => self.outputs.values().next(),
+            Some(_) => self.outputs.get(&self.main),
+            None => None,
+        };
+        v.map_or(&[], Vec::as_slice)
     }
 }
 
@@ -147,11 +154,13 @@ impl Cache {
     }
 
     /// Values in slot `i`.
+    #[inline]
     pub(crate) fn val(&self, i: usize) -> Option<&Rc<Computed>> {
         self.slots.get(i)?.as_ref().map(|s| &s.val)
     }
 
     /// True if slot `i` changed in the current tick.
+    #[inline]
     pub(crate) fn touched_now(&self, i: usize) -> bool {
         self.slots
             .get(i)
@@ -160,6 +169,7 @@ impl Cache {
     }
 
     /// Generation: slot numbers taken in an earlier generation are invalid.
+    #[inline]
     pub(crate) fn gen(&self) -> u64 {
         self.gen
     }

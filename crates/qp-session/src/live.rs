@@ -275,6 +275,7 @@ fn cond_ids(c: &Condition) -> [Option<&str>; 2] {
 /// [`eval_condition`] from known cache slots (no lookups); `None` when a slot is
 /// missing (then the caller evaluates by id).
 #[allow(clippy::option_option)]
+#[inline]
 fn eval_slots(
     cache: &crate::values::Cache,
     c: &Condition,
@@ -338,11 +339,13 @@ impl CondInfo {
     }
 
     /// True if one of `changed` (bar series) is among the series the condition rests on.
+    #[inline]
     fn rests_on_any(&self, changed: &[&str]) -> bool {
         changed.iter().any(|b| self.closure.iter().any(|s| s == b))
     }
 
     /// [`cond_blocked`] from the index (`all_ready`: [`all_ready`] of `plane`).
+    #[inline]
     fn blocked(&self, plane: &DataPlane, all_ready: bool) -> bool {
         if plane.series.is_empty() || all_ready {
             return false;
@@ -483,6 +486,7 @@ impl<'a> Ents<'a> {
 
     /// [`hears`] from the index, for principal `who` (its position in the session's
     /// principals, or its id when it is not one).
+    #[inline]
     fn hears(&mut self, who: Result<usize, &str>, info: &CondInfo) -> bool {
         if info.feeds.is_empty() || self.plane.series.is_empty() {
             return true;
@@ -511,6 +515,7 @@ impl<'a> Ents<'a> {
 
 /// [`eval_condition`] through a slot memo: from the known cache slots when they are of
 /// the current cache generation, else by id (and the slots are noted).
+#[inline]
 fn eval_memo(
     rd: &Document,
     cache: &mut crate::values::Cache,

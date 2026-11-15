@@ -36,7 +36,7 @@
 | V | Evre 1 bağımsız doğrulama | denetçi alt ajan | — | `experiments/VERIFY-E1.md` (9/9) |
 | H | Düzenek şartnamesi (alternatiflerden önce) + M1/M2 düzeneği + M3–M6 düzeneği; M7 = RP2 düzeneği | orkestratör + 2 alt ajan (+ M7 ajanı kopyaladı) | yeniden üretim | `harness/SPEC.md` (`a35d726`), `harness/`, `harness-sim/` |
 | M1–M7 | 16 alternatif, ayrı dallar, ayrı alt ajanlar, birbirini görmeden | 15 alt ajan | orkestratör yeniden ölçtü/puanladı | `experiments/M*/` |
-| S | Ürün motoru, gramer işareti ve görünümler, otorite + protokol §20, hassasiyet benzetimi, performans | 4 alt ajan + 3 düzeltme ajanı + orkestratör | denetim | `experiments/S/` |
+| S | Ürün motoru, gramer işareti ve görünümler, otorite + protokol §20, hassasiyet benzetimi, performans ve düzeltmesi | 4 alt ajan + 3 düzeltme ajanı + orkestratör | denetim | `experiments/S/`, DECISIONS Ö41 |
 | HT | İnsan testi paketi | alt ajan | denetim | `human-test/` |
 | E | Ajan yazabilirlik (C01–C20, iki koşu) | alt ajan | denetim | `ergonomics/RESULTS.md` |
 | A | Son denetim | bağımsız alt ajan | — | `AUDIT.md` |
@@ -61,7 +61,7 @@
 | 14 | Rejimli sentetik; gerçek veride ayrı ölçüm; sentetik karnenin anlamsızlığı yazılı; gerçek veri depoda yok | ✅ | `qp_source::synthetic_market` (dört rejim); M3/M4/M5 gerçek veri tabloları; `git ls-files | grep fixtures/local` boş. |
 | 15 | İnsan testi paketi | ✅ | `human-test/` (iki kitapçık sırası, yönerge ~16 dk, form, puanlama, örnek). |
 | 16 | Protokol eki; yeni dökümler üç taşımada; var olan 36 değişmeden; ≥20 kapsül görevi | ✅ | PROTOCOL §19.9, §20; dökümler 37–43 (+ düzeltmelerden gelenler) × inproc/serve/MCP; 36 eski döküm bayt eşit; E: C01–C20 iki koşu, son 19/20 ve 20/20, ilk deneme 12/20 ve 11/20. |
-| 17 | 30 enstrüman × altı dedektör canlı tik; RP2 tabanıyla karşılaştırma; WASM | ⚠️ → bkz. "Performans" | Ölçüldü; ilk ölçüm otoritenin kapsül yolunda ciddi bir maliyet buldu (bar kapanışı 3,65 s, bağlanma 161 s, 1.000 bar geçmişte); düzeltme ve yeniden ölçüm aşağıda. WASM varsayılan 616.021 B gzip (+%3,0), yansılı 1.310.330 B (+%20,4). |
+| 17 | 30 enstrüman × altı dedektör canlı tik; RP2 tabanıyla karşılaştırma; WASM | ✅ (notla) | İlk ölçüm otoritenin kapsül yolunda ciddi bir maliyet buldu (1.000 bar geçmişte bar kapanışı 3,65 s, bağlanma 161 s); düzeltildi, çıktılar bayt eşit: düzeltme tiki 2,27 µs/olay (RP2 bağlı N=5'in 2,9×'i), kapanış 48 ms, bağlanma 133 ms (hedefin üstünde). Telefon/WASM tiki ölçülmedi. WASM varsayılan 616.021 B gzip (+%3,0), yansılı 1.310.330 B (+%20,4). |
 | 18 | REPORT, AUDIT; STATUS, ROADMAP; CAPSULE uygulamayla tutarlı | ✅ | Bu dosya; `AUDIT.md`; CAPSULE §9 (çerçeve değişmedi, §9.9 seçimler). |
 
 ## Ölçüm ve seçim özeti (M1–M7)
@@ -89,7 +89,7 @@ Kaynak `experiments/S/S-D.md`. Apple M4 Max; yük ortalaması ölçüm anında 5
 | RP2 tabanı (aynı gün yeniden koşum) | bağlı N=5 0,78 µs, N=500 8,78 µs; belge içi N=5 2,04 µs (RP2 raporuyla ±%4,5) |
 | Motor yalnız (30 enstrüman × 7 dedektör) | pazar tiki 215 µs (enstrüman başı 7,2 µs; adaylar 204 µs), bar kapanışı 218 µs; `ledger_stat` 13 ns (S-C dizini: 5.784 → 14 ns) |
 | Oturum, ilk ölçüm (1.000 bar geçmiş, 30 enstrüman) | düzeltme tiki 11,3 µs/olay; bar kapanışı **3,65 s** (lisanslı akışla 8,0 s); bağlanma **161 s** — maliyet motorda değil, oturumun kapsül yolunda (cümle tazeleme %50, okuyucu projeksiyonu %45, `hello` özeti) |
-| Oturum, düzeltmeden sonra | (aşağıda doldurulur) |
+| Oturum, düzeltmeden sonra (aynı ölçüm; çıktılar bayt eşit) | 1.000 bar: düzeltme tiki **2,27 µs/olay** (lisanslı akışla 2,33; motorsuz yol 2,0–2,1) → RP2 bağlı N=5'in 2,9×'i (≤ 3× hedefi, akışla sınırda), N=500'ün altında; bar kapanışı (30 enstrüman) **48 ms** (akışla 90 ms); bağlanma **133 ms** (akışla 247 ms; hedef ~100 ms aşıldı: yetkisiz okuyucunun ilk `hello`'su bütün cümleleri ilk kez rakamsız yazıyor). 100 bar: 4,9 ms kapanış, 8,1 ms bağlanma. |
 | WASM gzip -9 | varsayılan 616.021 B (+17.697, +%3,0; RP2 598.324); yansılı 1.310.330 B (+222.319, +%20,4) |
 
 ## Sapmalar

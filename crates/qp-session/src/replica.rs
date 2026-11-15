@@ -127,7 +127,8 @@ pub struct ReplicaOptions {
     /// ([`Replica::take_refetch`]) before marking the claim disputed. Off: disputed at once.
     pub refetch: bool,
     /// (R3, §19.9) When a claim becomes `disputed`, send the authority a `dispute`
-    /// ([`Replica::take_outbox`]) once per (claim, `t`, own data digest). Off by default
+    /// ([`Replica::take_outbox`]) once per (claim, `t`, authority's evidence): a changed
+    /// own data digest alone does not dispute again (no dispute storm). Off by default
     /// (the host turns it on).
     pub dispute: bool,
 }
@@ -177,7 +178,7 @@ pub struct Replica {
     display_version: u64,
     /// Capsule claims learnt from a mirrored entry's evidence (fallback).
     pending_learn: Vec<(ClaimRef, ClaimEvidence)>,
-    /// (R3) Disputes sent: (claim, `t`, own data digest).
+    /// (R3) Disputes sent: (claim, `t`, the authority's evidence as JSON).
     disputes_sent: BTreeSet<(ClaimRef, i64, String)>,
     dispute_counter: u64,
 }
@@ -722,7 +723,8 @@ impl Replica {
     }
 
     /// Queues a `dispute` (§19.9) for a claim its own data contradicts, once per (claim,
-    /// `t`, digest of its own bars of the claim's bar series up to `t`).
+    /// `t`, authority's evidence); it carries the digest of its own bars of the claim's bar
+    /// series up to `t`. A rejection re-asserts the same evidence: no new dispute.
     fn send_dispute(&mut self, claim: &ClaimRef, ev: &ClaimEvidence, item: &DisplayItem) {
         let Some(s) = self.s.as_ref() else {
             return;
@@ -736,10 +738,11 @@ impl Replica {
         };
         let digest = qp_schema::data::data_digest(&bars[..=i]);
         let anchor_t = anchor_of(&s.doc, &ev.series);
-        if !self
-            .disputes_sent
-            .insert((claim.clone(), ev.t, digest.clone()))
-        {
+        if !self.disputes_sent.insert((
+            claim.clone(),
+            ev.t,
+            serde_json::to_string(ev).unwrap_or_default(),
+        )) {
             return;
         }
         self.dispute_counter += 1;

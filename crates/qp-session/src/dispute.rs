@@ -212,13 +212,15 @@ impl Session {
             return Vec::new();
         }
         let prev = self.claims.ctx_reason.replace(ClaimReason::DataCorrected);
+        let lo_i = new.binary_search_by_key(&lo, |x| x.t).unwrap_or(0);
         if let Some(i) = first {
             let seq = store.seq();
             if store.reset(new, seq).is_ok() {
                 self.data_changed(vec![(series.to_owned(), Delta::Rebuild { from: i })]);
-                self.scan_conditions(series, i);
             }
         }
+        // Condition claims the settled data holds anywhere in the answer's range.
+        self.scan_conditions(series, lo_i);
         self.decide_disputes(series, lo, hi);
         let retracted = self.retractions();
         self.claims.ctx_reason = prev;
@@ -249,16 +251,16 @@ impl Session {
         }
     }
 
-    /// After bar changes: a bar of a bound series that closed is queued for settled
-    /// verification (hygiene on).
+    /// After bar changes (hygiene on): a bar of a bound series that closed, or a closed
+    /// bar the feed corrected (with the closed bars after it), is queued for settled
+    /// verification; a feed correction also asserts at once the condition claims it makes
+    /// at closed bars (the provider's own correction; the settled answer confirms).
     pub(crate) fn note_closed(&mut self, changed: &[(String, Delta)]) {
         if !self.settle.verify_closed {
             return;
         }
+        let mut scans = Vec::new();
         for (id, d) in changed {
-            let Delta::Appended { from } = *d else {
-                continue;
-            };
             let Some(bs) = self.plane.series.get(id) else {
                 continue;
             };
@@ -266,9 +268,14 @@ impl Session {
                 continue;
             };
             let feed = bs.binding.feed_key();
-            // Every bar closed by this append: the one before the first new bar and the
-            // new ones except the last.
-            let lo = from.saturating_sub(1);
+            let lo = match *d {
+                // Every bar closed by this append: the one before the first new bar and
+                // the new ones except the last.
+                Delta::Appended { from } => from.saturating_sub(1),
+                // A correction of a closed bar: from it to the last closed bar.
+                Delta::Revised { index } if index + 1 < bars.len() => index,
+                _ => continue,
+            };
             let hi = bars.len().saturating_sub(1);
             if lo >= hi {
                 continue;
@@ -279,6 +286,12 @@ impl Session {
                 from_t: bars[lo].t,
                 to_t: bars[hi - 1].t,
             });
+            if matches!(d, Delta::Revised { .. }) {
+                scans.push((id.clone(), lo));
+            }
+        }
+        for (id, lo) in scans {
+            self.scan_conditions(&id, lo);
         }
     }
 

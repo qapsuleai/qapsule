@@ -1634,7 +1634,8 @@ yansı onu `disputed` gösterir ve iddia orada kalır: otorite geri çekmez, do�
 gelmez (RP2 son denetimi O1). İki mekanizma, ikisi de barındırıcı üzerinden ve belirleyici:
 
 **1. Otoritenin kesin bar hijyeni.** Barındırıcı açar (`Session::set_settle_check(true)`;
-dökümde `init.data.settled.verify_closed`). Bağlı serinin bir barı kapandığında otorite
+dökümde `init.data.settled.verify_closed`). Bağlı serinin bir barı kapandığında ya da
+besleme kapalı bir barı düzelttiğinde (o bardan son kapalı bara kadar) otorite
 barındırıcıdan **kesin bar** ister (`take_settle_requests()` → `SettleRequest {series, feed,
 from_t, to_t}`; Matriks REST karşılığı, §19.5'in otorite tarafı). Barındırıcı kesin
 kaynaktan çeker (bar henüz kesinleşmediyse sonra yeniden dener) ve cevabı verir:
@@ -1644,17 +1645,21 @@ kaynaktan çeker (bar henüz kesinleşmediyse sonra yeniden dener) ve cevabı ve
   hiç düzeltilmez; tutmadığı bar yok sayılır).
 - O barlara dayanan kayıtlı iddiaları yeniden sınar (§19.3 adım 3): tutmuyorsa
   `withdrawn`, değerleri değiştiyse yeniden `asserted` — ikisi de `reason: "data_corrected"`.
-- Düzeltilen ilk bardan son kapalı bara kadar, koşul aboneliklerinin **kesin veride**
-  tuttuğu ama kayıtlı olmayan iddialarını `asserted` (`final`, `data_corrected`) yapar.
-  Bu, §19.8'deki "düzeltmenin yeni doğurduğu iddia iddia edilmez" sınırını yalnız kesin
-  veri için kaldırır (ör. beslemede kaybolan kapanış tiki). Niyet ve kapsül
+- Cevabın kapsadığı ilk bardan son kapalı bara kadar, koşul aboneliklerinin **kesin
+  veride** tuttuğu ama kayıtlı olmayan iddialarını `asserted` (`final`, `data_corrected`)
+  yapar. Hijyen açıkken beslemenin kendi düzeltmesi de (kapalı bir bara `patch`) aynı
+  taramayı hemen yapar (sağlayıcının düzeltmesi; kesin cevap sonra doğrular). Bu, §19.8'deki
+  "düzeltmenin yeni doğurduğu iddia iddia edilmez" sınırını hijyen açıkken kaldırır (ör.
+  beslemede kaybolan kapanış tiki, iddia doğuran düzeltme). Niyet ve kapsül
   geçersizleşmeleri taranmaz.
 
 Kesinlik bu doğrulamayı **beklemez** (gecikme maliyeti yok); yanlış kesin iddia en geç
 "kesinleşme gecikmesi + kesin kaynak cevabı" kadar sonra düşer.
 
 **2. Yansının itirazı (`dispute`).** Yansı bir iddiayı kendi temiz, yeniden çekilmiş
-verisinde `disputed` yaptığında (§19.4) otoriteye bir kez itiraz gönderir
+verisinde `disputed` yaptığında (§19.4) otoriteye itiraz gönderir — (iddia, `t`,
+otoritenin kanıtı) başına bir kez: yalnız kendi verisinin özeti değişti diye yeniden itiraz
+etmez (haksız itirazın cevabı aynı kanıtı yeniden ileri sürer: döngü yok)
 (`ReplicaOptions.dispute`, varsayılan kapalı; barındırıcı açar):
 
 ```json

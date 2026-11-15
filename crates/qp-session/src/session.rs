@@ -158,6 +158,8 @@ pub struct Session {
     /// Bumped whenever `intent_state` is written outside the live path (the live index
     /// keeps a copy of each intent's state, valid for one epoch).
     pub(crate) intent_epoch: u64,
+    /// (R3/M7) Disputes and settled-bar requests (§19.9).
+    pub(crate) settle: crate::dispute::Settle,
 }
 
 /// Resolves `rel` under `root`, refusing absolute paths and paths that leave `root`.
@@ -252,7 +254,12 @@ impl Session {
             ),
             None => Provider::None,
         };
-        Self::build(init, repo_root, provider)
+        let settled = init.data.as_ref().and_then(|d| d.settled.clone());
+        let mut s = Self::build(init, repo_root, provider)?;
+        if let Some(t) = settled {
+            s.settle.set_test_source(&t);
+        }
+        Ok(s)
     }
 
     /// Starts an authority whose bound series are resolved by the host's `provider`
@@ -331,6 +338,7 @@ impl Session {
             series_writer: BTreeMap::new(),
             invalidation_writer: BTreeMap::new(),
             intent_epoch: 1,
+            settle: crate::dispute::Settle::default(),
         };
         // Resolve the bindings on load (§18.3); a first ready resolution is anchored by
         // an engine entry. No connection exists yet: its notifications go nowhere.
@@ -924,6 +932,29 @@ impl Session {
                 Ok(lines) => lines,
                 Err(e) => vec![err_line(conn, None, e)],
             },
+            ClientMsg::Dispute {
+                id,
+                claim,
+                t,
+                values,
+                anchor_t,
+                digest,
+            } => {
+                if !permissions(self.conns[ci].role).read {
+                    return vec![err_line(conn, Some(id), forbidden_read())];
+                }
+                let d = crate::dispute::DisputeIn {
+                    claim,
+                    t,
+                    values,
+                    anchor_t,
+                    digest,
+                };
+                match self.dispute(ci, &id, d) {
+                    Ok(lines) => lines,
+                    Err(e) => vec![err_line(conn, Some(id), e)],
+                }
+            }
         }
     }
 
@@ -1553,7 +1584,7 @@ impl Session {
 
     /// Writes the pending anchor stamps (§18.3) as one engine entry: `put_series` of each
     /// bound series with `anchor_t` set to the first bar of its first ready resolution.
-    fn stamp_anchors(&mut self) -> Option<Seq> {
+    pub(crate) fn stamp_anchors(&mut self) -> Option<Seq> {
         let stamps = std::mem::take(&mut self.pending_stamps);
         let mut changes = Vec::new();
         let mut names = Vec::new();
@@ -1623,10 +1654,9 @@ impl Session {
             });
         }
         self.data_changed(outcome.changed);
-        Ok(DataOutcome {
-            lines: self.settle_data(),
-            notices,
-        })
+        let mut lines = self.settle_data();
+        lines.extend(self.serve_test_source());
+        Ok(DataOutcome { lines, notices })
     }
 
     /// Resolves again every bound series that is not ready (after a gap, a limit, a
@@ -1678,6 +1708,7 @@ impl Session {
             self.cache.clear();
         }
         self.claims_after_bars(&changed);
+        self.note_closed(&changed);
         let seq = self.seq();
         for (id, d) in changed {
             self.pending_views.push((id, d, seq));
@@ -1687,7 +1718,7 @@ impl Session {
     /// After a data change without a log entry: watchers at the current position, then
     /// invalidations of every live capsule (§8.1, §18.4); incremental: only those resting
     /// on the changed series (§18.8).
-    fn settle_data(&mut self) -> Vec<OutboundLine> {
+    pub(crate) fn settle_data(&mut self) -> Vec<OutboundLine> {
         if self.incremental {
             return self.settle_live(None);
         }
@@ -1725,7 +1756,7 @@ impl Session {
     }
 
     /// Writes an engine entry (author `qp`) carrying a claim's evidence (§19).
-    fn engine_entry_with(
+    pub(crate) fn engine_entry_with(
         &mut self,
         changes: Vec<ChangeOp>,
         summary: String,
@@ -2469,7 +2500,8 @@ fn msg_id(m: &ClientMsg) -> Option<String> {
         | ClientMsg::Subscribe { id, .. }
         | ClientMsg::Unsubscribe { id, .. }
         | ClientMsg::Input { id, .. }
-        | ClientMsg::Attend { id, .. } => Some(id.clone()),
+        | ClientMsg::Attend { id, .. }
+        | ClientMsg::Dispute { id, .. } => Some(id.clone()),
         ClientMsg::Hello { .. } | ClientMsg::Clock { .. } => None,
     }
 }

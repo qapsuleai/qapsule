@@ -1,0 +1,39 @@
+[package]
+name = "rp2-harness"
+description = "RP2/T7: deterministic consistency scenario harness (world, feeds, channel, oracle) for data-plane / meaning-plane consistency approaches."
+version = "0.0.0"
+edition = "2021"
+publish = false
+
+# Not a member of the main workspace (the root workspace only lists `crates/*`).
+[workspace]
+
+[[bin]]
+name = "harness"
+path = "src/main.rs"
+
+[lib]
+name = "harness"
+path = "src/lib.rs"
+
+[dependencies]
+qp-schema = { path = "../../../../../crates/qp-schema" }
+qp-compute = { path = "../../../../../crates/qp-compute" }
+# RP2/T8: the `bs` approach drives the real replica (`qp_session::replica`).
+qp-session = { path = "../../../../../crates/qp-session" }
+qp-source = { path = "../../../../../crates/qp-source" }
+serde = { version = "1.0.229", features = ["derive"] }
+serde_json = { version = "1.0.154", features = ["float_roundtrip"] }
+flate2 = { version = "1", default-features = false, features = ["rust_backend"] }
+
+[lints.rust]
+unsafe_code = "forbid"
+
+[profile.release]
+lto = "thin"
+codegen-units = 1
+debug = false
+
+# Tests run whole scenarios; keep them fast.
+[profile.test]
+opt-level = 2

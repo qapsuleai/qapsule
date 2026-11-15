@@ -30,6 +30,7 @@ mod bindq;
 mod canon;
 mod claims;
 pub mod conform;
+mod dispute;
 mod error;
 mod expand;
 mod explain;
@@ -55,6 +56,10 @@ pub use apply::{
     touched_keys,
 };
 pub use canon::{canon_document, thresholds};
+pub use dispute::{
+    SettleRequest, MAX_DIGESTS as MAX_DISPUTE_DIGESTS, MAX_OPEN as MAX_OPEN_DISPUTES,
+    MAX_PER_CONN as MAX_DISPUTES_PER_CONN,
+};
 pub use explain::explain_scene;
 pub use plane::{DataError, DataOutcome, HostNotice};
 pub use present::profile_for;

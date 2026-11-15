@@ -210,6 +210,9 @@ pub enum SeriesSource {
         /// Named feed of the host; the host's default if absent.
         #[serde(default, skip_serializing_if = "Option::is_none")]
         feed: Option<String>,
+        /// Time of bar 0, fixed by the authority on first resolution (engine entry; §18.3).
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        anchor_t: Option<TimestampMs>,
     },
     /// Local computation: a study applied to other series.
     Study {
@@ -278,11 +281,13 @@ impl Series {
                 interval,
                 window,
                 feed,
+                anchor_t,
             } => Some(crate::data::DataBinding {
                 symbol: symbol.clone(),
                 interval: interval.clone(),
                 window: window.clone(),
                 feed: feed.clone(),
+                anchor_t: *anchor_t,
             }),
             _ => None,
         }
@@ -639,6 +644,8 @@ pub struct Document {
 }
 
 /// The operation a command performs on a document.
+// Legacy draft type (PROTOCOL Ek A); `Fact` grew with `evidence_ref` (RP2). Not on a hot path.
+#[allow(clippy::large_enum_variant)]
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
 #[serde(tag = "kind", rename_all = "snake_case", deny_unknown_fields)]
 pub enum Op {

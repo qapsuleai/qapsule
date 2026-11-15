@@ -144,7 +144,7 @@ impl Session {
     /// (study values computed with `qp-compute` and cached first).
     pub fn provider(&mut self) -> DocProvider<'_> {
         warm(rd!(self), &mut self.cache);
-        DocProvider::new(rd!(self), &self.cache)
+        DocProvider::new(rd!(self), &self.cache).with_headlines(&self.headlines)
     }
 
     /// Compiles view `view_id` into its scene description with `opts` (frame size,
@@ -160,8 +160,12 @@ impl Session {
     ) -> Result<SceneDesc, ProtocolError> {
         warm(rd!(self), &mut self.cache);
         let view = need_view(rd!(self), view_id, "/view")?;
-        compile(view, &DocProvider::new(rd!(self), &self.cache), opts)
-            .map_err(|e| grammar_error(&e, "/view"))
+        compile(
+            view,
+            &DocProvider::new(rd!(self), &self.cache).with_headlines(&self.headlines),
+            opts,
+        )
+        .map_err(|e| grammar_error(&e, "/view"))
     }
 
     /// Compiles a view as connection `conn` sees it: `view_id` (default: the connection's
@@ -253,8 +257,12 @@ impl Session {
             filtered = without_layers(view, &blocked);
             &filtered
         };
-        let scene = compile(view, &DocProvider::new(rd!(self), &self.cache), &opts)
-            .map_err(|e| grammar_error(&e, qp))?;
+        let scene = compile(
+            view,
+            &DocProvider::new(rd!(self), &self.cache).with_headlines(&self.headlines),
+            &opts,
+        )
+        .map_err(|e| grammar_error(&e, qp))?;
         let times: Vec<i64> = view_bar_series(rd!(self), view)
             .and_then(Series::bars)
             .map(|b| b.iter().map(|b| b.t).collect())
@@ -368,7 +376,11 @@ impl Session {
         if c.profile.max_points > 0 {
             opts.max_points = Some(u64::from(c.profile.max_points));
         }
-        let Ok(scene) = compile(view, &DocProvider::new(rd!(self), &self.cache), &opts) else {
+        let Ok(scene) = compile(
+            view,
+            &DocProvider::new(rd!(self), &self.cache).with_headlines(&self.headlines),
+            &opts,
+        ) else {
             return BTreeMap::new();
         };
         scene

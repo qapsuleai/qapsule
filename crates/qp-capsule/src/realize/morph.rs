@@ -15,6 +15,9 @@
 //! - final-stop softening p/ç/t/k → b/c/d/ğ before a vowel-initial suffix on written
 //!   polysyllabic common nouns (`eşik` → `eşiğin`, `direnç` → `direnci`), never after an
 //!   apostrophe;
+//! - palatal final `l` (R3/S-C): loanwords such as `sinyal`, `kontrol`, `rol` take
+//!   front-vowel suffixes although their last vowel is back (`sinyalin`, `kontrolü`,
+//!   `rolde`); the list is [`PALATAL_L`];
 //! - aorist (-Ar for monosyllabic stems except the -Ir list, -Ir for polysyllabic, -r after
 //!   a vowel), conditional = aorist + sA (`çıkarsa`, `inerse`, `kapanırsa`), past -DI,
 //!   copula -DIr (`bardır`, `gündür`).
@@ -31,6 +34,10 @@ pub struct Word {
     /// Already carries a 3rd-person possessive (`ortalaması`, `seviyesi`): buffer `n`.
     pub possessed: bool,
 }
+
+/// Words whose final `l` is palatal: suffixes take the front counterpart of the last
+/// vowel (`sinyal` → `sinyalin`, not `sinyalın`).
+pub const PALATAL_L: [&str; 7] = ["sinyal", "kontrol", "rol", "hal", "alkol", "petrol", "gol"];
 
 const VOWELS: [char; 8] = ['a', 'ı', 'o', 'u', 'e', 'i', 'ö', 'ü'];
 const VOICELESS: [char; 8] = ['f', 's', 't', 'k', 'ç', 'ş', 'h', 'p'];
@@ -168,7 +175,25 @@ impl Word {
     }
 
     fn lv(&self) -> char {
-        last_vowel(&self.spoken)
+        let v = last_vowel(&self.spoken);
+        let palatal = PALATAL_L.iter().any(|w| {
+            self.spoken == *w
+                || self
+                    .spoken
+                    .strip_suffix(w)
+                    .is_some_and(|head| head.ends_with(' '))
+        });
+        if palatal {
+            match v {
+                'a' => 'e',
+                'ı' => 'i',
+                'o' => 'ö',
+                'u' => 'ü',
+                c => c,
+            }
+        } else {
+            v
+        }
     }
 
     fn join(&self, suffix: &str) -> String {
@@ -458,6 +483,12 @@ mod tests {
             "kırılım seviyesinin"
         );
         assert_eq!(Word::noun("fiyat").gen(), "fiyatın");
+        // Palatal final l (R3/S-C).
+        assert_eq!(Word::noun("sinyal").gen(), "sinyalin");
+        assert_eq!(Word::noun("sinyal").loc(), "sinyalde");
+        assert_eq!(Word::noun("kontrol").acc(), "kontrolü");
+        assert_eq!(Word::noun("bu sinyal").dat(), "bu sinyale");
+        assert_eq!(Word::noun("kanal").gen(), "kanalın");
         assert_eq!(Word::noun("5 bar").copula(), "5 bardır");
         assert_eq!(Word::noun("birkaç gün").copula(), "birkaç gündür");
         assert_eq!(Word::noun("bir süre").copula(), "bir süredir");

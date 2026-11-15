@@ -93,7 +93,7 @@ struct Open {
 }
 
 /// Idempotence key: (connection, claim, `t`, digest).
-type SeenKey = (String, ClaimRef, TimestampMs, String);
+pub(crate) type SeenKey = (String, ClaimRef, TimestampMs, String);
 
 /// Dispute and settled-request state of a session.
 #[derive(Debug, Default)]
@@ -109,6 +109,26 @@ pub(crate) struct Settle {
 }
 
 impl Settle {
+    /// Whether this dispute (connection, claim, `t`, digest) was made already.
+    pub(crate) fn seen_contains(&self, k: &SeenKey) -> bool {
+        self.seen.contains_key(k)
+    }
+
+    /// Records (or decides) a dispute's verdict.
+    pub(crate) fn seen_insert(&mut self, k: SeenKey, v: DisputeVerdict) {
+        self.seen.insert(k, v);
+    }
+
+    /// A dispute's verdict so far.
+    pub(crate) fn seen_get(&self, k: &SeenKey) -> Option<DisputeVerdict> {
+        self.seen.get(k).copied()
+    }
+
+    /// Queues a settled request for the host.
+    pub(crate) fn push_request(&mut self, r: SettleRequest) {
+        self.requests.push(r);
+    }
+
     /// Sets the synchronous test source from `init.data.settled`.
     pub(crate) fn set_test_source(&mut self, s: &InitSettled) {
         let mut m: BTreeMap<FeedKey, BTreeMap<TimestampMs, Bar>> = BTreeMap::new();
@@ -228,6 +248,9 @@ impl Session {
         for s in retracted {
             lines.extend(self.entry_events(s));
         }
+        // (R3, §20) Engine stories resting on corrected bars are retracted; capsule
+        // disputes the answer covers are decided.
+        lines.extend(self.capsule_settled(series, lo, hi, first.is_some()));
         lines.extend(self.settle_data());
         lines
     }
@@ -302,6 +325,22 @@ impl Session {
         id: &str,
         d: DisputeIn,
     ) -> Result<Vec<OutboundLine>, ProtocolError> {
+        if let ClaimRef::Capsule { capsule, .. } = &d.claim {
+            if self.engine_capsule(capsule).is_some() {
+                if let Some(dg) = &d.digest {
+                    if !valid_digest(dg) {
+                        return Err(E::new(
+                            ErrorCode::Invalid,
+                            "`digest` must be 16 lowercase hex digits (data_digest)",
+                        )
+                        .at("/digest")
+                        .build());
+                    }
+                }
+                let capsule = capsule.clone();
+                return Ok(self.capsule_dispute(ci, id, &capsule, d.t, d.digest));
+            }
+        }
         let conn = self.conns[ci].id.clone();
         let principal = self.conns[ci].principal.clone();
         let owner = match d.claim {

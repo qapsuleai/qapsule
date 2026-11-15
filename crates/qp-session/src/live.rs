@@ -697,6 +697,7 @@ impl Session {
         for s in entries {
             lines.extend(self.entry_events(s));
         }
+        lines.extend(self.run_capsules());
         lines.extend(self.view_events());
         lines.extend(conds);
         let claims = self.claim_events();

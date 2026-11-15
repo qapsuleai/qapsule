@@ -195,6 +195,92 @@ pub struct Engine {
     instruments: BTreeSet<String>,
     counters: Counters,
     birth_counts: BTreeMap<String, BirthCounts>,
+    /// Ledger rows indexed per key and overall in close-time order (R3/S-C): lookups in
+    /// O(log n + retracted rows) instead of a scan of every row. Derived from `ledger`;
+    /// never serialized.
+    index: LedgerIndex,
+}
+
+/// Close-time ordered counts of ledger rows (one key, or all keys).
+#[derive(Debug, Clone, Default)]
+struct KeyIndex {
+    /// Close times (`recorded_at`), non-decreasing.
+    t: Vec<i64>,
+    /// `realized[i]` = realized rows among the first `i` (length `t.len() + 1`).
+    realized: Vec<u32>,
+    /// Retracted rows: `(recorded_at, retracted_at, realized)`.
+    retracted: Vec<(i64, i64, bool)>,
+}
+
+impl KeyIndex {
+    fn insert(&mut self, t: i64, realized: bool) {
+        if self.realized.is_empty() {
+            self.realized.push(0);
+        }
+        let pos = self.t.partition_point(|x| *x <= t);
+        self.t.insert(pos, t);
+        if pos + 1 == self.t.len() {
+            let last = self.realized[pos];
+            self.realized.push(last + u32::from(realized));
+        } else {
+            // Out-of-order close (bars fed out of global time order): rebuild the tail.
+            self.realized.insert(pos + 1, 0);
+            self.realized[pos + 1] = self.realized[pos] + u32::from(realized);
+            // Every later prefix gains this row.
+            for r in &mut self.realized[pos + 2..] {
+                *r += u32::from(realized);
+            }
+        }
+    }
+
+    /// Same semantics as [`LedgerRecord::counts`] summed over the rows.
+    fn stat(&self, before_t: i64) -> LedgerStat {
+        let k = self.t.partition_point(|x| *x < before_t);
+        let mut n = u32::try_from(k).unwrap_or(u32::MAX);
+        let mut realized = self.realized.get(k).copied().unwrap_or(0);
+        for (rec, ret, real) in &self.retracted {
+            if *rec < before_t && *ret < before_t {
+                n -= 1;
+                realized -= u32::from(*real);
+            }
+        }
+        LedgerStat { n, realized }
+    }
+}
+
+#[derive(Debug, Clone, Default)]
+struct LedgerIndex {
+    all: KeyIndex,
+    by_key: BTreeMap<String, KeyIndex>,
+}
+
+impl LedgerIndex {
+    fn key(r: &LedgerRecord) -> &str {
+        r.entry.key.as_deref().unwrap_or("")
+    }
+
+    fn insert(&mut self, r: &LedgerRecord) {
+        let real = r.entry.outcome == Outcome::Confirmed;
+        self.all.insert(r.entry.recorded_at, real);
+        self.by_key
+            .entry(Self::key(r).to_owned())
+            .or_default()
+            .insert(r.entry.recorded_at, real);
+    }
+
+    fn retract(&mut self, r: &LedgerRecord, at: i64) {
+        let row = (
+            r.entry.recorded_at,
+            at,
+            r.entry.outcome == Outcome::Confirmed,
+        );
+        self.all.retracted.push(row);
+        self.by_key
+            .entry(Self::key(r).to_owned())
+            .or_default()
+            .retracted
+            .push(row);
+    }
 }
 
 struct BarIn<'a> {
@@ -308,6 +394,7 @@ impl Engine {
             instruments: BTreeSet::new(),
             counters: Counters::default(),
             birth_counts: BTreeMap::new(),
+            index: LedgerIndex::default(),
         }
     }
 
@@ -462,6 +549,7 @@ impl Engine {
         for r in &mut self.ledger {
             if r.entry.capsule.as_deref() == Some(capsule) && r.retracted_at.is_none() {
                 r.retracted_at = Some(t);
+                self.index.retract(r, t);
             }
         }
         self.events.push(ev.clone());
@@ -471,19 +559,33 @@ impl Engine {
     /// Ledger statistic of `key` over the closes strictly before `before_t` (rows of
     /// stories retracted before `before_t` excluded).
     #[must_use]
+    ///
+    /// O(log n) in the rows of `key` (plus its retracted rows): the rows are indexed per
+    /// key in close-time order (R3/S-C); the result is the row scan's
+    /// ([`Engine::ledger_stat_scan`]).
     pub fn ledger_stat(&self, key: &str, before_t: i64) -> LedgerStat {
+        self.index
+            .by_key
+            .get(key)
+            .map_or_else(LedgerStat::default, |k| k.stat(before_t))
+    }
+
+    /// Ledger statistic over all keys, closes strictly before `before_t` (indexed).
+    #[must_use]
+    pub fn ledger_stat_all(&self, before_t: i64) -> LedgerStat {
+        self.index.all.stat(before_t)
+    }
+
+    /// [`Engine::ledger_stat`] by scanning every row (the definition; tests compare the
+    /// index against it).
+    #[must_use]
+    pub fn ledger_stat_scan(&self, key: Option<&str>, before_t: i64) -> LedgerStat {
         stat(
             self.ledger
                 .iter()
-                .filter(|r| r.entry.key.as_deref() == Some(key)),
+                .filter(|r| key.is_none_or(|k| r.entry.key.as_deref() == Some(k))),
             before_t,
         )
-    }
-
-    /// Ledger statistic over all keys, closes strictly before `before_t`.
-    #[must_use]
-    pub fn ledger_stat_all(&self, before_t: i64) -> LedgerStat {
-        stat(self.ledger.iter(), before_t)
     }
 
     /// Open stories, in birth order.
@@ -542,7 +644,7 @@ impl Engine {
             Stage::Expired => (Outcome::Refuted, Some(CapsuleState::Expired)),
             _ => return,
         };
-        self.ledger.push(LedgerRecord {
+        let rec = LedgerRecord {
             entry: LedgerEntry {
                 finding: finding_id(&s.id),
                 state,
@@ -555,7 +657,9 @@ impl Engine {
                 bar: Some(s.story.last_bar),
             },
             retracted_at: None,
-        });
+        };
+        self.index.insert(&rec);
+        self.ledger.push(rec);
     }
 
     fn birth_counts_of(&self, id: &str, out: &BarOut) -> BirthCounts {

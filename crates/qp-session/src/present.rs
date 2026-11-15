@@ -67,6 +67,7 @@ pub(crate) fn present(
     finding: &Finding,
     surface: SurfaceKind,
     profile: &Profile,
+    headlines: &std::collections::BTreeMap<String, String>,
 ) -> Presentation {
     let capsule = doc.capsules.iter().find(|c| c.finding == finding.id);
     let depth = depth::effective_depth(profile.depth, profile);
@@ -76,7 +77,7 @@ pub(crate) fn present(
     } else {
         None
     };
-    let prov = DocProvider::new(doc, cache);
+    let prov = DocProvider::new(doc, cache).with_headlines(headlines);
     let mut p = Presentation {
         finding: finding.id.clone(),
         depth,

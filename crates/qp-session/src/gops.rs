@@ -322,6 +322,7 @@ pub(crate) fn expand_grammar(
             let e = encoding;
             let set: Vec<&str> = [
                 ("x", e.x.is_some()),
+                ("x2", e.x2.is_some()),
                 ("y", e.y.is_some()),
                 ("y2", e.y2.is_some()),
                 ("color", e.color.is_some()),
@@ -367,6 +368,9 @@ pub(crate) fn expand_grammar(
             if e.x.is_some() {
                 l.encoding.x.clone_from(&e.x);
             }
+            if e.x2.is_some() {
+                l.encoding.x2.clone_from(&e.x2);
+            }
             if e.y.is_some() {
                 l.encoding.y.clone_from(&e.y);
             }
@@ -391,6 +395,7 @@ pub(crate) fn expand_grammar(
             for name in unset {
                 match name.as_str() {
                     "x" => l.encoding.x = None,
+                    "x2" => l.encoding.x2 = None,
                     "y" => l.encoding.y = None,
                     "y2" => l.encoding.y2 = None,
                     "color" => l.encoding.color = None,

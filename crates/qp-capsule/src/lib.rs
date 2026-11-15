@@ -32,6 +32,7 @@
 //! | [`outcome`] | [`outcome::Barrier`] (per-kind ATR triple barrier) | M5a |
 //! | [`rank`] | [`rank::Confirm`] (confirmation-led combination) | M3c |
 //! | [`realize`] | [`realize::Template`] (template grammar, TR + EN) | M2a |
+//! | [`trust`] | [`trust::Muhur`] (binary-lattice seal with receipts) | M6b |
 //!
 //! [`EngineConfig::r3`] is the engine with these choices; [`sentence::sentences_at`]
 //! writes a story's sentences from engine data (K26).
@@ -47,6 +48,7 @@ pub mod realize;
 pub mod scaffold;
 pub mod sentence;
 pub mod theme;
+pub mod trust;
 
 pub use audience::admits;
 pub use engine::{

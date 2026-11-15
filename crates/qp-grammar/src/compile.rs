@@ -202,7 +202,7 @@ fn first_bar_series(view: &View, p: &dyn DataProvider) -> Option<String> {
                     _ => None,
                 }?;
                 match p.series_kind(&fact.series)? {
-                    SeriesKind::Bars => Some(fact.series),
+                    SeriesKind::Bars => Some(fact.series.clone()),
                     SeriesKind::Values => p.input_bars(&fact.series).filter(|b| bars(b)),
                     SeriesKind::Points => None,
                 }

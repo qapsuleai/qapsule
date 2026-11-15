@@ -51,10 +51,10 @@ pub trait DataProvider {
     fn symbol(&self, series: &str) -> Option<String>;
     /// Bar interval of a bar series (title).
     fn interval(&self, series: &str) -> Option<String>;
-    /// A fact by id.
-    fn fact(&self, id: &str) -> Option<Fact>;
-    /// A finding by id.
-    fn finding(&self, id: &str) -> Option<Finding>;
+    /// A fact by id (borrowed when the provider holds it).
+    fn fact(&self, id: &str) -> Option<Cow<'_, Fact>>;
+    /// A finding by id (borrowed when the provider holds it).
+    fn finding(&self, id: &str) -> Option<Cow<'_, Finding>>;
     /// Headline of the capsule presenting `finding`, if there is one.
     fn headline(&self, finding: &str) -> Option<String>;
     /// Value of a named threshold (`<study>.<name>`), e.g. the overbought level → 70.
@@ -267,12 +267,12 @@ impl DataProvider for MemProvider {
         self.bars.get(series).and_then(|b| b.interval.clone())
     }
 
-    fn fact(&self, id: &str) -> Option<Fact> {
-        self.facts.get(id).cloned()
+    fn fact(&self, id: &str) -> Option<Cow<'_, Fact>> {
+        self.facts.get(id).map(Cow::Borrowed)
     }
 
-    fn finding(&self, id: &str) -> Option<Finding> {
-        self.findings.get(id).cloned()
+    fn finding(&self, id: &str) -> Option<Cow<'_, Finding>> {
+        self.findings.get(id).map(Cow::Borrowed)
     }
 
     fn headline(&self, finding: &str) -> Option<String> {

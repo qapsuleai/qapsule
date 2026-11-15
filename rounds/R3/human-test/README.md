@@ -78,7 +78,6 @@ Nasıl seçildi (ayrıntı `gen/src/main.rs` başındaki sabitlerde):
   yaklaşık 4 mm. Ekran (telefon) gösterimi birincildir; gösterim türü formda kaydedilir.
 - **Önceki adıma dönme** kâğıtta tam önlenemez; görevli izler ve not eder.
 - **Güç:** 5–10 kişiyle eşli işaret testi yalnız çok tek yönlü farkları yakalar (`SCORING.md`).
-- **Cümlelerdeki bir ürün hatası test metnine geçti:** S7'de "Sinyalın ömrü" (doğrusu
-  "Sinyalin"); kaynak `qp_capsule::realize` Türkçe ünlü uyumu (yabancı kökenli "sinyal").
-  Paket ürünü değiştirmez; düzeltme ürün tarafında yapılınca `./generate.sh` cümleyi yeniler.
+- İlk üretimde S7'de "Sinyalın ömrü" ünlü uyumu hatası vardı; ürün tarafında düzeltildi
+  (S-C, `37b78b7`) ve paket `./generate.sh` ile yeniden üretildi.
 - Gerçek piyasa verisi yok: bütün değerler M2 düzeneğinin uydurma durumlarıdır.

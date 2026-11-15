@@ -295,9 +295,33 @@
     }
   },
   "product_changes": {
+    "s07": {
+      "tr": "PGSUS'ta yaklaşık bir hafta önce aşağı dönüş işareti çıktı: fiyat yeni tepe yaparken RSI daha düşük tepe yaptı. Sinyalin ömrü bugün sonuçsuz doldu; artık geçerli değil. Karnesi henüz az örnekli. Sunucu doğruladı; rakamlar kurumsal akış lisansı gerektiriyor.",
+      "en": "About a week ago, PGSUS showed a downward reversal signal: price made a new high while RSI made a lower high. Its life ran out today without an outcome; it is no longer valid. Its record is still thin. Server-verified; the figures require an institutional flow data license."
+    },
+    "s09": {
+      "tr": "GARAN bugün 128,48'deki direnci yukarı kırdı (kapanış 131,01): yukarı kırılım. Sinyalin 1 barlık ömrü bugün sonuçsuz doldu; artık geçerli değil. Geçmişte bu sinyal 140 seferin 51'inde beklendiği gibi sonuçlandı.",
+      "en": "Today, GARAN broke above resistance at 128.48 (close 131.01): an upside breakout. Its 1-bar life ran out today without an outcome; it is no longer valid. Historically, this signal played out in 51 of 140 cases."
+    },
+    "s14": {
+      "tr": "THYAO'da dün Bollinger bantları daraldı: sıkışma, yön belirsiz. Sinyalin ömrü bugün sonuçsuz doldu; artık geçerli değil. Geçmişte bu tür sinyal çoğunlukla beklendiği gibi sonuçlandı. Sunucu doğruladı; rakamlar kurumsal akış lisansı gerektiriyor.",
+      "en": "Yesterday, THYAO's Bollinger bands narrowed: a squeeze, direction open. Its life ran out today without an outcome; it is no longer valid. Historically, this kind of signal mostly played out. Server-verified; the figures require an institutional flow data license."
+    },
     "s19": {
       "tr": "FROTO'da RSI yaklaşık bir hafta önce aşırı alım eşiğinin üstüne çıktı: aşırı alım. Uzama sürmedi: fiyat bugün geri düştü; sinyal gerçekleşmedi sayıldı; artık geçerli değil. Karnesi henüz az örnekli. Sunucu doğruladı; rakamlar kurumsal akış lisansı gerektiriyor.",
       "en": "About a week ago, FROTO's RSI rose above the overbought threshold: overbought. The stretch did not continue: the price fell back today, so it counts as not played out; it is no longer valid. Its record is still thin. Server-verified; the figures require an institutional flow data license."
+    },
+    "s23": {
+      "tr": "AKBNK'ta 5 bar önce kurumsal net satış (1.496.000) son günlerin ortalamasını (374.000) belirgin biçimde aştı: para çıkışı. Sinyalin 5 barlık ömrü bugün sonuçsuz doldu; artık geçerli değil. Geçmişte bu sinyal 140 seferin 50'sinde beklendiği gibi sonuçlandı.",
+      "en": "5 bars ago, net institutional selling in AKBNK (1,496,000) clearly exceeded the recent average (374,000): money outflow. Its 5-bar life ran out today without an outcome; it is no longer valid. Historically, this signal played out in 50 of 140 cases."
+    },
+    "s29": {
+      "tr": "KCHOL bugün dönüş noktasının (286,57) altına indi; şu an 295,17, artık dönüş noktasının altında değil. Aşağı dönüş sona erdi. Sinyalin 1 barlık ömrü bugün sonuçsuz doldu. Karnesi henüz az örnekli: 8 seferin 4'ünde tuttu.",
+      "en": "Today, KCHOL crossed below the reversal point (286.57); it is now at 295.17, no longer below the reversal point. The downward reversal has ended. Its 1-bar life ran out today without an outcome. Its record is still thin: it played out in 4 of 8 cases."
+    },
+    "s35": {
+      "tr": "GARAN 5 bar önce 109,96'nın üstüne çıktı; şu an 106,66, artık 109,96'nın üstünde değil. Yukarı kırılım sona erdi. Sinyalin 5 barlık ömrü bugün sonuçsuz doldu. Geçmişte bu sinyal 140 seferin 82'sinde beklendiği gibi sonuçlandı.",
+      "en": "5 bars ago, GARAN crossed above 109.96; it is now at 106.66, no longer above 109.96. The upside breakout has ended. Its 5-bar life ran out today without an outcome. Historically, this signal played out in 82 of 140 cases."
     },
     "s42": {
       "tr": "KCHOL'da RSI dünden beri aşırı alım eşiğinin üstünde. Aşırı alım sürüyor. Uzama sürdü: fiyat bugün yükselmeye devam etti; sinyal gerçekleşti sayıldı. Karnesi henüz az örnekli. Sunucu doğruladı; rakamlar kurumsal akış lisansı gerektiriyor.",
@@ -312,7 +336,7 @@
       "en": "Net institutional buying in GARAN is stronger than usual (recent average 319,000) as of today, now 325,380. The money inflow is still in place. An opposite signal appeared today and weakened it. Historically, this signal played out in 63 of 140 cases."
     },
     "s46": {
-      "tr": "PGSUS'ta kurumsal net satış dün her zamankinden güçlü hâle geldi; artık her zamankinden güçlü değil. Para çıkışı sona erdi. Sinyalın ömrü bugün sonuçsuz doldu. Geçmişte bu tür sinyal kabaca yarı yarıya tuttu. Sunucu doğruladı; rakamlar kurumsal akış lisansı gerektiriyor.",
+      "tr": "PGSUS'ta kurumsal net satış dün her zamankinden güçlü hâle geldi; artık her zamankinden güçlü değil. Para çıkışı sona erdi. Sinyalin ömrü bugün sonuçsuz doldu. Geçmişte bu tür sinyal kabaca yarı yarıya tuttu. Sunucu doğruladı; rakamlar kurumsal akış lisansı gerektiriyor.",
       "en": "Yesterday, net institutional selling in PGSUS became stronger than usual; it is no longer stronger than usual. The money outflow has ended. Its life ran out today without an outcome. Historically, this kind of signal played out about as often as not. Server-verified; the figures require an institutional flow data license."
     },
     "s47": {

@@ -326,6 +326,14 @@ impl Session {
                         entries.drain(..entries.len() - l);
                     }
                 }
+                // Claim evidence values are data-plane values (§18.3): filtered for the
+                // asker; the stored entries stay intact for replay.
+                let asker = &self.conns[ci].principal;
+                for e in &mut entries {
+                    if let Some(ev) = e.evidence.as_mut() {
+                        *ev = crate::claims::for_principal(&self.doc, &self.plane, asker, ev);
+                    }
+                }
                 Ok(QueryResult::Log { entries })
             }
             Query::Study {

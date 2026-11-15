@@ -1769,7 +1769,14 @@ impl Session {
                                     bar,
                                     t,
                                     seq,
-                                    evidence,
+                                    evidence: evidence.map(|ev| {
+                                        crate::claims::for_principal(
+                                            &self.doc,
+                                            &self.plane,
+                                            &self.conns[ci].principal,
+                                            &ev,
+                                        )
+                                    }),
                                 },
                             },
                         ));
@@ -1787,7 +1794,12 @@ impl Session {
                             &c.id,
                             ServerMsg::Notify {
                                 sub: s.id.clone(),
-                                event: ev.clone(),
+                                event: crate::claims::event_for(
+                                    &self.doc,
+                                    &self.plane,
+                                    &c.principal,
+                                    &ev,
+                                ),
                             },
                         ));
                     }
@@ -1861,7 +1873,14 @@ impl Session {
                                     approved_by: e.approved_by.clone(),
                                     cause: e.cause.clone(),
                                     changes: e.changes.clone(),
-                                    evidence: e.evidence.clone(),
+                                    evidence: e.evidence.as_ref().map(|ev| {
+                                        crate::claims::for_principal(
+                                            &self.doc,
+                                            &self.plane,
+                                            &c.principal,
+                                            ev,
+                                        )
+                                    }),
                                 },
                             },
                         ));
@@ -1894,7 +1913,14 @@ impl Session {
                                     capsule: capsule.clone(),
                                     state: *state,
                                     seq,
-                                    evidence: e.evidence.clone(),
+                                    evidence: e.evidence.as_ref().map(|ev| {
+                                        crate::claims::for_principal(
+                                            &self.doc,
+                                            &self.plane,
+                                            &c.principal,
+                                            ev,
+                                        )
+                                    }),
                                 },
                             },
                         ));

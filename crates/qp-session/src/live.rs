@@ -435,7 +435,12 @@ impl Session {
                             &c.id,
                             ServerMsg::Notify {
                                 sub: s.id.clone(),
-                                event: ev.clone(),
+                                event: crate::claims::event_for(
+                                    &self.doc,
+                                    &self.plane,
+                                    &c.principal,
+                                    &ev,
+                                ),
                             },
                         ));
                     }
@@ -520,7 +525,14 @@ impl Session {
                                     bar,
                                     t,
                                     seq,
-                                    evidence,
+                                    evidence: evidence.map(|ev| {
+                                        crate::claims::for_principal(
+                                            &self.doc,
+                                            &self.plane,
+                                            &c.principal,
+                                            &ev,
+                                        )
+                                    }),
                                 },
                             },
                         ));

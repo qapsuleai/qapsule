@@ -470,7 +470,12 @@ impl crate::session::Session {
                             event: qp_schema::protocol::Event::Claim {
                                 claim: p.claim.clone(),
                                 state: p.state,
-                                evidence: p.evidence.clone(),
+                                evidence: for_principal(
+                                    &self.doc,
+                                    &self.plane,
+                                    &c.principal,
+                                    &p.evidence,
+                                ),
                                 seq,
                             },
                         },
@@ -480,4 +485,81 @@ impl crate::session::Session {
         }
         lines
     }
+}
+
+/// True if `principal` holds the data entitlement of every bound feed the evidence rests
+/// on (its bar series and every operand series, through study inputs).
+fn entitled_all(doc: &Document, plane: &DataPlane, principal: &str, ev: &ClaimEvidence) -> bool {
+    if plane.series.is_empty() {
+        return true;
+    }
+    let mut stack: Vec<&str> = std::iter::once(ev.series.as_str())
+        .chain(ev.values.iter().map(|v| v.series.as_str()))
+        .collect();
+    let mut seen = 0usize;
+    while let Some(id) = stack.pop() {
+        seen += 1;
+        if seen > 1024 {
+            return false;
+        }
+        let Some(s) = find_series(doc, id) else {
+            continue;
+        };
+        match &s.source {
+            SeriesSource::Bind { .. } => {
+                let Some(b) = s.binding() else { continue };
+                if !plane.entitled(principal, &b.feed_key()) {
+                    return false;
+                }
+            }
+            SeriesSource::Study { inputs, .. } => stack.extend(inputs.iter().map(String::as_str)),
+            _ => {}
+        }
+    }
+    true
+}
+
+/// The evidence as `principal` may receive it (§18.3: data-plane values do not go to an
+/// unentitled principal, meaning does): without the entitlement of every bound feed it
+/// rests on, every operand's `value` and `prev` are removed; series ids, `t`, maturity,
+/// cleanliness and the anchor stay.
+pub(crate) fn for_principal(
+    doc: &Document,
+    plane: &DataPlane,
+    principal: &str,
+    ev: &ClaimEvidence,
+) -> ClaimEvidence {
+    let mut ev = ev.clone();
+    if !entitled_all(doc, plane, principal, &ev) {
+        for v in &mut ev.values {
+            v.value = None;
+            v.prev = None;
+        }
+    }
+    ev
+}
+
+/// An event as `principal` may receive it: its claim evidence filtered by
+/// [`for_principal`] (events without evidence unchanged).
+pub(crate) fn event_for(
+    doc: &Document,
+    plane: &DataPlane,
+    principal: &str,
+    e: &qp_schema::protocol::Event,
+) -> qp_schema::protocol::Event {
+    use qp_schema::protocol::Event;
+    let mut e = e.clone();
+    match &mut e {
+        Event::Change { evidence, .. }
+        | Event::FindingState { evidence, .. }
+        | Event::ConditionMet { evidence, .. }
+        | Event::IntentTriggered { evidence, .. } => {
+            if let Some(ev) = evidence.as_mut() {
+                *ev = for_principal(doc, plane, principal, ev);
+            }
+        }
+        Event::Claim { evidence, .. } => *evidence = for_principal(doc, plane, principal, evidence),
+        _ => {}
+    }
+    e
 }

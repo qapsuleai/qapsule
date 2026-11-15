@@ -2098,9 +2098,12 @@ pub struct EvidenceValue {
     pub series: String,
     /// Bar time of `value` (the claim's bar on that series' bar series).
     pub t: TimestampMs,
-    /// Value at `t`.
+    /// Value at `t` (absent in warmup, and for a recipient without the data entitlement
+    /// of the feed it rests on: §18.3, §19.7).
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub value: Option<f64>,
-    /// Value at the bar before `t`.
+    /// Value at the bar before `t` (absent as `value`).
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub prev: Option<f64>,
 }
 

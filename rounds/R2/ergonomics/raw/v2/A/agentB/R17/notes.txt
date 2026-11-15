@@ -1,0 +1,1 @@
+attempt1: add_fact (level evidence 123.45) + insert_layer rule on candle panel with layer.origin fact; applied. Unclear: origin sits inside the layer object for insert_layer (worked); needing a fabricated fact for a user constant is awkward; fact bar 199 arbitrary.

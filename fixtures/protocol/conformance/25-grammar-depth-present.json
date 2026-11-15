@@ -1,0 +1,520 @@
+{
+ "name": "25-grammar-depth-present",
+ "description": "R2 depth rules (GRAMMAR §13): present for watch/phone/desktop gives sentence / capsule (with capsule view) / chart; show_finding writes the chart view with a fact-origin rule and highlight emphasis, linked to the capsule.",
+ "covers": [
+  "query",
+  "present",
+  "depth",
+  "presenter",
+  "show_finding",
+  "origin",
+  "emphasis"
+ ],
+ "init": "fixtures/protocol/init/thyao.json",
+ "steps": [
+  {
+   "send": {
+    "conn": "w",
+    "msg": {
+     "type": "hello",
+     "protocol": "qp/0",
+     "principal": "arkin",
+     "surface": {
+      "kind": "watch"
+     }
+    }
+   },
+   "expect": [
+    {
+     "conn": "w",
+     "msg": {
+      "type": "welcome",
+      "protocol": "qp/0",
+      "principal": "arkin",
+      "role": "owner",
+      "seq": "$any",
+      "profile": {
+       "depth": "sentence"
+      }
+     }
+    }
+   ]
+  },
+  {
+   "send": {
+    "conn": "p",
+    "msg": {
+     "type": "hello",
+     "protocol": "qp/0",
+     "principal": "arkin",
+     "surface": {
+      "kind": "phone"
+     }
+    }
+   },
+   "expect": [
+    {
+     "conn": "p",
+     "msg": {
+      "type": "welcome",
+      "protocol": "qp/0",
+      "principal": "arkin",
+      "role": "owner",
+      "seq": "$any",
+      "profile": {
+       "depth": "capsule",
+       "max_points": 60,
+       "max_glyphs": 3
+      }
+     }
+    }
+   ]
+  },
+  {
+   "send": {
+    "conn": "d",
+    "msg": {
+     "type": "hello",
+     "protocol": "qp/0",
+     "principal": "arkin",
+     "surface": {
+      "kind": "desktop"
+     }
+    }
+   },
+   "expect": [
+    {
+     "conn": "d",
+     "msg": {
+      "type": "welcome",
+      "protocol": "qp/0",
+      "principal": "arkin",
+      "role": "owner",
+      "seq": "$any",
+      "profile": {
+       "depth": "chart"
+      }
+     }
+    }
+   ]
+  },
+  {
+   "send": {
+    "conn": "w",
+    "msg": {
+     "type": "query",
+     "id": "q1",
+     "query": {
+      "kind": "present",
+      "finding": "fnd-overbought"
+     }
+    }
+   },
+   "expect": [
+    {
+     "conn": "w",
+     "msg": {
+      "type": "result",
+      "id": "q1",
+      "data": {
+       "kind": "presentation",
+       "presentation": {
+        "finding": "fnd-overbought",
+        "depth": "sentence",
+        "surface": "watch",
+        "text": "THYAO aşırı alımda: RSI 70'in üstünde.",
+        "state": "live",
+        "glyphs": "$absent",
+        "confidence": "$absent",
+        "spark": "$absent",
+        "view": "$absent",
+        "capsule_view": "$absent"
+       }
+      }
+     }
+    }
+   ],
+   "note": "sentence: capsule headline, no visual."
+  },
+  {
+   "send": {
+    "conn": "p",
+    "msg": {
+     "type": "query",
+     "id": "q2",
+     "query": {
+      "kind": "present",
+      "finding": "fnd-overbought"
+     }
+    }
+   },
+   "expect": [
+    {
+     "conn": "p",
+     "msg": {
+      "type": "result",
+      "id": "q2",
+      "data": {
+       "kind": "presentation",
+       "presentation": {
+        "finding": "fnd-overbought",
+        "depth": "capsule",
+        "surface": "phone",
+        "text": "THYAO aşırı alımda: RSI 70'in üstünde.",
+        "state": "live",
+        "confidence": 0.65,
+        "glyphs": [
+         {
+          "kind": "direction",
+          "value": 0.6
+         },
+         {
+          "kind": "extremity",
+          "value": 0.8
+         },
+         {
+          "kind": "uncertainty",
+          "value": 0.35
+         }
+        ],
+        "spark": "$any",
+        "view": "$absent",
+        "capsule_view": {
+         "panels": [
+          {
+           "y": "$any"
+          }
+         ],
+         "layers": [
+          {
+           "mark": "line",
+           "series": "rsi14"
+          },
+          {
+           "mark": "rule",
+           "origin": {
+            "/encoding/y": {
+             "kind": "fact",
+             "fact": "fact-rsi-cross70",
+             "field": "level"
+            }
+           }
+          },
+          {
+           "mark": "point",
+           "fact": "fact-rsi-cross70"
+          }
+         ]
+        }
+       }
+      }
+     }
+    }
+   ],
+   "note": "capsule (GRAMMAR §13): one panel, the fact series' main output over the last 60 bars (140..199), a rule at the fact level (origin: fact) and a point at the fact bar 150, which is visible."
+  },
+  {
+   "send": {
+    "conn": "d",
+    "msg": {
+     "type": "query",
+     "id": "q3",
+     "query": {
+      "kind": "present",
+      "finding": "fnd-overbought"
+     }
+    }
+   },
+   "expect": [
+    {
+     "conn": "d",
+     "msg": {
+      "type": "result",
+      "id": "q3",
+      "data": {
+       "kind": "presentation",
+       "presentation": {
+        "finding": "fnd-overbought",
+        "depth": "chart",
+        "surface": "desktop",
+        "text": "THYAO aşırı alımda: RSI 70'in üstünde.",
+        "confidence": 0.65,
+        "view": {
+         "x": {
+          "kind": "time",
+          "domain": [
+           1750291200000,
+           1759881600000
+          ]
+         },
+         "panels": [
+          {
+           "id": 0,
+           "y": {
+            "kind": "linear"
+           }
+          },
+          {
+           "id": 1,
+           "y": {
+            "kind": "linear"
+           }
+          }
+         ],
+         "layers": [
+          {
+           "mark": "candle",
+           "series": "px",
+           "panel": 0
+          },
+          {
+           "mark": "line",
+           "series": "rsi14",
+           "panel": 1
+          },
+          {
+           "mark": "rule",
+           "panel": 1,
+           "origin": {
+            "/encoding/y": {
+             "kind": "fact",
+             "fact": "fact-rsi-cross70",
+             "field": "level"
+            }
+           }
+          }
+         ],
+         "emphasis": [
+          {
+           "kind": "highlight",
+           "target": "$any"
+          }
+         ]
+        },
+        "facts": [
+         {
+          "id": "fact-rsi-cross70"
+         }
+        ]
+       }
+      }
+     }
+    }
+   ],
+   "note": "chart: candles, the RSI line and a rule at the fact level; x.domain = [t(150-30), t(199)]; highlight on the fact bar."
+  },
+  {
+   "send": {
+    "conn": "d",
+    "msg": {
+     "type": "query",
+     "id": "q4",
+     "query": {
+      "kind": "present",
+      "finding": "fnd-overbought",
+      "surface": "watch"
+     }
+    }
+   },
+   "expect": [
+    {
+     "conn": "d",
+     "msg": {
+      "type": "result",
+      "id": "q4",
+      "data": {
+       "kind": "presentation",
+       "presentation": {
+        "depth": "sentence",
+        "surface": "watch",
+        "text": "THYAO aşırı alımda: RSI 70'in üstünde.",
+        "view": "$absent"
+       }
+      }
+     }
+    }
+   ]
+  },
+  {
+   "send": {
+    "conn": "d",
+    "msg": {
+     "type": "command",
+     "id": "c1",
+     "ops": [
+      {
+       "op": "show_finding",
+       "finding": "fnd-overbought",
+       "view": "fv"
+      }
+     ]
+    }
+   },
+   "expect": [
+    {
+     "conn": "d",
+     "msg": {
+      "type": "ack",
+      "id": "c1",
+      "status": "applied",
+      "seq": 1,
+      "created": [
+       "fv"
+      ]
+     }
+    }
+   ]
+  },
+  {
+   "send": {
+    "conn": "d",
+    "msg": {
+     "type": "query",
+     "id": "q5",
+     "query": {
+      "kind": "present",
+      "finding": "fnd-overbought"
+     }
+    }
+   },
+   "expect": [
+    {
+     "conn": "d",
+     "msg": {
+      "type": "result",
+      "id": "q5",
+      "data": {
+       "kind": "presentation",
+       "presentation": {
+        "depth": "chart",
+        "view": {
+         "x": {
+          "kind": "time",
+          "domain": [
+           1750291200000,
+           1759881600000
+          ]
+         },
+         "panels": [
+          {
+           "id": 0,
+           "y": {
+            "kind": "linear"
+           }
+          },
+          {
+           "id": 1,
+           "y": {
+            "kind": "linear"
+           }
+          }
+         ],
+         "layers": [
+          {
+           "mark": "candle",
+           "series": "px",
+           "panel": 0
+          },
+          {
+           "mark": "line",
+           "series": "rsi14",
+           "panel": 1
+          },
+          {
+           "mark": "rule",
+           "panel": 1,
+           "origin": {
+            "/encoding/y": {
+             "kind": "fact",
+             "fact": "fact-rsi-cross70",
+             "field": "level"
+            }
+           }
+          }
+         ],
+         "emphasis": [
+          {
+           "kind": "highlight",
+           "target": "$any"
+          }
+         ],
+         "id": "fv"
+        }
+       }
+      }
+     }
+    }
+   ],
+   "note": "After show_finding the capsule's view is presented."
+  }
+ ],
+ "final": {
+  "log_len": 1,
+  "document": {
+   "views": [
+    {
+     "id": "main"
+    },
+    {
+     "x": {
+      "kind": "time",
+      "domain": [
+       1750291200000,
+       1759881600000
+      ]
+     },
+     "panels": [
+      {
+       "id": 0,
+       "y": {
+        "kind": "linear"
+       }
+      },
+      {
+       "id": 1,
+       "y": {
+        "kind": "linear"
+       }
+      }
+     ],
+     "layers": [
+      {
+       "mark": "candle",
+       "series": "px",
+       "panel": 0
+      },
+      {
+       "mark": "line",
+       "series": "rsi14",
+       "panel": 1
+      },
+      {
+       "mark": "rule",
+       "panel": 1,
+       "origin": {
+        "/encoding/y": {
+         "kind": "fact",
+         "fact": "fact-rsi-cross70",
+         "field": "level"
+        }
+       }
+      }
+     ],
+     "emphasis": [
+      {
+       "kind": "highlight",
+       "target": "$any"
+      }
+     ],
+     "id": "fv"
+    }
+   ],
+   "capsules": [
+    {
+     "id": "cap-overbought",
+     "view": "fv"
+    }
+   ]
+  }
+ }
+}

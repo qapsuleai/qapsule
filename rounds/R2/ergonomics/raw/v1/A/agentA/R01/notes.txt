@@ -1,0 +1,1 @@
+attempt1: add_study rsi7 (inputs selector bars) + insert_panel after {mark:candle} with line layer; applied first try (new panel 3 placed right under price). Spec clear; screen query returns empty for headless (no screens) so I could not visually verify.

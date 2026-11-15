@@ -1,0 +1,1 @@
+attempt1: set_emphasis highlight with selector {finding:{kind:breakout,latest:true}} -> resolved to ueqto (bar 185), applied. No problems. ("Son kırılım" interpreted as latest breakout finding.)

@@ -1,0 +1,4 @@
+{"conn":"a","msg":{"type":"hello","protocol":"qp/0","principal":"editor","surface":{"kind":"headless"}}}
+{"conn":"a","msg":{"type":"query","id":"q0","query":{"kind":"study","series":{"kind":"bars"},"reduce":"count"}}}
+{"conn":"a","msg":{"type":"command","id":"c1","ops":[{"op":"set_view_range","view":{},"from_bar":140,"to_bar":199}]}}
+{"conn":"a","msg":{"type":"query","id":"q2","query":{"kind":"list","collection":"views"}}}

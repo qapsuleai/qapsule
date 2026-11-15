@@ -1,0 +1,1 @@
+attempt1: present query with surface "phone" (my own connection is headless, so surface param needed) -> OK; spark has 60 points (phone max_points). Unclear: "kaç bar" could mean spark length or capsule_view; both 60.

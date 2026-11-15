@@ -64,3 +64,24 @@ Kanıt `rounds/RD1/REPORT.md` ve `rounds/RD1/experiments/`.
 | A10 | Devir protokolünün tamamı: kira, fencing, `(epoch, seq)` sürekliliği, parçalı anlık görüntü | R4 öncesi (cihaz) | T6d "Öneriler". |
 | A11 | Öğe başına `base` (çevrimdışı biriken komutların kendi kendisiyle çakışmaması) | `qp/1` | T6d: tek `base` ile 20 komuttan 1'i, öğe başına 19'u uygulandı. |
 | A12 | MCP olay kanalı: `notifications/message` (2026-07-28'de kullanımdan kalktı) yerine `subscriptions/listen` + `log` | MCP barındırıcısıyla ilk gerçek kullanımda | `crates/qp-mcp/NOTES.md`. |
+
+## Önerilen (R2) — ana akış onayı bekliyor
+
+R2 bu satırları **önerir**; kesinleştirmedi. Kanıt `rounds/R2/REPORT.md`, `docs/GRAMMAR.md`,
+`rounds/R2/ergonomics/RESULTS.md`.
+
+| # | Önerilen karar | Kanıt |
+|---|----------------|-------|
+| Ö10 | **Gramer v0** (`docs/GRAMMAR.md`): görünüm = kimlikli paneller (numara kimlik, konum değil) + kimlikli katmanlar (işaret + veri başvurusu + kapalı, tipli kodlama kanalları) + kimlikli ölçekler + kalıcı vurgu; tema görünümden ayrı. `qp/0` görünümleri kanonik biçime çevrilerek anlamını korur. | RD1'in 17 dökümü değişmeden geçiyor; altı görünüm + iki derinlik görünümü yalnız protokol mesajlarıyla kuruldu (`fixtures/views/`). |
+| Ö11 | **Köken zorunlu:** katmandaki her sayısal veri sabiti bir kökene (olgu alanı, adlandırılmış eşik, seri değeri) bağlanır; bağlanamayan sabit `no_origin` ile reddedilir. Panelin hesabının adlandırılmış eşiğine tam eşit sabit otomatik bağlanır (`rsi` panelinde 30 → `rsi.oversold`). | İlke 6; RD1/T6e'de modelin yazdığı görünümlerin 7/10'unda kökensiz kural vardı. |
+| Ö12 | **Sahne tarifi tek doğruluk kaynağı** (`qp-schema::scene`): çizici yalnız tarifi boyar, `screen`/`hit` yalnız tarifi okur; gramer ve çizicide hesap kodu yok (`qp-render` artık `qp-compute`'a bağlı değil). | R0 altın görseli tariften bayt-eşit; tarayıcı 0 px; nokta sorgusu özellik testi. |
+| Ö13 | **Anlamla başvuru: T8a (yapılandırılmış seçici nesneler)** seçilir; T8b (`@ad` dili) dalda kalır. | T9: ilk denemede kimliksiz başarı A 19/20, B 10/20, yalnız kimlik 2/20; sonunda A 19/20 → düzeltme (`split_layer`, katı `output`) sonrası A v2 20/20 (ilk deneme 19/20, kimliksiz 16/20); B 20/20; kimlik 20/20. |
+| Ö14 | Gramer işlemleri kimlikle (`insert_layer`, `delete_layer`, `move_layer`, `set_encoding`, panel ve ölçek işlemleri, `set_emphasis`); `add_layer.index` ve `remove_layer` kullanımdan kalkar, `qp/1`'de kaldırılır. Çakışma denetimi katman düzeyinde. | T6c'nin 18 eşzamanlı durumu kimlikli işlemlerle: yanlış sonuç 0 (`base`'siz 18 doğru; `base` ile 16 doğru + 2 güvenli ret). |
+| Ö15 | **Belirleyici yerleşim:** log ölçek dahil yalnız IEEE temel işlemleri (belirleyici `log10`/`pow10`); LOD piksel sütununa göre (`slot < 1`), işaret değiştirilmez. | 100.000 bar kare süresi LOD'lu 2,7 ms (derleme 1,55 + tarama 1,20; M4 Max), LOD'suz 62 ms; LOD–tam fark 2.275 px (%0,32). |
+| Ö16 | Sunucu (presenter) derinlik kuralları `qp-grammar::depth`'te; `present` telefon için kapsül görünümünü de verir. | 1.000 tekrar × 3 derinlik → tek çıktı. |
+| Ö17 | `qp-compute`: en büyük periyot 100.000 (`MAX_PERIOD`); `Study::discard_last` (zincir düzeltmesi). | R1 denetim bulguları 4–6, RD1 D3; hesap özeti değişmedi (`7b1e99d40889f83c`). |
+
+| # | Açık karar (R2) | Ne zaman | Not |
+|---|------------|----------|-----|
+| A13 | WASM boyutu: gramer derleyicisi wasm'a girince gzip 476.603 → 595.475 B (+118.872 B, +%25; RD1'e göre +120.349 B; denetçinin temiz kopyası 595.584 B) | R4 öncesi | `wasm-opt -Oz` ile 526 KB; ince bir wasm yüzeyi (yalnız tarama) ya da derleyiciyi sunucuda tutmak seçenek. |
+| A14 | Bollinger bantlarında uzun seride kayan M2 sürüklenmesi (50k barda göreli ~1,2e-9) | R3 öncesi | Her `period` barda tam yeniden hesap sınırlar ama hesap özetini değiştirir. |

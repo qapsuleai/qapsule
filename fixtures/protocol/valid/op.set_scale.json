@@ -1,0 +1,6 @@
+{
+ "op": "set_scale",
+ "view": "main",
+ "scale": "y0",
+ "kind": "log"
+}

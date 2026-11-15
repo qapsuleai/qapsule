@@ -1,0 +1,3 @@
+{"conn":"a","msg":{"type":"hello","protocol":"qp/0","principal":"editor","surface":{"kind":"headless"}}}
+{"conn":"a","msg":{"type":"command","id":"c1","ops":[{"op":"insert_layer","view":"fw2lc","layer":{"mark":"point","fact":"ikexx","panel":0,"encoding":{}}}]}}
+{"conn":"a","msg":{"type":"query","id":"q1","query":{"kind":"get","id":"fw2lc"}}}

@@ -1,0 +1,7 @@
+view capsule-fnd-overbought "THYAO aşırı alımda: RSI 70'in üstünde." (390x300)
+x: slots 140..199 of 200 bar(s), 2025-07-17 .. 2025-10-08, 5.166666666666667 px per slot
+panel 0: y0 linear [39.47894083714551, 79.95485924780115], 3 layer(s)
+  line line rsi14 "RSI14" fields rsi: 60 item(s); last rsi=55.09991178461079 (bar 199, 2025-10-08)
+  level rule constant: 1 item(s); last y=70
+    /encoding/y = 70 from fact-rsi-cross70.level
+  fact point fact fact-rsi-cross70 fields value: 1 item(s); last value=72.83959265032422 (bar 150, 2025-07-31)

@@ -1,0 +1,2 @@
+{"conn":"a","msg":{"type":"hello","protocol":"qp/0","principal":"editor","surface":{"kind":"headless"}}}
+{"conn":"a","msg":{"type":"command","id":"c1","ops":[{"op":"insert_layer","view":{},"layer":{"mark":"bar","series":{"study":"macd"},"panel":{"shows":{"study":"macd"}},"encoding":{"y":"histogram","color":{"when":{"field":"histogram","op":"ge","than":0},"then":"up","else":"down"}},"origin":{"/encoding/color/when/than":{"kind":"threshold","name":"macd.zero"}}}}]}}

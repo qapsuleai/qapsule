@@ -1,0 +1,1 @@
+attempt1: add_study rsi period 7 (inputs selector {"kind":"bars"}) + insert_panel after {"mark":"candle"} with line layer; applied (created rsi7, panel 3, l0). No problems. Unclear: whether insert_panel needs explicit panel id (omitting worked); layer id in ack.created 'l0' looked odd but fine.

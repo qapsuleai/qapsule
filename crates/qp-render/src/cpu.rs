@@ -4,10 +4,11 @@
 use std::collections::BTreeMap;
 use std::sync::OnceLock;
 
-use tiny_skia::{Color, LineCap, LineJoin, Paint, PathBuilder, Pixmap, Rect, Stroke, Transform};
-
-use crate::scene::{Align, Prim, Rgba, Scene};
 use crate::RenderError;
+use qp_schema::scene::{Align, Prim, Rgba, SceneDesc};
+use tiny_skia::{
+    Color, FillRule, LineCap, LineJoin, Paint, PathBuilder, Pixmap, Rect, Stroke, Transform,
+};
 
 /// IBM Plex Mono Regular, SIL OFL 1.1 (see `assets/fonts/OFL.txt`). Embedded so output never
 /// depends on system fonts.
@@ -103,18 +104,50 @@ fn draw_text(
     }
 }
 
-/// Rasterizes `scene` into a premultiplied RGBA8 pixmap.
+/// Largest accepted frame side in pixels (same bound as the grammar compiler).
+pub const MAX_DIM: u32 = 16_384;
+/// Largest accepted text size in pixels (a bound on the glyph bitmaps fontdue allocates).
+pub const MAX_TEXT_PX: f32 = 512.0;
+
+/// Builds an open path through `points` (`None` for fewer than two usable points).
+fn polyline_path(points: &[[f32; 2]], close: bool) -> Option<tiny_skia::Path> {
+    let mut pb = PathBuilder::new();
+    for (i, &[x, y]) in points.iter().enumerate() {
+        if i == 0 {
+            pb.move_to(x, y);
+        } else {
+            pb.line_to(x, y);
+        }
+    }
+    if close {
+        pb.close();
+    }
+    pb.finish()
+}
+
+/// Rasterizes the primitives of `scene` (`SceneDesc::prims()`, in paint order) into a
+/// premultiplied RGBA8 pixmap. Nothing else of the scene is read: layout is final there.
+///
+/// Primitives tiny-skia cannot build (non-finite coordinates, degenerate paths, a negative
+/// or non-finite stroke width or radius) draw nothing.
 ///
 /// # Errors
-/// Fails if the pixmap cannot be allocated or the embedded font is unusable.
-pub fn rasterize(scene: &Scene) -> Result<Pixmap, RenderError> {
+/// Fails for a size outside `1x1 ..= 16384x16384`, a text size that is not finite or not
+/// in `(0, 512]`, an allocation failure or an unusable embedded font.
+pub fn rasterize(scene: &SceneDesc) -> Result<Pixmap, RenderError> {
+    let (width, height) = (scene.width, scene.height);
+    if !(1..=MAX_DIM).contains(&width) || !(1..=MAX_DIM).contains(&height) {
+        return Err(RenderError::new(format!(
+            "size {width}x{height} out of range (1x1 ..= {MAX_DIM}x{MAX_DIM})"
+        )));
+    }
     let font = font()?;
-    let mut pm = Pixmap::new(scene.width, scene.height)
-        .ok_or_else(|| RenderError::new("cannot allocate pixmap"))?;
+    let mut pm =
+        Pixmap::new(width, height).ok_or_else(|| RenderError::new("cannot allocate pixmap"))?;
     pm.fill(color(scene.background));
     let mut cache = GlyphCache::new();
     let id = Transform::identity();
-    for p in &scene.prims {
+    for p in scene.prims() {
         match p {
             Prim::Rect { x, y, w, h, color } => {
                 if let Some(r) = Rect::from_xywh(*x as f32, *y as f32, *w as f32, *h as f32) {
@@ -126,15 +159,10 @@ pub fn rasterize(scene: &Scene) -> Result<Pixmap, RenderError> {
                 width,
                 color,
             } => {
-                let mut pb = PathBuilder::new();
-                for (i, &(x, y)) in points.iter().enumerate() {
-                    if i == 0 {
-                        pb.move_to(x, y);
-                    } else {
-                        pb.line_to(x, y);
-                    }
+                if !(width.is_finite() && *width >= 0.0) {
+                    continue;
                 }
-                if let Some(path) = pb.finish() {
+                if let Some(path) = polyline_path(points, false) {
                     let stroke = Stroke {
                         width: *width,
                         line_cap: LineCap::Butt,
@@ -142,6 +170,16 @@ pub fn rasterize(scene: &Scene) -> Result<Pixmap, RenderError> {
                         ..Stroke::default()
                     };
                     pm.stroke_path(&path, &paint(*color, true), &stroke, id, None);
+                }
+            }
+            Prim::Fill { points, color } => {
+                if let Some(path) = polyline_path(points, true) {
+                    pm.fill_path(&path, &paint(*color, true), FillRule::Winding, id, None);
+                }
+            }
+            Prim::Circle { cx, cy, r, color } => {
+                if let Some(path) = PathBuilder::from_circle(*cx, *cy, *r) {
+                    pm.fill_path(&path, &paint(*color, true), FillRule::Winding, id, None);
                 }
             }
             Prim::Text {
@@ -152,6 +190,11 @@ pub fn rasterize(scene: &Scene) -> Result<Pixmap, RenderError> {
                 color,
                 align,
             } => {
+                if !(px.is_finite() && *px > 0.0 && *px <= MAX_TEXT_PX) {
+                    return Err(RenderError::new(format!(
+                        "text size {px} out of range (0, {MAX_TEXT_PX}]"
+                    )));
+                }
                 draw_text(
                     &mut pm,
                     font,

@@ -67,11 +67,9 @@ pub(crate) fn rsi_from_avg_pass(avg_gain: f64, avg_loss: f64) -> f64 {
 
 impl Rsi {
     /// # Errors
-    /// `period == 0`.
+    /// `period` of 0 or above [`crate::MAX_PERIOD`].
     pub fn new(period: usize) -> Result<Self, ComputeError> {
-        if period == 0 {
-            return Err(ComputeError::new("rsi: period must be >= 1"));
-        }
+        crate::check_period("rsi", "period", period)?;
         let p = pf(period);
         Ok(Self {
             period,

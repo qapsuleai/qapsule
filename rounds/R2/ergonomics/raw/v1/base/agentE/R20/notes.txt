@@ -1,0 +1,2 @@
+attempt1: insert_panel with panel:3 (integer) -> schema error: panel must be an object. PROTOCOL.md's op table lists only `panel`, so the type is unclear; GRAMMAR.md §2 shows the Panel object.
+attempt2: panel object {id:3,name:bandwidth,y:{kind:linear}} + line layer bw (idfgo, y=bandwidth) -> applied, verified.

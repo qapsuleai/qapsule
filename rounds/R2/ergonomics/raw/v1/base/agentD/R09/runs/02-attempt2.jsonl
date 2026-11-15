@@ -1,0 +1,3 @@
+{"conn":"a","msg":{"type":"hello","protocol":"qp/0","principal":"editor","surface":{"kind":"headless"}}}
+{"conn":"a","msg":{"type":"command","id":"c1","mode":"direct","ops":[{"op":"delete_layer","view":"i3dgn","layer":"mc7qp"},{"op":"insert_layer","view":"i3dgn","after":"aao5y","layer":{"id":"bbband","mark":"band","series":"vdp01","panel":0,"encoding":{"y":"upper","y2":"lower"}}}]}}
+{"conn":"a","msg":{"type":"query","id":"q1","query":{"kind":"get","id":"i3dgn"}}}

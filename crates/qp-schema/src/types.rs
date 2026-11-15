@@ -12,6 +12,8 @@ use std::collections::BTreeMap;
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 
+use crate::grammar::View;
+
 /// Schema version written into every [`Document`].
 pub const SCHEMA_VERSION: &str = "0";
 
@@ -485,89 +487,7 @@ pub struct Capsule {
     pub provenance: Provenance,
 }
 
-// ---------------------------------------------------------------------------
-// View
-// ---------------------------------------------------------------------------
-
-/// Visual mark of a layer.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
-#[serde(rename_all = "snake_case")]
-pub enum Mark {
-    /// Candlesticks (needs bars).
-    Candle,
-    /// Polyline.
-    Line,
-    /// Filled area.
-    Area,
-    /// Vertical bars.
-    Bar,
-    /// Horizontal or vertical reference line.
-    Rule,
-    /// Points.
-    Point,
-    /// Text label.
-    Text,
-}
-
-/// Scale type.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
-#[serde(rename_all = "snake_case")]
-pub enum ScaleKind {
-    /// Time axis.
-    Time,
-    /// Linear numeric.
-    Linear,
-    /// Logarithmic numeric.
-    Log,
-}
-
-/// A scale mapping data values to a visual axis.
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
-#[serde(deny_unknown_fields)]
-pub struct Scale {
-    /// Scale type.
-    pub kind: ScaleKind,
-    /// Fixed domain `[min, max]`; automatic when absent.
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub domain: Option<[f64; 2]>,
-}
-
-/// One layer of a view: a mark bound to a series.
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
-#[serde(deny_unknown_fields)]
-pub struct Layer {
-    /// Visual mark.
-    pub mark: Mark,
-    /// Series id; absent for constant marks (e.g. a rule).
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub series: Option<String>,
-    /// Panel index (0 = main price panel).
-    #[serde(default)]
-    pub panel: u32,
-    /// Encoding: visual channel -> field or constant, e.g. `{"y": "v", "color": "#888"}`.
-    #[serde(default)]
-    pub encoding: BTreeMap<String, String>,
-}
-
-/// A presentation recipe written in the visual grammar.
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
-#[serde(deny_unknown_fields)]
-pub struct View {
-    /// Unique id within the document.
-    pub id: String,
-    /// Optional title.
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub title: Option<String>,
-    /// Display time zone override (IANA); display only, see [`Document::display_tz`].
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub display_tz: Option<String>,
-    /// Horizontal scale.
-    pub x: Scale,
-    /// Vertical scale per panel, indexed by `Layer::panel`.
-    pub y: Vec<Scale>,
-    /// Layers, drawn in order.
-    pub layers: Vec<Layer>,
-}
+// View: see `crate::grammar` (R2).
 
 // ---------------------------------------------------------------------------
 // Intent, Ledger

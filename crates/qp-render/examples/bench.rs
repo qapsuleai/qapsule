@@ -11,7 +11,10 @@
 use std::path::PathBuf;
 use std::time::Instant;
 
-use qp_render::{cpu, scene, DEFAULT_HEIGHT, DEFAULT_WIDTH};
+#[path = "../tests/r0/mod.rs"]
+mod r0;
+
+use qp_render::{cpu, DEFAULT_HEIGHT, DEFAULT_WIDTH};
 
 fn fnv1a(bytes: &[u8]) -> u64 {
     let mut h: u64 = 0xcbf2_9ce4_8422_2325;
@@ -67,17 +70,17 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let t = Instant::now();
     let json = std::fs::read_to_string(root.join("fixtures/bars/sample.json"))?;
     let bars = qp_render::parse_bars(&json)?;
-    let png = qp_render::render_png(&bars, w, h)?;
+    let png = qp_render::render_scene_png(&r0::scene(&bars, w, h))?;
     let first_frame = ms(t);
 
     let golden = std::fs::read(root.join("fixtures/golden/sample.png"))?;
-    let rgba = qp_render::render_rgba(&bars, w, h)?;
+    let rgba = qp_render::render_scene_rgba(&r0::scene(&bars, w, h))?;
     let (gd_px, gd_max) = diff(&rgba, &decode_png(&golden));
 
     let sample_rgba: Vec<f64> = (0..30)
         .map(|_| {
             let t = Instant::now();
-            let _ = qp_render::render_rgba(&bars, w, h);
+            let _ = qp_render::render_scene_rgba(&r0::scene(&bars, w, h));
             ms(t)
         })
         .collect();
@@ -95,7 +98,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let mut big_hash = 0;
     for _ in 0..5 {
         let t = Instant::now();
-        let sc = scene::build_scene(&big, w, h)?;
+        let sc = r0::scene(&big, w, h);
         scene_ms.push(ms(t));
         let t = Instant::now();
         let pm = cpu::rasterize(&sc)?;

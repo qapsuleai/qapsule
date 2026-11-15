@@ -1,0 +1,2 @@
+{"conn":"a","msg":{"type":"hello","protocol":"qp/0","principal":"editor","surface":{"kind":"headless"}}}
+{"conn":"a","msg":{"type":"command","id":"c1","ops":[{"op":"insert_panel","view":{},"panel":{"name":"bandwidth","y":{"kind":"linear"}},"layers":[{"mark":"line","series":{"study":"bollinger"},"encoding":{"y":"bandwidth"}}]}]}}

@@ -1,0 +1,3 @@
+{"conn":"a","msg":{"type":"hello","protocol":"qp/0","principal":"editor","surface":{"kind":"headless"}}}
+{"conn":"a","msg":{"type":"command","id":"c1","ops":[{"op":"move_panel","view":"@view","panel":"@panel:macd","before":"@panel:rsi"}]}}
+{"conn":"a","msg":{"type":"query","id":"q1","query":{"kind":"list","collection":"views"}}}

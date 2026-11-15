@@ -21,11 +21,9 @@ pub struct Sma {
 
 impl Sma {
     /// # Errors
-    /// `period == 0`.
+    /// `period` of 0 or above [`crate::MAX_PERIOD`].
     pub fn new(period: usize) -> Result<Self, ComputeError> {
-        if period == 0 {
-            return Err(ComputeError::new("sma: period must be >= 1"));
-        }
+        crate::check_period("sma", "period", period)?;
         Ok(Self {
             period,
             pf: pf(period),

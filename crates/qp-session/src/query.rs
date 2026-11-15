@@ -216,6 +216,7 @@ impl Session {
                 let role = self.conns[ci].role;
                 Ok(QueryResult::Description {
                     description: Description {
+                        thresholds: crate::canon::thresholds(),
                         protocol: PROTOCOL_VERSION.to_owned(),
                         doc: self.doc.id.clone(),
                         ops: variant_names(&op_schema, "op"),
@@ -418,6 +419,7 @@ impl Session {
                     .clone()
                     .unwrap_or_else(|| self.conns[ci].principal.clone());
                 self.need_principal(&p, &ptr(qp, "principal"))?;
+                self.warm_values();
                 let screens = self
                     .conns
                     .iter()
@@ -445,6 +447,15 @@ impl Session {
                     },
                 })
             }
+            Query::Hit {
+                view,
+                x,
+                y,
+                width,
+                height,
+            } => Ok(QueryResult::Hit {
+                hit: self.hit(ci, view.as_deref(), *x, *y, (*width, *height))?,
+            }),
             Query::Present { finding, surface } => {
                 let f = match finding {
                     Some(id) => need_finding(&self.doc, id, &ptr(qp, "finding"))?.clone(),
@@ -568,7 +579,7 @@ impl Session {
         Some((bars.len().saturating_sub(n) as u64, last as u64))
     }
 
-    fn range_of(&self, c: &Conn, view: &View) -> Option<(u64, u64)> {
+    pub(crate) fn range_of(&self, c: &Conn, view: &View) -> Option<(u64, u64)> {
         let saved = c.viewports.get(&view.id).copied().and_then(|(a, b)| {
             // A saved viewport can outlive data that got shorter (an undone
             // `append_bars`): clamp it to the current bar series.
@@ -584,7 +595,7 @@ impl Session {
 
     /// The connection's current viewport: the last one set by input, else the initial
     /// range of the document's first view.
-    fn conn_viewport(&self, c: &Conn) -> Option<Viewport> {
+    pub(crate) fn conn_viewport(&self, c: &Conn) -> Option<Viewport> {
         if let Some(v) = &c.current {
             // Re-clamp through `range_of` (the data may have shrunk since).
             if let Some(view) = self.doc.views.iter().find(|x| x.id == v.view) {
@@ -646,6 +657,18 @@ impl Session {
             .and_then(Series::bars)
             .and_then(|b| b.get(usize::try_from(vp.to_bar).ok()?))
             .map(|b| b.c);
+        // R2: name, scale and layers from the compiled scene (`docs/GRAMMAR.md` §16).
+        let mut compiled = self.screen_panels(c, &vp);
+        // Stack order (top to bottom, §5.4), not panel id order: they differ after
+        // `move_panel` / `insert_panel`.
+        let stack = |id: u32| {
+            view.panels
+                .iter()
+                .position(|p| p.id == Some(id))
+                .unwrap_or(usize::MAX)
+        };
+        let mut panels: Vec<_> = panels.into_iter().collect();
+        panels.sort_by_key(|(id, _)| (stack(*id), *id));
         Some(ScreenInfo {
             principal: c.principal.clone(),
             surface: c.surface.kind,
@@ -654,10 +677,24 @@ impl Session {
             interval: bs.and_then(|s| s.interval.clone()),
             panels: panels
                 .into_iter()
-                .map(|(panel, (series, marks))| PanelInfo {
-                    panel,
-                    series,
-                    marks,
+                .map(|(panel, (series, marks))| {
+                    let (name, scale, layers) = match compiled.remove(&panel) {
+                        Some((n, s, l)) => (n, Some(s), l),
+                        None => (None, None, Vec::new()),
+                    };
+                    PanelInfo {
+                        select: crate::select::Resolver {
+                            doc: &self.doc,
+                            root: None,
+                        }
+                        .panel_hint(view, panel),
+                        name,
+                        scale,
+                        layers,
+                        panel,
+                        series,
+                        marks,
+                    }
                 })
                 .collect(),
             capsules,
@@ -779,15 +816,18 @@ impl Session {
                 if *bar > last {
                     return Err(past("bar", *bar));
                 }
-                let has_panel = (*panel as usize) < view.y.len()
-                    || view.layers.iter().any(|l| l.panel == *panel);
-                if !has_panel {
+                if view.panel(*panel).is_none() {
                     return Err(E::new(
                         ErrorCode::Invalid,
                         format!("view `{view_id}` has no panel {panel}"),
                     )
                     .at(ptr(gp, "panel"))
-                    .expected([format!("0..={}", view.y.len().saturating_sub(1))])
+                    .expected(
+                        view.panels
+                            .iter()
+                            .filter_map(|p| p.id)
+                            .map(|i| i.to_string()),
+                    )
                     .build());
                 }
                 self.input_counter += 1;
@@ -798,6 +838,7 @@ impl Session {
                 self.focus.insert(
                     principal,
                     Target {
+                        layer: None,
                         view: Some(view.id.clone()),
                         panel: Some(*panel),
                         series: None,

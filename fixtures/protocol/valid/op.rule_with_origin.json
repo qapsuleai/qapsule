@@ -1,0 +1,18 @@
+{
+ "op": "insert_layer",
+ "view": "main",
+ "layer": {
+  "mark": "rule",
+  "panel": 0,
+  "encoding": {
+   "y": 123.45
+  },
+  "origin": {
+   "/encoding/y": {
+    "kind": "fact",
+    "fact": "f-lvl",
+    "field": "level"
+   }
+  }
+ }
+}

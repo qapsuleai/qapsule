@@ -85,3 +85,65 @@ fn multi_input_multi_output() {
     assert!(run(&mut s, &[&high]).is_err());
     let _ = Rsi::new(3).unwrap();
 }
+
+/// Test-only study with a value-dependent `None`: the input if `>= 10`, else `None`.
+#[derive(Clone)]
+struct AtLeast10;
+
+impl Core for AtLeast10 {
+    const NAME: &'static str = "at_least_10";
+    const OUTPUTS: &'static [&'static str] = &["v"];
+    const N_IN: usize = 1;
+    fn params(&self) -> BTreeMap<String, f64> {
+        BTreeMap::new()
+    }
+    fn warmup(&self) -> Vec<usize> {
+        vec![0]
+    }
+    fn peek(&self, x: &[f64], out: &mut [Option<f64>]) {
+        out[0] = (x[0] >= 10.0).then_some(x[0]);
+    }
+    fn commit(&mut self, _x: &[f64]) {}
+    fn reset(&mut self) {}
+}
+
+/// R1 audit finding 4: a revision that turns the first study's output from a value into
+/// `None` must also take the bar back out of the second study.
+#[test]
+fn revision_to_none_is_not_committed_downstream() {
+    let mk = || {
+        Chain::new(
+            Box::new(Streaming::new(AtLeast10, qp_compute::Field::Close)),
+            0,
+            common::study("sma", &[("period", 2.0)]),
+        )
+    };
+    // Batch over the final prices [20, 5, 40]: the gate gives [20, None, 40], so the
+    // SMA(2) sees [20, 40] and the last bar is 30.
+    let mut batch = mk();
+    let want = run(&mut batch, &[&[20.0, 5.0, 40.0]]).unwrap();
+    assert_eq!(want[0], vec![None, None, Some(30.0)]);
+
+    // Streaming: bar 1 first arrives as 30 (defined), is revised to 5 (None).
+    let mut s = mk();
+    let mut o = vec![None];
+    s.push(&[20.0], &mut o);
+    s.push(&[30.0], &mut o);
+    assert_eq!(o[0], Some(25.0));
+    s.update_last(&[5.0], &mut o);
+    assert_eq!(o[0], None);
+    s.push(&[40.0], &mut o);
+    // Before the fix the stale 30 was committed into the SMA: (30 + 40) / 2 = 35.
+    assert_eq!(o[0], Some(30.0));
+
+    // And back: None -> value -> None -> value on the same bar.
+    let mut s = mk();
+    s.push(&[20.0], &mut o);
+    s.push(&[5.0], &mut o);
+    s.update_last(&[30.0], &mut o);
+    assert_eq!(o[0], Some(25.0));
+    s.update_last(&[6.0], &mut o);
+    assert_eq!(o[0], None);
+    s.push(&[40.0], &mut o);
+    assert_eq!(o[0], Some(30.0));
+}

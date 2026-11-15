@@ -1,0 +1,1 @@
+attempt1: set_scale with selectors (view {}, scale {panel:{mark:candle}}, kind log) -> applied, resolved y0 on view hc7b9. Success. Unclear: screen query returned no screens because arkin's desktop connection doesn't exist in my run; run.sh only accepts files inside task dirs so no separate discovery run was possible (I used selectors blind).

@@ -1,0 +1,16 @@
+{
+ "type": "error",
+ "id": "c4",
+ "error": {
+  "code": "no_origin",
+  "message": "layer `l5` of view `main`: constant 123.45 at /encoding/y has no origin",
+  "path": "/ops/0/layer/encoding/y",
+  "candidates": [
+   {
+    "id": "{\"kind\":\"fact\",\"fact\":\"f-brk-2\",\"field\":\"level\"}",
+    "about": "breakout level 121.30 (bar 185)"
+   }
+  ],
+  "hint": "Bind it to a fact or a named threshold via the layer's origin."
+ }
+}

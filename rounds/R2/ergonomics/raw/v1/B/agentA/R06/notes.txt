@@ -1,0 +1,1 @@
+attempt1: insert_layer rule on panel 1 with y "30", grey color like the 70 rule, explicit origin rsi.oversold. Applied; view shows the layer. No issues.

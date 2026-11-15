@@ -1,0 +1,9 @@
+{
+ "op": "insert_layer",
+ "view": "main",
+ "layer": {
+  "mark": "cone",
+  "series": "q05",
+  "panel": 0
+ }
+}

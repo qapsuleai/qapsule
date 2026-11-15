@@ -25,20 +25,10 @@ enum Command {
     /// Run a study (sma, ema, rsi, macd, bollinger) over a bar series and print the
     /// result as `StudyOutput` JSON: one value per bar, warmup `null` (K13).
     Compute(ComputeArgs),
-    /// Render a bars JSON file to PNG with the reference renderer.
-    Render {
-        /// Input bars JSON file.
-        input: PathBuf,
-        /// Output PNG file.
-        #[arg(short, long)]
-        out: PathBuf,
-        /// Image width in pixels.
-        #[arg(long, default_value_t = qp_render::DEFAULT_WIDTH)]
-        width: u32,
-        /// Image height in pixels.
-        #[arg(long, default_value_t = qp_render::DEFAULT_HEIGHT)]
-        height: u32,
-    },
+    /// Render to PNG with the reference renderer: a bars JSON file as the R0 chart
+    /// (candles + SMA(20)), or a view of a session built from an init/transcript
+    /// (`--view`), or the view of a presentation (`--present`, `--surface`).
+    Render(RenderArgs),
     /// Run the protocol authority (`qp/0`) over stdin/stdout: one JSON line per message,
     /// `{"conn":…,"msg":…}` in and out (docs/PROTOCOL.md §3).
     Serve {
@@ -68,6 +58,12 @@ enum Command {
         #[arg(long, default_value = ".")]
         root: PathBuf,
     },
+    /// Print a plain-text semantic summary of a view, read from its compiled scene
+    /// (panels, scales and visible domains, layers with data, origins and last values,
+    /// emphasis). Headless: nothing is rendered.
+    Explain(SceneArgs),
+    /// Print the compiled scene description (`SceneDesc` JSON) of a view.
+    Scene(SceneArgs),
     /// Run protocol conformance transcripts (docs/PROTOCOL.md §15).
     Conform {
         /// Transcript files or directories of `*.json` transcripts.
@@ -81,6 +77,67 @@ enum Command {
         #[arg(long, default_value = ".")]
         root: PathBuf,
     },
+}
+
+/// Which view of which session: the session starts from `--init` (or the transcript's
+/// init) and runs the transcript's messages; the view is a document view (`--view`) or
+/// the view the presenter returns for a finding on a surface (`--present`, `--surface`).
+#[derive(Debug, clap::Args)]
+struct ViewSource {
+    /// Session init (`SessionInit` JSON). Default: the transcript's init.
+    #[arg(long)]
+    init: Option<PathBuf>,
+    /// A conformance transcript whose messages are sent first (its expectations are not
+    /// checked), e.g. one that builds the view with grammar operations.
+    #[arg(long)]
+    transcript: Option<PathBuf>,
+    /// View id.
+    #[arg(long)]
+    view: Option<String>,
+    /// Instead of `--view`: present this finding (`present` query) on `--surface` and
+    /// use the presentation's view (`capsule_view` at capsule depth, `view` at chart
+    /// depth).
+    #[arg(long, conflicts_with = "view")]
+    present: Option<String>,
+    /// Surface kind for `--present`: desktop, phone, watch, voice or headless.
+    #[arg(long, default_value = "desktop", requires = "present")]
+    surface: String,
+    /// Directory that paths in the init and transcript are relative to (and confined to).
+    #[arg(long, default_value = ".")]
+    root: PathBuf,
+}
+
+#[derive(Debug, clap::Args)]
+struct SceneArgs {
+    #[command(flatten)]
+    source: ViewSource,
+    /// Frame width in pixels.
+    #[arg(long, default_value_t = qp_session::HIT_WIDTH)]
+    width: u32,
+    /// Frame height in pixels.
+    #[arg(long, default_value_t = qp_session::HIT_HEIGHT)]
+    height: u32,
+    /// Pretty-print the JSON (`qp scene`).
+    #[arg(long)]
+    pretty: bool,
+}
+
+#[derive(Debug, clap::Args)]
+struct RenderArgs {
+    /// Input bars JSON file, rendered as the R0 chart (candles + SMA(20)).
+    #[arg(required_unless_present_any = ["init", "transcript"], conflicts_with_all = ["init", "transcript", "view", "present"])]
+    input: Option<PathBuf>,
+    #[command(flatten)]
+    source: ViewSource,
+    /// Output PNG file.
+    #[arg(short, long)]
+    out: PathBuf,
+    /// Image width in pixels.
+    #[arg(long, default_value_t = qp_render::DEFAULT_WIDTH)]
+    width: u32,
+    /// Image height in pixels.
+    #[arg(long, default_value_t = qp_render::DEFAULT_HEIGHT)]
+    height: u32,
 }
 
 #[derive(Debug, clap::Args)]
@@ -170,12 +227,10 @@ fn run(command: Command) -> Result<Outcome, String> {
                 },
         } => schema_validate(&file, &type_name, schema_dir.as_deref()),
         Command::Compute(args) => compute(&args),
-        Command::Render {
-            input,
-            out,
-            width,
-            height,
-        } => render(&input, &out, width, height),
+        Command::Render(args) => match &args.input {
+            Some(input) => render(input, &args.out, args.width, args.height),
+            None => render_view(&args),
+        },
         Command::Serve {
             init,
             root,
@@ -192,7 +247,160 @@ fn run(command: Command) -> Result<Outcome, String> {
             transport,
             root,
         } => conform(&inputs, &transport, &root),
+        Command::Explain(args) => scene_cmd(&args, true),
+        Command::Scene(args) => scene_cmd(&args, false),
     }
+}
+
+/// A session from `--init` (or the transcript's init), after the transcript's messages,
+/// and the first principal of its init.
+fn scene_session(src: &ViewSource) -> Result<(qp_session::Session, String), String> {
+    let transcript: Option<qp_schema::protocol::Transcript> = src
+        .transcript
+        .as_deref()
+        .map(qp_session::read_json)
+        .transpose()?;
+    let init: qp_schema::protocol::SessionInit = match (&src.init, &transcript) {
+        (Some(p), _) => qp_session::read_json(p)?,
+        (None, Some(t)) => qp_session::conform::load_init(&t.init, &src.root)?.init,
+        (None, None) => return Err("give --init or --transcript".to_owned()),
+    };
+    let principal = init
+        .principals
+        .first()
+        .map(|p| p.id.clone())
+        .unwrap_or_default();
+    let mut session = qp_session::Session::new(init, &src.root)?;
+    for step in transcript.iter().flat_map(|t| &t.steps) {
+        if let Some(line) = &step.send {
+            let text = serde_json::to_string(&line.msg).map_err(|e| e.to_string())?;
+            session.handle_raw(&line.conn, &text);
+        } else if let Some(raw) = &step.send_raw {
+            session.handle_raw(&raw.conn, &raw.line);
+        }
+    }
+    Ok((session, principal))
+}
+
+/// Connection the CLI opens to ask the presenter.
+const PRESENT_CONN: &str = "qp-cli-present";
+
+/// The view the presenter returns for `finding` on a `surface` connection opened as
+/// `principal`: `capsule_view` (capsule depth) or `view` (chart depth).
+fn presented_view(
+    session: &mut qp_session::Session,
+    principal: &str,
+    finding: &str,
+    surface: &str,
+) -> Result<qp_schema::grammar::View, String> {
+    let hello = serde_json::json!({"type":"hello","protocol":"qp/0","principal":principal,
+        "surface":{"kind":surface}});
+    let first =
+        |outs: Vec<qp_schema::protocol::OutboundLine>| -> Result<serde_json::Value, String> {
+            let o = outs
+                .into_iter()
+                .find(|o| o.conn == PRESENT_CONN)
+                .ok_or("no answer")?;
+            serde_json::to_value(&o.msg).map_err(|e| e.to_string())
+        };
+    let w = first(session.handle_raw(PRESENT_CONN, &hello.to_string()))?;
+    if w["type"] != "welcome" {
+        return Err(format!(
+            "hello as `{principal}` on `{surface}` refused: {w}"
+        ));
+    }
+    let q = serde_json::json!({"type":"query","id":"present","query":{"kind":"present","finding":finding}});
+    let r = first(session.handle_raw(PRESENT_CONN, &q.to_string()))?;
+    let p = &r["data"]["presentation"];
+    if r["type"] != "result" || p.is_null() {
+        return Err(format!("present `{finding}` failed: {r}"));
+    }
+    let v = if p["capsule_view"].is_object() {
+        &p["capsule_view"]
+    } else if p["view"].is_object() {
+        &p["view"]
+    } else {
+        return Err(format!(
+            "the presentation of `{finding}` on `{surface}` (depth {}) has no view",
+            p["depth"]
+        ));
+    };
+    serde_json::from_value(v.clone()).map_err(|e| e.to_string())
+}
+
+/// Compiles the view `src` names at `width` x `height`; also returns the view (for
+/// `explain`). `Err(Ok(e))` is a protocol error to print as JSON, `Err(Err(m))` a usage
+/// or I/O error.
+fn compile_source(
+    src: &ViewSource,
+    width: u32,
+    height: u32,
+) -> Result<
+    (qp_schema::grammar::View, qp_schema::scene::SceneDesc),
+    Result<Box<qp_schema::protocol::ProtocolError>, String>,
+> {
+    let (mut session, principal) = scene_session(src).map_err(Err)?;
+    let opts = qp_session::CompileOptions::new(width, height);
+    match (&src.view, &src.present) {
+        (Some(view), _) => {
+            let scene = session.scene(view, &opts).map_err(|e| Ok(Box::new(e)))?;
+            let v = session
+                .document()
+                .views
+                .iter()
+                .find(|v| &v.id == view)
+                .cloned()
+                .ok_or_else(|| Err(format!("no view `{view}`")))?;
+            Ok((v, scene))
+        }
+        (None, Some(finding)) => {
+            let v = presented_view(&mut session, &principal, finding, &src.surface).map_err(Err)?;
+            let scene = qp_grammar::compile(&v, &session.provider(), &opts)
+                .map_err(|e| Err(e.to_string()))?;
+            Ok((v, scene))
+        }
+        (None, None) => Err(Err("give --view or --present".to_owned())),
+    }
+}
+
+fn print_protocol_error(e: &qp_schema::protocol::ProtocolError) -> Outcome {
+    eprintln!(
+        "qp: {}",
+        serde_json::to_string(e).unwrap_or_else(|_| e.message.clone())
+    );
+    Outcome::Invalid
+}
+
+fn scene_cmd(args: &SceneArgs, explain: bool) -> Result<Outcome, String> {
+    let (view, scene) = match compile_source(&args.source, args.width, args.height) {
+        Ok(x) => x,
+        Err(Ok(e)) => return Ok(print_protocol_error(&e)),
+        Err(Err(m)) => return Err(m),
+    };
+    if explain {
+        print!("{}", qp_session::explain_scene(&view, &scene));
+    } else {
+        let text = if args.pretty {
+            serde_json::to_string_pretty(&scene)
+        } else {
+            serde_json::to_string(&scene)
+        }
+        .map_err(|e| e.to_string())?;
+        println!("{text}");
+    }
+    Ok(Outcome::Ok)
+}
+
+fn render_view(args: &RenderArgs) -> Result<Outcome, String> {
+    let scene = match compile_source(&args.source, args.width, args.height) {
+        Ok((_, scene)) => scene,
+        Err(Ok(e)) => return Ok(print_protocol_error(&e)),
+        Err(Err(m)) => return Err(m),
+    };
+    let png = qp_render::render_scene_png(&scene).map_err(|e| e.to_string())?;
+    std::fs::write(&args.out, png)
+        .map_err(|e| format!("cannot write {}: {e}", args.out.display()))?;
+    Ok(Outcome::Ok)
 }
 
 fn parse_param(s: &str) -> Result<(String, f64), String> {
@@ -395,9 +603,43 @@ fn render(input: &Path, out: &Path, width: u32, height: u32) -> Result<Outcome, 
     let text = std::fs::read_to_string(input)
         .map_err(|e| format!("cannot read {}: {e}", input.display()))?;
     let bars = qp_render::parse_bars(&text).map_err(|e| format!("{}: {e}", input.display()))?;
-    let png = qp_render::render_png(&bars, width, height).map_err(|e| e.to_string())?;
+    let scene = r0_scene(&bars, width, height)?;
+    let png = qp_render::render_scene_png(&scene).map_err(|e| e.to_string())?;
     std::fs::write(out, png).map_err(|e| format!("cannot write {}: {e}", out.display()))?;
     Ok(Outcome::Ok)
+}
+
+/// The R0 chart (candles + SMA(20) of close, one linear panel) of a bar series: study
+/// values from the compute core, layout from the grammar compiler; the renderer only
+/// rasterizes the resulting scene.
+fn r0_scene(
+    series: &qp_schema::Series,
+    width: u32,
+    height: u32,
+) -> Result<qp_schema::scene::SceneDesc, String> {
+    const R0_VIEW: &str = r#"{"id":"r0","x":{"kind":"time"},
+      "panels":[{"id":0,"y":{"kind":"linear"}}],
+      "layers":[{"id":"candles","mark":"candle","series":"px","panel":0},
+                {"id":"sma","mark":"line","series":"sma20","panel":0}]}"#;
+    let bars = series.bars().ok_or("series has no embedded bars")?.to_vec();
+    let params = std::collections::BTreeMap::from([("period".to_owned(), 20.0)]);
+    let line = qp_compute::compute_bars("sma", &params, qp_compute::Field::Close, &bars)
+        .map_err(|e| e.to_string())?
+        .outputs
+        .into_values()
+        .next()
+        .unwrap_or_default();
+    let provider = qp_grammar::MemProvider::new()
+        .with_bars("px", bars, series.symbol(), series.interval.as_deref())
+        .with_values("sma20", "px", vec![("sma", line)], "sma", &["sma"])
+        .with_label("sma20", "SMA20");
+    let view = serde_json::from_str(R0_VIEW).map_err(|e| e.to_string())?;
+    qp_grammar::compile(
+        &view,
+        &provider,
+        &qp_grammar::CompileOptions::new(width, height),
+    )
+    .map_err(|e| e.to_string())
 }
 
 fn serve(init: &Path, root: &Path, batch_end: bool) -> Result<Outcome, String> {

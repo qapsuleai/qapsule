@@ -1,0 +1,1 @@
+attempt1: set_encoding width 2 on RSI line layer gz62i -> applied. No issues.

@@ -1,0 +1,1 @@
+attempt1: set_emphasis on view @view with highlight target item @finding:latest(breakout) (resolved to hgtwi, bar 185). Applied. Unclear: whether set_emphasis replaces the list (existing emphasis was empty so no loss); whether "vurgula" means persistent emphasis vs attend (chose persistent emphasis).

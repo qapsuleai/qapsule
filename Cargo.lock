@@ -1518,6 +1518,7 @@ dependencies = [
  "assert_cmd",
  "clap",
  "qp-compute",
+ "qp-grammar",
  "qp-mcp",
  "qp-render",
  "qp-schema",
@@ -1532,6 +1533,16 @@ name = "qp-compute"
 version = "0.0.0"
 dependencies = [
  "proptest",
+ "qp-schema",
+ "serde_json",
+]
+
+[[package]]
+name = "qp-grammar"
+version = "0.0.0"
+dependencies = [
+ "proptest",
+ "qp-compute",
  "qp-schema",
  "serde_json",
 ]
@@ -1553,9 +1564,9 @@ dependencies = [
  "png",
  "pollster",
  "qp-compute",
+ "qp-grammar",
  "qp-schema",
  "qp-source",
- "serde",
  "serde_json",
  "tiny-skia",
  "vello",
@@ -1579,6 +1590,7 @@ name = "qp-session"
 version = "0.0.0"
 dependencies = [
  "qp-compute",
+ "qp-grammar",
  "qp-schema",
  "schemars",
  "serde",
@@ -1601,6 +1613,7 @@ name = "qp-wasm"
 version = "0.0.0"
 dependencies = [
  "qp-compute",
+ "qp-grammar",
  "qp-render",
  "qp-schema",
  "serde_json",

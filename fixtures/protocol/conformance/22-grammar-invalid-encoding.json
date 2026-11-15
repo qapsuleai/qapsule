@@ -1,0 +1,462 @@
+{
+ "name": "22-grammar-invalid-encoding",
+ "description": "R2 invalid grammar input: unknown channel `colour` (schema, did_you_mean color), unknown mark, bad colour names and hex, band without y2, unknown panel/layer/anchor, duplicate layer id, opacity out of range; nothing is applied.",
+ "covers": [
+  "command",
+  "error",
+  "grammar",
+  "schema",
+  "did_you_mean"
+ ],
+ "init": "fixtures/protocol/init/thyao.json",
+ "steps": [
+  {
+   "send": {
+    "conn": "a",
+    "msg": {
+     "type": "hello",
+     "protocol": "qp/0",
+     "principal": "arkin",
+     "surface": {
+      "kind": "desktop"
+     }
+    }
+   },
+   "expect": [
+    {
+     "conn": "a",
+     "msg": {
+      "type": "welcome",
+      "protocol": "qp/0",
+      "principal": "arkin",
+      "role": "owner",
+      "seq": "$any"
+     }
+    }
+   ]
+  },
+  {
+   "send_raw": {
+    "conn": "a",
+    "line": "{\"type\": \"command\", \"id\": \"c1\", \"ops\": [{\"op\": \"insert_layer\", \"view\": \"main\", \"layer\": {\"mark\": \"line\", \"series\": \"px\", \"panel\": 0, \"encoding\": {\"y\": \"c\", \"colour\": \"down\"}}}]}"
+   },
+   "expect": [
+    {
+     "conn": "a",
+     "msg": {
+      "type": "error",
+      "id": "c1",
+      "error": {
+       "code": "schema",
+       "did_you_mean": [
+        "color"
+       ]
+      }
+     }
+    }
+   ],
+   "note": "Closed, typed channel set: unknown channel -> schema with did_you_mean (GRAMMAR §7)."
+  },
+  {
+   "send_raw": {
+    "conn": "a",
+    "line": "{\"type\": \"command\", \"id\": \"c2\", \"ops\": [{\"op\": \"insert_layer\", \"view\": \"main\", \"layer\": {\"mark\": \"candles\", \"series\": \"px\", \"panel\": 0}}]}"
+   },
+   "expect": [
+    {
+     "conn": "a",
+     "msg": {
+      "type": "error",
+      "id": "c2",
+      "error": {
+       "code": "schema",
+       "did_you_mean": [
+        "candle"
+       ]
+      }
+     }
+    }
+   ]
+  },
+  {
+   "send": {
+    "conn": "a",
+    "msg": {
+     "type": "command",
+     "id": "c3",
+     "ops": [
+      {
+       "op": "set_encoding",
+       "view": "main",
+       "layer": "l1",
+       "encoding": {
+        "color": "dwon"
+       }
+      }
+     ]
+    }
+   },
+   "expect": [
+    {
+     "conn": "a",
+     "msg": {
+      "type": "error",
+      "id": "c3",
+      "error": {
+       "code": "invalid",
+       "did_you_mean": [
+        "down",
+        "warn"
+       ]
+      }
+     }
+    }
+   ],
+   "note": "Colour must be #rrggbb, #rrggbbaa or a theme name; close names in did_you_mean (edit distance <= 3, nearest first)."
+  },
+  {
+   "send": {
+    "conn": "a",
+    "msg": {
+     "type": "command",
+     "id": "c4",
+     "ops": [
+      {
+       "op": "set_encoding",
+       "view": "main",
+       "layer": "l1",
+       "encoding": {
+        "color": "#ef53"
+       }
+      }
+     ]
+    }
+   },
+   "expect": [
+    {
+     "conn": "a",
+     "msg": {
+      "type": "error",
+      "id": "c4",
+      "error": {
+       "code": "invalid"
+      }
+     }
+    }
+   ]
+  },
+  {
+   "send": {
+    "conn": "a",
+    "msg": {
+     "type": "command",
+     "id": "c5",
+     "ops": [
+      {
+       "op": "insert_layer",
+       "view": "main",
+       "layer": {
+        "mark": "band",
+        "series": "bb20",
+        "panel": 0,
+        "encoding": {
+         "y": "upper"
+        }
+       }
+      }
+     ]
+    }
+   },
+   "expect": [
+    {
+     "conn": "a",
+     "msg": {
+      "type": "error",
+      "id": "c5",
+      "error": {
+       "code": "invalid"
+      }
+     }
+    }
+   ],
+   "note": "band needs y and y2 (GRAMMAR §5)."
+  },
+  {
+   "send": {
+    "conn": "a",
+    "msg": {
+     "type": "command",
+     "id": "c6",
+     "ops": [
+      {
+       "op": "insert_layer",
+       "view": "main",
+       "layer": {
+        "mark": "line",
+        "series": "rsi14",
+        "panel": 7
+       }
+      }
+     ]
+    }
+   },
+   "expect": [
+    {
+     "conn": "a",
+     "msg": {
+      "type": "error",
+      "id": "c6",
+      "error": {
+       "code": "not_found",
+       "path": "/ops/0/layer/panel"
+      }
+     }
+    }
+   ],
+   "note": "layer.panel must name an existing panel (GRAMMAR §11 rule 5)."
+  },
+  {
+   "send": {
+    "conn": "a",
+    "msg": {
+     "type": "command",
+     "id": "c7",
+     "ops": [
+      {
+       "op": "set_encoding",
+       "view": "main",
+       "layer": "l9",
+       "encoding": {
+        "width": 2
+       }
+      }
+     ]
+    }
+   },
+   "expect": [
+    {
+     "conn": "a",
+     "msg": {
+      "type": "error",
+      "id": "c7",
+      "error": {
+       "code": "not_found",
+       "path": "/ops/0/layer",
+       "did_you_mean": [
+        "l0",
+        "l1",
+        "l2",
+        "l3",
+        "l4"
+       ]
+      }
+     }
+    }
+   ],
+   "note": "did_you_mean: at most 5, edit distance then alphabetical (§13)."
+  },
+  {
+   "send": {
+    "conn": "a",
+    "msg": {
+     "type": "command",
+     "id": "c8",
+     "ops": [
+      {
+       "op": "insert_layer",
+       "view": "main",
+       "after": "nope",
+       "layer": {
+        "mark": "line",
+        "series": "rsi14",
+        "panel": 1
+       }
+      }
+     ]
+    }
+   },
+   "expect": [
+    {
+     "conn": "a",
+     "msg": {
+      "type": "error",
+      "id": "c8",
+      "error": {
+       "code": "not_found",
+       "path": "/ops/0/after"
+      }
+     }
+    }
+   ]
+  },
+  {
+   "send": {
+    "conn": "a",
+    "msg": {
+     "type": "command",
+     "id": "c9",
+     "ops": [
+      {
+       "op": "insert_layer",
+       "view": "main",
+       "layer": {
+        "id": "l0",
+        "mark": "line",
+        "series": "rsi14",
+        "panel": 1
+       }
+      }
+     ]
+    }
+   },
+   "expect": [
+    {
+     "conn": "a",
+     "msg": {
+      "type": "error",
+      "id": "c9",
+      "error": {
+       "code": "duplicate"
+      }
+     }
+    }
+   ]
+  },
+  {
+   "send": {
+    "conn": "a",
+    "msg": {
+     "type": "command",
+     "id": "c10",
+     "ops": [
+      {
+       "op": "set_encoding",
+       "view": "main",
+       "layer": "l2",
+       "encoding": {
+        "opacity": 1.5
+       }
+      }
+     ]
+    }
+   },
+   "expect": [
+    {
+     "conn": "a",
+     "msg": {
+      "type": "error",
+      "id": "c10",
+      "error": {
+       "code": "invalid"
+      }
+     }
+    }
+   ],
+   "note": "opacity is 0..1 (GRAMMAR §7)."
+  },
+  {
+   "send": {
+    "conn": "a",
+    "msg": {
+     "type": "command",
+     "id": "c11",
+     "ops": [
+      {
+       "op": "set_encoding",
+       "view": "main",
+       "layer": "l2",
+       "encoding": {
+        "width": 2
+       }
+      },
+      {
+       "op": "delete_layer",
+       "view": "mian",
+       "layer": "l2"
+      }
+     ]
+    }
+   },
+   "expect": [
+    {
+     "conn": "a",
+     "msg": {
+      "type": "error",
+      "id": "c11",
+      "error": {
+       "code": "not_found",
+       "path": "/ops/1/view",
+       "did_you_mean": [
+        "main"
+       ]
+      }
+     }
+    }
+   ],
+   "note": "All or nothing: the valid first op is not applied either."
+  }
+ ],
+ "final": {
+  "log_len": 0,
+  "document": {
+   "views": [
+    {
+     "id": "main",
+     "layers": [
+      {
+       "id": "l0",
+       "mark": "candle",
+       "series": "px",
+       "panel": 0,
+       "label": "$absent"
+      },
+      {
+       "id": "l1",
+       "mark": "line",
+       "series": "bb20",
+       "panel": 0,
+       "encoding": {
+        "color": "#90a4ae"
+       },
+       "label": "$absent"
+      },
+      {
+       "id": "l2",
+       "mark": "line",
+       "series": "rsi14",
+       "panel": 1,
+       "encoding": {
+        "color": "#7e57c2",
+        "y": "rsi"
+       },
+       "label": "$absent"
+      },
+      {
+       "id": "l3",
+       "mark": "rule",
+       "panel": 1,
+       "encoding": {
+        "color": "#9e9e9e",
+        "y": "70"
+       },
+       "origin": {
+        "/encoding/y": {
+         "kind": "threshold",
+         "name": "rsi.overbought"
+        }
+       },
+       "label": "$absent"
+      },
+      {
+       "id": "l4",
+       "mark": "line",
+       "series": "macd",
+       "panel": 2,
+       "label": "$absent"
+      }
+     ]
+    }
+   ]
+  }
+ }
+}

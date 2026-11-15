@@ -1,0 +1,1 @@
+Ekranda 3 panel var: fiyat paneli (THYAO mumları + Bollinger(20,2) üst/orta/alt bant), RSI14 paneli (70 aşırı alım çizgisiyle) ve MACD(12,26,9) paneli. SMA50 dokümanda var ama ekranda çizili değil.

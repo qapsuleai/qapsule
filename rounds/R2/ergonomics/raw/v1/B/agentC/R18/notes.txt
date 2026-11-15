@@ -1,0 +1,2 @@
+attempt1: move_panel @panel:macd before @panel:rsi; applied, but screen query still showed 0,1,2 (screen sorts by id despite doc saying stack order), so unverified.
+attempt2: same command + list views; panels order [0,2,1] -> MACD above RSI. Success.

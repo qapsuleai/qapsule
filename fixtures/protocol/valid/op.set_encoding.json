@@ -1,0 +1,13 @@
+{
+ "op": "set_encoding",
+ "view": "main",
+ "layer": "l1",
+ "encoding": {
+  "y": "upper",
+  "color": "down",
+  "width": 2
+ },
+ "unset": [
+  "opacity"
+ ]
+}

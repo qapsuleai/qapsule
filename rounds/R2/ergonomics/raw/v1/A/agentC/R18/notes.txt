@@ -1,0 +1,1 @@
+attempt1: move_panel panel{shows study macd} before{shows study rsi} -> applied (panel 2 now above panel 1). No problems.

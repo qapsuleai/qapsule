@@ -28,7 +28,7 @@ pub struct Certificate {
 
 /// Relative widening of the input range used as state bounds. The rounding drift of an
 /// average of values in `[lo, hi]` is below `~ 2·u·period` relative (`u = 2^-53`); 1e-6
-/// covers every allowed period (≤ 1e9).
+/// covers every allowed period (≤ [`crate::MAX_PERIOD`]).
 const WIDEN: f64 = 1e-6;
 
 fn widen_lo(v: f64) -> f64 {
@@ -52,7 +52,7 @@ const MIN_LOOKBACK: usize = 64;
 /// Preconditions of the guarantee: the bounds must be built from the **same** series that
 /// is later passed to `*_tail_with` (they are not checked against it), and the period must
 /// be at most ~1e8 (the 1e-6 widening covers the seed mean's rounding drift up to there;
-/// periods are validated up to 1e9 elsewhere, far beyond practical use).
+/// periods are validated up to [`crate::MAX_PERIOD`] = 1e5 elsewhere).
 #[derive(Debug, Clone, Copy)]
 pub struct Bounds {
     from: usize,
@@ -95,7 +95,7 @@ impl Bounds {
 /// to [`crate::run`] over the whole series.
 ///
 /// # Panics
-/// `period == 0`, `from > x.len()` or `out.len() != x.len() - from`.
+/// `period` of 0 or above [`crate::MAX_PERIOD`], `from > x.len()` or `out.len() != x.len() - from`.
 pub fn ema_tail(x: &[f64], period: usize, from: usize, out: &mut [f64]) -> Certificate {
     ema_tail_with(x, period, &Bounds::new(x, from), out)
 }
@@ -108,6 +108,10 @@ pub fn ema_tail_with(x: &[f64], period: usize, bounds: &Bounds, out: &mut [f64])
     let from = bounds.from;
     let n = x.len();
     assert!(from <= n && out.len() == n - from);
+    assert!(
+        (1..=crate::MAX_PERIOD).contains(&period),
+        "period out of range"
+    );
     let pf = period as f64;
     let a = 2.0 / (pf + 1.0);
     let step = |s: f64, xi: f64| xi * a + s * (1.0 - a);
@@ -170,7 +174,7 @@ pub fn ema_tail_with(x: &[f64], period: usize, bounds: &Bounds, out: &mut [f64])
 /// RSI(`period`) outputs for bars `from..x.len()` into `out`, identical to a full run.
 ///
 /// # Panics
-/// `period == 0`, `from > x.len()` or `out.len() != x.len() - from`.
+/// `period` of 0 or above [`crate::MAX_PERIOD`], `from > x.len()` or `out.len() != x.len() - from`.
 pub fn rsi_tail(x: &[f64], period: usize, from: usize, out: &mut [f64]) -> Certificate {
     rsi_tail_with(x, period, &Bounds::new(x, from), out)
 }
@@ -183,6 +187,10 @@ pub fn rsi_tail_with(x: &[f64], period: usize, bounds: &Bounds, out: &mut [f64])
     let from = bounds.from;
     let n = x.len();
     assert!(from <= n && out.len() == n - from);
+    assert!(
+        (1..=crate::MAX_PERIOD).contains(&period),
+        "period out of range"
+    );
     let pf = period as f64;
     let pm1 = pf - 1.0;
     let split = |c: f64| {

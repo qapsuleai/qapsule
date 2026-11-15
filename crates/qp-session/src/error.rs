@@ -13,6 +13,7 @@ pub(crate) struct E(ProtocolError);
 impl E {
     pub(crate) fn new(code: ErrorCode, message: impl Into<String>) -> Self {
         Self(ProtocolError {
+            candidates: Vec::new(),
             code,
             message: message.into(),
             path: None,

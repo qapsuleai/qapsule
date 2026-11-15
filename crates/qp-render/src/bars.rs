@@ -2,7 +2,7 @@
 //!
 //! Since R1 the bar type and the fixture format are `qp-schema`'s (`Bar`, `Series`).
 
-use qp_schema::{Bar, Series};
+use qp_schema::Series;
 
 use crate::RenderError;
 
@@ -15,13 +15,6 @@ use crate::RenderError;
 /// strictly increasing.
 pub fn parse_bars(json: &str) -> Result<Series, RenderError> {
     qp_schema::parse_bar_series(json).map_err(RenderError::new)
-}
-
-/// The bars of a series, or an error if it carries none.
-pub(crate) fn bars_of(series: &Series) -> Result<&[Bar], RenderError> {
-    series
-        .bars()
-        .ok_or_else(|| RenderError::new("series has no embedded bars"))
 }
 
 /// Minimal 64-bit LCG (Knuth MMIX constants). Integer-only, so identical on every target.

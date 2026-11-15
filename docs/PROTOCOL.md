@@ -1,6 +1,6 @@
 # Qapsule Alan Protokolü — `qp/0`
 
-Durum: **v0** (RD1). Mesaj tiplerinin tek kaynağı `crates/qp-schema/src/protocol.rs`;
+Durum: **v0** (RD1; R2'de gramer eki — §5.1 gramer işlemleri, §5.4 `hit`, §4.1 `summary`, §13 `no_origin`/`ambiguous`, §17 anlamla başvuru; hepsi ek, kırıcı değil). Mesaj tiplerinin tek kaynağı `crates/qp-schema/src/protocol.rs`;
 JSON Schema oradan üretilir (`qp schema export`): `ClientMsg`, `ServerMsg`, `Op`,
 `ChangeOp`, `Query`, `LogEntry`, `InboundLine`, `OutboundLine`. Bu belge ile şema
 çelişirse şema doğrudur ve bu belge düzeltilir.
@@ -135,6 +135,10 @@ Her bağlantının ilk mesajı `hello`dur. Yüzey kendini tanıtır; otorite pro
   destekler; tanımadığı özelliği sessizce dışarıda bırakır.
 - `hello` olmadan gelen her mesaj, ikinci bir `hello`, bilinmeyen `principal` ya da
   desteklenmeyen `protocol` → `error` `handshake`.
+- `welcome.summary` (R2, `DocSummary`): dokümanın kısa özeti — seriler (kimlik, tür,
+  hesap/parametreler, alanlar, açıklama metni `RSI14`), görünümler → paneller → katmanlar
+  (kimlik, işaret, ne çizdiği), olgular, bulgular (en son bar), bekleyen öneri sayısı. Ajan
+  ilk mesajında kimliklere buradan başvurabilir (`docs/GRAMMAR.md` §12).
 
 ### 4.2 Komut — `command` → `ack`
 
@@ -325,9 +329,20 @@ Kalıcı, adım adım bir **anlatım çizelgesi** dikkat değil, dokümandır: `
 | `put_series` | `series` | Seriyi ekle/değiştir. |
 | `add_study` | `id?`, `study`, `inputs`, `params?`, `show?{view, with?, panel?}` | Hesap serisi ekler; `show` varsa görünüme `line` katmanı ekler. `with`: o serinin çizildiği panel; `panel`: panel numarası; ikisi de yoksa yeni panel (en büyük panel + 1). |
 | `set_params` | `series`, `params` | Hesap serisinin parametrelerini birleştirerek değiştirir; kimlik ve katmanlar korunur. Değişim: serinin tamamıyla `put_series`. |
-| `put_view` | `view` | Görünümü ekle/değiştir (Görünüm v0 tipi; R2'de gramer). |
-| `add_layer` | `view`, `layer`, `index?` | Katman ekler (yoksa sona). |
-| `remove_layer` | `view`, `index` | Katmanı siler. |
+| `put_view` | `view` | Görünümü ekle/değiştir (gramer v0: `docs/GRAMMAR.md`). |
+| `add_layer` | `view`, `layer`, `index?` | Katman ekler (yoksa sona). **`index` kullanımdan kalktı** (eşzamanlı yazıda kayar); `insert_layer` kullanın. |
+| `remove_layer` | `view`, `index` | **Kullanımdan kalktı:** katmanı konumla siler; `delete_layer` kullanın. |
+| `insert_layer` | `view`, `layer`, `after?`, `before?` | (R2) Katmanı kimlikle yerleştirir: `after` katmanından hemen sonra, `before`'dan hemen önce, yoksa sona. `layer.panel` var olan bir panel id'si. Sabitlerin kökeni denetlenir (§13 `no_origin`). Değişim: `insert_layer` (konumla, otoritenin hesapladığı). |
+| `delete_layer` | `view`, `layer` | (R2) Katmanı kimlikle siler. |
+| `split_layer` | `view`, `layer` | (R2/T8a) Çok çıktılı bir `line` katmanını (`y`'siz; Bollinger: `upper`/`middle`/`lower`, MACD: `macd`/`signal`) çıktı başına bir katmana böler: her biri açık `y` ile, aynı panelde, aynı çizim yerinde (çıktı sırasıyla), aynı kodlamayla. Yeni kimlikler en küçük kullanılmayan `l<k>` (bölünen kimlik yeniden kullanılmaz). Değişim: `delete_layer` + `insert_layer`'lar (tersi baytı geri getirir). `ack.created`: yeni katman kimlikleri, çıktı sırasıyla. Tek çıktılı katman → `invalid`; vurgu hedefiyse `in_use`. |
+| `move_layer` | `view`, `layer`, `panel?`, `after?`, `before?` | (R2) Katmanı başka panele ve/veya çizim sırasında başka yere taşır. Değişim: `put_layer`. |
+| `set_encoding` | `view`, `layer`, `encoding`, `unset?`, `origin?`, `label?` | (R2) Verilen kanalları değiştirir, `unset`'tekileri kaldırır, diğerleri kalır. Değişim: `put_layer`. |
+| `insert_panel` | `view`, `panel`, `layers?`, `after?`, `before?` | (R2) Panel ekler (`after` panelinin hemen altına, `before`'un hemen üstüne, yoksa en alta), isteğe bağlı katmanlarıyla. `ack.created`: panel id'si (ondalık), sonra katman kimlikleri. |
+| `delete_panel` | `view`, `panel` | (R2) Paneli ve içindeki katmanları siler. |
+| `move_panel` | `view`, `panel`, `after?`, `before?` | (R2) Paneli yığında taşır. |
+| `set_panel` | `view`, `panel`, `name?`, `weight?` | (R2) Panelin adı/göreli yüksekliği. |
+| `set_scale` | `view`, `scale`, `kind?`, `domain?`, `auto_domain?` | (R2) Ölçeği kimlikle değiştirir (`x`, `y<panel>`): tür (`linear`/`log`), sabit alan ya da otomatik. |
+| `set_emphasis` | `view`, `emphasis` | (R2) Görünümün kalıcı vurgu listesini değiştirir. |
 | `set_view_range` | `view`, `from_bar`, `to_bar` | Görünümün kalıcı yatay aralığı: `x.domain = [t(from_bar), t(to_bar)]` (görünümün ilk bar serisine göre). |
 | `add_fact` | `id?`, `kind`, `series`, `bar`, `text`, `evidence?` | Olgu ekler (`t` bar zamanından). |
 | `add_finding` | `id?`, `claim`, `facts`, `confidence`, `invalidation`, `capsule?` | Bulgu ekler; `capsule` (başlık) verilirse canlı kapsül de. |
@@ -386,7 +401,8 @@ yakalanır; bir kesişim koşulu yalnızca kesişim barında tetiklenir.
 
 ### 5.3 Değişimler (`ChangeOp`)
 
-`put_series`, `put_view`, `insert_layer`, `delete_layer`, `set_x_domain`, `put_fact`,
+`put_series`, `put_view`, `insert_layer`, `delete_layer`, `put_layer`, `put_panel`,
+`delete_panel`, `set_emphasis`, `set_x_domain`, `put_fact`,
 `put_finding`, `put_capsule`, `set_capsule_state`, `put_intent`, `push_ledger`,
 `pop_ledger`, `put_narrative`, `put_proposal`, `delete`, `append_bars`, `truncate_bars`,
 `set_last_bar`. Her biri tam öğe taşır; `put_*` değişimlerinin isteğe bağlı `index` alanı
@@ -396,6 +412,15 @@ aynı bırakır; köken (`provenance`) otorite tarafından damgalanır
 (istemci köken yazmaz). İstemcinin `Op`'ları değişimlere açılır; örneğin
 `reject_finding` → `set_capsule_state` + `push_ledger`; `add_study` (+`show`) →
 `put_series` + `insert_layer`.
+
+Gramer değişimleri (R2): değişimler otoritenin sırasıyla uygulandığından konum taşıyabilir
+(eşzamanlılık sorunu isteklerde, değişimlerde değil). `put_layer {view, index, layer}`
+aynı kimlikli katmanı kaldırıp `index`'e koyar (değiştirme + taşıma; tersi eski katman ve
+eski konum); `delete_layer` artık isteğe bağlı `layer` kimliğini de taşır (uygulamada
+denetlenir); `put_panel {view, index, panel}`, `delete_panel {view, panel}`,
+`set_emphasis {view, emphasis}`. Çakışma denetimi (`base`) katman düzeyindedir: dokunulan
+anahtarlar `görünüm/katman` (`main/l3`) ve yapısal değişimler için `görünüm/panels`;
+böylece aynı görünümün farklı katmanlarına eşzamanlı yazılar çakışmaz.
 
 ### 5.4 Sorgular (`Query`, alan `"kind"`)
 
@@ -408,11 +433,12 @@ aynı bırakır; köken (`provenance`) otorite tarafından damgalanır
 | `log` | `after_seq?`, `since_t?`, `until_t?`, `within_ms?`, `author?`, `limit?` | `log`: girdiler, `seq` artan. `within_ms`: `now`'dan geriye bu kadar milisaniye ("son 30 dakika" = `1800000`). `limit` en son n girdiyi verir. |
 | `study` | `series`, `range?`, `output?`, `reduce?` | `values` (barlarla hizalı, ısınma `null`; K13/K20) ya da `reduced` (`min`, `max`, `mean`, `first`, `last`, `count`; `null`lar atlanır; `min`/`max`/`first`/`last` bar ve zamanı da verir). Bar serisinde çıktılar `o`,`h`,`l`,`c`,`v`. |
 | `at` | `series`, `bar?` ya da `t?` | `at`: OHLCV ve o bar serisine dayanan her hesabın o bardaki değerleri. |
-| `screen` | `principal?` | `screen`: kişinin ekranlı (`desktop`, `phone`, `watch`) her bağlantısı için, bağlantı açılış sırasıyla: görünüm, görünen aralık, sembol ve aralık (görünümün ilk bar serisinden), paneller (panel numarası artan; `series` = o paneldeki katmanların serileri, katman sırasıyla, tekrarsız; `marks` = bütün katmanların işaretleri, katman sırasıyla), olgu barı görünen aralıkta olan bulguların kapsülleri, görünen son barın kapanışı. |
+| `screen` | `principal?` | `screen`: kişinin ekranlı (`desktop`, `phone`, `watch`) her bağlantısı için, bağlantı açılış sırasıyla: görünüm, görünen aralık, sembol ve aralık (görünümün ilk bar serisinden), paneller (yığın sırasıyla; `panel` = panel id'si; R2'de ayrıca `name`, `scale` {id, tür, görünen alan} ve `layers` — kimlik, işaret, veri, alanlar, açıklama, sabitler ve kökenleri, görünen öğe sayısı, son değerler, sahne tarifinden; `series` = o paneldeki katmanların serileri, katman sırasıyla, tekrarsız; `marks` = bütün katmanların işaretleri, katman sırasıyla), olgu barı görünen aralıkta olan bulguların kapsülleri, görünen son barın kapanışı. |
 | `attention` | `principal` | `attention`: kişinin en son etkin ekranlı bağlantısının bakış aralığı (girdi yoksa başlangıç aralığı), son odak (`tap`: görünüm, panel, bar), zamanı, yönergeler. |
+| `hit` | `view?`, `x`, `y`, `width?`, `height?` | (R2) `hit`: görünüm `width`×`height` (varsayılan 1200×600) çizildiğinde (`x`,`y`) pikselinde ne olduğu — panel, bar, zaman, ölçekteki değer ve en üstteki öğe (katman, işaret, veri, bar, zaman, değerler, kökenler); boş alanda `item` yok. Görünen aralık: soranın o görünümdeki bakışı, yoksa kalıcı aralık, yoksa bütün barlar. Sahne tarifinden cevaplanır, çizim yapılmaz (`docs/GRAMMAR.md` §16). |
 | `present` | `finding?`, `surface?` | `presentation` (§10). `finding` yoksa en önemli canlı bulgu (en yüksek güven; eşitlikte kimlik sırası). |
 
-**Hedef** (`Target`; dikkat ve anlatım adımlarında): `view`, `panel`, `series`, `output`
+**Hedef** (`Target`; dikkat, anlatım adımları ve R2'de görünüm vurgusu): `view`, `panel` (panel id'si), `layer` (R2), `series`, `output`
 (serinin çıktısı ya da bar alanı: hacim için `"v"`), `item` (bulgu, olgu…), `from_bar`,
 `to_bar`. Hepsi isteğe bağlıdır; olabildiğince belirli yazılır.
 
@@ -622,6 +648,13 @@ Her hata, ajanın yardım almadan düzeltebileceği kadar bilgi taşır:
 | `not_pending` | Öneri beklemede değil | — |
 | `limit` | Boyut sınırı | `expected` (sınır) |
 | `unsupported` | Bu otoritede desteklenmiyor | `hint` |
+| `no_origin` | (R2) Katmandaki sayısal sabitin kökeni yok (olgu, adlandırılmış eşik, seri değeri) | `path` (sabitin yeri), `candidates`, `hint` |
+| `ambiguous` | (R2) Anlamla başvuru birden çok öğeye uyuyor; otorite rastgele seçmez | `path`, `candidates` (türün sırasıyla, §17) |
+
+`candidates` (R2): `{id, about}` listesi — kullanılacak kimlik (ya da köken için JSON
+metni) ve ne olduğu. `ack.resolved` (R2): komuttaki anlamla başvuruların çözüldüğü
+kimlikler (`{"/ops/0/layer": "l3"}`); günlükte istek çözülmüş kimliklerle saklanır, böylece
+yeniden oynatma değişmez.
 
 `path`, gelen mesajın içine JSON göstericisidir (`/ops/1/params/period`). `did_you_mean`
 en çok 5 öneri verir: adaylar, düzenleme uzaklığı ≤ 3 olanlar ve verilen adı içeren ya da
@@ -634,6 +667,9 @@ kimlikleri, alan adları… Bir komutta hata varsa **hiçbir** işlem uygulanmaz
 - Dışarıdan gelen her mesaj güvenilmezdir. Sınırlar `welcome.limits`'te bildirilir ve
   ayrıştırmadan **önce** (bayt sayısı) ve sonra (işlem, bar, dizge uzunluğu) denetlenir.
 - JSON iç içe derinliği serde_json'ın sınırıyla (128) sınırlıdır.
+- (R2) Satır içi **nokta serileri** de kabul edilir (`data.kind = "points"`): boş olmayan,
+  `t` kesin artan, `v` sonlu ya da `null`; nokta sayısı `limits.max_bars` ile sınırlı
+  (ör. tahmin yelpazesi bantları, `docs/GRAMMAR.md` §3).
 - v0 otoritesi seri kaynağı olarak yalnızca `inline` ve `study` kabul eder; `file`,
   `matriks`, `nats` → `unsupported`. Dosya bağları otoritenin yapılandırmasıyla, taban
   klasöre hapsedilerek açılır (R1 bulgusu; `qp_source::open_binding`), protokolden değil.
@@ -659,6 +695,11 @@ kimlikleri, alan adları… Bir komutta hata varsa **hiçbir** işlem uygulanmaz
 }
 ```
 
+`send.msg` tipli bir `ClientMsg` olarak çözülür; bu yüzden **anlamla başvuru (§17) seçici
+nesneleri** içeren ya da tipli biçimin taşıyamadığı bir mesaj `send_raw` ile yazılmalıdır
+(ham satır olduğu gibi otoriteye gider). Şema doğrulaması (`Transcript`) seçicili `send.msg`'i
+kabul eder ama koşucu reddeder (R2 denetimi K2; öneri: koşucu `send.msg`'i ham iletsin).
+
 Kurallar: her adımın çıktıları **tam olarak** `expect` uzunluğunda ve sırasında olmalıdır;
 her beklenen mesaj gerçek mesajın **alt kümesi** olarak eşleşir (nesnelerde beklenen her
 anahtar eşleşmeli, fazla anahtar serbest; diziler aynı uzunlukta ve öğe öğe; sayılar tam
@@ -678,6 +719,237 @@ sonunda koşucu günlüğü baştan oynatır ve dokümanın baytlarının aynı 
   `notifications/message` ile gider (MCP 2026-07-28'de kullanımdan kalkmış bir yöntem; doğal
   yol `subscriptions/listen` + `log` sorgusu). Ayrıntı: `rounds/RD1/EMBEDDING.md`.
 - **A2UI ve MCP Apps:** analiz `rounds/RD1/EMBEDDING.md`.
+
+## 17. Anlamla başvuru (R2) — yapılandırılmış seçiciler
+
+> Tasarım T8a (`rounds/R2/experiments/T8a.md`). Bu bölüm, tasarım seçilmiş gibi tam
+> şartnamedir; seçim R2/T9 ölçümüyle yapılır (`rounds/R2/REPORT.md`).
+
+Bir mesajda **kimlik alan her yere** (seri, görünüm, panel, katman, olgu, bulgu, öneri,
+ölçek, herhangi bir öğe) kimlik yerine bir **seçici** (selector) yazılabilir: öğeyi
+nitelikleriyle tarif eden küçük bir nesne. Otorite seçiciyi o anki dokümana karşı
+deterministik olarak çözer, yerine kimliği yazar, çözümü cevapta geri verir ve günlüğe
+yalnızca kimlikli isteği yazar.
+
+```json
+{"op":"set_encoding","view":{},"layer":{"shows":{"study":"rsi"}},"encoding":{"width":2}}
+```
+
+"Tek görünümdeki, RSI'ı çizen katmanın kalınlığını 2 yap."
+Kimlik bir dizge (panelde sayı), seçici bir **nesnedir**; ikisi aynı alanda yazılabilir.
+
+### 17.1 Sözlük
+
+Kapalı ve tiplidir (`qp-schema`: `SeriesSel`, `ViewSel`, `PanelSel`, `LayerSel`,
+`FactSel`, `FindingSel`, `ProposalSel`, `ScaleSel`, `ItemSel`); bilinmeyen anahtar
+`schema` hatasıdır (`did_you_mean` ile). Her seçicide ayrıca `first` ve `latest`
+(§17.3) vardır.
+
+| Tür | Anahtarlar | Örnek ("…") |
+|-----|------------|-------------|
+| seri | `kind` (`bars`/`study`/`points`), `study`, `params` {ad: sayı}, `on` (seri), `symbol`, `label` | `{"study":"rsi","params":{"period":14}}` "RSI(14)"; `{"kind":"bars"}` "fiyat serisi"; `{"study":"sma","params":{"period":50}}` |
+| görünüm | `title`, `shows` (seri) | `{}` "tek görünüm"; `{"shows":{"study":"macd"}}` |
+| panel | `name`, `shows` (seri), `mark` | `{"mark":"candle"}` "fiyat paneli"; `{"shows":{"study":"rsi"}}` "RSI'ın paneli"; `{"name":"macd"}` |
+| katman | `shows` (seri), `output`, `mark`, `panel` (panel), `value`, `fact` (olgu), `finding` (bulgu), `label` | `{"output":"upper"}` "üst bant" (tek başına çizen katman, §17.1); `{"mark":"rule","value":70}` "70 çizgisi" |
+| olgu | `kind`, `on` (seri), `bar` | `{"kind":"breakout","first":true}` "eski kırılımın olgusu" |
+| bulgu | `kind` (olgularından birinin türü), `on` (seri), `fact` (olgu), `state` (kapsül durumu) | `{"kind":"breakout","latest":true}` "son kırılım" |
+| öneri | `state` | `{"state":"pending","latest":true}` |
+| ölçek | `panel` (panel; zorunlu) | `{"panel":{"mark":"candle"}}` → `"y0"` |
+| öğe | tek anahtar, türün adı: `series`, `view`, `fact`, `finding`, `proposal` | `{"finding":{"kind":"breakout","latest":true}}` |
+
+Anahtarların anlamı:
+
+- `study`, `kind`, `name`, `title`, `symbol`, `label`, `output`: metin; **büyük/küçük
+  harf duyarsız** tam eşitlik (benzerlik yok). `label`, `welcome.summary`'deki açıklama
+  metnidir (`RSI14`, `MACD(12,26,9)`; katmanda verilmişse katmanın `label`'ı).
+- `params`: verilen her parametre eşit olmalı (`f64` tam eşitlik); verilmeyenler serbest.
+  Dokümandaki parametreler varsayılanlarla tamdır: `{"period":14}` varsayılan RSI'a uyar.
+- `on` (seri): hesabın girdilerinden biri o seri. `on` (olgu/bulgu): olgu o seri hakkında.
+- `shows`: görünümde/panelde bir katman ya da katmanın kendisi o seriyi çizer
+  (`layer.series`).
+- `mark`: panelde o işaretli bir katman var; katmanda işaret odur.
+- `output`: katman o alanı **tek başına** çizer — `y` onu adlandırır; ya da `y` yoktur ve
+  katman varsayılan olarak tek bir çıktı çizer, o da budur (tek çıktılı hesap, bar
+  serisinde `c`). Başka çıktılarla birlikte çizen katman uymaz: tek Bollinger çizgisi
+  (`upper`, `middle`, `lower`'ı birlikte çizer) `{"output":"upper"}`'a uymaz, çünkü onu
+  boyamak üç bandı birden boyar. Hiçbir katman uymuyor ama böyle bir katman çıktıyı
+  başkalarıyla birlikte çiziyorsa hata `invalid`'dir: aday o katman, `hint` hazır diziyi
+  verir — aynı komutta önce `split_layer`, sonra stil:
+
+  ```json
+  [{"op":"split_layer","view":{},"layer":{"shows":{"study":"bollinger"}}},
+   {"op":"set_encoding","view":{},"layer":{"output":"upper"},"encoding":{"color":"down"}}]
+  ```
+
+  Seçiciler işlem işlem çözüldüğü için ikinci işlemin `output`'u, ilkinin oluşturduğu
+  `upper` katmanına çözülür (`ack.created`: `["l5","l6","l7"]`, `resolved`
+  `{"/ops/1/layer":"l5"}`).
+- `value`: katmanın `y` ya da `x` sabiti bu sayıya tam eşit (kuralın seviyesi).
+- `bar`: olgunun bar numarası. `state`: kapsül/öneri durumu (şema adları).
+
+### 17.2 Nerede yazılır
+
+| Mesaj | Alanlar |
+|-------|---------|
+| `add_study` | `inputs[]`, `show.view`, `show.with`, `show.panel` |
+| `set_params`, `add_fact`, `append_bars`, `update_last_bar` | `series` |
+| `add_layer`, `insert_layer` | `view`, `layer` (aşağıda), `after`, `before` |
+| `delete_layer`, `split_layer`, `move_layer`, `set_encoding` | `view`, `layer`, `panel`, `after`, `before`, `encoding` (aşağıda) |
+| `insert_panel` | `view`, `layers[]`, `after`, `before` |
+| `delete_panel`, `move_panel`, `set_panel` | `view`, `panel`, `after`, `before` |
+| `set_scale` | `view`, `scale` |
+| `set_emphasis` | `view`, `emphasis[].target` |
+| `remove_layer`, `set_view_range` | `view` |
+| `add_finding`, `update_finding` | `facts[]`, `finding`, `invalidation` (koşul) |
+| `approve_finding`, `reject_finding`, `show_finding` | `finding` |
+| `add_intent` | `trigger` (koşul) |
+| `add_narrative` | `about` (öğe), `steps[].target` |
+| `remove` | `id` (öğe) |
+| `accept_proposal`, `reject_proposal` | `proposal` |
+| sorgu `get` / `study`, `at` / `hit` / `present` | `id` (öğe) / `series` / `view` / `finding` |
+| `subscribe` | `changes.ids[]` (öğe), `finding.finding`, `condition.condition` |
+| `attend` | `directive.steps[].target` |
+
+- **Katman nesnesi** (`insert_layer.layer`, `add_layer.layer`, `insert_panel.layers[]`):
+  `series`, `fact`, `finding`, `panel` ve kodlamadaki seri başvuruları
+  (`encoding.{x,y,y2}.series`, `encoding.color.when.than.series`).
+- **Hedef** (`Target`): `view`, `panel`, `layer`, `series`, `item` (öğe seçicisi).
+- **Koşul** (`Condition`): `threshold.series`, `compare.left`, `compare.right`.
+- `put_view`, `put_series`, `input` hareketleri ve kökenler (`origin`) seçici almaz
+  (bütün öğe yazılır ya da arayüz kimlikle konuşur).
+
+**Panel ve katman hangi görünümde aranır?** İşlemin `view` alanındaki görünümde
+(`show.panel` için `show.view`; hedefte `target.view`, yoksa `set_emphasis`'in görünümü).
+Görünüm adı verilmemişse (dikkat ve anlatım hedefleri) bütün görünümlerde, görünüm sırası
+ve görünüm içi sırayla aranır. Görünüm alanı bir seçiciyse önce o çözülür. Var olmayan
+bir görünüm `not_found` (görünüm alanının yolunda).
+
+### 17.3 Eşleşme ve sıralama kuralları
+
+1. Verilen **her** anahtar tutmalıdır (VE). `{}` o türün bütün öğelerine uyar.
+2. İç içe seçici (`shows`, `on`, `panel`, `fact`, `finding`) uyduğu öğelerin **kümesidir**
+   (kendi `first`/`latest`'i uygulandıktan sonra); tek olması gerekmez. Yerine kimlik
+   de yazılabilir (`{"shows":"rsi14"}`). İç içe seçici hiçbir öğeye uymuyorsa hata onun
+   yolunda `not_found` olur.
+3. **Türün sırası** (adaylar hep bu sırada tutulur):
+   seri, görünüm, öneri → doküman sırası (eklenme); panel → yığın sırası (üstten alta);
+   katman → çizim sırası; olgu → bar, eşitlikte doküman sırası; bulgu → olgularının en
+   büyük barı, eşitlikte doküman sırası. Görünüm verilmemişse önce görünüm sırası.
+4. **Tek eşleşme** → çözülür. **Birden çok** → `first: true` ilkini, `latest: true`
+   sonuncusunu seçer (bulguda "en son", panelde "en alttaki", katmanda "en üstteki");
+   ikisi yoksa `ambiguous`. İkisi birden → `invalid`. **Hiç** → `not_found`.
+5. Bulanık eşleşme, ağırlık, olasılık yoktur. Aynı doküman + aynı mesaj = aynı çözüm.
+
+### 17.4 Çözüm, cevap ve günlük
+
+- Seçiciler mesaj tipli biçime ayrıştırılmadan **önce** çözülür (`Session::handle_raw`):
+  her seçici yerinde kimliğe (panelde sayıya, ölçekte `"y<id>"`'e) çevrilir, sonra mesaj
+  her zamanki gibi denetlenir ve uygulanır. Böylece tipli mesaj, günlük (`request`) ve
+  öneriler (`proposal.ops`) **yalnız kimlik** taşır; yeniden oynatma ve bayt eşitliği
+  değişmez.
+- Komutta işlemler **sırayla** çözülür: n'inci işlemin seçicileri, önceki işlemlerin
+  uygulanmış olduğu taslak dokümana karşı çözülür (aynı komutta eklenen bir katmana
+  seçiciyle başvurulabilir). Önceki işlem hata veriyorsa taslak ilerlemez; hatayı komutun
+  kendisi bildirir (ya hep ya hiç değişmez).
+- `ack.resolved` ve `result.resolved`: `{mesajdaki JSON göstericisi: kimlik}` — yalnız
+  en dıştaki seçiciler (iç içe olanlar değil); panel kimliği ondalık dizge (`"0"`).
+  `subscribe` ve `attend` ack'leri de taşır. Sorgu cevabının kendisi de kimliği verir
+  (ör. `reduced.series`, `presentation.finding`, `item.id`).
+- Öneri: seçiciler öneri anında çözülür; öneri çözülmüş kimlikleri saklar; kabulde
+  yeniden çözülmez.
+- Seçici kullanmak `read` yetkisi ister (çözüm dokümanı okur); `feed` rolü kimlik
+  kullanır (`forbidden`, seçicinin yolunda).
+- Hata sırası: önce seçicilerin şeması ve çözümü, sonra mesajın geri kalanının şeması,
+  sonra yetki ve uygulama.
+
+### 17.5 Hatalar
+
+| Durum | Kod | Ek bilgi |
+|-------|-----|----------|
+| Bilinmeyen seçici anahtarı / yanlış tip | `schema` | `path` anahtarın yolu, `expected`, `did_you_mean` |
+| Birden çok eşleşme | `ambiguous` | `path`, `candidates` (eşleşenler, türün sırasıyla, en çok 10), `hint` |
+| Eşleşme yok | `not_found` | `path`, `candidates` (en yakınlar, en çok 5), `did_you_mean` (metin değerinde yazım hatası), `hint` |
+| `first` ve `latest` birlikte | `invalid` | `path` |
+| `output` yalnız çok çıktılı bir katmanda (birlikte çiziliyor) | `invalid` | `path`, `candidates` (o katman), `hint` (`split_layer` + stil dizisi) |
+
+`ambiguous` adaylarının sırası **türün sırasıdır**; yani `first: true` adayların ilkini,
+`latest: true` sonuncusunu seçer — ajan ya bir anahtar ekler, ya `first`/`latest` ekler,
+ya da adayın kimliğini kullanır. `not_found` adayları: en çok anahtarı tutan öğeler önce,
+eşitlikte türün sırası; hiçbir anahtar tutmuyorsa türün ilk beş öğesi. Bir metin
+anahtarının değeri dokümanda hiç yoksa ileti bunu söyler ve `did_you_mean` dokümandaki
+değerlerden önerir (`bolinger` → `bollinger`).
+
+### 17.6 İlk mesajda neye başvurulabilir
+
+- `welcome.summary.select` (`SelectHints`): özetteki her öğe için **şu an ona çözülen**
+  bir seçici; anahtar öğe kimliği (panel `"<görünüm>/<panel>"`, katman
+  `"<görünüm>/<katman>"`, o görünüm içinde çözülür). Sıra: en kısa anlamlı seçici
+  (`{"study":"rsi"}`), gerekiyorsa parametreler, sonra `first`/`latest`, sonra bar.
+  Hiçbir seçici tek değilse öğe listede yoktur (kimliği kullanılır).
+- `screen` cevabında her panelin `select`'i (o görünüm içinde).
+
+### 17.7 Örnekler (`thyao` örnek dokümanı)
+
+```json
+→ {"type":"query","id":"q1","query":{"kind":"study",
+   "series":{"study":"rsi","params":{"period":14}},"range":{"last":50},"reduce":"max"}}
+← {"type":"result","id":"q1","seq":0,"now":1760000000000,
+   "data":{"kind":"reduced","series":"rsi14","reduce":"max","bars":50,"values":{"rsi":{"value":78.115,"bar":154,"t":1754438400000}}},
+   "resolved":{"/query/series":"rsi14"}}
+
+→ {"type":"command","id":"c1","ops":[{"op":"set_scale","view":{},
+   "scale":{"panel":{"mark":"candle"}},"kind":"log"}]}
+← {"type":"ack","id":"c1","status":"applied","seq":1,
+   "resolved":{"/ops/0/scale":"y0","/ops/0/view":"main"}}
+   (günlükte: {"op":"set_scale","view":"main","scale":"y0","kind":"log"})
+
+→ {"type":"command","id":"c2","ops":[{"op":"set_encoding","view":{},
+   "layer":{"mark":"line"},"encoding":{"width":2}}]}
+← {"type":"error","id":"c2","error":{"code":"ambiguous",
+   "message":"3 layers match {\"mark\":\"line\"}; the authority does not pick one",
+   "path":"/ops/0/layer",
+   "hint":"Add a key that tells them apart, add \"first\":true or \"latest\":true (candidates are in paint order), or use one of the candidate ids.",
+   "candidates":[{"id":"l1","about":"bb20.upper/middle/lower line (panel 0 of view main)"},
+                 {"id":"l2","about":"rsi14.rsi line (panel 1 of view main)"},
+                 {"id":"l4","about":"macd.macd/signal line (panel 2 of view main)"}]}}
+
+→ {"type":"command","id":"c3","ops":[
+   {"op":"add_study","id":"rsi7","study":"rsi","inputs":[{"kind":"bars"}],"params":{"period":7}},
+   {"op":"insert_panel","view":{},"panel":{"name":"rsi7","y":{"kind":"linear"}},
+    "after":{"mark":"candle"},"layers":[{"mark":"line","series":"rsi7"}]}]}
+← {"type":"ack","id":"c3","status":"applied","seq":2,"created":["rsi7","3","l5"],
+   "resolved":{"/ops/0/inputs/0":"px","/ops/1/after":"0","/ops/1/view":"main"}}
+
+→ {"type":"command","id":"c4","ops":[{"op":"set_emphasis","view":{},"emphasis":[
+   {"target":{"item":{"finding":{"kind":"cross_above","latest":true}}},"kind":"highlight"}]}]}
+← {"type":"ack","id":"c4","status":"applied","seq":3,
+   "resolved":{"/ops/0/emphasis/0/target/item":"fnd-overbought","/ops/0/view":"main"}}
+
+→ {"type":"command","id":"c5","ops":[{"op":"delete_panel","view":{},
+   "panel":{"shows":{"study":"bolinger"}}}]}
+← {"type":"error","id":"c5","error":{"code":"not_found",
+   "message":"no series matches {\"study\":\"bolinger\"}; no series has study `bolinger`",
+   "path":"/ops/0/panel/shows","did_you_mean":["bollinger"],
+   "candidates":[{"id":"px","about":"THYAO 1d: bars"}, "…"]}}
+```
+
+Uygunluk dökümü: `crates/qp-session/tests/transcripts/t-select.json` (başarı, belirsizlik,
+`first`/`latest`, bulunamama, şema, öneri). Yirmi R2 görevinin kimliksiz yazımı:
+`crates/qp-session/tests/selectors.rs` (`r_tasks`).
+
+### 17.8 Şema
+
+Seçici türleri ve kimlik-ya-da-seçici türleri (`SeriesRef`, `ViewRef`, `PanelRef`,
+`LayerRef`, `FactRef`, `FindingRef`, `ProposalRef`, `ScaleRef`, `ItemRef`) `qp-schema`'dadır.
+İşlem/sorgu alanları Rust'ta kimlik tipinde (`String`, `u32`) kalır; JSON Schema'ları
+`#[schemars(with = …)]` ile "kimlik ya da seçici"dir. İç içe yapılar için tel biçimleri
+(`LayerIn`, `EncodingIn`, `TargetIn`, `ConditionIn`, `EmphasisIn`, `NarrativeStepIn`,
+`AttentionDirectiveIn` …) yalnız şemayı tarif eder; alan adlarının saklanan tiplerle aynı
+kaldığını bir test denetler. Saklanan görünüm (`View`) şeması seçici içermez. Bilinen
+uzlaşma: `Op` tipi hem istek hem saklanan istek (`LogEntry.request`, `Proposal.ops`)
+olduğundan saklanan isteğin şeması da seçiciye izin verir görünür; otorite oraya yalnız
+kimlik yazar. MCP araçları bu şemadan üretildiği için her `op_*`/`query_*` aracı seçici
+kabul eder.
 
 ## Ek A — Eski `Command` tipi
 

@@ -37,6 +37,11 @@ impl Cache {
     pub(crate) fn clear(&mut self) {
         self.map.clear();
     }
+
+    /// Cached values of a series, if computed.
+    pub(crate) fn get(&self, id: &str) -> Option<&Rc<Computed>> {
+        self.map.get(id)
+    }
 }
 
 pub(crate) fn find_series<'a>(doc: &'a Document, id: &str) -> Option<&'a Series> {

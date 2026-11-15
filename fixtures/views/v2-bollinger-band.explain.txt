@@ -1,0 +1,6 @@
+view boll (1200x600)
+x: slots 0..199 of 200 bar(s), 2025-01-02 .. 2025-10-08, 5.6 px per slot
+panel 0: y0 linear [87.3255, 132.74450000000002], 3 layer(s)
+  band band bb "BOLLINGER(20,2)" fields upper lower: 181 item(s), 19 value(s) not drawn; last lower=121.43120925184256 upper=128.5097907481575 (bar 199, 2025-10-08)
+  mid line bb "BOLLINGER(20,2)" fields middle: 181 item(s), 19 value(s) not drawn; last middle=124.97050000000004 (bar 199, 2025-10-08)
+  candles candle px "SAMPLE 1d" fields o h l c: 200 item(s); last c=124.69 h=126.61 l=124.47 o=125.26 (bar 199, 2025-10-08)

@@ -149,8 +149,9 @@ proptest! {
         ..ProptestConfig::default()
     })]
 
-    /// Rolling sums (SMA) and the windowed Welford variance (Bollinger) stay within 1e-9
-    /// of a from-scratch computation, also on long series far from zero.
+    /// Rolling sums (SMA) and the windowed Welford variance (Bollinger) match a
+    /// from-scratch computation within a *relative* tolerance (`common::REL_TOL`,
+    /// `common::BAND_REL_TOL`), also on long series far from zero (levels up to 1e6).
     #[test]
     fn rolling_state_matches_naive_reference(
         steps in prop::collection::vec(-300i32..300, 1..1500),
@@ -173,13 +174,118 @@ proptest! {
                 None => prop_assert!(sma[0][i].is_none() && bb[1][i].is_none()),
                 Some((m, sd)) => {
                     let s = sma[0][i].unwrap();
-                    prop_assert!(common::close(s, m, 1e-9), "sma[{}] {} vs {}", i, s, m);
-                    let ours_sd = bb[1][i].unwrap() - bb[0][i].unwrap();
-                    // std itself is O(level * 1e-16) noisy in absolute terms; compare with
-                    // a tolerance relative to the price level.
-                    prop_assert!((ours_sd - sd).abs() <= 1e-10 * level.max(1.0), "std[{}] {} vs {}", i, ours_sd, sd);
+                    prop_assert!(common::close(s, m, common::REL_TOL), "sma[{}] {} vs {}", i, s, m);
+                    let mid = bb[0][i].unwrap();
+                    prop_assert!(common::close(mid, m, common::REL_TOL), "middle[{}] {} vs {}", i, mid, m);
+                    // The std itself is tiny next to the price; its error is relative to
+                    // the price level, so compare the price-sized bands (k = 1).
+                    let (up, lo) = (bb[1][i].unwrap(), bb[2][i].unwrap());
+                    prop_assert!(common::close(up, m + sd, common::BAND_REL_TOL), "upper[{}] {} vs {}", i, up, m + sd);
+                    prop_assert!(common::close(lo, m - sd, common::BAND_REL_TOL), "lower[{}] {} vs {}", i, lo, m - sd);
                 }
             }
         }
+    }
+}
+
+/// Test-only study whose `None` depends on the value, not on the bar count: `gate(level)`
+/// passes the input through when it is `>= level` and outputs `None` otherwise. Revising
+/// a bar can therefore turn a defined value into `None` and back (R1 audit finding 4).
+#[derive(Clone)]
+struct Gate(f64);
+
+impl qp_compute::Core for Gate {
+    const NAME: &'static str = "gate";
+    const OUTPUTS: &'static [&'static str] = &["gate"];
+    const N_IN: usize = 1;
+    fn params(&self) -> std::collections::BTreeMap<String, f64> {
+        std::collections::BTreeMap::from([("level".to_owned(), self.0)])
+    }
+    fn warmup(&self) -> Vec<usize> {
+        vec![0]
+    }
+    fn peek(&self, x: &[f64], out: &mut [Option<f64>]) {
+        out[0] = (x[0] >= self.0).then_some(x[0]);
+    }
+    fn commit(&mut self, _x: &[f64]) {}
+    fn reset(&mut self) {}
+}
+
+type Spec = (&'static str, Vec<(&'static str, f64)>);
+
+/// First stage of a chain: the value-dependent gate (`Some(level)`) or a built-in study
+/// (whose `None` is index-based).
+fn first_spec() -> impl Strategy<Value = (Option<f64>, Spec)> {
+    prop_oneof![
+        (1u32..20_000).prop_map(|l| (Some(f64::from(l)), ("", vec![]))),
+        spec().prop_map(|s| (None, s)),
+    ]
+}
+
+fn first_study(gate: Option<f64>, name: &str, kv: &[(&str, f64)]) -> Box<dyn Study> {
+    match gate {
+        Some(level) => Box::new(qp_compute::Streaming::new(
+            Gate(level),
+            qp_compute::Field::Close,
+        )),
+        None => common::study(name, kv),
+    }
+}
+
+/// Reference for `second(first.output[which])`: run `first` in batch, feed only its
+/// defined values to `second` in batch, scatter the results back to those bars.
+fn chain_reference(
+    first: &mut dyn Study,
+    which: usize,
+    second: &mut dyn Study,
+    x: &[f64],
+) -> Vec<Vec<Option<f64>>> {
+    let f = run(first, &[x]).unwrap();
+    let col = &f[which];
+    let defined: Vec<f64> = col.iter().flatten().copied().collect();
+    let s = run(second, &[&defined]).unwrap();
+    s.iter()
+        .map(|sc| {
+            let mut it = sc.iter();
+            col.iter()
+                .map(|v| v.and_then(|_| *it.next().unwrap()))
+                .collect()
+        })
+        .collect()
+}
+
+proptest! {
+    #![proptest_config(ProptestConfig {
+        rng_seed: RngSeed::Fixed(0x0051_2028),
+        failure_persistence: None,
+        cases: 512,
+        ..ProptestConfig::default()
+    })]
+
+    /// `Chain`: batch = streaming = "revise the last bar" = reference, bit for bit, also
+    /// when revisions turn the first study's output from a value into `None` and back.
+    #[test]
+    fn chain_modes_are_bit_identical(
+        x in prices(),
+        (gate, (fname, fkv)) in first_spec(),
+        which_seed in 0usize..4,
+        (sname, skv) in spec(),
+        noise in prop::collection::vec(0.5f64..1.5, 1..8),
+    ) {
+        let first = first_study(gate, fname, &fkv);
+        let which = which_seed % first.outputs().len();
+        let mut chain = qp_compute::Chain::new(first, which, common::study(sname, &skv));
+        let want = chain_reference(
+            first_study(gate, fname, &fkv).as_mut(),
+            which,
+            common::study(sname, &skv).as_mut(),
+            &x,
+        );
+        let batch = run(&mut chain, &[&x]).unwrap();
+        let stream = streamed(&mut chain, &x);
+        let rev = revised(&mut chain, &x, &noise);
+        prop_assert_eq!(bits(&batch), bits(&want), "batch vs reference");
+        prop_assert_eq!(bits(&batch), bits(&stream), "batch vs streaming");
+        prop_assert_eq!(bits(&batch), bits(&rev), "batch vs revised");
     }
 }

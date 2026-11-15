@@ -1,0 +1,12 @@
+{
+ "op": "set_emphasis",
+ "view": "main",
+ "emphasis": [
+  {
+   "target": {
+    "item": "fnd-overbought"
+   },
+   "kind": "highlight"
+  }
+ ]
+}

@@ -1,0 +1,1 @@
+attempt1: set_view_range 140..199 (guessed 200 bars from spec example; verified via count query = 200). Applied. Guessing before seeing the data was lucky; spec never states bar count.

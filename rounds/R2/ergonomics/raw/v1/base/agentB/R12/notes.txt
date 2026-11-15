@@ -1,0 +1,2 @@
+attempt1: discovery-only run (shared with R02), no change.
+attempt2: set_view_range from_bar 140 to_bar 199 (200 bars, so last 60), applied; x.domain set. Persistent command (not input) because of "böyle kalsın". Needed discovery to know the bar count and view id.

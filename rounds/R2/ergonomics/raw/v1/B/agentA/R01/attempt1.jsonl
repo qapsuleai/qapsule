@@ -1,0 +1,3 @@
+{"conn":"a","msg":{"type":"hello","protocol":"qp/0","principal":"editor","surface":{"kind":"headless"}}}
+{"conn":"a","msg":{"type":"command","id":"c1","ops":[{"op":"add_study","id":"rsi7","study":"rsi","inputs":["bukgt"],"params":{"period":7}},{"op":"insert_panel","view":"fw2lc","panel":{"name":"rsi7","y":{"kind":"linear","domain":[0,100]}},"after":0,"layers":[{"mark":"line","series":"rsi7","panel":0,"encoding":{"y":"rsi"}}]}]}}
+{"conn":"a","msg":{"type":"query","id":"q1","query":{"kind":"screen"}}}

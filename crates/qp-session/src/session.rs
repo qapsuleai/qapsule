@@ -13,13 +13,14 @@ use qp_schema::protocol::{
 use qp_schema::{Author, CapsuleState, Document};
 use serde_json::Value;
 
-use crate::apply::{apply_all, touched, touched_ids};
+use crate::apply::{apply_all, first_overlap, touched_ids, touched_key, touched_keys};
 use crate::error::{invalid, ptr, PResult, E};
 use crate::expand::{
     check_condition, expand_ops, need_finding, need_proposal, summarize_ops, undone_set, Ctx,
 };
-use crate::locate::{locate, ViolationKind};
+use crate::locate::locate;
 use crate::present::profile_for;
+use crate::select;
 use crate::values::{eval_condition, holds, Cache};
 
 /// Principal id of the engine when it writes log entries itself.
@@ -208,6 +209,8 @@ impl Session {
             DocumentRef::Inline(d) => (**d).clone(),
             DocumentRef::Path(p) => read_json(&confine(repo_root, p)?)?,
         };
+        // Canonical form of every view (GRAMMAR.md §11); the log replays from it.
+        let doc = crate::canon::canon_document(&doc)?;
         let schema = schemars::schema_for!(ClientMsg).to_value();
         let mut s = Self {
             initial: doc.clone(),
@@ -348,6 +351,13 @@ impl Session {
             }
         };
         let id = value.get("id").and_then(Value::as_str).map(str::to_owned);
+        let mut value = value;
+        // Reference by meaning (§17): selectors become ids before the typed parse, so
+        // the typed message, the log and proposals only ever hold ids.
+        let resolved = match self.resolve_selectors(conn, &mut value) {
+            Ok(r) => r,
+            Err(e) => return vec![err_line(conn, id, e)],
+        };
         let msg: ClientMsg = match serde_path_to_error::deserialize(&value) {
             Ok(m) => m,
             Err(e) => return vec![err_line(conn, id, self.schema_error(&value, &e))],
@@ -355,7 +365,114 @@ impl Session {
         if let Err(e) = self.check_limits(&value, &msg) {
             return vec![err_line(conn, id, e)];
         }
-        self.handle(conn, msg)
+        self.handle_resolved(conn, msg, resolved)
+    }
+
+    /// Finds the selectors of a raw message, resolves them against the document (for a
+    /// command: op by op, each against the document as the earlier ops of the same
+    /// command leave it) and writes the ids in their place. Returns `{pointer -> id}`.
+    fn resolve_selectors(&self, conn: &str, msg: &mut Value) -> PResult<BTreeMap<String, String>> {
+        let mut out = BTreeMap::new();
+        let groups = select::sites(msg);
+        let Some(first) = groups
+            .iter()
+            .flatten()
+            .find(|s| select::is_selector(msg, s))
+            .cloned()
+        else {
+            return Ok(out);
+        };
+        let Some(ci) = self.conn_index(conn) else {
+            return Err(E::new(
+                ErrorCode::Handshake,
+                "the first message on a connection must be `hello`",
+            )
+            .hint("Send {\"type\":\"hello\",\"protocol\":\"qp/0\",\"principal\":…,\"surface\":{\"kind\":…}} first.")
+            .build());
+        };
+        let role = self.conns[ci].role;
+        let perms = permissions(role);
+        if !perms.read {
+            return Err(E::new(
+                ErrorCode::Forbidden,
+                format!(
+                    "role `{}` may not read the document, so it cannot use selectors",
+                    role_str(role)
+                ),
+            )
+            .at(first.path)
+            .hint("Use the item's id instead of a selector.")
+            .build());
+        }
+        let is_command = msg.get("type").and_then(Value::as_str) == Some("command");
+        if !is_command {
+            let r = select::Resolver {
+                doc: &self.doc,
+                root: Some(&self.schema),
+            };
+            for g in &groups {
+                select::resolve_group(&r, msg, g, &mut out)?;
+            }
+            return Ok(out);
+        }
+        if groups.len() > self.limits.max_ops as usize {
+            // The op limit is reported after parsing.
+            return Ok(out);
+        }
+        // Op by op on a scratch copy: a selector may name an item an earlier op of the
+        // same command creates or changes. A failing earlier op leaves the copy as it
+        // was; the command itself reports that failure.
+        let principal = self.conns[ci].principal.clone();
+        let author = self
+            .principal(&principal)
+            .map(|p| p.author.clone())
+            .ok_or_else(|| E::new(ErrorCode::Handshake, "principal vanished").build())?;
+        let seq = self.seq() + 1;
+        let mut ctx = Ctx {
+            author,
+            approved_by: None,
+            at: self.clock,
+            seq,
+            id_seq: seq,
+            n: 0,
+            created: Vec::new(),
+            speaker: &principal,
+            is_owner: role == Role::Owner,
+            can_decide: perms.decide,
+            log: &self.log,
+            undoes: None,
+        };
+        let mut scratch = self.doc.clone();
+        let last = groups
+            .iter()
+            .rposition(|g| g.iter().any(|s| select::is_selector(msg, s)))
+            .unwrap_or(0);
+        for (i, g) in groups.iter().enumerate().take(last + 1) {
+            {
+                let r = select::Resolver {
+                    doc: &scratch,
+                    root: Some(&self.schema),
+                };
+                select::resolve_group(&r, msg, g, &mut out)?;
+            }
+            if i == last {
+                break;
+            }
+            let p = ptr("/ops", i);
+            let Some(op) = msg
+                .pointer(&p)
+                .and_then(|v| serde_json::from_value::<Op>(v.clone()).ok())
+            else {
+                continue;
+            };
+            if let Ok(cs) = crate::expand::expand_op(&scratch, &op, &p, &mut ctx) {
+                let mut next = scratch.clone();
+                if apply_all(&mut next, &cs).is_ok() {
+                    scratch = next;
+                }
+            }
+        }
+        Ok(out)
     }
 
     fn schema_error(
@@ -364,33 +481,7 @@ impl Session {
         e: &serde_path_to_error::Error<serde_json::Error>,
     ) -> ProtocolError {
         if let Some(v) = locate(value, &self.schema, &self.schema) {
-            let msg = v.message();
-            let mut b = E::new(ErrorCode::Schema, msg).at(v.path.clone());
-            match &v.kind {
-                ViolationKind::UnknownField { field, expected } => {
-                    b = b
-                        .dym(field, expected.iter().map(String::as_str))
-                        .expected(expected.clone())
-                        .hint("Fix or remove the field; the authority rejects unknown fields.");
-                }
-                ViolationKind::UnknownValue {
-                    value: given,
-                    expected,
-                    ..
-                } => {
-                    b = b
-                        .dym(given, expected.iter().map(String::as_str))
-                        .expected(expected.clone())
-                        .hint("Use one of the expected names; {\"kind\":\"describe\"} lists ops and queries.");
-                }
-                ViolationKind::MissingField { field } => {
-                    b = b.expected([field.clone()]);
-                }
-                ViolationKind::WrongType { expected, .. } => {
-                    b = b.expected([expected.clone()]);
-                }
-            }
-            return b.build();
+            return select::violation_error(&v, "");
         }
         let mut path = String::new();
         for seg in e.path().iter() {
@@ -441,9 +532,11 @@ impl Session {
             for (i, op) in ops.iter().enumerate() {
                 let (n, path) = match op {
                     Op::AppendBars { bars, .. } => (bars.len(), "bars"),
-                    Op::PutSeries { series } => {
-                        (series.bars().map_or(0, <[qp_schema::Bar]>::len), "series")
-                    }
+                    Op::PutSeries { series } => match &series.data {
+                        Some(qp_schema::SeriesData::Bars { bars }) => (bars.len(), "series"),
+                        Some(qp_schema::SeriesData::Points { points }) => (points.len(), "series"),
+                        None => continue,
+                    },
                     _ => continue,
                 };
                 if n > self.limits.max_bars as usize {
@@ -480,8 +573,19 @@ impl Session {
         }
     }
 
-    /// Handles a parsed message.
+    /// Handles a parsed message (its id fields hold ids; selectors are resolved by
+    /// [`Session::handle_raw`]).
     pub fn handle(&mut self, conn: &str, msg: ClientMsg) -> Vec<OutboundLine> {
+        self.handle_resolved(conn, msg, BTreeMap::new())
+    }
+
+    /// Handles a parsed message whose selectors resolved to `resolved` (§17).
+    fn handle_resolved(
+        &mut self,
+        conn: &str,
+        msg: ClientMsg,
+        resolved: BTreeMap<String, String>,
+    ) -> Vec<OutboundLine> {
         let ci = self.conn_index(conn);
         if let ClientMsg::Hello {
             protocol,
@@ -510,7 +614,7 @@ impl Session {
                 mode,
                 base,
                 reason,
-            } => match self.command(ci, &id, &ops, mode, base, reason) {
+            } => match self.command(ci, &id, &ops, mode, (base, reason), resolved) {
                 Ok(lines) => lines,
                 Err(e) => vec![err_line(conn, Some(id), e)],
             },
@@ -526,13 +630,20 @@ impl Session {
                             seq: self.seq(),
                             now: self.clock(),
                             data,
+                            resolved,
                         },
                     )],
                     Err(e) => vec![err_line(conn, Some(id), e)],
                 }
             }
             ClientMsg::Subscribe { id, topic } => match self.subscribe(ci, &id, topic) {
-                Ok(()) => vec![out(conn, ack(id, AckStatus::Subscribed))],
+                Ok(()) => {
+                    let mut a = ack(id, AckStatus::Subscribed);
+                    if let ServerMsg::Ack { resolved: r, .. } = &mut a {
+                        *r = resolved;
+                    }
+                    vec![out(conn, a)]
+                }
                 Err(e) => vec![err_line(conn, Some(id), e)],
             },
             ClientMsg::Unsubscribe { id, sub } => {
@@ -561,6 +672,7 @@ impl Session {
                                 seq: self.seq(),
                                 now: self.clock(),
                                 data,
+                                resolved: BTreeMap::new(),
                             },
                         )];
                         v.append(&mut events);
@@ -574,6 +686,7 @@ impl Session {
                     let mut v = vec![out(
                         conn,
                         ServerMsg::Ack {
+                            resolved,
                             id,
                             status: AckStatus::Delivered,
                             seq: None,
@@ -656,6 +769,10 @@ impl Session {
         vec![out(
             conn,
             ServerMsg::Welcome {
+                // Only principals that may read get the summary (a feed may not).
+                summary: permissions(p.role)
+                    .read
+                    .then(|| crate::summary::summarize_doc(&self.doc)),
                 protocol: PROTOCOL_VERSION.to_owned(),
                 doc: self.doc.id.clone(),
                 principal: p.id,
@@ -682,8 +799,8 @@ impl Session {
         id: &str,
         ops: &[Op],
         mode: WriteMode,
-        base: Option<Seq>,
-        reason: Option<String>,
+        (base, reason): (Option<Seq>, Option<String>),
+        resolved: BTreeMap<String, String>,
     ) -> PResult<Vec<OutboundLine>> {
         if ops.is_empty() {
             return Err(invalid("a command needs at least one op", "/ops"));
@@ -782,8 +899,8 @@ impl Session {
                     id,
                     (proposal, note.clone()),
                     &principal,
-                    base,
-                    reason,
+                    (base, reason),
+                    resolved,
                 );
             }
             let mut ctx = Ctx {
@@ -824,6 +941,7 @@ impl Session {
             let mut lines = vec![out(
                 &conn,
                 ServerMsg::Ack {
+                    resolved,
                     id: id.to_owned(),
                     status: AckStatus::Applied,
                     seq: Some(seq),
@@ -898,6 +1016,7 @@ impl Session {
         let mut lines = vec![out(
             &conn,
             ServerMsg::Ack {
+                resolved,
                 id: id.to_owned(),
                 status: AckStatus::Proposed,
                 seq: Some(seq),
@@ -916,8 +1035,8 @@ impl Session {
         id: &str,
         (pid, note): (&str, Option<String>),
         decider: &str,
-        base: Option<Seq>,
-        reason: Option<String>,
+        (base, reason): (Option<Seq>, Option<String>),
+        resolved: BTreeMap<String, String>,
     ) -> PResult<Vec<OutboundLine>> {
         let pr = need_proposal(&self.doc, pid, "/ops/0/proposal")?.clone();
         let seq = self.seq() + 1;
@@ -993,6 +1112,7 @@ impl Session {
         let mut lines = vec![out(
             conn,
             ServerMsg::Ack {
+                resolved,
                 id: id.to_owned(),
                 status: AckStatus::Applied,
                 seq: Some(seq),
@@ -1028,12 +1148,12 @@ impl Session {
             if undone.contains(&e.seq) || e.undoes.is_some_and(|x| x > b) {
                 continue;
             }
-            let t = touched_ids(&e.changes);
+            let t = touched_keys(&e.changes);
             for (k, c) in changes.iter().enumerate() {
-                let id = touched(c);
-                if t.contains(id) {
+                let key = std::iter::once(touched_key(c)).collect();
+                if let Some(id) = first_overlap(&key, &t) {
                     if first.is_none() {
-                        first = Some((id.to_owned(), e.seq, e.author.clone(), origin[k]));
+                        first = Some((id, e.seq, e.author.clone(), origin[k]));
                     }
                     conflicts.push(e.seq);
                     break;
@@ -1549,6 +1669,7 @@ impl Session {
 
 fn ack(id: String, status: AckStatus) -> ServerMsg {
     ServerMsg::Ack {
+        resolved: std::collections::BTreeMap::new(),
         id,
         status,
         seq: None,

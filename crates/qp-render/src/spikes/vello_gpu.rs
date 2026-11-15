@@ -1,4 +1,4 @@
-//! Spike backend (feature `spike-vello-gpu`): draws a [`Scene`] with vello (GPU compute via
+//! Spike backend (feature `spike-vello-gpu`): draws a [`SceneDesc`] with vello (GPU compute via
 //! wgpu) into an offscreen texture and reads it back. Native/headless only in R0.
 //! Comparison-only; the reference renderer is [`crate::cpu`].
 
@@ -7,14 +7,15 @@ use std::pin::Pin;
 use std::sync::{Arc, Mutex, PoisonError};
 use std::task::{Context, Poll, Waker};
 
-use vello::kurbo::{Affine, BezPath, Rect, Stroke};
+use vello::kurbo::{Affine, BezPath, Circle, Rect, Stroke};
 use vello::peniko::{Blob, Color, Fill, FontData};
 use vello::wgpu;
 pub use vello::AaConfig;
 use vello::{Glyph, RenderParams, Renderer, RendererOptions};
 
-use crate::scene::{Prim, Rgba, Scene};
+use crate::scene::{Prim, Rgba};
 use crate::RenderError;
+use crate::SceneDesc;
 
 fn err(e: impl std::fmt::Display) -> RenderError {
     RenderError::new(format!("vello/wgpu: {e}"))
@@ -79,10 +80,10 @@ impl GpuRenderer {
         })
     }
 
-    fn encode(&self, scene: &Scene) -> Result<vello::Scene, RenderError> {
+    fn encode(&self, scene: &SceneDesc) -> Result<vello::Scene, RenderError> {
         let mut vs = vello::Scene::new();
         let id = Affine::IDENTITY;
-        for p in &scene.prims {
+        for p in scene.prims() {
             match p {
                 Prim::Rect {
                     x,
@@ -101,7 +102,7 @@ impl GpuRenderer {
                     color: c,
                 } => {
                     let mut bp = BezPath::new();
-                    for (i, &(x, y)) in points.iter().enumerate() {
+                    for (i, &[x, y]) in points.iter().enumerate() {
                         let pt = (f64::from(x), f64::from(y));
                         if i == 0 {
                             bp.move_to(pt);
@@ -110,6 +111,28 @@ impl GpuRenderer {
                         }
                     }
                     vs.stroke(&Stroke::new(f64::from(*width)), id, color(*c), None, &bp);
+                }
+                Prim::Fill { points, color: c } => {
+                    let mut bp = BezPath::new();
+                    for (i, &[x, y]) in points.iter().enumerate() {
+                        let pt = (f64::from(x), f64::from(y));
+                        if i == 0 {
+                            bp.move_to(pt);
+                        } else {
+                            bp.line_to(pt);
+                        }
+                    }
+                    bp.close_path();
+                    vs.fill(Fill::NonZero, id, color(*c), None, &bp);
+                }
+                Prim::Circle {
+                    cx,
+                    cy,
+                    r,
+                    color: c,
+                } => {
+                    let circle = Circle::new((f64::from(*cx), f64::from(*cy)), f64::from(*r));
+                    vs.fill(Fill::NonZero, id, color(*c), None, &circle);
                 }
                 Prim::Text {
                     x,
@@ -143,7 +166,7 @@ impl GpuRenderer {
     /// # Errors
     /// GPU submission or readback failure.
     #[cfg(not(target_arch = "wasm32"))]
-    pub fn render(&mut self, scene: &Scene, aa: AaConfig) -> Result<Vec<u8>, RenderError> {
+    pub fn render(&mut self, scene: &SceneDesc, aa: AaConfig) -> Result<Vec<u8>, RenderError> {
         pollster::block_on(self.render_async(scene, aa))
     }
 
@@ -153,7 +176,7 @@ impl GpuRenderer {
     /// GPU submission or readback failure.
     pub async fn render_async(
         &mut self,
-        scene: &Scene,
+        scene: &SceneDesc,
         aa: AaConfig,
     ) -> Result<Vec<u8>, RenderError> {
         let vs = self.encode(scene)?;

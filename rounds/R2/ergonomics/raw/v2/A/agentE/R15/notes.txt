@@ -1,0 +1,1 @@
+attempt1: set_encoding with layer selector {shows:{study:rsi}}, encoding width 2 -> applied, resolved to layer yirpe; list views confirms width 2.0. Success. No difficulties.

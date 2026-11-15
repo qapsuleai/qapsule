@@ -1,0 +1,1 @@
+attempt1: set_view_range from_bar 140 to_bar 199 (guessed 200 bars from the spec examples; welcome.summary confirmed len 200). Applied, x.domain set. Bar count had to be guessed before seeing welcome.

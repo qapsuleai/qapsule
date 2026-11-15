@@ -1,0 +1,1 @@
+attempt1: list findings + present(surface=phone) without finding; default was the RSI finding, wrong one. attempt2: present f7b4v phone: capsule depth, spark from_bar 140 (60 bars), 3 glyphs. Same ambiguity as R04.

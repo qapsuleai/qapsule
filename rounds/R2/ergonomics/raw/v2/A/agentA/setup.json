@@ -1,0 +1,126 @@
+{
+ "label": "v2",
+ "variant": "A",
+ "branch": "r2/t8a-selectors",
+ "commit": "967390231b2ee378ea0a0944a0ee33c5875b827c",
+ "agent": "A",
+ "tasks": [
+  "R01",
+  "R06",
+  "R11",
+  "R16"
+ ],
+ "seed": 2928032534,
+ "mapping": {
+  "px": "tl4l0",
+  "rsi14": "o0u0y",
+  "macd": "gcwz8",
+  "bb20": "uvlk3",
+  "sma50": "f88a4",
+  "main": "t6y26",
+  "fact-rsi-cross70": "n6s92",
+  "fact-brk-new": "wc9q9",
+  "fact-brk-old": "woyc7",
+  "fnd-overbought": "emleu",
+  "fnd-brk-new": "i7u78",
+  "fnd-brk-old": "xgw4t",
+  "cap-overbought": "avc0r",
+  "cap-brk-new": "uvxmj",
+  "cap-brk-old": "rstpo",
+  "L-candles": "j8p16",
+  "L-bb": "p7sr7",
+  "L-rsi": "m2nzj",
+  "L-rule70": "nv6p7",
+  "L-macd": "mlznm"
+ },
+ "setup": [
+  {
+   "conn": "zz-host",
+   "msg": {
+    "type": "hello",
+    "protocol": "qp/0",
+    "principal": "host",
+    "surface": {
+     "kind": "headless"
+    }
+   }
+  },
+  {
+   "conn": "zz-ark",
+   "msg": {
+    "type": "hello",
+    "protocol": "qp/0",
+    "principal": "arkin",
+    "surface": {
+     "kind": "desktop"
+    }
+   }
+  },
+  {
+   "conn": "zz-host",
+   "msg": {
+    "type": "clock",
+    "now": 1760001800000
+   }
+  }
+ ],
+ "epilogue": [
+  {
+   "conn": "zz-host",
+   "msg": {
+    "type": "query",
+    "id": "e-doc",
+    "query": {
+     "kind": "document"
+    }
+   }
+  },
+  {
+   "conn": "zz-host",
+   "msg": {
+    "type": "query",
+    "id": "e-screen",
+    "query": {
+     "kind": "screen",
+     "principal": "arkin"
+    }
+   }
+  },
+  {
+   "conn": "zz-host",
+   "msg": {
+    "type": "query",
+    "id": "e-log",
+    "query": {
+     "kind": "log"
+    }
+   }
+  },
+  {
+   "conn": "zz-ref",
+   "msg": {
+    "type": "hello",
+    "protocol": "qp/0",
+    "principal": "editor",
+    "surface": {
+     "kind": "headless"
+    }
+   }
+  },
+  {
+   "conn": "zz-ref",
+   "msg": {
+    "type": "query",
+    "id": "e-hit",
+    "query": {
+     "kind": "hit",
+     "view": "t6y26",
+     "x": 900,
+     "y": 200,
+     "width": 1200,
+     "height": 600
+    }
+   }
+  }
+ ]
+}

@@ -1,0 +1,1 @@
+Ekranda 3 panel var: fiyat paneli (mumlar + Bollinger(20,2) bantları), RSI(14) paneli (70 aşırı alım çizgisiyle) ve MACD(12,26,9) paneli. Dokümanda SMA50 de tanımlı ama ekranda çizilmiyor.

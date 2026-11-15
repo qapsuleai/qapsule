@@ -1,0 +1,2 @@
+attempt1: insert_layer rule with encoding.y 123.45 -> no_origin error (as spec §10 says; nothing applied).
+attempt2: add_fact (kind level, evidence.level 123.45, bar 199 = last bar) + insert_layer rule with origin pointing to that fact in one command -> applied. Unclear in spec: which bar/kind a helper fact should have; I added a new fact to the document as a side effect.

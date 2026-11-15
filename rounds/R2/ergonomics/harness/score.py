@@ -565,7 +565,10 @@ def score_agent(adir):
                 continue
             c = ctx(r, r[:-6] + ".full.jsonl")
             why = check(t, c, m, ans)
+            docids = set(m.values())
+            copied = sorted({x for x in re.findall(r'"([A-Za-z0-9_.:-]+)"', "\n".join(content[r])) if x in docids})
             att.append({"file": name, "run": os.path.relpath(r, adir), "how": how, "pass": not why, "why": why,
+                        "doc_ids_used": copied,
                         "msgs": len(c["lines"]), "errors": len(c["errors"]),
                         "error_codes": [e.get("error", {}).get("code") for e in c["errors"]]})
         # final: the last run of an attempt file in this task dir (re-runs included)
@@ -578,6 +581,8 @@ def score_agent(adir):
                "other_runs": other, "reruns": sum(1 for r in runs if os.path.basename(r)[3:] in names) - len(
                    [n for n in last if n in names]),
                "first": bool(att) and att[0]["pass"], "final": final_pass,
+               # first try written without any document id (so without a prior discovery run)
+               "first_blind": bool(att) and att[0]["pass"] and not att[0].get("doc_ids_used"),
                "any": any(a["pass"] for a in att),
                "first_error": bool(att) and att[0]["errors"] > 0,
                "msgs_first": att[0]["msgs"] if att else 0, "msgs_total": sum(a["msgs"] for a in att),
@@ -605,6 +610,7 @@ def score_variant(label, variant):
     errd = [r for r in rows if r["first_error"]]
     summ = {"variant": variant, "label": label, "tasks": n,
             "first": sum(r["first"] for r in rows), "final": sum(r["final"] for r in rows),
+            "first_blind": sum(r["first_blind"] for r in rows),
             "any": sum(r["any"] for r in rows),
             "recovered": sum(r["final"] for r in ff), "failed_first": len(ff),
             "first_error": len(errd), "recovered_after_error": sum(r["final"] for r in errd),
@@ -627,14 +633,14 @@ def main(argv):
     label = argv[0] if argv else "v1"
     variants = argv[1:] or ["base", "A", "B"]
     allrows = {}
-    print("| Variant | First try | Final | Recovered (failed first → final) | First try had an error → final | Attempts | Msgs (first / all) | Tokens | Output tokens | Agent wall time (s) |")
-    print("|---|---|---|---|---|---|---|---|---|---|")
+    print("| Variant | First try | First try w/o document ids | Final | Recovered (failed first → final) | First try had an error → final | Attempts | Msgs (first / all) | Tokens | Output tokens | Agent wall time (s) |")
+    print("|---|---|---|---|---|---|---|---|---|---|---|")
     for v in variants:
         if not os.path.isdir(os.path.join(RAW, label, v)):
             continue
         s, rows, agents = score_variant(label, v)
         allrows[v] = rows
-        print(f"| {v} | {s['first']}/{s['tasks']} | {s['final']}/{s['tasks']} | {s['recovered']}/{s['failed_first']} | "
+        print(f"| {v} | {s['first']}/{s['tasks']} | {s['first_blind']}/{s['tasks']} | {s['final']}/{s['tasks']} | {s['recovered']}/{s['failed_first']} | "
               f"{s['recovered_after_error']}/{s['first_error']} | {s['attempts']} | {s['msgs_first']} / {s['msgs_total']} | "
               f"{s['tokens']:,} | {s['output_tokens']:,} | {s['wall_s']} |")
     print()

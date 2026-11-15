@@ -1,0 +1,108 @@
+v1/base/agentA: tool calls 27 (executed 22: reads 3, writes 12, run.sh 6; denied 5); executed out of bounds: 6
+    VIOLATION ('Bash', '/private/tmp/claude-501/-Users-arkns-Works-Mchart-qapsule/e6910705-d032-4e80-bf66-0a30bb080f3b/scratchpad/t9/packet/base/run.sh R01/attempt1.jsonl | tail -n +2 | cut -c1-3500')
+    VIOLATION ('Bash', '/private/tmp/claude-501/-Users-arkns-Works-Mchart-qapsule/e6910705-d032-4e80-bf66-0a30bb080f3b/scratchpad/t9/packet/base/run.sh R06/attempt1.jsonl | tail -n +2 | cut -c1-3500')
+    VIOLATION ('Bash', '/private/tmp/claude-501/-Users-arkns-Works-Mchart-qapsule/e6910705-d032-4e80-bf66-0a30bb080f3b/scratchpad/t9/packet/base/run.sh R11/attempt1.jsonl | tail -n +2 | cut -c1-3500')
+    VIOLATION ('Bash', '/private/tmp/claude-501/-Users-arkns-Works-Mchart-qapsule/e6910705-d032-4e80-bf66-0a30bb080f3b/scratchpad/t9/packet/base/run.sh R16/attempt1.jsonl | tail -n +2 | cut -c1-3500')
+    VIOLATION ('Bash', '/private/tmp/claude-501/-Users-arkns-Works-Mchart-qapsule/e6910705-d032-4e80-bf66-0a30bb080f3b/scratchpad/t9/packet/base/run.sh R01/attempt2.jsonl | tail -n +2 | cut -c1-3500')
+    VIOLATION ('Bash', '/private/tmp/claude-501/-Users-arkns-Works-Mchart-qapsule/e6910705-d032-4e80-bf66-0a30bb080f3b/scratchpad/t9/packet/base/run.sh R01/attempt3.jsonl | tail -n +2 | cut -c1-600,1500-2200 | head -c 5000; ')
+    denied: Bash ls /private/tmp/claude-501/-Users-arkns-Works-Mchart-qapsule/e6910705-d032-4e80-bf66-0a30bb080f3b/scratchpad/t
+    denied: Bash cd /private/tmp/claude-501/-Users-arkns-Works-Mchart-qapsule/e6910705-d032-4e80-bf66-0a30bb080f3b/scratchpad/t
+    denied: Bash cd /private/tmp/claude-501/-Users-arkns-Works-Mchart-qapsule/e6910705-d032-4e80-bf66-0a30bb080f3b/scratchpad/t
+    denied: Bash cd /private/tmp/claude-501/-Users-arkns-Works-Mchart-qapsule/e6910705-d032-4e80-bf66-0a30bb080f3b/scratchpad/t
+    denied: Bash cd /private/tmp/claude-501/-Users-arkns-Works-Mchart-qapsule/e6910705-d032-4e80-bf66-0a30bb080f3b/scratchpad/t
+v1/base/agentB: tool calls 22 (executed 18: reads 4, writes 9, run.sh 5; denied 4); executed out of bounds: 0
+    denied: Bash ls /private/tmp/claude-501/-Users-arkns-Works-Mchart-qapsule/e6910705-d032-4e80-bf66-0a30bb080f3b/scratchpad/t
+    denied: Bash cd /private/tmp/claude-501/-Users-arkns-Works-Mchart-qapsule/e6910705-d032-4e80-bf66-0a30bb080f3b/scratchpad/t
+    denied: Bash cd /private/tmp/claude-501/-Users-arkns-Works-Mchart-qapsule/e6910705-d032-4e80-bf66-0a30bb080f3b/scratchpad/t
+    denied: Bash cp R02/attempt1.jsonl R07/attempt1.jsonl && cp R02/attempt1.jsonl R12/attempt1.jsonl && cp R02/attempt1.jsonl 
+v1/base/agentC: tool calls 25 (executed 20: reads 3, writes 13, run.sh 4; denied 5); executed out of bounds: 0
+    denied: Bash ls /private/tmp/claude-501/-Users-arkns-Works-Mchart-qapsule/e6910705-d032-4e80-bf66-0a30bb080f3b/scratchpad/t
+    denied: Bash mkdir -p R03 R08 R13 R18 && \nH='{"conn":"e","msg":{"type":"hello","protocol":"qp/0","principal":"editor","surf
+    denied: Bash ../../../../packet/base/run.sh R13/attempt1.jsonl 2>&1 | cut -c1-6000
+    denied: Bash for r in R03 R08 R18; do cp R13/attempt1.jsonl $r/attempt1.jsonl; done; ls R*
+    denied: Bash cp R13/attempt1.jsonl R03/attempt1.jsonl && cp R13/attempt1.jsonl R08/attempt1.jsonl && cp R13/attempt1.jsonl 
+v1/base/agentD: tool calls 28 (executed 24: reads 3, writes 14, run.sh 7; denied 4); executed out of bounds: 1
+    VIOLATION ('Bash', '/private/tmp/claude-501/-Users-arkns-Works-Mchart-qapsule/e6910705-d032-4e80-bf66-0a30bb080f3b/scratchpad/t9/packet/base/run.sh /private/tmp/claude-501/-Users-arkns-Works-Mchart-qapsule/e6910705-d032-')
+    denied: Bash ls /private/tmp/claude-501/-Users-arkns-Works-Mchart-qapsule/e6910705-d032-4e80-bf66-0a30bb080f3b/scratchpad/t
+    denied: Bash cd /private/tmp/claude-501/-Users-arkns-Works-Mchart-qapsule/e6910705-d032-4e80-bf66-0a30bb080f3b/scratchpad/t
+    denied: Bash cd /private/tmp/claude-501/-Users-arkns-Works-Mchart-qapsule/e6910705-d032-4e80-bf66-0a30bb080f3b/scratchpad/t
+    denied: Bash cd /private/tmp/claude-501/-Users-arkns-Works-Mchart-qapsule/e6910705-d032-4e80-bf66-0a30bb080f3b/scratchpad/t
+v1/base/agentE: tool calls 29 (executed 23: reads 3, writes 14, run.sh 6; denied 6); executed out of bounds: 0
+    denied: Bash ls /private/tmp/claude-501/-Users-arkns-Works-Mchart-qapsule/e6910705-d032-4e80-bf66-0a30bb080f3b/scratchpad/t
+    denied: Bash cd /private/tmp/claude-501/-Users-arkns-Works-Mchart-qapsule/e6910705-d032-4e80-bf66-0a30bb080f3b/scratchpad/t
+    denied: Bash R=/private/tmp/claude-501/-Users-arkns-Works-Mchart-qapsule/e6910705-d032-4e80-bf66-0a30bb080f3b/scratchpad/t9
+    denied: Bash B=/private/tmp/claude-501/-Users-arkns-Works-Mchart-qapsule/e6910705-d032-4e80-bf66-0a30bb080f3b/scratchpad/t9
+    denied: Bash cd /private/tmp/claude-501/-Users-arkns-Works-Mchart-qapsule/e6910705-d032-4e80-bf66-0a30bb080f3b/scratchpad/t
+    denied: Bash cd /private/tmp/claude-501/-Users-arkns-Works-Mchart-qapsule/e6910705-d032-4e80-bf66-0a30bb080f3b/scratchpad/t
+v1/A/agentA: tool calls 20 (executed 16: reads 4, writes 8, run.sh 0; denied 4); executed out of bounds: 4
+    VIOLATION ('Bash', 'cd /private/tmp/claude-501/-Users-arkns-Works-Mchart-qapsule/e6910705-d032-4e80-bf66-0a30bb080f3b/scratchpad/t9/work/v1/A/agentA/R01 && /private/tmp/claude-501/-Users-arkns-Works-Mchart-qapsule/e69107')
+    VIOLATION ('Bash', 'cd /private/tmp/claude-501/-Users-arkns-Works-Mchart-qapsule/e6910705-d032-4e80-bf66-0a30bb080f3b/scratchpad/t9/work/v1/A/agentA/R06 && /private/tmp/claude-501/-Users-arkns-Works-Mchart-qapsule/e69107')
+    VIOLATION ('Bash', 'cd /private/tmp/claude-501/-Users-arkns-Works-Mchart-qapsule/e6910705-d032-4e80-bf66-0a30bb080f3b/scratchpad/t9/work/v1/A/agentA/R11 && /private/tmp/claude-501/-Users-arkns-Works-Mchart-qapsule/e69107')
+    VIOLATION ('Bash', 'cd /private/tmp/claude-501/-Users-arkns-Works-Mchart-qapsule/e6910705-d032-4e80-bf66-0a30bb080f3b/scratchpad/t9/work/v1/A/agentA/R16 && /private/tmp/claude-501/-Users-arkns-Works-Mchart-qapsule/e69107')
+    denied: Bash ls /private/tmp/claude-501/-Users-arkns-Works-Mchart-qapsule/e6910705-d032-4e80-bf66-0a30bb080f3b/scratchpad/t
+    denied: Bash cd /private/tmp/claude-501/-Users-arkns-Works-Mchart-qapsule/e6910705-d032-4e80-bf66-0a30bb080f3b/scratchpad/t
+    denied: Bash cd /private/tmp/claude-501/-Users-arkns-Works-Mchart-qapsule/e6910705-d032-4e80-bf66-0a30bb080f3b/scratchpad/t
+    denied: Bash cd /private/tmp/claude-501/-Users-arkns-Works-Mchart-qapsule/e6910705-d032-4e80-bf66-0a30bb080f3b/scratchpad/t
+v1/A/agentB: tool calls 20 (executed 16: reads 4, writes 8, run.sh 4; denied 4); executed out of bounds: 4
+    VIOLATION ('Bash', '/private/tmp/claude-501/-Users-arkns-Works-Mchart-qapsule/e6910705-d032-4e80-bf66-0a30bb080f3b/scratchpad/t9/packet/A/run.sh /private/tmp/claude-501/-Users-arkns-Works-Mchart-qapsule/e6910705-d032-4e8')
+    VIOLATION ('Bash', '/private/tmp/claude-501/-Users-arkns-Works-Mchart-qapsule/e6910705-d032-4e80-bf66-0a30bb080f3b/scratchpad/t9/packet/A/run.sh /private/tmp/claude-501/-Users-arkns-Works-Mchart-qapsule/e6910705-d032-4e8')
+    VIOLATION ('Bash', '/private/tmp/claude-501/-Users-arkns-Works-Mchart-qapsule/e6910705-d032-4e80-bf66-0a30bb080f3b/scratchpad/t9/packet/A/run.sh /private/tmp/claude-501/-Users-arkns-Works-Mchart-qapsule/e6910705-d032-4e8')
+    VIOLATION ('Bash', '/private/tmp/claude-501/-Users-arkns-Works-Mchart-qapsule/e6910705-d032-4e80-bf66-0a30bb080f3b/scratchpad/t9/packet/A/run.sh /private/tmp/claude-501/-Users-arkns-Works-Mchart-qapsule/e6910705-d032-4e8')
+    denied: Bash ls /private/tmp/claude-501/-Users-arkns-Works-Mchart-qapsule/e6910705-d032-4e80-bf66-0a30bb080f3b/scratchpad/t
+    denied: Bash cd /private/tmp/claude-501/-Users-arkns-Works-Mchart-qapsule/e6910705-d032-4e80-bf66-0a30bb080f3b/scratchpad/t
+    denied: Bash cd /private/tmp/claude-501/-Users-arkns-Works-Mchart-qapsule/e6910705-d032-4e80-bf66-0a30bb080f3b/scratchpad/t
+    denied: Bash cd /private/tmp/claude-501/-Users-arkns-Works-Mchart-qapsule/e6910705-d032-4e80-bf66-0a30bb080f3b/scratchpad/t
+v1/A/agentC: tool calls 21 (executed 17: reads 4, writes 9, run.sh 4; denied 4); executed out of bounds: 4
+    VIOLATION ('Bash', '/private/tmp/claude-501/-Users-arkns-Works-Mchart-qapsule/e6910705-d032-4e80-bf66-0a30bb080f3b/scratchpad/t9/packet/A/run.sh /private/tmp/claude-501/-Users-arkns-Works-Mchart-qapsule/e6910705-d032-4e8')
+    VIOLATION ('Bash', '/private/tmp/claude-501/-Users-arkns-Works-Mchart-qapsule/e6910705-d032-4e80-bf66-0a30bb080f3b/scratchpad/t9/packet/A/run.sh /private/tmp/claude-501/-Users-arkns-Works-Mchart-qapsule/e6910705-d032-4e8')
+    VIOLATION ('Bash', '/private/tmp/claude-501/-Users-arkns-Works-Mchart-qapsule/e6910705-d032-4e80-bf66-0a30bb080f3b/scratchpad/t9/packet/A/run.sh /private/tmp/claude-501/-Users-arkns-Works-Mchart-qapsule/e6910705-d032-4e8')
+    VIOLATION ('Bash', '/private/tmp/claude-501/-Users-arkns-Works-Mchart-qapsule/e6910705-d032-4e80-bf66-0a30bb080f3b/scratchpad/t9/packet/A/run.sh /private/tmp/claude-501/-Users-arkns-Works-Mchart-qapsule/e6910705-d032-4e8')
+    denied: Bash ls /private/tmp/claude-501/-Users-arkns-Works-Mchart-qapsule/e6910705-d032-4e80-bf66-0a30bb080f3b/scratchpad/t
+    denied: Bash cd /private/tmp/claude-501/-Users-arkns-Works-Mchart-qapsule/e6910705-d032-4e80-bf66-0a30bb080f3b/scratchpad/t
+    denied: Bash cd /private/tmp/claude-501/-Users-arkns-Works-Mchart-qapsule/e6910705-d032-4e80-bf66-0a30bb080f3b/scratchpad/t
+    denied: Bash cd /private/tmp/claude-501/-Users-arkns-Works-Mchart-qapsule/e6910705-d032-4e80-bf66-0a30bb080f3b/scratchpad/t
+v1/A/agentD: tool calls 23 (executed 19: reads 4, writes 11, run.sh 4; denied 4); executed out of bounds: 4
+    VIOLATION ('Bash', '/private/tmp/claude-501/-Users-arkns-Works-Mchart-qapsule/e6910705-d032-4e80-bf66-0a30bb080f3b/scratchpad/t9/packet/A/run.sh /private/tmp/claude-501/-Users-arkns-Works-Mchart-qapsule/e6910705-d032-4e8')
+    VIOLATION ('Bash', '/private/tmp/claude-501/-Users-arkns-Works-Mchart-qapsule/e6910705-d032-4e80-bf66-0a30bb080f3b/scratchpad/t9/packet/A/run.sh /private/tmp/claude-501/-Users-arkns-Works-Mchart-qapsule/e6910705-d032-4e8')
+    VIOLATION ('Bash', '/private/tmp/claude-501/-Users-arkns-Works-Mchart-qapsule/e6910705-d032-4e80-bf66-0a30bb080f3b/scratchpad/t9/packet/A/run.sh /private/tmp/claude-501/-Users-arkns-Works-Mchart-qapsule/e6910705-d032-4e8')
+    VIOLATION ('Bash', '/private/tmp/claude-501/-Users-arkns-Works-Mchart-qapsule/e6910705-d032-4e80-bf66-0a30bb080f3b/scratchpad/t9/packet/A/run.sh /private/tmp/claude-501/-Users-arkns-Works-Mchart-qapsule/e6910705-d032-4e8')
+    denied: Bash ls /private/tmp/claude-501/-Users-arkns-Works-Mchart-qapsule/e6910705-d032-4e80-bf66-0a30bb080f3b/scratchpad/t
+    denied: Bash cd /private/tmp/claude-501/-Users-arkns-Works-Mchart-qapsule/e6910705-d032-4e80-bf66-0a30bb080f3b/scratchpad/t
+    denied: Bash cd /private/tmp/claude-501/-Users-arkns-Works-Mchart-qapsule/e6910705-d032-4e80-bf66-0a30bb080f3b/scratchpad/t
+    denied: Bash cd /private/tmp/claude-501/-Users-arkns-Works-Mchart-qapsule/e6910705-d032-4e80-bf66-0a30bb080f3b/scratchpad/t
+v1/A/agentE: tool calls 23 (executed 20: reads 4, writes 10, run.sh 6; denied 3); executed out of bounds: 0
+    denied: Bash ls /private/tmp/claude-501/-Users-arkns-Works-Mchart-qapsule/e6910705-d032-4e80-bf66-0a30bb080f3b/scratchpad/t
+    denied: Bash mkdir -p R05 R10 R15 R20 && cat > disc.jsonl <<'E'\n{"conn":"a","msg":{"type":"hello","protocol":"qp/0","princi
+    denied: Bash B=/private/tmp/claude-501/-Users-arkns-Works-Mchart-qapsule/e6910705-d032-4e80-bf66-0a30bb080f3b/scratchpad/t9
+v1/B/agentA: tool calls 24 (executed 20: reads 4, writes 10, run.sh 6; denied 4); executed out of bounds: 0
+    denied: Bash ls /private/tmp/claude-501/-Users-arkns-Works-Mchart-qapsule/e6910705-d032-4e80-bf66-0a30bb080f3b/scratchpad/t
+    denied: Bash mkdir -p R01 R06 R11 R16 && cat > probe.jsonl <<'E'\n{"conn":"a","msg":{"type":"hello","protocol":"qp/0","princ
+    denied: Bash mkdir -p R01 R06 R11 R16 && /private/tmp/claude-501/-Users-arkns-Works-Mchart-qapsule/e6910705-d032-4e80-bf66-
+    denied: Bash B=/private/tmp/claude-501/-Users-arkns-Works-Mchart-qapsule/e6910705-d032-4e80-bf66-0a30bb080f3b/scratchpad/t9
+v1/B/agentB: tool calls 22 (executed 20: reads 4, writes 10, run.sh 6; denied 2); executed out of bounds: 1
+    VIOLATION ('Bash', '/private/tmp/claude-501/-Users-arkns-Works-Mchart-qapsule/e6910705-d032-4e80-bf66-0a30bb080f3b/scratchpad/t9/packet/B/run.sh /private/tmp/claude-501/-Users-arkns-Works-Mchart-qapsule/e6910705-d032-4e8')
+    denied: Bash ls /private/tmp/claude-501/-Users-arkns-Works-Mchart-qapsule/e6910705-d032-4e80-bf66-0a30bb080f3b/scratchpad/t
+    denied: Bash cd /private/tmp/claude-501/-Users-arkns-Works-Mchart-qapsule/e6910705-d032-4e80-bf66-0a30bb080f3b/scratchpad/t
+v1/B/agentC: tool calls 24 (executed 22: reads 5, writes 11, run.sh 6; denied 2); executed out of bounds: 0
+    denied: Bash cd /private/tmp/claude-501/-Users-arkns-Works-Mchart-qapsule/e6910705-d032-4e80-bf66-0a30bb080f3b/scratchpad/t
+    denied: Bash for r in R03 R08 R13 R18; do mkdir -p $r; done\nH='{"type":"hello","protocol":"qp/0","principal":"editor","surf
+v1/B/agentD: tool calls 22 (executed 19: reads 4, writes 11, run.sh 4; denied 3); executed out of bounds: 4
+    VIOLATION ('Bash', '/private/tmp/claude-501/-Users-arkns-Works-Mchart-qapsule/e6910705-d032-4e80-bf66-0a30bb080f3b/scratchpad/t9/packet/B/run.sh /private/tmp/claude-501/-Users-arkns-Works-Mchart-qapsule/e6910705-d032-4e8')
+    VIOLATION ('Bash', '/private/tmp/claude-501/-Users-arkns-Works-Mchart-qapsule/e6910705-d032-4e80-bf66-0a30bb080f3b/scratchpad/t9/packet/B/run.sh /private/tmp/claude-501/-Users-arkns-Works-Mchart-qapsule/e6910705-d032-4e8')
+    VIOLATION ('Bash', '/private/tmp/claude-501/-Users-arkns-Works-Mchart-qapsule/e6910705-d032-4e80-bf66-0a30bb080f3b/scratchpad/t9/packet/B/run.sh /private/tmp/claude-501/-Users-arkns-Works-Mchart-qapsule/e6910705-d032-4e8')
+    VIOLATION ('Bash', '/private/tmp/claude-501/-Users-arkns-Works-Mchart-qapsule/e6910705-d032-4e80-bf66-0a30bb080f3b/scratchpad/t9/packet/B/run.sh /private/tmp/claude-501/-Users-arkns-Works-Mchart-qapsule/e6910705-d032-4e8')
+    denied: Bash ls /private/tmp/claude-501/-Users-arkns-Works-Mchart-qapsule/e6910705-d032-4e80-bf66-0a30bb080f3b/scratchpad/t
+    denied: Bash cd /private/tmp/claude-501/-Users-arkns-Works-Mchart-qapsule/e6910705-d032-4e80-bf66-0a30bb080f3b/scratchpad/t
+    denied: Bash mkdir -p R04 R09 R14 R19 && ls
+v1/B/agentE: tool calls 18 (executed 14: reads 3, writes 5, run.sh 0; denied 4); executed out of bounds: 6
+    VIOLATION ('Bash', 'cd /private/tmp/claude-501/-Users-arkns-Works-Mchart-qapsule/e6910705-d032-4e80-bf66-0a30bb080f3b/scratchpad/t9/work/v1/B/agentE; /private/tmp/claude-501/-Users-arkns-Works-Mchart-qapsule/e6910705-d03')
+    VIOLATION ('Bash', 'cd /private/tmp/claude-501/-Users-arkns-Works-Mchart-qapsule/e6910705-d032-4e80-bf66-0a30bb080f3b/scratchpad/t9/work/v1/B/agentE; /private/tmp/claude-501/-Users-arkns-Works-Mchart-qapsule/e6910705-d03')
+    VIOLATION ('Bash', 'cd /private/tmp/claude-501/-Users-arkns-Works-Mchart-qapsule/e6910705-d032-4e80-bf66-0a30bb080f3b/scratchpad/t9/work/v1/B/agentE; /private/tmp/claude-501/-Users-arkns-Works-Mchart-qapsule/e6910705-d03')
+    VIOLATION ('Bash', 'cd /private/tmp/claude-501/-Users-arkns-Works-Mchart-qapsule/e6910705-d032-4e80-bf66-0a30bb080f3b/scratchpad/t9/work/v1/B/agentE; /private/tmp/claude-501/-Users-arkns-Works-Mchart-qapsule/e6910705-d03')
+    VIOLATION ('Bash', 'cd /private/tmp/claude-501/-Users-arkns-Works-Mchart-qapsule/e6910705-d032-4e80-bf66-0a30bb080f3b/scratchpad/t9/work/v1/B/agentE; /private/tmp/claude-501/-Users-arkns-Works-Mchart-qapsule/e6910705-d03')
+    VIOLATION ('Bash', 'cd /private/tmp/claude-501/-Users-arkns-Works-Mchart-qapsule/e6910705-d032-4e80-bf66-0a30bb080f3b/scratchpad/t9/work/v1/B/agentE\necho "attempt1: probe only (hello + list views) to learn ids, request n')
+    denied: Bash ls /private/tmp/claude-501/-Users-arkns-Works-Mchart-qapsule/e6910705-d032-4e80-bf66-0a30bb080f3b/scratchpad/t
+    denied: Bash cd /private/tmp/claude-501/-Users-arkns-Works-Mchart-qapsule/e6910705-d032-4e80-bf66-0a30bb080f3b/scratchpad/t
+    denied: Bash cd /private/tmp/claude-501/-Users-arkns-Works-Mchart-qapsule/e6910705-d032-4e80-bf66-0a30bb080f3b/scratchpad/t
+    denied: Bash cd /private/tmp/claude-501/-Users-arkns-Works-Mchart-qapsule/e6910705-d032-4e80-bf66-0a30bb080f3b/scratchpad/t
+TOTAL executed out-of-bounds calls: 34; denied calls: 58

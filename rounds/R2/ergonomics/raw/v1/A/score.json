@@ -69,6 +69,7 @@
    "attributed_tokens_heuristic": 25690,
    "detail": [
     {
+     "doc_ids_used": [],
      "error_codes": [],
      "errors": 0,
      "file": "attempt1.jsonl",
@@ -81,6 +82,7 @@
    ],
    "final": true,
    "first": true,
+   "first_blind": true,
    "first_error": false,
    "msgs_first": 4,
    "msgs_total": 4,
@@ -99,6 +101,7 @@
    "attributed_tokens_heuristic": 25670,
    "detail": [
     {
+     "doc_ids_used": [],
      "error_codes": [],
      "errors": 0,
      "file": "attempt1.jsonl",
@@ -114,6 +117,7 @@
    ],
    "final": false,
    "first": false,
+   "first_blind": false,
    "first_error": false,
    "msgs_first": 4,
    "msgs_total": 4,
@@ -132,6 +136,7 @@
    "attributed_tokens_heuristic": 25667,
    "detail": [
     {
+     "doc_ids_used": [],
      "error_codes": [],
      "errors": 0,
      "file": "attempt1.jsonl",
@@ -144,6 +149,7 @@
    ],
    "final": true,
    "first": true,
+   "first_blind": true,
    "first_error": false,
    "msgs_first": 2,
    "msgs_total": 2,
@@ -162,6 +168,7 @@
    "attributed_tokens_heuristic": 25687,
    "detail": [
     {
+     "doc_ids_used": [],
      "error_codes": [],
      "errors": 0,
      "file": "attempt1.jsonl",
@@ -174,6 +181,7 @@
    ],
    "final": true,
    "first": true,
+   "first_blind": true,
    "first_error": false,
    "msgs_first": 2,
    "msgs_total": 2,
@@ -192,6 +200,7 @@
    "attributed_tokens_heuristic": 107034,
    "detail": [
     {
+     "doc_ids_used": [],
      "error_codes": [],
      "errors": 0,
      "file": "attempt1.jsonl",
@@ -204,6 +213,7 @@
    ],
    "final": true,
    "first": true,
+   "first_blind": true,
    "first_error": false,
    "msgs_first": 2,
    "msgs_total": 2,
@@ -224,6 +234,7 @@
    "attributed_tokens_heuristic": 25690,
    "detail": [
     {
+     "doc_ids_used": [],
      "error_codes": [],
      "errors": 0,
      "file": "attempt1.jsonl",
@@ -236,6 +247,7 @@
    ],
    "final": true,
    "first": true,
+   "first_blind": true,
    "first_error": false,
    "msgs_first": 4,
    "msgs_total": 4,
@@ -254,6 +266,7 @@
    "attributed_tokens_heuristic": 25670,
    "detail": [
     {
+     "doc_ids_used": [],
      "error_codes": [],
      "errors": 0,
      "file": "attempt1.jsonl",
@@ -266,6 +279,7 @@
    ],
    "final": true,
    "first": true,
+   "first_blind": true,
    "first_error": false,
    "msgs_first": 3,
    "msgs_total": 3,
@@ -284,6 +298,7 @@
    "attributed_tokens_heuristic": 25667,
    "detail": [
     {
+     "doc_ids_used": [],
      "error_codes": [],
      "errors": 0,
      "file": "attempt1.jsonl",
@@ -296,6 +311,7 @@
    ],
    "final": true,
    "first": true,
+   "first_blind": true,
    "first_error": false,
    "msgs_first": 2,
    "msgs_total": 2,
@@ -314,6 +330,7 @@
    "attributed_tokens_heuristic": 25687,
    "detail": [
     {
+     "doc_ids_used": [],
      "error_codes": [],
      "errors": 0,
      "file": "attempt1.jsonl",
@@ -326,6 +343,7 @@
    ],
    "final": true,
    "first": true,
+   "first_blind": true,
    "first_error": false,
    "msgs_first": 3,
    "msgs_total": 3,
@@ -344,6 +362,7 @@
    "attributed_tokens_heuristic": 52657,
    "detail": [
     {
+     "doc_ids_used": [],
      "error_codes": [],
      "errors": 0,
      "file": "attempt1.jsonl",
@@ -356,6 +375,7 @@
    ],
    "final": true,
    "first": true,
+   "first_blind": true,
    "first_error": false,
    "msgs_first": 2,
    "msgs_total": 2,
@@ -374,6 +394,7 @@
    "attributed_tokens_heuristic": 25690,
    "detail": [
     {
+     "doc_ids_used": [],
      "error_codes": [],
      "errors": 0,
      "file": "attempt1.jsonl",
@@ -386,6 +407,7 @@
    ],
    "final": true,
    "first": true,
+   "first_blind": true,
    "first_error": false,
    "msgs_first": 4,
    "msgs_total": 4,
@@ -404,6 +426,7 @@
    "attributed_tokens_heuristic": 25670,
    "detail": [
     {
+     "doc_ids_used": [],
      "error_codes": [],
      "errors": 0,
      "file": "attempt1.jsonl",
@@ -416,6 +439,7 @@
    ],
    "final": true,
    "first": true,
+   "first_blind": true,
    "first_error": false,
    "msgs_first": 4,
    "msgs_total": 4,
@@ -434,6 +458,7 @@
    "attributed_tokens_heuristic": 25667,
    "detail": [
     {
+     "doc_ids_used": [],
      "error_codes": [],
      "errors": 0,
      "file": "attempt1.jsonl",
@@ -446,6 +471,7 @@
    ],
    "final": true,
    "first": true,
+   "first_blind": true,
    "first_error": false,
    "msgs_first": 2,
    "msgs_total": 2,
@@ -464,6 +490,7 @@
    "attributed_tokens_heuristic": 25687,
    "detail": [
     {
+     "doc_ids_used": [],
      "error_codes": [],
      "errors": 0,
      "file": "attempt1.jsonl",
@@ -476,6 +503,7 @@
    ],
    "final": true,
    "first": true,
+   "first_blind": true,
    "first_error": false,
    "msgs_first": 2,
    "msgs_total": 2,
@@ -494,6 +522,7 @@
    "attributed_tokens_heuristic": 52657,
    "detail": [
     {
+     "doc_ids_used": [],
      "error_codes": [],
      "errors": 0,
      "file": "attempt1.jsonl",
@@ -506,6 +535,7 @@
    ],
    "final": true,
    "first": true,
+   "first_blind": true,
    "first_error": false,
    "msgs_first": 2,
    "msgs_total": 2,
@@ -524,6 +554,7 @@
    "attributed_tokens_heuristic": 403837,
    "detail": [
     {
+     "doc_ids_used": [],
      "error_codes": [],
      "errors": 0,
      "file": "attempt1.jsonl",
@@ -536,6 +567,7 @@
    ],
    "final": true,
    "first": true,
+   "first_blind": true,
    "first_error": false,
    "msgs_first": 4,
    "msgs_total": 4,
@@ -554,6 +586,7 @@
    "attributed_tokens_heuristic": 405163,
    "detail": [
     {
+     "doc_ids_used": [],
      "error_codes": [],
      "errors": 0,
      "file": "attempt1.jsonl",
@@ -566,6 +599,7 @@
    ],
    "final": true,
    "first": true,
+   "first_blind": true,
    "first_error": false,
    "msgs_first": 3,
    "msgs_total": 3,
@@ -584,6 +618,7 @@
    "attributed_tokens_heuristic": 390655,
    "detail": [
     {
+     "doc_ids_used": [],
      "error_codes": [],
      "errors": 0,
      "file": "attempt1.jsonl",
@@ -596,6 +631,7 @@
    ],
    "final": true,
    "first": true,
+   "first_blind": true,
    "first_error": false,
    "msgs_first": 2,
    "msgs_total": 2,
@@ -614,6 +650,7 @@
    "attributed_tokens_heuristic": 396809,
    "detail": [
     {
+     "doc_ids_used": [],
      "error_codes": [],
      "errors": 0,
      "file": "attempt1.jsonl",
@@ -626,6 +663,7 @@
    ],
    "final": true,
    "first": true,
+   "first_blind": true,
    "first_error": false,
    "msgs_first": 2,
    "msgs_total": 2,
@@ -644,6 +682,7 @@
    "attributed_tokens_heuristic": 356023,
    "detail": [
     {
+     "doc_ids_used": [],
      "error_codes": [],
      "errors": 0,
      "file": "attempt1.jsonl",
@@ -656,6 +695,7 @@
    ],
    "final": true,
    "first": true,
+   "first_blind": true,
    "first_error": false,
    "msgs_first": 2,
    "msgs_total": 2,
@@ -675,6 +715,7 @@
   "failed_first": 1,
   "final": 19,
   "first": 19,
+  "first_blind": 19,
   "first_error": 0,
   "label": "v1",
   "msgs_first": 55,

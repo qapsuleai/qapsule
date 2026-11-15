@@ -1,0 +1,1 @@
+attempt1: oldest breakout fact = ikexx (bar 120, level 103.9); insert_layer point with fact ikexx on panel 0. Applied. No issues.

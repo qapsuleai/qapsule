@@ -69,6 +69,7 @@
    "attributed_tokens_heuristic": 462377,
    "detail": [
     {
+     "doc_ids_used": [],
      "error_codes": [],
      "errors": 0,
      "file": "attempt1.jsonl",
@@ -83,6 +84,10 @@
      ]
     },
     {
+     "doc_ids_used": [
+      "jltn5",
+      "vesho"
+     ],
      "error_codes": [],
      "errors": 0,
      "file": "attempt2.jsonl",
@@ -93,6 +98,10 @@
      "why": []
     },
     {
+     "doc_ids_used": [
+      "jltn5",
+      "vesho"
+     ],
      "error_codes": [],
      "errors": 0,
      "file": "attempt3.jsonl",
@@ -105,6 +114,7 @@
    ],
    "final": true,
    "first": false,
+   "first_blind": false,
    "first_error": false,
    "msgs_first": 5,
    "msgs_total": 12,
@@ -123,6 +133,7 @@
    "attributed_tokens_heuristic": 177404,
    "detail": [
     {
+     "doc_ids_used": [],
      "error_codes": [],
      "errors": 0,
      "file": "attempt1.jsonl",
@@ -135,6 +146,11 @@
      ]
     },
     {
+     "doc_ids_used": [
+      "isc5l",
+      "w78lu",
+      "wat86"
+     ],
      "error_codes": [],
      "errors": 0,
      "file": "attempt2.jsonl",
@@ -147,6 +163,7 @@
    ],
    "final": true,
    "first": false,
+   "first_blind": false,
    "first_error": false,
    "msgs_first": 4,
    "msgs_total": 7,
@@ -165,6 +182,7 @@
    "attributed_tokens_heuristic": 12837,
    "detail": [
     {
+     "doc_ids_used": [],
      "error_codes": [],
      "errors": 0,
      "file": "attempt1.jsonl",
@@ -177,6 +195,10 @@
      ]
     },
     {
+     "doc_ids_used": [
+      "bjgte",
+      "xep2d"
+     ],
      "error_codes": [],
      "errors": 0,
      "file": "attempt2.jsonl",
@@ -189,6 +211,7 @@
    ],
    "final": true,
    "first": false,
+   "first_blind": false,
    "first_error": false,
    "msgs_first": 6,
    "msgs_total": 9,
@@ -207,6 +230,7 @@
    "attributed_tokens_heuristic": 24332,
    "detail": [
     {
+     "doc_ids_used": [],
      "error_codes": [],
      "errors": 0,
      "file": "attempt1.jsonl",
@@ -220,6 +244,9 @@
      ]
     },
     {
+     "doc_ids_used": [
+      "f7b4v"
+     ],
      "error_codes": [],
      "errors": 0,
      "file": "attempt2.jsonl",
@@ -232,6 +259,7 @@
    ],
    "final": true,
    "first": false,
+   "first_blind": false,
    "first_error": false,
    "msgs_first": 3,
    "msgs_total": 5,
@@ -250,6 +278,7 @@
    "attributed_tokens_heuristic": 180916,
    "detail": [
     {
+     "doc_ids_used": [],
      "error_codes": [
       "not_found"
      ],
@@ -264,6 +293,9 @@
      ]
     },
     {
+     "doc_ids_used": [
+      "s5ybj"
+     ],
      "error_codes": [],
      "errors": 0,
      "file": "attempt2.jsonl",
@@ -276,6 +308,7 @@
    ],
    "final": true,
    "first": false,
+   "first_blind": false,
    "first_error": true,
    "msgs_first": 4,
    "msgs_total": 7,
@@ -294,6 +327,10 @@
    "attributed_tokens_heuristic": 12846,
    "detail": [
     {
+     "doc_ids_used": [
+      "jltn5",
+      "t1nui"
+     ],
      "error_codes": [],
      "errors": 0,
      "file": "attempt1.jsonl",
@@ -306,6 +343,7 @@
    ],
    "final": true,
    "first": true,
+   "first_blind": false,
    "first_error": false,
    "msgs_first": 3,
    "msgs_total": 3,
@@ -336,6 +374,9 @@
      ]
     },
     {
+     "doc_ids_used": [
+      "isc5l"
+     ],
      "error_codes": [],
      "errors": 0,
      "file": "attempt2.jsonl",
@@ -348,6 +389,7 @@
    ],
    "final": true,
    "first": false,
+   "first_blind": false,
    "first_error": false,
    "msgs_first": 0,
    "msgs_total": 3,
@@ -366,6 +408,7 @@
    "attributed_tokens_heuristic": 12837,
    "detail": [
     {
+     "doc_ids_used": [],
      "error_codes": [],
      "errors": 0,
      "file": "attempt1.jsonl",
@@ -380,6 +423,10 @@
      ]
     },
     {
+     "doc_ids_used": [
+      "ly9ux",
+      "xep2d"
+     ],
      "error_codes": [],
      "errors": 0,
      "file": "attempt2.jsonl",
@@ -392,6 +439,7 @@
    ],
    "final": true,
    "first": false,
+   "first_blind": false,
    "first_error": false,
    "msgs_first": 6,
    "msgs_total": 9,
@@ -410,6 +458,7 @@
    "attributed_tokens_heuristic": 338145,
    "detail": [
     {
+     "doc_ids_used": [],
      "error_codes": [],
      "errors": 0,
      "file": "attempt1.jsonl",
@@ -422,6 +471,12 @@
      ]
     },
     {
+     "doc_ids_used": [
+      "aao5y",
+      "i3dgn",
+      "mc7qp",
+      "vdp01"
+     ],
      "error_codes": [],
      "errors": 0,
      "file": "attempt2.jsonl",
@@ -434,6 +489,7 @@
    ],
    "final": true,
    "first": false,
+   "first_blind": false,
    "first_error": false,
    "msgs_first": 3,
    "msgs_total": 6,
@@ -452,6 +508,10 @@
    "attributed_tokens_heuristic": 12842,
    "detail": [
     {
+     "doc_ids_used": [
+      "s5ybj",
+      "zasba"
+     ],
      "error_codes": [],
      "errors": 0,
      "file": "attempt1.jsonl",
@@ -464,6 +524,7 @@
    ],
    "final": true,
    "first": true,
+   "first_blind": false,
    "first_error": false,
    "msgs_first": 3,
    "msgs_total": 3,
@@ -482,6 +543,11 @@
    "attributed_tokens_heuristic": 12846,
    "detail": [
     {
+     "doc_ids_used": [
+      "jltn5",
+      "v0hdk",
+      "vesho"
+     ],
      "error_codes": [],
      "errors": 0,
      "file": "attempt1.jsonl",
@@ -494,6 +560,7 @@
    ],
    "final": true,
    "first": true,
+   "first_blind": false,
    "first_error": false,
    "msgs_first": 3,
    "msgs_total": 3,
@@ -524,6 +591,9 @@
      ]
     },
     {
+     "doc_ids_used": [
+      "isc5l"
+     ],
      "error_codes": [],
      "errors": 0,
      "file": "attempt2.jsonl",
@@ -536,6 +606,7 @@
    ],
    "final": true,
    "first": false,
+   "first_blind": false,
    "first_error": false,
    "msgs_first": 0,
    "msgs_total": 3,
@@ -554,6 +625,7 @@
    "attributed_tokens_heuristic": 152374,
    "detail": [
     {
+     "doc_ids_used": [],
      "error_codes": [],
      "errors": 0,
      "file": "attempt1.jsonl",
@@ -566,6 +638,7 @@
    ],
    "final": true,
    "first": true,
+   "first_blind": true,
    "first_error": false,
    "msgs_first": 6,
    "msgs_total": 6,
@@ -584,6 +657,7 @@
    "attributed_tokens_heuristic": 24332,
    "detail": [
     {
+     "doc_ids_used": [],
      "error_codes": [],
      "errors": 0,
      "file": "attempt1.jsonl",
@@ -596,6 +670,7 @@
    ],
    "final": true,
    "first": true,
+   "first_blind": true,
    "first_error": false,
    "msgs_first": 2,
    "msgs_total": 2,
@@ -614,6 +689,10 @@
    "attributed_tokens_heuristic": 12842,
    "detail": [
     {
+     "doc_ids_used": [
+      "e0aox",
+      "s5ybj"
+     ],
      "error_codes": [],
      "errors": 0,
      "file": "attempt1.jsonl",
@@ -626,6 +705,7 @@
    ],
    "final": true,
    "first": true,
+   "first_blind": false,
    "first_error": false,
    "msgs_first": 3,
    "msgs_total": 3,
@@ -644,6 +724,10 @@
    "attributed_tokens_heuristic": 307651,
    "detail": [
     {
+     "doc_ids_used": [
+      "fn2kv",
+      "jltn5"
+     ],
      "error_codes": [],
      "errors": 0,
      "file": "attempt1.jsonl",
@@ -656,6 +740,7 @@
    ],
    "final": true,
    "first": true,
+   "first_blind": false,
    "first_error": false,
    "msgs_first": 3,
    "msgs_total": 3,
@@ -686,6 +771,10 @@
      ]
     },
     {
+     "doc_ids_used": [
+      "isc5l",
+      "ugd5d"
+     ],
      "error_codes": [],
      "errors": 0,
      "file": "attempt2.jsonl",
@@ -698,6 +787,7 @@
    ],
    "final": true,
    "first": false,
+   "first_blind": false,
    "first_error": false,
    "msgs_first": 0,
    "msgs_total": 3,
@@ -716,6 +806,7 @@
    "attributed_tokens_heuristic": 295630,
    "detail": [
     {
+     "doc_ids_used": [],
      "error_codes": [],
      "errors": 0,
      "file": "attempt1.jsonl",
@@ -728,6 +819,9 @@
      ]
     },
     {
+     "doc_ids_used": [
+      "xep2d"
+     ],
      "error_codes": [],
      "errors": 0,
      "file": "attempt2.jsonl",
@@ -740,6 +834,7 @@
    ],
    "final": true,
    "first": false,
+   "first_blind": false,
    "first_error": false,
    "msgs_first": 6,
    "msgs_total": 9,
@@ -758,6 +853,7 @@
    "attributed_tokens_heuristic": 119796,
    "detail": [
     {
+     "doc_ids_used": [],
      "error_codes": [],
      "errors": 0,
      "file": "attempt1.jsonl",
@@ -770,6 +866,9 @@
      ]
     },
     {
+     "doc_ids_used": [
+      "f7b4v"
+     ],
      "error_codes": [],
      "errors": 0,
      "file": "attempt2.jsonl",
@@ -782,6 +881,7 @@
    ],
    "final": true,
    "first": false,
+   "first_blind": false,
    "first_error": false,
    "msgs_first": 3,
    "msgs_total": 5,
@@ -800,6 +900,10 @@
    "attributed_tokens_heuristic": 487069,
    "detail": [
     {
+     "doc_ids_used": [
+      "idfgo",
+      "s5ybj"
+     ],
      "error_codes": [
       "schema"
      ],
@@ -814,6 +918,10 @@
      ]
     },
     {
+     "doc_ids_used": [
+      "idfgo",
+      "s5ybj"
+     ],
      "error_codes": [],
      "errors": 0,
      "file": "attempt2.jsonl",
@@ -826,6 +934,7 @@
    ],
    "final": true,
    "first": false,
+   "first_blind": false,
    "first_error": true,
    "msgs_first": 3,
    "msgs_total": 6,
@@ -845,6 +954,7 @@
   "failed_first": 13,
   "final": 20,
   "first": 7,
+  "first_blind": 2,
   "first_error": 2,
   "label": "v1",
   "msgs_first": 66,

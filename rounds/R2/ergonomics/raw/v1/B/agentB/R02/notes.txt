@@ -1,0 +1,2 @@
+attempt1: set_encoding color on "@line:bollinger.upper" -> applied, but the layer draws upper/middle/lower so ALL three lines turned red (wrong). Spec doesn't say a multi-output layer can't color one output.
+attempt2: insert_layer of a new line layer (y:"upper", color #ff0000) after the bollinger layer; original left untouched (note: the original upper line stays underneath, hidden by the overlay). Applied.

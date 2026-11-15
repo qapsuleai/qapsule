@@ -1517,6 +1517,8 @@ version = "0.0.0"
 dependencies = [
  "qp-facts",
  "qp-schema",
+ "serde",
+ "serde_json",
 ]
 
 [[package]]

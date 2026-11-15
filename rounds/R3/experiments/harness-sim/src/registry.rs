@@ -64,6 +64,7 @@ pub fn outcomes() -> Vec<(&'static str, OutcomeFactory)> {
         ("barrier", || {
             (m5_barrier::outcome(), m5_barrier::perturbations())
         }),
+        ("semantic", || (m5_semantic::outcome(), m5_semantic::perturbations())),
     ]
 }
 

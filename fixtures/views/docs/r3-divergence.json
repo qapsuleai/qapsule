@@ -4,7 +4,7 @@
       "depth": "capsule",
       "finding": "fnd.SYN01.reversal-up.195",
       "glyphs": [],
-      "headline": "SYN01 6 bar önce fiyatta daha düşük dip (4.56 → 4.43) yaptı ama RSI 39.1 → 40.1 ile ters yönde kaldı: pozitif uyumsuzluk.",
+      "headline": "SYN01'de 6 bar önce yukarı dönüş işareti çıktı: fiyat yeni dip yaparken RSI daha yüksek dip yaptı (fiyat 4,43, RSI 40,1). Hâlâ geçerli olup olmadığı bilinmiyor. Karnesi henüz az örnekli: 3 seferin 1'inde tuttu.",
       "id": "cap.SYN01.reversal-up.195",
       "provenance": {
         "at": 1696921200000,
@@ -115,7 +115,7 @@
   ],
   "findings": [
     {
-      "claim": "SYN01 6 bar önce fiyatta daha düşük dip (4.56 → 4.43) yaptı ama RSI 39.1 → 40.1 ile ters yönde kaldı: pozitif uyumsuzluk.",
+      "claim": "SYN01'de 6 bar önce yukarı dönüş işareti çıktı: fiyat yeni dip yaparken RSI daha yüksek dip yaptı (fiyat 4,43, RSI 40,1). Hâlâ geçerli olup olmadığı bilinmiyor. Karnesi henüz az örnekli: 3 seferin 1'inde tuttu.",
       "confidence": 0.3333333333333333,
       "facts": [
         "fx.SYN01.reversal.rsi_divergence.bullish.195"

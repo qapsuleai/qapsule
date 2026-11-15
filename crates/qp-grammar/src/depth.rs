@@ -472,7 +472,7 @@ pub fn capsule_card_view(
     sentence.encoding.text = Some("headline".to_owned());
     sentence.encoding.x = Some(panel_at(0.0, CARD_GLYPH_PX + 10.0));
     sentence.encoding.y = Some(panel_at(0.0, 0.0));
-    sentence.encoding.size = Some(SizeSpec::Constant(13.0));
+    sentence.encoding.size = Some(SizeSpec::Constant(12.0));
     let mut ledger = layer("ledger", Mark::Text, 0);
     ledger.finding = Some(finding.to_owned());
     ledger.encoding.text = Some("ledger".to_owned());
@@ -504,7 +504,7 @@ pub fn capsule_card_view(
         theme: None,
         x: time_scale(bars[i(from)].t, bars[i(n - 1)].t),
         y: Vec::new(),
-        panels: vec![named_panel(0, "card", 2.0), named_panel(1, "price", 3.0)],
+        panels: vec![named_panel(0, "card", 3.0), named_panel(1, "price", 2.0)],
         layers,
         emphasis: Vec::new(),
     })

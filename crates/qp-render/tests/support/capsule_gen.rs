@@ -20,8 +20,8 @@
 //!   and only the selected story's facts, finding and capsule. Breakout: kind `breakout`,
 //!   up, confirmed by the volume family. Squeeze: kind `squeeze`. Divergence:
 //!   `reversal.rsi_divergence`.
-//! - **Sentence:** a fixture-local Turkish template over engine values (the M2 realizer is
-//!   not in the product crates yet); every number in it is an evidence value.
+//! - **Sentence:** the product sentence: `qp_capsule::sentence::sentences_at` with
+//!   `qp_capsule::realize::Template`, Turkish, an entitled reader, as of the cut bar.
 //!
 //! Transcripts: `c1-sentence` (watch: the sentence only, checked by `qp conform`),
 //! `c2-capsule` (phone, 390x300: the capsule card), `c3-chart` (desktop: `show_finding`
@@ -245,57 +245,21 @@ pub fn select(sample: Sample) -> (String, Vec<Bar>, OpenStory) {
     panic!("no {sample:?} sample in the search range");
 }
 
-fn ago(now: u64, bar: u64) -> String {
-    match now.saturating_sub(bar) {
-        0 => "bugün".to_owned(),
-        k => format!("{k} bar önce"),
-    }
-}
-
-/// The fixture sentence (Turkish; every number is an evidence value of the lead fact).
-fn headline(sample: Sample, symbol: &str, s: &OpenStory, now: u64) -> String {
-    let lead = &s.facts[0];
-    let ev = |k: &str| lead.evidence.get(k).copied().unwrap_or_default();
-    let when = ago(now, lead.bar);
-    match sample {
-        Sample::Breakout => {
-            let vol = s.facts.iter().find(|f| {
-                f.meaning
-                    .as_ref()
-                    .is_some_and(|m| m.family == EvidenceFamily::Volume)
-            });
-            let tail = vol.map_or_else(String::new, |v| {
-                let ratio = v.evidence.get("ratio").copied().unwrap_or_default();
-                let day = match v.bar.saturating_sub(lead.bar) {
-                    0 => "aynı gün".to_owned(),
-                    1 => "ertesi gün".to_owned(),
-                    k => format!("{k} bar sonra"),
-                };
-                format!("; {day} hacim 20 günlük ortalamanın {ratio:.1} katına çıktı")
-            });
-            format!(
-                "{symbol} {when} son 20 barın en yükseğini ({:.2}) yukarı kırdı{tail}.",
-                ev("level")
-            )
-        }
-        Sample::Squeeze => format!(
-            "{symbol} {when} Bollinger bandının son 120 barın en darına indiği bir sıkışmaya girdi; bant {:.2}–{:.2}.",
-            ev("lower"),
-            ev("upper")
-        ),
-        Sample::Divergence => {
-            let down = s.story.direction == Direction::Down;
-            format!(
-                "{symbol} {when} fiyatta {} ({:.2} → {:.2}) yaptı ama RSI {:.1} → {:.1} ile ters yönde kaldı: {} uyumsuzluk.",
-                if down { "daha yüksek tepe" } else { "daha düşük dip" },
-                ev("p1_price"),
-                ev("p2_price"),
-                ev("p1_rsi"),
-                ev("p2_rsi"),
-                if down { "negatif" } else { "pozitif" }
-            )
-        }
-    }
+/// The product sentence (`qp_capsule::sentence::sentences_at` with the template realizer,
+/// Turkish, an entitled reader) of the story as of `now`, from the engine re-run on
+/// exactly `bars`.
+fn headline(symbol: &str, bars: &[Bar], s: &OpenStory, now: u64) -> String {
+    let eng = run(symbol, bars);
+    qp_capsule::sentence::sentences_at(
+        &eng,
+        &qp_capsule::realize::Template,
+        &s.id,
+        bars,
+        now,
+        &qp_capsule::sentence::Reader::entitled(),
+    )
+    .expect("sentence of the selected story")
+    .tr
 }
 
 fn bar_json(b: &Bar) -> Value {
@@ -308,7 +272,7 @@ pub fn document(sample: Sample) -> Value {
     let (symbol, bars, s) = select(sample);
     let now = bars.len() as u64 - 1;
     let finding_id = qp_capsule::engine::finding_id(&s.id);
-    let text = headline(sample, &symbol, &s, now);
+    let text = headline(&symbol, &bars, &s, now);
     let facts: Vec<Value> = s
         .facts
         .iter()

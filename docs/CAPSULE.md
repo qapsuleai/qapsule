@@ -172,6 +172,8 @@ katılır/doğar; (4) önem (M3, seçim) yeniden hesaplanır. Aynı barda birden
 | Ufuk (bar sayısı) doldu | `expired` (kapanır, karne: ıska) | `horizon` |
 | Dayandığı veri düzeltildi / itiraz haklı çıktı | `retracted` (kapanır, karne **yok**) | `data_corrected`, `dispute_upheld` |
 
+Kapandıktan sonra geri çekilen hikâyenin karne satırı silinmez, `retracted_at` ile işaretlenir: geri çekilmeden önce doğanların `ledger_at_birth`'i değişmez, sonra doğanlar o satırı saymaz (aynı `t`'de geri çekmeden sonra işlenen doğum da saymaz).
+
 Kapanmış hikâyeye olgu katılmaz; aynı temada yeni olgu yeni hikâye başlatır.
 
 ### 9.4 Karne

@@ -125,7 +125,7 @@ Ayrıntı `docs/PROTOCOL.md` §19; seçimin gerekçesi `rounds/RP2/experiments/T
 
 | Kavram | Kodda | Tanım |
 |--------|-------|-------|
-| Olgu dedektörü | `Detector` (`qp-facts`) | Bar serisinden (ve varsa lisanslı akıştan) tipli olgu üreten deterministik akışkan fonksiyon. Toplu ve akışkan çalıştırma bit düzeyinde aynıdır; açık barda `peek` aday üretir, kapanışta `push` kesin olgu. |
+| Olgu dedektörü | `Detector` (`qp-facts`) | Bar serisinden (ve varsa lisanslı akıştan) tipli olgu üreten deterministik akışkan fonksiyon. Toplu ve akışkan çalıştırma bit düzeyinde aynıdır; açık barda verilen sonuç (`push` ya da canlı düzeltmede `update_last`: "bar şimdi kapansaydı") adaydır; bar kesinleşince olgu olur. |
 | Anlam türü | `MeaningKind` | Olgunun altı anlamından biri: devam (`continuation`), dönüş (`reversal`), kırılım (`breakout`), sıkışma (`squeeze`), aşırılık (`extreme`), akış (`flow`). İşaretin şekli bunu kodlar. |
 | Yön | `Direction` | `up`, `down`, `neutral` (belirsiz). |
 | Olgu anlamı | `FactMeaning` | Olgunun `meaning` alanı: tür, yön, kanıt ailesi, zaman türü, dedektör ve sürümü, enstrüman, güç, lisans, geometri, koşul, sunucu olgusu bayrağı. |

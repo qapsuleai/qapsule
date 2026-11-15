@@ -11,5 +11,8 @@ publish.workspace = true
 qp-schema = { path = "../qp-schema" }
 qp-compute = { path = "../qp-compute" }
 
+[dev-dependencies]
+qp-source = { path = "../qp-source" }
+
 [lints]
 workspace = true

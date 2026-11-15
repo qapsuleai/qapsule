@@ -5,9 +5,9 @@ Her round sonunda güncellenir.
 
 ## Şu an
 
-- **Aktif round:** R2 (yeniden yazıldı, koşulmayı bekliyor).
-- **Son güncelleme:** 2026-11-14
-- **Sıradaki adım:** `scripts/preflight.sh`; `rounds/R2/PROMPT.md` yeni bir Claude Code oturumuna verilir.
+- **Aktif round:** yok (R2 tamamlandı; sonraki round ana akışta tasarlanır).
+- **Son güncelleme:** 2026-11-15
+- **Sıradaki adım:** ana akış: R2 önerilen kararları (`DECISIONS.md` Ö10–Ö17, A13–A14) ve R2 açık soruları; RP2 tasarımı.
 
 ## Round geçmişi
 
@@ -18,6 +18,7 @@ Her round sonunda güncellenir.
 | R1 | Tamamlandı: 10/10 kabul ölçütü (ölçüt 5'te uyarı: süre hedefleri M4 Max'te tutuyor, GitHub Linux koşucusunda RSI, MACD ve Bollinger yerelde, MACD WASM'da aşıyor). Depo GitHub'da, CI yeşil. `qp-compute` (Study, 5 indikatör, toplu = akışkan = düzelt bit-eşit, tarama), `qp-source`, `qp-calendar` (K16), `qp compute`. Hesap özeti aarch64 = x86_64 = wasm32. | `rounds/R1/REPORT.md`, `rounds/R1/AUDIT.md`, `rounds/R1/BENCH.md` |
 | RD1 | Tamamlandı: kabul ölçütleri 10 ✅ / 3 ⚠️; bağımsız denetim koşullu kabul, dört koşul giderildi. Alan protokolü `qp/0` (`docs/PROTOCOL.md`; 8 mesaj türü), tipler `qp-schema::protocol`, referans otorite `qp-session`, `qp serve`, `qp conform`, MCP uyarlayıcısı `qp-mcp` (araçlar şemadan). 17 uygunluk dökümü inproc/serve/mcp'de geçiyor; yeniden oynatma bayt-eşit. Beş çelişkili karar ölçüldü: K21-1 koru, K21-2 koru (inceltmelerle), K21-3 incelt, JSON kanonik, anlamsal değişim. Ajan yazabilirlik: v1 15/20 → v2 14/20 ilk deneme (sonunda 17 → 18); kimlikler kopyalanamayınca 6/20 ilk, 19/20 sonunda, düzeltme 13/14. Alt ajanlar bu round'da çalıştı. | `rounds/RD1/REPORT.md`, `rounds/RD1/RESEARCH.md`, `rounds/RD1/AUDIT.md` |
 | RP1 | Tamamlandı: 7/7 kabul ölçütü, bağımsız denetim "kabul". 8 yönde 21 yaklaşım (9 alındı). SoA şerit çekirdekleri, ızgarada ortak alt hesap paylaşımı, zincirler için hesap grafiği, seri şeritleri, commit-only attach, paralel indirgeme taraması, kanıtlı geç başlangıç (yeni yöntem). K17 hedefleri beş indikatörde GitHub koşucusunda da tutuyor (en kötü RSI 42,2 ms yerel, 57,3 ms WASM). Bit-eşitlik ve hesap özeti değişmedi. | `rounds/RP1/REPORT.md`, `rounds/RP1/RESEARCH.md`, `rounds/RP1/AUDIT.md` |
+| R2 | Tamamlandı: 14/14 kabul ölçütü (denetim sonucu `AUDIT.md`). Gramer v0 (`docs/GRAMMAR.md`; `qp-schema::grammar`, `::scene`), `qp-grammar` derleyicisi, çizici yalnız sahne tarifinden (hesapsız), altı görünüm + iki derinlik görünümü yalnız protokol dökümlerinden (V0 R0 altınla bayt-eşit), köken zorunlu (`no_origin`), kimlikli gramer işlemleri (18 eşzamanlı durumda yanlış 0), `screen`/`hit` sahne tarifinden, anlamla başvuru: seçici nesneler (T9: ilk denemede kimliksiz 19/20; B 10/20; yalnız kimlik 2/20; A v2 sonunda 20/20), 100k bar kare 2,7 ms (LOD), 27 döküm × 3 taşıma, WASM +%25 (595 KB gzip). | `rounds/R2/REPORT.md`, `rounds/R2/AUDIT.md`, `rounds/R2/ergonomics/RESULTS.md` |
 
 ## Bilinen durumlar
 
@@ -32,11 +33,13 @@ Her round sonunda güncellenir.
 - `scripts/qapsule-gh.env` `.gitignore`'daki `*.env` kuralı yüzünden izlenmiyor; temiz klonda `qgh`/`preflight` çalışmaz (gizli bilgi içermiyor, istisna önerisi R1 raporunda).
 - Tarama süre hedefleri (K17) RP1 sonrası GitHub koşucusunda da tutuyor; koşucu CPU'su çalışmadan çalışmaya değişiyor (AMD EPYC 9V74 / 7763, Intel Xeon 8573C), ölçümler CPU modeline göre okunmalı. `sweep_bench` CI'da profil ve şerit tablosunu basıyor.
 - RD1'de alt ajanlar sorunsuz başlatıldı (context-mode engeli bu oturumda yoktu); bütün alt görevler, deneyler, ölçüm ve denetim alt ajanlarla yapıldı.
-- `verify.sh` 13 adım (RD1'de `protocol` ve `conform` eklendi; `conform` dökümleri inproc, `qp serve` ve MCP üzerinden koşar).
+- `verify.sh` 14 adım (RD1'de `protocol` ve `conform`, R2'de `views` eklendi; `conform` dökümleri inproc, `qp serve` ve MCP üzerinden koşar; 27 döküm).
 - Referans otorite (`qp-session`) her komutta dokümanı kopyalıyor; canlı yolda yavaş (T6d: 84 µs/tik, artımlı yol 0,18 µs). Öneri olarak duruyor.
 - R1'de alt görevler hook kısıtı nedeniyle alt ajanlara verilemedi; denetim yine bağımsız alt ajanla yapıldı. RP1'de de aynı: yalnızca E1 deneyi ve denetim alt ajanla (hook'un ürettiği girdiyle tek başına yeniden gönderilince) başlatılabildi.
 
 ## Arkin'den beklenenler
+
+- R2 önerilen karar satırları (`DECISIONS.md` Ö10–Ö17) ve açık kararlar A13 (WASM boyutu), A14; R2 açık soruları (`rounds/R2/REPORT.md`).
 
 - K14 (bar hizası borsaya göre, gösterim kullanıcıya göre) onayı; R1'de bu şekilde uygulandı (günlük bar `t` = seans açılışının UTC zamanı).
 - Süre hedeflerinin hangi donanıma göre olduğu (R1 raporu, açık soru 4).

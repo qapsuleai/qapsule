@@ -1,0 +1,3975 @@
+{
+  "harness": "r3-h-m12/1",
+  "alt": "control",
+  "summary": {
+    "en": {
+      "sentences": 73,
+      "empty": 0,
+      "time_correct": 0.4521,
+      "time_correct_by_class": {
+        "event": 0.7917,
+        "expectation": 0.0,
+        "state_ended": 0.0,
+        "state_holding": 1.0
+      },
+      "violations": {
+        "missing_conditional": 24,
+        "missing_no_longer": 11,
+        "missing_past": 7
+      },
+      "time_ref_exact": 0.0,
+      "k26_correct": false,
+      "determinism": 1.0,
+      "redacted": 18,
+      "leaks": 18,
+      "open": 55,
+      "sentences_with_invented": 0,
+      "invented_numbers": 0
+    },
+    "tr": {
+      "sentences": 73,
+      "empty": 0,
+      "time_correct": 0.0,
+      "time_correct_by_class": {
+        "event": 0.0,
+        "expectation": 0.0,
+        "state_ended": 0.0,
+        "state_holding": 0.0
+      },
+      "violations": {
+        "missing_conditional": 24,
+        "missing_no_longer": 11,
+        "missing_past": 35,
+        "missing_present": 14,
+        "missing_time_ref": 24
+      },
+      "time_ref_exact": 0.0,
+      "k26_correct": false,
+      "determinism": 1.0,
+      "redacted": 18,
+      "leaks": 18,
+      "open": 55,
+      "sentences_with_invented": 0,
+      "invented_numbers": 0
+    }
+  },
+  "sentences": {
+    "en": [
+      {
+        "id": "s01",
+        "sentence": "event continuation down stage=invalidated bars_ago=0 holds=na",
+        "deterministic": true,
+        "expected": "event",
+        "features": {
+          "past": true,
+          "present": true,
+          "conditional": false,
+          "no_longer": false,
+          "time_ref": true,
+          "time_ref_exact": false
+        },
+        "violations": [],
+        "redacted": false,
+        "leak": false,
+        "number_words": [],
+        "numbers": [
+          {
+            "token": "0",
+            "slot": "bars_ago"
+          }
+        ],
+        "invented": 0
+      },
+      {
+        "id": "s02",
+        "sentence": "event continuation up stage=weakened bars_ago=1 holds=na",
+        "deterministic": true,
+        "expected": "event",
+        "features": {
+          "past": true,
+          "present": true,
+          "conditional": false,
+          "no_longer": false,
+          "time_ref": true,
+          "time_ref_exact": false
+        },
+        "violations": [],
+        "redacted": false,
+        "leak": false,
+        "number_words": [],
+        "numbers": [
+          {
+            "token": "1",
+            "slot": "bars_ago"
+          }
+        ],
+        "invented": 0
+      },
+      {
+        "id": "s03",
+        "sentence": "event continuation down stage=realized bars_ago=5 holds=na",
+        "deterministic": true,
+        "expected": "event",
+        "features": {
+          "past": true,
+          "present": true,
+          "conditional": false,
+          "no_longer": false,
+          "time_ref": true,
+          "time_ref_exact": false
+        },
+        "violations": [],
+        "redacted": true,
+        "leak": true,
+        "number_words": [],
+        "numbers": [
+          {
+            "token": "5",
+            "slot": "bars_ago"
+          }
+        ],
+        "invented": 0
+      },
+      {
+        "id": "s04",
+        "sentence": "event continuation up stage=born bars_ago=30 holds=na",
+        "deterministic": true,
+        "expected": "event",
+        "features": {
+          "past": false,
+          "present": true,
+          "conditional": false,
+          "no_longer": false,
+          "time_ref": true,
+          "time_ref_exact": false
+        },
+        "violations": [
+          "missing_past"
+        ],
+        "redacted": false,
+        "leak": false,
+        "number_words": [],
+        "numbers": [
+          {
+            "token": "30",
+            "slot": "bars_ago"
+          }
+        ],
+        "invented": 0
+      },
+      {
+        "id": "s05",
+        "sentence": "event reversal down stage=weakened bars_ago=0 holds=na",
+        "deterministic": true,
+        "expected": "event",
+        "features": {
+          "past": true,
+          "present": true,
+          "conditional": false,
+          "no_longer": false,
+          "time_ref": true,
+          "time_ref_exact": false
+        },
+        "violations": [],
+        "redacted": false,
+        "leak": false,
+        "number_words": [],
+        "numbers": [
+          {
+            "token": "0",
+            "slot": "bars_ago"
+          }
+        ],
+        "invented": 0
+      },
+      {
+        "id": "s06",
+        "sentence": "event reversal up stage=weakened bars_ago=1 holds=na",
+        "deterministic": true,
+        "expected": "event",
+        "features": {
+          "past": true,
+          "present": true,
+          "conditional": false,
+          "no_longer": false,
+          "time_ref": true,
+          "time_ref_exact": false
+        },
+        "violations": [],
+        "redacted": false,
+        "leak": false,
+        "number_words": [],
+        "numbers": [
+          {
+            "token": "1",
+            "slot": "bars_ago"
+          }
+        ],
+        "invented": 0
+      },
+      {
+        "id": "s07",
+        "sentence": "event reversal down stage=expired bars_ago=5 holds=na",
+        "deterministic": true,
+        "expected": "event",
+        "features": {
+          "past": true,
+          "present": true,
+          "conditional": false,
+          "no_longer": false,
+          "time_ref": true,
+          "time_ref_exact": false
+        },
+        "violations": [],
+        "redacted": true,
+        "leak": true,
+        "number_words": [],
+        "numbers": [
+          {
+            "token": "5",
+            "slot": "bars_ago"
+          }
+        ],
+        "invented": 0
+      },
+      {
+        "id": "s08",
+        "sentence": "event reversal down stage=confirmed bars_ago=30 holds=na",
+        "deterministic": true,
+        "expected": "event",
+        "features": {
+          "past": true,
+          "present": true,
+          "conditional": false,
+          "no_longer": false,
+          "time_ref": true,
+          "time_ref_exact": false
+        },
+        "violations": [],
+        "redacted": false,
+        "leak": false,
+        "number_words": [],
+        "numbers": [
+          {
+            "token": "30",
+            "slot": "bars_ago"
+          }
+        ],
+        "invented": 0
+      },
+      {
+        "id": "s09",
+        "sentence": "event breakout up stage=expired bars_ago=0 holds=na",
+        "deterministic": true,
+        "expected": "event",
+        "features": {
+          "past": true,
+          "present": true,
+          "conditional": false,
+          "no_longer": false,
+          "time_ref": true,
+          "time_ref_exact": false
+        },
+        "violations": [],
+        "redacted": false,
+        "leak": false,
+        "number_words": [],
+        "numbers": [
+          {
+            "token": "0",
+            "slot": "bars_ago"
+          }
+        ],
+        "invented": 0
+      },
+      {
+        "id": "s10",
+        "sentence": "event breakout up stage=invalidated bars_ago=1 holds=na",
+        "deterministic": true,
+        "expected": "event",
+        "features": {
+          "past": true,
+          "present": true,
+          "conditional": false,
+          "no_longer": false,
+          "time_ref": true,
+          "time_ref_exact": false
+        },
+        "violations": [],
+        "redacted": false,
+        "leak": false,
+        "number_words": [],
+        "numbers": [
+          {
+            "token": "1",
+            "slot": "bars_ago"
+          }
+        ],
+        "invented": 0
+      },
+      {
+        "id": "s11",
+        "sentence": "event breakout up stage=confirmed bars_ago=5 holds=na",
+        "deterministic": true,
+        "expected": "event",
+        "features": {
+          "past": true,
+          "present": true,
+          "conditional": false,
+          "no_longer": false,
+          "time_ref": true,
+          "time_ref_exact": false
+        },
+        "violations": [],
+        "redacted": false,
+        "leak": false,
+        "number_words": [],
+        "numbers": [
+          {
+            "token": "5",
+            "slot": "bars_ago"
+          }
+        ],
+        "invented": 0
+      },
+      {
+        "id": "s12",
+        "sentence": "event breakout down stage=weakened bars_ago=30 holds=na",
+        "deterministic": true,
+        "expected": "event",
+        "features": {
+          "past": true,
+          "present": true,
+          "conditional": false,
+          "no_longer": false,
+          "time_ref": true,
+          "time_ref_exact": false
+        },
+        "violations": [],
+        "redacted": false,
+        "leak": false,
+        "number_words": [],
+        "numbers": [
+          {
+            "token": "30",
+            "slot": "bars_ago"
+          }
+        ],
+        "invented": 0
+      },
+      {
+        "id": "s13",
+        "sentence": "event squeeze neutral stage=born bars_ago=0 holds=na",
+        "deterministic": true,
+        "expected": "event",
+        "features": {
+          "past": false,
+          "present": true,
+          "conditional": false,
+          "no_longer": false,
+          "time_ref": true,
+          "time_ref_exact": false
+        },
+        "violations": [
+          "missing_past"
+        ],
+        "redacted": false,
+        "leak": false,
+        "number_words": [],
+        "numbers": [
+          {
+            "token": "0",
+            "slot": "lead.bandwidth"
+          }
+        ],
+        "invented": 0
+      },
+      {
+        "id": "s14",
+        "sentence": "event squeeze neutral stage=expired bars_ago=1 holds=na",
+        "deterministic": true,
+        "expected": "event",
+        "features": {
+          "past": true,
+          "present": true,
+          "conditional": false,
+          "no_longer": false,
+          "time_ref": true,
+          "time_ref_exact": false
+        },
+        "violations": [],
+        "redacted": true,
+        "leak": true,
+        "number_words": [],
+        "numbers": [
+          {
+            "token": "1",
+            "slot": "bars_ago"
+          }
+        ],
+        "invented": 0
+      },
+      {
+        "id": "s15",
+        "sentence": "event squeeze neutral stage=weakened bars_ago=5 holds=na",
+        "deterministic": true,
+        "expected": "event",
+        "features": {
+          "past": true,
+          "present": true,
+          "conditional": false,
+          "no_longer": false,
+          "time_ref": true,
+          "time_ref_exact": false
+        },
+        "violations": [],
+        "redacted": false,
+        "leak": false,
+        "number_words": [],
+        "numbers": [
+          {
+            "token": "5",
+            "slot": "bars_ago"
+          }
+        ],
+        "invented": 0
+      },
+      {
+        "id": "s16",
+        "sentence": "event squeeze neutral stage=invalidated bars_ago=30 holds=na",
+        "deterministic": true,
+        "expected": "event",
+        "features": {
+          "past": true,
+          "present": true,
+          "conditional": false,
+          "no_longer": false,
+          "time_ref": true,
+          "time_ref_exact": false
+        },
+        "violations": [],
+        "redacted": false,
+        "leak": false,
+        "number_words": [],
+        "numbers": [
+          {
+            "token": "30",
+            "slot": "bars_ago"
+          }
+        ],
+        "invented": 0
+      },
+      {
+        "id": "s17",
+        "sentence": "event extreme down stage=confirmed bars_ago=0 holds=na",
+        "deterministic": true,
+        "expected": "event",
+        "features": {
+          "past": true,
+          "present": true,
+          "conditional": false,
+          "no_longer": false,
+          "time_ref": true,
+          "time_ref_exact": false
+        },
+        "violations": [],
+        "redacted": false,
+        "leak": false,
+        "number_words": [],
+        "numbers": [
+          {
+            "token": "0",
+            "slot": "bars_ago"
+          }
+        ],
+        "invented": 0
+      },
+      {
+        "id": "s18",
+        "sentence": "event extreme up stage=confirmed bars_ago=1 holds=na",
+        "deterministic": true,
+        "expected": "event",
+        "features": {
+          "past": true,
+          "present": true,
+          "conditional": false,
+          "no_longer": false,
+          "time_ref": true,
+          "time_ref_exact": false
+        },
+        "violations": [],
+        "redacted": false,
+        "leak": false,
+        "number_words": [],
+        "numbers": [
+          {
+            "token": "1",
+            "slot": "bars_ago"
+          }
+        ],
+        "invented": 0
+      },
+      {
+        "id": "s19",
+        "sentence": "event extreme up stage=invalidated bars_ago=5 holds=na",
+        "deterministic": true,
+        "expected": "event",
+        "features": {
+          "past": true,
+          "present": true,
+          "conditional": false,
+          "no_longer": false,
+          "time_ref": true,
+          "time_ref_exact": false
+        },
+        "violations": [],
+        "redacted": true,
+        "leak": true,
+        "number_words": [],
+        "numbers": [
+          {
+            "token": "5",
+            "slot": "bars_ago"
+          }
+        ],
+        "invented": 0
+      },
+      {
+        "id": "s20",
+        "sentence": "event extreme up stage=born bars_ago=30 holds=na",
+        "deterministic": true,
+        "expected": "event",
+        "features": {
+          "past": false,
+          "present": true,
+          "conditional": false,
+          "no_longer": false,
+          "time_ref": true,
+          "time_ref_exact": false
+        },
+        "violations": [
+          "missing_past"
+        ],
+        "redacted": true,
+        "leak": true,
+        "number_words": [],
+        "numbers": [
+          {
+            "token": "30",
+            "slot": "bars_ago"
+          }
+        ],
+        "invented": 0
+      },
+      {
+        "id": "s21",
+        "sentence": "event flow down stage=born bars_ago=0 holds=na",
+        "deterministic": true,
+        "expected": "event",
+        "features": {
+          "past": false,
+          "present": true,
+          "conditional": false,
+          "no_longer": false,
+          "time_ref": true,
+          "time_ref_exact": false
+        },
+        "violations": [
+          "missing_past"
+        ],
+        "redacted": false,
+        "leak": false,
+        "number_words": [],
+        "numbers": [
+          {
+            "token": "0",
+            "slot": "bars_ago"
+          }
+        ],
+        "invented": 0
+      },
+      {
+        "id": "s22",
+        "sentence": "event flow up stage=born bars_ago=1 holds=na",
+        "deterministic": true,
+        "expected": "event",
+        "features": {
+          "past": false,
+          "present": true,
+          "conditional": false,
+          "no_longer": false,
+          "time_ref": true,
+          "time_ref_exact": false
+        },
+        "violations": [
+          "missing_past"
+        ],
+        "redacted": false,
+        "leak": false,
+        "number_words": [],
+        "numbers": [
+          {
+            "token": "1",
+            "slot": "bars_ago"
+          }
+        ],
+        "invented": 0
+      },
+      {
+        "id": "s23",
+        "sentence": "event flow down stage=expired bars_ago=5 holds=na",
+        "deterministic": true,
+        "expected": "event",
+        "features": {
+          "past": true,
+          "present": true,
+          "conditional": false,
+          "no_longer": false,
+          "time_ref": true,
+          "time_ref_exact": false
+        },
+        "violations": [],
+        "redacted": false,
+        "leak": false,
+        "number_words": [],
+        "numbers": [
+          {
+            "token": "5",
+            "slot": "bars_ago"
+          }
+        ],
+        "invented": 0
+      },
+      {
+        "id": "s24",
+        "sentence": "event flow down stage=weakened bars_ago=30 holds=na",
+        "deterministic": true,
+        "expected": "event",
+        "features": {
+          "past": true,
+          "present": true,
+          "conditional": false,
+          "no_longer": false,
+          "time_ref": true,
+          "time_ref_exact": false
+        },
+        "violations": [],
+        "redacted": false,
+        "leak": false,
+        "number_words": [],
+        "numbers": [
+          {
+            "token": "30",
+            "slot": "bars_ago"
+          }
+        ],
+        "invented": 0
+      },
+      {
+        "id": "s25",
+        "sentence": "state continuation up stage=weakened bars_ago=0 holds=yes",
+        "deterministic": true,
+        "expected": "state_holding",
+        "features": {
+          "past": true,
+          "present": true,
+          "conditional": false,
+          "no_longer": false,
+          "time_ref": true,
+          "time_ref_exact": false
+        },
+        "violations": [],
+        "redacted": true,
+        "leak": true,
+        "number_words": [],
+        "numbers": [
+          {
+            "token": "0",
+            "slot": "bars_ago"
+          }
+        ],
+        "invented": 0
+      },
+      {
+        "id": "s26",
+        "sentence": "state continuation down stage=invalidated bars_ago=1 holds=no",
+        "deterministic": true,
+        "expected": "state_ended",
+        "features": {
+          "past": true,
+          "present": true,
+          "conditional": false,
+          "no_longer": false,
+          "time_ref": true,
+          "time_ref_exact": false
+        },
+        "violations": [
+          "missing_no_longer"
+        ],
+        "redacted": false,
+        "leak": false,
+        "number_words": [],
+        "numbers": [
+          {
+            "token": "1",
+            "slot": "bars_ago"
+          }
+        ],
+        "invented": 0
+      },
+      {
+        "id": "s27",
+        "sentence": "state continuation down stage=born bars_ago=5 holds=yes",
+        "deterministic": true,
+        "expected": "state_holding",
+        "features": {
+          "past": false,
+          "present": true,
+          "conditional": false,
+          "no_longer": false,
+          "time_ref": true,
+          "time_ref_exact": false
+        },
+        "violations": [],
+        "redacted": false,
+        "leak": false,
+        "number_words": [],
+        "numbers": [
+          {
+            "token": "5",
+            "slot": "bars_ago"
+          }
+        ],
+        "invented": 0
+      },
+      {
+        "id": "s28",
+        "sentence": "state continuation up stage=realized bars_ago=30 holds=yes",
+        "deterministic": true,
+        "expected": "state_holding",
+        "features": {
+          "past": true,
+          "present": true,
+          "conditional": false,
+          "no_longer": false,
+          "time_ref": true,
+          "time_ref_exact": false
+        },
+        "violations": [],
+        "redacted": false,
+        "leak": false,
+        "number_words": [],
+        "numbers": [
+          {
+            "token": "30",
+            "slot": "bars_ago"
+          }
+        ],
+        "invented": 0
+      },
+      {
+        "id": "s29",
+        "sentence": "state reversal down stage=expired bars_ago=0 holds=no",
+        "deterministic": true,
+        "expected": "state_ended",
+        "features": {
+          "past": true,
+          "present": true,
+          "conditional": false,
+          "no_longer": false,
+          "time_ref": true,
+          "time_ref_exact": false
+        },
+        "violations": [
+          "missing_no_longer"
+        ],
+        "redacted": false,
+        "leak": false,
+        "number_words": [],
+        "numbers": [
+          {
+            "token": "0",
+            "slot": "bars_ago"
+          }
+        ],
+        "invented": 0
+      },
+      {
+        "id": "s30",
+        "sentence": "state reversal up stage=invalidated bars_ago=1 holds=no",
+        "deterministic": true,
+        "expected": "state_ended",
+        "features": {
+          "past": true,
+          "present": true,
+          "conditional": false,
+          "no_longer": false,
+          "time_ref": true,
+          "time_ref_exact": false
+        },
+        "violations": [
+          "missing_no_longer"
+        ],
+        "redacted": false,
+        "leak": false,
+        "number_words": [],
+        "numbers": [
+          {
+            "token": "1",
+            "slot": "bars_ago"
+          }
+        ],
+        "invented": 0
+      },
+      {
+        "id": "s31",
+        "sentence": "state reversal down stage=realized bars_ago=5 holds=yes",
+        "deterministic": true,
+        "expected": "state_holding",
+        "features": {
+          "past": true,
+          "present": true,
+          "conditional": false,
+          "no_longer": false,
+          "time_ref": true,
+          "time_ref_exact": false
+        },
+        "violations": [],
+        "redacted": true,
+        "leak": true,
+        "number_words": [],
+        "numbers": [
+          {
+            "token": "5",
+            "slot": "bars_ago"
+          }
+        ],
+        "invented": 0
+      },
+      {
+        "id": "s32",
+        "sentence": "state reversal down stage=realized bars_ago=30 holds=yes",
+        "deterministic": true,
+        "expected": "state_holding",
+        "features": {
+          "past": true,
+          "present": true,
+          "conditional": false,
+          "no_longer": false,
+          "time_ref": true,
+          "time_ref_exact": false
+        },
+        "violations": [],
+        "redacted": false,
+        "leak": false,
+        "number_words": [],
+        "numbers": [
+          {
+            "token": "30",
+            "slot": "bars_ago"
+          }
+        ],
+        "invented": 0
+      },
+      {
+        "id": "s33",
+        "sentence": "state breakout up stage=born bars_ago=0 holds=yes",
+        "deterministic": true,
+        "expected": "state_holding",
+        "features": {
+          "past": false,
+          "present": true,
+          "conditional": false,
+          "no_longer": false,
+          "time_ref": true,
+          "time_ref_exact": false
+        },
+        "violations": [],
+        "redacted": true,
+        "leak": true,
+        "number_words": [],
+        "numbers": [
+          {
+            "token": "0",
+            "slot": "bars_ago"
+          }
+        ],
+        "invented": 0
+      },
+      {
+        "id": "s34",
+        "sentence": "state breakout up stage=realized bars_ago=1 holds=no",
+        "deterministic": true,
+        "expected": "state_ended",
+        "features": {
+          "past": true,
+          "present": true,
+          "conditional": false,
+          "no_longer": false,
+          "time_ref": true,
+          "time_ref_exact": false
+        },
+        "violations": [
+          "missing_no_longer"
+        ],
+        "redacted": false,
+        "leak": false,
+        "number_words": [],
+        "numbers": [
+          {
+            "token": "1",
+            "slot": "bars_ago"
+          }
+        ],
+        "invented": 0
+      },
+      {
+        "id": "s35",
+        "sentence": "state breakout up stage=expired bars_ago=5 holds=no",
+        "deterministic": true,
+        "expected": "state_ended",
+        "features": {
+          "past": true,
+          "present": true,
+          "conditional": false,
+          "no_longer": false,
+          "time_ref": true,
+          "time_ref_exact": false
+        },
+        "violations": [
+          "missing_no_longer"
+        ],
+        "redacted": false,
+        "leak": false,
+        "number_words": [],
+        "numbers": [
+          {
+            "token": "5",
+            "slot": "bars_ago"
+          }
+        ],
+        "invented": 0
+      },
+      {
+        "id": "s36",
+        "sentence": "state breakout down stage=invalidated bars_ago=30 holds=no",
+        "deterministic": true,
+        "expected": "state_ended",
+        "features": {
+          "past": true,
+          "present": true,
+          "conditional": false,
+          "no_longer": false,
+          "time_ref": true,
+          "time_ref_exact": false
+        },
+        "violations": [
+          "missing_no_longer"
+        ],
+        "redacted": false,
+        "leak": false,
+        "number_words": [],
+        "numbers": [
+          {
+            "token": "30",
+            "slot": "bars_ago"
+          }
+        ],
+        "invented": 0
+      },
+      {
+        "id": "s37",
+        "sentence": "state squeeze neutral stage=invalidated bars_ago=0 holds=no",
+        "deterministic": true,
+        "expected": "state_ended",
+        "features": {
+          "past": true,
+          "present": true,
+          "conditional": false,
+          "no_longer": false,
+          "time_ref": true,
+          "time_ref_exact": false
+        },
+        "violations": [
+          "missing_no_longer"
+        ],
+        "redacted": true,
+        "leak": true,
+        "number_words": [],
+        "numbers": [
+          {
+            "token": "0",
+            "slot": "lead.bandwidth"
+          }
+        ],
+        "invented": 0
+      },
+      {
+        "id": "s38",
+        "sentence": "state squeeze neutral stage=realized bars_ago=1 holds=yes",
+        "deterministic": true,
+        "expected": "state_holding",
+        "features": {
+          "past": true,
+          "present": true,
+          "conditional": false,
+          "no_longer": false,
+          "time_ref": true,
+          "time_ref_exact": false
+        },
+        "violations": [],
+        "redacted": false,
+        "leak": false,
+        "number_words": [],
+        "numbers": [
+          {
+            "token": "1",
+            "slot": "bars_ago"
+          }
+        ],
+        "invented": 0
+      },
+      {
+        "id": "s39",
+        "sentence": "state squeeze neutral stage=realized bars_ago=5 holds=yes",
+        "deterministic": true,
+        "expected": "state_holding",
+        "features": {
+          "past": true,
+          "present": true,
+          "conditional": false,
+          "no_longer": false,
+          "time_ref": true,
+          "time_ref_exact": false
+        },
+        "violations": [],
+        "redacted": false,
+        "leak": false,
+        "number_words": [],
+        "numbers": [
+          {
+            "token": "5",
+            "slot": "ledger.realized"
+          }
+        ],
+        "invented": 0
+      },
+      {
+        "id": "s40",
+        "sentence": "state squeeze neutral stage=weakened bars_ago=30 holds=yes",
+        "deterministic": true,
+        "expected": "state_holding",
+        "features": {
+          "past": true,
+          "present": true,
+          "conditional": false,
+          "no_longer": false,
+          "time_ref": true,
+          "time_ref_exact": false
+        },
+        "violations": [],
+        "redacted": false,
+        "leak": false,
+        "number_words": [],
+        "numbers": [
+          {
+            "token": "30",
+            "slot": "bars_ago"
+          }
+        ],
+        "invented": 0
+      },
+      {
+        "id": "s41",
+        "sentence": "state extreme up stage=born bars_ago=0 holds=yes",
+        "deterministic": true,
+        "expected": "state_holding",
+        "features": {
+          "past": false,
+          "present": true,
+          "conditional": false,
+          "no_longer": false,
+          "time_ref": true,
+          "time_ref_exact": false
+        },
+        "violations": [],
+        "redacted": false,
+        "leak": false,
+        "number_words": [],
+        "numbers": [
+          {
+            "token": "0",
+            "slot": "bars_ago"
+          }
+        ],
+        "invented": 0
+      },
+      {
+        "id": "s42",
+        "sentence": "state extreme up stage=realized bars_ago=1 holds=yes",
+        "deterministic": true,
+        "expected": "state_holding",
+        "features": {
+          "past": true,
+          "present": true,
+          "conditional": false,
+          "no_longer": false,
+          "time_ref": true,
+          "time_ref_exact": false
+        },
+        "violations": [],
+        "redacted": true,
+        "leak": true,
+        "number_words": [],
+        "numbers": [
+          {
+            "token": "1",
+            "slot": "bars_ago"
+          }
+        ],
+        "invented": 0
+      },
+      {
+        "id": "s43",
+        "sentence": "state extreme up stage=born bars_ago=5 holds=no",
+        "deterministic": true,
+        "expected": "state_ended",
+        "features": {
+          "past": false,
+          "present": true,
+          "conditional": false,
+          "no_longer": false,
+          "time_ref": true,
+          "time_ref_exact": false
+        },
+        "violations": [
+          "missing_past",
+          "missing_no_longer"
+        ],
+        "redacted": true,
+        "leak": true,
+        "number_words": [],
+        "numbers": [
+          {
+            "token": "5",
+            "slot": "ledger.missed"
+          }
+        ],
+        "invented": 0
+      },
+      {
+        "id": "s44",
+        "sentence": "state extreme up stage=realized bars_ago=30 holds=yes",
+        "deterministic": true,
+        "expected": "state_holding",
+        "features": {
+          "past": true,
+          "present": true,
+          "conditional": false,
+          "no_longer": false,
+          "time_ref": true,
+          "time_ref_exact": false
+        },
+        "violations": [],
+        "redacted": false,
+        "leak": false,
+        "number_words": [],
+        "numbers": [
+          {
+            "token": "30",
+            "slot": "bars_ago"
+          }
+        ],
+        "invented": 0
+      },
+      {
+        "id": "s45",
+        "sentence": "state flow up stage=weakened bars_ago=0 holds=yes",
+        "deterministic": true,
+        "expected": "state_holding",
+        "features": {
+          "past": true,
+          "present": true,
+          "conditional": false,
+          "no_longer": false,
+          "time_ref": true,
+          "time_ref_exact": false
+        },
+        "violations": [],
+        "redacted": false,
+        "leak": false,
+        "number_words": [],
+        "numbers": [
+          {
+            "token": "0",
+            "slot": "bars_ago"
+          }
+        ],
+        "invented": 0
+      },
+      {
+        "id": "s46",
+        "sentence": "state flow down stage=expired bars_ago=1 holds=no",
+        "deterministic": true,
+        "expected": "state_ended",
+        "features": {
+          "past": true,
+          "present": true,
+          "conditional": false,
+          "no_longer": false,
+          "time_ref": true,
+          "time_ref_exact": false
+        },
+        "violations": [
+          "missing_no_longer"
+        ],
+        "redacted": true,
+        "leak": true,
+        "number_words": [],
+        "numbers": [
+          {
+            "token": "1",
+            "slot": "bars_ago"
+          }
+        ],
+        "invented": 0
+      },
+      {
+        "id": "s47",
+        "sentence": "state flow down stage=born bars_ago=5 holds=no",
+        "deterministic": true,
+        "expected": "state_ended",
+        "features": {
+          "past": false,
+          "present": true,
+          "conditional": false,
+          "no_longer": false,
+          "time_ref": true,
+          "time_ref_exact": false
+        },
+        "violations": [
+          "missing_past",
+          "missing_no_longer"
+        ],
+        "redacted": true,
+        "leak": true,
+        "number_words": [],
+        "numbers": [
+          {
+            "token": "5",
+            "slot": "bars_ago"
+          }
+        ],
+        "invented": 0
+      },
+      {
+        "id": "s48",
+        "sentence": "state flow down stage=confirmed bars_ago=30 holds=yes",
+        "deterministic": true,
+        "expected": "state_holding",
+        "features": {
+          "past": true,
+          "present": true,
+          "conditional": false,
+          "no_longer": false,
+          "time_ref": true,
+          "time_ref_exact": false
+        },
+        "violations": [],
+        "redacted": false,
+        "leak": false,
+        "number_words": [],
+        "numbers": [
+          {
+            "token": "30",
+            "slot": "bars_ago"
+          }
+        ],
+        "invented": 0
+      },
+      {
+        "id": "s49",
+        "sentence": "expectation continuation up stage=invalidated bars_ago=0 holds=no",
+        "deterministic": true,
+        "expected": "expectation",
+        "features": {
+          "past": true,
+          "present": true,
+          "conditional": false,
+          "no_longer": false,
+          "time_ref": true,
+          "time_ref_exact": false
+        },
+        "violations": [
+          "missing_conditional"
+        ],
+        "redacted": true,
+        "leak": true,
+        "number_words": [],
+        "numbers": [
+          {
+            "token": "0",
+            "slot": "bars_ago"
+          }
+        ],
+        "invented": 0
+      },
+      {
+        "id": "s50",
+        "sentence": "expectation continuation up stage=weakened bars_ago=1 holds=yes",
+        "deterministic": true,
+        "expected": "expectation",
+        "features": {
+          "past": true,
+          "present": true,
+          "conditional": false,
+          "no_longer": false,
+          "time_ref": true,
+          "time_ref_exact": false
+        },
+        "violations": [
+          "missing_conditional"
+        ],
+        "redacted": false,
+        "leak": false,
+        "number_words": [],
+        "numbers": [
+          {
+            "token": "1",
+            "slot": "bars_ago"
+          }
+        ],
+        "invented": 0
+      },
+      {
+        "id": "s51",
+        "sentence": "expectation continuation down stage=born bars_ago=5 holds=yes",
+        "deterministic": true,
+        "expected": "expectation",
+        "features": {
+          "past": false,
+          "present": true,
+          "conditional": false,
+          "no_longer": false,
+          "time_ref": true,
+          "time_ref_exact": false
+        },
+        "violations": [
+          "missing_conditional"
+        ],
+        "redacted": false,
+        "leak": false,
+        "number_words": [],
+        "numbers": [
+          {
+            "token": "5",
+            "slot": "bars_ago"
+          }
+        ],
+        "invented": 0
+      },
+      {
+        "id": "s52",
+        "sentence": "expectation continuation up stage=invalidated bars_ago=30 holds=no",
+        "deterministic": true,
+        "expected": "expectation",
+        "features": {
+          "past": true,
+          "present": true,
+          "conditional": false,
+          "no_longer": false,
+          "time_ref": true,
+          "time_ref_exact": false
+        },
+        "violations": [
+          "missing_conditional"
+        ],
+        "redacted": true,
+        "leak": true,
+        "number_words": [],
+        "numbers": [
+          {
+            "token": "30",
+            "slot": "bars_ago"
+          }
+        ],
+        "invented": 0
+      },
+      {
+        "id": "s53",
+        "sentence": "expectation reversal down stage=invalidated bars_ago=0 holds=no",
+        "deterministic": true,
+        "expected": "expectation",
+        "features": {
+          "past": true,
+          "present": true,
+          "conditional": false,
+          "no_longer": false,
+          "time_ref": true,
+          "time_ref_exact": false
+        },
+        "violations": [
+          "missing_conditional"
+        ],
+        "redacted": false,
+        "leak": false,
+        "number_words": [],
+        "numbers": [
+          {
+            "token": "0",
+            "slot": "bars_ago"
+          }
+        ],
+        "invented": 0
+      },
+      {
+        "id": "s54",
+        "sentence": "expectation reversal down stage=confirmed bars_ago=1 holds=yes",
+        "deterministic": true,
+        "expected": "expectation",
+        "features": {
+          "past": true,
+          "present": true,
+          "conditional": false,
+          "no_longer": false,
+          "time_ref": true,
+          "time_ref_exact": false
+        },
+        "violations": [
+          "missing_conditional"
+        ],
+        "redacted": false,
+        "leak": false,
+        "number_words": [],
+        "numbers": [
+          {
+            "token": "1",
+            "slot": "bars_ago"
+          }
+        ],
+        "invented": 0
+      },
+      {
+        "id": "s55",
+        "sentence": "expectation reversal down stage=confirmed bars_ago=5 holds=na",
+        "deterministic": true,
+        "expected": "expectation",
+        "features": {
+          "past": true,
+          "present": true,
+          "conditional": false,
+          "no_longer": false,
+          "time_ref": true,
+          "time_ref_exact": false
+        },
+        "violations": [
+          "missing_conditional"
+        ],
+        "redacted": false,
+        "leak": false,
+        "number_words": [],
+        "numbers": [
+          {
+            "token": "5",
+            "slot": "bars_ago"
+          }
+        ],
+        "invented": 0
+      },
+      {
+        "id": "s56",
+        "sentence": "expectation reversal up stage=expired bars_ago=30 holds=no",
+        "deterministic": true,
+        "expected": "expectation",
+        "features": {
+          "past": true,
+          "present": true,
+          "conditional": false,
+          "no_longer": false,
+          "time_ref": true,
+          "time_ref_exact": false
+        },
+        "violations": [
+          "missing_conditional"
+        ],
+        "redacted": false,
+        "leak": false,
+        "number_words": [],
+        "numbers": [
+          {
+            "token": "30",
+            "slot": "bars_ago"
+          }
+        ],
+        "invented": 0
+      },
+      {
+        "id": "s57",
+        "sentence": "expectation breakout up stage=confirmed bars_ago=0 holds=yes",
+        "deterministic": true,
+        "expected": "expectation",
+        "features": {
+          "past": true,
+          "present": true,
+          "conditional": false,
+          "no_longer": false,
+          "time_ref": true,
+          "time_ref_exact": false
+        },
+        "violations": [
+          "missing_conditional"
+        ],
+        "redacted": false,
+        "leak": false,
+        "number_words": [],
+        "numbers": [
+          {
+            "token": "0",
+            "slot": "bars_ago"
+          }
+        ],
+        "invented": 0
+      },
+      {
+        "id": "s58",
+        "sentence": "expectation breakout up stage=realized bars_ago=1 holds=na",
+        "deterministic": true,
+        "expected": "expectation",
+        "features": {
+          "past": true,
+          "present": true,
+          "conditional": false,
+          "no_longer": false,
+          "time_ref": true,
+          "time_ref_exact": false
+        },
+        "violations": [
+          "missing_conditional"
+        ],
+        "redacted": false,
+        "leak": false,
+        "number_words": [],
+        "numbers": [
+          {
+            "token": "1",
+            "slot": "bars_ago"
+          }
+        ],
+        "invented": 0
+      },
+      {
+        "id": "s59",
+        "sentence": "expectation breakout down stage=weakened bars_ago=5 holds=yes",
+        "deterministic": true,
+        "expected": "expectation",
+        "features": {
+          "past": true,
+          "present": true,
+          "conditional": false,
+          "no_longer": false,
+          "time_ref": true,
+          "time_ref_exact": false
+        },
+        "violations": [
+          "missing_conditional"
+        ],
+        "redacted": true,
+        "leak": true,
+        "number_words": [],
+        "numbers": [
+          {
+            "token": "5",
+            "slot": "lead.atr"
+          }
+        ],
+        "invented": 0
+      },
+      {
+        "id": "s60",
+        "sentence": "expectation breakout down stage=confirmed bars_ago=30 holds=na",
+        "deterministic": true,
+        "expected": "expectation",
+        "features": {
+          "past": true,
+          "present": true,
+          "conditional": false,
+          "no_longer": false,
+          "time_ref": true,
+          "time_ref_exact": false
+        },
+        "violations": [
+          "missing_conditional"
+        ],
+        "redacted": false,
+        "leak": false,
+        "number_words": [],
+        "numbers": [
+          {
+            "token": "30",
+            "slot": "bars_ago"
+          }
+        ],
+        "invented": 0
+      },
+      {
+        "id": "s61",
+        "sentence": "expectation squeeze neutral stage=confirmed bars_ago=0 holds=na",
+        "deterministic": true,
+        "expected": "expectation",
+        "features": {
+          "past": true,
+          "present": true,
+          "conditional": false,
+          "no_longer": false,
+          "time_ref": true,
+          "time_ref_exact": false
+        },
+        "violations": [
+          "missing_conditional"
+        ],
+        "redacted": true,
+        "leak": true,
+        "number_words": [],
+        "numbers": [
+          {
+            "token": "0",
+            "slot": "lead.bandwidth"
+          }
+        ],
+        "invented": 0
+      },
+      {
+        "id": "s62",
+        "sentence": "expectation squeeze neutral stage=weakened bars_ago=1 holds=na",
+        "deterministic": true,
+        "expected": "expectation",
+        "features": {
+          "past": true,
+          "present": true,
+          "conditional": false,
+          "no_longer": false,
+          "time_ref": true,
+          "time_ref_exact": false
+        },
+        "violations": [
+          "missing_conditional"
+        ],
+        "redacted": false,
+        "leak": false,
+        "number_words": [],
+        "numbers": [
+          {
+            "token": "1",
+            "slot": "bars_ago"
+          }
+        ],
+        "invented": 0
+      },
+      {
+        "id": "s63",
+        "sentence": "expectation squeeze neutral stage=expired bars_ago=5 holds=no",
+        "deterministic": true,
+        "expected": "expectation",
+        "features": {
+          "past": true,
+          "present": true,
+          "conditional": false,
+          "no_longer": false,
+          "time_ref": true,
+          "time_ref_exact": false
+        },
+        "violations": [
+          "missing_conditional"
+        ],
+        "redacted": false,
+        "leak": false,
+        "number_words": [],
+        "numbers": [
+          {
+            "token": "5",
+            "slot": "ledger.missed"
+          }
+        ],
+        "invented": 0
+      },
+      {
+        "id": "s64",
+        "sentence": "expectation squeeze neutral stage=born bars_ago=30 holds=yes",
+        "deterministic": true,
+        "expected": "expectation",
+        "features": {
+          "past": false,
+          "present": true,
+          "conditional": false,
+          "no_longer": false,
+          "time_ref": true,
+          "time_ref_exact": false
+        },
+        "violations": [
+          "missing_conditional"
+        ],
+        "redacted": false,
+        "leak": false,
+        "number_words": [],
+        "numbers": [
+          {
+            "token": "30",
+            "slot": "bars_ago"
+          }
+        ],
+        "invented": 0
+      },
+      {
+        "id": "s65",
+        "sentence": "expectation extreme down stage=invalidated bars_ago=0 holds=no",
+        "deterministic": true,
+        "expected": "expectation",
+        "features": {
+          "past": true,
+          "present": true,
+          "conditional": false,
+          "no_longer": false,
+          "time_ref": true,
+          "time_ref_exact": false
+        },
+        "violations": [
+          "missing_conditional"
+        ],
+        "redacted": false,
+        "leak": false,
+        "number_words": [],
+        "numbers": [
+          {
+            "token": "0",
+            "slot": "bars_ago"
+          }
+        ],
+        "invented": 0
+      },
+      {
+        "id": "s66",
+        "sentence": "expectation extreme up stage=realized bars_ago=1 holds=na",
+        "deterministic": true,
+        "expected": "expectation",
+        "features": {
+          "past": true,
+          "present": true,
+          "conditional": false,
+          "no_longer": false,
+          "time_ref": true,
+          "time_ref_exact": false
+        },
+        "violations": [
+          "missing_conditional"
+        ],
+        "redacted": false,
+        "leak": false,
+        "number_words": [],
+        "numbers": [
+          {
+            "token": "1",
+            "slot": "bars_ago"
+          }
+        ],
+        "invented": 0
+      },
+      {
+        "id": "s67",
+        "sentence": "expectation extreme down stage=realized bars_ago=5 holds=na",
+        "deterministic": true,
+        "expected": "expectation",
+        "features": {
+          "past": true,
+          "present": true,
+          "conditional": false,
+          "no_longer": false,
+          "time_ref": true,
+          "time_ref_exact": false
+        },
+        "violations": [
+          "missing_conditional"
+        ],
+        "redacted": false,
+        "leak": false,
+        "number_words": [],
+        "numbers": [
+          {
+            "token": "5",
+            "slot": "bars_ago"
+          }
+        ],
+        "invented": 0
+      },
+      {
+        "id": "s68",
+        "sentence": "expectation extreme down stage=confirmed bars_ago=30 holds=na",
+        "deterministic": true,
+        "expected": "expectation",
+        "features": {
+          "past": true,
+          "present": true,
+          "conditional": false,
+          "no_longer": false,
+          "time_ref": true,
+          "time_ref_exact": false
+        },
+        "violations": [
+          "missing_conditional"
+        ],
+        "redacted": true,
+        "leak": true,
+        "number_words": [],
+        "numbers": [
+          {
+            "token": "30",
+            "slot": "lead.level"
+          }
+        ],
+        "invented": 0
+      },
+      {
+        "id": "s69",
+        "sentence": "expectation flow up stage=expired bars_ago=0 holds=no",
+        "deterministic": true,
+        "expected": "expectation",
+        "features": {
+          "past": true,
+          "present": true,
+          "conditional": false,
+          "no_longer": false,
+          "time_ref": true,
+          "time_ref_exact": false
+        },
+        "violations": [
+          "missing_conditional"
+        ],
+        "redacted": false,
+        "leak": false,
+        "number_words": [],
+        "numbers": [
+          {
+            "token": "0",
+            "slot": "bars_ago"
+          }
+        ],
+        "invented": 0
+      },
+      {
+        "id": "s70",
+        "sentence": "expectation flow down stage=confirmed bars_ago=1 holds=yes",
+        "deterministic": true,
+        "expected": "expectation",
+        "features": {
+          "past": true,
+          "present": true,
+          "conditional": false,
+          "no_longer": false,
+          "time_ref": true,
+          "time_ref_exact": false
+        },
+        "violations": [
+          "missing_conditional"
+        ],
+        "redacted": false,
+        "leak": false,
+        "number_words": [],
+        "numbers": [
+          {
+            "token": "1",
+            "slot": "bars_ago"
+          }
+        ],
+        "invented": 0
+      },
+      {
+        "id": "s71",
+        "sentence": "expectation flow down stage=expired bars_ago=5 holds=no",
+        "deterministic": true,
+        "expected": "expectation",
+        "features": {
+          "past": true,
+          "present": true,
+          "conditional": false,
+          "no_longer": false,
+          "time_ref": true,
+          "time_ref_exact": false
+        },
+        "violations": [
+          "missing_conditional"
+        ],
+        "redacted": false,
+        "leak": false,
+        "number_words": [],
+        "numbers": [
+          {
+            "token": "5",
+            "slot": "bars_ago"
+          }
+        ],
+        "invented": 0
+      },
+      {
+        "id": "s72",
+        "sentence": "expectation flow down stage=expired bars_ago=30 holds=no",
+        "deterministic": true,
+        "expected": "expectation",
+        "features": {
+          "past": true,
+          "present": true,
+          "conditional": false,
+          "no_longer": false,
+          "time_ref": true,
+          "time_ref_exact": false
+        },
+        "violations": [
+          "missing_conditional"
+        ],
+        "redacted": false,
+        "leak": false,
+        "number_words": [],
+        "numbers": [
+          {
+            "token": "30",
+            "slot": "bars_ago"
+          }
+        ],
+        "invented": 0
+      },
+      {
+        "id": "k26",
+        "sentence": "state extreme up stage=weakened bars_ago=3 holds=no",
+        "deterministic": true,
+        "expected": "state_ended",
+        "features": {
+          "past": true,
+          "present": true,
+          "conditional": false,
+          "no_longer": false,
+          "time_ref": true,
+          "time_ref_exact": false
+        },
+        "violations": [
+          "missing_no_longer"
+        ],
+        "redacted": false,
+        "leak": false,
+        "number_words": [],
+        "numbers": [
+          {
+            "token": "3",
+            "slot": "bars_ago"
+          }
+        ],
+        "invented": 0
+      }
+    ],
+    "tr": [
+      {
+        "id": "s01",
+        "sentence": "event continuation down stage=invalidated bars_ago=0 holds=na",
+        "deterministic": true,
+        "expected": "event",
+        "features": {
+          "past": false,
+          "present": false,
+          "conditional": false,
+          "no_longer": false,
+          "time_ref": false,
+          "time_ref_exact": false
+        },
+        "violations": [
+          "missing_past",
+          "missing_time_ref"
+        ],
+        "redacted": false,
+        "leak": false,
+        "number_words": [],
+        "numbers": [
+          {
+            "token": "0",
+            "slot": "bars_ago"
+          }
+        ],
+        "invented": 0
+      },
+      {
+        "id": "s02",
+        "sentence": "event continuation up stage=weakened bars_ago=1 holds=na",
+        "deterministic": true,
+        "expected": "event",
+        "features": {
+          "past": false,
+          "present": false,
+          "conditional": false,
+          "no_longer": false,
+          "time_ref": false,
+          "time_ref_exact": false
+        },
+        "violations": [
+          "missing_past",
+          "missing_time_ref"
+        ],
+        "redacted": false,
+        "leak": false,
+        "number_words": [],
+        "numbers": [
+          {
+            "token": "1",
+            "slot": "bars_ago"
+          }
+        ],
+        "invented": 0
+      },
+      {
+        "id": "s03",
+        "sentence": "event continuation down stage=realized bars_ago=5 holds=na",
+        "deterministic": true,
+        "expected": "event",
+        "features": {
+          "past": false,
+          "present": false,
+          "conditional": false,
+          "no_longer": false,
+          "time_ref": false,
+          "time_ref_exact": false
+        },
+        "violations": [
+          "missing_past",
+          "missing_time_ref"
+        ],
+        "redacted": true,
+        "leak": true,
+        "number_words": [],
+        "numbers": [
+          {
+            "token": "5",
+            "slot": "bars_ago"
+          }
+        ],
+        "invented": 0
+      },
+      {
+        "id": "s04",
+        "sentence": "event continuation up stage=born bars_ago=30 holds=na",
+        "deterministic": true,
+        "expected": "event",
+        "features": {
+          "past": false,
+          "present": false,
+          "conditional": false,
+          "no_longer": false,
+          "time_ref": false,
+          "time_ref_exact": false
+        },
+        "violations": [
+          "missing_past",
+          "missing_time_ref"
+        ],
+        "redacted": false,
+        "leak": false,
+        "number_words": [],
+        "numbers": [
+          {
+            "token": "30",
+            "slot": "bars_ago"
+          }
+        ],
+        "invented": 0
+      },
+      {
+        "id": "s05",
+        "sentence": "event reversal down stage=weakened bars_ago=0 holds=na",
+        "deterministic": true,
+        "expected": "event",
+        "features": {
+          "past": false,
+          "present": false,
+          "conditional": false,
+          "no_longer": false,
+          "time_ref": false,
+          "time_ref_exact": false
+        },
+        "violations": [
+          "missing_past",
+          "missing_time_ref"
+        ],
+        "redacted": false,
+        "leak": false,
+        "number_words": [],
+        "numbers": [
+          {
+            "token": "0",
+            "slot": "bars_ago"
+          }
+        ],
+        "invented": 0
+      },
+      {
+        "id": "s06",
+        "sentence": "event reversal up stage=weakened bars_ago=1 holds=na",
+        "deterministic": true,
+        "expected": "event",
+        "features": {
+          "past": false,
+          "present": false,
+          "conditional": false,
+          "no_longer": false,
+          "time_ref": false,
+          "time_ref_exact": false
+        },
+        "violations": [
+          "missing_past",
+          "missing_time_ref"
+        ],
+        "redacted": false,
+        "leak": false,
+        "number_words": [],
+        "numbers": [
+          {
+            "token": "1",
+            "slot": "bars_ago"
+          }
+        ],
+        "invented": 0
+      },
+      {
+        "id": "s07",
+        "sentence": "event reversal down stage=expired bars_ago=5 holds=na",
+        "deterministic": true,
+        "expected": "event",
+        "features": {
+          "past": false,
+          "present": false,
+          "conditional": false,
+          "no_longer": false,
+          "time_ref": false,
+          "time_ref_exact": false
+        },
+        "violations": [
+          "missing_past",
+          "missing_time_ref"
+        ],
+        "redacted": true,
+        "leak": true,
+        "number_words": [],
+        "numbers": [
+          {
+            "token": "5",
+            "slot": "bars_ago"
+          }
+        ],
+        "invented": 0
+      },
+      {
+        "id": "s08",
+        "sentence": "event reversal down stage=confirmed bars_ago=30 holds=na",
+        "deterministic": true,
+        "expected": "event",
+        "features": {
+          "past": false,
+          "present": false,
+          "conditional": false,
+          "no_longer": false,
+          "time_ref": false,
+          "time_ref_exact": false
+        },
+        "violations": [
+          "missing_past",
+          "missing_time_ref"
+        ],
+        "redacted": false,
+        "leak": false,
+        "number_words": [],
+        "numbers": [
+          {
+            "token": "30",
+            "slot": "bars_ago"
+          }
+        ],
+        "invented": 0
+      },
+      {
+        "id": "s09",
+        "sentence": "event breakout up stage=expired bars_ago=0 holds=na",
+        "deterministic": true,
+        "expected": "event",
+        "features": {
+          "past": false,
+          "present": false,
+          "conditional": false,
+          "no_longer": false,
+          "time_ref": false,
+          "time_ref_exact": false
+        },
+        "violations": [
+          "missing_past",
+          "missing_time_ref"
+        ],
+        "redacted": false,
+        "leak": false,
+        "number_words": [],
+        "numbers": [
+          {
+            "token": "0",
+            "slot": "bars_ago"
+          }
+        ],
+        "invented": 0
+      },
+      {
+        "id": "s10",
+        "sentence": "event breakout up stage=invalidated bars_ago=1 holds=na",
+        "deterministic": true,
+        "expected": "event",
+        "features": {
+          "past": false,
+          "present": false,
+          "conditional": false,
+          "no_longer": false,
+          "time_ref": false,
+          "time_ref_exact": false
+        },
+        "violations": [
+          "missing_past",
+          "missing_time_ref"
+        ],
+        "redacted": false,
+        "leak": false,
+        "number_words": [],
+        "numbers": [
+          {
+            "token": "1",
+            "slot": "bars_ago"
+          }
+        ],
+        "invented": 0
+      },
+      {
+        "id": "s11",
+        "sentence": "event breakout up stage=confirmed bars_ago=5 holds=na",
+        "deterministic": true,
+        "expected": "event",
+        "features": {
+          "past": false,
+          "present": false,
+          "conditional": false,
+          "no_longer": false,
+          "time_ref": false,
+          "time_ref_exact": false
+        },
+        "violations": [
+          "missing_past",
+          "missing_time_ref"
+        ],
+        "redacted": false,
+        "leak": false,
+        "number_words": [],
+        "numbers": [
+          {
+            "token": "5",
+            "slot": "bars_ago"
+          }
+        ],
+        "invented": 0
+      },
+      {
+        "id": "s12",
+        "sentence": "event breakout down stage=weakened bars_ago=30 holds=na",
+        "deterministic": true,
+        "expected": "event",
+        "features": {
+          "past": false,
+          "present": false,
+          "conditional": false,
+          "no_longer": false,
+          "time_ref": false,
+          "time_ref_exact": false
+        },
+        "violations": [
+          "missing_past",
+          "missing_time_ref"
+        ],
+        "redacted": false,
+        "leak": false,
+        "number_words": [],
+        "numbers": [
+          {
+            "token": "30",
+            "slot": "bars_ago"
+          }
+        ],
+        "invented": 0
+      },
+      {
+        "id": "s13",
+        "sentence": "event squeeze neutral stage=born bars_ago=0 holds=na",
+        "deterministic": true,
+        "expected": "event",
+        "features": {
+          "past": false,
+          "present": false,
+          "conditional": false,
+          "no_longer": false,
+          "time_ref": false,
+          "time_ref_exact": false
+        },
+        "violations": [
+          "missing_past",
+          "missing_time_ref"
+        ],
+        "redacted": false,
+        "leak": false,
+        "number_words": [],
+        "numbers": [
+          {
+            "token": "0",
+            "slot": "lead.bandwidth"
+          }
+        ],
+        "invented": 0
+      },
+      {
+        "id": "s14",
+        "sentence": "event squeeze neutral stage=expired bars_ago=1 holds=na",
+        "deterministic": true,
+        "expected": "event",
+        "features": {
+          "past": false,
+          "present": false,
+          "conditional": false,
+          "no_longer": false,
+          "time_ref": false,
+          "time_ref_exact": false
+        },
+        "violations": [
+          "missing_past",
+          "missing_time_ref"
+        ],
+        "redacted": true,
+        "leak": true,
+        "number_words": [],
+        "numbers": [
+          {
+            "token": "1",
+            "slot": "bars_ago"
+          }
+        ],
+        "invented": 0
+      },
+      {
+        "id": "s15",
+        "sentence": "event squeeze neutral stage=weakened bars_ago=5 holds=na",
+        "deterministic": true,
+        "expected": "event",
+        "features": {
+          "past": false,
+          "present": false,
+          "conditional": false,
+          "no_longer": false,
+          "time_ref": false,
+          "time_ref_exact": false
+        },
+        "violations": [
+          "missing_past",
+          "missing_time_ref"
+        ],
+        "redacted": false,
+        "leak": false,
+        "number_words": [],
+        "numbers": [
+          {
+            "token": "5",
+            "slot": "bars_ago"
+          }
+        ],
+        "invented": 0
+      },
+      {
+        "id": "s16",
+        "sentence": "event squeeze neutral stage=invalidated bars_ago=30 holds=na",
+        "deterministic": true,
+        "expected": "event",
+        "features": {
+          "past": false,
+          "present": false,
+          "conditional": false,
+          "no_longer": false,
+          "time_ref": false,
+          "time_ref_exact": false
+        },
+        "violations": [
+          "missing_past",
+          "missing_time_ref"
+        ],
+        "redacted": false,
+        "leak": false,
+        "number_words": [],
+        "numbers": [
+          {
+            "token": "30",
+            "slot": "bars_ago"
+          }
+        ],
+        "invented": 0
+      },
+      {
+        "id": "s17",
+        "sentence": "event extreme down stage=confirmed bars_ago=0 holds=na",
+        "deterministic": true,
+        "expected": "event",
+        "features": {
+          "past": false,
+          "present": false,
+          "conditional": false,
+          "no_longer": false,
+          "time_ref": false,
+          "time_ref_exact": false
+        },
+        "violations": [
+          "missing_past",
+          "missing_time_ref"
+        ],
+        "redacted": false,
+        "leak": false,
+        "number_words": [],
+        "numbers": [
+          {
+            "token": "0",
+            "slot": "bars_ago"
+          }
+        ],
+        "invented": 0
+      },
+      {
+        "id": "s18",
+        "sentence": "event extreme up stage=confirmed bars_ago=1 holds=na",
+        "deterministic": true,
+        "expected": "event",
+        "features": {
+          "past": false,
+          "present": false,
+          "conditional": false,
+          "no_longer": false,
+          "time_ref": false,
+          "time_ref_exact": false
+        },
+        "violations": [
+          "missing_past",
+          "missing_time_ref"
+        ],
+        "redacted": false,
+        "leak": false,
+        "number_words": [],
+        "numbers": [
+          {
+            "token": "1",
+            "slot": "bars_ago"
+          }
+        ],
+        "invented": 0
+      },
+      {
+        "id": "s19",
+        "sentence": "event extreme up stage=invalidated bars_ago=5 holds=na",
+        "deterministic": true,
+        "expected": "event",
+        "features": {
+          "past": false,
+          "present": false,
+          "conditional": false,
+          "no_longer": false,
+          "time_ref": false,
+          "time_ref_exact": false
+        },
+        "violations": [
+          "missing_past",
+          "missing_time_ref"
+        ],
+        "redacted": true,
+        "leak": true,
+        "number_words": [],
+        "numbers": [
+          {
+            "token": "5",
+            "slot": "bars_ago"
+          }
+        ],
+        "invented": 0
+      },
+      {
+        "id": "s20",
+        "sentence": "event extreme up stage=born bars_ago=30 holds=na",
+        "deterministic": true,
+        "expected": "event",
+        "features": {
+          "past": false,
+          "present": false,
+          "conditional": false,
+          "no_longer": false,
+          "time_ref": false,
+          "time_ref_exact": false
+        },
+        "violations": [
+          "missing_past",
+          "missing_time_ref"
+        ],
+        "redacted": true,
+        "leak": true,
+        "number_words": [],
+        "numbers": [
+          {
+            "token": "30",
+            "slot": "bars_ago"
+          }
+        ],
+        "invented": 0
+      },
+      {
+        "id": "s21",
+        "sentence": "event flow down stage=born bars_ago=0 holds=na",
+        "deterministic": true,
+        "expected": "event",
+        "features": {
+          "past": false,
+          "present": false,
+          "conditional": false,
+          "no_longer": false,
+          "time_ref": false,
+          "time_ref_exact": false
+        },
+        "violations": [
+          "missing_past",
+          "missing_time_ref"
+        ],
+        "redacted": false,
+        "leak": false,
+        "number_words": [],
+        "numbers": [
+          {
+            "token": "0",
+            "slot": "bars_ago"
+          }
+        ],
+        "invented": 0
+      },
+      {
+        "id": "s22",
+        "sentence": "event flow up stage=born bars_ago=1 holds=na",
+        "deterministic": true,
+        "expected": "event",
+        "features": {
+          "past": false,
+          "present": false,
+          "conditional": false,
+          "no_longer": false,
+          "time_ref": false,
+          "time_ref_exact": false
+        },
+        "violations": [
+          "missing_past",
+          "missing_time_ref"
+        ],
+        "redacted": false,
+        "leak": false,
+        "number_words": [],
+        "numbers": [
+          {
+            "token": "1",
+            "slot": "bars_ago"
+          }
+        ],
+        "invented": 0
+      },
+      {
+        "id": "s23",
+        "sentence": "event flow down stage=expired bars_ago=5 holds=na",
+        "deterministic": true,
+        "expected": "event",
+        "features": {
+          "past": false,
+          "present": false,
+          "conditional": false,
+          "no_longer": false,
+          "time_ref": false,
+          "time_ref_exact": false
+        },
+        "violations": [
+          "missing_past",
+          "missing_time_ref"
+        ],
+        "redacted": false,
+        "leak": false,
+        "number_words": [],
+        "numbers": [
+          {
+            "token": "5",
+            "slot": "bars_ago"
+          }
+        ],
+        "invented": 0
+      },
+      {
+        "id": "s24",
+        "sentence": "event flow down stage=weakened bars_ago=30 holds=na",
+        "deterministic": true,
+        "expected": "event",
+        "features": {
+          "past": false,
+          "present": false,
+          "conditional": false,
+          "no_longer": false,
+          "time_ref": false,
+          "time_ref_exact": false
+        },
+        "violations": [
+          "missing_past",
+          "missing_time_ref"
+        ],
+        "redacted": false,
+        "leak": false,
+        "number_words": [],
+        "numbers": [
+          {
+            "token": "30",
+            "slot": "bars_ago"
+          }
+        ],
+        "invented": 0
+      },
+      {
+        "id": "s25",
+        "sentence": "state continuation up stage=weakened bars_ago=0 holds=yes",
+        "deterministic": true,
+        "expected": "state_holding",
+        "features": {
+          "past": false,
+          "present": false,
+          "conditional": false,
+          "no_longer": false,
+          "time_ref": false,
+          "time_ref_exact": false
+        },
+        "violations": [
+          "missing_present"
+        ],
+        "redacted": true,
+        "leak": true,
+        "number_words": [],
+        "numbers": [
+          {
+            "token": "0",
+            "slot": "bars_ago"
+          }
+        ],
+        "invented": 0
+      },
+      {
+        "id": "s26",
+        "sentence": "state continuation down stage=invalidated bars_ago=1 holds=no",
+        "deterministic": true,
+        "expected": "state_ended",
+        "features": {
+          "past": false,
+          "present": false,
+          "conditional": false,
+          "no_longer": false,
+          "time_ref": false,
+          "time_ref_exact": false
+        },
+        "violations": [
+          "missing_past",
+          "missing_no_longer"
+        ],
+        "redacted": false,
+        "leak": false,
+        "number_words": [],
+        "numbers": [
+          {
+            "token": "1",
+            "slot": "bars_ago"
+          }
+        ],
+        "invented": 0
+      },
+      {
+        "id": "s27",
+        "sentence": "state continuation down stage=born bars_ago=5 holds=yes",
+        "deterministic": true,
+        "expected": "state_holding",
+        "features": {
+          "past": false,
+          "present": false,
+          "conditional": false,
+          "no_longer": false,
+          "time_ref": false,
+          "time_ref_exact": false
+        },
+        "violations": [
+          "missing_present"
+        ],
+        "redacted": false,
+        "leak": false,
+        "number_words": [],
+        "numbers": [
+          {
+            "token": "5",
+            "slot": "bars_ago"
+          }
+        ],
+        "invented": 0
+      },
+      {
+        "id": "s28",
+        "sentence": "state continuation up stage=realized bars_ago=30 holds=yes",
+        "deterministic": true,
+        "expected": "state_holding",
+        "features": {
+          "past": false,
+          "present": false,
+          "conditional": false,
+          "no_longer": false,
+          "time_ref": false,
+          "time_ref_exact": false
+        },
+        "violations": [
+          "missing_present"
+        ],
+        "redacted": false,
+        "leak": false,
+        "number_words": [],
+        "numbers": [
+          {
+            "token": "30",
+            "slot": "bars_ago"
+          }
+        ],
+        "invented": 0
+      },
+      {
+        "id": "s29",
+        "sentence": "state reversal down stage=expired bars_ago=0 holds=no",
+        "deterministic": true,
+        "expected": "state_ended",
+        "features": {
+          "past": false,
+          "present": false,
+          "conditional": false,
+          "no_longer": false,
+          "time_ref": false,
+          "time_ref_exact": false
+        },
+        "violations": [
+          "missing_past",
+          "missing_no_longer"
+        ],
+        "redacted": false,
+        "leak": false,
+        "number_words": [],
+        "numbers": [
+          {
+            "token": "0",
+            "slot": "bars_ago"
+          }
+        ],
+        "invented": 0
+      },
+      {
+        "id": "s30",
+        "sentence": "state reversal up stage=invalidated bars_ago=1 holds=no",
+        "deterministic": true,
+        "expected": "state_ended",
+        "features": {
+          "past": false,
+          "present": false,
+          "conditional": false,
+          "no_longer": false,
+          "time_ref": false,
+          "time_ref_exact": false
+        },
+        "violations": [
+          "missing_past",
+          "missing_no_longer"
+        ],
+        "redacted": false,
+        "leak": false,
+        "number_words": [],
+        "numbers": [
+          {
+            "token": "1",
+            "slot": "bars_ago"
+          }
+        ],
+        "invented": 0
+      },
+      {
+        "id": "s31",
+        "sentence": "state reversal down stage=realized bars_ago=5 holds=yes",
+        "deterministic": true,
+        "expected": "state_holding",
+        "features": {
+          "past": false,
+          "present": false,
+          "conditional": false,
+          "no_longer": false,
+          "time_ref": false,
+          "time_ref_exact": false
+        },
+        "violations": [
+          "missing_present"
+        ],
+        "redacted": true,
+        "leak": true,
+        "number_words": [],
+        "numbers": [
+          {
+            "token": "5",
+            "slot": "bars_ago"
+          }
+        ],
+        "invented": 0
+      },
+      {
+        "id": "s32",
+        "sentence": "state reversal down stage=realized bars_ago=30 holds=yes",
+        "deterministic": true,
+        "expected": "state_holding",
+        "features": {
+          "past": false,
+          "present": false,
+          "conditional": false,
+          "no_longer": false,
+          "time_ref": false,
+          "time_ref_exact": false
+        },
+        "violations": [
+          "missing_present"
+        ],
+        "redacted": false,
+        "leak": false,
+        "number_words": [],
+        "numbers": [
+          {
+            "token": "30",
+            "slot": "bars_ago"
+          }
+        ],
+        "invented": 0
+      },
+      {
+        "id": "s33",
+        "sentence": "state breakout up stage=born bars_ago=0 holds=yes",
+        "deterministic": true,
+        "expected": "state_holding",
+        "features": {
+          "past": false,
+          "present": false,
+          "conditional": false,
+          "no_longer": false,
+          "time_ref": false,
+          "time_ref_exact": false
+        },
+        "violations": [
+          "missing_present"
+        ],
+        "redacted": true,
+        "leak": true,
+        "number_words": [],
+        "numbers": [
+          {
+            "token": "0",
+            "slot": "bars_ago"
+          }
+        ],
+        "invented": 0
+      },
+      {
+        "id": "s34",
+        "sentence": "state breakout up stage=realized bars_ago=1 holds=no",
+        "deterministic": true,
+        "expected": "state_ended",
+        "features": {
+          "past": false,
+          "present": false,
+          "conditional": false,
+          "no_longer": false,
+          "time_ref": false,
+          "time_ref_exact": false
+        },
+        "violations": [
+          "missing_past",
+          "missing_no_longer"
+        ],
+        "redacted": false,
+        "leak": false,
+        "number_words": [],
+        "numbers": [
+          {
+            "token": "1",
+            "slot": "bars_ago"
+          }
+        ],
+        "invented": 0
+      },
+      {
+        "id": "s35",
+        "sentence": "state breakout up stage=expired bars_ago=5 holds=no",
+        "deterministic": true,
+        "expected": "state_ended",
+        "features": {
+          "past": false,
+          "present": false,
+          "conditional": false,
+          "no_longer": false,
+          "time_ref": false,
+          "time_ref_exact": false
+        },
+        "violations": [
+          "missing_past",
+          "missing_no_longer"
+        ],
+        "redacted": false,
+        "leak": false,
+        "number_words": [],
+        "numbers": [
+          {
+            "token": "5",
+            "slot": "bars_ago"
+          }
+        ],
+        "invented": 0
+      },
+      {
+        "id": "s36",
+        "sentence": "state breakout down stage=invalidated bars_ago=30 holds=no",
+        "deterministic": true,
+        "expected": "state_ended",
+        "features": {
+          "past": false,
+          "present": false,
+          "conditional": false,
+          "no_longer": false,
+          "time_ref": false,
+          "time_ref_exact": false
+        },
+        "violations": [
+          "missing_past",
+          "missing_no_longer"
+        ],
+        "redacted": false,
+        "leak": false,
+        "number_words": [],
+        "numbers": [
+          {
+            "token": "30",
+            "slot": "bars_ago"
+          }
+        ],
+        "invented": 0
+      },
+      {
+        "id": "s37",
+        "sentence": "state squeeze neutral stage=invalidated bars_ago=0 holds=no",
+        "deterministic": true,
+        "expected": "state_ended",
+        "features": {
+          "past": false,
+          "present": false,
+          "conditional": false,
+          "no_longer": false,
+          "time_ref": false,
+          "time_ref_exact": false
+        },
+        "violations": [
+          "missing_past",
+          "missing_no_longer"
+        ],
+        "redacted": true,
+        "leak": true,
+        "number_words": [],
+        "numbers": [
+          {
+            "token": "0",
+            "slot": "lead.bandwidth"
+          }
+        ],
+        "invented": 0
+      },
+      {
+        "id": "s38",
+        "sentence": "state squeeze neutral stage=realized bars_ago=1 holds=yes",
+        "deterministic": true,
+        "expected": "state_holding",
+        "features": {
+          "past": false,
+          "present": false,
+          "conditional": false,
+          "no_longer": false,
+          "time_ref": false,
+          "time_ref_exact": false
+        },
+        "violations": [
+          "missing_present"
+        ],
+        "redacted": false,
+        "leak": false,
+        "number_words": [],
+        "numbers": [
+          {
+            "token": "1",
+            "slot": "bars_ago"
+          }
+        ],
+        "invented": 0
+      },
+      {
+        "id": "s39",
+        "sentence": "state squeeze neutral stage=realized bars_ago=5 holds=yes",
+        "deterministic": true,
+        "expected": "state_holding",
+        "features": {
+          "past": false,
+          "present": false,
+          "conditional": false,
+          "no_longer": false,
+          "time_ref": false,
+          "time_ref_exact": false
+        },
+        "violations": [
+          "missing_present"
+        ],
+        "redacted": false,
+        "leak": false,
+        "number_words": [],
+        "numbers": [
+          {
+            "token": "5",
+            "slot": "ledger.realized"
+          }
+        ],
+        "invented": 0
+      },
+      {
+        "id": "s40",
+        "sentence": "state squeeze neutral stage=weakened bars_ago=30 holds=yes",
+        "deterministic": true,
+        "expected": "state_holding",
+        "features": {
+          "past": false,
+          "present": false,
+          "conditional": false,
+          "no_longer": false,
+          "time_ref": false,
+          "time_ref_exact": false
+        },
+        "violations": [
+          "missing_present"
+        ],
+        "redacted": false,
+        "leak": false,
+        "number_words": [],
+        "numbers": [
+          {
+            "token": "30",
+            "slot": "bars_ago"
+          }
+        ],
+        "invented": 0
+      },
+      {
+        "id": "s41",
+        "sentence": "state extreme up stage=born bars_ago=0 holds=yes",
+        "deterministic": true,
+        "expected": "state_holding",
+        "features": {
+          "past": false,
+          "present": false,
+          "conditional": false,
+          "no_longer": false,
+          "time_ref": false,
+          "time_ref_exact": false
+        },
+        "violations": [
+          "missing_present"
+        ],
+        "redacted": false,
+        "leak": false,
+        "number_words": [],
+        "numbers": [
+          {
+            "token": "0",
+            "slot": "bars_ago"
+          }
+        ],
+        "invented": 0
+      },
+      {
+        "id": "s42",
+        "sentence": "state extreme up stage=realized bars_ago=1 holds=yes",
+        "deterministic": true,
+        "expected": "state_holding",
+        "features": {
+          "past": false,
+          "present": false,
+          "conditional": false,
+          "no_longer": false,
+          "time_ref": false,
+          "time_ref_exact": false
+        },
+        "violations": [
+          "missing_present"
+        ],
+        "redacted": true,
+        "leak": true,
+        "number_words": [],
+        "numbers": [
+          {
+            "token": "1",
+            "slot": "bars_ago"
+          }
+        ],
+        "invented": 0
+      },
+      {
+        "id": "s43",
+        "sentence": "state extreme up stage=born bars_ago=5 holds=no",
+        "deterministic": true,
+        "expected": "state_ended",
+        "features": {
+          "past": false,
+          "present": false,
+          "conditional": false,
+          "no_longer": false,
+          "time_ref": false,
+          "time_ref_exact": false
+        },
+        "violations": [
+          "missing_past",
+          "missing_no_longer"
+        ],
+        "redacted": true,
+        "leak": true,
+        "number_words": [],
+        "numbers": [
+          {
+            "token": "5",
+            "slot": "ledger.missed"
+          }
+        ],
+        "invented": 0
+      },
+      {
+        "id": "s44",
+        "sentence": "state extreme up stage=realized bars_ago=30 holds=yes",
+        "deterministic": true,
+        "expected": "state_holding",
+        "features": {
+          "past": false,
+          "present": false,
+          "conditional": false,
+          "no_longer": false,
+          "time_ref": false,
+          "time_ref_exact": false
+        },
+        "violations": [
+          "missing_present"
+        ],
+        "redacted": false,
+        "leak": false,
+        "number_words": [],
+        "numbers": [
+          {
+            "token": "30",
+            "slot": "bars_ago"
+          }
+        ],
+        "invented": 0
+      },
+      {
+        "id": "s45",
+        "sentence": "state flow up stage=weakened bars_ago=0 holds=yes",
+        "deterministic": true,
+        "expected": "state_holding",
+        "features": {
+          "past": false,
+          "present": false,
+          "conditional": false,
+          "no_longer": false,
+          "time_ref": false,
+          "time_ref_exact": false
+        },
+        "violations": [
+          "missing_present"
+        ],
+        "redacted": false,
+        "leak": false,
+        "number_words": [],
+        "numbers": [
+          {
+            "token": "0",
+            "slot": "bars_ago"
+          }
+        ],
+        "invented": 0
+      },
+      {
+        "id": "s46",
+        "sentence": "state flow down stage=expired bars_ago=1 holds=no",
+        "deterministic": true,
+        "expected": "state_ended",
+        "features": {
+          "past": false,
+          "present": false,
+          "conditional": false,
+          "no_longer": false,
+          "time_ref": false,
+          "time_ref_exact": false
+        },
+        "violations": [
+          "missing_past",
+          "missing_no_longer"
+        ],
+        "redacted": true,
+        "leak": true,
+        "number_words": [],
+        "numbers": [
+          {
+            "token": "1",
+            "slot": "bars_ago"
+          }
+        ],
+        "invented": 0
+      },
+      {
+        "id": "s47",
+        "sentence": "state flow down stage=born bars_ago=5 holds=no",
+        "deterministic": true,
+        "expected": "state_ended",
+        "features": {
+          "past": false,
+          "present": false,
+          "conditional": false,
+          "no_longer": false,
+          "time_ref": false,
+          "time_ref_exact": false
+        },
+        "violations": [
+          "missing_past",
+          "missing_no_longer"
+        ],
+        "redacted": true,
+        "leak": true,
+        "number_words": [],
+        "numbers": [
+          {
+            "token": "5",
+            "slot": "bars_ago"
+          }
+        ],
+        "invented": 0
+      },
+      {
+        "id": "s48",
+        "sentence": "state flow down stage=confirmed bars_ago=30 holds=yes",
+        "deterministic": true,
+        "expected": "state_holding",
+        "features": {
+          "past": false,
+          "present": false,
+          "conditional": false,
+          "no_longer": false,
+          "time_ref": false,
+          "time_ref_exact": false
+        },
+        "violations": [
+          "missing_present"
+        ],
+        "redacted": false,
+        "leak": false,
+        "number_words": [],
+        "numbers": [
+          {
+            "token": "30",
+            "slot": "bars_ago"
+          }
+        ],
+        "invented": 0
+      },
+      {
+        "id": "s49",
+        "sentence": "expectation continuation up stage=invalidated bars_ago=0 holds=no",
+        "deterministic": true,
+        "expected": "expectation",
+        "features": {
+          "past": false,
+          "present": false,
+          "conditional": false,
+          "no_longer": false,
+          "time_ref": false,
+          "time_ref_exact": false
+        },
+        "violations": [
+          "missing_conditional"
+        ],
+        "redacted": true,
+        "leak": true,
+        "number_words": [],
+        "numbers": [
+          {
+            "token": "0",
+            "slot": "bars_ago"
+          }
+        ],
+        "invented": 0
+      },
+      {
+        "id": "s50",
+        "sentence": "expectation continuation up stage=weakened bars_ago=1 holds=yes",
+        "deterministic": true,
+        "expected": "expectation",
+        "features": {
+          "past": false,
+          "present": false,
+          "conditional": false,
+          "no_longer": false,
+          "time_ref": false,
+          "time_ref_exact": false
+        },
+        "violations": [
+          "missing_conditional"
+        ],
+        "redacted": false,
+        "leak": false,
+        "number_words": [],
+        "numbers": [
+          {
+            "token": "1",
+            "slot": "bars_ago"
+          }
+        ],
+        "invented": 0
+      },
+      {
+        "id": "s51",
+        "sentence": "expectation continuation down stage=born bars_ago=5 holds=yes",
+        "deterministic": true,
+        "expected": "expectation",
+        "features": {
+          "past": false,
+          "present": false,
+          "conditional": false,
+          "no_longer": false,
+          "time_ref": false,
+          "time_ref_exact": false
+        },
+        "violations": [
+          "missing_conditional"
+        ],
+        "redacted": false,
+        "leak": false,
+        "number_words": [],
+        "numbers": [
+          {
+            "token": "5",
+            "slot": "bars_ago"
+          }
+        ],
+        "invented": 0
+      },
+      {
+        "id": "s52",
+        "sentence": "expectation continuation up stage=invalidated bars_ago=30 holds=no",
+        "deterministic": true,
+        "expected": "expectation",
+        "features": {
+          "past": false,
+          "present": false,
+          "conditional": false,
+          "no_longer": false,
+          "time_ref": false,
+          "time_ref_exact": false
+        },
+        "violations": [
+          "missing_conditional"
+        ],
+        "redacted": true,
+        "leak": true,
+        "number_words": [],
+        "numbers": [
+          {
+            "token": "30",
+            "slot": "bars_ago"
+          }
+        ],
+        "invented": 0
+      },
+      {
+        "id": "s53",
+        "sentence": "expectation reversal down stage=invalidated bars_ago=0 holds=no",
+        "deterministic": true,
+        "expected": "expectation",
+        "features": {
+          "past": false,
+          "present": false,
+          "conditional": false,
+          "no_longer": false,
+          "time_ref": false,
+          "time_ref_exact": false
+        },
+        "violations": [
+          "missing_conditional"
+        ],
+        "redacted": false,
+        "leak": false,
+        "number_words": [],
+        "numbers": [
+          {
+            "token": "0",
+            "slot": "bars_ago"
+          }
+        ],
+        "invented": 0
+      },
+      {
+        "id": "s54",
+        "sentence": "expectation reversal down stage=confirmed bars_ago=1 holds=yes",
+        "deterministic": true,
+        "expected": "expectation",
+        "features": {
+          "past": false,
+          "present": false,
+          "conditional": false,
+          "no_longer": false,
+          "time_ref": false,
+          "time_ref_exact": false
+        },
+        "violations": [
+          "missing_conditional"
+        ],
+        "redacted": false,
+        "leak": false,
+        "number_words": [],
+        "numbers": [
+          {
+            "token": "1",
+            "slot": "bars_ago"
+          }
+        ],
+        "invented": 0
+      },
+      {
+        "id": "s55",
+        "sentence": "expectation reversal down stage=confirmed bars_ago=5 holds=na",
+        "deterministic": true,
+        "expected": "expectation",
+        "features": {
+          "past": false,
+          "present": false,
+          "conditional": false,
+          "no_longer": false,
+          "time_ref": false,
+          "time_ref_exact": false
+        },
+        "violations": [
+          "missing_conditional"
+        ],
+        "redacted": false,
+        "leak": false,
+        "number_words": [],
+        "numbers": [
+          {
+            "token": "5",
+            "slot": "bars_ago"
+          }
+        ],
+        "invented": 0
+      },
+      {
+        "id": "s56",
+        "sentence": "expectation reversal up stage=expired bars_ago=30 holds=no",
+        "deterministic": true,
+        "expected": "expectation",
+        "features": {
+          "past": false,
+          "present": false,
+          "conditional": false,
+          "no_longer": false,
+          "time_ref": false,
+          "time_ref_exact": false
+        },
+        "violations": [
+          "missing_conditional"
+        ],
+        "redacted": false,
+        "leak": false,
+        "number_words": [],
+        "numbers": [
+          {
+            "token": "30",
+            "slot": "bars_ago"
+          }
+        ],
+        "invented": 0
+      },
+      {
+        "id": "s57",
+        "sentence": "expectation breakout up stage=confirmed bars_ago=0 holds=yes",
+        "deterministic": true,
+        "expected": "expectation",
+        "features": {
+          "past": false,
+          "present": false,
+          "conditional": false,
+          "no_longer": false,
+          "time_ref": false,
+          "time_ref_exact": false
+        },
+        "violations": [
+          "missing_conditional"
+        ],
+        "redacted": false,
+        "leak": false,
+        "number_words": [],
+        "numbers": [
+          {
+            "token": "0",
+            "slot": "bars_ago"
+          }
+        ],
+        "invented": 0
+      },
+      {
+        "id": "s58",
+        "sentence": "expectation breakout up stage=realized bars_ago=1 holds=na",
+        "deterministic": true,
+        "expected": "expectation",
+        "features": {
+          "past": false,
+          "present": false,
+          "conditional": false,
+          "no_longer": false,
+          "time_ref": false,
+          "time_ref_exact": false
+        },
+        "violations": [
+          "missing_conditional"
+        ],
+        "redacted": false,
+        "leak": false,
+        "number_words": [],
+        "numbers": [
+          {
+            "token": "1",
+            "slot": "bars_ago"
+          }
+        ],
+        "invented": 0
+      },
+      {
+        "id": "s59",
+        "sentence": "expectation breakout down stage=weakened bars_ago=5 holds=yes",
+        "deterministic": true,
+        "expected": "expectation",
+        "features": {
+          "past": false,
+          "present": false,
+          "conditional": false,
+          "no_longer": false,
+          "time_ref": false,
+          "time_ref_exact": false
+        },
+        "violations": [
+          "missing_conditional"
+        ],
+        "redacted": true,
+        "leak": true,
+        "number_words": [],
+        "numbers": [
+          {
+            "token": "5",
+            "slot": "lead.atr"
+          }
+        ],
+        "invented": 0
+      },
+      {
+        "id": "s60",
+        "sentence": "expectation breakout down stage=confirmed bars_ago=30 holds=na",
+        "deterministic": true,
+        "expected": "expectation",
+        "features": {
+          "past": false,
+          "present": false,
+          "conditional": false,
+          "no_longer": false,
+          "time_ref": false,
+          "time_ref_exact": false
+        },
+        "violations": [
+          "missing_conditional"
+        ],
+        "redacted": false,
+        "leak": false,
+        "number_words": [],
+        "numbers": [
+          {
+            "token": "30",
+            "slot": "bars_ago"
+          }
+        ],
+        "invented": 0
+      },
+      {
+        "id": "s61",
+        "sentence": "expectation squeeze neutral stage=confirmed bars_ago=0 holds=na",
+        "deterministic": true,
+        "expected": "expectation",
+        "features": {
+          "past": false,
+          "present": false,
+          "conditional": false,
+          "no_longer": false,
+          "time_ref": false,
+          "time_ref_exact": false
+        },
+        "violations": [
+          "missing_conditional"
+        ],
+        "redacted": true,
+        "leak": true,
+        "number_words": [],
+        "numbers": [
+          {
+            "token": "0",
+            "slot": "lead.bandwidth"
+          }
+        ],
+        "invented": 0
+      },
+      {
+        "id": "s62",
+        "sentence": "expectation squeeze neutral stage=weakened bars_ago=1 holds=na",
+        "deterministic": true,
+        "expected": "expectation",
+        "features": {
+          "past": false,
+          "present": false,
+          "conditional": false,
+          "no_longer": false,
+          "time_ref": false,
+          "time_ref_exact": false
+        },
+        "violations": [
+          "missing_conditional"
+        ],
+        "redacted": false,
+        "leak": false,
+        "number_words": [],
+        "numbers": [
+          {
+            "token": "1",
+            "slot": "bars_ago"
+          }
+        ],
+        "invented": 0
+      },
+      {
+        "id": "s63",
+        "sentence": "expectation squeeze neutral stage=expired bars_ago=5 holds=no",
+        "deterministic": true,
+        "expected": "expectation",
+        "features": {
+          "past": false,
+          "present": false,
+          "conditional": false,
+          "no_longer": false,
+          "time_ref": false,
+          "time_ref_exact": false
+        },
+        "violations": [
+          "missing_conditional"
+        ],
+        "redacted": false,
+        "leak": false,
+        "number_words": [],
+        "numbers": [
+          {
+            "token": "5",
+            "slot": "ledger.missed"
+          }
+        ],
+        "invented": 0
+      },
+      {
+        "id": "s64",
+        "sentence": "expectation squeeze neutral stage=born bars_ago=30 holds=yes",
+        "deterministic": true,
+        "expected": "expectation",
+        "features": {
+          "past": false,
+          "present": false,
+          "conditional": false,
+          "no_longer": false,
+          "time_ref": false,
+          "time_ref_exact": false
+        },
+        "violations": [
+          "missing_conditional"
+        ],
+        "redacted": false,
+        "leak": false,
+        "number_words": [],
+        "numbers": [
+          {
+            "token": "30",
+            "slot": "bars_ago"
+          }
+        ],
+        "invented": 0
+      },
+      {
+        "id": "s65",
+        "sentence": "expectation extreme down stage=invalidated bars_ago=0 holds=no",
+        "deterministic": true,
+        "expected": "expectation",
+        "features": {
+          "past": false,
+          "present": false,
+          "conditional": false,
+          "no_longer": false,
+          "time_ref": false,
+          "time_ref_exact": false
+        },
+        "violations": [
+          "missing_conditional"
+        ],
+        "redacted": false,
+        "leak": false,
+        "number_words": [],
+        "numbers": [
+          {
+            "token": "0",
+            "slot": "bars_ago"
+          }
+        ],
+        "invented": 0
+      },
+      {
+        "id": "s66",
+        "sentence": "expectation extreme up stage=realized bars_ago=1 holds=na",
+        "deterministic": true,
+        "expected": "expectation",
+        "features": {
+          "past": false,
+          "present": false,
+          "conditional": false,
+          "no_longer": false,
+          "time_ref": false,
+          "time_ref_exact": false
+        },
+        "violations": [
+          "missing_conditional"
+        ],
+        "redacted": false,
+        "leak": false,
+        "number_words": [],
+        "numbers": [
+          {
+            "token": "1",
+            "slot": "bars_ago"
+          }
+        ],
+        "invented": 0
+      },
+      {
+        "id": "s67",
+        "sentence": "expectation extreme down stage=realized bars_ago=5 holds=na",
+        "deterministic": true,
+        "expected": "expectation",
+        "features": {
+          "past": false,
+          "present": false,
+          "conditional": false,
+          "no_longer": false,
+          "time_ref": false,
+          "time_ref_exact": false
+        },
+        "violations": [
+          "missing_conditional"
+        ],
+        "redacted": false,
+        "leak": false,
+        "number_words": [],
+        "numbers": [
+          {
+            "token": "5",
+            "slot": "bars_ago"
+          }
+        ],
+        "invented": 0
+      },
+      {
+        "id": "s68",
+        "sentence": "expectation extreme down stage=confirmed bars_ago=30 holds=na",
+        "deterministic": true,
+        "expected": "expectation",
+        "features": {
+          "past": false,
+          "present": false,
+          "conditional": false,
+          "no_longer": false,
+          "time_ref": false,
+          "time_ref_exact": false
+        },
+        "violations": [
+          "missing_conditional"
+        ],
+        "redacted": true,
+        "leak": true,
+        "number_words": [],
+        "numbers": [
+          {
+            "token": "30",
+            "slot": "lead.level"
+          }
+        ],
+        "invented": 0
+      },
+      {
+        "id": "s69",
+        "sentence": "expectation flow up stage=expired bars_ago=0 holds=no",
+        "deterministic": true,
+        "expected": "expectation",
+        "features": {
+          "past": false,
+          "present": false,
+          "conditional": false,
+          "no_longer": false,
+          "time_ref": false,
+          "time_ref_exact": false
+        },
+        "violations": [
+          "missing_conditional"
+        ],
+        "redacted": false,
+        "leak": false,
+        "number_words": [],
+        "numbers": [
+          {
+            "token": "0",
+            "slot": "bars_ago"
+          }
+        ],
+        "invented": 0
+      },
+      {
+        "id": "s70",
+        "sentence": "expectation flow down stage=confirmed bars_ago=1 holds=yes",
+        "deterministic": true,
+        "expected": "expectation",
+        "features": {
+          "past": false,
+          "present": false,
+          "conditional": false,
+          "no_longer": false,
+          "time_ref": false,
+          "time_ref_exact": false
+        },
+        "violations": [
+          "missing_conditional"
+        ],
+        "redacted": false,
+        "leak": false,
+        "number_words": [],
+        "numbers": [
+          {
+            "token": "1",
+            "slot": "bars_ago"
+          }
+        ],
+        "invented": 0
+      },
+      {
+        "id": "s71",
+        "sentence": "expectation flow down stage=expired bars_ago=5 holds=no",
+        "deterministic": true,
+        "expected": "expectation",
+        "features": {
+          "past": false,
+          "present": false,
+          "conditional": false,
+          "no_longer": false,
+          "time_ref": false,
+          "time_ref_exact": false
+        },
+        "violations": [
+          "missing_conditional"
+        ],
+        "redacted": false,
+        "leak": false,
+        "number_words": [],
+        "numbers": [
+          {
+            "token": "5",
+            "slot": "bars_ago"
+          }
+        ],
+        "invented": 0
+      },
+      {
+        "id": "s72",
+        "sentence": "expectation flow down stage=expired bars_ago=30 holds=no",
+        "deterministic": true,
+        "expected": "expectation",
+        "features": {
+          "past": false,
+          "present": false,
+          "conditional": false,
+          "no_longer": false,
+          "time_ref": false,
+          "time_ref_exact": false
+        },
+        "violations": [
+          "missing_conditional"
+        ],
+        "redacted": false,
+        "leak": false,
+        "number_words": [],
+        "numbers": [
+          {
+            "token": "30",
+            "slot": "bars_ago"
+          }
+        ],
+        "invented": 0
+      },
+      {
+        "id": "k26",
+        "sentence": "state extreme up stage=weakened bars_ago=3 holds=no",
+        "deterministic": true,
+        "expected": "state_ended",
+        "features": {
+          "past": false,
+          "present": false,
+          "conditional": false,
+          "no_longer": false,
+          "time_ref": false,
+          "time_ref_exact": false
+        },
+        "violations": [
+          "missing_past",
+          "missing_no_longer"
+        ],
+        "redacted": false,
+        "leak": false,
+        "number_words": [],
+        "numbers": [
+          {
+            "token": "3",
+            "slot": "bars_ago"
+          }
+        ],
+        "invented": 0
+      }
+    ]
+  }
+}

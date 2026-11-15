@@ -249,7 +249,13 @@ fn init(mk: &Market, mode: Mode, bound: bool) -> SessionInit {
 }
 
 fn send(s: &mut Session, conn: &str, msg: &Value) -> usize {
-    s.handle_raw(conn, &msg.to_string()).len()
+    let t = Instant::now();
+    let lines = s.handle_raw(conn, &msg.to_string());
+    if std::env::var_os("QP_TIME_SEND").is_some() {
+        eprintln!("send {conn} {}: {:.3} ms", msg["type"], us(t) / 1e3);
+    }
+    digest_lines(&lines);
+    lines.len()
 }
 
 /// A fresh session with its connections: (session, `Session::new` µs, µs of the four
@@ -282,6 +288,26 @@ fn session(mk: &Market, mode: Mode, bound: bool) -> (Session, f64, f64) {
     (s, new_us, us(t))
 }
 
+/// FNV-1a of every outbound line (`conn|msg`) of a run, in order (output equality check
+/// across code changes; env `QP_LINES_DIGEST=1`, off by default: it costs time).
+static LINES: std::sync::atomic::AtomicU64 =
+    std::sync::atomic::AtomicU64::new(0xcbf2_9ce4_8422_2325);
+
+fn digest_lines(lines: &[qp_schema::protocol::OutboundLine]) {
+    if std::env::var_os("QP_LINES_DIGEST").is_none() {
+        return;
+    }
+    let mut h = LINES.load(std::sync::atomic::Ordering::Relaxed);
+    for l in lines {
+        let s = format!("{}|{}\n", l.conn, serde_json::to_string(&l.msg).unwrap());
+        for b in s.as_bytes() {
+            h ^= u64::from(*b);
+            h = h.wrapping_mul(0x0000_0100_0000_01b3);
+        }
+    }
+    LINES.store(h, std::sync::atomic::Ordering::Relaxed);
+}
+
 /// One market tick; returns the outbound lines per connection (a, b, c, other).
 fn tick(s: &mut Session, row: &[String], bound: bool, counts: &mut [usize; 4]) {
     for m in row {
@@ -291,6 +317,7 @@ fn tick(s: &mut Session, row: &[String], bound: bool, counts: &mut [usize; 4]) {
         } else {
             s.handle_raw("f", m)
         };
+        digest_lines(&lines);
         for l in &lines {
             let k = match l.conn.as_str() {
                 "a" => 0,
@@ -331,7 +358,9 @@ fn measure(cfg: &Cfg, mk: &Market, mode: Mode) {
     let mut digest = Vec::new();
     let mut counts = [0usize; 4];
     let mut end = String::new();
+    let mut line_digests = Vec::new();
     for _ in 0..cfg.runs {
+        LINES.store(0xcbf2_9ce4_8422_2325, std::sync::atomic::Ordering::Relaxed);
         let (mut s, new_us, hello_us) = session(mk, mode, cfg.bound);
         news.push(new_us);
         hellos.push(hello_us);
@@ -355,6 +384,11 @@ fn measure(cfg: &Cfg, mk: &Market, mode: Mode) {
             closes.push(mean(&close));
         }
         digest.push(fnv(&serde_json::to_vec(s.document()).unwrap()));
+        line_digests.push(format!(
+            "{:016x} log {:016x}",
+            LINES.load(std::sync::atomic::Ordering::Relaxed),
+            fnv(&serde_json::to_vec(s.log()).unwrap())
+        ));
         let d = s.document();
         end = format!(
             "log {} facts {} findings {} capsules {} live {} ledger {}",
@@ -432,10 +466,34 @@ fn measure(cfg: &Cfg, mk: &Market, mode: Mode) {
         digest[0], counts[0], counts[1], counts[2], counts[3]
     );
     println!("{k}.end = {end}");
+    if std::env::var_os("QP_LINES_DIGEST").is_some() {
+        println!("{k}.lines_digest = {}", line_digests.join(", "));
+    }
 }
 
 fn main() {
     let a: Vec<String> = std::env::args().collect();
+    if a.get(1).map(String::as_str) == Some("hello") {
+        // `hello <mode> <history> <principal> <n>`: n hellos (new connections), for a
+        // profile of the connection cost.
+        let mode = Mode::parse(&a[2]);
+        let history: usize = a[3].parse().unwrap();
+        let mk = market(30, history, 1, true);
+        let (mut s, _, _) = session(&mk, mode, true);
+        let n: usize = a[5].parse().unwrap();
+        let t = Instant::now();
+        for k in 0..n {
+            send(
+                &mut s,
+                &format!("x{k}"),
+                &json!({"type":"hello","protocol":"qp/0","principal":a[4],"surface":{"kind":"headless"}}),
+            );
+        }
+        #[allow(clippy::cast_precision_loss)]
+        let per = us(t) / 1e3 / n as f64;
+        eprintln!("hello {}: {per:.3} ms each", a[4]);
+        return;
+    }
     if a.get(1).map(String::as_str) == Some("profile") {
         let mode = Mode::parse(&a[2]);
         let ticks: usize = a[3].parse().unwrap();

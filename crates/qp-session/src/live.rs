@@ -734,15 +734,29 @@ impl Session {
                 stamp: 0,
             });
         }
+        // (R3/perf) Findings by id (first occurrence, as `iter().find` gives it).
+        let mut finding_at: std::collections::HashMap<&str, usize> =
+            std::collections::HashMap::with_capacity(doc.findings.len());
+        for (i, f) in doc.findings.iter().enumerate() {
+            finding_at.entry(f.id.as_str()).or_insert(i);
+        }
         for c in doc
             .capsules
             .iter()
             .filter(|c| c.state == qp_schema::CapsuleState::Live)
         {
-            let Some(f) = doc.findings.iter().find(|f| f.id == c.finding) else {
+            let Some(f) = finding_at
+                .get(c.finding.as_str())
+                .map(|&i| &doc.findings[i])
+            else {
                 continue;
             };
             let info = idx.cond_info(doc, &f.invalidation);
+            // (R3/perf) A condition resting on no series (a text condition, as every
+            // engine finding's) is never evaluated by `invalidate_live`: no watch.
+            if info.closure.is_empty() {
+                continue;
+            }
             let who = self
                 .responsible(f, info.closure())
                 .iter()

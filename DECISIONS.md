@@ -151,6 +151,7 @@ R3 bu satırları **önerir**; kesinleştirmedi. Kanıt `rounds/R3/REPORT.md`,
 | Ö38 | **İtiraz ve kesin bar hijyeni (A20, K36 uygulaması)**: PROTOCOL §19.9 (M7 RESULTS §8 metni). | `M7/RESULTS.md`: M1–M3 = 0 her senaryoda; AUD1/AUD3 kaçırma 7 → 0, M7X 51 → 1; AUD2 49 → 53 (iyileşmedi). |
 | Ö39 | **Hassasiyet:** üç seviye (kademe 1 / 1–2 / hepsi); `future` → `important`, `habituated` → `all`; pozisyon ve niyet kapsülleri seviyeden bağımsız; sistem seviyeyi değiştirmez. | `S/sensitivity.md`: sentetik `important` 1,59/gün, `all` 3,23/gün (izleme listesi 10 enstrüman). |
 | Ö40 | **Protokol eki** PROTOCOL §20 (kapsül sorguları, `capsules` konusu, kitle işlemleri, kanıta açılma ve yetki); dökümler 37–. | `S/S-C.md`. |
+| Ö41 | **Otoritenin kapsül işi önbellekli, çıktı aynı (R3/perf):** okuyucu izdüşümü okuyucu ve kapsül başına tutulur, günlükle izlenir, yetki cevabı her kullanımda sorulur; başlıklar yalnız girdisi değişen kapsüller için yeniden yazılır (bit bit bar anlık görüntüsü); cümle girdinin tamamıyla anahtarlanır; okuyucu görünümleri günlük konumu + izdüşüm + okuma dokümanı barları aynıyken yeniden verilir. Önbelleğin kuralı tutmayan durumda (silme, seri konması, kimlik çakışması) eski hesap. | `S/S-D.md` "Düzeltmeden sonra": 1.000 bar kapanış 3,65 s → 48 ms (`flow` 8,0 s → 90 ms), bağlanma 161 s → 133 ms; bütün giden satırlar, günlük ve doküman önce/sonra bayt eşit (`tests/capsule_perf_equality.rs`). |
 
 | # | Açık karar (R3) | Ne zaman | Not |
 |---|------------|----------|-----|

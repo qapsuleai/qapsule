@@ -109,8 +109,13 @@ Protokol taşımadan bağımsızdır. Tanımlı iki taşıma:
   `{"batch_end":true}` satırı yazılır (taşıma düzeyi; protokolün parçası değil).
   (RP2) **Barındırıcı çerçevesi:** `qp serve --host-frames` ile `{"host":{"data":<DataEvent>}}`
   satırı bir veri olayını barındırıcı yolundan (`Session::handle_host_frame` →
-  `Session::data_event`, §18.4) motora verir; çıktısı olayın yol açtığı bildirimlerdir,
-  reddedilen olay `{"host":{"error":"…"}}` döner. Taşıma düzeyidir ve **yalnız
+  `Session::host_data_event`, §18.4) motora verir; çıktısı olayın yol açtığı bildirimlerdir,
+  reddedilen olay `{"host":{"error":"…"}}` döner. Barındırıcıya ayrıca **`host` satırları**
+  yazılır (bağlantı bildirimlerinden önce, her biri bir satır): `seq` boşluğu
+  `{"host":{"gap":{"series":"px","feed":{…},"expected":1,"got":7}}}`, bağın başka nedenle
+  `stale` olması (büyüme sınırı) `{"host":{"stale":{"series","feed","reason"}}}`. Bu satır
+  hata değildir (olay alındı, uygulanacak bir şey yoktu); barındırıcı bağı yeniden çözer
+  ya da boşluğu doldurur. Taşıma düzeyidir ve **yalnız
   barındırıcınındır**: protokol mesajı değildir, bağlantı (`conn`) taşımaz, günlüğe girmez.
   Bayrak yalnız akışın sahibi barındırıcıysa verilir; bayraksız böyle bir satır çerçeve
   hatasıdır (`conn` yok). Akışa güvenilmeyen istemcileri çoğullayan bir aracı `host`
@@ -750,7 +755,8 @@ olayın yol açtığı bildirimlerdir (çoğu zaman boş). Veri düzlemi `init.d
 (§18.6). Üç taşımada barındırıcı yolu: süreç içi `Session::data_event`; `qp serve`
 `--host-frames` ile barındırıcı çerçevesi (§3); MCP'de koşucunun `Hub::data_event` yolu —
 bir MCP aracı **değildir**, ajan veri olayı enjekte edemez. Motorun reddettiği olay adımı
-başarısız sayar.
+başarısız sayar. Barındırıcı satırları (`{"host":{"gap":…}}`) bağlantı çıktısı
+olmadığından `expect`'e girmez; koşucu `qp serve` çıktısında onları atlar.
 
 Koşucu `send.msg`'i **yazıldığı haliyle, ham JSON olarak** iletir (RP2; R2 denetimi K2):
 tipli bir `ClientMsg`'e çevirmez. Bu yüzden **anlamla başvuru (§17) seçici nesneleri** içeren
@@ -1096,8 +1102,46 @@ gider.**
 |-------|----------------|
 | `study`, `at`, `hit` değerleri, `screen` katman `last` ve `last_close`, `present` kıvılcımı ve görünümü, `list full` | verilmez (`no_entitlement` ya da alan boş; `screen`'de katman `binding: no_entitlement`) |
 | `summary.series[].len`, bağın kendisi, `binding` sorgusunda durum ve çapa | verilir (veri değil) |
-| olgular, bulgular, kapsül durumları ve onların metinleri, kanıt değerleri (`evidence`), `finding_state`, `condition_met`, `intent_triggered` | verilir (anlam düzlemi; dokümanın parçası). **Açık soru** (Arkin): olgunun kanıt değerleri (ör. "RSI 71,4") veri lisansı kapsamında mı? Kapsamdaysa yetkisiz kişiye `evidence` değerleri gizlenir; v0 göstermektedir. |
+| olgular, bulgular, kapsül durumları ve onların metinleri, kanıt değerleri (`evidence`), `finding_state` | verilir (anlam düzlemi; dokümanın parçası). **Açık soru** (Arkin): olgunun kanıt değerleri (ör. "RSI 71,4") veri lisansı kapsamında mı? Kapsamdaysa yetkisiz kişiye `evidence` değerleri gizlenir; v0 göstermektedir. |
+| `condition_met`, `intent_triggered` | **verilmez**: koşulun okuduğu (hesap girdileri üzerinden) her bağlı beslemeye yetkili olmayan aboneye gitmez; o abone için koşul değerlendirilmez, kenar durumu korunur (RP2 T4 denetimi Y1) |
 | `verify_evidence` | `no_entitlement` |
+
+**Koşul yazmak veri okumaktır (Y1).** Bir koşulun sonucu, kenar kenar, okuduğu verinin
+değerini söyler: eşiği ikiye bölerek yazan biri kapsül durumundan kapanışı 20 komutta
+0,001 duyarlıkla öğrenebilir (`rounds/RP2/audits/T4.md`). Bu yüzden bağlı veride
+değerlendirilen bir şeyi **yazmak ya da ona abone olmak**, yazanın / abonenin koşulun
+okuduğu (hesap girdileri üzerinden, özyinelemeli) **her bağlı beslemeye veri yetkisi**
+ister; yoksa `no_entitlement`, koşulun serisinin yolunda:
+
+| Yazı / abonelik | Yol |
+|-----------------|-----|
+| `add_finding` / `update_finding` geçersizliği | `/ops/i/invalidation/series` (`left`, `right`) |
+| `add_intent` tetikleyicisi | `/ops/i/trigger/series` (`left`, `right`) |
+| `subscribe` `condition` konusu | `/topic/condition/series` (`left`, `right`) |
+| `add_fact` (olgunun bar zamanı) | `/ops/i/series` (önceden de böyleydi) |
+| katman sabitinin `fact` kökeni, `field: value` (bağlı olgu) | `/…/origin/<k>/fact` |
+
+Yetki, bağın çözümüne değil dokümandaki bağa bakar (aynı komutta konan bağ da sayılır).
+Öneri kabulünde önerenin yetkisi denetlenir (öneri anında da: kuru koşu). Sağlayıcı yoksa
+kimse yetkili değildir.
+
+Değerlendirme tarafı da korunur: bu oturumun bir kişisinin yazdığı bulgu geçersizliği,
+o kişi koşulun okuduğu beslemelerden birine yetkili değilse **değerlendirilmez** (sonradan
+olan durumlar: yazdığı belge içi seri bağlı seriye çevrildi, bir geri alma bağı geri
+getirdi). Yazarı oturumun kişisi olmayan bulgular (başka yerden gelen doküman, motor)
+otoritenin görüşüyle değerlendirilir. `condition_met` ve `intent_triggered` aboneye
+kendi yetkisiyle süzülür (yukarıdaki tablo).
+
+**Açık soru (Arkin) — kalan bir bitlik sızıntı.** Kapsül durumu (`live` → `invalidated`)
+anlam düzlemindedir ve belgeyle herkese gider. Koşulu **yetkili** bir kişi yazdıysa, bu
+durumu okuyan yetkisiz kişi koşulun sonucunu (bir bit: eşik aşıldı mı, ne zaman) öğrenir.
+Yetkisiz kişi koşulu kendisi seçemediği için ikili arama yapamaz; ama yetkili yazar
+isteyerek çok sayıda eşik yazarsa değer sızar. Benzer bir köşe: yetkisiz bir `editor`
+yetkili birinin bulgusunun geçersizliğini belge içi bir seriye çevirir (`update_finding`;
+belge içi seride serbest) ve sonra o seriyi bağlı seriye çevirirse koşul yazarın (yetkili)
+adına değerlendirilir. v0 ikisini de kabul eder; seçenekler: (a) kapsül durumunu da
+yetkisize gizlemek (`finding_state` dahil), (b) koşulun okuduğu serinin bağını yazan
+kişinin yetkisini de istemek, (c) gevşek bırakıp lisans metnine yazmak.
 
 **Uygulama notları (T4, referans otorite).**
 
@@ -1130,7 +1174,7 @@ hesaplar için:
 | görünüm, `screen`, `hit` | o serinin katmanları çizilmez; `screen` katmanında `binding` durumu; diğer katmanlar ve paneller çalışır |
 | geçersizlik koşulu, niyet, `condition` aboneliği | değerlendirilmez (yanlış sayılır); kenar durumu korunur |
 | `present` | kıvılcım (`spark`) ve görünüm verilmez; metin ve durum verilir |
-| komutlar | dokümanı değiştiren komutlar çalışır (veri okumaz); `add_fact` olgunun bar zamanını okuduğu için yazarın veri yetkisi ister |
+| komutlar | dokümanı değiştiren komutlar çalışır (veri okumaz); `add_fact` olgunun bar zamanını okuduğu için, koşul yazan komutlar sonuçları veriyi söylediği için yazarın veri yetkisi ister (yukarıda) |
 
 **Bar numaraları ve çapa.** Bağlı serinin bar numarası **çapadan** (bar 0'ın zamanı,
 `anchor_t`) sayılır; sonradan gelen barlar sona eklenir, pencere kaymaz. Çapa dokümanda
@@ -1143,7 +1187,18 @@ yeniden başlatmadan sonra da aynı barı gösterir. Kaynakta tam `anchor_t` zam
 yoksa (sağlayıcının geçmişi kısaldı ya da değişti) bar numaraları tutmaz: bağ `stale` olur
 (`reason`: çapa barı yok), değer verilmez. Çapa ancak bağı yeniden yazan bir komutla
 (`put_series`; pencere ya da sembol değişir, `anchor_t` yazılmaz) sıfırlanır; ilk yeni
-çözümde yeniden damgalanır. Düzlemler arası kimlik yine de **zamandır** (`t`): olgular
+çözümde yeniden damgalanır.
+
+**Çapa damgası geri alınmaz (Y2, O2).** Çapa damgası girdisinin (yazarı `qp`, her değişimi
+`anchor_t`'li bir bağlı seri, tersi aynı seri `anchor_t`'siz) geri alınması — owner için de
+— `undo_conflict`'tir ("çapa ancak bağı yeniden yazan bir komutla sıfırlanır"); aksi halde
+bağ yeniden çözülüp başka bir çapayla damgalanır ve `Fact.bar` artık olgunun `t`'sini
+göstermez. Buna karşılık bağı **koyan ya da yeniden yazan** girdinin geri alınması onun
+çapa damgası tarafından engellenmez (o damga, geri alınan girdinin koyduğu bağın aynısını
+damgalıyorsa çatışma sayılmaz): geri alma seriyi kaldırır (yeni seri) ya da önceki bağı
+**önceki çapasıyla** geri koyar (yeniden yazma); damga onunla gider, bar numaraları
+yeniden yazmadan önceki gibidir. Geri almanın geri alınması seriyi damgalı haliyle geri
+getirir. Bunun dışında hiçbir yol aynı bağ için farklı bir çapa damgalamaz. Düzlemler arası kimlik yine de **zamandır** (`t`): olgular
 `t` taşır, kanıt başvurusu zaman aralığıdır.
 
 **Hesap başlangıcı çapadır.** Hesaplar bar 0'dan başlar; üstel ve Wilder ortalamaları
@@ -1176,7 +1231,12 @@ Veri olayı (`DataEvent`) alan düzeyindedir; yalnızca değişen alanlar gelir 
   gelen `seq` ≤ o numara olan olaylar yinelemedir. Yeniden çözüm aynı kuralla devam eder. Alıcı (otorite ya da yansı):
   `seq` ≤ son → yineleme, yok sayılır (eşgüçlü); `seq` > son + 1 → **boşluk**: besleme
   `stale` olur, olay uygulanmaz, barındırıcıya boşluk bildirilir (yeniden çözme ya da
-  boşluk doldurma barındırıcının işi; piyasa verisi geleneği).
+  boşluk doldurma barındırıcının işi; piyasa verisi geleneği). Bu hata değildir:
+  referans otoritede `Session::host_data_event` `Ok(DataOutcome { lines, notices })` döner,
+  `notices` içinde `HostNotice::Gap { series, feed, expected, got }` (büyüme sınırında
+  `HostNotice::Stale { series, feed, reason }`); bağ başına yalnız `stale`'e geçişte bir
+  kez. `qp serve --host-frames` bunu `{"host":{"gap":{…}}}` yazar (§3). `Session::data_event`
+  yalnız bildirimleri (`lines`) döner; barındırıcı `host_data_event`'i kullanmalıdır.
 - Kurallara uymayan olay (geride kalan `bar`, olmayan `t`'ye `patch`, boş `patch`, sonlu
   olmayan değer, sonrası `validate_bars`'a uymayan bar — ör. `h < l`) uygulanmaz ve
   barındırıcıya hata olarak döner; doküman ve bağlantılar etkilenmez. **Reddedilen olay
@@ -1207,6 +1267,15 @@ mesajlar ve aynı veri olayları aynı sırayla verildiğinde aynıdır. Yeniden
 (başlangıç + değişimler) için veri olayları gerekmez.
 
 ### 18.5 Dondurulmuş kanıt
+
+**Sayıyı motor söyler (O3).** Olgu bir hesap serisindeyse ve istemci `evidence.value` ya
+da `evidence.prev` verdiyse, bunlar hesabın ana çıktısının olgunun barındaki ve bir önceki
+bardaki değerine **bit düzeyinde** eşit olmalıdır; değilse `invalid`
+(`/ops/i/evidence/value`, `expected`: motorun değeri), motorun değeri yoksa (ısınma, bar 0'da
+`prev`) `invalid`. Diğer anahtarlar (`level` …) ve bar serilerindeki olgular denetlenmez.
+Böylece `verify_evidence`'in `changed` dediği değer farkı yalnız verinin değişmesinden
+gelir. (Bağlı seride okuma dokümanı komutun başındaki haliyle kullanılır; aynı komutta
+konan bir hesap serisi denetlenmez.)
 
 Otorite bir olguyu eklerken (`add_fact`; R3'te dedektörler) olguya **kanıt başvurusu**
 (`evidence_ref`, `EvidenceRef`) damgalar; istemci göndermez:
@@ -1272,7 +1341,10 @@ beslemesi `interval`'den bağımsız olarak günlük hafta içi barlar üretir) 
   (`qp_source::resolve_binding_path`); protokolden yol gelmez. `init.data.feeds[].path`
   depo köküne hapsedilir.
 - Veri yetkisi her okumada soranın kimliğiyle denetlenir; bir kişinin yetkisi olmayan veri
-  ona hiçbir sorgu cevabında (değer, kıvılcım, nokta sorgusu) gitmez.
+  ona hiçbir sorgu cevabında (değer, kıvılcım, nokta sorgusu) ve hiçbir koşul bildiriminde
+  (`condition_met`, `intent_triggered`) gitmez; veride değerlendirilen koşulu ancak yetkili
+  kişi yazar (§18.3, "Koşul yazmak veri okumaktır"; kalan bir bitlik sızıntı açık soru).
+- Bağlı seride `window.last` sınırı oturumun `limits.max_bind_bars`'ıdır (varsayılanı değil).
 - Anlık görüntü (`document`) bağlı serilerin barlarını içermez (doküman taşımaz); paylaşılan
   doküman veri lisansını taşımaz (K23).
 

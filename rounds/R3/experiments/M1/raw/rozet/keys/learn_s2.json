@@ -1,0 +1,146 @@
+{
+  "harness": "r3-h-m12/1",
+  "alt": "rozet",
+  "condition": "learn",
+  "seed": 2,
+  "examples": [
+    {
+      "label": "E1",
+      "spec": "reversal.down|realized|s0.9|c0.6|n1|f1|-",
+      "kind": "reversal",
+      "direction": "down",
+      "strength": "high",
+      "phase": "realized"
+    },
+    {
+      "label": "E2",
+      "spec": "breakout.up|failed|s0.2|c0.6|n1|f1|-",
+      "kind": "breakout",
+      "direction": "up",
+      "strength": "low",
+      "phase": "failed"
+    },
+    {
+      "label": "E3",
+      "spec": "continuation.up|retracted|s0.9|c0.6|n1|f1|-",
+      "kind": "continuation",
+      "direction": "up",
+      "strength": "high",
+      "phase": "retracted"
+    },
+    {
+      "label": "E4",
+      "spec": "flow.neutral|realized|s0.9|c0.6|n1|f1|-",
+      "kind": "flow",
+      "direction": "neutral",
+      "strength": "high",
+      "phase": "realized"
+    },
+    {
+      "label": "E5",
+      "spec": "continuation.down|retracted|s0.2|c0.6|n1|f1|-",
+      "kind": "continuation",
+      "direction": "down",
+      "strength": "low",
+      "phase": "retracted"
+    }
+  ],
+  "items": [
+    {
+      "label": "A1",
+      "spec": "extreme.up|final|s0.2|c0.6|n1|f1|-",
+      "kind": "extreme",
+      "direction": "up",
+      "strength": "low",
+      "phase": "final"
+    },
+    {
+      "label": "A2",
+      "spec": "breakout.up|candidate|s0.2|c0.6|n1|f1|-",
+      "kind": "breakout",
+      "direction": "up",
+      "strength": "low",
+      "phase": "candidate"
+    },
+    {
+      "label": "A3",
+      "spec": "reversal.down|candidate|s0.9|c0.6|n1|f1|-",
+      "kind": "reversal",
+      "direction": "down",
+      "strength": "high",
+      "phase": "candidate"
+    },
+    {
+      "label": "A4",
+      "spec": "reversal.down|candidate|s0.2|c0.6|n1|f1|-",
+      "kind": "reversal",
+      "direction": "down",
+      "strength": "low",
+      "phase": "candidate"
+    },
+    {
+      "label": "B1",
+      "spec": "flow.neutral|final|s0.2|c0.6|n1|f1|-",
+      "kind": "flow",
+      "direction": "neutral",
+      "strength": "low",
+      "phase": "final"
+    },
+    {
+      "label": "B2",
+      "spec": "reversal.up|retracted|s0.9|c0.6|n1|f1|-",
+      "kind": "reversal",
+      "direction": "up",
+      "strength": "high",
+      "phase": "retracted"
+    },
+    {
+      "label": "B3",
+      "spec": "extreme.down|realized|s0.2|c0.6|n1|f1|-",
+      "kind": "extreme",
+      "direction": "down",
+      "strength": "low",
+      "phase": "realized"
+    },
+    {
+      "label": "B4",
+      "spec": "reversal.up|realized|s0.9|c0.6|n1|f1|-",
+      "kind": "reversal",
+      "direction": "up",
+      "strength": "high",
+      "phase": "realized"
+    },
+    {
+      "label": "C1",
+      "spec": "squeeze.neutral|realized|s0.2|c0.6|n1|f1|-",
+      "kind": "squeeze",
+      "direction": "neutral",
+      "strength": "low",
+      "phase": "realized"
+    },
+    {
+      "label": "C2",
+      "spec": "continuation.down|final|s0.9|c0.6|n1|f1|-",
+      "kind": "continuation",
+      "direction": "down",
+      "strength": "high",
+      "phase": "final"
+    },
+    {
+      "label": "C3",
+      "spec": "flow.down|realized|s0.9|c0.6|n1|f1|-",
+      "kind": "flow",
+      "direction": "down",
+      "strength": "high",
+      "phase": "realized"
+    },
+    {
+      "label": "C4",
+      "spec": "squeeze.neutral|candidate|s0.2|c0.6|n1|f1|-",
+      "kind": "squeeze",
+      "direction": "neutral",
+      "strength": "low",
+      "phase": "candidate"
+    }
+  ]
+}

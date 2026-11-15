@@ -1,0 +1,20 @@
+You are taking a reading test. Signs from a market "meaning alphabet" are shown in an image: each small sign stands for one observation about a stock's chart. The rules of the signs are not given; infer them from the signs themselves.
+
+The six meaning kinds:
+- continuation: the move goes on
+- reversal: the move may be turning
+- breakout: a boundary was crossed
+- squeeze: the move is narrowing; direction unknown
+- extreme: an unusual stretch (overbought / oversold)
+- flow: money flowing in or out, independent of price
+
+Fields to answer for every sign:
+- kind: one of continuation, reversal, breakout, squeeze, extreme, flow
+- direction: up, down or neutral
+- strength: low or high
+- phase: candidate (seen on an unfinished bar), final (confirmed, still open), realized (closed: it came true), failed (closed: it did not come true) or retracted (closed: withdrawn because its data was wrong)
+
+First open /private/var/folders/3h/tkg8gmr96tscr2t77stj77v40000gn/T/r3h-reader.HinmWF/examples.png with the Read tool: it shows five example signs (E1 to E5), each with its correct answer written next to it. Then open /private/var/folders/3h/tkg8gmr96tscr2t77stj77v40000gn/T/r3h-reader.HinmWF/test.png: it shows 12 new signs in a grid labelled A1 to C4 (row letter, column number). Answer for the 12 new signs.
+
+Give your best guess for every field of every label, even when unsure. Reply with a single JSON object and nothing else, keyed by label, for example:
+{"A1": {"kind": "breakout", "direction": "up", "strength": "high", "phase": "final"}, "A2": {...}, ...}

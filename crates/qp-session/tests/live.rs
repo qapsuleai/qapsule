@@ -589,3 +589,151 @@ fn incremental_equals_from_scratch_inline() {
 fn incremental_equals_from_scratch_bound() {
     property(true, 11..17);
 }
+
+/// Two bound series on two feeds (THYAO, ASELS), each with a study and its own view, an
+/// inline series with a third view; condition subscriptions and a live capsule on each.
+fn two_feeds() -> Session {
+    let inst = |s: &str| json!({"symbol": s});
+    let bind = |id: &str, sym: &str| {
+        json!({"id":id,"instrument":inst(sym),"interval":"1d",
+               "source":{"kind":"bind","symbol":sym,"interval":"1d","window":{"last":100}}})
+    };
+    let study = |id: &str, input: &str, sym: &str, st: &str, p: Value| {
+        json!({"id":id,"instrument":inst(sym),"interval":"1d",
+               "source":{"kind":"study","study":st,"inputs":[input],"params":p}})
+    };
+    let mut rng = Rng(9);
+    let view = |id: &str, series: &[&str]| {
+        json!({"id":id,"x":{"kind":"time"},"y":[{"kind":"linear"}],
+               "layers": series.iter().map(|s| json!({"mark":"line","series":s,"panel":0,"encoding":{}})).collect::<Vec<_>>()})
+    };
+    let doc = json!({
+        "schema_version":"0","id":"doc-two","title":"two feeds","display_tz":"Europe/Istanbul",
+        "series":[
+            bind("px","THYAO"), study("rsi","px","THYAO","rsi",json!({"period":14.0})),
+            bind("asl","ASELS"), study("asma","asl","ASELS","sma",json!({"period":5.0})),
+            {"id":"idx","instrument":inst("XU100"),"interval":"1d","source":{"kind":"inline"},
+             "data":{"kind":"bars","bars":walk(&mut rng, 50, 10.0)}}
+        ],
+        "views":[view("va",&["px","rsi"]), view("vb",&["asl","asma"]), view("vi",&["idx"])],
+        "facts":[],"findings":[],"capsules":[],"intents":[],"ledger":[]
+    });
+    let init: SessionInit = serde_json::from_value(json!({
+        "document": doc, "clock": T0,
+        "principals": [
+            {"id":"arkin","author":{"kind":"human","name":"arkin"},"role":"owner"},
+            {"id":"viewer","author":{"kind":"human","name":"viewer"},"role":"viewer"},
+            {"id":"feed","author":{"kind":"engine","name":"feed","version":"0"},"role":"feed"},
+            {"id":"host","author":{"kind":"engine","name":"host","version":"0"},"role":"host"}
+        ],
+        "data": {"feeds":[
+            {"feed":{"symbol":"THYAO","interval":"1d"},"synthetic":{"n":120,"seed":3}},
+            {"feed":{"symbol":"ASELS","interval":"1d"},"synthetic":{"n":120,"seed":4}}],
+            "entitlements":{"host":["*"],"arkin":["*"],"viewer":["*"]}}
+    }))
+    .unwrap();
+    Session::new(init, &root()).unwrap()
+}
+
+fn msgs(lines: &[OutboundLine]) -> Vec<Value> {
+    lines
+        .iter()
+        .map(|l| serde_json::to_value(l).unwrap())
+        .collect()
+}
+
+#[test]
+fn a_tick_wakes_only_affected_views_and_watchers() {
+    let mut s = two_feeds();
+    let send = |s: &mut Session, conn: &str, m: Value| msgs(&s.handle_raw(conn, &m.to_string()));
+    for (c, p) in [("a", "arkin"), ("b", "viewer"), ("f", "feed")] {
+        send(
+            &mut s,
+            c,
+            json!({"type":"hello","protocol":"qp/0","principal":p,"surface":{"kind":"headless"}}),
+        );
+    }
+    // Conn a watches feed 1 (THYAO), conn b feed 2 (ASELS) and the inline view.
+    for (c, id, topic) in [
+        ("a", "va", json!({"kind":"view","view":"va"})),
+        (
+            "a",
+            "ca",
+            json!({"kind":"condition","condition":{"kind":"threshold","series":"rsi","op":"gt","value":0.0}}),
+        ),
+        ("b", "vb", json!({"kind":"view","view":"vb"})),
+        ("b", "vi", json!({"kind":"view","view":"vi"})),
+        (
+            "b",
+            "cb",
+            json!({"kind":"condition","condition":{"kind":"threshold","series":"asma","op":"cross_above","value":-1.0}}),
+        ),
+        (
+            "b",
+            "cb2",
+            json!({"kind":"condition","condition":{"kind":"compare","left":"asl","op":"cross_below","right":"asma"}}),
+        ),
+        (
+            "b",
+            "chb",
+            json!({"kind":"changes","ids":["asl","asma","vb"]}),
+        ),
+    ] {
+        let r = send(&mut s, c, json!({"type":"subscribe","id":id,"topic":topic}));
+        assert_eq!(r[0]["msg"]["status"], "subscribed", "{r:?}");
+    }
+    let last = |s: &mut Session, id: &str| bars_of(s, id).last().cloned().unwrap();
+    let feed1 = json!({"symbol":"THYAO","interval":"1d"});
+    let mut rng = Rng(77);
+    let mut seen = 0;
+    for seq in 1..=200u64 {
+        let b = last(&mut s, "px");
+        let change = match seq % 10 {
+            0 => json!({"kind":"bar","bar":next_bar(&mut rng, &b)}),
+            5 => {
+                let bars = bars_of(&mut s, "px");
+                let e = &bars[bars.len() - 5];
+                json!({"kind":"patch","t":e.t,"fields":{"c":r2((e.l + e.h) / 2.0)}})
+            }
+            _ => {
+                let r = revise(&mut rng, &b);
+                json!({"kind":"patch","t":r.t,"fields":{"c":r.c,"h":r.h,"l":r.l}})
+            }
+        };
+        let ev: DataEvent =
+            serde_json::from_value(json!({"feed":feed1,"seq":seq,"change":change})).unwrap();
+        let out = msgs(&s.data_event(&ev).unwrap());
+        // Nothing for conn b (view vb, view vi, conditions on ASELS, changes on ASELS).
+        assert!(out.iter().all(|m| m["conn"] == "a"), "{out:?}");
+        // View va is told every time, from the right bar.
+        let vc: Vec<&Value> = out
+            .iter()
+            .filter(|m| m["msg"]["event"]["kind"] == "view_changed")
+            .collect();
+        // One event per changed bar series (px; rsi rests on it).
+        assert_eq!(vc.len(), 1, "{out:?}");
+        let n = bars_of(&mut s, "px").len() as u64;
+        let e = &vc[0]["msg"]["event"];
+        assert_eq!(
+            (e["view"].as_str(), e["series"].as_str()),
+            (Some("va"), Some("px"))
+        );
+        assert_eq!(e["to_bar"], n - 1);
+        let from = if seq % 10 == 5 { n - 5 } else { n - 1 };
+        assert_eq!(e["from_bar"], from, "{out:?}");
+        seen += 1;
+    }
+    assert_eq!(seen, 200);
+    // An inline bar command on idx wakes only vi (conn b) besides the ack.
+    let b = last(&mut s, "idx");
+    let out = send(
+        &mut s,
+        "f",
+        json!({"type":"command","id":"i1","ops":[{"op":"append_bars","series":"idx","bars":[next_bar(&mut rng, &b)]}]}),
+    );
+    assert_eq!(out.len(), 2, "{out:?}");
+    assert_eq!(out[0]["msg"]["type"], "ack");
+    assert_eq!(out[1]["conn"], "b");
+    assert_eq!(out[1]["msg"]["sub"], "vi");
+    assert_eq!(out[1]["msg"]["event"]["from_bar"], 50);
+}

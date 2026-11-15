@@ -154,10 +154,10 @@ dokümana girer; bulgunun `facts` listesi hikâyeye katılan olgulardır.
 
 ### 9.3 Yaşam döngüsü kuralları (sabit; deney değil)
 
-Her kesin olgu, tema kuralının (M4, seçim) kararıyla bir hikâyeye katılır, yeni hikâye
+Her kesin olgu, tema kuralının (M4 seçimi: tür + yön, akış teyit olarak — `kinddir`) kararıyla bir hikâyeye katılır, yeni hikâye
 başlatır ya da yok sayılır. Bir barda olaylar şu sırayla işlenir: (1) açık hikâyelerin
-sonuç kuralı (M5, seçim) bu barla; (2) ufuk dolanlar `expired`; (3) bu barın olguları
-katılır/doğar; (4) önem (M3, seçim) yeniden hesaplanır. Aynı barda birden çok olgu
+sonuç kuralı (M5 seçimi: oynaklık bariyeri — `barrier`) bu barla; (2) ufuk dolanlar `expired`; (3) bu barın olguları
+katılır/doğar; (4) önem (M3 seçimi: teyit merkezli birleşim — `confirm`) yeniden hesaplanır. Aynı barda birden çok olgu
 `(dedektör, kod)` sırasıyla işlenir.
 
 | Olay | Geçiş | Neden kodu |
@@ -195,7 +195,7 @@ Kapanmış hikâyeye olgu katılmaz; aynı temada yeni olgu yeni hikâye başlat
 | Beklenti | Koşullu | "148 üzerinde iki kapanış olursa kırılım teyit olur." |
 
 Karne cümlenin parçası olabilir ("bu durum geçmişte 100 seferin 62'sinde …"); lisanslı
-olgunun cümlesi **hiç rakam içermez** (karne ayrı alanda gider). Üretim yöntemi M2 (seçim).
+olgunun cümlesi **hiç rakam içermez** (karne ayrı alanda gider). Üretim yöntemi M2 seçimi: belirleyici şablon dilbilgisi (`qp_capsule::realize::Template`), dil modeli yok.
 
 ### 9.6 İşaret
 
@@ -204,7 +204,7 @@ olgunun cümlesi **hiç rakam içermez** (karne ayrı alanda gider). Üretim yö
 
 ### 9.7 Sunucu olgusu ve güven yolu
 
-Yetkisiz kullanıcıya lisanslı olgudan yalnız güven yolunun (M6, seçim) ürettiği nitel
+Yetkisiz kullanıcıya lisanslı olgudan yalnız güven yolunun (M6 seçimi: mühür — `qp_capsule::trust::Muhur`) ürettiği nitel
 iletiler (`QualMessage`) gider: rakam yok, `trust = server` işareti, gösterim barı. Saldırı
 ölçüsü: art arda gelen iletilerden ham değer aralığının daraltılması.
 
@@ -213,3 +213,21 @@ iletiler (`QualMessage`) gider: rakam yok, `trust = server` işareti, gösterim 
 `Sensitivity` → kademe süzgeci: `important` kademe 1, `balanced` 1–2, `all` hepsi.
 Kişinin pozisyonu ya da etkin niyetiyle ilgili enstrümanın kapsülü (özellikle `weakened`,
 `invalidated`) kademeden bağımsız geçer. Varsayılan gruptan gelir; sistem değiştirmez.
+
+### 9.9 Seçimler ve bağlantılar (R3)
+
+| Konu | Seçim (öneri, `DECISIONS.md` Ö29–Ö40) | Uygulama | Kanıt |
+|------|------|----------|-------|
+| İşaret alfabesi (M1) | `siluet` (insan testi `siluet` ↔ `rozet`) | `qp_grammar::glyph`, gramer `glyph` işareti (GRAMMAR §18) | `experiments/M1/RESULTS.md` |
+| Cümle (M2) | şablon dilbilgisi | `qp_capsule::realize`, `sentence::sentences_at` | `M2/RESULTS.md` |
+| Önem (M3) | `confirm` | `qp_capsule::rank` | `M3/RESULTS.md` |
+| Tema (M4) | `kinddir` | `qp_capsule::theme` | `M4/RESULTS.md` |
+| Sonuç (M5) | `barrier`; aşırılıkta "uzama sürdü" gerçekleşti sayılır | `qp_capsule::outcome` | `M5/RESULTS.md` |
+| Güven yolu (M6) | mühür; yetkisiz okuyucu lisanslı hikâyeyi yalnız mühür iletileriyle görür (olgu ve kapsülün varlığı ayrıca gitmez) | `qp_capsule::trust::Muhur`, PROTOCOL §20 | `M6/RESULTS.md` |
+| İtiraz ve geri çekme (M7) | kesin bar hijyeni + `dispute` | `qp-session` `dispute.rs`, PROTOCOL §19.9 | `M7/RESULTS.md` |
+| Otoritede motor | bar kesinleşince `EngineConfig::r3()`; sonuç motor yazarlı değişim olarak günlükte; günlükten yeniden oynatma aynı hikâyeyi verir | `qp-session` `capsule.rs`, PROTOCOL §20 | `S/S-C.md` |
+| Hassasiyet | §9.8; kitle kişiye özeldir, başkasına gitmez | `qp_capsule::audience`, `set_audience` | `S/sensitivity.md` |
+
+Kanıtın açılması (vazgeçilmez, K34): yetkili okuyucu kanıt değerlerini görür; yetkisiz okuyucu
+yorumu, karneyi ve "bu kanıt şu veri yetkisini gerektirir" (`requires`) ile neye dayandığını
+(`rests_on`) alır. Lisanslı akışta bu bilgi mühür iletisinin ekleriyle verilir.

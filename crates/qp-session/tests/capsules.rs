@@ -200,12 +200,25 @@ fn entitlement_sweep_no_licensed_value_reaches_an_unentitled_reader() {
         .collect();
     assert!(!lic_caps.is_empty());
     let f0 = lic_caps[0].finding.clone();
+    // Ana may not write (viewer): Arkın (owner, entitled) stores the view.
+    hello(&mut s, "o", "arkin", None);
     let r = send(
         &mut s,
-        "a",
+        "o",
         json!({"type":"command","id":"sf","ops":[{"op":"show_finding","finding":f0,"view":"lic"}]}),
     );
+    let ack = serde_json::to_value(&r[0].msg).unwrap();
+    assert_eq!(ack["status"], "applied", "{ack}");
     out.extend(r);
+    // The stored view keeps no licensed evidence value as a constant (only the origin).
+    let lic_view =
+        serde_json::to_string(s.document().views.iter().find(|v| v.id == "lic").unwrap()).unwrap();
+    for v in values_of(s.document(), &licensed) {
+        assert!(
+            !lic_view.contains(v.as_str()),
+            "licensed {v} in the view: {lic_view}"
+        );
+    }
     let doc = s.document().clone();
     let all_ids: Vec<String> = doc
         .facts
@@ -352,6 +365,153 @@ fn entitlement_sweep_no_licensed_value_reaches_an_unentitled_reader() {
         .unwrap()
         .chars()
         .any(|c| c.is_ascii_digit()));
+}
+
+/// R3/E fixes: `show_finding` builds its view from the bound bars (the command's scratch
+/// document has none) and needs the speaker's data entitlement; `verify_evidence.item`
+/// takes an item selector (§17.2), resolved like every other selector field.
+#[test]
+#[allow(clippy::too_many_lines)]
+fn show_finding_on_a_bound_series_and_verify_evidence_by_selector() {
+    let mut v = serde_json::to_value(init_k(60)).unwrap();
+    v["principals"]
+        .as_array_mut()
+        .unwrap()
+        .push(json!({"id":"eda","role":"editor","author":{"kind":"human","name":"Eda"}}));
+    v["data"]["entitlements"]["eda"] = json!([]);
+    let mut s = Session::new(serde_json::from_value(v).unwrap(), &root()).unwrap();
+    hello(&mut s, "o", "arkin", None);
+    hello(&mut s, "e", "eda", None);
+    feed(&mut s, 60, 60, 160);
+    let doc = s.document().clone();
+    assert!(
+        doc.series[0].bars().is_none(),
+        "px is bound: no bars in the document"
+    );
+    let fnd = doc
+        .findings
+        .iter()
+        .rev()
+        .find(|f| {
+            f.facts.iter().all(|id| {
+                doc.facts
+                    .iter()
+                    .any(|x| &x.id == id && x.meaning.is_some() && x.series == "px")
+            })
+        })
+        .expect("a finding on px")
+        .clone();
+
+    // show_finding: applied; the view spans bound bar times (the scratch document has
+    // no bars; they come from the reading document).
+    let r = send(
+        &mut s,
+        "o",
+        json!({"type":"command","id":"sf","ops":[{"op":"show_finding","finding":fnd.id}]}),
+    );
+    let ack = serde_json::to_value(&r[0].msg).unwrap();
+    assert_eq!(ack["status"], "applied", "{ack}");
+    let vid = ack["created"][0].as_str().unwrap().to_owned();
+    let view = s
+        .document()
+        .views
+        .iter()
+        .find(|v| v.id == vid)
+        .unwrap()
+        .clone();
+    #[allow(clippy::cast_precision_loss)]
+    let last_t = bars()[159].t as f64;
+    assert_eq!(view.x.domain.unwrap()[1], last_t);
+    assert!(view
+        .layers
+        .iter()
+        .any(|l| l.series.as_deref() == Some("px")));
+    if let Some(c) = s.document().capsules.iter().find(|c| c.finding == fnd.id) {
+        assert_eq!(c.view.as_deref(), Some(vid.as_str()));
+    }
+
+    // An editor without the data entitlement may not (the view reads bar times).
+    let r = send(
+        &mut s,
+        "e",
+        json!({"type":"command","id":"sf2","ops":[{"op":"show_finding","finding":fnd.id}]}),
+    );
+    let err = serde_json::to_value(&r[0].msg).unwrap();
+    assert_eq!(err["type"], "error", "{err}");
+    assert_eq!(err["error"]["code"], "no_entitlement", "{err}");
+    assert_eq!(err["error"]["path"], "/ops/0/finding", "{err}");
+
+    // verify_evidence: the item as a selector resolves like any selector field.
+    let kind = doc
+        .facts
+        .iter()
+        .find(|x| x.id == fnd.facts[0])
+        .unwrap()
+        .kind
+        .clone();
+    let by_id = q(&mut s, "o", json!({"kind":"verify_evidence","item":fnd.id}));
+    assert_eq!(by_id["type"], "result", "{by_id}");
+    let latest = q(
+        &mut s,
+        "o",
+        json!({"kind":"verify_evidence","item":{"finding":{"kind":kind,"latest":true}}}),
+    );
+    assert_eq!(latest["type"], "result", "{latest}");
+    let rid = latest["resolved"]["/query/item"].as_str().unwrap();
+    assert_eq!(latest["data"]["check"]["item"], rid);
+    assert!(latest["data"]["check"]["verified"].is_boolean());
+    let fact = q(
+        &mut s,
+        "o",
+        json!({"kind":"verify_evidence","item":{"fact":{"kind":kind,"first":true}}}),
+    );
+    assert_eq!(fact["type"], "result", "{fact}");
+    assert_eq!(fact["data"]["check"]["facts"].as_array().unwrap().len(), 1);
+    let n_kind = doc
+        .findings
+        .iter()
+        .filter(|f| {
+            f.facts
+                .iter()
+                .any(|id| doc.facts.iter().any(|x| &x.id == id && x.kind == kind))
+        })
+        .count();
+    if n_kind > 1 {
+        let amb = q(
+            &mut s,
+            "o",
+            json!({"kind":"verify_evidence","item":{"finding":{"kind":kind}}}),
+        );
+        assert_eq!(amb["error"]["code"], "ambiguous", "{amb}");
+        assert!(
+            amb["error"]["path"]
+                .as_str()
+                .unwrap()
+                .starts_with("/query/item"),
+            "{amb}"
+        );
+    }
+    let bad = q(
+        &mut s,
+        "o",
+        json!({"kind":"verify_evidence","item":{"finding":{"knd":kind}}}),
+    );
+    assert_eq!(bad["error"]["code"], "schema", "{bad}");
+    assert!(
+        bad["error"]["path"]
+            .as_str()
+            .unwrap()
+            .starts_with("/query/item"),
+        "{bad}"
+    );
+    // The binding query's series takes a selector too (same schema claim).
+    let b = q(
+        &mut s,
+        "o",
+        json!({"kind":"binding","series":{"kind":"bars"}}),
+    );
+    assert_eq!(b["type"], "result", "{b}");
+    assert_eq!(b["resolved"]["/query/series"], "px", "{b}");
 }
 
 /// GOAL 2 / VERIFY 9: a breakout that forms inside the live bar is a candidate on the

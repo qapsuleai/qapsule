@@ -944,7 +944,18 @@ pub(crate) fn expand_op(
                 }
                 None => ctx.new_id(doc, "view", None, &ptr(p, "view"))?,
             };
-            let built = crate::present::presenter_view(doc, f, &vid)
+            // The view reads the bar times of the finding's facts' series: on a bound
+            // series the speaker needs its data entitlement (§18.3), as for `add_fact`.
+            if let Some(r) = &ctx.data {
+                for fid in &f.facts {
+                    if let Some(x) = doc.facts.iter().find(|x| &x.id == fid) {
+                        if let Some(b) = r.plane.gate(doc, Some(ctx.speaker), &x.series) {
+                            return Err(b.error(&x.series, &ptr(p, "finding")));
+                        }
+                    }
+                }
+            }
+            let built = crate::present::presenter_view(doc, ctx.data, f, &vid)
                 .map_err(|m| invalid(m, ptr(p, "finding")))?;
             let built = canon_view(doc, &built, &ptr(p, "finding"), ctx.reads())?;
             let mut out = vec![ChangeOp::PutView {

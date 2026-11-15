@@ -1,0 +1,732 @@
+{
+ "name": "31-no-entitlement",
+ "description": "RP2 §18.3: a principal without a data entitlement gets no_entitlement for study/at/hit, unreadable screen layers carry binding: no_entitlement, the binding query gives state and anchor but no position; the inline series and its view work; a pending feed answers no_data; a data event for it waits.",
+ "covers": [
+  "data",
+  "binding",
+  "entitlement",
+  "screen"
+ ],
+ "init": {
+  "document": "fixtures/protocol/docs/bound-mixed.json",
+  "clock": 1760000000000,
+  "epoch": 0,
+  "principals": [
+   {
+    "id": "arkin",
+    "author": {
+     "kind": "human",
+     "name": "arkin"
+    },
+    "role": "owner"
+   },
+   {
+    "id": "editor",
+    "author": {
+     "kind": "agent",
+     "name": "editor"
+    },
+    "role": "editor"
+   },
+   {
+    "id": "viewer",
+    "author": {
+     "kind": "human",
+     "name": "viewer"
+    },
+    "role": "viewer"
+   },
+   {
+    "id": "host",
+    "author": {
+     "kind": "engine",
+     "name": "host",
+     "version": "0"
+    },
+    "role": "host"
+   }
+  ],
+  "data": {
+   "feeds": [
+    {
+     "feed": {
+      "symbol": "THYAO",
+      "interval": "1d"
+     },
+     "synthetic": {
+      "n": 200,
+      "seed": 11
+     }
+    },
+    {
+     "feed": {
+      "symbol": "ASELS",
+      "interval": "1d"
+     },
+     "synthetic": {
+      "n": 60,
+      "seed": 3
+     }
+    }
+   ],
+   "entitlements": {
+    "host": [
+     "*"
+    ],
+    "arkin": [
+     "THYAO",
+     "ASELS"
+    ]
+   },
+   "pending": [
+    {
+     "symbol": "ASELS",
+     "interval": "1d"
+    }
+   ]
+  }
+ },
+ "steps": [
+  {
+   "note": "viewer has the read role but no data entitlement: the summary gives the binding state and the bar count (not data), never values.",
+   "send": {
+    "conn": "v",
+    "msg": {
+     "type": "hello",
+     "protocol": "qp/0",
+     "principal": "viewer",
+     "surface": {
+      "kind": "desktop"
+     }
+    }
+   },
+   "expect": [
+    {
+     "conn": "v",
+     "msg": {
+      "type": "welcome",
+      "seq": 1,
+      "summary": {
+       "series": [
+        {
+         "id": "px",
+         "len": 120,
+         "binding": "no_entitlement"
+        },
+        {
+         "id": "rsi14",
+         "binding": "$absent"
+        },
+        {
+         "id": "asl",
+         "binding": "no_entitlement",
+         "len": "$absent"
+        },
+        {
+         "id": "idx",
+         "len": 40,
+         "binding": "$absent"
+        }
+       ],
+       "views": "$any"
+      }
+     }
+    }
+   ]
+  },
+  {
+   "note": "arkin is entitled to THYAO and ASELS; ASELS's feed never answers: pending.",
+   "send": {
+    "conn": "a",
+    "msg": {
+     "type": "hello",
+     "protocol": "qp/0",
+     "principal": "arkin",
+     "surface": {
+      "kind": "headless"
+     }
+    }
+   },
+   "expect": [
+    {
+     "conn": "a",
+     "msg": {
+      "type": "welcome",
+      "seq": 1,
+      "summary": {
+       "series": [
+        {
+         "id": "px",
+         "binding": "ready"
+        },
+        "$any",
+        {
+         "id": "asl",
+         "binding": "pending"
+        },
+        "$any"
+       ],
+       "views": "$any"
+      }
+     }
+    }
+   ]
+  },
+  {
+   "send": {
+    "conn": "v",
+    "msg": {
+     "type": "query",
+     "id": "q-rsi",
+     "query": {
+      "kind": "study",
+      "series": "rsi14",
+      "range": {
+       "last": 1
+      }
+     }
+    }
+   },
+   "expect": [
+    {
+     "conn": "v",
+     "msg": {
+      "type": "error",
+      "id": "q-rsi",
+      "error": {
+       "code": "no_entitlement",
+       "path": "/query/series",
+       "message": "`rsi14` rests on bound series `px`, which is `no_entitlement`: principal `viewer` has no data entitlement for `THYAO`"
+      }
+     }
+    }
+   ]
+  },
+  {
+   "send": {
+    "conn": "v",
+    "msg": {
+     "type": "query",
+     "id": "q-at",
+     "query": {
+      "kind": "at",
+      "series": "px"
+     }
+    }
+   },
+   "expect": [
+    {
+     "conn": "v",
+     "msg": {
+      "type": "error",
+      "id": "q-at",
+      "error": {
+       "code": "no_entitlement",
+       "path": "/query/series"
+      }
+     }
+    }
+   ]
+  },
+  {
+   "note": "screen: the layers of px and of the study on it are not drawn; each says its binding state. The bar count frames the viewport (not data); last_close is withheld.",
+   "send": {
+    "conn": "v",
+    "msg": {
+     "type": "query",
+     "id": "q-scr",
+     "query": {
+      "kind": "screen"
+     }
+    }
+   },
+   "expect": [
+    {
+     "conn": "v",
+     "msg": {
+      "type": "result",
+      "id": "q-scr",
+      "data": {
+       "kind": "screen",
+       "screens": [
+        {
+         "viewport": {
+          "view": "main"
+         },
+         "symbol": "THYAO",
+         "last_close": "$absent",
+         "panels": [
+          {
+           "panel": 0,
+           "scale": "$absent",
+           "layers": [
+            {
+             "id": "l0",
+             "mark": "candle",
+             "data": {
+              "kind": "series",
+              "series": "px"
+             },
+             "items": 0,
+             "last": "$absent",
+             "binding": "no_entitlement"
+            }
+           ]
+          },
+          {
+           "panel": 1,
+           "layers": [
+            {
+             "id": "l1",
+             "mark": "line",
+             "data": {
+              "kind": "series",
+              "series": "rsi14"
+             },
+             "items": 0,
+             "binding": "no_entitlement"
+            }
+           ]
+          }
+         ]
+        }
+       ]
+      }
+     }
+    }
+   ]
+  },
+  {
+   "send": {
+    "conn": "v",
+    "msg": {
+     "type": "query",
+     "id": "q-hit",
+     "query": {
+      "kind": "hit",
+      "view": "main",
+      "x": 600,
+      "y": 200
+     }
+    }
+   },
+   "expect": [
+    {
+     "conn": "v",
+     "msg": {
+      "type": "error",
+      "id": "q-hit",
+      "error": {
+       "code": "no_entitlement",
+       "path": "/query/view"
+      }
+     }
+    }
+   ]
+  },
+  {
+   "note": "binding query for the unentitled asker: state, reason and the anchor (not data); no data position.",
+   "send": {
+    "conn": "v",
+    "msg": {
+     "type": "query",
+     "id": "q-b",
+     "query": {
+      "kind": "binding"
+     }
+    }
+   },
+   "expect": [
+    {
+     "conn": "v",
+     "msg": {
+      "type": "result",
+      "id": "q-b",
+      "data": {
+       "kind": "bindings",
+       "bindings": [
+        {
+         "series": "px",
+         "state": "no_entitlement",
+         "reason": "principal `viewer` has no data entitlement for `THYAO`",
+         "anchor_t": 1745452800000,
+         "position": "$absent"
+        },
+        {
+         "series": "asl",
+         "state": "no_entitlement",
+         "anchor_t": "$absent",
+         "position": "$absent"
+        }
+       ]
+      }
+     }
+    }
+   ]
+  },
+  {
+   "note": "The rest of the document works: the inline series and its view.",
+   "send": {
+    "conn": "v",
+    "msg": {
+     "type": "query",
+     "id": "q-idx",
+     "query": {
+      "kind": "study",
+      "series": "idx",
+      "range": {
+       "last": 1
+      },
+      "reduce": "last"
+     }
+    }
+   },
+   "expect": [
+    {
+     "conn": "v",
+     "msg": {
+      "type": "result",
+      "id": "q-idx",
+      "data": {
+       "kind": "reduced",
+       "series": "idx",
+       "values": {
+        "c": {
+         "value": 9838.64,
+         "bar": 39
+        }
+       }
+      }
+     }
+    }
+   ]
+  },
+  {
+   "send": {
+    "conn": "v",
+    "msg": {
+     "type": "input",
+     "id": "i1",
+     "gesture": {
+      "kind": "look",
+      "view": "index",
+      "from_bar": 20,
+      "to_bar": 39
+     }
+    }
+   },
+   "expect": [
+    {
+     "conn": "v",
+     "msg": {
+      "type": "result",
+      "id": "i1",
+      "data": {
+       "kind": "viewport",
+       "viewport": {
+        "view": "index",
+        "from_bar": 20,
+        "to_bar": 39
+       }
+      }
+     }
+    }
+   ]
+  },
+  {
+   "send": {
+    "conn": "v",
+    "msg": {
+     "type": "query",
+     "id": "q-scr2",
+     "query": {
+      "kind": "screen"
+     }
+    }
+   },
+   "expect": [
+    {
+     "conn": "v",
+     "msg": {
+      "type": "result",
+      "id": "q-scr2",
+      "data": {
+       "kind": "screen",
+       "screens": [
+        {
+         "viewport": {
+          "view": "index"
+         },
+         "symbol": "XU100",
+         "last_close": 9838.64,
+         "panels": [
+          {
+           "panel": 0,
+           "scale": {
+            "id": "y0"
+           },
+           "layers": [
+            {
+             "id": "l0",
+             "items": 20,
+             "binding": "$absent",
+             "last": {
+              "c": 9838.64
+             }
+            }
+           ]
+          }
+         ]
+        }
+       ]
+      }
+     }
+    }
+   ]
+  },
+  {
+   "send": {
+    "conn": "a",
+    "msg": {
+     "type": "query",
+     "id": "q-b2",
+     "query": {
+      "kind": "binding"
+     }
+    }
+   },
+   "expect": [
+    {
+     "conn": "a",
+     "msg": {
+      "type": "result",
+      "id": "q-b2",
+      "data": {
+       "kind": "bindings",
+       "bindings": [
+        {
+         "series": "px",
+         "state": "ready",
+         "anchor_t": 1745452800000,
+         "position": {
+          "bars": 120,
+          "seq": 0,
+          "digest": "63b0d3e4a98c2c2d"
+         }
+        },
+        {
+         "series": "asl",
+         "state": "pending",
+         "reason": "the data provider has not answered yet",
+         "position": "$absent"
+        }
+       ]
+      }
+     }
+    }
+   ]
+  },
+  {
+   "note": "A pending binding: no_data at the series path.",
+   "send": {
+    "conn": "a",
+    "msg": {
+     "type": "query",
+     "id": "q-asl",
+     "query": {
+      "kind": "at",
+      "series": "asl"
+     }
+    }
+   },
+   "expect": [
+    {
+     "conn": "a",
+     "msg": {
+      "type": "error",
+      "id": "q-asl",
+      "error": {
+       "code": "no_data",
+       "path": "/query/series",
+       "message": "bound series `asl` is `pending`: the data provider has not answered yet"
+      }
+     }
+    }
+   ]
+  },
+  {
+   "send": {
+    "conn": "a",
+    "msg": {
+     "type": "query",
+     "id": "q-rsi2",
+     "query": {
+      "kind": "study",
+      "series": "rsi14",
+      "range": {
+       "last": 1
+      },
+      "reduce": "last"
+     }
+    }
+   },
+   "expect": [
+    {
+     "conn": "a",
+     "msg": {
+      "type": "result",
+      "id": "q-rsi2",
+      "data": {
+       "kind": "reduced",
+       "values": {
+        "rsi": {
+         "value": 58.35328878319725,
+         "bar": 119
+        }
+       }
+      }
+     }
+    }
+   ]
+  },
+  {
+   "note": "A data event for the pending feed waits for the host's re-resolution: accepted, nothing changes.",
+   "data": {
+    "feed": {
+     "symbol": "ASELS",
+     "interval": "1d"
+    },
+    "seq": 1,
+    "change": {
+     "kind": "patch",
+     "t": 1759881600000,
+     "fields": {
+      "v": 1.0
+     }
+    }
+   },
+   "expect": []
+  },
+  {
+   "send": {
+    "conn": "e",
+    "msg": {
+     "type": "hello",
+     "protocol": "qp/0",
+     "principal": "editor",
+     "surface": {
+      "kind": "headless"
+     }
+    }
+   },
+   "expect": [
+    {
+     "conn": "e",
+     "msg": {
+      "type": "welcome",
+      "role": "editor"
+     }
+    }
+   ]
+  },
+  {
+   "note": "add_fact reads the fact's bar time: an author without the entitlement gets no_entitlement at the series path.",
+   "send": {
+    "conn": "e",
+    "msg": {
+     "type": "command",
+     "id": "c0",
+     "ops": [
+      {
+       "op": "add_fact",
+       "kind": "note",
+       "series": "rsi14",
+       "bar": 100,
+       "text": "x"
+      }
+     ]
+    }
+   },
+   "expect": [
+    {
+     "conn": "e",
+     "msg": {
+      "type": "error",
+      "id": "c0",
+      "error": {
+       "code": "no_entitlement",
+       "path": "/ops/0/series"
+      }
+     }
+    }
+   ]
+  },
+  {
+   "note": "Commands that read no data work.",
+   "send": {
+    "conn": "a",
+    "msg": {
+     "type": "command",
+     "id": "c1",
+     "ops": [
+      {
+       "op": "put_view",
+       "view": {
+        "id": "idx-only",
+        "x": {
+         "kind": "time"
+        },
+        "y": [
+         {
+          "kind": "linear"
+         }
+        ],
+        "layers": [
+         {
+          "mark": "candle",
+          "series": "idx",
+          "panel": 0,
+          "encoding": {}
+         }
+        ]
+       }
+      }
+     ]
+    }
+   },
+   "expect": [
+    {
+     "conn": "a",
+     "msg": {
+      "type": "ack",
+      "id": "c1",
+      "status": "applied",
+      "seq": 2
+     }
+    }
+   ]
+  }
+ ],
+ "final": {
+  "document": {
+   "series": [
+    {
+     "id": "px",
+     "data": "$absent"
+    },
+    "$any",
+    {
+     "id": "asl",
+     "data": "$absent",
+     "source": {
+      "anchor_t": "$absent"
+     }
+    },
+    {
+     "id": "idx"
+    }
+   ]
+  },
+  "log_len": 2
+ }
+}

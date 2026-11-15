@@ -553,8 +553,9 @@ impl Session {
                 .at(qp)
                 .hint(
                     "Pass `finding` with one of the candidate ids, or a selector such as \
-                     {\"latest\":true} (the finding with the latest fact bar); candidates \
-                     are in latest-fact-bar order.",
+                     {\"latest\":true}. Candidates are in ascending order of their latest \
+                     fact bar: the last candidate is the most recent, the one \
+                     {\"latest\":true} picks.",
                 )
                 .build();
                 e.candidates = live

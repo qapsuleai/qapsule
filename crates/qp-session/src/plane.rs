@@ -346,7 +346,12 @@ impl DataPlane {
                 ));
             }
         }
-        Some((bs.bound.current_state(), bs.bound.current_reason()))
+        let state = bs.bound.current_state();
+        let reason = bs.bound.current_reason().or_else(|| {
+            (state == BindingState::Pending)
+                .then(|| "the data provider has not answered yet".to_owned())
+        });
+        Some((state, reason))
     }
 
     /// If the data of `series` (itself or, for a study, its bar input) rests on a bound

@@ -1,0 +1,403 @@
+{
+ "name": "32-verify-evidence",
+ "description": "RP2 §18.5: add_fact stamps frozen evidence (bars 0..=fact bar by FNV-1a 64 digest); verify_evidence verifies it, ignores a patch after the fact, and after a correction before the fact reports changed with the first difference and the recomputed value/prev.",
+ "covers": [
+  "data",
+  "evidence"
+ ],
+ "init": {
+  "document": "fixtures/protocol/docs/thyao-bound.json",
+  "clock": 1760000000000,
+  "epoch": 0,
+  "proposal_ttl_ms": null,
+  "principals": [
+   {
+    "id": "arkin",
+    "author": {
+     "kind": "human",
+     "name": "arkin"
+    },
+    "role": "owner"
+   },
+   {
+    "id": "scout",
+    "author": {
+     "kind": "agent",
+     "name": "scout"
+    },
+    "role": "proposer"
+   },
+   {
+    "id": "editor",
+    "author": {
+     "kind": "agent",
+     "name": "editor"
+    },
+    "role": "editor"
+   },
+   {
+    "id": "viewer",
+    "author": {
+     "kind": "human",
+     "name": "viewer"
+    },
+    "role": "viewer"
+   },
+   {
+    "id": "feed",
+    "author": {
+     "kind": "engine",
+     "name": "feed",
+     "version": "0"
+    },
+    "role": "feed"
+   },
+   {
+    "id": "host",
+    "author": {
+     "kind": "engine",
+     "name": "host",
+     "version": "0"
+    },
+    "role": "host"
+   }
+  ],
+  "data": {
+   "feeds": [
+    {
+     "feed": {
+      "symbol": "THYAO",
+      "interval": "1d"
+     },
+     "synthetic": {
+      "n": 320,
+      "seed": 7
+     }
+    }
+   ],
+   "entitlements": {
+    "host": [
+     "*"
+    ],
+    "arkin": [
+     "THYAO"
+    ],
+    "scout": [
+     "THYAO"
+    ]
+   }
+  }
+ },
+ "steps": [
+  {
+   "send": {
+    "conn": "a",
+    "msg": {
+     "type": "hello",
+     "protocol": "qp/0",
+     "principal": "arkin",
+     "surface": {
+      "kind": "headless"
+     }
+    }
+   },
+   "expect": [
+    {
+     "conn": "a",
+     "msg": {
+      "type": "welcome",
+      "seq": 1
+     }
+    }
+   ]
+  },
+  {
+   "note": "The client sends the evidence values; the authority stamps evidence_ref (bars 0..=250 of px by digest).",
+   "send": {
+    "conn": "a",
+    "msg": {
+     "type": "command",
+     "id": "c1",
+     "ops": [
+      {
+       "op": "add_fact",
+       "id": "fact-rsi-48",
+       "kind": "value",
+       "series": "rsi14",
+       "bar": 250,
+       "text": "RSI(14) 48,4, bar 250.",
+       "evidence": {
+        "prev": 42.43789494505598,
+        "value": 48.41675196259
+       }
+      },
+      {
+       "op": "add_finding",
+       "id": "fnd-rsi",
+       "claim": "RSI(14) bar 250'de 48,4.",
+       "facts": [
+        "fact-rsi-48"
+       ],
+       "confidence": 0.5,
+       "invalidation": {
+        "kind": "text",
+        "text": "—"
+       }
+      }
+     ]
+    }
+   },
+   "expect": [
+    {
+     "conn": "a",
+     "msg": {
+      "type": "ack",
+      "id": "c1",
+      "status": "applied",
+      "seq": 2,
+      "created": [
+       "fact-rsi-48",
+       "fnd-rsi"
+      ]
+     }
+    }
+   ]
+  },
+  {
+   "send": {
+    "conn": "a",
+    "msg": {
+     "type": "query",
+     "id": "q-f",
+     "query": {
+      "kind": "get",
+      "id": "fact-rsi-48"
+     }
+    }
+   },
+   "expect": [
+    {
+     "conn": "a",
+     "msg": {
+      "type": "result",
+      "id": "q-f",
+      "data": {
+       "kind": "item",
+       "item": {
+        "id": "fact-rsi-48",
+        "t": 1768435200000,
+        "evidence_ref": {
+         "series": "px",
+         "binding": {
+          "symbol": "THYAO",
+          "interval": "1d",
+          "window": {
+           "last": 300
+          },
+          "anchor_t": 1738195200000
+         },
+         "from_t": 1738195200000,
+         "to_t": 1768435200000,
+         "bars": 251,
+         "alg": "fnv1a64",
+         "digest": "988e22744a9c8a32"
+        }
+       }
+      }
+     }
+    }
+   ]
+  },
+  {
+   "note": "Data unchanged: verified (digest and recomputed value/prev bit-identical).",
+   "send": {
+    "conn": "a",
+    "msg": {
+     "type": "query",
+     "id": "q-v1",
+     "query": {
+      "kind": "verify_evidence",
+      "item": "fnd-rsi"
+     }
+    }
+   },
+   "expect": [
+    {
+     "conn": "a",
+     "msg": {
+      "type": "result",
+      "id": "q-v1",
+      "data": {
+       "kind": "evidence_check",
+       "check": {
+        "item": "fnd-rsi",
+        "verified": true,
+        "facts": [
+         {
+          "fact": "fact-rsi-48",
+          "status": "verified",
+          "current": {
+           "bars": 251,
+           "digest": "988e22744a9c8a32"
+          },
+          "values": {
+           "prev": {
+            "then": 42.43789494505598,
+            "now": 42.43789494505598
+           },
+           "value": {
+            "then": 48.41675196259,
+            "now": 48.41675196259
+           }
+          }
+         }
+        ]
+       }
+      }
+     }
+    }
+   ]
+  },
+  {
+   "note": "A live patch after the fact's bar does not touch the evidence range.",
+   "data": {
+    "feed": {
+     "symbol": "THYAO",
+     "interval": "1d"
+    },
+    "seq": 1,
+    "change": {
+     "kind": "patch",
+     "t": 1774396800000,
+     "fields": {
+      "c": 105.0
+     }
+    }
+   },
+   "expect": []
+  },
+  {
+   "send": {
+    "conn": "a",
+    "msg": {
+     "type": "query",
+     "id": "q-v2",
+     "query": {
+      "kind": "verify_evidence",
+      "item": "fact-rsi-48"
+     }
+    }
+   },
+   "expect": [
+    {
+     "conn": "a",
+     "msg": {
+      "type": "result",
+      "id": "q-v2",
+      "data": {
+       "kind": "evidence_check",
+       "check": {
+        "item": "fact-rsi-48",
+        "verified": true
+       }
+      }
+     }
+    }
+   ]
+  },
+  {
+   "note": "The source corrects bar 100 (before the fact): the close moves from 96.36 to 96.9.",
+   "data": {
+    "feed": {
+     "symbol": "THYAO",
+     "interval": "1d"
+    },
+    "seq": 2,
+    "change": {
+     "kind": "patch",
+     "t": 1750291200000,
+     "fields": {
+      "c": 96.9
+     }
+    }
+   },
+   "expect": []
+  },
+  {
+   "note": "verify_evidence names the first difference (the digest) and the recomputed evidence values.",
+   "send": {
+    "conn": "a",
+    "msg": {
+     "type": "query",
+     "id": "q-v3",
+     "query": {
+      "kind": "verify_evidence",
+      "item": "fnd-rsi"
+     }
+    }
+   },
+   "expect": [
+    {
+     "conn": "a",
+     "msg": {
+      "type": "result",
+      "id": "q-v3",
+      "data": {
+       "kind": "evidence_check",
+       "check": {
+        "item": "fnd-rsi",
+        "verified": false,
+        "facts": [
+         {
+          "fact": "fact-rsi-48",
+          "status": "changed",
+          "message": "data digest 988e22744a9c8a32 → ac1f103bbfd3f0cd: a bar in t=1738195200000…1768435200000 changed; `value` 48.41675196259 → 48.41674791482106",
+          "stored": {
+           "digest": "988e22744a9c8a32"
+          },
+          "current": {
+           "bars": 251,
+           "digest": "ac1f103bbfd3f0cd"
+          },
+          "values": {
+           "prev": {
+            "then": 42.43789494505598,
+            "now": 42.4378825663117
+           },
+           "value": {
+            "then": 48.41675196259,
+            "now": 48.41674791482106
+           }
+          }
+         }
+        ]
+       }
+      }
+     }
+    }
+   ]
+  }
+ ],
+ "final": {
+  "document": {
+   "facts": [
+    {
+     "id": "fact-rsi-48",
+     "evidence_ref": {
+      "bars": 251
+     }
+    }
+   ],
+   "series": [
+    {
+     "id": "px",
+     "data": "$absent"
+    },
+    "$any",
+    "$any",
+    "$any"
+   ]
+  },
+  "log_len": 2
+ }
+}

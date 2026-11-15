@@ -977,7 +977,7 @@ fn presenter_view_is_canonical_with_origin_and_emphasis() {
     let v = view(&h, "vp");
     assert_eq!(
         v["layers"][2],
-        json!({"id":"l2","mark":"rule","panel":1,"encoding":{"y":"70"},
+        json!({"id":"level","mark":"rule","panel":1,"encoding":{"y":"70"},
                "origin":{"/encoding/y":{"kind":"fact","fact":"fact-rsi-cross70","field":"level"}}})
     );
     assert_eq!(

@@ -1,9 +1,9 @@
 view v-overbought (1200x600)
 x: slots 120..199 of 200 bar(s), 2025-06-19 .. 2025-10-08, 14 px per slot
 panel 0: y0 linear [102.53999999999999, 132.02], 1 layer(s)
-  l0 candle px "THYAO 1d" fields o h l c: 80 item(s); last c=124.69 h=126.61 l=124.47 o=125.26 (bar 199, 2025-10-08)
+  candles candle px "THYAO 1d" fields o h l c: 80 item(s); last c=124.69 h=126.61 l=124.47 o=125.26 (bar 199, 2025-10-08)
 panel 1: y1 linear [39.47894083714551, 79.95485924780115], 2 layer(s)
-  l1 line rsi14 "RSI14" fields rsi: 80 item(s); last rsi=55.09991178461079 (bar 199, 2025-10-08)
-  l2 rule constant: 1 item(s); last y=70
+  line line rsi14 "RSI14" fields rsi: 80 item(s); last rsi=55.09991178461079 (bar 199, 2025-10-08)
+  level rule constant: 1 item(s); last y=70
     /encoding/y = 70 from fact-rsi-cross70.level
 emphasis: highlight bars 150..150 (all panels)

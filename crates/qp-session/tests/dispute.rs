@@ -206,7 +206,7 @@ fn a_dispute_waits_for_the_host_settled_answer() {
     connect(&mut s, "r", "device", &[("k", json!({"kind":"claims"}))]);
     let _ = bad_tick(&mut s);
     let d = json!({"type":"dispute","id":"d","claim":{"kind":"capsule","capsule":"cap-floor","finding":"fnd-floor"},
-        "t":T0 + 4 * DAY,"digest":"abc"});
+        "t":T0 + 4 * DAY,"digest":"0000000000000abc"});
     let r = s.handle_raw("r", &d.to_string());
     let m = &msgs(&r, "r")[0];
     assert_eq!(m["data"]["verdict"], "pending", "{m}");
@@ -231,22 +231,58 @@ fn a_dispute_waits_for_the_host_settled_answer() {
 }
 
 #[test]
-fn open_disputes_are_limited_per_connection() {
+fn disputes_are_bounded_per_claim_and_digests_checked() {
     let mut s = Session::new(init(false, false), &root()).unwrap();
     connect(&mut s, "r", "device", &[("k", json!({"kind":"claims"}))]);
     let _ = bad_tick(&mut s);
-    let mut verdicts = Vec::new();
-    for i in 0..=qp_session::MAX_OPEN_DISPUTES {
-        let d = json!({"type":"dispute","id":format!("d{i}"),
+    let dispute = |i: usize, digest: Value| {
+        json!({"type":"dispute","id":format!("d{i}"),
             "claim":{"kind":"capsule","capsule":"cap-floor","finding":"fnd-floor"},
-            "t":T0 + 4 * DAY,"digest":format!("{i:016x}")});
-        let r = s.handle_raw("r", &d.to_string());
+            "t":T0 + 4 * DAY,"digest":digest})
+        .to_string()
+    };
+    // A digest is 16 lowercase hex digits: anything else is refused (no unbounded keys).
+    for bad in ["abc", "ZZZZZZZZZZZZZZZZ", "0000000000000000aa"] {
+        let r = s.handle_raw("r", &dispute(0, json!(bad)));
+        let m = &msgs(&r, "r")[0];
+        assert_eq!(m["type"], "error", "{m}");
+        assert_eq!(m["error"]["path"], "/digest");
+    }
+    let mut verdicts = Vec::new();
+    for i in 0..=qp_session::MAX_DISPUTE_DIGESTS {
+        let r = s.handle_raw("r", &dispute(i, json!(format!("{i:016x}"))));
         verdicts.push(msgs(&r, "r")[0]["data"]["verdict"].clone());
     }
-    assert!(verdicts[..qp_session::MAX_OPEN_DISPUTES]
+    assert!(verdicts[..qp_session::MAX_DISPUTE_DIGESTS]
         .iter()
         .all(|v| v == "pending"));
-    assert_eq!(verdicts[qp_session::MAX_OPEN_DISPUTES], "limited");
+    assert_eq!(verdicts[qp_session::MAX_DISPUTE_DIGESTS], "limited");
+}
+
+/// An unentitled principal cannot tell an asserted claim from an absent one: both are
+/// `unknown` (no existence oracle).
+#[test]
+fn an_unentitled_dispute_learns_nothing() {
+    let mut init = transcript()["init"].clone();
+    init["data"].as_object_mut().unwrap().remove("settled");
+    init["principals"]
+        .as_array_mut()
+        .unwrap()
+        .push(json!({"id":"guest","author":{"kind":"human","name":"guest"},"role":"viewer"}));
+    let mut s = Session::new(serde_json::from_value(init).unwrap(), &root()).unwrap();
+    connect(&mut s, "g", "guest", &[]);
+    let _ = bad_tick(&mut s);
+    let ask = |s: &mut Session, t: i64| {
+        let d = json!({"type":"dispute","id":"d",
+            "claim":{"kind":"capsule","capsule":"cap-floor","finding":"fnd-floor"},
+            "t":t,"digest":"0123456789abcdef"});
+        msgs(&s.handle_raw("g", &d.to_string()), "g")
+    };
+    let asserted = ask(&mut s, T0 + 4 * DAY);
+    let absent = ask(&mut s, T0 + 3 * DAY);
+    assert_eq!(asserted, absent);
+    assert_eq!(asserted[0]["data"]["verdict"], "unknown");
+    assert!(s.take_settle_requests().is_empty());
 }
 
 /// Authority ↔ replica in step: the replica's own data has the true t4; it refetches,

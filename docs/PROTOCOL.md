@@ -1665,8 +1665,10 @@ verisinde `disputed` yaptığında (§19.4) otoriteye bir kez itiraz gönderir
 
 - Yalnız otoritenin **kayıtlı** iddiası itiraz edilebilir (koşul iddiası: gönderenin kendi
   aboneliği; kapsül ve niyet iddiası: dokümanın). İddianın dayandığı her beslemeye veri
-  yetkisi olmayan kişi itiraz edemez (`no_entitlement`; karar veri hakkında bilgi verir,
-  §19.7). Okuma izni yeter (izleyici itiraz edebilir).
+  yetkisi olmayan kişinin itirazı, ileri sürülmeyen iddianınkiyle **aynı** cevabı alır
+  (`unknown`; karar veri hakkında bilgi verir, §19.7; iddianın varlığı da sızmaz). Okuma
+  izni yeter (izleyici itiraz edebilir). `digest` verilirse tam 16 küçük onaltılık hanedir
+  (`data_digest`), değilse `invalid` (`/digest`).
 - Otorite **yansının değerleriyle karar vermez**: `values`, `anchor_t`, `digest` kayıt ve
   eşgüçlülük içindir. Karar kesin veridedir: otorite barındırıcıdan `[çapa, t]` aralığının
   kesin barlarını ister (`SettleRequest`) ve cevapta (yukarıdaki 1. maddenin adımları)
@@ -1679,7 +1681,8 @@ verisinde `disputed` yaptığında (§19.4) otoriteye bir kez itiraz gönderir
   `pending` (barındırıcının kesin cevabı bekleniyor; karar sonra `claim` olayıyla gelir),
   `upheld`, `rejected` (+ otoritenin kanıtı), `duplicate` (aynı bağlantıdan aynı iddia,
   `t` ve `digest` daha önce itiraz edildi), `unknown` (otorite bu iddiayı ileri sürmüyor:
-  hiç ya da artık), `limited` (bağlantı başına en çok 16 açık itiraz).
+  hiç ya da artık, ya da kişinin yetkisi yok), `limited` (bağlantı başına en çok 16 açık
+  itiraz, ömrü boyunca en çok 256 itiraz; aynı iddia ve `t` için en çok 4 farklı `digest`).
 - Eşzamanlı kesin kaynağı olan barındırıcıda (test sağlayıcısı) karar aynı adımda verilir.
   Kesin kaynağı olmayan barındırıcıda itirazlar `pending` kalır.
 - Taşıma: `qp serve` ve süreç içi yolda sıradan bir mesajdır; MCP'de araç değildir (yansı

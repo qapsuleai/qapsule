@@ -44,6 +44,19 @@ use crate::values::{bar_series, condition_series, Delta};
 
 /// At most this many open disputes per connection (further ones: `limited`).
 pub const MAX_OPEN: usize = 16;
+/// At most this many disputes accepted per connection over its life (further ones:
+/// `limited`); bounds the idempotence record.
+pub const MAX_PER_CONN: usize = 256;
+/// At most this many different digests per (connection, claim, `t`) (further ones:
+/// `limited`).
+pub const MAX_DIGESTS: usize = 4;
+
+/// A digest is exactly 16 lowercase hex digits (`data_digest`).
+fn valid_digest(d: &str) -> bool {
+    d.len() == 16
+        && d.bytes()
+            .all(|c| c.is_ascii_digit() || (b'a'..=b'f').contains(&c))
+}
 
 /// A request for settled bars the authority makes to its host (§19.9): bars of bound
 /// series `series` (feed `feed`) with `from_t <= t <= to_t`, from the provider's settled
@@ -284,7 +297,25 @@ impl Session {
         };
         let key: ClaimKey = (owner, d.claim.clone(), d.t);
         let (seq, now) = (self.seq(), self.clock());
-        let Some(ev) = self.claims.registered(&key).cloned() else {
+        if let Some(dg) = &d.digest {
+            if !valid_digest(dg) {
+                return Err(E::new(
+                    ErrorCode::Invalid,
+                    "`digest` must be 16 lowercase hex digits (data_digest)",
+                )
+                .at("/digest")
+                .build());
+            }
+        }
+        // The verdict says something about the data: only for a principal entitled to
+        // every feed the claim rests on (§19.7). An absent claim and a claim the principal
+        // may not hear get the same answer (`unknown`): no existence oracle.
+        let ev = self
+            .claims
+            .registered(&key)
+            .filter(|ev| ev.feeds.iter().all(|k| self.plane.entitled(&principal, k)))
+            .cloned();
+        let Some(ev) = ev else {
             return Ok(vec![verdict_line(
                 &conn,
                 id,
@@ -294,16 +325,6 @@ impl Session {
                 None,
             )]);
         };
-        // The verdict says something about the data: only for a principal entitled to
-        // every feed the claim rests on (§19.7).
-        if !ev.feeds.iter().all(|k| self.plane.entitled(&principal, k)) {
-            return Err(E::new(
-                ErrorCode::NoEntitlement,
-                "the claim rests on a feed this principal has no data entitlement for",
-            )
-            .at("/claim")
-            .build());
-        }
         let _ = (&d.values, d.anchor_t);
         let seen: SeenKey = (
             conn.clone(),
@@ -321,7 +342,17 @@ impl Session {
                 None,
             )]);
         }
-        if self.settle.open.iter().filter(|o| o.conn == conn).count() >= MAX_OPEN {
+        let per_conn = self.settle.seen.keys().filter(|k| k.0 == conn).count();
+        let per_claim = self
+            .settle
+            .seen
+            .keys()
+            .filter(|k| k.0 == conn && k.1 == d.claim && k.2 == d.t)
+            .count();
+        if self.settle.open.iter().filter(|o| o.conn == conn).count() >= MAX_OPEN
+            || per_conn >= MAX_PER_CONN
+            || per_claim >= MAX_DIGESTS
+        {
             return Ok(vec![verdict_line(
                 &conn,
                 id,

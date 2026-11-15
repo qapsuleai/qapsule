@@ -563,3 +563,41 @@ fn a_persons_audience_reaches_nobody_else() {
     let host = q(&mut s, "h", json!({"kind":"document"}));
     assert!(host["data"]["document"]["audiences"]["ana"].is_object());
 }
+
+/// Security review: host keys given at construction drive the mühür from the first bar
+/// (receipts differ from the demo keys, statements identical); after the first server
+/// comment the call is refused.
+#[test]
+fn host_trust_keys_take_effect_and_are_refused_late() {
+    let comments = |s: &mut Session| {
+        hello(s, "b", "bora", None);
+        send(
+            s,
+            "b",
+            json!({"type":"subscribe","id":"s","topic":{"kind":"capsules"}}),
+        );
+        let out = feed(s, 60, 60, 200);
+        texts(&out, "b")
+            .into_iter()
+            .filter(|l| l.contains("\"server_comment\""))
+            .collect::<Vec<_>>()
+    };
+    let mut demo = Session::new(init_k(60), &root()).unwrap();
+    let mut host = Session::new_with_trust_keys(
+        init_k(60),
+        &root(),
+        b"host-receipt".to_vec(),
+        b"host-audit".to_vec(),
+    )
+    .unwrap();
+    let (a, b) = (comments(&mut demo), comments(&mut host));
+    assert!(!a.is_empty());
+    assert_eq!(a.len(), b.len());
+    assert!(
+        a.iter().zip(&b).all(|(x, y)| x != y),
+        "receipts must change"
+    );
+    assert!(host
+        .set_trust_keys(b"late".to_vec(), b"late".to_vec())
+        .is_err());
+}

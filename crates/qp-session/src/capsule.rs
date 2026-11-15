@@ -391,13 +391,37 @@ impl Session {
     }
 
     /// (R3, §20) Host-supplied secret keys of the server-fact trust path (mühür): the
-    /// receipt key and the audit-log key. Call before the session starts its capsule
-    /// runner. Without it the authority uses the public demo keys, which is only for the
-    /// synthetic test-host flow (`init.capsules.flow`) and transcripts; a real host with
-    /// real licensed data must set its own keys (kept in its secret store, never in the
-    /// document or the log).
-    pub fn set_trust_keys(&mut self, receipt_key: Vec<u8>, audit_key: Vec<u8>) {
+    /// receipt key and the audit-log key (kept in the host's secret store, never in the
+    /// document or the log). Re-keys every running trust path. Refused once any server
+    /// comment has been issued (receipts already made with the old key would no longer
+    /// match), so a host passes its keys at construction ([`Session::new_with_trust_keys`]). Without them
+    /// the authority uses the public demo keys, which only exist for the synthetic
+    /// test-host flow (`init.capsules.flow`, the only flow source in R3) and transcripts.
+    ///
+    /// # Errors
+    ///
+    /// A message when a server comment has already been issued.
+    pub fn set_trust_keys(
+        &mut self,
+        receipt_key: Vec<u8>,
+        audit_key: Vec<u8>,
+    ) -> Result<(), String> {
+        if let Some(r) = &mut self.runner {
+            if !r.comments.is_empty() {
+                return Err("trust keys must be set before the first server comment".to_owned());
+            }
+            for w in &mut r.watched {
+                if w.muhur.is_some() {
+                    w.muhur = Some(qp_capsule::trust::Muhur::with_keys(
+                        qp_capsule::trust::Params::default(),
+                        &receipt_key,
+                        &audit_key,
+                    ));
+                }
+            }
+        }
         self.trust_keys = Some((receipt_key, audit_key));
+        Ok(())
     }
 
     /// `true` when `principal` may read the licensed flow of `instrument` (or there is

@@ -162,7 +162,7 @@ pub struct Session {
     pub(crate) settle: crate::dispute::Settle,
     /// (R3, §20) The capsule engine (`init.capsules`); `None`: no engine.
     pub(crate) runner: Option<crate::capsule::Runner>,
-    /// Host-supplied mühür keys (R3, `set_trust_keys`).
+    /// Host-supplied mühür keys (R3, `new_with_trust_keys`, `with_provider_and_trust_keys`, `set_trust_keys`).
     pub(crate) trust_keys: Option<(Vec<u8>, Vec<u8>)>,
     /// (R3, §20) Inside [`Session::as_reader`]: the reader's projection.
     pub(crate) proj: Option<crate::capsule::Proj>,
@@ -270,6 +270,29 @@ impl Session {
     /// # Errors
     /// The document cannot be read or parsed.
     pub fn new(init: SessionInit, repo_root: &Path) -> Result<Self, String> {
+        Self::new_inner(init, repo_root, None)
+    }
+
+    /// (R3, §20) [`Session::new`] with the host's secret mühür keys (receipt key, audit-log
+    /// key) in place before the capsule runner starts, so no server comment is ever made
+    /// with the public demo keys.
+    ///
+    /// # Errors
+    /// As [`Session::new`].
+    pub fn new_with_trust_keys(
+        init: SessionInit,
+        repo_root: &Path,
+        receipt_key: Vec<u8>,
+        audit_key: Vec<u8>,
+    ) -> Result<Self, String> {
+        Self::new_inner(init, repo_root, Some((receipt_key, audit_key)))
+    }
+
+    fn new_inner(
+        init: SessionInit,
+        repo_root: &Path,
+        keys: Option<(Vec<u8>, Vec<u8>)>,
+    ) -> Result<Self, String> {
         let provider = match &init.data {
             Some(d) => Provider::Memory(
                 qp_source::MemoryProvider::from_init(d, repo_root)
@@ -278,7 +301,7 @@ impl Session {
             None => Provider::None,
         };
         let settled = init.data.as_ref().and_then(|d| d.settled.clone());
-        let mut s = Self::build(init, repo_root, provider)?;
+        let mut s = Self::build_keys(init, repo_root, provider, keys)?;
         if let Some(t) = settled {
             s.settle.set_test_source(&t);
         }
@@ -301,13 +324,46 @@ impl Session {
         Self::build(init, repo_root, Provider::Host(provider))
     }
 
+    /// (R3, §20) [`Session::with_provider`] with the host's secret mühür keys (see
+    /// [`Session::new_with_trust_keys`]); the constructor a real host with licensed data
+    /// uses.
+    ///
+    /// # Errors
+    /// As [`Session::with_provider`].
+    pub fn with_provider_and_trust_keys(
+        init: SessionInit,
+        repo_root: &Path,
+        provider: Box<dyn qp_source::SourceProvider>,
+        receipt_key: Vec<u8>,
+        audit_key: Vec<u8>,
+    ) -> Result<Self, String> {
+        if init.data.is_some() {
+            return Err("give either init.data or a host provider, not both".to_owned());
+        }
+        Self::build_keys(
+            init,
+            repo_root,
+            Provider::Host(provider),
+            Some((receipt_key, audit_key)),
+        )
+    }
+
     pub(crate) fn build(
         init: SessionInit,
         repo_root: &Path,
         provider: Provider,
     ) -> Result<Self, String> {
+        Self::build_keys(init, repo_root, provider, None)
+    }
+
+    fn build_keys(
+        init: SessionInit,
+        repo_root: &Path,
+        provider: Provider,
+        keys: Option<(Vec<u8>, Vec<u8>)>,
+    ) -> Result<Self, String> {
         let schema = schemars::schema_for!(ClientMsg).to_value();
-        Self::build_with(init, repo_root, provider, schema)
+        Self::build_with_keys(init, repo_root, provider, schema, keys)
     }
 
     /// [`Session::build`] with the inbound schema given (`Null` for a follower that never
@@ -318,6 +374,16 @@ impl Session {
         repo_root: &Path,
         provider: Provider,
         schema: Value,
+    ) -> Result<Self, String> {
+        Self::build_with_keys(init, repo_root, provider, schema, None)
+    }
+
+    fn build_with_keys(
+        init: SessionInit,
+        repo_root: &Path,
+        provider: Provider,
+        schema: Value,
+        trust_keys: Option<(Vec<u8>, Vec<u8>)>,
     ) -> Result<Self, String> {
         let capsules = init.capsules.clone();
         let doc: Document = match &init.document {
@@ -364,7 +430,7 @@ impl Session {
             intent_epoch: 1,
             settle: crate::dispute::Settle::default(),
             runner: None,
-            trust_keys: None,
+            trust_keys,
             proj: None,
             real_facts: Vec::new(),
             headlines: BTreeMap::new(),

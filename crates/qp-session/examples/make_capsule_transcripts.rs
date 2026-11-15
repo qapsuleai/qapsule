@@ -182,8 +182,8 @@ fn t38() -> Value {
         hello("a", "ana", None),
         sub("a", "k", json!({"kind":"capsules","all":true})),
     ];
-    for i in k..=128 {
-        steps.push(bar_ev(k, i, &b[i], None));
+    for (i, bar) in b.iter().enumerate().take(128 + 1).skip(k) {
+        steps.push(bar_ev(k, i, bar, None));
     }
     steps.push(query("a", "q1", json!({"kind":"capsules","since_bar":120})));
     steps.push(query(
@@ -218,8 +218,8 @@ fn t39() -> Value {
         sub("b", "k", json!({"kind":"capsules","all":true})),
         sub("c", "k", json!({"kind":"capsules","all":true})),
     ];
-    for i in k..=93 {
-        steps.push(bar_ev(k, i, &b[i], None));
+    for (i, bar) in b.iter().enumerate().take(93 + 1).skip(k) {
+        steps.push(bar_ev(k, i, bar, None));
     }
     steps.push(send_n(
         "a",
@@ -252,8 +252,8 @@ fn t40() -> Value {
     let b = bars();
     let k = 92;
     let mut steps = vec![hello("t", "ana", None), hello("e", "ana", Some("en"))];
-    for i in k..=95 {
-        steps.push(bar_ev(k, i, &b[i], None));
+    for (i, bar) in b.iter().enumerate().take(95 + 1).skip(k) {
+        steps.push(bar_ev(k, i, bar, None));
     }
     steps.push(send_n(
         "t",

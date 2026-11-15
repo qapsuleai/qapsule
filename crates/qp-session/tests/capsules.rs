@@ -71,8 +71,8 @@ fn q(s: &mut Session, conn: &str, query: Value) -> Value {
 fn feed(s: &mut Session, k: usize, from: usize, to: usize) -> Vec<OutboundLine> {
     let b = bars();
     let mut out = Vec::new();
-    for i in from..to {
-        out.extend(s.data_event(&ev(i - k + 1, &b[i])).unwrap());
+    for (i, bar) in b.iter().enumerate().take(to).skip(from) {
+        out.extend(s.data_event(&ev(i - k + 1, bar)).unwrap());
     }
     out
 }

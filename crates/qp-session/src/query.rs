@@ -485,15 +485,31 @@ impl Session {
                 };
                 // A finding whose data the asker may not read: text and state, no
                 // spark and no view (§18.3).
-                let blocked = rd!(self)
-                    .facts
-                    .iter()
-                    .find(|x| Some(&x.id) == f.facts.first())
-                    .is_some_and(|x| {
-                        self.plane
-                            .gate(&self.doc, Some(&self.conns[ci].principal), &x.series)
-                            .is_some()
+                let blocked = {
+                    let asker = self.conns[ci].principal.as_str();
+                    let facts_blocked = f.facts.iter().any(|id| {
+                        self.doc
+                            .facts
+                            .iter()
+                            .find(|x| &x.id == id)
+                            .is_some_and(|x| {
+                                self.plane.gate(&self.doc, Some(asker), &x.series).is_some()
+                            })
                     });
+                    let view_blocked = self
+                        .doc
+                        .capsules
+                        .iter()
+                        .find(|c| c.finding == f.id)
+                        .and_then(|c| c.view.as_ref())
+                        .and_then(|v| self.doc.views.iter().find(|x| &x.id == v))
+                        .is_some_and(|v| {
+                            v.layers
+                                .iter()
+                                .any(|l| self.plane.gate_layer(&self.doc, Some(asker), l).is_some())
+                        });
+                    facts_blocked || view_blocked
+                };
                 let mut pr = present(rd!(self), &mut self.cache, &f, kind, &profile);
                 if blocked {
                     pr.spark = None;

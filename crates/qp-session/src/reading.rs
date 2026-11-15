@@ -18,6 +18,9 @@ use crate::expand::{need_view, view_bar_series};
 use crate::provider::{warm, DocProvider};
 use crate::session::{Conn, Session};
 
+/// Panel id → (name, scale if compiled, layers) of a screen.
+pub(crate) type ScreenPanels = BTreeMap<u32, (Option<String>, Option<ScaleInfo>, Vec<LayerInfo>)>;
+
 /// Default frame width of the point query (`docs/PROTOCOL.md` §5.4).
 pub const HIT_WIDTH: u32 = 1200;
 /// Default frame height of the point query.
@@ -262,12 +265,7 @@ impl Session {
     /// The R2 panel fields of a screen (panel id → name, scale, layers), compiled at the
     /// connection's viewport and its surface's frame. Empty when the view does not
     /// compile (the RD1 fields are still answered). Call after [`warm`].
-    pub(crate) fn screen_panels(
-        &self,
-        c: &Conn,
-        vp: &Viewport,
-        asker: &str,
-    ) -> BTreeMap<u32, (Option<String>, Option<ScaleInfo>, Vec<LayerInfo>)> {
+    pub(crate) fn screen_panels(&self, c: &Conn, vp: &Viewport, asker: &str) -> ScreenPanels {
         let Some(view) = self.doc.views.iter().find(|v| v.id == vp.view) else {
             return BTreeMap::new();
         };
@@ -282,15 +280,14 @@ impl Session {
         // §18.3: the asker's unreadable layers are not drawn; they are listed with their
         // binding state, in paint order, and the rest of the view compiles without them.
         let filtered = without_layers(view, &blocked);
-        let mut out: BTreeMap<u32, (Option<String>, Option<ScaleInfo>, Vec<LayerInfo>)> =
-            if filtered.layers.is_empty() {
-                BTreeMap::new()
-            } else {
-                self.compiled_panels(c, vp, &filtered)
-                    .into_iter()
-                    .map(|(k, (n, s, l))| (k, (n, Some(s), l)))
-                    .collect()
-            };
+        let mut out: ScreenPanels = if filtered.layers.is_empty() {
+            BTreeMap::new()
+        } else {
+            self.compiled_panels(c, vp, &filtered)
+                .into_iter()
+                .map(|(k, (n, s, l))| (k, (n, Some(s), l)))
+                .collect()
+        };
         for (i, l) in view.layers.iter().enumerate() {
             let Some((state, series)) = blocked.get(&i) else {
                 continue;
@@ -349,24 +346,10 @@ impl Session {
             return out;
         }
         for (i, l) in view.layers.iter().enumerate() {
-            let series = l.series.clone().or_else(|| {
-                let fact = l.fact.clone().or_else(|| {
-                    l.finding.as_ref().and_then(|f| {
-                        self.doc
-                            .findings
-                            .iter()
-                            .find(|x| &x.id == f)
-                            .and_then(|x| x.facts.first().cloned())
-                    })
-                })?;
-                self.doc
-                    .facts
-                    .iter()
-                    .find(|x| x.id == fact)
-                    .map(|x| x.series.clone())
-            });
-            let Some(series) = series else { continue };
-            if let Some(b) = self.plane.gate(&self.doc, Some(asker), &series) {
+            if let Some(b) = self.plane.gate_layer(&self.doc, Some(asker), l) {
+                // The layer's data source (what `screen` names), not the series that
+                // blocked it.
+                let series = l.series.clone().unwrap_or(b.series);
                 out.insert(i, (b.state, series));
             }
         }

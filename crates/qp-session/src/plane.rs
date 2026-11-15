@@ -363,18 +363,55 @@ impl DataPlane {
         asker: Option<&str>,
         series: &str,
     ) -> Option<Blocked> {
-        let root = bar_root(doc, series)?;
-        if !matches!(root.source, SeriesSource::Bind { .. }) {
+        if self.series.is_empty() {
             return None;
         }
-        let (state, reason) = self
-            .state_for(&root.id, asker)
-            .unwrap_or((BindingState::Pending, Some("not resolved yet".to_owned())));
-        (state != BindingState::Ready).then(|| Blocked {
-            series: root.id.clone(),
-            state,
-            reason: reason.unwrap_or_else(|| state_str(state).to_owned()),
-        })
+        // Every bound series the data rests on, through all study inputs (recursively).
+        let mut stack = vec![series.to_owned()];
+        let mut seen = std::collections::BTreeSet::new();
+        while let Some(id) = stack.pop() {
+            if !seen.insert(id.clone()) || seen.len() > 1024 {
+                continue;
+            }
+            let Some(s) = find_series(doc, &id) else {
+                continue;
+            };
+            match &s.source {
+                SeriesSource::Bind { .. } => {
+                    let (state, reason) = self
+                        .state_for(&id, asker)
+                        .unwrap_or((BindingState::Pending, Some("not resolved yet".to_owned())));
+                    if state != BindingState::Ready {
+                        return Some(Blocked {
+                            series: id,
+                            state,
+                            reason: reason.unwrap_or_else(|| state_str(state).to_owned()),
+                        });
+                    }
+                }
+                SeriesSource::Study { inputs, .. } => {
+                    stack.extend(inputs.iter().rev().cloned());
+                }
+                _ => {}
+            }
+        }
+        None
+    }
+
+    /// The first series `layer` reads (its data, its facts' series, series named in
+    /// channels, colour conditions and origins) that is not ready for `asker`.
+    pub(crate) fn gate_layer(
+        &self,
+        doc: &Document,
+        asker: Option<&str>,
+        layer: &qp_schema::Layer,
+    ) -> Option<Blocked> {
+        if self.series.is_empty() {
+            return None;
+        }
+        layer_reads(doc, layer)
+            .iter()
+            .find_map(|s| self.gate(doc, asker, s))
     }
 
     /// Applies a host data event to every bound series of its feed (§18.4), and to the
@@ -451,6 +488,63 @@ impl DataPlane {
         }
         Ok(EventOutcome { changed })
     }
+}
+
+/// Every series a layer reads values from: its `series`; the series of its fact or of
+/// every fact of its finding; series named in `x`/`y`/`y2` references and in a colour
+/// condition's operand; series and fact origins of its constants (§18.3: a layer whose
+/// data the asker may not read is not drawn).
+pub(crate) fn layer_reads(doc: &Document, l: &qp_schema::Layer) -> Vec<String> {
+    use qp_schema::grammar::{ColorSpec, Operand, Origin, Position};
+    let mut out: Vec<String> = Vec::new();
+    let mut add = |s: &str| {
+        if !out.iter().any(|x| x == s) {
+            out.push(s.to_owned());
+        }
+    };
+    if let Some(s) = &l.series {
+        add(s);
+    }
+    let fact_series = |id: &str| {
+        doc.facts
+            .iter()
+            .find(|f| f.id == id)
+            .map(|f| f.series.clone())
+    };
+    let mut facts: Vec<String> = l.fact.iter().cloned().collect();
+    if let Some(fnd) = &l.finding {
+        if let Some(f) = doc.findings.iter().find(|x| &x.id == fnd) {
+            facts.extend(f.facts.iter().cloned());
+        }
+    }
+    for o in l.origin.values() {
+        match o {
+            Origin::Series { series, .. } => add(series),
+            Origin::Fact { fact, .. } => facts.push(fact.clone()),
+            Origin::Threshold { .. } => {}
+        }
+    }
+    for f in &facts {
+        if let Some(s) = fact_series(f) {
+            add(&s);
+        }
+    }
+    let e = &l.encoding;
+    for p in [&e.x, &e.y, &e.y2].into_iter().flatten() {
+        if let Position::Ref(r) = p {
+            if let Some(s) = &r.series {
+                add(s);
+            }
+        }
+    }
+    if let Some(ColorSpec::When(w)) = &e.color {
+        if let Operand::Ref(r) = &w.when.than {
+            if let Some(s) = &r.series {
+                add(s);
+            }
+        }
+    }
+    out
 }
 
 /// Puts the ready bars of bound series `id` into the reading document (or removes them

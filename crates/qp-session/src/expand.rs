@@ -1110,7 +1110,7 @@ fn canonical_interval(s: &str) -> Option<String> {
     let split = s.find(|c: char| !c.is_ascii_digit())?;
     let (num, unit) = s.split_at(split);
     let n: u32 = num.parse().ok()?;
-    let canon = if unit == "m" && n % 60 == 0 {
+    let canon = if unit == "m" && n.is_multiple_of(60) {
         format!("{}h", n / 60)
     } else {
         format!("{n}{unit}")

@@ -14,6 +14,8 @@
 //!   `clock` (host only), `send_raw` (not a JSON message), any message before the
 //!   connection's `hello`, and messages whose `id` is not a string (an MCP tool call
 //!   always has a request id).
+//! - `data` steps (RP2, §18.4) are host-only: they go to [`Hub::data_event`], never to
+//!   an MCP tool, so an agent cannot inject market data.
 //!
 //! Tool results are turned back into protocol messages (`structuredContent`, checked
 //! against `content[0].text` and `isError`), notifications back into `notify` messages
@@ -309,6 +311,21 @@ impl Transport for McpTransport {
                 .map(|(_, c, m)| json!({"conn": c, "msg": m})),
         );
         Ok(out)
+    }
+
+    fn data(&mut self, event: &qp_schema::data::DataEvent) -> Result<Vec<Value>, String> {
+        // Host only: data events reach the hub directly, never through a tool.
+        self.stats.direct += 1;
+        self.hub
+            .borrow_mut()
+            .data_event(event)
+            .map_err(|e| format!("data event rejected: {e}"))?;
+        let mut notes = self.drain()?;
+        notes.sort_by_key(|(o, _, _)| *o);
+        Ok(notes
+            .into_iter()
+            .map(|(_, c, m)| json!({"conn": c, "msg": m}))
+            .collect())
     }
 
     fn finish(&mut self) -> Result<FinalState, String> {

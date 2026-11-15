@@ -1,0 +1,527 @@
+//! The data plane inside the authority (RP2, K23; `docs/PROTOCOL.md` §18).
+//!
+//! The document carries bindings, never bound bars. The authority keeps, **outside the
+//! document**:
+//!
+//! - the host's source provider ([`Provider`]): from `init.data` (a
+//!   [`MemoryProvider`], test host) or handed in by the host
+//!   ([`crate::Session::with_provider`]);
+//! - per bound series, its binding as resolved and a [`Bound`] (state, reason, anchor and
+//!   a [`qp_source::FeedStore`] with the window's bars, its bounds and live growth cap),
+//!   resolved with the entitlement of the first principal whose role is `host` (§18.3);
+//! - nothing per asker: reads are filtered per asker with [`DataPlane::gate`] (data
+//!   plane values do not go to an unentitled asker; the meaning plane does).
+//!
+//! The session reads bound bars through a *reading document* (`Session::rd`): the
+//! document with each ready bound series' bars filled in. It is never serialised, never
+//! logged and never sent; every bar reader (values cache, conditions, queries, grammar
+//! provider, presenter) takes it instead of the document, so hesap ve görünüm kodu
+//! bağlı ile belge içi seriyi ayırt etmez (§18.2).
+
+use std::collections::BTreeMap;
+use std::fmt;
+
+use qp_schema::data::{
+    data_digest, BindingState, DataBinding, DataEvent, EvidenceRef, FeedKey, DATA_DIGEST_ALG,
+};
+use qp_schema::protocol::{ErrorCode, ProtocolError};
+use qp_schema::{Bar, Document, Series, SeriesData, SeriesSource};
+use qp_source::{bind, Applied, Bound, EventError, MemoryProvider, SourceProvider};
+
+use crate::error::E;
+use crate::values::find_series;
+
+/// The host's source provider as the session holds it.
+pub(crate) enum Provider {
+    /// No provider: bindings stay `pending`.
+    None,
+    /// The test/simple host provider built from `init.data`; it also takes the data
+    /// events the host delivers, so later resolutions see them.
+    Memory(MemoryProvider),
+    /// A provider handed in by the host (the host keeps it up to date itself).
+    Host(Box<dyn SourceProvider>),
+}
+
+impl Provider {
+    pub(crate) fn get(&self) -> Option<&dyn SourceProvider> {
+        match self {
+            Self::None => None,
+            Self::Memory(m) => Some(m),
+            Self::Host(h) => Some(h.as_ref()),
+        }
+    }
+}
+
+/// One bound series as the authority resolved it.
+pub(crate) struct BoundSeries {
+    /// The binding as in the document (its `anchor_t` follows the stamping entry).
+    pub binding: DataBinding,
+    /// The resolution (state, reason, anchor, bars).
+    pub bound: Bound,
+}
+
+/// A bound series is not ready for an asker (§18.3).
+#[derive(Debug, Clone)]
+pub(crate) struct Blocked {
+    /// The bound series the data rests on.
+    pub series: String,
+    /// Its state for the asker.
+    pub state: BindingState,
+    /// Why, in words.
+    pub reason: String,
+}
+
+pub(crate) fn state_str(s: BindingState) -> &'static str {
+    match s {
+        BindingState::Ready => "ready",
+        BindingState::Pending => "pending",
+        BindingState::NoEntitlement => "no_entitlement",
+        BindingState::NoData => "no_data",
+        BindingState::Stale => "stale",
+    }
+}
+
+impl Blocked {
+    /// The protocol error for a read that needs this data, at `path` (§18.3):
+    /// `no_entitlement` for a missing entitlement, `no_data` otherwise (pending, no data,
+    /// stale).
+    pub(crate) fn error(&self, about: &str, path: &str) -> ProtocolError {
+        let code = if self.state == BindingState::NoEntitlement {
+            ErrorCode::NoEntitlement
+        } else {
+            ErrorCode::NoData
+        };
+        let rests = if about == self.series {
+            format!("bound series `{about}`")
+        } else {
+            format!("`{about}` rests on bound series `{}`, which", self.series)
+        };
+        let hint = match self.state {
+            BindingState::NoEntitlement => {
+                "The data licence of this feed does not cover you; the rest of the document works. Ask the host for an entitlement."
+            }
+            BindingState::Pending => "The data provider has not answered yet; ask again later.",
+            BindingState::Stale => "The feed is stale until the host re-resolves the binding.",
+            BindingState::NoData | BindingState::Ready => {
+                "Check the binding (`binding` query): symbol, interval, window."
+            }
+        };
+        E::new(
+            code,
+            format!("{rests} is `{}`: {}", state_str(self.state), self.reason),
+        )
+        .at(path)
+        .hint(hint)
+        .build()
+    }
+}
+
+/// A data event the authority could not take (§18.4: not applied, reported to the
+/// host; the document and the connections are unaffected).
+#[derive(Debug, Clone, PartialEq)]
+pub enum DataError {
+    /// Neither a bound series nor the session's own provider knows the event's feed.
+    UnknownFeed(FeedKey),
+    /// The event breaks the rules (§18.4) for this bound series.
+    Rejected {
+        /// The bound series whose store rejected it (absent: the provider's store).
+        series: Option<String>,
+        /// Why.
+        error: EventError,
+    },
+}
+
+impl fmt::Display for DataError {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            Self::UnknownFeed(k) => {
+                write!(f, "no bound series and no feed {}/{}", k.symbol, k.interval)
+            }
+            Self::Rejected {
+                series: Some(s),
+                error,
+            } => write!(f, "event rejected for bound series `{s}`: {error}"),
+            Self::Rejected {
+                series: None,
+                error,
+            } => write!(f, "event rejected: {error}"),
+        }
+    }
+}
+
+impl std::error::Error for DataError {}
+
+/// What one data event did to the bound series (by id).
+pub(crate) struct EventOutcome {
+    /// Bound series whose bars or state changed (their reading copy must be refreshed).
+    pub changed: Vec<String>,
+}
+
+/// The authority's data plane.
+pub(crate) struct DataPlane {
+    pub provider: Provider,
+    /// The principal whose entitlement the authority's own work uses: the first one with
+    /// role `host` (§18.3).
+    pub host: Option<String>,
+    /// Bound series id → its resolution.
+    pub series: BTreeMap<String, BoundSeries>,
+    pub max_bind_bars: u32,
+}
+
+/// The binding of a series, if it is bound.
+pub(crate) fn binding_of(s: &Series) -> Option<DataBinding> {
+    s.binding()
+}
+
+/// True if `s` is a bar series by its kind (inline bars or a binding), whether or not
+/// its bars are available now.
+pub(crate) fn is_bar_series(s: &Series) -> bool {
+    s.bars().is_some() || matches!(s.source, SeriesSource::Bind { .. })
+}
+
+/// The bar series `series` rests on, by kind (itself if it is one, else the first input
+/// of its study, recursively).
+pub(crate) fn bar_root<'a>(doc: &'a Document, series: &str) -> Option<&'a Series> {
+    let mut cur = find_series(doc, series)?;
+    for _ in 0..64 {
+        if is_bar_series(cur) {
+            return Some(cur);
+        }
+        match &cur.source {
+            SeriesSource::Study { inputs, .. } => cur = find_series(doc, inputs.first()?)?,
+            _ => return None,
+        }
+    }
+    None
+}
+
+fn same_but_anchor(a: &DataBinding, b: &DataBinding) -> bool {
+    a.symbol == b.symbol && a.interval == b.interval && a.window == b.window && a.feed == b.feed
+}
+
+fn not_ready(state: BindingState, reason: String) -> Bound {
+    Bound {
+        state,
+        reason: Some(reason),
+        anchor_t: None,
+        store: None,
+    }
+}
+
+impl DataPlane {
+    pub(crate) fn new(provider: Provider, host: Option<String>, max_bind_bars: u32) -> Self {
+        Self {
+            provider,
+            host,
+            series: BTreeMap::new(),
+            max_bind_bars,
+        }
+    }
+
+    fn resolve(&self, b: &DataBinding) -> Bound {
+        let Some(p) = self.provider.get() else {
+            return not_ready(
+                BindingState::Pending,
+                "the host gave the authority no data provider".to_owned(),
+            );
+        };
+        let Some(h) = &self.host else {
+            return not_ready(
+                BindingState::NoEntitlement,
+                "no principal has the role `host`; the authority resolves bindings with its entitlement"
+                    .to_owned(),
+            );
+        };
+        match bind(p, h, b, self.max_bind_bars) {
+            Ok(bound) => bound,
+            Err(e) => not_ready(BindingState::NoData, format!("provider data: {e}")),
+        }
+    }
+
+    /// Brings the plane in line with the document: bound series that are new or whose
+    /// binding changed are resolved, others dropped. A binding whose only change is the
+    /// authority's own anchor stamp keeps its resolution. Returns the anchors to stamp
+    /// (series id, `anchor_t`): ready resolutions of bindings without `anchor_t` (§18.3).
+    pub(crate) fn sync(&mut self, doc: &Document) -> Vec<(String, i64)> {
+        let wanted: BTreeMap<String, DataBinding> = doc
+            .series
+            .iter()
+            .filter_map(|s| binding_of(s).map(|b| (s.id.clone(), b)))
+            .collect();
+        self.series.retain(|id, bs| match wanted.get(id) {
+            Some(w) if *w == bs.binding => true,
+            Some(w)
+                if bs.binding.anchor_t.is_none()
+                    && w.anchor_t.is_some()
+                    && w.anchor_t == bs.bound.anchor_t
+                    && same_but_anchor(w, &bs.binding) =>
+            {
+                bs.binding = w.clone();
+                true
+            }
+            _ => false,
+        });
+        for (id, w) in wanted {
+            if !self.series.contains_key(&id) {
+                let bound = self.resolve(&w);
+                self.series.insert(id, BoundSeries { binding: w, bound });
+            }
+        }
+        self.stamps()
+    }
+
+    fn stamps(&self) -> Vec<(String, i64)> {
+        self.series
+            .iter()
+            .filter(|(_, bs)| {
+                bs.binding.anchor_t.is_none() && bs.bound.current_state() == BindingState::Ready
+            })
+            .filter_map(|(id, bs)| bs.bound.anchor_t.map(|t| (id.clone(), t)))
+            .collect()
+    }
+
+    /// Resolves again every binding that is not ready (host API after a gap, a limit or
+    /// a provider that answered late). Returns the anchors to stamp and the series whose
+    /// state or bars changed.
+    pub(crate) fn refresh(&mut self) -> (Vec<(String, i64)>, Vec<String>) {
+        let ids: Vec<String> = self
+            .series
+            .iter()
+            .filter(|(_, bs)| bs.bound.current_state() != BindingState::Ready)
+            .map(|(id, _)| id.clone())
+            .collect();
+        let mut changed = Vec::new();
+        for id in ids {
+            let b = self.series[&id].binding.clone();
+            let bound = self.resolve(&b);
+            if let Some(bs) = self.series.get_mut(&id) {
+                bs.bound = bound;
+            }
+            changed.push(id);
+        }
+        (self.stamps(), changed)
+    }
+
+    /// Ready bars of a bound series (the host's resolution).
+    pub(crate) fn bars(&self, id: &str) -> Option<&[Bar]> {
+        let bs = self.series.get(id)?;
+        if bs.bound.current_state() != BindingState::Ready {
+            return None;
+        }
+        bs.bound.store.as_ref().map(qp_source::FeedStore::bars)
+    }
+
+    /// The host's state and reason of a bound series.
+    pub(crate) fn host_state(&self, id: &str) -> Option<(BindingState, Option<String>)> {
+        self.series
+            .get(id)
+            .map(|bs| (bs.bound.current_state(), bs.bound.current_reason()))
+    }
+
+    /// True if `asker` may read `feed` (data entitlement, §18.3 item 2).
+    pub(crate) fn entitled(&self, asker: &str, feed: &FeedKey) -> bool {
+        self.provider.get().is_some_and(|p| p.entitled(asker, feed))
+    }
+
+    /// The state of bound series `id` for `asker` (`None`: the authority's own view).
+    pub(crate) fn state_for(
+        &self,
+        id: &str,
+        asker: Option<&str>,
+    ) -> Option<(BindingState, Option<String>)> {
+        let bs = self.series.get(id)?;
+        if let Some(a) = asker {
+            let key = bs.binding.feed_key();
+            if !self.entitled(a, &key) {
+                let feed = key
+                    .feed
+                    .as_deref()
+                    .map_or_else(String::new, |f| format!("{f}/"));
+                return Some((
+                    BindingState::NoEntitlement,
+                    Some(format!(
+                        "principal `{a}` has no data entitlement for `{feed}{}`",
+                        key.symbol
+                    )),
+                ));
+            }
+        }
+        Some((bs.bound.current_state(), bs.bound.current_reason()))
+    }
+
+    /// If the data of `series` (itself or, for a study, its bar input) rests on a bound
+    /// series that is not ready for `asker` (the authority's own view for `None`): which,
+    /// in what state and why (§18.3).
+    pub(crate) fn gate(
+        &self,
+        doc: &Document,
+        asker: Option<&str>,
+        series: &str,
+    ) -> Option<Blocked> {
+        let root = bar_root(doc, series)?;
+        if !matches!(root.source, SeriesSource::Bind { .. }) {
+            return None;
+        }
+        let (state, reason) = self
+            .state_for(&root.id, asker)
+            .unwrap_or((BindingState::Pending, Some("not resolved yet".to_owned())));
+        (state != BindingState::Ready).then(|| Blocked {
+            series: root.id.clone(),
+            state,
+            reason: reason.unwrap_or_else(|| state_str(state).to_owned()),
+        })
+    }
+
+    /// Applies a host data event to every bound series of its feed (§18.4), and to the
+    /// session's own memory provider (so later resolutions see it).
+    ///
+    /// # Errors
+    /// The event's feed is unknown, or a store rejects it (nothing of that store changes;
+    /// stores already updated keep the event: their own rules accepted it).
+    pub(crate) fn apply_event(&mut self, ev: &DataEvent) -> Result<EventOutcome, DataError> {
+        let mut provider_knows = false;
+        let mut provider_err = None;
+        if let Provider::Memory(m) = &mut self.provider {
+            match m.apply(ev) {
+                Ok(_) => provider_knows = true,
+                Err(EventError::UnknownFeed { .. }) => {}
+                Err(e) => {
+                    provider_knows = true;
+                    provider_err = Some(e);
+                }
+            }
+        }
+        let mut changed = Vec::new();
+        let mut any = false;
+        let mut first_err = None;
+        for (id, bs) in &mut self.series {
+            if bs.binding.feed_key() != ev.feed {
+                continue;
+            }
+            let Some(store) = bs.bound.store.as_mut() else {
+                // Not resolved (pending, no entitlement, no data, anchored limit): the
+                // event waits for the host's re-resolution.
+                any = true;
+                continue;
+            };
+            any = true;
+            let before = store.state();
+            match store.apply(ev) {
+                Ok(
+                    Applied::NewBar { .. }
+                    | Applied::LiveUpdate { .. }
+                    | Applied::Correction { .. },
+                ) => {
+                    changed.push(id.clone());
+                }
+                Ok(Applied::Gap { .. } | Applied::Stale(_)) => {
+                    if before != store.state() {
+                        changed.push(id.clone());
+                    }
+                }
+                Ok(Applied::Duplicate | Applied::OutsideWindow { .. }) => {}
+                Err(e) => {
+                    if first_err.is_none() {
+                        first_err = Some(DataError::Rejected {
+                            series: Some(id.clone()),
+                            error: e,
+                        });
+                    }
+                }
+            }
+        }
+        if let Some(e) = first_err {
+            return Err(e);
+        }
+        if !any {
+            if let Some(e) = provider_err {
+                return Err(DataError::Rejected {
+                    series: None,
+                    error: e,
+                });
+            }
+            if !provider_knows {
+                return Err(DataError::UnknownFeed(ev.feed.clone()));
+            }
+        }
+        Ok(EventOutcome { changed })
+    }
+}
+
+/// Puts the ready bars of bound series `id` into the reading document (or removes them
+/// when the binding is not ready).
+pub(crate) fn inject(rd: &mut Document, plane: &DataPlane, id: &str) {
+    let Some(s) = rd.series.iter_mut().find(|s| s.id == id) else {
+        return;
+    };
+    if !matches!(s.source, SeriesSource::Bind { .. }) {
+        return;
+    }
+    s.data = plane
+        .bars(id)
+        .map(|b| SeriesData::Bars { bars: b.to_vec() });
+}
+
+/// The reading document: `doc` with every ready bound series' bars (`None` when the
+/// document has no bound series; readers then use the document itself).
+pub(crate) fn reading_doc(doc: &Document, plane: &DataPlane) -> Option<Document> {
+    if plane.series.is_empty() {
+        return None;
+    }
+    let mut rd = doc.clone();
+    let ids: Vec<String> = plane.series.keys().cloned().collect();
+    for id in ids {
+        inject(&mut rd, plane, &id);
+    }
+    Some(rd)
+}
+
+/// Read access to the data plane for command expansion (`add_fact`, `set_view_range`).
+#[derive(Clone, Copy)]
+pub(crate) struct Reader<'a> {
+    /// The reading document as of the command's start.
+    pub rd: &'a Document,
+    /// The plane (entitlements, states).
+    pub plane: &'a DataPlane,
+}
+
+/// The bars of the bar series of `series` as `doc` (a scratch document of a command)
+/// describes it: inline bars from `doc`; a bound series' bars from the reading document
+/// when its binding there is still the same. Returns the bar series and its bars.
+pub(crate) fn bars_for<'a>(
+    doc: &'a Document,
+    data: Option<&Reader<'a>>,
+    series: &str,
+) -> Option<(&'a Series, &'a [Bar])> {
+    let root = bar_root(doc, series)?;
+    if let Some(b) = root.bars() {
+        return Some((root, b));
+    }
+    let r = data?;
+    let rs = find_series(r.rd, &root.id)?;
+    let same = match (&rs.source, &root.source) {
+        (a @ SeriesSource::Bind { .. }, b) => a == b,
+        _ => false,
+    };
+    if !same {
+        return None;
+    }
+    rs.bars().map(|b| (root, b))
+}
+
+/// Frozen evidence of a fact (§18.5): bars 0 to `to` (inclusive) of bar series `bs`.
+///
+/// # Panics
+/// `to` out of range (callers check).
+pub(crate) fn evidence_ref(bs: &Series, bars: &[Bar], to: usize) -> EvidenceRef {
+    let range = &bars[..=to];
+    EvidenceRef {
+        series: bs.id.clone(),
+        binding: binding_of(bs),
+        from_t: range[0].t,
+        to_t: range[to].t,
+        bars: range.len() as u64,
+        alg: DATA_DIGEST_ALG.to_owned(),
+        digest: data_digest(range),
+    }
+}

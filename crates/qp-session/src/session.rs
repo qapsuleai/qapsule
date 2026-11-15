@@ -19,6 +19,7 @@ use crate::expand::{
     check_condition, expand_ops, need_finding, need_proposal, summarize_ops, undone_set, Ctx,
 };
 use crate::locate::locate;
+use crate::plane::{inject, reading_doc, DataError, DataPlane, Provider, Reader};
 use crate::present::profile_for;
 use crate::select;
 use crate::values::{eval_condition, holds, Cache};
@@ -119,6 +120,13 @@ pub struct Session {
     pub(crate) att_counter: u64,
     pub(crate) input_counter: u64,
     pub(crate) schema: Value,
+    /// The data plane (bound series resolutions; outside the document, §18).
+    pub(crate) plane: DataPlane,
+    /// The reading document: the document with ready bound bars (`None` without bound
+    /// series). Never serialised, logged or sent.
+    pub(crate) rd: Option<Document>,
+    /// Anchors to stamp in an engine entry (§18.3), from the last plane sync.
+    pub(crate) pending_stamps: Vec<(String, i64)>,
 }
 
 /// Resolves `rel` under `root`, refusing absolute paths and paths that leave `root`.
@@ -206,6 +214,33 @@ impl Session {
     /// # Errors
     /// The document cannot be read or parsed.
     pub fn new(init: SessionInit, repo_root: &Path) -> Result<Self, String> {
+        let provider = match &init.data {
+            Some(d) => Provider::Memory(
+                qp_source::MemoryProvider::from_init(d, repo_root)
+                    .map_err(|e| format!("init.data: {e}"))?,
+            ),
+            None => Provider::None,
+        };
+        Self::build(init, repo_root, provider)
+    }
+
+    /// Starts an authority whose bound series are resolved by the host's `provider`
+    /// (§18.3) instead of `init.data` (which must then be absent).
+    ///
+    /// # Errors
+    /// As [`Session::new`]; `init.data` given as well.
+    pub fn with_provider(
+        init: SessionInit,
+        repo_root: &Path,
+        provider: Box<dyn qp_source::SourceProvider>,
+    ) -> Result<Self, String> {
+        if init.data.is_some() {
+            return Err("give either init.data or a host provider, not both".to_owned());
+        }
+        Self::build(init, repo_root, Provider::Host(provider))
+    }
+
+    fn build(init: SessionInit, repo_root: &Path, provider: Provider) -> Result<Self, String> {
         let doc: Document = match &init.document {
             DocumentRef::Inline(d) => (**d).clone(),
             DocumentRef::Path(p) => read_json(&confine(repo_root, p)?)?,
@@ -213,6 +248,13 @@ impl Session {
         // Canonical form of every view (GRAMMAR.md §11); the log replays from it.
         let doc = crate::canon::canon_document(&doc)?;
         let schema = schemars::schema_for!(ClientMsg).to_value();
+        let limits = default_limits();
+        let host = init
+            .principals
+            .iter()
+            .find(|p| p.role == Role::Host)
+            .map(|p| p.id.clone());
+        let plane = DataPlane::new(provider, host, limits.max_bind_bars);
         let mut s = Self {
             initial: doc.clone(),
             doc,
@@ -221,7 +263,7 @@ impl Session {
             clock: init.clock,
             epoch: init.epoch,
             ttl: init.proposal_ttl_ms,
-            limits: default_limits(),
+            limits,
             conns: Vec::new(),
             cache: Cache::default(),
             intent_state: BTreeMap::new(),
@@ -230,8 +272,18 @@ impl Session {
             att_counter: 0,
             input_counter: 0,
             schema,
+            plane,
+            rd: None,
+            pending_stamps: Vec::new(),
         };
-        s.eval_intents(0);
+        // Resolve the bindings on load (§18.3); a first ready resolution is anchored by
+        // an engine entry. No connection exists yet: its notifications go nowhere.
+        s.pending_stamps = s.plane.sync(&s.doc);
+        s.rd = reading_doc(&s.doc, &s.plane);
+        if let Some(seq) = s.stamp_anchors() {
+            let _ = s.invalidations(seq);
+        }
+        s.eval_intents(s.seq());
         Ok(s)
     }
 
@@ -318,6 +370,34 @@ impl Session {
             Some(m) => m.to_string(),
         };
         self.handle_raw(conn, &text)
+    }
+
+    /// A host frame of the line transport (`{"host":{"data":<DataEvent>}}`, §3, §18.4):
+    /// transport level and host only — `qp serve` accepts it only with `--host-frames`,
+    /// on the host's own stream. Not a protocol message; it never enters the log.
+    /// Returns the notifications the event causes.
+    ///
+    /// # Errors
+    /// A malformed frame or event, or a [`DataError`], as text (`qp serve` writes it as
+    /// `{"host":{"error":…}}`).
+    pub fn handle_host_frame(&mut self, line: &str) -> Result<Vec<OutboundLine>, String> {
+        let v: Value =
+            serde_json::from_str(line).map_err(|e| format!("host frame is not JSON: {e}"))?;
+        let host = v
+            .as_object()
+            .filter(|o| o.len() == 1)
+            .and_then(|o| o.get("host"))
+            .and_then(Value::as_object)
+            .ok_or("a host frame is {\"host\":{\"data\":…}}")?;
+        if host.len() != 1 {
+            return Err("a host frame carries exactly one of: data".to_owned());
+        }
+        let ev = host
+            .get("data")
+            .ok_or("unknown host frame (expected `data`)")?;
+        let ev: qp_schema::data::DataEvent =
+            serde_json::from_value(ev.clone()).map_err(|e| format!("data event: {e}"))?;
+        self.data_event(&ev).map_err(|e| e.to_string())
     }
 
     /// THE boundary: one raw inbound message on connection `conn`. Checks the size,
@@ -408,7 +488,7 @@ impl Session {
         let is_command = msg.get("type").and_then(Value::as_str) == Some("command");
         if !is_command {
             let r = select::Resolver {
-                doc: &self.doc,
+                doc: rd!(self),
                 root: Some(&self.schema),
             };
             for g in &groups {
@@ -442,6 +522,7 @@ impl Session {
             can_decide: perms.decide,
             log: &self.log,
             undoes: None,
+            data: self.reader(),
         };
         // The live document is used until an op before the last selector changes it;
         // only then is one scratch copy made, and later ops change that copy in place
@@ -456,7 +537,7 @@ impl Session {
         for (i, g) in groups.iter().enumerate().take(last + 1) {
             if g.iter().any(|s| select::is_selector(msg, s)) {
                 let r = select::Resolver {
-                    doc: scratch.as_ref().unwrap_or(&self.doc),
+                    doc: scratch.as_ref().unwrap_or(rd!(self)),
                     root: Some(&self.schema),
                 };
                 select::resolve_group(&r, msg, g, &mut out)?;
@@ -471,12 +552,12 @@ impl Session {
             else {
                 continue;
             };
-            let cur = scratch.as_ref().unwrap_or(&self.doc);
+            let cur = scratch.as_ref().unwrap_or(rd!(self));
             if let Ok(cs) = crate::expand::expand_op(cur, &op, &p, &mut ctx) {
                 if cs.is_empty() {
                     continue;
                 }
-                let doc = scratch.get_or_insert_with(|| self.doc.clone());
+                let doc = scratch.get_or_insert_with(|| rd!(self).clone());
                 apply_or_roll_back(doc, &cs);
             }
         }
@@ -778,9 +859,7 @@ impl Session {
             conn,
             ServerMsg::Welcome {
                 // Only principals that may read get the summary (a feed may not).
-                summary: permissions(p.role)
-                    .read
-                    .then(|| crate::summary::summarize_doc(&self.doc)),
+                summary: permissions(p.role).read.then(|| self.summary_for(&p.id)),
                 protocol: PROTOCOL_VERSION.to_owned(),
                 doc: self.doc.id.clone(),
                 principal: p.id,
@@ -924,6 +1003,7 @@ impl Session {
                 can_decide: perms.decide,
                 log: &self.log,
                 undoes: None,
+                data: self.reader(),
             };
             let ex = expand_ops(&self.doc, ops, "/ops", &mut ctx)?;
             let created = ctx.created;
@@ -976,6 +1056,7 @@ impl Session {
             can_decide: perms.decide,
             log: &self.log,
             undoes: None,
+            data: self.reader(),
         };
         let ex = expand_ops(&self.doc, ops, "/ops", &mut ctx)?;
         let created = ctx.created;
@@ -1073,6 +1154,7 @@ impl Session {
             can_decide: false,
             log: &self.log,
             undoes: None,
+            data: self.reader(),
         };
         let ex = expand_ops(&self.doc, &pr.ops, "/ops", &mut ctx).map_err(|mut e| {
             e.message = format!(
@@ -1187,6 +1269,10 @@ impl Session {
     }
 
     fn commit(&mut self, entry: LogEntry, doc: Document) {
+        let series_set = entry
+            .changes
+            .iter()
+            .any(|c| matches!(c, ChangeOp::PutSeries { .. } | ChangeOp::Delete { .. }));
         if entry.changes.iter().any(|c| {
             matches!(
                 c,
@@ -1200,7 +1286,135 @@ impl Session {
             self.cache.clear();
         }
         self.doc = doc;
+        // The data plane follows the document (§18.3): bindings put, changed or deleted
+        // are resolved or dropped; the reading document mirrors the document.
+        if series_set {
+            self.pending_stamps = self.plane.sync(&self.doc);
+            self.rd = reading_doc(&self.doc, &self.plane);
+        } else if let Some(rd) = self.rd.as_mut() {
+            if apply_all(rd, &entry.changes).is_err() {
+                self.rd = reading_doc(&self.doc, &self.plane);
+            }
+        }
         self.log.push(entry);
+    }
+
+    /// Writes the pending anchor stamps (§18.3) as one engine entry: `put_series` of each
+    /// bound series with `anchor_t` set to the first bar of its first ready resolution.
+    fn stamp_anchors(&mut self) -> Option<Seq> {
+        let stamps = std::mem::take(&mut self.pending_stamps);
+        let mut changes = Vec::new();
+        let mut names = Vec::new();
+        for (id, t) in stamps {
+            let Some(mut s) = self.doc.series.iter().find(|s| s.id == id).cloned() else {
+                continue;
+            };
+            if let qp_schema::SeriesSource::Bind { anchor_t, .. } = &mut s.source {
+                if anchor_t.is_some() {
+                    continue;
+                }
+                *anchor_t = Some(t);
+            } else {
+                continue;
+            }
+            names.push(format!("{id} at t={t}"));
+            changes.push(ChangeOp::PutSeries {
+                series: s,
+                index: None,
+            });
+        }
+        if changes.is_empty() {
+            return None;
+        }
+        self.engine_entry(changes, format!("anchor {}", names.join(", ")))
+    }
+
+    /// The host's data path (§18.4): applies a data event to the bound series of its
+    /// feed (duplicate, gap, stale, outside-window and rule checks by
+    /// `qp_source::FeedStore`), then, if bars or a binding state changed, evaluates live
+    /// capsules' invalidations, condition subscriptions and intents as a bar write does
+    /// (engine entries and notifications in the order of §15). The event is not a
+    /// protocol message: it never enters the log and causes no `change` by itself.
+    ///
+    /// T4 path: the values cache is cleared and recomputed on demand; the incremental
+    /// live path (§18.8) replaces [`Session::data_event`]'s body in T5.
+    ///
+    /// # Errors
+    /// [`DataError`]: unknown feed or an event the rules reject (nothing applied to that
+    /// store; the host re-resolves after the gap that follows, §18.4).
+    pub fn data_event(
+        &mut self,
+        ev: &qp_schema::data::DataEvent,
+    ) -> Result<Vec<OutboundLine>, DataError> {
+        let outcome = self.plane.apply_event(ev)?;
+        if outcome.changed.is_empty() {
+            return Ok(Vec::new());
+        }
+        self.data_changed(&outcome.changed);
+        Ok(self.settle_data())
+    }
+
+    /// Resolves again every bound series that is not ready (after a gap, a limit, a
+    /// provider that answered late) and returns the notifications this causes (an anchor
+    /// stamp entry, invalidations, conditions).
+    pub fn refresh_bindings(&mut self) -> Vec<OutboundLine> {
+        let (stamps, changed) = self.plane.refresh();
+        if changed.is_empty() {
+            return Vec::new();
+        }
+        self.pending_stamps = stamps;
+        self.data_changed(&changed);
+        match self.stamp_anchors() {
+            Some(seq) => self.settle(seq),
+            None => self.settle_data(),
+        }
+    }
+
+    /// The host's binding state of a bound series (`None`: not a bound series).
+    #[must_use]
+    pub fn binding_state(&self, series: &str) -> Option<qp_schema::data::BindingState> {
+        self.plane.host_state(series).map(|(s, _)| s)
+    }
+
+    fn data_changed(&mut self, ids: &[String]) {
+        match self.rd.as_mut() {
+            Some(rd) => {
+                for id in ids {
+                    inject(rd, &self.plane, id);
+                }
+            }
+            None => self.rd = reading_doc(&self.doc, &self.plane),
+        }
+        self.cache.clear();
+    }
+
+    /// After a data change without a log entry: watchers at the current position, then
+    /// invalidations of every live capsule (§8.1, §18.4).
+    fn settle_data(&mut self) -> Vec<OutboundLine> {
+        let seq = self.seq();
+        let (mut conds, mut intents) = self.eval_watchers(seq);
+        let mut entries = Vec::new();
+        for s in self.invalidate(true, &BTreeSet::new()) {
+            entries.push(s);
+            let (c, i) = self.eval_watchers(s);
+            conds.extend(c);
+            intents.extend(i);
+        }
+        let mut lines = Vec::new();
+        for s in entries {
+            lines.extend(self.entry_events(s));
+        }
+        lines.extend(conds);
+        lines.extend(intents);
+        lines
+    }
+
+    /// Reader of the data plane for command expansion.
+    pub(crate) fn reader(&self) -> Option<Reader<'_>> {
+        self.rd.as_ref().map(|rd| Reader {
+            rd,
+            plane: &self.plane,
+        })
     }
 
     /// Writes an engine entry (author `qp`).
@@ -1233,11 +1447,21 @@ impl Session {
     fn settle(&mut self, seq: Seq) -> Vec<OutboundLine> {
         let mut entries = vec![seq];
         let (mut conds, mut intents) = self.eval_watchers(seq);
-        for s in self.invalidations(seq) {
+        let mut data_entries = vec![seq];
+        if let Some(s) = self.stamp_anchors() {
             entries.push(s);
+            data_entries.push(s);
             let (c, i) = self.eval_watchers(s);
             conds.extend(c);
             intents.extend(i);
+        }
+        for d in data_entries {
+            for s in self.invalidations(d) {
+                entries.push(s);
+                let (c, i) = self.eval_watchers(s);
+                conds.extend(c);
+                intents.extend(i);
+            }
         }
         let mut lines = Vec::new();
         for s in entries {
@@ -1273,6 +1497,13 @@ impl Session {
         if !all && findings.is_empty() {
             return Vec::new();
         }
+        self.invalidate(all, &findings)
+    }
+
+    /// Engine entries invalidating live capsules (all, or those of `findings`) whose
+    /// invalidation holds now. A condition resting on a bound series that is not ready
+    /// is not evaluated (§18.3).
+    fn invalidate(&mut self, all: bool, findings: &BTreeSet<String>) -> Vec<Seq> {
         let candidates: Vec<(String, String)> = self
             .doc
             .capsules
@@ -1286,7 +1517,10 @@ impl Session {
                 continue;
             };
             let cond = f.invalidation.clone();
-            if holds(&self.doc, &mut self.cache, &cond) {
+            if self.cond_blocked(&cond) {
+                continue;
+            }
+            if holds(rd!(self), &mut self.cache, &cond) {
                 let changes = vec![ChangeOp::SetCapsuleState {
                     capsule: cap.clone(),
                     state: CapsuleState::Invalidated,
@@ -1311,7 +1545,11 @@ impl Session {
                     continue;
                 };
                 let condition = condition.clone();
-                let r = eval_condition(&self.doc, &mut self.cache, &condition);
+                if self.cond_blocked(&condition) {
+                    // Not evaluated; the edge state is kept (§18.3).
+                    continue;
+                }
+                let r = eval_condition(rd!(self), &mut self.cache, &condition);
                 let now = r.is_some_and(|x| x.0);
                 let prev = self.conns[ci].subs[si].last.replace(now);
                 if prev == Some(false) && now {
@@ -1361,7 +1599,13 @@ impl Session {
             if matches!(trig, qp_schema::Condition::Text { .. }) {
                 continue;
             }
-            let r = eval_condition(&self.doc, &mut self.cache, &trig);
+            if self.cond_blocked(&trig) {
+                if let Some(prev) = self.intent_state.get(&id) {
+                    state.insert(id, *prev);
+                }
+                continue;
+            }
+            let r = eval_condition(rd!(self), &mut self.cache, &trig);
             let now = r.is_some_and(|x| x.0);
             if self.intent_state.get(&id) == Some(&false) && now {
                 if let Some((_, bar, t)) = r {
@@ -1507,7 +1751,7 @@ impl Session {
                     ));
                 }
                 check_condition(&self.doc, condition, "/topic/condition")?;
-                last = Some(holds(&self.doc, &mut self.cache, condition));
+                last = Some(holds(rd!(self), &mut self.cache, condition));
             }
             Topic::Attention { principal: Some(p) } => {
                 if self.principal(p).is_none() {
@@ -1572,6 +1816,30 @@ impl Session {
             }
         }
         Ok(lines)
+    }
+
+    /// True if `c` reads a series resting on a bound series that is not ready for the
+    /// authority (pending, no data, stale): the condition is not evaluated (§18.3).
+    pub(crate) fn cond_blocked(&self, c: &qp_schema::Condition) -> bool {
+        if self.plane.series.is_empty() {
+            return false;
+        }
+        crate::values::condition_series(c)
+            .iter()
+            .any(|(_, s)| self.plane.gate(&self.doc, None, s).is_some())
+    }
+
+    /// The `welcome` summary for `principal`: over the reading document (`len` is the
+    /// number of bars the authority holds), each bound series with its binding state for
+    /// that principal (§18.2).
+    pub(crate) fn summary_for(&self, principal: &str) -> qp_schema::protocol::DocSummary {
+        let mut sum = crate::summary::summarize_doc(rd!(self));
+        for s in &mut sum.series {
+            if let Some((state, _)) = self.plane.state_for(&s.id, Some(principal)) {
+                s.binding = Some(state);
+            }
+        }
+        sum
     }
 
     /// Notifications of a viewport change of `principal` to its attention watchers.

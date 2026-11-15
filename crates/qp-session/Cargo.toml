@@ -11,6 +11,7 @@ publish.workspace = true
 qp-compute = { version = "0.0.0", path = "../qp-compute" }
 qp-grammar = { version = "0.0.0", path = "../qp-grammar" }
 qp-schema = { version = "0.0.0", path = "../qp-schema" }
+qp-source = { version = "0.0.0", path = "../qp-source" }
 schemars = "1.2.3"
 serde = { version = "1.0.229", features = ["derive"] }
 serde_json = { version = "1.0.154", features = ["float_roundtrip"] }

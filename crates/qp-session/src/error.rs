@@ -47,6 +47,16 @@ impl E {
         self
     }
 
+    /// Sets `did_you_mean` to exactly these suggestions.
+    pub(crate) fn suggest<I, S>(mut self, items: I) -> Self
+    where
+        I: IntoIterator<Item = S>,
+        S: Into<String>,
+    {
+        self.0.did_you_mean = items.into_iter().map(Into::into).collect();
+        self
+    }
+
     pub(crate) fn hint(mut self, hint: impl Into<String>) -> Self {
         self.0.hint = Some(hint.into());
         self

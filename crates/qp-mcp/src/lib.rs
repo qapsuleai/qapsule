@@ -99,6 +99,26 @@ impl Hub {
         reply
     }
 
+    /// The host's data path (§18.4; not an MCP tool, agents cannot inject data): hands a
+    /// data event to the session and queues every output line by its connection.
+    ///
+    /// # Errors
+    /// The session rejected the event.
+    pub fn data_event(
+        &mut self,
+        ev: &qp_schema::data::DataEvent,
+    ) -> Result<(), qp_session::DataError> {
+        for line in self.session.data_event(ev)? {
+            let msg = serde_json::to_value(&line.msg).unwrap_or(Value::Null);
+            self.order += 1;
+            self.queues.entry(line.conn).or_default().push(Queued {
+                order: self.order,
+                msg,
+            });
+        }
+        Ok(())
+    }
+
     /// Takes the pending messages of `conn`.
     pub fn take(&mut self, conn: &str) -> Vec<Queued> {
         self.queues.remove(conn).unwrap_or_default()

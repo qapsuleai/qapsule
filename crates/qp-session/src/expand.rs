@@ -19,7 +19,7 @@ use crate::apply::{all_ids, apply_all, find_collection, first_overlap, touched_k
 use crate::canon::{canon_view, limit_panels};
 use crate::error::{invalid, num, ptr, PResult, E};
 use crate::gops::{expand_grammar, layer_in_use, new_layer};
-use crate::values::{bar_series, bars_of, condition_series, find_series, study_outputs};
+use crate::values::{bar_series, condition_series, find_series, study_outputs};
 
 /// Who writes, when, and how ids are numbered.
 pub(crate) struct Ctx<'a> {
@@ -40,6 +40,9 @@ pub(crate) struct Ctx<'a> {
     pub log: &'a [LogEntry],
     /// Set when the command is an undo.
     pub undoes: Option<Seq>,
+    /// The data plane, when the document has bound series (§18): bound bars for
+    /// `add_fact` / `set_view_range`, the speaker's entitlement for `add_fact`.
+    pub data: Option<crate::plane::Reader<'a>>,
 }
 
 impl Ctx<'_> {
@@ -189,6 +192,15 @@ pub(crate) fn check_condition(doc: &Document, c: &Condition, path: &str) -> PRes
     Ok(())
 }
 
+/// The first bar series drawn in a view, by kind (a bound series even when its bars are
+/// not available).
+pub(crate) fn view_bar_series_any<'a>(doc: &'a Document, view: &View) -> Option<&'a Series> {
+    view.layers
+        .iter()
+        .filter_map(|l| l.series.as_deref())
+        .find_map(|s| crate::plane::bar_root(doc, s))
+}
+
 /// The first bar series drawn in a view.
 pub(crate) fn view_bar_series<'a>(doc: &'a Document, view: &View) -> Option<&'a Series> {
     view.layers
@@ -225,7 +237,7 @@ fn check_study(
     }
     let ip = ptr(&ptr(path, "inputs"), 0);
     let input = need_series(doc, &inputs[0], &ip)?;
-    if input.bars().is_none() {
+    if !crate::plane::is_bar_series(input) {
         return Err(invalid(
             format!("input `{}` is not a bar series", inputs[0]),
             ip,
@@ -388,16 +400,16 @@ pub(crate) fn expand_op(
                         output: output.clone(),
                     };
                 }
+                SeriesSource::Bind { .. } => check_bind(doc, series, &sp)?,
                 SeriesSource::File { .. }
                 | SeriesSource::Matriks { .. }
-                | SeriesSource::Nats { .. }
-                | SeriesSource::Bind { .. } => {
+                | SeriesSource::Nats { .. } => {
                     return Err(E::new(
                         ErrorCode::Unsupported,
-                        "this authority accepts only `inline` and `study` series sources",
+                        "this authority accepts only `inline`, `study` and `bind` series sources",
                     )
                     .at(ptr(&src, "kind"))
-                    .expected(["inline", "study"])
+                    .expected(["inline", "study", "bind"])
                     .hint("File and feed bindings are opened by the host configuration, not by the protocol.")
                     .build())
                 }
@@ -598,8 +610,9 @@ pub(crate) fn expand_op(
             to_bar,
         } => {
             let v = need_view(doc, view, &ptr(p, "view"))?;
-            let bars = view_bar_series(doc, v)
-                .and_then(Series::bars)
+            let bars = view_bar_series_any(doc, v)
+                .and_then(|s| crate::plane::bars_for(doc, ctx.data.as_ref(), &s.id))
+                .map(|(_, b)| b)
                 .ok_or_else(|| {
                     invalid(format!("view `{view}` draws no bar series"), ptr(p, "view"))
                 })?;
@@ -641,9 +654,17 @@ pub(crate) fn expand_op(
             evidence,
         } => {
             need_series(doc, series, &ptr(p, "series"))?;
-            let bars = bars_of(doc, series).ok_or_else(|| {
-                invalid(format!("series `{series}` has no bars"), ptr(p, "series"))
-            })?;
+            // `add_fact` reads the fact's bar time: the speaker needs the data
+            // entitlement of a bound series (§18.3).
+            if let Some(r) = &ctx.data {
+                if let Some(b) = r.plane.gate(doc, Some(ctx.speaker), series) {
+                    return Err(b.error(series, &ptr(p, "series")));
+                }
+            }
+            let (bs, bars) =
+                crate::plane::bars_for(doc, ctx.data.as_ref(), series).ok_or_else(|| {
+                    invalid(format!("series `{series}` has no bars"), ptr(p, "series"))
+                })?;
             let Some(b) = bars.get(usize::try_from(*bar).unwrap_or(usize::MAX)) else {
                 return Err(E::new(
                     ErrorCode::Invalid,
@@ -660,6 +681,12 @@ pub(crate) fn expand_op(
                 ));
             }
             let t = b.t;
+            // Frozen evidence (§18.5): bars 0..=bar of the bar series, by digest.
+            let evidence_ref = Some(crate::plane::evidence_ref(
+                bs,
+                bars,
+                usize::try_from(*bar).unwrap_or(0),
+            ));
             let fid = ctx.new_id(doc, "fact", id.as_ref(), &ptr(p, "id"))?;
             let fact = Fact {
                 id: fid,
@@ -669,7 +696,7 @@ pub(crate) fn expand_op(
                 t,
                 text: text.clone(),
                 evidence: evidence.clone(),
-                evidence_ref: None,
+                evidence_ref,
                 provenance: ctx.prov(vec![series.clone()]),
             };
             Ok(vec![ChangeOp::PutFact { fact, index: None }])
@@ -915,6 +942,7 @@ pub(crate) fn expand_op(
         Op::Remove { id } => expand_remove(doc, id, p),
         Op::AppendBars { series, bars } => {
             let s = need_series(doc, series, &ptr(p, "series"))?;
+            bound_no_bar_writes(s, &ptr(p, "series"))?;
             let Some(old) = inline_bars(s) else {
                 return Err(invalid(
                     format!("series `{series}` is not an inline bar series"),
@@ -951,6 +979,7 @@ pub(crate) fn expand_op(
         }
         Op::UpdateLastBar { series, bar } => {
             let s = need_series(doc, series, &ptr(p, "series"))?;
+            bound_no_bar_writes(s, &ptr(p, "series"))?;
             let Some(last) = inline_bars(s).and_then(<[qp_schema::Bar]>::last) else {
                 return Err(invalid(
                     format!("series `{series}` is not an inline bar series with bars"),
@@ -1053,6 +1082,139 @@ fn check_confidence(c: f64, path: &str) -> PResult<()> {
         .expected(["0..=1"])
         .build())
     }
+}
+
+/// `append_bars` / `update_last_bar` are for inline series (§18.2).
+fn bound_no_bar_writes(s: &Series, path: &str) -> PResult<()> {
+    if matches!(s.source, SeriesSource::Bind { .. }) {
+        return Err(E::new(
+            ErrorCode::Invalid,
+            format!(
+                "series `{}` is bound: the data of a bound series comes from the data plane",
+                s.id
+            ),
+        )
+        .at(path)
+        .hint("Bar writes are for inline series; the host delivers bound data as data events.")
+        .build());
+    }
+    Ok(())
+}
+
+/// Most bound series a document may hold (`max_ops × 4`, §18.7).
+pub(crate) const MAX_BOUND_SERIES: usize = 256;
+
+/// Canonical interval spelling (§18.2): `Nm` only when N is not a multiple of 60, no
+/// leading zeros. Returns the canonical form when `s` is a valid but non-canonical one.
+fn canonical_interval(s: &str) -> Option<String> {
+    let split = s.find(|c: char| !c.is_ascii_digit())?;
+    let (num, unit) = s.split_at(split);
+    let n: u32 = num.parse().ok()?;
+    let canon = if unit == "m" && n % 60 == 0 {
+        format!("{}h", n / 60)
+    } else {
+        format!("{n}{unit}")
+    };
+    (canon != s).then_some(canon)
+}
+
+/// Validates a bound series of `put_series` (§18.2, §18.7).
+fn check_bind(doc: &Document, series: &Series, sp: &str) -> PResult<()> {
+    let SeriesSource::Bind {
+        symbol,
+        interval,
+        window,
+        feed,
+        anchor_t,
+    } = &series.source
+    else {
+        return Ok(());
+    };
+    let src = ptr(sp, "source");
+    if anchor_t.is_some() {
+        return Err(E::new(
+            ErrorCode::Invalid,
+            "`anchor_t` is written by the authority, never by clients",
+        )
+        .at(ptr(&src, "anchor_t"))
+        .hint("Omit `anchor_t`; the authority anchors the binding on its first resolution.")
+        .build());
+    }
+    qp_source::validate_id("symbol", symbol).map_err(|m| invalid(m, ptr(&src, "symbol")))?;
+    if let Some(f) = feed {
+        qp_source::validate_id("feed", f).map_err(|m| invalid(m, ptr(&src, "feed")))?;
+    }
+    if let Err(m) = qp_source::validate_interval(interval) {
+        return Err(E::new(ErrorCode::Invalid, m)
+            .at(ptr(&src, "interval"))
+            .expected([
+                "1m…1440m (not a multiple of 60)",
+                "1h…24h",
+                "1d",
+                "1w",
+                "1M",
+            ])
+            .build());
+    }
+    if let Some(c) = canonical_interval(interval) {
+        return Err(E::new(
+            ErrorCode::Invalid,
+            format!("interval `{interval}` is not written canonically; the same feed is `{c}`"),
+        )
+        .at(ptr(&src, "interval"))
+        .suggest([c])
+        .build());
+    }
+    let max = crate::session::default_limits().max_bind_bars;
+    window
+        .validate(max)
+        .map_err(|m| invalid(m, ptr(&src, "window")))?;
+    if series.data.is_some() {
+        return Err(invalid(
+            "a bound series carries no data: its bars come from the data plane",
+            ptr(sp, "data"),
+        ));
+    }
+    if let Some(i) = &series.instrument {
+        if &i.symbol != symbol {
+            return Err(E::new(
+                ErrorCode::Invalid,
+                format!(
+                    "instrument symbol `{}` differs from the binding's `{symbol}`",
+                    i.symbol
+                ),
+            )
+            .at(ptr(&ptr(sp, "instrument"), "symbol"))
+            .expected([symbol.clone()])
+            .build());
+        }
+    }
+    if let Some(iv) = &series.interval {
+        if iv != interval {
+            return Err(E::new(
+                ErrorCode::Invalid,
+                format!("interval `{iv}` differs from the binding's `{interval}`"),
+            )
+            .at(ptr(sp, "interval"))
+            .expected([interval.clone()])
+            .build());
+        }
+    }
+    let bound = doc
+        .series
+        .iter()
+        .filter(|s| s.id != series.id && matches!(s.source, SeriesSource::Bind { .. }))
+        .count();
+    if bound + 1 > MAX_BOUND_SERIES {
+        return Err(E::new(
+            ErrorCode::Limit,
+            format!("a document holds at most {MAX_BOUND_SERIES} bound series"),
+        )
+        .at(ptr(&src, "kind"))
+        .expected([MAX_BOUND_SERIES.to_string()])
+        .build());
+    }
+    Ok(())
 }
 
 fn inline_bars(s: &Series) -> Option<&[qp_schema::Bar]> {

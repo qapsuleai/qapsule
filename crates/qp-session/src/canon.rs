@@ -1031,7 +1031,7 @@ pub(crate) fn check_layer(doc: &Document, l: &mut Layer, site: &Site<'_>) -> PRe
     let d = layer_data(doc, l);
     match l.mark {
         Mark::Candle => {
-            let ok = matches!(d, Data::Series(s) if s.bars().is_some());
+            let ok = matches!(d, Data::Series(s) if crate::plane::is_bar_series(s));
             if !ok {
                 return Err(E::new(ErrorCode::Invalid, "`candle` needs a bar series")
                     .at(site.at(if l.series.is_some() {
@@ -1042,7 +1042,7 @@ pub(crate) fn check_layer(doc: &Document, l: &mut Layer, site: &Site<'_>) -> PRe
                     .expected(
                         doc.series
                             .iter()
-                            .filter(|s| s.bars().is_some())
+                            .filter(|s| crate::plane::is_bar_series(s))
                             .map(|s| s.id.clone()),
                     )
                     .build());

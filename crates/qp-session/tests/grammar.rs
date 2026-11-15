@@ -938,6 +938,11 @@ fn welcome_summary_of_thyao() {
         json!(["macd", "signal", "histogram"])
     );
     assert_eq!(s["series"][3]["label"], "BOLLINGER(20,2)");
+    // Documented order (PROTOCOL §7), not the engine's `middle, upper, …`.
+    assert_eq!(
+        s["series"][3]["fields"],
+        json!(["upper", "middle", "lower", "bandwidth"])
+    );
     let p = &s["views"][0]["panels"];
     assert_eq!(p[0]["scale"], "y0 linear");
     assert_eq!(p[1]["scale"], "y1 linear [0, 100]");

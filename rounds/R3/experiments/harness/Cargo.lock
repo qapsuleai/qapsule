@@ -110,6 +110,14 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "5d15f86d12da44cd8d4ec3c73984537eb7f4cadcb9776a575a0a8a05ca11005c"
 
 [[package]]
+name = "m1-siluet"
+version = "0.0.0"
+dependencies = [
+ "qp-grammar",
+ "qp-schema",
+]
+
+[[package]]
 name = "memchr"
 version = "2.8.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -155,6 +163,13 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "985e7ec9bb745e6ce6535b544d84d6cd6f7ad8bd711c398938ae983b91a766d9"
 dependencies = [
  "unicode-ident",
+]
+
+[[package]]
+name = "qp-calendar"
+version = "0.0.0"
+dependencies = [
+ "qp-schema",
 ]
 
 [[package]]
@@ -212,6 +227,7 @@ dependencies = [
 name = "qp-source"
 version = "0.0.0"
 dependencies = [
+ "qp-calendar",
  "qp-schema",
  "serde_json",
 ]
@@ -229,6 +245,7 @@ dependencies = [
 name = "r3-harness"
 version = "0.0.0"
 dependencies = [
+ "m1-siluet",
  "qp-capsule",
  "qp-grammar",
  "qp-render",

@@ -1,0 +1,8 @@
+{
+  "experiment": "m2",
+  "alt": "template",
+  "lang": "en",
+  "seed": 2,
+  "reader": "r2",
+  "model": "sonnet"
+}

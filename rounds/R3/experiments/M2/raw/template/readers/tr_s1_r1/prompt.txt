@@ -1,0 +1,42 @@
+You are taking a reading test. Below are 24 numbered sentences in Turkish. Each describes one observation about a stock's chart. A "bar" is one period of the chart (for example one trading day). For every sentence answer three questions:
+
+1. What happened? `kind` (one of the six kinds below) and `direction` (up, down or neutral).
+2. When? `when` = "past" (it happened some bars ago; then give `bars_ago` as an integer, 0 = this bar / today, or null if the sentence does not say), "now" (a state that holds now) or "conditional" (an expectation that depends on a condition); `bars_ago` is null unless `when` is "past".
+3. Is it still valid now? `still_valid` = "yes", "no" or "unknown".
+
+The six kinds:
+- continuation: the move goes on
+- reversal: the move may be turning
+- breakout: a boundary was crossed
+- squeeze: the move is narrowing; direction unknown
+- extreme: an unusual stretch (overbought / oversold)
+- flow: money flowing in or out, independent of price
+
+Sentences:
+1. GARAN dün 168,43'ün üstüne çıktı; şu an 163,38, artık 168,43'ün üstünde değil. Yukarı kırılım sona erdi. Beklenen sonuç bugün gerçekleşti. Karnesi henüz az örnekli: 8 seferin 2'sinde tuttu.
+2. THYAO'da dün Bollinger bantları daraldı: sıkışma, yön belirsiz. Sinyalın ömrü bugün sonuçsuz doldu; artık geçerli değil. Geçmişte bu tür sinyal çoğunlukla beklendiği gibi sonuçlandı. Sunucu doğruladı; rakamlar kurumsal akış lisansı gerektiriyor.
+3. AKBNK'ta bant genişliği 3 bar içinde eşiğin (0,06) altına inerse sıkışma (yön belirsiz) teyit olur. Koşul hâlâ açık. Geçmişte bu sinyal 140 seferin 52'sinde beklendiği gibi sonuçlandı.
+4. PGSUS'ta 30 bar önce hareketli ortalamalar yükseliş yönünde dizildi (kapanış 57,29, uzun ortalama 55,00): yükseliş eğiliminde devam sinyali. Hâlâ geçerli olup olmadığı bilinmiyor. Geçmişte bu sinyal 140 seferin 67'sinde beklendiği gibi sonuçlandı.
+5. GARAN'da bant genişliği dünden beri eşiğin (0,06) altında; şu an 0,0588. Sıkışma (yön belirsiz) sürüyor. Beklenen sonuç bugün gerçekleşti. Karnesi henüz az örnekli: 8 seferin 2'sinde tuttu.
+6. SISE'de kurumsal net akış 3 bar içinde son günlerin ortalamasının (334.000) altına inerse para çıkışı teyit olur. Beklentinin 5 barlık ömrü bugün sonuçsuz doldu; artık geçerli değil. Karnesi henüz az örnekli: 8 seferin 2'sinde tuttu.
+7. THYAO'da RSI 3 bar önce 70'in üstüne çıktı, bugün yeniden altına indi; şu an 55, artık 70'in üstünde değil. Aşırı alım sona erdi. Geçmişte bu sinyal 140 seferin 87'sinde beklendiği gibi sonuçlandı.
+8. EREGL'de RSI 3 bar içinde 30'un altına inerse aşırı satım teyit olur. Beklenti bugün gerçekleşti. Koşulun bugünkü durumu bilinmiyor. Geçmişte bu sinyal 140 seferin 42'sinde beklendiği gibi sonuçlandı.
+9. THYAO'da RSI bugün itibarıyla 70'in üstünde; şu an 71,4. Aşırı alım sürüyor. Karnesi henüz az örnekli: 8 seferin 2'sinde tuttu.
+10. PGSUS'ta RSI bugün 30'un altına indi (28,8): aşırı satım. Bugün hacim de teyit etti; 2 bağımsız kanıt ailesi destekliyor. Hâlâ geçerli olup olmadığı bilinmiyor. Geçmişte bu sinyal 140 seferin 99'unda beklendiği gibi sonuçlandı.
+11. SAHOL 3 bar içinde dönüş noktasının (161,73) altında kapanırsa aşağı dönüş teyit olur. Beklenti bugün geçersiz oldu; artık geçerli değil. Geçmişte bu sinyal 140 seferin 98'inde beklendiği gibi sonuçlandı.
+12. EREGL 3 bar içinde 245,84'ün üstünde kapanırsa yukarı kırılım teyit olur. Beklenti bugün gerçekleşti. Koşulun bugünkü durumu bilinmiyor. Karnesi henüz az örnekli: 8 seferin 6'sında tuttu.
+13. FROTO'da RSI bir aydan uzun süre önce aşırı alım eşiğinin üstüne çıktı: aşırı alım. Hâlâ geçerli olup olmadığı bilinmiyor. Geçmişte bu tür sinyal çoğunlukla beklendiği gibi sonuçlandı. Sunucu doğruladı; rakamlar kurumsal akış lisansı gerektiriyor.
+14. FROTO yaklaşık bir haftadır dönüş noktasının altında. Aşağı dönüş sürüyor. Beklenen sonuç bugün gerçekleşti. Karnesi henüz az örnekli. Sunucu doğruladı; rakamlar kurumsal akış lisansı gerektiriyor.
+15. THYAO'da bugün aşağı dönüş işareti çıktı: fiyat yeni tepe yaparken RSI daha düşük tepe yaptı (fiyat 168,94, RSI 52,1). Bugün ters yönde bir sinyal geldi; görünüm zayıfladı. Hâlâ geçerli olup olmadığı bilinmiyor. Karnesi henüz az örnekli: 8 seferin 6'sında tuttu.
+16. SISE 30 bardır dönüş noktasının (177,59) altında; şu an 174,04. Aşağı dönüş sürüyor. Beklenen sonuç bugün gerçekleşti. Geçmişte bu sinyal 140 seferin 68'inde beklendiği gibi sonuçlandı.
+17. GARAN bugün 128,48'deki direnci yukarı kırdı (kapanış 131,01): yukarı kırılım. Sinyalın 1 barlık ömrü bugün sonuçsuz doldu; artık geçerli değil. Geçmişte bu sinyal 140 seferin 51'inde beklendiği gibi sonuçlandı.
+18. EREGL 3 bar içinde uzun ortalamanın (255,56) üstünde kapanırsa yükseliş eğilimi teyit olur. Bugün ters yönde bir sinyal geldi; görünüm zayıfladı. Koşul hâlâ açık. Karnesi henüz az örnekli: 8 seferin 4'ünde tuttu.
+19. FROTO'da kurumsal net akış 3 bar içinde son günlerin ortalamasının (499.000) altına inerse para çıkışı teyit olur. Bugün hacim de teyit etti; 2 bağımsız kanıt ailesi destekliyor. Koşul hâlâ açık. Geçmişte bu sinyal 140 seferin 85'inde beklendiği gibi sonuçlandı.
+20. GARAN'da kurumsal net akış bugün itibarıyla son günlerin ortalamasının (319.000) üstünde; şu an 325.380. Para girişi sürüyor. Bugün ters yönde bir sinyal geldi; görünüm zayıfladı. Geçmişte bu sinyal 140 seferin 63'ünde beklendiği gibi sonuçlandı.
+21. PGSUS dün 167,59'daki direnci yukarı kırdı (kapanış 172,40): yukarı kırılım. Sinyal bugün geçersiz oldu; artık geçerli değil. Karnesi henüz az örnekli: 8 seferin 3'ünde tuttu.
+22. KCHOL 3 bar içinde dönüş noktasının (214,64) altında kapanırsa aşağı dönüş teyit olur. Bugün hacim de teyit etti; 2 bağımsız kanıt ailesi destekliyor. Koşul hâlâ açık. Karnesi henüz az örnekli: 8 seferin 3'ünde tuttu.
+23. SAHOL'da bant genişliği birkaç bar içinde eşiğin altına inerse sıkışma (yön belirsiz) teyit olur. Bugün hacim de teyit etti. Koşulun bugünkü durumu bilinmiyor. Karnesi henüz az örnekli. Sunucu doğruladı; rakamlar kurumsal akış lisansı gerektiriyor.
+24. FROTO'da kurumsal net akış 3 bar içinde son günlerin ortalamasının (484.000) üstüne çıkarsa para girişi teyit olur. Beklentinin 1 barlık ömrü bugün sonuçsuz doldu; artık geçerli değil. Geçmişte bu sinyal 140 seferin 70'inde beklendiği gibi sonuçlandı.
+
+Give your best guess for every sentence. Reply with a single JSON object and nothing else, keyed by sentence number, for example:
+{"1": {"kind": "breakout", "direction": "up", "when": "past", "bars_ago": 3, "still_valid": "no"}, "2": {...}, ...}

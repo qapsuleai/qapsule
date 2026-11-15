@@ -1,0 +1,296 @@
+{
+  "harness": "r3-h-m12/1",
+  "alt": "template",
+  "lang": "tr",
+  "seed": 2,
+  "items": [
+    {
+      "label": "1",
+      "situation": "k26",
+      "sentence": "THYAO'da RSI 3 bar önce 70'in üstüne çıktı, bugün yeniden altına indi; şu an 55, artık 70'in üstünde değil. Aşırı alım sona erdi. Geçmişte bu sinyal 140 seferin 87'sinde beklendiği gibi sonuçlandı.",
+      "truth": {
+        "kind": "extreme",
+        "direction": "up",
+        "when": "past",
+        "bars_ago": 3,
+        "still_valid": "no"
+      }
+    },
+    {
+      "label": "2",
+      "situation": "s17",
+      "sentence": "PGSUS'ta RSI bugün 30'un altına indi (28,8): aşırı satım. Bugün hacim de teyit etti; 2 bağımsız kanıt ailesi destekliyor. Hâlâ geçerli olup olmadığı bilinmiyor. Geçmişte bu sinyal 140 seferin 99'unda beklendiği gibi sonuçlandı.",
+      "truth": {
+        "kind": "extreme",
+        "direction": "down",
+        "when": "past",
+        "bars_ago": 0,
+        "still_valid": "unknown"
+      }
+    },
+    {
+      "label": "3",
+      "situation": "s34",
+      "sentence": "GARAN dün 168,43'ün üstüne çıktı; şu an 163,38, artık 168,43'ün üstünde değil. Yukarı kırılım sona erdi. Beklenen sonuç bugün gerçekleşti. Karnesi henüz az örnekli: 8 seferin 2'sinde tuttu.",
+      "truth": {
+        "kind": "breakout",
+        "direction": "up",
+        "when": "past",
+        "bars_ago": 1,
+        "still_valid": "no"
+      }
+    },
+    {
+      "label": "4",
+      "situation": "s44",
+      "sentence": "ASELS'te RSI 30 bardır 70'in üstünde; şu an 71,4. Aşırı alım sürüyor. Beklenen sonuç bugün gerçekleşti. Geçmişte bu sinyal 140 seferin 62'sinde beklendiği gibi sonuçlandı.",
+      "truth": {
+        "kind": "extreme",
+        "direction": "up",
+        "when": "now",
+        "bars_ago": null,
+        "still_valid": "yes"
+      }
+    },
+    {
+      "label": "5",
+      "situation": "s52",
+      "sentence": "SAHOL birkaç bar içinde uzun ortalamanın üstünde kapanırsa yükseliş eğilimi teyit olur. Beklenti bugün geçersiz oldu; artık geçerli değil. Geçmişte bu tür sinyal kabaca yarı yarıya tuttu. Sunucu doğruladı; rakamlar kurumsal akış lisansı gerektiriyor.",
+      "truth": {
+        "kind": "continuation",
+        "direction": "up",
+        "when": "conditional",
+        "bars_ago": null,
+        "still_valid": "no"
+      }
+    },
+    {
+      "label": "6",
+      "situation": "s43",
+      "sentence": "BIMAS'ta RSI yaklaşık bir hafta önce aşırı alım eşiğinin üstüne çıktı; artık aşırı alım eşiğinin üstünde değil. Aşırı alım sona erdi. Karnesi henüz az örnekli. Sunucu doğruladı; rakamlar kurumsal akış lisansı gerektiriyor.",
+      "truth": {
+        "kind": "extreme",
+        "direction": "up",
+        "when": "past",
+        "bars_ago": 5,
+        "still_valid": "no"
+      }
+    },
+    {
+      "label": "7",
+      "situation": "s71",
+      "sentence": "SISE'de kurumsal net akış 3 bar içinde son günlerin ortalamasının (334.000) altına inerse para çıkışı teyit olur. Beklentinin 5 barlık ömrü bugün sonuçsuz doldu; artık geçerli değil. Karnesi henüz az örnekli: 8 seferin 2'sinde tuttu.",
+      "truth": {
+        "kind": "flow",
+        "direction": "down",
+        "when": "conditional",
+        "bars_ago": null,
+        "still_valid": "no"
+      }
+    },
+    {
+      "label": "8",
+      "situation": "s27",
+      "sentence": "SISE 5 bardır uzun ortalamanın (71,29) altında; şu an 69,86. Düşüş eğilimi sürüyor. Geçmişte bu sinyal 140 seferin 63'ünde beklendiği gibi sonuçlandı.",
+      "truth": {
+        "kind": "continuation",
+        "direction": "down",
+        "when": "now",
+        "bars_ago": null,
+        "still_valid": "yes"
+      }
+    },
+    {
+      "label": "9",
+      "situation": "s66",
+      "sentence": "THYAO'da RSI 3 bar içinde 70'in üstüne çıkarsa aşırı alım teyit olur. Beklenti bugün gerçekleşti. Koşulun bugünkü durumu bilinmiyor. Geçmişte bu sinyal 140 seferin 86'sında beklendiği gibi sonuçlandı.",
+      "truth": {
+        "kind": "extreme",
+        "direction": "up",
+        "when": "conditional",
+        "bars_ago": null,
+        "still_valid": "unknown"
+      }
+    },
+    {
+      "label": "10",
+      "situation": "s45",
+      "sentence": "GARAN'da kurumsal net akış bugün itibarıyla son günlerin ortalamasının (319.000) üstünde; şu an 325.380. Para girişi sürüyor. Bugün ters yönde bir sinyal geldi; görünüm zayıfladı. Geçmişte bu sinyal 140 seferin 63'ünde beklendiği gibi sonuçlandı.",
+      "truth": {
+        "kind": "flow",
+        "direction": "up",
+        "when": "now",
+        "bars_ago": null,
+        "still_valid": "yes"
+      }
+    },
+    {
+      "label": "11",
+      "situation": "s63",
+      "sentence": "ASELS'te bant genişliği 3 bar içinde eşiğin (0,06) altına inerse sıkışma (yön belirsiz) teyit olur. Beklentinin 5 barlık ömrü bugün sonuçsuz doldu; artık geçerli değil. Karnesi henüz az örnekli: 8 seferin 3'ünde tuttu.",
+      "truth": {
+        "kind": "squeeze",
+        "direction": "neutral",
+        "when": "conditional",
+        "bars_ago": null,
+        "still_valid": "no"
+      }
+    },
+    {
+      "label": "12",
+      "situation": "s67",
+      "sentence": "EREGL'de RSI 3 bar içinde 30'un altına inerse aşırı satım teyit olur. Beklenti bugün gerçekleşti. Koşulun bugünkü durumu bilinmiyor. Geçmişte bu sinyal 140 seferin 42'sinde beklendiği gibi sonuçlandı.",
+      "truth": {
+        "kind": "extreme",
+        "direction": "down",
+        "when": "conditional",
+        "bars_ago": null,
+        "still_valid": "unknown"
+      }
+    },
+    {
+      "label": "13",
+      "situation": "s41",
+      "sentence": "THYAO'da RSI bugün itibarıyla 70'in üstünde; şu an 71,4. Aşırı alım sürüyor. Karnesi henüz az örnekli: 8 seferin 2'sinde tuttu.",
+      "truth": {
+        "kind": "extreme",
+        "direction": "up",
+        "when": "now",
+        "bars_ago": null,
+        "still_valid": "yes"
+      }
+    },
+    {
+      "label": "14",
+      "situation": "s58",
+      "sentence": "EREGL 3 bar içinde 245,84'ün üstünde kapanırsa yukarı kırılım teyit olur. Beklenti bugün gerçekleşti. Koşulun bugünkü durumu bilinmiyor. Karnesi henüz az örnekli: 8 seferin 6'sında tuttu.",
+      "truth": {
+        "kind": "breakout",
+        "direction": "up",
+        "when": "conditional",
+        "bars_ago": null,
+        "still_valid": "unknown"
+      }
+    },
+    {
+      "label": "15",
+      "situation": "s48",
+      "sentence": "EREGL'de kurumsal net akış 30 bardır son günlerin ortalamasının (452.000) altında; şu an 442.960. Para çıkışı sürüyor. Bugün hacim de teyit etti; 2 bağımsız kanıt ailesi destekliyor. Karnesi henüz az örnekli: 8 seferin 5'inde tuttu.",
+      "truth": {
+        "kind": "flow",
+        "direction": "down",
+        "when": "now",
+        "bars_ago": null,
+        "still_valid": "yes"
+      }
+    },
+    {
+      "label": "16",
+      "situation": "s16",
+      "sentence": "TUPRS'ta 30 bar önce Bollinger bantları daraldı (bant genişliği 0,025, eşik 0,06): sıkışma, yön belirsiz. Sinyal bugün geçersiz oldu; artık geçerli değil. Karnesi henüz az örnekli: 8 seferin 2'sinde tuttu.",
+      "truth": {
+        "kind": "squeeze",
+        "direction": "neutral",
+        "when": "past",
+        "bars_ago": 30,
+        "still_valid": "no"
+      }
+    },
+    {
+      "label": "17",
+      "situation": "s36",
+      "sentence": "EREGL 30 bar önce 46,19'un altına indi; şu an 47,58, artık 46,19'un altında değil. Aşağı kırılım sona erdi. Sinyal bugün geçersiz oldu. Geçmişte bu sinyal 140 seferin 81'inde beklendiği gibi sonuçlandı.",
+      "truth": {
+        "kind": "breakout",
+        "direction": "down",
+        "when": "past",
+        "bars_ago": 30,
+        "still_valid": "no"
+      }
+    },
+    {
+      "label": "18",
+      "situation": "s07",
+      "sentence": "PGSUS'ta yaklaşık bir hafta önce aşağı dönüş işareti çıktı: fiyat yeni tepe yaparken RSI daha düşük tepe yaptı. Sinyalın ömrü bugün sonuçsuz doldu; artık geçerli değil. Karnesi henüz az örnekli. Sunucu doğruladı; rakamlar kurumsal akış lisansı gerektiriyor.",
+      "truth": {
+        "kind": "reversal",
+        "direction": "down",
+        "when": "past",
+        "bars_ago": 5,
+        "still_valid": "no"
+      }
+    },
+    {
+      "label": "19",
+      "situation": "s38",
+      "sentence": "GARAN'da bant genişliği dünden beri eşiğin (0,06) altında; şu an 0,0588. Sıkışma (yön belirsiz) sürüyor. Beklenen sonuç bugün gerçekleşti. Karnesi henüz az örnekli: 8 seferin 2'sinde tuttu.",
+      "truth": {
+        "kind": "squeeze",
+        "direction": "neutral",
+        "when": "now",
+        "bars_ago": null,
+        "still_valid": "yes"
+      }
+    },
+    {
+      "label": "20",
+      "situation": "s62",
+      "sentence": "THYAO'da bant genişliği 3 bar içinde eşiğin (0,06) altına inerse sıkışma (yön belirsiz) teyit olur. Bugün ters yönde bir sinyal geldi; görünüm zayıfladı. Koşulun bugünkü durumu bilinmiyor. Geçmişte bu sinyal 140 seferin 45'inde beklendiği gibi sonuçlandı.",
+      "truth": {
+        "kind": "squeeze",
+        "direction": "neutral",
+        "when": "conditional",
+        "bars_ago": null,
+        "still_valid": "unknown"
+      }
+    },
+    {
+      "label": "21",
+      "situation": "s32",
+      "sentence": "SISE 30 bardır dönüş noktasının (177,59) altında; şu an 174,04. Aşağı dönüş sürüyor. Beklenen sonuç bugün gerçekleşti. Geçmişte bu sinyal 140 seferin 68'inde beklendiği gibi sonuçlandı.",
+      "truth": {
+        "kind": "reversal",
+        "direction": "down",
+        "when": "now",
+        "bars_ago": null,
+        "still_valid": "yes"
+      }
+    },
+    {
+      "label": "22",
+      "situation": "s01",
+      "sentence": "SISE'de bugün hareketli ortalamalar düşüş yönünde dizildi (kapanış 196,96, uzun ortalama 204,84): düşüş eğiliminde devam sinyali. Sinyal bugün geçersiz oldu; artık geçerli değil. Karnesi henüz az örnekli: 8 seferin 2'sinde tuttu.",
+      "truth": {
+        "kind": "continuation",
+        "direction": "down",
+        "when": "past",
+        "bars_ago": 0,
+        "still_valid": "no"
+      }
+    },
+    {
+      "label": "23",
+      "situation": "s30",
+      "sentence": "GARAN dün dönüş noktasının (33,26) üstüne çıktı; şu an 32,26, artık dönüş noktasının üstünde değil. Yukarı dönüş sona erdi. Sinyal bugün geçersiz oldu. Karnesi henüz az örnekli: 8 seferin 4'ünde tuttu.",
+      "truth": {
+        "kind": "reversal",
+        "direction": "up",
+        "when": "past",
+        "bars_ago": 1,
+        "still_valid": "no"
+      }
+    },
+    {
+      "label": "24",
+      "situation": "s70",
+      "sentence": "FROTO'da kurumsal net akış 3 bar içinde son günlerin ortalamasının (499.000) altına inerse para çıkışı teyit olur. Bugün hacim de teyit etti; 2 bağımsız kanıt ailesi destekliyor. Koşul hâlâ açık. Geçmişte bu sinyal 140 seferin 85'inde beklendiği gibi sonuçlandı.",
+      "truth": {
+        "kind": "flow",
+        "direction": "down",
+        "when": "conditional",
+        "bars_ago": null,
+        "still_valid": "yes"
+      }
+    }
+  ]
+}

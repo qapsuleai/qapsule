@@ -1,0 +1,10 @@
+{
+  "alt": "llmslot_run2",
+  "note": "wall-clock timing on this machine (release build recommended); not deterministic, not part of any byte-equality claim",
+  "ns_per_sentence": {
+    "en": 286.0,
+    "tr": 296.0
+  },
+  "passes": 20,
+  "llm": null
+}

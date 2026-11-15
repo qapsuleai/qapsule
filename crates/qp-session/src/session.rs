@@ -139,6 +139,8 @@ pub struct Session {
     /// View id -> every series it reads, with the inputs of studies among them
     /// (transitively); built on demand, dropped on structure changes.
     pub(crate) view_reads: Option<BTreeMap<String, BTreeSet<String>>>,
+    /// (RP2/T8) Asserted data-derived claims, gap marks and queued `claim` events (§19).
+    pub(crate) claims: crate::claims::Claims,
 }
 
 /// Resolves `rel` under `root`, refusing absolute paths and paths that leave `root`.
@@ -290,6 +292,7 @@ impl Session {
             incremental: true,
             pending_views: Vec::new(),
             view_reads: None,
+            claims: crate::claims::Claims::default(),
         };
         // Resolve the bindings on load (§18.3); a first ready resolution is anchored by
         // an engine entry. No connection exists yet: its notifications go nowhere.
@@ -300,6 +303,9 @@ impl Session {
         }
         s.eval_intents(s.seq());
         s.pending_views.clear();
+        // No connection exists at load: claims asserted now are registered (for their
+        // finalisation) but announce nothing.
+        let _ = s.claims.take();
         Ok(s)
     }
 
@@ -1113,6 +1119,7 @@ impl Session {
                     Some(u) => format!("undo {u}"),
                     None => summarize_ops(ops, &created),
                 },
+                evidence: None,
             };
             self.commit(entry, ex.doc);
             let mut lines = vec![out(
@@ -1188,6 +1195,7 @@ impl Session {
             inverse,
             undoes: None,
             summary: format!("propose {pid}: {}", summarize_ops(ops, &created)),
+            evidence: None,
         };
         self.committed(entry);
         let mut lines = vec![out(
@@ -1285,6 +1293,7 @@ impl Session {
             inverse,
             undoes: None,
             summary: format!("accept {pid}: {}", summarize_ops(&pr.ops, &created)),
+            evidence: None,
         };
         self.commit(entry, doc);
         let mut lines = vec![out(
@@ -1413,6 +1422,9 @@ impl Session {
                 }
             }
         }
+        if !bars.is_empty() {
+            self.claims_after_bars(&bars);
+        }
         for (id, d) in bars {
             self.pending_views.push((id, d, entry.seq));
         }
@@ -1523,6 +1535,7 @@ impl Session {
         } else {
             self.cache.clear();
         }
+        self.claims_after_bars(&changed);
         let seq = self.seq();
         for (id, d) in changed {
             self.pending_views.push((id, d, seq));
@@ -1552,6 +1565,7 @@ impl Session {
         lines.extend(self.view_events());
         lines.extend(conds);
         lines.extend(intents);
+        lines.extend(self.claim_events());
         lines
     }
 
@@ -1565,6 +1579,16 @@ impl Session {
 
     /// Writes an engine entry (author `qp`).
     fn engine_entry(&mut self, changes: Vec<ChangeOp>, summary: String) -> Option<Seq> {
+        self.engine_entry_with(changes, summary, None)
+    }
+
+    /// Writes an engine entry (author `qp`) carrying a claim's evidence (§19).
+    fn engine_entry_with(
+        &mut self,
+        changes: Vec<ChangeOp>,
+        summary: String,
+        evidence: Option<qp_schema::protocol::ClaimEvidence>,
+    ) -> Option<Seq> {
         // In place, no document copy: a change that does not fit rolls the earlier ones
         // back.
         let inverse = crate::live::apply_in_place(&mut self.doc, &changes).ok()?;
@@ -1581,6 +1605,7 @@ impl Session {
             inverse,
             undoes: None,
             summary,
+            evidence,
         });
         Some(seq)
     }
@@ -1617,6 +1642,7 @@ impl Session {
         lines.extend(self.view_events());
         lines.extend(conds);
         lines.extend(intents);
+        lines.extend(self.claim_events());
         lines
     }
 
@@ -1680,11 +1706,30 @@ impl Session {
                     capsule: cap.clone(),
                     state: CapsuleState::Invalidated,
                 }];
-                if let Some(s) = self.engine_entry(
+                let ev = crate::claims::evidence(
+                    rd!(self),
+                    &mut self.cache,
+                    &self.claims,
+                    &self.plane,
+                    &cond,
+                );
+                if let Some(s) = self.engine_entry_with(
                     changes,
                     format!("invalidate {cap}: invalidation of {fnd} holds"),
+                    ev.clone(),
                 ) {
                     out.push(s);
+                    if let Some(ev) = ev {
+                        self.claims.assert(
+                            crate::claims::Owner::Doc,
+                            qp_schema::protocol::ClaimRef::Capsule {
+                                capsule: cap.clone(),
+                                finding: fnd.clone(),
+                            },
+                            cond,
+                            ev,
+                        );
+                    }
                 }
             }
         }
@@ -1709,11 +1754,23 @@ impl Session {
                 let prev = self.conns[ci].subs[si].last.replace(now);
                 if prev == Some(false) && now {
                     if let Some((_, bar, t)) = r {
+                        let evidence = self.claim_asserted(
+                            crate::claims::Owner::Conn(self.conns[ci].id.clone()),
+                            qp_schema::protocol::ClaimRef::Condition {
+                                sub: self.conns[ci].subs[si].id.clone(),
+                            },
+                            &condition,
+                        );
                         conds.push(out(
                             &self.conns[ci].id,
                             ServerMsg::Notify {
                                 sub: self.conns[ci].subs[si].id.clone(),
-                                event: Event::ConditionMet { bar, t, seq },
+                                event: Event::ConditionMet {
+                                    bar,
+                                    t,
+                                    seq,
+                                    evidence,
+                                },
                             },
                         ));
                     }
@@ -1764,11 +1821,17 @@ impl Session {
             let now = r.is_some_and(|x| x.0);
             if self.intent_state.get(&id) == Some(&false) && now {
                 if let Some((_, bar, t)) = r {
+                    let evidence = self.claim_asserted(
+                        crate::claims::Owner::Doc,
+                        qp_schema::protocol::ClaimRef::Intent { intent: id.clone() },
+                        &trig,
+                    );
                     fired.push(Event::IntentTriggered {
                         intent: id.clone(),
                         bar,
                         t,
                         seq,
+                        evidence,
                     });
                 }
             }
@@ -1798,6 +1861,7 @@ impl Session {
                                     approved_by: e.approved_by.clone(),
                                     cause: e.cause.clone(),
                                     changes: e.changes.clone(),
+                                    evidence: e.evidence.clone(),
                                 },
                             },
                         ));
@@ -1830,6 +1894,7 @@ impl Session {
                                     capsule: capsule.clone(),
                                     state: *state,
                                     seq,
+                                    evidence: e.evidence.clone(),
                                 },
                             },
                         ));
@@ -1924,7 +1989,8 @@ impl Session {
             Topic::Changes { .. }
             | Topic::Proposals {}
             | Topic::Attention { principal: None }
-            | Topic::Intents {} => {}
+            | Topic::Intents {}
+            | Topic::Claims {} => {}
         }
         self.conns[ci].subs.push(Sub {
             id: id.to_owned(),

@@ -549,7 +549,7 @@ pub(crate) fn condition_series(c: &Condition) -> Vec<(&'static str, &str)> {
     }
 }
 
-fn cmp(op: CompareOp, prev: Option<(f64, f64)>, last: (f64, f64)) -> bool {
+pub(crate) fn cmp(op: CompareOp, prev: Option<(f64, f64)>, last: (f64, f64)) -> bool {
     let (a, b) = last;
     match op {
         CompareOp::Lt => a < b,

@@ -1221,6 +1221,11 @@ pub struct LogEntry {
     pub undoes: Option<Seq>,
     /// Short deterministic summary, e.g. `"add_study rsi(period=7) -> rsi-3-0"`.
     pub summary: String,
+    /// (RP2/T8) For an engine entry caused by data (a live capsule's invalidation after
+    /// a data event or a bar write): the evidence of the claim (§19). Not replayed; the
+    /// document does not depend on it.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub evidence: Option<ClaimEvidence>,
 }
 
 // ---------------------------------------------------------------------------
@@ -1941,6 +1946,11 @@ pub enum Topic {
         #[schemars(with = "ViewRef")]
         view: String,
     },
+    /// (RP2/T8) The authority's data-derived claims with their evidence (§19): every
+    /// capsule invalidation and intent trigger of the document and this connection's own
+    /// condition subscriptions, as they are asserted (provisional), become final at the
+    /// bar's close, are withdrawn, or change cleanliness. The topic a replica listens to.
+    Claims {},
 }
 
 /// A pushed event.
@@ -1963,6 +1973,9 @@ pub enum Event {
         cause: Option<String>,
         /// The changes.
         changes: Vec<ChangeOp>,
+        /// (RP2/T8) Evidence of the claim (§19), when data caused this entry.
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        evidence: Option<ClaimEvidence>,
     },
     /// A finding's capsule changed state.
     FindingState {
@@ -1974,6 +1987,9 @@ pub enum Event {
         state: CapsuleState,
         /// Log position.
         seq: Seq,
+        /// (RP2/T8) Evidence of the claim (§19), when data caused the change.
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        evidence: Option<ClaimEvidence>,
     },
     /// A watched condition became true at a bar.
     ConditionMet {
@@ -1983,6 +1999,9 @@ pub enum Event {
         t: TimestampMs,
         /// Log position.
         seq: Seq,
+        /// (RP2/T8) Evidence of the claim (§19): the operands' values at `t` and the bar before, maturity, cleanliness.
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        evidence: Option<ClaimEvidence>,
     },
     /// A proposal was created, accepted, rejected or expired.
     Proposal {
@@ -2017,6 +2036,9 @@ pub enum Event {
         t: TimestampMs,
         /// Log position.
         seq: Seq,
+        /// (RP2/T8) Evidence of the claim (§19): the trigger's operand values, maturity, cleanliness.
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        evidence: Option<ClaimEvidence>,
     },
     /// (RP2) What a watched view draws changed from bar `from_bar` on: redraw from there.
     /// One event per changed series the view reads.
@@ -2036,6 +2058,105 @@ pub enum Event {
         /// current position).
         seq: Seq,
     },
+    /// (RP2/T8) A claim's lifecycle step (topic `claims`, §19): asserted (provisional at
+    /// the live bar, final when the bar closed and the claim still holds there, again
+    /// when a correction changed its values or its cleanliness changed) or withdrawn.
+    Claim {
+        /// What the claim is about.
+        claim: ClaimRef,
+        /// Asserted or withdrawn.
+        state: ClaimState,
+        /// The evidence (for a withdrawal: the values that no longer hold).
+        evidence: ClaimEvidence,
+        /// Log position.
+        seq: Seq,
+    },
+}
+
+// ---------------------------------------------------------------------------
+// Consistency (RP2/T8, `docs/PROTOCOL.md` §19)
+// ---------------------------------------------------------------------------
+
+/// Maturity of a claim's bar on one side's data.
+#[derive(
+    Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Serialize, Deserialize, JsonSchema,
+)]
+#[serde(rename_all = "snake_case")]
+pub enum Maturity {
+    /// The bar is the live (last, not yet closed) bar.
+    Provisional,
+    /// The bar is closed: a later bar exists, or the window is closed (`to_t`).
+    Final,
+}
+
+/// One operand value a claim rests on: the main output of a series the condition reads,
+/// at the claim's bar and at the bar before it (`null` in warmup).
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
+#[serde(deny_unknown_fields)]
+pub struct EvidenceValue {
+    /// Series id (as in the condition).
+    pub series: String,
+    /// Bar time of `value` (the claim's bar on that series' bar series).
+    pub t: TimestampMs,
+    /// Value at `t`.
+    pub value: Option<f64>,
+    /// Value at the bar before `t`.
+    pub prev: Option<f64>,
+}
+
+/// The evidence an authority attaches to a data-derived claim (§19): a few numbers, never
+/// bars (K23).
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
+#[serde(deny_unknown_fields)]
+pub struct ClaimEvidence {
+    /// The bar series the claim rests on (of its first operand; bound or inline).
+    pub series: String,
+    /// The claim's bar time: the identity of the bar across the planes (§18.3).
+    pub t: TimestampMs,
+    /// Each operand's value at `t` and at the bar before, in condition order.
+    pub values: Vec<EvidenceValue>,
+    /// `final` if the bar is closed on the authority's data, else `provisional`.
+    pub maturity: Maturity,
+    /// The authority's data up to `t` has no unrepaired sequence gap.
+    pub clean: bool,
+    /// Calculation start: the bound series' anchor (bar 0 time, §18.3) the values were
+    /// computed from; absent for inline series.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub anchor_t: Option<TimestampMs>,
+}
+
+/// What a claim is about.
+#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Serialize, Deserialize, JsonSchema)]
+#[serde(tag = "kind", rename_all = "snake_case", deny_unknown_fields)]
+pub enum ClaimRef {
+    /// A condition subscription of the receiving connection became true.
+    Condition {
+        /// The subscription id.
+        sub: String,
+    },
+    /// An intent's trigger became true.
+    Intent {
+        /// Intent id.
+        intent: String,
+    },
+    /// A live capsule's invalidation held (the capsule was invalidated).
+    Capsule {
+        /// Capsule id.
+        capsule: String,
+        /// Its finding.
+        finding: String,
+    },
+}
+
+/// The authority's latest word on a claim.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
+#[serde(rename_all = "snake_case")]
+pub enum ClaimState {
+    /// The authority asserts the claim (see the evidence's maturity and cleanliness).
+    Asserted,
+    /// The authority no longer asserts it (it did not hold at the bar's close, or a
+    /// correction broke it).
+    Withdrawn,
 }
 
 // ---------------------------------------------------------------------------

@@ -370,6 +370,7 @@ impl Session {
             inverse,
             undoes,
             summary: summarize_ops(ops, &created),
+            evidence: None,
         });
         let mut lines = vec![out(
             &conn,
@@ -425,6 +426,7 @@ impl Session {
         }
         lines.extend(self.view_events());
         lines.extend(conds);
+        let claims = self.claim_events();
         for ev in fired {
             for c in &self.conns {
                 for s in &c.subs {
@@ -440,6 +442,7 @@ impl Session {
                 }
             }
         }
+        lines.extend(claims);
         lines
     }
 
@@ -494,11 +497,31 @@ impl Session {
                 let prev = s.last.replace(now);
                 if prev == Some(false) && now {
                     if let Some((_, bar, t)) = r {
+                        let evidence = crate::claims::evidence(
+                            rd,
+                            cache,
+                            &self.claims,
+                            &self.plane,
+                            condition,
+                        );
+                        if let Some(ev) = &evidence {
+                            self.claims.assert(
+                                crate::claims::Owner::Conn(c.id.clone()),
+                                qp_schema::protocol::ClaimRef::Condition { sub: s.id.clone() },
+                                condition.clone(),
+                                ev.clone(),
+                            );
+                        }
                         lines.push(out(
                             &c.id,
                             ServerMsg::Notify {
                                 sub: s.id.clone(),
-                                event: Event::ConditionMet { bar, t, seq },
+                                event: Event::ConditionMet {
+                                    bar,
+                                    t,
+                                    seq,
+                                    evidence,
+                                },
                             },
                         ));
                     }
@@ -525,11 +548,29 @@ impl Session {
             let now = r.is_some_and(|x| x.0);
             if self.intent_state.get(&i.id) == Some(&false) && now {
                 if let Some((_, bar, t)) = r {
+                    let evidence = crate::claims::evidence(
+                        rd,
+                        &mut self.cache,
+                        &self.claims,
+                        &self.plane,
+                        trig,
+                    );
+                    if let Some(ev) = &evidence {
+                        self.claims.assert(
+                            crate::claims::Owner::Doc,
+                            qp_schema::protocol::ClaimRef::Intent {
+                                intent: i.id.clone(),
+                            },
+                            trig.clone(),
+                            ev.clone(),
+                        );
+                    }
                     fired.push(Event::IntentTriggered {
                         intent: i.id.clone(),
                         bar,
                         t,
                         seq,
+                        evidence,
                     });
                 }
             }

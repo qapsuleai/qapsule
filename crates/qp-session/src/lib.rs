@@ -28,6 +28,7 @@ macro_rules! rd {
 mod apply;
 mod bindq;
 mod canon;
+mod claims;
 pub mod conform;
 mod error;
 mod expand;

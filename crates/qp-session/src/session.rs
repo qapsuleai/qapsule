@@ -19,7 +19,7 @@ use crate::expand::{
     check_condition, expand_ops, need_finding, need_proposal, summarize_ops, undone_set, Ctx,
 };
 use crate::locate::locate;
-use crate::plane::{inject, reading_doc, DataError, DataPlane, Provider, Reader};
+use crate::plane::{reading_doc, DataError, DataPlane, Provider, Reader};
 use crate::present::profile_for;
 use crate::select;
 use crate::values::{eval_condition, holds, Cache};
@@ -73,6 +73,9 @@ pub(crate) struct Sub {
     pub topic: Topic,
     /// Last value of a watched condition (edge detection).
     pub last: Option<bool>,
+    /// Cache slots of a condition's series, with the cache generation they belong to
+    /// (incremental live path: which ticks affect the condition).
+    pub memo: Option<(u64, [Option<usize>; 2])>,
 }
 
 #[derive(Debug)]
@@ -127,6 +130,15 @@ pub struct Session {
     pub(crate) rd: Option<Document>,
     /// Anchors to stamp in an engine entry (§18.3), from the last plane sync.
     pub(crate) pending_stamps: Vec<(String, i64)>,
+    /// Incremental live path on (default). Off: every bar change clears the values cache
+    /// and every watcher and live capsule is evaluated (the from-scratch reference path,
+    /// for tests and measurements).
+    pub(crate) incremental: bool,
+    /// Bar changes not yet announced to `view` subscribers: (bar series, delta, seq).
+    pub(crate) pending_views: Vec<(String, crate::values::Delta, Seq)>,
+    /// View id -> every series it reads, with the inputs of studies among them
+    /// (transitively); built on demand, dropped on structure changes.
+    pub(crate) view_reads: Option<BTreeMap<String, BTreeSet<String>>>,
 }
 
 /// Resolves `rel` under `root`, refusing absolute paths and paths that leave `root`.
@@ -165,7 +177,7 @@ pub fn read_json<T: serde::de::DeserializeOwned>(path: &Path) -> Result<T, Strin
     serde_json::from_str(&text).map_err(|e| format!("{}: {e}", path.display()))
 }
 
-fn out(conn: &str, msg: ServerMsg) -> OutboundLine {
+pub(crate) fn out(conn: &str, msg: ServerMsg) -> OutboundLine {
     OutboundLine {
         conn: conn.to_owned(),
         msg,
@@ -275,6 +287,9 @@ impl Session {
             plane,
             rd: None,
             pending_stamps: Vec::new(),
+            incremental: true,
+            pending_views: Vec::new(),
+            view_reads: None,
         };
         // Resolve the bindings on load (§18.3); a first ready resolution is anchored by
         // an engine entry. No connection exists yet: its notifications go nowhere.
@@ -284,7 +299,18 @@ impl Session {
             let _ = s.invalidations(seq);
         }
         s.eval_intents(s.seq());
+        s.pending_views.clear();
         Ok(s)
+    }
+
+    /// Switches the incremental live path (§18.8) on (default) or off. Off, every bar
+    /// change clears the values cache and every watcher and live capsule is evaluated
+    /// after it: the from-scratch reference the incremental path is tested against
+    /// (outputs, log and document are byte-identical). For tests and measurements.
+    #[doc(hidden)]
+    pub fn set_incremental(&mut self, on: bool) {
+        self.incremental = on;
+        self.cache.clear();
     }
 
     /// The current document.
@@ -980,6 +1006,13 @@ impl Session {
         let conn = self.conns[ci].id.clone();
 
         if direct {
+            if self.incremental
+                && ops
+                    .iter()
+                    .all(|o| matches!(o, Op::AppendBars { .. } | Op::UpdateLastBar { .. }))
+            {
+                return self.bar_command(ci, id, ops, (base, reason), resolved);
+            }
             if let [Op::AcceptProposal { proposal, note }] = ops {
                 return self.accept(
                     &conn,
@@ -1085,8 +1118,7 @@ impl Session {
             proposal,
             index: None,
         }];
-        let mut doc = self.doc.clone();
-        let inverse = apply_all(&mut doc, &changes)
+        let inverse = crate::live::apply_in_place(&mut self.doc, &changes)
             .map_err(|m| invalid(format!("cannot store proposal: {m}"), "/ops"))?;
         let entry = LogEntry {
             reason: reason.clone(),
@@ -1101,7 +1133,7 @@ impl Session {
             undoes: None,
             summary: format!("propose {pid}: {}", summarize_ops(ops, &created)),
         };
-        self.commit(entry, doc);
+        self.committed(entry);
         let mut lines = vec![out(
             &conn,
             ServerMsg::Ack {
@@ -1217,7 +1249,12 @@ impl Session {
 
     /// `base` check (§8.2): an item the command touches changed in an entry after
     /// `base` that is not undone (undo pairs both after `base` cancel out).
-    fn base_check(&self, base: Option<Seq>, changes: &[ChangeOp], origin: &[usize]) -> PResult<()> {
+    pub(crate) fn base_check(
+        &self,
+        base: Option<Seq>,
+        changes: &[ChangeOp],
+        origin: &[usize],
+    ) -> PResult<()> {
         let Some(b) = base else { return Ok(()) };
         if b > self.seq() {
             // A base from the future cannot be checked; accepting it would silently
@@ -1269,32 +1306,59 @@ impl Session {
     }
 
     fn commit(&mut self, entry: LogEntry, doc: Document) {
+        self.doc = doc;
+        self.committed(entry);
+    }
+
+    /// Records `entry`, whose changes `self.doc` already holds (applied in place or by
+    /// replacing the document): the data plane, the reading document, the values cache
+    /// and the view index follow, then the entry joins the log.
+    pub(crate) fn committed(&mut self, entry: LogEntry) {
         let series_set = entry
             .changes
             .iter()
             .any(|c| matches!(c, ChangeOp::PutSeries { .. } | ChangeOp::Delete { .. }));
-        if entry.changes.iter().any(|c| {
-            matches!(
-                c,
-                ChangeOp::PutSeries { .. }
-                    | ChangeOp::Delete { .. }
-                    | ChangeOp::AppendBars { .. }
-                    | ChangeOp::TruncateBars { .. }
-                    | ChangeOp::SetLastBar { .. }
-            )
-        }) {
+        let bars = crate::live::bar_deltas(&self.doc, &entry.changes);
+        if !self.incremental && (series_set || !bars.is_empty()) {
             self.cache.clear();
         }
-        self.doc = doc;
-        // The data plane follows the document (§18.3): bindings put, changed or deleted
-        // are resolved or dropped; the reading document mirrors the document.
         if series_set {
+            // The data plane follows the document (§18.3): bindings put, changed or
+            // deleted are resolved or dropped; the reading document mirrors the document.
             self.pending_stamps = self.plane.sync(&self.doc);
             self.rd = reading_doc(&self.doc, &self.plane);
-        } else if let Some(rd) = self.rd.as_mut() {
-            if apply_all(rd, &entry.changes).is_err() {
-                self.rd = reading_doc(&self.doc, &self.plane);
+            if self.incremental {
+                let mut ids: Vec<&str> = entry
+                    .changes
+                    .iter()
+                    .filter_map(|c| match c {
+                        ChangeOp::PutSeries { series, .. } => Some(series.id.as_str()),
+                        ChangeOp::Delete { id } => Some(id.as_str()),
+                        _ => None,
+                    })
+                    .collect();
+                ids.extend(bars.iter().map(|(id, _)| id.as_str()));
+                self.cache.forget(rd!(self), &ids);
             }
+            self.view_reads = None;
+        } else {
+            if let Some(rd) = self.rd.as_mut() {
+                if apply_all(rd, &entry.changes).is_err() {
+                    self.rd = reading_doc(&self.doc, &self.plane);
+                }
+            }
+            if !entry.changes.iter().all(crate::live::keeps_view_reads) {
+                self.view_reads = None;
+            }
+            if self.incremental && !bars.is_empty() {
+                self.cache.begin_tick();
+                for (id, d) in &bars {
+                    self.cache.apply_delta(rd!(self), id, *d);
+                }
+            }
+        }
+        for (id, d) in bars {
+            self.pending_views.push((id, d, entry.seq));
         }
         self.log.push(entry);
     }
@@ -1336,8 +1400,9 @@ impl Session {
     /// (engine entries and notifications in the order of §15). The event is not a
     /// protocol message: it never enters the log and causes no `change` by itself.
     ///
-    /// T4 path: the values cache is cleared and recomputed on demand; the incremental
-    /// live path (§18.8) replaces [`Session::data_event`]'s body in T5.
+    /// Incremental (§18.8): the reading document takes the changed bar in place, the
+    /// study series on the ticked bound series advance their streaming state, and only
+    /// the watchers, live capsules and `view` subscriptions resting on it are evaluated.
     ///
     /// # Errors
     /// [`DataError`]: unknown feed or an event the rules reject (nothing applied to that
@@ -1350,7 +1415,7 @@ impl Session {
         if outcome.changed.is_empty() {
             return Ok(Vec::new());
         }
-        self.data_changed(&outcome.changed);
+        self.data_changed(outcome.changed);
         Ok(self.settle_data())
     }
 
@@ -1363,7 +1428,11 @@ impl Session {
             return Vec::new();
         }
         self.pending_stamps = stamps;
-        self.data_changed(&changed);
+        let changed = changed
+            .into_iter()
+            .map(|id| (id, crate::values::Delta::Rebuild { from: 0 }))
+            .collect();
+        self.data_changed(changed);
         match self.stamp_anchors() {
             Some(seq) => self.settle(seq),
             None => self.settle_data(),
@@ -1376,21 +1445,41 @@ impl Session {
         self.plane.host_state(series).map(|(s, _)| s)
     }
 
-    fn data_changed(&mut self, ids: &[String]) {
+    /// After the data plane changed bound series (`changed`: series, how): the reading
+    /// document takes the change in place (a new bar is pushed, a revised bar replaced;
+    /// a state change re-injects or removes the bars), the values cache follows
+    /// incrementally (or is cleared on the reference path), and the change waits for
+    /// `view` subscribers.
+    fn data_changed(&mut self, changed: Vec<(String, crate::values::Delta)>) {
         match self.rd.as_mut() {
             Some(rd) => {
-                for id in ids {
-                    inject(rd, &self.plane, id);
+                for (id, d) in &changed {
+                    crate::live::mirror(rd, &self.plane, id, *d);
                 }
             }
             None => self.rd = reading_doc(&self.doc, &self.plane),
         }
-        self.cache.clear();
+        if self.incremental {
+            self.cache.begin_tick();
+            for (id, d) in &changed {
+                self.cache.apply_delta(rd!(self), id, *d);
+            }
+        } else {
+            self.cache.clear();
+        }
+        let seq = self.seq();
+        for (id, d) in changed {
+            self.pending_views.push((id, d, seq));
+        }
     }
 
     /// After a data change without a log entry: watchers at the current position, then
-    /// invalidations of every live capsule (§8.1, §18.4).
+    /// invalidations of every live capsule (§8.1, §18.4); incremental: only those resting
+    /// on the changed series (§18.8).
     fn settle_data(&mut self) -> Vec<OutboundLine> {
+        if self.incremental {
+            return self.settle_live(None);
+        }
         let seq = self.seq();
         let (mut conds, mut intents) = self.eval_watchers(seq);
         let mut entries = Vec::new();
@@ -1404,6 +1493,7 @@ impl Session {
         for s in entries {
             lines.extend(self.entry_events(s));
         }
+        lines.extend(self.view_events());
         lines.extend(conds);
         lines.extend(intents);
         lines
@@ -1419,32 +1509,33 @@ impl Session {
 
     /// Writes an engine entry (author `qp`).
     fn engine_entry(&mut self, changes: Vec<ChangeOp>, summary: String) -> Option<Seq> {
-        let mut doc = self.doc.clone();
-        let inverse = apply_all(&mut doc, &changes).ok()?;
+        // In place, no document copy: a change that does not fit rolls the earlier ones
+        // back.
+        let inverse = crate::live::apply_in_place(&mut self.doc, &changes).ok()?;
         let seq = self.seq() + 1;
-        self.commit(
-            LogEntry {
-                reason: None,
-                seq,
-                at: self.clock,
-                author: ENGINE_PRINCIPAL.to_owned(),
-                approved_by: None,
-                cause: None,
-                request: Vec::new(),
-                changes,
-                inverse,
-                undoes: None,
-                summary,
-            },
-            doc,
-        );
+        self.committed(LogEntry {
+            reason: None,
+            seq,
+            at: self.clock,
+            author: ENGINE_PRINCIPAL.to_owned(),
+            approved_by: None,
+            cause: None,
+            request: Vec::new(),
+            changes,
+            inverse,
+            undoes: None,
+            summary,
+        });
         Some(seq)
     }
 
     /// After entry `seq`: engine follow-up entries and all notifications, in the order of
     /// §15 (per entry: change, finding_state, proposal; then condition_met, then
     /// intent_triggered).
-    fn settle(&mut self, seq: Seq) -> Vec<OutboundLine> {
+    pub(crate) fn settle(&mut self, seq: Seq) -> Vec<OutboundLine> {
+        if self.incremental && self.pending_stamps.is_empty() && self.bars_only(seq) {
+            return self.settle_live(Some(seq));
+        }
         let mut entries = vec![seq];
         let (mut conds, mut intents) = self.eval_watchers(seq);
         let mut data_entries = vec![seq];
@@ -1467,6 +1558,7 @@ impl Session {
         for s in entries {
             lines.extend(self.entry_events(s));
         }
+        lines.extend(self.view_events());
         lines.extend(conds);
         lines.extend(intents);
         lines
@@ -1511,6 +1603,13 @@ impl Session {
             .filter(|c| c.state == CapsuleState::Live && (all || findings.contains(&c.finding)))
             .map(|c| (c.id.clone(), c.finding.clone()))
             .collect();
+        self.invalidate_these(candidates)
+    }
+
+    /// Engine entries invalidating those of `candidates` (capsule, finding) whose
+    /// invalidation holds now (not evaluated when resting on a bound series that is not
+    /// ready).
+    pub(crate) fn invalidate_these(&mut self, candidates: Vec<(String, String)>) -> Vec<Seq> {
         let mut out = Vec::new();
         for (cap, fnd) in candidates {
             let Some(f) = self.doc.findings.iter().find(|f| f.id == fnd) else {
@@ -1624,7 +1723,7 @@ impl Session {
     }
 
     /// Notifications for one log entry.
-    fn entry_events(&self, seq: Seq) -> Vec<OutboundLine> {
+    pub(crate) fn entry_events(&self, seq: Seq) -> Vec<OutboundLine> {
         let e = &self.log[usize::try_from(seq - 1).unwrap_or(0)];
         let mut lines = Vec::new();
         let touched = touched_ids(&e.changes);
@@ -1763,6 +1862,9 @@ impl Session {
                     );
                 }
             }
+            Topic::View { view } => {
+                crate::expand::need_view(&self.doc, view, "/topic/view")?;
+            }
             Topic::Changes { .. }
             | Topic::Proposals {}
             | Topic::Attention { principal: None }
@@ -1772,6 +1874,7 @@ impl Session {
             id: id.to_owned(),
             topic,
             last,
+            memo: None,
         });
         Ok(())
     }
@@ -1821,12 +1924,7 @@ impl Session {
     /// True if `c` reads a series resting on a bound series that is not ready for the
     /// authority (pending, no data, stale): the condition is not evaluated (§18.3).
     pub(crate) fn cond_blocked(&self, c: &qp_schema::Condition) -> bool {
-        if self.plane.series.is_empty() {
-            return false;
-        }
-        crate::values::condition_series(c)
-            .iter()
-            .any(|(_, s)| self.plane.gate(&self.doc, None, s).is_some())
+        crate::live::cond_blocked(&self.plane, &self.doc, c)
     }
 
     /// The `welcome` summary for `principal`: over the reading document (`len` is the

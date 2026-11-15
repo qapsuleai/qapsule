@@ -29,7 +29,7 @@ use qp_schema::{Bar, Document, Series, SeriesData, SeriesSource};
 use qp_source::{bind, Applied, Bound, EventError, MemoryProvider, SourceProvider};
 
 use crate::error::E;
-use crate::values::find_series;
+use crate::values::{find_series, Delta};
 
 /// The host's source provider as the session holds it.
 pub(crate) enum Provider {
@@ -153,8 +153,9 @@ impl std::error::Error for DataError {}
 
 /// What one data event did to the bound series (by id).
 pub(crate) struct EventOutcome {
-    /// Bound series whose bars or state changed (their reading copy must be refreshed).
-    pub changed: Vec<String>,
+    /// Bound series whose bars or state changed, and how (their reading copy and the
+    /// values on them follow, §18.8).
+    pub changed: Vec<(String, Delta)>,
 }
 
 /// The authority's data plane.
@@ -449,16 +450,15 @@ impl DataPlane {
             any = true;
             let before = store.state();
             match store.apply(ev) {
-                Ok(
-                    Applied::NewBar { .. }
-                    | Applied::LiveUpdate { .. }
-                    | Applied::Correction { .. },
-                ) => {
-                    changed.push(id.clone());
+                Ok(Applied::NewBar { index }) => {
+                    changed.push((id.clone(), Delta::Appended { from: index }));
+                }
+                Ok(Applied::LiveUpdate { index } | Applied::Correction { index }) => {
+                    changed.push((id.clone(), Delta::Revised { index }));
                 }
                 Ok(Applied::Gap { .. } | Applied::Stale(_)) => {
                     if before != store.state() {
-                        changed.push(id.clone());
+                        changed.push((id.clone(), Delta::Rebuild { from: 0 }));
                     }
                 }
                 Ok(Applied::Duplicate | Applied::OutsideWindow { .. }) => {}

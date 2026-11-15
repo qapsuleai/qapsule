@@ -327,6 +327,7 @@ pub(crate) fn sites(msg: &Value) -> Vec<Vec<Site>> {
                 match t.get("kind").and_then(Value::as_str) {
                     Some("changes") => push_all(&mut out, t, p, "ids", Kind::Item),
                     Some("finding") => push(&mut out, t, p, "finding", Kind::Finding, None),
+                    Some("view") => push(&mut out, t, p, "view", Kind::View, None),
                     Some("condition") => {
                         if let Some(c) = t.get("condition") {
                             condition_sites(&mut out, c, "/topic/condition");

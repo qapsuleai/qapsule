@@ -93,6 +93,7 @@ fn series_summary(doc: &Document, s: &Series) -> SeriesSummary {
         interval: s.interval.clone(),
         len,
         label: series_label(s),
+        binding: None,
     }
 }
 

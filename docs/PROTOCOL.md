@@ -1,6 +1,6 @@
 # Qapsule Alan Protokolü — `qp/0`
 
-Durum: **v0** (RD1; R2'de gramer eki — §5.1 gramer işlemleri, §5.4 `hit`, §4.1 `summary`, §13 `no_origin`/`ambiguous`, §17 anlamla başvuru; hepsi ek, kırıcı değil). Mesaj tiplerinin tek kaynağı `crates/qp-schema/src/protocol.rs`;
+Durum: **v0** (RD1; R2'de gramer eki — §5.1 gramer işlemleri, §5.4 `hit`, §4.1 `summary`, §13 `no_origin`/`ambiguous`, §17 anlamla başvuru; RP2'de veri düzlemi eki — §18 veri bağı, veri olayları, dondurulmuş kanıt; hepsi ek, kırıcı değil). Mesaj tiplerinin tek kaynağı `crates/qp-schema/src/protocol.rs`;
 JSON Schema oradan üretilir (`qp schema export`): `ClientMsg`, `ServerMsg`, `Op`,
 `ChangeOp`, `Query`, `LogEntry`, `InboundLine`, `OutboundLine`. Bu belge ile şema
 çelişirse şema doğrudur ve bu belge düzeltilir.
@@ -74,8 +74,16 @@ dokümanı **bayt düzeyinde** aynen elde edilir. "Başlangıç dokümanı" otor
 (presenter), saat ya da rastgelelik gerekmez; değişimler tam öğeleri taşır.
 
 Hesap serileri (`source.kind = "study"`) dokümanda veri taşımaz; değerleri girdilerinden
-otoritede deterministik olarak hesaplanır (`qp-compute`). Bar serileri verilerini
-`data.bars` içinde taşır (v0'da yalnızca `inline` ve `study` kaynakları desteklenir; bkz. §14).
+otoritede deterministik olarak hesaplanır (`qp-compute`). **Bağlı seriler**
+(`source.kind = "bind"`, RP2) de veri taşımaz: barları veri düzleminden gelir, her kişinin
+veri yetkisiyle çözülür (§18; K23). Belge içi bar serileri (`inline`) verilerini
+`data.bars` içinde taşır; test verisi ve küçük örnekler için kalır (§14).
+
+**Veri düzlemi ve anlam düzlemi (K23).** Protokol yalnızca anlamı taşır. Bağlı serilerin
+barları ve canlı fiyatları protokol mesajı değildir, günlüğe girmez; barındırıcı onları
+veri olayları olarak motora doğrudan verir (§18.4). Bu yüzden günlük ve yeniden oynatma
+değişmezi bağlı serilerde de aynıdır: doküman veri olaylarıyla değişmez; veri olayının
+yol açtığı motor girdileri (kapsül geçersizleşmesi) tam değişimleriyle günlüktedir.
 
 Bütün öğe kimlikleri (seri, görünüm, olgu, bulgu, kapsül, niyet, anlatım, öneri)
 doküman genelinde **tektir**. Kimlik biçimi: `^[A-Za-z0-9][A-Za-z0-9_.:-]{0,63}$`.
@@ -437,6 +445,8 @@ böylece aynı görünümün farklı katmanlarına eşzamanlı yazılar çakış
 | `attention` | `principal` | `attention`: kişinin en son etkin ekranlı bağlantısının bakış aralığı (girdi yoksa başlangıç aralığı), son odak (`tap`: görünüm, panel, bar), zamanı, yönergeler. |
 | `hit` | `view?`, `x`, `y`, `width?`, `height?` | (R2) `hit`: görünüm `width`×`height` (varsayılan 1200×600) çizildiğinde (`x`,`y`) pikselinde ne olduğu — panel, bar, zaman, ölçekteki değer ve en üstteki öğe (katman, işaret, veri, bar, zaman, değerler, kökenler); boş alanda `item` yok. Görünen aralık: soranın o görünümdeki bakışı, yoksa kalıcı aralık, yoksa bütün barlar. Sahne tarifinden cevaplanır, çizim yapılmaz (`docs/GRAMMAR.md` §16). |
 | `present` | `finding?`, `surface?` | `presentation` (§10). `finding` yoksa en önemli canlı bulgu (en yüksek güven; eşitlikte kimlik sırası). |
+| `binding` | `series?` | (RP2) `bindings`: bağlı serilerin soran için durumu (`ready`, `pending`, `no_entitlement`, `no_data`), nedeni, çapa (`anchor_t`, bar 0'ın zamanı) ve otoritenin veri konumu (§18.3). |
+| `verify_evidence` | `item` (olgu ya da bulgu) | (RP2) `evidence_check`: olgunun (bulguda her olgunun) dondurulmuş kanıtının bugünkü veriye karşı sınaması — veri özeti ve kanıt değerleri; fark varsa bildirir (§18.5). |
 
 **Hedef** (`Target`; dikkat, anlatım adımları ve R2'de görünüm vurgusu): `view`, `panel` (panel id'si), `layer` (R2), `series`, `output`
 (serinin çıktısı ya da bar alanı: hacim için `"v"`), `item` (bulgu, olgu…), `from_bar`,
@@ -650,6 +660,8 @@ Her hata, ajanın yardım almadan düzeltebileceği kadar bilgi taşır:
 | `unsupported` | Bu otoritede desteklenmiyor | `hint` |
 | `no_origin` | (R2) Katmandaki sayısal sabitin kökeni yok (olgu, adlandırılmış eşik, seri değeri) | `path` (sabitin yeri), `candidates`, `hint` |
 | `ambiguous` | (R2) Anlamla başvuru birden çok öğeye uyuyor; otorite rastgele seçmez | `path`, `candidates` (türün sırasıyla, §17) |
+| `no_entitlement` | (RP2) Soranın bağlı serinin beslemesi için veri yetkisi yok (borsa veri lisansı; rol yetkisi değil) | `path` (seri başvurusu), `hint` |
+| `no_data` | (RP2) Bağlı serinin verisi yok: kaynak bağı tanımıyor, pencere boş ya da çözüm bekliyor | `path`, `hint` |
 
 `candidates` (R2): `{id, about}` listesi — kullanılacak kimlik (ya da köken için JSON
 metni) ve ne olduğu. `ack.resolved` (R2): komuttaki anlamla başvuruların çözüldüğü
@@ -670,9 +682,11 @@ kimlikleri, alan adları… Bir komutta hata varsa **hiçbir** işlem uygulanmaz
 - (R2) Satır içi **nokta serileri** de kabul edilir (`data.kind = "points"`): boş olmayan,
   `t` kesin artan, `v` sonlu ya da `null`; nokta sayısı `limits.max_bars` ile sınırlı
   (ör. tahmin yelpazesi bantları, `docs/GRAMMAR.md` §3).
-- v0 otoritesi seri kaynağı olarak yalnızca `inline` ve `study` kabul eder; `file`,
-  `matriks`, `nats` → `unsupported`. Dosya bağları otoritenin yapılandırmasıyla, taban
-  klasöre hapsedilerek açılır (R1 bulgusu; `qp_source::open_binding`), protokolden değil.
+- Otorite seri kaynağı olarak `inline`, `study` ve (RP2) `bind` kabul eder; `file`,
+  `matriks`, `nats` → `unsupported` (eski yer tutucular; yerlerini `bind` aldı). Dosya
+  beslemeleri barındırıcının yapılandırmasıyla, taban klasöre hapsedilerek açılır (R1
+  bulgusu; `qp_source::open_binding`), protokolden değil. Veri bağının sınırları ve yetki
+  denetimi §18.7'de.
 - Köken istemciden alınmaz; otorite damgalar. Rol istemciden alınmaz; yapılandırmadan gelir.
 - Yetki her işlem için ayrı denetlenir; bir komuttaki tek yetkisiz işlem tüm komutu
   `forbidden` (ya da `auto` kipinde öneri) yapar.
@@ -694,6 +708,10 @@ kimlikleri, alan adları… Bir komutta hata varsa **hiçbir** işlem uygulanmaz
   "final": {"document": { … }}
 }
 ```
+
+Bir adım `send`, `send_raw` ya da (RP2) `data` taşır. `data` bir veri olayıdır (§18.4):
+koşucu onu bağlantıdan değil barındırıcı yolundan motora verir; `expect` olayın yol açtığı
+bildirimlerdir (çoğu zaman boş). Veri düzlemi `init.data` ile kurulur (§18.6).
 
 `send.msg` tipli bir `ClientMsg` olarak çözülür; bu yüzden **anlamla başvuru (§17) seçici
 nesneleri** içeren ya da tipli biçimin taşıyamadığı bir mesaj `send_raw` ile yazılmalıdır
@@ -950,6 +968,194 @@ uzlaşma: `Op` tipi hem istek hem saklanan istek (`LogEntry.request`, `Proposal.
 olduğundan saklanan isteğin şeması da seçiciye izin verir görünür; otorite oraya yalnız
 kimlik yazar. MCP araçları bu şemadan üretildiği için her `op_*`/`query_*` aracı seçici
 kabul eder.
+
+## 18. Veri düzlemi (RP2) — veri bağı, veri olayları, dondurulmuş kanıt
+
+> K23: piyasa verisi protokolün içinden akmaz; kaynağından kendi biçiminde gelir ve motora
+> veri sağlayıcı üzerinden girer. Doküman bar taşımaz, **veri bağı** taşır. Kavramlar
+> `docs/CONCEPTS.md` "Veri düzlemi". Tipler `qp-schema::data` ve `qp-schema::protocol`.
+
+### 18.1 İki düzlem
+
+| | Veri düzlemi | Anlam düzlemi (protokol) |
+|---|---|---|
+| Ne taşır | barlar, canlı fiyat (alan düzeyinde) | komut, değişim, olgu, bulgu, kapsül durumu, koşul olayları, sorgu cevapları |
+| Biçim | kaynağın kendi biçimi (Matriks protobuf, NATS, dosya); motora `DataEvent` olarak girer | JSON mesajları (§3) |
+| Günlük | girmez | her yazı bir girdi |
+| Kim çözer | her taraf kendi veri yetkisiyle (otorite, her yansı) | tek otorite |
+
+Protokolde bar yalnızca küçük sorgu sonuçlarında (`study`, `at`, sınırlı aralıklarla), test
+verisinde (`inline`) ve ajanın açıkça istediği kısa aralıklarda bulunur.
+
+### 18.2 Veri bağı
+
+Bir serinin kaynağı `bind` olabilir:
+
+```json
+{"op":"put_series","series":{"id":"px","interval":"1d",
+  "instrument":{"symbol":"THYAO","exchange":"BIST"},
+  "source":{"kind":"bind","symbol":"THYAO","interval":"1d","window":{"last":10000}}}}
+```
+
+| Alan | Kural |
+|------|-------|
+| `symbol` | `^[A-Za-z0-9][A-Za-z0-9._-]{0,31}$` |
+| `interval` | `1m`…`1440m`, `1h`…`24h`, `1d`, `1w`, `1M` (`qp_calendar::Interval`) |
+| `window` | tam olarak biri: `{"last": n}` (1 ≤ n ≤ `limits.max_bind_bars`), `{"from_t": t}`, `{"from_t": a, "to_t": b}` (a ≤ b; kapalı pencere canlı bar almaz) |
+| `feed` | isteğe bağlı besleme adı (`matriks`, `delayed`…), `symbol` ile aynı desen; yoksa barındırıcının varsayılanı |
+
+- Bağlı seri `data` taşımaz (`invalid`, `/…/data`). Serinin `instrument.symbol` ve
+  `interval` alanları verilmişse bağınkiyle aynı olmalıdır (`invalid`).
+- Bağlı seriye `append_bars` / `update_last_bar` → `invalid` ("bağlı serinin verisi veri
+  düzleminden gelir"). Bu işlemler belge içi seriler içindir.
+- Hesap serileri bağlı serilere bağlanabilir (`inputs`); hesap ve görünüm kodu bağlı ile
+  belge içi seriyi ayırt etmez.
+- Aynı `symbol` + `interval` + `feed` (besleme, `FeedKey`) bağlı seriler veriyi paylaşır;
+  pencereleri farklı olabilir.
+- `welcome.summary.series[].binding` soranın bağ durumunu, `len` otoritenin tuttuğu bar
+  sayısını verir.
+
+### 18.3 Çözüm, bağ durumu ve çapa
+
+Barındırıcı otoriteye bir **veri sağlayıcı** (`SourceProvider`) verir. Sağlayıcı bir bağı
+bir kişi adına çözer: yetki denetimi, ilk barlar, sonra veri olayları. Otorite:
+
+1. **Kendi motor işi için** (bulgu geçersizleşmesi, koşullar, niyetler, sunucu) bağı
+   `host` rolündeki kişinin veri yetkisiyle çözer. Çözüm komut yolunda değil, bağ
+   dokümana girdiğinde (yüklemede ya da `put_series` uygulandıktan sonra) yapılır; doküman
+   değişmez.
+2. **Her okuma için** soranın yetkisini ayrıca denetler: soranın beslemeye yetkisi yoksa
+   o serinin verisini (ve ona dayanan hesapların değerlerini) okuyan sorgu
+   `no_entitlement` döner. Rol yetkisi (`read`) ile veri yetkisi ayrıdır.
+
+**Bağ durumu** (`BindingState`): `ready`, `pending` (sağlayıcı henüz cevap vermedi),
+`no_entitlement`, `no_data`. `binding` sorgusu her bağlı seri için durumu, nedeni,
+**çapayı** (`anchor_t`, bar 0'ın zamanı) ve otoritenin veri konumunu (`DataPosition`:
+bar sayısı, son bar zamanı, son uygulanan kaynak sıra numarası, bütün barların özeti)
+verir.
+
+**Çözülemeyen bağ belgeyi durdurmaz.** Durumu `ready` olmayan bir bağlı seri ve ona dayanan
+hesaplar için:
+
+| Yer | Davranış |
+|-----|----------|
+| `study`, `at`, `hit` öğesi, `verify_evidence` | `no_entitlement` / `no_data` hatası, serinin yolunda |
+| görünüm, `screen`, `hit` | o serinin katmanları çizilmez; `screen` katmanında `binding` durumu; diğer katmanlar ve paneller çalışır |
+| geçersizlik koşulu, niyet, `condition` aboneliği | değerlendirilmez (yanlış sayılır); kenar durumu korunur |
+| `present` | kıvılcım (`spark`) ve görünüm verilmez; metin ve durum verilir |
+| komutlar | dokümanı değiştiren komutlar çalışır (veri okumaz); `add_fact` olgunun bar zamanını okuduğu için yazarın veri yetkisi ister |
+
+**Bar numaraları ve çapa.** Bağlı serinin bar numarası otoritenin çözdüğü pencerenin ilk
+barından (çapa) sayılır; sonradan gelen barlar sona eklenir, pencere kaymaz. Farklı
+zamanda ya da farklı yetkiyle çözen bir yansının bar 0'ı farklı olabilir; bu yüzden
+düzlemler arası kimlik **zamandır** (`t`): olgular `t` taşır, kanıt başvurusu zaman
+aralığıdır. Aynı bar numaralarını isteyen yansı bağı `{"from_t": anchor_t}` ile çözer.
+
+**Hesap başlangıcı çapadır.** Hesaplar bar 0'dan başlar; üstel ve Wilder ortalamaları
+bütün geçmişi hatırladığından (RSI(14)'te eski bir barın etkisi ~500 bar sonra `f64`
+duyarlılığının altına iner; `rounds/RP2/RESEARCH.md` §1.2) farklı bardan başlayan iki taraf
+aynı bar için farklı bitler üretir ve eşik yakınında kesişim konusunda bile ayrışabilir. Bu
+yüzden otoriteyle **bit düzeyinde aynı** değer isteyen yansı bağı çapadan
+(`{"from_t": anchor_t}`) çözer; tutarlılık kuralları (§19) buna dayanır.
+
+### 18.4 Veri olayları
+
+Veri olayı (`DataEvent`) alan düzeyindedir; yalnızca değişen alanlar gelir (Matriks
+`SymbolMessage` `UPDATE` gibi):
+
+```json
+{"feed":{"symbol":"THYAO","interval":"1d"},"seq":41,"change":{"kind":"bar","bar":{"t":1760054400000,"o":301.5,"h":301.5,"l":301.5,"c":301.5,"v":0}}}
+{"feed":{"symbol":"THYAO","interval":"1d"},"seq":42,"change":{"kind":"patch","t":1760054400000,"fields":{"c":302.25,"h":302.25,"v":1200}}}
+{"feed":{"symbol":"THYAO","interval":"1d"},"seq":43,"change":{"kind":"patch","t":1759968000000,"fields":{"c":299.0}}}
+```
+
+- `bar`: son bardan sonra yeni bar (`t` kesin büyük).
+- `patch`: var olan bir barın verilen alanları (en az biri). Son barda **canlı
+  güncelleme**, daha eski barda **düzeltme** (veri sağlayıcının geçmiş düzeltmesi,
+  bölünme ayarı).
+- `seq`: beslemenin kaynak sıra numarası, 1'den boşluksuz. Alıcı (otorite ya da yansı):
+  `seq` ≤ son → yineleme, yok sayılır (eşgüçlü); `seq` > son + 1 → **boşluk**: besleme
+  `stale` olur, olay uygulanmaz, barındırıcıya boşluk bildirilir (yeniden çözme ya da
+  boşluk doldurma barındırıcının işi; piyasa verisi geleneği).
+- Kurallara uymayan olay (geride kalan `bar`, olmayan `t`'ye `patch`, sonlu olmayan değer)
+  uygulanmaz ve barındırıcıya hata olarak döner; doküman ve bağlantılar etkilenmez.
+
+**Olay protokol mesajı değildir.** Barındırıcı onu motora doğrudan verir (referans otoritede
+`Session::data_event`); bağlantılardan gelmez, günlüğe girmez, `change` olayı üretmez.
+Yol açtığı şeyler ise anlam düzlemindedir ve bugünkü kurallarla yayılır (§8.1): canlı
+kapsüllerin geçersizlik koşulu doğru olursa motor girdisi (`qp`) ve `finding_state`;
+`condition_met`; `intent_triggered`. Bir veri olayı yalnızca o beslemeye bağlı serilere
+dayanan hesapları, koşulları ve görünümleri etkiler (§18.8).
+
+**Belirleyicilik.** Otoritenin çıktısı (mesajlar + günlük) aynı başlangıç dokümanı, aynı
+mesajlar ve aynı veri olayları aynı sırayla verildiğinde aynıdır. Yeniden oynatma
+(başlangıç + değişimler) için veri olayları gerekmez.
+
+### 18.5 Dondurulmuş kanıt
+
+Otorite bir olguyu eklerken (`add_fact`; R3'te dedektörler) olguya **kanıt başvurusu**
+(`evidence_ref`, `EvidenceRef`) damgalar; istemci göndermez:
+
+```json
+"evidence_ref":{"series":"px","binding":{"symbol":"THYAO","interval":"1d","window":{"last":10000}},
+  "from_t":1514851200000,"to_t":1754438400000,"bars":1843,"alg":"fnv1a64","digest":"9c1f0e5a7b2d4c11"}
+```
+
+- `series`: olgunun serisinin bar serisi (hesap serisinde girdisinin bar serisi, §5.1).
+- Aralık: bar 0'dan olgunun barına kadar (kapsayıcı). Gerekçe: göstergelerin değeri bütün
+  geçmişe dayanır (üstel ve Wilder ortalamaları); geçmişin herhangi bir yerindeki düzeltme
+  iddiayı etkileyebilir.
+- `digest`: veri özeti — FNV-1a 64 (standart başlangıç), her bar için sırayla `t`'nin
+  (`i64`) ve `o`, `h`, `l`, `c`, `v`'nin IEEE-754 bitlerinin 8 bayt küçük-endian hali;
+  16 küçük onaltılık hane (`qp_schema::data::data_digest`). Her hedefte aynı. Kriptografik
+  değildir: düzeltmeyi yakalar, kasıtlı sahteciliği değil (paylaşılan, imzalı kanıt R6'da
+  gömülü ikili ek kararıyla birlikte).
+- Belge içi serilerde de damgalanır (`binding` yok).
+
+**`verify_evidence`** (`item`: olgu ya da bulgu) her olgu için:
+
+1. Bar serisinin bugünkü barlarında `from_t`…`to_t` aralığını **zamana göre** bulur, bar
+   sayısını ve özeti hesaplar (`current`).
+2. Olgu bir hesap serisindeyse kanıt değerlerinden `value` ve `prev`'i olgunun barında
+   (zamanla bulunur) yeniden hesaplar (`values`: `then` / `now`).
+3. Durum: `verified` (özet ve değerler bit düzeyinde aynı), `changed` (ileti ilk farkı söyler:
+   bar sayısı, özet, değer), `no_ref`, `unavailable` (bağ hazır değil ya da aralık artık
+   yok), `no_entitlement`.
+
+Bulgu `verified` ise bütün olguları `verified`'dır. Sorgu dokümanı değiştirmez.
+
+### 18.6 Test veri sağlayıcısı (dökümler)
+
+`init.data` (`InitData`) otoritenin barındırıcısını taklit eder: beslemeler (`feeds`; her
+biri `bars`, `path` ya da `synthetic {n, seed}` ile ilk barlarıyla), yetkiler
+(`entitlements`: kişi → semboller, `"*"` hepsi; listede olmayan kişinin yetkisi yok;
+otoritenin kendi işi `host` kişisinin yetkisiyle) ve hiç cevap vermeyen beslemeler
+(`pending`). Adımdaki `data` (§15) veri olayını barındırıcı yolundan verir. Pencere
+`{"last": n}` sağlayıcının son `n` barıdır.
+
+### 18.7 Güvenlik ve sınırlar
+
+- Veri bağı dış girdidir: `symbol`, `feed` deseni, `interval` kapalı kümesi, pencere
+  kuralları ve `window.last ≤ limits.max_bind_bars` (varsayılan 100.000) şemadan sonra,
+  uygulamadan önce denetlenir. Sağlayıcı `from_t` penceresi için daha çok bar verirse
+  otorite en son `max_bind_bars` barı tutar ve `binding` sorgusunun `reason`'ında söyler.
+- Dosya beslemeleri barındırıcı yapılandırmasıyla, taban klasöre hapsedilerek açılır
+  (`qp_source::resolve_binding_path`); protokolden yol gelmez. `init.data.feeds[].path`
+  depo köküne hapsedilir.
+- Veri yetkisi her okumada soranın kimliğiyle denetlenir; bir kişinin yetkisi olmayan veri
+  ona hiçbir sorgu cevabında (değer, kıvılcım, nokta sorgusu) gitmez.
+- Anlık görüntü (`document`) bağlı serilerin barlarını içermez (doküman taşımaz); paylaşılan
+  doküman veri lisansını taşımaz (K23).
+
+### 18.8 Artımlı canlı yol ve etkilenenler
+
+Bir veri olayı ya da belge içi bar yazısı (`append_bars`, `update_last_bar`) dokümanı
+kopyalamadan uygulanır ve yalnızca etkilediklerini günceller: o beslemeye (seriye) dayanan
+hesapların akışlı durumu (`push` / son barı düzelt; geçmiş düzeltmede o bardan sonrası),
+o hesaplara dayanan koşullar ve canlı kapsüller, o serileri çizen görünümler. Etkilenmeyen
+görünüme ve aboneliğe hiçbir mesaj gitmez. Sonuç baştan hesapla bayt düzeyinde aynıdır.
+Ayrıntı ve ölçüm `rounds/RP2/REPORT.md`.
+
 
 ## Ek A — Eski `Command` tipi
 

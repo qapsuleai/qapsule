@@ -388,7 +388,10 @@ pub(crate) fn expand_op(
                         output: output.clone(),
                     };
                 }
-                SeriesSource::File { .. } | SeriesSource::Matriks { .. } | SeriesSource::Nats { .. } => {
+                SeriesSource::File { .. }
+                | SeriesSource::Matriks { .. }
+                | SeriesSource::Nats { .. }
+                | SeriesSource::Bind { .. } => {
                     return Err(E::new(
                         ErrorCode::Unsupported,
                         "this authority accepts only `inline` and `study` series sources",
@@ -666,6 +669,7 @@ pub(crate) fn expand_op(
                 t,
                 text: text.clone(),
                 evidence: evidence.clone(),
+                evidence_ref: None,
                 provenance: ctx.prov(vec![series.clone()]),
             };
             Ok(vec![ChangeOp::PutFact { fact, index: None }])

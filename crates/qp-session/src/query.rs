@@ -456,6 +456,13 @@ impl Session {
             } => Ok(QueryResult::Hit {
                 hit: self.hit(ci, view.as_deref(), *x, *y, (*width, *height))?,
             }),
+            Query::Binding { .. } | Query::VerifyEvidence { .. } => Err(E::new(
+                ErrorCode::Unsupported,
+                "data bindings are not resolved by this authority yet",
+            )
+            .at(qp)
+            .hint("Specified in docs/PROTOCOL.md §18; implemented in RP2/T4.")
+            .build()),
             Query::Present { finding, surface } => {
                 let f = match finding {
                     Some(id) => need_finding(&self.doc, id, &ptr(qp, "finding"))?.clone(),

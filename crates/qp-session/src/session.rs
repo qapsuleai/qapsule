@@ -41,6 +41,7 @@ pub fn default_limits() -> Limits {
         max_bars: 10_000,
         max_subscriptions: 32,
         max_string: 4096,
+        max_bind_bars: 100_000,
     }
 }
 

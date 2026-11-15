@@ -1,0 +1,11 @@
+approach bs2n — bs2 ablation: the real authority and replica without §19.9
+scen  seeds  fail   live failL |    M1     M2      M2ms   M3f   M3p |    M4        M5 |     M6p p50/95/99     M6f p50/95/99 |      M7ms  M7> |    M8 |  M9B/cl    M9B/s | M10w/e |  M11 p50/un/x |   M12  max |     M13ms
+AUD1    100     0      0     0 |     0      0         0     0     0 |     0  521/4539 |  4389/36163/36457    3412/5117/7440 |    735378    0 |   644 |    1515     26.2 |    9.9 |   1155/529/16 |  5138    4 |  17768049
+  AUD1 done in 5.4s; worst seed None
+AUD2    100     0      0     0 |     0      0         0     0     0 |     0  373/4739 |  4246/36176/38015    3422/5601/9612 |    911547   55 |   408 |    1428     23.7 |  167.2 |   1184/241/10 |  4708    3 |  72161616
+  AUD2 done in 4.7s; worst seed None
+AUD3    100     5     11     5 |     0      0         0     7     4 |     0  488/4524 |  4328/47105/63279    3424/5108/7414 |   3336767    7 |   608 |    1534     26.5 |  416.6 |   1068/416/25 |  5153    3 |  22653715
+  AUD3 done in 7.6s; worst seed Some((30, 4))
+M7X     100     0      0     0 |     0      0         0     0     0 |     0  904/4539 |  3500/35803/36391    3406/5499/8676 |    460114    1 |  1230 |    1599     27.6 |    4.5 |    665/520/76 |  4361    2 |  83171421
+  M7X done in 7.5s; worst seed None
+results written to /Users/arkns/Works/Mchart/qapsule/.claude/worktrees/agent-a18d936c605d970c8/rounds/R3/experiments/M7/raw/bs2/bs2n-aud.json

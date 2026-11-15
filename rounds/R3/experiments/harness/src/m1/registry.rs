@@ -35,6 +35,7 @@ pub fn all() -> Vec<M1Entry> {
         entry(Box::new(super::control::Control), super::control::LEGEND),
         // --- M1 alternatives: one line each, e.g.
         // entry(Box::new(m1_foo::Alphabet), m1_foo::LEGEND),
+        entry(Box::new(m1_siluet::Alphabet), m1_siluet::LEGEND),
     ]
 }
 

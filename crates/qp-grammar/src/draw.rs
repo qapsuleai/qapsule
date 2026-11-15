@@ -256,7 +256,7 @@ fn lines(pl: &Prepared, g: &Geo<'_>, out: &mut SceneLayer) {
         }
         flush(&mut pts, color, &mut out.prims);
     }
-    // Items: one per slot, all traces' values together (rows are aligned by slot).
+    // Items: one per (slot, output); rows of all traces are aligned by slot.
     let aligned = pl
         .traces
         .windows(2)
@@ -312,14 +312,13 @@ fn lines(pl: &Prepared, g: &Geo<'_>, out: &mut SceneLayer) {
         });
     };
     if aligned {
+        // Slot-major, then output order: a multi-output line (e.g. bands drawn as one
+        // line layer) yields one item per (slot, output), each with its own ±4 px box
+        // (GRAMMAR §16), so a pixel between two traces hits nothing.
         for i in 0..n {
-            let rows: Vec<(&String, &PRow, bool)> = pl
-                .traces
-                .iter()
-                .zip(&pl.keys)
-                .map(|(t, k)| (k, &t.rows[i], t.lod_line))
-                .collect();
-            item_for(&rows, out);
+            for (t, k) in pl.traces.iter().zip(&pl.keys) {
+                item_for(&[(k, &t.rows[i], t.lod_line)], out);
+            }
         }
     } else {
         for (t, k) in pl.traces.iter().zip(&pl.keys) {

@@ -1,0 +1,217 @@
+{
+  "covers": [
+    "grammar",
+    "add_study",
+    "put_view",
+    "insert_layer"
+  ],
+  "description": "V1 (a): price, RSI and MACD histogram panels; layers inserted by id; 70/30 rules bind to the named thresholds rsi.overbought/rsi.oversold; histogram colour by sign (macd.zero).",
+  "final": {
+    "document": {
+      "views": [
+        {
+          "id": "three"
+        }
+      ]
+    }
+  },
+  "init": {
+    "clock": 1760000000000,
+    "document": "fixtures/views/docs/base.json",
+    "epoch": 0,
+    "principals": [
+      {
+        "author": {
+          "kind": "human",
+          "name": "arkin"
+        },
+        "id": "arkin",
+        "role": "owner"
+      }
+    ]
+  },
+  "name": "v1-three-panels",
+  "steps": [
+    {
+      "expect": [
+        {
+          "conn": "a",
+          "msg": {
+            "principal": "arkin",
+            "role": "owner",
+            "type": "welcome"
+          }
+        }
+      ],
+      "send": {
+        "conn": "a",
+        "msg": {
+          "principal": "arkin",
+          "protocol": "qp/0",
+          "surface": {
+            "kind": "desktop"
+          },
+          "type": "hello"
+        }
+      }
+    },
+    {
+      "expect": [
+        {
+          "conn": "a",
+          "msg": {
+            "id": "c1",
+            "status": "applied",
+            "type": "ack"
+          }
+        }
+      ],
+      "send": {
+        "conn": "a",
+        "msg": {
+          "id": "c1",
+          "ops": [
+            {
+              "id": "rsi14",
+              "inputs": [
+                "px"
+              ],
+              "op": "add_study",
+              "study": "rsi"
+            },
+            {
+              "id": "macd",
+              "inputs": [
+                "px"
+              ],
+              "op": "add_study",
+              "study": "macd"
+            },
+            {
+              "op": "put_view",
+              "view": {
+                "id": "three",
+                "layers": [
+                  {
+                    "id": "candles",
+                    "mark": "candle",
+                    "panel": 0,
+                    "series": "px"
+                  }
+                ],
+                "panels": [
+                  {
+                    "id": 0,
+                    "name": "price",
+                    "y": {
+                      "kind": "linear"
+                    }
+                  },
+                  {
+                    "id": 1,
+                    "name": "rsi",
+                    "y": {
+                      "domain": [
+                        0,
+                        100
+                      ],
+                      "kind": "linear"
+                    }
+                  },
+                  {
+                    "id": 2,
+                    "name": "macd",
+                    "y": {
+                      "kind": "linear"
+                    }
+                  }
+                ],
+                "x": {
+                  "kind": "time"
+                }
+              }
+            }
+          ],
+          "type": "command"
+        }
+      }
+    },
+    {
+      "expect": [
+        {
+          "conn": "a",
+          "msg": {
+            "id": "c2",
+            "status": "applied",
+            "type": "ack"
+          }
+        }
+      ],
+      "send": {
+        "conn": "a",
+        "msg": {
+          "id": "c2",
+          "ops": [
+            {
+              "layer": {
+                "id": "rsi",
+                "mark": "line",
+                "panel": 1,
+                "series": "rsi14"
+              },
+              "op": "insert_layer",
+              "view": "three"
+            },
+            {
+              "layer": {
+                "encoding": {
+                  "y": 70
+                },
+                "id": "ob",
+                "mark": "rule",
+                "panel": 1
+              },
+              "op": "insert_layer",
+              "view": "three"
+            },
+            {
+              "layer": {
+                "encoding": {
+                  "y": 30
+                },
+                "id": "os",
+                "mark": "rule",
+                "panel": 1
+              },
+              "op": "insert_layer",
+              "view": "three"
+            },
+            {
+              "layer": {
+                "encoding": {
+                  "color": {
+                    "else": "down",
+                    "then": "up",
+                    "when": {
+                      "field": "histogram",
+                      "op": "ge",
+                      "than": 0
+                    }
+                  },
+                  "y": "histogram"
+                },
+                "id": "hist",
+                "mark": "bar",
+                "panel": 2,
+                "series": "macd"
+              },
+              "op": "insert_layer",
+              "view": "three"
+            }
+          ],
+          "type": "command"
+        }
+      }
+    }
+  ]
+}

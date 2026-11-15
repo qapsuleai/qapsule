@@ -1,0 +1,183 @@
+{
+  "covers": [
+    "grammar",
+    "add_study",
+    "put_view"
+  ],
+  "description": "V5 (e): conditional colours: area between close and SMA(50) coloured up/down by which is above (split at the crossing); RSI line coloured by value steps at 30/70 (rsi.* thresholds).",
+  "final": {
+    "document": {
+      "views": [
+        {
+          "id": "cond"
+        }
+      ]
+    }
+  },
+  "init": {
+    "clock": 1760000000000,
+    "document": "fixtures/views/docs/base.json",
+    "epoch": 0,
+    "principals": [
+      {
+        "author": {
+          "kind": "human",
+          "name": "arkin"
+        },
+        "id": "arkin",
+        "role": "owner"
+      }
+    ]
+  },
+  "name": "v5-conditional",
+  "steps": [
+    {
+      "expect": [
+        {
+          "conn": "a",
+          "msg": {
+            "principal": "arkin",
+            "role": "owner",
+            "type": "welcome"
+          }
+        }
+      ],
+      "send": {
+        "conn": "a",
+        "msg": {
+          "principal": "arkin",
+          "protocol": "qp/0",
+          "surface": {
+            "kind": "desktop"
+          },
+          "type": "hello"
+        }
+      }
+    },
+    {
+      "expect": [
+        {
+          "conn": "a",
+          "msg": {
+            "id": "c1",
+            "status": "applied",
+            "type": "ack"
+          }
+        }
+      ],
+      "send": {
+        "conn": "a",
+        "msg": {
+          "id": "c1",
+          "ops": [
+            {
+              "id": "sma50",
+              "inputs": [
+                "px"
+              ],
+              "op": "add_study",
+              "params": {
+                "period": 50
+              },
+              "study": "sma"
+            },
+            {
+              "id": "rsi14",
+              "inputs": [
+                "px"
+              ],
+              "op": "add_study",
+              "study": "rsi"
+            },
+            {
+              "op": "put_view",
+              "view": {
+                "id": "cond",
+                "layers": [
+                  {
+                    "encoding": {
+                      "color": {
+                        "else": "down",
+                        "then": "up",
+                        "when": {
+                          "field": "c",
+                          "op": "ge",
+                          "than": {
+                            "field": "sma",
+                            "series": "sma50"
+                          }
+                        }
+                      },
+                      "opacity": 0.3,
+                      "y": "c",
+                      "y2": {
+                        "field": "sma",
+                        "series": "sma50"
+                      }
+                    },
+                    "id": "fill",
+                    "mark": "area",
+                    "panel": 0,
+                    "series": "px"
+                  },
+                  {
+                    "encoding": {
+                      "color": "text",
+                      "y": "c"
+                    },
+                    "id": "close",
+                    "mark": "line",
+                    "panel": 0,
+                    "series": "px"
+                  },
+                  {
+                    "encoding": {
+                      "color": {
+                        "colors": [
+                          "up",
+                          "muted",
+                          "down"
+                        ],
+                        "field": "rsi",
+                        "thresholds": [
+                          30,
+                          70
+                        ]
+                      }
+                    },
+                    "id": "rsi",
+                    "mark": "line",
+                    "panel": 1,
+                    "series": "rsi14"
+                  }
+                ],
+                "panels": [
+                  {
+                    "id": 0,
+                    "y": {
+                      "kind": "linear"
+                    }
+                  },
+                  {
+                    "id": 1,
+                    "y": {
+                      "domain": [
+                        0,
+                        100
+                      ],
+                      "kind": "linear"
+                    }
+                  }
+                ],
+                "x": {
+                  "kind": "time"
+                }
+              }
+            }
+          ],
+          "type": "command"
+        }
+      }
+    }
+  ]
+}

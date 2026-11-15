@@ -56,6 +56,55 @@ fn put_series_inline_and_study_and_unsupported() {
 }
 
 #[test]
+fn put_series_inline_points() {
+    let mut h = owner();
+    let r = h.cmd(
+        "a",
+        "c1",
+        json!([{"op":"put_series","series":{"id":"q50","source":{"kind":"inline"},
+            "data":{"kind":"points","points":[{"t":10,"v":1.5},{"t":20,"v":null},{"t":30,"v":2.0}]}}}]),
+    );
+    assert_eq!(r["status"], "applied", "{r}");
+    assert_eq!(r["created"], json!(["q50"]));
+    // Not ascending.
+    let r = h.cmd(
+        "a",
+        "c2",
+        json!([{"op":"put_series","series":{"id":"qx","source":{"kind":"inline"},
+            "data":{"kind":"points","points":[{"t":10,"v":1.0},{"t":10,"v":2.0}]}}}]),
+    );
+    assert_eq!(code(&r), "invalid");
+    assert_eq!(r["error"]["path"], "/ops/0/series/data/points/1");
+    // Empty.
+    let r = h.cmd(
+        "a",
+        "c3",
+        json!([{"op":"put_series","series":{"id":"qy","source":{"kind":"inline"},
+            "data":{"kind":"points","points":[]}}}]),
+    );
+    assert_eq!(code(&r), "invalid");
+    // No data at all.
+    let r = h.cmd(
+        "a",
+        "c4",
+        json!([{"op":"put_series","series":{"id":"qz","source":{"kind":"inline"}}}]),
+    );
+    assert_eq!(code(&r), "unsupported");
+    assert_eq!(r["error"]["path"], "/ops/0/series/data");
+    // Over the size limit.
+    let pts: Vec<Value> = (0..10_001).map(|i| json!({"t": i, "v": 1.0})).collect();
+    let r = h.cmd(
+        "a",
+        "c5",
+        json!([{"op":"put_series","series":{"id":"qw","source":{"kind":"inline"},
+            "data":{"kind":"points","points":pts}}}]),
+    );
+    assert_eq!(code(&r), "limit");
+    assert_eq!(r["error"]["path"], "/ops/0/series");
+    h.assert_replay();
+}
+
+#[test]
 fn add_study_new_panel_adds_a_panel() {
     let mut h = owner();
     let r = h.cmd(

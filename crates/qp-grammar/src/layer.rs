@@ -109,6 +109,14 @@ impl Chan<'_> {
             Chan::Const(v) => Some(*v),
         }
     }
+
+    /// Whether the channel's source has an entry at `slot` (see `Column::has`).
+    fn has(&self, slot: u64) -> bool {
+        match self {
+            Chan::Col(c) => c.has(slot),
+            Chan::Field(_) | Chan::Const(_) => true,
+        }
+    }
 }
 
 enum ColorRule<'f> {
@@ -1165,7 +1173,7 @@ fn series_rows(
                 match y.at(s, None) {
                     Some(v) => rows.push(mk(s, 1, [Some(v), None, None, None], s, None)),
                     None => {
-                        if s < fr.n_bars() {
+                        if y.has(s) {
                             skipped += 1;
                         }
                         rows.push(mk(s, 1, [None; 4], s, None));
@@ -1197,7 +1205,7 @@ fn series_rows(
                             }
                         }
                         None => {
-                            if s < fr.n_bars() {
+                            if y.has(s) {
                                 skipped += 1;
                             }
                         }
@@ -1295,7 +1303,7 @@ fn pair_rows(
                             }
                         }
                         None => {
-                            if s < fr.n_bars() {
+                            if y.has(s) || y2.is_some_and(|c| c.has(s)) {
                                 skipped += 1;
                             }
                         }

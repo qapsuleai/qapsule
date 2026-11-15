@@ -81,6 +81,7 @@ pub fn trust_paths() -> Vec<(&'static str, TrustFactory)> {
         // M6 alternatifleri: bir satır, ör.
         // ("a1", m6_a1::trust_path),
         ("coarse", m6_coarse::trust_path),
+        ("muhur", m6_muhur::trust_path),
     ]
 }
 

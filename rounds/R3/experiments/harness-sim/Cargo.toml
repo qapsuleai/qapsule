@@ -27,6 +27,7 @@ m4-kinddir = { path = "../M4/kinddir" }
 m4-arc = { path = "../M4/arc" }
 m3_ledger = { path = "../M3/ledger" }
 m6-coarse = { path = "../M6/coarse" }
+m6-muhur = { path = "../M6/muhur" }
 
 [lints.rust]
 unsafe_code = "forbid"

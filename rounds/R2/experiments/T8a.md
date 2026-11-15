@@ -143,7 +143,7 @@ görevlerde gerekmedi (ama özet ipuçlarında `value` "70 kuralı" için çık�
 2. **Doküman büyüdükçe seçici belirsizleşir.** `{"study":"rsi"}` ikinci bir RSI eklenince
    `ambiguous` olur; hata adayları ve düzeltme yolunu verir ama bir tur harcar. Kalıcı bir
    kayıtta (anlatım, niyet) zaten kimlik saklanıyor, sorun yalnız yazım anında.
-3. **R02** (T9'da düzeltildi, §9): `output` artık yalnız o çıktıyı tek başına çizen katmana
+3. **R02** (T9'da düzeltildi, §8): `output` artık yalnız o çıktıyı tek başına çizen katmana
    uyar; bölünmemiş katmanda `invalid` + hazır `split_layer` dizisi döner.
 4. **Sözlük bilgisi gerekiyor**: `mark:"candle"` = "fiyat paneli" çıkarımını ajan yapmalı;
    panel adı yoksa "price" adıyla başvurulamaz (adlar dokümanda varsa `name` çalışır).
@@ -160,7 +160,7 @@ görevlerde gerekmedi (ama özet ipuçlarında `value` "70 kuralı" için çık�
 10. Seçicili komutta işlem başına doküman kopyası: büyük dokümanda (10 000 bar) maliyet
     ölçülmedi.
 
-## 9. T9 sonrası düzeltmeler
+## 8. T9 sonrası düzeltmeler
 
 T9 ölçümü bu tasarımı seçti: ilk denemede 19/20 (kimliksiz; B 10/20, taban 2/20), sonunda
 19/20. Tek başarısızlık R02: `{output:"upper"}` üç çıktıyı birlikte çizen tek Bollinger
@@ -185,7 +185,7 @@ sonuç. Düzeltmeler:
    gösteriyordu. Artık yığın sırası (test: `screen_lists_panels_in_stack_order`); RD1'in 17
    dökümü değişmeden geçiyor (orada kimlik sırası = yığın sırası).
 
-## 8. Doğrulama
+## 9. Doğrulama
 
 - `cargo test --workspace` yeşil; RD1'in 17 dökümü `inproc`, `serve`, `mcp` taşımalarında
   geçiyor; `t-select.json` (yeni döküm: başarı, belirsizlik, `first`/`latest`, bulunamama,

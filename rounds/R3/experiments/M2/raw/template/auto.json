@@ -1,0 +1,5170 @@
+{
+  "harness": "r3-h-m12/1",
+  "alt": "template",
+  "summary": {
+    "en": {
+      "sentences": 73,
+      "empty": 0,
+      "time_correct": 1.0,
+      "time_correct_by_class": {
+        "event": 1.0,
+        "expectation": 1.0,
+        "state_ended": 1.0,
+        "state_holding": 1.0
+      },
+      "violations": {},
+      "time_ref_exact": 0.8286,
+      "k26_correct": true,
+      "determinism": 1.0,
+      "redacted": 18,
+      "leaks": 0,
+      "open": 55,
+      "sentences_with_invented": 0,
+      "invented_numbers": 0
+    },
+    "tr": {
+      "sentences": 73,
+      "empty": 0,
+      "time_correct": 1.0,
+      "time_correct_by_class": {
+        "event": 1.0,
+        "expectation": 1.0,
+        "state_ended": 1.0,
+        "state_holding": 1.0
+      },
+      "violations": {},
+      "time_ref_exact": 0.8286,
+      "k26_correct": true,
+      "determinism": 1.0,
+      "redacted": 18,
+      "leaks": 0,
+      "open": 55,
+      "sentences_with_invented": 0,
+      "invented_numbers": 0
+    }
+  },
+  "sentences": {
+    "en": [
+      {
+        "id": "s01",
+        "sentence": "Today, SISE's moving averages lined up for a downtrend (close 196.96, long average 204.84): a continuation of the downtrend. It was invalidated today and is no longer valid. Its record is still thin: it played out in 2 of 8 cases.",
+        "deterministic": true,
+        "expected": "event",
+        "features": {
+          "past": true,
+          "present": true,
+          "conditional": false,
+          "no_longer": true,
+          "time_ref": true,
+          "time_ref_exact": true
+        },
+        "violations": [],
+        "redacted": false,
+        "leak": false,
+        "number_words": [],
+        "numbers": [
+          {
+            "token": "196.96",
+            "slot": "lead.close"
+          },
+          {
+            "token": "204.84",
+            "slot": "lead.slow"
+          },
+          {
+            "token": "2",
+            "slot": "ledger.realized"
+          },
+          {
+            "token": "8",
+            "slot": "ledger.n"
+          }
+        ],
+        "invented": 0
+      },
+      {
+        "id": "s02",
+        "sentence": "Yesterday, TUPRS's moving averages lined up for an uptrend (close 148.41, long average 142.47): a continuation of the uptrend. An opposite signal appeared today and weakened it. Whether it still holds is unknown. Historically, this signal played out in 89 of 140 cases.",
+        "deterministic": true,
+        "expected": "event",
+        "features": {
+          "past": true,
+          "present": true,
+          "conditional": false,
+          "no_longer": false,
+          "time_ref": true,
+          "time_ref_exact": true
+        },
+        "violations": [],
+        "redacted": false,
+        "leak": false,
+        "number_words": [],
+        "numbers": [
+          {
+            "token": "148.41",
+            "slot": "lead.close"
+          },
+          {
+            "token": "142.47",
+            "slot": "lead.slow"
+          },
+          {
+            "token": "89",
+            "slot": "ledger.realized"
+          },
+          {
+            "token": "140",
+            "slot": "ledger.n"
+          }
+        ],
+        "invented": 0
+      },
+      {
+        "id": "s03",
+        "sentence": "About a week ago, EREGL's moving averages lined up for a downtrend: a continuation of the downtrend. The expected outcome came true today. Whether it still holds is unknown. Historically, this kind of signal mostly played out. Server-verified; the figures require an institutional flow data license.",
+        "deterministic": true,
+        "expected": "event",
+        "features": {
+          "past": true,
+          "present": true,
+          "conditional": false,
+          "no_longer": false,
+          "time_ref": true,
+          "time_ref_exact": false
+        },
+        "violations": [],
+        "redacted": true,
+        "leak": false,
+        "number_words": [],
+        "numbers": [],
+        "invented": 0
+      },
+      {
+        "id": "s04",
+        "sentence": "30 bars ago, PGSUS's moving averages lined up for an uptrend (close 57.29, long average 55.00): a continuation of the uptrend. Whether it still holds is unknown. Historically, this signal played out in 67 of 140 cases.",
+        "deterministic": true,
+        "expected": "event",
+        "features": {
+          "past": true,
+          "present": true,
+          "conditional": false,
+          "no_longer": false,
+          "time_ref": true,
+          "time_ref_exact": true
+        },
+        "violations": [],
+        "redacted": false,
+        "leak": false,
+        "number_words": [],
+        "numbers": [
+          {
+            "token": "30",
+            "slot": "bars_ago"
+          },
+          {
+            "token": "57.29",
+            "slot": "lead.close"
+          },
+          {
+            "token": "55.00",
+            "slot": "lead.slow"
+          },
+          {
+            "token": "67",
+            "slot": "ledger.realized"
+          },
+          {
+            "token": "140",
+            "slot": "ledger.n"
+          }
+        ],
+        "invented": 0
+      },
+      {
+        "id": "s05",
+        "sentence": "Today, THYAO showed a downward reversal signal: price made a new high while RSI made a lower high (price 168.94, RSI 52.1). An opposite signal appeared today and weakened it. Whether it still holds is unknown. Its record is still thin: it played out in 6 of 8 cases.",
+        "deterministic": true,
+        "expected": "event",
+        "features": {
+          "past": true,
+          "present": true,
+          "conditional": false,
+          "no_longer": false,
+          "time_ref": true,
+          "time_ref_exact": true
+        },
+        "violations": [],
+        "redacted": false,
+        "leak": false,
+        "number_words": [],
+        "numbers": [
+          {
+            "token": "168.94",
+            "slot": "lead.price"
+          },
+          {
+            "token": "52.1",
+            "slot": "lead.rsi"
+          },
+          {
+            "token": "6",
+            "slot": "ledger.realized"
+          },
+          {
+            "token": "8",
+            "slot": "ledger.n"
+          }
+        ],
+        "invented": 0
+      },
+      {
+        "id": "s06",
+        "sentence": "Yesterday, BIMAS showed an upward reversal signal: price made a new low while RSI made a higher low (price 21.49, RSI 53.6). An opposite signal appeared today and weakened it. Whether it still holds is unknown. Its record is still thin: it played out in 2 of 8 cases.",
+        "deterministic": true,
+        "expected": "event",
+        "features": {
+          "past": true,
+          "present": true,
+          "conditional": false,
+          "no_longer": false,
+          "time_ref": true,
+          "time_ref_exact": true
+        },
+        "violations": [],
+        "redacted": false,
+        "leak": false,
+        "number_words": [],
+        "numbers": [
+          {
+            "token": "21.49",
+            "slot": "lead.price"
+          },
+          {
+            "token": "53.6",
+            "slot": "lead.rsi"
+          },
+          {
+            "token": "2",
+            "slot": "ledger.realized"
+          },
+          {
+            "token": "8",
+            "slot": "ledger.n"
+          }
+        ],
+        "invented": 0
+      },
+      {
+        "id": "s07",
+        "sentence": "About a week ago, PGSUS showed a downward reversal signal: price made a new high while RSI made a lower high. Its life ran out today without an outcome; it is no longer valid. Its record is still thin. Server-verified; the figures require an institutional flow data license.",
+        "deterministic": true,
+        "expected": "event",
+        "features": {
+          "past": true,
+          "present": true,
+          "conditional": false,
+          "no_longer": true,
+          "time_ref": true,
+          "time_ref_exact": false
+        },
+        "violations": [],
+        "redacted": true,
+        "leak": false,
+        "number_words": [],
+        "numbers": [],
+        "invented": 0
+      },
+      {
+        "id": "s08",
+        "sentence": "30 bars ago, THYAO showed a downward reversal signal: price made a new high while RSI made a lower high (price 25.63, RSI 50.1). Volume confirmed it today; 2 independent evidence families support it. Whether it still holds is unknown. Its record is still thin: it played out in 4 of 8 cases.",
+        "deterministic": true,
+        "expected": "event",
+        "features": {
+          "past": true,
+          "present": true,
+          "conditional": false,
+          "no_longer": false,
+          "time_ref": true,
+          "time_ref_exact": true
+        },
+        "violations": [],
+        "redacted": false,
+        "leak": false,
+        "number_words": [],
+        "numbers": [
+          {
+            "token": "30",
+            "slot": "bars_ago"
+          },
+          {
+            "token": "25.63",
+            "slot": "lead.price"
+          },
+          {
+            "token": "50.1",
+            "slot": "lead.rsi"
+          },
+          {
+            "token": "2",
+            "slot": "families"
+          },
+          {
+            "token": "4",
+            "slot": "ledger.realized"
+          },
+          {
+            "token": "8",
+            "slot": "ledger.n"
+          }
+        ],
+        "invented": 0
+      },
+      {
+        "id": "s09",
+        "sentence": "Today, GARAN broke above resistance at 128.48 (close 131.01): an upside breakout. Its 1-bar life ran out today without an outcome; it is no longer valid. Historically, this signal played out in 51 of 140 cases.",
+        "deterministic": true,
+        "expected": "event",
+        "features": {
+          "past": true,
+          "present": true,
+          "conditional": false,
+          "no_longer": true,
+          "time_ref": true,
+          "time_ref_exact": true
+        },
+        "violations": [],
+        "redacted": false,
+        "leak": false,
+        "number_words": [],
+        "numbers": [
+          {
+            "token": "128.48",
+            "slot": "lead.level"
+          },
+          {
+            "token": "131.01",
+            "slot": "lead.close"
+          },
+          {
+            "token": "1",
+            "slot": "families"
+          },
+          {
+            "token": "51",
+            "slot": "ledger.realized"
+          },
+          {
+            "token": "140",
+            "slot": "ledger.n"
+          }
+        ],
+        "invented": 0
+      },
+      {
+        "id": "s10",
+        "sentence": "Yesterday, PGSUS broke above resistance at 167.59 (close 172.40): an upside breakout. It was invalidated today and is no longer valid. Its record is still thin: it played out in 3 of 8 cases.",
+        "deterministic": true,
+        "expected": "event",
+        "features": {
+          "past": true,
+          "present": true,
+          "conditional": false,
+          "no_longer": true,
+          "time_ref": true,
+          "time_ref_exact": true
+        },
+        "violations": [],
+        "redacted": false,
+        "leak": false,
+        "number_words": [],
+        "numbers": [
+          {
+            "token": "167.59",
+            "slot": "lead.level"
+          },
+          {
+            "token": "172.40",
+            "slot": "lead.close"
+          },
+          {
+            "token": "3",
+            "slot": "ledger.realized"
+          },
+          {
+            "token": "8",
+            "slot": "ledger.n"
+          }
+        ],
+        "invented": 0
+      },
+      {
+        "id": "s11",
+        "sentence": "5 bars ago, EREGL broke above resistance at 42.68 (close 43.15): an upside breakout. Volume confirmed it today; 2 independent evidence families support it. Whether it still holds is unknown. Historically, this signal played out in 98 of 140 cases.",
+        "deterministic": true,
+        "expected": "event",
+        "features": {
+          "past": true,
+          "present": true,
+          "conditional": false,
+          "no_longer": false,
+          "time_ref": true,
+          "time_ref_exact": true
+        },
+        "violations": [],
+        "redacted": false,
+        "leak": false,
+        "number_words": [],
+        "numbers": [
+          {
+            "token": "5",
+            "slot": "bars_ago"
+          },
+          {
+            "token": "42.68",
+            "slot": "lead.level"
+          },
+          {
+            "token": "43.15",
+            "slot": "lead.close"
+          },
+          {
+            "token": "2",
+            "slot": "families"
+          },
+          {
+            "token": "98",
+            "slot": "ledger.realized"
+          },
+          {
+            "token": "140",
+            "slot": "ledger.n"
+          }
+        ],
+        "invented": 0
+      },
+      {
+        "id": "s12",
+        "sentence": "30 bars ago, AKBNK broke below support at 20.86 (close 20.58): a downside breakout. An opposite signal appeared today and weakened it. Whether it still holds is unknown. Its record is still thin: it played out in 2 of 8 cases.",
+        "deterministic": true,
+        "expected": "event",
+        "features": {
+          "past": true,
+          "present": true,
+          "conditional": false,
+          "no_longer": false,
+          "time_ref": true,
+          "time_ref_exact": true
+        },
+        "violations": [],
+        "redacted": false,
+        "leak": false,
+        "number_words": [],
+        "numbers": [
+          {
+            "token": "30",
+            "slot": "bars_ago"
+          },
+          {
+            "token": "20.86",
+            "slot": "lead.level"
+          },
+          {
+            "token": "20.58",
+            "slot": "lead.close"
+          },
+          {
+            "token": "2",
+            "slot": "ledger.realized"
+          },
+          {
+            "token": "8",
+            "slot": "ledger.n"
+          }
+        ],
+        "invented": 0
+      },
+      {
+        "id": "s13",
+        "sentence": "Today, ASELS's Bollinger bands narrowed (band width 0.049, threshold 0.06): a squeeze, direction open. Whether it still holds is unknown. Its record is still thin: it played out in 2 of 8 cases.",
+        "deterministic": true,
+        "expected": "event",
+        "features": {
+          "past": true,
+          "present": true,
+          "conditional": false,
+          "no_longer": false,
+          "time_ref": true,
+          "time_ref_exact": true
+        },
+        "violations": [],
+        "redacted": false,
+        "leak": false,
+        "number_words": [],
+        "numbers": [
+          {
+            "token": "0.049",
+            "slot": "lead.bandwidth"
+          },
+          {
+            "token": "0.06",
+            "slot": "lead.threshold"
+          },
+          {
+            "token": "2",
+            "slot": "ledger.realized"
+          },
+          {
+            "token": "8",
+            "slot": "ledger.n"
+          }
+        ],
+        "invented": 0
+      },
+      {
+        "id": "s14",
+        "sentence": "Yesterday, THYAO's Bollinger bands narrowed: a squeeze, direction open. Its life ran out today without an outcome; it is no longer valid. Historically, this kind of signal mostly played out. Server-verified; the figures require an institutional flow data license.",
+        "deterministic": true,
+        "expected": "event",
+        "features": {
+          "past": true,
+          "present": true,
+          "conditional": false,
+          "no_longer": true,
+          "time_ref": true,
+          "time_ref_exact": true
+        },
+        "violations": [],
+        "redacted": true,
+        "leak": false,
+        "number_words": [],
+        "numbers": [],
+        "invented": 0
+      },
+      {
+        "id": "s15",
+        "sentence": "5 bars ago, SAHOL's Bollinger bands narrowed (band width 0.044, threshold 0.06): a squeeze, direction open. An opposite signal appeared today and weakened it. Whether it still holds is unknown. Historically, this signal played out in 63 of 140 cases.",
+        "deterministic": true,
+        "expected": "event",
+        "features": {
+          "past": true,
+          "present": true,
+          "conditional": false,
+          "no_longer": false,
+          "time_ref": true,
+          "time_ref_exact": true
+        },
+        "violations": [],
+        "redacted": false,
+        "leak": false,
+        "number_words": [],
+        "numbers": [
+          {
+            "token": "5",
+            "slot": "bars_ago"
+          },
+          {
+            "token": "0.044",
+            "slot": "lead.bandwidth"
+          },
+          {
+            "token": "0.06",
+            "slot": "lead.threshold"
+          },
+          {
+            "token": "63",
+            "slot": "ledger.realized"
+          },
+          {
+            "token": "140",
+            "slot": "ledger.n"
+          }
+        ],
+        "invented": 0
+      },
+      {
+        "id": "s16",
+        "sentence": "30 bars ago, TUPRS's Bollinger bands narrowed (band width 0.025, threshold 0.06): a squeeze, direction open. It was invalidated today and is no longer valid. Its record is still thin: it played out in 2 of 8 cases.",
+        "deterministic": true,
+        "expected": "event",
+        "features": {
+          "past": true,
+          "present": true,
+          "conditional": false,
+          "no_longer": true,
+          "time_ref": true,
+          "time_ref_exact": true
+        },
+        "violations": [],
+        "redacted": false,
+        "leak": false,
+        "number_words": [],
+        "numbers": [
+          {
+            "token": "30",
+            "slot": "bars_ago"
+          },
+          {
+            "token": "0.025",
+            "slot": "lead.bandwidth"
+          },
+          {
+            "token": "0.06",
+            "slot": "lead.threshold"
+          },
+          {
+            "token": "2",
+            "slot": "ledger.realized"
+          },
+          {
+            "token": "8",
+            "slot": "ledger.n"
+          }
+        ],
+        "invented": 0
+      },
+      {
+        "id": "s17",
+        "sentence": "Today, PGSUS's RSI fell below 30 (to 28.8): oversold. Volume confirmed it today; 2 independent evidence families support it. Whether it still holds is unknown. Historically, this signal played out in 99 of 140 cases.",
+        "deterministic": true,
+        "expected": "event",
+        "features": {
+          "past": true,
+          "present": true,
+          "conditional": false,
+          "no_longer": false,
+          "time_ref": true,
+          "time_ref_exact": true
+        },
+        "violations": [],
+        "redacted": false,
+        "leak": false,
+        "number_words": [],
+        "numbers": [
+          {
+            "token": "30",
+            "slot": "lead.level"
+          },
+          {
+            "token": "28.8",
+            "slot": "lead.value"
+          },
+          {
+            "token": "2",
+            "slot": "families"
+          },
+          {
+            "token": "99",
+            "slot": "ledger.realized"
+          },
+          {
+            "token": "140",
+            "slot": "ledger.n"
+          }
+        ],
+        "invented": 0
+      },
+      {
+        "id": "s18",
+        "sentence": "Yesterday, BIMAS's RSI rose above 70 (to 72.6): overbought. Volume confirmed it today; 2 independent evidence families support it. Whether it still holds is unknown. Its record is still thin: it played out in 4 of 8 cases.",
+        "deterministic": true,
+        "expected": "event",
+        "features": {
+          "past": true,
+          "present": true,
+          "conditional": false,
+          "no_longer": false,
+          "time_ref": true,
+          "time_ref_exact": true
+        },
+        "violations": [],
+        "redacted": false,
+        "leak": false,
+        "number_words": [],
+        "numbers": [
+          {
+            "token": "70",
+            "slot": "lead.level"
+          },
+          {
+            "token": "72.6",
+            "slot": "lead.value"
+          },
+          {
+            "token": "2",
+            "slot": "families"
+          },
+          {
+            "token": "4",
+            "slot": "ledger.realized"
+          },
+          {
+            "token": "8",
+            "slot": "ledger.n"
+          }
+        ],
+        "invented": 0
+      },
+      {
+        "id": "s19",
+        "sentence": "About a week ago, FROTO's RSI rose above the overbought threshold: overbought. It was invalidated today and is no longer valid. Its record is still thin. Server-verified; the figures require an institutional flow data license.",
+        "deterministic": true,
+        "expected": "event",
+        "features": {
+          "past": true,
+          "present": true,
+          "conditional": false,
+          "no_longer": true,
+          "time_ref": true,
+          "time_ref_exact": false
+        },
+        "violations": [],
+        "redacted": true,
+        "leak": false,
+        "number_words": [],
+        "numbers": [],
+        "invented": 0
+      },
+      {
+        "id": "s20",
+        "sentence": "More than a month ago, FROTO's RSI rose above the overbought threshold: overbought. Whether it still holds is unknown. Historically, this kind of signal mostly played out. Server-verified; the figures require an institutional flow data license.",
+        "deterministic": true,
+        "expected": "event",
+        "features": {
+          "past": true,
+          "present": true,
+          "conditional": false,
+          "no_longer": false,
+          "time_ref": true,
+          "time_ref_exact": false
+        },
+        "violations": [],
+        "redacted": true,
+        "leak": false,
+        "number_words": [],
+        "numbers": [],
+        "invented": 0
+      },
+      {
+        "id": "s21",
+        "sentence": "Today, net institutional selling in AKBNK (1,345,000) clearly exceeded the recent average (563,000): money outflow. Whether it still holds is unknown. Historically, this signal played out in 63 of 140 cases.",
+        "deterministic": true,
+        "expected": "event",
+        "features": {
+          "past": true,
+          "present": true,
+          "conditional": false,
+          "no_longer": false,
+          "time_ref": true,
+          "time_ref_exact": true
+        },
+        "violations": [],
+        "redacted": false,
+        "leak": false,
+        "number_words": [],
+        "numbers": [
+          {
+            "token": "1,345,000",
+            "slot": "lead.net"
+          },
+          {
+            "token": "563,000",
+            "slot": "lead.avg5"
+          },
+          {
+            "token": "63",
+            "slot": "ledger.realized"
+          },
+          {
+            "token": "140",
+            "slot": "ledger.n"
+          }
+        ],
+        "invented": 0
+      },
+      {
+        "id": "s22",
+        "sentence": "Yesterday, net institutional buying in FROTO (1,026,000) clearly exceeded the recent average (481,000): money inflow. Whether it still holds is unknown. Its record is still thin: it played out in 6 of 8 cases.",
+        "deterministic": true,
+        "expected": "event",
+        "features": {
+          "past": true,
+          "present": true,
+          "conditional": false,
+          "no_longer": false,
+          "time_ref": true,
+          "time_ref_exact": true
+        },
+        "violations": [],
+        "redacted": false,
+        "leak": false,
+        "number_words": [],
+        "numbers": [
+          {
+            "token": "1,026,000",
+            "slot": "lead.net"
+          },
+          {
+            "token": "481,000",
+            "slot": "lead.avg5"
+          },
+          {
+            "token": "6",
+            "slot": "ledger.realized"
+          },
+          {
+            "token": "8",
+            "slot": "ledger.n"
+          }
+        ],
+        "invented": 0
+      },
+      {
+        "id": "s23",
+        "sentence": "5 bars ago, net institutional selling in AKBNK (1,496,000) clearly exceeded the recent average (374,000): money outflow. Its 5-bar life ran out today without an outcome; it is no longer valid. Historically, this signal played out in 50 of 140 cases.",
+        "deterministic": true,
+        "expected": "event",
+        "features": {
+          "past": true,
+          "present": true,
+          "conditional": false,
+          "no_longer": true,
+          "time_ref": true,
+          "time_ref_exact": true
+        },
+        "violations": [],
+        "redacted": false,
+        "leak": false,
+        "number_words": [],
+        "numbers": [
+          {
+            "token": "5",
+            "slot": "bars_ago"
+          },
+          {
+            "token": "1,496,000",
+            "slot": "lead.net"
+          },
+          {
+            "token": "374,000",
+            "slot": "lead.avg5"
+          },
+          {
+            "token": "5",
+            "slot": "bars_ago"
+          },
+          {
+            "token": "50",
+            "slot": "ledger.realized"
+          },
+          {
+            "token": "140",
+            "slot": "ledger.n"
+          }
+        ],
+        "invented": 0
+      },
+      {
+        "id": "s24",
+        "sentence": "30 bars ago, net institutional selling in PGSUS (1,280,000) clearly exceeded the recent average (597,000): money outflow. An opposite signal appeared today and weakened it. Whether it still holds is unknown. Historically, this signal played out in 54 of 140 cases.",
+        "deterministic": true,
+        "expected": "event",
+        "features": {
+          "past": true,
+          "present": true,
+          "conditional": false,
+          "no_longer": false,
+          "time_ref": true,
+          "time_ref_exact": true
+        },
+        "violations": [],
+        "redacted": false,
+        "leak": false,
+        "number_words": [],
+        "numbers": [
+          {
+            "token": "30",
+            "slot": "bars_ago"
+          },
+          {
+            "token": "1,280,000",
+            "slot": "lead.net"
+          },
+          {
+            "token": "597,000",
+            "slot": "lead.avg5"
+          },
+          {
+            "token": "54",
+            "slot": "ledger.realized"
+          },
+          {
+            "token": "140",
+            "slot": "ledger.n"
+          }
+        ],
+        "invented": 0
+      },
+      {
+        "id": "s25",
+        "sentence": "BIMAS is above the long average as of today. The uptrend is still in place. An opposite signal appeared today and weakened it. Historically, this kind of signal mostly played out. Server-verified; the figures require an institutional flow data license.",
+        "deterministic": true,
+        "expected": "state_holding",
+        "features": {
+          "past": true,
+          "present": true,
+          "conditional": false,
+          "no_longer": false,
+          "time_ref": true,
+          "time_ref_exact": false
+        },
+        "violations": [],
+        "redacted": true,
+        "leak": false,
+        "number_words": [],
+        "numbers": [],
+        "invented": 0
+      },
+      {
+        "id": "s26",
+        "sentence": "Yesterday, PGSUS crossed below the long average (29.19); it is now at 30.07, no longer below the long average. The downtrend has ended. The signal was invalidated today. Its record is still thin: it played out in 2 of 8 cases.",
+        "deterministic": true,
+        "expected": "state_ended",
+        "features": {
+          "past": true,
+          "present": true,
+          "conditional": false,
+          "no_longer": true,
+          "time_ref": true,
+          "time_ref_exact": true
+        },
+        "violations": [],
+        "redacted": false,
+        "leak": false,
+        "number_words": [],
+        "numbers": [
+          {
+            "token": "29.19",
+            "slot": "lead.slow"
+          },
+          {
+            "token": "30.07",
+            "slot": "current"
+          },
+          {
+            "token": "2",
+            "slot": "ledger.realized"
+          },
+          {
+            "token": "8",
+            "slot": "ledger.n"
+          }
+        ],
+        "invented": 0
+      },
+      {
+        "id": "s27",
+        "sentence": "SISE has been below the long average (71.29) for 5 bars and is now at 69.86. The downtrend is still in place. Historically, this signal played out in 63 of 140 cases.",
+        "deterministic": true,
+        "expected": "state_holding",
+        "features": {
+          "past": true,
+          "present": true,
+          "conditional": false,
+          "no_longer": false,
+          "time_ref": false,
+          "time_ref_exact": false
+        },
+        "violations": [],
+        "redacted": false,
+        "leak": false,
+        "number_words": [],
+        "numbers": [
+          {
+            "token": "71.29",
+            "slot": "lead.slow"
+          },
+          {
+            "token": "5",
+            "slot": "bars_ago"
+          },
+          {
+            "token": "69.86",
+            "slot": "current"
+          },
+          {
+            "token": "63",
+            "slot": "ledger.realized"
+          },
+          {
+            "token": "140",
+            "slot": "ledger.n"
+          }
+        ],
+        "invented": 0
+      },
+      {
+        "id": "s28",
+        "sentence": "THYAO has been above the long average (57.17) for 30 bars and is now at 58.31. The uptrend is still in place. The expected outcome came true today. Its record is still thin: it played out in 2 of 8 cases.",
+        "deterministic": true,
+        "expected": "state_holding",
+        "features": {
+          "past": true,
+          "present": true,
+          "conditional": false,
+          "no_longer": false,
+          "time_ref": true,
+          "time_ref_exact": false
+        },
+        "violations": [],
+        "redacted": false,
+        "leak": false,
+        "number_words": [],
+        "numbers": [
+          {
+            "token": "57.17",
+            "slot": "lead.slow"
+          },
+          {
+            "token": "30",
+            "slot": "bars_ago"
+          },
+          {
+            "token": "58.31",
+            "slot": "current"
+          },
+          {
+            "token": "2",
+            "slot": "ledger.realized"
+          },
+          {
+            "token": "8",
+            "slot": "ledger.n"
+          }
+        ],
+        "invented": 0
+      },
+      {
+        "id": "s29",
+        "sentence": "Today, KCHOL crossed below the reversal point (286.57); it is now at 295.17, no longer below the reversal point. The downward reversal has ended. Its 1-bar life ran out today without an outcome. Its record is still thin: it played out in 4 of 8 cases.",
+        "deterministic": true,
+        "expected": "state_ended",
+        "features": {
+          "past": true,
+          "present": true,
+          "conditional": false,
+          "no_longer": true,
+          "time_ref": true,
+          "time_ref_exact": true
+        },
+        "violations": [],
+        "redacted": false,
+        "leak": false,
+        "number_words": [],
+        "numbers": [
+          {
+            "token": "286.57",
+            "slot": "lead.price"
+          },
+          {
+            "token": "295.17",
+            "slot": "current"
+          },
+          {
+            "token": "1",
+            "slot": "families"
+          },
+          {
+            "token": "4",
+            "slot": "ledger.realized"
+          },
+          {
+            "token": "8",
+            "slot": "ledger.n"
+          }
+        ],
+        "invented": 0
+      },
+      {
+        "id": "s30",
+        "sentence": "Yesterday, GARAN crossed above the reversal point (33.26); it is now at 32.26, no longer above the reversal point. The upward reversal has ended. The signal was invalidated today. Its record is still thin: it played out in 4 of 8 cases.",
+        "deterministic": true,
+        "expected": "state_ended",
+        "features": {
+          "past": true,
+          "present": true,
+          "conditional": false,
+          "no_longer": true,
+          "time_ref": true,
+          "time_ref_exact": true
+        },
+        "violations": [],
+        "redacted": false,
+        "leak": false,
+        "number_words": [],
+        "numbers": [
+          {
+            "token": "33.26",
+            "slot": "lead.price"
+          },
+          {
+            "token": "32.26",
+            "slot": "current"
+          },
+          {
+            "token": "4",
+            "slot": "ledger.realized"
+          },
+          {
+            "token": "8",
+            "slot": "ledger.n"
+          }
+        ],
+        "invented": 0
+      },
+      {
+        "id": "s31",
+        "sentence": "FROTO has been below the reversal point for about a week. The downward reversal is still in place. The expected outcome came true today. Its record is still thin. Server-verified; the figures require an institutional flow data license.",
+        "deterministic": true,
+        "expected": "state_holding",
+        "features": {
+          "past": true,
+          "present": true,
+          "conditional": false,
+          "no_longer": false,
+          "time_ref": true,
+          "time_ref_exact": false
+        },
+        "violations": [],
+        "redacted": true,
+        "leak": false,
+        "number_words": [],
+        "numbers": [],
+        "invented": 0
+      },
+      {
+        "id": "s32",
+        "sentence": "SISE has been below the reversal point (177.59) for 30 bars and is now at 174.04. The downward reversal is still in place. The expected outcome came true today. Historically, this signal played out in 68 of 140 cases.",
+        "deterministic": true,
+        "expected": "state_holding",
+        "features": {
+          "past": true,
+          "present": true,
+          "conditional": false,
+          "no_longer": false,
+          "time_ref": true,
+          "time_ref_exact": false
+        },
+        "violations": [],
+        "redacted": false,
+        "leak": false,
+        "number_words": [],
+        "numbers": [
+          {
+            "token": "177.59",
+            "slot": "lead.price"
+          },
+          {
+            "token": "30",
+            "slot": "bars_ago"
+          },
+          {
+            "token": "174.04",
+            "slot": "current"
+          },
+          {
+            "token": "68",
+            "slot": "ledger.realized"
+          },
+          {
+            "token": "140",
+            "slot": "ledger.n"
+          }
+        ],
+        "invented": 0
+      },
+      {
+        "id": "s33",
+        "sentence": "THYAO is above the breakout level as of today. The upside breakout is still in place. Historically, this kind of signal mostly did not play out. Server-verified; the figures require an institutional flow data license.",
+        "deterministic": true,
+        "expected": "state_holding",
+        "features": {
+          "past": true,
+          "present": true,
+          "conditional": false,
+          "no_longer": false,
+          "time_ref": true,
+          "time_ref_exact": false
+        },
+        "violations": [],
+        "redacted": true,
+        "leak": false,
+        "number_words": [],
+        "numbers": [],
+        "invented": 0
+      },
+      {
+        "id": "s34",
+        "sentence": "Yesterday, GARAN crossed above 168.43; it is now at 163.38, no longer above 168.43. The upside breakout has ended. The expected outcome came true today. Its record is still thin: it played out in 2 of 8 cases.",
+        "deterministic": true,
+        "expected": "state_ended",
+        "features": {
+          "past": true,
+          "present": true,
+          "conditional": false,
+          "no_longer": true,
+          "time_ref": true,
+          "time_ref_exact": true
+        },
+        "violations": [],
+        "redacted": false,
+        "leak": false,
+        "number_words": [],
+        "numbers": [
+          {
+            "token": "168.43",
+            "slot": "lead.level"
+          },
+          {
+            "token": "163.38",
+            "slot": "current"
+          },
+          {
+            "token": "168.43",
+            "slot": "lead.level"
+          },
+          {
+            "token": "2",
+            "slot": "ledger.realized"
+          },
+          {
+            "token": "8",
+            "slot": "ledger.n"
+          }
+        ],
+        "invented": 0
+      },
+      {
+        "id": "s35",
+        "sentence": "5 bars ago, GARAN crossed above 109.96; it is now at 106.66, no longer above 109.96. The upside breakout has ended. Its 5-bar life ran out today without an outcome. Historically, this signal played out in 82 of 140 cases.",
+        "deterministic": true,
+        "expected": "state_ended",
+        "features": {
+          "past": true,
+          "present": true,
+          "conditional": false,
+          "no_longer": true,
+          "time_ref": true,
+          "time_ref_exact": true
+        },
+        "violations": [],
+        "redacted": false,
+        "leak": false,
+        "number_words": [],
+        "numbers": [
+          {
+            "token": "5",
+            "slot": "bars_ago"
+          },
+          {
+            "token": "109.96",
+            "slot": "lead.level"
+          },
+          {
+            "token": "106.66",
+            "slot": "current"
+          },
+          {
+            "token": "109.96",
+            "slot": "lead.level"
+          },
+          {
+            "token": "5",
+            "slot": "bars_ago"
+          },
+          {
+            "token": "82",
+            "slot": "ledger.realized"
+          },
+          {
+            "token": "140",
+            "slot": "ledger.n"
+          }
+        ],
+        "invented": 0
+      },
+      {
+        "id": "s36",
+        "sentence": "30 bars ago, EREGL crossed below 46.19; it is now at 47.58, no longer below 46.19. The downside breakout has ended. The signal was invalidated today. Historically, this signal played out in 81 of 140 cases.",
+        "deterministic": true,
+        "expected": "state_ended",
+        "features": {
+          "past": true,
+          "present": true,
+          "conditional": false,
+          "no_longer": true,
+          "time_ref": true,
+          "time_ref_exact": true
+        },
+        "violations": [],
+        "redacted": false,
+        "leak": false,
+        "number_words": [],
+        "numbers": [
+          {
+            "token": "30",
+            "slot": "bars_ago"
+          },
+          {
+            "token": "46.19",
+            "slot": "lead.level"
+          },
+          {
+            "token": "47.58",
+            "slot": "current"
+          },
+          {
+            "token": "46.19",
+            "slot": "lead.level"
+          },
+          {
+            "token": "81",
+            "slot": "ledger.realized"
+          },
+          {
+            "token": "140",
+            "slot": "ledger.n"
+          }
+        ],
+        "invented": 0
+      },
+      {
+        "id": "s37",
+        "sentence": "Today, SAHOL's band width crossed below the threshold; it is no longer below the threshold. The squeeze (direction open) has ended. The signal was invalidated today. Historically, this kind of signal played out about as often as not. Server-verified; the figures require an institutional flow data license.",
+        "deterministic": true,
+        "expected": "state_ended",
+        "features": {
+          "past": true,
+          "present": true,
+          "conditional": false,
+          "no_longer": true,
+          "time_ref": true,
+          "time_ref_exact": true
+        },
+        "violations": [],
+        "redacted": true,
+        "leak": false,
+        "number_words": [],
+        "numbers": [],
+        "invented": 0
+      },
+      {
+        "id": "s38",
+        "sentence": "GARAN's band width has been below the threshold (0.06) since yesterday and is now 0.0588. The squeeze (direction open) is still in place. The expected outcome came true today. Its record is still thin: it played out in 2 of 8 cases.",
+        "deterministic": true,
+        "expected": "state_holding",
+        "features": {
+          "past": true,
+          "present": true,
+          "conditional": false,
+          "no_longer": false,
+          "time_ref": true,
+          "time_ref_exact": false
+        },
+        "violations": [],
+        "redacted": false,
+        "leak": false,
+        "number_words": [],
+        "numbers": [
+          {
+            "token": "0.06",
+            "slot": "lead.threshold"
+          },
+          {
+            "token": "0.0588",
+            "slot": "current"
+          },
+          {
+            "token": "2",
+            "slot": "ledger.realized"
+          },
+          {
+            "token": "8",
+            "slot": "ledger.n"
+          }
+        ],
+        "invented": 0
+      },
+      {
+        "id": "s39",
+        "sentence": "GARAN's band width has been below the threshold (0.06) for 5 bars and is now 0.0588. The squeeze (direction open) is still in place. The expected outcome came true today. Its record is still thin: it played out in 5 of 8 cases.",
+        "deterministic": true,
+        "expected": "state_holding",
+        "features": {
+          "past": true,
+          "present": true,
+          "conditional": false,
+          "no_longer": false,
+          "time_ref": true,
+          "time_ref_exact": false
+        },
+        "violations": [],
+        "redacted": false,
+        "leak": false,
+        "number_words": [],
+        "numbers": [
+          {
+            "token": "0.06",
+            "slot": "lead.threshold"
+          },
+          {
+            "token": "5",
+            "slot": "ledger.realized"
+          },
+          {
+            "token": "0.0588",
+            "slot": "current"
+          },
+          {
+            "token": "5",
+            "slot": "ledger.realized"
+          },
+          {
+            "token": "8",
+            "slot": "ledger.n"
+          }
+        ],
+        "invented": 0
+      },
+      {
+        "id": "s40",
+        "sentence": "THYAO's band width has been below the threshold (0.06) for 30 bars and is now 0.0588. The squeeze (direction open) is still in place. An opposite signal appeared today and weakened it. Its record is still thin: it played out in 3 of 8 cases.",
+        "deterministic": true,
+        "expected": "state_holding",
+        "features": {
+          "past": true,
+          "present": true,
+          "conditional": false,
+          "no_longer": false,
+          "time_ref": true,
+          "time_ref_exact": false
+        },
+        "violations": [],
+        "redacted": false,
+        "leak": false,
+        "number_words": [],
+        "numbers": [
+          {
+            "token": "0.06",
+            "slot": "lead.threshold"
+          },
+          {
+            "token": "30",
+            "slot": "bars_ago"
+          },
+          {
+            "token": "0.0588",
+            "slot": "current"
+          },
+          {
+            "token": "3",
+            "slot": "ledger.realized"
+          },
+          {
+            "token": "8",
+            "slot": "ledger.n"
+          }
+        ],
+        "invented": 0
+      },
+      {
+        "id": "s41",
+        "sentence": "THYAO's RSI is above 70 as of today, now 71.4. The overbought state is still in place. Its record is still thin: it played out in 2 of 8 cases.",
+        "deterministic": true,
+        "expected": "state_holding",
+        "features": {
+          "past": true,
+          "present": true,
+          "conditional": false,
+          "no_longer": false,
+          "time_ref": true,
+          "time_ref_exact": false
+        },
+        "violations": [],
+        "redacted": false,
+        "leak": false,
+        "number_words": [],
+        "numbers": [
+          {
+            "token": "70",
+            "slot": "lead.level"
+          },
+          {
+            "token": "71.4",
+            "slot": "current"
+          },
+          {
+            "token": "2",
+            "slot": "ledger.realized"
+          },
+          {
+            "token": "8",
+            "slot": "ledger.n"
+          }
+        ],
+        "invented": 0
+      },
+      {
+        "id": "s42",
+        "sentence": "KCHOL's RSI has been above the overbought threshold since yesterday. The overbought state is still in place. The expected outcome came true today. Its record is still thin. Server-verified; the figures require an institutional flow data license.",
+        "deterministic": true,
+        "expected": "state_holding",
+        "features": {
+          "past": true,
+          "present": true,
+          "conditional": false,
+          "no_longer": false,
+          "time_ref": true,
+          "time_ref_exact": false
+        },
+        "violations": [],
+        "redacted": true,
+        "leak": false,
+        "number_words": [],
+        "numbers": [],
+        "invented": 0
+      },
+      {
+        "id": "s43",
+        "sentence": "About a week ago, BIMAS's RSI crossed above the overbought threshold; it is no longer above the overbought threshold. The overbought state has ended. Its record is still thin. Server-verified; the figures require an institutional flow data license.",
+        "deterministic": true,
+        "expected": "state_ended",
+        "features": {
+          "past": true,
+          "present": true,
+          "conditional": false,
+          "no_longer": true,
+          "time_ref": true,
+          "time_ref_exact": false
+        },
+        "violations": [],
+        "redacted": true,
+        "leak": false,
+        "number_words": [],
+        "numbers": [],
+        "invented": 0
+      },
+      {
+        "id": "s44",
+        "sentence": "ASELS's RSI has been above 70 for 30 bars and is now 71.4. The overbought state is still in place. The expected outcome came true today. Historically, this signal played out in 62 of 140 cases.",
+        "deterministic": true,
+        "expected": "state_holding",
+        "features": {
+          "past": true,
+          "present": true,
+          "conditional": false,
+          "no_longer": false,
+          "time_ref": true,
+          "time_ref_exact": false
+        },
+        "violations": [],
+        "redacted": false,
+        "leak": false,
+        "number_words": [],
+        "numbers": [
+          {
+            "token": "70",
+            "slot": "lead.level"
+          },
+          {
+            "token": "30",
+            "slot": "bars_ago"
+          },
+          {
+            "token": "71.4",
+            "slot": "current"
+          },
+          {
+            "token": "62",
+            "slot": "ledger.realized"
+          },
+          {
+            "token": "140",
+            "slot": "ledger.n"
+          }
+        ],
+        "invented": 0
+      },
+      {
+        "id": "s45",
+        "sentence": "Net institutional flow in GARAN is above the recent average (319,000) as of today, now 325,380. The money inflow is still in place. An opposite signal appeared today and weakened it. Historically, this signal played out in 63 of 140 cases.",
+        "deterministic": true,
+        "expected": "state_holding",
+        "features": {
+          "past": true,
+          "present": true,
+          "conditional": false,
+          "no_longer": false,
+          "time_ref": true,
+          "time_ref_exact": false
+        },
+        "violations": [],
+        "redacted": false,
+        "leak": false,
+        "number_words": [],
+        "numbers": [
+          {
+            "token": "319,000",
+            "slot": "lead.avg5"
+          },
+          {
+            "token": "325,380",
+            "slot": "current"
+          },
+          {
+            "token": "63",
+            "slot": "ledger.realized"
+          },
+          {
+            "token": "140",
+            "slot": "ledger.n"
+          }
+        ],
+        "invented": 0
+      },
+      {
+        "id": "s46",
+        "sentence": "Yesterday, net institutional flow in PGSUS crossed below the recent average; it is no longer below the recent average. The money outflow has ended. Its life ran out today without an outcome. Historically, this kind of signal played out about as often as not. Server-verified; the figures require an institutional flow data license.",
+        "deterministic": true,
+        "expected": "state_ended",
+        "features": {
+          "past": true,
+          "present": true,
+          "conditional": false,
+          "no_longer": true,
+          "time_ref": true,
+          "time_ref_exact": true
+        },
+        "violations": [],
+        "redacted": true,
+        "leak": false,
+        "number_words": [],
+        "numbers": [],
+        "invented": 0
+      },
+      {
+        "id": "s47",
+        "sentence": "About a week ago, net institutional flow in BIMAS crossed below the recent average; it is no longer below the recent average. The money outflow has ended. Historically, this kind of signal mostly played out. Server-verified; the figures require an institutional flow data license.",
+        "deterministic": true,
+        "expected": "state_ended",
+        "features": {
+          "past": true,
+          "present": true,
+          "conditional": false,
+          "no_longer": true,
+          "time_ref": true,
+          "time_ref_exact": false
+        },
+        "violations": [],
+        "redacted": true,
+        "leak": false,
+        "number_words": [],
+        "numbers": [],
+        "invented": 0
+      },
+      {
+        "id": "s48",
+        "sentence": "Net institutional flow in EREGL has been below the recent average (452,000) for 30 bars and is now 442,960. The money outflow is still in place. Volume confirmed it today; 2 independent evidence families support it. Its record is still thin: it played out in 5 of 8 cases.",
+        "deterministic": true,
+        "expected": "state_holding",
+        "features": {
+          "past": true,
+          "present": true,
+          "conditional": false,
+          "no_longer": false,
+          "time_ref": true,
+          "time_ref_exact": false
+        },
+        "violations": [],
+        "redacted": false,
+        "leak": false,
+        "number_words": [],
+        "numbers": [
+          {
+            "token": "452,000",
+            "slot": "lead.avg5"
+          },
+          {
+            "token": "30",
+            "slot": "bars_ago"
+          },
+          {
+            "token": "442,960",
+            "slot": "current"
+          },
+          {
+            "token": "2",
+            "slot": "families"
+          },
+          {
+            "token": "5",
+            "slot": "ledger.realized"
+          },
+          {
+            "token": "8",
+            "slot": "ledger.n"
+          }
+        ],
+        "invented": 0
+      },
+      {
+        "id": "s49",
+        "sentence": "If FROTO closes above the long average within a few bars, the uptrend would be confirmed. The expectation was invalidated today and is no longer valid. Historically, this kind of signal mostly did not play out. Server-verified; the figures require an institutional flow data license.",
+        "deterministic": true,
+        "expected": "expectation",
+        "features": {
+          "past": true,
+          "present": true,
+          "conditional": true,
+          "no_longer": true,
+          "time_ref": true,
+          "time_ref_exact": false
+        },
+        "violations": [],
+        "redacted": true,
+        "leak": false,
+        "number_words": [],
+        "numbers": [],
+        "invented": 0
+      },
+      {
+        "id": "s50",
+        "sentence": "If EREGL closes above the long average (255.56) within 3 bars, the uptrend would be confirmed. An opposite signal appeared today and weakened it. The setup is still open. Its record is still thin: it played out in 4 of 8 cases.",
+        "deterministic": true,
+        "expected": "expectation",
+        "features": {
+          "past": true,
+          "present": true,
+          "conditional": true,
+          "no_longer": false,
+          "time_ref": true,
+          "time_ref_exact": false
+        },
+        "violations": [],
+        "redacted": false,
+        "leak": false,
+        "number_words": [],
+        "numbers": [
+          {
+            "token": "255.56",
+            "slot": "lead.slow"
+          },
+          {
+            "token": "3",
+            "slot": "within_bars"
+          },
+          {
+            "token": "4",
+            "slot": "ledger.realized"
+          },
+          {
+            "token": "8",
+            "slot": "ledger.n"
+          }
+        ],
+        "invented": 0
+      },
+      {
+        "id": "s51",
+        "sentence": "If KCHOL closes below the long average (142.99) within 3 bars, the downtrend would be confirmed. The setup is still open. Historically, this signal played out in 60 of 140 cases.",
+        "deterministic": true,
+        "expected": "expectation",
+        "features": {
+          "past": true,
+          "present": true,
+          "conditional": true,
+          "no_longer": false,
+          "time_ref": false,
+          "time_ref_exact": false
+        },
+        "violations": [],
+        "redacted": false,
+        "leak": false,
+        "number_words": [],
+        "numbers": [
+          {
+            "token": "142.99",
+            "slot": "lead.slow"
+          },
+          {
+            "token": "3",
+            "slot": "within_bars"
+          },
+          {
+            "token": "60",
+            "slot": "ledger.realized"
+          },
+          {
+            "token": "140",
+            "slot": "ledger.n"
+          }
+        ],
+        "invented": 0
+      },
+      {
+        "id": "s52",
+        "sentence": "If SAHOL closes above the long average within a few bars, the uptrend would be confirmed. The expectation was invalidated today and is no longer valid. Historically, this kind of signal played out about as often as not. Server-verified; the figures require an institutional flow data license.",
+        "deterministic": true,
+        "expected": "expectation",
+        "features": {
+          "past": true,
+          "present": true,
+          "conditional": true,
+          "no_longer": true,
+          "time_ref": true,
+          "time_ref_exact": false
+        },
+        "violations": [],
+        "redacted": true,
+        "leak": false,
+        "number_words": [],
+        "numbers": [],
+        "invented": 0
+      },
+      {
+        "id": "s53",
+        "sentence": "If SAHOL closes below the reversal point (161.73) within 3 bars, the downward reversal would be confirmed. The expectation was invalidated today and is no longer valid. Historically, this signal played out in 98 of 140 cases.",
+        "deterministic": true,
+        "expected": "expectation",
+        "features": {
+          "past": true,
+          "present": true,
+          "conditional": true,
+          "no_longer": true,
+          "time_ref": true,
+          "time_ref_exact": false
+        },
+        "violations": [],
+        "redacted": false,
+        "leak": false,
+        "number_words": [],
+        "numbers": [
+          {
+            "token": "161.73",
+            "slot": "lead.price"
+          },
+          {
+            "token": "3",
+            "slot": "within_bars"
+          },
+          {
+            "token": "98",
+            "slot": "ledger.realized"
+          },
+          {
+            "token": "140",
+            "slot": "ledger.n"
+          }
+        ],
+        "invented": 0
+      },
+      {
+        "id": "s54",
+        "sentence": "If KCHOL closes below the reversal point (214.64) within 3 bars, the downward reversal would be confirmed. Volume confirmed it today; 2 independent evidence families support it. The setup is still open. Its record is still thin: it played out in 3 of 8 cases.",
+        "deterministic": true,
+        "expected": "expectation",
+        "features": {
+          "past": true,
+          "present": true,
+          "conditional": true,
+          "no_longer": false,
+          "time_ref": true,
+          "time_ref_exact": false
+        },
+        "violations": [],
+        "redacted": false,
+        "leak": false,
+        "number_words": [],
+        "numbers": [
+          {
+            "token": "214.64",
+            "slot": "lead.price"
+          },
+          {
+            "token": "3",
+            "slot": "ledger.realized"
+          },
+          {
+            "token": "2",
+            "slot": "families"
+          },
+          {
+            "token": "3",
+            "slot": "ledger.realized"
+          },
+          {
+            "token": "8",
+            "slot": "ledger.n"
+          }
+        ],
+        "invented": 0
+      },
+      {
+        "id": "s55",
+        "sentence": "If SAHOL closes below the reversal point (277.15) within 3 bars, the downward reversal would be confirmed. Volume confirmed it today; 2 independent evidence families support it. Whether the setup is still open is unknown. Its record is still thin: it played out in 4 of 8 cases.",
+        "deterministic": true,
+        "expected": "expectation",
+        "features": {
+          "past": true,
+          "present": true,
+          "conditional": true,
+          "no_longer": false,
+          "time_ref": true,
+          "time_ref_exact": false
+        },
+        "violations": [],
+        "redacted": false,
+        "leak": false,
+        "number_words": [],
+        "numbers": [
+          {
+            "token": "277.15",
+            "slot": "lead.price"
+          },
+          {
+            "token": "3",
+            "slot": "within_bars"
+          },
+          {
+            "token": "2",
+            "slot": "families"
+          },
+          {
+            "token": "4",
+            "slot": "ledger.realized"
+          },
+          {
+            "token": "8",
+            "slot": "ledger.n"
+          }
+        ],
+        "invented": 0
+      },
+      {
+        "id": "s56",
+        "sentence": "If TUPRS closes above the reversal point (228.51) within 3 bars, the upward reversal would be confirmed. The expectation's 30-bar life ran out today without an outcome; it is no longer valid. Historically, this signal played out in 49 of 140 cases.",
+        "deterministic": true,
+        "expected": "expectation",
+        "features": {
+          "past": true,
+          "present": true,
+          "conditional": true,
+          "no_longer": true,
+          "time_ref": true,
+          "time_ref_exact": false
+        },
+        "violations": [],
+        "redacted": false,
+        "leak": false,
+        "number_words": [],
+        "numbers": [
+          {
+            "token": "228.51",
+            "slot": "lead.price"
+          },
+          {
+            "token": "3",
+            "slot": "within_bars"
+          },
+          {
+            "token": "30",
+            "slot": "bars_ago"
+          },
+          {
+            "token": "49",
+            "slot": "ledger.realized"
+          },
+          {
+            "token": "140",
+            "slot": "ledger.n"
+          }
+        ],
+        "invented": 0
+      },
+      {
+        "id": "s57",
+        "sentence": "If TUPRS closes above 199.00 within 3 bars, the upside breakout would be confirmed. Volume confirmed it today; 2 independent evidence families support it. The setup is still open. Its record is still thin: it played out in 6 of 8 cases.",
+        "deterministic": true,
+        "expected": "expectation",
+        "features": {
+          "past": true,
+          "present": true,
+          "conditional": true,
+          "no_longer": false,
+          "time_ref": true,
+          "time_ref_exact": false
+        },
+        "violations": [],
+        "redacted": false,
+        "leak": false,
+        "number_words": [],
+        "numbers": [
+          {
+            "token": "199.00",
+            "slot": "lead.level"
+          },
+          {
+            "token": "3",
+            "slot": "within_bars"
+          },
+          {
+            "token": "2",
+            "slot": "ledger.missed"
+          },
+          {
+            "token": "6",
+            "slot": "ledger.realized"
+          },
+          {
+            "token": "8",
+            "slot": "ledger.n"
+          }
+        ],
+        "invented": 0
+      },
+      {
+        "id": "s58",
+        "sentence": "If EREGL closes above 245.84 within 3 bars, the upside breakout would be confirmed. The expectation came true today. Whether the setup is still open is unknown. Its record is still thin: it played out in 6 of 8 cases.",
+        "deterministic": true,
+        "expected": "expectation",
+        "features": {
+          "past": true,
+          "present": true,
+          "conditional": true,
+          "no_longer": false,
+          "time_ref": true,
+          "time_ref_exact": false
+        },
+        "violations": [],
+        "redacted": false,
+        "leak": false,
+        "number_words": [],
+        "numbers": [
+          {
+            "token": "245.84",
+            "slot": "lead.level"
+          },
+          {
+            "token": "3",
+            "slot": "within_bars"
+          },
+          {
+            "token": "6",
+            "slot": "ledger.realized"
+          },
+          {
+            "token": "8",
+            "slot": "ledger.n"
+          }
+        ],
+        "invented": 0
+      },
+      {
+        "id": "s59",
+        "sentence": "If TUPRS closes below the breakout level within a few bars, the downside breakout would be confirmed. An opposite signal appeared today and weakened it. The setup is still open. Historically, this kind of signal played out about as often as not. Server-verified; the figures require an institutional flow data license.",
+        "deterministic": true,
+        "expected": "expectation",
+        "features": {
+          "past": true,
+          "present": true,
+          "conditional": true,
+          "no_longer": false,
+          "time_ref": true,
+          "time_ref_exact": false
+        },
+        "violations": [],
+        "redacted": true,
+        "leak": false,
+        "number_words": [],
+        "numbers": [],
+        "invented": 0
+      },
+      {
+        "id": "s60",
+        "sentence": "If GARAN closes below 265.33 within 3 bars, the downside breakout would be confirmed. Volume confirmed it today; 2 independent evidence families support it. Whether the setup is still open is unknown. Its record is still thin: it played out in 6 of 8 cases.",
+        "deterministic": true,
+        "expected": "expectation",
+        "features": {
+          "past": true,
+          "present": true,
+          "conditional": true,
+          "no_longer": false,
+          "time_ref": true,
+          "time_ref_exact": false
+        },
+        "violations": [],
+        "redacted": false,
+        "leak": false,
+        "number_words": [],
+        "numbers": [
+          {
+            "token": "265.33",
+            "slot": "lead.level"
+          },
+          {
+            "token": "3",
+            "slot": "within_bars"
+          },
+          {
+            "token": "2",
+            "slot": "ledger.missed"
+          },
+          {
+            "token": "6",
+            "slot": "lead.atr"
+          },
+          {
+            "token": "8",
+            "slot": "ledger.n"
+          }
+        ],
+        "invented": 0
+      },
+      {
+        "id": "s61",
+        "sentence": "If SAHOL's band width falls below the threshold within a few bars, the squeeze (direction open) would be confirmed. Volume confirmed it today. Whether the setup is still open is unknown. Its record is still thin. Server-verified; the figures require an institutional flow data license.",
+        "deterministic": true,
+        "expected": "expectation",
+        "features": {
+          "past": true,
+          "present": true,
+          "conditional": true,
+          "no_longer": false,
+          "time_ref": true,
+          "time_ref_exact": false
+        },
+        "violations": [],
+        "redacted": true,
+        "leak": false,
+        "number_words": [],
+        "numbers": [],
+        "invented": 0
+      },
+      {
+        "id": "s62",
+        "sentence": "If THYAO's band width falls below the threshold (0.06) within 3 bars, the squeeze (direction open) would be confirmed. An opposite signal appeared today and weakened it. Whether the setup is still open is unknown. Historically, this signal played out in 45 of 140 cases.",
+        "deterministic": true,
+        "expected": "expectation",
+        "features": {
+          "past": true,
+          "present": true,
+          "conditional": true,
+          "no_longer": false,
+          "time_ref": true,
+          "time_ref_exact": false
+        },
+        "violations": [],
+        "redacted": false,
+        "leak": false,
+        "number_words": [],
+        "numbers": [
+          {
+            "token": "0.06",
+            "slot": "lead.threshold"
+          },
+          {
+            "token": "3",
+            "slot": "within_bars"
+          },
+          {
+            "token": "45",
+            "slot": "ledger.realized"
+          },
+          {
+            "token": "140",
+            "slot": "ledger.n"
+          }
+        ],
+        "invented": 0
+      },
+      {
+        "id": "s63",
+        "sentence": "If ASELS's band width falls below the threshold (0.06) within 3 bars, the squeeze (direction open) would be confirmed. The expectation's 5-bar life ran out today without an outcome; it is no longer valid. Its record is still thin: it played out in 3 of 8 cases.",
+        "deterministic": true,
+        "expected": "expectation",
+        "features": {
+          "past": true,
+          "present": true,
+          "conditional": true,
+          "no_longer": true,
+          "time_ref": true,
+          "time_ref_exact": false
+        },
+        "violations": [],
+        "redacted": false,
+        "leak": false,
+        "number_words": [],
+        "numbers": [
+          {
+            "token": "0.06",
+            "slot": "lead.threshold"
+          },
+          {
+            "token": "3",
+            "slot": "ledger.realized"
+          },
+          {
+            "token": "5",
+            "slot": "ledger.missed"
+          },
+          {
+            "token": "3",
+            "slot": "ledger.realized"
+          },
+          {
+            "token": "8",
+            "slot": "ledger.n"
+          }
+        ],
+        "invented": 0
+      },
+      {
+        "id": "s64",
+        "sentence": "If AKBNK's band width falls below the threshold (0.06) within 3 bars, the squeeze (direction open) would be confirmed. The setup is still open. Historically, this signal played out in 52 of 140 cases.",
+        "deterministic": true,
+        "expected": "expectation",
+        "features": {
+          "past": true,
+          "present": true,
+          "conditional": true,
+          "no_longer": false,
+          "time_ref": false,
+          "time_ref_exact": false
+        },
+        "violations": [],
+        "redacted": false,
+        "leak": false,
+        "number_words": [],
+        "numbers": [
+          {
+            "token": "0.06",
+            "slot": "lead.threshold"
+          },
+          {
+            "token": "3",
+            "slot": "within_bars"
+          },
+          {
+            "token": "52",
+            "slot": "ledger.realized"
+          },
+          {
+            "token": "140",
+            "slot": "ledger.n"
+          }
+        ],
+        "invented": 0
+      },
+      {
+        "id": "s65",
+        "sentence": "If THYAO's RSI falls below 30 within 3 bars, the oversold state would be confirmed. The expectation was invalidated today and is no longer valid. Historically, this signal played out in 93 of 140 cases.",
+        "deterministic": true,
+        "expected": "expectation",
+        "features": {
+          "past": true,
+          "present": true,
+          "conditional": true,
+          "no_longer": true,
+          "time_ref": true,
+          "time_ref_exact": false
+        },
+        "violations": [],
+        "redacted": false,
+        "leak": false,
+        "number_words": [],
+        "numbers": [
+          {
+            "token": "30",
+            "slot": "lead.level"
+          },
+          {
+            "token": "3",
+            "slot": "within_bars"
+          },
+          {
+            "token": "93",
+            "slot": "ledger.realized"
+          },
+          {
+            "token": "140",
+            "slot": "ledger.n"
+          }
+        ],
+        "invented": 0
+      },
+      {
+        "id": "s66",
+        "sentence": "If THYAO's RSI rises above 70 within 3 bars, the overbought state would be confirmed. The expectation came true today. Whether the setup is still open is unknown. Historically, this signal played out in 86 of 140 cases.",
+        "deterministic": true,
+        "expected": "expectation",
+        "features": {
+          "past": true,
+          "present": true,
+          "conditional": true,
+          "no_longer": false,
+          "time_ref": true,
+          "time_ref_exact": false
+        },
+        "violations": [],
+        "redacted": false,
+        "leak": false,
+        "number_words": [],
+        "numbers": [
+          {
+            "token": "70",
+            "slot": "lead.level"
+          },
+          {
+            "token": "3",
+            "slot": "within_bars"
+          },
+          {
+            "token": "86",
+            "slot": "ledger.realized"
+          },
+          {
+            "token": "140",
+            "slot": "ledger.n"
+          }
+        ],
+        "invented": 0
+      },
+      {
+        "id": "s67",
+        "sentence": "If EREGL's RSI falls below 30 within 3 bars, the oversold state would be confirmed. The expectation came true today. Whether the setup is still open is unknown. Historically, this signal played out in 42 of 140 cases.",
+        "deterministic": true,
+        "expected": "expectation",
+        "features": {
+          "past": true,
+          "present": true,
+          "conditional": true,
+          "no_longer": false,
+          "time_ref": true,
+          "time_ref_exact": false
+        },
+        "violations": [],
+        "redacted": false,
+        "leak": false,
+        "number_words": [],
+        "numbers": [
+          {
+            "token": "30",
+            "slot": "lead.level"
+          },
+          {
+            "token": "3",
+            "slot": "within_bars"
+          },
+          {
+            "token": "42",
+            "slot": "ledger.realized"
+          },
+          {
+            "token": "140",
+            "slot": "ledger.n"
+          }
+        ],
+        "invented": 0
+      },
+      {
+        "id": "s68",
+        "sentence": "If PGSUS's RSI falls below the oversold threshold within a few bars, the oversold state would be confirmed. Volume confirmed it today. Whether the setup is still open is unknown. Its record is still thin. Server-verified; the figures require an institutional flow data license.",
+        "deterministic": true,
+        "expected": "expectation",
+        "features": {
+          "past": true,
+          "present": true,
+          "conditional": true,
+          "no_longer": false,
+          "time_ref": true,
+          "time_ref_exact": false
+        },
+        "violations": [],
+        "redacted": true,
+        "leak": false,
+        "number_words": [],
+        "numbers": [],
+        "invented": 0
+      },
+      {
+        "id": "s69",
+        "sentence": "If net institutional flow in FROTO rises above the recent average (484,000) within 3 bars, the money inflow would be confirmed. The expectation's 1-bar life ran out today without an outcome; it is no longer valid. Historically, this signal played out in 70 of 140 cases.",
+        "deterministic": true,
+        "expected": "expectation",
+        "features": {
+          "past": true,
+          "present": true,
+          "conditional": true,
+          "no_longer": true,
+          "time_ref": true,
+          "time_ref_exact": false
+        },
+        "violations": [],
+        "redacted": false,
+        "leak": false,
+        "number_words": [],
+        "numbers": [
+          {
+            "token": "484,000",
+            "slot": "lead.avg5"
+          },
+          {
+            "token": "3",
+            "slot": "within_bars"
+          },
+          {
+            "token": "1",
+            "slot": "families"
+          },
+          {
+            "token": "70",
+            "slot": "ledger.realized"
+          },
+          {
+            "token": "140",
+            "slot": "ledger.n"
+          }
+        ],
+        "invented": 0
+      },
+      {
+        "id": "s70",
+        "sentence": "If net institutional flow in FROTO falls below the recent average (499,000) within 3 bars, the money outflow would be confirmed. Volume confirmed it today; 2 independent evidence families support it. The setup is still open. Historically, this signal played out in 85 of 140 cases.",
+        "deterministic": true,
+        "expected": "expectation",
+        "features": {
+          "past": true,
+          "present": true,
+          "conditional": true,
+          "no_longer": false,
+          "time_ref": true,
+          "time_ref_exact": false
+        },
+        "violations": [],
+        "redacted": false,
+        "leak": false,
+        "number_words": [],
+        "numbers": [
+          {
+            "token": "499,000",
+            "slot": "lead.avg5"
+          },
+          {
+            "token": "3",
+            "slot": "within_bars"
+          },
+          {
+            "token": "2",
+            "slot": "families"
+          },
+          {
+            "token": "85",
+            "slot": "ledger.realized"
+          },
+          {
+            "token": "140",
+            "slot": "ledger.n"
+          }
+        ],
+        "invented": 0
+      },
+      {
+        "id": "s71",
+        "sentence": "If net institutional flow in SISE falls below the recent average (334,000) within 3 bars, the money outflow would be confirmed. The expectation's 5-bar life ran out today without an outcome; it is no longer valid. Its record is still thin: it played out in 2 of 8 cases.",
+        "deterministic": true,
+        "expected": "expectation",
+        "features": {
+          "past": true,
+          "present": true,
+          "conditional": true,
+          "no_longer": true,
+          "time_ref": true,
+          "time_ref_exact": false
+        },
+        "violations": [],
+        "redacted": false,
+        "leak": false,
+        "number_words": [],
+        "numbers": [
+          {
+            "token": "334,000",
+            "slot": "lead.avg5"
+          },
+          {
+            "token": "3",
+            "slot": "within_bars"
+          },
+          {
+            "token": "5",
+            "slot": "bars_ago"
+          },
+          {
+            "token": "2",
+            "slot": "ledger.realized"
+          },
+          {
+            "token": "8",
+            "slot": "ledger.n"
+          }
+        ],
+        "invented": 0
+      },
+      {
+        "id": "s72",
+        "sentence": "If net institutional flow in BIMAS falls below the recent average (896,000) within 3 bars, the money outflow would be confirmed. The expectation's 30-bar life ran out today without an outcome; it is no longer valid. Its record is still thin: it played out in 6 of 8 cases.",
+        "deterministic": true,
+        "expected": "expectation",
+        "features": {
+          "past": true,
+          "present": true,
+          "conditional": true,
+          "no_longer": true,
+          "time_ref": true,
+          "time_ref_exact": false
+        },
+        "violations": [],
+        "redacted": false,
+        "leak": false,
+        "number_words": [],
+        "numbers": [
+          {
+            "token": "896,000",
+            "slot": "lead.avg5"
+          },
+          {
+            "token": "3",
+            "slot": "within_bars"
+          },
+          {
+            "token": "30",
+            "slot": "bars_ago"
+          },
+          {
+            "token": "6",
+            "slot": "ledger.realized"
+          },
+          {
+            "token": "8",
+            "slot": "ledger.n"
+          }
+        ],
+        "invented": 0
+      },
+      {
+        "id": "k26",
+        "sentence": "3 bars ago, THYAO's RSI crossed above 70; it fell back below today and is now 55, no longer above 70. The overbought state has ended. Historically, this signal played out in 87 of 140 cases.",
+        "deterministic": true,
+        "expected": "state_ended",
+        "features": {
+          "past": true,
+          "present": true,
+          "conditional": false,
+          "no_longer": true,
+          "time_ref": true,
+          "time_ref_exact": true
+        },
+        "violations": [],
+        "redacted": false,
+        "leak": false,
+        "number_words": [],
+        "numbers": [
+          {
+            "token": "3",
+            "slot": "bars_ago"
+          },
+          {
+            "token": "70",
+            "slot": "lead.level"
+          },
+          {
+            "token": "55",
+            "slot": "latest.value"
+          },
+          {
+            "token": "70",
+            "slot": "lead.level"
+          },
+          {
+            "token": "87",
+            "slot": "ledger.realized"
+          },
+          {
+            "token": "140",
+            "slot": "ledger.n"
+          }
+        ],
+        "invented": 0
+      }
+    ],
+    "tr": [
+      {
+        "id": "s01",
+        "sentence": "SISE'de bugün hareketli ortalamalar düşüş yönünde dizildi (kapanış 196,96, uzun ortalama 204,84): düşüş eğiliminde devam sinyali. Sinyal bugün geçersiz oldu; artık geçerli değil. Karnesi henüz az örnekli: 8 seferin 2'sinde tuttu.",
+        "deterministic": true,
+        "expected": "event",
+        "features": {
+          "past": true,
+          "present": false,
+          "conditional": true,
+          "no_longer": true,
+          "time_ref": true,
+          "time_ref_exact": true
+        },
+        "violations": [],
+        "redacted": false,
+        "leak": false,
+        "number_words": [],
+        "numbers": [
+          {
+            "token": "196,96",
+            "slot": "lead.close"
+          },
+          {
+            "token": "204,84",
+            "slot": "lead.slow"
+          },
+          {
+            "token": "8",
+            "slot": "ledger.n"
+          },
+          {
+            "token": "2",
+            "slot": "ledger.realized"
+          }
+        ],
+        "invented": 0
+      },
+      {
+        "id": "s02",
+        "sentence": "TUPRS'ta dün hareketli ortalamalar yükseliş yönünde dizildi (kapanış 148,41, uzun ortalama 142,47): yükseliş eğiliminde devam sinyali. Bugün ters yönde bir sinyal geldi; görünüm zayıfladı. Hâlâ geçerli olup olmadığı bilinmiyor. Geçmişte bu sinyal 140 seferin 89'unda beklendiği gibi sonuçlandı.",
+        "deterministic": true,
+        "expected": "event",
+        "features": {
+          "past": true,
+          "present": true,
+          "conditional": false,
+          "no_longer": false,
+          "time_ref": true,
+          "time_ref_exact": true
+        },
+        "violations": [],
+        "redacted": false,
+        "leak": false,
+        "number_words": [],
+        "numbers": [
+          {
+            "token": "148,41",
+            "slot": "lead.close"
+          },
+          {
+            "token": "142,47",
+            "slot": "lead.slow"
+          },
+          {
+            "token": "140",
+            "slot": "ledger.n"
+          },
+          {
+            "token": "89",
+            "slot": "ledger.realized"
+          }
+        ],
+        "invented": 0
+      },
+      {
+        "id": "s03",
+        "sentence": "EREGL'de yaklaşık bir hafta önce hareketli ortalamalar düşüş yönünde dizildi: düşüş eğiliminde devam sinyali. Beklenen sonuç bugün gerçekleşti. Hâlâ geçerli olup olmadığı bilinmiyor. Geçmişte bu tür sinyal çoğunlukla beklendiği gibi sonuçlandı. Sunucu doğruladı; rakamlar kurumsal akış lisansı gerektiriyor.",
+        "deterministic": true,
+        "expected": "event",
+        "features": {
+          "past": true,
+          "present": true,
+          "conditional": false,
+          "no_longer": false,
+          "time_ref": true,
+          "time_ref_exact": false
+        },
+        "violations": [],
+        "redacted": true,
+        "leak": false,
+        "number_words": [],
+        "numbers": [],
+        "invented": 0
+      },
+      {
+        "id": "s04",
+        "sentence": "PGSUS'ta 30 bar önce hareketli ortalamalar yükseliş yönünde dizildi (kapanış 57,29, uzun ortalama 55,00): yükseliş eğiliminde devam sinyali. Hâlâ geçerli olup olmadığı bilinmiyor. Geçmişte bu sinyal 140 seferin 67'sinde beklendiği gibi sonuçlandı.",
+        "deterministic": true,
+        "expected": "event",
+        "features": {
+          "past": true,
+          "present": true,
+          "conditional": false,
+          "no_longer": false,
+          "time_ref": true,
+          "time_ref_exact": true
+        },
+        "violations": [],
+        "redacted": false,
+        "leak": false,
+        "number_words": [],
+        "numbers": [
+          {
+            "token": "30",
+            "slot": "bars_ago"
+          },
+          {
+            "token": "57,29",
+            "slot": "lead.close"
+          },
+          {
+            "token": "55,00",
+            "slot": "lead.slow"
+          },
+          {
+            "token": "140",
+            "slot": "ledger.n"
+          },
+          {
+            "token": "67",
+            "slot": "ledger.realized"
+          }
+        ],
+        "invented": 0
+      },
+      {
+        "id": "s05",
+        "sentence": "THYAO'da bugün aşağı dönüş işareti çıktı: fiyat yeni tepe yaparken RSI daha düşük tepe yaptı (fiyat 168,94, RSI 52,1). Bugün ters yönde bir sinyal geldi; görünüm zayıfladı. Hâlâ geçerli olup olmadığı bilinmiyor. Karnesi henüz az örnekli: 8 seferin 6'sında tuttu.",
+        "deterministic": true,
+        "expected": "event",
+        "features": {
+          "past": true,
+          "present": true,
+          "conditional": false,
+          "no_longer": false,
+          "time_ref": true,
+          "time_ref_exact": true
+        },
+        "violations": [],
+        "redacted": false,
+        "leak": false,
+        "number_words": [],
+        "numbers": [
+          {
+            "token": "168,94",
+            "slot": "lead.price"
+          },
+          {
+            "token": "52,1",
+            "slot": "lead.rsi"
+          },
+          {
+            "token": "8",
+            "slot": "ledger.n"
+          },
+          {
+            "token": "6",
+            "slot": "ledger.realized"
+          }
+        ],
+        "invented": 0
+      },
+      {
+        "id": "s06",
+        "sentence": "BIMAS'ta dün yukarı dönüş işareti çıktı: fiyat yeni dip yaparken RSI daha yüksek dip yaptı (fiyat 21,49, RSI 53,6). Bugün ters yönde bir sinyal geldi; görünüm zayıfladı. Hâlâ geçerli olup olmadığı bilinmiyor. Karnesi henüz az örnekli: 8 seferin 2'sinde tuttu.",
+        "deterministic": true,
+        "expected": "event",
+        "features": {
+          "past": true,
+          "present": true,
+          "conditional": false,
+          "no_longer": false,
+          "time_ref": true,
+          "time_ref_exact": true
+        },
+        "violations": [],
+        "redacted": false,
+        "leak": false,
+        "number_words": [],
+        "numbers": [
+          {
+            "token": "21,49",
+            "slot": "lead.price"
+          },
+          {
+            "token": "53,6",
+            "slot": "lead.rsi"
+          },
+          {
+            "token": "8",
+            "slot": "ledger.n"
+          },
+          {
+            "token": "2",
+            "slot": "ledger.realized"
+          }
+        ],
+        "invented": 0
+      },
+      {
+        "id": "s07",
+        "sentence": "PGSUS'ta yaklaşık bir hafta önce aşağı dönüş işareti çıktı: fiyat yeni tepe yaparken RSI daha düşük tepe yaptı. Sinyalın ömrü bugün sonuçsuz doldu; artık geçerli değil. Karnesi henüz az örnekli. Sunucu doğruladı; rakamlar kurumsal akış lisansı gerektiriyor.",
+        "deterministic": true,
+        "expected": "event",
+        "features": {
+          "past": true,
+          "present": true,
+          "conditional": false,
+          "no_longer": true,
+          "time_ref": true,
+          "time_ref_exact": false
+        },
+        "violations": [],
+        "redacted": true,
+        "leak": false,
+        "number_words": [],
+        "numbers": [],
+        "invented": 0
+      },
+      {
+        "id": "s08",
+        "sentence": "THYAO'da 30 bar önce aşağı dönüş işareti çıktı: fiyat yeni tepe yaparken RSI daha düşük tepe yaptı (fiyat 25,63, RSI 50,1). Bugün hacim de teyit etti; 2 bağımsız kanıt ailesi destekliyor. Hâlâ geçerli olup olmadığı bilinmiyor. Karnesi henüz az örnekli: 8 seferin 4'ünde tuttu.",
+        "deterministic": true,
+        "expected": "event",
+        "features": {
+          "past": true,
+          "present": true,
+          "conditional": false,
+          "no_longer": false,
+          "time_ref": true,
+          "time_ref_exact": true
+        },
+        "violations": [],
+        "redacted": false,
+        "leak": false,
+        "number_words": [],
+        "numbers": [
+          {
+            "token": "30",
+            "slot": "bars_ago"
+          },
+          {
+            "token": "25,63",
+            "slot": "lead.price"
+          },
+          {
+            "token": "50,1",
+            "slot": "lead.rsi"
+          },
+          {
+            "token": "2",
+            "slot": "families"
+          },
+          {
+            "token": "8",
+            "slot": "ledger.n"
+          },
+          {
+            "token": "4",
+            "slot": "ledger.realized"
+          }
+        ],
+        "invented": 0
+      },
+      {
+        "id": "s09",
+        "sentence": "GARAN bugün 128,48'deki direnci yukarı kırdı (kapanış 131,01): yukarı kırılım. Sinyalın 1 barlık ömrü bugün sonuçsuz doldu; artık geçerli değil. Geçmişte bu sinyal 140 seferin 51'inde beklendiği gibi sonuçlandı.",
+        "deterministic": true,
+        "expected": "event",
+        "features": {
+          "past": true,
+          "present": false,
+          "conditional": false,
+          "no_longer": true,
+          "time_ref": true,
+          "time_ref_exact": true
+        },
+        "violations": [],
+        "redacted": false,
+        "leak": false,
+        "number_words": [],
+        "numbers": [
+          {
+            "token": "128,48",
+            "slot": "lead.level"
+          },
+          {
+            "token": "131,01",
+            "slot": "lead.close"
+          },
+          {
+            "token": "1",
+            "slot": "families"
+          },
+          {
+            "token": "140",
+            "slot": "ledger.n"
+          },
+          {
+            "token": "51",
+            "slot": "ledger.realized"
+          }
+        ],
+        "invented": 0
+      },
+      {
+        "id": "s10",
+        "sentence": "PGSUS dün 167,59'daki direnci yukarı kırdı (kapanış 172,40): yukarı kırılım. Sinyal bugün geçersiz oldu; artık geçerli değil. Karnesi henüz az örnekli: 8 seferin 3'ünde tuttu.",
+        "deterministic": true,
+        "expected": "event",
+        "features": {
+          "past": true,
+          "present": false,
+          "conditional": false,
+          "no_longer": true,
+          "time_ref": true,
+          "time_ref_exact": true
+        },
+        "violations": [],
+        "redacted": false,
+        "leak": false,
+        "number_words": [],
+        "numbers": [
+          {
+            "token": "167,59",
+            "slot": "lead.level"
+          },
+          {
+            "token": "172,40",
+            "slot": "lead.close"
+          },
+          {
+            "token": "8",
+            "slot": "ledger.n"
+          },
+          {
+            "token": "3",
+            "slot": "ledger.realized"
+          }
+        ],
+        "invented": 0
+      },
+      {
+        "id": "s11",
+        "sentence": "EREGL 5 bar önce 42,68'deki direnci yukarı kırdı (kapanış 43,15): yukarı kırılım. Bugün hacim de teyit etti; 2 bağımsız kanıt ailesi destekliyor. Hâlâ geçerli olup olmadığı bilinmiyor. Geçmişte bu sinyal 140 seferin 98'inde beklendiği gibi sonuçlandı.",
+        "deterministic": true,
+        "expected": "event",
+        "features": {
+          "past": true,
+          "present": true,
+          "conditional": false,
+          "no_longer": false,
+          "time_ref": true,
+          "time_ref_exact": true
+        },
+        "violations": [],
+        "redacted": false,
+        "leak": false,
+        "number_words": [],
+        "numbers": [
+          {
+            "token": "5",
+            "slot": "bars_ago"
+          },
+          {
+            "token": "42,68",
+            "slot": "lead.level"
+          },
+          {
+            "token": "43,15",
+            "slot": "lead.close"
+          },
+          {
+            "token": "2",
+            "slot": "families"
+          },
+          {
+            "token": "140",
+            "slot": "ledger.n"
+          },
+          {
+            "token": "98",
+            "slot": "ledger.realized"
+          }
+        ],
+        "invented": 0
+      },
+      {
+        "id": "s12",
+        "sentence": "AKBNK 30 bar önce 20,86'daki desteği aşağı kırdı (kapanış 20,58): aşağı kırılım. Bugün ters yönde bir sinyal geldi; görünüm zayıfladı. Hâlâ geçerli olup olmadığı bilinmiyor. Karnesi henüz az örnekli: 8 seferin 2'sinde tuttu.",
+        "deterministic": true,
+        "expected": "event",
+        "features": {
+          "past": true,
+          "present": true,
+          "conditional": false,
+          "no_longer": false,
+          "time_ref": true,
+          "time_ref_exact": true
+        },
+        "violations": [],
+        "redacted": false,
+        "leak": false,
+        "number_words": [],
+        "numbers": [
+          {
+            "token": "30",
+            "slot": "bars_ago"
+          },
+          {
+            "token": "20,86",
+            "slot": "lead.level"
+          },
+          {
+            "token": "20,58",
+            "slot": "lead.close"
+          },
+          {
+            "token": "8",
+            "slot": "ledger.n"
+          },
+          {
+            "token": "2",
+            "slot": "ledger.realized"
+          }
+        ],
+        "invented": 0
+      },
+      {
+        "id": "s13",
+        "sentence": "ASELS'te bugün Bollinger bantları daraldı (bant genişliği 0,049, eşik 0,06): sıkışma, yön belirsiz. Hâlâ geçerli olup olmadığı bilinmiyor. Karnesi henüz az örnekli: 8 seferin 2'sinde tuttu.",
+        "deterministic": true,
+        "expected": "event",
+        "features": {
+          "past": true,
+          "present": true,
+          "conditional": false,
+          "no_longer": false,
+          "time_ref": true,
+          "time_ref_exact": true
+        },
+        "violations": [],
+        "redacted": false,
+        "leak": false,
+        "number_words": [],
+        "numbers": [
+          {
+            "token": "0,049",
+            "slot": "lead.bandwidth"
+          },
+          {
+            "token": "0,06",
+            "slot": "lead.threshold"
+          },
+          {
+            "token": "8",
+            "slot": "ledger.n"
+          },
+          {
+            "token": "2",
+            "slot": "ledger.realized"
+          }
+        ],
+        "invented": 0
+      },
+      {
+        "id": "s14",
+        "sentence": "THYAO'da dün Bollinger bantları daraldı: sıkışma, yön belirsiz. Sinyalın ömrü bugün sonuçsuz doldu; artık geçerli değil. Geçmişte bu tür sinyal çoğunlukla beklendiği gibi sonuçlandı. Sunucu doğruladı; rakamlar kurumsal akış lisansı gerektiriyor.",
+        "deterministic": true,
+        "expected": "event",
+        "features": {
+          "past": true,
+          "present": true,
+          "conditional": false,
+          "no_longer": true,
+          "time_ref": true,
+          "time_ref_exact": true
+        },
+        "violations": [],
+        "redacted": true,
+        "leak": false,
+        "number_words": [],
+        "numbers": [],
+        "invented": 0
+      },
+      {
+        "id": "s15",
+        "sentence": "SAHOL'da 5 bar önce Bollinger bantları daraldı (bant genişliği 0,044, eşik 0,06): sıkışma, yön belirsiz. Bugün ters yönde bir sinyal geldi; görünüm zayıfladı. Hâlâ geçerli olup olmadığı bilinmiyor. Geçmişte bu sinyal 140 seferin 63'ünde beklendiği gibi sonuçlandı.",
+        "deterministic": true,
+        "expected": "event",
+        "features": {
+          "past": true,
+          "present": true,
+          "conditional": false,
+          "no_longer": false,
+          "time_ref": true,
+          "time_ref_exact": true
+        },
+        "violations": [],
+        "redacted": false,
+        "leak": false,
+        "number_words": [],
+        "numbers": [
+          {
+            "token": "5",
+            "slot": "bars_ago"
+          },
+          {
+            "token": "0,044",
+            "slot": "lead.bandwidth"
+          },
+          {
+            "token": "0,06",
+            "slot": "lead.threshold"
+          },
+          {
+            "token": "140",
+            "slot": "ledger.n"
+          },
+          {
+            "token": "63",
+            "slot": "ledger.realized"
+          }
+        ],
+        "invented": 0
+      },
+      {
+        "id": "s16",
+        "sentence": "TUPRS'ta 30 bar önce Bollinger bantları daraldı (bant genişliği 0,025, eşik 0,06): sıkışma, yön belirsiz. Sinyal bugün geçersiz oldu; artık geçerli değil. Karnesi henüz az örnekli: 8 seferin 2'sinde tuttu.",
+        "deterministic": true,
+        "expected": "event",
+        "features": {
+          "past": true,
+          "present": false,
+          "conditional": false,
+          "no_longer": true,
+          "time_ref": true,
+          "time_ref_exact": true
+        },
+        "violations": [],
+        "redacted": false,
+        "leak": false,
+        "number_words": [],
+        "numbers": [
+          {
+            "token": "30",
+            "slot": "bars_ago"
+          },
+          {
+            "token": "0,025",
+            "slot": "lead.bandwidth"
+          },
+          {
+            "token": "0,06",
+            "slot": "lead.threshold"
+          },
+          {
+            "token": "8",
+            "slot": "ledger.n"
+          },
+          {
+            "token": "2",
+            "slot": "ledger.realized"
+          }
+        ],
+        "invented": 0
+      },
+      {
+        "id": "s17",
+        "sentence": "PGSUS'ta RSI bugün 30'un altına indi (28,8): aşırı satım. Bugün hacim de teyit etti; 2 bağımsız kanıt ailesi destekliyor. Hâlâ geçerli olup olmadığı bilinmiyor. Geçmişte bu sinyal 140 seferin 99'unda beklendiği gibi sonuçlandı.",
+        "deterministic": true,
+        "expected": "event",
+        "features": {
+          "past": true,
+          "present": true,
+          "conditional": false,
+          "no_longer": false,
+          "time_ref": true,
+          "time_ref_exact": true
+        },
+        "violations": [],
+        "redacted": false,
+        "leak": false,
+        "number_words": [],
+        "numbers": [
+          {
+            "token": "30",
+            "slot": "lead.level"
+          },
+          {
+            "token": "28,8",
+            "slot": "lead.value"
+          },
+          {
+            "token": "2",
+            "slot": "families"
+          },
+          {
+            "token": "140",
+            "slot": "ledger.n"
+          },
+          {
+            "token": "99",
+            "slot": "ledger.realized"
+          }
+        ],
+        "invented": 0
+      },
+      {
+        "id": "s18",
+        "sentence": "BIMAS'ta RSI dün 70'in üstüne çıktı (72,6): aşırı alım. Bugün hacim de teyit etti; 2 bağımsız kanıt ailesi destekliyor. Hâlâ geçerli olup olmadığı bilinmiyor. Karnesi henüz az örnekli: 8 seferin 4'ünde tuttu.",
+        "deterministic": true,
+        "expected": "event",
+        "features": {
+          "past": true,
+          "present": true,
+          "conditional": false,
+          "no_longer": false,
+          "time_ref": true,
+          "time_ref_exact": true
+        },
+        "violations": [],
+        "redacted": false,
+        "leak": false,
+        "number_words": [],
+        "numbers": [
+          {
+            "token": "70",
+            "slot": "lead.level"
+          },
+          {
+            "token": "72,6",
+            "slot": "lead.value"
+          },
+          {
+            "token": "2",
+            "slot": "families"
+          },
+          {
+            "token": "8",
+            "slot": "ledger.n"
+          },
+          {
+            "token": "4",
+            "slot": "ledger.realized"
+          }
+        ],
+        "invented": 0
+      },
+      {
+        "id": "s19",
+        "sentence": "FROTO'da RSI yaklaşık bir hafta önce aşırı alım eşiğinin üstüne çıktı: aşırı alım. Sinyal bugün geçersiz oldu; artık geçerli değil. Karnesi henüz az örnekli. Sunucu doğruladı; rakamlar kurumsal akış lisansı gerektiriyor.",
+        "deterministic": true,
+        "expected": "event",
+        "features": {
+          "past": true,
+          "present": true,
+          "conditional": false,
+          "no_longer": true,
+          "time_ref": true,
+          "time_ref_exact": false
+        },
+        "violations": [],
+        "redacted": true,
+        "leak": false,
+        "number_words": [],
+        "numbers": [],
+        "invented": 0
+      },
+      {
+        "id": "s20",
+        "sentence": "FROTO'da RSI bir aydan uzun süre önce aşırı alım eşiğinin üstüne çıktı: aşırı alım. Hâlâ geçerli olup olmadığı bilinmiyor. Geçmişte bu tür sinyal çoğunlukla beklendiği gibi sonuçlandı. Sunucu doğruladı; rakamlar kurumsal akış lisansı gerektiriyor.",
+        "deterministic": true,
+        "expected": "event",
+        "features": {
+          "past": true,
+          "present": true,
+          "conditional": false,
+          "no_longer": false,
+          "time_ref": true,
+          "time_ref_exact": false
+        },
+        "violations": [],
+        "redacted": true,
+        "leak": false,
+        "number_words": [],
+        "numbers": [],
+        "invented": 0
+      },
+      {
+        "id": "s21",
+        "sentence": "AKBNK'ta bugün kurumsal net satış (1.345.000) son günlerin ortalamasını (563.000) belirgin biçimde aştı: para çıkışı. Hâlâ geçerli olup olmadığı bilinmiyor. Geçmişte bu sinyal 140 seferin 63'ünde beklendiği gibi sonuçlandı.",
+        "deterministic": true,
+        "expected": "event",
+        "features": {
+          "past": true,
+          "present": true,
+          "conditional": false,
+          "no_longer": false,
+          "time_ref": true,
+          "time_ref_exact": true
+        },
+        "violations": [],
+        "redacted": false,
+        "leak": false,
+        "number_words": [],
+        "numbers": [
+          {
+            "token": "1.345.000",
+            "slot": "lead.net"
+          },
+          {
+            "token": "563.000",
+            "slot": "lead.avg5"
+          },
+          {
+            "token": "140",
+            "slot": "ledger.n"
+          },
+          {
+            "token": "63",
+            "slot": "ledger.realized"
+          }
+        ],
+        "invented": 0
+      },
+      {
+        "id": "s22",
+        "sentence": "FROTO'da dün kurumsal net alış (1.026.000) son günlerin ortalamasını (481.000) belirgin biçimde aştı: para girişi. Hâlâ geçerli olup olmadığı bilinmiyor. Karnesi henüz az örnekli: 8 seferin 6'sında tuttu.",
+        "deterministic": true,
+        "expected": "event",
+        "features": {
+          "past": true,
+          "present": true,
+          "conditional": false,
+          "no_longer": false,
+          "time_ref": true,
+          "time_ref_exact": true
+        },
+        "violations": [],
+        "redacted": false,
+        "leak": false,
+        "number_words": [],
+        "numbers": [
+          {
+            "token": "1.026.000",
+            "slot": "lead.net"
+          },
+          {
+            "token": "481.000",
+            "slot": "lead.avg5"
+          },
+          {
+            "token": "8",
+            "slot": "ledger.n"
+          },
+          {
+            "token": "6",
+            "slot": "ledger.realized"
+          }
+        ],
+        "invented": 0
+      },
+      {
+        "id": "s23",
+        "sentence": "AKBNK'ta 5 bar önce kurumsal net satış (1.496.000) son günlerin ortalamasını (374.000) belirgin biçimde aştı: para çıkışı. Sinyalın 5 barlık ömrü bugün sonuçsuz doldu; artık geçerli değil. Geçmişte bu sinyal 140 seferin 50'sinde beklendiği gibi sonuçlandı.",
+        "deterministic": true,
+        "expected": "event",
+        "features": {
+          "past": true,
+          "present": false,
+          "conditional": false,
+          "no_longer": true,
+          "time_ref": true,
+          "time_ref_exact": true
+        },
+        "violations": [],
+        "redacted": false,
+        "leak": false,
+        "number_words": [],
+        "numbers": [
+          {
+            "token": "5",
+            "slot": "bars_ago"
+          },
+          {
+            "token": "1.496.000",
+            "slot": "lead.net"
+          },
+          {
+            "token": "374.000",
+            "slot": "lead.avg5"
+          },
+          {
+            "token": "5",
+            "slot": "bars_ago"
+          },
+          {
+            "token": "140",
+            "slot": "ledger.n"
+          },
+          {
+            "token": "50",
+            "slot": "ledger.realized"
+          }
+        ],
+        "invented": 0
+      },
+      {
+        "id": "s24",
+        "sentence": "PGSUS'ta 30 bar önce kurumsal net satış (1.280.000) son günlerin ortalamasını (597.000) belirgin biçimde aştı: para çıkışı. Bugün ters yönde bir sinyal geldi; görünüm zayıfladı. Hâlâ geçerli olup olmadığı bilinmiyor. Geçmişte bu sinyal 140 seferin 54'ünde beklendiği gibi sonuçlandı.",
+        "deterministic": true,
+        "expected": "event",
+        "features": {
+          "past": true,
+          "present": true,
+          "conditional": false,
+          "no_longer": false,
+          "time_ref": true,
+          "time_ref_exact": true
+        },
+        "violations": [],
+        "redacted": false,
+        "leak": false,
+        "number_words": [],
+        "numbers": [
+          {
+            "token": "30",
+            "slot": "bars_ago"
+          },
+          {
+            "token": "1.280.000",
+            "slot": "lead.net"
+          },
+          {
+            "token": "597.000",
+            "slot": "lead.avg5"
+          },
+          {
+            "token": "140",
+            "slot": "ledger.n"
+          },
+          {
+            "token": "54",
+            "slot": "ledger.realized"
+          }
+        ],
+        "invented": 0
+      },
+      {
+        "id": "s25",
+        "sentence": "BIMAS bugün itibarıyla uzun ortalamanın üstünde. Yükseliş eğilimi sürüyor. Bugün ters yönde bir sinyal geldi; görünüm zayıfladı. Geçmişte bu tür sinyal çoğunlukla beklendiği gibi sonuçlandı. Sunucu doğruladı; rakamlar kurumsal akış lisansı gerektiriyor.",
+        "deterministic": true,
+        "expected": "state_holding",
+        "features": {
+          "past": true,
+          "present": true,
+          "conditional": false,
+          "no_longer": false,
+          "time_ref": true,
+          "time_ref_exact": false
+        },
+        "violations": [],
+        "redacted": true,
+        "leak": false,
+        "number_words": [],
+        "numbers": [],
+        "invented": 0
+      },
+      {
+        "id": "s26",
+        "sentence": "PGSUS dün uzun ortalamanın (29,19) altına indi; şu an 30,07, artık uzun ortalamanın altında değil. Düşüş eğilimi sona erdi. Sinyal bugün geçersiz oldu. Karnesi henüz az örnekli: 8 seferin 2'sinde tuttu.",
+        "deterministic": true,
+        "expected": "state_ended",
+        "features": {
+          "past": true,
+          "present": true,
+          "conditional": false,
+          "no_longer": true,
+          "time_ref": true,
+          "time_ref_exact": true
+        },
+        "violations": [],
+        "redacted": false,
+        "leak": false,
+        "number_words": [],
+        "numbers": [
+          {
+            "token": "29,19",
+            "slot": "lead.slow"
+          },
+          {
+            "token": "30,07",
+            "slot": "current"
+          },
+          {
+            "token": "8",
+            "slot": "ledger.n"
+          },
+          {
+            "token": "2",
+            "slot": "ledger.realized"
+          }
+        ],
+        "invented": 0
+      },
+      {
+        "id": "s27",
+        "sentence": "SISE 5 bardır uzun ortalamanın (71,29) altında; şu an 69,86. Düşüş eğilimi sürüyor. Geçmişte bu sinyal 140 seferin 63'ünde beklendiği gibi sonuçlandı.",
+        "deterministic": true,
+        "expected": "state_holding",
+        "features": {
+          "past": true,
+          "present": true,
+          "conditional": true,
+          "no_longer": false,
+          "time_ref": false,
+          "time_ref_exact": false
+        },
+        "violations": [],
+        "redacted": false,
+        "leak": false,
+        "number_words": [],
+        "numbers": [
+          {
+            "token": "5",
+            "slot": "bars_ago"
+          },
+          {
+            "token": "71,29",
+            "slot": "lead.slow"
+          },
+          {
+            "token": "69,86",
+            "slot": "current"
+          },
+          {
+            "token": "140",
+            "slot": "ledger.n"
+          },
+          {
+            "token": "63",
+            "slot": "ledger.realized"
+          }
+        ],
+        "invented": 0
+      },
+      {
+        "id": "s28",
+        "sentence": "THYAO 30 bardır uzun ortalamanın (57,17) üstünde; şu an 58,31. Yükseliş eğilimi sürüyor. Beklenen sonuç bugün gerçekleşti. Karnesi henüz az örnekli: 8 seferin 2'sinde tuttu.",
+        "deterministic": true,
+        "expected": "state_holding",
+        "features": {
+          "past": true,
+          "present": true,
+          "conditional": false,
+          "no_longer": false,
+          "time_ref": true,
+          "time_ref_exact": false
+        },
+        "violations": [],
+        "redacted": false,
+        "leak": false,
+        "number_words": [],
+        "numbers": [
+          {
+            "token": "30",
+            "slot": "bars_ago"
+          },
+          {
+            "token": "57,17",
+            "slot": "lead.slow"
+          },
+          {
+            "token": "58,31",
+            "slot": "current"
+          },
+          {
+            "token": "8",
+            "slot": "ledger.n"
+          },
+          {
+            "token": "2",
+            "slot": "ledger.realized"
+          }
+        ],
+        "invented": 0
+      },
+      {
+        "id": "s29",
+        "sentence": "KCHOL bugün dönüş noktasının (286,57) altına indi; şu an 295,17, artık dönüş noktasının altında değil. Aşağı dönüş sona erdi. Sinyalın 1 barlık ömrü bugün sonuçsuz doldu. Karnesi henüz az örnekli: 8 seferin 4'ünde tuttu.",
+        "deterministic": true,
+        "expected": "state_ended",
+        "features": {
+          "past": true,
+          "present": true,
+          "conditional": false,
+          "no_longer": true,
+          "time_ref": true,
+          "time_ref_exact": true
+        },
+        "violations": [],
+        "redacted": false,
+        "leak": false,
+        "number_words": [],
+        "numbers": [
+          {
+            "token": "286,57",
+            "slot": "lead.price"
+          },
+          {
+            "token": "295,17",
+            "slot": "current"
+          },
+          {
+            "token": "1",
+            "slot": "families"
+          },
+          {
+            "token": "8",
+            "slot": "ledger.n"
+          },
+          {
+            "token": "4",
+            "slot": "ledger.realized"
+          }
+        ],
+        "invented": 0
+      },
+      {
+        "id": "s30",
+        "sentence": "GARAN dün dönüş noktasının (33,26) üstüne çıktı; şu an 32,26, artık dönüş noktasının üstünde değil. Yukarı dönüş sona erdi. Sinyal bugün geçersiz oldu. Karnesi henüz az örnekli: 8 seferin 4'ünde tuttu.",
+        "deterministic": true,
+        "expected": "state_ended",
+        "features": {
+          "past": true,
+          "present": true,
+          "conditional": false,
+          "no_longer": true,
+          "time_ref": true,
+          "time_ref_exact": true
+        },
+        "violations": [],
+        "redacted": false,
+        "leak": false,
+        "number_words": [],
+        "numbers": [
+          {
+            "token": "33,26",
+            "slot": "lead.price"
+          },
+          {
+            "token": "32,26",
+            "slot": "current"
+          },
+          {
+            "token": "8",
+            "slot": "ledger.n"
+          },
+          {
+            "token": "4",
+            "slot": "ledger.realized"
+          }
+        ],
+        "invented": 0
+      },
+      {
+        "id": "s31",
+        "sentence": "FROTO yaklaşık bir haftadır dönüş noktasının altında. Aşağı dönüş sürüyor. Beklenen sonuç bugün gerçekleşti. Karnesi henüz az örnekli. Sunucu doğruladı; rakamlar kurumsal akış lisansı gerektiriyor.",
+        "deterministic": true,
+        "expected": "state_holding",
+        "features": {
+          "past": true,
+          "present": true,
+          "conditional": false,
+          "no_longer": false,
+          "time_ref": true,
+          "time_ref_exact": false
+        },
+        "violations": [],
+        "redacted": true,
+        "leak": false,
+        "number_words": [],
+        "numbers": [],
+        "invented": 0
+      },
+      {
+        "id": "s32",
+        "sentence": "SISE 30 bardır dönüş noktasının (177,59) altında; şu an 174,04. Aşağı dönüş sürüyor. Beklenen sonuç bugün gerçekleşti. Geçmişte bu sinyal 140 seferin 68'inde beklendiği gibi sonuçlandı.",
+        "deterministic": true,
+        "expected": "state_holding",
+        "features": {
+          "past": true,
+          "present": true,
+          "conditional": true,
+          "no_longer": false,
+          "time_ref": true,
+          "time_ref_exact": false
+        },
+        "violations": [],
+        "redacted": false,
+        "leak": false,
+        "number_words": [],
+        "numbers": [
+          {
+            "token": "30",
+            "slot": "bars_ago"
+          },
+          {
+            "token": "177,59",
+            "slot": "lead.price"
+          },
+          {
+            "token": "174,04",
+            "slot": "current"
+          },
+          {
+            "token": "140",
+            "slot": "ledger.n"
+          },
+          {
+            "token": "68",
+            "slot": "ledger.realized"
+          }
+        ],
+        "invented": 0
+      },
+      {
+        "id": "s33",
+        "sentence": "THYAO bugün itibarıyla kırılım seviyesinin üstünde. Yukarı kırılım sürüyor. Geçmişte bu tür sinyal çoğunlukla tutmadı. Sunucu doğruladı; rakamlar kurumsal akış lisansı gerektiriyor.",
+        "deterministic": true,
+        "expected": "state_holding",
+        "features": {
+          "past": true,
+          "present": true,
+          "conditional": false,
+          "no_longer": false,
+          "time_ref": true,
+          "time_ref_exact": false
+        },
+        "violations": [],
+        "redacted": true,
+        "leak": false,
+        "number_words": [],
+        "numbers": [],
+        "invented": 0
+      },
+      {
+        "id": "s34",
+        "sentence": "GARAN dün 168,43'ün üstüne çıktı; şu an 163,38, artık 168,43'ün üstünde değil. Yukarı kırılım sona erdi. Beklenen sonuç bugün gerçekleşti. Karnesi henüz az örnekli: 8 seferin 2'sinde tuttu.",
+        "deterministic": true,
+        "expected": "state_ended",
+        "features": {
+          "past": true,
+          "present": true,
+          "conditional": false,
+          "no_longer": true,
+          "time_ref": true,
+          "time_ref_exact": true
+        },
+        "violations": [],
+        "redacted": false,
+        "leak": false,
+        "number_words": [],
+        "numbers": [
+          {
+            "token": "168,43",
+            "slot": "lead.level"
+          },
+          {
+            "token": "163,38",
+            "slot": "current"
+          },
+          {
+            "token": "168,43",
+            "slot": "lead.level"
+          },
+          {
+            "token": "8",
+            "slot": "ledger.n"
+          },
+          {
+            "token": "2",
+            "slot": "ledger.realized"
+          }
+        ],
+        "invented": 0
+      },
+      {
+        "id": "s35",
+        "sentence": "GARAN 5 bar önce 109,96'nın üstüne çıktı; şu an 106,66, artık 109,96'nın üstünde değil. Yukarı kırılım sona erdi. Sinyalın 5 barlık ömrü bugün sonuçsuz doldu. Geçmişte bu sinyal 140 seferin 82'sinde beklendiği gibi sonuçlandı.",
+        "deterministic": true,
+        "expected": "state_ended",
+        "features": {
+          "past": true,
+          "present": true,
+          "conditional": false,
+          "no_longer": true,
+          "time_ref": true,
+          "time_ref_exact": true
+        },
+        "violations": [],
+        "redacted": false,
+        "leak": false,
+        "number_words": [],
+        "numbers": [
+          {
+            "token": "5",
+            "slot": "bars_ago"
+          },
+          {
+            "token": "109,96",
+            "slot": "lead.level"
+          },
+          {
+            "token": "106,66",
+            "slot": "current"
+          },
+          {
+            "token": "109,96",
+            "slot": "lead.level"
+          },
+          {
+            "token": "5",
+            "slot": "bars_ago"
+          },
+          {
+            "token": "140",
+            "slot": "ledger.n"
+          },
+          {
+            "token": "82",
+            "slot": "ledger.realized"
+          }
+        ],
+        "invented": 0
+      },
+      {
+        "id": "s36",
+        "sentence": "EREGL 30 bar önce 46,19'un altına indi; şu an 47,58, artık 46,19'un altında değil. Aşağı kırılım sona erdi. Sinyal bugün geçersiz oldu. Geçmişte bu sinyal 140 seferin 81'inde beklendiği gibi sonuçlandı.",
+        "deterministic": true,
+        "expected": "state_ended",
+        "features": {
+          "past": true,
+          "present": true,
+          "conditional": false,
+          "no_longer": true,
+          "time_ref": true,
+          "time_ref_exact": true
+        },
+        "violations": [],
+        "redacted": false,
+        "leak": false,
+        "number_words": [],
+        "numbers": [
+          {
+            "token": "30",
+            "slot": "bars_ago"
+          },
+          {
+            "token": "46,19",
+            "slot": "lead.level"
+          },
+          {
+            "token": "47,58",
+            "slot": "current"
+          },
+          {
+            "token": "46,19",
+            "slot": "lead.level"
+          },
+          {
+            "token": "140",
+            "slot": "ledger.n"
+          },
+          {
+            "token": "81",
+            "slot": "ledger.realized"
+          }
+        ],
+        "invented": 0
+      },
+      {
+        "id": "s37",
+        "sentence": "SAHOL'da bant genişliği bugün eşiğin altına indi; artık eşiğin altında değil. Sıkışma (yön belirsiz) sona erdi. Sinyal bugün geçersiz oldu. Geçmişte bu tür sinyal kabaca yarı yarıya tuttu. Sunucu doğruladı; rakamlar kurumsal akış lisansı gerektiriyor.",
+        "deterministic": true,
+        "expected": "state_ended",
+        "features": {
+          "past": true,
+          "present": true,
+          "conditional": false,
+          "no_longer": true,
+          "time_ref": true,
+          "time_ref_exact": true
+        },
+        "violations": [],
+        "redacted": true,
+        "leak": false,
+        "number_words": [],
+        "numbers": [],
+        "invented": 0
+      },
+      {
+        "id": "s38",
+        "sentence": "GARAN'da bant genişliği dünden beri eşiğin (0,06) altında; şu an 0,0588. Sıkışma (yön belirsiz) sürüyor. Beklenen sonuç bugün gerçekleşti. Karnesi henüz az örnekli: 8 seferin 2'sinde tuttu.",
+        "deterministic": true,
+        "expected": "state_holding",
+        "features": {
+          "past": true,
+          "present": true,
+          "conditional": false,
+          "no_longer": false,
+          "time_ref": true,
+          "time_ref_exact": false
+        },
+        "violations": [],
+        "redacted": false,
+        "leak": false,
+        "number_words": [],
+        "numbers": [
+          {
+            "token": "0,06",
+            "slot": "lead.threshold"
+          },
+          {
+            "token": "0,0588",
+            "slot": "current"
+          },
+          {
+            "token": "8",
+            "slot": "ledger.n"
+          },
+          {
+            "token": "2",
+            "slot": "ledger.realized"
+          }
+        ],
+        "invented": 0
+      },
+      {
+        "id": "s39",
+        "sentence": "GARAN'da bant genişliği 5 bardır eşiğin (0,06) altında; şu an 0,0588. Sıkışma (yön belirsiz) sürüyor. Beklenen sonuç bugün gerçekleşti. Karnesi henüz az örnekli: 8 seferin 5'inde tuttu.",
+        "deterministic": true,
+        "expected": "state_holding",
+        "features": {
+          "past": true,
+          "present": true,
+          "conditional": false,
+          "no_longer": false,
+          "time_ref": true,
+          "time_ref_exact": false
+        },
+        "violations": [],
+        "redacted": false,
+        "leak": false,
+        "number_words": [],
+        "numbers": [
+          {
+            "token": "5",
+            "slot": "ledger.realized"
+          },
+          {
+            "token": "0,06",
+            "slot": "lead.threshold"
+          },
+          {
+            "token": "0,0588",
+            "slot": "current"
+          },
+          {
+            "token": "8",
+            "slot": "ledger.n"
+          },
+          {
+            "token": "5",
+            "slot": "ledger.realized"
+          }
+        ],
+        "invented": 0
+      },
+      {
+        "id": "s40",
+        "sentence": "THYAO'da bant genişliği 30 bardır eşiğin (0,06) altında; şu an 0,0588. Sıkışma (yön belirsiz) sürüyor. Bugün ters yönde bir sinyal geldi; görünüm zayıfladı. Karnesi henüz az örnekli: 8 seferin 3'ünde tuttu.",
+        "deterministic": true,
+        "expected": "state_holding",
+        "features": {
+          "past": true,
+          "present": true,
+          "conditional": false,
+          "no_longer": false,
+          "time_ref": true,
+          "time_ref_exact": false
+        },
+        "violations": [],
+        "redacted": false,
+        "leak": false,
+        "number_words": [],
+        "numbers": [
+          {
+            "token": "30",
+            "slot": "bars_ago"
+          },
+          {
+            "token": "0,06",
+            "slot": "lead.threshold"
+          },
+          {
+            "token": "0,0588",
+            "slot": "current"
+          },
+          {
+            "token": "8",
+            "slot": "ledger.n"
+          },
+          {
+            "token": "3",
+            "slot": "ledger.realized"
+          }
+        ],
+        "invented": 0
+      },
+      {
+        "id": "s41",
+        "sentence": "THYAO'da RSI bugün itibarıyla 70'in üstünde; şu an 71,4. Aşırı alım sürüyor. Karnesi henüz az örnekli: 8 seferin 2'sinde tuttu.",
+        "deterministic": true,
+        "expected": "state_holding",
+        "features": {
+          "past": true,
+          "present": true,
+          "conditional": false,
+          "no_longer": false,
+          "time_ref": true,
+          "time_ref_exact": false
+        },
+        "violations": [],
+        "redacted": false,
+        "leak": false,
+        "number_words": [],
+        "numbers": [
+          {
+            "token": "70",
+            "slot": "lead.level"
+          },
+          {
+            "token": "71,4",
+            "slot": "current"
+          },
+          {
+            "token": "8",
+            "slot": "ledger.n"
+          },
+          {
+            "token": "2",
+            "slot": "ledger.realized"
+          }
+        ],
+        "invented": 0
+      },
+      {
+        "id": "s42",
+        "sentence": "KCHOL'da RSI dünden beri aşırı alım eşiğinin üstünde. Aşırı alım sürüyor. Beklenen sonuç bugün gerçekleşti. Karnesi henüz az örnekli. Sunucu doğruladı; rakamlar kurumsal akış lisansı gerektiriyor.",
+        "deterministic": true,
+        "expected": "state_holding",
+        "features": {
+          "past": true,
+          "present": true,
+          "conditional": false,
+          "no_longer": false,
+          "time_ref": true,
+          "time_ref_exact": false
+        },
+        "violations": [],
+        "redacted": true,
+        "leak": false,
+        "number_words": [],
+        "numbers": [],
+        "invented": 0
+      },
+      {
+        "id": "s43",
+        "sentence": "BIMAS'ta RSI yaklaşık bir hafta önce aşırı alım eşiğinin üstüne çıktı; artık aşırı alım eşiğinin üstünde değil. Aşırı alım sona erdi. Karnesi henüz az örnekli. Sunucu doğruladı; rakamlar kurumsal akış lisansı gerektiriyor.",
+        "deterministic": true,
+        "expected": "state_ended",
+        "features": {
+          "past": true,
+          "present": true,
+          "conditional": false,
+          "no_longer": true,
+          "time_ref": true,
+          "time_ref_exact": false
+        },
+        "violations": [],
+        "redacted": true,
+        "leak": false,
+        "number_words": [],
+        "numbers": [],
+        "invented": 0
+      },
+      {
+        "id": "s44",
+        "sentence": "ASELS'te RSI 30 bardır 70'in üstünde; şu an 71,4. Aşırı alım sürüyor. Beklenen sonuç bugün gerçekleşti. Geçmişte bu sinyal 140 seferin 62'sinde beklendiği gibi sonuçlandı.",
+        "deterministic": true,
+        "expected": "state_holding",
+        "features": {
+          "past": true,
+          "present": true,
+          "conditional": false,
+          "no_longer": false,
+          "time_ref": true,
+          "time_ref_exact": false
+        },
+        "violations": [],
+        "redacted": false,
+        "leak": false,
+        "number_words": [],
+        "numbers": [
+          {
+            "token": "30",
+            "slot": "bars_ago"
+          },
+          {
+            "token": "70",
+            "slot": "lead.level"
+          },
+          {
+            "token": "71,4",
+            "slot": "current"
+          },
+          {
+            "token": "140",
+            "slot": "ledger.n"
+          },
+          {
+            "token": "62",
+            "slot": "ledger.realized"
+          }
+        ],
+        "invented": 0
+      },
+      {
+        "id": "s45",
+        "sentence": "GARAN'da kurumsal net akış bugün itibarıyla son günlerin ortalamasının (319.000) üstünde; şu an 325.380. Para girişi sürüyor. Bugün ters yönde bir sinyal geldi; görünüm zayıfladı. Geçmişte bu sinyal 140 seferin 63'ünde beklendiği gibi sonuçlandı.",
+        "deterministic": true,
+        "expected": "state_holding",
+        "features": {
+          "past": true,
+          "present": true,
+          "conditional": false,
+          "no_longer": false,
+          "time_ref": true,
+          "time_ref_exact": false
+        },
+        "violations": [],
+        "redacted": false,
+        "leak": false,
+        "number_words": [],
+        "numbers": [
+          {
+            "token": "319.000",
+            "slot": "lead.avg5"
+          },
+          {
+            "token": "325.380",
+            "slot": "current"
+          },
+          {
+            "token": "140",
+            "slot": "ledger.n"
+          },
+          {
+            "token": "63",
+            "slot": "ledger.realized"
+          }
+        ],
+        "invented": 0
+      },
+      {
+        "id": "s46",
+        "sentence": "PGSUS'ta kurumsal net akış dün son günlerin ortalamasının altına indi; artık son günlerin ortalamasının altında değil. Para çıkışı sona erdi. Sinyalın ömrü bugün sonuçsuz doldu. Geçmişte bu tür sinyal kabaca yarı yarıya tuttu. Sunucu doğruladı; rakamlar kurumsal akış lisansı gerektiriyor.",
+        "deterministic": true,
+        "expected": "state_ended",
+        "features": {
+          "past": true,
+          "present": true,
+          "conditional": false,
+          "no_longer": true,
+          "time_ref": true,
+          "time_ref_exact": true
+        },
+        "violations": [],
+        "redacted": true,
+        "leak": false,
+        "number_words": [],
+        "numbers": [],
+        "invented": 0
+      },
+      {
+        "id": "s47",
+        "sentence": "BIMAS'ta kurumsal net akış yaklaşık bir hafta önce son günlerin ortalamasının altına indi; artık son günlerin ortalamasının altında değil. Para çıkışı sona erdi. Geçmişte bu tür sinyal çoğunlukla beklendiği gibi sonuçlandı. Sunucu doğruladı; rakamlar kurumsal akış lisansı gerektiriyor.",
+        "deterministic": true,
+        "expected": "state_ended",
+        "features": {
+          "past": true,
+          "present": true,
+          "conditional": false,
+          "no_longer": true,
+          "time_ref": true,
+          "time_ref_exact": false
+        },
+        "violations": [],
+        "redacted": true,
+        "leak": false,
+        "number_words": [],
+        "numbers": [],
+        "invented": 0
+      },
+      {
+        "id": "s48",
+        "sentence": "EREGL'de kurumsal net akış 30 bardır son günlerin ortalamasının (452.000) altında; şu an 442.960. Para çıkışı sürüyor. Bugün hacim de teyit etti; 2 bağımsız kanıt ailesi destekliyor. Karnesi henüz az örnekli: 8 seferin 5'inde tuttu.",
+        "deterministic": true,
+        "expected": "state_holding",
+        "features": {
+          "past": true,
+          "present": true,
+          "conditional": false,
+          "no_longer": false,
+          "time_ref": true,
+          "time_ref_exact": false
+        },
+        "violations": [],
+        "redacted": false,
+        "leak": false,
+        "number_words": [],
+        "numbers": [
+          {
+            "token": "30",
+            "slot": "bars_ago"
+          },
+          {
+            "token": "452.000",
+            "slot": "lead.avg5"
+          },
+          {
+            "token": "442.960",
+            "slot": "current"
+          },
+          {
+            "token": "2",
+            "slot": "families"
+          },
+          {
+            "token": "8",
+            "slot": "ledger.n"
+          },
+          {
+            "token": "5",
+            "slot": "ledger.realized"
+          }
+        ],
+        "invented": 0
+      },
+      {
+        "id": "s49",
+        "sentence": "FROTO birkaç bar içinde uzun ortalamanın üstünde kapanırsa yükseliş eğilimi teyit olur. Beklenti bugün geçersiz oldu; artık geçerli değil. Geçmişte bu tür sinyal çoğunlukla tutmadı. Sunucu doğruladı; rakamlar kurumsal akış lisansı gerektiriyor.",
+        "deterministic": true,
+        "expected": "expectation",
+        "features": {
+          "past": true,
+          "present": true,
+          "conditional": true,
+          "no_longer": true,
+          "time_ref": true,
+          "time_ref_exact": false
+        },
+        "violations": [],
+        "redacted": true,
+        "leak": false,
+        "number_words": [],
+        "numbers": [],
+        "invented": 0
+      },
+      {
+        "id": "s50",
+        "sentence": "EREGL 3 bar içinde uzun ortalamanın (255,56) üstünde kapanırsa yükseliş eğilimi teyit olur. Bugün ters yönde bir sinyal geldi; görünüm zayıfladı. Koşul hâlâ açık. Karnesi henüz az örnekli: 8 seferin 4'ünde tuttu.",
+        "deterministic": true,
+        "expected": "expectation",
+        "features": {
+          "past": true,
+          "present": true,
+          "conditional": true,
+          "no_longer": false,
+          "time_ref": true,
+          "time_ref_exact": false
+        },
+        "violations": [],
+        "redacted": false,
+        "leak": false,
+        "number_words": [],
+        "numbers": [
+          {
+            "token": "3",
+            "slot": "within_bars"
+          },
+          {
+            "token": "255,56",
+            "slot": "lead.slow"
+          },
+          {
+            "token": "8",
+            "slot": "ledger.n"
+          },
+          {
+            "token": "4",
+            "slot": "ledger.realized"
+          }
+        ],
+        "invented": 0
+      },
+      {
+        "id": "s51",
+        "sentence": "KCHOL 3 bar içinde uzun ortalamanın (142,99) altında kapanırsa düşüş eğilimi teyit olur. Koşul hâlâ açık. Geçmişte bu sinyal 140 seferin 60'ında beklendiği gibi sonuçlandı.",
+        "deterministic": true,
+        "expected": "expectation",
+        "features": {
+          "past": true,
+          "present": true,
+          "conditional": true,
+          "no_longer": false,
+          "time_ref": false,
+          "time_ref_exact": false
+        },
+        "violations": [],
+        "redacted": false,
+        "leak": false,
+        "number_words": [],
+        "numbers": [
+          {
+            "token": "3",
+            "slot": "within_bars"
+          },
+          {
+            "token": "142,99",
+            "slot": "lead.slow"
+          },
+          {
+            "token": "140",
+            "slot": "ledger.n"
+          },
+          {
+            "token": "60",
+            "slot": "ledger.realized"
+          }
+        ],
+        "invented": 0
+      },
+      {
+        "id": "s52",
+        "sentence": "SAHOL birkaç bar içinde uzun ortalamanın üstünde kapanırsa yükseliş eğilimi teyit olur. Beklenti bugün geçersiz oldu; artık geçerli değil. Geçmişte bu tür sinyal kabaca yarı yarıya tuttu. Sunucu doğruladı; rakamlar kurumsal akış lisansı gerektiriyor.",
+        "deterministic": true,
+        "expected": "expectation",
+        "features": {
+          "past": true,
+          "present": true,
+          "conditional": true,
+          "no_longer": true,
+          "time_ref": true,
+          "time_ref_exact": false
+        },
+        "violations": [],
+        "redacted": true,
+        "leak": false,
+        "number_words": [],
+        "numbers": [],
+        "invented": 0
+      },
+      {
+        "id": "s53",
+        "sentence": "SAHOL 3 bar içinde dönüş noktasının (161,73) altında kapanırsa aşağı dönüş teyit olur. Beklenti bugün geçersiz oldu; artık geçerli değil. Geçmişte bu sinyal 140 seferin 98'inde beklendiği gibi sonuçlandı.",
+        "deterministic": true,
+        "expected": "expectation",
+        "features": {
+          "past": true,
+          "present": false,
+          "conditional": true,
+          "no_longer": true,
+          "time_ref": true,
+          "time_ref_exact": false
+        },
+        "violations": [],
+        "redacted": false,
+        "leak": false,
+        "number_words": [],
+        "numbers": [
+          {
+            "token": "3",
+            "slot": "within_bars"
+          },
+          {
+            "token": "161,73",
+            "slot": "lead.price"
+          },
+          {
+            "token": "140",
+            "slot": "ledger.n"
+          },
+          {
+            "token": "98",
+            "slot": "ledger.realized"
+          }
+        ],
+        "invented": 0
+      },
+      {
+        "id": "s54",
+        "sentence": "KCHOL 3 bar içinde dönüş noktasının (214,64) altında kapanırsa aşağı dönüş teyit olur. Bugün hacim de teyit etti; 2 bağımsız kanıt ailesi destekliyor. Koşul hâlâ açık. Karnesi henüz az örnekli: 8 seferin 3'ünde tuttu.",
+        "deterministic": true,
+        "expected": "expectation",
+        "features": {
+          "past": true,
+          "present": true,
+          "conditional": true,
+          "no_longer": false,
+          "time_ref": true,
+          "time_ref_exact": false
+        },
+        "violations": [],
+        "redacted": false,
+        "leak": false,
+        "number_words": [],
+        "numbers": [
+          {
+            "token": "3",
+            "slot": "ledger.realized"
+          },
+          {
+            "token": "214,64",
+            "slot": "lead.price"
+          },
+          {
+            "token": "2",
+            "slot": "families"
+          },
+          {
+            "token": "8",
+            "slot": "ledger.n"
+          },
+          {
+            "token": "3",
+            "slot": "ledger.realized"
+          }
+        ],
+        "invented": 0
+      },
+      {
+        "id": "s55",
+        "sentence": "SAHOL 3 bar içinde dönüş noktasının (277,15) altında kapanırsa aşağı dönüş teyit olur. Bugün hacim de teyit etti; 2 bağımsız kanıt ailesi destekliyor. Koşulun bugünkü durumu bilinmiyor. Karnesi henüz az örnekli: 8 seferin 4'ünde tuttu.",
+        "deterministic": true,
+        "expected": "expectation",
+        "features": {
+          "past": true,
+          "present": true,
+          "conditional": true,
+          "no_longer": false,
+          "time_ref": true,
+          "time_ref_exact": false
+        },
+        "violations": [],
+        "redacted": false,
+        "leak": false,
+        "number_words": [],
+        "numbers": [
+          {
+            "token": "3",
+            "slot": "within_bars"
+          },
+          {
+            "token": "277,15",
+            "slot": "lead.price"
+          },
+          {
+            "token": "2",
+            "slot": "families"
+          },
+          {
+            "token": "8",
+            "slot": "ledger.n"
+          },
+          {
+            "token": "4",
+            "slot": "ledger.realized"
+          }
+        ],
+        "invented": 0
+      },
+      {
+        "id": "s56",
+        "sentence": "TUPRS 3 bar içinde dönüş noktasının (228,51) üstünde kapanırsa yukarı dönüş teyit olur. Beklentinin 30 barlık ömrü bugün sonuçsuz doldu; artık geçerli değil. Geçmişte bu sinyal 140 seferin 49'unda beklendiği gibi sonuçlandı.",
+        "deterministic": true,
+        "expected": "expectation",
+        "features": {
+          "past": true,
+          "present": false,
+          "conditional": true,
+          "no_longer": true,
+          "time_ref": true,
+          "time_ref_exact": false
+        },
+        "violations": [],
+        "redacted": false,
+        "leak": false,
+        "number_words": [],
+        "numbers": [
+          {
+            "token": "3",
+            "slot": "within_bars"
+          },
+          {
+            "token": "228,51",
+            "slot": "lead.price"
+          },
+          {
+            "token": "30",
+            "slot": "bars_ago"
+          },
+          {
+            "token": "140",
+            "slot": "ledger.n"
+          },
+          {
+            "token": "49",
+            "slot": "ledger.realized"
+          }
+        ],
+        "invented": 0
+      },
+      {
+        "id": "s57",
+        "sentence": "TUPRS 3 bar içinde 199,00'un üstünde kapanırsa yukarı kırılım teyit olur. Bugün hacim de teyit etti; 2 bağımsız kanıt ailesi destekliyor. Koşul hâlâ açık. Karnesi henüz az örnekli: 8 seferin 6'sında tuttu.",
+        "deterministic": true,
+        "expected": "expectation",
+        "features": {
+          "past": true,
+          "present": true,
+          "conditional": true,
+          "no_longer": false,
+          "time_ref": true,
+          "time_ref_exact": false
+        },
+        "violations": [],
+        "redacted": false,
+        "leak": false,
+        "number_words": [],
+        "numbers": [
+          {
+            "token": "3",
+            "slot": "within_bars"
+          },
+          {
+            "token": "199,00",
+            "slot": "lead.level"
+          },
+          {
+            "token": "2",
+            "slot": "ledger.missed"
+          },
+          {
+            "token": "8",
+            "slot": "ledger.n"
+          },
+          {
+            "token": "6",
+            "slot": "ledger.realized"
+          }
+        ],
+        "invented": 0
+      },
+      {
+        "id": "s58",
+        "sentence": "EREGL 3 bar içinde 245,84'ün üstünde kapanırsa yukarı kırılım teyit olur. Beklenti bugün gerçekleşti. Koşulun bugünkü durumu bilinmiyor. Karnesi henüz az örnekli: 8 seferin 6'sında tuttu.",
+        "deterministic": true,
+        "expected": "expectation",
+        "features": {
+          "past": true,
+          "present": true,
+          "conditional": true,
+          "no_longer": false,
+          "time_ref": true,
+          "time_ref_exact": false
+        },
+        "violations": [],
+        "redacted": false,
+        "leak": false,
+        "number_words": [],
+        "numbers": [
+          {
+            "token": "3",
+            "slot": "within_bars"
+          },
+          {
+            "token": "245,84",
+            "slot": "lead.level"
+          },
+          {
+            "token": "8",
+            "slot": "ledger.n"
+          },
+          {
+            "token": "6",
+            "slot": "ledger.realized"
+          }
+        ],
+        "invented": 0
+      },
+      {
+        "id": "s59",
+        "sentence": "TUPRS birkaç bar içinde kırılım seviyesinin altında kapanırsa aşağı kırılım teyit olur. Bugün ters yönde bir sinyal geldi; görünüm zayıfladı. Koşul hâlâ açık. Geçmişte bu tür sinyal kabaca yarı yarıya tuttu. Sunucu doğruladı; rakamlar kurumsal akış lisansı gerektiriyor.",
+        "deterministic": true,
+        "expected": "expectation",
+        "features": {
+          "past": true,
+          "present": true,
+          "conditional": true,
+          "no_longer": false,
+          "time_ref": true,
+          "time_ref_exact": false
+        },
+        "violations": [],
+        "redacted": true,
+        "leak": false,
+        "number_words": [],
+        "numbers": [],
+        "invented": 0
+      },
+      {
+        "id": "s60",
+        "sentence": "GARAN 3 bar içinde 265,33'ün altında kapanırsa aşağı kırılım teyit olur. Bugün hacim de teyit etti; 2 bağımsız kanıt ailesi destekliyor. Koşulun bugünkü durumu bilinmiyor. Karnesi henüz az örnekli: 8 seferin 6'sında tuttu.",
+        "deterministic": true,
+        "expected": "expectation",
+        "features": {
+          "past": true,
+          "present": true,
+          "conditional": true,
+          "no_longer": false,
+          "time_ref": true,
+          "time_ref_exact": false
+        },
+        "violations": [],
+        "redacted": false,
+        "leak": false,
+        "number_words": [],
+        "numbers": [
+          {
+            "token": "3",
+            "slot": "within_bars"
+          },
+          {
+            "token": "265,33",
+            "slot": "lead.level"
+          },
+          {
+            "token": "2",
+            "slot": "ledger.missed"
+          },
+          {
+            "token": "8",
+            "slot": "ledger.n"
+          },
+          {
+            "token": "6",
+            "slot": "lead.atr"
+          }
+        ],
+        "invented": 0
+      },
+      {
+        "id": "s61",
+        "sentence": "SAHOL'da bant genişliği birkaç bar içinde eşiğin altına inerse sıkışma (yön belirsiz) teyit olur. Bugün hacim de teyit etti. Koşulun bugünkü durumu bilinmiyor. Karnesi henüz az örnekli. Sunucu doğruladı; rakamlar kurumsal akış lisansı gerektiriyor.",
+        "deterministic": true,
+        "expected": "expectation",
+        "features": {
+          "past": true,
+          "present": true,
+          "conditional": true,
+          "no_longer": false,
+          "time_ref": true,
+          "time_ref_exact": false
+        },
+        "violations": [],
+        "redacted": true,
+        "leak": false,
+        "number_words": [],
+        "numbers": [],
+        "invented": 0
+      },
+      {
+        "id": "s62",
+        "sentence": "THYAO'da bant genişliği 3 bar içinde eşiğin (0,06) altına inerse sıkışma (yön belirsiz) teyit olur. Bugün ters yönde bir sinyal geldi; görünüm zayıfladı. Koşulun bugünkü durumu bilinmiyor. Geçmişte bu sinyal 140 seferin 45'inde beklendiği gibi sonuçlandı.",
+        "deterministic": true,
+        "expected": "expectation",
+        "features": {
+          "past": true,
+          "present": true,
+          "conditional": true,
+          "no_longer": false,
+          "time_ref": true,
+          "time_ref_exact": false
+        },
+        "violations": [],
+        "redacted": false,
+        "leak": false,
+        "number_words": [],
+        "numbers": [
+          {
+            "token": "3",
+            "slot": "within_bars"
+          },
+          {
+            "token": "0,06",
+            "slot": "lead.threshold"
+          },
+          {
+            "token": "140",
+            "slot": "ledger.n"
+          },
+          {
+            "token": "45",
+            "slot": "ledger.realized"
+          }
+        ],
+        "invented": 0
+      },
+      {
+        "id": "s63",
+        "sentence": "ASELS'te bant genişliği 3 bar içinde eşiğin (0,06) altına inerse sıkışma (yön belirsiz) teyit olur. Beklentinin 5 barlık ömrü bugün sonuçsuz doldu; artık geçerli değil. Karnesi henüz az örnekli: 8 seferin 3'ünde tuttu.",
+        "deterministic": true,
+        "expected": "expectation",
+        "features": {
+          "past": true,
+          "present": false,
+          "conditional": true,
+          "no_longer": true,
+          "time_ref": true,
+          "time_ref_exact": false
+        },
+        "violations": [],
+        "redacted": false,
+        "leak": false,
+        "number_words": [],
+        "numbers": [
+          {
+            "token": "3",
+            "slot": "ledger.realized"
+          },
+          {
+            "token": "0,06",
+            "slot": "lead.threshold"
+          },
+          {
+            "token": "5",
+            "slot": "ledger.missed"
+          },
+          {
+            "token": "8",
+            "slot": "ledger.n"
+          },
+          {
+            "token": "3",
+            "slot": "ledger.realized"
+          }
+        ],
+        "invented": 0
+      },
+      {
+        "id": "s64",
+        "sentence": "AKBNK'ta bant genişliği 3 bar içinde eşiğin (0,06) altına inerse sıkışma (yön belirsiz) teyit olur. Koşul hâlâ açık. Geçmişte bu sinyal 140 seferin 52'sinde beklendiği gibi sonuçlandı.",
+        "deterministic": true,
+        "expected": "expectation",
+        "features": {
+          "past": true,
+          "present": true,
+          "conditional": true,
+          "no_longer": false,
+          "time_ref": false,
+          "time_ref_exact": false
+        },
+        "violations": [],
+        "redacted": false,
+        "leak": false,
+        "number_words": [],
+        "numbers": [
+          {
+            "token": "3",
+            "slot": "within_bars"
+          },
+          {
+            "token": "0,06",
+            "slot": "lead.threshold"
+          },
+          {
+            "token": "140",
+            "slot": "ledger.n"
+          },
+          {
+            "token": "52",
+            "slot": "ledger.realized"
+          }
+        ],
+        "invented": 0
+      },
+      {
+        "id": "s65",
+        "sentence": "THYAO'da RSI 3 bar içinde 30'un altına inerse aşırı satım teyit olur. Beklenti bugün geçersiz oldu; artık geçerli değil. Geçmişte bu sinyal 140 seferin 93'ünde beklendiği gibi sonuçlandı.",
+        "deterministic": true,
+        "expected": "expectation",
+        "features": {
+          "past": true,
+          "present": false,
+          "conditional": true,
+          "no_longer": true,
+          "time_ref": true,
+          "time_ref_exact": false
+        },
+        "violations": [],
+        "redacted": false,
+        "leak": false,
+        "number_words": [],
+        "numbers": [
+          {
+            "token": "3",
+            "slot": "within_bars"
+          },
+          {
+            "token": "30",
+            "slot": "lead.level"
+          },
+          {
+            "token": "140",
+            "slot": "ledger.n"
+          },
+          {
+            "token": "93",
+            "slot": "ledger.realized"
+          }
+        ],
+        "invented": 0
+      },
+      {
+        "id": "s66",
+        "sentence": "THYAO'da RSI 3 bar içinde 70'in üstüne çıkarsa aşırı alım teyit olur. Beklenti bugün gerçekleşti. Koşulun bugünkü durumu bilinmiyor. Geçmişte bu sinyal 140 seferin 86'sında beklendiği gibi sonuçlandı.",
+        "deterministic": true,
+        "expected": "expectation",
+        "features": {
+          "past": true,
+          "present": true,
+          "conditional": true,
+          "no_longer": false,
+          "time_ref": true,
+          "time_ref_exact": false
+        },
+        "violations": [],
+        "redacted": false,
+        "leak": false,
+        "number_words": [],
+        "numbers": [
+          {
+            "token": "3",
+            "slot": "within_bars"
+          },
+          {
+            "token": "70",
+            "slot": "lead.level"
+          },
+          {
+            "token": "140",
+            "slot": "ledger.n"
+          },
+          {
+            "token": "86",
+            "slot": "ledger.realized"
+          }
+        ],
+        "invented": 0
+      },
+      {
+        "id": "s67",
+        "sentence": "EREGL'de RSI 3 bar içinde 30'un altına inerse aşırı satım teyit olur. Beklenti bugün gerçekleşti. Koşulun bugünkü durumu bilinmiyor. Geçmişte bu sinyal 140 seferin 42'sinde beklendiği gibi sonuçlandı.",
+        "deterministic": true,
+        "expected": "expectation",
+        "features": {
+          "past": true,
+          "present": true,
+          "conditional": true,
+          "no_longer": false,
+          "time_ref": true,
+          "time_ref_exact": false
+        },
+        "violations": [],
+        "redacted": false,
+        "leak": false,
+        "number_words": [],
+        "numbers": [
+          {
+            "token": "3",
+            "slot": "within_bars"
+          },
+          {
+            "token": "30",
+            "slot": "lead.level"
+          },
+          {
+            "token": "140",
+            "slot": "ledger.n"
+          },
+          {
+            "token": "42",
+            "slot": "ledger.realized"
+          }
+        ],
+        "invented": 0
+      },
+      {
+        "id": "s68",
+        "sentence": "PGSUS'ta RSI birkaç bar içinde aşırı satım eşiğinin altına inerse aşırı satım teyit olur. Bugün hacim de teyit etti. Koşulun bugünkü durumu bilinmiyor. Karnesi henüz az örnekli. Sunucu doğruladı; rakamlar kurumsal akış lisansı gerektiriyor.",
+        "deterministic": true,
+        "expected": "expectation",
+        "features": {
+          "past": true,
+          "present": true,
+          "conditional": true,
+          "no_longer": false,
+          "time_ref": true,
+          "time_ref_exact": false
+        },
+        "violations": [],
+        "redacted": true,
+        "leak": false,
+        "number_words": [],
+        "numbers": [],
+        "invented": 0
+      },
+      {
+        "id": "s69",
+        "sentence": "FROTO'da kurumsal net akış 3 bar içinde son günlerin ortalamasının (484.000) üstüne çıkarsa para girişi teyit olur. Beklentinin 1 barlık ömrü bugün sonuçsuz doldu; artık geçerli değil. Geçmişte bu sinyal 140 seferin 70'inde beklendiği gibi sonuçlandı.",
+        "deterministic": true,
+        "expected": "expectation",
+        "features": {
+          "past": true,
+          "present": false,
+          "conditional": true,
+          "no_longer": true,
+          "time_ref": true,
+          "time_ref_exact": false
+        },
+        "violations": [],
+        "redacted": false,
+        "leak": false,
+        "number_words": [],
+        "numbers": [
+          {
+            "token": "3",
+            "slot": "within_bars"
+          },
+          {
+            "token": "484.000",
+            "slot": "lead.avg5"
+          },
+          {
+            "token": "1",
+            "slot": "families"
+          },
+          {
+            "token": "140",
+            "slot": "ledger.n"
+          },
+          {
+            "token": "70",
+            "slot": "ledger.realized"
+          }
+        ],
+        "invented": 0
+      },
+      {
+        "id": "s70",
+        "sentence": "FROTO'da kurumsal net akış 3 bar içinde son günlerin ortalamasının (499.000) altına inerse para çıkışı teyit olur. Bugün hacim de teyit etti; 2 bağımsız kanıt ailesi destekliyor. Koşul hâlâ açık. Geçmişte bu sinyal 140 seferin 85'inde beklendiği gibi sonuçlandı.",
+        "deterministic": true,
+        "expected": "expectation",
+        "features": {
+          "past": true,
+          "present": true,
+          "conditional": true,
+          "no_longer": false,
+          "time_ref": true,
+          "time_ref_exact": false
+        },
+        "violations": [],
+        "redacted": false,
+        "leak": false,
+        "number_words": [],
+        "numbers": [
+          {
+            "token": "3",
+            "slot": "within_bars"
+          },
+          {
+            "token": "499.000",
+            "slot": "lead.avg5"
+          },
+          {
+            "token": "2",
+            "slot": "families"
+          },
+          {
+            "token": "140",
+            "slot": "ledger.n"
+          },
+          {
+            "token": "85",
+            "slot": "ledger.realized"
+          }
+        ],
+        "invented": 0
+      },
+      {
+        "id": "s71",
+        "sentence": "SISE'de kurumsal net akış 3 bar içinde son günlerin ortalamasının (334.000) altına inerse para çıkışı teyit olur. Beklentinin 5 barlık ömrü bugün sonuçsuz doldu; artık geçerli değil. Karnesi henüz az örnekli: 8 seferin 2'sinde tuttu.",
+        "deterministic": true,
+        "expected": "expectation",
+        "features": {
+          "past": true,
+          "present": false,
+          "conditional": true,
+          "no_longer": true,
+          "time_ref": true,
+          "time_ref_exact": false
+        },
+        "violations": [],
+        "redacted": false,
+        "leak": false,
+        "number_words": [],
+        "numbers": [
+          {
+            "token": "3",
+            "slot": "within_bars"
+          },
+          {
+            "token": "334.000",
+            "slot": "lead.avg5"
+          },
+          {
+            "token": "5",
+            "slot": "bars_ago"
+          },
+          {
+            "token": "8",
+            "slot": "ledger.n"
+          },
+          {
+            "token": "2",
+            "slot": "ledger.realized"
+          }
+        ],
+        "invented": 0
+      },
+      {
+        "id": "s72",
+        "sentence": "BIMAS'ta kurumsal net akış 3 bar içinde son günlerin ortalamasının (896.000) altına inerse para çıkışı teyit olur. Beklentinin 30 barlık ömrü bugün sonuçsuz doldu; artık geçerli değil. Karnesi henüz az örnekli: 8 seferin 6'sında tuttu.",
+        "deterministic": true,
+        "expected": "expectation",
+        "features": {
+          "past": true,
+          "present": false,
+          "conditional": true,
+          "no_longer": true,
+          "time_ref": true,
+          "time_ref_exact": false
+        },
+        "violations": [],
+        "redacted": false,
+        "leak": false,
+        "number_words": [],
+        "numbers": [
+          {
+            "token": "3",
+            "slot": "within_bars"
+          },
+          {
+            "token": "896.000",
+            "slot": "lead.avg5"
+          },
+          {
+            "token": "30",
+            "slot": "bars_ago"
+          },
+          {
+            "token": "8",
+            "slot": "ledger.n"
+          },
+          {
+            "token": "6",
+            "slot": "ledger.realized"
+          }
+        ],
+        "invented": 0
+      },
+      {
+        "id": "k26",
+        "sentence": "THYAO'da RSI 3 bar önce 70'in üstüne çıktı, bugün yeniden altına indi; şu an 55, artık 70'in üstünde değil. Aşırı alım sona erdi. Geçmişte bu sinyal 140 seferin 87'sinde beklendiği gibi sonuçlandı.",
+        "deterministic": true,
+        "expected": "state_ended",
+        "features": {
+          "past": true,
+          "present": true,
+          "conditional": false,
+          "no_longer": true,
+          "time_ref": true,
+          "time_ref_exact": true
+        },
+        "violations": [],
+        "redacted": false,
+        "leak": false,
+        "number_words": [],
+        "numbers": [
+          {
+            "token": "3",
+            "slot": "bars_ago"
+          },
+          {
+            "token": "70",
+            "slot": "lead.level"
+          },
+          {
+            "token": "55",
+            "slot": "latest.value"
+          },
+          {
+            "token": "70",
+            "slot": "lead.level"
+          },
+          {
+            "token": "140",
+            "slot": "ledger.n"
+          },
+          {
+            "token": "87",
+            "slot": "ledger.realized"
+          }
+        ],
+        "invented": 0
+      }
+    ]
+  }
+}

@@ -1,0 +1,633 @@
+{
+ "name": "21-grammar-origins",
+ "description": "R2 constant origins (GRAMMAR §10): y=30 on the RSI panel auto-binds to rsi.oversold; 123.45 on the price panel is rejected with no_origin; explicit fact origin accepted; literal != origin value rejected; origin without literal writes it; unknown threshold; series origin with literal; legacy add_layer string constant.",
+ "covers": [
+  "command",
+  "change",
+  "grammar",
+  "origin",
+  "no_origin",
+  "error",
+  "summary"
+ ],
+ "init": "fixtures/protocol/init/thyao.json",
+ "steps": [
+  {
+   "send": {
+    "conn": "a",
+    "msg": {
+     "type": "hello",
+     "protocol": "qp/0",
+     "principal": "arkin",
+     "surface": {
+      "kind": "desktop"
+     }
+    }
+   },
+   "expect": [
+    {
+     "conn": "a",
+     "msg": {
+      "type": "welcome",
+      "protocol": "qp/0",
+      "principal": "arkin",
+      "role": "owner",
+      "seq": "$any"
+     }
+    }
+   ]
+  },
+  {
+   "send": {
+    "conn": "w",
+    "msg": {
+     "type": "hello",
+     "protocol": "qp/0",
+     "principal": "viewer",
+     "surface": {
+      "kind": "headless"
+     }
+    }
+   },
+   "expect": [
+    {
+     "conn": "w",
+     "msg": {
+      "type": "welcome",
+      "protocol": "qp/0",
+      "principal": "viewer",
+      "role": "viewer",
+      "seq": "$any"
+     }
+    }
+   ]
+  },
+  {
+   "send": {
+    "conn": "w",
+    "msg": {
+     "type": "subscribe",
+     "id": "s1",
+     "topic": {
+      "kind": "changes"
+     }
+    }
+   },
+   "expect": [
+    {
+     "conn": "w",
+     "msg": {
+      "type": "ack",
+      "id": "s1",
+      "status": "subscribed"
+     }
+    }
+   ]
+  },
+  {
+   "send": {
+    "conn": "a",
+    "msg": {
+     "type": "command",
+     "id": "c1",
+     "ops": [
+      {
+       "op": "insert_layer",
+       "view": "main",
+       "layer": {
+        "id": "os",
+        "mark": "rule",
+        "panel": 1,
+        "encoding": {
+         "y": 30
+        }
+       }
+      }
+     ]
+    }
+   },
+   "expect": [
+    {
+     "conn": "a",
+     "msg": {
+      "type": "ack",
+      "id": "c1",
+      "status": "applied",
+      "seq": 1,
+      "created": [
+       "os"
+      ]
+     }
+    },
+    {
+     "conn": "w",
+     "msg": {
+      "type": "notify",
+      "sub": "s1",
+      "event": {
+       "kind": "change",
+       "seq": 1,
+       "author": "arkin",
+       "cause": "c1",
+       "changes": [
+        {
+         "op": "insert_layer",
+         "view": "main",
+         "index": 5,
+         "layer": {
+          "id": "os",
+          "mark": "rule",
+          "panel": 1,
+          "encoding": {
+           "y": 30
+          },
+          "origin": {
+           "/encoding/y": {
+            "kind": "threshold",
+            "name": "rsi.oversold"
+           }
+          }
+         }
+        }
+       ]
+      }
+     }
+    }
+   ],
+   "note": "GRAMMAR §10 rule 2: 30 on the RSI panel binds to rsi.oversold; the origin is written into the layer."
+  },
+  {
+   "send": {
+    "conn": "a",
+    "msg": {
+     "type": "command",
+     "id": "c2",
+     "ops": [
+      {
+       "op": "insert_layer",
+       "view": "main",
+       "layer": {
+        "mark": "rule",
+        "panel": 0,
+        "encoding": {
+         "y": 123.45
+        }
+       }
+      }
+     ]
+    }
+   },
+   "expect": [
+    {
+     "conn": "a",
+     "msg": {
+      "type": "error",
+      "id": "c2",
+      "error": {
+       "code": "no_origin",
+       "path": "/ops/0/layer/encoding/y",
+       "hint": "$any",
+       "message": "$any"
+      }
+     }
+    }
+   ],
+   "note": "No named threshold on the price panel equals 123.45 and facts are never auto-bound -> no_origin."
+  },
+  {
+   "send": {
+    "conn": "a",
+    "msg": {
+     "type": "command",
+     "id": "c3",
+     "ops": [
+      {
+       "op": "insert_layer",
+       "view": "main",
+       "layer": {
+        "id": "lvl",
+        "mark": "rule",
+        "panel": 1,
+        "encoding": {
+         "y": 70
+        },
+        "origin": {
+         "/encoding/y": {
+          "kind": "fact",
+          "fact": "fact-rsi-cross70",
+          "field": "level"
+         }
+        }
+       }
+      }
+     ]
+    }
+   },
+   "expect": [
+    {
+     "conn": "a",
+     "msg": {
+      "type": "ack",
+      "id": "c3",
+      "status": "applied",
+      "seq": 2,
+      "created": [
+       "lvl"
+      ]
+     }
+    },
+    {
+     "conn": "w",
+     "msg": {
+      "type": "notify",
+      "sub": "s1",
+      "event": {
+       "kind": "change",
+       "seq": 2,
+       "author": "arkin",
+       "cause": "c3",
+       "changes": [
+        {
+         "op": "insert_layer",
+         "view": "main",
+         "index": 6,
+         "layer": {
+          "id": "lvl",
+          "encoding": {
+           "y": 70
+          },
+          "origin": {
+           "/encoding/y": {
+            "kind": "fact",
+            "fact": "fact-rsi-cross70",
+            "field": "level"
+           }
+          }
+         }
+        }
+       ]
+      }
+     }
+    }
+   ],
+   "note": "Explicit fact origin, constant bit-equal to the fact's evidence.level (70)."
+  },
+  {
+   "send": {
+    "conn": "a",
+    "msg": {
+     "type": "command",
+     "id": "c4",
+     "ops": [
+      {
+       "op": "insert_layer",
+       "view": "main",
+       "layer": {
+        "mark": "rule",
+        "panel": 1,
+        "encoding": {
+         "y": 71
+        },
+        "origin": {
+         "/encoding/y": {
+          "kind": "threshold",
+          "name": "rsi.overbought"
+         }
+        }
+       }
+      }
+     ]
+    }
+   },
+   "expect": [
+    {
+     "conn": "a",
+     "msg": {
+      "type": "error",
+      "id": "c4",
+      "error": {
+       "code": "invalid",
+       "path": "/ops/0/layer/encoding/y"
+      }
+     }
+    }
+   ],
+   "note": "Constant written and origin given but they differ (71 != 70)."
+  },
+  {
+   "send": {
+    "conn": "a",
+    "msg": {
+     "type": "command",
+     "id": "c5",
+     "ops": [
+      {
+       "op": "insert_layer",
+       "view": "main",
+       "layer": {
+        "id": "mid",
+        "mark": "rule",
+        "panel": 1,
+        "origin": {
+         "/encoding/y": {
+          "kind": "threshold",
+          "name": "rsi.mid"
+         }
+        }
+       }
+      }
+     ]
+    }
+   },
+   "expect": [
+    {
+     "conn": "a",
+     "msg": {
+      "type": "ack",
+      "id": "c5",
+      "status": "applied",
+      "seq": 3,
+      "created": [
+       "mid"
+      ]
+     }
+    },
+    {
+     "conn": "w",
+     "msg": {
+      "type": "notify",
+      "sub": "s1",
+      "event": {
+       "kind": "change",
+       "seq": 3,
+       "author": "arkin",
+       "cause": "c5",
+       "changes": [
+        {
+         "op": "insert_layer",
+         "view": "main",
+         "index": 7,
+         "layer": {
+          "id": "mid",
+          "encoding": {
+           "y": 50
+          },
+          "origin": {
+           "/encoding/y": {
+            "kind": "threshold",
+            "name": "rsi.mid"
+           }
+          }
+         }
+        }
+       ]
+      }
+     }
+    }
+   ],
+   "note": "Origin without a constant: the authority writes the origin's value (rule 4)."
+  },
+  {
+   "send": {
+    "conn": "a",
+    "msg": {
+     "type": "command",
+     "id": "c6",
+     "ops": [
+      {
+       "op": "insert_layer",
+       "view": "main",
+       "layer": {
+        "mark": "rule",
+        "panel": 1,
+        "encoding": {
+         "y": 70
+        },
+        "origin": {
+         "/encoding/y": {
+          "kind": "threshold",
+          "name": "rsi.overbougth"
+         }
+        }
+       }
+      }
+     ]
+    }
+   },
+   "expect": [
+    {
+     "conn": "a",
+     "msg": {
+      "type": "error",
+      "id": "c6",
+      "error": {
+       "code": "not_found",
+       "did_you_mean": [
+        "rsi.overbought"
+       ]
+      }
+     }
+    }
+   ],
+   "note": "An origin must resolve; unknown threshold name."
+  },
+  {
+   "send": {
+    "conn": "a",
+    "msg": {
+     "type": "command",
+     "id": "c7",
+     "ops": [
+      {
+       "op": "insert_layer",
+       "view": "main",
+       "layer": {
+        "mark": "rule",
+        "panel": 0,
+        "encoding": {
+         "y": 124.69
+        },
+        "origin": {
+         "/encoding/y": {
+          "kind": "series",
+          "series": "px",
+          "field": "c",
+          "at": "last"
+         }
+        }
+       }
+      }
+     ]
+    }
+   },
+   "expect": [
+    {
+     "conn": "a",
+     "msg": {
+      "type": "error",
+      "id": "c7",
+      "error": {
+       "code": "invalid",
+       "path": "/ops/0/layer/encoding/y"
+      }
+     }
+    }
+   ],
+   "note": "A series origin is live: the constant must not be written (rule 4)."
+  },
+  {
+   "send": {
+    "conn": "a",
+    "msg": {
+     "type": "command",
+     "id": "c8",
+     "ops": [
+      {
+       "op": "add_layer",
+       "view": "main",
+       "layer": {
+        "mark": "rule",
+        "panel": 1,
+        "encoding": {
+         "y": "30"
+        }
+       }
+      }
+     ]
+    }
+   },
+   "expect": [
+    {
+     "conn": "a",
+     "msg": {
+      "type": "ack",
+      "id": "c8",
+      "status": "applied",
+      "seq": 4
+     }
+    },
+    {
+     "conn": "w",
+     "msg": {
+      "type": "notify",
+      "sub": "s1",
+      "event": {
+       "kind": "change",
+       "seq": 4,
+       "author": "arkin",
+       "cause": "c8",
+       "changes": [
+        {
+         "op": "insert_layer",
+         "view": "main",
+         "index": 8,
+         "layer": {
+          "id": "l5",
+          "mark": "rule",
+          "panel": 1,
+          "origin": {
+           "/encoding/y": {
+            "kind": "threshold",
+            "name": "rsi.oversold"
+           }
+          }
+         }
+        }
+       ]
+      }
+     }
+    }
+   ],
+   "note": "Deprecated add_layer with the qp/0 string constant is bound the same way (rule 6)."
+  },
+  {
+   "send": {
+    "conn": "v",
+    "msg": {
+     "type": "hello",
+     "protocol": "qp/0",
+     "principal": "viewer",
+     "surface": {
+      "kind": "headless"
+     }
+    }
+   },
+   "expect": [
+    {
+     "conn": "v",
+     "msg": {
+      "type": "welcome",
+      "protocol": "qp/0",
+      "principal": "viewer",
+      "role": "viewer",
+      "seq": "$any",
+      "summary": {
+       "views": [
+        {
+         "id": "main",
+         "panels": [
+          {
+           "id": 0,
+           "layers": [
+            {
+             "id": "l0"
+            },
+            {
+             "id": "l1"
+            }
+           ]
+          },
+          {
+           "id": 1,
+           "layers": [
+            {
+             "id": "l2"
+            },
+            {
+             "id": "l3",
+             "mark": "rule",
+             "about": "rule 70 (rsi.overbought)"
+            },
+            {
+             "id": "os",
+             "mark": "rule",
+             "about": "rule 30 (rsi.oversold)"
+            },
+            {
+             "id": "lvl",
+             "mark": "rule"
+            },
+            {
+             "id": "mid",
+             "mark": "rule",
+             "about": "rule 50 (rsi.mid)"
+            },
+            {
+             "id": "l5",
+             "mark": "rule",
+             "about": "rule 30 (rsi.oversold)"
+            }
+           ]
+          },
+          {
+           "id": 2,
+           "layers": [
+            {
+             "id": "l4"
+            }
+           ]
+          }
+         ]
+        }
+       ]
+      }
+     }
+    }
+   ],
+   "note": "The origins are visible in welcome.summary (GRAMMAR §12: `rule 70 (rsi.overbought)`)."
+  }
+ ],
+ "final": {
+  "log_len": 4
+ }
+}

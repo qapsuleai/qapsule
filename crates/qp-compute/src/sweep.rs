@@ -541,3 +541,45 @@ pub fn cross_target_digest() -> u64 {
     }
     h
 }
+
+/// Digest of the R3/T3 studies (`highest`, `lowest`, `atr`), separate from
+/// [`cross_target_digest`] so that one stays unchanged: FNV-1a over every output of
+/// `highest(p)` on `x * 1.005`, `lowest(p)` on `x * 0.995` and `atr(p)` on
+/// `(x * 1.005, x * 0.995, x)` for `p` in `1, 2, 14, 20, 120`, `x = bench_closes(2_000,
+/// 7)`, through the `Study` trait with every bar first pushed with a wrong value (`x *
+/// 1.03`) and then revised (streaming + revise path). Printed by `examples/digest.rs r3`.
+#[must_use]
+pub fn r3_studies_digest() -> u64 {
+    use crate::core::Streaming;
+    use crate::studies::{Atr, Highest, Lowest};
+    use crate::Study;
+
+    fn feed(h: &mut u64, x: &[f64], s: &mut dyn Study, input: impl Fn(f64) -> Vec<f64>) {
+        let mut o = vec![None; s.outputs().len()];
+        for &xi in x {
+            s.push(&input(xi * 1.03), &mut o);
+            s.update_last(&input(xi), &mut o);
+            for v in &o {
+                for b in v.map_or(u64::MAX, f64::to_bits).to_le_bytes() {
+                    *h ^= u64::from(b);
+                    *h = h.wrapping_mul(0x0100_0000_01b3);
+                }
+            }
+        }
+    }
+
+    let x = bench_closes(2_000, 7);
+    let mut h = FNV_OFFSET;
+    for p in [1, 2, 14, 20, 120] {
+        let mut s = Streaming::new(Highest::new(p).expect("valid period"), Field::High);
+        feed(&mut h, &x, &mut s, |v| vec![v * 1.005]);
+        let mut s = Streaming::new(Lowest::new(p).expect("valid period"), Field::Low);
+        feed(&mut h, &x, &mut s, |v| vec![v * 0.995]);
+        let mut s = Streaming::with_inputs(
+            Atr::new(p).expect("valid period"),
+            vec!["high".into(), "low".into(), "close".into()],
+        );
+        feed(&mut h, &x, &mut s, |v| vec![v * 1.005, v * 0.995, v]);
+    }
+    h
+}

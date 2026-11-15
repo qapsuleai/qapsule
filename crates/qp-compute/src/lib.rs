@@ -44,7 +44,7 @@ use std::fmt;
 
 pub use chain::Chain;
 pub use core::{Core, Streaming};
-pub use studies::{Bollinger, Ema, Macd, Rsi, Sma};
+pub use studies::{Atr, Bollinger, Ema, Highest, Lowest, Macd, Rsi, Sma};
 
 use qp_schema::{Bar, StudyOutput};
 

@@ -1,0 +1,1181 @@
+{
+  "name": "dispute-retract",
+  "covers": [
+    "dispute",
+    "claims",
+    "data"
+  ],
+  "description": "R3/M7 (§19.9): a bad tick on the authority's own feed makes a wrong final capsule claim; the replica's dispute is upheld on the provider's settled bars (claim withdrawn with reason dispute_upheld, capsule retracted: story stage retracted, no ledger row); a dispute the settled data does not support is rejected (evidence to the disputer only); duplicate and unknown disputes.",
+  "init": {
+    "document": {
+      "schema_version": "0",
+      "id": "doc-dispute",
+      "title": "İtiraz ve geri çekme",
+      "series": [
+        {
+          "id": "px",
+          "instrument": {
+            "symbol": "THYAO"
+          },
+          "interval": "1d",
+          "source": {
+            "kind": "bind",
+            "symbol": "THYAO",
+            "interval": "1d",
+            "window": {
+              "last": 5
+            }
+          }
+        }
+      ],
+      "facts": [
+        {
+          "id": "fact-hold",
+          "kind": "threshold",
+          "series": "px",
+          "bar": 3,
+          "t": 1759968000000,
+          "text": "THYAO 103'te kapandı, bar 3.",
+          "evidence": {
+            "value": 103.0
+          },
+          "provenance": {
+            "author": {
+              "kind": "engine",
+              "name": "qp-facts",
+              "version": "0.0.0"
+            },
+            "at": 1760000000000,
+            "based_on": [
+              "px"
+            ]
+          }
+        }
+      ],
+      "findings": [
+        {
+          "id": "fnd-floor",
+          "claim": "THYAO 90'ın üstünde tutunuyor.",
+          "facts": [
+            "fact-hold"
+          ],
+          "confidence": 0.5,
+          "invalidation": {
+            "kind": "threshold",
+            "series": "px",
+            "op": "lt",
+            "value": 90.0
+          },
+          "provenance": {
+            "author": {
+              "kind": "agent",
+              "name": "scout"
+            },
+            "at": 1760000000000,
+            "based_on": [
+              "fact-hold"
+            ]
+          }
+        }
+      ],
+      "capsules": [
+        {
+          "id": "cap-floor",
+          "finding": "fnd-floor",
+          "state": "live",
+          "revision": 0,
+          "headline": "THYAO 90'ın üstünde.",
+          "glyphs": [
+            {
+              "kind": "direction",
+              "value": 0.0
+            }
+          ],
+          "depth": "capsule",
+          "story": {
+            "instrument": "THYAO",
+            "theme": "floor",
+            "kind": "continuation",
+            "direction": "up",
+            "time": "state",
+            "stage": "born",
+            "families": [
+              "price"
+            ],
+            "strength": 0.6,
+            "importance": 0.5,
+            "tier": 2,
+            "series": "px",
+            "born_bar": 3,
+            "last_bar": 3,
+            "horizon_bars": 20,
+            "ledger_key": "continuation/threshold@1",
+            "ledger_at_birth": {
+              "n": 0,
+              "realized": 0
+            },
+            "trust": "replica",
+            "history": [
+              {
+                "stage": "born",
+                "bar": 3,
+                "t": 1759968000000,
+                "facts": [
+                  "fact-hold"
+                ],
+                "reason": "new_story"
+              }
+            ]
+          },
+          "provenance": {
+            "author": {
+              "kind": "agent",
+              "name": "scout"
+            },
+            "at": 1760000000000,
+            "based_on": [
+              "fact-hold"
+            ]
+          }
+        }
+      ],
+      "intents": [],
+      "ledger": {
+        "entries": []
+      }
+    },
+    "clock": 1760000000000,
+    "epoch": 0,
+    "proposal_ttl_ms": null,
+    "principals": [
+      {
+        "id": "arkin",
+        "author": {
+          "kind": "human",
+          "name": "arkin"
+        },
+        "role": "owner"
+      },
+      {
+        "id": "device",
+        "author": {
+          "kind": "human",
+          "name": "device"
+        },
+        "role": "viewer"
+      },
+      {
+        "id": "host",
+        "author": {
+          "kind": "engine",
+          "name": "host",
+          "version": "0"
+        },
+        "role": "host"
+      }
+    ],
+    "data": {
+      "feeds": [
+        {
+          "feed": {
+            "symbol": "THYAO",
+            "interval": "1d"
+          },
+          "bars": [
+            {
+              "t": 1759708800000,
+              "o": 100.0,
+              "h": 100.5,
+              "l": 99.5,
+              "c": 100.0,
+              "v": 1000.0
+            },
+            {
+              "t": 1759795200000,
+              "o": 101.0,
+              "h": 101.5,
+              "l": 100.5,
+              "c": 101.0,
+              "v": 1000.0
+            },
+            {
+              "t": 1759881600000,
+              "o": 102.0,
+              "h": 102.5,
+              "l": 101.5,
+              "c": 102.0,
+              "v": 1000.0
+            },
+            {
+              "t": 1759968000000,
+              "o": 103.0,
+              "h": 103.5,
+              "l": 102.5,
+              "c": 103.0,
+              "v": 1000.0
+            },
+            {
+              "t": 1760054400000,
+              "o": 104.0,
+              "h": 104.5,
+              "l": 103.5,
+              "c": 104.0,
+              "v": 1000.0
+            }
+          ]
+        }
+      ],
+      "entitlements": {
+        "host": [
+          "*"
+        ],
+        "arkin": [
+          "*"
+        ],
+        "device": [
+          "*"
+        ]
+      },
+      "settled": {
+        "feeds": [
+          {
+            "feed": {
+              "symbol": "THYAO",
+              "interval": "1d"
+            },
+            "bars": [
+              {
+                "t": 1760054400000,
+                "o": 104.0,
+                "h": 104.5,
+                "l": 103.5,
+                "c": 104.0,
+                "v": 1000.0
+              }
+            ]
+          }
+        ],
+        "verify_closed": false
+      }
+    }
+  },
+  "steps": [
+    {
+      "note": "Owner; the anchor is stamped at load (entry 1).",
+      "send": {
+        "conn": "a",
+        "msg": {
+          "type": "hello",
+          "protocol": "qp/0",
+          "principal": "arkin",
+          "surface": {
+            "kind": "desktop"
+          }
+        }
+      },
+      "expect": [
+        {
+          "conn": "a",
+          "msg": {
+            "type": "welcome",
+            "seq": 1
+          }
+        }
+      ]
+    },
+    {
+      "note": "A replica (viewer, entitled to the feed).",
+      "send": {
+        "conn": "r",
+        "msg": {
+          "type": "hello",
+          "protocol": "qp/0",
+          "principal": "device",
+          "surface": {
+            "kind": "desktop"
+          }
+        }
+      },
+      "expect": [
+        {
+          "conn": "r",
+          "msg": {
+            "type": "welcome",
+            "seq": 1
+          }
+        }
+      ]
+    },
+    {
+      "send": {
+        "conn": "a",
+        "msg": {
+          "type": "subscribe",
+          "id": "ch",
+          "topic": {
+            "kind": "changes",
+            "ids": [
+              "cap-floor"
+            ]
+          }
+        }
+      },
+      "expect": [
+        {
+          "conn": "a",
+          "msg": {
+            "type": "ack",
+            "id": "ch",
+            "status": "subscribed"
+          }
+        }
+      ]
+    },
+    {
+      "send": {
+        "conn": "a",
+        "msg": {
+          "type": "subscribe",
+          "id": "ka",
+          "topic": {
+            "kind": "claims"
+          }
+        }
+      },
+      "expect": [
+        {
+          "conn": "a",
+          "msg": {
+            "type": "ack",
+            "id": "ka",
+            "status": "subscribed"
+          }
+        }
+      ]
+    },
+    {
+      "send": {
+        "conn": "r",
+        "msg": {
+          "type": "subscribe",
+          "id": "k",
+          "topic": {
+            "kind": "claims"
+          }
+        }
+      },
+      "expect": [
+        {
+          "conn": "r",
+          "msg": {
+            "type": "ack",
+            "id": "k",
+            "status": "subscribed"
+          }
+        }
+      ]
+    },
+    {
+      "send": {
+        "conn": "r",
+        "msg": {
+          "type": "subscribe",
+          "id": "c",
+          "topic": {
+            "kind": "condition",
+            "condition": {
+              "kind": "threshold",
+              "series": "px",
+              "op": "gt",
+              "value": 110.0
+            }
+          }
+        }
+      },
+      "expect": [
+        {
+          "conn": "r",
+          "msg": {
+            "type": "ack",
+            "id": "c",
+            "status": "subscribed"
+          }
+        }
+      ]
+    },
+    {
+      "note": "A bad tick on the authority's own feed: t4 at 85 (the source's t4 closes at 104). The capsule's invalidation (px < 90) holds: engine entry, capsule claim (provisional).",
+      "data": {
+        "feed": {
+          "symbol": "THYAO",
+          "interval": "1d"
+        },
+        "seq": 1,
+        "change": {
+          "kind": "patch",
+          "t": 1760054400000,
+          "fields": {
+            "c": 85.0,
+            "l": 85.0
+          }
+        }
+      },
+      "expect": [
+        {
+          "conn": "a",
+          "msg": {
+            "type": "notify",
+            "sub": "ch",
+            "event": {
+              "kind": "change",
+              "seq": 2,
+              "at": 1760000000000,
+              "author": "qp",
+              "changes": [
+                {
+                  "op": "set_capsule_state",
+                  "capsule": "cap-floor",
+                  "state": "invalidated"
+                }
+              ],
+              "evidence": {
+                "series": "px",
+                "t": 1760054400000,
+                "values": [
+                  {
+                    "series": "px",
+                    "t": 1760054400000,
+                    "value": 85.0,
+                    "prev": 103.0
+                  }
+                ],
+                "maturity": "provisional",
+                "clean": true,
+                "anchor_t": 1759708800000,
+                "feeds": [
+                  {
+                    "symbol": "THYAO",
+                    "interval": "1d"
+                  }
+                ]
+              }
+            }
+          }
+        },
+        {
+          "conn": "a",
+          "msg": {
+            "type": "notify",
+            "sub": "ka",
+            "event": {
+              "kind": "claim",
+              "claim": {
+                "kind": "capsule",
+                "capsule": "cap-floor",
+                "finding": "fnd-floor"
+              },
+              "state": "asserted",
+              "evidence": {
+                "series": "px",
+                "t": 1760054400000,
+                "values": [
+                  {
+                    "series": "px",
+                    "t": 1760054400000,
+                    "value": 85.0,
+                    "prev": 103.0
+                  }
+                ],
+                "maturity": "provisional",
+                "clean": true,
+                "anchor_t": 1759708800000,
+                "feeds": [
+                  {
+                    "symbol": "THYAO",
+                    "interval": "1d"
+                  }
+                ]
+              },
+              "seq": 2
+            }
+          }
+        },
+        {
+          "conn": "r",
+          "msg": {
+            "type": "notify",
+            "sub": "k",
+            "event": {
+              "kind": "claim",
+              "claim": {
+                "kind": "capsule",
+                "capsule": "cap-floor",
+                "finding": "fnd-floor"
+              },
+              "state": "asserted",
+              "evidence": {
+                "series": "px",
+                "t": 1760054400000,
+                "values": [
+                  {
+                    "series": "px",
+                    "t": 1760054400000,
+                    "value": 85.0,
+                    "prev": 103.0
+                  }
+                ],
+                "maturity": "provisional",
+                "clean": true,
+                "anchor_t": 1759708800000,
+                "feeds": [
+                  {
+                    "symbol": "THYAO",
+                    "interval": "1d"
+                  }
+                ]
+              },
+              "seq": 2
+            }
+          }
+        }
+      ]
+    },
+    {
+      "note": "t5 opens: t4 is closed on the authority's data; the capsule claim is asserted final (wrong).",
+      "data": {
+        "feed": {
+          "symbol": "THYAO",
+          "interval": "1d"
+        },
+        "seq": 2,
+        "change": {
+          "kind": "bar",
+          "bar": {
+            "t": 1760140800000,
+            "o": 101.0,
+            "h": 101.5,
+            "l": 100.5,
+            "c": 101.0,
+            "v": 1000.0
+          }
+        }
+      },
+      "expect": [
+        {
+          "conn": "a",
+          "msg": {
+            "type": "notify",
+            "sub": "ka",
+            "event": {
+              "kind": "claim",
+              "claim": {
+                "kind": "capsule",
+                "capsule": "cap-floor",
+                "finding": "fnd-floor"
+              },
+              "state": "asserted",
+              "evidence": {
+                "series": "px",
+                "t": 1760054400000,
+                "values": [
+                  {
+                    "series": "px",
+                    "t": 1760054400000,
+                    "value": 85.0,
+                    "prev": 103.0
+                  }
+                ],
+                "maturity": "final",
+                "clean": true,
+                "anchor_t": 1759708800000,
+                "feeds": [
+                  {
+                    "symbol": "THYAO",
+                    "interval": "1d"
+                  }
+                ]
+              },
+              "seq": 2
+            }
+          }
+        },
+        {
+          "conn": "r",
+          "msg": {
+            "type": "notify",
+            "sub": "k",
+            "event": {
+              "kind": "claim",
+              "claim": {
+                "kind": "capsule",
+                "capsule": "cap-floor",
+                "finding": "fnd-floor"
+              },
+              "state": "asserted",
+              "evidence": {
+                "series": "px",
+                "t": 1760054400000,
+                "values": [
+                  {
+                    "series": "px",
+                    "t": 1760054400000,
+                    "value": 85.0,
+                    "prev": 103.0
+                  }
+                ],
+                "maturity": "final",
+                "clean": true,
+                "anchor_t": 1759708800000,
+                "feeds": [
+                  {
+                    "symbol": "THYAO",
+                    "interval": "1d"
+                  }
+                ]
+              },
+              "seq": 2
+            }
+          }
+        }
+      ]
+    },
+    {
+      "note": "The replica's clean, refetched t4 closes at 104: it disputes. The authority re-checks on its provider's settled bars (test source: t4 = 104): upheld. Its t4 is corrected, the claim withdrawn (dispute_upheld) and the capsule retracted (story stage retracted, K37; no ledger row).",
+      "send": {
+        "conn": "r",
+        "msg": {
+          "type": "dispute",
+          "id": "d1",
+          "claim": {
+            "kind": "capsule",
+            "capsule": "cap-floor",
+            "finding": "fnd-floor"
+          },
+          "t": 1760054400000,
+          "values": [
+            {
+              "series": "px",
+              "t": 1760054400000,
+              "value": 104.0,
+              "prev": 103.0
+            }
+          ],
+          "anchor_t": 1759708800000,
+          "digest": "1111111111111111"
+        }
+      },
+      "expect": [
+        {
+          "conn": "r",
+          "msg": {
+            "type": "result",
+            "id": "d1",
+            "seq": 3,
+            "now": 1760000000000,
+            "data": {
+              "kind": "dispute",
+              "verdict": "upheld"
+            }
+          }
+        },
+        {
+          "conn": "a",
+          "msg": {
+            "type": "notify",
+            "sub": "ch",
+            "event": {
+              "kind": "change",
+              "seq": 3,
+              "at": 1760000000000,
+              "author": "qp",
+              "changes": [
+                {
+                  "op": "put_capsule",
+                  "capsule": {
+                    "id": "cap-floor",
+                    "finding": "fnd-floor",
+                    "state": "invalidated",
+                    "revision": 0,
+                    "headline": "THYAO 90'ın üstünde.",
+                    "glyphs": [
+                      {
+                        "kind": "direction",
+                        "value": 0.0
+                      }
+                    ],
+                    "depth": "capsule",
+                    "story": {
+                      "instrument": "THYAO",
+                      "theme": "floor",
+                      "kind": "continuation",
+                      "direction": "up",
+                      "time": "state",
+                      "stage": "retracted",
+                      "families": [
+                        "price"
+                      ],
+                      "strength": 0.6,
+                      "importance": 0.5,
+                      "tier": 2,
+                      "series": "px",
+                      "born_bar": 3,
+                      "last_bar": 4,
+                      "horizon_bars": 20,
+                      "ledger_key": "continuation/threshold@1",
+                      "ledger_at_birth": {
+                        "n": 0,
+                        "realized": 0
+                      },
+                      "trust": "replica",
+                      "history": [
+                        {
+                          "stage": "born",
+                          "bar": 3,
+                          "t": 1759968000000,
+                          "facts": [
+                            "fact-hold"
+                          ],
+                          "reason": "new_story"
+                        },
+                        {
+                          "stage": "retracted",
+                          "bar": 4,
+                          "t": 1760054400000,
+                          "reason": "dispute_upheld"
+                        }
+                      ]
+                    },
+                    "provenance": {
+                      "author": {
+                        "kind": "agent",
+                        "name": "scout"
+                      },
+                      "at": 1760000000000,
+                      "based_on": [
+                        "fact-hold"
+                      ]
+                    }
+                  }
+                }
+              ]
+            }
+          }
+        },
+        {
+          "conn": "a",
+          "msg": {
+            "type": "notify",
+            "sub": "ka",
+            "event": {
+              "kind": "claim",
+              "claim": {
+                "kind": "capsule",
+                "capsule": "cap-floor",
+                "finding": "fnd-floor"
+              },
+              "state": "withdrawn",
+              "evidence": {
+                "series": "px",
+                "t": 1760054400000,
+                "values": [
+                  {
+                    "series": "px",
+                    "t": 1760054400000,
+                    "value": 104.0,
+                    "prev": 103.0
+                  }
+                ],
+                "maturity": "final",
+                "clean": true,
+                "anchor_t": 1759708800000,
+                "feeds": [
+                  {
+                    "symbol": "THYAO",
+                    "interval": "1d"
+                  }
+                ]
+              },
+              "seq": 3,
+              "reason": "dispute_upheld"
+            }
+          }
+        },
+        {
+          "conn": "r",
+          "msg": {
+            "type": "notify",
+            "sub": "k",
+            "event": {
+              "kind": "claim",
+              "claim": {
+                "kind": "capsule",
+                "capsule": "cap-floor",
+                "finding": "fnd-floor"
+              },
+              "state": "withdrawn",
+              "evidence": {
+                "series": "px",
+                "t": 1760054400000,
+                "values": [
+                  {
+                    "series": "px",
+                    "t": 1760054400000,
+                    "value": 104.0,
+                    "prev": 103.0
+                  }
+                ],
+                "maturity": "final",
+                "clean": true,
+                "anchor_t": 1759708800000,
+                "feeds": [
+                  {
+                    "symbol": "THYAO",
+                    "interval": "1d"
+                  }
+                ]
+              },
+              "seq": 3,
+              "reason": "dispute_upheld"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "note": "t5 crosses 110 on the replica's condition subscription (provisional).",
+      "data": {
+        "feed": {
+          "symbol": "THYAO",
+          "interval": "1d"
+        },
+        "seq": 3,
+        "change": {
+          "kind": "patch",
+          "t": 1760140800000,
+          "fields": {
+            "c": 112.0,
+            "h": 112.0
+          }
+        }
+      },
+      "expect": [
+        {
+          "conn": "r",
+          "msg": {
+            "type": "notify",
+            "sub": "c",
+            "event": {
+              "kind": "condition_met",
+              "bar": 5,
+              "t": 1760140800000,
+              "seq": 3,
+              "evidence": {
+                "series": "px",
+                "t": 1760140800000,
+                "values": [
+                  {
+                    "series": "px",
+                    "t": 1760140800000,
+                    "value": 112.0,
+                    "prev": 104.0
+                  }
+                ],
+                "maturity": "provisional",
+                "clean": true,
+                "anchor_t": 1759708800000,
+                "feeds": [
+                  {
+                    "symbol": "THYAO",
+                    "interval": "1d"
+                  }
+                ]
+              }
+            }
+          }
+        },
+        {
+          "conn": "r",
+          "msg": {
+            "type": "notify",
+            "sub": "k",
+            "event": {
+              "kind": "claim",
+              "claim": {
+                "kind": "condition",
+                "sub": "c"
+              },
+              "state": "asserted",
+              "evidence": {
+                "series": "px",
+                "t": 1760140800000,
+                "values": [
+                  {
+                    "series": "px",
+                    "t": 1760140800000,
+                    "value": 112.0,
+                    "prev": 104.0
+                  }
+                ],
+                "maturity": "provisional",
+                "clean": true,
+                "anchor_t": 1759708800000,
+                "feeds": [
+                  {
+                    "symbol": "THYAO",
+                    "interval": "1d"
+                  }
+                ]
+              },
+              "seq": 3
+            }
+          }
+        }
+      ]
+    },
+    {
+      "note": "t6 opens: the condition claim at t5 is final.",
+      "data": {
+        "feed": {
+          "symbol": "THYAO",
+          "interval": "1d"
+        },
+        "seq": 4,
+        "change": {
+          "kind": "bar",
+          "bar": {
+            "t": 1760227200000,
+            "o": 112.0,
+            "h": 112.5,
+            "l": 111.5,
+            "c": 112.0,
+            "v": 1000.0
+          }
+        }
+      },
+      "expect": [
+        {
+          "conn": "r",
+          "msg": {
+            "type": "notify",
+            "sub": "k",
+            "event": {
+              "kind": "claim",
+              "claim": {
+                "kind": "condition",
+                "sub": "c"
+              },
+              "state": "asserted",
+              "evidence": {
+                "series": "px",
+                "t": 1760140800000,
+                "values": [
+                  {
+                    "series": "px",
+                    "t": 1760140800000,
+                    "value": 112.0,
+                    "prev": 104.0
+                  }
+                ],
+                "maturity": "final",
+                "clean": true,
+                "anchor_t": 1759708800000,
+                "feeds": [
+                  {
+                    "symbol": "THYAO",
+                    "interval": "1d"
+                  }
+                ]
+              },
+              "seq": 3
+            }
+          }
+        }
+      ]
+    },
+    {
+      "note": "A dispute the settled data does not support: rejected; the claim stands and its evidence goes back to the disputer only (reason dispute_rejected).",
+      "send": {
+        "conn": "r",
+        "msg": {
+          "type": "dispute",
+          "id": "d2",
+          "claim": {
+            "kind": "condition",
+            "sub": "c"
+          },
+          "t": 1760140800000,
+          "values": [
+            {
+              "series": "px",
+              "t": 1760140800000,
+              "value": 108.0,
+              "prev": 104.0
+            }
+          ],
+          "anchor_t": 1759708800000,
+          "digest": "2222222222222222"
+        }
+      },
+      "expect": [
+        {
+          "conn": "r",
+          "msg": {
+            "type": "result",
+            "id": "d2",
+            "seq": 3,
+            "now": 1760000000000,
+            "data": {
+              "kind": "dispute",
+              "verdict": "rejected",
+              "evidence": {
+                "series": "px",
+                "t": 1760140800000,
+                "values": [
+                  {
+                    "series": "px",
+                    "t": 1760140800000,
+                    "value": 112.0,
+                    "prev": 104.0
+                  }
+                ],
+                "maturity": "final",
+                "clean": true,
+                "anchor_t": 1759708800000,
+                "feeds": [
+                  {
+                    "symbol": "THYAO",
+                    "interval": "1d"
+                  }
+                ]
+              }
+            }
+          }
+        },
+        {
+          "conn": "r",
+          "msg": {
+            "type": "notify",
+            "sub": "k",
+            "event": {
+              "kind": "claim",
+              "claim": {
+                "kind": "condition",
+                "sub": "c"
+              },
+              "state": "asserted",
+              "evidence": {
+                "series": "px",
+                "t": 1760140800000,
+                "values": [
+                  {
+                    "series": "px",
+                    "t": 1760140800000,
+                    "value": 112.0,
+                    "prev": 104.0
+                  }
+                ],
+                "maturity": "final",
+                "clean": true,
+                "anchor_t": 1759708800000,
+                "feeds": [
+                  {
+                    "symbol": "THYAO",
+                    "interval": "1d"
+                  }
+                ]
+              },
+              "seq": 3,
+              "reason": "dispute_rejected"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "note": "The same dispute again (claim, t, digest): duplicate, nothing new.",
+      "send": {
+        "conn": "r",
+        "msg": {
+          "type": "dispute",
+          "id": "d3",
+          "claim": {
+            "kind": "condition",
+            "sub": "c"
+          },
+          "t": 1760140800000,
+          "values": [
+            {
+              "series": "px",
+              "t": 1760140800000,
+              "value": 108.0,
+              "prev": 104.0
+            }
+          ],
+          "anchor_t": 1759708800000,
+          "digest": "2222222222222222"
+        }
+      },
+      "expect": [
+        {
+          "conn": "r",
+          "msg": {
+            "type": "result",
+            "id": "d3",
+            "seq": 3,
+            "now": 1760000000000,
+            "data": {
+              "kind": "dispute",
+              "verdict": "duplicate"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "note": "A claim the authority does not assert: unknown.",
+      "send": {
+        "conn": "r",
+        "msg": {
+          "type": "dispute",
+          "id": "d4",
+          "claim": {
+            "kind": "condition",
+            "sub": "c"
+          },
+          "t": 1759968000000
+        }
+      },
+      "expect": [
+        {
+          "conn": "r",
+          "msg": {
+            "type": "result",
+            "id": "d4",
+            "seq": 3,
+            "now": 1760000000000,
+            "data": {
+              "kind": "dispute",
+              "verdict": "unknown"
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "final": {
+    "document": {
+      "capsules": [
+        {
+          "id": "cap-floor",
+          "state": "invalidated",
+          "story": {
+            "stage": "retracted"
+          }
+        }
+      ],
+      "ledger": {
+        "entries": []
+      }
+    }
+  }
+}

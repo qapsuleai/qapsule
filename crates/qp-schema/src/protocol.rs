@@ -113,6 +113,30 @@ pub enum ClientMsg {
         /// Current time, epoch milliseconds UTC. Must not go backwards.
         now: TimestampMs,
     },
+    /// (R3, §19.9) A replica disputes a claim the authority asserts as final: on its own
+    /// clean, refetched data the claim's predicate does not hold at `t`. The authority
+    /// re-checks the claim on its provider's settled bars; upheld → the claim is
+    /// withdrawn (`claim` event, reason `dispute_upheld`; a capsule resting on it is
+    /// retracted), rejected → its evidence goes back to the disputer. Answered with a
+    /// `result` (`kind: "dispute"`). One dispute per (claim, `t`, `digest`).
+    Dispute {
+        /// Client-chosen request id.
+        id: String,
+        /// The claim (for a condition claim: the sender's own subscription).
+        claim: ClaimRef,
+        /// The claim's bar time.
+        t: TimestampMs,
+        /// The replica's own operand values at `t` (and the bar before).
+        #[serde(default, skip_serializing_if = "Vec::is_empty")]
+        values: Vec<EvidenceValue>,
+        /// The anchor the replica computed from.
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        anchor_t: Option<TimestampMs>,
+        /// Digest of the replica's bars of the claim's bar series up to `t` (its data
+        /// position; `data_digest`, 16 hex digits).
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        digest: Option<String>,
+    },
 }
 
 /// A message from the authority to a client.
@@ -1892,6 +1916,36 @@ pub enum QueryResult {
         /// The check.
         check: EvidenceCheck,
     },
+    /// Answer to a `dispute` message (R3, §19.9).
+    Dispute {
+        /// The verdict so far.
+        verdict: DisputeVerdict,
+        /// For `rejected`: the authority's evidence on settled data.
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        evidence: Option<ClaimEvidence>,
+    },
+}
+
+/// The verdict on a `dispute` (R3, §19.9).
+#[derive(
+    Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Serialize, Deserialize, JsonSchema,
+)]
+#[serde(rename_all = "snake_case")]
+pub enum DisputeVerdict {
+    /// The authority waits for its settled data (the verdict follows as a `claim` event:
+    /// `withdrawn` with reason `dispute_upheld`, or `asserted` with reason
+    /// `dispute_rejected` to the disputer).
+    Pending,
+    /// The claim does not hold on settled data: withdrawn.
+    Upheld,
+    /// The claim holds on settled data: it stands.
+    Rejected,
+    /// The same dispute (claim, `t`, digest) was already made: nothing new.
+    Duplicate,
+    /// The authority does not assert this claim (never, or no longer).
+    Unknown,
+    /// Too many open disputes on this connection.
+    Limited,
 }
 
 // ---------------------------------------------------------------------------
@@ -2070,7 +2124,25 @@ pub enum Event {
         evidence: ClaimEvidence,
         /// Log position.
         seq: Seq,
+        /// (R3, §19.9) Why, when the step comes from settled data or a dispute.
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        reason: Option<ClaimReason>,
     },
+}
+
+/// Why a claim step happened (R3, §19.9; absent for the ordinary lifecycle of §19.3).
+#[derive(
+    Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Serialize, Deserialize, JsonSchema,
+)]
+#[serde(rename_all = "snake_case")]
+pub enum ClaimReason {
+    /// The authority's data proved wrong against its provider's settled bars.
+    DataCorrected,
+    /// A replica's dispute was upheld on settled data.
+    DisputeUpheld,
+    /// A replica's dispute was rejected: the claim holds on settled data (sent to the
+    /// disputer only, with the authority's evidence).
+    DisputeRejected,
 }
 
 // ---------------------------------------------------------------------------
@@ -2582,6 +2654,33 @@ pub struct InitData {
     /// Feeds that answer `pending` (never resolved) instead of data, for tests.
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
     pub pending: Vec<FeedKey>,
+    /// (R3, §19.9) The test provider's settled source: answers the authority's settled
+    /// requests synchronously with the provider's bars, these bars replacing theirs.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub settled: Option<InitSettled>,
+}
+
+/// The test settled source of a session init (R3, §19.9).
+#[derive(Debug, Clone, Default, PartialEq, Serialize, Deserialize, JsonSchema)]
+#[serde(deny_unknown_fields)]
+pub struct InitSettled {
+    /// Per feed, settled bars that differ from what the feed delivered (by `t`).
+    #[serde(default)]
+    pub feeds: Vec<InitSettledFeed>,
+    /// Verify every closed bar of a bound series against the settled source (the
+    /// authority's settled-bar hygiene); off: only disputes ask for settled bars.
+    #[serde(default)]
+    pub verify_closed: bool,
+}
+
+/// Settled bars of one feed (R3, §19.9).
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
+#[serde(deny_unknown_fields)]
+pub struct InitSettledFeed {
+    /// The feed.
+    pub feed: FeedKey,
+    /// The settled bars (replacing the provider's bars with the same `t`).
+    pub bars: Vec<Bar>,
 }
 
 /// One test feed: give exactly one of `bars`, `path`, `synthetic`.

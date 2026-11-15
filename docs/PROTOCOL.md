@@ -792,7 +792,8 @@ yalnız etkilenenlerin uyanması, 34 koşul yazma yetkisi + çapa geri alma + bo
 tutarlılık (iddia kanıtı, geçici → kesin → geri çekme, temizlik), 36 sorumlu kişiler ve
 yeniden canlanan kapsül. RP2'de değişen var olan fikstürler: döküm 11'in bir `note` metni ve
 `fixtures/views/d2-chart.explain.txt` (katman adları; ikisi de K25 gereği,
-`rounds/RP2/REPORT.md`).
+`rounds/RP2/REPORT.md`). **R3:** 37 itiraz ve geri çekme (`dispute`, kesin bar kaynağı,
+geri çekilen kapsül; §19.9).
 
 ## 16. Gömme
 
@@ -1619,6 +1620,92 @@ gösterir; değer göstermez.
 - İki uç aynı kapanış tikini kaybetmiş ve ikisi de temiz sanıyorsa aynı yanlışta
   anlaşabilirler; buna karşı kesinlik sağlayıcının kesin barına dayanır (barındırıcının
   kirli işareti ve kesin bar çekmesi).
+
+### 19.9 İtiraz ve geri çekme (R3)
+
+> K36 (A20 cevabı): "ikisi birden" — otorite kesin barla doğrular ve yansıdan itiraz yolu
+> açılır. Bu alt bölüm §19.8'deki "`dispute` v0'da yok" maddesinin yerini alır (`check`
+> yine yok). Referans: `crates/qp-session/src/dispute.rs`; ölçüm
+> `rounds/R3/experiments/M7/RESULTS.md`. Kavramlar: CAPSULE.md §9.3 (`retracted`, K37).
+
+**Sorun.** §19'un kuralı yansıyı yanlış göstermekten korur; ama otorite **kendi**
+beslemesinden (bozuk tik, sıra dışı olay, bölünme) yanlış bir **kesin** iddia çıkarırsa
+yansı onu `disputed` gösterir ve iddia orada kalır: otorite geri çekmez, doğru iddia hiç
+gelmez (RP2 son denetimi O1). İki mekanizma, ikisi de barındırıcı üzerinden ve belirleyici:
+
+**1. Otoritenin kesin bar hijyeni.** Barındırıcı açar (`Session::set_settle_check(true)`;
+dökümde `init.data.settled.verify_closed`). Bağlı serinin bir barı kapandığında otorite
+barındırıcıdan **kesin bar** ister (`take_settle_requests()` → `SettleRequest {series, feed,
+from_t, to_t}`; Matriks REST karşılığı, §19.5'in otorite tarafı). Barındırıcı kesin
+kaynaktan çeker (bar henüz kesinleşmediyse sonra yeniden dener) ve cevabı verir:
+`settled_bars(series, bars)`. Otorite:
+
+- Kendi barlarından farklı olan **kapalı** barları kesin değerlerle düzeltir (canlı bar
+  hiç düzeltilmez; tutmadığı bar yok sayılır).
+- O barlara dayanan kayıtlı iddiaları yeniden sınar (§19.3 adım 3): tutmuyorsa
+  `withdrawn`, değerleri değiştiyse yeniden `asserted` — ikisi de `reason: "data_corrected"`.
+- Düzeltilen ilk bardan son kapalı bara kadar, koşul aboneliklerinin **kesin veride**
+  tuttuğu ama kayıtlı olmayan iddialarını `asserted` (`final`, `data_corrected`) yapar.
+  Bu, §19.8'deki "düzeltmenin yeni doğurduğu iddia iddia edilmez" sınırını yalnız kesin
+  veri için kaldırır (ör. beslemede kaybolan kapanış tiki). Niyet ve kapsül
+  geçersizleşmeleri taranmaz.
+
+Kesinlik bu doğrulamayı **beklemez** (gecikme maliyeti yok); yanlış kesin iddia en geç
+"kesinleşme gecikmesi + kesin kaynak cevabı" kadar sonra düşer.
+
+**2. Yansının itirazı (`dispute`).** Yansı bir iddiayı kendi temiz, yeniden çekilmiş
+verisinde `disputed` yaptığında (§19.4) otoriteye bir kez itiraz gönderir
+(`ReplicaOptions.dispute`, varsayılan kapalı; barındırıcı açar):
+
+```json
+{"type":"dispute","id":"d1","claim":{"kind":"capsule","capsule":"cap-floor","finding":"fnd-floor"},
+ "t":1760054400000,"values":[{"series":"px","t":1760054400000,"value":104.0,"prev":103.0}],
+ "anchor_t":1759708800000,"digest":"<yansının çapadan t'ye kadar barlarının data_digest'i>"}
+```
+
+- Yalnız otoritenin **kayıtlı** iddiası itiraz edilebilir (koşul iddiası: gönderenin kendi
+  aboneliği; kapsül ve niyet iddiası: dokümanın). İddianın dayandığı her beslemeye veri
+  yetkisi olmayan kişi itiraz edemez (`no_entitlement`; karar veri hakkında bilgi verir,
+  §19.7). Okuma izni yeter (izleyici itiraz edebilir).
+- Otorite **yansının değerleriyle karar vermez**: `values`, `anchor_t`, `digest` kayıt ve
+  eşgüçlülük içindir. Karar kesin veridedir: otorite barındırıcıdan `[çapa, t]` aralığının
+  kesin barlarını ister (`SettleRequest`) ve cevapta (yukarıdaki 1. maddenin adımları)
+  iddiayı yeniden sınar.
+- **Haklı** (kesin veride tutmuyor): iddia `withdrawn`, `reason: "dispute_upheld"` (bütün
+  alıcılarına). **Haksız** (tutuyor): iddia kalır; otoritenin kanıtı yalnız itiraz edene
+  `asserted`, `reason: "dispute_rejected"` olarak gider; yansı `disputed` göstermeye devam
+  eder (kaynaklar gerçekten farklı).
+- Cevap bir `result`'tır: `{"kind":"dispute","verdict":…,"evidence"?}`. `verdict`:
+  `pending` (barındırıcının kesin cevabı bekleniyor; karar sonra `claim` olayıyla gelir),
+  `upheld`, `rejected` (+ otoritenin kanıtı), `duplicate` (aynı bağlantıdan aynı iddia,
+  `t` ve `digest` daha önce itiraz edildi), `unknown` (otorite bu iddiayı ileri sürmüyor:
+  hiç ya da artık), `limited` (bağlantı başına en çok 16 açık itiraz).
+- Eşzamanlı kesin kaynağı olan barındırıcıda (test sağlayıcısı) karar aynı adımda verilir.
+  Kesin kaynağı olmayan barındırıcıda itirazlar `pending` kalır.
+- Taşıma: `qp serve` ve süreç içi yolda sıradan bir mesajdır; MCP'de araç değildir (yansı
+  barındırıcısının mesajıdır, ajanın değil; `input` gibi doğrudan iletilir).
+
+**Kapsülün geri çekilmesi (K37).** Bir kapsül iddiası (geçersizleşmesi) kesin veri ya da
+haklı itirazla `withdrawn` olursa otorite motor girdisi (`qp`) yazar: `put_capsule`, hikâyenin
+aşaması `retracted`, geçmişine `{stage: "retracted", bar, t, reason: "data_corrected" |
+"dispute_upheld"}`. Karneye satır yazılmaz. Hikâyesi olmayan (R3 öncesi) kapsülde girdi
+yazılmaz, yalnız iddia düşer. `state` alanı (R3 öncesi) değiştirilmez: o tipte `retracted`
+yok (şema önerisi: `rounds/R3/experiments/M7/RESULTS.md`). Sıradan besleme düzeltmesiyle
+(sebepsiz) düşen kapsül iddiası bugünkü gibi dokümanı değiştirmez (§19.3).
+
+**`claim` olayına ek.** İsteğe bağlı `reason`: `data_corrected`, `dispute_upheld`,
+`dispute_rejected`. Sıradan yaşam döngüsünde (§19.3) yoktur; eski istemci yok sayar.
+
+**Barındırıcı ek API'si (referans otorite).** `set_settle_check`, `take_settle_requests`,
+`settled_bars`, ve `resync_bindings` (bütün bağlı serileri sağlayıcıdan yeniden çöz: ör.
+bölünme anlık görüntüsünü sağlayıcısına koyan barındırıcı; kayıtlı iddialar yeniden
+sınanır). Test sağlayıcısının kesin kaynağı: `init.data.settled = {feeds: [{feed, bars}],
+verify_closed}` — sağlayıcının kapalı barları, verilen barlar onlarınkinin yerine.
+
+Döküm: `fixtures/protocol/conformance/37-dispute-retract.json` (otoritenin bozuk tikinden
+yanlış kesin kapsül iddiası → yansının itirazı haklı: `withdrawn` + `dispute_upheld`, kapsül
+`retracted`, karne boş; kesin verinin desteklemediği itiraz: `rejected`, kanıt yalnız
+itiraz edene; aynı itiraz `duplicate`; ileri sürülmeyen iddia `unknown`).
 
 ## Ek A — Eski `Command` tipi
 

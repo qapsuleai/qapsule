@@ -20,7 +20,29 @@
 //! - **Edges, not levels**: detectors emit on change (a point event, a state's start or
 //!   end), never "still true" on every bar.
 //!
-//! Contract version: R3/T1. Implementations: R3/T3.
+//! Contract version: R3/T1. Implementations: R3/T3 ([`default_detectors`]; formulas in
+//! each module and in `rounds/R3/experiments/T3.md`).
+//!
+//! The implementations follow `qp-compute`'s `Core` model one level up: an [`Engine`]
+//! holds the committed state (bars `0..i`), `eval` computes the pending bar's
+//! detections and its would-be state change without changing anything, `commit` folds
+//! the final bar in. [`Staged`] wraps an engine into a [`Detector`] with a pending bar.
+
+mod breakout_range;
+mod extreme_rsi;
+mod flow_institutional;
+mod ma_stack;
+mod rsi_divergence;
+mod squeeze_bandwidth;
+mod volume_surge;
+
+pub use breakout_range::RangeBreakout;
+pub use extreme_rsi::RsiExtreme;
+pub use flow_institutional::InstitutionalFlow;
+pub use ma_stack::MaStack;
+pub use rsi_divergence::RsiDivergence;
+pub use squeeze_bandwidth::BandSqueeze;
+pub use volume_surge::VolumeSurge;
 
 use std::collections::BTreeMap;
 
@@ -79,6 +101,132 @@ pub trait Detector {
     fn push(&mut self, bar: &Bar, flow: Option<&FlowPoint>) -> Vec<Detection>;
     /// Replace the pending bar, return detections as if it closed.
     fn update_last(&mut self, bar: &Bar, flow: Option<&FlowPoint>) -> Vec<Detection>;
+}
+
+/// A detector's committed state plus its per-bar rule (see the crate docs).
+///
+/// Contract: `eval` must not change observable state and must be a function of the
+/// committed state and its arguments only; `commit(bar, step)` with the `step`
+/// that `eval(bar, flow)` returned must leave the state exactly as if that bar had been
+/// added. Then [`Staged`] gives batch = streaming = revised, bit for bit.
+pub trait Engine {
+    /// Everything `commit` needs from `eval` (study outputs of the bar, the new state).
+    type Step: Clone + std::fmt::Debug;
+    /// See [`Detector::id`].
+    fn id(&self) -> &'static str;
+    /// See [`Detector::version`].
+    fn version(&self) -> u32;
+    /// See [`Detector::family`].
+    fn family(&self) -> EvidenceFamily;
+    /// See [`Detector::license`]. Default: public.
+    fn license(&self) -> License {
+        License {
+            class: qp_schema::capsule::LicenseClass::Public,
+            entitlement: None,
+        }
+    }
+    /// See [`Detector::warmup`].
+    fn warmup(&self) -> usize;
+    /// Detections of the next bar (index = number of committed bars) on top of the
+    /// committed state, and the step to commit it with.
+    fn eval(&self, bar: &Bar, flow: Option<&FlowPoint>) -> (Self::Step, Vec<Detection>);
+    /// Folds the bar into the committed state.
+    fn commit(&mut self, bar: &Bar, step: Self::Step);
+}
+
+/// An [`Engine`] with a pending (still revisable) last bar: a [`Detector`].
+#[derive(Debug, Clone)]
+pub struct Staged<E: Engine> {
+    engine: E,
+    pending: Option<(Bar, E::Step)>,
+}
+
+impl<E: Engine> Staged<E> {
+    /// Wraps an engine with no bars.
+    #[must_use]
+    pub fn new(engine: E) -> Self {
+        Self {
+            engine,
+            pending: None,
+        }
+    }
+
+    /// The engine (committed state only).
+    #[must_use]
+    pub fn engine(&self) -> &E {
+        &self.engine
+    }
+
+    fn stage(&mut self, bar: &Bar, flow: Option<&FlowPoint>) -> Vec<Detection> {
+        let (step, out) = self.engine.eval(bar, flow);
+        self.pending = Some((bar.clone(), step));
+        out
+    }
+}
+
+impl<E: Engine> Detector for Staged<E> {
+    fn id(&self) -> &'static str {
+        self.engine.id()
+    }
+    fn version(&self) -> u32 {
+        self.engine.version()
+    }
+    fn family(&self) -> EvidenceFamily {
+        self.engine.family()
+    }
+    fn license(&self) -> License {
+        self.engine.license()
+    }
+    fn warmup(&self) -> usize {
+        self.engine.warmup()
+    }
+    fn push(&mut self, bar: &Bar, flow: Option<&FlowPoint>) -> Vec<Detection> {
+        if let Some((b, step)) = self.pending.take() {
+            self.engine.commit(&b, step);
+        }
+        self.stage(bar, flow)
+    }
+    fn update_last(&mut self, bar: &Bar, flow: Option<&FlowPoint>) -> Vec<Detection> {
+        // Without a pending bar this is a push of the first bar.
+        self.stage(bar, flow)
+    }
+}
+
+/// The R3 detectors with their default parameters, in a fixed order (continuation,
+/// reversal, breakout, squeeze, extreme, volume flow, institutional flow).
+#[must_use]
+pub fn default_detectors() -> Vec<Box<dyn Detector>> {
+    vec![
+        Box::new(MaStack::default().detector()),
+        Box::new(RsiDivergence::default().detector()),
+        Box::new(RangeBreakout::default().detector()),
+        Box::new(BandSqueeze::default().detector()),
+        Box::new(RsiExtreme::default().detector()),
+        Box::new(VolumeSurge::default().detector()),
+        Box::new(InstitutionalFlow::default().detector()),
+    ]
+}
+
+/// Evidence map from `(key, value)` pairs.
+pub(crate) fn evidence(kv: &[(&str, f64)]) -> BTreeMap<String, f64> {
+    kv.iter().map(|(k, v)| ((*k).to_owned(), *v)).collect()
+}
+
+/// `x` clipped to `[0, 1]`; `NaN` → 0.
+pub(crate) fn clip01(x: f64) -> f64 {
+    if x > 1.0 {
+        1.0
+    } else if x > 0.0 {
+        x
+    } else {
+        0.0
+    }
+}
+
+/// Bar index as `f64` (evidence); exact below 2^53.
+#[allow(clippy::cast_precision_loss)]
+pub(crate) fn bar_f64(i: u64) -> f64 {
+    i as f64
 }
 
 /// Run a detector over all bars: `(bar index, detection)` in bar order. Defined as

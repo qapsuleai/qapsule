@@ -209,6 +209,7 @@ fn follower(doc: Document, principal: &str, provider: Provider) -> Result<Sessio
         epoch: 0,
         proposal_ttl_ms: None,
         data: None,
+        capsules: None,
     };
     // Built without a provider: every binding is pending, so nothing is stamped.
     let mut s = Session::build_with(
@@ -331,6 +332,25 @@ impl Replica {
     pub fn bars(&self, series: &str) -> Option<&[Bar]> {
         let s = self.s.as_ref()?;
         crate::values::find_series(rd!(s), series).and_then(qp_schema::Series::bars)
+    }
+
+    /// (R3, K28, §20) Capsule candidates on the open (last) bar of bar series `series`,
+    /// computed from its **own** data ([`crate::capsule::candidates`]: public detectors
+    /// and `Engine::candidates`). Shown only on this replica; never sent to the
+    /// authority, never in its log or ledger; a candidate whose formation the next tick
+    /// undoes simply disappears.
+    #[must_use]
+    pub fn candidates(&self, series: &str) -> Vec<qp_capsule::CandidateStory> {
+        let Some(s) = self.s.as_ref() else {
+            return Vec::new();
+        };
+        let Some(bs) = crate::values::find_series(rd!(s), series) else {
+            return Vec::new();
+        };
+        let (Some(bars), Some(symbol)) = (bs.bars(), bs.symbol()) else {
+            return Vec::new();
+        };
+        crate::capsule::candidates(symbol, series, bars)
     }
 
     /// Its binding state of bound series `series`.

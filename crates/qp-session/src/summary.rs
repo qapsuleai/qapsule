@@ -198,6 +198,15 @@ pub(crate) fn layer_about(doc: &Document, l: &Layer) -> String {
     if let Some(y2) = &l.encoding.y2 {
         what = format!("{what}..{}", position_text(y2));
     }
+    // (R3) A segment or bar-range band: its horizontal extent.
+    if let Some(x2) = &l.encoding.x2 {
+        let x = l
+            .encoding
+            .x
+            .as_ref()
+            .map_or_else(String::new, position_text);
+        what = format!("{what} x {x}..{}", position_text(x2));
+    }
     format!("{what} {}", mark_name(l.mark))
 }
 

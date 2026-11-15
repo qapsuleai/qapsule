@@ -1,0 +1,1785 @@
+//! The capsule engine in the authority (R3, `docs/PROTOCOL.md` §20; `docs/CAPSULE.md` §9).
+//!
+//! # Runner
+//!
+//! With `init.capsules` the authority watches the named bar series (bound or inline). At
+//! every settle point it looks at each watched series: every bar that became **final**
+//! since the last look (a later bar exists, or the window is closed: RP2 maturity) goes,
+//! in order, through the detectors (`qp_facts::default_detectors`, streaming `push`) and
+//! the capsule engine (`qp_capsule::Engine` with `EngineConfig::r3()`). The licensed flow
+//! of a series (`init.capsules.flow`) is read only here (server facts), and only here it
+//! also feeds the chosen trust path ([`qp_capsule::trust::Muhur`]).
+//!
+//! What the engine says becomes **one engine entry** (author `qp`) per look and series,
+//! written even when nothing changed: the log's rhythm is the bar close, never the
+//! existence of a (licensed) story. Its changes, in order: the facts that caused a
+//! transition (`put_fact`, `evidence_ref` stamped as for `add_fact`), then per story its
+//! finding (`put_finding`, claim = the TR sentence) and capsule (`put_capsule`, story and
+//! state), then the ledger rows of the stories that closed (`push_ledger`, R3 fields).
+//! The document and the log hold the whole capsule history; replaying the log gives the
+//! same document byte for byte (the conformance runner checks it on every transcript).
+//!
+//! State mapping (`docs/CONCEPTS.md`): `born … confirmed` → `live`; `realized` → `live`
+//! (the close is in the ledger); `invalidated` → `invalidated`; `expired` → `expired`;
+//! `retracted` → `invalidated` and never a ledger row. A person's decision
+//! (`approve_finding` / `reject_finding`) is kept: the engine does not overwrite
+//! `approved` / `rejected`.
+//!
+//! # Projection (K33, K34, K36; M6 integration rule)
+//!
+//! Nothing licensed and no data-plane value reaches a principal that may not see it. The
+//! authority keeps one document and one log; what it **sends** is projected per
+//! principal ([`Proj`]):
+//!
+//! - a story born of a licensed fact the principal is not entitled to is **hidden**:
+//!   its fact(s), finding, capsule, views showing it and ledger rows never go, in any
+//!   message (queries, `change` events, `log`, `welcome` summary, errors' suggestions);
+//!   the principal gets the trust path's server comments instead (topic and query
+//!   `capsules`). Ledger **statistics** stay license-independent (K33);
+//! - a licensed fact that joined a public story is hidden from it: the story is shown
+//!   without that transition, with the families of its visible facts and the rank it had
+//!   before the hidden fact;
+//! - a principal without the entitlement of a story's bar feed gets its facts without
+//!   evidence values and without `evidence_ref` (data digest), and sentences without a
+//!   digit (`redacted`).
+//!
+//! Pre-R3 items (facts without `meaning`, capsules without a story) are never projected.
+
+use std::collections::{BTreeMap, BTreeSet};
+
+use qp_capsule::realize::Template;
+use qp_capsule::sentence::condition_now;
+use qp_capsule::{Engine, EngineConfig, FlowObservation, Lang, Realizer, SentenceInput, TrustPath};
+use qp_facts::{Detector, FlowPoint};
+use qp_schema::capsule::{
+    Audience, EvidenceFamily, LicenseClass, Stage, Story, TimeKind, UserGroup,
+};
+use qp_schema::data::FeedKey;
+use qp_schema::protocol::{
+    CapsuleDetail, CapsuleInit, CapsuleItem, CapsuleSentence, ChangeOp, ClaimEvidence, ClaimRef,
+    DisputeVerdict, ErrorCode, Event, EvidenceAccess, Language, LedgerRow, LogEntry, Maturity,
+    OutboundLine, QueryResult, Seq, ServerComment, ServerMsg, Topic,
+};
+use qp_schema::{
+    Author, Bar, Capsule, CapsuleState, Condition, Depth, Document, Fact, Finding, Provenance,
+    SeriesSource,
+};
+
+use crate::error::{ptr, PResult, E};
+use crate::session::{out, Session};
+use crate::values::{bar_series, find_series};
+
+/// Engine component name in provenance.
+const ENGINE_NAME: &str = "qp-capsule";
+
+/// The invalidation of an engine finding: decided by the outcome rule, never by a
+/// document condition (a text condition is never evaluated).
+const OUTCOME_TEXT: &str = "outcome rule (qp-capsule barrier, docs/CAPSULE.md §9.3)";
+
+/// One watched bar series.
+pub(crate) struct Watched {
+    series: String,
+    symbol: String,
+    interval: String,
+    /// Bars fed so far (final bars).
+    done: usize,
+    dets: Vec<Box<dyn Detector>>,
+    /// Licensed flow: seed and feed name.
+    flow: Option<(u64, String)>,
+    muhur: Option<qp_capsule::trust::Muhur>,
+}
+
+/// An open dispute on an engine capsule (§19.9 + §20).
+#[derive(Debug, Clone)]
+struct CapDispute {
+    conn: String,
+    capsule: String,
+    series: String,
+    t: i64,
+    seen: (String, ClaimRef, i64, String),
+}
+
+/// The authority's capsule engine and its state.
+pub(crate) struct Runner {
+    engine: Engine,
+    watched: Vec<Watched>,
+    /// Server comments made so far, with the log position they were made at.
+    comments: Vec<(Seq, ServerComment)>,
+    disputes: Vec<CapDispute>,
+}
+
+impl std::fmt::Debug for Runner {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("Runner")
+            .field(
+                "series",
+                &self.watched.iter().map(|w| &w.series).collect::<Vec<_>>(),
+            )
+            .field("events", &self.engine.events().len())
+            .finish_non_exhaustive()
+    }
+}
+
+impl Runner {
+    /// A runner for `init` over `doc` (series without a symbol are skipped).
+    pub(crate) fn new(init: &CapsuleInit, doc: &Document) -> Self {
+        let mut watched = Vec::new();
+        for id in &init.series {
+            let Some(s) = find_series(doc, id) else {
+                continue;
+            };
+            let Some(symbol) = s.symbol().map(str::to_owned) else {
+                continue;
+            };
+            let interval = s
+                .binding()
+                .map(|b| b.interval)
+                .or_else(|| s.interval.clone())
+                .unwrap_or_default();
+            let flow = init
+                .flow
+                .iter()
+                .find(|f| &f.series == id)
+                .map(|f| (f.seed, f.feed.clone().unwrap_or_else(|| "flow".to_owned())));
+            watched.push(Watched {
+                series: id.clone(),
+                symbol,
+                interval,
+                done: 0,
+                dets: qp_facts::default_detectors(),
+                muhur: flow
+                    .as_ref()
+                    .map(|_| qp_capsule::trust::Muhur::new(qp_capsule::trust::Params::default())),
+                flow,
+            });
+        }
+        Self {
+            engine: Engine::new(EngineConfig::r3()),
+            watched,
+            comments: Vec::new(),
+            disputes: Vec::new(),
+        }
+    }
+
+    fn watched_of(&self, series: &str) -> Option<&Watched> {
+        self.watched.iter().find(|w| w.series == series)
+    }
+
+    /// The licensed flow feed of `instrument`, if the runner reads one.
+    fn flow_feed(&self, instrument: &str) -> Option<FeedKey> {
+        self.watched
+            .iter()
+            .find(|w| w.symbol == instrument && w.flow.is_some())
+            .map(|w| FeedKey {
+                symbol: w.symbol.clone(),
+                interval: w.interval.clone(),
+                feed: w.flow.as_ref().map(|(_, f)| f.clone()),
+            })
+    }
+}
+
+/// Number of final bars of bar series `bs` with `n` bars: all of them when the window is
+/// closed (`to_t`), else all but the live last bar.
+fn final_count(doc: &Document, bs: &str, n: usize) -> usize {
+    let closed_window = find_series(doc, bs).is_some_and(
+        |s| matches!(&s.source, SeriesSource::Bind { window, .. } if window.to_t.is_some()),
+    );
+    if closed_window {
+        n
+    } else {
+        n.saturating_sub(1)
+    }
+}
+
+/// The synthetic licensed flow of `bars` (prefix-stable: record `i` depends on bars
+/// `..=i` only).
+fn flow_points(bars: &[Bar], seed: u64) -> Vec<FlowPoint> {
+    qp_source::synthetic_flow(bars, seed)
+        .into_iter()
+        .map(|r| FlowPoint {
+            t: r.t,
+            values: r.values,
+        })
+        .collect()
+}
+
+/// Capsule state for a story stage (`docs/CONCEPTS.md`, "Kapsülün yaşam döngüsü").
+fn state_of(stage: Stage) -> CapsuleState {
+    match stage {
+        Stage::Invalidated | Stage::Retracted => CapsuleState::Invalidated,
+        Stage::Expired => CapsuleState::Expired,
+        _ => CapsuleState::Live,
+    }
+}
+
+fn is_licensed(f: &Fact) -> bool {
+    f.meaning
+        .as_ref()
+        .is_some_and(|m| m.license.class == LicenseClass::Licensed)
+}
+
+/// Fact ids of a story in join order (transitions' facts, first occurrence).
+pub(crate) fn story_fact_ids(story: &Story) -> Vec<String> {
+    let mut out: Vec<String> = Vec::new();
+    for t in &story.history {
+        for f in &t.facts {
+            if !out.contains(f) {
+                out.push(f.clone());
+            }
+        }
+    }
+    out
+}
+
+/// The sentence pair of a story for one reader as of bar `now` of `bars` (K26), from the
+/// story and its facts only (no engine needed): `qp_capsule::sentence` rules with the
+/// chosen realizer. `redacted`: no digit at all (K33).
+pub(crate) fn sentence_pair(
+    story: &Story,
+    facts: &[Fact],
+    bars: &[Bar],
+    now: u64,
+    redacted: bool,
+) -> Option<(String, String)> {
+    let now_i = usize::try_from(now).ok()?;
+    let bars = bars.get(..=now_i)?;
+    let facts: Vec<Fact> = facts.iter().filter(|f| f.bar <= now).cloned().collect();
+    let lead = facts.first()?;
+    let latest = facts.last()?;
+    let (mut still_holds, current) = condition_now(lead, &facts, bars);
+    if matches!(
+        story.stage,
+        Stage::Invalidated | Stage::Expired | Stage::Retracted
+    ) && story.time == TimeKind::State
+    {
+        still_holds = Some(false);
+    }
+    let m = lead.meaning.as_ref()?;
+    let lead_view;
+    let lead_ref = if m.time == TimeKind::State
+        && m.condition
+            .as_ref()
+            .is_some_and(|c| c.within_bars.is_some())
+    {
+        let mut l = lead.clone();
+        if let Some(lm) = l.meaning.as_mut() {
+            lm.condition = None;
+        }
+        lead_view = l;
+        &lead_view
+    } else {
+        lead
+    };
+    let inp = SentenceInput {
+        story,
+        lead: lead_ref,
+        latest: if latest.id == lead.id {
+            lead_ref
+        } else {
+            latest
+        },
+        now_bar: now,
+        now_t: bars[now_i].t,
+        still_holds,
+        current: if redacted { None } else { current },
+        redacted,
+    };
+    Some((
+        Template.sentence(&inp, Lang::Tr),
+        Template.sentence(&inp, Lang::En),
+    ))
+}
+
+/// What a principal may receive (see the module docs).
+#[derive(Debug, Clone, Default)]
+pub(crate) struct Proj {
+    /// Fact, finding and capsule ids that never go.
+    pub hidden: BTreeSet<String>,
+    /// Fact ids sent without evidence values and `evidence_ref`.
+    pub redact: BTreeSet<String>,
+    /// Capsule id → its story as the principal sees it (licensed joins removed), when
+    /// that differs from the stored one.
+    pub stories: BTreeMap<String, Story>,
+    /// Capsules whose sentence must be written for this principal (redacted or with
+    /// hidden facts).
+    pub rewrite: BTreeSet<String>,
+}
+
+impl Proj {
+    fn mentions_hidden(&self, v: &impl serde::Serialize) -> bool {
+        if self.hidden.is_empty() {
+            return false;
+        }
+        let s = serde_json::to_string(v).unwrap_or_default();
+        self.hidden.iter().any(|h| s.contains(&format!("\"{h}\"")))
+    }
+}
+
+/// The story as seen without the transitions caused only by `hidden` facts: families of
+/// the visible supporting facts, strength their maximum, and the rank as it was before
+/// the first hidden transition.
+fn project_story(story: &Story, hidden: &BTreeSet<String>, facts: &[Fact]) -> Story {
+    let mut s = story.clone();
+    let mut kept = Vec::new();
+    let mut first_hidden: Option<usize> = None;
+    for (i, t) in story.history.iter().enumerate() {
+        if !t.facts.is_empty() && t.facts.iter().all(|f| hidden.contains(f)) {
+            first_hidden.get_or_insert(i);
+            continue;
+        }
+        kept.push(t.clone());
+    }
+    if first_hidden.is_none() {
+        return s;
+    }
+    s.history = kept;
+    if let Some(last) = s.history.last() {
+        s.stage = last.stage;
+        s.last_bar = last.bar;
+    }
+    let visible: Vec<&Fact> = facts.iter().filter(|f| !hidden.contains(&f.id)).collect();
+    let mut fams: Vec<EvidenceFamily> = Vec::new();
+    let mut strength: f64 = 0.0;
+    for f in &visible {
+        let Some(m) = f.meaning.as_ref() else {
+            continue;
+        };
+        let opposes = matches!(
+            (story.direction, m.direction),
+            (
+                qp_schema::capsule::Direction::Up,
+                qp_schema::capsule::Direction::Down
+            ) | (
+                qp_schema::capsule::Direction::Down,
+                qp_schema::capsule::Direction::Up
+            )
+        );
+        if opposes || m.edge == qp_schema::capsule::Edge::Exit {
+            continue;
+        }
+        if !fams.contains(&m.family) {
+            fams.push(m.family);
+        }
+        if m.strength > strength {
+            strength = m.strength;
+        }
+    }
+    fams.sort();
+    if !fams.is_empty() {
+        s.families = fams;
+        s.strength = strength;
+    }
+    s
+}
+
+impl Session {
+    /// Starts the runner (`init.capsules`), before the first settle.
+    pub(crate) fn start_capsules(&mut self, init: Option<&CapsuleInit>) {
+        self.runner = init.map(|i| Runner::new(i, &self.doc));
+    }
+
+    /// `true` when `principal` may read the licensed flow of `instrument` (or there is
+    /// none).
+    pub(crate) fn flow_ok(&self, principal: &str, instrument: &str) -> bool {
+        let Some(r) = self.runner.as_ref() else {
+            return true;
+        };
+        match r.flow_feed(instrument) {
+            Some(k) => self.plane.entitled(principal, &k),
+            None => true,
+        }
+    }
+
+    /// `true` when `principal` may read the bars of series `id` (inline: always).
+    pub(crate) fn bars_ok(&self, principal: &str, id: &str) -> bool {
+        let doc = rd!(self);
+        let Some(bs) = bar_series(doc, id).or_else(|| find_series(doc, id)) else {
+            return true;
+        };
+        match bs.binding() {
+            Some(b) => self.plane.entitled(principal, &b.feed_key()),
+            None => true,
+        }
+    }
+
+    /// What `principal` may receive of the engine's items; `None` when everything.
+    pub(crate) fn proj_for(&self, principal: &str) -> Option<Proj> {
+        self.runner.as_ref()?;
+        let doc = &self.doc;
+        let mut p = Proj::default();
+        let facts: BTreeMap<&str, &Fact> = doc.facts.iter().map(|f| (f.id.as_str(), f)).collect();
+        for c in &doc.capsules {
+            let Some(story) = c.story.as_ref() else {
+                continue;
+            };
+            let ids = story_fact_ids(story);
+            let Some(lead) = ids.first().and_then(|i| facts.get(i.as_str())) else {
+                continue;
+            };
+            let flow_ok = self.flow_ok(principal, &story.instrument);
+            if is_licensed(lead) && !flow_ok {
+                p.hidden.insert(c.id.clone());
+                p.hidden.insert(c.finding.clone());
+                for i in &ids {
+                    p.hidden.insert(i.clone());
+                }
+                continue;
+            }
+            let bars_ok = self.bars_ok(principal, &story.series);
+            let mut hidden_here = BTreeSet::new();
+            for i in &ids {
+                if let Some(f) = facts.get(i.as_str()) {
+                    if is_licensed(f) && !flow_ok {
+                        hidden_here.insert(i.clone());
+                    } else if !bars_ok && f.meaning.is_some() {
+                        p.redact.insert(i.clone());
+                    }
+                }
+            }
+            if !bars_ok {
+                p.rewrite.insert(c.id.clone());
+            }
+            if !hidden_here.is_empty() {
+                let story_facts: Vec<Fact> = ids
+                    .iter()
+                    .filter_map(|i| facts.get(i.as_str()).map(|f| (*f).clone()))
+                    .collect();
+                p.stories.insert(
+                    c.id.clone(),
+                    project_story(story, &hidden_here, &story_facts),
+                );
+                p.rewrite.insert(c.id.clone());
+                p.hidden.extend(hidden_here);
+            }
+        }
+        // A fact hidden in one story but shown in another stays shown there.
+        let shown: BTreeSet<String> = doc
+            .capsules
+            .iter()
+            .filter(|c| !p.hidden.contains(&c.id))
+            .filter_map(|c| c.story.as_ref())
+            .flat_map(story_fact_ids)
+            .filter(|i| {
+                facts.get(i.as_str()).is_some_and(|f| {
+                    !is_licensed(f)
+                        || self.flow_ok(
+                            principal,
+                            f.meaning.as_ref().map_or("", |m| m.instrument.as_str()),
+                        )
+                })
+            })
+            .collect();
+        p.hidden.retain(|h| !shown.contains(h));
+        if p.hidden.is_empty() && p.redact.is_empty() {
+            return None;
+        }
+        Some(p)
+    }
+
+    /// The document's facts with their values (inside [`Session::as_reader`] the
+    /// document is projected; sentences are still computed from the real facts and
+    /// redacted afterwards).
+    pub(crate) fn all_facts(&self) -> &[Fact] {
+        if self.proj.is_some() {
+            &self.real_facts
+        } else {
+            &self.doc.facts
+        }
+    }
+
+    /// The language of connection `conn`'s capsule sentences.
+    pub(crate) fn lang_of(&self, ci: usize) -> Language {
+        self.conns[ci].surface.lang.unwrap_or_default()
+    }
+
+    /// Index of the last final bar of the story's series in `doc` (the sentences' "now").
+    fn now_bar(doc: &Document, story: &Story) -> Option<(u64, Vec<Bar>)> {
+        let bs = bar_series(doc, &story.series)?;
+        let bars = bs.bars()?.to_vec();
+        let n = bars.len();
+        if n == 0 {
+            return None;
+        }
+        let f = final_count(doc, &bs.id, n).max(1);
+        let now = u64::try_from(f - 1).unwrap_or(0).max(story.last_bar);
+        Some((now.min(u64::try_from(n - 1).unwrap_or(0)), bars))
+    }
+
+    /// The sentences of capsule `c` (with story) for a reader with projection `p`
+    /// (`None`: entitled to everything), over the facts of `doc`.
+    pub(crate) fn reader_sentence(
+        &self,
+        doc: &Document,
+        c: &Capsule,
+        p: Option<&Proj>,
+        lang: Language,
+    ) -> Option<(CapsuleSentence, bool)> {
+        let story = p.and_then(|p| p.stories.get(&c.id)).or(c.story.as_ref())?;
+        let hidden = p.map(|p| &p.hidden);
+        let facts: Vec<Fact> = story_fact_ids(story)
+            .iter()
+            .filter(|i| hidden.is_none_or(|h| !h.contains(*i)))
+            .filter_map(|i| self.all_facts().iter().find(|f| &f.id == i).cloned())
+            .collect();
+        let redacted = p.is_some_and(|p| facts.iter().any(|f| p.redact.contains(&f.id)));
+        let (now, bars) = Self::now_bar(rd!(self), story).or_else(|| Self::now_bar(doc, story))?;
+        let (tr, en) = sentence_pair(story, &facts, &bars, now, redacted)?;
+        let text = match lang {
+            Language::Tr => tr.clone(),
+            Language::En => en.clone(),
+        };
+        Some((CapsuleSentence { text, tr, en }, redacted))
+    }
+
+    // -----------------------------------------------------------------------
+    // Runner: final bars → engine entries
+    // -----------------------------------------------------------------------
+
+    /// Feeds every bar that became final on a watched series to the detectors and the
+    /// engine; one engine entry per series that advanced; returns its notifications
+    /// (`change`, `finding_state`, topic `capsules`).
+    pub(crate) fn run_capsules(&mut self) -> Vec<OutboundLine> {
+        let Some(mut runner) = self.runner.take() else {
+            return Vec::new();
+        };
+        let mut lines = Vec::new();
+        for wi in 0..runner.watched.len() {
+            let rd = rd!(self);
+            let Some(bs) = find_series(rd, &runner.watched[wi].series) else {
+                continue;
+            };
+            let Some(all) = bs.bars() else {
+                continue;
+            };
+            let fin = final_count(rd, &bs.id, all.len());
+            if fin <= runner.watched[wi].done {
+                continue;
+            }
+            let bars: Vec<Bar> = all[..fin].to_vec();
+            let meta = bs.clone();
+            let w = &mut runner.watched[wi];
+            let flow = w.flow.as_ref().map(|(seed, _)| flow_points(&bars, *seed));
+            let from = w.done;
+            let mut events = Vec::new();
+            let mut made: BTreeMap<String, Fact> = BTreeMap::new();
+            let mut said: Vec<ServerComment> = Vec::new();
+            for i in from..fin {
+                let fp = flow.as_ref().and_then(|f| f.get(i));
+                let mut facts = Vec::new();
+                for det in &mut w.dets {
+                    for d in det.push(&bars[i], fp) {
+                        let mut f = qp_facts::to_fact(
+                            det.as_ref(),
+                            &d,
+                            &w.symbol,
+                            &w.series,
+                            i as u64,
+                            bars[i].t,
+                            qp_capsule::pipeline::ENGINE_VERSION,
+                        );
+                        f.evidence_ref = Some(crate::plane::evidence_ref(&meta, &bars, i));
+                        facts.push(f);
+                    }
+                }
+                let evs = runner
+                    .engine
+                    .on_bar(&w.symbol, &w.series, i as u64, &bars[..=i], &facts);
+                if let (Some(m), Some(p)) = (w.muhur.as_mut(), fp) {
+                    let server: Vec<Fact> =
+                        facts.iter().filter(|f| is_licensed(f)).cloned().collect();
+                    let obs = FlowObservation {
+                        t: bars[i].t,
+                        bar: i as u64,
+                        instrument: w.symbol.clone(),
+                        values: p.values.clone(),
+                    };
+                    for q in m.observe(&obs, &server) {
+                        said.push(ServerComment {
+                            instrument: q.instrument,
+                            series: w.series.clone(),
+                            bar: q.bar,
+                            t: q.t,
+                            codes: q.codes,
+                            tr: q.tr,
+                            en: q.en,
+                            trust: q.trust,
+                            attachments: q.attachments,
+                        });
+                    }
+                }
+                for f in facts {
+                    made.insert(f.id.clone(), f);
+                }
+                events.extend(evs);
+            }
+            w.done = fin;
+            let series = w.series.clone();
+            let changes = self.capsule_changes(&runner, &events, &made, fin - 1);
+            let summary = if fin - from == 1 {
+                format!("capsules {series} bar {from}")
+            } else {
+                format!("capsules {series} bars {from}..={}", fin - 1)
+            };
+            let Some(seq) = self.engine_entry_with(changes, summary, None) else {
+                continue;
+            };
+            for c in &said {
+                runner.comments.push((seq, c.clone()));
+            }
+            self.runner = Some(runner);
+            self.refresh_headlines();
+            lines.extend(self.entry_events(seq));
+            lines.extend(self.capsule_topic_lines(seq, &events, &said));
+            runner = self.runner.take().expect("runner put back");
+        }
+        self.runner = Some(runner);
+        lines
+    }
+
+    /// The changes of one look: facts that caused transitions, then per story its
+    /// finding and capsule (last snapshot), then ledger rows of the closes.
+    fn capsule_changes(
+        &self,
+        runner: &Runner,
+        events: &[qp_capsule::StoryEvent],
+        made: &BTreeMap<String, Fact>,
+        now: usize,
+    ) -> Vec<ChangeOp> {
+        let mut changes = Vec::new();
+        let mut put_facts: BTreeSet<String> = BTreeSet::new();
+        let mut order: Vec<&str> = Vec::new();
+        let mut last: BTreeMap<&str, &qp_capsule::StoryEvent> = BTreeMap::new();
+        for e in events {
+            for f in &e.transition.facts {
+                if put_facts.contains(f) || self.doc.facts.iter().any(|x| &x.id == f) {
+                    continue;
+                }
+                if let Some(fact) = made.get(f) {
+                    put_facts.insert(f.clone());
+                    changes.push(ChangeOp::PutFact {
+                        fact: fact.clone(),
+                        index: None,
+                    });
+                }
+            }
+            if !last.contains_key(e.capsule.as_str()) {
+                order.push(&e.capsule);
+            }
+            last.insert(&e.capsule, e);
+        }
+        let rd = rd!(self);
+        for id in order {
+            let e = last[id];
+            let story = &e.story;
+            let ids = story_fact_ids(story);
+            let facts: Vec<Fact> = ids
+                .iter()
+                .filter_map(|i| {
+                    made.get(i)
+                        .cloned()
+                        .or_else(|| self.doc.facts.iter().find(|f| &f.id == i).cloned())
+                })
+                .collect();
+            let bars = bar_series(rd, &story.series)
+                .and_then(qp_schema::Series::bars)
+                .map(<[Bar]>::to_vec)
+                .unwrap_or_default();
+            let now = (now as u64).max(story.last_bar);
+            let (tr, _) = sentence_pair(story, &facts, &bars, now, false)
+                .unwrap_or_else(|| (e.finding.clone(), e.finding.clone()));
+            let at = e.transition.t;
+            let prov = Provenance {
+                author: Author::Engine {
+                    name: ENGINE_NAME.to_owned(),
+                    version: qp_capsule::pipeline::ENGINE_VERSION.to_owned(),
+                },
+                at,
+                based_on: vec![story.series.clone()],
+                approved_by: None,
+            };
+            let existing = self.doc.capsules.iter().find(|c| c.id == e.capsule);
+            changes.push(ChangeOp::PutFinding {
+                finding: Finding {
+                    id: e.finding.clone(),
+                    claim: tr.clone(),
+                    facts: ids,
+                    confidence: story.strength.clamp(0.0, 1.0),
+                    invalidation: Condition::Text {
+                        text: OUTCOME_TEXT.to_owned(),
+                    },
+                    provenance: prov.clone(),
+                },
+                index: None,
+            });
+            let state = match existing.map(|c| c.state) {
+                Some(s @ (CapsuleState::Approved | CapsuleState::Rejected)) => s,
+                _ => state_of(story.stage),
+            };
+            changes.push(ChangeOp::PutCapsule {
+                capsule: Capsule {
+                    id: e.capsule.clone(),
+                    finding: e.finding.clone(),
+                    state,
+                    revision: u32::try_from(story.history.len().saturating_sub(1))
+                        .unwrap_or(u32::MAX),
+                    headline: tr,
+                    glyphs: Vec::new(),
+                    view: existing.and_then(|c| c.view.clone()),
+                    depth: Depth::Capsule,
+                    expires_at: None,
+                    story: Some(story.clone()),
+                    provenance: prov,
+                },
+                index: None,
+            });
+        }
+        for e in events {
+            if matches!(
+                e.transition.stage,
+                Stage::Realized | Stage::Invalidated | Stage::Expired
+            ) {
+                if let Some(r) = runner
+                    .engine
+                    .ledger_records()
+                    .iter()
+                    .rev()
+                    .find(|r| r.entry.capsule.as_deref() == Some(e.capsule.as_str()))
+                {
+                    changes.push(ChangeOp::PushLedger {
+                        entry: r.entry.clone(),
+                    });
+                }
+            }
+        }
+        changes
+    }
+
+    // -----------------------------------------------------------------------
+    // Items for a reader
+    // -----------------------------------------------------------------------
+
+    /// One capsule as listed for a reader (`p`: its projection; `doc`: the document it
+    /// sees).
+    pub(crate) fn capsule_item(
+        &self,
+        doc: &Document,
+        c: &Capsule,
+        p: Option<&Proj>,
+        lang: Language,
+        principal: &str,
+    ) -> Option<CapsuleItem> {
+        let story = p.and_then(|p| p.stories.get(&c.id)).or(c.story.as_ref())?;
+        let (sentence, redacted) = self.reader_sentence(doc, c, p, lang)?;
+        let last = story.history.last()?;
+        Some(CapsuleItem {
+            id: c.id.clone(),
+            finding: c.finding.clone(),
+            instrument: story.instrument.clone(),
+            series: story.series.clone(),
+            kind: story.kind,
+            direction: story.direction,
+            time: story.time,
+            stage: story.stage,
+            state: c.state,
+            tier: story.tier,
+            importance: story.importance,
+            confirmations: u8::try_from(story.families.len().clamp(1, 5)).unwrap_or(5),
+            trust: story.trust,
+            born_bar: story.born_bar,
+            last_bar: story.last_bar,
+            t: last.t,
+            ledger_at_birth: story.ledger_at_birth,
+            sentence,
+            relevant: self.relevant(doc, principal, &story.instrument),
+            redacted,
+        })
+    }
+
+    /// The audience of `principal` (the `habituated` default when it set none).
+    pub(crate) fn audience_of(doc: &Document, principal: &str) -> Audience {
+        doc.audiences.get(principal).cloned().unwrap_or(Audience {
+            group: UserGroup::Habituated,
+            sensitivity: None,
+            watchlist: Vec::new(),
+            positions: BTreeMap::new(),
+        })
+    }
+
+    /// Instruments of the active intents' triggers (symbols of the series they read).
+    fn intents_on(doc: &Document) -> Vec<String> {
+        let mut out = Vec::new();
+        for i in doc.intents.iter().filter(|i| i.active) {
+            let Some(t) = &i.trigger else { continue };
+            for (_, s) in crate::values::condition_series(t) {
+                if let Some(sym) = bar_series(doc, s).and_then(qp_schema::Series::symbol) {
+                    if !out.iter().any(|x| x == sym) {
+                        out.push(sym.to_owned());
+                    }
+                }
+            }
+        }
+        out
+    }
+
+    /// About `principal`'s position or one of the document's active intents.
+    fn relevant(&self, doc: &Document, principal: &str, instrument: &str) -> bool {
+        let a = Self::audience_of(doc, principal);
+        a.positions.get(instrument).is_some_and(|q| *q != 0.0)
+            || Self::intents_on(doc).iter().any(|s| s == instrument)
+    }
+
+    /// Whether a story reaches `principal`'s audience: watch list (empty = every
+    /// instrument), positions and intents; then the sensitivity filter with the
+    /// position/intent override (`qp_capsule::admits`).
+    fn admits(doc: &Document, principal: &str, story: &Story) -> bool {
+        let a = Self::audience_of(doc, principal);
+        let intents = Self::intents_on(doc);
+        let watched = a.watchlist.is_empty()
+            || a.watchlist.iter().any(|s| s == &story.instrument)
+            || a.positions.contains_key(&story.instrument)
+            || intents.iter().any(|s| s == &story.instrument);
+        watched && qp_capsule::admits(&a, story, &intents)
+    }
+
+    /// Server comments `principal` gets: those on instruments whose licensed flow it may
+    /// not read.
+    fn comments_for(&self, principal: &str) -> Vec<ServerComment> {
+        let Some(r) = self.runner.as_ref() else {
+            return Vec::new();
+        };
+        r.comments
+            .iter()
+            .filter(|(_, c)| !self.flow_ok(principal, &c.instrument))
+            .map(|(_, c)| c.clone())
+            .collect()
+    }
+
+    /// Answer to the `capsules` query (run on the asker's projected document).
+    #[allow(clippy::too_many_arguments)]
+    pub(crate) fn capsules_query(
+        &self,
+        ci: usize,
+        q: &qp_schema::protocol::Query,
+    ) -> PResult<QueryResult> {
+        let qp_schema::protocol::Query::Capsules {
+            instrument,
+            stages,
+            open,
+            meaning,
+            since_bar,
+            since_t,
+            audience,
+            limit,
+        } = q
+        else {
+            unreachable!("capsules query");
+        };
+        let principal = self.conns[ci].principal.clone();
+        let lang = self.lang_of(ci);
+        let p = self.proj.as_ref();
+        let doc = &self.doc;
+        let mut items: Vec<CapsuleItem> = Vec::new();
+        for c in &doc.capsules {
+            let Some(story) = p.and_then(|p| p.stories.get(&c.id)).or(c.story.as_ref()) else {
+                continue;
+            };
+            if instrument.as_ref().is_some_and(|i| i != &story.instrument)
+                || (!stages.is_empty() && !stages.contains(&story.stage))
+                || open.is_some_and(|o| o == story.stage.is_closed())
+                || meaning.is_some_and(|k| k != story.kind)
+                || since_bar.is_some_and(|b| story.last_bar < b)
+                || since_t.is_some_and(|t| story.history.last().is_none_or(|l| l.t < t))
+                || (*audience && !Self::admits(doc, &principal, story))
+            {
+                continue;
+            }
+            if let Some(it) = self.capsule_item(doc, c, p, lang, &principal) {
+                items.push(it);
+            }
+        }
+        items.sort_by(|a, b| {
+            b.importance
+                .total_cmp(&a.importance)
+                .then(b.t.cmp(&a.t))
+                .then(a.id.cmp(&b.id))
+        });
+        if let Some(l) = limit {
+            items.truncate(*l as usize);
+        }
+        let comments = self
+            .comments_for(&principal)
+            .into_iter()
+            .filter(|c| instrument.as_ref().is_none_or(|i| i == &c.instrument))
+            .filter(|c| since_bar.is_none_or(|b| c.bar >= b))
+            .filter(|c| since_t.is_none_or(|t| c.t >= t))
+            .collect();
+        Ok(QueryResult::Capsules {
+            capsules: items,
+            comments,
+        })
+    }
+
+    /// Answer to the `capsule` query (run on the asker's projected document).
+    pub(crate) fn capsule_query(&self, ci: usize, id: &str, path: &str) -> PResult<QueryResult> {
+        let principal = self.conns[ci].principal.clone();
+        let lang = self.lang_of(ci);
+        let p = self.proj.as_ref();
+        let doc = &self.doc;
+        let Some(c) = doc
+            .capsules
+            .iter()
+            .filter(|c| c.story.is_some())
+            .find(|c| c.id == id || c.finding == id)
+        else {
+            return Err(E::new(
+                ErrorCode::NotFound,
+                format!("no capsule with a story `{id}`"),
+            )
+            .at(ptr(path, "capsule"))
+            .dym(
+                id,
+                doc.capsules
+                    .iter()
+                    .filter(|c| c.story.is_some())
+                    .map(|c| c.id.as_str()),
+            )
+            .build());
+        };
+        let item = self
+            .capsule_item(doc, c, p, lang, &principal)
+            .ok_or_else(|| {
+                E::new(ErrorCode::NoData, "the capsule's bars are not available").build()
+            })?;
+        let story = p
+            .and_then(|p| p.stories.get(&c.id))
+            .or(c.story.as_ref())
+            .cloned()
+            .unwrap_or_else(|| unreachable!("story checked"));
+        let facts: Vec<Fact> = story_fact_ids(&story)
+            .iter()
+            .filter_map(|i| doc.facts.iter().find(|f| &f.id == i).cloned())
+            .collect();
+        let rd = rd!(self);
+        let (now, bars) = Self::now_bar(rd, &story).unwrap_or((story.last_bar, Vec::new()));
+        let now_t = bars
+            .get(usize::try_from(now).unwrap_or(0) + 1)
+            .or_else(|| bars.get(usize::try_from(now).unwrap_or(0)))
+            .map_or(i64::MAX, |b| b.t);
+        let ledger = ledger_rows(doc)
+            .into_iter()
+            .filter(|(k, ..)| k == &story.ledger_key)
+            .fold(
+                qp_schema::capsule::LedgerStat::default(),
+                |mut s, (_, _, t, real)| {
+                    if t < now_t {
+                        s.n += 1;
+                        s.realized += u32::from(real);
+                    }
+                    s
+                },
+            );
+        let glyph = qp_capsule::glyph_spec(&story, now, qp_grammar::depth::GLYPH_MIN_LEDGER_N);
+        let evidence = facts.iter().map(|f| self.evidence_access(f, p)).collect();
+        Ok(QueryResult::CapsuleDetail {
+            detail: Box::new(CapsuleDetail {
+                item,
+                story,
+                facts,
+                ledger,
+                glyph,
+                evidence,
+            }),
+        })
+    }
+
+    /// One fact's evidence for a reader (K34): the values, or the entitlement they
+    /// require and what they rest on.
+    fn evidence_access(&self, f: &Fact, p: Option<&Proj>) -> EvidenceAccess {
+        let m = f.meaning.as_ref();
+        let licensed = m.is_some_and(|m| m.license.class == LicenseClass::Licensed);
+        let open = p.is_none_or(|p| !p.redact.contains(&f.id));
+        let doc = rd!(self);
+        let bs = bar_series(doc, &f.series);
+        let feed = bs.and_then(qp_schema::Series::binding);
+        let symbol = m.map_or_else(|| f.series.clone(), |m| m.instrument.clone());
+        let mut rests_on = match &feed {
+            Some(b) => format!(
+                "bars {} {} (feed {})",
+                b.symbol,
+                b.interval,
+                b.feed.as_deref().unwrap_or("default")
+            ),
+            None => format!(
+                "bars of series {}",
+                bs.map_or(f.series.as_str(), |s| s.id.as_str())
+            ),
+        };
+        let requires = if open {
+            None
+        } else if licensed {
+            m.and_then(|m| m.license.entitlement.clone())
+        } else {
+            feed.as_ref().map(|b| match &b.feed {
+                Some(fd) => format!("{fd}/{}", b.symbol),
+                None => b.symbol.clone(),
+            })
+        };
+        if licensed {
+            let det = m.map_or("", |m| m.detector.as_str());
+            rests_on = format!("licensed flow of {symbol} ({det}); {rests_on}");
+        }
+        EvidenceAccess {
+            fact: f.id.clone(),
+            family: m.map_or(EvidenceFamily::Price, |m| m.family),
+            license: m.map_or(LicenseClass::Public, |m| m.license.class),
+            open,
+            values: if open {
+                f.evidence.clone()
+            } else {
+                BTreeMap::new()
+            },
+            evidence_ref: if open { f.evidence_ref.clone() } else { None },
+            requires,
+            rests_on,
+        }
+    }
+
+    /// Answer to the `ledger` query: rows of the document's ledger with a key, the
+    /// retracted capsules left out.
+    pub(crate) fn ledger_query(
+        &self,
+        key: Option<&str>,
+        meaning: Option<qp_schema::capsule::MeaningKind>,
+        detector: Option<&str>,
+        by_kind: bool,
+    ) -> QueryResult {
+        let mut rows: BTreeMap<String, LedgerRow> = BTreeMap::new();
+        let mut total = qp_schema::capsule::LedgerStat::default();
+        for (k, kind, _, real) in ledger_rows(&self.doc) {
+            let det = k
+                .split_once('/')
+                .map(|(_, r)| r.split('@').next().unwrap_or(r).to_owned());
+            if key.is_some_and(|x| x != k)
+                || meaning.is_some_and(|m| m != kind)
+                || detector.is_some_and(|d| det.as_deref() != Some(d))
+            {
+                continue;
+            }
+            let rk = if by_kind {
+                kind.name().to_owned()
+            } else {
+                k.clone()
+            };
+            let row = rows.entry(rk.clone()).or_insert(LedgerRow {
+                key: rk,
+                kind,
+                detector: if by_kind { None } else { det },
+                n: 0,
+                realized: 0,
+            });
+            row.n += 1;
+            row.realized += u32::from(real);
+            total.n += 1;
+            total.realized += u32::from(real);
+        }
+        QueryResult::Ledger {
+            rows: rows.into_values().collect(),
+            total,
+        }
+    }
+
+    // -----------------------------------------------------------------------
+    // Notifications
+    // -----------------------------------------------------------------------
+
+    /// Topic `capsules` notifications of one engine entry: per subscriber, the story
+    /// transitions it may see and that pass its filter; server comments to subscribers
+    /// without the flow entitlement.
+    pub(crate) fn capsule_topic_lines(
+        &self,
+        seq: Seq,
+        events: &[qp_capsule::StoryEvent],
+        said: &[ServerComment],
+    ) -> Vec<OutboundLine> {
+        let mut lines = Vec::new();
+        for (ci, c) in self.conns.iter().enumerate() {
+            let subs: Vec<(&str, Option<&String>, bool)> = c
+                .subs
+                .iter()
+                .filter_map(|s| match &s.topic {
+                    Topic::Capsules { instrument, all } => {
+                        Some((s.id.as_str(), instrument.as_ref(), *all))
+                    }
+                    _ => None,
+                })
+                .collect();
+            if subs.is_empty() {
+                continue;
+            }
+            let p = self.proj_for(&c.principal);
+            let doc = &self.doc;
+            let lang = self.lang_of(ci);
+            for e in events {
+                if p.as_ref().is_some_and(|p| {
+                    p.hidden.contains(&e.capsule)
+                        || (!e.transition.facts.is_empty()
+                            && e.transition.facts.iter().all(|f| p.hidden.contains(f)))
+                }) {
+                    continue;
+                }
+                let Some(cap) = doc.capsules.iter().find(|x| x.id == e.capsule) else {
+                    continue;
+                };
+                let Some(item) = self.capsule_item(doc, cap, p.as_ref(), lang, &c.principal) else {
+                    continue;
+                };
+                for (sub, inst, all) in &subs {
+                    if inst.is_some_and(|i| i != &item.instrument) {
+                        continue;
+                    }
+                    if !all {
+                        let story = p
+                            .as_ref()
+                            .and_then(|p| p.stories.get(&cap.id))
+                            .or(cap.story.as_ref());
+                        if !story.is_some_and(|s| Self::admits(doc, &c.principal, s)) {
+                            continue;
+                        }
+                    }
+                    lines.push(out(
+                        &c.id,
+                        ServerMsg::Notify {
+                            sub: (*sub).to_owned(),
+                            event: Event::Capsule {
+                                capsule: Box::new(item.clone()),
+                                transition: e.transition.clone(),
+                                seq,
+                            },
+                        },
+                    ));
+                }
+            }
+            for sc in said {
+                if self.flow_ok(&c.principal, &sc.instrument) {
+                    continue;
+                }
+                for (sub, inst, all) in &subs {
+                    if inst.is_some_and(|i| i != &sc.instrument) {
+                        continue;
+                    }
+                    if !all {
+                        let a = Self::audience_of(doc, &c.principal);
+                        let watched = a.watchlist.is_empty()
+                            || a.watchlist.contains(&sc.instrument)
+                            || a.positions.contains_key(&sc.instrument);
+                        if !watched {
+                            continue;
+                        }
+                    }
+                    lines.push(out(
+                        &c.id,
+                        ServerMsg::Notify {
+                            sub: (*sub).to_owned(),
+                            event: Event::ServerComment {
+                                comment: sc.clone(),
+                                seq,
+                            },
+                        },
+                    ));
+                }
+            }
+        }
+        lines
+    }
+
+    // -----------------------------------------------------------------------
+    // Projection of documents and changes
+    // -----------------------------------------------------------------------
+
+    /// `doc` as `p`'s principal may receive it.
+    pub(crate) fn project_doc(&self, doc: &Document, p: &Proj, lang: Language) -> Document {
+        let mut d = doc.clone();
+        d.facts.retain(|f| !p.hidden.contains(&f.id));
+        for f in &mut d.facts {
+            if p.redact.contains(&f.id) {
+                f.evidence.clear();
+                f.evidence_ref = None;
+            }
+        }
+        d.findings.retain(|f| !p.hidden.contains(&f.id));
+        for f in &mut d.findings {
+            f.facts.retain(|x| !p.hidden.contains(x));
+        }
+        d.capsules.retain(|c| !p.hidden.contains(&c.id));
+        let views_kept: Vec<qp_schema::View> = d
+            .views
+            .iter()
+            .filter(|v| !p.mentions_hidden(*v))
+            .cloned()
+            .collect();
+        d.views = views_kept;
+        let view_ids: BTreeSet<String> = d.views.iter().map(|v| v.id.clone()).collect();
+        for c in &mut d.capsules {
+            if let Some(s) = p.stories.get(&c.id) {
+                c.story = Some(s.clone());
+            }
+            if c.view.as_ref().is_some_and(|v| !view_ids.contains(v)) {
+                c.view = None;
+            }
+        }
+        // Sentences written for the reader where the stored one does not fit it.
+        let rewrites: Vec<(usize, String)> = d
+            .capsules
+            .iter()
+            .enumerate()
+            .filter(|(_, c)| p.rewrite.contains(&c.id))
+            .filter_map(|(i, c)| {
+                self.reader_sentence(&d, c, Some(p), lang)
+                    .map(|(s, _)| (i, s.text))
+            })
+            .collect();
+        for (i, text) in rewrites {
+            let fid = d.capsules[i].finding.clone();
+            d.capsules[i].headline.clone_from(&text);
+            if let Some(f) = d.findings.iter_mut().find(|f| f.id == fid) {
+                f.claim = text;
+            }
+        }
+        d.ledger.entries.retain(|e| {
+            !p.hidden.contains(&e.finding)
+                && e.capsule.as_ref().is_none_or(|c| !p.hidden.contains(c))
+        });
+        d.narratives.retain(|n| !p.mentions_hidden(n));
+        d.proposals.retain(|x| !p.mentions_hidden(x));
+        d
+    }
+
+    /// `changes` as `p`'s principal may receive them.
+    pub(crate) fn project_changes(
+        &self,
+        changes: &[ChangeOp],
+        p: &Proj,
+        lang: Language,
+    ) -> Vec<ChangeOp> {
+        let mut outv = Vec::new();
+        for c in changes {
+            match c {
+                ChangeOp::PutFact { fact, index } => {
+                    if p.hidden.contains(&fact.id) {
+                        continue;
+                    }
+                    let mut f = fact.clone();
+                    if p.redact.contains(&f.id) {
+                        f.evidence.clear();
+                        f.evidence_ref = None;
+                    }
+                    outv.push(ChangeOp::PutFact {
+                        fact: f,
+                        index: *index,
+                    });
+                }
+                ChangeOp::PutFinding { finding, index } => {
+                    if p.hidden.contains(&finding.id) {
+                        continue;
+                    }
+                    let mut f = finding.clone();
+                    f.facts.retain(|x| !p.hidden.contains(x));
+                    if let Some(cap) = self.doc.capsules.iter().find(|c| c.finding == f.id) {
+                        if p.rewrite.contains(&cap.id) {
+                            if let Some((s, _)) =
+                                self.reader_sentence(&self.doc, cap, Some(p), lang)
+                            {
+                                f.claim = s.text;
+                            }
+                        }
+                    }
+                    outv.push(ChangeOp::PutFinding {
+                        finding: f,
+                        index: *index,
+                    });
+                }
+                ChangeOp::PutCapsule { capsule, index } => {
+                    if p.hidden.contains(&capsule.id) {
+                        continue;
+                    }
+                    let mut cap = capsule.clone();
+                    if let Some(st) = cap.story.as_ref() {
+                        let ids = story_fact_ids(st);
+                        let hidden: BTreeSet<String> = ids
+                            .iter()
+                            .filter(|i| p.hidden.contains(*i))
+                            .cloned()
+                            .collect();
+                        if !hidden.is_empty() {
+                            let facts: Vec<Fact> = ids
+                                .iter()
+                                .filter_map(|i| self.doc.facts.iter().find(|f| &f.id == i).cloned())
+                                .collect();
+                            cap.story = Some(project_story(st, &hidden, &facts));
+                        }
+                    }
+                    if p.rewrite.contains(&cap.id) {
+                        if let Some((s, _)) = self.reader_sentence(&self.doc, &cap, Some(p), lang) {
+                            cap.headline = s.text;
+                        }
+                    }
+                    outv.push(ChangeOp::PutCapsule {
+                        capsule: cap,
+                        index: *index,
+                    });
+                }
+                ChangeOp::SetCapsuleState { capsule, .. } if p.hidden.contains(capsule) => {}
+                ChangeOp::Delete { id } if p.hidden.contains(id) => {}
+                ChangeOp::PushLedger { entry }
+                    if p.hidden.contains(&entry.finding)
+                        || entry.capsule.as_ref().is_some_and(|c| p.hidden.contains(c)) => {}
+                ChangeOp::PutView { .. }
+                | ChangeOp::InsertLayer { .. }
+                | ChangeOp::PutLayer { .. }
+                | ChangeOp::SetEmphasis { .. }
+                | ChangeOp::PutNarrative { .. }
+                | ChangeOp::PutProposal { .. }
+                    if p.mentions_hidden(c) => {}
+                other => outv.push(other.clone()),
+            }
+        }
+        outv
+    }
+
+    /// A log entry as `p`'s principal may receive it: changes and inverse projected,
+    /// request ops and a summary that name a hidden item removed.
+    pub(crate) fn project_entry(&self, e: &LogEntry, p: &Proj, lang: Language) -> LogEntry {
+        let mut x = e.clone();
+        x.changes = self.project_changes(&e.changes, p, lang);
+        x.inverse = self.project_changes(&e.inverse, p, lang);
+        x.request.retain(|op| !p.mentions_hidden(op));
+        if p.hidden.iter().any(|h| x.summary.contains(h.as_str())) {
+            x.summary = "…".to_owned();
+        }
+        if let Some(c) = x.cause.as_ref() {
+            if p.hidden.iter().any(|h| c.contains(h.as_str())) {
+                x.cause = None;
+            }
+        }
+        x
+    }
+
+    /// Runs `f` with the document (and the reading document) as `principal` may receive
+    /// them (R3, §20): every read path, selector and error suggestion then only sees
+    /// what the principal may see. Nothing written inside `f` may touch the document.
+    pub(crate) fn as_reader<R>(
+        &mut self,
+        principal: &str,
+        lang: Language,
+        f: impl FnOnce(&mut Self) -> R,
+    ) -> R {
+        let p = self.proj_for(principal);
+        let lines = self.runner.is_some() || lang == Language::En;
+        if p.is_none() && !lines {
+            return f(self);
+        }
+        let heads = if lines {
+            self.story_headlines(p.as_ref(), lang)
+        } else {
+            BTreeMap::new()
+        };
+        let saved_heads = std::mem::replace(&mut self.headlines, heads);
+        let Some(p) = p else {
+            let r = f(self);
+            self.headlines = saved_heads;
+            return r;
+        };
+        let doc = self.project_doc(&self.doc, &p, lang);
+        let rd = self.rd.as_ref().map(|r| self.project_doc(r, &p, lang));
+        let real_doc = std::mem::replace(&mut self.doc, doc);
+        let real_rd = std::mem::replace(&mut self.rd, rd);
+        let vr = self.view_reads.take();
+        let li = self.live_index.take();
+        let saved = self.proj.replace(p);
+        let real_facts = std::mem::replace(&mut self.real_facts, real_doc.facts.clone());
+        let r = f(self);
+        self.real_facts = real_facts;
+        self.proj = saved;
+        self.doc = real_doc;
+        self.rd = real_rd;
+        self.view_reads = vr;
+        self.live_index = li;
+        self.headlines = saved_heads;
+        r
+    }
+
+    /// Finding id → the realizer's sentence of every capsule with a story, for a reader
+    /// with projection `p` in `lang` (hidden capsules left out).
+    pub(crate) fn story_headlines(
+        &self,
+        p: Option<&Proj>,
+        lang: Language,
+    ) -> BTreeMap<String, String> {
+        self.doc
+            .capsules
+            .iter()
+            .filter(|c| c.story.is_some() && p.is_none_or(|p| !p.hidden.contains(&c.id)))
+            .filter_map(|c| {
+                self.reader_sentence(&self.doc, c, p, lang)
+                    .map(|(s, _)| (c.finding.clone(), s.text))
+            })
+            .collect()
+    }
+
+    /// Refreshes the authority's own headlines (TR, entitled) after the engine wrote.
+    pub(crate) fn refresh_headlines(&mut self) {
+        if self.runner.is_some() {
+            self.headlines = self.story_headlines(None, Language::Tr);
+        }
+    }
+
+    // -----------------------------------------------------------------------
+    // Disputes and settled data (§19.9 + §20)
+    // -----------------------------------------------------------------------
+
+    /// `true` when `capsule` is a story of a watched series.
+    pub(crate) fn engine_capsule(&self, capsule: &str) -> Option<String> {
+        let r = self.runner.as_ref()?;
+        let c = self.doc.capsules.iter().find(|c| c.id == capsule)?;
+        let s = c.story.as_ref()?;
+        r.watched_of(&s.series).map(|w| w.series.clone())
+    }
+
+    /// A `dispute` on an engine capsule: the claim is "the story's facts hold on the
+    /// settled bars". Settled bars from the anchor to `t` are asked; the answer re-runs
+    /// the detectors on the corrected data (see [`Session::capsule_settled`]).
+    pub(crate) fn capsule_dispute(
+        &mut self,
+        ci: usize,
+        id: &str,
+        capsule: &str,
+        t: i64,
+        digest: Option<String>,
+    ) -> Vec<OutboundLine> {
+        let conn = self.conns[ci].id.clone();
+        let principal = self.conns[ci].principal.clone();
+        let claim = ClaimRef::Capsule {
+            capsule: capsule.to_owned(),
+            finding: self
+                .doc
+                .capsules
+                .iter()
+                .find(|c| c.id == capsule)
+                .map(|c| c.finding.clone())
+                .unwrap_or_default(),
+        };
+        let reply = |s: &Self, v: DisputeVerdict, ev: Option<ClaimEvidence>| {
+            out(
+                &conn,
+                ServerMsg::Result {
+                    id: id.to_owned(),
+                    seq: s.seq(),
+                    now: s.clock(),
+                    data: QueryResult::Dispute {
+                        verdict: v,
+                        evidence: ev,
+                    },
+                    resolved: BTreeMap::new(),
+                },
+            )
+        };
+        let visible = self
+            .proj_for(&principal)
+            .is_none_or(|p| !p.hidden.contains(capsule));
+        let series = self.engine_capsule(capsule);
+        let story = self
+            .doc
+            .capsules
+            .iter()
+            .find(|c| c.id == capsule)
+            .and_then(|c| c.story.clone());
+        let (Some(series), Some(story), true) = (series, story, visible) else {
+            return vec![reply(self, DisputeVerdict::Unknown, None)];
+        };
+        if !self.bars_ok(&principal, &series)
+            || story.stage == Stage::Retracted
+            || t < story.history.first().map_or(i64::MAX, |h| h.t)
+        {
+            return vec![reply(self, DisputeVerdict::Unknown, None)];
+        }
+        let seen = (conn.clone(), claim.clone(), t, digest.unwrap_or_default());
+        if self.settle.seen_contains(&seen) {
+            return vec![reply(self, DisputeVerdict::Duplicate, None)];
+        }
+        self.settle
+            .seen_insert(seen.clone(), DisputeVerdict::Pending);
+        if let Some(r) = self.runner.as_mut() {
+            r.disputes.push(CapDispute {
+                conn: conn.clone(),
+                capsule: capsule.to_owned(),
+                series: series.clone(),
+                t,
+                seen: seen.clone(),
+            });
+        }
+        let feed = self.plane.series.get(&series).map(|b| b.binding.feed_key());
+        let from_t = self
+            .plane
+            .bars(&series)
+            .and_then(<[Bar]>::first)
+            .map_or(t, |b| b.t);
+        if let Some(feed) = feed {
+            self.settle.push_request(crate::dispute::SettleRequest {
+                series: series.clone(),
+                feed,
+                from_t,
+                to_t: t,
+            });
+        }
+        let lines = self.serve_test_source();
+        let verdict = self
+            .settle
+            .seen_get(&seen)
+            .unwrap_or(DisputeVerdict::Pending);
+        let ev = (verdict == DisputeVerdict::Rejected).then(|| self.capsule_evidence(&series, t));
+        let mut v = vec![reply(self, verdict, ev)];
+        v.extend(lines);
+        v
+    }
+
+    fn capsule_evidence(&self, series: &str, t: i64) -> ClaimEvidence {
+        let doc = rd!(self);
+        ClaimEvidence {
+            series: series.to_owned(),
+            t,
+            values: Vec::new(),
+            maturity: Maturity::Final,
+            clean: true,
+            anchor_t: crate::claims::anchor_of(doc, series),
+            feeds: find_series(doc, series)
+                .and_then(qp_schema::Series::binding)
+                .map(|b| vec![b.feed_key()])
+                .unwrap_or_default(),
+        }
+    }
+
+    /// After a settled answer on `series` (`lo..=hi`; `corrected`: bars changed): the
+    /// detectors re-run on the authority's (corrected) final bars; every story with a fact
+    /// the corrected data no longer gives (or gives with other evidence values) is
+    /// **retracted** (K37: `data_corrected`, or `dispute_upheld` when disputed; never in
+    /// the ledger). The detectors continue from the corrected data. Facts the corrected
+    /// data would newly give are not asserted (history is not rewritten). Open capsule
+    /// disputes the answer covers are decided. Returns the notifications.
+    pub(crate) fn capsule_settled(
+        &mut self,
+        series: &str,
+        lo: i64,
+        hi: i64,
+        corrected: bool,
+    ) -> Vec<OutboundLine> {
+        let Some(mut runner) = self.runner.take() else {
+            return Vec::new();
+        };
+        let Some(wi) = runner.watched.iter().position(|w| w.series == series) else {
+            self.runner = Some(runner);
+            return Vec::new();
+        };
+        let mut lines = Vec::new();
+        let mut retract: Vec<(String, u64, i64, &'static str)> = Vec::new();
+        if corrected {
+            let rd = rd!(self);
+            let bars: Vec<Bar> = find_series(rd, series)
+                .and_then(qp_schema::Series::bars)
+                .map(<[Bar]>::to_vec)
+                .unwrap_or_default();
+            let w = &mut runner.watched[wi];
+            let done = w.done.min(bars.len());
+            let flow = w
+                .flow
+                .as_ref()
+                .map(|(seed, _)| flow_points(&bars[..done], *seed));
+            let mut dets = qp_facts::default_detectors();
+            let mut again: BTreeMap<String, BTreeMap<String, u64>> = BTreeMap::new();
+            for (i, b) in bars[..done].iter().enumerate() {
+                let fp = flow.as_ref().and_then(|f| f.get(i));
+                for det in &mut dets {
+                    for d in det.push(b, fp) {
+                        let f = qp_facts::to_fact(
+                            det.as_ref(),
+                            &d,
+                            &w.symbol,
+                            &w.series,
+                            i as u64,
+                            b.t,
+                            qp_capsule::pipeline::ENGINE_VERSION,
+                        );
+                        let bits = f
+                            .evidence
+                            .iter()
+                            .map(|(k, v)| (k.clone(), v.to_bits()))
+                            .collect();
+                        again.insert(f.id, bits);
+                    }
+                }
+            }
+            w.dets = dets;
+            let mut stories: Vec<&qp_capsule::OpenStory> = runner
+                .engine
+                .open_stories()
+                .iter()
+                .chain(runner.engine.closed_stories())
+                .filter(|s| s.story.series == series && s.story.stage != Stage::Retracted)
+                .collect();
+            stories.sort_by(|a, b| a.id.cmp(&b.id));
+            for s in stories {
+                let broken = s.facts.iter().any(|f| {
+                    let bits: BTreeMap<String, u64> = f
+                        .evidence
+                        .iter()
+                        .map(|(k, v)| (k.clone(), v.to_bits()))
+                        .collect();
+                    again.get(&f.id) != Some(&bits)
+                });
+                if !broken {
+                    continue;
+                }
+                let disputed = runner
+                    .disputes
+                    .iter()
+                    .any(|d| d.capsule == s.id && d.series == series);
+                let last = s
+                    .story
+                    .history
+                    .last()
+                    .map_or((0, i64::MIN), |l| (l.bar, l.t));
+                let at_bar = u64::try_from(done.saturating_sub(1))
+                    .unwrap_or(0)
+                    .max(last.0);
+                let at_t = bars
+                    .get(usize::try_from(at_bar).unwrap_or(0))
+                    .map_or(last.1, |b| b.t)
+                    .max(last.1);
+                retract.push((
+                    s.id.clone(),
+                    at_bar,
+                    at_t,
+                    if disputed {
+                        "dispute_upheld"
+                    } else {
+                        "data_corrected"
+                    },
+                ));
+            }
+        }
+        let mut events = Vec::new();
+        for (id, bar, t, why) in retract {
+            if let Some(ev) = runner.engine.retract(&id, bar, t, why) {
+                events.push(ev);
+            }
+        }
+        // Decide the open disputes the answer covers.
+        let open = std::mem::take(&mut runner.disputes);
+        for d in open {
+            if d.series != series || d.t < lo || d.t > hi {
+                runner.disputes.push(d);
+                continue;
+            }
+            let retracted = events.iter().any(|e| e.capsule == d.capsule)
+                || runner
+                    .engine
+                    .closed_stories()
+                    .iter()
+                    .any(|s| s.id == d.capsule && s.story.stage == Stage::Retracted);
+            let verdict = if retracted {
+                DisputeVerdict::Upheld
+            } else {
+                DisputeVerdict::Rejected
+            };
+            self.settle.seen_insert(d.seen.clone(), verdict);
+            let _ = &d.conn;
+        }
+        if events.is_empty() {
+            self.runner = Some(runner);
+            return lines;
+        }
+        let changes = self.capsule_changes(&runner, &events, &BTreeMap::new(), 0);
+        let ids: Vec<String> = events.iter().map(|e| e.capsule.clone()).collect();
+        if let Some(seq) =
+            self.engine_entry_with(changes, format!("retract {}", ids.join(", ")), None)
+        {
+            self.runner = Some(runner);
+            self.refresh_headlines();
+            lines.extend(self.entry_events(seq));
+            lines.extend(self.capsule_topic_lines(seq, &events, &[]));
+            return lines;
+        }
+        self.runner = Some(runner);
+        lines
+    }
+}
+
+/// Ledger rows of `doc` with a key (R3), the retracted capsules left out:
+/// `(key, kind, recorded_at, realized)`.
+pub(crate) fn ledger_rows(
+    doc: &Document,
+) -> Vec<(String, qp_schema::capsule::MeaningKind, i64, bool)> {
+    let retracted: BTreeSet<&str> = doc
+        .capsules
+        .iter()
+        .filter(|c| {
+            c.story
+                .as_ref()
+                .is_some_and(|s| s.stage == Stage::Retracted)
+        })
+        .map(|c| c.id.as_str())
+        .collect();
+    doc.ledger
+        .entries
+        .iter()
+        .filter(|e| e.capsule.as_deref().is_none_or(|c| !retracted.contains(c)))
+        .filter_map(|e| {
+            let k = e.key.clone()?;
+            let kind = qp_schema::capsule::MeaningKind::ALL
+                .into_iter()
+                .find(|m| k.starts_with(&format!("{}/", m.name())))?;
+            Some((
+                k,
+                kind,
+                e.recorded_at,
+                e.outcome == qp_schema::Outcome::Confirmed,
+            ))
+        })
+        .collect()
+}
+
+/// Candidates on the open (last) bar of `bars` (K28, A16): a fresh detector set and
+/// engine run over the final bars (all but the last), then `Engine::candidates` with the
+/// last bar's provisional facts. For a replica or any local reader of an open bar; the
+/// authority never sends them, never logs them and never writes them to the ledger.
+/// Public detectors only (a device holds no licensed flow).
+#[must_use]
+pub fn candidates(symbol: &str, series: &str, bars: &[Bar]) -> Vec<qp_capsule::CandidateStory> {
+    let Some(last) = bars.len().checked_sub(1) else {
+        return Vec::new();
+    };
+    let mut engine = Engine::new(EngineConfig::r3());
+    let mut dets = qp_facts::default_detectors();
+    let mut provisional = Vec::new();
+    for (i, b) in bars.iter().enumerate() {
+        let mut facts = Vec::new();
+        for det in &mut dets {
+            for d in det.push(b, None) {
+                facts.push(qp_facts::to_fact(
+                    det.as_ref(),
+                    &d,
+                    symbol,
+                    series,
+                    i as u64,
+                    b.t,
+                    qp_capsule::pipeline::ENGINE_VERSION,
+                ));
+            }
+        }
+        if i == last {
+            provisional = facts;
+        } else {
+            engine.on_bar(symbol, series, i as u64, &bars[..=i], &facts);
+        }
+    }
+    engine.candidates(symbol, series, last as u64, bars, &provisional)
+}

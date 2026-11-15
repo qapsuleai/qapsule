@@ -160,6 +160,16 @@ pub struct Session {
     pub(crate) intent_epoch: u64,
     /// (R3/M7) Disputes and settled-bar requests (§19.9).
     pub(crate) settle: crate::dispute::Settle,
+    /// (R3, §20) The capsule engine (`init.capsules`); `None`: no engine.
+    pub(crate) runner: Option<crate::capsule::Runner>,
+    /// (R3, §20) Inside [`Session::as_reader`]: the reader's projection.
+    pub(crate) proj: Option<crate::capsule::Proj>,
+    /// (R3, §20) Inside [`Session::as_reader`]: the real document's facts.
+    pub(crate) real_facts: Vec<qp_schema::Fact>,
+    /// (R3, §20) Finding id → the capsule sentence the grammar provider speaks with
+    /// (the realizer's, for the current reader inside [`Session::as_reader`]); empty
+    /// without an engine and outside a reader with another language.
+    pub(crate) headlines: BTreeMap<String, String>,
 }
 
 /// Resolves `rel` under `root`, refusing absolute paths and paths that leave `root`.
@@ -236,6 +246,9 @@ fn allowed(op: &Op, perms: &Permissions) -> bool {
         | Op::RejectFinding { .. }
         | Op::AcceptProposal { .. }
         | Op::RejectProposal { .. } => perms.decide,
+        // (R3, §20) A person's own capsule preferences: anyone who may read (another
+        // person's: owner only, checked in the expansion).
+        Op::SetAudience { .. } | Op::SetSensitivity { .. } => perms.read,
         _ => perms.write,
     }
 }
@@ -296,6 +309,7 @@ impl Session {
         provider: Provider,
         schema: Value,
     ) -> Result<Self, String> {
+        let capsules = init.capsules.clone();
         let doc: Document = match &init.document {
             DocumentRef::Inline(d) => (**d).clone(),
             DocumentRef::Path(p) => read_json(&confine(repo_root, p)?)?,
@@ -339,7 +353,12 @@ impl Session {
             invalidation_writer: BTreeMap::new(),
             intent_epoch: 1,
             settle: crate::dispute::Settle::default(),
+            runner: None,
+            proj: None,
+            real_facts: Vec::new(),
+            headlines: BTreeMap::new(),
         };
+        s.start_capsules(capsules.as_ref());
         // Resolve the bindings on load (§18.3); a first ready resolution is anchored by
         // an engine entry. No connection exists yet: its notifications go nowhere.
         s.pending_stamps = s.plane.sync(&s.doc);
@@ -348,6 +367,8 @@ impl Session {
             let _ = s.invalidations(seq);
         }
         s.eval_intents(s.seq());
+        // The capsule engine catches up with the final bars at load (R3, §20).
+        let _ = s.run_capsules();
         s.pending_views.clear();
         // No connection exists at load: claims asserted now are registered (for their
         // finalisation) but announce nothing.
@@ -520,7 +541,13 @@ impl Session {
         let mut value = value;
         // Reference by meaning (§17): selectors become ids before the typed parse, so
         // the typed message, the log and proposals only ever hold ids.
-        let resolved = match self.resolve_selectors(conn, &mut value) {
+        let reader = self
+            .conn_index(conn)
+            .map(|ci| (self.conns[ci].principal.clone(), self.lang_of(ci)));
+        let resolved = match match reader {
+            Some((p, lang)) => self.as_reader(&p, lang, |s| s.resolve_selectors(conn, &mut value)),
+            None => self.resolve_selectors(conn, &mut value),
+        } {
             Ok(r) => r,
             Err(e) => return vec![err_line(conn, id, e)],
         };
@@ -850,7 +877,8 @@ impl Session {
                 if !permissions(self.conns[ci].role).read {
                     return vec![err_line(conn, Some(id), forbidden_read())];
                 }
-                match self.query(ci, &query) {
+                let (principal, lang) = (self.conns[ci].principal.clone(), self.lang_of(ci));
+                match self.as_reader(&principal, lang, |s| s.query(ci, &query)) {
                     Ok(data) => vec![out(
                         conn,
                         ServerMsg::Result {
@@ -864,16 +892,20 @@ impl Session {
                     Err(e) => vec![err_line(conn, Some(id), e)],
                 }
             }
-            ClientMsg::Subscribe { id, topic } => match self.subscribe(ci, &id, topic) {
-                Ok(()) => {
-                    let mut a = ack(id, AckStatus::Subscribed);
-                    if let ServerMsg::Ack { resolved: r, .. } = &mut a {
-                        *r = resolved;
+            ClientMsg::Subscribe { id, topic } => {
+                let (principal, lang) = (self.conns[ci].principal.clone(), self.lang_of(ci));
+                let r = self.as_reader(&principal, lang, |s| s.subscribe(ci, &id, topic));
+                match r {
+                    Ok(()) => {
+                        let mut a = ack(id, AckStatus::Subscribed);
+                        if let ServerMsg::Ack { resolved: r, .. } = &mut a {
+                            *r = resolved;
+                        }
+                        vec![out(conn, a)]
                     }
-                    vec![out(conn, a)]
+                    Err(e) => vec![err_line(conn, Some(id), e)],
                 }
-                Err(e) => vec![err_line(conn, Some(id), e)],
-            },
+            }
             ClientMsg::Unsubscribe { id, sub } => {
                 let c = &mut self.conns[ci];
                 if let Some(i) = c.subs.iter().position(|s| s.id == sub) {
@@ -891,7 +923,8 @@ impl Session {
                 if !permissions(self.conns[ci].role).read {
                     return vec![err_line(conn, Some(id), forbidden_read())];
                 }
-                match self.input(ci, &gesture) {
+                let (principal, lang) = (self.conns[ci].principal.clone(), self.lang_of(ci));
+                match self.as_reader(&principal, lang, |s| s.input(ci, &gesture)) {
                     Ok((data, mut events)) => {
                         let mut v = vec![out(
                             conn,
@@ -909,25 +942,29 @@ impl Session {
                     Err(e) => vec![err_line(conn, Some(id), e)],
                 }
             }
-            ClientMsg::Attend { id, directive } => match self.attend(ci, directive) {
-                Ok((did, mut events)) => {
-                    let mut v = vec![out(
-                        conn,
-                        ServerMsg::Ack {
-                            resolved,
-                            id,
-                            status: AckStatus::Delivered,
-                            seq: None,
-                            created: vec![did],
-                            proposal: None,
-                            undoes: None,
-                        },
-                    )];
-                    v.append(&mut events);
-                    v
+            ClientMsg::Attend { id, directive } => {
+                let (principal, lang) = (self.conns[ci].principal.clone(), self.lang_of(ci));
+                let r = self.as_reader(&principal, lang, |s| s.attend(ci, directive));
+                match r {
+                    Ok((did, mut events)) => {
+                        let mut v = vec![out(
+                            conn,
+                            ServerMsg::Ack {
+                                resolved,
+                                id,
+                                status: AckStatus::Delivered,
+                                seq: None,
+                                created: vec![did],
+                                proposal: None,
+                                undoes: None,
+                            },
+                        )];
+                        v.append(&mut events);
+                        v
+                    }
+                    Err(e) => vec![err_line(conn, Some(id), e)],
                 }
-                Err(e) => vec![err_line(conn, Some(id), e)],
-            },
+            }
             ClientMsg::Clock { now } => match self.tick(ci, now) {
                 Ok(lines) => lines,
                 Err(e) => vec![err_line(conn, None, e)],
@@ -1021,7 +1058,15 @@ impl Session {
             conn,
             ServerMsg::Welcome {
                 // Only principals that may read get the summary (a feed may not).
-                summary: permissions(p.role).read.then(|| self.summary_for(&p.id)),
+                summary: permissions(p.role).read.then(|| {
+                    let lang = self
+                        .conns
+                        .last()
+                        .and_then(|c| c.surface.lang)
+                        .unwrap_or_default();
+                    let pid = p.id.clone();
+                    self.as_reader(&pid, lang, |s| s.summary_for(&pid))
+                }),
                 protocol: PROTOCOL_VERSION.to_owned(),
                 doc: self.doc.id.clone(),
                 principal: p.id,
@@ -1140,6 +1185,38 @@ impl Session {
             .ok_or_else(|| E::new(ErrorCode::Handshake, "principal vanished").build())?;
         let seq = self.seq() + 1;
         let conn = self.conns[ci].id.clone();
+        // (R3, §20) A principal that may not see some engine items gets the errors the
+        // document it sees would give (no existence oracle): a dry run on it first.
+        if self.runner.is_some() && self.proj_for(&principal).is_some() {
+            let lang = self.lang_of(ci);
+            let author = author.clone();
+            let pr = principal.clone();
+            self.as_reader(&principal, lang, |s| {
+                let mut ctx = Ctx {
+                    author,
+                    approved_by: None,
+                    at: s.clock,
+                    seq,
+                    id_seq: seq,
+                    n: 0,
+                    created: Vec::new(),
+                    speaker: &pr,
+                    is_owner: role == Role::Owner,
+                    can_decide: perms.decide,
+                    log: &s.log,
+                    undoes: None,
+                    data: s.reader(),
+                    plane: &s.plane,
+                };
+                if ops
+                    .iter()
+                    .any(|o| matches!(o, Op::Undo { .. } | Op::AcceptProposal { .. }))
+                {
+                    return Ok(());
+                }
+                expand_ops(&s.doc, ops, "/ops", &mut ctx).map(|_| ())
+            })?;
+        }
 
         if direct {
             if self.incremental
@@ -1735,6 +1812,7 @@ impl Session {
         for s in entries {
             lines.extend(self.entry_events(s));
         }
+        lines.extend(self.run_capsules());
         lines.extend(self.view_events());
         lines.extend(conds);
         lines.extend(intents);
@@ -1816,6 +1894,7 @@ impl Session {
         for s in entries {
             lines.extend(self.entry_events(s));
         }
+        lines.extend(self.run_capsules());
         lines.extend(self.view_events());
         lines.extend(conds);
         lines.extend(intents);
@@ -2107,10 +2186,30 @@ impl Session {
         let e = &self.log[usize::try_from(seq - 1).unwrap_or(0)];
         let mut lines = Vec::new();
         let touched = touched_ids(&e.changes);
-        for c in &self.conns {
+        for (ci, c) in self.conns.iter().enumerate() {
+            // (R3, §20) What this subscriber may receive of the engine's items.
+            let proj = if c
+                .subs
+                .iter()
+                .any(|s| matches!(s.topic, Topic::Changes { .. }))
+            {
+                self.proj_for(&c.principal)
+            } else {
+                None
+            };
+            let projected = proj
+                .as_ref()
+                .map(|p| self.project_entry(e, p, self.lang_of(ci)));
+            let shown = projected.as_ref().unwrap_or(e);
             for s in &c.subs {
                 if let Topic::Changes { ids } = &s.topic {
                     if ids.is_empty() || ids.iter().any(|i| touched.contains(i)) {
+                        if proj.is_some() && !ids.is_empty() {
+                            let vis = touched_ids(&shown.changes);
+                            if !ids.iter().any(|i| vis.contains(i)) {
+                                continue;
+                            }
+                        }
                         lines.push(out(
                             &c.id,
                             ServerMsg::Notify {
@@ -2120,8 +2219,8 @@ impl Session {
                                     at: e.at,
                                     author: e.author.clone(),
                                     approved_by: e.approved_by.clone(),
-                                    cause: e.cause.clone(),
-                                    changes: e.changes.clone(),
+                                    cause: shown.cause.clone(),
+                                    changes: shown.changes.clone(),
                                     evidence: e.evidence.as_ref().map(|ev| {
                                         crate::claims::for_principal(
                                             &self.doc,
@@ -2153,6 +2252,12 @@ impl Session {
             for c in &self.conns {
                 for s in &c.subs {
                     if matches!(&s.topic, Topic::Finding { finding: f } if *f == finding) {
+                        if self
+                            .proj_for(&c.principal)
+                            .is_some_and(|p| p.hidden.contains(capsule))
+                        {
+                            continue;
+                        }
                         lines.push(out(
                             &c.id,
                             ServerMsg::Notify {
@@ -2272,7 +2377,8 @@ impl Session {
             | Topic::Proposals {}
             | Topic::Attention { principal: None }
             | Topic::Intents {}
-            | Topic::Claims {} => {}
+            | Topic::Claims {}
+            | Topic::Capsules { .. } => {}
         }
         self.conns[ci].subs.push(Sub {
             id: id.to_owned(),

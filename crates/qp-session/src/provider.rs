@@ -19,11 +19,27 @@ use crate::values::{bar_series, find_series, values, Cache};
 pub struct DocProvider<'a> {
     doc: &'a Document,
     cache: &'a Cache,
+    /// (R3) Finding id → the sentence written for this reader (language, entitlement),
+    /// used instead of the stored capsule headline.
+    headlines: Option<&'a std::collections::BTreeMap<String, String>>,
 }
 
 impl<'a> DocProvider<'a> {
     pub(crate) fn new(doc: &'a Document, cache: &'a Cache) -> Self {
-        Self { doc, cache }
+        Self {
+            doc,
+            cache,
+            headlines: None,
+        }
+    }
+
+    /// The same provider speaking with `headlines` (finding → sentence for the reader).
+    pub(crate) fn with_headlines(
+        mut self,
+        headlines: &'a std::collections::BTreeMap<String, String>,
+    ) -> Self {
+        self.headlines = Some(headlines);
+        self
     }
 }
 
@@ -117,6 +133,9 @@ impl DataProvider for DocProvider<'_> {
     }
 
     fn headline(&self, finding: &str) -> Option<String> {
+        if let Some(h) = self.headlines.and_then(|m| m.get(finding)) {
+            return Some(h.clone());
+        }
         self.doc
             .capsules
             .iter()
@@ -136,17 +155,18 @@ impl DataProvider for DocProvider<'_> {
             .map(Cow::Borrowed)
     }
 
-    /// R3 (minimal wiring, `docs/GRAMMAR.md` §18): the glyph of a capsule with a story,
-    /// by the grammar's rule ([`qp_grammar::depth::story_glyph`], equal to the engine's
-    /// `glyph_spec`) at the last bar of the story's bar series. When the session runs the
-    /// capsule engine itself, this is where the engine's own value goes.
+    /// R3 (`docs/GRAMMAR.md` §18, `docs/PROTOCOL.md` §20): the glyph of a capsule with a
+    /// story, by the capsule engine's own rule (`qp_capsule::glyph_spec`, confidence
+    /// shown from [`qp_grammar::depth::GLYPH_MIN_LEDGER_N`] closed rows on) at the last
+    /// bar of the story's bar series.
     fn glyph(&self, capsule_or_finding: &str) -> Option<Cow<'_, GlyphSpec>> {
         let c = self.capsule(capsule_or_finding)?;
         let story = c.story.as_ref()?;
         let n = self.bars(&story.series)?.len() as u64;
-        Some(Cow::Owned(qp_grammar::depth::story_glyph(
+        Some(Cow::Owned(qp_capsule::glyph_spec(
             story,
             n.saturating_sub(1),
+            qp_grammar::depth::GLYPH_MIN_LEDGER_N,
         )))
     }
 }

@@ -39,8 +39,9 @@ pub(crate) const THEME_TOKENS: [&str; 17] = [
 ];
 
 /// Channel names of [`qp_schema::grammar::Encoding`].
-pub(crate) const CHANNELS: [&str; 8] =
-    ["x", "y", "y2", "color", "opacity", "width", "size", "text"];
+pub(crate) const CHANNELS: [&str; 9] = [
+    "x", "x2", "y", "y2", "color", "opacity", "width", "size", "text",
+];
 
 /// Theme names.
 const THEMES: [&str; 2] = ["dark", "light"];
@@ -739,6 +740,23 @@ fn bound_fact_value(
     Ok(v.map(OriginValue::Value))
 }
 
+/// Whether origin `o` is an evidence value of a licensed fact (R3, K33): `bar`, `t` and
+/// geometry bars are not values of the licensed data.
+fn licensed_value(doc: &Document, o: &Origin) -> bool {
+    let Origin::Fact { fact, field } = o else {
+        return false;
+    };
+    field != "bar"
+        && field != "t"
+        && !field.starts_with("geometry.")
+        && doc.facts.iter().any(|f| {
+            &f.id == fact
+                && f.meaning
+                    .as_ref()
+                    .is_some_and(|m| m.license.class == qp_schema::capsule::LicenseClass::Licensed)
+        })
+}
+
 /// The value of an origin.
 fn origin_value(
     doc: &Document,
@@ -1033,6 +1051,13 @@ fn resolve_origins(
                 }
             }
             (OriginValue::Value(v), None) => {
+                // (R3, S-B §3) A licensed fact's evidence value is never written into a
+                // stored view: the position keeps its origin only and the compiler
+                // reads the value from the reader's provider (absent for a reader
+                // without the entitlement: the geometry is not drawn).
+                if licensed_value(doc, o) {
+                    continue;
+                }
                 if let Some(slot) = position_slot(l, k) {
                     *slot = Some(Position::Number(v));
                 }

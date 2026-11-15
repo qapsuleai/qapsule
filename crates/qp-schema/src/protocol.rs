@@ -15,6 +15,10 @@ use std::collections::BTreeMap;
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 
+use crate::capsule::{
+    Audience, Direction, EvidenceFamily, GlyphSpec, LedgerStat, LicenseClass, MeaningKind,
+    Sensitivity, Stage, Story, TimeKind, Transition, Trust,
+};
 use crate::data::{BindingState, DataBinding, DataEvent, DataPosition, EvidenceRef, FeedKey};
 use crate::grammar::{Layer, View};
 use crate::types::{
@@ -326,6 +330,20 @@ pub struct Surface {
     /// Upper bound on presentation depth the surface wants, below what its kind allows.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub max_depth: Option<Depth>,
+    /// (R3, §20) Language of capsule sentences for this connection; Turkish if absent.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub lang: Option<Language>,
+}
+
+/// Language of capsule sentences (R3, §20).
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default, Serialize, Deserialize, JsonSchema)]
+#[serde(rename_all = "snake_case")]
+pub enum Language {
+    /// Turkish (default).
+    #[default]
+    Tr,
+    /// English.
+    En,
 }
 
 /// The presentation profile the authority chose for a surface.
@@ -848,8 +866,8 @@ pub enum Op {
         #[serde(default)]
         #[schemars(with = "EncodingIn")]
         encoding: crate::grammar::Encoding,
-        /// Channel names to remove (`x`, `y`, `y2`, `color`, `opacity`, `width`,
-        /// `size`, `text`).
+        /// Channel names to remove (`x`, `x2`, `y`, `y2`, `color`, `opacity`,
+        /// `width`, `size`, `text`).
         #[serde(default, skip_serializing_if = "Vec::is_empty")]
         unset: Vec<String>,
         /// Origins to add or replace (JSON pointer inside the layer → origin).
@@ -1017,6 +1035,27 @@ pub enum Op {
         /// Optional note.
         #[serde(default, skip_serializing_if = "Option::is_none")]
         note: Option<String>,
+    },
+    /// (R3, §20) Set a person's capsule preferences: user group, sensitivity, watch list
+    /// and positions (replaces them as a whole). The speaker's own if `principal` is
+    /// absent; another person's only by an `owner`. Any principal that may read may set
+    /// its own. The system never writes it by itself (K31).
+    SetAudience {
+        /// Principal id; the speaker if absent.
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        principal: Option<String>,
+        /// The preferences.
+        audience: Audience,
+    },
+    /// (R3, §20) Set only the sensitivity level of a person (the speaker's own if
+    /// `principal` is absent); `null` returns to the group's default. A person without
+    /// preferences gets the `habituated` group.
+    SetSensitivity {
+        /// Principal id; the speaker if absent.
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        principal: Option<String>,
+        /// The level; `null` = the group's default.
+        sensitivity: Option<Sensitivity>,
     },
 }
 
@@ -1210,6 +1249,13 @@ pub enum ChangeOp {
         series: String,
         /// The bar.
         bar: Bar,
+    },
+    /// (R3) Set (or remove, `null`) a person's capsule preferences.
+    PutAudience {
+        /// Principal id.
+        principal: String,
+        /// The preferences; `null` removes them.
+        audience: Option<Audience>,
     },
 }
 
@@ -1464,6 +1510,207 @@ pub enum Query {
         #[schemars(with = "ItemRef")]
         item: String,
     },
+    /// (R3, §20) The capsules (stories) the asker may see, most important first
+    /// (importance descending, then latest transition, then id). Filters combine with
+    /// AND. Sentences are written for the asker (its language and data entitlement).
+    Capsules {
+        /// Only this instrument (symbol).
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        instrument: Option<String>,
+        /// Only these stages.
+        #[serde(default, skip_serializing_if = "Vec::is_empty")]
+        stages: Vec<Stage>,
+        /// `true`: only open stories; `false`: only closed ones.
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        open: Option<bool>,
+        /// Only this meaning kind.
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        meaning: Option<MeaningKind>,
+        /// Only stories with a transition at or after this bar.
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        since_bar: Option<u64>,
+        /// Only stories with a transition at or after this time (epoch ms).
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        since_t: Option<TimestampMs>,
+        /// Apply the asker's audience: watch list (and positions, intents) and
+        /// sensitivity, with the position/intent override (§9.8). Default false: every
+        /// story the asker may see.
+        #[serde(default, skip_serializing_if = "std::ops::Not::not")]
+        audience: bool,
+        /// Return at most this many.
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        limit: Option<u32>,
+    },
+    /// (R3, §20) One capsule opened to its evidence (K34): story history with
+    /// transitions and reasons, facts, sentences, ledger, glyph and, per fact, the
+    /// evidence values if the asker is entitled, otherwise the entitlement it requires
+    /// and what it rests on.
+    Capsule {
+        /// Capsule id, or its finding's id.
+        capsule: String,
+    },
+    /// (R3, §20) The ledger: closed capsules and realized ones per ledger key
+    /// (`kind/detector@version`), or summed per kind. Retracted capsules never count.
+    /// The ledger is license-independent (K33): every principal that may read gets it.
+    Ledger {
+        /// Only this ledger key.
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        key: Option<String>,
+        /// Only this meaning kind.
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        meaning: Option<MeaningKind>,
+        /// Only this detector.
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        detector: Option<String>,
+        /// Group rows per kind instead of per key.
+        #[serde(default, skip_serializing_if = "std::ops::Not::not")]
+        by_kind: bool,
+    },
+}
+
+/// Both sentences of a capsule for one reader (R3, §20).
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
+#[serde(deny_unknown_fields)]
+pub struct CapsuleSentence {
+    /// The sentence in the reader's language.
+    pub text: String,
+    /// Turkish.
+    pub tr: String,
+    /// English.
+    pub en: String,
+}
+
+/// One capsule as listed for a reader (R3, §20).
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
+#[serde(deny_unknown_fields)]
+pub struct CapsuleItem {
+    /// Capsule id.
+    pub id: String,
+    /// Finding id.
+    pub finding: String,
+    /// Instrument symbol.
+    pub instrument: String,
+    /// Bar series.
+    pub series: String,
+    /// Meaning kind.
+    pub kind: MeaningKind,
+    /// Direction.
+    pub direction: Direction,
+    /// Time kind.
+    pub time: TimeKind,
+    /// Story stage.
+    pub stage: Stage,
+    /// Capsule state.
+    pub state: CapsuleState,
+    /// Importance tier (1 most important).
+    pub tier: u8,
+    /// Importance score.
+    pub importance: f64,
+    /// Independent evidence families supporting it.
+    pub confirmations: u8,
+    /// Trust path.
+    pub trust: Trust,
+    /// Birth bar.
+    pub born_bar: u64,
+    /// Bar of the latest transition.
+    pub last_bar: u64,
+    /// Time of the latest transition.
+    pub t: TimestampMs,
+    /// Ledger of its key at birth (no look-ahead).
+    pub ledger_at_birth: LedgerStat,
+    /// The sentence as of the series' last closed bar, for this reader (K26).
+    pub sentence: CapsuleSentence,
+    /// About the reader's position or active intent (passes any sensitivity).
+    #[serde(default, skip_serializing_if = "std::ops::Not::not")]
+    pub relevant: bool,
+    /// The sentence carries no digits for this reader (K33).
+    #[serde(default, skip_serializing_if = "std::ops::Not::not")]
+    pub redacted: bool,
+}
+
+/// One fact's evidence as a reader may open it (R3, §20; K34).
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
+#[serde(deny_unknown_fields)]
+pub struct EvidenceAccess {
+    /// Fact id.
+    pub fact: String,
+    /// Evidence family.
+    pub family: EvidenceFamily,
+    /// License class of the data.
+    pub license: LicenseClass,
+    /// The reader may see the values.
+    pub open: bool,
+    /// The evidence values (only when `open`).
+    #[serde(default, skip_serializing_if = "BTreeMap::is_empty")]
+    pub values: BTreeMap<String, f64>,
+    /// The frozen evidence (only when `open`).
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub evidence_ref: Option<EvidenceRef>,
+    /// The data entitlement the values require (when not `open`).
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub requires: Option<String>,
+    /// What the evidence rests on, in words (always).
+    pub rests_on: String,
+}
+
+/// A capsule opened to its evidence (R3, §20).
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
+#[serde(deny_unknown_fields)]
+pub struct CapsuleDetail {
+    /// The capsule as listed.
+    pub item: CapsuleItem,
+    /// The story with every transition (bar, time, stage, reason, facts).
+    pub story: Story,
+    /// The facts as the reader may receive them.
+    pub facts: Vec<Fact>,
+    /// The ledger of its key now (closes before the series' last closed bar).
+    pub ledger: LedgerStat,
+    /// The glyph's parameters (engine `glyph_spec` at the last closed bar).
+    pub glyph: GlyphSpec,
+    /// Per fact: the evidence values or what they require (K34).
+    pub evidence: Vec<EvidenceAccess>,
+}
+
+/// One ledger row (R3, §20).
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
+#[serde(deny_unknown_fields)]
+pub struct LedgerRow {
+    /// Ledger key (`kind/detector@version`), or the kind when grouped by kind.
+    pub key: String,
+    /// Meaning kind.
+    pub kind: MeaningKind,
+    /// Detector (absent when grouped by kind).
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub detector: Option<String>,
+    /// Closed capsules (realized + invalidated + expired; never retracted).
+    pub n: u32,
+    /// Of which realized.
+    pub realized: u32,
+}
+
+/// A server-verified, digit-free comment on licensed data for a reader without the
+/// entitlement (R3, §20; the chosen trust path mühür, M6).
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
+#[serde(deny_unknown_fields)]
+pub struct ServerComment {
+    /// Instrument symbol.
+    pub instrument: String,
+    /// Bar series it belongs to.
+    pub series: String,
+    /// Bar index.
+    pub bar: u64,
+    /// Bar time.
+    pub t: TimestampMs,
+    /// Machine codes of what is said.
+    pub codes: Vec<String>,
+    /// Turkish.
+    pub tr: String,
+    /// English.
+    pub en: String,
+    /// Always `server` (K38).
+    pub trust: Trust,
+    /// What it requires and rests on, the rule and the receipt (no digits).
+    pub attachments: BTreeMap<String, String>,
 }
 
 /// One data binding and its state for the asker (§18.3).
@@ -1916,6 +2163,27 @@ pub enum QueryResult {
         /// The check.
         check: EvidenceCheck,
     },
+    /// Answer to `capsules` (R3, §20).
+    Capsules {
+        /// The capsules, most important first.
+        capsules: Vec<CapsuleItem>,
+        /// For a reader without the licensed data entitlement: the server comments on
+        /// that data (instead of the licensed stories).
+        #[serde(default, skip_serializing_if = "Vec::is_empty")]
+        comments: Vec<ServerComment>,
+    },
+    /// Answer to `capsule` (R3, §20).
+    CapsuleDetail {
+        /// The capsule opened to its evidence.
+        detail: Box<CapsuleDetail>,
+    },
+    /// Answer to `ledger` (R3, §20).
+    Ledger {
+        /// Rows, by key (or kind).
+        rows: Vec<LedgerRow>,
+        /// Sum over the rows.
+        total: LedgerStat,
+    },
     /// Answer to a `dispute` message (R3, §19.9).
     Dispute {
         /// The verdict so far.
@@ -2005,6 +2273,18 @@ pub enum Topic {
     /// condition subscriptions, as they are asserted (provisional), become final at the
     /// bar's close, are withdrawn, or change cleanliness. The topic a replica listens to.
     Claims {},
+    /// (R3, §20) Capsule story transitions for the subscriber: filtered by its audience
+    /// (watch list, sensitivity; stories about its positions and active intents always
+    /// pass) unless `all`; licensed stories reach a subscriber without the entitlement
+    /// only as server comments (`trust: server`).
+    Capsules {
+        /// Only this instrument.
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        instrument: Option<String>,
+        /// Every story the subscriber may see, without the audience filter.
+        #[serde(default, skip_serializing_if = "std::ops::Not::not")]
+        all: bool,
+    },
 }
 
 /// A pushed event.
@@ -2127,6 +2407,23 @@ pub enum Event {
         /// (R3, §19.9) Why, when the step comes from settled data or a dispute.
         #[serde(default, skip_serializing_if = "Option::is_none")]
         reason: Option<ClaimReason>,
+    },
+    /// (R3, §20) A capsule story transition (topic `capsules`).
+    Capsule {
+        /// The capsule as listed for the subscriber after the transition.
+        capsule: Box<CapsuleItem>,
+        /// The transition.
+        transition: Transition,
+        /// Log position of the engine entry.
+        seq: Seq,
+    },
+    /// (R3, §20) A server comment on licensed data (topic `capsules`, subscribers without
+    /// the entitlement).
+    ServerComment {
+        /// The comment.
+        comment: ServerComment,
+        /// Log position it was made at.
+        seq: Seq,
     },
 }
 
@@ -2635,6 +2932,36 @@ pub struct SessionInit {
     /// a test source provider (`docs/PROTOCOL.md` §18.6).
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub data: Option<InitData>,
+    /// (R3, §20) The capsule engine the authority runs: on which bar series, with which
+    /// licensed flow. Absent: no engine (documents and transcripts before R3).
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub capsules: Option<CapsuleInit>,
+}
+
+/// The authority's capsule engine (R3, §20; host configuration).
+#[derive(Debug, Clone, Default, PartialEq, Serialize, Deserialize, JsonSchema)]
+#[serde(deny_unknown_fields)]
+pub struct CapsuleInit {
+    /// Bar series (bound or inline, with an instrument symbol) the detectors and the
+    /// capsule engine run on, at every bar that becomes final.
+    pub series: Vec<String>,
+    /// Licensed flow feeds the authority alone reads (server facts).
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub flow: Vec<FlowInit>,
+}
+
+/// A licensed flow feed of the test host (R3, §20): `qp_source::synthetic_flow` over the
+/// bars of a watched series.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
+#[serde(deny_unknown_fields)]
+pub struct FlowInit {
+    /// The watched bar series the flow follows (one record per bar).
+    pub series: String,
+    /// Seed of the synthetic flow.
+    pub seed: u64,
+    /// Feed name; entitlement `feed/SYMBOL` (default `flow`).
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub feed: Option<String>,
 }
 
 /// Test data plane of a session init (RP2): the feeds a test source provider serves and

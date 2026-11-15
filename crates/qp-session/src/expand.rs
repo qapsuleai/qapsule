@@ -1032,6 +1032,51 @@ pub(crate) fn expand_op(
             }])
         }
         Op::Undo { seq } => expand_undo(doc, *seq, p, ctx),
+        Op::SetAudience {
+            principal,
+            audience,
+        } => {
+            let who = audience_target(principal.as_deref(), p, ctx)?;
+            for (sym, q) in &audience.positions {
+                if !q.is_finite() {
+                    return Err(invalid(
+                        format!("position of `{sym}` must be a finite number"),
+                        ptr(&ptr(&ptr(p, "audience"), "positions"), sym),
+                    ));
+                }
+            }
+            if let Some(i) = audience.watchlist.iter().position(String::is_empty) {
+                return Err(invalid(
+                    "a watch-list symbol must not be empty",
+                    ptr(&ptr(&ptr(p, "audience"), "watchlist"), i),
+                ));
+            }
+            Ok(vec![ChangeOp::PutAudience {
+                principal: who,
+                audience: Some(audience.clone()),
+            }])
+        }
+        Op::SetSensitivity {
+            principal,
+            sensitivity,
+        } => {
+            let who = audience_target(principal.as_deref(), p, ctx)?;
+            let mut a = doc
+                .audiences
+                .get(&who)
+                .cloned()
+                .unwrap_or(qp_schema::capsule::Audience {
+                    group: qp_schema::capsule::UserGroup::Habituated,
+                    sensitivity: None,
+                    watchlist: Vec::new(),
+                    positions: BTreeMap::new(),
+                });
+            a.sensitivity = *sensitivity;
+            Ok(vec![ChangeOp::PutAudience {
+                principal: who,
+                audience: Some(a),
+            }])
+        }
         Op::InsertLayer { .. }
         | Op::DeleteLayer { .. }
         | Op::SplitLayer { .. }
@@ -1974,6 +2019,26 @@ pub(crate) struct Expanded {
     pub origin: Vec<usize>,
 }
 
+/// The principal an audience op writes for (R3, §20): the speaker, or another person
+/// for an `owner` only.
+fn audience_target(principal: Option<&str>, p: &str, ctx: &Ctx<'_>) -> PResult<String> {
+    match principal {
+        None => Ok(ctx.speaker.to_owned()),
+        Some(w) if w == ctx.speaker => Ok(w.to_owned()),
+        Some(w) if ctx.is_owner => {
+            check_id(w, &ptr(p, "principal"))?;
+            Ok(w.to_owned())
+        }
+        Some(w) => Err(E::new(
+            ErrorCode::Forbidden,
+            format!("only an owner sets the capsule preferences of another person (`{w}`)"),
+        )
+        .at(ptr(p, "principal"))
+        .hint("Leave `principal` out to set your own.")
+        .build()),
+    }
+}
+
 /// Short deterministic summary of one op.
 pub(crate) fn summarize(op: &Op) -> String {
     fn params(p: &BTreeMap<String, f64>) -> String {
@@ -2038,6 +2103,24 @@ pub(crate) fn summarize(op: &Op) -> String {
         Op::SetScale { view, scale, .. } => format!("set_scale {view} {scale}"),
         Op::SetEmphasis { view, emphasis } => {
             format!("set_emphasis {view} ({})", emphasis.len())
+        }
+        Op::SetAudience { principal, .. } => match principal {
+            Some(w) => format!("set_audience {w}"),
+            None => "set_audience".to_owned(),
+        },
+        Op::SetSensitivity {
+            principal,
+            sensitivity,
+        } => {
+            let level = sensitivity.map_or("default", |s| match s {
+                qp_schema::capsule::Sensitivity::Important => "important",
+                qp_schema::capsule::Sensitivity::Balanced => "balanced",
+                qp_schema::capsule::Sensitivity::All => "all",
+            });
+            match principal {
+                Some(w) => format!("set_sensitivity {w} {level}"),
+                None => format!("set_sensitivity {level}"),
+            }
         }
     }
 }

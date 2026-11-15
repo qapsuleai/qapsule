@@ -1,0 +1,18 @@
+# R3 son denetim düzeneği (bağımsız denetçi). Çalışma alanının üyesi değildir.
+# Derleme: CARGO_TARGET_DIR=<geçici> cargo run --release --manifest-path rounds/R3/audit/Cargo.toml --bin <ad>
+[package]
+name = "r3-audit"
+version = "0.0.0"
+edition = "2021"
+publish = false
+
+[workspace]
+
+[dependencies]
+qp-schema = { path = "../../../crates/qp-schema" }
+qp-source = { path = "../../../crates/qp-source" }
+qp-facts = { path = "../../../crates/qp-facts" }
+qp-capsule = { path = "../../../crates/qp-capsule" }
+serde_json = { version = "1.0.154", features = ["float_roundtrip"] }
+serde = "1"
+qp-session = { path = "../../../crates/qp-session" }

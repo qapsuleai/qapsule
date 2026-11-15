@@ -43,9 +43,20 @@ pub(crate) struct Ctx<'a> {
     /// The data plane, when the document has bound series (§18): bound bars for
     /// `add_fact` / `set_view_range`, the speaker's entitlement for `add_fact`.
     pub data: Option<crate::plane::Reader<'a>>,
+    /// The data plane, always: the speaker's data entitlement for conditions on bound
+    /// series (§18.3) and the session's `max_bind_bars` (§18.7).
+    pub plane: &'a crate::plane::DataPlane,
 }
 
-impl Ctx<'_> {
+impl<'a> Ctx<'a> {
+    /// Bound data for origins of constants (§18.3), read as the speaker.
+    pub(crate) fn reads(&self) -> Option<crate::canon::Reads<'a>> {
+        self.data.map(|reader| crate::canon::Reads {
+            reader,
+            writer: self.speaker,
+        })
+    }
+
     fn prov(&self, based_on: Vec<String>) -> Provenance {
         Provenance {
             author: self.author.clone(),
@@ -400,7 +411,9 @@ pub(crate) fn expand_op(
                         output: output.clone(),
                     };
                 }
-                SeriesSource::Bind { .. } => check_bind(doc, series, &sp)?,
+                SeriesSource::Bind { .. } => {
+                    check_bind(doc, series, &sp, ctx.plane.max_bind_bars)?;
+                }
                 SeriesSource::File { .. }
                 | SeriesSource::Matriks { .. }
                 | SeriesSource::Nats { .. } => {
@@ -477,7 +490,7 @@ pub(crate) fn expand_op(
                 let mut layer = Layer::new(Mark::Line, panel);
                 layer.series = Some(sid);
                 let index = v.layers.len();
-                let l = new_layer(&scratch, &v, &layer, index, &ptr(p, "show"))?;
+                let l = new_layer(&scratch, &v, &layer, index, &ptr(p, "show"), ctx.reads())?;
                 out.push(ChangeOp::InsertLayer {
                     view: v.id.clone(),
                     index: u32::try_from(index).unwrap_or(u32::MAX),
@@ -553,7 +566,7 @@ pub(crate) fn expand_op(
                     .build())
                 }
             }
-            let canonical = canon_view(doc, view, &vp)?;
+            let canonical = canon_view(doc, view, &vp, ctx.reads())?;
             if !doc.views.iter().any(|v| v.id == view.id) {
                 ctx.note_created(&view.id);
             }
@@ -576,7 +589,7 @@ pub(crate) fn expand_op(
                 }
             }
             let at = index.map_or(v.layers.len(), |i| i as usize);
-            let l = new_layer(doc, v, layer, at, &ptr(p, "layer"))?;
+            let l = new_layer(doc, v, layer, at, &ptr(p, "layer"), ctx.reads())?;
             Ok(vec![ChangeOp::InsertLayer {
                 view: view.clone(),
                 index: u32::try_from(at).unwrap_or(u32::MAX),
@@ -681,6 +694,7 @@ pub(crate) fn expand_op(
                 ));
             }
             let t = b.t;
+            check_evidence_values(doc, ctx, series, *bar, evidence, p)?;
             // Frozen evidence (§18.5): bars 0..=bar of the bar series, by digest.
             let evidence_ref = Some(crate::plane::evidence_ref(
                 bs,
@@ -727,6 +741,7 @@ pub(crate) fn expand_op(
             }
             check_confidence(*confidence, &ptr(p, "confidence"))?;
             check_condition(doc, invalidation, &ptr(p, "invalidation"))?;
+            cond_entitled(doc, ctx, invalidation, &ptr(p, "invalidation"))?;
             let fid = ctx.new_id(doc, "fnd", id.as_ref(), &ptr(p, "id"))?;
             let finding = Finding {
                 id: fid.clone(),
@@ -783,6 +798,7 @@ pub(crate) fn expand_op(
             }
             if let Some(c) = invalidation {
                 check_condition(doc, c, &ptr(p, "invalidation"))?;
+                cond_entitled(doc, ctx, c, &ptr(p, "invalidation"))?;
                 nf.invalidation = c.clone();
             }
             Ok(vec![ChangeOp::PutFinding {
@@ -820,6 +836,7 @@ pub(crate) fn expand_op(
         Op::AddIntent { id, text, trigger } => {
             if let Some(t) = trigger {
                 check_condition(doc, t, &ptr(p, "trigger"))?;
+                cond_entitled(doc, ctx, t, &ptr(p, "trigger"))?;
             }
             let iid = ctx.new_id(doc, "intent", id.as_ref(), &ptr(p, "id"))?;
             Ok(vec![ChangeOp::PutIntent {
@@ -922,7 +939,7 @@ pub(crate) fn expand_op(
             };
             let built = crate::present::presenter_view(doc, f, &vid)
                 .map_err(|m| invalid(m, ptr(p, "finding")))?;
-            let built = canon_view(doc, &built, &ptr(p, "finding"))?;
+            let built = canon_view(doc, &built, &ptr(p, "finding"), ctx.reads())?;
             let mut out = vec![ChangeOp::PutView {
                 view: built,
                 index: None,
@@ -1084,6 +1101,121 @@ fn check_confidence(c: f64, path: &str) -> PResult<()> {
     }
 }
 
+/// The engine says the number (§18.5): on a study series, the evidence values `value`
+/// and `prev` given by the client must be bit-equal to the study's main output at the
+/// fact's bar and at the bar before it; otherwise `invalid` with the engine's value in
+/// `expected`.
+fn check_evidence_values(
+    doc: &Document,
+    ctx: &Ctx<'_>,
+    series: &str,
+    bar: u64,
+    evidence: &BTreeMap<String, f64>,
+    p: &str,
+) -> PResult<()> {
+    if !evidence.contains_key("value") && !evidence.contains_key("prev") {
+        return Ok(());
+    }
+    let Some(s) = find_series(doc, series) else {
+        return Ok(());
+    };
+    if !matches!(s.source, SeriesSource::Study { .. }) {
+        return Ok(());
+    }
+    // Inline bars are in `doc`; bound bars in the reading document (as of the command's
+    // start: a study put earlier in the same command over a bound series is not there,
+    // and is not checked).
+    let bound = crate::plane::bar_root(doc, series).is_some_and(|r| r.bars().is_none());
+    let src = if bound {
+        match &ctx.data {
+            Some(r) if find_series(r.rd, series).is_some_and(|x| x.source == s.source) => r.rd,
+            _ => return Ok(()),
+        }
+    } else {
+        doc
+    };
+    let Ok(v) = crate::values::values(src, &mut crate::values::Cache::default(), series) else {
+        return Ok(());
+    };
+    let main = v.main_values();
+    let i = usize::try_from(bar).unwrap_or(usize::MAX);
+    for (key, back) in [("value", 0usize), ("prev", 1usize)] {
+        let Some(given) = evidence.get(key).copied() else {
+            continue;
+        };
+        let at = i.checked_sub(back);
+        let engine = at.and_then(|j| main.get(j).copied().flatten());
+        let kp = ptr(&ptr(p, "evidence"), key);
+        match engine {
+            Some(n) if n.to_bits() == given.to_bits() => {}
+            Some(n) => {
+                return Err(E::new(
+                    ErrorCode::Invalid,
+                    format!(
+                        "evidence `{key}` {} is not the engine's value of `{series}` at bar {}: {}",
+                        num(given),
+                        at.unwrap_or(0),
+                        num(n)
+                    ),
+                )
+                .at(kp)
+                .expected([num(n)])
+                .hint("The engine says the number: write its value (query `study` or `at`), or omit the key.")
+                .build());
+            }
+            None => {
+                return Err(E::new(
+                    ErrorCode::Invalid,
+                    match at {
+                        Some(j) => format!(
+                            "evidence `{key}`: `{series}` has no value at bar {j} (warm-up)"
+                        ),
+                        None => format!("evidence `{key}`: bar {bar} has no previous bar"),
+                    },
+                )
+                .at(kp)
+                .hint("Omit the key: the engine has no number for it.")
+                .build());
+            }
+        }
+    }
+    Ok(())
+}
+
+/// A condition evaluated on bound data (a finding's invalidation, an intent's trigger)
+/// tells its outcome to whoever wrote it: the writer needs the data entitlement of every
+/// bound feed the condition reads, through study inputs (§18.3); otherwise
+/// `no_entitlement` at the series path.
+pub(crate) fn cond_entitled(
+    doc: &Document,
+    ctx: &Ctx<'_>,
+    c: &Condition,
+    path: &str,
+) -> PResult<()> {
+    condition_entitled(ctx.plane, doc, ctx.speaker, c, path)
+}
+
+/// [`cond_entitled`] for `principal` (also the `condition` subscription, §18.3).
+pub(crate) fn condition_entitled(
+    plane: &crate::plane::DataPlane,
+    doc: &Document,
+    principal: &str,
+    c: &Condition,
+    path: &str,
+) -> PResult<()> {
+    for (field, s) in condition_series(c) {
+        if let Some(b) = plane.unentitled(doc, principal, s) {
+            let mut e = b.error(s, &ptr(path, field));
+            e.hint = Some(
+                "A condition on bound data would tell you its values through its outcome; the data licence of this feed does not cover you. Ask the host for an entitlement."
+                    .to_owned(),
+            );
+            return Err(e);
+        }
+    }
+    Ok(())
+}
+
 /// `append_bars` / `update_last_bar` are for inline series (§18.2).
 fn bound_no_bar_writes(s: &Series, path: &str) -> PResult<()> {
     if matches!(s.source, SeriesSource::Bind { .. }) {
@@ -1119,7 +1251,7 @@ fn canonical_interval(s: &str) -> Option<String> {
 }
 
 /// Validates a bound series of `put_series` (§18.2, §18.7).
-fn check_bind(doc: &Document, series: &Series, sp: &str) -> PResult<()> {
+fn check_bind(doc: &Document, series: &Series, sp: &str, max_bind_bars: u32) -> PResult<()> {
     let SeriesSource::Bind {
         symbol,
         interval,
@@ -1165,9 +1297,8 @@ fn check_bind(doc: &Document, series: &Series, sp: &str) -> PResult<()> {
         .suggest([c])
         .build());
     }
-    let max = crate::session::default_limits().max_bind_bars;
     window
-        .validate(max)
+        .validate(max_bind_bars)
         .map_err(|m| invalid(m, ptr(&src, "window")))?;
     if series.data.is_some() {
         return Err(invalid(
@@ -1470,6 +1601,36 @@ fn has_decision(e: &LogEntry) -> bool {
     })
 }
 
+/// The bound series an engine entry anchors, if it is an anchor stamp (§18.3): author
+/// `qp`, every change a `put_series` of a bound series with `anchor_t` whose inverse is
+/// the same series without it.
+fn anchor_stamps(e: &LogEntry) -> Option<Vec<&str>> {
+    if e.author != crate::session::ENGINE_PRINCIPAL || e.changes.is_empty() {
+        return None;
+    }
+    let mut ids = Vec::new();
+    for c in &e.changes {
+        let ChangeOp::PutSeries { series, .. } = c else {
+            return None;
+        };
+        let SeriesSource::Bind {
+            anchor_t: Some(_), ..
+        } = &series.source
+        else {
+            return None;
+        };
+        let unstamped = e.inverse.iter().any(|i| {
+            matches!(i, ChangeOp::PutSeries { series: o, .. } if o.id == series.id
+                && matches!(o.source, SeriesSource::Bind { anchor_t: None, .. }))
+        });
+        if !unstamped {
+            return None;
+        }
+        ids.push(series.id.as_str());
+    }
+    Some(ids)
+}
+
 fn expand_undo(
     doc: &Document,
     seq: Option<Seq>,
@@ -1552,6 +1713,33 @@ fn expand_undo(
         .hint("Ask a principal who may decide.")
         .build());
     }
+    if let Some(ids) = anchor_stamps(target) {
+        return Err(E::new(
+            ErrorCode::UndoConflict,
+            format!(
+                "entry {} is the authority's anchor stamp of bound series {}: an anchor is reset only by a command that rewrites the binding (§18.3), never by undo",
+                target.seq,
+                ids.iter().map(|i| format!("`{i}`")).collect::<Vec<_>>().join(", ")
+            ),
+        )
+        .at(p)
+        .hint("Rewrite the binding with put_series (window, symbol or feed), or undo the entry that put it; the bar numbers of facts and views rest on the anchor.")
+        .build());
+    }
+    // Bindings the target put or rewrote: their anchor stamp (the engine entry right
+    // behind) goes with the undo, so it does not block it (§18.3).
+    let put: BTreeMap<&str, qp_schema::data::DataBinding> = target
+        .changes
+        .iter()
+        .filter_map(|c| match c {
+            ChangeOp::PutSeries { series, .. } => match &series.source {
+                SeriesSource::Bind { .. } => Some(series),
+                _ => None,
+            },
+            _ => None,
+        })
+        .filter_map(|s| Some((s.id.as_str(), crate::plane::binding_of(s)?)))
+        .collect();
     let touched = touched_keys(&target.changes);
     let mut conflicts = Vec::new();
     let mut by = String::new();
@@ -1562,7 +1750,20 @@ fn expand_undo(
         if undone.contains(&e.seq) || e.undoes.is_some() {
             continue;
         }
-        let t = touched_keys(&e.changes);
+        let mut t = touched_keys(&e.changes);
+        if !put.is_empty() && anchor_stamps(e).is_some() {
+            for c in &e.changes {
+                if let ChangeOp::PutSeries { series, .. } = c {
+                    let stamps_put = put.get(series.id.as_str()).is_some_and(|b| {
+                        crate::plane::binding_of(series)
+                            .is_some_and(|s| crate::plane::same_but_anchor(&s, b))
+                    });
+                    if stamps_put {
+                        t.remove(&series.id);
+                    }
+                }
+            }
+        }
         if let Some(id) = first_overlap(&t, &touched) {
             if by.is_empty() {
                 by = format!("`{id}` changed at seq {} by {}", e.seq, e.author);

@@ -121,6 +121,7 @@ pub(crate) fn new_layer(
     layer: &Layer,
     index: usize,
     base: &str,
+    reads: Option<crate::canon::Reads<'_>>,
 ) -> PResult<Layer> {
     limit_layers(view, 1, base)?;
     let mut l = layer.clone();
@@ -130,7 +131,15 @@ pub(crate) fn new_layer(
     }
     let mut nv = view.clone();
     nv.layers.insert(index, l.clone());
-    check_layer(doc, &mut l, &Site { view: &nv, base })?;
+    check_layer(
+        doc,
+        &mut l,
+        &Site {
+            view: &nv,
+            base,
+            reads,
+        },
+    )?;
     Ok(l)
 }
 
@@ -163,7 +172,7 @@ pub(crate) fn expand_grammar(
             }
             let ids: Vec<&str> = v.layers.iter().filter_map(|l| l.id.as_deref()).collect();
             let index = place(&ids, after.as_deref(), before.as_deref(), None, p)?;
-            let l = new_layer(doc, v, layer, index, &ptr(p, "layer"))?;
+            let l = new_layer(doc, v, layer, index, &ptr(p, "layer"), ctx.reads())?;
             ctx.created.push(layer_id(&l));
             Ok(vec![ChangeOp::InsertLayer {
                 view: view.clone(),
@@ -224,7 +233,7 @@ pub(crate) fn expand_grammar(
                 l.id = Some(id.clone());
                 l.encoding.y = Some(qp_schema::grammar::Position::Name(o.clone()));
                 let index = i + k;
-                let l = new_layer(doc, &nv, &l, index, &lp)?;
+                let l = new_layer(doc, &nv, &l, index, &lp, ctx.reads())?;
                 nv.layers.insert(index, l.clone());
                 ctx.created.push(id);
                 out.push(ChangeOp::InsertLayer {
@@ -279,7 +288,15 @@ pub(crate) fn expand_grammar(
             let mut nv = v.clone();
             nv.layers = rest;
             nv.layers.insert(index, l.clone());
-            check_layer(doc, &mut l, &Site { view: &nv, base: p })?;
+            check_layer(
+                doc,
+                &mut l,
+                &Site {
+                    view: &nv,
+                    base: p,
+                    reads: ctx.reads(),
+                },
+            )?;
             Ok(vec![ChangeOp::PutLayer {
                 view: view.clone(),
                 index: u32_of(index),
@@ -391,7 +408,15 @@ pub(crate) fn expand_grammar(
             }
             let mut nv = v.clone();
             nv.layers[i] = l.clone();
-            check_layer(doc, &mut l, &Site { view: &nv, base: p })?;
+            check_layer(
+                doc,
+                &mut l,
+                &Site {
+                    view: &nv,
+                    base: p,
+                    reads: ctx.reads(),
+                },
+            )?;
             Ok(vec![ChangeOp::PutLayer {
                 view: view.clone(),
                 index: u32_of(i),
@@ -462,6 +487,7 @@ pub(crate) fn expand_grammar(
                     &Site {
                         view: &nv,
                         base: &ptr(&lbase, k),
+                        reads: ctx.reads(),
                     },
                 )?;
             }

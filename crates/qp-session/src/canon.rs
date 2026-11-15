@@ -485,6 +485,29 @@ fn positive(v: f64, what: &str, path: &str) -> PResult<()> {
 pub(crate) struct Site<'a> {
     pub view: &'a View,
     pub base: &'a str,
+    /// Bound data for origins, when a command writes (absent on load).
+    pub reads: Option<Reads<'a>>,
+}
+
+/// What a writing command may read for an origin (§18.3): the `value` of a fact on a
+/// bound series comes from the reading document, if the writer is entitled to it.
+#[derive(Clone, Copy)]
+pub(crate) struct Reads<'a> {
+    /// The data plane's reader.
+    pub reader: crate::plane::Reader<'a>,
+    /// The principal who writes.
+    pub writer: &'a str,
+}
+
+/// The value of an origin, as far as the authority can tell.
+enum OriginValue {
+    /// A live `series` origin: no constant.
+    Live,
+    /// The origin's value.
+    Value(f64),
+    /// The `value` of a fact on a bound series, with no data at hand (loading a
+    /// document): the written constant is kept.
+    Unknown,
 }
 
 impl Site<'_> {
@@ -682,13 +705,54 @@ fn check_channels(
     Ok(consts)
 }
 
-/// The value of an origin (`None` for a live `series` origin).
-fn origin_value(doc: &Document, o: &Origin, path: &str) -> PResult<Option<f64>> {
+/// The `value` of fact `f` when its series rests on a bound series (bars not in the
+/// document): from the reading document, gated by the writer's entitlement (§18.3).
+/// `Ok(None)`: not a bound fact, or not computable (the caller says why).
+fn bound_fact_value(
+    doc: &Document,
+    f: &Fact,
+    reads: Option<Reads<'_>>,
+    path: &str,
+) -> PResult<Option<OriginValue>> {
+    let bound = crate::plane::bar_root(doc, &f.series)
+        .is_some_and(|r| r.bars().is_none() && matches!(r.source, SeriesSource::Bind { .. }));
+    if !bound {
+        return Ok(None);
+    }
+    let Some(r) = reads else {
+        return Ok(Some(OriginValue::Unknown));
+    };
+    if let Some(b) = r.reader.plane.gate(doc, Some(r.writer), &f.series) {
+        return Err(b.error(&f.series, &ptr(path, "fact")));
+    }
+    let v = values(r.reader.rd, &mut Cache::default(), &f.series)
+        .ok()
+        .and_then(|v| {
+            v.main_values()
+                .get(usize::try_from(f.bar).ok()?)
+                .copied()
+                .flatten()
+        });
+    Ok(v.map(OriginValue::Value))
+}
+
+/// The value of an origin.
+fn origin_value(
+    doc: &Document,
+    o: &Origin,
+    path: &str,
+    reads: Option<Reads<'_>>,
+) -> PResult<OriginValue> {
     match o {
         Origin::Fact { fact, field } => {
             let f = need_fact(doc, fact, &ptr(path, "fact"))?;
+            if field == "value" && !f.evidence.contains_key("value") {
+                if let Some(v) = bound_fact_value(doc, f, reads, path)? {
+                    return Ok(v);
+                }
+            }
             match fact_value(doc, f, field) {
-                Some(v) => Ok(Some(v)),
+                Some(v) => Ok(OriginValue::Value(v)),
                 None => {
                     let mut ok: Vec<String> = vec!["bar".to_owned(), "t".to_owned()];
                     ok.extend(f.evidence.keys().cloned());
@@ -706,7 +770,7 @@ fn origin_value(doc: &Document, o: &Origin, path: &str) -> PResult<Option<f64>> 
                 }
             }
         }
-        Origin::Threshold { name } => threshold(name).map(Some).ok_or_else(|| {
+        Origin::Threshold { name } => threshold(name).map(OriginValue::Value).ok_or_else(|| {
             E::new(ErrorCode::NotFound, format!("no named threshold `{name}`"))
                 .at(ptr(path, "name"))
                 .dym(name, THRESHOLDS.iter().map(|(n, _)| *n))
@@ -719,7 +783,7 @@ fn origin_value(doc: &Document, o: &Origin, path: &str) -> PResult<Option<f64>> 
             if let Some(f) = field {
                 check_field(doc, Data::Series(s), f, &ptr(path, "field"))?;
             }
-            Ok(None)
+            Ok(OriginValue::Live)
         }
     }
 }
@@ -896,7 +960,7 @@ fn resolve_origins(
             .expected(slots.clone())
             .build());
         }
-        let value = origin_value(doc, o, &op)?;
+        let value = origin_value(doc, o, &op, site.reads)?;
         let literal = consts.iter().find(|(p, _)| p == k).map(|(_, v)| *v);
         let is_position = position_slot(l, k).is_some();
         if is_position {
@@ -913,7 +977,19 @@ fn resolve_origins(
             }
         }
         match (value, literal) {
-            (None, Some(_)) => {
+            (OriginValue::Unknown, Some(_)) => {}
+            (OriginValue::Unknown, None) => {
+                return Err(E::new(
+                    ErrorCode::Invalid,
+                    format!(
+                        "`{}` rests on bound data the authority cannot read here: write the constant at `{k}`",
+                        origin_label(o)
+                    ),
+                )
+                .at(site.at(k))
+                .build())
+            }
+            (OriginValue::Live, Some(_)) => {
                 return Err(E::new(
                     ErrorCode::Invalid,
                     format!("a `series` origin is live: do not write a constant at `{k}`"),
@@ -922,7 +998,7 @@ fn resolve_origins(
                 .hint("Remove the constant, or bind it to a fact or a named threshold.")
                 .build())
             }
-            (None, None) => {
+            (OriginValue::Live, None) => {
                 if !is_position {
                     return Err(E::new(
                         ErrorCode::Invalid,
@@ -933,7 +1009,7 @@ fn resolve_origins(
                     .build());
                 }
             }
-            (Some(v), Some(lit)) => {
+            (OriginValue::Value(v), Some(lit)) => {
                 if v.to_bits() != lit.to_bits() {
                     return Err(E::new(
                         ErrorCode::Invalid,
@@ -950,7 +1026,7 @@ fn resolve_origins(
                     .build());
                 }
             }
-            (Some(v), None) => {
+            (OriginValue::Value(v), None) => {
                 if let Some(slot) = position_slot(l, k) {
                     *slot = Some(Position::Number(v));
                 }
@@ -1158,7 +1234,12 @@ pub(crate) fn check_emphasis(
 /// `panels`, panel and scale ids, layer ids, origins of constants, references. `base` is
 /// the JSON pointer of the view in the incoming message (or document).
 #[allow(clippy::too_many_lines)]
-pub(crate) fn canon_view(doc: &Document, view: &View, base: &str) -> PResult<View> {
+pub(crate) fn canon_view(
+    doc: &Document,
+    view: &View,
+    base: &str,
+    reads: Option<Reads<'_>>,
+) -> PResult<View> {
     let mut v = view.clone();
     if let Some(t) = &v.theme {
         if !THEMES.contains(&t.as_str()) {
@@ -1320,6 +1401,7 @@ pub(crate) fn canon_view(doc: &Document, view: &View, base: &str) -> PResult<Vie
             &Site {
                 view: &v,
                 base: &lp,
+                reads,
             },
         )?;
         v.layers[j] = l;
@@ -1337,7 +1419,7 @@ pub(crate) fn canon_view(doc: &Document, view: &View, base: &str) -> PResult<Vie
 pub fn canon_document(doc: &Document) -> Result<Document, String> {
     let mut out = doc.clone();
     for i in 0..doc.views.len() {
-        let v = canon_view(doc, &doc.views[i], &format!("/views/{i}")).map_err(|e| {
+        let v = canon_view(doc, &doc.views[i], &format!("/views/{i}"), None).map_err(|e| {
             format!(
                 "document `{}` is not valid: {} ({:?}) at {}",
                 doc.id,

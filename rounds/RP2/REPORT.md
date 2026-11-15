@@ -84,7 +84,7 @@ hesapları tam sütunla ilerletmesi + aynı mesajı çözmesi**. Oran = (oturum 
 | Altın görseller | değişmedi (8 görünüm × 2 bayt-eşit; tarayıcı 0 px) |
 | Bağlı anlık görüntü (10k bar) | 2.744 B / 985 B gzip |
 | Veri olayı uygulama (`FeedStore`) | 23,6 ns/olay; özet: ekleme O(1), bar i'de düzeltme O(n−i) |
-| WASM (gzip -9) | varsayılan 598.332 B (R2 595.475); `--features replica` 1.088.011 B |
+| WASM (gzip -9) | varsayılan 598.324 B (verify; T8 ölçümü 598.332; R2 595.475); `--features replica` 1.088.011 B |
 | Tutarlılık (B, 24 senaryo × 100 tohum) | yanlış/erken/çelişkili 0; kaçırma yalnız S4'te 2 (30 s kanal kopukluğu) |
 | Tutarlılık (gerçek yansı `bs`) | yanlış/erken/çelişkili 0; S16/S18'de çift ve geçersizlik dedektörleri `qp/0` koşulu olmadığı için iletilmiyor (model dışı kaçırma); denetçinin karma senaryoları AUD1–AUD3'te `b`, `bs`, `a` yanlış/erken 0, `bs` 7/49/7 kaçırma (geri çekme yolu yok, A20) |
 

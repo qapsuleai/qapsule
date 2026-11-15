@@ -1,0 +1,28 @@
+[package]
+name = "r3-human-test-gen"
+description = "R3/HT: deterministic generator of the human-test material (glyph pages, booklets, answer form, answer key)."
+version = "0.0.0"
+edition = "2021"
+publish = false
+
+# Not a member of the main workspace (the root workspace only lists `crates/*`).
+[workspace]
+
+[[bin]]
+name = "ht-gen"
+path = "src/main.rs"
+
+[dependencies]
+# The M1/M2 harness: glyph drawing path, alphabet registry (siluet, rozet), M2 situations, RNG.
+r3-harness = { path = "../../experiments/harness" }
+qp-schema = { path = "../../../../crates/qp-schema" }
+qp-grammar = { path = "../../../../crates/qp-grammar" }
+qp-render = { path = "../../../../crates/qp-render" }
+qp-capsule = { path = "../../../../crates/qp-capsule" }
+serde_json = { version = "1.0.154", features = ["float_roundtrip"] }
+
+[lints.rust]
+unsafe_code = "forbid"
+
+[profile.release]
+debug = false

@@ -1,7 +1,8 @@
 //! The incremental live path (RP2/T5, `docs/PROTOCOL.md` §18.8).
 //!
 //! - Property test (fixed seeds): random sequences of new bars, live revisions, past-bar
-//!   corrections, undos, structure changes and queries, on inline and bound series, with
+//!   corrections, undos (also with an explicit seq, mostly of an engine invalidation
+//!   entry: a capsule made live again), new findings, structure changes and queries, on inline and bound series, with
 //!   5–50 study series, condition subscriptions, intents and live capsules. The
 //!   incremental session and the from-scratch reference (`set_incremental(false)`: every
 //!   bar change clears the values cache, every watcher and capsule is evaluated, bar
@@ -464,8 +465,41 @@ fn run(seed: u64, bound: bool, steps: usize, kinds: &mut BTreeMap<String, usize>
                 json!([{"op":"append_bars","series":target,"bars":[b1.clone()]},
                        {"op":"append_bars","series":target,"bars":[b1]}]),
             );
-        } else if k < 93 {
+        } else if k < 90 {
             cmd(&mut p, "a", &id, json!([{"op":"undo"}]));
+        } else if k < 93 {
+            // RP2 T5 fixes (audit O1): an undo with an explicit seq, mostly of an engine
+            // invalidation entry (the capsule goes live again while its invalidation may
+            // still hold), else of a recent entry (also an undo, a finding, a bar write).
+            let log = p.inc.log();
+            let engine: Vec<u64> = log
+                .iter()
+                .filter(|e| {
+                    e.author == "qp"
+                        && e.changes.iter().any(|c| {
+                            matches!(c, qp_schema::protocol::ChangeOp::SetCapsuleState { .. })
+                        })
+                })
+                .map(|e| e.seq)
+                .collect();
+            let n = log.len() as u64;
+            let target = if !engine.is_empty() && rng.below(3) != 0 {
+                engine[rng.below(engine.len())]
+            } else {
+                n - rng.below(n.min(20) as usize) as u64
+            };
+            cmd(&mut p, "a", &id, json!([{"op":"undo","seq":target}]));
+        } else if k < 94 {
+            // A new finding with a capsule (its invalidation may hold at once).
+            let c = condition(&mut rng, &sc);
+            let fact = if rng.below(2) == 0 { "f1" } else { "f2" };
+            cmd(
+                &mut p,
+                "a",
+                &id,
+                json!([{"op":"add_finding","claim":"c","facts":[fact],
+                        "confidence":0.5,"invalidation":c,"capsule":"h"}]),
+            );
         } else if k < 96 {
             // Structure change: a study's parameters.
             let (s, study, _) = &sc.studies[rng.below(sc.studies.len())];

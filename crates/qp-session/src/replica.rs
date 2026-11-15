@@ -529,7 +529,11 @@ impl Replica {
         let Some(s) = self.s.as_mut() else {
             return false;
         };
-        let Ok(inverse) = crate::live::apply_in_place(&mut s.doc, &e.changes) else {
+        let restore = crate::live::Restore {
+            initial: &s.initial,
+            log: &s.log,
+        };
+        let Ok(inverse) = crate::live::apply_in_place(&mut s.doc, &e.changes, restore) else {
             return false;
         };
         e.inverse = inverse;

@@ -15,15 +15,37 @@ pub(crate) struct Computed {
     pub outputs: BTreeMap<String, Vec<Option<f64>>>,
     /// The output used in conditions.
     pub main: String,
+    /// Position of `main` among the keys of `outputs` (they never change once computed:
+    /// the live path reads the main output without a string lookup).
+    main_ix: Option<usize>,
 }
 
 impl Computed {
+    fn new(t: Vec<i64>, outputs: BTreeMap<String, Vec<Option<f64>>>, main: String) -> Self {
+        let main_ix = outputs.keys().position(|k| *k == main);
+        Self {
+            t,
+            outputs,
+            main,
+            main_ix,
+        }
+    }
+
+    #[inline]
     pub(crate) fn len(&self) -> usize {
         self.t.len()
     }
 
+    #[inline]
     pub(crate) fn main_values(&self) -> &[Option<f64>] {
-        self.outputs.get(&self.main).map_or(&[], Vec::as_slice)
+        // The main output first in key order (bar columns: `c`; one-output studies): no
+        // key comparison; else a lookup by name (faster than walking the map in WASM).
+        let v = match self.main_ix {
+            Some(0) => self.outputs.values().next(),
+            Some(_) => self.outputs.get(&self.main),
+            None => None,
+        };
+        v.map_or(&[], Vec::as_slice)
     }
 }
 
@@ -132,11 +154,13 @@ impl Cache {
     }
 
     /// Values in slot `i`.
+    #[inline]
     pub(crate) fn val(&self, i: usize) -> Option<&Rc<Computed>> {
         self.slots.get(i)?.as_ref().map(|s| &s.val)
     }
 
     /// True if slot `i` changed in the current tick.
+    #[inline]
     pub(crate) fn touched_now(&self, i: usize) -> bool {
         self.slots
             .get(i)
@@ -145,6 +169,7 @@ impl Cache {
     }
 
     /// Generation: slot numbers taken in an earlier generation are invalid.
+    #[inline]
     pub(crate) fn gen(&self) -> u64 {
         self.gen
     }
@@ -497,11 +522,7 @@ pub(crate) fn values(doc: &Document, cache: &mut Cache, id: &str) -> Result<Rc<C
         outputs.insert("l".to_owned(), col(|b| b.l));
         outputs.insert("c".to_owned(), col(|b| b.c));
         outputs.insert("v".to_owned(), col(|b| b.v));
-        let computed = Computed {
-            t: times(bars),
-            outputs,
-            main: "c".to_owned(),
-        };
+        let computed = Computed::new(times(bars), outputs, "c".to_owned());
         return Ok(cache.insert(id, computed, None));
     }
     match &s.source {
@@ -518,11 +539,7 @@ pub(crate) fn values(doc: &Document, cache: &mut Cache, id: &str) -> Result<Rc<C
                 .and_then(Series::bars)
                 .ok_or_else(|| format!("input `{input}` of `{id}` is not a bar series"))?;
             let (outputs, live) = run_study(study, params, bars)?;
-            let computed = Computed {
-                t: times(bars),
-                outputs,
-                main: main_output(study, output.as_ref()),
-            };
+            let computed = Computed::new(times(bars), outputs, main_output(study, output.as_ref()));
             let rc = cache.insert(id, computed, Some(live));
             // A study computed on demand joins its bar series' kept-current list.
             if let Some(i) = cache.slot_of(id) {

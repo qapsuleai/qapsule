@@ -24,9 +24,9 @@
 //! ([`rests_on`], the view index); the cache's touch stamps tell a watcher whether this
 //! tick changed one of its series.
 
-use std::collections::{BTreeMap, BTreeSet};
+use std::collections::{BTreeMap, BTreeSet, HashMap};
 
-use qp_schema::data::BindingState;
+use qp_schema::data::{BindingState, FeedKey};
 use qp_schema::protocol::{
     AckStatus, ChangeOp, Event, LogEntry, Op, OutboundLine, Seq, ServerMsg, Topic,
 };
@@ -111,25 +111,64 @@ pub(crate) fn keeps_view_reads(c: &ChangeOp) -> bool {
     )
 }
 
+/// What a failed in-place application falls back on when an inverse does not fit (it
+/// never should): the document rebuilt from the initial document and the log (the
+/// entries already committed; the failed command is not among them).
+#[derive(Clone, Copy)]
+pub(crate) struct Restore<'a> {
+    pub initial: &'a Document,
+    pub log: &'a [LogEntry],
+}
+
+impl Restore<'_> {
+    /// The document as the committed log leaves it (`None` if that fails as well).
+    fn rebuild(self) -> Option<Document> {
+        let mut doc = self.initial.clone();
+        for e in self.log {
+            crate::apply::apply_all(&mut doc, &e.changes).ok()?;
+        }
+        Some(doc)
+    }
+}
+
+/// Undoes `inverses` (in the order given). An inverse that does not fit would leave the
+/// document half rolled back: debug builds stop; release builds rebuild the document
+/// from the log (RP2 T5 audit D4).
+fn undo_in_place<'a>(
+    doc: &mut Document,
+    inverses: impl Iterator<Item = &'a ChangeOp>,
+    restore: Restore<'_>,
+) {
+    for inv in inverses {
+        if let Err(e) = apply_change(doc, inv) {
+            debug_assert!(false, "an inverse does not fit: {e}");
+            if let Some(d) = restore.rebuild() {
+                *doc = d;
+            }
+            return;
+        }
+    }
+}
+
 /// Applies `changes` to `doc` in place and returns their inverse (reversed, as
 /// [`crate::apply_all`]). If one does not fit, the ones applied before it are undone
 /// with their inverses, so `doc` is left as it was (the same bytes, as undo guarantees),
-/// and the error reads as [`crate::apply_all`]'s.
+/// and the error reads as [`crate::apply_all`]'s. Should an inverse not fit, the
+/// document is rebuilt from `restore`.
 ///
 /// # Errors
 /// The first change that does not fit.
 pub(crate) fn apply_in_place(
     doc: &mut Document,
     changes: &[ChangeOp],
+    restore: Restore<'_>,
 ) -> Result<Vec<ChangeOp>, String> {
     let mut inverse = Vec::with_capacity(changes.len());
     for (i, c) in changes.iter().enumerate() {
         match apply_change(doc, c) {
             Ok(inv) => inverse.push(inv),
             Err(e) => {
-                for inv in inverse.iter().rev() {
-                    let _ = apply_change(doc, inv);
-                }
+                undo_in_place(doc, inverse.iter().rev(), restore);
                 return Err(format!("change {i}: {e}"));
             }
         }
@@ -139,12 +178,8 @@ pub(crate) fn apply_in_place(
 }
 
 /// Undoes groups of inverses (each already reversed) in reverse order.
-fn roll_back(doc: &mut Document, groups: &[Vec<ChangeOp>]) {
-    for g in groups.iter().rev() {
-        for inv in g {
-            let _ = apply_change(doc, inv);
-        }
-    }
+fn roll_back(doc: &mut Document, groups: &[Vec<ChangeOp>], restore: Restore<'_>) {
+    undo_in_place(doc, groups.iter().rev().flatten(), restore);
 }
 
 /// Mirrors a data plane change of bound series `id` into the reading document in place:
@@ -207,24 +242,25 @@ fn all_ready(plane: &DataPlane) -> bool {
         .all(|bs| bs.bound.current_state() == BindingState::Ready)
 }
 
-/// True if series `id` is `bar` or rests on it through study inputs (any input,
-/// transitively).
-pub(crate) fn rests_on(doc: &Document, id: &str, bar: &str) -> bool {
-    let mut stack = vec![id];
-    let mut seen = 0usize;
-    while let Some(cur) = stack.pop() {
-        if cur == bar {
-            return true;
-        }
-        seen += 1;
-        if seen > 1024 {
-            return false;
-        }
-        if let Some(SeriesSource::Study { inputs, .. }) = find_series(doc, cur).map(|s| &s.source) {
-            stack.extend(inputs.iter().map(String::as_str));
+/// Every series `c` rests on (its series and, through every study input, theirs), as
+/// [`LiveIndex::cond_info`] finds them, by lookup in `doc`.
+pub(crate) fn closure_of(doc: &Document, c: &Condition) -> Vec<String> {
+    let mut closure: Vec<String> = Vec::new();
+    for id in cond_ids(c).into_iter().flatten() {
+        let mut stack = vec![id];
+        while let Some(cur) = stack.pop() {
+            if closure.len() > 4096 || closure.iter().any(|x| x == cur) {
+                continue;
+            }
+            closure.push(cur.to_owned());
+            if let Some(SeriesSource::Study { inputs, .. }) =
+                find_series(doc, cur).map(|s| &s.source)
+            {
+                stack.extend(inputs.iter().rev().map(String::as_str));
+            }
         }
     }
-    false
+    closure
 }
 
 /// The series ids a condition reads (at most two).
@@ -239,6 +275,7 @@ fn cond_ids(c: &Condition) -> [Option<&str>; 2] {
 /// [`eval_condition`] from known cache slots (no lookups); `None` when a slot is
 /// missing (then the caller evaluates by id).
 #[allow(clippy::option_option)]
+#[inline]
 fn eval_slots(
     cache: &crate::values::Cache,
     c: &Condition,
@@ -256,13 +293,6 @@ fn eval_slots(
         }
         Condition::Text { .. } => Some(None),
     }
-}
-
-fn reads_changed(doc: &Document, c: &Condition, changed: &[&str]) -> bool {
-    cond_ids(c)
-        .iter()
-        .flatten()
-        .any(|id| changed.iter().any(|b| rests_on(doc, id, b)))
 }
 
 /// The view index: view id → every series its layers read (`plane::layer_reads`) and,
@@ -285,6 +315,229 @@ fn build_view_reads(doc: &Document) -> BTreeMap<String, BTreeSet<String>> {
         out.insert(v.id.clone(), set);
     }
     out
+}
+
+/// Where one condition sits in the document's structure (RP2 T5 fixes): every series
+/// its series rest on (themselves included, through every study input), the bound
+/// series among them and their feeds. Derived from the document; rebuilt when the
+/// structure changes ([`LiveIndex`]).
+#[derive(Debug, Default, Clone)]
+pub(crate) struct CondInfo {
+    /// Series ids the condition rests on (the condition → bar series index: a tick on bar
+    /// series `X` affects the condition iff `X` is here).
+    closure: Vec<String>,
+    /// Bound series among them (readiness, §18.3).
+    bound: Vec<String>,
+    /// Their feeds, as positions in [`LiveIndex::feeds`] (entitlement, §18.3).
+    feeds: Vec<u32>,
+}
+
+impl CondInfo {
+    /// Series the condition rests on.
+    pub(crate) fn closure(&self) -> &[String] {
+        &self.closure
+    }
+
+    /// True if one of `changed` (bar series) is among the series the condition rests on.
+    #[inline]
+    fn rests_on_any(&self, changed: &[&str]) -> bool {
+        changed.iter().any(|b| self.closure.iter().any(|s| s == b))
+    }
+
+    /// [`cond_blocked`] from the index (`all_ready`: [`all_ready`] of `plane`).
+    #[inline]
+    fn blocked(&self, plane: &DataPlane, all_ready: bool) -> bool {
+        if plane.series.is_empty() || all_ready {
+            return false;
+        }
+        self.bound.iter().any(|id| {
+            plane
+                .series
+                .get(id)
+                .is_none_or(|bs| bs.bound.current_state() != BindingState::Ready)
+        })
+    }
+}
+
+/// An active intent with a value trigger, as the live path evaluates it.
+#[derive(Debug)]
+pub(crate) struct IntentWatch {
+    id: String,
+    trigger: Condition,
+    info: CondInfo,
+    /// Cache slots of the trigger's series, with their cache generation.
+    memo: Option<(u64, [Option<usize>; 2])>,
+    /// The intent's edge state as last written by the live path, valid while the
+    /// session's `intent_epoch` is `stamp` (then it equals `intent_state[id]`).
+    last: Option<bool>,
+    stamp: u64,
+}
+
+/// A live capsule whose finding exists, as the live path evaluates it.
+#[derive(Debug)]
+pub(crate) struct CapsuleWatch {
+    capsule: String,
+    finding: String,
+    invalidation: Condition,
+    info: CondInfo,
+    /// Principals of this session (positions in `Session::principals`) who must be
+    /// entitled to every feed the invalidation reads for it to be evaluated
+    /// ([`Session::responsible`], §18.3).
+    who: Vec<usize>,
+    memo: Option<(u64, [Option<usize>; 2])>,
+}
+
+/// The live path's view of the document structure: series positions, bound feeds,
+/// the watched intents and capsules with their [`CondInfo`]. Built for one structure
+/// generation of the session (bumped by every log entry that is not only bar writes);
+/// condition subscriptions keep their own [`CondInfo`] with the generation.
+#[derive(Debug, Default)]
+pub(crate) struct LiveIndex {
+    pub(crate) gen: u64,
+    /// Series id → position in `doc.series` (the first one, as `find_series`).
+    pos: HashMap<String, usize>,
+    /// Position in `doc.series` → feed position, for bound series.
+    feed_of: Vec<Option<u32>>,
+    /// Distinct feeds of the document's bound series.
+    feeds: Vec<FeedKey>,
+    intents: Vec<IntentWatch>,
+    capsules: Vec<CapsuleWatch>,
+}
+
+impl LiveIndex {
+    /// The index of `doc`'s series and feeds (no watchers yet).
+    fn of_series(doc: &Document, gen: u64) -> Self {
+        let mut idx = Self {
+            gen,
+            ..Self::default()
+        };
+        for (i, s) in doc.series.iter().enumerate() {
+            idx.pos.entry(s.id.clone()).or_insert(i);
+            let f = s.binding().map(|b| {
+                let k = b.feed_key();
+                match idx.feeds.iter().position(|x| *x == k) {
+                    Some(j) => j as u32,
+                    None => {
+                        idx.feeds.push(k);
+                        (idx.feeds.len() - 1) as u32
+                    }
+                }
+            });
+            idx.feed_of.push(f);
+        }
+        idx
+    }
+
+    /// Where `c` sits in `doc` (the document this index was built from).
+    pub(crate) fn cond_info(&self, doc: &Document, c: &Condition) -> CondInfo {
+        let mut info = CondInfo::default();
+        for id in cond_ids(c).into_iter().flatten() {
+            let mut stack = vec![id];
+            while let Some(cur) = stack.pop() {
+                if info.closure.len() > 4096 || info.closure.iter().any(|x| x == cur) {
+                    continue;
+                }
+                info.closure.push(cur.to_owned());
+                let Some(&i) = self.pos.get(cur) else {
+                    continue;
+                };
+                match &doc.series[i].source {
+                    SeriesSource::Bind { .. } => {
+                        info.bound.push(cur.to_owned());
+                        if let Some(f) = self.feed_of[i] {
+                            if !info.feeds.contains(&f) {
+                                info.feeds.push(f);
+                            }
+                        }
+                    }
+                    SeriesSource::Study { inputs, .. } => {
+                        stack.extend(inputs.iter().rev().map(String::as_str));
+                    }
+                    _ => {}
+                }
+            }
+        }
+        info
+    }
+}
+
+/// Data entitlements asked during one live change, per principal of the session (by
+/// position) and feed: the provider is asked once per pair.
+struct Ents<'a> {
+    plane: &'a DataPlane,
+    feeds: &'a [FeedKey],
+    principals: &'a [qp_schema::protocol::Principal],
+    asked: Vec<Vec<Option<bool>>>,
+}
+
+impl<'a> Ents<'a> {
+    fn new(
+        plane: &'a DataPlane,
+        feeds: &'a [FeedKey],
+        principals: &'a [qp_schema::protocol::Principal],
+    ) -> Self {
+        Self {
+            plane,
+            feeds,
+            principals,
+            asked: vec![Vec::new(); principals.len()],
+        }
+    }
+
+    /// [`hears`] from the index, for principal `who` (its position in the session's
+    /// principals, or its id when it is not one).
+    #[inline]
+    fn hears(&mut self, who: Result<usize, &str>, info: &CondInfo) -> bool {
+        if info.feeds.is_empty() || self.plane.series.is_empty() {
+            return true;
+        }
+        let (plane, feeds) = (self.plane, self.feeds);
+        let k = match who {
+            Ok(k) => k,
+            Err(p) => {
+                return info
+                    .feeds
+                    .iter()
+                    .all(|&f| plane.entitled(p, &feeds[f as usize]))
+            }
+        };
+        let principal = self.principals[k].id.as_str();
+        let row = &mut self.asked[k];
+        if row.is_empty() {
+            row.resize(feeds.len(), None);
+        }
+        info.feeds.iter().all(|&f| {
+            let f = f as usize;
+            *row[f].get_or_insert_with(|| plane.entitled(principal, &feeds[f]))
+        })
+    }
+}
+
+/// [`eval_condition`] through a slot memo: from the known cache slots when they are of
+/// the current cache generation, else by id (and the slots are noted).
+#[inline]
+fn eval_memo(
+    rd: &Document,
+    cache: &mut crate::values::Cache,
+    c: &Condition,
+    memo: &mut Option<(u64, [Option<usize>; 2])>,
+) -> Option<(bool, u64, i64)> {
+    if let Some(r) = memo
+        .filter(|(g, _)| *g == cache.gen())
+        .and_then(|(_, sl)| eval_slots(cache, c, sl))
+    {
+        return r;
+    }
+    let r = eval_condition(rd, cache, c);
+    let ids = cond_ids(c);
+    *memo = Some((
+        cache.gen(),
+        [
+            ids[0].and_then(|i| cache.slot_of(i)),
+            ids[1].and_then(|i| cache.slot_of(i)),
+        ],
+    ));
+    r
 }
 
 impl Session {
@@ -338,20 +591,24 @@ impl Session {
                 }),
                 plane: &self.plane,
             };
+            let restore = Restore {
+                initial: &self.initial,
+                log: &self.log,
+            };
             let doc = &mut self.doc;
             for (i, op) in ops.iter().enumerate() {
                 let p = ptr("/ops", i);
                 let cs = match expand_op(doc, op, &p, &mut ctx) {
                     Ok(cs) => cs,
                     Err(e) => {
-                        roll_back(doc, &groups);
+                        roll_back(doc, &groups, restore);
                         return Err(e);
                     }
                 };
-                match apply_in_place(doc, &cs) {
+                match apply_in_place(doc, &cs, restore) {
                     Ok(inv) => groups.push(inv),
                     Err(m) => {
-                        roll_back(doc, &groups);
+                        roll_back(doc, &groups, restore);
                         return Err(E::new(
                             qp_schema::protocol::ErrorCode::Invalid,
                             format!("cannot apply: {m}"),
@@ -366,7 +623,11 @@ impl Session {
             (ctx.created, ctx.undoes)
         };
         if let Err(e) = self.base_check(base, &changes, &origin) {
-            roll_back(&mut self.doc, &groups);
+            let restore = Restore {
+                initial: &self.initial,
+                log: &self.log,
+            };
+            roll_back(&mut self.doc, &groups, restore);
             return Err(e);
         }
         let inverse = groups.into_iter().rev().flatten().collect();
@@ -444,57 +705,108 @@ impl Session {
         lines
     }
 
+    /// The live index of the current structure generation (built if needed).
+    pub(crate) fn take_index(&mut self) -> LiveIndex {
+        match self.live_index.take() {
+            Some(i) if i.gen == self.struct_gen => i,
+            _ => self.build_index(),
+        }
+    }
+
+    /// Builds the live index of the document: series, feeds, active intents with a
+    /// value trigger and live capsules (with the principals who must hear them).
+    fn build_index(&self) -> LiveIndex {
+        let doc = &self.doc;
+        let mut idx = LiveIndex::of_series(doc, self.struct_gen);
+        for i in doc.intents.iter().filter(|i| i.active) {
+            let Some(trig) = &i.trigger else { continue };
+            if matches!(trig, Condition::Text { .. }) {
+                continue;
+            }
+            let info = idx.cond_info(doc, trig);
+            idx.intents.push(IntentWatch {
+                id: i.id.clone(),
+                trigger: trig.clone(),
+                info,
+                memo: None,
+                last: None,
+                stamp: 0,
+            });
+        }
+        for c in doc
+            .capsules
+            .iter()
+            .filter(|c| c.state == qp_schema::CapsuleState::Live)
+        {
+            let Some(f) = doc.findings.iter().find(|f| f.id == c.finding) else {
+                continue;
+            };
+            let info = idx.cond_info(doc, &f.invalidation);
+            let who = self
+                .responsible(f, info.closure())
+                .iter()
+                .filter_map(|p| self.principals.iter().position(|x| x.id == *p))
+                .collect();
+            idx.capsules.push(CapsuleWatch {
+                capsule: c.id.clone(),
+                finding: c.finding.clone(),
+                invalidation: f.invalidation.clone(),
+                info,
+                who,
+                memo: None,
+            });
+        }
+        idx
+    }
+
     /// Edge-triggered condition subscriptions resting on a changed series. A watcher is
     /// evaluated when a cache slot of its series changed in this tick, when its slots are
     /// not known (first time, or after the cache dropped slots), or when a series it
     /// reads is not computable and rests on a changed series.
     fn eval_conditions_live(&mut self, seq: Seq, changed: &[&str]) -> Vec<OutboundLine> {
+        let idx = self.take_index();
         let rd = self.rd.as_ref().unwrap_or(&self.doc);
         let cache = &mut self.cache;
+        let ready = all_ready(&self.plane);
+        let mut ents = Ents::new(&self.plane, &idx.feeds, &self.principals);
         let mut lines = Vec::new();
         for c in &mut self.conns {
+            let mut row = None;
             for s in &mut c.subs {
                 let Topic::Condition { condition } = &s.topic else {
                     continue;
                 };
+                if s.watch.as_ref().is_none_or(|(g, _)| *g != idx.gen) {
+                    s.watch = Some((idx.gen, idx.cond_info(&self.doc, condition)));
+                }
+                let info = &s.watch.as_ref().expect("set above").1;
                 let ids = cond_ids(condition);
                 let affected = match s.memo.filter(|(g, _)| *g == cache.gen()) {
                     None => true,
                     Some((_, slots)) => ids.iter().zip(slots).any(|(id, slot)| match (id, slot) {
                         (Some(_), Some(i)) => cache.touched_now(i),
-                        (Some(id), None) => changed.iter().any(|b| rests_on(rd, id, b)),
+                        (Some(_), None) => info.rests_on_any(changed),
                         (None, _) => false,
                     }),
                 };
                 if !affected {
                     continue;
                 }
-                if !hears(&self.plane, &self.doc, &c.principal, condition) {
+                let who = *row.get_or_insert_with(|| {
+                    self.principals
+                        .iter()
+                        .position(|p| p.id == c.principal)
+                        .ok_or(c.principal.as_str())
+                });
+                if !ents.hears(who, info) {
                     // Not evaluated for a subscriber without the data entitlement (§18.3).
                     continue;
                 }
-                if cond_blocked(&self.plane, &self.doc, condition) {
+                if info.blocked(&self.plane, ready) {
                     // Not evaluated; the edge state is kept (§18.3).
                     continue;
                 }
-                let fast = s
-                    .memo
-                    .filter(|(g, _)| *g == cache.gen())
-                    .and_then(|(_, sl)| eval_slots(cache, condition, sl));
-                let r = match fast {
-                    Some(r) => r,
-                    None => {
-                        let r = eval_condition(rd, cache, condition);
-                        s.memo = Some((
-                            cache.gen(),
-                            [
-                                ids[0].and_then(|i| cache.slot_of(i)),
-                                ids[1].and_then(|i| cache.slot_of(i)),
-                            ],
-                        ));
-                        r
-                    }
-                };
+                let r = eval_memo(rd, cache, condition, &mut s.memo);
                 let now = r.is_some_and(|x| x.0);
                 let prev = s.last.replace(now);
                 if prev == Some(false) && now {
@@ -537,45 +849,50 @@ impl Session {
                 }
             }
         }
+        drop(ents);
+        self.live_index = Some(idx);
         lines
     }
 
     /// Active intents whose trigger rests on a changed series; the others keep their
     /// state.
     fn eval_intents_live(&mut self, seq: Seq, changed: &[&str]) -> Vec<Event> {
+        let mut idx = self.take_index();
         let rd = self.rd.as_ref().unwrap_or(&self.doc);
+        let ready = all_ready(&self.plane);
         let mut fired = Vec::new();
-        for i in self.doc.intents.iter().filter(|i| i.active) {
-            let Some(trig) = &i.trigger else { continue };
-            if matches!(trig, Condition::Text { .. }) || !reads_changed(rd, trig, changed) {
+        for w in &mut idx.intents {
+            if !w.info.rests_on_any(changed) || w.info.blocked(&self.plane, ready) {
                 continue;
             }
-            if cond_blocked(&self.plane, &self.doc, trig) {
-                continue;
-            }
-            let r = eval_condition(rd, &mut self.cache, trig);
+            let r = eval_memo(rd, &mut self.cache, &w.trigger, &mut w.memo);
             let now = r.is_some_and(|x| x.0);
-            if self.intent_state.get(&i.id) == Some(&false) && now {
+            let prev = if w.stamp == self.intent_epoch {
+                w.last
+            } else {
+                self.intent_state.get(&w.id).copied()
+            };
+            if prev == Some(false) && now {
                 if let Some((_, bar, t)) = r {
                     let evidence = crate::claims::evidence(
                         rd,
                         &mut self.cache,
                         &self.claims,
                         &self.plane,
-                        trig,
+                        &w.trigger,
                     );
                     if let Some(ev) = &evidence {
                         self.claims.assert(
                             crate::claims::Owner::Doc,
                             qp_schema::protocol::ClaimRef::Intent {
-                                intent: i.id.clone(),
+                                intent: w.id.clone(),
                             },
-                            trig.clone(),
+                            w.trigger.clone(),
                             ev.clone(),
                         );
                     }
                     fired.push(Event::IntentTriggered {
-                        intent: i.id.clone(),
+                        intent: w.id.clone(),
                         bar,
                         t,
                         seq,
@@ -583,33 +900,42 @@ impl Session {
                     });
                 }
             }
-            self.intent_state.insert(i.id.clone(), now);
+            if prev != Some(now) {
+                self.intent_state.insert(w.id.clone(), now);
+            }
+            w.last = Some(now);
+            w.stamp = self.intent_epoch;
         }
+        self.live_index = Some(idx);
         fired
     }
 
     /// Engine entries invalidating live capsules whose invalidation rests on a changed
-    /// series and holds now.
+    /// series and holds now (evaluated from the index; the ones that hold go through
+    /// [`Session::invalidate_these`], which checks them again and writes the entries).
     fn invalidate_live(&mut self, changed: &[&str]) -> Vec<Seq> {
+        let mut idx = self.take_index();
         let rd = self.rd.as_ref().unwrap_or(&self.doc);
-        let candidates: Vec<(String, String)> = self
-            .doc
-            .capsules
-            .iter()
-            .filter(|c| c.state == qp_schema::CapsuleState::Live)
-            .filter(|c| {
-                self.doc
-                    .findings
-                    .iter()
-                    .find(|f| f.id == c.finding)
-                    .is_some_and(|f| reads_changed(rd, &f.invalidation, changed))
-            })
-            .map(|c| (c.id.clone(), c.finding.clone()))
-            .collect();
-        if candidates.is_empty() {
+        let ready = all_ready(&self.plane);
+        let mut ents = Ents::new(&self.plane, &idx.feeds, &self.principals);
+        let mut holding = Vec::new();
+        for w in &mut idx.capsules {
+            if !w.info.rests_on_any(changed) || w.info.blocked(&self.plane, ready) {
+                continue;
+            }
+            if !w.who.iter().all(|&k| ents.hears(Ok(k), &w.info)) {
+                continue;
+            }
+            if eval_memo(rd, &mut self.cache, &w.invalidation, &mut w.memo).is_some_and(|r| r.0) {
+                holding.push((w.capsule.clone(), w.finding.clone()));
+            }
+        }
+        drop(ents);
+        self.live_index = Some(idx);
+        if holding.is_empty() {
             return Vec::new();
         }
-        self.invalidate_these(candidates)
+        self.invalidate_these(holding)
     }
 
     /// `view_changed` for every pending bar change, to the `view` subscribers whose view

@@ -19,7 +19,8 @@
 //! (`run-live.sh`).
 //!
 //! Usage: `live [bars] [ticks] [reps] [studies,...] [paths] [watches]` (defaults
-//! `10000 600 15 5,50,500 inline,bound t6d,base,all`); `live profile <inline|bound> <t6d|base|all> <n> <ticks>`.
+//! `10000 600 15 5,50,500 inline,bound t6d,base,all`; watches also `ic`: `base` + 100
+//! intents + 100 live capsules, RP2 T5 fixes); `live profile <inline|bound> <t6d|base|all> <n> <ticks>`.
 
 use std::collections::BTreeMap;
 use std::path::Path;
@@ -78,8 +79,14 @@ fn fnv(bytes: &[u8]) -> u64 {
     h
 }
 
+static QUIET: std::sync::atomic::AtomicBool = std::sync::atomic::AtomicBool::new(false);
+
 macro_rules! kv {
-    ($k:expr, $($arg:tt)*) => { println!("{} = {}", $k, format!($($arg)*)) };
+    ($k:expr, $($arg:tt)*) => {
+        if !QUIET.load(std::sync::atomic::Ordering::Relaxed) {
+            println!("{} = {}", $k, format!($($arg)*))
+        }
+    };
 }
 
 // --- scenario (as T1) ------------------------------------------------------
@@ -213,6 +220,9 @@ enum Watch {
     T6d,
     Base,
     All,
+    /// RP2 T5 fixes (audit O2): `base` plus 100 active intents and 100 live capsules, all
+    /// resting on px (never triggered).
+    Ic,
 }
 
 impl Watch {
@@ -221,6 +231,7 @@ impl Watch {
             Self::T6d => "t6d",
             Self::Base => "base",
             Self::All => "all",
+            Self::Ic => "ic",
         }
     }
 }
@@ -280,6 +291,28 @@ fn live_session(doc: &Document, bars: &[Bar], bound: bool, w: Watch) -> Session 
             subscribe(&mut s, &conn, &format!("all-{id}"), &json!({"kind":"condition","condition":
                 {"kind":"threshold","series":id,"op":"gt","value":1e12}}));
         }
+    }
+    if w == Watch::Ic {
+        let st = studies(doc);
+        let r = send(&mut s, "u", &json!({"type":"command","id":"ic-f","ops":[
+            {"op":"add_fact","id":"ic-fact","kind":"note","series":"px","bar":10,"text":"x"}]}));
+        assert!(matches!(r[0], ServerMsg::Ack { .. }), "{:?}", r[0]);
+        let mut ops = Vec::new();
+        for k in 0..100 {
+            let (id, _, _) = &st[k % st.len()];
+            let cond = json!({"kind":"threshold","series":id,"op":"gt","value":1e12});
+            ops.push(json!({"op":"add_intent","id":format!("ic-i{k}"),"text":"t","trigger":cond}));
+            ops.push(json!({"op":"add_finding","id":format!("ic-f{k}"),"claim":"c","facts":["ic-fact"],
+                "confidence":0.5,"invalidation":cond,"capsule":"h"}));
+        }
+        for (j, chunk) in ops.chunks(50).enumerate() {
+            let r = send(&mut s, "u", &json!({"type":"command","id":format!("ic{j}"),"ops":chunk}));
+            assert!(matches!(r[0], ServerMsg::Ack { .. }), "{:?}", r[0]);
+        }
+        let live = s.document().capsules.iter()
+            .filter(|c| c.finding.starts_with("ic-f") && c.state == qp_schema::CapsuleState::Live)
+            .count();
+        assert_eq!(live, 100);
     }
     let _ = s.provider();
     s
@@ -524,8 +557,9 @@ fn section(cfg: &Cfg, n: usize, bound: bool, watches: &[Watch]) {
         });
         let sess = sm / ticks;
         kv!(format!("{kw}.session.loop_us"), "median {:.3} best {:.3}", sess, sb / ticks);
-        kv!(format!("{kw}.ratio"), "overhead/core_parse {:.2} (target <= 3) ; overhead/core_lean_parse {:.2} ; overhead/core(no parse) {:.1} ; overhead/core_lean(no parse) {:.1}",
-            (sess - core_parse) / core_parse, (sess - lean_parse) / lean_parse, (sess - core) / core, (sess - adv[1].0) / adv[1].0);
+        kv!(format!("{kw}.ratio"), "overhead/core_parse {:.2} (target <= 3) ; overhead/core_lean_parse {:.2} ; overhead/core(no parse) {:.1} ; overhead/core_lean(no parse) {:.1} ; best/best overhead/core_parse {:.2}",
+            (sess - core_parse) / core_parse, (sess - lean_parse) / lean_parse, (sess - core) / core, (sess - adv[1].0) / adv[1].0,
+            (sb / ticks - cb / ticks) / (cb / ticks));
     }
 }
 
@@ -534,6 +568,7 @@ fn profile(path: &str, watch: &str, n: usize, ticks: usize) {
     let w = match watch {
         "t6d" => Watch::T6d,
         "base" => Watch::Base,
+        "ic" => Watch::Ic,
         _ => Watch::All,
     };
     let (doc, bars) = gen_doc(10_000, n, bound);
@@ -567,6 +602,7 @@ fn main() {
         .map(|w| match w {
             "t6d" => Watch::T6d,
             "base" => Watch::Base,
+            "ic" => Watch::Ic,
             _ => Watch::All,
         })
         .collect();
@@ -574,6 +610,15 @@ fn main() {
     println!("# RP2/T5 live bench");
     kv!("target", "{target}");
     kv!("config", "bars {} ticks {} reps {} studies {:?} paths {:?}", cfg.bars, cfg.ticks, cfg.reps, counts, paths);
+    // RP2 T5 fixes (audit D1): one unmeasured pass first (the first measured section
+    // otherwise pays the process warm-up: allocator, caches, CPU frequency).
+    QUIET.store(true, std::sync::atomic::Ordering::Relaxed);
+    let warm = Cfg { bars: cfg.bars, ticks: cfg.ticks, reps: 3 };
+    for p in &paths {
+        section(&warm, counts[0], p == "bound", &watches);
+    }
+    QUIET.store(false, std::sync::atomic::Ordering::Relaxed);
+    kv!("warmup", "1 pass (n {} all paths and watches, reps 3), not reported", counts[0]);
     for n in counts {
         for p in &paths {
             section(&cfg, n, p == "bound", &watches);

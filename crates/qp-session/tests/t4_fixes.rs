@@ -208,9 +208,11 @@ fn bind_thyao(id: &str) -> Value {
 }
 
 /// The rebinding bypass: an unentitled editor writes a condition on its own inline
-/// series (allowed), then rebinds that series to the feed it may not read. Its condition
-/// is not evaluated (its author is not entitled), so its capsule's state tells nothing,
-/// whatever the data does; the owner's identical capsule is invalidated.
+/// series (allowed), then rebinds that series to the feed it may not read. Since the RP2
+/// T5 fixes the rebind itself is refused (a condition rests on the series); when the
+/// owner rebinds it, the editor's condition is still not evaluated (its author is not
+/// entitled), so its capsule's state tells nothing, whatever the data does; the owner's
+/// identical capsule is invalidated.
 #[test]
 fn y1_rebinding_does_not_open_an_oracle() {
     let mut h = no_entitlement();
@@ -231,10 +233,20 @@ fn y1_rebinding_does_not_open_an_oracle() {
     let cap_a = "cap-3-3";
     assert_eq!(capsule_state(&mut h, "a", cap_e), "live");
     assert_eq!(capsule_state(&mut h, "a", cap_a), "live");
-    // Rebind both to THYAO: px closes at c < probe, so the condition holds on the data.
-    for (conn, id) in [("e", "own"), ("a", "ownA")] {
+    // RP2 T5 fixes (§18.3): the editor may not re-point a series a condition rests on at
+    // a feed it may not read.
+    let r = h.cmd(
+        "e",
+        "c1",
+        json!([{"op":"put_series","series":bind_thyao("own")}]),
+    );
+    assert_eq!(code(&r), "no_entitlement", "{r}");
+    assert_eq!(r["error"]["path"], "/ops/0/series/source", "{r}");
+    // Rebind both to THYAO (the owner does it for the editor's series): px closes at
+    // c < probe, so the condition holds on the data.
+    for id in ["own", "ownA"] {
         let r = h.cmd(
-            conn,
+            "a",
             "c1",
             json!([{"op":"put_series","series":bind_thyao(id)}]),
         );

@@ -1,0 +1,850 @@
+{
+  "covers": [
+    "data"
+  ],
+  "description": "RP2 T5 audit fixes: a series a condition rests on is not re-pointed at a feed by an unentitled writer; a finding's invalidation is evaluated only if every principal responsible for it (author, last writer of the invalidation, last writer of each series it rests on) is entitled (§18.3); a capsule made live again by an undo is evaluated at once (§8.1, O1).",
+  "final": {
+    "document": {
+      "series": [
+        {
+          "id": "px"
+        },
+        "$any",
+        "$any",
+        "$any",
+        {
+          "id": "own",
+          "source": {
+            "kind": "bind"
+          }
+        }
+      ]
+    },
+    "log_len": 9
+  },
+  "init": {
+    "clock": 1760000000000,
+    "data": {
+      "entitlements": {
+        "arkin": [
+          "THYAO",
+          "ASELS"
+        ],
+        "host": [
+          "*"
+        ]
+      },
+      "feeds": [
+        {
+          "feed": {
+            "interval": "1d",
+            "symbol": "THYAO"
+          },
+          "synthetic": {
+            "n": 200,
+            "seed": 11
+          }
+        },
+        {
+          "feed": {
+            "interval": "1d",
+            "symbol": "ASELS"
+          },
+          "synthetic": {
+            "n": 60,
+            "seed": 3
+          }
+        }
+      ],
+      "pending": [
+        {
+          "interval": "1d",
+          "symbol": "ASELS"
+        }
+      ]
+    },
+    "document": "fixtures/protocol/docs/bound-mixed.json",
+    "epoch": 0,
+    "principals": [
+      {
+        "author": {
+          "kind": "human",
+          "name": "arkin"
+        },
+        "id": "arkin",
+        "role": "owner"
+      },
+      {
+        "author": {
+          "kind": "agent",
+          "name": "editor"
+        },
+        "id": "editor",
+        "role": "editor"
+      },
+      {
+        "author": {
+          "kind": "human",
+          "name": "viewer"
+        },
+        "id": "viewer",
+        "role": "viewer"
+      },
+      {
+        "author": {
+          "kind": "engine",
+          "name": "host",
+          "version": "0"
+        },
+        "id": "host",
+        "role": "host"
+      }
+    ]
+  },
+  "name": "36-entitlement-responsible-relive",
+  "steps": [
+    {
+      "expect": [
+        {
+          "conn": "a",
+          "msg": {
+            "type": "welcome"
+          }
+        }
+      ],
+      "note": "RP2 T5 audit fixes (§8.1, §18.3). arkin is entitled to THYAO; editor is not.",
+      "send": {
+        "conn": "a",
+        "msg": {
+          "principal": "arkin",
+          "protocol": "qp/0",
+          "surface": {
+            "kind": "headless"
+          },
+          "type": "hello"
+        }
+      }
+    },
+    {
+      "expect": [
+        {
+          "conn": "e",
+          "msg": {
+            "type": "welcome"
+          }
+        }
+      ],
+      "send": {
+        "conn": "e",
+        "msg": {
+          "principal": "editor",
+          "protocol": "qp/0",
+          "surface": {
+            "kind": "headless"
+          },
+          "type": "hello"
+        }
+      }
+    },
+    {
+      "expect": [
+        {
+          "conn": "a",
+          "msg": {
+            "id": "ch",
+            "status": "subscribed",
+            "type": "ack"
+          }
+        }
+      ],
+      "send": {
+        "conn": "a",
+        "msg": {
+          "id": "ch",
+          "topic": {
+            "kind": "changes"
+          },
+          "type": "subscribe"
+        }
+      }
+    },
+    {
+      "expect": [
+        {
+          "conn": "a",
+          "msg": {
+            "created": [
+              "own",
+              "f-own",
+              "fnd-own",
+              "cap-2-3"
+            ],
+            "id": "c1",
+            "seq": 2,
+            "status": "applied",
+            "type": "ack"
+          }
+        },
+        {
+          "conn": "a",
+          "msg": {
+            "event": {
+              "at": 1760000000000,
+              "author": "arkin",
+              "cause": "c1",
+              "changes": [
+                {
+                  "op": "put_series",
+                  "series": {
+                    "data": {
+                      "bars": [
+                        {
+                          "c": 1.0,
+                          "h": 1.0,
+                          "l": 1.0,
+                          "o": 1.0,
+                          "t": 1759000000000,
+                          "v": 1.0
+                        },
+                        {
+                          "c": 1.0,
+                          "h": 1.0,
+                          "l": 1.0,
+                          "o": 1.0,
+                          "t": 1759086400000,
+                          "v": 1.0
+                        },
+                        {
+                          "c": 1.0,
+                          "h": 1.0,
+                          "l": 1.0,
+                          "o": 1.0,
+                          "t": 1759172800000,
+                          "v": 1.0
+                        },
+                        {
+                          "c": 1.0,
+                          "h": 1.0,
+                          "l": 1.0,
+                          "o": 1.0,
+                          "t": 1759259200000,
+                          "v": 1.0
+                        },
+                        {
+                          "c": 1.0,
+                          "h": 1.0,
+                          "l": 1.0,
+                          "o": 1.0,
+                          "t": 1759345600000,
+                          "v": 1.0
+                        }
+                      ],
+                      "kind": "bars"
+                    },
+                    "id": "own",
+                    "source": {
+                      "kind": "inline"
+                    }
+                  }
+                },
+                {
+                  "fact": {
+                    "bar": 4,
+                    "evidence": {},
+                    "evidence_ref": {
+                      "alg": "fnv1a64",
+                      "bars": 5,
+                      "digest": "e964c2a84f050ec3",
+                      "from_t": 1759000000000,
+                      "series": "own",
+                      "to_t": 1759345600000
+                    },
+                    "id": "f-own",
+                    "kind": "note",
+                    "provenance": {
+                      "at": 1760000000000,
+                      "author": {
+                        "kind": "human",
+                        "name": "arkin"
+                      },
+                      "based_on": [
+                        "own"
+                      ]
+                    },
+                    "series": "own",
+                    "t": 1759345600000,
+                    "text": "x"
+                  },
+                  "op": "put_fact"
+                },
+                {
+                  "finding": {
+                    "claim": "p",
+                    "confidence": 0.5,
+                    "facts": [
+                      "f-own"
+                    ],
+                    "id": "fnd-own",
+                    "invalidation": {
+                      "kind": "threshold",
+                      "op": "gt",
+                      "series": "own",
+                      "value": 1000000000.0
+                    },
+                    "provenance": {
+                      "at": 1760000000000,
+                      "author": {
+                        "kind": "human",
+                        "name": "arkin"
+                      },
+                      "based_on": [
+                        "f-own"
+                      ]
+                    }
+                  },
+                  "op": "put_finding"
+                },
+                {
+                  "capsule": {
+                    "depth": "capsule",
+                    "finding": "fnd-own",
+                    "glyphs": [],
+                    "headline": "p",
+                    "id": "cap-2-3",
+                    "provenance": {
+                      "at": 1760000000000,
+                      "author": {
+                        "kind": "human",
+                        "name": "arkin"
+                      },
+                      "based_on": [
+                        "fnd-own"
+                      ]
+                    },
+                    "revision": 0,
+                    "state": "live"
+                  },
+                  "op": "put_capsule"
+                }
+              ],
+              "kind": "change",
+              "seq": 2
+            },
+            "sub": "ch",
+            "type": "notify"
+          }
+        }
+      ],
+      "note": "The owner's finding on its inline series `own` (closes at 1): the invalidation does not hold; the capsule is live.",
+      "send": {
+        "conn": "a",
+        "msg": {
+          "id": "c1",
+          "ops": [
+            {
+              "op": "put_series",
+              "series": {
+                "data": {
+                  "bars": [
+                    {
+                      "c": 1.0,
+                      "h": 1.0,
+                      "l": 1.0,
+                      "o": 1.0,
+                      "t": 1759000000000,
+                      "v": 1.0
+                    },
+                    {
+                      "c": 1.0,
+                      "h": 1.0,
+                      "l": 1.0,
+                      "o": 1.0,
+                      "t": 1759086400000,
+                      "v": 1.0
+                    },
+                    {
+                      "c": 1.0,
+                      "h": 1.0,
+                      "l": 1.0,
+                      "o": 1.0,
+                      "t": 1759172800000,
+                      "v": 1.0
+                    },
+                    {
+                      "c": 1.0,
+                      "h": 1.0,
+                      "l": 1.0,
+                      "o": 1.0,
+                      "t": 1759259200000,
+                      "v": 1.0
+                    },
+                    {
+                      "c": 1.0,
+                      "h": 1.0,
+                      "l": 1.0,
+                      "o": 1.0,
+                      "t": 1759345600000,
+                      "v": 1.0
+                    }
+                  ],
+                  "kind": "bars"
+                },
+                "id": "own",
+                "source": {
+                  "kind": "inline"
+                }
+              }
+            },
+            {
+              "bar": 4,
+              "evidence": {},
+              "id": "f-own",
+              "kind": "note",
+              "op": "add_fact",
+              "series": "own",
+              "text": "x"
+            },
+            {
+              "capsule": "p",
+              "claim": "p",
+              "confidence": 0.5,
+              "facts": [
+                "f-own"
+              ],
+              "id": "fnd-own",
+              "invalidation": {
+                "kind": "threshold",
+                "op": "gt",
+                "series": "own",
+                "value": 1000000000.0
+              },
+              "op": "add_finding"
+            }
+          ],
+          "type": "command"
+        }
+      }
+    },
+    {
+      "expect": [
+        {
+          "conn": "e",
+          "msg": {
+            "error": {
+              "code": "no_entitlement",
+              "hint": "A condition rests on this series: re-pointing it at a feed would tell you that feed's values through the condition's outcome, and its data licence does not cover you. Ask the host for an entitlement.",
+              "message": "bound series `own` is `no_entitlement`: principal `editor` has no data entitlement for `THYAO`",
+              "path": "/ops/0/series/source"
+            },
+            "id": "c2",
+            "type": "error"
+          }
+        }
+      ],
+      "note": "A condition rests on `own`: the unentitled editor may not re-point it at THYAO (no_entitlement at the source).",
+      "send": {
+        "conn": "e",
+        "msg": {
+          "id": "c2",
+          "ops": [
+            {
+              "op": "put_series",
+              "series": {
+                "id": "own",
+                "source": {
+                  "interval": "1d",
+                  "kind": "bind",
+                  "symbol": "THYAO",
+                  "window": {
+                    "last": 100
+                  }
+                }
+              }
+            }
+          ],
+          "type": "command"
+        }
+      }
+    },
+    {
+      "expect": [
+        {
+          "conn": "e",
+          "msg": {
+            "id": "c3",
+            "seq": 3,
+            "status": "applied",
+            "type": "ack"
+          }
+        },
+        {
+          "conn": "a",
+          "msg": {
+            "event": {
+              "at": 1760000000000,
+              "author": "editor",
+              "cause": "c3",
+              "changes": [
+                {
+                  "finding": {
+                    "claim": "p",
+                    "confidence": 0.5,
+                    "facts": [
+                      "f-own"
+                    ],
+                    "id": "fnd-own",
+                    "invalidation": {
+                      "kind": "threshold",
+                      "op": "gt",
+                      "series": "own",
+                      "value": 2.0
+                    },
+                    "provenance": {
+                      "at": 1760000000000,
+                      "author": {
+                        "kind": "human",
+                        "name": "arkin"
+                      },
+                      "based_on": [
+                        "f-own"
+                      ]
+                    }
+                  },
+                  "op": "put_finding"
+                }
+              ],
+              "kind": "change",
+              "seq": 3
+            },
+            "sub": "ch",
+            "type": "notify"
+          }
+        }
+      ],
+      "note": "The editor rewrites the invalidation (on the inline series: allowed); it still does not hold.",
+      "send": {
+        "conn": "e",
+        "msg": {
+          "id": "c3",
+          "ops": [
+            {
+              "finding": "fnd-own",
+              "invalidation": {
+                "kind": "threshold",
+                "op": "gt",
+                "series": "own",
+                "value": 2.0
+              },
+              "op": "update_finding"
+            }
+          ],
+          "type": "command"
+        }
+      }
+    },
+    {
+      "expect": [
+        {
+          "conn": "a",
+          "msg": {
+            "id": "c4",
+            "seq": 4,
+            "status": "applied",
+            "type": "ack"
+          }
+        },
+        {
+          "conn": "a",
+          "msg": {
+            "event": {
+              "at": 1760000000000,
+              "author": "arkin",
+              "cause": "c4",
+              "changes": [
+                {
+                  "op": "put_series",
+                  "series": {
+                    "id": "own",
+                    "source": {
+                      "interval": "1d",
+                      "kind": "bind",
+                      "symbol": "THYAO",
+                      "window": {
+                        "last": 100
+                      }
+                    }
+                  }
+                }
+              ],
+              "kind": "change",
+              "seq": 4
+            },
+            "sub": "ch",
+            "type": "notify"
+          }
+        },
+        {
+          "conn": "a",
+          "msg": {
+            "event": {
+              "at": 1760000000000,
+              "author": "qp",
+              "changes": [
+                {
+                  "op": "put_series",
+                  "series": {
+                    "id": "own",
+                    "source": {
+                      "anchor_t": 1747872000000,
+                      "interval": "1d",
+                      "kind": "bind",
+                      "symbol": "THYAO",
+                      "window": {
+                        "last": 100
+                      }
+                    }
+                  }
+                }
+              ],
+              "kind": "change",
+              "seq": 5
+            },
+            "sub": "ch",
+            "type": "notify"
+          }
+        }
+      ],
+      "note": "The owner binds `own` to THYAO (anchored by engine entry 5). On THYAO the invalidation holds, but the editor wrote it and is not entitled: it is not evaluated, the capsule stays live.",
+      "send": {
+        "conn": "a",
+        "msg": {
+          "id": "c4",
+          "ops": [
+            {
+              "op": "put_series",
+              "series": {
+                "id": "own",
+                "source": {
+                  "interval": "1d",
+                  "kind": "bind",
+                  "symbol": "THYAO",
+                  "window": {
+                    "last": 100
+                  }
+                }
+              }
+            }
+          ],
+          "type": "command"
+        }
+      }
+    },
+    {
+      "expect": [
+        {
+          "conn": "a",
+          "msg": {
+            "id": "c5",
+            "seq": 6,
+            "status": "applied",
+            "type": "ack"
+          }
+        },
+        {
+          "conn": "a",
+          "msg": {
+            "event": {
+              "at": 1760000000000,
+              "author": "arkin",
+              "cause": "c5",
+              "changes": [
+                {
+                  "finding": {
+                    "claim": "p",
+                    "confidence": 0.5,
+                    "facts": [
+                      "f-own"
+                    ],
+                    "id": "fnd-own",
+                    "invalidation": {
+                      "kind": "threshold",
+                      "op": "gt",
+                      "series": "own",
+                      "value": 2.5
+                    },
+                    "provenance": {
+                      "at": 1760000000000,
+                      "author": {
+                        "kind": "human",
+                        "name": "arkin"
+                      },
+                      "based_on": [
+                        "f-own"
+                      ]
+                    }
+                  },
+                  "op": "put_finding"
+                }
+              ],
+              "kind": "change",
+              "seq": 6
+            },
+            "sub": "ch",
+            "type": "notify"
+          }
+        },
+        {
+          "conn": "a",
+          "msg": {
+            "event": {
+              "at": 1760000000000,
+              "author": "qp",
+              "changes": [
+                {
+                  "capsule": "cap-2-3",
+                  "op": "set_capsule_state",
+                  "state": "invalidated"
+                }
+              ],
+              "evidence": {
+                "anchor_t": 1747872000000,
+                "clean": true,
+                "feeds": [
+                  {
+                    "interval": "1d",
+                    "symbol": "THYAO"
+                  }
+                ],
+                "maturity": "provisional",
+                "series": "own",
+                "t": 1759881600000,
+                "values": [
+                  {
+                    "prev": 89.99,
+                    "series": "own",
+                    "t": 1759881600000,
+                    "value": 91.42
+                  }
+                ]
+              },
+              "kind": "change",
+              "seq": 7
+            },
+            "sub": "ch",
+            "type": "notify"
+          }
+        }
+      ],
+      "note": "The owner rewrites the invalidation (gt 2.5; rewriting the same condition would leave the editor its last writer): now every principal responsible for it is entitled; the engine invalidates the capsule (entry 7).",
+      "send": {
+        "conn": "a",
+        "msg": {
+          "id": "c5",
+          "ops": [
+            {
+              "finding": "fnd-own",
+              "invalidation": {
+                "kind": "threshold",
+                "op": "gt",
+                "series": "own",
+                "value": 2.5
+              },
+              "op": "update_finding"
+            }
+          ],
+          "type": "command"
+        }
+      }
+    },
+    {
+      "expect": [
+        {
+          "conn": "a",
+          "msg": {
+            "id": "c6",
+            "seq": 8,
+            "status": "applied",
+            "type": "ack",
+            "undoes": 7
+          }
+        },
+        {
+          "conn": "a",
+          "msg": {
+            "event": {
+              "at": 1760000000000,
+              "author": "arkin",
+              "cause": "c6",
+              "changes": [
+                {
+                  "capsule": "cap-2-3",
+                  "op": "set_capsule_state",
+                  "state": "live"
+                }
+              ],
+              "kind": "change",
+              "seq": 8
+            },
+            "sub": "ch",
+            "type": "notify"
+          }
+        },
+        {
+          "conn": "a",
+          "msg": {
+            "event": {
+              "at": 1760000000000,
+              "author": "qp",
+              "changes": [
+                {
+                  "capsule": "cap-2-3",
+                  "op": "set_capsule_state",
+                  "state": "invalidated"
+                }
+              ],
+              "evidence": {
+                "anchor_t": 1747872000000,
+                "clean": true,
+                "feeds": [
+                  {
+                    "interval": "1d",
+                    "symbol": "THYAO"
+                  }
+                ],
+                "maturity": "provisional",
+                "series": "own",
+                "t": 1759881600000,
+                "values": [
+                  {
+                    "prev": 89.99,
+                    "series": "own",
+                    "t": 1759881600000,
+                    "value": 91.42
+                  }
+                ]
+              },
+              "kind": "change",
+              "seq": 9
+            },
+            "sub": "ch",
+            "type": "notify"
+          }
+        }
+      ],
+      "note": "O1: undoing the engine's invalidation makes the capsule live; it is evaluated at once and, still holding, invalidated again (entry 9).",
+      "send": {
+        "conn": "a",
+        "msg": {
+          "id": "c6",
+          "ops": [
+            {
+              "op": "undo",
+              "seq": 7
+            }
+          ],
+          "type": "command"
+        }
+      }
+    }
+  ]
+}

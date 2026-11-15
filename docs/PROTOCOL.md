@@ -507,7 +507,15 @@ Motorun kendisi de yazar olabilir (yazar kimliği `qp`, köken yazarı
 `{"kind":"engine","name":"qp","version":…}`). Bir seri verisini, bir hesap serisinin
 parametrelerini ya da bir bulgunun geçersizlik koşulunu değiştiren her girdiden sonra
 otorite canlı (`live`) kapsüllü bulguların geçersizlik koşullarını değerlendirir; koşul
-doğruysa yazarı `qp` olan ayrı bir girdi kapsülü `invalidated` yapar. Etkin niyetlerin
+doğruysa yazarı `qp` olan ayrı bir girdi kapsülü `invalidated` yapar. Bar yazısında ve
+veri olayında değerlendirilenler, değişen bar serisine dayanan koşullardır (§18.8:
+dayanmayanın değeri değişmemiştir). Bir kapsülü yeniden `live` yapan girdiden sonra da
+(ör. motorun geçersizleştirme girdisinin geri alınması, silinen kapsülün geri gelmesi) o
+kapsülün koşulu **hemen** değerlendirilir; koşul hâlâ doğruysa motor kapsülü yeniden
+`invalidated` yapar. Böylece hiçbir kapsül, koşulu doğruyken dayandığı seri tikleyene
+kadar `live` kalmaz ve artımlı yol baştan hesapla bayt düzeyinde aynı kalır (RP2 T5
+denetimi O1). Geçersizleştirme girdisini geri almak kapsülü kalıcı olarak canlandırmaz;
+bunun yolu bulgunun geçersizliğini değiştirmektir (`update_finding`). Etkin niyetlerin
 tetikleyicileri ve `condition` abonelikleri de her girdiden sonra değerlendirilir; kenar
 tetiklemelidir (önce yanlış, şimdi doğru); bir abonelik ya da niyet oluştuğu anda koşul
 zaten doğruysa, o an başlangıç kabul edilir ve olay üretilmez. `condition_met` ve `intent_triggered`
@@ -1129,23 +1137,44 @@ Yetki, bağın çözümüne değil dokümandaki bağa bakar (aynı komutta konan
 Öneri kabulünde önerenin yetkisi denetlenir (öneri anında da: kuru koşu). Sağlayıcı yoksa
 kimse yetkili değildir.
 
-Değerlendirme tarafı da korunur: bu oturumun bir kişisinin yazdığı bulgu geçersizliği,
-o kişi koşulun okuduğu beslemelerden birine yetkili değilse **değerlendirilmez** (sonradan
-olan durumlar: yazdığı belge içi seri bağlı seriye çevrildi, bir geri alma bağı geri
-getirdi). Yazarı oturumun kişisi olmayan bulgular (başka yerden gelen doküman, motor)
-otoritenin görüşüyle değerlendirilir. `condition_met` ve `intent_triggered` aboneye
-kendi yetkisiyle süzülür (yukarıdaki tablo).
+**Koşulu yeniden yönlendirmek de veri okumaktır (RP2 T5 düzeltmeleri).** Bir bulgunun
+geçersizliğinin ya da bir niyetin tetikleyicisinin (hesap girdileri üzerinden,
+özyinelemeli) dayandığı bir seriyi `put_series` ile yeniden yazan kişi, serinin **yeni**
+halinin dayandığı her bağlı beslemeye (kendi bağı ya da hesap girdileri) veri yetkisi
+ister; yoksa `no_entitlement`, yol `/ops/i/series/source` (hesap girdisinde
+`/ops/i/series/source/inputs/k`). Hiçbir koşulun okumadığı seriyi rolü izin veren herkes
+bağlayabilir (aşağıdaki değerlendirme kuralı onu sonradan korur).
+
+**Değerlendirme tarafı.** Bu oturumun kişilerinden, bir bulgunun geçersizliğinden
+**sorumlu** olanların hepsi koşulun okuduğu her bağlı beslemeye yetkili değilse
+geçersizlik **değerlendirilmez** (yanlış sayılır; kapsül `live` kalır). Sorumlular:
+
+1. bulgunun yazarı (köken yazarı);
+2. geçersizliği en son yazan (geçersizliği değiştiren son `add_finding` /
+   `update_finding` / geri alma girdisinin yazarı; geçersizliğe dokunmayan düzenleme
+   sayılmaz);
+3. koşulun dayandığı her serinin (hesap girdileri üzerinden) bağını ya da tanımını en son
+   yazan (son `put_series` / geri alma girdisinin yazarı; motorun çapa damgası sayılmaz,
+   başlangıç dokümanındaki seriler için kimse).
+
+Sorumlulardan oturumun kişisi olmayanlar (başka yerden gelen doküman, motor) sayılmaz:
+yalnız onlar varsa koşul otoritenin görüşüyle değerlendirilir. Kural iki yolu da kapatır:
+yetkisiz bir `editor`'ün yetkili birinin bulgusunun geçersizliğini belge içi bir seriye
+çevirip seriyi sonra (yetkili birine) bağlatması (2. madde), ve yetkisiz birinin bağladığı
+ya da hesap girdisini değiştirdiği seriye yetkili birinin koşul yazması (3. madde); bir
+geri alma bağı geri getirirse geri alan sorumlu olur. Kural iki yolda (artımlı ve baştan)
+aynıdır. `condition_met` ve `intent_triggered` aboneye kendi yetkisiyle süzülür
+(yukarıdaki tablo).
 
 **Açık soru (Arkin) — kalan bir bitlik sızıntı.** Kapsül durumu (`live` → `invalidated`)
-anlam düzlemindedir ve belgeyle herkese gider. Koşulu **yetkili** bir kişi yazdıysa, bu
-durumu okuyan yetkisiz kişi koşulun sonucunu (bir bit: eşik aşıldı mı, ne zaman) öğrenir.
-Yetkisiz kişi koşulu kendisi seçemediği için ikili arama yapamaz; ama yetkili yazar
-isteyerek çok sayıda eşik yazarsa değer sızar. Benzer bir köşe: yetkisiz bir `editor`
-yetkili birinin bulgusunun geçersizliğini belge içi bir seriye çevirir (`update_finding`;
-belge içi seride serbest) ve sonra o seriyi bağlı seriye çevirirse koşul yazarın (yetkili)
-adına değerlendirilir. v0 ikisini de kabul eder; seçenekler: (a) kapsül durumunu da
-yetkisize gizlemek (`finding_state` dahil), (b) koşulun okuduğu serinin bağını yazan
-kişinin yetkisini de istemek, (c) gevşek bırakıp lisans metnine yazmak.
+anlam düzlemindedir ve belgeyle herkese gider. Koşulu **yetkili** kişiler kurduysa (bütün
+sorumlular yetkili), bu durumu okuyan yetkisiz kişi koşulun sonucunu (bir bit: eşik aşıldı
+mı, ne zaman) öğrenir. Yetkisiz kişi koşulu kendisi seçemediği ya da yönlendiremediği için
+ikili arama yapamaz; ama yetkili yazar isteyerek çok sayıda eşik yazarsa değer sızar. v0
+bunu kabul eder; seçenekler: (a) kapsül durumunu da yetkisize gizlemek (`finding_state`
+dahil), (c) gevşek bırakıp lisans metnine yazmak. (Önceki (b) seçeneği — koşulun okuduğu
+serinin bağını yazanın yetkisini de istemek — yukarıdaki değerlendirme kuralıyla
+uygulandı.)
 
 **Uygulama notları (T4, referans otorite).**
 
@@ -1370,6 +1399,9 @@ seri; bar yazısında yazılan seri).
   geçersizlik koşulları): okuduğu serilerden biri `X`'e (hesap girdileri üzerinden,
   geçişli) dayanıyorsa değerlendirilir; dayanmıyorsa değeri değişmemiştir, değerlendirilmez
   ve kenar durumu korunur. Geçersizleşme motor girdisi ve bildirimleri §8.1 ve §15'teki gibi.
+  Bu eşitlik, canlı bir kapsülün koşulunun en son değerlendirildiği andan beri yalnız
+  dayandığı serilerin değişmesiyle değişebilmesine dayanır: kapsülü `live` yapan, bulgusunu
+  ya da dayandığı bir seriyi yazan her girdiden sonra o kapsül değerlendirilir (§8.1).
 - Görünümler: katmanlarının okuduğu seriler (`series`, olgu ve bulgu olgularının serileri,
   `x`/`y`/`y2` başvuruları, renk koşulunun sağ yanı, sabitlerin `series`/`fact` kökenleri)
   ve onların hesap girdileri (geçişli) `X`'i içeriyorsa `view` abonelerine `view_changed`.
@@ -1400,8 +1432,12 @@ seri; bar yazısında yazılan seri).
 işlem uygulananları tersleriyle geri alır); günlük girdisi kopyalayan yolunkiyle bayt bayt
 aynıdır. Motor girdileri de yerinde yazılır. Veri olayında okuma dokümanına yeni bar eklenir,
 düzeltilen bar yerine yazılır (bar dizisinin kopyası yok). Hesap değerleri seri başına akışlı
-durumla tutulur. Kaynak: `crates/qp-session/src/live.rs`, `values.rs`; ölçüm ve tasarım
-`rounds/RP2/experiments/T5.md`.
+durumla tutulur. Koşulların yapıdaki yeri (dayandığı seriler, aralarındaki bağlı seriler ve
+beslemeleri, kapsülün sorumluları; §18.3) bir dizinde tutulur ve günlüğe yalnız bar yazısı
+olmayan bir girdi geldiğinde yeniden kurulur; her koşul, niyet ve kapsül değerini önbellek
+yuvalarından okur; veri yetkisi bir değişimde kişi ve besleme başına bir kez sorulur.
+Kaynak: `crates/qp-session/src/live.rs`, `values.rs`; ölçüm ve tasarım
+`rounds/RP2/experiments/T5.md`, `T5-fixes.md`.
 
 ## 19. Tutarlılık: otorite ile yansının aynı veriye baktığı (RP2)
 

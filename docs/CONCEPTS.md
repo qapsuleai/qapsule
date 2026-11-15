@@ -39,7 +39,7 @@ karşılık kullanılır; dokümanda Türkçesi.
 | Günlük | `LogEntry` / log | Uygulanmış girdilerin sıralı, boşluksuz listesi; her girdide yazar, onaylayan, istek, değişim ve ters değişim. Denetim izidir. |
 | Öneri | `Proposal` | Onay bekleyen yazı: `bekliyor → kabul | ret | süresi doldu`. Dokümanın içinde durur. |
 | Sorgu | `Query` | Dokümanı değiştirmeyen anlamsal okuma. |
-| Abonelik | `Topic` | Bir bulgu, koşul, öneri, dikkat ya da değişim için haber isteği. |
+| Abonelik | `Topic` | Bir bulgu, koşul, öneri, dikkat, değişim ya da bir görünümün verisi (`view`: görünümün okuduğu bir serinin barları değişti, `view_changed`) için haber isteği. |
 | Girdi | `Gesture` | Dokunma, kaydırma, yakınlaştırma; motor yorumlar, dokümanı değiştirmez. |
 | Varlık durumu | presence | Kalıcı olmayan oturum durumu: bakılan aralık, odak, dikkat yönergeleri. Günlüğe girmez. |
 | Dikkat yönergesi | `AttentionDirective` | Bir kişinin nereye, hangi sırayla bakmasının istendiği. |

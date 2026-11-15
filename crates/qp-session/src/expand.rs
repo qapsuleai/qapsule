@@ -427,6 +427,7 @@ pub(crate) fn expand_op(
                     .build())
                 }
             }
+            rebind_entitled(doc, ctx, &s, &sp)?;
             if find_series(doc, &s.id).is_none() {
                 ctx.note_created(&s.id);
             }
@@ -1214,6 +1215,58 @@ pub(crate) fn condition_entitled(
         }
     }
     Ok(())
+}
+
+/// True if a finding's invalidation or an intent's trigger in `doc` rests on series
+/// `id` (itself or through study inputs).
+fn read_by_conditions(doc: &Document, id: &str) -> bool {
+    let reads = |c: &Condition| crate::live::closure_of(doc, c).iter().any(|s| s == id);
+    doc.findings.iter().any(|f| reads(&f.invalidation))
+        || doc
+            .intents
+            .iter()
+            .any(|i| i.trigger.as_ref().is_some_and(reads))
+}
+
+/// Rewriting a series that a condition rests on (a finding's invalidation, an intent's
+/// trigger) re-points that condition at other data: the writer needs the data
+/// entitlement of every bound feed the new version rests on (its binding, or through
+/// its study inputs), else `no_entitlement` at the series' source (§18.3). Otherwise an
+/// unentitled writer could aim a condition someone else wrote, or one they wrote on an
+/// inline series, at a feed they may not read.
+fn rebind_entitled(doc: &Document, ctx: &Ctx<'_>, s: &Series, sp: &str) -> PResult<()> {
+    let src = ptr(sp, "source");
+    let blocked = match &s.source {
+        SeriesSource::Bind { .. } => s
+            .binding()
+            .map(|b| b.feed_key())
+            .filter(|k| !ctx.plane.entitled(ctx.speaker, k))
+            .map(|k| {
+                (
+                    s.id.clone(),
+                    crate::plane::Blocked::unentitled(&s.id, ctx.speaker, &k),
+                    src.clone(),
+                )
+            }),
+        SeriesSource::Study { inputs, .. } => inputs.iter().enumerate().find_map(|(i, inp)| {
+            ctx.plane
+                .unentitled(doc, ctx.speaker, inp)
+                .map(|b| (inp.clone(), b, ptr(&ptr(&src, "inputs"), i)))
+        }),
+        _ => None,
+    };
+    let Some((about, b, path)) = blocked else {
+        return Ok(());
+    };
+    if !read_by_conditions(doc, &s.id) {
+        return Ok(());
+    }
+    let mut e = b.error(&about, &path);
+    e.hint = Some(
+        "A condition rests on this series: re-pointing it at a feed would tell you that feed's values through the condition's outcome, and its data licence does not cover you. Ask the host for an entitlement."
+            .to_owned(),
+    );
+    Err(e)
 }
 
 /// `append_bars` / `update_last_bar` are for inline series (§18.2).

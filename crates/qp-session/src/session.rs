@@ -76,6 +76,9 @@ pub(crate) struct Sub {
     /// Cache slots of a condition's series, with the cache generation they belong to
     /// (incremental live path: which ticks affect the condition).
     pub memo: Option<(u64, [Option<usize>; 2])>,
+    /// Where a condition sits in the structure, with the structure generation it was
+    /// derived for (incremental live path).
+    pub watch: Option<(u64, crate::live::CondInfo)>,
 }
 
 #[derive(Debug)]
@@ -141,6 +144,20 @@ pub struct Session {
     pub(crate) view_reads: Option<BTreeMap<String, BTreeSet<String>>>,
     /// (RP2/T8) Asserted data-derived claims, gap marks and queued `claim` events (§19).
     pub(crate) claims: crate::claims::Claims,
+    /// Structure generation: bumped by every log entry that is not only bar writes (the
+    /// live index and the subscriptions' condition info belong to one generation).
+    pub(crate) struct_gen: u64,
+    /// The live path's index of the structure (`None` or of an older generation: rebuilt
+    /// on demand).
+    pub(crate) live_index: Option<crate::live::LiveIndex>,
+    /// Series id → the principal whose entry last wrote it (`put_series`; engine entries
+    /// such as anchor stamps do not count). Series of the initial document have none.
+    pub(crate) series_writer: BTreeMap<String, String>,
+    /// Finding id → the principal whose entry last wrote its invalidation (§18.3).
+    pub(crate) invalidation_writer: BTreeMap<String, String>,
+    /// Bumped whenever `intent_state` is written outside the live path (the live index
+    /// keeps a copy of each intent's state, valid for one epoch).
+    pub(crate) intent_epoch: u64,
 }
 
 /// Resolves `rel` under `root`, refusing absolute paths and paths that leave `root`.
@@ -309,6 +326,11 @@ impl Session {
             pending_views: Vec::new(),
             view_reads: None,
             claims: crate::claims::Claims::default(),
+            struct_gen: 1,
+            live_index: None,
+            series_writer: BTreeMap::new(),
+            invalidation_writer: BTreeMap::new(),
+            intent_epoch: 1,
         };
         // Resolve the bindings on load (§18.3); a first ready resolution is anchored by
         // an engine entry. No connection exists yet: its notifications go nowhere.
@@ -1204,7 +1226,11 @@ impl Session {
             proposal,
             index: None,
         }];
-        let inverse = crate::live::apply_in_place(&mut self.doc, &changes)
+        let restore = crate::live::Restore {
+            initial: &self.initial,
+            log: &self.log,
+        };
+        let inverse = crate::live::apply_in_place(&mut self.doc, &changes, restore)
             .map_err(|m| invalid(format!("cannot store proposal: {m}"), "/ops"))?;
         let entry = LogEntry {
             reason: reason.clone(),
@@ -1452,7 +1478,77 @@ impl Session {
         for (id, d) in bars {
             self.pending_views.push((id, d, entry.seq));
         }
+        if !entry.changes.iter().all(|c| {
+            matches!(
+                c,
+                ChangeOp::AppendBars { .. }
+                    | ChangeOp::SetLastBar { .. }
+                    | ChangeOp::TruncateBars { .. }
+            )
+        }) {
+            self.struct_gen += 1;
+        }
+        self.note_writers(&entry);
         self.log.push(entry);
+    }
+
+    /// Notes who wrote the series and finding invalidations `entry` puts (§18.3: the
+    /// principals responsible for a condition). Engine entries write no meaning of their
+    /// own (an anchor stamp keeps the binding's writer).
+    fn note_writers(&mut self, entry: &LogEntry) {
+        if entry.author == ENGINE_PRINCIPAL {
+            return;
+        }
+        for c in &entry.changes {
+            match c {
+                ChangeOp::PutSeries { series, .. } => {
+                    self.series_writer
+                        .insert(series.id.clone(), entry.author.clone());
+                }
+                ChangeOp::PutFinding { finding, .. } => {
+                    let before = entry.inverse.iter().find_map(|i| match i {
+                        ChangeOp::PutFinding { finding: old, .. } if old.id == finding.id => {
+                            Some(&old.invalidation)
+                        }
+                        _ => None,
+                    });
+                    if before != Some(&finding.invalidation) {
+                        self.invalidation_writer
+                            .insert(finding.id.clone(), entry.author.clone());
+                    }
+                }
+                ChangeOp::Delete { id } => {
+                    self.series_writer.remove(id);
+                    self.invalidation_writer.remove(id);
+                }
+                _ => {}
+            }
+        }
+    }
+
+    /// The principals of this session responsible for finding `f`'s invalidation, who must
+    /// all be entitled to every bound feed it reads for it to be evaluated (§18.3): the
+    /// finding's author, whoever last wrote its invalidation, and whoever last wrote each
+    /// series it rests on (`closure`, through every study input). Authors that are not
+    /// principals of this session (another document, the engine) are left out: the
+    /// authority's own view.
+    pub(crate) fn responsible(&self, f: &qp_schema::Finding, closure: &[String]) -> Vec<String> {
+        let mut who: Vec<String> = Vec::new();
+        let mut add = |p: &str| {
+            if self.principal(p).is_some() && !who.iter().any(|w| w == p) {
+                who.push(p.to_owned());
+            }
+        };
+        add(&self.principal_of(&f.provenance.author));
+        if let Some(p) = self.invalidation_writer.get(&f.id) {
+            add(p);
+        }
+        for id in closure {
+            if let Some(p) = self.series_writer.get(id) {
+                add(p);
+            }
+        }
+        who
     }
 
     /// Writes the pending anchor stamps (§18.3) as one engine entry: `put_series` of each
@@ -1637,7 +1733,11 @@ impl Session {
     ) -> Option<Seq> {
         // In place, no document copy: a change that does not fit rolls the earlier ones
         // back.
-        let inverse = crate::live::apply_in_place(&mut self.doc, &changes).ok()?;
+        let restore = crate::live::Restore {
+            initial: &self.initial,
+            log: &self.log,
+        };
+        let inverse = crate::live::apply_in_place(&mut self.doc, &changes, restore).ok()?;
         let seq = self.seq() + 1;
         self.committed(LogEntry {
             reason: None,
@@ -1714,10 +1814,37 @@ impl Session {
                 _ => None,
             })
             .collect();
-        if !all && findings.is_empty() {
+        // Capsules the entry makes live (an undo of an invalidation, a capsule put back):
+        // evaluated now, so that a capsule never stays live with a holding invalidation
+        // until a series it rests on ticks (RP2 T5 audit O1).
+        let revived: BTreeSet<String> = entry
+            .changes
+            .iter()
+            .filter_map(|c| match c {
+                ChangeOp::SetCapsuleState {
+                    capsule,
+                    state: CapsuleState::Live,
+                } => Some(capsule.clone()),
+                ChangeOp::PutCapsule { capsule, .. } if capsule.state == CapsuleState::Live => {
+                    Some(capsule.id.clone())
+                }
+                _ => None,
+            })
+            .collect();
+        if !all && findings.is_empty() && revived.is_empty() {
             return Vec::new();
         }
-        self.invalidate(all, &findings)
+        let candidates: Vec<(String, String)> = self
+            .doc
+            .capsules
+            .iter()
+            .filter(|c| {
+                c.state == CapsuleState::Live
+                    && (all || findings.contains(&c.finding) || revived.contains(&c.id))
+            })
+            .map(|c| (c.id.clone(), c.finding.clone()))
+            .collect();
+        self.invalidate_these(candidates)
     }
 
     /// Engine entries invalidating live capsules (all, or those of `findings`) whose
@@ -1749,11 +1876,15 @@ impl Session {
             }
             // A principal of this session without the data entitlement of the feeds its
             // condition reads would learn them from its capsule's state (§18.3): its
-            // condition is not evaluated (e.g. its series was rebound after it was
-            // written, or an undo brought a binding back).
-            let author = self.principal_of(&f.provenance.author);
-            if self.principal(&author).is_some()
-                && !crate::live::hears(&self.plane, &self.doc, &author, &cond)
+            // condition is not evaluated unless every principal responsible for it (the
+            // author, whoever last wrote the invalidation, whoever last wrote a series it
+            // rests on) is entitled (e.g. its series was rebound after it was written, an
+            // undo brought a binding back, an editor rewrote the invalidation).
+            let closure = crate::live::closure_of(&self.doc, &cond);
+            let who = self.responsible(f, &closure);
+            if !who
+                .iter()
+                .all(|p| crate::live::hears(&self.plane, &self.doc, p, &cond))
             {
                 continue;
             }
@@ -1936,6 +2067,7 @@ impl Session {
             state.insert(id, now);
         }
         self.intent_state = state;
+        self.intent_epoch += 1;
         fired
     }
 
@@ -2116,6 +2248,7 @@ impl Session {
             topic,
             last,
             memo: None,
+            watch: None,
         });
         Ok(())
     }

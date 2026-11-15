@@ -85,6 +85,7 @@ değişkende aynı bölüm; her ajan taze süreç, kendi rastgele kimlikleriyle.
 | Ölçüm | Değer |
 |-------|-------|
 | `QP_VERIFY_BROWSER=1 scripts/verify.sh` | 14/14 PASS (R2'de `views` adımı eklendi) |
+| CI (GitHub, Linux x86_64) | `r2/int` 43658183855 başarılı; `main` birleştirmesi (`498eac1`) 43659782475 başarılı |
 | Uygunluk dökümleri | 27 (17 RD1 + 10 R2); inproc/serve/mcp 27/27; oturumun kendi 4 dökümü de üç taşımada |
 | Hesap özeti | `7b1e99d40889f83c` (aarch64, x86_64 Rosetta, wasm32) — değişmedi |
 | Altın görseller | `sample.png`, `stress.png` değişmedi; 7 yeni (`fixtures/golden/views/`) |

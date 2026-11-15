@@ -238,7 +238,12 @@ impl Transport for Serve {
         if let Some(e) = outs.iter().find_map(|o| o.pointer("/host/error")) {
             return Err(format!("data event rejected: {e}"));
         }
-        Ok(outs)
+        // Host notices (`{"host":{"gap":…}}`, §18.4) are for the host, not for a
+        // connection: the in-process transports do not see them either.
+        Ok(outs
+            .into_iter()
+            .filter(|o| o.get("host").is_none())
+            .collect())
     }
 
     fn finish(&mut self) -> Result<FinalState, String> {

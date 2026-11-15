@@ -56,7 +56,7 @@ pub use apply::{
 };
 pub use canon::{canon_document, thresholds};
 pub use explain::explain_scene;
-pub use plane::DataError;
+pub use plane::{DataError, DataOutcome, HostNotice};
 pub use present::profile_for;
 pub use provider::DocProvider;
 pub use qp_grammar::CompileOptions;

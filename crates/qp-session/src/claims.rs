@@ -463,6 +463,18 @@ impl crate::session::Session {
                         continue;
                     }
                 }
+                // Condition and intent claims follow their events (§18.3, T4 fix): not
+                // to a principal without the data entitlement of every feed they rest
+                // on. Capsule claims follow `finding_state`: sent, values stripped.
+                if !matches!(p.claim, ClaimRef::Capsule { .. })
+                    && !p
+                        .evidence
+                        .feeds
+                        .iter()
+                        .all(|k| self.plane.entitled(&c.principal, k))
+                {
+                    continue;
+                }
                 for s in &c.subs {
                     if !matches!(s.topic, qp_schema::protocol::Topic::Claims {}) {
                         continue;

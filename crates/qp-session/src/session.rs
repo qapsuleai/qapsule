@@ -19,7 +19,7 @@ use crate::expand::{
     check_condition, expand_ops, need_finding, need_proposal, summarize_ops, undone_set, Ctx,
 };
 use crate::locate::locate;
-use crate::plane::{reading_doc, DataError, DataPlane, Provider, Reader};
+use crate::plane::{reading_doc, DataError, DataOutcome, DataPlane, Provider, Reader};
 use crate::present::profile_for;
 use crate::select;
 use crate::values::{eval_condition, holds, Cache};
@@ -411,12 +411,13 @@ impl Session {
     /// A host frame of the line transport (`{"host":{"data":<DataEvent>}}`, §3, §18.4):
     /// transport level and host only — `qp serve` accepts it only with `--host-frames`,
     /// on the host's own stream. Not a protocol message; it never enters the log.
-    /// Returns the notifications the event causes.
+    /// Returns the notifications the event causes and the notices for the host (a gap,
+    /// a binding that became stale; `qp serve` writes them as `{"host":{"gap":…}}`).
     ///
     /// # Errors
     /// A malformed frame or event, or a [`DataError`], as text (`qp serve` writes it as
     /// `{"host":{"error":…}}`).
-    pub fn handle_host_frame(&mut self, line: &str) -> Result<Vec<OutboundLine>, String> {
+    pub fn handle_host_frame(&mut self, line: &str) -> Result<DataOutcome, String> {
         let v: Value =
             serde_json::from_str(line).map_err(|e| format!("host frame is not JSON: {e}"))?;
         let host = v
@@ -433,7 +434,7 @@ impl Session {
             .ok_or("unknown host frame (expected `data`)")?;
         let ev = <qp_schema::data::DataEvent as serde::Deserialize>::deserialize(ev)
             .map_err(|e| format!("data event: {e}"))?;
-        self.data_event(&ev).map_err(|e| e.to_string())
+        self.host_data_event(&ev).map_err(|e| e.to_string())
     }
 
     /// THE boundary: one raw inbound message on connection `conn`. Checks the size,
@@ -597,7 +598,11 @@ impl Session {
             log: &self.log,
             undoes: None,
             data: self.reader(),
+            plane: &self.plane,
         };
+        // Selectors read no bars (§17): they resolve over the document itself, never the
+        // reading document, so a scratch copy never copies bound bars (`add_fact` reads
+        // them through `ctx.data`).
         // The live document is used until an op before the last selector changes it;
         // only then is one scratch copy made, and later ops change that copy in place
         // (a failing op is rolled back with the inverses of its applied changes). No
@@ -611,7 +616,7 @@ impl Session {
         for (i, g) in groups.iter().enumerate().take(last + 1) {
             if g.iter().any(|s| select::is_selector(msg, s)) {
                 let r = select::Resolver {
-                    doc: scratch.as_ref().unwrap_or(rd!(self)),
+                    doc: scratch.as_ref().unwrap_or(&self.doc),
                     root: Some(&self.schema),
                 };
                 select::resolve_group(&r, msg, g, &mut out)?;
@@ -626,12 +631,12 @@ impl Session {
             else {
                 continue;
             };
-            let cur = scratch.as_ref().unwrap_or(rd!(self));
+            let cur = scratch.as_ref().unwrap_or(&self.doc);
             if let Ok(cs) = crate::expand::expand_op(cur, &op, &p, &mut ctx) {
                 if cs.is_empty() {
                     continue;
                 }
-                let doc = scratch.get_or_insert_with(|| rd!(self).clone());
+                let doc = scratch.get_or_insert_with(|| self.doc.clone());
                 apply_or_roll_back(doc, &cs);
             }
         }
@@ -1103,6 +1108,7 @@ impl Session {
                 log: &self.log,
                 undoes: None,
                 data: self.reader(),
+                plane: &self.plane,
             };
             let ex = expand_ops(&self.doc, ops, "/ops", &mut ctx)?;
             let created = ctx.created;
@@ -1157,6 +1163,7 @@ impl Session {
             log: &self.log,
             undoes: None,
             data: self.reader(),
+            plane: &self.plane,
         };
         let ex = expand_ops(&self.doc, ops, "/ops", &mut ctx)?;
         let created = ctx.created;
@@ -1255,6 +1262,7 @@ impl Session {
             log: &self.log,
             undoes: None,
             data: self.reader(),
+            plane: &self.plane,
         };
         let ex = expand_ops(&self.doc, &pr.ops, "/ops", &mut ctx).map_err(|mut e| {
             e.message = format!(
@@ -1483,12 +1491,34 @@ impl Session {
         &mut self,
         ev: &qp_schema::data::DataEvent,
     ) -> Result<Vec<OutboundLine>, DataError> {
+        self.host_data_event(ev).map(|o| o.lines)
+    }
+
+    /// [`Session::data_event`] with the notices for the host (§18.4): a `seq` gap or a
+    /// binding that became `stale` is not an error (the event was taken: nothing to
+    /// apply), but the host must re-resolve ([`Session::refresh_bindings`]) or fill the
+    /// gap. A host should use this entry point; `qp serve --host-frames` writes each
+    /// notice as a host frame.
+    ///
+    /// # Errors
+    /// As [`Session::data_event`].
+    pub fn host_data_event(
+        &mut self,
+        ev: &qp_schema::data::DataEvent,
+    ) -> Result<DataOutcome, DataError> {
         let outcome = self.plane.apply_event(ev)?;
+        let notices = outcome.notices;
         if outcome.changed.is_empty() {
-            return Ok(Vec::new());
+            return Ok(DataOutcome {
+                lines: Vec::new(),
+                notices,
+            });
         }
         self.data_changed(outcome.changed);
-        Ok(self.settle_data())
+        Ok(DataOutcome {
+            lines: self.settle_data(),
+            notices,
+        })
     }
 
     /// Resolves again every bound series that is not ready (after a gap, a limit, a
@@ -1705,6 +1735,16 @@ impl Session {
             if self.cond_blocked(&cond) {
                 continue;
             }
+            // A principal of this session without the data entitlement of the feeds its
+            // condition reads would learn them from its capsule's state (§18.3): its
+            // condition is not evaluated (e.g. its series was rebound after it was
+            // written, or an undo brought a binding back).
+            let author = self.principal_of(&f.provenance.author);
+            if self.principal(&author).is_some()
+                && !crate::live::hears(&self.plane, &self.doc, &author, &cond)
+            {
+                continue;
+            }
             if holds(rd!(self), &mut self.cache, &cond) {
                 let changes = vec![ChangeOp::SetCapsuleState {
                     capsule: cap.clone(),
@@ -1749,6 +1789,15 @@ impl Session {
                     continue;
                 };
                 let condition = condition.clone();
+                if !crate::live::hears(
+                    &self.plane,
+                    &self.doc,
+                    &self.conns[ci].principal,
+                    &condition,
+                ) {
+                    // Not evaluated for a subscriber without the data entitlement (§18.3).
+                    continue;
+                }
                 if self.cond_blocked(&condition) {
                     // Not evaluated; the edge state is kept (§18.3).
                     continue;
@@ -1789,12 +1838,33 @@ impl Session {
             }
         }
         let fired = self.eval_intents(seq);
-        let mut intents = Vec::new();
+        let intents = self.intent_lines(fired);
+        (conds, intents)
+    }
+
+    /// `intent_triggered` events to every `intents` subscriber entitled to the bound feeds
+    /// the intent's trigger reads (§18.3), by connection and subscription order.
+    pub(crate) fn intent_lines(&self, fired: Vec<Event>) -> Vec<OutboundLine> {
+        let mut lines = Vec::new();
         for ev in fired {
+            let trigger = match &ev {
+                Event::IntentTriggered { intent, .. } => self
+                    .doc
+                    .intents
+                    .iter()
+                    .find(|i| &i.id == intent)
+                    .and_then(|i| i.trigger.as_ref()),
+                _ => None,
+            };
             for c in &self.conns {
+                if let Some(t) = trigger {
+                    if !crate::live::hears(&self.plane, &self.doc, &c.principal, t) {
+                        continue;
+                    }
+                }
                 for s in &c.subs {
                     if matches!(s.topic, Topic::Intents {}) {
-                        intents.push(out(
+                        lines.push(out(
                             &c.id,
                             ServerMsg::Notify {
                                 sub: s.id.clone(),
@@ -1810,7 +1880,7 @@ impl Session {
                 }
             }
         }
-        (conds, intents)
+        lines
     }
 
     fn eval_intents(&mut self, seq: Seq) -> Vec<Event> {
@@ -2001,6 +2071,13 @@ impl Session {
                     ));
                 }
                 check_condition(&self.doc, condition, "/topic/condition")?;
+                crate::expand::condition_entitled(
+                    &self.plane,
+                    &self.doc,
+                    &self.conns[ci].principal,
+                    condition,
+                    "/topic/condition",
+                )?;
                 last = Some(holds(rd!(self), &mut self.cache, condition));
             }
             Topic::Attention { principal: Some(p) } => {

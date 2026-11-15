@@ -1,0 +1,15 @@
+# R3/M3 adayı "confirm" (teyit merkezli birleşim). Bağımsız crate: boş [workspace].
+[package]
+name = "m3-confirm"
+version = "0.1.0"
+edition = "2021"
+publish = false
+
+[workspace]
+
+[dependencies]
+qp-capsule = { path = "../../../../../crates/qp-capsule" }
+qp-schema = { path = "../../../../../crates/qp-schema" }
+
+[lints.rust]
+unsafe_code = "forbid"

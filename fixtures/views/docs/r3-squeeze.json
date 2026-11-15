@@ -4,7 +4,7 @@
       "depth": "capsule",
       "finding": "fnd.SYN01.squeeze-neutral.245",
       "glyphs": [],
-      "headline": "SYN01 6 bar önce Bollinger bandının son 120 barın en darına indiği bir sıkışmaya girdi; bant 4.48–4.70.",
+      "headline": "SYN01'de 6 bardır sıkışma (yön belirsiz) sürüyor. Henüz karnesi yok.",
       "id": "cap.SYN01.squeeze-neutral.245",
       "provenance": {
         "at": 1702969200000,
@@ -117,7 +117,7 @@
   ],
   "findings": [
     {
-      "claim": "SYN01 6 bar önce Bollinger bandının son 120 barın en darına indiği bir sıkışmaya girdi; bant 4.48–4.70.",
+      "claim": "SYN01'de 6 bardır sıkışma (yön belirsiz) sürüyor. Henüz karnesi yok.",
       "confidence": 0.5,
       "facts": [
         "fx.SYN01.squeeze.bandwidth.squeeze.245"

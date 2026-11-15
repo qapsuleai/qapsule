@@ -149,3 +149,28 @@ döngünün betik kopyasıyla denendi). `g1-glyphs-*` görselleri bir döküm de
 `views` 8 görünüm ×2 bayt eşit (yeni dörtlü listede değil, bkz. §5); `wasm` ham 1 943 806 /
 gzip -9 616 022 B; `digest` arm64 = x86_64 `7b1e99d40889f83c`; `conform` 36 döküm × inproc,
 serve, mcp.
+
+## 8. Sonradan düzeltme: kart cümlesi ürün gerçekleştiricisinden
+
+Dal `r3/s-views-fix`. §4'teki R3 örneklerinin cümlesi fikstüre özel elle yazılmış bir
+şablondu (ondalık nokta, ürün cümlesi değil). Üreteç (`capsule_gen.rs::headline`) artık
+ürün cümlesini kullanır: `qp_capsule::sentence::sentences_at(motor, &realize::Template,
+kapsül, barlar, now, &Reader::entitled())` Türkçesi; motor kesilmiş barlarda yeniden
+koşulur. Tohumlar, örnekler, barlar, olgular ve bulgular aynı. Yeni cümleler:
+
+- kırılım: "SYN03 6 bar önce 135,56'daki direnci yukarı kırdı (kapanış 136,20): yukarı
+  kırılım. 4 bar önce aynı aileden yeni bir kanıtla güçlendi. Artık geçerli değil. Karnesi
+  henüz az örnekli: 7 seferin 3'ünde tuttu."
+- sıkışma: "SYN01'de 6 bardır sıkışma (yön belirsiz) sürüyor. Henüz karnesi yok."
+- uyumsuzluk: "SYN01'de 6 bar önce yukarı dönüş işareti çıktı: fiyat yeni dip yaparken RSI
+  daha yüksek dip yaptı (fiyat 4,43, RSI 40,1). Hâlâ geçerli olup olmadığı bilinmiyor.
+  Karnesi henüz az örnekli: 3 seferin 1'inde tuttu."
+
+Yeniden üretilenler: `c1-sentence.json`, `docs/r3-*.json`, `c2-capsule.png` (c3–c5
+görselleri ve bütün explain dosyaları cümleyi çizmediği için bayt eşit kaldı). Ürün
+cümlesi kartta dört satırda kesiliyordu ("Artık geçerli …"); **kart düzeni en küçük
+değişiklikle düzeltildi** (`depth::capsule_card_view`): kart/fiyat panel ağırlığı 2:3 →
+3:2, cümle 13 → 12 px. Kırılım cümlesi artık altı satırda tam görünür. Bu kural yalnız
+`story` taşıyan kapsüllerde çalışır; R2 altınları (`d1`, `d2`) değişmedi.
+
+`QP_VERIFY_BROWSER=0 scripts/verify.sh` (`CARGO_INCREMENTAL=0`): **verify: OK**; `views` 12 görünüm ×2 bayt eşit, `test` ve `golden` PASS.

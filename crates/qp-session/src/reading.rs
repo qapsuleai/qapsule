@@ -70,6 +70,7 @@ pub(crate) fn panel_layers(view: &View, p: &ScenePanel) -> (ScaleInfo, Vec<Layer
             items: l.items.len() as u64,
             last: l.items.last().map(|i| i.values.clone()).unwrap_or_default(),
             select: None,
+            binding: None,
         })
         .collect();
     (scale, layers)

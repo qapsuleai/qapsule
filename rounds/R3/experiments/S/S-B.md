@@ -144,4 +144,8 @@ döngünün betik kopyasıyla denendi). `g1-glyphs-*` görselleri bir döküm de
 ## 7. Doğrulama
 
 `cargo fmt --all`, `cargo clippy --workspace --all-targets -- -D warnings`,
-`cargo test --workspace` ve `QP_VERIFY_BROWSER=0 scripts/verify.sh`: sonuç aşağıda.
+`cargo test --workspace` ve `QP_VERIFY_BROWSER=0 scripts/verify.sh` (`CARGO_INCREMENTAL=0`, 41aedc8 öncesi ağaç = 9425d12):
+**verify: OK** (1089 s). Bütün adımlar PASS; `browser` SKIP (`QP_VERIFY_BROWSER=0`).
+`views` 8 görünüm ×2 bayt eşit (yeni dörtlü listede değil, bkz. §5); `wasm` ham 1 943 806 /
+gzip -9 616 022 B; `digest` arm64 = x86_64 `7b1e99d40889f83c`; `conform` 36 döküm × inproc,
+serve, mcp.

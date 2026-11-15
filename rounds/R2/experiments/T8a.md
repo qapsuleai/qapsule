@@ -89,13 +89,15 @@ Panel/katman, işlemin `view`'ındaki görünümde aranır (hedefte `target.view
 
 Hepsi `crates/qp-session/tests/selectors.rs::r_tasks`'te, gizli kurulumun eşiyle (SMA50,
 bar 120/185 kırılım olguları ve bulguları) **dokümanın hiçbir kimliği yazılmadan**
-çalıştırılıyor ve ölçütleri denetleniyor (20/20; R14 nokta sorgusu henüz `unsupported`,
-görünüm seçicisi çözülüyor). Ajanın kendi seçtiği yeni kimlikler (`rsi7`) serbest.
+çalıştırılıyor ve ölçütleri denetleniyor (20/20). R14: `r2/int` (0cfaa26) birleştirmesinden
+sonra nokta sorgusu çalışıyor; `hit` görünüm seçicisini çözüyor ve `result.resolved`
+döndürüyor (test artık gerçek `hit` cevabı istiyor). Ajanın kendi seçtiği yeni kimlikler
+(`rsi7`) serbest.
 
 | # | Mesaj (işlemler / sorgu) |
 |---|------|
 | R01 | `add_study {id:"rsi7", study:"rsi", inputs:[{"kind":"bars"}], params:{period:7}}` + `insert_panel {view:{}, panel:{name:"rsi7", y:{kind:"linear"}}, after:{"mark":"candle"}, layers:[{mark:"line", series:"rsi7"}]}` |
-| R02 | `set_encoding {view:{}, layer:{"shows":{"study":"bollinger"}}, encoding:{y:"middle"}}` + `insert_layer {view:{}, layer:{mark:"line", series:{"study":"bollinger"}, panel:{"mark":"candle"}, encoding:{y:"upper", color:"down"}}}` + aynısı `y:"lower"` |
+| R02 | `split_layer {view:{}, layer:{"shows":{"study":"bollinger"}}}` + `set_encoding {view:{}, layer:{"output":"upper"}, encoding:{color:"down"}}` (T9 sonrası; eski yol — `y:"middle"` + iki `insert_layer` — da çalışır) |
 | R03 | `set_emphasis {view:{}, emphasis:[{target:{item:{"finding":{"kind":"breakout","latest":true}}}, kind:"highlight"}]}` |
 | R04 | `{"kind":"present","finding":{"kind":"breakout","latest":true},"surface":"watch"}` |
 | R05 | `set_scale {view:{}, scale:{"panel":{"mark":"candle"}}, kind:"log"}` |
@@ -141,9 +143,8 @@ görevlerde gerekmedi (ama özet ipuçlarında `value` "70 kuralı" için çık�
 2. **Doküman büyüdükçe seçici belirsizleşir.** `{"study":"rsi"}` ikinci bir RSI eklenince
    `ambiguous` olur; hata adayları ve düzeltme yolunu verir ama bir tur harcar. Kalıcı bir
    kayıtta (anlatım, niyet) zaten kimlik saklanıyor, sorun yalnız yazım anında.
-3. **R02 hâlâ zor**: tek Bollinger katmanını bölmek gramer sorunu; seçici yalnız katmanı
-   bulur. `output:"upper"` bölünmemiş katmana da uyar (o katman upper'ı da çizer) — renk
-   verilirse üç bant birden boyanır.
+3. **R02** (T9'da düzeltildi, §9): `output` artık yalnız o çıktıyı tek başına çizen katmana
+   uyar; bölünmemiş katmanda `invalid` + hazır `split_layer` dizisi döner.
 4. **Sözlük bilgisi gerekiyor**: `mark:"candle"` = "fiyat paneli" çıkarımını ajan yapmalı;
    panel adı yoksa "price" adıyla başvurulamaz (adlar dokümanda varsa `name` çalışır).
 5. **Şema uzlaşması**: `Op` hem istek hem saklanan istek (günlük, öneri) tipi; saklanan
@@ -158,6 +159,31 @@ görevlerde gerekmedi (ama özet ipuçlarında `value` "70 kuralı" için çık�
 9. `feed` rolü seçici kullanamaz (okuma yetkisi yok; çözüm dokümanı sızdırırdı).
 10. Seçicili komutta işlem başına doküman kopyası: büyük dokümanda (10 000 bar) maliyet
     ölçülmedi.
+
+## 9. T9 sonrası düzeltmeler
+
+T9 ölçümü bu tasarımı seçti: ilk denemede 19/20 (kimliksiz; B 10/20, taban 2/20), sonunda
+19/20. Tek başarısızlık R02: `{output:"upper"}` üç çıktıyı birlikte çizen tek Bollinger
+katmanına uydu, `set_encoding` üç bandı birden boyadı ve `applied` döndü — sessiz yanlış
+sonuç. Düzeltmeler:
+
+1. **`output` kuralı daraltıldı:** katman o çıktıyı **tek başına** çizmeli (`y` onu
+   adlandırır ya da `y` yok ve tek varsayılan çıktısı odur). Birlikte çizen katman uymaz.
+   Hiçbir katman uymuyor ama çıktıyı başkalarıyla çizen bir katman varsa `invalid`:
+   aday o katman, `hint` hazır dizi
+   `[{"op":"split_layer","view":"main","layer":"l1"},{"op":"set_encoding","view":"main","layer":{"output":"upper"},"encoding":{…}}]`.
+   Böylece aynı hata artık sessiz değil, düzeltme yolu da tek adım.
+2. **Yeni işlem `split_layer {view, layer}`:** çok çıktılı `line`'ı çıktı başına katmana
+   böler (açık `y`, aynı panel, aynı yer, aynı kodlama; kimlikler en küçük kullanılmayan
+   `l<k>`, bölünenin kimliği yeniden kullanılmaz). Değişim `delete_layer` + `insert_layer`'lar,
+   geri alma baytı geri getirir; `ack.created` çıktı sırasıyla. Seçiciler işlem işlem
+   çözüldüğünden `[split_layer {layer:{shows:{study:"bollinger"}}}, set_encoding
+   {layer:{output:"upper"}, …}]` tek komutta çalışır (test:
+   `split_then_style_the_upper_band_in_one_command`, `t-select.json`).
+3. **Otorite hatası (T9 buldu):** `screen` panelleri panel kimliği sırasıyla veriyordu,
+   §5.4 yığın sırası diyor. `move_panel` sonrası doküman [0,2,1], `screen` [0,1,2]
+   gösteriyordu. Artık yığın sırası (test: `screen_lists_panels_in_stack_order`); RD1'in 17
+   dökümü değişmeden geçiyor (orada kimlik sırası = yığın sırası).
 
 ## 8. Doğrulama
 

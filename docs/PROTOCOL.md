@@ -334,6 +334,7 @@ Kalıcı, adım adım bir **anlatım çizelgesi** dikkat değil, dokümandır: `
 | `remove_layer` | `view`, `index` | **Kullanımdan kalktı:** katmanı konumla siler; `delete_layer` kullanın. |
 | `insert_layer` | `view`, `layer`, `after?`, `before?` | (R2) Katmanı kimlikle yerleştirir: `after` katmanından hemen sonra, `before`'dan hemen önce, yoksa sona. `layer.panel` var olan bir panel id'si. Sabitlerin kökeni denetlenir (§13 `no_origin`). Değişim: `insert_layer` (konumla, otoritenin hesapladığı). |
 | `delete_layer` | `view`, `layer` | (R2) Katmanı kimlikle siler. |
+| `split_layer` | `view`, `layer` | (R2/T8a) Çok çıktılı bir `line` katmanını (`y`'siz; Bollinger: `upper`/`middle`/`lower`, MACD: `macd`/`signal`) çıktı başına bir katmana böler: her biri açık `y` ile, aynı panelde, aynı çizim yerinde (çıktı sırasıyla), aynı kodlamayla. Yeni kimlikler en küçük kullanılmayan `l<k>` (bölünen kimlik yeniden kullanılmaz). Değişim: `delete_layer` + `insert_layer`'lar (tersi baytı geri getirir). `ack.created`: yeni katman kimlikleri, çıktı sırasıyla. Tek çıktılı katman → `invalid`; vurgu hedefiyse `in_use`. |
 | `move_layer` | `view`, `layer`, `panel?`, `after?`, `before?` | (R2) Katmanı başka panele ve/veya çizim sırasında başka yere taşır. Değişim: `put_layer`. |
 | `set_encoding` | `view`, `layer`, `encoding`, `unset?`, `origin?`, `label?` | (R2) Verilen kanalları değiştirir, `unset`'tekileri kaldırır, diğerleri kalır. Değişim: `put_layer`. |
 | `insert_panel` | `view`, `panel`, `layers?`, `after?`, `before?` | (R2) Panel ekler (`after` panelinin hemen altına, `before`'un hemen üstüne, yoksa en alta), isteğe bağlı katmanlarıyla. `ack.created`: panel id'si (ondalık), sonra katman kimlikleri. |
@@ -723,11 +724,10 @@ deterministik olarak çözer, yerine kimliği yazar, çözümü cevapta geri ver
 yalnızca kimlikli isteği yazar.
 
 ```json
-{"op":"set_encoding","view":{},"layer":{"shows":{"study":"bollinger"},"output":"upper"},
- "encoding":{"color":"down"}}
+{"op":"set_encoding","view":{},"layer":{"shows":{"study":"rsi"}},"encoding":{"width":2}}
 ```
 
-"Tek görünümdeki, Bollinger'i çizen ve `upper`'ı çizen katmanın rengini `down` yap."
+"Tek görünümdeki, RSI'ı çizen katmanın kalınlığını 2 yap."
 Kimlik bir dizge (panelde sayı), seçici bir **nesnedir**; ikisi aynı alanda yazılabilir.
 
 ### 17.1 Sözlük
@@ -742,7 +742,7 @@ Kapalı ve tiplidir (`qp-schema`: `SeriesSel`, `ViewSel`, `PanelSel`, `LayerSel`
 | seri | `kind` (`bars`/`study`/`points`), `study`, `params` {ad: sayı}, `on` (seri), `symbol`, `label` | `{"study":"rsi","params":{"period":14}}` "RSI(14)"; `{"kind":"bars"}` "fiyat serisi"; `{"study":"sma","params":{"period":50}}` |
 | görünüm | `title`, `shows` (seri) | `{}` "tek görünüm"; `{"shows":{"study":"macd"}}` |
 | panel | `name`, `shows` (seri), `mark` | `{"mark":"candle"}` "fiyat paneli"; `{"shows":{"study":"rsi"}}` "RSI'ın paneli"; `{"name":"macd"}` |
-| katman | `shows` (seri), `output`, `mark`, `panel` (panel), `value`, `fact` (olgu), `finding` (bulgu), `label` | `{"shows":{"study":"bollinger"},"output":"upper"}` "üst bant"; `{"mark":"rule","value":70}` "70 çizgisi" |
+| katman | `shows` (seri), `output`, `mark`, `panel` (panel), `value`, `fact` (olgu), `finding` (bulgu), `label` | `{"output":"upper"}` "üst bant" (tek başına çizen katman, §17.1); `{"mark":"rule","value":70}` "70 çizgisi" |
 | olgu | `kind`, `on` (seri), `bar` | `{"kind":"breakout","first":true}` "eski kırılımın olgusu" |
 | bulgu | `kind` (olgularından birinin türü), `on` (seri), `fact` (olgu), `state` (kapsül durumu) | `{"kind":"breakout","latest":true}` "son kırılım" |
 | öneri | `state` | `{"state":"pending","latest":true}` |
@@ -760,9 +760,22 @@ Anahtarların anlamı:
 - `shows`: görünümde/panelde bir katman ya da katmanın kendisi o seriyi çizer
   (`layer.series`).
 - `mark`: panelde o işaretli bir katman var; katmanda işaret odur.
-- `output`: katman o alanı çizer — `y` ya da `y2` onu adlandırır; ya da `y` yoktur ve alan
-  katmanın varsayılan olarak çizdiklerindendir (`line` + Bollinger: `upper`, `middle`,
-  `lower`; `line` + MACD: `macd`, `signal`; mum: `o h l c`; diğerleri: ana çıktı).
+- `output`: katman o alanı **tek başına** çizer — `y` onu adlandırır; ya da `y` yoktur ve
+  katman varsayılan olarak tek bir çıktı çizer, o da budur (tek çıktılı hesap, bar
+  serisinde `c`). Başka çıktılarla birlikte çizen katman uymaz: tek Bollinger çizgisi
+  (`upper`, `middle`, `lower`'ı birlikte çizer) `{"output":"upper"}`'a uymaz, çünkü onu
+  boyamak üç bandı birden boyar. Hiçbir katman uymuyor ama böyle bir katman çıktıyı
+  başkalarıyla birlikte çiziyorsa hata `invalid`'dir: aday o katman, `hint` hazır diziyi
+  verir — aynı komutta önce `split_layer`, sonra stil:
+
+  ```json
+  [{"op":"split_layer","view":{},"layer":{"shows":{"study":"bollinger"}}},
+   {"op":"set_encoding","view":{},"layer":{"output":"upper"},"encoding":{"color":"down"}}]
+  ```
+
+  Seçiciler işlem işlem çözüldüğü için ikinci işlemin `output`'u, ilkinin oluşturduğu
+  `upper` katmanına çözülür (`ack.created`: `["l5","l6","l7"]`, `resolved`
+  `{"/ops/1/layer":"l5"}`).
 - `value`: katmanın `y` ya da `x` sabiti bu sayıya tam eşit (kuralın seviyesi).
 - `bar`: olgunun bar numarası. `state`: kapsül/öneri durumu (şema adları).
 
@@ -773,7 +786,7 @@ Anahtarların anlamı:
 | `add_study` | `inputs[]`, `show.view`, `show.with`, `show.panel` |
 | `set_params`, `add_fact`, `append_bars`, `update_last_bar` | `series` |
 | `add_layer`, `insert_layer` | `view`, `layer` (aşağıda), `after`, `before` |
-| `delete_layer`, `move_layer`, `set_encoding` | `view`, `layer`, `panel`, `after`, `before`, `encoding` (aşağıda) |
+| `delete_layer`, `split_layer`, `move_layer`, `set_encoding` | `view`, `layer`, `panel`, `after`, `before`, `encoding` (aşağıda) |
 | `insert_panel` | `view`, `layers[]`, `after`, `before` |
 | `delete_panel`, `move_panel`, `set_panel` | `view`, `panel`, `after`, `before` |
 | `set_scale` | `view`, `scale` |
@@ -849,6 +862,7 @@ bir görünüm `not_found` (görünüm alanının yolunda).
 | Birden çok eşleşme | `ambiguous` | `path`, `candidates` (eşleşenler, türün sırasıyla, en çok 10), `hint` |
 | Eşleşme yok | `not_found` | `path`, `candidates` (en yakınlar, en çok 5), `did_you_mean` (metin değerinde yazım hatası), `hint` |
 | `first` ve `latest` birlikte | `invalid` | `path` |
+| `output` yalnız çok çıktılı bir katmanda (birlikte çiziliyor) | `invalid` | `path`, `candidates` (o katman), `hint` (`split_layer` + stil dizisi) |
 
 `ambiguous` adaylarının sırası **türün sırasıdır**; yani `first: true` adayların ilkini,
 `latest: true` sonuncusunu seçer — ajan ya bir anahtar ekler, ya `first`/`latest` ekler,

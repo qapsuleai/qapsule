@@ -102,7 +102,7 @@ pub fn resolve_window(
             range.len(),
             max.saturating_mul(2)
         ));
-    } else if range.len() > max {
+    } else if anchor.is_none() && range.len() > max {
         let selected = range.len();
         range.start = range.end - max;
         capped = Some(format!(

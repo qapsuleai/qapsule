@@ -250,7 +250,6 @@ pub const DATA_DIGEST_ALG: &str = "fnv1a64";
 
 /// Start state of [`data_digest_u64`] (the FNV-1a 64 offset basis).
 pub const DATA_DIGEST_OFFSET: u64 = 0xcbf2_9ce4_8422_2325;
-const FNV_OFFSET: u64 = DATA_DIGEST_OFFSET;
 const FNV_PRIME: u64 = 0x0100_0000_01b3;
 
 fn fnv(mut h: u64, v: u64) -> u64 {
@@ -333,7 +332,7 @@ mod tests {
         let a = vec![bar(1, 10.0), bar(2, 11.0)];
         let d = data_digest(&a);
         assert_eq!(d.len(), 16);
-        assert_eq!(data_digest(&[]), format!("{FNV_OFFSET:016x}"));
+        assert_eq!(data_digest(&[]), format!("{DATA_DIGEST_OFFSET:016x}"));
         let mut b = a.clone();
         b[0].c = 10.000_000_000_000_002;
         assert_ne!(d, data_digest(&b));

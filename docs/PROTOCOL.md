@@ -1100,7 +1100,9 @@ zamanını, yazarı `qp` olan bir motor girdisiyle (`put_series`, bağın `ancho
 dokümana yazar. O andan sonra her çözüm (otoritenin yeniden başlatmadan sonraki çözümü,
 her yansınınki) `from_t = anchor_t`'den başlar; `last` yalnız ilk çözümün büyüklüğüdür.
 Böylece `Fact.bar`, `set_view_range`, hedeflerin `from_bar`/`to_bar`'ı ve `condition_met.bar`
-yeniden başlatmadan sonra da aynı barı gösterir. Çapa ancak bağı yeniden yazan bir komutla
+yeniden başlatmadan sonra da aynı barı gösterir. Kaynakta tam `anchor_t` zamanlı bar
+yoksa (sağlayıcının geçmişi kısaldı ya da değişti) bar numaraları tutmaz: bağ `stale` olur
+(`reason`: çapa barı yok), değer verilmez. Çapa ancak bağı yeniden yazan bir komutla
 (`put_series`; pencere ya da sembol değişir, `anchor_t` yazılmaz) sıfırlanır; ilk yeni
 çözümde yeniden damgalanır. Düzlemler arası kimlik yine de **zamandır** (`t`): olgular
 `t` taşır, kanıt başvurusu zaman aralığıdır.
@@ -1197,8 +1199,9 @@ Bulgu `verified` ise bütün olguları `verified`'dır. Sorgu dokümanı değiş
 
 `init.data` (`InitData`) otoritenin barındırıcısını taklit eder: beslemeler (`feeds`; her
 biri `bars`, `path` ya da `synthetic {n, seed}` ile ilk barlarıyla), yetkiler
-(`entitlements`: kişi → semboller, `"*"` hepsi; listede olmayan kişinin yetkisi yok;
-otoritenin kendi işi `host` kişisinin yetkisiyle) ve hiç cevap vermeyen beslemeler
+(`entitlements`: kişi → `SYMBOL`, `feed/SYMBOL`, `feed/*` ya da `*`; listede olmayan kişinin
+yetkisi yok; otoritenin kendi işi rolü `host` olan ilk kişinin yetkisiyle; `synthetic`
+beslemesi `interval`'den bağımsız olarak günlük hafta içi barlar üretir) ve hiç cevap vermeyen beslemeler
 (`pending`). Adımdaki `data` (§15) veri olayını barındırıcı yolundan verir. Pencere
 `{"last": n}` sağlayıcının son `n` barıdır.
 
@@ -1210,12 +1213,13 @@ otoritenin kendi işi `host` kişisinin yetkisiyle) ve hiç cevap vermeyen besle
   otorite en son `max_bind_bars` barı tutar ve `binding` sorgusunun `reason`'ında söyler
   (çapa bu kırpılmış ilk bardır). Açık pencere canlı barlarla büyür; tutulan bar sayısı
   `2 × max_bind_bars`'a ulaşırsa bağ `stale` olur (`reason`: sınır) ve yeni bar
-  uygulanmaz; yeniden çapalamak bağı yeniden yazan bir komut ister. Bir dokümandaki bağlı
+  uygulanmaz. Çapası olan bağın çözümü de aynı `2 × max_bind_bars` sınırını kullanır (aksi
+  halde yeniden başlatma `ready` bağı `stale` yapardı); çapa kırpılmaz; yeniden çapalamak bağı yeniden yazan bir komut ister. Bir dokümandaki bağlı
   seri sayısı `max_ops × 4`'ü (256) aşamaz (`limit`).
 - Patch sonrası bar `qp_schema::validate_bars` kurallarına uymalıdır (sonlu değerler);
   uymayan olay uygulanmaz.
-- Kapalı pencereye (`to_t`) `bar` olayı uygulanmaz (barındırıcıya hata); `to_t` içindeki bir
-  bara `patch` (düzeltme) uygulanır.
+- Kapalı pencerede `to_t`'den sonraki `bar` olayı pencere dışıdır: yok sayılır, `seq`'i
+  ilerletir (§18.4); `to_t` içindeki bir bara `patch` (düzeltme) uygulanır.
 - Dosya beslemeleri barındırıcı yapılandırmasıyla, taban klasöre hapsedilerek açılır
   (`qp_source::resolve_binding_path`); protokolden yol gelmez. `init.data.feeds[].path`
   depo köküne hapsedilir.

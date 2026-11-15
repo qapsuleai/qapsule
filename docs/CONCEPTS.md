@@ -160,6 +160,17 @@ Ayrıntı `docs/PROTOCOL.md` §19; seçimin gerekçesi `rounds/RP2/experiments/T
 | İşaret tarifi | `GlyphSpec` | Bir anlam işaretinin motorca üretilmiş parametreleri (yukarıdaki kanallar). Gramerde `glyph` işaretinin verisidir. |
 | İşaret aşaması | `GlyphPhase` | Çizgi biçiminin kodladığı aşama: aday, kesin, gerçekleşti, gerçekleşmedi, geri çekildi. |
 | Gerçekleştirici | realizer (M2) | Hikâyeden cümleyi üreten deterministik dil parçası (şablon dilbilgisi; Türkçe ve İngilizce). |
+| Okuyucu | `Reader` (`qp_capsule::sentence`) | Cümleyi ve kanıtı okuyan kişinin veri yetkileri (§18.3 biçimi). Okuyucu bir olgunun rakamlarını görmeye yetkili değilse cümle hiç rakam içermez (`redacted`), kanıt değerleri ve veri özeti ona gitmez. |
+| Okuyucuya göre izdüşüm | projection (`qp-session`) | Otoritenin bir belgeyi, değişimi ya da kapsülü belli bir kişiye göndermeden önce onun veri yetkisine göre süzmesi: yetkisi olmayan lisanslı olgu ve yalnız ona dayanan hikâye hiç gitmez; bar yetkisi olmayana kanıt değerleri ve veri özeti çıkarılır. Saklanan doküman ve günlük değişmez. |
+| Kapsül motoru (otoritede) | capsule runner (`qp-session`) | Otoritenin, açıkça açılmış bar serilerinde (`init.capsules`) her kesinleşen barda dedektörleri ve kapsül motorunu (`EngineConfig::r3`) koşturup olguları, bulguları, kapsülleri ve karne satırlarını motor girdisi (`qp`) olarak günlüğe yazması. Her kesinleşme turu tam bir motor girdisi yazar (boş da olsa): günlük sırası lisanslı bir hikâyenin varlığını söylemez. |
+| Mühür | `qp_capsule::trust::Muhur` (M6 seçimi) | Lisanslı akış için güven yolu: ham değer gelir gelmez işaret + ikili büyüklük basamağına indirgenir; ileti yalnız "olağan düzeyinin belirgin biçimde üzerinde" der, `trust = server` ve makbuz taşır. Yetkisiz okuyucu lisanslı akış hikâyesini **yalnız** mühür iletileriyle görür. |
+| Sunucu yorumu | `ServerComment` | Mühürün yetkisize giden iletisi (protokolde): enstrüman, bar, zaman, kodlar, TR/EN cümle, `trust = server`, ekler (gereken yetki, neye dayandığı, makbuz). Rakam içermez. |
+| Kapsül konusu | `capsules` topic | Abonenin kitlesine (izleme listesi, hassasiyet; pozisyon ve niyet geçişi) göre süzülmüş hikâye geçişleri; yetkisiz aboneye lisanslı hikâye yerine sunucu yorumları. |
+| Kitle işlemleri | `set_audience`, `set_sensitivity` | Kişinin kendi kapsül tercihlerini (grup, hassasiyet, izleme listesi, pozisyonlar) dokümana yazan işlemler; başkasınınkini yalnız `owner` yazar. Sistem bunları kendiliğinden yazmaz. |
+| İlgili kapsül | `relevant` | Okuyucunun pozisyonu ya da etkin niyetiyle ilgili enstrümanın kapsülü; hassasiyet kademesinden bağımsız geçer (§9.8). |
+| Aday okuması | `Replica::candidates` | Yansının açık bardaki adayları kendi verisinden hesaplaması; otoriteye, günlüğe ve karneye hiç girmez. |
+| Kart paneli | `card` paneli (`qp_grammar::depth::capsule_card_view`) | Kapsül derinliğinde işaret, cümle ve karne satırını taşıyan panel: bütün katmanları panele göre konumlanır; ızgara ve eksen çizilmez (`docs/GRAMMAR.md` §18). |
+| Panele göre konum | `Position::Panel` | Bir katman öğesinin konumunun veri değeriyle değil panelin kesriyle ve piksel kaydırmasıyla verilmesi (`{"panel":0.5,"px":-13}`). Sayı taşımaz, kökeni gerekmez. |
 
 ## Kapsülün yaşam döngüsü
 

@@ -1,6 +1,6 @@
 {
  "name": "t-select",
- "description": "Reference by meaning with structured selectors (docs/PROTOCOL.md §17): resolution in queries, commands and proposals, ack/result.resolved, ids in the log, ambiguous with ranked candidates, first/latest, not_found with candidates and did_you_mean, unknown selector keys.",
+ "description": "Reference by meaning with structured selectors (docs/PROTOCOL.md §17): resolution in queries, commands and proposals, `output` only on a layer drawing it alone, split_layer then style in one command, ack/result.resolved, ids in the log, ambiguous with ranked candidates, first/latest, not_found with candidates and did_you_mean, unknown selector keys.",
  "covers": [
   "select",
   "command",
@@ -85,7 +85,32 @@
   {
    "send_raw": {
     "conn": "a",
-    "line": "{\"type\": \"command\", \"id\": \"c1\", \"ops\": [{\"op\": \"set_encoding\", \"view\": {}, \"layer\": {\"shows\": {\"study\": \"bollinger\"}, \"output\": \"upper\"}, \"encoding\": {\"color\": \"down\"}}]}"
+    "line": "{\"type\": \"command\", \"id\": \"c0\", \"ops\": [{\"op\": \"set_encoding\", \"view\": {}, \"layer\": {\"shows\": {\"study\": \"bollinger\"}, \"output\": \"upper\"}, \"encoding\": {\"color\": \"down\"}}]}"
+   },
+   "expect": [
+    {
+     "conn": "a",
+     "msg": {
+      "type": "error",
+      "id": "c0",
+      "error": {
+       "code": "invalid",
+       "path": "/ops/0/layer",
+       "candidates": [
+        {
+         "id": "l1",
+         "about": "$any"
+        }
+       ]
+      }
+     }
+    }
+   ]
+  },
+  {
+   "send_raw": {
+    "conn": "a",
+    "line": "{\"type\": \"command\", \"id\": \"c1\", \"ops\": [{\"op\": \"split_layer\", \"view\": {}, \"layer\": {\"shows\": {\"study\": \"bollinger\"}}}, {\"op\": \"set_encoding\", \"view\": {}, \"layer\": {\"output\": \"upper\"}, \"encoding\": {\"color\": \"down\"}}]}"
    },
    "expect": [
     {
@@ -95,9 +120,16 @@
       "id": "c1",
       "status": "applied",
       "seq": 1,
+      "created": [
+       "l5",
+       "l6",
+       "l7"
+      ],
       "resolved": {
        "/ops/0/view": "main",
-       "/ops/0/layer": "l1"
+       "/ops/0/layer": "l1",
+       "/ops/1/view": "main",
+       "/ops/1/layer": "l5"
       }
      }
     }
@@ -122,9 +154,14 @@
          "seq": 1,
          "request": [
           {
+           "op": "split_layer",
+           "view": "main",
+           "layer": "l1"
+          },
+          {
            "op": "set_encoding",
            "view": "main",
-           "layer": "l1",
+           "layer": "l5",
            "encoding": {
             "color": "down"
            }
@@ -153,7 +190,15 @@
        "path": "/ops/0/layer",
        "candidates": [
         {
-         "id": "l1",
+         "id": "l5",
+         "about": "$any"
+        },
+        {
+         "id": "l6",
+         "about": "$any"
+        },
+        {
+         "id": "l7",
          "about": "$any"
         },
         {
@@ -380,11 +425,28 @@
     {
      "id": "main",
      "layers": [
-      {},
       {
-       "id": "l1",
+       "id": "l0"
+      },
+      {
+       "id": "l5",
        "encoding": {
+        "y": "upper",
         "color": "down"
+       }
+      },
+      {
+       "id": "l6",
+       "encoding": {
+        "y": "middle",
+        "color": "#90a4ae"
+       }
+      },
+      {
+       "id": "l7",
+       "encoding": {
+        "y": "lower",
+        "color": "#90a4ae"
        }
       },
       {
@@ -393,7 +455,9 @@
         "width": 2.0
        }
       },
-      {},
+      {
+       "id": "l3"
+      },
       {
        "id": "l4",
        "encoding": {

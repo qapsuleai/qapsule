@@ -254,7 +254,7 @@ fn op_sites(op: &Value, p: &str) -> Vec<Site> {
                 }
             }
         }
-        "delete_layer" | "move_layer" | "set_encoding" => {
+        "delete_layer" | "split_layer" | "move_layer" | "set_encoding" => {
             push(o, op, p, "view", K::View, None);
             push(o, op, p, "layer", K::Layer, vw);
             push(o, op, p, "panel", K::Panel, vw);
@@ -686,8 +686,11 @@ pub(crate) fn view_title(doc: &Document, v: &View) -> Option<String> {
     })
 }
 
-/// Fields a layer draws (for `output`).
-fn layer_draws(doc: &Document, l: &qp_schema::Layer, field: &str) -> bool {
+/// Whether a layer draws `field` (for `output`). Strict (the selector rule): the layer
+/// draws that output **by itself** — its `y` names it, or `y` is absent and it draws
+/// exactly one default output, that one. Loose (only to explain a miss): also among
+/// others — named in `y2`, or one of several default outputs (a Bollinger line).
+fn layer_draws(doc: &Document, l: &qp_schema::Layer, field: &str, loose: bool) -> bool {
     let named = |p: &Option<Position>| match p {
         Some(Position::Name(n)) => eq_text(n, field),
         Some(Position::Ref(r)) => {
@@ -696,23 +699,28 @@ fn layer_draws(doc: &Document, l: &qp_schema::Layer, field: &str) -> bool {
         }
         _ => false,
     };
-    if named(&l.encoding.y) || named(&l.encoding.y2) {
+    if named(&l.encoding.y) || (loose && named(&l.encoding.y2)) {
         return true;
     }
     if l.encoding.y.is_some() {
         return false;
     }
-    match layer_data(doc, l) {
+    let defaults: Vec<String> = match layer_data(doc, l) {
         Data::Series(s) => {
             if l.mark == Mark::Line {
-                drawing_outputs(s).iter().any(|o| eq_text(o, field))
+                drawing_outputs(s)
             } else if l.mark == Mark::Candle {
-                ["o", "h", "l", "c"].iter().any(|o| eq_text(o, field))
+                ["o", "h", "l", "c"].map(str::to_owned).to_vec()
             } else {
-                eq_text(&series_main(s), field)
+                vec![series_main(s)]
             }
         }
-        d => crate::canon::data_main(doc, d).is_some_and(|m| eq_text(&m, field)),
+        d => crate::canon::data_main(doc, d).into_iter().collect(),
+    };
+    if loose {
+        defaults.iter().any(|o| eq_text(o, field))
+    } else {
+        defaults.len() == 1 && eq_text(&defaults[0], field)
     }
 }
 
@@ -1014,7 +1022,13 @@ impl<'a> Resolver<'a> {
         Ok(o)
     }
 
-    fn layer_rows(&self, view: Option<&View>, sel: &LayerSel, path: &str) -> PResult<Outcome> {
+    fn layer_rows(
+        &self,
+        view: Option<&View>,
+        sel: &LayerSel,
+        path: &str,
+        loose: bool,
+    ) -> PResult<Outcome> {
         let doc = self.doc;
         let shows = match &sel.shows {
             Some(r) => Some(self.series_set(r, &ptr(path, "shows"))?),
@@ -1064,7 +1078,7 @@ impl<'a> Resolver<'a> {
                     c.push(l.series.as_ref().is_some_and(|s| set.contains(s)));
                 }
                 if let Some(f) = &sel.output {
-                    c.push(layer_draws(doc, l, f));
+                    c.push(layer_draws(doc, l, f, loose));
                 }
                 if let Some(m) = sel.mark {
                     c.push(l.mark == m);
@@ -1239,6 +1253,43 @@ impl<'a> Resolver<'a> {
         o
     }
 
+    /// When `output` matched no layer but a multi-output layer draws it among others:
+    /// `invalid`, naming that layer and the ready sequence (split, then style).
+    fn split_first(&self, view: Option<&View>, s: &LayerSel, path: &str) -> Option<ProtocolError> {
+        let o = self.layer_rows(view, s, path, true).ok()?;
+        let m = pick(o.rows, s.first, s.latest, path).ok()?;
+        let first = m.first()?;
+        let out = s.output.clone().unwrap_or_default();
+        let vid = view.map(|v| v.id.clone()).or_else(|| {
+            self.doc
+                .views
+                .iter()
+                .find(|v| v.layer(&first.id).is_some())
+                .map(|v| v.id.clone())
+        })?;
+        let q = |x: &str| Value::String(x.to_owned()).to_string();
+        let seq = format!(
+            "[{{\"op\":\"split_layer\",\"view\":{v},\"layer\":{l}}},{{\"op\":\"set_encoding\",\"view\":{v},\"layer\":{{\"output\":{o}}},\"encoding\":{{…}}}}]",
+            v = q(&vid),
+            l = q(&first.id),
+            o = q(&out)
+        );
+        Some(
+            E::new(
+                ErrorCode::Invalid,
+                format!(
+                    "no layer draws `{out}` by itself; layer `{}` draws it together with other outputs, so styling it would change them all",
+                    first.id
+                ),
+            )
+            .at(path)
+            .hint(format!(
+                "Split that layer first, in the same command: {seq}"
+            ))
+            .build_with(candidates(&m, MAX_AMBIGUOUS)),
+        )
+    }
+
     // -- entry points -----------------------------------------------------
 
     /// Checks a selector against its schema and parses it.
@@ -1308,8 +1359,13 @@ impl<'a> Resolver<'a> {
             }
             Kind::Layer => {
                 let s: LayerSel = self.parse(kind.def(), sel, path)?;
-                let o = self.layer_rows(view, &s, path)?;
-                decide(kind, path, sel, o, s.first, s.latest)
+                let o = self.layer_rows(view, &s, path, false)?;
+                match decide(kind, path, sel, o, s.first, s.latest) {
+                    Err(e) if e.code == ErrorCode::NotFound && s.output.is_some() => {
+                        Err(self.split_first(view, &s, path).unwrap_or(e))
+                    }
+                    r => r,
+                }
             }
             Kind::Fact => {
                 let s: FactSel = self.parse(kind.def(), sel, path)?;
@@ -1409,7 +1465,7 @@ impl<'a> Resolver<'a> {
     }
 
     fn layer_ids(&self, v: &View, s: &LayerSel) -> Vec<String> {
-        self.ids(|| Ok((self.layer_rows(Some(v), s, "")?, s.first, s.latest)))
+        self.ids(|| Ok((self.layer_rows(Some(v), s, "", false)?, s.first, s.latest)))
     }
 
     fn fact_ids(&self, s: &FactSel) -> Vec<String> {

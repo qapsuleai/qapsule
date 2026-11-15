@@ -659,6 +659,16 @@ impl Session {
             .map(|b| b.c);
         // R2: name, scale and layers from the compiled scene (`docs/GRAMMAR.md` §16).
         let mut compiled = self.screen_panels(c, &vp);
+        // Stack order (top to bottom, §5.4), not panel id order: they differ after
+        // `move_panel` / `insert_panel`.
+        let stack = |id: u32| {
+            view.panels
+                .iter()
+                .position(|p| p.id == Some(id))
+                .unwrap_or(usize::MAX)
+        };
+        let mut panels: Vec<_> = panels.into_iter().collect();
+        panels.sort_by_key(|(id, _)| (stack(*id), *id));
         Some(ScreenInfo {
             principal: c.principal.clone(),
             surface: c.surface.kind,

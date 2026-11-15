@@ -759,6 +759,21 @@ pub enum Op {
         #[schemars(with = "LayerRef")]
         layer: String,
     },
+    /// Split a multi-output `line` layer (e.g. one Bollinger line drawing `upper`,
+    /// `middle`, `lower`) into one layer per drawn output, each with an explicit `y`, at
+    /// the same place in the paint order, in the same panel, with the same encoding.
+    /// `ack.created`: the new layer ids, in output order. Then each output can be styled
+    /// alone (`set_encoding` with `layer: {"output": "upper"}`).
+    SplitLayer {
+        /// View id.
+        /// Also takes a selector (§17).
+        #[schemars(with = "ViewRef")]
+        view: String,
+        /// Layer id.
+        /// Also takes a selector (§17).
+        #[schemars(with = "LayerRef")]
+        layer: String,
+    },
     /// Move a layer: to another panel, and/or to another place in the paint order.
     MoveLayer {
         /// View id.

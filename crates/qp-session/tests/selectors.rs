@@ -512,3 +512,88 @@ fn welcome_hints_resolve_to_their_items() {
         assert_eq!(r["data"]["item"]["id"], *id, "{s}");
     }
 }
+
+#[test]
+fn split_then_style_the_upper_band_in_one_command() {
+    let mut h = setup();
+    let before = serde_json::to_vec(h.s.document()).unwrap();
+    let r = h.cmd(
+        "a",
+        "c1",
+        json!([
+            {"op":"split_layer","view":{},"layer":{"shows":{"study":"bollinger"}}},
+            {"op":"set_encoding","view":{},"layer":{"output":"upper"},"encoding":{"color":"down"}}
+        ]),
+    );
+    applied(&r);
+    assert_eq!(r["created"], json!(["l5", "l6", "l7"]));
+    assert_eq!(r["resolved"]["/ops/1/layer"], "l5");
+    let ls = layers(&h);
+    let ids: Vec<&str> = ls.iter().map(|l| l["id"].as_str().unwrap()).collect();
+    assert_eq!(ids, ["l0", "l5", "l6", "l7", "l2", "l3", "l4"]);
+    assert_eq!(ls[1]["encoding"], json!({"y":"upper","color":"down"}));
+    assert_eq!(ls[2]["encoding"], json!({"y":"middle","color":"#90a4ae"}));
+    assert_eq!(ls[3]["encoding"], json!({"y":"lower","color":"#90a4ae"}));
+    assert!(ls[1..4]
+        .iter()
+        .all(|l| l["panel"] == 0 && l["series"] == "bb20"));
+    h.assert_replay();
+    // Exact inverse: undo restores the bytes.
+    let r = h.cmd("a", "u", json!([{"op":"undo"}]));
+    applied(&r);
+    assert_eq!(serde_json::to_vec(h.s.document()).unwrap(), before);
+    h.assert_replay();
+}
+
+#[test]
+fn output_matches_only_a_layer_drawing_it_alone() {
+    let mut h = setup();
+    let r = h.cmd(
+        "a",
+        "c1",
+        json!([{"op":"set_encoding","view":{},"layer":{"output":"upper"},"encoding":{"color":"down"}}]),
+    );
+    assert_eq!(code(&r), "invalid", "{r}");
+    assert_eq!(r["error"]["candidates"][0]["id"], "l1");
+    let hint = r["error"]["hint"].as_str().unwrap();
+    assert!(
+        hint.contains("\"op\":\"split_layer\",\"view\":\"main\",\"layer\":\"l1\""),
+        "{hint}"
+    );
+    assert_eq!(h.s.log().len(), 1, "nothing applied");
+    // A single-output layer still matches by its default output.
+    let r = h.cmd(
+        "a",
+        "c2",
+        json!([{"op":"set_encoding","view":{},"layer":{"output":"rsi"},"encoding":{"width":2}}]),
+    );
+    applied(&r);
+    assert_eq!(r["resolved"]["/ops/0/layer"], "l2");
+    // Only multi-output line layers split.
+    let r = h.cmd(
+        "a",
+        "c3",
+        json!([{"op":"split_layer","view":{},"layer":{"shows":{"study":"rsi"}}}]),
+    );
+    assert_eq!(code(&r), "invalid");
+}
+
+#[test]
+fn screen_lists_panels_in_stack_order() {
+    let mut h = setup();
+    let r = h.cmd(
+        "a",
+        "c1",
+        json!([{"op":"move_panel","view":{},"panel":{"shows":{"study":"macd"}},
+            "before":{"shows":{"study":"rsi"}}}]),
+    );
+    applied(&r);
+    let r = h.query("a", json!({"kind":"screen"}));
+    let order: Vec<u64> = r["data"]["screens"][0]["panels"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .map(|p| p["panel"].as_u64().unwrap())
+        .collect();
+    assert_eq!(order, vec![0, 2, 1]);
+}

@@ -181,6 +181,60 @@ pub(crate) fn expand_grammar(
                 layer: Some(layer.clone()),
             }])
         }
+        Op::SplitLayer { view, layer } => {
+            let v = need_view(doc, view, &ptr(p, "view"))?;
+            let lp = ptr(p, "layer");
+            let i = need_layer(v, layer, &lp)?;
+            let old = &v.layers[i];
+            let outputs = match crate::canon::layer_data(doc, old) {
+                crate::canon::Data::Series(s)
+                    if old.mark == qp_schema::Mark::Line && old.encoding.y.is_none() =>
+                {
+                    crate::summary::drawing_outputs(s)
+                }
+                _ => Vec::new(),
+            };
+            if outputs.len() < 2 {
+                return Err(E::new(
+                    ErrorCode::Invalid,
+                    format!(
+                        "layer `{layer}` draws one output; only a `line` layer without `y` on a multi-output study (bollinger, macd) can be split"
+                    ),
+                )
+                .at(lp)
+                .hint("Style the layer directly with set_encoding.")
+                .build());
+            }
+            layer_in_use(v, layer, &lp)?;
+            limit_layers(v, outputs.len() - 1, p)?;
+            // New ids: the smallest unused `l<k>`, the split layer's id still counted
+            // as taken (it is never reused by its own parts).
+            let mut taken = layer_ids(v);
+            let mut nv = v.clone();
+            nv.layers.remove(i);
+            let mut out = vec![ChangeOp::DeleteLayer {
+                view: view.clone(),
+                index: u32_of(i),
+                layer: Some(layer.clone()),
+            }];
+            for (k, o) in outputs.iter().enumerate() {
+                let id = next_layer_id(&taken);
+                taken.insert(id.clone());
+                let mut l = old.clone();
+                l.id = Some(id.clone());
+                l.encoding.y = Some(qp_schema::grammar::Position::Name(o.clone()));
+                let index = i + k;
+                let l = new_layer(doc, &nv, &l, index, &lp)?;
+                nv.layers.insert(index, l.clone());
+                ctx.created.push(id);
+                out.push(ChangeOp::InsertLayer {
+                    view: view.clone(),
+                    index: u32_of(index),
+                    layer: l,
+                });
+            }
+            Ok(out)
+        }
         Op::MoveLayer {
             view,
             layer,

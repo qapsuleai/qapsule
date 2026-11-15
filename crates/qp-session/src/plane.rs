@@ -156,6 +156,54 @@ pub(crate) struct EventOutcome {
     /// Bound series whose bars or state changed, and how (their reading copy and the
     /// values on them follow, §18.8).
     pub changed: Vec<(String, Delta)>,
+    /// What the host must be told (§18.4: a gap; a store that became stale).
+    pub notices: Vec<HostNotice>,
+}
+
+/// A notice for the host about a bound series (§3, §18.4): not a protocol message and
+/// not a connection's output; `qp serve --host-frames` writes it as
+/// `{"host":{"gap":{…}}}` or `{"host":{"stale":{…}}}`. After one, the binding is
+/// `stale` until the host re-resolves it ([`crate::Session::refresh_bindings`]).
+#[derive(Debug, Clone, PartialEq, serde::Serialize)]
+#[serde(rename_all = "snake_case")]
+pub enum HostNotice {
+    /// A `seq` gap: the event was not applied and the binding became `stale`.
+    Gap {
+        /// The bound series.
+        series: String,
+        /// Its feed.
+        feed: FeedKey,
+        /// The sequence number the authority waited for.
+        expected: u64,
+        /// The sequence number that arrived.
+        got: u64,
+    },
+    /// The binding became `stale` for another reason (the live growth cap, §18.7).
+    Stale {
+        /// The bound series.
+        series: String,
+        /// Its feed.
+        feed: FeedKey,
+        /// Why, in words.
+        reason: String,
+    },
+}
+
+/// What a host data event caused ([`crate::Session::host_data_event`]).
+#[derive(Debug, Clone, Default)]
+pub struct DataOutcome {
+    /// Notifications for the connections (§18.4, §18.8).
+    pub lines: Vec<qp_schema::protocol::OutboundLine>,
+    /// Notices for the host (a gap, a binding that became stale).
+    pub notices: Vec<HostNotice>,
+}
+
+impl HostNotice {
+    /// The host frame for this notice (`{"host":{"gap":{…}}}`, `{"host":{"stale":{…}}}`).
+    #[must_use]
+    pub fn frame(&self) -> serde_json::Value {
+        serde_json::json!({ "host": self })
+    }
 }
 
 /// The authority's data plane.
@@ -196,7 +244,18 @@ pub(crate) fn bar_root<'a>(doc: &'a Document, series: &str) -> Option<&'a Series
     None
 }
 
-fn same_but_anchor(a: &DataBinding, b: &DataBinding) -> bool {
+fn no_entitlement_reason(principal: &str, key: &FeedKey) -> String {
+    let feed = key
+        .feed
+        .as_deref()
+        .map_or_else(String::new, |f| format!("{f}/"));
+    format!(
+        "principal `{principal}` has no data entitlement for `{feed}{}`",
+        key.symbol
+    )
+}
+
+pub(crate) fn same_but_anchor(a: &DataBinding, b: &DataBinding) -> bool {
     a.symbol == b.symbol && a.interval == b.interval && a.window == b.window && a.feed == b.feed
 }
 
@@ -334,16 +393,9 @@ impl DataPlane {
         if let Some(a) = asker {
             let key = bs.binding.feed_key();
             if !self.entitled(a, &key) {
-                let feed = key
-                    .feed
-                    .as_deref()
-                    .map_or_else(String::new, |f| format!("{f}/"));
                 return Some((
                     BindingState::NoEntitlement,
-                    Some(format!(
-                        "principal `{a}` has no data entitlement for `{feed}{}`",
-                        key.symbol
-                    )),
+                    Some(no_entitlement_reason(a, &key)),
                 ));
             }
         }
@@ -353,6 +405,46 @@ impl DataPlane {
                 .then(|| "the data provider has not answered yet".to_owned())
         });
         Some((state, reason))
+    }
+
+    /// The first bound series `series` rests on (itself, or through every study input,
+    /// recursively) whose feed `principal` has no data entitlement for (§18.3, the write
+    /// side of a condition). It reads the document's bindings, not the plane's
+    /// resolutions (a binding put earlier in the same command counts) and looks only at
+    /// the entitlement, not at readiness. No provider: nobody is entitled.
+    pub(crate) fn unentitled(
+        &self,
+        doc: &Document,
+        principal: &str,
+        series: &str,
+    ) -> Option<Blocked> {
+        let mut stack = vec![series.to_owned()];
+        let mut seen = std::collections::BTreeSet::new();
+        while let Some(id) = stack.pop() {
+            if !seen.insert(id.clone()) || seen.len() > 1024 {
+                continue;
+            }
+            let Some(s) = find_series(doc, &id) else {
+                continue;
+            };
+            match &s.source {
+                SeriesSource::Bind { .. } => {
+                    let key = binding_of(s)?.feed_key();
+                    if !self.entitled(principal, &key) {
+                        return Some(Blocked {
+                            series: id,
+                            state: BindingState::NoEntitlement,
+                            reason: no_entitlement_reason(principal, &key),
+                        });
+                    }
+                }
+                SeriesSource::Study { inputs, .. } => {
+                    stack.extend(inputs.iter().rev().cloned());
+                }
+                _ => {}
+            }
+        }
+        None
     }
 
     /// If the data of `series` (itself or, for a study, its bar input) rests on a bound
@@ -435,6 +527,7 @@ impl DataPlane {
             }
         }
         let mut changed = Vec::new();
+        let mut notices = Vec::new();
         let mut any = false;
         let mut first_err = None;
         for (id, bs) in &mut self.series {
@@ -456,9 +549,24 @@ impl DataPlane {
                 Ok(Applied::LiveUpdate { index } | Applied::Correction { index }) => {
                     changed.push((id.clone(), Delta::Revised { index }));
                 }
-                Ok(Applied::Gap { .. } | Applied::Stale(_)) => {
+                Ok(a @ (Applied::Gap { .. } | Applied::Stale(_))) => {
                     if before != store.state() {
                         changed.push((id.clone(), Delta::Rebuild { from: 0 }));
+                        let feed = ev.feed.clone();
+                        notices.push(match a {
+                            Applied::Gap { expected, got } => HostNotice::Gap {
+                                series: id.clone(),
+                                feed,
+                                expected,
+                                got,
+                            },
+                            Applied::Stale(r) => HostNotice::Stale {
+                                series: id.clone(),
+                                feed,
+                                reason: r.reason(),
+                            },
+                            _ => unreachable!("matched above"),
+                        });
                     }
                 }
                 Ok(Applied::Duplicate | Applied::OutsideWindow { .. }) => {}
@@ -486,7 +594,7 @@ impl DataPlane {
                 return Err(DataError::UnknownFeed(ev.feed.clone()));
             }
         }
-        Ok(EventOutcome { changed })
+        Ok(EventOutcome { changed, notices })
     }
 }
 

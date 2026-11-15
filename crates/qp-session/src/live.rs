@@ -187,6 +187,17 @@ pub(crate) fn cond_blocked(plane: &DataPlane, doc: &Document, c: &Condition) -> 
         .any(|(_, s)| plane.gate(doc, None, s).is_some())
 }
 
+/// True if `principal` may hear the outcome of `c` (`condition_met`, `intent_triggered`,
+/// a capsule invalidated by its author's condition): entitled to every bound feed the
+/// condition reads, through study inputs (§18.3). The outcome of a condition is data:
+/// edge by edge it tells the values.
+pub(crate) fn hears(plane: &DataPlane, doc: &Document, principal: &str, c: &Condition) -> bool {
+    plane.series.is_empty()
+        || crate::values::condition_series(c)
+            .iter()
+            .all(|(_, s)| plane.unentitled(doc, principal, s).is_none())
+}
+
 /// Every bound series is ready for the authority (then no condition is blocked: the
 /// plane holds every bound series of the document after a sync).
 fn all_ready(plane: &DataPlane) -> bool {
@@ -325,6 +336,7 @@ impl Session {
                     rd,
                     plane: &self.plane,
                 }),
+                plane: &self.plane,
             };
             let doc = &mut self.doc;
             for (i, op) in ops.iter().enumerate() {
@@ -425,21 +437,7 @@ impl Session {
         }
         lines.extend(self.view_events());
         lines.extend(conds);
-        for ev in fired {
-            for c in &self.conns {
-                for s in &c.subs {
-                    if matches!(s.topic, Topic::Intents {}) {
-                        lines.push(out(
-                            &c.id,
-                            ServerMsg::Notify {
-                                sub: s.id.clone(),
-                                event: ev.clone(),
-                            },
-                        ));
-                    }
-                }
-            }
-        }
+        lines.extend(self.intent_lines(fired));
         lines
     }
 
@@ -466,6 +464,10 @@ impl Session {
                     }),
                 };
                 if !affected {
+                    continue;
+                }
+                if !hears(&self.plane, &self.doc, &c.principal, condition) {
+                    // Not evaluated for a subscriber without the data entitlement (§18.3).
                     continue;
                 }
                 if cond_blocked(&self.plane, &self.doc, condition) {

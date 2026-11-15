@@ -667,7 +667,14 @@ fn serve(init: &Path, root: &Path, batch_end: bool, host_frames: bool) -> Result
                 .is_some_and(|v| v.get("host").is_some());
         let lines = if is_host {
             match session.handle_host_frame(&line) {
-                Ok(l) => l,
+                Ok(o) => {
+                    // Notices for the host (§18.4: a gap, a binding that became stale),
+                    // before the connections' notifications.
+                    for n in &o.notices {
+                        writeln!(out, "{}", n.frame()).map_err(|e| format!("stdout: {e}"))?;
+                    }
+                    o.lines
+                }
                 Err(e) => {
                     let text = serde_json::json!({"host": {"error": e}}).to_string();
                     writeln!(out, "{text}").map_err(|e| format!("stdout: {e}"))?;

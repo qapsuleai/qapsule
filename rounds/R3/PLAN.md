@@ -19,3 +19,4 @@ Bütünleştirme dalı `r3/int`. Her alt görev kendi dalında (`r3/<görev>`), 
 - M1a–c, M2a–b, M3a–c, M4a–b, M5a–b, M6a–b, M7: her biri ayrı dal + ayrı alt ajan.
 - S: seçimlerin bütünleştirilmesi; T6/T7; altın görseller; dökümler; hassasiyet benzetimi; performans.
 - E: ajan yazabilirlik; HT: insan testi paketi; A: son denetim.
+- [ ] HT generate.sh yeniden: S-C 'Sinyalın' düzeltmesinden sonra

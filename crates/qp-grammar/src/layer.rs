@@ -3,7 +3,10 @@
 
 use std::collections::BTreeMap;
 
-use qp_schema::grammar::{Cmp, ColorSpec, Layer, Mark, Operand, Origin, Position, SizeSpec};
+use qp_schema::capsule::GlyphSpec;
+use qp_schema::grammar::{
+    Cmp, ColorSpec, Layer, Mark, Operand, Origin, PanelPos, Position, SizeSpec,
+};
 use qp_schema::scene::{DataSource, ResolvedConstant, Rgba};
 
 use crate::error::{ErrorKind, GrammarError};
@@ -23,7 +26,21 @@ pub(crate) enum Geom {
     RuleV,
     Point,
     Text,
+    /// A rule segment from bar `x` to bar `x2` (R3 evidence geometry).
+    Segment,
+    /// A meaning glyph (R3).
+    Glyph,
 }
+
+/// Panel-relative layout positions of a `text` or `glyph` layer (R3).
+#[derive(Debug, Clone, Copy, Default, PartialEq)]
+pub(crate) struct Anchor {
+    pub x: Option<PanelPos>,
+    pub y: Option<PanelPos>,
+}
+
+/// Default glyph size in pixels.
+pub(crate) const GLYPH_SIZE: f64 = 24.0;
 
 /// One drawn element's values.
 #[derive(Debug, Clone)]
@@ -92,6 +109,12 @@ pub(crate) struct Prepared {
     pub skipped: u64,
     /// Whether the layer is bound to data (first data layer gets the last-value tag).
     pub has_data: bool,
+    /// Panel-relative positions (`text`, `glyph`; R3).
+    pub anchor: Anchor,
+    /// Bar extent `x..=x2` of a segment (R3).
+    pub extent: Option<(u64, u64)>,
+    /// Glyph parameters, one per row of the first trace (`glyph`; R3).
+    pub glyphs: Vec<GlyphSpec>,
 }
 
 /// A channel: a column by slot, a row field, or a constant.
@@ -225,7 +248,11 @@ fn resolve_constants(
     for (ptr, origin) in &layer.origin {
         let valid = matches!(
             ptr.as_str(),
-            "/encoding/x" | "/encoding/y" | "/encoding/y2" | "/encoding/color/when/than"
+            "/encoding/x"
+                | "/encoding/x2"
+                | "/encoding/y"
+                | "/encoding/y2"
+                | "/encoding/color/when/than"
         ) || ptr
             .strip_prefix("/encoding/color/thresholds/")
             .and_then(|i| i.parse::<usize>().ok())
@@ -249,7 +276,11 @@ fn resolve_constants(
                     "bar" => Some(f.bar as f64),
                     "t" => Some(f.t as f64),
                     "value" => fr.fact_value(&f, id, ptr)?,
-                    k => f.evidence.get(k).copied(),
+                    k => f
+                        .evidence
+                        .get(k)
+                        .copied()
+                        .or_else(|| crate::depth::geometry_field(&f, k)),
                 };
                 v.ok_or_else(|| {
                     nf(format!(
@@ -461,7 +492,50 @@ impl<'f> Ctx<'f, '_> {
             Some(Position::Ref(r)) => self
                 .data_ref(r.series.as_deref(), r.field.as_deref(), ptr)
                 .map(Some),
+            Some(Position::Panel(_)) => Err(self.err(
+                ErrorKind::Invalid,
+                ptr,
+                "a panel-relative position is only for `text` and `glyph`",
+            )),
         }
+    }
+
+    /// A bar constant (`x`, `x2` of a segment, band extent or point; R3): a number with an
+    /// origin. A bar-valued origin (a fact's `bar`, a geometry bar) reads as a bar index,
+    /// anything else as a time (like a vertical rule's `x`).
+    fn bar_const(&self, ptr: &str, pos: Option<&Position>) -> Result<Option<u64>, GrammarError> {
+        let v = match pos {
+            None if self.constants.contains_key(ptr) => self.constant(ptr, None)?,
+            None => return Ok(None),
+            Some(Position::Number(n)) => self.constant(ptr, Some(*n))?,
+            Some(Position::Name(s)) if s.trim().parse::<f64>().is_ok_and(f64::is_finite) => {
+                self.constant(ptr, s.trim().parse::<f64>().ok())?
+            }
+            Some(_) => {
+                return Err(self.err(
+                    ErrorKind::Invalid,
+                    ptr,
+                    "here a bar: a numeric constant with an origin (e.g. a fact's `bar` or a geometry bar)",
+                ))
+            }
+        };
+        let by_bar = matches!(
+            self.constants.get(ptr).map(|c| &c.origin),
+            Some(Origin::Fact { field, .. }) if is_bar_field(field)
+        );
+        let slot = if by_bar {
+            #[allow(clippy::cast_possible_truncation, clippy::cast_sign_loss)]
+            (v >= 0.0 && v.fract() == 0.0).then(|| v as u64)
+        } else {
+            self.fr.time_slot(v)
+        };
+        slot.map(Some).ok_or_else(|| {
+            self.err(
+                ErrorKind::Invalid,
+                ptr,
+                format!("{} is not a bar of the view", crate::detmath::num(v)),
+            )
+        })
     }
 
     fn color(&self, spec: &str, ptr: &str) -> Result<Rgba, GrammarError> {
@@ -543,6 +617,25 @@ impl<'f> Ctx<'f, '_> {
     }
 }
 
+/// Whether a fact field names a bar (`bar`, or a geometry bar; R3).
+pub(crate) fn is_bar_field(field: &str) -> bool {
+    field == "bar"
+        || (field.starts_with("geometry.")
+            && (field.ends_with(".from_bar") || field.ends_with(".to_bar") || field.ends_with(".bar")))
+}
+
+/// Whether a position is panel-relative.
+fn is_panel(p: Option<&Position>) -> bool {
+    matches!(p, Some(Position::Panel(_)))
+}
+
+fn panel_pos(p: Option<&Position>) -> Option<PanelPos> {
+    match p {
+        Some(Position::Panel(pp)) => Some(*pp),
+        _ => None,
+    }
+}
+
 /// Prepares one layer. `palette` counts uncoloured line/area/band traces in the panel.
 #[allow(clippy::too_many_lines)]
 pub(crate) fn prepare(
@@ -612,6 +705,20 @@ pub(crate) fn prepare(
             row.texts.insert("claim".to_owned(), finding.claim.clone());
             all_rows.push(row);
         }
+        // R3 capsule texts (the capsule card): its sentence and its ledger line.
+        let headline = fr.p.headline(f);
+        let ledger = fr
+            .p
+            .capsule(f)
+            .and_then(|c| c.story.as_ref().map(|s| crate::depth::ledger_text(&s.ledger_at_birth)));
+        for row in &mut all_rows {
+            if let Some(h) = &headline {
+                row.texts.insert("headline".to_owned(), h.clone());
+            }
+            if let Some(l) = &ledger {
+                row.texts.insert("ledger".to_owned(), l.clone());
+            }
+        }
         (Src::Rows, DataSource::Finding { finding: f.clone() })
     } else {
         (Src::Nothing, DataSource::Constant {})
@@ -638,13 +745,42 @@ pub(crate) fn prepare(
             return Err(cx.err(ErrorKind::Invalid, "/encoding/width", "width must be > 0"));
         }
     }
-    if enc.x.is_some() && layer.mark != Mark::Rule {
+    let x2_given = enc.x2.is_some() || cx.constants.contains_key("/encoding/x2");
+    let x_ok = match layer.mark {
+        Mark::Rule => true,
+        Mark::Band | Mark::Area => x2_given,
+        Mark::Point => !matches!(cx.src, Src::Rows | Src::Slots(_)),
+        Mark::Text | Mark::Glyph => is_panel(enc.x.as_ref()),
+        _ => false,
+    };
+    if enc.x.is_some() && !x_ok {
         return Err(cx.err(
             ErrorKind::Invalid,
             "/encoding/x",
-            "in v0 the `x` channel is only used by `rule` (a vertical rule); other marks are placed at their row's bar",
+            "`x` is used by `rule` (vertical rule, or with `x2` a segment), by `band`/`area` with `x2` (a bar extent), by a data-less `point` (its bar) and, panel-relative, by `text` and `glyph`; other marks are placed at their row's bar",
         ));
     }
+    if x2_given && !matches!(layer.mark, Mark::Rule | Mark::Band | Mark::Area) {
+        return Err(cx.err(
+            ErrorKind::Invalid,
+            "/encoding/x2",
+            "`x2` (the last bar of an extent) is used by `rule`, `band` and `area`",
+        ));
+    }
+    let extent = if x2_given && layer.mark != Mark::Rule {
+        let a = cx.bar_const("/encoding/x", enc.x.as_ref())?.ok_or_else(|| {
+            cx.err(ErrorKind::Invalid, "/encoding/x", "`x2` needs `x` (the first bar)")
+        })?;
+        let b = cx
+            .bar_const("/encoding/x2", enc.x2.as_ref())?
+            .unwrap_or(a);
+        Some((a.min(b), a.max(b)))
+    } else {
+        None
+    };
+    let mut anchor = Anchor::default();
+    let mut glyphs: Vec<GlyphSpec> = Vec::new();
+    let mut seg_extent: Option<(u64, u64)> = None;
     let label = layer.label.clone().or_else(|| {
         layer
             .series
@@ -827,7 +963,7 @@ pub(crate) fn prepare(
                 Mark::Bar => RowAgg::MaxAbs,
                 _ => RowAgg::Envelope,
             };
-            let (rows, sk) = pair_rows(&cx, &y, y2.as_ref(), &rule, opacity, agg);
+            let (rows, sk) = pair_rows(&cx, &y, y2.as_ref(), &rule, opacity, agg, extent);
             skipped += sk;
             let base = rule.at(fr.to, None, None).0;
             traces.push(Trace {
@@ -865,7 +1001,40 @@ pub(crate) fn prepare(
                     text: None,
                 }
             };
-            if let Some((y, key)) = cx.position(enc.y.as_ref(), "/encoding/y", "y")? {
+            if x2_given {
+                // A segment from bar `x` to bar `x2` at `y` (sloped to `y2`): evidence
+                // geometry (R3). Every value is a constant with an origin.
+                geom = Geom::Segment;
+                let a = cx.bar_const("/encoding/x", enc.x.as_ref())?.ok_or_else(|| {
+                    cx.err(ErrorKind::Invalid, "/encoding/x", "`x2` needs `x` (the first bar)")
+                })?;
+                let b = cx
+                    .bar_const("/encoding/x2", enc.x2.as_ref())?
+                    .unwrap_or(a);
+                let konst = |ptr: &str, pos: Option<&Position>, key: &str| match cx
+                    .position(pos, ptr, key)?
+                {
+                    Some((Chan::Const(v), _)) => Ok(Some(v)),
+                    None => Ok(None),
+                    Some(_) => Err(cx.err(
+                        ErrorKind::Invalid,
+                        ptr,
+                        "a segment's `y`/`y2` are constants with an origin",
+                    )),
+                };
+                let y0 = konst("/encoding/y", enc.y.as_ref(), "y")?.ok_or_else(|| {
+                    cx.err(ErrorKind::Invalid, "/encoding/y", "a segment needs `y`")
+                })?;
+                let y1 = konst("/encoding/y2", enc.y2.as_ref(), "y2")?;
+                let mut row = mk(a, Some(y0), None);
+                row.v[1] = y1;
+                rows.push(row);
+                seg_extent = Some((a, b));
+                keys.push("y".into());
+                if y1.is_some() {
+                    keys.push("y2".into());
+                }
+            } else if let Some((y, key)) = cx.position(enc.y.as_ref(), "/encoding/y", "y")? {
                 geom = Geom::RuleH;
                 match (&y, &cx.src) {
                     (Chan::Const(v), _) => rows.push(mk(fr.to, Some(*v), None)),
@@ -949,6 +1118,171 @@ pub(crate) fn prepare(
                 base,
                 lod_line: false,
             });
+        }
+        Mark::Text if is_panel(enc.x.as_ref()) || is_panel(enc.y.as_ref()) => {
+            geom = Geom::Text;
+            anchor = Anchor {
+                x: panel_pos(enc.x.as_ref()),
+                y: panel_pos(enc.y.as_ref()),
+            };
+            if !matches!(cx.src, Src::Rows) {
+                return Err(cx.err(
+                    ErrorKind::Invalid,
+                    "/encoding/text",
+                    "`text` reads a text field of a fact or finding",
+                ));
+            }
+            let f = text_field_of(&cx)?;
+            let y = if anchor.y.is_some() {
+                None
+            } else {
+                Some(main_or_err(&cx, "text")?)
+            };
+            let size = match &enc.size {
+                None => 11.0,
+                Some(SizeSpec::Constant(s)) if s.is_finite() && *s > 0.0 => *s,
+                Some(_) => {
+                    return Err(cx.err(
+                        ErrorKind::Invalid,
+                        "/encoding/size",
+                        "a panel-positioned `text` takes a constant size > 0",
+                    ))
+                }
+            };
+            let rule = cx.color_rule(ColorRule::Const(theme.text))?;
+            let mut rows = Vec::new();
+            // A panel-relative `x` has no bar: the layer draws its first row only.
+            let src_rows: Vec<&Row> = if anchor.x.is_some() {
+                cx.all_rows.iter().take(1).collect()
+            } else {
+                cx.visible_rows().collect()
+            };
+            for r in src_rows {
+                let v = match &y {
+                    Some((c, _)) => match c.at(r.slot, Some(r)) {
+                        Some(v) => Some(v),
+                        None => {
+                            skipped += 1;
+                            continue;
+                        }
+                    },
+                    None => None,
+                };
+                let (color, ckey) = rule.at(r.slot, Some(r), None);
+                rows.push(PRow {
+                    slot: r.slot,
+                    n: 1,
+                    t: fr.slot_time(r.slot),
+                    v: [v, None, None, None],
+                    color: with_opacity(color, opacity),
+                    ckey,
+                    size,
+                    text: r.texts.get(&f).cloned(),
+                });
+            }
+            let base = rule.at(fr.to, None, None).0;
+            traces.push(Trace {
+                rows,
+                split: Split::None,
+                base,
+                lod_line: false,
+            });
+            if let Some((_, k)) = y {
+                fields.push(k.clone());
+                keys.push(k);
+            }
+            fields.push(f);
+        }
+        Mark::Glyph => {
+            geom = Geom::Glyph;
+            let Some(finding) = &layer.finding else {
+                return Err(cx.err(
+                    ErrorKind::Invalid,
+                    if layer.fact.is_some() || layer.series.is_some() {
+                        "/mark"
+                    } else {
+                        "/finding"
+                    },
+                    "`glyph` draws the capsule of a finding: bind the layer to its `finding`",
+                ));
+            };
+            for (bad, set) in [
+                ("/encoding/color", enc.color.is_some()),
+                ("/encoding/opacity", enc.opacity.is_some()),
+                ("/encoding/width", enc.width.is_some()),
+                ("/encoding/y2", enc.y2.is_some()),
+                ("/encoding/text", enc.text.is_some()),
+            ] {
+                if set {
+                    return Err(cx.err(
+                        ErrorKind::Invalid,
+                        bad,
+                        "a glyph takes only `x`, `y` and `size`; its colours come from the theme and its other channels from the capsule",
+                    ));
+                }
+            }
+            let spec = fr.p.glyph(finding).ok_or_else(|| {
+                cx.err(
+                    ErrorKind::NotFound,
+                    "/finding",
+                    format!("finding `{finding}` has no meaning glyph (no R3 capsule with a story presents it)"),
+                )
+            })?;
+            let size = match &enc.size {
+                None => GLYPH_SIZE,
+                Some(SizeSpec::Constant(s)) if s.is_finite() && *s > 0.0 => *s,
+                Some(_) => {
+                    return Err(cx.err(
+                        ErrorKind::Invalid,
+                        "/encoding/size",
+                        "a glyph takes a constant size > 0 (pixels)",
+                    ))
+                }
+            };
+            // `y` absent: at the top of the panel (a glyph strip over the chart).
+            anchor = Anchor {
+                x: panel_pos(enc.x.as_ref()),
+                y: match &enc.y {
+                    None => Some(PanelPos { panel: 0.0, px: 2.0 }),
+                    p => panel_pos(p.as_ref()),
+                },
+            };
+            let y = if anchor.y.is_some() {
+                None
+            } else {
+                cx.position(enc.y.as_ref(), "/encoding/y", "y")?
+            };
+            let mut rows = Vec::new();
+            if let Some(r) = cx.all_rows.first() {
+                let visible = anchor.x.is_some() || (r.slot >= fr.from && r.slot <= fr.to);
+                let v = y.as_ref().and_then(|(c, _)| c.at(r.slot, Some(r)));
+                if visible && (y.is_none() || v.is_some()) {
+                    rows.push(PRow {
+                        slot: r.slot,
+                        n: 1,
+                        t: fr.slot_time(r.slot),
+                        v: [v, None, None, None],
+                        color: [0; 4],
+                        ckey: None,
+                        size,
+                        text: None,
+                    });
+                    glyphs.push(spec.into_owned());
+                } else {
+                    skipped += 1;
+                }
+            }
+            traces.push(Trace {
+                rows,
+                split: Split::None,
+                base: theme.text,
+                lod_line: false,
+            });
+            fields.push("glyph".to_owned());
+            if let Some((_, k)) = y {
+                fields.push(k.clone());
+                keys.push(k);
+            }
         }
         Mark::Point | Mark::Text => {
             geom = if layer.mark == Mark::Point {
@@ -1069,12 +1403,23 @@ pub(crate) fn prepare(
                     }
                 }
                 Src::Nothing => {
-                    if let Chan::Const(_) = y {
-                        return Err(cx.err(
-                            ErrorKind::Invalid,
-                            "",
-                            "`point`/`text` without data has no bar to sit on",
-                        ));
+                    // A data-less point sits on the bar its `x` constant names (R3
+                    // evidence geometry: a swing point).
+                    match cx.bar_const("/encoding/x", enc.x.as_ref())? {
+                        Some(s) if layer.mark == Mark::Point => {
+                            if s >= fr.from && s <= fr.to {
+                                push(s, 1, None, &mut skipped);
+                            }
+                        }
+                        _ => {
+                            if let Chan::Const(_) = y {
+                                return Err(cx.err(
+                                    ErrorKind::Invalid,
+                                    "",
+                                    "`point`/`text` without data has no bar to sit on (a `point` takes its bar from an `x` constant)",
+                                ));
+                            }
+                        }
                     }
                 }
             }
@@ -1122,7 +1467,43 @@ pub(crate) fn prepare(
         edge: enc.width.is_some(),
         skipped,
         has_data: n_data == 1,
+        anchor,
+        extent: seg_extent,
+        glyphs,
     })
+}
+
+/// The text field of a `text` layer: the `text` channel, else `claim` (finding) / `text`
+/// (fact); it must exist in the layer's rows.
+fn text_field_of(cx: &Ctx<'_, '_>) -> Result<String, GrammarError> {
+    let layer = cx.layer;
+    let f = layer.encoding.text.clone().or_else(|| match &layer.finding {
+        Some(_) => Some("claim".to_owned()),
+        None => layer.fact.as_ref().map(|_| "text".to_owned()),
+    });
+    let f = f.ok_or_else(|| {
+        cx.err(
+            ErrorKind::Invalid,
+            "/encoding/text",
+            "`text` needs the `text` channel",
+        )
+    })?;
+    if !cx.all_rows.iter().any(|r| r.texts.contains_key(&f)) {
+        let mut names: Vec<&str> = Vec::new();
+        for r in &cx.all_rows {
+            for k in r.texts.keys() {
+                if !names.contains(&k.as_str()) {
+                    names.push(k);
+                }
+            }
+        }
+        return Err(cx.err(
+            ErrorKind::NotFound,
+            "/encoding/text",
+            format!("text field `{f}` not found (fields: {})", names.join(", ")),
+        ));
+    }
+    Ok(f)
 }
 
 #[derive(Clone, Copy)]
@@ -1233,7 +1614,9 @@ fn pair_rows(
     rule: &ColorRule<'_>,
     opacity: f64,
     agg: RowAgg,
+    extent: Option<(u64, u64)>,
 ) -> (Vec<PRow>, u64) {
+    let inside = |s: u64| extent.is_none_or(|(a, b)| s >= a && s <= b);
     let fr = cx.fr;
     let mut rows = Vec::new();
     let mut skipped = 0u64;
@@ -1263,7 +1646,7 @@ fn pair_rows(
     let is_bar = matches!(agg, RowAgg::MaxAbs);
     match cx.src {
         Src::Rows => {
-            for r in cx.visible_rows() {
+            for r in cx.visible_rows().filter(|r| inside(r.slot)) {
                 match both(r.slot, Some(r)) {
                     Some(v) => rows.push(mk(r.slot, 1, Some(v), r.slot, Some(r))),
                     None => skipped += 1,
@@ -1274,7 +1657,10 @@ fn pair_rows(
             for (s0, n) in fr.buckets() {
                 let mut acc: Option<(f64, Option<f64>)> = None;
                 let mut at = s0;
-                for s in s0..s0 + n {
+                if extent.is_some() && !(s0..s0 + n).any(inside) {
+                    continue;
+                }
+                for s in (s0..s0 + n).filter(|s| inside(*s)) {
                     match both(s, None) {
                         Some((a, b)) => {
                             acc = Some(match (acc, agg) {

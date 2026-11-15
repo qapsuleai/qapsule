@@ -1,0 +1,85 @@
+{
+  "covers": [
+    "presenter",
+    "present",
+    "depth",
+    "capsule",
+    "glyph"
+  ],
+  "description": "C2: the same R3 capsule at capsule depth (phone): the capsule card (meaning glyph, sentence, ledger line) over a mini price line with the breakout level and the fact point. Rendered with `qp render --present <finding> --surface phone --width 390 --height 300`.",
+  "final": {
+    "document": {}
+  },
+  "init": {
+    "clock": 1760000000000,
+    "document": "fixtures/views/docs/r3-breakout.json",
+    "epoch": 0,
+    "principals": [
+      {
+        "author": {
+          "kind": "human",
+          "name": "arkin"
+        },
+        "id": "arkin",
+        "role": "owner"
+      }
+    ]
+  },
+  "name": "c2-capsule",
+  "steps": [
+    {
+      "expect": [
+        {
+          "conn": "a",
+          "msg": {
+            "principal": "arkin",
+            "role": "owner",
+            "type": "welcome"
+          }
+        }
+      ],
+      "send": {
+        "conn": "a",
+        "msg": {
+          "principal": "arkin",
+          "protocol": "qp/0",
+          "surface": {
+            "kind": "phone"
+          },
+          "type": "hello"
+        }
+      }
+    },
+    {
+      "expect": [
+        {
+          "conn": "a",
+          "msg": {
+            "data": {
+              "kind": "presentation",
+              "presentation": {
+                "capsule_view": "$any",
+                "depth": "capsule",
+                "finding": "fnd.SYN03.breakout-up.144",
+                "surface": "phone"
+              }
+            },
+            "id": "q1",
+            "type": "result"
+          }
+        }
+      ],
+      "send": {
+        "conn": "a",
+        "msg": {
+          "id": "q1",
+          "query": {
+            "finding": "fnd.SYN03.breakout-up.144",
+            "kind": "present"
+          },
+          "type": "query"
+        }
+      }
+    }
+  ]
+}

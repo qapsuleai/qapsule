@@ -131,6 +131,7 @@ fn position_text(p: &Position) -> String {
             (None, Some(f)) => f.clone(),
             (None, None) => String::new(),
         },
+        Position::Panel(pp) => format!("panel {}{:+}px", num(pp.panel), pp.px),
     }
 }
 
@@ -144,6 +145,7 @@ fn mark_name(m: Mark) -> &'static str {
         Mark::Point => "point",
         Mark::Text => "text",
         Mark::Band => "band",
+        Mark::Glyph => "glyph",
     }
 }
 

@@ -278,6 +278,11 @@ impl<'a> Frame<'a> {
         }
         let mut texts = BTreeMap::new();
         texts.insert("text".to_owned(), fact.text.clone());
+        // R3: the evidence geometry's values are absent (redacted for a reader without
+        // the data entitlement): say what the evidence needs (`docs/GRAMMAR.md` §18).
+        if let Some(note) = crate::depth::evidence_note(fact) {
+            texts.insert("requires".to_owned(), note);
+        }
         Ok(Row {
             slot: fact.bar,
             nums,

@@ -44,6 +44,9 @@ pub enum Mark {
     Text,
     /// Fill between two values `y` and `y2` (both required): bands, envelopes, fans.
     Band,
+    /// Meaning glyph (R3, `docs/GRAMMAR.md` §18) of the capsule that presents the layer's
+    /// `finding`; drawn by the product alphabet from the capsule's glyph parameters.
+    Glyph,
 }
 
 /// Scale type.
@@ -132,12 +135,14 @@ pub struct DataRef {
     pub field: Option<String>,
 }
 
-/// A position channel (`x`, `y`, `y2`).
+/// A position channel (`x`, `x2`, `y`, `y2`).
 ///
 /// - a string: a field of the layer's data (`"c"`, `"upper"`, `"level"`); a string that
 ///   parses as a number (`"70"`) is a numeric constant (the `qp/0` form);
 /// - a number: a numeric constant (needs an [`Origin`]);
-/// - an object: a field of another series ([`DataRef`]), e.g. the other edge of a band.
+/// - an object: a field of another series ([`DataRef`]), e.g. the other edge of a band;
+/// - `{"panel": f, "px": d}`: a panel-relative layout position ([`PanelPos`], R3; `text`
+///   and `glyph` only).
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
 #[serde(untagged)]
 pub enum Position {
@@ -147,6 +152,28 @@ pub enum Position {
     Name(String),
     /// Field of a (possibly other) series.
     Ref(DataRef),
+    /// Panel-relative layout position (not data; needs no origin).
+    Panel(PanelPos),
+}
+
+/// A panel-relative layout position (R3, `docs/GRAMMAR.md` §18): `panel` is the fraction
+/// of the panel's width (`x`) or height (`y`) from its left/top edge, `px` a pixel offset
+/// added to it. A layout constant, like a size: it claims nothing about the data, so it
+/// needs no [`Origin`]. Used by `text` and `glyph` (a capsule card's sentence, ledger line
+/// and glyph).
+#[derive(Debug, Clone, Copy, PartialEq, Serialize, Deserialize, JsonSchema)]
+#[serde(deny_unknown_fields)]
+pub struct PanelPos {
+    /// Fraction `0..=1` of the panel's extent from its left (`x`) or top (`y`) edge.
+    pub panel: f64,
+    /// Pixel offset added to it (may be negative).
+    #[serde(default, skip_serializing_if = "is_zero_px")]
+    pub px: f64,
+}
+
+#[allow(clippy::trivially_copy_pass_by_ref)]
+fn is_zero_px(v: &f64) -> bool {
+    *v == 0.0
 }
 
 /// Comparison in a colour condition.
@@ -254,6 +281,12 @@ pub struct Encoding {
     /// Horizontal position. Default: the row's bar. A constant makes a vertical rule.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub x: Option<Position>,
+    /// Second horizontal position (R3): the last bar of a bar extent. With `x`, a
+    /// horizontal `rule` becomes a segment from bar `x` to bar `x2` (sloped when `y2` is
+    /// also given), and a `band`/`area` covers only bars `x..=x2` (evidence geometry,
+    /// `docs/GRAMMAR.md` §18).
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub x2: Option<Position>,
     /// Vertical position. Default: the main output of the layer's series (`c` for bars,
     /// `v` for points, `level` for facts); for `line` on a multi-output study, one line
     /// per default output.
@@ -305,7 +338,9 @@ pub enum SeriesAt {
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
 #[serde(tag = "kind", rename_all = "snake_case", deny_unknown_fields)]
 pub enum Origin {
-    /// A field of a fact: an evidence key (`level`), or `bar` / `t` / `value`.
+    /// A field of a fact: an evidence key (`level`), or `bar` / `t` / `value`, or (R3) a
+    /// bar of the fact's evidence geometry: `geometry.<i>.from_bar`,
+    /// `geometry.<i>.to_bar`, `geometry.<i>.points.<j>.bar` (`docs/GRAMMAR.md` §18).
     Fact {
         /// Fact id.
         fact: String,

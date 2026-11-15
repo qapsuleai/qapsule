@@ -34,6 +34,11 @@ pollster = { version = "0.4", optional = true }
 qp-compute = { path = "../qp-compute" }
 qp-grammar = { path = "../qp-grammar" }
 serde_json = "1"
+# R3 capsule view fixtures (tests/support/capsule_gen.rs, examples/make_capsule_views.rs):
+# real detectors and engine on synthetic bars; the session renders the transcripts.
+qp-facts = { path = "../qp-facts" }
+qp-capsule = { path = "../qp-capsule" }
+qp-session = { path = "../qp-session" }
 
 [[example]]
 name = "spike_vello_cpu"

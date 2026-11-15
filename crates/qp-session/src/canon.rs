@@ -69,7 +69,7 @@ pub(crate) fn position_constant(p: &Position) -> Option<f64> {
     match p {
         Position::Number(v) => Some(*v),
         Position::Name(s) => numeric(s),
-        Position::Ref(_) => None,
+        Position::Ref(_) | Position::Panel(_) => None,
     }
 }
 
@@ -591,6 +591,9 @@ fn check_position(doc: &Document, d: Data<'_>, p: &Position, path: &str) -> PRes
             check_ref(doc, d, r, path)?;
             Ok(None)
         }
+        // A layout position (R3, GRAMMAR §18): not a data constant; the compiler checks
+        // which marks take it.
+        Position::Panel(_) => Ok(None),
     }
 }
 
@@ -604,7 +607,7 @@ fn check_channels(
 ) -> PResult<Vec<(String, f64)>> {
     let e = &l.encoding;
     let mut consts = Vec::new();
-    for (name, ch) in [("x", &e.x), ("y", &e.y), ("y2", &e.y2)] {
+    for (name, ch) in [("x", &e.x), ("x2", &e.x2), ("y", &e.y), ("y2", &e.y2)] {
         if let Some(p) = ch {
             let pointer = format!("/encoding/{name}");
             if let Some(v) = check_position(doc, d, p, &site.at(&pointer))? {
@@ -796,6 +799,8 @@ pub(crate) fn fact_value(doc: &Document, f: &Fact, field: &str) -> Option<f64> {
         "bar" => Some(f.bar as f64),
         "t" => Some(f.t as f64),
         k if f.evidence.contains_key(k) => f.evidence.get(k).copied(),
+        // R3: a bar of the fact's evidence geometry (GRAMMAR §18).
+        k if k.starts_with("geometry.") => qp_grammar::depth::geometry_field(f, k),
         "value" => {
             let v = values(doc, &mut Cache::default(), &f.series).ok()?;
             v.main_values()
@@ -906,7 +911,7 @@ fn candidates(doc: &Document, view: &View, l: &Layer, v: f64) -> Vec<Candidate> 
 
 /// Pointers of the layer that may carry an origin.
 fn origin_slots(l: &Layer) -> Vec<String> {
-    let mut v: Vec<String> = ["/encoding/x", "/encoding/y", "/encoding/y2"]
+    let mut v: Vec<String> = ["/encoding/x", "/encoding/x2", "/encoding/y", "/encoding/y2"]
         .map(str::to_owned)
         .to_vec();
     match &l.encoding.color {
@@ -926,6 +931,7 @@ fn origin_slots(l: &Layer) -> Vec<String> {
 fn position_slot<'a>(l: &'a mut Layer, pointer: &str) -> Option<&'a mut Option<Position>> {
     match pointer {
         "/encoding/x" => Some(&mut l.encoding.x),
+        "/encoding/x2" => Some(&mut l.encoding.x2),
         "/encoding/y" => Some(&mut l.encoding.y),
         "/encoding/y2" => Some(&mut l.encoding.y2),
         _ => None,
@@ -1158,6 +1164,16 @@ pub(crate) fn check_layer(doc: &Document, l: &mut Layer, site: &Site<'_>) -> PRe
                         .expected(["text"])
                         .build(),
                 );
+            }
+        }
+        Mark::Glyph => {
+            if l.finding.is_none() {
+                return Err(E::new(
+                    ErrorCode::Invalid,
+                    "`glyph` draws the capsule of a finding: bind the layer to its `finding`",
+                )
+                .at(site.at("/finding"))
+                .build());
             }
         }
         Mark::Line | Mark::Area | Mark::Bar | Mark::Point => {}

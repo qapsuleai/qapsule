@@ -1,0 +1,18 @@
+view v-c3-chart (1200x600)
+x: slots 114..150 of 151 bar(s), 2023-06-09 .. 2023-07-31, 30.27027027027027 px per slot
+panel 0: y0 linear [128.256, 140.88400000000001], 5 layer(s)
+  candles candle px "SYN03 1d" fields o h l c: 37 item(s); last c=133.95 h=135.3 l=133.76 o=134.74 (bar 150, 2023-07-31)
+  level rule constant: 1 item(s); last y=135.56
+    /encoding/x = 124 from fx.SYN03.breakout.range.up.144.geometry.0.from_bar
+    /encoding/x2 = 144 from fx.SYN03.breakout.range.up.144.geometry.0.to_bar
+    /encoding/y = 135.56 from fx.SYN03.breakout.range.up.144.level
+  level-2 rule constant: 1 item(s); last y=136.24
+    /encoding/x = 125 from fx.SYN03.breakout.range.up.145.geometry.0.from_bar
+    /encoding/x2 = 145 from fx.SYN03.breakout.range.up.145.geometry.0.to_bar
+    /encoding/y = 136.24 from fx.SYN03.breakout.range.up.145.level
+  level-3 rule constant: 1 item(s); last y=139.54
+    /encoding/x = 126 from fx.SYN03.breakout.range.up.146.geometry.0.from_bar
+    /encoding/x2 = 146 from fx.SYN03.breakout.range.up.146.geometry.0.to_bar
+    /encoding/y = 139.54 from fx.SYN03.breakout.range.up.146.level
+  glyph glyph finding fnd.SYN03.breakout-up.144 fields glyph: 1 item(s); last confirmations=2 freshness=0.5555555555555556 strength=1 (bar 144, 2023-07-21)
+emphasis: highlight bars 144..144 (all panels)

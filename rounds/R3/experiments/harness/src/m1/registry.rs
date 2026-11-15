@@ -37,6 +37,7 @@ pub fn all() -> Vec<M1Entry> {
         // entry(Box::new(m1_foo::Alphabet), m1_foo::LEGEND),
         entry(Box::new(m1_siluet::Alphabet), m1_siluet::LEGEND),
         entry(Box::new(m1_rozet::Alphabet), m1_rozet::LEGEND),
+        entry(Box::new(m1_iz::Alphabet), m1_iz::LEGEND),
     ]
 }
 

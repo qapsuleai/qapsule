@@ -25,7 +25,7 @@ Ortak ilkeler:
 Girdi: `Box<dyn Alphabet>`. Çizim: `qp-render`'ın CPU çizicisi (altın görsellerle aynı yol).
 
 **Glif kümesi.** Çekirdek küme `K`: tür × yön = devam↑↓, dönüş↑↓, kırılım↑↓, sıkışma·,
-aşırılık↑↓, akış↑↓· (13), aşama `final`, güç 0,6, güven 0,6, teyit 1, tazelik 1. Kanal
+aşırılık↑↓, akış↑↓· (12; ilk yazımda yanlışlıkla 13 yazılmıştı, düzenek 12 ile koşar), aşama `final`, güç 0,6, güven 0,6, teyit 1, tazelik 1. Kanal
 kümeleri: aynı glifin yalnız bir kanalı değişen çiftleri: yön, aşama (5), güç (0,2 / 0,9),
 teyit (1/2/3), güven (yok / 0,3 / 0,8), tazelik (1 / 0,3), sunucu işareti.
 
@@ -39,7 +39,7 @@ ortalama; her kanal için en zayıf çift; koşul başına (boyut × tema × gö
 **(b) Okuma testi.** Görsel okuyabilen taze alt ajanlar (her ajan yalnız **bir**
 alfabe görür). Sayfa: 4×4 ızgarada 16 glif, her biri 32 px çizilip 4× en yakın komşuyla
 büyütülmüş (sınır: model küçük pikseli insan gibi görmez; raporda yazılır), A1…D4 etiketli;
-glifler tohumlu seçilir (K'den 12 + kanal çeşitlemeleri 4). Ajan her etiket için JSON'la
+glifler tohumlu seçilir (K'nin 12'si + kanal çeşitlemeleri 4). Ajan her etiket için JSON'la
 cevaplar: `kind` (altı türden biri), `direction` (up/down/neutral), `strength`
 (low/high), `phase` (candidate/final/realized/failed/retracted). İki koşul: **açıklamasız**
 (yalnız "bu işaretler bir piyasa anlam alfabesidir; altı tür: …" listesi; işaretlerin
@@ -69,7 +69,7 @@ hâlâ geçerli mi) düzenekte tanımlı.
 1. **Zaman doğruluğu (K26), otomatik:** dil başına belirleyici sınıflayıcı: olay → geçmiş
    zaman eki/biçimi + zaman başvurusu; bitmiş durum → geçmiş + "artık … değil"/"no longer";
    süren durum → şimdiki zaman; beklenti → koşul (`-sa/-se`, "if"). Sözlükler
-   `harness/m2_lexicon.rs`'de; ihlaller listelenir.
+   `harness/src/m2/lexicon.rs`'de; ihlaller listelenir.
 2. **Belirleyicilik:** aynı girdi iki kez → bayt eşit mi (oran).
 3. **Sızıntı:** `redacted` durumlarda rakam (`[0-9]`), sayı sözcüğü (sözlük) ve lisanslı kanıt
    değerinin herhangi bir yuvarlanmış biçimi geçiyor mu. Sayısal olmayan durumlarda

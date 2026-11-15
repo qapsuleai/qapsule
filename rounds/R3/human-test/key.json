@@ -402,54 +402,6 @@
       "when": "past"
     },
     "S2": {
-      "bars_ago": 3,
-      "direction": "up",
-      "kind": "extreme",
-      "redacted": false,
-      "situation": "k26",
-      "stage": "weakened",
-      "still_valid": "no",
-      "text": "THYAO'da RSI 3 bar önce 70'in üstüne çıktı, bugün yeniden altına indi; şu an 55, artık 70'in üstünde değil. Aşırı alım sona erdi. Geçmişte bu sinyal 140 seferin 87'sinde beklendiği gibi sonuçlandı.",
-      "time": "state",
-      "when": "past"
-    },
-    "S3": {
-      "bars_ago": null,
-      "direction": "up",
-      "kind": "continuation",
-      "redacted": false,
-      "situation": "s50",
-      "stage": "weakened",
-      "still_valid": "yes",
-      "text": "EREGL 3 bar içinde uzun ortalamanın (255,56) üstünde kapanırsa yükseliş eğilimi teyit olur. Bugün ters yönde bir sinyal geldi; görünüm zayıfladı. Koşul hâlâ açık. Karnesi henüz az örnekli: 8 seferin 4'ünde tuttu.",
-      "time": "expectation",
-      "when": "conditional"
-    },
-    "S4": {
-      "bars_ago": 0,
-      "direction": "down",
-      "kind": "extreme",
-      "redacted": false,
-      "situation": "s17",
-      "stage": "confirmed",
-      "still_valid": "unknown",
-      "text": "PGSUS'ta RSI bugün 30'un altına indi (28,8): aşırı satım. Bugün hacim de teyit etti; 2 bağımsız kanıt ailesi destekliyor. Hâlâ geçerli olup olmadığı bilinmiyor. Geçmişte bu sinyal 140 seferin 99'unda beklendiği gibi sonuçlandı.",
-      "time": "event",
-      "when": "past"
-    },
-    "S5": {
-      "bars_ago": null,
-      "direction": "down",
-      "kind": "flow",
-      "redacted": false,
-      "situation": "s71",
-      "stage": "expired",
-      "still_valid": "no",
-      "text": "SISE'de kurumsal net satış 3 bar içinde her zamankinden güçlü hâle gelirse (son günlerin ortalaması 334.000) para çıkışı teyit olur. Beklentinin 5 barlık ömrü bugün sonuçsuz doldu; artık geçerli değil. Karnesi henüz az örnekli: 8 seferin 2'sinde tuttu.",
-      "time": "expectation",
-      "when": "conditional"
-    },
-    "S6": {
       "bars_ago": null,
       "direction": "neutral",
       "kind": "squeeze",
@@ -461,19 +413,43 @@
       "time": "state",
       "when": "now"
     },
-    "S7": {
-      "bars_ago": 5,
-      "direction": "down",
-      "kind": "reversal",
-      "redacted": true,
-      "situation": "s07",
-      "stage": "expired",
+    "S3": {
+      "bars_ago": 3,
+      "direction": "up",
+      "kind": "extreme",
+      "redacted": false,
+      "situation": "k26",
+      "stage": "weakened",
       "still_valid": "no",
-      "text": "PGSUS'ta yaklaşık bir hafta önce aşağı dönüş işareti çıktı: fiyat yeni tepe yaparken RSI daha düşük tepe yaptı. Sinyalin ömrü bugün sonuçsuz doldu; artık geçerli değil. Karnesi henüz az örnekli. Sunucu doğruladı; rakamlar kurumsal akış lisansı gerektiriyor.",
+      "text": "THYAO'da RSI 3 bar önce 70'in üstüne çıktı, bugün yeniden altına indi; şu an 55, artık 70'in üstünde değil. Aşırı alım sona erdi. Geçmişte bu sinyal 140 seferin 87'sinde beklendiği gibi sonuçlandı.",
+      "time": "state",
+      "when": "past"
+    },
+    "S4": {
+      "bars_ago": null,
+      "direction": "up",
+      "kind": "continuation",
+      "redacted": false,
+      "situation": "s50",
+      "stage": "weakened",
+      "still_valid": "yes",
+      "text": "EREGL 3 bar içinde uzun ortalamanın (255,56) üstünde kapanırsa yükseliş eğilimi teyit olur. Bugün ters yönde bir sinyal geldi; görünüm zayıfladı. Koşul hâlâ açık. Karnesi henüz az örnekli: 8 seferin 4'ünde tuttu.",
+      "time": "expectation",
+      "when": "conditional"
+    },
+    "S5": {
+      "bars_ago": 0,
+      "direction": "down",
+      "kind": "extreme",
+      "redacted": false,
+      "situation": "s17",
+      "stage": "confirmed",
+      "still_valid": "unknown",
+      "text": "PGSUS'ta RSI bugün 30'un altına indi (28,8): aşırı satım. Bugün hacim de teyit etti; 2 bağımsız kanıt ailesi destekliyor. Hâlâ geçerli olup olmadığı bilinmiyor. Geçmişte bu sinyal 140 seferin 99'unda beklendiği gibi sonuçlandı.",
       "time": "event",
       "when": "past"
     },
-    "S8": {
+    "S6": {
       "bars_ago": 5,
       "direction": "down",
       "kind": "flow",
@@ -484,6 +460,18 @@
       "text": "BIMAS'ta kurumsal net satış yaklaşık bir hafta önce her zamankinden güçlü hâle geldi; artık her zamankinden güçlü değil. Para çıkışı sona erdi. Geçmişte bu tür sinyal çoğunlukla beklendiği gibi sonuçlandı. Sunucu doğruladı; rakamlar kurumsal akış lisansı gerektiriyor.",
       "time": "state",
       "when": "past"
+    },
+    "S7": {
+      "bars_ago": null,
+      "direction": "up",
+      "kind": "reversal",
+      "redacted": false,
+      "situation": "s56",
+      "stage": "expired",
+      "still_valid": "no",
+      "text": "TUPRS 3 bar içinde dönüş noktasının (228,51) üstünde kapanırsa yukarı dönüş teyit olur. Beklentinin 30 barlık ömrü bugün sonuçsuz doldu; artık geçerli değil. Geçmişte bu sinyal 140 seferin 49'unda beklendiği gibi sonuçlandı.",
+      "time": "expectation",
+      "when": "conditional"
     }
   },
   "strength_values": {

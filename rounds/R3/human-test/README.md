@@ -81,3 +81,13 @@ Nasıl seçildi (ayrıntı `gen/src/main.rs` başındaki sabitlerde):
 - İlk üretimde S7'de "Sinyalın ömrü" ünlü uyumu hatası vardı; ürün tarafında düzeltildi
   (S-C, `37b78b7`) ve paket `./generate.sh` ile yeniden üretildi.
 - Gerçek piyasa verisi yok: bütün değerler M2 düzeneğinin uydurma durumlarıdır.
+
+## Denetimden sonra (D3)
+
+- Rakamsız ("sunucu doğruladı") cümleler artık yalnız akış türünden seçiliyor; önceki S7 bir
+  fiyat dönüşüne bu etiketi veriyordu (üründe çıkmaz). Paket yeniden üretildi.
+- Beklenti cümlelerinde "koşul hâlâ açık mı" sorusuna "bilinmiyor" cevabı savunulabilir;
+  puanlamada bu soruyu ayrı raporlayın (`score.py` alan başına veriyor).
+- Ekran gösteriminde 1. adımda alfabenin açıklaması sonraki ekranda duruyor: görevli kaydırmayı
+  denetlemeli; daha sağlamı 1. adımı ayrı dosyada göstermek (öneri).
+- Rozet'te çerçeve kalınlığı ve gri dolgu 24 px'te zor okunuyor (denetçinin gözlemi).

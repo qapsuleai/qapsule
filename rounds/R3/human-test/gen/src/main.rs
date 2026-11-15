@@ -431,10 +431,10 @@ fn pick_sentences() -> Vec<Sent> {
     type Crit = fn(&Situation) -> bool;
     let crit: [Crit; 7] = [
         |s| s.factors.time == "event" && !s.factors.redacted && s.factors.bars_ago > 0,
-        |s| s.factors.time == "event" && s.factors.redacted,
+        |s| s.factors.time == "event" && s.factors.redacted && s.factors.kind == "flow",
         |s| s.factors.time == "event" && s.factors.bars_ago == 0 && !s.factors.redacted,
         |s| s.factors.time == "state" && s.truth.still_valid == "yes" && !s.factors.redacted,
-        |s| s.factors.time == "state" && s.truth.still_valid == "no" && s.factors.redacted,
+        |s| s.factors.time == "state" && s.truth.still_valid == "no" && s.factors.redacted && s.factors.kind == "flow",
         |s| s.factors.time == "expectation" && s.truth.still_valid == "yes" && !s.factors.redacted,
         |s| s.factors.time == "expectation" && s.truth.still_valid == "no",
     ];

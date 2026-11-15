@@ -1,0 +1,20 @@
+[package]
+name = "m1-rozet"
+description = "R3/M1 candidate alphabet \"rozet\": a fixed circular badge; kind = inner pattern, direction = rotation, confirmations = ring segments, confidence = fill level."
+version = "0.0.0"
+edition = "2021"
+publish = false
+
+# Not a member of the main workspace.
+[workspace]
+
+[lib]
+name = "m1_rozet"
+path = "src/lib.rs"
+
+[dependencies]
+qp-schema = { path = "../../../../../crates/qp-schema" }
+qp-grammar = { path = "../../../../../crates/qp-grammar" }
+
+[lints.rust]
+unsafe_code = "forbid"

@@ -107,6 +107,14 @@ Protokol taşımadan bağımsızdır. Tanımlı iki taşıma:
   ham mesaj metni olarak otoriteye verilir (`{"conn":"a","msg":"{not json"}`).
   Test koşucuları için `qp serve --batch-end`: her giriş satırının çıktıları bittiğinde
   `{"batch_end":true}` satırı yazılır (taşıma düzeyi; protokolün parçası değil).
+  (RP2) **Barındırıcı çerçevesi:** `qp serve --host-frames` ile `{"host":{"data":<DataEvent>}}`
+  satırı bir veri olayını barındırıcı yolundan (`Session::handle_host_frame` →
+  `Session::data_event`, §18.4) motora verir; çıktısı olayın yol açtığı bildirimlerdir,
+  reddedilen olay `{"host":{"error":"…"}}` döner. Taşıma düzeyidir ve **yalnız
+  barındırıcınındır**: protokol mesajı değildir, bağlantı (`conn`) taşımaz, günlüğe girmez.
+  Bayrak yalnız akışın sahibi barındırıcıysa verilir; bayraksız böyle bir satır çerçeve
+  hatasıdır (`conn` yok). Akışa güvenilmeyen istemcileri çoğullayan bir aracı `host`
+  satırlarını geçirmemelidir.
 
 - **JSON-RPC eşlemesi** (MCP, LSP benzeri ortamlar için): istemci mesajı
   `{"jsonrpc":"2.0","id":<id>,"method":"qp/<type>","params":<mesajın geri kalanı>}`;
@@ -732,9 +740,13 @@ kimlikleri, alan adları… Bir komutta hata varsa **hiçbir** işlem uygulanmaz
 }
 ```
 
-Bir adım `send`, `send_raw` ya da (RP2) `data` taşır. `data` bir veri olayıdır (§18.4):
-koşucu onu bağlantıdan değil barındırıcı yolundan motora verir; `expect` olayın yol açtığı
-bildirimlerdir (çoğu zaman boş). Veri düzlemi `init.data` ile kurulur (§18.6).
+Bir adım tam olarak birini taşır: `send`, `send_raw` ya da (RP2) `data`. `data` bir veri
+olayıdır (§18.4): koşucu onu bağlantıdan değil barındırıcı yolundan motora verir; `expect`
+olayın yol açtığı bildirimlerdir (çoğu zaman boş). Veri düzlemi `init.data` ile kurulur
+(§18.6). Üç taşımada barındırıcı yolu: süreç içi `Session::data_event`; `qp serve`
+`--host-frames` ile barındırıcı çerçevesi (§3); MCP'de koşucunun `Hub::data_event` yolu —
+bir MCP aracı **değildir**, ajan veri olayı enjekte edemez. Motorun reddettiği olay adımı
+başarısız sayar.
 
 Koşucu `send.msg`'i **yazıldığı haliyle, ham JSON olarak** iletir (RP2; R2 denetimi K2):
 tipli bir `ClientMsg`'e çevirmez. Bu yüzden **anlamla başvuru (§17) seçici nesneleri** içeren
@@ -1082,6 +1094,28 @@ gider.**
 | olgular, bulgular, kapsül durumları ve onların metinleri, kanıt değerleri (`evidence`), `finding_state`, `condition_met`, `intent_triggered` | verilir (anlam düzlemi; dokümanın parçası). **Açık soru** (Arkin): olgunun kanıt değerleri (ör. "RSI 71,4") veri lisansı kapsamında mı? Kapsamdaysa yetkisiz kişiye `evidence` değerleri gizlenir; v0 göstermektedir. |
 | `verify_evidence` | `no_entitlement` |
 
+**Uygulama notları (T4, referans otorite).**
+
+- Sağlayıcı yoksa bağ `pending` (`reason`: sağlayıcı yok); rolü `host` olan kişi yoksa
+  `no_entitlement` (`reason`: host yok). Sağlayıcı geç cevap verdiğinde ya da boşluk / sınır
+  sonrası barındırıcı `Session::refresh_bindings` ile hazır olmayan bağları yeniden çözer.
+- Çapa damgası, bağı dokümana sokan girdinin hemen arkasından gelen motor girdisidir
+  (yüklemede girdi 1); geçersizleşme girdilerinden öncedir. Yalnız çapası değişen bağ
+  yeniden çözülmez.
+- Okuma süzgeci bir serinin **bütün** veri bağımlılıklarına bakar: hesap serilerinde bütün
+  girdiler (özyinelemeli); katmanlarda kendi serisi, olgusunun / bulgusunun bütün
+  olgularının serileri, `x`/`y`/`y2` başvuruları, renk koşulunun sağ yanı ve sabitlerin
+  `series`/`fact` kökenleri. Biri soran için hazır değilse katman çizilmez (`screen`'de
+  `binding`, `items: 0`, `last` yok); görünümün bar serisi hazır değilse `hit` serinin
+  hatasını `/query/view`'da döner. `present` bulgunun herhangi bir olgusu ya da kapsülün
+  kayıtlı görünümü okunamıyorsa kıvılcım ve görünüm vermez.
+- `welcome.summary.series[].binding` yalnız bağlı serilerde bulunur (hazır olanlarda
+  `ready`).
+- `verify_evidence` hazır olmayan ya da yetkisiz bağda hata değil, olgu başına durum döner
+  (`no_entitlement`, `unavailable`); aşağıdaki tablodaki "hata" bu sorguda olgu durumudur.
+- Hazır olmayan bağa dayanan koşul aboneliği ve niyet değerlendirilmez; önceki kenar
+  durumu (`last`) korunur.
+
 **Çözülemeyen bağ belgeyi durdurmaz.** Durumu `ready` olmayan bir bağlı seri ve ona dayanan
 hesaplar için:
 
@@ -1149,6 +1183,10 @@ Veri olayı (`DataEvent`) alan düzeyindedir; yalnızca değişen alanlar gelir 
   doğurmasın).
 - Kontrol sırası: besleme, yineleme (`seq` ≤ son: içeriğe bakılmadan yok sayılır), boşluk /
   `stale`, sonra olayın kendi kuralları.
+- (T4) Olay beslemesine bağlı her seriye uygulanır. Beslemesi bağlı olup henüz çözülmemiş
+  (`pending`, `no_entitlement`, `no_data`) bir seriye gelen olay kabul edilir, bir şey
+  değiştirmez (yeniden çözüm onu içerir). Ne bağlı bir serinin ne de otoritenin kendi test
+  sağlayıcısının (`init.data`) bildiği besleme hatadır (`unknown feed`).
 
 **Olay protokol mesajı değildir.** Barındırıcı onu motora doğrudan verir (referans otoritede
 `Session::data_event`); bağlantılardan gelmez, günlüğe girmez, `change` olayı üretmez.
@@ -1194,6 +1232,9 @@ Otorite bir olguyu eklerken (`add_fact`; R3'te dedektörler) olguya **kanıt ba�
    yok), `no_entitlement`.
 
 Bulgu `verified` ise bütün olguları `verified`'dır. Sorgu dokümanı değiştirmez.
+İleti biçimi (T4): `bar count in t=a…b: n → m`, `data digest x → y: a bar in t=a…b
+changed; `value` v → w` (değer farkı varsa eklenir) ya da yalnız değer farkı. Değerler bit
+düzeyinde karşılaştırılır; `prev` olgunun barından bir önceki barın ana çıktısıdır.
 
 ### 18.6 Test veri sağlayıcısı (dökümler)
 

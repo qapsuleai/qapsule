@@ -122,9 +122,34 @@ dependencies = [
 ]
 
 [[package]]
+name = "qp-calendar"
+version = "0.0.0"
+dependencies = [
+ "qp-schema",
+]
+
+[[package]]
+name = "qp-capsule"
+version = "0.0.0"
+dependencies = [
+ "qp-compute",
+ "qp-facts",
+ "qp-schema",
+ "serde",
+]
+
+[[package]]
 name = "qp-compute"
 version = "0.0.0"
 dependencies = [
+ "qp-schema",
+]
+
+[[package]]
+name = "qp-facts"
+version = "0.0.0"
+dependencies = [
+ "qp-compute",
  "qp-schema",
 ]
 
@@ -148,7 +173,9 @@ dependencies = [
 name = "qp-session"
 version = "0.0.0"
 dependencies = [
+ "qp-capsule",
  "qp-compute",
+ "qp-facts",
  "qp-grammar",
  "qp-schema",
  "qp-source",
@@ -163,6 +190,7 @@ dependencies = [
 name = "qp-source"
 version = "0.0.0"
 dependencies = [
+ "qp-calendar",
  "qp-schema",
  "serde_json",
 ]

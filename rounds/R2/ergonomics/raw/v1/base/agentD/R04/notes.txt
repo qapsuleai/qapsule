@@ -1,0 +1,1 @@
+attempt1: list findings + present(surface=watch) without finding; default picked the RSI finding (highest confidence), not the breakout. attempt2: present with finding f7b4v (latest breakout, bar 185) worked. Unclear: present's default choice is highest confidence, so findings must be listed first to pick the right one (welcome.summary also has ids).

@@ -1,0 +1,2 @@
+{"conn":"a","msg":{"type":"hello","protocol":"qp/0","principal":"editor","surface":{"kind":"headless"}}}
+{"conn":"a","msg":{"type":"command","id":"c1","ops":[{"op":"insert_panel","view":{},"panel":{"name":"volume","y":{"kind":"linear"}},"after":{"mark":"candle"},"layers":[{"mark":"bar","series":{"kind":"bars"},"encoding":{"y":"v"}}]}]}}

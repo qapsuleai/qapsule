@@ -1,0 +1,1 @@
+attempt1: hello + screen query for arkin; answered directly from result. No problems. Note: screen lists only drawn layers; SMA50 exists in summary but is not drawn.

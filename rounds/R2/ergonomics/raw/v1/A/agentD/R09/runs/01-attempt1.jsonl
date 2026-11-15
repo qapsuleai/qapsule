@@ -1,0 +1,3 @@
+{"conn":"a","msg":{"type":"hello","protocol":"qp/0","principal":"editor","surface":{"kind":"headless"}}}
+{"conn":"a","msg":{"type":"command","id":"c1","ops":[{"op":"insert_layer","view":{},"layer":{"mark":"band","series":{"study":"bollinger"},"panel":{"shows":{"study":"bollinger"}},"encoding":{"y":"upper","y2":"lower"}}},{"op":"delete_layer","view":{},"layer":{"shows":{"study":"bollinger"},"mark":"line"}}]}}
+{"conn":"a","msg":{"type":"query","id":"q1","query":{"kind":"list","collection":"views"}}}

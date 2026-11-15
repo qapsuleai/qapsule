@@ -1,0 +1,1 @@
+attempt1: insert_panel id 3 'bandwidth' with line layer on its4l y=bandwidth -> applied (ack created 3, bw). Unclear: insert_panel's panel field accepted a full object, spec table doesn't say its type.

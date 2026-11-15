@@ -1,0 +1,2 @@
+attempt1: discovery-only run (shared with R02), no change.
+attempt2: add_fact (level evidence 123.45, series ugd5d bar 199) + insert_layer rule panel 0 y=123.45 with origin pointing at the fact, in one command; applied. Spec point: a bare constant gets no_origin, so a fact has to be created first; this is in GRAMMAR §10 but easy to miss. Side effect: an extra fact is added to the document; the bar choice (last) was arbitrary.

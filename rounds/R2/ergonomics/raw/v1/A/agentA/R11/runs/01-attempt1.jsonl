@@ -1,0 +1,4 @@
+{"conn":"a","msg":{"type":"hello","protocol":"qp/0","principal":"editor","surface":{"kind":"headless"}}}
+{"conn":"a","msg":{"type":"query","id":"q0","query":{"kind":"list","collection":"series"}}}
+{"conn":"a","msg":{"type":"command","id":"c1","ops":[{"op":"insert_layer","view":{},"layer":{"mark":"line","series":{"kind":"bars"},"panel":{"mark":"candle"},"encoding":{"y":"c","color":{"when":{"field":"c","op":"ge","than":{"series":{"study":"sma","params":{"period":50}},"field":"sma"}},"then":"up","else":"down"}}}}]}}
+{"conn":"a","msg":{"type":"query","id":"q9","query":{"kind":"screen"}}}

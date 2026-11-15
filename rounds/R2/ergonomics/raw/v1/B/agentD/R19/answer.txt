@@ -1,0 +1,1 @@
+Telefonda kapsül olarak görünür: "THYAO 122,40 direncini kırdı: yeni zirve denemesi.", güven 0,55, 3 simge ve kapanış çizgisi + 122,40 seviye kuralı + olgu noktası; son 60 bar (bar 140–199) gösterilir.

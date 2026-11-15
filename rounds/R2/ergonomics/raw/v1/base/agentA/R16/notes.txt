@@ -1,0 +1,1 @@
+attempt1: insert_layer point with fact fn2kv (older breakout, bar 120, vs necr0 bar 185) on panel 0 -> applied. Point y uses fact level 103.9 (not bar close). 'Eski' interpreted as older by bar.

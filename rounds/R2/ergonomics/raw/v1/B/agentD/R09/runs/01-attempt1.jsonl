@@ -1,0 +1,3 @@
+{"conn":"a","msg":{"type":"hello","protocol":"qp/0","principal":"editor","surface":{"kind":"headless"}}}
+{"conn":"a","msg":{"type":"command","id":"c1","ops":[{"op":"insert_layer","view":"@view","layer":{"mark":"band","series":"@bollinger(20,2)","panel":"@panel:price","encoding":{"y":"upper","y2":"lower"}}}]}}
+{"conn":"a","msg":{"type":"query","id":"q2","query":{"kind":"list","collection":"views"}}}

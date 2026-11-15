@@ -1,0 +1,817 @@
+{
+ "agents": {
+  "agentA": {
+   "cost_usd": 0.3927321,
+   "duration_ms": 62577,
+   "num_turns": 25,
+   "output_tokens": 7500,
+   "overhead_tokens": 270737,
+   "result_usage_total": 656073,
+   "seed": 3912273253,
+   "tokens": 656073,
+   "tokens_sum_messages": 649136,
+   "tool_calls": 24
+  },
+  "agentB": {
+   "cost_usd": 0.38271580000000005,
+   "duration_ms": 66351,
+   "num_turns": 23,
+   "output_tokens": 7719,
+   "overhead_tokens": 50023,
+   "result_usage_total": 490624,
+   "seed": 3798213665,
+   "tokens": 490624,
+   "tokens_sum_messages": 483402,
+   "tool_calls": 22
+  },
+  "agentC": {
+   "cost_usd": 0.4291834,
+   "duration_ms": 68171,
+   "num_turns": 25,
+   "output_tokens": 8074,
+   "overhead_tokens": 213825,
+   "result_usage_total": 631869,
+   "seed": 4067924256,
+   "tokens": 631869,
+   "tokens_sum_messages": 624439,
+   "tool_calls": 24
+  },
+  "agentD": {
+   "cost_usd": 0.3643438,
+   "duration_ms": 52251,
+   "num_turns": 23,
+   "output_tokens": 6538,
+   "overhead_tokens": 160085,
+   "result_usage_total": 415983,
+   "seed": 2417041509,
+   "tokens": 415983,
+   "tokens_sum_messages": 410040,
+   "tool_calls": 22
+  },
+  "agentE": {
+   "cost_usd": 0.301105,
+   "duration_ms": 52341,
+   "num_turns": 19,
+   "output_tokens": 6433,
+   "overhead_tokens": 50048,
+   "result_usage_total": 447515,
+   "seed": 3014150058,
+   "tokens": 447515,
+   "tokens_sum_messages": 441684,
+   "tool_calls": 18
+  }
+ },
+ "rows": [
+  {
+   "agent": "A",
+   "any": true,
+   "attempts": 1,
+   "attributed_tokens_heuristic": 123680,
+   "detail": [
+    {
+     "doc_ids_used": [
+      "bukgt",
+      "fw2lc"
+     ],
+     "error_codes": [],
+     "errors": 0,
+     "file": "attempt1.jsonl",
+     "how": "run",
+     "msgs": 3,
+     "pass": true,
+     "run": "R01/runs/02-attempt1.jsonl",
+     "why": []
+    }
+   ],
+   "final": true,
+   "first": true,
+   "first_blind": false,
+   "first_error": false,
+   "msgs_first": 3,
+   "msgs_total": 3,
+   "notes": "attempt1: add_study rsi(7) id rsi7 (no show) + insert_panel after panel 0 with a line layer. Applied (created rsi7, panel 3, l0). Could not verify panel order: screen query returns empty for headless; get view after would have shown panels. Spec unclear: insert_panel layers need a `panel` field though it is ignored; I probed state with a list query in a probe.jsonl first (needed real ids, which are random per doc).",
+   "other_runs": [
+    "probe.jsonl"
+   ],
+   "output_tokens": 1875,
+   "reruns": 0,
+   "task": "R01",
+   "tokens": 164018,
+   "wall_s": 15.6
+  },
+  {
+   "agent": "B",
+   "any": true,
+   "attempts": 2,
+   "attributed_tokens_heuristic": 70242,
+   "detail": [
+    {
+     "doc_ids_used": [],
+     "error_codes": [],
+     "errors": 0,
+     "file": "attempt1.jsonl",
+     "how": "run",
+     "msgs": 3,
+     "pass": false,
+     "run": "R02/runs/01-attempt1.jsonl",
+     "why": [
+      "Bollinger middle still drawn and not red",
+      "Bollinger lower still drawn and not red"
+     ]
+    },
+    {
+     "doc_ids_used": [],
+     "error_codes": [],
+     "errors": 0,
+     "file": "attempt2.jsonl",
+     "how": "run",
+     "msgs": 3,
+     "pass": true,
+     "run": "R02/runs/02-attempt2.jsonl",
+     "why": []
+    }
+   ],
+   "final": true,
+   "first": false,
+   "first_blind": false,
+   "first_error": false,
+   "msgs_first": 3,
+   "msgs_total": 6,
+   "notes": "attempt1: set_encoding color on \"@line:bollinger.upper\" -> applied, but the layer draws upper/middle/lower so ALL three lines turned red (wrong). Spec doesn't say a multi-output layer can't color one output.\nattempt2: insert_layer of a new line layer (y:\"upper\", color #ff0000) after the bollinger layer; original left untouched (note: the original upper line stays underneath, hidden by the overlay). Applied.",
+   "other_runs": [],
+   "output_tokens": 1930,
+   "reruns": 0,
+   "task": "R02",
+   "tokens": 122656,
+   "wall_s": 16.6
+  },
+  {
+   "agent": "C",
+   "any": true,
+   "attempts": 1,
+   "attributed_tokens_heuristic": 53456,
+   "detail": [
+    {
+     "doc_ids_used": [],
+     "error_codes": [],
+     "errors": 0,
+     "file": "attempt1.jsonl",
+     "how": "run",
+     "msgs": 3,
+     "pass": true,
+     "run": "R03/runs/01-attempt1.jsonl",
+     "why": []
+    }
+   ],
+   "final": true,
+   "first": true,
+   "first_blind": true,
+   "first_error": false,
+   "msgs_first": 3,
+   "msgs_total": 3,
+   "notes": "attempt1: set_emphasis on view @view with highlight target item @finding:latest(breakout) (resolved to hgtwi, bar 185). Applied. Unclear: whether set_emphasis replaces the list (existing emphasis was empty so no loss); whether \"vurgula\" means persistent emphasis vs attend (chose persistent emphasis).",
+   "other_runs": [],
+   "output_tokens": 2018,
+   "reruns": 0,
+   "task": "R03",
+   "tokens": 157967,
+   "wall_s": 17.0
+  },
+  {
+   "agent": "D",
+   "any": true,
+   "attempts": 1,
+   "attributed_tokens_heuristic": 40021,
+   "detail": [
+    {
+     "doc_ids_used": [],
+     "error_codes": [],
+     "errors": 0,
+     "file": "attempt1.jsonl",
+     "how": "run",
+     "msgs": 2,
+     "pass": true,
+     "run": "R04/runs/01-attempt1.jsonl",
+     "why": []
+    }
+   ],
+   "final": true,
+   "first": true,
+   "first_blind": true,
+   "first_error": false,
+   "msgs_first": 2,
+   "msgs_total": 2,
+   "notes": "attempt1: present query, finding \"@finding:latest(breakout)\", surface watch -> OK first try. Unclear: \"son\" = latest bar (bar 185 finding uncql); spec handled it fine.",
+   "other_runs": [],
+   "output_tokens": 1634,
+   "reruns": 0,
+   "task": "R04",
+   "tokens": 103996,
+   "wall_s": 13.1
+  },
+  {
+   "agent": "E",
+   "any": true,
+   "attempts": 2,
+   "attributed_tokens_heuristic": 148565,
+   "detail": [
+    {
+     "doc_ids_used": [],
+     "error_codes": [],
+     "errors": 0,
+     "file": "attempt1.jsonl",
+     "how": "run",
+     "msgs": 2,
+     "pass": false,
+     "run": "R05/runs/01-attempt1.jsonl",
+     "why": [
+      "price panel y scale is log"
+     ]
+    },
+    {
+     "doc_ids_used": [
+      "fmrvv"
+     ],
+     "error_codes": [],
+     "errors": 0,
+     "file": "attempt2.jsonl",
+     "how": "run",
+     "msgs": 2,
+     "pass": true,
+     "run": "R05/runs/02-attempt2.jsonl",
+     "why": []
+    }
+   ],
+   "final": true,
+   "first": false,
+   "first_blind": false,
+   "first_error": false,
+   "msgs_first": 2,
+   "msgs_total": 4,
+   "notes": "attempt1: probe only (hello + list views) to learn ids, request not attempted; attempt2: set_scale y0 kind log on view fmrvv -> applied. Unclear: ids are random so a probe was needed; which panel is 'Fiyat paneli' inferred from summary (panel 0 / y0).",
+   "other_runs": [],
+   "output_tokens": 1608,
+   "reruns": 0,
+   "task": "R05",
+   "tokens": 111879,
+   "wall_s": 13.1
+  },
+  {
+   "agent": "A",
+   "any": true,
+   "attempts": 1,
+   "attributed_tokens_heuristic": 67684,
+   "detail": [
+    {
+     "doc_ids_used": [
+      "fw2lc"
+     ],
+     "error_codes": [],
+     "errors": 0,
+     "file": "attempt1.jsonl",
+     "how": "run",
+     "msgs": 3,
+     "pass": true,
+     "run": "R06/runs/01-attempt1.jsonl",
+     "why": []
+    }
+   ],
+   "final": true,
+   "first": true,
+   "first_blind": false,
+   "first_error": false,
+   "msgs_first": 3,
+   "msgs_total": 3,
+   "notes": "attempt1: insert_layer rule on panel 1 with y \"30\", grey color like the 70 rule, explicit origin rsi.oversold. Applied; view shows the layer. No issues.",
+   "other_runs": [],
+   "output_tokens": 1875,
+   "reruns": 0,
+   "task": "R06",
+   "tokens": 164018,
+   "wall_s": 15.6
+  },
+  {
+   "agent": "B",
+   "any": true,
+   "attempts": 1,
+   "attributed_tokens_heuristic": 12506,
+   "detail": [
+    {
+     "doc_ids_used": [],
+     "error_codes": [],
+     "errors": 0,
+     "file": "attempt1.jsonl",
+     "how": "run",
+     "msgs": 3,
+     "pass": true,
+     "run": "R07/runs/01-attempt1.jsonl",
+     "why": []
+    }
+   ],
+   "final": true,
+   "first": true,
+   "first_blind": true,
+   "first_error": false,
+   "msgs_first": 3,
+   "msgs_total": 3,
+   "notes": "attempt1: delete_panel view \"@view\", panel \"@panel:macd\" -> applied; panel 2 and its layer gone. No problems.",
+   "other_runs": [],
+   "output_tokens": 1930,
+   "reruns": 0,
+   "task": "R07",
+   "tokens": 122656,
+   "wall_s": 16.6
+  },
+  {
+   "agent": "C",
+   "any": true,
+   "attempts": 2,
+   "attributed_tokens_heuristic": 197628,
+   "detail": [
+    {
+     "doc_ids_used": [],
+     "error_codes": [],
+     "errors": 0,
+     "file": "attempt1.jsonl",
+     "how": "run",
+     "msgs": 3,
+     "pass": true,
+     "run": "R08/runs/01-attempt1.jsonl",
+     "why": []
+    },
+    {
+     "doc_ids_used": [],
+     "error_codes": [],
+     "errors": 0,
+     "file": "attempt2.jsonl",
+     "how": "run",
+     "msgs": 3,
+     "pass": true,
+     "run": "R08/runs/02-attempt2.jsonl",
+     "why": []
+    }
+   ],
+   "final": true,
+   "first": true,
+   "first_blind": true,
+   "first_error": false,
+   "msgs_first": 3,
+   "msgs_total": 6,
+   "notes": "attempt1: insert_panel after @panel:price with bar layer series @volume (spec example form). Applied; but the screen query lists panels by id (volume looked last), so I could not verify position.\nattempt2: same command + list views; panels order is [0,3,1,2], so volume sits directly under price. Success. Misleading: screen says panels are in stack order but showed id order; insert_panel `panel` is documented as number but example uses an object (worked).",
+   "other_runs": [],
+   "output_tokens": 2018,
+   "reruns": 0,
+   "task": "R08",
+   "tokens": 157967,
+   "wall_s": 17.0
+  },
+  {
+   "agent": "D",
+   "any": true,
+   "attempts": 1,
+   "attributed_tokens_heuristic": 289976,
+   "detail": [
+    {
+     "doc_ids_used": [],
+     "error_codes": [],
+     "errors": 0,
+     "file": "attempt1.jsonl",
+     "how": "run",
+     "msgs": 3,
+     "pass": true,
+     "run": "R09/runs/01-attempt1.jsonl",
+     "why": []
+    }
+   ],
+   "final": true,
+   "first": true,
+   "first_blind": true,
+   "first_error": false,
+   "msgs_first": 3,
+   "msgs_total": 3,
+   "notes": "attempt1: insert_layer band (series @bollinger(20,2), panel @panel:price, encoding y=upper,y2=lower) + list views to verify -> applied, layer l0 added in panel 0. I kept the existing line layer (qhkm1) as outline; ambiguous whether \"göster\" means replace the line. No mark-change op exists (set_encoding can't change mark), which is a bit unclear. Real ids differ from doc examples (random), names @... worked.",
+   "other_runs": [],
+   "output_tokens": 1634,
+   "reruns": 0,
+   "task": "R09",
+   "tokens": 103996,
+   "wall_s": 13.1
+  },
+  {
+   "agent": "E",
+   "any": true,
+   "attempts": 1,
+   "attributed_tokens_heuristic": 12512,
+   "detail": [
+    {
+     "doc_ids_used": [
+      "fmrvv",
+      "ubxmh"
+     ],
+     "error_codes": [],
+     "errors": 0,
+     "file": "attempt1.jsonl",
+     "how": "run",
+     "msgs": 2,
+     "pass": true,
+     "run": "R10/runs/01-attempt1.jsonl",
+     "why": []
+    }
+   ],
+   "final": true,
+   "first": true,
+   "first_blind": false,
+   "first_error": false,
+   "msgs_first": 2,
+   "msgs_total": 2,
+   "notes": "attempt1: insert_layer bar on macd series panel 2, y=histogram, conditional color up/down with macd.zero origin -> applied. Kept existing MACD line layer. Unclear: whether 'green/red' should be theme names up/down (used) vs hex.",
+   "other_runs": [],
+   "output_tokens": 1608,
+   "reruns": 0,
+   "task": "R10",
+   "tokens": 111879,
+   "wall_s": 13.1
+  },
+  {
+   "agent": "A",
+   "any": true,
+   "attempts": 1,
+   "attributed_tokens_heuristic": 67684,
+   "detail": [
+    {
+     "doc_ids_used": [
+      "bukgt",
+      "fw2lc",
+      "kw0zh"
+     ],
+     "error_codes": [],
+     "errors": 0,
+     "file": "attempt1.jsonl",
+     "how": "run",
+     "msgs": 3,
+     "pass": true,
+     "run": "R11/runs/01-attempt1.jsonl",
+     "why": []
+    }
+   ],
+   "final": true,
+   "first": true,
+   "first_blind": false,
+   "first_error": false,
+   "msgs_first": 3,
+   "msgs_total": 3,
+   "notes": "attempt1: insert_layer line of price series (bukgt) y=c on panel 0 with conditional color c ge sma50 field -> up else down (theme names). Applied; view shows it. SMA50 series already existed (undrawn). Note the candles remain drawn too; the request said \"draw close\", I added a line.",
+   "other_runs": [],
+   "output_tokens": 1875,
+   "reruns": 0,
+   "task": "R11",
+   "tokens": 164018,
+   "wall_s": 15.6
+  },
+  {
+   "agent": "B",
+   "any": true,
+   "attempts": 1,
+   "attributed_tokens_heuristic": 12506,
+   "detail": [
+    {
+     "doc_ids_used": [],
+     "error_codes": [],
+     "errors": 0,
+     "file": "attempt1.jsonl",
+     "how": "run",
+     "msgs": 4,
+     "pass": true,
+     "run": "R12/runs/01-attempt1.jsonl",
+     "why": []
+    }
+   ],
+   "final": true,
+   "first": true,
+   "first_blind": true,
+   "first_error": false,
+   "msgs_first": 4,
+   "msgs_total": 4,
+   "notes": "attempt1: set_view_range from_bar 140 to_bar 199 (guessed 200 bars from the spec examples; welcome.summary confirmed len 200). Applied, x.domain set. Bar count had to be guessed before seeing welcome.",
+   "other_runs": [],
+   "output_tokens": 1930,
+   "reruns": 0,
+   "task": "R12",
+   "tokens": 122656,
+   "wall_s": 16.6
+  },
+  {
+   "agent": "C",
+   "any": true,
+   "attempts": 1,
+   "attributed_tokens_heuristic": 53456,
+   "detail": [
+    {
+     "doc_ids_used": [],
+     "error_codes": [],
+     "errors": 0,
+     "file": "attempt1.jsonl",
+     "how": "run",
+     "msgs": 2,
+     "pass": true,
+     "run": "R13/runs/01-attempt1.jsonl",
+     "why": []
+    }
+   ],
+   "final": true,
+   "first": true,
+   "first_blind": true,
+   "first_error": false,
+   "msgs_first": 2,
+   "msgs_total": 2,
+   "notes": "attempt1: hello + screen query for arkin; answered directly from result. No problems. Note: screen lists only drawn layers; SMA50 exists in summary but is not drawn.",
+   "other_runs": [],
+   "output_tokens": 2018,
+   "reruns": 0,
+   "task": "R13",
+   "tokens": 157967,
+   "wall_s": 17.0
+  },
+  {
+   "agent": "D",
+   "any": true,
+   "attempts": 1,
+   "attributed_tokens_heuristic": 40021,
+   "detail": [
+    {
+     "doc_ids_used": [],
+     "error_codes": [],
+     "errors": 0,
+     "file": "attempt1.jsonl",
+     "how": "run",
+     "msgs": 2,
+     "pass": true,
+     "run": "R14/runs/01-attempt1.jsonl",
+     "why": []
+    }
+   ],
+   "final": true,
+   "first": true,
+   "first_blind": true,
+   "first_error": false,
+   "msgs_first": 2,
+   "msgs_total": 2,
+   "notes": "attempt1: hit query view @view, x=900,y=200,width=1200,height=600 -> OK; result has no item (empty area), panel 0 bar 159. Note: visible range for my headless connection is default last 120 bars; spec says so but it affects the bar answer.",
+   "other_runs": [],
+   "output_tokens": 1634,
+   "reruns": 0,
+   "task": "R14",
+   "tokens": 103996,
+   "wall_s": 13.1
+  },
+  {
+   "agent": "E",
+   "any": true,
+   "attempts": 1,
+   "attributed_tokens_heuristic": 12512,
+   "detail": [
+    {
+     "doc_ids_used": [
+      "fmrvv",
+      "gz62i"
+     ],
+     "error_codes": [],
+     "errors": 0,
+     "file": "attempt1.jsonl",
+     "how": "run",
+     "msgs": 2,
+     "pass": true,
+     "run": "R15/runs/01-attempt1.jsonl",
+     "why": []
+    }
+   ],
+   "final": true,
+   "first": true,
+   "first_blind": false,
+   "first_error": false,
+   "msgs_first": 2,
+   "msgs_total": 2,
+   "notes": "attempt1: set_encoding width 2 on RSI line layer gz62i -> applied. No issues.",
+   "other_runs": [],
+   "output_tokens": 1608,
+   "reruns": 0,
+   "task": "R15",
+   "tokens": 111879,
+   "wall_s": 13.1
+  },
+  {
+   "agent": "A",
+   "any": true,
+   "attempts": 1,
+   "attributed_tokens_heuristic": 390087,
+   "detail": [
+    {
+     "doc_ids_used": [
+      "fw2lc",
+      "ikexx"
+     ],
+     "error_codes": [],
+     "errors": 0,
+     "file": "attempt1.jsonl",
+     "how": "run",
+     "msgs": 3,
+     "pass": true,
+     "run": "R16/runs/01-attempt1.jsonl",
+     "why": []
+    }
+   ],
+   "final": true,
+   "first": true,
+   "first_blind": false,
+   "first_error": false,
+   "msgs_first": 3,
+   "msgs_total": 3,
+   "notes": "attempt1: oldest breakout fact = ikexx (bar 120, level 103.9); insert_layer point with fact ikexx on panel 0. Applied. No issues.",
+   "other_runs": [],
+   "output_tokens": 1875,
+   "reruns": 0,
+   "task": "R16",
+   "tokens": 164018,
+   "wall_s": 15.6
+  },
+  {
+   "agent": "B",
+   "any": true,
+   "attempts": 2,
+   "attributed_tokens_heuristic": 388149,
+   "detail": [
+    {
+     "doc_ids_used": [],
+     "error_codes": [
+      "no_origin"
+     ],
+     "errors": 1,
+     "file": "attempt1.jsonl",
+     "how": "run",
+     "msgs": 3,
+     "pass": false,
+     "run": "R17/runs/01-attempt1.jsonl",
+     "why": [
+      "a rule bound to a fact with level 123.45, or the user is told why not and the option"
+     ]
+    },
+    {
+     "doc_ids_used": [],
+     "error_codes": [],
+     "errors": 0,
+     "file": "attempt2.jsonl",
+     "how": "run",
+     "msgs": 3,
+     "pass": true,
+     "run": "R17/runs/02-attempt2.jsonl",
+     "why": []
+    }
+   ],
+   "final": true,
+   "first": false,
+   "first_blind": false,
+   "first_error": true,
+   "msgs_first": 3,
+   "msgs_total": 6,
+   "notes": "attempt1: insert_layer rule with encoding.y 123.45 -> no_origin error (as spec §10 says; nothing applied).\nattempt2: add_fact (kind level, evidence.level 123.45, bar 199 = last bar) + insert_layer rule with origin pointing to that fact in one command -> applied. Unclear in spec: which bar/kind a helper fact should have; I added a new fact to the document as a side effect.",
+   "other_runs": [],
+   "output_tokens": 1930,
+   "reruns": 0,
+   "task": "R17",
+   "tokens": 122656,
+   "wall_s": 16.6
+  },
+  {
+   "agent": "C",
+   "any": true,
+   "attempts": 2,
+   "attributed_tokens_heuristic": 319898,
+   "detail": [
+    {
+     "doc_ids_used": [],
+     "error_codes": [],
+     "errors": 0,
+     "file": "attempt1.jsonl",
+     "how": "run",
+     "msgs": 3,
+     "pass": true,
+     "run": "R18/runs/01-attempt1.jsonl",
+     "why": []
+    },
+    {
+     "doc_ids_used": [],
+     "error_codes": [],
+     "errors": 0,
+     "file": "attempt2.jsonl",
+     "how": "run",
+     "msgs": 3,
+     "pass": true,
+     "run": "R18/runs/02-attempt2.jsonl",
+     "why": []
+    }
+   ],
+   "final": true,
+   "first": true,
+   "first_blind": true,
+   "first_error": false,
+   "msgs_first": 3,
+   "msgs_total": 6,
+   "notes": "attempt1: move_panel @panel:macd before @panel:rsi; applied, but screen query still showed 0,1,2 (screen sorts by id despite doc saying stack order), so unverified.\nattempt2: same command + list views; panels order [0,2,1] -> MACD above RSI. Success.",
+   "other_runs": [],
+   "output_tokens": 2018,
+   "reruns": 0,
+   "task": "R18",
+   "tokens": 157967,
+   "wall_s": 17.0
+  },
+  {
+   "agent": "D",
+   "any": true,
+   "attempts": 1,
+   "attributed_tokens_heuristic": 40021,
+   "detail": [
+    {
+     "doc_ids_used": [],
+     "error_codes": [],
+     "errors": 0,
+     "file": "attempt1.jsonl",
+     "how": "run",
+     "msgs": 2,
+     "pass": true,
+     "run": "R19/runs/01-attempt1.jsonl",
+     "why": []
+    }
+   ],
+   "final": true,
+   "first": true,
+   "first_blind": true,
+   "first_error": false,
+   "msgs_first": 2,
+   "msgs_total": 2,
+   "notes": "attempt1: present query with surface \"phone\" (my own connection is headless, so surface param needed) -> OK; spark has 60 points (phone max_points). Unclear: \"kaç bar\" could mean spark length or capsule_view; both 60.",
+   "other_runs": [],
+   "output_tokens": 1634,
+   "reruns": 0,
+   "task": "R19",
+   "tokens": 103996,
+   "wall_s": 13.1
+  },
+  {
+   "agent": "E",
+   "any": true,
+   "attempts": 1,
+   "attributed_tokens_heuristic": 268095,
+   "detail": [
+    {
+     "doc_ids_used": [
+      "fmrvv",
+      "its4l"
+     ],
+     "error_codes": [],
+     "errors": 0,
+     "file": "attempt1.jsonl",
+     "how": "run",
+     "msgs": 2,
+     "pass": true,
+     "run": "R20/runs/01-attempt1.jsonl",
+     "why": []
+    }
+   ],
+   "final": true,
+   "first": true,
+   "first_blind": false,
+   "first_error": false,
+   "msgs_first": 2,
+   "msgs_total": 2,
+   "notes": "attempt1: insert_panel id 3 'bandwidth' with line layer on its4l y=bandwidth -> applied (ack created 3, bw). Unclear: insert_panel's panel field accepted a full object, spec table doesn't say its type.",
+   "other_runs": [],
+   "output_tokens": 1608,
+   "reruns": 0,
+   "task": "R20",
+   "tokens": 111879,
+   "wall_s": 13.1
+  }
+ ],
+ "summary": {
+  "any": 20,
+  "attempts": 25,
+  "cost_usd": 1.8701,
+  "failed_first": 3,
+  "final": 20,
+  "first": 17,
+  "first_blind": 10,
+  "first_error": 1,
+  "label": "v1",
+  "msgs_first": 53,
+  "msgs_total": 67,
+  "output_tokens": 36264,
+  "recovered": 3,
+  "recovered_after_error": 1,
+  "reruns": 0,
+  "tasks": 20,
+  "tokens": 2642064,
+  "unnumbered_runs": 1,
+  "variant": "B",
+  "wall_s": 301.7
+ }
+}

@@ -1,0 +1,2 @@
+attempt1: insert_panel after @panel:price with bar layer series @volume (spec example form). Applied; but the screen query lists panels by id (volume looked last), so I could not verify position.
+attempt2: same command + list views; panels order is [0,3,1,2], so volume sits directly under price. Success. Misleading: screen says panels are in stack order but showed id order; insert_panel `panel` is documented as number but example uses an object (worked).

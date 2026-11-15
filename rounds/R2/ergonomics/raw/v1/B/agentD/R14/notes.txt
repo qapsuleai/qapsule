@@ -1,0 +1,1 @@
+attempt1: hit query view @view, x=900,y=200,width=1200,height=600 -> OK; result has no item (empty area), panel 0 bar 159. Note: visible range for my headless connection is default last 120 bars; spec says so but it affects the bar answer.

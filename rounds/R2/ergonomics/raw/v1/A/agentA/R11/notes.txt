@@ -1,0 +1,1 @@
+attempt1: insert_layer line on bars series, panel {mark:candle}, y=c, color when c ge sma50 (selector) then up else down; applied. Ambiguity: "draw the close" could mean recoloring the existing candle layer; I added a new line layer instead. SMA50 already existed.

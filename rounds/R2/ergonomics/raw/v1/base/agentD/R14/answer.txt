@@ -1,0 +1,1 @@
+Fiyat panelinde (900,200) pikselinde öğe yok (boş alan): panel 0, bar 159, yaklaşık 108,81 fiyat seviyesi; üstünde mum ya da çizgi öğesi bulunmuyor.

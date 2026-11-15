@@ -1,0 +1,5 @@
+{"t": 1794700527.269096, "task": "R05", "file": "attempt1.jsonl", "run": 1, "msgs": 2, "shown": 2, "stderr": ""}
+{"t": 1794700550.164042, "task": "R05", "file": "attempt2.jsonl", "run": 2, "msgs": 2, "shown": 2, "stderr": ""}
+{"t": 1794700551.290783, "task": "R10", "file": "attempt1.jsonl", "run": 1, "msgs": 2, "shown": 2, "stderr": ""}
+{"t": 1794700552.590917, "task": "R15", "file": "attempt1.jsonl", "run": 1, "msgs": 2, "shown": 2, "stderr": ""}
+{"t": 1794700553.801443, "task": "R20", "file": "attempt1.jsonl", "run": 1, "msgs": 2, "shown": 2, "stderr": ""}

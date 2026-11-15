@@ -1,0 +1,1 @@
+attempt1: insert_panel (name volume) after {mark:candle} with a bar layer, series {kind:bars}, encoding y:"v"; applied, created panel 3 and layer l0; screen query confirmed panel 3 sits right under panel 0. Unclear: layer.panel not needed in insert_panel layers (worked). Volume bars' auto domain starts below 0 (-124k) because of the 5% pad, which looks odd.

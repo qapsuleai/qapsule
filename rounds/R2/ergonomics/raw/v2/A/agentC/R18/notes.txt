@@ -1,0 +1,1 @@
+attempt1: move_panel panel {shows:{study:macd}} before {shows:{study:rsi}} (resolved to panel 2 before panel 1); applied. Not verified with a follow-up query. "Üstüne" read as: MACD directly above RSI.

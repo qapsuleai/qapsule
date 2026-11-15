@@ -1,0 +1,1 @@
+attempt1: delete_panel with selector shows study macd; applied (resolved panel 2). No issues.

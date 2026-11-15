@@ -1,0 +1,2 @@
+attempt1: discovery-only run (same file as R13 attempt1) to learn that MACD is panel id 2 and RSI is panel id 1 in view xep2d.
+attempt2: move_panel panel 2 before 1; applied, panel order now 0,2,1. Spec note: panel ids are not positions, so the request must be mapped via layers' series (ct8vs = macd) to panel id.

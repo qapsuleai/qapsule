@@ -1,0 +1,4 @@
+{"conn":"a","msg":{"type":"hello","protocol":"qp/0","principal":"editor","surface":{"kind":"headless"}}}
+{"conn":"a","msg":{"type":"query","id":"q0","query":{"kind":"screen","principal":"arkin"}}}
+{"conn":"a","msg":{"type":"command","id":"c1","ops":[{"op":"set_encoding","view":{},"layer":{"shows":{"study":"bollinger"},"output":"upper"},"encoding":{"color":"down"}}]}}
+{"conn":"a","msg":{"type":"query","id":"q2","query":{"kind":"list","collection":"views"}}}

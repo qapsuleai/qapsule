@@ -1,0 +1,1 @@
+attempt1: present finding=ezqmd surface=phone (id known from probe in R04 run). Got capsule depth, 3 glyphs, spark of 60 bars (from_bar 140), confidence 0.55. Worked first time.

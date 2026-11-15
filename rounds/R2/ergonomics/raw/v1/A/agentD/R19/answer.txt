@@ -1,0 +1,1 @@
+Telefonda kapsül olarak görünür: "THYAO 122,40 direncini kırdı: yeni zirve denemesi.", güven 0,55, 3 işaret ve son 60 barlık (bar 140-199) kapanış çizgisi; yani 60 bar gösterilir.

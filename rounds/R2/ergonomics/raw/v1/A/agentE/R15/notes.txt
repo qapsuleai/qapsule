@@ -1,0 +1,1 @@
+attempt1: set_encoding width 2 on layer selector {shows:{study:rsi},mark:line} -> resolved i0umw; applied. No problems.

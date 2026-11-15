@@ -1,0 +1,2 @@
+attempt1: discovery-only run (list views/series, screen arkin) since ids are random; no change made.
+attempt2: set_encoding on Bollinger layer w78lu (y=upper, color #ff0000) + two new line layers for middle/lower keeping the old grey. Applied. Unclear: no semantic reference ("üst bant") exists in ops (§17 empty); the single line layer draws three outputs so I had to split it. "Kırmızı" has no theme token; used #ff0000 (theme "down" is reddish but also means bearish).

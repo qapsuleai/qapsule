@@ -1,0 +1,1 @@
+attempt1: insert_layer line of price series (bukgt) y=c on panel 0 with conditional color c ge sma50 field -> up else down (theme names). Applied; view shows it. SMA50 series already existed (undrawn). Note the candles remain drawn too; the request said "draw close", I added a line.

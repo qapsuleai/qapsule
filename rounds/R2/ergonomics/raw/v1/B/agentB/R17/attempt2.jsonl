@@ -1,0 +1,3 @@
+{"conn":"a","msg":{"type":"hello","protocol":"qp/0","principal":"editor","surface":{"kind":"headless"}}}
+{"conn":"a","msg":{"type":"command","id":"c1","reason":"Kullanıcı 123,45 seviyesine yatay çizgi istedi","ops":[{"op":"add_fact","id":"fact-hline-12345","kind":"level","series":"@price","bar":199,"text":"Kullanıcı seviyesi 123,45","evidence":{"level":123.45}},{"op":"insert_layer","view":"@view","layer":{"mark":"rule","panel":"@panel:price","encoding":{"y":123.45},"origin":{"/encoding/y":{"kind":"fact","fact":"fact-hline-12345","field":"level"}}}}]}}
+{"conn":"a","msg":{"type":"query","id":"q1","query":{"kind":"list","collection":"views"}}}

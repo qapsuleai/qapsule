@@ -1,0 +1,1 @@
+Attempt1: set_view_range view {} from_bar 140 to_bar 199 -> applied; x.domain set persistently. The bar count (200) was guessed beforehand and then confirmed by a count query in the same run (welcome.summary len=200 also shows it). Not knowable before the run.

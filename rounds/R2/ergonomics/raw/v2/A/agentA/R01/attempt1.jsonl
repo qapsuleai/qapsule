@@ -1,0 +1,2 @@
+{"conn":"a","msg":{"type":"hello","protocol":"qp/0","principal":"editor","surface":{"kind":"headless"}}}
+{"conn":"a","msg":{"type":"command","id":"c1","ops":[{"op":"add_study","id":"rsi7","study":"rsi","inputs":[{"kind":"bars"}],"params":{"period":7}},{"op":"insert_panel","view":{},"panel":{"name":"rsi7","y":{"kind":"linear"}},"after":{"mark":"candle"},"layers":[{"mark":"line","series":"rsi7"}]}]}}

@@ -1,0 +1,1 @@
+attempt1: probe only (hello + list views) to learn ids, request not attempted; attempt2: set_scale y0 kind log on view fmrvv -> applied. Unclear: ids are random so a probe was needed; which panel is 'Fiyat paneli' inferred from summary (panel 0 / y0).

@@ -1,0 +1,2 @@
+{"conn":"e","msg":{"type":"hello","protocol":"qp/0","principal":"editor","surface":{"kind":"headless"}}}
+{"conn":"e","msg":{"type":"command","id":"c1","ops":[{"op":"set_emphasis","view":{},"emphasis":[{"target":{"item":{"finding":{"kind":"breakout","latest":true}}},"kind":"highlight"}]}]}}

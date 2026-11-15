@@ -1,0 +1,2 @@
+attempt1: list findings + present without finding (default = highest confidence, which was the RSI finding, not the breakout); used it to learn ids. Latest breakout = ezqmd (bar 185).
+attempt2: present finding=ezqmd surface=watch -> sentence text. Worked. Unclear: "son kırılım" has no direct selector; had to find via list/welcome.summary (select.latest hint).

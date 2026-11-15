@@ -1,0 +1,1 @@
+attempt1: insert_layer point with fact selector {kind:breakout,first:true} on candle panel; resolved to kpr9s (bar 120, the older of two breakouts); applied. Spec clear.

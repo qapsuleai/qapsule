@@ -1,0 +1,1 @@
+Attempt1: add_fact (kind level, evidence.level 123.45, bar 199) + insert_layer rule on the candle panel with origin pointing to that fact -> applied. Unclear: the spec requires an origin for numeric constants, so a synthetic fact had to be created; the fact's bar is arbitrary (I chose the last bar).

@@ -1,0 +1,1 @@
+attempt1: hit query view=munk2 x=900 y=200 width=1200 height=600 (view id from welcome.summary of an earlier probe). Result: panel 0, bar 159, value 108.81, no item (empty area). Worked first time. Note: hit uses the asker's viewport, headless default = last 120 bars.

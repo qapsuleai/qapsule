@@ -1,0 +1,1 @@
+attempt1: hit query, view {}, 1200x600, (900,200) -> panel 0 bar 159 value 108.81, no item (empty area). Succeeded; nothing misleading.

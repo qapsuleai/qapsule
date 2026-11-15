@@ -1,0 +1,1 @@
+attempt1: hit query x=900,y=200,width=1200,height=600, view omitted; result had panel 0, bar 159, value 108.81 and no item (empty area). Succeeded first try. Note: the result gives no explicit 'empty' flag, only the absence of item.

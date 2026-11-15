@@ -1,0 +1,2 @@
+{"conn":"a","msg":{"type":"hello","protocol":"qp/0","principal":"editor","surface":{"kind":"headless"}}}
+{"conn":"a","msg":{"type":"command","id":"c1","ops":[{"op":"add_fact","id":"fact-level-12345","kind":"level","series":{"kind":"bars"},"bar":199,"text":"Seviye 123,45","evidence":{"level":123.45}},{"op":"insert_layer","view":{},"layer":{"mark":"rule","panel":{"mark":"candle"},"encoding":{"y":123.45},"origin":{"/encoding/y":{"kind":"fact","fact":"fact-level-12345","field":"level"}}}}]}}

@@ -1613,8 +1613,8 @@ gösterir; değer göstermez.
   (iki farklı geçmiş aynı RSI'yı verebilir); veri özeti bunu yakalar.
 - Koşullar son barda değerlendirilir: geçmişte bir düzeltmenin **yeni** doğurduğu iddia
   (eski bir barda kesişim) iddia edilmez; yalnız kayıtlı iddialar yeniden sınanır.
-- Yansıdan otoriteye "itiraz" (`dispute`) ve "sen söylemiyorsun" (`check`) mesajları v0'da
-  yok (öneri); `disputed` yalnız yansıda görünür.
+- Yansıdan otoriteye "itiraz" (`dispute`) R3'te eklendi (§19.9); "sen söylemiyorsun"
+  (`check`) mesajı hâlâ yok (öneri). `disputed` yansıda görünür.
 - Kanal sırası: `qp/0` bağlantısı sıralı bir akıştır (§3). Sırasız taşımada çerçeve numarası
   taşıma düzeyinde sırayı kurar (düzenekte `bs` böyle yapar).
 - İki uç aynı kapanış tikini kaybetmiş ve ikisi de temiz sanıyorsa aynı yanlışta

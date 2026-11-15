@@ -312,5 +312,9 @@ fn grammar_ops_and_hit_are_generated_tools() {
         assert!(props.contains_key(k), "query_hit lacks {k}");
     }
     let names: Vec<&str> = tools::tools().iter().map(|t| t.name.as_str()).collect();
-    assert_eq!(names.len(), 37 + grammar.len() + 1, "{names:?}");
+    // RD1: 37; R2: grammar ops + `query_hit`; RP2: `query_binding`, `query_verify_evidence`.
+    for k in ["query_binding", "query_verify_evidence"] {
+        assert!(names.contains(&k), "missing tool {k}");
+    }
+    assert_eq!(names.len(), 37 + grammar.len() + 1 + 2, "{names:?}");
 }

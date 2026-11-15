@@ -5,6 +5,7 @@
 
 use std::path::{Path, PathBuf};
 
+pub mod data;
 pub mod grammar;
 pub mod protocol;
 pub mod scene;
@@ -33,6 +34,9 @@ pub fn json_schemas() -> Vec<(&'static str, serde_json::Value)> {
         ("StudyOutput", schema_of::<StudyOutput>()),
         ("Instrument", schema_of::<Instrument>()),
         ("Calendar", schema_of::<Calendar>()),
+        ("DataBinding", schema_of::<data::DataBinding>()),
+        ("DataEvent", schema_of::<data::DataEvent>()),
+        ("EvidenceRef", schema_of::<data::EvidenceRef>()),
         ("ClientMsg", schema_of::<protocol::ClientMsg>()),
         ("ServerMsg", schema_of::<protocol::ServerMsg>()),
         ("Op", schema_of::<protocol::Op>()),

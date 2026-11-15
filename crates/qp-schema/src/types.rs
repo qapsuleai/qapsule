@@ -197,6 +197,20 @@ pub enum SeriesSource {
         /// Subject name.
         subject: String,
     },
+    /// A data binding (RP2, K23): the series' bars come from the data plane, resolved
+    /// per principal by the host's source provider; the document carries no bars
+    /// (`docs/PROTOCOL.md` §18). Fields as in [`crate::data::DataBinding`].
+    Bind {
+        /// Exchange symbol, e.g. `THYAO`.
+        symbol: String,
+        /// Bar interval, e.g. `1d`, `5m`.
+        interval: String,
+        /// Which bars: `{"last": n}`, `{"from_t": t}` or `{"from_t": a, "to_t": b}`.
+        window: crate::data::Window,
+        /// Named feed of the host; the host's default if absent.
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        feed: Option<String>,
+    },
     /// Local computation: a study applied to other series.
     Study {
         /// Study name, e.g. `rsi`.
@@ -245,10 +259,33 @@ impl Series {
         }
     }
 
-    /// The instrument symbol, if any.
+    /// The instrument symbol, if any (the binding's symbol for a bound series).
     #[must_use]
     pub fn symbol(&self) -> Option<&str> {
-        self.instrument.as_ref().map(|i| i.symbol.as_str())
+        match (&self.instrument, &self.source) {
+            (Some(i), _) => Some(i.symbol.as_str()),
+            (None, SeriesSource::Bind { symbol, .. }) => Some(symbol.as_str()),
+            _ => None,
+        }
+    }
+
+    /// The data binding, for a bound series (`source.kind = "bind"`).
+    #[must_use]
+    pub fn binding(&self) -> Option<crate::data::DataBinding> {
+        match &self.source {
+            SeriesSource::Bind {
+                symbol,
+                interval,
+                window,
+                feed,
+            } => Some(crate::data::DataBinding {
+                symbol: symbol.clone(),
+                interval: interval.clone(),
+                window: window.clone(),
+                feed: feed.clone(),
+            }),
+            _ => None,
+        }
     }
 }
 
@@ -322,6 +359,10 @@ pub struct Fact {
     /// Evidence values, e.g. `{"level": 70, "prev": 68.9, "value": 71.4}`.
     #[serde(default)]
     pub evidence: BTreeMap<String, f64>,
+    /// Frozen evidence (RP2): the data this fact rests on, by reference and content
+    /// digest; stamped by the authority (`docs/PROTOCOL.md` §18.5). Clients never send it.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub evidence_ref: Option<crate::data::EvidenceRef>,
     /// Who detected it.
     pub provenance: Provenance,
 }

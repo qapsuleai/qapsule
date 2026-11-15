@@ -31,6 +31,7 @@ fn doc(bar: u64, headline: bool) -> MemProvider {
         t: bars[bar as usize].t,
         text: "RSI(14) crossed 70".into(),
         evidence: [("level".to_owned(), 70.0)].into_iter().collect(),
+        evidence_ref: None,
         provenance: prov(),
     };
     let finding = Finding {
@@ -215,6 +216,7 @@ fn chart_view_for_a_fact_on_bars() {
         t: bars[185].t,
         text: "breakout".into(),
         evidence: [("level".to_owned(), 121.3)].into_iter().collect(),
+        evidence_ref: None,
         provenance: prov(),
     };
     let finding = Finding {

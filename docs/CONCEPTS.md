@@ -24,7 +24,7 @@ karşılık kullanılır; dokümanda Türkçesi.
 | Gösterim saat dilimi | `display_tz` | Zamanın kullanıcıya hangi saat diliminde gösterileceği. Bar hizasını etkilemez. |
 | Isınma | `warmup` | Bir hesabın ilk geçerli değerini üretmesi için gereken bar sayısı. Bu barlarda çıktı boştur (`null`); çıktı uzunluğu her zaman bar sayısına eşittir. |
 | Hesap çıktısı | `StudyOutput` | Bir hesabın bir bar serisi üzerindeki sonucu: bar zamanları ve adlandırılmış çıktılar, her biri bar sayısı uzunluğunda; ısınma `null`. |
-| Bar olayı | `BarEvent` | Seri kaynağının ürettiği adım: yeni bar ya da son barın düzeltilmesi (canlı bar). Hesabın akışkan ve "son barı düzelt" kiplerine birebir karşılık gelir. |
+| Bar olayı | `BarEvent` | Seri kaynağının ürettiği adım: yeni bar ya da son barın düzeltilmesi (canlı bar). Hesabın akışkan ve "son barı düzelt" kiplerine birebir karşılık gelir. Alan düzeyindeki genişlemesi veri olayıdır (`DataEvent`). |
 | Parametre taraması | `sweep` | Bir hesabın tek çağrıda çok sayıda parametre kümesiyle çalıştırılması; her sonuç tek tek çalıştırmayla bit-eşittir. |
 | Köken | `Provenance` | Bir öğeyi kimin, neye dayanarak, ne zaman ürettiği. |
 | Alan protokolü | `qp/0` | Motor, arayüzler ve ajanlar arasındaki konuşma; arayüz ve ajan aynı mesajları kullanır (`docs/PROTOCOL.md`). |
@@ -76,6 +76,27 @@ Ayrıntı ve örnekler `docs/GRAMMAR.md`.
 | Anlamla başvuru | semantic reference | Bir öğeye kimlik yerine anlamıyla başvurmak ("RSI(14)'ün paneli", "en son kırılım bulgusu"). Otorite deterministik çözer; belirsizse seçenekleri sıralayan `ambiguous` hatası döner; günlükte çözülmüş kimlik saklanır. |
 | Seçici | selector (`SeriesSel`, `PanelSel`, `LayerSel`…) | Anlamla başvurunun seçilen biçimi: kimlik yazılacak alana konan, öğeyi özellikleriyle tarif eden nesne (`{"study":"rsi","params":{"period":14}}`, `{"shows":{"study":"macd"}}`, `{"kind":"breakout","latest":true}`). Tek eşleşme kullanılır; çok eşleşme `ambiguous`; günlükte kimlik saklanır (`docs/PROTOCOL.md` §17). |
 | Nokta serisi | `SeriesData::Points` | Bar olmayan, `t`/`v` noktalarından oluşan seri (ör. tahmin yelpazesinin bantları). Son bardan sonraki noktalar ardışık seans yuvalarına yerleşir (`docs/GRAMMAR.md` §3). |
+
+### Veri düzlemi (RP2)
+
+Piyasa verisi protokolün içinden akmaz (K23); kaynağından kendi biçiminde gelir. Ayrıntı
+`docs/PROTOCOL.md` §18.
+
+| Kavram | Kodda | Tanım |
+|--------|-------|-------|
+| Veri düzlemi | data plane | Bar verisinin ve canlı fiyatın aktığı yol: kaynaktan (Matriks, NATS, dosya, sentetik) motora, kendi biçiminde. Protokol mesajı değildir, günlüğe girmez. |
+| Anlam düzlemi | meaning plane | Protokolün taşıdığı her şey: komutlar, değişimler, olgular, bulgular, kapsül durumları, koşul olayları. Veri taşımaz; veriye başvurur. |
+| Veri bağı | `DataBinding` (`source.kind = "bind"`) | Bir serinin verisini taşımak yerine onu tarif eden bağ: enstrüman (sembol), periyot ve pencere; isteğe bağlı besleme adı. Dokümanda durur; her kullanıcının kendi veri yetkisiyle çözülür. |
+| Pencere | `Window` | Bağın hangi barları istediği: son N bar (`{"last": n}`), bir zamandan bu yana (`{"from_t": t}`) ya da kapalı aralık (`{"from_t": a, "to_t": b}`). |
+| Besleme | feed (`FeedKey`) | Aynı sembol ve periyodun tek veri akışı. Aynı beslemeye bağlı birden çok seri veriyi paylaşır. |
+| Veri sağlayıcı | `SourceProvider` | Barındırıcının (sunucu, cihaz kabuğu) motora verdiği, bağı bir kişinin veri yetkisiyle çözen arayüz: yetki denetimi, ilk barlar, sonra veri olayları. (Gramer derleyicisinin `DataProvider`'ı başka bir şeydir: derleyiciye otoritenin değerlerini veren okuma arayüzü.) |
+| Bağ durumu | `BindingState` | Bir bağın bir kişi için çözüm sonucu: `ready` (barlar hazır), `pending` (bekleniyor), `no_entitlement` (yetki yok), `no_data` (kaynakta veri yok). Çözülemeyen bağ belgenin geri kalanını durdurmaz. |
+| Veri olayı | `DataEvent` | Veri kaynağının alan düzeyindeki adımı: yeni bar (`bar`) ya da var olan bir barın **yalnızca değişen alanları** (`patch`): son barda canlı güncelleme, daha eski barda düzeltme. Her olay beslemenin kaynak sıra numarasını (`seq`) taşır. `BarEvent`'in genişlemesidir. |
+| Veri konumu | `DataPosition` | Bir beslemenin bir tarafta (otorite ya da yansı) ulaştığı yer: bar sayısı, son bar zamanı, uygulanan olay sayısı ve o ana kadarki verinin özeti. İki tarafın aynı veriye bakıp bakmadığı bununla karşılaştırılır. |
+| Veri özeti | `DataDigest` | Bir bar aralığının içerik özeti: barların zaman ve değerlerinin bit düzeyindeki baytları üzerinden belirleyici bir karma (v0: FNV-1a 64; kriptografik değil: düzeltmeyi yakalar, kasıtlı sahteciliği değil). |
+| Kanıt başvurusu | `EvidenceRef` | Bir olgunun dayandığı veriyi gösteren dondurulmuş başvuru: hangi seri ve bağ, hangi zaman aralığı, kaç bar ve o aralığın veri özeti. Otorite olgu eklenirken damgalar. "Bu iddia o gün şu veriye dayanıyordu" sonradan sınanabilir. |
+| Kanıt doğrulama | `verify_evidence` | Bir olgu ya da bulgunun kanıt başvurularını bugünkü veriye karşı sınayan sorgu: veri özeti aynı mı, olgunun kanıt değerleri yeniden hesapta aynı mı; değilse farkı bildirir. |
+| Veri yetkisi | entitlement | Bir kişinin bir beslemeyi görme hakkı (borsa veri lisansı). Rol yetkisinden (`Role`) ayrıdır; veri sağlayıcı denetler. |
 
 ## Kapsülün yaşam döngüsü
 

@@ -18,7 +18,7 @@ macro_rules! approaches {
 }
 
 // One line per approach. T7 branches append their module here (e.g. `n, a`).
-approaches!(n, a, b, c, d, bs);
+approaches!(n, a, b, c, d, bs, bs2, bs2h, bs2d, bs2n);
 
 /// Finds an approach by name.
 #[must_use]

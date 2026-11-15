@@ -1,0 +1,1 @@
+wasm compile+instantiate ms = 4.0

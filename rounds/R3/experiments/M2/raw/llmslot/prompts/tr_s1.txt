@@ -1,0 +1,42 @@
+You are taking a reading test. Below are 24 numbered sentences in Turkish. Each describes one observation about a stock's chart. A "bar" is one period of the chart (for example one trading day). For every sentence answer three questions:
+
+1. What happened? `kind` (one of the six kinds below) and `direction` (up, down or neutral).
+2. When? `when` = "past" (it happened some bars ago; then give `bars_ago` as an integer, 0 = this bar / today, or null if the sentence does not say), "now" (a state that holds now) or "conditional" (an expectation that depends on a condition); `bars_ago` is null unless `when` is "past".
+3. Is it still valid now? `still_valid` = "yes", "no" or "unknown".
+
+The six kinds:
+- continuation: the move goes on
+- reversal: the move may be turning
+- breakout: a boundary was crossed
+- squeeze: the move is narrowing; direction unknown
+- extreme: an unusual stretch (overbought / oversold)
+- flow: money flowing in or out, independent of price
+
+Sentences:
+1. GARAN'da kapanış dün 168,43'teki sınırın üstüne çıkarak yukarı kırılım verdi; şu an 163,38 ve artık sınırın üstünde değil, sinyal gerçekleşti ve artık geçerli değil. Bu tür sinyal geçmişte 8 örneğin 2'sinde gerçekleşti (örnek az).
+2. THYAO'da dün Bollinger bant daralması görüldü ve yön belirsiz bir sıkışma oluştu; ufuk süresi doldu, sinyal artık geçerli değil.
+3. AKBNK'de Bollinger bant genişliği 3 bar içinde sıkışma eşiği olan 0,06'nın altında kalırsa sıkışma teyit olur, yön belirsiz; sinyal yeni oluştu ve hâlâ geçerli. Bu tür sinyal geçmişte 140 örneğin 52'sinde gerçekleşti.
+4. PGSUS'ta 30 bar önce 57,29 kapanışla kısa vadeli ortalama (56,72) uzun vadeli ortalamanın (55) üzerinde kalarak yukarı yönlü trend devamı sinyali oluştu; sinyal yeni oluştu ve bu tür sinyal geçmişte 140 örneğin 67'sinde gerçekleşti.
+5. GARAN'da yön belirsiz sıkışma (Bollinger bant daralması) sürüyor: bant genişliği 1 bardır 0,06 eşiğinin altında, şu an 0,0588; sinyal gerçekleşti ve hâlâ geçerli. Bu tür sinyal geçmişte 8 örneğin 2'sinde gerçekleşti (örnek az).
+6. SISE'deki aşağı yönlü kurumsal para akışı sinyali, kurumsal net akış 3 bar içinde 334.000'lik yakın dönem ortalamasının altına inerse teyit olacaktı; süresi doldu ve artık geçerli değil. Bu tür sinyal geçmişte 8 örneğin 2'sinde gerçekleşti (örnek az).
+7. THYAO'da RSI 3 bar önce 70'in üstüne çıkarak aşırı alıma girdi; şu an 55 ve artık 70'in üstünde değil, aşırı alım sona erdi. Bu tür sinyal geçmişte 140 örneğin 87'sinde gerçekleşti.
+8. EREGL'de RSI 3 bar içinde 30'un altına inerse aşırı satım sinyali teyit olacaktı; beklenen sonuç geldi ve sinyal gerçekleşti. Bu tür sinyal geçmişte 140 örneğin 42'sinde gerçekleşti.
+9. THYAO'da RSI 70'in üstünde, aşırı alım sinyali yeni oluştu ve şu an 71,4 ile hâlâ geçerli; bu tür sinyal geçmişte 8 örneğin 2'sinde gerçekleşti (örnek az).
+10. PGSUS'ta RSI bugün 30'un altına inerek aşırı satıma girdi (28,8); hacim artışı sinyali teyit etti. Bu tür sinyal geçmişte 140 örneğin 99'unda gerçekleşti.
+11. SAHOL'daki aşağı dönüş sinyali, kapanış 3 bar içinde 161,73'ün altına inerse teyit olacaktı; beklenen sonuç tutmadığı için bugün geçersiz oldu ve artık geçerli değil. Bu tür sinyal geçmişte 140 örneğin 98'inde gerçekleşti.
+12. EREGL'deki yukarı kırılım sinyali, kapanış 3 bar içinde 245,84'ün üstünde kalırsa teyit olacaktı; beklenen sonuç geldi ve sinyal gerçekleşti. Bu tür sinyal geçmişte 8 örneğin 6'sında gerçekleşti (örnek az).
+13. FROTO'da RSI bir aydan uzun süre önce aşırı alım eşiğinin üstüne çıktı; yukarı yönlü aşırı alım sinyali yeni oluştu.
+14. FROTO'da aşağı yönlü dönüş sinyali (RSI uyumsuzluğu) gerçekleşti, beklenen sonuç geldi ve sinyal hâlâ geçerli; kapanış şu an da sinyal barındaki fiyatın altında kalıyor.
+15. THYAO'da bugün 168,94 fiyatla aşağı yönlü dönüş sinyali (RSI uyumsuzluğu) oluştu; ters yönde bir sinyal geldiği için sinyal zayıfladı. Bu tür sinyal geçmişte 8 örneğin 6'sında gerçekleşti (örnek az).
+16. SISE'de aşağı yönlü dönüş sinyali (RSI uyumsuzluğu) gerçekleşti; kapanış 30 bardır sinyal barındaki 177,59'un altında ve şu an 174,04 ile hâlâ geçerli. Bu tür sinyal geçmişte 140 örneğin 68'inde gerçekleşti.
+17. GARAN'da bugün 131,01 kapanışla 128,48'deki aralık sınırının üstüne yukarı yönlü kırılım oldu; ufuk süresi doldu ve sinyal artık geçerli değil. Bu tür kırılım geçmişte 140 örneğin 51'inde gerçekleşti.
+18. EREGL'de kapanış 3 bar içinde uzun vadeli ortalamanın (255,56) üstünde kalırsa yukarı yönlü trend devamı teyit olur; ters yönde bir sinyal geldiği için sinyal zayıfladı, ama hâlâ geçerli. Bu tür sinyal geçmişte 8 örneğin 4'ünde gerçekleşti (örnek az).
+19. FROTO'da kurumsal net akış 3 bar içinde yakın dönem ortalamasının altında kalırsa aşağı yönlü kurumsal para akışı sinyali tamamlanmış olur; sinyal hacim artışıyla teyit edildi ve hâlâ geçerli. Bu tür sinyal geçmişte 140 örneğin 85'inde gerçekleşti.
+20. GARAN'da yukarı yönlü kurumsal para akışı hâlâ sürüyor: kurumsal net akış şu an 325.380 ile 319.000 olan yakın dönem ortalamasının üstünde; ters yönde bir sinyal geldiği için sinyal zayıfladı. Bu tür sinyal geçmişte 140 örneğin 63'ünde gerçekleşti.
+21. PGSUS dün 172,4 kapanışla 167,59'daki aralık sınırını yukarı kırdı; beklenen sonuç tutmadığı için kırılım geçersiz oldu ve artık geçerli değil. Bu tür sinyal geçmişte 8 örneğin 3'ünde gerçekleşti (örnek az).
+22. KCHOL'da kapanış 3 bar içinde 214,64'ün altında kalırsa aşağı yönlü dönüş sinyali (RSI uyumsuzluğu) teyit olur; sinyal hacim artışıyla teyit edildi ve hâlâ geçerli. Bu tür sinyal geçmişte 8 örneğin 3'ünde gerçekleşti (örnek az).
+23. SAHOL'da Bollinger bant genişliği birkaç bar içinde sıkışma eşiğinin altında kalırsa sıkışma tamamlanmış olur, yön belirsiz; hacim artışı bugün sinyali teyit etti.
+24. FROTO'da kurumsal net akış 3 bar içinde 484.000 olan yakın dönem ortalamasının üstünde kalırsa yukarı yönlü kurumsal para akışı teyit olacaktı; ufuk süresi doldu ve sinyal artık geçerli değil. Bu tür sinyal geçmişte 140 örneğin 70'inde gerçekleşti.
+
+Give your best guess for every sentence. Reply with a single JSON object and nothing else, keyed by sentence number, for example:
+{"1": {"kind": "breakout", "direction": "up", "when": "past", "bars_ago": 3, "still_valid": "no"}, "2": {...}, ...}

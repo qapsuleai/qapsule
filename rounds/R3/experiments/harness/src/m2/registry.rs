@@ -38,6 +38,16 @@ pub fn all() -> Vec<Box<dyn Realizer>> {
         // --- M2 alternatives: one line each, e.g.
         // Box::new(m2_foo::Realizer),
         // Box::new(FileRealizer::new("llm_foo", alt_file("llm_foo"))),
+        Box::new(m2_template::Realizer),
+        Box::new(FileRealizer::new("llmslot", alt_file("llmslot"))),
+        // Second independent generation of `llmslot` (same prompt), for run-to-run checks only.
+        Box::new(FileRealizer::new(
+            "llmslot_run2",
+            crate::io::default_root()
+                .join("M2")
+                .join("llmslot")
+                .join("sentences.run2.json"),
+        )),
     ]
 }
 

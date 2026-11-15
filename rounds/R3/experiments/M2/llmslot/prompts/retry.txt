@@ -1,0 +1,8 @@
+Write the capsule sentence for these slots.
+
+slots: {SLOTS}
+
+Your previous text was rejected by the verifier:
+{FEEDBACK}
+
+Fix every listed problem and follow all the rules. Reply with only a JSON object with the key(s) {KEYS}.

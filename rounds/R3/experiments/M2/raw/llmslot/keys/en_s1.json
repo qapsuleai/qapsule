@@ -1,0 +1,296 @@
+{
+  "harness": "r3-h-m12/1",
+  "alt": "llmslot",
+  "lang": "en",
+  "seed": 1,
+  "items": [
+    {
+      "label": "1",
+      "situation": "s34",
+      "sentence": "GARAN's upside breakout above 168.43 occurred yesterday; the close is now 163.38, no longer above it, and the realized signal is no longer valid. This kind of signal realized in 2 of 8 past cases (small sample).",
+      "truth": {
+        "kind": "breakout",
+        "direction": "up",
+        "when": "past",
+        "bars_ago": 1,
+        "still_valid": "no"
+      }
+    },
+    {
+      "label": "2",
+      "situation": "s14",
+      "sentence": "THYAO formed a squeeze from Bollinger band narrowing yesterday, with the direction undecided; its horizon ran out and the signal is no longer valid.",
+      "truth": {
+        "kind": "squeeze",
+        "direction": "neutral",
+        "when": "past",
+        "bars_ago": 1,
+        "still_valid": "no"
+      }
+    },
+    {
+      "label": "3",
+      "situation": "s64",
+      "sentence": "If AKBNK's Bollinger bandwidth stays below the 0.06 squeeze threshold within 3 bars, the squeeze is confirmed, with direction undecided; the signal is newly formed and still valid. This kind of signal realized in 52 of 140 past cases.",
+      "truth": {
+        "kind": "squeeze",
+        "direction": "neutral",
+        "when": "conditional",
+        "bars_ago": null,
+        "still_valid": "yes"
+      }
+    },
+    {
+      "label": "4",
+      "situation": "s04",
+      "sentence": "PGSUS formed an upward trend continuation signal 30 bars ago, with a 57.29 close and the short-term moving average (56.72) above the long-term one (55); the signal is newly formed and this kind of signal realized in 67 of 140 past cases.",
+      "truth": {
+        "kind": "continuation",
+        "direction": "up",
+        "when": "past",
+        "bars_ago": 30,
+        "still_valid": "unknown"
+      }
+    },
+    {
+      "label": "5",
+      "situation": "s38",
+      "sentence": "GARAN's squeeze (Bollinger band narrowing) is still on, direction undecided: bandwidth has been below the 0.06 threshold for 1 bar, now 0.0588; the signal realized. This kind of signal realized in 2 of 8 past cases (small sample).",
+      "truth": {
+        "kind": "squeeze",
+        "direction": "neutral",
+        "when": "now",
+        "bars_ago": null,
+        "still_valid": "yes"
+      }
+    },
+    {
+      "label": "6",
+      "situation": "s71",
+      "sentence": "SISE's downward institutional money flow signal was to be confirmed if net flow fell below its 334,000 recent average within 3 bars; it expired and is no longer valid. This signal realized in 2 of 8 past cases (small sample).",
+      "truth": {
+        "kind": "flow",
+        "direction": "down",
+        "when": "conditional",
+        "bars_ago": null,
+        "still_valid": "no"
+      }
+    },
+    {
+      "label": "7",
+      "situation": "k26",
+      "sentence": "THYAO's RSI rose above 70 into overbought territory 3 bars ago; it is now 55 and no longer above 70, so the overbought state has ended. This kind of signal realized in 87 of 140 past cases.",
+      "truth": {
+        "kind": "extreme",
+        "direction": "up",
+        "when": "past",
+        "bars_ago": 3,
+        "still_valid": "no"
+      }
+    },
+    {
+      "label": "8",
+      "situation": "s67",
+      "sentence": "EREGL's oversold signal was to be confirmed if RSI fell below 30 within 3 bars; the expected outcome came and the signal realized. This kind of signal realized in 42 of 140 past cases.",
+      "truth": {
+        "kind": "extreme",
+        "direction": "down",
+        "when": "conditional",
+        "bars_ago": null,
+        "still_valid": "unknown"
+      }
+    },
+    {
+      "label": "9",
+      "situation": "s41",
+      "sentence": "THYAO's RSI is still above 70, so a newly formed overbought signal holds and is now at 71.4; this kind of signal realized in 2 of 8 past cases (small sample).",
+      "truth": {
+        "kind": "extreme",
+        "direction": "up",
+        "when": "now",
+        "bars_ago": null,
+        "still_valid": "yes"
+      }
+    },
+    {
+      "label": "10",
+      "situation": "s17",
+      "sentence": "PGSUS's RSI fell below 30 into oversold territory today (28.8); a volume surge confirmed the signal. This kind of signal realized in 99 of 140 past cases.",
+      "truth": {
+        "kind": "extreme",
+        "direction": "down",
+        "when": "past",
+        "bars_ago": 0,
+        "still_valid": "unknown"
+      }
+    },
+    {
+      "label": "11",
+      "situation": "s53",
+      "sentence": "SAHOL's downward reversal signal was to be confirmed if the close fell below 161.73 within 3 bars; it was invalidated today and is no longer valid. This kind of signal realized in 98 of 140 past cases.",
+      "truth": {
+        "kind": "reversal",
+        "direction": "down",
+        "when": "conditional",
+        "bars_ago": null,
+        "still_valid": "no"
+      }
+    },
+    {
+      "label": "12",
+      "situation": "s58",
+      "sentence": "EREGL's upward breakout signal was to be confirmed if the close stayed above 245.84 within 3 bars; the expected outcome came and the signal realized. This kind of signal realized in 6 of 8 past cases (small sample).",
+      "truth": {
+        "kind": "breakout",
+        "direction": "up",
+        "when": "conditional",
+        "bars_ago": null,
+        "still_valid": "unknown"
+      }
+    },
+    {
+      "label": "13",
+      "situation": "s20",
+      "sentence": "FROTO's RSI rose above its overbought threshold over a month ago; a new upward overbought signal formed.",
+      "truth": {
+        "kind": "extreme",
+        "direction": "up",
+        "when": "past",
+        "bars_ago": 30,
+        "still_valid": "unknown"
+      }
+    },
+    {
+      "label": "14",
+      "situation": "s31",
+      "sentence": "FROTO's downward reversal signal (RSI divergence) has realized, as the expected outcome came, and it still holds; the close is now still below the price at the signal bar.",
+      "truth": {
+        "kind": "reversal",
+        "direction": "down",
+        "when": "now",
+        "bars_ago": null,
+        "still_valid": "yes"
+      }
+    },
+    {
+      "label": "15",
+      "situation": "s05",
+      "sentence": "A downward reversal signal (RSI divergence) formed in THYAO today at a price of 168.94; an opposite-direction signal appeared, so it weakened. This kind of signal realized in 6 of 8 past cases (small sample).",
+      "truth": {
+        "kind": "reversal",
+        "direction": "down",
+        "when": "past",
+        "bars_ago": 0,
+        "still_valid": "unknown"
+      }
+    },
+    {
+      "label": "16",
+      "situation": "s32",
+      "sentence": "SISE's downward reversal signal (RSI divergence) has realized and is still valid: the close has stayed below the 177.59 signal-bar price for 30 bars and is now 174.04; this kind of signal realized in 68 of 140 past cases.",
+      "truth": {
+        "kind": "reversal",
+        "direction": "down",
+        "when": "now",
+        "bars_ago": null,
+        "still_valid": "yes"
+      }
+    },
+    {
+      "label": "17",
+      "situation": "s09",
+      "sentence": "GARAN's upside breakout above the 128.48 range boundary came today with a 131.01 close; its horizon ran out and the signal is no longer valid. This kind of breakout realized in 51 of 140 past cases.",
+      "truth": {
+        "kind": "breakout",
+        "direction": "up",
+        "when": "past",
+        "bars_ago": 0,
+        "still_valid": "no"
+      }
+    },
+    {
+      "label": "18",
+      "situation": "s50",
+      "sentence": "If EREGL's close stays above its long-term moving average (255.56) within 3 bars, upward trend continuation is confirmed; an opposite signal weakened it but it still holds. This kind of signal realized in 4 of 8 past cases (small sample).",
+      "truth": {
+        "kind": "continuation",
+        "direction": "up",
+        "when": "conditional",
+        "bars_ago": null,
+        "still_valid": "yes"
+      }
+    },
+    {
+      "label": "19",
+      "situation": "s70",
+      "sentence": "If FROTO's institutional net flow stays below its recent average within 3 bars, the downward institutional money flow is complete; a volume surge confirmed it and it still holds. This kind of signal realized in 85 of 140 past cases.",
+      "truth": {
+        "kind": "flow",
+        "direction": "down",
+        "when": "conditional",
+        "bars_ago": null,
+        "still_valid": "yes"
+      }
+    },
+    {
+      "label": "20",
+      "situation": "s45",
+      "sentence": "GARAN's upward institutional money flow still holds: institutional net flow is now 325,380, above its recent average of 319,000, though it weakened as an opposite-direction signal appeared. This kind of signal realized in 63 of 140 past cases.",
+      "truth": {
+        "kind": "flow",
+        "direction": "up",
+        "when": "now",
+        "bars_ago": null,
+        "still_valid": "yes"
+      }
+    },
+    {
+      "label": "21",
+      "situation": "s10",
+      "sentence": "PGSUS broke above its range boundary at 167.59 with a 172.4 close yesterday; the expected outcome failed, so the upside breakout was invalidated and is no longer valid. This kind of signal realized in 3 of 8 past cases (small sample).",
+      "truth": {
+        "kind": "breakout",
+        "direction": "up",
+        "when": "past",
+        "bars_ago": 1,
+        "still_valid": "no"
+      }
+    },
+    {
+      "label": "22",
+      "situation": "s54",
+      "sentence": "If KCHOL's close stays below 214.64 within 3 bars, the downward reversal signal (RSI divergence) is confirmed; a volume surge confirmed it and it still holds. This kind of signal realized in 3 of 8 past cases (small sample).",
+      "truth": {
+        "kind": "reversal",
+        "direction": "down",
+        "when": "conditional",
+        "bars_ago": null,
+        "still_valid": "yes"
+      }
+    },
+    {
+      "label": "23",
+      "situation": "s61",
+      "sentence": "If SAHOL's Bollinger bandwidth stays below the squeeze threshold within a few bars, the squeeze is complete, with direction undecided; a volume surge confirmed the signal today.",
+      "truth": {
+        "kind": "squeeze",
+        "direction": "neutral",
+        "when": "conditional",
+        "bars_ago": null,
+        "still_valid": "unknown"
+      }
+    },
+    {
+      "label": "24",
+      "situation": "s69",
+      "sentence": "If FROTO's institutional net flow stayed above its 484,000 recent average within 3 bars, the upward institutional money flow was to be confirmed; it expired and is no longer valid. This signal realized in 70 of 140 past cases.",
+      "truth": {
+        "kind": "flow",
+        "direction": "up",
+        "when": "conditional",
+        "bars_ago": null,
+        "still_valid": "no"
+      }
+    }
+  ]
+}

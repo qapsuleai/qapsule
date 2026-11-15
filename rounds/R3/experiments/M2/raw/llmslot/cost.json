@@ -1,0 +1,16 @@
+{
+  "alt": "llmslot",
+  "note": "wall-clock timing on this machine (release build recommended); not deterministic, not part of any byte-equality claim",
+  "ns_per_sentence": {
+    "en": 287.0,
+    "tr": 300.0
+  },
+  "passes": 20,
+  "llm": {
+    "calls": 147,
+    "mean_seconds": 10.131,
+    "max_seconds": 17.351,
+    "mean_input_tokens": 3141.0,
+    "mean_output_tokens": 400.6
+  }
+}

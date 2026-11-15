@@ -1,0 +1,42 @@
+You are taking a reading test. Below are 24 numbered sentences in English. Each describes one observation about a stock's chart. A "bar" is one period of the chart (for example one trading day). For every sentence answer three questions:
+
+1. What happened? `kind` (one of the six kinds below) and `direction` (up, down or neutral).
+2. When? `when` = "past" (it happened some bars ago; then give `bars_ago` as an integer, 0 = this bar / today, or null if the sentence does not say), "now" (a state that holds now) or "conditional" (an expectation that depends on a condition); `bars_ago` is null unless `when` is "past".
+3. Is it still valid now? `still_valid` = "yes", "no" or "unknown".
+
+The six kinds:
+- continuation: the move goes on
+- reversal: the move may be turning
+- breakout: a boundary was crossed
+- squeeze: the move is narrowing; direction unknown
+- extreme: an unusual stretch (overbought / oversold)
+- flow: money flowing in or out, independent of price
+
+Sentences:
+1. GARAN's upside breakout above 168.43 occurred yesterday; the close is now 163.38, no longer above it, and the realized signal is no longer valid. This kind of signal realized in 2 of 8 past cases (small sample).
+2. THYAO formed a squeeze from Bollinger band narrowing yesterday, with the direction undecided; its horizon ran out and the signal is no longer valid.
+3. If AKBNK's Bollinger bandwidth stays below the 0.06 squeeze threshold within 3 bars, the squeeze is confirmed, with direction undecided; the signal is newly formed and still valid. This kind of signal realized in 52 of 140 past cases.
+4. PGSUS formed an upward trend continuation signal 30 bars ago, with a 57.29 close and the short-term moving average (56.72) above the long-term one (55); the signal is newly formed and this kind of signal realized in 67 of 140 past cases.
+5. GARAN's squeeze (Bollinger band narrowing) is still on, direction undecided: bandwidth has been below the 0.06 threshold for 1 bar, now 0.0588; the signal realized. This kind of signal realized in 2 of 8 past cases (small sample).
+6. SISE's downward institutional money flow signal was to be confirmed if net flow fell below its 334,000 recent average within 3 bars; it expired and is no longer valid. This signal realized in 2 of 8 past cases (small sample).
+7. THYAO's RSI rose above 70 into overbought territory 3 bars ago; it is now 55 and no longer above 70, so the overbought state has ended. This kind of signal realized in 87 of 140 past cases.
+8. EREGL's oversold signal was to be confirmed if RSI fell below 30 within 3 bars; the expected outcome came and the signal realized. This kind of signal realized in 42 of 140 past cases.
+9. THYAO's RSI is still above 70, so a newly formed overbought signal holds and is now at 71.4; this kind of signal realized in 2 of 8 past cases (small sample).
+10. PGSUS's RSI fell below 30 into oversold territory today (28.8); a volume surge confirmed the signal. This kind of signal realized in 99 of 140 past cases.
+11. SAHOL's downward reversal signal was to be confirmed if the close fell below 161.73 within 3 bars; it was invalidated today and is no longer valid. This kind of signal realized in 98 of 140 past cases.
+12. EREGL's upward breakout signal was to be confirmed if the close stayed above 245.84 within 3 bars; the expected outcome came and the signal realized. This kind of signal realized in 6 of 8 past cases (small sample).
+13. FROTO's RSI rose above its overbought threshold over a month ago; a new upward overbought signal formed.
+14. FROTO's downward reversal signal (RSI divergence) has realized, as the expected outcome came, and it still holds; the close is now still below the price at the signal bar.
+15. A downward reversal signal (RSI divergence) formed in THYAO today at a price of 168.94; an opposite-direction signal appeared, so it weakened. This kind of signal realized in 6 of 8 past cases (small sample).
+16. SISE's downward reversal signal (RSI divergence) has realized and is still valid: the close has stayed below the 177.59 signal-bar price for 30 bars and is now 174.04; this kind of signal realized in 68 of 140 past cases.
+17. GARAN's upside breakout above the 128.48 range boundary came today with a 131.01 close; its horizon ran out and the signal is no longer valid. This kind of breakout realized in 51 of 140 past cases.
+18. If EREGL's close stays above its long-term moving average (255.56) within 3 bars, upward trend continuation is confirmed; an opposite signal weakened it but it still holds. This kind of signal realized in 4 of 8 past cases (small sample).
+19. If FROTO's institutional net flow stays below its recent average within 3 bars, the downward institutional money flow is complete; a volume surge confirmed it and it still holds. This kind of signal realized in 85 of 140 past cases.
+20. GARAN's upward institutional money flow still holds: institutional net flow is now 325,380, above its recent average of 319,000, though it weakened as an opposite-direction signal appeared. This kind of signal realized in 63 of 140 past cases.
+21. PGSUS broke above its range boundary at 167.59 with a 172.4 close yesterday; the expected outcome failed, so the upside breakout was invalidated and is no longer valid. This kind of signal realized in 3 of 8 past cases (small sample).
+22. If KCHOL's close stays below 214.64 within 3 bars, the downward reversal signal (RSI divergence) is confirmed; a volume surge confirmed it and it still holds. This kind of signal realized in 3 of 8 past cases (small sample).
+23. If SAHOL's Bollinger bandwidth stays below the squeeze threshold within a few bars, the squeeze is complete, with direction undecided; a volume surge confirmed the signal today.
+24. If FROTO's institutional net flow stayed above its 484,000 recent average within 3 bars, the upward institutional money flow was to be confirmed; it expired and is no longer valid. This signal realized in 70 of 140 past cases.
+
+Give your best guess for every sentence. Reply with a single JSON object and nothing else, keyed by sentence number, for example:
+{"1": {"kind": "breakout", "direction": "up", "when": "past", "bars_ago": 3, "still_valid": "no"}, "2": {...}, ...}

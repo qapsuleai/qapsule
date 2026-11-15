@@ -45,8 +45,11 @@ sonucu.)
 - Sınır hedef bar başınadır; çok barı birleştiren saldırgan bar başına 2,81 bite kadar
   kazanabilir. Genişlik/yayılım ölçüsü dar bir kovada 5,42 bite çıkabiliyor.
 - Lisanslı olguların ~%17'si ileti almıyor; iletilerin ~%29'u dedektör olgusu olmayan barda:
-  ileti mühürün kendi kuralını söylüyor, dedektörün olgusunu değil (ürün kararı: aynı kapsül mü?
-  S'de: ileti kapsülün yorumu olarak yalnız olgulu barda; öbürleri liste düzeyinde).
+  ileti mühürün kendi kuralını söylüyor, dedektörün olgusunu değil. Bütünleştirme kuralı (S):
+  yetkisiz okuyucu lisanslı akış hikâyesini **yalnız mühür iletileriyle** görür; dedektör
+  olgusunun ve onun doğurduğu kapsülün varlığı, zamanı ve aşaması yetkisize ayrıca gitmez
+  (olgunun kendi eşiği `2·avg5` ince kanalı yeniden açar; iletileri olguya göre süzmek de
+  süzme kararı ham değere bağlı olduğu için sızdırır). Karne lisanstan bağımsız gider (K33).
 - Makbuz simetrik anahtarlı; kullanıcı tek başına doğrulayamaz (öneri: belirleyici Ed25519).
 - SHA-256/HMAC crate içinde yazıldı (FIPS 180-4, RFC 4231 test vektörleri geçiyor);
   kriptografi denetimi yapılmadı.

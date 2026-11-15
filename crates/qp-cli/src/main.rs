@@ -255,10 +255,11 @@ fn run(command: Command) -> Result<Outcome, String> {
 /// A session from `--init` (or the transcript's init), after the transcript's messages,
 /// and the first principal of its init.
 fn scene_session(src: &ViewSource) -> Result<(qp_session::Session, String), String> {
-    let transcript: Option<qp_schema::protocol::Transcript> = src
+    // `send.msg` is forwarded raw, as the conformance runner does (selectors allowed).
+    let transcript: Option<qp_session::conform::RunTranscript> = src
         .transcript
         .as_deref()
-        .map(qp_session::read_json)
+        .map(qp_session::conform::read_transcript)
         .transpose()?;
     let init: qp_schema::protocol::SessionInit = match (&src.init, &transcript) {
         (Some(p), _) => qp_session::read_json(p)?,

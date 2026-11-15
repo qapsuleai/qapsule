@@ -16,8 +16,27 @@
 //! | [`TrustPath`] | How does a licensed server fact reach an unentitled user? | M6 |
 //!
 //! The lifecycle rules (`docs/CAPSULE.md` §9.3) are fixed, not an experiment.
+//!
+//! Modules (R3/T4+T5):
+//!
+//! - [`engine`]: the lifecycle state machine, candidates, ledger, retraction, glyph spec.
+//! - [`pipeline`]: headless simulation (detectors → facts → engine) in global time order.
+//! - [`audience`]: the sensitivity filter (§9.8).
+//! - [`scaffold`]: trivial strategies for tests only.
 
 use std::collections::BTreeMap;
+
+pub mod audience;
+pub mod engine;
+pub mod pipeline;
+pub mod scaffold;
+
+pub use audience::admits;
+pub use engine::{
+    glyph_spec, CandidateStory, Engine, EngineConfig, EngineSnapshot, LedgerRecord, StoryEvent,
+    StorySnapshot, FRESHNESS_HALF_BARS,
+};
+pub use pipeline::{simulate, InstrumentInput, SimResult};
 
 use qp_schema::capsule::{LedgerStat, MeaningKind, Story, TimeKind, Trust};
 use qp_schema::{Bar, Fact};

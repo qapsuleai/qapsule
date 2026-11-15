@@ -74,6 +74,8 @@ Ayrıntı ve örnekler `docs/GRAMMAR.md`.
 | Yüzey indirgemesi | profile reduction | Yüzey profilinin (`max_points`, `max_glyphs`, `series_data`) derinlik kuralının çıktısını kısması. |
 | Doküman özeti | `DocSummary` | `welcome`'da gelen kısa doküman özeti: seriler, görünümler/paneller/katmanlar, olgular, bulgular; ajanın ilk mesajında başvurabilmesi için. |
 | Anlamla başvuru | semantic reference | Bir öğeye kimlik yerine anlamıyla başvurmak ("RSI(14)'ün paneli", "en son kırılım bulgusu"). Otorite deterministik çözer; belirsizse seçenekleri sıralayan `ambiguous` hatası döner; günlükte çözülmüş kimlik saklanır. |
+| Seçici | selector (`SeriesSel`, `PanelSel`, `LayerSel`…) | Anlamla başvurunun seçilen biçimi: kimlik yazılacak alana konan, öğeyi özellikleriyle tarif eden nesne (`{"study":"rsi","params":{"period":14}}`, `{"shows":{"study":"macd"}}`, `{"kind":"breakout","latest":true}`). Tek eşleşme kullanılır; çok eşleşme `ambiguous`; günlükte kimlik saklanır (`docs/PROTOCOL.md` §17). |
+| Nokta serisi | `SeriesData::Points` | Bar olmayan, `t`/`v` noktalarından oluşan seri (ör. tahmin yelpazesinin bantları). Son bardan sonraki noktalar ardışık seans yuvalarına yerleşir (`docs/GRAMMAR.md` §3). |
 
 ## Kapsülün yaşam döngüsü
 

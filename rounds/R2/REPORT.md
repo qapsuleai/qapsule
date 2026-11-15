@@ -1,7 +1,8 @@
 # R2 — Rapor: Görsel Gramer v0
 
-- **Durum:** Tamamlandı (denetim sonucu aşağıda, "Denetim" bölümünde). Kabul ölçütleri tablosu
-  kanıtlarıyla aşağıda.
+- **Durum:** Tamamlandı. Kabul ölçütleri: **12 ✅, 2 ⚠️** (6 ve 7; bağımsız denetimin
+  değerlendirmesi). Bağımsız denetim: **koşullu kabul** (`AUDIT.md`); dört koşul denetimden
+  sonra giderildi ("Denetim" bölümü).
 - **Tarih:** 2026-11-15
 - **Alt ajanlar:** Başlatılabildi (ilk iş olarak deneme alt ajanı koşuldu ve cevap verdi).
   Bütün uygulama alt görevleri, iki anlamla başvuru tasarımı, ölçüm ve her alt görevin
@@ -36,19 +37,19 @@
 
 | # | Ölçüt | Sonuç | Kanıt |
 |---|-------|-------|-------|
-| 1 | Gramer tipleri `qp-schema`'da; JSON Schema ve MCP araçları ondan; `GRAMMAR.md` örnekli, elenenler sonda; kavramlar sözlükte (koddan önce) | ✅ (sapma: aşağıda 1) | `qp-schema::grammar` (`View`, `Panel`, `Layer`, `Mark` 8 işaret, `Scale`, `Encoding` kapalı kanal kümesi, `Origin`, `Emphasis`) ve `::scene` (`SceneDesc`); `qp schema export` 23 şema (`View`, `SceneDesc` dahil), iki dışa aktarım aynı (verify `schema`); MCP 49 araç şemadan (RD1: 37; `crates/qp-mcp/tests/tools.rs`); `docs/GRAMMAR.md` §1–16 her kavram örnekli, §17 elenen 13 seçenek; `docs/CONCEPTS.md` "Görsel gramer (R2)" 20 kavram, commit `d1e0ea0` tiplerin commit'inden (`b462ed2`) önce. |
+| 1 | Gramer tipleri `qp-schema`'da; JSON Schema ve MCP araçları ondan; `GRAMMAR.md` örnekli, elenenler sonda; kavramlar sözlükte (koddan önce) | ✅ (sapma: aşağıda 1; "seçici" ve "nokta serisi" denetimden sonra eklendi, K3) | `qp-schema::grammar` (`View`, `Panel`, `Layer`, `Mark` 8 işaret, `Scale`, `Encoding` kapalı kanal kümesi, `Origin`, `Emphasis`) ve `::scene` (`SceneDesc`); `qp schema export` 23 şema (`View`, `SceneDesc` dahil), iki dışa aktarım aynı (verify `schema`); MCP 49 araç şemadan (RD1: 37; `crates/qp-mcp/tests/tools.rs`); `docs/GRAMMAR.md` §1–16 her kavram örnekli, §17 elenen 13 seçenek; `docs/CONCEPTS.md` "Görsel gramer (R2)" 20 kavram, commit `d1e0ea0` tiplerin commit'inden (`b462ed2`) önce. |
 | 2 | Katman, panel, ölçek kimlikle; gramer işlemleri kimlikle; indeksli alanlar kullanımdan kalkmış işaretli; T6c'nin 18 durumunda yanlış 0 | ✅ | Katman `id`, panel numara kimliği (konum değil), ölçek `x`/`y<panel>`; 10 işlem (`insert_layer`, `delete_layer`, `move_layer`, `set_encoding`, `insert/delete/move_panel`, `set_panel`, `set_scale`, `set_emphasis`) + `split_layer`; şemada `add_layer.index` ve `remove_layer` `"deprecated": true`; `crates/qp-session/tests/concurrency.rs`: `base`'siz 18 doğru, `base` ile 16 doğru + 2 güvenli ret, **yanlış 0** (RD1/T6c: körlemesine JSON Patch 10/18, indeksli `remove_layer` 4/18 yanlış). Döküm 23 katman düzeyinde çakışmayı sınar. |
 | 3 | R0 mum+SMA, yalnız protokol mesajlarıyla kurulmuş görünümden, altınla bayt düzeyinde aynı | ✅ | `fixtures/views/v0-r0.json` (`add_study` + `put_view`) → `fixtures/golden/sample.png` ile bayt-eşit (verify `views`: "V0 = sample.png"; `crates/qp-cli/tests/views.rs`); ilkel düzeyinde de eşit (`crates/qp-grammar/tests/r0_equivalence.rs`, f32 bit eşitliği); tarayıcı 0 px. `sample.png` ve `stress.png` değişmedi. |
 | 4 | Beş yeni görünüm yalnız protokol mesajlarıyla, altın görselleri var: (a) üç panel, (b) Bollinger alan, (c) yelpaze, (d) log, (e) koşullu renk | ✅ | `fixtures/views/v1…v5-*.json` → `fixtures/golden/views/v1-three-panels.png`, `v2-bollinger-band.png`, `v3-fan.png`, `v4-log.png`, `v5-conditional.png`; başlangıç dokümanlarında görünüm yok; her biri iki kez çizilip bayt-eşit (verify `views` 8×2). Denetçi görselleri gözle açtı ve 30 noktayı veriden bağımsız hesapladı (RSI Wilder, MACD, Bollinger, SMA, log eşleme); hepsi 1–2 px içinde. |
 | 5 | Derinlik: `sentence`/`capsule`/`chart` gramer kurallarından; sunucu taşındı; `capsule` ve `chart` altın görseli; üç yüzey indirgemesi dökümde; sunucu belirleyici | ✅ | `qp-grammar::depth` (`sentence`, `capsule_view`, `chart_view`, `present`); `show_finding` ve `present` bunu kullanıyor; `present` telefonda `capsule_view` da veriyor. Altın: `d1-capsule.png` (390×300), `d2-chart.png`. Döküm 25: saat → sentence, telefon → capsule (60 bar, kapsül görünümü), masaüstü → chart (+ RD1 döküm 11). Belirleyicilik: 1.000 × 3 derinlik → derinlik başına tek çıktı (`tests/presenter.rs`). Süre (M4 Max): `chart_view` 709 ns medyan, `show_finding` uçtan uca 10,1 µs (RD1: 125 ns / 6,6 µs; artış sağlayıcının olgu/bulguyu kopyalaması ve bar zamanlarını toplaması, aşağıda Öneriler). |
-| 6 | Kökeni olmayan işaret reddediliyor (katman, alan, neden, yakın seçenek); geçersiz kanal reddediliyor; testler | ✅ | `no_origin`: `"layer l5 of view main: constant 123.45 at /encoding/y has no origin"`, `path`, `candidates` (panelin eşikleri ve sayısal kanıtlı olgular, yakın değer önce), `hint` (add_fact ya da eşik); RSI panelinde `30` → `rsi.oversold` otomatik bağ. `colour` → `schema` + `did_you_mean: ["color"]` + `expected` kanal listesi. Testler `crates/qp-session/tests/grammar.rs`, dökümler 21 ve 22, `fixtures/protocol/invalid/op.layer_unknown_channel.json`. |
-| 7 | `screen` her görünümü özetliyor; nokta sorgusu panel, katman, bar, zaman, değerler, veri başvurusu; veri→piksel→veri özellik testi; ikisi de sahne tarifinden, çizicisiz | ✅ | `qp-session` `qp-render`'a bağlı değil (`cargo tree`); `crates/qp-session/tests/reading.rs`: 6 görünüm × 2 soran × 250 piksel = 3.000 isabet, 781 değer `study`/`get` verisiyle **birebir** aynı; veriden uzak 120 boş alan "öğe yok"; 329 gidiş-dönüş aynı bar ve panel. `qp-grammar` gidiş-dönüş özellik testi (sabit tohum). Döküm 24. |
+| 6 | Kökeni olmayan işaret reddediliyor (katman, alan, neden, yakın seçenek); geçersiz kanal reddediliyor; testler | ⚠️ (denetim: eşiği ve sayısal olgusu olmayan panelde — ör. fiyat paneli — `candidates` boş; yalnız `hint` add_fact'i öneriyor) | `no_origin`: `"layer l5 of view main: constant 123.45 at /encoding/y has no origin"`, `path`, `candidates` (panelin eşikleri ve sayısal kanıtlı olgular, yakın değer önce), `hint` (add_fact ya da eşik); RSI panelinde `30` → `rsi.oversold` otomatik bağ. `colour` → `schema` + `did_you_mean: ["color"]` + `expected` kanal listesi. Testler `crates/qp-session/tests/grammar.rs`, dökümler 21 ve 22, `fixtures/protocol/invalid/op.layer_unknown_channel.json`. |
+| 7 | `screen` her görünümü özetliyor; nokta sorgusu panel, katman, bar, zaman, değerler, veri başvurusu; veri→piksel→veri özellik testi; ikisi de sahne tarifinden, çizicisiz | ⚠️ (denetim K1: ekranlı bağlantılarda bakış son barda bittiği için yelpazenin gelecek yuvaları `screen`/`hit`'te görünmüyor; ekransızda, `qp render`/`qp explain`'de görünüyor. Sınır GRAMMAR §3'e yazıldı; özellik testi ekransız soranla yapılmıştı) | `qp-session` `qp-render`'a bağlı değil (`cargo tree`); `crates/qp-session/tests/reading.rs`: 6 görünüm × 2 soran × 250 piksel = 3.000 isabet, 781 değer `study`/`get` verisiyle **birebir** aynı; veriden uzak 120 boş alan "öğe yok"; 329 gidiş-dönüş aynı bar ve panel. `qp-grammar` gidiş-dönüş özellik testi (sabit tohum). Döküm 24. |
 | 8 | Anlamla başvuru: en az iki tasarım kurulup ölçülmüş; seçilen şartnamede; belirsiz başvuru seçenekli hata | ✅ | T8a (seçici nesneler) ve T8b (`@ad` dili) ayrı dallarda, birbirini görmeden; T9 ile ölçüldü; **A seçildi**, `docs/PROTOCOL.md` §17. `ambiguous`: `"3 layers match {\"mark\":\"line\"}; the authority does not pick one"`, adaylar türün sırasıyla. Günlükte yalnız kimlik (denetçi doğruladı), `ack.resolved`/`result.resolved`. |
 | 9 | Ajan yazabilirlik (gramer): ≥20 görev; kimlikler kopyalanamaz; yalnız şartname+şema dosya erişimiyle; ilk deneme, son, mesaj, belirteç; RD1 v2r karşılaştırması; düzeltme ve yeniden ölçüm | ✅ (sınır aşağıda) | `rounds/R2/ergonomics/RESULTS.md`. Ölçülen ajanlar `sandbox-exec` içinde `claude -p` (sonnet): depo okuması `EPERM`; kimlikler ajan başına rastgele; daemon başka ajanın dosyasını reddediyor. Tablo aşağıda ("Ajan yazabilirlik"). Yeniden puanlama bayt-eşit (denetçi). |
 | 10 | 100.000 bar kararlı kare süresi < 8 ms; LOD'lu/tam fark; eski viewport/LOD'dan alınan/alınmayan | ✅ | `crates/qp-render/examples/frame_100k.rs` (1200×600, 31 koşu medyanı, M4 Max): **LOD'lu 2,745 ms** (derleme 1,550 + tarama 1,197), LOD'suz 61,9 ms; denetçi yeniden ölçümü 2,78–2,90 ms (±%6). LOD–tam piksel farkı 2.275 / 720.000 (%0,32). `crates/qp-grammar/LEGACY.md`: alınan 7, alınmayan 9 madde. |
 | 11 | En az sekiz yeni döküm, üç taşımada; RD1'in 17'si değişmeden | ✅ | 10 yeni (18–27); inproc/serve/mcp 27/27; 01–17 `git diff` boş. Ayrıca oturumun kendi 4 dökümü (`t-select` dahil) üç taşımada. |
 | 12 | R1 denetim bulguları: periyot üst sınırı, `Chain` düzeltme hatası ve özellik testi, göreli tolerans; `period: 1e18` iletisi | ✅ | `MAX_PERIOD = 100000`; `period 1e18` → "parameter `period` is 1e18, which exceeds the maximum period 100000"; `Chain::update_last` hatası düzeltmeden önce başarısız olan testle yakalandı, `chain_modes_are_bit_identical` özellik testi (sabit tohum); göreli tolerans + yüksek fiyat testi. Hesap özeti `7b1e99d40889f83c` (aarch64, x86_64, wasm32) değişmedi. |
-| 13 | WASM boyutu ölçülmüş, RD1 ile karşılaştırılmış | ✅ | gzip -9: **595.475 B** (RD1 475.126 B; R2 başı `r2/int` 476.603 B): **+120.349 B (+%25)**. Neden: tarayıcı bağlaması R0 sahnesini `qp-grammar` ile kuruyor (derleyici wasm'a girdi). `wasm-opt -Oz` ile 526 KB. Açık karar A13. |
+| 13 | WASM boyutu ölçülmüş, RD1 ile karşılaştırılmış | ✅ | gzip -9: **595.475 B** (denetçinin temiz kopyası 595.584 B; RD1 475.126 B; R2 başı `r2/int` 476.603 B): RD1'e göre **+120.349 B (+%25)**, R2 başına göre +118.872 B (ara ölçüm T4a: 593.252 B, `split_layer` öncesi). Neden: tarayıcı bağlaması R0 sahnesini `qp-grammar` ile kuruyor (derleyici wasm'a girdi). `wasm-opt -Oz` ile 526 KB. Açık karar A13. |
 | 14 | `REPORT.md`, `AUDIT.md`; `STATUS.md`, `ROADMAP.md`; önerilen karar satırları ayrı bölümde | ✅ | Bu dosya; `AUDIT.md`; `STATUS.md`, `ROADMAP.md`; `DECISIONS.md` "Önerilen (R2)" Ö10–Ö17, açık A13–A14. |
 
 ## Ajan yazabilirlik (T9)
@@ -144,6 +145,8 @@ değişkende aynı bölüm; her ajan taze süreç, kendi rastgele kimlikleriyle.
    gramerin kendi adları kullanılıyor; tek kural hangisi olsun?
 5. Bulgu adı verilmeyen `present` en yüksek güvenli bulguyu seçiyor; ölçümde iki ajanı yanılttı.
    "En son" mu olmalı?
+6. Ekranlı bağlantının bakışı gelecek yuvalara (tahmin yelpazesi) uzayabilsin mi (`look` son
+   barın ötesine; varsayılan bakış gelecek noktaları kapsasın)? (Denetim K1.)
 
 ## Öneriler (kapsam dışı, yapılmadı)
 
@@ -169,4 +172,31 @@ değişkende aynı bölüm; her ajan taze süreç, kendi rastgele kimlikleriyle.
 
 ## Denetim
 
-(T11 sonucu aşağıya yazılır.)
+Bağımsız denetçi alt ajan `521d5f4`'ü temiz kopyada denetledi (`AUDIT.md`). **Sonuç: koşullu
+kabul.** VERIFY: 14 PASS, 2 koşullu PASS (7, 10), 0 FAIL. Ölçütler (denetçi): 9 ✅, 5 ⚠️ (1, 6,
+7, 13, 14), 0 ❌.
+
+Denetçinin bağımsız doğruladıkları: temiz kopyada `verify.sh` 14/14; CI 43658183855 başarılı;
+sekiz görünüm dökümlerinden iki kez çizilip altınlarla sha256-eşit; sekiz görsel gözle açıldı,
+göstergeler kendi Python hesabıyla `qp explain`'e 1e-13 içinde eşit, 40'tan fazla piksel noktası
+0–2 px; yalnız şartname ve şemadan **kimlik bilmeden seçicilerle yeni bir görünüm** (hacim
+çubukları + kapanış alanı) kurdu, ilk gerçek komut uygulandı; 176 nokta sorgusu, 0 uyuşmazlık;
+1.000 × 3 sunucu tek çıktı; ergonomi yeniden puanlaması bayt-eşit, 400 rastgele kimlik; 100k kare
+2,683 ms (−%2,3); hesap özeti değişmedi; gizli bilgi yok; `../Docs`, `../Services` değişmedi;
+22 düşmanca mesaj tanımlı hata ya da güvenli sonuç verdi.
+
+**Koşullar ve giderilmeleri (denetimden sonra, `r2/int`'te):**
+
+| Koşul | Giderme |
+|-------|---------|
+| K1: yelpazenin gelecek yuvaları ekranlı bağlantılarda `screen`/`hit`'te görünmüyor | Davranış `docs/GRAMMAR.md` §3'e "v0 sınırı" olarak yazıldı; ölçüt 7 ⚠️; açık soru 6. Kod değişmedi (ana akış kararı). |
+| K2: seçicili döküm adımı yalnız `send_raw` ile çalışıyor | `docs/PROTOCOL.md` §15'e yazıldı; koşucunun ham iletmesi öneri. |
+| K3: "seçici" ve "nokta serisi" sözlükte yok | `docs/CONCEPTS.md`'ye eklendi. |
+| K4: denetimden önce "Tamamlandı, 14/14" ve tutarsız WASM sayıları | Bu rapor, `STATUS.md`, `ROADMAP.md`, `DECISIONS.md` A13 düzeltildi. |
+
+Düşük önemdeki notlar (öneri olarak): v1'de MACD panelinde açıklama ve RSI'da 30/70 eksen
+etiketi yok; v2'de yinelenen açıklama; v3 açıklamasında ham seri kimlikleri; hacim panelinde
+eksen sıfırın altına iniyor ve `{:.2}` biçimi (`2000000.00`); `LayerIn.panel` varsayılanı 0
+belgelenmemiş; günlükteki `insert_panel` isteğinde katmanlar `"panel": 0` görünüyor; `set_emphasis`
+`to_bar` 4294967295'i kabul ediyor; id'si u32::MAX olan panel, sonraki id'siz panel eklemelerini
+engelliyor; 18 eşzamanlı durumun yalnız 3'ü gramer işlemi kullanıyor (diğerleri RD1 senaryoları).

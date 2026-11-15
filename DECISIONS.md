@@ -83,5 +83,5 @@ R2 bu satırları **önerir**; kesinleştirmedi. Kanıt `rounds/R2/REPORT.md`, `
 
 | # | Açık karar (R2) | Ne zaman | Not |
 |---|------------|----------|-----|
-| A13 | WASM boyutu: gramer derleyicisi wasm'a girince gzip +116,6 KB (476,6 → 593,2 KB) | R4 öncesi | `wasm-opt -Oz` ile 526 KB; ince bir wasm yüzeyi (yalnız tarama) ya da derleyiciyi sunucuda tutmak seçenek. |
+| A13 | WASM boyutu: gramer derleyicisi wasm'a girince gzip 476.603 → 595.475 B (+118.872 B, +%25; RD1'e göre +120.349 B; denetçinin temiz kopyası 595.584 B) | R4 öncesi | `wasm-opt -Oz` ile 526 KB; ince bir wasm yüzeyi (yalnız tarama) ya da derleyiciyi sunucuda tutmak seçenek. |
 | A14 | Bollinger bantlarında uzun seride kayan M2 sürüklenmesi (50k barda göreli ~1,2e-9) | R3 öncesi | Her `period` barda tam yeniden hesap sınırlar ama hesap özetini değiştirir. |

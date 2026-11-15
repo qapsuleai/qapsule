@@ -89,6 +89,12 @@ after?|before?}`, `set_panel {view, panel, name?, weight?}`.
 - **Barların ötesi:** nokta serilerinin son bardan sonraki noktaları (ör. tahmin yelpazesi)
   ardışık seanslar sayılır: son bardan sonraki k'inci nokta `son bar + k` yuvasına yerleşir.
   Görünen aralık bu yuvaları kapsayacak kadar sağa uzar (yalnız aralık belirtilmemişse).
+  **v0 sınırı (R2 denetimi K1):** ekranlı bir bağlantının (masaüstü, telefon, saat) her zaman
+  bir bakışı vardır (varsayılan: son N bar) ve `look` son barın ötesine izin vermez; bu yüzden
+  bu bağlantılar için `screen` ve `hit` gelecek yuvaları **göstermez** (yelpaze bantları yalnız
+  son bar yuvasıyla görünür). Ekransız bağlantılar, `qp render` ve `qp explain` gelecek
+  yuvaları gösterir. Bakışın gelecek yuvalara uzaması ana akış kararıdır (`rounds/R2/REPORT.md`
+  açık soru 6).
 
 ## 4. Katman (`Layer`)
 

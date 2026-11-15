@@ -695,6 +695,11 @@ kimlikleri, alan adları… Bir komutta hata varsa **hiçbir** işlem uygulanmaz
 }
 ```
 
+`send.msg` tipli bir `ClientMsg` olarak çözülür; bu yüzden **anlamla başvuru (§17) seçici
+nesneleri** içeren ya da tipli biçimin taşıyamadığı bir mesaj `send_raw` ile yazılmalıdır
+(ham satır olduğu gibi otoriteye gider). Şema doğrulaması (`Transcript`) seçicili `send.msg`'i
+kabul eder ama koşucu reddeder (R2 denetimi K2; öneri: koşucu `send.msg`'i ham iletsin).
+
 Kurallar: her adımın çıktıları **tam olarak** `expect` uzunluğunda ve sırasında olmalıdır;
 her beklenen mesaj gerçek mesajın **alt kümesi** olarak eşleşir (nesnelerde beklenen her
 anahtar eşleşmeli, fazla anahtar serbest; diziler aynı uzunlukta ve öğe öğe; sayılar tam

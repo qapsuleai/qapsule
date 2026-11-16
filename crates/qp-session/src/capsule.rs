@@ -1507,6 +1507,20 @@ impl Session {
             || (*audience && !Self::admits(doc, principal, story, story.stage)))
     }
 
+    /// (R4/K42-FEED) Whether `it`'s latest transition is at the latest final bar of its
+    /// series: what became known in the current bar period (for a daily series, the
+    /// current session).
+    fn is_current(&self, it: &CapsuleItem) -> bool {
+        [rd!(self), &self.doc]
+            .into_iter()
+            .find_map(|d| {
+                let bs = bar_series(d, &it.series)?;
+                let n = bs.bars()?.len();
+                (n > 0).then(|| final_count(d, &bs.id, n).max(1) - 1)
+            })
+            .is_some_and(|last| usize::try_from(it.last_bar).is_ok_and(|b| b >= last))
+    }
+
     /// Answer to the `capsules` query (run on the asker's projected document).
     #[allow(clippy::too_many_arguments)]
     pub(crate) fn capsules_query(
@@ -1519,6 +1533,7 @@ impl Session {
             since_bar,
             since_t,
             latest,
+            audience,
             limit,
             ..
         } = q
@@ -1572,7 +1587,29 @@ impl Session {
                 .then(a.id.cmp(&b.id))
         });
         if let Some(l) = limit {
-            items.truncate(*l as usize);
+            let l = *l as usize;
+            if *audience && items.len() > l {
+                // (R4/K42-FEED) `limit` does not cut a current negative transition of the
+                // asker's position/intent story (K42/A22: it reaches the person whatever
+                // the level; the page size must not undo that). Kept: those first, then
+                // the rest by rank; the answer stays in rank order and at most `limit`.
+                let keep: Vec<bool> = items
+                    .iter()
+                    .map(|it| it.relevant && it.stage.is_negative() && self.is_current(it))
+                    .collect();
+                let mut room = l.saturating_sub(keep.iter().filter(|k| **k).count());
+                let mut take = Vec::with_capacity(l);
+                for (it, k) in items.into_iter().zip(keep) {
+                    if k || room > 0 {
+                        if !k {
+                            room -= 1;
+                        }
+                        take.push(it);
+                    }
+                }
+                items = take;
+            }
+            items.truncate(l);
         }
         let comments = self
             .comments_for(&principal)

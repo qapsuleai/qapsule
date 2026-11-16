@@ -6,7 +6,7 @@
 <title>Qapsule</title>
 <link rel="stylesheet" href="style.css">
 </head>
-<body data-theme="dark">
+<body data-theme="dark" data-tab="feed">
 <main id="phone">
   <header id="top">
     <div id="title"><b>Qapsule</b> <span id="clock"></span></div>
@@ -23,7 +23,7 @@
     <p id="empty" data-l="empty"></p>
   </section>
 
-  <section id="layer" hidden>
+  <section id="layer">
     <div id="layerbar">
       <button id="back" data-l="back"></button>
       <span id="depth"></span>
@@ -53,6 +53,8 @@
     <table id="instruments"><thead><tr><th data-l="symbol"></th><th data-l="watch"></th><th data-l="position"></th></tr></thead><tbody></tbody></table>
     <button id="s_apply" data-l="apply"></button>
     <p id="phoneurl"><span data-l="phone"></span> <code id="url"></code></p>
+    <p id="lanwarn" class="small" data-l="lan_warn" hidden></p>
+    <p id="lanhint" class="small" hidden><span data-l="lan_hint"></span> <code>scripts/demo.sh --lan</code></p>
   </section>
 
   <section id="metrics" class="page">

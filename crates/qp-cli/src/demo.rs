@@ -12,7 +12,16 @@
 //!   message: a separate frame) and `{"start":…}` again after a backward seek (a new
 //!   authority, epoch + 1: the page starts over and says `hello` again).
 //! - `POST /send?conn=…` — a JSON array of protocol messages of that connection, in order
-//!   (answers come on the stream). `204`.
+//!   (answers come on the stream). `204`. It needs the connection's secret (header
+//!   `X-Qp-Token`, given only in that connection's `start` frame), `Content-Type:
+//!   application/json` and a same-origin `Origin`; otherwise `403`/`415`.
+//! - Every request's `Host` must be this host (`localhost`, `127.0.0.1`, `[::1]`, the
+//!   address listened on or the printed LAN address, with the port), else `403` (DNS
+//!   rebinding). Default address `127.0.0.1`; `--lan` listens on `0.0.0.0` for phones.
+//!
+//! The per-connection secret is 128 bits from the operating system (`/dev/urandom`):
+//! host code, not compute code — it never reaches the authority, the document or any
+//! digest, so replay determinism is unaffected.
 //! - `GET /<file>` — the shell's static files (`--web`, default `shells/web`), `/` →
 //!   `index.html`. Nothing else is served; the page loads nothing from elsewhere (CSP).
 
@@ -34,9 +43,13 @@ pub struct DemoArgs {
     /// Port.
     #[arg(long, default_value_t = 8390)]
     pub port: u16,
-    /// Address to listen on (`0.0.0.0`: phones on the same network can open it).
-    #[arg(long, default_value = "0.0.0.0")]
+    /// Address to listen on. Default `127.0.0.1` (this machine only); see `--lan`.
+    #[arg(long, default_value = "127.0.0.1")]
     pub bind: String,
+    /// Listen on every interface (`0.0.0.0`) so that a phone on the same network can open
+    /// the page. Devices on the local network can then see the demo.
+    #[arg(long)]
+    pub lan: bool,
     /// The web shell's directory (index.html, main.js, pkg/).
     #[arg(long, default_value = "shells/web")]
     pub web: PathBuf,
@@ -129,7 +142,9 @@ enum Cmd {
     },
     Send {
         conn: String,
+        token: String,
         body: String,
+        reply: Sender<bool>,
     },
     Gone {
         conn: String,
@@ -139,7 +154,26 @@ enum Cmd {
 struct Client {
     principal: String,
     lang: String,
+    token: String,
     tx: Sender<String>,
+}
+
+/// 128 bits from the operating system's randomness, as 32 hex digits.
+fn secret() -> Result<String, String> {
+    let mut b = [0u8; 16];
+    std::fs::File::open("/dev/urandom")
+        .and_then(|mut f| f.read_exact(&mut b))
+        .map_err(|e| format!("no OS randomness for the connection secret: {e}"))?;
+    Ok(b.iter().map(|x| format!("{x:02x}")).collect())
+}
+
+/// Constant-time comparison of two secrets.
+fn same_secret(a: &str, b: &str) -> bool {
+    a.len() == b.len()
+        && a.bytes()
+            .zip(b.bytes())
+            .fold(0u8, |acc, (x, y)| acc | (x ^ y))
+            == 0
 }
 
 struct Hub {
@@ -157,11 +191,11 @@ impl Hub {
         u64::try_from(self.start.elapsed().as_millis()).unwrap_or(u64::MAX)
     }
 
-    fn start_frame(&self, conn: &str, principal: &str, lang: &str) -> String {
+    fn start_frame(&self, conn: &str, token: &str, principal: &str, lang: &str) -> String {
         let mut data: InitData = self.host.init().data.clone().unwrap_or_default();
         data.entitlements.retain(|p, _| p == principal);
         json!({"start": {
-            "conn": conn, "principal": principal, "lang": lang,
+            "conn": conn, "token": token, "principal": principal, "lang": lang,
             "data": data, "events": self.host.recorded_events(),
             "info": self.info,
         }})
@@ -185,7 +219,12 @@ impl Hub {
             let frames: Vec<(Sender<String>, String)> = self
                 .clients
                 .iter()
-                .map(|(id, c)| (c.tx.clone(), self.start_frame(id, &c.principal, &c.lang)))
+                .map(|(id, c)| {
+                    (
+                        c.tx.clone(),
+                        self.start_frame(id, &c.token, &c.principal, &c.lang),
+                    )
+                })
                 .collect();
             for (tx, f) in frames {
                 let _ = tx.send(f);
@@ -209,19 +248,36 @@ impl Hub {
                 lang,
                 tx,
             } => {
+                let Ok(token) = secret() else {
+                    return;
+                };
                 self.next += 1;
                 let conn = format!("c{}", self.next);
-                let _ = tx.send(self.start_frame(&conn, &principal, &lang));
+                let _ = tx.send(self.start_frame(&conn, &token, &principal, &lang));
                 self.clients.insert(
                     conn,
                     Client {
                         principal,
                         lang,
+                        token,
                         tx,
                     },
                 );
             }
-            Cmd::Send { conn, body } => {
+            Cmd::Send {
+                conn,
+                token,
+                body,
+                reply,
+            } => {
+                let ok = self
+                    .clients
+                    .get(&conn)
+                    .is_some_and(|c| same_secret(&c.token, &token));
+                let _ = reply.send(ok);
+                if !ok {
+                    return;
+                }
                 let msgs: Vec<Value> = match serde_json::from_str::<Value>(&body) {
                     Ok(Value::Array(a)) => a,
                     Ok(v) => vec![v],
@@ -296,7 +352,24 @@ fn static_path(web: &Path, path: &str) -> Option<PathBuf> {
     Some(web.join(rel))
 }
 
-fn connection(mut s: TcpStream, web: &Path, tx: &Sender<Cmd>) {
+/// What a request must look like to be served (`Host` values allowed).
+struct Gate {
+    hosts: Vec<String>,
+}
+
+impl Gate {
+    fn host_ok(&self, host: Option<&str>) -> bool {
+        host.is_some_and(|h| self.hosts.iter().any(|x| x.eq_ignore_ascii_case(h)))
+    }
+    fn origin_ok(&self, origin: Option<&str>, host: Option<&str>) -> bool {
+        match (origin, host) {
+            (Some(o), Some(h)) => o.eq_ignore_ascii_case(&format!("http://{h}")),
+            _ => false,
+        }
+    }
+}
+
+fn connection(mut s: TcpStream, web: &Path, tx: &Sender<Cmd>, gate: &Gate) {
     let Ok(peer) = s.try_clone() else { return };
     let mut r = BufReader::new(peer);
     let mut line = String::new();
@@ -306,16 +379,24 @@ fn connection(mut s: TcpStream, web: &Path, tx: &Sender<Cmd>) {
     let mut parts = line.split_whitespace();
     let (method, target) = (parts.next().unwrap_or(""), parts.next().unwrap_or(""));
     let mut len = 0usize;
+    let mut headers: BTreeMap<String, String> = BTreeMap::new();
     loop {
         let mut h = String::new();
         if r.read_line(&mut h).is_err() || h == "\r\n" || h.is_empty() {
             break;
         }
         if let Some((k, v)) = h.split_once(':') {
-            if k.eq_ignore_ascii_case("content-length") {
+            let k = k.trim().to_ascii_lowercase();
+            if k == "content-length" {
                 len = v.trim().parse().unwrap_or(0);
             }
+            headers.insert(k, v.trim().to_owned());
         }
+    }
+    let host = headers.get("host").map(String::as_str);
+    if !gate.host_ok(host) {
+        respond(&mut s, "403 Forbidden", "text/plain", b"unknown Host");
+        return;
     }
     let (path, q) = target.split_once('?').unwrap_or((target, ""));
     match (method, path) {
@@ -347,15 +428,49 @@ Cache-Control: no-store\r\nConnection: keep-alive\r\n\r\n";
                 respond(&mut s, "400 Bad Request", "text/plain", b"short body");
                 return;
             }
-            let Some(conn) = query_param(q, "conn") else {
-                respond(&mut s, "400 Bad Request", "text/plain", b"no conn");
+            if !gate.origin_ok(headers.get("origin").map(String::as_str), host) {
+                respond(&mut s, "403 Forbidden", "text/plain", b"cross-origin");
+                return;
+            }
+            if !headers
+                .get("content-type")
+                .is_some_and(|c| c.to_ascii_lowercase().starts_with("application/json"))
+            {
+                respond(
+                    &mut s,
+                    "415 Unsupported Media Type",
+                    "text/plain",
+                    b"json only",
+                );
+                return;
+            }
+            let (Some(conn), Some(token)) = (query_param(q, "conn"), headers.get("x-qp-token"))
+            else {
+                respond(
+                    &mut s,
+                    "403 Forbidden",
+                    "text/plain",
+                    b"no connection secret",
+                );
                 return;
             };
+            let (rtx, rrx) = mpsc::channel();
             let _ = tx.send(Cmd::Send {
                 conn,
+                token: token.clone(),
                 body: String::from_utf8_lossy(&body).into_owned(),
+                reply: rtx,
             });
-            respond(&mut s, "204 No Content", "text/plain", b"");
+            if rrx.recv_timeout(Duration::from_secs(30)).unwrap_or(false) {
+                respond(&mut s, "204 No Content", "text/plain", b"");
+            } else {
+                respond(
+                    &mut s,
+                    "403 Forbidden",
+                    "text/plain",
+                    b"wrong connection secret",
+                );
+            }
         }
         ("GET", p) => {
             match static_path(web, p).and_then(|f| std::fs::read(&f).ok().map(|b| (f, b))) {
@@ -404,22 +519,36 @@ fn stream_events(s: &mut TcpStream, frx: &Receiver<String>, tx: &Sender<Cmd>) {
 pub fn demo(a: &DemoArgs) -> Result<(), String> {
     let host = host(a)?;
     let st = host.state();
-    let listener = TcpListener::bind((a.bind.as_str(), a.port))
-        .map_err(|e| format!("bind {}:{}: {e}", a.bind, a.port))?;
+    let bind = if a.lan { "0.0.0.0" } else { a.bind.as_str() };
+    let listener =
+        TcpListener::bind((bind, a.port)).map_err(|e| format!("bind {bind}:{}: {e}", a.port))?;
     let port = listener.local_addr().map_err(|e| e.to_string())?.port();
     let mut urls = vec![format!("http://localhost:{port}/")];
-    let phone = (a.bind == "0.0.0.0")
-        .then(local_ip)
-        .flatten()
-        .map(|ip| format!("http://{ip}:{port}/"));
+    let lan_ip = (bind == "0.0.0.0").then(local_ip).flatten();
+    let phone = lan_ip.as_ref().map(|ip| format!("http://{ip}:{port}/"));
     if let Some(u) = &phone {
         urls.push(u.clone());
     }
-    let info = json!({"urls": urls, "phone": phone, "synthetic": st.synthetic, "note": st.note});
+    let mut hosts: Vec<String> = ["localhost", "127.0.0.1", "[::1]"]
+        .iter()
+        .map(|h| format!("{h}:{port}"))
+        .collect();
+    if bind != "0.0.0.0" && bind != "127.0.0.1" {
+        hosts.push(format!("{bind}:{port}"));
+    }
+    if let Some(ip) = &lan_ip {
+        hosts.push(format!("{ip}:{port}"));
+    }
+    let gate = std::sync::Arc::new(Gate { hosts });
+    let info = json!({"urls": urls, "phone": phone, "lan": bind != "127.0.0.1",
+        "synthetic": st.synthetic, "note": st.note});
     println!("qp demo: {}", urls[0]);
     match &phone {
-        Some(u) => println!("telefondan aç / open on your phone (same network): {u}"),
-        None => println!("telefondan açmak için --bind 0.0.0.0 ile başlatın / start with --bind 0.0.0.0 to open on a phone"),
+        Some(u) => {
+            println!("telefondan aç / open on your phone (same network): {u}");
+            println!("uyarı: yerel ağdaki cihazlar gösterimi görebilir / warning: devices on the local network can see the demo");
+        }
+        None => println!("telefondan açmak için: scripts/demo.sh --lan / to open on a phone: scripts/demo.sh --lan"),
     }
     if st.synthetic {
         println!(
@@ -440,8 +569,8 @@ pub fn demo(a: &DemoArgs) -> Result<(), String> {
     let web = a.web.clone();
     std::thread::spawn(move || {
         for s in listener.incoming().flatten() {
-            let (web, tx) = (web.clone(), tx.clone());
-            std::thread::spawn(move || connection(s, &web, &tx));
+            let (web, tx, gate) = (web.clone(), tx.clone(), gate.clone());
+            std::thread::spawn(move || connection(s, &web, &tx, &gate));
         }
     });
     let mut hub = Hub {

@@ -19,6 +19,8 @@ const L = {
     hint_capsule: 'Grafiğe inmek için dokunun.', hint_chart: 'Sürükleyin, kıstırın; kanıt için işarete ya da seviyeye dokunun.',
     hint_evidence: 'Kanıt', requires: 'Bu kanıt şu yetkiyi gerektirir:', rests_on: 'Dayandığı:',
     disconnected: 'Bağlantı koptu; yeniden bağlanılıyor…',
+    lan_warn: 'Uyarı: yerel ağdaki cihazlar bu gösterimi görebilir.',
+    lan_hint: 'Telefondan açmak için gösterimi şöyle başlatın:',
   },
   en: {
     synthetic: 'Synthetic data', tab_feed: 'Feed', tab_settings: 'Settings', tab_metrics: 'Metrics',
@@ -33,6 +35,8 @@ const L = {
     hint_capsule: 'Tap to open the chart.', hint_chart: 'Drag, pinch; tap the glyph or a level for the evidence.',
     hint_evidence: 'Evidence', requires: 'This evidence requires the entitlement:', rests_on: 'Rests on:',
     disconnected: 'Disconnected; reconnecting…',
+    lan_warn: 'Warning: devices on the local network can see this demo.',
+    lan_hint: 'To open it on a phone, start the demo with:',
   },
 };
 
@@ -51,6 +55,7 @@ const FACE_H = 240;
 
 let core = null;
 let conn = '';
+let token = '';
 let source = null;
 let wasmReady = 0;
 let chain = Promise.resolve();
@@ -85,7 +90,8 @@ function flush() {
   if (out === '[]') return;
   const url = new URL('/send', location.href);
   url.searchParams.set('conn', conn);
-  const p = chain.then(() => fetch(url, { method: 'POST', body: out })).catch(() => {});
+  const headers = { 'Content-Type': 'application/json', 'X-Qp-Token': token };
+  const p = chain.then(() => fetch(url, { method: 'POST', body: out, headers })).catch(() => {});
   posts.add(p);
   p.finally(() => posts.delete(p));
   chain = p;
@@ -104,6 +110,7 @@ function connect() {
 function start(frame) {
   const v = JSON.parse(frame).start;
   conn = v.conn;
+  token = v.token;
   info = v.info;
   core = new Shell(JSON.stringify(v));
   core.metric_mark('wasm_ready', wasmReady);
@@ -115,6 +122,8 @@ function start(frame) {
   $('banner').hidden = !info.synthetic;
   $('note').textContent = info.note || '';
   $('url').textContent = info.phone || info.urls[0];
+  $('lanwarn').hidden = !info.lan;
+  $('lanhint').hidden = Boolean(info.lan);
   flush();
 }
 
@@ -219,12 +228,8 @@ function renderFeed() {
 
 function renderLayer(force) {
   const open = JSON.parse(core.open());
-  const layer = $('layer');
-  if (open.depth === 'sentence') {
-    layer.hidden = true;
-    return open;
-  }
-  layer.hidden = false;
+  document.body.classList.toggle('open', open.depth !== 'sentence');
+  if (open.depth === 'sentence') return open;
   $('depth').textContent = t(open.depth);
   $('opentext').textContent = open.text;
   $('hint').textContent = t(HINT[open.depth]);
@@ -332,7 +337,7 @@ function repaint(ch) {
     const from = core.transition_from();
     const open = JSON.parse(core.open());
     if (from === 'sentence' && open.capsule && faces.get(open.capsule)) old = faces.get(open.capsule).firstChild;
-    else if (from !== 'sentence' && !$('layer').hidden) old = $('scene');
+    else if (from !== 'sentence' && document.body.classList.contains('open')) old = $('scene');
     if (old && old.tagName === 'CANVAS') snap = snapshot(old);
     else old = null;
   }
@@ -378,6 +383,7 @@ function wire() {
     b.onclick = () => {
       for (const x of document.querySelectorAll('#tabs button')) x.classList.toggle('on', x === b);
       for (const p of document.querySelectorAll('.page')) p.classList.toggle('on', p.id === b.dataset.tab);
+      document.body.dataset.tab = b.dataset.tab;
       if (b.dataset.tab === 'metrics') renderMetrics();
       if (b.dataset.tab === 'settings') renderSettings();
     };

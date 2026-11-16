@@ -2,12 +2,16 @@
 # R4/T5: the demo in one command (shells/web/README.md).
 #
 #   scripts/demo.sh [qp demo options]     e.g. --synthetic, --data DIR, --from 2025-06-02,
-#                                         --speed 8, --port 8390, --paused
+#                                         --speed 8, --port 8390, --paused, --lan
+#
+#   --lan  listens on 0.0.0.0 so that a phone on the same network can open the page
+#          (printed address). Devices on the local network can then see the demo.
+#          Without it the demo listens on 127.0.0.1 (this machine only).
 #
 # 1. builds the web shell's core (qp-wasm, feature `replica`) with wasm-pack into
 #    shells/web/pkg (skipped when up to date; QP_DEMO_REBUILD=1 forces it) and writes
 #    shells/web/pkg/sizes.json (raw and gzip -9 sizes, for the metrics page);
-# 2. builds `qp` (release) and runs `qp demo`: a local host on 0.0.0.0:8390 that serves
+# 2. builds `qp` (release) and runs `qp demo`: a local host on 127.0.0.1:8390 that serves
 #    the page and the protocol on one origin. Without local data (fixtures/local/bars or
 #    QAPSULE_LOCAL_BARS) it runs the synthetic market and the page says so.
 # Requirements: rustup target wasm32-unknown-unknown, wasm-pack (cargo install wasm-pack).

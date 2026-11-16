@@ -43,3 +43,8 @@ wasm-opt = false
 
 [lints]
 workspace = true
+
+[[example]]
+# R4/T6: the page's opening timed natively (see the file).
+name = "startup"
+required-features = ["replica"]

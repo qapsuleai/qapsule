@@ -625,6 +625,17 @@ impl ShellCore {
     /// # Errors
     /// Not JSON, or a message that is not a server message.
     pub fn on_frame(&mut self, text: &str) -> Result<Value, String> {
+        // (R4/T6) A message frame as the host writes it (`{"msg":…}`, compact) is parsed
+        // straight into the message: no intermediate JSON tree and no copy of it (the
+        // document answer is megabytes). Anything else takes the general path.
+        if let Some(inner) = text
+            .strip_prefix("{\"msg\":")
+            .and_then(|r| r.strip_suffix('}'))
+        {
+            if let Ok(msg) = serde_json::from_str::<ServerMsg>(inner) {
+                return Ok(self.on_message(&msg));
+            }
+        }
         let v: Value = serde_json::from_str(text).map_err(|e| e.to_string())?;
         if let Some(m) = v.get("msg") {
             let msg: ServerMsg = serde_json::from_value(m.clone()).map_err(|e| e.to_string())?;

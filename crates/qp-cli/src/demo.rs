@@ -69,7 +69,8 @@ pub struct DemoArgs {
     /// Instruments.
     #[arg(long, default_value_t = 30)]
     pub instruments: u32,
-    /// Bars of history before the replay starts.
+    /// Bars of history before the replay starts (with `--from` too: the bars just
+    /// before that date).
     #[arg(long, default_value_t = 120)]
     pub history: u32,
     /// Synthetic trading days.
@@ -121,7 +122,9 @@ fn host(a: &DemoArgs) -> Result<ReplayHost, String> {
     } else {
         a.data.clone().unwrap_or_else(qp_source::local_bars_dir)
     };
-    let mut h = ReplayHost::with_local_dir(init, &a.root, &dir)?;
+    // (R4/T6) `--history` also bounds the history before `--from` (else every earlier
+    // bar: on the full local history the page's first capsule took seconds).
+    let mut h = ReplayHost::with_window(init, &a.root, &dir, Some(a.history as usize))?;
     h.set_record_events(true);
     Ok(h)
 }

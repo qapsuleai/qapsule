@@ -1931,11 +1931,21 @@ impl Session {
                     .map(|(s, _)| (i, s.text)),
             })
             .collect();
-        for (i, text) in rewrites {
-            let fid = d.capsules[i].finding.clone();
+        // (R4/T6) The first finding of each id, looked up once (a linear search per
+        // rewritten capsule was most of a public reader's first `hello`).
+        let mut finding_at: std::collections::HashMap<&str, usize> =
+            std::collections::HashMap::with_capacity(d.findings.len());
+        for (k, f) in d.findings.iter().enumerate() {
+            finding_at.entry(f.id.as_str()).or_insert(k);
+        }
+        let targets: Vec<(usize, Option<usize>)> = rewrites
+            .iter()
+            .map(|(i, _)| (*i, finding_at.get(d.capsules[*i].finding.as_str()).copied()))
+            .collect();
+        for ((i, k), (_, text)) in targets.into_iter().zip(rewrites) {
             d.capsules[i].headline.clone_from(&text);
-            if let Some(f) = d.findings.iter_mut().find(|f| f.id == fid) {
-                f.claim = text;
+            if let Some(k) = k {
+                d.findings[k].claim = text;
             }
         }
         d.ledger.entries.retain(|e| {

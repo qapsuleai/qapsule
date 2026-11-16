@@ -83,6 +83,23 @@ struct SourceInfo {
 
 /// Builds the replay feeds asked for by `r`; local without data falls back to the
 /// synthetic market with a note.
+/// Keeps each feed's last `window` coarse bars before `from_t` (and the replayed part);
+/// finer bars before the first kept coarse bar go too (they are used only inside replayed
+/// days). A feed with no bar before `from_t` is left as it is (the replay reports it).
+fn window_feeds(feeds: &mut [ReplayFeed], from_t: i64, window: usize) {
+    for f in feeds {
+        let first = f.bars.partition_point(|b| b.t < from_t);
+        let cut = first.saturating_sub(window.max(1));
+        if cut == 0 {
+            continue;
+        }
+        f.bars.drain(..cut);
+        let t0 = f.bars[0].t;
+        let lo = f.fine.partition_point(|b| b.t < t0);
+        f.fine.drain(..lo);
+    }
+}
+
 fn build_feeds(r: &ReplayInit, local_dir: &Path) -> Result<(Vec<ReplayFeed>, SourceInfo), String> {
     let n = r.instruments.unwrap_or(DEFAULT_INSTRUMENTS).max(1) as usize;
     let interval = r.interval.clone().unwrap_or_else(|| "1d".to_owned());
@@ -283,11 +300,32 @@ impl ReplayHost {
         root: &Path,
         local_dir: &Path,
     ) -> Result<Self, String> {
+        Self::with_window(init, root, local_dir, None)
+    }
+
+    /// (R4/T6) [`ReplayHost::with_local_dir`] with a history window: with `init.replay.from_t`
+    /// set, each feed keeps only its last `window` bars before the first replayed bar (the
+    /// initial resolution; `from_t` alone takes every earlier bar). Without `from_t` the
+    /// window changes nothing (`init.replay.history` already counts the bars). For a host
+    /// whose readers must open fast (`qp demo`): the document — capsules, ledger — grows
+    /// with the history.
+    ///
+    /// # Errors
+    /// As [`ReplayHost::new`].
+    pub fn with_window(
+        init: SessionInit,
+        root: &Path,
+        local_dir: &Path,
+        window: Option<usize>,
+    ) -> Result<Self, String> {
         let r = init
             .replay
             .clone()
             .ok_or("a replay host needs init.replay")?;
-        let (feeds, info) = build_feeds(&r, local_dir)?;
+        let (mut feeds, info) = build_feeds(&r, local_dir)?;
+        if let (Some(w), Some(from)) = (window, r.from_t) {
+            window_feeds(&mut feeds, from, w);
+        }
         let speed = r.speed.unwrap_or(DEFAULT_SPEED);
         if !(speed > 0.0 && speed <= MAX_SPEED) {
             return Err(format!(

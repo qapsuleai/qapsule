@@ -210,6 +210,7 @@ fn follower(doc: Document, principal: &str, provider: Provider) -> Result<Sessio
         proposal_ttl_ms: None,
         data: None,
         capsules: None,
+        replay: None,
     };
     // Built without a provider: every binding is pending, so nothing is stamped.
     let mut s = Session::build_with(

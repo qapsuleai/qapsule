@@ -1153,6 +1153,15 @@ impl Session {
                     Err(e) => vec![err_line(conn, Some(id), e)],
                 }
             }
+            // (R4, §21) Answered by a replay host (`crate::replayhost`) before it gets
+            // here; a bare authority has no replay source.
+            ClientMsg::Replay { id, .. } => vec![err_line(
+                conn,
+                Some(id),
+                E::new(ErrorCode::Unsupported, "this authority has no replay source")
+                    .hint("Replay controls work on a session started with `init.replay` (docs/PROTOCOL.md §21).")
+                    .build(),
+            )],
         }
     }
 
@@ -3128,12 +3137,26 @@ impl Session {
         Ok(())
     }
 
+    /// (R4, §21) The host's own clock input, without a connection: what a `clock` message
+    /// on the host's connection does (same checks, same outputs). The replay host gives
+    /// the virtual time with it before each step's data events.
+    ///
+    /// # Errors
+    /// The clock would go back (`invalid`).
+    pub fn host_clock(&mut self, now: i64) -> Result<Vec<OutboundLine>, ProtocolError> {
+        self.advance_clock(now)
+    }
+
     fn tick(&mut self, ci: usize, now: i64) -> PResult<Vec<OutboundLine>> {
         if self.conns[ci].role != Role::Host {
             return Err(E::new(ErrorCode::Forbidden, "only the host sends `clock`")
                 .hint("The authority's time comes from its host connection.")
                 .build());
         }
+        self.advance_clock(now)
+    }
+
+    fn advance_clock(&mut self, now: i64) -> PResult<Vec<OutboundLine>> {
         if now < self.clock {
             return Err(E::new(
                 ErrorCode::Invalid,
@@ -3345,7 +3368,8 @@ fn msg_id(m: &ClientMsg) -> Option<String> {
         | ClientMsg::Unsubscribe { id, .. }
         | ClientMsg::Input { id, .. }
         | ClientMsg::Attend { id, .. }
-        | ClientMsg::Dispute { id, .. } => Some(id.clone()),
+        | ClientMsg::Dispute { id, .. }
+        | ClientMsg::Replay { id, .. } => Some(id.clone()),
         ClientMsg::Hello { .. } | ClientMsg::Clock { .. } => None,
     }
 }

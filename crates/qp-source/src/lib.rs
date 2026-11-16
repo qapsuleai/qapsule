@@ -58,7 +58,7 @@ pub use regimes::{
     MARKET_START,
 };
 pub use replay::{
-    aggregate_days, local_replay_feeds, read_symbols, synthetic_replay_feeds, Intraday,
+    aggregate_days, date_start, local_replay_feeds, read_symbols, synthetic_replay_feeds, Intraday,
     IntradayCounts, Replay, ReplayCursor, ReplayFeed, ReplayOptions, ReplayStep,
 };
 pub use synthetic::{synthetic_bars, synthetic_series, SyntheticSource};

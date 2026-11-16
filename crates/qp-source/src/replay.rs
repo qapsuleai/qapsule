@@ -416,6 +416,13 @@ impl Replay {
         self.times.get(self.cursor.step as usize).copied()
     }
 
+    /// Number of steps whose time is at or before `t` (the step count [`Replay::seek`]
+    /// to `t` reaches).
+    #[must_use]
+    pub fn steps_until(&self, t: TimestampMs) -> u64 {
+        self.times.partition_point(|&x| x <= t) as u64
+    }
+
     /// Takes the next step (`None` at the end).
     pub fn step(&mut self) -> Option<ReplayStep> {
         let t = self.peek_t()?;
@@ -469,6 +476,19 @@ impl Replay {
         }
         (back, self.advance_to(t))
     }
+}
+
+/// Start of local day `date` (`YYYY-MM-DD`) in the XIST time zone, UTC epoch ms.
+///
+/// # Errors
+/// Not a valid date.
+pub fn date_start(date: &str) -> Result<TimestampMs, SourceError> {
+    let day = qp_calendar::parse_date(date).map_err(|e| SourceError::new(e.to_string()))?;
+    let midnight = day * DAY_MS;
+    let off = xist().map_or(0, |c| {
+        i64::from(c.zone().offset_at(midnight.div_euclid(1000)))
+    });
+    Ok(midnight - off * 1000)
 }
 
 /// `n` synthetic instruments (`SYN01`, …) of `days` daily bars on feed `feed`: with `fine`,
@@ -692,6 +712,13 @@ mod tests {
         let feeds = synthetic_replay_feeds(1, 10, 1, false, None);
         let e = Replay::new(feeds, &ReplayOptions::default_with_history(0)).unwrap_err();
         assert!(e.to_string().contains("no bar before"));
+    }
+
+    #[test]
+    fn date_start_is_istanbul_midnight() {
+        // 2024-03-05 00:00 Europe/Istanbul (UTC+3) = 2024-03-04 21:00 UTC.
+        assert_eq!(date_start("2024-03-05").unwrap(), 1_709_586_000_000);
+        assert!(date_start("2024-13-01").is_err());
     }
 
     #[test]

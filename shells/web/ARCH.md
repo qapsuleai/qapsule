@@ -33,7 +33,7 @@ kural için bozuk bir satır) yakalanmazsa adım düşer.
 `set_sensitivity`, `set_audience`, `set_style`, `back`, `open_to`, `pointer`, `wheel`,
 `transition`, `transition_from`, `metric_frame`, `metric_span`, `metric_mark`, `metric_env`,
 `metrics`, `metrics_rows`, `digests`, `png`, `sent`; (R4/H-M8910) `set_look`, `mark_seen`, (R4/S1) `seen_at`,
-`open_capsule`, `set_dpr`, `face_size`, `choices`, `transition_progress`, `transition_frame`.
+`open_capsule`, `set_dpr`, `face_size`, `choices`, `transition_progress`, `transition_frame`; (R4/D) `metric_device`, `metric_memory`, `metric_reset` (ölçüm ekranı: cihaz bilgisi, bellek örneği, seriyi sıfırlama).
 
 **Kabuğun yaptığı:** akışı açar (`EventSource`), çekirdeğin kuyruğunu sırayla gönderir
 (`POST /send`), çerçeveyi çekirdeğe verir; çekirdeğin döndürdüğü pikselleri `putImageData`

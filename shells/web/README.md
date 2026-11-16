@@ -22,9 +22,9 @@ scripts/demo.sh --lan
 Konsol ve sayfanın **Ayarlar** sekmesi "telefondan aç: http://192.168.x.y:8390/" adresini
 yazar; telefon bilgisayarla **aynı ağda** olmalı. **Uyarı:** `--lan` ile yerel ağdaki
 cihazlar gösterimi görebilir (gerçek veriyle açıyorsanız aklınızda olsun). `--lan` olmadan
-gösterim yalnız bu bilgisayardan açılır (`127.0.0.1`). Telefonda ölçüm için **Ölçüm**
-sekmesini açın, akışı kaydırın, bir grafiği sürükleyin, **Özeti kopyala**'ya dokunun ve
-metni bize iletin.
+gösterim yalnız bu bilgisayardan açılır (`127.0.0.1`). Telefonda ölçüm adım adım:
+`rounds/R4/DEVICE.md` "Telefon yönergesi" (Ölçüm sekmesinde **Sıfırla** → durağan 10 sn →
+akışı 10 sn kaydır → grafiği 10 sn sürükle/kıstır → **Özeti kopyala**).
 
 ## Kullanım
 
@@ -51,8 +51,11 @@ metni bize iletin.
   gelir (Ayarlar'dan elle girilenler gelmez). Örnek:
   `http://localhost:8390/?watch=SYN02,SYN03&long=SYN09,SYN12&seen=600`, oynatma çubuğundan
   önce `600`, sonra `609`.
-- **Ölçüm:** kare süresi (durağan, kaydırırken, sürüklerken), tik maliyeti, açılış
-  zamanları, paket boyutu; kopyalanabilir JSON özet.
+- **Ölçüm:** kare süresi (durağan, kaydırırken, sürüklerken, yakınlaştırırken; p50/p95/p99,
+  16,7 ve 33,3 ms'yi aşan kare oranı), tik maliyeti, yüz ve sahne boyama, açılış zamanları,
+  paket boyutu, bellek (JS yığını — yalnız Chromium —, WASM belleği), cihaz bilgisi (çekirdek
+  sayısı, ekran, DPR); **Sıfırla** kare ve süre serilerini baştan başlatır; **Özeti kopyala**
+  JSON özeti panoya koyar (pano izni yoksa metin kutusunda seçili gelir).
 
 ## Testler
 
@@ -63,6 +66,7 @@ node tests/parity.mjs ../../target/release/qp /tmp/p  # ağ + kabuksuz eşitlik
 node tests/settings.mjs ../../target/release/qp       # (R4/S1) Ayarlar, varsayılanlar, ?seen= ?watch= ?long= (verify adım 18)
 node screens.mjs ../../target/release/qp /tmp/s       # sabit anda ekran görüntüleri
 node tests/metrics.mjs ../../target/release/qp 4      # ölçüm (4× işlemci kısıtı)
+node tests/device.mjs ../../target/release/qp          # (R4/D) cihaz ölçümü: 1×/4×/6× kısıt, DPR 1/3, varsayılan ve r3, 3 tekrar, medyan (~20 dk)
 ```
 
 Gerçek veriyle ekran görüntüsü: `node screens.mjs <qp> ../../fixtures/local/screens --data

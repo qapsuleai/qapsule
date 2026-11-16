@@ -639,6 +639,22 @@ mod shell_binding {
             self.inner.metric_env(b, agent);
         }
 
+        /// (R4/D) A device fact (`cores`, `device_memory_gb`, `screen_w`, `screen_h`).
+        pub fn metric_device(&mut self, name: &str, value: f64) {
+            self.inner.metric_device(name, value);
+        }
+
+        /// (R4/D) A memory sample: the page's JS heap (bytes, 0 if unknown); the core
+        /// adds its own WASM memory.
+        pub fn metric_memory(&mut self, js_heap: f64) {
+            self.inner.metric_memory(js_heap);
+        }
+
+        /// (R4/D) Starts the frame and span series over.
+        pub fn metric_reset(&mut self) {
+            self.inner.metric_reset();
+        }
+
         /// The metrics summary (JSON).
         pub fn metrics(&self) -> String {
             self.inner.metrics_json().to_string()

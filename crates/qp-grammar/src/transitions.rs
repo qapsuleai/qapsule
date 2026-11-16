@@ -154,6 +154,8 @@ pub fn r3_frame(shared: &[SharedElement], from: (f64, f64), to: (f64, f64), p: f
 
 // --- M10 alternatives: shared / frame functions (or `mod <name>;`) go below this line --
 
+mod tutamir;
+
 /// Transition designs a connection may choose; the first is the default.
 pub static TRANSITIONS: &[TransitionDesign] = &[
     TransitionDesign {
@@ -163,6 +165,12 @@ pub static TRANSITIONS: &[TransitionDesign] = &[
         frame: r3_frame,
     },
     // --- M10 alternatives: one line each
+    TransitionDesign {
+        name: "tutamir",
+        duration_ms: 420.0,
+        shared: tutamir::shared,
+        frame: tutamir::frame,
+    },
 ];
 
 /// Registered names.

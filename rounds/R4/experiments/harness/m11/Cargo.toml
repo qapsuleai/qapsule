@@ -1,0 +1,38 @@
+[package]
+name = "r4-m11-harness"
+description = "R4/H-M11: deterministic measurement harness for M11 (the outcome mark: realized vs failed). Written before any alternative existed; it measures the outcome styles registered in qp_grammar::glyph::outcome::STYLES (reference `r3`)."
+version = "0.0.0"
+edition = "2021"
+publish = false
+
+# Not a member of the main workspace (the root workspace only lists `crates/*`).
+[workspace]
+
+[[bin]]
+name = "m11"
+path = "src/main.rs"
+
+[lib]
+name = "m11"
+path = "src/lib.rs"
+
+[dependencies]
+qp-schema = { path = "../../../../../crates/qp-schema" }
+qp-grammar = { path = "../../../../../crates/qp-grammar" }
+qp-render = { path = "../../../../../crates/qp-render" }
+# The `rozet` alphabet (R3/M1 finalist) lives in its experiment crate until the product
+# carries it; the harness draws it from there, unchanged.
+m1-rozet = { path = "../../../../R3/experiments/M1/rozet" }
+serde = { version = "1.0.229", features = ["derive"] }
+serde_json = { version = "1.0.154", features = ["float_roundtrip"] }
+
+[lints.rust]
+unsafe_code = "forbid"
+
+[profile.release]
+lto = "thin"
+codegen-units = 1
+debug = false
+
+[profile.test]
+opt-level = 2

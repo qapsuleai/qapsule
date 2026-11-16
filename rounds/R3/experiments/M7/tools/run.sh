@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
-# R3/M7 measurement: bs2 and its ablations on AUD1–AUD3 + M7X, bs2 and bs2n on S0–S19
+# R3/M7 measurement (output dir under raw/: $1, default bs2): bs2 and its ablations on AUD1–AUD3 + M7X, bs2 and bs2n on S0–S19
 # (+ extras), extra counters of bs2; tables and compacted results into raw/bs2/.
 set -euo pipefail
 here="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$here/harness"
 cargo build --release
-out="$here/raw/bs2"
+out="$here/raw/${1:-bs2}"
 mkdir -p "$out"
 specs=(--spec ../specs/aud1.json --spec ../specs/aud2.json --spec ../specs/aud3.json --spec ../specs/m7x.json)
 for ap in bs bs2 bs2n bs2h bs2d; do

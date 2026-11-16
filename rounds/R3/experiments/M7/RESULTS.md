@@ -21,7 +21,8 @@ kesinleştirmeden önce kesin barla doğrular ve yansıdan itiraz yolu açılır
 - **Ölçüm (gerçek otorite + gerçek yansı, `bs2`):** M1 = M2 = M3 = 0 bütün senaryolarda
   (S0–S19 + ekler, AUD1–AUD3, M7X); M5 AUD1/AUD3 **0/0** (`bs` 7/7), AUD2 53 (`bs` 49; yansının
   REFRESH'siz kesintisi — O1 sınıfı değil, §5), M7X (otorite beslemesi de bozuk) **1**
-  (`bs` 51).
+  (`bs` 51). **AUD2 düzeltmesi (§10):** AUD2 M5 53 → **0** (yansının kesinti içindeki kesin
+  çekmesi + otoritenin yeniden çözüm taraması); S tabloları değişmedi.
 - **Ablasyon:** iyileşmenin taşıyıcısı **hijyen**; gerçek otorite §19.9 olmadan (`bs2n`)
   AUD1/2/3/M7X'te 521/373/488/904 kaçırıyor ve AUD3'te **sert hata** (M3f 7, M3p 4)
   yapıyor; yalnız itiraz (`bs2d`) bunu düzeltmiyor (512/318/481/830, AUD3 sert hata
@@ -235,7 +236,7 @@ abonelik sınırı, 100 koşul aboneliği sığmıyordu; aboneliklerin ek bağla
 
 ## 6. Dürüst sınırlar
 
-1. **AUD2 iyileşmedi (49 → 53).** Kaçırmalar yansının REFRESH'siz 240 s'lik kesintisinden
+1. **AUD2 iyileşmedi (49 → 53)** — §10'da düzeltildi (53 → 0). Kaçırmalar yansının REFRESH'siz 240 s'lik kesintisinden
    (bölünme ve düzeltmeler kesintinin içinde); `bs2n`/`bs2h`/`bs2` aynı tohumlarda birer
    kaçırma. Bu O1 sınıfı (otoritenin yanlışı) değil, yansının veri katmanının sınırı;
    §19.9 onu hedeflemiyor. 4 tohumda `bs` kaçırmadı, `bs2` kaçırdı (23, 52, 95; 51'de 2).
@@ -305,3 +306,111 @@ abonelik sınırı, 100 koşul aboneliği sığmıyordu; aboneliklerin ek bağla
   sebep etiketi.
 - Düzeneğe gerçek otoriteyle REFRESH'siz kesinti sonrası yansı onarımı (AUD2) için ayrı
   bir deney.
+
+## 10. AUD2 düzeltmesi (`r3/m7-aud2`, 2026-11-16)
+
+Hedef (GOAL ölçüt 11 / VERIFY 12): M7 tasarımıyla yanlış/erken/çelişkili gösterim 0 kalırken
+AUD2'de M5 `bs`'nin 49'unun açıkça altına inmeli. Önce `bs2` 53'tü (§6.1).
+
+### 10.1 Teşhis
+
+AUD2'nin 53 kaçırması 100 tohumda 1–2'şer iddia; hepsi kesintinin (yansı beslemesi
+540–780 s, REFRESH yok) içindeki barlarda (`t` = bar 6, 10, 11). Olay düzeyinde iz (geçici,
+ortamla açılan `eprintln`; ölçü kodu commit'te değişmedi) iki ayrı neden gösterdi:
+
+1. **Yansı tarafı (çoğunluk; ör. tohum 0, 3, 4, 5, 23, 52).** Kesinti sırasında yansının
+   barındırıcısı bekleyen iddianın barını kesin kaynaktan dolduruyor (`Fill`, `set_settled`)
+   ama yalnız son tuttuğu bardan `t`'ye kadar. Kesinti içindeki düzeltmeler (bar 10–12) ve
+   ×2 bölünme yansının **önceki** barlarına hiç ulaşmıyor; RSI kendi verisinde tutmuyor →
+   `pending` (`not_held`). §19.4'te kesin çekme (`take_refetch`) yalnız **kapalı** barda
+   isteniyordu; kesintide yansının barı kapanmıyor. Kesinti bitip bar kapanınca çekme
+   yapılıyor ve iddia ~785 s'de gösteriliyor: `final_since` 688 s + Δ_miss 30 s'yi aşıyor.
+2. **Otorite tarafı (ör. tohum 9, 22, 33, 42, 43, 92, 93).** Bar 11'deki iddia doğuran
+   düzeltme ×2 bölünmeyle **aynı anlık görüntüde** geliyor; barındırıcı akış veremeyince
+   `resync_bindings` çağırıyor. Yeniden çözüm (Rebuild) yalnız kayıtlı iddiaları yeniden
+   sınıyordu; düzeltmenin doğurduğu (bar kapanışında geri çekilmiş) iddia taranmıyordu —
+   §19.9'un "beslemenin düzeltmesi taranır" kuralı yalnız tek bar `patch`'ine uygulanıyordu.
+   Otorite iddiayı ancak ~60 s sonra ileri sürüyordu (tohum 9: 688 s yerine 748 s).
+
+Kanaldaki kopukluk (600–640 s) kaçırmalarda rol oynamıyor (tutulan satırlar tek çerçevede
+gidiyor, §4).
+
+### 10.2 Tasarım (ürün kodu; düzenek değişmedi)
+
+- **Yansı (`replica.rs::judge`, §19.4 yeni satır):** yüklem tutmuyor, otorite `final`,
+  kendi barı kapalı **değil** ama barındırıcı onu kesin değerle vermiş (`set_settled`) ve
+  temiz → bir kez kesin çekme ister (`take_refetch`, barındırıcı `[çapa, t]` çeker:
+  §19.5'in boşluk onarımı); `pending` (`not_held`) kalır, **bar kapanmadan `disputed` /
+  itiraz olmaz**. Barındırıcının bugünkü `take_refetch` yolu aynen kullanılıyor; `bs2`
+  bağdaştırıcısında satır değişmedi.
+- **Otorite (`dispute.rs::resync_bindings` → `note_resolved`, §19.9 yeni madde):** hijyen
+  açıkken yeniden çözüm kapalı barları değiştirdiyse (bölünmenin anlık görüntüsü, onunla
+  gelen düzeltme) bu da sağlayıcının düzeltmesi sayılır: değişen ilk kapalı bardan son
+  kapalı bara `SettleRequest` + aynı koşul taraması hemen. Hijyen kapalıyken davranış
+  aynı.
+- Yeni protokol mesajı yok; döküm 45 gerekmedi. Testler: `tests/dispute.rs`
+  `a_resync_that_corrects_closed_bars_asserts_the_claims_it_makes`,
+  `a_settled_but_open_bar_that_disagrees_asks_for_a_refetch`.
+
+Ablasyon (`bs2`, AUD2 M5, 100 tohum): yalnız yansı düzeltmesi **9**, yalnız otorite
+düzeltmesi **51**, ikisi **0**. İkisi tamamlayıcı: yansı düzeltmesi tek başına kaçırmaların
+çoğunu kapatıyor, kalan 9'u otoritenin geç ileri sürmesi.
+
+### 10.3 Sonuçlar (tohum 0–99; S17 0–19)
+
+Komut: `tools/run.sh aud2-fix` (çıktı dizini artık bir argüman). Ham: `raw/aud2-fix/`.
+`bs` de gerçek `qp_session::Replica`'yı kullandığı için yansı düzeltmesi onu da etkiler;
+"bs (eski)" `raw/baseline/` (RP2 denetimiyle bire bir), "bs (yeni)" bu dalda yeniden koşu.
+
+| Senaryo | M1/M2/M3f/M3p bs2 eski → yeni | M5 bs (eski) | M5 bs (yeni) | M5 bs2 eski | **M5 bs2 yeni** | M9 B/iddia · B/s bs2 eski → yeni | M10 iş/olay bs2 eski → yeni | M13 s bs2 eski → yeni | M6p p95 ms bs2 eski → yeni |
+|---|---|---|---|---|---|---|---|---|---|
+| AUD1 | 0/0/0/0 → 0/0/0/0 | 7/4539 | 7/4539 | 0/4539 | **0/4539** | 1542 · 26.7 → 1542 · 26.7 | 23.5 → 23.6 | 30 → 42 | 36197 → 36197 |
+| AUD2 | 0/0/0/0 → 0/0/0/0 | 49/4739 | 0/4739 | 53/4739 | **0/4739** | 1385 · 23.0 → 1386 · 23.0 | 471.8 → 485.6 | 5 → 5 | 36412 → 65756 |
+| AUD3 | 0/0/0/0 → 0/0/0/0 | 7/4524 | 7/4524 | 0/4524 | **0/4524** | 1541 · 26.6 → 1541 · 26.6 | 1084.8 → 1087.8 | 26 → 26 | 59679 → 60801 |
+| M7X | 0/0/0/0 → 0/0/0/0 | 51/4539 | 51/4539 | 1/4539 | **1/4539** | 1708 · 29.5 → 1708 · 29.5 | 15.9 → 15.9 | 49 → 45 | 36248 → 36164 |
+
+Ablasyonlar (M5, AUD1/AUD2/AUD3/M7X; eski → yeni): `bs2n` 521/373/488/904 →
+521/**362**/488/904; `bs2d` 512/318/481/830 → 512/**307**/481/830; `bs2h` 0/53/0/1 →
+0/**0**/0/1. AUD3'teki `bs2n`/`bs2d` sert hataları (5 tohum, M3f 7, M3p 4) aynen — §19.9'suz
+otoritenin sorunu, bu düzeltmeyle ilgisiz.
+
+**S0–S19 (+ S2a, S2c, S12s, S15k):** `bs2` ve `bs2n` tabloları eski koşuyla **bayt bayt aynı**
+(süre satırları hariç; `raw/aud2-fix/table-bs2-all.txt`, `table-bs2n-all.txt`). Hiçbir
+senaryonun M5'i kötüleşmedi; S2c 3, S16 284, S18 1.448 aynen (§6.2, §6.6).
+
+`m7stats` (100 tohum): kesin bar çekme bölünmeli senaryolarda tohum başına +1 (AUD1
+6.525 → 6.627, AUD2 5.783 → 5.883, AUD3 6.520 → 6.620, M7X 6.366 → 6.466, S10 6.100 → 6.200:
+bölünmenin yeniden çözümü tek bir aralık isteği, ~1.200 bar). İtirazlar AUD1 396 → 406,
+AUD3 398 → 393, M7X 356 → 354; `upheld` sayıları aynı (M7X 2).
+
+Okuma:
+
+- **Hedef tuttu:** AUD2 M5 **53 → 0** (`bs` 49'un açıkça altında), AUD1/AUD3 0 kaldı,
+  M1 = M2 = M3 = 0 her senaryoda, hiçbir senaryonun M5'i kötüleşmedi.
+- **M9 bayt** değişmedi (±1 B/iddia). **M10 yansı işi** AUD2'de +%3 (471,8 → 485,6; kesinti
+  içinde `[çapa, t]` kesin çekmesi ~1.200 bar), diğerlerinde ±%0,3.
+- **M6p p95 AUD2 36 → 66 s:** önce hiç gösterilmeyen (kaçan) iddialar şimdi kesinti
+  içinde `set_settled` ile `provisional` gösteriliyor; geç gösterilenler kuyruğa ekleniyor.
+  Kötüleşme değil, kaçırmanın gecikmeye dönüşmesi (M6f p95 7.854 → 7.693 ms iyileşti).
+- **M13 AUD1 30 → 42 s** (100 tohumda toplam disputed süre): yeniden çözüm taramasının
+  bölünmede ileri sürdüğü iddialardan birkaçında yansı kendi temiz verisinde `disputed`
+  gösteriyor (itiraz +10, `unknown` 29 → 37). Sert hata değil; olay düzeyinde izlenmedi.
+- Belirleyicilik: aynı koşu iki kez (`bs2` AUD tek tek ve `run.sh` içinde) aynı tabloyu
+  verdi; tek makine (aarch64 macOS).
+
+### 10.4 Doğrulama
+
+`QP_VERIFY_BROWSER=0 scripts/verify.sh`: **verify: OK** — fmt, clippy, test (qp-session
+`tests/` hepsi, `non_interference.rs` dahil; `dispute.rs` 8 test), schema (28), golden bayt
+aynı, views 12×2, wasm, digest `7b1e99d40889f83c` (değişmedi), protocol, **conform 44 döküm ×
+inproc/serve/mcp** (değişmeden), replica PASS; browser SKIP.
+
+### 10.5 Sınırlar ve öneriler
+
+- Yansı düzeltmesi `set_settled` veren barındırıcıya dayanıyor (§19.5'in "kesinleşmiş değer
+  işareti"); onu vermeyen barındırıcıda kesinti sonrasına kadar `pending` kalır.
+- Bölünmede tarama bütün geçmişe bakar (değişen ilk kapalı bar = 0); aboneliğin başlangıcıyla
+  sınırlama önerisi (§6.7) burada da geçerli.
+- `refetched` anahtarı (seri, `t`) başına bir kez: çekme kesinti içinde yapıldıysa ve
+  sonradan yeni bir bölünme gelirse bar kapanınca ikinci çekme olmadan `disputed` olabilir
+  (AUD'larda görülmedi; itiraz yolu kanıtla düzeltir).

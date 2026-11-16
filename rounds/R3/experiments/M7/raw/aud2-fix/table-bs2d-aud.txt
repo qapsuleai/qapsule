@@ -1,0 +1,11 @@
+approach bs2d — bs2 ablation: disputes only, no settled-bar hygiene
+scen  seeds  fail   live failL |    M1     M2      M2ms   M3f   M3p |    M4        M5 |     M6p p50/95/99     M6f p50/95/99 |      M7ms  M7> |    M8 |  M9B/cl    M9B/s | M10w/e |  M11 p50/un/x |   M12  max |     M13ms
+AUD1    100     0      0     0 |     0      0         0     0     0 |     0  512/4539 |  4607/36186/36598 3578/1117521/1414429 |    766997    0 |   628 |    1531     26.5 |   11.8 |  1460/305/201 |  5452    4 |    146899
+  AUD1 done in 1.5s; worst seed None
+AUD2    100     0      0     0 |     0      0         0     0     0 |     0  307/4739 |  4714/36296/38071 3520/581054/2019807 |    940720   56 |   341 |    1411     23.4 |  229.9 |    1949/166/6 |  4934    3 |    205280
+  AUD2 done in 1.2s; worst seed None
+AUD3    100     5     11     5 |     0      0         0     7     4 |     0  481/4524 |  4627/59679/63509 3598/999108/1272113 |   2644400    6 |   590 |    1555     26.9 |  535.3 |  1377/196/190 |  5490    3 |    189423
+  AUD3 done in 2.4s; worst seed Some((30, 4))
+M7X     100     0      0     0 |     0      0         0     0     0 |     0  830/4539 |  3548/35864/36543 4034/1265461/2020166 |    530961    1 |  1138 |    1720     29.7 |    4.3 |  1359/239/118 |  5064    3 |    638593
+  M7X done in 1.8s; worst seed None
+results written to /Users/arkns/Works/Mchart/qapsule/.claude/worktrees/agent-a5af97f9e639cec25/rounds/R3/experiments/M7/raw/aud2-fix/bs2d-aud.json

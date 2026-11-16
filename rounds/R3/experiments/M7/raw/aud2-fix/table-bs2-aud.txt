@@ -1,0 +1,11 @@
+approach bs2 — R3/M7: real qp_session authority (settled-bar hygiene) + real replica (dispute): §19.9
+scen  seeds  fail   live failL |    M1     M2      M2ms   M3f   M3p |    M4        M5 |     M6p p50/95/99     M6f p50/95/99 |      M7ms  M7> |    M8 |  M9B/cl    M9B/s | M10w/e |  M11 p50/un/x |   M12  max |     M13ms
+AUD1    100     0      0     0 |     0      0         0     0     0 |     0    0/4539 |  4864/36197/36528    3281/5107/7412 |    915859    3 |    24 |    1542     26.7 |   23.6 |     1565/92/0 |  5855    4 |     42440
+  AUD1 done in 1.5s; worst seed None
+AUD2    100     0      0     0 |     0      0         0     0     0 |     0    0/4739 |  5286/65756/66999   3481/7693/96517 |   1104571   65 |    24 |    1386     23.0 |  485.6 |     2420/44/4 |  5151    2 |      5203
+  AUD2 done in 1.3s; worst seed None
+AUD3    100     0      0     0 |     0      0         0     0     0 |     0    0/4524 |  5035/60801/63451    3276/5250/7384 |    842562    0 |    24 |    1541     26.6 | 1087.8 |     1504/23/2 |  5858    3 |     25993
+  AUD3 done in 2.4s; worst seed None
+M7X     100     0      0     0 |     0      0         0     0     0 |     0    1/4539 |  3773/36164/36928    3563/6064/8431 |    829110    0 |    40 |    1708     29.5 |   15.9 |    1510/92/10 |  5858    4 |     45317
+  M7X done in 1.6s; worst seed None
+results written to /Users/arkns/Works/Mchart/qapsule/.claude/worktrees/agent-a5af97f9e639cec25/rounds/R3/experiments/M7/raw/aud2-fix/bs2-aud.json

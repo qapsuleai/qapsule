@@ -1,0 +1,14 @@
+{
+  "code": "2760beb1",
+  "experiment": "m10",
+  "model": "sonnet",
+  "order": [
+    "4",
+    "2",
+    "3",
+    "1"
+  ],
+  "persona": "H",
+  "reader": "r3",
+  "seed": 3
+}

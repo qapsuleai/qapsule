@@ -192,6 +192,7 @@ $B score --exp m9
 
 # M10
 $B m10 --transition <ad>         # raw/<ad>/computed.json, raw/screens/<kod>-<i>-<j>.png, raw/keys/<kod>.json
+                                 # gösterim portu 8472; M8910_PORT=<n> ile başka port (ölçüleri değiştirmez)
 ./run_readers.sh m10 <ad> F - 3
 $B score --exp m10
 

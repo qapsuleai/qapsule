@@ -1,0 +1,17 @@
+Yıllardır borsada işlem yapıyorsun; teknik analize, mum grafiklerine ve indikatörlere alışkınsın. Telefonunda bir piyasa uygulamasına bakıyorsun. Gördüğünü okuyup cevapla.
+
+Bu bir piyasa bilgi uygulamasının ekran görüntüsü.
+
+Aşağıda 4 kısa dizi var. Her dizide önce bir kartın açılmış hâlini, sonra ekranın geçiş sırasındaki iki ara karesini, sonra açılan grafik ekranını görürsün (Read aracıyla sırayla aç):
+- Dizi 1: kart @DIR@/f75a83ba-3-1.png, ara kare 1 @DIR@/f75a83ba-3-2.png, ara kare 2 @DIR@/f75a83ba-3-3.png, grafik @DIR@/f75a83ba-3-4.png
+- Dizi 2: kart @DIR@/f75a83ba-4-1.png, ara kare 1 @DIR@/f75a83ba-4-2.png, ara kare 2 @DIR@/f75a83ba-4-3.png, grafik @DIR@/f75a83ba-4-4.png
+- Dizi 3: kart @DIR@/f75a83ba-2-1.png, ara kare 1 @DIR@/f75a83ba-2-2.png, ara kare 2 @DIR@/f75a83ba-2-3.png, grafik @DIR@/f75a83ba-2-4.png
+- Dizi 4: kart @DIR@/f75a83ba-1-1.png, ara kare 1 @DIR@/f75a83ba-1-2.png, ara kare 2 @DIR@/f75a83ba-1-3.png, grafik @DIR@/f75a83ba-1-4.png
+
+Grafik ekranında A, B, C, D harfli dört işaret var. Her dizi için:
+G1 Grafikte işaretli yer az önceki kartın söylediği şeyin neresi? "A" | "B" | "C" | "D"
+G2 Grafik ekranında az önceki kartla aynı şeye mi bakıyorsun? "evet" | "hayır" | "emin değilim"
+G3 Grafikte kartın iddiası hâlâ geçerli mi? "evet, sürüyor" | "hayır, artık geçerli değil" | "kapandı: gerçekleşti" | "kapandı: tutmadı" | "kapandı: süresi doldu ya da geri çekildi" | "bilmiyorum"
+
+Cevabını yalnız bir JSON nesnesi olarak ver (anahtarlar dizi numaraları), başka hiçbir şey yazma:
+{"1": {"G1": "…", "G2": "…", "G3": "…"}, "2": {"G1": "…", "G2": "…", "G3": "…"}, "3": {"G1": "…", "G2": "…", "G3": "…"}, "4": {"G1": "…", "G2": "…", "G3": "…"}, "not": "(isteğe bağlı, kısa)"}

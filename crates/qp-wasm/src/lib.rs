@@ -582,6 +582,11 @@ mod shell_binding {
             self.inner.metrics_rows().to_string()
         }
 
+        /// Every message sent so far (JSON array).
+        pub fn sent(&self) -> String {
+            serde_json::Value::Array(self.inner.sent().to_vec()).to_string()
+        }
+
         /// Parity digests (JSON).
         pub fn digests(&mut self) -> String {
             self.inner.digests().to_string()

@@ -28,8 +28,9 @@ use qp_schema::{Bar, Capsule, Fact, Finding, Point, View};
 use qp_session::{Replica, Session};
 use serde_json::{json, Value};
 
-/// Face frame height (the authority's default, `qp_session` `FACE_HEIGHT`).
-pub const FACE_HEIGHT: u32 = 140;
+/// Face frame height the shell lays faces out at (reported with every face gesture; the
+/// authority's own default is 140, too small for the §18.4 card M8 will replace).
+pub const FACE_HEIGHT: u32 = 240;
 /// Phone frame (`screen`'s surface frame for phones).
 pub const PHONE_FRAME: (u32, u32) = (390, 300);
 /// Capsules asked for per feed query.
@@ -492,6 +493,7 @@ impl ShellCore {
             ServerMsg::Welcome { profile, .. } => {
                 self.welcomed = true;
                 self.max_points = profile.max_points;
+                ch["welcome"] = json!(true);
                 self.push(
                     json!({"type":"subscribe","id":"feed-topic","topic":{"kind":"capsules"}}),
                 );
@@ -614,20 +616,16 @@ impl ShellCore {
     /// The feed as the authority ordered it: `[{id, text, scene}]` — `text` is the
     /// reader's sentence (shown as text when there is no face scene).
     pub fn feed_json(&mut self) -> Value {
-        let (w, h) = self.frames["face"];
-        let items = self.feed.clone();
-        let look = self.look.clone();
-        let mp = self.max_points;
-        let mut out = Vec::new();
-        for it in &items {
-            let has = self
-                .replica
-                .session_mut()
-                .and_then(|s| face_scene(s, it, &look, mp, w, h))
-                .is_some();
-            out.push(json!({"id": it.id, "text": it.sentence.text, "scene": has,
-                "relevant": it.relevant}));
-        }
+        let out: Vec<Value> = self
+            .feed
+            .iter()
+            .map(|it| {
+                // A face scene needs the reader's own bars of the capsule's series.
+                let has = self.replica.bars(&it.series).is_some_and(|b| !b.is_empty());
+                json!({"id": it.id, "target": format!("face:{}", it.id),
+                    "text": it.sentence.text, "scene": has, "relevant": it.relevant})
+            })
+            .collect();
         Value::Array(out)
     }
 
@@ -1082,8 +1080,9 @@ impl ShellCore {
 
     /// The last transition's moving elements in page coordinates: the before boxes are
     /// inside the element at (`from_left`, `from_top`), the after boxes inside the one
-    /// at (`to_left`, `to_top`). `[{id, from:{x,y,w,h}, to:{x,y,w,h}, src:{x,y,w,h}}]` —
-    /// `src` is the before box inside the old canvas (what to copy).
+    /// at (`to_left`, `to_top`). `[{id, from:{left,top,width,height}, to:{…}, src:[x, y,
+    /// w, h]}]` — `from`/`to` as CSS lengths, `src` the before box inside the old canvas
+    /// (what to copy).
     #[must_use]
     pub fn transition_json(
         &self,
@@ -1092,18 +1091,20 @@ impl ShellCore {
         to_left: f64,
         to_top: f64,
     ) -> Value {
-        let rect = |r: &qp_schema::scene::PixelRect, l: f64, t: f64| {
-            json!({"x": f64::from(r.left) + l, "y": f64::from(r.top) + t,
-                   "w": f64::from(r.right - r.left).max(1.0),
-                   "h": f64::from(r.bottom - r.top).max(1.0)})
+        let css = |r: &qp_schema::scene::PixelRect, l: f64, t: f64| {
+            let (w, h) = (r.right - r.left, r.bottom - r.top);
+            json!({"left": format!("{}px", f64::from(r.left) + l),
+                   "top": format!("{}px", f64::from(r.top) + t),
+                   "width": format!("{}px", w.max(1)), "height": format!("{}px", h.max(1))})
         };
         Value::Array(
             self.shared
                 .iter()
                 .filter_map(|s| {
                     let (b, a) = (s.before.as_ref()?, s.after.as_ref()?);
-                    Some(json!({"id": s.id, "from": rect(b, from_left, from_top),
-                        "to": rect(a, to_left, to_top), "src": rect(b, 0.0, 0.0)}))
+                    Some(json!({"id": s.id, "from": css(b, from_left, from_top),
+                        "to": css(a, to_left, to_top),
+                        "src": [b.left, b.top, (b.right - b.left).max(1), (b.bottom - b.top).max(1)]}))
                 })
                 .collect(),
         )

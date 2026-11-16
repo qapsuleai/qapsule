@@ -9,7 +9,7 @@
 //! `shells/web/tests/parity.mjs`) is compared with [`shell_less`] by `scripts/verify.sh`.
 //!
 //! Script: a JSON array of steps — `{"seek_step":n}`, `{"tap_face":{"index":i,"x":…,
-//! "y":…}}`, `{"tap_scene":{"x":…,"y":…}}`, `{"drag":{"dx":…}}`, `{"pinch2x":{}}`, `{"style":{"face"?,
+//! "y":…}}`, `{"tap_scene":{"x":…,"y":…}}`, `{"drag":{"dx":…}}`, `{"pinch2x":{}}`, `{"wheel":{"dy":…,"x":…}}`, `{"style":{"face"?,
 //! "alphabet"?,"theme"?}}`, `{"back":{}}`, `{"digest":"label"}`. Output: `{label:
 //! digests}`.
 
@@ -203,6 +203,16 @@ pub fn shell_less(host: &mut ReplayHost, principal: &str, lang: &str, script: &[
                 host,
                 json!({"kind":"drag","dx":f(t,"dx"),"width":sw,"height":sh}),
             );
+        } else if let Some(t) = step.get("wheel") {
+            let factor = if f(t, "dy") < 0.0 {
+                crate::shell::WHEEL_FACTOR
+            } else {
+                1.0 / crate::shell::WHEEL_FACTOR
+            };
+            a.input(
+                host,
+                json!({"kind":"pinch","factor":factor,"x":f(t,"x"),"width":sw,"height":sh}),
+            );
         } else if step.get("pinch2x").is_some() {
             // Two fingers at 150 and 250, the second moves to 350: factor 2 at x 250.
             a.input(
@@ -289,6 +299,9 @@ pub fn with_core(host: &mut ReplayHost, principal: &str, lang: &str, script: &[V
             core.pointer("scene", "down", 1, x, 150.0);
             core.pointer("scene", "move", 1, x + dx, 150.0);
             core.pointer("scene", "up", 1, x + dx, 150.0);
+            feed_core(&mut core, host, Vec::new());
+        } else if let Some(t) = step.get("wheel") {
+            core.wheel(f(t, "dy"), f(t, "x"));
             feed_core(&mut core, host, Vec::new());
         } else if step.get("pinch2x").is_some() {
             core.pointer("scene", "down", 1, 150.0, 150.0);

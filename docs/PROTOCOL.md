@@ -1784,7 +1784,7 @@ Barındırıcı yapılandırması (`SessionInit.capsules`, protokol mesajı değ
 |--------|-------|
 | `capsules` | `capsules`: `CapsuleItem` listesi — kimlik, bulgu, enstrüman, seri, tür, yön, zaman türü, aşama, durum, kademe, önem, teyit, güven, doğum/son bar, son geçiş zamanı, `ledger_at_birth`, `sentence {text, tr, en}`, `relevant` (pozisyon/niyet), `redacted`. Sıra: önem azalan, sonra son geçiş zamanı azalan, sonra kimlik. Süzgeçler VE'lenir; `audience: true` soranın kitlesini uygular (aşağıda). `comments`: soranın akış yetkisi olmayan enstrümanlarda sunucu yorumları. |
 | `capsule` | `capsule_detail`: `item`, `story` (bütün geçişler: bar, zaman, aşama, neden, olgular), `facts` (okuyucuya göre), `ledger` (anahtarın şimdiki karnesi: son kesin bardan önce kapananlar), `glyph`, `evidence` — olgu başına `{fact, family, license, open, values?, evidence_ref?, requires?, rests_on}`: yetkiliye değerler ve dondurulmuş kanıt; yetkisize "şu yetkiyi gerektirir" (`requires`, ör. `bist/THYAO`) ve neye dayandığı (`rests_on`, her zaman) — K34. Görünmeyen ya da olmayan kapsül: `not_found` (ikisi aynı). |
-| `ledger` | `ledger`: `rows` (anahtar ya da `by_kind` ile tür başına `n`, `realized`), `total`. Geri çekilenler sayılmaz. Lisanstan bağımsız: her okuyucuya aynı (lisanslı anahtarlar dahil, K33). |
+| `ledger` | `ledger`: `rows` (anahtar ya da `by_kind` ile tür başına `n`, `realized`), `total`. Geri çekilenler sayılmaz. Lisanstan bağımsız (K33): her lisanslı akışa yetkili okuyucuya motorun karnesi, açık görünüm okuyucusuna (§20.5) açık-yalnız motorun karnesi — lisanslı veriden hiç etkilenmez. |
 
 ### 20.3 İşlemler: kitle
 
@@ -1814,17 +1814,62 @@ yetki, kanıtın dayandığı, kural, makbuz).
 
 ### 20.5 Okuyucuya göre izdüşüm (K33, K34, K36, M6 bütünleştirme kuralı)
 
-Otorite tek doküman ve tek günlük tutar; **gönderdiğini** okuyucuya göre süzer (yalnız R3
-öğeleri: `meaning`'li olgular, `story`'li kapsüller; R3 öncesi öğeler değişmez):
+Otorite tek doküman ve tek günlük tutar (yeniden oynatma bunlardan); **gönderdiğini**
+okuyucuya göre kurar (yalnız R3 öğeleri: `meaning`'li olgular, `story`'li kapsüller; R3
+öncesi öğeler değişmez):
 
-1. Doğuran olgusu lisanslı olan hikâye, akış yetkisi olmayana **hiç gitmez**: olguları,
-   bulgusu, kapsülü, onu gösteren görünümler, karne satırları; hiçbir sorgu, `change`,
-   `log`, `finding_state`, `welcome` özeti ve hata önerisinde (`dym`). Varlığı, zamanı ve
-   aşaması ayrıca gitmez; yalnız mühür yorumları gider. Karne istatistiği gider.
-2. Lisanslı olgu herkese açık bir hikâyeye katıldıysa o olgu ve geçişi gizlenir; hikâye
-   görünen olguların aileleri ve gücüyle, gizli olgudan önceki kademesiyle gösterilir.
+1. **Açık görünüm (R3/K1, girişimsizlik yapı gereği).** Motor lisanslı akış okuyorsa
+   otorite ikinci bir motor, **açık-yalnız motor** koşar: aynı `EngineConfig::r3()`, aynı
+   kesin barlar, yalnız açık lisans sınıfındaki olgular. Bunun bakışları ikinci bir doküman
+   ve günlüğe, **açık dünyaya** yazılır; girdi girdiye otoritenin günlüğüyle eşleşir (aynı
+   `seq`, `at`, yazar): motor bakışı ve düzeltilmiş veriyle geri çekme → açık-yalnız
+   motorun kendi değişimleri (olgular, bulgular, kapsüller, karne satırları); yetkili
+   kişinin doğrudan komutu → aynı işlemler açık dünyada genişletilir (uymuyorsa çeviri,
+   aşağıda); **açık görünüm okuyucusunun** komutu yalnız açık dünyada doğrulanır ve
+   genişletilir (hata, çakışma, atanan kimlik, girdinin değişimleri oradan; öneri de yalnız
+   açık dünyada doğrulanır), otoritenin dünyası aynı işlemleri ancak orada da uyuyor ve iki
+   dünyanın paylaşmadığı bir motor öğesine (yalnız otoritede olan ya da kimliği açık dünyada
+   başka bir öğenin olan) dokunmuyorsa alır, yoksa açık dünyanın değişimlerinin çevirisini
+   (kişinin kendi öğeleri korunur, yalnız açık dünyada olan motor öğeleri düşer) — okuyucunun
+   gözleyebileceği hiçbir şey değişmez; diğer girdiler (barlar, seriler, çapalar, öneriler ve
+   kabulleri, diğer motor girdileri) çevrilir: açık dünyada kimliği olmayan motor öğesine
+   dokunan değişim düşer, kimliği olan bulgu/kapsül açık dünyanın içeriğini korur ve yalnız
+   değişeni alır (iddia, güven, geçersizlik; görünüm, durum; geri çekme); istek, özet ve
+   neden bu öğeleri anıyorsa izdüşümdeki gibi temizlenir. **Lisanslı akışların hepsine
+   yetkili olmayan** okuyucu (kısmi yetki dahil: sıralayıcının bağlamı bütün enstrümanları
+   kapsadığından, yetkisi olmayan bir akıştan arınmış hikâye ancak açık dünyada vardır)
+   **açık görünüm okuyucusudur**: bütün okuma yolları (sorgular — `capsules`, `capsule`,
+   `ledger`, `log`, `document`, `list`, `describe`, `present`, `verify_evidence` —,
+   abonelik, `hello` özeti, girdi, dikkat, seçici çözümü, hata önerileri), `change` ve
+   `finding_state` olayları ve `capsules` konusunun geçişleri açık dünyanın dokümanı,
+   günlüğü, okuma dokümanı ve karnesiyle çalışır; itirazı açık-yalnız motorda karara
+   bağlanır. Böylece bulgunun `confidence`'ı, kapsülün cümlesi, hikâyesi (aşama, aileler,
+   güç), `importance`/`tier`'ı ve sırası, `ledger_at_birth`, karne sayıları ve olayların
+   varlığı **yalnız açık veriye** (ve kişilerin komutlarına) bağlıdır. Bu okuyucuya lisanslı
+   veriden etkilenen tek kanal mühür iletileridir (`trust: server`; `capsules` sorgusunun
+   `comments`'i, `server_comment` olayı). Düzeltilmiş veri cevabından sonraki motor girdisi
+   açık dünya varken, bir şey geri çekilmese de yazılır (özet `settled <seri>`): girdinin
+   varlığı lisanslı hikâyelerin bozulmasına bağlı olmasın. **Sıra numarası** iki dünyada
+   ortaktır (ayrı bir açık `seq` yok); bu yüzden otoritenin her girdisinin **varlığı** açık
+   veriye ve kişilerin komutlarına bağlı olacak biçimde kuruludur: motor bakışı her bar
+   kapanışında, düzeltme girdisi her düzeltilmiş cevapta, çapa damgası bağlamadan, komut
+   kişiden; §8.1 geçersizleşmesi **çalışan motorun kapsülüne (izlenen serideki hikâye) hiç uygulanmaz** (motor
+   kapsülü yalnız sonuç kuralıyla kapanır, `update_finding` ile yazılmış veri koşulu
+   değerlendirilmez), kişinin kendi kapsülleri ise iki dünyada da bulunur (yukarıdaki
+   çeviriler onları korur) ve koşulları aynı açık barlarda aynı anda tutar. Açık dünyada
+   karşılığı olmayan bir motor girdisi (kuruluş gereği yazılmaz) açık dünyada kanıtsız ve
+   özeti `…` olurdu. Motor kapsülüne itiraz itirazcının dünyasında yönlendirilir: açık
+   görünüm okuyucusu için yalnız otoritede olan kapsül, olmayan kapsülle aynı cevabı alır.
+   Test: aynı açık barlar, farklı
+   lisanslı akış tohumları (ve akışsız koşu) → mühür iletileri dışında bayt eşit
+   (`crates/qp-session/tests/non_interference.rs`).
+2. Açık görünüm okuyucusu olmayan (bütün lisanslı akışlara yetkili) okuyucu otoritenin
+   dünyasını alır; lisanslı olgu yalnız akışın yetkisi olmayana gizlenir (aşağıdaki kurallar
+   artık yalnız bu dünyada, örn. akışa yetkili ama bar beslemesine yetkisiz okuyucu için
+   geçerlidir): doğuran olgusu lisanslı hikâye hiç gitmez; lisanslı olgu açık hikâyeye
+   katıldıysa o olgu ve geçişi gizlenir.
 3. Hikâyenin bar beslemesine yetkisi olmayana olgular kanıt değeri ve `evidence_ref`
-   (veri özeti) olmadan, cümleler rakamsız (`redacted`) gider.
+   (veri özeti) olmadan, cümleler rakamsız (`redacted`) gider (her iki dünyada).
 
 Uygulama: sorgu, abonelik, girdi, dikkat ve seçici çözümü okuyucunun dokümanında çalışır
 (hatalar ve öneriler de); komut önce okuyucunun dokümanında kuru koşulur (görmediği öğeye
@@ -1834,6 +1879,10 @@ değer, kimlik ve özet olmadığı testle taranır (`crates/qp-session/tests/ca
 
 **Sınırlar.** Günlüğün `seq`'i tektir: bir motor girdisinin varlığı herkese görünür (bu
 yüzden her bar kapanışında yazılır). Bir girdinin özeti gizli kimlik içerirse `…` olur.
+Kişilerin komutları (yetkili kişinin hangi kapsülü onayladığı, ne yazdığı) açık dünyaya da
+geçer: girişimsizlik lisanslı **veri** içindir, kişinin seçimi için değil. Açık dünyada bir
+kapsül, otoritenin dünyasındaki lisanslı doğumlu bir hikâyenin kimliğini taşıyabilir
+(kimlik = enstrüman, tür, yön, doğum barı): ikisi ayrı öğedir.
 Yansı aynalanan dokümanı izdüşümle alır (akış yetkisi olmayan yansının dokümanı otoritenin
 dokümanından farklıdır; RP2 yansı özetleri bu durumda karşılaştırılamaz).
 

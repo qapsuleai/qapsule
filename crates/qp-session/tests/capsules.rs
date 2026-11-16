@@ -279,9 +279,29 @@ fn entitlement_sweep_no_licensed_value_reaches_an_unentitled_reader() {
     let lic_values = values_of(&doc, &licensed);
     assert!(lic_values.len() > 5, "{lic_values:?}");
     // (The licensed facts' `evidence_ref` digests are of the bist bars Bora may read.)
+    // (R3/K1) Bora reads the public world: a public story there may carry the id of a
+    // licensed-born story of the authority's (ids are instrument, kind, direction and
+    // birth bar). The public world's stories are those of the same run without the flow.
+    let public_ids: BTreeSet<String> = {
+        let mut v = init_of("38-capsule-lifecycle");
+        v["data"]["feeds"][0]["bars"] = json!(bars()[..60]);
+        v["capsules"]["flow"] = json!([]);
+        let mut p = Session::new(serde_json::from_value(v).unwrap(), &root()).unwrap();
+        feed(&mut p, 60, 60, 160);
+        p.document()
+            .capsules
+            .iter()
+            .flat_map(|c| [c.id.clone(), c.finding.clone()])
+            .collect()
+    };
     let mut forbidden_b: Vec<String> = licensed.iter().cloned().collect();
-    forbidden_b.extend(lic_caps.iter().map(|c| c.id.clone()));
-    forbidden_b.extend(lic_caps.iter().map(|c| c.finding.clone()));
+    forbidden_b.extend(
+        lic_caps
+            .iter()
+            .flat_map(|c| [c.id.clone(), c.finding.clone()])
+            .filter(|id| !public_ids.contains(id)),
+    );
+    assert!(forbidden_b.len() > licensed.len(), "{forbidden_b:?}");
     let b_out = texts(&out, "b");
     assert!(b_out.len() > 100);
     for line in &b_out {

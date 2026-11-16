@@ -27,8 +27,17 @@
 //!
 //! # Projection (K33, K34, K36; M6 integration rule)
 //!
-//! Nothing licensed and no data-plane value reaches a principal that may not see it. The
-//! authority keeps one document and one log; what it **sends** is projected per
+//! Nothing licensed and no data-plane value reaches a principal that may not see it.
+//!
+//! (R3/K1) A principal not entitled to every licensed flow the engine reads does not get
+//! a projection of the authority's capsule items at all: it reads the **public world**
+//! ([`crate::public`]), written by a second, public-only engine, so everything it gets
+//! about capsules is a function of public data (and of people's commands); the mühür
+//! messages are its only channel influenced by licensed data. The rules below then
+//! hide licensed items in the authority's world (a reader entitled to the flows but not
+//! to some bars, the host) and apply the bar entitlement and audiences in both worlds.
+//!
+//! The authority keeps one document and one log; what it **sends** is projected per
 //! principal ([`Proj`]):
 //!
 //! - a story born of a licensed fact the principal is not entitled to is **hidden**:
@@ -101,11 +110,17 @@ struct CapDispute {
     series: String,
     t: i64,
     seen: (String, ClaimRef, i64, String),
+    /// (R3/K1) Disputed by a public-view reader: decided on the public-only engine.
+    public: bool,
 }
 
 /// The authority's capsule engine and its state.
 pub(crate) struct Runner {
     engine: Engine,
+    /// (R3/K1) With a licensed flow: the public-only engine (same configuration, the
+    /// same final bars, only the facts of public license class), whose looks the public
+    /// world takes ([`crate::public`]).
+    pub_engine: Option<Engine>,
     watched: Vec<Watched>,
     /// Server comments made so far, with the log position they were made at.
     comments: Vec<(Seq, ServerComment)>,
@@ -165,8 +180,10 @@ impl Runner {
                 pos: None,
             });
         }
+        let flow = watched.iter().any(|w| w.flow.is_some());
         Self {
             engine: Engine::new(EngineConfig::r3()),
+            pub_engine: flow.then(|| Engine::new(EngineConfig::r3())),
             watched,
             comments: Vec::new(),
             disputes: Vec::new(),
@@ -188,6 +205,24 @@ impl Runner {
                 interval: w.interval.clone(),
                 feed: w.flow.as_ref().map(|(_, f)| f.clone()),
             })
+    }
+
+    /// Whether the runner reads any licensed flow.
+    pub(crate) fn has_flow(&self) -> bool {
+        self.watched.iter().any(|w| w.flow.is_some())
+    }
+
+    /// The licensed flow feeds the runner reads.
+    pub(crate) fn flow_feeds(&self) -> Vec<FeedKey> {
+        self.watched
+            .iter()
+            .filter(|w| w.flow.is_some())
+            .map(|w| FeedKey {
+                symbol: w.symbol.clone(),
+                interval: w.interval.clone(),
+                feed: w.flow.as_ref().map(|(_, f)| f.clone()),
+            })
+            .collect()
     }
 }
 
@@ -364,7 +399,7 @@ pub(crate) struct Proj {
 
 impl Proj {
     /// Whether the JSON of `v` holds a hidden id as a string (`"id"`).
-    fn mentions_hidden(&self, v: &impl serde::Serialize) -> bool {
+    pub(crate) fn mentions_hidden(&self, v: &impl serde::Serialize) -> bool {
         if self.hidden.is_empty() {
             return false;
         }
@@ -452,6 +487,7 @@ impl Session {
             .as_ref()
             .map(|(r, a)| (r.as_slice(), a.as_slice()));
         self.runner = init.map(|i| Runner::new(i, &self.doc, keys));
+        self.start_public();
     }
 
     /// (R3, §20) Host-supplied secret keys of the server-fact trust path (mühür): the
@@ -991,6 +1027,7 @@ impl Session {
             let flow = w.flow.as_ref().map(|(seed, _)| flow_points(bars, *seed));
             let from = w.done;
             let mut events = Vec::new();
+            let mut events_pub = Vec::new();
             let mut made: BTreeMap<String, Fact> = BTreeMap::new();
             let mut said: Vec<ServerComment> = Vec::new();
             for i in from..fin {
@@ -1014,6 +1051,17 @@ impl Session {
                 let evs = runner
                     .engine
                     .on_bar(&w.symbol, &w.series, i as u64, &bars[..=i], &facts);
+                // (R3/K1) The public-only engine: the same bar, public facts only.
+                if let Some(pe) = runner.pub_engine.as_mut() {
+                    let evp = if facts.iter().any(is_licensed) {
+                        let public: Vec<Fact> =
+                            facts.iter().filter(|f| !is_licensed(f)).cloned().collect();
+                        pe.on_bar(&w.symbol, &w.series, i as u64, &bars[..=i], &public)
+                    } else {
+                        pe.on_bar(&w.symbol, &w.series, i as u64, &bars[..=i], &facts)
+                    };
+                    events_pub.extend(evp);
+                }
                 if let (Some(m), Some(p)) = (w.muhur.as_mut(), fp) {
                     let server: Vec<Fact> =
                         facts.iter().filter(|f| is_licensed(f)).cloned().collect();
@@ -1044,13 +1092,22 @@ impl Session {
             }
             w.done = fin;
             let series = w.series.clone();
-            let changes = self.capsule_changes(&runner, &events, &made, fin - 1);
+            let changes = self.capsule_changes(&runner.engine, &events, &made, fin - 1);
+            if let Some(pe) = runner.pub_engine.as_ref() {
+                let changes =
+                    self.in_world(true, |s| s.capsule_changes(pe, &events_pub, &made, fin - 1));
+                self.pending_pub = Some(crate::public::PubPending {
+                    changes,
+                    summary: None,
+                });
+            }
             let summary = if fin - from == 1 {
                 format!("capsules {series} bar {from}")
             } else {
                 format!("capsules {series} bars {from}..={}", fin - 1)
             };
             let Some(seq) = self.engine_entry_with(changes, summary, None) else {
+                self.pending_pub = None;
                 continue;
             };
             for c in &said {
@@ -1059,7 +1116,7 @@ impl Session {
             self.runner = Some(runner);
             wrote = true;
             lines.extend(self.entry_events(seq));
-            lines.extend(self.capsule_topic_lines(seq, &events, &said));
+            lines.extend(self.capsule_topic_lines(seq, &events, &events_pub, &said));
             runner = self.runner.take().expect("runner put back");
         }
         self.runner = Some(runner);
@@ -1075,7 +1132,7 @@ impl Session {
     /// finding and capsule (last snapshot), then ledger rows of the closes.
     fn capsule_changes(
         &self,
-        runner: &Runner,
+        engine: &Engine,
         events: &[qp_capsule::StoryEvent],
         made: &BTreeMap<String, Fact>,
         now: usize,
@@ -1178,8 +1235,7 @@ impl Session {
                 e.transition.stage,
                 Stage::Realized | Stage::Invalidated | Stage::Expired
             ) {
-                if let Some(r) = runner
-                    .engine
+                if let Some(r) = engine
                     .ledger_records()
                     .iter()
                     .rev()
@@ -1505,9 +1561,14 @@ impl Session {
     fn ledger_now(&self) -> Vec<(String, qp_schema::capsule::MeaningKind, i64, bool)> {
         match self.runner.as_ref() {
             Some(r) => {
+                // (R3/K1) In the public world, the public-only engine's.
+                let engine = match (self.in_public, r.pub_engine.as_ref()) {
+                    (true, Some(e)) => e,
+                    _ => &r.engine,
+                };
                 let doc = Document {
                     ledger: qp_schema::Ledger {
-                        entries: r.engine.ledger(),
+                        entries: engine.ledger(),
                     },
                     ..Document {
                         schema_version: String::new(),
@@ -1582,15 +1643,40 @@ impl Session {
 
     /// Topic `capsules` notifications of one engine entry: per subscriber, the story
     /// transitions it may see and that pass its filter; server comments to subscribers
-    /// without the flow entitlement.
+    /// without the flow entitlement. (R3/K1) A public-view reader's transitions are the
+    /// public-only engine's (`events_pub`), read in the public world.
     pub(crate) fn capsule_topic_lines(
+        &mut self,
+        seq: Seq,
+        events: &[qp_capsule::StoryEvent],
+        events_pub: &[qp_capsule::StoryEvent],
+        said: &[ServerComment],
+    ) -> Vec<OutboundLine> {
+        let mut lines = self.capsule_topic_lines_in(seq, events, said, false);
+        if self.other.is_some() && self.conns.iter().any(|c| self.public_view(&c.principal)) {
+            let p = self.in_world(true, |s| {
+                s.capsule_topic_lines_in(seq, events_pub, said, true)
+            });
+            lines.extend(p);
+            lines.sort_by_key(|(ci, _)| *ci);
+        }
+        lines.into_iter().map(|(_, l)| l).collect()
+    }
+
+    /// [`Session::capsule_topic_lines`] for the connections of the world the fields hold
+    /// (`public`), each line with its connection index.
+    fn capsule_topic_lines_in(
         &self,
         seq: Seq,
         events: &[qp_capsule::StoryEvent],
         said: &[ServerComment],
-    ) -> Vec<OutboundLine> {
+        public: bool,
+    ) -> Vec<(usize, OutboundLine)> {
         let mut lines = Vec::new();
         for (ci, c) in self.conns.iter().enumerate() {
+            if self.other.is_some() && self.public_view(&c.principal) != public {
+                continue;
+            }
             let subs: Vec<(&str, Option<&String>, bool)> = c
                 .subs
                 .iter()
@@ -1637,16 +1723,19 @@ impl Session {
                             continue;
                         }
                     }
-                    lines.push(out(
-                        &c.id,
-                        ServerMsg::Notify {
-                            sub: (*sub).to_owned(),
-                            event: Event::Capsule {
-                                capsule: Box::new(item.clone()),
-                                transition: e.transition.clone(),
-                                seq,
+                    lines.push((
+                        ci,
+                        out(
+                            &c.id,
+                            ServerMsg::Notify {
+                                sub: (*sub).to_owned(),
+                                event: Event::Capsule {
+                                    capsule: Box::new(item.clone()),
+                                    transition: e.transition.clone(),
+                                    seq,
+                                },
                             },
-                        },
+                        ),
                     ));
                 }
             }
@@ -1667,15 +1756,18 @@ impl Session {
                             continue;
                         }
                     }
-                    lines.push(out(
-                        &c.id,
-                        ServerMsg::Notify {
-                            sub: (*sub).to_owned(),
-                            event: Event::ServerComment {
-                                comment: sc.clone(),
-                                seq,
+                    lines.push((
+                        ci,
+                        out(
+                            &c.id,
+                            ServerMsg::Notify {
+                                sub: (*sub).to_owned(),
+                                event: Event::ServerComment {
+                                    comment: sc.clone(),
+                                    seq,
+                                },
                             },
-                        },
+                        ),
                     ));
                 }
             }
@@ -1905,6 +1997,15 @@ impl Session {
         lang: Language,
         f: impl FnOnce(&mut Self) -> R,
     ) -> R {
+        // (R3/K1) A public-view reader reads the public world. Its headlines are brought
+        // up to date here, when a reader needs them (not after every engine entry).
+        let public = self.public_view(principal);
+        if public != self.in_public && self.other.is_some() {
+            return self.in_world(public, |s| s.as_reader(principal, lang, f));
+        }
+        if self.in_public && self.proj.is_none() && !self.headlines_current() {
+            self.refresh_headlines();
+        }
         let p = self.reader_proj(principal);
         let lines = self.runner.is_some() || lang == Language::En;
         if p.is_none() && !lines {
@@ -2192,6 +2293,17 @@ impl Session {
     // Disputes and settled data (§19.9 + §20)
     // -----------------------------------------------------------------------
 
+    /// (R3/K1) Whether capsule `cap` is the running engine's: a story on a watched
+    /// series (by the capsule index).
+    pub(crate) fn runs_capsule(&self, cap: &str) -> bool {
+        let Some(r) = self.runner.as_ref() else {
+            return false;
+        };
+        self.doc_capsule(cap)
+            .and_then(|c| c.story.as_ref())
+            .is_some_and(|s| r.watched_of(&s.series).is_some())
+    }
+
     /// `true` when `capsule` is a story of a watched series.
     pub(crate) fn engine_capsule(&self, capsule: &str) -> Option<String> {
         let r = self.runner.as_ref()?;
@@ -2213,15 +2325,20 @@ impl Session {
     ) -> Vec<OutboundLine> {
         let conn = self.conns[ci].id.clone();
         let principal = self.conns[ci].principal.clone();
+        // (R3/K1) The capsule as the disputer's world has it.
+        let public = self.public_view(&principal);
+        let (finding, visible, series, story) = self.in_world(public, |s| {
+            let c = s.doc.capsules.iter().find(|c| c.id == capsule);
+            let finding = c.map(|c| c.finding.clone()).unwrap_or_default();
+            let story = c.and_then(|c| c.story.clone());
+            let visible = s
+                .proj_for(&principal)
+                .is_none_or(|p| !p.hidden.contains(capsule));
+            (finding, visible, s.engine_capsule(capsule), story)
+        });
         let claim = ClaimRef::Capsule {
             capsule: capsule.to_owned(),
-            finding: self
-                .doc
-                .capsules
-                .iter()
-                .find(|c| c.id == capsule)
-                .map(|c| c.finding.clone())
-                .unwrap_or_default(),
+            finding,
         };
         let reply = |s: &Self, v: DisputeVerdict, ev: Option<ClaimEvidence>| {
             out(
@@ -2238,16 +2355,6 @@ impl Session {
                 },
             )
         };
-        let visible = self
-            .proj_for(&principal)
-            .is_none_or(|p| !p.hidden.contains(capsule));
-        let series = self.engine_capsule(capsule);
-        let story = self
-            .doc
-            .capsules
-            .iter()
-            .find(|c| c.id == capsule)
-            .and_then(|c| c.story.clone());
         let (Some(series), Some(story), true) = (series, story, visible) else {
             return vec![reply(self, DisputeVerdict::Unknown, None)];
         };
@@ -2270,6 +2377,7 @@ impl Session {
                 series: series.clone(),
                 t,
                 seen: seen.clone(),
+                public,
             });
         }
         let feed = self.plane.series.get(&series).map(|b| b.binding.feed_key());
@@ -2336,6 +2444,7 @@ impl Session {
         };
         let mut lines = Vec::new();
         let mut retract: Vec<(String, u64, i64, &'static str)> = Vec::new();
+        let mut retract_pub: Vec<(String, u64, i64, &'static str)> = Vec::new();
         if corrected {
             let rd = rd!(self);
             let bars: Vec<Bar> = find_series(rd, series)
@@ -2373,58 +2482,34 @@ impl Session {
                 }
             }
             w.dets = dets;
-            let mut stories: Vec<&qp_capsule::OpenStory> = runner
-                .engine
-                .open_stories()
-                .iter()
-                .chain(runner.engine.closed_stories())
-                .filter(|s| s.story.series == series && s.story.stage != Stage::Retracted)
-                .collect();
-            stories.sort_by(|a, b| a.id.cmp(&b.id));
-            for s in stories {
-                let broken = s.facts.iter().any(|f| {
-                    let bits: BTreeMap<String, u64> = f
-                        .evidence
-                        .iter()
-                        .map(|(k, v)| (k.clone(), v.to_bits()))
-                        .collect();
-                    again.get(&f.id) != Some(&bits)
-                });
-                if !broken {
-                    continue;
-                }
-                let disputed = runner
-                    .disputes
-                    .iter()
-                    .any(|d| d.capsule == s.id && d.series == series);
-                let last = s
-                    .story
-                    .history
-                    .last()
-                    .map_or((0, i64::MIN), |l| (l.bar, l.t));
-                let at_bar = u64::try_from(done.saturating_sub(1))
-                    .unwrap_or(0)
-                    .max(last.0);
-                let at_t = bars
-                    .get(usize::try_from(at_bar).unwrap_or(0))
-                    .map_or(last.1, |b| b.t)
-                    .max(last.1);
-                retract.push((
-                    s.id.clone(),
-                    at_bar,
-                    at_t,
-                    if disputed {
-                        "dispute_upheld"
-                    } else {
-                        "data_corrected"
-                    },
-                ));
+            let broken = |engine: &Engine, public: bool| {
+                broken_stories(
+                    engine,
+                    series,
+                    &again,
+                    &bars,
+                    done,
+                    runner.disputes.iter().filter(|d| !public || d.public),
+                )
+            };
+            retract = broken(&runner.engine, false);
+            if let Some(pe) = runner.pub_engine.as_ref() {
+                retract_pub = broken(pe, true);
             }
         }
         let mut events = Vec::new();
         for (id, bar, t, why) in retract {
             if let Some(ev) = runner.engine.retract(&id, bar, t, why) {
                 events.push(ev);
+            }
+        }
+        // (R3/K1) The public-only engine's stories, retracted on the same corrected data.
+        let mut events_pub = Vec::new();
+        if let Some(pe) = runner.pub_engine.as_mut() {
+            for (id, bar, t, why) in retract_pub {
+                if let Some(ev) = pe.retract(&id, bar, t, why) {
+                    events_pub.push(ev);
+                }
             }
         }
         // Decide the open disputes the answer covers.
@@ -2434,9 +2519,13 @@ impl Session {
                 runner.disputes.push(d);
                 continue;
             }
-            let retracted = events.iter().any(|e| e.capsule == d.capsule)
-                || runner
-                    .engine
+            // (R3/K1) A public-view reader's dispute is decided on the public-only engine.
+            let (evs, engine) = match (d.public, runner.pub_engine.as_ref()) {
+                (true, Some(pe)) => (&events_pub, pe),
+                _ => (&events, &runner.engine),
+            };
+            let retracted = evs.iter().any(|e| e.capsule == d.capsule)
+                || engine
                     .closed_stories()
                     .iter()
                     .any(|s| s.id == d.capsule && s.story.stage == Stage::Retracted);
@@ -2448,24 +2537,103 @@ impl Session {
             self.settle.seen_insert(d.seen.clone(), verdict);
             let _ = &d.conn;
         }
-        if events.is_empty() {
+        // (R3/K1) With a public world, whether an entry is written may not depend on the
+        // licensed data (which stories of the authority's engine broke): one entry per
+        // corrected answer, each world with its own retractions.
+        let public_world = runner.pub_engine.is_some();
+        if events.is_empty() && !(public_world && corrected) {
             self.runner = Some(runner);
             return lines;
         }
-        let changes = self.capsule_changes(&runner, &events, &BTreeMap::new(), 0);
-        let ids: Vec<String> = events.iter().map(|e| e.capsule.clone()).collect();
-        if let Some(seq) =
-            self.engine_entry_with(changes, format!("retract {}", ids.join(", ")), None)
-        {
+        let summary = |evs: &[qp_capsule::StoryEvent]| {
+            if evs.is_empty() {
+                format!("settled {series}")
+            } else {
+                let ids: Vec<&str> = evs.iter().map(|e| e.capsule.as_str()).collect();
+                format!("retract {}", ids.join(", "))
+            }
+        };
+        let changes = self.capsule_changes(&runner.engine, &events, &BTreeMap::new(), 0);
+        if let Some(pe) = runner.pub_engine.as_ref() {
+            let changes = self.in_world(true, |s| {
+                s.capsule_changes(pe, &events_pub, &BTreeMap::new(), 0)
+            });
+            self.pending_pub = Some(crate::public::PubPending {
+                changes,
+                summary: Some(summary(&events_pub)),
+            });
+        }
+        if let Some(seq) = self.engine_entry_with(changes, summary(&events), None) {
             self.runner = Some(runner);
             self.refresh_headlines();
             lines.extend(self.entry_events(seq));
-            lines.extend(self.capsule_topic_lines(seq, &events, &[]));
+            lines.extend(self.capsule_topic_lines(seq, &events, &events_pub, &[]));
             return lines;
         }
+        self.pending_pub = None;
         self.runner = Some(runner);
         lines
     }
+}
+
+/// The stories of `engine` on `series` (not retracted) with a fact the corrected data no
+/// longer gives with the same evidence (`again`: fact id → evidence bits over the first
+/// `done` corrected `bars`): (capsule, bar, t, reason) of their retraction, by id.
+fn broken_stories<'a>(
+    engine: &Engine,
+    series: &str,
+    again: &BTreeMap<String, BTreeMap<String, u64>>,
+    bars: &[Bar],
+    done: usize,
+    disputes: impl Iterator<Item = &'a CapDispute> + Clone,
+) -> Vec<(String, u64, i64, &'static str)> {
+    let mut out = Vec::new();
+    let mut stories: Vec<&qp_capsule::OpenStory> = engine
+        .open_stories()
+        .iter()
+        .chain(engine.closed_stories())
+        .filter(|s| s.story.series == series && s.story.stage != Stage::Retracted)
+        .collect();
+    stories.sort_by(|a, b| a.id.cmp(&b.id));
+    for s in stories {
+        let broken = s.facts.iter().any(|f| {
+            let bits: BTreeMap<String, u64> = f
+                .evidence
+                .iter()
+                .map(|(k, v)| (k.clone(), v.to_bits()))
+                .collect();
+            again.get(&f.id) != Some(&bits)
+        });
+        if !broken {
+            continue;
+        }
+        let disputed = disputes
+            .clone()
+            .any(|d| d.capsule == s.id && d.series == series);
+        let last = s
+            .story
+            .history
+            .last()
+            .map_or((0, i64::MIN), |l| (l.bar, l.t));
+        let at_bar = u64::try_from(done.saturating_sub(1))
+            .unwrap_or(0)
+            .max(last.0);
+        let at_t = bars
+            .get(usize::try_from(at_bar).unwrap_or(0))
+            .map_or(last.1, |b| b.t)
+            .max(last.1);
+        out.push((
+            s.id.clone(),
+            at_bar,
+            at_t,
+            if disputed {
+                "dispute_upheld"
+            } else {
+                "data_corrected"
+            },
+        ));
+    }
+    out
 }
 
 /// Ledger rows of `doc` with a key (R3), the retracted capsules left out:

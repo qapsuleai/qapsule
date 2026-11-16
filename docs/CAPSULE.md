@@ -206,7 +206,10 @@ olgunun cümlesi **hiç rakam içermez** (karne ayrı alanda gider). Üretim yö
 
 Yetkisiz kullanıcıya lisanslı olgudan yalnız güven yolunun (M6 seçimi: mühür — `qp_capsule::trust::Muhur`) ürettiği nitel
 iletiler (`QualMessage`) gider: rakam yok, `trust = server` işareti, gösterim barı. Saldırı
-ölçüsü: art arda gelen iletilerden ham değer aralığının daraltılması.
+ölçüsü: art arda gelen iletilerden ham değer aralığının daraltılması. Yetkisiz okuyucunun
+bütün kapsül görünümü (bulgu güveni, önem, kademe, sıra, karne, olayların varlığı) yalnız
+açık olgularla beslenen ikinci bir motorun sonucundan kurulur; mühür iletileri dışında hiçbir
+kanalı lisanslı veriye bağlı değildir (R3/K1, `docs/PROTOCOL.md` §20.5).
 
 ### 9.8 Hassasiyet
 

@@ -394,3 +394,55 @@ K1_NO_ARKIN=1 cargo run … --bin k1_probe -- <depo> k1_bars.json 200           
 K1_SHOW=b|e cargo run … --bin k1_probe -- …                                                                          # ilk farkı göster
 git diff 92b0d84 9ae6b50 -- fixtures
 ```
+
+## Son kontrol (a808f04)
+
+Denetlenen: `r3/int` @ `a808f04` (`r3/fix-k1b`: açık dünyanın kendi `seq`'i, kişi komutları her
+dünyada ayrı, atomik ters çeviri; S-E §7, PROTOCOL §20.5). Dal `r3/audit3`. `k1_probe` genişletildi
+(aşağıda); denetçinin girdileri artık yapılandırmadan bağımsız (önceki sürüm Eda'nın kabul listesini
+otoritenin dokümanından okuyordu — bir saldırganın göremeyeceği bilgi; düzeltildi, sabit
+`prop-1…prop-599` aralığı).
+
+### K1
+
+| # | Deneme | Sonuç |
+|---|---|---|
+| 1 | `session_probe` (tohum 1 ↔ 2/7/42, Bora ve Can, mühür çıkarıldı) | **0 fark** (276/275 satır; 16 son cevabın 0'ı; `confidence` farkı 0). Yeniden oynatma, aday, varlık kâhini aynı. `cap.THYAO.flow.up.124` satırları kimlik çakışması (açık hacim hikâyesi), sızıntı değil |
+| 2 | `k1_probe`, `K1_NO_ARKIN=1` (5 yapılandırma, Bora, Can, Dora kısmi, Eda sahip, Fatih öneren) | Dört akışlı karşılaştırmanın hepsinde açık görünümlü beş okuyucu **0 farklı satır**; Ana değişiyor (pozitif kontrol) |
+| 3 | `k1_probe`, Arkın açık: bar 120'de 588 kimlikli evrendeki her bulguya onay/ret ve `show_finding`; bar 125'te 25 `undo` ve Fatih'in her bulguya önerisi + Arkın'ın `prop-1…prop-499` için `accept_proposal`; bar 130'da **Gül (öneren, `*`)** lisanslı her akış bulgusuna `reject_finding` önerisi (yalnız otoritede öneri); sonda Eda kendi olgu+bulgusunu **lisanslı kimliklerle** yazar ve geri alır, `prop-1…prop-599` için `accept`/`reject_proposal` | Açık görünümlü beş okuyucu (Bora, Can, Dora, Eda, Fatih) dört akışlı karşılaştırmanın hepsinde **0 farklı satır**. Önceki kanal (b) (`cause`/`seq` kayması) kapandı |
+| 4 | Otorite bütünlüğü: lisanslı doğumlu kapsüller (`state`/`view`), lisanslı akış olgularını taşıyan bulgular ve lisanslı olgular (bayt), açık görünümlü yazarlardan önce ve sonra | Her yapılandırmada **0** değişen (159–179 öğe). Kanal (a) kapsül/bulgu/olgu için kapandı |
+| 5 | **Öneri kimliği çakışması** (koordinatörün bildirdiği YÜKSEK, `reverse_changes`'te "aynı koleksiyon" = eşit sayılması) | **Yeniden üretildi.** Arkın kapalıyken, akışlı her yapılandırmada Gül'ün yalnız otoritede olan 25–30 önerisinin **2**'si Eda'nın kararıyla değişti. Örnek: otoritede `prop-150` = Gül'ün `reject_finding fnd.ASELS.flow.down.108` önerisi, `pending` → `rejected`, `decided_by: Eda`, `decided_seq: 545`; Eda açık dünyada başka bir `prop-150`'yi reddetmişti (her dünyanın kendi `seq`'i → kimlikler çakışıyor). Gizlilik bozulmuyor (Eda'nın satırları da tohumdan bağımsız), ama açık görünümlü bir yazar otoritede lisanslı öğeye dayanan, göremediği bir öneriyi karara bağlayabiliyor. `r3/fix-k1c` bekleniyor |
+| 6 | Akışsız ↔ akışlı | Bora/Can/Dora 3.888–3.908 satır farklı (Eda/Fatih 0). Tasarım gereği: akış yokken açık dünya yok, okuyucu otoriteyi okur (S-E §7 "Testler"). Lisanslı akışın **var olup olmadığı** yapılandırmadır, lisanslı veri değil; kanal sayılmadı (Bilgi) |
+| 7 | Dora'nın ham satırlarındaki `flow.institutional` | 672 satır: **612** Dora'nın kendi gönderdiği lisanslı olgu kimliğini yineleyen `not_found` hataları (153 kimlik × 4 sorgu; `did_you_mean`'de lisanslı kimlik **yok**), **60** mühür eki (`evidence: flow.institutional/net`, `trust: server`; tasarım gereği, değer içermez). Sızıntı değil |
+
+**K1: gizlilik yönü giderildi; bütünlük yönünde bir YÜKSEK bulgu açık (deneme 5, `r3/fix-k1c`).**
+
+### K2
+
+`STATUS.md` (aktif round yok, R3 tamamlandı), `ROADMAP.md` (R3 "Tamamlandı … koşullar giderildi")
+ve `REPORT.md` "Denetim" bölümü güncel. **Giderildi**, bir tutarsızlıkla: `REPORT.md` başı ve
+`ROADMAP.md` "koşullar giderildi" diyor, ama REPORT ölçüt 9 ve 10 hâlâ "⚠️ (`r3/fix-k1b`
+bekleniyor)" ve K1 deneme 5 açık; k1c'den sonra ikisi birlikte güncellenmeli.
+
+### verify
+
+`CARGO_INCREMENTAL=0 QP_VERIFY_BROWSER=1 scripts/verify.sh` @ `a808f04`: **çıkış 0, 15/15 PASS**
+(344 s); 459 test geçti, 0 kaldı, 2 yok sayıldı; browser PASS; digest arm64/x86_64/wasm32
+`7b1e99d40889f83c`; conform 44 × 3; wasm gzip -9 616.022 B.
+
+### Son hüküm (a808f04)
+
+**Koşullu kabul.** Kalan tek koşul: K1-c — açık görünümlü yazarın komutu otoritede yalnız
+otoritede olan **hiçbir** öğeye (öneriler dahil; eşitlik koleksiyon değil öğe düzeyinde)
+dokunmamalı; `k1_probe` deneme 5 (Gül'ün önerileri) 0 vermeli ve girişimsizlik testine eklenmeli.
+Ardından REPORT ölçüt 9/10 ve "koşullar giderildi" ifadesi güncellenir. Gizlilik (Y1, O1, kanal b)
+bu commit'te giderilmiş durumda.
+
+```sh
+git checkout -B r3/audit3 a808f04
+CARGO_INCREMENTAL=0 QP_VERIFY_BROWSER=1 scripts/verify.sh
+cargo run --release --manifest-path rounds/R3/audit/Cargo.toml --bin session_probe -- <depo> sp_bars.json 200
+cargo run --release --manifest-path rounds/R3/audit/Cargo.toml --bin k1_probe -- <depo> k1_bars.json 200     # Arkın, Gül açık
+K1_NO_ARKIN=1 cargo run … --bin k1_probe -- <depo> k1_bars.json 200                                           # deneme 2 ve 5 (GULDIFF stderr'de)
+# ortam anahtarları: K1_NO_ARKIN, K1_NO_EXTRA (undo/kabul), K1_NO_GUL, K1_SHOW=<bağlantı>
+```

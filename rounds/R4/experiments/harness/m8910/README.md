@@ -264,7 +264,10 @@ aynı barındırıcı `interval: "1h"` ile oynatır; 12 enstrüman, 90 gün). Bu
   katmanının metin öğeleri, birleştirilmiş) karakter/sözcük TR/EN en çok ve ortalama; metin
   öğesi sayısı ve metin kutusu alanı / yüz alanı (gömülü yazı tipinin ilerleme genişliği ×
   yazı boyu); **ek bilgi birimi** = başlık dışındaki her metin katmanı + işaret dışı grafik
-  öğesi bulunan her panel; işaret kutusu alanı (px², pay); WCAG karşıtlığı (her metin
+  öğesi bulunan her panel + derlenmiş sahnenin başlık satırı (görünümün `title`'ı ya da sembol +
+  periyot; `over`'da taban çizgisi 23) metin taşıyorsa 1 (eval-m8 düzeltmesi: başlık dışındaki
+  görünür her metin satırı ek bilgidir; değer etiketi ve eksen yazıları sayılmış grafik panelinin
+  parçasıdır); işaret kutusu alanı (px², pay); WCAG karşıtlığı (her metin
   öğesi, merkezinin altındaki zemine göre; işaretin **tanıtıcı parçası**: mürekkebi işaret
   kutusunun ≥ %2'si olan en yüksek karşıtlıklı ilkel, altındaki işaret plakasına ya da
   zemine göre; en düşük ilkel bilgi için); en küçük yazı. Sert eşikler SPEC §2(b).
@@ -306,7 +309,10 @@ Cevap normalleştirilir (Türkçe küçük harf, tırnak/nokta, boşluk) ve anah
 karşılaştırılır; serbest metin puanlanmaz. Ağırlık `(2·F + 1·H) / 3`. Başvuru sıralanır,
 seçilmez.
 - **M8:** (1) sert eşiklerden birini geçemeyen elenir (hepsi geçemezse uygulanmaz,
-  yazılır); (2) tam doğru oranı (yüz başına S1–S5 hepsi); (3) fark < 0,05 → eleştirmen
+  yazılır); **E6:** eşik başına — hiçbir alternatifin geçemediği ve bütün tasarımların (`r3`
+  dahil) aynı en kötü değeri aldığı eşik uygulanmaz (`score::m8_waived`, `rule1_waived`);
+  **E7:** başlık uzunluğu eşiği ve başlık en çok/ortalaması #9 dışındaki durumlarla, #9
+  `headline_chars_unentitled`'da ayrıca; (2) tam doğru oranı (yüz başına S1–S5 hepsi); (3) fark < 0,05 → eleştirmen
   ortalama sırası, o da eşitse kısa ortalama başlık (TR+EN); ilk iki `top2`. Şans düzeyi
   soru başına `1/seçenek sayısı`, tam doğru için çarpımı.
 - **M9:** ortalama doğruluk (G1 F1, G2, G3); fark < 0,05 → ortalama kaydırma + dokunma (doğru

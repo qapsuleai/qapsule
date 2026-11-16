@@ -248,3 +248,12 @@ bağlandı.
 - **E5 (başlık şablonu).** Her M8 alternatifi kendi başlık şablonunu `realize::parts` yapı
   taşlarından kurar (çekirdekte; arayüz H-FP ile açılır). Başvuru `r3` bugünkü kapsül cümlesini
   kullanır.
+- **E6 (M8 kural 1 eşik başına; 2026-11-16, ilk alternatif tesliminden sonra, hiçbir okuma ve
+  puan yokken).** Kural 1 eşik başına uygulanır. Tasarımdan bağımsız bir nedenle (alfabe ya da
+  kabuk; başvuru `r3` de aynı değeri alır) **hiçbir** alternatifin geçemediği eşik o eşik için
+  uygulanmaz ve sonuç notunda yazılır; öteki eşikler elemeye devam eder. Gerekçe: kapanmış
+  işaretin soluk gri çizimi alfabenin kuralıdır (karşıtlık 2,06, `r3` dahil); yazılı kural bütün
+  alternatifleri eler ve başlık/metin eşiklerini de boşa çıkarırdı.
+- **E7 (#9 başlık ölçüsü).** Yetkisiz okuyucunun yüzü bütün tasarımlarda kabuğun düz metnidir
+  (yüz şablonu çizilmez); başlık uzunluğu sert eşiği #9 dışındaki durumlarla hesaplanır, #9 ayrıca
+  yazılır.

@@ -1,0 +1,31 @@
+{
+  "harness": "r4-h-m8910/1",
+  "t0_step": 600,
+  "t1_step": 609,
+  "t0": 1695124800000,
+  "t1": 1695211200000,
+  "choice": {
+    "group": "habituated",
+    "long": [
+      "SYN09",
+      "SYN12"
+    ],
+    "sensitivity": "balanced",
+    "short": [],
+    "watch": [
+      "SYN02",
+      "SYN03",
+      "SYN04",
+      "SYN05",
+      "SYN22",
+      "SYN25",
+      "SYN26",
+      "SYN28"
+    ]
+  },
+  "held": [
+    "SYN09",
+    "SYN12"
+  ],
+  "negative": "SYN09"
+}

@@ -40,7 +40,8 @@
 #                built with wasm-pack, `qp demo` (synthetic, paused); the page's requests go
 #                only to its own origin; its digests (document, faces, open scene) equal the
 #                shell-less `qp drive` run; screenshots at a fixed replay moment twice: page
-#                screenshots byte-identical, core-painted scenes equal fixtures/golden/demo
+#                screenshots byte-identical, core-painted scenes equal fixtures/golden/demo;
+#                the settings page and URL settings (shells/web/tests/settings.mjs, R4/S2)
 #
 # Environment:
 #   QP_VERIFY_BROWSER=1  force the browser step (fails if tools are missing)
@@ -475,6 +476,7 @@ step_demo() {
   fi
   mkdir -p "$d"
   (cd shells/web && node tests/parity.mjs "$qp" "$d/parity") || fail "parity or network test failed"
+  (cd shells/web && node tests/settings.mjs "$qp") || fail "settings page test failed"
   (cd shells/web && node screens.mjs "$qp" "$d/a" && node screens.mjs "$qp" "$d/b") || fail "screenshots failed"
   for f in "$d"/a/*.png; do
     b="$(basename "$f")"
@@ -499,7 +501,7 @@ step_demo() {
     [ -f "$d/a/$(basename "$f")" ] || { echo "$(basename "$f"): golden not produced" >&2; bad=$((bad + 1)); }
   done
   [ "$bad" -eq 0 ] || fail "$bad screenshot check(s) failed"
-  note "same origin only; browser = shell-less digests; $n images x2 (scenes identical, pages within chrome tolerance), scenes = goldens"
+  note "same origin only; browser = shell-less digests; settings page; $n images x2 (scenes identical, pages within chrome tolerance), scenes = goldens"
 }
 
 # --- run -------------------------------------------------------------------

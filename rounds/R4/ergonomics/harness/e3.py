@@ -34,6 +34,7 @@ import re
 import secrets
 import shutil
 import socketserver
+import stat
 import subprocess
 import sys
 import threading
@@ -263,8 +264,11 @@ def run_lines(docs_dir, s, lines):
 def render(docs_dir, s, lines, png, out_base, work_dir):
     """Draws a view of the session after hidden setup + the agent's lines (qp render)."""
     out = png.get("out", "")
-    real_out = os.path.realpath(os.path.dirname(out) or "/") + "/" + os.path.basename(out)
-    if not out.endswith(".png") or not real_out.startswith(os.path.realpath(work_dir) + "/"):
+    # R4 hardening: the full resolved path must be inside the work dir; an existing target
+    # that is a symlink is refused; the copy below opens with O_NOFOLLOW.
+    real_out = os.path.realpath(out) if out else ""
+    if not out.endswith(".png") or not real_out.startswith(os.path.realpath(work_dir) + "/") \
+            or os.path.islink(out):
         return "png error: --png must name a .png file inside your own work dir\n", None
     steps = []
     for x in s["setup"]:
@@ -294,7 +298,9 @@ def render(docs_dir, s, lines, png, out_base, work_dir):
     rec = {"argv": argv[1:], "rc": p.returncode, "stdout": p.stdout[-2000:], "stderr": p.stderr[-2000:],
            "out": out, "png": png}
     if p.returncode == 0 and os.path.exists(tmp):
-        shutil.copy(tmp, real_out)
+        fd = os.open(real_out, os.O_WRONLY | os.O_CREAT | os.O_TRUNC | os.O_NOFOLLOW, 0o644)
+        with os.fdopen(fd, "wb") as g, open(tmp, "rb") as src:
+            shutil.copyfileobj(src, g)
         rec["bytes"] = os.path.getsize(tmp)
         rec["sha256"] = hashlib.sha256(open(tmp, "rb").read()).hexdigest()
         os.unlink(tmp)  # the image stays in the agent's work dir only
@@ -385,9 +391,18 @@ def handle_attempt(path, token, png=None):
         if key not in SETUPS:
             SETUPS[key] = setup.make(json.load(open(os.path.join(ap["raw"], "setup.json")))["seed"])
     s = SETUPS[key]
+    # R4 hardening (no check-then-reopen): open once without following links, check that it
+    # is a regular file, read from the same descriptor.
     try:
-        text = open(real, encoding="utf-8").read(2_000_000)
-    except OSError as e:
+        fd = os.open(real, os.O_RDONLY | os.O_NOFOLLOW)
+        try:
+            if not stat.S_ISREG(os.fstat(fd).st_mode):
+                return f"error: cannot read {path}: not a regular file\n"
+            with os.fdopen(fd, "rb", closefd=False) as fh:
+                text = fh.read(2_000_000).decode("utf-8")
+        finally:
+            os.close(fd)
+    except (OSError, UnicodeDecodeError) as e:
         return f"error: cannot read {path}: {e}\n"
     lines = read_lines(text)
     for raw in lines:

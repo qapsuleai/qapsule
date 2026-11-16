@@ -1934,7 +1934,7 @@ Barındırıcı yapılandırması (`SessionInit.capsules`, protokol mesajı değ
 | `born_since_bar` / `born_since_t` (R4) | Bu bardan / zamandan itibaren **doğanlar** (doğum barı / doğum geçişinin zamanı). |
 | `latest` (R4) | Yalnız **en son doğan** eşleşen kapsül: en büyük doğum zamanı, sonra doğum barı, sonra kimlik. Öteki süzgeçlerden sonra, `limit`'ten önce uygulanır. |
 | `audience` | Soranın kitlesi (§20.4). |
-| `limit` | En çok bu kadar. |
+| `limit` | En çok bu kadar. (R4, K42-FEED) `audience: true` iken sınır, soranın pozisyon/niyet kapsülünün **şimdiki** olumsuz geçişini (`relevant`, aşama `weakened`/`invalidated`/`retracted`, son geçişi dizinin son kesin barında; günlük dizide bu seans) kesmez: bunlar önce alınır, kalan yer sıraya göre dolar; cevap yine sıralı ve en çok `limit`. |
 
 ```json
 → {"type":"query","id":"q","query":{"kind":"capsule","capsule":{"instrument":"THYAO","meaning":"breakout","direction":"up","latest":true}}}

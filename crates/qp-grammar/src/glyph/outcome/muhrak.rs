@@ -214,7 +214,12 @@ impl Muhrak {
         let hw = (0.065 * s).max(0.9).min(0.5 * s);
         let crack: Vec<P> = CRACK
             .iter()
-            .map(|[u, v]| [bx.x + u * s, (bx.y + v * s).max(bx.y + hw).min(bx.y + s - hw)])
+            .map(|[u, v]| {
+                [
+                    bx.x + u * s,
+                    (bx.y + v * s).max(bx.y + hw).min(bx.y + s - hw),
+                ]
+            })
             .collect();
         // Broken off: fade everything right of the crack.
         let mut ghost = crack.clone();

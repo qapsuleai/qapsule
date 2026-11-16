@@ -1817,6 +1817,24 @@ pub struct CapsuleDetail {
     pub glyph: GlyphSpec,
     /// Per fact: the evidence values or what they require (K34).
     pub evidence: Vec<EvidenceAccess>,
+    /// (R4/S1, §20.2) Only when `capsule` was a selector, the reader may not read the
+    /// licensed flow of the instrument and the authority already told this reader of
+    /// licensed activity newer than the resolved capsule's latest transition: the
+    /// entitlement those stories require and the server comments that told it (the same
+    /// comments the `capsules` query gives). Absent otherwise.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub withheld: Option<Withheld>,
+}
+
+/// (R4/S1, §20.2) What a capsule selector may also have matched that the reader cannot
+/// see: newer licensed stories, told only by the server comments the reader already gets.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
+#[serde(deny_unknown_fields)]
+pub struct Withheld {
+    /// Entitlements they require (the comments' `entitlement`, e.g. `flow/*`).
+    pub requires: Vec<String>,
+    /// The server comments newer than the resolved capsule's latest transition.
+    pub comments: Vec<ServerComment>,
 }
 
 /// One ledger row (R3, §20).
@@ -2804,7 +2822,9 @@ pub enum Gesture {
     /// evidence), or straight to `to`. Answered with an `interaction` carrying the
     /// `opening`: what to show at the new depth and the elements both depths share.
     Open {
-        /// Capsule id (or the id of the finding it presents).
+        /// Capsule id (or the id of the finding it presents); (R4/S1) also a capsule
+        /// selector (§17, [`CapsuleSel`]).
+        #[schemars(with = "CapsuleRef")]
         capsule: String,
         /// Depth to open to; one deeper than now if absent.
         #[serde(default, skip_serializing_if = "Option::is_none")]

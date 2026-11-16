@@ -1,5 +1,5 @@
 //! Generates the R3 capsule conformance transcripts 38–44 and the R4/T3 (K42 and R3
-//! ergonomics) transcripts 45–48
+//! ergonomics) transcripts 45–48, and the R4/S1 transcript 57 (selector `withheld`)
 //! (`fixtures/protocol/conformance/38-*.json` …, `docs/PROTOCOL.md` §15, §20).
 //!
 //! Each scenario is written as messages and data events; the expected outputs are what
@@ -638,6 +638,39 @@ fn t48() -> Value {
     )
 }
 
+fn t57() -> Value {
+    let b = bars();
+    let k = 121;
+    let mut steps = vec![hello("a", "ana", None), hello("b", "bora", None)];
+    for (i, bar) in b.iter().enumerate().take(150 + 1).skip(k) {
+        steps.push(bar_ev(k, i, bar, None));
+    }
+    let sel = json!({"instrument":"THYAO","meaning":"flow","latest":true});
+    steps.push(send_n(
+        "a",
+        json!({"type":"query","id":"w1","query":{"kind":"capsule","capsule":sel}}),
+        "Ana holds the flow entitlement: THYAO's latest flow story is a licensed one; nothing is withheld.",
+    ));
+    steps.push(send_n(
+        "b",
+        json!({"type":"query","id":"w2","query":{"kind":"capsule","capsule":sel}}),
+        "Bora (bars, no licensed flow): the same selector resolves among the stories he may see (an open-data flow story). `withheld` says that newer licensed activity exists and what it requires — only what the server comments he already gets told him (no new existence oracle).",
+    ));
+    steps.push(send_n(
+        "b",
+        json!({"type":"query","id":"w3","query":{"kind":"capsule","capsule":{"instrument":"THYAO","meaning":"breakout","latest":true}}}),
+        "A selector that rules flow out: no `withheld`.",
+    ));
+    run(
+        "57-capsule-selector-withheld",
+        "R4/S1 (ergonomics C11; §20.2, §20.5): a capsule selector answered for a reader without the licensed flow resolves among what he may see, and says what it may also have matched: `capsule_detail.withheld` = the entitlement newer licensed stories require and the server comments (mühür) newer than the resolved capsule's latest transition. Absent for an entitled reader, for an id, and for a selector whose `meaning` is not `flow`.",
+        &["selectors", "capsule", "entitlement", "server-comment", "withheld"],
+        init(k, None),
+        steps,
+        None,
+    )
+}
+
 fn pretty(v: &Value) -> String {
     let mut s = serde_json::to_string_pretty(v).expect("json");
     s.push('\n');
@@ -660,6 +693,7 @@ fn main() {
         t46(),
         t47(),
         t48(),
+        t57(),
     ] {
         let name = t["name"].as_str().unwrap().to_owned();
         let path = dir.join(format!("{name}.json"));

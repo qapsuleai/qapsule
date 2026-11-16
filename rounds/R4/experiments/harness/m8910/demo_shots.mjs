@@ -134,7 +134,11 @@ try {
   const errors = [];
   page.on('pageerror', (e) => errors.push(String(e)));
   page.on('console', (m) => { if (m.type() === 'error') errors.push(m.text()); });
-  const q = new URLSearchParams({ anim: '0', ...plan.settings });
+  // (R4/S2) The presentation now opens with its own defaults (face `vadrel`, feed `elikov`,
+  // transition `zumlak`, outcome `tg5`); the M9/M10 screens were taken on the R3 designs,
+  // so every design setting a plan does not give is pinned to `r3` (a re-run looks the same).
+  const R3 = { face: 'r3', feed: 'r3', transition: 'r3', outcome: 'r3' };
+  const q = new URLSearchParams({ anim: '0', ...R3, ...plan.settings });
   await page.goto(`${origin}/?${q}`);
   await settle(page);
   await page.addStyleTag({ content: LABEL_CSS });

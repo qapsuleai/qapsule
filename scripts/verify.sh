@@ -32,7 +32,9 @@
 #                Node reproduce every digest (same tool rule as the browser step)
 #  16 replay     R4/T2 (PROTOCOL §21): `qp replay` (synthetic market, 30 instruments, hourly
 #                path, recorded controls with a forward and a backward seek) twice: the two
-#                line streams are byte-identical and no host notice was raised
+#                line streams are byte-identical, no host notice was raised, no error line,
+#                and after the last backward seek (`reset: true`) the tool's connection is
+#                back (`welcome`) and notifications still arrive (the stream is not empty)
 #  17 shell      R4/T5 architecture test of the web shell (shells/web/ARCH.md): no domain
 #                logic in its JavaScript (no arithmetic, sorting, filtering, formatting, text
 #                building), only allowed core methods, no external address; plus a self-test
@@ -419,7 +421,16 @@ JSON
   "$qp" replay --source synthetic --steps 300 --controls "$d/controls.json" --out "$d/b.jsonl" \
     || fail "qp replay raised host notices"
   cmp -s "$d/a.jsonl" "$d/b.jsonl" || fail "two replay runs differ"
-  note "two runs byte-identical ($(wc -l <"$d/a.jsonl" | tr -d ' ') lines)"
+  local last after welcome notes
+  ! grep -q '"msg":{"type":"error"' "$d/a.jsonl" || fail "qp replay wrote an error line"
+  last="$(grep -n '"reset":true' "$d/a.jsonl" | tail -1 | cut -d: -f1)"
+  [ -n "$last" ] || fail "no backward seek (reset) in the replay stream"
+  after="$(tail -n +"$((last + 1))" "$d/a.jsonl")"
+  welcome="$(printf '%s\n' "$after" | grep -c '"msg":{"type":"welcome"' || true)"
+  notes="$(printf '%s\n' "$after" | grep -c '"msg":{"type":"notify"' || true)"
+  [ "$welcome" -ge 1 ] || fail "no reconnection (welcome) after the last backward seek"
+  [ "$notes" -ge 1 ] || fail "empty stream after the last backward seek"
+  note "two runs byte-identical ($(wc -l <"$d/a.jsonl" | tr -d ' ') lines; $notes notifications after the last backward seek)"
 }
 
 step_replica() {

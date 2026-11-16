@@ -91,8 +91,9 @@ enum Command {
     /// (`fixtures/local/bars`, or `--local-bars`) or the synthetic market, through the
     /// reference authority with the capsule engine on every instrument. Writes one JSON
     /// line per message the authority sends a watching connection (owner `arkin`,
-    /// subscribed to `capsules` and `changes`) and per replay result; two runs with the
-    /// same arguments write the same bytes.
+    /// subscribed to `capsules` and `changes`) and per replay result; after a backward
+    /// seek (a new authority, `reset: true`) it connects again the same way and goes on;
+    /// two runs with the same arguments write the same bytes.
     Replay(ReplayArgs),
     /// (R4/T5) The local demo: replay host + authority + the web shell on one origin
     /// (`scripts/demo.sh`; `shells/web/README.md`).
@@ -454,17 +455,34 @@ fn replay_cmd(a: &ReplayArgs) -> Result<Outcome, String> {
         }
         Ok::<(), String>(())
     };
-    let hello = serde_json::json!({"type":"hello","protocol":"qp/0","principal":"arkin","surface":{"kind":"phone"}});
-    let ls = host.handle_raw("c", &hello.to_string());
+    // The watching connection: `hello` and the subscriptions. A backward seek is a new
+    // authority (§21.3, `reset: true`, epoch + 1) that closes every connection; the tool
+    // then connects again exactly like this, as the demo shell does, and the stream goes on.
+    let connect = |host: &mut qp_session::ReplayHost| {
+        let hello = serde_json::json!({"type":"hello","protocol":"qp/0","principal":"arkin","surface":{"kind":"phone"}});
+        let mut ls = host.handle_raw("c", &hello.to_string());
+        for (id, topic) in [
+            ("caps", serde_json::json!({"kind":"capsules","all":true})),
+            ("ch", serde_json::json!({"kind":"changes"})),
+        ] {
+            let m = serde_json::json!({"type":"subscribe","id":id,"topic":topic});
+            ls.extend(host.handle_raw("c", &m.to_string()));
+        }
+        ls
+    };
+    let is_reset = |lines: &[qp_schema::protocol::OutboundLine]| {
+        lines.iter().any(|l| {
+            matches!(
+                &l.msg,
+                qp_schema::protocol::ServerMsg::Result {
+                    data: qp_schema::protocol::QueryResult::Replay { replay },
+                    ..
+                } if replay.reset
+            )
+        })
+    };
+    let ls = connect(&mut host);
     put(&mut out, &ls)?;
-    for (id, topic) in [
-        ("caps", serde_json::json!({"kind":"capsules","all":true})),
-        ("ch", serde_json::json!({"kind":"changes"})),
-    ] {
-        let m = serde_json::json!({"type":"subscribe","id":id,"topic":topic});
-        let ls = host.handle_raw("c", &m.to_string());
-        put(&mut out, &ls)?;
-    }
     let ls = host.handle_raw(
         "c",
         &serde_json::json!({"type":"replay","id":"status","control":{"kind":"status"}}).to_string(),
@@ -478,7 +496,10 @@ fn replay_cmd(a: &ReplayArgs) -> Result<Outcome, String> {
         while next < controls.len() && controls[next].at <= host.replay().cursor().step {
             let id = format!("ctl{next}");
             let m = serde_json::json!({"type":"replay","id":id,"control":controls[next].control});
-            let ls = host.handle_raw("c", &m.to_string());
+            let mut ls = host.handle_raw("c", &m.to_string());
+            if is_reset(&ls) {
+                ls.extend(connect(&mut host));
+            }
             lines_n += ls.len() as u64;
             put(&mut out, &ls)?;
             next += 1;

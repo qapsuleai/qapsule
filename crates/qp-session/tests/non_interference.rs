@@ -7,6 +7,12 @@
 //! once the server comments (mühür messages: `trust: server`, `server_comment`) are taken
 //! out. Those are the only channel the licensed data may influence for them (M6
 //! integration rule, Ö37). Positive control: the fully entitled reader's lines do differ.
+//!
+//! The comparisons are between licensed flows. A run with **no** licensed flow at all is
+//! a different configuration, not different licensed data: no public world exists, every
+//! reader reads the authority (and, e.g., gets claims on document capsules). Tests that
+//! include seed 0 only check what does not depend on the world; tests 3 and 4 exclude it
+//! (audit, K1-c check: "yapılandırma, veri değil", PROTOCOL §20.5).
 
 use std::collections::BTreeSet;
 use std::path::{Path, PathBuf};

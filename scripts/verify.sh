@@ -30,6 +30,9 @@
 #                replica's data in step (digests equal after every step) and 25 events
 #                behind (no wrong or early claim); the tapes replayed by the WASM replica in
 #                Node reproduce every digest (same tool rule as the browser step)
+#  16 replay     R4/T2 (PROTOCOL §21): `qp replay` (synthetic market, 30 instruments, hourly
+#                path, recorded controls with a forward and a backward seek) twice: the two
+#                line streams are byte-identical and no host notice was raised
 #
 # Environment:
 #   QP_VERIFY_BROWSER=1  force the browser step (fails if tools are missing)
@@ -393,6 +396,23 @@ step_conform() {
   note "$n transcripts x inproc, serve, mcp"
 }
 
+step_replay() {
+  build_qp
+  local d="$tmp/replay"
+  mkdir -p "$d"
+  cat >"$d/controls.json" <<'JSON'
+[{"at":5,"control":{"kind":"speed","steps_per_s":10}},
+ {"at":50,"control":{"kind":"seek","date":"2023-07-03"}},
+ {"at":120,"control":{"kind":"seek","step":30}}]
+JSON
+  "$qp" replay --source synthetic --steps 300 --controls "$d/controls.json" --out "$d/a.jsonl" \
+    || fail "qp replay raised host notices"
+  "$qp" replay --source synthetic --steps 300 --controls "$d/controls.json" --out "$d/b.jsonl" \
+    || fail "qp replay raised host notices"
+  cmp -s "$d/a.jsonl" "$d/b.jsonl" || fail "two replay runs differ"
+  note "two runs byte-identical ($(wc -l <"$d/a.jsonl" | tr -d ' ') lines)"
+}
+
 step_replica() {
   build_qp
   local d="$tmp/replica" mode="${QP_VERIFY_BROWSER:-}" have_tools=1 wp pkg="$target_dir/wasm-replica/pkg"
@@ -431,6 +451,7 @@ run_step digest step_digest
 run_step protocol step_protocol
 run_step conform step_conform
 run_step replica step_replica
+run_step replay step_replay
 total=$((SECONDS - total_start))
 
 failed=0

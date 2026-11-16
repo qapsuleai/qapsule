@@ -85,6 +85,13 @@ enum Command {
         #[arg(short, long)]
         out: PathBuf,
     },
+    /// Replay historical bars like a live feed (docs/PROTOCOL.md §21): local real data
+    /// (`fixtures/local/bars`, or `--local-bars`) or the synthetic market, through the
+    /// reference authority with the capsule engine on every instrument. Writes one JSON
+    /// line per message the authority sends a watching connection (owner `arkin`,
+    /// subscribed to `capsules` and `changes`) and per replay result; two runs with the
+    /// same arguments write the same bytes.
+    Replay(ReplayArgs),
     /// Run protocol conformance transcripts (docs/PROTOCOL.md §15).
     Conform {
         /// Transcript files or directories of `*.json` transcripts.
@@ -98,6 +105,63 @@ enum Command {
         #[arg(long, default_value = ".")]
         root: PathBuf,
     },
+}
+
+#[derive(Debug, clap::Args)]
+struct ReplayArgs {
+    /// Session init with `init.replay` (default: the demo init built from the flags).
+    #[arg(long)]
+    init: Option<PathBuf>,
+    /// `synthetic` or `local` (falls back to synthetic, and says so, without data).
+    #[arg(long, default_value = "synthetic")]
+    source: String,
+    /// Local bars directory (default: `$QAPSULE_LOCAL_BARS` or `fixtures/local/bars`).
+    #[arg(long)]
+    local_bars: Option<PathBuf>,
+    /// Number of instruments.
+    #[arg(long, default_value_t = 30)]
+    instruments: u32,
+    /// Synthetic market: trading days.
+    #[arg(long, default_value_t = 260)]
+    days: u32,
+    /// Synthetic market: seed.
+    #[arg(long, default_value_t = 1)]
+    seed: u64,
+    /// Feed interval.
+    #[arg(long, default_value = "1d")]
+    interval: String,
+    /// Finer interval that moves a bar inside its day (`1h`; `none` for the OHLC path).
+    #[arg(long, default_value = "1h")]
+    fine: String,
+    /// Bars of history before the first replayed bar (without `--from`).
+    #[arg(long, default_value_t = 120)]
+    history: u32,
+    /// First replayed day (`YYYY-MM-DD`).
+    #[arg(long)]
+    from: Option<String>,
+    /// Last replayed day (`YYYY-MM-DD`).
+    #[arg(long)]
+    to: Option<String>,
+    /// Steps to take (default: all).
+    #[arg(long)]
+    steps: Option<u64>,
+    /// Recorded controls: a JSON array of `{"at": <step>, "control": <ReplayControl>}`,
+    /// applied when the replay has taken `at` steps (before the next one).
+    #[arg(long)]
+    controls: Option<PathBuf>,
+    /// What to write: `messages` (default), `events` (the data events, `{"t","event"}`)
+    /// or `none`.
+    #[arg(long, default_value = "messages")]
+    emit: String,
+    /// Print a timing summary to stderr (steps, events, ms per step, per virtual day).
+    #[arg(long)]
+    stats: bool,
+    /// Write here instead of stdout.
+    #[arg(short, long)]
+    out: Option<PathBuf>,
+    /// Directory that document paths in `--init` are relative to.
+    #[arg(long, default_value = ".")]
+    root: PathBuf,
 }
 
 /// Which view of which session: the session starts from `--init` (or the transcript's
@@ -284,9 +348,189 @@ fn run(command: Command) -> Result<Outcome, String> {
             root,
         } => conform(&inputs, &transport, &root),
         Command::ReplicaTape { lag, out } => replica_tape(lag, &out),
+        Command::Replay(args) => replay_cmd(&args),
         Command::Explain(args) => scene_cmd(&args, true),
         Command::Scene(args) => scene_cmd(&args, false),
     }
+}
+
+/// `qp replay` (§21): see [`ReplayArgs`].
+#[allow(clippy::too_many_lines)]
+fn replay_cmd(a: &ReplayArgs) -> Result<Outcome, String> {
+    use qp_schema::protocol::{ReplayControl, ReplayInit, ReplaySourceKind};
+    use std::io::Write;
+    let init = match &a.init {
+        Some(p) => qp_session::read_json(p)?,
+        None => {
+            let source = match a.source.as_str() {
+                "synthetic" => ReplaySourceKind::Synthetic,
+                "local" => ReplaySourceKind::Local,
+                s => return Err(format!("--source `{s}`: expected synthetic or local")),
+            };
+            let day = |d: &str| qp_source::date_start(d).map_err(|e| format!("date `{d}`: {e}"));
+            qp_session::demo_init(ReplayInit {
+                source,
+                instruments: Some(a.instruments),
+                days: Some(a.days),
+                seed: Some(a.seed),
+                interval: Some(a.interval.clone()),
+                fine: (a.fine != "none").then(|| a.fine.clone()),
+                history: Some(a.history),
+                from_t: a.from.as_deref().map(day).transpose()?,
+                to_t: a
+                    .to
+                    .as_deref()
+                    .map(day)
+                    .transpose()?
+                    .map(|t| t + 86_400_000 - 1),
+                ..ReplayInit::default()
+            })
+        }
+    };
+    let dir = a
+        .local_bars
+        .clone()
+        .unwrap_or_else(qp_source::local_bars_dir);
+    let t0 = std::time::Instant::now();
+    let mut host = qp_session::ReplayHost::with_local_dir(init, &a.root, &dir)?;
+    let built = t0.elapsed();
+    struct At {
+        at: u64,
+        control: ReplayControl,
+    }
+    let mut controls: Vec<At> = match &a.controls {
+        Some(p) => {
+            let raw: Vec<serde_json::Value> = qp_session::read_json(p)?;
+            raw.into_iter()
+                .enumerate()
+                .map(|(i, v)| {
+                    let at = v.get("at").and_then(serde_json::Value::as_u64);
+                    let control = v
+                        .get("control")
+                        .cloned()
+                        .map(serde_json::from_value::<ReplayControl>);
+                    match (at, control) {
+                        (Some(at), Some(Ok(control))) => Ok(At { at, control }),
+                        _ => Err(format!(
+                            "{}: entry {i} is not {{\"at\": <step>, \"control\": <ReplayControl>}}",
+                            p.display()
+                        )),
+                    }
+                })
+                .collect::<Result<_, _>>()?
+        }
+        None => Vec::new(),
+    };
+    controls.sort_by_key(|c| c.at);
+    let (emit_msgs, emit_events) = match a.emit.as_str() {
+        "messages" => (true, false),
+        "events" => (false, true),
+        "none" => (false, false),
+        e => return Err(format!("--emit `{e}`: expected messages, events or none")),
+    };
+    let mut out: Box<dyn Write> = match &a.out {
+        Some(p) => Box::new(std::io::BufWriter::new(
+            std::fs::File::create(p).map_err(|e| format!("{}: {e}", p.display()))?,
+        )),
+        None => Box::new(std::io::BufWriter::new(std::io::stdout().lock())),
+    };
+    let put = |out: &mut Box<dyn Write>, lines: &[qp_schema::protocol::OutboundLine]| {
+        if !emit_msgs {
+            return Ok(());
+        }
+        for l in lines {
+            let text = serde_json::to_string(l).map_err(|e| e.to_string())?;
+            writeln!(out, "{text}").map_err(|e| format!("write: {e}"))?;
+        }
+        Ok::<(), String>(())
+    };
+    let hello = serde_json::json!({"type":"hello","protocol":"qp/0","principal":"arkin","surface":{"kind":"phone"}});
+    let ls = host.handle_raw("c", &hello.to_string());
+    put(&mut out, &ls)?;
+    for (id, topic) in [
+        ("caps", serde_json::json!({"kind":"capsules","all":true})),
+        ("ch", serde_json::json!({"kind":"changes"})),
+    ] {
+        let m = serde_json::json!({"type":"subscribe","id":id,"topic":topic});
+        let ls = host.handle_raw("c", &m.to_string());
+        put(&mut out, &ls)?;
+    }
+    let ls = host.handle_raw(
+        "c",
+        &serde_json::json!({"type":"replay","id":"status","control":{"kind":"status"}}).to_string(),
+    );
+    put(&mut out, &ls)?;
+    let limit = a.steps.unwrap_or(u64::MAX);
+    let mut next = 0;
+    let (mut steps, mut events, mut lines_n) = (0_u64, 0_u64, 0_u64);
+    let t1 = std::time::Instant::now();
+    loop {
+        while next < controls.len() && controls[next].at <= host.replay().cursor().step {
+            let id = format!("ctl{next}");
+            let m = serde_json::json!({"type":"replay","id":id,"control":controls[next].control});
+            let ls = host.handle_raw("c", &m.to_string());
+            lines_n += ls.len() as u64;
+            put(&mut out, &ls)?;
+            next += 1;
+        }
+        if steps >= limit {
+            break;
+        }
+        let Some((st, ls)) = host.take_step() else {
+            break;
+        };
+        steps += 1;
+        events += st.events.len() as u64;
+        lines_n += ls.len() as u64;
+        if emit_events {
+            for ev in &st.events {
+                let text = serde_json::to_string(&serde_json::json!({"t": st.t, "event": ev}))
+                    .map_err(|e| e.to_string())?;
+                writeln!(out, "{text}").map_err(|e| format!("write: {e}"))?;
+            }
+        }
+        put(&mut out, &ls)?;
+    }
+    out.flush().map_err(|e| format!("write: {e}"))?;
+    let run = t1.elapsed();
+    let st = host.state();
+    if a.stats {
+        let days = st.days.fine + st.days.ohlc + st.days.bar;
+        let per_day_steps = if days == 0 {
+            0.0
+        } else {
+            #[allow(clippy::cast_precision_loss)]
+            {
+                st.steps as f64 / days as f64 * f64::from(st.instruments)
+            }
+        };
+        #[allow(clippy::cast_precision_loss)]
+        let ms_step = run.as_secs_f64() * 1000.0 / steps.max(1) as f64;
+        eprintln!(
+            "source {:?} (synthetic: {}){} | {} instruments, interval {}, fine {:?}, days fine/ohlc/bar {}/{}/{} | build {:.1} ms | {steps} steps, {events} events, {lines_n} lines in {:.1} ms: {ms_step:.3} ms/step, {:.1} ms per virtual day ({:.1} steps/day) | log {} entries, {} capsules, {} host notices",
+            st.source,
+            st.synthetic,
+            st.note.as_deref().map(|n| format!(" [{n}]")).unwrap_or_default(),
+            st.instruments,
+            st.interval,
+            st.fine,
+            st.days.fine,
+            st.days.ohlc,
+            st.days.bar,
+            built.as_secs_f64() * 1000.0,
+            run.as_secs_f64() * 1000.0,
+            ms_step * per_day_steps,
+            per_day_steps,
+            host.session().log().len(),
+            host.session().document().capsules.len(),
+            host.notices().len(),
+        );
+    }
+    Ok(if host.notices().is_empty() {
+        Outcome::Ok
+    } else {
+        Outcome::Invalid
+    })
 }
 
 /// `qp replica-tape`: runs the check, writes the tape, prints a summary; invalid if a

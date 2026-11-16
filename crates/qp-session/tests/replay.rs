@@ -235,3 +235,23 @@ fn local_without_data_says_synthetic() {
     assert!(st.note.is_some());
     assert_eq!(st.instruments, 4);
 }
+
+#[test]
+#[ignore = "timing probe"]
+fn probe_host_alone_30() {
+    let t0 = std::time::Instant::now();
+    let mut a = host(ReplayInit {
+        instruments: Some(30),
+        days: Some(170),
+        history: Some(120),
+        fine: Some("1h".to_owned()),
+        ..ReplayInit::default()
+    });
+    let t1 = t0.elapsed();
+    hello(&mut a, "a", "arkin");
+    let mut n = 0;
+    while let Some((_, l)) = a.take_step() {
+        n += l.len();
+    }
+    eprintln!("build {t1:?} total {:?} lines {n}", t0.elapsed());
+}

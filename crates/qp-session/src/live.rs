@@ -710,6 +710,7 @@ impl Session {
         lines.extend(conds);
         let claims = self.claim_events();
         lines.extend(self.intent_lines(fired));
+        lines.extend(self.eval_intents_public());
         lines.extend(claims);
         lines
     }

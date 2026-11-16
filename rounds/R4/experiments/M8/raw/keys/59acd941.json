@@ -1,0 +1,62 @@
+{
+  "experiment": "m8",
+  "face": "fotolay",
+  "page": 2,
+  "labels": {
+    "A": {
+      "state": 3,
+      "key": {
+        "s1": "yukarı",
+        "s1b": "aşırı gitti",
+        "s2": "birkaç gün önce",
+        "s3": "hayır, artık geçerli değil",
+        "s4": "çoğunlukla tutmadı",
+        "s5": "hiçbir şey, yalnız bilgi veriyor"
+      }
+    },
+    "B": {
+      "state": 11,
+      "key": {
+        "s1": "aşağı",
+        "s1b": "fiyat önemli bir seviyeyi geçti",
+        "s2": "birkaç saat önce",
+        "s3": "evet, sürüyor",
+        "s4": "yarı yarıya",
+        "s5": "hiçbir şey, yalnız bilgi veriyor"
+      }
+    },
+    "C": {
+      "state": 4,
+      "key": {
+        "s1": "belirsiz",
+        "s1b": "fiyat sıkıştı, hareketsiz",
+        "s2": "dün",
+        "s3": "evet, sürüyor",
+        "s4": "az örnek var, bilinmiyor",
+        "s5": "hiçbir şey, yalnız bilgi veriyor"
+      }
+    },
+    "D": {
+      "state": 6,
+      "key": {
+        "s1": "aşağı",
+        "s1b": "fiyat önemli bir seviyeyi geçti",
+        "s2": "bir haftadan önce",
+        "s3": "kapandı: tutmadı",
+        "s4": "az örnek var, bilinmiyor",
+        "s5": "hiçbir şey, yalnız bilgi veriyor"
+      }
+    },
+    "E": {
+      "state": 2,
+      "key": {
+        "s1": "aşağı",
+        "s1b": "fiyat önemli bir seviyeyi geçti",
+        "s2": "birkaç gün önce",
+        "s3": "evet, sürüyor",
+        "s4": "yarı yarıya",
+        "s5": "hiçbir şey, yalnız bilgi veriyor"
+      }
+    }
+  }
+}

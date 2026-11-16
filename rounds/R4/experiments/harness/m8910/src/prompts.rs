@@ -34,7 +34,7 @@ pub fn m8_persona(p: &str, image: &str, n: usize) -> String {
     let labels: Vec<&str> = crate::m8::LABELS[..n.min(crate::m8::LABELS.len())].to_vec();
     format!(
         "{persona}\n\n{CONTEXT}\n\nGörüntü: @DIR@/{image} (Read aracıyla aç). Ekranda alt alta {n} kart var; \
-her kartın sol üst köşesinde bir harf var ({labs}).\n\n\
+her kartın sağ üst köşesinde bir harf var ({labs}).\n\n\
 Her harf için aşağıdaki altı soruyu cevapla. Her soruda yalnız verilen seçeneklerden birini, tırnak içindeki \
 metni aynen yazarak seç.\n\n\
 S1 Ne oldu? (yön): {s1}\n\
@@ -79,7 +79,7 @@ pub fn m8_critic(designs: &[(String, Vec<String>)]) -> String {
     let mut s = String::from(
         "Bir piyasa bilgi uygulamasının akış ekranı için birkaç tasarımı değerlendiren deneyimli bir arayüz \
 tasarımcısısın. Her tasarımda aynı durumlar gösterilir: her ekranda alt alta kartlar var, her kart bir piyasa \
-olayını kapalı hâlde (tek bakışta) anlatır; kartların sol üstündeki harfler yalnız konum etiketidir. \
+olayını kapalı hâlde (tek bakışta) anlatır; kartların sağ üstündeki harfler yalnız konum etiketidir. \
 Uygulama yatırım tavsiyesi vermemelidir.\n\nGörüntüler (Read aracıyla aç; hepsi @DIR@ dizininde):\n",
     );
     for (l, files) in designs {

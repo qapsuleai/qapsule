@@ -44,6 +44,15 @@ pub const THEMES: [&str; 2] = ["light", "dark"];
 /// Languages measured.
 pub const LANGS: [&str; 2] = ["tr", "en"];
 
+/// S8 state of the unentitled reader: its face is the shell's plain text in every design
+/// (no face template is drawn), so the headline length threshold leaves it out and reports
+/// it separately (SPEC §8 E7).
+pub const UNENTITLED_STATE: usize = 9;
+
+/// Baseline of the compiled scene's title row (`qp_grammar::compile`: title, close and
+/// panel-0 legends; CSS px).
+pub const TITLE_BASELINE: i32 = 23;
+
 /// Share of the glyph box a primitive must cover to count as the glyph's identifying part.
 pub const GLYPH_PART: f64 = 0.02;
 
@@ -174,7 +183,8 @@ pub struct Measures {
     /// Text box area / face area.
     pub text_area_share: f64,
     /// Additional information units (README: text layers besides the headline + panels
-    /// with non-text, non-glyph marks).
+    /// with non-text, non-glyph marks + the title row when it shows text — eval-m8 fix:
+    /// every visible text line besides the headline counts, the view's `title` too).
     pub extra_units: usize,
     /// Glyph box area (px²).
     pub glyph_area: f64,
@@ -396,6 +406,15 @@ pub fn measure(f: &Face, height: u32) -> Measures {
         }
     }
     let _ = headline_layers;
+    // The title row (view `title`, else symbol + interval; close; panel-0 legends) is a
+    // visible text line besides the headline: one unit (eval-m8 fix). Other `over`/`under`
+    // texts (last-value tags, axis labels) belong to a chart panel already counted above.
+    if sc.over.iter().any(|p| {
+        matches!(p, Prim::Text { baseline, text, .. }
+            if (f64::from(*baseline) - f64::from(TITLE_BASELINE)).abs() < 0.5 && !text.trim().is_empty())
+    }) {
+        extra += 1;
+    }
     let headline = headline.join(" ");
     let mut text_items = 0usize;
     let mut text_area = 0.0;
@@ -479,6 +498,10 @@ pub struct Computed {
     pub headline_chars: BTreeMap<String, [f64; 2]>,
     /// Headline words: max and mean, per language.
     pub headline_words: BTreeMap<String, [f64; 2]>,
+    /// Headline characters of the unentitled reader's face (#9, the shell's plain text),
+    /// per language — reported apart, outside the headline threshold (SPEC §8 E7).
+    #[serde(default)]
+    pub headline_chars_unentitled: BTreeMap<String, usize>,
     /// Hard threshold results (name → pass) and the worst values.
     pub thresholds: BTreeMap<String, Threshold>,
     /// All hard thresholds pass.
@@ -504,11 +527,19 @@ pub fn computed(face: &str, faces: &[Face]) -> Computed {
     let ms: Vec<Measures> = faces.iter().map(|f| measure(f, height)).collect();
     let mut hc = BTreeMap::new();
     let mut hw = BTreeMap::new();
+    let mut hu = BTreeMap::new();
     for lang in LANGS {
+        // E7: headline statistics without #9 (reported apart).
         let v: Vec<&Measures> = ms
             .iter()
-            .filter(|m| m.lang == lang && m.theme == "light")
+            .filter(|m| m.lang == lang && m.theme == "light" && m.state != UNENTITLED_STATE)
             .collect();
+        if let Some(u) = ms
+            .iter()
+            .find(|m| m.lang == lang && m.theme == "light" && m.state == UNENTITLED_STATE)
+        {
+            hu.insert(lang.to_owned(), u.headline_chars);
+        }
         let n = v.len().max(1) as f64;
         let mc = v.iter().map(|m| m.headline_chars).max().unwrap_or(0) as f64;
         let ac = v.iter().map(|m| m.headline_chars as f64).sum::<f64>() / n;
@@ -547,7 +578,12 @@ pub fn computed(face: &str, faces: &[Face]) -> Computed {
             pass: sc.iter().all(|m| m.min_text_px >= limits::MIN_PX),
         },
     );
-    let hmax = ms.iter().map(|m| m.headline_chars).max().unwrap_or(0);
+    let hmax = ms
+        .iter()
+        .filter(|m| m.state != UNENTITLED_STATE)
+        .map(|m| m.headline_chars)
+        .max()
+        .unwrap_or(0);
     th.insert(
         "headline_chars".to_owned(),
         Threshold {
@@ -573,6 +609,7 @@ pub fn computed(face: &str, faces: &[Face]) -> Computed {
         faces: ms,
         headline_chars: hc,
         headline_words: hw,
+        headline_chars_unentitled: hu,
         thresholds: th,
         pass,
     }
@@ -841,6 +878,16 @@ pub fn computed_md(c: &Computed) -> String {
         s.push_str(&format!(
             "| {l} | {} / {} | {} / {} |\n",
             v[0], v[1], w[0], w[1]
+        ));
+    }
+    if !c.headline_chars_unentitled.is_empty() {
+        s.push_str(&format!(
+            "\nUnentitled reader (#{UNENTITLED_STATE}, shell's plain text; outside the headline threshold, E7): {}\n",
+            c.headline_chars_unentitled
+                .iter()
+                .map(|(l, n)| format!("{l} {n}"))
+                .collect::<Vec<_>>()
+                .join(", ")
         ));
     }
     s.push_str("\n| state | lang | theme | chars | text items | text area | extra | glyph px² | glyph share | text contrast min | glyph contrast | min px |\n|---:|---|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|\n");

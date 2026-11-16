@@ -209,6 +209,48 @@ fn m8_key(k: &s8::Key, q: &str) -> String {
     }
 }
 
+/// SPEC §8 E6: rule 1 per threshold. A threshold that **no** alternative passes, for a
+/// reason independent of the designs (the reference `r3` and every alternative have the
+/// same worst value — the alphabet or the shell), is not applied; the others still
+/// eliminate. Returns the waived thresholds and the steps in words.
+#[must_use]
+pub fn m8_waived(
+    comps: &BTreeMap<String, m8::Computed>,
+) -> (std::collections::BTreeSet<String>, Vec<String>) {
+    let mut waived = std::collections::BTreeSet::new();
+    let mut steps = Vec::new();
+    let reference = comps.get(crate::REFERENCE);
+    let alts: Vec<&m8::Computed> = comps
+        .iter()
+        .filter(|(d, _)| d.as_str() != crate::REFERENCE)
+        .map(|(_, c)| c)
+        .collect();
+    let Some(first) = alts.first() else {
+        return (waived, steps);
+    };
+    for name in first.thresholds.keys() {
+        let ts: Vec<&m8::Threshold> = alts.iter().filter_map(|c| c.thresholds.get(name)).collect();
+        if ts.len() != alts.len() || ts.iter().any(|t| t.pass) {
+            continue;
+        }
+        let same = reference
+            .and_then(|r| r.thresholds.get(name))
+            .is_some_and(|rt| ts.iter().all(|t| (t.worst - rt.worst).abs() < 1e-9));
+        if same {
+            waived.insert(name.clone());
+            steps.push(format!(
+                "E6: no alternative passes `{name}` and every design incl. the reference has the same worst value ({}): not applied",
+                ts[0].worst
+            ));
+        } else {
+            steps.push(format!(
+                "E6: no alternative passes `{name}`, but the values differ between designs: still applied"
+            ));
+        }
+    }
+    (waived, steps)
+}
+
 /// M8 scores and selection.
 ///
 /// # Errors
@@ -295,6 +337,24 @@ pub fn m8(exp: &Path) -> Result<Value, String> {
     }
     let mut designs = BTreeMap::new();
     let mut entries = Vec::new();
+    let all_names: Vec<String> = io::subdirs(&raw)
+        .into_iter()
+        .filter(|d| d.join("computed.json").exists())
+        .map(|d| io::file_name(&d))
+        .chain(acc.keys().cloned())
+        .collect::<std::collections::BTreeSet<_>>()
+        .into_iter()
+        .collect();
+    let comps: BTreeMap<String, m8::Computed> = all_names
+        .iter()
+        .filter_map(|d| {
+            io::read(&raw.join(d).join("computed.json"))
+                .ok()
+                .and_then(|s| serde_json::from_str(&s).ok())
+                .map(|c| (d.clone(), c))
+        })
+        .collect();
+    let (waived, rule1_steps) = m8_waived(&comps);
     let names: Vec<String> = io::subdirs(&raw)
         .into_iter()
         .filter(|d| d.join("computed.json").exists())
@@ -335,14 +395,25 @@ pub fn m8(exp: &Path) -> Result<Value, String> {
             "critic_criteria": crit.get(&d).map(|m| m.iter().map(|(k, v)| (k.clone(), r4(mean(v)))).collect::<BTreeMap<_, _>>()),
             "hard_thresholds_pass": comp.as_ref().map(|c| c.pass), "headline_mean_chars_tr_en": head.map(|h| io::round(h, 2)),
         }));
+        let failed: Vec<String> = comp.as_ref().map_or_else(Vec::new, |c| {
+            c.thresholds
+                .iter()
+                .filter(|(k, t)| !t.pass && !waived.contains(*k))
+                .map(|(k, _)| k.clone())
+                .collect()
+        });
+        designs
+            .get_mut(&d)
+            .and_then(Value::as_object_mut)
+            .map(|o| o.insert("thresholds_failed_after_e6".into(), json!(failed)));
         entries.push(Entry {
             design: d.clone(),
             primary,
             ties: vec![rank, head],
-            eligible: comp.as_ref().is_some_and(|c| c.pass),
+            eligible: comp.is_some() && failed.is_empty(),
         });
     }
-    let sel = select(
+    let mut sel = select(
         &entries,
         &[false, false],
         &[
@@ -350,6 +421,7 @@ pub fn m8(exp: &Path) -> Result<Value, String> {
             "mean headline TR+EN (shorter wins)",
         ],
     );
+    sel.steps.splice(0..0, rule1_steps);
     let chance: BTreeMap<&str, f64> = [
         ("S1", 1.0 / s8::S1.len() as f64),
         ("S1b", 1.0 / s8::S1B.len() as f64),
@@ -365,7 +437,7 @@ pub fn m8(exp: &Path) -> Result<Value, String> {
     Ok(
         json!({"experiment": "m8", "harness": crate::HARNESS_VERSION, "chance": chance,
               "chance_full": io::round(full_chance, 6), "designs": designs, "readers": per_reader,
-              "selection": sel,
+              "selection": sel, "rule1_waived": waived,
               "limit": "Persona ajanı insan değildir; bu ölçüm ön elemedir, son söz insan testi v2'dedir."}),
     )
 }
@@ -688,5 +760,40 @@ mod tests {
         x.eligible = false;
         let s = select(&[x, e("b", 0.1, 0.0)], &[false], &["rank"]);
         assert_eq!(s.selected.as_deref(), Some("b"));
+    }
+
+    #[test]
+    fn e6_waives_a_threshold_no_design_can_pass() {
+        let c = |worst_g: f64, worst_h: f64| m8::Computed {
+            harness: String::new(),
+            face: String::new(),
+            height: 0,
+            faces: Vec::new(),
+            headline_chars: BTreeMap::new(),
+            headline_words: BTreeMap::new(),
+            headline_chars_unentitled: BTreeMap::new(),
+            thresholds: [
+                ("glyph_contrast", 3.0, worst_g, worst_g >= 3.0),
+                ("headline_chars", 80.0, worst_h, worst_h <= 80.0),
+            ]
+            .into_iter()
+            .map(|(k, limit, worst, pass)| (k.to_owned(), m8::Threshold { limit, worst, pass }))
+            .collect(),
+            pass: false,
+        };
+        let comps: BTreeMap<String, m8::Computed> = [
+            ("r3".to_owned(), c(2.06, 208.0)),
+            ("a".to_owned(), c(2.06, 90.0)),
+            ("b".to_owned(), c(2.06, 70.0)),
+        ]
+        .into_iter()
+        .collect();
+        let (w, _) = m8_waived(&comps);
+        assert!(w.contains("glyph_contrast"));
+        assert!(!w.contains("headline_chars"));
+        // Different values: design-dependent, not waived.
+        let mut comps = comps;
+        comps.insert("b".to_owned(), c(2.5, 70.0));
+        assert!(m8_waived(&comps).0.is_empty());
     }
 }

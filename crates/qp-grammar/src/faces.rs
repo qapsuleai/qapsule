@@ -66,6 +66,11 @@ pub const DEFAULT_FACE: &str = "r3";
 pub const ALIASES: [(&str, &str); 1] = [("card", "r3")];
 
 // --- M8 alternatives: view functions (or `mod <name>;`) go below this line -------------
+mod tavrik;
+
+mod vadrel;
+
+mod fotolay;
 
 /// Face designs a connection may choose; the first is the default.
 pub static FACES: &[FaceDesign] = &[
@@ -76,6 +81,24 @@ pub static FACES: &[FaceDesign] = &[
         headline: None,
     },
     // --- M8 alternatives: one line each
+    FaceDesign {
+        name: "vadrel",
+        height: vadrel::HEIGHT,
+        view: vadrel::view,
+        headline: Some(vadrel::headline),
+    },
+    FaceDesign {
+        name: "tavrik",
+        height: tavrik::HEIGHT,
+        view: tavrik::view,
+        headline: Some(tavrik::headline),
+    },
+    FaceDesign {
+        name: "fotolay",
+        height: fotolay::HEIGHT,
+        view: fotolay::view,
+        headline: Some(fotolay::headline),
+    },
 ];
 
 /// Designs known besides [`FACES`]: none (unit tests register an example design with a

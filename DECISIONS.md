@@ -44,6 +44,11 @@
 | K38 | 2026-11-15 | **Sunucu olgusu için ayrı güven yolu:** yansının kendi verisinde sınayamadığı (veri lisansı nedeniyle) iddialar, tutarlılık kuralının istisnası olarak, "sunucu tarafından doğrulandı" işaretiyle gösterilir. Tasarım R3'te alternatifleriyle ölçülür; nitel yorumlardan ham değerin geri çıkarılamadığı kanıtlanır. | K33 ile Ö25 birlikte lisanssız kullanıcının yorumu hiç görememesine yol açıyordu. |
 | K39 | 2026-11-15 | Emin olunmayan her tasarım seçeneği alternatifleriyle kurulur ve ölçülür; ölçüm yöntemi round tasarımında adıyla yazılır. İnsan algısına dayanan konularda (işaret okunabilirliği gibi) hesap ve yapay zekâ ölçümü ön elemedir; son söz gerçek kullanıcı testindedir. | Arkin: alternatifler içinde emin olmadığımız hususlarda ölçüm kavramlarımızı unutmayalım. |
 | K40 | 2026-11-15 | Model ve anahtar gereksinimleri `docs/MODELS.md`'de, gerçek veriye erişim `docs/DATA_ACCESS.md`'de tutulur. Motor anahtarsız çalışır; anahtar gerektiren round bunu `PROMPT.md`'nin başında yazar. Belirteç ve anahtarlar `.env.local`'da durur, Arkin girer, ajan dosyayı açmaz. Gerçek veri yalnızca `fixtures/local/` altında, depoya girmeden kullanılır. | Arkin: token ihtiyacı doğarsa kaydedilsin; gerçek barlar Matriks servisinden çekilebilir. |
+| K41 | 2026-11-16 | R3 önerileri Ö29–Ö41 kabul edildi (aşağıdaki "R3 kararları" tablosu). Alfabe (Ö32) insan testine kadar geçicidir. | Arkin onayı. Kanıt `rounds/R3/REPORT.md`. |
+| K42 | 2026-11-16 | R3 açık kararlarının cevapları: **A23:** karne anahtarına yön eklenir. **A22:** pozisyon ve niyetle ilgili kapsüllerde yalnızca olumsuz geçişler (zayıfladı, geçersiz, geri çekildi) hassasiyet seviyesinden bağımsız gelir; doğumlar seviyeye tabidir. **A28:** "artık geçerli değil" durumu işarette de görünür; durum koşulu ile beklenen çözüm ayrılır. | Gerçek veride yukarı kırılım ~0,60, aşağı ~0,40 tuttu; `important` seviyesine ulaşan doğumların %84'ü pozisyon/niyet yolundandı; kapsül görselinde cümle ile işaret çelişiyordu. |
+| K43 | 2026-11-16 | Kapsülün yüzü "tek bakış" için yeniden tasarlanır: kısa başlık cümlesi, öne çıkan işaret, gündelik dil (bar sayısı yerine periyoda uygun süre; iç terimler yok). Ayrıntı açılınca gelir. Tasarım alternatifleriyle kurulur, persona ajanlarıyla ön elenir, insan testiyle kesinleşir (K39). | R3 kapsül görseli doğru ama rapor gibiydi: beş satır metin, küçük işaret, iç dil. |
+| K44 | 2026-11-16 | İlk kullanılabilir gösterim canlı veriyle değil, gerçek geçmiş verinin **yeniden oynatılmasıyla** yapılır: belirleyici, tekrarlanabilir, piyasa saatinden bağımsız, hızlandırılabilir. Gerçek Matriks MQTT bağlantısı R6'da; R4'ten hemen sonra ya da ayrı oturumda paralel. | Canlı bağlantı test edilemez ve tekrarlanamaz; yeniden oynatma aynı protokol yolunu (alan düzeyinde veri olayı) kullanır, R6'da yalnızca kaynak değişir. |
+| K45 | 2026-11-16 | GPU çizim yolu (K12'nin ikinci kısmı) ertelenir; karar R4'te gerçek telefonda ölçülen kare süresine göre verilir. | Referans çizici 1200×600 kareyi 0,75 ms'de, 100 bin barı 2,7 ms'de çiziyor; ihtiyaç kanıtlanmadı. |
 
 ## Açık kararlar
 
@@ -132,7 +137,7 @@ T7-COMPARE, T8, T9), `docs/PROTOCOL.md` §18–§19.
 | A20 | Otoritenin yanlış kesin iddiasının onarımı: `qp/1`'de yansıdan `dispute`/`check` ve/veya otoritede kesin bar doğrulaması (B'nin hijyeni); gerçek otoriteyle düzenek yaklaşımı | R3 (dedektörlerle) | Son denetim O1; AUD1/AUD2. |
 | A19 | Veri özeti kriptografik mi olsun (128 bit / SHA-256), imzalı paylaşılan kanıt | R6 (gömülü ikili ek kararıyla) | T2 denetimi O5; RESEARCH S5. |
 
-## Önerilen (R3) — ana akış onayı bekliyor
+## R3 kararları — kabul edildi (2026-11-16, K41)
 
 R3 bu satırları **önerir**; kesinleştirmedi. Kanıt `rounds/R3/REPORT.md`,
 `rounds/R3/experiments/` (M1–M7 `RESULTS.md`, düzenek `harness/SPEC.md`, `S/`).
@@ -156,12 +161,12 @@ R3 bu satırları **önerir**; kesinleştirmedi. Kanıt `rounds/R3/REPORT.md`,
 | # | Açık karar (R3) | Ne zaman | Not |
 |---|------------|----------|-----|
 | A21 | İnsan testi sonucu: `siluet` mi `rozet` mi | İnsan testinden sonra | `rounds/R3/human-test/`. |
-| A22 | Pozisyon/niyet geçişi `important` seviyesini dolduruyor (sentetik %57, gerçek %84 geçen doğum yalnız bu yoldan) | R4/R9 | Yalnız bazı aşamalar (geçersizleşme, zayıflama) ya da kademeler geçsin mi? Ölçülmedi. |
-| A23 | Karne anahtarında yön yok (gerçek günlükte kırılım yukarı ~0,60, aşağı ~0,40) | R5 öncesi | Anahtara yön eklemek karnenin örneklemini böler. |
+| A22 | Pozisyon/niyet geçişi — **KAPANDI** | — | K42. |
+| A23 | Karne anahtarında yön — **KAPANDI** | — | K42. |
 | A24 | `CapsuleState`'e `retracted` eklenmesi (bugün `invalidated` + hikâye aşaması `retracted`) | `qp/1` | M7 RESULTS §8. |
 | A25 | Mühür makbuzu simetrik anahtarlı; kullanıcı tek başına doğrulayamıyor. Anahtarlar barındırıcıdan (`Session::set_trust_keys`); verilmezse demo anahtarları (yalnız sentetik test beslemesi) | R6 (A19 ile) | Belirleyici Ed25519 önerisi; gerçek barındırıcının anahtar saklama yolu R6'da. |
 | A27 | Açık dünyanın kendi iddia kaydı: bugün açık görünümlü okuyucular belge kapsülleri ve niyetler üzerindeki `claims` olaylarını almıyor; kısmi akış yetkisi de açık görünümü alıyor (alt küme motorları) | R4/R6 | `rounds/R3/experiments/S/S-E.md` §7. |
-| A28 | Açık hikâyede durum koşulu bozulunca cümle "artık geçerli değil" derken işaret `final` aşamasında (`c2-capsule`); durum koşulu ile beklenen çözümün `MeaningCondition`'da ayrılması | R4 öncesi | Denetim O2, S-A önerisi. |
+| A28 | Geçerlilik işarette — **KAPANDI** | — | K42; uygulaması R4. |
 | A29 | Barındırıcı mühür anahtarı vermezse demo anahtarları (bugün yalnız sentetik test beslemesi var); gerçek akış kaynağında demo anahtarıyla başlamayı reddetmek | R6 | Denetim D2; PROTOCOL §20. |
 | A30 | Derinlikler arası küçük bilgi farkları (cümle hacim teyidini söylemiyor; bant 20 bar geriye çiziliyor) | R4 | Denetim D4. |
 | A26 | Kesin bar hijyeninin REST kotası (bağ × bar başına bir çekme) | R6 (A17 ile) | Şüpheli barlarla sınırlama. |

@@ -5,9 +5,9 @@ Her round sonunda güncellenir.
 
 ## Şu an
 
-- **Aktif round:** yok (R3 tamamlandı; sonraki round ana akışta tasarlanır).
+- **Aktif round:** R4 (koşulmayı bekliyor).
 - **Son güncelleme:** 2026-11-16
-- **Sıradaki adım:** ana akış: R3 önerilen kararları (`DECISIONS.md` Ö29–Ö41) ve açık kararlar A21–A26; R3 açık soruları (`rounds/R3/REPORT.md`); insan testi (`rounds/R3/human-test/`) uygulanması.
+- **Sıradaki adım:** `fixtures/local/symbols.txt` güncellenir; `scripts/preflight.sh`; `rounds/R4/PROMPT.md` yeni bir Claude Code oturumuna verilir.
 
 ## Round geçmişi
 

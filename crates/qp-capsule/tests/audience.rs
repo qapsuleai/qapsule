@@ -61,10 +61,27 @@ fn position_and_intent_override_level() {
     let mut a = aud(UserGroup::Future, Some(Sensitivity::Important));
     a.positions.insert("POS".to_owned(), -100.0);
     a.positions.insert("FLAT".to_owned(), 0.0);
-    for st in [Stage::Weakened, Stage::Invalidated, Stage::Born] {
+    // (K42/A22) Only negative transitions pass whatever the level.
+    for st in [Stage::Weakened, Stage::Invalidated, Stage::Retracted] {
         assert!(admits(&a, &story("POS", 3, st), &[]));
         assert!(admits(&a, &story("INT", 3, st), &["INT".to_owned()]));
     }
+    // Births and the other transitions go through the level filter.
+    for st in [
+        Stage::Born,
+        Stage::Strengthened,
+        Stage::Confirmed,
+        Stage::Realized,
+        Stage::Expired,
+    ] {
+        assert!(!admits(&a, &story("POS", 3, st), &[]), "{st:?}");
+        assert!(!admits(&a, &story("INT", 3, st), &["INT".to_owned()]));
+        assert!(admits(&a, &story("POS", 1, st), &[]), "{st:?} tier 1");
+    }
+    // A transition stage other than the story's current one (topic `capsules`).
+    let born = story("POS", 3, Stage::Born);
+    assert!(qp_capsule::admits_at(&a, &born, Stage::Weakened, &[]));
+    assert!(!qp_capsule::admits_at(&a, &born, Stage::Born, &[]));
     // Zero quantity is not a position; no intent → tier filter.
     assert!(!admits(&a, &story("FLAT", 3, Stage::Invalidated), &[]));
     assert!(!admits(

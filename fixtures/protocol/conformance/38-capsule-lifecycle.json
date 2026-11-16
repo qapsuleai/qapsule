@@ -1165,18 +1165,18 @@
                 "direction": "down",
                 "finding": "fnd.THYAO.breakout.down.115",
                 "id": "cap.THYAO.breakout.down.115",
-                "importance": 1.4601231174212248,
+                "importance": 1.4879223452204524,
                 "instrument": "THYAO",
                 "kind": "breakout",
                 "last_bar": 120,
                 "ledger_at_birth": {
-                  "n": 6,
+                  "n": 4,
                   "realized": 2
                 },
                 "sentence": {
-                  "en": "5 bars ago, THYAO broke below support at 4.71 (close 4.69): a downside breakout. It was invalidated on this bar and is no longer valid. Its record is still thin: it played out in 2 of 6 cases.",
-                  "text": "THYAO 5 bar önce 4,71'deki desteği aşağı kırdı (kapanış 4,69): aşağı kırılım. Sinyal bu barda geçersiz oldu; artık geçerli değil. Karnesi henüz az örnekli: 6 seferin 2'sinde tuttu.",
-                  "tr": "THYAO 5 bar önce 4,71'deki desteği aşağı kırdı (kapanış 4,69): aşağı kırılım. Sinyal bu barda geçersiz oldu; artık geçerli değil. Karnesi henüz az örnekli: 6 seferin 2'sinde tuttu."
+                  "en": "5 bars ago, THYAO broke below support at 4.71 (close 4.69): a downside breakout. It was invalidated on this bar and is no longer valid. Its record is still thin: it played out in 2 of 4 cases.",
+                  "text": "THYAO 5 bar önce 4,71'deki desteği aşağı kırdı (kapanış 4,69): aşağı kırılım. Sinyal bu barda geçersiz oldu; artık geçerli değil. Karnesi henüz az örnekli: 4 seferin 2'sinde tuttu.",
+                  "tr": "THYAO 5 bar önce 4,71'deki desteği aşağı kırdı (kapanış 4,69): aşağı kırılım. Sinyal bu barda geçersiz oldu; artık geçerli değil. Karnesi henüz az örnekli: 4 seferin 2'sinde tuttu."
                 },
                 "series": "px",
                 "stage": "invalidated",
@@ -1184,7 +1184,8 @@
                 "t": 1687158000000,
                 "tier": 3,
                 "time": "event",
-                "trust": "replica"
+                "trust": "replica",
+                "validity": "closed"
               },
               "kind": "capsule",
               "seq": 3,
@@ -1209,18 +1210,18 @@
                 "direction": "up",
                 "finding": "fnd.THYAO.flow.up.120",
                 "id": "cap.THYAO.flow.up.120",
-                "importance": 1.6511818186419132,
+                "importance": 1.6270059944660888,
                 "instrument": "THYAO",
                 "kind": "flow",
                 "last_bar": 120,
                 "ledger_at_birth": {
-                  "n": 9,
-                  "realized": 6
+                  "n": 5,
+                  "realized": 3
                 },
                 "sentence": {
-                  "en": "On this bar, net institutional buying in THYAO (429,157) clearly exceeded the recent average (113,710): money inflow. Whether it still holds is unknown. Its record is still thin: it played out in 6 of 9 cases. Server-verified.",
-                  "text": "THYAO'da bu barda kurumsal net alış (429.157) son günlerin ortalamasını (113.710) belirgin biçimde aştı: para girişi. Hâlâ geçerli olup olmadığı bilinmiyor. Karnesi henüz az örnekli: 9 seferin 6'sında tuttu. Sunucu doğruladı.",
-                  "tr": "THYAO'da bu barda kurumsal net alış (429.157) son günlerin ortalamasını (113.710) belirgin biçimde aştı: para girişi. Hâlâ geçerli olup olmadığı bilinmiyor. Karnesi henüz az örnekli: 9 seferin 6'sında tuttu. Sunucu doğruladı."
+                  "en": "On this bar, net institutional buying in THYAO (429,157) clearly exceeded the recent average (113,710): money inflow. Whether it still holds is unknown. Its record is still thin: it played out in 3 of 5 cases. Server-verified.",
+                  "text": "THYAO'da bu barda kurumsal net alış (429.157) son günlerin ortalamasını (113.710) belirgin biçimde aştı: para girişi. Hâlâ geçerli olup olmadığı bilinmiyor. Karnesi henüz az örnekli: 5 seferin 3'ünde tuttu. Sunucu doğruladı.",
+                  "tr": "THYAO'da bu barda kurumsal net alış (429.157) son günlerin ortalamasını (113.710) belirgin biçimde aştı: para girişi. Hâlâ geçerli olup olmadığı bilinmiyor. Karnesi henüz az örnekli: 5 seferin 3'ünde tuttu. Sunucu doğruladı."
                 },
                 "series": "px",
                 "stage": "born",
@@ -1228,7 +1229,8 @@
                 "t": 1687158000000,
                 "tier": 2,
                 "time": "event",
-                "trust": "server"
+                "trust": "server",
+                "validity": "valid"
               },
               "kind": "capsule",
               "seq": 3,
@@ -1345,18 +1347,18 @@
                 "direction": "up",
                 "finding": "fnd.THYAO.flow.up.120",
                 "id": "cap.THYAO.flow.up.120",
-                "importance": 1.6557972032572976,
+                "importance": 1.6298631373232317,
                 "instrument": "THYAO",
                 "kind": "flow",
                 "last_bar": 124,
                 "ledger_at_birth": {
-                  "n": 9,
-                  "realized": 6
+                  "n": 5,
+                  "realized": 3
                 },
                 "sentence": {
-                  "en": "4 bars ago, net institutional buying in THYAO (429,157) clearly exceeded the recent average (113,710): money inflow. It was invalidated on this bar and is no longer valid. Its record is still thin: it played out in 6 of 9 cases. Server-verified.",
-                  "text": "THYAO'da 4 bar önce kurumsal net alış (429.157) son günlerin ortalamasını (113.710) belirgin biçimde aştı: para girişi. Sinyal bu barda geçersiz oldu; artık geçerli değil. Karnesi henüz az örnekli: 9 seferin 6'sında tuttu. Sunucu doğruladı.",
-                  "tr": "THYAO'da 4 bar önce kurumsal net alış (429.157) son günlerin ortalamasını (113.710) belirgin biçimde aştı: para girişi. Sinyal bu barda geçersiz oldu; artık geçerli değil. Karnesi henüz az örnekli: 9 seferin 6'sında tuttu. Sunucu doğruladı."
+                  "en": "4 bars ago, net institutional buying in THYAO (429,157) clearly exceeded the recent average (113,710): money inflow. It was invalidated on this bar and is no longer valid. Its record is still thin: it played out in 3 of 5 cases. Server-verified.",
+                  "text": "THYAO'da 4 bar önce kurumsal net alış (429.157) son günlerin ortalamasını (113.710) belirgin biçimde aştı: para girişi. Sinyal bu barda geçersiz oldu; artık geçerli değil. Karnesi henüz az örnekli: 5 seferin 3'ünde tuttu. Sunucu doğruladı.",
+                  "tr": "THYAO'da 4 bar önce kurumsal net alış (429.157) son günlerin ortalamasını (113.710) belirgin biçimde aştı: para girişi. Sinyal bu barda geçersiz oldu; artık geçerli değil. Karnesi henüz az örnekli: 5 seferin 3'ünde tuttu. Sunucu doğruladı."
                 },
                 "series": "px",
                 "stage": "invalidated",
@@ -1364,7 +1366,8 @@
                 "t": 1687503600000,
                 "tier": 2,
                 "time": "event",
-                "trust": "server"
+                "trust": "server",
+                "validity": "closed"
               },
               "kind": "capsule",
               "seq": 7,
@@ -1389,18 +1392,18 @@
                 "direction": "down",
                 "finding": "fnd.THYAO.breakout.down.124",
                 "id": "cap.THYAO.breakout.down.124",
-                "importance": 3.595316337843666,
+                "importance": 3.6207549343348937,
                 "instrument": "THYAO",
                 "kind": "breakout",
                 "last_bar": 124,
                 "ledger_at_birth": {
-                  "n": 8,
+                  "n": 6,
                   "realized": 3
                 },
                 "sentence": {
-                  "en": "On this bar, THYAO broke below support at 4.67 (close 4.55): a downside breakout. Volume confirmed it on this bar; 3 independent evidence families support it. It still holds. Its record is still thin: it played out in 3 of 8 cases.",
-                  "text": "THYAO bu barda 4,67'deki desteği aşağı kırdı (kapanış 4,55): aşağı kırılım. Bu barda hacim de teyit etti; 3 bağımsız kanıt ailesi destekliyor. Hâlâ geçerli. Karnesi henüz az örnekli: 8 seferin 3'ünde tuttu.",
-                  "tr": "THYAO bu barda 4,67'deki desteği aşağı kırdı (kapanış 4,55): aşağı kırılım. Bu barda hacim de teyit etti; 3 bağımsız kanıt ailesi destekliyor. Hâlâ geçerli. Karnesi henüz az örnekli: 8 seferin 3'ünde tuttu."
+                  "en": "On this bar, THYAO broke below support at 4.67 (close 4.55): a downside breakout. Volume confirmed it on this bar; 3 independent evidence families support it. It still holds. Its record is still thin: it played out in 3 of 6 cases.",
+                  "text": "THYAO bu barda 4,67'deki desteği aşağı kırdı (kapanış 4,55): aşağı kırılım. Bu barda hacim de teyit etti; 3 bağımsız kanıt ailesi destekliyor. Hâlâ geçerli. Karnesi henüz az örnekli: 6 seferin 3'ünde tuttu.",
+                  "tr": "THYAO bu barda 4,67'deki desteği aşağı kırdı (kapanış 4,55): aşağı kırılım. Bu barda hacim de teyit etti; 3 bağımsız kanıt ailesi destekliyor. Hâlâ geçerli. Karnesi henüz az örnekli: 6 seferin 3'ünde tuttu."
                 },
                 "series": "px",
                 "stage": "confirmed",
@@ -1408,7 +1411,8 @@
                 "t": 1687503600000,
                 "tier": 1,
                 "time": "event",
-                "trust": "replica"
+                "trust": "replica",
+                "validity": "valid"
               },
               "kind": "capsule",
               "seq": 7,
@@ -1436,18 +1440,18 @@
                 "direction": "down",
                 "finding": "fnd.THYAO.continuation.down.124",
                 "id": "cap.THYAO.continuation.down.124",
-                "importance": 1.6360963554246375,
+                "importance": 1.6642488480932591,
                 "instrument": "THYAO",
                 "kind": "continuation",
                 "last_bar": 124,
                 "ledger_at_birth": {
-                  "n": 3,
+                  "n": 1,
                   "realized": 0
                 },
                 "sentence": {
-                  "en": "THYAO is below the short average (4.78) as of this bar, now at 4.55. The downtrend is still in place. Its record is still thin: it played out in 0 of 3 cases.",
-                  "text": "THYAO bu bar itibarıyla kısa ortalamanın (4,78) altında; şu an 4,55. Düşüş eğilimi sürüyor. Karnesi henüz az örnekli: 3 seferin 0'ında tuttu.",
-                  "tr": "THYAO bu bar itibarıyla kısa ortalamanın (4,78) altında; şu an 4,55. Düşüş eğilimi sürüyor. Karnesi henüz az örnekli: 3 seferin 0'ında tuttu."
+                  "en": "THYAO is below the short average (4.78) as of this bar, now at 4.55. The downtrend is still in place. Its record is still thin: it played out in 0 of 1 cases.",
+                  "text": "THYAO bu bar itibarıyla kısa ortalamanın (4,78) altında; şu an 4,55. Düşüş eğilimi sürüyor. Karnesi henüz az örnekli: 1 seferin 0'ında tuttu.",
+                  "tr": "THYAO bu bar itibarıyla kısa ortalamanın (4,78) altında; şu an 4,55. Düşüş eğilimi sürüyor. Karnesi henüz az örnekli: 1 seferin 0'ında tuttu."
                 },
                 "series": "px",
                 "stage": "born",
@@ -1455,7 +1459,8 @@
                 "t": 1687503600000,
                 "tier": 2,
                 "time": "state",
-                "trust": "replica"
+                "trust": "replica",
+                "validity": "valid"
               },
               "kind": "capsule",
               "seq": 7,
@@ -1483,18 +1488,18 @@
                 "direction": "down",
                 "finding": "fnd.THYAO.breakout.down.124",
                 "id": "cap.THYAO.breakout.down.124",
-                "importance": 3.595316337843666,
+                "importance": 3.6207549343348937,
                 "instrument": "THYAO",
                 "kind": "breakout",
                 "last_bar": 124,
                 "ledger_at_birth": {
-                  "n": 8,
+                  "n": 6,
                   "realized": 3
                 },
                 "sentence": {
-                  "en": "On this bar, THYAO broke below support at 4.67 (close 4.55): a downside breakout. Volume confirmed it on this bar; 3 independent evidence families support it. It still holds. Its record is still thin: it played out in 3 of 8 cases.",
-                  "text": "THYAO bu barda 4,67'deki desteği aşağı kırdı (kapanış 4,55): aşağı kırılım. Bu barda hacim de teyit etti; 3 bağımsız kanıt ailesi destekliyor. Hâlâ geçerli. Karnesi henüz az örnekli: 8 seferin 3'ünde tuttu.",
-                  "tr": "THYAO bu barda 4,67'deki desteği aşağı kırdı (kapanış 4,55): aşağı kırılım. Bu barda hacim de teyit etti; 3 bağımsız kanıt ailesi destekliyor. Hâlâ geçerli. Karnesi henüz az örnekli: 8 seferin 3'ünde tuttu."
+                  "en": "On this bar, THYAO broke below support at 4.67 (close 4.55): a downside breakout. Volume confirmed it on this bar; 3 independent evidence families support it. It still holds. Its record is still thin: it played out in 3 of 6 cases.",
+                  "text": "THYAO bu barda 4,67'deki desteği aşağı kırdı (kapanış 4,55): aşağı kırılım. Bu barda hacim de teyit etti; 3 bağımsız kanıt ailesi destekliyor. Hâlâ geçerli. Karnesi henüz az örnekli: 6 seferin 3'ünde tuttu.",
+                  "tr": "THYAO bu barda 4,67'deki desteği aşağı kırdı (kapanış 4,55): aşağı kırılım. Bu barda hacim de teyit etti; 3 bağımsız kanıt ailesi destekliyor. Hâlâ geçerli. Karnesi henüz az örnekli: 6 seferin 3'ünde tuttu."
                 },
                 "series": "px",
                 "stage": "confirmed",
@@ -1502,7 +1507,8 @@
                 "t": 1687503600000,
                 "tier": 1,
                 "time": "event",
-                "trust": "replica"
+                "trust": "replica",
+                "validity": "valid"
               },
               "kind": "capsule",
               "seq": 7,
@@ -1530,18 +1536,18 @@
                 "direction": "down",
                 "finding": "fnd.THYAO.breakout.down.124",
                 "id": "cap.THYAO.breakout.down.124",
-                "importance": 3.595316337843666,
+                "importance": 3.6207549343348937,
                 "instrument": "THYAO",
                 "kind": "breakout",
                 "last_bar": 124,
                 "ledger_at_birth": {
-                  "n": 8,
+                  "n": 6,
                   "realized": 3
                 },
                 "sentence": {
-                  "en": "On this bar, THYAO broke below support at 4.67 (close 4.55): a downside breakout. Volume confirmed it on this bar; 3 independent evidence families support it. It still holds. Its record is still thin: it played out in 3 of 8 cases.",
-                  "text": "THYAO bu barda 4,67'deki desteği aşağı kırdı (kapanış 4,55): aşağı kırılım. Bu barda hacim de teyit etti; 3 bağımsız kanıt ailesi destekliyor. Hâlâ geçerli. Karnesi henüz az örnekli: 8 seferin 3'ünde tuttu.",
-                  "tr": "THYAO bu barda 4,67'deki desteği aşağı kırdı (kapanış 4,55): aşağı kırılım. Bu barda hacim de teyit etti; 3 bağımsız kanıt ailesi destekliyor. Hâlâ geçerli. Karnesi henüz az örnekli: 8 seferin 3'ünde tuttu."
+                  "en": "On this bar, THYAO broke below support at 4.67 (close 4.55): a downside breakout. Volume confirmed it on this bar; 3 independent evidence families support it. It still holds. Its record is still thin: it played out in 3 of 6 cases.",
+                  "text": "THYAO bu barda 4,67'deki desteği aşağı kırdı (kapanış 4,55): aşağı kırılım. Bu barda hacim de teyit etti; 3 bağımsız kanıt ailesi destekliyor. Hâlâ geçerli. Karnesi henüz az örnekli: 6 seferin 3'ünde tuttu.",
+                  "tr": "THYAO bu barda 4,67'deki desteği aşağı kırdı (kapanış 4,55): aşağı kırılım. Bu barda hacim de teyit etti; 3 bağımsız kanıt ailesi destekliyor. Hâlâ geçerli. Karnesi henüz az örnekli: 6 seferin 3'ünde tuttu."
                 },
                 "series": "px",
                 "stage": "confirmed",
@@ -1549,7 +1555,8 @@
                 "t": 1687503600000,
                 "tier": 1,
                 "time": "event",
-                "trust": "replica"
+                "trust": "replica",
+                "validity": "valid"
               },
               "kind": "capsule",
               "seq": 7,
@@ -1622,18 +1629,18 @@
                 "direction": "down",
                 "finding": "fnd.THYAO.breakout.down.124",
                 "id": "cap.THYAO.breakout.down.124",
-                "importance": 3.599202977519779,
+                "importance": 3.623831857411817,
                 "instrument": "THYAO",
                 "kind": "breakout",
                 "last_bar": 126,
                 "ledger_at_birth": {
-                  "n": 8,
+                  "n": 6,
                   "realized": 3
                 },
                 "sentence": {
-                  "en": "2 bars ago, THYAO broke below support at 4.67 (close 4.55): a downside breakout. It strengthened on this bar with new evidence from the same family. It still holds. Its record is still thin: it played out in 3 of 8 cases.",
-                  "text": "THYAO 2 bar önce 4,67'deki desteği aşağı kırdı (kapanış 4,55): aşağı kırılım. Bu barda aynı aileden yeni bir kanıtla güçlendi. Hâlâ geçerli. Karnesi henüz az örnekli: 8 seferin 3'ünde tuttu.",
-                  "tr": "THYAO 2 bar önce 4,67'deki desteği aşağı kırdı (kapanış 4,55): aşağı kırılım. Bu barda aynı aileden yeni bir kanıtla güçlendi. Hâlâ geçerli. Karnesi henüz az örnekli: 8 seferin 3'ünde tuttu."
+                  "en": "2 bars ago, THYAO broke below support at 4.67 (close 4.55): a downside breakout. It strengthened on this bar with new evidence from the same family. It still holds. Its record is still thin: it played out in 3 of 6 cases.",
+                  "text": "THYAO 2 bar önce 4,67'deki desteği aşağı kırdı (kapanış 4,55): aşağı kırılım. Bu barda aynı aileden yeni bir kanıtla güçlendi. Hâlâ geçerli. Karnesi henüz az örnekli: 6 seferin 3'ünde tuttu.",
+                  "tr": "THYAO 2 bar önce 4,67'deki desteği aşağı kırdı (kapanış 4,55): aşağı kırılım. Bu barda aynı aileden yeni bir kanıtla güçlendi. Hâlâ geçerli. Karnesi henüz az örnekli: 6 seferin 3'ünde tuttu."
                 },
                 "series": "px",
                 "stage": "strengthened",
@@ -1641,7 +1648,8 @@
                 "t": 1687849200000,
                 "tier": 1,
                 "time": "event",
-                "trust": "replica"
+                "trust": "replica",
+                "validity": "valid"
               },
               "kind": "capsule",
               "seq": 9,
@@ -1688,7 +1696,8 @@
                 "t": 1687849200000,
                 "tier": 3,
                 "time": "state",
-                "trust": "replica"
+                "trust": "replica",
+                "validity": "valid"
               },
               "kind": "capsule",
               "seq": 9,
@@ -1739,18 +1748,18 @@
                 "direction": "down",
                 "finding": "fnd.THYAO.breakout.down.124",
                 "id": "cap.THYAO.breakout.down.124",
-                "importance": 3.599202977519779,
+                "importance": 3.623831857411817,
                 "instrument": "THYAO",
                 "kind": "breakout",
                 "last_bar": 127,
                 "ledger_at_birth": {
-                  "n": 8,
+                  "n": 6,
                   "realized": 3
                 },
                 "sentence": {
-                  "en": "3 bars ago, THYAO broke below support at 4.67 (close 4.55): a downside breakout. The expected outcome came true on this bar. It still holds. Its record is still thin: it played out in 3 of 8 cases.",
-                  "text": "THYAO 3 bar önce 4,67'deki desteği aşağı kırdı (kapanış 4,55): aşağı kırılım. Beklenen sonuç bu barda gerçekleşti. Hâlâ geçerli. Karnesi henüz az örnekli: 8 seferin 3'ünde tuttu.",
-                  "tr": "THYAO 3 bar önce 4,67'deki desteği aşağı kırdı (kapanış 4,55): aşağı kırılım. Beklenen sonuç bu barda gerçekleşti. Hâlâ geçerli. Karnesi henüz az örnekli: 8 seferin 3'ünde tuttu."
+                  "en": "3 bars ago, THYAO broke below support at 4.67 (close 4.55): a downside breakout. The expected outcome came true on this bar. It still holds. Its record is still thin: it played out in 3 of 6 cases.",
+                  "text": "THYAO 3 bar önce 4,67'deki desteği aşağı kırdı (kapanış 4,55): aşağı kırılım. Beklenen sonuç bu barda gerçekleşti. Hâlâ geçerli. Karnesi henüz az örnekli: 6 seferin 3'ünde tuttu.",
+                  "tr": "THYAO 3 bar önce 4,67'deki desteği aşağı kırdı (kapanış 4,55): aşağı kırılım. Beklenen sonuç bu barda gerçekleşti. Hâlâ geçerli. Karnesi henüz az örnekli: 6 seferin 3'ünde tuttu."
                 },
                 "series": "px",
                 "stage": "realized",
@@ -1758,7 +1767,8 @@
                 "t": 1687935600000,
                 "tier": 1,
                 "time": "event",
-                "trust": "replica"
+                "trust": "replica",
+                "validity": "closed"
               },
               "kind": "capsule",
               "seq": 10,
@@ -1788,18 +1798,18 @@
                   "direction": "down",
                   "finding": "fnd.THYAO.breakout.down.124",
                   "id": "cap.THYAO.breakout.down.124",
-                  "importance": 3.599202977519779,
+                  "importance": 3.623831857411817,
                   "instrument": "THYAO",
                   "kind": "breakout",
                   "last_bar": 127,
                   "ledger_at_birth": {
-                    "n": 8,
+                    "n": 6,
                     "realized": 3
                   },
                   "sentence": {
-                    "en": "3 bars ago, THYAO broke below support at 4.67 (close 4.55): a downside breakout. The expected outcome came true on this bar. It still holds. Its record is still thin: it played out in 3 of 8 cases.",
-                    "text": "THYAO 3 bar önce 4,67'deki desteği aşağı kırdı (kapanış 4,55): aşağı kırılım. Beklenen sonuç bu barda gerçekleşti. Hâlâ geçerli. Karnesi henüz az örnekli: 8 seferin 3'ünde tuttu.",
-                    "tr": "THYAO 3 bar önce 4,67'deki desteği aşağı kırdı (kapanış 4,55): aşağı kırılım. Beklenen sonuç bu barda gerçekleşti. Hâlâ geçerli. Karnesi henüz az örnekli: 8 seferin 3'ünde tuttu."
+                    "en": "3 bars ago, THYAO broke below support at 4.67 (close 4.55): a downside breakout. The expected outcome came true on this bar. It still holds. Its record is still thin: it played out in 3 of 6 cases.",
+                    "text": "THYAO 3 bar önce 4,67'deki desteği aşağı kırdı (kapanış 4,55): aşağı kırılım. Beklenen sonuç bu barda gerçekleşti. Hâlâ geçerli. Karnesi henüz az örnekli: 6 seferin 3'ünde tuttu.",
+                    "tr": "THYAO 3 bar önce 4,67'deki desteği aşağı kırdı (kapanış 4,55): aşağı kırılım. Beklenen sonuç bu barda gerçekleşti. Hâlâ geçerli. Karnesi henüz az örnekli: 6 seferin 3'ünde tuttu."
                   },
                   "series": "px",
                   "stage": "realized",
@@ -1807,34 +1817,8 @@
                   "t": 1687935600000,
                   "tier": 1,
                   "time": "event",
-                  "trust": "replica"
-                },
-                {
-                  "born_bar": 120,
-                  "confirmations": 1,
-                  "direction": "up",
-                  "finding": "fnd.THYAO.flow.up.120",
-                  "id": "cap.THYAO.flow.up.120",
-                  "importance": 1.6557972032572976,
-                  "instrument": "THYAO",
-                  "kind": "flow",
-                  "last_bar": 124,
-                  "ledger_at_birth": {
-                    "n": 9,
-                    "realized": 6
-                  },
-                  "sentence": {
-                    "en": "7 bars ago, net institutional buying in THYAO (429,157) clearly exceeded the recent average (113,710): money inflow. It was invalidated 3 bars ago and is no longer valid. Its record is still thin: it played out in 6 of 9 cases. Server-verified.",
-                    "text": "THYAO'da 7 bar önce kurumsal net alış (429.157) son günlerin ortalamasını (113.710) belirgin biçimde aştı: para girişi. Sinyal 3 bar önce geçersiz oldu; artık geçerli değil. Karnesi henüz az örnekli: 9 seferin 6'sında tuttu. Sunucu doğruladı.",
-                    "tr": "THYAO'da 7 bar önce kurumsal net alış (429.157) son günlerin ortalamasını (113.710) belirgin biçimde aştı: para girişi. Sinyal 3 bar önce geçersiz oldu; artık geçerli değil. Karnesi henüz az örnekli: 9 seferin 6'sında tuttu. Sunucu doğruladı."
-                  },
-                  "series": "px",
-                  "stage": "invalidated",
-                  "state": "invalidated",
-                  "t": 1687503600000,
-                  "tier": 2,
-                  "time": "event",
-                  "trust": "server"
+                  "trust": "replica",
+                  "validity": "closed"
                 },
                 {
                   "born_bar": 124,
@@ -1842,18 +1826,18 @@
                   "direction": "down",
                   "finding": "fnd.THYAO.continuation.down.124",
                   "id": "cap.THYAO.continuation.down.124",
-                  "importance": 1.6360963554246375,
+                  "importance": 1.6642488480932591,
                   "instrument": "THYAO",
                   "kind": "continuation",
                   "last_bar": 124,
                   "ledger_at_birth": {
-                    "n": 3,
+                    "n": 1,
                     "realized": 0
                   },
                   "sentence": {
-                    "en": "THYAO has been below the short average (4.78) for 3 bars and is now at 4.47. The downtrend is still in place. Its record is still thin: it played out in 0 of 3 cases.",
-                    "text": "THYAO 3 bardır kısa ortalamanın (4,78) altında; şu an 4,47. Düşüş eğilimi sürüyor. Karnesi henüz az örnekli: 3 seferin 0'ında tuttu.",
-                    "tr": "THYAO 3 bardır kısa ortalamanın (4,78) altında; şu an 4,47. Düşüş eğilimi sürüyor. Karnesi henüz az örnekli: 3 seferin 0'ında tuttu."
+                    "en": "THYAO has been below the short average (4.78) for 3 bars and is now at 4.47. The downtrend is still in place. Its record is still thin: it played out in 0 of 1 cases.",
+                    "text": "THYAO 3 bardır kısa ortalamanın (4,78) altında; şu an 4,47. Düşüş eğilimi sürüyor. Karnesi henüz az örnekli: 1 seferin 0'ında tuttu.",
+                    "tr": "THYAO 3 bardır kısa ortalamanın (4,78) altında; şu an 4,47. Düşüş eğilimi sürüyor. Karnesi henüz az örnekli: 1 seferin 0'ında tuttu."
                   },
                   "series": "px",
                   "stage": "born",
@@ -1861,7 +1845,36 @@
                   "t": 1687503600000,
                   "tier": 2,
                   "time": "state",
-                  "trust": "replica"
+                  "trust": "replica",
+                  "validity": "valid"
+                },
+                {
+                  "born_bar": 120,
+                  "confirmations": 1,
+                  "direction": "up",
+                  "finding": "fnd.THYAO.flow.up.120",
+                  "id": "cap.THYAO.flow.up.120",
+                  "importance": 1.6298631373232317,
+                  "instrument": "THYAO",
+                  "kind": "flow",
+                  "last_bar": 124,
+                  "ledger_at_birth": {
+                    "n": 5,
+                    "realized": 3
+                  },
+                  "sentence": {
+                    "en": "7 bars ago, net institutional buying in THYAO (429,157) clearly exceeded the recent average (113,710): money inflow. It was invalidated 3 bars ago and is no longer valid. Its record is still thin: it played out in 3 of 5 cases. Server-verified.",
+                    "text": "THYAO'da 7 bar önce kurumsal net alış (429.157) son günlerin ortalamasını (113.710) belirgin biçimde aştı: para girişi. Sinyal 3 bar önce geçersiz oldu; artık geçerli değil. Karnesi henüz az örnekli: 5 seferin 3'ünde tuttu. Sunucu doğruladı.",
+                    "tr": "THYAO'da 7 bar önce kurumsal net alış (429.157) son günlerin ortalamasını (113.710) belirgin biçimde aştı: para girişi. Sinyal 3 bar önce geçersiz oldu; artık geçerli değil. Karnesi henüz az örnekli: 5 seferin 3'ünde tuttu. Sunucu doğruladı."
+                  },
+                  "series": "px",
+                  "stage": "invalidated",
+                  "state": "invalidated",
+                  "t": 1687503600000,
+                  "tier": 2,
+                  "time": "event",
+                  "trust": "server",
+                  "validity": "closed"
                 },
                 {
                   "born_bar": 126,
@@ -1888,7 +1901,8 @@
                   "t": 1687849200000,
                   "tier": 3,
                   "time": "state",
-                  "trust": "replica"
+                  "trust": "replica",
+                  "validity": "valid"
                 },
                 {
                   "born_bar": 115,
@@ -1896,18 +1910,18 @@
                   "direction": "down",
                   "finding": "fnd.THYAO.breakout.down.115",
                   "id": "cap.THYAO.breakout.down.115",
-                  "importance": 1.4601231174212248,
+                  "importance": 1.4879223452204524,
                   "instrument": "THYAO",
                   "kind": "breakout",
                   "last_bar": 120,
                   "ledger_at_birth": {
-                    "n": 6,
+                    "n": 4,
                     "realized": 2
                   },
                   "sentence": {
-                    "en": "12 bars ago, THYAO broke below support at 4.71 (close 4.69): a downside breakout. It was invalidated 7 bars ago and is no longer valid. Its record is still thin: it played out in 2 of 6 cases.",
-                    "text": "THYAO 12 bar önce 4,71'deki desteği aşağı kırdı (kapanış 4,69): aşağı kırılım. Sinyal 7 bar önce geçersiz oldu; artık geçerli değil. Karnesi henüz az örnekli: 6 seferin 2'sinde tuttu.",
-                    "tr": "THYAO 12 bar önce 4,71'deki desteği aşağı kırdı (kapanış 4,69): aşağı kırılım. Sinyal 7 bar önce geçersiz oldu; artık geçerli değil. Karnesi henüz az örnekli: 6 seferin 2'sinde tuttu."
+                    "en": "12 bars ago, THYAO broke below support at 4.71 (close 4.69): a downside breakout. It was invalidated 7 bars ago and is no longer valid. Its record is still thin: it played out in 2 of 4 cases.",
+                    "text": "THYAO 12 bar önce 4,71'deki desteği aşağı kırdı (kapanış 4,69): aşağı kırılım. Sinyal 7 bar önce geçersiz oldu; artık geçerli değil. Karnesi henüz az örnekli: 4 seferin 2'sinde tuttu.",
+                    "tr": "THYAO 12 bar önce 4,71'deki desteği aşağı kırdı (kapanış 4,69): aşağı kırılım. Sinyal 7 bar önce geçersiz oldu; artık geçerli değil. Karnesi henüz az örnekli: 4 seferin 2'sinde tuttu."
                   },
                   "series": "px",
                   "stage": "invalidated",
@@ -1915,7 +1929,8 @@
                   "t": 1687158000000,
                   "tier": 3,
                   "time": "event",
-                  "trust": "replica"
+                  "trust": "replica",
+                  "validity": "closed"
                 }
               ],
               "kind": "capsules"
@@ -2316,7 +2331,8 @@
                   "freshness": 1.0,
                   "kind": "breakout",
                   "phase": "realized",
-                  "strength": 1.0
+                  "strength": 1.0,
+                  "validity": "closed"
                 },
                 "item": {
                   "born_bar": 124,
@@ -2324,18 +2340,18 @@
                   "direction": "down",
                   "finding": "fnd.THYAO.breakout.down.124",
                   "id": "cap.THYAO.breakout.down.124",
-                  "importance": 3.599202977519779,
+                  "importance": 3.623831857411817,
                   "instrument": "THYAO",
                   "kind": "breakout",
                   "last_bar": 127,
                   "ledger_at_birth": {
-                    "n": 8,
+                    "n": 6,
                     "realized": 3
                   },
                   "sentence": {
-                    "en": "3 bars ago, THYAO broke below support at 4.67 (close 4.55): a downside breakout. The expected outcome came true on this bar. It still holds. Its record is still thin: it played out in 3 of 8 cases.",
-                    "text": "THYAO 3 bar önce 4,67'deki desteği aşağı kırdı (kapanış 4,55): aşağı kırılım. Beklenen sonuç bu barda gerçekleşti. Hâlâ geçerli. Karnesi henüz az örnekli: 8 seferin 3'ünde tuttu.",
-                    "tr": "THYAO 3 bar önce 4,67'deki desteği aşağı kırdı (kapanış 4,55): aşağı kırılım. Beklenen sonuç bu barda gerçekleşti. Hâlâ geçerli. Karnesi henüz az örnekli: 8 seferin 3'ünde tuttu."
+                    "en": "3 bars ago, THYAO broke below support at 4.67 (close 4.55): a downside breakout. The expected outcome came true on this bar. It still holds. Its record is still thin: it played out in 3 of 6 cases.",
+                    "text": "THYAO 3 bar önce 4,67'deki desteği aşağı kırdı (kapanış 4,55): aşağı kırılım. Beklenen sonuç bu barda gerçekleşti. Hâlâ geçerli. Karnesi henüz az örnekli: 6 seferin 3'ünde tuttu.",
+                    "tr": "THYAO 3 bar önce 4,67'deki desteği aşağı kırdı (kapanış 4,55): aşağı kırılım. Beklenen sonuç bu barda gerçekleşti. Hâlâ geçerli. Karnesi henüz az örnekli: 6 seferin 3'ünde tuttu."
                   },
                   "series": "px",
                   "stage": "realized",
@@ -2343,14 +2359,21 @@
                   "t": 1687935600000,
                   "tier": 1,
                   "time": "event",
-                  "trust": "replica"
+                  "trust": "replica",
+                  "validity": "closed"
                 },
                 "ledger": {
-                  "n": 9,
+                  "n": 7,
                   "realized": 4
                 },
                 "story": {
                   "born_bar": 124,
+                  "condition": {
+                    "key": "level",
+                    "op": "lt",
+                    "subject": "close",
+                    "within_bars": 3
+                  },
                   "direction": "down",
                   "families": [
                     "price",
@@ -2402,15 +2425,18 @@
                     }
                   ],
                   "horizon_bars": 10,
-                  "importance": 3.599202977519779,
+                  "importance": 3.623831857411817,
                   "instrument": "THYAO",
                   "kind": "breakout",
                   "last_bar": 127,
                   "ledger_at_birth": {
-                    "n": 8,
+                    "n": 6,
                     "realized": 3
                   },
-                  "ledger_key": "breakout/breakout.range@1",
+                  "ledger_key": "breakout/down/breakout.range@1",
+                  "resolution": {
+                    "rule": "barrier"
+                  },
                   "series": "px",
                   "stage": "realized",
                   "strength": 1.0,
@@ -2451,10 +2477,19 @@
               "rows": [
                 {
                   "detector": "breakout.range",
-                  "key": "breakout/breakout.range@1",
+                  "direction": "down",
+                  "key": "breakout/down/breakout.range@1",
                   "kind": "breakout",
-                  "n": 9,
+                  "n": 7,
                   "realized": 4
+                },
+                {
+                  "detector": "breakout.range",
+                  "direction": "up",
+                  "key": "breakout/up/breakout.range@1",
+                  "kind": "breakout",
+                  "n": 2,
+                  "realized": 0
                 }
               ],
               "total": {

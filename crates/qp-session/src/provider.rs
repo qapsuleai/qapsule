@@ -178,14 +178,31 @@ impl DataProvider for DocProvider<'_> {
     /// story, by the capsule engine's own rule (`qp_capsule::glyph_spec`, confidence
     /// shown from [`qp_grammar::depth::GLYPH_MIN_LEDGER_N`] closed rows on) at the last
     /// bar of the story's bar series.
+    ///
+    /// (R4, K42/A28) With the story's validity at that bar (from its facts in the
+    /// document and the bars, the rule the sentence uses), so a capsule that no longer
+    /// holds looks so in its glyph too.
     fn glyph(&self, capsule_or_finding: &str) -> Option<Cow<'_, GlyphSpec>> {
         let c = self.capsule(capsule_or_finding)?;
         let story = c.story.as_ref()?;
-        let n = self.bars(&story.series)?.len() as u64;
-        Some(Cow::Owned(qp_capsule::glyph_spec(
+        let bars = self.bars(&story.series)?;
+        let now = (bars.len() as u64).saturating_sub(1);
+        let facts: Vec<&qp_schema::Fact> = crate::capsule::story_fact_ids(story)
+            .iter()
+            .filter_map(|i| self.doc.facts.iter().find(|f| &f.id == i))
+            .collect();
+        let validity = crate::capsule::story_validity(
             story,
-            n.saturating_sub(1),
+            &facts,
+            &bars,
+            now,
+            &mut qp_capsule::sentence::StudyMemo::default(),
+        );
+        Some(Cow::Owned(qp_capsule::glyph_spec_at(
+            story,
+            now,
             qp_grammar::depth::GLYPH_MIN_LEDGER_N,
+            validity,
         )))
     }
 }

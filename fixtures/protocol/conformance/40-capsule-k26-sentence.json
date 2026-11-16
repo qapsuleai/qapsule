@@ -1192,7 +1192,8 @@
                   "freshness": 1.0,
                   "kind": "continuation",
                   "phase": "final",
-                  "strength": 0.040553264279189295
+                  "strength": 0.040553264279189295,
+                  "validity": "no_longer"
                 },
                 "item": {
                   "born_bar": 84,
@@ -1200,18 +1201,18 @@
                   "direction": "down",
                   "finding": "fnd.THYAO.continuation.down.84",
                   "id": "cap.THYAO.continuation.down.84",
-                  "importance": 0.9582381087589441,
+                  "importance": 0.9878433719168389,
                   "instrument": "THYAO",
                   "kind": "continuation",
                   "last_bar": 94,
                   "ledger_at_birth": {
-                    "n": 2,
+                    "n": 0,
                     "realized": 0
                   },
                   "sentence": {
-                    "en": "10 bars ago, THYAO crossed below the short average (5.23); it rose back above on this bar and is now at 5.10, no longer below the short average. The downtrend has ended. Its record is still thin: it played out in 0 of 2 cases.",
-                    "text": "THYAO 10 bar önce kısa ortalamanın (5,23) altına indi, bu barda yeniden üstüne çıktı; şu an 5,10, artık kısa ortalamanın altında değil. Düşüş eğilimi sona erdi. Karnesi henüz az örnekli: 2 seferin 0'ında tuttu.",
-                    "tr": "THYAO 10 bar önce kısa ortalamanın (5,23) altına indi, bu barda yeniden üstüne çıktı; şu an 5,10, artık kısa ortalamanın altında değil. Düşüş eğilimi sona erdi. Karnesi henüz az örnekli: 2 seferin 0'ında tuttu."
+                    "en": "10 bars ago, THYAO crossed below the short average (5.23); it rose back above on this bar and is now at 5.10, no longer below the short average. The downtrend has ended. No track record yet.",
+                    "text": "THYAO 10 bar önce kısa ortalamanın (5,23) altına indi, bu barda yeniden üstüne çıktı; şu an 5,10, artık kısa ortalamanın altında değil. Düşüş eğilimi sona erdi. Henüz karnesi yok.",
+                    "tr": "THYAO 10 bar önce kısa ortalamanın (5,23) altına indi, bu barda yeniden üstüne çıktı; şu an 5,10, artık kısa ortalamanın altında değil. Düşüş eğilimi sona erdi. Henüz karnesi yok."
                   },
                   "series": "px",
                   "stage": "weakened",
@@ -1219,14 +1220,20 @@
                   "t": 1683874800000,
                   "tier": 3,
                   "time": "state",
-                  "trust": "replica"
+                  "trust": "replica",
+                  "validity": "no_longer"
                 },
                 "ledger": {
-                  "n": 2,
+                  "n": 0,
                   "realized": 0
                 },
                 "story": {
                   "born_bar": 84,
+                  "condition": {
+                    "key": "sma20",
+                    "op": "lt",
+                    "subject": "close"
+                  },
                   "direction": "down",
                   "families": [
                     "price"
@@ -1252,15 +1259,18 @@
                     }
                   ],
                   "horizon_bars": 20,
-                  "importance": 0.9582381087589441,
+                  "importance": 0.9878433719168389,
                   "instrument": "THYAO",
                   "kind": "continuation",
                   "last_bar": 94,
                   "ledger_at_birth": {
-                    "n": 2,
+                    "n": 0,
                     "realized": 0
                   },
-                  "ledger_key": "continuation/continuation.ma_stack@1",
+                  "ledger_key": "continuation/down/continuation.ma_stack@1",
+                  "resolution": {
+                    "rule": "barrier"
+                  },
                   "series": "px",
                   "stage": "weakened",
                   "strength": 0.040553264279189295,
@@ -1495,7 +1505,8 @@
                   "freshness": 1.0,
                   "kind": "continuation",
                   "phase": "final",
-                  "strength": 0.040553264279189295
+                  "strength": 0.040553264279189295,
+                  "validity": "no_longer"
                 },
                 "item": {
                   "born_bar": 84,
@@ -1503,18 +1514,18 @@
                   "direction": "down",
                   "finding": "fnd.THYAO.continuation.down.84",
                   "id": "cap.THYAO.continuation.down.84",
-                  "importance": 0.9582381087589441,
+                  "importance": 0.9878433719168389,
                   "instrument": "THYAO",
                   "kind": "continuation",
                   "last_bar": 94,
                   "ledger_at_birth": {
-                    "n": 2,
+                    "n": 0,
                     "realized": 0
                   },
                   "sentence": {
-                    "en": "10 bars ago, THYAO crossed below the short average (5.23); it rose back above on this bar and is now at 5.10, no longer below the short average. The downtrend has ended. Its record is still thin: it played out in 0 of 2 cases.",
-                    "text": "10 bars ago, THYAO crossed below the short average (5.23); it rose back above on this bar and is now at 5.10, no longer below the short average. The downtrend has ended. Its record is still thin: it played out in 0 of 2 cases.",
-                    "tr": "THYAO 10 bar önce kısa ortalamanın (5,23) altına indi, bu barda yeniden üstüne çıktı; şu an 5,10, artık kısa ortalamanın altında değil. Düşüş eğilimi sona erdi. Karnesi henüz az örnekli: 2 seferin 0'ında tuttu."
+                    "en": "10 bars ago, THYAO crossed below the short average (5.23); it rose back above on this bar and is now at 5.10, no longer below the short average. The downtrend has ended. No track record yet.",
+                    "text": "10 bars ago, THYAO crossed below the short average (5.23); it rose back above on this bar and is now at 5.10, no longer below the short average. The downtrend has ended. No track record yet.",
+                    "tr": "THYAO 10 bar önce kısa ortalamanın (5,23) altına indi, bu barda yeniden üstüne çıktı; şu an 5,10, artık kısa ortalamanın altında değil. Düşüş eğilimi sona erdi. Henüz karnesi yok."
                   },
                   "series": "px",
                   "stage": "weakened",
@@ -1522,14 +1533,20 @@
                   "t": 1683874800000,
                   "tier": 3,
                   "time": "state",
-                  "trust": "replica"
+                  "trust": "replica",
+                  "validity": "no_longer"
                 },
                 "ledger": {
-                  "n": 2,
+                  "n": 0,
                   "realized": 0
                 },
                 "story": {
                   "born_bar": 84,
+                  "condition": {
+                    "key": "sma20",
+                    "op": "lt",
+                    "subject": "close"
+                  },
                   "direction": "down",
                   "families": [
                     "price"
@@ -1555,15 +1572,18 @@
                     }
                   ],
                   "horizon_bars": 20,
-                  "importance": 0.9582381087589441,
+                  "importance": 0.9878433719168389,
                   "instrument": "THYAO",
                   "kind": "continuation",
                   "last_bar": 94,
                   "ledger_at_birth": {
-                    "n": 2,
+                    "n": 0,
                     "realized": 0
                   },
-                  "ledger_key": "continuation/continuation.ma_stack@1",
+                  "ledger_key": "continuation/down/continuation.ma_stack@1",
+                  "resolution": {
+                    "rule": "barrier"
+                  },
                   "series": "px",
                   "stage": "weakened",
                   "strength": 0.040553264279189295,
@@ -1627,7 +1647,8 @@
                   "t": 1683615600000,
                   "tier": 3,
                   "time": "event",
-                  "trust": "replica"
+                  "trust": "replica",
+                  "validity": "closed"
                 }
               ],
               "kind": "capsules"

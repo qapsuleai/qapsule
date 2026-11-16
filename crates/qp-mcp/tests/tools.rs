@@ -334,3 +334,28 @@ fn grammar_ops_and_hit_are_generated_tools() {
         "{names:?}"
     );
 }
+
+/// R4/T3: the tools are generated from the schema, so the K42 and R3-ergonomics fields
+/// appear in them: `query_capsule.capsule` takes a capsule selector, `query_capsules` has
+/// `latest` and the birth filters, `query_ledger` has `direction`.
+#[test]
+fn r4_capsule_fields_in_tools() {
+    let props = |n: &str| {
+        tools::find(n)
+            .unwrap_or_else(|| panic!("missing tool {n}"))
+            .input_schema["properties"]
+            .clone()
+    };
+    let cs = props("query_capsules");
+    for k in ["latest", "born_since_bar", "born_since_t"] {
+        assert!(cs.get(k).is_some(), "query_capsules lacks {k}");
+    }
+    assert!(props("query_ledger").get("direction").is_some());
+    let cap = tools::find("query_capsule")
+        .unwrap()
+        .input_schema
+        .to_string();
+    for k in ["CapsuleSel", "born_bar", "open"] {
+        assert!(cap.contains(k), "query_capsule schema lacks {k}: {cap}");
+    }
+}

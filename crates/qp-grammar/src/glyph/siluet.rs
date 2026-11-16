@@ -15,6 +15,7 @@
 //! | strength | silhouette size and stroke weight |
 //! | confidence | a pale plate filled from the bottom up to the confidence level; none = no plate |
 //! | phase | candidate = dashed strokes, hollow arrowhead; final = solid; closed = grey silhouette with a corner badge: realized ✓, failed ✗; retracted = grey and struck through |
+//! | validity (R4, K42/A28) | only `no_longer` (open story, state condition broke): grey silhouette and a hollow ring with a bar in the corner badge; absent / `valid` / `closed` draw as above |
 //! | freshness | opacity |
 //! | confirmations | 1–5 short ticks along the bottom edge |
 //! | server | a solid folded corner (dog-ear) at the top right |
@@ -24,7 +25,7 @@
 
 use super::{Alphabet as AlphabetTrait, GlyphBox};
 use crate::theme::{with_opacity, Theme};
-use qp_schema::capsule::{Direction, GlyphPhase, GlyphSpec, MeaningKind};
+use qp_schema::capsule::{Direction, GlyphPhase, GlyphSpec, MeaningKind, Validity};
 use qp_schema::scene::{Prim, Rgba};
 
 /// The "siluet" alphabet.
@@ -407,14 +408,18 @@ impl AlphabetTrait for Siluet {
         let fresh = 0.3 + 0.7 * spec.freshness.clamp(0.0, 1.0);
         let closed = is_closed(spec.phase);
         let candidate = spec.phase == GlyphPhase::Candidate;
+        // (R4, K42/A28) "No longer holds": only an open story whose state condition broke.
+        // Absent / valid / closed validity draws exactly as in R3.
+        let no_longer = !closed && spec.validity == Some(Validity::NoLonger);
+        let grey = closed || no_longer;
 
         let dir_col = match spec.direction {
             Direction::Up => theme.up,
             Direction::Down => theme.down,
             Direction::Neutral => theme.accent,
         };
-        let main: Rgba = with_opacity(if closed { theme.muted } else { dir_col }, fresh);
-        let edge: Rgba = with_opacity(if closed { theme.muted } else { theme.text }, fresh);
+        let main: Rgba = with_opacity(if grey { theme.muted } else { dir_col }, fresh);
+        let edge: Rgba = with_opacity(if grey { theme.muted } else { theme.text }, fresh);
         let ink = with_opacity(theme.text, fresh);
         let mut out = Vec::new();
 
@@ -424,7 +429,7 @@ impl AlphabetTrait for Siluet {
             let c = c.clamp(0.0, 1.0) as f32;
             if c > 0.0 {
                 let top = bx.y + s * (1.0 - c);
-                let tint = if closed { theme.muted } else { dir_col };
+                let tint = if grey { theme.muted } else { dir_col };
                 out.push(Prim::Fill {
                     points: vec![
                         [bx.x, top],
@@ -574,6 +579,30 @@ impl AlphabetTrait for Siluet {
                     color: ink,
                 });
             }
+            GlyphPhase::Candidate | GlyphPhase::Final if no_longer => {
+                // No longer holds: grey silhouette and a hollow ring with a bar (a "no
+                // longer" sign) in the outcome corner: neither the solid ✓ disc nor the
+                // bare ✗, and readable without colour.
+                let (bcx, bcy, br) = (bx.x + 0.83 * s, bx.y + 0.83 * s, 0.165 * s);
+                let q = |u: f32, v: f32| [bx.x + u * s, bx.y + v * s];
+                out.push(Prim::Circle {
+                    cx: bcx,
+                    cy: bcy,
+                    r: br,
+                    color: ink,
+                });
+                out.push(Prim::Circle {
+                    cx: bcx,
+                    cy: bcy,
+                    r: (br - bw).max(0.4),
+                    color: theme.bg,
+                });
+                out.push(Prim::Polyline {
+                    points: vec![q(0.83 - 0.095, 0.83), q(0.83 + 0.095, 0.83)],
+                    width: bw,
+                    color: ink,
+                });
+            }
             GlyphPhase::Candidate | GlyphPhase::Final => {}
         }
 
@@ -624,6 +653,7 @@ mod tests {
                                         freshness,
                                         confirmations,
                                         server,
+                                        validity: None,
                                     });
                                 }
                             }

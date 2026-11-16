@@ -229,6 +229,21 @@ impl Edge {
 }
 
 /// A machine-checkable condition attached to a meaning (sentence slot).
+///
+/// (R4, K42/A28) The same shape serves two different roles, which a story keeps in two
+/// separate fields ([`Story::condition`], [`Story::resolution`]):
+///
+/// - **state condition** (durum koşulu): whether the claim still holds **now** ("RSI is
+///   above 70", "the close is still above the broken level"); it decides the capsule's
+///   [`Validity`];
+/// - **expected resolution** (beklenen çözüm): how the story is expected to close ("a
+///   close outside the band within 20 bars"); a state may have ended while the story is
+///   still open.
+///
+/// On a fact ([`FactMeaning::condition`]) the role follows from the time kind
+/// (`qp_capsule::sentence::split_condition`): a state's condition with `within_bars` is
+/// its expected resolution, an expectation's condition is what resolves it, and every
+/// other condition is a state condition.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
 #[serde(deny_unknown_fields)]
 pub struct MeaningCondition {
@@ -279,6 +294,43 @@ impl Stage {
             Self::Realized | Self::Invalidated | Self::Expired | Self::Retracted
         )
     }
+
+    /// (R4, K42/A22) Whether the stage is a **negative transition**: `weakened`,
+    /// `invalidated` or `retracted`. Only these reach a person whose position or active
+    /// intent the story is about whatever their sensitivity; births and the other
+    /// transitions go through the sensitivity filter.
+    #[must_use]
+    pub fn is_negative(self) -> bool {
+        matches!(self, Self::Weakened | Self::Invalidated | Self::Retracted)
+    }
+}
+
+/// How a story is expected to close (R4, K42/A28: the **expected resolution**, kept apart
+/// from the state condition).
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
+#[serde(deny_unknown_fields)]
+pub struct Resolution {
+    /// The outcome rule that closes the story (`barrier`: the per-kind volatility
+    /// barrier, M5); its natural life is [`Story::horizon_bars`].
+    pub rule: String,
+    /// The resolution the detector names, if any (a squeeze: "a close outside the band
+    /// within 20 bars"; an expectation: its condition).
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub condition: Option<MeaningCondition>,
+}
+
+/// Whether a capsule's claim still holds **today** (R4, K42/A28; `docs/CONCEPTS.md`
+/// "Geçerlilik"). The headline and the glyph say the same thing.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize, JsonSchema)]
+#[serde(rename_all = "snake_case")]
+pub enum Validity {
+    /// Geçerli: the story is open and its state condition holds (or it has none).
+    Valid,
+    /// Artık geçerli değil: the state condition no longer holds; the story is not
+    /// closed yet (its expected resolution is still pending).
+    NoLonger,
+    /// Kapandı: the story closed (realized, invalidated, expired or retracted).
+    Closed,
 }
 
 /// One transition in a capsule's story.
@@ -353,7 +405,8 @@ pub struct Story {
     pub last_bar: u64,
     /// Natural life in bars from birth (expiry by bar count, never by clock).
     pub horizon_bars: u32,
-    /// Ledger key (`kind/detector@version`).
+    /// Ledger key (`kind/direction/detector@version`; R4, K42/A23: up, down and neutral
+    /// stories of one detector are counted apart).
     pub ledger_key: String,
     /// Ledger at birth: only capsules closed before the birth bar (no look-ahead).
     pub ledger_at_birth: LedgerStat,
@@ -361,6 +414,15 @@ pub struct Story {
     pub trust: Trust,
     /// Transitions, in order.
     pub history: Vec<Transition>,
+    /// (R4, K42/A28) The **state condition**: whether the claim still holds now (from the
+    /// fact that gave birth). Absent when the claim has none (a squeeze's band, an
+    /// expectation) and on stories written before R4.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub condition: Option<MeaningCondition>,
+    /// (R4, K42/A28) The **expected resolution**: how the story is expected to close.
+    /// Absent on stories written before R4.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub resolution: Option<Resolution>,
 }
 
 /// Sensitivity level (K31): the attention budget a user chose.
@@ -472,4 +534,10 @@ pub struct GlyphSpec {
     /// Server-verified mark (K38).
     #[serde(default, skip_serializing_if = "std::ops::Not::not")]
     pub server: bool,
+    /// (R4, K42/A28) Validity today, when the producer knows it (it needs the bars and
+    /// the state condition, not only the story). An alphabet draws a mark only for
+    /// [`Validity::NoLonger`]; `valid` and `closed` look as before (closed is the
+    /// phase). Absent: unknown, drawn as before.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub validity: Option<Validity>,
 }

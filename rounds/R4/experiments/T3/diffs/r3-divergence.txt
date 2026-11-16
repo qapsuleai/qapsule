@@ -1,0 +1,14 @@
+# fixtures/views/docs/r3-divergence.json: 4ee7fc6 -> K42 (jdiff.py; then changed sentence clauses, sentdiff.py)
+added    resolution                 1  e.g. /capsules/0/story/resolution: null -> {"rule": "fixture.move4"}
+changed  claim                      1  e.g. /findings/0/claim: "SYN01'de 6 bar önce yukarı dönüş işareti çıktı: fiyat yeni dip yaparken RSI daha yüksek d -> "SYN01'de 6 bar önce yukarı dönüş işareti çıktı: fiyat yeni dip yaparken RSI daha yüksek d
+changed  confidence                 1  e.g. /findings/0/confidence: 0.3333333333333333 -> 0.5
+changed  headline                   1  e.g. /capsules/0/headline: "SYN01'de 6 bar önce yukarı dönüş işareti çıktı: fiyat yeni dip yaparken RSI daha yüksek d -> "SYN01'de 6 bar önce yukarı dönüş işareti çıktı: fiyat yeni dip yaparken RSI daha yüksek d
+changed  ledger_key                 1  e.g. /capsules/0/story/ledger_key: "reversal/reversal.rsi_divergence@1" -> "reversal/up/reversal.rsi_divergence@1"
+changed  n                          1  e.g. /capsules/0/story/ledger_at_birth/n: 3 -> 0
+changed  realized                   1  e.g. /capsules/0/story/ledger_at_birth/realized: 1 -> 0
+changed  title                      1  e.g. /title: "R3 sample: SYN01 (reversal/reversal.rsi_divergence@1)" -> "R3 sample: SYN01 (reversal/up/reversal.rsi_divergence@1)"
+total 8 leaf differences
+
+## sentences
+- "Karnesi henüz az örnekli: 3 seferin 1'inde tuttu."
++ 'Henüz karnesi yok.'

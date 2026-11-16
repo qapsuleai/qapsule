@@ -267,6 +267,8 @@ fn case(
                 Trust::Replica
             },
             history,
+            condition: None,
+            resolution: None,
         },
         lead,
         latest,

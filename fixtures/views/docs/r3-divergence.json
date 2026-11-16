@@ -4,7 +4,7 @@
       "depth": "capsule",
       "finding": "fnd.SYN01.reversal-up.195",
       "glyphs": [],
-      "headline": "SYN01'de 6 bar önce yukarı dönüş işareti çıktı: fiyat yeni dip yaparken RSI daha yüksek dip yaptı (fiyat 4,43, RSI 40,1). Hâlâ geçerli olup olmadığı bilinmiyor. Karnesi henüz az örnekli: 3 seferin 1'inde tuttu.",
+      "headline": "SYN01'de 6 bar önce yukarı dönüş işareti çıktı: fiyat yeni dip yaparken RSI daha yüksek dip yaptı (fiyat 4,43, RSI 40,1). Hâlâ geçerli olup olmadığı bilinmiyor. Henüz karnesi yok.",
       "id": "cap.SYN01.reversal-up.195",
       "provenance": {
         "at": 1696921200000,
@@ -42,10 +42,13 @@
         "kind": "reversal",
         "last_bar": 195,
         "ledger_at_birth": {
-          "n": 3,
-          "realized": 1
+          "n": 0,
+          "realized": 0
         },
-        "ledger_key": "reversal/reversal.rsi_divergence@1",
+        "ledger_key": "reversal/up/reversal.rsi_divergence@1",
+        "resolution": {
+          "rule": "fixture.move4"
+        },
         "series": "px",
         "stage": "born",
         "strength": 0.05121342871155932,
@@ -115,8 +118,8 @@
   ],
   "findings": [
     {
-      "claim": "SYN01'de 6 bar önce yukarı dönüş işareti çıktı: fiyat yeni dip yaparken RSI daha yüksek dip yaptı (fiyat 4,43, RSI 40,1). Hâlâ geçerli olup olmadığı bilinmiyor. Karnesi henüz az örnekli: 3 seferin 1'inde tuttu.",
-      "confidence": 0.3333333333333333,
+      "claim": "SYN01'de 6 bar önce yukarı dönüş işareti çıktı: fiyat yeni dip yaparken RSI daha yüksek dip yaptı (fiyat 4,43, RSI 40,1). Hâlâ geçerli olup olmadığı bilinmiyor. Henüz karnesi yok.",
+      "confidence": 0.5,
       "facts": [
         "fx.SYN01.reversal.rsi_divergence.bullish.195"
       ],
@@ -1775,5 +1778,5 @@
       }
     }
   ],
-  "title": "R3 sample: SYN01 (reversal/reversal.rsi_divergence@1)"
+  "title": "R3 sample: SYN01 (reversal/up/reversal.rsi_divergence@1)"
 }

@@ -31,7 +31,8 @@
 //! - If an `exit` fact of the lead's detector joined the story at or before `now`, the
 //!   state ended: `still_holds = false` (the detector said so), `current` = the subject
 //!   now.
-//! - A state whose condition has `within_bars` is not a holding condition but the state's
+//! - (R4, K42/A28: [`split_condition`]) A state whose condition has `within_bars` is not a
+//!   holding condition (state condition) but the state's
 //!   expected resolution (`squeeze.bandwidth`: "a close outside the band within 20 bars").
 //!   Its truth is not whether the state holds, so the sentence uses the lead fact without
 //!   that condition: `still_holds` = no exit yet and the story still open, `current =
@@ -39,7 +40,9 @@
 //! - A story closed as `invalidated`, `expired` or `retracted` is never "holding".
 
 use qp_compute::{Bollinger, Rsi, Sma};
-use qp_schema::capsule::{Edge, License, LicenseClass, Stage, TimeKind};
+use qp_schema::capsule::{
+    Edge, FactMeaning, License, LicenseClass, MeaningCondition, Stage, Story, TimeKind, Validity,
+};
 use qp_schema::{Bar, CompareOp, Fact};
 
 use crate::engine::Engine;
@@ -114,6 +117,9 @@ pub struct Sentences {
     pub current: Option<f64>,
     /// No digits for this reader (K33).
     pub redacted: bool,
+    /// (R4, K42/A28) Validity at `now`: the same value the glyph carries
+    /// ([`validity_now`]).
+    pub validity: Validity,
     /// Turkish sentence.
     pub tr: String,
     /// English sentence.
@@ -270,16 +276,20 @@ pub fn condition_now_memo(
                 .as_ref()
                 .is_some_and(|fm| fm.edge == Edge::Exit && fm.detector == m.detector)
         });
-    let Some(c) = m.condition.as_ref() else {
+    // The state condition decides; an expectation keeps its own condition (R3 rule).
+    let (state, resolution) = split_condition(m);
+    let tracked = if m.time == TimeKind::Expectation {
+        resolution
+    } else {
+        state
+    };
+    let Some(c) = tracked else {
         return if m.time == TimeKind::State {
             (Some(!exited), None)
         } else {
             (None, None)
         };
     };
-    if m.time == TimeKind::State && c.within_bars.is_some() {
-        return (Some(!exited), None);
-    }
     let cur = subject_now(&c.subject, bars, memo);
     if exited {
         return (Some(false), cur);
@@ -319,32 +329,14 @@ pub fn sentences_at(
     let facts: Vec<Fact> = rec.facts.iter().filter(|f| f.bar <= now).cloned().collect();
     let lead = facts.first()?;
     let latest = facts.last()?;
-    let (mut still_holds, current) = condition_now(lead, &facts, bars);
-    if matches!(
-        story.stage,
-        Stage::Invalidated | Stage::Expired | Stage::Retracted
-    ) && story.time == TimeKind::State
-    {
-        still_holds = Some(false);
-    }
+    let (still_holds, current) = condition_now(lead, &facts, bars);
+    let still_holds = closed_override(story, still_holds);
+    let validity = validity_now(story, still_holds);
     let m = lead.meaning.as_ref()?;
     let redacted = !reader.may_see(&m.license, &m.instrument);
-    // A state's resolution condition is not its holding condition (module docs).
-    let lead_view;
-    let lead_ref = if m.time == TimeKind::State
-        && m.condition
-            .as_ref()
-            .is_some_and(|c| c.within_bars.is_some())
-    {
-        let mut l = lead.clone();
-        if let Some(lm) = l.meaning.as_mut() {
-            lm.condition = None;
-        }
-        lead_view = l;
-        &lead_view
-    } else {
-        lead
-    };
+    // A state's expected resolution is not its state condition (module docs).
+    let lead_view = sentence_lead(lead);
+    let lead_ref = lead_view.as_ref().unwrap_or(lead);
     let current = if redacted { None } else { current };
     let inp = SentenceInput {
         story,
@@ -367,7 +359,77 @@ pub fn sentences_at(
         still_holds,
         current,
         redacted,
+        validity,
         tr: realizer.sentence(&inp, Lang::Tr),
         en: realizer.sentence(&inp, Lang::En),
     })
+}
+
+/// (R4, K42/A28) The two roles of a fact's condition: `(state condition, expected
+/// resolution)`.
+///
+/// - an expectation's condition is what resolves it: `(None, Some(c))`;
+/// - a state's condition bounded by `within_bars` is the state's expected resolution
+///   (`squeeze.bandwidth`: "a close outside the band within 20 bars"): `(None, Some(c))`;
+/// - every other condition (an event's "the close is still beyond the level", a state's
+///   holding condition) is a state condition: `(Some(c), None)`.
+#[must_use]
+pub fn split_condition(m: &FactMeaning) -> (Option<&MeaningCondition>, Option<&MeaningCondition>) {
+    match m.condition.as_ref() {
+        None => (None, None),
+        Some(c)
+            if m.time == TimeKind::Expectation
+                || (m.time == TimeKind::State && c.within_bars.is_some()) =>
+        {
+            (None, Some(c))
+        }
+        Some(c) => (Some(c), None),
+    }
+}
+
+/// The lead fact as the realizer reads it: a state whose condition is its expected
+/// resolution is written without that condition (it does not say whether the state
+/// holds). `None`: the lead as is.
+#[must_use]
+pub fn sentence_lead(lead: &Fact) -> Option<Fact> {
+    let m = lead.meaning.as_ref()?;
+    if m.time == TimeKind::State && split_condition(m).1.is_some() {
+        let mut l = lead.clone();
+        if let Some(lm) = l.meaning.as_mut() {
+            lm.condition = None;
+        }
+        Some(l)
+    } else {
+        None
+    }
+}
+
+/// A state story closed as `invalidated`, `expired` or `retracted` is never holding.
+#[must_use]
+pub fn closed_override(story: &Story, still_holds: Option<bool>) -> Option<bool> {
+    if matches!(
+        story.stage,
+        Stage::Invalidated | Stage::Expired | Stage::Retracted
+    ) && story.time == TimeKind::State
+    {
+        Some(false)
+    } else {
+        still_holds
+    }
+}
+
+/// (R4, K42/A28) Validity of a story today from its stage and whether its state
+/// condition still holds (`still_holds` as [`condition_now`] gives it, after
+/// [`closed_override`]): closed stage → `closed`; open and the state condition broke →
+/// `no_longer`; otherwise `valid`. The sentence's "artık geçerli değil / no longer holds"
+/// tail is said exactly when this is not `valid`.
+#[must_use]
+pub fn validity_now(story: &Story, still_holds: Option<bool>) -> Validity {
+    if story.stage.is_closed() {
+        Validity::Closed
+    } else if still_holds == Some(false) {
+        Validity::NoLonger
+    } else {
+        Validity::Valid
+    }
 }

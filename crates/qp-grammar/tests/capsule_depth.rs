@@ -75,6 +75,8 @@ fn story(stage: Stage, lab: LedgerStat) -> Story {
         ledger_at_birth: lab,
         trust: Trust::Replica,
         history: Vec::new(),
+        condition: None,
+        resolution: None,
     }
 }
 

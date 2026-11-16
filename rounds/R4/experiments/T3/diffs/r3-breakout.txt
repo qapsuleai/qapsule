@@ -1,0 +1,15 @@
+# fixtures/views/docs/r3-breakout.json: 4ee7fc6 -> K42 (jdiff.py; then changed sentence clauses, sentdiff.py)
+added    condition                  1  e.g. /capsules/0/story/condition: null -> {"key": "level", "op": "gt", "subject": "close", "within_bars": 3}
+added    resolution                 1  e.g. /capsules/0/story/resolution: null -> {"rule": "fixture.move4"}
+changed  claim                      1  e.g. /findings/0/claim: "SYN03 6 bar önce 135,56'daki direnci yukarı kırdı (kapanış 136,20): yukarı kırılım. 4 bar -> "SYN03 6 bar önce 135,56'daki direnci yukarı kırdı (kapanış 136,20): yukarı kırılım. 4 bar
+changed  confidence                 1  e.g. /findings/0/confidence: 0.42857142857142855 -> 0.5
+changed  headline                   1  e.g. /capsules/0/headline: "SYN03 6 bar önce 135,56'daki direnci yukarı kırdı (kapanış 136,20): yukarı kırılım. 4 bar -> "SYN03 6 bar önce 135,56'daki direnci yukarı kırdı (kapanış 136,20): yukarı kırılım. 4 bar
+changed  ledger_key                 1  e.g. /capsules/0/story/ledger_key: "breakout/breakout.range@1" -> "breakout/up/breakout.range@1"
+changed  n                          1  e.g. /capsules/0/story/ledger_at_birth/n: 7 -> 0
+changed  realized                   1  e.g. /capsules/0/story/ledger_at_birth/realized: 3 -> 0
+changed  title                      1  e.g. /title: "R3 sample: SYN03 (breakout/breakout.range@1)" -> "R3 sample: SYN03 (breakout/up/breakout.range@1)"
+total 9 leaf differences
+
+## sentences
+- "Karnesi henüz az örnekli: 7 seferin 3'ünde tuttu."
++ 'Henüz karnesi yok.'

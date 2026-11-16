@@ -1,0 +1,18 @@
+# fixtures/protocol/conformance/42-capsule-candidate.json: 4ee7fc6 -> K42 (jdiff.py; then changed sentence clauses, sentdiff.py)
+changed  n                          2  e.g. /steps/6/expect/0/msg/data/capsules/0/ledger_at_birth/n: 10 -> 6
+added    *                          1  e.g. /steps/7/expect/0/msg/data/rows/1: null -> {"detector": "breakout.range", "direction": "up", "key": "breakout/up/breakout.range@1", "
+added    direction                  1  e.g. /steps/7/expect/0/msg/data/rows/0/direction: null -> "down"
+added    validity                   1  e.g. /steps/6/expect/0/msg/data/capsules/0/validity: null -> "closed"
+changed  en                         1  e.g. /steps/6/expect/0/msg/data/capsules/0/sentence/en: "5 bars ago, net institutional buying in THYAO (307,254) clearly exceeded the recent avera -> "5 bars ago, net institutional buying in THYAO (307,254) clearly exceeded the recent avera
+changed  importance                 1  e.g. /steps/6/expect/0/msg/data/capsules/0/importance: 1.4644194812424567 -> 1.440763567263962
+changed  key                        1  e.g. /steps/7/expect/0/msg/data/rows/0/key: "breakout/breakout.range@1" -> "breakout/down/breakout.range@1"
+changed  realized                   1  e.g. /steps/6/expect/0/msg/data/capsules/0/ledger_at_birth/realized: 6 -> 3
+changed  text                       1  e.g. /steps/6/expect/0/msg/data/capsules/0/sentence/text: "THYAO'da 5 bar önce kurumsal net alış (307.254) son günlerin ortalamasını (145.970) belir -> "THYAO'da 5 bar önce kurumsal net alış (307.254) son günlerin ortalamasını (145.970) belir
+changed  tr                         1  e.g. /steps/6/expect/0/msg/data/capsules/0/sentence/tr: "THYAO'da 5 bar önce kurumsal net alış (307.254) son günlerin ortalamasını (145.970) belir -> "THYAO'da 5 bar önce kurumsal net alış (307.254) son günlerin ortalamasını (145.970) belir
+total 11 leaf differences
+
+## sentences
+- 'Its record is still thin: it played out in 6 of 10 cases. Server-verified.'
++ 'Its record is still thin: it played out in 3 of 6 cases. Server-verified.'
+- "Karnesi henüz az örnekli: 10 seferin 6'sında tuttu. Sunucu doğruladı."
++ "Karnesi henüz az örnekli: 6 seferin 3'ünde tuttu. Sunucu doğruladı."

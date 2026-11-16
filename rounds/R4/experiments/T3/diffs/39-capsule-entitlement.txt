@@ -1,0 +1,22 @@
+# fixtures/protocol/conformance/39-capsule-entitlement.json: 4ee7fc6 -> K42 (jdiff.py; then changed sentence clauses, sentdiff.py)
+added    validity                  11  e.g. /steps/7/expect/0/msg/event/capsule/validity: null -> "valid"
+changed  n                          9  e.g. /steps/7/expect/0/msg/event/capsule/ledger_at_birth/n: 7 -> 4
+changed  importance                 7  e.g. /steps/7/expect/0/msg/event/capsule/importance: 1.520473855692566 -> 1.509345079857908
+changed  realized                   6  e.g. /steps/7/expect/0/msg/event/capsule/ledger_at_birth/realized: 5 -> 3
+changed  en                         5  e.g. /steps/7/expect/0/msg/event/capsule/sentence/en: "On this bar, net institutional buying in THYAO (337,273) clearly exceeded the recent aver -> "On this bar, net institutional buying in THYAO (337,273) clearly exceeded the recent aver
+changed  text                       5  e.g. /steps/7/expect/0/msg/event/capsule/sentence/text: "THYAO'da bu barda kurumsal net alış (337.273) son günlerin ortalamasını (137.900) belirgi -> "THYAO'da bu barda kurumsal net alış (337.273) son günlerin ortalamasını (137.900) belirgi
+changed  tr                         5  e.g. /steps/7/expect/0/msg/event/capsule/sentence/tr: "THYAO'da bu barda kurumsal net alış (337.273) son günlerin ortalamasını (137.900) belirgi -> "THYAO'da bu barda kurumsal net alış (337.273) son günlerin ortalamasını (137.900) belirgi
+added    resolution                 2  e.g. /steps/10/expect/0/msg/data/detail/story/resolution: null -> {"rule": "barrier"}
+changed  ledger_key                 2  e.g. /steps/10/expect/0/msg/data/detail/story/ledger_key: "flow/flow.institutional@1" -> "flow/up/flow.institutional@1"
+added    condition                  1  e.g. /steps/13/expect/0/msg/data/detail/story/condition: null -> {"key": "sma20", "op": "lt", "subject": "close"}
+total 53 leaf differences
+
+## sentences
+- 'Its record is still thin: it played out in 5 of 7 cases. Server-verified.'
++ 'Its record is still thin: it played out in 3 of 4 cases. Server-verified.'
+- "Karnesi henüz az örnekli: 7 seferin 5'inde tuttu. Sunucu doğruladı."
++ "Karnesi henüz az örnekli: 4 seferin 3'ünde tuttu. Sunucu doğruladı."
+- 'Its record is still thin.'
++ 'No track record yet.'
+- 'Karnesi henüz az örnekli.'
++ 'Henüz karnesi yok.'

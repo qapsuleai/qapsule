@@ -907,7 +907,7 @@ Kimlik bir dizge (panelde sayı), seçici bir **nesnedir**; ikisi aynı alanda y
 ### 17.1 Sözlük
 
 Kapalı ve tiplidir (`qp-schema`: `SeriesSel`, `ViewSel`, `PanelSel`, `LayerSel`,
-`FactSel`, `FindingSel`, `ProposalSel`, `ScaleSel`, `ItemSel`); bilinmeyen anahtar
+`FactSel`, `FindingSel`, `ProposalSel`, `ScaleSel`, `ItemSel`; R4: `CapsuleSel`); bilinmeyen anahtar
 `schema` hatasıdır (`did_you_mean` ile). Her seçicide ayrıca `first` ve `latest`
 (§17.3) vardır.
 
@@ -917,8 +917,9 @@ Kapalı ve tiplidir (`qp-schema`: `SeriesSel`, `ViewSel`, `PanelSel`, `LayerSel`
 | görünüm | `title`, `shows` (seri) | `{}` "tek görünüm"; `{"shows":{"study":"macd"}}` |
 | panel | `name`, `shows` (seri), `mark` | `{"mark":"candle"}` "fiyat paneli"; `{"shows":{"study":"rsi"}}` "RSI'ın paneli"; `{"name":"macd"}` |
 | katman | `shows` (seri), `output`, `mark`, `panel` (panel), `value`, `fact` (olgu), `finding` (bulgu), `label` | `{"output":"upper"}` "üst bant" (tek başına çizen katman, §17.1); `{"mark":"rule","value":70}` "70 çizgisi" |
-| olgu | `kind`, `on` (seri), `bar` | `{"kind":"breakout","first":true}` "eski kırılımın olgusu" |
-| bulgu | `kind` (olgularından birinin türü), `on` (seri), `fact` (olgu), `state` (kapsül durumu) | `{"kind":"breakout","latest":true}` "son kırılım" |
+| olgu | `kind` (olgunun tam türü), `on` (seri), `bar` | `{"kind":"breakout.range.up","first":true}` "eski yukarı kırılımın olgusu" |
+| bulgu | `kind` (olgularından birinin tam türü), `on` (seri), `fact` (olgu), `state` (kapsül durumu); R4: `instrument`, `meaning` (anlam türü), `stage` (hikâye aşaması), `open` (hikâyesi açık mı) | `{"kind":"breakout.range.down","latest":true}` "son aşağı kırılım"; `{"meaning":"breakout","open":true,"latest":true}` "son açık kırılım hikâyesinin bulgusu" |
+| kapsül (R4) | `instrument`, `meaning` (anlam türü), `direction`, `stage`, `open`, `born_bar`, `series` | `{"instrument":"THYAO","meaning":"breakout","open":true}` "THYAO'nun açık kırılım kapsülü" |
 | öneri | `state` | `{"state":"pending","latest":true}` |
 | ölçek | `panel` (panel; zorunlu) | `{"panel":{"mark":"candle"}}` → `"y0"` |
 | öğe | tek anahtar, türün adı: `series`, `view`, `fact`, `finding`, `proposal` | `{"finding":{"kind":"breakout","latest":true}}` |
@@ -952,6 +953,18 @@ Anahtarların anlamı:
   `{"/ops/1/layer":"l5"}`).
 - `value`: katmanın `y` ya da `x` sabiti bu sayıya tam eşit (kuralın seviyesi).
 - `bar`: olgunun bar numarası. `state`: kapsül/öneri durumu (şema adları).
+- **Olgu türü tamdır** (R4 açıklaması): motorun olguları `<dedektör>.<kod>` türündedir
+  (`breakout.range.up`, `breakout.range.down`, `continuation.ma_stack.bull`,
+  `extreme.rsi.overbought`, `flow.institutional.net_buy` …); `{"kind":"breakout"}` bunlara
+  **uymaz** (tam eşitlik). Anlam türüne göre seçmek için bulguda ya da kapsülde `meaning`
+  (`breakout`, `continuation`, `reversal`, `squeeze`, `extreme`, `flow`) kullanılır.
+- (R4) Bulgu ve kapsül seçicisinin hikâye anahtarları (`instrument`, `meaning`,
+  `direction`, `stage`, `open`, `born_bar`, `series`) bulguyu sunan kapsülün `story`'sine
+  bakar; hikâyesiz bulgu/kapsül bu anahtarlarla eşleşmez. `open: true` aşaması kapanmamış
+  (`realized`, `invalidated`, `expired`, `retracted` dışında) demektir.
+- **Kapsülün sırası** (R4): son geçişin barı, eşitlikte doğum barı, sonra doküman sırası;
+  `latest: true` en son hareket edeni seçer. Kapsül seçicisi yalnız hikâyeli kapsüllere
+  çözülür ve kapsül kimliğine (`cap.…`) çevrilir.
 
 ### 17.2 Nerede yazılır
 
@@ -974,6 +987,7 @@ Anahtarların anlamı:
 | `accept_proposal`, `reject_proposal` | `proposal` |
 | sorgu `get` / `study`, `at` / `hit` / `present` | `id` (öğe) / `series` / `view` / `finding` |
 | sorgu `verify_evidence` / `binding` | `item` (öğe: `{"fact":…}` ya da `{"finding":…}`) / `series` |
+| sorgu `capsule` (R4) | `capsule` (kapsül seçicisi; kimlik ya da bulgu kimliği de olur) |
 | `subscribe` | `changes.ids[]` (öğe), `finding.finding`, `condition.condition` |
 | `attend` | `directive.steps[].target` |
 
@@ -1001,7 +1015,8 @@ bir görünüm `not_found` (görünüm alanının yolunda).
 3. **Türün sırası** (adaylar hep bu sırada tutulur):
    seri, görünüm, öneri → doküman sırası (eklenme); panel → yığın sırası (üstten alta);
    katman → çizim sırası; olgu → bar, eşitlikte doküman sırası; bulgu → olgularının en
-   büyük barı, eşitlikte doküman sırası. Görünüm verilmemişse önce görünüm sırası.
+   büyük barı, eşitlikte doküman sırası; kapsül (R4) → son geçiş barı, doğum barı,
+   doküman sırası. Görünüm verilmemişse önce görünüm sırası.
 4. **Tek eşleşme** → çözülür. **Birden çok** → `first: true` ilkini, `latest: true`
    sonuncusunu seçer (bulguda "en son", panelde "en alttaki", katmanda "en üstteki");
    ikisi yoksa `ambiguous`. İkisi birden → `invalid`. **Hiç** → `not_found`.
@@ -1810,7 +1825,8 @@ itiraz edene; aynı itiraz `duplicate`; ileri sürülmeyen iddia `unknown`).
 Şema `qp-schema::protocol` (ek alanların hepsi isteğe bağlı; R3 öncesi dökümler bayt bayt
 aynı), referans otorite `crates/qp-session/src/capsule.rs`. MCP araçları şemadan üretilir
 (`op_set_audience`, `op_set_sensitivity`, `query_capsules`, `query_capsule`,
-`query_ledger`).
+`query_ledger`); R4 alanları (`capsule` seçicisi, `latest`, `born_since_*`, `direction`,
+`validity`) araçlarda da görünür.
 
 ### 20.1 Otoritede kapsül motoru
 
@@ -1853,9 +1869,35 @@ Barındırıcı yapılandırması (`SessionInit.capsules`, protokol mesajı değ
 
 | `kind` | Cevap |
 |--------|-------|
-| `capsules` | `capsules`: `CapsuleItem` listesi — kimlik, bulgu, enstrüman, seri, tür, yön, zaman türü, aşama, durum, kademe, önem, teyit, güven, doğum/son bar, son geçiş zamanı, `ledger_at_birth`, `sentence {text, tr, en}`, `relevant` (pozisyon/niyet), `redacted`. Sıra: önem azalan, sonra son geçiş zamanı azalan, sonra kimlik. Süzgeçler VE'lenir; `audience: true` soranın kitlesini uygular (aşağıda). `comments`: soranın akış yetkisi olmayan enstrümanlarda sunucu yorumları. |
-| `capsule` | `capsule_detail`: `item`, `story` (bütün geçişler: bar, zaman, aşama, neden, olgular), `facts` (okuyucuya göre), `ledger` (anahtarın şimdiki karnesi: son kesin bardan önce kapananlar), `glyph`, `evidence` — olgu başına `{fact, family, license, open, values?, evidence_ref?, requires?, rests_on}`: yetkiliye değerler ve dondurulmuş kanıt; yetkisize "şu yetkiyi gerektirir" (`requires`, ör. `bist/THYAO`) ve neye dayandığı (`rests_on`, her zaman) — K34. Görünmeyen ya da olmayan kapsül: `not_found` (ikisi aynı). |
-| `ledger` | `ledger`: `rows` (anahtar ya da `by_kind` ile tür başına `n`, `realized`), `total`. Geri çekilenler sayılmaz. Lisanstan bağımsız (K33): her lisanslı akışa yetkili okuyucuya motorun karnesi, açık görünüm okuyucusuna (§20.5) açık-yalnız motorun karnesi — lisanslı veriden hiç etkilenmez. |
+| `capsules` | `capsules`: `CapsuleItem` listesi — kimlik, bulgu, enstrüman, seri, tür, yön, zaman türü, aşama, durum, kademe, önem, teyit, güven, doğum/son bar, son geçiş zamanı, `ledger_at_birth`, `sentence {text, tr, en}`, (R4) `validity` (`valid` / `no_longer` / `closed`, cümleyle aynı bar itibarıyla; K42/A28), `relevant` (pozisyon/niyet; anlamı §20.4), `redacted`. Sıra: önem azalan, sonra son geçiş zamanı azalan, sonra kimlik. Süzgeçler VE'lenir (aşağıdaki tablo); `audience: true` soranın kitlesini uygular (§20.4, hikâyenin şimdiki aşamasıyla). Cevabın ayrıca `comments` alanı vardır: soranın akış yetkisi olmayan enstrümanlarda sunucu yorumları. |
+| `capsule` | `capsule_detail`: `item`, `story` (bütün geçişler: bar, zaman, aşama, neden, olgular; R4: `condition` = durum koşulu, `resolution` = beklenen çözüm `{rule, condition?}`), `facts` (okuyucuya göre), `ledger` (anahtarın şimdiki karnesi: son kesin bardan önce kapananlar), `glyph` (R4: `validity` dahil, öğeninkiyle aynı), `evidence` — olgu başına `{fact, family, license, open, values?, evidence_ref?, requires?, rests_on}`: yetkiliye değerler ve dondurulmuş kanıt; yetkisize "şu yetkiyi gerektirir" (`requires`, ör. `bist/THYAO`) ve neye dayandığı (`rests_on`, her zaman) — K34. (R4) `capsule` alanı kapsül kimliği, bulgu kimliği ya da **kapsül seçicisi** alır (§17.1; `result.resolved`'da `/query/capsule`). Görünmeyen ya da olmayan kapsül: `not_found` (ikisi aynı). |
+| `ledger` | `ledger`: `rows` (anahtar ya da `by_kind` ile tür başına `n`, `realized`; R4: satırda `direction`), `total`. Anahtar `<tür>/<yön>/<dedektör>@<sürüm>` (K42/A23). Süzgeçler: `key`, `meaning`, `detector`, (R4) `direction`; `by_kind` yönleri toplar (`direction` verilmişse yalnız o yön, satır `direction`'ı taşır). Geri çekilenler sayılmaz. Lisanstan bağımsız (K33): her lisanslı akışa yetkili okuyucuya motorun karnesi, açık görünüm okuyucusuna (§20.5) açık-yalnız motorun karnesi — lisanslı veriden hiç etkilenmez. |
+
+`capsules` süzgeçleri (hepsi isteğe bağlı, VE'lenir):
+
+| Alan | Anlamı |
+|------|--------|
+| `instrument` | Yalnız bu enstrüman. |
+| `stages` | Yalnız bu aşamalar (`born`, `strengthened`, `weakened`, `confirmed`, `realized`, `invalidated`, `expired`, `retracted`). |
+| `open` | `true` yalnız açık, `false` yalnız kapanmış hikâyeler. |
+| `meaning` | Yalnız bu anlam türü (`continuation`, `reversal`, `breakout`, `squeeze`, `extreme`, `flow`). |
+| `since_bar` / `since_t` | Son geçişi bu bardan / zamandan (ms) itibaren olanlar (geçişi süzer: eski doğumlu ama yeni hareket eden hikâye de gelir). |
+| `born_since_bar` / `born_since_t` (R4) | Bu bardan / zamandan itibaren **doğanlar** (doğum barı / doğum geçişinin zamanı). |
+| `latest` (R4) | Yalnız **en son doğan** eşleşen kapsül: en büyük doğum zamanı, sonra doğum barı, sonra kimlik. Öteki süzgeçlerden sonra, `limit`'ten önce uygulanır. |
+| `audience` | Soranın kitlesi (§20.4). |
+| `limit` | En çok bu kadar. |
+
+```json
+→ {"type":"query","id":"q","query":{"kind":"capsule","capsule":{"instrument":"THYAO","meaning":"breakout","direction":"up","latest":true}}}
+← {"type":"result","id":"q","data":{"kind":"capsule_detail","detail":{"item":{"id":"cap.THYAO.breakout.up.147","validity":"closed",…},…}},
+   "resolved":{"/query/capsule":"cap.THYAO.breakout.up.147"}}
+→ {"type":"query","id":"r","query":{"kind":"capsules","latest":true}}
+→ {"type":"query","id":"s","query":{"kind":"capsules","born_since_bar":145,"meaning":"breakout"}}
+→ {"type":"query","id":"l","query":{"kind":"ledger","meaning":"breakout","direction":"down"}}
+```
+
+Dökümler: 45 (karne yönü), 46 (olumsuz geçiş), 47 (geçerlilik), 48 (kapsül seçicisi ve
+`capsules` süzgeçleri).
 
 ### 20.3 İşlemler: kitle
 
@@ -1863,6 +1905,28 @@ Barındırıcı yapılandırması (`SessionInit.capsules`, protokol mesajı değ
 |------|---------|---------|
 | `set_audience` | `principal?`, `audience {group, sensitivity?, watchlist?, positions?}` | `put_audience` |
 | `set_sensitivity` | `principal?`, `sensitivity` (`important`/`balanced`/`all`; `null` = grubun varsayılanı) | `put_audience` |
+
+**`Audience` biçimi** (`qp-schema::capsule::Audience`; bilinmeyen alan `schema`):
+
+| Alan | Tip | Anlamı |
+|------|-----|--------|
+| `group` | `"habituated"` \| `"future"` (zorunlu) | Kullanıcı grubu. Varsayılan hassasiyeti: `habituated` (alışkın kullanıcı) → `all`; `future` (geleceğin yatırımcısı) → `important`. |
+| `sensitivity` | `"important"` \| `"balanced"` \| `"all"` (isteğe bağlı) | Seçilen seviye; yoksa grubun varsayılanı. Sistem hiç değiştirmez (K31). |
+| `watchlist` | sembol dizisi (isteğe bağlı) | İzleme listesi; boşsa her enstrüman. |
+| `positions` | `{sembol: miktar}` (isteğe bağlı) | Pozisyonlar; işaret uzun/kısa, `0` pozisyon sayılmaz. |
+
+```json
+{"type":"command","id":"c1","ops":[{"op":"set_audience","audience":
+  {"group":"future","sensitivity":"balanced","watchlist":["THYAO","ASELS"],"positions":{"THYAO":100,"ASELS":-50}}}]}
+{"type":"command","id":"c2","ops":[{"op":"set_sensitivity","sensitivity":null}]}
+```
+
+- `set_audience` kişinin tercihini **tamamen değiştirir** (verilmeyen alan boşalır;
+  izleme listesine ekleme/çıkarma için bütün listeyi yeniden yazın). `set_sensitivity` yalnız
+  seviyeyi değiştirir (`null`: grubun varsayılanı); kişinin henüz tercihi yoksa grup
+  `habituated` olur.
+- `principal` yoksa soranın kendisi. Kişi kendi tercihini `document.audiences[<kendisi>]`'nden
+  okur (yalnız kendi girdisi gelir; aşağıdaki gizlilik kuralı).
 
 Kişi kendi tercihini yazar (`read` yetkisi yeter); başkasınınkini yalnız `owner`
 (`forbidden`). **Öneri olamazlar** (kişisel veri öneriyle herkese gitmesin). Sistem bunları
@@ -1877,8 +1941,14 @@ tutar) görür. `owner` başkasınınkini yazabilir ama okuyamaz.
 görebildiği hikâye geçişleri: `{"kind":"capsule","capsule":CapsuleItem,"transition":…,"seq"}`.
 `all` yoksa kitle süzgeci: izleme listesi (boşsa her enstrüman; pozisyon ve etkin niyetin
 enstrümanı her zaman), sonra hassasiyet kademesi (`important` 1, `balanced` 1–2, `all`
-hepsi) — pozisyon ya da etkin niyetle ilgili kapsül kademeden bağımsız geçer (§9.8). Kişi
-tercih yazmadıysa grup `habituated` (`all`). Akış yetkisi olmayan aboneye lisanslı
+hepsi). (R4, K42/A22) Pozisyon ya da etkin niyetle ilgili kapsülün (`relevant: true`)
+yalnız **olumsuz geçişleri** — `weakened`, `invalidated`, `retracted` — kademeden bağımsız
+geçer; doğumu ve öteki geçişleri herkes gibi kademeye tabidir. Konu her geçişi **kendi
+aşamasıyla** değerlendirir (bildirilen `transition.stage`); `capsules` sorgusunun
+`audience`'ı hikâyenin şimdiki aşamasıyla (CAPSULE §9.8). `relevant` alanı yalnız
+"pozisyon ya da etkin niyetle ilgili" demektir; tek başına seviyeyi aşmaz. Kişi tercih
+yazmadıysa grup `habituated` (`all`). Döküm 46: `important` seviyesinde pozisyonu olan
+okuyucuya kademe 3 doğum gitmez, aynı hikâyenin zayıflaması gider. Akış yetkisi olmayan aboneye lisanslı
 hikâyeler yerine mühürün iletileri: `{"kind":"server_comment","comment":{instrument,
 series, bar, t, codes, tr, en, trust:"server", attachments}}` (rakam yok; ekler: gereken
 yetki, kanıtın dayandığı, kural, makbuz).

@@ -46,7 +46,8 @@
 use std::collections::{BTreeMap, BTreeSet};
 
 use qp_schema::capsule::{
-    Direction, Edge, GlyphPhase, GlyphSpec, LedgerStat, Stage, Story, Transition, Trust,
+    Direction, Edge, GlyphPhase, GlyphSpec, LedgerStat, MeaningKind, Resolution, Stage, Story,
+    Transition, Trust, Validity,
 };
 use qp_schema::{Bar, CapsuleState, Fact, LedgerEntry, Outcome};
 use serde::{Deserialize, Serialize};
@@ -319,15 +320,48 @@ pub fn finding_id(capsule: &str) -> String {
     }
 }
 
-/// Ledger key of a fact: `<kind>/<detector>@<version>`; `None` without meaning.
+/// Ledger key of a fact: `<kind>/<direction>/<detector>@<version>` (R4, K42/A23: the
+/// direction is part of the key, so up, down and neutral stories of one detector keep
+/// separate records and separate bases); `None` without meaning.
 #[must_use]
 pub fn ledger_key(f: &Fact) -> Option<String> {
-    f.meaning
-        .as_ref()
-        .map(|m| format!("{}/{}@{}", m.kind.name(), m.detector, m.detector_version))
+    f.meaning.as_ref().map(|m| {
+        format!(
+            "{}/{}/{}@{}",
+            m.kind.name(),
+            direction_name(m.direction),
+            m.detector,
+            m.detector_version
+        )
+    })
 }
 
-fn direction_name(d: Direction) -> &'static str {
+/// Parts of a ledger key: `(kind, direction, detector, version)`. Takes the R4 form
+/// `kind/direction/detector@version` and the R3 form `kind/detector@version` (direction
+/// `None`). `None` when the key has neither form.
+#[must_use]
+pub fn parse_ledger_key(key: &str) -> Option<(MeaningKind, Option<Direction>, &str, &str)> {
+    let (kind, rest) = key.split_once('/')?;
+    let kind = MeaningKind::ALL.into_iter().find(|m| m.name() == kind)?;
+    let (dir, rest) = match rest.split_once('/') {
+        Some((d, r)) => (
+            Some(match d {
+                "up" => Direction::Up,
+                "down" => Direction::Down,
+                "neutral" => Direction::Neutral,
+                _ => return None,
+            }),
+            r,
+        ),
+        None => (None, rest),
+    };
+    let (det, ver) = rest.split_once('@')?;
+    Some((kind, dir, det, ver))
+}
+
+/// Snake-case name of a direction (`up`, `down`, `neutral`).
+#[must_use]
+pub fn direction_name(d: Direction) -> &'static str {
     match d {
         Direction::Up => "up",
         Direction::Down => "down",
@@ -793,6 +827,7 @@ impl Engine {
                             facts: vec![f.id.clone()],
                             reason: "new_story".to_owned(),
                         };
+                        let split = crate::sentence::split_condition(m);
                         let story = Story {
                             instrument: inp.instrument.to_owned(),
                             theme,
@@ -816,6 +851,11 @@ impl Engine {
                                 Trust::Replica
                             },
                             history: vec![tr.clone()],
+                            condition: split.0.cloned(),
+                            resolution: Some(Resolution {
+                                rule: self.cfg.outcome.name().to_owned(),
+                                condition: split.1.cloned(),
+                            }),
                         };
                         let s = OpenStory {
                             id: id.clone(),
@@ -950,5 +990,22 @@ pub fn glyph_spec(story: &Story, now_bar: u64, min_ledger_n: u32) -> GlyphSpec {
         freshness,
         confirmations,
         server: story.trust == Trust::Server,
+        validity: None,
+    }
+}
+
+/// [`glyph_spec`] with the story's validity today (R4, K42/A28), which the caller
+/// computes from the bars ([`crate::sentence::validity_now`]): the glyph then says what
+/// the headline says.
+#[must_use]
+pub fn glyph_spec_at(
+    story: &Story,
+    now_bar: u64,
+    min_ledger_n: u32,
+    validity: Validity,
+) -> GlyphSpec {
+    GlyphSpec {
+        validity: Some(validity),
+        ..glyph_spec(story, now_bar, min_ledger_n)
     }
 }

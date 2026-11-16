@@ -1,0 +1,7 @@
+# fixtures/views/c1-sentence.json: 4ee7fc6 -> K42 (jdiff.py; then changed sentence clauses, sentdiff.py)
+changed  text                       1  e.g. /steps/1/expect/0/msg/data/presentation/text: "SYN03 6 bar önce 135,56'daki direnci yukarı kırdı (kapanış 136,20): yukarı kırılım. 4 bar -> "SYN03 6 bar önce 135,56'daki direnci yukarı kırdı (kapanış 136,20): yukarı kırılım. 4 bar
+total 1 leaf differences
+
+## sentences
+- "Karnesi henüz az örnekli: 7 seferin 3'ünde tuttu."
++ 'Henüz karnesi yok.'

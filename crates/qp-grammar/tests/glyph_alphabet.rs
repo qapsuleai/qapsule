@@ -124,6 +124,7 @@ pub fn all_specs() -> Vec<GlyphSpec> {
                                     freshness,
                                     confirmations,
                                     server,
+                                    validity: None,
                                 });
                             }
                         }

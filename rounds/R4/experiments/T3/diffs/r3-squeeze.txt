@@ -1,0 +1,7 @@
+# fixtures/views/docs/r3-squeeze.json: 4ee7fc6 -> K42 (jdiff.py; then changed sentence clauses, sentdiff.py)
+added    resolution                 1  e.g. /capsules/0/story/resolution: null -> {"condition": {"key": "half_width", "op": "gt", "subject": "close_dev", "within_bars": 20}
+changed  ledger_key                 1  e.g. /capsules/0/story/ledger_key: "squeeze/squeeze.bandwidth@1" -> "squeeze/neutral/squeeze.bandwidth@1"
+changed  title                      1  e.g. /title: "R3 sample: SYN01 (squeeze/squeeze.bandwidth@1)" -> "R3 sample: SYN01 (squeeze/neutral/squeeze.bandwidth@1)"
+total 3 leaf differences
+
+## sentences

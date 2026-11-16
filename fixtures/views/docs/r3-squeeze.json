@@ -45,7 +45,16 @@
           "n": 0,
           "realized": 0
         },
-        "ledger_key": "squeeze/squeeze.bandwidth@1",
+        "ledger_key": "squeeze/neutral/squeeze.bandwidth@1",
+        "resolution": {
+          "condition": {
+            "key": "half_width",
+            "op": "gt",
+            "subject": "close_dev",
+            "within_bars": 20
+          },
+          "rule": "fixture.move4"
+        },
         "series": "px",
         "stage": "born",
         "strength": 0.7921186223833427,
@@ -2177,5 +2186,5 @@
       }
     }
   ],
-  "title": "R3 sample: SYN01 (squeeze/squeeze.bandwidth@1)"
+  "title": "R3 sample: SYN01 (squeeze/neutral/squeeze.bandwidth@1)"
 }

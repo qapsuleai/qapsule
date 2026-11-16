@@ -1,0 +1,236 @@
+{
+  "faces": {
+    "Y1": "<<YUZ1>>",
+    "Y2": "<<YUZ2>>"
+  },
+  "base": {
+    "lang": "tr",
+    "theme": "light",
+    "face": "@Y1",
+    "alphabet": "siluet",
+    "feed": "r3",
+    "transition": "zumlak",
+    "outcome": "tg5"
+  },
+  "comparisons": {
+    "face": {
+      "task": "G1",
+      "param": "face",
+      "A": "@Y1",
+      "B": "@Y2"
+    },
+    "feed": {
+      "task": "G2",
+      "param": "feed",
+      "A": "elikov",
+      "B": "vakiro"
+    },
+    "transition": {
+      "task": "G3",
+      "param": "transition",
+      "A": "zumlak",
+      "B": "tutamir"
+    },
+    "outcome": {
+      "task": "G4",
+      "param": "outcome",
+      "A": "tg5",
+      "B": "r3"
+    },
+    "alphabet": {
+      "task": "G5",
+      "param": "alphabet",
+      "A": "siluet",
+      "B": "rozet"
+    }
+  },
+  "G2": {
+    "audience": {
+      "group": "habituated",
+      "sensitivity": "balanced",
+      "watch": [
+        "SYN02",
+        "SYN03",
+        "SYN04",
+        "SYN05",
+        "SYN22",
+        "SYN25",
+        "SYN26",
+        "SYN28"
+      ],
+      "long": [
+        "SYN09",
+        "SYN12"
+      ],
+      "short": []
+    },
+    "sets": [
+      {
+        "t0": 600,
+        "t1": 609
+      },
+      {
+        "t0": 882,
+        "t1": 891,
+        "audience": {
+          "group": "habituated",
+          "sensitivity": "balanced",
+          "watch": [
+            "SYN02",
+            "SYN03",
+            "SYN04",
+            "SYN05",
+            "SYN22",
+            "SYN25",
+            "SYN26",
+            "SYN28"
+          ],
+          "long": [
+            "SYN19",
+            "SYN01"
+          ],
+          "short": []
+        }
+      }
+    ]
+  },
+  "order": [
+    "P0",
+    "G5",
+    "G1",
+    "G3",
+    "G4",
+    "G2"
+  ],
+  "practice": {
+    "step": 1,
+    "row": 0,
+    "capsule": "cap.SYN28.continuation.down.118"
+  },
+  "G5": {
+    "sets": [
+      {
+        "step": 1,
+        "rows": [
+          -3,
+          -2,
+          -1
+        ],
+        "capsules": [
+          "cap.SYN25.continuation.down.76",
+          "cap.SYN18.continuation.up.107",
+          "cap.SYN21.continuation.down.104"
+        ]
+      },
+      {
+        "step": 201,
+        "rows": [
+          -3,
+          -2,
+          -1
+        ],
+        "capsules": [
+          "cap.SYN29.breakout.up.82",
+          "cap.SYN11.breakout.up.140",
+          "cap.SYN21.breakout.up.57"
+        ]
+      }
+    ]
+  },
+  "G1": {
+    "sets": [
+      [
+        {
+          "step": 1,
+          "row": 1,
+          "capsule": "cap.SYN25.breakout.down.26"
+        },
+        {
+          "step": 46,
+          "row": 2,
+          "capsule": "cap.SYN01.breakout.down.124"
+        },
+        {
+          "step": 64,
+          "row": 2,
+          "capsule": "cap.SYN19.breakout.down.124"
+        }
+      ],
+      [
+        {
+          "step": 100,
+          "row": 7,
+          "capsule": "cap.SYN12.breakout.down.129"
+        },
+        {
+          "step": 163,
+          "row": 1,
+          "capsule": "cap.SYN02.breakout.down.127"
+        },
+        {
+          "step": 334,
+          "row": 4,
+          "capsule": "cap.SYN20.breakout.down.154"
+        }
+      ]
+    ]
+  },
+  "G3": {
+    "sets": [
+      [
+        {
+          "step": 334,
+          "row": 5,
+          "capsule": "cap.SYN25.breakout.down.93"
+        },
+        {
+          "step": 334,
+          "row": 7,
+          "capsule": "cap.SYN23.breakout.down.106"
+        }
+      ],
+      [
+        {
+          "step": 469,
+          "row": 7,
+          "capsule": "cap.SYN13.breakout.down.171"
+        },
+        {
+          "step": 469,
+          "row": 6,
+          "capsule": "cap.SYN02.breakout.down.126"
+        }
+      ]
+    ]
+  },
+  "G4": {
+    "sets": [
+      {
+        "step": 76,
+        "rows": [
+          -3,
+          -2,
+          -1
+        ],
+        "capsules": [
+          "cap.SYN21.breakout.up.57",
+          "cap.SYN23.breakout.up.115",
+          "cap.SYN08.breakout.up.121"
+        ]
+      },
+      {
+        "step": 351,
+        "rows": [
+          -3,
+          -2,
+          -1
+        ],
+        "capsules": [
+          "cap.SYN14.breakout.down.103",
+          "cap.SYN05.breakout.up.127",
+          "cap.SYN18.breakout.up.101"
+        ]
+      }
+    ]
+  }
+}

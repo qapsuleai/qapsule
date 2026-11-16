@@ -321,3 +321,76 @@ python3 -I rounds/R3/human-test/score.py answers.csv
 git grep -nIE "jwt [A-Za-z0-9]|eyJ[A-Za-z0-9_-]{10,}|BEGIN (RSA|EC|OPENSSH) PRIVATE"; git ls-files | grep fixtures/local
 git diff main -- rounds/R0 rounds/R1 rounds/RD1 rounds/RP1 rounds/R2 rounds/RP2
 ```
+
+## Koşulların giderilmesi (yeniden denetim, 9ae6b50)
+
+Denetlenen: `r3/int` @ `9ae6b50` (K1 düzeltmesi `r3/fix-k1`, tasarım `experiments/S/S-E.md`,
+PROTOCOL §20.2/§20.5, testler `crates/qp-session/tests/non_interference.rs`). Dal `r3/audit2`.
+Ek denetçi düzeneği: `rounds/R3/audit/src/bin/k1_probe.rs` (yeni).
+
+**K1: kısmen giderildi.** Asıl açık (Y1 ve O1) kapandı: yetkili bir yazarın lisanslı öğeye
+dokunan komutu yokken yetkisiz okuyucuların (okuyucu, yazar, öneren, kısmi akış yetkili) bütün
+akışı lisanslı veriden bağımsız. **Ama** iki kanal kaldı: (a) açık görünümlü bir yazarın komutu
+otoritede yalnız lisanslı olan bir kapsülü değiştiriyor (bütünlük); (b) **yetkili** bir yazarın
+yalnız lisanslı öğeye dokunan komutu, açık günlüğe boş bir girdi (`changes: []`, `summary: "…"`,
+`cause`, `seq`) olarak geçiyor; girdinin varlığı lisanslı veriye bağlı. (a) koordinatörün
+bildirdiği YÜKSEK bulguyla aynı; (b) bildirilen üç bulgunun hiçbiri değil, yeni.
+
+### Kanıt
+
+| # | Deneme | Sonuç |
+|---|---|---|
+| 1 | Kendi `session_probe`'um, yeni kod (döküm 39 kurgusu, kendi barlarım, 200 bar; akış tohumu 1 ↔ 2/7/42; Bora ve Can; mühür iletileri çıkarıldı) | **0 fark**: Bora 276/276, Can 275/275 satır; son 16 sorgu cevabının 0'ı farklı; kırılım bulgularında `confidence` farkı 0 (eski kodda 8/5/4). Otoritenin dokümanında `fnd.THYAO.breakout.up.30` güveni hâlâ tohuma göre 0,3298 ↔ 0,7783: değer otoritede duruyor ama artık açık görünüm okuyucusuna gitmiyor. Yeniden oynatma, K26, aday ve varlık kâhini sonuçları değişmedi |
+| 1b | Aynı koşunun değer taraması | 15 satırda `cap.THYAO.flow.up.124` kimliği var: bu açık dünyadaki **açık** bir hacim sıçraması hikâyesi (olgu `fx.THYAO.flow.volume_surge.surge.124`), otoritedeki lisanslı doğumlu hikâyeyle aynı kimliği taşıyor (S-E §2 kimlik çakışması, belgelendi). Girişimsizlik eşitliği bunun lisanslı veriden bağımsız olduğunu gösteriyor; sızıntı değil |
+| 2 | `k1_probe`, **iki enstrüman**, iki lisanslı akış, 5 yapılandırma: (1,1001), (2,1002), yalnız THYAO akışı farklı (7,1001), yalnız ASELS akışı farklı (1,1007), akışsız. Kişiler: Bora (barlar), Can (hiçbir şey), **Dora (barlar + yalnız `flow/THYAO`)**, **Eda (sahip, yalnız barlar)**, **Fatih (öneren, yalnız barlar)**, Ana (`*`, pozitif kontrol). 588 kimlik evreni (bütün koşuların otoritelerindeki olgu/bulgu/kapsül; 153 lisanslı olgu). Okuyucular her kimliğe `capsule`, `get`, `present`, `verify_evidence`, `mode: propose` ile `reject_finding` ve uydurma `dispute` gönderir; `log` (`after_seq` 0/50/100), `ledger` iki biçim, `capsules` dört biçim, `document`, `describe`. Eda her kimliğe doğrudan `approve`/`reject_finding` ve `show_finding`; Fatih her kimliğe öneri; Eda bütün önerileri ve 40 uydurma öneri kimliğini `accept_proposal`. Arkın'ın komutları **kapalı** | Bora, Can, Dora, Eda, Fatih: dört karşılaştırmanın hepsinde **0 farklı satır** (4.416 / 4.415 / 4.414 / 4.829 / 4.128 satır); Ana'nınki 4.490–4.517 satır farklı (pozitif kontrol). Kısmi yetkili Dora'nın akışı THYAO akışı değişince de değişmiyor: S-E'deki "kısmi yetki → açık görünüm" davranışı doğrulandı (yetkili olduğu THYAO lisanslı hikâyelerini de görmüyor) |
+| 3 | Aynı, ama bar 120'de **Arkın (sahip, `*`)** evrendeki her bulguya `approve`/`reject_finding` (aynı komut listesi her yapılandırmada) ve bir `show_finding` | **Kırık (b):** Bora/Can/Dora 47 (tohum 2) – 4.266 (akışsız) satır farklı, Eda/Fatih 3–971. İlk fark: Bora'nın `changes` konusunda `{"author":"arkin","cause":"o37","changes":[],"seq":153}` ↔ aynı `seq`'te `cause":"o52"`; Eda'nın `log` cevabında `{"cause":"o37","changes":[],"summary":"…"}` girdileri. Arkın'ın komutunun otoritede uygulanıp uygulanmadığı (= hedeflediği kimliğin otoritede lisanslı doğumlu olarak bulunup bulunmadığı) açık günlükte girdinin varlığı, `cause` ve sonraki `seq` kayması olarak görünüyor. Arkın'ın seçimi aynı; değişen yalnız lisanslı veri. Örn. her yeni bulguyu otomatik onaylayan bir ajan, lisanslı doğumların zamanını açık okuyuculara bar bar duyurur |
+| 4 | Açık görünümlü yazarların otoriteye etkisi (otoritenin dokümanında lisanslı doğumlu kapsüllerin `state`/`view`'ı, Eda/Fatih'ten önce ve sonra) | **Kırık (a):** her akışlı yapılandırmada 35–41 lisanslı doğumlu kapsülün **1**'i değişti (akışsızda 0). Açık görünümlü bir yazar, açık dünyada var olan bir kimlik üzerinden otoritede yalnız lisanslı olan kapsülün durumunu ya da görünümünü değiştirebiliyor. Koordinatörün bildirdiği YÜKSEK bulgu (ters çevirme / kimlik çakışması) ile aynı; bağımsız olarak buldum |
+| 5 | `AcceptProposal` kâhini (bildirilen ORTA) | Benim kurgumda **görünmedi**: Eda'nın bütün `accept_proposal` cevapları ve sonrası tohumdan bağımsız. Bulunmadı demek; kâhin doğrulamanın otoritede yapılmasından, benim önerilerim (`approve_finding` her kimliğe) bu farkı tetiklemedi |
+| 6 | `apply_each` atomikliği (bildirilen ORTA) | Ayrıca denemedim |
+
+### Davranış değişiklikleri
+
+| Değişiklik | Belgede | Denetim |
+|---|---|---|
+| Çalışan motorun kapsülü §8.1 veri koşuluyla geçersizleşmez (yalnız sonuç kuralıyla kapanır) | PROTOCOL §20.5, S-E §2 ve §2b-1 | Kabul edilebilir: motor kapsülünün yaşamı zaten sonuç kuralına bağlı; motor olmayan hikâyeli kapsül (döküm 37) eskisi gibi §8.1 ile geçersizleşiyor |
+| Kısmi akış yetkisi → açık görünüm | PROTOCOL §20.5, S-E §6 | Kabul edilebilir (güvenli taraf), deneme 2 doğruladı; kayıp (yetkili olunan akışın lisanslı hikâyeleri görünmez) S-E §6'da açık, `DECISIONS` açık kararına da yazılmalı (öneri) |
+| Her bar kapanışında bir motor girdisi (boş bile olsa), düzeltilmiş cevapta her zaman girdi | PROTOCOL §20.5 (`seq` paylaşımı), S-E §2 | Kabul edilebilir ve gerekli; ama aynı ilke kişinin komutları için tutmuyor (kanal b) |
+| Döküm 39 yeniden üretildi | S-E §3 | `git diff 92b0d84 9ae6b50 -- fixtures`: yalnız `39-capsule-entitlement.json` (12+/9−); 01–38 ve 40–44 bayt eşit. Değişen alanlar yalnız Bora/Can: önem 1,490984 → 1,485308, `e2` önerisi, `ledger by_kind` `flow` 7/5 → 2/1 — hepsi açık-yalnız motorun beklenen sonucu |
+| Karne açık görünüm okuyucusuna açık-yalnız motordan (K33 anlamı daraldı) | PROTOCOL §20.2, DECISIONS Ö37 notu | Kabul edilebilir; O1'i kapatıyor |
+
+### verify
+
+`CARGO_INCREMENTAL=0 QP_VERIFY_BROWSER=1 scripts/verify.sh` @ `9ae6b50`: **çıkış 0, 15/15 PASS**
+(340 s); testler 96 ikili, 459 geçti, 0 kaldı, 2 yok sayıldı; browser PASS; digest arm64, x86_64,
+wasm32 `7b1e99d40889f83c`; conform 44 × inproc, serve, mcp; wasm gzip -9 616.022 B.
+
+### K2
+
+Bekliyor: `STATUS.md` ("R3 koşulmayı bekliyor") ve `ROADMAP.md` ("Hazır, koşulacak") `9ae6b50`'de
+hâlâ güncel değil. `REPORT.md`'de "Denetim" bölümü yazılmış; ölçüt 9 ve 10 "(K1 sonrası)",
+K1 satırı "(aşağıda doldurulur)".
+
+### Güncel hüküm
+
+**Koşullu kabul, K1 açık.** Kapanması için: (a) açık görünümlü yazarın komutu otoritede yalnız
+lisanslı olan öğeye hiçbir yoldan dokunmamalı (`r3/fix-k1b`); (b) yetkili kişinin komutundan
+doğan, açık dünyada karşılığı boş olan girdi açık okuyucunun gözleyebileceği bir iz bırakmamalı
+(ya açık dünyada girdinin varlığı lisanslı veriden bağımsız olmalı — ör. her komut girdisi her
+iki dünyada da yazılır —, ya da bu kanal bilinçli bir karar olarak `DECISIONS.md`'ye yazılmalı;
+S-E'nin "kişinin seçimi" gerekçesi burada geçmiyor, çünkü seçim aynı, değişen veri);
+(c) girişimsizlik testine yetkili yazarın lisanslı kimliklere komutu ve açık görünümlü yazarın
+otorite bütünlüğü denetimi eklenmeli (`k1_probe` deneme 3 ve 4). K2 kapanış belgeleriyle.
+
+Komutlar:
+
+```sh
+git checkout -B r3/audit2 9ae6b50
+CARGO_INCREMENTAL=0 QP_VERIFY_BROWSER=1 scripts/verify.sh
+python3 -I rounds/R3/audit/gen_bars.py sp_bars.json 5 1 400
+cargo run --release --manifest-path rounds/R3/audit/Cargo.toml --bin session_probe -- <depo> sp_bars.json 200
+python3 -I rounds/R3/audit/gen_bars.py k1_bars.json 13 2 200
+cargo run --release --manifest-path rounds/R3/audit/Cargo.toml --bin k1_probe -- <depo> k1_bars.json 200            # deneme 3, 4
+K1_NO_ARKIN=1 cargo run … --bin k1_probe -- <depo> k1_bars.json 200                                                  # deneme 2
+K1_SHOW=b|e cargo run … --bin k1_probe -- …                                                                          # ilk farkı göster
+git diff 92b0d84 9ae6b50 -- fixtures
+```

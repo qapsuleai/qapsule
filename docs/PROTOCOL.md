@@ -1577,6 +1577,7 @@ derleyicisiyle. Kendi motor girdisi yazmaz, çapa damgalamaz, izleyici değerlen
 | yüklem tutuyor, otorite `provisional`, kendi barı canlı, **canlı gösterim açık** | `shown`, `provisional` |
 | yüklem tutuyor, başka her durum (otoritenin kesinini ya da kendi kapanışını bekliyor; iki taraf da kirli) | `pending` |
 | yüklem tutmuyor, otorite `final`, kendi barı kapalı ve temiz | barındırıcıdan kesin bar çekme ister (`take_refetch`); çekildikten (`refetched`) sonra hâlâ tutmuyorsa `disputed` ("kaynaklar farklı"; iddia olarak gösterilmez) |
+| yüklem tutmuyor, otorite `final`, kendi barı kapalı değil ama barındırıcı kesinleşmiş değerle verdi (`set_settled`), temiz | (R3/M7) bir kez kesin bar çekme ister (`take_refetch`, `[çapa, t]`: geride kalan beslemenin kaçırdığı düzeltme ve bölünme önceki barlarda olabilir); `pending` (`not_held`) — bar kapanmadan `disputed` olmaz |
 | yüklem tutmuyor, başka durum | `pending` |
 
 `withdrawn` iddia görüntüden çıkar. Görüntü durumu belirleyicidir (iddia ve `t` sırasıyla).
@@ -1670,6 +1671,11 @@ kaynaktan çeker (bar henüz kesinleşmediyse sonra yeniden dener) ve cevabı ve
   "düzeltmenin yeni doğurduğu iddia iddia edilmez" sınırını hijyen açıkken kaldırır (ör.
   beslemede kaybolan kapanış tiki, iddia doğuran düzeltme). Niyet ve kapsül
   geçersizleşmeleri taranmaz.
+- Hijyen açıkken **yeniden çözüm** (`Session::resync_bindings`; ör. bölünmenin anlık
+  görüntüsü, onunla birlikte gelen düzeltme) kapalı barları değiştirdiyse bu da
+  sağlayıcının düzeltmesidir: değişen ilk kapalı bardan son kapalı bara kadar kesin istek
+  (`SettleRequest`) ve aynı tarama hemen yapılır (R3/M7 AUD2 düzeltmesi). Hijyen kapalıyken
+  yeniden çözüm eskisi gibi yalnız kayıtlı iddiaları yeniden sınar.
 
 Kesinlik bu doğrulamayı **beklemez** (gecikme maliyeti yok); yanlış kesin iddia en geç
 "kesinleşme gecikmesi + kesin kaynak cevabı" kadar sonra düşer.

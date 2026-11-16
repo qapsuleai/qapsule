@@ -1,0 +1,24 @@
+[package]
+name = "m1-iz"
+description = "R3/M1 candidate alphabet `iz` (trace): each glyph is the motion trace of a meaning; the kind is the topology of the stroke."
+version = "0.0.0"
+edition = "2021"
+publish = false
+
+# Not a member of the main workspace.
+[workspace]
+
+[lib]
+name = "m1_iz"
+path = "src/lib.rs"
+
+[dependencies]
+qp-schema = { path = "../../../../../crates/qp-schema" }
+qp-grammar = { path = "../../../../../crates/qp-grammar" }
+
+[dev-dependencies]
+# Contact sheet example only (examples/contact.rs).
+qp-render = { path = "../../../../../crates/qp-render" }
+
+[lints.rust]
+unsafe_code = "forbid"

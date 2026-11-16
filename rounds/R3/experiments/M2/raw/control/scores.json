@@ -1,0 +1,96 @@
+{
+  "harness": "r3-h-m12/1",
+  "alt": "control",
+  "langs": {
+    "tr": {
+      "readers": 1,
+      "items": 24,
+      "accuracy": {
+        "direction": 1.0,
+        "full": 0.9167,
+        "kind": 1.0,
+        "still_valid": 1.0,
+        "what": 1.0,
+        "when": 0.9167,
+        "when_exact": 0.9167
+      },
+      "chance": {
+        "direction": 0.3333,
+        "kind": 0.1667,
+        "still_valid": 0.3333,
+        "what": 0.0556,
+        "when": 0.3333
+      },
+      "majority": {
+        "direction": 0.4583,
+        "full": 0.0833,
+        "kind": 0.2083,
+        "still_valid": 0.375,
+        "what": 0.2083,
+        "when": 0.4167,
+        "when_exact": 0.4167
+      },
+      "k26_full": "0/1",
+      "per_reader": [
+        {
+          "run": "tr_s1_r1",
+          "reader": "r1",
+          "seed": 1,
+          "parsed": true,
+          "items": 24,
+          "missing": 0,
+          "correct": {
+            "direction": 24,
+            "full": 22,
+            "kind": 24,
+            "still_valid": 24,
+            "what": 24,
+            "when": 22,
+            "when_exact": 22
+          },
+          "k26": {
+            "direction": true,
+            "full": false,
+            "kind": true,
+            "still_valid": true,
+            "what": true,
+            "when": false,
+            "when_exact": false
+          },
+          "wrong": {
+            "1": [
+              "when",
+              "when_exact"
+            ],
+            "10": [],
+            "11": [],
+            "12": [],
+            "13": [],
+            "14": [],
+            "15": [],
+            "16": [],
+            "17": [],
+            "18": [],
+            "19": [],
+            "2": [],
+            "20": [],
+            "21": [],
+            "22": [],
+            "23": [],
+            "24": [],
+            "3": [],
+            "4": [],
+            "5": [],
+            "6": [],
+            "7": [
+              "when",
+              "when_exact"
+            ],
+            "8": [],
+            "9": []
+          }
+        }
+      ]
+    }
+  }
+}

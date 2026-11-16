@@ -368,6 +368,10 @@ pub struct Fact {
     /// digest; stamped by the authority (`docs/PROTOCOL.md` §18.5). Clients never send it.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub evidence_ref: Option<crate::data::EvidenceRef>,
+    /// Meaning (R3): kind, direction, family, time kind, detector, license, geometry.
+    /// Absent on facts written before R3.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub meaning: Option<crate::capsule::FactMeaning>,
     /// Who detected it.
     pub provenance: Provenance,
 }
@@ -529,6 +533,10 @@ pub struct Capsule {
     /// Expiry time, epoch milliseconds UTC.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub expires_at: Option<TimestampMs>,
+    /// The story (R3): theme, stage, families, ledger at birth, history. Absent on
+    /// capsules written before R3.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub story: Option<crate::capsule::Story>,
     /// Who made it and when.
     pub provenance: Provenance,
 }
@@ -584,6 +592,19 @@ pub struct LedgerEntry {
     /// Optional note.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub note: Option<String>,
+    /// Capsule id (R3).
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub capsule: Option<String>,
+    /// Ledger key `kind/detector@version` (R3).
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub key: Option<String>,
+    /// Closing stage (R3): `realized`, `invalidated` or `expired` (`retracted` is never
+    /// recorded, K37).
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub stage: Option<crate::capsule::Stage>,
+    /// Bar at which the outcome was decided (R3).
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub bar: Option<u64>,
 }
 
 /// The record of findings compared with reality afterwards.
@@ -641,6 +662,9 @@ pub struct Document {
     /// Proposals: writes waiting for approval, and their outcome (protocol v0).
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
     pub proposals: Vec<crate::protocol::Proposal>,
+    /// Capsule preferences per person (principal id → audience), R3.
+    #[serde(default, skip_serializing_if = "BTreeMap::is_empty")]
+    pub audiences: BTreeMap<String, crate::capsule::Audience>,
 }
 
 /// The operation a command performs on a document.

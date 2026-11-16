@@ -18,10 +18,12 @@
 //! Determinism: no clock, no hash maps; the queue is filled in evaluation order, which is
 //! the same on the incremental and the from-scratch path.
 
-use std::collections::BTreeMap;
+use std::collections::{BTreeMap, BTreeSet};
 
 use qp_schema::data::BindingState;
-use qp_schema::protocol::{ClaimEvidence, ClaimRef, ClaimState, EvidenceValue, Maturity};
+use qp_schema::protocol::{
+    ClaimEvidence, ClaimReason, ClaimRef, ClaimState, EvidenceValue, Maturity,
+};
 use qp_schema::{CompareOp, Condition, Document, SeriesSource};
 
 use crate::plane::DataPlane;
@@ -65,15 +67,25 @@ pub(crate) struct Pending {
     pub claim: ClaimRef,
     pub state: ClaimState,
     pub evidence: ClaimEvidence,
+    /// (R3, §19.9) Why: settled data or a dispute; `None` for the ordinary lifecycle.
+    pub reason: Option<ClaimReason>,
 }
+
+/// A registered claim's key: who receives it, what it is about, its bar time.
+pub(crate) type ClaimKey = (Owner, ClaimRef, i64);
 
 /// The authority's claims (registry, gap marks, queue).
 #[derive(Debug, Default)]
 pub(crate) struct Claims {
-    reg: BTreeMap<(Owner, ClaimRef, i64), Reg>,
+    reg: BTreeMap<ClaimKey, Reg>,
     gaps: BTreeMap<String, Gap>,
     pending: Vec<Pending>,
     counter: u64,
+    /// (R3) Reason given to the steps `after_bars` makes while it is set (the settled-bar
+    /// path sets `data_corrected`).
+    pub(crate) ctx_reason: Option<ClaimReason>,
+    /// (R3) Claims with an open dispute: a withdrawal of one is `dispute_upheld`.
+    pub(crate) disputed: BTreeSet<ClaimKey>,
 }
 
 /// The value of `id` at index `i` and `i - 1`, with the bar time of `i`.
@@ -274,12 +286,28 @@ impl Claims {
             claim,
             state: ClaimState::Asserted,
             evidence: ev,
+            reason: self.ctx_reason,
         });
     }
 
     /// Takes the queued events.
     pub(crate) fn take(&mut self) -> Vec<Pending> {
         std::mem::take(&mut self.pending)
+    }
+
+    /// The queued events (not taken).
+    pub(crate) fn queued(&self) -> &[Pending] {
+        &self.pending
+    }
+
+    /// Queues one event as it is (R3: a dispute's rejection to the disputer).
+    pub(crate) fn push(&mut self, p: Pending) {
+        self.pending.push(p);
+    }
+
+    /// The evidence of a registered claim.
+    pub(crate) fn registered(&self, key: &ClaimKey) -> Option<&ClaimEvidence> {
+        self.reg.get(key).map(|r| &r.ev)
     }
 
     /// After the bars of bar series changed (`changed`, `rd` and the cache already
@@ -367,6 +395,11 @@ impl Claims {
                     }
                 };
                 let Some((state, ev)) = next else { continue };
+                let reason = if state == ClaimState::Withdrawn && self.disputed.contains(&key) {
+                    Some(ClaimReason::DisputeUpheld)
+                } else {
+                    self.ctx_reason
+                };
                 match state {
                     ClaimState::Withdrawn => {
                         self.reg.remove(&key);
@@ -382,6 +415,7 @@ impl Claims {
                     claim: key.1.clone(),
                     state,
                     evidence: ev,
+                    reason,
                 });
             }
         }
@@ -475,6 +509,12 @@ impl crate::session::Session {
                 {
                     continue;
                 }
+                // (R3/K1b) Claims on document items (capsules, intents) are the
+                // authority's world's; a public-view reader gets its own conditions' only.
+                if !matches!(p.claim, ClaimRef::Condition { .. }) && self.public_view(&c.principal)
+                {
+                    continue;
+                }
                 for s in &c.subs {
                     if !matches!(s.topic, qp_schema::protocol::Topic::Claims {}) {
                         continue;
@@ -492,7 +532,8 @@ impl crate::session::Session {
                                     &c.principal,
                                     &p.evidence,
                                 ),
-                                seq,
+                                seq: self.seq_to(&c.principal, seq),
+                                reason: p.reason,
                             },
                         },
                     ));

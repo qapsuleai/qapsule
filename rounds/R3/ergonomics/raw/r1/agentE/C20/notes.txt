@@ -1,0 +1,1 @@
+attempt1: reused id from C10 discovery; --png --present fnd.THYAO.breakout.down.314 (chart depth: candles, level rules, glyph, highlight). PNG written. Unclear: "işaretli" interpreted as the presenter chart with glyph/highlight marks.

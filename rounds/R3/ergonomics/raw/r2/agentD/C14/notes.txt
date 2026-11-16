@@ -1,0 +1,2 @@
+attempt1: verify_evidence with a selector object as item -> schema error (item must be a string id; spec 17.2 doesn't list verify_evidence.item as selector-capable). Also my selector had the dotted-kind problem.
+attempt2: found id via capsules query, verify_evidence item=fnd.THYAO.breakout.down.310 -> evidence_check, all facts verified.

@@ -1,0 +1,42 @@
+You are taking a reading test. Below are 24 numbered sentences in English. Each describes one observation about a stock's chart. A "bar" is one period of the chart (for example one trading day). For every sentence answer three questions:
+
+1. What happened? `kind` (one of the six kinds below) and `direction` (up, down or neutral).
+2. When? `when` = "past" (it happened some bars ago; then give `bars_ago` as an integer, 0 = this bar / today, or null if the sentence does not say), "now" (a state that holds now) or "conditional" (an expectation that depends on a condition); `bars_ago` is null unless `when` is "past".
+3. Is it still valid now? `still_valid` = "yes", "no" or "unknown".
+
+The six kinds:
+- continuation: the move goes on
+- reversal: the move may be turning
+- breakout: a boundary was crossed
+- squeeze: the move is narrowing; direction unknown
+- extreme: an unusual stretch (overbought / oversold)
+- flow: money flowing in or out, independent of price
+
+Sentences:
+1. 3 bars ago, THYAO's RSI crossed above 70; it fell back below today and is now 55, no longer above 70. The overbought state has ended. Historically, this signal played out in 87 of 140 cases.
+2. Today, PGSUS's RSI fell below 30 (to 28.8): oversold. Volume confirmed it today; 2 independent evidence families support it. Whether it still holds is unknown. Historically, this signal played out in 99 of 140 cases.
+3. Yesterday, GARAN crossed above 168.43; it is now at 163.38, no longer above 168.43. The upside breakout has ended. The expected outcome came true today. Its record is still thin: it played out in 2 of 8 cases.
+4. ASELS's RSI has been above 70 for 30 bars and is now 71.4. The overbought state is still in place. The expected outcome came true today. Historically, this signal played out in 62 of 140 cases.
+5. If SAHOL closes above the long average within a few bars, the uptrend would be confirmed. The expectation was invalidated today and is no longer valid. Historically, this kind of signal played out about as often as not. Server-verified; the figures require an institutional flow data license.
+6. About a week ago, BIMAS's RSI crossed above the overbought threshold; it is no longer above the overbought threshold. The overbought state has ended. Its record is still thin. Server-verified; the figures require an institutional flow data license.
+7. If net institutional flow in SISE falls below the recent average (334,000) within 3 bars, the money outflow would be confirmed. The expectation's 5-bar life ran out today without an outcome; it is no longer valid. Its record is still thin: it played out in 2 of 8 cases.
+8. SISE has been below the long average (71.29) for 5 bars and is now at 69.86. The downtrend is still in place. Historically, this signal played out in 63 of 140 cases.
+9. If THYAO's RSI rises above 70 within 3 bars, the overbought state would be confirmed. The expectation came true today. Whether the setup is still open is unknown. Historically, this signal played out in 86 of 140 cases.
+10. Net institutional flow in GARAN is above the recent average (319,000) as of today, now 325,380. The money inflow is still in place. An opposite signal appeared today and weakened it. Historically, this signal played out in 63 of 140 cases.
+11. If ASELS's band width falls below the threshold (0.06) within 3 bars, the squeeze (direction open) would be confirmed. The expectation's 5-bar life ran out today without an outcome; it is no longer valid. Its record is still thin: it played out in 3 of 8 cases.
+12. If EREGL's RSI falls below 30 within 3 bars, the oversold state would be confirmed. The expectation came true today. Whether the setup is still open is unknown. Historically, this signal played out in 42 of 140 cases.
+13. THYAO's RSI is above 70 as of today, now 71.4. The overbought state is still in place. Its record is still thin: it played out in 2 of 8 cases.
+14. If EREGL closes above 245.84 within 3 bars, the upside breakout would be confirmed. The expectation came true today. Whether the setup is still open is unknown. Its record is still thin: it played out in 6 of 8 cases.
+15. Net institutional flow in EREGL has been below the recent average (452,000) for 30 bars and is now 442,960. The money outflow is still in place. Volume confirmed it today; 2 independent evidence families support it. Its record is still thin: it played out in 5 of 8 cases.
+16. 30 bars ago, TUPRS's Bollinger bands narrowed (band width 0.025, threshold 0.06): a squeeze, direction open. It was invalidated today and is no longer valid. Its record is still thin: it played out in 2 of 8 cases.
+17. 30 bars ago, EREGL crossed below 46.19; it is now at 47.58, no longer below 46.19. The downside breakout has ended. The signal was invalidated today. Historically, this signal played out in 81 of 140 cases.
+18. About a week ago, PGSUS showed a downward reversal signal: price made a new high while RSI made a lower high. Its life ran out today without an outcome; it is no longer valid. Its record is still thin. Server-verified; the figures require an institutional flow data license.
+19. GARAN's band width has been below the threshold (0.06) since yesterday and is now 0.0588. The squeeze (direction open) is still in place. The expected outcome came true today. Its record is still thin: it played out in 2 of 8 cases.
+20. If THYAO's band width falls below the threshold (0.06) within 3 bars, the squeeze (direction open) would be confirmed. An opposite signal appeared today and weakened it. Whether the setup is still open is unknown. Historically, this signal played out in 45 of 140 cases.
+21. SISE has been below the reversal point (177.59) for 30 bars and is now at 174.04. The downward reversal is still in place. The expected outcome came true today. Historically, this signal played out in 68 of 140 cases.
+22. Today, SISE's moving averages lined up for a downtrend (close 196.96, long average 204.84): a continuation of the downtrend. It was invalidated today and is no longer valid. Its record is still thin: it played out in 2 of 8 cases.
+23. Yesterday, GARAN crossed above the reversal point (33.26); it is now at 32.26, no longer above the reversal point. The upward reversal has ended. The signal was invalidated today. Its record is still thin: it played out in 4 of 8 cases.
+24. If net institutional flow in FROTO falls below the recent average (499,000) within 3 bars, the money outflow would be confirmed. Volume confirmed it today; 2 independent evidence families support it. The setup is still open. Historically, this signal played out in 85 of 140 cases.
+
+Give your best guess for every sentence. Reply with a single JSON object and nothing else, keyed by sentence number, for example:
+{"1": {"kind": "breakout", "direction": "up", "when": "past", "bars_ago": 3, "still_valid": "no"}, "2": {...}, ...}

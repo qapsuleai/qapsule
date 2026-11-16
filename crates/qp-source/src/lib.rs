@@ -13,6 +13,11 @@
 //! [`SourceProvider`] is the host-supplied provider ([`MemoryProvider`] for tests and
 //! simple hosts); [`SyntheticEvents`] generates a deterministic field-level stream.
 //!
+//! R3 (data for fact detectors and capsule measurements): [`synthetic_market`] generates
+//! regime-driven XIST-aligned bars for many instruments, [`synthetic_flow`] a licensed
+//! broker-flow feed (K33), and [`load_local_bars`] reads real bars fetched into
+//! `fixtures/local/bars/` by `scripts/fetch-bars.sh` (K23).
+//!
 //! [`DataEvent`]: qp_schema::data::DataEvent
 //!
 //! Note on names: `qp_schema::SeriesSource` is the *description* of a binding inside a
@@ -26,7 +31,10 @@ use qp_schema::{Bar, Instrument, Series, SeriesData};
 
 mod events;
 mod feed;
+mod flow;
+mod local;
 mod provider;
+mod regimes;
 mod synthetic;
 mod window;
 
@@ -34,9 +42,16 @@ pub use events::{
     bar_patch_diff, data_events_from_bar_events, SyntheticEvents, SyntheticEventsConfig,
 };
 pub use feed::{Applied, EventError, FeedStore, StaleReason, TimeBounds};
+pub use flow::{synthetic_flow, FlowRecord, FLOW_KEYS};
+pub use local::{load_local_bars, load_local_bars_with, local_bars_dir, LOCAL_BARS_ENV};
 pub use provider::{
     bind, entitlement_matches, validate_binding, validate_entitlement, validate_id,
     validate_interval, Bound, MemoryProvider, Resolution, SourceProvider,
+};
+pub use regimes::{
+    regime_at, regime_bars, regime_schedule, synthetic_market, synthetic_market_hourly,
+    trading_day_opens, trading_hour_opens, Regime, RegimeSpan, RegimeSpec, SyntheticInstrument,
+    MARKET_START,
 };
 pub use synthetic::{synthetic_bars, synthetic_series, SyntheticSource};
 pub use window::{resolve_window, ResolvedWindow};

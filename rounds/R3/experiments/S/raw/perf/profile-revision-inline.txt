@@ -1,0 +1,20 @@
+# profile revision-inline: mode caps, history 250, per_bar 100000000, path inline, phase loop,  0:20  up 39 days, 12:04, 8 users, load averages: 9.68 9.54 9.16
+# inclusive samples (function counted once per stack), qp_/serde frames only
+  2697 100.0% capsule_tick::main
+  2697 100.0% capsule_tick::tick
+  2697 100.0% qp_session::session::Session::handle_raw
+  2696 100.0% qp_session::session::Session::handle_resolved
+  2696 100.0% qp_session::session::Session::command
+  2664  98.8% qp_session::capsule::<impl qp_session::session::Session>::proj_for
+  2032  75.3% qp_session::live::<impl qp_session::session::Session>::bar_command
+  2030  75.3% qp_session::live::<impl qp_session::session::Session>::settle_live
+  2024  75.0% qp_session::session::Session::entry_events
+  2024  75.0% qp_session::capsule::<impl qp_session::session::Session>::reader_proj
+   339  12.6% qp_session::capsule::story_fact_ids
+   300  11.1% qp_session::capsule::<impl qp_session::session::Session>::flow_ok
+   151   5.6% qp_session::capsule::<impl qp_session::session::Session>::bars_ok
+     7   0.3% core::ptr::drop_in_place$LT$alloc::collections::btree::map::BTreeMap$LT$$RF$str,$RF$qp_schema::types::Fact>>
+     3   0.1% qp_schema::types::Series::binding
+     3   0.1% qp_session::capsule::<impl qp_session::session::Session>::run_capsules
+     1   0.0% qp_session::error::ptr
+     1   0.0% qp_session::expand::summarize_ops

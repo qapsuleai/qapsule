@@ -1,0 +1,8 @@
+{
+  "experiment": "m1",
+  "alt": "iz",
+  "condition": "learn",
+  "seed": 2,
+  "reader": "r2",
+  "model": "sonnet"
+}

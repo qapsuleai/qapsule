@@ -1,0 +1,1469 @@
+{
+ "doc": {
+  "audiences_host": null,
+  "capsule_states": {
+   "cap.ASELS.breakout.down.154": "invalidated",
+   "cap.ASELS.breakout.down.178": "expired",
+   "cap.ASELS.breakout.down.194": "live",
+   "cap.ASELS.breakout.down.195": "live",
+   "cap.ASELS.breakout.down.202": "live",
+   "cap.ASELS.breakout.down.205": "live",
+   "cap.ASELS.breakout.down.208": "live",
+   "cap.ASELS.breakout.down.213": "live",
+   "cap.ASELS.breakout.down.220": "invalidated",
+   "cap.ASELS.breakout.down.227": "live",
+   "cap.ASELS.breakout.down.229": "live",
+   "cap.ASELS.breakout.down.23": "expired",
+   "cap.ASELS.breakout.down.230": "live",
+   "cap.ASELS.breakout.down.236": "expired",
+   "cap.ASELS.breakout.down.36": "invalidated",
+   "cap.ASELS.breakout.up.101": "live",
+   "cap.ASELS.breakout.up.105": "live",
+   "cap.ASELS.breakout.up.107": "invalidated",
+   "cap.ASELS.breakout.up.112": "live",
+   "cap.ASELS.breakout.up.114": "invalidated",
+   "cap.ASELS.breakout.up.130": "invalidated",
+   "cap.ASELS.breakout.up.135": "invalidated",
+   "cap.ASELS.breakout.up.159": "live",
+   "cap.ASELS.breakout.up.162": "invalidated",
+   "cap.ASELS.breakout.up.170": "invalidated",
+   "cap.ASELS.breakout.up.262": "live",
+   "cap.ASELS.breakout.up.264": "live",
+   "cap.ASELS.breakout.up.272": "live",
+   "cap.ASELS.breakout.up.276": "live",
+   "cap.ASELS.breakout.up.278": "live",
+   "cap.ASELS.breakout.up.279": "live",
+   "cap.ASELS.breakout.up.282": "live",
+   "cap.ASELS.breakout.up.286": "live",
+   "cap.ASELS.breakout.up.288": "invalidated",
+   "cap.ASELS.breakout.up.292": "live",
+   "cap.ASELS.breakout.up.295": "live",
+   "cap.ASELS.breakout.up.296": "live",
+   "cap.ASELS.breakout.up.297": "live",
+   "cap.ASELS.breakout.up.301": "live",
+   "cap.ASELS.breakout.up.302": "live",
+   "cap.ASELS.breakout.up.312": "live",
+   "cap.ASELS.breakout.up.314": "invalidated",
+   "cap.ASELS.breakout.up.57": "live",
+   "cap.ASELS.breakout.up.62": "live",
+   "cap.ASELS.breakout.up.66": "live",
+   "cap.ASELS.breakout.up.67": "invalidated",
+   "cap.ASELS.breakout.up.71": "live",
+   "cap.ASELS.breakout.up.73": "invalidated",
+   "cap.ASELS.breakout.up.92": "live",
+   "cap.ASELS.continuation.down.185": "live",
+   "cap.ASELS.continuation.down.250": "invalidated",
+   "cap.ASELS.continuation.down.51": "invalidated",
+   "cap.ASELS.continuation.up.132": "live",
+   "cap.ASELS.continuation.up.146": "live",
+   "cap.ASELS.continuation.up.159": "live",
+   "cap.ASELS.continuation.up.274": "live",
+   "cap.ASELS.continuation.up.64": "live",
+   "cap.ASELS.continuation.up.85": "live",
+   "cap.ASELS.extreme.down.180": "expired",
+   "cap.ASELS.extreme.down.194": "live",
+   "cap.ASELS.extreme.down.227": "live",
+   "cap.ASELS.extreme.up.111": "live",
+   "cap.ASELS.extreme.up.135": "invalidated",
+   "cap.ASELS.extreme.up.163": "invalidated",
+   "cap.ASELS.extreme.up.276": "live",
+   "cap.ASELS.extreme.up.66": "live",
+   "cap.ASELS.extreme.up.71": "live",
+   "cap.ASELS.extreme.up.92": "live",
+   "cap.ASELS.flow.down.10": "expired",
+   "cap.ASELS.flow.down.108": "invalidated",
+   "cap.ASELS.flow.down.145": "invalidated",
+   "cap.ASELS.flow.down.151": "live",
+   "cap.ASELS.flow.down.165": "invalidated",
+   "cap.ASELS.flow.down.177": "live",
+   "cap.ASELS.flow.down.20": "live",
+   "cap.ASELS.flow.down.201": "live",
+   "cap.ASELS.flow.down.215": "expired",
+   "cap.ASELS.flow.down.256": "invalidated",
+   "cap.ASELS.flow.down.34": "live",
+   "cap.ASELS.flow.down.47": "live",
+   "cap.ASELS.flow.down.78": "invalidated",
+   "cap.ASELS.flow.up.11": "expired",
+   "cap.ASELS.flow.up.111": "live",
+   "cap.ASELS.flow.up.119": "expired",
+   "cap.ASELS.flow.up.129": "invalidated",
+   "cap.ASELS.flow.up.143": "invalidated",
+   "cap.ASELS.flow.up.168": "live",
+   "cap.ASELS.flow.up.28": "expired",
+   "cap.ASELS.flow.up.291": "live",
+   "cap.ASELS.flow.up.41": "invalidated",
+   "cap.ASELS.flow.up.53": "live",
+   "cap.ASELS.flow.up.84": "live",
+   "cap.ASELS.flow.up.91": "live",
+   "cap.ASELS.reversal.down.133": "invalidated",
+   "cap.ASELS.reversal.down.172": "live",
+   "cap.ASELS.reversal.down.76": "live",
+   "cap.ASELS.reversal.up.238": "invalidated",
+   "cap.ASELS.reversal.up.248": "live",
+   "cap.THYAO.breakout.down.165": "invalidated",
+   "cap.THYAO.breakout.down.216": "invalidated",
+   "cap.THYAO.breakout.down.26": "invalidated",
+   "cap.THYAO.breakout.down.309": "live",
+   "cap.THYAO.breakout.down.311": "live",
+   "cap.THYAO.breakout.down.315": "live",
+   "cap.THYAO.breakout.down.32": "live",
+   "cap.THYAO.breakout.down.35": "live",
+   "cap.THYAO.breakout.down.36": "invalidated",
+   "cap.THYAO.breakout.down.96": "invalidated",
+   "cap.THYAO.breakout.up.110": "invalidated",
+   "cap.THYAO.breakout.up.146": "invalidated",
+   "cap.THYAO.breakout.up.174": "live",
+   "cap.THYAO.breakout.up.175": "invalidated",
+   "cap.THYAO.breakout.up.192": "invalidated",
+   "cap.THYAO.breakout.up.207": "invalidated",
+   "cap.THYAO.breakout.up.236": "invalidated",
+   "cap.THYAO.breakout.up.248": "live",
+   "cap.THYAO.breakout.up.258": "invalidated",
+   "cap.THYAO.breakout.up.265": "live",
+   "cap.THYAO.breakout.up.273": "invalidated",
+   "cap.THYAO.breakout.up.276": "live",
+   "cap.THYAO.breakout.up.277": "invalidated",
+   "cap.THYAO.breakout.up.296": "invalidated",
+   "cap.THYAO.breakout.up.44": "live",
+   "cap.THYAO.breakout.up.45": "invalidated",
+   "cap.THYAO.continuation.down.168": "invalidated",
+   "cap.THYAO.continuation.down.314": "live",
+   "cap.THYAO.continuation.down.52": "invalidated",
+   "cap.THYAO.continuation.down.70": "invalidated",
+   "cap.THYAO.continuation.up.103": "live",
+   "cap.THYAO.continuation.up.117": "expired",
+   "cap.THYAO.continuation.up.138": "live",
+   "cap.THYAO.continuation.up.152": "invalidated",
+   "cap.THYAO.continuation.up.154": "invalidated",
+   "cap.THYAO.continuation.up.177": "invalidated",
+   "cap.THYAO.continuation.up.202": "live",
+   "cap.THYAO.continuation.up.219": "invalidated",
+   "cap.THYAO.continuation.up.235": "invalidated",
+   "cap.THYAO.continuation.up.247": "live",
+   "cap.THYAO.continuation.up.262": "live",
+   "cap.THYAO.continuation.up.288": "invalidated",
+   "cap.THYAO.continuation.up.292": "live",
+   "cap.THYAO.continuation.up.300": "invalidated",
+   "cap.THYAO.continuation.up.79": "expired",
+   "cap.THYAO.extreme.down.313": "live",
+   "cap.THYAO.extreme.down.36": "invalidated",
+   "cap.THYAO.extreme.up.175": "invalidated",
+   "cap.THYAO.extreme.up.276": "live",
+   "cap.THYAO.extreme.up.297": "invalidated",
+   "cap.THYAO.flow.down.10": "expired",
+   "cap.THYAO.flow.down.112": "live",
+   "cap.THYAO.flow.down.113": "expired",
+   "cap.THYAO.flow.down.134": "invalidated",
+   "cap.THYAO.flow.down.21": "invalidated",
+   "cap.THYAO.flow.down.215": "invalidated",
+   "cap.THYAO.flow.down.239": "live",
+   "cap.THYAO.flow.down.25": "live",
+   "cap.THYAO.flow.down.259": "live",
+   "cap.THYAO.flow.down.261": "invalidated",
+   "cap.THYAO.flow.down.286": "live",
+   "cap.THYAO.flow.down.298": "live",
+   "cap.THYAO.flow.down.61": "invalidated",
+   "cap.THYAO.flow.up.102": "invalidated",
+   "cap.THYAO.flow.up.132": "invalidated",
+   "cap.THYAO.flow.up.158": "invalidated",
+   "cap.THYAO.flow.up.170": "live",
+   "cap.THYAO.flow.up.190": "invalidated",
+   "cap.THYAO.flow.up.199": "live",
+   "cap.THYAO.flow.up.218": "live",
+   "cap.THYAO.flow.up.233": "live",
+   "cap.THYAO.flow.up.246": "live",
+   "cap.THYAO.flow.up.275": "live",
+   "cap.THYAO.flow.up.307": "invalidated",
+   "cap.THYAO.flow.up.38": "invalidated",
+   "cap.THYAO.flow.up.55": "invalidated",
+   "cap.THYAO.flow.up.73": "expired",
+   "cap.THYAO.reversal.down.124": "expired",
+   "cap.THYAO.reversal.down.149": "live",
+   "cap.THYAO.reversal.down.194": "invalidated",
+   "cap.THYAO.reversal.down.250": "invalidated",
+   "cap.THYAO.reversal.down.256": "invalidated",
+   "cap.THYAO.reversal.down.261": "invalidated",
+   "cap.THYAO.reversal.down.300": "live",
+   "cap.THYAO.reversal.down.78": "expired",
+   "cap.THYAO.reversal.up.176": "invalidated",
+   "cap.THYAO.reversal.up.67": "expired",
+   "cap.THYAO.squeeze.neutral.138": "invalidated"
+  },
+  "findings": [
+   {
+    "facts": [
+     "fx.THYAO.flow.institutional.net_sell.10",
+     "fx.THYAO.flow.institutional.net_sell.12",
+     "fx.THYAO.flow.institutional.net_sell.15"
+    ],
+    "id": "fnd.THYAO.flow.down.10"
+   },
+   {
+    "facts": [
+     "fx.THYAO.flow.institutional.net_sell.21"
+    ],
+    "id": "fnd.THYAO.flow.down.21"
+   },
+   {
+    "facts": [
+     "fx.THYAO.flow.institutional.net_sell.25"
+    ],
+    "id": "fnd.THYAO.flow.down.25"
+   },
+   {
+    "facts": [
+     "fx.THYAO.breakout.range.down.26"
+    ],
+    "id": "fnd.THYAO.breakout.down.26"
+   },
+   {
+    "facts": [
+     "fx.THYAO.breakout.range.down.32",
+     "fx.THYAO.flow.institutional.net_sell.32"
+    ],
+    "id": "fnd.THYAO.breakout.down.32"
+   },
+   {
+    "facts": [
+     "fx.THYAO.breakout.range.down.35",
+     "fx.THYAO.flow.institutional.net_sell.35"
+    ],
+    "id": "fnd.THYAO.breakout.down.35"
+   },
+   {
+    "facts": [
+     "fx.THYAO.breakout.range.down.36"
+    ],
+    "id": "fnd.THYAO.breakout.down.36"
+   },
+   {
+    "facts": [
+     "fx.THYAO.extreme.rsi.oversold.36"
+    ],
+    "id": "fnd.THYAO.extreme.down.36"
+   },
+   {
+    "facts": [
+     "fx.THYAO.flow.institutional.net_buy.38"
+    ],
+    "id": "fnd.THYAO.flow.up.38"
+   },
+   {
+    "facts": [
+     "fx.THYAO.breakout.range.up.44"
+    ],
+    "id": "fnd.THYAO.breakout.up.44"
+   },
+   {
+    "facts": [
+     "fx.THYAO.breakout.range.up.45",
+     "fx.THYAO.flow.institutional.net_buy.45",
+     "fx.THYAO.flow.volume_surge.surge.45"
+    ],
+    "id": "fnd.THYAO.breakout.up.45"
+   },
+   {
+    "facts": [
+     "fx.THYAO.continuation.ma_stack.bear.52",
+     "fx.THYAO.continuation.ma_stack.bear_end.56",
+     "fx.THYAO.continuation.ma_stack.bear.64",
+     "fx.THYAO.flow.institutional.net_buy.65",
+     "fx.THYAO.continuation.ma_stack.bear_end.66"
+    ],
+    "id": "fnd.THYAO.continuation.down.52"
+   },
+   {
+    "facts": [
+     "fx.THYAO.flow.institutional.net_buy.55"
+    ],
+    "id": "fnd.THYAO.flow.up.55"
+   },
+   {
+    "facts": [
+     "fx.THYAO.flow.institutional.net_sell.61"
+    ],
+    "id": "fnd.THYAO.flow.down.61"
+   },
+   {
+    "facts": [
+     "fx.THYAO.reversal.rsi_divergence.bullish.67"
+    ],
+    "id": "fnd.THYAO.reversal.up.67"
+   },
+   {
+    "facts": [
+     "fx.THYAO.continuation.ma_stack.bear.70",
+     "fx.THYAO.flow.institutional.net_sell.70",
+     "fx.THYAO.continuation.ma_stack.bear_end.71",
+     "fx.THYAO.flow.institutional.net_sell.71"
+    ],
+    "id": "fnd.THYAO.continuation.down.70"
+   },
+   {
+    "facts": [
+     "fx.THYAO.flow.institutional.net_buy.73"
+    ],
+    "id": "fnd.THYAO.flow.up.73"
+   },
+   {
+    "facts": [
+     "fx.THYAO.reversal.rsi_divergence.bearish.78"
+    ],
+    "id": "fnd.THYAO.reversal.down.78"
+   },
+   {
+    "facts": [
+     "fx.THYAO.continuation.ma_stack.bull.79",
+     "fx.THYAO.continuation.ma_stack.bull_end.82",
+     "fx.THYAO.continuation.ma_stack.bull.86",
+     "fx.THYAO.flow.institutional.net_buy.86",
+     "fx.THYAO.continuation.ma_stack.bull_end.90",
+     "fx.THYAO.flow.institutional.net_sell.91",
+     "fx.THYAO.continuation.ma_stack.bull.92",
+     "fx.THYAO.continuation.ma_stack.bull_end.93"
+    ],
+    "id": "fnd.THYAO.continuation.up.79"
+   },
+   {
+    "facts": [
+     "fx.THYAO.breakout.range.down.96"
+    ],
+    "id": "fnd.THYAO.breakout.down.96"
+   },
+   {
+    "facts": [
+     "fx.THYAO.flow.institutional.net_buy.102"
+    ],
+    "id": "fnd.THYAO.flow.up.102"
+   },
+   {
+    "facts": [
+     "fx.THYAO.continuation.ma_stack.bull.103",
+     "fx.THYAO.continuation.ma_stack.bull_end.104",
+     "fx.THYAO.continuation.ma_stack.bull.105"
+    ],
+    "id": "fnd.THYAO.continuation.up.103"
+   },
+   {
+    "facts": [
+     "fx.THYAO.breakout.range.up.110"
+    ],
+    "id": "fnd.THYAO.breakout.up.110"
+   },
+   {
+    "facts": [
+     "fx.THYAO.flow.institutional.net_sell.112"
+    ],
+    "id": "fnd.THYAO.flow.down.112"
+   },
+   {
+    "facts": [
+     "fx.THYAO.flow.institutional.net_sell.113",
+     "fx.THYAO.flow.institutional.net_sell.115"
+    ],
+    "id": "fnd.THYAO.flow.down.113"
+   },
+   {
+    "facts": [
+     "fx.THYAO.continuation.ma_stack.bull.117",
+     "fx.THYAO.continuation.ma_stack.bull_end.118",
+     "fx.THYAO.continuation.ma_stack.bull.120",
+     "fx.THYAO.flow.institutional.net_buy.120",
+     "fx.THYAO.continuation.ma_stack.bull_end.122",
+     "fx.THYAO.continuation.ma_stack.bull.126",
+     "fx.THYAO.flow.institutional.net_buy.126",
+     "fx.THYAO.continuation.ma_stack.bull_end.129"
+    ],
+    "id": "fnd.THYAO.continuation.up.117"
+   },
+   {
+    "facts": [
+     "fx.THYAO.reversal.rsi_divergence.bearish.124"
+    ],
+    "id": "fnd.THYAO.reversal.down.124"
+   },
+   {
+    "facts": [
+     "fx.THYAO.flow.institutional.net_buy.132"
+    ],
+    "id": "fnd.THYAO.flow.up.132"
+   },
+   {
+    "facts": [
+     "fx.THYAO.flow.institutional.net_sell.134"
+    ],
+    "id": "fnd.THYAO.flow.down.134"
+   },
+   {
+    "facts": [
+     "fx.THYAO.continuation.ma_stack.bull.138",
+     "fx.THYAO.continuation.ma_stack.bull_end.139",
+     "fx.THYAO.continuation.ma_stack.bull.140",
+     "fx.THYAO.continuation.ma_stack.bull_end.151"
+    ],
+    "id": "fnd.THYAO.continuation.up.138"
+   },
+   {
+    "facts": [
+     "fx.THYAO.squeeze.bandwidth.squeeze.138"
+    ],
+    "id": "fnd.THYAO.squeeze.neutral.138"
+   },
+   {
+    "facts": [
+     "fx.THYAO.breakout.range.up.146",
+     "fx.THYAO.flow.institutional.net_buy.146"
+    ],
+    "id": "fnd.THYAO.breakout.up.146"
+   },
+   {
+    "facts": [
+     "fx.THYAO.reversal.rsi_divergence.bearish.149"
+    ],
+    "id": "fnd.THYAO.reversal.down.149"
+   },
+   {
+    "facts": [
+     "fx.THYAO.continuation.ma_stack.bull.152",
+     "fx.THYAO.flow.institutional.net_buy.152"
+    ],
+    "id": "fnd.THYAO.continuation.up.152"
+   },
+   {
+    "facts": [
+     "fx.THYAO.continuation.ma_stack.bull.154",
+     "fx.THYAO.continuation.ma_stack.bull_end.156"
+    ],
+    "id": "fnd.THYAO.continuation.up.154"
+   },
+   {
+    "facts": [
+     "fx.THYAO.flow.institutional.net_buy.158"
+    ],
+    "id": "fnd.THYAO.flow.up.158"
+   },
+   {
+    "facts": [
+     "fx.THYAO.breakout.range.down.165",
+     "fx.THYAO.flow.institutional.net_sell.165"
+    ],
+    "id": "fnd.THYAO.breakout.down.165"
+   },
+   {
+    "facts": [
+     "fx.THYAO.continuation.ma_stack.bear.168"
+    ],
+    "id": "fnd.THYAO.continuation.down.168"
+   },
+   {
+    "facts": [
+     "fx.THYAO.flow.institutional.net_buy.170"
+    ],
+    "id": "fnd.THYAO.flow.up.170"
+   },
+   {
+    "facts": [
+     "fx.THYAO.breakout.range.up.174",
+     "fx.THYAO.flow.institutional.net_buy.174",
+     "fx.THYAO.flow.volume_surge.surge.174"
+    ],
+    "id": "fnd.THYAO.breakout.up.174"
+   },
+   {
+    "facts": [
+     "fx.THYAO.breakout.range.up.175",
+     "fx.THYAO.breakout.range.up.176"
+    ],
+    "id": "fnd.THYAO.breakout.up.175"
+   },
+   {
+    "facts": [
+     "fx.THYAO.extreme.rsi.overbought.175",
+     "fx.THYAO.extreme.rsi.overbought_end.177"
+    ],
+    "id": "fnd.THYAO.extreme.up.175"
+   },
+   {
+    "facts": [
+     "fx.THYAO.reversal.rsi_divergence.bullish.176"
+    ],
+    "id": "fnd.THYAO.reversal.up.176"
+   },
+   {
+    "facts": [
+     "fx.THYAO.continuation.ma_stack.bull.177"
+    ],
+    "id": "fnd.THYAO.continuation.up.177"
+   },
+   {
+    "facts": [
+     "fx.THYAO.flow.institutional.net_buy.190"
+    ],
+    "id": "fnd.THYAO.flow.up.190"
+   },
+   {
+    "facts": [
+     "fx.THYAO.breakout.range.up.192",
+     "fx.THYAO.flow.institutional.net_buy.192"
+    ],
+    "id": "fnd.THYAO.breakout.up.192"
+   },
+   {
+    "facts": [
+     "fx.THYAO.reversal.rsi_divergence.bearish.194"
+    ],
+    "id": "fnd.THYAO.reversal.down.194"
+   },
+   {
+    "facts": [
+     "fx.THYAO.flow.institutional.net_buy.199"
+    ],
+    "id": "fnd.THYAO.flow.up.199"
+   },
+   {
+    "facts": [
+     "fx.THYAO.continuation.ma_stack.bull.202",
+     "fx.THYAO.flow.institutional.net_buy.202"
+    ],
+    "id": "fnd.THYAO.continuation.up.202"
+   },
+   {
+    "facts": [
+     "fx.THYAO.breakout.range.up.207",
+     "fx.THYAO.flow.institutional.net_buy.207"
+    ],
+    "id": "fnd.THYAO.breakout.up.207"
+   },
+   {
+    "facts": [
+     "fx.THYAO.flow.institutional.net_sell.215"
+    ],
+    "id": "fnd.THYAO.flow.down.215"
+   },
+   {
+    "facts": [
+     "fx.THYAO.breakout.range.down.216"
+    ],
+    "id": "fnd.THYAO.breakout.down.216"
+   },
+   {
+    "facts": [
+     "fx.THYAO.flow.institutional.net_buy.218"
+    ],
+    "id": "fnd.THYAO.flow.up.218"
+   },
+   {
+    "facts": [
+     "fx.THYAO.continuation.ma_stack.bull.219",
+     "fx.THYAO.flow.institutional.net_buy.219",
+     "fx.THYAO.continuation.ma_stack.bull_end.224",
+     "fx.THYAO.flow.institutional.net_buy.225"
+    ],
+    "id": "fnd.THYAO.continuation.up.219"
+   },
+   {
+    "facts": [
+     "fx.THYAO.flow.institutional.net_buy.233"
+    ],
+    "id": "fnd.THYAO.flow.up.233"
+   },
+   {
+    "facts": [
+     "fx.THYAO.continuation.ma_stack.bull.235",
+     "fx.THYAO.continuation.ma_stack.bull_end.242"
+    ],
+    "id": "fnd.THYAO.continuation.up.235"
+   },
+   {
+    "facts": [
+     "fx.THYAO.breakout.range.up.236",
+     "fx.THYAO.breakout.range.up.237"
+    ],
+    "id": "fnd.THYAO.breakout.up.236"
+   },
+   {
+    "facts": [
+     "fx.THYAO.flow.institutional.net_sell.239"
+    ],
+    "id": "fnd.THYAO.flow.down.239"
+   },
+   {
+    "facts": [
+     "fx.THYAO.flow.institutional.net_buy.246"
+    ],
+    "id": "fnd.THYAO.flow.up.246"
+   },
+   {
+    "facts": [
+     "fx.THYAO.continuation.ma_stack.bull.247"
+    ],
+    "id": "fnd.THYAO.continuation.up.247"
+   },
+   {
+    "facts": [
+     "fx.THYAO.breakout.range.up.248",
+     "fx.THYAO.breakout.range.up.253",
+     "fx.THYAO.flow.institutional.net_buy.253"
+    ],
+    "id": "fnd.THYAO.breakout.up.248"
+   },
+   {
+    "facts": [
+     "fx.THYAO.reversal.rsi_divergence.bearish.250"
+    ],
+    "id": "fnd.THYAO.reversal.down.250"
+   },
+   {
+    "facts": [
+     "fx.THYAO.reversal.rsi_divergence.bearish.256"
+    ],
+    "id": "fnd.THYAO.reversal.down.256"
+   },
+   {
+    "facts": [
+     "fx.THYAO.breakout.range.up.258"
+    ],
+    "id": "fnd.THYAO.breakout.up.258"
+   },
+   {
+    "facts": [
+     "fx.THYAO.flow.institutional.net_sell.259"
+    ],
+    "id": "fnd.THYAO.flow.down.259"
+   },
+   {
+    "facts": [
+     "fx.THYAO.flow.institutional.net_sell.261"
+    ],
+    "id": "fnd.THYAO.flow.down.261"
+   },
+   {
+    "facts": [
+     "fx.THYAO.reversal.rsi_divergence.bearish.261"
+    ],
+    "id": "fnd.THYAO.reversal.down.261"
+   },
+   {
+    "facts": [
+     "fx.THYAO.continuation.ma_stack.bull.262"
+    ],
+    "id": "fnd.THYAO.continuation.up.262"
+   },
+   {
+    "facts": [
+     "fx.THYAO.breakout.range.up.265",
+     "fx.THYAO.flow.institutional.net_sell.266"
+    ],
+    "id": "fnd.THYAO.breakout.up.265"
+   },
+   {
+    "facts": [
+     "fx.THYAO.breakout.range.up.273",
+     "fx.THYAO.flow.institutional.net_buy.273"
+    ],
+    "id": "fnd.THYAO.breakout.up.273"
+   },
+   {
+    "facts": [
+     "fx.THYAO.flow.institutional.net_buy.275"
+    ],
+    "id": "fnd.THYAO.flow.up.275"
+   },
+   {
+    "facts": [
+     "fx.THYAO.breakout.range.up.276",
+     "fx.THYAO.flow.institutional.net_buy.276"
+    ],
+    "id": "fnd.THYAO.breakout.up.276"
+   },
+   {
+    "facts": [
+     "fx.THYAO.extreme.rsi.overbought.276"
+    ],
+    "id": "fnd.THYAO.extreme.up.276"
+   },
+   {
+    "facts": [
+     "fx.THYAO.breakout.range.up.277",
+     "fx.THYAO.breakout.range.up.278"
+    ],
+    "id": "fnd.THYAO.breakout.up.277"
+   },
+   {
+    "facts": [
+     "fx.THYAO.flow.institutional.net_sell.286"
+    ],
+    "id": "fnd.THYAO.flow.down.286"
+   },
+   {
+    "facts": [
+     "fx.THYAO.continuation.ma_stack.bull.288",
+     "fx.THYAO.continuation.ma_stack.bull_end.289"
+    ],
+    "id": "fnd.THYAO.continuation.up.288"
+   },
+   {
+    "facts": [
+     "fx.THYAO.continuation.ma_stack.bull.292"
+    ],
+    "id": "fnd.THYAO.continuation.up.292"
+   },
+   {
+    "facts": [
+     "fx.THYAO.breakout.range.up.296"
+    ],
+    "id": "fnd.THYAO.breakout.up.296"
+   },
+   {
+    "facts": [
+     "fx.THYAO.extreme.rsi.overbought.297"
+    ],
+    "id": "fnd.THYAO.extreme.up.297"
+   },
+   {
+    "facts": [
+     "fx.THYAO.flow.institutional.net_sell.298",
+     "fx.THYAO.flow.volume_surge.surge.298"
+    ],
+    "id": "fnd.THYAO.flow.down.298"
+   },
+   {
+    "facts": [
+     "fx.THYAO.continuation.ma_stack.bull.300",
+     "fx.THYAO.continuation.ma_stack.bull_end.301",
+     "fx.THYAO.flow.institutional.net_sell.301"
+    ],
+    "id": "fnd.THYAO.continuation.up.300"
+   },
+   {
+    "facts": [
+     "fx.THYAO.reversal.rsi_divergence.bearish.300"
+    ],
+    "id": "fnd.THYAO.reversal.down.300"
+   },
+   {
+    "facts": [
+     "fx.THYAO.flow.institutional.net_buy.307"
+    ],
+    "id": "fnd.THYAO.flow.up.307"
+   },
+   {
+    "facts": [
+     "fx.THYAO.breakout.range.down.309",
+     "fx.THYAO.breakout.range.down.310"
+    ],
+    "id": "fnd.THYAO.breakout.down.309"
+   },
+   {
+    "facts": [
+     "fx.THYAO.breakout.range.down.311",
+     "fx.THYAO.flow.volume_surge.surge.311",
+     "fx.THYAO.breakout.range.down.313",
+     "fx.THYAO.flow.institutional.net_sell.313"
+    ],
+    "id": "fnd.THYAO.breakout.down.311"
+   },
+   {
+    "facts": [
+     "fx.THYAO.extreme.rsi.oversold.313"
+    ],
+    "id": "fnd.THYAO.extreme.down.313"
+   },
+   {
+    "facts": [
+     "fx.THYAO.continuation.ma_stack.bear.314"
+    ],
+    "id": "fnd.THYAO.continuation.down.314"
+   },
+   {
+    "facts": [
+     "fx.THYAO.breakout.range.down.315",
+     "fx.THYAO.breakout.range.down.316",
+     "fx.THYAO.breakout.range.down.318"
+    ],
+    "id": "fnd.THYAO.breakout.down.315"
+   },
+   {
+    "facts": [
+     "fx.ASELS.flow.institutional.net_sell.10",
+     "fx.ASELS.flow.institutional.net_sell.15",
+     "fx.ASELS.flow.institutional.net_sell.19"
+    ],
+    "id": "fnd.ASELS.flow.down.10"
+   },
+   {
+    "facts": [
+     "fx.ASELS.flow.institutional.net_buy.11",
+     "fx.ASELS.flow.institutional.net_buy.13"
+    ],
+    "id": "fnd.ASELS.flow.up.11"
+   },
+   {
+    "facts": [
+     "fx.ASELS.flow.institutional.net_sell.20"
+    ],
+    "id": "fnd.ASELS.flow.down.20"
+   },
+   {
+    "facts": [
+     "fx.ASELS.breakout.range.down.23"
+    ],
+    "id": "fnd.ASELS.breakout.down.23"
+   },
+   {
+    "facts": [
+     "fx.ASELS.flow.institutional.net_buy.28"
+    ],
+    "id": "fnd.ASELS.flow.up.28"
+   },
+   {
+    "facts": [
+     "fx.ASELS.flow.institutional.net_sell.34"
+    ],
+    "id": "fnd.ASELS.flow.down.34"
+   },
+   {
+    "facts": [
+     "fx.ASELS.breakout.range.down.36"
+    ],
+    "id": "fnd.ASELS.breakout.down.36"
+   },
+   {
+    "facts": [
+     "fx.ASELS.flow.institutional.net_buy.41"
+    ],
+    "id": "fnd.ASELS.flow.up.41"
+   },
+   {
+    "facts": [
+     "fx.ASELS.flow.institutional.net_sell.47"
+    ],
+    "id": "fnd.ASELS.flow.down.47"
+   },
+   {
+    "facts": [
+     "fx.ASELS.continuation.ma_stack.bear.51",
+     "fx.ASELS.continuation.ma_stack.bear_end.54"
+    ],
+    "id": "fnd.ASELS.continuation.down.51"
+   },
+   {
+    "facts": [
+     "fx.ASELS.flow.volume_surge.surge.53"
+    ],
+    "id": "fnd.ASELS.flow.up.53"
+   },
+   {
+    "facts": [
+     "fx.ASELS.breakout.range.up.57",
+     "fx.ASELS.breakout.range.up.59",
+     "fx.ASELS.flow.institutional.net_buy.59",
+     "fx.ASELS.flow.institutional.net_buy.60"
+    ],
+    "id": "fnd.ASELS.breakout.up.57"
+   },
+   {
+    "facts": [
+     "fx.ASELS.breakout.range.up.62",
+     "fx.ASELS.flow.institutional.net_buy.62",
+     "fx.ASELS.breakout.range.up.65"
+    ],
+    "id": "fnd.ASELS.breakout.up.62"
+   },
+   {
+    "facts": [
+     "fx.ASELS.continuation.ma_stack.bull.64"
+    ],
+    "id": "fnd.ASELS.continuation.up.64"
+   },
+   {
+    "facts": [
+     "fx.ASELS.breakout.range.up.66",
+     "fx.ASELS.flow.institutional.net_buy.66",
+     "fx.ASELS.flow.volume_surge.surge.66"
+    ],
+    "id": "fnd.ASELS.breakout.up.66"
+   },
+   {
+    "facts": [
+     "fx.ASELS.extreme.rsi.overbought.66"
+    ],
+    "id": "fnd.ASELS.extreme.up.66"
+   },
+   {
+    "facts": [
+     "fx.ASELS.breakout.range.up.67",
+     "fx.ASELS.breakout.range.up.68",
+     "fx.ASELS.breakout.range.up.69"
+    ],
+    "id": "fnd.ASELS.breakout.up.67"
+   },
+   {
+    "facts": [
+     "fx.ASELS.breakout.range.up.71",
+     "fx.ASELS.breakout.range.up.72"
+    ],
+    "id": "fnd.ASELS.breakout.up.71"
+   },
+   {
+    "facts": [
+     "fx.ASELS.extreme.rsi.overbought.71"
+    ],
+    "id": "fnd.ASELS.extreme.up.71"
+   },
+   {
+    "facts": [
+     "fx.ASELS.breakout.range.up.73",
+     "fx.ASELS.flow.institutional.net_buy.73"
+    ],
+    "id": "fnd.ASELS.breakout.up.73"
+   },
+   {
+    "facts": [
+     "fx.ASELS.reversal.rsi_divergence.bearish.76"
+    ],
+    "id": "fnd.ASELS.reversal.down.76"
+   },
+   {
+    "facts": [
+     "fx.ASELS.flow.institutional.net_sell.78",
+     "fx.ASELS.flow.volume_surge.surge.78"
+    ],
+    "id": "fnd.ASELS.flow.down.78"
+   },
+   {
+    "facts": [
+     "fx.ASELS.flow.institutional.net_buy.84"
+    ],
+    "id": "fnd.ASELS.flow.up.84"
+   },
+   {
+    "facts": [
+     "fx.ASELS.continuation.ma_stack.bull.85"
+    ],
+    "id": "fnd.ASELS.continuation.up.85"
+   },
+   {
+    "facts": [
+     "fx.ASELS.flow.institutional.net_buy.91"
+    ],
+    "id": "fnd.ASELS.flow.up.91"
+   },
+   {
+    "facts": [
+     "fx.ASELS.breakout.range.up.92",
+     "fx.ASELS.flow.institutional.net_buy.92",
+     "fx.ASELS.breakout.range.up.97"
+    ],
+    "id": "fnd.ASELS.breakout.up.92"
+   },
+   {
+    "facts": [
+     "fx.ASELS.extreme.rsi.overbought.92",
+     "fx.ASELS.extreme.rsi.overbought_end.96",
+     "fx.ASELS.extreme.rsi.overbought.97"
+    ],
+    "id": "fnd.ASELS.extreme.up.92"
+   },
+   {
+    "facts": [
+     "fx.ASELS.breakout.range.up.101",
+     "fx.ASELS.breakout.range.up.102"
+    ],
+    "id": "fnd.ASELS.breakout.up.101"
+   },
+   {
+    "facts": [
+     "fx.ASELS.breakout.range.up.105",
+     "fx.ASELS.breakout.range.up.106"
+    ],
+    "id": "fnd.ASELS.breakout.up.105"
+   },
+   {
+    "facts": [
+     "fx.ASELS.breakout.range.up.107",
+     "fx.ASELS.flow.institutional.net_buy.107"
+    ],
+    "id": "fnd.ASELS.breakout.up.107"
+   },
+   {
+    "facts": [
+     "fx.ASELS.flow.institutional.net_sell.108"
+    ],
+    "id": "fnd.ASELS.flow.down.108"
+   },
+   {
+    "facts": [
+     "fx.ASELS.extreme.rsi.overbought.111"
+    ],
+    "id": "fnd.ASELS.extreme.up.111"
+   },
+   {
+    "facts": [
+     "fx.ASELS.flow.institutional.net_buy.111"
+    ],
+    "id": "fnd.ASELS.flow.up.111"
+   },
+   {
+    "facts": [
+     "fx.ASELS.breakout.range.up.112"
+    ],
+    "id": "fnd.ASELS.breakout.up.112"
+   },
+   {
+    "facts": [
+     "fx.ASELS.breakout.range.up.114",
+     "fx.ASELS.flow.institutional.net_sell.115"
+    ],
+    "id": "fnd.ASELS.breakout.up.114"
+   },
+   {
+    "facts": [
+     "fx.ASELS.flow.institutional.net_buy.119",
+     "fx.ASELS.flow.institutional.net_buy.125"
+    ],
+    "id": "fnd.ASELS.flow.up.119"
+   },
+   {
+    "facts": [
+     "fx.ASELS.flow.institutional.net_buy.129"
+    ],
+    "id": "fnd.ASELS.flow.up.129"
+   },
+   {
+    "facts": [
+     "fx.ASELS.breakout.range.up.130",
+     "fx.ASELS.flow.institutional.net_buy.130"
+    ],
+    "id": "fnd.ASELS.breakout.up.130"
+   },
+   {
+    "facts": [
+     "fx.ASELS.continuation.ma_stack.bull.132"
+    ],
+    "id": "fnd.ASELS.continuation.up.132"
+   },
+   {
+    "facts": [
+     "fx.ASELS.reversal.rsi_divergence.bearish.133"
+    ],
+    "id": "fnd.ASELS.reversal.down.133"
+   },
+   {
+    "facts": [
+     "fx.ASELS.breakout.range.up.135",
+     "fx.ASELS.flow.institutional.net_buy.135",
+     "fx.ASELS.flow.volume_surge.surge.135"
+    ],
+    "id": "fnd.ASELS.breakout.up.135"
+   },
+   {
+    "facts": [
+     "fx.ASELS.extreme.rsi.overbought.135"
+    ],
+    "id": "fnd.ASELS.extreme.up.135"
+   },
+   {
+    "facts": [
+     "fx.ASELS.flow.institutional.net_buy.143"
+    ],
+    "id": "fnd.ASELS.flow.up.143"
+   },
+   {
+    "facts": [
+     "fx.ASELS.flow.institutional.net_sell.145"
+    ],
+    "id": "fnd.ASELS.flow.down.145"
+   },
+   {
+    "facts": [
+     "fx.ASELS.continuation.ma_stack.bull.146"
+    ],
+    "id": "fnd.ASELS.continuation.up.146"
+   },
+   {
+    "facts": [
+     "fx.ASELS.flow.institutional.net_sell.151",
+     "fx.ASELS.flow.volume_surge.surge.151"
+    ],
+    "id": "fnd.ASELS.flow.down.151"
+   },
+   {
+    "facts": [
+     "fx.ASELS.breakout.range.down.154"
+    ],
+    "id": "fnd.ASELS.breakout.down.154"
+   },
+   {
+    "facts": [
+     "fx.ASELS.breakout.range.up.159",
+     "fx.ASELS.flow.institutional.net_buy.159",
+     "fx.ASELS.breakout.range.up.161"
+    ],
+    "id": "fnd.ASELS.breakout.up.159"
+   },
+   {
+    "facts": [
+     "fx.ASELS.continuation.ma_stack.bull.159"
+    ],
+    "id": "fnd.ASELS.continuation.up.159"
+   },
+   {
+    "facts": [
+     "fx.ASELS.breakout.range.up.162",
+     "fx.ASELS.breakout.range.up.163",
+     "fx.ASELS.flow.institutional.net_buy.163"
+    ],
+    "id": "fnd.ASELS.breakout.up.162"
+   },
+   {
+    "facts": [
+     "fx.ASELS.extreme.rsi.overbought.163"
+    ],
+    "id": "fnd.ASELS.extreme.up.163"
+   },
+   {
+    "facts": [
+     "fx.ASELS.flow.institutional.net_sell.165"
+    ],
+    "id": "fnd.ASELS.flow.down.165"
+   },
+   {
+    "facts": [
+     "fx.ASELS.flow.institutional.net_buy.168"
+    ],
+    "id": "fnd.ASELS.flow.up.168"
+   },
+   {
+    "facts": [
+     "fx.ASELS.breakout.range.up.170",
+     "fx.ASELS.flow.institutional.net_buy.170"
+    ],
+    "id": "fnd.ASELS.breakout.up.170"
+   },
+   {
+    "facts": [
+     "fx.ASELS.reversal.rsi_divergence.bearish.172"
+    ],
+    "id": "fnd.ASELS.reversal.down.172"
+   },
+   {
+    "facts": [
+     "fx.ASELS.flow.institutional.net_sell.177"
+    ],
+    "id": "fnd.ASELS.flow.down.177"
+   },
+   {
+    "facts": [
+     "fx.ASELS.breakout.range.down.178",
+     "fx.ASELS.flow.institutional.net_sell.178",
+     "fx.ASELS.flow.volume_surge.surge.178",
+     "fx.ASELS.breakout.range.down.183"
+    ],
+    "id": "fnd.ASELS.breakout.down.178"
+   },
+   {
+    "facts": [
+     "fx.ASELS.extreme.rsi.oversold.180",
+     "fx.ASELS.extreme.rsi.oversold_end.181",
+     "fx.ASELS.extreme.rsi.oversold.182",
+     "fx.ASELS.extreme.rsi.oversold_end.185"
+    ],
+    "id": "fnd.ASELS.extreme.down.180"
+   },
+   {
+    "facts": [
+     "fx.ASELS.continuation.ma_stack.bear.185"
+    ],
+    "id": "fnd.ASELS.continuation.down.185"
+   },
+   {
+    "facts": [
+     "fx.ASELS.breakout.range.down.194",
+     "fx.ASELS.flow.institutional.net_sell.194"
+    ],
+    "id": "fnd.ASELS.breakout.down.194"
+   },
+   {
+    "facts": [
+     "fx.ASELS.extreme.rsi.oversold.194"
+    ],
+    "id": "fnd.ASELS.extreme.down.194"
+   },
+   {
+    "facts": [
+     "fx.ASELS.breakout.range.down.195",
+     "fx.ASELS.flow.institutional.net_sell.195",
+     "fx.ASELS.breakout.range.down.197"
+    ],
+    "id": "fnd.ASELS.breakout.down.195"
+   },
+   {
+    "facts": [
+     "fx.ASELS.flow.institutional.net_sell.201"
+    ],
+    "id": "fnd.ASELS.flow.down.201"
+   },
+   {
+    "facts": [
+     "fx.ASELS.breakout.range.down.202",
+     "fx.ASELS.flow.institutional.net_sell.202",
+     "fx.ASELS.breakout.range.down.203",
+     "fx.ASELS.breakout.range.down.204"
+    ],
+    "id": "fnd.ASELS.breakout.down.202"
+   },
+   {
+    "facts": [
+     "fx.ASELS.breakout.range.down.205",
+     "fx.ASELS.breakout.range.down.206",
+     "fx.ASELS.flow.institutional.net_sell.206",
+     "fx.ASELS.flow.volume_surge.surge.206"
+    ],
+    "id": "fnd.ASELS.breakout.down.205"
+   },
+   {
+    "facts": [
+     "fx.ASELS.breakout.range.down.208",
+     "fx.ASELS.breakout.range.down.211"
+    ],
+    "id": "fnd.ASELS.breakout.down.208"
+   },
+   {
+    "facts": [
+     "fx.ASELS.breakout.range.down.213",
+     "fx.ASELS.breakout.range.down.217"
+    ],
+    "id": "fnd.ASELS.breakout.down.213"
+   },
+   {
+    "facts": [
+     "fx.ASELS.flow.institutional.net_sell.215",
+     "fx.ASELS.flow.institutional.net_sell.223"
+    ],
+    "id": "fnd.ASELS.flow.down.215"
+   },
+   {
+    "facts": [
+     "fx.ASELS.breakout.range.down.220",
+     "fx.ASELS.flow.institutional.net_sell.220"
+    ],
+    "id": "fnd.ASELS.breakout.down.220"
+   },
+   {
+    "facts": [
+     "fx.ASELS.breakout.range.down.227"
+    ],
+    "id": "fnd.ASELS.breakout.down.227"
+   },
+   {
+    "facts": [
+     "fx.ASELS.extreme.rsi.oversold.227"
+    ],
+    "id": "fnd.ASELS.extreme.down.227"
+   },
+   {
+    "facts": [
+     "fx.ASELS.breakout.range.down.229",
+     "fx.ASELS.flow.institutional.net_sell.229"
+    ],
+    "id": "fnd.ASELS.breakout.down.229"
+   },
+   {
+    "facts": [
+     "fx.ASELS.breakout.range.down.230",
+     "fx.ASELS.flow.institutional.net_sell.230",
+     "fx.ASELS.flow.volume_surge.surge.230",
+     "fx.ASELS.breakout.range.down.231"
+    ],
+    "id": "fnd.ASELS.breakout.down.230"
+   },
+   {
+    "facts": [
+     "fx.ASELS.breakout.range.down.236",
+     "fx.ASELS.flow.institutional.net_sell.236",
+     "fx.ASELS.flow.volume_surge.surge.236",
+     "fx.ASELS.breakout.range.down.242",
+     "fx.ASELS.flow.institutional.net_sell.242",
+     "fx.ASELS.breakout.range.down.243",
+     "fx.ASELS.flow.institutional.net_buy.243"
+    ],
+    "id": "fnd.ASELS.breakout.down.236"
+   },
+   {
+    "facts": [
+     "fx.ASELS.reversal.rsi_divergence.bullish.238"
+    ],
+    "id": "fnd.ASELS.reversal.up.238"
+   },
+   {
+    "facts": [
+     "fx.ASELS.reversal.rsi_divergence.bullish.248"
+    ],
+    "id": "fnd.ASELS.reversal.up.248"
+   },
+   {
+    "facts": [
+     "fx.ASELS.continuation.ma_stack.bear.250",
+     "fx.ASELS.continuation.ma_stack.bear_end.253"
+    ],
+    "id": "fnd.ASELS.continuation.down.250"
+   },
+   {
+    "facts": [
+     "fx.ASELS.flow.institutional.net_sell.256"
+    ],
+    "id": "fnd.ASELS.flow.down.256"
+   },
+   {
+    "facts": [
+     "fx.ASELS.breakout.range.up.262",
+     "fx.ASELS.flow.institutional.net_buy.262",
+     "fx.ASELS.breakout.range.up.263",
+     "fx.ASELS.flow.institutional.net_buy.263"
+    ],
+    "id": "fnd.ASELS.breakout.up.262"
+   },
+   {
+    "facts": [
+     "fx.ASELS.breakout.range.up.264",
+     "fx.ASELS.breakout.range.up.265",
+     "fx.ASELS.flow.institutional.net_buy.265",
+     "fx.ASELS.flow.volume_surge.surge.265"
+    ],
+    "id": "fnd.ASELS.breakout.up.264"
+   },
+   {
+    "facts": [
+     "fx.ASELS.breakout.range.up.272",
+     "fx.ASELS.flow.institutional.net_buy.272",
+     "fx.ASELS.breakout.range.up.275"
+    ],
+    "id": "fnd.ASELS.breakout.up.272"
+   },
+   {
+    "facts": [
+     "fx.ASELS.continuation.ma_stack.bull.274"
+    ],
+    "id": "fnd.ASELS.continuation.up.274"
+   },
+   {
+    "facts": [
+     "fx.ASELS.breakout.range.up.276",
+     "fx.ASELS.breakout.range.up.277"
+    ],
+    "id": "fnd.ASELS.breakout.up.276"
+   },
+   {
+    "facts": [
+     "fx.ASELS.extreme.rsi.overbought.276"
+    ],
+    "id": "fnd.ASELS.extreme.up.276"
+   },
+   {
+    "facts": [
+     "fx.ASELS.breakout.range.up.278"
+    ],
+    "id": "fnd.ASELS.breakout.up.278"
+   },
+   {
+    "facts": [
+     "fx.ASELS.breakout.range.up.279"
+    ],
+    "id": "fnd.ASELS.breakout.up.279"
+   },
+   {
+    "facts": [
+     "fx.ASELS.breakout.range.up.282",
+     "fx.ASELS.flow.institutional.net_buy.282",
+     "fx.ASELS.breakout.range.up.283"
+    ],
+    "id": "fnd.ASELS.breakout.up.282"
+   },
+   {
+    "facts": [
+     "fx.ASELS.breakout.range.up.286"
+    ],
+    "id": "fnd.ASELS.breakout.up.286"
+   },
+   {
+    "facts": [
+     "fx.ASELS.breakout.range.up.288",
+     "fx.ASELS.flow.institutional.net_buy.288"
+    ],
+    "id": "fnd.ASELS.breakout.up.288"
+   },
+   {
+    "facts": [
+     "fx.ASELS.flow.institutional.net_buy.291"
+    ],
+    "id": "fnd.ASELS.flow.up.291"
+   },
+   {
+    "facts": [
+     "fx.ASELS.breakout.range.up.292",
+     "fx.ASELS.breakout.range.up.293",
+     "fx.ASELS.breakout.range.up.294"
+    ],
+    "id": "fnd.ASELS.breakout.up.292"
+   },
+   {
+    "facts": [
+     "fx.ASELS.breakout.range.up.295"
+    ],
+    "id": "fnd.ASELS.breakout.up.295"
+   },
+   {
+    "facts": [
+     "fx.ASELS.breakout.range.up.296",
+     "fx.ASELS.flow.institutional.net_buy.296"
+    ],
+    "id": "fnd.ASELS.breakout.up.296"
+   },
+   {
+    "facts": [
+     "fx.ASELS.breakout.range.up.297",
+     "fx.ASELS.flow.institutional.net_buy.297",
+     "fx.ASELS.breakout.range.up.298",
+     "fx.ASELS.breakout.range.up.300"
+    ],
+    "id": "fnd.ASELS.breakout.up.297"
+   },
+   {
+    "facts": [
+     "fx.ASELS.breakout.range.up.301",
+     "fx.ASELS.flow.institutional.net_buy.301",
+     "fx.ASELS.flow.volume_surge.surge.301"
+    ],
+    "id": "fnd.ASELS.breakout.up.301"
+   },
+   {
+    "facts": [
+     "fx.ASELS.breakout.range.up.302",
+     "fx.ASELS.breakout.range.up.304",
+     "fx.ASELS.breakout.range.up.306"
+    ],
+    "id": "fnd.ASELS.breakout.up.302"
+   },
+   {
+    "facts": [
+     "fx.ASELS.breakout.range.up.312",
+     "fx.ASELS.flow.institutional.net_sell.312",
+     "fx.ASELS.breakout.range.up.313"
+    ],
+    "id": "fnd.ASELS.breakout.up.312"
+   },
+   {
+    "facts": [
+     "fx.ASELS.breakout.range.up.314"
+    ],
+    "id": "fnd.ASELS.breakout.up.314"
+   }
+  ],
+  "proposals": [],
+  "views": []
+ },
+ "editor_audience": null,
+ "log": [],
+ "s_caps_sha256": "328621d876c583a3d0eb1bdcb4b62e4a5dee6b9f3fde1b84ff6846bda89c9017"
+}

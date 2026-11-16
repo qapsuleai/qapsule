@@ -1,0 +1,119 @@
+{
+  "covers": [
+    "presenter",
+    "present",
+    "depth",
+    "capsule",
+    "glyph"
+  ],
+  "description": "C4: an R3 squeeze capsule at chart depth (desktop): the Bollinger band of the squeeze drawn from the fact's evidence (upper/lower over the geometry's bars, origin: the fact) and the meaning glyph. Rendered with `qp render --present <finding> --surface desktop`.",
+  "final": {
+    "document": {
+      "views": [
+        {
+          "id": "v-c4-band"
+        }
+      ]
+    }
+  },
+  "init": {
+    "clock": 1760000000000,
+    "document": "fixtures/views/docs/r3-squeeze.json",
+    "epoch": 0,
+    "principals": [
+      {
+        "author": {
+          "kind": "human",
+          "name": "arkin"
+        },
+        "id": "arkin",
+        "role": "owner"
+      }
+    ]
+  },
+  "name": "c4-band",
+  "steps": [
+    {
+      "expect": [
+        {
+          "conn": "a",
+          "msg": {
+            "principal": "arkin",
+            "role": "owner",
+            "type": "welcome"
+          }
+        }
+      ],
+      "send": {
+        "conn": "a",
+        "msg": {
+          "principal": "arkin",
+          "protocol": "qp/0",
+          "surface": {
+            "kind": "desktop"
+          },
+          "type": "hello"
+        }
+      }
+    },
+    {
+      "expect": [
+        {
+          "conn": "a",
+          "msg": {
+            "id": "c1",
+            "status": "applied",
+            "type": "ack"
+          }
+        }
+      ],
+      "send": {
+        "conn": "a",
+        "msg": {
+          "id": "c1",
+          "ops": [
+            {
+              "finding": "fnd.SYN01.squeeze-neutral.245",
+              "op": "show_finding",
+              "view": "v-c4-band"
+            }
+          ],
+          "type": "command"
+        }
+      }
+    },
+    {
+      "expect": [
+        {
+          "conn": "a",
+          "msg": {
+            "data": {
+              "kind": "presentation",
+              "presentation": {
+                "depth": "chart",
+                "finding": "fnd.SYN01.squeeze-neutral.245",
+                "surface": "desktop",
+                "view": {
+                  "id": "v-c4-band"
+                }
+              }
+            },
+            "id": "q1",
+            "type": "result"
+          }
+        }
+      ],
+      "send": {
+        "conn": "a",
+        "msg": {
+          "id": "q1",
+          "query": {
+            "finding": "fnd.SYN01.squeeze-neutral.245",
+            "kind": "present"
+          },
+          "type": "query"
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,2445 @@
+{
+  "harness": "r3-h-m12/1",
+  "alt": "control",
+  "method": "qp_render CPU raster; sRGB->linear; Gaussian blur sigma 0.5 px (radius 2, clamped edges) in linear RGB; Machado 2009 severity 1.0 in linear RGB (clamped) or luminance; CIELAB D65; pair distance = min over +-1 px shifts of mean DeltaE76 over all pixels (background shifted in); values rounded to 4 decimals",
+  "main": {
+    "condition": "16/light/normal",
+    "pair": {
+      "a": "continuation.up",
+      "b": "continuation.down",
+      "d": 0.0
+    }
+  },
+  "k_mean_worst": 0.6886,
+  "channel_worst": {
+    "confidence": {
+      "condition": "16/light/normal",
+      "pair": {
+        "a": "continuation.up|final|s0.6|cnone|n1|f1|-",
+        "b": "continuation.up|final|s0.6|c0.3|n1|f1|-",
+        "d": 0.0
+      }
+    },
+    "confirmations": {
+      "condition": "16/light/normal",
+      "pair": {
+        "a": "continuation.up|final|s0.6|c0.6|n1|f1|-",
+        "b": "continuation.up|final|s0.6|c0.6|n2|f1|-",
+        "d": 0.0
+      }
+    },
+    "direction": {
+      "condition": "16/light/normal",
+      "pair": {
+        "a": "continuation.up|final|s0.6|c0.6|n1|f1|-",
+        "b": "continuation.down|final|s0.6|c0.6|n1|f1|-",
+        "d": 0.0
+      }
+    },
+    "freshness": {
+      "condition": "16/light/normal",
+      "pair": {
+        "a": "continuation.up|final|s0.6|c0.6|n1|f1|-",
+        "b": "continuation.up|final|s0.6|c0.6|n1|f0.3|-",
+        "d": 0.0
+      }
+    },
+    "phase": {
+      "condition": "16/light/normal",
+      "pair": {
+        "a": "continuation.up|candidate|s0.6|c0.6|n1|f1|-",
+        "b": "continuation.up|final|s0.6|c0.6|n1|f1|-",
+        "d": 0.0
+      }
+    },
+    "server": {
+      "condition": "16/light/normal",
+      "pair": {
+        "a": "continuation.up|final|s0.6|c0.6|n1|f1|-",
+        "b": "continuation.up|final|s0.6|c0.6|n1|f1|srv",
+        "d": 0.0
+      }
+    },
+    "strength": {
+      "condition": "16/light/normal",
+      "pair": {
+        "a": "continuation.up|final|s0.2|c0.6|n1|f1|-",
+        "b": "continuation.up|final|s0.9|c0.6|n1|f1|-",
+        "d": 0.0
+      }
+    }
+  },
+  "out_of_box_prims": 0,
+  "conditions": [
+    {
+      "size": 16,
+      "theme": "light",
+      "vision": "normal",
+      "k": {
+        "pairs": 66,
+        "weakest": {
+          "a": "continuation.up",
+          "b": "continuation.down",
+          "d": 0.0
+        },
+        "mean": 1.954
+      },
+      "channels": {
+        "confidence": {
+          "pairs": 36,
+          "weakest": {
+            "a": "continuation.up|final|s0.6|cnone|n1|f1|-",
+            "b": "continuation.up|final|s0.6|c0.3|n1|f1|-",
+            "d": 0.0
+          },
+          "mean": 0.0
+        },
+        "confirmations": {
+          "pairs": 36,
+          "weakest": {
+            "a": "continuation.up|final|s0.6|c0.6|n1|f1|-",
+            "b": "continuation.up|final|s0.6|c0.6|n2|f1|-",
+            "d": 0.0
+          },
+          "mean": 0.0
+        },
+        "direction": {
+          "pairs": 7,
+          "weakest": {
+            "a": "continuation.up|final|s0.6|c0.6|n1|f1|-",
+            "b": "continuation.down|final|s0.6|c0.6|n1|f1|-",
+            "d": 0.0
+          },
+          "mean": 0.0
+        },
+        "freshness": {
+          "pairs": 12,
+          "weakest": {
+            "a": "continuation.up|final|s0.6|c0.6|n1|f1|-",
+            "b": "continuation.up|final|s0.6|c0.6|n1|f0.3|-",
+            "d": 0.0
+          },
+          "mean": 0.0
+        },
+        "phase": {
+          "pairs": 120,
+          "weakest": {
+            "a": "continuation.up|candidate|s0.6|c0.6|n1|f1|-",
+            "b": "continuation.up|final|s0.6|c0.6|n1|f1|-",
+            "d": 0.0
+          },
+          "mean": 0.0
+        },
+        "server": {
+          "pairs": 12,
+          "weakest": {
+            "a": "continuation.up|final|s0.6|c0.6|n1|f1|-",
+            "b": "continuation.up|final|s0.6|c0.6|n1|f1|srv",
+            "d": 0.0
+          },
+          "mean": 0.0
+        },
+        "strength": {
+          "pairs": 12,
+          "weakest": {
+            "a": "continuation.up|final|s0.2|c0.6|n1|f1|-",
+            "b": "continuation.up|final|s0.9|c0.6|n1|f1|-",
+            "d": 0.0
+          },
+          "mean": 0.0
+        }
+      }
+    },
+    {
+      "size": 16,
+      "theme": "light",
+      "vision": "deutan",
+      "k": {
+        "pairs": 66,
+        "weakest": {
+          "a": "continuation.up",
+          "b": "continuation.down",
+          "d": 0.0
+        },
+        "mean": 1.6309
+      },
+      "channels": {
+        "confidence": {
+          "pairs": 36,
+          "weakest": {
+            "a": "continuation.up|final|s0.6|cnone|n1|f1|-",
+            "b": "continuation.up|final|s0.6|c0.3|n1|f1|-",
+            "d": 0.0
+          },
+          "mean": 0.0
+        },
+        "confirmations": {
+          "pairs": 36,
+          "weakest": {
+            "a": "continuation.up|final|s0.6|c0.6|n1|f1|-",
+            "b": "continuation.up|final|s0.6|c0.6|n2|f1|-",
+            "d": 0.0
+          },
+          "mean": 0.0
+        },
+        "direction": {
+          "pairs": 7,
+          "weakest": {
+            "a": "continuation.up|final|s0.6|c0.6|n1|f1|-",
+            "b": "continuation.down|final|s0.6|c0.6|n1|f1|-",
+            "d": 0.0
+          },
+          "mean": 0.0
+        },
+        "freshness": {
+          "pairs": 12,
+          "weakest": {
+            "a": "continuation.up|final|s0.6|c0.6|n1|f1|-",
+            "b": "continuation.up|final|s0.6|c0.6|n1|f0.3|-",
+            "d": 0.0
+          },
+          "mean": 0.0
+        },
+        "phase": {
+          "pairs": 120,
+          "weakest": {
+            "a": "continuation.up|candidate|s0.6|c0.6|n1|f1|-",
+            "b": "continuation.up|final|s0.6|c0.6|n1|f1|-",
+            "d": 0.0
+          },
+          "mean": 0.0
+        },
+        "server": {
+          "pairs": 12,
+          "weakest": {
+            "a": "continuation.up|final|s0.6|c0.6|n1|f1|-",
+            "b": "continuation.up|final|s0.6|c0.6|n1|f1|srv",
+            "d": 0.0
+          },
+          "mean": 0.0
+        },
+        "strength": {
+          "pairs": 12,
+          "weakest": {
+            "a": "continuation.up|final|s0.2|c0.6|n1|f1|-",
+            "b": "continuation.up|final|s0.9|c0.6|n1|f1|-",
+            "d": 0.0
+          },
+          "mean": 0.0
+        }
+      }
+    },
+    {
+      "size": 16,
+      "theme": "light",
+      "vision": "protan",
+      "k": {
+        "pairs": 66,
+        "weakest": {
+          "a": "continuation.up",
+          "b": "continuation.down",
+          "d": 0.0
+        },
+        "mean": 1.7165
+      },
+      "channels": {
+        "confidence": {
+          "pairs": 36,
+          "weakest": {
+            "a": "continuation.up|final|s0.6|cnone|n1|f1|-",
+            "b": "continuation.up|final|s0.6|c0.3|n1|f1|-",
+            "d": 0.0
+          },
+          "mean": 0.0
+        },
+        "confirmations": {
+          "pairs": 36,
+          "weakest": {
+            "a": "continuation.up|final|s0.6|c0.6|n1|f1|-",
+            "b": "continuation.up|final|s0.6|c0.6|n2|f1|-",
+            "d": 0.0
+          },
+          "mean": 0.0
+        },
+        "direction": {
+          "pairs": 7,
+          "weakest": {
+            "a": "continuation.up|final|s0.6|c0.6|n1|f1|-",
+            "b": "continuation.down|final|s0.6|c0.6|n1|f1|-",
+            "d": 0.0
+          },
+          "mean": 0.0
+        },
+        "freshness": {
+          "pairs": 12,
+          "weakest": {
+            "a": "continuation.up|final|s0.6|c0.6|n1|f1|-",
+            "b": "continuation.up|final|s0.6|c0.6|n1|f0.3|-",
+            "d": 0.0
+          },
+          "mean": 0.0
+        },
+        "phase": {
+          "pairs": 120,
+          "weakest": {
+            "a": "continuation.up|candidate|s0.6|c0.6|n1|f1|-",
+            "b": "continuation.up|final|s0.6|c0.6|n1|f1|-",
+            "d": 0.0
+          },
+          "mean": 0.0
+        },
+        "server": {
+          "pairs": 12,
+          "weakest": {
+            "a": "continuation.up|final|s0.6|c0.6|n1|f1|-",
+            "b": "continuation.up|final|s0.6|c0.6|n1|f1|srv",
+            "d": 0.0
+          },
+          "mean": 0.0
+        },
+        "strength": {
+          "pairs": 12,
+          "weakest": {
+            "a": "continuation.up|final|s0.2|c0.6|n1|f1|-",
+            "b": "continuation.up|final|s0.9|c0.6|n1|f1|-",
+            "d": 0.0
+          },
+          "mean": 0.0
+        }
+      }
+    },
+    {
+      "size": 16,
+      "theme": "light",
+      "vision": "tritan",
+      "k": {
+        "pairs": 66,
+        "weakest": {
+          "a": "continuation.up",
+          "b": "continuation.down",
+          "d": 0.0
+        },
+        "mean": 1.6364
+      },
+      "channels": {
+        "confidence": {
+          "pairs": 36,
+          "weakest": {
+            "a": "continuation.up|final|s0.6|cnone|n1|f1|-",
+            "b": "continuation.up|final|s0.6|c0.3|n1|f1|-",
+            "d": 0.0
+          },
+          "mean": 0.0
+        },
+        "confirmations": {
+          "pairs": 36,
+          "weakest": {
+            "a": "continuation.up|final|s0.6|c0.6|n1|f1|-",
+            "b": "continuation.up|final|s0.6|c0.6|n2|f1|-",
+            "d": 0.0
+          },
+          "mean": 0.0
+        },
+        "direction": {
+          "pairs": 7,
+          "weakest": {
+            "a": "continuation.up|final|s0.6|c0.6|n1|f1|-",
+            "b": "continuation.down|final|s0.6|c0.6|n1|f1|-",
+            "d": 0.0
+          },
+          "mean": 0.0
+        },
+        "freshness": {
+          "pairs": 12,
+          "weakest": {
+            "a": "continuation.up|final|s0.6|c0.6|n1|f1|-",
+            "b": "continuation.up|final|s0.6|c0.6|n1|f0.3|-",
+            "d": 0.0
+          },
+          "mean": 0.0
+        },
+        "phase": {
+          "pairs": 120,
+          "weakest": {
+            "a": "continuation.up|candidate|s0.6|c0.6|n1|f1|-",
+            "b": "continuation.up|final|s0.6|c0.6|n1|f1|-",
+            "d": 0.0
+          },
+          "mean": 0.0
+        },
+        "server": {
+          "pairs": 12,
+          "weakest": {
+            "a": "continuation.up|final|s0.6|c0.6|n1|f1|-",
+            "b": "continuation.up|final|s0.6|c0.6|n1|f1|srv",
+            "d": 0.0
+          },
+          "mean": 0.0
+        },
+        "strength": {
+          "pairs": 12,
+          "weakest": {
+            "a": "continuation.up|final|s0.2|c0.6|n1|f1|-",
+            "b": "continuation.up|final|s0.9|c0.6|n1|f1|-",
+            "d": 0.0
+          },
+          "mean": 0.0
+        }
+      }
+    },
+    {
+      "size": 16,
+      "theme": "light",
+      "vision": "gray",
+      "k": {
+        "pairs": 66,
+        "weakest": {
+          "a": "continuation.up",
+          "b": "continuation.down",
+          "d": 0.0
+        },
+        "mean": 0.6886
+      },
+      "channels": {
+        "confidence": {
+          "pairs": 36,
+          "weakest": {
+            "a": "continuation.up|final|s0.6|cnone|n1|f1|-",
+            "b": "continuation.up|final|s0.6|c0.3|n1|f1|-",
+            "d": 0.0
+          },
+          "mean": 0.0
+        },
+        "confirmations": {
+          "pairs": 36,
+          "weakest": {
+            "a": "continuation.up|final|s0.6|c0.6|n1|f1|-",
+            "b": "continuation.up|final|s0.6|c0.6|n2|f1|-",
+            "d": 0.0
+          },
+          "mean": 0.0
+        },
+        "direction": {
+          "pairs": 7,
+          "weakest": {
+            "a": "continuation.up|final|s0.6|c0.6|n1|f1|-",
+            "b": "continuation.down|final|s0.6|c0.6|n1|f1|-",
+            "d": 0.0
+          },
+          "mean": 0.0
+        },
+        "freshness": {
+          "pairs": 12,
+          "weakest": {
+            "a": "continuation.up|final|s0.6|c0.6|n1|f1|-",
+            "b": "continuation.up|final|s0.6|c0.6|n1|f0.3|-",
+            "d": 0.0
+          },
+          "mean": 0.0
+        },
+        "phase": {
+          "pairs": 120,
+          "weakest": {
+            "a": "continuation.up|candidate|s0.6|c0.6|n1|f1|-",
+            "b": "continuation.up|final|s0.6|c0.6|n1|f1|-",
+            "d": 0.0
+          },
+          "mean": 0.0
+        },
+        "server": {
+          "pairs": 12,
+          "weakest": {
+            "a": "continuation.up|final|s0.6|c0.6|n1|f1|-",
+            "b": "continuation.up|final|s0.6|c0.6|n1|f1|srv",
+            "d": 0.0
+          },
+          "mean": 0.0
+        },
+        "strength": {
+          "pairs": 12,
+          "weakest": {
+            "a": "continuation.up|final|s0.2|c0.6|n1|f1|-",
+            "b": "continuation.up|final|s0.9|c0.6|n1|f1|-",
+            "d": 0.0
+          },
+          "mean": 0.0
+        }
+      }
+    },
+    {
+      "size": 24,
+      "theme": "light",
+      "vision": "normal",
+      "k": {
+        "pairs": 66,
+        "weakest": {
+          "a": "continuation.up",
+          "b": "continuation.down",
+          "d": 0.0
+        },
+        "mean": 2.124
+      },
+      "channels": {
+        "confidence": {
+          "pairs": 36,
+          "weakest": {
+            "a": "continuation.up|final|s0.6|cnone|n1|f1|-",
+            "b": "continuation.up|final|s0.6|c0.3|n1|f1|-",
+            "d": 0.0
+          },
+          "mean": 0.0
+        },
+        "confirmations": {
+          "pairs": 36,
+          "weakest": {
+            "a": "continuation.up|final|s0.6|c0.6|n1|f1|-",
+            "b": "continuation.up|final|s0.6|c0.6|n2|f1|-",
+            "d": 0.0
+          },
+          "mean": 0.0
+        },
+        "direction": {
+          "pairs": 7,
+          "weakest": {
+            "a": "continuation.up|final|s0.6|c0.6|n1|f1|-",
+            "b": "continuation.down|final|s0.6|c0.6|n1|f1|-",
+            "d": 0.0
+          },
+          "mean": 0.0
+        },
+        "freshness": {
+          "pairs": 12,
+          "weakest": {
+            "a": "continuation.up|final|s0.6|c0.6|n1|f1|-",
+            "b": "continuation.up|final|s0.6|c0.6|n1|f0.3|-",
+            "d": 0.0
+          },
+          "mean": 0.0
+        },
+        "phase": {
+          "pairs": 120,
+          "weakest": {
+            "a": "continuation.up|candidate|s0.6|c0.6|n1|f1|-",
+            "b": "continuation.up|final|s0.6|c0.6|n1|f1|-",
+            "d": 0.0
+          },
+          "mean": 0.0
+        },
+        "server": {
+          "pairs": 12,
+          "weakest": {
+            "a": "continuation.up|final|s0.6|c0.6|n1|f1|-",
+            "b": "continuation.up|final|s0.6|c0.6|n1|f1|srv",
+            "d": 0.0
+          },
+          "mean": 0.0
+        },
+        "strength": {
+          "pairs": 12,
+          "weakest": {
+            "a": "continuation.up|final|s0.2|c0.6|n1|f1|-",
+            "b": "continuation.up|final|s0.9|c0.6|n1|f1|-",
+            "d": 0.0
+          },
+          "mean": 0.0
+        }
+      }
+    },
+    {
+      "size": 24,
+      "theme": "light",
+      "vision": "deutan",
+      "k": {
+        "pairs": 66,
+        "weakest": {
+          "a": "continuation.up",
+          "b": "continuation.down",
+          "d": 0.0
+        },
+        "mean": 1.8268
+      },
+      "channels": {
+        "confidence": {
+          "pairs": 36,
+          "weakest": {
+            "a": "continuation.up|final|s0.6|cnone|n1|f1|-",
+            "b": "continuation.up|final|s0.6|c0.3|n1|f1|-",
+            "d": 0.0
+          },
+          "mean": 0.0
+        },
+        "confirmations": {
+          "pairs": 36,
+          "weakest": {
+            "a": "continuation.up|final|s0.6|c0.6|n1|f1|-",
+            "b": "continuation.up|final|s0.6|c0.6|n2|f1|-",
+            "d": 0.0
+          },
+          "mean": 0.0
+        },
+        "direction": {
+          "pairs": 7,
+          "weakest": {
+            "a": "continuation.up|final|s0.6|c0.6|n1|f1|-",
+            "b": "continuation.down|final|s0.6|c0.6|n1|f1|-",
+            "d": 0.0
+          },
+          "mean": 0.0
+        },
+        "freshness": {
+          "pairs": 12,
+          "weakest": {
+            "a": "continuation.up|final|s0.6|c0.6|n1|f1|-",
+            "b": "continuation.up|final|s0.6|c0.6|n1|f0.3|-",
+            "d": 0.0
+          },
+          "mean": 0.0
+        },
+        "phase": {
+          "pairs": 120,
+          "weakest": {
+            "a": "continuation.up|candidate|s0.6|c0.6|n1|f1|-",
+            "b": "continuation.up|final|s0.6|c0.6|n1|f1|-",
+            "d": 0.0
+          },
+          "mean": 0.0
+        },
+        "server": {
+          "pairs": 12,
+          "weakest": {
+            "a": "continuation.up|final|s0.6|c0.6|n1|f1|-",
+            "b": "continuation.up|final|s0.6|c0.6|n1|f1|srv",
+            "d": 0.0
+          },
+          "mean": 0.0
+        },
+        "strength": {
+          "pairs": 12,
+          "weakest": {
+            "a": "continuation.up|final|s0.2|c0.6|n1|f1|-",
+            "b": "continuation.up|final|s0.9|c0.6|n1|f1|-",
+            "d": 0.0
+          },
+          "mean": 0.0
+        }
+      }
+    },
+    {
+      "size": 24,
+      "theme": "light",
+      "vision": "protan",
+      "k": {
+        "pairs": 66,
+        "weakest": {
+          "a": "continuation.up",
+          "b": "continuation.down",
+          "d": 0.0
+        },
+        "mean": 1.9087
+      },
+      "channels": {
+        "confidence": {
+          "pairs": 36,
+          "weakest": {
+            "a": "continuation.up|final|s0.6|cnone|n1|f1|-",
+            "b": "continuation.up|final|s0.6|c0.3|n1|f1|-",
+            "d": 0.0
+          },
+          "mean": 0.0
+        },
+        "confirmations": {
+          "pairs": 36,
+          "weakest": {
+            "a": "continuation.up|final|s0.6|c0.6|n1|f1|-",
+            "b": "continuation.up|final|s0.6|c0.6|n2|f1|-",
+            "d": 0.0
+          },
+          "mean": 0.0
+        },
+        "direction": {
+          "pairs": 7,
+          "weakest": {
+            "a": "continuation.up|final|s0.6|c0.6|n1|f1|-",
+            "b": "continuation.down|final|s0.6|c0.6|n1|f1|-",
+            "d": 0.0
+          },
+          "mean": 0.0
+        },
+        "freshness": {
+          "pairs": 12,
+          "weakest": {
+            "a": "continuation.up|final|s0.6|c0.6|n1|f1|-",
+            "b": "continuation.up|final|s0.6|c0.6|n1|f0.3|-",
+            "d": 0.0
+          },
+          "mean": 0.0
+        },
+        "phase": {
+          "pairs": 120,
+          "weakest": {
+            "a": "continuation.up|candidate|s0.6|c0.6|n1|f1|-",
+            "b": "continuation.up|final|s0.6|c0.6|n1|f1|-",
+            "d": 0.0
+          },
+          "mean": 0.0
+        },
+        "server": {
+          "pairs": 12,
+          "weakest": {
+            "a": "continuation.up|final|s0.6|c0.6|n1|f1|-",
+            "b": "continuation.up|final|s0.6|c0.6|n1|f1|srv",
+            "d": 0.0
+          },
+          "mean": 0.0
+        },
+        "strength": {
+          "pairs": 12,
+          "weakest": {
+            "a": "continuation.up|final|s0.2|c0.6|n1|f1|-",
+            "b": "continuation.up|final|s0.9|c0.6|n1|f1|-",
+            "d": 0.0
+          },
+          "mean": 0.0
+        }
+      }
+    },
+    {
+      "size": 24,
+      "theme": "light",
+      "vision": "tritan",
+      "k": {
+        "pairs": 66,
+        "weakest": {
+          "a": "continuation.up",
+          "b": "continuation.down",
+          "d": 0.0
+        },
+        "mean": 1.7491
+      },
+      "channels": {
+        "confidence": {
+          "pairs": 36,
+          "weakest": {
+            "a": "continuation.up|final|s0.6|cnone|n1|f1|-",
+            "b": "continuation.up|final|s0.6|c0.3|n1|f1|-",
+            "d": 0.0
+          },
+          "mean": 0.0
+        },
+        "confirmations": {
+          "pairs": 36,
+          "weakest": {
+            "a": "continuation.up|final|s0.6|c0.6|n1|f1|-",
+            "b": "continuation.up|final|s0.6|c0.6|n2|f1|-",
+            "d": 0.0
+          },
+          "mean": 0.0
+        },
+        "direction": {
+          "pairs": 7,
+          "weakest": {
+            "a": "continuation.up|final|s0.6|c0.6|n1|f1|-",
+            "b": "continuation.down|final|s0.6|c0.6|n1|f1|-",
+            "d": 0.0
+          },
+          "mean": 0.0
+        },
+        "freshness": {
+          "pairs": 12,
+          "weakest": {
+            "a": "continuation.up|final|s0.6|c0.6|n1|f1|-",
+            "b": "continuation.up|final|s0.6|c0.6|n1|f0.3|-",
+            "d": 0.0
+          },
+          "mean": 0.0
+        },
+        "phase": {
+          "pairs": 120,
+          "weakest": {
+            "a": "continuation.up|candidate|s0.6|c0.6|n1|f1|-",
+            "b": "continuation.up|final|s0.6|c0.6|n1|f1|-",
+            "d": 0.0
+          },
+          "mean": 0.0
+        },
+        "server": {
+          "pairs": 12,
+          "weakest": {
+            "a": "continuation.up|final|s0.6|c0.6|n1|f1|-",
+            "b": "continuation.up|final|s0.6|c0.6|n1|f1|srv",
+            "d": 0.0
+          },
+          "mean": 0.0
+        },
+        "strength": {
+          "pairs": 12,
+          "weakest": {
+            "a": "continuation.up|final|s0.2|c0.6|n1|f1|-",
+            "b": "continuation.up|final|s0.9|c0.6|n1|f1|-",
+            "d": 0.0
+          },
+          "mean": 0.0
+        }
+      }
+    },
+    {
+      "size": 24,
+      "theme": "light",
+      "vision": "gray",
+      "k": {
+        "pairs": 66,
+        "weakest": {
+          "a": "continuation.up",
+          "b": "continuation.down",
+          "d": 0.0
+        },
+        "mean": 0.7521
+      },
+      "channels": {
+        "confidence": {
+          "pairs": 36,
+          "weakest": {
+            "a": "continuation.up|final|s0.6|cnone|n1|f1|-",
+            "b": "continuation.up|final|s0.6|c0.3|n1|f1|-",
+            "d": 0.0
+          },
+          "mean": 0.0
+        },
+        "confirmations": {
+          "pairs": 36,
+          "weakest": {
+            "a": "continuation.up|final|s0.6|c0.6|n1|f1|-",
+            "b": "continuation.up|final|s0.6|c0.6|n2|f1|-",
+            "d": 0.0
+          },
+          "mean": 0.0
+        },
+        "direction": {
+          "pairs": 7,
+          "weakest": {
+            "a": "continuation.up|final|s0.6|c0.6|n1|f1|-",
+            "b": "continuation.down|final|s0.6|c0.6|n1|f1|-",
+            "d": 0.0
+          },
+          "mean": 0.0
+        },
+        "freshness": {
+          "pairs": 12,
+          "weakest": {
+            "a": "continuation.up|final|s0.6|c0.6|n1|f1|-",
+            "b": "continuation.up|final|s0.6|c0.6|n1|f0.3|-",
+            "d": 0.0
+          },
+          "mean": 0.0
+        },
+        "phase": {
+          "pairs": 120,
+          "weakest": {
+            "a": "continuation.up|candidate|s0.6|c0.6|n1|f1|-",
+            "b": "continuation.up|final|s0.6|c0.6|n1|f1|-",
+            "d": 0.0
+          },
+          "mean": 0.0
+        },
+        "server": {
+          "pairs": 12,
+          "weakest": {
+            "a": "continuation.up|final|s0.6|c0.6|n1|f1|-",
+            "b": "continuation.up|final|s0.6|c0.6|n1|f1|srv",
+            "d": 0.0
+          },
+          "mean": 0.0
+        },
+        "strength": {
+          "pairs": 12,
+          "weakest": {
+            "a": "continuation.up|final|s0.2|c0.6|n1|f1|-",
+            "b": "continuation.up|final|s0.9|c0.6|n1|f1|-",
+            "d": 0.0
+          },
+          "mean": 0.0
+        }
+      }
+    },
+    {
+      "size": 32,
+      "theme": "light",
+      "vision": "normal",
+      "k": {
+        "pairs": 66,
+        "weakest": {
+          "a": "continuation.up",
+          "b": "continuation.down",
+          "d": 0.0
+        },
+        "mean": 2.2072
+      },
+      "channels": {
+        "confidence": {
+          "pairs": 36,
+          "weakest": {
+            "a": "continuation.up|final|s0.6|cnone|n1|f1|-",
+            "b": "continuation.up|final|s0.6|c0.3|n1|f1|-",
+            "d": 0.0
+          },
+          "mean": 0.0
+        },
+        "confirmations": {
+          "pairs": 36,
+          "weakest": {
+            "a": "continuation.up|final|s0.6|c0.6|n1|f1|-",
+            "b": "continuation.up|final|s0.6|c0.6|n2|f1|-",
+            "d": 0.0
+          },
+          "mean": 0.0
+        },
+        "direction": {
+          "pairs": 7,
+          "weakest": {
+            "a": "continuation.up|final|s0.6|c0.6|n1|f1|-",
+            "b": "continuation.down|final|s0.6|c0.6|n1|f1|-",
+            "d": 0.0
+          },
+          "mean": 0.0
+        },
+        "freshness": {
+          "pairs": 12,
+          "weakest": {
+            "a": "continuation.up|final|s0.6|c0.6|n1|f1|-",
+            "b": "continuation.up|final|s0.6|c0.6|n1|f0.3|-",
+            "d": 0.0
+          },
+          "mean": 0.0
+        },
+        "phase": {
+          "pairs": 120,
+          "weakest": {
+            "a": "continuation.up|candidate|s0.6|c0.6|n1|f1|-",
+            "b": "continuation.up|final|s0.6|c0.6|n1|f1|-",
+            "d": 0.0
+          },
+          "mean": 0.0
+        },
+        "server": {
+          "pairs": 12,
+          "weakest": {
+            "a": "continuation.up|final|s0.6|c0.6|n1|f1|-",
+            "b": "continuation.up|final|s0.6|c0.6|n1|f1|srv",
+            "d": 0.0
+          },
+          "mean": 0.0
+        },
+        "strength": {
+          "pairs": 12,
+          "weakest": {
+            "a": "continuation.up|final|s0.2|c0.6|n1|f1|-",
+            "b": "continuation.up|final|s0.9|c0.6|n1|f1|-",
+            "d": 0.0
+          },
+          "mean": 0.0
+        }
+      }
+    },
+    {
+      "size": 32,
+      "theme": "light",
+      "vision": "deutan",
+      "k": {
+        "pairs": 66,
+        "weakest": {
+          "a": "continuation.up",
+          "b": "continuation.down",
+          "d": 0.0
+        },
+        "mean": 1.8863
+      },
+      "channels": {
+        "confidence": {
+          "pairs": 36,
+          "weakest": {
+            "a": "continuation.up|final|s0.6|cnone|n1|f1|-",
+            "b": "continuation.up|final|s0.6|c0.3|n1|f1|-",
+            "d": 0.0
+          },
+          "mean": 0.0
+        },
+        "confirmations": {
+          "pairs": 36,
+          "weakest": {
+            "a": "continuation.up|final|s0.6|c0.6|n1|f1|-",
+            "b": "continuation.up|final|s0.6|c0.6|n2|f1|-",
+            "d": 0.0
+          },
+          "mean": 0.0
+        },
+        "direction": {
+          "pairs": 7,
+          "weakest": {
+            "a": "continuation.up|final|s0.6|c0.6|n1|f1|-",
+            "b": "continuation.down|final|s0.6|c0.6|n1|f1|-",
+            "d": 0.0
+          },
+          "mean": 0.0
+        },
+        "freshness": {
+          "pairs": 12,
+          "weakest": {
+            "a": "continuation.up|final|s0.6|c0.6|n1|f1|-",
+            "b": "continuation.up|final|s0.6|c0.6|n1|f0.3|-",
+            "d": 0.0
+          },
+          "mean": 0.0
+        },
+        "phase": {
+          "pairs": 120,
+          "weakest": {
+            "a": "continuation.up|candidate|s0.6|c0.6|n1|f1|-",
+            "b": "continuation.up|final|s0.6|c0.6|n1|f1|-",
+            "d": 0.0
+          },
+          "mean": 0.0
+        },
+        "server": {
+          "pairs": 12,
+          "weakest": {
+            "a": "continuation.up|final|s0.6|c0.6|n1|f1|-",
+            "b": "continuation.up|final|s0.6|c0.6|n1|f1|srv",
+            "d": 0.0
+          },
+          "mean": 0.0
+        },
+        "strength": {
+          "pairs": 12,
+          "weakest": {
+            "a": "continuation.up|final|s0.2|c0.6|n1|f1|-",
+            "b": "continuation.up|final|s0.9|c0.6|n1|f1|-",
+            "d": 0.0
+          },
+          "mean": 0.0
+        }
+      }
+    },
+    {
+      "size": 32,
+      "theme": "light",
+      "vision": "protan",
+      "k": {
+        "pairs": 66,
+        "weakest": {
+          "a": "continuation.up",
+          "b": "continuation.down",
+          "d": 0.0
+        },
+        "mean": 1.949
+      },
+      "channels": {
+        "confidence": {
+          "pairs": 36,
+          "weakest": {
+            "a": "continuation.up|final|s0.6|cnone|n1|f1|-",
+            "b": "continuation.up|final|s0.6|c0.3|n1|f1|-",
+            "d": 0.0
+          },
+          "mean": 0.0
+        },
+        "confirmations": {
+          "pairs": 36,
+          "weakest": {
+            "a": "continuation.up|final|s0.6|c0.6|n1|f1|-",
+            "b": "continuation.up|final|s0.6|c0.6|n2|f1|-",
+            "d": 0.0
+          },
+          "mean": 0.0
+        },
+        "direction": {
+          "pairs": 7,
+          "weakest": {
+            "a": "continuation.up|final|s0.6|c0.6|n1|f1|-",
+            "b": "continuation.down|final|s0.6|c0.6|n1|f1|-",
+            "d": 0.0
+          },
+          "mean": 0.0
+        },
+        "freshness": {
+          "pairs": 12,
+          "weakest": {
+            "a": "continuation.up|final|s0.6|c0.6|n1|f1|-",
+            "b": "continuation.up|final|s0.6|c0.6|n1|f0.3|-",
+            "d": 0.0
+          },
+          "mean": 0.0
+        },
+        "phase": {
+          "pairs": 120,
+          "weakest": {
+            "a": "continuation.up|candidate|s0.6|c0.6|n1|f1|-",
+            "b": "continuation.up|final|s0.6|c0.6|n1|f1|-",
+            "d": 0.0
+          },
+          "mean": 0.0
+        },
+        "server": {
+          "pairs": 12,
+          "weakest": {
+            "a": "continuation.up|final|s0.6|c0.6|n1|f1|-",
+            "b": "continuation.up|final|s0.6|c0.6|n1|f1|srv",
+            "d": 0.0
+          },
+          "mean": 0.0
+        },
+        "strength": {
+          "pairs": 12,
+          "weakest": {
+            "a": "continuation.up|final|s0.2|c0.6|n1|f1|-",
+            "b": "continuation.up|final|s0.9|c0.6|n1|f1|-",
+            "d": 0.0
+          },
+          "mean": 0.0
+        }
+      }
+    },
+    {
+      "size": 32,
+      "theme": "light",
+      "vision": "tritan",
+      "k": {
+        "pairs": 66,
+        "weakest": {
+          "a": "continuation.up",
+          "b": "continuation.down",
+          "d": 0.0
+        },
+        "mean": 1.8824
+      },
+      "channels": {
+        "confidence": {
+          "pairs": 36,
+          "weakest": {
+            "a": "continuation.up|final|s0.6|cnone|n1|f1|-",
+            "b": "continuation.up|final|s0.6|c0.3|n1|f1|-",
+            "d": 0.0
+          },
+          "mean": 0.0
+        },
+        "confirmations": {
+          "pairs": 36,
+          "weakest": {
+            "a": "continuation.up|final|s0.6|c0.6|n1|f1|-",
+            "b": "continuation.up|final|s0.6|c0.6|n2|f1|-",
+            "d": 0.0
+          },
+          "mean": 0.0
+        },
+        "direction": {
+          "pairs": 7,
+          "weakest": {
+            "a": "continuation.up|final|s0.6|c0.6|n1|f1|-",
+            "b": "continuation.down|final|s0.6|c0.6|n1|f1|-",
+            "d": 0.0
+          },
+          "mean": 0.0
+        },
+        "freshness": {
+          "pairs": 12,
+          "weakest": {
+            "a": "continuation.up|final|s0.6|c0.6|n1|f1|-",
+            "b": "continuation.up|final|s0.6|c0.6|n1|f0.3|-",
+            "d": 0.0
+          },
+          "mean": 0.0
+        },
+        "phase": {
+          "pairs": 120,
+          "weakest": {
+            "a": "continuation.up|candidate|s0.6|c0.6|n1|f1|-",
+            "b": "continuation.up|final|s0.6|c0.6|n1|f1|-",
+            "d": 0.0
+          },
+          "mean": 0.0
+        },
+        "server": {
+          "pairs": 12,
+          "weakest": {
+            "a": "continuation.up|final|s0.6|c0.6|n1|f1|-",
+            "b": "continuation.up|final|s0.6|c0.6|n1|f1|srv",
+            "d": 0.0
+          },
+          "mean": 0.0
+        },
+        "strength": {
+          "pairs": 12,
+          "weakest": {
+            "a": "continuation.up|final|s0.2|c0.6|n1|f1|-",
+            "b": "continuation.up|final|s0.9|c0.6|n1|f1|-",
+            "d": 0.0
+          },
+          "mean": 0.0
+        }
+      }
+    },
+    {
+      "size": 32,
+      "theme": "light",
+      "vision": "gray",
+      "k": {
+        "pairs": 66,
+        "weakest": {
+          "a": "continuation.up",
+          "b": "continuation.down",
+          "d": 0.0
+        },
+        "mean": 0.8219
+      },
+      "channels": {
+        "confidence": {
+          "pairs": 36,
+          "weakest": {
+            "a": "continuation.up|final|s0.6|cnone|n1|f1|-",
+            "b": "continuation.up|final|s0.6|c0.3|n1|f1|-",
+            "d": 0.0
+          },
+          "mean": 0.0
+        },
+        "confirmations": {
+          "pairs": 36,
+          "weakest": {
+            "a": "continuation.up|final|s0.6|c0.6|n1|f1|-",
+            "b": "continuation.up|final|s0.6|c0.6|n2|f1|-",
+            "d": 0.0
+          },
+          "mean": 0.0
+        },
+        "direction": {
+          "pairs": 7,
+          "weakest": {
+            "a": "continuation.up|final|s0.6|c0.6|n1|f1|-",
+            "b": "continuation.down|final|s0.6|c0.6|n1|f1|-",
+            "d": 0.0
+          },
+          "mean": 0.0
+        },
+        "freshness": {
+          "pairs": 12,
+          "weakest": {
+            "a": "continuation.up|final|s0.6|c0.6|n1|f1|-",
+            "b": "continuation.up|final|s0.6|c0.6|n1|f0.3|-",
+            "d": 0.0
+          },
+          "mean": 0.0
+        },
+        "phase": {
+          "pairs": 120,
+          "weakest": {
+            "a": "continuation.up|candidate|s0.6|c0.6|n1|f1|-",
+            "b": "continuation.up|final|s0.6|c0.6|n1|f1|-",
+            "d": 0.0
+          },
+          "mean": 0.0
+        },
+        "server": {
+          "pairs": 12,
+          "weakest": {
+            "a": "continuation.up|final|s0.6|c0.6|n1|f1|-",
+            "b": "continuation.up|final|s0.6|c0.6|n1|f1|srv",
+            "d": 0.0
+          },
+          "mean": 0.0
+        },
+        "strength": {
+          "pairs": 12,
+          "weakest": {
+            "a": "continuation.up|final|s0.2|c0.6|n1|f1|-",
+            "b": "continuation.up|final|s0.9|c0.6|n1|f1|-",
+            "d": 0.0
+          },
+          "mean": 0.0
+        }
+      }
+    },
+    {
+      "size": 16,
+      "theme": "dark",
+      "vision": "normal",
+      "k": {
+        "pairs": 66,
+        "weakest": {
+          "a": "continuation.up",
+          "b": "continuation.down",
+          "d": 0.0
+        },
+        "mean": 1.3158
+      },
+      "channels": {
+        "confidence": {
+          "pairs": 36,
+          "weakest": {
+            "a": "continuation.up|final|s0.6|cnone|n1|f1|-",
+            "b": "continuation.up|final|s0.6|c0.3|n1|f1|-",
+            "d": 0.0
+          },
+          "mean": 0.0
+        },
+        "confirmations": {
+          "pairs": 36,
+          "weakest": {
+            "a": "continuation.up|final|s0.6|c0.6|n1|f1|-",
+            "b": "continuation.up|final|s0.6|c0.6|n2|f1|-",
+            "d": 0.0
+          },
+          "mean": 0.0
+        },
+        "direction": {
+          "pairs": 7,
+          "weakest": {
+            "a": "continuation.up|final|s0.6|c0.6|n1|f1|-",
+            "b": "continuation.down|final|s0.6|c0.6|n1|f1|-",
+            "d": 0.0
+          },
+          "mean": 0.0
+        },
+        "freshness": {
+          "pairs": 12,
+          "weakest": {
+            "a": "continuation.up|final|s0.6|c0.6|n1|f1|-",
+            "b": "continuation.up|final|s0.6|c0.6|n1|f0.3|-",
+            "d": 0.0
+          },
+          "mean": 0.0
+        },
+        "phase": {
+          "pairs": 120,
+          "weakest": {
+            "a": "continuation.up|candidate|s0.6|c0.6|n1|f1|-",
+            "b": "continuation.up|final|s0.6|c0.6|n1|f1|-",
+            "d": 0.0
+          },
+          "mean": 0.0
+        },
+        "server": {
+          "pairs": 12,
+          "weakest": {
+            "a": "continuation.up|final|s0.6|c0.6|n1|f1|-",
+            "b": "continuation.up|final|s0.6|c0.6|n1|f1|srv",
+            "d": 0.0
+          },
+          "mean": 0.0
+        },
+        "strength": {
+          "pairs": 12,
+          "weakest": {
+            "a": "continuation.up|final|s0.2|c0.6|n1|f1|-",
+            "b": "continuation.up|final|s0.9|c0.6|n1|f1|-",
+            "d": 0.0
+          },
+          "mean": 0.0
+        }
+      }
+    },
+    {
+      "size": 16,
+      "theme": "dark",
+      "vision": "deutan",
+      "k": {
+        "pairs": 66,
+        "weakest": {
+          "a": "continuation.up",
+          "b": "continuation.down",
+          "d": 0.0
+        },
+        "mean": 1.3171
+      },
+      "channels": {
+        "confidence": {
+          "pairs": 36,
+          "weakest": {
+            "a": "continuation.up|final|s0.6|cnone|n1|f1|-",
+            "b": "continuation.up|final|s0.6|c0.3|n1|f1|-",
+            "d": 0.0
+          },
+          "mean": 0.0
+        },
+        "confirmations": {
+          "pairs": 36,
+          "weakest": {
+            "a": "continuation.up|final|s0.6|c0.6|n1|f1|-",
+            "b": "continuation.up|final|s0.6|c0.6|n2|f1|-",
+            "d": 0.0
+          },
+          "mean": 0.0
+        },
+        "direction": {
+          "pairs": 7,
+          "weakest": {
+            "a": "continuation.up|final|s0.6|c0.6|n1|f1|-",
+            "b": "continuation.down|final|s0.6|c0.6|n1|f1|-",
+            "d": 0.0
+          },
+          "mean": 0.0
+        },
+        "freshness": {
+          "pairs": 12,
+          "weakest": {
+            "a": "continuation.up|final|s0.6|c0.6|n1|f1|-",
+            "b": "continuation.up|final|s0.6|c0.6|n1|f0.3|-",
+            "d": 0.0
+          },
+          "mean": 0.0
+        },
+        "phase": {
+          "pairs": 120,
+          "weakest": {
+            "a": "continuation.up|candidate|s0.6|c0.6|n1|f1|-",
+            "b": "continuation.up|final|s0.6|c0.6|n1|f1|-",
+            "d": 0.0
+          },
+          "mean": 0.0
+        },
+        "server": {
+          "pairs": 12,
+          "weakest": {
+            "a": "continuation.up|final|s0.6|c0.6|n1|f1|-",
+            "b": "continuation.up|final|s0.6|c0.6|n1|f1|srv",
+            "d": 0.0
+          },
+          "mean": 0.0
+        },
+        "strength": {
+          "pairs": 12,
+          "weakest": {
+            "a": "continuation.up|final|s0.2|c0.6|n1|f1|-",
+            "b": "continuation.up|final|s0.9|c0.6|n1|f1|-",
+            "d": 0.0
+          },
+          "mean": 0.0
+        }
+      }
+    },
+    {
+      "size": 16,
+      "theme": "dark",
+      "vision": "protan",
+      "k": {
+        "pairs": 66,
+        "weakest": {
+          "a": "continuation.up",
+          "b": "continuation.down",
+          "d": 0.0
+        },
+        "mean": 1.2697
+      },
+      "channels": {
+        "confidence": {
+          "pairs": 36,
+          "weakest": {
+            "a": "continuation.up|final|s0.6|cnone|n1|f1|-",
+            "b": "continuation.up|final|s0.6|c0.3|n1|f1|-",
+            "d": 0.0
+          },
+          "mean": 0.0
+        },
+        "confirmations": {
+          "pairs": 36,
+          "weakest": {
+            "a": "continuation.up|final|s0.6|c0.6|n1|f1|-",
+            "b": "continuation.up|final|s0.6|c0.6|n2|f1|-",
+            "d": 0.0
+          },
+          "mean": 0.0
+        },
+        "direction": {
+          "pairs": 7,
+          "weakest": {
+            "a": "continuation.up|final|s0.6|c0.6|n1|f1|-",
+            "b": "continuation.down|final|s0.6|c0.6|n1|f1|-",
+            "d": 0.0
+          },
+          "mean": 0.0
+        },
+        "freshness": {
+          "pairs": 12,
+          "weakest": {
+            "a": "continuation.up|final|s0.6|c0.6|n1|f1|-",
+            "b": "continuation.up|final|s0.6|c0.6|n1|f0.3|-",
+            "d": 0.0
+          },
+          "mean": 0.0
+        },
+        "phase": {
+          "pairs": 120,
+          "weakest": {
+            "a": "continuation.up|candidate|s0.6|c0.6|n1|f1|-",
+            "b": "continuation.up|final|s0.6|c0.6|n1|f1|-",
+            "d": 0.0
+          },
+          "mean": 0.0
+        },
+        "server": {
+          "pairs": 12,
+          "weakest": {
+            "a": "continuation.up|final|s0.6|c0.6|n1|f1|-",
+            "b": "continuation.up|final|s0.6|c0.6|n1|f1|srv",
+            "d": 0.0
+          },
+          "mean": 0.0
+        },
+        "strength": {
+          "pairs": 12,
+          "weakest": {
+            "a": "continuation.up|final|s0.2|c0.6|n1|f1|-",
+            "b": "continuation.up|final|s0.9|c0.6|n1|f1|-",
+            "d": 0.0
+          },
+          "mean": 0.0
+        }
+      }
+    },
+    {
+      "size": 16,
+      "theme": "dark",
+      "vision": "tritan",
+      "k": {
+        "pairs": 66,
+        "weakest": {
+          "a": "continuation.up",
+          "b": "continuation.down",
+          "d": 0.0
+        },
+        "mean": 1.154
+      },
+      "channels": {
+        "confidence": {
+          "pairs": 36,
+          "weakest": {
+            "a": "continuation.up|final|s0.6|cnone|n1|f1|-",
+            "b": "continuation.up|final|s0.6|c0.3|n1|f1|-",
+            "d": 0.0
+          },
+          "mean": 0.0
+        },
+        "confirmations": {
+          "pairs": 36,
+          "weakest": {
+            "a": "continuation.up|final|s0.6|c0.6|n1|f1|-",
+            "b": "continuation.up|final|s0.6|c0.6|n2|f1|-",
+            "d": 0.0
+          },
+          "mean": 0.0
+        },
+        "direction": {
+          "pairs": 7,
+          "weakest": {
+            "a": "continuation.up|final|s0.6|c0.6|n1|f1|-",
+            "b": "continuation.down|final|s0.6|c0.6|n1|f1|-",
+            "d": 0.0
+          },
+          "mean": 0.0
+        },
+        "freshness": {
+          "pairs": 12,
+          "weakest": {
+            "a": "continuation.up|final|s0.6|c0.6|n1|f1|-",
+            "b": "continuation.up|final|s0.6|c0.6|n1|f0.3|-",
+            "d": 0.0
+          },
+          "mean": 0.0
+        },
+        "phase": {
+          "pairs": 120,
+          "weakest": {
+            "a": "continuation.up|candidate|s0.6|c0.6|n1|f1|-",
+            "b": "continuation.up|final|s0.6|c0.6|n1|f1|-",
+            "d": 0.0
+          },
+          "mean": 0.0
+        },
+        "server": {
+          "pairs": 12,
+          "weakest": {
+            "a": "continuation.up|final|s0.6|c0.6|n1|f1|-",
+            "b": "continuation.up|final|s0.6|c0.6|n1|f1|srv",
+            "d": 0.0
+          },
+          "mean": 0.0
+        },
+        "strength": {
+          "pairs": 12,
+          "weakest": {
+            "a": "continuation.up|final|s0.2|c0.6|n1|f1|-",
+            "b": "continuation.up|final|s0.9|c0.6|n1|f1|-",
+            "d": 0.0
+          },
+          "mean": 0.0
+        }
+      }
+    },
+    {
+      "size": 16,
+      "theme": "dark",
+      "vision": "gray",
+      "k": {
+        "pairs": 66,
+        "weakest": {
+          "a": "continuation.up",
+          "b": "continuation.down",
+          "d": 0.0
+        },
+        "mean": 1.006
+      },
+      "channels": {
+        "confidence": {
+          "pairs": 36,
+          "weakest": {
+            "a": "continuation.up|final|s0.6|cnone|n1|f1|-",
+            "b": "continuation.up|final|s0.6|c0.3|n1|f1|-",
+            "d": 0.0
+          },
+          "mean": 0.0
+        },
+        "confirmations": {
+          "pairs": 36,
+          "weakest": {
+            "a": "continuation.up|final|s0.6|c0.6|n1|f1|-",
+            "b": "continuation.up|final|s0.6|c0.6|n2|f1|-",
+            "d": 0.0
+          },
+          "mean": 0.0
+        },
+        "direction": {
+          "pairs": 7,
+          "weakest": {
+            "a": "continuation.up|final|s0.6|c0.6|n1|f1|-",
+            "b": "continuation.down|final|s0.6|c0.6|n1|f1|-",
+            "d": 0.0
+          },
+          "mean": 0.0
+        },
+        "freshness": {
+          "pairs": 12,
+          "weakest": {
+            "a": "continuation.up|final|s0.6|c0.6|n1|f1|-",
+            "b": "continuation.up|final|s0.6|c0.6|n1|f0.3|-",
+            "d": 0.0
+          },
+          "mean": 0.0
+        },
+        "phase": {
+          "pairs": 120,
+          "weakest": {
+            "a": "continuation.up|candidate|s0.6|c0.6|n1|f1|-",
+            "b": "continuation.up|final|s0.6|c0.6|n1|f1|-",
+            "d": 0.0
+          },
+          "mean": 0.0
+        },
+        "server": {
+          "pairs": 12,
+          "weakest": {
+            "a": "continuation.up|final|s0.6|c0.6|n1|f1|-",
+            "b": "continuation.up|final|s0.6|c0.6|n1|f1|srv",
+            "d": 0.0
+          },
+          "mean": 0.0
+        },
+        "strength": {
+          "pairs": 12,
+          "weakest": {
+            "a": "continuation.up|final|s0.2|c0.6|n1|f1|-",
+            "b": "continuation.up|final|s0.9|c0.6|n1|f1|-",
+            "d": 0.0
+          },
+          "mean": 0.0
+        }
+      }
+    },
+    {
+      "size": 24,
+      "theme": "dark",
+      "vision": "normal",
+      "k": {
+        "pairs": 66,
+        "weakest": {
+          "a": "continuation.up",
+          "b": "continuation.down",
+          "d": 0.0
+        },
+        "mean": 1.3337
+      },
+      "channels": {
+        "confidence": {
+          "pairs": 36,
+          "weakest": {
+            "a": "continuation.up|final|s0.6|cnone|n1|f1|-",
+            "b": "continuation.up|final|s0.6|c0.3|n1|f1|-",
+            "d": 0.0
+          },
+          "mean": 0.0
+        },
+        "confirmations": {
+          "pairs": 36,
+          "weakest": {
+            "a": "continuation.up|final|s0.6|c0.6|n1|f1|-",
+            "b": "continuation.up|final|s0.6|c0.6|n2|f1|-",
+            "d": 0.0
+          },
+          "mean": 0.0
+        },
+        "direction": {
+          "pairs": 7,
+          "weakest": {
+            "a": "continuation.up|final|s0.6|c0.6|n1|f1|-",
+            "b": "continuation.down|final|s0.6|c0.6|n1|f1|-",
+            "d": 0.0
+          },
+          "mean": 0.0
+        },
+        "freshness": {
+          "pairs": 12,
+          "weakest": {
+            "a": "continuation.up|final|s0.6|c0.6|n1|f1|-",
+            "b": "continuation.up|final|s0.6|c0.6|n1|f0.3|-",
+            "d": 0.0
+          },
+          "mean": 0.0
+        },
+        "phase": {
+          "pairs": 120,
+          "weakest": {
+            "a": "continuation.up|candidate|s0.6|c0.6|n1|f1|-",
+            "b": "continuation.up|final|s0.6|c0.6|n1|f1|-",
+            "d": 0.0
+          },
+          "mean": 0.0
+        },
+        "server": {
+          "pairs": 12,
+          "weakest": {
+            "a": "continuation.up|final|s0.6|c0.6|n1|f1|-",
+            "b": "continuation.up|final|s0.6|c0.6|n1|f1|srv",
+            "d": 0.0
+          },
+          "mean": 0.0
+        },
+        "strength": {
+          "pairs": 12,
+          "weakest": {
+            "a": "continuation.up|final|s0.2|c0.6|n1|f1|-",
+            "b": "continuation.up|final|s0.9|c0.6|n1|f1|-",
+            "d": 0.0
+          },
+          "mean": 0.0
+        }
+      }
+    },
+    {
+      "size": 24,
+      "theme": "dark",
+      "vision": "deutan",
+      "k": {
+        "pairs": 66,
+        "weakest": {
+          "a": "continuation.up",
+          "b": "continuation.down",
+          "d": 0.0
+        },
+        "mean": 1.3374
+      },
+      "channels": {
+        "confidence": {
+          "pairs": 36,
+          "weakest": {
+            "a": "continuation.up|final|s0.6|cnone|n1|f1|-",
+            "b": "continuation.up|final|s0.6|c0.3|n1|f1|-",
+            "d": 0.0
+          },
+          "mean": 0.0
+        },
+        "confirmations": {
+          "pairs": 36,
+          "weakest": {
+            "a": "continuation.up|final|s0.6|c0.6|n1|f1|-",
+            "b": "continuation.up|final|s0.6|c0.6|n2|f1|-",
+            "d": 0.0
+          },
+          "mean": 0.0
+        },
+        "direction": {
+          "pairs": 7,
+          "weakest": {
+            "a": "continuation.up|final|s0.6|c0.6|n1|f1|-",
+            "b": "continuation.down|final|s0.6|c0.6|n1|f1|-",
+            "d": 0.0
+          },
+          "mean": 0.0
+        },
+        "freshness": {
+          "pairs": 12,
+          "weakest": {
+            "a": "continuation.up|final|s0.6|c0.6|n1|f1|-",
+            "b": "continuation.up|final|s0.6|c0.6|n1|f0.3|-",
+            "d": 0.0
+          },
+          "mean": 0.0
+        },
+        "phase": {
+          "pairs": 120,
+          "weakest": {
+            "a": "continuation.up|candidate|s0.6|c0.6|n1|f1|-",
+            "b": "continuation.up|final|s0.6|c0.6|n1|f1|-",
+            "d": 0.0
+          },
+          "mean": 0.0
+        },
+        "server": {
+          "pairs": 12,
+          "weakest": {
+            "a": "continuation.up|final|s0.6|c0.6|n1|f1|-",
+            "b": "continuation.up|final|s0.6|c0.6|n1|f1|srv",
+            "d": 0.0
+          },
+          "mean": 0.0
+        },
+        "strength": {
+          "pairs": 12,
+          "weakest": {
+            "a": "continuation.up|final|s0.2|c0.6|n1|f1|-",
+            "b": "continuation.up|final|s0.9|c0.6|n1|f1|-",
+            "d": 0.0
+          },
+          "mean": 0.0
+        }
+      }
+    },
+    {
+      "size": 24,
+      "theme": "dark",
+      "vision": "protan",
+      "k": {
+        "pairs": 66,
+        "weakest": {
+          "a": "continuation.up",
+          "b": "continuation.down",
+          "d": 0.0
+        },
+        "mean": 1.288
+      },
+      "channels": {
+        "confidence": {
+          "pairs": 36,
+          "weakest": {
+            "a": "continuation.up|final|s0.6|cnone|n1|f1|-",
+            "b": "continuation.up|final|s0.6|c0.3|n1|f1|-",
+            "d": 0.0
+          },
+          "mean": 0.0
+        },
+        "confirmations": {
+          "pairs": 36,
+          "weakest": {
+            "a": "continuation.up|final|s0.6|c0.6|n1|f1|-",
+            "b": "continuation.up|final|s0.6|c0.6|n2|f1|-",
+            "d": 0.0
+          },
+          "mean": 0.0
+        },
+        "direction": {
+          "pairs": 7,
+          "weakest": {
+            "a": "continuation.up|final|s0.6|c0.6|n1|f1|-",
+            "b": "continuation.down|final|s0.6|c0.6|n1|f1|-",
+            "d": 0.0
+          },
+          "mean": 0.0
+        },
+        "freshness": {
+          "pairs": 12,
+          "weakest": {
+            "a": "continuation.up|final|s0.6|c0.6|n1|f1|-",
+            "b": "continuation.up|final|s0.6|c0.6|n1|f0.3|-",
+            "d": 0.0
+          },
+          "mean": 0.0
+        },
+        "phase": {
+          "pairs": 120,
+          "weakest": {
+            "a": "continuation.up|candidate|s0.6|c0.6|n1|f1|-",
+            "b": "continuation.up|final|s0.6|c0.6|n1|f1|-",
+            "d": 0.0
+          },
+          "mean": 0.0
+        },
+        "server": {
+          "pairs": 12,
+          "weakest": {
+            "a": "continuation.up|final|s0.6|c0.6|n1|f1|-",
+            "b": "continuation.up|final|s0.6|c0.6|n1|f1|srv",
+            "d": 0.0
+          },
+          "mean": 0.0
+        },
+        "strength": {
+          "pairs": 12,
+          "weakest": {
+            "a": "continuation.up|final|s0.2|c0.6|n1|f1|-",
+            "b": "continuation.up|final|s0.9|c0.6|n1|f1|-",
+            "d": 0.0
+          },
+          "mean": 0.0
+        }
+      }
+    },
+    {
+      "size": 24,
+      "theme": "dark",
+      "vision": "tritan",
+      "k": {
+        "pairs": 66,
+        "weakest": {
+          "a": "continuation.up",
+          "b": "continuation.down",
+          "d": 0.0
+        },
+        "mean": 1.171
+      },
+      "channels": {
+        "confidence": {
+          "pairs": 36,
+          "weakest": {
+            "a": "continuation.up|final|s0.6|cnone|n1|f1|-",
+            "b": "continuation.up|final|s0.6|c0.3|n1|f1|-",
+            "d": 0.0
+          },
+          "mean": 0.0
+        },
+        "confirmations": {
+          "pairs": 36,
+          "weakest": {
+            "a": "continuation.up|final|s0.6|c0.6|n1|f1|-",
+            "b": "continuation.up|final|s0.6|c0.6|n2|f1|-",
+            "d": 0.0
+          },
+          "mean": 0.0
+        },
+        "direction": {
+          "pairs": 7,
+          "weakest": {
+            "a": "continuation.up|final|s0.6|c0.6|n1|f1|-",
+            "b": "continuation.down|final|s0.6|c0.6|n1|f1|-",
+            "d": 0.0
+          },
+          "mean": 0.0
+        },
+        "freshness": {
+          "pairs": 12,
+          "weakest": {
+            "a": "continuation.up|final|s0.6|c0.6|n1|f1|-",
+            "b": "continuation.up|final|s0.6|c0.6|n1|f0.3|-",
+            "d": 0.0
+          },
+          "mean": 0.0
+        },
+        "phase": {
+          "pairs": 120,
+          "weakest": {
+            "a": "continuation.up|candidate|s0.6|c0.6|n1|f1|-",
+            "b": "continuation.up|final|s0.6|c0.6|n1|f1|-",
+            "d": 0.0
+          },
+          "mean": 0.0
+        },
+        "server": {
+          "pairs": 12,
+          "weakest": {
+            "a": "continuation.up|final|s0.6|c0.6|n1|f1|-",
+            "b": "continuation.up|final|s0.6|c0.6|n1|f1|srv",
+            "d": 0.0
+          },
+          "mean": 0.0
+        },
+        "strength": {
+          "pairs": 12,
+          "weakest": {
+            "a": "continuation.up|final|s0.2|c0.6|n1|f1|-",
+            "b": "continuation.up|final|s0.9|c0.6|n1|f1|-",
+            "d": 0.0
+          },
+          "mean": 0.0
+        }
+      }
+    },
+    {
+      "size": 24,
+      "theme": "dark",
+      "vision": "gray",
+      "k": {
+        "pairs": 66,
+        "weakest": {
+          "a": "continuation.up",
+          "b": "continuation.down",
+          "d": 0.0
+        },
+        "mean": 1.0235
+      },
+      "channels": {
+        "confidence": {
+          "pairs": 36,
+          "weakest": {
+            "a": "continuation.up|final|s0.6|cnone|n1|f1|-",
+            "b": "continuation.up|final|s0.6|c0.3|n1|f1|-",
+            "d": 0.0
+          },
+          "mean": 0.0
+        },
+        "confirmations": {
+          "pairs": 36,
+          "weakest": {
+            "a": "continuation.up|final|s0.6|c0.6|n1|f1|-",
+            "b": "continuation.up|final|s0.6|c0.6|n2|f1|-",
+            "d": 0.0
+          },
+          "mean": 0.0
+        },
+        "direction": {
+          "pairs": 7,
+          "weakest": {
+            "a": "continuation.up|final|s0.6|c0.6|n1|f1|-",
+            "b": "continuation.down|final|s0.6|c0.6|n1|f1|-",
+            "d": 0.0
+          },
+          "mean": 0.0
+        },
+        "freshness": {
+          "pairs": 12,
+          "weakest": {
+            "a": "continuation.up|final|s0.6|c0.6|n1|f1|-",
+            "b": "continuation.up|final|s0.6|c0.6|n1|f0.3|-",
+            "d": 0.0
+          },
+          "mean": 0.0
+        },
+        "phase": {
+          "pairs": 120,
+          "weakest": {
+            "a": "continuation.up|candidate|s0.6|c0.6|n1|f1|-",
+            "b": "continuation.up|final|s0.6|c0.6|n1|f1|-",
+            "d": 0.0
+          },
+          "mean": 0.0
+        },
+        "server": {
+          "pairs": 12,
+          "weakest": {
+            "a": "continuation.up|final|s0.6|c0.6|n1|f1|-",
+            "b": "continuation.up|final|s0.6|c0.6|n1|f1|srv",
+            "d": 0.0
+          },
+          "mean": 0.0
+        },
+        "strength": {
+          "pairs": 12,
+          "weakest": {
+            "a": "continuation.up|final|s0.2|c0.6|n1|f1|-",
+            "b": "continuation.up|final|s0.9|c0.6|n1|f1|-",
+            "d": 0.0
+          },
+          "mean": 0.0
+        }
+      }
+    },
+    {
+      "size": 32,
+      "theme": "dark",
+      "vision": "normal",
+      "k": {
+        "pairs": 66,
+        "weakest": {
+          "a": "continuation.up",
+          "b": "continuation.down",
+          "d": 0.0
+        },
+        "mean": 1.5637
+      },
+      "channels": {
+        "confidence": {
+          "pairs": 36,
+          "weakest": {
+            "a": "continuation.up|final|s0.6|cnone|n1|f1|-",
+            "b": "continuation.up|final|s0.6|c0.3|n1|f1|-",
+            "d": 0.0
+          },
+          "mean": 0.0
+        },
+        "confirmations": {
+          "pairs": 36,
+          "weakest": {
+            "a": "continuation.up|final|s0.6|c0.6|n1|f1|-",
+            "b": "continuation.up|final|s0.6|c0.6|n2|f1|-",
+            "d": 0.0
+          },
+          "mean": 0.0
+        },
+        "direction": {
+          "pairs": 7,
+          "weakest": {
+            "a": "continuation.up|final|s0.6|c0.6|n1|f1|-",
+            "b": "continuation.down|final|s0.6|c0.6|n1|f1|-",
+            "d": 0.0
+          },
+          "mean": 0.0
+        },
+        "freshness": {
+          "pairs": 12,
+          "weakest": {
+            "a": "continuation.up|final|s0.6|c0.6|n1|f1|-",
+            "b": "continuation.up|final|s0.6|c0.6|n1|f0.3|-",
+            "d": 0.0
+          },
+          "mean": 0.0
+        },
+        "phase": {
+          "pairs": 120,
+          "weakest": {
+            "a": "continuation.up|candidate|s0.6|c0.6|n1|f1|-",
+            "b": "continuation.up|final|s0.6|c0.6|n1|f1|-",
+            "d": 0.0
+          },
+          "mean": 0.0
+        },
+        "server": {
+          "pairs": 12,
+          "weakest": {
+            "a": "continuation.up|final|s0.6|c0.6|n1|f1|-",
+            "b": "continuation.up|final|s0.6|c0.6|n1|f1|srv",
+            "d": 0.0
+          },
+          "mean": 0.0
+        },
+        "strength": {
+          "pairs": 12,
+          "weakest": {
+            "a": "continuation.up|final|s0.2|c0.6|n1|f1|-",
+            "b": "continuation.up|final|s0.9|c0.6|n1|f1|-",
+            "d": 0.0
+          },
+          "mean": 0.0
+        }
+      }
+    },
+    {
+      "size": 32,
+      "theme": "dark",
+      "vision": "deutan",
+      "k": {
+        "pairs": 66,
+        "weakest": {
+          "a": "continuation.up",
+          "b": "continuation.down",
+          "d": 0.0
+        },
+        "mean": 1.5688
+      },
+      "channels": {
+        "confidence": {
+          "pairs": 36,
+          "weakest": {
+            "a": "continuation.up|final|s0.6|cnone|n1|f1|-",
+            "b": "continuation.up|final|s0.6|c0.3|n1|f1|-",
+            "d": 0.0
+          },
+          "mean": 0.0
+        },
+        "confirmations": {
+          "pairs": 36,
+          "weakest": {
+            "a": "continuation.up|final|s0.6|c0.6|n1|f1|-",
+            "b": "continuation.up|final|s0.6|c0.6|n2|f1|-",
+            "d": 0.0
+          },
+          "mean": 0.0
+        },
+        "direction": {
+          "pairs": 7,
+          "weakest": {
+            "a": "continuation.up|final|s0.6|c0.6|n1|f1|-",
+            "b": "continuation.down|final|s0.6|c0.6|n1|f1|-",
+            "d": 0.0
+          },
+          "mean": 0.0
+        },
+        "freshness": {
+          "pairs": 12,
+          "weakest": {
+            "a": "continuation.up|final|s0.6|c0.6|n1|f1|-",
+            "b": "continuation.up|final|s0.6|c0.6|n1|f0.3|-",
+            "d": 0.0
+          },
+          "mean": 0.0
+        },
+        "phase": {
+          "pairs": 120,
+          "weakest": {
+            "a": "continuation.up|candidate|s0.6|c0.6|n1|f1|-",
+            "b": "continuation.up|final|s0.6|c0.6|n1|f1|-",
+            "d": 0.0
+          },
+          "mean": 0.0
+        },
+        "server": {
+          "pairs": 12,
+          "weakest": {
+            "a": "continuation.up|final|s0.6|c0.6|n1|f1|-",
+            "b": "continuation.up|final|s0.6|c0.6|n1|f1|srv",
+            "d": 0.0
+          },
+          "mean": 0.0
+        },
+        "strength": {
+          "pairs": 12,
+          "weakest": {
+            "a": "continuation.up|final|s0.2|c0.6|n1|f1|-",
+            "b": "continuation.up|final|s0.9|c0.6|n1|f1|-",
+            "d": 0.0
+          },
+          "mean": 0.0
+        }
+      }
+    },
+    {
+      "size": 32,
+      "theme": "dark",
+      "vision": "protan",
+      "k": {
+        "pairs": 66,
+        "weakest": {
+          "a": "continuation.up",
+          "b": "continuation.down",
+          "d": 0.0
+        },
+        "mean": 1.51
+      },
+      "channels": {
+        "confidence": {
+          "pairs": 36,
+          "weakest": {
+            "a": "continuation.up|final|s0.6|cnone|n1|f1|-",
+            "b": "continuation.up|final|s0.6|c0.3|n1|f1|-",
+            "d": 0.0
+          },
+          "mean": 0.0
+        },
+        "confirmations": {
+          "pairs": 36,
+          "weakest": {
+            "a": "continuation.up|final|s0.6|c0.6|n1|f1|-",
+            "b": "continuation.up|final|s0.6|c0.6|n2|f1|-",
+            "d": 0.0
+          },
+          "mean": 0.0
+        },
+        "direction": {
+          "pairs": 7,
+          "weakest": {
+            "a": "continuation.up|final|s0.6|c0.6|n1|f1|-",
+            "b": "continuation.down|final|s0.6|c0.6|n1|f1|-",
+            "d": 0.0
+          },
+          "mean": 0.0
+        },
+        "freshness": {
+          "pairs": 12,
+          "weakest": {
+            "a": "continuation.up|final|s0.6|c0.6|n1|f1|-",
+            "b": "continuation.up|final|s0.6|c0.6|n1|f0.3|-",
+            "d": 0.0
+          },
+          "mean": 0.0
+        },
+        "phase": {
+          "pairs": 120,
+          "weakest": {
+            "a": "continuation.up|candidate|s0.6|c0.6|n1|f1|-",
+            "b": "continuation.up|final|s0.6|c0.6|n1|f1|-",
+            "d": 0.0
+          },
+          "mean": 0.0
+        },
+        "server": {
+          "pairs": 12,
+          "weakest": {
+            "a": "continuation.up|final|s0.6|c0.6|n1|f1|-",
+            "b": "continuation.up|final|s0.6|c0.6|n1|f1|srv",
+            "d": 0.0
+          },
+          "mean": 0.0
+        },
+        "strength": {
+          "pairs": 12,
+          "weakest": {
+            "a": "continuation.up|final|s0.2|c0.6|n1|f1|-",
+            "b": "continuation.up|final|s0.9|c0.6|n1|f1|-",
+            "d": 0.0
+          },
+          "mean": 0.0
+        }
+      }
+    },
+    {
+      "size": 32,
+      "theme": "dark",
+      "vision": "tritan",
+      "k": {
+        "pairs": 66,
+        "weakest": {
+          "a": "continuation.up",
+          "b": "continuation.down",
+          "d": 0.0
+        },
+        "mean": 1.3713
+      },
+      "channels": {
+        "confidence": {
+          "pairs": 36,
+          "weakest": {
+            "a": "continuation.up|final|s0.6|cnone|n1|f1|-",
+            "b": "continuation.up|final|s0.6|c0.3|n1|f1|-",
+            "d": 0.0
+          },
+          "mean": 0.0
+        },
+        "confirmations": {
+          "pairs": 36,
+          "weakest": {
+            "a": "continuation.up|final|s0.6|c0.6|n1|f1|-",
+            "b": "continuation.up|final|s0.6|c0.6|n2|f1|-",
+            "d": 0.0
+          },
+          "mean": 0.0
+        },
+        "direction": {
+          "pairs": 7,
+          "weakest": {
+            "a": "continuation.up|final|s0.6|c0.6|n1|f1|-",
+            "b": "continuation.down|final|s0.6|c0.6|n1|f1|-",
+            "d": 0.0
+          },
+          "mean": 0.0
+        },
+        "freshness": {
+          "pairs": 12,
+          "weakest": {
+            "a": "continuation.up|final|s0.6|c0.6|n1|f1|-",
+            "b": "continuation.up|final|s0.6|c0.6|n1|f0.3|-",
+            "d": 0.0
+          },
+          "mean": 0.0
+        },
+        "phase": {
+          "pairs": 120,
+          "weakest": {
+            "a": "continuation.up|candidate|s0.6|c0.6|n1|f1|-",
+            "b": "continuation.up|final|s0.6|c0.6|n1|f1|-",
+            "d": 0.0
+          },
+          "mean": 0.0
+        },
+        "server": {
+          "pairs": 12,
+          "weakest": {
+            "a": "continuation.up|final|s0.6|c0.6|n1|f1|-",
+            "b": "continuation.up|final|s0.6|c0.6|n1|f1|srv",
+            "d": 0.0
+          },
+          "mean": 0.0
+        },
+        "strength": {
+          "pairs": 12,
+          "weakest": {
+            "a": "continuation.up|final|s0.2|c0.6|n1|f1|-",
+            "b": "continuation.up|final|s0.9|c0.6|n1|f1|-",
+            "d": 0.0
+          },
+          "mean": 0.0
+        }
+      }
+    },
+    {
+      "size": 32,
+      "theme": "dark",
+      "vision": "gray",
+      "k": {
+        "pairs": 66,
+        "weakest": {
+          "a": "continuation.up",
+          "b": "continuation.down",
+          "d": 0.0
+        },
+        "mean": 1.1977
+      },
+      "channels": {
+        "confidence": {
+          "pairs": 36,
+          "weakest": {
+            "a": "continuation.up|final|s0.6|cnone|n1|f1|-",
+            "b": "continuation.up|final|s0.6|c0.3|n1|f1|-",
+            "d": 0.0
+          },
+          "mean": 0.0
+        },
+        "confirmations": {
+          "pairs": 36,
+          "weakest": {
+            "a": "continuation.up|final|s0.6|c0.6|n1|f1|-",
+            "b": "continuation.up|final|s0.6|c0.6|n2|f1|-",
+            "d": 0.0
+          },
+          "mean": 0.0
+        },
+        "direction": {
+          "pairs": 7,
+          "weakest": {
+            "a": "continuation.up|final|s0.6|c0.6|n1|f1|-",
+            "b": "continuation.down|final|s0.6|c0.6|n1|f1|-",
+            "d": 0.0
+          },
+          "mean": 0.0
+        },
+        "freshness": {
+          "pairs": 12,
+          "weakest": {
+            "a": "continuation.up|final|s0.6|c0.6|n1|f1|-",
+            "b": "continuation.up|final|s0.6|c0.6|n1|f0.3|-",
+            "d": 0.0
+          },
+          "mean": 0.0
+        },
+        "phase": {
+          "pairs": 120,
+          "weakest": {
+            "a": "continuation.up|candidate|s0.6|c0.6|n1|f1|-",
+            "b": "continuation.up|final|s0.6|c0.6|n1|f1|-",
+            "d": 0.0
+          },
+          "mean": 0.0
+        },
+        "server": {
+          "pairs": 12,
+          "weakest": {
+            "a": "continuation.up|final|s0.6|c0.6|n1|f1|-",
+            "b": "continuation.up|final|s0.6|c0.6|n1|f1|srv",
+            "d": 0.0
+          },
+          "mean": 0.0
+        },
+        "strength": {
+          "pairs": 12,
+          "weakest": {
+            "a": "continuation.up|final|s0.2|c0.6|n1|f1|-",
+            "b": "continuation.up|final|s0.9|c0.6|n1|f1|-",
+            "d": 0.0
+          },
+          "mean": 0.0
+        }
+      }
+    }
+  ]
+}

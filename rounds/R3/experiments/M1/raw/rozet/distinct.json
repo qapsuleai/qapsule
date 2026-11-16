@@ -1,0 +1,2445 @@
+{
+  "harness": "r3-h-m12/1",
+  "alt": "rozet",
+  "method": "qp_render CPU raster; sRGB->linear; Gaussian blur sigma 0.5 px (radius 2, clamped edges) in linear RGB; Machado 2009 severity 1.0 in linear RGB (clamped) or luminance; CIELAB D65; pair distance = min over +-1 px shifts of mean DeltaE76 over all pixels (background shifted in); values rounded to 4 decimals",
+  "main": {
+    "condition": "16/light/gray",
+    "pair": {
+      "a": "continuation.down",
+      "b": "breakout.down",
+      "d": 2.5476
+    }
+  },
+  "k_mean_worst": 4.0592,
+  "channel_worst": {
+    "confidence": {
+      "condition": "16/dark/gray",
+      "pair": {
+        "a": "flow.up|final|s0.6|cnone|n1|f1|-",
+        "b": "flow.up|final|s0.6|c0.3|n1|f1|-",
+        "d": 1.4927
+      }
+    },
+    "confirmations": {
+      "condition": "24/light/protan",
+      "pair": {
+        "a": "flow.down|final|s0.6|c0.6|n1|f1|-",
+        "b": "flow.down|final|s0.6|c0.6|n2|f1|-",
+        "d": 2.1664
+      }
+    },
+    "direction": {
+      "condition": "24/light/gray",
+      "pair": {
+        "a": "breakout.up|final|s0.6|c0.6|n1|f1|-",
+        "b": "breakout.down|final|s0.6|c0.6|n1|f1|-",
+        "d": 2.5653
+      }
+    },
+    "freshness": {
+      "condition": "16/light/gray",
+      "pair": {
+        "a": "extreme.down|final|s0.6|c0.6|n1|f1|-",
+        "b": "extreme.down|final|s0.6|c0.6|n1|f0.3|-",
+        "d": 10.5026
+      }
+    },
+    "phase": {
+      "condition": "16/light/gray",
+      "pair": {
+        "a": "flow.down|final|s0.6|c0.6|n1|f1|-",
+        "b": "flow.down|failed|s0.6|c0.6|n1|f1|-",
+        "d": 2.0205
+      }
+    },
+    "server": {
+      "condition": "16/light/protan",
+      "pair": {
+        "a": "flow.neutral|final|s0.6|c0.6|n1|f1|-",
+        "b": "flow.neutral|final|s0.6|c0.6|n1|f1|srv",
+        "d": 1.6508
+      }
+    },
+    "strength": {
+      "condition": "24/dark/gray",
+      "pair": {
+        "a": "extreme.down|final|s0.2|c0.6|n1|f1|-",
+        "b": "extreme.down|final|s0.9|c0.6|n1|f1|-",
+        "d": 2.269
+      }
+    }
+  },
+  "out_of_box_prims": 0,
+  "conditions": [
+    {
+      "size": 16,
+      "theme": "light",
+      "vision": "normal",
+      "k": {
+        "pairs": 66,
+        "weakest": {
+          "a": "continuation.up",
+          "b": "reversal.up",
+          "d": 3.7424
+        },
+        "mean": 7.8831
+      },
+      "channels": {
+        "confidence": {
+          "pairs": 36,
+          "weakest": {
+            "a": "flow.up|final|s0.6|cnone|n1|f1|-",
+            "b": "flow.up|final|s0.6|c0.3|n1|f1|-",
+            "d": 2.3796
+          },
+          "mean": 4.8046
+        },
+        "confirmations": {
+          "pairs": 36,
+          "weakest": {
+            "a": "flow.down|final|s0.6|c0.6|n1|f1|-",
+            "b": "flow.down|final|s0.6|c0.6|n2|f1|-",
+            "d": 2.2546
+          },
+          "mean": 2.7535
+        },
+        "direction": {
+          "pairs": 7,
+          "weakest": {
+            "a": "flow.up|final|s0.6|c0.6|n1|f1|-",
+            "b": "flow.neutral|final|s0.6|c0.6|n1|f1|-",
+            "d": 7.9166
+          },
+          "mean": 9.5881
+        },
+        "freshness": {
+          "pairs": 12,
+          "weakest": {
+            "a": "breakout.up|final|s0.6|c0.6|n1|f1|-",
+            "b": "breakout.up|final|s0.6|c0.6|n1|f0.3|-",
+            "d": 11.4317
+          },
+          "mean": 12.4677
+        },
+        "phase": {
+          "pairs": 120,
+          "weakest": {
+            "a": "squeeze.neutral|final|s0.6|c0.6|n1|f1|-",
+            "b": "squeeze.neutral|failed|s0.6|c0.6|n1|f1|-",
+            "d": 2.8358
+          },
+          "mean": 12.9958
+        },
+        "server": {
+          "pairs": 12,
+          "weakest": {
+            "a": "extreme.down|final|s0.6|c0.6|n1|f1|-",
+            "b": "extreme.down|final|s0.6|c0.6|n1|f1|srv",
+            "d": 1.6543
+          },
+          "mean": 1.6566
+        },
+        "strength": {
+          "pairs": 12,
+          "weakest": {
+            "a": "extreme.up|final|s0.2|c0.6|n1|f1|-",
+            "b": "extreme.up|final|s0.9|c0.6|n1|f1|-",
+            "d": 3.3274
+          },
+          "mean": 5.4016
+        }
+      }
+    },
+    {
+      "size": 16,
+      "theme": "light",
+      "vision": "deutan",
+      "k": {
+        "pairs": 66,
+        "weakest": {
+          "a": "continuation.up",
+          "b": "breakout.up",
+          "d": 2.7812
+        },
+        "mean": 5.1901
+      },
+      "channels": {
+        "confidence": {
+          "pairs": 36,
+          "weakest": {
+            "a": "flow.up|final|s0.6|cnone|n1|f1|-",
+            "b": "flow.up|final|s0.6|c0.3|n1|f1|-",
+            "d": 2.3877
+          },
+          "mean": 4.8162
+        },
+        "confirmations": {
+          "pairs": 36,
+          "weakest": {
+            "a": "flow.down|final|s0.6|c0.6|n1|f1|-",
+            "b": "flow.down|final|s0.6|c0.6|n2|f1|-",
+            "d": 2.2572
+          },
+          "mean": 2.7559
+        },
+        "direction": {
+          "pairs": 7,
+          "weakest": {
+            "a": "breakout.up|final|s0.6|c0.6|n1|f1|-",
+            "b": "breakout.down|final|s0.6|c0.6|n1|f1|-",
+            "d": 4.4523
+          },
+          "mean": 5.6748
+        },
+        "freshness": {
+          "pairs": 12,
+          "weakest": {
+            "a": "breakout.up|final|s0.6|c0.6|n1|f1|-",
+            "b": "breakout.up|final|s0.6|c0.6|n1|f0.3|-",
+            "d": 10.9308
+          },
+          "mean": 11.8008
+        },
+        "phase": {
+          "pairs": 120,
+          "weakest": {
+            "a": "reversal.up|final|s0.6|c0.6|n1|f1|-",
+            "b": "reversal.up|failed|s0.6|c0.6|n1|f1|-",
+            "d": 2.153
+          },
+          "mean": 11.6095
+        },
+        "server": {
+          "pairs": 12,
+          "weakest": {
+            "a": "extreme.down|final|s0.6|c0.6|n1|f1|-",
+            "b": "extreme.down|final|s0.6|c0.6|n1|f1|srv",
+            "d": 1.6564
+          },
+          "mean": 1.6586
+        },
+        "strength": {
+          "pairs": 12,
+          "weakest": {
+            "a": "extreme.up|final|s0.2|c0.6|n1|f1|-",
+            "b": "extreme.up|final|s0.9|c0.6|n1|f1|-",
+            "d": 2.4758
+          },
+          "mean": 4.1813
+        }
+      }
+    },
+    {
+      "size": 16,
+      "theme": "light",
+      "vision": "protan",
+      "k": {
+        "pairs": 66,
+        "weakest": {
+          "a": "continuation.up",
+          "b": "breakout.up",
+          "d": 2.6627
+        },
+        "mean": 4.5898
+      },
+      "channels": {
+        "confidence": {
+          "pairs": 36,
+          "weakest": {
+            "a": "flow.up|final|s0.6|cnone|n1|f1|-",
+            "b": "flow.up|final|s0.6|c0.3|n1|f1|-",
+            "d": 2.3523
+          },
+          "mean": 4.7584
+        },
+        "confirmations": {
+          "pairs": 36,
+          "weakest": {
+            "a": "flow.down|final|s0.6|c0.6|n1|f1|-",
+            "b": "flow.down|final|s0.6|c0.6|n2|f1|-",
+            "d": 2.2499
+          },
+          "mean": 2.7492
+        },
+        "direction": {
+          "pairs": 7,
+          "weakest": {
+            "a": "breakout.up|final|s0.6|c0.6|n1|f1|-",
+            "b": "breakout.down|final|s0.6|c0.6|n1|f1|-",
+            "d": 3.2951
+          },
+          "mean": 4.6747
+        },
+        "freshness": {
+          "pairs": 12,
+          "weakest": {
+            "a": "breakout.up|final|s0.6|c0.6|n1|f1|-",
+            "b": "breakout.up|final|s0.6|c0.6|n1|f0.3|-",
+            "d": 10.8055
+          },
+          "mean": 11.6928
+        },
+        "phase": {
+          "pairs": 120,
+          "weakest": {
+            "a": "continuation.down|final|s0.6|c0.6|n1|f1|-",
+            "b": "continuation.down|failed|s0.6|c0.6|n1|f1|-",
+            "d": 2.2959
+          },
+          "mean": 11.4059
+        },
+        "server": {
+          "pairs": 12,
+          "weakest": {
+            "a": "flow.neutral|final|s0.6|c0.6|n1|f1|-",
+            "b": "flow.neutral|final|s0.6|c0.6|n1|f1|srv",
+            "d": 1.6508
+          },
+          "mean": 1.6531
+        },
+        "strength": {
+          "pairs": 12,
+          "weakest": {
+            "a": "extreme.up|final|s0.2|c0.6|n1|f1|-",
+            "b": "extreme.up|final|s0.9|c0.6|n1|f1|-",
+            "d": 2.3755
+          },
+          "mean": 4.0181
+        }
+      }
+    },
+    {
+      "size": 16,
+      "theme": "light",
+      "vision": "tritan",
+      "k": {
+        "pairs": 66,
+        "weakest": {
+          "a": "breakout.up",
+          "b": "flow.up",
+          "d": 3.8756
+        },
+        "mean": 9.0386
+      },
+      "channels": {
+        "confidence": {
+          "pairs": 36,
+          "weakest": {
+            "a": "flow.up|final|s0.6|cnone|n1|f1|-",
+            "b": "flow.up|final|s0.6|c0.3|n1|f1|-",
+            "d": 2.3707
+          },
+          "mean": 4.7872
+        },
+        "confirmations": {
+          "pairs": 36,
+          "weakest": {
+            "a": "flow.down|final|s0.6|c0.6|n1|f1|-",
+            "b": "flow.down|final|s0.6|c0.6|n2|f1|-",
+            "d": 2.2536
+          },
+          "mean": 2.7523
+        },
+        "direction": {
+          "pairs": 7,
+          "weakest": {
+            "a": "flow.up|final|s0.6|c0.6|n1|f1|-",
+            "b": "flow.neutral|final|s0.6|c0.6|n1|f1|-",
+            "d": 7.9885
+          },
+          "mean": 11.2375
+        },
+        "freshness": {
+          "pairs": 12,
+          "weakest": {
+            "a": "breakout.up|final|s0.6|c0.6|n1|f1|-",
+            "b": "breakout.up|final|s0.6|c0.6|n1|f0.3|-",
+            "d": 11.4945
+          },
+          "mean": 12.713
+        },
+        "phase": {
+          "pairs": 120,
+          "weakest": {
+            "a": "squeeze.neutral|final|s0.6|c0.6|n1|f1|-",
+            "b": "squeeze.neutral|failed|s0.6|c0.6|n1|f1|-",
+            "d": 2.8322
+          },
+          "mean": 13.4963
+        },
+        "server": {
+          "pairs": 12,
+          "weakest": {
+            "a": "flow.neutral|final|s0.6|c0.6|n1|f1|-",
+            "b": "flow.neutral|final|s0.6|c0.6|n1|f1|srv",
+            "d": 1.6528
+          },
+          "mean": 1.6553
+        },
+        "strength": {
+          "pairs": 12,
+          "weakest": {
+            "a": "extreme.up|final|s0.2|c0.6|n1|f1|-",
+            "b": "extreme.up|final|s0.9|c0.6|n1|f1|-",
+            "d": 3.4241
+          },
+          "mean": 5.9238
+        }
+      }
+    },
+    {
+      "size": 16,
+      "theme": "light",
+      "vision": "gray",
+      "k": {
+        "pairs": 66,
+        "weakest": {
+          "a": "continuation.down",
+          "b": "breakout.down",
+          "d": 2.5476
+        },
+        "mean": 4.0592
+      },
+      "channels": {
+        "confidence": {
+          "pairs": 36,
+          "weakest": {
+            "a": "flow.up|final|s0.6|cnone|n1|f1|-",
+            "b": "flow.up|final|s0.6|c0.3|n1|f1|-",
+            "d": 2.3531
+          },
+          "mean": 4.7517
+        },
+        "confirmations": {
+          "pairs": 36,
+          "weakest": {
+            "a": "flow.down|final|s0.6|c0.6|n1|f1|-",
+            "b": "flow.down|final|s0.6|c0.6|n2|f1|-",
+            "d": 2.253
+          },
+          "mean": 2.7522
+        },
+        "direction": {
+          "pairs": 7,
+          "weakest": {
+            "a": "breakout.up|final|s0.6|c0.6|n1|f1|-",
+            "b": "breakout.down|final|s0.6|c0.6|n1|f1|-",
+            "d": 2.5806
+          },
+          "mean": 3.951
+        },
+        "freshness": {
+          "pairs": 12,
+          "weakest": {
+            "a": "extreme.down|final|s0.6|c0.6|n1|f1|-",
+            "b": "extreme.down|final|s0.6|c0.6|n1|f0.3|-",
+            "d": 10.5026
+          },
+          "mean": 11.4582
+        },
+        "phase": {
+          "pairs": 120,
+          "weakest": {
+            "a": "flow.down|final|s0.6|c0.6|n1|f1|-",
+            "b": "flow.down|failed|s0.6|c0.6|n1|f1|-",
+            "d": 2.0205
+          },
+          "mean": 10.8363
+        },
+        "server": {
+          "pairs": 12,
+          "weakest": {
+            "a": "flow.neutral|final|s0.6|c0.6|n1|f1|-",
+            "b": "flow.neutral|final|s0.6|c0.6|n1|f1|srv",
+            "d": 1.6527
+          },
+          "mean": 1.6549
+        },
+        "strength": {
+          "pairs": 12,
+          "weakest": {
+            "a": "extreme.up|final|s0.2|c0.6|n1|f1|-",
+            "b": "extreme.up|final|s0.9|c0.6|n1|f1|-",
+            "d": 2.3702
+          },
+          "mean": 3.6571
+        }
+      }
+    },
+    {
+      "size": 24,
+      "theme": "light",
+      "vision": "normal",
+      "k": {
+        "pairs": 66,
+        "weakest": {
+          "a": "continuation.up",
+          "b": "breakout.up",
+          "d": 4.1619
+        },
+        "mean": 8.7385
+      },
+      "channels": {
+        "confidence": {
+          "pairs": 36,
+          "weakest": {
+            "a": "flow.up|final|s0.6|cnone|n1|f1|-",
+            "b": "flow.up|final|s0.6|c0.3|n1|f1|-",
+            "d": 2.499
+          },
+          "mean": 5.2291
+        },
+        "confirmations": {
+          "pairs": 36,
+          "weakest": {
+            "a": "flow.down|final|s0.6|c0.6|n1|f1|-",
+            "b": "flow.down|final|s0.6|c0.6|n2|f1|-",
+            "d": 2.1703
+          },
+          "mean": 2.7202
+        },
+        "direction": {
+          "pairs": 7,
+          "weakest": {
+            "a": "flow.up|final|s0.6|c0.6|n1|f1|-",
+            "b": "flow.neutral|final|s0.6|c0.6|n1|f1|-",
+            "d": 8.7854
+          },
+          "mean": 10.3433
+        },
+        "freshness": {
+          "pairs": 12,
+          "weakest": {
+            "a": "breakout.up|final|s0.6|c0.6|n1|f1|-",
+            "b": "breakout.up|final|s0.6|c0.6|n1|f0.3|-",
+            "d": 12.3083
+          },
+          "mean": 13.3978
+        },
+        "phase": {
+          "pairs": 120,
+          "weakest": {
+            "a": "extreme.up|final|s0.6|c0.6|n1|f1|-",
+            "b": "extreme.up|failed|s0.6|c0.6|n1|f1|-",
+            "d": 3.0624
+          },
+          "mean": 14.9938
+        },
+        "server": {
+          "pairs": 12,
+          "weakest": {
+            "a": "extreme.down|final|s0.6|c0.6|n1|f1|-",
+            "b": "extreme.down|final|s0.6|c0.6|n1|f1|srv",
+            "d": 2.0014
+          },
+          "mean": 2.0022
+        },
+        "strength": {
+          "pairs": 12,
+          "weakest": {
+            "a": "extreme.up|final|s0.2|c0.6|n1|f1|-",
+            "b": "extreme.up|final|s0.9|c0.6|n1|f1|-",
+            "d": 3.5355
+          },
+          "mean": 5.8295
+        }
+      }
+    },
+    {
+      "size": 24,
+      "theme": "light",
+      "vision": "deutan",
+      "k": {
+        "pairs": 66,
+        "weakest": {
+          "a": "continuation.up",
+          "b": "breakout.up",
+          "d": 3.0839
+        },
+        "mean": 5.9646
+      },
+      "channels": {
+        "confidence": {
+          "pairs": 36,
+          "weakest": {
+            "a": "flow.up|final|s0.6|cnone|n1|f1|-",
+            "b": "flow.up|final|s0.6|c0.3|n1|f1|-",
+            "d": 2.5094
+          },
+          "mean": 5.2502
+        },
+        "confirmations": {
+          "pairs": 36,
+          "weakest": {
+            "a": "flow.down|final|s0.6|c0.6|n1|f1|-",
+            "b": "flow.down|final|s0.6|c0.6|n2|f1|-",
+            "d": 2.1726
+          },
+          "mean": 2.7226
+        },
+        "direction": {
+          "pairs": 7,
+          "weakest": {
+            "a": "breakout.up|final|s0.6|c0.6|n1|f1|-",
+            "b": "breakout.down|final|s0.6|c0.6|n1|f1|-",
+            "d": 4.8037
+          },
+          "mean": 6.396
+        },
+        "freshness": {
+          "pairs": 12,
+          "weakest": {
+            "a": "breakout.up|final|s0.6|c0.6|n1|f1|-",
+            "b": "breakout.up|final|s0.6|c0.6|n1|f0.3|-",
+            "d": 11.7896
+          },
+          "mean": 12.7279
+        },
+        "phase": {
+          "pairs": 120,
+          "weakest": {
+            "a": "continuation.up|final|s0.6|c0.6|n1|f1|-",
+            "b": "continuation.up|failed|s0.6|c0.6|n1|f1|-",
+            "d": 2.4298
+          },
+          "mean": 13.6461
+        },
+        "server": {
+          "pairs": 12,
+          "weakest": {
+            "a": "extreme.down|final|s0.6|c0.6|n1|f1|-",
+            "b": "extreme.down|final|s0.6|c0.6|n1|f1|srv",
+            "d": 2.0041
+          },
+          "mean": 2.0049
+        },
+        "strength": {
+          "pairs": 12,
+          "weakest": {
+            "a": "extreme.up|final|s0.2|c0.6|n1|f1|-",
+            "b": "extreme.up|final|s0.9|c0.6|n1|f1|-",
+            "d": 2.7058
+          },
+          "mean": 4.4931
+        }
+      }
+    },
+    {
+      "size": 24,
+      "theme": "light",
+      "vision": "protan",
+      "k": {
+        "pairs": 66,
+        "weakest": {
+          "a": "continuation.up",
+          "b": "breakout.up",
+          "d": 2.9704
+        },
+        "mean": 5.3463
+      },
+      "channels": {
+        "confidence": {
+          "pairs": 36,
+          "weakest": {
+            "a": "flow.up|final|s0.6|cnone|n1|f1|-",
+            "b": "flow.up|final|s0.6|c0.3|n1|f1|-",
+            "d": 2.4757
+          },
+          "mean": 5.1851
+        },
+        "confirmations": {
+          "pairs": 36,
+          "weakest": {
+            "a": "flow.down|final|s0.6|c0.6|n1|f1|-",
+            "b": "flow.down|final|s0.6|c0.6|n2|f1|-",
+            "d": 2.1664
+          },
+          "mean": 2.7162
+        },
+        "direction": {
+          "pairs": 7,
+          "weakest": {
+            "a": "breakout.up|final|s0.6|c0.6|n1|f1|-",
+            "b": "breakout.down|final|s0.6|c0.6|n1|f1|-",
+            "d": 3.5333
+          },
+          "mean": 5.3699
+        },
+        "freshness": {
+          "pairs": 12,
+          "weakest": {
+            "a": "breakout.up|final|s0.6|c0.6|n1|f1|-",
+            "b": "breakout.up|final|s0.6|c0.6|n1|f0.3|-",
+            "d": 11.6603
+          },
+          "mean": 12.5873
+        },
+        "phase": {
+          "pairs": 120,
+          "weakest": {
+            "a": "reversal.up|final|s0.6|c0.6|n1|f1|-",
+            "b": "reversal.up|failed|s0.6|c0.6|n1|f1|-",
+            "d": 2.5545
+          },
+          "mean": 13.413
+        },
+        "server": {
+          "pairs": 12,
+          "weakest": {
+            "a": "extreme.down|final|s0.6|c0.6|n1|f1|-",
+            "b": "extreme.down|final|s0.6|c0.6|n1|f1|srv",
+            "d": 1.9969
+          },
+          "mean": 1.9977
+        },
+        "strength": {
+          "pairs": 12,
+          "weakest": {
+            "a": "extreme.up|final|s0.2|c0.6|n1|f1|-",
+            "b": "extreme.up|final|s0.9|c0.6|n1|f1|-",
+            "d": 2.5514
+          },
+          "mean": 4.3045
+        }
+      }
+    },
+    {
+      "size": 24,
+      "theme": "light",
+      "vision": "tritan",
+      "k": {
+        "pairs": 66,
+        "weakest": {
+          "a": "continuation.up",
+          "b": "breakout.up",
+          "d": 4.2677
+        },
+        "mean": 9.8244
+      },
+      "channels": {
+        "confidence": {
+          "pairs": 36,
+          "weakest": {
+            "a": "flow.up|final|s0.6|cnone|n1|f1|-",
+            "b": "flow.up|final|s0.6|c0.3|n1|f1|-",
+            "d": 2.4893
+          },
+          "mean": 5.2085
+        },
+        "confirmations": {
+          "pairs": 36,
+          "weakest": {
+            "a": "flow.down|final|s0.6|c0.6|n1|f1|-",
+            "b": "flow.down|final|s0.6|c0.6|n2|f1|-",
+            "d": 2.1692
+          },
+          "mean": 2.719
+        },
+        "direction": {
+          "pairs": 7,
+          "weakest": {
+            "a": "flow.up|final|s0.6|c0.6|n1|f1|-",
+            "b": "flow.neutral|final|s0.6|c0.6|n1|f1|-",
+            "d": 8.6779
+          },
+          "mean": 11.8648
+        },
+        "freshness": {
+          "pairs": 12,
+          "weakest": {
+            "a": "reversal.up|final|s0.6|c0.6|n1|f1|-",
+            "b": "reversal.up|final|s0.6|c0.6|n1|f0.3|-",
+            "d": 12.2749
+          },
+          "mean": 13.5891
+        },
+        "phase": {
+          "pairs": 120,
+          "weakest": {
+            "a": "extreme.up|final|s0.6|c0.6|n1|f1|-",
+            "b": "extreme.up|failed|s0.6|c0.6|n1|f1|-",
+            "d": 3.0791
+          },
+          "mean": 15.4328
+        },
+        "server": {
+          "pairs": 12,
+          "weakest": {
+            "a": "extreme.down|final|s0.6|c0.6|n1|f1|-",
+            "b": "extreme.down|final|s0.6|c0.6|n1|f1|srv",
+            "d": 2.0
+          },
+          "mean": 2.0008
+        },
+        "strength": {
+          "pairs": 12,
+          "weakest": {
+            "a": "extreme.up|final|s0.2|c0.6|n1|f1|-",
+            "b": "extreme.up|final|s0.9|c0.6|n1|f1|-",
+            "d": 3.6091
+          },
+          "mean": 6.3295
+        }
+      }
+    },
+    {
+      "size": 24,
+      "theme": "light",
+      "vision": "gray",
+      "k": {
+        "pairs": 66,
+        "weakest": {
+          "a": "breakout.up",
+          "b": "breakout.down",
+          "d": 2.5653
+        },
+        "mean": 4.674
+      },
+      "channels": {
+        "confidence": {
+          "pairs": 36,
+          "weakest": {
+            "a": "flow.up|final|s0.6|cnone|n1|f1|-",
+            "b": "flow.up|final|s0.6|c0.3|n1|f1|-",
+            "d": 2.4772
+          },
+          "mean": 5.1827
+        },
+        "confirmations": {
+          "pairs": 36,
+          "weakest": {
+            "a": "flow.down|final|s0.6|c0.6|n1|f1|-",
+            "b": "flow.down|final|s0.6|c0.6|n2|f1|-",
+            "d": 2.1692
+          },
+          "mean": 2.7191
+        },
+        "direction": {
+          "pairs": 7,
+          "weakest": {
+            "a": "breakout.up|final|s0.6|c0.6|n1|f1|-",
+            "b": "breakout.down|final|s0.6|c0.6|n1|f1|-",
+            "d": 2.5653
+          },
+          "mean": 4.4616
+        },
+        "freshness": {
+          "pairs": 12,
+          "weakest": {
+            "a": "extreme.down|final|s0.6|c0.6|n1|f1|-",
+            "b": "extreme.down|final|s0.6|c0.6|n1|f0.3|-",
+            "d": 11.2879
+          },
+          "mean": 12.2866
+        },
+        "phase": {
+          "pairs": 120,
+          "weakest": {
+            "a": "continuation.down|final|s0.6|c0.6|n1|f1|-",
+            "b": "continuation.down|failed|s0.6|c0.6|n1|f1|-",
+            "d": 2.2472
+          },
+          "mean": 12.7968
+        },
+        "server": {
+          "pairs": 12,
+          "weakest": {
+            "a": "extreme.down|final|s0.6|c0.6|n1|f1|-",
+            "b": "extreme.down|final|s0.6|c0.6|n1|f1|srv",
+            "d": 1.9997
+          },
+          "mean": 2.0004
+        },
+        "strength": {
+          "pairs": 12,
+          "weakest": {
+            "a": "extreme.down|final|s0.2|c0.6|n1|f1|-",
+            "b": "extreme.down|final|s0.9|c0.6|n1|f1|-",
+            "d": 2.5369
+          },
+          "mean": 3.8735
+        }
+      }
+    },
+    {
+      "size": 32,
+      "theme": "light",
+      "vision": "normal",
+      "k": {
+        "pairs": 66,
+        "weakest": {
+          "a": "breakout.up",
+          "b": "flow.up",
+          "d": 4.8078
+        },
+        "mean": 9.608
+      },
+      "channels": {
+        "confidence": {
+          "pairs": 36,
+          "weakest": {
+            "a": "flow.up|final|s0.6|cnone|n1|f1|-",
+            "b": "flow.up|final|s0.6|c0.3|n1|f1|-",
+            "d": 2.4735
+          },
+          "mean": 5.175
+        },
+        "confirmations": {
+          "pairs": 36,
+          "weakest": {
+            "a": "flow.down|final|s0.6|c0.6|n1|f1|-",
+            "b": "flow.down|final|s0.6|c0.6|n2|f1|-",
+            "d": 2.1956
+          },
+          "mean": 2.7906
+        },
+        "direction": {
+          "pairs": 7,
+          "weakest": {
+            "a": "flow.up|final|s0.6|c0.6|n1|f1|-",
+            "b": "flow.neutral|final|s0.6|c0.6|n1|f1|-",
+            "d": 9.4756
+          },
+          "mean": 11.2475
+        },
+        "freshness": {
+          "pairs": 12,
+          "weakest": {
+            "a": "breakout.up|final|s0.6|c0.6|n1|f1|-",
+            "b": "breakout.up|final|s0.6|c0.6|n1|f0.3|-",
+            "d": 13.0889
+          },
+          "mean": 14.2081
+        },
+        "phase": {
+          "pairs": 120,
+          "weakest": {
+            "a": "extreme.up|final|s0.6|c0.6|n1|f1|-",
+            "b": "extreme.up|failed|s0.6|c0.6|n1|f1|-",
+            "d": 3.213
+          },
+          "mean": 16.0894
+        },
+        "server": {
+          "pairs": 12,
+          "weakest": {
+            "a": "squeeze.neutral|final|s0.6|c0.6|n1|f1|-",
+            "b": "squeeze.neutral|final|s0.6|c0.6|n1|f1|srv",
+            "d": 2.2139
+          },
+          "mean": 2.2149
+        },
+        "strength": {
+          "pairs": 12,
+          "weakest": {
+            "a": "extreme.up|final|s0.2|c0.6|n1|f1|-",
+            "b": "extreme.up|final|s0.9|c0.6|n1|f1|-",
+            "d": 3.783
+          },
+          "mean": 6.3178
+        }
+      }
+    },
+    {
+      "size": 32,
+      "theme": "light",
+      "vision": "deutan",
+      "k": {
+        "pairs": 66,
+        "weakest": {
+          "a": "breakout.up",
+          "b": "flow.up",
+          "d": 3.6418
+        },
+        "mean": 6.7041
+      },
+      "channels": {
+        "confidence": {
+          "pairs": 36,
+          "weakest": {
+            "a": "flow.up|final|s0.6|cnone|n1|f1|-",
+            "b": "flow.up|final|s0.6|c0.3|n1|f1|-",
+            "d": 2.4865
+          },
+          "mean": 5.201
+        },
+        "confirmations": {
+          "pairs": 36,
+          "weakest": {
+            "a": "flow.down|final|s0.6|c0.6|n1|f1|-",
+            "b": "flow.down|final|s0.6|c0.6|n2|f1|-",
+            "d": 2.198
+          },
+          "mean": 2.7934
+        },
+        "direction": {
+          "pairs": 7,
+          "weakest": {
+            "a": "breakout.up|final|s0.6|c0.6|n1|f1|-",
+            "b": "breakout.down|final|s0.6|c0.6|n1|f1|-",
+            "d": 5.9117
+          },
+          "mean": 7.2089
+        },
+        "freshness": {
+          "pairs": 12,
+          "weakest": {
+            "a": "breakout.up|final|s0.6|c0.6|n1|f1|-",
+            "b": "breakout.up|final|s0.6|c0.6|n1|f0.3|-",
+            "d": 12.6211
+          },
+          "mean": 13.5236
+        },
+        "phase": {
+          "pairs": 120,
+          "weakest": {
+            "a": "continuation.up|final|s0.6|c0.6|n1|f1|-",
+            "b": "continuation.up|failed|s0.6|c0.6|n1|f1|-",
+            "d": 2.5545
+          },
+          "mean": 14.6785
+        },
+        "server": {
+          "pairs": 12,
+          "weakest": {
+            "a": "squeeze.neutral|final|s0.6|c0.6|n1|f1|-",
+            "b": "squeeze.neutral|final|s0.6|c0.6|n1|f1|srv",
+            "d": 2.2177
+          },
+          "mean": 2.2185
+        },
+        "strength": {
+          "pairs": 12,
+          "weakest": {
+            "a": "extreme.up|final|s0.2|c0.6|n1|f1|-",
+            "b": "extreme.up|final|s0.9|c0.6|n1|f1|-",
+            "d": 2.9252
+          },
+          "mean": 4.9207
+        }
+      }
+    },
+    {
+      "size": 32,
+      "theme": "light",
+      "vision": "protan",
+      "k": {
+        "pairs": 66,
+        "weakest": {
+          "a": "breakout.up",
+          "b": "flow.up",
+          "d": 3.4648
+        },
+        "mean": 6.0481
+      },
+      "channels": {
+        "confidence": {
+          "pairs": 36,
+          "weakest": {
+            "a": "flow.up|final|s0.6|cnone|n1|f1|-",
+            "b": "flow.up|final|s0.6|c0.3|n1|f1|-",
+            "d": 2.4514
+          },
+          "mean": 5.1319
+        },
+        "confirmations": {
+          "pairs": 36,
+          "weakest": {
+            "a": "flow.down|final|s0.6|c0.6|n1|f1|-",
+            "b": "flow.down|final|s0.6|c0.6|n2|f1|-",
+            "d": 2.1914
+          },
+          "mean": 2.786
+        },
+        "direction": {
+          "pairs": 7,
+          "weakest": {
+            "a": "breakout.up|final|s0.6|c0.6|n1|f1|-",
+            "b": "breakout.down|final|s0.6|c0.6|n1|f1|-",
+            "d": 4.5667
+          },
+          "mean": 6.1412
+        },
+        "freshness": {
+          "pairs": 12,
+          "weakest": {
+            "a": "breakout.up|final|s0.6|c0.6|n1|f1|-",
+            "b": "breakout.up|final|s0.6|c0.6|n1|f0.3|-",
+            "d": 12.499
+          },
+          "mean": 13.3657
+        },
+        "phase": {
+          "pairs": 120,
+          "weakest": {
+            "a": "continuation.up|final|s0.6|c0.6|n1|f1|-",
+            "b": "continuation.up|failed|s0.6|c0.6|n1|f1|-",
+            "d": 2.6544
+          },
+          "mean": 14.4192
+        },
+        "server": {
+          "pairs": 12,
+          "weakest": {
+            "a": "squeeze.neutral|final|s0.6|c0.6|n1|f1|-",
+            "b": "squeeze.neutral|final|s0.6|c0.6|n1|f1|srv",
+            "d": 2.2079
+          },
+          "mean": 2.2088
+        },
+        "strength": {
+          "pairs": 12,
+          "weakest": {
+            "a": "extreme.up|final|s0.2|c0.6|n1|f1|-",
+            "b": "extreme.up|final|s0.9|c0.6|n1|f1|-",
+            "d": 2.7494
+          },
+          "mean": 4.7256
+        }
+      }
+    },
+    {
+      "size": 32,
+      "theme": "light",
+      "vision": "tritan",
+      "k": {
+        "pairs": 66,
+        "weakest": {
+          "a": "breakout.up",
+          "b": "flow.up",
+          "d": 4.6502
+        },
+        "mean": 10.6193
+      },
+      "channels": {
+        "confidence": {
+          "pairs": 36,
+          "weakest": {
+            "a": "flow.up|final|s0.6|cnone|n1|f1|-",
+            "b": "flow.up|final|s0.6|c0.3|n1|f1|-",
+            "d": 2.4635
+          },
+          "mean": 5.1536
+        },
+        "confirmations": {
+          "pairs": 36,
+          "weakest": {
+            "a": "flow.down|final|s0.6|c0.6|n1|f1|-",
+            "b": "flow.down|final|s0.6|c0.6|n2|f1|-",
+            "d": 2.1946
+          },
+          "mean": 2.7895
+        },
+        "direction": {
+          "pairs": 7,
+          "weakest": {
+            "a": "flow.up|final|s0.6|c0.6|n1|f1|-",
+            "b": "flow.neutral|final|s0.6|c0.6|n1|f1|-",
+            "d": 9.2938
+          },
+          "mean": 12.6532
+        },
+        "freshness": {
+          "pairs": 12,
+          "weakest": {
+            "a": "breakout.up|final|s0.6|c0.6|n1|f1|-",
+            "b": "breakout.up|final|s0.6|c0.6|n1|f0.3|-",
+            "d": 12.909
+          },
+          "mean": 14.3384
+        },
+        "phase": {
+          "pairs": 120,
+          "weakest": {
+            "a": "extreme.up|final|s0.6|c0.6|n1|f1|-",
+            "b": "extreme.up|failed|s0.6|c0.6|n1|f1|-",
+            "d": 3.2246
+          },
+          "mean": 16.4901
+        },
+        "server": {
+          "pairs": 12,
+          "weakest": {
+            "a": "squeeze.neutral|final|s0.6|c0.6|n1|f1|-",
+            "b": "squeeze.neutral|final|s0.6|c0.6|n1|f1|srv",
+            "d": 2.2123
+          },
+          "mean": 2.2133
+        },
+        "strength": {
+          "pairs": 12,
+          "weakest": {
+            "a": "extreme.up|final|s0.2|c0.6|n1|f1|-",
+            "b": "extreme.up|final|s0.9|c0.6|n1|f1|-",
+            "d": 3.7924
+          },
+          "mean": 6.7831
+        }
+      }
+    },
+    {
+      "size": 32,
+      "theme": "light",
+      "vision": "gray",
+      "k": {
+        "pairs": 66,
+        "weakest": {
+          "a": "breakout.up",
+          "b": "breakout.down",
+          "d": 3.4288
+        },
+        "mean": 5.2554
+      },
+      "channels": {
+        "confidence": {
+          "pairs": 36,
+          "weakest": {
+            "a": "flow.up|final|s0.6|cnone|n1|f1|-",
+            "b": "flow.up|final|s0.6|c0.3|n1|f1|-",
+            "d": 2.4527
+          },
+          "mean": 5.1329
+        },
+        "confirmations": {
+          "pairs": 36,
+          "weakest": {
+            "a": "flow.down|final|s0.6|c0.6|n1|f1|-",
+            "b": "flow.down|final|s0.6|c0.6|n2|f1|-",
+            "d": 2.1944
+          },
+          "mean": 2.7894
+        },
+        "direction": {
+          "pairs": 7,
+          "weakest": {
+            "a": "breakout.up|final|s0.6|c0.6|n1|f1|-",
+            "b": "breakout.down|final|s0.6|c0.6|n1|f1|-",
+            "d": 3.4288
+          },
+          "mean": 5.1129
+        },
+        "freshness": {
+          "pairs": 12,
+          "weakest": {
+            "a": "extreme.down|final|s0.6|c0.6|n1|f1|-",
+            "b": "extreme.down|final|s0.6|c0.6|n1|f0.3|-",
+            "d": 12.0726
+          },
+          "mean": 13.0092
+        },
+        "phase": {
+          "pairs": 120,
+          "weakest": {
+            "a": "continuation.down|final|s0.6|c0.6|n1|f1|-",
+            "b": "continuation.down|failed|s0.6|c0.6|n1|f1|-",
+            "d": 2.4064
+          },
+          "mean": 13.7346
+        },
+        "server": {
+          "pairs": 12,
+          "weakest": {
+            "a": "squeeze.neutral|final|s0.6|c0.6|n1|f1|-",
+            "b": "squeeze.neutral|final|s0.6|c0.6|n1|f1|srv",
+            "d": 2.2116
+          },
+          "mean": 2.2124
+        },
+        "strength": {
+          "pairs": 12,
+          "weakest": {
+            "a": "extreme.down|final|s0.2|c0.6|n1|f1|-",
+            "b": "extreme.down|final|s0.9|c0.6|n1|f1|-",
+            "d": 2.7543
+          },
+          "mean": 4.2316
+        }
+      }
+    },
+    {
+      "size": 16,
+      "theme": "dark",
+      "vision": "normal",
+      "k": {
+        "pairs": 66,
+        "weakest": {
+          "a": "continuation.up",
+          "b": "reversal.up",
+          "d": 4.0186
+        },
+        "mean": 9.5587
+      },
+      "channels": {
+        "confidence": {
+          "pairs": 36,
+          "weakest": {
+            "a": "flow.up|final|s0.6|cnone|n1|f1|-",
+            "b": "flow.up|final|s0.6|c0.3|n1|f1|-",
+            "d": 1.5379
+          },
+          "mean": 3.5448
+        },
+        "confirmations": {
+          "pairs": 36,
+          "weakest": {
+            "a": "extreme.up|final|s0.6|c0.6|n1|f1|-",
+            "b": "extreme.up|final|s0.6|c0.6|n2|f1|-",
+            "d": 2.4231
+          },
+          "mean": 3.2524
+        },
+        "direction": {
+          "pairs": 7,
+          "weakest": {
+            "a": "flow.up|final|s0.6|c0.6|n1|f1|-",
+            "b": "flow.neutral|final|s0.6|c0.6|n1|f1|-",
+            "d": 7.6399
+          },
+          "mean": 11.9676
+        },
+        "freshness": {
+          "pairs": 12,
+          "weakest": {
+            "a": "breakout.up|final|s0.6|c0.6|n1|f1|-",
+            "b": "breakout.up|final|s0.6|c0.6|n1|f0.3|-",
+            "d": 16.0349
+          },
+          "mean": 17.0679
+        },
+        "phase": {
+          "pairs": 120,
+          "weakest": {
+            "a": "flow.neutral|final|s0.6|c0.6|n1|f1|-",
+            "b": "flow.neutral|failed|s0.6|c0.6|n1|f1|-",
+            "d": 3.2815
+          },
+          "mean": 15.3061
+        },
+        "server": {
+          "pairs": 12,
+          "weakest": {
+            "a": "squeeze.neutral|final|s0.6|c0.6|n1|f1|-",
+            "b": "squeeze.neutral|final|s0.6|c0.6|n1|f1|srv",
+            "d": 1.7185
+          },
+          "mean": 1.748
+        },
+        "strength": {
+          "pairs": 12,
+          "weakest": {
+            "a": "extreme.up|final|s0.2|c0.6|n1|f1|-",
+            "b": "extreme.up|final|s0.9|c0.6|n1|f1|-",
+            "d": 4.291
+          },
+          "mean": 5.9888
+        }
+      }
+    },
+    {
+      "size": 16,
+      "theme": "dark",
+      "vision": "deutan",
+      "k": {
+        "pairs": 66,
+        "weakest": {
+          "a": "continuation.up",
+          "b": "extreme.up",
+          "d": 2.8574
+        },
+        "mean": 6.2581
+      },
+      "channels": {
+        "confidence": {
+          "pairs": 36,
+          "weakest": {
+            "a": "flow.up|final|s0.6|cnone|n1|f1|-",
+            "b": "flow.up|final|s0.6|c0.3|n1|f1|-",
+            "d": 1.5071
+          },
+          "mean": 3.4835
+        },
+        "confirmations": {
+          "pairs": 36,
+          "weakest": {
+            "a": "extreme.up|final|s0.6|c0.6|n1|f1|-",
+            "b": "extreme.up|final|s0.6|c0.6|n2|f1|-",
+            "d": 2.4216
+          },
+          "mean": 3.2501
+        },
+        "direction": {
+          "pairs": 7,
+          "weakest": {
+            "a": "flow.up|final|s0.6|c0.6|n1|f1|-",
+            "b": "flow.neutral|final|s0.6|c0.6|n1|f1|-",
+            "d": 5.0688
+          },
+          "mean": 7.0433
+        },
+        "freshness": {
+          "pairs": 12,
+          "weakest": {
+            "a": "breakout.up|final|s0.6|c0.6|n1|f1|-",
+            "b": "breakout.up|final|s0.6|c0.6|n1|f0.3|-",
+            "d": 15.1611
+          },
+          "mean": 16.2657
+        },
+        "phase": {
+          "pairs": 120,
+          "weakest": {
+            "a": "continuation.up|final|s0.6|c0.6|n1|f1|-",
+            "b": "continuation.up|failed|s0.6|c0.6|n1|f1|-",
+            "d": 2.5757
+          },
+          "mean": 13.758
+        },
+        "server": {
+          "pairs": 12,
+          "weakest": {
+            "a": "reversal.up|final|s0.6|c0.6|n1|f1|-",
+            "b": "reversal.up|final|s0.6|c0.6|n1|f1|srv",
+            "d": 1.7117
+          },
+          "mean": 1.7418
+        },
+        "strength": {
+          "pairs": 12,
+          "weakest": {
+            "a": "extreme.up|final|s0.2|c0.6|n1|f1|-",
+            "b": "extreme.up|final|s0.9|c0.6|n1|f1|-",
+            "d": 3.0357
+          },
+          "mean": 4.724
+        }
+      }
+    },
+    {
+      "size": 16,
+      "theme": "dark",
+      "vision": "protan",
+      "k": {
+        "pairs": 66,
+        "weakest": {
+          "a": "continuation.down",
+          "b": "reversal.down",
+          "d": 3.0444
+        },
+        "mean": 5.1126
+      },
+      "channels": {
+        "confidence": {
+          "pairs": 36,
+          "weakest": {
+            "a": "flow.up|final|s0.6|cnone|n1|f1|-",
+            "b": "flow.up|final|s0.6|c0.3|n1|f1|-",
+            "d": 1.5076
+          },
+          "mean": 3.5048
+        },
+        "confirmations": {
+          "pairs": 36,
+          "weakest": {
+            "a": "extreme.up|final|s0.6|c0.6|n1|f1|-",
+            "b": "extreme.up|final|s0.6|c0.6|n2|f1|-",
+            "d": 2.4233
+          },
+          "mean": 3.2547
+        },
+        "direction": {
+          "pairs": 7,
+          "weakest": {
+            "a": "breakout.up|final|s0.6|c0.6|n1|f1|-",
+            "b": "breakout.down|final|s0.6|c0.6|n1|f1|-",
+            "d": 4.2684
+          },
+          "mean": 5.3603
+        },
+        "freshness": {
+          "pairs": 12,
+          "weakest": {
+            "a": "extreme.down|final|s0.6|c0.6|n1|f1|-",
+            "b": "extreme.down|final|s0.6|c0.6|n1|f0.3|-",
+            "d": 14.8482
+          },
+          "mean": 15.8102
+        },
+        "phase": {
+          "pairs": 120,
+          "weakest": {
+            "a": "continuation.up|final|s0.6|c0.6|n1|f1|-",
+            "b": "continuation.up|failed|s0.6|c0.6|n1|f1|-",
+            "d": 2.6127
+          },
+          "mean": 13.3327
+        },
+        "server": {
+          "pairs": 12,
+          "weakest": {
+            "a": "reversal.up|final|s0.6|c0.6|n1|f1|-",
+            "b": "reversal.up|final|s0.6|c0.6|n1|f1|srv",
+            "d": 1.7114
+          },
+          "mean": 1.7468
+        },
+        "strength": {
+          "pairs": 12,
+          "weakest": {
+            "a": "extreme.down|final|s0.2|c0.6|n1|f1|-",
+            "b": "extreme.down|final|s0.9|c0.6|n1|f1|-",
+            "d": 3.0811
+          },
+          "mean": 4.1707
+        }
+      }
+    },
+    {
+      "size": 16,
+      "theme": "dark",
+      "vision": "tritan",
+      "k": {
+        "pairs": 66,
+        "weakest": {
+          "a": "continuation.up",
+          "b": "reversal.up",
+          "d": 4.0684
+        },
+        "mean": 11.0239
+      },
+      "channels": {
+        "confidence": {
+          "pairs": 36,
+          "weakest": {
+            "a": "flow.up|final|s0.6|cnone|n1|f1|-",
+            "b": "flow.up|final|s0.6|c0.3|n1|f1|-",
+            "d": 1.5203
+          },
+          "mean": 3.5446
+        },
+        "confirmations": {
+          "pairs": 36,
+          "weakest": {
+            "a": "extreme.up|final|s0.6|c0.6|n1|f1|-",
+            "b": "extreme.up|final|s0.6|c0.6|n2|f1|-",
+            "d": 2.4239
+          },
+          "mean": 3.2517
+        },
+        "direction": {
+          "pairs": 7,
+          "weakest": {
+            "a": "flow.up|final|s0.6|c0.6|n1|f1|-",
+            "b": "flow.neutral|final|s0.6|c0.6|n1|f1|-",
+            "d": 7.6449
+          },
+          "mean": 14.1214
+        },
+        "freshness": {
+          "pairs": 12,
+          "weakest": {
+            "a": "breakout.up|final|s0.6|c0.6|n1|f1|-",
+            "b": "breakout.up|final|s0.6|c0.6|n1|f0.3|-",
+            "d": 15.9577
+          },
+          "mean": 17.3857
+        },
+        "phase": {
+          "pairs": 120,
+          "weakest": {
+            "a": "flow.neutral|final|s0.6|c0.6|n1|f1|-",
+            "b": "flow.neutral|failed|s0.6|c0.6|n1|f1|-",
+            "d": 3.281
+          },
+          "mean": 15.8986
+        },
+        "server": {
+          "pairs": 12,
+          "weakest": {
+            "a": "reversal.up|final|s0.6|c0.6|n1|f1|-",
+            "b": "reversal.up|final|s0.6|c0.6|n1|f1|srv",
+            "d": 1.7156
+          },
+          "mean": 1.7492
+        },
+        "strength": {
+          "pairs": 12,
+          "weakest": {
+            "a": "extreme.up|final|s0.2|c0.6|n1|f1|-",
+            "b": "extreme.up|final|s0.9|c0.6|n1|f1|-",
+            "d": 4.3898
+          },
+          "mean": 6.5752
+        }
+      }
+    },
+    {
+      "size": 16,
+      "theme": "dark",
+      "vision": "gray",
+      "k": {
+        "pairs": 66,
+        "weakest": {
+          "a": "breakout.up",
+          "b": "breakout.down",
+          "d": 2.6376
+        },
+        "mean": 4.2706
+      },
+      "channels": {
+        "confidence": {
+          "pairs": 36,
+          "weakest": {
+            "a": "flow.up|final|s0.6|cnone|n1|f1|-",
+            "b": "flow.up|final|s0.6|c0.3|n1|f1|-",
+            "d": 1.4927
+          },
+          "mean": 3.4295
+        },
+        "confirmations": {
+          "pairs": 36,
+          "weakest": {
+            "a": "extreme.up|final|s0.6|c0.6|n1|f1|-",
+            "b": "extreme.up|final|s0.6|c0.6|n2|f1|-",
+            "d": 2.4214
+          },
+          "mean": 3.2508
+        },
+        "direction": {
+          "pairs": 7,
+          "weakest": {
+            "a": "breakout.up|final|s0.6|c0.6|n1|f1|-",
+            "b": "breakout.down|final|s0.6|c0.6|n1|f1|-",
+            "d": 2.6376
+          },
+          "mean": 4.0696
+        },
+        "freshness": {
+          "pairs": 12,
+          "weakest": {
+            "a": "extreme.down|final|s0.6|c0.6|n1|f1|-",
+            "b": "extreme.down|final|s0.6|c0.6|n1|f0.3|-",
+            "d": 14.6499
+          },
+          "mean": 15.6393
+        },
+        "phase": {
+          "pairs": 120,
+          "weakest": {
+            "a": "flow.down|final|s0.6|c0.6|n1|f1|-",
+            "b": "flow.down|failed|s0.6|c0.6|n1|f1|-",
+            "d": 2.4369
+          },
+          "mean": 12.6597
+        },
+        "server": {
+          "pairs": 12,
+          "weakest": {
+            "a": "reversal.up|final|s0.6|c0.6|n1|f1|-",
+            "b": "reversal.up|final|s0.6|c0.6|n1|f1|srv",
+            "d": 1.7103
+          },
+          "mean": 1.7406
+        },
+        "strength": {
+          "pairs": 12,
+          "weakest": {
+            "a": "extreme.down|final|s0.2|c0.6|n1|f1|-",
+            "b": "extreme.down|final|s0.9|c0.6|n1|f1|-",
+            "d": 2.3697
+          },
+          "mean": 3.8507
+        }
+      }
+    },
+    {
+      "size": 24,
+      "theme": "dark",
+      "vision": "normal",
+      "k": {
+        "pairs": 66,
+        "weakest": {
+          "a": "continuation.up",
+          "b": "breakout.up",
+          "d": 4.6982
+        },
+        "mean": 10.0272
+      },
+      "channels": {
+        "confidence": {
+          "pairs": 36,
+          "weakest": {
+            "a": "flow.up|final|s0.6|cnone|n1|f1|-",
+            "b": "flow.up|final|s0.6|c0.3|n1|f1|-",
+            "d": 1.9419
+          },
+          "mean": 4.4397
+        },
+        "confirmations": {
+          "pairs": 36,
+          "weakest": {
+            "a": "extreme.up|final|s0.6|c0.6|n1|f1|-",
+            "b": "extreme.up|final|s0.6|c0.6|n2|f1|-",
+            "d": 2.1931
+          },
+          "mean": 2.9979
+        },
+        "direction": {
+          "pairs": 7,
+          "weakest": {
+            "a": "flow.up|final|s0.6|c0.6|n1|f1|-",
+            "b": "flow.neutral|final|s0.6|c0.6|n1|f1|-",
+            "d": 8.2228
+          },
+          "mean": 12.1134
+        },
+        "freshness": {
+          "pairs": 12,
+          "weakest": {
+            "a": "breakout.up|final|s0.6|c0.6|n1|f1|-",
+            "b": "breakout.up|final|s0.6|c0.6|n1|f0.3|-",
+            "d": 15.7006
+          },
+          "mean": 16.7047
+        },
+        "phase": {
+          "pairs": 120,
+          "weakest": {
+            "a": "flow.neutral|final|s0.6|c0.6|n1|f1|-",
+            "b": "flow.neutral|failed|s0.6|c0.6|n1|f1|-",
+            "d": 3.1306
+          },
+          "mean": 16.1722
+        },
+        "server": {
+          "pairs": 12,
+          "weakest": {
+            "a": "squeeze.neutral|final|s0.6|c0.6|n1|f1|-",
+            "b": "squeeze.neutral|final|s0.6|c0.6|n1|f1|srv",
+            "d": 1.9275
+          },
+          "mean": 1.9582
+        },
+        "strength": {
+          "pairs": 12,
+          "weakest": {
+            "a": "extreme.up|final|s0.2|c0.6|n1|f1|-",
+            "b": "extreme.up|final|s0.9|c0.6|n1|f1|-",
+            "d": 3.9317
+          },
+          "mean": 6.0966
+        }
+      }
+    },
+    {
+      "size": 24,
+      "theme": "dark",
+      "vision": "deutan",
+      "k": {
+        "pairs": 66,
+        "weakest": {
+          "a": "continuation.up",
+          "b": "breakout.up",
+          "d": 3.3216
+        },
+        "mean": 6.8723
+      },
+      "channels": {
+        "confidence": {
+          "pairs": 36,
+          "weakest": {
+            "a": "flow.up|final|s0.6|cnone|n1|f1|-",
+            "b": "flow.up|final|s0.6|c0.3|n1|f1|-",
+            "d": 1.9241
+          },
+          "mean": 4.3998
+        },
+        "confirmations": {
+          "pairs": 36,
+          "weakest": {
+            "a": "extreme.up|final|s0.6|c0.6|n1|f1|-",
+            "b": "extreme.up|final|s0.6|c0.6|n2|f1|-",
+            "d": 2.1913
+          },
+          "mean": 2.9956
+        },
+        "direction": {
+          "pairs": 7,
+          "weakest": {
+            "a": "flow.up|final|s0.6|c0.6|n1|f1|-",
+            "b": "flow.neutral|final|s0.6|c0.6|n1|f1|-",
+            "d": 5.6919
+          },
+          "mean": 7.4657
+        },
+        "freshness": {
+          "pairs": 12,
+          "weakest": {
+            "a": "breakout.up|final|s0.6|c0.6|n1|f1|-",
+            "b": "breakout.up|final|s0.6|c0.6|n1|f0.3|-",
+            "d": 14.8607
+          },
+          "mean": 15.9436
+        },
+        "phase": {
+          "pairs": 120,
+          "weakest": {
+            "a": "reversal.up|final|s0.6|c0.6|n1|f1|-",
+            "b": "reversal.up|failed|s0.6|c0.6|n1|f1|-",
+            "d": 2.5889
+          },
+          "mean": 14.6884
+        },
+        "server": {
+          "pairs": 12,
+          "weakest": {
+            "a": "squeeze.neutral|final|s0.6|c0.6|n1|f1|-",
+            "b": "squeeze.neutral|final|s0.6|c0.6|n1|f1|srv",
+            "d": 1.9251
+          },
+          "mean": 1.9549
+        },
+        "strength": {
+          "pairs": 12,
+          "weakest": {
+            "a": "extreme.up|final|s0.2|c0.6|n1|f1|-",
+            "b": "extreme.up|final|s0.9|c0.6|n1|f1|-",
+            "d": 2.8909
+          },
+          "mean": 4.8467
+        }
+      }
+    },
+    {
+      "size": 24,
+      "theme": "dark",
+      "vision": "protan",
+      "k": {
+        "pairs": 66,
+        "weakest": {
+          "a": "continuation.up",
+          "b": "breakout.up",
+          "d": 3.6874
+        },
+        "mean": 5.722
+      },
+      "channels": {
+        "confidence": {
+          "pairs": 36,
+          "weakest": {
+            "a": "flow.up|final|s0.6|cnone|n1|f1|-",
+            "b": "flow.up|final|s0.6|c0.3|n1|f1|-",
+            "d": 1.9301
+          },
+          "mean": 4.4264
+        },
+        "confirmations": {
+          "pairs": 36,
+          "weakest": {
+            "a": "extreme.up|final|s0.6|c0.6|n1|f1|-",
+            "b": "extreme.up|final|s0.6|c0.6|n2|f1|-",
+            "d": 2.1956
+          },
+          "mean": 3.0009
+        },
+        "direction": {
+          "pairs": 7,
+          "weakest": {
+            "a": "breakout.up|final|s0.6|c0.6|n1|f1|-",
+            "b": "breakout.down|final|s0.6|c0.6|n1|f1|-",
+            "d": 4.3768
+          },
+          "mean": 5.8311
+        },
+        "freshness": {
+          "pairs": 12,
+          "weakest": {
+            "a": "extreme.down|final|s0.6|c0.6|n1|f1|-",
+            "b": "extreme.down|final|s0.6|c0.6|n1|f0.3|-",
+            "d": 14.3539
+          },
+          "mean": 15.513
+        },
+        "phase": {
+          "pairs": 120,
+          "weakest": {
+            "a": "reversal.up|final|s0.6|c0.6|n1|f1|-",
+            "b": "reversal.up|failed|s0.6|c0.6|n1|f1|-",
+            "d": 2.606
+          },
+          "mean": 14.2571
+        },
+        "server": {
+          "pairs": 12,
+          "weakest": {
+            "a": "squeeze.neutral|final|s0.6|c0.6|n1|f1|-",
+            "b": "squeeze.neutral|final|s0.6|c0.6|n1|f1|srv",
+            "d": 1.9307
+          },
+          "mean": 1.9607
+        },
+        "strength": {
+          "pairs": 12,
+          "weakest": {
+            "a": "extreme.down|final|s0.2|c0.6|n1|f1|-",
+            "b": "extreme.down|final|s0.9|c0.6|n1|f1|-",
+            "d": 2.8188
+          },
+          "mean": 4.281
+        }
+      }
+    },
+    {
+      "size": 24,
+      "theme": "dark",
+      "vision": "tritan",
+      "k": {
+        "pairs": 66,
+        "weakest": {
+          "a": "continuation.up",
+          "b": "breakout.up",
+          "d": 4.7385
+        },
+        "mean": 11.3756
+      },
+      "channels": {
+        "confidence": {
+          "pairs": 36,
+          "weakest": {
+            "a": "flow.up|final|s0.6|cnone|n1|f1|-",
+            "b": "flow.up|final|s0.6|c0.3|n1|f1|-",
+            "d": 1.9295
+          },
+          "mean": 4.4392
+        },
+        "confirmations": {
+          "pairs": 36,
+          "weakest": {
+            "a": "extreme.up|final|s0.6|c0.6|n1|f1|-",
+            "b": "extreme.up|final|s0.6|c0.6|n2|f1|-",
+            "d": 2.193
+          },
+          "mean": 2.9975
+        },
+        "direction": {
+          "pairs": 7,
+          "weakest": {
+            "a": "flow.up|final|s0.6|c0.6|n1|f1|-",
+            "b": "flow.neutral|final|s0.6|c0.6|n1|f1|-",
+            "d": 8.1709
+          },
+          "mean": 14.0508
+        },
+        "freshness": {
+          "pairs": 12,
+          "weakest": {
+            "a": "breakout.up|final|s0.6|c0.6|n1|f1|-",
+            "b": "breakout.up|final|s0.6|c0.6|n1|f0.3|-",
+            "d": 15.6017
+          },
+          "mean": 16.9818
+        },
+        "phase": {
+          "pairs": 120,
+          "weakest": {
+            "a": "flow.neutral|final|s0.6|c0.6|n1|f1|-",
+            "b": "flow.neutral|failed|s0.6|c0.6|n1|f1|-",
+            "d": 3.1277
+          },
+          "mean": 16.7056
+        },
+        "server": {
+          "pairs": 12,
+          "weakest": {
+            "a": "squeeze.neutral|final|s0.6|c0.6|n1|f1|-",
+            "b": "squeeze.neutral|final|s0.6|c0.6|n1|f1|srv",
+            "d": 1.9271
+          },
+          "mean": 1.9585
+        },
+        "strength": {
+          "pairs": 12,
+          "weakest": {
+            "a": "extreme.up|final|s0.2|c0.6|n1|f1|-",
+            "b": "extreme.up|final|s0.9|c0.6|n1|f1|-",
+            "d": 3.9942
+          },
+          "mean": 6.6608
+        }
+      }
+    },
+    {
+      "size": 24,
+      "theme": "dark",
+      "vision": "gray",
+      "k": {
+        "pairs": 66,
+        "weakest": {
+          "a": "breakout.up",
+          "b": "breakout.down",
+          "d": 2.7834
+        },
+        "mean": 4.907
+      },
+      "channels": {
+        "confidence": {
+          "pairs": 36,
+          "weakest": {
+            "a": "flow.up|final|s0.6|cnone|n1|f1|-",
+            "b": "flow.up|final|s0.6|c0.3|n1|f1|-",
+            "d": 1.9158
+          },
+          "mean": 4.3699
+        },
+        "confirmations": {
+          "pairs": 36,
+          "weakest": {
+            "a": "extreme.up|final|s0.6|c0.6|n1|f1|-",
+            "b": "extreme.up|final|s0.6|c0.6|n2|f1|-",
+            "d": 2.1924
+          },
+          "mean": 2.9968
+        },
+        "direction": {
+          "pairs": 7,
+          "weakest": {
+            "a": "breakout.up|final|s0.6|c0.6|n1|f1|-",
+            "b": "breakout.down|final|s0.6|c0.6|n1|f1|-",
+            "d": 2.7834
+          },
+          "mean": 4.5689
+        },
+        "freshness": {
+          "pairs": 12,
+          "weakest": {
+            "a": "extreme.down|final|s0.6|c0.6|n1|f1|-",
+            "b": "extreme.down|final|s0.6|c0.6|n1|f0.3|-",
+            "d": 14.1187
+          },
+          "mean": 15.3341
+        },
+        "phase": {
+          "pairs": 120,
+          "weakest": {
+            "a": "flow.down|final|s0.6|c0.6|n1|f1|-",
+            "b": "flow.down|failed|s0.6|c0.6|n1|f1|-",
+            "d": 2.4393
+          },
+          "mean": 13.6024
+        },
+        "server": {
+          "pairs": 12,
+          "weakest": {
+            "a": "squeeze.neutral|final|s0.6|c0.6|n1|f1|-",
+            "b": "squeeze.neutral|final|s0.6|c0.6|n1|f1|srv",
+            "d": 1.9259
+          },
+          "mean": 1.9556
+        },
+        "strength": {
+          "pairs": 12,
+          "weakest": {
+            "a": "extreme.down|final|s0.2|c0.6|n1|f1|-",
+            "b": "extreme.down|final|s0.9|c0.6|n1|f1|-",
+            "d": 2.269
+          },
+          "mean": 3.9844
+        }
+      }
+    },
+    {
+      "size": 32,
+      "theme": "dark",
+      "vision": "normal",
+      "k": {
+        "pairs": 66,
+        "weakest": {
+          "a": "breakout.up",
+          "b": "flow.up",
+          "d": 5.0526
+        },
+        "mean": 10.4771
+      },
+      "channels": {
+        "confidence": {
+          "pairs": 36,
+          "weakest": {
+            "a": "flow.up|final|s0.6|cnone|n1|f1|-",
+            "b": "flow.up|final|s0.6|c0.3|n1|f1|-",
+            "d": 2.0733
+          },
+          "mean": 4.6527
+        },
+        "confirmations": {
+          "pairs": 36,
+          "weakest": {
+            "a": "continuation.up|final|s0.6|c0.6|n1|f1|-",
+            "b": "continuation.up|final|s0.6|c0.6|n2|f1|-",
+            "d": 2.2575
+          },
+          "mean": 2.9441
+        },
+        "direction": {
+          "pairs": 7,
+          "weakest": {
+            "a": "flow.up|final|s0.6|c0.6|n1|f1|-",
+            "b": "flow.neutral|final|s0.6|c0.6|n1|f1|-",
+            "d": 8.5916
+          },
+          "mean": 12.5248
+        },
+        "freshness": {
+          "pairs": 12,
+          "weakest": {
+            "a": "squeeze.neutral|final|s0.6|c0.6|n1|f1|-",
+            "b": "squeeze.neutral|final|s0.6|c0.6|n1|f0.3|-",
+            "d": 15.3196
+          },
+          "mean": 16.444
+        },
+        "phase": {
+          "pairs": 120,
+          "weakest": {
+            "a": "flow.neutral|final|s0.6|c0.6|n1|f1|-",
+            "b": "flow.neutral|failed|s0.6|c0.6|n1|f1|-",
+            "d": 3.2315
+          },
+          "mean": 16.4441
+        },
+        "server": {
+          "pairs": 12,
+          "weakest": {
+            "a": "squeeze.neutral|final|s0.6|c0.6|n1|f1|-",
+            "b": "squeeze.neutral|final|s0.6|c0.6|n1|f1|srv",
+            "d": 2.0762
+          },
+          "mean": 2.0843
+        },
+        "strength": {
+          "pairs": 12,
+          "weakest": {
+            "a": "extreme.up|final|s0.2|c0.6|n1|f1|-",
+            "b": "extreme.up|final|s0.9|c0.6|n1|f1|-",
+            "d": 4.2295
+          },
+          "mean": 6.622
+        }
+      }
+    },
+    {
+      "size": 32,
+      "theme": "dark",
+      "vision": "deutan",
+      "k": {
+        "pairs": 66,
+        "weakest": {
+          "a": "breakout.up",
+          "b": "flow.up",
+          "d": 3.8458
+        },
+        "mean": 7.3691
+      },
+      "channels": {
+        "confidence": {
+          "pairs": 36,
+          "weakest": {
+            "a": "flow.up|final|s0.6|cnone|n1|f1|-",
+            "b": "flow.up|final|s0.6|c0.3|n1|f1|-",
+            "d": 2.0629
+          },
+          "mean": 4.6265
+        },
+        "confirmations": {
+          "pairs": 36,
+          "weakest": {
+            "a": "continuation.up|final|s0.6|c0.6|n1|f1|-",
+            "b": "continuation.up|final|s0.6|c0.6|n2|f1|-",
+            "d": 2.2555
+          },
+          "mean": 2.9417
+        },
+        "direction": {
+          "pairs": 7,
+          "weakest": {
+            "a": "flow.up|final|s0.6|c0.6|n1|f1|-",
+            "b": "flow.neutral|final|s0.6|c0.6|n1|f1|-",
+            "d": 6.1381
+          },
+          "mean": 8.0015
+        },
+        "freshness": {
+          "pairs": 12,
+          "weakest": {
+            "a": "breakout.up|final|s0.6|c0.6|n1|f1|-",
+            "b": "breakout.up|final|s0.6|c0.6|n1|f0.3|-",
+            "d": 14.7556
+          },
+          "mean": 15.6814
+        },
+        "phase": {
+          "pairs": 120,
+          "weakest": {
+            "a": "reversal.up|final|s0.6|c0.6|n1|f1|-",
+            "b": "reversal.up|failed|s0.6|c0.6|n1|f1|-",
+            "d": 2.73
+          },
+          "mean": 14.9721
+        },
+        "server": {
+          "pairs": 12,
+          "weakest": {
+            "a": "squeeze.neutral|final|s0.6|c0.6|n1|f1|-",
+            "b": "squeeze.neutral|final|s0.6|c0.6|n1|f1|srv",
+            "d": 2.0739
+          },
+          "mean": 2.0818
+        },
+        "strength": {
+          "pairs": 12,
+          "weakest": {
+            "a": "extreme.up|final|s0.2|c0.6|n1|f1|-",
+            "b": "extreme.up|final|s0.9|c0.6|n1|f1|-",
+            "d": 3.2525
+          },
+          "mean": 5.3388
+        }
+      }
+    },
+    {
+      "size": 32,
+      "theme": "dark",
+      "vision": "protan",
+      "k": {
+        "pairs": 66,
+        "weakest": {
+          "a": "breakout.down",
+          "b": "flow.down",
+          "d": 4.0153
+        },
+        "mean": 6.1801
+      },
+      "channels": {
+        "confidence": {
+          "pairs": 36,
+          "weakest": {
+            "a": "flow.up|final|s0.6|cnone|n1|f1|-",
+            "b": "flow.up|final|s0.6|c0.3|n1|f1|-",
+            "d": 2.0738
+          },
+          "mean": 4.6569
+        },
+        "confirmations": {
+          "pairs": 36,
+          "weakest": {
+            "a": "continuation.up|final|s0.6|c0.6|n1|f1|-",
+            "b": "continuation.up|final|s0.6|c0.6|n2|f1|-",
+            "d": 2.2603
+          },
+          "mean": 2.9471
+        },
+        "direction": {
+          "pairs": 7,
+          "weakest": {
+            "a": "breakout.up|final|s0.6|c0.6|n1|f1|-",
+            "b": "breakout.down|final|s0.6|c0.6|n1|f1|-",
+            "d": 5.129
+          },
+          "mean": 6.3524
+        },
+        "freshness": {
+          "pairs": 12,
+          "weakest": {
+            "a": "extreme.down|final|s0.6|c0.6|n1|f1|-",
+            "b": "extreme.down|final|s0.6|c0.6|n1|f0.3|-",
+            "d": 14.267
+          },
+          "mean": 15.2484
+        },
+        "phase": {
+          "pairs": 120,
+          "weakest": {
+            "a": "reversal.up|final|s0.6|c0.6|n1|f1|-",
+            "b": "reversal.up|failed|s0.6|c0.6|n1|f1|-",
+            "d": 2.7348
+          },
+          "mean": 14.5274
+        },
+        "server": {
+          "pairs": 12,
+          "weakest": {
+            "a": "squeeze.neutral|final|s0.6|c0.6|n1|f1|-",
+            "b": "squeeze.neutral|final|s0.6|c0.6|n1|f1|srv",
+            "d": 2.0795
+          },
+          "mean": 2.0875
+        },
+        "strength": {
+          "pairs": 12,
+          "weakest": {
+            "a": "extreme.down|final|s0.2|c0.6|n1|f1|-",
+            "b": "extreme.down|final|s0.9|c0.6|n1|f1|-",
+            "d": 3.0786
+          },
+          "mean": 4.7376
+        }
+      }
+    },
+    {
+      "size": 32,
+      "theme": "dark",
+      "vision": "tritan",
+      "k": {
+        "pairs": 66,
+        "weakest": {
+          "a": "breakout.up",
+          "b": "flow.up",
+          "d": 5.0751
+        },
+        "mean": 11.7683
+      },
+      "channels": {
+        "confidence": {
+          "pairs": 36,
+          "weakest": {
+            "a": "flow.up|final|s0.6|cnone|n1|f1|-",
+            "b": "flow.up|final|s0.6|c0.3|n1|f1|-",
+            "d": 2.0682
+          },
+          "mean": 4.6541
+        },
+        "confirmations": {
+          "pairs": 36,
+          "weakest": {
+            "a": "continuation.up|final|s0.6|c0.6|n1|f1|-",
+            "b": "continuation.up|final|s0.6|c0.6|n2|f1|-",
+            "d": 2.2576
+          },
+          "mean": 2.9439
+        },
+        "direction": {
+          "pairs": 7,
+          "weakest": {
+            "a": "flow.up|final|s0.6|c0.6|n1|f1|-",
+            "b": "flow.neutral|final|s0.6|c0.6|n1|f1|-",
+            "d": 8.511
+          },
+          "mean": 14.355
+        },
+        "freshness": {
+          "pairs": 12,
+          "weakest": {
+            "a": "squeeze.neutral|final|s0.6|c0.6|n1|f1|-",
+            "b": "squeeze.neutral|final|s0.6|c0.6|n1|f0.3|-",
+            "d": 15.3064
+          },
+          "mean": 16.7039
+        },
+        "phase": {
+          "pairs": 120,
+          "weakest": {
+            "a": "flow.neutral|final|s0.6|c0.6|n1|f1|-",
+            "b": "flow.neutral|failed|s0.6|c0.6|n1|f1|-",
+            "d": 3.2298
+          },
+          "mean": 16.9558
+        },
+        "server": {
+          "pairs": 12,
+          "weakest": {
+            "a": "squeeze.neutral|final|s0.6|c0.6|n1|f1|-",
+            "b": "squeeze.neutral|final|s0.6|c0.6|n1|f1|srv",
+            "d": 2.0763
+          },
+          "mean": 2.0846
+        },
+        "strength": {
+          "pairs": 12,
+          "weakest": {
+            "a": "extreme.up|final|s0.2|c0.6|n1|f1|-",
+            "b": "extreme.up|final|s0.9|c0.6|n1|f1|-",
+            "d": 4.2821
+          },
+          "mean": 7.1833
+        }
+      }
+    },
+    {
+      "size": 32,
+      "theme": "dark",
+      "vision": "gray",
+      "k": {
+        "pairs": 66,
+        "weakest": {
+          "a": "breakout.up",
+          "b": "flow.down",
+          "d": 3.4789
+        },
+        "mean": 5.3744
+      },
+      "channels": {
+        "confidence": {
+          "pairs": 36,
+          "weakest": {
+            "a": "flow.up|final|s0.6|cnone|n1|f1|-",
+            "b": "flow.up|final|s0.6|c0.3|n1|f1|-",
+            "d": 2.058
+          },
+          "mean": 4.6119
+        },
+        "confirmations": {
+          "pairs": 36,
+          "weakest": {
+            "a": "continuation.up|final|s0.6|c0.6|n1|f1|-",
+            "b": "continuation.up|final|s0.6|c0.6|n2|f1|-",
+            "d": 2.2568
+          },
+          "mean": 2.9431
+        },
+        "direction": {
+          "pairs": 7,
+          "weakest": {
+            "a": "breakout.up|final|s0.6|c0.6|n1|f1|-",
+            "b": "breakout.down|final|s0.6|c0.6|n1|f1|-",
+            "d": 3.5265
+          },
+          "mean": 5.1359
+        },
+        "freshness": {
+          "pairs": 12,
+          "weakest": {
+            "a": "extreme.down|final|s0.6|c0.6|n1|f1|-",
+            "b": "extreme.down|final|s0.6|c0.6|n1|f0.3|-",
+            "d": 13.9374
+          },
+          "mean": 15.0585
+        },
+        "phase": {
+          "pairs": 120,
+          "weakest": {
+            "a": "reversal.up|final|s0.6|c0.6|n1|f1|-",
+            "b": "reversal.up|failed|s0.6|c0.6|n1|f1|-",
+            "d": 2.7007
+          },
+          "mean": 13.8737
+        },
+        "server": {
+          "pairs": 12,
+          "weakest": {
+            "a": "squeeze.neutral|final|s0.6|c0.6|n1|f1|-",
+            "b": "squeeze.neutral|final|s0.6|c0.6|n1|f1|srv",
+            "d": 2.075
+          },
+          "mean": 2.0829
+        },
+        "strength": {
+          "pairs": 12,
+          "weakest": {
+            "a": "extreme.down|final|s0.2|c0.6|n1|f1|-",
+            "b": "extreme.down|final|s0.9|c0.6|n1|f1|-",
+            "d": 2.6471
+          },
+          "mean": 4.4643
+        }
+      }
+    }
+  ]
+}

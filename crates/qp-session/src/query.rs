@@ -326,6 +326,14 @@ impl Session {
                         entries.drain(..entries.len() - l);
                     }
                 }
+                // (R3, §20) Engine items the asker may not see are projected out.
+                if let Some(p) = self.proj.as_ref() {
+                    let lang = self.lang_of(ci);
+                    entries = entries
+                        .iter()
+                        .map(|e| self.project_entry(e, p, lang))
+                        .collect();
+                }
                 // Claim evidence values are data-plane values (§18.3): filtered for the
                 // asker; the stored entries stay intact for replay.
                 let asker = &self.conns[ci].principal;
@@ -476,6 +484,14 @@ impl Session {
                     bindings: self.bindings(&asker, series.as_deref(), &ptr(qp, "series"))?,
                 })
             }
+            Query::Capsules { .. } => self.capsules_query(ci, q),
+            Query::Capsule { capsule } => self.capsule_query(ci, capsule, qp),
+            Query::Ledger {
+                key,
+                meaning,
+                detector,
+                by_kind,
+            } => Ok(self.ledger_query(key.as_deref(), *meaning, detector.as_deref(), *by_kind)),
             Query::VerifyEvidence { item } => {
                 let asker = self.conns[ci].principal.clone();
                 Ok(QueryResult::EvidenceCheck {
@@ -518,7 +534,17 @@ impl Session {
                         });
                     facts_blocked || view_blocked
                 };
-                let mut pr = present(rd!(self), &mut self.cache, &f, kind, &profile);
+                // (R3, §20) A capsule with a story speaks with the realizer's sentence for
+                // the asker (its language and entitlement) when the authority runs the
+                // engine or the asker reads another language (`Session::headlines`).
+                let mut pr = present(
+                    rd!(self),
+                    &mut self.cache,
+                    &f,
+                    kind,
+                    &profile,
+                    &self.headlines,
+                );
                 if blocked {
                     pr.spark = None;
                     pr.view = None;

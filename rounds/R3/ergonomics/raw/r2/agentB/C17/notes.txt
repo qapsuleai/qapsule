@@ -1,0 +1,2 @@
+attempt1: capsules (filtresiz) kesif; cikti cok buyuk (236KB), son bar indeksi welcome.summary'den 318 (len 319).
+attempt2: capsules since_bar:309 -> born_bar'a gore elle sayildi (6: 4 breakout, 1 continuation, 1 extreme). Belirsiz: since_bar "gecis" zamanina gore suzer, dogum barina degil (born_bar sonucta ayri alan); sunucuda turune gore sayim yok, istemci sayiyor. ledger by_kind karne sayar, dogum degil.

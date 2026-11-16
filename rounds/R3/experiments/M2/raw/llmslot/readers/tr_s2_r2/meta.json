@@ -1,0 +1,8 @@
+{
+  "experiment": "m2",
+  "alt": "llmslot",
+  "lang": "tr",
+  "seed": 2,
+  "reader": "r2",
+  "model": "sonnet"
+}

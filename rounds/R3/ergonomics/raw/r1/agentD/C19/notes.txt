@@ -1,0 +1,1 @@
+attempt1: capsules query with stages:["realized"] -> worked first time; returned all realized capsules (THYAO and ASELS, ~90, ordered by importance). No instrument filter requested so none applied. Note "stage realized" has state "live" in the doc, so "gerçekleşen" had to be mapped to stage, not state. Output is huge (welcome summary + full list); no limit used.

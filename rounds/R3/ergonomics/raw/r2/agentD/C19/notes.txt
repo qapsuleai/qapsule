@@ -1,0 +1,1 @@
+attempt1: capsules query with stages ["realized"] worked first try (92 capsules, all instruments). Assumed "gerçekleşen" = stage realized, not instrument-limited. Unclear: realized capsules still have state "live"; stages type (array) was guessed without seeing schema.

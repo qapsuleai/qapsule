@@ -1,0 +1,251 @@
+//! Qapsule capsule engine (R3): facts → findings → capsule stories → ledger.
+//!
+//! Deterministic like the rest of the core: no clock (time is the bar), no network, no
+//! randomness, no LLM. The same bars and the same detector output always give the same
+//! stories, transitions, ledger and sentences.
+//!
+//! This file is the **contract** written in R3/T1; the measured design questions are
+//! traits so that alternatives (R3 M2–M6) plug in without seeing each other:
+//!
+//! | Trait | Question | Experiment |
+//! |-------|----------|------------|
+//! | [`Realizer`] | How is the sentence produced? | M2 |
+//! | [`Ranker`] | How important is a story (importance, tier)? | M3 |
+//! | [`ThemeRule`] | Which facts belong to the same story? | M4 |
+//! | [`OutcomeRule`] | What does "realized" mean per kind; horizon in bars? | M5 |
+//! | [`TrustPath`] | How does a licensed server fact reach an unentitled user? | M6 |
+//!
+//! The lifecycle rules (`docs/CAPSULE.md` §9.3) are fixed, not an experiment.
+//!
+//! Modules (R3/T4+T5):
+//!
+//! - [`engine`]: the lifecycle state machine, candidates, ledger, retraction, glyph spec.
+//! - [`pipeline`]: headless simulation (detectors → facts → engine) in global time order.
+//! - [`audience`]: the sensitivity filter (§9.8).
+//! - [`scaffold`]: trivial strategies for tests only.
+//!
+//! The measured choices (R3/S-A, productized from `rounds/R3/experiments/`):
+//!
+//! | Module | Strategy | Experiment |
+//! |--------|----------|------------|
+//! | [`theme`] | [`theme::KindDir`] (kind + direction, flow as evidence) | M4a |
+//! | [`outcome`] | [`outcome::Barrier`] (per-kind ATR triple barrier) | M5a |
+//! | [`rank`] | [`rank::Confirm`] (confirmation-led combination) | M3c |
+//! | [`realize`] | [`realize::Template`] (template grammar, TR + EN) | M2a |
+//! | [`trust`] | [`trust::Muhur`] (binary-lattice seal with receipts) | M6b |
+//!
+//! [`EngineConfig::r3`] is the engine with these choices; [`sentence::sentences_at`]
+//! writes a story's sentences from engine data (K26).
+
+use std::collections::BTreeMap;
+
+pub mod audience;
+pub mod engine;
+pub mod outcome;
+pub mod pipeline;
+pub mod rank;
+pub mod realize;
+pub mod scaffold;
+pub mod sentence;
+pub mod theme;
+pub mod trust;
+
+pub use audience::admits;
+pub use engine::{
+    glyph_spec, CandidateStory, Engine, EngineConfig, EngineSnapshot, LedgerRecord, StoryEvent,
+    StorySnapshot, FRESHNESS_HALF_BARS,
+};
+pub use pipeline::{simulate, InstrumentInput, SimResult};
+
+use qp_schema::capsule::{LedgerStat, MeaningKind, Story, TimeKind, Trust};
+use qp_schema::{Bar, Fact};
+
+/// A story that is still open, with the facts that joined it so far (in join order).
+#[derive(Debug, Clone, PartialEq)]
+pub struct OpenStory {
+    /// Capsule id (`cap.<instrument>.<theme>.<born bar>`).
+    pub id: String,
+    /// The story.
+    pub story: Story,
+    /// Facts that joined, in order (the first one gave birth).
+    pub facts: Vec<Fact>,
+}
+
+// ---------------------------------------------------------------------------
+// M4: theme identity
+// ---------------------------------------------------------------------------
+
+/// What to do with a new final fact.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum ThemeDecision {
+    /// Join this open story (capsule id).
+    Join(String),
+    /// Start a new story with this theme key.
+    New {
+        /// Theme key (stable, deterministic; becomes part of the capsule id).
+        theme: String,
+    },
+    /// The fact starts nothing and joins nothing (e.g. a state exit with no story).
+    Ignore,
+}
+
+/// Theme identity rule (M4).
+pub trait ThemeRule {
+    /// Name used in reports.
+    fn name(&self) -> &'static str;
+    /// Decide for `fact` (which has `meaning`), given the open stories of the same
+    /// instrument (oldest first).
+    fn decide(&self, fact: &Fact, open: &[&OpenStory]) -> ThemeDecision;
+}
+
+// ---------------------------------------------------------------------------
+// M5: outcome definition
+// ---------------------------------------------------------------------------
+
+/// Outcome of a story decided by the rule.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum Verdict {
+    /// It came true: `realized`, ledger hit.
+    Realized,
+    /// Its invalidation happened: `invalidated`, ledger miss.
+    Invalidated,
+}
+
+/// Outcome rule (M5). Must read nothing after `now` (the engine only passes
+/// `bars[..=now]`; the look-ahead test shuffles later data and checks the ledger).
+pub trait OutcomeRule {
+    /// Name used in reports.
+    fn name(&self) -> &'static str;
+    /// Natural life in bars for a kind and time kind; reaching it without a verdict
+    /// closes the story as `expired`.
+    fn horizon(&self, kind: MeaningKind, time: TimeKind) -> u32;
+    /// Judge an open story at bar `now` (`bars` = the story's bar series up to and
+    /// including `now`). `None` = undecided. The reason is a short machine code.
+    fn judge(&self, s: &OpenStory, bars: &[Bar], now: u64) -> Option<(Verdict, &'static str)>;
+}
+
+// ---------------------------------------------------------------------------
+// M3: ranking
+// ---------------------------------------------------------------------------
+
+/// What a ranker may read about a story's context, all as of the bar it ranks at
+/// (no look-ahead).
+#[derive(Debug, Clone, Copy, PartialEq, Default)]
+pub struct RankCtx {
+    /// Ledger of the story's ledger key, closed strictly before this bar.
+    pub ledger: LedgerStat,
+    /// Ledger over all keys, closed strictly before this bar.
+    pub ledger_all: LedgerStat,
+    /// Stories of the same kind and direction born on this instrument before this one.
+    pub same_kind_on_instrument: u32,
+    /// Bars of this instrument seen so far (including this bar).
+    pub bars_seen: u64,
+    /// Stories of the same kind born on any instrument before this one.
+    pub same_kind_all: u32,
+    /// Stories of any kind born on any instrument before this one.
+    pub stories_all: u32,
+    /// Instruments seen so far.
+    pub instruments: u32,
+}
+
+/// Ranking rule (M3): importance score and tier (1 most important … 3).
+pub trait Ranker {
+    /// Name used in reports.
+    fn name(&self) -> &'static str;
+    /// Rank a story at its birth and at every later transition.
+    fn rank(&self, s: &OpenStory, ctx: &RankCtx) -> (f64, u8);
+}
+
+// ---------------------------------------------------------------------------
+// M2: sentence
+// ---------------------------------------------------------------------------
+
+/// Sentence language.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, PartialOrd, Ord)]
+pub enum Lang {
+    /// Turkish.
+    Tr,
+    /// English.
+    En,
+}
+
+/// Everything a realizer may say; every number in here comes from the engine (K32).
+#[derive(Debug, Clone, PartialEq)]
+pub struct SentenceInput<'a> {
+    /// The story (stage, kind, direction, time kind, families, ledger at birth…).
+    pub story: &'a Story,
+    /// The fact that gave birth.
+    pub lead: &'a Fact,
+    /// The latest fact that joined (may be `lead`).
+    pub latest: &'a Fact,
+    /// Bar the sentence is written for ("now").
+    pub now_bar: u64,
+    /// Its time.
+    pub now_t: i64,
+    /// Whether the lead fact's state/condition still holds now (`None` if not
+    /// applicable, e.g. a point event without a condition).
+    pub still_holds: Option<bool>,
+    /// Current value of the lead fact's subject (e.g. today's RSI) if applicable and
+    /// visible to the reader; `None` otherwise.
+    pub current: Option<f64>,
+    /// `true` when the reader may not see numbers of this fact (licensed, unentitled,
+    /// K33): the sentence must contain no digits at all.
+    pub redacted: bool,
+}
+
+/// Sentence producer (M2). Must be a pure function of its input.
+pub trait Realizer {
+    /// Name used in reports.
+    fn name(&self) -> &'static str;
+    /// One sentence in `lang`.
+    fn sentence(&self, inp: &SentenceInput<'_>, lang: Lang) -> String;
+}
+
+// ---------------------------------------------------------------------------
+// M6: server-fact trust path
+// ---------------------------------------------------------------------------
+
+/// One licensed observation the server sees (never sent to an unentitled user).
+#[derive(Debug, Clone, PartialEq)]
+pub struct FlowObservation {
+    /// Bar time.
+    pub t: i64,
+    /// Bar index.
+    pub bar: u64,
+    /// Instrument.
+    pub instrument: String,
+    /// Raw licensed values (e.g. `net`, `avg5`).
+    pub values: BTreeMap<String, f64>,
+}
+
+/// What an unentitled user receives about a server fact.
+#[derive(Debug, Clone, PartialEq)]
+pub struct QualMessage {
+    /// Bar time the comment is about.
+    pub t: i64,
+    /// Bar index.
+    pub bar: u64,
+    /// Instrument.
+    pub instrument: String,
+    /// Machine codes of the qualitative relations stated (`above_avg`, `rising`…).
+    pub codes: Vec<String>,
+    /// Turkish sentence (no digits).
+    pub tr: String,
+    /// English sentence (no digits).
+    pub en: String,
+    /// Trust mark shown with it (K38).
+    pub trust: Trust,
+    /// When it is shown, as a bar index (`>= bar`; display delay in bars).
+    pub shown_bar: u64,
+    /// Anything else the user receives (e.g. a verification token); never a raw value.
+    pub attachments: BTreeMap<String, String>,
+}
+
+/// Server-fact trust path (M6). Deterministic; sees raw values, emits only messages.
+pub trait TrustPath {
+    /// Name used in reports.
+    fn name(&self) -> &'static str;
+    /// Observe one bar's licensed data (and the server facts detected on it); return the
+    /// messages for an unentitled user.
+    fn observe(&mut self, obs: &FlowObservation, facts: &[Fact]) -> Vec<QualMessage>;
+}

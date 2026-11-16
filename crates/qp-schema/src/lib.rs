@@ -5,6 +5,7 @@
 
 use std::path::{Path, PathBuf};
 
+pub mod capsule;
 pub mod data;
 pub mod grammar;
 pub mod protocol;
@@ -37,6 +38,8 @@ pub fn json_schemas() -> Vec<(&'static str, serde_json::Value)> {
         ("DataBinding", schema_of::<data::DataBinding>()),
         ("DataEvent", schema_of::<data::DataEvent>()),
         ("EvidenceRef", schema_of::<data::EvidenceRef>()),
+        ("Story", schema_of::<capsule::Story>()),
+        ("GlyphSpec", schema_of::<capsule::GlyphSpec>()),
         ("ClientMsg", schema_of::<protocol::ClientMsg>()),
         ("ServerMsg", schema_of::<protocol::ServerMsg>()),
         ("Op", schema_of::<protocol::Op>()),

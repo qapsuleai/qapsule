@@ -176,7 +176,7 @@ step_golden() {
   note "byte-identical to golden"
 }
 
-# R2 views: one line per view, "<transcript stem> <qp render/explain view selection>".
+# R2 views (R3: c2–c5 kapsül görünümleri): one line per view, "<transcript stem> <qp render/explain view selection>".
 VIEWS_LIST='v0-r0 --view r0
 v1-three-panels --view three
 v2-bollinger-band --view boll
@@ -184,7 +184,11 @@ v3-fan --view fan
 v4-log --view logv
 v5-conditional --view cond
 d1-capsule --present fnd-overbought --surface phone --width 390 --height 300
-d2-chart --present fnd-overbought --surface desktop'
+d2-chart --present fnd-overbought --surface desktop
+c2-capsule --present fnd.SYN03.breakout-up.144 --surface phone --width 390 --height 300
+c3-chart --present fnd.SYN03.breakout-up.144 --surface desktop
+c4-band --present fnd.SYN01.squeeze-neutral.245 --surface desktop
+c5-points --present fnd.SYN01.reversal-up.195 --surface desktop'
 
 step_views() {
   build_qp
@@ -317,6 +321,12 @@ step_digest() {
   got="$(cargo run -q --release -p qp-compute --example digest)"
   echo "host $(uname -m): $got (expected $want)"
   [ "$got" = "$want" ] || fail "host digest $got != $want"
+  # R3: the new studies (Highest, Lowest, Atr) have their own digest; the old one is unchanged.
+  local want3 got3
+  want3="$(tr -d '[:space:]' <fixtures/compute/digest-r3.txt)"
+  got3="$(cargo run -q --release -p qp-compute --example digest -- r3)"
+  echo "host $(uname -m) r3 studies: $got3 (expected $want3)"
+  [ "$got3" = "$want3" ] || fail "host r3 digest $got3 != $want3"
   ran="$(uname -m)"
   if [ "$(uname -s)" = Darwin ] && [ "$(uname -m)" = arm64 ] \
     && rustup target list --installed 2>/dev/null | grep -q '^x86_64-apple-darwin$' \

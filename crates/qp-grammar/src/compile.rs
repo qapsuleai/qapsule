@@ -825,8 +825,24 @@ pub fn compile(
             (ly >= rc.top && ly <= rc.bottom).then_some((ly, v, color))
         })
         .collect();
+    // A card panel (R3): every layer in it is panel-positioned (a capsule card's glyph,
+    // sentence and ledger line). It has no value scale to show: no grid, value labels or
+    // axis lines.
+    let card: Vec<bool> = panel_ids
+        .iter()
+        .map(|pid| {
+            let mut ls = prepared.iter().filter(|pl| pl.panel == *pid).peekable();
+            ls.peek().is_some() && ls.all(|pl| pl.anchor.y.is_some())
+        })
+        .collect();
     // Horizontal grid and value labels (R0 order: line, label, line, label...).
-    for ((rc, y), tag) in rects.iter().zip(&ymaps).zip(&tags) {
+    for (((rc, y), tag), _) in rects
+        .iter()
+        .zip(&ymaps)
+        .zip(&tags)
+        .zip(&card)
+        .filter(|(_, c)| !**c)
+    {
         let divs = (f64::from(rc.bottom - rc.top) / 90.0)
             .round()
             .clamp(2.0, 6.0);
@@ -864,7 +880,7 @@ pub fn compile(
             #[allow(clippy::cast_possible_truncation)]
             let x = crate::scale::slot_x(&xmap, s) as i32;
             if x.saturating_sub(last_label_x) >= 72 {
-                for rc in &rects {
+                for (rc, _) in rects.iter().zip(&card).filter(|(_, c)| !**c) {
                     under.push(rect(x, rc.top, 1, rc.bottom - rc.top, theme.grid));
                 }
                 under.push(Prim::Text {
@@ -881,7 +897,7 @@ pub fn compile(
         prev_month = Some(ym);
     }
     // Axes.
-    for rc in &rects {
+    for (rc, _) in rects.iter().zip(&card).filter(|(_, c)| !**c) {
         under.push(rect(
             rc.right,
             rc.top,
@@ -913,6 +929,7 @@ pub fn compile(
             rect: rects[pi],
             k,
             bold: bold.contains(pl.id.as_str()),
+            theme,
         };
         scene_panels[pi].layers.push(draw(pl, &g));
     }

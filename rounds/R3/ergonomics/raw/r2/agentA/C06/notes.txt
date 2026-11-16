@@ -1,0 +1,1 @@
+attempt1: ledger by_kind:true (+ an unneeded capsules query). Worked: breakout n=74 realized=42. Unclear: "Kırılım türü" -> kind "breakout" is my inference; spec doesn't list kind names (found in output).

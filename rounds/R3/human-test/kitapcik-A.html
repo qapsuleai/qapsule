@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Kitapçık A</title>
+<style>
+:root { --ink:#111; --muted:#555; --rule:#999; --soft:#f2f2f2; --bg:#fff; }
+* { box-sizing: border-box; }
+html, body { background: var(--bg); color: var(--ink); margin: 0; }
+body { font-family: -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; font-size: 15px; line-height: 1.45; }
+.page { max-width: 720px; margin: 0 auto; padding: 20px 16px 40px; min-height: 100vh; border-bottom: 2px dashed var(--rule); break-after: page; page-break-after: always; }
+.page:last-child { border-bottom: 0; }
+h1 { font-size: 20px; margin: 0 0 8px; }
+h2 { font-size: 17px; margin: 14px 0 6px; }
+.tag { font-size: 12px; color: var(--muted); letter-spacing: .04em; text-transform: uppercase; }
+.do { background: var(--soft); border-left: 4px solid var(--ink); padding: 8px 10px; margin: 10px 0; }
+.legend { border: 1px solid var(--rule); padding: 10px 12px; margin: 10px 0; font-size: 15px; }
+.fig { overflow-x: auto; margin: 10px 0; }
+.fig img { display: block; max-width: none; image-rendering: auto; }
+table { border-collapse: collapse; width: 100%; }
+td, th { border: 1px solid var(--rule); padding: 3px 5px; vertical-align: top; text-align: left; }
+th { background: var(--soft); font-weight: 600; }
+.voc td:first-child { white-space: nowrap; font-weight: 600; }
+.sent { font-size: 17px; margin: 0 0 14px; }
+.sent b { display: inline-block; min-width: 2.2em; }
+.small { font-size: 12px; color: var(--muted); }
+@media print {
+  @page { size: A4; margin: 12mm; }
+  .page { min-height: 0; border-bottom: 0; padding: 0; max-width: none; }
+  body { font-size: 12.5px; }
+}
+
+.f td { padding: 2px 4px; font-size: 13px; }
+.f td.l { font-weight: 700; white-space: nowrap; width: 3.2em; }
+.o { display: inline-block; min-width: 1.9em; padding: 0 2px; margin: 1px 1px; border: 1px solid #bbb; border-radius: 9px; text-align: center; font-size: 12px; }
+.hdr td { padding: 6px 8px; }
+.line { border-bottom: 1px solid #555; height: 1.6em; margin: 4px 0; }
+</style>
+</head>
+<body>
+<section class="page"><div class="tag">Kitapçık A</div>
+<h1>İşaret okuma denemesi</h1>
+<p>Bu kitapçıkta bir piyasa "anlam alfabesi"nin işaretleri var. Her küçük işaret, bir hisse grafiği hakkında bir gözlemi anlatır. Bu bir sınav değil; ölçülen sizin değil, işaretlerin anlaşılırlığı. Emin olmadığınızda tahmin edin.</p>
+<p>Sayfaları görevli söyleyince çevirin. Önceki bir adıma dönüp cevap değiştirmeyin.</p>
+<h2>Sözlük</h2>
+<p class="small">Bu tablo yalnız sözcüklerin anlamını verir; işaretlerin nasıl çizildiğini söylemez. Kodlar formda daire içine alacağınız kısaltmalardır.</p>
+<table class="voc">
+<tr><th colspan="2">Tür (işaretin anlamı)</th></tr>
+<tr><td>Devam (DV)</td><td>Hareket sürüyor.</td></tr>
+<tr><td>Dönüş (DN)</td><td>Hareket tersine dönüyor olabilir.</td></tr>
+<tr><td>Kırılım (KR)</td><td>Bir sınır aşıldı.</td></tr>
+<tr><td>Sıkışma (SK)</td><td>Hareket daralıyor; yön belirsiz.</td></tr>
+<tr><td>Aşırılık (AŞ)</td><td>Olağandışı uzama (aşırı alım / aşırı satım).</td></tr>
+<tr><td>Akış (AK)</td><td>Fiyattan bağımsız para girişi ya da çıkışı.</td></tr>
+<tr><th colspan="2">Yön</th></tr>
+<tr><td>↑ / ↓ / —</td><td>Yukarı, aşağı ya da yönsüz (belirsiz).</td></tr>
+<tr><th colspan="2">Güç</th></tr>
+<tr><td>Z / G</td><td>Zayıf ya da güçlü.</td></tr>
+<tr><th colspan="2">Aşama (gözlemin yaşamı)</th></tr>
+<tr><td>Aday (AD)</td><td>Bar daha kapanmadan görüldü; kaybolabilir.</td></tr>
+<tr><td>Kesin (KE)</td><td>Bar kapandı, gözlem kesinleşti; hâlâ açık.</td></tr>
+<tr><td>Gerçekleşti (GE)</td><td>Kapandı: beklenen oldu.</td></tr>
+<tr><td>Gerçekleşmedi (GM)</td><td>Kapandı: beklenen olmadı.</td></tr>
+<tr><td>Geri çekildi (GÇ)</td><td>Kapandı: dayandığı veri hatalı çıktı, geri alındı.</td></tr>
+</table>
+</section>
+<section class="page"><div class="tag">Kitapçık A · Bölüm 1 · Alfabe M</div>
+<h1>Bölüm 1 — 1. adım: açıklamasız okuma</h1>
+<div class="do">Formda <b>Bölüm 1 → 1. adım</b> satırlarını (A1–B4) doldurun. Her işaret için tür, yön, güç, aşama ve ne kadar emin olduğunuz. C ve D satırlarını şimdilik boş bırakın.</div>
+<p class="small">Önce etiketin yanındaki küçük (gerçek boyutlu) işarete bakın; altındaki aynı işaretin büyütülmüşüdür.</p>
+<div class="fig"><img src="pages/alfabe-M-okuma.png" width="360" height="476" alt="Alfabe M okuma sayfası"></div>
+</section>
+<section class="page"><div class="tag">Kitapçık A · Bölüm 1 · Alfabe M</div>
+<h1>Bölüm 1 — 2. adım: açıklama ile okuma</h1>
+<p>Alfabe M'nin kendi kısa açıklaması:</p>
+<div class="legend">Şekil türü söyler. Devam: düz çapraz ok. Dönüş: U biçiminde geri dönen ok. Kırılım: yatay çizgiyi delip geçen ok. Sıkışma: birbirine yaklaşan iki çizgi. Aşırılık: ucunda nokta olan sivri tepe. Akış: geniş ok başı altında iki dalgalı çizgi. Yön: şeklin baktığı yer; yukarı yeşil, aşağı kırmızı, yönsüz turuncu (yan yatık ya da simetrik). Güç: büyük ve kalın güçlü, küçük ve ince zayıf. Aşama: kesik çizgi ve boş ok başı aday; dolu renkli çizgi kesinleşmiş; gri şekil kapanmış: sağ altta ✓ gerçekleşti, ✗ gerçekleşmedi, üstü çizili geri çekildi. Zemindeki soluk dolgunun yüksekliği güven. Solukluk eskilik. Alttaki kısa çizgiler teyit eden kanıt ailesi sayısı. Sağ üstte koyu kıvrık köşe: sunucu doğruladı.</div>
+<div class="do">Açıklamayı okuyun, sonra formda <b>Bölüm 1 → 2. adım</b> satırlarını (C1–D4) doldurun. A–B cevaplarınızı değiştirmeyin.</div>
+<div class="fig"><img src="pages/alfabe-M-okuma.png" width="360" height="476" alt="Alfabe M okuma sayfası"></div>
+</section>
+<section class="page"><div class="tag">Kitapçık A · Bölüm 1 · Alfabe M</div>
+<h1>Bölüm 1 — 3. adım: örneklerle öğrenme</h1>
+<div class="do">E1–E5 örneklerini cevaplarıyla inceleyin (yaklaşık yarım dakika). Sonra formda <b>Bölüm 1 → 3. adım</b> satırlarını (L1–L4) doldurun.</div>
+<div class="fig"><img src="pages/alfabe-M-ogrenme.png" width="360" height="510" alt="Alfabe M öğrenme sayfası"></div>
+</section>
+<section class="page"><div class="tag">Kitapçık A · Bölüm 2 · Alfabe N</div>
+<h1>Bölüm 2 — 1. adım: açıklamasız okuma</h1>
+<div class="do">Formda <b>Bölüm 2 → 1. adım</b> satırlarını (A1–B4) doldurun. Her işaret için tür, yön, güç, aşama ve ne kadar emin olduğunuz. C ve D satırlarını şimdilik boş bırakın.</div>
+<p class="small">Önce etiketin yanındaki küçük (gerçek boyutlu) işarete bakın; altındaki aynı işaretin büyütülmüşüdür.</p>
+<div class="fig"><img src="pages/alfabe-N-okuma.png" width="360" height="476" alt="Alfabe N okuma sayfası"></div>
+</section>
+<section class="page"><div class="tag">Kitapçık A · Bölüm 2 · Alfabe N</div>
+<h1>Bölüm 2 — 2. adım: açıklama ile okuma</h1>
+<p>Alfabe N'nin kendi kısa açıklaması:</p>
+<div class="legend">Her işaret aynı yuvarlak rozettir. İç desen türü söyler: iki ok başı = devam; küçük aşağı ve büyük yukarı iki ok = dönüş; açık çizgiyi delen ok = kırılım; birbirine dönük iki üçgen = sıkışma; çizginin ötesindeki nokta = aşırılık; damla = akış. Desenin ucu yönü gösterir: yukarı (yeşil), aşağı (kırmızı), yana = yönsüz (koyu). Büyük desen güçlü, küçük desen zayıf. Aşama: içi boş desen ve ince gri halka = aday; dolu desen = kesin; kalın çerçeve = gerçekleşti; eğik çizgiyle üstü çizili = gerçekleşmedi; tümü gri ve çarpılı = geri çekildi. Halkanın parça sayısı = bağımsız teyit sayısı. Alttan yükselen gri dolgu = güven. Soluk = eski. Sağ üst köşede elmas = sunucu doğruladı.</div>
+<div class="do">Açıklamayı okuyun, sonra formda <b>Bölüm 2 → 2. adım</b> satırlarını (C1–D4) doldurun. A–B cevaplarınızı değiştirmeyin.</div>
+<div class="fig"><img src="pages/alfabe-N-okuma.png" width="360" height="476" alt="Alfabe N okuma sayfası"></div>
+</section>
+<section class="page"><div class="tag">Kitapçık A · Bölüm 2 · Alfabe N</div>
+<h1>Bölüm 2 — 3. adım: örneklerle öğrenme</h1>
+<div class="do">E1–E5 örneklerini cevaplarıyla inceleyin (yaklaşık yarım dakika). Sonra formda <b>Bölüm 2 → 3. adım</b> satırlarını (L1–L4) doldurun.</div>
+<div class="fig"><img src="pages/alfabe-N-ogrenme.png" width="360" height="510" alt="Alfabe N öğrenme sayfası"></div>
+</section>
+<section class="page"><div class="tag">Kitapçık A · Bölüm 3</div>
+<h1>Bölüm 3 — Kapsül cümleleri</h1>
+<div class="do">Her cümle için formda: ne oldu (tür ve yön), ne zaman (geçmişte / şu an / bir koşula bağlı) ve hâlâ geçerli mi (evet / hayır / bilinmiyor). Cümlede yazmayanı bilinmiyor sayın.</div>
+<p class="sent"><b>S1</b> AKBNK 30 bar önce 20,86'daki desteği aşağı kırdı (kapanış 20,58): aşağı kırılım. Bugün ters yönde bir sinyal geldi; görünüm zayıfladı. Hâlâ geçerli olup olmadığı bilinmiyor. Karnesi henüz az örnekli: 8 seferin 2'sinde tuttu.</p>
+<p class="sent"><b>S2</b> GARAN'da bant genişliği 5 bardır eşiğin (0,06) altında; şu an 0,0588. Sıkışma (yön belirsiz) sürüyor. Beklenen sonuç bugün gerçekleşti. Karnesi henüz az örnekli: 8 seferin 5'inde tuttu.</p>
+<p class="sent"><b>S3</b> THYAO'da RSI 3 bar önce 70'in üstüne çıktı, bugün yeniden altına indi; şu an 55, artık 70'in üstünde değil. Aşırı alım sona erdi. Geçmişte bu sinyal 140 seferin 87'sinde beklendiği gibi sonuçlandı.</p>
+<p class="sent"><b>S4</b> EREGL 3 bar içinde uzun ortalamanın (255,56) üstünde kapanırsa yükseliş eğilimi teyit olur. Bugün ters yönde bir sinyal geldi; görünüm zayıfladı. Koşul hâlâ açık. Karnesi henüz az örnekli: 8 seferin 4'ünde tuttu.</p>
+<p class="sent"><b>S5</b> PGSUS'ta RSI bugün 30'un altına indi (28,8): aşırı satım. Bugün hacim de teyit etti; 2 bağımsız kanıt ailesi destekliyor. Hâlâ geçerli olup olmadığı bilinmiyor. Geçmişte bu sinyal 140 seferin 99'unda beklendiği gibi sonuçlandı.</p>
+<p class="sent"><b>S6</b> BIMAS'ta kurumsal net satış yaklaşık bir hafta önce her zamankinden güçlü hâle geldi; artık her zamankinden güçlü değil. Para çıkışı sona erdi. Geçmişte bu tür sinyal çoğunlukla beklendiği gibi sonuçlandı. Sunucu doğruladı; rakamlar kurumsal akış lisansı gerektiriyor.</p>
+<p class="sent"><b>S7</b> TUPRS 3 bar içinde dönüş noktasının (228,51) üstünde kapanırsa yukarı dönüş teyit olur. Beklentinin 30 barlık ömrü bugün sonuçsuz doldu; artık geçerli değil. Geçmişte bu sinyal 140 seferin 49'unda beklendiği gibi sonuçlandı.</p>
+<p class="small">"Bar": grafikteki bir mum, yani bir zaman dilimi (ör. bir gün).</p></section>
+<section class="page"><div class="tag">Kitapçık A · Bölüm 4</div>
+<h1>Bölüm 4 — Tercih</h1>
+<div class="do">Formdaki son üç soruyu cevaplayın. Hatırlamak için iki okuma sayfası aşağıda.</div>
+<div class="fig"><img src="pages/alfabe-M-okuma.png" width="360" height="476" alt="Alfabe M okuma sayfası"></div>
+<div class="fig"><img src="pages/alfabe-N-okuma.png" width="360" height="476" alt="Alfabe N okuma sayfası"></div>
+</section>
+</body>
+</html>

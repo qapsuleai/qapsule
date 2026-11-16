@@ -1,0 +1,20 @@
+[package]
+name = "m2-template"
+description = "R3/M2a: deterministic template-grammar realizer (time kind x stage x language, Turkish morphology, no-digit family for redacted facts). No LLM."
+version = "0.0.0"
+edition = "2021"
+publish = false
+
+# Not a member of the main workspace (the root workspace only lists `crates/*`).
+[workspace]
+
+[lib]
+name = "m2_template"
+path = "src/lib.rs"
+
+[dependencies]
+qp-schema = { path = "../../../../../crates/qp-schema" }
+qp-capsule = { path = "../../../../../crates/qp-capsule" }
+
+[lints.rust]
+unsafe_code = "forbid"

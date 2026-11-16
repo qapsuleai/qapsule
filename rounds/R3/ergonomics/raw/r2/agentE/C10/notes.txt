@@ -1,0 +1,3 @@
+attempt1: capsules{open:true} + present with selector {kind:"breakout",state:"live"}. capsules ok (open = born/strengthened only; 3 THYAO capsules). Selector failed not_found: `kind` in the finding selector is the FACT kind (breakout.range.down), not the capsule kind; spec says "olgularından birinin türü" but easy to miss.
+attempt2: present with explicit finding id fnd.THYAO.breakout.down.312 -> chart view with level rule layers + glyph. Succeeded.
+Unclear: "açık" (open) vs state live is not defined in PROTOCOL; inferred from capsules open:true output.

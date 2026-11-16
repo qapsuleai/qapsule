@@ -1,0 +1,296 @@
+{
+  "harness": "r3-h-m12/1",
+  "alt": "control",
+  "lang": "tr",
+  "seed": 1,
+  "items": [
+    {
+      "label": "1",
+      "situation": "s34",
+      "sentence": "state breakout up stage=realized bars_ago=1 holds=no",
+      "truth": {
+        "kind": "breakout",
+        "direction": "up",
+        "when": "past",
+        "bars_ago": 1,
+        "still_valid": "no"
+      }
+    },
+    {
+      "label": "2",
+      "situation": "s14",
+      "sentence": "event squeeze neutral stage=expired bars_ago=1 holds=na",
+      "truth": {
+        "kind": "squeeze",
+        "direction": "neutral",
+        "when": "past",
+        "bars_ago": 1,
+        "still_valid": "no"
+      }
+    },
+    {
+      "label": "3",
+      "situation": "s64",
+      "sentence": "expectation squeeze neutral stage=born bars_ago=30 holds=yes",
+      "truth": {
+        "kind": "squeeze",
+        "direction": "neutral",
+        "when": "conditional",
+        "bars_ago": null,
+        "still_valid": "yes"
+      }
+    },
+    {
+      "label": "4",
+      "situation": "s04",
+      "sentence": "event continuation up stage=born bars_ago=30 holds=na",
+      "truth": {
+        "kind": "continuation",
+        "direction": "up",
+        "when": "past",
+        "bars_ago": 30,
+        "still_valid": "unknown"
+      }
+    },
+    {
+      "label": "5",
+      "situation": "s38",
+      "sentence": "state squeeze neutral stage=realized bars_ago=1 holds=yes",
+      "truth": {
+        "kind": "squeeze",
+        "direction": "neutral",
+        "when": "now",
+        "bars_ago": null,
+        "still_valid": "yes"
+      }
+    },
+    {
+      "label": "6",
+      "situation": "s71",
+      "sentence": "expectation flow down stage=expired bars_ago=5 holds=no",
+      "truth": {
+        "kind": "flow",
+        "direction": "down",
+        "when": "conditional",
+        "bars_ago": null,
+        "still_valid": "no"
+      }
+    },
+    {
+      "label": "7",
+      "situation": "k26",
+      "sentence": "state extreme up stage=weakened bars_ago=3 holds=no",
+      "truth": {
+        "kind": "extreme",
+        "direction": "up",
+        "when": "past",
+        "bars_ago": 3,
+        "still_valid": "no"
+      }
+    },
+    {
+      "label": "8",
+      "situation": "s67",
+      "sentence": "expectation extreme down stage=realized bars_ago=5 holds=na",
+      "truth": {
+        "kind": "extreme",
+        "direction": "down",
+        "when": "conditional",
+        "bars_ago": null,
+        "still_valid": "unknown"
+      }
+    },
+    {
+      "label": "9",
+      "situation": "s41",
+      "sentence": "state extreme up stage=born bars_ago=0 holds=yes",
+      "truth": {
+        "kind": "extreme",
+        "direction": "up",
+        "when": "now",
+        "bars_ago": null,
+        "still_valid": "yes"
+      }
+    },
+    {
+      "label": "10",
+      "situation": "s17",
+      "sentence": "event extreme down stage=confirmed bars_ago=0 holds=na",
+      "truth": {
+        "kind": "extreme",
+        "direction": "down",
+        "when": "past",
+        "bars_ago": 0,
+        "still_valid": "unknown"
+      }
+    },
+    {
+      "label": "11",
+      "situation": "s53",
+      "sentence": "expectation reversal down stage=invalidated bars_ago=0 holds=no",
+      "truth": {
+        "kind": "reversal",
+        "direction": "down",
+        "when": "conditional",
+        "bars_ago": null,
+        "still_valid": "no"
+      }
+    },
+    {
+      "label": "12",
+      "situation": "s58",
+      "sentence": "expectation breakout up stage=realized bars_ago=1 holds=na",
+      "truth": {
+        "kind": "breakout",
+        "direction": "up",
+        "when": "conditional",
+        "bars_ago": null,
+        "still_valid": "unknown"
+      }
+    },
+    {
+      "label": "13",
+      "situation": "s20",
+      "sentence": "event extreme up stage=born bars_ago=30 holds=na",
+      "truth": {
+        "kind": "extreme",
+        "direction": "up",
+        "when": "past",
+        "bars_ago": 30,
+        "still_valid": "unknown"
+      }
+    },
+    {
+      "label": "14",
+      "situation": "s31",
+      "sentence": "state reversal down stage=realized bars_ago=5 holds=yes",
+      "truth": {
+        "kind": "reversal",
+        "direction": "down",
+        "when": "now",
+        "bars_ago": null,
+        "still_valid": "yes"
+      }
+    },
+    {
+      "label": "15",
+      "situation": "s05",
+      "sentence": "event reversal down stage=weakened bars_ago=0 holds=na",
+      "truth": {
+        "kind": "reversal",
+        "direction": "down",
+        "when": "past",
+        "bars_ago": 0,
+        "still_valid": "unknown"
+      }
+    },
+    {
+      "label": "16",
+      "situation": "s32",
+      "sentence": "state reversal down stage=realized bars_ago=30 holds=yes",
+      "truth": {
+        "kind": "reversal",
+        "direction": "down",
+        "when": "now",
+        "bars_ago": null,
+        "still_valid": "yes"
+      }
+    },
+    {
+      "label": "17",
+      "situation": "s09",
+      "sentence": "event breakout up stage=expired bars_ago=0 holds=na",
+      "truth": {
+        "kind": "breakout",
+        "direction": "up",
+        "when": "past",
+        "bars_ago": 0,
+        "still_valid": "no"
+      }
+    },
+    {
+      "label": "18",
+      "situation": "s50",
+      "sentence": "expectation continuation up stage=weakened bars_ago=1 holds=yes",
+      "truth": {
+        "kind": "continuation",
+        "direction": "up",
+        "when": "conditional",
+        "bars_ago": null,
+        "still_valid": "yes"
+      }
+    },
+    {
+      "label": "19",
+      "situation": "s70",
+      "sentence": "expectation flow down stage=confirmed bars_ago=1 holds=yes",
+      "truth": {
+        "kind": "flow",
+        "direction": "down",
+        "when": "conditional",
+        "bars_ago": null,
+        "still_valid": "yes"
+      }
+    },
+    {
+      "label": "20",
+      "situation": "s45",
+      "sentence": "state flow up stage=weakened bars_ago=0 holds=yes",
+      "truth": {
+        "kind": "flow",
+        "direction": "up",
+        "when": "now",
+        "bars_ago": null,
+        "still_valid": "yes"
+      }
+    },
+    {
+      "label": "21",
+      "situation": "s10",
+      "sentence": "event breakout up stage=invalidated bars_ago=1 holds=na",
+      "truth": {
+        "kind": "breakout",
+        "direction": "up",
+        "when": "past",
+        "bars_ago": 1,
+        "still_valid": "no"
+      }
+    },
+    {
+      "label": "22",
+      "situation": "s54",
+      "sentence": "expectation reversal down stage=confirmed bars_ago=1 holds=yes",
+      "truth": {
+        "kind": "reversal",
+        "direction": "down",
+        "when": "conditional",
+        "bars_ago": null,
+        "still_valid": "yes"
+      }
+    },
+    {
+      "label": "23",
+      "situation": "s61",
+      "sentence": "expectation squeeze neutral stage=confirmed bars_ago=0 holds=na",
+      "truth": {
+        "kind": "squeeze",
+        "direction": "neutral",
+        "when": "conditional",
+        "bars_ago": null,
+        "still_valid": "unknown"
+      }
+    },
+    {
+      "label": "24",
+      "situation": "s69",
+      "sentence": "expectation flow up stage=expired bars_ago=0 holds=no",
+      "truth": {
+        "kind": "flow",
+        "direction": "up",
+        "when": "conditional",
+        "bars_ago": null,
+        "still_valid": "no"
+      }
+    }
+  ]
+}

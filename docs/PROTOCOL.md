@@ -392,6 +392,8 @@ Kalıcı, adım adım bir **anlatım çizelgesi** dikkat değil, dokümandır: `
 | `undo` | `seq?` | Bir girdiyi tersini yeni girdi olarak yazarak geri alır (§8.3). |
 | `accept_proposal` | `proposal`, `note?` | Öneriyi kabul eder (§4.7). Yetki: `decide`. |
 | `reject_proposal` | `proposal`, `note?` | Öneriyi reddeder. Yetki: `decide`. |
+| `set_audience` | `principal?`, `audience` | (R3, §20.3) Kişinin kapsül tercihleri (grup, hassasiyet, izleme listesi, pozisyonlar). Kendi: `read`; başkası: `owner`. Öneri olamaz. |
+| `set_sensitivity` | `principal?`, `sensitivity` | (R3, §20.3) Yalnız hassasiyet seviyesi (`null`: grubun varsayılanı). |
 
 Atanan kimlikler: `<tür>-<seq>-<n>`; `tür` ∈ `series`, `view`, `fact`, `fnd`, `cap`,
 `intent`, `narr`; `seq` girdinin konumu, `n` o girdide oluşturulan öğenin sırası (0'dan).
@@ -438,7 +440,7 @@ yakalanır; bir kesişim koşulu yalnızca kesişim barında tetiklenir.
 `delete_panel`, `set_emphasis`, `set_x_domain`, `put_fact`,
 `put_finding`, `put_capsule`, `set_capsule_state`, `put_intent`, `push_ledger`,
 `pop_ledger`, `put_narrative`, `put_proposal`, `delete`, `append_bars`, `truncate_bars`,
-`set_last_bar`. Her biri tam öğe taşır; `put_*` değişimlerinin isteğe bağlı `index` alanı
+`set_last_bar`, (R3) `put_audience` (`principal`, `audience` ya da `null`). Her biri tam öğe taşır; `put_*` değişimlerinin isteğe bağlı `index` alanı
 yeni öğenin koleksiyondaki yeridir (yoksa sona; var olan öğe yerinde değiştirilir) —
 silmenin tersi öğeyi eski yerine koyar, böylece sil + geri al dokümanı bayt düzeyinde
 aynı bırakır; köken (`provenance`) otorite tarafından damgalanır
@@ -472,6 +474,9 @@ böylece aynı görünümün farklı katmanlarına eşzamanlı yazılar çakış
 | `present` | `finding?`, `surface?` | `presentation` (§10). `finding` yoksa (K25): tek canlı bulgu varsa o; **birden çok canlı bulgu varsa otorite seçmez**, `ambiguous` döner — `candidates` bütün canlı bulgular, seçicinin bulgu sırasıyla (§17.3: olgularının en büyük barı, eşitlikte doküman sırası) — **artan** sıra: son aday en yeni olandır, `{"latest":true}` onu seçer, `hint` `finding` ya da bir seçici (`{"latest":true}`) yazmayı söyler; hiç canlı bulgu yoksa `not_found`. |
 | `binding` | `series?` | (RP2) `bindings`: bağlı serilerin soran için durumu (`ready`, `pending`, `no_entitlement`, `no_data`, `stale`), nedeni, çapa (`anchor_t`, bar 0'ın zamanı) ve otoritenin veri konumu (§18.3). |
 | `verify_evidence` | `item` (olgu ya da bulgu) | (RP2) `evidence_check`: olgunun (bulguda her olgunun) dondurulmuş kanıtının bugünkü veriye karşı sınaması — veri özeti ve kanıt değerleri; fark varsa bildirir (§18.5). |
+| `capsules` | `instrument?`, `stages?`, `open?`, `meaning?`, `since_bar?`, `since_t?`, `audience?`, `limit?` | (R3, §20) `capsules`: soranın görebildiği kapsüller, önem sırasıyla; yetkisi olmayan lisanslı akış için `comments` (sunucu yorumları). |
+| `capsule` | `capsule` (kapsül ya da bulgu kimliği) | (R3, §20) `capsule_detail`: hikâye (geçişler, nedenler), olgular, cümle, karne, işaret tarifi, olgu başına kanıt erişimi (K34). |
+| `ledger` | `key?`, `meaning?`, `detector?`, `by_kind?` | (R3, §20) `ledger`: anahtar (ya da tür) başına kapanan ve gerçekleşen sayısı; lisanstan bağımsız. |
 
 **Hedef** (`Target`; dikkat, anlatım adımları ve R2'de görünüm vurgusu): `view`, `panel` (panel id'si), `layer` (R2), `series`, `output`
 (serinin çıktısı ya da bar alanı: hacim için `"v"`), `item` (bulgu, olgu…), `from_bar`,
@@ -642,7 +647,10 @@ kural (`encoding.y` = değerin en kısa yazımı, tamsayıysa ondalıksız: `"70
 `x.domain = [t(max(0, olgu barı − 30)), t(son bar)]`; `y` her panel için `linear`.
 Katman kimlikleri gramerin kendi adlarıdır (K25; `docs/GRAMMAR.md` §11): `candles`, `line`,
 `level` (kapsül görünümünde `line`, `level`, `fact`). Görünüm kimliği verilmezse `view-<seq>-0`. Aynı doküman her zaman aynı
-görünümü üretir. Ajan grameri doğrudan da yazabilir (`put_view`, `add_layer`); ikisi aynı
+görünümü üretir. Bağlı seride (§18) barlar komutun başındaki okuma dokümanından okunur
+(`add_fact`, `set_view_range` gibi); görünüm bar zamanlarını okuduğu için konuşanın bulgunun
+olgularının serilerine veri yetkisi olmalıdır, yoksa `no_entitlement` (`/ops/i/finding`).
+Ajan grameri doğrudan da yazabilir (`put_view`, `add_layer`); ikisi aynı
 komut yolundadır (K21-1, ölçüm `rounds/RD1/experiments/`).
 
 ## 11. Zaman: saat, canlı güncelleme, anlatım çizelgesi
@@ -792,7 +800,16 @@ yalnız etkilenenlerin uyanması, 34 koşul yazma yetkisi + çapa geri alma + bo
 tutarlılık (iddia kanıtı, geçici → kesin → geri çekme, temizlik), 36 sorumlu kişiler ve
 yeniden canlanan kapsül. RP2'de değişen var olan fikstürler: döküm 11'in bir `note` metni ve
 `fixtures/views/d2-chart.explain.txt` (katman adları; ikisi de K25 gereği,
-`rounds/RP2/REPORT.md`).
+`rounds/RP2/REPORT.md`). **R3:** 37 itiraz ve geri çekme (`dispute`, kesin bar kaynağı,
+geri çekilen kapsül; §19.9); §20 kapsül eki: 38 kapsül yaşam döngüsü (`capsules` konusu,
+doğdu → teyit edildi → güçlendi → gerçekleşti, geçersiz; `capsules`, `capsule`, `ledger`),
+39 yetki (yetkili / yalnız bar yetkili / yetkisiz okuyucu: lisanslı hikâye, sunucu yorumu,
+"gerektirir"), 40 K26 cümlesi (geçmiş + "artık … değil" / "no longer", TR ve EN; süresi
+doldu), 41 hassasiyet ve pozisyon geçişi (`set_audience`, `set_sensitivity`), 42 adayın
+iz bırakmaması, 43 geri çekme (kapsül itirazı haklı → `retracted`, karnede yok), 44 bağlı
+seride `verify_evidence.item` seçicisi (çözüm, `ambiguous`, `schema`) ve `show_finding`
+(R3/E düzeltmeleri). 38–44
+`cargo run -p qp-session --example make_capsule_transcripts -- --write` ile üretilir.
 
 ## 16. Gömme
 
@@ -891,6 +908,7 @@ Anahtarların anlamı:
 | `remove` | `id` (öğe) |
 | `accept_proposal`, `reject_proposal` | `proposal` |
 | sorgu `get` / `study`, `at` / `hit` / `present` | `id` (öğe) / `series` / `view` / `finding` |
+| sorgu `verify_evidence` / `binding` | `item` (öğe: `{"fact":…}` ya da `{"finding":…}`) / `series` |
 | `subscribe` | `changes.ids[]` (öğe), `finding.finding`, `condition.condition` |
 | `attend` | `directive.steps[].target` |
 
@@ -1338,7 +1356,8 @@ Otorite bir olguyu eklerken (`add_fact`; R3'te dedektörler) olguya **kanıt ba�
   gömülü ikili ek kararıyla birlikte).
 - Belge içi serilerde de damgalanır (`binding` yok).
 
-**`verify_evidence`** (`item`: olgu ya da bulgu) her olgu için:
+**`verify_evidence`** (`item`: olgu ya da bulgu; kimlik ya da öğe seçicisi, §17.2 —
+`{"finding":{"kind":"breakout.range.down","latest":true}}`) her olgu için:
 
 1. Bar serisinin bugünkü barlarında `from_t`…`to_t` aralığını **zamana göre** bulur, bar
    sayısını ve özeti hesaplar (`current`).
@@ -1612,13 +1631,287 @@ gösterir; değer göstermez.
   (iki farklı geçmiş aynı RSI'yı verebilir); veri özeti bunu yakalar.
 - Koşullar son barda değerlendirilir: geçmişte bir düzeltmenin **yeni** doğurduğu iddia
   (eski bir barda kesişim) iddia edilmez; yalnız kayıtlı iddialar yeniden sınanır.
-- Yansıdan otoriteye "itiraz" (`dispute`) ve "sen söylemiyorsun" (`check`) mesajları v0'da
-  yok (öneri); `disputed` yalnız yansıda görünür.
+- Yansıdan otoriteye "itiraz" (`dispute`) R3'te eklendi (§19.9); "sen söylemiyorsun"
+  (`check`) mesajı hâlâ yok (öneri). `disputed` yansıda görünür.
 - Kanal sırası: `qp/0` bağlantısı sıralı bir akıştır (§3). Sırasız taşımada çerçeve numarası
   taşıma düzeyinde sırayı kurar (düzenekte `bs` böyle yapar).
 - İki uç aynı kapanış tikini kaybetmiş ve ikisi de temiz sanıyorsa aynı yanlışta
   anlaşabilirler; buna karşı kesinlik sağlayıcının kesin barına dayanır (barındırıcının
   kirli işareti ve kesin bar çekmesi).
+
+### 19.9 İtiraz ve geri çekme (R3)
+
+> K36 (A20 cevabı): "ikisi birden" — otorite kesin barla doğrular ve yansıdan itiraz yolu
+> açılır. Bu alt bölüm §19.8'deki "`dispute` v0'da yok" maddesinin yerini alır (`check`
+> yine yok). Referans: `crates/qp-session/src/dispute.rs`; ölçüm
+> `rounds/R3/experiments/M7/RESULTS.md`. Kavramlar: CAPSULE.md §9.3 (`retracted`, K37).
+
+**Sorun.** §19'un kuralı yansıyı yanlış göstermekten korur; ama otorite **kendi**
+beslemesinden (bozuk tik, sıra dışı olay, bölünme) yanlış bir **kesin** iddia çıkarırsa
+yansı onu `disputed` gösterir ve iddia orada kalır: otorite geri çekmez, doğru iddia hiç
+gelmez (RP2 son denetimi O1). İki mekanizma, ikisi de barındırıcı üzerinden ve belirleyici:
+
+**1. Otoritenin kesin bar hijyeni.** Barındırıcı açar (`Session::set_settle_check(true)`;
+dökümde `init.data.settled.verify_closed`). Bağlı serinin bir barı kapandığında ya da
+besleme kapalı bir barı düzelttiğinde (o bardan son kapalı bara kadar) otorite
+barındırıcıdan **kesin bar** ister (`take_settle_requests()` → `SettleRequest {series, feed,
+from_t, to_t}`; Matriks REST karşılığı, §19.5'in otorite tarafı). Barındırıcı kesin
+kaynaktan çeker (bar henüz kesinleşmediyse sonra yeniden dener) ve cevabı verir:
+`settled_bars(series, bars)`. Otorite:
+
+- Kendi barlarından farklı olan **kapalı** barları kesin değerlerle düzeltir (canlı bar
+  hiç düzeltilmez; tutmadığı bar yok sayılır).
+- O barlara dayanan kayıtlı iddiaları yeniden sınar (§19.3 adım 3): tutmuyorsa
+  `withdrawn`, değerleri değiştiyse yeniden `asserted` — ikisi de `reason: "data_corrected"`.
+- Cevabın kapsadığı ilk bardan son kapalı bara kadar, koşul aboneliklerinin **kesin
+  veride** tuttuğu ama kayıtlı olmayan iddialarını `asserted` (`final`, `data_corrected`)
+  yapar. Hijyen açıkken beslemenin kendi düzeltmesi de (kapalı bir bara `patch`) aynı
+  taramayı hemen yapar (sağlayıcının düzeltmesi; kesin cevap sonra doğrular). Bu, §19.8'deki
+  "düzeltmenin yeni doğurduğu iddia iddia edilmez" sınırını hijyen açıkken kaldırır (ör.
+  beslemede kaybolan kapanış tiki, iddia doğuran düzeltme). Niyet ve kapsül
+  geçersizleşmeleri taranmaz.
+
+Kesinlik bu doğrulamayı **beklemez** (gecikme maliyeti yok); yanlış kesin iddia en geç
+"kesinleşme gecikmesi + kesin kaynak cevabı" kadar sonra düşer.
+
+**2. Yansının itirazı (`dispute`).** Yansı bir iddiayı kendi temiz, yeniden çekilmiş
+verisinde `disputed` yaptığında (§19.4) otoriteye itiraz gönderir — (iddia, `t`,
+otoritenin kanıtı) başına bir kez: yalnız kendi verisinin özeti değişti diye yeniden itiraz
+etmez (haksız itirazın cevabı aynı kanıtı yeniden ileri sürer: döngü yok)
+(`ReplicaOptions.dispute`, varsayılan kapalı; barındırıcı açar):
+
+```json
+{"type":"dispute","id":"d1","claim":{"kind":"capsule","capsule":"cap-floor","finding":"fnd-floor"},
+ "t":1760054400000,"values":[{"series":"px","t":1760054400000,"value":104.0,"prev":103.0}],
+ "anchor_t":1759708800000,"digest":"<yansının çapadan t'ye kadar barlarının data_digest'i>"}
+```
+
+- Yalnız otoritenin **kayıtlı** iddiası itiraz edilebilir (koşul iddiası: gönderenin kendi
+  aboneliği; kapsül ve niyet iddiası: dokümanın). İddianın dayandığı her beslemeye veri
+  yetkisi olmayan kişinin itirazı, ileri sürülmeyen iddianınkiyle **aynı** cevabı alır
+  (`unknown`; karar veri hakkında bilgi verir, §19.7; iddianın varlığı da sızmaz). Okuma
+  izni yeter (izleyici itiraz edebilir). `digest` verilirse tam 16 küçük onaltılık hanedir
+  (`data_digest`), değilse `invalid` (`/digest`).
+- Otorite **yansının değerleriyle karar vermez**: `values`, `anchor_t`, `digest` kayıt ve
+  eşgüçlülük içindir. Karar kesin veridedir: otorite barındırıcıdan `[çapa, t]` aralığının
+  kesin barlarını ister (`SettleRequest`) ve cevapta (yukarıdaki 1. maddenin adımları)
+  iddiayı yeniden sınar.
+- **Haklı** (kesin veride tutmuyor): iddia `withdrawn`, `reason: "dispute_upheld"` (bütün
+  alıcılarına). **Haksız** (tutuyor): iddia kalır; otoritenin kanıtı yalnız itiraz edene
+  `asserted`, `reason: "dispute_rejected"` olarak gider; yansı `disputed` göstermeye devam
+  eder (kaynaklar gerçekten farklı).
+- Cevap bir `result`'tır: `{"kind":"dispute","verdict":…,"evidence"?}`. `verdict`:
+  `pending` (barındırıcının kesin cevabı bekleniyor; karar sonra `claim` olayıyla gelir),
+  `upheld`, `rejected` (+ otoritenin kanıtı), `duplicate` (aynı bağlantıdan aynı iddia,
+  `t` ve `digest` daha önce itiraz edildi), `unknown` (otorite bu iddiayı ileri sürmüyor:
+  hiç ya da artık, ya da kişinin yetkisi yok), `limited` (bağlantı başına en çok 16 açık
+  itiraz, ömrü boyunca en çok 256 itiraz; aynı iddia ve `t` için en çok 4 farklı `digest`).
+- Eşzamanlı kesin kaynağı olan barındırıcıda (test sağlayıcısı) karar aynı adımda verilir.
+  Kesin kaynağı olmayan barındırıcıda itirazlar `pending` kalır.
+- Taşıma: `qp serve` ve süreç içi yolda sıradan bir mesajdır; MCP'de araç değildir (yansı
+  barındırıcısının mesajıdır, ajanın değil; `input` gibi doğrudan iletilir).
+
+**Kapsülün geri çekilmesi (K37).** Bir kapsül iddiası (geçersizleşmesi) kesin veri ya da
+haklı itirazla `withdrawn` olursa otorite motor girdisi (`qp`) yazar: `put_capsule`, hikâyenin
+aşaması `retracted`, geçmişine `{stage: "retracted", bar, t, reason: "data_corrected" |
+"dispute_upheld"}`. Karneye satır yazılmaz. Hikâyesi olmayan (R3 öncesi) kapsülde girdi
+yazılmaz, yalnız iddia düşer. `state` alanı (R3 öncesi) değiştirilmez: o tipte `retracted`
+yok (şema önerisi: `rounds/R3/experiments/M7/RESULTS.md`). Sıradan besleme düzeltmesiyle
+(sebepsiz) düşen kapsül iddiası bugünkü gibi dokümanı değiştirmez (§19.3).
+
+**`claim` olayına ek.** İsteğe bağlı `reason`: `data_corrected`, `dispute_upheld`,
+`dispute_rejected`. Sıradan yaşam döngüsünde (§19.3) yoktur; eski istemci yok sayar.
+
+**Barındırıcı ek API'si (referans otorite).** `set_settle_check`, `take_settle_requests`,
+`settled_bars`, ve `resync_bindings` (bütün bağlı serileri sağlayıcıdan yeniden çöz: ör.
+bölünme anlık görüntüsünü sağlayıcısına koyan barındırıcı; kayıtlı iddialar yeniden
+sınanır). Test sağlayıcısının kesin kaynağı: `init.data.settled = {feeds: [{feed, bars}],
+verify_closed}` — sağlayıcının kapalı barları, verilen barlar onlarınkinin yerine.
+
+Döküm: `fixtures/protocol/conformance/37-dispute-retract.json` (otoritenin bozuk tikinden
+yanlış kesin kapsül iddiası → yansının itirazı haklı: `withdrawn` + `dispute_upheld`, kapsül
+`retracted`, karne boş; kesin verinin desteklemediği itiraz: `rejected`, kanıt yalnız
+itiraz edene; aynı itiraz `duplicate`; ileri sürülmeyen iddia `unknown`).
+
+## 20. Kapsül (R3)
+
+Çerçeve `docs/CAPSULE.md` (§9 uygulama), kavramlar `docs/CONCEPTS.md` "Kapsül (R3)".
+Şema `qp-schema::protocol` (ek alanların hepsi isteğe bağlı; R3 öncesi dökümler bayt bayt
+aynı), referans otorite `crates/qp-session/src/capsule.rs`. MCP araçları şemadan üretilir
+(`op_set_audience`, `op_set_sensitivity`, `query_capsules`, `query_capsule`,
+`query_ledger`).
+
+### 20.1 Otoritede kapsül motoru
+
+Barındırıcı yapılandırması (`SessionInit.capsules`, protokol mesajı değil):
+
+```json
+"capsules": {"series": ["px"], "flow": [{"series": "px", "seed": 1, "feed": "flow"}]}
+```
+
+- `series`: motorun koştuğu bar serileri (bağlı ya da belge içi; sembolü olan). Yoksa motor
+  yok: R3 öncesi davranış.
+- Bir bar **kesinleşince** (sonraki bar geldi ya da pencere kapalı; RP2 olgunluğu)
+  dedektörler (`qp_facts::default_detectors`, akışkan) ve motor (`EngineConfig::r3`) o barı
+  işler. Bakış başına (bir yazı, bir veri olayı, yükleme) ilerleyen her seri için **tek motor
+  girdisi** (`qp`) yazılır, değişim olmasa da: günlüğün ritmi bar kapanışıdır, lisanslı bir
+  hikâyenin varlığı değil. Özet `capsules <seri> bar <i>` ya da `… bars a..=b`.
+- Girdinin değişimleri sırayla: geçişe yol açan olgular (`put_fact`; `evidence_ref`
+  `add_fact`'teki gibi damgalı, §18.5), hikâye başına bulgu (`put_finding`: iddia = TR cümle,
+  `invalidation` metin koşulu — sonuç kuralı karar verir, belge koşulu değil) ve kapsül
+  (`put_capsule`: `story`, durum), kapananların karne satırları (`push_ledger`: `capsule`,
+  `key`, `stage`, `bar`).
+- Durum eşlemesi: `born … confirmed` → `live`; `realized` → `live` (kapanış karnede);
+  `invalidated` → `invalidated`; `expired` → `expired`; `retracted` → `invalidated`, karne
+  satırı yok. Kişinin kararı (`approve_finding` / `reject_finding`; kapsül onay/ret için tek
+  yol bunlardır) korunur: motor `approved`/`rejected`'ı ezmez.
+- Doküman ve günlük bütün kapsül geçmişini taşır: başlangıç + değişimler aynı dokümanı
+  (aynı hikâyeleri) bayt bayt verir; aynı girdiler aynı günlüğü verir (artımlı = baştan).
+- **Lisanslı akış** (`flow`): test barındırıcısında `qp_source::synthetic_flow(barlar, seed)`.
+  Akış değerleri yalnız otoritede okunur (sunucu olgusu, K33) ve seçilen güven yolu
+  **mühür**'ü (`qp_capsule::trust::Muhur`, M6) besler. Akış verisinin yetkisi
+  `feed/SYMBOL` (varsayılan `flow/THYAO`) biçiminde, §18.3 kuralıyla denetlenir.
+- Kapsül cümlesi **okuyucu için** yazılır: gerçekleştirici (M2, `Template`) dizinin son
+  kesin barı itibarıyla (K26), bağlantının dili (`hello.surface.lang`: `tr` varsayılan,
+  `en`) ve okuyucunun yetkisiyle (aşağıda). Saklanan `headline` yetkili TR görünümüdür;
+  `present`, kapsül kartı (`capsule_view`) ve `capsules`/`capsule` cevapları okuyucunun
+  cümlesini kullanır (motor yokken ve dil TR iken saklanan başlık; R3 c1–c5 fikstürleri
+  değişmedi). İşaret tarifi motorun `glyph_spec`'idir.
+
+### 20.2 Sorgular
+
+| `kind` | Cevap |
+|--------|-------|
+| `capsules` | `capsules`: `CapsuleItem` listesi — kimlik, bulgu, enstrüman, seri, tür, yön, zaman türü, aşama, durum, kademe, önem, teyit, güven, doğum/son bar, son geçiş zamanı, `ledger_at_birth`, `sentence {text, tr, en}`, `relevant` (pozisyon/niyet), `redacted`. Sıra: önem azalan, sonra son geçiş zamanı azalan, sonra kimlik. Süzgeçler VE'lenir; `audience: true` soranın kitlesini uygular (aşağıda). `comments`: soranın akış yetkisi olmayan enstrümanlarda sunucu yorumları. |
+| `capsule` | `capsule_detail`: `item`, `story` (bütün geçişler: bar, zaman, aşama, neden, olgular), `facts` (okuyucuya göre), `ledger` (anahtarın şimdiki karnesi: son kesin bardan önce kapananlar), `glyph`, `evidence` — olgu başına `{fact, family, license, open, values?, evidence_ref?, requires?, rests_on}`: yetkiliye değerler ve dondurulmuş kanıt; yetkisize "şu yetkiyi gerektirir" (`requires`, ör. `bist/THYAO`) ve neye dayandığı (`rests_on`, her zaman) — K34. Görünmeyen ya da olmayan kapsül: `not_found` (ikisi aynı). |
+| `ledger` | `ledger`: `rows` (anahtar ya da `by_kind` ile tür başına `n`, `realized`), `total`. Geri çekilenler sayılmaz. Lisanstan bağımsız (K33): her lisanslı akışa yetkili okuyucuya motorun karnesi, açık görünüm okuyucusuna (§20.5) açık-yalnız motorun karnesi — lisanslı veriden hiç etkilenmez. |
+
+### 20.3 İşlemler: kitle
+
+| `op` | Alanlar | Değişim |
+|------|---------|---------|
+| `set_audience` | `principal?`, `audience {group, sensitivity?, watchlist?, positions?}` | `put_audience` |
+| `set_sensitivity` | `principal?`, `sensitivity` (`important`/`balanced`/`all`; `null` = grubun varsayılanı) | `put_audience` |
+
+Kişi kendi tercihini yazar (`read` yetkisi yeter); başkasınınkini yalnız `owner`
+(`forbidden`). **Öneri olamazlar** (kişisel veri öneriyle herkese gitmesin). Sistem bunları
+hiç yazmaz (K31; test). **Gizlilik:** bir kişinin tercihleri (pozisyonlar, izleme listesi,
+seviye) başka hiçbir okuyucuya gitmez: `document`, `change`, `log` (değişim, ters değişim,
+istek ve özet), `welcome` özeti dahil; yalnız kendisi ve barındırıcı (`host`, depoyu zaten
+tutar) görür. `owner` başkasınınkini yazabilir ama okuyamaz.
+
+### 20.4 `capsules` konusu
+
+`{"kind":"capsules","instrument?":…,"all?":false}`. Her motor girdisinden sonra abonenin
+görebildiği hikâye geçişleri: `{"kind":"capsule","capsule":CapsuleItem,"transition":…,"seq"}`.
+`all` yoksa kitle süzgeci: izleme listesi (boşsa her enstrüman; pozisyon ve etkin niyetin
+enstrümanı her zaman), sonra hassasiyet kademesi (`important` 1, `balanced` 1–2, `all`
+hepsi) — pozisyon ya da etkin niyetle ilgili kapsül kademeden bağımsız geçer (§9.8). Kişi
+tercih yazmadıysa grup `habituated` (`all`). Akış yetkisi olmayan aboneye lisanslı
+hikâyeler yerine mühürün iletileri: `{"kind":"server_comment","comment":{instrument,
+series, bar, t, codes, tr, en, trust:"server", attachments}}` (rakam yok; ekler: gereken
+yetki, kanıtın dayandığı, kural, makbuz).
+
+### 20.5 Okuyucuya göre izdüşüm (K33, K34, K36, M6 bütünleştirme kuralı)
+
+Otorite tek doküman ve tek günlük tutar (yeniden oynatma bunlardan); **gönderdiğini**
+okuyucuya göre kurar (yalnız R3 öğeleri: `meaning`'li olgular, `story`'li kapsüller; R3
+öncesi öğeler değişmez):
+
+1. **Açık görünüm (R3/K1, girişimsizlik yapı gereği).** Motor lisanslı akış okuyorsa
+   otorite ikinci bir motor, **açık-yalnız motor** koşar: aynı `EngineConfig::r3()`, aynı
+   kesin barlar, yalnız açık lisans sınıfındaki olgular; ve ikinci bir doküman ile
+   günlük, **açık dünya**, tutar. Açık dünyanın **kendi sıra numaraları** vardır (R3/K1b):
+   - her motor bakışı (bar kapanışında, seri başına) ve barları düzelten her kesin veri
+     cevabı (özet `settled <seri>` ya da `retract …`) → açık-yalnız motorun kendi
+     değişimleri; çapa damgası ve bar yazıları (seri verisi) → aynen;
+   - **her kişinin komutu** (doğrudan, öneri, kabul, geri alma) açık dünyada **kendi
+     başına** genişletilir (açık `seq` ve kimliklerle): orada uyuyorsa bir girdi, uymuyorsa
+     hiçbir şey — otoritenin dünyasında ne olduğundan bağımsız. Yetkili kişinin
+     `undo { seq }`'su, `accept_proposal`'ı ve `reject_proposal`'ı otoritenin girdilerini
+     ya da önerilerini adlandırır: açık dünyada bu komutun kendi girdilerinin yaptığı açık
+     girdiye/öneriye çevrilir (yoksa hiçbir şey); `seq`'siz `undo` açık dünyada, kişinin
+     açık girdileri arasında çözülür. Kişi, okuduğu dünyanın
+     cevabını alır (hata, `base` çakışması, `seq`, kimlikler);
+   - açık dünyanın kendi kapsüllerinin (kişilerin, hikâyesiz) §8.1 geçersizleşmesi orada
+     değerlendirilir ve orada yazılır.
+   Otoritenin açık dünyada karşılığı olmayan girdisi (ör. yetkili kişinin yalnız lisanslı
+   bir bulguyu onaylaması, yalnız otoritede olan bir kapsülün geçersizleşmesi) açık
+   dünyada **hiç iz bırakmaz**: yer tutucu yok, sıra numarası kayması yok. **Açık görünüm
+   okuyucusunun** komutu otoritenin dünyasına yalnız açık değişimlerin geri çevirisiyle,
+   **hep ya da hiç**, ulaşır: her değişimin adlandırdığı kimlik ya iki dünyada da yok
+   (yeni) ya da iki dünyada **bayt eşit** bir öğe (kanonik JSON) — hiçbir motor öğesi, hiçbir
+   öneri —, değişimler birlikte uygulanmalı; yoksa otorite hiçbir şey almaz (okuyucu bunu
+   göremez). Açık görünümlü kişinin önerileri ve öneri kararları yalnız açık dünyadadır. **Lisanslı akışların hepsine yetkili olmayan** okuyucu (kısmi yetki dahil:
+   sıralayıcının bağlamı bütün enstrümanları kapsadığından, yetkisi olmayan bir akıştan
+   arınmış hikâye ancak açık dünyada vardır) **açık görünüm okuyucusudur**: bütün okuma
+   yolları (sorgular — `capsules`, `capsule`, `ledger`, `log`, `document`, `list`,
+   `describe`, `present`, `verify_evidence` —, abonelik, `hello` özeti, girdi, dikkat,
+   seçici çözümü, hata önerileri), `change`, `finding_state` ve `proposal` olayları ve
+   `capsules` konusunun geçişleri açık dünyanın dokümanı, günlüğü, okuma dokümanı ve
+   karnesiyle çalışır; aldığı her `seq` (`welcome`, `result`, `ack`, olaylar) açık dünyanın
+   numarasıdır; itirazı itirazcının dünyasında yönlendirilir ve açık-yalnız motorda karara
+   bağlanır; `claims` konusunda yalnız kendi koşul iddialarını alır (belge öğesi iddialarına
+   itirazı `unknown`); `intents` konusunda açık dünyanın niyetleri açık dünyada
+   değerlendirilir (kendi etkinliği ve kenar durumuyla). Böylece bulgunun `confidence`'ı,
+   kapsülün cümlesi, hikâyesi, `importance`/`tier`'ı ve sırası, `ledger_at_birth`, karne
+   sayıları, girdilerin ve olayların varlığı ve numaraları **yalnız açık veriye ve
+   kişilerin komutlarına** bağlıdır — yetkili kişinin aynı komutları dahil. Bu okuyucuya
+   lisanslı veriden etkilenen tek kanal mühür iletileridir (`trust: server`; `capsules`
+   sorgusunun `comments`'i, `server_comment` olayı). Çalışan motorun kapsülü (izlenen
+   serideki hikâye) §8.1 veri koşuluyla geçersizleşmez (yalnız sonuç kuralıyla kapanır).
+   Test: aynı açık barlar, farklı lisanslı akış tohumları (ve akışsız koşu) → mühür
+   iletileri dışında bayt eşit (`crates/qp-session/tests/non_interference.rs`; denetçinin
+   `rounds/R3/audit/src/bin/k1_probe.rs`).
+2. Açık görünüm okuyucusu olmayan (bütün lisanslı akışlara yetkili) okuyucu otoritenin
+   dünyasını alır; lisanslı olgu yalnız akışın yetkisi olmayana gizlenir (aşağıdaki kurallar
+   artık yalnız bu dünyada, örn. akışa yetkili ama bar beslemesine yetkisiz okuyucu için
+   geçerlidir): doğuran olgusu lisanslı hikâye hiç gitmez; lisanslı olgu açık hikâyeye
+   katıldıysa o olgu ve geçişi gizlenir.
+3. Hikâyenin bar beslemesine yetkisi olmayana olgular kanıt değeri ve `evidence_ref`
+   (veri özeti) olmadan, cümleler rakamsız (`redacted`) gider (her iki dünyada).
+
+Uygulama: sorgu, abonelik, girdi, dikkat ve seçici çözümü okuyucunun dokümanında çalışır
+(hatalar ve öneriler de); komut önce okuyucunun dokümanında kuru koşulur (görmediği öğeye
+dokunan komut, olmayan öğedeki hatayı alır). `show_finding` lisanslı olgunun kanıt değerini
+görünüme sabit olarak yazmaz (yalnız köken). Yetkisiz okuyucuya giden her mesajda lisanslı
+değer, kimlik ve özet olmadığı testle taranır (`crates/qp-session/tests/capsules.rs`).
+
+**Sınırlar.** Otoritenin günlüğü ve `seq`'i değişmedi (yeniden oynatma onlardan); açık
+görünüm okuyucusu yalnız açık dünyanınkini görür. Kişilerin komutları açık dünyaya da
+geçer (orada kendi başına uygulanarak): girişimsizlik lisanslı **veri** içindir, kişinin
+seçimi için değil; aynı komutlar her yapılandırmada aynı açık sonucu verir. Yetkili kişinin
+yarattığı öğelerin kimlikleri (`fnd-<seq>-<n>`) iki dünyada farklı olabilir (her dünya
+kendi `seq`'iyle). Açık dünyada bir
+kapsül, otoritenin dünyasındaki lisanslı doğumlu bir hikâyenin kimliğini taşıyabilir
+(kimlik = enstrüman, tür, yön, doğum barı): ikisi ayrı öğedir.
+Yansı aynalanan dokümanı izdüşümle alır (akış yetkisi olmayan yansının dokümanı otoritenin
+dokümanından farklıdır; RP2 yansı özetleri bu durumda karşılaştırılamaz).
+
+### 20.6 Aday
+
+Aday sunucudan gelmez (K28, A16): yansı açık barı **kendi verisinden** hesaplar
+(`Replica::candidates`, `qp_session::capsule::candidates`: açık dedektörler +
+`Engine::candidates`). Otorite açık barda hiçbir şey söylemez; bar kapanınca aday ya
+kesinleşir (olgu yeniden çıkar) ya da kaybolur — günlükte ve karnede izi kalmaz (döküm 42).
+
+### 20.7 İtiraz ve geri çekme (§19.9 ile)
+
+`dispute` `claim: {"kind":"capsule", capsule, finding}` motorun bir kapsülünü gösterirse
+iddia "hikâyenin olguları kesin barlarda da çıkar"dır. Otorite çapadan `t`'ye kesin bar ister;
+cevap barı düzeltirse dedektörler düzeltilmiş barlarda baştan koşulur: olgusu artık çıkmayan
+(ya da değerleri değişen) her hikâye **geri çekilir** (`retracted`, neden `dispute_upheld` —
+itiraz edilmişse — ya da `data_corrected`; karneye yazılmaz, kapanmış hikâyenin satırı
+sayılmaz). Dedektörler düzeltilmiş veriden devam eder; düzeltilmiş verinin yeni doğurduğu
+olgu ileri sürülmez (geçmiş yeniden yazılmaz). Karar: geri çekildiyse `upheld`, değilse
+`rejected` (kanıt: seri, `t`, kesin, çapa, beslemeler). Aynı itiraz `duplicate`; görünmeyen
+kapsül ya da bar yetkisi yok: `unknown`.
+
+
+> **Mühür anahtarları (R3, güvenlik incelemesi):** makbuz ve denetim günlüğü anahtarları
+> barındırıcının gizli anahtarlarıdır; barındırıcı oturumu kurarken `Session::new_with_trust_keys` / `Session::with_provider_and_trust_keys`
+> ile verir (ilk sunucu yorumundan önce; sonradan `set_trust_keys` reddedilir) (belgeye ve günlüğe girmez). Verilmezse otorite herkese açık **demo** anahtarlarını
+> kullanır; bu yalnız sentetik test beslemesi (`init.capsules.flow`) ve dökümler içindir.
 
 ## Ek A — Eski `Command` tipi
 

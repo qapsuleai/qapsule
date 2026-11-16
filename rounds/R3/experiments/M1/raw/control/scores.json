@@ -1,0 +1,106 @@
+{
+  "harness": "r3-h-m12/1",
+  "alt": "control",
+  "conditions": {
+    "nolegend": {
+      "readers": 1,
+      "items": 16,
+      "accuracy": {
+        "direction": 0.4375,
+        "full": 0.125,
+        "kind": 1.0,
+        "phase": 0.375,
+        "strength": 0.5625
+      },
+      "chance": {
+        "direction": 0.3333,
+        "full": 0.0056,
+        "kind": 0.1667,
+        "phase": 0.2,
+        "strength": 0.5
+      },
+      "majority": {
+        "direction": 0.4375,
+        "full": 0.125,
+        "kind": 0.25,
+        "phase": 1.0,
+        "strength": 1.0
+      },
+      "per_reader": [
+        {
+          "run": "nolegend_s1_r1",
+          "reader": "r1",
+          "seed": 1,
+          "parsed": true,
+          "items": 16,
+          "missing": 0,
+          "correct": {
+            "direction": 7,
+            "full": 2,
+            "kind": 16,
+            "phase": 6,
+            "strength": 9
+          },
+          "wrong": {
+            "A1": [
+              "direction"
+            ],
+            "A2": [
+              "phase"
+            ],
+            "A3": [
+              "direction",
+              "strength",
+              "phase"
+            ],
+            "A4": [
+              "phase"
+            ],
+            "B1": [
+              "direction"
+            ],
+            "B2": [
+              "direction",
+              "strength"
+            ],
+            "B3": [
+              "direction"
+            ],
+            "B4": [
+              "strength",
+              "phase"
+            ],
+            "C1": [
+              "direction",
+              "strength",
+              "phase"
+            ],
+            "C2": [
+              "direction",
+              "phase"
+            ],
+            "C3": [],
+            "C4": [
+              "direction",
+              "strength",
+              "phase"
+            ],
+            "D1": [
+              "direction",
+              "phase"
+            ],
+            "D2": [
+              "strength",
+              "phase"
+            ],
+            "D3": [],
+            "D4": [
+              "strength",
+              "phase"
+            ]
+          }
+        }
+      ]
+    }
+  }
+}

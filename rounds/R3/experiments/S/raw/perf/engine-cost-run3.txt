@@ -1,0 +1,21 @@
+# start 2026-11-15T20:56:40Z 23:56  up 39 days, 11:40, 8 users, load averages: 7.50 9.52 12.27
+engine_cost: 30 instruments x 7 detectors, 500 bars, 20 ticks/bar, 7 runs (median), bars >= 60 timed
+| Quantity | Market (30 instr.) | Per instrument |
+|---|---:|---:|
+| Tick: detectors + facts + candidates (ns) | 215056 | 7169 |
+| — detectors (7 × update_last) + to_fact (ns) | 11278 | 376 |
+| — Engine::candidates on the open bar (ns) | 203351 | 6778 |
+| Tick, bars 60–199 (ns) | 191173 | 6372 |
+| Tick, bars 360–499 (ns) | 232058 | 7735 |
+| Tick p99 (ns) | 275292 | 9176 |
+| One ledger_stat over the final ledger (ns) | 13 | — |
+| Bar close: Engine::on_bar (ns) | 218037 | 7268 |
+candidates per market tick (mean): 11.14; open stories at end: 43; events: 11951; ledger rows at end: 4240
+run 0: tick 215890 ns (det 11278, cand 204612), close 218037 ns
+run 1: tick 212578 ns (det 11068, cand 201510), close 217031 ns
+run 2: tick 213868 ns (det 11142, cand 202726), close 215602 ns
+run 3: tick 213134 ns (det 11141, cand 201993), close 214631 ns
+run 4: tick 217726 ns (det 11805, cand 205921), close 227111 ns
+run 5: tick 216340 ns (det 11811, cand 204529), close 227291 ns
+run 6: tick 215056 ns (det 11705, cand 203351), close 224628 ns
+# end 2026-11-15T20:56:57Z 23:56  up 39 days, 11:41, 8 users, load averages: 7.28 9.36 12.16

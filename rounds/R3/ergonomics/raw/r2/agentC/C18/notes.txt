@@ -1,0 +1,2 @@
+attempt1: document query + set_audience with placeholder group "zzz" to discover valid groups -> schema error (habituated|future).
+attempt2: set_audience {group:habituated, positions:{THYAO:100}} -> applied seq 4. Caveats: set_audience replaces the whole audience, so any existing watchlist/sensitivity would be lost; I could not read my audience back (get editor not_found). Spec does not list group values or say whether set_audience merges; positive qty = long assumed.

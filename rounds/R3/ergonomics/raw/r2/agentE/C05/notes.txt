@@ -1,0 +1,1 @@
+attempt1: hello + capsules{limit:3} (+ unfiltered capsules). Worked; ordering is by importance. Unclear whether "en önemli" should exclude closed/invalidated capsules; used plain importance order. welcome.summary is huge and cannot be suppressed; the unfiltered capsules query returns ~300 items.

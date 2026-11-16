@@ -365,6 +365,19 @@ pub fn apply_change(doc: &mut Document, change: &ChangeOp) -> Result<ChangeOp, S
                 bar: old,
             }
         }
+        ChangeOp::PutAudience {
+            principal,
+            audience,
+        } => {
+            let old = match audience {
+                Some(a) => doc.audiences.insert(principal.clone(), a.clone()),
+                None => doc.audiences.remove(principal),
+            };
+            ChangeOp::PutAudience {
+                principal: principal.clone(),
+                audience: old,
+            }
+        }
     })
 }
 
@@ -435,6 +448,7 @@ pub fn touched(change: &ChangeOp) -> &str {
         ChangeOp::SetCapsuleState { capsule, .. } => capsule,
         ChangeOp::PutIntent { intent, .. } => &intent.id,
         ChangeOp::PushLedger { .. } | ChangeOp::PopLedger {} => "ledger",
+        ChangeOp::PutAudience { .. } => "audiences",
         ChangeOp::PutNarrative { narrative, .. } => &narrative.id,
         ChangeOp::PutProposal { proposal, .. } => &proposal.id,
         ChangeOp::Delete { id } => id,

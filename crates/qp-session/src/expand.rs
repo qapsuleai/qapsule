@@ -712,6 +712,7 @@ pub(crate) fn expand_op(
                 text: text.clone(),
                 evidence: evidence.clone(),
                 evidence_ref,
+                meaning: None,
                 provenance: ctx.prov(vec![series.clone()]),
             };
             Ok(vec![ChangeOp::PutFact { fact, index: None }])
@@ -768,6 +769,7 @@ pub(crate) fn expand_op(
                         headline: headline.clone(),
                         glyphs: Vec::new(),
                         view: None,
+                        story: None,
                         depth: Depth::Capsule,
                         expires_at: None,
                         provenance: ctx.prov(vec![fid]),
@@ -830,6 +832,10 @@ pub(crate) fn expand_op(
                     outcome: Outcome::Pending,
                     recorded_at: ctx.at,
                     note: note.clone(),
+                    capsule: None,
+                    key: None,
+                    stage: None,
+                    bar: None,
                 },
             });
             Ok(out)
@@ -938,7 +944,18 @@ pub(crate) fn expand_op(
                 }
                 None => ctx.new_id(doc, "view", None, &ptr(p, "view"))?,
             };
-            let built = crate::present::presenter_view(doc, f, &vid)
+            // The view reads the bar times of the finding's facts' series: on a bound
+            // series the speaker needs its data entitlement (§18.3), as for `add_fact`.
+            if let Some(r) = &ctx.data {
+                for fid in &f.facts {
+                    if let Some(x) = doc.facts.iter().find(|x| &x.id == fid) {
+                        if let Some(b) = r.plane.gate(doc, Some(ctx.speaker), &x.series) {
+                            return Err(b.error(&x.series, &ptr(p, "finding")));
+                        }
+                    }
+                }
+            }
+            let built = crate::present::presenter_view(doc, ctx.data, f, &vid)
                 .map_err(|m| invalid(m, ptr(p, "finding")))?;
             let built = canon_view(doc, &built, &ptr(p, "finding"), ctx.reads())?;
             let mut out = vec![ChangeOp::PutView {
@@ -1026,6 +1043,51 @@ pub(crate) fn expand_op(
             }])
         }
         Op::Undo { seq } => expand_undo(doc, *seq, p, ctx),
+        Op::SetAudience {
+            principal,
+            audience,
+        } => {
+            let who = audience_target(principal.as_deref(), p, ctx)?;
+            for (sym, q) in &audience.positions {
+                if !q.is_finite() {
+                    return Err(invalid(
+                        format!("position of `{sym}` must be a finite number"),
+                        ptr(&ptr(&ptr(p, "audience"), "positions"), sym),
+                    ));
+                }
+            }
+            if let Some(i) = audience.watchlist.iter().position(String::is_empty) {
+                return Err(invalid(
+                    "a watch-list symbol must not be empty",
+                    ptr(&ptr(&ptr(p, "audience"), "watchlist"), i),
+                ));
+            }
+            Ok(vec![ChangeOp::PutAudience {
+                principal: who,
+                audience: Some(audience.clone()),
+            }])
+        }
+        Op::SetSensitivity {
+            principal,
+            sensitivity,
+        } => {
+            let who = audience_target(principal.as_deref(), p, ctx)?;
+            let mut a = doc
+                .audiences
+                .get(&who)
+                .cloned()
+                .unwrap_or(qp_schema::capsule::Audience {
+                    group: qp_schema::capsule::UserGroup::Habituated,
+                    sensitivity: None,
+                    watchlist: Vec::new(),
+                    positions: BTreeMap::new(),
+                });
+            a.sensitivity = *sensitivity;
+            Ok(vec![ChangeOp::PutAudience {
+                principal: who,
+                audience: Some(a),
+            }])
+        }
         Op::InsertLayer { .. }
         | Op::DeleteLayer { .. }
         | Op::SplitLayer { .. }
@@ -1968,6 +2030,26 @@ pub(crate) struct Expanded {
     pub origin: Vec<usize>,
 }
 
+/// The principal an audience op writes for (R3, §20): the speaker, or another person
+/// for an `owner` only.
+fn audience_target(principal: Option<&str>, p: &str, ctx: &Ctx<'_>) -> PResult<String> {
+    match principal {
+        None => Ok(ctx.speaker.to_owned()),
+        Some(w) if w == ctx.speaker => Ok(w.to_owned()),
+        Some(w) if ctx.is_owner => {
+            check_id(w, &ptr(p, "principal"))?;
+            Ok(w.to_owned())
+        }
+        Some(w) => Err(E::new(
+            ErrorCode::Forbidden,
+            format!("only an owner sets the capsule preferences of another person (`{w}`)"),
+        )
+        .at(ptr(p, "principal"))
+        .hint("Leave `principal` out to set your own.")
+        .build()),
+    }
+}
+
 /// Short deterministic summary of one op.
 pub(crate) fn summarize(op: &Op) -> String {
     fn params(p: &BTreeMap<String, f64>) -> String {
@@ -2032,6 +2114,24 @@ pub(crate) fn summarize(op: &Op) -> String {
         Op::SetScale { view, scale, .. } => format!("set_scale {view} {scale}"),
         Op::SetEmphasis { view, emphasis } => {
             format!("set_emphasis {view} ({})", emphasis.len())
+        }
+        Op::SetAudience { principal, .. } => match principal {
+            Some(w) => format!("set_audience {w}"),
+            None => "set_audience".to_owned(),
+        },
+        Op::SetSensitivity {
+            principal,
+            sensitivity,
+        } => {
+            let level = sensitivity.map_or("default", |s| match s {
+                qp_schema::capsule::Sensitivity::Important => "important",
+                qp_schema::capsule::Sensitivity::Balanced => "balanced",
+                qp_schema::capsule::Sensitivity::All => "all",
+            });
+            match principal {
+                Some(w) => format!("set_sensitivity {w} {level}"),
+                None => format!("set_sensitivity {level}"),
+            }
         }
     }
 }

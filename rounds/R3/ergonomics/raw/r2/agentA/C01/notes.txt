@@ -1,0 +1,2 @@
+attempt1: capsules instrument THYAO (+open:true). Worked; the open:true query gave the live ones, but I wanted to check "bugün" explicitly.
+attempt2: since_t=start of today, since_bar=312, open:true limit 20. No capsule since today's start; 3 open ones. Unclear: what "bugün" means (spec has no definition; I used now from welcome/result). The spec does not say what `open` means (I assumed not closed/not realized).

@@ -1,0 +1,296 @@
+{
+  "harness": "r3-h-m12/1",
+  "alt": "template",
+  "lang": "en",
+  "seed": 1,
+  "items": [
+    {
+      "label": "1",
+      "situation": "s34",
+      "sentence": "Yesterday, GARAN crossed above 168.43; it is now at 163.38, no longer above 168.43. The upside breakout has ended. The expected outcome came true today. Its record is still thin: it played out in 2 of 8 cases.",
+      "truth": {
+        "kind": "breakout",
+        "direction": "up",
+        "when": "past",
+        "bars_ago": 1,
+        "still_valid": "no"
+      }
+    },
+    {
+      "label": "2",
+      "situation": "s14",
+      "sentence": "Yesterday, THYAO's Bollinger bands narrowed: a squeeze, direction open. Its life ran out today without an outcome; it is no longer valid. Historically, this kind of signal mostly played out. Server-verified; the figures require an institutional flow data license.",
+      "truth": {
+        "kind": "squeeze",
+        "direction": "neutral",
+        "when": "past",
+        "bars_ago": 1,
+        "still_valid": "no"
+      }
+    },
+    {
+      "label": "3",
+      "situation": "s64",
+      "sentence": "If AKBNK's band width falls below the threshold (0.06) within 3 bars, the squeeze (direction open) would be confirmed. The setup is still open. Historically, this signal played out in 52 of 140 cases.",
+      "truth": {
+        "kind": "squeeze",
+        "direction": "neutral",
+        "when": "conditional",
+        "bars_ago": null,
+        "still_valid": "yes"
+      }
+    },
+    {
+      "label": "4",
+      "situation": "s04",
+      "sentence": "30 bars ago, PGSUS's moving averages lined up for an uptrend (close 57.29, long average 55.00): a continuation of the uptrend. Whether it still holds is unknown. Historically, this signal played out in 67 of 140 cases.",
+      "truth": {
+        "kind": "continuation",
+        "direction": "up",
+        "when": "past",
+        "bars_ago": 30,
+        "still_valid": "unknown"
+      }
+    },
+    {
+      "label": "5",
+      "situation": "s38",
+      "sentence": "GARAN's band width has been below the threshold (0.06) since yesterday and is now 0.0588. The squeeze (direction open) is still in place. The expected outcome came true today. Its record is still thin: it played out in 2 of 8 cases.",
+      "truth": {
+        "kind": "squeeze",
+        "direction": "neutral",
+        "when": "now",
+        "bars_ago": null,
+        "still_valid": "yes"
+      }
+    },
+    {
+      "label": "6",
+      "situation": "s71",
+      "sentence": "If net institutional flow in SISE falls below the recent average (334,000) within 3 bars, the money outflow would be confirmed. The expectation's 5-bar life ran out today without an outcome; it is no longer valid. Its record is still thin: it played out in 2 of 8 cases.",
+      "truth": {
+        "kind": "flow",
+        "direction": "down",
+        "when": "conditional",
+        "bars_ago": null,
+        "still_valid": "no"
+      }
+    },
+    {
+      "label": "7",
+      "situation": "k26",
+      "sentence": "3 bars ago, THYAO's RSI crossed above 70; it fell back below today and is now 55, no longer above 70. The overbought state has ended. Historically, this signal played out in 87 of 140 cases.",
+      "truth": {
+        "kind": "extreme",
+        "direction": "up",
+        "when": "past",
+        "bars_ago": 3,
+        "still_valid": "no"
+      }
+    },
+    {
+      "label": "8",
+      "situation": "s67",
+      "sentence": "If EREGL's RSI falls below 30 within 3 bars, the oversold state would be confirmed. The expectation came true today. Whether the setup is still open is unknown. Historically, this signal played out in 42 of 140 cases.",
+      "truth": {
+        "kind": "extreme",
+        "direction": "down",
+        "when": "conditional",
+        "bars_ago": null,
+        "still_valid": "unknown"
+      }
+    },
+    {
+      "label": "9",
+      "situation": "s41",
+      "sentence": "THYAO's RSI is above 70 as of today, now 71.4. The overbought state is still in place. Its record is still thin: it played out in 2 of 8 cases.",
+      "truth": {
+        "kind": "extreme",
+        "direction": "up",
+        "when": "now",
+        "bars_ago": null,
+        "still_valid": "yes"
+      }
+    },
+    {
+      "label": "10",
+      "situation": "s17",
+      "sentence": "Today, PGSUS's RSI fell below 30 (to 28.8): oversold. Volume confirmed it today; 2 independent evidence families support it. Whether it still holds is unknown. Historically, this signal played out in 99 of 140 cases.",
+      "truth": {
+        "kind": "extreme",
+        "direction": "down",
+        "when": "past",
+        "bars_ago": 0,
+        "still_valid": "unknown"
+      }
+    },
+    {
+      "label": "11",
+      "situation": "s53",
+      "sentence": "If SAHOL closes below the reversal point (161.73) within 3 bars, the downward reversal would be confirmed. The expectation was invalidated today and is no longer valid. Historically, this signal played out in 98 of 140 cases.",
+      "truth": {
+        "kind": "reversal",
+        "direction": "down",
+        "when": "conditional",
+        "bars_ago": null,
+        "still_valid": "no"
+      }
+    },
+    {
+      "label": "12",
+      "situation": "s58",
+      "sentence": "If EREGL closes above 245.84 within 3 bars, the upside breakout would be confirmed. The expectation came true today. Whether the setup is still open is unknown. Its record is still thin: it played out in 6 of 8 cases.",
+      "truth": {
+        "kind": "breakout",
+        "direction": "up",
+        "when": "conditional",
+        "bars_ago": null,
+        "still_valid": "unknown"
+      }
+    },
+    {
+      "label": "13",
+      "situation": "s20",
+      "sentence": "More than a month ago, FROTO's RSI rose above the overbought threshold: overbought. Whether it still holds is unknown. Historically, this kind of signal mostly played out. Server-verified; the figures require an institutional flow data license.",
+      "truth": {
+        "kind": "extreme",
+        "direction": "up",
+        "when": "past",
+        "bars_ago": 30,
+        "still_valid": "unknown"
+      }
+    },
+    {
+      "label": "14",
+      "situation": "s31",
+      "sentence": "FROTO has been below the reversal point for about a week. The downward reversal is still in place. The expected outcome came true today. Its record is still thin. Server-verified; the figures require an institutional flow data license.",
+      "truth": {
+        "kind": "reversal",
+        "direction": "down",
+        "when": "now",
+        "bars_ago": null,
+        "still_valid": "yes"
+      }
+    },
+    {
+      "label": "15",
+      "situation": "s05",
+      "sentence": "Today, THYAO showed a downward reversal signal: price made a new high while RSI made a lower high (price 168.94, RSI 52.1). An opposite signal appeared today and weakened it. Whether it still holds is unknown. Its record is still thin: it played out in 6 of 8 cases.",
+      "truth": {
+        "kind": "reversal",
+        "direction": "down",
+        "when": "past",
+        "bars_ago": 0,
+        "still_valid": "unknown"
+      }
+    },
+    {
+      "label": "16",
+      "situation": "s32",
+      "sentence": "SISE has been below the reversal point (177.59) for 30 bars and is now at 174.04. The downward reversal is still in place. The expected outcome came true today. Historically, this signal played out in 68 of 140 cases.",
+      "truth": {
+        "kind": "reversal",
+        "direction": "down",
+        "when": "now",
+        "bars_ago": null,
+        "still_valid": "yes"
+      }
+    },
+    {
+      "label": "17",
+      "situation": "s09",
+      "sentence": "Today, GARAN broke above resistance at 128.48 (close 131.01): an upside breakout. Its 1-bar life ran out today without an outcome; it is no longer valid. Historically, this signal played out in 51 of 140 cases.",
+      "truth": {
+        "kind": "breakout",
+        "direction": "up",
+        "when": "past",
+        "bars_ago": 0,
+        "still_valid": "no"
+      }
+    },
+    {
+      "label": "18",
+      "situation": "s50",
+      "sentence": "If EREGL closes above the long average (255.56) within 3 bars, the uptrend would be confirmed. An opposite signal appeared today and weakened it. The setup is still open. Its record is still thin: it played out in 4 of 8 cases.",
+      "truth": {
+        "kind": "continuation",
+        "direction": "up",
+        "when": "conditional",
+        "bars_ago": null,
+        "still_valid": "yes"
+      }
+    },
+    {
+      "label": "19",
+      "situation": "s70",
+      "sentence": "If net institutional flow in FROTO falls below the recent average (499,000) within 3 bars, the money outflow would be confirmed. Volume confirmed it today; 2 independent evidence families support it. The setup is still open. Historically, this signal played out in 85 of 140 cases.",
+      "truth": {
+        "kind": "flow",
+        "direction": "down",
+        "when": "conditional",
+        "bars_ago": null,
+        "still_valid": "yes"
+      }
+    },
+    {
+      "label": "20",
+      "situation": "s45",
+      "sentence": "Net institutional flow in GARAN is above the recent average (319,000) as of today, now 325,380. The money inflow is still in place. An opposite signal appeared today and weakened it. Historically, this signal played out in 63 of 140 cases.",
+      "truth": {
+        "kind": "flow",
+        "direction": "up",
+        "when": "now",
+        "bars_ago": null,
+        "still_valid": "yes"
+      }
+    },
+    {
+      "label": "21",
+      "situation": "s10",
+      "sentence": "Yesterday, PGSUS broke above resistance at 167.59 (close 172.40): an upside breakout. It was invalidated today and is no longer valid. Its record is still thin: it played out in 3 of 8 cases.",
+      "truth": {
+        "kind": "breakout",
+        "direction": "up",
+        "when": "past",
+        "bars_ago": 1,
+        "still_valid": "no"
+      }
+    },
+    {
+      "label": "22",
+      "situation": "s54",
+      "sentence": "If KCHOL closes below the reversal point (214.64) within 3 bars, the downward reversal would be confirmed. Volume confirmed it today; 2 independent evidence families support it. The setup is still open. Its record is still thin: it played out in 3 of 8 cases.",
+      "truth": {
+        "kind": "reversal",
+        "direction": "down",
+        "when": "conditional",
+        "bars_ago": null,
+        "still_valid": "yes"
+      }
+    },
+    {
+      "label": "23",
+      "situation": "s61",
+      "sentence": "If SAHOL's band width falls below the threshold within a few bars, the squeeze (direction open) would be confirmed. Volume confirmed it today. Whether the setup is still open is unknown. Its record is still thin. Server-verified; the figures require an institutional flow data license.",
+      "truth": {
+        "kind": "squeeze",
+        "direction": "neutral",
+        "when": "conditional",
+        "bars_ago": null,
+        "still_valid": "unknown"
+      }
+    },
+    {
+      "label": "24",
+      "situation": "s69",
+      "sentence": "If net institutional flow in FROTO rises above the recent average (484,000) within 3 bars, the money inflow would be confirmed. The expectation's 1-bar life ran out today without an outcome; it is no longer valid. Historically, this signal played out in 70 of 140 cases.",
+      "truth": {
+        "kind": "flow",
+        "direction": "up",
+        "when": "conditional",
+        "bars_ago": null,
+        "still_valid": "no"
+      }
+    }
+  ]
+}

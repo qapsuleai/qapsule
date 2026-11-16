@@ -48,12 +48,20 @@ pub(crate) fn rank(d: Depth) -> u8 {
 /// the fact; linear value scales. Layer ids are the grammar's own names (`candles`,
 /// `line`, `level`; `docs/GRAMMAR.md` §11, K25), as in the capsule view.
 ///
+/// `doc` is the command's scratch document; a bound bar series' bars come from the data
+/// plane's reading document (`reader`, §18), as for `add_fact` and `set_view_range`.
+///
 /// # Errors
 /// The finding has no facts, or its first fact's series has no bars.
-pub(crate) fn presenter_view(doc: &Document, finding: &Finding, id: &str) -> Result<View, String> {
+pub(crate) fn presenter_view(
+    doc: &Document,
+    reader: Option<crate::plane::Reader<'_>>,
+    finding: &Finding,
+    id: &str,
+) -> Result<View, String> {
     // The chart rule reads no study values: an empty cache is enough.
     let cache = Cache::default();
-    let p = DocProvider::new(doc, &cache);
+    let p = DocProvider::new(doc, &cache).with_reader(reader);
     depth::chart_view(&finding.id, &p, id).map_err(|e| e.reason)
 }
 
@@ -67,6 +75,7 @@ pub(crate) fn present(
     finding: &Finding,
     surface: SurfaceKind,
     profile: &Profile,
+    headlines: &std::collections::BTreeMap<String, String>,
 ) -> Presentation {
     let capsule = doc.capsules.iter().find(|c| c.finding == finding.id);
     let depth = depth::effective_depth(profile.depth, profile);
@@ -76,7 +85,7 @@ pub(crate) fn present(
     } else {
         None
     };
-    let prov = DocProvider::new(doc, cache);
+    let prov = DocProvider::new(doc, cache).with_headlines(headlines);
     let mut p = Presentation {
         finding: finding.id.clone(),
         depth,

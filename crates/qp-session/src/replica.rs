@@ -30,7 +30,7 @@ use qp_schema::protocol::{
     ClaimEvidence, ClaimRef, ClaimState, DocumentRef, Event, EvidenceValue, LogEntry, Maturity,
     Principal, ProtocolError, QueryResult, Role, Seq, ServerMsg, SessionInit,
 };
-use qp_schema::{Author, Bar, Condition, Document};
+use qp_schema::{Author, Bar, Condition, Document, Series};
 use serde::Serialize;
 
 use crate::claims::{anchor_of, closed, eval_at};
@@ -126,6 +126,11 @@ pub struct ReplicaOptions {
     /// On disagreement on clean data, ask the host for a settled refetch
     /// ([`Replica::take_refetch`]) before marking the claim disputed. Off: disputed at once.
     pub refetch: bool,
+    /// (R3, §19.9) When a claim becomes `disputed`, send the authority a `dispute`
+    /// ([`Replica::take_outbox`]) once per (claim, `t`, authority's evidence): a changed
+    /// own data digest alone does not dispute again (no dispute storm). Off by default
+    /// (the host turns it on).
+    pub dispute: bool,
 }
 
 impl Default for ReplicaOptions {
@@ -133,6 +138,7 @@ impl Default for ReplicaOptions {
         Self {
             live: false,
             refetch: true,
+            dispute: false,
         }
     }
 }
@@ -172,6 +178,9 @@ pub struct Replica {
     display_version: u64,
     /// Capsule claims learnt from a mirrored entry's evidence (fallback).
     pending_learn: Vec<(ClaimRef, ClaimEvidence)>,
+    /// (R3) Disputes sent: (claim, `t`, the authority's evidence as JSON).
+    disputes_sent: BTreeSet<(ClaimRef, i64, String)>,
+    dispute_counter: u64,
 }
 
 impl std::fmt::Debug for Replica {
@@ -200,6 +209,7 @@ fn follower(doc: Document, principal: &str, provider: Provider) -> Result<Sessio
         epoch: 0,
         proposal_ttl_ms: None,
         data: None,
+        capsules: None,
     };
     // Built without a provider: every binding is pending, so nothing is stamped.
     let mut s = Session::build_with(
@@ -260,6 +270,8 @@ impl Replica {
             roots: BTreeMap::new(),
             display_version: 0,
             pending_learn: Vec::new(),
+            disputes_sent: BTreeSet::new(),
+            dispute_counter: 0,
         }
     }
 
@@ -320,6 +332,25 @@ impl Replica {
     pub fn bars(&self, series: &str) -> Option<&[Bar]> {
         let s = self.s.as_ref()?;
         crate::values::find_series(rd!(s), series).and_then(qp_schema::Series::bars)
+    }
+
+    /// (R3, K28, §20) Capsule candidates on the open (last) bar of bar series `series`,
+    /// computed from its **own** data ([`crate::capsule::candidates`]: public detectors
+    /// and `Engine::candidates`). Shown only on this replica; never sent to the
+    /// authority, never in its log or ledger; a candidate whose formation the next tick
+    /// undoes simply disappears.
+    #[must_use]
+    pub fn candidates(&self, series: &str) -> Vec<qp_capsule::CandidateStory> {
+        let Some(s) = self.s.as_ref() else {
+            return Vec::new();
+        };
+        let Some(bs) = crate::values::find_series(rd!(s), series) else {
+            return Vec::new();
+        };
+        let (Some(bars), Some(symbol)) = (bs.bars(), bs.symbol()) else {
+            return Vec::new();
+        };
+        crate::capsule::candidates(symbol, series, bars)
     }
 
     /// Its binding state of bound series `series`.
@@ -711,6 +742,47 @@ impl Replica {
         self.display = out;
     }
 
+    /// Queues a `dispute` (§19.9) for a claim its own data contradicts, once per (claim,
+    /// `t`, authority's evidence); it carries the digest of its own bars of the claim's bar
+    /// series up to `t`. A rejection re-asserts the same evidence: no new dispute.
+    fn send_dispute(&mut self, claim: &ClaimRef, ev: &ClaimEvidence, item: &DisplayItem) {
+        let Some(s) = self.s.as_ref() else {
+            return;
+        };
+        let rd = rd!(s);
+        let Some(bars) = crate::values::find_series(rd, &ev.series).and_then(Series::bars) else {
+            return;
+        };
+        let Ok(i) = bars.binary_search_by_key(&ev.t, |b| b.t) else {
+            return;
+        };
+        let digest = qp_schema::data::data_digest(&bars[..=i]);
+        let anchor_t = anchor_of(&s.doc, &ev.series);
+        if !self.disputes_sent.insert((
+            claim.clone(),
+            ev.t,
+            serde_json::to_string(ev).unwrap_or_default(),
+        )) {
+            return;
+        }
+        self.dispute_counter += 1;
+        self.outbox.push(serde_json::json!({
+            "type": "dispute",
+            "id": format!("replica:dispute:{}", self.dispute_counter),
+            "claim": claim,
+            "t": ev.t,
+            "values": item.values,
+            "anchor_t": anchor_t,
+            "digest": digest,
+        }));
+    }
+
+    /// Disputes sent so far.
+    #[must_use]
+    pub fn disputes_sent(&self) -> u64 {
+        self.dispute_counter
+    }
+
     /// Increases whenever the display state changes.
     #[must_use]
     pub fn display_version(&self) -> u64 {
@@ -829,6 +901,9 @@ impl Replica {
             if !self.opts.refetch || self.refetched.contains(&key) {
                 item.state = Shown::Disputed;
                 item.reason = Some("sources_differ");
+                if self.opts.dispute {
+                    self.send_dispute(claim, ev, &item);
+                }
                 return item;
             }
             if self.refetch_asked.insert(key.clone()) {

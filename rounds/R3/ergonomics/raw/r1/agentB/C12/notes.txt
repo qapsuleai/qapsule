@@ -1,0 +1,1 @@
+attempt1: subscribe, topic capsules, instrument THYAO, all:true; ack subscribed. Ambiguity: all:true skips the audience filter; I chose it so every transition is reported. No notifications seen since the run has no data events.

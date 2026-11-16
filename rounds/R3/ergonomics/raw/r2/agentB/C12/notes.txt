@@ -1,0 +1,1 @@
+attempt1: subscribe topic {kind:capsules, instrument:"THYAO"}; ack subscribed. Sorun yok. Not: kitle suzgeci (all yok) acik; hassasiyet seviyesi dusuk gecisleri susturabilir, "tum gecisler" icin all:true gerekebilir - belirsiz; gecis olayi uretilmedigi icin run'da dogrulanamadi.

@@ -1,0 +1,85 @@
+{
+  "covers": [
+    "presenter",
+    "present",
+    "depth",
+    "capsule",
+    "glyph"
+  ],
+  "description": "C1: an R3 capsule (range breakout up, confirmed by volume) at sentence depth (watch): the presenter returns only the capsule's sentence. Same capsule as c2-capsule and c3-chart.",
+  "final": {
+    "document": {}
+  },
+  "init": {
+    "clock": 1760000000000,
+    "document": "fixtures/views/docs/r3-breakout.json",
+    "epoch": 0,
+    "principals": [
+      {
+        "author": {
+          "kind": "human",
+          "name": "arkin"
+        },
+        "id": "arkin",
+        "role": "owner"
+      }
+    ]
+  },
+  "name": "c1-sentence",
+  "steps": [
+    {
+      "expect": [
+        {
+          "conn": "a",
+          "msg": {
+            "principal": "arkin",
+            "role": "owner",
+            "type": "welcome"
+          }
+        }
+      ],
+      "send": {
+        "conn": "a",
+        "msg": {
+          "principal": "arkin",
+          "protocol": "qp/0",
+          "surface": {
+            "kind": "watch"
+          },
+          "type": "hello"
+        }
+      }
+    },
+    {
+      "expect": [
+        {
+          "conn": "a",
+          "msg": {
+            "data": {
+              "kind": "presentation",
+              "presentation": {
+                "depth": "sentence",
+                "finding": "fnd.SYN03.breakout-up.144",
+                "surface": "watch",
+                "text": "SYN03 6 bar önce 135,56'daki direnci yukarı kırdı (kapanış 136,20): yukarı kırılım. 4 bar önce aynı aileden yeni bir kanıtla güçlendi. Artık geçerli değil. Karnesi henüz az örnekli: 7 seferin 3'ünde tuttu."
+              }
+            },
+            "id": "q1",
+            "type": "result"
+          }
+        }
+      ],
+      "send": {
+        "conn": "a",
+        "msg": {
+          "id": "q1",
+          "query": {
+            "finding": "fnd.SYN03.breakout-up.144",
+            "kind": "present"
+          },
+          "type": "query"
+        }
+      }
+    }
+  ]
+}

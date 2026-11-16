@@ -408,3 +408,103 @@ büyüklüğünü verir. Ölçüm: `rounds/R2/REPORT.md` (ölçüt 10).
 | Sahne tarifini `qp-grammar`'ın iç tipi yapmak | Çizici, anlamsal okuma ve ileride GPU kabuğu aynı biçimi okuyacak; tek şema kaynağı `qp-schema` (`scene.rs`). |
 | Çizimde `ln`/`log10` | Hedefler arası belirleyicilik R0 kuralıyla yasak; belirleyici yordam yazıldı. |
 | Tema renklerini görünümde saklamak | Görünüm ile sunum karışır; tema motorda, görünümde yalnız ad. |
+
+## 18. Anlam işareti ve kapsül görünümü (R3)
+
+R3/T7 eki. Kavramlar `docs/CONCEPTS.md` "Kapsül (R3)", çerçeve `docs/CAPSULE.md` §4, §9.6.
+Eklerin hepsi isteğe bağlı alan ya da yeni enum değeridir: R2 görünümleri, dökümleri,
+altın görselleri ve `explain` dosyaları değişmez (doğrulama: `scripts/verify.sh` `views`
+adımı ve `crates/qp-cli/tests/views.rs`).
+
+### 18.1 `glyph` işareti
+
+```json
+{"id":"glyph","mark":"glyph","finding":"fnd.SYN03.breakout-up.144","panel":0,
+ "encoding":{"size":32}}
+```
+
+- **Veri:** katmanın `finding`'i; işaret o bulguyu sunan kapsülün işaretidir. Parametreler
+  (`GlyphSpec`: tür, yön, güç, güven, aşama, tazelik, teyit, sunucu işareti) derleyiciye
+  `DataProvider::glyph(kapsül_ya_da_bulgu)` ile gelir (varsayılan: yok; kapsülün kendisi
+  `DataProvider::capsule`). Otoritenin sağlayıcısı R3/T7'de kuralı
+  `qp_grammar::depth::story_glyph` ile uygular: motorun `qp_capsule::glyph_spec(story,
+  son_bar, GLYPH_MIN_LEDGER_N = 20)` kuralının aynısı (testle karşılaştırılır). Motoru
+  çalıştıran oturum kendi değerini verebilir.
+- **Satır:** bulgunun ilk olgusu (bar, zaman, olgu alanları). Bir katman bir işaret çizer.
+- **Kodlama:** `x` yoksa olgu barı, `{"panel":…}` ise panele göre; `y` yoksa panelin
+  üstü (bar üstünde işaret şeridi), alan ya da kökenli sabit ise o değer, `{"panel":…}`
+  ise panele göre; `size` sabit piksel (varsayılan 24). `color`, `opacity`, `width`,
+  `y2`, `text` ve alana bağlı `size` `invalid`: renkler yalnız temadan gelir.
+- **Çizim:** ürün alfabesi (`qp_grammar::glyph::alphabet()`, R3/M1 seçimi `siluet`)
+  kutuya `Prim`'ler üretir; sahne tarifi ilkelleri taşır, çizici hesap yapmaz. Kutu panelin
+  içinde tutulur. Alfabe değişimi `alphabet()` içindeki tek satırdır (insan testi
+  `rozet`'i öne çıkarırsa).
+- **Okuma:** öğe değerleri `strength`, `freshness`, `confirmations`, varsa `confidence`;
+  `hit` öğenin verisini `{"kind":"finding","finding":…}` olarak döndürür (kapsül, bulgusu
+  üzerinden: kimlikler `cap.…` ↔ `fnd.…`).
+- **Hatalar:** `finding` yok → `invalid` (`/finding`; `fact`/`series` ile → `/mark`);
+  işareti olmayan bulgu → `not_found` (`/finding`).
+
+### 18.2 Panele göre konum (`{"panel": f, "px": d}`)
+
+Konum kanallarının yeni biçimi: panelin genişliğinin (`x`) ya da yüksekliğinin (`y`) `f`
+kesri artı `d` piksel. **Düzen sabitidir**, veri iddiası değildir; köken istemez (§10 kural
+5). Yalnız `text` ve `glyph` alır; başka işarette `invalid`.
+
+- `text`: panele göre `x` → metin o noktaya sola yaslanır, panelin sağ kenarında satır
+  kırılır, panelin altını aşan satırlar düşer (son kalan satır "…" ile biter); bir bara
+  bağlı olmadığı için katman ilk satırını çizer. Panele göre `y` → ilk satırın üstü.
+- **Kart paneli:** bütün katmanları panele göre `y` kullanan bir panelin değer ölçeği
+  gösterilmez (ızgara, değer etiketi, eksen çizgisi yok).
+- Bulgu satırlarının yeni metin alanları: `headline` (kapsül cümlesi), `ledger` (karne
+  satırı); olgu satırının `requires` alanı (§18.4).
+
+### 18.3 `x2`: parça ve bar aralığı
+
+`Encoding.x2` (bar aralığının son barı):
+
+- `rule` + `y` + `x` + `x2`: `x` barından `x2` barına yatay parça; `y2` de verilirse
+  `(x, y)`'den `(x2, y2)`'ye eğik parça. Değerler kökenli sabittir.
+- `band`/`area` + `x` + `x2`: yalnız `x..=x2` barları.
+- Veri bağlamayan `point` + `x`: noktanın barı.
+- Bar sabitleri: kökeni barsa (olgunun `bar`'ı ya da geometri barı) bar sırası, değilse
+  zaman (dikey kuralla aynı kural).
+
+**Geometri kökenleri:** `Origin::Fact` alanı olgunun kanıt geometrisinin barlarını da
+adresler: `geometry.<i>.from_bar`, `geometry.<i>.to_bar`, `geometry.<i>.points.<j>.bar`
+(`qp_grammar::depth::geometry_field`; otoritenin `canon`'u aynı işlevi kullanır).
+
+### 18.4 Derinlik kuralları (R3)
+
+R2 bulguları (olgusunda `meaning`, kapsülünde `story` yok) §13'teki kurallarla aynen
+sunulur. R3:
+
+| Derinlik | Çıktı |
+|----------|-------|
+| `sentence` | Kapsülün cümlesi (`headline`). |
+| `capsule` | Kapsül kartı (kapsülün `story`'si varsa): panel 0 `card` (ağırlık 2) — `glyph` (40 px, sol üst), `sentence` (cümle, 13 px, kırılır), `ledger` (karne satırı: `Karne <gerçekleşen>/<kapanan>` ya da `henüz karne yok`, sol alt); panel 1 `price` (ağırlık 3) — `line` (bar serisinin kapanışı, son `max_points` bar, açıklama `C`), olgunun `level`'i varsa `level` kuralı (köken: olgu), görünürse `fact` noktası. Başlık türetilir (sembol, periyot). |
+| `chart` | (ilk olguda `meaning` varsa) R2 grafik kuralı + mum panelinde bulgunun her olgusunun kanıt geometrisi + kapsülün işareti olgu barının üstünde (`glyph`, 32 px). Görünen aralık ilk olgunun 30 bar öncesinden ya da ilk geometri barının 5 bar öncesinden (hangisi önceyse) son bara. Olguya `highlight`. |
+
+**Kanıt geometrisi** (`depth::evidence_layers`): `Level` → `level` parçası (`rule`,
+`x..x2`, `accent`, 2 px); `Band` → `band` (mumların altında, `accent`, opaklık 0,18, kenar
+1 px); `Points` → ardışık noktalar arasında `swing` parçaları ve her nokta için
+`swing-point`. Bütün konumlar (değerler ve barlar) **yalnız kökenle** bağlanır: katman sayı
+taşımaz, derleyici değeri okuyucunun sağlayıcısındaki olgudan çözer (K33). Kimlikler
+tekrar ederse `-2`, `-3`… eki (K25).
+
+**Kanıt yetkisi:** geometrinin bir değeri olgunun kanıtında yoksa (yetkisiz okuyucu için
+otorite ayıklamış) o geometri çizilmez; olgunun satırına `requires` metni eklenir ("Kanıt
+değerleri veri yetkisi gerektirir: `<entitlement>`") ve grafik onu panelin sol üstünde
+`evidence` metin katmanında (`warn`) gösterir. Yetkili okuyucu için kurulmuş bir görünüm
+yetkisiz sağlayıcıyla derlenirse sıfır çizilmez, `not_found` döner. Not: `show_finding`
+görünümü dokümana yazarken otorite kökenli değeri sabit olarak yazar (§10 kural 4); lisanslı
+olgunun saklanan görünümünü okuyucuya göre ayıklamak oturumun işidir (R3 bütünleştirme).
+
+### 18.5 Elenen seçenekler
+
+| Seçenek | Neden elendi |
+|---------|--------------|
+| Katmana ayrı `capsule` veri alanı | `finding` bağı yeterli (kapsül bulgusuyla bire bir); yeni `DataSource` türü `hit`/`screen`/`explain`'i ve oturumu genişletirdi. |
+| Kanıt değerlerini görünüme sabit olarak yazmak | Lisanslı olgunun rakamı görünümle yetkisiz okuyucuya gidebilirdi (güvenlik incelemesi); değer yalnız kökenden çözülür. |
+| Başlığı birden çok satıra kırmak | Var olan altın görseller değişirdi (`d1-capsule` başlığı zaten kesiliyor); cümle kartta ayrı metin katmanı. |
+| Kart için gramer dışı özel çizim | Kart da gramer cümlesi olmalı (ilke 8): üç katman, panele göre konum. |

@@ -8,11 +8,11 @@ license.workspace = true
 publish.workspace = true
 
 [dependencies]
+qp-calendar = { path = "../qp-calendar" }
 qp-schema = { path = "../qp-schema" }
 serde_json = { version = "1.0.154", features = ["float_roundtrip"] }
 
 [dev-dependencies]
-qp-calendar = { path = "../qp-calendar" }
 qp-compute = { path = "../qp-compute" }
 serde_json = "1.0.154"
 

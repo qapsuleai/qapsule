@@ -1,6 +1,6 @@
 # R3 — Rapor: Kapsül
 
-- **Durum:** Tamamlandı. Bağımsız son denetim: ilk hüküm **koşullu kabul** (K1, K2); koşullar giderildi, üç yeniden denetimden sonra **son hüküm kabul** ("Denetim" bölümü). Kabul ölçütleri: tablo.
+- **Durum:** Tamamlandı. Bağımsız son denetim: ilk hüküm **koşullu kabul** (K1, K2); koşullar giderildi, üç yeniden denetimden sonra **son hüküm kabul** ("Denetim" bölümü). Kabul ölçütleri: **17 ✅, 1 ⚠️** (11: itirazda AUD2 iyileşmedi).
 - **Tarih:** 2026-11-15 / 16
 - **Alt ajanlar:** Başlatılabildi (ilk iş deneme alt ajanı koşuldu ve cevap verdi). Bütün alt
   görevler, 16 alternatif, iki düzenek, doğrulama, ölçümler, insan testi paketi, ajan

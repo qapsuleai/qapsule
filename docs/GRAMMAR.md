@@ -508,3 +508,41 @@ olgunun saklanan görünümünü okuyucuya göre ayıklamak oturumun işidir (R3
 | Kanıt değerlerini görünüme sabit olarak yazmak | Lisanslı olgunun rakamı görünümle yetkisiz okuyucuya gidebilirdi (güvenlik incelemesi); değer yalnız kökenden çözülür. |
 | Başlığı birden çok satıra kırmak | Var olan altın görseller değişirdi (`d1-capsule` başlığı zaten kesiliyor); cümle kartta ayrı metin katmanı. |
 | Kart için gramer dışı özel çizim | Kart da gramer cümlesi olmalı (ilke 8): üç katman, panele göre konum. |
+
+### 18.6 Açılma ve ortak öğeler (R4)
+
+R4/T4 eki (`docs/PROTOCOL.md` §4.6.1). Kurallar `qp_grammar::depth` (`deeper`,
+`shallower`, `presenter_depth`, `tap_opens`, `transition_anchors`, `shared_elements`) ve
+piksel → bar aritmetiği `qp_grammar::gesture` (`drag_bars`, `pinch_anchor`, `pan_range`,
+`zoom_range`; otoritenin `pan`/`zoom`'u ile aynı kural, testle karşılaştırılır). Hiçbiri
+dokümana yazmaz.
+
+**Açılma derinlikleri:** `sentence` (açık kapsül yok: akış) → `capsule` (açılmış kapsül;
+sahnesi §18.4 kartı) → `chart` (işaretli grafik; §18.4 grafik kuralı ya da kapsülün saklı
+görünümü) → `evidence` (aynı grafik + olgu başına kanıt erişimi). `evidence` sunucuda
+`chart` derinliğiyle çizilir. Akıştaki kapalı kapsülün **yüzü** bugün kartla aynı sahnedir
+(M8 yüzü ayrı bir derinlik kuralına taşıyabilir; açılma kuralı değişmez).
+
+**Dokunmanın açtığı (`tap_opens`):**
+
+| Derinlik | Dokunulan | Sonuç |
+|----------|-----------|-------|
+| `sentence` (yüz) | her yer | `capsule` |
+| `capsule` | her yer | `chart` |
+| `chart` | kanıt öğesi: olgu ya da bulgu katmanı (olgu noktası, işaret) ya da sabiti bir olgudan gelen katman (seviye, bant, salınım) | `evidence` |
+| `chart` | başka yer | açılma yok; bar odaklanır |
+| `evidence` | her yer | açılma yok |
+
+**Geçiş öğeleri (`transition_anchors`):** bir kapsül sahnesinde kimlikli öğeler ve
+kutuları (öğenin isabet kutularının birleşimi): `glyph` (işaret katmanı), `headline` ve
+`ledger` (bulgunun metin katmanları), `fact:<olgu>` (olgu çizen katman), `evidence:<olgu>`
+(sabiti olgudan gelen katmanlar), `price` (bar serisini çizen ilk katmanın paneli),
+`bar:<i>` (bulgunun ilk olgusunun barı görünüyorsa o panelde bar sütunu). **Ortak öğeler
+(`shared_elements`):** iki sahnede de olan kimlikler, kimlik sırasıyla, iki kutuyla. Bir
+tarafta sahne yoksa (`sentence`, yüz çizmeyen yüzey) cümle yine görünür: `headline` o
+tarafta kutusuz döner. Kabuk geçiş animasyonunu yalnız bu iki kutu arasında boyar; hangi
+öğenin süreceğine çekirdek karar verir (M10 iki geçiş tasarımını bu yapı üzerine kurar;
+yeni bir öğe yeni bir kimlikle eklenir, yapı değişmez).
+
+Örnek (`r4-input-open-close`): kapsül → grafik geçişinde `bar:124`, `evidence:fx…124`,
+`glyph`, `price` ortaktır; grafikte başlık metni olmadığı için `headline` ortak değildir.

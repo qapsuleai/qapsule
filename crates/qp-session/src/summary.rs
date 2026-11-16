@@ -337,25 +337,15 @@ pub(crate) struct FastHints<'a> {
     finding_at: HashMap<&'a str, usize>,
     /// Finding positions in the resolver's row order (finding bar, position).
     gorder: Vec<usize>,
-    /// Lower-case fact kind → fact positions, in row order (bar, position); on demand.
+    /// Lower-case fact kind → fact positions, in row order (bar, position); built whole
+    /// on first use.
     facts_of_kind: RefCell<HashMap<String, Rc<Vec<usize>>>>,
     /// Lower-case fact kind → finding positions with a fact of that kind, in row order;
-    /// on demand.
+    /// built whole on first use.
     findings_of_kind: RefCell<HashMap<String, Rc<Vec<usize>>>>,
-    /// Fact id → finding positions resting on it, in row order; on demand.
-    findings_of_fact: RefCell<HashMap<String, Rc<Vec<usize>>>>,
-}
-
-/// `a.to_lowercase() == lower` (`lower` already lower-case), without a copy for ASCII.
-fn lower_eq(a: &str, lower: &str) -> bool {
-    if a.is_ascii() {
-        a.len() == lower.len()
-            && a.bytes()
-                .zip(lower.bytes())
-                .all(|(x, y)| x.to_ascii_lowercase() == y)
-    } else {
-        a.to_lowercase() == lower
-    }
+    /// Fact id → finding positions resting on it, in row order; built whole on first use
+    /// (R4/T6: one pass over the findings instead of one per asked fact).
+    findings_of_fact: RefCell<Option<HashMap<&'a str, Rc<Vec<usize>>>>>,
 }
 
 impl<'a> FastHints<'a> {
@@ -395,68 +385,96 @@ impl<'a> FastHints<'a> {
         }
     }
 
-    fn found(&self, f: &'a Finding) -> impl Iterator<Item = &'a Fact> + '_ {
-        let doc = self.doc;
-        f.facts
+    /// Lower-case kind of every fact (a copy only per distinct raw kind).
+    fn lower_kinds(&self) -> Vec<Rc<str>> {
+        let mut seen: HashMap<&str, Rc<str>> = HashMap::new();
+        self.doc
+            .facts
             .iter()
-            .filter_map(move |id| self.fact_at.get(id.as_str()).map(|&i| &doc.facts[i]))
+            .map(|f| {
+                Rc::clone(
+                    seen.entry(f.kind.as_str())
+                        .or_insert_with(|| Rc::from(f.kind.to_lowercase())),
+                )
+            })
+            .collect()
+    }
+
+    /// (R4/T6) Both kind indexes in one pass each, on the first kind asked (one pass per
+    /// asked kind before). Grouping by `to_lowercase` is the resolver's case-insensitive kind match.
+    fn build_kind_indexes(&self) {
+        if !self.facts_of_kind.borrow().is_empty() || self.doc.facts.is_empty() {
+            return;
+        }
+        let lower = self.lower_kinds();
+        let mut facts: HashMap<Rc<str>, Vec<(u64, usize)>> = HashMap::new();
+        for (i, f) in self.doc.facts.iter().enumerate() {
+            facts
+                .entry(Rc::clone(&lower[i]))
+                .or_default()
+                .push((f.bar, i));
+        }
+        let mut findings: HashMap<Rc<str>, Vec<usize>> = HashMap::new();
+        let mut kinds: Vec<&Rc<str>> = Vec::new();
+        for &i in &self.gorder {
+            kinds.clear();
+            for id in &self.doc.findings[i].facts {
+                if let Some(&j) = self.fact_at.get(id.as_str()) {
+                    if !kinds.contains(&&lower[j]) {
+                        kinds.push(&lower[j]);
+                    }
+                }
+            }
+            for k in &kinds {
+                findings.entry(Rc::clone(k)).or_default().push(i);
+            }
+        }
+        let mut fk = self.facts_of_kind.borrow_mut();
+        for (k, mut v) in facts {
+            v.sort_unstable();
+            fk.insert(
+                k.to_string(),
+                Rc::new(v.into_iter().map(|(_, i)| i).collect()),
+            );
+        }
+        let mut gk = self.findings_of_kind.borrow_mut();
+        for (k, v) in findings {
+            gk.insert(k.to_string(), Rc::new(v));
+        }
     }
 
     fn kind_facts(&self, lower: &str) -> Rc<Vec<usize>> {
-        if let Some(v) = self.facts_of_kind.borrow().get(lower) {
-            return Rc::clone(v);
-        }
-        let mut v: Vec<(u64, usize)> = self
-            .doc
-            .facts
-            .iter()
-            .enumerate()
-            .filter(|(_, f)| lower_eq(&f.kind, lower))
-            .map(|(i, f)| (f.bar, i))
-            .collect();
-        v.sort_unstable();
-        let v = Rc::new(v.into_iter().map(|(_, i)| i).collect::<Vec<_>>());
+        self.build_kind_indexes();
         self.facts_of_kind
-            .borrow_mut()
-            .insert(lower.to_owned(), Rc::clone(&v));
-        v
+            .borrow()
+            .get(lower)
+            .map_or_else(|| Rc::new(Vec::new()), Rc::clone)
     }
 
     fn kind_findings(&self, lower: &str) -> Rc<Vec<usize>> {
-        if let Some(v) = self.findings_of_kind.borrow().get(lower) {
-            return Rc::clone(v);
-        }
-        let v: Rc<Vec<usize>> = Rc::new(
-            self.gorder
-                .iter()
-                .copied()
-                .filter(|&i| {
-                    self.found(&self.doc.findings[i])
-                        .any(|x| lower_eq(&x.kind, lower))
-                })
-                .collect(),
-        );
+        self.build_kind_indexes();
         self.findings_of_kind
-            .borrow_mut()
-            .insert(lower.to_owned(), Rc::clone(&v));
-        v
+            .borrow()
+            .get(lower)
+            .map_or_else(|| Rc::new(Vec::new()), Rc::clone)
     }
 
     fn fact_findings(&self, id: &str) -> Rc<Vec<usize>> {
-        if let Some(v) = self.findings_of_fact.borrow().get(id) {
-            return Rc::clone(v);
-        }
-        let v: Rc<Vec<usize>> = Rc::new(
-            self.gorder
-                .iter()
-                .copied()
-                .filter(|&i| self.doc.findings[i].facts.iter().any(|x| x == id))
-                .collect(),
-        );
-        self.findings_of_fact
-            .borrow_mut()
-            .insert(id.to_owned(), Rc::clone(&v));
-        v
+        let mut cache = self.findings_of_fact.borrow_mut();
+        let index = cache.get_or_insert_with(|| {
+            let mut m: HashMap<&'a str, Vec<usize>> = HashMap::new();
+            for &i in &self.gorder {
+                let facts = &self.doc.findings[i].facts;
+                for (k, x) in facts.iter().enumerate() {
+                    // A finding counts once per fact id, however often it names it.
+                    if facts[..k].iter().all(|y| y != x) {
+                        m.entry(x.as_str()).or_default().push(i);
+                    }
+                }
+            }
+            m.into_iter().map(|(k, v)| (k, Rc::new(v))).collect()
+        });
+        index.get(id).map_or_else(|| Rc::new(Vec::new()), Rc::clone)
     }
 
     pub(crate) fn fact_pos(&self, id: &str) -> Option<usize> {
@@ -476,14 +494,19 @@ impl<'a> FastHints<'a> {
         let Some(k) = &s.kind else {
             unreachable!("hint candidates name a kind");
         };
-        let mut m: Vec<&str> = self
-            .kind_facts(&k.to_lowercase())
+        let rows = self.kind_facts(&k.to_lowercase());
+        let mut hits = rows
             .iter()
             .filter(|&&i| s.bar.is_none_or(|b| doc.facts[i].bar == b))
-            .map(|&i| doc.facts[i].id.as_str())
-            .collect();
-        pick(&mut m, s.first, s.latest);
-        m
+            .map(|&i| doc.facts[i].id.as_str());
+        // (R4/T6) `pick` without collecting every row for `first` / `latest`.
+        if s.first {
+            hits.next().into_iter().collect()
+        } else if s.latest {
+            hits.last().into_iter().collect()
+        } else {
+            hits.collect()
+        }
     }
 
     /// The ids a finding selector made of `kind` or `fact`, `first`, `latest` resolves to.

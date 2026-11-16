@@ -494,6 +494,38 @@ fn main() {
         eprintln!("hello {}: {per:.3} ms each", a[4]);
         return;
     }
+    if a.get(1).map(String::as_str) == Some("first") {
+        // `first <mode> <history> <principals,…> <reps>` (R4/T6): per rep a fresh session
+        // without connections, then one `hello` per principal (the first hello of each,
+        // the costly one), timed separately; for a profile of the connection cost.
+        let mode = Mode::parse(&a[2]);
+        let history: usize = a[3].parse().unwrap();
+        let who: Vec<&str> = a[4].split(',').collect();
+        let reps: usize = a[5].parse().unwrap();
+        let mk = market(30, history, 1, true);
+        let mut per: Vec<Vec<f64>> = vec![Vec::new(); who.len()];
+        for _ in 0..reps {
+            let mut s = Session::new(init(&mk, mode, true), Path::new(".")).expect("session");
+            for (k, p) in who.iter().enumerate() {
+                let t = Instant::now();
+                send(
+                    &mut s,
+                    &format!("x{k}"),
+                    &json!({"type":"hello","protocol":"qp/0","principal":p,"surface":{"kind":"headless"}}),
+                );
+                per[k].push(us(t) / 1e3);
+            }
+        }
+        for (k, p) in who.iter().enumerate() {
+            eprintln!(
+                "first hello {p}: median {:.3} ms min {:.3} max {:.3}",
+                pct(&per[k], 0.5),
+                pct(&per[k], 0.0),
+                pct(&per[k], 1.0)
+            );
+        }
+        return;
+    }
     if a.get(1).map(String::as_str) == Some("profile") {
         let mode = Mode::parse(&a[2]);
         let ticks: usize = a[3].parse().unwrap();

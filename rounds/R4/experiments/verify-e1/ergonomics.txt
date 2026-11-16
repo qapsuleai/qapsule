@@ -1,0 +1,26 @@
+capsules: 23
+au5 audiences: {"ana": {"group": "future", "watchlist": ["THYAO"], "positions": {"THYAO": -25.0}}}
+au6 audiences: null
+q1 cap.THYAO.continuation.down.84 stage=expired born=84 last=104 resolved={'/query/capsule': 'cap.THYAO.continuation.down.84'}
+q2 cap.THYAO.breakout.down.30 stage=realized born=30 last=32 resolved={'/query/capsule': 'cap.THYAO.breakout.down.30'}
+q3 cap.THYAO.breakout.down.109 stage=realized born=109 last=115 resolved={'/query/capsule': 'cap.THYAO.breakout.down.109'}
+q4 ERROR ambiguous 9 capsules match {"meaning":"flow"}; the authority does not pick one did_you_mean=None cand=[{'id': 'cap.THYAO.flow.up.6', 'about': 'THYAO flow up (expired), born bar 6, last bar 16'}, {'id': 'cap.THYAO.flow.down
+q5 ERROR not_found no capsule matches {"direction":"up","meaning":"squeeze"} did_you_mean=None cand=[{'id': 'cap.THYAO.flow.up.6', 'about': 'THYAO flow up (expired), born bar 6, last bar 16'}, {'id': 'cap.THYAO.flow.up.4
+q6 ERROR schema unknown field `meening` did_you_mean=['meaning'] cand=None
+l1 1: ['cap.THYAO.extreme.down.30']
+l2 4: ['cap.THYAO.breakout.down.109', 'cap.THYAO.flow.down.101', 'cap.THYAO.breakout.down.115', 'cap.THYAO.breakout.down.106']
+l3 1: ['cap.THYAO.breakout.down.115']
+f1 {"type": "result", "id": "f1", "seq": 2, "now": 1760000000000, "data": {"kind": "presentation", "presentation": {"finding": "fnd.THYAO.breakout.down.109", "depth": "chart", "surface": "desktop", "text": "THYAO 10 bar \u00f6nce 4,82'deki deste\u011fi a\u015fa\u011f\u0131 k\u0131rd\u0131 (kapan\u0131\
+f2 ERROR not_found no finding matches {"instrument":"THYAO","latest":true,"stage":"weakened"} did_you_mean=None cand=[{'id': 'fnd.THYAO.flow.up.6', 'about': "THYAO'da 113 bar önce kurumsal net alış (7.876.726) son gün… (flow.institutiona
+au1 {"type": "ack", "id": "au1", "status": "applied", "seq": 3}
+au2 {"type": "ack", "id": "au2", "status": "applied", "seq": 4}
+au3 ERROR schema unknown field `risk` did_you_mean=None cand=None
+au4 11: ['cap.THYAO.breakout.down.30', 'cap.THYAO.reversal.down.51', 'cap.THYAO.flow.down.69', 'cap.THYAO.flow.up.57', 'cap.THYAO.breakout.down.109', 'cap.THYAO.breakout.down.32']
+expect q1 (latest = max last transition bar, then born): cap.THYAO.continuation.down.84 | candidates [('cap.THYAO.continuation.up.73', 75), ('cap.THYAO.continuation.up.58', 63), ('cap.THYAO.continuation.down.84', 104)]
+expect q2 (first closed down breakout): cap.THYAO.breakout.down.30
+expect q3: cap.THYAO.breakout.down.109 [('cap.THYAO.flow.down.101', 106, 101), ('cap.THYAO.breakout.down.106', 109, 106), ('cap.THYAO.breakout.down.109', 115, 109)]
+expect q4: ambiguous if >1 flow: 9
+expect l1 latest born extreme: cap.THYAO.extreme.down.30
+expect l2 born>=100: 4
+expect l3: cap.THYAO.breakout.down.115
+stderr: 

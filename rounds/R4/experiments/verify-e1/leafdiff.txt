@@ -1,0 +1,127 @@
+== fixtures/protocol/conformance/38-capsule-lifecycle.json: 116 changed leaves
+       1 k42-field:condition
+       2 k42-field:direction
+      15 k42-field:importance
+       1 k42-field:ledger_key
+      16 k42-field:n
+       4 k42-field:realized
+       1 k42-field:resolution
+       1 k42-field:rows
+      17 k42-field:validity
+       2 other:born_bar
+       2 other:finding
+       2 other:id
+       2 other:kind
+       2 other:stage
+       2 other:state
+       2 other:time
+       2 other:trust
+      36 sentence: karne clause only
+       6 sentence: other change
+   OTHER steps/10/expect/0/msg/data/capsules/1/born_bar
+     - 120
+     + 124
+   OTHER steps/10/expect/0/msg/data/capsules/1/finding
+     - fnd.THYAO.flow.up.120
+     + fnd.THYAO.continuation.down.124
+   OTHER steps/10/expect/0/msg/data/capsules/1/id
+     - cap.THYAO.flow.up.120
+     + cap.THYAO.continuation.down.124
+   OTHER steps/10/expect/0/msg/data/capsules/1/kind
+     - flow
+     + continuation
+   OTHER steps/10/expect/0/msg/data/capsules/1/sentence/en
+     - 7 bars ago, net institutional buying in THYAO (429,157) clearly exceeded the recent average (113,710): money inflow. It was invalidated 3 bars ago and is no longer valid. Its record is still thin: it played out in 6 of 9 cases. Server-verified.
+     + THYAO has been below the short average (4.78) for 3 bars and is now at 4.47. The downtrend is still in place. Its record is still thin: it played out in 0 of 1 cases.
+   OTHER steps/10/expect/0/msg/data/capsules/1/sentence/text
+     - THYAO'da 7 bar önce kurumsal net alış (429.157) son günlerin ortalamasını (113.710) belirgin biçimde aştı: para girişi. Sinyal 3 bar önce geçersiz oldu; artık geçerli değil. Karnesi henüz az örnekli: 9 seferin 6'sında tuttu. Sunucu doğruladı.
+     + THYAO 3 bardır kısa ortalamanın (4,78) altında; şu an 4,47. Düşüş eğilimi sürüyor. Karnesi henüz az örnekli: 1 seferin 0'ında tuttu.
+== fixtures/protocol/conformance/39-capsule-entitlement.json: 53 changed leaves
+       1 k42-field:condition
+       7 k42-field:importance
+       2 k42-field:ledger_key
+       9 k42-field:n
+       6 k42-field:realized
+       2 k42-field:resolution
+      11 k42-field:validity
+      15 sentence: karne clause only
+== fixtures/protocol/conformance/40-capsule-k26-sentence.json: 27 changed leaves
+       2 k42-field:condition
+       4 k42-field:importance
+       2 k42-field:ledger_key
+       6 k42-field:n
+       2 k42-field:resolution
+       5 k42-field:validity
+       6 sentence: karne clause only
+== fixtures/protocol/conformance/41-capsule-sensitivity.json: 29 changed leaves
+       4 k42-field:importance
+       4 k42-field:n
+       4 k42-field:validity
+       1 other:capsules
+       1 other:description
+       1 other:expect
+       2 other:note
+      12 sentence: karne clause only
+   OTHER description
+     - R3 (K31, §20): sensitivity and the position override. `set_audience` / `set_sensitivity` write a person's own preferences through the command path (another person's only by an owner); the topic `capsules` filters by them: with the future-investor default (`imp
+     + R3 (K31, §20): sensitivity and the position override. `set_audience` / `set_sensitivity` write a person's own preferences through the command path (another person's only by an owner); the topic `capsules` filters by them: with the future-investor default (`imp
+   OTHER steps/5/note
+     - She holds THYAO now: stories about a position pass any level (`relevant`).
+     + She holds THYAO now: the negative transitions of stories about a position pass any level (`relevant`; K42/A22: births still go through the level).
+   OTHER steps/7/expect
+     - [{'conn': 'a', 'msg': {'event': {'capsule': {'born_bar': 124, 'confirmations': 3, 'direction': 'down', 'finding': 'fnd.THYAO.breakout.down.124', 'id': 'cap.THYAO.breakout.down.124', 'importance': 3.599202977519779, 'instrument': 'THYAO', 'kind': 'breakout', 'l
+     + [{'conn': 'a', 'msg': {'event': {'capsule': {'born_bar': 124, 'confirmations': 3, 'direction': 'down', 'finding': 'fnd.THYAO.breakout.down.124', 'id': 'cap.THYAO.breakout.down.124', 'importance': 3.623831857411817, 'instrument': 'THYAO', 'kind': 'breakout', 'l
+   OTHER steps/7/note
+     - A tier-3 RSI extreme passes because of the position.
+     + K42/A22: the tier-3 RSI extreme born on this bar does not reach her although she holds THYAO (a birth goes through the level); the tier-1 breakout's transition does.
+   OTHER steps/12/expect/0/msg/data/capsules
+     - [{'born_bar': 124, 'confirmations': 3, 'direction': 'down', 'finding': 'fnd.THYAO.breakout.down.124', 'id': 'cap.THYAO.breakout.down.124', 'importance': 3.599202977519779, 'instrument': 'THYAO', 'kind': 'breakout', 'last_bar': 127, 'ledger_at_birth': {'n': 8, 
+     + [{'born_bar': 124, 'confirmations': 3, 'direction': 'down', 'finding': 'fnd.THYAO.breakout.down.124', 'id': 'cap.THYAO.breakout.down.124', 'importance': 3.623831857411817, 'instrument': 'THYAO', 'kind': 'breakout', 'last_bar': 127, 'ledger_at_birth': {'n': 6, 
+== fixtures/protocol/conformance/42-capsule-candidate.json: 8 changed leaves
+       1 k42-field:importance
+       1 k42-field:n
+       1 k42-field:realized
+       1 k42-field:rows
+       1 k42-field:validity
+       3 sentence: karne clause only
+== fixtures/protocol/conformance/43-capsule-retract.json: 73 changed leaves
+       1 k42-field:condition
+      10 k42-field:importance
+       1 k42-field:ledger_key
+      11 k42-field:n
+      11 k42-field:realized
+       1 k42-field:resolution
+       1 k42-field:rows
+      10 k42-field:validity
+      27 sentence: karne clause only
+== fixtures/protocol/conformance/44-capsule-selectors-bound.json: 13 changed leaves
+       2 k42-field:condition
+       1 k42-field:expected
+       2 k42-field:importance
+       2 k42-field:ledger_key
+       2 k42-field:n
+       2 k42-field:resolution
+       2 sentence: karne clause only
+== fixtures/views/c1-sentence.json: 1 changed leaves
+       1 sentence: karne clause only
+== fixtures/views/docs/r3-breakout.json: 9 changed leaves
+       1 k42-field:condition
+       1 k42-field:confidence
+       1 k42-field:ledger_key
+       1 k42-field:n
+       1 k42-field:realized
+       1 k42-field:resolution
+       1 k42-field:title
+       2 sentence: karne clause only
+== fixtures/views/docs/r3-divergence.json: 8 changed leaves
+       1 k42-field:confidence
+       1 k42-field:ledger_key
+       1 k42-field:n
+       1 k42-field:realized
+       1 k42-field:resolution
+       1 k42-field:title
+       2 sentence: karne clause only
+== fixtures/views/docs/r3-squeeze.json: 3 changed leaves
+       1 k42-field:ledger_key
+       1 k42-field:resolution
+       1 k42-field:title

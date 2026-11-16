@@ -1,0 +1,13 @@
+before hello: {"type":"error","id":"x","error":{"code":"handshake","message":"the first message on a connection must be `hello`","hint":"Send {\"type\":\"hello\",\"protocol\":\"qp/0\",\"principal\":…,\"surface\":{\"kind\":…}} first."}}
+{"date":"2023-13-40","kind":"seek"} -> ERROR "invalid" "/control/date" "`date`: invalid date `2023-13-40` (expected YYYY-MM-DD)"
+{"date":"2031-01-01","kind":"seek"} -> step 180 / 180 t 1677250800000 done true reset null epoch 0 (+0 lines)
+{"date":"2001-01-01","kind":"seek"} -> step 0 / 180 t 1674802800000 done false reset true epoch 1 (+0 lines)
+{"kind":"seek","t":-5} -> step 0 / 180 t 1674802800000 done false reset null epoch 1 (+0 lines)
+{"kind":"seek","step":999999} -> step 180 / 180 t 1677250800000 done true reset null epoch 1 (+0 lines)
+{"kind":"step","n":0} -> ERROR "invalid" "/control/n" "`n` is 0; take 1 to 100000 steps"
+{"kind":"speed","steps_per_s":0.0} -> ERROR "invalid" "/control/steps_per_s" "speed 0 is not in (0, 1000] steps per second"
+{"kind":"speed","steps_per_s":1000000000.0} -> ERROR "invalid" "/control/steps_per_s" "speed 1000000000 is not in (0, 1000] steps per second"
+{"kind":"seek","step":3} -> step 3 / 180 t 1675069200000 done false reset true epoch 2 (+0 lines)
+{"kind":"seek","step":3} -> step 3 / 180 t 1675069200000 done false reset null epoch 2 (+0 lines)
+{"kind":"seek"} -> ERROR "invalid" "/control" "`seek` takes exactly one of `t`, `date`, `step`"
+{"extra":1,"kind":"step","n":5} -> ERROR "schema" "/control/extra" "unknown field `extra`"

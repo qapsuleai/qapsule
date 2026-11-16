@@ -1,0 +1,2 @@
+qp replay local (aggregate): source Local (synthetic: false) | 10 instruments, interval 1d, fine Some("1h"), days fine/ohlc/bar 640/0/0 | build 512.1 ms | 200 steps, 2000 events, 334 lines in 1490.6 ms: 7.453 ms/step, 66.5 ms per virtual day (8.9 steps/day) | log 211 entries, 3414 capsules, 0 host notices
+two runs cmp: byte-equal (338 lines, 454959 bytes); controls: [{"at":3,"control":{"kind":"speed","steps_per_s":20}}, {"at":40,"control":{"kind":"seek","date":"2025-06-02"}}, {"at":60,"control":{"kind":"seek","step":10}}, {"at":25,"control":{"kind":"step","n":5}}]

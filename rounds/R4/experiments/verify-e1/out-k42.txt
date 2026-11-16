@@ -1,0 +1,5 @@
+A23 births 846 key prefix ok 846 bad 0; ledger_at_birth recomputed from same-key closes strictly before birth: ok 846 bad 0; births where an undirected count would differ: 806
+A23 distinct keys: breakout/down/breakout.range@1, breakout/up/breakout.range@1, continuation/down/continuation.ma_stack@1, continuation/up/continuation.ma_stack@1, extreme/down/extreme.rsi@1, extreme/up/extreme.rsi@1, flow/down/flow.volume_surge@1, flow/neutral/flow.volume_surge@1, flow/up/flow.volume_surge@1, reversal/down/reversal.rsi_divergence@1, reversal/up/reversal.rsi_divergence@1, squeeze/neutral/squeeze.bandwidth@1
+look-ahead: events up to cutoff (bar 300): 1562 vs 1562 equal=true ; whole run differs after cutoff=true
+look-ahead: ledger_stat(key, t_cut] equal for 12 keys, differ 0
+look-ahead: births <= cutoff with ledger_at_birth/importance/tier equal: true

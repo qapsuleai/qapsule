@@ -1,0 +1,289 @@
+[
+  {
+    "header": "Elindeki hisselerde yeni"
+  },
+  {
+    "id": "cap.SYN09.flow.up.183",
+    "mark": "yeni · tutmadı",
+    "relevant": true,
+    "scene": true,
+    "target": "face:cap.SYN09.flow.up.183",
+    "text": "SYN09'de 3 bar önce hacim (3.331.559.344) ortalamasının (230.493.601) belirgin üstüne çıktı: para girişi. Sinyal bu barda geçersiz oldu; artık geçerli değil. Geçmişte bu sinyal 33 seferin 16'sında beklendiği gibi sonuçlandı."
+  },
+  {
+    "header": "Diğerleri, geçmişte en çok tutan önce"
+  },
+  {
+    "id": "cap.SYN22.continuation.down.108",
+    "relevant": false,
+    "scene": true,
+    "target": "face:cap.SYN22.continuation.down.108",
+    "text": "SYN22 78 bardır kısa ortalamanın (46,45) altında; şu an 34,37. Düşüş eğilimi sürüyor. Beklenen sonuç 73 bar önce gerçekleşti. Geçmişte bu sinyal 33 seferin 20'sinde beklendiği gibi sonuçlandı."
+  },
+  {
+    "id": "cap.SYN22.continuation.down.90",
+    "relevant": false,
+    "scene": true,
+    "target": "face:cap.SYN22.continuation.down.90",
+    "text": "SYN22 96 bardır kısa ortalamanın (48,88) altında; şu an 34,37. Düşüş eğilimi sürüyor. Beklenen sonuç 94 bar önce gerçekleşti. Geçmişte bu sinyal 22 seferin 13'ünde beklendiği gibi sonuçlandı."
+  },
+  {
+    "id": "cap.SYN26.breakout.down.47",
+    "relevant": false,
+    "scene": true,
+    "target": "face:cap.SYN26.breakout.down.47",
+    "text": "SYN26 139 bar önce 110,95'teki desteği aşağı kırdı (kapanış 108,38): aşağı kırılım. Sinyal 137 bar önce geçersiz oldu; artık geçerli değil. Geçmişte bu sinyal 41 seferin 24'ünde beklendiği gibi sonuçlandı."
+  },
+  {
+    "id": "cap.SYN26.breakout.down.46",
+    "relevant": false,
+    "scene": true,
+    "target": "face:cap.SYN26.breakout.down.46",
+    "text": "SYN26 140 bar önce 111,73'teki desteği aşağı kırdı (kapanış 111,20): aşağı kırılım. Beklenen sonuç 139 bar önce gerçekleşti. Geçmişte bu sinyal 40 seferin 23'ünde beklendiği gibi sonuçlandı."
+  },
+  {
+    "id": "cap.SYN28.continuation.down.118",
+    "relevant": false,
+    "scene": true,
+    "target": "face:cap.SYN28.continuation.down.118",
+    "text": "SYN28 68 bar önce kısa ortalamanın (95,70) altına indi, 60 bar önce yeniden üstüne çıktı; şu an 110,12, artık kısa ortalamanın altında değil. Düşüş eğilimi sona erdi. Sinyal 56 bar önce geçersiz oldu. Geçmişte bu sinyal 54 seferin 30'unda beklendiği gibi sonuçlandı."
+  },
+  {
+    "id": "cap.SYN26.breakout.down.51",
+    "relevant": false,
+    "scene": true,
+    "target": "face:cap.SYN26.breakout.down.51",
+    "text": "SYN26 135 bar önce 108,31'deki desteği aşağı kırdı (kapanış 100,90): aşağı kırılım. Sinyal 132 bar önce geçersiz oldu; artık geçerli değil. Geçmişte bu sinyal 51 seferin 28'inde beklendiği gibi sonuçlandı."
+  },
+  {
+    "id": "cap.SYN12.breakout.down.129",
+    "relevant": true,
+    "scene": true,
+    "target": "face:cap.SYN12.breakout.down.129",
+    "text": "SYN12 57 bar önce 20,25'teki desteği aşağı kırdı (kapanış 19,78): aşağı kırılım. Sinyalin 10 barlık ömrü 47 bar önce sonuçsuz doldu; artık geçerli değil. Geçmişte bu sinyal 203 seferin 110'unda beklendiği gibi sonuçlandı."
+  },
+  {
+    "id": "cap.SYN02.breakout.down.126",
+    "relevant": false,
+    "scene": true,
+    "target": "face:cap.SYN02.breakout.down.126",
+    "text": "SYN02 60 bar önce 148,30'daki desteği aşağı kırdı (kapanış 134,97): aşağı kırılım. Beklenen sonuç 59 bar önce gerçekleşti. Geçmişte bu sinyal 199 seferin 107'sinde beklendiği gibi sonuçlandı."
+  },
+  {
+    "id": "cap.SYN02.breakout.down.127",
+    "relevant": false,
+    "scene": true,
+    "target": "face:cap.SYN02.breakout.down.127",
+    "text": "SYN02 59 bar önce 134,14'teki desteği aşağı kırdı (kapanış 122,15): aşağı kırılım. Sinyalin 10 barlık ömrü 49 bar önce sonuçsuz doldu; artık geçerli değil. Geçmişte bu sinyal 201 seferin 108'inde beklendiği gibi sonuçlandı."
+  },
+  {
+    "id": "cap.SYN09.breakout.down.127",
+    "relevant": true,
+    "scene": true,
+    "target": "face:cap.SYN09.breakout.down.127",
+    "text": "SYN09 59 bar önce 32,74'teki desteği aşağı kırdı (kapanış 30,53): aşağı kırılım. Sinyal 57 bar önce geçersiz oldu; artık geçerli değil. Geçmişte bu sinyal 201 seferin 108'inde beklendiği gibi sonuçlandı."
+  },
+  {
+    "id": "cap.SYN25.breakout.down.170",
+    "relevant": false,
+    "scene": true,
+    "target": "face:cap.SYN25.breakout.down.170",
+    "text": "SYN25 16 bar önce 141,34'teki desteği aşağı kırdı (kapanış 138,23): aşağı kırılım. Beklenen sonuç 14 bar önce gerçekleşti. Geçmişte bu sinyal 235 seferin 123'ünde beklendiği gibi sonuçlandı."
+  },
+  {
+    "id": "cap.SYN12.breakout.down.107",
+    "relevant": true,
+    "scene": true,
+    "target": "face:cap.SYN12.breakout.down.107",
+    "text": "SYN12 79 bar önce 22,35'teki desteği aşağı kırdı (kapanış 21,34): aşağı kırılım. Beklenen sonuç 77 bar önce gerçekleşti. Geçmişte bu sinyal 44 seferin 23'ünde beklendiği gibi sonuçlandı."
+  },
+  {
+    "id": "cap.SYN26.breakout.down.175",
+    "relevant": false,
+    "scene": true,
+    "target": "face:cap.SYN26.breakout.down.175",
+    "text": "SYN26 11 bar önce 91,22'deki desteği aşağı kırdı (kapanış 86,04): aşağı kırılım. Beklenen sonuç 8 bar önce gerçekleşti. Geçmişte bu sinyal 243 seferin 127'sinde beklendiği gibi sonuçlandı."
+  },
+  {
+    "id": "cap.SYN25.breakout.down.167",
+    "relevant": false,
+    "scene": true,
+    "target": "face:cap.SYN25.breakout.down.167",
+    "text": "SYN25 19 bar önce 147,03'teki desteği aşağı kırdı (kapanış 142,95): aşağı kırılım. Beklenen sonuç 16 bar önce gerçekleşti. Geçmişte bu sinyal 234 seferin 122'sinde beklendiği gibi sonuçlandı."
+  },
+  {
+    "id": "cap.SYN25.breakout.down.93",
+    "relevant": false,
+    "scene": true,
+    "target": "face:cap.SYN25.breakout.down.93",
+    "text": "SYN25 93 bar önce 173,47'deki desteği aşağı kırdı (kapanış 160,80): aşağı kırılım. Beklenen sonuç 91 bar önce gerçekleşti. Geçmişte bu sinyal 104 seferin 54'ünde beklendiği gibi sonuçlandı."
+  },
+  {
+    "id": "cap.SYN22.breakout.down.90",
+    "relevant": false,
+    "scene": true,
+    "target": "face:cap.SYN22.breakout.down.90",
+    "text": "SYN22 96 bar önce 47,46'daki desteği aşağı kırdı (kapanış 46,34): aşağı kırılım. Beklenen sonuç 94 bar önce gerçekleşti. Geçmişte bu sinyal 80 seferin 38'inde beklendiği gibi sonuçlandı."
+  },
+  {
+    "id": "cap.SYN28.breakout.up.177",
+    "relevant": false,
+    "scene": true,
+    "target": "face:cap.SYN28.breakout.up.177",
+    "text": "SYN28 9 bar önce 98,01'deki direnci yukarı kırdı (kapanış 101,29): yukarı kırılım. Beklenen sonuç 7 bar önce gerçekleşti. Geçmişte bu sinyal 193 seferin 86'sında beklendiği gibi sonuçlandı."
+  },
+  {
+    "id": "cap.SYN05.breakout.up.174",
+    "relevant": false,
+    "scene": true,
+    "target": "face:cap.SYN05.breakout.up.174",
+    "text": "SYN05 12 bar önce 55,68'deki direnci yukarı kırdı (kapanış 58,45): yukarı kırılım. Beklenen sonuç 11 bar önce gerçekleşti. Geçmişte bu sinyal 188 seferin 82'sinde beklendiği gibi sonuçlandı."
+  },
+  {
+    "id": "cap.SYN03.breakout.up.170",
+    "relevant": false,
+    "scene": true,
+    "target": "face:cap.SYN03.breakout.up.170",
+    "text": "SYN03 16 bar önce 145,75'teki direnci yukarı kırdı (kapanış 151,23): yukarı kırılım. Beklenen sonuç 15 bar önce gerçekleşti. Geçmişte bu sinyal 181 seferin 78'inde beklendiği gibi sonuçlandı."
+  },
+  {
+    "id": "cap.SYN09.breakout.up.143",
+    "relevant": true,
+    "scene": true,
+    "target": "face:cap.SYN09.breakout.up.143",
+    "text": "SYN09 43 bar önce 34,43'teki direnci yukarı kırdı (kapanış 36,81): yukarı kırılım. Sinyal 41 bar önce geçersiz oldu; artık geçerli değil. Geçmişte bu sinyal 129 seferin 54'ünde beklendiği gibi sonuçlandı."
+  },
+  {
+    "id": "cap.SYN12.breakout.up.150",
+    "relevant": true,
+    "scene": true,
+    "target": "face:cap.SYN12.breakout.up.150",
+    "text": "SYN12 36 bar önce 20,54'teki direnci yukarı kırdı (kapanış 21,23): yukarı kırılım. Sinyal 32 bar önce geçersiz oldu; artık geçerli değil. Geçmişte bu sinyal 146 seferin 61'inde beklendiği gibi sonuçlandı."
+  },
+  {
+    "id": "cap.SYN28.continuation.down.166",
+    "relevant": false,
+    "scene": true,
+    "target": "face:cap.SYN28.continuation.down.166",
+    "text": "SYN28 20 bar önce kısa ortalamanın (97,32) altına indi, 10 bar önce yeniden üstüne çıktı; şu an 110,12, artık kısa ortalamanın altında değil. Düşüş eğilimi sona erdi. Sinyal 9 bar önce geçersiz oldu. Geçmişte bu sinyal 97 seferin 40'ında beklendiği gibi sonuçlandı."
+  },
+  {
+    "id": "cap.SYN05.breakout.up.127",
+    "relevant": false,
+    "scene": true,
+    "target": "face:cap.SYN05.breakout.up.127",
+    "text": "SYN05 59 bar önce 49,56'daki direnci yukarı kırdı (kapanış 51,87): yukarı kırılım. Sinyal 55 bar önce geçersiz oldu; artık geçerli değil. Geçmişte bu sinyal 103 seferin 42'sinde beklendiği gibi sonuçlandı."
+  },
+  {
+    "id": "cap.SYN12.breakout.up.72",
+    "relevant": true,
+    "scene": true,
+    "target": "face:cap.SYN12.breakout.up.72",
+    "text": "SYN12 114 bar önce 22,81'deki direnci yukarı kırdı (kapanış 23,11): yukarı kırılım. Beklenen sonuç 111 bar önce gerçekleşti. Geçmişte bu sinyal 24 seferin 7'sinde beklendiği gibi sonuçlandı."
+  },
+  {
+    "id": "cap.SYN25.breakout.down.26",
+    "relevant": false,
+    "scene": true,
+    "target": "face:cap.SYN25.breakout.down.26",
+    "text": "SYN25 160 bar önce 178,70'teki desteği aşağı kırdı (kapanış 177,45): aşağı kırılım. Sinyal 157 bar önce geçersiz oldu; artık geçerli değil. Karnesi henüz az örnekli: 5 seferin 4'ünde tuttu."
+  },
+  {
+    "id": "cap.SYN26.reversal.up.73",
+    "relevant": false,
+    "scene": true,
+    "target": "face:cap.SYN26.reversal.up.73",
+    "text": "SYN26'de 113 bar önce yukarı dönüş işareti çıktı: fiyat yeni dip yaparken RSI daha yüksek dip yaptı (fiyat 85,44, RSI 32,2). Beklenen sonuç 110 bar önce gerçekleşti. Karnesi henüz az örnekli: 11 seferin 3'ünde tuttu."
+  },
+  {
+    "id": "cap.SYN04.breakout.up.105",
+    "relevant": false,
+    "scene": true,
+    "target": "face:cap.SYN04.breakout.up.105",
+    "text": "SYN04 81 bar önce 35,18'deki direnci yukarı kırdı (kapanış 36,99): yukarı kırılım. Sinyal 78 bar önce geçersiz oldu; artık geçerli değil. Karnesi henüz az örnekli: 18 seferin 8'inde tuttu."
+  },
+  {
+    "id": "cap.SYN04.breakout.up.97",
+    "relevant": false,
+    "scene": true,
+    "target": "face:cap.SYN04.breakout.up.97",
+    "text": "SYN04 89 bar önce 32,28'deki direnci yukarı kırdı (kapanış 33,65): yukarı kırılım. Beklenen sonuç 85 bar önce gerçekleşti. Karnesi henüz az örnekli: 16 seferin 7'sinde tuttu."
+  },
+  {
+    "id": "cap.SYN02.breakout.up.48",
+    "relevant": false,
+    "scene": true,
+    "target": "face:cap.SYN02.breakout.up.48",
+    "text": "SYN02 138 bar önce 129,62'deki direnci yukarı kırdı (kapanış 134,33): yukarı kırılım. Sinyal 135 bar önce geçersiz oldu; artık geçerli değil. Karnesi henüz az örnekli: 2 seferin 0'ında tuttu."
+  },
+  {
+    "id": "cap.SYN02.breakout.up.55",
+    "relevant": false,
+    "scene": true,
+    "target": "face:cap.SYN02.breakout.up.55",
+    "text": "SYN02 131 bar önce 136,50'deki direnci yukarı kırdı (kapanış 145,23): yukarı kırılım. Sinyal 130 bar önce geçersiz oldu; artık geçerli değil. Karnesi henüz az örnekli: 3 seferin 0'ında tuttu."
+  },
+  {
+    "id": "cap.SYN04.breakout.up.23",
+    "relevant": false,
+    "scene": true,
+    "target": "face:cap.SYN04.breakout.up.23",
+    "text": "SYN04 163 bar önce 33,59'daki direnci yukarı kırdı (kapanış 33,67): yukarı kırılım. Sinyal 161 bar önce geçersiz oldu; artık geçerli değil. Henüz karnesi yok."
+  },
+  {
+    "id": "cap.SYN25.continuation.down.76",
+    "relevant": false,
+    "scene": true,
+    "target": "face:cap.SYN25.continuation.down.76",
+    "text": "SYN25 110 bar önce kısa ortalamanın (175,84) altına indi, 106 bar önce yeniden üstüne çıktı; şu an 118,11, artık kısa ortalamanın altında değil. Düşüş eğilimi sona erdi. Sinyal 103 bar önce geçersiz oldu. Karnesi henüz az örnekli: 17 seferin 8'inde tuttu."
+  },
+  {
+    "id": "cap.SYN26.flow.down.27",
+    "relevant": false,
+    "scene": true,
+    "target": "face:cap.SYN26.flow.down.27",
+    "text": "SYN26'de 159 bar önce hacim (7.282.406.201) ortalamasının (961.051.290) belirgin üstüne çıktı: para çıkışı. Beklenen sonuç 155 bar önce gerçekleşti. Karnesi henüz az örnekli: 2 seferin 1'inde tuttu."
+  },
+  {
+    "id": "cap.SYN12.flow.up.35",
+    "relevant": true,
+    "scene": true,
+    "target": "face:cap.SYN12.flow.up.35",
+    "text": "SYN12'de 151 bar önce hacim (703.619.790) ortalamasının (71.080.716) belirgin üstüne çıktı: para girişi. Sinyal 146 bar önce geçersiz oldu; artık geçerli değil. Karnesi henüz az örnekli: 1 seferin 1'inde tuttu."
+  },
+  {
+    "id": "cap.SYN25.squeeze.neutral.147",
+    "relevant": false,
+    "scene": true,
+    "target": "face:cap.SYN25.squeeze.neutral.147",
+    "text": "SYN25'de 39 bar önce sıkışma (yön belirsiz) başladı; artık sürmüyor. Sıkışma (yön belirsiz) sona erdi. Sinyal 19 bar önce geçersiz oldu. Henüz karnesi yok."
+  },
+  {
+    "id": "cap.SYN02.squeeze.neutral.184",
+    "relevant": false,
+    "scene": true,
+    "target": "face:cap.SYN02.squeeze.neutral.184",
+    "text": "SYN02'de 2 bardır sıkışma (yön belirsiz) sürüyor. Karnesi henüz az örnekli: 11 seferin 4'ünde tuttu."
+  },
+  {
+    "id": "cap.SYN02.continuation.up.78",
+    "relevant": false,
+    "scene": true,
+    "target": "face:cap.SYN02.continuation.up.78",
+    "text": "SYN02 108 bardır kısa ortalamanın (148,57) üstünde; şu an 123,09. Yükseliş eğilimi sürüyor. Beklenen sonuç 106 bar önce gerçekleşti. Karnesi henüz az örnekli: 2 seferin 1'inde tuttu."
+  },
+  {
+    "id": "cap.SYN28.continuation.up.49",
+    "relevant": false,
+    "scene": true,
+    "target": "face:cap.SYN28.continuation.up.49",
+    "text": "SYN28 137 bardır kısa ortalamanın (88,78) üstünde; şu an 110,12. Yükseliş eğilimi sürüyor. Beklenen sonuç 132 bar önce gerçekleşti. Henüz karnesi yok."
+  },
+  {
+    "id": "cap.SYN03.continuation.down.108",
+    "relevant": false,
+    "scene": true,
+    "target": "face:cap.SYN03.continuation.down.108",
+    "text": "SYN03 78 bar önce kısa ortalamanın (146,13) altına indi; şu an 171,32, artık kısa ortalamanın altında değil. Düşüş eğilimi sona erdi. Sinyal 74 bar önce geçersiz oldu. Karnesi henüz az örnekli: 3 seferin 2'sinde tuttu."
+  }
+]

@@ -1,0 +1,16 @@
+Yıllardır borsada işlem yapıyorsun; teknik analize, mum grafiklerine ve indikatörlere alışkınsın. Telefonunda bir piyasa uygulamasına bakıyorsun. Gördüğünü okuyup cevapla.
+
+Bu bir piyasa bilgi uygulamasının ekran görüntüsü.
+
+Aşağıdaki görüntüler aynı ekranın aşağı kaydırılmış hâlleridir, sırayla: ekran 1 = /private/var/folders/3h/tkg8gmr96tscr2t77stj77v40000gn/T/rdr.STM6Hx/c6640e72-1.png, ekran 2 = /private/var/folders/3h/tkg8gmr96tscr2t77stj77v40000gn/T/rdr.STM6Hx/c6640e72-2.png, ekran 3 = /private/var/folders/3h/tkg8gmr96tscr2t77stj77v40000gn/T/rdr.STM6Hx/c6640e72-3.png, ekran 4 = /private/var/folders/3h/tkg8gmr96tscr2t77stj77v40000gn/T/rdr.STM6Hx/c6640e72-4.png, ekran 5 = /private/var/folders/3h/tkg8gmr96tscr2t77stj77v40000gn/T/rdr.STM6Hx/c6640e72-5.png, ekran 6 = /private/var/folders/3h/tkg8gmr96tscr2t77stj77v40000gn/T/rdr.STM6Hx/c6640e72-6.png. (Read aracıyla aç; ekran 1 en üsttür.) Kartların sol üstündeki kısa etiketler kartları adlandırmak içindir.
+
+Uygulamaya en son bir önceki işlem gününde, aşağı yukarı bu saatte bakmıştın; şimdi yeniden açtın.
+
+G1 Son baktığından beri ne değişti? Değişen her enstrümanı ve değişimin yönünü şu seçeneklerden seç (birden çok seçebilirsin, hiçbiri de olabilir): "SYN02 yukarı" | "SYN02 aşağı" | "SYN02 yönsüz" | "SYN03 yukarı" | "SYN03 aşağı" | "SYN03 yönsüz" | "SYN04 yukarı" | "SYN04 aşağı" | "SYN04 yönsüz" | "SYN05 yukarı" | "SYN05 aşağı" | "SYN05 yönsüz" | "SYN09 yukarı" | "SYN09 aşağı" | "SYN09 yönsüz" | "SYN12 yukarı" | "SYN12 aşağı" | "SYN12 yönsüz" | "SYN22 yukarı" | "SYN22 aşağı" | "SYN22 yönsüz" | "SYN25 yukarı" | "SYN25 aşağı" | "SYN25 yönsüz" | "SYN26 yukarı" | "SYN26 aşağı" | "SYN26 yönsüz" | "SYN28 yukarı" | "SYN28 aşağı" | "SYN28 yönsüz"
+G2 Elindeki hisseler: SYN09 ve SYN12. Bunlarda olumsuz bir şey var mı? Hangisinde: "SYN09" | "SYN12" | "ikisinde de" | "hiçbirinde" | "bilmiyorum". Ne: "zayıfladı" | "tutmadı, geçersiz oldu" | "geri çekildi" | "olumsuz bir şey yok" | "bilmiyorum"
+G3 En güvenilir kart hangisi? (etiketini yaz)
+
+Her görev için ayrıca cevabı hangi ekranda bulduğunu (ekran numaraları) ve cevap için bir kartı açman (dokunup ayrıntısına bakman) gerekir miydi, gerekirdiyse hangilerini (etiketler) yaz.
+
+Cevabını yalnız bir JSON nesnesi olarak ver, başka hiçbir şey yazma:
+{"G1": {"cevap": ["…"], "ekran": [1], "acmam_gerekirdi": []}, "G2": {"hangisi": "…", "ne": "…", "ekran": [1], "acmam_gerekirdi": []}, "G3": {"cevap": "…", "ekran": [1], "acmam_gerekirdi": []}, "not": "(isteğe bağlı, kısa)"}

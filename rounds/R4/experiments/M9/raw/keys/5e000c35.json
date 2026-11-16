@@ -1,0 +1,80 @@
+{
+  "experiment": "m9",
+  "design": "elikov",
+  "g1": [
+    "SYN09 yukarı"
+  ],
+  "instruments": [
+    "SYN02",
+    "SYN03",
+    "SYN04",
+    "SYN05",
+    "SYN09",
+    "SYN12",
+    "SYN22",
+    "SYN25",
+    "SYN26",
+    "SYN28"
+  ],
+  "g2_which": "SYN09",
+  "g2_what": "tutmadı, geçersiz oldu",
+  "g3": [
+    "NZ",
+    "MP"
+  ],
+  "labels": {
+    "cap.SYN02.breakout.down.126": "PV",
+    "cap.SYN02.breakout.down.127": "ZV",
+    "cap.SYN02.breakout.up.48": "SZ",
+    "cap.SYN02.breakout.up.55": "ZK",
+    "cap.SYN02.continuation.up.78": "MK",
+    "cap.SYN02.squeeze.neutral.184": "PS",
+    "cap.SYN03.breakout.up.170": "PR",
+    "cap.SYN03.continuation.down.108": "PM",
+    "cap.SYN04.breakout.up.105": "ZM",
+    "cap.SYN04.breakout.up.23": "RM",
+    "cap.SYN04.breakout.up.97": "SN",
+    "cap.SYN05.breakout.up.127": "KZ",
+    "cap.SYN05.breakout.up.174": "MT",
+    "cap.SYN09.breakout.down.127": "KR",
+    "cap.SYN09.breakout.up.143": "ZN",
+    "cap.SYN09.flow.up.183": "NM",
+    "cap.SYN12.breakout.down.107": "KL",
+    "cap.SYN12.breakout.down.129": "ZL",
+    "cap.SYN12.breakout.up.150": "LS",
+    "cap.SYN12.breakout.up.72": "TR",
+    "cap.SYN12.flow.up.35": "MS",
+    "cap.SYN22.breakout.down.90": "ZS",
+    "cap.SYN22.continuation.down.108": "MP",
+    "cap.SYN22.continuation.down.90": "LR",
+    "cap.SYN25.breakout.down.167": "ZT",
+    "cap.SYN25.breakout.down.170": "RP",
+    "cap.SYN25.breakout.down.26": "NZ",
+    "cap.SYN25.breakout.down.93": "LK",
+    "cap.SYN25.continuation.down.76": "MR",
+    "cap.SYN25.squeeze.neutral.147": "NV",
+    "cap.SYN26.breakout.down.175": "VS",
+    "cap.SYN26.breakout.down.46": "VR",
+    "cap.SYN26.breakout.down.47": "NK",
+    "cap.SYN26.breakout.down.51": "PK",
+    "cap.SYN26.flow.down.27": "KM",
+    "cap.SYN26.reversal.up.73": "VZ",
+    "cap.SYN28.breakout.up.177": "ZR",
+    "cap.SYN28.continuation.down.118": "VL",
+    "cap.SYN28.continuation.down.166": "PL",
+    "cap.SYN28.continuation.up.49": "SR"
+  },
+  "needed": {
+    "G1": [
+      "NM"
+    ],
+    "G2": [
+      "NM"
+    ],
+    "G3": [
+      "NZ",
+      "MP"
+    ]
+  },
+  "rules": 5
+}

@@ -35,6 +35,39 @@ pub struct FeedCtx<'a> {
     pub fresh: &'a [bool],
     /// The replay clock now (ms), if known.
     pub now: Option<i64>,
+    /// (R4/S1) Per item (same order): the local wall time of `CapsuleItem.t` in the
+    /// reader's display zone — the core reads the zone's calendar (`qp_calendar`); a layout
+    /// never assumes a zone offset.
+    pub local: &'a [LocalStamp],
+    /// (R4/S1) Local wall time of `now`, if known.
+    pub now_local: Option<LocalStamp>,
+    /// (R4/S1) Local wall time of `seen`, if set.
+    pub seen_local: Option<LocalStamp>,
+}
+
+/// (R4/S1) A local wall time: day number (days since 1970-01-01 on the local calendar) and
+/// minute of the day. The core fills it from the display zone; weekdays follow from the day
+/// number (1970-01-01 was a Thursday).
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
+pub struct LocalStamp {
+    /// Local day number.
+    pub day: i64,
+    /// Minute of the local day, `0..1440`.
+    pub minute: u32,
+}
+
+impl LocalStamp {
+    /// The local wall time of UTC instant `t` (ms) at a fixed offset east of UTC (ms):
+    /// for a caller that already knows the zone's offset at `t` (and for tests).
+    #[must_use]
+    pub fn at_offset(t: i64, offset_ms: i64) -> Self {
+        const MS_PER_DAY: i64 = 86_400_000;
+        let l = t + offset_ms;
+        Self {
+            day: l.div_euclid(MS_PER_DAY),
+            minute: u32::try_from(l.rem_euclid(MS_PER_DAY) / 60_000).unwrap_or(0),
+        }
+    }
 }
 
 /// One row of the feed, top to bottom.
@@ -68,8 +101,14 @@ pub struct FeedLayout {
     pub layout: LayoutFn,
 }
 
-/// The default layout.
+/// The protocol's default layout (`ViewState.feed` absent; a bare connection).
 pub const DEFAULT_FEED: &str = "r3";
+
+/// (R4/S1) The layout the presentation shell asks for when the reader chose none (M9's
+/// pick, `rounds/R4/experiments/M9/RESULTS.md`). The shell core sends it with the `style`
+/// gesture at start; the protocol default ([`DEFAULT_FEED`]) does not change, so bare
+/// connections, transcripts and existing goldens stay byte-identical.
+pub const PRESENTED_FEED: &str = "elikov";
 
 /// `r3`: the `capsules` order, nothing added.
 fn r3(c: &FeedCtx<'_>) -> Vec<FeedRow> {
@@ -155,6 +194,7 @@ mod tests {
     #[test]
     fn registry_is_well_formed() {
         assert_eq!(LAYOUTS[0].name, DEFAULT_FEED);
+        assert!(is_feed(PRESENTED_FEED));
         let n = names();
         for (i, a) in n.iter().enumerate() {
             assert!(!n[i + 1..].contains(a), "duplicate layout {a}");
@@ -165,8 +205,18 @@ mod tests {
             seen: None,
             fresh: &[],
             now: None,
+            local: &[],
+            now_local: None,
+            seen_local: None,
         };
         assert!(layout(None, &ctx).is_empty());
+        assert_eq!(
+            LocalStamp::at_offset(1_695_162_600_000, 3 * 3_600_000),
+            LocalStamp {
+                day: 19_620,
+                minute: 90
+            }
+        );
         assert!(!is_feed("nope"));
     }
 }

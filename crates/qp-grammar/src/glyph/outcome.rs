@@ -40,8 +40,14 @@ use super::{Alphabet, GlyphBox};
 use crate::error::{ErrorKind, GrammarError};
 use crate::theme::Theme;
 
-/// The default outcome style (the R3 drawing).
+/// The default outcome style (the R3 drawing; `ViewState.outcome` and
+/// `CompileOptions::outcome` absent).
 pub const DEFAULT_OUTCOME: &str = "r3";
+
+/// (R4/S1) The style the presentation shell asks for when the reader chose none (M11's
+/// pick, `rounds/R4/experiments/M11/RESULTS.md`). Sent by the shell core with the `style`
+/// gesture at start; [`DEFAULT_OUTCOME`] stays the protocol's and the compiler's default.
+pub const PRESENTED_OUTCOME: &str = "tg5";
 
 /// Word limit of [`OutcomeStyle::legend`] (SPEC M11 (b): one sentence, ≤ 30 words).
 pub const LEGEND_MAX_WORDS: usize = 30;
@@ -107,8 +113,7 @@ pub use tg5::Tg5;
 /// Every outcome style, by setting name. **Alternatives add one line here.**
 pub static STYLES: &[&dyn OutcomeStyle] = &[
     &R3, // --- M11 alternatives: one line each, e.g. `&MyStyle,`
-    &Muhrak,
-    &Tg5,
+    &Muhrak, &Tg5,
 ];
 
 /// The names in [`STYLES`], in order.
@@ -172,6 +177,7 @@ mod tests {
     fn registry_names_are_unique_and_valid() {
         let n = names();
         assert_eq!(n[0], DEFAULT_OUTCOME);
+        assert!(by_name(PRESENTED_OUTCOME).is_ok());
         let mut s = n.clone();
         s.sort_unstable();
         s.dedup();

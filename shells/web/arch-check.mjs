@@ -16,7 +16,7 @@ export const ALLOWED_CORE = new Set([
   'transition_from', 'metric_frame', 'metric_span', 'metric_mark', 'metric_env', 'metrics',
   'metrics_rows', 'digests', 'png', 'sent',
   // R4/H-M8910
-  'set_look', 'mark_seen', 'open_capsule', 'set_dpr', 'face_size', 'choices',
+  'set_look', 'mark_seen', 'seen_at', 'open_capsule', 'set_dpr', 'face_size', 'choices',
   'transition_progress', 'transition_frame',
 ]);
 

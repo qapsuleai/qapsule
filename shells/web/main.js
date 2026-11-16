@@ -21,6 +21,7 @@ const L = {
     disconnected: 'Bağlantı koptu; yeniden bağlanılıyor…',
     lan_warn: 'Uyarı: yerel ağdaki cihazlar bu gösterimi görebilir.',
     lan_hint: 'Telefondan açmak için gösterimi şöyle başlatın:',
+    seen: 'Son bakışımı şimdi işaretle', seen_done: 'Son bakış işaretlendi',
   },
   en: {
     synthetic: 'Synthetic data', tab_feed: 'Feed', tab_settings: 'Settings', tab_metrics: 'Metrics',
@@ -37,6 +38,7 @@ const L = {
     disconnected: 'Disconnected; reconnecting…',
     lan_warn: 'Warning: devices on the local network can see this demo.',
     lan_hint: 'To open it on a phone, start the demo with:',
+    seen: 'Mark my last look now', seen_done: 'Last look marked',
   },
 };
 
@@ -51,6 +53,14 @@ const ui = {
   transition: params.get('transition') || '',
   outcome: params.get('outcome') || '',
   anim: params.get('anim') !== '0',
+  // (R4/S1) Human-test settings: last look (`now` or a step) and the audience, given to
+  // the core as they are (it reads the comma lists); applied again on every start frame,
+  // so a backward seek (a new authority) keeps them.
+  seen: params.get('seen') || '',
+  group: params.get('group') || '',
+  watch: params.get('watch') || '',
+  long: params.get('long') || '',
+  short: params.get('short') || '',
 };
 const HINT = { capsule: 'hint_capsule', chart: 'hint_chart', evidence: 'hint_evidence' };
 // Face and scene sizes come from the core (`face_size`, `open().px/style`): the face
@@ -131,6 +141,8 @@ function start(frame) {
   fetch('pkg/sizes.json').then((r) => r.text()).then((s) => core.metric_env(s, navigator.userAgent)).catch(() => {});
   if (ui.theme === 'light' || ui.alphabet || ui.face) core.set_style(ui.face, ui.alphabet, ui.theme);
   if (ui.feed || ui.transition || ui.outcome) core.set_look(JSON.stringify({ feed: ui.feed, transition: ui.transition, outcome: ui.outcome }));
+  if (ui.watch || ui.long || ui.short || ui.group) core.set_audience(JSON.stringify({ group: ui.group, watch: ui.watch, long: ui.long, short: ui.short }));
+  if (ui.seen) core.seen_at(ui.seen);
   faces.clear();
   $('list').replaceChildren();
   $('banner').hidden = !info.synthetic;
@@ -513,6 +525,7 @@ function wire() {
   $('s_noent').checked = ui.principal === 'visitor';
   $('s_noent').onchange = (e) => { ui.principal = e.target.checked ? 'visitor' : 'arkin'; connect(); };
   $('s_apply').onclick = applyAudience;
+  $('s_seen').onclick = () => { core.mark_seen(); flush(); toast(t('seen_done')); };
   $('m_copy').onclick = copyMetrics;
 }
 
@@ -624,6 +637,9 @@ window.qp = {
   // (R4/H-M8910) for the measurement harness (rounds/R4/experiments/harness/m8910):
   look: () => core.look(),
   seen: () => { core.mark_seen(); flush(); },
+  // (R4/S1) for tests/settings.mjs
+  audience: () => core.audience(),
+  choices: () => core.choices(),
   openCapsule: (id) => { core.open_capsule(id); flush(); },
   openTo: (to) => { core.open_to(to); flush(); },
   // Shows the last transition frozen at progress `p` (a value the harness gives).

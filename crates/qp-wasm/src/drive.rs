@@ -167,6 +167,8 @@ pub fn shell_less(host: &mut ReplayHost, principal: &str, lang: &str, script: &[
         &json!({"type":"hello","protocol":"qp/0","principal":principal,
             "surface":{"kind":"phone","screen":[390,844],"input":["touch"],"lang":lang}}),
     );
+    // (R4/S1) The presentation's settings, as the shell asks for them after `hello`.
+    a.input(host, ShellCore::presented_look());
     a.send(
         host,
         &json!({"type":"subscribe","id":"feed-topic","topic":{"kind":"capsules"}}),

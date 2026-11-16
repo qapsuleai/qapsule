@@ -93,8 +93,13 @@ pub struct TransitionDesign {
     pub frame: FrameFn,
 }
 
-/// The default design.
+/// The protocol's default design (`ViewState.transition` absent; a bare connection).
 pub const DEFAULT_TRANSITION: &str = "r3";
+
+/// (R4/S1) The design the presentation shell asks for when the reader chose none (M10's
+/// pick, `rounds/R4/experiments/M10/RESULTS.md`; `tutamir` second). Sent by the shell core
+/// with the `style` gesture at start; the protocol default ([`DEFAULT_TRANSITION`]) stays.
+pub const PRESENTED_TRANSITION: &str = "zumlak";
 
 /// The anchors of one side (`depth::transition_anchors`), `None` without a scene.
 #[must_use]
@@ -249,5 +254,6 @@ mod tests {
         assert_eq!(fh.elements[0].rect, [50.0, 75.0, 15.0, 15.0]);
         assert!((progress(None, 0.0, 130.0) - 0.5).abs() < 1e-12);
         assert_eq!(TRANSITIONS[0].name, DEFAULT_TRANSITION);
+        assert!(is_transition(PRESENTED_TRANSITION));
     }
 }

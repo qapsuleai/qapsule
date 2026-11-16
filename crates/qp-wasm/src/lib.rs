@@ -534,6 +534,12 @@ mod shell_binding {
             self.inner.mark_seen();
         }
 
+        /// (R4/S1) The page's `?seen=` (`now` or a step number): the last look is marked
+        /// when the replay is there.
+        pub fn seen_at(&mut self, step_or_now: &str) {
+            self.inner.seen_at(step_or_now);
+        }
+
         /// (R4/H-M8910) Open capsule `id` to its capsule depth.
         pub fn open_capsule(&mut self, id: &str) {
             self.inner.open_capsule(id);

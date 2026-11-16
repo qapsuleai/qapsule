@@ -15,41 +15,29 @@
 //! most. Empty sections have no header. A capsule about the reader's position or intent
 //! (`relevant`) carries the mark "pozisyonun" / "your position".
 //!
-//! Local day: the exchange's zone, `Europe/Istanbul`, fixed UTC+03:00 since 2016 (no
-//! daylight saving); the shell core's display zone is the same (`qp_wasm::shell::DISPLAY_TZ`).
-//! Integer arithmetic only; same items, language, `seen` and `now` → same rows.
+//! Local day: the core gives the local wall times (`FeedCtx::local`, `now_local`,
+//! `seen_local`; R4/S1) from the display zone's calendar (`Europe/Istanbul` in the
+//! presentation); the layout assumes no zone offset. Integer arithmetic only; same items,
+//! language, local times and `seen` → same rows.
 
 use qp_schema::protocol::{CapsuleItem, Language};
 
-use super::{FeedCtx, FeedRow};
+use super::{FeedCtx, FeedRow, LocalStamp};
 
 /// Rules / parameters: last-look section, calendar sections (today, yesterday, 7 days,
 /// earlier), position mark, zone offset.
 pub const RULES: u32 = 4;
 
-const MS_PER_MIN: i64 = 60_000;
-const MS_PER_DAY: i64 = 86_400_000;
-/// `Europe/Istanbul` (UTC+03:00, no daylight saving since 2016).
-const ZONE_OFFSET_MS: i64 = 3 * 60 * MS_PER_MIN;
 /// The rolling-week section covers this many local days back (yesterday excluded).
 const WEEK_DAYS: i64 = 7;
-
-fn local_ms(t: i64) -> i64 {
-    t + ZONE_OFFSET_MS
-}
-
-fn local_day(t: i64) -> i64 {
-    local_ms(t).div_euclid(MS_PER_DAY)
-}
 
 /// Monday = 0 (1970-01-01 was a Thursday).
 fn weekday(day: i64) -> usize {
     usize::try_from((day + 3).rem_euclid(7)).unwrap_or(0)
 }
 
-fn hhmm(t: i64) -> String {
-    let m = local_ms(t).rem_euclid(MS_PER_DAY) / MS_PER_MIN;
-    format!("{:02}:{:02}", m / 60, m % 60)
+fn hhmm(t: LocalStamp) -> String {
+    format!("{:02}:{:02}", t.minute / 60, t.minute % 60)
 }
 
 /// Sections after the last-look one, oldest last.
@@ -61,11 +49,11 @@ enum Section {
     Earlier,
 }
 
-fn section(t: i64, now: Option<i64>) -> Section {
-    let Some(now) = now else {
+fn section(t: Option<LocalStamp>, now: Option<LocalStamp>) -> Section {
+    let (Some(t), Some(now)) = (t, now) else {
         return Section::Earlier;
     };
-    match local_day(now) - local_day(t) {
+    match now.day - t.day {
         d if d <= 0 => Section::Today,
         1 => Section::Yesterday,
         d if d <= WEEK_DAYS => Section::Week,
@@ -107,8 +95,8 @@ const WEEKDAYS_EN: [&str; 7] = [
 
 /// When the last look was, in everyday words: "bugün 15:00", "dün 15:00", "pazartesi
 /// 15:00" (within the week), "9 gün önce".
-fn when(seen: i64, now: Option<i64>, lang: Language) -> String {
-    let d = now.map_or(0, |n| local_day(n) - local_day(seen));
+fn when(seen: LocalStamp, now: Option<LocalStamp>, lang: Language) -> String {
+    let d = now.map_or(0, |n| n.day - seen.day);
     let tr = matches!(lang, Language::Tr);
     match d {
         d if d <= 0 => {
@@ -126,7 +114,7 @@ fn when(seen: i64, now: Option<i64>, lang: Language) -> String {
             }
         }
         d if d < WEEK_DAYS => {
-            let w = weekday(local_day(seen));
+            let w = weekday(seen.day);
             if tr {
                 format!("{} {}", WEEKDAYS_TR[w], hhmm(seen))
             } else {
@@ -164,7 +152,7 @@ fn push_rows(rows: &mut Vec<FeedRow>, items: &[&CapsuleItem], lang: Language) {
 pub fn layout(c: &FeedCtx<'_>) -> Vec<FeedRow> {
     let fresh = |k: usize| c.seen.is_some() && c.fresh.get(k).copied().unwrap_or(false);
     let mut rows = Vec::new();
-    if let Some(seen) = c.seen {
+    if let (Some(_), Some(seen)) = (c.seen, c.seen_local) {
         let new: Vec<&CapsuleItem> = c
             .items
             .iter()
@@ -172,7 +160,7 @@ pub fn layout(c: &FeedCtx<'_>) -> Vec<FeedRow> {
             .filter(|(k, _)| fresh(*k))
             .map(|(_, i)| i)
             .collect();
-        let at = when(seen, c.now, c.lang);
+        let at = when(seen, c.now_local, c.lang);
         let text = match (new.is_empty(), c.lang) {
             (false, Language::Tr) => format!("Son baktığından beri · {at}"),
             (false, Language::En) => format!("Since your last look · {at}"),
@@ -187,7 +175,7 @@ pub fn layout(c: &FeedCtx<'_>) -> Vec<FeedRow> {
         .iter()
         .enumerate()
         .filter(|(k, _)| !fresh(*k))
-        .map(|(_, i)| (section(i.t, c.now), i))
+        .map(|(k, i)| (section(c.local.get(k).copied(), c.now_local), i))
         .collect();
     for s in [
         Section::Today,
@@ -215,37 +203,49 @@ pub fn layout(c: &FeedCtx<'_>) -> Vec<FeedRow> {
 mod tests {
     use super::*;
 
+    const MS_PER_DAY: i64 = 86_400_000;
+    /// `Europe/Istanbul` in the test data (UTC+03:00, no daylight saving since 2016).
+    fn ist(t: i64) -> LocalStamp {
+        LocalStamp::at_offset(t, 3 * 3_600_000)
+    }
+
     #[test]
     fn calendar_helpers() {
         // 2023-09-19 12:00 UTC = Tuesday 15:00 in Istanbul.
         let t = 1_695_124_800_000;
-        assert_eq!(hhmm(t), "15:00");
-        assert_eq!(weekday(local_day(t)), 1);
+        assert_eq!(hhmm(ist(t)), "15:00");
+        assert_eq!(weekday(ist(t).day), 1);
         // 22:30 UTC is already the next local day.
         let late = 1_695_162_600_000; // 2023-09-19 22:30 UTC
-        assert_eq!(local_day(late), local_day(t) + 1);
-        assert_eq!(hhmm(late), "01:30");
+        assert_eq!(ist(late).day, ist(t).day + 1);
+        assert_eq!(hhmm(ist(late)), "01:30");
         let day = MS_PER_DAY;
-        assert_eq!(when(t, Some(t + day), Language::Tr), "dün 15:00");
-        assert_eq!(when(t, Some(t + day), Language::En), "yesterday 15:00");
-        assert_eq!(when(t, Some(t + 2 * day), Language::Tr), "salı 15:00");
-        assert_eq!(when(t, Some(t + 9 * day), Language::En), "9 days ago");
-        assert_eq!(when(t, None, Language::Tr), "bugün 15:00");
-        assert_eq!(section(t, Some(t)), Section::Today);
-        assert_eq!(section(t, Some(t + day)), Section::Yesterday);
-        assert_eq!(section(t, Some(t + 7 * day)), Section::Week);
-        assert_eq!(section(t, Some(t + 8 * day)), Section::Earlier);
-        assert_eq!(section(t, None), Section::Earlier);
+        let at = |d: i64| Some(ist(t + d * day));
+        assert_eq!(when(ist(t), at(1), Language::Tr), "dün 15:00");
+        assert_eq!(when(ist(t), at(1), Language::En), "yesterday 15:00");
+        assert_eq!(when(ist(t), at(2), Language::Tr), "salı 15:00");
+        assert_eq!(when(ist(t), at(9), Language::En), "9 days ago");
+        assert_eq!(when(ist(t), None, Language::Tr), "bugün 15:00");
+        assert_eq!(section(Some(ist(t)), at(0)), Section::Today);
+        assert_eq!(section(Some(ist(t)), at(1)), Section::Yesterday);
+        assert_eq!(section(Some(ist(t)), at(7)), Section::Week);
+        assert_eq!(section(Some(ist(t)), at(8)), Section::Earlier);
+        assert_eq!(section(Some(ist(t)), None), Section::Earlier);
+        assert_eq!(section(None, at(0)), Section::Earlier);
     }
 
     #[test]
     fn empty_feed_with_a_last_look_says_nothing_new() {
+        let (seen, now) = (1_695_124_800_000, 1_695_211_200_000);
         let ctx = FeedCtx {
             items: &[],
             lang: Language::Tr,
-            seen: Some(1_695_124_800_000),
+            seen: Some(seen),
             fresh: &[],
-            now: Some(1_695_211_200_000),
+            now: Some(now),
+            local: &[],
+            now_local: Some(ist(now)),
+            seen_local: Some(ist(seen)),
         };
         assert_eq!(
             layout(&ctx),
@@ -253,7 +253,11 @@ mod tests {
                 text: "Son baktığından beri yeni bir şey yok · dün 15:00".into()
             }]
         );
-        let none = FeedCtx { seen: None, ..ctx };
+        let none = FeedCtx {
+            seen: None,
+            seen_local: None,
+            ..ctx
+        };
         assert!(layout(&none).is_empty());
     }
 }

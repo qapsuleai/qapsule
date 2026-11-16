@@ -189,7 +189,7 @@
         "s1b": "fiyat sıkıştı, hareketsiz",
         "s2": "dün",
         "s3": "evet, sürüyor",
-        "s4": "çoğunlukla tutmadı",
+        "s4": "az örnek var, bilinmiyor",
         "s5": "hiçbir şey, yalnız bilgi veriyor"
       },
       "note": ""
@@ -285,7 +285,7 @@
         "s1b": "fiyat önemli bir seviyeyi geçti",
         "s2": "bir haftadan önce",
         "s3": "kapandı: tutmadı",
-        "s4": "geçmişte çoğunlukla tuttu",
+        "s4": "az örnek var, bilinmiyor",
         "s5": "hiçbir şey, yalnız bilgi veriyor"
       },
       "note": ""
@@ -333,7 +333,7 @@
         "s1b": "büyük alım ya da satım var",
         "s2": "bir haftadan önce",
         "s3": "kapandı: süresi doldu ya da geri çekildi",
-        "s4": "çoğunlukla tutmadı",
+        "s4": "az örnek var, bilinmiyor",
         "s5": "hiçbir şey, yalnız bilgi veriyor"
       },
       "note": ""
@@ -540,7 +540,7 @@
         "s1b": "yön değişiyor",
         "s2": "dün",
         "s3": "evet, sürüyor",
-        "s4": "yarı yarıya",
+        "s4": "az örnek var, bilinmiyor",
         "s5": "hiçbir şey, yalnız bilgi veriyor"
       },
       "note": ""

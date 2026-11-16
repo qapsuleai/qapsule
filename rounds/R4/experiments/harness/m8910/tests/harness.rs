@@ -166,3 +166,82 @@ fn prompts_reject_design_names() {
     assert!(m8910::blind::check("x", "Bu ekranda r3 yazıyor").is_err());
     assert!(m8910::blind::check("x", "Ekrandaki kartlar").is_ok());
 }
+
+/// SPEC E1: the S4 "few cases" bucket is the product's threshold (`n <
+/// GLYPH_MIN_LEDGER_N`, 20), not `n < 5`; the committed `s8.json` keys follow it.
+#[test]
+fn s4_few_cases_is_the_products_threshold() {
+    let s8: Value = serde_json::from_str(
+        &std::fs::read_to_string(Path::new(env!("CARGO_MANIFEST_DIR")).join("../s8.json")).unwrap(),
+    )
+    .unwrap();
+    let few = "az örnek var, bilinmiyor";
+    let mut n_few = 0;
+    for st in s8["states"].as_array().unwrap() {
+        if st["found"] != json!(true) {
+            continue;
+        }
+        let item: qp_schema::protocol::CapsuleItem =
+            serde_json::from_value(st["item"].clone()).unwrap();
+        let n = item.ledger_at_birth.n;
+        assert_eq!(s8::trust_answer(&item), st["key"]["s4"].as_str().unwrap());
+        assert_eq!(
+            st["key"]["s4"] == json!(few),
+            n < qp_grammar::depth::GLYPH_MIN_LEDGER_N,
+            "state {} n {n}",
+            st["state"]
+        );
+        n_few += usize::from(n < 20);
+    }
+    assert!(n_few > 1);
+}
+
+/// H-FP: the shell's replica gives a face design's headline template the same headline
+/// pieces as the authority for the same capsule item (same story, bars, "now" and
+/// calendar), in TR and EN; the S2-relevant phrase follows the key's day buckets.
+#[test]
+fn replica_headline_parts_equal_the_authoritys() {
+    use m8910::world::{Core, Kind, World};
+    use qp_schema::protocol::{CapsuleItem, Language};
+    let s = m8::read_s8(&Path::new(env!("CARGO_MANIFEST_DIR")).join("../s8.json")).unwrap();
+    let mut sts: Vec<&s8::State> = s
+        .states
+        .iter()
+        .filter(|x| x.found && Kind::from_name(&x.world) == Some(Kind::Demo))
+        .collect();
+    sts.sort_by_key(|x| (x.step, x.state));
+    let mut w = World::new(Kind::Demo).unwrap();
+    let mut c = Core::connect(&mut w, "hfp", m8910::READER, "tr").unwrap();
+    let mut n = 0;
+    for st in sts {
+        if w.step() < st.step {
+            c.seek(&mut w, st.step);
+        }
+        let item: CapsuleItem = serde_json::from_value(st.item.clone()).unwrap();
+        for lang in [Language::Tr, Language::En] {
+            let a = w.host.session().item_headline_parts(&item, lang);
+            let r = c
+                .core
+                .replica_mut()
+                .session_mut()
+                .and_then(|s| s.item_headline_parts(&item, lang));
+            assert!(a.is_some(), "state {}", st.state);
+            assert_eq!(a, r, "state {} {lang:?}", st.state);
+            n += 1;
+        }
+        let tr = w
+            .host
+            .session()
+            .item_headline_parts(&item, Language::Tr)
+            .unwrap();
+        let s2 = st.key.as_ref().unwrap().s2.as_str();
+        if s2 == "dün" {
+            assert_eq!(tr.moved, "dün", "state {}", st.state);
+        }
+        if item.redacted {
+            assert!(!tr.moved.chars().any(|c| c.is_ascii_digit()));
+            assert_eq!(tr.ledger_n, None);
+        }
+    }
+    assert!(n >= 10);
+}

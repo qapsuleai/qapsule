@@ -193,11 +193,15 @@ pub fn validity_answer(item: &CapsuleItem) -> &'static str {
     }
 }
 
-/// The S4 answer (ledger at birth: ≥ 60 %, 40–60 %, < 40 %, n < 5).
+/// The S4 answer (ledger at birth: ≥ 60 %, 40–60 %, < 40 %, few cases).
+///
+/// SPEC E1: "few cases" is the product's threshold, `n <`
+/// [`qp_grammar::depth::GLYPH_MIN_LEDGER_N`] (20; the sentence says "henüz az örnekli"
+/// below it), not the §2 table's `n < 5`. State #10 (`n < 5`) is inside it.
 #[must_use]
 pub fn trust_answer(item: &CapsuleItem) -> &'static str {
     let l = &item.ledger_at_birth;
-    if l.n < 5 {
+    if l.n < qp_grammar::depth::GLYPH_MIN_LEDGER_N {
         return S4[3];
     }
     let r = f64::from(l.realized) / f64::from(l.n);

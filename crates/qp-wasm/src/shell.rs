@@ -56,10 +56,12 @@ pub fn scene_digest(scene: &SceneDesc) -> String {
 /// A data provider that speaks with the reader's sentences: the follower session's
 /// provider (document, own bars, values) with the headline of each finding replaced by
 /// the sentence the authority wrote for this reader (the `capsules` answer's
-/// `sentence.text`: its language and entitlement).
+/// `sentence.text`: its language and entitlement). (R4/H-FP) On a face, it also gives the
+/// headline pieces of that capsule for the same reader (`Session::item_headline_parts`).
 struct Reader<'a> {
     inner: qp_session::DocProvider<'a>,
     heads: &'a BTreeMap<String, String>,
+    parts: Option<(&'a str, qp_grammar::HeadlineParts)>,
 }
 
 impl DataProvider for Reader<'_> {
@@ -117,6 +119,22 @@ impl DataProvider for Reader<'_> {
     fn glyph(&self, c: &str) -> Option<std::borrow::Cow<'_, GlyphSpec>> {
         self.inner.glyph(c)
     }
+    fn headline_parts(&self, finding: &str) -> Option<qp_grammar::HeadlineParts> {
+        match &self.parts {
+            Some((f, hp)) if *f == finding => Some(hp.clone()),
+            _ => self.inner.headline_parts(finding),
+        }
+    }
+}
+
+/// The language of the reader's sentence in `item`: the authority wrote `sentence.text` in
+/// the reader's language (`en` when it is the English sentence and not the Turkish one).
+fn item_lang(item: &CapsuleItem) -> Language {
+    if item.sentence.text == item.sentence.en && item.sentence.text != item.sentence.tr {
+        Language::En
+    } else {
+        Language::Tr
+    }
 }
 
 fn options(look: &ViewState, w: u32, h: u32, range: Option<(u64, u64)>) -> CompileOptions {
@@ -142,13 +160,22 @@ pub fn face_scene(
     h: u32,
 ) -> Option<SceneDesc> {
     let heads = BTreeMap::from([(item.finding.clone(), item.sentence.text.clone())]);
+    // (R4/H-FP) The headline pieces only for a design with a headline template.
+    let parts = qp_grammar::faces::headline_template(look.face.as_deref())
+        .ok()
+        .flatten()
+        .and_then(|_| s.item_headline_parts(item, item_lang(item)))
+        .map(|hp| (item.finding.as_str(), hp));
     let p = Reader {
         inner: s.provider(),
         heads: &heads,
+        parts,
     };
     let id = format!("capsule-{}", item.finding);
     let view = depth::face_view(look.face.as_deref(), &item.finding, max_points, &p, &id).ok()?;
-    compile(&view, &p, &options(look, w, h, None)).ok()
+    let mut o = options(look, w, h, None);
+    o.face.clone_from(&look.face);
+    compile(&view, &p, &o).ok()
 }
 
 /// The open capsule's view at its depth, rebuilt over the replica's current document and
@@ -206,6 +233,7 @@ pub fn open_scene(
     let p = Reader {
         inner: s.provider(),
         heads: &heads,
+        parts: None,
     };
     let view = open_view(&p, stored, o, look, max_points)?;
     let range = look
@@ -495,7 +523,16 @@ impl ShellCore {
 
     /// The host's replay state that came with a data frame.
     pub fn set_replay(&mut self, st: ReplayState) {
+        self.set_calendar(&st);
         self.replay = Some(st);
+    }
+
+    /// (R4/H-FP) The replica's headline-piece calendar: the replay source's.
+    fn set_calendar(&mut self, st: &ReplayState) {
+        if self.replay.as_ref().map(|r| r.source) != Some(st.source) {
+            self.replica
+                .set_headline_calendar(qp_session::headparts::replay_calendar(st.source));
+        }
     }
 
     /// One message of the authority on this connection. Returns what changed:
@@ -584,6 +621,7 @@ impl ShellCore {
                         self.flush_gesture();
                     }
                     (Some(Asked::Replay), QueryResult::Replay { replay }) => {
+                        self.set_calendar(replay);
                         self.replay = Some(replay.clone());
                         ch["status"] = json!(true);
                     }

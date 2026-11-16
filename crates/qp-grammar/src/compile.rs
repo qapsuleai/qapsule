@@ -71,6 +71,12 @@ pub struct CompileOptions {
     /// (R4/T5) Glyph alphabet by name (`crate::glyph::ALPHABETS`); the product's if
     /// `None`.
     pub alphabet: Option<String>,
+    /// (R4/H-FP) The face design (`crate::faces`) whose feed face this scene is, set only
+    /// when compiling a face (open depth `sentence`). With a headline template
+    /// ([`crate::faces::FaceDesign::headline`]) the finding's `headline` text field is
+    /// the template's output; `None` (every other scene) or a design without one: the
+    /// capsule's sentence. An unknown name is `invalid`.
+    pub face: Option<String>,
 }
 
 impl CompileOptions {
@@ -87,6 +93,7 @@ impl CompileOptions {
             lod: true,
             max_points: None,
             alphabet: None,
+            face: None,
         }
     }
 }
@@ -609,6 +616,10 @@ pub fn compile(
             ),
         )
     })?;
+    let headline = match opts.face.as_deref() {
+        Some(n) => crate::faces::headline_template(Some(n))?,
+        None => None,
+    };
     if view.x.kind != ScaleKind::Time {
         return Err(GrammarError::new(
             ErrorKind::Invalid,
@@ -679,6 +690,7 @@ pub fn compile(
     let (left, right, top, bottom) = (LEFT, wi - RIGHT_MARGIN, TOP, hi - BOTTOM_MARGIN);
     let mut fr = Frame {
         p: provider,
+        headline,
         theme,
         bar_series: bar_series.clone(),
         bars,

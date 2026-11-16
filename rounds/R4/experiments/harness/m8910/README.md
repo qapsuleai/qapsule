@@ -40,10 +40,66 @@ alternatif başka dosyaya dokunmak zorunda kalırsa dur ve orkestratöre yaz.
    olgu/seri katmanları. Başlık katmanı `DataSource::Finding` + `Mark::Text` + alan
    `headline` olmalı (düzenek başlık uzunluğunu buradan ölçer); işaret `Mark::Glyph`.
 2. `pub static FACES` listesine, `// --- M8 alternatives: one line each` altına tek satır:
-   `FaceDesign { name: "<ad>", height: <px>, view: <işlev> },`
+   `FaceDesign { name: "<ad>", height: <px>, view: <işlev>, headline: Some(<şablon>) },`
    **Yükseklik kuralı:** yüz kendi yüksekliğini bildirir (CSS px, telefon genişliği 390'da,
    120..=844). Kabuk sayıyı çekirdekten alır (`ShellCore::face_size_json` →
    `faces::height`), otorite de aynı adla derler; kabukta hesap yok.
+
+3. **Başlık şablonu (SPEC E5; H-FP).** Alternatif başlığını kapsülün uzun cümlesinden değil,
+   kendi şablonuyla kurar; şablon da `faces.rs`'te (ya da `faces/<ad>.rs`'te) yazılır:
+
+   ```rust
+   pub type HeadlineFn = fn(&HeadlineParts) -> String;   // qp_grammar::faces
+   fn <ad>_headline(hp: &qp_grammar::HeadlineParts) -> String { … }
+   ```
+
+   `HeadlineParts` (`qp_grammar::provider`, kökten `qp_grammar::HeadlineParts`) okuyucunun
+   dilinde düz metinler ve birkaç bayraktır; otorite ve kabuğun yansısı okuyucunun cümlesini
+   yazdığı kuralla doldurur (`qp_capsule::realize::parts`; iç terim yok):
+
+   | Alan | Anlamı | Örnek TR / EN |
+   |---|---|---|
+   | `lang` | metinlerin dili (`Language::Tr`/`En`); şablon dili buradan seçer | |
+   | `instrument` | enstrüman etiketi (sembol) | `SYN03` |
+   | `event` | ne oldu, kısa ad öbeği | yukarı kırılım / upside breakout |
+   | `direction_word` | yön, tek sözcük | yukarı / up |
+   | `when` | doğduğu an, periyoda ve takvime göre süre ifadesi | bugün, dün, cuma günü, 3 işlem günü önce, 2 saat önce / today, 3 trading days ago |
+   | `moved` | son geçişin anı, aynı tür ifade | dün / yesterday |
+   | `validity_phrase` | hâlâ geçerli mi; kapandıysa nasıl | hâlâ geçerli, artık geçerli değil, gerçekleşti, tutmadı, süresi doldu, geri çekildi / still holds, no longer holds, played out, did not play out, ran out of time, withdrawn |
+   | `ledger_short` | doğumdaki karne, kısaltılmış ama dürüst | 7'de 3 tuttu (az örnek), karnesi yok / 3 of 7 played out (few cases), no record yet |
+   | `stage` | aşama (`Stage`) | |
+   | `validity` | geçerlilik (`Validity`; kapsül öğesi ve işaretle aynı değer) | |
+   | `redacted` | okuyucu rakam görmez (veri yetkisi yok) | |
+   | `ledger_n` | karne `n`; yetkisizde `None` | |
+   | `few_cases` | `n < GLYPH_MIN_LEDGER_N` (20; `n = 0` dahil) — ürünün "az örnek" eşiği | |
+
+   **"Şimdi" ve takvim:** süre ifadelerinin "şimdi"si serinin son barıdır (bitmiş olmasa
+   da; günlük seride bugünün barı sürerken dünkü olay "dün"); periyot serinin `interval`'ı
+   (gösterim `1d`, saatlik dünya `1h`), takvim enstrümanın takvimi, yoksa oynatmanınki
+   (sentetik pazarın donmuş takvimi; yerel veride `XIST`). Anahtarın S2'si (ne zaman)
+   **son geçişin** günüdür: ona karşılık gelen parça `moved`'dır, `when` doğuşun anıdır
+   (çoğu açık olayda aynı; #3, #11'de farklı). Anahtarın "birkaç gün önce" kovası takvim
+   günüdür; parça hafta sonunu aşan bir günlük farkı "cuma günü" der (#3).
+
+   **Yetkisiz okuyucu:** bütün metinler rakamsızdır (`when` "birkaç gün önce" türü, karne
+   nitel: "az örnek", "çoğunlukla tuttu"); şablon rakam eklememeli (enstrüman etiketindeki
+   rakamlar dışında). Bugün yetkisiz okuyucunun yüzü bütün tasarımlarda düz metindir
+   (Açık sorular 2), yani şablon orada çizilmez; yine de rakamsız yazılmalıdır.
+
+   **Nerede geçerli:** yalnız o yüzün sahnesinde (`CompileOptions.face`, otoritede açılma
+   derinliği `sentence`, kabukta `face_scene`). Orada bulgunun `headline` metin alanı
+   şablonun çıktısıdır — görünüm kuralı başlık katmanını yine `DataSource::Finding` +
+   `Mark::Text` + alan `headline` ile kurar, düzenek başlığı buradan ölçer. Parça yoksa
+   (öykü ya da bar yok) cümle kalır. Protokoldeki kapsül `headline`'ı, açık kapsül, grafik ve
+   dökümler değişmez. `r3`: `headline: None` (bugünkü cümle). **Sert eşik** başlık ≤ 80
+   karakter (TR ve EN; `computed.json`).
+
+   **Kayıt satırı yüz yüksekliğiyle birlikte:** `height` yüzün kendi yüksekliği (CSS px,
+   390 genişlikte, 120..=844; E4: hesap ölçüsü olarak kaydedilir), `headline` şablon:
+
+   ```rust
+   FaceDesign { name: "<ad>", height: 180, view: <ad>_view, headline: Some(<ad>_headline) },
+   ```
 
 Seçim: bakış ayarı `face` (`style` hareketi, `ViewState.face`; gösterimde URL `?face=<ad>`
 ya da Ayarlar → Yüz tasarımı). Bilinmeyen ad `invalid` (`/gesture/face`). `card` = `r3`'ün
@@ -162,8 +218,10 @@ karne `n ≥ 5`; #10 `n < 5`; bir kapsül tek duruma. **Anahtar motordan** (`Cap
 serinin barları): yön, tür (sade karşılık tablosu `kind_plain`), ne zaman (takvim: geçiş
 barının yerel günü ile oynatma saatinin yerel günü — 0 bugün, 1 dün, 2–6 birkaç gün, ≥ 7
 bir haftadan önce; gün içi seride aynı gün bar sonundan ≤ 3 saat "birkaç saat önce", sonrası
-"bugün"), geçerlilik + aşama, güven kovası (`ledger_at_birth`: ≥ %60, %40–60, < %40, n < 5),
-tavsiye: yok.
+"bugün"), geçerlilik + aşama, güven kovası (`ledger_at_birth`: ≥ %60, %40–60, < %40, n < 20),
+tavsiye: yok. **E1:** güven kovasının "az örnek"i ürünün eşiğidir, `n < GLYPH_MIN_LEDGER_N`
+(20); #10 (`n < 5`) bunun içinde kalır. Durum seçimindeki `n ≥ 5` tercihi değişmedi (yalnız
+anahtarın S4 kovası).
 
 Dünyalar: **gösterim** (`qp demo --synthetic --paused` ile aynı barındırıcı,
 `qp_wasm::drive::parity_host`) ve **saatlik dünya** (aynı sentetik üreticinin
@@ -271,9 +329,9 @@ Sayfa görüntülerinin içindeki yüz/sahne pikselleri her platformda bayt eşi
 3. **S8 #8 (geri çekildi) bulunamadı**, kurulamadı (düzeltilmiş bar sağlayıcısı gerekir).
    Sayfa 2'de 5 yüz var; S3'ün "kapandı: süresi doldu ya da geri çekildi" seçeneği #7 ile
    sınanıyor.
-4. **S4 kovası ile ürünün eşiği:** anahtar SPEC'in kovalarını kullanır (`n < 5` az örnek);
-   ürünün cümlesi `n < 20`'yi "henüz az örnekli" der (`GLYPH_MIN_LEDGER_N`; ör. #4 "7 seferin
-   2'sinde"). Okuyucu cümleye uyarsa S4'te "yanlış" sayılır; bütün tasarımlar için aynı.
+4. **S4 kovası ile ürünün eşiği:** SPEC E1 ile kapandı (H-FP): anahtarın "az örnek" kovası
+   `n < GLYPH_MIN_LEDGER_N` (20). `s8.json`'da S4'ü değişenler #4 (n 7), #6 (n 5), #7 (n 5),
+   #12 (n 17): hepsi "az örnek var, bilinmiyor". M9 G3'ün "n ≥ 5" kuralı (SPEC §3) değişmedi.
 5. **`alt` yasak sözcüğü:** M11 düzeneğindeki gibi çıplak Türkçe "alt" serbest, kimlik
    biçimleri (`alt-`, `alt_`, `/alt`) yasak. Ayrıca `face`, `feed`, `transition`, `outcome`,
    `card`, `key`, `s8` yasak.

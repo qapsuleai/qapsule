@@ -896,6 +896,16 @@ impl Replica {
             return pending(item, why);
         }
         // Its own data does not hold the claim.
+        if auth_final && own_settled && !own_closed && own_clean {
+            // The bar came from a settled fetch while its own feed lags (e.g. an outage):
+            // the bars before it may miss corrections the feed never delivered. Ask for
+            // the settled range once (§19.5 gap repair); never disputed before closing.
+            let key = (ev.series.clone(), ev.t);
+            if self.opts.refetch && self.refetch_asked.insert(key.clone()) {
+                self.refetch_new.push(key);
+            }
+            return pending(item, "not_held");
+        }
         if auth_final && own_closed && own_clean {
             let key = (ev.series.clone(), ev.t);
             if !self.opts.refetch || self.refetched.contains(&key) {

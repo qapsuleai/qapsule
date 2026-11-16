@@ -335,3 +335,136 @@ fn the_replica_disputes_once_and_the_claim_falls() {
         qp_schema::capsule::Stage::Retracted
     );
 }
+
+/// A host provider whose bars the test changes (a split snapshot, a re-delivered
+/// correction).
+struct HostBars(std::rc::Rc<std::cell::RefCell<Vec<Bar>>>);
+
+impl qp_source::SourceProvider for HostBars {
+    fn entitled(&self, _principal: &str, _feed: &qp_schema::data::FeedKey) -> bool {
+        true
+    }
+
+    fn resolve(
+        &self,
+        _principal: &str,
+        _binding: &qp_schema::data::DataBinding,
+    ) -> qp_source::Resolution {
+        qp_source::Resolution::Ready {
+            bars: self.0.borrow().clone(),
+            seq: 0,
+        }
+    }
+}
+
+/// An authority over transcript 37's document whose data comes from `bars`, with a
+/// `claims` subscription and a condition subscription `px > 110` on connection `a`.
+fn host_session(bars: &std::rc::Rc<std::cell::RefCell<Vec<Bar>>>, hygiene: bool) -> Session {
+    let mut init = transcript()["init"].clone();
+    init.as_object_mut().unwrap().remove("data");
+    let init: SessionInit = serde_json::from_value(init).unwrap();
+    let mut s = Session::with_provider(init, &root(), Box::new(HostBars(std::rc::Rc::clone(bars))))
+        .unwrap();
+    s.set_settle_check(hygiene);
+    connect(
+        &mut s,
+        "a",
+        "arkin",
+        &[
+            ("k", json!({"kind":"claims"})),
+            (
+                "c",
+                json!({"kind":"condition","condition":{"kind":"threshold","series":"px","op":"gt","value":110.0}}),
+            ),
+        ],
+    );
+    let _ = s.take_settle_requests();
+    s
+}
+
+/// (R3/M7, AUD2) With hygiene on, a re-resolution that changes closed bars is a
+/// provider correction: the claim its new data makes at a closed bar is asserted at once
+/// and the changed range is queued for settled verification. Hygiene off: as before.
+#[test]
+fn a_resync_that_corrects_closed_bars_asserts_the_claims_it_makes() {
+    let bars = std::rc::Rc::new(std::cell::RefCell::new(
+        (0..6).map(|i| bar(i, 100.0 + i as f64)).collect::<Vec<_>>(),
+    ));
+    let mut s = host_session(&bars, true);
+    // Unchanged data: nothing asserted, nothing to verify.
+    let lines = s.resync_bindings();
+    assert!(claim_events(&msgs(&lines, "a")).is_empty());
+    assert!(s.take_settle_requests().is_empty());
+    // The provider re-delivers t3 corrected to 112 (crossing 110).
+    bars.borrow_mut()[3] = bar(3, 112.0);
+    let lines = s.resync_bindings();
+    let ms = msgs(&lines, "a");
+    let cl = claim_events(&ms);
+    assert_eq!(cl.len(), 1, "{ms:?}");
+    assert_eq!(cl[0]["state"], "asserted");
+    assert_eq!(cl[0]["evidence"]["t"], T0 + 3 * DAY);
+    assert_eq!(cl[0]["evidence"]["maturity"], "final");
+    let reqs = s.take_settle_requests();
+    assert_eq!(reqs.len(), 1, "{reqs:?}");
+    assert_eq!((reqs[0].from_t, reqs[0].to_t), (T0 + 3 * DAY, T0 + 4 * DAY));
+
+    bars.borrow_mut()[3] = bar(3, 103.0);
+    let mut s = host_session(&bars, false);
+    bars.borrow_mut()[3] = bar(3, 112.0);
+    let lines = s.resync_bindings();
+    assert!(claim_events(&msgs(&lines, "a")).is_empty());
+    assert!(s.take_settle_requests().is_empty());
+}
+
+/// (R3/M7, AUD2) A final claim on a bar the replica's lagging feed has not closed but the
+/// host filled from the settled source (`set_settled`): when its own data does not hold
+/// it, the replica asks for the settled range once (the bars before may miss
+/// corrections) and never disputes before its bar closes.
+#[test]
+fn a_settled_but_open_bar_that_disagrees_asks_for_a_refetch() {
+    let mut a = Session::new(init(true, false), &root()).unwrap();
+    let data = transcript()["init"]["data"].clone();
+    let mut r = Replica::with_memory("device", qp_session::tape::memory_provider(&data).unwrap());
+    r.set_options(ReplicaOptions {
+        dispute: true,
+        ..ReplicaOptions::default()
+    });
+    let pump = |a: &mut Session, r: &mut Replica, lines: Vec<OutboundLine>| {
+        let mut q: VecDeque<OutboundLine> = lines.into();
+        while let Some(l) = q.pop_front() {
+            if l.conn == "r" {
+                r.on_line(&serde_json::to_string(&l).unwrap()).unwrap();
+            }
+            for m in r.take_outbox() {
+                assert_ne!(m["type"], "dispute", "no dispute before the bar closes");
+                q.extend(a.handle_raw("r", &m.to_string()));
+            }
+        }
+    };
+    let hello =
+        json!({"type":"hello","protocol":"qp/0","principal":"device","surface":{"kind":"phone"}});
+    let w = a.handle_raw("r", &hello.to_string());
+    pump(&mut a, &mut r, w);
+    // The authority's feed: t4 closes at 85 (a final claim at t4); the replica's feed
+    // lags: its t4 is still open at 104.
+    let lines = bad_tick(&mut a);
+    pump(&mut a, &mut r, lines);
+    let t4 = T0 + 4 * DAY;
+    let item = r.display().iter().find(|i| i.t == t4).expect("claim at t4");
+    assert_eq!(item.reason, Some("not_held"), "{item:?}");
+    assert!(
+        r.take_refetch().is_empty(),
+        "open bar, not settled: no refetch"
+    );
+    // The host fills t4 from the settled source; still open on its chart.
+    r.set_settled("px", t4);
+    assert_eq!(r.take_refetch(), vec![("px".to_owned(), t4)]);
+    let item = r.display().iter().find(|i| i.t == t4).expect("claim at t4");
+    assert_eq!(item.state, qp_session::replica::Shown::Pending);
+    // Once only; after the refetch it stays pending (not disputed) while open.
+    r.refetched("px", t4);
+    assert!(r.take_refetch().is_empty());
+    let item = r.display().iter().find(|i| i.t == t4).expect("claim at t4");
+    assert_eq!(item.state, qp_session::replica::Shown::Pending);
+    assert!(r.take_outbox().is_empty());
+}

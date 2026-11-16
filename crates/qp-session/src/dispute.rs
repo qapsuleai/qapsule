@@ -259,8 +259,21 @@ impl Session {
     /// after it put settled or re-delivered data into its provider, e.g. a split
     /// snapshot): values are recomputed and the registered claims re-checked. Returns the
     /// notifications.
+    ///
+    /// With hygiene on, a re-resolution that changes closed bars (a split snapshot, a
+    /// correction re-delivered with it) is a provider correction like a feed `patch`
+    /// (§19.9): from the first changed closed bar to the last closed bar the bars are
+    /// queued for settled verification and the condition claims the new data holds there
+    /// are asserted at once.
     pub fn resync_bindings(&mut self) -> Vec<OutboundLine> {
         let ids: Vec<String> = self.plane.series.keys().cloned().collect();
+        let before: Vec<(String, Vec<Bar>)> = if self.settle.verify_closed {
+            ids.iter()
+                .filter_map(|id| Some((id.clone(), self.plane.bars(id)?.to_vec())))
+                .collect()
+        } else {
+            Vec::new()
+        };
         self.plane.series.clear();
         self.pending_stamps = self.plane.sync(&self.doc);
         self.data_changed(
@@ -268,6 +281,9 @@ impl Session {
                 .map(|id| (id, Delta::Rebuild { from: 0 }))
                 .collect(),
         );
+        for (id, old) in before {
+            self.note_resolved(&id, &old);
+        }
         match self.stamp_anchors() {
             Some(seq) => self.settle(seq),
             None => self.settle_data(),
@@ -316,6 +332,44 @@ impl Session {
         for (id, lo) in scans {
             self.scan_conditions(&id, lo);
         }
+    }
+
+    /// After a re-resolution (hygiene on): the first closed bar of `series` that differs
+    /// from `old` (by time or value) on, to the last closed bar, is verified and scanned
+    /// as a feed correction is ([`Session::note_closed`]).
+    fn note_resolved(&mut self, series: &str, old: &[Bar]) {
+        let Some(bs) = self.plane.series.get(series) else {
+            return;
+        };
+        let feed = bs.binding.feed_key();
+        let Some(bars) = self.plane.bars(series) else {
+            return;
+        };
+        let n = bars.len();
+        if n < 2 || old.is_empty() {
+            return;
+        }
+        // Closed bars: all but the last; a bar the old data did not hold closed is new.
+        let old_closed = &old[..old.len() - 1];
+        let Some(lo) = bars[..n - 1]
+            .iter()
+            .enumerate()
+            .find(|(i, b)| old_closed.get(*i) != Some(*b))
+            .map(|(i, _)| i)
+        else {
+            return;
+        };
+        // Bars the old data did not hold at all are appends (verified when they close).
+        if lo >= old_closed.len() && old.get(lo).is_none_or(|o| o.t != bars[lo].t) {
+            return;
+        }
+        self.settle.requests.push(SettleRequest {
+            series: series.to_owned(),
+            feed,
+            from_t: bars[lo].t,
+            to_t: bars[n - 2].t,
+        });
+        self.scan_conditions(series, lo);
     }
 
     /// A `dispute` from connection `ci` (§19.9).

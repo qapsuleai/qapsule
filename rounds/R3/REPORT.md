@@ -1,6 +1,6 @@
 # R3 — Rapor: Kapsül
 
-- **Durum:** Tamamlandı. Bağımsız son denetim: ilk hüküm **koşullu kabul** (K1, K2); koşullar giderildi, üç yeniden denetimden sonra **son hüküm kabul** ("Denetim" bölümü). Kabul ölçütleri: **17 ✅, 1 ⚠️** (11: itirazda AUD2 iyileşmedi).
+- **Durum:** Tamamlandı. Bağımsız son denetim: ilk hüküm **koşullu kabul** (K1, K2); koşullar giderildi, yeniden denetimlerden sonra **son hüküm kabul**; ölçüt 11 (AUD2) sonradan düzeltildi ve doğrulandı ("Denetim" bölümü). Kabul ölçütleri: **18 ✅** (11 önce ⚠️ idi: AUD2; sonradan düzeltildi ve denetçi doğruladı).
 - **Tarih:** 2026-11-15 / 16
 - **Alt ajanlar:** Başlatılabildi (ilk iş deneme alt ajanı koşuldu ve cevap verdi). Bütün alt
   görevler, 16 alternatif, iki düzenek, doğrulama, ölçümler, insan testi paketi, ajan
@@ -55,7 +55,7 @@
 | 8 | Anlam zoom'u üç derinlikte; `chart`'ta geometri olgu kanıtından | ✅ | `c1-sentence` (döküm), `c2-capsule`, `c3-chart` (kırılan seviye), `c4-band` (bant), `c5-points` (tepe/dip noktaları); geometri yalnız kökenle bağlı, değer okuyucunun sağlayıcısından. |
 | 9 | Yetkili değerleri görür; yetkisize yorum + karne + "şu yetkiyi gerektirir"; sayısal değer/özet gitmez (testle) | ✅ (denetim K1 giderildikten sonra; son kontrol `471af9f`) | `capsule` sorgusu `requires`/`rests_on`; değer taraması (`entitlement_sweep_…`) ve **girişimsizlik testleri** (`tests/non_interference.rs`: aynı açık veri, lisanslı akış tohumları 1/2/7/42 ve akışsız; yetkisiz okuyuculara giden her şey mühür iletileri dışında bayt eşit). Denetim Y1'i değer taraması görmemişti (aşağıda). |
 | 10 | Sunucu olgusu uçtan uca; güven yolu şartnamede; geri çıkarma saldırısı raporda | ✅ (denetim K1 giderildikten sonra; son kontrol `471af9f`) | Sentetik lisanslı akış → `flow.institutional` → mühür → `server_comment` (döküm 39); PROTOCOL §20; `M6/RESULTS.md`: kâhin saldırısı bit p90 1,22, yapı gereği sınır ≤ 2,81 bit/hedef bar. |
-| 11 | İtiraz ve geri çekme: M7; uygulandı; "geri çekildi" dökümde | ⚠️ | §19.9, döküm 37 ve 43; yanlış/erken/çelişkili gösterim her senaryoda 0; kaçırılan kesin iddia AUD1 7 → 0, AUD3 7 → 0, M7X 51 → 1; **AUD2 49 → 53 (iyileşmedi**: yansının REFRESH'siz 240 s kesintisi). |
+| 11 | İtiraz ve geri çekme: M7; uygulandı; "geri çekildi" dökümde | ✅ | §19.9, döküm 37 ve 43; yanlış/erken/çelişkili gösterim her senaryoda 0; kaçırılan kesin iddia (100 tohum) AUD1 7 → **0**, AUD2 49 → **0**, AUD3 7 → **0**, M7X 51 → 1. AUD2 ilk ölçümde 53'tü (yansının REFRESH'siz kesintisi + bölünmeyle aynı anlık görüntüde gelen düzeltme); düzeltme `r3/m7-aud2` (yansı: kesinleşmiş dolgulu açık barda tek seferlik kesin çekme, §19.5; otorite: kapalı barları değiştiren yeniden çözümde tarama, §19.9), `M7/RESULTS.md` §10; denetçi yeniden üretti (`AUDIT.md` son bölüm). S-senaryoları bayt eşit. |
 | 12 | Üç seviye, iki grup varsayılanı, pozisyon/niyet bağımsız, sistem değiştirmez; ≥250 gün × ≥30 enstrüman benzetimi | ✅ | `S/sensitivity.md` (30 × 500 × 3 tohum; belirleyici, iki koşu bayt eşit): `important` 1,59/gün, `balanced` 2,06, `all` 3,23; gerçek veri `S/sensitivity-real.md`. Bulgu: pozisyon/niyet geçişi `important`'ı dolduruyor (A22). |
 | 13 | M1–M7 düzenekler önce, alternatifler, ham, seçim; DECISIONS'ta öneri | ✅ (notlarla) | SPEC `a35d726` < bütün alternatifler; ham `experiments/M*/raw/`; DECISIONS Ö29–Ö41. Notlar aşağıda ("Sapmalar"). |
 | 14 | Rejimli sentetik; gerçek veride ayrı ölçüm; sentetik karnenin anlamsızlığı yazılı; gerçek veri depoda yok | ✅ | `qp_source::synthetic_market` (dört rejim); M3/M4/M5 gerçek veri tabloları; `git ls-files | grep fixtures/local` boş. |
@@ -74,7 +74,7 @@
 | M4 | tür + yön, yön yayı | **tür + yön** | Yanlış birleştirme ikisinde 0; kaybolan bilgi ~%4 vs ~%22–30; yay %11–13 daha az kapsül. |
 | M5 | oynaklık bariyeri, türün anlamı | **bariyer** | Gerçek − yalancı eş sentetikte ≈ 0 (doğru), gerçekte +0,088 / +0,043; "türün anlamı"nın farkı yapısal (sentetikte de 0,16). |
 | M6 | kaba ilişki, mühür (özgün) | **mühür** | Yapı gereği sınır ≤ log2 7 bit/hedef bar; sınanabilir makbuz; gecikme 0; iletiler 9.503 vs 21.901. Kaba ilişki deneysel kuyrukta daha iyi (3,98 vs 5,42 bit). |
-| M7 | itiraz + kesin bar hijyeni | uygulandı | M1–M3 = 0; AUD1/AUD3 7 → 0; AUD2 iyileşmedi. İyileşmeyi hijyen taşıyor (ablasyon). |
+| M7 | itiraz + kesin bar hijyeni | uygulandı | M1–M3 = 0; AUD1/AUD2/AUD3 7/49/7 → 0/0/0 (AUD2 sonradan düzeltildi). İyileşmeyi hijyen ve yansının boşluk onarımı taşıyor (ablasyon). |
 
 Sentetik veride karne bir başarı oranı kanıtı değildir (veri öngörülemez; M3'te bütün
 sıralayıcılar sentetikte K1−K3 ≈ 0). Görsel ve metin okuyan alt ajanlar insan gözü/okuru
@@ -152,7 +152,7 @@ bar, en çok 5,71; ≤ 7 farklı döküm: raporun sınırıyla tutarlı); perfor
 
 1. Ö29–Ö41 kabul mü? Özellikle Ö32 (alfabe, insan testine kadar), Ö37 (mühür ve "yetkisize
    lisanslı hikâye yalnız mühür iletileriyle" kuralı — K34 ile gerilim: kanıtın varlığı ve
-   dayanağı mühür ekleriyle söyleniyor, olgunun kendisi değil), Ö38 (AUD2 iyileşmedi).
+   dayanağı mühür ekleriyle söyleniyor, olgunun kendisi değil), Ö38 (AUD2 sonradan düzeltildi).
 2. A21–A26 (`DECISIONS.md`): insan testi sonucu; pozisyon/niyet geçişinin `important`'ı
    doldurması; karne anahtarında yön; `CapsuleState::retracted`; mühür makbuzunun kullanıcıca
    doğrulanması; hijyenin REST kotası.

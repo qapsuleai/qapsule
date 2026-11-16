@@ -66,6 +66,7 @@ pub const DEFAULT_FACE: &str = "r3";
 pub const ALIASES: [(&str, &str); 1] = [("card", "r3")];
 
 // --- M8 alternatives: view functions (or `mod <name>;`) go below this line -------------
+mod tavrik;
 
 mod vadrel;
 
@@ -83,6 +84,12 @@ pub static FACES: &[FaceDesign] = &[
         height: vadrel::HEIGHT,
         view: vadrel::view,
         headline: Some(vadrel::headline),
+    },
+    FaceDesign {
+        name: "tavrik",
+        height: tavrik::HEIGHT,
+        view: tavrik::view,
+        headline: Some(tavrik::headline),
     },
 ];
 

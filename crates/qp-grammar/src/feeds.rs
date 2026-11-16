@@ -85,6 +85,7 @@ fn r3(c: &FeedCtx<'_>) -> Vec<FeedRow> {
 // --- M9 alternatives: layout functions (or `mod <name>;`) go below this line -----------
 
 mod elikov;
+mod vakiro;
 
 /// Feed layouts a connection may choose; the first is the default.
 pub static LAYOUTS: &[FeedLayout] = &[
@@ -98,6 +99,11 @@ pub static LAYOUTS: &[FeedLayout] = &[
         name: "elikov",
         rules: 5,
         layout: elikov::elikov,
+    },
+    FeedLayout {
+        name: "vakiro",
+        rules: vakiro::RULES,
+        layout: vakiro::layout,
     },
 ];
 

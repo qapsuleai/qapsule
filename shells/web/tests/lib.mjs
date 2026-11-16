@@ -6,7 +6,8 @@ export const FACE_W = 390;
 
 /** Starts `qp demo` (synthetic unless args say otherwise) and resolves with its base URL. */
 export function startDemo(qp, web, port, extra = []) {
-  const args = ['demo', '--web', web, '--port', String(port), '--bind', '127.0.0.1', '--synthetic', '--paused', ...extra];
+  const data = extra.includes('--data') ? [] : ['--synthetic'];
+  const args = ['demo', '--web', web, '--port', String(port), ...data, '--paused', ...extra];
   const child = spawn(qp, args, { stdio: ['ignore', 'pipe', 'inherit'] });
   return new Promise((resolve, reject) => {
     let out = '';

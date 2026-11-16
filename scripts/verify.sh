@@ -33,6 +33,14 @@
 #  16 replay     R4/T2 (PROTOCOL §21): `qp replay` (synthetic market, 30 instruments, hourly
 #                path, recorded controls with a forward and a backward seek) twice: the two
 #                line streams are byte-identical and no host notice was raised
+#  17 shell      R4/T5 architecture test of the web shell (shells/web/ARCH.md): no domain
+#                logic in its JavaScript (no arithmetic, sorting, filtering, formatting, text
+#                building), only allowed core methods, no external address; plus a self-test
+#  18 demo       R4/T5 in headless Chromium (same tool rule as the browser step): the shell
+#                built with wasm-pack, `qp demo` (synthetic, paused); the page's requests go
+#                only to its own origin; its digests (document, faces, open scene) equal the
+#                shell-less `qp drive` run; screenshots at a fixed replay moment twice: page
+#                screenshots byte-identical, core-painted scenes equal fixtures/golden/demo
 #
 # Environment:
 #   QP_VERIFY_BROWSER=1  force the browser step (fails if tools are missing)
@@ -433,6 +441,60 @@ step_replica() {
   note "native authority = native replica = wasm32 replica (lag 0, 25)"
 }
 
+step_shell() {
+  if [ "${QP_VERIFY_BROWSER:-}" = 0 ] && ! command -v node >/dev/null 2>&1; then
+    skip "node not found and QP_VERIFY_BROWSER=0"
+  fi
+  command -v node >/dev/null 2>&1 || fail "node not found (the architecture test needs node)"
+  node shells/web/arch-check.mjs || fail "the web shell breaks an architecture rule"
+  note "no domain logic in shells/web; self-test passes"
+}
+
+step_demo() {
+  local mode="${QP_VERIFY_BROWSER:-}" wp d="$tmp/demo" f b bad=0 n=0
+  case "$mode" in
+    0) skip "QP_VERIFY_BROWSER=0" ;;
+    1) ;;
+    *)
+      command -v node >/dev/null 2>&1 || skip "node not found (set QP_VERIFY_BROWSER=1 to force)"
+      if ! command -v wasm-pack >/dev/null 2>&1 && [ ! -x "$HOME/.cargo/bin/wasm-pack" ]; then
+        skip "wasm-pack not found (set QP_VERIFY_BROWSER=1 to force)"
+      fi
+      ;;
+  esac
+  build_qp
+  wp="$(command -v wasm-pack || echo "$HOME/.cargo/bin/wasm-pack")"
+  "$wp" build crates/qp-wasm --target web --profile wasm --no-opt \
+    --out-dir ../../shells/web/pkg -- --features replica
+  rm -f shells/web/pkg/.gitignore shells/web/pkg/package.json shells/web/pkg/README.md
+  printf '{"wasm_raw":%s,"wasm_gzip":%s}\n' "$(wc -c <shells/web/pkg/qp_wasm_bg.wasm | tr -d ' ')" \
+    "$(gzip -9 -c shells/web/pkg/qp_wasm_bg.wasm | wc -c | tr -d ' ')" >shells/web/pkg/sizes.json
+  (cd shells/web && { [ -d node_modules ] || npm ci --no-audit --no-fund; })
+  if ! (cd shells/web && node -e "const fs=require('fs');process.exit(fs.existsSync(require('playwright').chromium.executablePath())?0:1)"); then
+    (cd shells/web && npx playwright install chromium)
+  fi
+  mkdir -p "$d"
+  (cd shells/web && node tests/parity.mjs "$qp" "$d/parity") || fail "parity or network test failed"
+  (cd shells/web && node screens.mjs "$qp" "$d/a" && node screens.mjs "$qp" "$d/b") || fail "screenshots failed"
+  for f in "$d"/a/*.png; do
+    b="$(basename "$f")"
+    n=$((n + 1))
+    cmp -s "$f" "$d/b/$b" || { echo "$b: two runs differ" >&2; bad=$((bad + 1)); continue; }
+    case "$b" in *.page.png) continue ;; esac
+    if ! cmp -s "$f" "fixtures/golden/demo/$b"; then
+      mkdir -p "$target_dir/golden-actual/demo"
+      cp "$f" "$target_dir/golden-actual/demo/$b"
+      echo "$b: differs from fixtures/golden/demo/$b (actual: $target_dir/golden-actual/demo/$b)" >&2
+      bad=$((bad + 1))
+    fi
+  done
+  for f in fixtures/golden/demo/*.png; do
+    [ -f "$d/a/$(basename "$f")" ] || { echo "$(basename "$f"): golden not produced" >&2; bad=$((bad + 1)); }
+  done
+  [ "$bad" -eq 0 ] || fail "$bad screenshot check(s) failed"
+  note "same origin only; browser = shell-less digests; $n images x2 identical, scenes = goldens"
+}
+
 # --- run -------------------------------------------------------------------
 
 total_start=$SECONDS
@@ -452,6 +514,8 @@ run_step protocol step_protocol
 run_step conform step_conform
 run_step replica step_replica
 run_step replay step_replay
+run_step shell step_shell
+run_step demo step_demo
 total=$((SECONDS - total_start))
 
 failed=0

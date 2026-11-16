@@ -693,6 +693,7 @@ impl Session {
         let fired = self.eval_intents_live(seq, &changed_ref);
         let mut entries: Vec<Seq> = entry.into_iter().collect();
         entries.extend(self.invalidate_live(&changed_ref));
+        entries.extend(self.invalidate_public_only());
         let mut lines = Vec::new();
         for s in entries {
             lines.extend(self.entry_events(s));

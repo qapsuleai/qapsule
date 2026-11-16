@@ -355,7 +355,7 @@ fn oracle_run(
     seed: u64,
     ids: &[(String, String)],
     shared: &str,
-) -> Vec<OutboundLine> {
+) -> (Vec<OutboundLine>, Session) {
     let k = 60;
     let mut v = serde_json::to_value(init(bars, k, seed)).unwrap();
     for p in v["principals"].as_array_mut().unwrap() {
@@ -403,7 +403,7 @@ fn oracle_run(
             &json!({"type":"command","id":"o","ops":[op]}),
         ));
     }
-    for (i, b) in bars.iter().enumerate().take(n).skip(half) {
+    for (i, b) in bars.iter().enumerate().take(n - 1).skip(half) {
         out.extend(s.data_event(&ev(i - k + 1, b)).unwrap());
     }
     let t = bars[n - 5].t;
@@ -415,9 +415,42 @@ fn oracle_run(
             json!({"type":"dispute","id":"e","claim":{"kind":"capsule","capsule":cap,"finding":fnd},"t":t,"digest":"zz"}),
             json!({"type":"query","id":"q","query":{"kind":"capsule","capsule":cap}}),
         ] {
-            out.extend(send(&mut s, "b", &m));
+            let r = send(&mut s, "b", &m);
+            // (R3/K1b) Bora accepts every proposal he made (a public-view decider).
+            let props: Vec<String> = r
+                .iter()
+                .filter_map(|l| {
+                    let v = serde_json::to_value(&l.msg).unwrap();
+                    v["proposal"].as_str().map(str::to_owned)
+                })
+                .collect();
+            out.extend(r);
+            for pid in props {
+                out.extend(send(
+                    &mut s,
+                    "b",
+                    &json!({"type":"command","id":"a","ops":[{"op":"accept_proposal","proposal":pid}]}),
+                ));
+            }
         }
     }
+    // (R3/K1b) Bora writes his own fact, finding and capsule under ids the authority's
+    // world may give to its own (licensed) items, with an invalidation that holds.
+    for (i, (_, fnd)) in ids.iter().take(4).enumerate() {
+        let cond = json!({"kind":"threshold","series":"px","op":"gt","value": bars[n - 3].c * 0.5});
+        for op in [
+            json!({"op":"add_fact","id":format!("fx-bora-{i}"),"kind":"note","series":"px","bar":n - 4,"text":"b"}),
+            json!({"op":"add_finding","id":fnd,"claim":"Bora'nın","facts":[format!("fx-bora-{i}")],
+                   "confidence":0.4,"invalidation":cond,"capsule":"Bora'nın notu"}),
+        ] {
+            out.extend(send(
+                &mut s,
+                "b",
+                &json!({"type":"command","id":"w","ops":[op]}),
+            ));
+        }
+    }
+    out.extend(s.data_event(&ev(n - k, &bars[n - 1])).unwrap());
     for c in ["b", "c"] {
         for q in [
             json!({"kind":"log"}),
@@ -427,7 +460,7 @@ fn oracle_run(
             out.extend(send(&mut s, c, &json!({"type":"query","id":"q","query":q})));
         }
     }
-    out
+    (out, s)
 }
 
 /// Engine (capsule, finding) ids of a seed's authority document after `n` bars.
@@ -478,7 +511,7 @@ fn no_oracle_through_commands_proposals_disputes_or_invalidations() {
         .expect("a shared engine finding")
         .1
         .clone();
-    let base = oracle_run(&bars, n, 1, &ids, &shared);
+    let (base, auth) = oracle_run(&bars, n, 1, &ids, &shared);
     let b = stripped(&base, "b");
     assert!(
         b.iter()
@@ -489,8 +522,38 @@ fn no_oracle_through_commands_proposals_disputes_or_invalidations() {
     assert!(!b
         .iter()
         .any(|l| l.contains(&format!("invalidation of {shared}"))));
+    // (R3/K1b) Bora accepted proposals as a public-view decider.
+    assert!(b
+        .iter()
+        .any(|l| l.contains("\"id\":\"a\"") && l.contains("\"status\":\"applied\"")));
+    // (R3/K1b) Bora's own findings under ids the authority's world gives to its own
+    // items: the authority's items are untouched, Bora sees his own (and its capsule's
+    // invalidation, evaluated in the public world).
+    let mut collided = 0;
+    for (_, fnd) in ids.iter().take(4) {
+        if let Some(f) = auth.document().findings.iter().find(|f| &f.id == fnd) {
+            collided += 1;
+            assert!(
+                matches!(f.provenance.author, qp_schema::Author::Engine { .. }),
+                "{fnd} overwritten in the authority: {f:?}"
+            );
+            assert_ne!(f.claim, "Bora'nın");
+        }
+        assert!(
+            b.iter()
+                .any(|l| l.contains(&format!("invalidation of {fnd} holds"))),
+            "{fnd}: Bora's capsule not invalidated in his world"
+        );
+    }
+    assert!(collided > 0, "no collision exercised");
+    let doc_b = b
+        .iter()
+        .rev()
+        .find(|l| l.contains("\"kind\":\"document\""))
+        .unwrap();
+    assert!(doc_b.contains("Bora'nın"));
     for seed in [2_u64, 7, 42, 0] {
-        let other = oracle_run(&bars, n, seed, &ids, &shared);
+        let other = oracle_run(&bars, n, seed, &ids, &shared).0;
         for c in ["b", "c"] {
             let x = stripped(&base, c);
             let y = stripped(&other, c);

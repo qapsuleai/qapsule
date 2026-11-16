@@ -200,6 +200,20 @@ pub struct Session {
     /// (R3/K1) The public world's version of the entry being committed, when the writer
     /// made one itself (the engine's look, a command of a public-view reader).
     pub(crate) pending_pub: Option<crate::public::PubPending>,
+    /// (R3/K1b) Capsules (without a story) a public-view writer made that only the
+    /// public world holds; their invalidation is evaluated there.
+    pub(crate) pub_only: BTreeSet<String>,
+}
+
+/// A proposal's acceptance expanded in one world ([`Session::accept`]).
+struct Accepted {
+    doc: Document,
+    changes: Vec<ChangeOp>,
+    inverse: Vec<ChangeOp>,
+    created: Vec<String>,
+    proposer: String,
+    reason: Option<String>,
+    ops: Vec<Op>,
 }
 
 /// Resolves `rel` under `root`, refusing absolute paths and paths that leave `root`.
@@ -468,6 +482,7 @@ impl Session {
             other: None,
             in_public: false,
             pending_pub: None,
+            pub_only: BTreeSet::new(),
         };
         s.audience_seen = s.doc.audiences.keys().cloned().collect();
         s.start_capsules(capsules.as_ref());
@@ -1401,23 +1416,20 @@ impl Session {
             };
             let full = expand_ops(&self.doc, ops, "/ops", &mut ctx);
             let (fcreated, fundoes) = (ctx.created, ctx.undoes);
-            let mut rev = Vec::new();
+            let mut pub_inverse = Vec::new();
             let (ex, created, undoes, pending) = match pub_ex {
                 // A public-view reader: everything it observes (errors, conflicts, ids,
                 // the entry's changes) comes from the public world. The authority's world
                 // takes the same ops when they apply there and touch no engine item the
-                // two worlds do not share; else the public world's changes translated
-                // (people's own items kept, engine items only the public world has
-                // dropped). Either way nothing it could see differs.
+                // two worlds do not share; else the public world's changes translated, all
+                // or nothing (`commit_for_public_writer`). Nothing it could see differs.
                 Some(p) if public => {
                     let (changes, inverse, created, undoes) = p?;
                     let ex = full.ok().filter(|ex| {
                         !self.diverged_touch(&ex.changes)
                             && self.base_check(base, &ex.changes, &ex.origin).is_ok()
                     });
-                    if ex.is_none() {
-                        rev = self.reverse_changes(&changes, &inverse);
-                    }
+                    pub_inverse = inverse;
                     (ex, created, undoes, Some(changes))
                 }
                 p => {
@@ -1431,10 +1443,6 @@ impl Session {
                     )
                 }
             };
-            self.pending_pub = pending.map(|changes| crate::public::PubPending {
-                changes,
-                summary: None,
-            });
             let entry = LogEntry {
                 reason: reason.clone(),
                 seq,
@@ -1452,23 +1460,25 @@ impl Session {
                 },
                 evidence: None,
             };
-            match ex {
-                Some(ex) => self.commit(
+            if public && self.other.is_some() {
+                let full = ex.map(|ex| (ex.changes, ex.inverse, ex.doc));
+                let changes = pending.unwrap_or_default();
+                self.commit_for_public_writer(entry, full, changes, &pub_inverse);
+            } else {
+                self.pending_pub = pending.map(|changes| crate::public::PubPending {
+                    changes,
+                    summary: None,
+                    evidence: None,
+                });
+                let ex = ex.expect("an entitled writer's command applied");
+                self.commit(
                     LogEntry {
                         changes: ex.changes,
                         inverse: ex.inverse,
                         ..entry
                     },
                     ex.doc,
-                ),
-                None => {
-                    let (changes, inverse) = self.apply_each(rev);
-                    self.committed(LogEntry {
-                        changes,
-                        inverse,
-                        ..entry
-                    });
-                }
+                );
             }
             let mut lines = vec![out(
                 &conn,
@@ -1596,6 +1606,7 @@ impl Session {
         Ok(lines)
     }
 
+    #[allow(clippy::too_many_arguments)]
     fn accept(
         &mut self,
         conn: &str,
@@ -1605,8 +1616,98 @@ impl Session {
         (base, reason): (Option<Seq>, Option<String>),
         resolved: BTreeMap<String, String>,
     ) -> PResult<Vec<OutboundLine>> {
-        let pr = need_proposal(&self.doc, pid, "/ops/0/proposal")?.clone();
         let seq = self.seq() + 1;
+        // (R3/K1b) A public-view decider: the acceptance is validated and expanded in the
+        // public world (its errors, conflicts and ids); the authority's world takes the
+        // same acceptance when it applies there and touches no engine item the two
+        // worlds do not share, else the public changes translated, all or nothing.
+        let public = self.public_view(decider) && self.other.is_some();
+        let (a, pub_side) = if public {
+            let n = note.clone();
+            let p = self.in_world(true, |s| s.accept_expand(pid, n, decider, base, seq))?;
+            let full = self
+                .accept_expand(pid, note, decider, base, seq)
+                .ok()
+                .filter(|a| !self.diverged_touch(&a.changes));
+            (full, Some(p))
+        } else {
+            let a = self.accept_expand(pid, note.clone(), decider, base, seq)?;
+            let p = if self.other.is_some() {
+                self.in_world(true, |s| s.accept_expand(pid, note, decider, base, seq))
+                    .ok()
+            } else {
+                None
+            };
+            (Some(a), p)
+        };
+        let head = if public {
+            pub_side.as_ref()
+        } else {
+            a.as_ref()
+        }
+        .expect("the deciding world's acceptance");
+        let entry = LogEntry {
+            reason: reason.or_else(|| head.reason.clone()),
+            seq,
+            at: self.clock,
+            author: head.proposer.clone(),
+            approved_by: Some(decider.to_owned()),
+            cause: Some(id.to_owned()),
+            request: head.ops.clone(),
+            changes: Vec::new(),
+            inverse: Vec::new(),
+            undoes: None,
+            summary: format!("accept {pid}: {}", summarize_ops(&head.ops, &head.created)),
+            evidence: None,
+        };
+        let created = head.created.clone();
+        if public {
+            let p = pub_side.expect("public side");
+            let full = a.map(|a| (a.changes, a.inverse, a.doc));
+            self.commit_for_public_writer(entry, full, p.changes, &p.inverse);
+        } else {
+            let a = a.expect("authority side");
+            self.pending_pub = pub_side.map(|p| crate::public::PubPending {
+                changes: p.changes,
+                summary: None,
+                evidence: None,
+            });
+            self.commit(
+                LogEntry {
+                    changes: a.changes,
+                    inverse: a.inverse,
+                    ..entry
+                },
+                a.doc,
+            );
+        }
+        let mut lines = vec![out(
+            conn,
+            ServerMsg::Ack {
+                resolved,
+                id: id.to_owned(),
+                status: AckStatus::Applied,
+                seq: Some(seq),
+                created,
+                proposal: None,
+                undoes: None,
+            },
+        )];
+        lines.extend(self.settle(seq));
+        Ok(lines)
+    }
+
+    /// The acceptance of proposal `pid` by `decider` as entry `seq`, expanded and
+    /// `base`-checked in the world the fields hold.
+    fn accept_expand(
+        &self,
+        pid: &str,
+        note: Option<String>,
+        decider: &str,
+        base: Option<Seq>,
+        seq: Seq,
+    ) -> PResult<Accepted> {
+        let pr = need_proposal(&self.doc, pid, "/ops/0/proposal")?.clone();
         let proposer = self.principal_of(&pr.provenance.author);
         let proposer_owner = self
             .principal(&proposer)
@@ -1664,35 +1765,74 @@ impl Session {
         changes.extend(tail);
         let origin = vec![0; changes.len()];
         self.base_check(base, &changes, &origin)?;
-        let entry = LogEntry {
-            reason: reason.or_else(|| pr.reason.clone()),
-            seq,
-            at: self.clock,
-            author: proposer,
-            approved_by: Some(decider.to_owned()),
-            cause: Some(id.to_owned()),
-            request: pr.ops.clone(),
+        Ok(Accepted {
+            doc,
             changes,
             inverse,
-            undoes: None,
-            summary: format!("accept {pid}: {}", summarize_ops(&pr.ops, &created)),
-            evidence: None,
+            created,
+            proposer,
+            reason: pr.reason.clone(),
+            ops: pr.ops,
+        })
+    }
+
+    /// (R3/K1b) Commits the entry of a public-view writer: the public world takes
+    /// `pub_changes` (its own expansion); the authority's document takes `full` (the
+    /// same ops expanded there, when they apply and touch no item the two worlds do not
+    /// share) or else the public changes translated back
+    /// ([`Session::reverse_changes`]), **all or nothing**, never touching an item the
+    /// two worlds hold differently. Capsules of the writer the authority's world did not
+    /// take are remembered: their §8.1 invalidation is then evaluated in the public
+    /// world ([`Session::invalidate_public_only`]).
+    pub(crate) fn commit_for_public_writer(
+        &mut self,
+        entry: LogEntry,
+        full: Option<(Vec<ChangeOp>, Vec<ChangeOp>, Document)>,
+        pub_changes: Vec<ChangeOp>,
+        pub_inverse: &[ChangeOp],
+    ) {
+        let caps: Vec<String> = pub_changes
+            .iter()
+            .filter_map(|c| match c {
+                ChangeOp::PutCapsule { capsule, .. } if capsule.story.is_none() => {
+                    Some(capsule.id.clone())
+                }
+                _ => None,
+            })
+            .collect();
+        let rev = if full.is_none() {
+            self.reverse_changes(&pub_changes, pub_inverse)
+        } else {
+            None
         };
-        self.commit(entry, doc);
-        let mut lines = vec![out(
-            conn,
-            ServerMsg::Ack {
-                resolved,
-                id: id.to_owned(),
-                status: AckStatus::Applied,
-                seq: Some(seq),
-                created,
-                proposal: None,
-                undoes: None,
-            },
-        )];
-        lines.extend(self.settle(seq));
-        Ok(lines)
+        self.pending_pub = Some(crate::public::PubPending {
+            changes: pub_changes,
+            summary: None,
+            evidence: None,
+        });
+        match full {
+            Some((changes, inverse, doc)) => self.commit(
+                LogEntry {
+                    changes,
+                    inverse,
+                    ..entry
+                },
+                doc,
+            ),
+            None => {
+                let (changes, inverse) = self.apply_atomic(rev.unwrap_or_default());
+                self.committed(LogEntry {
+                    changes,
+                    inverse,
+                    ..entry
+                });
+            }
+        }
+        for c in caps {
+            if !self.doc_capsule(&c).is_some_and(|x| x.story.is_none()) {
+                self.pub_only.insert(c);
+            }
+        }
     }
 
     /// `base` check (§8.2): an item the command touches changed in an entry after
@@ -2059,6 +2199,12 @@ impl Session {
             conds.extend(c);
             intents.extend(i);
         }
+        for s in self.invalidate_public_only() {
+            entries.push(s);
+            let (c, i) = self.eval_watchers(s);
+            conds.extend(c);
+            intents.extend(i);
+        }
         let mut lines = Vec::new();
         for s in entries {
             lines.extend(self.entry_events(s));
@@ -2140,6 +2286,14 @@ impl Session {
                 conds.extend(c);
                 intents.extend(i);
             }
+        }
+        // (R3/K1b) Invalidations of the public-view writers' own capsules only the
+        // public world holds.
+        for s in self.invalidate_public_only() {
+            entries.push(s);
+            let (c, i) = self.eval_watchers(s);
+            conds.extend(c);
+            intents.extend(i);
         }
         let mut lines = Vec::new();
         for s in entries {

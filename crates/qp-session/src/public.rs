@@ -77,6 +77,8 @@ pub(crate) struct PubPending {
     pub changes: Vec<ChangeOp>,
     /// Its own summary (`None`: the authority's).
     pub summary: Option<String>,
+    /// Its own claim evidence (`None`: the authority's).
+    pub evidence: Option<qp_schema::protocol::ClaimEvidence>,
 }
 
 /// Whether `c` only writes bars (the same in both worlds).
@@ -173,27 +175,58 @@ impl Session {
         only_in(&self.doc, pubdoc)
     }
 
-    /// (In the authority's world) a public-view reader's command changes `changes`
-    /// (inverse `inverse`, of the public world) as the authority's document takes them:
-    /// [`translate`] the other way (engine items only the public world has dropped;
-    /// people's own items — findings, capsules without a story, views — kept, so that
-    /// both worlds hold them and their invalidations coincide).
+    /// (In the authority's world, R3/K1b) a public-view writer's changes `changes`
+    /// (inverse `inverse`, of the public world, not yet applied there) as the
+    /// authority's document may take them, **all or nothing**: `None` when any change
+    /// names an item the two worlds do not hold alike — an engine item (fact with a
+    /// meaning, engine finding, capsule with a story) of either document, or an id the
+    /// two documents hold in different collections or only one of them holds — or when
+    /// the translation would drop or empty a change. Only people's own items (new
+    /// ones, or ones both worlds hold) pass, so the authority's items are never written
+    /// from the public world. The caller applies the result atomically.
     pub(crate) fn reverse_changes(
         &self,
         changes: &[ChangeOp],
         inverse: &[ChangeOp],
-    ) -> Vec<ChangeOp> {
-        let Some(w) = self.other.as_ref() else {
-            return Vec::new();
-        };
+    ) -> Option<Vec<ChangeOp>> {
+        let w = self.other.as_ref()?;
         let p = Proj {
             hidden: only_in(&w.doc, &self.doc),
             ..Proj::default()
         };
-        changes
-            .iter()
-            .filter_map(|c| translate(c, inverse, &self.doc, &p))
-            .collect()
+        let engine_item = |d: &Document, id: &str| {
+            d.facts.iter().any(|f| f.id == id && f.meaning.is_some())
+                || d.findings
+                    .iter()
+                    .any(|f| f.id == id && engine_author(&f.provenance.author))
+                || d.capsules.iter().any(|c| c.id == id && c.story.is_some())
+        };
+        let alike = |id: &str| {
+            let a = crate::apply::find_collection(&self.doc, id);
+            let b = crate::apply::find_collection(&w.doc, id);
+            a == b && !engine_item(&self.doc, id) && !engine_item(&w.doc, id)
+        };
+        let mut out = Vec::with_capacity(changes.len());
+        for c in changes {
+            let ok = match c {
+                ChangeOp::PushLedger { entry } => {
+                    alike(&entry.finding) && entry.capsule.as_deref().is_none_or(alike)
+                }
+                ChangeOp::PutAudience { .. } => true,
+                _ => alike(crate::apply::touched(c)),
+            };
+            if !ok {
+                return None;
+            }
+            let t = translate(c, inverse, &self.doc, &p)?;
+            if let ChangeOp::PutFinding { finding, .. } = &t {
+                if finding.facts.is_empty() {
+                    return None;
+                }
+            }
+            out.push(t);
+        }
+        Some(out)
     }
 
     /// Whether `changes` (of the authority's world) name an engine item the two worlds
@@ -254,6 +287,9 @@ impl Session {
                 x.changes = p.changes;
                 if let Some(s) = p.summary {
                     x.summary = s;
+                }
+                if p.evidence.is_some() {
+                    x.evidence = p.evidence;
                 }
                 // An engine look names nothing a reader may not see.
                 if e.request.is_empty() {
@@ -320,32 +356,108 @@ impl Session {
         x
     }
 
-    /// Applies `changes` one by one to the document the fields hold, leaving out those
-    /// that do not fit; returns the applied changes and their inverse (reversed).
-    pub(crate) fn apply_each(&mut self, changes: Vec<ChangeOp>) -> (Vec<ChangeOp>, Vec<ChangeOp>) {
-        let mut kept = Vec::with_capacity(changes.len());
-        let mut inverse = Vec::with_capacity(changes.len());
-        for c in changes {
-            let restore = crate::live::Restore {
-                initial: &self.initial,
-                log: &self.log,
-            };
-            if let Ok(inv) =
-                crate::live::apply_in_place(&mut self.doc, std::slice::from_ref(&c), restore)
-            {
-                inverse.extend(inv);
-                kept.push(c);
+    /// (R3/K1b) §8.1 invalidations of the capsules only the public world holds (a
+    /// public-view writer's own the authority's world did not take: `pub_only`),
+    /// evaluated in the public world with the same rules as
+    /// [`Session::invalidate_these`]. Each one that holds is one engine entry: the public
+    /// world's `set_capsule_state` (with its summary and evidence), no change in the
+    /// authority's world. The existence of the entry rests on the public world only.
+    pub(crate) fn invalidate_public_only(&mut self) -> Vec<qp_schema::protocol::Seq> {
+        if self.pub_only.is_empty() || self.other.is_none() || self.in_public {
+            return Vec::new();
+        }
+        enum Look {
+            Gone,
+            Quiet,
+            Holds(String, Option<qp_schema::protocol::ClaimEvidence>),
+        }
+        let mut out = Vec::new();
+        let ids: Vec<String> = self.pub_only.iter().cloned().collect();
+        for cap in ids {
+            let look = self.in_world(true, |s| {
+                let Some(c) = s.doc.capsules.iter().find(|c| c.id == cap) else {
+                    return Look::Gone;
+                };
+                if c.story.is_some() {
+                    return Look::Gone;
+                }
+                if c.state != qp_schema::CapsuleState::Live {
+                    return Look::Quiet;
+                }
+                let fnd = c.finding.clone();
+                let Some(f) = s.doc.findings.iter().find(|f| f.id == fnd) else {
+                    return Look::Quiet;
+                };
+                let cond = f.invalidation.clone();
+                if s.cond_blocked(&cond) {
+                    return Look::Quiet;
+                }
+                let closure = crate::live::closure_of(&s.doc, &cond);
+                let who = s.responsible(f, &closure);
+                if !who
+                    .iter()
+                    .all(|p| crate::live::hears(&s.plane, &s.doc, p, &cond))
+                {
+                    return Look::Quiet;
+                }
+                let rd = s.rd.as_ref().unwrap_or(&s.doc);
+                if !crate::values::holds(rd, &mut s.cache, &cond) {
+                    return Look::Quiet;
+                }
+                let ev = crate::claims::evidence(rd, &mut s.cache, &s.claims, &s.plane, &cond);
+                Look::Holds(fnd, ev)
+            });
+            match look {
+                Look::Gone => {
+                    self.pub_only.remove(&cap);
+                }
+                Look::Quiet => {}
+                Look::Holds(fnd, evidence) => {
+                    self.pending_pub = Some(PubPending {
+                        changes: vec![ChangeOp::SetCapsuleState {
+                            capsule: cap.clone(),
+                            state: qp_schema::CapsuleState::Invalidated,
+                        }],
+                        summary: Some(format!("invalidate {cap}: invalidation of {fnd} holds")),
+                        evidence,
+                    });
+                    match self.engine_entry_with(
+                        Vec::new(),
+                        "invalidate (public world)".to_owned(),
+                        None,
+                    ) {
+                        Some(seq) => out.push(seq),
+                        None => self.pending_pub = None,
+                    }
+                }
             }
         }
-        inverse.reverse();
-        (kept, inverse)
+        out
     }
 
-    /// Applies `pe` to the public world and logs it there. A change that does not fit
-    /// the public document is left out (the entry keeps its place in the sequence).
+    /// (R3/K1b) Applies `changes` to the document the fields hold **atomically**: all of
+    /// them (returned with their inverse) or, when one does not fit, none (the document
+    /// is rolled back; two empty lists): never a partial entry.
+    pub(crate) fn apply_atomic(
+        &mut self,
+        changes: Vec<ChangeOp>,
+    ) -> (Vec<ChangeOp>, Vec<ChangeOp>) {
+        let restore = crate::live::Restore {
+            initial: &self.initial,
+            log: &self.log,
+        };
+        match crate::live::apply_in_place(&mut self.doc, &changes, restore) {
+            Ok(inverse) => (changes, inverse),
+            Err(_) => (Vec::new(), Vec::new()),
+        }
+    }
+
+    /// Applies `pe` to the public world and logs it there, atomically: when its changes
+    /// do not fit the public document, none is applied (the entry keeps its place in the
+    /// sequence, without changes).
     pub(crate) fn commit_public(&mut self, mut pe: LogEntry) {
         self.in_world(true, |s| {
-            let (kept, inverse) = s.apply_each(std::mem::take(&mut pe.changes));
+            let (kept, inverse) = s.apply_atomic(std::mem::take(&mut pe.changes));
             pe.changes = kept;
             pe.inverse = inverse;
             let series_set = pe

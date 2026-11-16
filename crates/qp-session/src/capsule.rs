@@ -1099,6 +1099,7 @@ impl Session {
                 self.pending_pub = Some(crate::public::PubPending {
                     changes,
                     summary: None,
+                    evidence: None,
                 });
             }
             let summary = if fin - from == 1 {
@@ -2561,6 +2562,7 @@ impl Session {
             self.pending_pub = Some(crate::public::PubPending {
                 changes,
                 summary: Some(summary(&events_pub)),
+                evidence: None,
             });
         }
         if let Some(seq) = self.engine_entry_with(changes, summary(&events), None) {

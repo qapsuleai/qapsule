@@ -44,12 +44,24 @@ A = persona ölçümünün ön seçimi, B = ikinci. Adlar katılımcıya hiçbir
    `http://192.168.x.y:8391/links.html`. Gösterimin adresini bir kez yazın. Kodlar (U0–U10)
    tarafsızdır; adlar yalnız URL'dedir ve bu sayfa katılımcıya gösterilmez.
 4. **Son bakış yer imi** (G2 için): telefonun tarayıcısına adı `sb`, adresi
-   `javascript:qp.seen();void(0)` olan bir yer imi ekleyin (links.html'de yazar). Gösterimde
-   "son bakış"ı koyan bir düğme yok (açık soru, `README.md`). Çalışmazsa G2'yi masaüstü
+   `javascript:qp.seen();void(0)` olan bir yer imi ekleyin (links.html'de yazar). (R4/S1'den
+   beri Ayarlar'da "Son bakışımı şimdi işaretle" düğmesi ve `?seen=` de var; yer imi yedektir.) Çalışmazsa G2'yi masaüstü
    tarayıcıda telefon görünümüyle (390×844) yapın, konsolda `qp.seen()`; formda gösterim "masaüstü".
-5. **Metin örtüsü** (G5, G4): yüzün yalnız işaretini açıkta bırakan opak bir kâğıt şerit
-   (ör. katlanmış A4). Telefon masada durur; örtü işaretin sağındaki/altındaki bütün metni ve
-   enstrüman adını kapatır. Örtüyü `Y1` yüzüne göre bir kez kesin; deneme oturumunda denetleyin.
+5. **Metin örtüsü** (G5, G4): yüzün yalnız işaretini açıkta bırakan opak bir kâğıt
+   (ör. katlanmış A4). Telefon masada durur. G5 ve G4 tabanın yüzüyle (`Y1`) yapılır; örtü
+   ona göre bir kez kesilir, deneme oturumunda denetlenir.
+   - **`Y1`'de işaret solda, cümle sağda:** her yüzün üstünde bir satır ek bilgi (karne,
+     soldan başlar), altında solda küçük kare işaret (~32 CSS px, ekranın sol kenarından
+     ~8 px içeride), işaretin sağında başlık cümlesi (enstrüman adı cümlenin ilk sözcüğü,
+     zaman ve "hâlâ geçerli / kapandı: …" de cümlede). Yüzler alt alta ve eşit yükseklikte.
+     Örtü: kâğıda **son üç yüzün işaretlerinin hizasında üç küçük pencere** (her biri
+     işaretten biraz büyük, ~1,2 cm kare; aralarındaki dikey uzaklık bir yüz yüksekliği)
+     açın; pencerelerin sağında kalan cümle sütunu ve üstteki karne satırları kâğıtla kapalı
+     kalır. Pencere yerlerini deneme oturumunda telefonun kendisinde ölçün (G5 ve G4 aynı
+     "son üç" konumunu kullanır; sayfa en alta kaydırılmış olmalı).
+   - **`Y2`'de işaret resmin üstünde**, olayın anında: yatay yeri her kapsülde değişir ve
+     resim yönü gösterir, sabit pencereli örtü işe yaramaz. Bu yüzden G5 ve G4 `Y2` ile
+     yapılmaz (plan tabanı `Y1`); taban değişirse örtü yeniden tasarlanmalı.
 6. Telefon: tarayıcı yakınlaştırması %100, parlaklık normal, gece modu kapalı; ekran kilidi
    uzun. Katılımcı **iki parmakla büyütmez** (G4 için şart). Adres çubuğu görünmesin: sayfayı
    hafif kaydırınca mobil tarayıcı çubuğu gizler; tasarım adı geçen URL'yi katılımcı görmemeli.

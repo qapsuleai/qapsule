@@ -38,14 +38,15 @@ metni bize iletin.
   `?alphabet= &face= &feed= &transition= &outcome=`), "veri yetkisi yok" kipi (kanıtta "şu yetkiyi gerektirir"),
   **Son bakışımı şimdi işaretle** (oynatma saatinde; akış düzeni "son baktığından beri"yi buna
   göre gösterir), izleme listesi ve pozisyonlar (**Uygula**).
-- **Varsayılan görünüm (R4/S1):** hiçbir şey seçilmezse gösterim M9–M11 seçimleriyle açılır:
-  akış `elikov`, geçiş `zumlak`, sonuç işareti `tg5` (yüz `r3`; M8 sürüyor). Öteki kayıtlı
-  tasarımlar Ayarlar'dan ya da URL'den seçilir; R3 görünümü:
+- **Varsayılan görünüm (R4/S1, S2):** hiçbir şey seçilmezse gösterim M8–M11 seçimleriyle açılır:
+  yüz `vadrel`, akış `elikov`, geçiş `zumlak`, sonuç işareti `tg5`. Öteki kayıtlı tasarımlar
+  (yüz: `r3`, `fotolay`, `tavrik`) Ayarlar'dan ya da URL'den seçilir; R3 görünümü:
   `?face=r3&feed=r3&transition=r3&outcome=r3`.
 - **İnsan testi için URL (R4/S1):** `?seen=now` (açılışta son bakış o anki oynatma saati) ya da
   `?seen=600` (oynatma 600. adımda ya da ötesinde **ilk durduğu** anın saatiyle: doğrudan 609'a
   atlanırsa son bakış 609 olur, bu yüzden önce `600`'e gidin); `?watch=SYN02,SYN03&long=SYN09&short=SYN12`
-  (`&group=future` isteğe bağlı) izleme listesini ve pozisyonları kurar. Bunlar her başlangıçta
+  (`&group=future` isteğe bağlı) izleme listesini ve pozisyonları kurar (R4/S2: listede
+  yalnız gösterimin enstrümanları kalır, her biri bir kez; yanlış yazılan sembol atılır). Bunlar her başlangıçta
   yeniden uygulanır: geriye sarmak otoriteyi baştan kurar, URL'deki kitle ve son bakış yine
   gelir (Ayarlar'dan elle girilenler gelmez). Örnek:
   `http://localhost:8390/?watch=SYN02,SYN03&long=SYN09,SYN12&seen=600`, oynatma çubuğundan
@@ -59,7 +60,7 @@ metni bize iletin.
 node shells/web/arch-check.mjs                        # mimari testi (ARCH.md)
 cd shells/web && npm ci
 node tests/parity.mjs ../../target/release/qp /tmp/p  # ağ + kabuksuz eşitlik
-node tests/settings.mjs ../../target/release/qp       # (R4/S1) Ayarlar, varsayılanlar, ?seen= ?watch= ?long=
+node tests/settings.mjs ../../target/release/qp       # (R4/S1) Ayarlar, varsayılanlar, ?seen= ?watch= ?long= (verify adım 18)
 node screens.mjs ../../target/release/qp /tmp/s       # sabit anda ekran görüntüleri
 node tests/metrics.mjs ../../target/release/qp 4      # ölçüm (4× işlemci kısıtı)
 ```

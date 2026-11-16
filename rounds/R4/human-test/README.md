@@ -8,6 +8,10 @@ elemeydi; **persona ajanı insan değildir** — son söz bu testtedir.
 **Yüz adları tek yerde:** `plan.json` → `"faces": {"Y1": "vadrel", "Y2": "fotolay"}` (M8 ilk iki, `rounds/R4/experiments/M8/RESULTS.md`;
 yer tutucular 2026-11-16 dolduruldu). `node prepare.mjs key` yüzler gösterimde kayıtlıyken yeniden koşulur (anahtar
 değişmez, `links.html` dolar). Başka hiçbir dosyada yüz adı yazmaz; belgeler `Y1`/`Y2` der.
+**R4/S2 (yüzler kayıtlı, gösterimin varsayılan yüzü `Y1`):** `node prepare.mjs key` yeniden koşuldu:
+17 maddenin anahtarı bayt eşit, `key.md` aynı; `key.json`'da yalnız `unfilled_faces` boşaldı;
+`links.html` gerçek yüz adlarını taşıyor. Aşağıdaki tablonun "yüz `r3`" satırı R4/S1 öncesidir:
+artık Ayarlar ve `?face=` dört yüzü sunar (`r3`, `Y1`, `Y2` ve elenen üçüncü).
 
 ## İçindekiler
 

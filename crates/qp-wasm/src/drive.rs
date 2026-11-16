@@ -49,6 +49,8 @@ struct Agent {
     n: u64,
     /// The replay clock from the last replay answer (the feed layout may read it).
     now: Option<i64>,
+    /// The replay source of the last replay answer (its calendar is set on the replica).
+    source: Option<qp_schema::protocol::ReplaySourceKind>,
 }
 
 impl Agent {
@@ -68,7 +70,18 @@ impl Agent {
                 ServerMsg::Welcome { profile, .. } => self.max_points = profile.max_points,
                 ServerMsg::Result { data, .. } => match data {
                     QueryResult::Capsules { capsules, .. } => self.feed.clone_from(capsules),
-                    QueryResult::Replay { replay } => self.now = Some(replay.t),
+                    QueryResult::Replay { replay } => {
+                        // (R4/S2) The headline-piece calendar, as the shell core sets it
+                        // (`ShellCore::set_calendar`): faces with a headline template
+                        // (`vadrel`, the presentation's face) phrase elapsed time by it.
+                        if self.source != Some(replay.source) {
+                            self.source = Some(replay.source);
+                            self.replica.set_headline_calendar(
+                                qp_session::headparts::replay_calendar(replay.source),
+                            );
+                        }
+                        self.now = Some(replay.t);
+                    }
                     QueryResult::Interaction { interaction } => {
                         self.look = interaction.state.clone();
                         if let Some(o) = &interaction.opening {
@@ -191,6 +204,7 @@ pub fn shell_less(host: &mut ReplayHost, principal: &str, lang: &str, script: &[
         max_points: 60,
         n: 0,
         now: None,
+        source: None,
     };
     a.send(
         host,

@@ -62,6 +62,13 @@ pub struct FaceDesign {
 /// The default face design.
 pub const DEFAULT_FACE: &str = "r3";
 
+/// (R4/S2) The face the presentation shell asks for when the reader chose none (M8's
+/// pick, `docs/FACE.md`, `rounds/R4/experiments/M8/RESULTS.md`). The shell core sends it
+/// with the `style` gesture at start, like `feeds::PRESENTED_FEED`; the protocol default
+/// ([`DEFAULT_FACE`]) does not change, so bare connections, transcripts and existing
+/// goldens stay byte-identical.
+pub const PRESENTED_FACE: &str = "vadrel";
+
 /// Earlier names still accepted: `(alias, name)`.
 pub const ALIASES: [(&str, &str); 1] = [("card", "r3")];
 
@@ -72,7 +79,8 @@ mod vadrel;
 
 mod fotolay;
 
-/// Face designs a connection may choose; the first is the default.
+/// Face designs a connection may choose; the first is the default. (R4/S2) After the
+/// reference, M8's ranking: the first two (`vadrel`, `fotolay`) go to the human test.
 pub static FACES: &[FaceDesign] = &[
     FaceDesign {
         name: "r3",
@@ -88,16 +96,16 @@ pub static FACES: &[FaceDesign] = &[
         headline: Some(vadrel::headline),
     },
     FaceDesign {
-        name: "tavrik",
-        height: tavrik::HEIGHT,
-        view: tavrik::view,
-        headline: Some(tavrik::headline),
-    },
-    FaceDesign {
         name: "fotolay",
         height: fotolay::HEIGHT,
         view: fotolay::view,
         headline: Some(fotolay::headline),
+    },
+    FaceDesign {
+        name: "tavrik",
+        height: tavrik::HEIGHT,
+        view: tavrik::view,
+        headline: Some(tavrik::headline),
     },
 ];
 
@@ -377,5 +385,9 @@ mod tests {
         assert_eq!(height(None), 240);
         assert_eq!(height(Some("card")), 240);
         assert!(by_name(Some("nope")).is_err());
+        // (R4/S2) the presentation's face is registered and is not the protocol default.
+        assert!(is_face(PRESENTED_FACE));
+        assert_ne!(PRESENTED_FACE, DEFAULT_FACE);
+        assert_eq!(&names()[..3], ["r3", "vadrel", "fotolay"]);
     }
 }

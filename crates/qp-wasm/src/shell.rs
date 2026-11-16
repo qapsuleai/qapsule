@@ -372,6 +372,9 @@ pub struct ShellCore {
     /// (R4/S1) A last look the page asked for (`?seen=`) that waits for the replay: `None`
     /// now (at the first known replay clock), `Some(n)` when the replay reaches step `n`.
     seen_pending: Option<Option<u64>>,
+    /// (R4/S2) The symbols of the host's feeds (initial data): what a URL audience list
+    /// may name.
+    symbols: std::collections::BTreeSet<String>,
 }
 
 impl std::fmt::Debug for ShellCore {
@@ -505,6 +508,7 @@ impl ShellCore {
             scale: 1,
             trans_t0: None,
             seen_pending: None,
+            symbols: data.feeds.iter().map(|f| f.feed.symbol.clone()).collect(),
         };
         me.push(json!({"type":"hello","protocol":"qp/0","principal":principal,
             "surface":{"kind":"phone","screen":[390,844],"input":["touch"],"lang":lang_name(lang)}}));
@@ -520,12 +524,13 @@ impl ShellCore {
 
     /// (R4/S1) The `style` gesture of the presentation's defaults: feed layout, depth
     /// transition and outcome mark picked in M9–M11 (`qp_grammar::feeds::PRESENTED_FEED`,
-    /// `transitions::PRESENTED_TRANSITION`, `glyph::outcome::PRESENTED_OUTCOME`). The
-    /// protocol's own defaults (a bare connection) stay `r3`; the face is not set here
-    /// (M8 is still open).
+    /// `transitions::PRESENTED_TRANSITION`, `glyph::outcome::PRESENTED_OUTCOME`) and the
+    /// face picked in M8 (`qp_grammar::faces::PRESENTED_FACE`, R4/S2). The protocol's own
+    /// defaults (a bare connection) stay `r3`.
     #[must_use]
     pub fn presented_look() -> Value {
         json!({"kind":"style",
+               "face": qp_grammar::faces::PRESENTED_FACE,
                "feed": qp_grammar::feeds::PRESENTED_FEED,
                "transition": qp_grammar::transitions::PRESENTED_TRANSITION,
                "outcome": qp_grammar::glyph::outcome::PRESENTED_OUTCOME})
@@ -1101,7 +1106,8 @@ impl ShellCore {
     /// `set_audience` from the settings page's choices: `{group, sensitivity?, watch:
     /// [symbol], long: [symbol], short: [symbol]}` (a position is one unit long or short).
     /// (R4/S1) A list may also be one comma-separated string, as the page's URL gives it
-    /// (`?watch=SYN01,SYN02&long=SYN09`).
+    /// (`?watch=SYN01,SYN02&long=SYN09`); (R4/S2) such a list keeps only symbols of the
+    /// host's feeds, each once (a typo or a foreign symbol is dropped, not watched).
     pub fn set_audience(&mut self, choice: &Value) {
         let group = choice
             .get("group")
@@ -1120,12 +1126,15 @@ impl ShellCore {
                     .iter()
                     .filter_map(|x| x.as_str().map(str::to_owned))
                     .collect(),
-                Some(Value::String(t)) => t
-                    .split(',')
-                    .map(str::trim)
-                    .filter(|x| !x.is_empty())
-                    .map(str::to_owned)
-                    .collect(),
+                Some(Value::String(t)) => {
+                    let mut out: Vec<String> = Vec::new();
+                    for x in t.split(',').map(str::trim) {
+                        if self.symbols.contains(x) && !out.iter().any(|o| o == x) {
+                            out.push(x.to_owned());
+                        }
+                    }
+                    out
+                }
                 _ => Vec::new(),
             }
         };

@@ -157,7 +157,16 @@ yok (Açık sorular 3).
 
 M11 stili (`qp_grammar::glyph::outcome::STYLES`, M11 düzeneği) artık bakış ayarıdır:
 `style.outcome` (`ViewState.outcome`; `?outcome=<ad>`, Ayarlar → Sonuç işareti); otoritenin
-isabet derlemesi ve yansı `CompileOptions.outcome`'u bundan doldurur. Varsayılan `r3`.
+isabet derlemesi ve yansı `CompileOptions.outcome`'u bundan doldurur. Varsayılan `r3`
+(protokolün; gösterimin varsayılanı aşağıda).
+
+> **Gösterimin varsayılanı (R4/S1, S2):** gösterim artık `vadrel` yüzü, `elikov` akışı,
+> `zumlak` geçişi ve `tg5` sonuç işaretiyle açılır (kabuk çekirdeğinin `PRESENTED_*`
+> sabitleri; protokolün varsayılanı `r3` kaldı). Düzenek ekranları ayarları açıkça verir:
+> `demo_shots.mjs` planın vermediği `face`, `feed`, `transition`, `outcome`'u `r3`'e
+> sabitler; M9/M10 ekranları yeniden üretilirse aynı kalır (S2'de M9 `5e000c35` yeniden
+> üretildi: 6 ekran bayt eşit; sabitlemesiz, gösterimin varsayılanlarıyla farklı).
+> `shoot.mjs` (M8) gösterimi kullanmaz (düzeneğin ürettiği durağan sayfa), etkilenmez.
 
 ## Komutlar
 

@@ -43,7 +43,7 @@ fn sent_kind<'a>(core: &'a ShellCore, op: &str) -> Vec<&'a Value> {
 }
 
 #[test]
-fn the_presentation_asks_for_the_m9_m11_picks_and_the_page_overrides_them() {
+fn the_presentation_asks_for_the_m8_m11_picks_and_the_page_overrides_them() {
     let core = page(&mut parity_host(), |_| {});
     let look = serde_json::to_value(core.look()).unwrap();
     assert_eq!(look["feed"], qp_grammar::feeds::PRESENTED_FEED, "{look}");
@@ -55,17 +55,15 @@ fn the_presentation_asks_for_the_m9_m11_picks_and_the_page_overrides_them() {
         look["outcome"],
         qp_grammar::glyph::outcome::PRESENTED_OUTCOME
     );
-    assert!(
-        look.get("face").is_none(),
-        "the face default is M8's: {look}"
-    );
+    // (R4/S2) the face is M8's pick.
+    assert_eq!(look["face"], qp_grammar::faces::PRESENTED_FACE, "{look}");
     // The page's own choice (URL) is sent after the defaults and wins; `r3` is the
     // protocol default, so the fields are absent again.
     let core = page(&mut parity_host(), |c| {
-        c.set_look(&json!({"feed":"r3","transition":"r3","outcome":"r3"}));
+        c.set_look(&json!({"face":"r3","feed":"r3","transition":"r3","outcome":"r3"}));
     });
     let look = serde_json::to_value(core.look()).unwrap();
-    for k in ["feed", "transition", "outcome"] {
+    for k in ["face", "feed", "transition", "outcome"] {
         assert!(look.get(k).is_none(), "{k}: {look}");
     }
 }
@@ -73,13 +71,14 @@ fn the_presentation_asks_for_the_m9_m11_picks_and_the_page_overrides_them() {
 #[test]
 fn url_audience_takes_comma_lists() {
     let core = page(&mut parity_host(), |c| {
-        c.set_audience(&json!({"group":"","watch":"SYN01, SYN02","long":"SYN09","short":""}));
+        c.set_audience(&json!({"group":"","watch":"SYN01, SYN02, NOPE, SYN01,","long":"SYN09","short":"syn03"}));
     });
     let a = sent_kind(&core, "set_audience");
     assert_eq!(a.len(), 1, "{:?}", core.sent());
     let aud = &a[0]["ops"][0]["audience"];
     assert_eq!(aud["group"], "habituated");
     assert_eq!(aud["watchlist"], json!(["SYN01", "SYN02"]));
+    // (R4/S2) unknown symbols and repeats are dropped (symbols are case-sensitive).
     assert_eq!(aud["positions"], json!({"SYN09": 1.0}));
     assert_eq!(core.audience()["watchlist"], json!(["SYN01", "SYN02"]));
 }

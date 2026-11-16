@@ -5,9 +5,9 @@ Her round sonunda güncellenir.
 
 ## Şu an
 
-- **Aktif round:** R3 (koşulmayı bekliyor).
-- **Son güncelleme:** 2026-11-15
-- **Sıradaki adım:** `scripts/preflight.sh`; `rounds/R3/PROMPT.md` yeni bir Claude Code oturumuna verilir.
+- **Aktif round:** yok (R3 tamamlandı; sonraki round ana akışta tasarlanır).
+- **Son güncelleme:** 2026-11-16
+- **Sıradaki adım:** ana akış: R3 önerilen kararları (`DECISIONS.md` Ö29–Ö41) ve açık kararlar A21–A26; R3 açık soruları (`rounds/R3/REPORT.md`); insan testi (`rounds/R3/human-test/`) uygulanması.
 
 ## Round geçmişi
 
@@ -20,6 +20,7 @@ Her round sonunda güncellenir.
 | RP1 | Tamamlandı: 7/7 kabul ölçütü, bağımsız denetim "kabul". 8 yönde 21 yaklaşım (9 alındı). SoA şerit çekirdekleri, ızgarada ortak alt hesap paylaşımı, zincirler için hesap grafiği, seri şeritleri, commit-only attach, paralel indirgeme taraması, kanıtlı geç başlangıç (yeni yöntem). K17 hedefleri beş indikatörde GitHub koşucusunda da tutuyor (en kötü RSI 42,2 ms yerel, 57,3 ms WASM). Bit-eşitlik ve hesap özeti değişmedi. | `rounds/RP1/REPORT.md`, `rounds/RP1/RESEARCH.md`, `rounds/RP1/AUDIT.md` |
 | R2 | Tamamlandı: kabul ölçütleri 12 ✅ / 2 ⚠️ (6: kökensiz sabit için bazı panellerde aday yok; 7: ekranlı bakış gelecek yuvaları göstermiyor); bağımsız denetim koşullu kabul, dört koşul giderildi. Gramer v0 (`docs/GRAMMAR.md`; `qp-schema::grammar`, `::scene`), `qp-grammar` derleyicisi, çizici yalnız sahne tarifinden (hesapsız), altı görünüm + iki derinlik görünümü yalnız protokol dökümlerinden (V0 R0 altınla bayt-eşit), köken zorunlu (`no_origin`), kimlikli gramer işlemleri (18 eşzamanlı durumda yanlış 0), `screen`/`hit` sahne tarifinden, anlamla başvuru: seçici nesneler (T9: ilk denemede kimliksiz 19/20; B 10/20; yalnız kimlik 2/20; A v2 sonunda 20/20), 100k bar kare 2,7 ms (LOD), 27 döküm × 3 taşıma, WASM +%25 (595 KB gzip). | `rounds/R2/REPORT.md`, `rounds/R2/AUDIT.md`, `rounds/R2/ergonomics/RESULTS.md` |
 | RP2 | Tamamlandı: kabul ölçütleri 11 ✅ / 1 ⚠️ (7: seçilen tasarımın kendini onarma yolu `qp/0`'da yok, A20); bağımsız son denetim koşullu kabul, iki koşul giderildi. Veri bağı (`source.kind = "bind"`, kalıcı çapa, veri yetkisi; PROTOCOL §18): 10.000 barlı bağlı dokümanın anlık görüntüsü 2.744 B / gzip 985 B (RD1 750 KB / 211 KB), cihazda hazır olma 0,50 ms. Alan düzeyinde veri olayları (`qp-source`: `FeedStore`, `SourceProvider`; Matriks eşlemesi uygulanmadan). Artımlı canlı yol: tikte doküman kopyası yok, artımlı = baştan bayt düzeyinde (özellik testi), tik 85 µs → 2,0 µs (belge içi, N=5) / 0,76 µs (bağlı); hedef ≤ 3× çekirdek 54/54 durumda (en kötü 2,66; yalın paydayla N=500 `all` 5,06). `view` konusu: etkilenmeyene mesaj yok. Dondurulmuş kanıt (`evidence_ref`, `verify_evidence`). Tutarlılık: dört yaklaşım ayrı dallarda, bağımsız düzenekle; hepsi yanlış/erken 0; B seçildi (§19: iddia kanıtı, `claims` konusu, yansı kendi verisinde yeniden sınar); yansı yerel ↔ WASM özetleri her adımda aynı. K25 (belirsiz sunum, gramer katman adları, geleceğe bakış) ve R2 kalanları. 36 döküm × 3 taşıma; hesap özeti ve altın görseller değişmedi. | `rounds/RP2/REPORT.md`, `rounds/RP2/RESEARCH.md`, `rounds/RP2/AUDIT.md` |
+| R3 | Tamamlandı: kabul ölçütleri 17 ✅ / 1 ⚠️ (11: itirazda AUD2 iyileşmedi, 49 → 53); bağımsız son denetim koşullu kabul (K1: lisanslı akış gücü açık bulgunun `confidence`'ı ile yetkisize gidiyordu — girişimsizlik denemesiyle bulundu; yapı gereği giderildi: yalnız açık olgularla ikinci motor, "açık dünya"; K2 kapanış belgeleri). Olgu dedektörleri (`qp-facts`, 7 dedektör, altı tür; toplu = akışkan), kapsül motoru (`qp-capsule`: hikâye, aday, karne ileriye bakmadan, cümle TR/EN, hassasiyet, mühür), otoritede motor ve PROTOCOL §19.9 (itiraz, kesin bar hijyeni), §20 (kapsül); gramer `glyph` işareti ve kapsül görünümleri (yeni altınlar g1, c2–c5). M1–M7: düzenek önce, 16 alternatif ayrı ajanlarla; seçimler siluet (insan testine kadar), şablon dilbilgisi, teyit birleşimi, tür+yön, oynaklık bariyeri, mühür, itiraz+hijyen. Gerçek veri (5 sembol, günlük 2018– ve 60 dk son iki yıl) yalnız yerelde. Ajan yazabilirlik C01–C20: son 19–20/20, ilk deneme 11–12/20. Performans: tik 2,27 µs/olay (RP2 bağlı N=5'in 2,9×'i), kapanış 48 ms, bağlanma 133 ms (1.000 bar, 30 enstrüman). 44 döküm × 3 taşıma; eski altınlar ve hesap özeti değişmedi. | `rounds/R3/REPORT.md`, `rounds/R3/AUDIT.md`, `rounds/R3/experiments/`, `rounds/R3/human-test/`, `rounds/R3/ergonomics/RESULTS.md` |
 
 ## Bilinen durumlar
 
@@ -34,11 +35,19 @@ Her round sonunda güncellenir.
 - `scripts/qapsule-gh.env` `.gitignore`'daki `*.env` kuralı yüzünden izlenmiyor; temiz klonda `qgh`/`preflight` çalışmaz (gizli bilgi içermiyor, istisna önerisi R1 raporunda).
 - Tarama süre hedefleri (K17) RP1 sonrası GitHub koşucusunda da tutuyor; koşucu CPU'su çalışmadan çalışmaya değişiyor (AMD EPYC 9V74 / 7763, Intel Xeon 8573C), ölçümler CPU modeline göre okunmalı. `sweep_bench` CI'da profil ve şerit tablosunu basıyor.
 - RD1'de alt ajanlar sorunsuz başlatıldı (context-mode engeli bu oturumda yoktu); bütün alt görevler, deneyler, ölçüm ve denetim alt ajanlarla yapıldı.
-- `verify.sh` 15 adım (RD1'de `protocol` ve `conform`, R2'de `views`, RP2'de `replica` eklendi; `conform` dökümleri inproc, `qp serve` ve MCP üzerinden koşar; 36 döküm).
+- `verify.sh` 15 adım (RD1'de `protocol` ve `conform`, R2'de `views`, RP2'de `replica` eklendi; `conform` dökümleri inproc, `qp serve` ve MCP üzerinden koşar; R3 sonunda 44 döküm, 12 görünüm; `digest` adımı R3 hesaplarının ayrı özetini de denetler).
+- R3'ten beri gerçek geçmiş barlar `scripts/fetch-bars.sh` ile `fixtures/local/` altına çekilebilir (`docs/DATA_ACCESS.md`); depoya girmez.
 - RP2'den beri canlı yol artımlı: bar yazısı, veri olayı ve motor girdisi dokümanı kopyalamaz (tik 0,76–20 µs, 10k bar, 5–500 hesap). Diğer komutlar hâlâ dokümanı kopyalar.
 - R1'de alt görevler hook kısıtı nedeniyle alt ajanlara verilemedi; denetim yine bağımsız alt ajanla yapıldı. RP1'de de aynı: yalnızca E1 deneyi ve denetim alt ajanla (hook'un ürettiği girdiyle tek başına yeniden gönderilince) başlatılabildi.
 
 ## Arkin'den beklenenler
+
+- R3 önerilen karar satırları (`DECISIONS.md` Ö29–Ö41) ve açık kararlar A21–A26; R3 açık soruları
+  (`rounds/R3/REPORT.md`): mühürün "yetkisize lisanslı hikâye yalnız mühür iletileriyle" kuralı ile
+  K34 gerilimi; pozisyon/niyet geçişinin `important`'ı doldurması; açık hikâyede "artık geçerli
+  değil" cümlesi; kapanmış hikâyelerin arşivlenmesi; insan testi cevaplarının depoya girmesi.
+- İnsan testi (5–10 kişi, ~16 dk): `rounds/R3/human-test/GUIDE.md`; sonuç alfabe seçimini (A21) kapatır.
+- `fixtures/local/symbols.txt`'teki `MIGRS` büyük olasılıkla `MGROS` (her istekte 503).
 
 - RP2 önerilen karar satırları (`DECISIONS.md` Ö18–Ö28) ve açık kararlar A15 (kanıt değerleri ve veri lisansı), A16 (canlı barda geçici iddia), A17 (kesin bar kaynağı), A18 (paylaşılan depo, geçmiş düzeltmede kısmi yeniden hesap), A19 (kriptografik özet), A20 (otoritenin yanlış kesin iddiasının onarımı); RP2 açık soruları (`rounds/RP2/REPORT.md`).
 

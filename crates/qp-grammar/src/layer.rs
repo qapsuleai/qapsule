@@ -707,8 +707,9 @@ pub(crate) fn prepare(
             row.texts.insert("claim".to_owned(), finding.claim.clone());
             all_rows.push(row);
         }
-        // R3 capsule texts (the capsule card): its sentence and its ledger line.
-        let headline = fr.p.headline(f);
+        // R3 capsule texts (the capsule card): its sentence and its ledger line. (R4/H-FP)
+        // In a face scene whose design has a headline template, the template's sentence.
+        let headline = crate::faces::headline_text(fr.headline, f, fr.p);
         let ledger = fr.p.capsule(f).and_then(|c| {
             c.story
                 .as_ref()

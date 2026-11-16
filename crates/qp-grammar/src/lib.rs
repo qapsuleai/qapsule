@@ -30,5 +30,5 @@ pub mod transitions;
 
 pub use compile::{compile, CompileOptions};
 pub use error::{ErrorKind, GrammarError};
-pub use provider::{DataProvider, MemProvider, SeriesKind};
+pub use provider::{DataProvider, HeadlineParts, MemProvider, SeriesKind};
 pub use theme::Theme;

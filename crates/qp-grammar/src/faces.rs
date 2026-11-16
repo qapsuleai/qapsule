@@ -15,12 +15,20 @@
 //! `M8 alternatives` marker (or declare `mod <name>;` there and put it in
 //! `src/faces/<name>.rs`), then add one line to [`FACES`]. Nothing else changes; the
 //! settings page and the harness list the names from here.
+//!
+//! **Headline template (R4/H-FP, SPEC E5):** a design may also write its own headline
+//! ([`FaceDesign::headline`], a [`HeadlineFn`] over [`HeadlineParts`]). In that design's
+//! face scene — and only there: the compile option [`crate::CompileOptions::face`] names
+//! it — the finding's `headline` text field is the template's output (the harness
+//! measures the headline from that field); without a template, or when the provider has
+//! no pieces for the finding, it is the capsule's sentence as before. The capsule's
+//! protocol `headline`, the open capsule, the chart and every transcript are untouched.
 
 use qp_schema::View;
 
 use crate::depth;
 use crate::error::{ErrorKind, GrammarError};
-use crate::provider::DataProvider;
+use crate::provider::{DataProvider, HeadlineParts};
 
 /// Builds a face's view: `(finding, max_points, provider, view id) -> View`. `max_points`
 /// is the connection profile's point budget; the view id is `capsule-<finding>`.
@@ -30,6 +38,12 @@ pub type FaceViewFn = fn(
     p: &dyn DataProvider,
     id: &str,
 ) -> Result<View, GrammarError>;
+
+/// A face design's headline template (R4/H-FP): the headline sentence from the reader's
+/// headline pieces, in the pieces' language ([`HeadlineParts::lang`]). Deterministic;
+/// at most 80 characters (SPEC §2(b)); for a redacted reader ([`HeadlineParts::redacted`])
+/// it must not add digits (the pieces have none).
+pub type HeadlineFn = fn(&HeadlineParts) -> String;
 
 /// One face design.
 #[derive(Debug, Clone, Copy)]
@@ -41,6 +55,8 @@ pub struct FaceDesign {
     pub height: u32,
     /// The view rule.
     pub view: FaceViewFn,
+    /// The headline template; `None`: the capsule's sentence (`DataProvider::headline`).
+    pub headline: Option<HeadlineFn>,
 }
 
 /// The default face design.
@@ -57,9 +73,21 @@ pub static FACES: &[FaceDesign] = &[
         name: "r3",
         height: 240,
         view: depth::capsule_view,
+        headline: None,
     },
     // --- M8 alternatives: one line each
 ];
+
+/// Designs known besides [`FACES`]: none (unit tests register an example design with a
+/// headline template here; it never enters the registry).
+#[cfg(not(test))]
+const UNLISTED: &[FaceDesign] = &[];
+#[cfg(test)]
+const UNLISTED: &[FaceDesign] = &[tests::TEMPLATED];
+
+fn known() -> impl Iterator<Item = &'static FaceDesign> {
+    FACES.iter().chain(UNLISTED.iter())
+}
 
 /// Registered names, in registry order.
 #[must_use]
@@ -74,7 +102,7 @@ pub fn canonical(name: &str) -> Option<&'static str> {
         .iter()
         .find(|(a, _)| *a == name)
         .map_or(name, |(_, n)| *n);
-    FACES.iter().find(|f| f.name == n).map(|f| f.name)
+    known().find(|f| f.name == n).map(|f| f.name)
 }
 
 /// Whether `name` is a known face design (or alias).
@@ -96,13 +124,35 @@ pub fn by_name(name: Option<&str>) -> Result<&'static FaceDesign, GrammarError> 
             format!("unknown face `{n}` (known: {})", names().join(", ")),
         )
     })?;
-    Ok(FACES.iter().find(|f| f.name == c).unwrap_or(&FACES[0]))
+    Ok(known().find(|f| f.name == c).unwrap_or(&FACES[0]))
 }
 
 /// The face height of design `name` (`None` or unknown: the default's).
 #[must_use]
 pub fn height(name: Option<&str>) -> u32 {
     by_name(name).map_or(FACES[0].height, |f| f.height)
+}
+
+/// The headline template of design `name` (`None`: the default's; `r3` has none).
+///
+/// # Errors
+/// An unknown name (`invalid`, `/face`).
+pub fn headline_template(name: Option<&str>) -> Result<Option<HeadlineFn>, GrammarError> {
+    Ok(by_name(name)?.headline)
+}
+
+/// The face's `headline` text for `finding`: design `template`'s output over the
+/// provider's pieces when both exist, else the capsule's sentence
+/// ([`DataProvider::headline`]).
+#[must_use]
+pub fn headline_text(
+    template: Option<HeadlineFn>,
+    finding: &str,
+    p: &dyn DataProvider,
+) -> Option<String> {
+    template
+        .and_then(|t| p.headline_parts(finding).map(|hp| t(&hp)))
+        .or_else(|| p.headline(finding))
 }
 
 /// The face view of `finding` by design `face` (`None`: the default).
@@ -122,6 +172,169 @@ pub fn face_view(
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::{compile, CompileOptions, MemProvider};
+    use qp_schema::capsule::{Stage, Validity};
+    use qp_schema::protocol::Language;
+    use qp_schema::scene::Prim;
+    use qp_schema::{Author, Fact, Finding, Provenance};
+
+    /// An example headline template (tests only; never in [`FACES`]).
+    fn example_headline(hp: &HeadlineParts) -> String {
+        match hp.lang {
+            Language::Tr => format!(
+                "{} {}, {} · {}",
+                hp.instrument, hp.event, hp.when, hp.validity_phrase
+            ),
+            Language::En => format!(
+                "{} {}, {} · {}",
+                hp.instrument, hp.event, hp.when, hp.validity_phrase
+            ),
+        }
+    }
+
+    pub(super) const TEMPLATED: FaceDesign = FaceDesign {
+        name: "zz-test-headline",
+        height: 240,
+        view: depth::capsule_card_view,
+        headline: Some(example_headline),
+    };
+
+    fn hp(lang: Language) -> HeadlineParts {
+        let tr = lang == Language::Tr;
+        HeadlineParts {
+            lang,
+            instrument: "SYN03".into(),
+            event: if tr {
+                "yukarı kırılım"
+            } else {
+                "upside breakout"
+            }
+            .into(),
+            direction_word: if tr { "yukarı" } else { "up" }.into(),
+            when: if tr { "bugün" } else { "today" }.into(),
+            moved: if tr { "bugün" } else { "today" }.into(),
+            validity_phrase: if tr { "hâlâ geçerli" } else { "still holds" }.into(),
+            ledger_short: if tr {
+                "30'da 18 tuttu"
+            } else {
+                "18 of 30 played out"
+            }
+            .into(),
+            stage: Stage::Born,
+            validity: Validity::Valid,
+            redacted: false,
+            ledger_n: Some(30),
+            few_cases: false,
+        }
+    }
+
+    fn provider(parts: Option<HeadlineParts>) -> MemProvider {
+        let json = std::fs::read_to_string(concat!(
+            env!("CARGO_MANIFEST_DIR"),
+            "/../../fixtures/bars/sample.json"
+        ))
+        .expect("sample bars");
+        let bars = qp_schema::parse_bar_series(&json)
+            .expect("valid sample")
+            .bars()
+            .expect("bars")
+            .to_vec();
+        let prov = Provenance {
+            author: Author::Engine {
+                name: "t".into(),
+                version: "0".into(),
+            },
+            at: 0,
+            based_on: Vec::new(),
+            approved_by: None,
+        };
+        let fact = Fact {
+            id: "f".into(),
+            kind: "breakout.range.up".into(),
+            series: "px".into(),
+            bar: 180,
+            t: bars[180].t,
+            text: "breakout".into(),
+            evidence: std::collections::BTreeMap::new(),
+            evidence_ref: None,
+            meaning: None,
+            provenance: prov.clone(),
+        };
+        let finding = Finding {
+            id: "fnd".into(),
+            claim: "breakout".into(),
+            facts: vec!["f".into()],
+            confidence: 0.5,
+            invalidation: qp_schema::Condition::Text { text: "-".into() },
+            provenance: prov,
+        };
+        let p = MemProvider::new()
+            .with_bars("px", bars, Some("SYN03"), Some("1d"))
+            .with_fact(fact)
+            .with_finding(finding)
+            .with_headline("fnd", "The capsule's long sentence.");
+        match parts {
+            Some(hp) => p.with_headline_parts("fnd", hp),
+            None => p,
+        }
+    }
+
+    /// The card view's sentence and price line (the test provider has no capsule story).
+    fn card(p: &MemProvider) -> View {
+        let mut v = depth::capsule_card_view("fnd", 60, p, "capsule-fnd").unwrap();
+        v.layers
+            .retain(|l| matches!(l.id.as_deref(), Some("sentence" | "line")));
+        v
+    }
+
+    /// The scene's texts joined by spaces (a long line wraps into several).
+    fn texts(face: Option<&str>, p: &MemProvider) -> String {
+        let v = card(p);
+        let mut o = CompileOptions::new(390, 240);
+        o.face = face.map(str::to_owned);
+        compile(&v, p, &o)
+            .unwrap()
+            .prims()
+            .filter_map(|x| match x {
+                Prim::Text { text, .. } => Some(text.clone()),
+                _ => None,
+            })
+            .collect::<Vec<_>>()
+            .join(" ")
+    }
+
+    /// (R4/H-FP) A face design's headline template writes the finding's `headline` text
+    /// in its face scene only; no face, `r3` or a provider without pieces: the sentence.
+    #[test]
+    fn headline_template_applies_in_its_face_scene_only() {
+        let sentence = "The capsule's long sentence.";
+        for lang in [Language::Tr, Language::En] {
+            let p = provider(Some(hp(lang)));
+            let want = example_headline(&hp(lang));
+            assert!(want.chars().count() <= 80, "{want}");
+            let t = texts(Some("zz-test-headline"), &p);
+            assert!(t.contains(&want), "{t}");
+            assert!(!t.contains(sentence), "{t}");
+            for face in [None, Some("r3"), Some("card")] {
+                let t = texts(face, &p);
+                assert!(t.contains(sentence), "{face:?} {t}");
+                assert!(!t.contains(&want));
+            }
+            // Deterministic.
+            assert_eq!(
+                texts(Some("zz-test-headline"), &p),
+                texts(Some("zz-test-headline"), &p)
+            );
+        }
+        let t = texts(Some("zz-test-headline"), &provider(None));
+        assert!(t.contains(sentence), "{t}");
+        let v = card(&provider(None));
+        let mut o = CompileOptions::new(390, 240);
+        o.face = Some("no-such-face".into());
+        assert!(compile(&v, &provider(None), &o).is_err());
+        assert!(headline_template(None).unwrap().is_none());
+        assert!(!names().contains(&"zz-test-headline"));
+    }
 
     #[test]
     fn registry_is_well_formed() {

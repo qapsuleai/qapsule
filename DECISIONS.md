@@ -160,4 +160,5 @@ R3 bu satırları **önerir**; kesinleştirmedi. Kanıt `rounds/R3/REPORT.md`,
 | A23 | Karne anahtarında yön yok (gerçek günlükte kırılım yukarı ~0,60, aşağı ~0,40) | R5 öncesi | Anahtara yön eklemek karnenin örneklemini böler. |
 | A24 | `CapsuleState`'e `retracted` eklenmesi (bugün `invalidated` + hikâye aşaması `retracted`) | `qp/1` | M7 RESULTS §8. |
 | A25 | Mühür makbuzu simetrik anahtarlı; kullanıcı tek başına doğrulayamıyor. Anahtarlar barındırıcıdan (`Session::set_trust_keys`); verilmezse demo anahtarları (yalnız sentetik test beslemesi) | R6 (A19 ile) | Belirleyici Ed25519 önerisi; gerçek barındırıcının anahtar saklama yolu R6'da. |
+| A27 | Açık dünyanın kendi iddia kaydı: bugün açık görünümlü okuyucular belge kapsülleri ve niyetler üzerindeki `claims` olaylarını almıyor; kısmi akış yetkisi de açık görünümü alıyor (alt küme motorları) | R4/R6 | `rounds/R3/experiments/S/S-E.md` §7. |
 | A26 | Kesin bar hijyeninin REST kotası (bağ × bar başına bir çekme) | R6 (A17 ile) | Şüpheli barlarla sınırlama. |

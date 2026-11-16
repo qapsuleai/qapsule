@@ -67,6 +67,8 @@ pub const ALIASES: [(&str, &str); 1] = [("card", "r3")];
 
 // --- M8 alternatives: view functions (or `mod <name>;`) go below this line -------------
 
+mod fotolay;
+
 /// Face designs a connection may choose; the first is the default.
 pub static FACES: &[FaceDesign] = &[
     FaceDesign {
@@ -76,6 +78,12 @@ pub static FACES: &[FaceDesign] = &[
         headline: None,
     },
     // --- M8 alternatives: one line each
+    FaceDesign {
+        name: "fotolay",
+        height: fotolay::HEIGHT,
+        view: fotolay::view,
+        headline: Some(fotolay::headline),
+    },
 ];
 
 /// Designs known besides [`FACES`]: none (unit tests register an example design with a

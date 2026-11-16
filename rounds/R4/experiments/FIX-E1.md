@@ -182,3 +182,9 @@ replica, replay. `git ls-files | grep fixtures/local`: boş.
 - `rounds/R3/experiments/S/crosscheck` (m2 fikstürünü yeniden üreten araç) koşulmadı.
   `product_changes`'ı doğrudan ürün realizer'ından ürettiği için aynı dört kaydı verir; yalnız
   `note` metni araçta sabit (R3 klasörü değiştirilmedi), yeniden üretilirse FIX-E1 cümlesi düşer.
+
+> **Orkestratör notu (birleştirmede):** T5'in yeni gösterim altını
+> `fixtures/golden/demo/feed-tr-dark.face-2.png` B2 öncesi cümleyle üretilmişti; birleşik kodda
+> yüzün cümlesinden yalnız "Hâlâ geçerli." düştü (kapanmış kapsül, gerçekleşti). Görüntü bu
+> nedenle yeniden üretildi; başka fark yok (gözle karşılaştırıldı). Bu R4'te eklenmiş bir
+> altındır, R3 öncesi altınlar değişmedi.

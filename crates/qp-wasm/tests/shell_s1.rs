@@ -71,13 +71,14 @@ fn the_presentation_asks_for_the_m8_m11_picks_and_the_page_overrides_them() {
 #[test]
 fn url_audience_takes_comma_lists() {
     let core = page(&mut parity_host(), |c| {
-        c.set_audience(&json!({"group":"","watch":"SYN01, SYN02","long":"SYN09","short":""}));
+        c.set_audience(&json!({"group":"","watch":"SYN01, SYN02, NOPE, SYN01,","long":"SYN09","short":"syn03"}));
     });
     let a = sent_kind(&core, "set_audience");
     assert_eq!(a.len(), 1, "{:?}", core.sent());
     let aud = &a[0]["ops"][0]["audience"];
     assert_eq!(aud["group"], "habituated");
     assert_eq!(aud["watchlist"], json!(["SYN01", "SYN02"]));
+    // (R4/S2) unknown symbols and repeats are dropped (symbols are case-sensitive).
     assert_eq!(aud["positions"], json!({"SYN09": 1.0}));
     assert_eq!(core.audience()["watchlist"], json!(["SYN01", "SYN02"]));
 }

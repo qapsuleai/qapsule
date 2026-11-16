@@ -479,8 +479,15 @@ step_demo() {
   for f in "$d"/a/*.png; do
     b="$(basename "$f")"
     n=$((n + 1))
+    case "$b" in
+      *.page.png)
+        # browser chrome: bounded antialias tolerance (shells/web/tests/pagecmp.mjs)
+        (cd shells/web && node tests/pagecmp.mjs "$f" "$d/b/$b" 2>/dev/null) ||
+          { echo "$b: two runs differ" >&2; bad=$((bad + 1)); }
+        continue
+        ;;
+    esac
     cmp -s "$f" "$d/b/$b" || { echo "$b: two runs differ" >&2; bad=$((bad + 1)); continue; }
-    case "$b" in *.page.png) continue ;; esac
     if ! cmp -s "$f" "fixtures/golden/demo/$b"; then
       mkdir -p "$target_dir/golden-actual/demo"
       cp "$f" "$target_dir/golden-actual/demo/$b"
@@ -492,7 +499,7 @@ step_demo() {
     [ -f "$d/a/$(basename "$f")" ] || { echo "$(basename "$f"): golden not produced" >&2; bad=$((bad + 1)); }
   done
   [ "$bad" -eq 0 ] || fail "$bad screenshot check(s) failed"
-  note "same origin only; browser = shell-less digests; $n images x2 identical, scenes = goldens"
+  note "same origin only; browser = shell-less digests; $n images x2 (scenes identical, pages within chrome tolerance), scenes = goldens"
 }
 
 # --- run -------------------------------------------------------------------

@@ -1,0 +1,13 @@
+1 two runs same walls: equal=true bytes=388254 lines=257 fnv=2ffff9fd3bf7a2d5 notices=0 final step=120 epoch=1
+1b different pump chunking (same due steps): equal=true ; doc equal=true
+1c forbidden lines=1 reset lines=1 controls=[0, 3, 99, 100, 101, 102, 103, 104, 104, 119, 119, 20, 31]
+2 speed 1: step 150 notif bytes 192050 fnv 9dfc59fdc925e07f doc b0467304a8525b8a log e0e1014cb57cfcd5 equal-to-speed1: true
+2 speed 37: step 150 notif bytes 192050 fnv 9dfc59fdc925e07f doc b0467304a8525b8a log e0e1014cb57cfcd5 equal-to-speed1: true
+2 speed 900: step 150 notif bytes 192050 fnv 9dfc59fdc925e07f doc b0467304a8525b8a log e0e1014cb57cfcd5 equal-to-speed1: true
+3 back seek step 180->37: doc equal=true log equal=true reset in reply=true doc fnv b8d8a39a30a37e32
+3b then 60 more steps: notifications equal=true (lines 51), doc equal=true, log equal=true
+3c back seek by date 2023-04-02: step 135 == fresh 135; doc equal=true log equal=true reset=true
+3d seek date: last t before = 1680274800000 (local date 2023-03-31), next step t local date 2023-04-03
+4 replica lag 0: steps 180 compared 180 differing 0 final_doc_equal true shown 631 violations 0 first None notices 0 capsules 75 stream fnv 4adbefdda4e7bd95
+4 replica lag 4: steps 180 compared 180 differing 0 final_doc_equal true shown 591 violations 0 first None notices 0 capsules 75 stream fnv 4adbefdda4e7bd95
+4b replica lag 4 two runs equal (summary incl. stream fnv): true

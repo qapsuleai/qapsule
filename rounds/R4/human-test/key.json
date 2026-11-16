@@ -714,8 +714,5 @@
     }
   },
   "warnings": [],
-  "unfilled_faces": [
-    "Y1",
-    "Y2"
-  ]
+  "unfilled_faces": []
 }

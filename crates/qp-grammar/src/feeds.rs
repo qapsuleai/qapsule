@@ -84,6 +84,8 @@ fn r3(c: &FeedCtx<'_>) -> Vec<FeedRow> {
 
 // --- M9 alternatives: layout functions (or `mod <name>;`) go below this line -----------
 
+mod vakiro;
+
 /// Feed layouts a connection may choose; the first is the default.
 pub static LAYOUTS: &[FeedLayout] = &[
     FeedLayout {
@@ -92,6 +94,11 @@ pub static LAYOUTS: &[FeedLayout] = &[
         layout: r3,
     },
     // --- M9 alternatives: one line each
+    FeedLayout {
+        name: "vakiro",
+        rules: vakiro::RULES,
+        layout: vakiro::layout,
+    },
 ];
 
 /// Registered names.

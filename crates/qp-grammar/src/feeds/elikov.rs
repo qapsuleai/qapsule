@@ -185,6 +185,9 @@ mod tests {
             seen: None,
             fresh: &[],
             now: None,
+            local: &[],
+            now_local: None,
+            seen_local: None,
         };
         assert!(elikov(&ctx).is_empty());
     }

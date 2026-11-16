@@ -712,6 +712,14 @@ impl Session {
         let reader = self
             .conn_index(conn)
             .map(|ci| (self.conns[ci].principal.clone(), self.lang_of(ci)));
+        // (R4/S1) A `capsule` query by selector: kept to say what it may also match that
+        // the reader cannot see (`CapsuleDetail.withheld`).
+        let capsule_sel = (value.get("type").and_then(Value::as_str) == Some("query"))
+            .then(|| value.pointer("/query/capsule").filter(|v| v.is_object()))
+            .flatten()
+            .and_then(|v| {
+                serde_json::from_value::<qp_schema::protocol::CapsuleSel>(v.clone()).ok()
+            });
         let resolved = match match reader {
             Some((p, lang)) => self.as_reader(&p, lang, |s| s.resolve_selectors(conn, &mut value)),
             None => self.resolve_selectors(conn, &mut value),
@@ -731,7 +739,22 @@ impl Session {
         if let Err(e) = self.check_limits(&value, &msg) {
             return vec![err_line(conn, id, e)];
         }
-        self.handle_resolved(conn, msg, resolved)
+        let mut lines = self.handle_resolved(conn, msg, resolved);
+        let asker = self
+            .conn_index(conn)
+            .map(|ci| self.conns[ci].principal.clone());
+        if let (Some(sel), Some(principal)) = (capsule_sel, asker) {
+            for l in &mut lines {
+                if let ServerMsg::Result {
+                    data: qp_schema::protocol::QueryResult::CapsuleDetail { detail },
+                    ..
+                } = &mut l.msg
+                {
+                    detail.withheld = self.withheld_for(&principal, &sel, &detail.item);
+                }
+            }
+        }
+        lines
     }
 
     /// The live tick's fast parse (§18.8): a `command` whose ops are all bar writes
@@ -1101,7 +1124,7 @@ impl Session {
                                 seq: self.seq_to(&principal, self.seq()),
                                 now: self.clock(),
                                 data,
-                                resolved: BTreeMap::new(),
+                                resolved,
                             },
                         )];
                         v.append(&mut events);

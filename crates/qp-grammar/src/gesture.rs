@@ -1,7 +1,7 @@
 //! Pixel gestures on a compiled scene (R4, `docs/PROTOCOL.md` §4.6): a drag in pixels as
 //! bars, a pinch centre as the anchor bar, and the visible-range arithmetic of `pan` and
-//! `zoom` as pure functions. The authority's bar-space gestures (`pan`, `zoom`) follow
-//! the same rules (cross-checked in `qp-session`'s tests).
+//! `zoom` as pure functions. The authority's bar-space gestures (`pan`, `zoom`) call
+//! the same functions (R4/S1: one implementation; `qp-session` query and input).
 
 use qp_schema::scene::XMap;
 

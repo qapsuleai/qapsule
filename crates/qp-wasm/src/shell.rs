@@ -369,6 +369,9 @@ pub struct ShellCore {
     scale: u32,
     /// (R4/H-M8910) Start (shell timestamp, ms) of the running transition's animation.
     trans_t0: Option<f64>,
+    /// (R4/S1) A last look the page asked for (`?seen=`) that waits for the replay: `None`
+    /// now (at the first known replay clock), `Some(n)` when the replay reaches step `n`.
+    seen_pending: Option<Option<u64>>,
 }
 
 impl std::fmt::Debug for ShellCore {
@@ -394,6 +397,43 @@ fn depth_name(d: OpenDepth) -> &'static str {
         OpenDepth::Chart => "chart",
         OpenDepth::Evidence => "evidence",
     }
+}
+
+/// (R4/S1) The feed rows of `items` by layout `feed` (`qp_grammar::feeds`), with the local
+/// wall times the layout reads filled from the display zone: the shell core's feed and the
+/// shell-less driver use the same rows.
+#[must_use]
+pub fn feed_rows(
+    feed: Option<&str>,
+    items: &[CapsuleItem],
+    lang: Language,
+    seen: Option<i64>,
+    fresh: &[bool],
+    now: Option<i64>,
+) -> Vec<qp_grammar::feeds::FeedRow> {
+    let local: Vec<qp_grammar::feeds::LocalStamp> =
+        items.iter().map(|it| local_stamp(it.t)).collect();
+    qp_grammar::feeds::layout(
+        feed,
+        &qp_grammar::feeds::FeedCtx {
+            items,
+            lang,
+            seen,
+            fresh,
+            now,
+            local: &local,
+            now_local: now.map(local_stamp),
+            seen_local: seen.map(local_stamp),
+        },
+    )
+}
+
+/// (R4/S1) The local wall time of `t` (ms) in the display time zone, from the zone's
+/// embedded rules (`qp_calendar::Zone`); UTC if the zone were missing.
+#[must_use]
+pub fn local_stamp(t: i64) -> qp_grammar::feeds::LocalStamp {
+    let off = qp_calendar::Zone::get(DISPLAY_TZ).map_or(0, |z| z.offset_at(t.div_euclid(1000)));
+    qp_grammar::feeds::LocalStamp::at_offset(t, i64::from(off) * 1000)
 }
 
 /// `YYYY-MM-DD HH:MM` of `t` in the display time zone.
@@ -464,10 +504,31 @@ impl ShellCore {
             sent: Vec::new(),
             scale: 1,
             trans_t0: None,
+            seen_pending: None,
         };
         me.push(json!({"type":"hello","protocol":"qp/0","principal":principal,
             "surface":{"kind":"phone","screen":[390,844],"input":["touch"],"lang":lang_name(lang)}}));
+        // (R4/S1) The presentation's own settings: the shell asks for them right after
+        // `hello`; whatever the page chose (URL, settings page) is sent after and wins.
+        me.ask(
+            "in",
+            Asked::Input,
+            json!({"type":"input","gesture":Self::presented_look()}),
+        );
         Ok(me)
+    }
+
+    /// (R4/S1) The `style` gesture of the presentation's defaults: feed layout, depth
+    /// transition and outcome mark picked in M9–M11 (`qp_grammar::feeds::PRESENTED_FEED`,
+    /// `transitions::PRESENTED_TRANSITION`, `glyph::outcome::PRESENTED_OUTCOME`). The
+    /// protocol's own defaults (a bare connection) stay `r3`; the face is not set here
+    /// (M8 is still open).
+    #[must_use]
+    pub fn presented_look() -> Value {
+        json!({"kind":"style",
+               "feed": qp_grammar::feeds::PRESENTED_FEED,
+               "transition": qp_grammar::transitions::PRESENTED_TRANSITION,
+               "outcome": qp_grammar::glyph::outcome::PRESENTED_OUTCOME})
     }
 
     fn id(&mut self, prefix: &str) -> String {
@@ -525,6 +586,31 @@ impl ShellCore {
     pub fn set_replay(&mut self, st: ReplayState) {
         self.set_calendar(&st);
         self.replay = Some(st);
+        self.seen_when_due();
+    }
+
+    /// (R4/S1) The page's `?seen=` setting: `now` marks the last look at the replay clock
+    /// as soon as it is known; a step number marks it when the replay first stands at or
+    /// past that step (at that moment's clock). Anything else is ignored.
+    pub fn seen_at(&mut self, step_or_now: &str) {
+        self.seen_pending = match step_or_now.trim() {
+            "now" => Some(None),
+            s => match s.parse::<u64>() {
+                Ok(n) => Some(Some(n)),
+                Err(_) => return,
+            },
+        };
+        self.seen_when_due();
+    }
+
+    fn seen_when_due(&mut self) {
+        let (Some(want), Some(r)) = (self.seen_pending, self.replay.as_ref()) else {
+            return;
+        };
+        if want.is_none_or(|n| r.step >= n) {
+            self.seen_pending = None;
+            self.mark_seen();
+        }
     }
 
     /// (R4/H-FP) The replica's headline-piece calendar: the replay source's.
@@ -623,6 +709,7 @@ impl ShellCore {
                     (Some(Asked::Replay), QueryResult::Replay { replay }) => {
                         self.set_calendar(replay);
                         self.replay = Some(replay.clone());
+                        self.seen_when_due();
                         ch["status"] = json!(true);
                     }
                     (Some(Asked::Input), _) => self.flush_gesture(),
@@ -702,7 +789,8 @@ impl ShellCore {
 
     /// The feed rows, top to bottom, by the connection's feed layout (`look.feed`,
     /// `qp_grammar::feeds`; `r3`: the authority's `capsules` order): a capsule row is
-    /// `{id, target, text, scene, relevant, mark?}` — `text` is the reader's sentence (shown
+    /// `{id, target, text, scene, relevant, closed, mark?}` (R4/S1 `closed`: the story is
+    /// closed, its glyph shows the outcome mark) — `text` is the reader's sentence (shown
     /// as text when there is no face scene), `mark` the layout's short mark; a layout row
     /// is `{header}` (its text, written by the layout).
     pub fn feed_json(&mut self) -> Value {
@@ -713,15 +801,13 @@ impl ShellCore {
             .iter()
             .map(|it| self.look.seen.is_some_and(|s| self.known_at(it) > s))
             .collect();
-        let rows = qp_grammar::feeds::layout(
+        let rows = feed_rows(
             self.look.feed.as_deref(),
-            &qp_grammar::feeds::FeedCtx {
-                items: &self.feed,
-                lang,
-                seen: self.look.seen,
-                fresh: &fresh,
-                now,
-            },
+            &self.feed,
+            lang,
+            self.look.seen,
+            &fresh,
+            now,
         );
         let out: Vec<Value> = rows
             .into_iter()
@@ -732,7 +818,8 @@ impl ShellCore {
                     // A face scene needs the reader's own bars of the capsule's series.
                     let has = self.replica.bars(&it.series).is_some_and(|b| !b.is_empty());
                     let mut v = json!({"id": it.id, "target": format!("face:{}", it.id),
-                        "text": it.sentence.text, "scene": has, "relevant": it.relevant});
+                        "text": it.sentence.text, "scene": has, "relevant": it.relevant,
+                        "closed": it.validity == qp_schema::capsule::Validity::Closed});
                     if let Some(m) = mark {
                         v["mark"] = json!(m);
                     }
@@ -1013,6 +1100,8 @@ impl ShellCore {
 
     /// `set_audience` from the settings page's choices: `{group, sensitivity?, watch:
     /// [symbol], long: [symbol], short: [symbol]}` (a position is one unit long or short).
+    /// (R4/S1) A list may also be one comma-separated string, as the page's URL gives it
+    /// (`?watch=SYN01,SYN02&long=SYN09`).
     pub fn set_audience(&mut self, choice: &Value) {
         let group = choice
             .get("group")
@@ -1026,15 +1115,19 @@ impl ShellCore {
             }
         }
         let list = |k: &str| -> Vec<String> {
-            choice
-                .get(k)
-                .and_then(Value::as_array)
-                .map(|a| {
-                    a.iter()
-                        .filter_map(|x| x.as_str().map(str::to_owned))
-                        .collect()
-                })
-                .unwrap_or_default()
+            match choice.get(k) {
+                Some(Value::Array(a)) => a
+                    .iter()
+                    .filter_map(|x| x.as_str().map(str::to_owned))
+                    .collect(),
+                Some(Value::String(t)) => t
+                    .split(',')
+                    .map(str::trim)
+                    .filter(|x| !x.is_empty())
+                    .map(str::to_owned)
+                    .collect(),
+                _ => Vec::new(),
+            }
         };
         let watch = list("watch");
         if !watch.is_empty() {

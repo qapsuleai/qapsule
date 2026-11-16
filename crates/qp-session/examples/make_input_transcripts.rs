@@ -1,4 +1,5 @@
-//! Generates the R4 interaction transcripts (`fixtures/protocol/conformance/5[1-5]-input-*.json`,
+//! Generates the R4 interaction transcripts (`fixtures/protocol/conformance/5[1-5]-input-*.json`;
+//! R4/S1: `56-input-look`, `58-input-open-selector`;
 //! `docs/PROTOCOL.md` §4.6, §7, §15): pixel gestures, opening between depths, evidence
 //! for an entitled and an unentitled reader, and view state that never reaches the log.
 //!
@@ -259,6 +260,47 @@ fn presence() -> Value {
     )
 }
 
+fn look() -> Value {
+    run(
+        "56-input-look",
+        "R4/S1 (§4.6.2, §4.6.1): the view-state settings of M9–M11. `style` sets the feed layout (`feed`), the depth transition (`transition`), the outcome mark (`outcome`) and the last look (`seen`, ms); the answer's `state` carries them (a field at its protocol default `r3` is absent). Opening with the `zumlak` transition: `Opening.shared` holds the measured shared elements (glyph, marked bar, fact, `span` = the common bar × price window with a box in each scene; no `price`) and three one-sided frame entries (`scene:before`, `pane:before`, `scene:after`; §4.6.1). Unknown names are `invalid` with the known ones; back to `r3` empties the fields. The feed rows themselves (group headers, marks) are not a protocol answer: the shell core lays them out from `capsules` and this state (`qp_grammar::feeds`).",
+        &["input", "style", "view-state", "feed", "transition", "outcome", "seen", "shared-elements", "errors"],
+        vec![
+            hello("p", "arkin"),
+            input("p", "s1", json!({"kind":"style","feed":"elikov","transition":"zumlak","outcome":"tg5","seen":1_672_000_000_000_i64}),
+                "The presentation's settings (S1): the state carries feed, transition, outcome and the last look."),
+            input("p", "o1", json!({"kind":"open","capsule":CAP,"width":358,"height":240}),
+                "Face → capsule with `zumlak`: the anchors both scenes have (no `price`), `span` and the three one-sided frame entries."),
+            input("p", "o2", json!({"kind":"open","capsule":CAP,"width":390,"height":400}),
+                "Capsule → chart with `zumlak`: `span` (the common window) and the one-sided frame entries."),
+            input("p", "e1", json!({"kind":"style","feed":"nope"}),
+                "Unknown feed layout: `invalid` with the known names; nothing changes."),
+            input("p", "e2", json!({"kind":"style","outcome":"nope"}),
+                "Unknown outcome style: `invalid` with the known names."),
+            input("p", "s2", json!({"kind":"style","feed":"r3","transition":"r3","outcome":"r3","seen":0}),
+                "Back to the protocol defaults: the fields are absent again (`seen` 0 clears)."),
+        ],
+    )
+}
+
+fn open_selector() -> Value {
+    run(
+        "58-input-open-selector",
+        "R4/S1 (§4.6.1, §17.2; ergonomics C10): the `open` gesture's `capsule` takes a capsule selector like the `capsule` query: it resolves on the reader's document and the answer names it in `resolved` (`/gesture/capsule`). Several matches are `ambiguous` with the candidates; no match is `not_found`.",
+        &["input", "open", "selectors", "errors"],
+        vec![
+            hello("p", "arkin"),
+            input("p", "o1", json!({"kind":"open","capsule":{"instrument":"THYAO","meaning":"breakout","direction":"down","latest":true},"to":"chart","width":390,"height":400}),
+                "THYAO's latest down breakout, straight to its chart, without knowing its id."),
+            input("p", "c1", json!({"kind":"close","to":"sentence"}), "Back to the feed."),
+            input("p", "e1", json!({"kind":"open","capsule":{"meaning":"breakout"}}),
+                "Several breakouts: `ambiguous` with the candidates."),
+            input("p", "e2", json!({"kind":"open","capsule":{"meaning":"squeeze","direction":"up","open":true}}),
+                "No such story: `not_found` with the closest capsules."),
+        ],
+    )
+}
+
 fn pretty(v: &Value) -> String {
     let mut s = serde_json::to_string_pretty(v).expect("json");
     s.push('\n');
@@ -269,7 +311,15 @@ fn main() {
     let write = std::env::args().any(|a| a == "--write");
     let dir = root().join("fixtures/protocol/conformance");
     let mut stale = 0;
-    for t in [tap_hit(), pan_pinch(), open_close(), evidence(), presence()] {
+    for t in [
+        tap_hit(),
+        pan_pinch(),
+        open_close(),
+        evidence(),
+        presence(),
+        look(),
+        open_selector(),
+    ] {
         let name = t["name"].as_str().unwrap().to_owned();
         let path = dir.join(format!("{name}.json"));
         let text = pretty(&t);

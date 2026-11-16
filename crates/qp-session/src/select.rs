@@ -346,6 +346,16 @@ pub(crate) fn sites(msg: &Value) -> Vec<Vec<Site>> {
             }
             vec![out]
         }
+        Some("input") => {
+            // (R4/S1) `open.capsule` takes a capsule selector too (§17.2).
+            let mut out = Vec::new();
+            if let Some(g) = msg.get("gesture") {
+                if g.get("kind").and_then(Value::as_str) == Some("open") {
+                    push(&mut out, g, "/gesture", "capsule", Kind::Capsule, None);
+                }
+            }
+            vec![out]
+        }
         Some("attend") => {
             let mut out = Vec::new();
             if let Some(d) = msg.get("directive") {

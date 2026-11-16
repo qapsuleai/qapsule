@@ -1700,8 +1700,45 @@ impl Session {
                 ledger,
                 glyph,
                 evidence,
+                withheld: None,
             }),
         })
+    }
+
+    /// (R4/S1, §20.2, ergonomics C11) What a capsule selector `sel` may also have matched
+    /// that `principal` cannot see: when the reader lacks the licensed flow of the
+    /// instrument (the selector's, else the resolved capsule's) and the selector does not
+    /// rule flow out, the server comments the reader already gets (`capsules`) that are
+    /// newer than the resolved capsule's latest transition, with their entitlement. No new
+    /// existence oracle: only what the comments told this reader already.
+    pub(crate) fn withheld_for(
+        &self,
+        principal: &str,
+        sel: &qp_schema::protocol::CapsuleSel,
+        item: &CapsuleItem,
+    ) -> Option<qp_schema::protocol::Withheld> {
+        if sel
+            .meaning
+            .is_some_and(|m| m != qp_schema::capsule::MeaningKind::Flow)
+        {
+            return None;
+        }
+        let instrument = sel.instrument.as_deref().unwrap_or(&item.instrument);
+        let comments: Vec<ServerComment> = self
+            .comments_for(principal)
+            .into_iter()
+            .filter(|c| c.instrument == instrument && c.t > item.t)
+            .collect();
+        if comments.is_empty() {
+            return None;
+        }
+        let mut requires: Vec<String> = comments
+            .iter()
+            .filter_map(|c| c.attachments.get("entitlement").cloned())
+            .collect();
+        requires.sort();
+        requires.dedup();
+        Some(qp_schema::protocol::Withheld { requires, comments })
     }
 
     /// One fact's evidence for a reader (K34): the values, or the entitlement they

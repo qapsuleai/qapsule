@@ -208,6 +208,9 @@ yeniden oynatma `docs/PROTOCOL.md` §21; kapsülün yüzü `docs/FACE.md`.
 | Son bakış | last look (`ViewState.seen`) | Okuyucunun akışa en son baktığı an (bakış durumu, günlüğe girmez); akış düzeni "son baktığımdan beri"yi buna göre işaretler. |
 | Geçiş tasarımı | transition design (`qp_grammar::transitions`) | Açılmada hangi öğelerin ortak kaldığını ve ara karelerde nerede, ne opaklıkta durduğunu veren adlı kural. Başvuru `r3` (T4 ortak öğeleri, doğrusal kayma). |
 | Sonuç işareti | outcome mark | Kapanmış kapsülün işaretinde "gerçekleşti" ile "tutmadı"yı ayıran kanal (M11). Renksiz de okunur. |
+| Gösterimin varsayılanı | presented default (`PRESENTED_FEED`, `PRESENTED_TRANSITION`, `PRESENTED_OUTCOME`) | (R4/S1) Gösterim kabuğunun çekirdeğinin okuyucu bir şey seçmediğinde istediği bakış ayarı (bugün `elikov`, `zumlak`, `tg5`: M9–M11 seçimleri). Protokolün varsayılanından (`r3`, alan yok) ayrıdır; çıplak bağlantılar ve dökümler değişmez. |
+| Kare verisi | frame entry (`Opening.shared`'da tek yanlı kayıt) | (R4/S1) Geçiş tasarımının ara kare kuralına verdiği, yalnız bir sahnede kutusu olan bölge (`scene:before`, `pane:before`, `scene:after`). Ortak öğe değildir (PROTOCOL §4.6.1). |
+| Gizli kalan | withheld (`CapsuleDetail.withheld`) | (R4/S1) Seçiciyle sorulan kapsülde, okuyucunun yetkisiz olduğu lisanslı akıştan daha yeni hikâyelerin varlığı ve gerektirdiği yetki — yalnız okuyucuya zaten verilen sunucu yorumlarından (PROTOCOL §20.2). |
 | Ölçüm ekranı | metrics page | Gösterimde kare süresi (durağan, kaydırırken), tik maliyeti, açılış süresi ve paket boyutunu gösteren ve kopyalanabilir özet üreten sayfa. |
 | Persona | persona | Ölçümde ekran görüntüsünü okuyan taze alt ajanın rolü: geleceğin yatırımcısı (teknik analiz bilmez, beş saniyesi var) ya da alışkın kullanıcı. İnsan değildir; ön elemedir (K39). |
 

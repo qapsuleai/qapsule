@@ -935,13 +935,7 @@ impl Session {
                 }
                 (*from_bar, *to_bar)
             }
-            Gesture::Pan { bars, .. } => {
-                let width = to - from;
-                let max_from = last_slot.saturating_sub(width);
-                let target = i128::from(from) + i128::from(*bars);
-                let nf = u64::try_from(target.clamp(0, i128::from(max_from))).unwrap_or(0);
-                (nf, nf + width)
-            }
+            Gesture::Pan { bars, .. } => qp_grammar::gesture::pan_range(from, to, *bars, last_slot),
             Gesture::Zoom {
                 factor, anchor_bar, ..
             } => {
@@ -955,28 +949,8 @@ impl Session {
                 if anchor > last_slot {
                     return Err(past_slot("anchor_bar", anchor));
                 }
-                let width = to - from + 1;
-                #[allow(
-                    clippy::cast_precision_loss,
-                    clippy::cast_possible_truncation,
-                    clippy::cast_sign_loss
-                )]
-                let nw = {
-                    let w = (width as f64 / factor).round();
-                    let w = if w.is_finite() { w.max(2.0) } else { 2.0 };
-                    (w.min(slots as f64) as u64).max(1)
-                };
-                #[allow(clippy::cast_precision_loss)]
-                let r = if width > 1 {
-                    (anchor as f64 - from as f64) / (width - 1) as f64
-                } else {
-                    1.0
-                };
-                #[allow(clippy::cast_precision_loss, clippy::cast_possible_truncation)]
-                let off = (r * (nw - 1) as f64).round() as i128;
-                let max_from = i128::from(slots - nw);
-                let nf = u64::try_from((i128::from(anchor) - off).clamp(0, max_from)).unwrap_or(0);
-                (nf, nf + nw - 1)
+                // (R4/S1) One rule for bar-space and pixel gestures (`qp_grammar::gesture`).
+                qp_grammar::gesture::zoom_range(from, to, *factor, anchor, slots)
             }
             Gesture::Tap { panel, bar, .. } => {
                 // A tap answers the bar's values (data plane, §18.3).

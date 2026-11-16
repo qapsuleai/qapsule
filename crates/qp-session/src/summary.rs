@@ -324,6 +324,9 @@ fn select_hints(
     (h != SelectHints::default()).then_some(h)
 }
 
+/// Key → row positions (shared).
+type RowsOf<'a> = HashMap<&'a str, Rc<Vec<usize>>>;
+
 /// (R3/perf, S-D §6.3 item 4) The fact and finding hints of the summary
 /// ([`crate::select::Resolver::fact_hint`], [`crate::select::Resolver::finding_hint`]),
 /// computed from indexes built once instead of resolving every candidate selector over
@@ -345,7 +348,7 @@ pub(crate) struct FastHints<'a> {
     findings_of_kind: RefCell<HashMap<String, Rc<Vec<usize>>>>,
     /// Fact id → finding positions resting on it, in row order; built whole on first use
     /// (R4/T6: one pass over the findings instead of one per asked fact).
-    findings_of_fact: RefCell<Option<HashMap<&'a str, Rc<Vec<usize>>>>>,
+    findings_of_fact: RefCell<Option<RowsOf<'a>>>,
 }
 
 impl<'a> FastHints<'a> {
@@ -503,7 +506,7 @@ impl<'a> FastHints<'a> {
         if s.first {
             hits.next().into_iter().collect()
         } else if s.latest {
-            hits.last().into_iter().collect()
+            hits.next_back().into_iter().collect()
         } else {
             hits.collect()
         }

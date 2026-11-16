@@ -70,6 +70,8 @@ mod tavrik;
 
 mod vadrel;
 
+mod fotolay;
+
 /// Face designs a connection may choose; the first is the default.
 pub static FACES: &[FaceDesign] = &[
     FaceDesign {
@@ -90,6 +92,12 @@ pub static FACES: &[FaceDesign] = &[
         height: tavrik::HEIGHT,
         view: tavrik::view,
         headline: Some(tavrik::headline),
+    },
+    FaceDesign {
+        name: "fotolay",
+        height: fotolay::HEIGHT,
+        view: fotolay::view,
+        headline: Some(fotolay::headline),
     },
 ];
 

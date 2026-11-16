@@ -2,20 +2,18 @@
 
 Girdi: `answers.example.csv` · anahtar: `key.json` · plan: `plan.json`. Ağırlık: genç 2, alışkın 1 (persona F/H gibi). Persona ajanı insan değildir; bu rapor insan sonucudur.
 
-> **Uyarı:** `plan.json` yüz adları doldurulmamış; yüz satırlarında yer tutucu görünür.
-
 ## Katılımcılar
 
 Toplam 6: alışkın 3, genç 3. Gösterim: ekran 5, masaüstü 1.
 
 | katılımcı | G5 önce | G1 önce | G3 önce | G4 önce | G2 önce |
 |---|---|---|---|---|---|
-| A01 | `siluet` | `<<YUZ1>>` | `zumlak` | `tg5` | `vakiro` |
-| A02 | `rozet` | `<<YUZ2>>` | `tutamir` | `r3` | `elikov` |
-| A03 | `siluet` | `<<YUZ2>>` | `zumlak` | `r3` | `elikov` |
-| G01 | `siluet` | `<<YUZ1>>` | `zumlak` | `tg5` | `vakiro` |
-| G02 | `rozet` | `<<YUZ2>>` | `tutamir` | `r3` | `elikov` |
-| G03 | `siluet` | `<<YUZ2>>` | `zumlak` | `r3` | `elikov` |
+| A01 | `siluet` | `vadrel` | `zumlak` | `tg5` | `vakiro` |
+| A02 | `rozet` | `fotolay` | `tutamir` | `r3` | `elikov` |
+| A03 | `siluet` | `fotolay` | `zumlak` | `r3` | `elikov` |
+| G01 | `siluet` | `vadrel` | `zumlak` | `tg5` | `vakiro` |
+| G02 | `rozet` | `fotolay` | `tutamir` | `r3` | `elikov` |
+| G03 | `siluet` | `fotolay` | `zumlak` | `r3` | `elikov` |
 
 ## G5 — alfabe (işaret): `siluet` (A) ile `rozet` (B)
 
@@ -46,34 +44,34 @@ Sıra etkisi (birincil, ilk / ikinci gösterilen): `siluet` 0,17 / 0,33 · `roze
 - Süre farkı (A − B, katılımcı medyanlarının medyanı): 1,50 sn (eksi: A hızlı).
 - Tercih: `siluet` 1, `rozet` 4, fark yok 1.
 
-## G1 — kapsülün yüzü (ilk bakış): `<<YUZ1>>` (A) ile `<<YUZ2>>` (B)
+## G1 — kapsülün yüzü (ilk bakış): `vadrel` (A) ile `fotolay` (B)
 
 Birincil ölçü: yüz başına tam doğru (S1–S5).
 
 | tasarım | grup | n | birincil | s1 | s1b | s2 | s3 | s4 | s5 | s2+s3 | süre medyan (sn) | ipucu |
 |---|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
-| `<<YUZ1>>` | alışkın | 3 | 0,78 | 1,00 (9/9) | 1,00 (9/9) | 0,89 (8/9) | 0,89 (8/9) | 1,00 (9/9) | 1,00 (9/9) | 0,78 (7/9) | 43,00 | 0 |
-| `<<YUZ1>>` | genç | 3 | 0,11 | 0,89 (8/9) | 0,56 (5/9) | 0,89 (8/9) | 0,89 (8/9) | 0,78 (7/9) | 0,89 (8/9) | 0,78 (7/9) | 32,00 | 0 |
-| `<<YUZ1>>` | hepsi | 6 | 0,44 | 0,94 (17/18) | 0,78 (14/18) | 0,89 (16/18) | 0,89 (16/18) | 0,89 (16/18) | 0,94 (17/18) | 0,78 (14/18) | 39,00 | 0 |
-| `<<YUZ2>>` | alışkın | 3 | 0,22 | 0,56 (5/9) | 1,00 (9/9) | 0,89 (8/9) | 0,89 (8/9) | 0,67 (6/9) | 0,67 (6/9) | 0,78 (7/9) | 37,00 | 0 |
-| `<<YUZ2>>` | genç | 3 | 0,22 | 0,56 (5/9) | 0,89 (8/9) | 0,78 (7/9) | 0,33 (3/9) | 0,89 (8/9) | 0,78 (7/9) | 0,33 (3/9) | 36,00 | 0 |
-| `<<YUZ2>>` | hepsi | 6 | 0,22 | 0,56 (10/18) | 0,94 (17/18) | 0,83 (15/18) | 0,61 (11/18) | 0,78 (14/18) | 0,72 (13/18) | 0,56 (10/18) | 37,00 | 0 |
+| `vadrel` | alışkın | 3 | 0,78 | 1,00 (9/9) | 1,00 (9/9) | 0,89 (8/9) | 0,89 (8/9) | 1,00 (9/9) | 1,00 (9/9) | 0,78 (7/9) | 43,00 | 0 |
+| `vadrel` | genç | 3 | 0,11 | 0,89 (8/9) | 0,56 (5/9) | 0,89 (8/9) | 0,89 (8/9) | 0,78 (7/9) | 0,89 (8/9) | 0,78 (7/9) | 32,00 | 0 |
+| `vadrel` | hepsi | 6 | 0,44 | 0,94 (17/18) | 0,78 (14/18) | 0,89 (16/18) | 0,89 (16/18) | 0,89 (16/18) | 0,94 (17/18) | 0,78 (14/18) | 39,00 | 0 |
+| `fotolay` | alışkın | 3 | 0,22 | 0,56 (5/9) | 1,00 (9/9) | 0,89 (8/9) | 0,89 (8/9) | 0,67 (6/9) | 0,67 (6/9) | 0,78 (7/9) | 37,00 | 0 |
+| `fotolay` | genç | 3 | 0,22 | 0,56 (5/9) | 0,89 (8/9) | 0,78 (7/9) | 0,33 (3/9) | 0,89 (8/9) | 0,78 (7/9) | 0,33 (3/9) | 36,00 | 0 |
+| `fotolay` | hepsi | 6 | 0,22 | 0,56 (10/18) | 0,94 (17/18) | 0,83 (15/18) | 0,61 (11/18) | 0,78 (14/18) | 0,72 (13/18) | 0,56 (10/18) | 37,00 | 0 |
 
-Sıra etkisi (birincil, ilk / ikinci gösterilen): `<<YUZ1>>` 0,33 / 0,50 · `<<YUZ2>>` 0,08 / 0,50
+Sıra etkisi (birincil, ilk / ikinci gösterilen): `vadrel` 0,33 / 0,50 · `fotolay` 0,08 / 0,50
 
-| katılımcı | grup | `<<YUZ1>>` | `<<YUZ2>>` | fark (A − B) | süre A | süre B | tercih |
+| katılımcı | grup | `vadrel` | `fotolay` | fark (A − B) | süre A | süre B | tercih |
 |---|---|---:|---:|---:|---:|---:|---|
-| A01 | alışkın | 0,67 | 0,33 | 0,33 | 43,00 | 37,00 | <<YUZ1>> |
-| A02 | alışkın | 0,67 | 0,33 | 0,33 | 29,00 | 33,00 | <<YUZ1>> |
-| A03 | alışkın | 1,00 | 0,00 | 1,00 | 50,00 | 40,00 | <<YUZ1>> |
-| G01 | genç | 0,00 | 0,67 | -0,67 | 30,00 | 33,00 | <<YUZ1>> |
-| G02 | genç | 0,33 | 0,00 | 0,33 | 32,00 | 35,00 | <<YUZ1>> |
-| G03 | genç | 0,00 | 0,00 | 0,00 | 34,00 | 52,00 | <<YUZ1>> |
+| A01 | alışkın | 0,67 | 0,33 | 0,33 | 43,00 | 37,00 | vadrel |
+| A02 | alışkın | 0,67 | 0,33 | 0,33 | 29,00 | 33,00 | vadrel |
+| A03 | alışkın | 1,00 | 0,00 | 1,00 | 50,00 | 40,00 | vadrel |
+| G01 | genç | 0,00 | 0,67 | -0,67 | 30,00 | 33,00 | vadrel |
+| G02 | genç | 0,33 | 0,00 | 0,33 | 32,00 | 35,00 | vadrel |
+| G03 | genç | 0,00 | 0,00 | 0,00 | 34,00 | 52,00 | vadrel |
 
 - Eşli: 6 katılımcı; A daha iyi 4, B daha iyi 1, eşit 1; ortalama fark 0,22, ağırlıklı fark 0,11; işaret testi p = 0,38 (bilgi için; güç düşük).
 - Gruplar: alışkın ort. fark 0,56 (n=3), genç ort. fark -0,11 (n=3)
 - Süre farkı (A − B, katılımcı medyanlarının medyanı): -3,00 sn (eksi: A hızlı).
-- Tercih: `<<YUZ1>>` 6, `<<YUZ2>>` 0, fark yok 0.
+- Tercih: `vadrel` 6, `fotolay` 0, fark yok 0.
 
 ## G3 — açılma geçişi: `zumlak` (A) ile `tutamir` (B)
 
@@ -174,7 +172,7 @@ Persona ajanı insan değildir: aşağıdaki insan sonucu persona ölçümünden
 | karşılaştırma | ön seçim (A) | sonuç | gerekçe |
 |---|---|---|---|
 | A21 alfabe | `siluet` | **`rozet` (değişir)** | birincil ölçüde ağırlıklı fark -0,48 (eşik 0,10), işaret 0–5 |
-| yüz (M8 ilk iki) | `<<YUZ1>>` | **`<<YUZ1>>` (onay)** | gruplar ayrışıyor (alışkın 0,56, genç -0,11), kural 1 uygulanmadı; tercih 6–0 (en az ⅔ ve çoğunluk) |
+| yüz (M8 ilk iki) | `vadrel` | **`vadrel` (onay)** | gruplar ayrışıyor (alışkın 0,56, genç -0,11), kural 1 uygulanmadı; tercih 6–0 (en az ⅔ ve çoğunluk) |
 | M10 geçiş | `zumlak` | **`tutamir` (değişir)** | doğruluk farkı belirleyici değil (-0,06); tercih 0–6 (en az ⅔ ve çoğunluk) |
 | M11 sonuç işareti | `tg5` | **`tg5` (onay)** | birincil ölçüde ağırlıklı fark 0,33 (eşik 0,10), işaret 4–0 |
 | M9 akış düzeni | `elikov` | **`vakiro` (değişir)** | birincil ölçüde ağırlıklı fark -0,44 (eşik 0,10), işaret 0–5 |

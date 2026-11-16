@@ -5,8 +5,8 @@ alfabe `siluet`/`rozet` (A21), kapsülün yüzü (M8'in ilk iki sırası), akı�
 (M9), geçiş `zumlak`/`tutamir` (M10), sonuç işareti `tg5`/`r3` (M11). Persona ajanları ön
 elemeydi; **persona ajanı insan değildir** — son söz bu testtedir.
 
-**Yüz adları tek yerde:** `plan.json` → `"faces": {"Y1": "<<YUZ1>>", "Y2": "<<YUZ2>>"}`. M8
-sonucu gelince bu iki değer doldurulur ve `node prepare.mjs key` yeniden koşulur (anahtar
+**Yüz adları tek yerde:** `plan.json` → `"faces": {"Y1": "vadrel", "Y2": "fotolay"}` (M8 ilk iki, `rounds/R4/experiments/M8/RESULTS.md`;
+yer tutucular 2026-11-16 dolduruldu). `node prepare.mjs key` yüzler gösterimde kayıtlıyken yeniden koşulur (anahtar
 değişmez, `links.html` dolar). Başka hiçbir dosyada yüz adı yazmaz; belgeler `Y1`/`Y2` der.
 
 ## İçindekiler

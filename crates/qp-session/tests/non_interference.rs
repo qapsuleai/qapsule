@@ -8,6 +8,7 @@
 //! out. Those are the only channel the licensed data may influence for them (M6
 //! integration rule, Ö37). Positive control: the fully entitled reader's lines do differ.
 
+use std::collections::BTreeSet;
 use std::path::{Path, PathBuf};
 
 use qp_schema::data::DataEvent;
@@ -339,4 +340,165 @@ fn a_retraction_and_an_entitled_persons_commands_do_not_interfere_either() {
         ana_differs |= lines_of(&base, "a") != lines_of(&other, "a");
     }
     assert!(ana_differs, "the entitled reader's lines never changed");
+}
+
+/// Security review of K1 (four channels): a public-view reader who may write (Bora, made
+/// an owner here: his entitlements are unchanged) acts on every engine id the authority's
+/// world has in any of the runs — direct `approve_finding`, a proposal of it, a `dispute`,
+/// a `capsule` query — and an entitled owner (Arkın) adds a finding of his own with a
+/// data invalidation that holds (an invalidation entry with evidence) and writes a data
+/// invalidation onto an engine finding both worlds have (never evaluated: an engine
+/// capsule ends by the outcome rule only).
+fn oracle_run(
+    bars: &[Bar],
+    n: usize,
+    seed: u64,
+    ids: &[(String, String)],
+    shared: &str,
+) -> Vec<OutboundLine> {
+    let k = 60;
+    let mut v = serde_json::to_value(init(bars, k, seed)).unwrap();
+    for p in v["principals"].as_array_mut().unwrap() {
+        if p["id"] == "bora" {
+            p["role"] = json!("owner");
+        }
+    }
+    let mut s = Session::new(serde_json::from_value(v).unwrap(), &root()).unwrap();
+    let mut out = Vec::new();
+    out.extend(hello(&mut s, "t", "ana", None));
+    out.extend(hello(&mut s, "b", "bora", None));
+    out.extend(hello(&mut s, "c", "can", Some("en")));
+    out.extend(hello(&mut s, "o", "arkin", None));
+    for c in ["b", "c"] {
+        for (i, t) in [
+            json!({"kind":"capsules","all":true}),
+            json!({"kind":"changes"}),
+            json!({"kind":"claims"}),
+        ]
+        .iter()
+        .enumerate()
+        {
+            out.extend(send(
+                &mut s,
+                c,
+                &json!({"type":"subscribe","id":format!("s{i}"),"topic":t}),
+            ));
+        }
+    }
+    let half = (k + n) / 2;
+    for (i, b) in bars.iter().enumerate().take(half).skip(k) {
+        out.extend(s.data_event(&ev(i - k + 1, b)).unwrap());
+    }
+    // Arkın: his own finding, invalid as soon as it is written (close > half of now).
+    let cond = json!({"kind":"threshold","series":"px","op":"gt","value": bars[half].c * 0.5});
+    for op in [
+        json!({"op":"add_fact","id":"fx-arkin","kind":"note","series":"px","bar":half - 2,"text":"not"}),
+        json!({"op":"add_finding","id":"fnd-arkin","claim":"mine","facts":["fx-arkin"],"confidence":0.5,
+               "invalidation":cond,"capsule":"Arkın'ın notu"}),
+        json!({"op":"update_finding","finding":shared,"invalidation":cond}),
+    ] {
+        out.extend(send(
+            &mut s,
+            "o",
+            &json!({"type":"command","id":"o","ops":[op]}),
+        ));
+    }
+    for (i, b) in bars.iter().enumerate().take(n).skip(half) {
+        out.extend(s.data_event(&ev(i - k + 1, b)).unwrap());
+    }
+    let t = bars[n - 5].t;
+    for (cap, fnd) in ids {
+        for m in [
+            json!({"type":"command","id":"x","ops":[{"op":"approve_finding","finding":fnd}]}),
+            json!({"type":"command","id":"p","mode":"propose","ops":[{"op":"reject_finding","finding":fnd}]}),
+            json!({"type":"dispute","id":"d","claim":{"kind":"capsule","capsule":cap,"finding":fnd},"t":t}),
+            json!({"type":"dispute","id":"e","claim":{"kind":"capsule","capsule":cap,"finding":fnd},"t":t,"digest":"zz"}),
+            json!({"type":"query","id":"q","query":{"kind":"capsule","capsule":cap}}),
+        ] {
+            out.extend(send(&mut s, "b", &m));
+        }
+    }
+    for c in ["b", "c"] {
+        for q in [
+            json!({"kind":"log"}),
+            json!({"kind":"document"}),
+            json!({"kind":"capsules"}),
+        ] {
+            out.extend(send(&mut s, c, &json!({"type":"query","id":"q","query":q})));
+        }
+    }
+    out
+}
+
+/// Engine (capsule, finding) ids of a seed's authority document after `n` bars.
+fn engine_ids(bars: &[Bar], n: usize, seed: u64) -> BTreeSet<(String, String)> {
+    let k = 60;
+    let mut s = Session::new(init(bars, k, seed), &root()).unwrap();
+    for (i, b) in bars.iter().enumerate().take(n).skip(k) {
+        s.data_event(&ev(i - k + 1, b)).unwrap();
+    }
+    s.document()
+        .capsules
+        .iter()
+        .filter(|c| c.story.is_some())
+        .map(|c| (c.id.clone(), c.finding.clone()))
+        .collect()
+}
+
+#[test]
+fn no_oracle_through_commands_proposals_disputes_or_invalidations() {
+    let n = 200;
+    let bars = qp_source::synthetic_market(1, n, 1)[0].bars.clone();
+    let seeds = [1_u64, 2, 7, 42];
+    let per: Vec<BTreeSet<(String, String)>> =
+        seeds.iter().map(|s| engine_ids(&bars, n, *s)).collect();
+    let public = engine_ids(&bars, n, 0);
+    // Every id some authority world has and the public world has not (licensed-born, or
+    // only there because a licensed fact changed a story), and a few shared ones.
+    let mut ids: Vec<(String, String)> = per
+        .iter()
+        .flatten()
+        .filter(|x| !public.contains(x))
+        .cloned()
+        .collect::<BTreeSet<_>>()
+        .into_iter()
+        .collect();
+    assert!(ids.len() > 5, "{ids:?}");
+    ids.extend(public.iter().cloned());
+    // An engine finding every world has by the middle of the run.
+    let half = 130;
+    let mut common = engine_ids(&bars, half, 0);
+    for s in seeds {
+        let x = engine_ids(&bars, half, s);
+        common.retain(|c| x.contains(c));
+    }
+    let shared = common
+        .iter()
+        .next()
+        .expect("a shared engine finding")
+        .1
+        .clone();
+    let base = oracle_run(&bars, n, 1, &ids, &shared);
+    let b = stripped(&base, "b");
+    assert!(
+        b.iter()
+            .any(|l| l.contains("invalidation of fnd-arkin holds")),
+        "no invalidation: {:.3000}",
+        lines_of(&base, "o")[1..].join("\n")
+    );
+    assert!(!b
+        .iter()
+        .any(|l| l.contains(&format!("invalidation of {shared}"))));
+    for seed in [2_u64, 7, 42, 0] {
+        let other = oracle_run(&bars, n, seed, &ids, &shared);
+        for c in ["b", "c"] {
+            let x = stripped(&base, c);
+            let y = stripped(&other, c);
+            assert!(
+                x == y,
+                "seed 1 vs {seed}: {c} differs: {}",
+                first_diff(&x, &y)
+            );
+        }
+    }
 }

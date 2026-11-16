@@ -1124,9 +1124,6 @@ impl Session {
         // reads them; the document they are written from is the last entry's).
         if wrote {
             self.refresh_headlines();
-            if self.other.is_some() {
-                self.in_world(true, Self::refresh_headlines);
-            }
         }
         lines
     }
@@ -2000,10 +1997,14 @@ impl Session {
         lang: Language,
         f: impl FnOnce(&mut Self) -> R,
     ) -> R {
-        // (R3/K1) A public-view reader reads the public world.
+        // (R3/K1) A public-view reader reads the public world. Its headlines are brought
+        // up to date here, when a reader needs them (not after every engine entry).
         let public = self.public_view(principal);
         if public != self.in_public && self.other.is_some() {
             return self.in_world(public, |s| s.as_reader(principal, lang, f));
+        }
+        if self.in_public && self.proj.is_none() && !self.headlines_current() {
+            self.refresh_headlines();
         }
         let p = self.reader_proj(principal);
         let lines = self.runner.is_some() || lang == Language::En;
@@ -2292,6 +2293,17 @@ impl Session {
     // Disputes and settled data (§19.9 + §20)
     // -----------------------------------------------------------------------
 
+    /// (R3/K1) Whether capsule `cap` is the running engine's: a story on a watched
+    /// series (by the capsule index).
+    pub(crate) fn runs_capsule(&self, cap: &str) -> bool {
+        let Some(r) = self.runner.as_ref() else {
+            return false;
+        };
+        self.doc_capsule(cap)
+            .and_then(|c| c.story.as_ref())
+            .is_some_and(|s| r.watched_of(&s.series).is_some())
+    }
+
     /// `true` when `capsule` is a story of a watched series.
     pub(crate) fn engine_capsule(&self, capsule: &str) -> Option<String> {
         let r = self.runner.as_ref()?;
@@ -2554,9 +2566,6 @@ impl Session {
         if let Some(seq) = self.engine_entry_with(changes, summary(&events), None) {
             self.runner = Some(runner);
             self.refresh_headlines();
-            if self.other.is_some() {
-                self.in_world(true, Self::refresh_headlines);
-            }
             lines.extend(self.entry_events(seq));
             lines.extend(self.capsule_topic_lines(seq, &events, &events_pub, &[]));
             return lines;

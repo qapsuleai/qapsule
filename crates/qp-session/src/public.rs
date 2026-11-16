@@ -8,9 +8,13 @@
 //!
 //! - an engine look's entry (and a settled-data retraction) holds the public-only
 //!   engine's own changes (facts, findings, capsules, ledger rows of its stories);
-//! - a direct command holds the same ops expanded in the public world (nothing when they
-//!   do not apply there; a public-view reader's op on an item only the public world has
-//!   is applied there and not refused);
+//! - an entitled principal's direct command holds the same ops expanded in the public
+//!   world (translated, below, when they do not apply there); a public-view reader's
+//!   command (and proposal) is validated and expanded in the public world only — every
+//!   error, conflict, id and change it sees comes from there — and the authority's world
+//!   takes the same ops only when they apply there and touch no engine item the two
+//!   worlds do not share ([`Session::diverged_touch`]), else the public changes
+//!   translated back ([`Session::reverse_changes`]: people's own items kept);
 //! - every other entry (bars, series, anchors, proposals and their acceptance, other
 //!   engine entries) is translated ([`Session::public_entry`]): changes that put, change
 //!   or name an engine item the public world has no item of (by id) are dropped, an
@@ -19,6 +23,11 @@
 //!   a retraction), an undo undoes the public world's version of the entry;
 //! - request ops, summary and cause that name an engine item only the authority's world
 //!   has are removed (as for a projected entry).
+//!
+//! The sequence number is shared, so every entry's **existence** is made to rest on
+//! public data and people's commands: a look per bar close, a settled entry per corrected
+//! answer, anchor stamps from bindings, and §8.1 invalidations only of people's own
+//! capsules (an engine capsule ends by the outcome rule only), which both worlds hold.
 //!
 //! A principal not entitled to every licensed flow the engine reads is a **public-view**
 //! reader ([`Session::public_view`]): every read path (`as_reader`: queries, `subscribe`,
@@ -161,32 +170,60 @@ impl Session {
     /// story) of the authority's document that the public world has no item of (by id:
     /// what the public world takes depends on the public world only).
     fn full_only(&self, pubdoc: &Document) -> BTreeSet<String> {
-        let mut out = BTreeSet::new();
-        let pf: BTreeSet<&str> = pubdoc.facts.iter().map(|f| f.id.as_str()).collect();
-        for f in &self.doc.facts {
-            if f.meaning.is_some() && !pf.contains(f.id.as_str()) {
-                out.insert(f.id.clone());
-            }
-        }
-        let pc: BTreeSet<&str> = pubdoc
-            .capsules
+        only_in(&self.doc, pubdoc)
+    }
+
+    /// (In the authority's world) a public-view reader's command changes `changes`
+    /// (inverse `inverse`, of the public world) as the authority's document takes them:
+    /// [`translate`] the other way (engine items only the public world has dropped;
+    /// people's own items — findings, capsules without a story, views — kept, so that
+    /// both worlds hold them and their invalidations coincide).
+    pub(crate) fn reverse_changes(
+        &self,
+        changes: &[ChangeOp],
+        inverse: &[ChangeOp],
+    ) -> Vec<ChangeOp> {
+        let Some(w) = self.other.as_ref() else {
+            return Vec::new();
+        };
+        let p = Proj {
+            hidden: only_in(&w.doc, &self.doc),
+            ..Proj::default()
+        };
+        changes
             .iter()
-            .filter(|c| c.story.is_some())
-            .map(|c| c.id.as_str())
-            .collect();
+            .filter_map(|c| translate(c, inverse, &self.doc, &p))
+            .collect()
+    }
+
+    /// Whether `changes` (of the authority's world) name an engine item the two worlds
+    /// do not share: one only the authority's world has, or one whose id the public world
+    /// gives to another item (a capsule born of another fact, and its finding).
+    pub(crate) fn diverged_touch(&self, changes: &[ChangeOp]) -> bool {
+        let Some(w) = self.other.as_ref() else {
+            return false;
+        };
+        let mut hidden = self.full_only(&w.doc);
+        let lead = |c: &qp_schema::Capsule| {
+            c.story
+                .as_ref()
+                .and_then(|s| s.history.first())
+                .and_then(|t| t.facts.first())
+                .cloned()
+        };
+        let pc: HashMap<&str, &qp_schema::Capsule> =
+            w.doc.capsules.iter().map(|c| (c.id.as_str(), c)).collect();
         for c in self.doc.capsules.iter().filter(|c| c.story.is_some()) {
-            if !pc.contains(c.id.as_str()) {
-                out.insert(c.id.clone());
-                out.insert(c.finding.clone());
+            if pc.get(c.id.as_str()).is_some_and(|p| lead(p) != lead(c)) {
+                hidden.insert(c.id.clone());
+                hidden.insert(c.finding.clone());
             }
         }
-        let pfi: BTreeSet<&str> = pubdoc.findings.iter().map(|f| f.id.as_str()).collect();
-        for f in &self.doc.findings {
-            if engine_author(&f.provenance.author) && !pfi.contains(f.id.as_str()) {
-                out.insert(f.id.clone());
-            }
-        }
-        out
+        let p = Proj {
+            hidden,
+            ..Proj::default()
+        };
+        changes.iter().any(|c| p.mentions_hidden(c))
     }
 
     /// The public world's version of `e` (an entry of the authority's world, about to
@@ -250,6 +287,17 @@ impl Session {
                     }
                 }
             }
+            // An engine entry about items the public world does not have carries no
+            // evidence and no summary there. (By construction none is written: the
+            // engine entries outside the looks — anchor stamps, invalidations of
+            // non-engine capsules, which both worlds share — rest on public data.)
+            if e.author == crate::session::ENGINE_PRINCIPAL
+                && x.changes.is_empty()
+                && !e.changes.is_empty()
+            {
+                x.evidence = None;
+                "…".clone_into(&mut x.summary);
+            }
         }
         x.request = e
             .request
@@ -272,25 +320,32 @@ impl Session {
         x
     }
 
+    /// Applies `changes` one by one to the document the fields hold, leaving out those
+    /// that do not fit; returns the applied changes and their inverse (reversed).
+    pub(crate) fn apply_each(&mut self, changes: Vec<ChangeOp>) -> (Vec<ChangeOp>, Vec<ChangeOp>) {
+        let mut kept = Vec::with_capacity(changes.len());
+        let mut inverse = Vec::with_capacity(changes.len());
+        for c in changes {
+            let restore = crate::live::Restore {
+                initial: &self.initial,
+                log: &self.log,
+            };
+            if let Ok(inv) =
+                crate::live::apply_in_place(&mut self.doc, std::slice::from_ref(&c), restore)
+            {
+                inverse.extend(inv);
+                kept.push(c);
+            }
+        }
+        inverse.reverse();
+        (kept, inverse)
+    }
+
     /// Applies `pe` to the public world and logs it there. A change that does not fit
     /// the public document is left out (the entry keeps its place in the sequence).
     pub(crate) fn commit_public(&mut self, mut pe: LogEntry) {
         self.in_world(true, |s| {
-            let mut kept = Vec::with_capacity(pe.changes.len());
-            let mut inverse = Vec::with_capacity(pe.changes.len());
-            for c in std::mem::take(&mut pe.changes) {
-                let restore = crate::live::Restore {
-                    initial: &s.initial,
-                    log: &s.log,
-                };
-                if let Ok(inv) =
-                    crate::live::apply_in_place(&mut s.doc, std::slice::from_ref(&c), restore)
-                {
-                    inverse.extend(inv);
-                    kept.push(c);
-                }
-            }
-            inverse.reverse();
+            let (kept, inverse) = s.apply_each(std::mem::take(&mut pe.changes));
             pe.changes = kept;
             pe.inverse = inverse;
             let series_set = pe
@@ -311,6 +366,37 @@ impl Session {
             s.log.push(pe);
         });
     }
+}
+
+/// Ids of the engine items (facts with a meaning, engine findings, capsules with a story
+/// and their findings) of `a` that `b` has no item of (by id).
+fn only_in(a: &Document, b: &Document) -> BTreeSet<String> {
+    let mut out = BTreeSet::new();
+    let bf: BTreeSet<&str> = b.facts.iter().map(|f| f.id.as_str()).collect();
+    for f in &a.facts {
+        if f.meaning.is_some() && !bf.contains(f.id.as_str()) {
+            out.insert(f.id.clone());
+        }
+    }
+    let bc: BTreeSet<&str> = b
+        .capsules
+        .iter()
+        .filter(|c| c.story.is_some())
+        .map(|c| c.id.as_str())
+        .collect();
+    for c in a.capsules.iter().filter(|c| c.story.is_some()) {
+        if !bc.contains(c.id.as_str()) {
+            out.insert(c.id.clone());
+            out.insert(c.finding.clone());
+        }
+    }
+    let bfi: BTreeSet<&str> = b.findings.iter().map(|f| f.id.as_str()).collect();
+    for f in &a.findings {
+        if engine_author(&f.provenance.author) && !bfi.contains(f.id.as_str()) {
+            out.insert(f.id.clone());
+        }
+    }
+    out
 }
 
 /// One change of an entry of the authority's world as the public world takes it

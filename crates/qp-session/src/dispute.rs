@@ -326,7 +326,11 @@ impl Session {
         d: DisputeIn,
     ) -> Result<Vec<OutboundLine>, ProtocolError> {
         if let ClaimRef::Capsule { capsule, .. } = &d.claim {
-            if self.engine_capsule(capsule).is_some() {
+            // (R3/K1) Routed in the disputer's world: for a public-view reader a capsule
+            // only the authority's world has is an absent capsule.
+            let public = self.public_view(&self.conns[ci].principal);
+            let engine = self.in_world(public, |s| s.engine_capsule(capsule).is_some());
+            if engine {
                 if let Some(dg) = &d.digest {
                     if !valid_digest(dg) {
                         return Err(E::new(

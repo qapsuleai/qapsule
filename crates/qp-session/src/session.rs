@@ -1354,12 +1354,12 @@ impl Session {
             }
             // (R3/K1) With a public world, the command is expanded there too: that world
             // takes these changes (a function of the ops and the public world only, not a
-            // translation of the authority's; nothing when they do not apply there), and a
-            // public-view reader's op on an item only that world has is not refused.
+            // translation of the authority's; when they do not apply there, the entry is
+            // translated, `public::translate`).
             let pub_ex = if self.other.is_some() {
                 let author = author.clone();
                 let pr = principal.clone();
-                self.in_world(true, |s| {
+                Some(self.in_world(true, |s| {
                     let mut ctx = Ctx {
                         author,
                         approved_by: None,
@@ -1376,12 +1376,10 @@ impl Session {
                         data: s.reader(),
                         plane: &s.plane,
                     };
-                    Some(
-                        expand_ops(&s.doc, ops, "/ops", &mut ctx)
-                            .ok()
-                            .map(|ex| (ex.changes, ctx.created, ctx.undoes)),
-                    )
-                })
+                    let ex = expand_ops(&s.doc, ops, "/ops", &mut ctx)?;
+                    s.base_check(base, &ex.changes, &ex.origin)?;
+                    Ok::<_, ProtocolError>((ex.changes, ex.inverse, ctx.created, ctx.undoes))
+                }))
             } else {
                 None
             };
@@ -1402,28 +1400,37 @@ impl Session {
                 plane: &self.plane,
             };
             let full = expand_ops(&self.doc, ops, "/ops", &mut ctx);
-            let (ex, created, undoes, pending) = match (full, pub_ex) {
-                (Ok(ex), p) => (
-                    ex,
-                    ctx.created,
-                    ctx.undoes,
-                    p.map(|p| p.map(|(c, ..)| c).unwrap_or_default()),
-                ),
-                // Only the public world has the item: the authority's world takes nothing.
-                (Err(_), Some(Some((changes, created, undoes)))) if public => (
-                    crate::expand::Expanded {
-                        doc: self.doc.clone(),
-                        changes: Vec::new(),
-                        inverse: Vec::new(),
-                        origin: Vec::new(),
-                    },
-                    created,
-                    undoes,
-                    Some(changes),
-                ),
-                (Err(e), _) => return Err(e),
+            let (fcreated, fundoes) = (ctx.created, ctx.undoes);
+            let mut rev = Vec::new();
+            let (ex, created, undoes, pending) = match pub_ex {
+                // A public-view reader: everything it observes (errors, conflicts, ids,
+                // the entry's changes) comes from the public world. The authority's world
+                // takes the same ops when they apply there and touch no engine item the
+                // two worlds do not share; else the public world's changes translated
+                // (people's own items kept, engine items only the public world has
+                // dropped). Either way nothing it could see differs.
+                Some(p) if public => {
+                    let (changes, inverse, created, undoes) = p?;
+                    let ex = full.ok().filter(|ex| {
+                        !self.diverged_touch(&ex.changes)
+                            && self.base_check(base, &ex.changes, &ex.origin).is_ok()
+                    });
+                    if ex.is_none() {
+                        rev = self.reverse_changes(&changes, &inverse);
+                    }
+                    (ex, created, undoes, Some(changes))
+                }
+                p => {
+                    let ex = full?;
+                    self.base_check(base, &ex.changes, &ex.origin)?;
+                    (
+                        Some(ex),
+                        fcreated,
+                        fundoes,
+                        p.and_then(Result::ok).map(|(c, ..)| c),
+                    )
+                }
             };
-            self.base_check(base, &ex.changes, &ex.origin)?;
             self.pending_pub = pending.map(|changes| crate::public::PubPending {
                 changes,
                 summary: None,
@@ -1436,8 +1443,8 @@ impl Session {
                 approved_by: None,
                 cause: Some(id.to_owned()),
                 request: ops.to_vec(),
-                changes: ex.changes,
-                inverse: ex.inverse,
+                changes: Vec::new(),
+                inverse: Vec::new(),
                 undoes,
                 summary: match undoes {
                     Some(u) => format!("undo {u}"),
@@ -1445,7 +1452,24 @@ impl Session {
                 },
                 evidence: None,
             };
-            self.commit(entry, ex.doc);
+            match ex {
+                Some(ex) => self.commit(
+                    LogEntry {
+                        changes: ex.changes,
+                        inverse: ex.inverse,
+                        ..entry
+                    },
+                    ex.doc,
+                ),
+                None => {
+                    let (changes, inverse) = self.apply_each(rev);
+                    self.committed(LogEntry {
+                        changes,
+                        inverse,
+                        ..entry
+                    });
+                }
+            }
             let mut lines = vec![out(
                 &conn,
                 ServerMsg::Ack {
@@ -1463,25 +1487,54 @@ impl Session {
         }
 
         // Proposal: validate by a dry run (ids assigned now, reused on acceptance).
-        let mut ctx = Ctx {
-            author: author.clone(),
-            approved_by: None,
-            at: self.clock,
-            seq,
-            id_seq: seq,
-            n: 0,
-            created: Vec::new(),
-            speaker: &principal,
-            is_owner: role == Role::Owner,
-            can_decide: perms.decide,
-            log: &self.log,
-            undoes: None,
-            data: self.reader(),
-            plane: &self.plane,
+        // (R3/K1) A public-view reader's proposal is validated in the public world only
+        // (the authority's errors and conflicts would tell what that world holds).
+        let created = if public && self.other.is_some() {
+            let author = author.clone();
+            let pr = principal.clone();
+            self.in_world(true, |s| {
+                let mut ctx = Ctx {
+                    author,
+                    approved_by: None,
+                    at: s.clock,
+                    seq,
+                    id_seq: seq,
+                    n: 0,
+                    created: Vec::new(),
+                    speaker: &pr,
+                    is_owner: role == Role::Owner,
+                    can_decide: perms.decide,
+                    log: &s.log,
+                    undoes: None,
+                    data: s.reader(),
+                    plane: &s.plane,
+                };
+                let ex = expand_ops(&s.doc, ops, "/ops", &mut ctx)?;
+                s.base_check(base, &ex.changes, &ex.origin)?;
+                Ok::<_, ProtocolError>(ctx.created)
+            })?
+        } else {
+            let mut ctx = Ctx {
+                author: author.clone(),
+                approved_by: None,
+                at: self.clock,
+                seq,
+                id_seq: seq,
+                n: 0,
+                created: Vec::new(),
+                speaker: &principal,
+                is_owner: role == Role::Owner,
+                can_decide: perms.decide,
+                log: &self.log,
+                undoes: None,
+                data: self.reader(),
+                plane: &self.plane,
+            };
+            let ex = expand_ops(&self.doc, ops, "/ops", &mut ctx)?;
+            let created = ctx.created;
+            self.base_check(base, &ex.changes, &ex.origin)?;
+            created
         };
-        let ex = expand_ops(&self.doc, ops, "/ops", &mut ctx)?;
-        let created = ctx.created;
-        self.base_check(base, &ex.changes, &ex.origin)?;
         let pid = format!("prop-{seq}");
         let proposal = Proposal {
             id: pid.clone(),
@@ -2175,6 +2228,14 @@ impl Session {
     pub(crate) fn invalidate_these(&mut self, candidates: Vec<(String, String)>) -> Vec<Seq> {
         let mut out = Vec::new();
         for (cap, fnd) in candidates {
+            // (R3, §20.1) A capsule of the running engine (a story on a watched series)
+            // ends by the outcome rule only, never by a document condition (a person's
+            // `update_finding` cannot make one). (R3/K1) So no invalidation entry is ever
+            // about an engine item, whose world differs between the authority and the
+            // public world. (A story capsule of a document without an engine keeps §8.1.)
+            if self.runs_capsule(&cap) {
+                continue;
+            }
             let Some(f) = self.doc.findings.iter().find(|f| f.id == fnd) else {
                 continue;
             };

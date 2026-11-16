@@ -58,6 +58,7 @@ let conn = '';
 let token = '';
 let source = null;
 let wasmReady = 0;
+const early = []; // frames that arrived before the WASM was ready, in order
 let chain = Promise.resolve();
 const posts = new Set();
 const faces = new Map(); // capsule id -> element
@@ -103,7 +104,11 @@ function connect() {
   url.searchParams.set('principal', ui.principal);
   url.searchParams.set('lang', ui.lang);
   source = new EventSource(url);
-  source.onmessage = (e) => onFrame(e.data);
+  source.onmessage = (e) => {
+    // (R4/T6) The stream opens while the WASM still loads; its first frames wait here.
+    if (!wasmReady) early.push(e.data);
+    else onFrame(e.data);
+  };
   source.onerror = () => toast(t('disconnected'));
 }
 
@@ -113,6 +118,7 @@ function start(frame) {
   token = v.token;
   info = v.info;
   core = new Shell(JSON.stringify(v));
+  core.metric_mark('start_frame', performance.now());
   core.metric_mark('wasm_ready', wasmReady);
   core.set_frame('face', FACE_W, FACE_H);
   fetch('pkg/sizes.json').then((r) => r.text()).then((s) => core.metric_env(s, navigator.userAgent)).catch(() => {});
@@ -197,6 +203,20 @@ function faceElement(item) {
   return el;
 }
 
+// (R4/T6) The first paint does not wait for the intersection observer's first callback
+// (a frame or more later): the faces already inside the list's box are painted now. The
+// observer keeps the set up to date from then on.
+function firstFaces(nodes) {
+  const box = $('feed').getBoundingClientRect();
+  for (const el of nodes) {
+    const r = el.getBoundingClientRect();
+    if (r.bottom > box.top && r.top < box.bottom) {
+      visible.add(el.dataset.id);
+      paintFace(el.dataset.id, true);
+    }
+  }
+}
+
 function renderFeed() {
   const items = JSON.parse(core.feed());
   const nodes = [];
@@ -222,7 +242,9 @@ function renderFeed() {
     }
   }
   $('list').replaceChildren(...nodes);
+  if (nodes.length) core.metric_mark('feed', performance.now());
   $('empty').hidden = items.length !== 0;
+  if (!painted) firstFaces(nodes);
   for (const id of visible) paintFace(id, false);
 }
 
@@ -517,9 +539,12 @@ async function main() {
   if (!ui.anim) document.body.classList.add('noanim');
   labels();
   wire();
+  // (R4/T6) Connect first: the host prepares the start frame while the WASM downloads
+  // and compiles (they used to run one after the other).
+  connect();
   await init();
   wasmReady = performance.now();
-  connect();
+  while (early.length) onFrame(early.shift());
   requestAnimationFrame(frame);
 }
 

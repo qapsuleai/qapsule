@@ -9,7 +9,8 @@
 #          Without it the demo listens on 127.0.0.1 (this machine only).
 #
 # 1. builds the web shell's core (qp-wasm, feature `replica`) with wasm-pack into
-#    shells/web/pkg (skipped when up to date; QP_DEMO_REBUILD=1 forces it) and writes
+#    shells/web/pkg, stripped of function names (skipped when up to date;
+#    QP_DEMO_REBUILD=1 forces it) and writes
 #    shells/web/pkg/sizes.json (raw and gzip -9 sizes, for the metrics page);
 # 2. builds `qp` (release) and runs `qp demo`: a local host on 127.0.0.1:8390 that serves
 #    the page and the protocol on one origin. Without local data (fixtures/local/bars or
@@ -32,7 +33,10 @@ if [ -f "$pkg/qp_wasm_bg.wasm" ] && [ "${QP_DEMO_REBUILD:-0}" != 1 ]; then
   [ -z "$newer" ] && stale=0
 fi
 if [ "$stale" = 1 ]; then
-  echo "== building the shell core (wasm-pack, profile wasm, feature replica)"
+  echo "== building the shell core (wasm-pack, profile wasm, feature replica, stripped)"
+  # R4/T6: without the function-name section (22% of the raw file: 5.4 -> 4.2 MB raw,
+  # 1.45 -> 1.23 MB gzip); the default (view) build keeps the profile as it is.
+  CARGO_PROFILE_WASM_STRIP=true \
   "$wasm_pack" build crates/qp-wasm --target web --profile wasm --no-opt \
     --out-dir ../../shells/web/pkg -- --features replica
   rm -f "$pkg/.gitignore" "$pkg/package.json" "$pkg/README.md"

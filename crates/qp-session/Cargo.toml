@@ -8,6 +8,7 @@ license.workspace = true
 publish.workspace = true
 
 [dependencies]
+qp-calendar = { version = "0.0.0", path = "../qp-calendar" }
 qp-capsule = { version = "0.0.0", path = "../qp-capsule" }
 qp-compute = { version = "0.0.0", path = "../qp-compute" }
 qp-facts = { version = "0.0.0", path = "../qp-facts" }

@@ -345,7 +345,9 @@ impl ReplayHost {
         };
         let replay = Replay::new(feeds, &opts).map_err(|e| format!("init.replay: {e}"))?;
         let init = expand_init(init, root, &r, &replay)?;
-        let session = Session::new(init.clone(), root)?;
+        let mut session = Session::new(init.clone(), root)?;
+        // (R4/H-FP) The headline pieces' elapsed phrases on the replay's own calendar.
+        session.set_headline_calendar(crate::headparts::replay_calendar(info.kind));
         Ok(Self {
             init,
             root: root.to_owned(),
@@ -662,6 +664,8 @@ impl ReplayHost {
         let mut init = self.init.clone();
         init.epoch += self.resets;
         self.session = Session::new(init, &self.root)?;
+        self.session
+            .set_headline_calendar(crate::headparts::replay_calendar(self.info.kind));
         self.replay.reset();
         self.recorded.clear();
         Ok(())

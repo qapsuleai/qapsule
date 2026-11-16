@@ -189,6 +189,10 @@ pub struct Session {
     /// (the realizer's, for the current reader inside [`Session::as_reader`]); empty
     /// without an engine and outside a reader with another language.
     pub(crate) headlines: BTreeMap<String, String>,
+    /// (R4/H-FP) The exchange calendar of the headline pieces' elapsed phrases for a bar
+    /// series whose instrument names none ([`Session::set_headline_calendar`]); `None`:
+    /// the built-in `XIST`.
+    pub(crate) headline_cal: Option<qp_schema::Calendar>,
     /// (R3, §20) Principals whose capsule preferences a change ever wrote (or the initial
     /// document holds): other readers get documents, changes and log entries without
     /// them.
@@ -507,6 +511,7 @@ impl Session {
             views: Vec::new(),
             real_facts: Vec::new(),
             headlines: BTreeMap::new(),
+            headline_cal: None,
             audience_seen: BTreeSet::new(),
             other: None,
             in_public: false,

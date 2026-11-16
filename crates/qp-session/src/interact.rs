@@ -503,8 +503,11 @@ impl Session {
             }
             let name = self.conns[ci].look.face.clone();
             let max_points = self.conns[ci].profile.max_points;
+            let lang = self.lang_of(ci);
             warm(rd!(self), &mut self.cache);
-            let p = DocProvider::new(rd!(self), &self.cache).with_headlines(&self.headlines);
+            let p = DocProvider::new(rd!(self), &self.cache)
+                .with_headlines(&self.headlines)
+                .with_parts(self, lang);
             return Ok(depth::face_view(
                 name.as_deref(),
                 finding,
@@ -524,12 +527,16 @@ impl Session {
     /// Compiles `view` for reader `ci` at `frame` over `range` (the `hit` query's
     /// compile: the reader's unreadable layers are not drawn; a view whose bar series is
     /// unreadable is an error), with the bar times of its first bar series.
+    ///
+    /// (R4/H-FP) `face`: the face design when `view` is a capsule's face (open depth
+    /// `sentence`), so its headline template applies (`CompileOptions::face`).
     fn reader_scene(
         &mut self,
         ci: usize,
         view: &View,
         frame: (u32, u32),
         range: Option<(u64, u64)>,
+        face: Option<String>,
     ) -> PResult<(SceneDesc, Vec<i64>)> {
         warm(rd!(self), &mut self.cache);
         let asker = self.conns[ci].principal.clone();
@@ -552,9 +559,13 @@ impl Session {
         opts.theme.clone_from(&self.conns[ci].look.theme);
         opts.alphabet.clone_from(&self.conns[ci].look.alphabet);
         opts.outcome.clone_from(&self.conns[ci].look.outcome);
+        opts.face = face;
+        let lang = self.lang_of(ci);
         let scene = compile(
             view,
-            &DocProvider::new(rd!(self), &self.cache).with_headlines(&self.headlines),
+            &DocProvider::new(rd!(self), &self.cache)
+                .with_headlines(&self.headlines)
+                .with_parts(self, lang),
             &opts,
         )
         .map_err(|e| E::new(ErrorCode::Invalid, e.to_string()).at(GP).build())?;
@@ -582,7 +593,12 @@ impl Session {
             None
         };
         let frame = self.frame(ci, depth_key(d));
-        let (scene, times) = self.reader_scene(ci, &view, frame, range)?;
+        let face = if d == OpenDepth::Sentence {
+            self.conns[ci].look.face.clone()
+        } else {
+            None
+        };
+        let (scene, times) = self.reader_scene(ci, &view, frame, range, face)?;
         Ok(Some((view, scene, times)))
     }
 
@@ -737,7 +753,7 @@ impl Session {
                 let view = need_view(rd!(self), vid, GP)?.clone();
                 let frame = self.frame(ci, &frame_key(on));
                 let range = self.hit_range(&self.conns[ci], vid);
-                let (scene, times) = self.reader_scene(ci, &view, frame, range)?;
+                let (scene, times) = self.reader_scene(ci, &view, frame, range, None)?;
                 let hit = hit_scene(&scene, x, y, &times);
                 let mut out = Out::default();
                 // A glyph (or any layer drawing a finding) presented by a capsule: the tap
@@ -827,7 +843,7 @@ impl Session {
                 let view = need_view(rd!(self), vid, GP)?.clone();
                 let frame = self.frame(ci, &frame_key(on));
                 let range = self.hit_range(&self.conns[ci], vid);
-                let (scene, _) = self.reader_scene(ci, &view, frame, range)?;
+                let (scene, _) = self.reader_scene(ci, &view, frame, range, None)?;
                 let g = match m {
                     Move::Drag(dx) => Gesture::Pan {
                         view: vid.clone(),

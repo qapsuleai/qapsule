@@ -25,6 +25,9 @@ pub struct DocProvider<'a> {
     /// The data plane during a command (§18): a bound bar series' bars come from the
     /// reading document when the scratch document `doc` has none ([`crate::plane::bars_for`]).
     reader: Option<crate::plane::Reader<'a>>,
+    /// (R4/H-FP) The session and reader language the headline pieces are written for
+    /// (inside [`crate::Session::as_reader`]: with the reader's projection).
+    parts: Option<(&'a crate::Session, qp_schema::protocol::Language)>,
 }
 
 impl<'a> DocProvider<'a> {
@@ -34,6 +37,7 @@ impl<'a> DocProvider<'a> {
             cache,
             headlines: None,
             reader: None,
+            parts: None,
         }
     }
 
@@ -50,6 +54,18 @@ impl<'a> DocProvider<'a> {
         headlines: &'a std::collections::BTreeMap<String, String>,
     ) -> Self {
         self.headlines = Some(headlines);
+        self
+    }
+
+    /// (R4/H-FP) The same provider giving the headline pieces of session `s`'s reader in
+    /// `lang` ([`crate::Session::reader_parts`]; the reader's projection inside
+    /// [`crate::Session::as_reader`]), alongside the headlines of that reader.
+    pub(crate) fn with_parts(
+        mut self,
+        s: &'a crate::Session,
+        lang: qp_schema::protocol::Language,
+    ) -> Self {
+        self.parts = Some((s, lang));
         self
     }
 }
@@ -204,5 +220,19 @@ impl DataProvider for DocProvider<'_> {
             qp_grammar::depth::GLYPH_MIN_LEDGER_N,
             validity,
         )))
+    }
+
+    /// (R4/H-FP) The reader's headline pieces (see [`DocProvider::with_parts`]); `None`
+    /// without them.
+    fn headline_parts(&self, finding: &str) -> Option<qp_grammar::HeadlineParts> {
+        let (s, lang) = self.parts?;
+        let c = s.doc.capsules.iter().find(|c| c.finding == finding)?;
+        s.reader_parts(
+            &s.doc,
+            c,
+            s.proj.as_deref(),
+            lang,
+            &mut qp_capsule::sentence::StudyMemo::default(),
+        )
     }
 }

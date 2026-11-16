@@ -1007,6 +1007,85 @@ impl Session {
         Some(story_validity(story, &facts, bars, now, memo))
     }
 
+    /// (R4/H-FP) The headline pieces of capsule `c` for a reader with projection `p` in
+    /// `lang` ([`crate::headparts`]): the same story, facts, "now", validity and
+    /// redaction as [`Session::reader_text_with`] writes the reader's sentence with.
+    pub(crate) fn reader_parts(
+        &self,
+        doc: &Document,
+        c: &Capsule,
+        p: Option<&Proj>,
+        lang: Language,
+        memo: &mut StudyMemo,
+    ) -> Option<qp_grammar::HeadlineParts> {
+        let story = p.and_then(|p| p.stories.get(&c.id)).or(c.story.as_ref())?;
+        let hidden = p.map(|p| &p.hidden);
+        let facts: Vec<&Fact> = story_fact_ids(story)
+            .iter()
+            .filter(|i| hidden.is_none_or(|h| !h.contains(*i)))
+            .filter_map(|i| self.fact_by_id(i))
+            .collect();
+        let redacted = p.is_some_and(|p| facts.iter().any(|f| p.redact.contains(&f.id)));
+        let (now, bars, bs) =
+            Self::now_series(rd!(self), story).or_else(|| Self::now_series(doc, story))?;
+        let validity = story_validity(story, &facts, bars, now, memo);
+        crate::headparts::story_parts(
+            story,
+            (bs, bars, now),
+            validity,
+            redacted,
+            lang,
+            self.headline_cal.as_ref(),
+        )
+    }
+
+    /// [`Session::now_bar`] with the bar series it read.
+    fn now_series<'d>(
+        doc: &'d Document,
+        story: &Story,
+    ) -> Option<(u64, &'d [Bar], &'d qp_schema::Series)> {
+        let (now, bars) = Self::now_bar(doc, story)?;
+        Some((now, bars, bar_series(doc, &story.series)?))
+    }
+
+    /// (R4/H-FP) The headline pieces of the capsule of `item` (the authority's `capsules`
+    /// answer for this reader) in `lang`, over this session's own story and bars: what the
+    /// shell's replica gives a face design's headline template. Validity and redaction are
+    /// the item's (the authority's, K42/A28, K33); "now" is the last final bar of the
+    /// story's series, as for the sentence. `None` without the capsule's story or bars
+    /// (an unentitled reader's replica has no bars; its face is text anyway).
+    #[must_use]
+    pub fn item_headline_parts(
+        &self,
+        item: &qp_schema::protocol::CapsuleItem,
+        lang: Language,
+    ) -> Option<qp_grammar::HeadlineParts> {
+        let caps = &rd!(self).capsules;
+        let c = caps
+            .iter()
+            .find(|c| c.id == item.id)
+            .or_else(|| caps.iter().find(|c| c.finding == item.finding))
+            .or_else(|| self.doc.capsules.iter().find(|c| c.id == item.id))?;
+        let story = c.story.as_ref()?;
+        let (now, bars, bs) =
+            Self::now_series(rd!(self), story).or_else(|| Self::now_series(&self.doc, story))?;
+        crate::headparts::story_parts(
+            story,
+            (bs, bars, now),
+            item.validity,
+            item.redacted,
+            lang,
+            self.headline_cal.as_ref(),
+        )
+    }
+
+    /// (R4/H-FP) The exchange calendar of headline pieces for bar series whose instrument
+    /// names none (`None`: the built-in `XIST`); see [`crate::headparts`]. A replay host
+    /// sets [`crate::headparts::replay_calendar`] of its source.
+    pub fn set_headline_calendar(&mut self, cal: Option<qp_schema::Calendar>) {
+        self.headline_cal = cal;
+    }
+
     // -----------------------------------------------------------------------
     // Runner: final bars → engine entries
     // -----------------------------------------------------------------------

@@ -156,6 +156,8 @@ pub struct Replica {
     /// The provider until the document arrives (then it lives in the session's plane).
     provider: Option<Provider>,
     s: Option<Session>,
+    /// (R4/H-FP) The calendar of the session's headline pieces (kept across reloads).
+    headline_cal: Option<qp_schema::Calendar>,
     seq: Seq,
     /// `change` events received before the document or after a gap.
     buffered: BTreeMap<Seq, LogEntry>,
@@ -253,6 +255,7 @@ impl Replica {
             principal: principal.to_owned(),
             provider: Some(provider),
             s: None,
+            headline_cal: None,
             seq: 0,
             buffered: BTreeMap::new(),
             log_asked: false,
@@ -326,6 +329,15 @@ impl Replica {
     /// The follower session (read access: queries over the replica's own data).
     pub fn session_mut(&mut self) -> Option<&mut Session> {
         self.s.as_mut()
+    }
+
+    /// (R4/H-FP) The exchange calendar of its session's headline pieces
+    /// ([`Session::set_headline_calendar`]), kept across reloads.
+    pub fn set_headline_calendar(&mut self, cal: Option<qp_schema::Calendar>) {
+        if let Some(s) = self.s.as_mut() {
+            s.set_headline_calendar(cal.clone());
+        }
+        self.headline_cal = cal;
     }
 
     /// Its own bars of bound or inline bar series `series` (what its chart shows).
@@ -516,7 +528,8 @@ impl Replica {
             }),
         };
         match follower(doc, &self.principal, provider) {
-            Ok(s) => {
+            Ok(mut s) => {
+                s.set_headline_calendar(self.headline_cal.clone());
                 self.s = Some(s);
                 self.seq = seq;
                 self.doc_asked = false;

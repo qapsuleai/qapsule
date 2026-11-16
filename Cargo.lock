@@ -1616,6 +1616,7 @@ dependencies = [
 name = "qp-session"
 version = "0.0.0"
 dependencies = [
+ "qp-calendar",
  "qp-capsule",
  "qp-compute",
  "qp-facts",

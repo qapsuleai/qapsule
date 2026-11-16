@@ -1,0 +1,13 @@
+# R4 son denetim düzeneği (bağımsız denetçi). Çalışma alanının üyesi değildir.
+# Derleme: CARGO_TARGET_DIR=<geçici> cargo run --release --manifest-path rounds/R4/audit/probe/Cargo.toml --bin <ad>
+[package]
+name = "r4-audit"
+version = "0.0.0"
+edition = "2021"
+publish = false
+
+[workspace]
+
+[dependencies]
+qp-calendar = { path = "../../../../crates/qp-calendar" }
+qp-capsule = { path = "../../../../crates/qp-capsule" }

@@ -424,6 +424,13 @@ impl<'a> Plan<'a> {
         }
     }
 
+    /// The story is closed (realized, invalidated, expired or retracted): the stage
+    /// remark says how it ended and no validity tail follows.
+    #[must_use]
+    pub fn closed(&self) -> bool {
+        self.stage.is_closed()
+    }
+
     /// An evidence value of the lead fact (first key present), never when redacted.
     #[must_use]
     pub fn val(&self, keys: &[&str]) -> Option<f64> {

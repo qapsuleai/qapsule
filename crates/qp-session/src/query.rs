@@ -620,7 +620,7 @@ impl Session {
         }
     }
 
-    fn at_bar(&mut self, series: &str, i: usize) -> AtBar {
+    pub(crate) fn at_bar(&mut self, series: &str, i: usize) -> AtBar {
         let bars = rd!(self)
             .series
             .iter()
@@ -664,7 +664,7 @@ impl Session {
     /// Initial visible range of a view for a surface (§4.6): the slots whose time falls
     /// in `x.domain`, else the surface's last N bars and every future slot after them
     /// (K25: the default viewport covers the future points).
-    fn initial_range(
+    pub(crate) fn initial_range(
         &self,
         view: &View,
         kind: qp_schema::protocol::SurfaceKind,
@@ -835,6 +835,8 @@ impl Session {
                 .collect(),
             capsules,
             last_close,
+            view_state: (c.look != qp_schema::protocol::ViewState::default())
+                .then(|| c.look.clone()),
         })
     }
 
@@ -851,6 +853,8 @@ impl Session {
             | Gesture::Pan { view, .. }
             | Gesture::Zoom { view, .. }
             | Gesture::Tap { view, .. } => view,
+            // (R4) Pixel gestures and open/close: `interact.rs`.
+            _ => return self.interact(ci, g),
         };
         let view = need_view(rd!(self), view_id, &ptr(gp, "view"))?.clone();
         let bar_series = view_bar_series(rd!(self), &view)
@@ -1013,6 +1017,7 @@ impl Session {
                     Vec::new(),
                 ));
             }
+            _ => unreachable!("pixel gestures return above"),
         };
         let vp = Viewport {
             view: view.id.clone(),

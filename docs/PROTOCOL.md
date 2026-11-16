@@ -18,7 +18,7 @@ hello      (kimim, hangi yüzey)   →    welcome  (rol, yetki, profil, sınırl
 command    (dokümanı değiştir)    →    ack (applied | proposed)  ya da error
 query      (anlamsal okuma)       →    result                    ya da error
 subscribe / unsubscribe           →    ack, sonra notify …
-input      (kaydır, yakınlaştır)  →    result (viewport | at)
+input      (kaydır, yakınlaştır)  →    result (viewport | at | interaction)
 attend     (dikkat yönlendir)     →    ack (delivered); hedefe notify
 clock      (yalnızca host)        →    (cevap yok; süre aşımları işlenir)
 ```
@@ -296,6 +296,59 @@ içindir (`bar` ≤ son bar). `screen` ve `hit` görünen gelecek yuvalardaki ö
 `screen.last_close` görünen son **barın** kapanışıdır. Kalıcı aralık (`set_view_range`) yine
 barlarla sınırlıdır. Döküm: `29-future-look`.
 
+#### 4.6.1 Piksel hareketleri ve açılma (R4)
+
+Kabuk px'i bara çevirmez, isabet testi yapmaz, açılmaya karar vermez (`docs/ARCHITECTURE.md`
+"Kabuk sınırı"). Ham hareketi **piksel** olarak gönderir; çekirdek onu bağlantının **bakış
+durumu** (§7) ve hedefin sahne tarifi (`docs/GRAMMAR.md` §14) üzerinden çözer. Bar uzayındaki
+dört hareket (`look`, `pan`, `zoom`, `tap`) aynen kalır.
+
+| Hareket | Alanlar (`?` isteğe bağlı) | Etki |
+|---------|---------|------|
+| `tap_at` | `target?`, `x`, `y`, `width?`, `height?` | Hedefin sahnesinde nokta sorgusu (`hit` ile **aynı kod**: `qp_session::hit_scene`). Sonra açılma kuralı (`docs/GRAMMAR.md` §18.6): kapsül bir derinlik açılır; grafikte kanıt öğesine dokunmak kanıtı açar; düz bir mum odaklanır (`at`, `tap` gibi). Belge görünümünde bir kapsülün işaretine (`glyph`) dokunmak o kapsülü açar. |
+| `drag` | `target?`, `dx`, `width?`, `height?` | Yatay sürükleme: `bars = round(−dx / slot)` (parmak sağa → eski barlar görünür). Belge görünümünde `pan` ile aynı yoldan (bağlantı bakışı, `viewport` olayı); açık kapsülün grafiğinde bakış durumunun aralığı aynı kurallarla (`qp_grammar::gesture::pan_range`) kayar. |
+| `pinch` | `target?`, `factor` (>1 yakınlaştırır), `x?`, `width?`, `height?` | `x` sütunundaki bar yerinde kalır (yoksa son görünen bar); `zoom` ile aynı kural (`zoom_range`). |
+| `open` | `capsule` (kapsül ya da bulgu kimliği), `to?`, `width?`, `height?` | Kapsülü bir derinlik (ya da `to`'ya kadar) açar: `sentence → capsule → chart → evidence`. |
+| `close` | `to?`, `width?`, `height?` | Açık kapsülü bir derinlik geri (ya da `to`'ya; `sentence` = akışa dönüş) kapatır. |
+
+- **Hedef** (`target`, `SurfaceTarget`): `{"view": …}` (belgenin bir görünümü) ya da
+  `{"capsule": …}` (akıştaki yüzü ya da açık kapsül, o bağlantıdaki derinliğiyle); ikisi
+  birden `invalid`. Verilmezse **o anki sahne**: açık kapsül varsa o, yoksa bağlantının o
+  anki görünümü.
+- **Yüzey boyutu.** Piksel, hedefin **çerçevesine** göredir. Kabuk çerçeveyi harekete
+  `width`/`height` ile ekler; çekirdek onu bakış durumunda **çerçeve anahtarı** başına saklar
+  (`view:<id>`, `face` — akıştaki kapsül yüzü, `capsule`, `chart`) ve sonraki hareketler
+  boyutsuz gelebilir. Hiç bildirilmemişse `screen`'in yüzey çerçevesi (telefon 390×300;
+  yüz için aynı genişlik × 140). Sınırlar `200..=16384` × `120..=16384`, dışı `invalid`
+  (`/gesture/width`). Gerekçe: `hello.surface.screen` cihazın tamamıdır, oysa telefonda akış
+  kartı ile grafik farklı boyuttadır; hedef başına ayrı bir `look` mesajı da her düzen
+  değişiminde sıra bağımlılığı doğururdu. Boyut hareketle gelince her mesaj kendi başına
+  çözülebilir (ajan durumsuz sürebilir), kabuk düzen değişince bir kez gönderir.
+- **Cevap:** `result` + `data.kind = "interaction"` (`Interaction`): `hit` (dokunulan yer),
+  `at` (odaklanan bar), `viewport` (yeni aralık), `opening` (derinlik geçişi) ve `state`
+  (hareketten sonraki bakış durumu). Bar uzayındaki hareketler eski cevaplarını verir.
+- **Açılma cevabı** (`Opening`): `capsule`, `finding`, `from`, `to`; `presentation` —
+  sunucunun `to` derinliğindeki çıktısı (§10.2'nin kuralları, bağlantının profili o
+  derinlikte: `capsule` = kart `capsule_view`, `chart`/`evidence` = görünüm ve olgular;
+  yetkisiz okuyucuya kıvılcım ve görünüm yok, §18.3); `frame` — yeni sahnenin çerçevesi;
+  `shared` — **geçişte ortak kalan öğeler**: kimlik + iki sahnedeki kutular
+  (`docs/GRAMMAR.md` §18.6; kabuk yalnız iki kutu arasını boyar); `evidence` — `evidence`
+  derinliğinde `capsule` sorgusunun olgu başına kanıt erişimi (yetkiliye değerler ve
+  dondurulmuş kanıt, yetkisize `requires` ve `rests_on`; §20.2, K34). Kanıt yeniden
+  hesaplanmaz, aynı kod döner.
+- **Derinlik sınırı:** `surface.max_depth` (`sentence`/`capsule`) açılmayı sınırlar; ötesi
+  `invalid` (`/gesture/to`). Telefonun profil derinliği (`capsule`) yalnız `present`'in
+  varsayılanıdır; kullanıcı açtığında grafiğe ve kanıta inilir.
+- **Hatalar:** açık kapsül yokken `close`, `open` ile `sentence`, açık olmayan bir kapsülde
+  (yüz) `drag`/`pinch`, pozitif olmayan `factor`, sonlu olmayan `x`/`y` → `invalid`;
+  bilinmeyen ya da okuyucunun göremediği kapsül → `not_found` (aynı cevap).
+- Her piksel hareketi ve açılma, girdi sayacını ve son girdi zamanını günceller; dokümana
+  ve günlüğe **hiçbir şey yazmaz** (§7). `drag`/`pinch` `viewport` olayı üretir (açık
+  kapsülün grafiğinde görünüm kimliği `present-<bulgu>` ya da kapsülün saklı görünümü).
+- Dökümler: `r4-input-tap-hit`, `r4-input-pan-pinch`, `r4-input-open-close`,
+  `r4-input-evidence`, `r4-input-presence` (üretici:
+  `cargo run -p qp-session --example make_input_transcripts -- --write`).
+
 ### 4.7 Öneri — `command` (öneri kipi) ve karar işlemleri
 
 Ajanlar varsayılan olarak **öneri** yazar; yetkiyle doğrudan yazar (K21-5). `proposer`
@@ -468,7 +521,7 @@ böylece aynı görünümün farklı katmanlarına eşzamanlı yazılar çakış
 | `log` | `after_seq?`, `since_t?`, `until_t?`, `within_ms?`, `author?`, `limit?` | `log`: girdiler, `seq` artan. `within_ms`: `now`'dan geriye bu kadar milisaniye ("son 30 dakika" = `1800000`). `limit` en son n girdiyi verir. |
 | `study` | `series`, `range?`, `output?`, `reduce?` | `values` (barlarla hizalı, ısınma `null`; K13/K20) ya da `reduced` (`min`, `max`, `mean`, `first`, `last`, `count`; `null`lar atlanır; `min`/`max`/`first`/`last` bar ve zamanı da verir). Bar serisinde çıktılar `o`,`h`,`l`,`c`,`v`. |
 | `at` | `series`, `bar?` ya da `t?` | `at`: OHLCV ve o bar serisine dayanan her hesabın o bardaki değerleri. |
-| `screen` | `principal?` | `screen`: kişinin ekranlı (`desktop`, `phone`, `watch`) her bağlantısı için, bağlantı açılış sırasıyla: görünüm, görünen aralık, sembol ve aralık (görünümün ilk bar serisinden), paneller (yığın sırasıyla; `panel` = panel id'si; R2'de ayrıca `name`, `scale` {id, tür, görünen alan} ve `layers` — kimlik, işaret, veri, alanlar, açıklama, sabitler ve kökenleri, görünen öğe sayısı, son değerler, sahne tarifinden; `series` = o paneldeki katmanların serileri, katman sırasıyla, tekrarsız; `marks` = bütün katmanların işaretleri, katman sırasıyla), olgu barı görünen aralıkta olan bulguların kapsülleri, görünen son barın kapanışı. |
+| `screen` | `principal?` | `screen`: kişinin ekranlı (`desktop`, `phone`, `watch`) her bağlantısı için, bağlantı açılış sırasıyla: görünüm, görünen aralık, sembol ve aralık (görünümün ilk bar serisinden), paneller (yığın sırasıyla; `panel` = panel id'si; R2'de ayrıca `name`, `scale` {id, tür, görünen alan} ve `layers` — kimlik, işaret, veri, alanlar, açıklama, sabitler ve kökenleri, görünen öğe sayısı, son değerler, sahne tarifinden; `series` = o paneldeki katmanların serileri, katman sırasıyla, tekrarsız; `marks` = bütün katmanların işaretleri, katman sırasıyla), olgu barı görünen aralıkta olan bulguların kapsülleri, görünen son barın kapanışı; (R4) bağlantının bakış durumu `view_state` (§7). |
 | `attention` | `principal` | `attention`: kişinin en son etkin ekranlı bağlantısının bakış aralığı (girdi yoksa başlangıç aralığı), son odak (`tap`: görünüm, panel, bar), zamanı, yönergeler. |
 | `hit` | `view?`, `x`, `y`, `width?`, `height?` | (R2) `hit`: görünüm `width`×`height` (varsayılan 1200×600) çizildiğinde (`x`,`y`) pikselinde ne olduğu — panel, bar, zaman, ölçekteki değer ve en üstteki öğe (katman, işaret, veri, bar, zaman, değerler, kökenler); boş alanda `item` yok. Görünen aralık: soranın o görünümdeki bakışı (ekranlı bağlantıda varsayılan bakış; gelecek yuvalar dahil, §4.6), yoksa kalıcı aralık, yoksa bütün yuvalar. Sahne tarifinden cevaplanır, çizim yapılmaz (`docs/GRAMMAR.md` §16). |
 | `present` | `finding?`, `surface?` | `presentation` (§10). `finding` yoksa (K25): tek canlı bulgu varsa o; **birden çok canlı bulgu varsa otorite seçmez**, `ambiguous` döner — `candidates` bütün canlı bulgular, seçicinin bulgu sırasıyla (§17.3: olgularının en büyük barı, eşitlikte doküman sırası) — **artan** sıra: son aday en yeni olandır, `{"latest":true}` onu seçer, `hint` `finding` ya da bir seçici (`{"latest":true}`) yazmayı söyler; hiç canlı bulgu yoksa `not_found`. |
@@ -495,7 +548,13 @@ içindedir; reddedilen ve süresi dolan öneriler de iz olarak kalır.
 ## 7. Varlık durumu (presence)
 
 Bağlantı başına: yüzey, profil, görünür aralık (viewport), odak (son `tap`), son girdi
-zamanı. Kişi başına: dikkat yönergeleri (en son 16). Varlık durumu günlüğe girmez ve
+zamanı ve (R4) **bakış durumu** (`ViewState`): açık kapsül ve bulgusu, derinliği
+(`sentence`/`capsule`/`chart`/`evidence`), o derinlikte gösterilen görünümün kimliği,
+grafik derinliğinde görünen aralık ve kabuğun bildirdiği çerçeve boyutları (§4.6.1). Akış
+listesindeki kaydırma konumu kabuğun düzen öğesidir, çekirdeğe gönderilmez. Ajan bakış
+durumunu `screen` cevabındaki `view_state` alanından okur (yalnız bir piksel hareketi ya da
+açılma onu ayarladıysa). Test: 1000 girdiden sonra günlük uzunluğu ve doküman özeti aynı
+(`crates/qp-session/tests/interaction.rs`). Kişi başına: dikkat yönergeleri (en son 16). Varlık durumu günlüğe girmez ve
 yeniden oynatılmaz; otorite değişince (devir) sıfırlanır. Ajanlar onu `screen` ve
 `attention` sorgularıyla okur; böylece insanın baktığı yer ajanın okuduğu aynı sistemdedir
 (AI-native testi 4), ama saniyede onlarca kaydırma kalıcı günlüğü şişirmez.
@@ -637,6 +696,9 @@ seçmez", güven ya da kimlik sırasıyla seçim yapılmaz); hiç → `not_found
   olgusunun serisinden, son `max_points` bar).
 - **`chart`**: + `view` (kapsülün görünümü; yoksa sunucunun kurduğu görünüm — dokümana
   yazılmaz), `facts` (kanıt olgular).
+
+(R4) Aynı kurallar `input` ile açılmada (`open`, `close`, açan `tap_at`) `opening.presentation`
+olarak döner (§4.6.1); orada derinliği profil değil bakış durumu seçer.
 
 ### 10.3 Sunucu (presenter)
 
@@ -809,7 +871,10 @@ doldu), 41 hassasiyet ve pozisyon geçişi (`set_audience`, `set_sensitivity`), 
 iz bırakmaması, 43 geri çekme (kapsül itirazı haklı → `retracted`, karnede yok), 44 bağlı
 seride `verify_evidence.item` seçicisi (çözüm, `ambiguous`, `schema`) ve `show_finding`
 (R3/E düzeltmeleri). 38–44
-`cargo run -p qp-session --example make_capsule_transcripts -- --write` ile üretilir.
+`cargo run -p qp-session --example make_capsule_transcripts -- --write` ile üretilir. **R4 (girdi):**
+`r4-input-*` (orkestratör numaralandırır): piksel dokunma ve isabet, sürükleme ve
+kıstırma, açılma/kapama ve ortak öğeler, kanıta inme (yetkili/yetkisiz), bakış durumunun
+günlüğe girmemesi (§4.6.1).
 
 ## 16. Gömme
 

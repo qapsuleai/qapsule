@@ -18,6 +18,7 @@ pub mod detmath;
 mod draw;
 pub mod error;
 mod frame;
+pub mod gesture;
 pub mod glyph;
 mod layer;
 pub mod provider;

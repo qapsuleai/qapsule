@@ -98,6 +98,8 @@ pub(crate) struct Conn {
     pub last_input: u64,
     /// Clock at the last input.
     pub last_at: Option<i64>,
+    /// (R4, §7) View state: open capsule, its depth and chart range, frame sizes.
+    pub look: qp_schema::protocol::ViewState,
 }
 
 impl Conn {
@@ -1214,6 +1216,7 @@ impl Session {
             current: None,
             last_input: 0,
             last_at: None,
+            look: qp_schema::protocol::ViewState::default(),
         });
         vec![out(
             conn,

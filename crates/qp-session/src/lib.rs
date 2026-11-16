@@ -37,6 +37,7 @@ mod error;
 mod expand;
 mod explain;
 mod gops;
+mod interact;
 mod live;
 mod locate;
 mod plane;

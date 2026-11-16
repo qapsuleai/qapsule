@@ -1984,6 +1984,9 @@ pub struct ScreenInfo {
     /// Last close in the visible range.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub last_close: Option<f64>,
+    /// (R4, §7) The connection's view state, once a pixel gesture or open/close set it.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub view_state: Option<ViewState>,
 }
 
 /// Where a principal looks, and what they are asked to look at.
@@ -2152,6 +2155,12 @@ pub enum QueryResult {
     Viewport {
         /// The new viewport.
         viewport: Viewport,
+    },
+    /// (R4, §4.6) Answer to a pixel gesture (`tap_at`, `drag`, `pinch`) or `open` /
+    /// `close`.
+    Interaction {
+        /// What the gesture did.
+        interaction: Box<Interaction>,
     },
     /// Answer to `binding` (RP2).
     Bindings {
@@ -2580,6 +2589,223 @@ pub enum Gesture {
         /// Bar index.
         bar: u64,
     },
+    /// (R4, §4.6) Tap at pixel (`x`, `y`) of a target as the surface draws it. The engine
+    /// hit-tests the target's scene (the `hit` code) and decides what the tap means: a
+    /// bar's values (`at`), or opening a capsule one depth further (§4.6 "Açılma").
+    /// Answered with an `interaction`.
+    TapAt {
+        /// What was tapped; the connection's current scene if absent.
+        #[serde(default, skip_serializing_if = "SurfaceTarget::is_current")]
+        target: SurfaceTarget,
+        /// Pixel x inside the target's frame (0 = left edge).
+        x: f64,
+        /// Pixel y inside the target's frame (0 = top edge).
+        y: f64,
+        /// Frame width the surface draws the target at; remembered per target (view
+        /// state). Omit to use the remembered or the surface's default size.
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        width: Option<u32>,
+        /// Frame height, as `width`.
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        height: Option<u32>,
+    },
+    /// (R4, §4.6) Horizontal drag by `dx` pixels on a chart (positive: the finger moves
+    /// right, older bars come into view). The engine turns pixels into bars with the
+    /// scene's slot width. Answered with an `interaction`.
+    Drag {
+        /// The chart dragged; the connection's current scene if absent.
+        #[serde(default, skip_serializing_if = "SurfaceTarget::is_current")]
+        target: SurfaceTarget,
+        /// Pixels moved (positive = right).
+        dx: f64,
+        /// Frame width (see `tap_at`).
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        width: Option<u32>,
+        /// Frame height (see `tap_at`).
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        height: Option<u32>,
+    },
+    /// (R4, §4.6) Pinch on a chart by `factor` (> 1: the fingers move apart, fewer bars)
+    /// around pixel column `x` (the bar under it stays in place; default: the last visible
+    /// bar). Answered with an `interaction`.
+    Pinch {
+        /// The chart pinched; the connection's current scene if absent.
+        #[serde(default, skip_serializing_if = "SurfaceTarget::is_current")]
+        target: SurfaceTarget,
+        /// Factor, > 0.
+        factor: f64,
+        /// Pixel x of the pinch centre.
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        x: Option<f64>,
+        /// Frame width (see `tap_at`).
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        width: Option<u32>,
+        /// Frame height (see `tap_at`).
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        height: Option<u32>,
+    },
+    /// (R4, §4.6) Open a capsule one depth further (sentence → capsule → chart →
+    /// evidence), or straight to `to`. Answered with an `interaction` carrying the
+    /// `opening`: what to show at the new depth and the elements both depths share.
+    Open {
+        /// Capsule id (or the id of the finding it presents).
+        capsule: String,
+        /// Depth to open to; one deeper than now if absent.
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        to: Option<OpenDepth>,
+        /// Frame width the new depth will be drawn at (see `tap_at`).
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        width: Option<u32>,
+        /// Frame height, as `width`.
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        height: Option<u32>,
+    },
+    /// (R4, §4.6) Close the open capsule one depth back, or to `to` (`sentence`: back to
+    /// the feed). Answered with an `interaction` carrying the `opening` (the way back).
+    Close {
+        /// Depth to go back to; one shallower than now if absent.
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        to: Option<OpenDepth>,
+        /// Frame width the depth closed to is drawn at (see `tap_at`).
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        width: Option<u32>,
+        /// Frame height, as `width`.
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        height: Option<u32>,
+    },
+}
+
+/// (R4, §4.6) What a pixel gesture lands on: a view of the document (a chart) or a
+/// capsule (its face in the feed, or the open capsule at its depth). At most one field;
+/// neither means the connection's current scene (the open capsule if there is one,
+/// otherwise its current view).
+#[derive(Debug, Clone, Default, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
+#[serde(deny_unknown_fields)]
+pub struct SurfaceTarget {
+    /// A view id of the document.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub view: Option<String>,
+    /// A capsule id (or the id of the finding it presents).
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub capsule: Option<String>,
+}
+
+impl SurfaceTarget {
+    /// No field set: the connection's current scene.
+    #[must_use]
+    pub fn is_current(&self) -> bool {
+        self.view.is_none() && self.capsule.is_none()
+    }
+}
+
+/// (R4, §4.6) How far a capsule is opened on one connection: `sentence` (nothing open:
+/// the feed of faces or sentences), `capsule` (the capsule opened), `chart` (its marked
+/// chart), `evidence` (the chart with the evidence opened).
+#[derive(
+    Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Default, Serialize, Deserialize, JsonSchema,
+)]
+#[serde(rename_all = "snake_case")]
+pub enum OpenDepth {
+    /// Nothing open.
+    #[default]
+    Sentence,
+    /// The capsule opened.
+    Capsule,
+    /// Its marked chart.
+    Chart,
+    /// The chart with its evidence opened.
+    Evidence,
+}
+
+/// (R4, §4.6, §7) A connection's view state (presence; never logged, never in the
+/// document): how far which capsule is open, the chart range shown at chart depth and the
+/// frame sizes the surface reported per target.
+#[derive(Debug, Clone, Default, PartialEq, Serialize, Deserialize, JsonSchema)]
+#[serde(deny_unknown_fields)]
+pub struct ViewState {
+    /// Depth of the open capsule (`sentence`: none open).
+    pub depth: OpenDepth,
+    /// The open capsule.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub capsule: Option<String>,
+    /// The finding it presents.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub finding: Option<String>,
+    /// Id of the view shown at this depth (`capsule-<finding>` at capsule depth; the
+    /// capsule's stored view or `present-<finding>` at chart and evidence depth).
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub view: Option<String>,
+    /// Visible range of that chart (chart and evidence depth).
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub range: Option<Viewport>,
+    /// Frame sizes `[width, height]` reported by the surface, by frame key: `view:<id>`,
+    /// `face` (a capsule face in the feed), `capsule`, `chart`.
+    #[serde(default, skip_serializing_if = "BTreeMap::is_empty")]
+    pub frames: BTreeMap<String, [u32; 2]>,
+}
+
+/// (R4, §4.6) One element both sides of a depth transition show (e.g. the glyph, the
+/// headline, the marked bar), with its box in each scene: the shell animates between the
+/// two boxes. A side without a scene (the sentence depth) has no box.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
+#[serde(deny_unknown_fields)]
+pub struct SharedElement {
+    /// Element id: `glyph`, `headline`, `ledger`, `price`, `bar:<i>`, `fact:<id>`,
+    /// `evidence:<fact>` (`docs/GRAMMAR.md` §18.6).
+    pub id: String,
+    /// Box in the scene before the transition.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub before: Option<crate::scene::PixelRect>,
+    /// Box in the scene after it.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub after: Option<crate::scene::PixelRect>,
+}
+
+/// (R4, §4.6) A depth transition of a capsule (open or close).
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
+#[serde(deny_unknown_fields)]
+pub struct Opening {
+    /// Capsule id.
+    pub capsule: String,
+    /// The finding it presents.
+    pub finding: String,
+    /// Depth before.
+    pub from: OpenDepth,
+    /// Depth after.
+    pub to: OpenDepth,
+    /// What to show at `to`: the presenter's output at that depth (`text`; the card at
+    /// capsule depth; the view and facts at chart and evidence depth).
+    pub presentation: Presentation,
+    /// Frame `[width, height]` the new depth's scene was laid out at, if it has one.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub frame: Option<[u32; 2]>,
+    /// Elements both depths show, by id, with their boxes in each scene.
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub shared: Vec<SharedElement>,
+    /// At evidence depth: per fact, the values or the entitlement they require (the
+    /// `capsule` query's `evidence`, K34).
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub evidence: Vec<EvidenceAccess>,
+}
+
+/// (R4, §4.6) The answer to a pixel gesture or an open/close.
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
+#[serde(deny_unknown_fields)]
+pub struct Interaction {
+    /// What was under the finger (`tap_at`), from the same code as the `hit` query.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub hit: Option<HitInfo>,
+    /// The bar tapped on a chart, with its values (as for `tap`).
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub at: Option<AtBar>,
+    /// The new visible range (`drag`, `pinch`).
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub viewport: Option<Viewport>,
+    /// The depth transition, if the gesture opened or closed a capsule.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub opening: Option<Opening>,
+    /// The connection's view state after the gesture.
+    pub state: ViewState,
 }
 
 /// Where someone wants a person to look, in order.

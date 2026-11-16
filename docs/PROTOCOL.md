@@ -21,6 +21,7 @@ subscribe / unsubscribe           →    ack, sonra notify …
 input      (kaydır, yakınlaştır)  →    result (viewport | at | interaction)
 attend     (dikkat yönlendir)     →    ack (delivered); hedefe notify
 clock      (yalnızca host)        →    (cevap yok; süre aşımları işlenir)
+replay     (R4: oynatma denetimi) →    result (replay)            ya da error   (§21)
 ```
 
 Her mesaj tek bir JSON nesnesidir; türü `"type"` alanıdır. Örnek bir konuşma:
@@ -130,6 +131,8 @@ Protokol taşımadan bağımsızdır. Tanımlı iki taşıma:
 
 Sekiz tür: **Komut, Değişim, Sorgu, Abonelik, Girdi, Öneri, Dikkat, Yetenek.**
 Aşağıda her biri, alanları ve örneğiyle. Alanların tam listesi şemadadır.
+(R4) Barındırıcının yeniden oynatma kaynağına giden **`replay`** denetim mesajı ayrıca
+§21'de; dokümana yazmaz, günlüğe girmez.
 
 ### 4.1 Yetenek — `hello` / `welcome`
 
@@ -872,9 +875,18 @@ iz bırakmaması, 43 geri çekme (kapsül itirazı haklı → `retracted`, karne
 seride `verify_evidence.item` seçicisi (çözüm, `ambiguous`, `schema`) ve `show_finding`
 (R3/E düzeltmeleri). 38–44
 `cargo run -p qp-session --example make_capsule_transcripts -- --write` ile üretilir. **R4 (girdi):**
-`r4-input-*` (orkestratör numaralandırır): piksel dokunma ve isabet, sürükleme ve
+51–55: piksel dokunma ve isabet, sürükleme ve
 kıstırma, açılma/kapama ve ortak öğeler, kanıta inme (yetkili/yetkisiz), bakış durumunun
 günlüğe girmemesi (§4.6.1).
+**R4/T2 (§21):** 49 yeniden oynatma denetimi (`init.replay`: durum, adım, hız, duraklat,
+sürdür, tarihe ve zamana ileri git, izleyicinin `forbidden`'ı, `invalid`/`schema` hataları,
+geri gitmede otoritenin yeniden kurulması, `epoch` 1, bağlantının yeniden `hello`'su), 50
+yeniden oynatma kaynağı olmayan otoritede `unsupported`. `cargo run -p qp-session --example
+make_replay_transcripts -- --write` ile üretilir. Koşucu `init.replay` taşıyan dökümü bir
+yeniden oynatma barındırıcısıyla (`qp_session::ReplayHost`) koşar: süreç içi
+`conform::InProcReplay`, `qp serve` (`init.replay` görünce barındırıcıyı kurar;
+`--no-local-data`), MCP'de `Hub::shared_replay` (`replay_<kind>` araçları). Dökümlerde
+yerel veri hiç okunmaz.
 
 ## 16. Gömme
 
@@ -2053,6 +2065,109 @@ kapsül ya da bar yetkisi yok: `unknown`.
 > barındırıcının gizli anahtarlarıdır; barındırıcı oturumu kurarken `Session::new_with_trust_keys` / `Session::with_provider_and_trust_keys`
 > ile verir (ilk sunucu yorumundan önce; sonradan `set_trust_keys` reddedilir) (belgeye ve günlüğe girmez). Verilmezse otorite herkese açık **demo** anahtarlarını
 > kullanır; bu yalnız sentetik test beslemesi (`init.capsules.flow`) ve dökümler içindir.
+
+## 21. Yeniden oynatma (R4)
+
+Kavramlar `docs/CONCEPTS.md` "Gösterim (R4)" (yeniden oynatma, oynatma saati, oynatma
+konumu, oynatma denetimi); karar K44. Kaynak `crates/qp-source/src/replay.rs`
+(`Replay`), barındırıcı `crates/qp-session/src/replayhost.rs` (`ReplayHost`), şema
+`qp-schema::protocol` (`ClientMsg::Replay`, `ReplayControl`, `ReplayState`,
+`QueryResult::Replay`, `SessionInit.replay` / `ReplayInit`). Tasarım ve ölçüm
+`rounds/R4/experiments/T2.md`.
+
+### 21.1 Kaynak
+
+Geçmiş barlar (yerel gerçek veri `fixtures/local/bars`, K23; yoksa sentetik pazar) canlı
+akış gibi verilir. Her beslemenin kaba barları (ör. `1d`) ve isteğe bağlı **ince** barları
+(ör. `1h`) vardır. Başlangıçtan önceki barlar ilk çözümdür (barındırıcının sağlayıcısı
+tutar, `seq` 0); sonraki her bar §18.4 veri olaylarıyla gelir:
+
+- **ince** (`fine`): barın açılışında `bar` olayı `{o, h: o, l: o, c: o, v: 0}`; her ince
+  barın sonunda birikimli durumun değişen alanlarıyla `patch` (son barın aralığına
+  kıstırılmış, `h` hiç düşmez, `l` hiç yükselmez, `v` hiç azalmaz); son ince adım barı
+  **tam** son haline getirir;
+- **ohlc** (ince veri yok; belirleyici ve **etiketli** bar içi yol): açılış → ilk uç
+  (yükselen barda dip, düşende tepe) → ikinci uç → kapanış, XIST seansına yayılmış;
+  son adım bar;
+- **bar** (`path: false`): tek `bar` olayıyla bütün bar.
+
+Hangi günün hangi yolla kurulduğu durumda sayılır (`days {fine, ohlc, bar}`); sayfa ince
+veri olmayan günü etiketleyebilir.
+
+**Adım:** tek bir sanal zaman. Bir adım o zamandaki bütün beslemelerin olaylarını taşır;
+eşitlikte sıra besleme anahtarıdır (sembol, periyot, besleme). Adım sınırları hızdan
+bağımsızdır. **Oynatma konumu** (`ReplayCursor`): sanal zaman, atılan adım sayısı,
+besleme başına verilen olay sayısı. Olaylar konumun fonksiyonudur.
+
+Sentetik pazar: `ReplayInit.fine = "1h"` ile `qp_source::synthetic_market_hourly` (günlük
+barlar saatlik barlardan toplanır; saatlikler ince barlardır), yoksa `synthetic_market`;
+semboller `SYN01…`. Yerel veri: `<bars>/../symbols.txt` sırasıyla (yoksa alfabetik) ilk
+`instruments` sembol; ince periyot dosyası (`1hour`, `5min`) yoksa o günler `ohlc`.
+Yerel veri istenip bulunamazsa sentetik pazar kullanılır ve durum bunu söyler
+(`synthetic: true`, `note`). Gerçek veri makineden çıkmaz; dökümler yalnız sentetiktir.
+
+### 21.2 Barındırıcı
+
+`SessionInit.replay` (`ReplayInit`, barındırıcı yapılandırması; protokol mesajı değil):
+`source` (`synthetic` | `local`), `instruments` (30), `days` (260), `seed` (1), `interval`
+(`1d`), `fine`, `history` (120 bar) ya da `from_t`, `to_t`, `path` (true), `feed`, `speed`
+(4), `running` (false: duraklatılmış başlar), `entitlements` (boşsa her kişiye `*`),
+`bind_all` (her beslemeye bağlı seri, kimlik sembolün küçük harfi, pencere ilk çözüm),
+`capsules_all` (kapsül motoru her birinde, §20.1). `init.data` ile birlikte verilemez:
+barındırıcı `init.data`'yı yeniden oynatmanın ilk barlarından kurar. Otoritenin ilk saati
+ilk çözümün son barının zamanıdır (`init.clock` yerine).
+
+Her adımda barındırıcı otoriteye önce **saati** (`Session::host_clock`, bir `clock`
+mesajının aynısı; otoritenin saati yoktur, §11), sonra adımın veri olaylarını sırayla
+(`Session::host_data_event`) verir; ortaya çıkan bildirimler bugünkü kurallarla yayılır
+(§15 çıktı sırası). Duvar saati yalnız **ne zaman** adım atılacağını belirler
+(`ReplayHost::pump`): çalışırken hız × geçen süre kadar adım; içerik sanal zamanın
+fonksiyonudur. Aynı veri + aynı denetimler aynı konumlarda (`ReplayHost::controls`:
+`(adım, denetim)` kaydı) → bayt düzeyinde aynı mesaj akışı.
+
+### 21.3 `replay` mesajı
+
+```json
+→ {"type":"replay","id":"r1","control":{"kind":"step","n":12}}
+← {"type":"result","id":"r1","seq":42,"now":1678802400000,"data":{"kind":"replay","replay":{
+    "t":1678802400000,"step":13,"steps":180,"events":26,"from_t":1678690800000,"to_t":1680879600000,
+    "paused":true,"done":false,"speed":8.0,"synthetic":true,"source":"synthetic",
+    "instruments":2,"interval":"1d","fine":"1h","days":{"fine":40,"ohlc":0,"bar":0},"epoch":0}}}
+← … adımların yol açtığı bildirimler (abonelere)
+```
+
+| `control.kind` | Alanlar | Ne yapar |
+|----------------|---------|----------|
+| `status` | — | Durum (değiştirmez). |
+| `pause` | — | Duvar saatiyle ilerlemeyi durdurur (`step`, `seek` çalışır). |
+| `resume` | — | Duvar saatiyle, şimdiki hızla ilerler. |
+| `speed` | `steps_per_s` (`0 < x ≤ 1000`) | Hız: duvar saniyesi başına adım. |
+| `step` | `n` (1; en çok 100000) | Şimdi `n` adım. |
+| `seek` | tam olarak biri: `t` (o ana kadarki her adım), `date` (`YYYY-AA-GG`: borsa saat diliminde o günün başı; o günden hiçbir şey alınmamış), `step` (o kadar adım) | İleri: aradaki adımlar atılır, bildirimleri `result`'tan sonra gelir. **Geri:** otorite başlangıcından yeniden kurulur ve konuma sessizce ilerletilir — yeni otorite (`epoch + 1`, §8.4): bütün bağlantılar kapanır, istemciler yeniden `hello` der; durumda `reset: true`. Kullanıcı yazıları (ör. `set_audience`) yeni otoritede yoktur. |
+
+Cevap her zaman `result` (`kind: "replay"`, `ReplayState`): `t` (sanal zaman = otoritenin
+saati), `step`/`steps`, `events`, `from_t`/`to_t`, `paused`, `done`, `speed`,
+`synthetic`, `source`, `note?`, `instruments`, `interval`, `fine?`, `days`, `epoch`,
+`reset?`. Mesaj dokümana yazmaz, günlüğe girmez; adımların yol açtığı motor girdileri
+(kapsül motoru, geçersizleşmeler) bugünkü gibi günlüktedir.
+
+**Yetki.** `status`: `read` izni olan her rol. Zaman çizelgesini değiştiren denetimler
+(`pause`, `resume`, `speed`, `step`, `seek`): yalnız `host` ve `owner` rolleri — zaman
+çizelgesi bütün okuyucuların ortak dünyasıdır; izleyici (`viewer`), öneren (`proposer`,
+ajan), `editor`, `feed` için `forbidden`. Gösterimde tek kullanıcı `owner`dır; aynı oturumu
+süren ajan aynı kimlikle bağlanır.
+
+**Hatalar.** Kaynağı olmayan otorite: `unsupported`. Geçersiz alan: `invalid` (`path`:
+`/control/steps_per_s`, `/control/n`, `/control/date`, `/control`). Bilinmeyen denetim ya
+da tür hatası: otoritenin `schema` hatası. `hello`'dan önce: `handshake`.
+
+**Taşımalar.** Süreç içi `ReplayHost::handle_raw`; `qp serve --init` (`init.replay` varsa
+barındırıcı; çalışırken adımlar duvar saatiyle atılır ve bildirimleri girdi satırından
+bağımsız yazılır); MCP: `replay` ve şemadan üretilen `replay_status`, `replay_pause`,
+`replay_resume`, `replay_speed`, `replay_step`, `replay_seek` araçları. CLI:
+`qp replay` (yerel ya da sentetik, periyot, ince periyot, başlangıç/bitiş tarihi, adım
+sayısı, kayıtlı denetimler; satır akışı; iki koşu bayt eşit).
+
 
 ## Ek A — Eski `Command` tipi
 

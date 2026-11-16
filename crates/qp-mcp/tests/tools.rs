@@ -30,6 +30,11 @@ fn every_op_and_query_has_a_tool_in_schema_order() {
     assert!(ops.len() >= 20 && queries.len() >= 9);
     let mut expected: Vec<String> = ops.iter().map(|o| format!("op_{o}")).collect();
     expected.extend(queries.iter().map(|q| format!("query_{q}")));
+    expected.extend(
+        tags("ReplayControl", "kind")
+            .iter()
+            .map(|k| format!("replay_{k}")),
+    );
     expected.extend(GENERIC.iter().map(|g| (*g).to_owned()));
     let names: Vec<&str> = tools::tools().iter().map(|t| t.name.as_str()).collect();
     assert_eq!(names, expected);
@@ -49,7 +54,7 @@ fn every_op_and_query_has_a_tool_in_schema_order() {
                     assert!(props.contains_key(k), "{} lacks {k}", t.name);
                 }
             }
-            ToolKind::Query(_) => assert!(!props.contains_key("kind")),
+            ToolKind::Query(_) | ToolKind::Replay(_) => assert!(!props.contains_key("kind")),
             ToolKind::Message(_) => {
                 assert!(!props.contains_key("type"));
                 let req = t.input_schema["required"].as_array().unwrap();
@@ -328,9 +333,22 @@ fn grammar_ops_and_hit_are_generated_tools() {
     for k in r3 {
         assert!(names.contains(&k), "missing tool {k}");
     }
+    // R4/T2 (§21): one tool per replay control and the generic `replay`.
+    let r4 = [
+        "replay_status",
+        "replay_pause",
+        "replay_resume",
+        "replay_speed",
+        "replay_step",
+        "replay_seek",
+        "replay",
+    ];
+    for k in r4 {
+        assert!(names.contains(&k), "missing tool {k}");
+    }
     assert_eq!(
         names.len(),
-        37 + grammar.len() + 1 + 2 + r3.len(),
+        37 + grammar.len() + 1 + 2 + r3.len() + r4.len(),
         "{names:?}"
     );
 }

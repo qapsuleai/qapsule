@@ -1,0 +1,125 @@
+{
+  "covers": [
+    "replay",
+    "unsupported"
+  ],
+  "description": "R4 (§21): an authority without `init.replay` has no replay source; a `replay` message is `unsupported`, a malformed one a schema error.",
+  "final": {
+    "log_len": 0
+  },
+  "init": {
+    "clock": 1700000000000,
+    "document": "fixtures/protocol/docs/thyao.json",
+    "epoch": 0,
+    "principals": [
+      {
+        "author": {
+          "kind": "engine",
+          "name": "host",
+          "version": "0"
+        },
+        "id": "host",
+        "role": "host"
+      },
+      {
+        "author": {
+          "kind": "human",
+          "name": "Arkın"
+        },
+        "id": "arkin",
+        "role": "owner"
+      },
+      {
+        "author": {
+          "kind": "agent",
+          "name": "scout"
+        },
+        "id": "scout",
+        "role": "proposer"
+      },
+      {
+        "author": {
+          "kind": "human",
+          "name": "Guest"
+        },
+        "id": "guest",
+        "role": "viewer"
+      }
+    ]
+  },
+  "name": "50-replay-unsupported",
+  "steps": [
+    {
+      "expect": [
+        {
+          "conn": "a",
+          "msg": {
+            "epoch": 0,
+            "seq": 0,
+            "type": "welcome"
+          }
+        }
+      ],
+      "send": {
+        "conn": "a",
+        "msg": {
+          "principal": "arkin",
+          "protocol": "qp/0",
+          "surface": {
+            "kind": "phone"
+          },
+          "type": "hello"
+        }
+      }
+    },
+    {
+      "expect": [
+        {
+          "conn": "a",
+          "msg": {
+            "error": {
+              "code": "unsupported",
+              "hint": "Replay controls work on a session started with `init.replay` (docs/PROTOCOL.md §21).",
+              "message": "this authority has no replay source"
+            },
+            "id": "r1",
+            "type": "error"
+          }
+        }
+      ],
+      "send": {
+        "conn": "a",
+        "msg": {
+          "control": {
+            "kind": "status"
+          },
+          "id": "r1",
+          "type": "replay"
+        }
+      }
+    },
+    {
+      "expect": [
+        {
+          "conn": "a",
+          "msg": {
+            "error": {
+              "code": "schema",
+              "expected": [
+                "integer"
+              ],
+              "message": "invalid type: expected integer, got string",
+              "path": "/control/n"
+            },
+            "id": "r2",
+            "type": "error"
+          }
+        }
+      ],
+      "send_raw": {
+        "conn": "a",
+        "line": "{\"control\":{\"kind\":\"step\",\"n\":\"many\"},\"id\":\"r2\",\"type\":\"replay\"}"
+      }
+    }
+  ]
+}

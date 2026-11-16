@@ -141,6 +141,130 @@ pub enum ClientMsg {
         #[serde(default, skip_serializing_if = "Option::is_none")]
         digest: Option<String>,
     },
+    /// (R4, §21) A control of the host's replay source: speed, pause, resume, step, seek,
+    /// status. Answered by the replay host with a `result` (`kind: "replay"`); an
+    /// authority without a replay source answers `unsupported`. Never written to the
+    /// document or the log. `status` needs `read`; every other control the role `host` or
+    /// `owner`.
+    Replay {
+        /// Client-chosen request id.
+        id: String,
+        /// What to do.
+        control: ReplayControl,
+    },
+}
+
+/// (R4, §21) A replay control. A **step** is one distinct virtual time of the replay
+/// (every feed's events at that time); step boundaries do not depend on the speed.
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
+#[serde(tag = "kind", rename_all = "snake_case", deny_unknown_fields)]
+pub enum ReplayControl {
+    /// Where the replay is (no change).
+    Status,
+    /// Stop advancing with the wall clock (explicit `step` and `seek` still work).
+    Pause,
+    /// Advance with the wall clock again, at the current speed.
+    Resume,
+    /// Set the speed: steps per wall-clock second (`0 < steps_per_s <= 1000`).
+    Speed {
+        /// Steps per second.
+        steps_per_s: f64,
+    },
+    /// Take `n` steps now (default 1, at most 100000); the notifications they cause
+    /// follow the `result`.
+    Step {
+        /// Number of steps.
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        n: Option<u32>,
+    },
+    /// Go to a position: exactly one of `t` (every step at or before `t` taken), `date`
+    /// (`YYYY-MM-DD`: the start of that day in the exchange time zone, nothing of that
+    /// day taken) or `step` (that many steps taken). Forward: the steps in between are
+    /// taken and their notifications follow the `result`. Backward: the authority is
+    /// rebuilt from its init and advanced silently to the position (a new authority,
+    /// `epoch + 1`, §8.4): every connection is closed and must send `hello` again.
+    Seek {
+        /// Virtual time, epoch ms.
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        t: Option<TimestampMs>,
+        /// A date in the exchange time zone.
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        date: Option<String>,
+        /// A step count.
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        step: Option<u64>,
+    },
+}
+
+/// (R4, §21) Where the replay data comes from.
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
+#[serde(rename_all = "snake_case")]
+pub enum ReplaySourceKind {
+    /// The deterministic synthetic market (`qp_source::synthetic_market`).
+    #[default]
+    Synthetic,
+    /// Real bars fetched to the host's machine (`fixtures/local/`, K23).
+    Local,
+}
+
+/// (R4, §21) Replayed days by how a bar was built inside the day.
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
+#[serde(deny_unknown_fields)]
+pub struct ReplayDays {
+    /// From finer bars (e.g. hourly bars of a daily feed).
+    pub fine: u64,
+    /// On the labelled synthetic path open → extreme → extreme → close (no fine data).
+    pub ohlc: u64,
+    /// As one whole bar.
+    pub bar: u64,
+}
+
+/// (R4, §21) The state of a replay (answer to every `replay` control).
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
+#[serde(deny_unknown_fields)]
+pub struct ReplayState {
+    /// Virtual time (the authority's clock): the time of the last step taken.
+    pub t: TimestampMs,
+    /// Steps taken.
+    pub step: u64,
+    /// Steps of the whole replay.
+    pub steps: u64,
+    /// Data events delivered so far.
+    pub events: u64,
+    /// Time of the first step.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub from_t: Option<TimestampMs>,
+    /// Time of the last step.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub to_t: Option<TimestampMs>,
+    /// Not advancing with the wall clock.
+    pub paused: bool,
+    /// Every step taken.
+    pub done: bool,
+    /// Steps per wall-clock second.
+    pub speed: f64,
+    /// True when the data is synthetic (a page must say so on screen).
+    pub synthetic: bool,
+    /// Where the data comes from.
+    pub source: ReplaySourceKind,
+    /// Why the source differs from the one asked for (e.g. no local data).
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub note: Option<String>,
+    /// Number of instruments (feeds).
+    pub instruments: u32,
+    /// Bar interval of the feeds.
+    pub interval: String,
+    /// Interval of the finer bars that move a bar inside its day, if any.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub fine: Option<String>,
+    /// Replayed days by how they were built.
+    pub days: ReplayDays,
+    /// Authority epoch (grows with every backward seek).
+    pub epoch: u64,
+    /// True when this control rebuilt the authority (a backward seek): every connection
+    /// was closed.
+    #[serde(default, skip_serializing_if = "is_false")]
+    pub reset: bool,
 }
 
 /// A message from the authority to a client.
@@ -2228,6 +2352,11 @@ pub enum QueryResult {
         #[serde(default, skip_serializing_if = "Option::is_none")]
         evidence: Option<ClaimEvidence>,
     },
+    /// Answer to a `replay` message (R4, §21).
+    Replay {
+        /// The replay's state after the control.
+        replay: ReplayState,
+    },
 }
 
 /// The verdict on a `dispute` (R3, §19.9).
@@ -3189,6 +3318,72 @@ pub struct SessionInit {
     /// licensed flow. Absent: no engine (documents and transcripts before R3).
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub capsules: Option<CapsuleInit>,
+    /// (R4, §21) A replay source: the authority runs under a replay host that serves
+    /// `init.data` from the replay's initial bars, gives the clock and the data events,
+    /// and answers `replay` messages. Absent: no replay (`replay` → `unsupported`).
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub replay: Option<ReplayInit>,
+}
+
+/// The replay source of a session (R4, §21; host configuration, not a protocol
+/// message). Paths never come from here: local data is read from the host's own
+/// directory (`qp_source::local_bars_dir`).
+#[derive(Debug, Clone, Default, PartialEq, Serialize, Deserialize, JsonSchema)]
+#[serde(deny_unknown_fields)]
+pub struct ReplayInit {
+    /// `synthetic` (default) or `local`; `local` without data falls back to the
+    /// synthetic market and says so (`ReplayState::note`).
+    #[serde(default)]
+    pub source: ReplaySourceKind,
+    /// Number of instruments (default 30).
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub instruments: Option<u32>,
+    /// Synthetic market: trading days (default 260).
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub days: Option<u32>,
+    /// Synthetic market: seed (default 1).
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub seed: Option<u64>,
+    /// Feed interval (default `1d`; the synthetic market has `1d` only).
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub interval: Option<String>,
+    /// Finer interval that moves a bar inside its day (e.g. `1h`); absent: none (the
+    /// labelled OHLC path, or whole bars with `path: false`).
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub fine: Option<String>,
+    /// Bars of each feed resolved before the first replayed bar (default 120).
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub history: Option<u32>,
+    /// First replayed bar: the first with `t >= from_t` (overrides `history`).
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub from_t: Option<TimestampMs>,
+    /// Last replayed bar: `t <= to_t`.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub to_t: Option<TimestampMs>,
+    /// Without fine data: the OHLC path (default true) or one whole bar per day.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub path: Option<bool>,
+    /// Named feed of the replay's feed keys (default: none, the host's default feed).
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub feed: Option<String>,
+    /// Initial speed, steps per wall-clock second (default 4).
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub speed: Option<f64>,
+    /// Start running with the wall clock (default false: paused).
+    #[serde(default, skip_serializing_if = "is_false")]
+    pub running: bool,
+    /// Principal id -> data entitlements on the replay's feeds (as `InitData`);
+    /// empty: every principal is entitled to every feed (`*`).
+    #[serde(default, skip_serializing_if = "BTreeMap::is_empty")]
+    pub entitlements: BTreeMap<String, Vec<String>>,
+    /// Add a bound series (id: the symbol in lower case, window: the history) for every
+    /// replay feed no series of the document binds.
+    #[serde(default, skip_serializing_if = "is_false")]
+    pub bind_all: bool,
+    /// Run the capsule engine (§20) on every bound series of a replay feed (added to
+    /// `capsules.series`).
+    #[serde(default, skip_serializing_if = "is_false")]
+    pub capsules_all: bool,
 }
 
 /// The authority's capsule engine (R3, §20; host configuration).

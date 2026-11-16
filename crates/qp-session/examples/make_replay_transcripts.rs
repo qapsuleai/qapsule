@@ -112,7 +112,13 @@ fn run(
     let mut out_steps = Vec::new();
     for (conn, m, note) in steps {
         let lines = h.send(&conn, &m.to_string());
-        let mut step = json!({"send": {"conn": conn, "msg": m}});
+        // A message the schema rejects goes as a raw line (`send_raw`, §15).
+        let typed = serde_json::from_value::<qp_schema::protocol::ClientMsg>(m.clone()).is_ok();
+        let mut step = if typed {
+            json!({"send": {"conn": conn, "msg": m}})
+        } else {
+            json!({"send_raw": {"conn": conn, "line": m.to_string()}})
+        };
         if let Some(n) = note {
             step["note"] = json!(n);
         }

@@ -116,16 +116,9 @@
           }
         }
       ],
-      "send": {
+      "send_raw": {
         "conn": "a",
-        "msg": {
-          "control": {
-            "kind": "step",
-            "n": "many"
-          },
-          "id": "r2",
-          "type": "replay"
-        }
+        "line": "{\"control\":{\"kind\":\"step\",\"n\":\"many\"},\"id\":\"r2\",\"type\":\"replay\"}"
       }
     }
   ]

@@ -1158,15 +1158,9 @@
         }
       ],
       "note": "Not a control: the authority's schema error.",
-      "send": {
+      "send_raw": {
         "conn": "a",
-        "msg": {
-          "control": {
-            "kind": "rewind"
-          },
-          "id": "r13",
-          "type": "replay"
-        }
+        "line": "{\"control\":{\"kind\":\"rewind\"},\"id\":\"r13\",\"type\":\"replay\"}"
       }
     },
     {

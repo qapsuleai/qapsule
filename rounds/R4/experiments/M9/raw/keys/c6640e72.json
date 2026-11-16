@@ -1,0 +1,80 @@
+{
+  "experiment": "m9",
+  "design": "vakiro",
+  "g1": [
+    "SYN09 yukarı"
+  ],
+  "instruments": [
+    "SYN02",
+    "SYN03",
+    "SYN04",
+    "SYN05",
+    "SYN09",
+    "SYN12",
+    "SYN22",
+    "SYN25",
+    "SYN26",
+    "SYN28"
+  ],
+  "g2_which": "SYN09",
+  "g2_what": "tutmadı, geçersiz oldu",
+  "g3": [
+    "SV",
+    "NP"
+  ],
+  "labels": {
+    "cap.SYN02.breakout.down.126": "KS",
+    "cap.SYN02.breakout.down.127": "SM",
+    "cap.SYN02.breakout.up.48": "VL",
+    "cap.SYN02.breakout.up.55": "SZ",
+    "cap.SYN02.continuation.up.78": "MZ",
+    "cap.SYN02.squeeze.neutral.184": "NM",
+    "cap.SYN03.breakout.up.170": "LR",
+    "cap.SYN03.continuation.down.108": "TZ",
+    "cap.SYN04.breakout.up.105": "TS",
+    "cap.SYN04.breakout.up.23": "TV",
+    "cap.SYN04.breakout.up.97": "LT",
+    "cap.SYN05.breakout.up.127": "VS",
+    "cap.SYN05.breakout.up.174": "KZ",
+    "cap.SYN09.breakout.down.127": "RK",
+    "cap.SYN09.breakout.up.143": "PZ",
+    "cap.SYN09.flow.up.183": "ZT",
+    "cap.SYN12.breakout.down.107": "SL",
+    "cap.SYN12.breakout.down.129": "TN",
+    "cap.SYN12.breakout.up.150": "RN",
+    "cap.SYN12.breakout.up.72": "NK",
+    "cap.SYN12.flow.up.35": "MV",
+    "cap.SYN22.breakout.down.90": "VK",
+    "cap.SYN22.continuation.down.108": "NP",
+    "cap.SYN22.continuation.down.90": "LM",
+    "cap.SYN25.breakout.down.167": "VM",
+    "cap.SYN25.breakout.down.170": "NV",
+    "cap.SYN25.breakout.down.26": "SV",
+    "cap.SYN25.breakout.down.93": "NT",
+    "cap.SYN25.continuation.down.76": "MP",
+    "cap.SYN25.squeeze.neutral.147": "SN",
+    "cap.SYN26.breakout.down.175": "KM",
+    "cap.SYN26.breakout.down.46": "KN",
+    "cap.SYN26.breakout.down.47": "ZL",
+    "cap.SYN26.breakout.down.51": "MR",
+    "cap.SYN26.flow.down.27": "RM",
+    "cap.SYN26.reversal.up.73": "LZ",
+    "cap.SYN28.breakout.up.177": "PT",
+    "cap.SYN28.continuation.down.118": "ZN",
+    "cap.SYN28.continuation.down.166": "NS",
+    "cap.SYN28.continuation.up.49": "MS"
+  },
+  "needed": {
+    "G1": [
+      "ZT"
+    ],
+    "G2": [
+      "ZT"
+    ],
+    "G3": [
+      "SV",
+      "NP"
+    ]
+  },
+  "rules": 4
+}

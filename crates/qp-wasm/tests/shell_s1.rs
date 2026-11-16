@@ -43,7 +43,7 @@ fn sent_kind<'a>(core: &'a ShellCore, op: &str) -> Vec<&'a Value> {
 }
 
 #[test]
-fn the_presentation_asks_for_the_m9_m11_picks_and_the_page_overrides_them() {
+fn the_presentation_asks_for_the_m8_m11_picks_and_the_page_overrides_them() {
     let core = page(&mut parity_host(), |_| {});
     let look = serde_json::to_value(core.look()).unwrap();
     assert_eq!(look["feed"], qp_grammar::feeds::PRESENTED_FEED, "{look}");
@@ -55,17 +55,15 @@ fn the_presentation_asks_for_the_m9_m11_picks_and_the_page_overrides_them() {
         look["outcome"],
         qp_grammar::glyph::outcome::PRESENTED_OUTCOME
     );
-    assert!(
-        look.get("face").is_none(),
-        "the face default is M8's: {look}"
-    );
+    // (R4/S2) the face is M8's pick.
+    assert_eq!(look["face"], qp_grammar::faces::PRESENTED_FACE, "{look}");
     // The page's own choice (URL) is sent after the defaults and wins; `r3` is the
     // protocol default, so the fields are absent again.
     let core = page(&mut parity_host(), |c| {
-        c.set_look(&json!({"feed":"r3","transition":"r3","outcome":"r3"}));
+        c.set_look(&json!({"face":"r3","feed":"r3","transition":"r3","outcome":"r3"}));
     });
     let look = serde_json::to_value(core.look()).unwrap();
-    for k in ["feed", "transition", "outcome"] {
+    for k in ["face", "feed", "transition", "outcome"] {
         assert!(look.get(k).is_none(), "{k}: {look}");
     }
 }

@@ -520,12 +520,13 @@ impl ShellCore {
 
     /// (R4/S1) The `style` gesture of the presentation's defaults: feed layout, depth
     /// transition and outcome mark picked in M9–M11 (`qp_grammar::feeds::PRESENTED_FEED`,
-    /// `transitions::PRESENTED_TRANSITION`, `glyph::outcome::PRESENTED_OUTCOME`). The
-    /// protocol's own defaults (a bare connection) stay `r3`; the face is not set here
-    /// (M8 is still open).
+    /// `transitions::PRESENTED_TRANSITION`, `glyph::outcome::PRESENTED_OUTCOME`) and the
+    /// face picked in M8 (`qp_grammar::faces::PRESENTED_FACE`, R4/S2). The protocol's own
+    /// defaults (a bare connection) stay `r3`.
     #[must_use]
     pub fn presented_look() -> Value {
         json!({"kind":"style",
+               "face": qp_grammar::faces::PRESENTED_FACE,
                "feed": qp_grammar::feeds::PRESENTED_FEED,
                "transition": qp_grammar::transitions::PRESENTED_TRANSITION,
                "outcome": qp_grammar::glyph::outcome::PRESENTED_OUTCOME})

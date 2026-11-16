@@ -712,20 +712,16 @@ fn chart_view_r3(
 // R4/T5: capsule face designs (`docs/PROTOCOL.md` §4.6.2)
 // ---------------------------------------------------------------------------
 
-/// Face design names a connection may choose (`style` gesture, `docs/PROTOCOL.md`
-/// §4.6.2); the first is the default. M8 adds its alternatives here (a name and a branch
-/// in [`face_view`]); the opening rule and the shared elements do not change.
-pub const FACES: [&str; 1] = ["card"];
-
-/// Whether `name` is a known face design.
+/// Whether `name` is a known face design (`crate::faces`, R4/H-M8910: the registry with
+/// each design's height; `card` is the earlier name of `r3`).
 #[must_use]
 pub fn is_face(name: &str) -> bool {
-    FACES.contains(&name)
+    crate::faces::is_face(name)
 }
 
 /// The face of a capsule in the feed (open depth `sentence`) by face design `face`
-/// (`None`: the default): today only `card`, the §18.4 capsule card
-/// ([`capsule_view`] at `max_points`).
+/// (`None`: the default, `r3` = the §18.4 capsule card [`capsule_view`] at `max_points`).
+/// The designs are registered in [`crate::faces::FACES`].
 ///
 /// # Errors
 /// An unknown face name (`invalid`, `/face`) or the design's own errors.
@@ -736,14 +732,7 @@ pub fn face_view(
     p: &dyn DataProvider,
     id: &str,
 ) -> Result<View, GrammarError> {
-    match face.unwrap_or(FACES[0]) {
-        "card" => capsule_view(finding, max_points, p, id),
-        other => Err(GrammarError::new(
-            ErrorKind::Invalid,
-            "/face",
-            format!("unknown face `{other}` (known: {})", FACES.join(", ")),
-        )),
-    }
+    crate::faces::face_view(face, finding, max_points, p, id)
 }
 
 // ---------------------------------------------------------------------------

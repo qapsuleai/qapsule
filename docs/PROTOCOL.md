@@ -365,17 +365,26 @@ aynı adlarla aynı sahneyi derler.
 
 | Alan | Değerler | Varsayılan |
 |------|----------|------------|
-| `face` | `qp_grammar::depth::FACES` (bugün `card`: §18.4 kapsül kartı) | `card` |
+| `face` | `qp_grammar::faces::FACES` (`r3`: §18.4 kapsül kartı, 240 px; `card` eski adı) | `r3` |
 | `alphabet` | `qp_grammar::glyph::ALPHABETS` (`siluet`, `rozet`) | `siluet` (ürünün) |
 | `theme` | `dark`, `light`; `view`: görünümün kendisi | `view` |
+| `feed` (R4/H-M8910) | `qp_grammar::feeds::LAYOUTS` (akış düzeni; `r3`: `capsules` sırası) | `r3` |
+| `transition` (R4/H-M8910) | `qp_grammar::transitions::TRANSITIONS` (açılma geçişi; `r3`: T4 ortak öğeleri, doğrusal ara kare) | `r3` |
+| `outcome` (R4/H-M8910) | `qp_grammar::glyph::outcome::STYLES` (sonuç işareti, M11) | `r3` |
+| `seen` (R4/H-M8910) | son bakış zamanı (ms); `0` siler | yok |
 
 - Verilmeyen alan değişmez; bilinmeyen ad `invalid` (`/gesture/face`, `/gesture/alphabet`,
   `/gesture/theme`, `expected` bilinen adlar). Doğrulama her şeyden önce: hatalı istek hiçbir
   şeyi değiştirmez.
 - Cevap `interaction`; `state` (`ViewState`) yeni `face`, `alphabet`, `theme` alanlarını taşır
   (varsayılandaysa alan yoktur: eski cevaplar bayt eşit).
-- M8 yüz alternatifleri `FACES`'e ad ve `depth::face_view`'a bir kol olarak eklenir; açılma
-  kuralı ve ortak öğeler değişmez. Alfabe değişimi derleyici seçeneğidir
+- M8 yüz alternatifleri `qp_grammar::faces` kaydına bir satırdır (ad, **yükseklik**, görünüm
+  kuralı); yüz kendi yüksekliğini bildirir, kabuk onu çekirdekten alır. M9 akış düzenleri
+  `qp_grammar::feeds`, M10 geçişleri `qp_grammar::transitions` kaydındadır: düzen kabuğun
+  dizeceği satırları (kapsül, grup başlığı metni, kısa işaret) verir; geçiş `Opening.shared`'ı
+  ve ara kareleri (öğe başına kaynak sahne, kutu, opaklık; yeni sahnenin opaklığı) verir.
+  Varsayılanlarda (`r3`) cevaplar ve dökümler bayt eşittir. Kullanım ve ölçüm:
+  `rounds/R4/experiments/harness/m8910/README.md`. Alfabe değişimi derleyici seçeneğidir
   (`CompileOptions::alphabet`); ürünün alfabesi (`glyph::alphabet()`) değişmez.
 - `rozet` R3/M1 deneyinden aynen taşındı; `validity` kanalı yoktur (K42: "artık geçerli
   değil" yalnız `siluet`'te işarette görünür; insan testi `rozet`'i seçerse eklenmeli).

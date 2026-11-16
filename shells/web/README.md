@@ -34,7 +34,8 @@ metni bize iletin.
 - **Oynatma çubuğu:** ▶/❚❚, +1 adım, hız, tarihe (`YYYY-AA-GG`) ya da adım numarasına git.
   Geri gitmek otoriteyi baştan kurar; ayarlardaki izleme listesi ve pozisyonlar silinir.
 - **Ayarlar:** dil (TR/EN), tema, hassasiyet, işaret alfabesi (`siluet`/`rozet`), yüz
-  tasarımı, "veri yetkisi yok" kipi (kanıtta "şu yetkiyi gerektirir"), izleme listesi ve
+  tasarımı, akış düzeni, geçiş, sonuç işareti (seçenekler çekirdeğin kayıtlarından; URL ile de:
+  `?face= &feed= &transition= &outcome=`), "veri yetkisi yok" kipi (kanıtta "şu yetkiyi gerektirir"), izleme listesi ve
   pozisyonlar (**Uygula**).
 - **Ölçüm:** kare süresi (durağan, kaydırırken, sürüklerken), tik maliyeti, açılış
   zamanları, paket boyutu; kopyalanabilir JSON özet.

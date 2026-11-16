@@ -17,6 +17,8 @@ pub mod depth;
 pub mod detmath;
 mod draw;
 pub mod error;
+pub mod faces;
+pub mod feeds;
 mod frame;
 pub mod gesture;
 pub mod glyph;
@@ -24,6 +26,7 @@ mod layer;
 pub mod provider;
 pub mod scale;
 pub mod theme;
+pub mod transitions;
 
 pub use compile::{compile, CompileOptions};
 pub use error::{ErrorKind, GrammarError};

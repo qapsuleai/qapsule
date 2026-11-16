@@ -21,7 +21,7 @@ use qp_schema::protocol::{
 use qp_session::{ReplayHost, Replica};
 use serde_json::{json, Value};
 
-use crate::shell::{face_scene, open_scene, scene_digest, ShellCore, FACE_HEIGHT, PHONE_FRAME};
+use crate::shell::{face_scene, open_scene, scene_digest, ShellCore, PHONE_FRAME};
 
 const CONN: &str = "w";
 
@@ -111,13 +111,14 @@ impl Agent {
         let look = self.look.clone();
         let mp = self.max_points;
         let items = self.feed.clone();
+        let fh = qp_grammar::faces::height(look.face.as_deref());
         let faces: Vec<Value> = items
             .iter()
             .map(|it| {
                 let d = self
                     .replica
                     .session_mut()
-                    .and_then(|s| face_scene(s, it, &look, mp, PHONE_FRAME.0, FACE_HEIGHT))
+                    .and_then(|s| face_scene(s, it, &look, mp, PHONE_FRAME.0, fh))
                     .map(|s| scene_digest(&s));
                 json!({"id": it.id, "digest": d})
             })
@@ -171,7 +172,7 @@ pub fn shell_less(host: &mut ReplayHost, principal: &str, lang: &str, script: &[
         &json!({"type":"subscribe","id":"feed-topic","topic":{"kind":"capsules"}}),
     );
     let mut out = serde_json::Map::new();
-    let (fw, fh) = (PHONE_FRAME.0, FACE_HEIGHT);
+    let fw = PHONE_FRAME.0;
     let (sw, sh) = PHONE_FRAME;
     for step in script {
         if let Some(n) = step.get("seek_step").and_then(Value::as_u64) {
@@ -188,6 +189,7 @@ pub fn shell_less(host: &mut ReplayHost, principal: &str, lang: &str, script: &[
             a.refresh_feed(host);
             let i = usize::try_from(t["index"].as_u64().unwrap_or(0)).unwrap_or(0);
             let cap = a.feed[i].id.clone();
+            let fh = qp_grammar::faces::height(a.look.face.as_deref());
             a.input(
                 host,
                 json!({"kind":"tap_at","x":f(t,"x"),"y":f(t,"y"),"width":fw,"height":fh,
@@ -221,7 +223,7 @@ pub fn shell_less(host: &mut ReplayHost, principal: &str, lang: &str, script: &[
             );
         } else if let Some(t) = step.get("style") {
             let mut g = json!({"kind":"style"});
-            for k in ["face", "alphabet", "theme"] {
+            for k in ["face", "alphabet", "theme", "feed", "transition", "outcome"] {
                 if let Some(v) = t.get(k) {
                     g[k] = v.clone();
                 }
@@ -311,8 +313,7 @@ pub fn with_core(host: &mut ReplayHost, principal: &str, lang: &str, script: &[V
             core.pointer("scene", "up", 1, 150.0, 150.0);
             feed_core(&mut core, host, Vec::new());
         } else if let Some(t) = step.get("style") {
-            let g = |k: &str| t.get(k).and_then(Value::as_str).unwrap_or("").to_owned();
-            core.set_style(&g("face"), &g("alphabet"), &g("theme"));
+            core.set_look(t);
             feed_core(&mut core, host, Vec::new());
         } else if step.get("back").is_some() {
             core.back();

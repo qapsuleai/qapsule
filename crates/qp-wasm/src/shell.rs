@@ -28,9 +28,13 @@ use qp_schema::{Bar, Capsule, Fact, Finding, Point, View};
 use qp_session::{Replica, Session};
 use serde_json::{json, Value};
 
-/// Face frame height the shell lays faces out at (reported with every face gesture; the
-/// authority's own default is 140, too small for the §18.4 card M8 will replace).
+/// Face frame height of the default face design (`r3`, 240 CSS px). (R4/H-M8910) The
+/// height a face is laid out at is the design's own (`qp_grammar::faces::height`), read
+/// by [`ShellCore::face_size_json`]; the shell never computes it. Reported with every face
+/// gesture (the authority's own default is 140).
 pub const FACE_HEIGHT: u32 = 240;
+/// Largest device scale the core paints at (HiDPI).
+pub const MAX_SCALE: u32 = 3;
 /// Phone frame (`screen`'s surface frame for phones).
 pub const PHONE_FRAME: (u32, u32) = (390, 300);
 /// Capsules asked for per feed query.
@@ -120,6 +124,7 @@ fn options(look: &ViewState, w: u32, h: u32, range: Option<(u64, u64)>) -> Compi
     o.range = range;
     o.theme.clone_from(&look.theme);
     o.alphabet.clone_from(&look.alphabet);
+    o.outcome.clone_from(&look.outcome);
     o
 }
 
@@ -332,6 +337,10 @@ pub struct ShellCore {
     version: u64,
     /// Every message sent (for the record and the parity check).
     sent: Vec<Value>,
+    /// (R4/H-M8910) Device scale the scenes are painted at (1: CSS px).
+    scale: u32,
+    /// (R4/H-M8910) Start (shell timestamp, ms) of the running transition's animation.
+    trans_t0: Option<f64>,
 }
 
 impl std::fmt::Debug for ShellCore {
@@ -413,7 +422,10 @@ impl ShellCore {
             asked: BTreeMap::new(),
             error: None,
             frames: BTreeMap::from([
-                ("face".to_owned(), (PHONE_FRAME.0, FACE_HEIGHT)),
+                (
+                    "face".to_owned(),
+                    (PHONE_FRAME.0, qp_grammar::faces::height(None)),
+                ),
                 ("scene".to_owned(), PHONE_FRAME),
             ]),
             gesture: None,
@@ -422,6 +434,8 @@ impl ShellCore {
             scene_shown: None,
             version: 0,
             sent: Vec::new(),
+            scale: 1,
+            trans_t0: None,
         };
         me.push(json!({"type":"hello","protocol":"qp/0","principal":principal,
             "surface":{"kind":"phone","screen":[390,844],"input":["touch"],"lang":lang_name(lang)}}));
@@ -511,6 +525,21 @@ impl ShellCore {
                         "theme":self.look.theme.clone().unwrap_or_else(|| "view".to_owned())});
                     self.ask("in", Asked::Input, json!({"type":"input","gesture":st}));
                 }
+                // (R4/H-M8910) The other remembered settings, only when one is set (the
+                // message above stays byte-identical for the T5 settings).
+                let mut more = json!({"kind":"style"});
+                for (k, v) in [
+                    ("feed", &self.look.feed),
+                    ("transition", &self.look.transition),
+                    ("outcome", &self.look.outcome),
+                ] {
+                    if let Some(v) = v {
+                        more[k] = json!(v);
+                    }
+                }
+                if more.as_object().is_some_and(|o| o.len() > 1) {
+                    self.ask("in", Asked::Input, json!({"type":"input","gesture":more}));
+                }
                 ch["status"] = json!(true);
             }
             ServerMsg::Result { id, data, .. } => {
@@ -523,7 +552,16 @@ impl ShellCore {
                     }
                     (Some(Asked::Input), QueryResult::Interaction { interaction }) => {
                         self.look = interaction.state.clone();
+                        // (R4/H-M8910) The face design states its height.
+                        let fh = qp_grammar::faces::height(self.look.face.as_deref());
+                        if let Some(f) = self.frames.get_mut("face") {
+                            if f.1 != fh {
+                                f.1 = fh;
+                                self.face_shown.clear();
+                            }
+                        }
                         if let Some(o) = &interaction.opening {
+                            self.trans_t0 = None;
                             self.shared_from = depth_name(o.from).to_owned();
                             self.shared.clone_from(&o.shared);
                             if o.from == OpenDepth::Sentence {
@@ -613,20 +651,123 @@ impl ShellCore {
 
     // --- what to show --------------------------------------------------------
 
-    /// The feed as the authority ordered it: `[{id, text, scene}]` — `text` is the
-    /// reader's sentence (shown as text when there is no face scene).
+    /// The feed rows, top to bottom, by the connection's feed layout (`look.feed`,
+    /// `qp_grammar::feeds`; `r3`: the authority's `capsules` order): a capsule row is
+    /// `{id, target, text, scene, relevant, mark?}` — `text` is the reader's sentence (shown
+    /// as text when there is no face scene), `mark` the layout's short mark; a layout row
+    /// is `{header}` (its text, written by the layout).
     pub fn feed_json(&mut self) -> Value {
-        let out: Vec<Value> = self
+        let lang = self.lang;
+        let now = self.replay.as_ref().map(|r| r.t);
+        let fresh: Vec<bool> = self
             .feed
             .iter()
-            .map(|it| {
-                // A face scene needs the reader's own bars of the capsule's series.
-                let has = self.replica.bars(&it.series).is_some_and(|b| !b.is_empty());
-                json!({"id": it.id, "target": format!("face:{}", it.id),
-                    "text": it.sentence.text, "scene": has, "relevant": it.relevant})
+            .map(|it| self.look.seen.is_some_and(|s| self.known_at(it) > s))
+            .collect();
+        let rows = qp_grammar::feeds::layout(
+            self.look.feed.as_deref(),
+            &qp_grammar::feeds::FeedCtx {
+                items: &self.feed,
+                lang,
+                seen: self.look.seen,
+                fresh: &fresh,
+                now,
+            },
+        );
+        let out: Vec<Value> = rows
+            .into_iter()
+            .filter_map(|r| match r {
+                qp_grammar::feeds::FeedRow::Header { text } => Some(json!({"header": text})),
+                qp_grammar::feeds::FeedRow::Capsule { id, mark } => {
+                    let it = self.feed.iter().find(|i| i.id == id)?;
+                    // A face scene needs the reader's own bars of the capsule's series.
+                    let has = self.replica.bars(&it.series).is_some_and(|b| !b.is_empty());
+                    let mut v = json!({"id": it.id, "target": format!("face:{}", it.id),
+                        "text": it.sentence.text, "scene": has, "relevant": it.relevant});
+                    if let Some(m) = mark {
+                        v["mark"] = json!(m);
+                    }
+                    Some(v)
+                }
             })
             .collect();
         Value::Array(out)
+    }
+
+    /// (R4/H-M8910) When the reader could first know capsule `it`'s latest transition:
+    /// the open time of the bar after its transition bar (the bar closed then), or — the
+    /// transition being on the newest bar — `i64::MAX` (now).
+    #[must_use]
+    pub fn known_at(&self, it: &CapsuleItem) -> i64 {
+        let next = usize::try_from(it.last_bar)
+            .ok()
+            .and_then(|b| b.checked_add(1));
+        self.replica
+            .bars(&it.series)
+            .and_then(|b| next.and_then(|n| b.get(n)))
+            .map_or(i64::MAX, |b| b.t)
+    }
+
+    /// (R4/H-M8910) The face frame: `{css:[w,h], px:[w,h], style:{width,height}}` — the
+    /// design's height (`qp_grammar::faces::height`), the backing size at the device scale
+    /// and the CSS lengths (the shell sizes its canvases with these, computes nothing).
+    #[must_use]
+    pub fn face_size_json(&self) -> Value {
+        let (w, h) = self.frames["face"];
+        self.size_json(w, h)
+    }
+
+    fn size_json(&self, w: u32, h: u32) -> Value {
+        json!({"css": [w, h], "px": [w * self.scale, h * self.scale],
+               "style": {"width": format!("{w}px"), "height": format!("{h}px")}})
+    }
+
+    /// (R4/H-M8910) The names each setting accepts, from the registries (the settings
+    /// page lists them; nothing is hard-coded in the shell): `{face, alphabet, feed,
+    /// transition, outcome}`, the default first.
+    #[must_use]
+    pub fn choices_json() -> Value {
+        json!({
+            "face": qp_grammar::faces::names(),
+            "alphabet": qp_grammar::glyph::ALPHABETS,
+            "feed": qp_grammar::feeds::names(),
+            "transition": qp_grammar::transitions::names(),
+            "outcome": qp_grammar::glyph::outcome::names(),
+        })
+    }
+
+    /// (R4/H-M8910) The device pixel ratio the page reports; the core paints at the nearest
+    /// integer scale in `1..=MAX_SCALE`. Returns whether the scale changed.
+    pub fn set_dpr(&mut self, dpr: f64) -> bool {
+        #[allow(clippy::cast_possible_truncation, clippy::cast_sign_loss)]
+        let s = if dpr.is_finite() && dpr > 0.0 {
+            (dpr.round() as u32).clamp(1, MAX_SCALE)
+        } else {
+            1
+        };
+        let changed = s != self.scale;
+        self.scale = s;
+        if changed {
+            self.face_shown.clear();
+            self.scene_shown = None;
+        }
+        changed
+    }
+
+    /// The point budget of the connection's profile (from `welcome`).
+    #[must_use]
+    pub fn max_points(&self) -> u32 {
+        self.max_points
+    }
+
+    /// The device scale scenes are painted at.
+    #[must_use]
+    pub fn scale(&self) -> u32 {
+        self.scale
+    }
+
+    fn pixels(&self, scene: &SceneDesc) -> Vec<u8> {
+        qp_render::render_scene_rgba_scaled(scene, self.scale).unwrap_or_default()
     }
 
     /// The face scene of capsule `id` at the face frame.
@@ -650,7 +791,7 @@ impl ShellCore {
             return Vec::new();
         }
         self.face_shown.insert(id.to_owned(), d);
-        qp_render::render_scene_rgba(&scene).unwrap_or_default()
+        self.pixels(&scene)
     }
 
     /// The open capsule's scene.
@@ -673,22 +814,31 @@ impl ShellCore {
             return Vec::new();
         }
         self.scene_shown = Some(d);
-        qp_render::render_scene_rgba(&scene).unwrap_or_default()
+        self.pixels(&scene)
     }
 
-    /// The open capsule: `{depth, capsule, text, frame:[w,h], scene}`; depth `sentence`
-    /// when nothing is open.
+    /// The open capsule: `{depth, capsule, text, frame:[w,h], scene, px?, style?}`
+    /// (`px`/`style`: the scene's backing size at the device scale and its CSS lengths);
+    /// depth `sentence` when nothing is open.
     #[must_use]
     pub fn open_json(&self) -> Value {
         match &self.opening {
             None => json!({"depth": "sentence"}),
-            Some(o) => json!({
-                "depth": depth_name(o.to),
-                "capsule": o.capsule,
-                "text": self.open_headline.clone().unwrap_or_else(|| o.presentation.text.clone()),
-                "frame": o.frame,
-                "scene": o.frame.is_some(),
-            }),
+            Some(o) => {
+                let mut v = json!({
+                    "depth": depth_name(o.to),
+                    "capsule": o.capsule,
+                    "text": self.open_headline.clone().unwrap_or_else(|| o.presentation.text.clone()),
+                    "frame": o.frame,
+                    "scene": o.frame.is_some(),
+                });
+                if let Some([w, h]) = o.frame {
+                    let sz = self.size_json(w, h);
+                    v["px"] = sz["px"].clone();
+                    v["style"] = sz["style"].clone();
+                }
+                v
+            }
         }
     }
 
@@ -867,6 +1017,46 @@ impl ShellCore {
             }
         }
         self.ask("in", Asked::Input, json!({"type":"input","gesture":g}));
+    }
+
+    /// (R4/H-M8910) The `style` gesture from a settings object `{face?, alphabet?, theme?,
+    /// feed?, transition?, outcome?}` (absent or `""`: unchanged).
+    pub fn set_look(&mut self, choice: &Value) {
+        let mut g = json!({"kind":"style"});
+        for k in ["face", "alphabet", "theme", "feed", "transition", "outcome"] {
+            if let Some(v) = choice.get(k).and_then(Value::as_str) {
+                if !v.is_empty() {
+                    g[k] = json!(v);
+                }
+            }
+        }
+        if g.as_object().is_some_and(|o| o.len() > 1) {
+            self.ask("in", Asked::Input, json!({"type":"input","gesture":g}));
+        }
+    }
+
+    /// (R4/H-M8910) "I looked now": the `style` gesture's `seen` at the replay clock (the
+    /// feed layout may mark what changed since). Nothing without a replay state.
+    pub fn mark_seen(&mut self) {
+        let Some(t) = self.replay.as_ref().map(|r| r.t) else {
+            return;
+        };
+        self.ask(
+            "in",
+            Asked::Input,
+            json!({"type":"input","gesture":{"kind":"style","seen":t}}),
+        );
+    }
+
+    /// (R4/H-M8910) Open capsule `id` from the feed to its capsule depth (the `open`
+    /// gesture; what a tap on its face does, by id).
+    pub fn open_capsule(&mut self, id: &str) {
+        let (w, h) = self.frames["scene"];
+        self.ask(
+            "in",
+            Asked::Input,
+            json!({"type":"input","gesture":{"kind":"open","capsule":id,"to":"capsule","width":w,"height":h}}),
+        );
     }
 
     /// Open the open capsule straight to `to` (`chart`, `evidence`): the way down when the
@@ -1108,6 +1298,7 @@ impl ShellCore {
         to_left: f64,
         to_top: f64,
     ) -> Value {
+        let k = i32::try_from(self.scale).unwrap_or(1);
         let css = |r: &qp_schema::scene::PixelRect, l: f64, t: f64| {
             let (w, h) = (r.right - r.left, r.bottom - r.top);
             json!({"left": format!("{}px", f64::from(r.left) + l),
@@ -1121,10 +1312,68 @@ impl ShellCore {
                     let (b, a) = (s.before.as_ref()?, s.after.as_ref()?);
                     Some(json!({"id": s.id, "from": css(b, from_left, from_top),
                         "to": css(a, to_left, to_top),
-                        "src": [b.left, b.top, (b.right - b.left).max(1), (b.bottom - b.top).max(1)]}))
+                        "src": [b.left * k, b.top * k, (b.right - b.left).max(1) * k,
+                                (b.bottom - b.top).max(1) * k]}))
                 })
                 .collect(),
         )
+    }
+
+    /// (R4/H-M8910) Progress (0..=1) of the last transition's animation at shell time `t`
+    /// (ms, `performance.now()`); the first call after a transition starts the clock.
+    pub fn transition_progress(&mut self, t: f64) -> f64 {
+        let t0 = *self.trans_t0.get_or_insert(t);
+        qp_grammar::transitions::progress(self.look.transition.as_deref(), t0, t)
+    }
+
+    /// (R4/H-M8910) The last transition's frame at progress `p` by the connection's
+    /// transition design (`qp_grammar::transitions`): `{done, scene_opacity, elements:
+    /// [{id, source: "before"|"after", src:[x,y,w,h], style:{left,top,width,height,
+    /// opacity}}]}` — `src` in backing px of the source canvas (device scale), `style` as
+    /// CSS values; the old scene at page (`from_left`, `from_top`), the new at (`to_left`,
+    /// `to_top`).
+    #[must_use]
+    pub fn transition_frame(
+        &self,
+        p: f64,
+        from_left: f64,
+        from_top: f64,
+        to_left: f64,
+        to_top: f64,
+    ) -> Value {
+        let d = qp_grammar::transitions::by_name(self.look.transition.as_deref());
+        let p = if p.is_finite() {
+            p.clamp(0.0, 1.0)
+        } else {
+            1.0
+        };
+        let f = (d.frame)(&self.shared, (from_left, from_top), (to_left, to_top), p);
+        let k = i32::try_from(self.scale).unwrap_or(1);
+        let els: Vec<Value> = f
+            .elements
+            .iter()
+            .map(|e| {
+                let r = e.src;
+                json!({"id": e.id,
+                    "source": match e.source {
+                        qp_grammar::transitions::Source::Before => "before",
+                        qp_grammar::transitions::Source::After => "after",
+                    },
+                    "src": [r.left * k, r.top * k, (r.right - r.left).max(1) * k,
+                            (r.bottom - r.top).max(1) * k],
+                    "style": {"left": format!("{}px", e.rect[0]), "top": format!("{}px", e.rect[1]),
+                              "width": format!("{}px", e.rect[2]), "height": format!("{}px", e.rect[3]),
+                              "opacity": format!("{}", e.opacity.clamp(0.0, 1.0))}})
+            })
+            .collect();
+        json!({"done": p >= 1.0, "scene_opacity": format!("{}", f.scene_opacity.clamp(0.0, 1.0)),
+               "elements": els})
+    }
+
+    /// The last transition's shared elements (the authority's `Opening.shared`).
+    #[must_use]
+    pub fn shared(&self) -> &[qp_schema::protocol::SharedElement] {
+        &self.shared
     }
 
     /// Where the last transition started (`sentence`: from a face in the feed).

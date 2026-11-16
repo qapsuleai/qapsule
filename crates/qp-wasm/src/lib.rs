@@ -518,6 +518,62 @@ mod shell_binding {
             self.inner.set_style(face, alphabet, theme);
         }
 
+        /// (R4/H-M8910) Style from a settings object (JSON: `face`, `alphabet`, `theme`,
+        /// `feed`, `transition`, `outcome`; `""`: unchanged).
+        ///
+        /// # Errors
+        /// Not JSON.
+        pub fn set_look(&mut self, choice_json: &str) -> Result<(), JsError> {
+            let c = serde_json::from_str(choice_json).map_err(err)?;
+            self.inner.set_look(&c);
+            Ok(())
+        }
+
+        /// (R4/H-M8910) Mark the reader's last look at the replay clock.
+        pub fn mark_seen(&mut self) {
+            self.inner.mark_seen();
+        }
+
+        /// (R4/H-M8910) Open capsule `id` to its capsule depth.
+        pub fn open_capsule(&mut self, id: &str) {
+            self.inner.open_capsule(id);
+        }
+
+        /// (R4/H-M8910) The page's device pixel ratio; returns whether the paint scale
+        /// changed (repaint then).
+        pub fn set_dpr(&mut self, dpr: f64) -> bool {
+            self.inner.set_dpr(dpr)
+        }
+
+        /// (R4/H-M8910) The names each setting accepts (JSON).
+        pub fn choices(&self) -> String {
+            ShellCore::choices_json().to_string()
+        }
+
+        /// (R4/H-M8910) The face frame (JSON: `css`, `px`, `style`).
+        pub fn face_size(&self) -> String {
+            self.inner.face_size_json().to_string()
+        }
+
+        /// (R4/H-M8910) Progress of the last transition's animation at shell time `t`.
+        pub fn transition_progress(&mut self, t: f64) -> f64 {
+            self.inner.transition_progress(t)
+        }
+
+        /// (R4/H-M8910) The last transition's frame at progress `p` (JSON).
+        pub fn transition_frame(
+            &self,
+            p: f64,
+            from_left: f64,
+            from_top: f64,
+            to_left: f64,
+            to_top: f64,
+        ) -> String {
+            self.inner
+                .transition_frame(p, from_left, from_top, to_left, to_top)
+                .to_string()
+        }
+
         /// Open the open capsule to `to` (`chart`, `evidence`).
         pub fn open_to(&mut self, to: &str) {
             self.inner.open_to(to);

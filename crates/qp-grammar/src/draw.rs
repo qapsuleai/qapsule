@@ -7,7 +7,7 @@ use qp_schema::scene::{Item, PixelRect, Prim, Rgba, SceneLayer, XMap, YMap};
 use qp_schema::grammar::PanelPos;
 
 use crate::detmath::px;
-use crate::glyph::{alphabet, GlyphBox};
+use crate::glyph::GlyphBox;
 use crate::layer::{step_index, Geom, PRow, Prepared, Split};
 use crate::scale::value_y;
 use crate::theme::Theme;
@@ -55,6 +55,8 @@ pub(crate) struct Geo<'a> {
     pub bold: bool,
     /// Theme (glyph colours).
     pub theme: &'a Theme,
+    /// (R4/T5) Glyph alphabet (`CompileOptions::alphabet`).
+    pub alphabet: &'static dyn crate::glyph::Alphabet,
 }
 
 impl Geo<'_> {
@@ -798,7 +800,7 @@ fn glyphs(pl: &Prepared, g: &Geo<'_>, out: &mut SceneLayer) {
             y: top as f32,
             size: s as f32,
         };
-        out.prims.extend(alphabet().draw(spec, bx, g.theme));
+        out.prims.extend(g.alphabet.draw(spec, bx, g.theme));
         let mut vals: BTreeMap<String, f64> = BTreeMap::new();
         vals.insert("strength".to_owned(), spec.strength);
         vals.insert("freshness".to_owned(), spec.freshness);

@@ -709,6 +709,44 @@ fn chart_view_r3(
 }
 
 // ---------------------------------------------------------------------------
+// R4/T5: capsule face designs (`docs/GRAMMAR.md` §18.7)
+// ---------------------------------------------------------------------------
+
+/// Face design names a connection may choose (`style` gesture, `docs/PROTOCOL.md`
+/// §4.6.2); the first is the default. M8 adds its alternatives here (a name and a branch
+/// in [`face_view`]); the opening rule and the shared elements do not change.
+pub const FACES: [&str; 1] = ["card"];
+
+/// Whether `name` is a known face design.
+#[must_use]
+pub fn is_face(name: &str) -> bool {
+    FACES.contains(&name)
+}
+
+/// The face of a capsule in the feed (open depth `sentence`) by face design `face`
+/// (`None`: the default): today only `card`, the §18.4 capsule card
+/// ([`capsule_view`] at `max_points`).
+///
+/// # Errors
+/// An unknown face name (`invalid`, `/face`) or the design's own errors.
+pub fn face_view(
+    face: Option<&str>,
+    finding: &str,
+    max_points: u32,
+    p: &dyn DataProvider,
+    id: &str,
+) -> Result<View, GrammarError> {
+    match face.unwrap_or(FACES[0]) {
+        "card" => capsule_view(finding, max_points, p, id),
+        other => Err(GrammarError::new(
+            ErrorKind::Invalid,
+            "/face",
+            format!("unknown face `{other}` (known: {})", FACES.join(", ")),
+        )),
+    }
+}
+
+// ---------------------------------------------------------------------------
 // R4: opening between depths (`docs/GRAMMAR.md` §18.6, `docs/PROTOCOL.md` §4.6)
 // ---------------------------------------------------------------------------
 

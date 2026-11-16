@@ -1642,6 +1642,7 @@ dependencies = [
 name = "qp-wasm"
 version = "0.0.0"
 dependencies = [
+ "qp-calendar",
  "qp-compute",
  "qp-grammar",
  "qp-render",

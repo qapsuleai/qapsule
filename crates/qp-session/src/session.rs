@@ -527,6 +527,7 @@ impl Session {
             let _ = s.invalidations(seq);
         }
         s.eval_intents(s.seq());
+        let _ = s.eval_intents_public();
         // The capsule engine catches up with the final bars at load (R3, §20).
         let _ = s.run_capsules();
         s.pending_views.clear();
@@ -1779,11 +1780,10 @@ impl Session {
             let pe = pub_entry(self, ops, &p);
             let pid = format!("prop-{}", p.seq);
             let mut lines = vec![ack(p.seq, p.created.clone())];
+            // (R3/K1c) It stays in the public world: `reverse_changes` never takes a
+            // proposal.
             lines.extend(self.commit_public_writer(pe, &[]));
-            // The authority's world took the proposal under the same id.
-            if self.doc.proposals.iter().any(|x| x.id == pid) {
-                self.prop_map.insert(pid.clone(), pid);
-            }
+            let _ = pid;
             return Ok(lines);
         }
         let pub_ops = self.ops_to_pub(ops);
@@ -1866,8 +1866,26 @@ impl Session {
             evidence: None,
         };
         self.committed(entry);
-        if let Some(p) = self.pub_of(seq) {
-            self.prop_map.insert(pid, format!("prop-{p}"));
+        // (R3/K1c) Both worlds hold this proposal only when this command's own entries
+        // (the authority's just committed, and the public one it made) put it.
+        let put = |e: Option<&LogEntry>, id: &str| {
+            e.is_some_and(|e| {
+                e.changes.iter().any(
+                    |c| matches!(c, ChangeOp::PutProposal { proposal, .. } if proposal.id == id),
+                )
+            })
+        };
+        if put(self.log.last().filter(|e| e.seq == seq), &pid) {
+            if let Some(p) = self.pub_of(seq) {
+                let ppid = format!("prop-{p}");
+                let ok = self
+                    .other
+                    .as_ref()
+                    .is_some_and(|w| put(w.log.last().filter(|e| e.seq == p), &ppid));
+                if ok {
+                    self.prop_map.insert(pid, ppid);
+                }
+            }
         }
         let mut lines = vec![ack(seq, created)];
         lines.extend(self.settle(seq));
@@ -2758,7 +2776,8 @@ impl Session {
             }
         }
         let fired = self.eval_intents(seq);
-        let intents = self.intent_lines(fired);
+        let mut intents = self.intent_lines(fired);
+        intents.extend(self.eval_intents_public());
         (conds, intents)
     }
 
@@ -2782,20 +2801,10 @@ impl Session {
                         continue;
                     }
                 }
-                // (R3/K1b) A public-view reader hears an intent the public world holds
-                // alike (same id and trigger), under its own sequence number.
+                // (R3/K1c) A public-view reader hears the public world's intents only
+                // (`eval_intents_public`).
                 if self.public_view(&c.principal) {
-                    let same = match (&ev, self.other.as_ref()) {
-                        (Event::IntentTriggered { intent, .. }, Some(w)) => w
-                            .doc
-                            .intents
-                            .iter()
-                            .any(|i| &i.id == intent && i.trigger.as_ref() == trigger),
-                        _ => false,
-                    };
-                    if !same {
-                        continue;
-                    }
+                    continue;
                 }
                 for s in &c.subs {
                     if matches!(s.topic, Topic::Intents {}) {

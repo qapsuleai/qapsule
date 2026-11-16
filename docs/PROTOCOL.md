@@ -1827,9 +1827,11 @@ okuyucuya göre kurar (yalnız R3 öğeleri: `meaning`'li olgular, `story`'li ka
      değişimleri; çapa damgası ve bar yazıları (seri verisi) → aynen;
    - **her kişinin komutu** (doğrudan, öneri, kabul, geri alma) açık dünyada **kendi
      başına** genişletilir (açık `seq` ve kimliklerle): orada uyuyorsa bir girdi, uymuyorsa
-     hiçbir şey — otoritenin dünyasında ne olduğundan bağımsız. Yetkili kişinin `undo`'su
-     ve `accept_proposal`'ı otoritenin girdilerini adlandırır: açık dünyada o girdilerin
-     yaptığı açık girdiye/öneriye çevrilir (yoksa hiçbir şey). Kişi, okuduğu dünyanın
+     hiçbir şey — otoritenin dünyasında ne olduğundan bağımsız. Yetkili kişinin
+     `undo { seq }`'su, `accept_proposal`'ı ve `reject_proposal`'ı otoritenin girdilerini
+     ya da önerilerini adlandırır: açık dünyada bu komutun kendi girdilerinin yaptığı açık
+     girdiye/öneriye çevrilir (yoksa hiçbir şey); `seq`'siz `undo` açık dünyada, kişinin
+     açık girdileri arasında çözülür. Kişi, okuduğu dünyanın
      cevabını alır (hata, `base` çakışması, `seq`, kimlikler);
    - açık dünyanın kendi kapsüllerinin (kişilerin, hikâyesiz) §8.1 geçersizleşmesi orada
      değerlendirilir ve orada yazılır.
@@ -1837,11 +1839,10 @@ okuyucuya göre kurar (yalnız R3 öğeleri: `meaning`'li olgular, `story`'li ka
    bir bulguyu onaylaması, yalnız otoritede olan bir kapsülün geçersizleşmesi) açık
    dünyada **hiç iz bırakmaz**: yer tutucu yok, sıra numarası kayması yok. **Açık görünüm
    okuyucusunun** komutu otoritenin dünyasına yalnız açık değişimlerin geri çevirisiyle,
-   **hep ya da hiç**, ulaşır: her değişim iki dünyanın aynı tuttuğu bir öğeyi (yeni bir
-   kimlik ya da kişinin iki dünyada da olan kendi öğesi) adlandırmalı — hiçbir motor öğesi,
-   yalnız bir dünyada olan hiçbir kimlik —, değişimler birlikte uygulanmalı; yoksa otorite
-   hiçbir şey almaz (okuyucu bunu göremez). Öneri, iki dünya aynı kimlikle tuttuğunda
-   eşlenir. **Lisanslı akışların hepsine yetkili olmayan** okuyucu (kısmi yetki dahil:
+   **hep ya da hiç**, ulaşır: her değişimin adlandırdığı kimlik ya iki dünyada da yok
+   (yeni) ya da iki dünyada **bayt eşit** bir öğe (kanonik JSON) — hiçbir motor öğesi, hiçbir
+   öneri —, değişimler birlikte uygulanmalı; yoksa otorite hiçbir şey almaz (okuyucu bunu
+   göremez). Açık görünümlü kişinin önerileri ve öneri kararları yalnız açık dünyadadır. **Lisanslı akışların hepsine yetkili olmayan** okuyucu (kısmi yetki dahil:
    sıralayıcının bağlamı bütün enstrümanları kapsadığından, yetkisi olmayan bir akıştan
    arınmış hikâye ancak açık dünyada vardır) **açık görünüm okuyucusudur**: bütün okuma
    yolları (sorgular — `capsules`, `capsule`, `ledger`, `log`, `document`, `list`,
@@ -1850,8 +1851,9 @@ okuyucuya göre kurar (yalnız R3 öğeleri: `meaning`'li olgular, `story`'li ka
    `capsules` konusunun geçişleri açık dünyanın dokümanı, günlüğü, okuma dokümanı ve
    karnesiyle çalışır; aldığı her `seq` (`welcome`, `result`, `ack`, olaylar) açık dünyanın
    numarasıdır; itirazı itirazcının dünyasında yönlendirilir ve açık-yalnız motorda karara
-   bağlanır; `claims` konusunda yalnız kendi koşul iddialarını, `intents` konusunda açık
-   dünyada aynı (kimlik ve tetik) olan niyetleri alır. Böylece bulgunun `confidence`'ı,
+   bağlanır; `claims` konusunda yalnız kendi koşul iddialarını alır (belge öğesi iddialarına
+   itirazı `unknown`); `intents` konusunda açık dünyanın niyetleri açık dünyada
+   değerlendirilir (kendi etkinliği ve kenar durumuyla). Böylece bulgunun `confidence`'ı,
    kapsülün cümlesi, hikâyesi, `importance`/`tier`'ı ve sırası, `ledger_at_birth`, karne
    sayıları, girdilerin ve olayların varlığı ve numaraları **yalnız açık veriye ve
    kişilerin komutlarına** bağlıdır — yetkili kişinin aynı komutları dahil. Bu okuyucuya

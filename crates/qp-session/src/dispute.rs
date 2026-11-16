@@ -363,6 +363,19 @@ impl Session {
                 .build());
             }
         }
+        // (R3/K1c) Claims on document items (capsules, intents) are registered in the
+        // authority's world only: a public-view reader gets `unknown` for them, whatever
+        // the registry holds (as `claim_events` never sends them to it).
+        if !matches!(d.claim, ClaimRef::Condition { .. }) && self.public_view(&principal) {
+            return Ok(vec![verdict_line(
+                &conn,
+                id,
+                seq,
+                now,
+                DisputeVerdict::Unknown,
+                None,
+            )]);
+        }
         // The verdict says something about the data: only for a principal entitled to
         // every feed the claim rests on (§19.7). An absent claim and a claim the principal
         // may not hear get the same answer (`unknown`): no existence oracle.

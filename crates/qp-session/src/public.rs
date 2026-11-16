@@ -72,6 +72,8 @@ pub(crate) struct World {
     pub headlines: BTreeMap<String, String>,
     pub series_writer: BTreeMap<String, String>,
     pub invalidation_writer: BTreeMap<String, String>,
+    pub intent_state: BTreeMap<String, bool>,
+    pub intent_epoch: u64,
 }
 
 /// What the public world logs for the authority entry about to be committed.
@@ -150,6 +152,8 @@ impl Session {
                 headlines: BTreeMap::new(),
                 series_writer: self.series_writer.clone(),
                 invalidation_writer: self.invalidation_writer.clone(),
+                intent_state: self.intent_state.clone(),
+                intent_epoch: self.intent_epoch,
             })
         });
         self.full_to_pub = vec![None; self.log.len()];
@@ -182,6 +186,8 @@ impl Session {
         std::mem::swap(&mut self.headlines, &mut w.headlines);
         std::mem::swap(&mut self.series_writer, &mut w.series_writer);
         std::mem::swap(&mut self.invalidation_writer, &mut w.invalidation_writer);
+        std::mem::swap(&mut self.intent_state, &mut w.intent_state);
+        std::mem::swap(&mut self.intent_epoch, &mut w.intent_epoch);
         self.other = Some(w);
         self.in_public = !self.in_public;
     }
@@ -251,7 +257,19 @@ impl Session {
         use qp_schema::protocol::Op;
         ops.iter()
             .map(|o| match o {
+                // (R3/K1c) An authority entry → the public entry it made, or nothing.
                 Op::Undo { seq: Some(s) } => self.pub_of(*s).map(|p| Op::Undo { seq: Some(p) }),
+                // "Undo my last" is resolved in the public world, among the person's public
+                // entries: mapping the authority's resolution would make the public outcome
+                // depend on which of the person's entries the authority's world holds (e.g.
+                // an approval of a licensed-only story, which has no public entry).
+                Op::Undo { seq: None } => Some(Op::Undo { seq: None }),
+                Op::RejectProposal { proposal, note } => {
+                    self.proposal_to_pub(proposal).map(|p| Op::RejectProposal {
+                        proposal: p,
+                        note: note.clone(),
+                    })
+                }
                 Op::AcceptProposal { proposal, note } => {
                     self.proposal_to_pub(proposal).map(|p| Op::AcceptProposal {
                         proposal: p,
@@ -295,18 +313,33 @@ impl Session {
                     .any(|f| f.id == id && engine_author(&f.provenance.author))
                 || d.capsules.iter().any(|c| c.id == id && c.story.is_some())
         };
+        // (R3/K1c) Alike: absent from both documents (truly new), or present in both as
+        // the same item, byte for byte (canonical JSON) — and never an engine item or a
+        // proposal.
         let alike = |id: &str| {
             let a = crate::apply::find_collection(&self.doc, id);
             let b = crate::apply::find_collection(&w.doc, id);
-            a == b && !engine_item(&self.doc, id) && !engine_item(&w.doc, id)
+            if a != b
+                || a == Some(qp_schema::protocol::Collection::Proposals)
+                || engine_item(&self.doc, id)
+                || engine_item(&w.doc, id)
+            {
+                return false;
+            }
+            a.is_none() || item_json(&self.doc, id) == item_json(&w.doc, id)
         };
         let mut out = Vec::with_capacity(changes.len());
         for c in changes {
             let ok = match c {
+                // A public-view person's proposals and their decisions live in the public
+                // world only.
+                ChangeOp::PutProposal { .. } => false,
                 ChangeOp::PushLedger { entry } => {
                     alike(&entry.finding) && entry.capsule.as_deref().is_none_or(alike)
                 }
-                ChangeOp::PutAudience { .. } => true,
+                ChangeOp::PutAudience { principal, .. } => {
+                    self.doc.audiences.get(principal) == w.doc.audiences.get(principal)
+                }
                 _ => alike(crate::apply::touched(c)),
             };
             if !ok {
@@ -447,6 +480,90 @@ impl Session {
         lines
     }
 
+    /// (R3/K1c) The public world's intents, evaluated there (its own intents, active
+    /// flags and edge state; the rules of `eval_intents`, without the authority's claim
+    /// registry): the `intent_triggered` events, built from the public document, to the
+    /// public-view connections subscribed to `intents`, under the public sequence number.
+    pub(crate) fn eval_intents_public(&mut self) -> Vec<qp_schema::protocol::OutboundLine> {
+        use qp_schema::protocol::{Event, ServerMsg, Topic};
+        if self.other.is_none() || self.in_public {
+            return Vec::new();
+        }
+        self.in_world(true, |s| {
+            let seq = s.seq();
+            let mut fired = Vec::new();
+            let mut state = BTreeMap::new();
+            let intents: Vec<_> = s
+                .doc
+                .intents
+                .iter()
+                .filter(|i| i.active)
+                .filter_map(|i| i.trigger.clone().map(|t| (i.id.clone(), t)))
+                .collect();
+            for (id, trig) in intents {
+                if matches!(trig, qp_schema::Condition::Text { .. }) {
+                    continue;
+                }
+                if s.cond_blocked(&trig) {
+                    if let Some(prev) = s.intent_state.get(&id) {
+                        state.insert(id, *prev);
+                    }
+                    continue;
+                }
+                let rd = s.rd.as_ref().unwrap_or(&s.doc);
+                let r = crate::values::eval_condition(rd, &mut s.cache, &trig);
+                let now = r.is_some_and(|x| x.0);
+                if s.intent_state.get(&id) == Some(&false) && now {
+                    if let Some((_, bar, t)) = r {
+                        let rd = s.rd.as_ref().unwrap_or(&s.doc);
+                        let evidence =
+                            crate::claims::evidence(rd, &mut s.cache, &s.claims, &s.plane, &trig);
+                        fired.push((
+                            trig.clone(),
+                            Event::IntentTriggered {
+                                intent: id.clone(),
+                                bar,
+                                t,
+                                seq,
+                                evidence,
+                            },
+                        ));
+                    }
+                }
+                state.insert(id, now);
+            }
+            s.intent_state = state;
+            s.intent_epoch += 1;
+            let mut lines = Vec::new();
+            for (trig, ev) in fired {
+                for c in &s.conns {
+                    if !s.public_view(&c.principal)
+                        || !crate::live::hears(&s.plane, &s.doc, &c.principal, &trig)
+                    {
+                        continue;
+                    }
+                    for sub in &c.subs {
+                        if matches!(sub.topic, Topic::Intents {}) {
+                            lines.push(crate::session::out(
+                                &c.id,
+                                ServerMsg::Notify {
+                                    sub: sub.id.clone(),
+                                    event: crate::claims::event_for(
+                                        &s.doc,
+                                        &s.plane,
+                                        &c.principal,
+                                        &ev,
+                                    ),
+                                },
+                            ));
+                        }
+                    }
+                }
+            }
+            lines
+        })
+    }
+
     /// (R3/K1b) Applies `changes` to the document the fields hold **atomically**: all of
     /// them (returned with their inverse) or, when one does not fit, none (the document
     /// is rolled back; `None`): never a partial entry.
@@ -530,6 +647,23 @@ impl Session {
         let parts = self.in_world(true, |s| s.entry_events_in(p, true));
         parts.into_iter().flatten().map(|(_, l)| l).collect()
     }
+}
+
+/// The canonical JSON of the item `id` of `doc` (the first one, in collection order).
+fn item_json(doc: &Document, id: &str) -> Option<String> {
+    fn find<T: serde::Serialize>(v: &[T], key: impl Fn(&T) -> &str, id: &str) -> Option<String> {
+        v.iter()
+            .find(|x| key(x) == id)
+            .and_then(|x| serde_json::to_string(x).ok())
+    }
+    find(&doc.series, |x| x.id.as_str(), id)
+        .or_else(|| find(&doc.views, |x| x.id.as_str(), id))
+        .or_else(|| find(&doc.facts, |x| x.id.as_str(), id))
+        .or_else(|| find(&doc.findings, |x| x.id.as_str(), id))
+        .or_else(|| find(&doc.capsules, |x| x.id.as_str(), id))
+        .or_else(|| find(&doc.intents, |x| x.id.as_str(), id))
+        .or_else(|| find(&doc.narratives, |x| x.id.as_str(), id))
+        .or_else(|| find(&doc.proposals, |x| x.id.as_str(), id))
 }
 
 /// Ids of the engine items (facts with a meaning, engine findings, capsules with a story

@@ -625,3 +625,220 @@ fn no_oracle_through_commands_proposals_disputes_or_invalidations() {
         }
     }
 }
+
+/// (R3/K1c) Proposals, undo, intents and document-item disputes. Arkın (entitled) makes
+/// the same kind of moves in every configuration: approves every finding id any run's
+/// authority had, proposes two approvals (one of a public story, one of a licensed-only
+/// id), rejects what he proposed (`reject_proposal` of the ids his acks name), undoes his
+/// last two entries (`undo` without `seq`) and writes an intent. Bora (a public-view
+/// owner) writes an intent that triggers later, proposes and accepts in his own world,
+/// creates a proposal whose id collides with Arkın's, and disputes a capsule and an
+/// intent claim. Bora and Can get the same lines (mühür aside) for every licensed flow;
+/// the authority's proposals and engine items are untouched by Bora.
+fn proposals_run(
+    bars: &[Bar],
+    n: usize,
+    seed: u64,
+    ids: &[(String, String)],
+    public_id: &str,
+) -> Vec<OutboundLine> {
+    let k = 60;
+    let mut v = serde_json::to_value(init(bars, k, seed)).unwrap();
+    for p in v["principals"].as_array_mut().unwrap() {
+        if p["id"] == "bora" {
+            p["role"] = json!("owner");
+        }
+    }
+    let mut s = Session::new(serde_json::from_value(v).unwrap(), &root()).unwrap();
+    let mut out = Vec::new();
+    out.extend(hello(&mut s, "a", "ana", None));
+    out.extend(hello(&mut s, "b", "bora", None));
+    out.extend(hello(&mut s, "c", "can", None));
+    out.extend(hello(&mut s, "o", "arkin", None));
+    for c in ["b", "c"] {
+        for (i, t) in [
+            json!({"kind":"changes"}),
+            json!({"kind":"claims"}),
+            json!({"kind":"intents"}),
+            json!({"kind":"proposals"}),
+        ]
+        .iter()
+        .enumerate()
+        {
+            out.extend(send(
+                &mut s,
+                c,
+                &json!({"type":"subscribe","id":format!("s{i}"),"topic":t}),
+            ));
+        }
+    }
+    let half = 130;
+    for (i, b) in bars.iter().enumerate().take(half).skip(k) {
+        out.extend(s.data_event(&ev(i - k + 1, b)).unwrap());
+    }
+    // An intent threshold crossed later (false now, true later).
+    let now_c = bars[half - 1].c;
+    let later = bars[half..n].iter().map(|b| b.c).fold(f64::MIN, f64::max);
+    assert!(later > now_c, "no later rise to trigger on");
+    let level = (now_c + later) / 2.0;
+    let trigger = json!({"kind":"threshold","series":"px","op":"gt","value":level});
+    let send_o = |s: &mut Session, out: &mut Vec<OutboundLine>, m: Value| {
+        let r = send(s, "o", &m);
+        let v: Vec<Value> = r
+            .iter()
+            .map(|l| serde_json::to_value(&l.msg).unwrap())
+            .collect();
+        out.extend(r);
+        v
+    };
+    for (j, (_, f)) in ids.iter().enumerate() {
+        send_o(
+            &mut s,
+            &mut out,
+            json!({"type":"command","id":format!("o{j}"),"ops":[{"op":"approve_finding","finding":f}]}),
+        );
+    }
+    let mut props = Vec::new();
+    for f in [public_id, ids[0].1.as_str()] {
+        for v in send_o(
+            &mut s,
+            &mut out,
+            json!({"type":"command","id":"op","mode":"propose","ops":[{"op":"approve_finding","finding":f}]}),
+        ) {
+            if let Some(p) = v["proposal"].as_str() {
+                props.push(p.to_owned());
+            }
+        }
+    }
+    for p in &props {
+        send_o(
+            &mut s,
+            &mut out,
+            json!({"type":"command","id":"or","ops":[{"op":"reject_proposal","proposal":p}]}),
+        );
+    }
+    for _ in 0..2 {
+        send_o(
+            &mut s,
+            &mut out,
+            json!({"type":"command","id":"ou","ops":[{"op":"undo"}]}),
+        );
+    }
+    send_o(
+        &mut s,
+        &mut out,
+        json!({"type":"command","id":"oi","ops":[{"op":"add_intent","text":"Arkın","trigger":trigger}]}),
+    );
+    // Bora: his intent, a proposal (its id may be an id Arkın's proposals have in the
+    // authority's world) accepted by himself, and disputes on document-item claims.
+    let before = (
+        serde_json::to_string(&s.document().proposals).unwrap(),
+        s.document()
+            .capsules
+            .iter()
+            .filter(|c| c.story.is_some())
+            .map(|c| serde_json::to_string(c).unwrap())
+            .collect::<Vec<_>>(),
+    );
+    out.extend(send(
+        &mut s,
+        "b",
+        &json!({"type":"command","id":"bi","ops":[{"op":"add_intent","id":"bora-i","text":"Bora","trigger":trigger}]}),
+    ));
+    let r = send(
+        &mut s,
+        "b",
+        &json!({"type":"command","id":"bp","mode":"propose","ops":[{"op":"approve_finding","finding":public_id}]}),
+    );
+    let pid: Option<String> = r.iter().find_map(|l| {
+        serde_json::to_value(&l.msg).unwrap()["proposal"]
+            .as_str()
+            .map(str::to_owned)
+    });
+    out.extend(r);
+    // Bora names the same ids in every configuration: his own proposal and every
+    // `prop-<n>` the authority's world may hold (Arkın's, by id collision).
+    let fixed: Vec<String> = (60..140).map(|k| format!("prop-{k}")).collect();
+    for p in pid.iter().chain(fixed.iter()) {
+        for op in ["reject_proposal", "accept_proposal"] {
+            out.extend(send(
+                &mut s,
+                "b",
+                &json!({"type":"command","id":"bd","ops":[{"op":op,"proposal":p}]}),
+            ));
+        }
+    }
+    for claim in [
+        json!({"kind":"capsule","capsule":ids[0].0,"finding":ids[0].1}),
+        json!({"kind":"intent","intent":"bora-i"}),
+    ] {
+        out.extend(send(
+            &mut s,
+            "b",
+            &json!({"type":"dispute","id":"bd","claim":claim,"t":bars[half - 2].t}),
+        ));
+    }
+    let after = (
+        serde_json::to_string(&s.document().proposals).unwrap(),
+        s.document()
+            .capsules
+            .iter()
+            .filter(|c| c.story.is_some())
+            .map(|c| serde_json::to_string(c).unwrap())
+            .collect::<Vec<_>>(),
+    );
+    assert!(
+        before == after,
+        "a public-view writer changed the authority's proposals or engine capsules (seed {seed})"
+    );
+    for (i, b) in bars.iter().enumerate().take(n).skip(half) {
+        out.extend(s.data_event(&ev(i - k + 1, b)).unwrap());
+    }
+    for c in ["b", "c"] {
+        for q in [json!({"kind":"log"}), json!({"kind":"document"})] {
+            out.extend(send(&mut s, c, &json!({"type":"query","id":"q","query":q})));
+        }
+    }
+    out
+}
+
+#[test]
+fn proposals_undo_intents_and_disputes_do_not_interfere() {
+    let n = 200;
+    let bars = qp_source::synthetic_market(1, n, 1)[0].bars.clone();
+    let seeds = [1_u64, 2, 7, 42];
+    let per: Vec<BTreeSet<(String, String)>> =
+        seeds.iter().map(|s| engine_ids(&bars, 130, *s)).collect();
+    let public = engine_ids(&bars, 130, 0);
+    let mut ids: Vec<(String, String)> = per
+        .iter()
+        .flatten()
+        .filter(|x| !public.contains(x))
+        .cloned()
+        .collect::<BTreeSet<_>>()
+        .into_iter()
+        .collect();
+    ids.sort_by_key(|x| !per[0].contains(x));
+    assert!(!ids.is_empty());
+    let public_id = public.iter().next_back().unwrap().1.clone();
+    let base = proposals_run(&bars, n, 1, &ids, &public_id);
+    let b = stripped(&base, "b");
+    assert!(
+        b.iter().any(|l| l.contains("\"intent_triggered\"")),
+        "no public intent trigger"
+    );
+    assert!(b.iter().any(|l| l.contains("\"kind\":\"proposal\"")));
+    assert!(b.iter().any(|l| l.contains("\"verdict\":\"unknown\"")));
+    for seed in [2_u64, 7, 42] {
+        let other = proposals_run(&bars, n, seed, &ids, &public_id);
+        for c in ["b", "c"] {
+            let x = stripped(&base, c);
+            let y = stripped(&other, c);
+            assert!(
+                x == y,
+                "seed 1 vs {seed}: {c} differs: {}",
+                first_diff(&x, &y)
+            );
+        }
+    }
+}

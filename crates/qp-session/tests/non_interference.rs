@@ -174,9 +174,6 @@ fn lines_of(out: &[OutboundLine], conn: &str) -> Vec<String> {
 
 /// The first differing line of two streams (for the failure message).
 fn first_diff(a: &[String], b: &[String]) -> String {
-    if a.len() != b.len() {
-        return format!("{} vs {} lines", a.len(), b.len());
-    }
     for (i, (x, y)) in a.iter().zip(b).enumerate() {
         if x != y {
             let at = x
@@ -184,15 +181,21 @@ fn first_diff(a: &[String], b: &[String]) -> String {
                 .zip(y.bytes())
                 .position(|(p, q)| p != q)
                 .unwrap_or(0);
-            let from = at.saturating_sub(120);
-            return format!(
-                "line {i}: …{}… vs …{}…",
-                &x[from..(at + 120).min(x.len())],
-                &y[from..(at + 120).min(y.len())]
-            );
+            let cut = |t: &str| {
+                let mut a = at.saturating_sub(120);
+                while !t.is_char_boundary(a) {
+                    a -= 1;
+                }
+                let mut b = (at + 120).min(t.len());
+                while !t.is_char_boundary(b) {
+                    b += 1;
+                }
+                t[a..b].to_owned()
+            };
+            return format!("line {i}: …{}… vs …{}…", cut(x), cut(y));
         }
     }
-    String::new()
+    format!("{} vs {} lines", a.len(), b.len())
 }
 
 #[test]
@@ -355,7 +358,7 @@ fn oracle_run(
     seed: u64,
     ids: &[(String, String)],
     shared: &str,
-) -> Vec<OutboundLine> {
+) -> (Vec<OutboundLine>, Session) {
     let k = 60;
     let mut v = serde_json::to_value(init(bars, k, seed)).unwrap();
     for p in v["principals"].as_array_mut().unwrap() {
@@ -403,10 +406,50 @@ fn oracle_run(
             &json!({"type":"command","id":"o","ops":[op]}),
         ));
     }
-    for (i, b) in bars.iter().enumerate().take(n).skip(half) {
+    // (Audit K1, attempt 3) Arkın, entitled, sends the same list in every configuration:
+    // approve or reject every finding id any run's authority had, and show one. Whether
+    // each applies in the authority's world depends on the licensed data; nothing of it
+    // may reach a public-view reader.
+    for (i, (_, fnd)) in ids.iter().enumerate() {
+        let op = if i % 3 == 0 {
+            json!({"op":"reject_finding","finding":fnd})
+        } else {
+            json!({"op":"approve_finding","finding":fnd})
+        };
+        out.extend(send(
+            &mut s,
+            "o",
+            &json!({"type":"command","id":format!("o{i}"),"ops":[op]}),
+        ));
+    }
+    if let Some((_, fnd)) = ids.first() {
+        out.extend(send(
+            &mut s,
+            "o",
+            &json!({"type":"command","id":"os","ops":[{"op":"show_finding","finding":fnd,"view":"ov"}]}),
+        ));
+    }
+    for (i, b) in bars.iter().enumerate().take(n - 1).skip(half) {
         out.extend(s.data_event(&ev(i - k + 1, b)).unwrap());
     }
     let t = bars[n - 5].t;
+    // (Audit K1, attempt 4) The authority's engine items before the public-view writer.
+    let engine_items = |s: &Session| -> Vec<String> {
+        s.document()
+            .capsules
+            .iter()
+            .filter(|c| c.story.is_some())
+            .map(|c| serde_json::to_string(c).unwrap())
+            .chain(
+                s.document()
+                    .findings
+                    .iter()
+                    .filter(|f| matches!(f.provenance.author, qp_schema::Author::Engine { .. }))
+                    .map(|f| serde_json::to_string(f).unwrap()),
+            )
+            .collect()
+    };
+    let before = engine_items(&s);
     for (cap, fnd) in ids {
         for m in [
             json!({"type":"command","id":"x","ops":[{"op":"approve_finding","finding":fnd}]}),
@@ -415,9 +458,48 @@ fn oracle_run(
             json!({"type":"dispute","id":"e","claim":{"kind":"capsule","capsule":cap,"finding":fnd},"t":t,"digest":"zz"}),
             json!({"type":"query","id":"q","query":{"kind":"capsule","capsule":cap}}),
         ] {
-            out.extend(send(&mut s, "b", &m));
+            let r = send(&mut s, "b", &m);
+            // (R3/K1b) Bora accepts every proposal he made (a public-view decider).
+            let props: Vec<String> = r
+                .iter()
+                .filter_map(|l| {
+                    let v = serde_json::to_value(&l.msg).unwrap();
+                    v["proposal"].as_str().map(str::to_owned)
+                })
+                .collect();
+            out.extend(r);
+            for pid in props {
+                out.extend(send(
+                    &mut s,
+                    "b",
+                    &json!({"type":"command","id":"a","ops":[{"op":"accept_proposal","proposal":pid}]}),
+                ));
+            }
         }
     }
+    // (R3/K1b) Bora writes his own fact, finding and capsule under ids the authority's
+    // world may give to its own (licensed) items, with an invalidation that holds.
+    for (i, (_, fnd)) in ids.iter().take(4).enumerate() {
+        let cond = json!({"kind":"threshold","series":"px","op":"gt","value": bars[n - 3].c * 0.5});
+        for op in [
+            json!({"op":"add_fact","id":format!("fx-bora-{i}"),"kind":"note","series":"px","bar":n - 4,"text":"b"}),
+            json!({"op":"add_finding","id":fnd,"claim":"Bora'nın","facts":[format!("fx-bora-{i}")],
+                   "confidence":0.4,"invalidation":cond,"capsule":"Bora'nın notu"}),
+        ] {
+            out.extend(send(
+                &mut s,
+                "b",
+                &json!({"type":"command","id":"w","ops":[op]}),
+            ));
+        }
+    }
+    // Bora (a public-view owner) approved, proposed, accepted, disputed and wrote under
+    // engine ids: the authority's engine items are untouched.
+    assert!(
+        before == engine_items(&s),
+        "a public-view writer changed an authority engine item (seed {seed})"
+    );
+    out.extend(s.data_event(&ev(n - k, &bars[n - 1])).unwrap());
     for c in ["b", "c"] {
         for q in [
             json!({"kind":"log"}),
@@ -427,7 +509,7 @@ fn oracle_run(
             out.extend(send(&mut s, c, &json!({"type":"query","id":"q","query":q})));
         }
     }
-    out
+    (out, s)
 }
 
 /// Engine (capsule, finding) ids of a seed's authority document after `n` bars.
@@ -464,6 +546,8 @@ fn no_oracle_through_commands_proposals_disputes_or_invalidations() {
         .into_iter()
         .collect();
     assert!(ids.len() > 5, "{ids:?}");
+    // Seed 1's authority-only ids first: Bora writes his own items under the first ones.
+    ids.sort_by_key(|x| !per[0].contains(x));
     ids.extend(public.iter().cloned());
     // An engine finding every world has by the middle of the run.
     let half = 130;
@@ -478,7 +562,7 @@ fn no_oracle_through_commands_proposals_disputes_or_invalidations() {
         .expect("a shared engine finding")
         .1
         .clone();
-    let base = oracle_run(&bars, n, 1, &ids, &shared);
+    let (base, auth) = oracle_run(&bars, n, 1, &ids, &shared);
     let b = stripped(&base, "b");
     assert!(
         b.iter()
@@ -489,8 +573,47 @@ fn no_oracle_through_commands_proposals_disputes_or_invalidations() {
     assert!(!b
         .iter()
         .any(|l| l.contains(&format!("invalidation of {shared}"))));
-    for seed in [2_u64, 7, 42, 0] {
-        let other = oracle_run(&bars, n, seed, &ids, &shared);
+    // (R3/K1b) Bora accepted proposals as a public-view decider.
+    assert!(b
+        .iter()
+        .any(|l| l.contains("\"id\":\"a\"") && l.contains("\"status\":\"applied\"")));
+    // (R3/K1b) Bora's own findings under ids the authority's world gives to its own
+    // items: the authority's items are untouched, Bora sees his own (and its capsule's
+    // invalidation, evaluated in the public world).
+    let mut collided = 0;
+    for (cap, fnd) in ids.iter().take(4) {
+        let pair = (cap.clone(), fnd.clone());
+        if let Some(f) = auth
+            .document()
+            .findings
+            .iter()
+            .find(|f| &f.id == fnd && per[0].contains(&pair))
+        {
+            collided += 1;
+            assert!(
+                matches!(f.provenance.author, qp_schema::Author::Engine { .. }),
+                "{fnd} overwritten in the authority: {f:?}"
+            );
+            assert_ne!(f.claim, "Bora'nın");
+        }
+        assert!(
+            b.iter()
+                .any(|l| l.contains(&format!("invalidation of {fnd} holds"))),
+            "{fnd}: Bora's capsule not invalidated in his world"
+        );
+    }
+    assert!(collided > 0, "no collision exercised");
+    let doc_b = b
+        .iter()
+        .rev()
+        .find(|l| l.contains("\"kind\":\"document\""))
+        .unwrap();
+    assert!(doc_b.contains("Bora'nın"));
+    // (Without a flow there is no public world: Bora, a writer there, reads the authority,
+    // whose claims on document capsules a public-view reader does not get; so only the
+    // licensed flow varies here.)
+    for seed in [2_u64, 7, 42] {
+        let other = oracle_run(&bars, n, seed, &ids, &shared).0;
         for c in ["b", "c"] {
             let x = stripped(&base, c);
             let y = stripped(&other, c);

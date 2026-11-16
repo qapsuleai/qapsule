@@ -121,6 +121,8 @@ pub(crate) struct Runner {
     /// same final bars, only the facts of public license class), whose looks the public
     /// world takes ([`crate::public`]).
     pub_engine: Option<Engine>,
+    /// The licensed flow feeds the runner reads.
+    flow_keys: Vec<FeedKey>,
     watched: Vec<Watched>,
     /// Server comments made so far, with the log position they were made at.
     comments: Vec<(Seq, ServerComment)>,
@@ -181,7 +183,17 @@ impl Runner {
             });
         }
         let flow = watched.iter().any(|w| w.flow.is_some());
+        let flow_keys = watched
+            .iter()
+            .filter(|w| w.flow.is_some())
+            .map(|w| FeedKey {
+                symbol: w.symbol.clone(),
+                interval: w.interval.clone(),
+                feed: w.flow.as_ref().map(|(_, f)| f.clone()),
+            })
+            .collect();
         Self {
+            flow_keys,
             engine: Engine::new(EngineConfig::r3()),
             pub_engine: flow.then(|| Engine::new(EngineConfig::r3())),
             watched,
@@ -213,16 +225,8 @@ impl Runner {
     }
 
     /// The licensed flow feeds the runner reads.
-    pub(crate) fn flow_feeds(&self) -> Vec<FeedKey> {
-        self.watched
-            .iter()
-            .filter(|w| w.flow.is_some())
-            .map(|w| FeedKey {
-                symbol: w.symbol.clone(),
-                interval: w.interval.clone(),
-                feed: w.flow.as_ref().map(|(_, f)| f.clone()),
-            })
-            .collect()
+    pub(crate) fn flow_feeds(&self) -> &[FeedKey] {
+        &self.flow_keys
     }
 }
 
@@ -1096,10 +1100,7 @@ impl Session {
             if let Some(pe) = runner.pub_engine.as_ref() {
                 let changes =
                     self.in_world(true, |s| s.capsule_changes(pe, &events_pub, &made, fin - 1));
-                self.pending_pub = Some(crate::public::PubPending {
-                    changes,
-                    summary: None,
-                });
+                self.pending_pub = Some(crate::public::PubPending::of(changes));
             }
             let summary = if fin - from == 1 {
                 format!("capsules {series} bar {from}")
@@ -1653,9 +1654,14 @@ impl Session {
         said: &[ServerComment],
     ) -> Vec<OutboundLine> {
         let mut lines = self.capsule_topic_lines_in(seq, events, said, false);
-        if self.other.is_some() && self.conns.iter().any(|c| self.public_view(&c.principal)) {
+        // (R3/K1b) Under the public entry's own number (every look makes one).
+        let pseq = self.pub_of(seq);
+        if let (true, Some(pseq)) = (
+            self.other.is_some() && self.conns.iter().any(|c| self.public_view(&c.principal)),
+            pseq,
+        ) {
             let p = self.in_world(true, |s| {
-                s.capsule_topic_lines_in(seq, events_pub, said, true)
+                s.capsule_topic_lines_in(pseq, events_pub, said, true)
             });
             lines.extend(p);
             lines.sort_by_key(|(ci, _)| *ci);
@@ -2345,7 +2351,7 @@ impl Session {
                 &conn,
                 ServerMsg::Result {
                     id: id.to_owned(),
-                    seq: s.seq(),
+                    seq: s.seq_to(&principal, s.seq()),
                     now: s.clock(),
                     data: QueryResult::Dispute {
                         verdict: v,
@@ -2558,10 +2564,13 @@ impl Session {
             let changes = self.in_world(true, |s| {
                 s.capsule_changes(pe, &events_pub, &BTreeMap::new(), 0)
             });
-            self.pending_pub = Some(crate::public::PubPending {
+            self.pending_pub = Some(crate::public::PubNext::Entry(crate::public::PubPending {
                 changes,
                 summary: Some(summary(&events_pub)),
-            });
+                evidence: None,
+                undoes: None,
+                request: None,
+            }));
         }
         if let Some(seq) = self.engine_entry_with(changes, summary(&events), None) {
             self.runner = Some(runner);

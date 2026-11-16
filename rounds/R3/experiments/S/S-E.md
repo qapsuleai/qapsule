@@ -220,3 +220,96 @@ değişiklikten önceydi (yalnız geçersizleşme adayında bir dizin bakışı 
   öğeyi anan öneri/görünüm/anlatı düşer, istek ve özet temizlenir. Bu bir insan kanalıdır,
   veri kanalı değil.
 - Açık dünya bellekte ikinci bir doküman, günlük ve okuma dokümanı tutar (akış varken).
+
+## 7. K1b — ikinci güvenlik incelemesi ve yeniden denetim (kanal a, b)
+
+Dal `r3/fix-k1b` (`r3/int` `ea254ab` üstünde; denetçinin `k1_probe`'u için `r3/int` `4ffebc3`
+birleştirildi). Bulgular:
+
+| # | Kaynak | Bulgu | Düzeltme |
+|---|---|---|---|
+| 1 | Güvenlik incelemesi (YÜKSEK); yeniden denetim kanal (a), deneme 4 | Açık görünümlü yazarın komutu otoritede uygulanamayınca (`diverged_touch`/`base`) ters çeviri + `apply_each` otoritenin dokümanına `put_*` yazıyordu: yalnız otoritede olan bir motor öğesini (ya da başka koleksiyondaki aynı kimliği) ezebiliyordu (`k1_probe`: akışlı her yapılandırmada lisanslı doğumlu 1 kapsül değişiyordu) | Açık görünümlü yazarın komutu otoriteye **yalnız** açık değişimlerin ters çevirisiyle ulaşır (`reverse_changes`): her değişim iki dünyanın aynı tuttuğu bir öğeyi adlandırmalı — iki belgede aynı koleksiyon (ya da ikisinde de yok), hiçbir belgede motor öğesi değil (`meaning`'li olgu, motor bulgusu, hikâyeli kapsül) —, çeviri hiçbir değişimi düşürmemeli ya da bulguyu olgusuz bırakmamalı; değişimler **atomik** uygulanır. Biri tutmazsa otorite hiçbir şey almaz; yazar açık dünyanın cevabını aldığı için bunu göremez (hata otoriteden gelmez) |
+| 2 | Güvenlik incelemesi (ORTA) | `accept_proposal` otoritede genişletiliyor, otoritenin hatasını/kimliklerini döndürüyordu | Kabul de her dünyada kendi başına: açık görünümlü karar verenin kabulü açık dünyada genişletilir ve `base`'i orada denetlenir (cevap oradan); otorite yalnız ters çeviriyi (1) alır. Yetkili karar verenin kabulü otoritede (cevabı oradan) ve, aynı öneriyi açık dünya da tutuyorsa (`prop_map`), açık dünyada kendi başına. Kuru koşu `accept_proposal`'ı hâlâ atlıyor: açık görünümlü için doğrulama `accept` içinde, açık dünyada, her şeyden önce yapılıyor |
+| 3 | Güvenlik incelemesi (ORTA) | `apply_each` değişimleri tek tek uygulayıp tutmayanı sessizce atlıyordu (kısmi girdi) | `apply_atomic`: hep ya da hiç (`apply_in_place` geri alır); açık dünyaya yazılan her girdi de atomik (tutmazsa o dünyada girdi yok) |
+| 4 | Yeniden denetim kanal (b), deneme 3 | **Yetkili** bir kişinin (Arkın) her yapılandırmada aynı komut listesi, yalnız lisanslı bir bulguya dokunan her komut için açık günlüğe boş bir girdi (`changes: []`, `summary: "…"`, `cause`) yazıyor, sonraki `seq`'leri kaydırıyordu (47–4.266 farklı satır) | **Açık dünyanın kendi sıra numaraları** (aşağıda) |
+
+### Karar: açık dünyanın kendi sıra numaraları
+
+İki seçenek vardı: (i) her kişi komutu her iki dünyada her zaman tam bir girdi yazar, ya da
+(ii) açık dünyanın kendi `seq`'i olur ve açık karşılığı olmayan otorite girdisi orada hiç
+yer tutmaz. (i) yetmez: otoritede **başarısız** olan bir komut (hedefi o yapılandırmada
+otoritede yok) otoritede girdi yazmaz; `seq` ortakken açık dünya da yazamaz. Hedef açık
+dünyada varsa (açık bir hikâye) bu, girdinin varlığını yine lisanslı veriye bağlar. Ayrıca
+otoritedeki her otomatik girdi (yalnız otoritede olan kişi kapsülünün geçersizleşmesi) yer
+tutardı. **(ii) seçildi**:
+
+- Açık dünyanın günlüğü kendi numarasıyla büyür (`commit_public`); eşlemeler
+  `full_to_pub` (otorite girdisi → yaptığı açık girdi) ve `pub_at` (otorite günlüğü
+  uzunluğu → o sırada açık günlüğün uzunluğu).
+- Açık dünya **her kişinin komutunu kendi başına** genişletir (açık `seq` ve kimliklerle;
+  `pub_expand`): orada uyuyorsa girdi, uymuyorsa hiçbir şey — otoritede ne olduğundan
+  bağımsız (yetkili kişinin otoritede başarısız olan ama açık dünyada uyan komutu açık
+  dünyada uygulanır; kişi otoritenin hatasını alır). Yetkili kişinin `undo`'su ve
+  `accept_proposal`'ı otoritenin girdilerini adlandırır: açık karşılığına çevrilir
+  (`ops_to_pub`, `prop_map`), yoksa açık dünya hiçbir şey almaz. Öneriler de böyle; açık
+  görünümlü önerenin önerisi otoriteye, kimlik iki dünyada boşsa aynı kimlikle geçer.
+- Motor bakışları (bar kapanışı başına) ve düzeltme girdileri her zaman; çapa damgaları ve
+  bar yazıları aynen; otoritenin diğer motor girdileri (geçersizleşme vb.) **hiç**.
+- Açık dünyanın kendi kapsüllerinin (kişilerin) §8.1 geçersizleşmesi açık dünyada
+  değerlendirilir ve yazılır (`invalidate_in_public`; iddia kaydı yok).
+- Açık görünüm okuyucusuna giden her `seq` açık dünyanın: `welcome`, sorgu ve girdi
+  `result`'ları, `ack`, `change`/`finding_state`/`proposal` (açık girdinin numarası),
+  `capsule`/`server_comment` (bakışın açık girdisi), `condition_met`, `intent_triggered`,
+  `view_changed`, `claim`, itiraz cevabı (`seq_to`). `claims` konusunda açık görünümlü
+  okuyucu yalnız kendi koşul iddialarını, `intents` konusunda açık dünyada aynı kimlik ve
+  tetikle olan niyetleri alır (belge öğesi iddiaları ve niyetler otoritenin dünyasında
+  değerlendiriliyor).
+- Otoritenin dokümanı ve günlüğü değişmedi; yeniden oynatma kesin. Açık dünya yokken (akış
+  yok) bütün yollar eskisi gibi (tek dünya kodu ayrı dalda, değişmeden).
+
+### Testler (K1b)
+
+- `non_interference.rs` 3. test genişletildi: Bora (rolü `owner`, veri yetkisi aynı) her
+  öneriyi kabul eder (açık görünümlü karar veren); bütün tohumların otoritelerinde olup
+  açık dünyada olmayan kimliklerle (önce tohum 1'inkiler) **kendi** bulgu ve kapsülünü
+  yazar (kimlik çakışması); **Arkın (yetkili) her yapılandırmada aynı listeyle** her
+  bulgu kimliğini onaylar/reddeder ve birini gösterir (denetim deneme 3); Bora'nın
+  eylemlerinden önce ve sonra otoritenin bütün motor öğeleri (hikâyeli kapsüller, motor
+  bulguları) bayt eşit (deneme 4); Bora'nın kendi kapsülü açık dünyada geçersizleşir;
+  çakışan kimlikteki otorite bulgusu motorun kalır. Tohum 1 ↔ 2/7/42: Bora ve Can'ın
+  satırları mühür dışında bayt eşit. (Akışsız koşu bu testte karşılaştırılmıyor: akış
+  yokken açık dünya yok, Bora otoriteyi okur ve belge kapsüllerinin iddialarını da alır.)
+  Eski kodda (`4ffebc3`) deneme 4 kırılıyor ("a public-view writer changed an authority
+  engine item").
+- `capsule_perf_equality.rs`: tam yetkili bağlantılar (a, f, i), günlük ve doküman yine
+  bayt eşit; tam yetkili olmayanların satırları açık numaralarla (3017 → 3014 satır,
+  `d43ff5b9b8b70b19`).
+- Dökümler: 44 × 3 taşıma; `make_capsule_transcripts`: 38–44 hepsi "same" (bu dökümlerde
+  açık dünya ile otoritenin numaraları çakışıyor); 01–37 değişmedi.
+- **`k1_probe`** (denetçinin; `gen_bars.py k1_bars.json 13 2 200`, 200 bar, iki enstrüman,
+  beş yapılandırma): Arkın'ın komutlarıyla ve `K1_NO_ARKIN=1` ile, dört karşılaştırmanın
+  hepsinde (akışsız dahil) Bora, Can, Dora, Eda, Fatih **0 farklı satır** (Arkın'lı:
+  4.465 / 4.464 / 4.463 / 4.829 / 4.128 satır; Arkın'sız: 4.416 / 4.415 / 4.414 / 4.829 /
+  4.128); Ana'nınki 4.271–4.456 satır farklı (pozitif kontrol); açık görünümlü yazarların
+  otoritede değiştirdiği lisanslı doğumlu kapsül her yapılandırmada **0**.
+
+### Kalan
+
+- Açık görünümlü okuyucu belge öğesi iddialarını (`claims`: kapsül ve niyet) ve açık
+  dünyada aynı olmayan niyetlerin tetiklerini almaz (açık dünyada iddia kaydı ve niyet
+  değerlendirmesi yok): işlev eksiği, kanal değil.
+- Yetkili kişinin açık dünyadaki öğelerinin kimlikleri otoritedekinden farklı olabilir
+  (her dünya kendi `seq`'iyle); yetkili kişi otoritenin kimliğini adlandırdığında açık
+  dünya o kimliği kendi içinde arar (aynı dize, belki başka öğe ya da hiç): komutun açık
+  sonucu yine yalnız komutun ve açık dünyanın fonksiyonu.
+- Mühür dışında bilerek bırakılan kanal yok.
+
+### Performans (K1b)
+
+`capsule_tick -- 30 1000 600 3 flow bound`, aynı makine (yük ~6): `flow` düzeltme tiki olay
+başına 2,44 µs (K1: 2,39; önce 2,33), kapanış tiki 81 ms (K1: 77–78; önce 88–89), bağlanma
+177 ms, `Session::new` 1,40 s; doküman özeti `c0f2042a1be8204a` (otorite değişmedi). İlk
+denemede düzeltme tiki 7,7 µs idi (her veri olayında bağlantı başına açık `seq` eşlemesi ve
+akış beslemesi listesinin yeniden kurulması); besleme anahtarları `Runner`'da tutuluyor ve
+eşleme yalnız koşul aboneliği varken hesaplanıyor. Ham dosya tutulmadı (S-D yöntemi, tek koşu
+grubu).

@@ -489,3 +489,56 @@ Koşul kalmadı. Öneriler (kapsam dışı, bağlayıcı değil): O2 (açık hik
 "kesin" işaret), D2 (demo anahtarına sessiz düşüş), D4, kısmi akış yetkisinin açık görünüme
 düşmesi ve açık görünüm okuyucusunun belge kapsülü iddialarını almaması `DECISIONS.md` açık
 kararlarına; girişimsizlik testine akışsız ↔ akışlı karşılaştırmanın neden dışarıda kaldığı notu.
+
+## Ölçüt 11 / AUD2 düzeltmesi kontrolü (d74179e)
+
+Denetlenen: `r3/m7-aud2` @ `d74179e` (`main` `c8c6592` üstünde; ürün düzeltmesi `2cbc856`:
+`crates/qp-session/src/replica.rs` +10, `dispute.rs` +54, `tests/dispute.rs` +133; ölçüm
+`d74179e`: RESULTS §10, `raw/aud2-fix/`). Dal `r3/audit5`.
+
+**Düzenek değişmedi.** `git diff main -- rounds/R3/experiments/M7/harness` boş (ölçü kodu,
+bağdaştırıcı ve `Cargo.lock` dahil); yalnız `tools/run.sh` çıktı dizinini argüman aldı.
+
+**Yeniden koşum** (`harness run --spec aud1/aud2/aud3/m7x --seeds 100`, tohum 0–99, hepsi):
+
+| Senaryo | M1/M2/M3f/M3p `bs` · `bs2` | M5 `bs` (RP2/eski) | M5 `bs` (bu dal) | M5 `bs2` (önce) | **M5 `bs2` (bu dal)** |
+|---|---|---|---|---|---|
+| AUD1 | 0 · 0 | 7/4539 | 7/4539 | 0/4539 | **0/4539** |
+| AUD2 | 0 · 0 | 49/4739 | 0/4739 | 53/4739 | **0/4739** |
+| AUD3 | 0 · 0 | 7/4524 | 7/4524 | 0/4524 | **0/4524** |
+| M7X | 0 · 0 | 51/4539 | 51/4539 | 1/4539 | **1/4539** |
+
+AUD/M7X satırları `raw/aud2-fix/table-{bs,bs2}-aud.txt` ile **bayt eşit**. `bs` de gerçek
+`qp_session::Replica`'yı kullandığı için yansı düzeltmesi onun AUD2'sini de 49 → 0 yapıyor;
+RESULTS §10.3 bunu açıkça yazıyor ve karşılaştırmayı RP2'nin `bs`'i (49) ile yapıyor — doğru
+taban o. `bs2 --scenario all` (S0–S19 + S2a, S2c, S12s, S15k; S17 20 tohum, diğerleri 100):
+24 satır `raw/aud2-fix/table-bs2-all.txt` **ve** düzeltmeden önceki `raw/bs2/table-bs2-all.txt`
+ile **bayt eşit**; M1+M2+M3f+M3p toplam 0; M5 S2c 3, S4 2, S16 284, S18 1.448 (önceki gibi,
+belgeli `qp/0` sınırları).
+
+**Kod incelemesi.**
+- *Yansı (`judge`, §19.4 yeni satır):* yalnız "yüklem kendi verisinde tutmuyor" dalına eklenen
+  koşul (`auth_final && own_settled && !own_closed && own_clean`) eskiden de `pending
+  (not_held)` dönen duruma bir kez `take_refetch` isteği ekliyor; gösterim durumu değişmiyor,
+  `disputed`/itiraz bar kapanmadan olmuyor. Gösterim ancak kesin çekme verisiyle yüklem tutunca
+  (mevcut `own_settled` → `Provisional`, kapanınca `Final` dalları) oluyor. §19.5 boşluk
+  onarımıyla uyumlu; **yeni yanlış/erken gösterim yolu yok**.
+- *Otorite (`resync_bindings` → `note_resolved`, §19.9 yeni madde):* yalnız hijyen açıkken; yeniden
+  çözümden önceki kapalı barlarla karşılaştırıp değişen ilk kapalı bardan son kapalı bara bir
+  `SettleRequest` ve `scan_conditions` — tek bar `patch`'inin mevcut yolu. Yeni veriyle ileri
+  sürülen iddia kesin doğrulamayla geri çekilebilir (aynı sınıf risk, §19.9'da zaten var); M7X
+  (otoritenin beslemesi de bozuk) dahil her senaryoda M1–M3 = 0 bunu ölçümle destekliyor.
+  Karşılaştırma indeksle yapıldığı için pencere kayarsa istek bütün kapalı aralığı kapsar
+  (maliyet; RESULTS'taki bölünmeli senaryolarda tohum başına +1 istek, ~1.200 bar). Belgede
+  (PROTOCOL §19.4 tablosu ve §19.9) iki davranış da yazılı; yeni mesaj yok, döküm değişmedi.
+- *Bilgi:* AUD2'de geçici gösterim gecikmesinin p95'i 36,4 s → 65,8 s (M6p; RESULTS §10.3'te
+  var): daha önce hiç gösterilmeyen (M5) iddialar artık geç de olsa gösteriliyor; hata değil.
+
+**verify** @ `d74179e`: `CARGO_INCREMENTAL=0 QP_VERIFY_BROWSER=1 scripts/verify.sh` → **çıkış 0,
+15/15 PASS** (451 s); 462 test geçti (yeni `a_resync_that_corrects_closed_bars_asserts_the_claims_it_makes`,
+`a_settled_but_open_bar_that_disagrees_asks_for_a_refetch` dahil), 0 kaldı, 2 yok sayıldı;
+browser PASS; digest `7b1e99d40889f83c` üç hedefte; conform 44 × 3.
+
+**Ölçüt 11: PASS** (önceden ⚠️). Yanlış/erken/çelişkili gösterim her senaryoda 0; kaçırılan
+kesin iddia RP2 `bs`'ine göre AUD1 7 → 0, AUD2 49 → 0, AUD3 7 → 0, M7X 51 → 1.
+REPORT ölçüt 11 satırı ✅ olarak güncellenebilir.

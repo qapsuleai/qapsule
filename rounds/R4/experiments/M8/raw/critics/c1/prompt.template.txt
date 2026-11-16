@@ -1,0 +1,22 @@
+Bir piyasa bilgi uygulamasının akış ekranı için birkaç tasarımı değerlendiren deneyimli bir arayüz tasarımcısısın. Her tasarımda aynı durumlar gösterilir: her ekranda alt alta kartlar var, her kart bir piyasa olayını kapalı hâlde (tek bakışta) anlatır; kartların sağ üstündeki harfler yalnız konum etiketidir. Uygulama yatırım tavsiyesi vermemelidir.
+
+Görüntüler (Read aracıyla aç; hepsi @DIR@ dizininde):
+- Tasarım P: @DIR@/P-1.png, @DIR@/P-1-gri.png, @DIR@/P-2.png, @DIR@/P-2-gri.png
+- Tasarım L: @DIR@/L-1.png, @DIR@/L-1-gri.png, @DIR@/L-2.png, @DIR@/L-2-gri.png
+- Tasarım T: @DIR@/T-1.png, @DIR@/T-1-gri.png, @DIR@/T-2.png, @DIR@/T-2-gri.png
+- Tasarım R: @DIR@/R-1.png, @DIR@/R-1-gri.png, @DIR@/R-2.png, @DIR@/R-2-gri.png
+
+("-gri" ile biten dosyalar aynı ekranın gri tonlamalı kopyasıdır.)
+
+Her tasarıma aşağıdaki sekiz ölçütün her biri için 1 (çok kötü) ile 5 (çok iyi) arasında bir tam sayı puan ver, sonra tasarımları en iyiden en kötüye sırala:
+1. Tek bakış: kapalı yüz tek bir mesaj veriyor mu?
+2. Hiyerarşi: önce ne okunacağı belli mi?
+3. Geçerlilik: sürüyor / artık geçerli değil / kapandı ilk bakışta ayrılıyor mu; işaret ve cümle aynı şeyi mi söylüyor?
+4. Dürüstlük: güvenilirlik (karne, az örnek) görünür mü, kısaltılmış ama gizlenmemiş mi?
+5. Gündelik dil: iç terim, jargon, "bar" yok mu; zaman gündelik mi?
+6. Erişilebilirlik: renk tek başına anlam taşımıyor mu (gri kopya verilir)?
+7. Tavsiye değil: ekran bir eylem önermiyor mu?
+8. Estetik ve özgünlük: finans uygulaması kalıbının kopyası değil, "tek bakışta anlam" hedefinden mi?
+
+Cevabını yalnız bir JSON nesnesi olarak ver, başka hiçbir şey yazma:
+{"puanlar": {"P": {"1": 0, "2": 0, "3": 0, "4": 0, "5": 0, "6": 0, "7": 0, "8": 0}, "L": {"1": 0, "2": 0, "3": 0, "4": 0, "5": 0, "6": 0, "7": 0, "8": 0}, "T": {"1": 0, "2": 0, "3": 0, "4": 0, "5": 0, "6": 0, "7": 0, "8": 0}, "R": {"1": 0, "2": 0, "3": 0, "4": 0, "5": 0, "6": 0, "7": 0, "8": 0}}, "sira": ["P", "L", "T", "R"], "gerekce": "(kısa)"}

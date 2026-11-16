@@ -1,0 +1,73 @@
+{
+  "experiment": "m8",
+  "face": "tavrik",
+  "page": 1,
+  "labels": {
+    "A": {
+      "state": 1,
+      "key": {
+        "s1": "yukarı",
+        "s1b": "fiyat önemli bir seviyeyi geçti",
+        "s2": "bugün",
+        "s3": "evet, sürüyor",
+        "s4": "yarı yarıya",
+        "s5": "hiçbir şey, yalnız bilgi veriyor"
+      }
+    },
+    "B": {
+      "state": 5,
+      "key": {
+        "s1": "aşağı",
+        "s1b": "fiyat önemli bir seviyeyi geçti",
+        "s2": "bir haftadan önce",
+        "s3": "kapandı: gerçekleşti",
+        "s4": "yarı yarıya",
+        "s5": "hiçbir şey, yalnız bilgi veriyor"
+      }
+    },
+    "C": {
+      "state": 7,
+      "key": {
+        "s1": "yukarı",
+        "s1b": "büyük alım ya da satım var",
+        "s2": "bir haftadan önce",
+        "s3": "kapandı: süresi doldu ya da geri çekildi",
+        "s4": "az örnek var, bilinmiyor",
+        "s5": "hiçbir şey, yalnız bilgi veriyor"
+      }
+    },
+    "D": {
+      "state": 9,
+      "key": {
+        "s1": "aşağı",
+        "s1b": "hareket sürüyor",
+        "s2": "birkaç gün önce",
+        "s3": "evet, sürüyor",
+        "s4": "yarı yarıya",
+        "s5": "hiçbir şey, yalnız bilgi veriyor"
+      }
+    },
+    "E": {
+      "state": 12,
+      "key": {
+        "s1": "aşağı",
+        "s1b": "yön değişiyor",
+        "s2": "dün",
+        "s3": "evet, sürüyor",
+        "s4": "az örnek var, bilinmiyor",
+        "s5": "hiçbir şey, yalnız bilgi veriyor"
+      }
+    },
+    "F": {
+      "state": 10,
+      "key": {
+        "s1": "belirsiz",
+        "s1b": "büyük alım ya da satım var",
+        "s2": "dün",
+        "s3": "evet, sürüyor",
+        "s4": "az örnek var, bilinmiyor",
+        "s5": "hiçbir şey, yalnız bilgi veriyor"
+      }
+    }
+  }
+}

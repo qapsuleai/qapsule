@@ -1,0 +1,17 @@
+Yirmi yaşındasın. Hisse senedi alıp satıyorsun ama teknik analiz bilmiyorsun; grafik, indikatör, mum gibi terimler sana bir şey ifade etmiyor. Telefonuna bir bildirim geldi; ekrana yalnızca birkaç saniye bakacaksın. İlk bakışta ne anladığını cevapla; uzun uzun inceleme.
+
+Bu bir piyasa bilgi uygulamasının ekran görüntüsü.
+
+Görüntü: /private/var/folders/3h/tkg8gmr96tscr2t77stj77v40000gn/T/rdr.agNyNs/59acd941.png (Read aracıyla aç). Ekranda alt alta 5 kart var; her kartın sağ üst köşesinde bir harf var (A, B, C, D, E).
+
+Her harf için aşağıdaki altı soruyu cevapla. Her soruda yalnız verilen seçeneklerden birini, tırnak içindeki metni aynen yazarak seç.
+
+S1 Ne oldu? (yön): "yukarı" | "aşağı" | "belirsiz" | "anlamadım"
+S1b Ne oldu? (ne tür): "fiyat önemli bir seviyeyi geçti" | "yön değişiyor" | "hareket sürüyor" | "fiyat sıkıştı, hareketsiz" | "aşırı gitti" | "büyük alım ya da satım var" | "anlamadım"
+S2 Ne zaman? "bugün" | "dün" | "birkaç gün önce" | "bir haftadan önce" | "birkaç saat önce" | "bilmiyorum"
+S3 Hâlâ geçerli mi? "evet, sürüyor" | "hayır, artık geçerli değil" | "kapandı: gerçekleşti" | "kapandı: tutmadı" | "kapandı: süresi doldu ya da geri çekildi" | "bilmiyorum"
+S4 Ne kadar güvenilir? "geçmişte çoğunlukla tuttu" | "yarı yarıya" | "çoğunlukla tutmadı" | "az örnek var, bilinmiyor" | "hiçbir bilgi göremedim"
+S5 Bana ne yapmamı söylüyor? "al" | "sat" | "bekle" | "hiçbir şey, yalnız bilgi veriyor" | "bilmiyorum"
+
+Cevabını yalnız bir JSON nesnesi olarak ver, başka hiçbir şey yazma:
+{"A": {"S1": "…", "S1b": "…", "S2": "…", "S3": "…", "S4": "…", "S5": "…"}, "B": {"S1": "…", "S1b": "…", "S2": "…", "S3": "…", "S4": "…", "S5": "…"}, "C": {"S1": "…", "S1b": "…", "S2": "…", "S3": "…", "S4": "…", "S5": "…"}, "D": {"S1": "…", "S1b": "…", "S2": "…", "S3": "…", "S4": "…", "S5": "…"}, "E": {"S1": "…", "S1b": "…", "S2": "…", "S3": "…", "S4": "…", "S5": "…"}, "not": "(isteğe bağlı, kısa)"}

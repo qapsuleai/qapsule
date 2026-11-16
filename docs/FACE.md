@@ -11,7 +11,7 @@ Kanıt: `rounds/R4/experiments/M8/RESULTS.md` (ölçüler, ham kayıtlar `raw/`)
 
 ## Seçilen: `vadrel` — "cümle önde"
 
-Kod `crates/qp-grammar/src/faces/vadrel.rs`; kayıt `faces.rs` (`FACES`). Yükseklik 188 CSS px
+Kod `crates/qp-grammar/src/faces/vadrel.rs`; kayıt `faces.rs` (`FACES`). Gösterimin varsayılan yüzü (`PRESENTED_FACE`); protokolün varsayılanı `r3` kalır (çıplak bağlantılar ve dökümler değişmez). Altınlar: `fixtures/golden/demo/feed-*-r4.*` (`vadrel`), `feed-tr-dark-fotolay.*`. Yükseklik 188 CSS px
 (telefon genişliği 390'da; kabuk sayıyı çekirdekten alır).
 
 ```

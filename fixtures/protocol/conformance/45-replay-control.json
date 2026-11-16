@@ -1,0 +1,1322 @@
+{
+  "covers": [
+    "replay",
+    "replay-status",
+    "replay-step",
+    "replay-speed",
+    "replay-pause",
+    "replay-resume",
+    "replay-seek",
+    "replay-reset",
+    "forbidden"
+  ],
+  "description": "R4 (§21): a replay host over the synthetic market (two instruments, daily bars moved inside the day by their hourly bars, the capsule engine on both). The owner drives the timeline with `replay` messages: status, one step (the day opens), a day of steps (the notifications of the steps follow the `result`; a closed bar goes through the capsule engine), pause / speed / resume / pause (the content never depends on the wall clock), seek forward by date and by time. A viewer may read the status but not move the timeline; invalid controls are `invalid` with a path, an unknown control a schema error. Seeking back rebuilds the authority (epoch 1): every connection is closed and says hello again, and the document is the one the steps up to that position produce.",
+  "final": {
+    "log_len": 5
+  },
+  "init": {
+    "clock": 0,
+    "document": {
+      "display_tz": "Europe/Istanbul",
+      "id": "doc-replay",
+      "schema_version": "0",
+      "title": "Yeniden oynatma"
+    },
+    "epoch": 0,
+    "principals": [
+      {
+        "author": {
+          "kind": "engine",
+          "name": "host",
+          "version": "0"
+        },
+        "id": "host",
+        "role": "host"
+      },
+      {
+        "author": {
+          "kind": "human",
+          "name": "Arkın"
+        },
+        "id": "arkin",
+        "role": "owner"
+      },
+      {
+        "author": {
+          "kind": "agent",
+          "name": "scout"
+        },
+        "id": "scout",
+        "role": "proposer"
+      },
+      {
+        "author": {
+          "kind": "human",
+          "name": "Guest"
+        },
+        "id": "guest",
+        "role": "viewer"
+      }
+    ],
+    "replay": {
+      "bind_all": true,
+      "capsules_all": true,
+      "days": 70,
+      "fine": "1h",
+      "history": 50,
+      "instruments": 2,
+      "speed": 8.0
+    }
+  },
+  "name": "45-replay-control",
+  "steps": [
+    {
+      "expect": [
+        {
+          "conn": "a",
+          "msg": {
+            "epoch": 0,
+            "seq": 3,
+            "type": "welcome"
+          }
+        }
+      ],
+      "send": {
+        "conn": "a",
+        "msg": {
+          "principal": "arkin",
+          "protocol": "qp/0",
+          "surface": {
+            "kind": "phone"
+          },
+          "type": "hello"
+        }
+      }
+    },
+    {
+      "expect": [
+        {
+          "conn": "a",
+          "msg": {
+            "id": "caps",
+            "status": "subscribed",
+            "type": "ack"
+          }
+        }
+      ],
+      "note": "Every capsule transition, for every reader preference.",
+      "send": {
+        "conn": "a",
+        "msg": {
+          "id": "caps",
+          "topic": {
+            "all": true,
+            "kind": "capsules"
+          },
+          "type": "subscribe"
+        }
+      }
+    },
+    {
+      "expect": [
+        {
+          "conn": "g",
+          "msg": {
+            "epoch": 0,
+            "seq": 3,
+            "type": "welcome"
+          }
+        }
+      ],
+      "send": {
+        "conn": "g",
+        "msg": {
+          "principal": "guest",
+          "protocol": "qp/0",
+          "surface": {
+            "kind": "phone"
+          },
+          "type": "hello"
+        }
+      }
+    },
+    {
+      "expect": [
+        {
+          "conn": "a",
+          "msg": {
+            "data": {
+              "kind": "replay",
+              "replay": {
+                "days": {
+                  "bar": 0,
+                  "fine": 40,
+                  "ohlc": 0
+                },
+                "done": false,
+                "epoch": 0,
+                "events": 0,
+                "fine": "1h",
+                "from_t": 1678690800000,
+                "instruments": 2,
+                "interval": "1d",
+                "paused": true,
+                "source": "synthetic",
+                "speed": 8.0,
+                "step": 0,
+                "steps": 180,
+                "synthetic": true,
+                "t": 1678431600000,
+                "to_t": 1680879600000
+              }
+            },
+            "id": "r1",
+            "now": 1678431600000,
+            "seq": 3,
+            "type": "result"
+          }
+        }
+      ],
+      "note": "Paused at the start: virtual time = the last history bar; synthetic data, said so.",
+      "send": {
+        "conn": "a",
+        "msg": {
+          "control": {
+            "kind": "status"
+          },
+          "id": "r1",
+          "type": "replay"
+        }
+      }
+    },
+    {
+      "expect": [
+        {
+          "conn": "a",
+          "msg": {
+            "data": {
+              "kind": "replay",
+              "replay": {
+                "days": {
+                  "bar": 0,
+                  "fine": 40,
+                  "ohlc": 0
+                },
+                "done": false,
+                "epoch": 0,
+                "events": 2,
+                "fine": "1h",
+                "from_t": 1678690800000,
+                "instruments": 2,
+                "interval": "1d",
+                "paused": true,
+                "source": "synthetic",
+                "speed": 8.0,
+                "step": 1,
+                "steps": 180,
+                "synthetic": true,
+                "t": 1678690800000,
+                "to_t": 1680879600000
+              }
+            },
+            "id": "r2",
+            "now": 1678690800000,
+            "seq": 5,
+            "type": "result"
+          }
+        },
+        {
+          "conn": "a",
+          "msg": {
+            "event": {
+              "capsule": {
+                "born_bar": 48,
+                "confirmations": 1,
+                "direction": "up",
+                "finding": "fnd.SYN02.extreme.up.48",
+                "id": "cap.SYN02.extreme.up.48",
+                "importance": 0.9567729139722839,
+                "instrument": "SYN02",
+                "kind": "extreme",
+                "last_bar": 49,
+                "ledger_at_birth": {
+                  "n": 2,
+                  "realized": 0
+                },
+                "sentence": {
+                  "en": "1 bar ago, SYN02's RSI crossed above 70; it fell back below on this bar and is now 66.4, no longer above 70. The overbought state has ended. Its record is still thin: it played out in 0 of 2 cases.",
+                  "text": "SYN02'de RSI 1 bar önce 70'in üstüne çıktı, bu barda yeniden altına indi; şu an 66,4, artık 70'in üstünde değil. Aşırı alım sona erdi. Karnesi henüz az örnekli: 2 seferin 0'ında tuttu.",
+                  "tr": "SYN02'de RSI 1 bar önce 70'in üstüne çıktı, bu barda yeniden altına indi; şu an 66,4, artık 70'in üstünde değil. Aşırı alım sona erdi. Karnesi henüz az örnekli: 2 seferin 0'ında tuttu."
+                },
+                "series": "syn02",
+                "stage": "weakened",
+                "state": "live",
+                "t": 1678431600000,
+                "tier": 3,
+                "time": "state",
+                "trust": "replica"
+              },
+              "kind": "capsule",
+              "seq": 5,
+              "transition": {
+                "bar": 49,
+                "facts": [
+                  "fx.SYN02.extreme.rsi.overbought_end.49"
+                ],
+                "reason": "state_ended",
+                "stage": "weakened",
+                "t": 1678431600000
+              }
+            },
+            "sub": "caps",
+            "type": "notify"
+          }
+        }
+      ],
+      "note": "One step: the first replayed day opens (a `bar` event per instrument at the session open).",
+      "send": {
+        "conn": "a",
+        "msg": {
+          "control": {
+            "kind": "step"
+          },
+          "id": "r2",
+          "type": "replay"
+        }
+      }
+    },
+    {
+      "expect": [
+        {
+          "conn": "a",
+          "msg": {
+            "data": {
+              "kind": "replay",
+              "replay": {
+                "days": {
+                  "bar": 0,
+                  "fine": 40,
+                  "ohlc": 0
+                },
+                "done": false,
+                "epoch": 0,
+                "events": 26,
+                "fine": "1h",
+                "from_t": 1678690800000,
+                "instruments": 2,
+                "interval": "1d",
+                "paused": true,
+                "source": "synthetic",
+                "speed": 8.0,
+                "step": 13,
+                "steps": 180,
+                "synthetic": true,
+                "t": 1678788000000,
+                "to_t": 1680879600000
+              }
+            },
+            "id": "r3",
+            "now": 1678788000000,
+            "seq": 7,
+            "type": "result"
+          }
+        }
+      ],
+      "note": "The rest of that day and the next open: the first day's bar becomes final and the engine writes its entries.",
+      "send": {
+        "conn": "a",
+        "msg": {
+          "control": {
+            "kind": "step",
+            "n": 12
+          },
+          "id": "r3",
+          "type": "replay"
+        }
+      }
+    },
+    {
+      "expect": [
+        {
+          "conn": "a",
+          "msg": {
+            "data": {
+              "kind": "replay",
+              "replay": {
+                "days": {
+                  "bar": 0,
+                  "fine": 40,
+                  "ohlc": 0
+                },
+                "done": false,
+                "epoch": 0,
+                "events": 26,
+                "fine": "1h",
+                "from_t": 1678690800000,
+                "instruments": 2,
+                "interval": "1d",
+                "paused": true,
+                "source": "synthetic",
+                "speed": 20.0,
+                "step": 13,
+                "steps": 180,
+                "synthetic": true,
+                "t": 1678788000000,
+                "to_t": 1680879600000
+              }
+            },
+            "id": "r4",
+            "now": 1678788000000,
+            "seq": 7,
+            "type": "result"
+          }
+        }
+      ],
+      "send": {
+        "conn": "a",
+        "msg": {
+          "control": {
+            "kind": "speed",
+            "steps_per_s": 20.0
+          },
+          "id": "r4",
+          "type": "replay"
+        }
+      }
+    },
+    {
+      "expect": [
+        {
+          "conn": "a",
+          "msg": {
+            "data": {
+              "kind": "replay",
+              "replay": {
+                "days": {
+                  "bar": 0,
+                  "fine": 40,
+                  "ohlc": 0
+                },
+                "done": false,
+                "epoch": 0,
+                "events": 26,
+                "fine": "1h",
+                "from_t": 1678690800000,
+                "instruments": 2,
+                "interval": "1d",
+                "paused": false,
+                "source": "synthetic",
+                "speed": 20.0,
+                "step": 13,
+                "steps": 180,
+                "synthetic": true,
+                "t": 1678788000000,
+                "to_t": 1680879600000
+              }
+            },
+            "id": "r5",
+            "now": 1678788000000,
+            "seq": 7,
+            "type": "result"
+          }
+        }
+      ],
+      "note": "Running: steps follow the wall clock at 20 steps/s; no wall time passes in a transcript.",
+      "send": {
+        "conn": "a",
+        "msg": {
+          "control": {
+            "kind": "resume"
+          },
+          "id": "r5",
+          "type": "replay"
+        }
+      }
+    },
+    {
+      "expect": [
+        {
+          "conn": "a",
+          "msg": {
+            "data": {
+              "kind": "replay",
+              "replay": {
+                "days": {
+                  "bar": 0,
+                  "fine": 40,
+                  "ohlc": 0
+                },
+                "done": false,
+                "epoch": 0,
+                "events": 26,
+                "fine": "1h",
+                "from_t": 1678690800000,
+                "instruments": 2,
+                "interval": "1d",
+                "paused": true,
+                "source": "synthetic",
+                "speed": 20.0,
+                "step": 13,
+                "steps": 180,
+                "synthetic": true,
+                "t": 1678788000000,
+                "to_t": 1680879600000
+              }
+            },
+            "id": "r6",
+            "now": 1678788000000,
+            "seq": 7,
+            "type": "result"
+          }
+        }
+      ],
+      "send": {
+        "conn": "a",
+        "msg": {
+          "control": {
+            "kind": "pause"
+          },
+          "id": "r6",
+          "type": "replay"
+        }
+      }
+    },
+    {
+      "expect": [
+        {
+          "conn": "a",
+          "msg": {
+            "data": {
+              "kind": "replay",
+              "replay": {
+                "days": {
+                  "bar": 0,
+                  "fine": 40,
+                  "ohlc": 0
+                },
+                "done": false,
+                "epoch": 0,
+                "events": 90,
+                "fine": "1h",
+                "from_t": 1678690800000,
+                "instruments": 2,
+                "interval": "1d",
+                "paused": true,
+                "source": "synthetic",
+                "speed": 20.0,
+                "step": 45,
+                "steps": 180,
+                "synthetic": true,
+                "t": 1679065200000,
+                "to_t": 1680879600000
+              }
+            },
+            "id": "r7",
+            "now": 1679065200000,
+            "seq": 13,
+            "type": "result"
+          }
+        },
+        {
+          "conn": "a",
+          "msg": {
+            "event": {
+              "capsule": {
+                "born_bar": 48,
+                "confirmations": 2,
+                "direction": "up",
+                "finding": "fnd.SYN02.breakout.up.48",
+                "id": "cap.SYN02.breakout.up.48",
+                "importance": 2.6201332728073634,
+                "instrument": "SYN02",
+                "kind": "breakout",
+                "last_bar": 51,
+                "ledger_at_birth": {
+                  "n": 5,
+                  "realized": 1
+                },
+                "sentence": {
+                  "en": "3 bars ago, SYN02 broke above resistance at 129.62 (close 134.33): an upside breakout. It was invalidated on this bar and is no longer valid. Its record is still thin: it played out in 1 of 5 cases.",
+                  "text": "SYN02 3 bar önce 129,62'deki direnci yukarı kırdı (kapanış 134,33): yukarı kırılım. Sinyal bu barda geçersiz oldu; artık geçerli değil. Karnesi henüz az örnekli: 5 seferin 1'inde tuttu.",
+                  "tr": "SYN02 3 bar önce 129,62'deki direnci yukarı kırdı (kapanış 134,33): yukarı kırılım. Sinyal bu barda geçersiz oldu; artık geçerli değil. Karnesi henüz az örnekli: 5 seferin 1'inde tuttu."
+                },
+                "series": "syn02",
+                "stage": "invalidated",
+                "state": "invalidated",
+                "t": 1678777200000,
+                "tier": 1,
+                "time": "event",
+                "trust": "replica"
+              },
+              "kind": "capsule",
+              "seq": 9,
+              "transition": {
+                "bar": 51,
+                "reason": "barrier.stop",
+                "stage": "invalidated",
+                "t": 1678777200000
+              }
+            },
+            "sub": "caps",
+            "type": "notify"
+          }
+        },
+        {
+          "conn": "a",
+          "msg": {
+            "event": {
+              "capsule": {
+                "born_bar": 48,
+                "confirmations": 1,
+                "direction": "up",
+                "finding": "fnd.SYN02.extreme.up.48",
+                "id": "cap.SYN02.extreme.up.48",
+                "importance": 0.9567729139722839,
+                "instrument": "SYN02",
+                "kind": "extreme",
+                "last_bar": 51,
+                "ledger_at_birth": {
+                  "n": 2,
+                  "realized": 0
+                },
+                "sentence": {
+                  "en": "3 bars ago, SYN02's RSI crossed above 70; it fell back below 2 bars ago and is now 54.4, no longer above 70. The overbought state has ended. The stretch did not continue: the price fell back on this bar, so it counts as not played out. Its record is still thin: it played out in 0 of 2 cases.",
+                  "text": "SYN02'de RSI 3 bar önce 70'in üstüne çıktı, 2 bar önce yeniden altına indi; şu an 54,4, artık 70'in üstünde değil. Aşırı alım sona erdi. Uzama sürmedi: fiyat bu barda geri düştü; sinyal gerçekleşmedi sayıldı. Karnesi henüz az örnekli: 2 seferin 0'ında tuttu.",
+                  "tr": "SYN02'de RSI 3 bar önce 70'in üstüne çıktı, 2 bar önce yeniden altına indi; şu an 54,4, artık 70'in üstünde değil. Aşırı alım sona erdi. Uzama sürmedi: fiyat bu barda geri düştü; sinyal gerçekleşmedi sayıldı. Karnesi henüz az örnekli: 2 seferin 0'ında tuttu."
+                },
+                "series": "syn02",
+                "stage": "invalidated",
+                "state": "invalidated",
+                "t": 1678777200000,
+                "tier": 3,
+                "time": "state",
+                "trust": "replica"
+              },
+              "kind": "capsule",
+              "seq": 9,
+              "transition": {
+                "bar": 51,
+                "reason": "barrier.stop",
+                "stage": "invalidated",
+                "t": 1678777200000
+              }
+            },
+            "sub": "caps",
+            "type": "notify"
+          }
+        },
+        {
+          "conn": "a",
+          "msg": {
+            "event": {
+              "capsule": {
+                "born_bar": 53,
+                "confirmations": 1,
+                "direction": "up",
+                "finding": "fnd.SYN01.breakout.up.53",
+                "id": "cap.SYN01.breakout.up.53",
+                "importance": 1.530337781986779,
+                "instrument": "SYN01",
+                "kind": "breakout",
+                "last_bar": 53,
+                "ledger_at_birth": {
+                  "n": 7,
+                  "realized": 1
+                },
+                "sentence": {
+                  "en": "On this bar, SYN01 broke above resistance at 5.23 (close 5.35): an upside breakout. It still holds. Its record is still thin: it played out in 1 of 7 cases.",
+                  "text": "SYN01 bu barda 5,23'teki direnci yukarı kırdı (kapanış 5,35): yukarı kırılım. Hâlâ geçerli. Karnesi henüz az örnekli: 7 seferin 1'inde tuttu.",
+                  "tr": "SYN01 bu barda 5,23'teki direnci yukarı kırdı (kapanış 5,35): yukarı kırılım. Hâlâ geçerli. Karnesi henüz az örnekli: 7 seferin 1'inde tuttu."
+                },
+                "series": "syn01",
+                "stage": "born",
+                "state": "live",
+                "t": 1678950000000,
+                "tier": 3,
+                "time": "event",
+                "trust": "replica"
+              },
+              "kind": "capsule",
+              "seq": 12,
+              "transition": {
+                "bar": 53,
+                "facts": [
+                  "fx.SYN01.breakout.range.up.53"
+                ],
+                "reason": "new_story",
+                "stage": "born",
+                "t": 1678950000000
+              }
+            },
+            "sub": "caps",
+            "type": "notify"
+          }
+        }
+      ],
+      "note": "Forward to the start of a day (nothing of that day taken): the steps in between are taken; their notifications follow.",
+      "send": {
+        "conn": "a",
+        "msg": {
+          "control": {
+            "date": "2023-03-20",
+            "kind": "seek"
+          },
+          "id": "r7",
+          "type": "replay"
+        }
+      }
+    },
+    {
+      "expect": [
+        {
+          "conn": "a",
+          "msg": {
+            "data": {
+              "kind": "replay",
+              "replay": {
+                "days": {
+                  "bar": 0,
+                  "fine": 40,
+                  "ohlc": 0
+                },
+                "done": false,
+                "epoch": 0,
+                "events": 120,
+                "fine": "1h",
+                "from_t": 1678690800000,
+                "instruments": 2,
+                "interval": "1d",
+                "paused": true,
+                "source": "synthetic",
+                "speed": 20.0,
+                "step": 60,
+                "steps": 180,
+                "synthetic": true,
+                "t": 1679400000000,
+                "to_t": 1680879600000
+              }
+            },
+            "id": "r8",
+            "now": 1679400000000,
+            "seq": 17,
+            "type": "result"
+          }
+        },
+        {
+          "conn": "a",
+          "msg": {
+            "event": {
+              "capsule": {
+                "born_bar": 54,
+                "confirmations": 1,
+                "direction": "up",
+                "finding": "fnd.SYN02.continuation.up.54",
+                "id": "cap.SYN02.continuation.up.54",
+                "importance": 1.5159674336706512,
+                "instrument": "SYN02",
+                "kind": "continuation",
+                "last_bar": 54,
+                "ledger_at_birth": {
+                  "n": 0,
+                  "realized": 0
+                },
+                "sentence": {
+                  "en": "SYN02 is above the short average (128.70) as of this bar, now at 134.50. The uptrend is still in place. No track record yet.",
+                  "text": "SYN02 bu bar itibarıyla kısa ortalamanın (128,70) üstünde; şu an 134,50. Yükseliş eğilimi sürüyor. Henüz karnesi yok.",
+                  "tr": "SYN02 bu bar itibarıyla kısa ortalamanın (128,70) üstünde; şu an 134,50. Yükseliş eğilimi sürüyor. Henüz karnesi yok."
+                },
+                "series": "syn02",
+                "stage": "born",
+                "state": "live",
+                "t": 1679036400000,
+                "tier": 3,
+                "time": "state",
+                "trust": "replica"
+              },
+              "kind": "capsule",
+              "seq": 15,
+              "transition": {
+                "bar": 54,
+                "facts": [
+                  "fx.SYN02.continuation.ma_stack.bull.54"
+                ],
+                "reason": "new_story",
+                "stage": "born",
+                "t": 1679036400000
+              }
+            },
+            "sub": "caps",
+            "type": "notify"
+          }
+        },
+        {
+          "conn": "a",
+          "msg": {
+            "event": {
+              "capsule": {
+                "born_bar": 53,
+                "confirmations": 1,
+                "direction": "up",
+                "finding": "fnd.SYN01.breakout.up.53",
+                "id": "cap.SYN01.breakout.up.53",
+                "importance": 1.530337781986779,
+                "instrument": "SYN01",
+                "kind": "breakout",
+                "last_bar": 55,
+                "ledger_at_birth": {
+                  "n": 7,
+                  "realized": 1
+                },
+                "sentence": {
+                  "en": "2 bars ago, SYN01 broke above resistance at 5.23 (close 5.35): an upside breakout. It was invalidated on this bar and is no longer valid. Its record is still thin: it played out in 1 of 7 cases.",
+                  "text": "SYN01 2 bar önce 5,23'teki direnci yukarı kırdı (kapanış 5,35): yukarı kırılım. Sinyal bu barda geçersiz oldu; artık geçerli değil. Karnesi henüz az örnekli: 7 seferin 1'inde tuttu.",
+                  "tr": "SYN01 2 bar önce 5,23'teki direnci yukarı kırdı (kapanış 5,35): yukarı kırılım. Sinyal bu barda geçersiz oldu; artık geçerli değil. Karnesi henüz az örnekli: 7 seferin 1'inde tuttu."
+                },
+                "series": "syn01",
+                "stage": "invalidated",
+                "state": "invalidated",
+                "t": 1679295600000,
+                "tier": 3,
+                "time": "event",
+                "trust": "replica"
+              },
+              "kind": "capsule",
+              "seq": 16,
+              "transition": {
+                "bar": 55,
+                "reason": "barrier.stop",
+                "stage": "invalidated",
+                "t": 1679295600000
+              }
+            },
+            "sub": "caps",
+            "type": "notify"
+          }
+        },
+        {
+          "conn": "a",
+          "msg": {
+            "event": {
+              "capsule": {
+                "born_bar": 54,
+                "confirmations": 1,
+                "direction": "up",
+                "finding": "fnd.SYN02.continuation.up.54",
+                "id": "cap.SYN02.continuation.up.54",
+                "importance": 1.5159674336706512,
+                "instrument": "SYN02",
+                "kind": "continuation",
+                "last_bar": 55,
+                "ledger_at_birth": {
+                  "n": 0,
+                  "realized": 0
+                },
+                "sentence": {
+                  "en": "SYN02 has been above the short average (128.70) for 1 bar and is now at 145.23. The uptrend is still in place. The expected outcome came true on this bar. No track record yet.",
+                  "text": "SYN02 1 bardır kısa ortalamanın (128,70) üstünde; şu an 145,23. Yükseliş eğilimi sürüyor. Beklenen sonuç bu barda gerçekleşti. Henüz karnesi yok.",
+                  "tr": "SYN02 1 bardır kısa ortalamanın (128,70) üstünde; şu an 145,23. Yükseliş eğilimi sürüyor. Beklenen sonuç bu barda gerçekleşti. Henüz karnesi yok."
+                },
+                "series": "syn02",
+                "stage": "realized",
+                "state": "live",
+                "t": 1679295600000,
+                "tier": 3,
+                "time": "state",
+                "trust": "replica"
+              },
+              "kind": "capsule",
+              "seq": 17,
+              "transition": {
+                "bar": 55,
+                "reason": "barrier.target",
+                "stage": "realized",
+                "t": 1679295600000
+              }
+            },
+            "sub": "caps",
+            "type": "notify"
+          }
+        },
+        {
+          "conn": "a",
+          "msg": {
+            "event": {
+              "capsule": {
+                "born_bar": 55,
+                "confirmations": 2,
+                "direction": "up",
+                "finding": "fnd.SYN02.breakout.up.55",
+                "id": "cap.SYN02.breakout.up.55",
+                "importance": 2.6189747103240584,
+                "instrument": "SYN02",
+                "kind": "breakout",
+                "last_bar": 55,
+                "ledger_at_birth": {
+                  "n": 7,
+                  "realized": 1
+                },
+                "sentence": {
+                  "en": "On this bar, SYN02 broke above resistance at 136.50 (close 145.23): an upside breakout. Volume confirmed it on this bar; 2 independent evidence families support it. It still holds. Its record is still thin: it played out in 1 of 7 cases.",
+                  "text": "SYN02 bu barda 136,50'deki direnci yukarı kırdı (kapanış 145,23): yukarı kırılım. Bu barda hacim de teyit etti; 2 bağımsız kanıt ailesi destekliyor. Hâlâ geçerli. Karnesi henüz az örnekli: 7 seferin 1'inde tuttu.",
+                  "tr": "SYN02 bu barda 136,50'deki direnci yukarı kırdı (kapanış 145,23): yukarı kırılım. Bu barda hacim de teyit etti; 2 bağımsız kanıt ailesi destekliyor. Hâlâ geçerli. Karnesi henüz az örnekli: 7 seferin 1'inde tuttu."
+                },
+                "series": "syn02",
+                "stage": "confirmed",
+                "state": "live",
+                "t": 1679295600000,
+                "tier": 1,
+                "time": "event",
+                "trust": "replica"
+              },
+              "kind": "capsule",
+              "seq": 17,
+              "transition": {
+                "bar": 55,
+                "facts": [
+                  "fx.SYN02.breakout.range.up.55"
+                ],
+                "reason": "new_story",
+                "stage": "born",
+                "t": 1679295600000
+              }
+            },
+            "sub": "caps",
+            "type": "notify"
+          }
+        },
+        {
+          "conn": "a",
+          "msg": {
+            "event": {
+              "capsule": {
+                "born_bar": 55,
+                "confirmations": 1,
+                "direction": "up",
+                "finding": "fnd.SYN02.extreme.up.55",
+                "id": "cap.SYN02.extreme.up.55",
+                "importance": 1.4726870953578604,
+                "instrument": "SYN02",
+                "kind": "extreme",
+                "last_bar": 55,
+                "ledger_at_birth": {
+                  "n": 3,
+                  "realized": 0
+                },
+                "sentence": {
+                  "en": "SYN02's RSI is above 70 as of this bar, now 75.6. The overbought state is still in place. Its record is still thin: it played out in 0 of 3 cases.",
+                  "text": "SYN02'de RSI bu bar itibarıyla 70'in üstünde; şu an 75,6. Aşırı alım sürüyor. Karnesi henüz az örnekli: 3 seferin 0'ında tuttu.",
+                  "tr": "SYN02'de RSI bu bar itibarıyla 70'in üstünde; şu an 75,6. Aşırı alım sürüyor. Karnesi henüz az örnekli: 3 seferin 0'ında tuttu."
+                },
+                "series": "syn02",
+                "stage": "born",
+                "state": "live",
+                "t": 1679295600000,
+                "tier": 3,
+                "time": "state",
+                "trust": "replica"
+              },
+              "kind": "capsule",
+              "seq": 17,
+              "transition": {
+                "bar": 55,
+                "facts": [
+                  "fx.SYN02.extreme.rsi.overbought.55"
+                ],
+                "reason": "new_story",
+                "stage": "born",
+                "t": 1679295600000
+              }
+            },
+            "sub": "caps",
+            "type": "notify"
+          }
+        },
+        {
+          "conn": "a",
+          "msg": {
+            "event": {
+              "capsule": {
+                "born_bar": 55,
+                "confirmations": 2,
+                "direction": "up",
+                "finding": "fnd.SYN02.breakout.up.55",
+                "id": "cap.SYN02.breakout.up.55",
+                "importance": 2.6189747103240584,
+                "instrument": "SYN02",
+                "kind": "breakout",
+                "last_bar": 55,
+                "ledger_at_birth": {
+                  "n": 7,
+                  "realized": 1
+                },
+                "sentence": {
+                  "en": "On this bar, SYN02 broke above resistance at 136.50 (close 145.23): an upside breakout. Volume confirmed it on this bar; 2 independent evidence families support it. It still holds. Its record is still thin: it played out in 1 of 7 cases.",
+                  "text": "SYN02 bu barda 136,50'deki direnci yukarı kırdı (kapanış 145,23): yukarı kırılım. Bu barda hacim de teyit etti; 2 bağımsız kanıt ailesi destekliyor. Hâlâ geçerli. Karnesi henüz az örnekli: 7 seferin 1'inde tuttu.",
+                  "tr": "SYN02 bu barda 136,50'deki direnci yukarı kırdı (kapanış 145,23): yukarı kırılım. Bu barda hacim de teyit etti; 2 bağımsız kanıt ailesi destekliyor. Hâlâ geçerli. Karnesi henüz az örnekli: 7 seferin 1'inde tuttu."
+                },
+                "series": "syn02",
+                "stage": "confirmed",
+                "state": "live",
+                "t": 1679295600000,
+                "tier": 1,
+                "time": "event",
+                "trust": "replica"
+              },
+              "kind": "capsule",
+              "seq": 17,
+              "transition": {
+                "bar": 55,
+                "facts": [
+                  "fx.SYN02.flow.volume_surge.surge.55"
+                ],
+                "reason": "new_family",
+                "stage": "confirmed",
+                "t": 1679295600000
+              }
+            },
+            "sub": "caps",
+            "type": "notify"
+          }
+        }
+      ],
+      "note": "Forward to a virtual time.",
+      "send": {
+        "conn": "a",
+        "msg": {
+          "control": {
+            "kind": "seek",
+            "t": 1679400000000
+          },
+          "id": "r8",
+          "type": "replay"
+        }
+      }
+    },
+    {
+      "expect": [
+        {
+          "conn": "g",
+          "msg": {
+            "data": {
+              "kind": "replay",
+              "replay": {
+                "days": {
+                  "bar": 0,
+                  "fine": 40,
+                  "ohlc": 0
+                },
+                "done": false,
+                "epoch": 0,
+                "events": 120,
+                "fine": "1h",
+                "from_t": 1678690800000,
+                "instruments": 2,
+                "interval": "1d",
+                "paused": true,
+                "source": "synthetic",
+                "speed": 20.0,
+                "step": 60,
+                "steps": 180,
+                "synthetic": true,
+                "t": 1679400000000,
+                "to_t": 1680879600000
+              }
+            },
+            "id": "r9",
+            "now": 1679400000000,
+            "seq": 17,
+            "type": "result"
+          }
+        }
+      ],
+      "note": "A viewer reads the status.",
+      "send": {
+        "conn": "g",
+        "msg": {
+          "control": {
+            "kind": "status"
+          },
+          "id": "r9",
+          "type": "replay"
+        }
+      }
+    },
+    {
+      "expect": [
+        {
+          "conn": "g",
+          "msg": {
+            "error": {
+              "code": "forbidden",
+              "hint": "Ask for `{\"kind\":\"status\"}`; the timeline is shared by every reader.",
+              "message": "only the roles `host` and `owner` control the replay",
+              "path": "/control"
+            },
+            "id": "r10",
+            "type": "error"
+          }
+        }
+      ],
+      "note": "A viewer may not move the shared timeline.",
+      "send": {
+        "conn": "g",
+        "msg": {
+          "control": {
+            "kind": "step"
+          },
+          "id": "r10",
+          "type": "replay"
+        }
+      }
+    },
+    {
+      "expect": [
+        {
+          "conn": "a",
+          "msg": {
+            "error": {
+              "code": "invalid",
+              "expected": [
+                "0 < steps_per_s <= 1000"
+              ],
+              "message": "speed 0 is not in (0, 1000] steps per second",
+              "path": "/control/steps_per_s"
+            },
+            "id": "r11",
+            "type": "error"
+          }
+        }
+      ],
+      "send": {
+        "conn": "a",
+        "msg": {
+          "control": {
+            "kind": "speed",
+            "steps_per_s": 0.0
+          },
+          "id": "r11",
+          "type": "replay"
+        }
+      }
+    },
+    {
+      "expect": [
+        {
+          "conn": "a",
+          "msg": {
+            "error": {
+              "code": "invalid",
+              "expected": [
+                "t",
+                "date",
+                "step"
+              ],
+              "message": "`seek` takes exactly one of `t`, `date`, `step`",
+              "path": "/control"
+            },
+            "id": "r12",
+            "type": "error"
+          }
+        }
+      ],
+      "note": "Exactly one of `t`, `date`, `step`.",
+      "send": {
+        "conn": "a",
+        "msg": {
+          "control": {
+            "kind": "seek",
+            "step": 2,
+            "t": 1
+          },
+          "id": "r12",
+          "type": "replay"
+        }
+      }
+    },
+    {
+      "expect": [
+        {
+          "conn": "a",
+          "msg": {
+            "error": {
+              "code": "schema",
+              "expected": [
+                "status",
+                "pause",
+                "resume",
+                "speed",
+                "step",
+                "seek"
+              ],
+              "hint": "Use one of the expected names; {\"kind\":\"describe\"} lists ops and queries.",
+              "message": "unknown kind `rewind`",
+              "path": "/control/kind"
+            },
+            "id": "r13",
+            "type": "error"
+          }
+        }
+      ],
+      "note": "Not a control: the authority's schema error.",
+      "send": {
+        "conn": "a",
+        "msg": {
+          "control": {
+            "kind": "rewind"
+          },
+          "id": "r13",
+          "type": "replay"
+        }
+      }
+    },
+    {
+      "expect": [
+        {
+          "conn": "a",
+          "msg": {
+            "data": {
+              "kind": "replay",
+              "replay": {
+                "days": {
+                  "bar": 0,
+                  "fine": 40,
+                  "ohlc": 0
+                },
+                "done": false,
+                "epoch": 1,
+                "events": 10,
+                "fine": "1h",
+                "from_t": 1678690800000,
+                "instruments": 2,
+                "interval": "1d",
+                "paused": true,
+                "reset": true,
+                "source": "synthetic",
+                "speed": 20.0,
+                "step": 5,
+                "steps": 180,
+                "synthetic": true,
+                "t": 1678705200000,
+                "to_t": 1680879600000
+              }
+            },
+            "id": "r14",
+            "now": 1678705200000,
+            "seq": 5,
+            "type": "result"
+          }
+        }
+      ],
+      "note": "Back: the authority is rebuilt and advanced to step 5 silently (`reset`, epoch 1).",
+      "send": {
+        "conn": "a",
+        "msg": {
+          "control": {
+            "kind": "seek",
+            "step": 5
+          },
+          "id": "r14",
+          "type": "replay"
+        }
+      }
+    },
+    {
+      "expect": [
+        {
+          "conn": "a",
+          "msg": {
+            "error": {
+              "code": "handshake",
+              "hint": "Send {\"type\":\"hello\",\"protocol\":\"qp/0\",\"principal\":…,\"surface\":{\"kind\":…}} first.",
+              "message": "the first message on a connection must be `hello`"
+            },
+            "id": "q1",
+            "type": "error"
+          }
+        }
+      ],
+      "note": "The connection was closed by the reset.",
+      "send": {
+        "conn": "a",
+        "msg": {
+          "id": "q1",
+          "query": {
+            "kind": "ledger"
+          },
+          "type": "query"
+        }
+      }
+    },
+    {
+      "expect": [
+        {
+          "conn": "a",
+          "msg": {
+            "epoch": 1,
+            "seq": 5,
+            "type": "welcome"
+          }
+        }
+      ],
+      "send": {
+        "conn": "a",
+        "msg": {
+          "principal": "arkin",
+          "protocol": "qp/0",
+          "surface": {
+            "kind": "phone"
+          },
+          "type": "hello"
+        }
+      }
+    },
+    {
+      "expect": [
+        {
+          "conn": "a",
+          "msg": {
+            "data": {
+              "kind": "replay",
+              "replay": {
+                "days": {
+                  "bar": 0,
+                  "fine": 40,
+                  "ohlc": 0
+                },
+                "done": false,
+                "epoch": 1,
+                "events": 10,
+                "fine": "1h",
+                "from_t": 1678690800000,
+                "instruments": 2,
+                "interval": "1d",
+                "paused": true,
+                "source": "synthetic",
+                "speed": 20.0,
+                "step": 5,
+                "steps": 180,
+                "synthetic": true,
+                "t": 1678705200000,
+                "to_t": 1680879600000
+              }
+            },
+            "id": "r15",
+            "now": 1678705200000,
+            "seq": 5,
+            "type": "result"
+          }
+        }
+      ],
+      "send": {
+        "conn": "a",
+        "msg": {
+          "control": {
+            "kind": "status"
+          },
+          "id": "r15",
+          "type": "replay"
+        }
+      }
+    }
+  ]
+}

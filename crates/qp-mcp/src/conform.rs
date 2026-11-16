@@ -8,7 +8,9 @@
 //!   adapter is kept).
 //! - `command` with exactly one op → `tools/call op_<name>`; any other `command` →
 //!   `tools/call command`; `query` → `tools/call query_<kind>` (or `query` for an
-//!   unknown kind); `subscribe`, `unsubscribe`, `attend` → their tools. The request id
+//!   unknown kind); `replay` → `tools/call replay_<kind>` (R4, §21; the transcript's
+//!   init has `init.replay`, so the hub wraps a replay host); `subscribe`,
+//!   `unsubscribe`, `attend` → their tools. The request id
 //!   travels in `_meta["dev.qapsule/id"]` (op/query tools) or the `id` argument.
 //! - Not carried over MCP, handed to the session directly: `input` (stays in the core),
 //!   `clock` (host only), `send_raw` (not a JSON message), any message before the
@@ -62,8 +64,14 @@ impl McpTransport {
     /// A transport over `session`.
     #[must_use]
     pub fn new(session: Session) -> Self {
+        Self::with_hub(Hub::shared(session))
+    }
+
+    /// A transport over a hub (e.g. one with a replay host, R4 §21).
+    #[must_use]
+    pub fn with_hub(hub: SharedHub) -> Self {
         Self {
-            hub: Hub::shared(session),
+            hub,
             adapters: BTreeMap::new(),
             rpc_id: 0,
             stats: Stats::default(),
@@ -259,6 +267,25 @@ pub fn to_tool(msg: &Value) -> Option<(String, Value, String)> {
             }
             Some(("query".to_owned(), rest(obj), id))
         }
+        "replay" => {
+            let known = obj
+                .keys()
+                .all(|k| ["type", "id", "control"].contains(&k.as_str()));
+            if let (true, Some(c)) = (known, obj.get("control").and_then(Value::as_object)) {
+                if let Some(name) = c
+                    .get("kind")
+                    .and_then(Value::as_str)
+                    .map(|k| format!("replay_{k}"))
+                {
+                    if tools::find(&name).is_some() {
+                        let mut args = c.clone();
+                        args.remove("kind");
+                        return Some((name, Value::Object(args), id));
+                    }
+                }
+            }
+            Some(("replay".to_owned(), rest(obj), id))
+        }
         "subscribe" | "unsubscribe" | "attend" => Some((ty.to_owned(), rest(obj), id)),
         _ => None,
     }
@@ -353,9 +380,15 @@ pub fn run_file(file: &Path, root: &Path) -> (TranscriptOutcome, Stats) {
         let t = read_transcript(file)?;
         outcome.name.clone_from(&t.name);
         let loaded = load_init(&t.init, root)?;
-        let session = Session::new(loaded.init.clone(), root)?;
-        let initial = session.initial_document().clone();
-        let mut tr = McpTransport::new(session);
+        let (mut tr, initial) = if loaded.init.replay.is_some() {
+            let host = qp_session::conform::transcript_replay_host(&loaded.init, root)?;
+            let initial = host.session().initial_document().clone();
+            (McpTransport::with_hub(Hub::shared_replay(host)), initial)
+        } else {
+            let session = Session::new(loaded.init.clone(), root)?;
+            let initial = session.initial_document().clone();
+            (McpTransport::new(session), initial)
+        };
         let r = run_steps(&t, &mut tr, &initial);
         stats = tr.stats;
         r

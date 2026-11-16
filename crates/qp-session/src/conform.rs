@@ -21,6 +21,7 @@ use qp_schema::Document;
 use serde_json::{json, Value};
 
 use crate::apply::replay;
+use crate::replayhost::ReplayHost;
 use crate::session::{confine, permissions, read_json, Session};
 
 /// A message to send, kept as raw JSON (`send` of a transcript step).
@@ -149,6 +150,49 @@ impl Transport for InProc {
     }
 }
 
+/// In-process transport over a replay host (R4, §21: transcripts with `init.replay`):
+/// calls [`ReplayHost::handle_raw`], so `replay` messages reach the host.
+pub struct InProcReplay {
+    /// The replay host.
+    pub host: ReplayHost,
+}
+
+impl Transport for InProcReplay {
+    fn send(&mut self, conn: &str, text: &str, _raw: bool) -> Result<Vec<Value>, String> {
+        self.host
+            .handle_raw(conn, text)
+            .iter()
+            .map(|l| serde_json::to_value(l).map_err(|e| e.to_string()))
+            .collect()
+    }
+
+    fn data(&mut self, event: &DataEvent) -> Result<Vec<Value>, String> {
+        self.host
+            .data_event(event)
+            .map_err(|e| format!("data event rejected: {e}"))?
+            .iter()
+            .map(|l| serde_json::to_value(l).map_err(|e| e.to_string()))
+            .collect()
+    }
+
+    fn finish(&mut self) -> Result<FinalState, String> {
+        Ok(FinalState {
+            document: self.host.session().document().clone(),
+            log: self.host.session().log().to_vec(),
+        })
+    }
+}
+
+/// The replay host of a transcript init with `init.replay`. Transcripts are
+/// deterministic: local data is never read (a `local` source falls back to the
+/// synthetic market, as on a machine without data).
+///
+/// # Errors
+/// As [`ReplayHost::with_local_dir`].
+pub fn transcript_replay_host(init: &SessionInit, root: &Path) -> Result<ReplayHost, String> {
+    ReplayHost::with_local_dir(init.clone(), root, Path::new(""))
+}
+
 /// Line transport: a `qp serve --batch-end` child process.
 pub struct Serve {
     child: Child,
@@ -158,8 +202,9 @@ pub struct Serve {
 }
 
 impl Serve {
-    /// Spawns `qp serve --init <init> --root <root> --batch-end --host-frames` (host
-    /// frames carry the transcript's `data` steps, §3). `reader` is a
+    /// Spawns `qp serve --init <init> --root <root> --batch-end --host-frames
+    /// --no-local-data` (host frames carry the transcript's `data` steps, §3; a replay
+    /// never reads local data in a transcript, §21). `reader` is a
     /// principal with read permission, used to fetch the final document and log.
     ///
     /// # Errors
@@ -173,6 +218,7 @@ impl Serve {
             .arg(root)
             .arg("--batch-end")
             .arg("--host-frames")
+            .arg("--no-local-data")
             .stdin(Stdio::piped())
             .stdout(Stdio::piped())
             .stderr(Stdio::inherit())
@@ -506,12 +552,16 @@ pub fn run_file(file: &Path, root: &Path, kind: &TransportKind) -> TranscriptOut
         outcome.name.clone_from(&t.name);
         let loaded = load_init(&t.init, root)?;
         let init = &loaded.init;
-        let session = Session::new(init.clone(), root)?;
-        let initial = session.initial_document().clone();
         match kind {
+            TransportKind::InProc if init.replay.is_some() => {
+                let host = transcript_replay_host(init, root)?;
+                let initial = host.session().initial_document().clone();
+                run_steps(&t, &mut InProcReplay { host }, &initial)
+            }
             TransportKind::InProc => {
-                let mut tr = InProc { session };
-                run_steps(&t, &mut tr, &initial)
+                let session = Session::new(init.clone(), root)?;
+                let initial = session.initial_document().clone();
+                run_steps(&t, &mut InProc { session }, &initial)
             }
             TransportKind::Serve(qp) => {
                 let reader = init
@@ -520,6 +570,14 @@ pub fn run_file(file: &Path, root: &Path, kind: &TransportKind) -> TranscriptOut
                     .find(|p| permissions(p.role).read && p.role != Role::Feed)
                     .map(|p| p.id.clone())
                     .ok_or("the init has no principal that may read")?;
+                let initial = if init.replay.is_some() {
+                    transcript_replay_host(init, root)?
+                        .session()
+                        .initial_document()
+                        .clone()
+                } else {
+                    Session::new(init.clone(), root)?.initial_document().clone()
+                };
                 let mut tr = Serve::spawn(qp, &loaded.path, root, &reader)?;
                 run_steps(&t, &mut tr, &initial)
             }

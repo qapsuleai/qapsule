@@ -17,7 +17,7 @@ use std::collections::BTreeMap;
 use std::rc::Rc;
 
 use qp_schema::protocol::Surface;
-use qp_session::Session;
+use qp_session::{ReplayHost, Session};
 use serde_json::{json, Map, Value};
 
 pub mod conform;
@@ -45,9 +45,18 @@ pub struct Queued {
     pub msg: Value,
 }
 
+/// The authority behind a hub: a bare session, or (R4, §21) a replay host whose
+/// `replay` messages it answers itself. (A plain session is kept inline: the hub is
+/// built once; boxing it would only add an indirection on every call.)
+#[allow(clippy::large_enum_variant)]
+enum Authority {
+    Plain(Session),
+    Replay(Box<ReplayHost>),
+}
+
 /// One session shared by several adapters (and raw connections).
 pub struct Hub {
-    session: Session,
+    session: Authority,
     queues: BTreeMap<String, Vec<Queued>>,
     order: u64,
 }
@@ -60,7 +69,7 @@ impl Hub {
     #[must_use]
     pub fn new(session: Session) -> Self {
         Self {
-            session,
+            session: Authority::Plain(session),
             queues: BTreeMap::new(),
             order: 0,
         }
@@ -72,10 +81,37 @@ impl Hub {
         Rc::new(RefCell::new(Self::new(session)))
     }
 
+    /// (R4, §21) Wraps a replay host: `replay` tool calls reach it.
+    #[must_use]
+    pub fn with_replay(host: ReplayHost) -> Self {
+        Self {
+            session: Authority::Replay(Box::new(host)),
+            queues: BTreeMap::new(),
+            order: 0,
+        }
+    }
+
+    /// [`Hub::with_replay`] in a shared handle.
+    #[must_use]
+    pub fn shared_replay(host: ReplayHost) -> SharedHub {
+        Rc::new(RefCell::new(Self::with_replay(host)))
+    }
+
     /// The session.
     #[must_use]
     pub fn session(&self) -> &Session {
-        &self.session
+        match &self.session {
+            Authority::Plain(s) => s,
+            Authority::Replay(h) => h.session(),
+        }
+    }
+
+    /// The replay host, if the hub has one.
+    pub fn replay_host(&mut self) -> Option<&mut ReplayHost> {
+        match &mut self.session {
+            Authority::Plain(_) => None,
+            Authority::Replay(h) => Some(h),
+        }
     }
 
     /// Hands raw message text on `conn` to the session. Returns the messages for `conn`
@@ -83,7 +119,11 @@ impl Hub {
     /// for `conn`, anything for other connections) is queued by its connection.
     pub fn send(&mut self, conn: &str, text: &str) -> Vec<Value> {
         let mut reply = Vec::new();
-        for line in self.session.handle_raw(conn, text) {
+        let lines = match &mut self.session {
+            Authority::Plain(s) => s.handle_raw(conn, text),
+            Authority::Replay(h) => h.handle_raw(conn, text),
+        };
+        for line in lines {
             let msg = serde_json::to_value(&line.msg).unwrap_or(Value::Null);
             let is_notify = msg.get("type").and_then(Value::as_str) == Some("notify");
             self.order += 1;
@@ -108,7 +148,11 @@ impl Hub {
         &mut self,
         ev: &qp_schema::data::DataEvent,
     ) -> Result<(), qp_session::DataError> {
-        for line in self.session.data_event(ev)? {
+        let lines = match &mut self.session {
+            Authority::Plain(s) => s.data_event(ev)?,
+            Authority::Replay(h) => h.data_event(ev)?,
+        };
+        for line in lines {
             let msg = serde_json::to_value(&line.msg).unwrap_or(Value::Null);
             self.order += 1;
             self.queues.entry(line.conn).or_default().push(Queued {
@@ -436,6 +480,11 @@ impl McpServer {
                 args.insert("kind".into(), json!(kind));
                 let id = request_id.unwrap_or_else(|| self.fresh_id());
                 json!({"type": "query", "id": id, "query": args})
+            }
+            ToolKind::Replay(kind) => {
+                args.insert("kind".into(), json!(kind));
+                let id = request_id.unwrap_or_else(|| self.fresh_id());
+                json!({"type": "replay", "id": id, "control": args})
             }
             ToolKind::Message(ty) => {
                 if !args.contains_key("id") {

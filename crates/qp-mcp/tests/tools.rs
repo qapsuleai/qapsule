@@ -30,6 +30,11 @@ fn every_op_and_query_has_a_tool_in_schema_order() {
     assert!(ops.len() >= 20 && queries.len() >= 9);
     let mut expected: Vec<String> = ops.iter().map(|o| format!("op_{o}")).collect();
     expected.extend(queries.iter().map(|q| format!("query_{q}")));
+    expected.extend(
+        tags("ReplayControl", "kind")
+            .iter()
+            .map(|k| format!("replay_{k}")),
+    );
     expected.extend(GENERIC.iter().map(|g| (*g).to_owned()));
     let names: Vec<&str> = tools::tools().iter().map(|t| t.name.as_str()).collect();
     assert_eq!(names, expected);
@@ -49,7 +54,7 @@ fn every_op_and_query_has_a_tool_in_schema_order() {
                     assert!(props.contains_key(k), "{} lacks {k}", t.name);
                 }
             }
-            ToolKind::Query(_) => assert!(!props.contains_key("kind")),
+            ToolKind::Query(_) | ToolKind::Replay(_) => assert!(!props.contains_key("kind")),
             ToolKind::Message(_) => {
                 assert!(!props.contains_key("type"));
                 let req = t.input_schema["required"].as_array().unwrap();

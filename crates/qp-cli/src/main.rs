@@ -46,6 +46,10 @@ enum Command {
         /// without this flag such a line is a framing error.
         #[arg(long)]
         host_frames: bool,
+        /// With `init.replay` (docs/PROTOCOL.md §21): never read local data (a `local`
+        /// source falls back to the synthetic market). Conformance runs use it.
+        #[arg(long)]
+        no_local_data: bool,
     },
     /// Run an MCP server over stdin/stdout (newline-delimited JSON-RPC, MCP stdio
     /// transport), speaking `qp/0` as one principal (rounds/RD1/EMBEDDING.md §1).
@@ -253,7 +257,21 @@ fn run(command: Command) -> Result<Outcome, String> {
             root,
             batch_end,
             host_frames,
-        } => serve(&init, &root, batch_end, host_frames),
+            no_local_data,
+        } => {
+            let init: qp_schema::protocol::SessionInit = qp_session::read_json(&init)?;
+            if init.replay.is_some() {
+                let dir = if no_local_data {
+                    PathBuf::new()
+                } else {
+                    qp_source::local_bars_dir()
+                };
+                let host = qp_session::ReplayHost::with_local_dir(init, &root, &dir)?;
+                serve_replay(host, batch_end, host_frames)
+            } else {
+                serve(init, &root, batch_end, host_frames)
+            }
+        }
         Command::Mcp {
             init,
             principal,
@@ -691,9 +709,13 @@ fn r0_scene(
     .map_err(|e| e.to_string())
 }
 
-fn serve(init: &Path, root: &Path, batch_end: bool, host_frames: bool) -> Result<Outcome, String> {
+fn serve(
+    init: qp_schema::protocol::SessionInit,
+    root: &Path,
+    batch_end: bool,
+    host_frames: bool,
+) -> Result<Outcome, String> {
     use std::io::{BufRead, Write};
-    let init: qp_schema::protocol::SessionInit = qp_session::read_json(init)?;
     let mut session = qp_session::Session::new(init, root)?;
     let stdin = std::io::stdin();
     let stdout = std::io::stdout();
@@ -738,15 +760,110 @@ fn serve(init: &Path, root: &Path, batch_end: bool, host_frames: bool) -> Result
     Ok(Outcome::Ok)
 }
 
+/// `qp serve` over a replay host (§21): `replay` messages reach the host; while the
+/// replay runs, steps are taken as the wall clock makes them due (their notifications
+/// are written as they happen, outside any input line's batch).
+fn serve_replay(
+    mut host: qp_session::ReplayHost,
+    batch_end: bool,
+    host_frames: bool,
+) -> Result<Outcome, String> {
+    use std::io::{BufRead, Write};
+    use std::sync::mpsc;
+    use std::time::{Duration, Instant};
+    let (tx, rx) = mpsc::channel::<Result<String, String>>();
+    std::thread::spawn(move || {
+        for line in std::io::stdin().lock().lines() {
+            if tx.send(line.map_err(|e| format!("stdin: {e}"))).is_err() {
+                break;
+            }
+        }
+    });
+    let start = Instant::now();
+    let wall = || u64::try_from(start.elapsed().as_millis()).unwrap_or(u64::MAX);
+    let stdout = std::io::stdout();
+    let mut out = stdout.lock();
+    let write = |out: &mut std::io::StdoutLock<'_>,
+                 lines: Vec<qp_schema::protocol::OutboundLine>|
+     -> Result<(), String> {
+        for o in lines {
+            let text = serde_json::to_string(&o).map_err(|e| e.to_string())?;
+            writeln!(out, "{text}").map_err(|e| format!("stdout: {e}"))?;
+        }
+        out.flush().map_err(|e| format!("stdout: {e}"))
+    };
+    loop {
+        // Running: wake when the next step is due (an anchor is set by the first pump).
+        let wait = match host.next_due_in(wall()) {
+            Some(ms) => Some(ms),
+            None if !host.state().paused && !host.state().done => Some(0),
+            None => None,
+        };
+        let msg = match wait {
+            Some(ms) => match rx.recv_timeout(Duration::from_millis(ms)) {
+                Ok(m) => Some(m),
+                Err(mpsc::RecvTimeoutError::Timeout) => None,
+                Err(mpsc::RecvTimeoutError::Disconnected) => break,
+            },
+            None => match rx.recv() {
+                Ok(m) => Some(m),
+                Err(_) => break,
+            },
+        };
+        let Some(line) = msg else {
+            let lines = host.pump(wall());
+            write(&mut out, lines)?;
+            continue;
+        };
+        let line = line?;
+        if line.trim().is_empty() {
+            continue;
+        }
+        let is_host = host_frames
+            && serde_json::from_str::<serde_json::Value>(&line)
+                .ok()
+                .is_some_and(|v| v.get("host").is_some());
+        let lines = if is_host {
+            match host.session_mut().handle_host_frame(&line) {
+                Ok(o) => {
+                    for n in &o.notices {
+                        writeln!(out, "{}", n.frame()).map_err(|e| format!("stdout: {e}"))?;
+                    }
+                    o.lines
+                }
+                Err(e) => {
+                    let text = serde_json::json!({"host": {"error": e}}).to_string();
+                    writeln!(out, "{text}").map_err(|e| format!("stdout: {e}"))?;
+                    Vec::new()
+                }
+            }
+        } else {
+            host.handle_frame(&line)
+        };
+        write(&mut out, lines)?;
+        if batch_end {
+            writeln!(out, "{{\"batch_end\":true}}").map_err(|e| format!("stdout: {e}"))?;
+            out.flush().map_err(|e| format!("stdout: {e}"))?;
+        }
+    }
+    Ok(Outcome::Ok)
+}
+
 fn mcp(init: &Path, principal: &str, surface: &str, root: &Path) -> Result<Outcome, String> {
     use std::io::{BufRead, Write};
     let init: qp_schema::protocol::SessionInit = qp_session::read_json(init)?;
-    let session = qp_session::Session::new(init, root)?;
+    // (R4, §21) With `init.replay` the hub wraps a replay host (`replay_*` tools). Only
+    // explicit steps advance it here: this transport has no wall-clock loop.
+    let hub = if init.replay.is_some() {
+        qp_mcp::Hub::shared_replay(qp_session::ReplayHost::new(init, root)?)
+    } else {
+        qp_mcp::Hub::shared(qp_session::Session::new(init, root)?)
+    };
     let surface: qp_schema::protocol::Surface =
         serde_json::from_value(serde_json::json!({ "kind": surface }))
             .map_err(|e| format!("--surface `{surface}`: {e}"))?;
     let config = qp_mcp::Config::new(principal, surface);
-    let mut server = qp_mcp::McpServer::connect(qp_mcp::Hub::shared(session), "mcp", config)
+    let mut server = qp_mcp::McpServer::connect(hub, "mcp", config)
         .map_err(|e| format!("hello refused: {e}"))?;
     let stdin = std::io::stdin();
     let stdout = std::io::stdout();

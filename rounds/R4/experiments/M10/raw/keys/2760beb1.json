@@ -1,0 +1,30 @@
+{
+  "experiment": "m10",
+  "design": "r3",
+  "seqs": {
+    "1": [
+      6,
+      "B",
+      "evet",
+      "kapandı: tutmadı"
+    ],
+    "2": [
+      101,
+      "B",
+      "evet",
+      "evet, sürüyor"
+    ],
+    "3": [
+      112,
+      "D",
+      "evet",
+      "evet, sürüyor"
+    ],
+    "4": [
+      3,
+      "D",
+      "evet",
+      "hayır, artık geçerli değil"
+    ]
+  }
+}

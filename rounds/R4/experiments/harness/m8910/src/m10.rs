@@ -44,6 +44,15 @@ pub const TAP: (f64, f64) = (195.0, 150.0);
 /// Port of the demo the screenshots use.
 pub const PORT: u16 = 8472;
 
+/// The demo port actually used: `M8910_PORT` from the environment when set (another
+/// worktree may hold the default), otherwise [`PORT`]. Changes no measure.
+pub fn port() -> u16 {
+    std::env::var("M8910_PORT")
+        .ok()
+        .and_then(|v| v.trim().parse().ok())
+        .unwrap_or(PORT)
+}
+
 /// One region label (scene CSS px, centre).
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct Region {
@@ -398,7 +407,7 @@ pub fn screens(
     io::write_json(&raw.join("key.json"), &m)?;
     if shoot {
         let plan = json!({
-            "kind": "m10", "qp": shots::qp_bin().display().to_string(), "port": PORT,
+            "kind": "m10", "qp": shots::qp_bin().display().to_string(), "port": port(),
             "settings": {"transition": transition, "lang": "tr", "theme": "light"},
             "code": p.code, "tap": [TAP.0, TAP.1], "frames": FRAMES,
             "states": p.states.iter().enumerate().map(|(i, s)| json!({

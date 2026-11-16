@@ -334,6 +334,9 @@ impl Samples {
     }
 }
 
+/// (R4/D) A frame interval this long or longer is a gap (not a frame): counted apart.
+const FRAME_GAP_MS: f64 = 1000.0;
+
 /// (R4/D) One 60 Hz frame (ms): the long-frame threshold of the metrics page.
 const LONG_FRAME_MS: f64 = 1000.0 / 60.0;
 
@@ -386,6 +389,8 @@ struct Metrics {
     /// (R4/D) Device facts the page reports (`cores`, `device_memory_gb`, `screen_w`,
     /// `screen_h`, `dpr`, …): last value wins.
     device: BTreeMap<String, f64>,
+    /// (R4/D) Frame gaps (intervals of a second or more) by mode.
+    gaps: BTreeMap<String, u64>,
     /// (R4/D) Memory samples in bytes (`js_heap` from the page, `wasm` from the core).
     memory: BTreeMap<String, Gauge>,
 }
@@ -1596,8 +1601,15 @@ impl ShellCore {
         let m = &mut self.metrics;
         if let Some((prev_mode, prev)) = &m.last_frame {
             let dt = t - prev;
-            if prev_mode == mode && dt > 0.0 && dt < 250.0 {
-                m.frames.entry(mode.to_owned()).or_default().push(dt);
+            // (R4/D) Intervals up to a second count (a saturated main thread gives 100+ ms
+            // frames, which the summary must show); longer gaps (background tab, a pause
+            // of the page) are only counted.
+            if prev_mode == mode && dt > 0.0 {
+                if dt < FRAME_GAP_MS {
+                    m.frames.entry(mode.to_owned()).or_default().push(dt);
+                } else {
+                    *m.gaps.entry(mode.to_owned()).or_default() += 1;
+                }
             }
         }
         m.last_frame = Some((mode.to_owned(), t));
@@ -1659,6 +1671,7 @@ impl ShellCore {
     pub fn metric_reset(&mut self) {
         let m = &mut self.metrics;
         m.frames.clear();
+        m.gaps.clear();
         m.spans.clear();
         m.last_frame = None;
     }
@@ -1670,7 +1683,13 @@ impl ShellCore {
         let frames: serde_json::Map<String, Value> = m
             .frames
             .iter()
-            .map(|(k, v)| (k.clone(), v.frame_summary()))
+            .map(|(k, v)| {
+                let mut f = v.frame_summary();
+                if let (Some(o), Some(g)) = (f.as_object_mut(), m.gaps.get(k)) {
+                    o.insert("gaps_1s".to_owned(), json!(g));
+                }
+                (k.clone(), f)
+            })
             .collect();
         let spans: serde_json::Map<String, Value> = m
             .spans

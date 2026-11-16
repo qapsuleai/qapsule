@@ -34,6 +34,14 @@ fn frame_summaries_carry_p99_and_long_frame_shares() {
     assert_eq!(z["max"], 40.0);
     assert_eq!(z["long_16_7"], 0.02);
     assert_eq!(z["long_33_3"], 0.01);
+    assert!(z.get("gaps_1s").is_none());
+    // A 300 ms frame counts; a 2 s gap is only counted.
+    c.metric_frame("zoom", t + 300.0);
+    c.metric_frame("zoom", t + 2300.0);
+    let z = &c.metrics_json()["frame_ms"]["zoom"];
+    assert_eq!(z["n"], 101, "{z}");
+    assert_eq!(z["max"], 300.0);
+    assert_eq!(z["gaps_1s"], 1);
     // Spans keep the plain summary (with p99, without long-frame shares).
     c.metric_span("face", 0.0, 2.0);
     let m = c.metrics_json();

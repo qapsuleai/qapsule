@@ -49,6 +49,10 @@ async function wheelFor(page, ms, x, y, dy, flip) {
   }
 }
 
+// The play/pause button, clicked through the DOM (the open layer's transition can keep
+// Playwright's "stable" check waiting; the handler is the same).
+const play = (page) => page.evaluate(() => document.getElementById('c_play').click());
+
 async function phaseRead(page) {
   const m = JSON.parse(await page.evaluate(() => window.qp.metrics()));
   await page.evaluate(() => window.qp.resetMetrics());
@@ -71,7 +75,7 @@ async function run(browser, rate, dpr, look) {
     const open = JSON.parse(await page.evaluate(() => window.qp.metrics())).open_ms;
     await settle(page, 120000);
     await page.selectOption('#c_speed', '{"kind":"speed","steps_per_s":16}');
-    await page.click('#c_play');
+    await play(page);
     await page.evaluate(() => window.qp.resetMetrics());
     const out = { open };
     await page.waitForTimeout(phase);
@@ -79,7 +83,7 @@ async function run(browser, rate, dpr, look) {
     await wheelFor(page, phase, 195, 400, 120, 25);
     out.scroll = await phaseRead(page);
     // Open the first capsule to its chart (paused, so the feed does not move under the click).
-    await page.click('#c_play');
+    await play(page);
     await settle(page, 120000);
     await page.locator('#feed').evaluate((e) => { e.scrollTop = 0; });
     await page.waitForTimeout(300);
@@ -88,7 +92,7 @@ async function run(browser, rate, dpr, look) {
     await clickIn(page, '#scene', 195, 150); await settle(page, 120000);
     await page.waitForTimeout(800); // the depth transition
     const depth = JSON.parse(await page.evaluate(() => window.qp.open())).depth;
-    await page.click('#c_play');
+    await play(page);
     await page.evaluate(() => window.qp.resetMetrics());
     const b = await page.locator('#scene').boundingBox();
     const end = Date.now() + phase;
@@ -124,7 +128,10 @@ function summarize(runs) {
   const pick = (f) => median(runs.map(f));
   const fr = (ph, mode) => {
     const g = (k) => pick((r) => r[ph].frame_ms[mode] && r[ph].frame_ms[mode][k]);
-    return { n: g('n'), p50: g('p50'), p95: g('p95'), p99: g('p99'), long_16_7: g('long_16_7'), long_33_3: g('long_33_3') };
+    const gaps = pick((r) => (r[ph].frame_ms[mode] && r[ph].frame_ms[mode].gaps_1s) || 0);
+    // Frames delivered per second in the phase (headless Chromium paints at 120 Hz).
+    return { n: g('n'), fps: g('n') === null ? 0 : g('n') / (phase / 1000), p50: g('p50'), p95: g('p95'), p99: g('p99'),
+      max: g('max'), long_16_7: g('long_16_7'), long_33_3: g('long_33_3'), gaps_1s: gaps };
   };
   const sp = (phases, name) => {
     const g = (k) => median(runs.flatMap((r) => phases.map((ph) => r[ph].span_ms[name] && r[ph].span_ms[name][k])));
@@ -151,8 +158,17 @@ try {
     for (const dpr of dprs) {
       for (const rate of rates) {
         const runs = [];
-        for (let k = 0; k < reps; k++) runs.push(await run(browser, rate, dpr, look));
-        const cfg = { look, dpr, rate, ...summarize(runs), bundle: runs[0].bundle, device: runs[0].device, look_used: runs[0].look };
+        let failed = 0;
+        while (runs.length < reps) {
+          try {
+            runs.push(await run(browser, rate, dpr, look));
+          } catch (e) {
+            failed += 1;
+            console.error(`device: run failed (${failed}): ${String(e).split('\n')[0]}`);
+            if (failed > reps) throw e;
+          }
+        }
+        const cfg = { look, dpr, rate, failed_runs: failed, ...summarize(runs), bundle: runs[0].bundle, device: runs[0].device, look_used: runs[0].look };
         if (raw) cfg.runs = runs;
         result.configs.push(cfg);
         console.error(`device: ${look} dpr${dpr} ${rate}x first_capsule ${cfg.open_ms.first_capsule} scroll p95 ${cfg.frame.scroll.p95} zoom p95 ${cfg.frame.zoom.p95}`);

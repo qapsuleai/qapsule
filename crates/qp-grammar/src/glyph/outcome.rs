@@ -99,12 +99,15 @@ impl OutcomeStyle for R3 {
 
 // --- M11 alternatives: one type each below this line, then one line in `STYLES` ---
 
+mod muhrak;
+pub use muhrak::Muhrak;
 mod tg5;
 pub use tg5::Tg5;
 
 /// Every outcome style, by setting name. **Alternatives add one line here.**
 pub static STYLES: &[&dyn OutcomeStyle] = &[
     &R3, // --- M11 alternatives: one line each, e.g. `&MyStyle,`
+    &Muhrak,
     &Tg5,
 ];
 

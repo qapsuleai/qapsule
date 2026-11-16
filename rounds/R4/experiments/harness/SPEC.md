@@ -228,3 +228,23 @@ rounds/R4/experiments/
       computed.json
     RESULTS.md        ölçüler, seçim kuralının uygulanışı, seçim, sınır cümlesi
 ```
+
+## 8. Ekler (alternatiflerden önce; 2026-11-16, orkestratör)
+
+Düzenek kurulurken (H-M8910) çıkan sapmalar; hiçbir alternatif yazılmadan ve okunmadan karara
+bağlandı.
+
+- **E1 (S4 kovası).** "Az örnek" kovası ürünün eşiğidir: karne `n < GLYPH_MIN_LEDGER_N` (20).
+  Gerekçe: anahtar ürünün kullanıcıya söylediğini ölçmeli; ürün `n < 20`'yi "henüz az örnekli"
+  diye yazar, okuyucunun buna uyması yanlış sayılmamalı. §2 tablosundaki "n < 5" bu eşikle
+  değişir; S8 #10 durumu (n < 5) aynı kalır (yeni eşiğin içinde).
+- **E2 (S8 #8 geri çekildi).** Sentetik oynatma geri çekme üretmez (§20.7: yalnız itiraz/veri
+  düzeltmesi); bu durum M8'de yoktur, sayfa 2 beş yüzle koşar. Sonuç notunda yazılır.
+- **E3 (saatlik dünya).** #1, #11, #12 düzeneğin saatlik dünyasından; M10 #1/#12 yerine gösterim
+  yedekleri (#101, #112) kullanır. Sonuç notunda yazılır.
+- **E4 (sayfa boyu).** M8 sayfası telefon genişliğinde (390 CSS px, DPR 2) tam boy alınır;
+  "tek ekran" şartı 844 px'e sığmayan yüzlerde kaydırmalı tek görüntü demektir. Yüz yüksekliği
+  hesap ölçüsü olarak kaydedilir (sert eşik değil).
+- **E5 (başlık şablonu).** Her M8 alternatifi kendi başlık şablonunu `realize::parts` yapı
+  taşlarından kurar (çekirdekte; arayüz H-FP ile açılır). Başvuru `r3` bugünkü kapsül cümlesini
+  kullanır.

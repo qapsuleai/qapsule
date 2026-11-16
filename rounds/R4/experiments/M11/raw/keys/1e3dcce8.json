@@ -1,0 +1,245 @@
+{
+  "harness": "r4-h-m11/1",
+  "code": "1e3dcce8",
+  "style": "r3",
+  "alphabet": "siluet",
+  "seed": 2,
+  "salt": 11,
+  "items": [
+    {
+      "label": "A1",
+      "glyph": "squeeze.neutral",
+      "outcome": "open",
+      "spec": {
+        "kind": "squeeze",
+        "direction": "neutral",
+        "strength": 0.3,
+        "confidence": 0.3,
+        "phase": "final",
+        "freshness": 1.0,
+        "confirmations": 3,
+        "validity": "valid"
+      }
+    },
+    {
+      "label": "A2",
+      "glyph": "squeeze.up",
+      "outcome": "open",
+      "spec": {
+        "kind": "squeeze",
+        "direction": "up",
+        "strength": 0.3,
+        "phase": "final",
+        "freshness": 1.0,
+        "confirmations": 2,
+        "validity": "valid"
+      }
+    },
+    {
+      "label": "A3",
+      "glyph": "reversal.up",
+      "outcome": "realized",
+      "spec": {
+        "kind": "reversal",
+        "direction": "up",
+        "strength": 0.9,
+        "confidence": 0.7,
+        "phase": "realized",
+        "freshness": 1.0,
+        "confirmations": 2,
+        "validity": "closed"
+      }
+    },
+    {
+      "label": "A4",
+      "glyph": "reversal.down",
+      "outcome": "failed",
+      "spec": {
+        "kind": "reversal",
+        "direction": "down",
+        "strength": 0.6,
+        "confidence": 0.7,
+        "phase": "failed",
+        "freshness": 1.0,
+        "confirmations": 2,
+        "validity": "closed"
+      }
+    },
+    {
+      "label": "B1",
+      "glyph": "reversal.neutral",
+      "outcome": "realized",
+      "spec": {
+        "kind": "reversal",
+        "direction": "neutral",
+        "strength": 0.6,
+        "confidence": 0.7,
+        "phase": "realized",
+        "freshness": 1.0,
+        "confirmations": 1,
+        "validity": "closed"
+      }
+    },
+    {
+      "label": "B2",
+      "glyph": "breakout.neutral",
+      "outcome": "failed",
+      "spec": {
+        "kind": "breakout",
+        "direction": "neutral",
+        "strength": 0.3,
+        "phase": "failed",
+        "freshness": 1.0,
+        "confirmations": 1,
+        "validity": "closed"
+      }
+    },
+    {
+      "label": "B3",
+      "glyph": "squeeze.down",
+      "outcome": "failed",
+      "spec": {
+        "kind": "squeeze",
+        "direction": "down",
+        "strength": 0.9,
+        "confidence": 0.3,
+        "phase": "failed",
+        "freshness": 1.0,
+        "confirmations": 1,
+        "validity": "closed"
+      }
+    },
+    {
+      "label": "B4",
+      "glyph": "flow.neutral",
+      "outcome": "failed",
+      "spec": {
+        "kind": "flow",
+        "direction": "neutral",
+        "strength": 0.6,
+        "phase": "failed",
+        "freshness": 1.0,
+        "confirmations": 3,
+        "validity": "closed"
+      }
+    },
+    {
+      "label": "C1",
+      "glyph": "continuation.down",
+      "outcome": "realized",
+      "spec": {
+        "kind": "continuation",
+        "direction": "down",
+        "strength": 0.3,
+        "confidence": 0.7,
+        "phase": "realized",
+        "freshness": 1.0,
+        "confirmations": 2,
+        "validity": "closed"
+      }
+    },
+    {
+      "label": "C2",
+      "glyph": "continuation.neutral",
+      "outcome": "realized",
+      "spec": {
+        "kind": "continuation",
+        "direction": "neutral",
+        "strength": 0.9,
+        "confidence": 0.7,
+        "phase": "realized",
+        "freshness": 1.0,
+        "confirmations": 2,
+        "validity": "closed"
+      }
+    },
+    {
+      "label": "C3",
+      "glyph": "extreme.neutral",
+      "outcome": "realized",
+      "spec": {
+        "kind": "extreme",
+        "direction": "neutral",
+        "strength": 0.9,
+        "phase": "realized",
+        "freshness": 1.0,
+        "confirmations": 1,
+        "validity": "closed"
+      }
+    },
+    {
+      "label": "C4",
+      "glyph": "breakout.up",
+      "outcome": "realized",
+      "spec": {
+        "kind": "breakout",
+        "direction": "up",
+        "strength": 0.6,
+        "confidence": 0.3,
+        "phase": "realized",
+        "freshness": 1.0,
+        "confirmations": 1,
+        "validity": "closed"
+      }
+    },
+    {
+      "label": "D1",
+      "glyph": "breakout.down",
+      "outcome": "open",
+      "spec": {
+        "kind": "breakout",
+        "direction": "down",
+        "strength": 0.6,
+        "confidence": 0.3,
+        "phase": "final",
+        "freshness": 1.0,
+        "confirmations": 1,
+        "validity": "valid"
+      }
+    },
+    {
+      "label": "D2",
+      "glyph": "flow.up",
+      "outcome": "failed",
+      "spec": {
+        "kind": "flow",
+        "direction": "up",
+        "strength": 0.9,
+        "confidence": 0.7,
+        "phase": "failed",
+        "freshness": 1.0,
+        "confirmations": 2,
+        "validity": "closed"
+      }
+    },
+    {
+      "label": "D3",
+      "glyph": "flow.down",
+      "outcome": "open",
+      "spec": {
+        "kind": "flow",
+        "direction": "down",
+        "strength": 0.3,
+        "phase": "final",
+        "freshness": 1.0,
+        "confirmations": 3,
+        "validity": "valid"
+      }
+    },
+    {
+      "label": "D4",
+      "glyph": "continuation.up",
+      "outcome": "failed",
+      "spec": {
+        "kind": "continuation",
+        "direction": "up",
+        "strength": 0.6,
+        "confidence": 0.3,
+        "phase": "failed",
+        "freshness": 1.0,
+        "confirmations": 3,
+        "validity": "closed"
+      }
+    }
+  ]
+}

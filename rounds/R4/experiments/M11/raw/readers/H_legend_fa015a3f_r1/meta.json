@@ -1,0 +1,10 @@
+{
+  "experiment": "m11",
+  "code": "fa015a3f",
+  "persona": "H",
+  "condition": "legend",
+  "seed": 1,
+  "reader": "r1",
+  "model": "sonnet",
+  "alphabet": "siluet"
+}

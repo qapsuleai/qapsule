@@ -1,0 +1,8 @@
+Yıllardır borsada işlem yapıyorsun; teknik analize, mum grafiklerine ve indikatörlere alışkınsın. Telefonunda bir piyasa uygulamasına bakıyorsun. Gördüğünü okuyup cevapla.
+
+Bu bir piyasa bilgi uygulamasının ekran görüntüsü.
+
+Read aracıyla @DIR@/9330026d.png dosyasını aç. Görüntüde uygulamanın kullandığı 16 küçük işaret 4×4 ızgarada duruyor; her işaretin üstünde etiketi var (A1'den D4'e: satır harfi, sütun rakamı). Her işaret, uygulamanın bir hisse senedi hakkındaki bir tespitidir. Bazı tespitler kapanmıştır: söylediği ya gerçekleşti ya da tutmadı. Bazıları hâlâ açıktır; sonucu henüz belli değildir.
+
+Her etiket için şu dört cevaptan birini seç: "gerçekleşti", "tutmadı", "açık" ya da "bilmiyorum". Emin değilsen de en iyi tahminini ver. Yalnızca tek bir JSON nesnesiyle cevap ver, başka bir şey yazma; anahtarlar etiketlerdir, örneğin:
+{"A1": "gerçekleşti", "A2": "açık", "A3": "tutmadı", …, "D4": "bilmiyorum"}

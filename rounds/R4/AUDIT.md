@@ -188,3 +188,23 @@ iki raporla tutarlı; fark tek okuyuculuk gürültü düzeyinde.
   belirteç normalize edilerek yapıldı).
 - `rounds/R4/audit/m8-repeat/` — üç okuyucunun istemi, cevabı, meta, puanlar.
 - `rounds/R4/audit/device-synthetic.log`, `capsule_tick.log`, `metrics-desktop.json`, `explore.log`.
+
+## Ek: Ö3 düzeltmesinin kontrolü (`r4/fix-replay`, `16df2ae` + `edc5949`)
+
+Yöntem: dalı kendi ağacıma birleştirmedim (denetçiye birleştirme yasak). `git archive r4/fix-replay`
+geçici bir dizine açıldı ve orada ayrı bir hedef dizinle derlendi. Eski ikili `39fcaf0`'ın
+`target/release/qp`'si. Ürün koduna dokunulmadı.
+
+| Kontrol | Sonuç | Kanıt |
+|---------|-------|-------|
+| Benim yeniden üretim komutum (`--seed 7 --instruments 12 --days 300 --steps 400`, `audit/scripts/replay-controls.json`), iki koşu | **PASS** | Çıkış 0/0. İki koşu `cmp` eşit, 1628 satır (eski 146), SHA-256 `884564bc2befd6b7…`. `error` satırı **0** (eski 4 `handshake`). İki `reset: true` (satır 142, 1175); `epoch` 0 → 1 → 2. Yedi denetimin hepsi `result` döndü: hız (5), adım (37), geri seek (12), duraklat/sürdür (80), tarihe git (495), geri seek (150). Son geri seek'ten sonra 1 `welcome`, **450 `notify`**. |
+| verify adım 16'nın yeni denetimi eski çıktıyı reddediyor mu | **PASS** | Adımın denetim mantığı birebir kopyalanıp verify'ın kendi denetim listesiyle (`--steps 300`, son denetim geri seek) iki ikiliye uygulandı. **Eski:** 693 satır, iki koşu eşit, "FAIL no welcome (notify 0)". Benim dizimdeki eski çıktı da "FAIL error line". **Yeni:** 1816 satır, iki koşu eşit, "PASS welcome 1 notify 1120". |
+| Yeni test eski kodda düşüyor, yenide geçiyor | **PASS** | `cargo test -p qp-cli --test replay`: yeni kodla 1/1 geçti. `main.rs` 39fcaf0'a döndürülünce `backward_seek_reconnects_and_the_stream_goes_on` `error line: {"code":"handshake",…}` ile düştü (sonra yeni `main.rs` geri kondu ve ikili yeniden derlendi; çıktı öncekiyle bayt eşit). |
+| Dökümler, altınlar, hesap özeti | **PASS** | `git diff 39fcaf0 r4/fix-replay --stat`: yalnız `crates/qp-cli/src/main.rs`, `crates/qp-cli/tests/replay.rs`, `scripts/verify.sh`, `rounds/R4/experiments/FIX-REPLAY.md`. `fixtures/`, `qp-session`, `qp-capsule`, `qp-compute`, `qp-grammar`, `shells/` değişmemiş. Yeni ikiliyle `qp conform` 58/58 (inproc). |
+
+Sınır: düzeltme dalında tam `scripts/verify.sh` koşmadım. Dalın notu 18/18 diyor. Ben adım 16'nın
+mantığını, yeni testi ve dökümleri ayrı ayrı denetledim.
+
+**Hüküm:** Ö3 düzeltmesi **PASS**. Birleştirildiğinde ana bulgulardaki 3. kabul koşulu
+(`qp replay` geri sarmadan sonra susuyor) kapanır. VERIFY 7'nin notu ve GOAL 1'in bulgusu da
+düşer.

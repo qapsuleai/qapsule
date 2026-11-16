@@ -313,3 +313,43 @@ denemede düzeltme tiki 7,7 µs idi (her veri olayında bağlantı başına aç�
 akış beslemesi listesinin yeniden kurulması); besleme anahtarları `Runner`'da tutuluyor ve
 eşleme yalnız koşul aboneliği varken hesaplanıyor. Ham dosya tutulmadı (S-D yöntemi, tek koşu
 grubu).
+
+### K1c — üçüncü güvenlik incelemesi ve kabul denetimi
+
+Dal `r3/fix-k1c` (`r3/int` üstünde; denetçinin genişletilmiş `k1_probe`'u için `r3/int`
+yeniden birleştirildi).
+
+| # | Bulgu | Düzeltme |
+|---|---|---|
+| YÜKSEK | `reverse_changes`'in "benzer" denetimi yalnız koleksiyonu karşılaştırıyordu: açık görünümlü yazar, iki dünyada aynı koleksiyonda ama **farklı** olan bir otorite öğesini (özellikle öneri: iki dünya `prop-<seq>`'i ayrı numaralar) ezebiliyordu. Denetçi: akışlı her yapılandırmada Eda'nın `accept`/`reject_proposal`'ı Gül'ün yalnız otoritede olan 2 önerisine karar veriyordu | Kimlik **ancak iki dünyada da yoksa** (yeni) ya da iki dünyada **bayt eşit** öğeyse (kanonik JSON) benzer; motor öğesi ve öneri hiçbir zaman. `put_proposal` (öneri ve kararı) açık görünümlü yazar için otoriteye hiç geçmez: onun önerileri ve kabulleri yalnız açık dünyada (`commit_public`). Kitle: yazarın iki dünyadaki kaydı eşitse |
+| ORTA 1 | `propose_two_worlds` `prop_map`'i otoritede o kimliğin bulunmasından çıkarıyordu | Yalnız bu komutun **kendi** az önce yazılan otorite girdisi ve yaptığı açık girdi öneriyi koyduysa: otorite `prop-<seq>` → açık `prop-<p>`; açık görünümlü önerenin önerisi hiç eşlenmez |
+| ORTA 2 | Açık görünüm okuyucusunun niyet tetikleri otoritenin değerlendirmesinden, "aynı kimlik ve tetik" süzgeciyle | Açık dünyada değerlendirilir (`eval_intents_public`: kendi niyetleri, etkinliği, kenar durumu — `intent_state` dünyayla takas edilir; iddia kaydı yok); olay açık belgeden kurulur; otoritenin niyet olayları açık görünüm okuyucusuna hiç gitmez |
+| ORTA 3 | `ops_to_pub`: `reject_proposal` eşlenmiyordu; `undo` (seq'siz) | `reject_proposal` da `proposal_to_pub` ile (karşılık yoksa hiçbir şey). `undo` (seq'siz) **açık dünyada çözülür** (kişinin açık girdileri arasından): incelemenin önerdiği "otoritede çöz, `pub_of` ile eşle" yolu, açık sonucu kişinin hangi girdisinin otoritede bulunduğuna (ör. yalnız lisanslı bir öneriyi onaylaması) bağlardı — girişimsizliği kırar; bilinçli olarak alınmadı |
+| ORTA 4 | `dispute()` açık görünüm okuyucusu için belge öğesi iddialarında otoritenin iddia kaydına bakıyordu | Açık görünüm okuyucusunun `Condition` dışı iddiaya itirazı her zaman `unknown` (`claim_events`'teki kapıyla aynı) |
+
+**Testler.** `non_interference.rs` 4. test (`proposals_undo_intents_and_disputes_do_not_interfere`):
+Arkın (yetkili) her bulgu kimliğini onaylar, biri açık biri yalnız lisanslı iki öneri yapar,
+onları reddeder, iki kez `undo` (seq'siz) ve bir niyet yazar; Bora (açık görünümlü sahip)
+sonradan tetiklenen bir niyet yazar, öneri yapar ve kendisi kabul eder, **sabit
+`prop-60…139` aralığına** `reject_proposal` ve `accept_proposal` gönderir (Arkın'ın otoritedeki
+önerileriyle kimlik çakışması), bir kapsül ve bir niyet iddiasına itiraz eder. Tohum 1 ↔ 2,
+7, 42: Bora ve Can'ın satırları mühür dışında bayt eşit; otoritenin önerileri ve hikâyeli
+kapsülleri Bora'dan önce ve sonra bayt eşit; Bora açık niyet tetiğini, öneri olaylarını ve
+`unknown` kararı alıyor. Eski kodda (`r3/int`) "a public-view writer changed the authority's
+proposals or engine capsules (seed 1)" ile kırılıyor.
+
+**`k1_probe` (denetçinin genişletilmiş hâli, Gül: `*` yetkili, lisanslı bulgulara öneri;
+Eda: açık görünümlü sahip, `prop-1…599`'a karar).** Arkın'lı ve `K1_NO_ARKIN=1`: akışlı dört
+yapılandırmanın her karşılaştırmasında Bora, Can, Dora, Eda, Fatih **0 farklı satır**;
+akışlı her yapılandırmada `GUL props 25–30 changed_by_public_writers 0`, lisanslı doğumlu
+kapsüllerden açık görünümlü yazarların değiştirdiği 0. Akışsız yapılandırmada açık dünya
+yoktur: orada Eda açık görünümlü değildir, Gül'ün (orada 3) önerisine karar vermesi meşrudur
+(`GULDIFF` yalnız bu yapılandırmada, lisanslı veri yok) ve Bora/Can/Dora belge kapsüllerinin
+iddialarını (`claims`) da alır; açık görünüm okuyucusu bunları almadığı için "akışsız ↔"
+satırı farklıdır (3.900–4.390 satır; ilk fark Eda'nın kapsülünün iddiası). Bu fark lisanslı
+veriye bağlı değil (akışlı dört yapılandırma kendi aralarında bayt eşit); açık dünyada iddia
+kaydı yokluğunun (§7 "Kalan") sonucu.
+
+**Kalan (değişmedi).** Açık dünyada iddia kaydı yok: açık görünüm okuyucusu belge öğesi
+iddialarını almaz ve onlara itirazı `unknown`. Öneri: iddia kaydını da dünyayla takas etmek
+(kesinleşme, geri çekme ve itirazın açık dünyada çalışması).

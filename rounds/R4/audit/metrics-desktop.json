@@ -1,0 +1,68 @@
+{
+  "agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/151.0.7922.34 Safari/537.36",
+  "bundle": {
+    "wasm_gzip": 1522723,
+    "wasm_raw": 5645727
+  },
+  "device": {
+    "cores": 16,
+    "device_memory_gb": 32,
+    "dpr": 2,
+    "scale": 2,
+    "screen_h": 844,
+    "screen_w": 390
+  },
+  "feed": 27,
+  "frame_ms": {
+    "idle": {
+      "long_16_7": 0.007,
+      "long_33_3": 0.003,
+      "max": 49.4,
+      "mean": 8.527,
+      "n": 300,
+      "p50": 8.3,
+      "p95": 9.8,
+      "p99": 10.3
+    }
+  },
+  "kind": "qapsule-demo-metrics",
+  "look": {
+    "alphabet": null,
+    "face": "vadrel",
+    "feed": "elikov",
+    "outcome": "tg5",
+    "transition": "zumlak"
+  },
+  "memory_bytes": {
+    "js_heap": {
+      "last": 10000000,
+      "max": 10000000
+    },
+    "wasm": {
+      "last": 41615360,
+      "max": 41615360
+    }
+  },
+  "open_ms": {
+    "connected": 16019.4,
+    "feed": 16077.6,
+    "start_frame": 16007.5,
+    "wasm_ready": 22.4
+  },
+  "replay": {
+    "instruments": 30,
+    "speed": 4,
+    "step": 130,
+    "synthetic": true
+  },
+  "span_ms": {
+    "face": {
+      "max": 1.2,
+      "mean": 1,
+      "n": 4,
+      "p50": 0.9,
+      "p95": 1.2,
+      "p99": 1.2
+    }
+  }
+}

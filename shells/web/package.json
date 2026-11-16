@@ -1,0 +1,9 @@
+{
+  "name": "qapsule-web-shell",
+  "private": true,
+  "type": "module",
+  "description": "R4/T5 web shell: headless browser tests (parity, network, screenshots) with Playwright.",
+  "devDependencies": {
+    "playwright": "1.62.0"
+  }
+}

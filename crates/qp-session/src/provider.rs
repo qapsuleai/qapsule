@@ -25,6 +25,9 @@ pub struct DocProvider<'a> {
     /// The data plane during a command (§18): a bound bar series' bars come from the
     /// reading document when the scratch document `doc` has none ([`crate::plane::bars_for`]).
     reader: Option<crate::plane::Reader<'a>>,
+    /// (R4/H-FP) The session and reader language the headline pieces are written for
+    /// (inside [`crate::Session::as_reader`]: with the reader's projection).
+    parts: Option<(&'a crate::Session, qp_schema::protocol::Language)>,
 }
 
 impl<'a> DocProvider<'a> {
@@ -34,6 +37,7 @@ impl<'a> DocProvider<'a> {
             cache,
             headlines: None,
             reader: None,
+            parts: None,
         }
     }
 
@@ -50,6 +54,18 @@ impl<'a> DocProvider<'a> {
         headlines: &'a std::collections::BTreeMap<String, String>,
     ) -> Self {
         self.headlines = Some(headlines);
+        self
+    }
+
+    /// (R4/H-FP) The same provider giving the headline pieces of session `s`'s reader in
+    /// `lang` ([`crate::Session::reader_parts`]; the reader's projection inside
+    /// [`crate::Session::as_reader`]), alongside the headlines of that reader.
+    pub(crate) fn with_parts(
+        mut self,
+        s: &'a crate::Session,
+        lang: qp_schema::protocol::Language,
+    ) -> Self {
+        self.parts = Some((s, lang));
         self
     }
 }
@@ -178,14 +194,45 @@ impl DataProvider for DocProvider<'_> {
     /// story, by the capsule engine's own rule (`qp_capsule::glyph_spec`, confidence
     /// shown from [`qp_grammar::depth::GLYPH_MIN_LEDGER_N`] closed rows on) at the last
     /// bar of the story's bar series.
+    ///
+    /// (R4, K42/A28) With the story's validity at that bar (from its facts in the
+    /// document and the bars, the rule the sentence uses), so a capsule that no longer
+    /// holds looks so in its glyph too.
     fn glyph(&self, capsule_or_finding: &str) -> Option<Cow<'_, GlyphSpec>> {
         let c = self.capsule(capsule_or_finding)?;
         let story = c.story.as_ref()?;
-        let n = self.bars(&story.series)?.len() as u64;
-        Some(Cow::Owned(qp_capsule::glyph_spec(
+        let bars = self.bars(&story.series)?;
+        let now = (bars.len() as u64).saturating_sub(1);
+        let facts: Vec<&qp_schema::Fact> = crate::capsule::story_fact_ids(story)
+            .iter()
+            .filter_map(|i| self.doc.facts.iter().find(|f| &f.id == i))
+            .collect();
+        let validity = crate::capsule::story_validity(
             story,
-            n.saturating_sub(1),
+            &facts,
+            &bars,
+            now,
+            &mut qp_capsule::sentence::StudyMemo::default(),
+        );
+        Some(Cow::Owned(qp_capsule::glyph_spec_at(
+            story,
+            now,
             qp_grammar::depth::GLYPH_MIN_LEDGER_N,
+            validity,
         )))
+    }
+
+    /// (R4/H-FP) The reader's headline pieces (see [`DocProvider::with_parts`]); `None`
+    /// without them.
+    fn headline_parts(&self, finding: &str) -> Option<qp_grammar::HeadlineParts> {
+        let (s, lang) = self.parts?;
+        let c = s.doc.capsules.iter().find(|c| c.finding == finding)?;
+        s.reader_parts(
+            &s.doc,
+            c,
+            s.proj.as_deref(),
+            lang,
+            &mut qp_capsule::sentence::StudyMemo::default(),
+        )
     }
 }

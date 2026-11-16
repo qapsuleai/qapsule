@@ -1,0 +1,211 @@
+{
+ "rows": [
+  {
+   "agent": "A",
+   "attempts": 3,
+   "final": false,
+   "final_idfree": false,
+   "final_lenient": false,
+   "first": true,
+   "first_idfree": true,
+   "task": "C01"
+  },
+  {
+   "agent": "B",
+   "attempts": 2,
+   "final": true,
+   "final_idfree": false,
+   "final_lenient": true,
+   "first": true,
+   "first_idfree": true,
+   "task": "C02"
+  },
+  {
+   "agent": "C",
+   "attempts": 1,
+   "final": true,
+   "final_idfree": true,
+   "final_lenient": true,
+   "first": true,
+   "first_idfree": true,
+   "task": "C03"
+  },
+  {
+   "agent": "D",
+   "attempts": 1,
+   "final": true,
+   "final_idfree": true,
+   "final_lenient": true,
+   "first": true,
+   "first_idfree": true,
+   "task": "C04"
+  },
+  {
+   "agent": "E",
+   "attempts": 1,
+   "final": true,
+   "final_idfree": true,
+   "final_lenient": true,
+   "first": true,
+   "first_idfree": true,
+   "task": "C05"
+  },
+  {
+   "agent": "A",
+   "attempts": 1,
+   "final": true,
+   "final_idfree": true,
+   "final_lenient": true,
+   "first": true,
+   "first_idfree": true,
+   "task": "C06"
+  },
+  {
+   "agent": "B",
+   "attempts": 1,
+   "final": true,
+   "final_idfree": true,
+   "final_lenient": true,
+   "first": true,
+   "first_idfree": true,
+   "task": "C07"
+  },
+  {
+   "agent": "C",
+   "attempts": 1,
+   "final": true,
+   "final_idfree": true,
+   "final_lenient": true,
+   "first": true,
+   "first_idfree": true,
+   "task": "C08"
+  },
+  {
+   "agent": "D",
+   "attempts": 1,
+   "final": true,
+   "final_idfree": true,
+   "final_lenient": true,
+   "first": true,
+   "first_idfree": true,
+   "task": "C09"
+  },
+  {
+   "agent": "E",
+   "attempts": 2,
+   "final": true,
+   "final_idfree": false,
+   "final_lenient": true,
+   "first": false,
+   "first_idfree": false,
+   "task": "C10"
+  },
+  {
+   "agent": "A",
+   "attempts": 1,
+   "final": false,
+   "final_idfree": false,
+   "final_lenient": false,
+   "first": false,
+   "first_idfree": false,
+   "task": "C11"
+  },
+  {
+   "agent": "B",
+   "attempts": 1,
+   "final": true,
+   "final_idfree": true,
+   "final_lenient": true,
+   "first": true,
+   "first_idfree": true,
+   "task": "C12"
+  },
+  {
+   "agent": "C",
+   "attempts": 2,
+   "final": false,
+   "final_idfree": false,
+   "final_lenient": true,
+   "first": false,
+   "first_idfree": false,
+   "task": "C13"
+  },
+  {
+   "agent": "D",
+   "attempts": 1,
+   "final": true,
+   "final_idfree": true,
+   "final_lenient": true,
+   "first": true,
+   "first_idfree": true,
+   "task": "C14"
+  },
+  {
+   "agent": "E",
+   "attempts": 1,
+   "final": true,
+   "final_idfree": false,
+   "final_lenient": true,
+   "first": true,
+   "first_idfree": false,
+   "task": "C15"
+  },
+  {
+   "agent": "A",
+   "attempts": 1,
+   "final": true,
+   "final_idfree": true,
+   "final_lenient": true,
+   "first": true,
+   "first_idfree": true,
+   "task": "C16"
+  },
+  {
+   "agent": "B",
+   "attempts": 2,
+   "final": true,
+   "final_idfree": true,
+   "final_lenient": true,
+   "first": true,
+   "first_idfree": true,
+   "task": "C17"
+  },
+  {
+   "agent": "C",
+   "attempts": 1,
+   "final": true,
+   "final_idfree": true,
+   "final_lenient": true,
+   "first": true,
+   "first_idfree": true,
+   "task": "C18"
+  },
+  {
+   "agent": "D",
+   "attempts": 1,
+   "final": true,
+   "final_idfree": true,
+   "final_lenient": true,
+   "first": true,
+   "first_idfree": true,
+   "task": "C19"
+  },
+  {
+   "agent": "E",
+   "attempts": 1,
+   "final": true,
+   "final_idfree": false,
+   "final_lenient": true,
+   "first": true,
+   "first_idfree": false,
+   "task": "C20"
+  }
+ ],
+ "summary": {
+  "final": 17,
+  "final_idfree": 13,
+  "final_lenient": 18,
+  "first": 17,
+  "first_idfree": 15
+ }
+}

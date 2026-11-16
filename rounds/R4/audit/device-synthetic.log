@@ -1,0 +1,435 @@
+23:18  up 40 days, 11:02, 8 users, load averages: 6.20 8.97 10.15
+device: default dpr1 1x first_capsule 114.6 scroll p95 9.8 zoom p95 9.8
+device: default dpr1 4x first_capsule 397.4 scroll p95 10.2 zoom p95 10.2
+device: default dpr3 1x first_capsule 117 scroll p95 9.7 zoom p95 9.6
+device: default dpr3 4x first_capsule 410.4 scroll p95 10.2 zoom p95 10.2
+{
+ "browser": "151.0.7922.34",
+ "node": "v24.3.0",
+ "extra": [],
+ "phase_ms": 5000,
+ "reps": 3,
+ "configs": [
+  {
+   "look": "default",
+   "dpr": 1,
+   "rate": 1,
+   "failed_runs": 0,
+   "open_ms": {
+    "wasm_ready": 19.2,
+    "connected": 39.5,
+    "first_capsule": 114.6
+   },
+   "frame": {
+    "idle": {
+     "n": 599,
+     "fps": 119.8,
+     "p50": 8.3,
+     "p95": 9.8,
+     "p99": 10.2,
+     "max": 10.4,
+     "long_16_7": 0,
+     "long_33_3": 0,
+     "gaps_1s": 0
+    },
+    "scroll": {
+     "n": 600,
+     "fps": 120,
+     "p50": 8.3,
+     "p95": 9.8,
+     "p99": 10.2,
+     "max": 10.3,
+     "long_16_7": 0,
+     "long_33_3": 0,
+     "gaps_1s": 0
+    },
+    "drag": {
+     "n": 558,
+     "fps": 111.6,
+     "p50": 8.3,
+     "p95": 9.8,
+     "p99": 10.3,
+     "max": 16.7,
+     "long_16_7": 0.005,
+     "long_33_3": 0,
+     "gaps_1s": 0
+    },
+    "zoom": {
+     "n": 601,
+     "fps": 120.2,
+     "p50": 8.3,
+     "p95": 9.8,
+     "p99": 10.2,
+     "max": 16.6,
+     "long_16_7": 0,
+     "long_33_3": 0,
+     "gaps_1s": 0
+    }
+   },
+   "tick": {
+    "n": 80,
+    "p50": 1.85,
+    "p95": 3.9,
+    "p99": 4.75
+   },
+   "face": {
+    "n": 73,
+    "p50": 0.6499999999999999,
+    "p95": 1.5,
+    "p99": 1.75
+   },
+   "scene": {
+    "n": 95,
+    "p50": 1,
+    "p95": 1.9,
+    "p99": 2.1500000000000004
+   },
+   "js_heap_mb": 4.151969909667969,
+   "wasm_mb": 18.8125,
+   "depth": [
+    "chart",
+    "chart",
+    "chart"
+   ],
+   "copy_ok": true,
+   "errors": [],
+   "bundle": {
+    "js_gzip": 15940,
+    "js_raw": 84321,
+    "wasm_gzip": 1288327,
+    "wasm_raw": 4377216
+   },
+   "device": {
+    "cores": 16,
+    "device_memory_gb": 32,
+    "dpr": 1,
+    "scale": 1,
+    "screen_h": 844,
+    "screen_w": 390
+   },
+   "look_used": {
+    "alphabet": null,
+    "face": "vadrel",
+    "feed": "elikov",
+    "outcome": "tg5",
+    "transition": "zumlak"
+   }
+  },
+  {
+   "look": "default",
+   "dpr": 1,
+   "rate": 4,
+   "failed_runs": 0,
+   "open_ms": {
+    "wasm_ready": 65.3,
+    "connected": 149.8,
+    "first_capsule": 397.4
+   },
+   "frame": {
+    "idle": {
+     "n": 584,
+     "fps": 116.8,
+     "p50": 8.3,
+     "p95": 10.1,
+     "p99": 23.1,
+     "max": 32.4,
+     "long_16_7": 0.012,
+     "long_33_3": 0,
+     "gaps_1s": 0
+    },
+    "scroll": {
+     "n": 583,
+     "fps": 116.6,
+     "p50": 8.3,
+     "p95": 10.2,
+     "p99": 24.8,
+     "max": 33.7,
+     "long_16_7": 0.015,
+     "long_33_3": 0.002,
+     "gaps_1s": 0
+    },
+    "drag": {
+     "n": 498,
+     "fps": 99.6,
+     "p50": 8.3,
+     "p95": 10.2,
+     "p99": 58.1,
+     "max": 68,
+     "long_16_7": 0.014,
+     "long_33_3": 0.014,
+     "gaps_1s": 0
+    },
+    "zoom": {
+     "n": 564,
+     "fps": 112.8,
+     "p50": 8.3,
+     "p95": 10.2,
+     "p99": 34.5,
+     "max": 58,
+     "long_16_7": 0.016,
+     "long_33_3": 0.012,
+     "gaps_1s": 0
+    }
+   },
+   "tick": {
+    "n": 80,
+    "p50": 3.3499999999999996,
+    "p95": 8.95,
+    "p99": 12.95
+   },
+   "face": {
+    "n": 71.5,
+    "p50": 2,
+    "p95": 2.7,
+    "p99": 3.1
+   },
+   "scene": {
+    "n": 90,
+    "p50": 3.05,
+    "p95": 4,
+    "p99": 4.5
+   },
+   "js_heap_mb": 3.8691444396972656,
+   "wasm_mb": 18.8125,
+   "depth": [
+    "chart",
+    "chart",
+    "chart"
+   ],
+   "copy_ok": true,
+   "errors": [],
+   "bundle": {
+    "js_gzip": 15940,
+    "js_raw": 84321,
+    "wasm_gzip": 1288327,
+    "wasm_raw": 4377216
+   },
+   "device": {
+    "cores": 16,
+    "device_memory_gb": 32,
+    "dpr": 1,
+    "scale": 1,
+    "screen_h": 844,
+    "screen_w": 390
+   },
+   "look_used": {
+    "alphabet": null,
+    "face": "vadrel",
+    "feed": "elikov",
+    "outcome": "tg5",
+    "transition": "zumlak"
+   }
+  },
+  {
+   "look": "default",
+   "dpr": 3,
+   "rate": 1,
+   "failed_runs": 0,
+   "open_ms": {
+    "wasm_ready": 18.9,
+    "connected": 39,
+    "first_capsule": 117
+   },
+   "frame": {
+    "idle": {
+     "n": 597,
+     "fps": 119.4,
+     "p50": 8.3,
+     "p95": 9.7,
+     "p99": 10.3,
+     "max": 17.9,
+     "long_16_7": 0.003,
+     "long_33_3": 0,
+     "gaps_1s": 0
+    },
+    "scroll": {
+     "n": 595,
+     "fps": 119,
+     "p50": 8.3,
+     "p95": 9.7,
+     "p99": 10.2,
+     "max": 17.7,
+     "long_16_7": 0.002,
+     "long_33_3": 0,
+     "gaps_1s": 0
+    },
+    "drag": {
+     "n": 550,
+     "fps": 110,
+     "p50": 8.3,
+     "p95": 9.9,
+     "p99": 16.3,
+     "max": 16.8,
+     "long_16_7": 0.005,
+     "long_33_3": 0,
+     "gaps_1s": 0
+    },
+    "zoom": {
+     "n": 601,
+     "fps": 120.2,
+     "p50": 8.3,
+     "p95": 9.6,
+     "p99": 10.2,
+     "max": 16.7,
+     "long_16_7": 0.002,
+     "long_33_3": 0,
+     "gaps_1s": 0
+    }
+   },
+   "tick": {
+    "n": 80,
+    "p50": 1.6,
+    "p95": 12.399999999999999,
+    "p99": 14.1
+   },
+   "face": {
+    "n": 73,
+    "p50": 2.6,
+    "p95": 4.15,
+    "p99": 4.699999999999999
+   },
+   "scene": {
+    "n": 94.5,
+    "p50": 3.1500000000000004,
+    "p95": 5.2,
+    "p99": 5.6
+   },
+   "js_heap_mb": 3.1189117431640625,
+   "wasm_mb": 25.875,
+   "depth": [
+    "chart",
+    "chart",
+    "chart"
+   ],
+   "copy_ok": true,
+   "errors": [],
+   "bundle": {
+    "js_gzip": 15940,
+    "js_raw": 84321,
+    "wasm_gzip": 1288327,
+    "wasm_raw": 4377216
+   },
+   "device": {
+    "cores": 16,
+    "device_memory_gb": 32,
+    "dpr": 3,
+    "scale": 3,
+    "screen_h": 844,
+    "screen_w": 390
+   },
+   "look_used": {
+    "alphabet": null,
+    "face": "vadrel",
+    "feed": "elikov",
+    "outcome": "tg5",
+    "transition": "zumlak"
+   }
+  },
+  {
+   "look": "default",
+   "dpr": 3,
+   "rate": 4,
+   "failed_runs": 0,
+   "open_ms": {
+    "wasm_ready": 69.3,
+    "connected": 150.5,
+    "first_capsule": 410.4
+   },
+   "frame": {
+    "idle": {
+     "n": 551,
+     "fps": 110.2,
+     "p50": 8.3,
+     "p95": 10.2,
+     "p99": 43.5,
+     "max": 65,
+     "long_16_7": 0.022,
+     "long_33_3": 0.016,
+     "gaps_1s": 0
+    },
+    "scroll": {
+     "n": 542,
+     "fps": 108.4,
+     "p50": 8.3,
+     "p95": 10.2,
+     "p99": 56.7,
+     "max": 66.5,
+     "long_16_7": 0.018,
+     "long_33_3": 0.017,
+     "gaps_1s": 0
+    },
+    "drag": {
+     "n": 486,
+     "fps": 97.2,
+     "p50": 8.3,
+     "p95": 10.2,
+     "p99": 75.8,
+     "max": 93,
+     "long_16_7": 0.019,
+     "long_33_3": 0.016,
+     "gaps_1s": 0
+    },
+    "zoom": {
+     "n": 554,
+     "fps": 110.8,
+     "p50": 8.3,
+     "p95": 10.2,
+     "p99": 42,
+     "max": 74.8,
+     "long_16_7": 0.016,
+     "long_33_3": 0.016,
+     "gaps_1s": 0
+    }
+   },
+   "tick": {
+    "n": 80,
+    "p50": 3.3,
+    "p95": 32.6,
+    "p99": 40.05
+   },
+   "face": {
+    "n": 71,
+    "p50": 7.6,
+    "p95": 8.85,
+    "p99": 9.15
+   },
+   "scene": {
+    "n": 91,
+    "p50": 10.100000000000001,
+    "p95": 11.850000000000001,
+    "p99": 12.649999999999999
+   },
+   "js_heap_mb": 2.9148788452148438,
+   "wasm_mb": 25.875,
+   "depth": [
+    "chart",
+    "chart",
+    "chart"
+   ],
+   "copy_ok": true,
+   "errors": [],
+   "bundle": {
+    "js_gzip": 15940,
+    "js_raw": 84321,
+    "wasm_gzip": 1288327,
+    "wasm_raw": 4377216
+   },
+   "device": {
+    "cores": 16,
+    "device_memory_gb": 32,
+    "dpr": 3,
+    "scale": 3,
+    "screen_h": 844,
+    "screen_w": 390
+   },
+   "look_used": {
+    "alphabet": null,
+    "face": "vadrel",
+    "feed": "elikov",
+    "outcome": "tg5",
+    "transition": "zumlak"
+   }
+  }
+ ]
+}
+23:23  up 40 days, 11:07, 8 users, load averages: 4.36 6.28 8.60

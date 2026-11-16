@@ -1,0 +1,1 @@
+attempt1: present with finding selector {instrument:THYAO,meaning:extreme,open:true}, surface:"phone" (capsule depth); worked, resolved to fnd.THYAO.extreme.down.309. Unclear: query present accepts surface kind but headless profile default is chart; had to know surface "phone" gives capsule depth.

@@ -1,0 +1,49 @@
+demo: http://localhost:8611/
+open+settle 301 ms; banner visible=true text="Sentetik veri"
+status: {"days":"4200 / 0 / 0","done":false,"epoch":0,"instruments":"30","note":null,"paused":true,"source":"synthetic","speed":"4","step":"0 / 1260","synthetic":true,"time":"2023-06-16 10:00"}
+feed rows at start: 41; empty text visible=false "Henüz kapsül yok. Oynatmayı başlatın."
+shot 01-acilis
+after ~4 s play: step 16 / 1260, 41 feed rows, headers Diğerleri, geçmişte en çok tutan önce
+shot 02-akis-oynatma
+after +1: {"days":"4200 / 0 / 0","done":false,"epoch":0,"instruments":"30","note":null,"paused":true,"source":"synthetic","speed":"4","step":"17 / 1260","synthetic":true,"time":"2023-06-20 17:00"}
+after seek 120: {"days":"4200 / 0 / 0","done":false,"epoch":0,"instruments":"30","note":null,"paused":true,"source":"synthetic","speed":"4","step":"120 / 1260","synthetic":true,"time":"2023-07-06 12:00"}; 41 rows
+shot 03-akis-adim120
+feed scrollTop after wheel: 1800
+shot 04-akis-kaydirildi
+tap face cap.SYN26.breakout.down.47: depth capsule; text "SYN26 85 bar önce 110,95'teki desteği aşağı kırdı (kapanış 108,38): aşağı kırılım. Sinyal 83 bar önce geçersiz oldu; artık geçerli değil. Geçmişte bu sinyal 41 seferin 24'ünde beklendiği gibi sonuçlandı."; hint "Grafiğe inmek için dokunun."
+shot 05-kapsul
+tap scene: depth chart; hint "Sürükleyin, kıstırın; kanıt için işarete ya da seviyeye dokunun."
+shot 06-grafik
+drag changed scene: true; zoom changed scene: true
+shot 07-grafik-surukle-yakinlastir
+evidence (arkin): depth evidence; evidence text: "price\natr 1.39\nclose 108.38\nlevel 110.95\nDayandığı: bars SYN26 1d (feed default)\nvolume\nratio 6.25\nvol_avg 1475274787.72\nvolume 9219577515.37\nDayandığı: bars SYN26 1d (feed default)"
+shot 08-kanit-yetkili
+back -> chart
+back -> capsule
+back -> sentence
+shot 09-ayarlar
+settings options: {"s_face":["r3","vadrel","fotolay","tavrik"],"s_alpha":["siluet","rozet"],"s_feed":["r3","elikov","vakiro"],"s_transition":["r3","tutamir","zumlak"],"s_outcome":["r3","muhrak","tg5"]}
+sensitivity important: 40 capsules (before 40)
+sensitivity balanced: 40 capsules (before 40)
+sensitivity all: 40 capsules (before 40)
+instruments listed: 30
+audience after apply: {"group":"habituated","positions":{"SYN02":1.0,"SYN03":-1.0},"sensitivity":"important","watchlist":["SYN01"]}
+important + watch/positions: 27 capsules (was 40); headers Elindeki hisseler | Diğerleri, geçmişte en çok tutan önce
+toast after last look: "Son bakış işaretlendi"
+shot 10-akis-izleme-pozisyon
+after last look + play: headers Diğerleri, geçmişte en çok tutan önce
+shot 11-son-bakis-sonrasi
+shot 12-acik-rozet
+shot 13-acik-fotolay
+look after style: {"depth":"sentence","frames":{"capsule":[390,300],"chart":[390,300],"face":[390,300]},"face":"fotolay","alphabet":"rozet","theme":"light","feed":"elikov","transition":"zumlak","outcome":"tg5","seen":1688634000000}
+EN: status {"days":"4200 / 0 / 0","done":false,"epoch":0,"instruments":"30","note":null,"paused":true,"source":"synthetic","speed":"4","step":"130 / 1260","synthetic":true,"time":"2023-07-07 13:00"}; look {"depth":"sentence","face":"vadrel","theme":"light","feed":"elikov","transition":"zumlak","outcome":"tg5"}; audience {"group":"habituated","positions":{"SYN02":1.0,"SYN03":-1.0},"sensitivity":"important","watchlist":["SYN01"]}; rows 29
+shot 14-en
+shot 15-olcum
+visitor: 41 rows; first texts: ["There is a server-verified downside breakout signal for This stock; the details require a data license.","There is a server-verified downside breakout signal for This stock; the details require a data license.","There is a server-verified downside breakout signal for This stock; the details require a data license."]
+shot 16-yetkisiz-akis
+visitor evidence: depth evidence; text "price\nThis evidence requires the entitlement: SYN26\nRests on: bars SYN26 1d (feed default)\nvolume\nThis evidence requires the entitlement: SYN26\nRests on: bars SYN26 1d (feed default)"
+shot 17-yetkisiz-kanit
+requests (page.on): 71, (route): 71
+foreign: []
+distinct paths: ["/","/style.css","/pkg/qp_wasm.js","/pkg/qp_wasm_bg.wasm","/main.js","/events","/pkg/sizes.json","/send"]
+page errors/warnings: []

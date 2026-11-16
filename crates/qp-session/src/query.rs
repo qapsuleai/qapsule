@@ -490,8 +490,15 @@ impl Session {
                 key,
                 meaning,
                 detector,
+                direction,
                 by_kind,
-            } => Ok(self.ledger_query(key.as_deref(), *meaning, detector.as_deref(), *by_kind)),
+            } => Ok(self.ledger_query(
+                key.as_deref(),
+                *meaning,
+                detector.as_deref(),
+                *direction,
+                *by_kind,
+            )),
             Query::VerifyEvidence { item } => {
                 let asker = self.conns[ci].principal.clone();
                 Ok(QueryResult::EvidenceCheck {
@@ -620,7 +627,7 @@ impl Session {
         }
     }
 
-    fn at_bar(&mut self, series: &str, i: usize) -> AtBar {
+    pub(crate) fn at_bar(&mut self, series: &str, i: usize) -> AtBar {
         let bars = rd!(self)
             .series
             .iter()
@@ -664,7 +671,7 @@ impl Session {
     /// Initial visible range of a view for a surface (§4.6): the slots whose time falls
     /// in `x.domain`, else the surface's last N bars and every future slot after them
     /// (K25: the default viewport covers the future points).
-    fn initial_range(
+    pub(crate) fn initial_range(
         &self,
         view: &View,
         kind: qp_schema::protocol::SurfaceKind,
@@ -835,6 +842,8 @@ impl Session {
                 .collect(),
             capsules,
             last_close,
+            view_state: (c.look != qp_schema::protocol::ViewState::default())
+                .then(|| c.look.clone()),
         })
     }
 
@@ -851,6 +860,8 @@ impl Session {
             | Gesture::Pan { view, .. }
             | Gesture::Zoom { view, .. }
             | Gesture::Tap { view, .. } => view,
+            // (R4) Pixel gestures and open/close: `interact.rs`.
+            _ => return self.interact(ci, g),
         };
         let view = need_view(rd!(self), view_id, &ptr(gp, "view"))?.clone();
         let bar_series = view_bar_series(rd!(self), &view)
@@ -924,13 +935,7 @@ impl Session {
                 }
                 (*from_bar, *to_bar)
             }
-            Gesture::Pan { bars, .. } => {
-                let width = to - from;
-                let max_from = last_slot.saturating_sub(width);
-                let target = i128::from(from) + i128::from(*bars);
-                let nf = u64::try_from(target.clamp(0, i128::from(max_from))).unwrap_or(0);
-                (nf, nf + width)
-            }
+            Gesture::Pan { bars, .. } => qp_grammar::gesture::pan_range(from, to, *bars, last_slot),
             Gesture::Zoom {
                 factor, anchor_bar, ..
             } => {
@@ -944,28 +949,8 @@ impl Session {
                 if anchor > last_slot {
                     return Err(past_slot("anchor_bar", anchor));
                 }
-                let width = to - from + 1;
-                #[allow(
-                    clippy::cast_precision_loss,
-                    clippy::cast_possible_truncation,
-                    clippy::cast_sign_loss
-                )]
-                let nw = {
-                    let w = (width as f64 / factor).round();
-                    let w = if w.is_finite() { w.max(2.0) } else { 2.0 };
-                    (w.min(slots as f64) as u64).max(1)
-                };
-                #[allow(clippy::cast_precision_loss)]
-                let r = if width > 1 {
-                    (anchor as f64 - from as f64) / (width - 1) as f64
-                } else {
-                    1.0
-                };
-                #[allow(clippy::cast_precision_loss, clippy::cast_possible_truncation)]
-                let off = (r * (nw - 1) as f64).round() as i128;
-                let max_from = i128::from(slots - nw);
-                let nf = u64::try_from((i128::from(anchor) - off).clamp(0, max_from)).unwrap_or(0);
-                (nf, nf + nw - 1)
+                // (R4/S1) One rule for bar-space and pixel gestures (`qp_grammar::gesture`).
+                qp_grammar::gesture::zoom_range(from, to, *factor, anchor, slots)
             }
             Gesture::Tap { panel, bar, .. } => {
                 // A tap answers the bar's values (data plane, §18.3).
@@ -1013,6 +998,7 @@ impl Session {
                     Vec::new(),
                 ));
             }
+            _ => unreachable!("pixel gestures return above"),
         };
         let vp = Viewport {
             view: view.id.clone(),

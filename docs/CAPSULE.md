@@ -24,6 +24,15 @@ ayrıntıları R3 tasarlar ve ölçer.
 Cümle her zaman olgunun zamanını ve bugünkü geçerliliğini yansıtır. Geçmişte olmuş bir
 olay şimdiki zamanla sunulmaz.
 
+**Geçerlilik, durum koşulu, beklenen çözüm (K42/A28, R4).** Kapsülün bugünkü
+**geçerliliği** üç değerdir: `valid` (hikâye açık, durum koşulu tutuyor ya da izlenen
+koşulu yok), `no_longer` (durum koşulu artık tutmuyor, hikâye henüz kapanmadı), `closed`
+(hikâye kapandı). Geçerliliği **durum koşulu** belirler ("kapanış kırılan seviyenin
+üstünde", "RSI 70'in üstünde"); hikâyenin nasıl kapanacağını söyleyen **beklenen çözüm**
+(sonuç kuralı: bariyer, ufuk; dedektörün adlandırdığı çözüm: "20 bar içinde bandın dışında
+kapanış") ondan ayrıdır: durum bitmiş, hikâye hâlâ açık olabilir. Cümle, kapsül öğesi ve
+işaret aynı geçerliliği söyler (§9.5, §9.6).
+
 ## 3. Kapsül bir hikâyedir (K28)
 
 Aynı enstrümanda aynı tema için ayrı ayrı kapsüller doğmaz; tek kapsül evrilir:
@@ -178,7 +187,13 @@ Kapanmış hikâyeye olgu katılmaz; aynı temada yeni olgu yeni hikâye başlat
 
 ### 9.4 Karne
 
-- Anahtar: `<tür>/<dedektör>@<sürüm>` (hikâyeyi doğuran olgunun dedektörü).
+- Anahtar (R4, K42/A23 "karne yönü"): `<tür>/<yön>/<dedektör>@<sürüm>` (hikâyeyi doğuran
+  olgunun türü, yönü ve dedektörü; ör. `breakout/up/breakout.range@1`). Yukarı, aşağı ve
+  yönsüz (`neutral`) hikâyeler ayrı sayılır: her yönün kendi tabanı vardır (gerçek veride
+  yukarı kırılım ~0,60, aşağı ~0,40 tuttu; tek anahtar ikisini karıştırıyordu). R3'te
+  anahtar `<tür>/<dedektör>@<sürüm>`'dü; `qp_capsule::parse_ledger_key` iki biçimi de okur.
+  Karne yön değiştiği için `ledger_at_birth`, önem (`RankCtx.ledger`) ve kademe de yöne göre
+  hesaplanır.
 - Her kapanış (geri çekilme hariç) karneye bir satır yazar: kapsül, anahtar, aşama, bar.
 - **İleriye bakma yok:** bir hikâyenin `ledger_at_birth`'i yalnız doğum barının zamanından
   **kesin olarak önce** kapanmış hikâyeleri sayar (çok enstrümanda zaman sırası `t`).
@@ -194,6 +209,27 @@ Kapanmış hikâyeye olgu katılmaz; aynı temada yeni olgu yeni hikâye başlat
 | Durum | Durum sürüyorsa şimdiki zaman; bittiyse geçmiş zaman + "artık geçerli değil" | "RSI 3 bar önce 70'in üstüne çıktı; şu an 55, artık 70'in üstünde değil." |
 | Beklenti | Koşullu | "148 üzerinde iki kapanış olursa kırılım teyit olur." |
 
+**Durum koşulu ve beklenen çözüm (R4, K42/A28).** Olgunun `condition`'ı iki rolden birini
+taşır (`qp_capsule::sentence::split_condition`): olayın ya da durumun koşulu **durum
+koşuludur**; `within_bars`'lı durum koşulu (sıkışma: "20 bar içinde bandın dışında
+kapanış") ve beklentinin koşulu **beklenen çözümdür**. Hikâye ikisini ayrı alanlarda tutar:
+`Story.condition` (durum koşulu) ve `Story.resolution` (`rule`: sonuç kuralı, ör.
+`barrier`; `condition`: dedektörün adlandırdığı çözüm). Geçerlilik
+(`sentence::validity_now`): kapanmış aşama → `closed`; açık ve durum koşulu tutmuyor →
+`no_longer`; değilse `valid`. Cümlenin "artık geçerli değil / no longer" kuyruğu tam olarak
+geçerlilik `valid` değilken söylenir; aynı değer kapsül öğesinde (`CapsuleItem.validity`) ve
+işarette (`GlyphSpec.validity`) gider.
+
+**Süre ifadesi (R4).** R3 cümlesi bar sayar ("6 bar önce"; R3 dökümleri ve ayrıntı derinliği
+bu cümleyle kalır). Yüz başlığı için `qp_capsule::realize::elapsed` bar farkını periyoda ve
+borsa takvimine göre gündelik süreye çevirir: günlükte "bugün", "dün", "cuma günü" (hafta sonu
+ya da tatil aşılınca), "3 işlem günü önce", "geçen hafta", "12 Mart'ta"; gün içinde "az önce",
+"25 dakika önce", "2 saat önce", "dün 15:00'te", "perşembe 15:00'te"; haftalık ve aylıkta "geçen
+hafta", "3 ay önce". Hafta sonu ve tatil işlem günü sayılmaz (`qp-calendar`, XIST). Başlığın
+yapı taşları (olay adı, ne zaman, geçerlilik, yön, kısaltılmış karne; "bar", "aile", "teyit"
+yok; yetkisize rakamsız) `qp_capsule::realize::parts`'tadır; başlığın kendisi yüz tasarımının
+(M8) işidir.
+
 Karne cümlenin parçası olabilir ("bu durum geçmişte 100 seferin 62'sinde …"); lisanslı
 olgunun cümlesi **hiç rakam içermez** (karne ayrı alanda gider). Üretim yöntemi M2 seçimi: belirleyici şablon dilbilgisi (`qp_capsule::realize::Template`), dil modeli yok.
 
@@ -201,6 +237,8 @@ olgunun cümlesi **hiç rakam içermez** (karne ayrı alanda gider). Üretim yö
 
 `GlyphSpec` kanalları §4'teki tablodur; alfabe (çizim kuralları) M1 ile seçilir ve gramere
 `glyph` işareti olarak girer (T7). Kapsül görünümü: işaret + cümle + küçük grafik + karne.
+(R4, K42/A28) Ek kanal **geçerlilik** (`validity`): yalnız `no_longer` farklı çizilir (gri
+siluet + "artık geçerli değil" rozeti); GRAMMAR §18.1.
 
 ### 9.7 Sunucu olgusu ve güven yolu
 
@@ -214,8 +252,14 @@ kanalı lisanslı veriye bağlı değildir (R3/K1, `docs/PROTOCOL.md` §20.5).
 ### 9.8 Hassasiyet
 
 `Sensitivity` → kademe süzgeci: `important` kademe 1, `balanced` 1–2, `all` hepsi.
-Kişinin pozisyonu ya da etkin niyetiyle ilgili enstrümanın kapsülü (özellikle `weakened`,
-`invalidated`) kademeden bağımsız geçer. Varsayılan gruptan gelir; sistem değiştirmez.
+(R4, K42/A22) Kişinin pozisyonu ya da etkin niyetiyle ilgili enstrümanın kapsülünde **yalnız
+olumsuz geçişler** (`weakened`, `invalidated`, `retracted`; `Stage::is_negative`) kademeden
+bağımsız geçer; doğum ve öteki geçişler (güçlendi, teyit edildi, gerçekleşti, süresi doldu)
+herkes gibi kademe süzgecinden geçer (`qp_capsule::admits_at`: geçişin aşamasıyla). R3'te
+pozisyon/niyet kapsülünün her geçişi geçiyordu ve `important` seviyesine ulaşan doğumların
+%84'ü bu yoldandı (R3 yerel verisi); güncel yerel veride K42 öncesi %71, sonrası %0;
+sentetikte %57 → %0 (`rounds/R4/experiments/T3-sensitivity.md`).
+Varsayılan gruptan gelir; sistem değiştirmez.
 
 ### 9.9 Seçimler ve bağlantılar (R3)
 
@@ -230,6 +274,10 @@ Kişinin pozisyonu ya da etkin niyetiyle ilgili enstrümanın kapsülü (özelli
 | İtiraz ve geri çekme (M7) | kesin bar hijyeni + `dispute` | `qp-session` `dispute.rs`, PROTOCOL §19.9 | `M7/RESULTS.md` |
 | Otoritede motor | bar kesinleşince `EngineConfig::r3()`; sonuç motor yazarlı değişim olarak günlükte; günlükten yeniden oynatma aynı hikâyeyi verir | `qp-session` `capsule.rs`, PROTOCOL §20 | `S/S-C.md` |
 | Hassasiyet | §9.8; kitle kişiye özeldir, başkasına gitmez | `qp_capsule::audience`, `set_audience` | `S/sensitivity.md` |
+| Karne yönü (R4, K42/A23) | anahtar `<tür>/<yön>/<dedektör>@<sürüm>` | `qp_capsule::engine::ledger_key`, `ledger` sorgusu `direction` | `rounds/R4/experiments/T3.md`, döküm 45 |
+| Olumsuz geçiş (R4, K42/A22) | pozisyon/niyet kapsülünde yalnız `weakened`/`invalidated`/`retracted` seviyeden bağımsız | `qp_capsule::admits_at` | `T3-sensitivity.md`, döküm 46 |
+| Geçerlilik (R4, K42/A28) | `valid`/`no_longer`/`closed`; durum koşulu ile beklenen çözüm ayrı | `sentence::validity_now`, `Story.condition`/`resolution`, `GlyphSpec.validity` | döküm 47, `g2-glyphs-validity` |
+| Süre ifadesi (R4) | takvime göre gündelik süre; başlık yapı taşları | `realize::elapsed`, `realize::parts` | birim testleri (VERIFY 12) |
 
 Kanıtın açılması (vazgeçilmez, K34): yetkili okuyucu kanıt değerlerini görür; yetkisiz okuyucu
 yorumu, karneyi ve "bu kanıt şu veri yetkisini gerektirir" (`requires`) ile neye dayandığını

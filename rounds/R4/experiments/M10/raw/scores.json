@@ -1,0 +1,187 @@
+{
+  "designs": {
+    "r3": {
+      "area_share_after": 0.669,
+      "persona": {
+        "F": {
+          "g1": 0.9167,
+          "g2": 1.0,
+          "g3": 0.3333
+        },
+        "H": {
+          "g1": 0.9167,
+          "g2": 1.0,
+          "g3": 0.4167
+        }
+      },
+      "taps": 2.0,
+      "weighted_g1": 0.9167,
+      "weighted_g2_g3": 0.6806
+    },
+    "tutamir": {
+      "area_share_after": 0.669,
+      "persona": {
+        "F": {
+          "g1": 1.0,
+          "g2": 1.0,
+          "g3": 0.3333
+        },
+        "H": {
+          "g1": 1.0,
+          "g2": 1.0,
+          "g3": 0.3333
+        }
+      },
+      "taps": 2.0,
+      "weighted_g1": 1.0,
+      "weighted_g2_g3": 0.6667
+    },
+    "zumlak": {
+      "area_share_after": 0.5696,
+      "persona": {
+        "F": {
+          "g1": 1.0,
+          "g2": 1.0,
+          "g3": 0.3333
+        },
+        "H": {
+          "g1": 1.0,
+          "g2": 1.0,
+          "g3": 0.5
+        }
+      },
+      "taps": 2.0,
+      "weighted_g1": 1.0,
+      "weighted_g2_g3": 0.6944
+    }
+  },
+  "experiment": "m10",
+  "harness": "r4-h-m8910/1",
+  "limit": "Persona ajanı insan değildir; bu ölçüm ön elemedir, son söz insan testi v2'dedir.",
+  "readers": [
+    {
+      "design": "zumlak",
+      "parsed": true,
+      "persona": "F",
+      "reader": "F_06489420_r1"
+    },
+    {
+      "design": "zumlak",
+      "parsed": true,
+      "persona": "F",
+      "reader": "F_06489420_r2"
+    },
+    {
+      "design": "zumlak",
+      "parsed": true,
+      "persona": "F",
+      "reader": "F_06489420_r3"
+    },
+    {
+      "design": "r3",
+      "parsed": true,
+      "persona": "F",
+      "reader": "F_2760beb1_r1"
+    },
+    {
+      "design": "r3",
+      "parsed": true,
+      "persona": "F",
+      "reader": "F_2760beb1_r2"
+    },
+    {
+      "design": "r3",
+      "parsed": true,
+      "persona": "F",
+      "reader": "F_2760beb1_r3"
+    },
+    {
+      "design": "tutamir",
+      "parsed": true,
+      "persona": "F",
+      "reader": "F_f75a83ba_r1"
+    },
+    {
+      "design": "tutamir",
+      "parsed": true,
+      "persona": "F",
+      "reader": "F_f75a83ba_r2"
+    },
+    {
+      "design": "tutamir",
+      "parsed": true,
+      "persona": "F",
+      "reader": "F_f75a83ba_r3"
+    },
+    {
+      "design": "zumlak",
+      "parsed": true,
+      "persona": "H",
+      "reader": "H_06489420_r1"
+    },
+    {
+      "design": "zumlak",
+      "parsed": true,
+      "persona": "H",
+      "reader": "H_06489420_r2"
+    },
+    {
+      "design": "zumlak",
+      "parsed": true,
+      "persona": "H",
+      "reader": "H_06489420_r3"
+    },
+    {
+      "design": "r3",
+      "parsed": true,
+      "persona": "H",
+      "reader": "H_2760beb1_r1"
+    },
+    {
+      "design": "r3",
+      "parsed": true,
+      "persona": "H",
+      "reader": "H_2760beb1_r2"
+    },
+    {
+      "design": "r3",
+      "parsed": true,
+      "persona": "H",
+      "reader": "H_2760beb1_r3"
+    },
+    {
+      "design": "tutamir",
+      "parsed": true,
+      "persona": "H",
+      "reader": "H_f75a83ba_r1"
+    },
+    {
+      "design": "tutamir",
+      "parsed": true,
+      "persona": "H",
+      "reader": "H_f75a83ba_r2"
+    },
+    {
+      "design": "tutamir",
+      "parsed": true,
+      "persona": "H",
+      "reader": "H_f75a83ba_r3"
+    }
+  ],
+  "selection": {
+    "ranking": [
+      "zumlak",
+      "tutamir",
+      "r3"
+    ],
+    "selected": "zumlak",
+    "steps": [
+      "primary: `tutamir` 1.0000 vs `zumlak` 1.0000 (difference 0.0000 < 0.05): tiebreaks",
+      "G2+G3 (higher wins): `tutamir` 0.6667, `zumlak` 0.6944"
+    ],
+    "top2": [
+      "zumlak",
+      "tutamir"
+    ]
+  }
+}

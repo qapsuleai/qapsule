@@ -1,0 +1,50 @@
+# fixtures/protocol/conformance/38-capsule-lifecycle.json: 4ee7fc6 -> K42 (jdiff.py; then changed sentence clauses, sentdiff.py)
+added    validity                  17  e.g. /steps/2/expect/0/msg/event/capsule/validity: null -> "closed"
+changed  n                         17  e.g. /steps/2/expect/0/msg/event/capsule/ledger_at_birth/n: 6 -> 4
+changed  importance                15  e.g. /steps/2/expect/0/msg/event/capsule/importance: 1.4601231174212248 -> 1.4879223452204524
+changed  en                        14  e.g. /steps/2/expect/0/msg/event/capsule/sentence/en: "5 bars ago, THYAO broke below support at 4.71 (close 4.69): a downside breakout. It was i -> "5 bars ago, THYAO broke below support at 4.71 (close 4.69): a downside breakout. It was i
+changed  text                      14  e.g. /steps/2/expect/0/msg/event/capsule/sentence/text: "THYAO 5 bar önce 4,71'deki desteği aşağı kırdı (kapanış 4,69): aşağı kırılım. Sinyal bu b -> "THYAO 5 bar önce 4,71'deki desteği aşağı kırdı (kapanış 4,69): aşağı kırılım. Sinyal bu b
+changed  tr                        14  e.g. /steps/2/expect/0/msg/event/capsule/sentence/tr: "THYAO 5 bar önce 4,71'deki desteği aşağı kırdı (kapanış 4,69): aşağı kırılım. Sinyal bu b -> "THYAO 5 bar önce 4,71'deki desteği aşağı kırdı (kapanış 4,69): aşağı kırılım. Sinyal bu b
+changed  realized                   4  e.g. /steps/2/expect/1/msg/event/capsule/ledger_at_birth/realized: 6 -> 3
+changed  born_bar                   2  e.g. /steps/10/expect/0/msg/data/capsules/1/born_bar: 120 -> 124
+changed  direction                  2  e.g. /steps/10/expect/0/msg/data/capsules/1/direction: "up" -> "down"
+changed  finding                    2  e.g. /steps/10/expect/0/msg/data/capsules/1/finding: "fnd.THYAO.flow.up.120" -> "fnd.THYAO.continuation.down.124"
+changed  id                         2  e.g. /steps/10/expect/0/msg/data/capsules/1/id: "cap.THYAO.flow.up.120" -> "cap.THYAO.continuation.down.124"
+changed  kind                       2  e.g. /steps/10/expect/0/msg/data/capsules/1/kind: "flow" -> "continuation"
+changed  stage                      2  e.g. /steps/10/expect/0/msg/data/capsules/1/stage: "invalidated" -> "born"
+changed  state                      2  e.g. /steps/10/expect/0/msg/data/capsules/1/state: "invalidated" -> "live"
+changed  time                       2  e.g. /steps/10/expect/0/msg/data/capsules/1/time: "event" -> "state"
+changed  trust                      2  e.g. /steps/10/expect/0/msg/data/capsules/1/trust: "server" -> "replica"
+added    *                          1  e.g. /steps/12/expect/0/msg/data/rows/1: null -> {"detector": "breakout.range", "direction": "up", "key": "breakout/up/breakout.range@1", "
+added    condition                  1  e.g. /steps/11/expect/0/msg/data/detail/story/condition: null -> {"key": "level", "op": "lt", "subject": "close", "within_bars": 3}
+added    direction                  1  e.g. /steps/12/expect/0/msg/data/rows/0/direction: null -> "down"
+added    resolution                 1  e.g. /steps/11/expect/0/msg/data/detail/story/resolution: null -> {"rule": "barrier"}
+changed  key                        1  e.g. /steps/12/expect/0/msg/data/rows/0/key: "breakout/breakout.range@1" -> "breakout/down/breakout.range@1"
+changed  ledger_key                 1  e.g. /steps/11/expect/0/msg/data/detail/story/ledger_key: "breakout/breakout.range@1" -> "breakout/down/breakout.range@1"
+total 119 leaf differences
+
+## sentences
+- 'Its record is still thin: it played out in 3 of 8 cases.'
++ 'Its record is still thin: it played out in 3 of 6 cases.'
+- "Karnesi henüz az örnekli: 8 seferin 3'ünde tuttu."
++ "Karnesi henüz az örnekli: 6 seferin 3'ünde tuttu."
+- '7 bars ago, net institutional buying in THYAO (429,157) clearly exceeded the recent average (113,710): money inflow. It was invalidated 3 bars ago and is no longer valid. Its record is still thin: it played out in 6 of 9 cases. Server-verified.'
++ 'THYAO has been below the short average (4.78) for 3 bars and is now at 4.47. The downtrend is still in place. Its record is still thin: it played out in 0 of 1 cases.'
+- "THYAO'da 7 bar önce kurumsal net alış (429.157) son günlerin ortalamasını (113.710) belirgin biçimde aştı: para girişi. Sinyal 3 bar önce geçersiz oldu; artık geçerli değil. Karnesi henüz az örnekli: 9 seferin 6'sında tuttu. Sunucu doğruladı."
++ "THYAO 3 bardır kısa ortalamanın (4,78) altında; şu an 4,47. Düşüş eğilimi sürüyor. Karnesi henüz az örnekli: 1 seferin 0'ında tuttu."
+- 'THYAO has been below the short average (4.78) for 3 bars and is now at 4.47. The downtrend is still in place. Its record is still thin: it played out in 0 of 3 cases.'
++ '7 bars ago, net institutional buying in THYAO (429,157) clearly exceeded the recent average (113,710): money inflow. It was invalidated 3 bars ago and is no longer valid. Its record is still thin: it played out in 3 of 5 cases. Server-verified.'
+- "THYAO 3 bardır kısa ortalamanın (4,78) altında; şu an 4,47. Düşüş eğilimi sürüyor. Karnesi henüz az örnekli: 3 seferin 0'ında tuttu."
++ "THYAO'da 7 bar önce kurumsal net alış (429.157) son günlerin ortalamasını (113.710) belirgin biçimde aştı: para girişi. Sinyal 3 bar önce geçersiz oldu; artık geçerli değil. Karnesi henüz az örnekli: 5 seferin 3'ünde tuttu. Sunucu doğruladı."
+- 'Its record is still thin: it played out in 2 of 6 cases.'
++ 'Its record is still thin: it played out in 2 of 4 cases.'
+- "Karnesi henüz az örnekli: 6 seferin 2'sinde tuttu."
++ "Karnesi henüz az örnekli: 4 seferin 2'sinde tuttu."
+- 'Its record is still thin: it played out in 6 of 9 cases. Server-verified.'
++ 'Its record is still thin: it played out in 3 of 5 cases. Server-verified.'
+- "Karnesi henüz az örnekli: 9 seferin 6'sında tuttu. Sunucu doğruladı."
++ "Karnesi henüz az örnekli: 5 seferin 3'ünde tuttu. Sunucu doğruladı."
+- 'Its record is still thin: it played out in 0 of 3 cases.'
++ 'Its record is still thin: it played out in 0 of 1 cases.'
+- "Karnesi henüz az örnekli: 3 seferin 0'ında tuttu."
++ "Karnesi henüz az örnekli: 1 seferin 0'ında tuttu."

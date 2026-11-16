@@ -1,0 +1,14 @@
+{
+  "code": "06489420",
+  "experiment": "m10",
+  "model": "sonnet",
+  "order": [
+    "3",
+    "2",
+    "1",
+    "4"
+  ],
+  "persona": "F",
+  "reader": "r1",
+  "seed": 1
+}

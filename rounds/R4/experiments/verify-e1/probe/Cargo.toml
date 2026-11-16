@@ -1,0 +1,17 @@
+[package]
+name = "verify-e1-probe"
+version = "0.0.0"
+edition = "2021"
+publish = false
+
+[workspace]
+
+[dependencies]
+qp-capsule = { path = "../../../../../crates/qp-capsule" }
+qp-calendar = { path = "../../../../../crates/qp-calendar" }
+qp-session = { path = "../../../../../crates/qp-session" }
+qp-schema = { path = "../../../../../crates/qp-schema" }
+qp-source = { path = "../../../../../crates/qp-source" }
+qp-grammar = { path = "../../../../../crates/qp-grammar" }
+qp-facts = { path = "../../../../../crates/qp-facts" }
+serde_json = { version = "1", features = ["float_roundtrip"] }

@@ -1030,18 +1030,18 @@
                 "direction": "up",
                 "finding": "fnd.THYAO.flow.up.90",
                 "id": "cap.THYAO.flow.up.90",
-                "importance": 1.520473855692566,
+                "importance": 1.509345079857908,
                 "instrument": "THYAO",
                 "kind": "flow",
                 "last_bar": 90,
                 "ledger_at_birth": {
-                  "n": 7,
-                  "realized": 5
+                  "n": 4,
+                  "realized": 3
                 },
                 "sentence": {
-                  "en": "On this bar, net institutional buying in THYAO (337,273) clearly exceeded the recent average (137,900): money inflow. Whether it still holds is unknown. Its record is still thin: it played out in 5 of 7 cases. Server-verified.",
-                  "text": "THYAO'da bu barda kurumsal net alış (337.273) son günlerin ortalamasını (137.900) belirgin biçimde aştı: para girişi. Hâlâ geçerli olup olmadığı bilinmiyor. Karnesi henüz az örnekli: 7 seferin 5'inde tuttu. Sunucu doğruladı.",
-                  "tr": "THYAO'da bu barda kurumsal net alış (337.273) son günlerin ortalamasını (137.900) belirgin biçimde aştı: para girişi. Hâlâ geçerli olup olmadığı bilinmiyor. Karnesi henüz az örnekli: 7 seferin 5'inde tuttu. Sunucu doğruladı."
+                  "en": "On this bar, net institutional buying in THYAO (337,273) clearly exceeded the recent average (137,900): money inflow. Whether it still holds is unknown. Its record is still thin: it played out in 3 of 4 cases. Server-verified.",
+                  "text": "THYAO'da bu barda kurumsal net alış (337.273) son günlerin ortalamasını (137.900) belirgin biçimde aştı: para girişi. Hâlâ geçerli olup olmadığı bilinmiyor. Karnesi henüz az örnekli: 4 seferin 3'ünde tuttu. Sunucu doğruladı.",
+                  "tr": "THYAO'da bu barda kurumsal net alış (337.273) son günlerin ortalamasını (137.900) belirgin biçimde aştı: para girişi. Hâlâ geçerli olup olmadığı bilinmiyor. Karnesi henüz az örnekli: 4 seferin 3'ünde tuttu. Sunucu doğruladı."
                 },
                 "series": "px",
                 "stage": "born",
@@ -1049,7 +1049,8 @@
                 "t": 1683529200000,
                 "tier": 3,
                 "time": "event",
-                "trust": "server"
+                "trust": "server",
+                "validity": "valid"
               },
               "kind": "capsule",
               "seq": 4,
@@ -1185,7 +1186,8 @@
                 "t": 1683615600000,
                 "tier": 3,
                 "time": "event",
-                "trust": "replica"
+                "trust": "replica",
+                "validity": "closed"
               },
               "kind": "capsule",
               "seq": 5,
@@ -1210,18 +1212,18 @@
                 "direction": "up",
                 "finding": "fnd.THYAO.flow.up.90",
                 "id": "cap.THYAO.flow.up.90",
-                "importance": 1.6758969151258725,
+                "importance": 1.6647681392912141,
                 "instrument": "THYAO",
                 "kind": "flow",
                 "last_bar": 91,
                 "ledger_at_birth": {
-                  "n": 7,
-                  "realized": 5
+                  "n": 4,
+                  "realized": 3
                 },
                 "sentence": {
-                  "en": "1 bar ago, net institutional buying in THYAO (337,273) clearly exceeded the recent average (137,900): money inflow. It strengthened on this bar with new evidence from the same family. Whether it still holds is unknown. Its record is still thin: it played out in 5 of 7 cases. Server-verified.",
-                  "text": "THYAO'da 1 bar önce kurumsal net alış (337.273) son günlerin ortalamasını (137.900) belirgin biçimde aştı: para girişi. Bu barda aynı aileden yeni bir kanıtla güçlendi. Hâlâ geçerli olup olmadığı bilinmiyor. Karnesi henüz az örnekli: 7 seferin 5'inde tuttu. Sunucu doğruladı.",
-                  "tr": "THYAO'da 1 bar önce kurumsal net alış (337.273) son günlerin ortalamasını (137.900) belirgin biçimde aştı: para girişi. Bu barda aynı aileden yeni bir kanıtla güçlendi. Hâlâ geçerli olup olmadığı bilinmiyor. Karnesi henüz az örnekli: 7 seferin 5'inde tuttu. Sunucu doğruladı."
+                  "en": "1 bar ago, net institutional buying in THYAO (337,273) clearly exceeded the recent average (137,900): money inflow. It strengthened on this bar with new evidence from the same family. Whether it still holds is unknown. Its record is still thin: it played out in 3 of 4 cases. Server-verified.",
+                  "text": "THYAO'da 1 bar önce kurumsal net alış (337.273) son günlerin ortalamasını (137.900) belirgin biçimde aştı: para girişi. Bu barda aynı aileden yeni bir kanıtla güçlendi. Hâlâ geçerli olup olmadığı bilinmiyor. Karnesi henüz az örnekli: 4 seferin 3'ünde tuttu. Sunucu doğruladı.",
+                  "tr": "THYAO'da 1 bar önce kurumsal net alış (337.273) son günlerin ortalamasını (137.900) belirgin biçimde aştı: para girişi. Bu barda aynı aileden yeni bir kanıtla güçlendi. Hâlâ geçerli olup olmadığı bilinmiyor. Karnesi henüz az örnekli: 4 seferin 3'ünde tuttu. Sunucu doğruladı."
                 },
                 "series": "px",
                 "stage": "strengthened",
@@ -1229,7 +1231,8 @@
                 "t": 1683615600000,
                 "tier": 2,
                 "time": "event",
-                "trust": "server"
+                "trust": "server",
+                "validity": "valid"
               },
               "kind": "capsule",
               "seq": 5,
@@ -1276,7 +1279,8 @@
                 "t": 1683615600000,
                 "tier": 3,
                 "time": "event",
-                "trust": "replica"
+                "trust": "replica",
+                "validity": "closed"
               },
               "kind": "capsule",
               "seq": 5,
@@ -1354,7 +1358,8 @@
                 "t": 1683615600000,
                 "tier": 3,
                 "time": "event",
-                "trust": "replica"
+                "trust": "replica",
+                "validity": "closed"
               },
               "kind": "capsule",
               "seq": 5,
@@ -1435,18 +1440,18 @@
                 "direction": "up",
                 "finding": "fnd.THYAO.flow.up.90",
                 "id": "cap.THYAO.flow.up.90",
-                "importance": 1.6808755779992723,
+                "importance": 1.6678641145234123,
                 "instrument": "THYAO",
                 "kind": "flow",
                 "last_bar": 92,
                 "ledger_at_birth": {
-                  "n": 7,
-                  "realized": 5
+                  "n": 4,
+                  "realized": 3
                 },
                 "sentence": {
-                  "en": "2 bars ago, net institutional buying in THYAO (337,273) clearly exceeded the recent average (137,900): money inflow. It strengthened on this bar with new evidence from the same family. Whether it still holds is unknown. Its record is still thin: it played out in 5 of 7 cases. Server-verified.",
-                  "text": "THYAO'da 2 bar önce kurumsal net alış (337.273) son günlerin ortalamasını (137.900) belirgin biçimde aştı: para girişi. Bu barda aynı aileden yeni bir kanıtla güçlendi. Hâlâ geçerli olup olmadığı bilinmiyor. Karnesi henüz az örnekli: 7 seferin 5'inde tuttu. Sunucu doğruladı.",
-                  "tr": "THYAO'da 2 bar önce kurumsal net alış (337.273) son günlerin ortalamasını (137.900) belirgin biçimde aştı: para girişi. Bu barda aynı aileden yeni bir kanıtla güçlendi. Hâlâ geçerli olup olmadığı bilinmiyor. Karnesi henüz az örnekli: 7 seferin 5'inde tuttu. Sunucu doğruladı."
+                  "en": "2 bars ago, net institutional buying in THYAO (337,273) clearly exceeded the recent average (137,900): money inflow. It strengthened on this bar with new evidence from the same family. Whether it still holds is unknown. Its record is still thin: it played out in 3 of 4 cases. Server-verified.",
+                  "text": "THYAO'da 2 bar önce kurumsal net alış (337.273) son günlerin ortalamasını (137.900) belirgin biçimde aştı: para girişi. Bu barda aynı aileden yeni bir kanıtla güçlendi. Hâlâ geçerli olup olmadığı bilinmiyor. Karnesi henüz az örnekli: 4 seferin 3'ünde tuttu. Sunucu doğruladı.",
+                  "tr": "THYAO'da 2 bar önce kurumsal net alış (337.273) son günlerin ortalamasını (137.900) belirgin biçimde aştı: para girişi. Bu barda aynı aileden yeni bir kanıtla güçlendi. Hâlâ geçerli olup olmadığı bilinmiyor. Karnesi henüz az örnekli: 4 seferin 3'ünde tuttu. Sunucu doğruladı."
                 },
                 "series": "px",
                 "stage": "strengthened",
@@ -1454,7 +1459,8 @@
                 "t": 1683702000000,
                 "tier": 2,
                 "time": "event",
-                "trust": "server"
+                "trust": "server",
+                "validity": "valid"
               },
               "kind": "capsule",
               "seq": 6,
@@ -1807,7 +1813,8 @@
                   "kind": "flow",
                   "phase": "final",
                   "server": true,
-                  "strength": 1.0
+                  "strength": 1.0,
+                  "validity": "valid"
                 },
                 "item": {
                   "born_bar": 90,
@@ -1815,18 +1822,18 @@
                   "direction": "up",
                   "finding": "fnd.THYAO.flow.up.90",
                   "id": "cap.THYAO.flow.up.90",
-                  "importance": 1.6808755779992723,
+                  "importance": 1.6678641145234123,
                   "instrument": "THYAO",
                   "kind": "flow",
                   "last_bar": 92,
                   "ledger_at_birth": {
-                    "n": 7,
-                    "realized": 5
+                    "n": 4,
+                    "realized": 3
                   },
                   "sentence": {
-                    "en": "2 bars ago, net institutional buying in THYAO (337,273) clearly exceeded the recent average (137,900): money inflow. It strengthened on this bar with new evidence from the same family. Whether it still holds is unknown. Its record is still thin: it played out in 5 of 7 cases. Server-verified.",
-                    "text": "THYAO'da 2 bar önce kurumsal net alış (337.273) son günlerin ortalamasını (137.900) belirgin biçimde aştı: para girişi. Bu barda aynı aileden yeni bir kanıtla güçlendi. Hâlâ geçerli olup olmadığı bilinmiyor. Karnesi henüz az örnekli: 7 seferin 5'inde tuttu. Sunucu doğruladı.",
-                    "tr": "THYAO'da 2 bar önce kurumsal net alış (337.273) son günlerin ortalamasını (137.900) belirgin biçimde aştı: para girişi. Bu barda aynı aileden yeni bir kanıtla güçlendi. Hâlâ geçerli olup olmadığı bilinmiyor. Karnesi henüz az örnekli: 7 seferin 5'inde tuttu. Sunucu doğruladı."
+                    "en": "2 bars ago, net institutional buying in THYAO (337,273) clearly exceeded the recent average (137,900): money inflow. It strengthened on this bar with new evidence from the same family. Whether it still holds is unknown. Its record is still thin: it played out in 3 of 4 cases. Server-verified.",
+                    "text": "THYAO'da 2 bar önce kurumsal net alış (337.273) son günlerin ortalamasını (137.900) belirgin biçimde aştı: para girişi. Bu barda aynı aileden yeni bir kanıtla güçlendi. Hâlâ geçerli olup olmadığı bilinmiyor. Karnesi henüz az örnekli: 4 seferin 3'ünde tuttu. Sunucu doğruladı.",
+                    "tr": "THYAO'da 2 bar önce kurumsal net alış (337.273) son günlerin ortalamasını (137.900) belirgin biçimde aştı: para girişi. Bu barda aynı aileden yeni bir kanıtla güçlendi. Hâlâ geçerli olup olmadığı bilinmiyor. Karnesi henüz az örnekli: 4 seferin 3'ünde tuttu. Sunucu doğruladı."
                   },
                   "series": "px",
                   "stage": "strengthened",
@@ -1834,11 +1841,12 @@
                   "t": 1683702000000,
                   "tier": 2,
                   "time": "event",
-                  "trust": "server"
+                  "trust": "server",
+                  "validity": "valid"
                 },
                 "ledger": {
-                  "n": 7,
-                  "realized": 5
+                  "n": 4,
+                  "realized": 3
                 },
                 "story": {
                   "born_bar": 90,
@@ -1876,15 +1884,18 @@
                     }
                   ],
                   "horizon_bars": 10,
-                  "importance": 1.6808755779992723,
+                  "importance": 1.6678641145234123,
                   "instrument": "THYAO",
                   "kind": "flow",
                   "last_bar": 92,
                   "ledger_at_birth": {
-                    "n": 7,
-                    "realized": 5
+                    "n": 4,
+                    "realized": 3
                   },
-                  "ledger_key": "flow/flow.institutional@1",
+                  "ledger_key": "flow/up/flow.institutional@1",
+                  "resolution": {
+                    "rule": "barrier"
+                  },
                   "series": "px",
                   "stage": "strengthened",
                   "strength": 1.0,
@@ -1979,7 +1990,8 @@
                   "t": 1683615600000,
                   "tier": 3,
                   "time": "event",
-                  "trust": "replica"
+                  "trust": "replica",
+                  "validity": "closed"
                 }
               ],
               "comments": [
@@ -2135,7 +2147,8 @@
                   "freshness": 0.38461538461538464,
                   "kind": "continuation",
                   "phase": "final",
-                  "strength": 0.040553264279189295
+                  "strength": 0.040553264279189295,
+                  "validity": "valid"
                 },
                 "item": {
                   "born_bar": 84,
@@ -2143,19 +2156,19 @@
                   "direction": "down",
                   "finding": "fnd.THYAO.continuation.down.84",
                   "id": "cap.THYAO.continuation.down.84",
-                  "importance": 1.4528441332653954,
+                  "importance": 1.478885799932062,
                   "instrument": "THYAO",
                   "kind": "continuation",
                   "last_bar": 84,
                   "ledger_at_birth": {
-                    "n": 2,
+                    "n": 0,
                     "realized": 0
                   },
                   "redacted": true,
                   "sentence": {
-                    "en": "THYAO has been below the short average for a while. The downtrend is still in place. Its record is still thin.",
-                    "text": "THYAO bir süredir kısa ortalamanın altında. Düşüş eğilimi sürüyor. Karnesi henüz az örnekli.",
-                    "tr": "THYAO bir süredir kısa ortalamanın altında. Düşüş eğilimi sürüyor. Karnesi henüz az örnekli."
+                    "en": "THYAO has been below the short average for a while. The downtrend is still in place. No track record yet.",
+                    "text": "THYAO bir süredir kısa ortalamanın altında. Düşüş eğilimi sürüyor. Henüz karnesi yok.",
+                    "tr": "THYAO bir süredir kısa ortalamanın altında. Düşüş eğilimi sürüyor. Henüz karnesi yok."
                   },
                   "series": "px",
                   "stage": "born",
@@ -2163,14 +2176,20 @@
                   "t": 1682665200000,
                   "tier": 3,
                   "time": "state",
-                  "trust": "replica"
+                  "trust": "replica",
+                  "validity": "valid"
                 },
                 "ledger": {
-                  "n": 2,
+                  "n": 0,
                   "realized": 0
                 },
                 "story": {
                   "born_bar": 84,
+                  "condition": {
+                    "key": "sma20",
+                    "op": "lt",
+                    "subject": "close"
+                  },
                   "direction": "down",
                   "families": [
                     "price"
@@ -2187,15 +2206,18 @@
                     }
                   ],
                   "horizon_bars": 20,
-                  "importance": 1.4528441332653954,
+                  "importance": 1.478885799932062,
                   "instrument": "THYAO",
                   "kind": "continuation",
                   "last_bar": 84,
                   "ledger_at_birth": {
-                    "n": 2,
+                    "n": 0,
                     "realized": 0
                   },
-                  "ledger_key": "continuation/continuation.ma_stack@1",
+                  "ledger_key": "continuation/down/continuation.ma_stack@1",
+                  "resolution": {
+                    "rule": "barrier"
+                  },
                   "series": "px",
                   "stage": "born",
                   "strength": 0.040553264279189295,

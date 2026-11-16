@@ -1,0 +1,2 @@
+attempt1: input open with a capsule selector object -> schema error (gesture open.capsule accepts only a string id); the capsule-detail query with the selector worked and revealed the id. Spec §4.6.1 says "capsule (kapsül ya da bulgu kimliği)" but §20 says selectors are accepted for capsule query only; the schema CapsuleRef exists, which misleads.
+attempt2: capsules query (open breakout THYAO -> exactly one) + input open to evidence with explicit id -> success (opening from sentence to evidence).

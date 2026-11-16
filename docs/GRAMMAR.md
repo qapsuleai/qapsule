@@ -439,6 +439,24 @@ adımı ve `crates/qp-cli/tests/views.rs`).
   kutuya `Prim`'ler üretir; sahne tarifi ilkelleri taşır, çizici hesap yapmaz. Kutu panelin
   içinde tutulur. Alfabe değişimi `alphabet()` içindeki tek satırdır (insan testi
   `rozet`'i öne çıkarırsa).
+- **Geçerlilik kanalı (R4/T3, K42/A28):** `GlyphSpec.validity` (`valid` / `no_longer` /
+  `closed`; isteğe bağlı, yoksa bilinmiyor). Alfabe yalnız `no_longer`'da farklı çizer:
+  açık hikâyenin durum koşulu artık tutmuyorsa siluet gri olur ve sağ alt köşeye "artık
+  geçerli değil" rozeti (içi boş halka + yatay çizgi) gelir; ✓ (dolu daire) ve ✗ (çıplak
+  çarpı) sonuç rozetlerinden ayrı, renksiz de okunur. `valid`, `closed` ve alan yokken
+  çizim R3'teki gibidir (g1 altınları değişmedi; geçerlilik tablosu yeni altın
+  `g2-glyphs-validity-{light,dark}.png`). Motoru ve barları bilen sağlayıcı
+  (`qp-session` `DocProvider::glyph`) değeri cümlenin kullandığı kuralla hesaplar
+  (`qp_capsule::glyph_spec_at` + `sentence::validity_now`); belgeden yalnız hikâyeyi okuyan
+  `story_glyph` alanı boş bırakır. Böylece cümle "artık geçerli değil" diyorsa işaret de
+  der (K42; test `crates/qp-session/tests/capsule_k42.rs`, iki dilde).
+- **Sonuç işareti stili (R4/M11):** "gerçekleşti" ile "tutmadı"yı ayıran sonuç işareti
+  (`docs/CONCEPTS.md` "Sonuç işareti") adla seçilen bir `OutcomeStyle` ile çizilir
+  (`qp_grammar::glyph::outcome`; stil alfabeyi sarar, her alfabe için ayrı çizebilir).
+  Seçim derleme seçeneğidir: `CompileOptions.outcome` (tema geçersiz kılması gibi bir bakış
+  ayarı; görünüme yazılmaz). Yoksa `r3`: alfabenin R3 çizimi aynen (altınlar bayt eşit).
+  Bilinmeyen ad → `invalid` (`(options)/outcome`). M11 alternatifleri yalnız
+  `glyph/outcome.rs`'e bir tip ve `STYLES`'a bir satır ekler.
 - **Okuma:** öğe değerleri `strength`, `freshness`, `confirmations`, varsa `confidence`;
   `hit` öğenin verisini `{"kind":"finding","finding":…}` olarak döndürür (kapsül, bulgusu
   üzerinden: kimlikler `cap.…` ↔ `fnd.…`).
@@ -508,3 +526,41 @@ olgunun saklanan görünümünü okuyucuya göre ayıklamak oturumun işidir (R3
 | Kanıt değerlerini görünüme sabit olarak yazmak | Lisanslı olgunun rakamı görünümle yetkisiz okuyucuya gidebilirdi (güvenlik incelemesi); değer yalnız kökenden çözülür. |
 | Başlığı birden çok satıra kırmak | Var olan altın görseller değişirdi (`d1-capsule` başlığı zaten kesiliyor); cümle kartta ayrı metin katmanı. |
 | Kart için gramer dışı özel çizim | Kart da gramer cümlesi olmalı (ilke 8): üç katman, panele göre konum. |
+
+### 18.6 Açılma ve ortak öğeler (R4)
+
+R4/T4 eki (`docs/PROTOCOL.md` §4.6.1). Kurallar `qp_grammar::depth` (`deeper`,
+`shallower`, `presenter_depth`, `tap_opens`, `transition_anchors`, `shared_elements`) ve
+piksel → bar aritmetiği `qp_grammar::gesture` (`drag_bars`, `pinch_anchor`, `pan_range`,
+`zoom_range`; otoritenin `pan`/`zoom`'u ile aynı kural, testle karşılaştırılır). Hiçbiri
+dokümana yazmaz.
+
+**Açılma derinlikleri:** `sentence` (açık kapsül yok: akış) → `capsule` (açılmış kapsül;
+sahnesi §18.4 kartı) → `chart` (işaretli grafik; §18.4 grafik kuralı ya da kapsülün saklı
+görünümü) → `evidence` (aynı grafik + olgu başına kanıt erişimi). `evidence` sunucuda
+`chart` derinliğiyle çizilir. Akıştaki kapalı kapsülün **yüzü** bugün kartla aynı sahnedir
+(M8 yüzü ayrı bir derinlik kuralına taşıyabilir; açılma kuralı değişmez).
+
+**Dokunmanın açtığı (`tap_opens`):**
+
+| Derinlik | Dokunulan | Sonuç |
+|----------|-----------|-------|
+| `sentence` (yüz) | her yer | `capsule` |
+| `capsule` | her yer | `chart` |
+| `chart` | kanıt öğesi: olgu ya da bulgu katmanı (olgu noktası, işaret) ya da sabiti bir olgudan gelen katman (seviye, bant, salınım) | `evidence` |
+| `chart` | başka yer | açılma yok; bar odaklanır |
+| `evidence` | her yer | açılma yok |
+
+**Geçiş öğeleri (`transition_anchors`):** bir kapsül sahnesinde kimlikli öğeler ve
+kutuları (öğenin isabet kutularının birleşimi): `glyph` (işaret katmanı), `headline` ve
+`ledger` (bulgunun metin katmanları), `fact:<olgu>` (olgu çizen katman), `evidence:<olgu>`
+(sabiti olgudan gelen katmanlar), `price` (bar serisini çizen ilk katmanın paneli),
+`bar:<i>` (bulgunun ilk olgusunun barı görünüyorsa o panelde bar sütunu). **Ortak öğeler
+(`shared_elements`):** iki sahnede de olan kimlikler, kimlik sırasıyla, iki kutuyla. Bir
+tarafta sahne yoksa (`sentence`, yüz çizmeyen yüzey) cümle yine görünür: `headline` o
+tarafta kutusuz döner. Kabuk geçiş animasyonunu yalnız bu iki kutu arasında boyar; hangi
+öğenin süreceğine çekirdek karar verir (M10 iki geçiş tasarımını bu yapı üzerine kurar;
+yeni bir öğe yeni bir kimlikle eklenir, yapı değişmez).
+
+Örnek (`53-input-open-close`): kapsül → grafik geçişinde `bar:124`, `evidence:fx…124`,
+`glyph`, `price` ortaktır; grafikte başlık metni olmadığı için `headline` ortak değildir.

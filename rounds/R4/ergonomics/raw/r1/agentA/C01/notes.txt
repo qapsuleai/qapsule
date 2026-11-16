@@ -1,0 +1,3 @@
+attempt1: capsules {instrument THYAO} -> works but returns all history (no "today" filter), huge output.
+attempt2: added since_t = start of UTC day of welcome.now -> empty (bar times are 07:00 UTC, now 17:00, no transition today).
+attempt3: since_bar 319 (empty) and 316 (one capsule, breakout.down.315 strengthened at bar 318). Unclear in spec what "bugün" maps to (bars vs wall-clock; no query for "last bar"); welcome is huge so reading output needs tail.

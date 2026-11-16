@@ -1,0 +1,1 @@
+THYAO'daki açık kırılım kapsülü cap.THYAO.breakout.down.312 (aşağı kırılım, 312. barda doğdu, şu an "güçlendi" aşamasında ve hâlâ geçerli). Kapsülü cümle düzeyinden kanıt (evidence) derinliğine açtım. Kanıt, 32,64 seviyesindeki desteğin aşağı kırılmasına dayanıyor (kapanış 32,60): 312, 313 ve 315. barlardaki breakout.range.down olguları ve bunların dondurulmuş kanıt özetleri.

@@ -1,0 +1,2 @@
+important: transitions(all) 252 delivered to arkin 39 | missing 0 wrongly delivered 0 not-in-all 0 | position births above level 20 (must not arrive) | position negative transitions above level 15, delivered 15
+balanced: transitions(all) 252 delivered to arkin 66 | missing 0 wrongly delivered 0 not-in-all 0 | position births above level 16 (must not arrive) | position negative transitions above level 13, delivered 13

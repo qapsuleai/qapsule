@@ -1,0 +1,30 @@
+{
+  "experiment": "m10",
+  "design": "zumlak",
+  "seqs": {
+    "1": [
+      6,
+      "C",
+      "evet",
+      "kapandı: tutmadı"
+    ],
+    "2": [
+      101,
+      "C",
+      "evet",
+      "evet, sürüyor"
+    ],
+    "3": [
+      112,
+      "A",
+      "evet",
+      "evet, sürüyor"
+    ],
+    "4": [
+      3,
+      "B",
+      "evet",
+      "hayır, artık geçerli değil"
+    ]
+  }
+}

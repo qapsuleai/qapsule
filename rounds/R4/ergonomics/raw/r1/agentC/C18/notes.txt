@@ -1,0 +1,2 @@
+attempt1: read-only document query to check for existing audience; none found.
+attempt2: set_audience {group habituated, positions {THYAO:100}} mode direct -> applied. Same notes as C08 (group required, full replacement semantics).

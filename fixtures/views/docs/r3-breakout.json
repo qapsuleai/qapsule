@@ -4,7 +4,7 @@
       "depth": "capsule",
       "finding": "fnd.SYN03.breakout-up.144",
       "glyphs": [],
-      "headline": "SYN03 6 bar önce 135,56'daki direnci yukarı kırdı (kapanış 136,20): yukarı kırılım. 4 bar önce aynı aileden yeni bir kanıtla güçlendi. Artık geçerli değil. Karnesi henüz az örnekli: 7 seferin 3'ünde tuttu.",
+      "headline": "SYN03 6 bar önce 135,56'daki direnci yukarı kırdı (kapanış 136,20): yukarı kırılım. 4 bar önce aynı aileden yeni bir kanıtla güçlendi. Artık geçerli değil. Henüz karnesi yok.",
       "id": "cap.SYN03.breakout-up.144",
       "provenance": {
         "at": 1690786800000,
@@ -24,6 +24,12 @@
       "state": "live",
       "story": {
         "born_bar": 144,
+        "condition": {
+          "key": "level",
+          "op": "gt",
+          "subject": "close",
+          "within_bars": 3
+        },
         "direction": "up",
         "families": [
           "price",
@@ -73,10 +79,13 @@
         "kind": "breakout",
         "last_bar": 146,
         "ledger_at_birth": {
-          "n": 7,
-          "realized": 3
+          "n": 0,
+          "realized": 0
         },
-        "ledger_key": "breakout/breakout.range@1",
+        "ledger_key": "breakout/up/breakout.range@1",
+        "resolution": {
+          "rule": "fixture.move4"
+        },
         "series": "px",
         "stage": "strengthened",
         "strength": 1.0,
@@ -281,8 +290,8 @@
   ],
   "findings": [
     {
-      "claim": "SYN03 6 bar önce 135,56'daki direnci yukarı kırdı (kapanış 136,20): yukarı kırılım. 4 bar önce aynı aileden yeni bir kanıtla güçlendi. Artık geçerli değil. Karnesi henüz az örnekli: 7 seferin 3'ünde tuttu.",
-      "confidence": 0.42857142857142855,
+      "claim": "SYN03 6 bar önce 135,56'daki direnci yukarı kırdı (kapanış 136,20): yukarı kırılım. 4 bar önce aynı aileden yeni bir kanıtla güçlendi. Artık geçerli değil. Henüz karnesi yok.",
+      "confidence": 0.5,
       "facts": [
         "fx.SYN03.breakout.range.up.144",
         "fx.SYN03.breakout.range.up.145",
@@ -1539,5 +1548,5 @@
       }
     }
   ],
-  "title": "R3 sample: SYN03 (breakout/breakout.range@1)"
+  "title": "R3 sample: SYN03 (breakout/up/breakout.range@1)"
 }

@@ -44,9 +44,11 @@ use qp_schema::capsule::{
 };
 use qp_schema::CompareOp;
 
+pub mod elapsed;
 pub mod en;
 pub mod morph;
 pub mod num;
+pub mod parts;
 pub mod tr;
 
 /// Ledger sample size from which counts are stated plainly; below it the sentence says
@@ -420,6 +422,13 @@ impl<'a> Plan<'a> {
             entitlement: m.and_then(|m| m.license.entitlement.as_deref()),
             redacted: red,
         }
+    }
+
+    /// The story is closed (realized, invalidated, expired or retracted): the stage
+    /// remark says how it ended and no validity tail follows.
+    #[must_use]
+    pub fn closed(&self) -> bool {
+        self.stage.is_closed()
     }
 
     /// An evidence value of the lead fact (first key present), never when redacted.

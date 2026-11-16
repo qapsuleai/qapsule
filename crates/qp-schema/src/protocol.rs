@@ -17,7 +17,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::capsule::{
     Audience, Direction, EvidenceFamily, GlyphSpec, LedgerStat, LicenseClass, MeaningKind,
-    Sensitivity, Stage, Story, TimeKind, Transition, Trust,
+    Sensitivity, Stage, Story, TimeKind, Transition, Trust, Validity,
 };
 use crate::data::{BindingState, DataBinding, DataEvent, DataPosition, EvidenceRef, FeedKey};
 use crate::grammar::{Layer, View};
@@ -141,6 +141,130 @@ pub enum ClientMsg {
         #[serde(default, skip_serializing_if = "Option::is_none")]
         digest: Option<String>,
     },
+    /// (R4, §21) A control of the host's replay source: speed, pause, resume, step, seek,
+    /// status. Answered by the replay host with a `result` (`kind: "replay"`); an
+    /// authority without a replay source answers `unsupported`. Never written to the
+    /// document or the log. `status` needs `read`; every other control the role `host` or
+    /// `owner`.
+    Replay {
+        /// Client-chosen request id.
+        id: String,
+        /// What to do.
+        control: ReplayControl,
+    },
+}
+
+/// (R4, §21) A replay control. A **step** is one distinct virtual time of the replay
+/// (every feed's events at that time); step boundaries do not depend on the speed.
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
+#[serde(tag = "kind", rename_all = "snake_case", deny_unknown_fields)]
+pub enum ReplayControl {
+    /// Where the replay is (no change).
+    Status,
+    /// Stop advancing with the wall clock (explicit `step` and `seek` still work).
+    Pause,
+    /// Advance with the wall clock again, at the current speed.
+    Resume,
+    /// Set the speed: steps per wall-clock second (`0 < steps_per_s <= 1000`).
+    Speed {
+        /// Steps per second.
+        steps_per_s: f64,
+    },
+    /// Take `n` steps now (default 1, at most 100000); the notifications they cause
+    /// follow the `result`.
+    Step {
+        /// Number of steps.
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        n: Option<u32>,
+    },
+    /// Go to a position: exactly one of `t` (every step at or before `t` taken), `date`
+    /// (`YYYY-MM-DD`: the start of that day in the exchange time zone, nothing of that
+    /// day taken) or `step` (that many steps taken). Forward: the steps in between are
+    /// taken and their notifications follow the `result`. Backward: the authority is
+    /// rebuilt from its init and advanced silently to the position (a new authority,
+    /// `epoch + 1`, §8.4): every connection is closed and must send `hello` again.
+    Seek {
+        /// Virtual time, epoch ms.
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        t: Option<TimestampMs>,
+        /// A date in the exchange time zone.
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        date: Option<String>,
+        /// A step count.
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        step: Option<u64>,
+    },
+}
+
+/// (R4, §21) Where the replay data comes from.
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
+#[serde(rename_all = "snake_case")]
+pub enum ReplaySourceKind {
+    /// The deterministic synthetic market (`qp_source::synthetic_market`).
+    #[default]
+    Synthetic,
+    /// Real bars fetched to the host's machine (`fixtures/local/`, K23).
+    Local,
+}
+
+/// (R4, §21) Replayed days by how a bar was built inside the day.
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
+#[serde(deny_unknown_fields)]
+pub struct ReplayDays {
+    /// From finer bars (e.g. hourly bars of a daily feed).
+    pub fine: u64,
+    /// On the labelled synthetic path open → extreme → extreme → close (no fine data).
+    pub ohlc: u64,
+    /// As one whole bar.
+    pub bar: u64,
+}
+
+/// (R4, §21) The state of a replay (answer to every `replay` control).
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
+#[serde(deny_unknown_fields)]
+pub struct ReplayState {
+    /// Virtual time (the authority's clock): the time of the last step taken.
+    pub t: TimestampMs,
+    /// Steps taken.
+    pub step: u64,
+    /// Steps of the whole replay.
+    pub steps: u64,
+    /// Data events delivered so far.
+    pub events: u64,
+    /// Time of the first step.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub from_t: Option<TimestampMs>,
+    /// Time of the last step.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub to_t: Option<TimestampMs>,
+    /// Not advancing with the wall clock.
+    pub paused: bool,
+    /// Every step taken.
+    pub done: bool,
+    /// Steps per wall-clock second.
+    pub speed: f64,
+    /// True when the data is synthetic (a page must say so on screen).
+    pub synthetic: bool,
+    /// Where the data comes from.
+    pub source: ReplaySourceKind,
+    /// Why the source differs from the one asked for (e.g. no local data).
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub note: Option<String>,
+    /// Number of instruments (feeds).
+    pub instruments: u32,
+    /// Bar interval of the feeds.
+    pub interval: String,
+    /// Interval of the finer bars that move a bar inside its day, if any.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub fine: Option<String>,
+    /// Replayed days by how they were built.
+    pub days: ReplayDays,
+    /// Authority epoch (grows with every backward seek).
+    pub epoch: u64,
+    /// True when this control rebuilt the authority (a backward seek): every connection
+    /// was closed.
+    #[serde(default, skip_serializing_if = "is_false")]
+    pub reset: bool,
 }
 
 /// A message from the authority to a client.
@@ -1532,6 +1656,17 @@ pub enum Query {
         /// Only stories with a transition at or after this time (epoch ms).
         #[serde(default, skip_serializing_if = "Option::is_none")]
         since_t: Option<TimestampMs>,
+        /// (R4) Only stories born at or after this bar (of their own bar series).
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        born_since_bar: Option<u64>,
+        /// (R4) Only stories born at or after this time (epoch ms; the birth bar's time).
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        born_since_t: Option<TimestampMs>,
+        /// (R4) Only the most recently born of the matching stories ("the latest
+        /// capsule"): the greatest birth time, then the greatest birth bar, then the
+        /// greatest id. Applied after every other filter, before `limit`.
+        #[serde(default, skip_serializing_if = "std::ops::Not::not")]
+        latest: bool,
         /// Apply the asker's audience: watch list (and positions, intents) and
         /// sensitivity, with the position/intent override (§9.8). Default false: every
         /// story the asker may see.
@@ -1547,10 +1682,13 @@ pub enum Query {
     /// and what it rests on.
     Capsule {
         /// Capsule id, or its finding's id.
+        /// (R4) Also takes a capsule selector (§17, [`CapsuleSel`]).
+        #[schemars(with = "CapsuleRef")]
         capsule: String,
     },
     /// (R3, §20) The ledger: closed capsules and realized ones per ledger key
-    /// (`kind/detector@version`), or summed per kind. Retracted capsules never count.
+    /// (`kind/direction/detector@version`, R4), or summed per kind. Retracted capsules
+    /// never count.
     /// The ledger is license-independent (K33): every principal that may read gets it.
     Ledger {
         /// Only this ledger key.
@@ -1562,7 +1700,11 @@ pub enum Query {
         /// Only this detector.
         #[serde(default, skip_serializing_if = "Option::is_none")]
         detector: Option<String>,
-        /// Group rows per kind instead of per key.
+        /// (R4, K42/A23) Only this direction.
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        direction: Option<Direction>,
+        /// Group rows per kind instead of per key (every direction summed; with
+        /// `direction`, that direction only).
         #[serde(default, skip_serializing_if = "std::ops::Not::not")]
         by_kind: bool,
     },
@@ -1620,7 +1762,13 @@ pub struct CapsuleItem {
     pub ledger_at_birth: LedgerStat,
     /// The sentence as of the series' last closed bar, for this reader (K26).
     pub sentence: CapsuleSentence,
-    /// About the reader's position or active intent (passes any sensitivity).
+    /// (R4, K42/A28) Whether the claim still holds as of the same bar: `valid`,
+    /// `no_longer` (the state condition broke, the story is still open) or `closed`.
+    /// The sentence and the glyph say the same.
+    pub validity: Validity,
+    /// About the reader's position or active intent. (R4, K42/A22) Its **negative
+    /// transitions** (`weakened`, `invalidated`, `retracted`) pass any sensitivity; its
+    /// birth and other transitions go through the sensitivity filter like any story.
     #[serde(default, skip_serializing_if = "std::ops::Not::not")]
     pub relevant: bool,
     /// The sentence carries no digits for this reader (K33).
@@ -1669,16 +1817,37 @@ pub struct CapsuleDetail {
     pub glyph: GlyphSpec,
     /// Per fact: the evidence values or what they require (K34).
     pub evidence: Vec<EvidenceAccess>,
+    /// (R4/S1, §20.2) Only when `capsule` was a selector, the reader may not read the
+    /// licensed flow of the instrument and the authority already told this reader of
+    /// licensed activity newer than the resolved capsule's latest transition: the
+    /// entitlement those stories require and the server comments that told it (the same
+    /// comments the `capsules` query gives). Absent otherwise.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub withheld: Option<Withheld>,
+}
+
+/// (R4/S1, §20.2) What a capsule selector may also have matched that the reader cannot
+/// see: newer licensed stories, told only by the server comments the reader already gets.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
+#[serde(deny_unknown_fields)]
+pub struct Withheld {
+    /// Entitlements they require (the comments' `entitlement`, e.g. `flow/*`).
+    pub requires: Vec<String>,
+    /// The server comments newer than the resolved capsule's latest transition.
+    pub comments: Vec<ServerComment>,
 }
 
 /// One ledger row (R3, §20).
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 #[serde(deny_unknown_fields)]
 pub struct LedgerRow {
-    /// Ledger key (`kind/detector@version`), or the kind when grouped by kind.
+    /// Ledger key (`kind/direction/detector@version`), or the kind when grouped by kind.
     pub key: String,
     /// Meaning kind.
     pub kind: MeaningKind,
+    /// (R4, K42/A23) Direction (absent when grouped by kind without a direction filter).
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub direction: Option<Direction>,
     /// Detector (absent when grouped by kind).
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub detector: Option<String>,
@@ -1984,6 +2153,9 @@ pub struct ScreenInfo {
     /// Last close in the visible range.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub last_close: Option<f64>,
+    /// (R4, §7) The connection's view state, once a pixel gesture or open/close set it.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub view_state: Option<ViewState>,
 }
 
 /// Where a principal looks, and what they are asked to look at.
@@ -2153,6 +2325,12 @@ pub enum QueryResult {
         /// The new viewport.
         viewport: Viewport,
     },
+    /// (R4, §4.6) Answer to a pixel gesture (`tap_at`, `drag`, `pinch`) or `open` /
+    /// `close`.
+    Interaction {
+        /// What the gesture did.
+        interaction: Box<Interaction>,
+    },
     /// Answer to `binding` (RP2).
     Bindings {
         /// Bound series, document order.
@@ -2191,6 +2369,11 @@ pub enum QueryResult {
         /// For `rejected`: the authority's evidence on settled data.
         #[serde(default, skip_serializing_if = "Option::is_none")]
         evidence: Option<ClaimEvidence>,
+    },
+    /// Answer to a `replay` message (R4, §21).
+    Replay {
+        /// The replay's state after the control.
+        replay: ReplayState,
     },
 }
 
@@ -2580,6 +2763,280 @@ pub enum Gesture {
         /// Bar index.
         bar: u64,
     },
+    /// (R4, §4.6) Tap at pixel (`x`, `y`) of a target as the surface draws it. The engine
+    /// hit-tests the target's scene (the `hit` code) and decides what the tap means: a
+    /// bar's values (`at`), or opening a capsule one depth further (§4.6 "Açılma").
+    /// Answered with an `interaction`.
+    TapAt {
+        /// What was tapped; the connection's current scene if absent.
+        #[serde(default, skip_serializing_if = "SurfaceTarget::is_current")]
+        target: SurfaceTarget,
+        /// Pixel x inside the target's frame (0 = left edge).
+        x: f64,
+        /// Pixel y inside the target's frame (0 = top edge).
+        y: f64,
+        /// Frame width the surface draws the target at; remembered per target (view
+        /// state). Omit to use the remembered or the surface's default size.
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        width: Option<u32>,
+        /// Frame height, as `width`.
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        height: Option<u32>,
+    },
+    /// (R4, §4.6) Horizontal drag by `dx` pixels on a chart (positive: the finger moves
+    /// right, older bars come into view). The engine turns pixels into bars with the
+    /// scene's slot width. Answered with an `interaction`.
+    Drag {
+        /// The chart dragged; the connection's current scene if absent.
+        #[serde(default, skip_serializing_if = "SurfaceTarget::is_current")]
+        target: SurfaceTarget,
+        /// Pixels moved (positive = right).
+        dx: f64,
+        /// Frame width (see `tap_at`).
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        width: Option<u32>,
+        /// Frame height (see `tap_at`).
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        height: Option<u32>,
+    },
+    /// (R4, §4.6) Pinch on a chart by `factor` (> 1: the fingers move apart, fewer bars)
+    /// around pixel column `x` (the bar under it stays in place; default: the last visible
+    /// bar). Answered with an `interaction`.
+    Pinch {
+        /// The chart pinched; the connection's current scene if absent.
+        #[serde(default, skip_serializing_if = "SurfaceTarget::is_current")]
+        target: SurfaceTarget,
+        /// Factor, > 0.
+        factor: f64,
+        /// Pixel x of the pinch centre.
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        x: Option<f64>,
+        /// Frame width (see `tap_at`).
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        width: Option<u32>,
+        /// Frame height (see `tap_at`).
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        height: Option<u32>,
+    },
+    /// (R4, §4.6) Open a capsule one depth further (sentence → capsule → chart →
+    /// evidence), or straight to `to`. Answered with an `interaction` carrying the
+    /// `opening`: what to show at the new depth and the elements both depths share.
+    Open {
+        /// Capsule id (or the id of the finding it presents); (R4/S1) also a capsule
+        /// selector (§17, [`CapsuleSel`]).
+        #[schemars(with = "CapsuleRef")]
+        capsule: String,
+        /// Depth to open to; one deeper than now if absent.
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        to: Option<OpenDepth>,
+        /// Frame width the new depth will be drawn at (see `tap_at`).
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        width: Option<u32>,
+        /// Frame height, as `width`.
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        height: Option<u32>,
+    },
+    /// (R4/T5, §4.6.2) The connection's presentation choices (view state, presence):
+    /// the capsule face design, the glyph alphabet and the theme the scenes of this
+    /// connection are compiled with. Each field given replaces the remembered one (an
+    /// absent field keeps it); unknown names are `invalid` with the known ones.
+    /// Answered with an `interaction` (its `state`).
+    Style {
+        /// Face design name (`qp_grammar::faces::FACES`, `docs/PROTOCOL.md` §4.6.2; default `r3`,
+        /// alias `card`).
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        face: Option<String>,
+        /// Glyph alphabet name (`siluet`, `rozet`; default `siluet`).
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        alphabet: Option<String>,
+        /// Theme (`light`, `dark`; `view`: the view's own, the default).
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        theme: Option<String>,
+        /// (R4/H-M8910) Feed layout name (`qp_grammar::feeds::LAYOUTS`; default `r3`, the
+        /// `capsules` order).
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        feed: Option<String>,
+        /// (R4/H-M8910) Depth transition name (`qp_grammar::transitions::TRANSITIONS`;
+        /// default `r3`).
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        transition: Option<String>,
+        /// (R4/H-M8910) Outcome mark style of glyphs (`qp_grammar::glyph::outcome::STYLES`;
+        /// default `r3`).
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        outcome: Option<String>,
+        /// (R4/H-M8910) The reader's last look ("son bakış"): a time (ms) the feed layout
+        /// may mark what changed since; `0` clears it.
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        seen: Option<TimestampMs>,
+    },
+    /// (R4, §4.6) Close the open capsule one depth back, or to `to` (`sentence`: back to
+    /// the feed). Answered with an `interaction` carrying the `opening` (the way back).
+    Close {
+        /// Depth to go back to; one shallower than now if absent.
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        to: Option<OpenDepth>,
+        /// Frame width the depth closed to is drawn at (see `tap_at`).
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        width: Option<u32>,
+        /// Frame height, as `width`.
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        height: Option<u32>,
+    },
+}
+
+/// (R4, §4.6) What a pixel gesture lands on: a view of the document (a chart) or a
+/// capsule (its face in the feed, or the open capsule at its depth). At most one field;
+/// neither means the connection's current scene (the open capsule if there is one,
+/// otherwise its current view).
+#[derive(Debug, Clone, Default, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
+#[serde(deny_unknown_fields)]
+pub struct SurfaceTarget {
+    /// A view id of the document.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub view: Option<String>,
+    /// A capsule id (or the id of the finding it presents).
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub capsule: Option<String>,
+}
+
+impl SurfaceTarget {
+    /// No field set: the connection's current scene.
+    #[must_use]
+    pub fn is_current(&self) -> bool {
+        self.view.is_none() && self.capsule.is_none()
+    }
+}
+
+/// (R4, §4.6) How far a capsule is opened on one connection: `sentence` (nothing open:
+/// the feed of faces or sentences), `capsule` (the capsule opened), `chart` (its marked
+/// chart), `evidence` (the chart with the evidence opened).
+#[derive(
+    Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Default, Serialize, Deserialize, JsonSchema,
+)]
+#[serde(rename_all = "snake_case")]
+pub enum OpenDepth {
+    /// Nothing open.
+    #[default]
+    Sentence,
+    /// The capsule opened.
+    Capsule,
+    /// Its marked chart.
+    Chart,
+    /// The chart with its evidence opened.
+    Evidence,
+}
+
+/// (R4, §4.6, §7) A connection's view state (presence; never logged, never in the
+/// document): how far which capsule is open, the chart range shown at chart depth and the
+/// frame sizes the surface reported per target.
+#[derive(Debug, Clone, Default, PartialEq, Serialize, Deserialize, JsonSchema)]
+#[serde(deny_unknown_fields)]
+pub struct ViewState {
+    /// Depth of the open capsule (`sentence`: none open).
+    pub depth: OpenDepth,
+    /// The open capsule.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub capsule: Option<String>,
+    /// The finding it presents.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub finding: Option<String>,
+    /// Id of the view shown at this depth (`capsule-<finding>` at capsule depth; the
+    /// capsule's stored view or `present-<finding>` at chart and evidence depth).
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub view: Option<String>,
+    /// Visible range of that chart (chart and evidence depth).
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub range: Option<Viewport>,
+    /// Frame sizes `[width, height]` reported by the surface, by frame key: `view:<id>`,
+    /// `face` (a capsule face in the feed), `capsule`, `chart`.
+    #[serde(default, skip_serializing_if = "BTreeMap::is_empty")]
+    pub frames: BTreeMap<String, [u32; 2]>,
+    /// (R4/T5) Face design the connection's capsule faces are built with (absent: the
+    /// default, `r3`).
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub face: Option<String>,
+    /// (R4/T5) Glyph alphabet its scenes draw with (absent: the product's, `siluet`).
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub alphabet: Option<String>,
+    /// (R4/T5) Theme its scenes are compiled with (absent: the view's own).
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub theme: Option<String>,
+    /// (R4/H-M8910) Feed layout (absent: the default, `r3`).
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub feed: Option<String>,
+    /// (R4/H-M8910) Depth transition (absent: the default, `r3`).
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub transition: Option<String>,
+    /// (R4/H-M8910) Outcome mark style (absent: the default, `r3`).
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub outcome: Option<String>,
+    /// (R4/H-M8910) The reader's last look (ms; absent: none).
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub seen: Option<TimestampMs>,
+}
+
+/// (R4, §4.6) One element both sides of a depth transition show (e.g. the glyph, the
+/// headline, the marked bar), with its box in each scene: the shell animates between the
+/// two boxes. A side without a scene (the sentence depth) has no box.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
+#[serde(deny_unknown_fields)]
+pub struct SharedElement {
+    /// Element id: `glyph`, `headline`, `ledger`, `price`, `bar:<i>`, `fact:<id>`,
+    /// `evidence:<fact>` (`docs/GRAMMAR.md` §18.6).
+    pub id: String,
+    /// Box in the scene before the transition.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub before: Option<crate::scene::PixelRect>,
+    /// Box in the scene after it.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub after: Option<crate::scene::PixelRect>,
+}
+
+/// (R4, §4.6) A depth transition of a capsule (open or close).
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
+#[serde(deny_unknown_fields)]
+pub struct Opening {
+    /// Capsule id.
+    pub capsule: String,
+    /// The finding it presents.
+    pub finding: String,
+    /// Depth before.
+    pub from: OpenDepth,
+    /// Depth after.
+    pub to: OpenDepth,
+    /// What to show at `to`: the presenter's output at that depth (`text`; the card at
+    /// capsule depth; the view and facts at chart and evidence depth).
+    pub presentation: Presentation,
+    /// Frame `[width, height]` the new depth's scene was laid out at, if it has one.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub frame: Option<[u32; 2]>,
+    /// Elements both depths show, by id, with their boxes in each scene.
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub shared: Vec<SharedElement>,
+    /// At evidence depth: per fact, the values or the entitlement they require (the
+    /// `capsule` query's `evidence`, K34).
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub evidence: Vec<EvidenceAccess>,
+}
+
+/// (R4, §4.6) The answer to a pixel gesture or an open/close.
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
+#[serde(deny_unknown_fields)]
+pub struct Interaction {
+    /// What was under the finger (`tap_at`), from the same code as the `hit` query.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub hit: Option<HitInfo>,
+    /// The bar tapped on a chart, with its values (as for `tap`).
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub at: Option<AtBar>,
+    /// The new visible range (`drag`, `pinch`).
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub viewport: Option<Viewport>,
+    /// The depth transition, if the gesture opened or closed a capsule.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub opening: Option<Opening>,
+    /// The connection's view state after the gesture.
+    pub state: ViewState,
 }
 
 /// Where someone wants a person to look, in order.
@@ -2936,6 +3393,72 @@ pub struct SessionInit {
     /// licensed flow. Absent: no engine (documents and transcripts before R3).
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub capsules: Option<CapsuleInit>,
+    /// (R4, §21) A replay source: the authority runs under a replay host that serves
+    /// `init.data` from the replay's initial bars, gives the clock and the data events,
+    /// and answers `replay` messages. Absent: no replay (`replay` → `unsupported`).
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub replay: Option<ReplayInit>,
+}
+
+/// The replay source of a session (R4, §21; host configuration, not a protocol
+/// message). Paths never come from here: local data is read from the host's own
+/// directory (`qp_source::local_bars_dir`).
+#[derive(Debug, Clone, Default, PartialEq, Serialize, Deserialize, JsonSchema)]
+#[serde(deny_unknown_fields)]
+pub struct ReplayInit {
+    /// `synthetic` (default) or `local`; `local` without data falls back to the
+    /// synthetic market and says so (`ReplayState::note`).
+    #[serde(default)]
+    pub source: ReplaySourceKind,
+    /// Number of instruments (default 30).
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub instruments: Option<u32>,
+    /// Synthetic market: trading days (default 260).
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub days: Option<u32>,
+    /// Synthetic market: seed (default 1).
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub seed: Option<u64>,
+    /// Feed interval (default `1d`; the synthetic market has `1d` only).
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub interval: Option<String>,
+    /// Finer interval that moves a bar inside its day (e.g. `1h`); absent: none (the
+    /// labelled OHLC path, or whole bars with `path: false`).
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub fine: Option<String>,
+    /// Bars of each feed resolved before the first replayed bar (default 120).
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub history: Option<u32>,
+    /// First replayed bar: the first with `t >= from_t` (overrides `history`).
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub from_t: Option<TimestampMs>,
+    /// Last replayed bar: `t <= to_t`.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub to_t: Option<TimestampMs>,
+    /// Without fine data: the OHLC path (default true) or one whole bar per day.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub path: Option<bool>,
+    /// Named feed of the replay's feed keys (default: none, the host's default feed).
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub feed: Option<String>,
+    /// Initial speed, steps per wall-clock second (default 4).
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub speed: Option<f64>,
+    /// Start running with the wall clock (default false: paused).
+    #[serde(default, skip_serializing_if = "is_false")]
+    pub running: bool,
+    /// Principal id -> data entitlements on the replay's feeds (as `InitData`);
+    /// empty: every principal is entitled to every feed (`*`).
+    #[serde(default, skip_serializing_if = "BTreeMap::is_empty")]
+    pub entitlements: BTreeMap<String, Vec<String>>,
+    /// Add a bound series (id: the symbol in lower case, window: the history) for every
+    /// replay feed no series of the document binds.
+    #[serde(default, skip_serializing_if = "is_false")]
+    pub bind_all: bool,
+    /// Run the capsule engine (§20) on every bound series of a replay feed (added to
+    /// `capsules.series`).
+    #[serde(default, skip_serializing_if = "is_false")]
+    pub capsules_all: bool,
 }
 
 /// The authority's capsule engine (R3, §20; host configuration).
@@ -3308,10 +3831,59 @@ pub struct FindingSel {
     /// State of its capsule (a finding without a capsule has none).
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub state: Option<CapsuleState>,
+    /// (R4) Its capsule's story is about this instrument (symbol).
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub instrument: Option<String>,
+    /// (R4) Its capsule's story has this meaning kind (`breakout`; `kind` is a fact kind
+    /// such as `breakout.range.up`).
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub meaning: Option<MeaningKind>,
+    /// (R4) Its capsule's story is at this stage.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub stage: Option<Stage>,
+    /// (R4) Its capsule's story is open (`true`) or closed (`false`).
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub open: Option<bool>,
     /// Pick the first match (by its latest fact bar: the oldest).
     #[serde(default, skip_serializing_if = "is_false")]
     pub first: bool,
     /// Pick the last match (by its latest fact bar: the most recent).
+    #[serde(default, skip_serializing_if = "is_false")]
+    pub latest: bool,
+}
+
+/// (R4) Selects a capsule with a story, e.g.
+/// `{"instrument":"THYAO","meaning":"breakout","open":true}` ("THYAO's open breakout
+/// capsule"). Order: the latest transition's bar, then the birth bar, then document
+/// order; so `latest` is the one that moved last.
+#[derive(Debug, Clone, Default, PartialEq, Serialize, Deserialize, JsonSchema)]
+#[serde(deny_unknown_fields)]
+pub struct CapsuleSel {
+    /// Instrument symbol.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub instrument: Option<String>,
+    /// Meaning kind.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub meaning: Option<MeaningKind>,
+    /// Direction.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub direction: Option<Direction>,
+    /// Story stage.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub stage: Option<Stage>,
+    /// Open (`true`) or closed (`false`).
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub open: Option<bool>,
+    /// Birth bar.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub born_bar: Option<u64>,
+    /// Bar series of the story.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub series: Option<String>,
+    /// Pick the first match (the one that moved earliest).
+    #[serde(default, skip_serializing_if = "is_false")]
+    pub first: bool,
+    /// Pick the last match (the one that moved last).
     #[serde(default, skip_serializing_if = "is_false")]
     pub latest: bool,
 }
@@ -3422,6 +3994,16 @@ pub enum FindingRef {
     Id(String),
     /// Selector.
     Select(FindingSel),
+}
+
+/// (R4) A capsule id (or its finding's id) or a [`CapsuleSel`].
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
+#[serde(untagged)]
+pub enum CapsuleRef {
+    /// Capsule id or finding id.
+    Id(String),
+    /// Selector.
+    Select(CapsuleSel),
 }
 
 /// A proposal id or a [`ProposalSel`].

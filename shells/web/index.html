@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Qapsule</title>
+<link rel="stylesheet" href="style.css">
+<link rel="modulepreload" href="pkg/qp_wasm.js">
+<link rel="preload" href="pkg/qp_wasm_bg.wasm" as="fetch" type="application/wasm" crossorigin>
+</head>
+<body data-theme="dark" data-tab="feed">
+<main id="phone">
+  <header id="top">
+    <div id="title"><b>Qapsule</b> <span id="clock"></span></div>
+    <div id="banner" hidden><span data-l="synthetic"></span> <span id="note"></span></div>
+    <nav id="tabs">
+      <button data-tab="feed" data-l="tab_feed" class="on"></button>
+      <button data-tab="settings" data-l="tab_settings"></button>
+      <button data-tab="metrics" data-l="tab_metrics"></button>
+    </nav>
+  </header>
+
+  <section id="feed" class="page on">
+    <div id="list"></div>
+    <p id="empty" data-l="empty"></p>
+  </section>
+
+  <section id="layer">
+    <div id="layerbar">
+      <button id="back" data-l="back"></button>
+      <span id="depth"></span>
+      <button id="toevidence" data-l="evidence"></button>
+    </div>
+    <p id="opentext"></p>
+    <canvas id="scene" width="390" height="300"></canvas>
+    <p id="hint"></p>
+    <div id="evidence"></div>
+  </section>
+
+  <section id="settings" class="page">
+    <h2 data-l="tab_settings"></h2>
+    <label><span data-l="lang"></span>
+      <select id="s_lang"><option value="tr">Türkçe</option><option value="en">English</option></select></label>
+    <label><span data-l="theme"></span>
+      <select id="s_theme"><option value="dark" data-l="dark"></option><option value="light" data-l="light"></option></select></label>
+    <label><span data-l="sensitivity"></span>
+      <select id="s_sens"><option value="" data-l="default"></option><option value="important" data-l="important"></option><option value="balanced" data-l="balanced"></option><option value="all" data-l="all"></option></select></label>
+    <label><span data-l="alphabet"></span>
+      <select id="s_alpha"><option value="siluet">siluet</option><option value="rozet">rozet</option></select></label>
+    <label><span data-l="face"></span>
+      <select id="s_face"><option value="r3">r3</option></select></label>
+    <label><span data-l="feedl"></span>
+      <select id="s_feed"><option value="r3">r3</option></select></label>
+    <label><span data-l="transition"></span>
+      <select id="s_transition"><option value="r3">r3</option></select></label>
+    <label><span data-l="outcome"></span>
+      <select id="s_outcome"><option value="r3">r3</option></select></label>
+    <label class="check"><input type="checkbox" id="s_noent"> <span data-l="noent"></span></label>
+    <button id="s_seen" data-l="seen"></button>
+    <h3 data-l="audience"></h3>
+    <label><span data-l="group"></span>
+      <select id="s_group"><option value="habituated" data-l="habituated"></option><option value="future" data-l="future"></option></select></label>
+    <table id="instruments"><thead><tr><th data-l="symbol"></th><th data-l="watch"></th><th data-l="position"></th></tr></thead><tbody></tbody></table>
+    <button id="s_apply" data-l="apply"></button>
+    <p id="phoneurl"><span data-l="phone"></span> <code id="url"></code></p>
+    <p id="lanwarn" class="small" data-l="lan_warn" hidden></p>
+    <p id="lanhint" class="small" hidden><span data-l="lan_hint"></span> <code>scripts/demo.sh --lan</code></p>
+  </section>
+
+  <section id="metrics" class="page">
+    <h2 data-l="tab_metrics"></h2>
+    <p class="small" data-l="m_hint"></p>
+    <table id="mrows"><tbody></tbody></table>
+    <button id="m_copy" data-l="copy"></button>
+    <button id="m_reset" data-l="reset"></button>
+    <textarea id="m_text" readonly hidden></textarea>
+  </section>
+
+  <footer id="controls">
+    <button id="c_play" data-l="play"></button>
+    <button id="c_step" data-l="step"></button>
+    <select id="c_speed">
+      <option value='{"kind":"speed","steps_per_s":1}'>1×</option>
+      <option value='{"kind":"speed","steps_per_s":4}' selected>4×</option>
+      <option value='{"kind":"speed","steps_per_s":16}'>16×</option>
+      <option value='{"kind":"speed","steps_per_s":64}'>64×</option></select>
+    <input id="c_date" type="text" inputmode="numeric" placeholder="YYYY-MM-DD" size="10">
+    <button id="c_go" data-l="go"></button>
+    <span id="c_step_n"></span>
+  </footer>
+  <div id="toast" hidden></div>
+</main>
+<div id="fx"></div>
+<script type="module" src="main.js"></script>
+</body>
+</html>

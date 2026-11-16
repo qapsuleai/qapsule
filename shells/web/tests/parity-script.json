@@ -1,0 +1,17 @@
+[
+  {"seek_step": 120},
+  {"digest": "feed"},
+  {"tap_face": {"index": 0, "x": 120, "y": 60}},
+  {"digest": "capsule"},
+  {"tap_scene": {"x": 195, "y": 150}},
+  {"digest": "chart"},
+  {"wheel": {"dy": -1, "x": 250}},
+  {"digest": "wheeled"},
+  {"drag": {"dx": 60}},
+  {"digest": "dragged"},
+  {"style": {"theme": "light", "alphabet": "rozet"}},
+  {"digest": "styled"},
+  {"back": {}},
+  {"back": {}},
+  {"digest": "back"}
+]

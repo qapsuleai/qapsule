@@ -98,6 +98,8 @@ pub(crate) struct Conn {
     pub last_input: u64,
     /// Clock at the last input.
     pub last_at: Option<i64>,
+    /// (R4, §7) View state: open capsule, its depth and chart range, frame sizes.
+    pub look: qp_schema::protocol::ViewState,
 }
 
 impl Conn {
@@ -187,6 +189,10 @@ pub struct Session {
     /// (the realizer's, for the current reader inside [`Session::as_reader`]); empty
     /// without an engine and outside a reader with another language.
     pub(crate) headlines: BTreeMap<String, String>,
+    /// (R4/H-FP) The exchange calendar of the headline pieces' elapsed phrases for a bar
+    /// series whose instrument names none ([`Session::set_headline_calendar`]); `None`:
+    /// the built-in `XIST`.
+    pub(crate) headline_cal: Option<qp_schema::Calendar>,
     /// (R3, §20) Principals whose capsule preferences a change ever wrote (or the initial
     /// document holds): other readers get documents, changes and log entries without
     /// them.
@@ -451,12 +457,12 @@ impl Session {
         trust_keys: Option<(Vec<u8>, Vec<u8>)>,
     ) -> Result<Self, String> {
         let capsules = init.capsules.clone();
-        let doc: Document = match &init.document {
-            DocumentRef::Inline(d) => (**d).clone(),
-            DocumentRef::Path(p) => read_json(&confine(repo_root, p)?)?,
+        let doc: Document = match init.document {
+            DocumentRef::Inline(d) => *d,
+            DocumentRef::Path(p) => read_json(&confine(repo_root, &p)?)?,
         };
         // Canonical form of every view (GRAMMAR.md §11); the log replays from it.
-        let doc = crate::canon::canon_document(&doc)?;
+        let doc = crate::canon::canon_document_owned(doc)?;
         let limits = default_limits();
         let host = init
             .principals
@@ -505,6 +511,7 @@ impl Session {
             views: Vec::new(),
             real_facts: Vec::new(),
             headlines: BTreeMap::new(),
+            headline_cal: None,
             audience_seen: BTreeSet::new(),
             other: None,
             in_public: false,
@@ -705,6 +712,14 @@ impl Session {
         let reader = self
             .conn_index(conn)
             .map(|ci| (self.conns[ci].principal.clone(), self.lang_of(ci)));
+        // (R4/S1) A `capsule` query by selector: kept to say what it may also match that
+        // the reader cannot see (`CapsuleDetail.withheld`).
+        let capsule_sel = (value.get("type").and_then(Value::as_str) == Some("query"))
+            .then(|| value.pointer("/query/capsule").filter(|v| v.is_object()))
+            .flatten()
+            .and_then(|v| {
+                serde_json::from_value::<qp_schema::protocol::CapsuleSel>(v.clone()).ok()
+            });
         let resolved = match match reader {
             Some((p, lang)) => self.as_reader(&p, lang, |s| s.resolve_selectors(conn, &mut value)),
             None => self.resolve_selectors(conn, &mut value),
@@ -724,7 +739,22 @@ impl Session {
         if let Err(e) = self.check_limits(&value, &msg) {
             return vec![err_line(conn, id, e)];
         }
-        self.handle_resolved(conn, msg, resolved)
+        let mut lines = self.handle_resolved(conn, msg, resolved);
+        let asker = self
+            .conn_index(conn)
+            .map(|ci| self.conns[ci].principal.clone());
+        if let (Some(sel), Some(principal)) = (capsule_sel, asker) {
+            for l in &mut lines {
+                if let ServerMsg::Result {
+                    data: qp_schema::protocol::QueryResult::CapsuleDetail { detail },
+                    ..
+                } = &mut l.msg
+                {
+                    detail.withheld = self.withheld_for(&principal, &sel, &detail.item);
+                }
+            }
+        }
+        lines
     }
 
     /// The live tick's fast parse (§18.8): a `command` whose ops are all bar writes
@@ -1094,7 +1124,7 @@ impl Session {
                                 seq: self.seq_to(&principal, self.seq()),
                                 now: self.clock(),
                                 data,
-                                resolved: BTreeMap::new(),
+                                resolved,
                             },
                         )];
                         v.append(&mut events);
@@ -1153,6 +1183,15 @@ impl Session {
                     Err(e) => vec![err_line(conn, Some(id), e)],
                 }
             }
+            // (R4, §21) Answered by a replay host (`crate::replayhost`) before it gets
+            // here; a bare authority has no replay source.
+            ClientMsg::Replay { id, .. } => vec![err_line(
+                conn,
+                Some(id),
+                E::new(ErrorCode::Unsupported, "this authority has no replay source")
+                    .hint("Replay controls work on a session started with `init.replay` (docs/PROTOCOL.md §21).")
+                    .build(),
+            )],
         }
     }
 
@@ -1214,6 +1253,7 @@ impl Session {
             current: None,
             last_input: 0,
             last_at: None,
+            look: qp_schema::protocol::ViewState::default(),
         });
         vec![out(
             conn,
@@ -3128,12 +3168,26 @@ impl Session {
         Ok(())
     }
 
+    /// (R4, §21) The host's own clock input, without a connection: what a `clock` message
+    /// on the host's connection does (same checks, same outputs). The replay host gives
+    /// the virtual time with it before each step's data events.
+    ///
+    /// # Errors
+    /// The clock would go back (`invalid`).
+    pub fn host_clock(&mut self, now: i64) -> Result<Vec<OutboundLine>, ProtocolError> {
+        self.advance_clock(now)
+    }
+
     fn tick(&mut self, ci: usize, now: i64) -> PResult<Vec<OutboundLine>> {
         if self.conns[ci].role != Role::Host {
             return Err(E::new(ErrorCode::Forbidden, "only the host sends `clock`")
                 .hint("The authority's time comes from its host connection.")
                 .build());
         }
+        self.advance_clock(now)
+    }
+
+    fn advance_clock(&mut self, now: i64) -> PResult<Vec<OutboundLine>> {
         if now < self.clock {
             return Err(E::new(
                 ErrorCode::Invalid,
@@ -3345,7 +3399,8 @@ fn msg_id(m: &ClientMsg) -> Option<String> {
         | ClientMsg::Unsubscribe { id, .. }
         | ClientMsg::Input { id, .. }
         | ClientMsg::Attend { id, .. }
-        | ClientMsg::Dispute { id, .. } => Some(id.clone()),
+        | ClientMsg::Dispute { id, .. }
+        | ClientMsg::Replay { id, .. } => Some(id.clone()),
         ClientMsg::Hello { .. } | ClientMsg::Clock { .. } => None,
     }
 }

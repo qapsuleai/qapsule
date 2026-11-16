@@ -1,0 +1,5 @@
+bar 310: born
+bar 310: confirmed
+bar 310: confirmed
+bar 312: strengthened
+bar 314: realized

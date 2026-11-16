@@ -18,6 +18,9 @@
 //! broker-flow feed (K33), and [`load_local_bars`] reads real bars fetched into
 //! `fixtures/local/bars/` by `scripts/fetch-bars.sh` (K23).
 //!
+//! R4 (K44, `docs/PROTOCOL.md` §21): [`Replay`] delivers historical bars (local real
+//! data or the synthetic market) like a live feed, as data events on a virtual timeline.
+//!
 //! [`DataEvent`]: qp_schema::data::DataEvent
 //!
 //! Note on names: `qp_schema::SeriesSource` is the *description* of a binding inside a
@@ -35,6 +38,7 @@ mod flow;
 mod local;
 mod provider;
 mod regimes;
+mod replay;
 mod synthetic;
 mod window;
 
@@ -49,9 +53,13 @@ pub use provider::{
     validate_interval, Bound, MemoryProvider, Resolution, SourceProvider,
 };
 pub use regimes::{
-    regime_at, regime_bars, regime_schedule, synthetic_market, synthetic_market_hourly,
-    trading_day_opens, trading_hour_opens, Regime, RegimeSpan, RegimeSpec, SyntheticInstrument,
-    MARKET_START,
+    regime_at, regime_bars, regime_schedule, synthetic_calendar, synthetic_market,
+    synthetic_market_hourly, trading_day_opens, trading_hour_opens, Regime, RegimeSpan, RegimeSpec,
+    SyntheticInstrument, MARKET_START, SYNTHETIC_HALF_DAYS, SYNTHETIC_HOLIDAYS,
+};
+pub use replay::{
+    aggregate_days, date_start, local_replay_feeds, read_symbols, synthetic_replay_feeds, Intraday,
+    IntradayCounts, Replay, ReplayCalendar, ReplayCursor, ReplayFeed, ReplayOptions, ReplayStep,
 };
 pub use synthetic::{synthetic_bars, synthetic_series, SyntheticSource};
 pub use window::{resolve_window, ResolvedWindow};

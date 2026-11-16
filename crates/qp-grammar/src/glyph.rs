@@ -9,7 +9,13 @@
 //!
 //! The product uses one alphabet, [`alphabet`]: `siluet` (R3/M1). The human test compares
 //! `siluet` with `rozet`; switching is the one line in [`alphabet`].
+//!
+//! (R4/M11) The outcome mark (realized vs failed) is drawn through a named
+//! [`outcome::OutcomeStyle`] wrapping the alphabet; the default `r3` is the alphabet's own
+//! drawing.
 
+pub mod outcome;
+pub mod rozet;
 pub mod siluet;
 
 use qp_schema::capsule::GlyphSpec;
@@ -41,4 +47,20 @@ pub trait Alphabet {
 #[must_use]
 pub fn alphabet() -> &'static dyn Alphabet {
     &siluet::Siluet
+}
+
+/// (R4/T5) Alphabet names a connection may choose (`style` gesture, `docs/PROTOCOL.md`
+/// §4.6.2): the human test's finalists. The first is the product's ([`alphabet`]).
+pub const ALPHABETS: [&str; 2] = ["siluet", "rozet"];
+
+/// (R4/T5) The alphabet named `name` (`None`: the product's, [`alphabet`]); `None` for an
+/// unknown name.
+#[must_use]
+pub fn alphabet_named(name: Option<&str>) -> Option<&'static dyn Alphabet> {
+    match name {
+        None => Some(alphabet()),
+        Some("siluet") => Some(&siluet::Siluet),
+        Some("rozet") => Some(&rozet::Rozet),
+        Some(_) => None,
+    }
 }

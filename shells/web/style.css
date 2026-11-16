@@ -1,0 +1,54 @@
+/* Qapsule demo shell (R4/T5): chrome only. Scenes are pixels from the core. */
+:root { --bg: #0f1115; --fg: #e6e8ec; --muted: #8a909c; --line: #262a33; --card: #161921; --accent: #5b9cff; }
+body[data-theme="light"] { --bg: #f6f7f9; --fg: #15171c; --muted: #5d6470; --line: #d9dce2; --card: #ffffff; --accent: #2563eb; }
+* { box-sizing: border-box; }
+html, body { margin: 0; height: 100%; background: #05060a; color: var(--fg);
+  font: 14px/1.35 system-ui, -apple-system, "Segoe UI", sans-serif; }
+body[data-theme="light"] { background: #c9ccd3; }
+#phone { position: relative; width: 390px; height: 844px; max-height: 100vh; margin: 0 auto;
+  background: var(--bg); display: flex; flex-direction: column; overflow: hidden; }
+@media (min-width: 500px) { #phone { margin-top: 12px; border-radius: 18px; box-shadow: 0 0 0 1px var(--line); } }
+@media (max-width: 499px) { #phone { width: 100vw; height: 100vh; } }
+#top { padding: 8px 12px 0; border-bottom: 1px solid var(--line); }
+#title { display: flex; gap: 8px; align-items: baseline; }
+#clock { color: var(--muted); font-variant-numeric: tabular-nums; }
+#banner { margin: 6px 0; padding: 4px 8px; border-radius: 6px; background: #5a4410; color: #ffe2a0; font-size: 12px; }
+body[data-theme="light"] #banner { background: #fff1c7; color: #6b4b00; }
+#tabs { display: flex; gap: 4px; margin-top: 6px; }
+#tabs button { flex: 1; background: none; color: var(--muted); border: 0; border-bottom: 2px solid transparent; padding: 6px; font: inherit; }
+#tabs button.on { color: var(--fg); border-bottom-color: var(--accent); }
+.page { display: none; flex: 1; overflow-y: auto; }
+.page.on { display: block; }
+#settings, #metrics { padding: 8px 12px; }
+#list { display: flex; flex-direction: column; gap: 6px; padding: 6px 0; }
+.face { position: relative; background: var(--card); }
+.face canvas { display: block; width: 390px; height: 240px; touch-action: pan-y; }
+.face .mark { position: absolute; top: 4px; right: 8px; padding: 1px 6px; border-radius: 8px; background: var(--accent); color: #fff; font-size: 11px; }
+.fhead { margin: 10px 12px 0; color: var(--muted); font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em; }
+.face p { margin: 0; padding: 14px 12px; min-height: 60px; }
+#empty { color: var(--muted); padding: 24px 12px; }
+#layer { display: none; flex: 1; overflow-y: auto; background: var(--bg); }
+body.open[data-tab="feed"] #layer { display: block; }
+body.open[data-tab="feed"] #feed { display: none; }
+#layerbar { display: flex; gap: 8px; align-items: center; padding: 8px 12px; border-bottom: 1px solid var(--line); }
+#depth { color: var(--muted); }
+#opentext { margin: 8px 12px; }
+#scene { display: block; width: 390px; height: 300px; touch-action: none; }
+#hint { color: var(--muted); margin: 6px 12px; font-size: 12px; }
+#evidence .ev { margin: 6px 12px; padding: 8px; border: 1px solid var(--line); border-radius: 6px; }
+#evidence .req { color: #ffb44c; }
+#controls { display: flex; gap: 4px; align-items: center; padding: 6px 8px; height: 48px; border-top: 1px solid var(--line); background: var(--bg); z-index: 6; }
+#controls input[type=date] { width: 120px; }
+#c_step_n { color: var(--muted); font-size: 11px; margin-left: auto; font-variant-numeric: tabular-nums; }
+button, select, input { font: inherit; color: var(--fg); background: var(--card); border: 1px solid var(--line); border-radius: 6px; padding: 4px 6px; }
+label { display: flex; justify-content: space-between; align-items: center; gap: 8px; margin: 8px 0; }
+label.check { justify-content: flex-start; }
+table { width: 100%; border-collapse: collapse; }
+td, th { padding: 3px 4px; border-bottom: 1px solid var(--line); text-align: left; font-size: 13px; }
+#mrows td:last-child { font-variant-numeric: tabular-nums; }
+#toast { position: absolute; left: 12px; right: 12px; bottom: 56px; padding: 8px; border-radius: 6px; background: #4a1820; color: #ffd6dc; z-index: 9; font-size: 12px; }
+#fx { position: fixed; inset: 0; pointer-events: none; z-index: 20; }
+#fx canvas { position: fixed; }
+body.noanim *, body.noanim #fx canvas { transition: none !important; }
+code { font-size: 12px; }
+.small { font-size: 12px; color: var(--muted); }

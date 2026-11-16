@@ -1,0 +1,38 @@
+[package]
+name = "r4-m8910-harness"
+description = "R4/H-M8910: deterministic measurement harnesses for M8 (capsule face), M9 (feed layout) and M10 (opening transition). Written before any alternative existed; it measures the designs registered in qp_grammar::{faces, feeds, transitions} (reference `r3`)."
+version = "0.0.0"
+edition = "2021"
+publish = false
+
+# Not a member of the main workspace (the root workspace only lists `crates/*`).
+[workspace]
+
+[[bin]]
+name = "m8910"
+path = "src/main.rs"
+
+[lib]
+name = "m8910"
+path = "src/lib.rs"
+
+[dependencies]
+qp-schema = { path = "../../../../../crates/qp-schema" }
+qp-grammar = { path = "../../../../../crates/qp-grammar" }
+qp-render = { path = "../../../../../crates/qp-render" }
+qp-session = { path = "../../../../../crates/qp-session" }
+qp-source = { path = "../../../../../crates/qp-source" }
+qp-wasm = { path = "../../../../../crates/qp-wasm", features = ["replica"] }
+serde = { version = "1.0.229", features = ["derive"] }
+serde_json = { version = "1.0.154", features = ["float_roundtrip"] }
+
+[lints.rust]
+unsafe_code = "forbid"
+
+[profile.release]
+lto = "thin"
+codegen-units = 1
+debug = false
+
+[profile.test]
+opt-level = 2

@@ -1,0 +1,1 @@
+attempt1: capsules query with stages:["realized"]; worked first time. Returned 89 capsules (THYAO and ASELS), importance order. Note: realized items can still have state live and validity closed. No spec problems.

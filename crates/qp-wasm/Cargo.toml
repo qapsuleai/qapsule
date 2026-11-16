@@ -15,7 +15,7 @@ default = []
 # RP2/T8: the replica binding (`Replica`, qp-session). Off in the default (R0 view) build
 # so that its size stays as measured; `scripts/verify.sh` builds it for the native <-> WASM
 # replica check.
-replica = ["dep:qp-session", "dep:qp-source"]
+replica = ["dep:qp-session", "dep:qp-source", "dep:qp-calendar"]
 # Spike variant: tiny-skia SIMD pipelines (build with RUSTFLAGS="-C target-feature=+simd128").
 simd = ["qp-render/simd"]
 # Spike variant: also export the vello_cpu backend for the browser comparison.
@@ -24,6 +24,7 @@ spike-vello-cpu = ["qp-render/spike-vello-cpu"]
 spike-vello-gpu = ["qp-render/spike-vello-gpu", "dep:wasm-bindgen-futures"]
 
 [dependencies]
+qp-calendar = { path = "../qp-calendar", optional = true }
 qp-compute = { path = "../qp-compute" }
 qp-grammar = { path = "../qp-grammar" }
 qp-render = { path = "../qp-render" }
@@ -42,3 +43,8 @@ wasm-opt = false
 
 [lints]
 workspace = true
+
+[[example]]
+# R4/T6: the page's opening timed natively (see the file).
+name = "startup"
+required-features = ["replica"]

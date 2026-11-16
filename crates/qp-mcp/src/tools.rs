@@ -1,8 +1,9 @@
 //! MCP tools generated from the protocol JSON Schema (`qp_schema::json_schema("ClientMsg")`).
 //!
 //! Nothing here names an operation or a query: one tool per `Op` variant
-//! (`op_<name>`), one per `Query` variant (`query_<kind>`), and the generic message
-//! tools `command`, `query`, `subscribe`, `unsubscribe`, `attend`. Input schemas are
+//! (`op_<name>`), one per `Query` variant (`query_<kind>`), one per `ReplayControl`
+//! variant (`replay_<kind>`, R4 §21), and the generic message tools `command`, `query`,
+//! `subscribe`, `unsubscribe`, `attend`, `replay`. Input schemas are
 //! the variants' schemas with the tag removed; descriptions are the schema's.
 
 use std::collections::BTreeSet;
@@ -14,7 +15,14 @@ use serde_json::{json, Map, Value};
 pub const COMMAND_EXTRAS: [&str; 3] = ["mode", "base", "reason"];
 
 /// Client message types that get a generic tool, in tool order.
-pub const GENERIC: [&str; 5] = ["command", "query", "subscribe", "unsubscribe", "attend"];
+pub const GENERIC: [&str; 6] = [
+    "command",
+    "query",
+    "subscribe",
+    "unsubscribe",
+    "attend",
+    "replay",
+];
 
 /// What a tool call becomes.
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -23,6 +31,8 @@ pub enum ToolKind {
     Op(String),
     /// A `query`; the query kind.
     Query(String),
+    /// (R4, §21) A `replay` message; the control kind.
+    Replay(String),
     /// A whole client message of this `type` (`command`, `query`, …); arguments are the
     /// message without `type`.
     Message(String),
@@ -67,8 +77,8 @@ pub fn output_schema() -> Value {
     })
 }
 
-/// All tools in deterministic order: ops (schema order), queries (schema order), then
-/// [`GENERIC`]. Generated once per process.
+/// All tools in deterministic order: ops (schema order), queries (schema order), replay
+/// controls (schema order), then [`GENERIC`]. Generated once per process.
 #[must_use]
 pub fn tools() -> &'static [Tool] {
     static TOOLS: OnceLock<Vec<Tool>> = OnceLock::new();
@@ -220,6 +230,24 @@ fn generate() -> Vec<Tool> {
             description: description(v, kind),
             input_schema: attach_defs(s, defs),
             kind: ToolKind::Query(kind.to_owned()),
+        });
+    }
+
+    for v in defs.get("ReplayControl").map(variants).unwrap_or_default() {
+        let Some(kind) = tag_of(v, "kind") else {
+            continue;
+        };
+        let mut s = v.clone();
+        drop_prop(&mut s, "kind", false);
+        ensure_properties(&mut s);
+        tools.push(Tool {
+            name: format!("replay_{kind}"),
+            description: format!(
+                "{} (A qp/0 `replay` message, docs/PROTOCOL.md §21.)",
+                description(v, kind)
+            ),
+            input_schema: attach_defs(s, defs),
+            kind: ToolKind::Replay(kind.to_owned()),
         });
     }
 

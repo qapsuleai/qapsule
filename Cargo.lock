@@ -1515,6 +1515,7 @@ dependencies = [
 name = "qp-capsule"
 version = "0.0.0"
 dependencies = [
+ "qp-calendar",
  "qp-compute",
  "qp-facts",
  "qp-schema",
@@ -1536,6 +1537,7 @@ dependencies = [
  "qp-schema",
  "qp-session",
  "qp-source",
+ "qp-wasm",
  "serde_json",
  "tempfile",
 ]
@@ -1614,6 +1616,7 @@ dependencies = [
 name = "qp-session"
 version = "0.0.0"
 dependencies = [
+ "qp-calendar",
  "qp-capsule",
  "qp-compute",
  "qp-facts",
@@ -1641,6 +1644,7 @@ dependencies = [
 name = "qp-wasm"
 version = "0.0.0"
 dependencies = [
+ "qp-calendar",
  "qp-compute",
  "qp-grammar",
  "qp-render",

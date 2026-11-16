@@ -18,9 +18,10 @@ hello      (kimim, hangi yüzey)   →    welcome  (rol, yetki, profil, sınırl
 command    (dokümanı değiştir)    →    ack (applied | proposed)  ya da error
 query      (anlamsal okuma)       →    result                    ya da error
 subscribe / unsubscribe           →    ack, sonra notify …
-input      (kaydır, yakınlaştır)  →    result (viewport | at)
+input      (kaydır, yakınlaştır)  →    result (viewport | at | interaction)
 attend     (dikkat yönlendir)     →    ack (delivered); hedefe notify
 clock      (yalnızca host)        →    (cevap yok; süre aşımları işlenir)
+replay     (R4: oynatma denetimi) →    result (replay)            ya da error   (§21)
 ```
 
 Her mesaj tek bir JSON nesnesidir; türü `"type"` alanıdır. Örnek bir konuşma:
@@ -130,6 +131,8 @@ Protokol taşımadan bağımsızdır. Tanımlı iki taşıma:
 
 Sekiz tür: **Komut, Değişim, Sorgu, Abonelik, Girdi, Öneri, Dikkat, Yetenek.**
 Aşağıda her biri, alanları ve örneğiyle. Alanların tam listesi şemadadır.
+(R4) Barındırıcının yeniden oynatma kaynağına giden **`replay`** denetim mesajı ayrıca
+§21'de; dokümana yazmaz, günlüğe girmez.
 
 ### 4.1 Yetenek — `hello` / `welcome`
 
@@ -295,6 +298,117 @@ son bardan sonraki k'inci nokta `son bar + k` yuvasıdır. Bakış bu yuvalara u
 içindir (`bar` ≤ son bar). `screen` ve `hit` görünen gelecek yuvalardaki öğeleri gösterir;
 `screen.last_close` görünen son **barın** kapanışıdır. Kalıcı aralık (`set_view_range`) yine
 barlarla sınırlıdır. Döküm: `29-future-look`.
+
+#### 4.6.1 Piksel hareketleri ve açılma (R4)
+
+Kabuk px'i bara çevirmez, isabet testi yapmaz, açılmaya karar vermez (`docs/ARCHITECTURE.md`
+"Kabuk sınırı"). Ham hareketi **piksel** olarak gönderir; çekirdek onu bağlantının **bakış
+durumu** (§7) ve hedefin sahne tarifi (`docs/GRAMMAR.md` §14) üzerinden çözer. Bar uzayındaki
+dört hareket (`look`, `pan`, `zoom`, `tap`) aynen kalır.
+
+| Hareket | Alanlar (`?` isteğe bağlı) | Etki |
+|---------|---------|------|
+| `tap_at` | `target?`, `x`, `y`, `width?`, `height?` | Hedefin sahnesinde nokta sorgusu (`hit` ile **aynı kod**: `qp_session::hit_scene`). Sonra açılma kuralı (`docs/GRAMMAR.md` §18.6): kapsül bir derinlik açılır; grafikte kanıt öğesine dokunmak kanıtı açar; düz bir mum odaklanır (`at`, `tap` gibi). Belge görünümünde bir kapsülün işaretine (`glyph`) dokunmak o kapsülü açar. |
+| `drag` | `target?`, `dx`, `width?`, `height?` | Yatay sürükleme: `bars = round(−dx / slot)` (parmak sağa → eski barlar görünür). Belge görünümünde `pan` ile aynı yoldan (bağlantı bakışı, `viewport` olayı); açık kapsülün grafiğinde bakış durumunun aralığı aynı kurallarla (`qp_grammar::gesture::pan_range`) kayar. |
+| `pinch` | `target?`, `factor` (>1 yakınlaştırır), `x?`, `width?`, `height?` | `x` sütunundaki bar yerinde kalır (yoksa son görünen bar); `zoom` ile aynı kural (`zoom_range`). |
+| `open` | `capsule` (kapsül ya da bulgu kimliği; R4/S1: **kapsül seçicisi** de, §17.1 — cevabın `resolved`'ında `/gesture/capsule`), `to?`, `width?`, `height?` | Kapsülü bir derinlik (ya da `to`'ya kadar) açar: `sentence → capsule → chart → evidence`. |
+| `close` | `to?`, `width?`, `height?` | Açık kapsülü bir derinlik geri (ya da `to`'ya; `sentence` = akışa dönüş) kapatır. |
+
+- **Hedef** (`target`, `SurfaceTarget`): `{"view": …}` (belgenin bir görünümü) ya da
+  `{"capsule": …}` (akıştaki yüzü ya da açık kapsül, o bağlantıdaki derinliğiyle); ikisi
+  birden `invalid`. Verilmezse **o anki sahne**: açık kapsül varsa o, yoksa bağlantının o
+  anki görünümü.
+- **Yüzey boyutu.** Piksel, hedefin **çerçevesine** göredir. Kabuk çerçeveyi harekete
+  `width`/`height` ile ekler; çekirdek onu bakış durumunda **çerçeve anahtarı** başına saklar
+  (`view:<id>`, `face` — akıştaki kapsül yüzü, `capsule`, `chart`) ve sonraki hareketler
+  boyutsuz gelebilir. Hiç bildirilmemişse `screen`'in yüzey çerçevesi (telefon 390×300;
+  yüz için aynı genişlik × 140). Sınırlar `200..=16384` × `120..=16384`, dışı `invalid`
+  (`/gesture/width`). Gerekçe: `hello.surface.screen` cihazın tamamıdır, oysa telefonda akış
+  kartı ile grafik farklı boyuttadır; hedef başına ayrı bir `look` mesajı da her düzen
+  değişiminde sıra bağımlılığı doğururdu. Boyut hareketle gelince her mesaj kendi başına
+  çözülebilir (ajan durumsuz sürebilir), kabuk düzen değişince bir kez gönderir.
+- **Cevap:** `result` + `data.kind = "interaction"` (`Interaction`): `hit` (dokunulan yer),
+  `at` (odaklanan bar), `viewport` (yeni aralık), `opening` (derinlik geçişi) ve `state`
+  (hareketten sonraki bakış durumu). Bar uzayındaki hareketler eski cevaplarını verir.
+- **Açılma cevabı** (`Opening`): `capsule`, `finding`, `from`, `to`; `presentation` —
+  sunucunun `to` derinliğindeki çıktısı (§10.2'nin kuralları, bağlantının profili o
+  derinlikte: `capsule` = kart `capsule_view`, `chart`/`evidence` = görünüm ve olgular;
+  yetkisiz okuyucuya kıvılcım ve görünüm yok, §18.3); `frame` — yeni sahnenin çerçevesi;
+  `shared` — **geçişte ortak kalan öğeler**: kimlik + iki sahnedeki kutular
+  (`docs/GRAMMAR.md` §18.6; kabuk yalnız iki kutu arasını boyar). Listeyi bağlantının
+  geçiş tasarımı (`style.transition`, §4.6.2) kurar. **Tek yanlı kayıtlar** (R4/S1): iki
+  kutusu da olan kayıt ortak öğedir; yalnız `before` ya da yalnız `after` kutusu olan kayıt
+  ortak öğe **değildir**, tasarımın ara kare kuralına verdiği **kare verisidir** (o sahnede
+  bir bölgenin kutusu). Bugün yalnız `zumlak` yazar: `scene:before` (eski sahnenin tamamı),
+  `pane:before` (eski sahnenin fiyat paneli), `scene:after` (yeni sahnenin tamamı); ayrıca
+  iki kutulu `span` (iki fiyat panelinin ortak bar × fiyat penceresi). Ortak öğe sayan bir
+  istemci tek yanlı kayıtları saymaz; anlamını bilmediği kaydı yok sayar. (Bunları
+  `Opening.shared` dışına taşımak geçiş arayüzünün kare işlevine sahneleri vermeyi
+  gerektirir; `rounds/R4/experiments/S1.md`.) `evidence` — `evidence`
+  derinliğinde `capsule` sorgusunun olgu başına kanıt erişimi (yetkiliye değerler ve
+  dondurulmuş kanıt, yetkisize `requires` ve `rests_on`; §20.2, K34). Kanıt yeniden
+  hesaplanmaz, aynı kod döner.
+- **Derinlik sınırı:** `surface.max_depth` (`sentence`/`capsule`) açılmayı sınırlar; ötesi
+  `invalid` (`/gesture/to`). Telefonun profil derinliği (`capsule`) yalnız `present`'in
+  varsayılanıdır; kullanıcı açtığında grafiğe ve kanıta inilir.
+- **Hatalar:** açık kapsül yokken `close`, `open` ile `sentence`, açık olmayan bir kapsülde
+  (yüz) `drag`/`pinch`, pozitif olmayan `factor`, sonlu olmayan `x`/`y` → `invalid`;
+  bilinmeyen ya da okuyucunun göremediği kapsül → `not_found` (aynı cevap).
+- Her piksel hareketi ve açılma, girdi sayacını ve son girdi zamanını günceller; dokümana
+  ve günlüğe **hiçbir şey yazmaz** (§7). `drag`/`pinch` `viewport` olayı üretir (açık
+  kapsülün grafiğinde görünüm kimliği `present-<bulgu>` ya da kapsülün saklı görünümü).
+- Dökümler: `51-input-tap-hit`, `52-input-pan-pinch`, `53-input-open-close`,
+  `54-input-evidence`, `55-input-presence`, (R4/S1) `56-input-look` (bakış ayarının M9–M11
+  alanları, `zumlak`'ın `Opening.shared`'ı), `58-input-open-selector` (`open` + seçici) (üretici:
+  `cargo run -p qp-session --example make_input_transcripts -- --write`).
+
+#### 4.6.2 Bakış ayarı — `style` (R4/T5)
+
+Bağlantının sahnelerinin **nasıl** kurulacağını seçer: kapsül yüzü tasarımı, işaret alfabesi,
+tema. Bakış durumunun (§7) parçasıdır: günlüğe girmez, dokümanı değiştirmez; aynı bağlantının
+sonraki piksel hareketleri ve açılmaları bu ayarla derlenir (isabet testi dahil), kabuğun yansısı
+aynı adlarla aynı sahneyi derler.
+
+```json
+{"type":"input","id":"i9","gesture":{"kind":"style","face":"card","alphabet":"rozet","theme":"light"}}
+```
+
+| Alan | Değerler | Varsayılan |
+|------|----------|------------|
+| `face` | `qp_grammar::faces::FACES` (`r3`: §18.4 kapsül kartı, 240 px; `card` eski adı) | `r3` |
+| `alphabet` | `qp_grammar::glyph::ALPHABETS` (`siluet`, `rozet`) | `siluet` (ürünün) |
+| `theme` | `dark`, `light`; `view`: görünümün kendisi | `view` |
+| `feed` (R4/H-M8910) | `qp_grammar::feeds::LAYOUTS` (akış düzeni; `r3`: `capsules` sırası) | `r3` |
+| `transition` (R4/H-M8910) | `qp_grammar::transitions::TRANSITIONS` (açılma geçişi; `r3`: T4 ortak öğeleri, doğrusal ara kare) | `r3` |
+| `outcome` (R4/H-M8910) | `qp_grammar::glyph::outcome::STYLES` (sonuç işareti, M11) | `r3` |
+| `seen` (R4/H-M8910) | son bakış zamanı (ms); `0` siler | yok |
+
+- Verilmeyen alan değişmez; bilinmeyen ad `invalid` (`/gesture/face`, `/gesture/alphabet`,
+  `/gesture/theme`, `expected` bilinen adlar). Doğrulama her şeyden önce: hatalı istek hiçbir
+  şeyi değiştirmez.
+- Cevap `interaction`; `state` (`ViewState`) yeni `face`, `alphabet`, `theme` alanlarını taşır
+  (varsayılandaysa alan yoktur: eski cevaplar bayt eşit).
+- M8 yüz alternatifleri `qp_grammar::faces` kaydına bir satırdır (ad, **yükseklik**, görünüm
+  kuralı); yüz kendi yüksekliğini bildirir, kabuk onu çekirdekten alır. M9 akış düzenleri
+  `qp_grammar::feeds`, M10 geçişleri `qp_grammar::transitions` kaydındadır: düzen kabuğun
+  dizeceği satırları (kapsül, grup başlığı metni, kısa işaret) verir; geçiş `Opening.shared`'ı
+  ve ara kareleri (öğe başına kaynak sahne, kutu, opaklık; yeni sahnenin opaklığı) verir.
+  Varsayılanlarda (`r3`) cevaplar ve dökümler bayt eşittir. Kullanım ve ölçüm:
+  `rounds/R4/experiments/harness/m8910/README.md`. Alfabe değişimi derleyici seçeneğidir
+  (`CompileOptions::alphabet`); ürünün alfabesi (`glyph::alphabet()`) değişmez.
+- **Protokol varsayılanı ile gösterimin varsayılanı** (R4/S1). Yukarıdaki tablonun
+  varsayılanları protokolündür: bakış ayarı göndermeyen bağlantının (ajan, dökümler, çıplak
+  `present`/`open`) cevapları değişmez. Gösterim kabuğunun çekirdeği (`ShellCore`) ise
+  `hello`'dan hemen sonra M9–M11 seçimlerini ister:
+  `{"kind":"style","feed":"elikov","transition":"zumlak","outcome":"tg5"}`
+  (`qp_grammar::feeds::PRESENTED_FEED`, `transitions::PRESENTED_TRANSITION`,
+  `glyph::outcome::PRESENTED_OUTCOME`); sayfanın kendi seçimi (URL, Ayarlar) ondan sonra
+  gider ve geçerlidir. Yüz varsayılanı (M8) değişmedi. Akış satırları (grup başlıkları,
+  kısa işaretler) protokol cevabı değildir: çekirdek `capsules` cevabından ve bu bakış
+  durumundan dizer (`qp_grammar::feeds`; yerel gün bilgisini de çekirdek verir:
+  `FeedCtx.local`, gösterim saat dilimi `Europe/Istanbul`).
+- `rozet` R3/M1 deneyinden aynen taşındı; `validity` kanalı yoktur (K42: "artık geçerli
+  değil" yalnız `siluet`'te işarette görünür; insan testi `rozet`'i seçerse eklenmeli).
 
 ### 4.7 Öneri — `command` (öneri kipi) ve karar işlemleri
 
@@ -468,7 +582,7 @@ böylece aynı görünümün farklı katmanlarına eşzamanlı yazılar çakış
 | `log` | `after_seq?`, `since_t?`, `until_t?`, `within_ms?`, `author?`, `limit?` | `log`: girdiler, `seq` artan. `within_ms`: `now`'dan geriye bu kadar milisaniye ("son 30 dakika" = `1800000`). `limit` en son n girdiyi verir. |
 | `study` | `series`, `range?`, `output?`, `reduce?` | `values` (barlarla hizalı, ısınma `null`; K13/K20) ya da `reduced` (`min`, `max`, `mean`, `first`, `last`, `count`; `null`lar atlanır; `min`/`max`/`first`/`last` bar ve zamanı da verir). Bar serisinde çıktılar `o`,`h`,`l`,`c`,`v`. |
 | `at` | `series`, `bar?` ya da `t?` | `at`: OHLCV ve o bar serisine dayanan her hesabın o bardaki değerleri. |
-| `screen` | `principal?` | `screen`: kişinin ekranlı (`desktop`, `phone`, `watch`) her bağlantısı için, bağlantı açılış sırasıyla: görünüm, görünen aralık, sembol ve aralık (görünümün ilk bar serisinden), paneller (yığın sırasıyla; `panel` = panel id'si; R2'de ayrıca `name`, `scale` {id, tür, görünen alan} ve `layers` — kimlik, işaret, veri, alanlar, açıklama, sabitler ve kökenleri, görünen öğe sayısı, son değerler, sahne tarifinden; `series` = o paneldeki katmanların serileri, katman sırasıyla, tekrarsız; `marks` = bütün katmanların işaretleri, katman sırasıyla), olgu barı görünen aralıkta olan bulguların kapsülleri, görünen son barın kapanışı. |
+| `screen` | `principal?` | `screen`: kişinin ekranlı (`desktop`, `phone`, `watch`) her bağlantısı için, bağlantı açılış sırasıyla: görünüm, görünen aralık, sembol ve aralık (görünümün ilk bar serisinden), paneller (yığın sırasıyla; `panel` = panel id'si; R2'de ayrıca `name`, `scale` {id, tür, görünen alan} ve `layers` — kimlik, işaret, veri, alanlar, açıklama, sabitler ve kökenleri, görünen öğe sayısı, son değerler, sahne tarifinden; `series` = o paneldeki katmanların serileri, katman sırasıyla, tekrarsız; `marks` = bütün katmanların işaretleri, katman sırasıyla), olgu barı görünen aralıkta olan bulguların kapsülleri, görünen son barın kapanışı; (R4) bağlantının bakış durumu `view_state` (§7). |
 | `attention` | `principal` | `attention`: kişinin en son etkin ekranlı bağlantısının bakış aralığı (girdi yoksa başlangıç aralığı), son odak (`tap`: görünüm, panel, bar), zamanı, yönergeler. |
 | `hit` | `view?`, `x`, `y`, `width?`, `height?` | (R2) `hit`: görünüm `width`×`height` (varsayılan 1200×600) çizildiğinde (`x`,`y`) pikselinde ne olduğu — panel, bar, zaman, ölçekteki değer ve en üstteki öğe (katman, işaret, veri, bar, zaman, değerler, kökenler); boş alanda `item` yok. Görünen aralık: soranın o görünümdeki bakışı (ekranlı bağlantıda varsayılan bakış; gelecek yuvalar dahil, §4.6), yoksa kalıcı aralık, yoksa bütün yuvalar. Sahne tarifinden cevaplanır, çizim yapılmaz (`docs/GRAMMAR.md` §16). |
 | `present` | `finding?`, `surface?` | `presentation` (§10). `finding` yoksa (K25): tek canlı bulgu varsa o; **birden çok canlı bulgu varsa otorite seçmez**, `ambiguous` döner — `candidates` bütün canlı bulgular, seçicinin bulgu sırasıyla (§17.3: olgularının en büyük barı, eşitlikte doküman sırası) — **artan** sıra: son aday en yeni olandır, `{"latest":true}` onu seçer, `hint` `finding` ya da bir seçici (`{"latest":true}`) yazmayı söyler; hiç canlı bulgu yoksa `not_found`. |
@@ -495,7 +609,13 @@ içindedir; reddedilen ve süresi dolan öneriler de iz olarak kalır.
 ## 7. Varlık durumu (presence)
 
 Bağlantı başına: yüzey, profil, görünür aralık (viewport), odak (son `tap`), son girdi
-zamanı. Kişi başına: dikkat yönergeleri (en son 16). Varlık durumu günlüğe girmez ve
+zamanı ve (R4) **bakış durumu** (`ViewState`): açık kapsül ve bulgusu, derinliği
+(`sentence`/`capsule`/`chart`/`evidence`), o derinlikte gösterilen görünümün kimliği,
+grafik derinliğinde görünen aralık ve kabuğun bildirdiği çerçeve boyutları (§4.6.1). Akış
+listesindeki kaydırma konumu kabuğun düzen öğesidir, çekirdeğe gönderilmez. Ajan bakış
+durumunu `screen` cevabındaki `view_state` alanından okur (yalnız bir piksel hareketi ya da
+açılma onu ayarladıysa). Test: 1000 girdiden sonra günlük uzunluğu ve doküman özeti aynı
+(`crates/qp-session/tests/interaction.rs`). Kişi başına: dikkat yönergeleri (en son 16). Varlık durumu günlüğe girmez ve
 yeniden oynatılmaz; otorite değişince (devir) sıfırlanır. Ajanlar onu `screen` ve
 `attention` sorgularıyla okur; böylece insanın baktığı yer ajanın okuduğu aynı sistemdedir
 (AI-native testi 4), ama saniyede onlarca kaydırma kalıcı günlüğü şişirmez.
@@ -637,6 +757,9 @@ seçmez", güven ya da kimlik sırasıyla seçim yapılmaz); hiç → `not_found
   olgusunun serisinden, son `max_points` bar).
 - **`chart`**: + `view` (kapsülün görünümü; yoksa sunucunun kurduğu görünüm — dokümana
   yazılmaz), `facts` (kanıt olgular).
+
+(R4) Aynı kurallar `input` ile açılmada (`open`, `close`, açan `tap_at`) `opening.presentation`
+olarak döner (§4.6.1); orada derinliği profil değil bakış durumu seçer.
 
 ### 10.3 Sunucu (presenter)
 
@@ -809,7 +932,19 @@ doldu), 41 hassasiyet ve pozisyon geçişi (`set_audience`, `set_sensitivity`), 
 iz bırakmaması, 43 geri çekme (kapsül itirazı haklı → `retracted`, karnede yok), 44 bağlı
 seride `verify_evidence.item` seçicisi (çözüm, `ambiguous`, `schema`) ve `show_finding`
 (R3/E düzeltmeleri). 38–44
-`cargo run -p qp-session --example make_capsule_transcripts -- --write` ile üretilir.
+`cargo run -p qp-session --example make_capsule_transcripts -- --write` ile üretilir. **R4 (girdi):**
+51–55: piksel dokunma ve isabet, sürükleme ve
+kıstırma, açılma/kapama ve ortak öğeler, kanıta inme (yetkili/yetkisiz), bakış durumunun
+günlüğe girmemesi (§4.6.1).
+**R4/T2 (§21):** 49 yeniden oynatma denetimi (`init.replay`: durum, adım, hız, duraklat,
+sürdür, tarihe ve zamana ileri git, izleyicinin `forbidden`'ı, `invalid`/`schema` hataları,
+geri gitmede otoritenin yeniden kurulması, `epoch` 1, bağlantının yeniden `hello`'su), 50
+yeniden oynatma kaynağı olmayan otoritede `unsupported`. `cargo run -p qp-session --example
+make_replay_transcripts -- --write` ile üretilir. Koşucu `init.replay` taşıyan dökümü bir
+yeniden oynatma barındırıcısıyla (`qp_session::ReplayHost`) koşar: süreç içi
+`conform::InProcReplay`, `qp serve` (`init.replay` görünce barındırıcıyı kurar;
+`--no-local-data`), MCP'de `Hub::shared_replay` (`replay_<kind>` araçları). Dökümlerde
+yerel veri hiç okunmaz.
 
 ## 16. Gömme
 
@@ -842,7 +977,7 @@ Kimlik bir dizge (panelde sayı), seçici bir **nesnedir**; ikisi aynı alanda y
 ### 17.1 Sözlük
 
 Kapalı ve tiplidir (`qp-schema`: `SeriesSel`, `ViewSel`, `PanelSel`, `LayerSel`,
-`FactSel`, `FindingSel`, `ProposalSel`, `ScaleSel`, `ItemSel`); bilinmeyen anahtar
+`FactSel`, `FindingSel`, `ProposalSel`, `ScaleSel`, `ItemSel`; R4: `CapsuleSel`); bilinmeyen anahtar
 `schema` hatasıdır (`did_you_mean` ile). Her seçicide ayrıca `first` ve `latest`
 (§17.3) vardır.
 
@@ -852,8 +987,9 @@ Kapalı ve tiplidir (`qp-schema`: `SeriesSel`, `ViewSel`, `PanelSel`, `LayerSel`
 | görünüm | `title`, `shows` (seri) | `{}` "tek görünüm"; `{"shows":{"study":"macd"}}` |
 | panel | `name`, `shows` (seri), `mark` | `{"mark":"candle"}` "fiyat paneli"; `{"shows":{"study":"rsi"}}` "RSI'ın paneli"; `{"name":"macd"}` |
 | katman | `shows` (seri), `output`, `mark`, `panel` (panel), `value`, `fact` (olgu), `finding` (bulgu), `label` | `{"output":"upper"}` "üst bant" (tek başına çizen katman, §17.1); `{"mark":"rule","value":70}` "70 çizgisi" |
-| olgu | `kind`, `on` (seri), `bar` | `{"kind":"breakout","first":true}` "eski kırılımın olgusu" |
-| bulgu | `kind` (olgularından birinin türü), `on` (seri), `fact` (olgu), `state` (kapsül durumu) | `{"kind":"breakout","latest":true}` "son kırılım" |
+| olgu | `kind` (olgunun tam türü), `on` (seri), `bar` | `{"kind":"breakout.range.up","first":true}` "eski yukarı kırılımın olgusu" |
+| bulgu | `kind` (olgularından birinin tam türü), `on` (seri), `fact` (olgu), `state` (kapsül durumu); R4: `instrument`, `meaning` (anlam türü), `stage` (hikâye aşaması), `open` (hikâyesi açık mı) | `{"kind":"breakout.range.down","latest":true}` "son aşağı kırılım"; `{"meaning":"breakout","open":true,"latest":true}` "son açık kırılım hikâyesinin bulgusu" |
+| kapsül (R4) | `instrument`, `meaning` (anlam türü), `direction`, `stage`, `open`, `born_bar`, `series` | `{"instrument":"THYAO","meaning":"breakout","open":true}` "THYAO'nun açık kırılım kapsülü" |
 | öneri | `state` | `{"state":"pending","latest":true}` |
 | ölçek | `panel` (panel; zorunlu) | `{"panel":{"mark":"candle"}}` → `"y0"` |
 | öğe | tek anahtar, türün adı: `series`, `view`, `fact`, `finding`, `proposal` | `{"finding":{"kind":"breakout","latest":true}}` |
@@ -887,6 +1023,21 @@ Anahtarların anlamı:
   `{"/ops/1/layer":"l5"}`).
 - `value`: katmanın `y` ya da `x` sabiti bu sayıya tam eşit (kuralın seviyesi).
 - `bar`: olgunun bar numarası. `state`: kapsül/öneri durumu (şema adları).
+- **Olgu türü tamdır** (R4 açıklaması): motorun olguları `<dedektör>.<kod>` türündedir
+  (`breakout.range.up`, `breakout.range.down`, `continuation.ma_stack.bull`,
+  `extreme.rsi.overbought`, `flow.institutional.net_buy` …); `{"kind":"breakout"}` bunlara
+  **uymaz** (tam eşitlik). Anlam türüne göre seçmek için bulguda ya da kapsülde `meaning`
+  (`breakout`, `continuation`, `reversal`, `squeeze`, `extreme`, `flow`) kullanılır.
+- (R4) Bulgu ve kapsül seçicisinin hikâye anahtarları (`instrument`, `meaning`,
+  `direction`, `stage`, `open`, `born_bar`, `series`) bulguyu sunan kapsülün `story`'sine
+  bakar; hikâyesiz bulgu/kapsül bu anahtarlarla eşleşmez. `open: true` aşaması kapanmamış
+  (`realized`, `invalidated`, `expired`, `retracted` dışında) demektir.
+- **Kapsülün sırası** (R4): son geçişin barı, eşitlikte doğum barı, sonra doküman sırası;
+  seçicide `latest: true` **en son hareket edeni** (son geçiş barı en büyük olanı) seçer.
+  Bu, `capsules` sorgusunun `latest` süzgecinden farklıdır: o **en son doğanı** verir
+  (§20.2; kod: `qp_session::select` kapsül sırası ve `capsules_query`). İkisi de kodun
+  davranışıdır; ad aynı, sıra farklı (R4/S1 notu). Kapsül seçicisi yalnız hikâyeli
+  kapsüllere çözülür ve kapsül kimliğine (`cap.…`) çevrilir.
 
 ### 17.2 Nerede yazılır
 
@@ -909,6 +1060,8 @@ Anahtarların anlamı:
 | `accept_proposal`, `reject_proposal` | `proposal` |
 | sorgu `get` / `study`, `at` / `hit` / `present` | `id` (öğe) / `series` / `view` / `finding` |
 | sorgu `verify_evidence` / `binding` | `item` (öğe: `{"fact":…}` ya da `{"finding":…}`) / `series` |
+| sorgu `capsule` (R4) | `capsule` (kapsül seçicisi; kimlik ya da bulgu kimliği de olur) |
+| `input` `open` (R4/S1) | `gesture.capsule` (kapsül seçicisi; kimlik ya da bulgu kimliği de olur) |
 | `subscribe` | `changes.ids[]` (öğe), `finding.finding`, `condition.condition` |
 | `attend` | `directive.steps[].target` |
 
@@ -917,7 +1070,7 @@ Anahtarların anlamı:
   (`encoding.{x,y,y2}.series`, `encoding.color.when.than.series`).
 - **Hedef** (`Target`): `view`, `panel`, `layer`, `series`, `item` (öğe seçicisi).
 - **Koşul** (`Condition`): `threshold.series`, `compare.left`, `compare.right`.
-- `put_view`, `put_series`, `input` hareketleri ve kökenler (`origin`) seçici almaz
+- `put_view`, `put_series`, `input` hareketleri (R4/S1: `open.capsule` dışında) ve kökenler (`origin`) seçici almaz
   (bütün öğe yazılır ya da arayüz kimlikle konuşur).
 
 **Panel ve katman hangi görünümde aranır?** İşlemin `view` alanındaki görünümde
@@ -936,7 +1089,8 @@ bir görünüm `not_found` (görünüm alanının yolunda).
 3. **Türün sırası** (adaylar hep bu sırada tutulur):
    seri, görünüm, öneri → doküman sırası (eklenme); panel → yığın sırası (üstten alta);
    katman → çizim sırası; olgu → bar, eşitlikte doküman sırası; bulgu → olgularının en
-   büyük barı, eşitlikte doküman sırası. Görünüm verilmemişse önce görünüm sırası.
+   büyük barı, eşitlikte doküman sırası; kapsül (R4) → son geçiş barı, doğum barı,
+   doküman sırası. Görünüm verilmemişse önce görünüm sırası.
 4. **Tek eşleşme** → çözülür. **Birden çok** → `first: true` ilkini, `latest: true`
    sonuncusunu seçer (bulguda "en son", panelde "en alttaki", katmanda "en üstteki");
    ikisi yoksa `ambiguous`. İkisi birden → `invalid`. **Hiç** → `not_found`.
@@ -1745,7 +1899,8 @@ itiraz edene; aynı itiraz `duplicate`; ileri sürülmeyen iddia `unknown`).
 Şema `qp-schema::protocol` (ek alanların hepsi isteğe bağlı; R3 öncesi dökümler bayt bayt
 aynı), referans otorite `crates/qp-session/src/capsule.rs`. MCP araçları şemadan üretilir
 (`op_set_audience`, `op_set_sensitivity`, `query_capsules`, `query_capsule`,
-`query_ledger`).
+`query_ledger`); R4 alanları (`capsule` seçicisi, `latest`, `born_since_*`, `direction`,
+`validity`) araçlarda da görünür.
 
 ### 20.1 Otoritede kapsül motoru
 
@@ -1788,9 +1943,43 @@ Barındırıcı yapılandırması (`SessionInit.capsules`, protokol mesajı değ
 
 | `kind` | Cevap |
 |--------|-------|
-| `capsules` | `capsules`: `CapsuleItem` listesi — kimlik, bulgu, enstrüman, seri, tür, yön, zaman türü, aşama, durum, kademe, önem, teyit, güven, doğum/son bar, son geçiş zamanı, `ledger_at_birth`, `sentence {text, tr, en}`, `relevant` (pozisyon/niyet), `redacted`. Sıra: önem azalan, sonra son geçiş zamanı azalan, sonra kimlik. Süzgeçler VE'lenir; `audience: true` soranın kitlesini uygular (aşağıda). `comments`: soranın akış yetkisi olmayan enstrümanlarda sunucu yorumları. |
-| `capsule` | `capsule_detail`: `item`, `story` (bütün geçişler: bar, zaman, aşama, neden, olgular), `facts` (okuyucuya göre), `ledger` (anahtarın şimdiki karnesi: son kesin bardan önce kapananlar), `glyph`, `evidence` — olgu başına `{fact, family, license, open, values?, evidence_ref?, requires?, rests_on}`: yetkiliye değerler ve dondurulmuş kanıt; yetkisize "şu yetkiyi gerektirir" (`requires`, ör. `bist/THYAO`) ve neye dayandığı (`rests_on`, her zaman) — K34. Görünmeyen ya da olmayan kapsül: `not_found` (ikisi aynı). |
-| `ledger` | `ledger`: `rows` (anahtar ya da `by_kind` ile tür başına `n`, `realized`), `total`. Geri çekilenler sayılmaz. Lisanstan bağımsız (K33): her lisanslı akışa yetkili okuyucuya motorun karnesi, açık görünüm okuyucusuna (§20.5) açık-yalnız motorun karnesi — lisanslı veriden hiç etkilenmez. |
+| `capsules` | `capsules`: `CapsuleItem` listesi — kimlik, bulgu, enstrüman, seri, tür, yön, zaman türü, aşama, durum, kademe, önem, teyit, güven, doğum/son bar, son geçiş zamanı, `ledger_at_birth`, `sentence {text, tr, en}`, (R4) `validity` (`valid` / `no_longer` / `closed`, cümleyle aynı bar itibarıyla; K42/A28), `relevant` (pozisyon/niyet; anlamı §20.4), `redacted`. Sıra: önem azalan, sonra son geçiş zamanı azalan, sonra kimlik. Süzgeçler VE'lenir (aşağıdaki tablo); `audience: true` soranın kitlesini uygular (§20.4, hikâyenin şimdiki aşamasıyla). Cevabın ayrıca `comments` alanı vardır: soranın akış yetkisi olmayan enstrümanlarda sunucu yorumları. |
+| `capsule` | `capsule_detail`: `item`, `story` (bütün geçişler: bar, zaman, aşama, neden, olgular; R4: `condition` = durum koşulu, `resolution` = beklenen çözüm `{rule, condition?}`), `facts` (okuyucuya göre), `ledger` (anahtarın şimdiki karnesi: son kesin bardan önce kapananlar), `glyph` (R4: `validity` dahil, öğeninkiyle aynı), `evidence` — olgu başına `{fact, family, license, open, values?, evidence_ref?, requires?, rests_on}`: yetkiliye değerler ve dondurulmuş kanıt; yetkisize "şu yetkiyi gerektirir" (`requires`, ör. `bist/THYAO`) ve neye dayandığı (`rests_on`, her zaman) — K34. (R4) `capsule` alanı kapsül kimliği, bulgu kimliği ya da **kapsül seçicisi** alır (§17.1; `result.resolved`'da `/query/capsule`). Görünmeyen ya da olmayan kapsül: `not_found` (ikisi aynı). |
+| `ledger` | `ledger`: `rows` (anahtar ya da `by_kind` ile tür başına `n`, `realized`; R4: satırda `direction`), `total`. Anahtar `<tür>/<yön>/<dedektör>@<sürüm>` (K42/A23). Süzgeçler: `key`, `meaning`, `detector`, (R4) `direction`; `by_kind` yönleri toplar (`direction` verilmişse yalnız o yön, satır `direction`'ı taşır). Geri çekilenler sayılmaz. Lisanstan bağımsız (K33): her lisanslı akışa yetkili okuyucuya motorun karnesi, açık görünüm okuyucusuna (§20.5) açık-yalnız motorun karnesi — lisanslı veriden hiç etkilenmez. |
+
+`capsules` süzgeçleri (hepsi isteğe bağlı, VE'lenir):
+
+| Alan | Anlamı |
+|------|--------|
+| `instrument` | Yalnız bu enstrüman. |
+| `stages` | Yalnız bu aşamalar (`born`, `strengthened`, `weakened`, `confirmed`, `realized`, `invalidated`, `expired`, `retracted`). |
+| `open` | `true` yalnız açık, `false` yalnız kapanmış hikâyeler. |
+| `meaning` | Yalnız bu anlam türü (`continuation`, `reversal`, `breakout`, `squeeze`, `extreme`, `flow`). |
+| `since_bar` / `since_t` | Son geçişi bu bardan / zamandan (ms) itibaren olanlar (geçişi süzer: eski doğumlu ama yeni hareket eden hikâye de gelir). |
+| `born_since_bar` / `born_since_t` (R4) | Bu bardan / zamandan itibaren **doğanlar** (doğum barı / doğum geçişinin zamanı). |
+| `latest` (R4) | Yalnız **en son doğan** eşleşen kapsül: en büyük doğum zamanı, sonra doğum barı, sonra kimlik. Öteki süzgeçlerden sonra, `limit`'ten önce uygulanır. Kapsül **seçicisinin** `latest`'i başkadır: en son **hareket edeni** seçer (§17.1). |
+| `audience` | Soranın kitlesi (§20.4). |
+| `limit` | En çok bu kadar. (R4, K42-FEED) `audience: true` iken sınır, soranın pozisyon/niyet kapsülünün **şimdiki** olumsuz geçişini (`relevant`, aşama `weakened`/`invalidated`/`retracted`, son geçişi dizinin son kesin barında; günlük dizide bu seans) kesmez: bunlar önce alınır, kalan yer sıraya göre dolar; cevap yine sıralı ve en çok `limit`. |
+
+```json
+→ {"type":"query","id":"q","query":{"kind":"capsule","capsule":{"instrument":"THYAO","meaning":"breakout","direction":"up","latest":true}}}
+← {"type":"result","id":"q","data":{"kind":"capsule_detail","detail":{"item":{"id":"cap.THYAO.breakout.up.147","validity":"closed",…},…}},
+   "resolved":{"/query/capsule":"cap.THYAO.breakout.up.147"}}
+→ {"type":"query","id":"r","query":{"kind":"capsules","latest":true}}
+→ {"type":"query","id":"s","query":{"kind":"capsules","born_since_bar":145,"meaning":"breakout"}}
+→ {"type":"query","id":"l","query":{"kind":"ledger","meaning":"breakout","direction":"down"}}
+```
+
+- **Seçicide gizli kalan** (R4/S1, `capsule_detail.withheld`): `capsule` bir seçiciyse ve
+  okuyucunun enstrümanın lisanslı akışına yetkisi yoksa, seçici okuyucunun görebildikleri
+  arasında çözülür (§20.5); okuyucuya `capsules` sorgusunda zaten verilen sunucu yorumlarından
+  çözülen kapsülün son geçişinden **daha yeni** olanlar varsa cevap bunları ve gerektirdikleri
+  yetkiyi taşır: `"withheld":{"requires":["flow/*"],"comments":[…]}`. Seçicinin `meaning`'i
+  `flow` dışındaysa, kimlikle sorulduysa ya da okuyucu yetkiliyse alan yoktur. Yeni bir varlık
+  kâhini değildir: söylenen yalnız yorumların okuyucuya zaten söylediğidir.
+
+Dökümler: 45 (karne yönü), 46 (olumsuz geçiş), 47 (geçerlilik), 48 (kapsül seçicisi ve
+`capsules` süzgeçleri), (R4/S1) 57 (seçicide `withheld`).
 
 ### 20.3 İşlemler: kitle
 
@@ -1798,6 +1987,28 @@ Barındırıcı yapılandırması (`SessionInit.capsules`, protokol mesajı değ
 |------|---------|---------|
 | `set_audience` | `principal?`, `audience {group, sensitivity?, watchlist?, positions?}` | `put_audience` |
 | `set_sensitivity` | `principal?`, `sensitivity` (`important`/`balanced`/`all`; `null` = grubun varsayılanı) | `put_audience` |
+
+**`Audience` biçimi** (`qp-schema::capsule::Audience`; bilinmeyen alan `schema`):
+
+| Alan | Tip | Anlamı |
+|------|-----|--------|
+| `group` | `"habituated"` \| `"future"` (zorunlu) | Kullanıcı grubu. Varsayılan hassasiyeti: `habituated` (alışkın kullanıcı) → `all`; `future` (geleceğin yatırımcısı) → `important`. |
+| `sensitivity` | `"important"` \| `"balanced"` \| `"all"` (isteğe bağlı) | Seçilen seviye; yoksa grubun varsayılanı. Sistem hiç değiştirmez (K31). |
+| `watchlist` | sembol dizisi (isteğe bağlı) | İzleme listesi; boşsa her enstrüman. |
+| `positions` | `{sembol: miktar}` (isteğe bağlı) | Pozisyonlar; işaret uzun/kısa, `0` pozisyon sayılmaz. |
+
+```json
+{"type":"command","id":"c1","ops":[{"op":"set_audience","audience":
+  {"group":"future","sensitivity":"balanced","watchlist":["THYAO","ASELS"],"positions":{"THYAO":100,"ASELS":-50}}}]}
+{"type":"command","id":"c2","ops":[{"op":"set_sensitivity","sensitivity":null}]}
+```
+
+- `set_audience` kişinin tercihini **tamamen değiştirir** (verilmeyen alan boşalır;
+  izleme listesine ekleme/çıkarma için bütün listeyi yeniden yazın). `set_sensitivity` yalnız
+  seviyeyi değiştirir (`null`: grubun varsayılanı); kişinin henüz tercihi yoksa grup
+  `habituated` olur.
+- `principal` yoksa soranın kendisi. Kişi kendi tercihini `document.audiences[<kendisi>]`'nden
+  okur (yalnız kendi girdisi gelir; aşağıdaki gizlilik kuralı).
 
 Kişi kendi tercihini yazar (`read` yetkisi yeter); başkasınınkini yalnız `owner`
 (`forbidden`). **Öneri olamazlar** (kişisel veri öneriyle herkese gitmesin). Sistem bunları
@@ -1812,8 +2023,14 @@ tutar) görür. `owner` başkasınınkini yazabilir ama okuyamaz.
 görebildiği hikâye geçişleri: `{"kind":"capsule","capsule":CapsuleItem,"transition":…,"seq"}`.
 `all` yoksa kitle süzgeci: izleme listesi (boşsa her enstrüman; pozisyon ve etkin niyetin
 enstrümanı her zaman), sonra hassasiyet kademesi (`important` 1, `balanced` 1–2, `all`
-hepsi) — pozisyon ya da etkin niyetle ilgili kapsül kademeden bağımsız geçer (§9.8). Kişi
-tercih yazmadıysa grup `habituated` (`all`). Akış yetkisi olmayan aboneye lisanslı
+hepsi). (R4, K42/A22) Pozisyon ya da etkin niyetle ilgili kapsülün (`relevant: true`)
+yalnız **olumsuz geçişleri** — `weakened`, `invalidated`, `retracted` — kademeden bağımsız
+geçer; doğumu ve öteki geçişleri herkes gibi kademeye tabidir. Konu her geçişi **kendi
+aşamasıyla** değerlendirir (bildirilen `transition.stage`); `capsules` sorgusunun
+`audience`'ı hikâyenin şimdiki aşamasıyla (CAPSULE §9.8). `relevant` alanı yalnız
+"pozisyon ya da etkin niyetle ilgili" demektir; tek başına seviyeyi aşmaz. Kişi tercih
+yazmadıysa grup `habituated` (`all`). Döküm 46: `important` seviyesinde pozisyonu olan
+okuyucuya kademe 3 doğum gitmez, aynı hikâyenin zayıflaması gider. Akış yetkisi olmayan aboneye lisanslı
 hikâyeler yerine mühürün iletileri: `{"kind":"server_comment","comment":{instrument,
 series, bar, t, codes, tr, en, trust:"server", attachments}}` (rakam yok; ekler: gereken
 yetki, kanıtın dayandığı, kural, makbuz).
@@ -1918,6 +2135,143 @@ kapsül ya da bar yetkisi yok: `unknown`.
 > barındırıcının gizli anahtarlarıdır; barındırıcı oturumu kurarken `Session::new_with_trust_keys` / `Session::with_provider_and_trust_keys`
 > ile verir (ilk sunucu yorumundan önce; sonradan `set_trust_keys` reddedilir) (belgeye ve günlüğe girmez). Verilmezse otorite herkese açık **demo** anahtarlarını
 > kullanır; bu yalnız sentetik test beslemesi (`init.capsules.flow`) ve dökümler içindir.
+
+## 21. Yeniden oynatma (R4)
+
+Kavramlar `docs/CONCEPTS.md` "Gösterim (R4)" (yeniden oynatma, oynatma saati, oynatma
+konumu, oynatma denetimi); karar K44. Kaynak `crates/qp-source/src/replay.rs`
+(`Replay`), barındırıcı `crates/qp-session/src/replayhost.rs` (`ReplayHost`), şema
+`qp-schema::protocol` (`ClientMsg::Replay`, `ReplayControl`, `ReplayState`,
+`QueryResult::Replay`, `SessionInit.replay` / `ReplayInit`). Tasarım ve ölçüm
+`rounds/R4/experiments/T2.md`.
+
+### 21.1 Kaynak
+
+Geçmiş barlar (yerel gerçek veri `fixtures/local/bars`, K23; yoksa sentetik pazar) canlı
+akış gibi verilir. Her beslemenin kaba barları (ör. `1d`) ve isteğe bağlı **ince** barları
+(ör. `1h`) vardır. Başlangıçtan önceki barlar ilk çözümdür (barındırıcının sağlayıcısı
+tutar, `seq` 0); sonraki her bar §18.4 veri olaylarıyla gelir:
+
+- **ince** (`fine`): barın açılışında `bar` olayı `{o, h: o, l: o, c: o, v: 0}`; her ince
+  barın sonunda birikimli durumun değişen alanlarıyla `patch` (son barın aralığına
+  kıstırılmış, `h` hiç düşmez, `l` hiç yükselmez, `v` hiç azalmaz); son ince adım barı
+  **tam** son haline getirir;
+- **ohlc** (ince veri yok; belirleyici ve **etiketli** bar içi yol): açılış → ilk uç
+  (yükselen barda dip, düşende tepe) → ikinci uç → kapanış, XIST seansına yayılmış;
+  son adım bar;
+- **bar** (`path: false`): tek `bar` olayıyla bütün bar.
+
+Hangi günün hangi yolla kurulduğu durumda sayılır (`days {fine, ohlc, bar}`); sayfa ince
+veri olmayan günü etiketleyebilir.
+
+**Adım:** tek bir sanal zaman. Bir adım o zamandaki bütün beslemelerin olaylarını taşır;
+eşitlikte sıra besleme anahtarıdır (sembol, periyot, besleme). Adım sınırları hızdan
+bağımsızdır. **Oynatma konumu** (`ReplayCursor`): sanal zaman, atılan adım sayısı,
+besleme başına verilen olay sayısı. Olaylar konumun fonksiyonudur.
+
+Sentetik pazar: `ReplayInit.fine = "1h"` ile `qp_source::synthetic_market_hourly` (günlük
+barlar saatlik barlardan toplanır; saatlikler ince barlardır), yoksa `synthetic_market`;
+semboller `SYN01…`. Yerel veri: `<bars>/../symbols.txt` sırasıyla (yoksa alfabetik) ilk
+`instruments` sembol; ince periyot dosyası (`1hour`, `5min`) yoksa o günler `ohlc`.
+Yerel veri istenip bulunamazsa sentetik pazar kullanılır ve durum bunu söyler
+(`synthetic: true`, `note`). Gerçek veri makineden çıkmaz; dökümler yalnız sentetiktir.
+
+### 21.2 Barındırıcı
+
+`SessionInit.replay` (`ReplayInit`, barındırıcı yapılandırması; protokol mesajı değil):
+`source` (`synthetic` | `local`), `instruments` (30), `days` (260), `seed` (1), `interval`
+(`1d`), `fine`, `history` (120 bar) ya da `from_t`, `to_t`, `path` (true), `feed`, `speed`
+(4), `running` (false: duraklatılmış başlar), `entitlements` (boşsa her kişiye `*`),
+`bind_all` (her beslemeye bağlı seri, kimlik sembolün küçük harfi, pencere ilk çözüm),
+`capsules_all` (kapsül motoru her birinde, §20.1). `init.data` ile birlikte verilemez:
+barındırıcı `init.data`'yı yeniden oynatmanın ilk barlarından kurar. Otoritenin ilk saati
+ilk çözümün son barının zamanıdır (`init.clock` yerine).
+
+Her adımda barındırıcı otoriteye önce **saati** (`Session::host_clock`, bir `clock`
+mesajının aynısı; otoritenin saati yoktur, §11), sonra adımın veri olaylarını sırayla
+(`Session::host_data_event`) verir; ortaya çıkan bildirimler bugünkü kurallarla yayılır
+(§15 çıktı sırası). Duvar saati yalnız **ne zaman** adım atılacağını belirler
+(`ReplayHost::pump`): çalışırken hız × geçen süre kadar adım; içerik sanal zamanın
+fonksiyonudur. Aynı veri + aynı denetimler aynı konumlarda (`ReplayHost::controls`:
+`(adım, denetim)` kaydı) → bayt düzeyinde aynı mesaj akışı.
+
+### 21.3 `replay` mesajı
+
+```json
+→ {"type":"replay","id":"r1","control":{"kind":"step","n":12}}
+← {"type":"result","id":"r1","seq":42,"now":1678802400000,"data":{"kind":"replay","replay":{
+    "t":1678802400000,"step":13,"steps":180,"events":26,"from_t":1678690800000,"to_t":1680879600000,
+    "paused":true,"done":false,"speed":8.0,"synthetic":true,"source":"synthetic",
+    "instruments":2,"interval":"1d","fine":"1h","days":{"fine":40,"ohlc":0,"bar":0},"epoch":0}}}
+← … adımların yol açtığı bildirimler (abonelere)
+```
+
+| `control.kind` | Alanlar | Ne yapar |
+|----------------|---------|----------|
+| `status` | — | Durum (değiştirmez). |
+| `pause` | — | Duvar saatiyle ilerlemeyi durdurur (`step`, `seek` çalışır). |
+| `resume` | — | Duvar saatiyle, şimdiki hızla ilerler. |
+| `speed` | `steps_per_s` (`0 < x ≤ 1000`) | Hız: duvar saniyesi başına adım. |
+| `step` | `n` (1; en çok 100000) | Şimdi `n` adım. |
+| `seek` | tam olarak biri: `t` (o ana kadarki her adım), `date` (`YYYY-AA-GG`: borsa saat diliminde o günün başı; o günden hiçbir şey alınmamış), `step` (o kadar adım) | İleri: aradaki adımlar atılır, bildirimleri `result`'tan sonra gelir. **Geri:** otorite başlangıcından yeniden kurulur ve konuma sessizce ilerletilir — yeni otorite (`epoch + 1`, §8.4): bütün bağlantılar kapanır, istemciler yeniden `hello` der; durumda `reset: true`. Kullanıcı yazıları (ör. `set_audience`) yeni otoritede yoktur. |
+
+Cevap her zaman `result` (`kind: "replay"`, `ReplayState`): `t` (sanal zaman = otoritenin
+saati), `step`/`steps`, `events`, `from_t`/`to_t`, `paused`, `done`, `speed`,
+`synthetic`, `source`, `note?`, `instruments`, `interval`, `fine?`, `days`, `epoch`,
+`reset?`. Mesaj dokümana yazmaz, günlüğe girmez; adımların yol açtığı motor girdileri
+(kapsül motoru, geçersizleşmeler) bugünkü gibi günlüktedir.
+
+**Yetki.** `status`: `read` izni olan her rol. Zaman çizelgesini değiştiren denetimler
+(`pause`, `resume`, `speed`, `step`, `seek`): yalnız `host` ve `owner` rolleri — zaman
+çizelgesi bütün okuyucuların ortak dünyasıdır; izleyici (`viewer`), öneren (`proposer`,
+ajan), `editor`, `feed` için `forbidden`. Gösterimde tek kullanıcı `owner`dır; aynı oturumu
+süren ajan aynı kimlikle bağlanır.
+
+**Hatalar.** Kaynağı olmayan otorite: `unsupported`. Geçersiz alan: `invalid` (`path`:
+`/control/steps_per_s`, `/control/n`, `/control/date`, `/control`). Bilinmeyen denetim ya
+da tür hatası: otoritenin `schema` hatası. `hello`'dan önce: `handshake`.
+
+**Taşımalar.** Süreç içi `ReplayHost::handle_raw`; `qp serve --init` (`init.replay` varsa
+barındırıcı; çalışırken adımlar duvar saatiyle atılır ve bildirimleri girdi satırından
+bağımsız yazılır); MCP: `replay` ve şemadan üretilen `replay_status`, `replay_pause`,
+`replay_resume`, `replay_speed`, `replay_step`, `replay_seek` araçları. CLI:
+`qp replay` (yerel ya da sentetik, periyot, ince periyot, başlangıç/bitiş tarihi, adım
+sayısı, kayıtlı denetimler; satır akışı; iki koşu bayt eşit).
+
+### 21.4 Gösterim barındırıcısı `qp demo` (R4/T5)
+
+Yerel gösterimin taşıması (`crates/qp-cli/src/demo.rs`; kullanım `shells/web/README.md`).
+Sayfa, protokol ve veri düzlemi **aynı kökendedir**; sayfa başka hiçbir yere istek yapmaz
+(CSP `default-src 'self'`; test `shells/web/tests/parity.mjs`).
+
+- `GET /events?principal=…&lang=…` — sunucu olay akışı (SSE). Bir akış bir protokol
+  bağlantısıdır. Çerçeveler (her `data:` satırı bir JSON nesnesi):
+  - `{"start":{conn, token, principal, lang, data, events, info}}` — ilk çerçeve: bağlantı
+    kimliği, bağlantının gizli değeri, yansının verisi (`data`: barındırıcının ilk barları ve
+    okuyucunun yetkisi, `InitData`; `events`: o ana kadar uygulanan veri olayları) ve sayfanın
+    notları (`info`: adresler, `synthetic`, `note`, `lan`). Geri `seek`'ten sonra (yeni
+    otorite, `epoch + 1`) her bağlantıya yeniden gelir; sayfa yansısını baştan kurar ve
+    yeniden `hello` der.
+  - `{"msg":ServerMsg}` — bu bağlantının protokol mesajları.
+  - `{"data":[DataEvent…],"replay":ReplayState}` — **veri düzlemi** (§18.1): adımların veri
+    olayları, yansının kendi beslemesi. Protokol mesajı değildir, günlüğe girmez; ayrı
+    çerçevedir. Oynatma durumu barındırıcının bilgisidir (sayfanın saati).
+- `POST /send?conn=…` — bağlantının protokol mesajları (JSON dizi, sırayla). Zorunlu:
+  `X-Qp-Token` (yalnız o bağlantının `start` çerçevesinde verilen 128 bitlik gizli değer;
+  işletim sistemi rastgeleliği — barındırıcı kodudur, otoriteye, dokümana ya da özetlere hiç
+  girmez, belirleyiciliği etkilemez), `Content-Type: application/json`, aynı kökenden
+  `Origin`. Eksik ya da yanlışsa `403`/`415`, mesaj otoriteye gitmez. Cevaplar akıştan gelir.
+- Her istekte `Host` bu barındırıcı olmalıdır (`localhost`, `127.0.0.1`, `[::1]`, dinlenen
+  adres ya da basılan yerel ağ adresi, portuyla); değilse `403` (DNS yeniden bağlama).
+  Varsayılan dinleme `127.0.0.1`; `--lan` `0.0.0.0`'ı dinler (aynı ağdaki telefon; yerel
+  ağdaki cihazlar gösterimi görebilir). Test `crates/qp-cli/tests/demo_security.rs`.
+- Gösterim oturumu: `qp_wasm::shell::demo_session_init` (`demo_init` + veri yetkisi olmayan
+  `visitor` sahibi — ayarlardaki "veri yetkisi yok" kipi; yalnız gösterim için).
+- Kabuksuz sürüş: `qp drive --script <adımlar>` aynı oturumu yalnız protokol mesajlarıyla
+  sürer ve kabuğun bildirdiği özetleri (doküman, her yüzün ve açık sahnenin `view_digest`'i,
+  bakış durumu) basar; tarayıcıdaki kabuğun özetleriyle eşitliği `scripts/verify.sh` `demo`
+  adımında denetlenir.
+
 
 ## Ek A — Eski `Command` tipi
 

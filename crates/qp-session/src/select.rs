@@ -22,8 +22,8 @@ use std::collections::{BTreeMap, BTreeSet};
 
 use qp_schema::grammar::{Mark, Position, View};
 use qp_schema::protocol::{
-    Candidate, ErrorCode, FactRef, FactSel, FindingRef, FindingSel, LayerSel, PanelRef, PanelSel,
-    ProposalSel, ProtocolError, ScaleSel, SeriesKind, SeriesRef, SeriesSel, ViewSel,
+    Candidate, CapsuleSel, ErrorCode, FactRef, FactSel, FindingRef, FindingSel, LayerSel, PanelRef,
+    PanelSel, ProposalSel, ProtocolError, ScaleSel, SeriesKind, SeriesRef, SeriesSel, ViewSel,
 };
 use qp_schema::{Document, Fact, Finding, Series, SeriesData, SeriesSource};
 use serde_json::{json, Value};
@@ -51,6 +51,8 @@ pub(crate) enum Kind {
     Proposal,
     Scale,
     Item,
+    /// (R4) A capsule with a story (`capsule` query).
+    Capsule,
 }
 
 impl Kind {
@@ -66,6 +68,7 @@ impl Kind {
             Kind::Proposal => "ProposalSel",
             Kind::Scale => "ScaleSel",
             Kind::Item => "ItemSel",
+            Kind::Capsule => "CapsuleSel",
         }
     }
 
@@ -80,6 +83,7 @@ impl Kind {
             Kind::Proposal => "proposal",
             Kind::Scale => "scale",
             Kind::Item => "item",
+            Kind::Capsule => "capsule",
         }
     }
 
@@ -94,6 +98,7 @@ impl Kind {
                 "fact" => "facts",
                 "finding" => "findings",
                 "proposal" => "proposals",
+                "capsule" => "capsules",
                 _ => "items",
             },
         }
@@ -317,6 +322,7 @@ pub(crate) fn sites(msg: &Value) -> Vec<Vec<Site>> {
                     Some("present") => push(&mut out, q, p, "finding", Kind::Finding, None),
                     Some("verify_evidence") => push(&mut out, q, p, "item", Kind::Item, None),
                     Some("binding") => push(&mut out, q, p, "series", Kind::Series, None),
+                    Some("capsule") => push(&mut out, q, p, "capsule", Kind::Capsule, None),
                     _ => {}
                 }
             }
@@ -336,6 +342,16 @@ pub(crate) fn sites(msg: &Value) -> Vec<Vec<Site>> {
                         }
                     }
                     _ => {}
+                }
+            }
+            vec![out]
+        }
+        Some("input") => {
+            // (R4/S1) `open.capsule` takes a capsule selector too (§17.2).
+            let mut out = Vec::new();
+            if let Some(g) = msg.get("gesture") {
+                if g.get("kind").and_then(Value::as_str) == Some("open") {
+                    push(&mut out, g, "/gesture", "capsule", Kind::Capsule, None);
                 }
             }
             vec![out]
@@ -571,10 +587,14 @@ fn decide(
     }
     let mut e = E::new(ErrorCode::NotFound, message)
         .at(path)
-        .hint(format!(
-            "Candidates are the closest {}; welcome.summary shows a `select` for each item that resolves to it.",
-            kind.plural()
-        ))
+        .hint(if kind == Kind::Capsule {
+            "Candidates are the closest capsules; the `capsules` query lists every capsule with its instrument, kind, direction and stage.".to_owned()
+        } else {
+            format!(
+                "Candidates are the closest {}; welcome.summary shows a `select` for each item that resolves to it.",
+                kind.plural()
+            )
+        })
         .build_with(candidates(&closest, MAX_NOT_FOUND));
     dym.dedup();
     dym.truncate(5);
@@ -589,6 +609,7 @@ fn order_name(kind: Kind) -> &'static str {
         Kind::Layer => "paint",
         Kind::Fact => "bar",
         Kind::Finding => "latest-fact-bar",
+        Kind::Capsule => "latest-transition-bar",
     }
 }
 
@@ -1187,6 +1208,10 @@ impl<'a> Resolver<'a> {
             ("on", on.is_some()),
             ("fact", facts.is_some()),
             ("state", sel.state.is_some()),
+            ("instrument", sel.instrument.is_some()),
+            ("meaning", sel.meaning.is_some()),
+            ("stage", sel.stage.is_some()),
+            ("open", sel.open.is_some()),
         ] {
             if g {
                 o.keys.push(k);
@@ -1218,6 +1243,24 @@ impl<'a> Resolver<'a> {
                         .is_some_and(|cap| cap.state == st),
                 );
             }
+            // (R4) Keys about the finding's capsule story.
+            let story = doc
+                .capsules
+                .iter()
+                .find(|cap| cap.finding == f.id)
+                .and_then(|cap| cap.story.as_ref());
+            if let Some(i) = &sel.instrument {
+                c.push(story.is_some_and(|s| eq_text(&s.instrument, i)));
+            }
+            if let Some(m) = sel.meaning {
+                c.push(story.is_some_and(|s| s.kind == m));
+            }
+            if let Some(st) = sel.stage {
+                c.push(story.is_some_and(|s| s.stage == st));
+            }
+            if let Some(op) = sel.open {
+                c.push(story.is_some_and(|s| s.stage.is_closed() != op));
+            }
             o.rows.push(Row {
                 id: f.id.clone(),
                 about: finding_about(doc, f),
@@ -1230,6 +1273,89 @@ impl<'a> Resolver<'a> {
             o.vocab.push(("kind", k.clone(), v));
         }
         Ok(o)
+    }
+
+    /// (R4) Capsules with a story, in the latest transition's bar order, then birth bar,
+    /// then document order.
+    fn capsule_rows(&self, sel: &CapsuleSel) -> Outcome {
+        let doc = self.doc;
+        let mut o = Outcome::new();
+        for (k, g) in [
+            ("instrument", sel.instrument.is_some()),
+            ("meaning", sel.meaning.is_some()),
+            ("direction", sel.direction.is_some()),
+            ("stage", sel.stage.is_some()),
+            ("open", sel.open.is_some()),
+            ("born_bar", sel.born_bar.is_some()),
+            ("series", sel.series.is_some()),
+        ] {
+            if g {
+                o.keys.push(k);
+            }
+        }
+        let mut order: Vec<(
+            u64,
+            u64,
+            usize,
+            &qp_schema::Capsule,
+            &qp_schema::capsule::Story,
+        )> = doc
+            .capsules
+            .iter()
+            .enumerate()
+            .filter_map(|(i, c)| c.story.as_ref().map(|s| (s.last_bar, s.born_bar, i, c, s)))
+            .collect();
+        order.sort_by_key(|(l, b, i, _, _)| (*l, *b, *i));
+        for (_, _, _, c, st) in order {
+            let mut ch = Vec::new();
+            if let Some(i) = &sel.instrument {
+                ch.push(eq_text(&st.instrument, i));
+            }
+            if let Some(m) = sel.meaning {
+                ch.push(st.kind == m);
+            }
+            if let Some(d) = sel.direction {
+                ch.push(st.direction == d);
+            }
+            if let Some(x) = sel.stage {
+                ch.push(st.stage == x);
+            }
+            if let Some(op) = sel.open {
+                ch.push(st.stage.is_closed() != op);
+            }
+            if let Some(b) = sel.born_bar {
+                ch.push(st.born_bar == b);
+            }
+            if let Some(sr) = &sel.series {
+                ch.push(st.series == *sr);
+            }
+            o.rows.push(Row {
+                id: c.id.clone(),
+                about: format!(
+                    "{} {} {} ({}), born bar {}, last bar {}",
+                    st.instrument,
+                    st.kind.name(),
+                    qp_capsule::engine::direction_name(st.direction),
+                    serde_json::to_value(st.stage)
+                        .ok()
+                        .and_then(|v| v.as_str().map(str::to_owned))
+                        .unwrap_or_default(),
+                    st.born_bar,
+                    st.last_bar
+                ),
+                value: Value::String(c.id.clone()),
+                checks: ch,
+            });
+        }
+        if let Some(i) = &sel.instrument {
+            let v = doc
+                .capsules
+                .iter()
+                .filter_map(|c| c.story.as_ref().map(|s| s.instrument.clone()))
+                .collect();
+            o.vocab.push(("instrument", i.clone(), v));
+        }
+        o
     }
 
     fn proposal_rows(&self, sel: &ProposalSel) -> Outcome {
@@ -1378,6 +1504,11 @@ impl<'a> Resolver<'a> {
             Kind::Finding => {
                 let s: FindingSel = self.parse(kind.def(), sel, path)?;
                 let o = self.finding_rows(&s, path)?;
+                decide(kind, path, sel, o, s.first, s.latest)
+            }
+            Kind::Capsule => {
+                let s: CapsuleSel = self.parse(kind.def(), sel, path)?;
+                let o = self.capsule_rows(&s);
                 decide(kind, path, sel, o, s.first, s.latest)
             }
             Kind::Proposal => {

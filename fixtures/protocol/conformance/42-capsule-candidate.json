@@ -1440,18 +1440,18 @@
                   "direction": "up",
                   "finding": "fnd.THYAO.flow.up.138",
                   "id": "cap.THYAO.flow.up.138",
-                  "importance": 1.4644194812424567,
+                  "importance": 1.440763567263962,
                   "instrument": "THYAO",
                   "kind": "flow",
                   "last_bar": 140,
                   "ledger_at_birth": {
-                    "n": 10,
-                    "realized": 6
+                    "n": 6,
+                    "realized": 3
                   },
                   "sentence": {
-                    "en": "5 bars ago, net institutional buying in THYAO (307,254) clearly exceeded the recent average (145,970): money inflow. The expected outcome came true 3 bars ago. Whether it still holds is unknown. Its record is still thin: it played out in 6 of 10 cases. Server-verified.",
-                    "text": "THYAO'da 5 bar önce kurumsal net alış (307.254) son günlerin ortalamasını (145.970) belirgin biçimde aştı: para girişi. Beklenen sonuç 3 bar önce gerçekleşti. Hâlâ geçerli olup olmadığı bilinmiyor. Karnesi henüz az örnekli: 10 seferin 6'sında tuttu. Sunucu doğruladı.",
-                    "tr": "THYAO'da 5 bar önce kurumsal net alış (307.254) son günlerin ortalamasını (145.970) belirgin biçimde aştı: para girişi. Beklenen sonuç 3 bar önce gerçekleşti. Hâlâ geçerli olup olmadığı bilinmiyor. Karnesi henüz az örnekli: 10 seferin 6'sında tuttu. Sunucu doğruladı."
+                    "en": "5 bars ago, net institutional buying in THYAO (307,254) clearly exceeded the recent average (145,970): money inflow. The expected outcome came true 3 bars ago. Its record is still thin: it played out in 3 of 6 cases. Server-verified.",
+                    "text": "THYAO'da 5 bar önce kurumsal net alış (307.254) son günlerin ortalamasını (145.970) belirgin biçimde aştı: para girişi. Beklenen sonuç 3 bar önce gerçekleşti. Karnesi henüz az örnekli: 6 seferin 3'ünde tuttu. Sunucu doğruladı.",
+                    "tr": "THYAO'da 5 bar önce kurumsal net alış (307.254) son günlerin ortalamasını (145.970) belirgin biçimde aştı: para girişi. Beklenen sonuç 3 bar önce gerçekleşti. Karnesi henüz az örnekli: 6 seferin 3'ünde tuttu. Sunucu doğruladı."
                   },
                   "series": "px",
                   "stage": "realized",
@@ -1459,7 +1459,8 @@
                   "t": 1689577200000,
                   "tier": 3,
                   "time": "event",
-                  "trust": "server"
+                  "trust": "server",
+                  "validity": "closed"
                 }
               ],
               "kind": "capsules"
@@ -1493,10 +1494,19 @@
               "rows": [
                 {
                   "detector": "breakout.range",
-                  "key": "breakout/breakout.range@1",
+                  "direction": "down",
+                  "key": "breakout/down/breakout.range@1",
                   "kind": "breakout",
-                  "n": 11,
+                  "n": 9,
                   "realized": 5
+                },
+                {
+                  "detector": "breakout.range",
+                  "direction": "up",
+                  "key": "breakout/up/breakout.range@1",
+                  "kind": "breakout",
+                  "n": 2,
+                  "realized": 0
                 }
               ],
               "total": {

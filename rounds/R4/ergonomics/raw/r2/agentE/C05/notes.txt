@@ -1,0 +1,1 @@
+attempt1: hello + capsules query (limit 3; default order is importance desc); worked first try. Notes: run.sh output is huge (welcome summary), had to read the saved output file. Assumed "most important" = importance order with no open-only filter (spec doesn't say whether closed capsules should count).

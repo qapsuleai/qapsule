@@ -1,0 +1,1 @@
+attempt1: set_sensitivity {sensitivity:"important"} (no principal = myself) -> ack applied seq 4. Success. Also queried full document (unnecessary, huge output; should not have). Spec clear (§20.3).

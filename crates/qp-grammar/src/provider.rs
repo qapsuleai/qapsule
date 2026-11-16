@@ -8,7 +8,8 @@
 use std::borrow::Cow;
 use std::collections::BTreeMap;
 
-use qp_schema::capsule::GlyphSpec;
+use qp_schema::capsule::{GlyphSpec, Stage, Validity};
+use qp_schema::protocol::Language;
 use qp_schema::{Bar, Capsule, Fact, Finding, Point};
 
 /// What kind of rows a series has.
@@ -22,6 +23,56 @@ pub enum SeriesKind {
     /// Timed points `(t, v)`: field `v`; points after the last bar occupy the following
     /// slots (`docs/GRAMMAR.md` §3).
     Points,
+}
+
+/// (R4/H-FP) The pieces of a capsule's short headline for one reader, from which a face
+/// design's headline template ([`crate::faces::HeadlineFn`]) builds its sentence (M8;
+/// `docs/CONCEPTS.md` "Başlık yapı taşları").
+///
+/// Plain texts in the reader's language ([`HeadlineParts::lang`]) plus a few flags. The
+/// authority fills them (and the shell's replica, for the same reader) with
+/// `qp_capsule::realize::parts`, by the language and audience rule of the reader's
+/// sentence: no text says "bar", "aile" or "teyit"; for a redacted reader (no data
+/// entitlement, K33) **no text holds a digit** and [`HeadlineParts::ledger_n`] is
+/// `None`.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct HeadlineParts {
+    /// The language every text below is in.
+    pub lang: Language,
+    /// Instrument label (its symbol, e.g. `SYN03`).
+    pub instrument: String,
+    /// What happened, a short noun phrase: "yukarı kırılım" / "upside breakout".
+    pub event: String,
+    /// The direction as one word: "yukarı" / "up", "aşağı" / "down", "yönsüz" / "no
+    /// direction".
+    pub direction_word: String,
+    /// When it was born, by the bar period and the exchange calendar: "bugün", "dün",
+    /// "cuma günü", "3 işlem günü önce", "2 saat önce" / "today", "3 trading days ago".
+    /// Redacted: the same without digits ("birkaç gün önce").
+    pub when: String,
+    /// When it last moved (its last transition), the same kind of phrase.
+    pub moved: String,
+    /// Whether it still holds, in words: "hâlâ geçerli" / "still holds", "artık geçerli
+    /// değil" / "no longer holds"; closed: how it ended ("gerçekleşti", "tutmadı",
+    /// "süresi doldu", "geri çekildi" / "played out", "did not play out", "ran out of
+    /// time", "withdrawn").
+    pub validity_phrase: String,
+    /// The ledger at birth, shortened but honest: "7'de 3 tuttu (az örnek)" / "3 of 7
+    /// played out (few cases)", "karnesi yok" / "no record yet"; redacted: qualitative
+    /// ("az örnek", "çoğunlukla tuttu" / "few cases", "mostly played out").
+    pub ledger_short: String,
+    /// The story's stage now.
+    pub stage: Stage,
+    /// Validity now: the same value as the capsule item's and the glyph's (K42/A28).
+    pub validity: Validity,
+    /// The reader gets no digits (K33): every text above is digit-free.
+    pub redacted: bool,
+    /// Closed ledger rows at birth (`n`); `None` for a redacted reader.
+    pub ledger_n: Option<u32>,
+    /// Few cases: `n < `[`crate::depth::GLYPH_MIN_LEDGER_N`] (also `n = 0`), the
+    /// product's "henüz az örnekli" threshold. Given to a redacted reader too (its ledger
+    /// text says "az örnek" anyway).
+    pub few_cases: bool,
 }
 
 /// Read-only access to the document's data for one compile.
@@ -72,6 +123,14 @@ pub trait DataProvider {
         let _ = capsule_or_finding;
         None
     }
+    /// (R4/H-FP) The headline pieces of the capsule presenting `finding` for the reader
+    /// this provider speaks for (its language and entitlement, like [`Self::headline`]).
+    /// Read only by a face design with a headline template. Default: none (the face then
+    /// shows [`Self::headline`]).
+    fn headline_parts(&self, finding: &str) -> Option<HeadlineParts> {
+        let _ = finding;
+        None
+    }
 }
 
 #[derive(Debug, Clone, Default)]
@@ -103,6 +162,7 @@ pub struct MemProvider {
     thresholds: BTreeMap<String, f64>,
     capsules: Vec<Capsule>,
     glyphs: BTreeMap<String, GlyphSpec>,
+    parts: BTreeMap<String, HeadlineParts>,
 }
 
 impl Default for MemProvider {
@@ -127,6 +187,7 @@ impl MemProvider {
             thresholds: BTreeMap::new(),
             capsules: Vec::new(),
             glyphs: BTreeMap::new(),
+            parts: BTreeMap::new(),
         }
     }
 
@@ -227,6 +288,13 @@ impl MemProvider {
     #[must_use]
     pub fn with_glyph(mut self, capsule_or_finding: &str, spec: GlyphSpec) -> Self {
         self.glyphs.insert(capsule_or_finding.to_owned(), spec);
+        self
+    }
+
+    /// Sets the headline pieces of a finding (R4/H-FP).
+    #[must_use]
+    pub fn with_headline_parts(mut self, finding: &str, parts: HeadlineParts) -> Self {
+        self.parts.insert(finding.to_owned(), parts);
         self
     }
 
@@ -341,5 +409,9 @@ impl DataProvider for MemProvider {
             story,
             n.saturating_sub(1),
         )))
+    }
+
+    fn headline_parts(&self, finding: &str) -> Option<HeadlineParts> {
+        self.parts.get(finding).cloned()
     }
 }

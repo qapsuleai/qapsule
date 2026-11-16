@@ -1,0 +1,647 @@
+{
+  "harness": "r4-h-m8910/1",
+  "method": "first capsule matching the state's rule, stepping the synthetic replay one step at a time (s8.rs; demo world = qp demo --synthetic; #11 in the hourly world)",
+  "states": [
+    {
+      "state": 1,
+      "title": "Olay, yukarı kırılım, bugün, geçerli",
+      "found": true,
+      "world": "hourly",
+      "step": 90,
+      "t": 1674652799999,
+      "principal": "arkin",
+      "capsule": "cap.SYN03.breakout.up.137",
+      "finding": "fnd.SYN03.breakout.up.137",
+      "item": {
+        "born_bar": 137,
+        "confirmations": 1,
+        "direction": "up",
+        "finding": "fnd.SYN03.breakout.up.137",
+        "id": "cap.SYN03.breakout.up.137",
+        "importance": 1.4528847274405647,
+        "instrument": "SYN03",
+        "kind": "breakout",
+        "last_bar": 138,
+        "ledger_at_birth": {
+          "n": 74,
+          "realized": 36
+        },
+        "sentence": {
+          "en": "4 bars ago, SYN03 broke above resistance at 197.23 (close 197.95): an upside breakout. It strengthened 3 bars ago with new evidence from the same family. It still holds. Historically, this signal played out in 36 of 74 cases.",
+          "text": "SYN03 4 bar önce 197,23'teki direnci yukarı kırdı (kapanış 197,95): yukarı kırılım. 3 bar önce aynı aileden yeni bir kanıtla güçlendi. Hâlâ geçerli. Geçmişte bu sinyal 74 seferin 36'sında beklendiği gibi sonuçlandı.",
+          "tr": "SYN03 4 bar önce 197,23'teki direnci yukarı kırdı (kapanış 197,95): yukarı kırılım. 3 bar önce aynı aileden yeni bir kanıtla güçlendi. Hâlâ geçerli. Geçmişte bu sinyal 74 seferin 36'sında beklendiği gibi sonuçlandı."
+        },
+        "series": "syn03",
+        "stage": "strengthened",
+        "state": "live",
+        "t": 1674637200000,
+        "tier": 3,
+        "time": "event",
+        "trust": "replica",
+        "validity": "valid"
+      },
+      "key": {
+        "s1": "yukarı",
+        "s1b": "fiyat önemli bir seviyeyi geçti",
+        "s2": "bugün",
+        "s3": "evet, sürüyor",
+        "s4": "yarı yarıya",
+        "s5": "hiçbir şey, yalnız bilgi veriyor"
+      },
+      "note": ""
+    },
+    {
+      "state": 2,
+      "title": "Olay, aşağı kırılım, 3 işlem günü önce (hafta sonu aşan), geçerli",
+      "found": true,
+      "world": "demo",
+      "step": 19,
+      "t": 1687330800000,
+      "principal": "arkin",
+      "capsule": "cap.SYN11.breakout.down.119",
+      "finding": "fnd.SYN11.breakout.down.119",
+      "item": {
+        "born_bar": 119,
+        "confirmations": 1,
+        "direction": "down",
+        "finding": "fnd.SYN11.breakout.down.119",
+        "id": "cap.SYN11.breakout.down.119",
+        "importance": 1.695083533105442,
+        "instrument": "SYN11",
+        "kind": "breakout",
+        "last_bar": 119,
+        "ledger_at_birth": {
+          "n": 188,
+          "realized": 103
+        },
+        "sentence": {
+          "en": "2 bars ago, SYN11 broke below support at 228.27 (close 213.27): a downside breakout. It still holds. Historically, this signal played out in 103 of 188 cases.",
+          "text": "SYN11 2 bar önce 228,27'deki desteği aşağı kırdı (kapanış 213,27): aşağı kırılım. Hâlâ geçerli. Geçmişte bu sinyal 188 seferin 103'ünde beklendiği gibi sonuçlandı.",
+          "tr": "SYN11 2 bar önce 228,27'deki desteği aşağı kırdı (kapanış 213,27): aşağı kırılım. Hâlâ geçerli. Geçmişte bu sinyal 188 seferin 103'ünde beklendiği gibi sonuçlandı."
+        },
+        "series": "syn11",
+        "stage": "born",
+        "state": "live",
+        "t": 1686898800000,
+        "tier": 1,
+        "time": "event",
+        "trust": "replica",
+        "validity": "valid"
+      },
+      "key": {
+        "s1": "aşağı",
+        "s1b": "fiyat önemli bir seviyeyi geçti",
+        "s2": "birkaç gün önce",
+        "s3": "evet, sürüyor",
+        "s4": "yarı yarıya",
+        "s5": "hiçbir şey, yalnız bilgi veriyor"
+      },
+      "note": ""
+    },
+    {
+      "state": 3,
+      "title": "Durum, aşırılık yukarı, artık geçerli değil (no_longer), hikâye açık",
+      "found": true,
+      "world": "demo",
+      "step": 46,
+      "t": 1687762800000,
+      "principal": "arkin",
+      "capsule": "cap.SYN06.extreme.up.123",
+      "finding": "fnd.SYN06.extreme.up.123",
+      "item": {
+        "born_bar": 123,
+        "confirmations": 1,
+        "direction": "up",
+        "finding": "fnd.SYN06.extreme.up.123",
+        "id": "cap.SYN06.extreme.up.123",
+        "importance": 0.8375072711389102,
+        "instrument": "SYN06",
+        "kind": "extreme",
+        "last_bar": 124,
+        "ledger_at_birth": {
+          "n": 41,
+          "realized": 16
+        },
+        "sentence": {
+          "en": "1 bar ago, SYN06's RSI crossed above 70; it fell back below on this bar and is now 67.5, no longer above 70. The overbought state has ended. Historically, this signal played out in 16 of 41 cases.",
+          "text": "SYN06'de RSI 1 bar önce 70'in üstüne çıktı, bu barda yeniden altına indi; şu an 67,5, artık 70'in üstünde değil. Aşırı alım sona erdi. Geçmişte bu sinyal 41 seferin 16'sında beklendiği gibi sonuçlandı.",
+          "tr": "SYN06'de RSI 1 bar önce 70'in üstüne çıktı, bu barda yeniden altına indi; şu an 67,5, artık 70'in üstünde değil. Aşırı alım sona erdi. Geçmişte bu sinyal 41 seferin 16'sında beklendiği gibi sonuçlandı."
+        },
+        "series": "syn06",
+        "stage": "weakened",
+        "state": "live",
+        "t": 1687503600000,
+        "tier": 3,
+        "time": "state",
+        "trust": "replica",
+        "validity": "no_longer"
+      },
+      "key": {
+        "s1": "yukarı",
+        "s1b": "aşırı gitti",
+        "s2": "birkaç gün önce",
+        "s3": "hayır, artık geçerli değil",
+        "s4": "çoğunlukla tutmadı",
+        "s5": "hiçbir şey, yalnız bilgi veriyor"
+      },
+      "note": ""
+    },
+    {
+      "state": 4,
+      "title": "Durum, sıkışma, sürüyor",
+      "found": true,
+      "world": "demo",
+      "step": 442,
+      "t": 1692946800000,
+      "principal": "arkin",
+      "capsule": "cap.SYN03.squeeze.neutral.168",
+      "finding": "fnd.SYN03.squeeze.neutral.168",
+      "item": {
+        "born_bar": 168,
+        "confirmations": 1,
+        "direction": "neutral",
+        "finding": "fnd.SYN03.squeeze.neutral.168",
+        "id": "cap.SYN03.squeeze.neutral.168",
+        "importance": 1.6630238242858417,
+        "instrument": "SYN03",
+        "kind": "squeeze",
+        "last_bar": 168,
+        "ledger_at_birth": {
+          "n": 7,
+          "realized": 2
+        },
+        "sentence": {
+          "en": "The squeeze (direction open) has been in place in SYN03 for 0 bars. It is still in place. Its record is still thin: it played out in 2 of 7 cases.",
+          "text": "SYN03'de bu bar itibarıyla sıkışma (yön belirsiz) sürüyor. Karnesi henüz az örnekli: 7 seferin 2'sinde tuttu.",
+          "tr": "SYN03'de bu bar itibarıyla sıkışma (yön belirsiz) sürüyor. Karnesi henüz az örnekli: 7 seferin 2'sinde tuttu."
+        },
+        "series": "syn03",
+        "stage": "born",
+        "state": "live",
+        "t": 1692860400000,
+        "tier": 2,
+        "time": "state",
+        "trust": "replica",
+        "validity": "valid"
+      },
+      "key": {
+        "s1": "belirsiz",
+        "s1b": "fiyat sıkıştı, hareketsiz",
+        "s2": "dün",
+        "s3": "evet, sürüyor",
+        "s4": "az örnek var, bilinmiyor",
+        "s5": "hiçbir şey, yalnız bilgi veriyor"
+      },
+      "note": ""
+    },
+    {
+      "state": 5,
+      "title": "Kapandı: gerçekleşti",
+      "found": true,
+      "world": "demo",
+      "step": 1,
+      "t": 1687158000000,
+      "principal": "arkin",
+      "capsule": "cap.SYN25.breakout.down.93",
+      "finding": "fnd.SYN25.breakout.down.93",
+      "item": {
+        "born_bar": 93,
+        "confirmations": 2,
+        "direction": "down",
+        "finding": "fnd.SYN25.breakout.down.93",
+        "id": "cap.SYN25.breakout.down.93",
+        "importance": 2.6894906904939813,
+        "instrument": "SYN25",
+        "kind": "breakout",
+        "last_bar": 95,
+        "ledger_at_birth": {
+          "n": 104,
+          "realized": 54
+        },
+        "sentence": {
+          "en": "26 bars ago, SYN25 broke below support at 173.47 (close 160.80): a downside breakout. The expected outcome came true 24 bars ago. Historically, this signal played out in 54 of 104 cases.",
+          "text": "SYN25 26 bar önce 173,47'deki desteği aşağı kırdı (kapanış 160,80): aşağı kırılım. Beklenen sonuç 24 bar önce gerçekleşti. Geçmişte bu sinyal 104 seferin 54'ünde beklendiği gibi sonuçlandı.",
+          "tr": "SYN25 26 bar önce 173,47'deki desteği aşağı kırdı (kapanış 160,80): aşağı kırılım. Beklenen sonuç 24 bar önce gerçekleşti. Geçmişte bu sinyal 104 seferin 54'ünde beklendiği gibi sonuçlandı."
+        },
+        "series": "syn25",
+        "stage": "realized",
+        "state": "live",
+        "t": 1684134000000,
+        "tier": 1,
+        "time": "event",
+        "trust": "replica",
+        "validity": "closed"
+      },
+      "key": {
+        "s1": "aşağı",
+        "s1b": "fiyat önemli bir seviyeyi geçti",
+        "s2": "bir haftadan önce",
+        "s3": "kapandı: gerçekleşti",
+        "s4": "yarı yarıya",
+        "s5": "hiçbir şey, yalnız bilgi veriyor"
+      },
+      "note": ""
+    },
+    {
+      "state": 6,
+      "title": "Kapandı: tutmadı (geçersiz)",
+      "found": true,
+      "world": "demo",
+      "step": 1,
+      "t": 1687158000000,
+      "principal": "arkin",
+      "capsule": "cap.SYN25.breakout.down.26",
+      "finding": "fnd.SYN25.breakout.down.26",
+      "item": {
+        "born_bar": 26,
+        "confirmations": 2,
+        "direction": "down",
+        "finding": "fnd.SYN25.breakout.down.26",
+        "id": "cap.SYN25.breakout.down.26",
+        "importance": 2.6966210055151483,
+        "instrument": "SYN25",
+        "kind": "breakout",
+        "last_bar": 29,
+        "ledger_at_birth": {
+          "n": 5,
+          "realized": 4
+        },
+        "sentence": {
+          "en": "93 bars ago, SYN25 broke below support at 178.70 (close 177.45): a downside breakout. It was invalidated 90 bars ago and is no longer valid. Its record is still thin: it played out in 4 of 5 cases.",
+          "text": "SYN25 93 bar önce 178,70'teki desteği aşağı kırdı (kapanış 177,45): aşağı kırılım. Sinyal 90 bar önce geçersiz oldu; artık geçerli değil. Karnesi henüz az örnekli: 5 seferin 4'ünde tuttu.",
+          "tr": "SYN25 93 bar önce 178,70'teki desteği aşağı kırdı (kapanış 177,45): aşağı kırılım. Sinyal 90 bar önce geçersiz oldu; artık geçerli değil. Karnesi henüz az örnekli: 5 seferin 4'ünde tuttu."
+        },
+        "series": "syn25",
+        "stage": "invalidated",
+        "state": "invalidated",
+        "t": 1676012400000,
+        "tier": 1,
+        "time": "event",
+        "trust": "replica",
+        "validity": "closed"
+      },
+      "key": {
+        "s1": "aşağı",
+        "s1b": "fiyat önemli bir seviyeyi geçti",
+        "s2": "bir haftadan önce",
+        "s3": "kapandı: tutmadı",
+        "s4": "az örnek var, bilinmiyor",
+        "s5": "hiçbir şey, yalnız bilgi veriyor"
+      },
+      "note": ""
+    },
+    {
+      "state": 7,
+      "title": "Kapandı: süresi doldu",
+      "found": true,
+      "world": "demo",
+      "step": 1,
+      "t": 1687158000000,
+      "principal": "arkin",
+      "capsule": "cap.SYN13.flow.up.60",
+      "finding": "fnd.SYN13.flow.up.60",
+      "item": {
+        "born_bar": 60,
+        "confirmations": 1,
+        "direction": "up",
+        "finding": "fnd.SYN13.flow.up.60",
+        "id": "cap.SYN13.flow.up.60",
+        "importance": 1.674789178057766,
+        "instrument": "SYN13",
+        "kind": "flow",
+        "last_bar": 70,
+        "ledger_at_birth": {
+          "n": 5,
+          "realized": 1
+        },
+        "sentence": {
+          "en": "59 bars ago, volume in SYN13 (6,483,134,769) jumped well above its average (1,162,876,391): money inflow. Its 10-bar life ran out 49 bars ago without an outcome; it is no longer valid. Its record is still thin: it played out in 1 of 5 cases.",
+          "text": "SYN13'de 59 bar önce hacim (6.483.134.769) ortalamasının (1.162.876.391) belirgin üstüne çıktı: para girişi. Sinyalin 10 barlık ömrü 49 bar önce sonuçsuz doldu; artık geçerli değil. Karnesi henüz az örnekli: 5 seferin 1'inde tuttu.",
+          "tr": "SYN13'de 59 bar önce hacim (6.483.134.769) ortalamasının (1.162.876.391) belirgin üstüne çıktı: para girişi. Sinyalin 10 barlık ömrü 49 bar önce sonuçsuz doldu; artık geçerli değil. Karnesi henüz az örnekli: 5 seferin 1'inde tuttu."
+        },
+        "series": "syn13",
+        "stage": "expired",
+        "state": "expired",
+        "t": 1681110000000,
+        "tier": 2,
+        "time": "event",
+        "trust": "replica",
+        "validity": "closed"
+      },
+      "key": {
+        "s1": "yukarı",
+        "s1b": "büyük alım ya da satım var",
+        "s2": "bir haftadan önce",
+        "s3": "kapandı: süresi doldu ya da geri çekildi",
+        "s4": "az örnek var, bilinmiyor",
+        "s5": "hiçbir şey, yalnız bilgi veriyor"
+      },
+      "note": ""
+    },
+    {
+      "state": 8,
+      "title": "Geri çekildi",
+      "found": false,
+      "world": "",
+      "step": 0,
+      "t": 0,
+      "principal": "",
+      "capsule": "",
+      "finding": "",
+      "item": null,
+      "key": null,
+      "note": "no retracted capsule in the synthetic replay: retraction needs an upheld dispute or a data correction (§20.7), which the replay never produces; building one needs a corrected-bar provider (out of the harness's reach without a product change) — see README"
+    },
+    {
+      "state": 9,
+      "title": "Lisanslı akış, yetkisiz okuyucu (rakamsız, sunucu doğruladı)",
+      "found": true,
+      "world": "demo",
+      "step": 1,
+      "t": 1687158000000,
+      "principal": "visitor",
+      "capsule": "cap.SYN28.continuation.down.118",
+      "finding": "fnd.SYN28.continuation.down.118",
+      "item": {
+        "born_bar": 118,
+        "confirmations": 2,
+        "direction": "down",
+        "finding": "fnd.SYN28.continuation.down.118",
+        "id": "cap.SYN28.continuation.down.118",
+        "importance": 2.720702660566816,
+        "instrument": "SYN28",
+        "kind": "continuation",
+        "last_bar": 118,
+        "ledger_at_birth": {
+          "n": 54,
+          "realized": 30
+        },
+        "redacted": true,
+        "sentence": {
+          "en": "There is a server-verified downtrend signal for This stock; the details require a data license.",
+          "text": "Bu hisse için sunucunun doğruladığı bir düşüş eğilimi sinyali var; ayrıntılar veri lisansı gerektiriyor.",
+          "tr": "Bu hisse için sunucunun doğruladığı bir düşüş eğilimi sinyali var; ayrıntılar veri lisansı gerektiriyor."
+        },
+        "series": "syn28",
+        "stage": "confirmed",
+        "state": "live",
+        "t": 1686812400000,
+        "tier": 1,
+        "time": "state",
+        "trust": "replica",
+        "validity": "valid"
+      },
+      "key": {
+        "s1": "aşağı",
+        "s1b": "hareket sürüyor",
+        "s2": "birkaç gün önce",
+        "s3": "evet, sürüyor",
+        "s4": "yarı yarıya",
+        "s5": "hiçbir şey, yalnız bilgi veriyor"
+      },
+      "note": "trust path `replica` (no `server` capsule for an unentitled reader in the demo)"
+    },
+    {
+      "state": 10,
+      "title": "Az örnekli karne (n < 5)",
+      "found": true,
+      "world": "demo",
+      "step": 28,
+      "t": 1687417200000,
+      "principal": "arkin",
+      "capsule": "cap.SYN09.flow.neutral.122",
+      "finding": "fnd.SYN09.flow.neutral.122",
+      "item": {
+        "born_bar": 122,
+        "confirmations": 1,
+        "direction": "neutral",
+        "finding": "fnd.SYN09.flow.neutral.122",
+        "id": "cap.SYN09.flow.neutral.122",
+        "importance": 1.61347715469283,
+        "instrument": "SYN09",
+        "kind": "flow",
+        "last_bar": 122,
+        "ledger_at_birth": {
+          "n": 0,
+          "realized": 0
+        },
+        "sentence": {
+          "en": "On this bar, volume in SYN09 (1,098,606,902) jumped well above its average (283,447,540): unusual money flow. Whether it still holds is unknown. No track record yet.",
+          "text": "SYN09'de bu barda hacim (1.098.606.902) ortalamasının (283.447.540) belirgin üstüne çıktı: olağandışı para akışı. Hâlâ geçerli olup olmadığı bilinmiyor. Henüz karnesi yok.",
+          "tr": "SYN09'de bu barda hacim (1.098.606.902) ortalamasının (283.447.540) belirgin üstüne çıktı: olağandışı para akışı. Hâlâ geçerli olup olmadığı bilinmiyor. Henüz karnesi yok."
+        },
+        "series": "syn09",
+        "stage": "born",
+        "state": "live",
+        "t": 1687330800000,
+        "tier": 2,
+        "time": "event",
+        "trust": "replica",
+        "validity": "valid"
+      },
+      "key": {
+        "s1": "belirsiz",
+        "s1b": "büyük alım ya da satım var",
+        "s2": "dün",
+        "s3": "evet, sürüyor",
+        "s4": "az örnek var, bilinmiyor",
+        "s5": "hiçbir şey, yalnız bilgi veriyor"
+      },
+      "note": ""
+    },
+    {
+      "state": 11,
+      "title": "60 dakikalık periyot, \"2 saat önce\"",
+      "found": true,
+      "world": "hourly",
+      "step": 9,
+      "t": 1674464400000,
+      "principal": "arkin",
+      "capsule": "cap.SYN12.breakout.down.119",
+      "finding": "fnd.SYN12.breakout.down.119",
+      "item": {
+        "born_bar": 119,
+        "confirmations": 2,
+        "direction": "down",
+        "finding": "fnd.SYN12.breakout.down.119",
+        "id": "cap.SYN12.breakout.down.119",
+        "importance": 2.531880653570444,
+        "instrument": "SYN12",
+        "kind": "breakout",
+        "last_bar": 120,
+        "ledger_at_birth": {
+          "n": 65,
+          "realized": 34
+        },
+        "sentence": {
+          "en": "2 bars ago, SYN12 broke below support at 19.97 (close 19.41): a downside breakout. It strengthened 1 bar ago with new evidence from the same family. It still holds. Historically, this signal played out in 34 of 65 cases.",
+          "text": "SYN12 2 bar önce 19,97'deki desteği aşağı kırdı (kapanış 19,41): aşağı kırılım. 1 bar önce aynı aileden yeni bir kanıtla güçlendi. Hâlâ geçerli. Geçmişte bu sinyal 65 seferin 34'ünde beklendiği gibi sonuçlandı.",
+          "tr": "SYN12 2 bar önce 19,97'deki desteği aşağı kırdı (kapanış 19,41): aşağı kırılım. 1 bar önce aynı aileden yeni bir kanıtla güçlendi. Hâlâ geçerli. Geçmişte bu sinyal 65 seferin 34'ünde beklendiği gibi sonuçlandı."
+        },
+        "series": "syn12",
+        "stage": "strengthened",
+        "state": "live",
+        "t": 1674457200000,
+        "tier": 1,
+        "time": "event",
+        "trust": "replica",
+        "validity": "valid"
+      },
+      "key": {
+        "s1": "aşağı",
+        "s1b": "fiyat önemli bir seviyeyi geçti",
+        "s2": "birkaç saat önce",
+        "s3": "evet, sürüyor",
+        "s4": "yarı yarıya",
+        "s5": "hiçbir şey, yalnız bilgi veriyor"
+      },
+      "note": ""
+    },
+    {
+      "state": 12,
+      "title": "Dönüş aşağı, teyit edilmiş (iki aile), dün",
+      "found": true,
+      "world": "hourly",
+      "step": 417,
+      "t": 1675926000000,
+      "principal": "arkin",
+      "capsule": "cap.SYN05.reversal.down.222",
+      "finding": "fnd.SYN05.reversal.down.222",
+      "item": {
+        "born_bar": 222,
+        "confirmations": 2,
+        "direction": "down",
+        "finding": "fnd.SYN05.reversal.down.222",
+        "id": "cap.SYN05.reversal.down.222",
+        "importance": 2.496775411281426,
+        "instrument": "SYN05",
+        "kind": "reversal",
+        "last_bar": 223,
+        "ledger_at_birth": {
+          "n": 17,
+          "realized": 9
+        },
+        "sentence": {
+          "en": "1 bar ago, SYN05 showed a downward reversal signal: price made a new high while RSI made a lower high (price 49.85, RSI 71). Volume confirmed it on this bar; 2 independent evidence families support it. Whether it still holds is unknown. Its record is still thin: it played out in 9 of 17 cases.",
+          "text": "SYN05'de 1 bar önce aşağı dönüş işareti çıktı: fiyat yeni tepe yaparken RSI daha düşük tepe yaptı (fiyat 49,85, RSI 71). Bu barda hacim de teyit etti; 2 bağımsız kanıt ailesi destekliyor. Hâlâ geçerli olup olmadığı bilinmiyor. Karnesi henüz az örnekli: 17 seferin 9'unda tuttu.",
+          "tr": "SYN05'de 1 bar önce aşağı dönüş işareti çıktı: fiyat yeni tepe yaparken RSI daha düşük tepe yaptı (fiyat 49,85, RSI 71). Bu barda hacim de teyit etti; 2 bağımsız kanıt ailesi destekliyor. Hâlâ geçerli olup olmadığı bilinmiyor. Karnesi henüz az örnekli: 17 seferin 9'unda tuttu."
+        },
+        "series": "syn05",
+        "stage": "confirmed",
+        "state": "live",
+        "t": 1675864800000,
+        "tier": 1,
+        "time": "event",
+        "trust": "replica",
+        "validity": "valid"
+      },
+      "key": {
+        "s1": "aşağı",
+        "s1b": "yön değişiyor",
+        "s2": "dün",
+        "s3": "evet, sürüyor",
+        "s4": "az örnek var, bilinmiyor",
+        "s5": "hiçbir şey, yalnız bilgi veriyor"
+      },
+      "note": ""
+    }
+  ],
+  "substitutes": [
+    {
+      "state": 101,
+      "title": "M10 demo substitute of #1: Olay, yukarı kırılım, bugün, geçerli",
+      "found": true,
+      "world": "demo",
+      "step": 10,
+      "t": 1687244400000,
+      "principal": "arkin",
+      "capsule": "cap.SYN06.breakout.up.118",
+      "finding": "fnd.SYN06.breakout.up.118",
+      "item": {
+        "born_bar": 118,
+        "confirmations": 2,
+        "direction": "up",
+        "finding": "fnd.SYN06.breakout.up.118",
+        "id": "cap.SYN06.breakout.up.118",
+        "importance": 2.385936946162762,
+        "instrument": "SYN06",
+        "kind": "breakout",
+        "last_bar": 120,
+        "ledger_at_birth": {
+          "n": 31,
+          "realized": 12
+        },
+        "sentence": {
+          "en": "2 bars ago, SYN06 broke above resistance at 114.27 (close 116.27): an upside breakout. It strengthened on this bar with new evidence from the same family. It still holds. Historically, this signal played out in 12 of 31 cases.",
+          "text": "SYN06 2 bar önce 114,27'deki direnci yukarı kırdı (kapanış 116,27): yukarı kırılım. Bu barda aynı aileden yeni bir kanıtla güçlendi. Hâlâ geçerli. Geçmişte bu sinyal 31 seferin 12'sinde beklendiği gibi sonuçlandı.",
+          "tr": "SYN06 2 bar önce 114,27'deki direnci yukarı kırdı (kapanış 116,27): yukarı kırılım. Bu barda aynı aileden yeni bir kanıtla güçlendi. Hâlâ geçerli. Geçmişte bu sinyal 31 seferin 12'sinde beklendiği gibi sonuçlandı."
+        },
+        "series": "syn06",
+        "stage": "strengthened",
+        "state": "live",
+        "t": 1687158000000,
+        "tier": 1,
+        "time": "event",
+        "trust": "replica",
+        "validity": "valid"
+      },
+      "key": {
+        "s1": "yukarı",
+        "s1b": "fiyat önemli bir seviyeyi geçti",
+        "s2": "dün",
+        "s3": "evet, sürüyor",
+        "s4": "çoğunlukla tutmadı",
+        "s5": "hiçbir şey, yalnız bilgi veriyor"
+      },
+      "note": ""
+    },
+    {
+      "state": 112,
+      "title": "M10 demo substitute of #12: Dönüş aşağı, teyit edilmiş (iki aile), dün",
+      "found": true,
+      "world": "demo",
+      "step": 10,
+      "t": 1687244400000,
+      "principal": "arkin",
+      "capsule": "cap.SYN28.reversal.down.120",
+      "finding": "fnd.SYN28.reversal.down.120",
+      "item": {
+        "born_bar": 120,
+        "confirmations": 1,
+        "direction": "down",
+        "finding": "fnd.SYN28.reversal.down.120",
+        "id": "cap.SYN28.reversal.down.120",
+        "importance": 1.619437505984893,
+        "instrument": "SYN28",
+        "kind": "reversal",
+        "last_bar": 120,
+        "ledger_at_birth": {
+          "n": 28,
+          "realized": 16
+        },
+        "sentence": {
+          "en": "On this bar, SYN28 showed a downward reversal signal: price made a new high while RSI made a lower high (price 97.93, RSI 40.9). Whether it still holds is unknown. Historically, this signal played out in 16 of 28 cases.",
+          "text": "SYN28'de bu barda aşağı dönüş işareti çıktı: fiyat yeni tepe yaparken RSI daha düşük tepe yaptı (fiyat 97,93, RSI 40,9). Hâlâ geçerli olup olmadığı bilinmiyor. Geçmişte bu sinyal 28 seferin 16'sında beklendiği gibi sonuçlandı.",
+          "tr": "SYN28'de bu barda aşağı dönüş işareti çıktı: fiyat yeni tepe yaparken RSI daha düşük tepe yaptı (fiyat 97,93, RSI 40,9). Hâlâ geçerli olup olmadığı bilinmiyor. Geçmişte bu sinyal 28 seferin 16'sında beklendiği gibi sonuçlandı."
+        },
+        "series": "syn28",
+        "stage": "born",
+        "state": "live",
+        "t": 1687158000000,
+        "tier": 2,
+        "time": "event",
+        "trust": "replica",
+        "validity": "valid"
+      },
+      "key": {
+        "s1": "aşağı",
+        "s1b": "yön değişiyor",
+        "s2": "dün",
+        "s3": "evet, sürüyor",
+        "s4": "yarı yarıya",
+        "s5": "hiçbir şey, yalnız bilgi veriyor"
+      },
+      "note": ""
+    }
+  ]
+}

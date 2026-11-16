@@ -1,0 +1,102 @@
+{
+  "059ce936": {
+    "design": "r3",
+    "experiment": "m8",
+    "page": 1,
+    "states": [
+      1,
+      5,
+      7,
+      9,
+      12,
+      10
+    ]
+  },
+  "262bbace": {
+    "design": "vadrel",
+    "experiment": "m8",
+    "page": 1,
+    "states": [
+      1,
+      5,
+      7,
+      9,
+      12,
+      10
+    ]
+  },
+  "37da4c4c": {
+    "design": "fotolay",
+    "experiment": "m8",
+    "page": 1,
+    "states": [
+      1,
+      5,
+      7,
+      9,
+      12,
+      10
+    ]
+  },
+  "59acd941": {
+    "design": "fotolay",
+    "experiment": "m8",
+    "page": 2,
+    "states": [
+      3,
+      11,
+      4,
+      6,
+      2
+    ]
+  },
+  "8d59d758": {
+    "design": "r3",
+    "experiment": "m8",
+    "page": 2,
+    "states": [
+      3,
+      11,
+      4,
+      6,
+      2
+    ]
+  },
+  "bcd99ae7": {
+    "design": "vadrel",
+    "experiment": "m8",
+    "page": 2,
+    "states": [
+      3,
+      11,
+      4,
+      6,
+      2
+    ]
+  },
+  "be730d1e": {
+    "design": "tavrik",
+    "experiment": "m8",
+    "page": 1,
+    "states": [
+      1,
+      5,
+      7,
+      9,
+      12,
+      10
+    ]
+  },
+  "dc16761a": {
+    "design": "tavrik",
+    "experiment": "m8",
+    "page": 2,
+    "states": [
+      3,
+      11,
+      4,
+      6,
+      2
+    ]
+  }
+}

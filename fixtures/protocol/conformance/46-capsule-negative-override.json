@@ -1,0 +1,1538 @@
+{
+  "covers": [
+    "topic-capsules",
+    "sensitivity",
+    "position-override",
+    "negative-transition",
+    "capsules"
+  ],
+  "description": "R4/T3 (K42/A22, §20.4, CAPSULE §9.8): for a story about a person's position or active intent only the negative transitions (weakened, invalidated, retracted) pass whatever the sensitivity; its birth and the other transitions go through the level like any story. Two readers at `important`, one holding THYAO: the tier-3 birth reaches neither, its weakening reaches the holder only, a tier-1 birth reaches both. The `capsules` query with `audience` applies the same rule to each story's current stage.",
+  "final": {
+    "log_len": 9
+  },
+  "init": {
+    "capsules": {
+      "flow": [
+        {
+          "seed": 1,
+          "series": "px"
+        }
+      ],
+      "series": [
+        "px"
+      ]
+    },
+    "clock": 1760000000000,
+    "data": {
+      "entitlements": {
+        "ana": [
+          "*"
+        ],
+        "arkin": [
+          "*"
+        ],
+        "bora": [
+          "bist/THYAO"
+        ],
+        "can": [],
+        "host": [
+          "*"
+        ]
+      },
+      "feeds": [
+        {
+          "bars": [
+            {
+              "c": 4.99,
+              "h": 5.06,
+              "l": 4.97,
+              "o": 5.04,
+              "t": 1672642800000,
+              "v": 13737553.77
+            },
+            {
+              "c": 5.01,
+              "h": 5.03,
+              "l": 4.98,
+              "o": 5.0,
+              "t": 1672729200000,
+              "v": 12608999.28
+            },
+            {
+              "c": 5.0,
+              "h": 5.05,
+              "l": 4.98,
+              "o": 5.02,
+              "t": 1672815600000,
+              "v": 10117754.75
+            },
+            {
+              "c": 5.06,
+              "h": 5.07,
+              "l": 5.0,
+              "o": 5.01,
+              "t": 1672902000000,
+              "v": 13048857.47
+            },
+            {
+              "c": 5.06,
+              "h": 5.06,
+              "l": 5.05,
+              "o": 5.06,
+              "t": 1672988400000,
+              "v": 7505512.82
+            },
+            {
+              "c": 5.02,
+              "h": 5.06,
+              "l": 5.0,
+              "o": 5.05,
+              "t": 1673247600000,
+              "v": 12487466.75
+            },
+            {
+              "c": 5.31,
+              "h": 5.32,
+              "l": 5.0,
+              "o": 5.02,
+              "t": 1673334000000,
+              "v": 153150439.26
+            },
+            {
+              "c": 5.29,
+              "h": 5.35,
+              "l": 5.26,
+              "o": 5.3,
+              "t": 1673420400000,
+              "v": 7548875.97
+            },
+            {
+              "c": 5.39,
+              "h": 5.42,
+              "l": 5.27,
+              "o": 5.29,
+              "t": 1673506800000,
+              "v": 20401359.55
+            },
+            {
+              "c": 5.48,
+              "h": 5.51,
+              "l": 5.36,
+              "o": 5.39,
+              "t": 1673593200000,
+              "v": 18203350.15
+            },
+            {
+              "c": 5.49,
+              "h": 5.51,
+              "l": 5.43,
+              "o": 5.47,
+              "t": 1673852400000,
+              "v": 10480085.32
+            },
+            {
+              "c": 5.39,
+              "h": 5.5,
+              "l": 5.35,
+              "o": 5.48,
+              "t": 1673938800000,
+              "v": 14858561.99
+            },
+            {
+              "c": 5.38,
+              "h": 5.43,
+              "l": 5.35,
+              "o": 5.4,
+              "t": 1674025200000,
+              "v": 12057882.93
+            },
+            {
+              "c": 5.38,
+              "h": 5.4,
+              "l": 5.34,
+              "o": 5.37,
+              "t": 1674111600000,
+              "v": 11827564.91
+            },
+            {
+              "c": 5.31,
+              "h": 5.39,
+              "l": 5.3,
+              "o": 5.39,
+              "t": 1674198000000,
+              "v": 15656020.67
+            },
+            {
+              "c": 5.27,
+              "h": 5.32,
+              "l": 5.27,
+              "o": 5.32,
+              "t": 1674457200000,
+              "v": 13550385.59
+            },
+            {
+              "c": 5.19,
+              "h": 5.26,
+              "l": 5.17,
+              "o": 5.26,
+              "t": 1674543600000,
+              "v": 17027787.77
+            },
+            {
+              "c": 5.16,
+              "h": 5.2,
+              "l": 5.16,
+              "o": 5.18,
+              "t": 1674630000000,
+              "v": 9691254.6
+            },
+            {
+              "c": 5.18,
+              "h": 5.18,
+              "l": 5.15,
+              "o": 5.16,
+              "t": 1674716400000,
+              "v": 11752543.28
+            },
+            {
+              "c": 5.24,
+              "h": 5.24,
+              "l": 5.18,
+              "o": 5.19,
+              "t": 1674802800000,
+              "v": 25552725.03
+            },
+            {
+              "c": 5.23,
+              "h": 5.26,
+              "l": 5.23,
+              "o": 5.25,
+              "t": 1675062000000,
+              "v": 14873395.06
+            },
+            {
+              "c": 5.17,
+              "h": 5.23,
+              "l": 5.15,
+              "o": 5.22,
+              "t": 1675148400000,
+              "v": 26845364.56
+            },
+            {
+              "c": 5.15,
+              "h": 5.17,
+              "l": 5.14,
+              "o": 5.16,
+              "t": 1675234800000,
+              "v": 15199008.04
+            },
+            {
+              "c": 5.21,
+              "h": 5.22,
+              "l": 5.12,
+              "o": 5.14,
+              "t": 1675321200000,
+              "v": 27403371.43
+            },
+            {
+              "c": 5.24,
+              "h": 5.25,
+              "l": 5.2,
+              "o": 5.21,
+              "t": 1675407600000,
+              "v": 19643505.82
+            },
+            {
+              "c": 5.22,
+              "h": 5.23,
+              "l": 5.21,
+              "o": 5.23,
+              "t": 1675666800000,
+              "v": 10892965.51
+            },
+            {
+              "c": 5.15,
+              "h": 5.23,
+              "l": 5.14,
+              "o": 5.22,
+              "t": 1675753200000,
+              "v": 25033232.82
+            },
+            {
+              "c": 5.13,
+              "h": 5.16,
+              "l": 5.11,
+              "o": 5.15,
+              "t": 1675839600000,
+              "v": 12614074.27
+            },
+            {
+              "c": 5.12,
+              "h": 5.14,
+              "l": 5.11,
+              "o": 5.13,
+              "t": 1675926000000,
+              "v": 11037637.64
+            },
+            {
+              "c": 5.12,
+              "h": 5.14,
+              "l": 5.11,
+              "o": 5.12,
+              "t": 1676012400000,
+              "v": 13890655.04
+            },
+            {
+              "c": 4.63,
+              "h": 5.18,
+              "l": 4.56,
+              "o": 5.13,
+              "t": 1676271600000,
+              "v": 143572533.29
+            },
+            {
+              "c": 4.66,
+              "h": 4.73,
+              "l": 4.61,
+              "o": 4.62,
+              "t": 1676358000000,
+              "v": 14347020.05
+            },
+            {
+              "c": 4.4,
+              "h": 4.7,
+              "l": 4.3,
+              "o": 4.65,
+              "t": 1676444400000,
+              "v": 25336910.54
+            },
+            {
+              "c": 4.63,
+              "h": 4.71,
+              "l": 4.4,
+              "o": 4.42,
+              "t": 1676530800000,
+              "v": 26507501.62
+            },
+            {
+              "c": 4.96,
+              "h": 5.07,
+              "l": 4.57,
+              "o": 4.6,
+              "t": 1676617200000,
+              "v": 29648324.07
+            },
+            {
+              "c": 5.1,
+              "h": 5.17,
+              "l": 4.87,
+              "o": 4.97,
+              "t": 1676876400000,
+              "v": 18091597.71
+            },
+            {
+              "c": 5.26,
+              "h": 5.31,
+              "l": 5.11,
+              "o": 5.13,
+              "t": 1676962800000,
+              "v": 22834341.89
+            },
+            {
+              "c": 5.14,
+              "h": 5.3,
+              "l": 5.11,
+              "o": 5.25,
+              "t": 1677049200000,
+              "v": 19522396.78
+            },
+            {
+              "c": 4.82,
+              "h": 5.21,
+              "l": 4.77,
+              "o": 5.15,
+              "t": 1677135600000,
+              "v": 27892329.54
+            },
+            {
+              "c": 4.84,
+              "h": 4.88,
+              "l": 4.75,
+              "o": 4.79,
+              "t": 1677222000000,
+              "v": 15622463.12
+            },
+            {
+              "c": 4.67,
+              "h": 4.85,
+              "l": 4.64,
+              "o": 4.84,
+              "t": 1677481200000,
+              "v": 24504522.33
+            },
+            {
+              "c": 5.02,
+              "h": 5.04,
+              "l": 4.62,
+              "o": 4.64,
+              "t": 1677567600000,
+              "v": 30153685.84
+            },
+            {
+              "c": 5.14,
+              "h": 5.16,
+              "l": 4.99,
+              "o": 5.03,
+              "t": 1677654000000,
+              "v": 21083830.63
+            },
+            {
+              "c": 5.0,
+              "h": 5.2,
+              "l": 4.93,
+              "o": 5.19,
+              "t": 1677740400000,
+              "v": 17820371.22
+            },
+            {
+              "c": 5.19,
+              "h": 5.29,
+              "l": 5.0,
+              "o": 5.04,
+              "t": 1677826800000,
+              "v": 21803423.81
+            },
+            {
+              "c": 5.37,
+              "h": 5.42,
+              "l": 5.06,
+              "o": 5.16,
+              "t": 1678086000000,
+              "v": 17712833.0
+            },
+            {
+              "c": 5.34,
+              "h": 5.48,
+              "l": 5.34,
+              "o": 5.39,
+              "t": 1678172400000,
+              "v": 14196279.11
+            },
+            {
+              "c": 5.47,
+              "h": 5.54,
+              "l": 5.24,
+              "o": 5.33,
+              "t": 1678258800000,
+              "v": 17928998.29
+            },
+            {
+              "c": 5.57,
+              "h": 5.6,
+              "l": 5.37,
+              "o": 5.43,
+              "t": 1678345200000,
+              "v": 13417571.69
+            },
+            {
+              "c": 5.28,
+              "h": 5.64,
+              "l": 5.2,
+              "o": 5.61,
+              "t": 1678431600000,
+              "v": 22688575.23
+            },
+            {
+              "c": 5.27,
+              "h": 5.42,
+              "l": 5.22,
+              "o": 5.32,
+              "t": 1678690800000,
+              "v": 13312802.02
+            },
+            {
+              "c": 5.24,
+              "h": 5.39,
+              "l": 5.2,
+              "o": 5.31,
+              "t": 1678777200000,
+              "v": 14528306.74
+            },
+            {
+              "c": 4.97,
+              "h": 5.3,
+              "l": 4.93,
+              "o": 5.22,
+              "t": 1678863600000,
+              "v": 29240381.46
+            },
+            {
+              "c": 4.93,
+              "h": 4.96,
+              "l": 4.92,
+              "o": 4.94,
+              "t": 1678950000000,
+              "v": 15306689.77
+            },
+            {
+              "c": 4.99,
+              "h": 5.01,
+              "l": 4.83,
+              "o": 4.92,
+              "t": 1679036400000,
+              "v": 18259125.12
+            },
+            {
+              "c": 5.02,
+              "h": 5.1,
+              "l": 5.02,
+              "o": 5.02,
+              "t": 1679295600000,
+              "v": 18104738.28
+            },
+            {
+              "c": 5.04,
+              "h": 5.1,
+              "l": 4.95,
+              "o": 5.03,
+              "t": 1679382000000,
+              "v": 14729714.57
+            },
+            {
+              "c": 5.52,
+              "h": 5.53,
+              "l": 4.98,
+              "o": 5.04,
+              "t": 1679468400000,
+              "v": 157344086.43
+            },
+            {
+              "c": 5.75,
+              "h": 5.77,
+              "l": 5.54,
+              "o": 5.57,
+              "t": 1679554800000,
+              "v": 30956255.05
+            },
+            {
+              "c": 5.76,
+              "h": 5.84,
+              "l": 5.7,
+              "o": 5.8,
+              "t": 1679641200000,
+              "v": 17085604.45
+            },
+            {
+              "c": 5.61,
+              "h": 5.88,
+              "l": 5.52,
+              "o": 5.79,
+              "t": 1679900400000,
+              "v": 24828806.11
+            },
+            {
+              "c": 5.68,
+              "h": 5.76,
+              "l": 5.51,
+              "o": 5.58,
+              "t": 1679986800000,
+              "v": 21424984.03
+            },
+            {
+              "c": 5.63,
+              "h": 5.73,
+              "l": 5.59,
+              "o": 5.69,
+              "t": 1680073200000,
+              "v": 21091460.94
+            },
+            {
+              "c": 5.39,
+              "h": 5.7,
+              "l": 5.29,
+              "o": 5.67,
+              "t": 1680159600000,
+              "v": 29460604.73
+            },
+            {
+              "c": 5.44,
+              "h": 5.48,
+              "l": 5.3,
+              "o": 5.4,
+              "t": 1680246000000,
+              "v": 17693957.11
+            },
+            {
+              "c": 5.48,
+              "h": 5.49,
+              "l": 5.38,
+              "o": 5.48,
+              "t": 1680505200000,
+              "v": 18892307.67
+            },
+            {
+              "c": 5.59,
+              "h": 5.67,
+              "l": 5.46,
+              "o": 5.47,
+              "t": 1680591600000,
+              "v": 22188516.56
+            },
+            {
+              "c": 5.44,
+              "h": 5.69,
+              "l": 5.37,
+              "o": 5.6,
+              "t": 1680678000000,
+              "v": 23960402.18
+            },
+            {
+              "c": 5.49,
+              "h": 5.51,
+              "l": 5.34,
+              "o": 5.42,
+              "t": 1680764400000,
+              "v": 19199816.58
+            },
+            {
+              "c": 5.25,
+              "h": 5.57,
+              "l": 5.2,
+              "o": 5.53,
+              "t": 1680850800000,
+              "v": 32410470.6
+            },
+            {
+              "c": 5.3,
+              "h": 5.36,
+              "l": 5.21,
+              "o": 5.21,
+              "t": 1681110000000,
+              "v": 16093671.82
+            },
+            {
+              "c": 5.19,
+              "h": 5.28,
+              "l": 5.16,
+              "o": 5.27,
+              "t": 1681196400000,
+              "v": 75051424.76
+            },
+            {
+              "c": 5.28,
+              "h": 5.33,
+              "l": 5.22,
+              "o": 5.23,
+              "t": 1681282800000,
+              "v": 20584806.58
+            },
+            {
+              "c": 5.78,
+              "h": 5.78,
+              "l": 5.31,
+              "o": 5.31,
+              "t": 1681369200000,
+              "v": 295235346.93
+            },
+            {
+              "c": 5.46,
+              "h": 5.8,
+              "l": 5.38,
+              "o": 5.77,
+              "t": 1681455600000,
+              "v": 28739218.15
+            },
+            {
+              "c": 5.3,
+              "h": 5.56,
+              "l": 5.26,
+              "o": 5.46,
+              "t": 1681714800000,
+              "v": 19500463.5
+            },
+            {
+              "c": 4.87,
+              "h": 5.32,
+              "l": 4.79,
+              "o": 5.26,
+              "t": 1681801200000,
+              "v": 27116769.02
+            },
+            {
+              "c": 4.84,
+              "h": 4.91,
+              "l": 4.84,
+              "o": 4.87,
+              "t": 1681887600000,
+              "v": 13790918.96
+            },
+            {
+              "c": 4.96,
+              "h": 4.99,
+              "l": 4.83,
+              "o": 4.83,
+              "t": 1681974000000,
+              "v": 25033764.01
+            },
+            {
+              "c": 5.06,
+              "h": 5.07,
+              "l": 4.94,
+              "o": 4.95,
+              "t": 1682060400000,
+              "v": 19551293.81
+            },
+            {
+              "c": 5.1,
+              "h": 5.15,
+              "l": 5.05,
+              "o": 5.06,
+              "t": 1682319600000,
+              "v": 16957282.81
+            },
+            {
+              "c": 5.0,
+              "h": 5.14,
+              "l": 4.96,
+              "o": 5.11,
+              "t": 1682406000000,
+              "v": 17335403.75
+            },
+            {
+              "c": 5.06,
+              "h": 5.07,
+              "l": 4.98,
+              "o": 5.0,
+              "t": 1682492400000,
+              "v": 16182307.75
+            },
+            {
+              "c": 5.09,
+              "h": 5.13,
+              "l": 5.07,
+              "o": 5.07,
+              "t": 1682578800000,
+              "v": 16915853.92
+            },
+            {
+              "c": 5.15,
+              "h": 5.18,
+              "l": 5.06,
+              "o": 5.09,
+              "t": 1682665200000,
+              "v": 21723480.63
+            },
+            {
+              "c": 5.12,
+              "h": 5.2,
+              "l": 5.09,
+              "o": 5.16,
+              "t": 1682924400000,
+              "v": 13923020.39
+            },
+            {
+              "c": 5.0,
+              "h": 5.15,
+              "l": 4.99,
+              "o": 5.12,
+              "t": 1683010800000,
+              "v": 27984298.56
+            },
+            {
+              "c": 5.04,
+              "h": 5.04,
+              "l": 5.0,
+              "o": 5.0,
+              "t": 1683097200000,
+              "v": 17484227.73
+            },
+            {
+              "c": 4.99,
+              "h": 5.06,
+              "l": 4.96,
+              "o": 5.05,
+              "t": 1683183600000,
+              "v": 13515889.68
+            },
+            {
+              "c": 4.98,
+              "h": 4.99,
+              "l": 4.95,
+              "o": 4.99,
+              "t": 1683270000000,
+              "v": 9678462.62
+            },
+            {
+              "c": 5.02,
+              "h": 5.05,
+              "l": 4.95,
+              "o": 4.98,
+              "t": 1683529200000,
+              "v": 11949293.69
+            },
+            {
+              "c": 5.04,
+              "h": 5.06,
+              "l": 5.0,
+              "o": 5.02,
+              "t": 1683615600000,
+              "v": 13412179.15
+            },
+            {
+              "c": 5.09,
+              "h": 5.12,
+              "l": 5.0,
+              "o": 5.03,
+              "t": 1683702000000,
+              "v": 61309694.65
+            },
+            {
+              "c": 5.06,
+              "h": 5.12,
+              "l": 5.05,
+              "o": 5.1,
+              "t": 1683788400000,
+              "v": 10460389.29
+            },
+            {
+              "c": 5.1,
+              "h": 5.12,
+              "l": 5.06,
+              "o": 5.07,
+              "t": 1683874800000,
+              "v": 19106896.68
+            },
+            {
+              "c": 5.13,
+              "h": 5.16,
+              "l": 5.1,
+              "o": 5.1,
+              "t": 1684134000000,
+              "v": 18711179.5
+            },
+            {
+              "c": 5.16,
+              "h": 5.18,
+              "l": 5.12,
+              "o": 5.14,
+              "t": 1684220400000,
+              "v": 18092045.06
+            },
+            {
+              "c": 5.13,
+              "h": 5.19,
+              "l": 5.12,
+              "o": 5.17,
+              "t": 1684306800000,
+              "v": 10068674.9
+            },
+            {
+              "c": 5.12,
+              "h": 5.12,
+              "l": 5.11,
+              "o": 5.12,
+              "t": 1684393200000,
+              "v": 9989169.54
+            },
+            {
+              "c": 5.09,
+              "h": 5.15,
+              "l": 5.07,
+              "o": 5.13,
+              "t": 1684479600000,
+              "v": 14359306.66
+            },
+            {
+              "c": 5.05,
+              "h": 5.1,
+              "l": 5.05,
+              "o": 5.09,
+              "t": 1684738800000,
+              "v": 14659773.34
+            },
+            {
+              "c": 5.02,
+              "h": 5.05,
+              "l": 5.01,
+              "o": 5.04,
+              "t": 1684825200000,
+              "v": 15799594.4
+            },
+            {
+              "c": 4.95,
+              "h": 5.04,
+              "l": 4.95,
+              "o": 5.02,
+              "t": 1684911600000,
+              "v": 28728549.74
+            },
+            {
+              "c": 5.01,
+              "h": 5.03,
+              "l": 4.94,
+              "o": 4.96,
+              "t": 1684998000000,
+              "v": 27865220.06
+            },
+            {
+              "c": 4.97,
+              "h": 5.02,
+              "l": 4.95,
+              "o": 5.01,
+              "t": 1685084400000,
+              "v": 21195204.1
+            },
+            {
+              "c": 4.97,
+              "h": 4.98,
+              "l": 4.95,
+              "o": 4.97,
+              "t": 1685343600000,
+              "v": 14555973.91
+            }
+          ],
+          "feed": {
+            "feed": "bist",
+            "interval": "1d",
+            "symbol": "THYAO"
+          }
+        }
+      ]
+    },
+    "document": {
+      "id": "doc-capsules",
+      "schema_version": "0",
+      "series": [
+        {
+          "id": "px",
+          "instrument": {
+            "symbol": "THYAO"
+          },
+          "interval": "1d",
+          "source": {
+            "feed": "bist",
+            "interval": "1d",
+            "kind": "bind",
+            "symbol": "THYAO",
+            "window": {
+              "last": 10000
+            }
+          }
+        }
+      ],
+      "title": "Kapsül"
+    },
+    "epoch": 0,
+    "principals": [
+      {
+        "author": {
+          "kind": "human",
+          "name": "host"
+        },
+        "id": "host",
+        "role": "host"
+      },
+      {
+        "author": {
+          "kind": "human",
+          "name": "Arkın"
+        },
+        "id": "arkin",
+        "role": "owner"
+      },
+      {
+        "author": {
+          "kind": "human",
+          "name": "Ana"
+        },
+        "id": "ana",
+        "role": "viewer"
+      },
+      {
+        "author": {
+          "kind": "human",
+          "name": "Bora"
+        },
+        "id": "bora",
+        "role": "viewer"
+      },
+      {
+        "author": {
+          "kind": "human",
+          "name": "Can"
+        },
+        "id": "can",
+        "role": "viewer"
+      }
+    ]
+  },
+  "name": "46-capsule-negative-override",
+  "steps": [
+    {
+      "expect": [
+        {
+          "conn": "a",
+          "msg": {
+            "seq": 2,
+            "type": "welcome"
+          }
+        }
+      ],
+      "send": {
+        "conn": "a",
+        "msg": {
+          "principal": "ana",
+          "protocol": "qp/0",
+          "surface": {
+            "kind": "headless"
+          },
+          "type": "hello"
+        }
+      }
+    },
+    {
+      "expect": [
+        {
+          "conn": "b",
+          "msg": {
+            "seq": 2,
+            "type": "welcome"
+          }
+        }
+      ],
+      "send": {
+        "conn": "b",
+        "msg": {
+          "principal": "arkin",
+          "protocol": "qp/0",
+          "surface": {
+            "kind": "headless"
+          },
+          "type": "hello"
+        }
+      }
+    },
+    {
+      "expect": [
+        {
+          "conn": "a",
+          "msg": {
+            "id": "k",
+            "status": "subscribed",
+            "type": "ack"
+          }
+        }
+      ],
+      "send": {
+        "conn": "a",
+        "msg": {
+          "id": "k",
+          "topic": {
+            "kind": "capsules"
+          },
+          "type": "subscribe"
+        }
+      }
+    },
+    {
+      "expect": [
+        {
+          "conn": "b",
+          "msg": {
+            "id": "k",
+            "status": "subscribed",
+            "type": "ack"
+          }
+        }
+      ],
+      "send": {
+        "conn": "b",
+        "msg": {
+          "id": "k",
+          "topic": {
+            "kind": "capsules"
+          },
+          "type": "subscribe"
+        }
+      }
+    },
+    {
+      "expect": [
+        {
+          "conn": "a",
+          "msg": {
+            "id": "s1",
+            "seq": 3,
+            "status": "applied",
+            "type": "ack"
+          }
+        }
+      ],
+      "note": "Ana: the future-investor group (`important`, tier 1) and a THYAO position.",
+      "send": {
+        "conn": "a",
+        "msg": {
+          "id": "s1",
+          "ops": [
+            {
+              "audience": {
+                "group": "future",
+                "positions": {
+                  "THYAO": 100
+                }
+              },
+              "op": "set_audience"
+            }
+          ],
+          "type": "command"
+        }
+      }
+    },
+    {
+      "expect": [
+        {
+          "conn": "b",
+          "msg": {
+            "id": "s2",
+            "seq": 4,
+            "status": "applied",
+            "type": "ack"
+          }
+        }
+      ],
+      "note": "Arkın (entitled like Ana): the same level, no position.",
+      "send": {
+        "conn": "b",
+        "msg": {
+          "id": "s2",
+          "ops": [
+            {
+              "audience": {
+                "group": "future"
+              },
+              "op": "set_audience"
+            }
+          ],
+          "type": "command"
+        }
+      }
+    },
+    {
+      "data": {
+        "change": {
+          "bar": {
+            "c": 4.89,
+            "h": 4.98,
+            "l": 4.89,
+            "o": 4.97,
+            "t": 1685430000000,
+            "v": 29644769.47
+          },
+          "kind": "bar"
+        },
+        "feed": {
+          "feed": "bist",
+          "interval": "1d",
+          "symbol": "THYAO"
+        },
+        "seq": 1
+      },
+      "expect": []
+    },
+    {
+      "data": {
+        "change": {
+          "bar": {
+            "c": 4.84,
+            "h": 4.89,
+            "l": 4.82,
+            "o": 4.88,
+            "t": 1685516400000,
+            "v": 25512626.42
+          },
+          "kind": "bar"
+        },
+        "feed": {
+          "feed": "bist",
+          "interval": "1d",
+          "symbol": "THYAO"
+        },
+        "seq": 2
+      },
+      "expect": [],
+      "note": "A tier-3 down breakout is born: a birth goes through the level for both (K42/A22), the position does not lift it."
+    },
+    {
+      "data": {
+        "change": {
+          "bar": {
+            "c": 4.87,
+            "h": 4.87,
+            "l": 4.82,
+            "o": 4.83,
+            "t": 1685602800000,
+            "v": 22924823.83
+          },
+          "kind": "bar"
+        },
+        "feed": {
+          "feed": "bist",
+          "interval": "1d",
+          "symbol": "THYAO"
+        },
+        "seq": 3
+      },
+      "expect": []
+    },
+    {
+      "data": {
+        "change": {
+          "bar": {
+            "c": 4.78,
+            "h": 4.87,
+            "l": 4.77,
+            "o": 4.86,
+            "t": 1685689200000,
+            "v": 39775551.35
+          },
+          "kind": "bar"
+        },
+        "feed": {
+          "feed": "bist",
+          "interval": "1d",
+          "symbol": "THYAO"
+        },
+        "seq": 4
+      },
+      "expect": [
+        {
+          "conn": "a",
+          "msg": {
+            "event": {
+              "capsule": {
+                "born_bar": 106,
+                "confirmations": 1,
+                "direction": "down",
+                "finding": "fnd.THYAO.breakout.down.106",
+                "id": "cap.THYAO.breakout.down.106",
+                "importance": 0.5425341742993354,
+                "instrument": "THYAO",
+                "kind": "breakout",
+                "last_bar": 108,
+                "ledger_at_birth": {
+                  "n": 3,
+                  "realized": 1
+                },
+                "relevant": true,
+                "sentence": {
+                  "en": "2 bars ago, THYAO broke below support at 4.94 (close 4.89): a downside breakout. An opposite signal appeared on this bar and weakened it. It still holds. Its record is still thin: it played out in 1 of 3 cases.",
+                  "text": "THYAO 2 bar önce 4,94'teki desteği aşağı kırdı (kapanış 4,89): aşağı kırılım. Bu barda ters yönde bir sinyal geldi; görünüm zayıfladı. Hâlâ geçerli. Karnesi henüz az örnekli: 3 seferin 1'inde tuttu.",
+                  "tr": "THYAO 2 bar önce 4,94'teki desteği aşağı kırdı (kapanış 4,89): aşağı kırılım. Bu barda ters yönde bir sinyal geldi; görünüm zayıfladı. Hâlâ geçerli. Karnesi henüz az örnekli: 3 seferin 1'inde tuttu."
+                },
+                "series": "px",
+                "stage": "weakened",
+                "state": "live",
+                "t": 1685602800000,
+                "tier": 3,
+                "time": "event",
+                "trust": "replica",
+                "validity": "valid"
+              },
+              "kind": "capsule",
+              "seq": 8,
+              "transition": {
+                "bar": 108,
+                "facts": [
+                  "fx.THYAO.flow.institutional.net_buy.108"
+                ],
+                "reason": "opposite_fact",
+                "stage": "weakened",
+                "t": 1685602800000
+              }
+            },
+            "sub": "k",
+            "type": "notify"
+          }
+        }
+      ],
+      "note": "The same story weakens (an opposite fact): a negative transition of a story about Ana's position reaches her whatever the level (`relevant`); Arkın gets nothing."
+    },
+    {
+      "data": {
+        "change": {
+          "bar": {
+            "c": 4.77,
+            "h": 4.79,
+            "l": 4.76,
+            "o": 4.78,
+            "t": 1685948400000,
+            "v": 17097904.54
+          },
+          "kind": "bar"
+        },
+        "feed": {
+          "feed": "bist",
+          "interval": "1d",
+          "symbol": "THYAO"
+        },
+        "seq": 5
+      },
+      "expect": [
+        {
+          "conn": "a",
+          "msg": {
+            "event": {
+              "capsule": {
+                "born_bar": 109,
+                "confirmations": 2,
+                "direction": "down",
+                "finding": "fnd.THYAO.breakout.down.109",
+                "id": "cap.THYAO.breakout.down.109",
+                "importance": 2.583582262397484,
+                "instrument": "THYAO",
+                "kind": "breakout",
+                "last_bar": 109,
+                "ledger_at_birth": {
+                  "n": 3,
+                  "realized": 1
+                },
+                "relevant": true,
+                "sentence": {
+                  "en": "On this bar, THYAO broke below support at 4.82 (close 4.78): a downside breakout. Money flow confirmed it on this bar; 2 independent evidence families support it. It still holds. Its record is still thin: it played out in 1 of 3 cases.",
+                  "text": "THYAO bu barda 4,82'deki desteği aşağı kırdı (kapanış 4,78): aşağı kırılım. Bu barda para akışı da teyit etti; 2 bağımsız kanıt ailesi destekliyor. Hâlâ geçerli. Karnesi henüz az örnekli: 3 seferin 1'inde tuttu.",
+                  "tr": "THYAO bu barda 4,82'deki desteği aşağı kırdı (kapanış 4,78): aşağı kırılım. Bu barda para akışı da teyit etti; 2 bağımsız kanıt ailesi destekliyor. Hâlâ geçerli. Karnesi henüz az örnekli: 3 seferin 1'inde tuttu."
+                },
+                "series": "px",
+                "stage": "confirmed",
+                "state": "live",
+                "t": 1685689200000,
+                "tier": 1,
+                "time": "event",
+                "trust": "replica",
+                "validity": "valid"
+              },
+              "kind": "capsule",
+              "seq": 9,
+              "transition": {
+                "bar": 109,
+                "facts": [
+                  "fx.THYAO.breakout.range.down.109"
+                ],
+                "reason": "new_story",
+                "stage": "born",
+                "t": 1685689200000
+              }
+            },
+            "sub": "k",
+            "type": "notify"
+          }
+        },
+        {
+          "conn": "a",
+          "msg": {
+            "event": {
+              "capsule": {
+                "born_bar": 109,
+                "confirmations": 2,
+                "direction": "down",
+                "finding": "fnd.THYAO.breakout.down.109",
+                "id": "cap.THYAO.breakout.down.109",
+                "importance": 2.583582262397484,
+                "instrument": "THYAO",
+                "kind": "breakout",
+                "last_bar": 109,
+                "ledger_at_birth": {
+                  "n": 3,
+                  "realized": 1
+                },
+                "relevant": true,
+                "sentence": {
+                  "en": "On this bar, THYAO broke below support at 4.82 (close 4.78): a downside breakout. Money flow confirmed it on this bar; 2 independent evidence families support it. It still holds. Its record is still thin: it played out in 1 of 3 cases.",
+                  "text": "THYAO bu barda 4,82'deki desteği aşağı kırdı (kapanış 4,78): aşağı kırılım. Bu barda para akışı da teyit etti; 2 bağımsız kanıt ailesi destekliyor. Hâlâ geçerli. Karnesi henüz az örnekli: 3 seferin 1'inde tuttu.",
+                  "tr": "THYAO bu barda 4,82'deki desteği aşağı kırdı (kapanış 4,78): aşağı kırılım. Bu barda para akışı da teyit etti; 2 bağımsız kanıt ailesi destekliyor. Hâlâ geçerli. Karnesi henüz az örnekli: 3 seferin 1'inde tuttu."
+                },
+                "series": "px",
+                "stage": "confirmed",
+                "state": "live",
+                "t": 1685689200000,
+                "tier": 1,
+                "time": "event",
+                "trust": "replica",
+                "validity": "valid"
+              },
+              "kind": "capsule",
+              "seq": 9,
+              "transition": {
+                "bar": 109,
+                "facts": [
+                  "fx.THYAO.flow.institutional.net_sell.109"
+                ],
+                "reason": "new_family",
+                "stage": "confirmed",
+                "t": 1685689200000
+              }
+            },
+            "sub": "k",
+            "type": "notify"
+          }
+        },
+        {
+          "conn": "b",
+          "msg": {
+            "event": {
+              "capsule": {
+                "born_bar": 109,
+                "confirmations": 2,
+                "direction": "down",
+                "finding": "fnd.THYAO.breakout.down.109",
+                "id": "cap.THYAO.breakout.down.109",
+                "importance": 2.583582262397484,
+                "instrument": "THYAO",
+                "kind": "breakout",
+                "last_bar": 109,
+                "ledger_at_birth": {
+                  "n": 3,
+                  "realized": 1
+                },
+                "sentence": {
+                  "en": "On this bar, THYAO broke below support at 4.82 (close 4.78): a downside breakout. Money flow confirmed it on this bar; 2 independent evidence families support it. It still holds. Its record is still thin: it played out in 1 of 3 cases.",
+                  "text": "THYAO bu barda 4,82'deki desteği aşağı kırdı (kapanış 4,78): aşağı kırılım. Bu barda para akışı da teyit etti; 2 bağımsız kanıt ailesi destekliyor. Hâlâ geçerli. Karnesi henüz az örnekli: 3 seferin 1'inde tuttu.",
+                  "tr": "THYAO bu barda 4,82'deki desteği aşağı kırdı (kapanış 4,78): aşağı kırılım. Bu barda para akışı da teyit etti; 2 bağımsız kanıt ailesi destekliyor. Hâlâ geçerli. Karnesi henüz az örnekli: 3 seferin 1'inde tuttu."
+                },
+                "series": "px",
+                "stage": "confirmed",
+                "state": "live",
+                "t": 1685689200000,
+                "tier": 1,
+                "time": "event",
+                "trust": "replica",
+                "validity": "valid"
+              },
+              "kind": "capsule",
+              "seq": 9,
+              "transition": {
+                "bar": 109,
+                "facts": [
+                  "fx.THYAO.breakout.range.down.109"
+                ],
+                "reason": "new_story",
+                "stage": "born",
+                "t": 1685689200000
+              }
+            },
+            "sub": "k",
+            "type": "notify"
+          }
+        },
+        {
+          "conn": "b",
+          "msg": {
+            "event": {
+              "capsule": {
+                "born_bar": 109,
+                "confirmations": 2,
+                "direction": "down",
+                "finding": "fnd.THYAO.breakout.down.109",
+                "id": "cap.THYAO.breakout.down.109",
+                "importance": 2.583582262397484,
+                "instrument": "THYAO",
+                "kind": "breakout",
+                "last_bar": 109,
+                "ledger_at_birth": {
+                  "n": 3,
+                  "realized": 1
+                },
+                "sentence": {
+                  "en": "On this bar, THYAO broke below support at 4.82 (close 4.78): a downside breakout. Money flow confirmed it on this bar; 2 independent evidence families support it. It still holds. Its record is still thin: it played out in 1 of 3 cases.",
+                  "text": "THYAO bu barda 4,82'deki desteği aşağı kırdı (kapanış 4,78): aşağı kırılım. Bu barda para akışı da teyit etti; 2 bağımsız kanıt ailesi destekliyor. Hâlâ geçerli. Karnesi henüz az örnekli: 3 seferin 1'inde tuttu.",
+                  "tr": "THYAO bu barda 4,82'deki desteği aşağı kırdı (kapanış 4,78): aşağı kırılım. Bu barda para akışı da teyit etti; 2 bağımsız kanıt ailesi destekliyor. Hâlâ geçerli. Karnesi henüz az örnekli: 3 seferin 1'inde tuttu."
+                },
+                "series": "px",
+                "stage": "confirmed",
+                "state": "live",
+                "t": 1685689200000,
+                "tier": 1,
+                "time": "event",
+                "trust": "replica",
+                "validity": "valid"
+              },
+              "kind": "capsule",
+              "seq": 9,
+              "transition": {
+                "bar": 109,
+                "facts": [
+                  "fx.THYAO.flow.institutional.net_sell.109"
+                ],
+                "reason": "new_family",
+                "stage": "confirmed",
+                "t": 1685689200000
+              }
+            },
+            "sub": "k",
+            "type": "notify"
+          }
+        }
+      ],
+      "note": "A tier-1 breakout is born: both get it by the level."
+    },
+    {
+      "expect": [
+        {
+          "conn": "a",
+          "msg": {
+            "data": {
+              "capsules": [
+                {
+                  "born_bar": 109,
+                  "confirmations": 2,
+                  "direction": "down",
+                  "finding": "fnd.THYAO.breakout.down.109",
+                  "id": "cap.THYAO.breakout.down.109",
+                  "importance": 2.583582262397484,
+                  "instrument": "THYAO",
+                  "kind": "breakout",
+                  "last_bar": 109,
+                  "ledger_at_birth": {
+                    "n": 3,
+                    "realized": 1
+                  },
+                  "relevant": true,
+                  "sentence": {
+                    "en": "On this bar, THYAO broke below support at 4.82 (close 4.78): a downside breakout. Money flow confirmed it on this bar; 2 independent evidence families support it. It still holds. Its record is still thin: it played out in 1 of 3 cases.",
+                    "text": "THYAO bu barda 4,82'deki desteği aşağı kırdı (kapanış 4,78): aşağı kırılım. Bu barda para akışı da teyit etti; 2 bağımsız kanıt ailesi destekliyor. Hâlâ geçerli. Karnesi henüz az örnekli: 3 seferin 1'inde tuttu.",
+                    "tr": "THYAO bu barda 4,82'deki desteği aşağı kırdı (kapanış 4,78): aşağı kırılım. Bu barda para akışı da teyit etti; 2 bağımsız kanıt ailesi destekliyor. Hâlâ geçerli. Karnesi henüz az örnekli: 3 seferin 1'inde tuttu."
+                  },
+                  "series": "px",
+                  "stage": "confirmed",
+                  "state": "live",
+                  "t": 1685689200000,
+                  "tier": 1,
+                  "time": "event",
+                  "trust": "replica",
+                  "validity": "valid"
+                }
+              ],
+              "kind": "capsules"
+            },
+            "id": "q",
+            "now": 1760000000000,
+            "seq": 9,
+            "type": "result"
+          }
+        }
+      ],
+      "send": {
+        "conn": "a",
+        "msg": {
+          "id": "q",
+          "query": {
+            "audience": true,
+            "kind": "capsules",
+            "since_bar": 100
+          },
+          "type": "query"
+        }
+      }
+    }
+  ]
+}

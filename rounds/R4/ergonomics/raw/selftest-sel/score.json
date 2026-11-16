@@ -1,0 +1,689 @@
+{
+ "agents": {
+  "agentA": {
+   "off": 2,
+   "seed": 2045518520
+  },
+  "agentB": {
+   "off": 4,
+   "seed": 1737249878
+  },
+  "agentC": {
+   "off": 2,
+   "seed": 1007001767
+  },
+  "agentD": {
+   "off": 5,
+   "seed": 3635462692
+  },
+  "agentE": {
+   "off": 2,
+   "seed": 2705057093
+  }
+ },
+ "rows": [
+  {
+   "agent": "A",
+   "answer": "cap.THYAO.extreme.down.311 (aşırı): THYAO'da RSI 5 bardır 30'un altında; şu an 28,1. Aşırı satım sürüyor. Karnesi henüz az örnekli: 1 seferin 0'ında tuttu.\ncap.THYAO.breakout.down.313 (kırılım): THYAO 3 bar önce 32,64'teki desteği aşağı kırdı (kapanış 32,60): aşağı kırılım. Bu barda aynı aileden yeni bir kanıtla güçlendi. Hâlâ geçerli. Karnesi henüz az örnekli: 8 seferin 3'ünde tuttu.\ncap.THYAO.continuation.down.312 (devam): THYAO 4 bardır kısa ortalamanın (42,52) altında; şu an 32,15. Düşüş eğilimi sürüyor. Karnesi henüz az örnekli: 3 seferin 0'ında tuttu.",
+   "attempts": 1,
+   "c13_alt_reading": null,
+   "detail": [
+    {
+     "error_codes": [],
+     "errors": 0,
+     "file": "attempt1.jsonl",
+     "how": "run",
+     "ids": [],
+     "msgs": 2,
+     "pass": true,
+     "run": "C01/runs/02-attempt1.jsonl",
+     "why": []
+    }
+   ],
+   "final": true,
+   "final_idfree": true,
+   "final_lenient": true,
+   "first": true,
+   "first_error": false,
+   "first_idfree": true,
+   "msgs_first": 2,
+   "msgs_total": 2,
+   "notes": "",
+   "other_runs": [
+    "probe.jsonl"
+   ],
+   "task": "C01"
+  },
+  {
+   "agent": "B",
+   "answer": "",
+   "attempts": 1,
+   "c13_alt_reading": null,
+   "detail": [
+    {
+     "error_codes": [],
+     "errors": 0,
+     "file": "attempt1.jsonl",
+     "how": "run",
+     "ids": [],
+     "msgs": 2,
+     "pass": true,
+     "run": "C02/runs/02-attempt1.jsonl",
+     "why": []
+    }
+   ],
+   "final": true,
+   "final_idfree": true,
+   "final_lenient": true,
+   "first": true,
+   "first_error": false,
+   "first_idfree": true,
+   "msgs_first": 2,
+   "msgs_total": 2,
+   "notes": "",
+   "other_runs": [
+    "probe.jsonl"
+   ],
+   "task": "C02"
+  },
+  {
+   "agent": "C",
+   "answer": "bar 316'de geçersiz oldu; neden: barrier.stop.",
+   "attempts": 1,
+   "c13_alt_reading": null,
+   "detail": [
+    {
+     "error_codes": [],
+     "errors": 0,
+     "file": "attempt1.jsonl",
+     "how": "run",
+     "ids": [],
+     "msgs": 2,
+     "pass": true,
+     "run": "C03/runs/02-attempt1.jsonl",
+     "why": []
+    }
+   ],
+   "final": true,
+   "final_idfree": true,
+   "final_lenient": true,
+   "first": true,
+   "first_error": false,
+   "first_idfree": true,
+   "msgs_first": 2,
+   "msgs_total": 2,
+   "notes": "",
+   "other_runs": [
+    "probe.jsonl"
+   ],
+   "task": "C03"
+  },
+  {
+   "agent": "D",
+   "answer": "",
+   "attempts": 1,
+   "c13_alt_reading": null,
+   "detail": [
+    {
+     "error_codes": [],
+     "errors": 0,
+     "file": "attempt1.jsonl",
+     "how": "run",
+     "ids": [],
+     "msgs": 2,
+     "pass": true,
+     "run": "C04/runs/02-attempt1.jsonl",
+     "why": []
+    }
+   ],
+   "final": true,
+   "final_idfree": true,
+   "final_lenient": true,
+   "first": true,
+   "first_error": false,
+   "first_idfree": true,
+   "msgs_first": 2,
+   "msgs_total": 2,
+   "notes": "",
+   "other_runs": [
+    "probe.jsonl"
+   ],
+   "task": "C04"
+  },
+  {
+   "agent": "E",
+   "answer": "1. cap.ASELS.breakout.down.234\n2. cap.ASELS.breakout.up.64\n3. cap.ASELS.breakout.up.133",
+   "attempts": 1,
+   "c13_alt_reading": null,
+   "detail": [
+    {
+     "error_codes": [],
+     "errors": 0,
+     "file": "attempt1.jsonl",
+     "how": "run",
+     "ids": [],
+     "msgs": 2,
+     "pass": true,
+     "run": "C05/runs/02-attempt1.jsonl",
+     "why": []
+    }
+   ],
+   "final": true,
+   "final_idfree": true,
+   "final_lenient": true,
+   "first": true,
+   "first_error": false,
+   "first_idfree": true,
+   "msgs_first": 2,
+   "msgs_total": 2,
+   "notes": "",
+   "other_runs": [
+    "probe.jsonl"
+   ],
+   "task": "C05"
+  },
+  {
+   "agent": "A",
+   "answer": "Kırılım: 74 kapanış, 42 gerçekleşti.",
+   "attempts": 1,
+   "c13_alt_reading": null,
+   "detail": [
+    {
+     "error_codes": [],
+     "errors": 0,
+     "file": "attempt1.jsonl",
+     "how": "run",
+     "ids": [],
+     "msgs": 2,
+     "pass": true,
+     "run": "C06/runs/02-attempt1.jsonl",
+     "why": []
+    }
+   ],
+   "final": true,
+   "final_idfree": true,
+   "final_lenient": true,
+   "first": true,
+   "first_error": false,
+   "first_idfree": true,
+   "msgs_first": 2,
+   "msgs_total": 2,
+   "notes": "",
+   "other_runs": [
+    "probe.jsonl"
+   ],
+   "task": "C06"
+  },
+  {
+   "agent": "B",
+   "answer": "",
+   "attempts": 1,
+   "c13_alt_reading": null,
+   "detail": [
+    {
+     "error_codes": [],
+     "errors": 0,
+     "file": "attempt1.jsonl",
+     "how": "run",
+     "ids": [],
+     "msgs": 2,
+     "pass": true,
+     "run": "C07/runs/02-attempt1.jsonl",
+     "why": []
+    }
+   ],
+   "final": true,
+   "final_idfree": true,
+   "final_lenient": true,
+   "first": true,
+   "first_error": false,
+   "first_idfree": true,
+   "msgs_first": 2,
+   "msgs_total": 2,
+   "notes": "",
+   "other_runs": [
+    "probe.jsonl"
+   ],
+   "task": "C07"
+  },
+  {
+   "agent": "C",
+   "answer": "",
+   "attempts": 1,
+   "c13_alt_reading": null,
+   "detail": [
+    {
+     "error_codes": [],
+     "errors": 0,
+     "file": "attempt1.jsonl",
+     "how": "run",
+     "ids": [],
+     "msgs": 2,
+     "pass": true,
+     "run": "C08/runs/02-attempt1.jsonl",
+     "why": []
+    }
+   ],
+   "final": true,
+   "final_idfree": true,
+   "final_lenient": true,
+   "first": true,
+   "first_error": false,
+   "first_idfree": true,
+   "msgs_first": 2,
+   "msgs_total": 2,
+   "notes": "",
+   "other_runs": [
+    "probe.jsonl"
+   ],
+   "task": "C08"
+  },
+  {
+   "agent": "D",
+   "answer": "",
+   "attempts": 1,
+   "c13_alt_reading": null,
+   "detail": [
+    {
+     "error_codes": [],
+     "errors": 0,
+     "file": "attempt1.jsonl",
+     "how": "run",
+     "ids": [],
+     "msgs": 2,
+     "pass": true,
+     "run": "C09/runs/02-attempt1.jsonl",
+     "why": []
+    }
+   ],
+   "final": true,
+   "final_idfree": true,
+   "final_lenient": true,
+   "first": true,
+   "first_error": false,
+   "first_idfree": true,
+   "msgs_first": 2,
+   "msgs_total": 2,
+   "notes": "",
+   "other_runs": [
+    "probe.jsonl"
+   ],
+   "task": "C09"
+  },
+  {
+   "agent": "E",
+   "answer": "Evet, kırılan seviye kural olarak çiziliyor.",
+   "attempts": 1,
+   "c13_alt_reading": null,
+   "detail": [
+    {
+     "error_codes": [],
+     "errors": 0,
+     "file": "attempt1.jsonl",
+     "how": "run",
+     "ids": [],
+     "msgs": 2,
+     "pass": true,
+     "run": "C10/runs/02-attempt1.jsonl",
+     "why": []
+    }
+   ],
+   "final": true,
+   "final_idfree": true,
+   "final_lenient": true,
+   "first": true,
+   "first_error": false,
+   "first_idfree": true,
+   "msgs_first": 2,
+   "msgs_total": 2,
+   "notes": "",
+   "other_runs": [
+    "probe.jsonl"
+   ],
+   "task": "C10"
+  },
+  {
+   "agent": "A",
+   "answer": "Kanıt değerleri açılamıyor; flow/* yetkisi gerekir.",
+   "attempts": 1,
+   "c13_alt_reading": null,
+   "detail": [
+    {
+     "error_codes": [],
+     "errors": 0,
+     "file": "attempt1.jsonl",
+     "how": "run",
+     "ids": [],
+     "msgs": 2,
+     "pass": true,
+     "run": "C11/runs/02-attempt1.jsonl",
+     "why": []
+    }
+   ],
+   "final": true,
+   "final_idfree": true,
+   "final_lenient": true,
+   "first": true,
+   "first_error": false,
+   "first_idfree": true,
+   "msgs_first": 2,
+   "msgs_total": 2,
+   "notes": "",
+   "other_runs": [
+    "probe.jsonl"
+   ],
+   "task": "C11"
+  },
+  {
+   "agent": "B",
+   "answer": "",
+   "attempts": 1,
+   "c13_alt_reading": null,
+   "detail": [
+    {
+     "error_codes": [],
+     "errors": 0,
+     "file": "attempt1.jsonl",
+     "how": "run",
+     "ids": [],
+     "msgs": 2,
+     "pass": true,
+     "run": "C12/runs/02-attempt1.jsonl",
+     "why": []
+    }
+   ],
+   "final": true,
+   "final_idfree": true,
+   "final_lenient": true,
+   "first": true,
+   "first_error": false,
+   "first_idfree": true,
+   "msgs_first": 2,
+   "msgs_total": 2,
+   "notes": "",
+   "other_runs": [
+    "probe.jsonl"
+   ],
+   "task": "C12"
+  },
+  {
+   "agent": "C",
+   "answer": "bar 309: born\nbar 309: confirmed\nbar 311: strengthened\nbar 313: realized",
+   "attempts": 1,
+   "c13_alt_reading": false,
+   "detail": [
+    {
+     "error_codes": [],
+     "errors": 0,
+     "file": "attempt1.jsonl",
+     "how": "run",
+     "ids": [],
+     "msgs": 2,
+     "pass": true,
+     "run": "C13/runs/02-attempt1.jsonl",
+     "why": []
+    }
+   ],
+   "final": true,
+   "final_idfree": true,
+   "final_lenient": true,
+   "first": true,
+   "first_error": false,
+   "first_idfree": true,
+   "msgs_first": 2,
+   "msgs_total": 2,
+   "notes": "",
+   "other_runs": [
+    "probe.jsonl"
+   ],
+   "task": "C13"
+  },
+  {
+   "agent": "D",
+   "answer": "",
+   "attempts": 1,
+   "c13_alt_reading": null,
+   "detail": [
+    {
+     "error_codes": [],
+     "errors": 0,
+     "file": "attempt1.jsonl",
+     "how": "run",
+     "ids": [],
+     "msgs": 2,
+     "pass": true,
+     "run": "C14/runs/02-attempt1.jsonl",
+     "why": []
+    }
+   ],
+   "final": true,
+   "final_idfree": true,
+   "final_lenient": true,
+   "first": true,
+   "first_error": false,
+   "first_idfree": true,
+   "msgs_first": 2,
+   "msgs_total": 2,
+   "notes": "",
+   "other_runs": [
+    "probe.jsonl"
+   ],
+   "task": "C14"
+  },
+  {
+   "agent": "E",
+   "answer": "",
+   "attempts": 1,
+   "c13_alt_reading": null,
+   "detail": [
+    {
+     "error_codes": [],
+     "errors": 0,
+     "file": "attempt1.jsonl",
+     "how": "run",
+     "ids": [
+      "cap.THYAO.breakout.down.313",
+      "fnd.THYAO.breakout.down.313"
+     ],
+     "msgs": 2,
+     "pass": true,
+     "run": "C15/runs/02-attempt1.jsonl",
+     "why": []
+    }
+   ],
+   "final": true,
+   "final_idfree": false,
+   "final_lenient": true,
+   "first": true,
+   "first_error": false,
+   "first_idfree": false,
+   "msgs_first": 2,
+   "msgs_total": 2,
+   "notes": "",
+   "other_runs": [
+    "probe.jsonl"
+   ],
+   "task": "C15"
+  },
+  {
+   "agent": "A",
+   "answer": "Hayır, geçerli değil.",
+   "attempts": 1,
+   "c13_alt_reading": null,
+   "detail": [
+    {
+     "error_codes": [],
+     "errors": 0,
+     "file": "attempt1.jsonl",
+     "how": "run",
+     "ids": [],
+     "msgs": 2,
+     "pass": true,
+     "run": "C16/runs/02-attempt1.jsonl",
+     "why": []
+    }
+   ],
+   "final": true,
+   "final_idfree": true,
+   "final_lenient": true,
+   "first": true,
+   "first_error": false,
+   "first_idfree": true,
+   "msgs_first": 2,
+   "msgs_total": 2,
+   "notes": "",
+   "other_runs": [
+    "probe.jsonl"
+   ],
+   "task": "C16"
+  },
+  {
+   "agent": "B",
+   "answer": "kırılım: 4\ndevam: 1\naşırı: 1\nakış: 1",
+   "attempts": 1,
+   "c13_alt_reading": null,
+   "detail": [
+    {
+     "error_codes": [],
+     "errors": 0,
+     "file": "attempt1.jsonl",
+     "how": "run",
+     "ids": [],
+     "msgs": 2,
+     "pass": true,
+     "run": "C17/runs/02-attempt1.jsonl",
+     "why": []
+    }
+   ],
+   "final": true,
+   "final_idfree": true,
+   "final_lenient": true,
+   "first": true,
+   "first_error": false,
+   "first_idfree": true,
+   "msgs_first": 2,
+   "msgs_total": 2,
+   "notes": "",
+   "other_runs": [
+    "probe.jsonl"
+   ],
+   "task": "C17"
+  },
+  {
+   "agent": "C",
+   "answer": "",
+   "attempts": 1,
+   "c13_alt_reading": null,
+   "detail": [
+    {
+     "error_codes": [],
+     "errors": 0,
+     "file": "attempt1.jsonl",
+     "how": "run",
+     "ids": [],
+     "msgs": 2,
+     "pass": true,
+     "run": "C18/runs/02-attempt1.jsonl",
+     "why": []
+    }
+   ],
+   "final": true,
+   "final_idfree": true,
+   "final_lenient": true,
+   "first": true,
+   "first_error": false,
+   "first_idfree": true,
+   "msgs_first": 2,
+   "msgs_total": 2,
+   "notes": "",
+   "other_runs": [
+    "probe.jsonl"
+   ],
+   "task": "C18"
+  },
+  {
+   "agent": "D",
+   "answer": "",
+   "attempts": 1,
+   "c13_alt_reading": null,
+   "detail": [
+    {
+     "error_codes": [],
+     "errors": 0,
+     "file": "attempt1.jsonl",
+     "how": "run",
+     "ids": [],
+     "msgs": 2,
+     "pass": true,
+     "run": "C19/runs/02-attempt1.jsonl",
+     "why": []
+    }
+   ],
+   "final": true,
+   "final_idfree": true,
+   "final_lenient": true,
+   "first": true,
+   "first_error": false,
+   "first_idfree": true,
+   "msgs_first": 2,
+   "msgs_total": 2,
+   "notes": "",
+   "other_runs": [
+    "probe.jsonl"
+   ],
+   "task": "C19"
+  },
+  {
+   "agent": "E",
+   "answer": "",
+   "attempts": 1,
+   "c13_alt_reading": null,
+   "detail": [
+    {
+     "error_codes": [],
+     "errors": 0,
+     "file": "attempt1.jsonl",
+     "how": "run",
+     "ids": [
+      "fnd.THYAO.breakout.down.313"
+     ],
+     "msgs": 1,
+     "pass": true,
+     "run": "C20/runs/02-attempt1.jsonl",
+     "why": []
+    }
+   ],
+   "final": true,
+   "final_idfree": false,
+   "final_lenient": true,
+   "first": true,
+   "first_error": false,
+   "first_idfree": false,
+   "msgs_first": 1,
+   "msgs_total": 1,
+   "notes": "",
+   "other_runs": [
+    "probe.jsonl"
+   ],
+   "task": "C20"
+  }
+ ],
+ "summary": {
+  "attempts": 20,
+  "cost_usd": 0,
+  "final": 20,
+  "final_idfree": 18,
+  "final_lenient": 20,
+  "first": 20,
+  "first_error": 0,
+  "first_idfree": 18,
+  "label": "selftest-sel",
+  "msgs_first": 39,
+  "msgs_total": 39,
+  "output_tokens": 0,
+  "tasks": 20,
+  "tokens": 0,
+  "unnumbered_runs": 20,
+  "wall_s": 0.0
+ }
+}

@@ -1461,9 +1461,18 @@ pub(crate) fn canon_view(
 /// # Errors
 /// The first problem, as text with its JSON pointer.
 pub fn canon_document(doc: &Document) -> Result<Document, String> {
-    let mut out = doc.clone();
+    canon_document_owned(doc.clone())
+}
+
+/// [`canon_document`] of a document the caller gives away (R4/T6: no second copy of a
+/// large document).
+///
+/// # Errors
+/// As [`canon_document`].
+pub fn canon_document_owned(mut doc: Document) -> Result<Document, String> {
+    let mut views = Vec::with_capacity(doc.views.len());
     for i in 0..doc.views.len() {
-        let v = canon_view(doc, &doc.views[i], &format!("/views/{i}"), None).map_err(|e| {
+        let v = canon_view(&doc, &doc.views[i], &format!("/views/{i}"), None).map_err(|e| {
             format!(
                 "document `{}` is not valid: {} ({:?}) at {}",
                 doc.id,
@@ -1472,7 +1481,8 @@ pub fn canon_document(doc: &Document) -> Result<Document, String> {
                 e.path.unwrap_or_default()
             )
         })?;
-        out.views[i] = v;
+        views.push(v);
     }
-    Ok(out)
+    doc.views = views;
+    Ok(doc)
 }

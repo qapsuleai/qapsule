@@ -1,0 +1,25 @@
+PASS |  1d | 2026-03-19 00:00 -> 2026-03-23 00:00 | got: perşembe günü / on Thursday | expected: perşembe günü / on Thursday | Ramazan B. 20 Mar Fri + weekend; 19 Mar half day
+PASS |  1d | 2026-04-22 00:00 -> 2026-04-27 00:00 | got: 2 işlem günü önce / 2 trading days ago | expected: 2 işlem günü önce / 2 trading days ago | 23 Apr Thu holiday: 24 Fri, 27 Mon
+PASS |  1d | 2026-05-15 00:00 -> 2026-05-20 00:00 | got: 2 işlem günü önce / 2 trading days ago | expected: 2 işlem günü önce / 2 trading days ago | 19 May Tue holiday: 18 Mon, 20 Wed
+FAIL |  1d | 2026-05-26 00:00 -> 2026-06-01 00:00 | got: 4 işlem günü önce / 4 trading days ago | expected: salı günü / on Tuesday | Kurban B. 27-29 May 2026
+FAIL |  1d | 2026-05-25 00:00 -> 2026-06-02 00:00 | got: geçen hafta / last week | expected: 3 işlem günü önce / 3 trading days ago | 26 half, 27-29 holiday, 1 Jun, 2 Jun
+FAIL |  1d | 2026-07-14 00:00 -> 2026-07-16 00:00 | got: 2 işlem günü önce / 2 trading days ago | expected: salı günü / on Tuesday | 15 Jul 2026 holiday
+FAIL |  1d | 2025-04-30 00:00 -> 2025-05-02 00:00 | got: 2 işlem günü önce / 2 trading days ago | expected: çarşamba günü / on Wednesday | 1 May 2025 Thu
+FAIL |  1d | 2025-03-28 00:00 -> 2025-04-02 00:00 | got: 3 işlem günü önce / 3 trading days ago | expected: cuma günü / on Friday | Ramazan B. 31 Mar-1 Apr 2025
+FAIL |  1d | 2025-06-04 00:00 -> 2025-06-12 00:00 | got: geçen hafta / last week | expected: 4 işlem günü önce / 4 trading days ago | 5 Jun half; 6 Jun, 9 Jun Kurban
+FAIL |  1d | 2025-10-27 00:00 -> 2025-11-04 00:00 | got: geçen hafta / last week | expected: 5 işlem günü önce / 5 trading days ago | 29 Oct 2025 Wed
+PASS |  1d | 2025-07-14 00:00 -> 2025-07-23 00:00 | got: geçen hafta / last week | expected: geçen hafta / last week | 15 Jul 2025 Tue holiday; 6 trading days, previous ISO week
+PASS |  1d | 2026-11-13 00:00 -> 2026-11-16 00:00 | got: cuma günü / on Friday | expected: cuma günü / on Friday | weekend
+PASS |  1d | 2026-11-12 00:00 -> 2026-11-13 00:00 | got: dün / yesterday | expected: dün / yesterday | plain
+PASS |  1d | 2026-10-02 00:00 -> 2026-11-16 00:00 | got: 2 Ekim'de / on 2 October | expected: 2 Ekim'de / on 2 October | >=20 trading days, same year
+PASS |  1d | 2025-12-31 00:00 -> 2026-02-02 00:00 | got: 31 Aralık 2025'te / on 31 December 2025 | expected: 31 Aralık 2025'te / on 31 December 2025 | year shown
+PASS | 60m | 2026-03-19 12:00 -> 2026-03-23 11:00 | got: perşembe 12:00'de / on Thursday at 12:00 | expected: perşembe 12:00'de / on Thursday at 12:00 | half day + Ramazan B. + weekend
+PASS | 60m | 2026-04-30 15:00 -> 2026-05-04 10:00 | got: perşembe 15:00'te / on Thursday at 15:00 | expected: perşembe 15:00'te / on Thursday at 15:00 | 1 May + weekend
+FAIL | 60m | 2026-05-26 12:00 -> 2026-06-01 10:00 | got: 4 işlem günü önce / 4 trading days ago | expected: salı 12:00'de / on Tuesday at 12:00 | Kurban B. 2026 (not in list)
+FAIL | 60m | 2025-04-30 17:00 -> 2025-05-02 10:00 | got: 2 işlem günü önce / 2 trading days ago | expected: çarşamba 17:00'de / on Wednesday at 17:00 | 1 May 2025 (not in list)
+PASS | 60m | 2026-11-13 17:00 -> 2026-11-16 10:00 | got: cuma 17:00'de / on Friday at 17:00 | expected: cuma 17:00'de / on Friday at 17:00 | weekend
+PASS | 60m | 2026-11-16 10:00 -> 2026-11-16 15:00 | got: 5 saat önce / 5 hours ago | expected: 5 saat önce / 5 hours ago | same day
+FAIL | 60m | 2026-11-16 14:00 -> 2026-11-16 15:00 | got: bir saat önce / an hour ago | expected: 1 saat önce / an hour ago | same day, one hour
+PASS | 60m | 2026-11-12 16:00 -> 2026-11-16 10:00 | got: 2 işlem günü önce / 2 trading days ago | expected: 2 işlem günü önce / 2 trading days ago | Thu -> Mon
+FAIL | 60m | 2025-06-04 16:00 -> 2025-06-10 10:00 | got: 4 işlem günü önce / 4 trading days ago | expected: 2 işlem günü önce / 2 trading days ago | Kurban 2025: 5 half, 6/9 holiday
+pass 13 fail 11

@@ -40,7 +40,7 @@ fn born_new_story_with_deterministic_ids() {
     let s = &ev[0].story;
     assert_eq!(s.stage, Stage::Born);
     assert_eq!(s.families, vec![EvidenceFamily::Price]);
-    assert_eq!(s.ledger_key, "breakout/d1@1");
+    assert_eq!(s.ledger_key, "breakout/up/d1@1");
     assert_eq!(s.ledger_at_birth, LedgerStat::default());
     assert_eq!(s.horizon_bars, 10);
     assert_eq!(ev[0].transition.facts, vec!["fx.AAA.d1.up.0".to_owned()]);
@@ -176,15 +176,15 @@ fn realized_by_outcome_rule_is_a_ledger_hit() {
     assert_eq!(l.len(), 1);
     assert_eq!(l[0].outcome, Outcome::Confirmed);
     assert_eq!(l[0].stage, Some(Stage::Realized));
-    assert_eq!(l[0].key.as_deref(), Some("breakout/d1@1"));
+    assert_eq!(l[0].key.as_deref(), Some("breakout/up/d1@1"));
     assert_eq!(l[0].capsule.as_deref(), Some("cap.AAA.breakout.0"));
     assert_eq!(l[0].finding, "fnd.AAA.breakout.0");
     assert_eq!(l[0].bar, Some(1));
     assert_eq!(l[0].recorded_at, t_of(1));
     // Strictly before: a close at t1 does not count at t1.
-    assert_eq!(e.ledger_stat("breakout/d1@1", t_of(1)).n, 0);
+    assert_eq!(e.ledger_stat("breakout/up/d1@1", t_of(1)).n, 0);
     assert_eq!(
-        e.ledger_stat("breakout/d1@1", t_of(2)),
+        e.ledger_stat("breakout/up/d1@1", t_of(2)),
         LedgerStat { n: 1, realized: 1 }
     );
 }
@@ -266,7 +266,7 @@ fn facts_processed_in_detector_code_order() {
     let ev = e.on_bar(A, SERIES, 0, &b, &[up(A, "z.price", 0), v]);
     assert_eq!(ev.len(), 2);
     assert_eq!(ev[0].transition.stage, Stage::Born);
-    assert_eq!(ev[0].story.ledger_key, "breakout/a.vol@1");
+    assert_eq!(ev[0].story.ledger_key, "breakout/up/a.vol@1");
     assert_eq!(stage_reason(&ev[1]), (Stage::Confirmed, "new_family"));
     // Bar-level rank is the same on both snapshots.
     assert_eq!(ev[0].story.importance, ev[1].story.importance);
@@ -337,7 +337,7 @@ fn retracted_open_story_never_in_ledger() {
     assert!(e.open_stories().is_empty());
     assert!(e.ledger().is_empty());
     assert!(e.ledger_records().is_empty());
-    assert_eq!(e.ledger_stat("breakout/d1@1", i64::MAX).n, 0);
+    assert_eq!(e.ledger_stat("breakout/up/d1@1", i64::MAX).n, 0);
     // Twice, unknown, or back in time: refused.
     assert!(e.retract("cap.AAA.breakout.0", 1, t_of(1), "x").is_none());
     assert!(e.retract("cap.nope", 1, t_of(1), "x").is_none());
@@ -346,7 +346,7 @@ fn retracted_open_story_never_in_ledger() {
 
 #[test]
 fn retracting_a_closed_story_does_not_change_earlier_births() {
-    let key = "breakout/d1@1";
+    let key = "breakout/up/d1@1";
     let mut e = engine(10);
     // bar 0 born, bar 1 realized (close t1), bar 2 born B (sees n=1),
     // retract the first at bar 3, bar 4 born C (sees n=0).

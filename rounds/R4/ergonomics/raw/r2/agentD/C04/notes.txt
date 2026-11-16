@@ -1,0 +1,1 @@
+attempt1: reject_finding with finding selector {instrument:THYAO,meaning:breakout,open:true}; resolved to fnd.THYAO.breakout.down.311. editor has no decide permission, so mode auto produced a proposal (prop-4), not an applied rejection. Spec note: reject_finding needs decide, and auto silently turns into proposal.

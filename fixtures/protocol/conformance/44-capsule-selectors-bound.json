@@ -1641,9 +1641,13 @@
               "expected": [
                 "fact",
                 "first",
+                "instrument",
                 "kind",
                 "latest",
+                "meaning",
                 "on",
+                "open",
+                "stage",
                 "state"
               ],
               "hint": "Fix or remove the field; the authority rejects unknown fields.",
@@ -1977,7 +1981,7 @@
                         "depth": "capsule",
                         "finding": "fnd.THYAO.breakout.down.124",
                         "glyphs": [],
-                        "headline": "THYAO 3 bar önce 4,67'deki desteği aşağı kırdı (kapanış 4,55): aşağı kırılım. Beklenen sonuç bu barda gerçekleşti. Hâlâ geçerli. Karnesi henüz az örnekli: 8 seferin 3'ünde tuttu.",
+                        "headline": "THYAO 3 bar önce 4,67'deki desteği aşağı kırdı (kapanış 4,55): aşağı kırılım. Beklenen sonuç bu barda gerçekleşti. Karnesi henüz az örnekli: 6 seferin 3'ünde tuttu.",
                         "id": "cap.THYAO.breakout.down.124",
                         "provenance": {
                           "at": 1687935600000,
@@ -1994,6 +1998,12 @@
                         "state": "live",
                         "story": {
                           "born_bar": 124,
+                          "condition": {
+                            "key": "level",
+                            "op": "lt",
+                            "subject": "close",
+                            "within_bars": 3
+                          },
                           "direction": "down",
                           "families": [
                             "price",
@@ -2045,15 +2055,18 @@
                             }
                           ],
                           "horizon_bars": 10,
-                          "importance": 3.599202977519779,
+                          "importance": 3.623831857411817,
                           "instrument": "THYAO",
                           "kind": "breakout",
                           "last_bar": 127,
                           "ledger_at_birth": {
-                            "n": 8,
+                            "n": 6,
                             "realized": 3
                           },
-                          "ledger_key": "breakout/breakout.range@1",
+                          "ledger_key": "breakout/down/breakout.range@1",
+                          "resolution": {
+                            "rule": "barrier"
+                          },
                           "series": "px",
                           "stage": "realized",
                           "strength": 1.0,
@@ -2073,7 +2086,7 @@
                         "depth": "capsule",
                         "finding": "fnd.THYAO.breakout.down.124",
                         "glyphs": [],
-                        "headline": "THYAO 3 bar önce 4,67'deki desteği aşağı kırdı (kapanış 4,55): aşağı kırılım. Beklenen sonuç bu barda gerçekleşti. Hâlâ geçerli. Karnesi henüz az örnekli: 8 seferin 3'ünde tuttu.",
+                        "headline": "THYAO 3 bar önce 4,67'deki desteği aşağı kırdı (kapanış 4,55): aşağı kırılım. Beklenen sonuç bu barda gerçekleşti. Karnesi henüz az örnekli: 6 seferin 3'ünde tuttu.",
                         "id": "cap.THYAO.breakout.down.124",
                         "provenance": {
                           "at": 1687935600000,
@@ -2090,6 +2103,12 @@
                         "state": "live",
                         "story": {
                           "born_bar": 124,
+                          "condition": {
+                            "key": "level",
+                            "op": "lt",
+                            "subject": "close",
+                            "within_bars": 3
+                          },
                           "direction": "down",
                           "families": [
                             "price",
@@ -2141,15 +2160,18 @@
                             }
                           ],
                           "horizon_bars": 10,
-                          "importance": 3.599202977519779,
+                          "importance": 3.623831857411817,
                           "instrument": "THYAO",
                           "kind": "breakout",
                           "last_bar": 127,
                           "ledger_at_birth": {
-                            "n": 8,
+                            "n": 6,
                             "realized": 3
                           },
-                          "ledger_key": "breakout/breakout.range@1",
+                          "ledger_key": "breakout/down/breakout.range@1",
+                          "resolution": {
+                            "rule": "barrier"
+                          },
                           "series": "px",
                           "stage": "realized",
                           "strength": 1.0,

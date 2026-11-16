@@ -1,0 +1,1 @@
+attempt1: capsule detail + dispute (claim capsule, t=son geçiş barı, values []); verdict rejected. dispute mesajının zorunlu alanları spec metninden net değil (values/anchor_t/digest isteğe bağlı mı); t olarak hangi barın verileceği belirsiz (last_bar t'sini kullandım). Kapsül id'si önceden bilinmediği için C05/C10 sorgularından aldım.

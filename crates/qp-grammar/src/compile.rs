@@ -60,11 +60,23 @@ pub struct CompileOptions {
     pub emphasis: Vec<Emphasis>,
     /// Theme override (`dark`, `light`); the view's theme otherwise.
     pub theme: Option<String>,
+    /// (R4/M11) Outcome style of glyphs by name (`qp_grammar::glyph::outcome::STYLES`);
+    /// absent = `r3`, the R3 drawing. A view setting like the theme override.
+    pub outcome: Option<String>,
     /// Level of detail when slots are narrower than one pixel (default `true`).
     pub lod: bool,
     /// Surface reduction: aggregate when more than this many slots are visible
     /// (`docs/GRAMMAR.md` §13, `profile.max_points`).
     pub max_points: Option<u64>,
+    /// (R4/T5) Glyph alphabet by name (`crate::glyph::ALPHABETS`); the product's if
+    /// `None`.
+    pub alphabet: Option<String>,
+    /// (R4/H-FP) The face design (`crate::faces`) whose feed face this scene is, set only
+    /// when compiling a face (open depth `sentence`). With a headline template
+    /// ([`crate::faces::FaceDesign::headline`]) the finding's `headline` text field is
+    /// the template's output; `None` (every other scene) or a design without one: the
+    /// capsule's sentence. An unknown name is `invalid`.
+    pub face: Option<String>,
 }
 
 impl CompileOptions {
@@ -77,8 +89,11 @@ impl CompileOptions {
             range: None,
             emphasis: Vec::new(),
             theme: None,
+            outcome: None,
             lod: true,
             max_points: None,
+            alphabet: None,
+            face: None,
         }
     }
 }
@@ -586,6 +601,25 @@ pub fn compile(
         Some(n) => Theme::by_name(n)?,
         None => Theme::dark(),
     };
+    let outcome = match opts.outcome.as_deref() {
+        Some(n) => crate::glyph::outcome::by_name(n)?,
+        None => crate::glyph::outcome::default_style(),
+    };
+    let alphabet = crate::glyph::alphabet_named(opts.alphabet.as_deref()).ok_or_else(|| {
+        GrammarError::new(
+            ErrorKind::Invalid,
+            "",
+            format!(
+                "unknown glyph alphabet `{}` (known: {})",
+                opts.alphabet.as_deref().unwrap_or_default(),
+                crate::glyph::ALPHABETS.join(", ")
+            ),
+        )
+    })?;
+    let headline = match opts.face.as_deref() {
+        Some(n) => crate::faces::headline_template(Some(n))?,
+        None => None,
+    };
     if view.x.kind != ScaleKind::Time {
         return Err(GrammarError::new(
             ErrorKind::Invalid,
@@ -656,6 +690,7 @@ pub fn compile(
     let (left, right, top, bottom) = (LEFT, wi - RIGHT_MARGIN, TOP, hi - BOTTOM_MARGIN);
     let mut fr = Frame {
         p: provider,
+        headline,
         theme,
         bar_series: bar_series.clone(),
         bars,
@@ -930,6 +965,8 @@ pub fn compile(
             k,
             bold: bold.contains(pl.id.as_str()),
             theme,
+            outcome,
+            alphabet,
         };
         scene_panels[pi].layers.push(draw(pl, &g));
     }

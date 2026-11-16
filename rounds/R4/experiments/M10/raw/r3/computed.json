@@ -1,0 +1,200 @@
+{
+  "harness": "r4-h-m8910/1",
+  "design": "r3",
+  "code": "2760beb1",
+  "states": [
+    {
+      "state": 6,
+      "step": 1,
+      "capsule": "cap.SYN25.breakout.down.26",
+      "regions": [
+        {
+          "label": "A",
+          "x": 284.3,
+          "y": 222.8,
+          "correct": false
+        },
+        {
+          "label": "B",
+          "x": 75.0,
+          "y": 103.5,
+          "correct": true
+        },
+        {
+          "label": "C",
+          "x": 162.9,
+          "y": 170.0,
+          "correct": false
+        },
+        {
+          "label": "D",
+          "x": 226.1,
+          "y": 70.1,
+          "correct": false
+        }
+      ],
+      "g1": "B",
+      "g2": "evet",
+      "g3": "kapandı: tutmadı",
+      "shared": 3,
+      "shared_ids": [
+        "evidence:fx.SYN25.breakout.range.down.26",
+        "glyph",
+        "price"
+      ],
+      "area_share_before": 0.2813,
+      "area_share_after": 0.653,
+      "shift_mean": 88.02,
+      "shift_max": 143.01,
+      "taps": 2,
+      "shared_open": 5
+    },
+    {
+      "state": 101,
+      "step": 10,
+      "capsule": "cap.SYN06.breakout.up.118",
+      "regions": [
+        {
+          "label": "A",
+          "x": 92.8,
+          "y": 81.7,
+          "correct": false
+        },
+        {
+          "label": "B",
+          "x": 286.0,
+          "y": 126.5,
+          "correct": true
+        },
+        {
+          "label": "C",
+          "x": 210.9,
+          "y": 130.9,
+          "correct": false
+        },
+        {
+          "label": "D",
+          "x": 38.3,
+          "y": 116.2,
+          "correct": false
+        }
+      ],
+      "g1": "B",
+      "g2": "evet",
+      "g3": "evet, sürüyor",
+      "shared": 4,
+      "shared_ids": [
+        "bar:118",
+        "evidence:fx.SYN06.breakout.range.up.118",
+        "glyph",
+        "price"
+      ],
+      "area_share_before": 0.2861,
+      "area_share_after": 0.6816,
+      "shift_mean": 134.01,
+      "shift_max": 258.01,
+      "taps": 2,
+      "shared_open": 7
+    },
+    {
+      "state": 112,
+      "step": 10,
+      "capsule": "cap.SYN28.reversal.down.120",
+      "regions": [
+        {
+          "label": "A",
+          "x": 187.6,
+          "y": 169.7,
+          "correct": false
+        },
+        {
+          "label": "B",
+          "x": 25.7,
+          "y": 124.3,
+          "correct": false
+        },
+        {
+          "label": "C",
+          "x": 91.7,
+          "y": 86.6,
+          "correct": false
+        },
+        {
+          "label": "D",
+          "x": 303.0,
+          "y": 108.0,
+          "correct": true
+        }
+      ],
+      "g1": "D",
+      "g2": "evet",
+      "g3": "evet, sürüyor",
+      "shared": 3,
+      "shared_ids": [
+        "bar:120",
+        "glyph",
+        "price"
+      ],
+      "area_share_before": 0.2676,
+      "area_share_after": 0.6706,
+      "shift_mean": 140.78,
+      "shift_max": 274.01,
+      "taps": 2,
+      "shared_open": 6
+    },
+    {
+      "state": 3,
+      "step": 46,
+      "capsule": "cap.SYN06.extreme.up.123",
+      "regions": [
+        {
+          "label": "A",
+          "x": 24.5,
+          "y": 192.4,
+          "correct": false
+        },
+        {
+          "label": "B",
+          "x": 238.5,
+          "y": 220.3,
+          "correct": false
+        },
+        {
+          "label": "C",
+          "x": 186.5,
+          "y": 178.0,
+          "correct": false
+        },
+        {
+          "label": "D",
+          "x": 294.0,
+          "y": 262.0,
+          "correct": true
+        }
+      ],
+      "g1": "D",
+      "g2": "evet",
+      "g3": "hayır, artık geçerli değil",
+      "shared": 4,
+      "shared_ids": [
+        "bar:123",
+        "evidence:fx.SYN06.extreme.rsi.overbought.123",
+        "glyph",
+        "price"
+      ],
+      "area_share_before": 0.2861,
+      "area_share_after": 0.6707,
+      "shift_mean": 136.63,
+      "shift_max": 266.01,
+      "taps": 2,
+      "shared_open": 7
+    }
+  ],
+  "mean": {
+    "area_share_after": 0.669,
+    "area_share_before": 0.2803,
+    "shared": 3.5,
+    "shift_mean": 124.86,
+    "taps": 2.0
+  }
+}

@@ -547,8 +547,11 @@ fn remark(p: &Plan<'_>) -> Option<String> {
     })
 }
 
+/// The validity tail of an open story. A closed story has none: its stage remark is the
+/// validity clause and says how it ended (FIX-E1 B2, K42: never "still holds" next to a
+/// closed glyph).
 fn tail(p: &Plan<'_>) -> Option<&'static str> {
-    if p.closed_no || matches!(p.class, Class::Holding | Class::Ended) {
+    if p.closed() || matches!(p.class, Class::Holding | Class::Ended) {
         return None;
     }
     Some(match (p.class, p.validity) {

@@ -1,0 +1,534 @@
+{
+  "command": "cargo run --release -p qp-capsule --example sensitivity -- real",
+  "rules": [
+    "kinddir",
+    "barrier",
+    "confirm"
+  ],
+  "data": "real",
+  "audience": {
+    "watchlist": [
+      "AEFES",
+      "AKBNK",
+      "ALARK",
+      "ASELS",
+      "ASTOR",
+      "BIMAS",
+      "BRSAN",
+      "CIMSA",
+      "DOAS",
+      "EKGYO"
+    ],
+    "positions": {
+      "AEFES": 100.0,
+      "ASELS": -50.0,
+      "EREGL": 200.0
+    },
+    "intents_on": [
+      "BRSAN"
+    ]
+  },
+  "universe": [
+    "AEFES",
+    "AKBNK",
+    "ALARK",
+    "ASELS",
+    "ASTOR",
+    "BIMAS",
+    "BRSAN",
+    "CIMSA",
+    "DOAS",
+    "EKGYO",
+    "EREGL"
+  ],
+  "warmup_bars": 50,
+  "level_never_changed": true,
+  "datasets": [
+    {
+      "name": "real-1day",
+      "instruments": 31,
+      "trading_days": 2220,
+      "counted_days": 2170,
+      "stories": 13274,
+      "events": 34619,
+      "levels": {
+        "all": {
+          "births": {
+            "days": 2170,
+            "mean": 2.0889400921658985,
+            "median": 2.0,
+            "p90": 5.0,
+            "max": 13.0,
+            "zero_share": 0.19032258064516128
+          },
+          "events": {
+            "days": 2170,
+            "mean": 5.489400921658986,
+            "median": 5.0,
+            "p90": 10.0,
+            "max": 26.0,
+            "zero_share": 0.02534562211981567
+          },
+          "override_births": 0,
+          "override_events": 0,
+          "override_events_by_stage": {},
+          "births_total": 4533
+        },
+        "balanced": {
+          "births": {
+            "days": 2170,
+            "mean": 1.2138248847926267,
+            "median": 1.0,
+            "p90": 3.0,
+            "max": 10.0,
+            "zero_share": 0.3534562211981567
+          },
+          "events": {
+            "days": 2170,
+            "mean": 3.1308755760368663,
+            "median": 3.0,
+            "p90": 6.0,
+            "max": 16.0,
+            "zero_share": 0.10184331797235023
+          },
+          "override_births": 1222,
+          "override_events": 3305,
+          "override_events_by_stage": {
+            "born": 1222,
+            "confirmed": 4,
+            "expired": 84,
+            "invalidated": 555,
+            "realized": 639,
+            "strengthened": 386,
+            "weakened": 415
+          },
+          "births_total": 2634
+        },
+        "important": {
+          "births": {
+            "days": 2170,
+            "mean": 0.9631336405529954,
+            "median": 1.0,
+            "p90": 2.0,
+            "max": 8.0,
+            "zero_share": 0.419815668202765
+          },
+          "events": {
+            "days": 2170,
+            "mean": 2.526728110599078,
+            "median": 2.0,
+            "p90": 5.0,
+            "max": 13.0,
+            "zero_share": 0.15207373271889402
+          },
+          "override_births": 1582,
+          "override_events": 4200,
+          "override_events_by_stage": {
+            "born": 1582,
+            "confirmed": 9,
+            "expired": 109,
+            "invalidated": 701,
+            "realized": 824,
+            "strengthened": 488,
+            "weakened": 487
+          },
+          "births_total": 2090
+        }
+      },
+      "groups": {
+        "future": {
+          "default_level": "important",
+          "births": {
+            "days": 2170,
+            "mean": 0.9631336405529954,
+            "median": 1.0,
+            "p90": 2.0,
+            "max": 8.0,
+            "zero_share": 0.419815668202765
+          },
+          "events": {
+            "days": 2170,
+            "mean": 2.526728110599078,
+            "median": 2.0,
+            "p90": 5.0,
+            "max": 13.0,
+            "zero_share": 0.15207373271889402
+          },
+          "override_births": 1582,
+          "override_events": 4200
+        },
+        "habituated": {
+          "default_level": "all",
+          "births": {
+            "days": 2170,
+            "mean": 2.0889400921658985,
+            "median": 2.0,
+            "p90": 5.0,
+            "max": 13.0,
+            "zero_share": 0.19032258064516128
+          },
+          "events": {
+            "days": 2170,
+            "mean": 5.489400921658986,
+            "median": 5.0,
+            "p90": 10.0,
+            "max": 26.0,
+            "zero_share": 0.02534562211981567
+          },
+          "override_births": 0,
+          "override_events": 0
+        }
+      },
+      "market_births": {
+        "all": {
+          "days": 2170,
+          "mean": 6.061751152073732,
+          "median": 5.0,
+          "p90": 12.0,
+          "max": 37.0,
+          "zero_share": 0.023502304147465437
+        },
+        "balanced": {
+          "days": 2170,
+          "mean": 1.9129032258064516,
+          "median": 1.0,
+          "p90": 4.0,
+          "max": 18.0,
+          "zero_share": 0.24608294930875577
+        },
+        "important": {
+          "days": 2170,
+          "mean": 0.6783410138248848,
+          "median": 0.0,
+          "p90": 2.0,
+          "max": 8.0,
+          "zero_share": 0.5751152073732719
+        }
+      }
+    },
+    {
+      "name": "real-1hour",
+      "instruments": 31,
+      "trading_days": 502,
+      "counted_days": 496,
+      "stories": 24035,
+      "events": 64112,
+      "levels": {
+        "all": {
+          "births": {
+            "days": 496,
+            "mean": 17.183467741935484,
+            "median": 16.0,
+            "p90": 26.0,
+            "max": 44.0,
+            "zero_share": 0.0
+          },
+          "events": {
+            "days": 496,
+            "mean": 45.8125,
+            "median": 43.0,
+            "p90": 65.0,
+            "max": 115.0,
+            "zero_share": 0.0
+          },
+          "override_births": 0,
+          "override_events": 0,
+          "override_events_by_stage": {},
+          "births_total": 8523
+        },
+        "balanced": {
+          "births": {
+            "days": 496,
+            "mean": 10.036290322580646,
+            "median": 10.0,
+            "p90": 16.0,
+            "max": 29.0,
+            "zero_share": 0.0
+          },
+          "events": {
+            "days": 496,
+            "mean": 26.18548387096774,
+            "median": 25.0,
+            "p90": 41.0,
+            "max": 71.0,
+            "zero_share": 0.0
+          },
+          "override_births": 2045,
+          "override_events": 5559,
+          "override_events_by_stage": {
+            "born": 2045,
+            "confirmed": 4,
+            "expired": 181,
+            "invalidated": 962,
+            "realized": 1039,
+            "strengthened": 575,
+            "weakened": 753
+          },
+          "births_total": 4978
+        },
+        "important": {
+          "births": {
+            "days": 496,
+            "mean": 7.850806451612903,
+            "median": 7.0,
+            "p90": 13.0,
+            "max": 22.0,
+            "zero_share": 0.0
+          },
+          "events": {
+            "days": 496,
+            "mean": 21.183467741935484,
+            "median": 20.0,
+            "p90": 33.0,
+            "max": 58.0,
+            "zero_share": 0.0
+          },
+          "override_births": 2666,
+          "override_events": 6913,
+          "override_events_by_stage": {
+            "born": 2666,
+            "confirmed": 8,
+            "expired": 214,
+            "invalidated": 1194,
+            "realized": 1310,
+            "strengthened": 691,
+            "weakened": 830
+          },
+          "births_total": 3894
+        }
+      },
+      "groups": {
+        "future": {
+          "default_level": "important",
+          "births": {
+            "days": 496,
+            "mean": 7.850806451612903,
+            "median": 7.0,
+            "p90": 13.0,
+            "max": 22.0,
+            "zero_share": 0.0
+          },
+          "events": {
+            "days": 496,
+            "mean": 21.183467741935484,
+            "median": 20.0,
+            "p90": 33.0,
+            "max": 58.0,
+            "zero_share": 0.0
+          },
+          "override_births": 2666,
+          "override_events": 6913
+        },
+        "habituated": {
+          "default_level": "all",
+          "births": {
+            "days": 496,
+            "mean": 17.183467741935484,
+            "median": 16.0,
+            "p90": 26.0,
+            "max": 44.0,
+            "zero_share": 0.0
+          },
+          "events": {
+            "days": 496,
+            "mean": 45.8125,
+            "median": 43.0,
+            "p90": 65.0,
+            "max": 115.0,
+            "zero_share": 0.0
+          },
+          "override_births": 0,
+          "override_events": 0
+        }
+      },
+      "market_births": {
+        "all": {
+          "days": 496,
+          "mean": 48.08467741935484,
+          "median": 46.0,
+          "p90": 70.0,
+          "max": 125.0,
+          "zero_share": 0.0
+        },
+        "balanced": {
+          "days": 496,
+          "mean": 16.157258064516128,
+          "median": 15.0,
+          "p90": 26.0,
+          "max": 57.0,
+          "zero_share": 0.0
+        },
+        "important": {
+          "days": 496,
+          "mean": 6.578629032258065,
+          "median": 5.0,
+          "p90": 12.0,
+          "max": 38.0,
+          "zero_share": 0.028225806451612902
+        }
+      }
+    }
+  ],
+  "pooled": {
+    "name": "pooled",
+    "instruments": 31,
+    "trading_days": 2722,
+    "counted_days": 2666,
+    "stories": 37309,
+    "events": 98731,
+    "levels": {
+      "all": {
+        "births": {
+          "days": 2666,
+          "mean": 4.897224306076519,
+          "median": 2.0,
+          "p90": 16.0,
+          "max": 44.0,
+          "zero_share": 0.15491372843210802
+        },
+        "events": {
+          "days": 2666,
+          "mean": 12.991372843210803,
+          "median": 6.0,
+          "p90": 43.0,
+          "max": 115.0,
+          "zero_share": 0.020630157539384845
+        },
+        "override_births": 0,
+        "override_events": 0,
+        "override_events_by_stage": {},
+        "births_total": 13056
+      },
+      "balanced": {
+        "births": {
+          "days": 2666,
+          "mean": 2.8552138034508627,
+          "median": 1.0,
+          "p90": 9.0,
+          "max": 29.0,
+          "zero_share": 0.28769692423105775
+        },
+        "events": {
+          "days": 2666,
+          "mean": 7.420105026256564,
+          "median": 3.0,
+          "p90": 24.0,
+          "max": 71.0,
+          "zero_share": 0.08289572393098274
+        },
+        "override_births": 3267,
+        "override_events": 8864,
+        "override_events_by_stage": {
+          "born": 3267,
+          "confirmed": 8,
+          "expired": 265,
+          "invalidated": 1517,
+          "realized": 1678,
+          "strengthened": 961,
+          "weakened": 1168
+        },
+        "births_total": 7612
+      },
+      "important": {
+        "births": {
+          "days": 2666,
+          "mean": 2.244561140285071,
+          "median": 1.0,
+          "p90": 7.0,
+          "max": 22.0,
+          "zero_share": 0.34171042760690173
+        },
+        "events": {
+          "days": 2666,
+          "mean": 5.99774943735934,
+          "median": 3.0,
+          "p90": 19.0,
+          "max": 58.0,
+          "zero_share": 0.12378094523630907
+        },
+        "override_births": 4248,
+        "override_events": 11113,
+        "override_events_by_stage": {
+          "born": 4248,
+          "confirmed": 17,
+          "expired": 323,
+          "invalidated": 1895,
+          "realized": 2134,
+          "strengthened": 1179,
+          "weakened": 1317
+        },
+        "births_total": 5984
+      }
+    },
+    "groups": {
+      "future": {
+        "default_level": "important",
+        "births": {
+          "days": 2666,
+          "mean": 2.244561140285071,
+          "median": 1.0,
+          "p90": 7.0,
+          "max": 22.0,
+          "zero_share": 0.34171042760690173
+        },
+        "events": {
+          "days": 2666,
+          "mean": 5.99774943735934,
+          "median": 3.0,
+          "p90": 19.0,
+          "max": 58.0,
+          "zero_share": 0.12378094523630907
+        },
+        "override_births": 4248,
+        "override_events": 11113
+      },
+      "habituated": {
+        "default_level": "all",
+        "births": {
+          "days": 2666,
+          "mean": 4.897224306076519,
+          "median": 2.0,
+          "p90": 16.0,
+          "max": 44.0,
+          "zero_share": 0.15491372843210802
+        },
+        "events": {
+          "days": 2666,
+          "mean": 12.991372843210803,
+          "median": 6.0,
+          "p90": 43.0,
+          "max": 115.0,
+          "zero_share": 0.020630157539384845
+        },
+        "override_births": 0,
+        "override_events": 0
+      }
+    },
+    "market_births": {
+      "all": {
+        "days": 2666,
+        "mean": 13.879969992498124,
+        "median": 6.0,
+        "p90": 45.0,
+        "max": 125.0,
+        "zero_share": 0.019129782445611403
+      },
+      "balanced": {
+        "days": 2666,
+        "mean": 4.563015753938485,
+        "median": 2.0,
+        "p90": 15.0,
+        "max": 57.0,
+        "zero_share": 0.2003000750187547
+      },
+      "important": {
+        "days": 2666,
+        "mean": 1.7760690172543137,
+        "median": 1.0,
+        "p90": 5.0,
+        "max": 38.0,
+        "zero_share": 0.47336834208552137
+      }
+    }
+  }
+}

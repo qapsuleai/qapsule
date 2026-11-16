@@ -4,6 +4,11 @@
 //! in the light and the dark theme: `fixtures/golden/views/g1-glyphs-light.png`,
 //! `g1-glyphs-dark.png`. Other channels fixed: strength 0.6, confidence 0.6 (fill),
 //! freshness 1, two confirmations, no server mark.
+//!
+//! (R4/T3, K42/A28) A second sheet for the validity channel, a new view:
+//! `g2-glyphs-validity-light.png` / `-dark.png`, columns final (no validity), final
+//! `valid`, final `no_longer`, realized `closed`, failed `closed`. Only `no_longer` draws
+//! differently; the g1 sheets are unchanged (validity absent).
 
 #[path = "support/golden_check.rs"]
 mod golden_check;
@@ -12,15 +17,25 @@ use qp_grammar::glyph::{alphabet, GlyphBox};
 use qp_grammar::Theme;
 use qp_render::render_scene_png;
 use qp_render::scene::scene_of;
-use qp_schema::capsule::{Direction, GlyphPhase, GlyphSpec, MeaningKind};
+use qp_schema::capsule::{Direction, GlyphPhase, GlyphSpec, MeaningKind, Validity};
 use qp_schema::scene::{Align, Prim};
 
-const PHASES: [(GlyphPhase, &str); 5] = [
-    (GlyphPhase::Candidate, "candidate"),
-    (GlyphPhase::Final, "final"),
-    (GlyphPhase::Realized, "realized"),
-    (GlyphPhase::Failed, "failed"),
-    (GlyphPhase::Retracted, "retracted"),
+type Col = (GlyphPhase, Option<Validity>, &'static str);
+
+const PHASES: [Col; 5] = [
+    (GlyphPhase::Candidate, None, "candidate"),
+    (GlyphPhase::Final, None, "final"),
+    (GlyphPhase::Realized, None, "realized"),
+    (GlyphPhase::Failed, None, "failed"),
+    (GlyphPhase::Retracted, None, "retracted"),
+];
+
+const VALIDITY: [Col; 5] = [
+    (GlyphPhase::Final, None, "final"),
+    (GlyphPhase::Final, Some(Validity::Valid), "valid"),
+    (GlyphPhase::Final, Some(Validity::NoLonger), "no_longer"),
+    (GlyphPhase::Realized, Some(Validity::Closed), "realized"),
+    (GlyphPhase::Failed, Some(Validity::Closed), "failed"),
 ];
 const DIRS: [(Direction, &str); 3] = [
     (Direction::Up, "up"),
@@ -34,8 +49,12 @@ const LABEL_W: i32 = 176;
 const HEAD: i32 = 30;
 
 fn sheet(theme: &Theme) -> Vec<u8> {
+    sheet_of(theme, &PHASES)
+}
+
+fn sheet_of(theme: &Theme, cols: &[Col; 5]) -> Vec<u8> {
     let mut prims = Vec::new();
-    for (j, (_, name)) in PHASES.iter().enumerate() {
+    for (j, (_, _, name)) in cols.iter().enumerate() {
         prims.push(Prim::Text {
             x: LABEL_W + CELL * i32::try_from(j).unwrap() + 34
                 - i32::try_from(name.len() * 36 / 10).unwrap(),
@@ -67,7 +86,7 @@ fn sheet(theme: &Theme) -> Vec<u8> {
                 color: theme.text,
                 align: Align::Left,
             });
-            for (j, (phase, _)) in PHASES.iter().enumerate() {
+            for (j, (phase, validity, _)) in cols.iter().enumerate() {
                 let spec = GlyphSpec {
                     kind,
                     direction: dir,
@@ -77,6 +96,7 @@ fn sheet(theme: &Theme) -> Vec<u8> {
                     freshness: 1.0,
                     confirmations: 2,
                     server: false,
+                    validity: *validity,
                 };
                 #[allow(clippy::cast_precision_loss)]
                 let bx = GlyphBox {
@@ -106,4 +126,22 @@ fn glyph_sheet_dark() {
     let a = sheet(&Theme::dark());
     assert_eq!(a, sheet(&Theme::dark()), "two renders differ");
     golden_check::check_file("fixtures/golden/views/g1-glyphs-dark.png", &a);
+}
+
+#[test]
+fn glyph_validity_sheet_light() {
+    let a = sheet_of(&Theme::light(), &VALIDITY);
+    assert_eq!(
+        a,
+        sheet_of(&Theme::light(), &VALIDITY),
+        "two renders differ"
+    );
+    golden_check::check_file("fixtures/golden/views/g2-glyphs-validity-light.png", &a);
+}
+
+#[test]
+fn glyph_validity_sheet_dark() {
+    let a = sheet_of(&Theme::dark(), &VALIDITY);
+    assert_eq!(a, sheet_of(&Theme::dark(), &VALIDITY), "two renders differ");
+    golden_check::check_file("fixtures/golden/views/g2-glyphs-validity-dark.png", &a);
 }

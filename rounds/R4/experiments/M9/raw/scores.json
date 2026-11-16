@@ -1,0 +1,282 @@
+{
+  "designs": {
+    "elikov": {
+      "min_scroll_from_key": {
+        "G1": 0,
+        "G2": 0,
+        "G3": 0
+      },
+      "persona": {
+        "F": {
+          "accuracy": 0.6667,
+          "g1_f1": 0.0,
+          "g1_precision": 0.0,
+          "g1_recall": 0.0,
+          "g2": 1.0,
+          "g3": 1.0,
+          "scroll": 0.8333,
+          "taps": 0.0
+        },
+        "H": {
+          "accuracy": 0.6667,
+          "g1_f1": 0.0,
+          "g1_precision": 0.0,
+          "g1_recall": 0.0,
+          "g2": 1.0,
+          "g3": 1.0,
+          "scroll": 1.6667,
+          "taps": 0.0
+        }
+      },
+      "rules": 5,
+      "weighted_accuracy": 0.6667,
+      "weighted_scroll_plus_taps": 1.1111
+    },
+    "r3": {
+      "min_scroll_from_key": {
+        "G1": null,
+        "G2": null,
+        "G3": 0
+      },
+      "persona": {
+        "F": {
+          "accuracy": 0.0,
+          "g1_f1": 0.0,
+          "g1_precision": 0.0,
+          "g1_recall": 0.0,
+          "g2": 0.0,
+          "g3": 0.0,
+          "scroll": null,
+          "taps": 0.0
+        },
+        "H": {
+          "accuracy": 0.0,
+          "g1_f1": 0.0,
+          "g1_precision": 0.0,
+          "g1_recall": 0.0,
+          "g2": 0.0,
+          "g3": 0.0,
+          "scroll": null,
+          "taps": 0.0
+        }
+      },
+      "rules": 0,
+      "weighted_accuracy": 0.0,
+      "weighted_scroll_plus_taps": null
+    },
+    "vakiro": {
+      "min_scroll_from_key": {
+        "G1": 0,
+        "G2": 0,
+        "G3": 1
+      },
+      "persona": {
+        "F": {
+          "accuracy": 0.4444,
+          "g1_f1": 0.3333,
+          "g1_precision": 0.3333,
+          "g1_recall": 0.3333,
+          "g2": 1.0,
+          "g3": 0.0,
+          "scroll": 0.0,
+          "taps": 0.0
+        },
+        "H": {
+          "accuracy": 0.5556,
+          "g1_f1": 0.6667,
+          "g1_precision": 0.6667,
+          "g1_recall": 0.6667,
+          "g2": 1.0,
+          "g3": 0.0,
+          "scroll": 0.2,
+          "taps": 0.0
+        }
+      },
+      "rules": 4,
+      "weighted_accuracy": 0.4815,
+      "weighted_scroll_plus_taps": 0.0667
+    }
+  },
+  "experiment": "m9",
+  "harness": "r4-h-m8910/1",
+  "limit": "Persona ajanı insan değildir; bu ölçüm ön elemedir, son söz insan testi v2'dedir.",
+  "readers": [
+    {
+      "design": "r3",
+      "g1_f1": 0.0,
+      "g2": false,
+      "g3": false,
+      "parsed": true,
+      "persona": "F",
+      "reader": "F_1ffa7657_r1"
+    },
+    {
+      "design": "r3",
+      "g1_f1": 0.0,
+      "g2": false,
+      "g3": false,
+      "parsed": true,
+      "persona": "F",
+      "reader": "F_1ffa7657_r2"
+    },
+    {
+      "design": "r3",
+      "g1_f1": 0.0,
+      "g2": false,
+      "g3": false,
+      "parsed": true,
+      "persona": "F",
+      "reader": "F_1ffa7657_r3"
+    },
+    {
+      "design": "elikov",
+      "g1_f1": 0.0,
+      "g2": true,
+      "g3": true,
+      "parsed": true,
+      "persona": "F",
+      "reader": "F_5e000c35_r1"
+    },
+    {
+      "design": "elikov",
+      "g1_f1": 0.0,
+      "g2": true,
+      "g3": true,
+      "parsed": true,
+      "persona": "F",
+      "reader": "F_5e000c35_r2"
+    },
+    {
+      "design": "elikov",
+      "g1_f1": 0.0,
+      "g2": true,
+      "g3": true,
+      "parsed": true,
+      "persona": "F",
+      "reader": "F_5e000c35_r3"
+    },
+    {
+      "design": "vakiro",
+      "g1_f1": 1.0,
+      "g2": true,
+      "g3": false,
+      "parsed": true,
+      "persona": "F",
+      "reader": "F_c6640e72_r1"
+    },
+    {
+      "design": "vakiro",
+      "g1_f1": 0.0,
+      "g2": true,
+      "g3": false,
+      "parsed": true,
+      "persona": "F",
+      "reader": "F_c6640e72_r2"
+    },
+    {
+      "design": "vakiro",
+      "g1_f1": 0.0,
+      "g2": true,
+      "g3": false,
+      "parsed": true,
+      "persona": "F",
+      "reader": "F_c6640e72_r3"
+    },
+    {
+      "design": "r3",
+      "g1_f1": 0.0,
+      "g2": false,
+      "g3": false,
+      "parsed": true,
+      "persona": "H",
+      "reader": "H_1ffa7657_r1"
+    },
+    {
+      "design": "r3",
+      "g1_f1": 0.0,
+      "g2": false,
+      "g3": false,
+      "parsed": true,
+      "persona": "H",
+      "reader": "H_1ffa7657_r2"
+    },
+    {
+      "design": "r3",
+      "g1_f1": 0.0,
+      "g2": false,
+      "g3": false,
+      "parsed": true,
+      "persona": "H",
+      "reader": "H_1ffa7657_r3"
+    },
+    {
+      "design": "elikov",
+      "g1_f1": 0.0,
+      "g2": true,
+      "g3": true,
+      "parsed": true,
+      "persona": "H",
+      "reader": "H_5e000c35_r1"
+    },
+    {
+      "design": "elikov",
+      "g1_f1": 0.0,
+      "g2": true,
+      "g3": true,
+      "parsed": true,
+      "persona": "H",
+      "reader": "H_5e000c35_r2"
+    },
+    {
+      "design": "elikov",
+      "g1_f1": 0.0,
+      "g2": true,
+      "g3": true,
+      "parsed": true,
+      "persona": "H",
+      "reader": "H_5e000c35_r3"
+    },
+    {
+      "design": "vakiro",
+      "g1_f1": 0.0,
+      "g2": true,
+      "g3": false,
+      "parsed": true,
+      "persona": "H",
+      "reader": "H_c6640e72_r1"
+    },
+    {
+      "design": "vakiro",
+      "g1_f1": 1.0,
+      "g2": true,
+      "g3": false,
+      "parsed": true,
+      "persona": "H",
+      "reader": "H_c6640e72_r2"
+    },
+    {
+      "design": "vakiro",
+      "g1_f1": 1.0,
+      "g2": true,
+      "g3": false,
+      "parsed": true,
+      "persona": "H",
+      "reader": "H_c6640e72_r3"
+    }
+  ],
+  "selection": {
+    "ranking": [
+      "elikov",
+      "vakiro",
+      "r3"
+    ],
+    "selected": "elikov",
+    "steps": [
+      "primary decides: `elikov` 0.6667 vs `vakiro` 0.4815"
+    ],
+    "top2": [
+      "elikov",
+      "vakiro"
+    ]
+  }
+}

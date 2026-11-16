@@ -1,0 +1,1 @@
+attempt1: query present with finding selector {instrument THYAO, meaning extreme, open true} and surface "phone" (phone profile depth = capsule); returned depth capsule. Unclear in spec: headless default depth is chart, so surface override (or input open to=capsule) is needed; "aşırılık" = meaning extreme had to be inferred.

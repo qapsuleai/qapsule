@@ -191,6 +191,14 @@ impl Session {
                 };
                 (o, Vec::new())
             }
+            Gesture::Style {
+                face,
+                alphabet,
+                theme,
+            } => {
+                self.set_style(ci, face.as_deref(), alphabet.as_deref(), theme.as_deref())?;
+                (Out::default(), Vec::new())
+            }
             Gesture::Look { .. }
             | Gesture::Pan { .. }
             | Gesture::Zoom { .. }
@@ -282,6 +290,54 @@ impl Session {
         } else {
             OpenDepth::Sentence
         }
+    }
+
+    /// (R4/T5) The `style` gesture: the connection's face design, glyph alphabet and
+    /// theme (view state; nothing is written). Validated before anything changes.
+    fn set_style(
+        &mut self,
+        ci: usize,
+        face: Option<&str>,
+        alphabet: Option<&str>,
+        theme: Option<&str>,
+    ) -> PResult<()> {
+        if let Some(f) = face {
+            if !depth::is_face(f) {
+                return Err(E::new(ErrorCode::Invalid, format!("unknown face `{f}`"))
+                    .at(ptr(GP, "face"))
+                    .expected(depth::FACES)
+                    .build());
+            }
+        }
+        if let Some(a) = alphabet {
+            if qp_grammar::glyph::alphabet_named(Some(a)).is_none() {
+                return Err(
+                    E::new(ErrorCode::Invalid, format!("unknown alphabet `{a}`"))
+                        .at(ptr(GP, "alphabet"))
+                        .expected(qp_grammar::glyph::ALPHABETS)
+                        .build(),
+                );
+            }
+        }
+        if let Some(t) = theme {
+            if t != "view" && !qp_grammar::theme::THEMES.contains(&t) {
+                return Err(E::new(ErrorCode::Invalid, format!("unknown theme `{t}`"))
+                    .at(ptr(GP, "theme"))
+                    .expected(qp_grammar::theme::THEMES.into_iter().chain(["view"]))
+                    .build());
+            }
+        }
+        let look = &mut self.conns[ci].look;
+        if let Some(f) = face {
+            look.face = (f != depth::FACES[0]).then(|| f.to_owned());
+        }
+        if let Some(a) = alphabet {
+            look.alphabet = (a != qp_grammar::glyph::ALPHABETS[0]).then(|| a.to_owned());
+        }
+        if let Some(t) = theme {
+            look.theme = (t != "view").then(|| t.to_owned());
+        }
+        Ok(())
     }
 
     /// Records a frame size the surface reported for `key`.
@@ -384,6 +440,25 @@ impl Session {
             d
         };
         let pr = self.present_at(ci, finding, face)?;
+        // (R4/T5) A face design other than the default card is the connection's choice
+        // (view state); built by the same grammar rule the shell's replica uses.
+        if d == OpenDepth::Sentence && self.conns[ci].look.face.is_some() {
+            if pr.capsule_view.is_none() {
+                return Ok(None);
+            }
+            let name = self.conns[ci].look.face.clone();
+            let max_points = self.conns[ci].profile.max_points;
+            warm(rd!(self), &mut self.cache);
+            let p = DocProvider::new(rd!(self), &self.cache).with_headlines(&self.headlines);
+            return Ok(depth::face_view(
+                name.as_deref(),
+                finding,
+                max_points,
+                &p,
+                &format!("capsule-{finding}"),
+            )
+            .ok());
+        }
         Ok(match depth::presenter_depth(face) {
             Depth::Capsule => pr.capsule_view.map(|v| *v),
             Depth::Chart | Depth::Workspace => pr.view,
@@ -418,6 +493,9 @@ impl Session {
         };
         let mut opts = CompileOptions::new(frame.0, frame.1);
         opts.range = range;
+        // (R4/T5) The connection's style (view state).
+        opts.theme.clone_from(&self.conns[ci].look.theme);
+        opts.alphabet.clone_from(&self.conns[ci].look.alphabet);
         let scene = compile(
             view,
             &DocProvider::new(rd!(self), &self.cache).with_headlines(&self.headlines),

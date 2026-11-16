@@ -68,6 +68,9 @@ pub struct CompileOptions {
     /// Surface reduction: aggregate when more than this many slots are visible
     /// (`docs/GRAMMAR.md` §13, `profile.max_points`).
     pub max_points: Option<u64>,
+    /// (R4/T5) Glyph alphabet by name (`crate::glyph::ALPHABETS`); the product's if
+    /// `None`.
+    pub alphabet: Option<String>,
 }
 
 impl CompileOptions {
@@ -83,6 +86,7 @@ impl CompileOptions {
             outcome: None,
             lod: true,
             max_points: None,
+            alphabet: None,
         }
     }
 }
@@ -594,6 +598,17 @@ pub fn compile(
         Some(n) => crate::glyph::outcome::by_name(n)?,
         None => crate::glyph::outcome::default_style(),
     };
+    let alphabet = crate::glyph::alphabet_named(opts.alphabet.as_deref()).ok_or_else(|| {
+        GrammarError::new(
+            ErrorKind::Invalid,
+            "",
+            format!(
+                "unknown glyph alphabet `{}` (known: {})",
+                opts.alphabet.as_deref().unwrap_or_default(),
+                crate::glyph::ALPHABETS.join(", ")
+            ),
+        )
+    })?;
     if view.x.kind != ScaleKind::Time {
         return Err(GrammarError::new(
             ErrorKind::Invalid,
@@ -939,6 +954,7 @@ pub fn compile(
             bold: bold.contains(pl.id.as_str()),
             theme,
             outcome,
+            alphabet,
         };
         scene_panels[pi].layers.push(draw(pl, &g));
     }

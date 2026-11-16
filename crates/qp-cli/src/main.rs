@@ -8,6 +8,8 @@ use std::process::ExitCode;
 
 use clap::{Parser, Subcommand};
 
+mod demo;
+
 #[derive(Debug, Parser)]
 #[command(name = "qp", version, about = "Qapsule command line", long_about = None)]
 struct Cli {
@@ -92,6 +94,12 @@ enum Command {
     /// subscribed to `capsules` and `changes`) and per replay result; two runs with the
     /// same arguments write the same bytes.
     Replay(ReplayArgs),
+    /// (R4/T5) The local demo: replay host + authority + the web shell on one origin
+    /// (`scripts/demo.sh`; `shells/web/README.md`).
+    Demo(demo::DemoArgs),
+    /// (R4/T5) Drive the demo session with protocol messages only (no shell) and print
+    /// the document and scene digests the web shell reports (parity check).
+    Drive(demo::DriveArgs),
     /// Run protocol conformance transcripts (docs/PROTOCOL.md §15).
     Conform {
         /// Transcript files or directories of `*.json` transcripts.
@@ -312,6 +320,8 @@ fn run(command: Command) -> Result<Outcome, String> {
                 },
         } => schema_validate(&file, &type_name, schema_dir.as_deref()),
         Command::Compute(args) => compute(&args),
+        Command::Demo(args) => demo::demo(&args).map(|()| Outcome::Ok),
+        Command::Drive(args) => demo::drive(&args).map(|()| Outcome::Ok),
         Command::Render(args) => match &args.input {
             Some(input) => render(input, &args.out, args.width, args.height),
             None => render_view(&args),

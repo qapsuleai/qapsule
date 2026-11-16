@@ -2816,6 +2816,22 @@ pub enum Gesture {
         #[serde(default, skip_serializing_if = "Option::is_none")]
         height: Option<u32>,
     },
+    /// (R4/T5, §4.6.2) The connection's presentation choices (view state, presence):
+    /// the capsule face design, the glyph alphabet and the theme the scenes of this
+    /// connection are compiled with. Each field given replaces the remembered one (an
+    /// absent field keeps it); unknown names are `invalid` with the known ones.
+    /// Answered with an `interaction` (its `state`).
+    Style {
+        /// Face design name (`qp_grammar::depth::FACES`, `docs/PROTOCOL.md` §4.6.2; default `card`).
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        face: Option<String>,
+        /// Glyph alphabet name (`siluet`, `rozet`; default `siluet`).
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        alphabet: Option<String>,
+        /// Theme (`light`, `dark`; `view`: the view's own, the default).
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        theme: Option<String>,
+    },
     /// (R4, §4.6) Close the open capsule one depth back, or to `to` (`sentence`: back to
     /// the feed). Answered with an `interaction` carrying the `opening` (the way back).
     Close {
@@ -2898,6 +2914,16 @@ pub struct ViewState {
     /// `face` (a capsule face in the feed), `capsule`, `chart`.
     #[serde(default, skip_serializing_if = "BTreeMap::is_empty")]
     pub frames: BTreeMap<String, [u32; 2]>,
+    /// (R4/T5) Face design the connection's capsule faces are built with (absent: the
+    /// default, `card`).
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub face: Option<String>,
+    /// (R4/T5) Glyph alphabet its scenes draw with (absent: the product's, `siluet`).
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub alphabet: Option<String>,
+    /// (R4/T5) Theme its scenes are compiled with (absent: the view's own).
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub theme: Option<String>,
 }
 
 /// (R4, §4.6) One element both sides of a depth transition show (e.g. the glyph, the

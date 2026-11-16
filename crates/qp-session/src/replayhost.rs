@@ -249,6 +249,10 @@ pub struct ReplayHost {
     resets: u64,
     controls: Vec<(u64, ReplayControl)>,
     notices: Vec<String>,
+    /// (R4/T5) Record the data events applied since the start (or the last rebuild), for
+    /// a host that also feeds replicas ([`ReplayHost::recorded_events`]).
+    record: bool,
+    recorded: Vec<DataEvent>,
 }
 
 impl std::fmt::Debug for ReplayHost {
@@ -312,6 +316,8 @@ impl ReplayHost {
             resets: 0,
             controls: Vec::new(),
             notices: Vec::new(),
+            record: false,
+            recorded: Vec::new(),
         })
     }
 
@@ -343,6 +349,21 @@ impl ReplayHost {
     #[must_use]
     pub fn controls(&self) -> &[(u64, ReplayControl)] {
         &self.controls
+    }
+
+    /// (R4/T5) Records every data event applied to the authority from now on (cleared by
+    /// a backward seek, which starts a new authority): a host that feeds replicas sends
+    /// them the events past what each has (`qp demo`). Off by default.
+    pub fn set_record_events(&mut self, on: bool) {
+        self.record = on;
+    }
+
+    /// (R4/T5) The data events applied since the start (or the last backward seek), in
+    /// order, while recording ([`ReplayHost::set_record_events`]). With the initial bars
+    /// (`init().data`) they are a replica's data at the current position.
+    #[must_use]
+    pub fn recorded_events(&self) -> &[DataEvent] {
+        &self.recorded
     }
 
     /// Host notices so far (gaps, stale bindings, rejected events: none expected).
@@ -600,6 +621,7 @@ impl ReplayHost {
         init.epoch += self.resets;
         self.session = Session::new(init, &self.root)?;
         self.replay.reset();
+        self.recorded.clear();
         Ok(())
     }
 
@@ -612,6 +634,9 @@ impl ReplayHost {
                 Vec::new()
             }
         };
+        if self.record {
+            self.recorded.extend(st.events.iter().cloned());
+        }
         for ev in &st.events {
             match self.session.host_data_event(ev) {
                 Ok(o) => {

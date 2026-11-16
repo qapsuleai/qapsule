@@ -90,6 +90,7 @@ Kaynak `experiments/S/S-D.md`. Apple M4 Max; yük ortalaması ölçüm anında 5
 | Motor yalnız (30 enstrüman × 7 dedektör) | pazar tiki 215 µs (enstrüman başı 7,2 µs; adaylar 204 µs), bar kapanışı 218 µs; `ledger_stat` 13 ns (S-C dizini: 5.784 → 14 ns) |
 | Oturum, ilk ölçüm (1.000 bar geçmiş, 30 enstrüman) | düzeltme tiki 11,3 µs/olay; bar kapanışı **3,65 s** (lisanslı akışla 8,0 s); bağlanma **161 s** — maliyet motorda değil, oturumun kapsül yolunda (cümle tazeleme %50, okuyucu projeksiyonu %45, `hello` özeti) |
 | Oturum, düzeltmeden sonra (aynı ölçüm; çıktılar bayt eşit) | 1.000 bar: düzeltme tiki **2,27 µs/olay** (lisanslı akışla 2,33; motorsuz yol 2,0–2,1) → RP2 bağlı N=5'in 2,9×'i (≤ 3× hedefi, akışla sınırda), N=500'ün altında; bar kapanışı (30 enstrüman) **48 ms** (akışla 90 ms); bağlanma **133 ms** (akışla 247 ms; hedef ~100 ms aşıldı: yetkisiz okuyucunun ilk `hello`'su bütün cümleleri ilk kez rakamsız yazıyor). 100 bar: 4,9 ms kapanış, 8,1 ms bağlanma. |
+| CI | `main` `86dd8f3`: koşu 43788530692 başarılı (8 dk 55 s, Linux x86_64, `verify.sh` tarayıcı zorunlu) |
 | WASM gzip -9 | varsayılan 616.117 B (son verify; S-D ölçümü 616.021) (+17.697, +%3,0; RP2 598.324); yansılı 1.310.330 B (+222.319, +%20,4) |
 
 ## Sapmalar

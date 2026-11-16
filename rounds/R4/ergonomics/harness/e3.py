@@ -261,14 +261,78 @@ def run_lines(docs_dir, s, lines):
     return shown, outs, proc.stderr
 
 
+class Unsafe(Exception):
+    pass
+
+
+def lexical_parts(path, work_dir):
+    """R4 hardening: the path's components below the work dir, lexically (no link is
+    resolved here; every component is opened later with O_NOFOLLOW)."""
+    if not path or not os.path.isabs(path):
+        raise Unsafe("not an absolute path")
+    rel = os.path.relpath(os.path.normpath(path), os.path.realpath(work_dir))
+    parts = rel.split(os.sep)
+    if rel.startswith("..") or any(x in ("", ".", "..") for x in parts):
+        raise Unsafe("outside the work dir")
+    return parts
+
+
+def open_parent(work_dir, parts):
+    """Opens the work dir once (O_DIRECTORY|O_NOFOLLOW) and walks every intermediate
+    component with dir_fd + O_DIRECTORY|O_NOFOLLOW. Returns the parent's fd (caller closes)."""
+    fl = os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW
+    fd = os.open(os.path.realpath(work_dir), fl)
+    try:
+        for part in parts[:-1]:
+            nfd = os.open(part, fl, dir_fd=fd)
+            os.close(fd)
+            fd = nfd
+    except OSError:
+        os.close(fd)
+        raise
+    return fd
+
+
+def read_under(work_dir, parts, limit=2_000_000):
+    pfd = open_parent(work_dir, parts)
+    try:
+        fd = os.open(parts[-1], os.O_RDONLY | os.O_NOFOLLOW, dir_fd=pfd)
+    finally:
+        os.close(pfd)
+    try:
+        st = os.fstat(fd)
+        if not stat.S_ISREG(st.st_mode) or st.st_nlink != 1:
+            raise Unsafe("not a regular file with a single link")
+        with os.fdopen(fd, "rb", closefd=False) as fh:
+            return fh.read(limit)
+    finally:
+        os.close(fd)
+
+
+def write_under(work_dir, parts, data):
+    """Temp name created with O_CREAT|O_EXCL|O_NOFOLLOW under the parent's fd, then renamed
+    into place with the same dir fd (rename replaces a link itself, never its target)."""
+    pfd = open_parent(work_dir, parts)
+    try:
+        tmpn = ".png-%s.tmp" % secrets.token_hex(8)
+        fd = os.open(tmpn, os.O_WRONLY | os.O_CREAT | os.O_EXCL | os.O_NOFOLLOW, 0o644, dir_fd=pfd)
+        with os.fdopen(fd, "wb") as g:
+            g.write(data)
+        os.rename(tmpn, parts[-1], src_dir_fd=pfd, dst_dir_fd=pfd)
+    finally:
+        os.close(pfd)
+
+
 def render(docs_dir, s, lines, png, out_base, work_dir):
     """Draws a view of the session after hidden setup + the agent's lines (qp render)."""
     out = png.get("out", "")
-    # R4 hardening: the full resolved path must be inside the work dir; an existing target
-    # that is a symlink is refused; the copy below opens with O_NOFOLLOW.
-    real_out = os.path.realpath(out) if out else ""
-    if not out.endswith(".png") or not real_out.startswith(os.path.realpath(work_dir) + "/") \
-            or os.path.islink(out):
+    # R4 hardening: a lexical check here (early message); the real check is the O_NOFOLLOW
+    # walk right before writing (write_under).
+    try:
+        out_parts = lexical_parts(out, work_dir)
+    except Unsafe:
+        out_parts = None
+    if not out.endswith(".png") or not out_parts:
         return "png error: --png must name a .png file inside your own work dir\n", None
     steps = []
     for x in s["setup"]:
@@ -298,13 +362,17 @@ def render(docs_dir, s, lines, png, out_base, work_dir):
     rec = {"argv": argv[1:], "rc": p.returncode, "stdout": p.stdout[-2000:], "stderr": p.stderr[-2000:],
            "out": out, "png": png}
     if p.returncode == 0 and os.path.exists(tmp):
-        fd = os.open(real_out, os.O_WRONLY | os.O_CREAT | os.O_TRUNC | os.O_NOFOLLOW, 0o644)
-        with os.fdopen(fd, "wb") as g, open(tmp, "rb") as src:
-            shutil.copyfileobj(src, g)
-        rec["bytes"] = os.path.getsize(tmp)
-        rec["sha256"] = hashlib.sha256(open(tmp, "rb").read()).hexdigest()
+        data = open(tmp, "rb").read()
         os.unlink(tmp)  # the image stays in the agent's work dir only
-        msg = f"png: wrote {out} ({rec['bytes']} bytes)\n"
+        try:
+            write_under(work_dir, out_parts, data)
+            rec["bytes"] = len(data)
+            rec["sha256"] = hashlib.sha256(data).hexdigest()
+            msg = f"png: wrote {out} ({rec['bytes']} bytes)\n"
+        except (OSError, Unsafe) as e:
+            rec["rc"] = -1
+            rec["write_error"] = str(e)
+            msg = "png error: --png must name a .png file inside your own work dir (no links)\n"
     else:
         msg = "png error: " + (p.stderr.strip() or p.stdout.strip() or f"exit {p.returncode}")[-1500:] + "\n"
     json.dump(rec, open(out_base + ".png.json", "w"), ensure_ascii=False, indent=1)
@@ -373,8 +441,8 @@ def token_dir():
 
 
 def handle_attempt(path, token, png=None):
-    real = os.path.realpath(path)
-    rel = os.path.relpath(real, os.path.realpath(SCR))
+    # R4 hardening: lexical path (links are not resolved; the read below walks with O_NOFOLLOW)
+    rel = os.path.relpath(os.path.normpath(path), os.path.realpath(SCR)) if os.path.isabs(path or "") else ""
     m = WORK_RE.match(rel)
     if not m:
         return "error: the file must be a .jsonl file inside one of your task work dirs\n"
@@ -391,18 +459,11 @@ def handle_attempt(path, token, png=None):
         if key not in SETUPS:
             SETUPS[key] = setup.make(json.load(open(os.path.join(ap["raw"], "setup.json")))["seed"])
     s = SETUPS[key]
-    # R4 hardening (no check-then-reopen): open once without following links, check that it
-    # is a regular file, read from the same descriptor.
+    # R4 hardening (no check-then-reopen): walk from the work dir with O_NOFOLLOW, fstat:
+    # regular file with one link, read from the same descriptor.
     try:
-        fd = os.open(real, os.O_RDONLY | os.O_NOFOLLOW)
-        try:
-            if not stat.S_ISREG(os.fstat(fd).st_mode):
-                return f"error: cannot read {path}: not a regular file\n"
-            with os.fdopen(fd, "rb", closefd=False) as fh:
-                text = fh.read(2_000_000).decode("utf-8")
-        finally:
-            os.close(fd)
-    except (OSError, UnicodeDecodeError) as e:
+        text = read_under(ap["work"], [task, name]).decode("utf-8")
+    except (OSError, UnicodeDecodeError, Unsafe) as e:
         return f"error: cannot read {path}: {e}\n"
     lines = read_lines(text)
     for raw in lines:

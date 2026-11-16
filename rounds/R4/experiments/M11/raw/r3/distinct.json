@@ -1,0 +1,1808 @@
+{
+  "harness": "r4-h-m11/1",
+  "style": "r3",
+  "method": "qp_render CPU raster of OutcomeStyle::draw(alphabet); sRGB->linear; Gaussian blur sigma 0.5 px (radius 2, clamped edges) in linear RGB; Machado 2009 severity 1.0 in linear RGB (clamped) or luminance; CIELAB D65; pair distance = min over +-1 px shifts of mean DeltaE76 over all pixels (background shifted in); pairs = realized vs failed for 6 kinds x 3 directions; values rounded to 4 decimals",
+  "main": {
+    "condition": "siluet/16/dark/deutan",
+    "pair": {
+      "glyph": "flow.up",
+      "d": 2.9803
+    }
+  },
+  "alphabets": {
+    "rozet": {
+      "main": {
+        "condition": "rozet/16/light/protan",
+        "pair": {
+          "glyph": "squeeze.neutral",
+          "d": 11.3302
+        }
+      },
+      "mean_worst": 11.8566,
+      "realized_open_worst": {
+        "condition": "rozet/16/dark/deutan",
+        "pair": {
+          "glyph": "squeeze.neutral",
+          "d": 9.561
+        }
+      },
+      "failed_open_worst": {
+        "condition": "rozet/16/light/gray",
+        "pair": {
+          "glyph": "flow.down",
+          "d": 2.0205
+        }
+      },
+      "out_of_box_prims": 0,
+      "conditions": [
+        {
+          "size": 16,
+          "theme": "light",
+          "vision": "normal",
+          "realized_failed": {
+            "pairs": 18,
+            "weakest": {
+              "glyph": "squeeze.neutral",
+              "d": 11.3388
+            },
+            "mean": 13.0914
+          },
+          "realized_open": {
+            "pairs": 18,
+            "weakest": {
+              "glyph": "squeeze.neutral",
+              "d": 9.8367
+            },
+            "mean": 11.2429
+          },
+          "failed_open": {
+            "pairs": 18,
+            "weakest": {
+              "glyph": "continuation.neutral",
+              "d": 2.252
+            },
+            "mean": 3.2052
+          }
+        },
+        {
+          "size": 16,
+          "theme": "light",
+          "vision": "deutan",
+          "realized_failed": {
+            "pairs": 18,
+            "weakest": {
+              "glyph": "squeeze.neutral",
+              "d": 11.3436
+            },
+            "mean": 12.619
+          },
+          "realized_open": {
+            "pairs": 18,
+            "weakest": {
+              "glyph": "squeeze.neutral",
+              "d": 9.8413
+            },
+            "mean": 11.228
+          },
+          "failed_open": {
+            "pairs": 18,
+            "weakest": {
+              "glyph": "reversal.up",
+              "d": 2.153
+            },
+            "mean": 2.7312
+          }
+        },
+        {
+          "size": 16,
+          "theme": "light",
+          "vision": "protan",
+          "realized_failed": {
+            "pairs": 18,
+            "weakest": {
+              "glyph": "squeeze.neutral",
+              "d": 11.3302
+            },
+            "mean": 12.4914
+          },
+          "realized_open": {
+            "pairs": 18,
+            "weakest": {
+              "glyph": "squeeze.neutral",
+              "d": 9.8287
+            },
+            "mean": 11.2075
+          },
+          "failed_open": {
+            "pairs": 18,
+            "weakest": {
+              "glyph": "continuation.neutral",
+              "d": 2.2483
+            },
+            "mean": 2.6197
+          }
+        },
+        {
+          "size": 16,
+          "theme": "light",
+          "vision": "tritan",
+          "realized_failed": {
+            "pairs": 18,
+            "weakest": {
+              "glyph": "squeeze.neutral",
+              "d": 11.3345
+            },
+            "mean": 13.2552
+          },
+          "realized_open": {
+            "pairs": 18,
+            "weakest": {
+              "glyph": "squeeze.neutral",
+              "d": 9.8335
+            },
+            "mean": 11.2512
+          },
+          "failed_open": {
+            "pairs": 18,
+            "weakest": {
+              "glyph": "continuation.neutral",
+              "d": 2.2502
+            },
+            "mean": 3.3663
+          }
+        },
+        {
+          "size": 16,
+          "theme": "light",
+          "vision": "gray",
+          "realized_failed": {
+            "pairs": 18,
+            "weakest": {
+              "glyph": "squeeze.neutral",
+              "d": 11.331
+            },
+            "mean": 12.3284
+          },
+          "realized_open": {
+            "pairs": 18,
+            "weakest": {
+              "glyph": "squeeze.neutral",
+              "d": 9.8311
+            },
+            "mean": 11.2093
+          },
+          "failed_open": {
+            "pairs": 18,
+            "weakest": {
+              "glyph": "flow.down",
+              "d": 2.0205
+            },
+            "mean": 2.4487
+          }
+        },
+        {
+          "size": 24,
+          "theme": "light",
+          "vision": "normal",
+          "realized_failed": {
+            "pairs": 18,
+            "weakest": {
+              "glyph": "continuation.neutral",
+              "d": 14.4506
+            },
+            "mean": 15.2412
+          },
+          "realized_open": {
+            "pairs": 18,
+            "weakest": {
+              "glyph": "squeeze.down",
+              "d": 12.4068
+            },
+            "mean": 12.9075
+          },
+          "failed_open": {
+            "pairs": 18,
+            "weakest": {
+              "glyph": "continuation.neutral",
+              "d": 2.5619
+            },
+            "mean": 3.3564
+          }
+        },
+        {
+          "size": 24,
+          "theme": "light",
+          "vision": "deutan",
+          "realized_failed": {
+            "pairs": 18,
+            "weakest": {
+              "glyph": "continuation.up",
+              "d": 14.3538
+            },
+            "mean": 14.8566
+          },
+          "realized_open": {
+            "pairs": 18,
+            "weakest": {
+              "glyph": "squeeze.down",
+              "d": 12.4137
+            },
+            "mean": 12.9238
+          },
+          "failed_open": {
+            "pairs": 18,
+            "weakest": {
+              "glyph": "continuation.up",
+              "d": 2.4298
+            },
+            "mean": 2.9561
+          }
+        },
+        {
+          "size": 24,
+          "theme": "light",
+          "vision": "protan",
+          "realized_failed": {
+            "pairs": 18,
+            "weakest": {
+              "glyph": "squeeze.down",
+              "d": 14.3098
+            },
+            "mean": 14.7085
+          },
+          "realized_open": {
+            "pairs": 18,
+            "weakest": {
+              "glyph": "squeeze.down",
+              "d": 12.3851
+            },
+            "mean": 12.88
+          },
+          "failed_open": {
+            "pairs": 18,
+            "weakest": {
+              "glyph": "reversal.up",
+              "d": 2.5545
+            },
+            "mean": 2.85
+          }
+        },
+        {
+          "size": 24,
+          "theme": "light",
+          "vision": "tritan",
+          "realized_failed": {
+            "pairs": 18,
+            "weakest": {
+              "glyph": "continuation.neutral",
+              "d": 14.4436
+            },
+            "mean": 15.3566
+          },
+          "realized_open": {
+            "pairs": 18,
+            "weakest": {
+              "glyph": "squeeze.down",
+              "d": 12.4067
+            },
+            "mean": 12.9022
+          },
+          "failed_open": {
+            "pairs": 18,
+            "weakest": {
+              "glyph": "continuation.neutral",
+              "d": 2.5592
+            },
+            "mean": 3.4755
+          }
+        },
+        {
+          "size": 24,
+          "theme": "light",
+          "vision": "gray",
+          "realized_failed": {
+            "pairs": 18,
+            "weakest": {
+              "glyph": "continuation.down",
+              "d": 14.1879
+            },
+            "mean": 14.5701
+          },
+          "realized_open": {
+            "pairs": 18,
+            "weakest": {
+              "glyph": "squeeze.down",
+              "d": 12.3936
+            },
+            "mean": 12.8977
+          },
+          "failed_open": {
+            "pairs": 18,
+            "weakest": {
+              "glyph": "continuation.down",
+              "d": 2.2472
+            },
+            "mean": 2.6932
+          }
+        },
+        {
+          "size": 32,
+          "theme": "light",
+          "vision": "normal",
+          "realized_failed": {
+            "pairs": 18,
+            "weakest": {
+              "glyph": "squeeze.up",
+              "d": 15.2228
+            },
+            "mean": 16.1717
+          },
+          "realized_open": {
+            "pairs": 18,
+            "weakest": {
+              "glyph": "squeeze.neutral",
+              "d": 12.8678
+            },
+            "mean": 13.4716
+          },
+          "failed_open": {
+            "pairs": 18,
+            "weakest": {
+              "glyph": "continuation.neutral",
+              "d": 2.9016
+            },
+            "mean": 3.637
+          }
+        },
+        {
+          "size": 32,
+          "theme": "light",
+          "vision": "deutan",
+          "realized_failed": {
+            "pairs": 18,
+            "weakest": {
+              "glyph": "squeeze.up",
+              "d": 15.0327
+            },
+            "mean": 15.7445
+          },
+          "realized_open": {
+            "pairs": 18,
+            "weakest": {
+              "glyph": "squeeze.neutral",
+              "d": 12.8876
+            },
+            "mean": 13.4926
+          },
+          "failed_open": {
+            "pairs": 18,
+            "weakest": {
+              "glyph": "continuation.up",
+              "d": 2.5545
+            },
+            "mean": 3.1893
+          }
+        },
+        {
+          "size": 32,
+          "theme": "light",
+          "vision": "protan",
+          "realized_failed": {
+            "pairs": 18,
+            "weakest": {
+              "glyph": "squeeze.down",
+              "d": 14.9119
+            },
+            "mean": 15.5837
+          },
+          "realized_open": {
+            "pairs": 18,
+            "weakest": {
+              "glyph": "squeeze.neutral",
+              "d": 12.8368
+            },
+            "mean": 13.4388
+          },
+          "failed_open": {
+            "pairs": 18,
+            "weakest": {
+              "glyph": "continuation.up",
+              "d": 2.6544
+            },
+            "mean": 3.081
+          }
+        },
+        {
+          "size": 32,
+          "theme": "light",
+          "vision": "tritan",
+          "realized_failed": {
+            "pairs": 18,
+            "weakest": {
+              "glyph": "squeeze.up",
+              "d": 15.2136
+            },
+            "mean": 16.292
+          },
+          "realized_open": {
+            "pairs": 18,
+            "weakest": {
+              "glyph": "squeeze.neutral",
+              "d": 12.8612
+            },
+            "mean": 13.4649
+          },
+          "failed_open": {
+            "pairs": 18,
+            "weakest": {
+              "glyph": "continuation.neutral",
+              "d": 2.8984
+            },
+            "mean": 3.7629
+          }
+        },
+        {
+          "size": 32,
+          "theme": "light",
+          "vision": "gray",
+          "realized_failed": {
+            "pairs": 18,
+            "weakest": {
+              "glyph": "squeeze.down",
+              "d": 14.7825
+            },
+            "mean": 15.4364
+          },
+          "realized_open": {
+            "pairs": 18,
+            "weakest": {
+              "glyph": "squeeze.neutral",
+              "d": 12.8562
+            },
+            "mean": 13.4596
+          },
+          "failed_open": {
+            "pairs": 18,
+            "weakest": {
+              "glyph": "continuation.down",
+              "d": 2.4064
+            },
+            "mean": 2.9115
+          }
+        },
+        {
+          "size": 16,
+          "theme": "dark",
+          "vision": "normal",
+          "realized_failed": {
+            "pairs": 18,
+            "weakest": {
+              "glyph": "continuation.neutral",
+              "d": 11.4845
+            },
+            "mean": 12.9632
+          },
+          "realized_open": {
+            "pairs": 18,
+            "weakest": {
+              "glyph": "squeeze.neutral",
+              "d": 9.5688
+            },
+            "mean": 10.5864
+          },
+          "failed_open": {
+            "pairs": 18,
+            "weakest": {
+              "glyph": "continuation.neutral",
+              "d": 2.4725
+            },
+            "mean": 4.005
+          }
+        },
+        {
+          "size": 16,
+          "theme": "dark",
+          "vision": "deutan",
+          "realized_failed": {
+            "pairs": 18,
+            "weakest": {
+              "glyph": "continuation.neutral",
+              "d": 11.4752
+            },
+            "mean": 12.2869
+          },
+          "realized_open": {
+            "pairs": 18,
+            "weakest": {
+              "glyph": "squeeze.neutral",
+              "d": 9.561
+            },
+            "mean": 10.5331
+          },
+          "failed_open": {
+            "pairs": 18,
+            "weakest": {
+              "glyph": "continuation.neutral",
+              "d": 2.4698
+            },
+            "mean": 3.3433
+          }
+        },
+        {
+          "size": 16,
+          "theme": "dark",
+          "vision": "protan",
+          "realized_failed": {
+            "pairs": 18,
+            "weakest": {
+              "glyph": "continuation.neutral",
+              "d": 11.4961
+            },
+            "mean": 12.1702
+          },
+          "realized_open": {
+            "pairs": 18,
+            "weakest": {
+              "glyph": "squeeze.neutral",
+              "d": 9.5786
+            },
+            "mean": 10.5523
+          },
+          "failed_open": {
+            "pairs": 18,
+            "weakest": {
+              "glyph": "continuation.neutral",
+              "d": 2.4756
+            },
+            "mean": 3.2056
+          }
+        },
+        {
+          "size": 16,
+          "theme": "dark",
+          "vision": "tritan",
+          "realized_failed": {
+            "pairs": 18,
+            "weakest": {
+              "glyph": "continuation.neutral",
+              "d": 11.4826
+            },
+            "mean": 13.1879
+          },
+          "realized_open": {
+            "pairs": 18,
+            "weakest": {
+              "glyph": "squeeze.neutral",
+              "d": 9.5664
+            },
+            "mean": 10.6099
+          },
+          "failed_open": {
+            "pairs": 18,
+            "weakest": {
+              "glyph": "continuation.neutral",
+              "d": 2.4715
+            },
+            "mean": 4.2232
+          }
+        },
+        {
+          "size": 16,
+          "theme": "dark",
+          "vision": "gray",
+          "realized_failed": {
+            "pairs": 18,
+            "weakest": {
+              "glyph": "flow.down",
+              "d": 11.3881
+            },
+            "mean": 11.8566
+          },
+          "realized_open": {
+            "pairs": 18,
+            "weakest": {
+              "glyph": "squeeze.neutral",
+              "d": 9.5641
+            },
+            "mean": 10.519
+          },
+          "failed_open": {
+            "pairs": 18,
+            "weakest": {
+              "glyph": "flow.down",
+              "d": 2.4369
+            },
+            "mean": 2.9083
+          }
+        },
+        {
+          "size": 24,
+          "theme": "dark",
+          "vision": "normal",
+          "realized_failed": {
+            "pairs": 18,
+            "weakest": {
+              "glyph": "continuation.neutral",
+              "d": 12.0737
+            },
+            "mean": 13.2529
+          },
+          "realized_open": {
+            "pairs": 18,
+            "weakest": {
+              "glyph": "squeeze.neutral",
+              "d": 10.453
+            },
+            "mean": 10.8648
+          },
+          "failed_open": {
+            "pairs": 18,
+            "weakest": {
+              "glyph": "continuation.neutral",
+              "d": 2.6405
+            },
+            "mean": 3.781
+          }
+        },
+        {
+          "size": 24,
+          "theme": "dark",
+          "vision": "deutan",
+          "realized_failed": {
+            "pairs": 18,
+            "weakest": {
+              "glyph": "continuation.neutral",
+              "d": 12.0644
+            },
+            "mean": 12.703
+          },
+          "realized_open": {
+            "pairs": 18,
+            "weakest": {
+              "glyph": "squeeze.neutral",
+              "d": 10.4449
+            },
+            "mean": 10.8471
+          },
+          "failed_open": {
+            "pairs": 18,
+            "weakest": {
+              "glyph": "reversal.up",
+              "d": 2.5889
+            },
+            "mean": 3.2436
+          }
+        },
+        {
+          "size": 24,
+          "theme": "dark",
+          "vision": "protan",
+          "realized_failed": {
+            "pairs": 18,
+            "weakest": {
+              "glyph": "continuation.neutral",
+              "d": 12.0865
+            },
+            "mean": 12.5976
+          },
+          "realized_open": {
+            "pairs": 18,
+            "weakest": {
+              "glyph": "squeeze.neutral",
+              "d": 10.4638
+            },
+            "mean": 10.8669
+          },
+          "failed_open": {
+            "pairs": 18,
+            "weakest": {
+              "glyph": "reversal.up",
+              "d": 2.606
+            },
+            "mean": 3.1203
+          }
+        },
+        {
+          "size": 24,
+          "theme": "dark",
+          "vision": "tritan",
+          "realized_failed": {
+            "pairs": 18,
+            "weakest": {
+              "glyph": "continuation.neutral",
+              "d": 12.0716
+            },
+            "mean": 13.4292
+          },
+          "realized_open": {
+            "pairs": 18,
+            "weakest": {
+              "glyph": "squeeze.neutral",
+              "d": 10.452
+            },
+            "mean": 10.8686
+          },
+          "failed_open": {
+            "pairs": 18,
+            "weakest": {
+              "glyph": "continuation.neutral",
+              "d": 2.6378
+            },
+            "mean": 3.9533
+          }
+        },
+        {
+          "size": 24,
+          "theme": "dark",
+          "vision": "gray",
+          "realized_failed": {
+            "pairs": 18,
+            "weakest": {
+              "glyph": "flow.down",
+              "d": 11.9283
+            },
+            "mean": 12.354
+          },
+          "realized_open": {
+            "pairs": 18,
+            "weakest": {
+              "glyph": "squeeze.neutral",
+              "d": 10.4497
+            },
+            "mean": 10.8482
+          },
+          "failed_open": {
+            "pairs": 18,
+            "weakest": {
+              "glyph": "flow.down",
+              "d": 2.4393
+            },
+            "mean": 2.8903
+          }
+        },
+        {
+          "size": 32,
+          "theme": "dark",
+          "vision": "normal",
+          "realized_failed": {
+            "pairs": 18,
+            "weakest": {
+              "glyph": "continuation.neutral",
+              "d": 12.67
+            },
+            "mean": 13.7259
+          },
+          "realized_open": {
+            "pairs": 18,
+            "weakest": {
+              "glyph": "squeeze.neutral",
+              "d": 10.7144
+            },
+            "mean": 11.1776
+          },
+          "failed_open": {
+            "pairs": 18,
+            "weakest": {
+              "glyph": "continuation.neutral",
+              "d": 2.7922
+            },
+            "mean": 3.8364
+          }
+        },
+        {
+          "size": 32,
+          "theme": "dark",
+          "vision": "deutan",
+          "realized_failed": {
+            "pairs": 18,
+            "weakest": {
+              "glyph": "continuation.neutral",
+              "d": 12.6593
+            },
+            "mean": 13.2313
+          },
+          "realized_open": {
+            "pairs": 18,
+            "weakest": {
+              "glyph": "squeeze.down",
+              "d": 10.6955
+            },
+            "mean": 11.1662
+          },
+          "failed_open": {
+            "pairs": 18,
+            "weakest": {
+              "glyph": "reversal.up",
+              "d": 2.73
+            },
+            "mean": 3.351
+          }
+        },
+        {
+          "size": 32,
+          "theme": "dark",
+          "vision": "protan",
+          "realized_failed": {
+            "pairs": 18,
+            "weakest": {
+              "glyph": "continuation.neutral",
+              "d": 12.6845
+            },
+            "mean": 13.1149
+          },
+          "realized_open": {
+            "pairs": 18,
+            "weakest": {
+              "glyph": "squeeze.down",
+              "d": 10.7206
+            },
+            "mean": 11.1869
+          },
+          "failed_open": {
+            "pairs": 18,
+            "weakest": {
+              "glyph": "reversal.up",
+              "d": 2.7348
+            },
+            "mean": 3.2154
+          }
+        },
+        {
+          "size": 32,
+          "theme": "dark",
+          "vision": "tritan",
+          "realized_failed": {
+            "pairs": 18,
+            "weakest": {
+              "glyph": "continuation.neutral",
+              "d": 12.6689
+            },
+            "mean": 13.8889
+          },
+          "realized_open": {
+            "pairs": 18,
+            "weakest": {
+              "glyph": "squeeze.neutral",
+              "d": 10.7132
+            },
+            "mean": 11.1782
+          },
+          "failed_open": {
+            "pairs": 18,
+            "weakest": {
+              "glyph": "continuation.neutral",
+              "d": 2.7908
+            },
+            "mean": 3.9979
+          }
+        },
+        {
+          "size": 32,
+          "theme": "dark",
+          "vision": "gray",
+          "realized_failed": {
+            "pairs": 18,
+            "weakest": {
+              "glyph": "flow.down",
+              "d": 12.6426
+            },
+            "mean": 12.9248
+          },
+          "realized_open": {
+            "pairs": 18,
+            "weakest": {
+              "glyph": "squeeze.down",
+              "d": 10.6962
+            },
+            "mean": 11.1708
+          },
+          "failed_open": {
+            "pairs": 18,
+            "weakest": {
+              "glyph": "reversal.up",
+              "d": 2.7007
+            },
+            "mean": 3.0381
+          }
+        }
+      ]
+    },
+    "siluet": {
+      "main": {
+        "condition": "siluet/16/dark/deutan",
+        "pair": {
+          "glyph": "flow.up",
+          "d": 2.9803
+        }
+      },
+      "mean_worst": 3.0374,
+      "realized_open_worst": {
+        "condition": "siluet/24/light/gray",
+        "pair": {
+          "glyph": "continuation.down",
+          "d": 4.6249
+        }
+      },
+      "failed_open_worst": {
+        "condition": "siluet/16/light/gray",
+        "pair": {
+          "glyph": "continuation.down",
+          "d": 2.2256
+        }
+      },
+      "out_of_box_prims": 0,
+      "conditions": [
+        {
+          "size": 16,
+          "theme": "light",
+          "vision": "normal",
+          "realized_failed": {
+            "pairs": 18,
+            "weakest": {
+              "glyph": "continuation.up",
+              "d": 3.2811
+            },
+            "mean": 3.3076
+          },
+          "realized_open": {
+            "pairs": 18,
+            "weakest": {
+              "glyph": "breakout.up",
+              "d": 13.5953
+            },
+            "mean": 19.0718
+          },
+          "failed_open": {
+            "pairs": 18,
+            "weakest": {
+              "glyph": "breakout.up",
+              "d": 11.6479
+            },
+            "mean": 17.2331
+          }
+        },
+        {
+          "size": 16,
+          "theme": "light",
+          "vision": "deutan",
+          "realized_failed": {
+            "pairs": 18,
+            "weakest": {
+              "glyph": "continuation.up",
+              "d": 3.2854
+            },
+            "mean": 3.3121
+          },
+          "realized_open": {
+            "pairs": 18,
+            "weakest": {
+              "glyph": "continuation.up",
+              "d": 5.8503
+            },
+            "mean": 13.8818
+          },
+          "failed_open": {
+            "pairs": 18,
+            "weakest": {
+              "glyph": "continuation.up",
+              "d": 3.3542
+            },
+            "mean": 11.7078
+          }
+        },
+        {
+          "size": 16,
+          "theme": "light",
+          "vision": "protan",
+          "realized_failed": {
+            "pairs": 18,
+            "weakest": {
+              "glyph": "continuation.up",
+              "d": 3.2736
+            },
+            "mean": 3.2997
+          },
+          "realized_open": {
+            "pairs": 18,
+            "weakest": {
+              "glyph": "continuation.up",
+              "d": 8.123
+            },
+            "mean": 12.2888
+          },
+          "failed_open": {
+            "pairs": 18,
+            "weakest": {
+              "glyph": "continuation.up",
+              "d": 5.631
+            },
+            "mean": 10.1572
+          }
+        },
+        {
+          "size": 16,
+          "theme": "light",
+          "vision": "tritan",
+          "realized_failed": {
+            "pairs": 18,
+            "weakest": {
+              "glyph": "continuation.up",
+              "d": 3.2789
+            },
+            "mean": 3.3052
+          },
+          "realized_open": {
+            "pairs": 18,
+            "weakest": {
+              "glyph": "breakout.up",
+              "d": 14.0312
+            },
+            "mean": 20.1292
+          },
+          "failed_open": {
+            "pairs": 18,
+            "weakest": {
+              "glyph": "breakout.up",
+              "d": 12.2064
+            },
+            "mean": 18.3617
+          }
+        },
+        {
+          "size": 16,
+          "theme": "light",
+          "vision": "gray",
+          "realized_failed": {
+            "pairs": 18,
+            "weakest": {
+              "glyph": "continuation.up",
+              "d": 3.2785
+            },
+            "mean": 3.3048
+          },
+          "realized_open": {
+            "pairs": 18,
+            "weakest": {
+              "glyph": "continuation.down",
+              "d": 4.6586
+            },
+            "mean": 6.5698
+          },
+          "failed_open": {
+            "pairs": 18,
+            "weakest": {
+              "glyph": "continuation.down",
+              "d": 2.2256
+            },
+            "mean": 4.0632
+          }
+        },
+        {
+          "size": 24,
+          "theme": "light",
+          "vision": "normal",
+          "realized_failed": {
+            "pairs": 18,
+            "weakest": {
+              "glyph": "continuation.up",
+              "d": 3.8452
+            },
+            "mean": 3.8614
+          },
+          "realized_open": {
+            "pairs": 18,
+            "weakest": {
+              "glyph": "breakout.up",
+              "d": 13.9715
+            },
+            "mean": 19.6201
+          },
+          "failed_open": {
+            "pairs": 18,
+            "weakest": {
+              "glyph": "breakout.up",
+              "d": 12.4171
+            },
+            "mean": 18.1558
+          }
+        },
+        {
+          "size": 24,
+          "theme": "light",
+          "vision": "deutan",
+          "realized_failed": {
+            "pairs": 18,
+            "weakest": {
+              "glyph": "continuation.up",
+              "d": 3.8514
+            },
+            "mean": 3.8678
+          },
+          "realized_open": {
+            "pairs": 18,
+            "weakest": {
+              "glyph": "continuation.up",
+              "d": 5.8055
+            },
+            "mean": 14.299
+          },
+          "failed_open": {
+            "pairs": 18,
+            "weakest": {
+              "glyph": "continuation.up",
+              "d": 3.9172
+            },
+            "mean": 12.6115
+          }
+        },
+        {
+          "size": 24,
+          "theme": "light",
+          "vision": "protan",
+          "realized_failed": {
+            "pairs": 18,
+            "weakest": {
+              "glyph": "continuation.up",
+              "d": 3.8354
+            },
+            "mean": 3.8514
+          },
+          "realized_open": {
+            "pairs": 18,
+            "weakest": {
+              "glyph": "continuation.up",
+              "d": 8.1087
+            },
+            "mean": 12.6915
+          },
+          "failed_open": {
+            "pairs": 18,
+            "weakest": {
+              "glyph": "continuation.up",
+              "d": 6.1588
+            },
+            "mean": 11.0425
+          }
+        },
+        {
+          "size": 24,
+          "theme": "light",
+          "vision": "tritan",
+          "realized_failed": {
+            "pairs": 18,
+            "weakest": {
+              "glyph": "continuation.up",
+              "d": 3.8421
+            },
+            "mean": 3.8582
+          },
+          "realized_open": {
+            "pairs": 18,
+            "weakest": {
+              "glyph": "breakout.up",
+              "d": 14.4152
+            },
+            "mean": 20.4634
+          },
+          "failed_open": {
+            "pairs": 18,
+            "weakest": {
+              "glyph": "breakout.up",
+              "d": 12.9567
+            },
+            "mean": 19.056
+          }
+        },
+        {
+          "size": 24,
+          "theme": "light",
+          "vision": "gray",
+          "realized_failed": {
+            "pairs": 18,
+            "weakest": {
+              "glyph": "continuation.up",
+              "d": 3.8418
+            },
+            "mean": 3.8578
+          },
+          "realized_open": {
+            "pairs": 18,
+            "weakest": {
+              "glyph": "continuation.down",
+              "d": 4.6249
+            },
+            "mean": 6.5827
+          },
+          "failed_open": {
+            "pairs": 18,
+            "weakest": {
+              "glyph": "continuation.down",
+              "d": 2.874
+            },
+            "mean": 4.6891
+          }
+        },
+        {
+          "size": 32,
+          "theme": "light",
+          "vision": "normal",
+          "realized_failed": {
+            "pairs": 18,
+            "weakest": {
+              "glyph": "continuation.up",
+              "d": 4.1344
+            },
+            "mean": 4.1476
+          },
+          "realized_open": {
+            "pairs": 18,
+            "weakest": {
+              "glyph": "continuation.up",
+              "d": 14.5819
+            },
+            "mean": 20.1216
+          },
+          "failed_open": {
+            "pairs": 18,
+            "weakest": {
+              "glyph": "continuation.up",
+              "d": 12.8499
+            },
+            "mean": 18.4817
+          }
+        },
+        {
+          "size": 32,
+          "theme": "light",
+          "vision": "deutan",
+          "realized_failed": {
+            "pairs": 18,
+            "weakest": {
+              "glyph": "continuation.up",
+              "d": 4.1416
+            },
+            "mean": 4.1549
+          },
+          "realized_open": {
+            "pairs": 18,
+            "weakest": {
+              "glyph": "continuation.up",
+              "d": 6.1533
+            },
+            "mean": 14.8113
+          },
+          "failed_open": {
+            "pairs": 18,
+            "weakest": {
+              "glyph": "continuation.up",
+              "d": 4.096
+            },
+            "mean": 12.9501
+          }
+        },
+        {
+          "size": 32,
+          "theme": "light",
+          "vision": "protan",
+          "realized_failed": {
+            "pairs": 18,
+            "weakest": {
+              "glyph": "continuation.up",
+              "d": 4.1229
+            },
+            "mean": 4.1359
+          },
+          "realized_open": {
+            "pairs": 18,
+            "weakest": {
+              "glyph": "continuation.up",
+              "d": 8.4267
+            },
+            "mean": 13.1911
+          },
+          "failed_open": {
+            "pairs": 18,
+            "weakest": {
+              "glyph": "continuation.up",
+              "d": 6.3112
+            },
+            "mean": 11.3668
+          }
+        },
+        {
+          "size": 32,
+          "theme": "light",
+          "vision": "tritan",
+          "realized_failed": {
+            "pairs": 18,
+            "weakest": {
+              "glyph": "continuation.up",
+              "d": 4.1311
+            },
+            "mean": 4.1442
+          },
+          "realized_open": {
+            "pairs": 18,
+            "weakest": {
+              "glyph": "breakout.up",
+              "d": 14.8909
+            },
+            "mean": 20.7999
+          },
+          "failed_open": {
+            "pairs": 18,
+            "weakest": {
+              "glyph": "breakout.up",
+              "d": 13.2589
+            },
+            "mean": 19.2178
+          }
+        },
+        {
+          "size": 32,
+          "theme": "light",
+          "vision": "gray",
+          "realized_failed": {
+            "pairs": 18,
+            "weakest": {
+              "glyph": "continuation.up",
+              "d": 4.1303
+            },
+            "mean": 4.1433
+          },
+          "realized_open": {
+            "pairs": 18,
+            "weakest": {
+              "glyph": "continuation.down",
+              "d": 4.9449
+            },
+            "mean": 6.9663
+          },
+          "failed_open": {
+            "pairs": 18,
+            "weakest": {
+              "glyph": "continuation.down",
+              "d": 3.0276
+            },
+            "mean": 4.9123
+          }
+        },
+        {
+          "size": 16,
+          "theme": "dark",
+          "vision": "normal",
+          "realized_failed": {
+            "pairs": 18,
+            "weakest": {
+              "glyph": "flow.up",
+              "d": 2.9826
+            },
+            "mean": 3.0396
+          },
+          "realized_open": {
+            "pairs": 18,
+            "weakest": {
+              "glyph": "breakout.up",
+              "d": 14.237
+            },
+            "mean": 21.5416
+          },
+          "failed_open": {
+            "pairs": 18,
+            "weakest": {
+              "glyph": "breakout.up",
+              "d": 12.2515
+            },
+            "mean": 19.8272
+          }
+        },
+        {
+          "size": 16,
+          "theme": "dark",
+          "vision": "deutan",
+          "realized_failed": {
+            "pairs": 18,
+            "weakest": {
+              "glyph": "flow.up",
+              "d": 2.9803
+            },
+            "mean": 3.0374
+          },
+          "realized_open": {
+            "pairs": 18,
+            "weakest": {
+              "glyph": "extreme.up",
+              "d": 5.0747
+            },
+            "mean": 15.9023
+          },
+          "failed_open": {
+            "pairs": 18,
+            "weakest": {
+              "glyph": "extreme.up",
+              "d": 3.0547
+            },
+            "mean": 13.9715
+          }
+        },
+        {
+          "size": 16,
+          "theme": "dark",
+          "vision": "protan",
+          "realized_failed": {
+            "pairs": 18,
+            "weakest": {
+              "glyph": "flow.up",
+              "d": 2.986
+            },
+            "mean": 3.043
+          },
+          "realized_open": {
+            "pairs": 18,
+            "weakest": {
+              "glyph": "extreme.up",
+              "d": 7.0798
+            },
+            "mean": 14.731
+          },
+          "failed_open": {
+            "pairs": 18,
+            "weakest": {
+              "glyph": "continuation.up",
+              "d": 4.9891
+            },
+            "mean": 12.6657
+          }
+        },
+        {
+          "size": 16,
+          "theme": "dark",
+          "vision": "tritan",
+          "realized_failed": {
+            "pairs": 18,
+            "weakest": {
+              "glyph": "flow.up",
+              "d": 2.9825
+            },
+            "mean": 3.0395
+          },
+          "realized_open": {
+            "pairs": 18,
+            "weakest": {
+              "glyph": "breakout.up",
+              "d": 14.9309
+            },
+            "mean": 22.0743
+          },
+          "failed_open": {
+            "pairs": 18,
+            "weakest": {
+              "glyph": "breakout.up",
+              "d": 13.0677
+            },
+            "mean": 20.4498
+          }
+        },
+        {
+          "size": 16,
+          "theme": "dark",
+          "vision": "gray",
+          "realized_failed": {
+            "pairs": 18,
+            "weakest": {
+              "glyph": "flow.up",
+              "d": 2.9813
+            },
+            "mean": 3.0382
+          },
+          "realized_open": {
+            "pairs": 18,
+            "weakest": {
+              "glyph": "squeeze.down",
+              "d": 5.2007
+            },
+            "mean": 6.9736
+          },
+          "failed_open": {
+            "pairs": 18,
+            "weakest": {
+              "glyph": "squeeze.down",
+              "d": 2.871
+            },
+            "mean": 4.656
+          }
+        },
+        {
+          "size": 24,
+          "theme": "dark",
+          "vision": "normal",
+          "realized_failed": {
+            "pairs": 18,
+            "weakest": {
+              "glyph": "flow.up",
+              "d": 3.264
+            },
+            "mean": 3.3067
+          },
+          "realized_open": {
+            "pairs": 18,
+            "weakest": {
+              "glyph": "breakout.up",
+              "d": 14.0834
+            },
+            "mean": 21.1198
+          },
+          "failed_open": {
+            "pairs": 18,
+            "weakest": {
+              "glyph": "breakout.up",
+              "d": 12.4899
+            },
+            "mean": 19.7515
+          }
+        },
+        {
+          "size": 24,
+          "theme": "dark",
+          "vision": "deutan",
+          "realized_failed": {
+            "pairs": 18,
+            "weakest": {
+              "glyph": "flow.up",
+              "d": 3.2615
+            },
+            "mean": 3.3042
+          },
+          "realized_open": {
+            "pairs": 18,
+            "weakest": {
+              "glyph": "extreme.up",
+              "d": 4.8763
+            },
+            "mean": 15.5572
+          },
+          "failed_open": {
+            "pairs": 18,
+            "weakest": {
+              "glyph": "continuation.up",
+              "d": 3.3655
+            },
+            "mean": 14.0271
+          }
+        },
+        {
+          "size": 24,
+          "theme": "dark",
+          "vision": "protan",
+          "realized_failed": {
+            "pairs": 18,
+            "weakest": {
+              "glyph": "flow.up",
+              "d": 3.268
+            },
+            "mean": 3.3105
+          },
+          "realized_open": {
+            "pairs": 18,
+            "weakest": {
+              "glyph": "extreme.up",
+              "d": 6.9573
+            },
+            "mean": 14.4207
+          },
+          "failed_open": {
+            "pairs": 18,
+            "weakest": {
+              "glyph": "continuation.up",
+              "d": 5.251
+            },
+            "mean": 12.7721
+          }
+        },
+        {
+          "size": 24,
+          "theme": "dark",
+          "vision": "tritan",
+          "realized_failed": {
+            "pairs": 18,
+            "weakest": {
+              "glyph": "flow.up",
+              "d": 3.2638
+            },
+            "mean": 3.3064
+          },
+          "realized_open": {
+            "pairs": 18,
+            "weakest": {
+              "glyph": "breakout.up",
+              "d": 14.8286
+            },
+            "mean": 21.6218
+          },
+          "failed_open": {
+            "pairs": 18,
+            "weakest": {
+              "glyph": "breakout.up",
+              "d": 13.3268
+            },
+            "mean": 20.3141
+          }
+        },
+        {
+          "size": 24,
+          "theme": "dark",
+          "vision": "gray",
+          "realized_failed": {
+            "pairs": 18,
+            "weakest": {
+              "glyph": "flow.up",
+              "d": 3.2624
+            },
+            "mean": 3.305
+          },
+          "realized_open": {
+            "pairs": 18,
+            "weakest": {
+              "glyph": "squeeze.down",
+              "d": 5.0064
+            },
+            "mean": 6.7513
+          },
+          "failed_open": {
+            "pairs": 18,
+            "weakest": {
+              "glyph": "squeeze.down",
+              "d": 3.1638
+            },
+            "mean": 4.927
+          }
+        },
+        {
+          "size": 32,
+          "theme": "dark",
+          "vision": "normal",
+          "realized_failed": {
+            "pairs": 18,
+            "weakest": {
+              "glyph": "flow.up",
+              "d": 3.5029
+            },
+            "mean": 3.5389
+          },
+          "realized_open": {
+            "pairs": 18,
+            "weakest": {
+              "glyph": "continuation.up",
+              "d": 13.9022
+            },
+            "mean": 20.7866
+          },
+          "failed_open": {
+            "pairs": 18,
+            "weakest": {
+              "glyph": "continuation.up",
+              "d": 12.3429
+            },
+            "mean": 19.429
+          }
+        },
+        {
+          "size": 32,
+          "theme": "dark",
+          "vision": "deutan",
+          "realized_failed": {
+            "pairs": 18,
+            "weakest": {
+              "glyph": "flow.up",
+              "d": 3.5002
+            },
+            "mean": 3.5362
+          },
+          "realized_open": {
+            "pairs": 18,
+            "weakest": {
+              "glyph": "extreme.up",
+              "d": 4.8234
+            },
+            "mean": 15.3178
+          },
+          "failed_open": {
+            "pairs": 18,
+            "weakest": {
+              "glyph": "continuation.up",
+              "d": 3.329
+            },
+            "mean": 13.8177
+          }
+        },
+        {
+          "size": 32,
+          "theme": "dark",
+          "vision": "protan",
+          "realized_failed": {
+            "pairs": 18,
+            "weakest": {
+              "glyph": "flow.up",
+              "d": 3.507
+            },
+            "mean": 3.5429
+          },
+          "realized_open": {
+            "pairs": 18,
+            "weakest": {
+              "glyph": "extreme.up",
+              "d": 6.8904
+            },
+            "mean": 14.2097
+          },
+          "failed_open": {
+            "pairs": 18,
+            "weakest": {
+              "glyph": "continuation.up",
+              "d": 5.242
+            },
+            "mean": 12.5956
+          }
+        },
+        {
+          "size": 32,
+          "theme": "dark",
+          "vision": "tritan",
+          "realized_failed": {
+            "pairs": 18,
+            "weakest": {
+              "glyph": "flow.up",
+              "d": 3.5027
+            },
+            "mean": 3.5386
+          },
+          "realized_open": {
+            "pairs": 18,
+            "weakest": {
+              "glyph": "continuation.up",
+              "d": 14.7387
+            },
+            "mean": 21.2518
+          },
+          "failed_open": {
+            "pairs": 18,
+            "weakest": {
+              "glyph": "continuation.up",
+              "d": 13.259
+            },
+            "mean": 19.9341
+          }
+        },
+        {
+          "size": 32,
+          "theme": "dark",
+          "vision": "gray",
+          "realized_failed": {
+            "pairs": 18,
+            "weakest": {
+              "glyph": "flow.up",
+              "d": 3.5014
+            },
+            "mean": 3.5373
+          },
+          "realized_open": {
+            "pairs": 18,
+            "weakest": {
+              "glyph": "squeeze.down",
+              "d": 4.9538
+            },
+            "mean": 6.6478
+          },
+          "failed_open": {
+            "pairs": 18,
+            "weakest": {
+              "glyph": "squeeze.down",
+              "d": 3.1132
+            },
+            "mean": 4.8936
+          }
+        }
+      ]
+    }
+  }
+}

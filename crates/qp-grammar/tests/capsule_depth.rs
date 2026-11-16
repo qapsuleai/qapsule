@@ -311,6 +311,22 @@ fn capsule_card_view_and_scene() {
     assert_eq!(s, compile(&v, &p, &CompileOptions::new(390, 300)).unwrap());
 }
 
+/// (R4/M11) The outcome style is selected by name from the compile options; `r3` is the
+/// default and draws exactly what no selection draws; an unknown name is `invalid`.
+#[test]
+fn outcome_style_is_a_compile_option() {
+    let p = r3(true);
+    let v = capsule_view("fnd-brk", 60, &p, "capsule-fnd-brk").unwrap();
+    let base = compile(&v, &p, &CompileOptions::new(390, 300)).unwrap();
+    let mut o = CompileOptions::new(390, 300);
+    o.outcome = Some("r3".into());
+    assert_eq!(compile(&v, &p, &o).unwrap(), base);
+    o.outcome = Some("no-such-style".into());
+    let e = compile(&v, &p, &o).unwrap_err();
+    assert_eq!(e.kind, qp_grammar::ErrorKind::Invalid);
+    assert_eq!(e.path, "(options)/outcome");
+}
+
 #[test]
 fn chart_view_draws_level_geometry_with_fact_origins() {
     let p = r3(true);

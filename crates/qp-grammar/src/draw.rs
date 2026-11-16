@@ -55,6 +55,8 @@ pub(crate) struct Geo<'a> {
     pub bold: bool,
     /// Theme (glyph colours).
     pub theme: &'a Theme,
+    /// (R4/M11) Outcome style of glyphs (`CompileOptions::outcome`).
+    pub outcome: &'a dyn crate::glyph::outcome::OutcomeStyle,
 }
 
 impl Geo<'_> {
@@ -798,7 +800,8 @@ fn glyphs(pl: &Prepared, g: &Geo<'_>, out: &mut SceneLayer) {
             y: top as f32,
             size: s as f32,
         };
-        out.prims.extend(alphabet().draw(spec, bx, g.theme));
+        out.prims
+            .extend(g.outcome.draw(alphabet(), spec, bx, g.theme));
         let mut vals: BTreeMap<String, f64> = BTreeMap::new();
         vals.insert("strength".to_owned(), spec.strength);
         vals.insert("freshness".to_owned(), spec.freshness);

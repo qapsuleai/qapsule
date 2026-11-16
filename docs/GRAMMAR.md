@@ -450,6 +450,13 @@ adımı ve `crates/qp-cli/tests/views.rs`).
   (`qp_capsule::glyph_spec_at` + `sentence::validity_now`); belgeden yalnız hikâyeyi okuyan
   `story_glyph` alanı boş bırakır. Böylece cümle "artık geçerli değil" diyorsa işaret de
   der (K42; test `crates/qp-session/tests/capsule_k42.rs`, iki dilde).
+- **Sonuç işareti stili (R4/M11):** "gerçekleşti" ile "tutmadı"yı ayıran sonuç işareti
+  (`docs/CONCEPTS.md` "Sonuç işareti") adla seçilen bir `OutcomeStyle` ile çizilir
+  (`qp_grammar::glyph::outcome`; stil alfabeyi sarar, her alfabe için ayrı çizebilir).
+  Seçim derleme seçeneğidir: `CompileOptions.outcome` (tema geçersiz kılması gibi bir bakış
+  ayarı; görünüme yazılmaz). Yoksa `r3`: alfabenin R3 çizimi aynen (altınlar bayt eşit).
+  Bilinmeyen ad → `invalid` (`(options)/outcome`). M11 alternatifleri yalnız
+  `glyph/outcome.rs`'e bir tip ve `STYLES`'a bir satır ekler.
 - **Okuma:** öğe değerleri `strength`, `freshness`, `confirmations`, varsa `confidence`;
   `hit` öğenin verisini `{"kind":"finding","finding":…}` olarak döndürür (kapsül, bulgusu
   üzerinden: kimlikler `cap.…` ↔ `fnd.…`).

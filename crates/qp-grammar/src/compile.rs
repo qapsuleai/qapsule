@@ -60,6 +60,9 @@ pub struct CompileOptions {
     pub emphasis: Vec<Emphasis>,
     /// Theme override (`dark`, `light`); the view's theme otherwise.
     pub theme: Option<String>,
+    /// (R4/M11) Outcome style of glyphs by name (`qp_grammar::glyph::outcome::STYLES`);
+    /// absent = `r3`, the R3 drawing. A view setting like the theme override.
+    pub outcome: Option<String>,
     /// Level of detail when slots are narrower than one pixel (default `true`).
     pub lod: bool,
     /// Surface reduction: aggregate when more than this many slots are visible
@@ -77,6 +80,7 @@ impl CompileOptions {
             range: None,
             emphasis: Vec::new(),
             theme: None,
+            outcome: None,
             lod: true,
             max_points: None,
         }
@@ -586,6 +590,10 @@ pub fn compile(
         Some(n) => Theme::by_name(n)?,
         None => Theme::dark(),
     };
+    let outcome = match opts.outcome.as_deref() {
+        Some(n) => crate::glyph::outcome::by_name(n)?,
+        None => crate::glyph::outcome::default_style(),
+    };
     if view.x.kind != ScaleKind::Time {
         return Err(GrammarError::new(
             ErrorKind::Invalid,
@@ -930,6 +938,7 @@ pub fn compile(
             k,
             bold: bold.contains(pl.id.as_str()),
             theme,
+            outcome,
         };
         scene_panels[pi].layers.push(draw(pl, &g));
     }

@@ -9,7 +9,12 @@
 //!
 //! The product uses one alphabet, [`alphabet`]: `siluet` (R3/M1). The human test compares
 //! `siluet` with `rozet`; switching is the one line in [`alphabet`].
+//!
+//! (R4/M11) The outcome mark (realized vs failed) is drawn through a named
+//! [`outcome::OutcomeStyle`] wrapping the alphabet; the default `r3` is the alphabet's own
+//! drawing.
 
+pub mod outcome;
 pub mod siluet;
 
 use qp_schema::capsule::GlyphSpec;

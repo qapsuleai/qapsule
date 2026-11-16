@@ -47,7 +47,7 @@
       }
     ]
   },
-  "name": "46-replay-unsupported",
+  "name": "50-replay-unsupported",
   "steps": [
     {
       "expect": [

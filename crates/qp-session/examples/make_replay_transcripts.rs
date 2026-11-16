@@ -144,7 +144,7 @@ fn run(
 
 fn t45() -> Value {
     run(
-        "45-replay-control",
+        "49-replay-control",
         "R4 (§21): a replay host over the synthetic market (two instruments, daily bars moved inside the day by their hourly bars, the capsule engine on both). The owner drives the timeline with `replay` messages: status, one step (the day opens), a day of steps (the notifications of the steps follow the `result`; a closed bar goes through the capsule engine), pause / speed / resume / pause (the content never depends on the wall clock), seek forward by date and by time. A viewer may read the status but not move the timeline; invalid controls are `invalid` with a path, an unknown control a schema error. Seeking back rebuilds the authority (epoch 1): every connection is closed and says hello again, and the document is the one the steps up to that position produce.",
         &["replay", "replay-status", "replay-step", "replay-speed", "replay-pause", "replay-resume", "replay-seek", "replay-reset", "forbidden"],
         replay_init(),
@@ -175,7 +175,7 @@ fn t45() -> Value {
 
 fn t46() -> Value {
     run(
-        "46-replay-unsupported",
+        "50-replay-unsupported",
         "R4 (§21): an authority without `init.replay` has no replay source; a `replay` message is `unsupported`, a malformed one a schema error.",
         &["replay", "unsupported"],
         json!({

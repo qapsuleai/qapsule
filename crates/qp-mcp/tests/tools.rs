@@ -333,9 +333,22 @@ fn grammar_ops_and_hit_are_generated_tools() {
     for k in r3 {
         assert!(names.contains(&k), "missing tool {k}");
     }
+    // R4/T2 (§21): one tool per replay control and the generic `replay`.
+    let r4 = [
+        "replay_status",
+        "replay_pause",
+        "replay_resume",
+        "replay_speed",
+        "replay_step",
+        "replay_seek",
+        "replay",
+    ];
+    for k in r4 {
+        assert!(names.contains(&k), "missing tool {k}");
+    }
     assert_eq!(
         names.len(),
-        37 + grammar.len() + 1 + 2 + r3.len(),
+        37 + grammar.len() + 1 + 2 + r3.len() + r4.len(),
         "{names:?}"
     );
 }

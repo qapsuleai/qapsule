@@ -352,7 +352,7 @@ impl Session {
             _ => Owner::Doc,
         };
         let key: ClaimKey = (owner, d.claim.clone(), d.t);
-        let (seq, now) = (self.seq(), self.clock());
+        let (seq, now) = (self.seq_to(&principal, self.seq()), self.clock());
         if let Some(dg) = &d.digest {
             if !valid_digest(dg) {
                 return Err(E::new(
@@ -460,7 +460,7 @@ impl Session {
         let mut v = vec![verdict_line(
             &conn,
             id,
-            self.seq(),
+            self.seq_to(&principal, self.seq()),
             self.clock(),
             verdict,
             evidence,

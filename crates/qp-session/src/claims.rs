@@ -509,6 +509,12 @@ impl crate::session::Session {
                 {
                     continue;
                 }
+                // (R3/K1b) Claims on document items (capsules, intents) are the
+                // authority's world's; a public-view reader gets its own conditions' only.
+                if !matches!(p.claim, ClaimRef::Condition { .. }) && self.public_view(&c.principal)
+                {
+                    continue;
+                }
                 for s in &c.subs {
                     if !matches!(s.topic, qp_schema::protocol::Topic::Claims {}) {
                         continue;
@@ -526,7 +532,7 @@ impl crate::session::Session {
                                     &c.principal,
                                     &p.evidence,
                                 ),
-                                seq,
+                                seq: self.seq_to(&c.principal, seq),
                                 reason: p.reason,
                             },
                         },

@@ -378,9 +378,11 @@ fn bound_with_flow_and_readers_unchanged() {
     ] {
         assert!(per.lines().any(|l| l == entitled), "{entitled}\n{per}");
     }
+    // R3/K1b: the public world has its own sequence numbers (3017 → 3014 lines: an
+    // entitled person's command the public world does not take leaves no entry there).
     assert_eq!(
         got,
-        "lines 3017 21188765 5d85e68b720ce155 log 1177744 e38025b8f0d9a037 doc 661323 01db88a5bab1d57f"
+        "lines 3014 21187649 d43ff5b9b8b70b19 log 1177744 e38025b8f0d9a037 doc 661323 01db88a5bab1d57f"
     );
 }
 

@@ -631,6 +631,7 @@ impl Session {
             return Err(e);
         }
         let inverse = groups.into_iter().rev().flatten().collect();
+        let pv = self.public_view(&principal);
         self.committed(LogEntry {
             reason,
             seq,
@@ -651,7 +652,12 @@ impl Session {
                 resolved,
                 id: id.to_owned(),
                 status: AckStatus::Applied,
-                seq: Some(seq),
+                // (R3/K1b) A public-view writer: the public entry's own number.
+                seq: Some(if pv {
+                    self.pub_of(seq).unwrap_or_else(|| self.pub_len())
+                } else {
+                    seq
+                }),
                 created,
                 proposal: None,
                 undoes,
@@ -693,11 +699,12 @@ impl Session {
         let fired = self.eval_intents_live(seq, &changed_ref);
         let mut entries: Vec<Seq> = entry.into_iter().collect();
         entries.extend(self.invalidate_live(&changed_ref));
-        entries.extend(self.invalidate_public_only());
         let mut lines = Vec::new();
         for s in entries {
             lines.extend(self.entry_events(s));
         }
+        // (R3/K1b) The public world's own capsules' invalidations.
+        lines.extend(self.invalidate_in_public());
         lines.extend(self.run_capsules());
         lines.extend(self.view_events());
         lines.extend(conds);
@@ -781,12 +788,26 @@ impl Session {
     /// reads is not computable and rests on a changed series.
     fn eval_conditions_live(&mut self, seq: Seq, changed: &[&str]) -> Vec<OutboundLine> {
         let idx = self.take_index();
+        // (R3/K1b) The sequence number each connection may receive.
+        let conditions = self.conns.iter().any(|c| {
+            c.subs
+                .iter()
+                .any(|s| matches!(s.topic, Topic::Condition { .. }))
+        });
+        let seqs: Vec<Seq> = if self.other.is_some() && conditions {
+            self.conns
+                .iter()
+                .map(|c| self.seq_to(&c.principal, seq))
+                .collect()
+        } else {
+            vec![seq; self.conns.len()]
+        };
         let rd = self.rd.as_ref().unwrap_or(&self.doc);
         let cache = &mut self.cache;
         let ready = all_ready(&self.plane);
         let mut ents = Ents::new(&self.plane, &idx.feeds, &self.principals);
         let mut lines = Vec::new();
-        for c in &mut self.conns {
+        for (ci, c) in self.conns.iter_mut().enumerate() {
             let mut row = None;
             for s in &mut c.subs {
                 let Topic::Condition { condition } = &s.topic else {
@@ -849,7 +870,7 @@ impl Session {
                                 event: Event::ConditionMet {
                                     bar,
                                     t,
-                                    seq,
+                                    seq: seqs[ci],
                                     evidence: evidence.map(|ev| {
                                         crate::claims::for_principal(
                                             &self.doc,
@@ -1002,7 +1023,7 @@ impl Session {
                                 series: series.clone(),
                                 from_bar: d.first_bar() as u64,
                                 to_bar: n.checked_sub(1).map(|x| x as u64),
-                                seq: *seq,
+                                seq: self.seq_to(&c.principal, *seq),
                             },
                         },
                     ));

@@ -453,12 +453,12 @@ impl Session {
         trust_keys: Option<(Vec<u8>, Vec<u8>)>,
     ) -> Result<Self, String> {
         let capsules = init.capsules.clone();
-        let doc: Document = match &init.document {
-            DocumentRef::Inline(d) => (**d).clone(),
-            DocumentRef::Path(p) => read_json(&confine(repo_root, p)?)?,
+        let doc: Document = match init.document {
+            DocumentRef::Inline(d) => *d,
+            DocumentRef::Path(p) => read_json(&confine(repo_root, &p)?)?,
         };
         // Canonical form of every view (GRAMMAR.md §11); the log replays from it.
-        let doc = crate::canon::canon_document(&doc)?;
+        let doc = crate::canon::canon_document_owned(doc)?;
         let limits = default_limits();
         let host = init
             .principals

@@ -1,0 +1,14 @@
+# fixtures/protocol/conformance/44-capsule-selectors-bound.json: 4ee7fc6 -> K42 (jdiff.py; then changed sentence clauses, sentdiff.py)
+added    *                          4  e.g. /steps/12/expect/0/msg/error/expected/6: null -> "on"
+changed  *                          4  e.g. /steps/12/expect/0/msg/error/expected/2: "kind" -> "instrument"
+added    condition                  2  e.g. /steps/16/expect/0/msg/data/entries/0/changes/1/capsule/story/condition: null -> {"key": "level", "op": "lt", "subject": "close", "within_bars": 3}
+added    resolution                 2  e.g. /steps/16/expect/0/msg/data/entries/0/changes/1/capsule/story/resolution: null -> {"rule": "barrier"}
+changed  headline                   2  e.g. /steps/16/expect/0/msg/data/entries/0/changes/1/capsule/headline: "THYAO 3 bar önce 4,67'deki desteği aşağı kırdı (kapanış 4,55): aşağı kırılım. Beklenen so -> "THYAO 3 bar önce 4,67'deki desteği aşağı kırdı (kapanış 4,55): aşağı kırılım. Beklenen so
+changed  importance                 2  e.g. /steps/16/expect/0/msg/data/entries/0/changes/1/capsule/story/importance: 3.599202977519779 -> 3.623831857411817
+changed  ledger_key                 2  e.g. /steps/16/expect/0/msg/data/entries/0/changes/1/capsule/story/ledger_key: "breakout/breakout.range@1" -> "breakout/down/breakout.range@1"
+changed  n                          2  e.g. /steps/16/expect/0/msg/data/entries/0/changes/1/capsule/story/ledger_at_birth/n: 8 -> 6
+total 20 leaf differences
+
+## sentences
+- "Karnesi henüz az örnekli: 8 seferin 3'ünde tuttu."
++ "Karnesi henüz az örnekli: 6 seferin 3'ünde tuttu."

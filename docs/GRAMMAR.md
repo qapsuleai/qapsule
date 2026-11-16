@@ -439,6 +439,17 @@ adımı ve `crates/qp-cli/tests/views.rs`).
   kutuya `Prim`'ler üretir; sahne tarifi ilkelleri taşır, çizici hesap yapmaz. Kutu panelin
   içinde tutulur. Alfabe değişimi `alphabet()` içindeki tek satırdır (insan testi
   `rozet`'i öne çıkarırsa).
+- **Geçerlilik kanalı (R4/T3, K42/A28):** `GlyphSpec.validity` (`valid` / `no_longer` /
+  `closed`; isteğe bağlı, yoksa bilinmiyor). Alfabe yalnız `no_longer`'da farklı çizer:
+  açık hikâyenin durum koşulu artık tutmuyorsa siluet gri olur ve sağ alt köşeye "artık
+  geçerli değil" rozeti (içi boş halka + yatay çizgi) gelir; ✓ (dolu daire) ve ✗ (çıplak
+  çarpı) sonuç rozetlerinden ayrı, renksiz de okunur. `valid`, `closed` ve alan yokken
+  çizim R3'teki gibidir (g1 altınları değişmedi; geçerlilik tablosu yeni altın
+  `g2-glyphs-validity-{light,dark}.png`). Motoru ve barları bilen sağlayıcı
+  (`qp-session` `DocProvider::glyph`) değeri cümlenin kullandığı kuralla hesaplar
+  (`qp_capsule::glyph_spec_at` + `sentence::validity_now`); belgeden yalnız hikâyeyi okuyan
+  `story_glyph` alanı boş bırakır. Böylece cümle "artık geçerli değil" diyorsa işaret de
+  der (K42; test `crates/qp-session/tests/capsule_k42.rs`, iki dilde).
 - **Okuma:** öğe değerleri `strength`, `freshness`, `confirmations`, varsa `confidence`;
   `hit` öğenin verisini `{"kind":"finding","finding":…}` olarak döndürür (kapsül, bulgusu
   üzerinden: kimlikler `cap.…` ↔ `fnd.…`).

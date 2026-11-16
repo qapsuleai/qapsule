@@ -1,4 +1,7 @@
-//! R3/S-A sensitivity simulation (GOAL criterion 12, `docs/CAPSULE.md` §6, §9.8, K31).
+//! R3/S-A sensitivity simulation (GOAL criterion 12, `docs/CAPSULE.md` §6, §9.8, K31),
+//! re-run in R4/T3 after K42 (A22: only negative transitions of a position/intent story
+//! pass any level; A23: directional ledger key). `admits` judges each event at its own
+//! transition stage (the event's story snapshot), so births no longer pass by position.
 //!
 //! ```text
 //! cargo run --release -p qp-capsule --example sensitivity -- synthetic
@@ -27,9 +30,10 @@
 //! - The level is never changed by the system: the audience is compared before and after
 //!   every run (assert).
 //!
-//! Output: `rounds/R3/experiments/S/sensitivity.{md,json}` (synthetic) or
-//! `sensitivity-real.{md,json}` (real; aggregate only). Deterministic: two runs give the
-//! same bytes.
+//! Output (R4/T3): `rounds/R4/experiments/T3/sensitivity.{md,json}` (synthetic) or
+//! `sensitivity-real.{md,json}` (real; aggregate only); the R3 outputs in
+//! `rounds/R3/experiments/S/` are the pre-K42 record and are not rewritten. Deterministic:
+//! two runs give the same bytes.
 
 #[path = "support/mod.rs"]
 mod support;
@@ -527,7 +531,7 @@ fn markdown(r: &Report) -> String {
     let real = r.data == "real";
     let _ = writeln!(
         s,
-        "# R3/S-A — Hassasiyet benzetimi ({})\n",
+        "# R4/T3 (K42 sonrası; R3/S-A aracı) — Hassasiyet benzetimi ({})\n",
         if real {
             "gerçek yerel veri, yalnız toplu"
         } else {
@@ -681,7 +685,7 @@ fn markdown(r: &Report) -> String {
 }
 
 fn out_dir() -> PathBuf {
-    std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("../../rounds/R3/experiments/S")
+    std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("../../rounds/R4/experiments/T3")
 }
 
 fn main() {

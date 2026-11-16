@@ -1,0 +1,17 @@
+# fixtures/protocol/conformance/40-capsule-k26-sentence.json: 4ee7fc6 -> K42 (jdiff.py; then changed sentence clauses, sentdiff.py)
+changed  n                          6  e.g. /steps/6/expect/0/msg/data/detail/item/ledger_at_birth/n: 2 -> 0
+added    validity                   5  e.g. /steps/6/expect/0/msg/data/detail/glyph/validity: null -> "no_longer"
+changed  importance                 4  e.g. /steps/6/expect/0/msg/data/detail/item/importance: 0.9582381087589441 -> 0.9878433719168389
+added    condition                  2  e.g. /steps/6/expect/0/msg/data/detail/story/condition: null -> {"key": "sma20", "op": "lt", "subject": "close"}
+added    resolution                 2  e.g. /steps/6/expect/0/msg/data/detail/story/resolution: null -> {"rule": "barrier"}
+changed  en                         2  e.g. /steps/6/expect/0/msg/data/detail/item/sentence/en: "10 bars ago, THYAO crossed below the short average (5.23); it rose back above on this bar -> "10 bars ago, THYAO crossed below the short average (5.23); it rose back above on this bar
+changed  ledger_key                 2  e.g. /steps/6/expect/0/msg/data/detail/story/ledger_key: "continuation/continuation.ma_stack@1" -> "continuation/down/continuation.ma_stack@1"
+changed  text                       2  e.g. /steps/6/expect/0/msg/data/detail/item/sentence/text: "THYAO 10 bar önce kısa ortalamanın (5,23) altına indi, bu barda yeniden üstüne çıktı; şu  -> "THYAO 10 bar önce kısa ortalamanın (5,23) altına indi, bu barda yeniden üstüne çıktı; şu 
+changed  tr                         2  e.g. /steps/6/expect/0/msg/data/detail/item/sentence/tr: "THYAO 10 bar önce kısa ortalamanın (5,23) altına indi, bu barda yeniden üstüne çıktı; şu  -> "THYAO 10 bar önce kısa ortalamanın (5,23) altına indi, bu barda yeniden üstüne çıktı; şu 
+total 27 leaf differences
+
+## sentences
+- 'Its record is still thin: it played out in 0 of 2 cases.'
++ 'No track record yet.'
+- "Karnesi henüz az örnekli: 2 seferin 0'ında tuttu."
++ 'Henüz karnesi yok.'

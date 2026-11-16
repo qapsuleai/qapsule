@@ -22,6 +22,8 @@ const L = {
     lan_warn: 'Uyarı: yerel ağdaki cihazlar bu gösterimi görebilir.',
     lan_hint: 'Telefondan açmak için gösterimi şöyle başlatın:',
     seen: 'Son bakışımı şimdi işaretle', seen_done: 'Son bakış işaretlendi',
+    reset: 'Sıfırla',
+    m_hint: 'Telefonda: Sıfırla → 10 sn dokunmadan bekleyin → Akış\'ta 10 sn kaydırın → bir kapsülü grafiğe açıp 10 sn sürükleyin ve kıstırın → buraya dönüp Özeti kopyala.',
   },
   en: {
     synthetic: 'Synthetic data', tab_feed: 'Feed', tab_settings: 'Settings', tab_metrics: 'Metrics',
@@ -39,6 +41,8 @@ const L = {
     lan_warn: 'Warning: devices on the local network can see this demo.',
     lan_hint: 'To open it on a phone, start the demo with:',
     seen: 'Mark my last look now', seen_done: 'Last look marked',
+    reset: 'Reset',
+    m_hint: 'On a phone: Reset → wait 10 s without touching → scroll the Feed for 10 s → open a capsule to its chart, drag and pinch for 10 s → come back here and Copy summary.',
   },
 };
 
@@ -81,6 +85,7 @@ const faces = new Map(); // capsule id -> element
 const visible = new Set();
 let mode = 'idle';
 let scrollTimer = 0;
+let zoomTimer = 0;
 let painted = false;
 let info = {};
 
@@ -139,6 +144,13 @@ function start(frame) {
   core.set_dpr(window.devicePixelRatio);
   sizeFaces();
   fetch('pkg/sizes.json').then((r) => r.text()).then((s) => core.metric_env(s, navigator.userAgent)).catch(() => {});
+  // (R4/D) Device facts for the summary, as the browser reports them (absent: 0).
+  core.metric_device('cores', navigator.hardwareConcurrency || 0);
+  core.metric_device('device_memory_gb', navigator.deviceMemory || 0);
+  core.metric_device('screen_w', screen.width);
+  core.metric_device('screen_h', screen.height);
+  core.metric_device('dpr', window.devicePixelRatio);
+  sampleMemory();
   if (ui.theme === 'light' || ui.alphabet || ui.face) core.set_style(ui.face, ui.alphabet, ui.theme);
   if (ui.feed || ui.transition || ui.outcome) core.set_look(JSON.stringify({ feed: ui.feed, transition: ui.transition, outcome: ui.outcome }));
   if (ui.watch || ui.long || ui.short || ui.group) core.set_audience(JSON.stringify({ group: ui.group, watch: ui.watch, long: ui.long, short: ui.short }));
@@ -457,7 +469,8 @@ function pointers(el) {
   el.addEventListener('pointermove', (e) => {
     if (!el.hasPointerCapture(e.pointerId)) return;
     const m = core.pointer(el.dataset.target, 'move', e.pointerId, e.offsetX, e.offsetY);
-    if (m === 'drag' || m === 'pinch') mode = 'drag';
+    if (m === 'drag') mode = 'drag';
+    if (m === 'pinch') mode = 'zoom';
     flush();
   });
   for (const ev of ['pointerup', 'pointercancel']) {
@@ -475,6 +488,10 @@ function wire() {
   pointers(scene);
   scene.addEventListener('wheel', (e) => {
     e.preventDefault();
+    // (R4/D) Wheel on the chart is its zoom: its frames are measured as `zoom`.
+    mode = 'zoom';
+    clearTimeout(zoomTimer);
+    zoomTimer = setTimeout(() => { mode = 'idle'; }, 150);
     core.wheel(e.deltaY, e.offsetX);
     flush();
   }, { passive: false });
@@ -527,6 +544,7 @@ function wire() {
   $('s_apply').onclick = applyAudience;
   $('s_seen').onclick = () => { core.mark_seen(); flush(); toast(t('seen_done')); };
   $('m_copy').onclick = copyMetrics;
+  $('m_reset').onclick = () => { if (core) { core.metric_reset(); renderMetrics(); } };
 }
 
 function fillChoices() {
@@ -589,6 +607,7 @@ function applyAudience() {
 }
 
 function renderMetrics() {
+  if (!core) return;
   const rows = [];
   for (const [k, v] of JSON.parse(core.metrics_rows())) {
     const tr = document.createElement('tr');
@@ -602,7 +621,16 @@ function renderMetrics() {
   $('mrows').tBodies[0].replaceChildren(...rows);
 }
 
+// (R4/D) Memory: the JS heap where the browser reports it (Chromium), the WASM memory
+// from the core; sampled every second and before the summary is read.
+function sampleMemory() {
+  if (!core) return;
+  const pm = performance.memory;
+  core.metric_memory(pm ? pm.usedJSHeapSize : 0);
+}
+
 function copyMetrics() {
+  sampleMemory();
   const text = core.metrics();
   const ta = $('m_text');
   ta.value = text;
@@ -623,7 +651,8 @@ function frame(ts) {
 window.qp = {
   ready: () => Boolean(core) && core.idle() && posts.size === 0,
   digests: () => core.digests(),
-  metrics: () => core.metrics(),
+  metrics: () => { sampleMemory(); return core.metrics(); },
+  resetMetrics: () => core.metric_reset(),
   status: () => core.status(),
   open: () => core.open(),
   feed: () => core.feed(),
@@ -666,6 +695,10 @@ async function main() {
   wasmReady = performance.now();
   while (early.length) onFrame(early.shift());
   requestAnimationFrame(frame);
+  setInterval(() => {
+    sampleMemory();
+    if (document.body.dataset.tab === 'metrics') renderMetrics();
+  }, 1000);
 }
 
 main();

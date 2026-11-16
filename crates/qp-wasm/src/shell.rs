@@ -311,7 +311,58 @@ impl Samples {
         #[allow(clippy::cast_precision_loss)]
         let mean = s.iter().sum::<f64>() / n as f64;
         json!({"n": n, "mean": round3(mean), "p50": round3(q(0.5)), "p95": round3(q(0.95)),
-               "max": round3(s[n - 1])})
+               "p99": round3(q(0.99)), "max": round3(s[n - 1])})
+    }
+    /// (R4/D) A frame-interval summary: [`Samples::summary`] plus the share of long frames
+    /// (intervals over one and over two 60 Hz frames, 16.7 and 33.3 ms).
+    fn frame_summary(&self) -> Value {
+        let mut v = self.summary();
+        if let Some(o) = v.as_object_mut() {
+            if !self.v.is_empty() {
+                #[allow(clippy::cast_precision_loss)]
+                let n = self.v.len() as f64;
+                #[allow(clippy::cast_precision_loss)]
+                let share = |limit: f64| self.v.iter().filter(|&&x| x > limit).count() as f64 / n;
+                o.insert("long_16_7".to_owned(), json!(round3(share(LONG_FRAME_MS))));
+                o.insert(
+                    "long_33_3".to_owned(),
+                    json!(round3(share(2.0 * LONG_FRAME_MS))),
+                );
+            }
+        }
+        v
+    }
+}
+
+/// (R4/D) One 60 Hz frame (ms): the long-frame threshold of the metrics page.
+const LONG_FRAME_MS: f64 = 1000.0 / 60.0;
+
+/// (R4/D) A gauge of the metrics page (device facts, memory): last and largest value.
+#[derive(Debug, Clone, Copy, Default)]
+struct Gauge {
+    last: f64,
+    max: f64,
+}
+
+impl Gauge {
+    fn set(&mut self, x: f64) {
+        self.last = x;
+        if x > self.max {
+            self.max = x;
+        }
+    }
+}
+
+/// (R4/D) The size of the WASM linear memory in bytes (`None` off the web).
+fn wasm_memory_bytes() -> Option<f64> {
+    #[cfg(target_arch = "wasm32")]
+    {
+        #[allow(clippy::cast_precision_loss)]
+        Some(core::arch::wasm32::memory_size(0) as f64 * 65536.0)
+    }
+    #[cfg(not(target_arch = "wasm32"))]
+    {
+        None
     }
 }
 
@@ -332,6 +383,11 @@ struct Metrics {
     marks: BTreeMap<String, f64>,
     bundle: Value,
     agent: String,
+    /// (R4/D) Device facts the page reports (`cores`, `device_memory_gb`, `screen_w`,
+    /// `screen_h`, `dpr`, …): last value wins.
+    device: BTreeMap<String, f64>,
+    /// (R4/D) Memory samples in bytes (`js_heap` from the page, `wasm` from the core).
+    memory: BTreeMap<String, Gauge>,
 }
 
 /// The core of the web shell (see the module docs).
@@ -1571,6 +1627,42 @@ impl ShellCore {
         agent.clone_into(&mut self.metrics.agent);
     }
 
+    /// (R4/D) A device fact the page reports (`cores`, `device_memory_gb`, `screen_w`,
+    /// `screen_h`, …). Non-finite values are ignored.
+    pub fn metric_device(&mut self, name: &str, value: f64) {
+        if value.is_finite() {
+            self.metrics.device.insert(name.to_owned(), value);
+        }
+    }
+
+    /// (R4/D) A memory sample: the page's JS heap in bytes (`0` when the browser does not
+    /// report it) and, from the core itself, the WASM linear memory.
+    pub fn metric_memory(&mut self, js_heap: f64) {
+        if js_heap.is_finite() && js_heap > 0.0 {
+            self.metrics
+                .memory
+                .entry("js_heap".to_owned())
+                .or_default()
+                .set(js_heap);
+        }
+        if let Some(w) = wasm_memory_bytes() {
+            self.metrics
+                .memory
+                .entry("wasm".to_owned())
+                .or_default()
+                .set(w);
+        }
+    }
+
+    /// (R4/D) Starts the frame and span series over (the opening marks, the bundle, the
+    /// device facts and memory stay): a measurement phase can be repeated cleanly.
+    pub fn metric_reset(&mut self) {
+        let m = &mut self.metrics;
+        m.frames.clear();
+        m.spans.clear();
+        m.last_frame = None;
+    }
+
     /// The metrics summary (the copyable JSON).
     #[must_use]
     pub fn metrics_json(&self) -> Value {
@@ -1578,7 +1670,7 @@ impl ShellCore {
         let frames: serde_json::Map<String, Value> = m
             .frames
             .iter()
-            .map(|(k, v)| (k.clone(), v.summary()))
+            .map(|(k, v)| (k.clone(), v.frame_summary()))
             .collect();
         let spans: serde_json::Map<String, Value> = m
             .spans
@@ -1592,6 +1684,10 @@ impl ShellCore {
             "open_ms": m.marks,
             "bundle": m.bundle,
             "agent": m.agent,
+            "device": self.device_json(),
+            "memory_bytes": m.memory.iter().map(|(k, g)| (k.clone(), json!({"last": g.last, "max": g.max})))
+                .collect::<serde_json::Map<String, Value>>(),
+            "look": self.look_effective(),
             "feed": self.feed.len(),
             "replay": self.replay.as_ref().map(|r| json!({"step": r.step, "instruments": r.instruments,
                 "synthetic": r.synthetic, "speed": r.speed})),
@@ -1620,12 +1716,35 @@ impl ShellCore {
         };
         for (k, v) in &m.frames {
             rows.push(json!([format!("frame.{k}"), fmt(v)]));
+            let f = v.frame_summary();
+            if let (Some(p99), Some(l)) = (f["p99"].as_f64(), f["long_16_7"].as_f64()) {
+                rows.push(json!([
+                    format!("frame.{k}.long"),
+                    format!("p99 {p99:.2} ms · >16,7 ms %{:.1}", l * 100.0)
+                ]));
+            }
         }
         for (k, v) in &m.spans {
             rows.push(json!([format!("span.{k}"), fmt(v)]));
         }
         for (k, v) in &m.marks {
             rows.push(json!([format!("open.{k}"), format!("{v:.1} ms")]));
+        }
+        for (k, g) in &m.memory {
+            rows.push(json!([
+                format!("memory.{k}"),
+                format!(
+                    "{:.1} MB (en çok {:.1} MB)",
+                    g.last / 1_048_576.0,
+                    g.max / 1_048_576.0
+                )
+            ]));
+        }
+        if let Some(o) = self.device_json().as_object() {
+            for (k, v) in o {
+                let text = v.as_f64().map_or_else(|| v.to_string(), |n| format!("{n}"));
+                rows.push(json!([format!("device.{k}"), text]));
+            }
         }
         if let Some(o) = m.bundle.as_object() {
             for (k, v) in o {
@@ -1637,6 +1756,29 @@ impl ShellCore {
             }
         }
         Value::Array(rows)
+    }
+
+    /// (R4/D) The look of the connection (`null`: not set yet, before `welcome`).
+    fn look_effective(&self) -> Value {
+        json!({
+            "face": self.look.face,
+            "feed": self.look.feed,
+            "transition": self.look.transition,
+            "outcome": self.look.outcome,
+            "alphabet": self.look.alphabet,
+        })
+    }
+
+    /// (R4/D) The device facts plus the paint scale the core chose (`scale`).
+    fn device_json(&self) -> Value {
+        let mut o: serde_json::Map<String, Value> = self
+            .metrics
+            .device
+            .iter()
+            .map(|(k, v)| (k.clone(), json!(v)))
+            .collect();
+        o.insert("scale".to_owned(), json!(self.scale));
+        Value::Object(o)
     }
 
     // --- parity ----------------------------------------------------------------

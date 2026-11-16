@@ -219,7 +219,7 @@ Kişinin pozisyonu ya da etkin niyetiyle ilgili enstrümanın kapsülü (özelli
 
 ### 9.9 Seçimler ve bağlantılar (R3)
 
-| Konu | Seçim (öneri, `DECISIONS.md` Ö29–Ö40) | Uygulama | Kanıt |
+| Konu | Seçim (öneri, `DECISIONS.md` Ö29–Ö41) | Uygulama | Kanıt |
 |------|------|----------|-------|
 | İşaret alfabesi (M1) | `siluet` (insan testi `siluet` ↔ `rozet`) | `qp_grammar::glyph`, gramer `glyph` işareti (GRAMMAR §18) | `experiments/M1/RESULTS.md` |
 | Cümle (M2) | şablon dilbilgisi | `qp_capsule::realize`, `sentence::sentences_at` | `M2/RESULTS.md` |

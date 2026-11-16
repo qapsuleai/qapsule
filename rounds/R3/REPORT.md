@@ -57,7 +57,7 @@
 | 10 | Sunucu olgusu uçtan uca; güven yolu şartnamede; geri çıkarma saldırısı raporda | ✅ (denetim K1 sonrası) | Sentetik lisanslı akış → `flow.institutional` → mühür → `server_comment` (döküm 39); PROTOCOL §20; `M6/RESULTS.md`: kâhin saldırısı bit p90 1,22, yapı gereği sınır ≤ 2,81 bit/hedef bar. |
 | 11 | İtiraz ve geri çekme: M7; uygulandı; "geri çekildi" dökümde | ⚠️ | §19.9, döküm 37 ve 43; yanlış/erken/çelişkili gösterim her senaryoda 0; kaçırılan kesin iddia AUD1 7 → 0, AUD3 7 → 0, M7X 51 → 1; **AUD2 49 → 53 (iyileşmedi**: yansının REFRESH'siz 240 s kesintisi). |
 | 12 | Üç seviye, iki grup varsayılanı, pozisyon/niyet bağımsız, sistem değiştirmez; ≥250 gün × ≥30 enstrüman benzetimi | ✅ | `S/sensitivity.md` (30 × 500 × 3 tohum; belirleyici, iki koşu bayt eşit): `important` 1,59/gün, `balanced` 2,06, `all` 3,23; gerçek veri `S/sensitivity-real.md`. Bulgu: pozisyon/niyet geçişi `important`'ı dolduruyor (A22). |
-| 13 | M1–M7 düzenekler önce, alternatifler, ham, seçim; DECISIONS'ta öneri | ✅ (notlarla) | SPEC `a35d726` < bütün alternatifler; ham `experiments/M*/raw/`; DECISIONS Ö29–Ö40. Notlar aşağıda ("Sapmalar"). |
+| 13 | M1–M7 düzenekler önce, alternatifler, ham, seçim; DECISIONS'ta öneri | ✅ (notlarla) | SPEC `a35d726` < bütün alternatifler; ham `experiments/M*/raw/`; DECISIONS Ö29–Ö41. Notlar aşağıda ("Sapmalar"). |
 | 14 | Rejimli sentetik; gerçek veride ayrı ölçüm; sentetik karnenin anlamsızlığı yazılı; gerçek veri depoda yok | ✅ | `qp_source::synthetic_market` (dört rejim); M3/M4/M5 gerçek veri tabloları; `git ls-files | grep fixtures/local` boş. |
 | 15 | İnsan testi paketi | ✅ | `human-test/` (iki kitapçık sırası, yönerge ~16 dk, form, puanlama, örnek). |
 | 16 | Protokol eki; yeni dökümler üç taşımada; var olan 36 değişmeden; ≥20 kapsül görevi | ✅ | PROTOCOL §19.9, §20; dökümler 37–43 (+ düzeltmelerden gelenler) × inproc/serve/MCP; 36 eski döküm bayt eşit; E: C01–C20 iki koşu, son 19/20 ve 20/20, ilk deneme 12/20 ve 11/20. |
@@ -148,7 +148,7 @@ bar, en çok 5,71; ≤ 7 farklı döküm: raporun sınırıyla tutarlı); perfor
 
 ## Açık sorular (ana akış için)
 
-1. Ö29–Ö40 kabul mü? Özellikle Ö32 (alfabe, insan testine kadar), Ö37 (mühür ve "yetkisize
+1. Ö29–Ö41 kabul mü? Özellikle Ö32 (alfabe, insan testine kadar), Ö37 (mühür ve "yetkisize
    lisanslı hikâye yalnız mühür iletileriyle" kuralı — K34 ile gerilim: kanıtın varlığı ve
    dayanağı mühür ekleriyle söyleniyor, olgunun kendisi değil), Ö38 (AUD2 iyileşmedi).
 2. A21–A26 (`DECISIONS.md`): insan testi sonucu; pozisyon/niyet geçişinin `important`'ı

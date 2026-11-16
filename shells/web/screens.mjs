@@ -32,10 +32,11 @@ if (data && !out.startsWith(path.join(root, 'fixtures', 'local'))) {
 }
 fs.mkdirSync(out, { recursive: true });
 
-// The R4/T5 shots are pinned to the R3 designs (`R3`): their goldens predate the R4/S1
-// presentation defaults (feed `elikov`, transition `zumlak`, outcome `tg5`) and do not
-// change. The `-r4` shots show the presentation as it opens now (no setting in the URL).
-const R3 = { feed: 'r3', transition: 'r3', outcome: 'r3' };
+// The R4/T5 shots are pinned to the R3 designs (`R3`): their goldens predate the R4
+// presentation defaults (face `vadrel` (S2), feed `elikov`, transition `zumlak`, outcome
+// `tg5` (S1)) and do not change. The `-r4` shots show the presentation as it opens now
+// (no design setting in the URL); `-fotolay`: M8's second face.
+const R3 = { face: 'r3', feed: 'r3', transition: 'r3', outcome: 'r3' };
 export const SHOTS = [
   { name: 'feed-tr-dark', look: R3, canvases: ['face-0', 'face-1', 'face-2'] },
   { name: 'feed-en-light', look: R3, lang: 'en', theme: 'light', canvases: ['face-0'] },
@@ -46,6 +47,10 @@ export const SHOTS = [
   // R4/S1: the presentation's defaults.
   { name: 'feed-tr-dark-r4', canvases: ['face-0', 'face-1', 'face-2'] },
   { name: 'feed-tr-light-r4-closed', theme: 'light', canvases: ['closed-0', 'closed-1'] },
+  // R4/S2: the presentation's face (`vadrel`) in the other language and theme, and M8's
+  // second face (`fotolay`, the human test's Y2).
+  { name: 'feed-en-light-r4', lang: 'en', theme: 'light', canvases: ['face-0', 'face-1'] },
+  { name: 'feed-tr-dark-fotolay', face: 'fotolay', canvases: ['face-0', 'face-1'] },
 ];
 
 const extra = data ? ['--data', data] : [];

@@ -406,7 +406,7 @@ impl Session {
 }
 
 /// `view` without the layers at `skip` (indexes).
-fn without_layers<T>(view: &View, skip: &BTreeMap<usize, T>) -> View {
+pub(crate) fn without_layers<T>(view: &View, skip: &BTreeMap<usize, T>) -> View {
     let mut v = view.clone();
     v.layers = view
         .layers

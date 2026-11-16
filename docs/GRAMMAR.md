@@ -555,5 +555,5 @@ tarafta kutusuz döner. Kabuk geçiş animasyonunu yalnız bu iki kutu arasında
 öğenin süreceğine çekirdek karar verir (M10 iki geçiş tasarımını bu yapı üzerine kurar;
 yeni bir öğe yeni bir kimlikle eklenir, yapı değişmez).
 
-Örnek (`r4-input-open-close`): kapsül → grafik geçişinde `bar:124`, `evidence:fx…124`,
+Örnek (`53-input-open-close`): kapsül → grafik geçişinde `bar:124`, `evidence:fx…124`,
 `glyph`, `price` ortaktır; grafikte başlık metni olmadığı için `headline` ortak değildir.

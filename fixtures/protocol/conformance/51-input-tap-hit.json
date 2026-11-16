@@ -1,12 +1,13 @@
 {
   "covers": [
     "input",
+    "tap_at",
+    "hit",
+    "open",
     "view-state",
-    "presence",
-    "log",
     "screen"
   ],
-  "description": "R4 (§4.6, §7): view state is presence. Ten pixel gestures and open/close on one connection: no log entry, no `change` event to a `changes` subscriber, the log keeps its length (`final.log_len`); another principal reads the view state with `screen`.",
+  "description": "R4 (§4.6): pixel taps resolved in the core. On the candle view `main` (phone, frame 390x300 reported with the tap) a tap on a candle answers what is under the finger (the `hit` code) and that bar's values (`at`); a tap outside the plot answers the empty hit and no bar. A tap on a capsule's face in the feed (frame 358x140) opens it: the engine decides, the answer carries the presentation at capsule depth and the elements face and opened capsule share, with their boxes in both scenes. `screen` then shows the view state to an agent.",
   "final": {
     "log_len": 2
   },
@@ -1163,7 +1164,7 @@
       }
     ]
   },
-  "name": "r4-input-presence",
+  "name": "51-input-tap-hit",
   "steps": [
     {
       "expect": [
@@ -1190,83 +1191,64 @@
     {
       "expect": [
         {
-          "conn": "a",
-          "msg": {
-            "seq": 2,
-            "type": "welcome"
-          }
-        }
-      ],
-      "send": {
-        "conn": "a",
-        "msg": {
-          "principal": "ana",
-          "protocol": "qp/0",
-          "surface": {
-            "kind": "phone"
-          },
-          "type": "hello"
-        }
-      }
-    },
-    {
-      "expect": [
-        {
-          "conn": "a",
-          "msg": {
-            "id": "ch",
-            "status": "subscribed",
-            "type": "ack"
-          }
-        }
-      ],
-      "send": {
-        "conn": "a",
-        "msg": {
-          "id": "ch",
-          "topic": {
-            "kind": "changes"
-          },
-          "type": "subscribe"
-        }
-      }
-    },
-    {
-      "expect": [
-        {
           "conn": "p",
           "msg": {
             "data": {
               "interaction": {
-                "state": {
-                  "depth": "sentence"
+                "at": {
+                  "bar": 125,
+                  "ohlcv": {
+                    "c": 4.55,
+                    "h": 4.56,
+                    "l": 4.52,
+                    "o": 4.53,
+                    "t": 1687762800000,
+                    "v": 11376022.92
+                  },
+                  "series": "px",
+                  "studies": {}
                 },
-                "viewport": {
-                  "from_bar": 69,
-                  "to_bar": 128,
+                "hit": {
+                  "bar": 125,
+                  "panel": 0,
+                  "t": 1687762800000,
+                  "value": 5.136590909090909,
                   "view": "main"
+                },
+                "state": {
+                  "depth": "sentence",
+                  "frames": {
+                    "view:main": [
+                      390,
+                      300
+                    ]
+                  }
                 }
               },
               "kind": "interaction"
             },
-            "id": "g0",
+            "id": "t1",
             "now": 1760000000000,
             "seq": 2,
             "type": "result"
           }
         }
       ],
+      "note": "A tap on a candle: the bar under the finger and its values.",
       "send": {
         "conn": "p",
         "msg": {
           "gesture": {
-            "dx": -25.0,
-            "kind": "drag",
+            "height": 300,
+            "kind": "tap_at",
             "target": {
               "view": "main"
-            }
+            },
+            "width": 390,
+            "x": 300.0,
+            "y": 150.0
           },
-          "id": "g0",
+          "id": "t1",
           "type": "input"
         }
       }
@@ -1278,36 +1260,41 @@
           "msg": {
             "data": {
               "interaction": {
-                "state": {
-                  "depth": "sentence"
-                },
-                "viewport": {
-                  "from_bar": 76,
-                  "to_bar": 123,
+                "hit": {
                   "view": "main"
+                },
+                "state": {
+                  "depth": "sentence",
+                  "frames": {
+                    "view:main": [
+                      390,
+                      300
+                    ]
+                  }
                 }
               },
               "kind": "interaction"
             },
-            "id": "g1",
+            "id": "t2",
             "now": 1760000000000,
             "seq": 2,
             "type": "result"
           }
         }
       ],
+      "note": "Outside the plot (the remembered 390x300 frame): no panel, no bar, no item.",
       "send": {
         "conn": "p",
         "msg": {
           "gesture": {
-            "factor": 1.25,
-            "kind": "pinch",
+            "kind": "tap_at",
             "target": {
               "view": "main"
             },
-            "x": 180.0
+            "x": 2.0,
+            "y": 5.0
           },
-          "id": "g1",
+          "id": "t2",
           "type": "input"
         }
       }
@@ -1319,6 +1306,22 @@
           "msg": {
             "data": {
               "interaction": {
+                "hit": {
+                  "bar": 88,
+                  "item": {
+                    "data": {
+                      "finding": "fnd.THYAO.breakout.down.124",
+                      "kind": "finding"
+                    },
+                    "layer": "sentence",
+                    "mark": "text",
+                    "values": {}
+                  },
+                  "panel": 0,
+                  "t": 1683183600000,
+                  "value": 0.8636363636363636,
+                  "view": "capsule-fnd.THYAO.breakout.down.124"
+                },
                 "opening": {
                   "capsule": "cap.THYAO.breakout.down.124",
                   "finding": "fnd.THYAO.breakout.down.124",
@@ -1580,7 +1583,7 @@
                     },
                     "state": "live",
                     "surface": "phone",
-                    "text": "THYAO 3 bar önce 4,67'deki desteği aşağı kırdı (kapanış 4,55): aşağı kırılım. Beklenen sonuç bu barda gerçekleşti. Hâlâ geçerli. Karnesi henüz az örnekli: 8 seferin 3'ünde tuttu."
+                    "text": "THYAO 3 bar önce 4,67'deki desteği aşağı kırdı (kapanış 4,55): aşağı kırılım. Beklenen sonuç bu barda gerçekleşti. Hâlâ geçerli. Karnesi henüz az örnekli: 6 seferin 3'ünde tuttu."
                   },
                   "shared": [
                     {
@@ -1592,8 +1595,8 @@
                       },
                       "before": {
                         "bottom": 116,
-                        "left": 291,
-                        "right": 297,
+                        "left": 262,
+                        "right": 268,
                         "top": 86
                       },
                       "id": "bar:124"
@@ -1608,7 +1611,7 @@
                       "before": {
                         "bottom": 114,
                         "left": 8,
-                        "right": 318,
+                        "right": 286,
                         "top": 107
                       },
                       "id": "evidence:fx.THYAO.breakout.range.down.124"
@@ -1622,8 +1625,8 @@
                       },
                       "before": {
                         "bottom": 117,
-                        "left": 290,
-                        "right": 299,
+                        "left": 261,
+                        "right": 270,
                         "top": 108
                       },
                       "id": "fact:fx.THYAO.breakout.range.down.124"
@@ -1653,7 +1656,7 @@
                       "before": {
                         "bottom": 82,
                         "left": 58,
-                        "right": 303,
+                        "right": 289,
                         "top": 34
                       },
                       "id": "headline"
@@ -1683,7 +1686,7 @@
                       "before": {
                         "bottom": 116,
                         "left": 8,
-                        "right": 318,
+                        "right": 286,
                         "top": 86
                       },
                       "id": "price"
@@ -1695,85 +1698,43 @@
                   "capsule": "cap.THYAO.breakout.down.124",
                   "depth": "capsule",
                   "finding": "fnd.THYAO.breakout.down.124",
-                  "view": "capsule-fnd.THYAO.breakout.down.124"
-                }
-              },
-              "kind": "interaction"
-            },
-            "id": "g2",
-            "now": 1760000000000,
-            "seq": 2,
-            "type": "result"
-          }
-        }
-      ],
-      "send": {
-        "conn": "p",
-        "msg": {
-          "gesture": {
-            "capsule": "cap.THYAO.breakout.down.124",
-            "kind": "open"
-          },
-          "id": "g2",
-          "type": "input"
-        }
-      }
-    },
-    {
-      "expect": [
-        {
-          "conn": "p",
-          "msg": {
-            "data": {
-              "interaction": {
-                "at": {
-                  "bar": 113,
-                  "ohlcv": {
-                    "c": 4.79,
-                    "h": 4.87,
-                    "l": 4.78,
-                    "o": 4.85,
-                    "t": 1686207600000,
-                    "v": 19713740.8
+                  "frames": {
+                    "face": [
+                      358,
+                      140
+                    ],
+                    "view:main": [
+                      390,
+                      300
+                    ]
                   },
-                  "series": "px",
-                  "studies": {}
-                },
-                "hit": {
-                  "bar": 113,
-                  "panel": 0,
-                  "t": 1686207600000,
-                  "value": 5.098409090909091,
-                  "view": "main"
-                },
-                "state": {
-                  "capsule": "cap.THYAO.breakout.down.124",
-                  "depth": "capsule",
-                  "finding": "fnd.THYAO.breakout.down.124",
                   "view": "capsule-fnd.THYAO.breakout.down.124"
                 }
               },
               "kind": "interaction"
             },
-            "id": "g3",
+            "id": "t3",
             "now": 1760000000000,
             "seq": 2,
             "type": "result"
           }
         }
       ],
+      "note": "A tap on a closed capsule's face opens it one depth (sentence → capsule).",
       "send": {
         "conn": "p",
         "msg": {
           "gesture": {
+            "height": 140,
             "kind": "tap_at",
             "target": {
-              "view": "main"
+              "capsule": "cap.THYAO.breakout.down.124"
             },
-            "x": 250.0,
-            "y": 120.0
+            "width": 358,
+            "x": 100.0,
+            "y": 40.0
           },
-          "id": "g3",
+          "id": "t3",
           "type": "input"
         }
       }
@@ -1782,910 +1743,30 @@
       "expect": [
         {
           "conn": "p",
-          "msg": {
-            "data": {
-              "interaction": {
-                "opening": {
-                  "capsule": "cap.THYAO.breakout.down.124",
-                  "finding": "fnd.THYAO.breakout.down.124",
-                  "frame": [
-                    390,
-                    140
-                  ],
-                  "from": "capsule",
-                  "presentation": {
-                    "depth": "sentence",
-                    "finding": "fnd.THYAO.breakout.down.124",
-                    "state": "live",
-                    "surface": "phone",
-                    "text": "THYAO 3 bar önce 4,67'deki desteği aşağı kırdı (kapanış 4,55): aşağı kırılım. Beklenen sonuç bu barda gerçekleşti. Hâlâ geçerli. Karnesi henüz az örnekli: 8 seferin 3'ünde tuttu."
-                  },
-                  "shared": [
-                    {
-                      "after": {
-                        "bottom": 116,
-                        "left": 291,
-                        "right": 297,
-                        "top": 86
-                      },
-                      "before": {
-                        "bottom": 276,
-                        "left": 291,
-                        "right": 297,
-                        "top": 182
-                      },
-                      "id": "bar:124"
-                    },
-                    {
-                      "after": {
-                        "bottom": 114,
-                        "left": 8,
-                        "right": 318,
-                        "top": 107
-                      },
-                      "before": {
-                        "bottom": 261,
-                        "left": 8,
-                        "right": 318,
-                        "top": 254
-                      },
-                      "id": "evidence:fx.THYAO.breakout.range.down.124"
-                    },
-                    {
-                      "after": {
-                        "bottom": 117,
-                        "left": 290,
-                        "right": 299,
-                        "top": 108
-                      },
-                      "before": {
-                        "bottom": 269,
-                        "left": 290,
-                        "right": 299,
-                        "top": 260
-                      },
-                      "id": "fact:fx.THYAO.breakout.range.down.124"
-                    },
-                    {
-                      "after": {
-                        "bottom": 74,
-                        "left": 8,
-                        "right": 48,
-                        "top": 34
-                      },
-                      "before": {
-                        "bottom": 74,
-                        "left": 8,
-                        "right": 48,
-                        "top": 34
-                      },
-                      "id": "glyph"
-                    },
-                    {
-                      "after": {
-                        "bottom": 82,
-                        "left": 58,
-                        "right": 303,
-                        "top": 34
-                      },
-                      "before": {
-                        "bottom": 130,
-                        "left": 58,
-                        "right": 303,
-                        "top": 34
-                      },
-                      "id": "headline"
-                    },
-                    {
-                      "after": {
-                        "bottom": 79,
-                        "left": 8,
-                        "right": 68,
-                        "top": 65
-                      },
-                      "before": {
-                        "bottom": 175,
-                        "left": 8,
-                        "right": 68,
-                        "top": 161
-                      },
-                      "id": "ledger"
-                    },
-                    {
-                      "after": {
-                        "bottom": 116,
-                        "left": 8,
-                        "right": 318,
-                        "top": 86
-                      },
-                      "before": {
-                        "bottom": 276,
-                        "left": 8,
-                        "right": 318,
-                        "top": 182
-                      },
-                      "id": "price"
-                    }
-                  ],
-                  "to": "sentence"
-                },
-                "state": {
-                  "depth": "sentence"
-                }
-              },
-              "kind": "interaction"
-            },
-            "id": "g4",
-            "now": 1760000000000,
-            "seq": 2,
-            "type": "result"
-          }
-        }
-      ],
-      "send": {
-        "conn": "p",
-        "msg": {
-          "gesture": {
-            "kind": "close",
-            "to": "sentence"
-          },
-          "id": "g4",
-          "type": "input"
-        }
-      }
-    },
-    {
-      "expect": [
-        {
-          "conn": "p",
-          "msg": {
-            "data": {
-              "interaction": {
-                "state": {
-                  "depth": "sentence"
-                },
-                "viewport": {
-                  "from_bar": 80,
-                  "to_bar": 127,
-                  "view": "main"
-                }
-              },
-              "kind": "interaction"
-            },
-            "id": "g5",
-            "now": 1760000000000,
-            "seq": 2,
-            "type": "result"
-          }
-        }
-      ],
-      "send": {
-        "conn": "p",
-        "msg": {
-          "gesture": {
-            "dx": -25.0,
-            "kind": "drag",
-            "target": {
-              "view": "main"
-            }
-          },
-          "id": "g5",
-          "type": "input"
-        }
-      }
-    },
-    {
-      "expect": [
-        {
-          "conn": "p",
-          "msg": {
-            "data": {
-              "interaction": {
-                "state": {
-                  "depth": "sentence"
-                },
-                "viewport": {
-                  "from_bar": 86,
-                  "to_bar": 123,
-                  "view": "main"
-                }
-              },
-              "kind": "interaction"
-            },
-            "id": "g6",
-            "now": 1760000000000,
-            "seq": 2,
-            "type": "result"
-          }
-        }
-      ],
-      "send": {
-        "conn": "p",
-        "msg": {
-          "gesture": {
-            "factor": 1.25,
-            "kind": "pinch",
-            "target": {
-              "view": "main"
-            },
-            "x": 180.0
-          },
-          "id": "g6",
-          "type": "input"
-        }
-      }
-    },
-    {
-      "expect": [
-        {
-          "conn": "p",
-          "msg": {
-            "data": {
-              "interaction": {
-                "opening": {
-                  "capsule": "cap.THYAO.breakout.down.124",
-                  "finding": "fnd.THYAO.breakout.down.124",
-                  "frame": [
-                    390,
-                    300
-                  ],
-                  "from": "sentence",
-                  "presentation": {
-                    "capsule_view": {
-                      "id": "capsule-fnd.THYAO.breakout.down.124",
-                      "layers": [
-                        {
-                          "encoding": {
-                            "size": 40.0,
-                            "x": {
-                              "panel": 0.0
-                            },
-                            "y": {
-                              "panel": 0.0
-                            }
-                          },
-                          "finding": "fnd.THYAO.breakout.down.124",
-                          "id": "glyph",
-                          "mark": "glyph",
-                          "panel": 0
-                        },
-                        {
-                          "encoding": {
-                            "size": 12.0,
-                            "text": "headline",
-                            "x": {
-                              "panel": 0.0,
-                              "px": 50.0
-                            },
-                            "y": {
-                              "panel": 0.0
-                            }
-                          },
-                          "finding": "fnd.THYAO.breakout.down.124",
-                          "id": "sentence",
-                          "mark": "text",
-                          "panel": 0
-                        },
-                        {
-                          "encoding": {
-                            "color": "muted",
-                            "size": 11.0,
-                            "text": "ledger",
-                            "x": {
-                              "panel": 0.0
-                            },
-                            "y": {
-                              "panel": 1.0,
-                              "px": -13.0
-                            }
-                          },
-                          "finding": "fnd.THYAO.breakout.down.124",
-                          "id": "ledger",
-                          "mark": "text",
-                          "panel": 0
-                        },
-                        {
-                          "encoding": {
-                            "y": "c"
-                          },
-                          "id": "line",
-                          "label": "C",
-                          "mark": "line",
-                          "panel": 1,
-                          "series": "px"
-                        },
-                        {
-                          "encoding": {
-                            "y": "4.67"
-                          },
-                          "id": "level",
-                          "mark": "rule",
-                          "origin": {
-                            "/encoding/y": {
-                              "fact": "fx.THYAO.breakout.range.down.124",
-                              "field": "level",
-                              "kind": "fact"
-                            }
-                          },
-                          "panel": 1
-                        },
-                        {
-                          "encoding": {
-                            "y": "value"
-                          },
-                          "fact": "fx.THYAO.breakout.range.down.124",
-                          "id": "fact",
-                          "mark": "point",
-                          "panel": 1
-                        }
-                      ],
-                      "panels": [
-                        {
-                          "id": 0,
-                          "name": "card",
-                          "weight": 3.0,
-                          "y": {
-                            "id": "y0",
-                            "kind": "linear"
-                          }
-                        },
-                        {
-                          "id": 1,
-                          "name": "price",
-                          "weight": 2.0,
-                          "y": {
-                            "id": "y1",
-                            "kind": "linear"
-                          }
-                        }
-                      ],
-                      "x": {
-                        "domain": [
-                          1680850800000.0,
-                          1688022000000.0
-                        ],
-                        "id": "x",
-                        "kind": "time"
-                      }
-                    },
-                    "confidence": 1.0,
-                    "depth": "capsule",
-                    "finding": "fnd.THYAO.breakout.down.124",
-                    "spark": {
-                      "from_bar": 69,
-                      "outputs": {
-                        "c": [
-                          5.25,
-                          5.3,
-                          5.19,
-                          5.28,
-                          5.78,
-                          5.46,
-                          5.3,
-                          4.87,
-                          4.84,
-                          4.96,
-                          5.06,
-                          5.1,
-                          5.0,
-                          5.06,
-                          5.09,
-                          5.15,
-                          5.12,
-                          5.0,
-                          5.04,
-                          4.99,
-                          4.98,
-                          5.02,
-                          5.04,
-                          5.09,
-                          5.06,
-                          5.1,
-                          5.13,
-                          5.16,
-                          5.13,
-                          5.12,
-                          5.09,
-                          5.05,
-                          5.02,
-                          4.95,
-                          5.01,
-                          4.97,
-                          4.97,
-                          4.89,
-                          4.84,
-                          4.87,
-                          4.78,
-                          4.77,
-                          4.81,
-                          4.84,
-                          4.79,
-                          4.72,
-                          4.69,
-                          4.68,
-                          4.7,
-                          4.72,
-                          4.76,
-                          4.79,
-                          4.77,
-                          4.81,
-                          4.83,
-                          4.55,
-                          4.55,
-                          4.49,
-                          4.47,
-                          4.43
-                        ]
-                      },
-                      "series": "px",
-                      "t": [
-                        1680850800000,
-                        1681110000000,
-                        1681196400000,
-                        1681282800000,
-                        1681369200000,
-                        1681455600000,
-                        1681714800000,
-                        1681801200000,
-                        1681887600000,
-                        1681974000000,
-                        1682060400000,
-                        1682319600000,
-                        1682406000000,
-                        1682492400000,
-                        1682578800000,
-                        1682665200000,
-                        1682924400000,
-                        1683010800000,
-                        1683097200000,
-                        1683183600000,
-                        1683270000000,
-                        1683529200000,
-                        1683615600000,
-                        1683702000000,
-                        1683788400000,
-                        1683874800000,
-                        1684134000000,
-                        1684220400000,
-                        1684306800000,
-                        1684393200000,
-                        1684479600000,
-                        1684738800000,
-                        1684825200000,
-                        1684911600000,
-                        1684998000000,
-                        1685084400000,
-                        1685343600000,
-                        1685430000000,
-                        1685516400000,
-                        1685602800000,
-                        1685689200000,
-                        1685948400000,
-                        1686034800000,
-                        1686121200000,
-                        1686207600000,
-                        1686294000000,
-                        1686553200000,
-                        1686639600000,
-                        1686726000000,
-                        1686812400000,
-                        1686898800000,
-                        1687158000000,
-                        1687244400000,
-                        1687330800000,
-                        1687417200000,
-                        1687503600000,
-                        1687762800000,
-                        1687849200000,
-                        1687935600000,
-                        1688022000000
-                      ]
-                    },
-                    "state": "live",
-                    "surface": "phone",
-                    "text": "THYAO 3 bar önce 4,67'deki desteği aşağı kırdı (kapanış 4,55): aşağı kırılım. Beklenen sonuç bu barda gerçekleşti. Hâlâ geçerli. Karnesi henüz az örnekli: 8 seferin 3'ünde tuttu."
-                  },
-                  "shared": [
-                    {
-                      "after": {
-                        "bottom": 276,
-                        "left": 291,
-                        "right": 297,
-                        "top": 182
-                      },
-                      "before": {
-                        "bottom": 116,
-                        "left": 291,
-                        "right": 297,
-                        "top": 86
-                      },
-                      "id": "bar:124"
-                    },
-                    {
-                      "after": {
-                        "bottom": 261,
-                        "left": 8,
-                        "right": 318,
-                        "top": 254
-                      },
-                      "before": {
-                        "bottom": 114,
-                        "left": 8,
-                        "right": 318,
-                        "top": 107
-                      },
-                      "id": "evidence:fx.THYAO.breakout.range.down.124"
-                    },
-                    {
-                      "after": {
-                        "bottom": 269,
-                        "left": 290,
-                        "right": 299,
-                        "top": 260
-                      },
-                      "before": {
-                        "bottom": 117,
-                        "left": 290,
-                        "right": 299,
-                        "top": 108
-                      },
-                      "id": "fact:fx.THYAO.breakout.range.down.124"
-                    },
-                    {
-                      "after": {
-                        "bottom": 74,
-                        "left": 8,
-                        "right": 48,
-                        "top": 34
-                      },
-                      "before": {
-                        "bottom": 74,
-                        "left": 8,
-                        "right": 48,
-                        "top": 34
-                      },
-                      "id": "glyph"
-                    },
-                    {
-                      "after": {
-                        "bottom": 130,
-                        "left": 58,
-                        "right": 303,
-                        "top": 34
-                      },
-                      "before": {
-                        "bottom": 82,
-                        "left": 58,
-                        "right": 303,
-                        "top": 34
-                      },
-                      "id": "headline"
-                    },
-                    {
-                      "after": {
-                        "bottom": 175,
-                        "left": 8,
-                        "right": 68,
-                        "top": 161
-                      },
-                      "before": {
-                        "bottom": 79,
-                        "left": 8,
-                        "right": 68,
-                        "top": 65
-                      },
-                      "id": "ledger"
-                    },
-                    {
-                      "after": {
-                        "bottom": 276,
-                        "left": 8,
-                        "right": 318,
-                        "top": 182
-                      },
-                      "before": {
-                        "bottom": 116,
-                        "left": 8,
-                        "right": 318,
-                        "top": 86
-                      },
-                      "id": "price"
-                    }
-                  ],
-                  "to": "capsule"
-                },
-                "state": {
-                  "capsule": "cap.THYAO.breakout.down.124",
-                  "depth": "capsule",
-                  "finding": "fnd.THYAO.breakout.down.124",
-                  "view": "capsule-fnd.THYAO.breakout.down.124"
-                }
-              },
-              "kind": "interaction"
-            },
-            "id": "g7",
-            "now": 1760000000000,
-            "seq": 2,
-            "type": "result"
-          }
-        }
-      ],
-      "send": {
-        "conn": "p",
-        "msg": {
-          "gesture": {
-            "capsule": "cap.THYAO.breakout.down.124",
-            "kind": "open"
-          },
-          "id": "g7",
-          "type": "input"
-        }
-      }
-    },
-    {
-      "expect": [
-        {
-          "conn": "p",
-          "msg": {
-            "data": {
-              "interaction": {
-                "at": {
-                  "bar": 115,
-                  "ohlcv": {
-                    "c": 4.69,
-                    "h": 4.73,
-                    "l": 4.68,
-                    "o": 4.72,
-                    "t": 1686553200000,
-                    "v": 15518097.52
-                  },
-                  "series": "px",
-                  "studies": {}
-                },
-                "hit": {
-                  "bar": 115,
-                  "panel": 0,
-                  "t": 1686553200000,
-                  "value": 5.012727272727273,
-                  "view": "main"
-                },
-                "state": {
-                  "capsule": "cap.THYAO.breakout.down.124",
-                  "depth": "capsule",
-                  "finding": "fnd.THYAO.breakout.down.124",
-                  "view": "capsule-fnd.THYAO.breakout.down.124"
-                }
-              },
-              "kind": "interaction"
-            },
-            "id": "g8",
-            "now": 1760000000000,
-            "seq": 2,
-            "type": "result"
-          }
-        }
-      ],
-      "send": {
-        "conn": "p",
-        "msg": {
-          "gesture": {
-            "kind": "tap_at",
-            "target": {
-              "view": "main"
-            },
-            "x": 250.0,
-            "y": 120.0
-          },
-          "id": "g8",
-          "type": "input"
-        }
-      }
-    },
-    {
-      "expect": [
-        {
-          "conn": "p",
-          "msg": {
-            "data": {
-              "interaction": {
-                "opening": {
-                  "capsule": "cap.THYAO.breakout.down.124",
-                  "finding": "fnd.THYAO.breakout.down.124",
-                  "frame": [
-                    390,
-                    140
-                  ],
-                  "from": "capsule",
-                  "presentation": {
-                    "depth": "sentence",
-                    "finding": "fnd.THYAO.breakout.down.124",
-                    "state": "live",
-                    "surface": "phone",
-                    "text": "THYAO 3 bar önce 4,67'deki desteği aşağı kırdı (kapanış 4,55): aşağı kırılım. Beklenen sonuç bu barda gerçekleşti. Hâlâ geçerli. Karnesi henüz az örnekli: 8 seferin 3'ünde tuttu."
-                  },
-                  "shared": [
-                    {
-                      "after": {
-                        "bottom": 116,
-                        "left": 291,
-                        "right": 297,
-                        "top": 86
-                      },
-                      "before": {
-                        "bottom": 276,
-                        "left": 291,
-                        "right": 297,
-                        "top": 182
-                      },
-                      "id": "bar:124"
-                    },
-                    {
-                      "after": {
-                        "bottom": 114,
-                        "left": 8,
-                        "right": 318,
-                        "top": 107
-                      },
-                      "before": {
-                        "bottom": 261,
-                        "left": 8,
-                        "right": 318,
-                        "top": 254
-                      },
-                      "id": "evidence:fx.THYAO.breakout.range.down.124"
-                    },
-                    {
-                      "after": {
-                        "bottom": 117,
-                        "left": 290,
-                        "right": 299,
-                        "top": 108
-                      },
-                      "before": {
-                        "bottom": 269,
-                        "left": 290,
-                        "right": 299,
-                        "top": 260
-                      },
-                      "id": "fact:fx.THYAO.breakout.range.down.124"
-                    },
-                    {
-                      "after": {
-                        "bottom": 74,
-                        "left": 8,
-                        "right": 48,
-                        "top": 34
-                      },
-                      "before": {
-                        "bottom": 74,
-                        "left": 8,
-                        "right": 48,
-                        "top": 34
-                      },
-                      "id": "glyph"
-                    },
-                    {
-                      "after": {
-                        "bottom": 82,
-                        "left": 58,
-                        "right": 303,
-                        "top": 34
-                      },
-                      "before": {
-                        "bottom": 130,
-                        "left": 58,
-                        "right": 303,
-                        "top": 34
-                      },
-                      "id": "headline"
-                    },
-                    {
-                      "after": {
-                        "bottom": 79,
-                        "left": 8,
-                        "right": 68,
-                        "top": 65
-                      },
-                      "before": {
-                        "bottom": 175,
-                        "left": 8,
-                        "right": 68,
-                        "top": 161
-                      },
-                      "id": "ledger"
-                    },
-                    {
-                      "after": {
-                        "bottom": 116,
-                        "left": 8,
-                        "right": 318,
-                        "top": 86
-                      },
-                      "before": {
-                        "bottom": 276,
-                        "left": 8,
-                        "right": 318,
-                        "top": 182
-                      },
-                      "id": "price"
-                    }
-                  ],
-                  "to": "sentence"
-                },
-                "state": {
-                  "depth": "sentence"
-                }
-              },
-              "kind": "interaction"
-            },
-            "id": "g9",
-            "now": 1760000000000,
-            "seq": 2,
-            "type": "result"
-          }
-        }
-      ],
-      "send": {
-        "conn": "p",
-        "msg": {
-          "gesture": {
-            "kind": "close",
-            "to": "sentence"
-          },
-          "id": "g9",
-          "type": "input"
-        }
-      }
-    },
-    {
-      "expect": [
-        {
-          "conn": "a",
-          "msg": {
-            "data": {
-              "entries": [],
-              "kind": "log"
-            },
-            "id": "l",
-            "now": 1760000000000,
-            "seq": 2,
-            "type": "result"
-          }
-        }
-      ],
-      "note": "Ana watched `changes`: ten gestures, no change event, and no log entry after the two of the start (the engine's load).",
-      "send": {
-        "conn": "a",
-        "msg": {
-          "id": "l",
-          "query": {
-            "after_seq": 2,
-            "kind": "log"
-          },
-          "type": "query"
-        }
-      }
-    },
-    {
-      "expect": [
-        {
-          "conn": "a",
           "msg": {
             "data": {
               "kind": "screen",
               "screens": [
                 {
                   "capsules": [
+                    "cap.THYAO.flow.down.69",
+                    "cap.THYAO.flow.up.71",
+                    "cap.THYAO.continuation.up.73",
+                    "cap.THYAO.breakout.down.76",
+                    "cap.THYAO.reversal.down.76",
                     "cap.THYAO.continuation.down.84",
                     "cap.THYAO.flow.up.90",
                     "cap.THYAO.flow.down.101",
                     "cap.THYAO.breakout.down.106",
                     "cap.THYAO.breakout.down.109",
                     "cap.THYAO.breakout.down.115",
-                    "cap.THYAO.flow.up.120"
+                    "cap.THYAO.flow.up.120",
+                    "cap.THYAO.breakout.down.124",
+                    "cap.THYAO.continuation.down.124",
+                    "cap.THYAO.extreme.down.126"
                   ],
                   "interval": "1d",
-                  "last_close": 4.83,
+                  "last_close": 4.43,
                   "panels": [
                     {
                       "layers": [
@@ -2701,13 +1782,13 @@
                             "c"
                           ],
                           "id": "candles",
-                          "items": 38,
+                          "items": 60,
                           "label": "THYAO 1d",
                           "last": {
-                            "c": 4.83,
-                            "h": 4.84,
-                            "l": 4.81,
-                            "o": 4.81
+                            "c": 4.43,
+                            "h": 4.51,
+                            "l": 4.41,
+                            "o": 4.48
                           },
                           "mark": "candle",
                           "select": {
@@ -2723,8 +1804,8 @@
                       "panel": 0,
                       "scale": {
                         "domain": [
-                          4.644,
-                          5.216
+                          4.3405000000000005,
+                          5.8694999999999995
                         ],
                         "id": "y0",
                         "kind": "linear"
@@ -2740,29 +1821,43 @@
                   "principal": "arkin",
                   "surface": "phone",
                   "symbol": "THYAO",
+                  "view_state": {
+                    "capsule": "cap.THYAO.breakout.down.124",
+                    "depth": "capsule",
+                    "finding": "fnd.THYAO.breakout.down.124",
+                    "frames": {
+                      "face": [
+                        358,
+                        140
+                      ],
+                      "view:main": [
+                        390,
+                        300
+                      ]
+                    },
+                    "view": "capsule-fnd.THYAO.breakout.down.124"
+                  },
                   "viewport": {
-                    "from_bar": 86,
-                    "to_bar": 123,
+                    "from_bar": 69,
+                    "to_bar": 128,
                     "view": "main"
                   }
                 }
               ]
             },
-            "id": "s",
+            "id": "s1",
             "now": 1760000000000,
             "seq": 2,
             "type": "result"
           }
         }
       ],
-      "note": "The agent reads where Arkın looks (viewport, view state) with `screen`.",
       "send": {
-        "conn": "a",
+        "conn": "p",
         "msg": {
-          "id": "s",
+          "id": "s1",
           "query": {
-            "kind": "screen",
-            "principal": "arkin"
+            "kind": "screen"
           },
           "type": "query"
         }

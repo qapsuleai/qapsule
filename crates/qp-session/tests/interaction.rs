@@ -16,7 +16,7 @@ fn root() -> PathBuf {
 fn session() -> Session {
     let t: Value = serde_json::from_str(
         &std::fs::read_to_string(
-            root().join("fixtures/protocol/conformance/r4-input-tap-hit.json"),
+            root().join("fixtures/protocol/conformance/51-input-tap-hit.json"),
         )
         .unwrap(),
     )

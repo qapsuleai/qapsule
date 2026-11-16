@@ -348,8 +348,8 @@ dört hareket (`look`, `pan`, `zoom`, `tap`) aynen kalır.
 - Her piksel hareketi ve açılma, girdi sayacını ve son girdi zamanını günceller; dokümana
   ve günlüğe **hiçbir şey yazmaz** (§7). `drag`/`pinch` `viewport` olayı üretir (açık
   kapsülün grafiğinde görünüm kimliği `present-<bulgu>` ya da kapsülün saklı görünümü).
-- Dökümler: `r4-input-tap-hit`, `r4-input-pan-pinch`, `r4-input-open-close`,
-  `r4-input-evidence`, `r4-input-presence` (üretici:
+- Dökümler: `51-input-tap-hit`, `52-input-pan-pinch`, `53-input-open-close`,
+  `54-input-evidence`, `55-input-presence` (üretici:
   `cargo run -p qp-session --example make_input_transcripts -- --write`).
 
 ### 4.7 Öneri — `command` (öneri kipi) ve karar işlemleri

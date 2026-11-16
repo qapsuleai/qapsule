@@ -1,4 +1,4 @@
-//! Generates the R4 interaction transcripts (`fixtures/protocol/conformance/r4-input-*.json`,
+//! Generates the R4 interaction transcripts (`fixtures/protocol/conformance/5[1-5]-input-*.json`,
 //! `docs/PROTOCOL.md` §4.6, §7, §15): pixel gestures, opening between depths, evidence
 //! for an entitled and an unentitled reader, and view state that never reaches the log.
 //!
@@ -132,7 +132,7 @@ fn run(name: &str, description: &str, covers: &[&str], steps: Vec<In>) -> Value 
 
 fn tap_hit() -> Value {
     run(
-        "r4-input-tap-hit",
+        "51-input-tap-hit",
         "R4 (§4.6): pixel taps resolved in the core. On the candle view `main` (phone, frame 390x300 reported with the tap) a tap on a candle answers what is under the finger (the `hit` code) and that bar's values (`at`); a tap outside the plot answers the empty hit and no bar. A tap on a capsule's face in the feed (frame 358x140) opens it: the engine decides, the answer carries the presentation at capsule depth and the elements face and opened capsule share, with their boxes in both scenes. `screen` then shows the view state to an agent.",
         &["input", "tap_at", "hit", "open", "view-state", "screen"],
         vec![
@@ -150,7 +150,7 @@ fn tap_hit() -> Value {
 
 fn pan_pinch() -> Value {
     run(
-        "r4-input-pan-pinch",
+        "52-input-pan-pinch",
         "R4 (§4.6): drag and pinch in pixels. On a document view the engine turns pixels into bars with the scene's slot width and goes through `pan`/`zoom` (the connection viewport, `viewport` events to attention subscribers); the result equals the bar-space gesture. On an open capsule's chart the same rules move the view state's range. Dragging a face (not a chart) is `invalid`; a pinch factor of 0 is `invalid`.",
         &["input", "drag", "pinch", "viewport", "view-state", "errors"],
         vec![
@@ -176,7 +176,7 @@ fn pan_pinch() -> Value {
 
 fn open_close() -> Value {
     run(
-        "r4-input-open-close",
+        "53-input-open-close",
         "R4 (§4.6, GRAMMAR §18.6): opening between depths with input. sentence → capsule → chart, back to capsule and to the feed. Each answer carries what to show at the new depth (presentation), the frame it was laid out at, the shared elements (glyph, marked bar, price trace, fact…) with their boxes before and after, and the view state. Errors: `close` with nothing open, `open` to the sentence, an unknown capsule.",
         &["input", "open", "close", "shared-elements", "view-state", "errors"],
         vec![
@@ -197,7 +197,7 @@ fn open_close() -> Value {
 
 fn evidence() -> Value {
     run(
-        "r4-input-evidence",
+        "54-input-evidence",
         "R4 (§4.6, §20.2, K34): opening to the evidence with input. At chart depth a tap on an element of the evidence (the glyph over the fact bar) opens the evidence: the entitled reader gets the values (the `capsule` query's `evidence`); a tap on a plain candle only focuses the bar. A reader without the data entitlement opens the same capsule to its evidence and gets what it rests on and 'requires bist/THYAO' — no values, no chart.",
         &["input", "open", "evidence", "entitlement", "tap_at"],
         vec![
@@ -252,7 +252,7 @@ fn presence() -> Value {
         "The agent reads where Arkın looks (viewport, view state) with `screen`.",
     ));
     run(
-        "r4-input-presence",
+        "55-input-presence",
         "R4 (§4.6, §7): view state is presence. Ten pixel gestures and open/close on one connection: no log entry, no `change` event to a `changes` subscriber, the log keeps its length (`final.log_len`); another principal reads the view state with `screen`.",
         &["input", "view-state", "presence", "log", "screen"],
         steps,

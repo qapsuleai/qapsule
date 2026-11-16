@@ -173,6 +173,36 @@ Ayrıntı `docs/PROTOCOL.md` §19; seçimin gerekçesi `rounds/RP2/experiments/T
 | Kart paneli | `card` paneli (`qp_grammar::depth::capsule_card_view`) | Kapsül derinliğinde işaret, cümle ve karne satırını taşıyan panel: bütün katmanları panele göre konumlanır; ızgara ve eksen çizilmez (`docs/GRAMMAR.md` §18). |
 | Panele göre konum | `Position::Panel` | Bir katman öğesinin konumunun veri değeriyle değil panelin kesriyle ve piksel kaydırmasıyla verilmesi (`{"panel":0.5,"px":-13}`). Sayı taşımaz, kökeni gerekmez. |
 
+### Gösterim (R4)
+
+Çerçeve `rounds/R4/GOAL.md`; kabuk sınırı `docs/ARCHITECTURE.md` "Kabuk sınırı (R4)";
+yeniden oynatma `docs/PROTOCOL.md` §21; kapsülün yüzü `docs/FACE.md`.
+
+| Kavram | Kodda | Tanım |
+|--------|-------|-------|
+| Yeniden oynatma | replay (`qp_source::replay`) | Geçmiş barları (yerel gerçek veri ya da sentetik pazar) canlı akış gibi, **alan düzeyinde veri olayları** (`DataEvent`) ve saat girdisi olarak sıralı veren belirleyici kaynak (K44). Aynı veri + aynı denetim girdileri → bayt düzeyinde aynı olay ve mesaj akışı. R6'da yalnız kaynak değişir. |
+| Oynatma saati | replay clock | Yeniden oynatmanın ürettiği sanal zaman; barındırıcı onu otoriteye `clock` olarak verir. Duvar saati yalnız **ne zaman** gönderileceğini belirler, **ne** gönderileceğini değil. |
+| Oynatma konumu | `ReplayCursor` | Yeniden oynatmanın ulaştığı yer: sanal zaman ve her beslemede verilmiş olay sayısı. Belirleyicidir; konum + veri → sonraki olaylar. |
+| Oynatma denetimi | `replay` mesajı (`ReplayControl`) | Barındırıcıya giden protokol mesajı: hız, duraklat, sürdür, adım, tarihe git, durum. Dokümana yazmaz, günlüğe girmez; geriye gitmek oturumu baştan kurup o konuma kadar belirleyici olarak ilerletmektir. Ajan aynı mesajlarla sürer. |
+| Gösterim | demo (`qp demo`, `scripts/demo.sh`) | Tek makinede çalışan yerel barındırıcı (otorite + yeniden oynatma + statik sayfa) ve web kabuğu. Dış ağa istek yapmaz. |
+| Kabuk | shell (`shells/web/`) | İnce istemci: sahne tarifini boyar, ham girdiyi protokole iletir, protokolden geleni gösterir. Alan mantığı (hesap, tespit, sıralama, cümle kurma, yerleşim) taşımaz. |
+| Düzen öğesi | chrome | Kabuğa ait, alan bilgisi taşımayan arayüz parçası: liste kaydırma, sekme, ayar sayfası, düğme. Neyi hangi sırayla göstereceğini protokolden alır. |
+| Kapsülün yüzü | face (`Depth::Capsule` yüz kuralı) | Kapalı kapsülün tek bakışlık hali: bir başlık cümlesi, bir işaret ve en çok iki ek bilgi (K43). Gramerle (derinlik kuralı) kurulur; kabuk yalnız boyar. |
+| Başlık cümlesi | `headline` (yüz cümlesi) | Kapalı yüzdeki tek cümle: ne oldu, ne zaman, hâlâ geçerli mi. Gündelik dil; iç terim ("aile", "teyit", "bar") yok. Şablon dilbilgisinden, TR ve EN. |
+| Ayrıntı cümlesi | `detail` | Kapsül açılınca gelen cümleler: kanıt, karnenin tam hali, koşul, ne olursa ne olur. |
+| Ek bilgi | face chip (`FaceChip`) | Yüzdeki en çok iki küçük bilgi (ör. kısaltılmış karne, "az örnekli", ne zaman). Dürüstlük bilgisi gizlenmez, kısaltılır. |
+| Süre ifadesi | elapsed phrase (`qp_capsule::realize::elapsed`) | Bar farkını periyoda ve borsa takvimine göre gündelik süreye çeviren ifade: "bugün", "dün", "6 işlem günü önce", "2 saat önce", "geçen hafta". Takvimden (`qp-calendar`) hesaplanır; hafta sonu ve tatil işlem günü sayılmaz. |
+| Geçerlilik | validity (`Validity`) | Kapsülün iddiasının **bugün** hâlâ geçerli olup olmadığı: `valid` (geçerli), `no_longer` (durum koşulu artık tutmuyor, hikâye henüz kapanmadı), `closed` (hikâye kapandı: gerçekleşti, tutmadı, süresi doldu, geri çekildi). Başlık ve işaret aynı şeyi söyler (K42). |
+| Durum koşulu | state condition | Durumun (`state`) **şu an** sürüp sürmediğini söyleyen koşul ("RSI 70'in üstünde"). Geçerliliği belirler. |
+| Beklenen çözüm | expected resolution | Hikâyenin nasıl kapanacağını söyleyen sonuç kuralı (bariyer, ufuk). Durum koşulundan ayrıdır (K42/A28): durum bitmiş, hikâye hâlâ açık olabilir. |
+| Karne yönü | directional ledger key | Karne anahtarına yönün eklenmesi: `<tür>/<yön>/<dedektör>@<sürüm>` (K42/A23). Yukarı ve aşağı kırılım ayrı sayılır. |
+| Akış | feed | Kapsüllerin çekirdekçe seçilmiş ve sıralanmış listesi (kişinin kitlesine göre). Sırayı ve gruplamayı çekirdek verir; kabuk yalnız alt alta dizer (düzen M9). |
+| Açılma | open (depth transition) | Bir kapsülün derinlikler arasında geçişi: cümle → kapsül → işaretli grafik. Kabuktan `input` ile istenir; hangi öğelerin ortak kaldığını çekirdek belirler (M10). |
+| Bakış durumu | view state (presence) | Bağlantı başına derinlik, açık kapsül, akış konumu, grafik aralığı. Varlık durumudur; günlüğe girmez (§4.6, §7). |
+| Sonuç işareti | outcome mark | Kapanmış kapsülün işaretinde "gerçekleşti" ile "tutmadı"yı ayıran kanal (M11). Renksiz de okunur. |
+| Ölçüm ekranı | metrics page | Gösterimde kare süresi (durağan, kaydırırken), tik maliyeti, açılış süresi ve paket boyutunu gösteren ve kopyalanabilir özet üreten sayfa. |
+| Persona | persona | Ölçümde ekran görüntüsünü okuyan taze alt ajanın rolü: geleceğin yatırımcısı (teknik analiz bilmez, beş saniyesi var) ya da alışkın kullanıcı. İnsan değildir; ön elemedir (K39). |
+
 ## Kapsülün yaşam döngüsü
 
 R3'ten itibaren kapsülün hikâye aşamaları `Stage`'dir (yukarıda; `docs/CAPSULE.md` §3).

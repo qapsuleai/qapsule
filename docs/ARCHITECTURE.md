@@ -72,6 +72,39 @@ yalnızca bir istemcidir (AI-native testi 5).
 - **Taşımalar:** süreç içi (`Session::handle_raw`), satır akışı (`qp serve`), MCP
   (`qp mcp`, araçlar şemadan üretilir). Uygunluk dökümleri üçünde de aynı.
 
+## Kabuk sınırı (R4)
+
+Kabuk (`shells/web/`, ileride iOS/Android) bir protokol istemcisidir. Aynı oturum kabuksuz,
+yalnız protokol mesajlarıyla sürüldüğünde aynı doküman ve aynı sahne özetleri çıkar.
+
+```
+  tarayıcı                                        yerel barındırıcı (qp demo)
+  ┌───────────── kabuk (JS, ince) ─────────────┐     ┌──────────────────────────────┐
+  │ düzen öğeleri: liste, sekme, ayar, düğme   │     │ yeniden oynatma (qp-source)  │
+  │ girdi → `input` / `command` / `replay`     │◄───►│   veri olayları + saat       │
+  │ protokolden gelen metni ve sırayı gösterir │ qp/0│ otorite (qp-session)         │
+  │ WASM (Rust çekirdeği):                     │     │ statik dosyalar (aynı köken) │
+  │   yansı, gramer derleme, sahne → piksel    │     └──────────────────────────────┘
+  └────────────────────────────────────────────┘
+```
+
+**Kabuk yapar:** statik dosyaları ve protokol bağlantısını **aynı kökenden** açar; sahne
+tarifini (`SceneDesc`) ya da WASM'ın ürettiği pikselleri boyar; ham girdiyi (dokunma,
+kaydırma, yakınlaştırma, düğme) protokol mesajına çevirir; protokolden gelen metni, listeyi
+ve sırayı **olduğu gibi** gösterir; düzen öğelerini (liste kaydırma, sekme, ayar sayfası)
+çizer; kendi arayüz etiketlerini (düğme adları) iki dilde tutar; ölçüm ekranı için süre
+ölçer.
+
+**Kabuk yapmaz:** piyasa verisi ya da hesap değeri üzerinde aritmetik; olgu tespiti;
+kapsül/öğe sıralama, süzme, gruplama; cümle kurma ya da alan verisinden metin birleştirme
+(sayı ve tarih biçimleme dahil); alan öğelerinin yerleşimi (konumlar sahne tarifinden
+gelir); dış ağa istek. Bu kurallar `shells/web/` için mimari testiyle denetlenir
+(`scripts/verify.sh` `shell` adımı).
+
+Bir tasarım yalnız kabukta özel kodla mümkünse ya gramer genişletilir (gerekçesiyle,
+`docs/GRAMMAR.md`) ya da tasarım elenir. Böylece aynı yüz yerel kabukta ve ekransız çıktıda
+da aynıdır.
+
 ## Hesap nerede yapılır
 
 - **Ortak ve yaygın olan** sunucuda bir kez hesaplanır ve akış olarak gelir.

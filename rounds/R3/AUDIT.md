@@ -446,3 +446,46 @@ cargo run --release --manifest-path rounds/R3/audit/Cargo.toml --bin k1_probe --
 K1_NO_ARKIN=1 cargo run … --bin k1_probe -- <depo> k1_bars.json 200                                           # deneme 2 ve 5 (GULDIFF stderr'de)
 # ortam anahtarları: K1_NO_ARKIN, K1_NO_EXTRA (undo/kabul), K1_NO_GUL, K1_SHOW=<bağlantı>
 ```
+
+## K1-c kontrolü (471af9f)
+
+Denetlenen: `r3/int` @ `471af9f` (`r3/fix-k1c`: ters çeviride öğe düzeyinde eşitlik, öneriler
+yalnız açık dünyada, niyetler ve itiraz açık dünyada). Dal `r3/audit4`. Denetçi düzeneği
+değişmeden (`k1_probe`, `session_probe`; aynı barlar ve girdiler).
+
+| # | Deneme | Sonuç |
+|---|---|---|
+| 1 | `session_probe` (tohum 1 ↔ 2/7/42, Bora, Can) | **0 fark** (276/275 satır; son 16 cevabın 0'ı); yeniden oynatma, aday, varlık kâhini aynı |
+| 2 | `k1_probe`, `K1_NO_ARKIN=1` | Dört akışlı karşılaştırmanın hepsinde Bora, Can, Dora, Eda, Fatih **0 farklı satır**; Ana 4.249–4.256 farklı (pozitif kontrol) |
+| 3 | `k1_probe`, Arkın açık (onay/ret, `show_finding`, 25 `undo`, `accept_proposal prop-1…499`), Gül'ün yalnız otoritedeki önerileri, Eda'nın lisanslı kimliklerle kendi öğeleri ve `prop-1…599` kararları | Dört akışlı karşılaştırmanın hepsinde beş açık görünümlü okuyucu **0 farklı satır**; Ana 4.323–4.330 farklı |
+| 4 | Otorite bütünlüğü | Lisanslı doğumlu öğeler: her akışlı yapılandırmada **0** değişen (159–179). Gül'ün yalnız otoritedeki önerileri: akışlı her yapılandırmada `changed_by_public_writers` **0** (25–30 öneri; a808f04'te 2). **K1-c giderildi** |
+| 5 | Dora'nın `flow.institutional` satırları | Değişmedi: 612 kendi gönderdiği kimliğin `not_found` yankısı (`did_you_mean`'de lisanslı kimlik yok), 60 mühür eki. Sızıntı değil |
+| 6 | Akışsız ↔ akışlı | Bora/Can/Dora 3.908 (Arkın kapalı) / 4.390 (açık) satır farklı; Eda/Fatih 0 / 1.552 ve 869. Akışsızda Eda Gül'ün 3 önerisine karar veriyor (`GULDIFF`, 3 değişen) |
+
+**Akışsız farkın değerlendirmesi: kabul edilebilir (yapılandırma; Bilgi).** Akış yokken lisanslı
+veri yok, açık dünya kurulmaz ve herkes tek dünyayı (otoriteyi) okur; o kurguda Eda açık
+görünümlü değil, Gül'ün önerileri lisanslı öğeye dayanmıyor (akışsızda "flow" bulguları açık hacim
+sıçramaları) ve sahip olarak karar vermesi meşru. Ayırt edilen şey yalnız "lisanslı akış
+yapılandırılmış mı" — bu zaten mühür iletilerinin varlığından ve PROTOCOL §20.5'ten bellidir,
+lisanslı **veri** değildir. Girişimsizlik iddiası (aynı açık veri, farklı lisanslı veri → aynı
+satırlar) yapılandırma içinde tanımlıdır ve dört akışlı yapılandırmada 0 farkla tutuyor. Fark
+eden içerik (açık görünüm okuyucusu belge kapsüllerinin iddialarını ve açık dünyada aynı olmayan
+niyet tetiklerini almıyor) S-E §7'de işlev eksiği olarak yazılı; öneri olarak kalır.
+
+**verify** @ `471af9f`: `CARGO_INCREMENTAL=0 QP_VERIFY_BROWSER=1 scripts/verify.sh` → **çıkış 0,
+15/15 PASS** (339 s); 460 test geçti, 0 kaldı, 2 yok sayıldı; browser PASS; digest arm64/x86_64/
+wasm32 `7b1e99d40889f83c`; conform 44 × 3; wasm gzip -9 616.022 B.
+
+**K1: giderildi.** Y1, O1, kanal (a), kanal (b) ve öneri kimliği çakışması kapandı; kalan tek
+lisanslı veri kanalı tasarım gereği mühür iletileri.
+
+**K2: giderildi** (`STATUS.md`, `ROADMAP.md`, REPORT "Denetim"). Bu kontrolden sonra yalnız
+ifade güncellemesi gerekiyor: REPORT başı ve `ROADMAP.md` "K1-c bekleniyor" diyor, REPORT ölçüt 9
+ve 10 hâlâ "⚠️ (`r3/fix-k1b` bekleniyor)" — ✅ olarak ve "koşullar giderildi" diye yazılmalı.
+
+### Nihai hüküm: **kabul**
+
+Koşul kalmadı. Öneriler (kapsam dışı, bağlayıcı değil): O2 (açık hikâyede "Artık geçerli değil" ile
+"kesin" işaret), D2 (demo anahtarına sessiz düşüş), D4, kısmi akış yetkisinin açık görünüme
+düşmesi ve açık görünüm okuyucusunun belge kapsülü iddialarını almaması `DECISIONS.md` açık
+kararlarına; girişimsizlik testine akışsız ↔ akışlı karşılaştırmanın neden dışarıda kaldığı notu.

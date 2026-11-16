@@ -9,6 +9,11 @@
 //! fills them for its reader from the capsule item the authority answered
 //! ([`crate::Session::item_headline_parts`]).
 //!
+//! "Now" for the elapsed phrases is the open time of the series' last bar, final or not
+//! (the sentence's "now" is the last *final* bar; on a daily series that is yesterday's
+//! while today's bar runs, which would turn "dün" into "bugün"). Validity is as of the
+//! sentence's bar.
+//!
 //! The elapsed phrases follow the bar period (the series' `interval`) and an exchange
 //! calendar: the series instrument's calendar when it names a built-in one, else the
 //! session's ([`crate::Session::set_headline_calendar`]: a replay host sets the synthetic
@@ -60,7 +65,11 @@ pub(crate) fn story_parts(
     fallback: Option<&Calendar>,
 ) -> Option<HeadlineParts> {
     let (bs, bars, now) = at;
-    let now_t = bars.get(usize::try_from(now).ok()?)?.t;
+    // The elapsed phrases' "now" is the series' last bar, final or not (the bar the
+    // reader's day is in: a daily capsule born on yesterday's bar reads "dün" while
+    // today's bar runs), never before the sentence's bar `now`. Authority and replica
+    // hold the same bars, so both say the same.
+    let now_t = bars.get(usize::try_from(now).ok()?)?.t.max(bars.last()?.t);
     let period = Period::parse(bs.interval.as_deref()?)?;
     let cal = calendar_of(bs, fallback)?;
     let p = parts(story, now_t, validity, &cal, period, redacted);

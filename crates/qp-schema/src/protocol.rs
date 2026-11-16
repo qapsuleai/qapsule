@@ -2822,7 +2822,8 @@ pub enum Gesture {
     /// absent field keeps it); unknown names are `invalid` with the known ones.
     /// Answered with an `interaction` (its `state`).
     Style {
-        /// Face design name (`qp_grammar::depth::FACES`, `docs/PROTOCOL.md` §4.6.2; default `card`).
+        /// Face design name (`qp_grammar::faces::FACES`, `docs/PROTOCOL.md` §4.6.2; default `r3`,
+        /// alias `card`).
         #[serde(default, skip_serializing_if = "Option::is_none")]
         face: Option<String>,
         /// Glyph alphabet name (`siluet`, `rozet`; default `siluet`).
@@ -2831,6 +2832,22 @@ pub enum Gesture {
         /// Theme (`light`, `dark`; `view`: the view's own, the default).
         #[serde(default, skip_serializing_if = "Option::is_none")]
         theme: Option<String>,
+        /// (R4/H-M8910) Feed layout name (`qp_grammar::feeds::LAYOUTS`; default `r3`, the
+        /// `capsules` order).
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        feed: Option<String>,
+        /// (R4/H-M8910) Depth transition name (`qp_grammar::transitions::TRANSITIONS`;
+        /// default `r3`).
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        transition: Option<String>,
+        /// (R4/H-M8910) Outcome mark style of glyphs (`qp_grammar::glyph::outcome::STYLES`;
+        /// default `r3`).
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        outcome: Option<String>,
+        /// (R4/H-M8910) The reader's last look ("son bakış"): a time (ms) the feed layout
+        /// may mark what changed since; `0` clears it.
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        seen: Option<TimestampMs>,
     },
     /// (R4, §4.6) Close the open capsule one depth back, or to `to` (`sentence`: back to
     /// the feed). Answered with an `interaction` carrying the `opening` (the way back).
@@ -2915,7 +2932,7 @@ pub struct ViewState {
     #[serde(default, skip_serializing_if = "BTreeMap::is_empty")]
     pub frames: BTreeMap<String, [u32; 2]>,
     /// (R4/T5) Face design the connection's capsule faces are built with (absent: the
-    /// default, `card`).
+    /// default, `r3`).
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub face: Option<String>,
     /// (R4/T5) Glyph alphabet its scenes draw with (absent: the product's, `siluet`).
@@ -2924,6 +2941,18 @@ pub struct ViewState {
     /// (R4/T5) Theme its scenes are compiled with (absent: the view's own).
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub theme: Option<String>,
+    /// (R4/H-M8910) Feed layout (absent: the default, `r3`).
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub feed: Option<String>,
+    /// (R4/H-M8910) Depth transition (absent: the default, `r3`).
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub transition: Option<String>,
+    /// (R4/H-M8910) Outcome mark style (absent: the default, `r3`).
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub outcome: Option<String>,
+    /// (R4/H-M8910) The reader's last look (ms; absent: none).
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub seen: Option<TimestampMs>,
 }
 
 /// (R4, §4.6) One element both sides of a depth transition show (e.g. the glyph, the

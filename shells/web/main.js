@@ -11,7 +11,7 @@ const L = {
     empty: 'Henüz kapsül yok. Oynatmayı başlatın.', back: '‹ Geri', lang: 'Dil', theme: 'Tema',
     dark: 'Koyu', light: 'Açık', sensitivity: 'Hassasiyet', default: 'Grubun varsayılanı',
     important: 'Önemli', balanced: 'Dengeli', all: 'Hepsi', alphabet: 'İşaret alfabesi',
-    face: 'Yüz tasarımı', noent: 'Veri yetkisi yok (gösterim)', audience: 'İzleme listesi ve pozisyonlar',
+    face: 'Yüz tasarımı', feedl: 'Akış düzeni', transition: 'Geçiş', outcome: 'Sonuç işareti', noent: 'Veri yetkisi yok (gösterim)', audience: 'İzleme listesi ve pozisyonlar',
     group: 'Kullanıcı', habituated: 'Alışkın', future: 'Geleceğin yatırımcısı', symbol: 'Sembol',
     watch: 'İzle', position: 'Pozisyon', apply: 'Uygula', phone: 'Telefondan aç:',
     copy: 'Özeti kopyala', copied: 'Kopyalandı', play: '▶', pause: '❚❚', step: '+1', go: 'Git',
@@ -27,7 +27,7 @@ const L = {
     empty: 'No capsules yet. Start the replay.', back: '‹ Back', lang: 'Language', theme: 'Theme',
     dark: 'Dark', light: 'Light', sensitivity: 'Sensitivity', default: "Group's default",
     important: 'Important', balanced: 'Balanced', all: 'All', alphabet: 'Glyph alphabet',
-    face: 'Face design', noent: 'No data entitlement (demo)', audience: 'Watchlist and positions',
+    face: 'Face design', feedl: 'Feed layout', transition: 'Transition', outcome: 'Outcome mark', noent: 'No data entitlement (demo)', audience: 'Watchlist and positions',
     group: 'User', habituated: 'Habituated', future: 'Future investor', symbol: 'Symbol',
     watch: 'Watch', position: 'Position', apply: 'Apply', phone: 'Open on your phone:',
     copy: 'Copy summary', copied: 'Copied', play: '▶', pause: '❚❚', step: '+1', go: 'Go',
@@ -47,11 +47,17 @@ const ui = {
   theme: params.get('theme') === 'light' ? 'light' : 'dark',
   alphabet: params.get('alphabet') || '',
   face: params.get('face') || '',
+  feed: params.get('feed') || '',
+  transition: params.get('transition') || '',
+  outcome: params.get('outcome') || '',
   anim: params.get('anim') !== '0',
 };
 const HINT = { capsule: 'hint_capsule', chart: 'hint_chart', evidence: 'hint_evidence' };
-const FACE_W = 390; // layout constants of the chrome (CSS px)
-const FACE_H = 240;
+// Face and scene sizes come from the core (`face_size`, `open().px/style`): the face
+// design states its height, the core paints at the device scale (HiDPI).
+let faceSize = null;
+let faceKey = '';
+let lastMove = null; // the last transition's canvases, for the harness's frozen frames
 
 let core = null;
 let conn = '';
@@ -114,9 +120,11 @@ function start(frame) {
   info = v.info;
   core = new Shell(JSON.stringify(v));
   core.metric_mark('wasm_ready', wasmReady);
-  core.set_frame('face', FACE_W, FACE_H);
+  core.set_dpr(window.devicePixelRatio);
+  sizeFaces();
   fetch('pkg/sizes.json').then((r) => r.text()).then((s) => core.metric_env(s, navigator.userAgent)).catch(() => {});
   if (ui.theme === 'light' || ui.alphabet || ui.face) core.set_style(ui.face, ui.alphabet, ui.theme);
+  if (ui.feed || ui.transition || ui.outcome) core.set_look(JSON.stringify({ feed: ui.feed, transition: ui.transition, outcome: ui.outcome }));
   faces.clear();
   $('list').replaceChildren();
   $('banner').hidden = !info.synthetic;
@@ -150,11 +158,16 @@ function put(canvas, px, w, h) {
   return true;
 }
 
+function sizeFaces() {
+  faceKey = core.face_size();
+  faceSize = JSON.parse(faceKey);
+}
+
 function paintFace(id, force) {
   const el = faces.get(id);
   if (!el || !el.firstChild || el.firstChild.tagName !== 'CANVAS') return;
   const t0 = performance.now();
-  if (put(el.firstChild, core.face_rgba(id, force), FACE_W, FACE_H)) {
+  if (put(el.firstChild, core.face_rgba(id, force), faceSize.px[0], faceSize.px[1])) {
     core.metric_span('face', t0, performance.now());
     if (!painted) {
       painted = true;
@@ -179,10 +192,12 @@ function faceElement(item) {
   const el = document.createElement('div');
   el.className = 'face';
   el.dataset.id = item.id;
+  el.dataset.size = faceKey;
   if (item.scene) {
     const c = document.createElement('canvas');
-    c.width = FACE_W;
-    c.height = FACE_H;
+    c.width = faceSize.px[0];
+    c.height = faceSize.px[1];
+    Object.assign(c.style, faceSize.style);
     c.dataset.target = item.target;
     pointers(c);
     el.append(c);
@@ -197,20 +212,44 @@ function faceElement(item) {
   return el;
 }
 
+function markOf(el, text) {
+  let m = el.querySelector('.mark');
+  if (!text) {
+    if (m) m.remove();
+    return;
+  }
+  if (!m) {
+    m = document.createElement('span');
+    m.className = 'mark';
+    el.append(m);
+  }
+  m.textContent = text;
+}
+
 function renderFeed() {
   const items = JSON.parse(core.feed());
+  sizeFaces();
   const nodes = [];
   const keep = new Set();
   for (const item of items) {
+    if (item.header !== undefined) {
+      // A layout row: the feed layout's group header, its text from the core.
+      const h = document.createElement('h4');
+      h.className = 'fhead';
+      h.textContent = item.header;
+      nodes.push(h);
+      continue;
+    }
     let el = faces.get(item.id);
     const isCanvas = el && el.firstChild.tagName === 'CANVAS';
-    if (!el || isCanvas !== item.scene) {
+    if (!el || isCanvas !== item.scene || el.dataset.size !== faceKey) {
       if (el) io.unobserve(el);
       el = faceElement(item);
       faces.set(item.id, el);
     } else if (!item.scene) {
       el.firstChild.textContent = item.text;
     }
+    markOf(el, item.mark);
     keep.add(item.id);
     nodes.push(el);
   }
@@ -222,7 +261,7 @@ function renderFeed() {
     }
   }
   $('list').replaceChildren(...nodes);
-  $('empty').hidden = items.length !== 0;
+  $('empty').hidden = nodes.length !== 0;
   for (const id of visible) paintFace(id, false);
 }
 
@@ -238,7 +277,8 @@ function renderLayer(force) {
   scene.hidden = !open.scene;
   if (open.scene) {
     const t0 = performance.now();
-    if (put(scene, core.scene_rgba(force), open.frame[0], open.frame[1])) core.metric_span('scene', t0, performance.now());
+    Object.assign(scene.style, open.style);
+    if (put(scene, core.scene_rgba(force), open.px[0], open.px[1])) core.metric_span('scene', t0, performance.now());
   }
   renderEvidence();
   return open;
@@ -295,29 +335,50 @@ function renderStatus() {
   if (s.note) $('note').textContent = s.note;
 }
 
-function transition(oldCanvas, snap) {
-  if (!ui.anim || !oldCanvas) return;
-  const a = oldCanvas.getBoundingClientRect();
-  const b = $('scene').getBoundingClientRect();
-  const moves = JSON.parse(core.transition(a.left, a.top, b.left, b.top));
-  if (!moves.length) return;
-  const fx = $('fx');
+// The depth transition: the core's design (`transition_frame`) says, per frame, which
+// element of the old (or new) scene is drawn where and how opaque, and how opaque the new
+// scene is; the shell copies those pixels into those boxes. The progress comes from the
+// core too (`transition_progress` turns the frame timestamp into 0..1).
+function moveCanvases(m) {
   const els = [];
-  for (const m of moves) {
+  const frame = JSON.parse(core.transition_frame(0, m.a.left, m.a.top, m.b.left, m.b.top));
+  for (const e of frame.elements) {
+    const src = e.source === 'after' ? m.after : m.snap;
     const c = document.createElement('canvas');
-    c.width = m.src[2];
-    c.height = m.src[3];
-    c.getContext('2d').drawImage(snap, m.src[0], m.src[1], m.src[2], m.src[3], 0, 0, m.src[2], m.src[3]);
-    Object.assign(c.style, m.from);
-    fx.append(c);
-    els.push([c, m]);
+    c.width = e.src[2];
+    c.height = e.src[3];
+    c.getContext('2d').drawImage(src, e.src[0], e.src[1], e.src[2], e.src[3], 0, 0, e.src[2], e.src[3]);
+    $('fx').append(c);
+    els.push(c);
   }
-  $('scene').classList.add('fade');
-  requestAnimationFrame(() => requestAnimationFrame(() => {
-    for (const [c, m] of els) Object.assign(c.style, m.to);
-    $('scene').classList.remove('fade');
-    setTimeout(() => { for (const [c] of els) c.remove(); }, 300);
-  }));
+  return els;
+}
+
+function showFrame(m, els, p) {
+  const frame = JSON.parse(core.transition_frame(p, m.a.left, m.a.top, m.b.left, m.b.top));
+  frame.elements.forEach((e, i) => { if (els[i]) Object.assign(els[i].style, e.style); });
+  $('scene').style.opacity = frame.scene_opacity;
+  return frame.done;
+}
+
+function clearFrame(els) {
+  for (const c of els) c.remove();
+  $('scene').style.opacity = '';
+}
+
+function transition(oldCanvas, snap, a) {
+  if (!oldCanvas) return;
+  const b = $('scene').getBoundingClientRect();
+  lastMove = { a, b, snap, after: snapshot($('scene')) };
+  if (!ui.anim) return;
+  const m = lastMove;
+  const els = moveCanvases(m);
+  if (!els.length) return;
+  const step = (ts) => {
+    if (showFrame(m, els, core.transition_progress(ts))) clearFrame(els);
+    else requestAnimationFrame(step);
+  };
+  requestAnimationFrame(step);
 }
 
 function snapshot(canvas) {
@@ -334,17 +395,20 @@ function repaint(ch) {
   if (ch.status) renderStatus();
   let old = null;
   let snap = null;
+  let rect = null;
   if (ch.transition) {
     const from = core.transition_from();
     const open = JSON.parse(core.open());
     if (from === 'sentence' && open.capsule && faces.get(open.capsule)) old = faces.get(open.capsule).firstChild;
     else if (from !== 'sentence' && document.body.classList.contains('open')) old = $('scene');
-    if (old && old.tagName === 'CANVAS') snap = snapshot(old);
-    else old = null;
+    if (old && old.tagName === 'CANVAS') {
+      snap = snapshot(old);
+      rect = old.getBoundingClientRect(); // before the layer covers the feed
+    } else old = null;
   }
   if (ch.feed) renderFeed();
   if (ch.scene || ch.transition) renderLayer(Boolean(ch.transition));
-  if (ch.transition) transition(old, snap);
+  if (ch.transition) transition(old, snap, rect);
 }
 
 // --- input ------------------------------------------------------------------------
@@ -418,6 +482,10 @@ function wire() {
   };
   $('s_alpha').onchange = (e) => { core.set_style('', e.target.value, ''); flush(); };
   $('s_face').onchange = (e) => { core.set_style(e.target.value, '', ''); flush(); };
+  const looks = { feed: 's_feed', transition: 's_transition', outcome: 's_outcome' };
+  for (const k of Object.keys(looks)) {
+    $(looks[k]).onchange = (e) => { core.set_look(JSON.stringify({ [k]: e.target.value })); flush(); };
+  }
   $('s_sens').onchange = (e) => { core.set_sensitivity(e.target.value); flush(); };
   $('s_noent').checked = ui.principal === 'visitor';
   $('s_noent').onchange = (e) => { ui.principal = e.target.checked ? 'visitor' : 'arkin'; connect(); };
@@ -425,7 +493,27 @@ function wire() {
   $('m_copy').onclick = copyMetrics;
 }
 
+function fillChoices() {
+  // The names each setting accepts come from the core's registries.
+  const ch = JSON.parse(core.choices());
+  const look = JSON.parse(core.look());
+  const sel = { face: 's_face', alphabet: 's_alpha', feed: 's_feed', transition: 's_transition', outcome: 's_outcome' };
+  for (const k of Object.keys(sel)) {
+    const el = $(sel[k]);
+    const opts = [];
+    for (const n of ch[k]) {
+      const o = document.createElement('option');
+      o.value = n;
+      o.textContent = n;
+      opts.push(o);
+    }
+    el.replaceChildren(...opts);
+    el.value = look[k] || ch[k][0];
+  }
+}
+
 function renderSettings() {
+  fillChoices();
   const body = $('instruments').tBodies[0];
   const rows = [];
   for (const sym of JSON.parse(core.instruments())) {
@@ -510,6 +598,21 @@ window.qp = {
     return Array.from(core.png(new Uint8Array(img.data.buffer), c.width, c.height));
   },
   repaint: () => { if (core) { renderFeed(); renderLayer(true); renderStatus(); } },
+  // (R4/H-M8910) for the measurement harness (rounds/R4/experiments/harness/m8910):
+  look: () => core.look(),
+  seen: () => { core.mark_seen(); flush(); },
+  openCapsule: (id) => { core.open_capsule(id); flush(); },
+  openTo: (to) => { core.open_to(to); flush(); },
+  // Shows the last transition frozen at progress `p` (a value the harness gives).
+  freeze: (p) => {
+    if (window.qp.frozen) clearFrame(window.qp.frozen);
+    if (!lastMove) return 0;
+    window.qp.frozen = moveCanvases(lastMove);
+    showFrame(lastMove, window.qp.frozen, p);
+    return window.qp.frozen.length;
+  },
+  unfreeze: () => { if (window.qp.frozen) clearFrame(window.qp.frozen); window.qp.frozen = null; },
+  frozen: null,
 };
 
 async function main() {

@@ -1,0 +1,3 @@
+# Build into the repository's ignored target/ (this crate is outside the workspace).
+[build]
+target-dir = "../../../../../target/harness-m8910"

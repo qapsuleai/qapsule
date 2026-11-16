@@ -57,6 +57,17 @@ pub fn render_scene_rgba(scene: &SceneDesc) -> Result<Vec<u8>, RenderError> {
     Ok(cpu::demultiply(pm.data()))
 }
 
+/// [`render_scene_rgba`] at an integer device scale `s` (R4/H-M8910, HiDPI): straight
+/// RGBA8 of `width·s × height·s` (see [`cpu::rasterize_scaled`]); `s = 1` is
+/// [`render_scene_rgba`].
+///
+/// # Errors
+/// As [`render_scene_rgba`], or `s` outside `1..=4`.
+pub fn render_scene_rgba_scaled(scene: &SceneDesc, s: u32) -> Result<Vec<u8>, RenderError> {
+    let pm = cpu::rasterize_scaled(scene, s)?;
+    Ok(cpu::demultiply(pm.data()))
+}
+
 /// Rasterizes `scene` and returns deterministic PNG bytes (8-bit RGBA, no ancillary
 /// chunks, fixed filter and compression settings; see [`encode_png`]).
 ///
@@ -96,4 +107,25 @@ pub fn encode_png(rgba: &[u8], width: u32, height: u32) -> Result<Vec<u8>, Rende
 #[doc(hidden)]
 pub fn render_stress_rgba(width: u32, height: u32) -> Result<Vec<u8>, RenderError> {
     render_scene_rgba(&scene::stress_scene(width, height))
+}
+
+#[cfg(test)]
+mod scale_tests {
+    use super::*;
+
+    /// R4/H-M8910: scale 1 is the reference path byte for byte; scale 2 doubles the sides.
+    #[test]
+    fn scaled_render() {
+        let sc = scene::stress_scene(120, 80);
+        assert_eq!(
+            render_scene_rgba_scaled(&sc, 1).unwrap(),
+            render_scene_rgba(&sc).unwrap()
+        );
+        assert_eq!(
+            render_scene_rgba_scaled(&sc, 2).unwrap().len(),
+            240 * 160 * 4
+        );
+        assert!(render_scene_rgba_scaled(&sc, 5).is_err());
+        assert!(render_scene_rgba_scaled(&sc, 0).is_err());
+    }
 }

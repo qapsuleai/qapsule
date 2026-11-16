@@ -20,16 +20,20 @@ kural için bozuk bir satır) yakalanmazsa adım düşer.
 | R6 | `./pkg/qp_wasm.js` dışından `import`; satır içi betik; `main.js` dışında betik; HTML'de `on…=` | Yüklenen kod yalnız bu iki dosya |
 
 **İstisna listesi:** yok. (Ölçüm süreleri ham `performance.now()` olarak çekirdeğe verilir;
-`metric_span(ad, t0, t1)` farkı çekirdekte alır. Çizim yüzeyi boyutu `FACE_W`/`FACE_H`
-sabitleri ve çekirdeğin bildirdiği `frame` ile verilir; çarpma yok — HiDPI ölçeği bu yüzden
-yok, bkz. `rounds/R4/experiments/T5.md` açık sorular.)
+`metric_span(ad, t0, t1)` farkı çekirdekte alır. (R4/H-M8910) Çizim yüzeyi boyutu
+çekirdekten gelir: yüz tasarımı kendi yüksekliğini bildirir (`face_size`: CSS boyutu, aygıt
+ölçeğinde arka tampon boyutu, CSS uzunlukları), açık sahne `open().px/style`; kabuk
+`devicePixelRatio`'yu olduğu gibi çekirdeğe verir (`set_dpr`), ölçeği çekirdek seçer ve o
+ölçekte boyar — kabukta çarpma yok. Geçiş kareleri (`transition_frame`) ve ilerleme
+(`transition_progress`, ham zaman damgasından) çekirdekte.)
 
 **İzinli çekirdek yöntemleri** (`Shell`, `crates/qp-wasm/src/lib.rs`): `on_frame`,
 `take_outbox`, `idle`, `feed`, `face_rgba`, `scene_rgba`, `open`, `evidence`, `status`,
 `take_error`, `look`, `instruments`, `audience`, `set_frame`, `replay`, `seek`,
 `set_sensitivity`, `set_audience`, `set_style`, `back`, `open_to`, `pointer`, `wheel`,
 `transition`, `transition_from`, `metric_frame`, `metric_span`, `metric_mark`, `metric_env`,
-`metrics`, `metrics_rows`, `digests`, `png`, `sent`.
+`metrics`, `metrics_rows`, `digests`, `png`, `sent`; (R4/H-M8910) `set_look`, `mark_seen`,
+`open_capsule`, `set_dpr`, `face_size`, `choices`, `transition_progress`, `transition_frame`.
 
 **Kabuğun yaptığı:** akışı açar (`EventSource`), çekirdeğin kuyruğunu sırayla gönderir
 (`POST /send`), çerçeveyi çekirdeğe verir; çekirdeğin döndürdüğü pikselleri `putImageData`

@@ -135,7 +135,89 @@ fn polyline_path(points: &[[f32; 2]], close: bool) -> Option<tiny_skia::Path> {
 /// Fails for a size outside `1x1 ..= 16384x16384`, a text size that is not finite or not
 /// in `(0, 512]`, an allocation failure or an unusable embedded font.
 pub fn rasterize(scene: &SceneDesc) -> Result<Pixmap, RenderError> {
-    let (width, height) = (scene.width, scene.height);
+    rasterize_prims(scene.width, scene.height, scene.background, scene.prims())
+}
+
+/// One primitive scaled by the integer factor `s` (R4/H-M8910, HiDPI): every coordinate,
+/// size, stroke width, radius and text size times `s`. `s = 1` is the identity.
+#[must_use]
+pub fn scale_prim(p: &Prim, s: u32) -> Prim {
+    #[allow(clippy::cast_possible_wrap, clippy::cast_precision_loss)]
+    let (si, sf) = (s as i32, s as f32);
+    let pts = |v: &[[f32; 2]]| v.iter().map(|[x, y]| [x * sf, y * sf]).collect();
+    match p {
+        Prim::Rect { x, y, w, h, color } => Prim::Rect {
+            x: x * si,
+            y: y * si,
+            w: w * s,
+            h: h * s,
+            color: *color,
+        },
+        Prim::Polyline {
+            points,
+            width,
+            color,
+        } => Prim::Polyline {
+            points: pts(points),
+            width: width * sf,
+            color: *color,
+        },
+        Prim::Fill { points, color } => Prim::Fill {
+            points: pts(points),
+            color: *color,
+        },
+        Prim::Circle { cx, cy, r, color } => Prim::Circle {
+            cx: cx * sf,
+            cy: cy * sf,
+            r: r * sf,
+            color: *color,
+        },
+        Prim::Text {
+            x,
+            baseline,
+            px,
+            text,
+            color,
+            align,
+        } => Prim::Text {
+            x: x * si,
+            baseline: baseline * si,
+            px: px * sf,
+            text: text.clone(),
+            color: *color,
+            align: *align,
+        },
+    }
+}
+
+/// [`rasterize`] at an integer device scale `s` (1..=4; R4/H-M8910, HiDPI): a pixmap of
+/// `width·s × height·s` with every primitive scaled ([`scale_prim`]). The scene and its
+/// hit boxes stay in CSS px; `s = 1` is exactly [`rasterize`].
+///
+/// # Errors
+/// As [`rasterize`], or `s` outside `1..=4`.
+pub fn rasterize_scaled(scene: &SceneDesc, s: u32) -> Result<Pixmap, RenderError> {
+    if s == 1 {
+        return rasterize(scene);
+    }
+    if !(1..=4).contains(&s) {
+        return Err(RenderError::new(format!("scale {s} out of range (1..=4)")));
+    }
+    let prims: Vec<Prim> = scene.prims().map(|p| scale_prim(p, s)).collect();
+    rasterize_prims(
+        scene.width.saturating_mul(s),
+        scene.height.saturating_mul(s),
+        scene.background,
+        prims.iter(),
+    )
+}
+
+fn rasterize_prims<'a>(
+    width: u32,
+    height: u32,
+    background: Rgba,
+    prims: impl Iterator<Item = &'a Prim>,
+) -> Result<Pixmap, RenderError> {
     if !(1..=MAX_DIM).contains(&width) || !(1..=MAX_DIM).contains(&height) {
         return Err(RenderError::new(format!(
             "size {width}x{height} out of range (1x1 ..= {MAX_DIM}x{MAX_DIM})"
@@ -144,10 +226,10 @@ pub fn rasterize(scene: &SceneDesc) -> Result<Pixmap, RenderError> {
     let font = font()?;
     let mut pm =
         Pixmap::new(width, height).ok_or_else(|| RenderError::new("cannot allocate pixmap"))?;
-    pm.fill(color(scene.background));
+    pm.fill(color(background));
     let mut cache = GlyphCache::new();
     let id = Transform::identity();
-    for p in scene.prims() {
+    for p in prims {
         match p {
             Prim::Rect { x, y, w, h, color } => {
                 if let Some(r) = Rect::from_xywh(*x as f32, *y as f32, *w as f32, *h as f32) {

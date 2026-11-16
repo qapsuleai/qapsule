@@ -14,9 +14,8 @@ use qp_schema::protocol::{
     ErrorCode, Gesture, Interaction, OpenDepth, Opening, OutboundLine, Presentation, QueryResult,
     SurfaceKind, SurfaceTarget, Target, Viewport,
 };
-use qp_schema::scene::{PixelRect, SceneDesc};
+use qp_schema::scene::SceneDesc;
 use qp_schema::{Depth, Series, View};
-use std::collections::BTreeMap;
 
 use crate::error::{invalid, ptr, PResult, E};
 use crate::expand::{need_view, view_bar_series, view_bar_series_any};
@@ -37,6 +36,20 @@ enum On {
     /// A capsule (id, finding) at the depth it has on this connection: the open capsule
     /// at its depth, any other at `sentence` (its face in the feed).
     Capsule(String, String, OpenDepth),
+}
+
+/// A capsule's scene at a depth with its price bar series and marked bar (R4/H-M8910).
+type SideScene = (SceneDesc, Option<String>, Option<u64>);
+
+/// The fields of a `style` gesture (R4/T5, R4/H-M8910).
+struct StyleReq<'a> {
+    face: Option<&'a str>,
+    alphabet: Option<&'a str>,
+    theme: Option<&'a str>,
+    feed: Option<&'a str>,
+    transition: Option<&'a str>,
+    outcome: Option<&'a str>,
+    seen: Option<i64>,
 }
 
 /// The frame key of a target (`ViewState::frames`).
@@ -195,8 +208,23 @@ impl Session {
                 face,
                 alphabet,
                 theme,
+                feed,
+                transition,
+                outcome,
+                seen,
             } => {
-                self.set_style(ci, face.as_deref(), alphabet.as_deref(), theme.as_deref())?;
+                self.set_style(
+                    ci,
+                    &StyleReq {
+                        face: face.as_deref(),
+                        alphabet: alphabet.as_deref(),
+                        theme: theme.as_deref(),
+                        feed: feed.as_deref(),
+                        transition: transition.as_deref(),
+                        outcome: outcome.as_deref(),
+                        seen: *seen,
+                    },
+                )?;
                 (Out::default(), Vec::new())
             }
             Gesture::Look { .. }
@@ -293,23 +321,21 @@ impl Session {
     }
 
     /// (R4/T5) The `style` gesture: the connection's face design, glyph alphabet and
-    /// theme (view state; nothing is written). Validated before anything changes.
-    fn set_style(
-        &mut self,
-        ci: usize,
-        face: Option<&str>,
-        alphabet: Option<&str>,
-        theme: Option<&str>,
-    ) -> PResult<()> {
-        if let Some(f) = face {
-            if !depth::is_face(f) {
-                return Err(E::new(ErrorCode::Invalid, format!("unknown face `{f}`"))
-                    .at(ptr(GP, "face"))
-                    .expected(depth::FACES)
-                    .build());
+    /// theme; (R4/H-M8910) feed layout, depth transition, outcome mark style and last look
+    /// (view state; nothing is written). Validated before anything changes.
+    fn set_style(&mut self, ci: usize, r: &StyleReq<'_>) -> PResult<()> {
+        let unknown = |field: &str, v: &str, known: Vec<&str>| {
+            E::new(ErrorCode::Invalid, format!("unknown {field} `{v}`"))
+                .at(ptr(GP, field))
+                .expected(known)
+                .build()
+        };
+        if let Some(f) = r.face {
+            if !qp_grammar::faces::is_face(f) {
+                return Err(unknown("face", f, qp_grammar::faces::names()));
             }
         }
-        if let Some(a) = alphabet {
+        if let Some(a) = r.alphabet {
             if qp_grammar::glyph::alphabet_named(Some(a)).is_none() {
                 return Err(
                     E::new(ErrorCode::Invalid, format!("unknown alphabet `{a}`"))
@@ -319,7 +345,7 @@ impl Session {
                 );
             }
         }
-        if let Some(t) = theme {
+        if let Some(t) = r.theme {
             if t != "view" && !qp_grammar::theme::THEMES.contains(&t) {
                 return Err(E::new(ErrorCode::Invalid, format!("unknown theme `{t}`"))
                     .at(ptr(GP, "theme"))
@@ -327,15 +353,44 @@ impl Session {
                     .build());
             }
         }
-        let look = &mut self.conns[ci].look;
-        if let Some(f) = face {
-            look.face = (f != depth::FACES[0]).then(|| f.to_owned());
+        if let Some(f) = r.feed {
+            if !qp_grammar::feeds::is_feed(f) {
+                return Err(unknown("feed", f, qp_grammar::feeds::names()));
+            }
         }
-        if let Some(a) = alphabet {
+        if let Some(t) = r.transition {
+            if !qp_grammar::transitions::is_transition(t) {
+                return Err(unknown("transition", t, qp_grammar::transitions::names()));
+            }
+        }
+        if let Some(o) = r.outcome {
+            if qp_grammar::glyph::outcome::by_name(o).is_err() {
+                return Err(unknown("outcome", o, qp_grammar::glyph::outcome::names()));
+            }
+        }
+        let look = &mut self.conns[ci].look;
+        if let Some(f) = r.face {
+            let c = qp_grammar::faces::canonical(f).unwrap_or(qp_grammar::faces::DEFAULT_FACE);
+            look.face = (c != qp_grammar::faces::DEFAULT_FACE).then(|| c.to_owned());
+        }
+        if let Some(a) = r.alphabet {
             look.alphabet = (a != qp_grammar::glyph::ALPHABETS[0]).then(|| a.to_owned());
         }
-        if let Some(t) = theme {
+        if let Some(t) = r.theme {
             look.theme = (t != "view").then(|| t.to_owned());
+        }
+        if let Some(f) = r.feed {
+            look.feed = (f != qp_grammar::feeds::DEFAULT_FEED).then(|| f.to_owned());
+        }
+        if let Some(t) = r.transition {
+            look.transition =
+                (t != qp_grammar::transitions::DEFAULT_TRANSITION).then(|| t.to_owned());
+        }
+        if let Some(o) = r.outcome {
+            look.outcome = (o != qp_grammar::glyph::outcome::DEFAULT_OUTCOME).then(|| o.to_owned());
+        }
+        if let Some(t) = r.seen {
+            look.seen = (t != 0).then_some(t);
         }
         Ok(())
     }
@@ -496,6 +551,7 @@ impl Session {
         // (R4/T5) The connection's style (view state).
         opts.theme.clone_from(&self.conns[ci].look.theme);
         opts.alphabet.clone_from(&self.conns[ci].look.alphabet);
+        opts.outcome.clone_from(&self.conns[ci].look.outcome);
         let scene = compile(
             view,
             &DocProvider::new(rd!(self), &self.cache).with_headlines(&self.headlines),
@@ -547,14 +603,10 @@ impl Session {
         saved.or_else(|| self.initial_range(view, c.surface.kind))
     }
 
-    /// The transition anchors of a capsule's scene at depth `d` (`docs/GRAMMAR.md`
-    /// §18.6): its elements and their boxes; `None` without a scene.
-    fn anchors(
-        &mut self,
-        ci: usize,
-        finding: &str,
-        d: OpenDepth,
-    ) -> PResult<Option<BTreeMap<String, PixelRect>>> {
+    /// A capsule's scene at depth `d` with what its transition anchors need
+    /// (`docs/GRAMMAR.md` §18.6): the price bar series and the marked (first fact's) bar;
+    /// `None` without a scene.
+    fn side_scene(&mut self, ci: usize, finding: &str, d: OpenDepth) -> PResult<Option<SideScene>> {
         let Some((view, scene, _)) = self.capsule_scene(ci, finding, d)? else {
             return Ok(None);
         };
@@ -567,11 +619,7 @@ impl Session {
             .and_then(|id| doc.facts.iter().find(|x| &x.id == id))
             .map(|f| f.bar);
         let price = view_bar_series(doc, &view).map(|s| s.id.clone());
-        Ok(Some(depth::transition_anchors(
-            &scene,
-            price.as_deref(),
-            fact_bar,
-        )))
+        Ok(Some((scene, price, fact_bar)))
     }
 
     /// Moves capsule `cap` from depth `from` to `to` on connection `ci`: the view state,
@@ -607,7 +655,7 @@ impl Session {
             .build());
         }
         // The scene before, as it was shown (the face when nothing was open).
-        let before = self.anchors(ci, finding, from)?;
+        let before = self.side_scene(ci, finding, from)?;
         let presentation = self.present_at(ci, finding, to)?;
         // Update the view state.
         let view_id = match to {
@@ -638,8 +686,22 @@ impl Session {
             look.view = view_id;
             look.range = range;
         }
-        let after = self.anchors(ci, finding, to)?;
-        let shared = depth::shared_elements(before.as_ref(), after.as_ref());
+        let after = self.side_scene(ci, finding, to)?;
+        // (R4/H-M8910) The connection's transition design picks the shared elements
+        // (`qp_grammar::transitions`; `r3` = the anchors both scenes have).
+        let shared = {
+            fn side(d: OpenDepth, s: Option<&SideScene>) -> qp_grammar::transitions::Side<'_> {
+                qp_grammar::transitions::Side {
+                    depth: d,
+                    scene: s.map(|x| &x.0),
+                    price_series: s.and_then(|x| x.1.as_deref()),
+                    marked_bar: s.and_then(|x| x.2),
+                }
+            }
+            let design =
+                qp_grammar::transitions::by_name(self.conns[ci].look.transition.as_deref());
+            (design.shared)(&side(from, before.as_ref()), &side(to, after.as_ref()))
+        };
         let frame = after.is_some().then(|| {
             let (w, h) = self.frame(ci, depth_key(to));
             [w, h]

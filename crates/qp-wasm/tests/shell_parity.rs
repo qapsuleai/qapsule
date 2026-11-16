@@ -51,3 +51,28 @@ fn shell_core_equals_shell_less() {
         a["styled"]["open"]["digest"]
     );
 }
+
+#[test]
+fn style_rejects_unknown_names_and_changes_nothing() {
+    let mut h = parity_host();
+    let hello =
+        r#"{"type":"hello","protocol":"qp/0","principal":"arkin","surface":{"kind":"phone"}}"#;
+    h.handle_raw("a", hello);
+    for (field, bad) in [("face", "tile"), ("alphabet", "nope"), ("theme", "neon")] {
+        let mut g = json!({"kind": "style", "theme": "light"});
+        g[field] = json!(bad);
+        let m = json!({"type": "input", "id": "s", "gesture": g});
+        let out = h.handle_raw("a", &m.to_string());
+        let v = serde_json::to_value(&out[0].msg).unwrap();
+        assert_eq!(v["error"]["code"], "invalid", "{v}");
+        assert_eq!(v["error"]["path"], format!("/gesture/{field}"), "{v}");
+    }
+    let m = json!({"type":"input","id":"s","gesture":{"kind":"style","alphabet":"rozet"}});
+    let v = serde_json::to_value(&h.handle_raw("a", &m.to_string())[0].msg).unwrap();
+    let st = &v["data"]["interaction"]["state"];
+    assert_eq!(st["alphabet"], "rozet", "{v}");
+    assert!(
+        st.get("theme").is_none(),
+        "a rejected style changed nothing: {v}"
+    );
+}

@@ -371,9 +371,13 @@ fn bound_with_flow_and_readers_unchanged() {
     // recorded before the perf fixes (a81b5e5) and before K1 (ee75ba3), byte for byte:
     // before K1 the whole line was
     // "lines 3023 21183036 923f2ecc80daa91b log 1177744 e38025b8f0d9a037 doc 661323 01db88a5bab1d57f".
+    // (R4/T3, K42) Re-recorded on the K42 code (directional ledger key → ledger at birth,
+    // importance and order; `validity` on items and glyphs; story condition/resolution;
+    // negative-transition override). The cache paths are unchanged by K42; the R3
+    // recordings above are kept for history. `rounds/R4/experiments/T3.md`.
     for entitled in [
-        "a 652 4905590 6fc394fb0c83b846",
-        "f 1 33827 7b5ca00a33059c69",
+        "a 634 4965011 0bf79d3304bb3560",
+        "f 1 33828 64e687e9ac6e5803",
         "i 1 33382 3803d7e72efd9cce",
     ] {
         assert!(per.lines().any(|l| l == entitled), "{entitled}\n{per}");
@@ -382,7 +386,8 @@ fn bound_with_flow_and_readers_unchanged() {
     // entitled person's command the public world does not take leaves no entry there).
     assert_eq!(
         got,
-        "lines 3014 21187649 d43ff5b9b8b70b19 log 1177744 e38025b8f0d9a037 doc 661323 01db88a5bab1d57f"
+        // R3/K1b: "lines 3014 21187649 d43ff5b9b8b70b19 log 1177744 e38025b8f0d9a037 doc 661323 01db88a5bab1d57f"
+        "lines 2996 21725039 712470eec960882f log 1209418 cc26cd5957963e33 doc 674891 d66cf7025043a379"
     );
 }
 
@@ -401,6 +406,8 @@ fn inline_unchanged() {
     println!("inline: {got}\n{per}");
     assert_eq!(
         got,
-        "lines 3747 12944829 9ae44424a6d56893 log 601548 3ef7a6effb39fab4 doc 282007 8a407794a0085f28"
+        // R3 (a81b5e5): "lines 3747 12944829 9ae44424a6d56893 log 601548 3ef7a6effb39fab4 doc 282007 8a407794a0085f28"
+        // R4/T3 (K42) re-recorded, see `bound_with_flow_and_readers_unchanged`.
+        "lines 3739 13164269 6ba3bbb9a84ac641 log 612798 3a99f85cceae652c doc 288051 fb03e8e6206af0bc"
     );
 }

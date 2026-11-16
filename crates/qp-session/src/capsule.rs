@@ -61,9 +61,7 @@ use qp_capsule::realize::Template;
 use qp_capsule::sentence::{condition_now_memo, StudyMemo};
 use qp_capsule::{Engine, EngineConfig, FlowObservation, Lang, Realizer, SentenceInput, TrustPath};
 use qp_facts::{Detector, FlowPoint};
-use qp_schema::capsule::{
-    Audience, EvidenceFamily, LicenseClass, Stage, Story, TimeKind, UserGroup,
-};
+use qp_schema::capsule::{Audience, EvidenceFamily, LicenseClass, Stage, Story, UserGroup};
 use qp_schema::data::FeedKey;
 use qp_schema::protocol::{
     CapsuleDetail, CapsuleInit, CapsuleItem, CapsuleSentence, ChangeOp, ClaimEvidence, ClaimRef,
@@ -312,15 +310,9 @@ pub(crate) fn sentence_pair_memo(
     let facts: Vec<&Fact> = facts.iter().copied().filter(|f| f.bar <= now).collect();
     let lead = *facts.first()?;
     let latest = *facts.last()?;
-    let (mut still_holds, current) = condition_now_memo(lead, &facts, bars, memo);
-    if matches!(
-        story.stage,
-        Stage::Invalidated | Stage::Expired | Stage::Retracted
-    ) && story.time == TimeKind::State
-    {
-        still_holds = Some(false);
-    }
-    let m = lead.meaning.as_ref()?;
+    let (still_holds, current) = condition_now_memo(lead, &facts, bars, memo);
+    let still_holds = qp_capsule::sentence::closed_override(story, still_holds);
+    lead.meaning.as_ref()?;
     let current = if redacted { None } else { current };
     let key = crate::capidx::SentenceKeyRef {
         story,
@@ -337,21 +329,9 @@ pub(crate) fn sentence_pair_memo(
             return Some(v);
         }
     }
-    let lead_view;
-    let lead_ref = if m.time == TimeKind::State
-        && m.condition
-            .as_ref()
-            .is_some_and(|c| c.within_bars.is_some())
-    {
-        let mut l = lead.clone();
-        if let Some(lm) = l.meaning.as_mut() {
-            lm.condition = None;
-        }
-        lead_view = l;
-        &lead_view
-    } else {
-        lead
-    };
+    // (K42/A28) A state's expected resolution is not its state condition.
+    let lead_view = qp_capsule::sentence::sentence_lead(lead);
+    let lead_ref = lead_view.as_ref().unwrap_or(lead);
     let inp = SentenceInput {
         story,
         lead: lead_ref,
@@ -381,6 +361,29 @@ pub(crate) fn sentence_pair_memo(
         c.borrow_mut().put(id, &key, v.clone());
     }
     Some(v)
+}
+
+/// (R4, K42/A28) Validity of `story` as of bar `now` over `facts` (the reader's) and
+/// `bars`: the same `still_holds` the sentence reads ([`sentence_pair_memo`]), so the
+/// item's `validity`, the glyph and the sentence agree.
+pub(crate) fn story_validity(
+    story: &Story,
+    facts: &[&Fact],
+    bars: &[Bar],
+    now: u64,
+    memo: &mut StudyMemo,
+) -> qp_schema::capsule::Validity {
+    let still = usize::try_from(now)
+        .ok()
+        .and_then(|i| bars.get(..=i))
+        .and_then(|bars| {
+            let facts: Vec<&Fact> = facts.iter().copied().filter(|f| f.bar <= now).collect();
+            let lead = *facts.first()?;
+            Some(condition_now_memo(lead, &facts, bars, memo).0)
+        })
+        .flatten();
+    let still = qp_capsule::sentence::closed_override(story, still);
+    qp_capsule::sentence::validity_now(story, still)
 }
 
 /// What a principal may receive (see the module docs).
@@ -984,6 +987,26 @@ impl Session {
         })
     }
 
+    /// (R4, K42/A28) Validity of capsule `c` for a reader with projection `p`, as of the
+    /// same bar and over the same facts as [`Session::reader_sentence_with`].
+    pub(crate) fn reader_validity(
+        &self,
+        doc: &Document,
+        c: &Capsule,
+        p: Option<&Proj>,
+        memo: &mut StudyMemo,
+    ) -> Option<qp_schema::capsule::Validity> {
+        let story = p.and_then(|p| p.stories.get(&c.id)).or(c.story.as_ref())?;
+        let hidden = p.map(|p| &p.hidden);
+        let facts: Vec<&Fact> = story_fact_ids(story)
+            .iter()
+            .filter(|i| hidden.is_none_or(|h| !h.contains(*i)))
+            .filter_map(|i| self.fact_by_id(i))
+            .collect();
+        let (now, bars) = Self::now_bar(rd!(self), story).or_else(|| Self::now_bar(doc, story))?;
+        Some(story_validity(story, &facts, bars, now, memo))
+    }
+
     // -----------------------------------------------------------------------
     // Runner: final bars → engine entries
     // -----------------------------------------------------------------------
@@ -1280,6 +1303,7 @@ impl Session {
     ) -> Option<CapsuleItem> {
         let story = p.and_then(|p| p.stories.get(&c.id)).or(c.story.as_ref())?;
         let (sentence, redacted) = self.reader_sentence_with(doc, c, p, lang, memo)?;
+        let validity = self.reader_validity(doc, c, p, memo)?;
         let last = story.history.last()?;
         Some(CapsuleItem {
             id: c.id.clone(),
@@ -1300,6 +1324,7 @@ impl Session {
             t: last.t,
             ledger_at_birth: story.ledger_at_birth,
             sentence,
+            validity,
             relevant: self.relevant(doc, principal, &story.instrument),
             redacted,
         })
@@ -1341,14 +1366,18 @@ impl Session {
     /// Whether a story reaches `principal`'s audience: watch list (empty = every
     /// instrument), positions and intents; then the sensitivity filter with the
     /// position/intent override (`qp_capsule::admits`).
-    fn admits(doc: &Document, principal: &str, story: &Story) -> bool {
+    ///
+    /// (K42/A22) `stage` is the transition judged: the story's current stage for the
+    /// `capsules` query, the notified transition's stage for the topic. Only a negative
+    /// transition of a position/intent story passes whatever the level.
+    fn admits(doc: &Document, principal: &str, story: &Story, stage: Stage) -> bool {
         let a = Self::audience_of(doc, principal);
         let intents = Self::intents_on(doc);
         let watched = a.watchlist.is_empty()
             || a.watchlist.iter().any(|s| s == &story.instrument)
             || a.positions.contains_key(&story.instrument)
             || intents.iter().any(|s| s == &story.instrument);
-        watched && qp_capsule::admits(&a, story, &intents)
+        watched && qp_capsule::admits_at(&a, story, stage, &intents)
     }
 
     /// Server comments `principal` gets: those on instruments whose licensed flow it may
@@ -1364,6 +1393,41 @@ impl Session {
             .collect()
     }
 
+    /// Whether `story` passes the filters of the `capsules` query `q` (all but
+    /// `latest` and `limit`).
+    fn capsule_passes(
+        &self,
+        doc: &Document,
+        principal: &str,
+        story: &Story,
+        q: &qp_schema::protocol::Query,
+    ) -> bool {
+        let qp_schema::protocol::Query::Capsules {
+            instrument,
+            stages,
+            open,
+            meaning,
+            since_bar,
+            since_t,
+            born_since_bar,
+            born_since_t,
+            audience,
+            ..
+        } = q
+        else {
+            return false;
+        };
+        !(instrument.as_ref().is_some_and(|i| i != &story.instrument)
+            || (!stages.is_empty() && !stages.contains(&story.stage))
+            || open.is_some_and(|o| o == story.stage.is_closed())
+            || meaning.is_some_and(|k| k != story.kind)
+            || since_bar.is_some_and(|b| story.last_bar < b)
+            || since_t.is_some_and(|t| story.history.last().is_none_or(|l| l.t < t))
+            || born_since_bar.is_some_and(|b| story.born_bar < b)
+            || born_since_t.is_some_and(|t| story.history.first().is_none_or(|h| h.t < t))
+            || (*audience && !Self::admits(doc, principal, story, story.stage)))
+    }
+
     /// Answer to the `capsules` query (run on the asker's projected document).
     #[allow(clippy::too_many_arguments)]
     pub(crate) fn capsules_query(
@@ -1373,13 +1437,11 @@ impl Session {
     ) -> PResult<QueryResult> {
         let qp_schema::protocol::Query::Capsules {
             instrument,
-            stages,
-            open,
-            meaning,
             since_bar,
             since_t,
-            audience,
+            latest,
             limit,
+            ..
         } = q
         else {
             unreachable!("capsules query");
@@ -1390,18 +1452,34 @@ impl Session {
         let doc = &self.doc;
         let mut items: Vec<CapsuleItem> = Vec::new();
         let mut memo = StudyMemo::default();
+        // (R4) `latest`: the most recently born match only (birth time, bar, id).
+        let mut newest: Option<(i64, u64, &str)> = None;
+        if *latest {
+            for c in &doc.capsules {
+                let Some(story) = p.and_then(|p| p.stories.get(&c.id)).or(c.story.as_ref()) else {
+                    continue;
+                };
+                if !self.capsule_passes(doc, &principal, story, q) {
+                    continue;
+                }
+                let key = (
+                    story.history.first().map_or(i64::MIN, |h| h.t),
+                    story.born_bar,
+                    c.id.as_str(),
+                );
+                if newest.is_none_or(|n| key > n) {
+                    newest = Some(key);
+                }
+            }
+        }
         for c in &doc.capsules {
+            if *latest && newest.is_none_or(|n| n.2 != c.id) {
+                continue;
+            }
             let Some(story) = p.and_then(|p| p.stories.get(&c.id)).or(c.story.as_ref()) else {
                 continue;
             };
-            if instrument.as_ref().is_some_and(|i| i != &story.instrument)
-                || (!stages.is_empty() && !stages.contains(&story.stage))
-                || open.is_some_and(|o| o == story.stage.is_closed())
-                || meaning.is_some_and(|k| k != story.kind)
-                || since_bar.is_some_and(|b| story.last_bar < b)
-                || since_t.is_some_and(|t| story.history.last().is_none_or(|l| l.t < t))
-                || (*audience && !Self::admits(doc, &principal, story))
-            {
+            if !self.capsule_passes(doc, &principal, story, q) {
                 continue;
             }
             if let Some(it) = self.capsule_item_with(doc, c, p, lang, &principal, &mut memo) {
@@ -1490,7 +1568,13 @@ impl Session {
                     s
                 },
             );
-        let glyph = qp_capsule::glyph_spec(&story, now, qp_grammar::depth::GLYPH_MIN_LEDGER_N);
+        // (K42/A28) The glyph carries the item's validity: it says what the sentence says.
+        let glyph = qp_capsule::glyph_spec_at(
+            &story,
+            now,
+            qp_grammar::depth::GLYPH_MIN_LEDGER_N,
+            item.validity,
+        );
         let evidence = facts.iter().map(|f| self.evidence_access(f, p)).collect();
         Ok(QueryResult::CapsuleDetail {
             detail: Box::new(CapsuleDetail {
@@ -1601,17 +1685,19 @@ impl Session {
         key: Option<&str>,
         meaning: Option<qp_schema::capsule::MeaningKind>,
         detector: Option<&str>,
+        direction: Option<qp_schema::capsule::Direction>,
         by_kind: bool,
     ) -> QueryResult {
         let mut rows: BTreeMap<String, LedgerRow> = BTreeMap::new();
         let mut total = qp_schema::capsule::LedgerStat::default();
         for (k, kind, _, real) in self.ledger_now() {
-            let det = k
-                .split_once('/')
-                .map(|(_, r)| r.split('@').next().unwrap_or(r).to_owned());
+            let parsed = qp_capsule::parse_ledger_key(&k);
+            let det = parsed.map(|(_, _, d, _)| d.to_owned());
+            let dir = parsed.and_then(|(_, d, _, _)| d);
             if key.is_some_and(|x| x != k)
                 || meaning.is_some_and(|m| m != kind)
                 || detector.is_some_and(|d| det.as_deref() != Some(d))
+                || direction.is_some_and(|d| dir != Some(d))
             {
                 continue;
             }
@@ -1623,6 +1709,7 @@ impl Session {
             let row = rows.entry(rk.clone()).or_insert(LedgerRow {
                 key: rk,
                 kind,
+                direction: if by_kind { direction } else { dir },
                 detector: if by_kind { None } else { det },
                 n: 0,
                 realized: 0,
@@ -1725,7 +1812,9 @@ impl Session {
                             .as_ref()
                             .and_then(|p| p.stories.get(&cap.id))
                             .or(cap.story.as_ref());
-                        if !story.is_some_and(|s| Self::admits(doc, &c.principal, s)) {
+                        if !story
+                            .is_some_and(|s| Self::admits(doc, &c.principal, s, e.transition.stage))
+                        {
                             continue;
                         }
                     }

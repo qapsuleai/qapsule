@@ -1515,6 +1515,7 @@ dependencies = [
 name = "qp-capsule"
 version = "0.0.0"
 dependencies = [
+ "qp-calendar",
  "qp-compute",
  "qp-facts",
  "qp-schema",

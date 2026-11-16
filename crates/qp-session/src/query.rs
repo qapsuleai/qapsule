@@ -490,8 +490,15 @@ impl Session {
                 key,
                 meaning,
                 detector,
+                direction,
                 by_kind,
-            } => Ok(self.ledger_query(key.as_deref(), *meaning, detector.as_deref(), *by_kind)),
+            } => Ok(self.ledger_query(
+                key.as_deref(),
+                *meaning,
+                detector.as_deref(),
+                *direction,
+                *by_kind,
+            )),
             Query::VerifyEvidence { item } => {
                 let asker = self.conns[ci].principal.clone();
                 Ok(QueryResult::EvidenceCheck {

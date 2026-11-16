@@ -50,10 +50,10 @@ pub mod sentence;
 pub mod theme;
 pub mod trust;
 
-pub use audience::admits;
+pub use audience::{admits, admits_at};
 pub use engine::{
-    glyph_spec, CandidateStory, Engine, EngineConfig, EngineSnapshot, LedgerRecord, StoryEvent,
-    StorySnapshot, FRESHNESS_HALF_BARS,
+    glyph_spec, glyph_spec_at, parse_ledger_key, CandidateStory, Engine, EngineConfig,
+    EngineSnapshot, LedgerRecord, StoryEvent, StorySnapshot, FRESHNESS_HALF_BARS,
 };
 pub use pipeline::{simulate, InstrumentInput, SimResult};
 

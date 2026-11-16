@@ -1,4 +1,5 @@
-//! Generates the R3 capsule conformance transcripts 38–44
+//! Generates the R3 capsule conformance transcripts 38–44 and the R4/T3 (K42 and R3
+//! ergonomics) transcripts 45–48
 //! (`fixtures/protocol/conformance/38-*.json` …, `docs/PROTOCOL.md` §15, §20).
 //!
 //! Each scenario is written as messages and data events; the expected outputs are what
@@ -311,10 +312,10 @@ fn t41() -> Value {
         send_n(
             "a",
             json!({"type":"command","id":"s2","ops":[{"op":"set_audience","audience":{"group":"future","positions":{"THYAO":100}}}]}),
-            "She holds THYAO now: stories about a position pass any level (`relevant`).",
+            "She holds THYAO now: the negative transitions of stories about a position pass any level (`relevant`; K42/A22: births still go through the level).",
         ),
         bar_ev(k, 126, &b[126], None),
-        bar_ev(k, 127, &b[127], Some("A tier-3 RSI extreme passes because of the position.")),
+        bar_ev(k, 127, &b[127], Some("K42/A22: the tier-3 RSI extreme born on this bar does not reach her although she holds THYAO (a birth goes through the level); the tier-1 breakout's transition does.")),
         send_n(
             "a",
             json!({"type":"command","id":"s3","ops":[{"op":"set_sensitivity","sensitivity":"balanced"}]}),
@@ -335,7 +336,7 @@ fn t41() -> Value {
     let _ = &mut steps;
     run(
         "41-capsule-sensitivity",
-        "R3 (K31, §20): sensitivity and the position override. `set_audience` / `set_sensitivity` write a person's own preferences through the command path (another person's only by an owner); the topic `capsules` filters by them: with the future-investor default (`important`) only tier 1 passes, a story about a held position passes any level. The engine writes many entries and never touches the preferences (final document).",
+        "R3 (K31, §20): sensitivity and the position override. `set_audience` / `set_sensitivity` write a person's own preferences through the command path (another person's only by an owner); the topic `capsules` filters by them: with the future-investor default (`important`) only tier 1 passes; (R4, K42/A22) only the negative transitions (weakened, invalidated, retracted) of a story about a held position pass any level, its birth does not. The engine writes many entries and never touches the preferences (final document).",
         &["set_audience", "set_sensitivity", "topic-capsules", "capsules", "sensitivity", "position-override"],
         init(k, None),
         steps,
@@ -475,6 +476,168 @@ fn t44() -> Value {
     )
 }
 
+fn t45() -> Value {
+    let b = bars();
+    let k = 121;
+    let mut steps = vec![hello("a", "ana", None)];
+    for (i, bar) in b.iter().enumerate().take(150 + 1).skip(k) {
+        steps.push(bar_ev(k, i, bar, None));
+    }
+    steps.push(send_n(
+        "a",
+        json!({"type":"query","id":"l1","query":{"kind":"ledger","meaning":"breakout"}}),
+        "K42/A23: the ledger key carries the direction (`kind/direction/detector@version`): up and down breakouts of one detector are two rows with separate bases.",
+    ));
+    steps.push(query(
+        "a",
+        "l2",
+        json!({"kind":"ledger","meaning":"breakout","direction":"down"}),
+    ));
+    steps.push(send_n(
+        "a",
+        json!({"type":"query","id":"l3","query":{"kind":"ledger","by_kind":true,"direction":"up"}}),
+        "Per kind, one direction only.",
+    ));
+    steps.push(query("a", "l4", json!({"kind":"ledger","by_kind":true})));
+    steps.push(send_n(
+        "a",
+        json!({"type":"query","id":"c1","query":{"kind":"capsule","capsule":"cap.THYAO.breakout.up.147"}}),
+        "An up breakout counts only earlier up breakouts at its birth (`ledger_at_birth`); its key names the direction.",
+    ));
+    run(
+        "45-capsule-ledger-direction",
+        "R4/T3 (K42/A23, §20.2): the ledger key is `kind/direction/detector@version`. On the bound THYAO series of transcript 38 run to bar 150, the `ledger` query gives the up and down range breakouts as separate rows (filter `direction`, rows carry `direction`; `by_kind` sums the directions unless one is asked for), and a story's `ledger_at_birth` counts only closed stories of its own direction.",
+        &["ledger", "ledger-direction", "capsule"],
+        init(k, None),
+        steps,
+        None,
+    )
+}
+
+fn t46() -> Value {
+    let b = bars();
+    let k = 106;
+    let steps = vec![
+        hello("a", "ana", None),
+        hello("b", "arkin", None),
+        sub("a", "k", json!({"kind":"capsules"})),
+        sub("b", "k", json!({"kind":"capsules"})),
+        send_n(
+            "a",
+            json!({"type":"command","id":"s1","ops":[{"op":"set_audience","audience":{"group":"future","positions":{"THYAO":100}}}]}),
+            "Ana: the future-investor group (`important`, tier 1) and a THYAO position.",
+        ),
+        send_n(
+            "b",
+            json!({"type":"command","id":"s2","ops":[{"op":"set_audience","audience":{"group":"future"}}]}),
+            "Arkın (entitled like Ana): the same level, no position.",
+        ),
+        bar_ev(k, 106, &b[106], None),
+        bar_ev(k, 107, &b[107], Some("A tier-3 down breakout is born: a birth goes through the level for both (K42/A22), the position does not lift it.")),
+        bar_ev(k, 108, &b[108], None),
+        bar_ev(k, 109, &b[109], Some("The same story weakens (an opposite fact): a negative transition of a story about Ana's position reaches her whatever the level (`relevant`); Arkın gets nothing.")),
+        bar_ev(k, 110, &b[110], Some("A tier-1 breakout is born: both get it by the level.")),
+        query("a", "q", json!({"kind":"capsules","audience":true,"since_bar":100})),
+    ];
+    run(
+        "46-capsule-negative-override",
+        "R4/T3 (K42/A22, §20.4, CAPSULE §9.8): for a story about a person's position or active intent only the negative transitions (weakened, invalidated, retracted) pass whatever the sensitivity; its birth and the other transitions go through the level like any story. Two readers at `important`, one holding THYAO: the tier-3 birth reaches neither, its weakening reaches the holder only, a tier-1 birth reaches both. The `capsules` query with `audience` applies the same rule to each story's current stage.",
+        &["topic-capsules", "sensitivity", "position-override", "negative-transition", "capsules"],
+        init(k, None),
+        steps,
+        None,
+    )
+}
+
+fn t47() -> Value {
+    let b = bars();
+    let k = 92;
+    let mut steps = vec![hello("t", "ana", None), hello("e", "ana", Some("en"))];
+    for (i, bar) in b.iter().enumerate().take(96 + 1).skip(k) {
+        steps.push(bar_ev(k, i, bar, None));
+    }
+    steps.push(send_n(
+        "t",
+        json!({"type":"query","id":"v1","query":{"kind":"capsules","open":true,"since_bar":84}}),
+        "K42/A28: every item carries `validity`. The short-average state ended (its state condition no longer holds) but the story is still open: `no_longer`; the other open stories are `valid`.",
+    ));
+    steps.push(send_n(
+        "t",
+        json!({"type":"query","id":"v2","query":{"kind":"capsule","capsule":"cap.THYAO.continuation.down.84"}}),
+        "The opened capsule: the story keeps the state condition (`condition`) apart from the expected resolution (`resolution`: the barrier rule); the glyph carries `validity: no_longer`, and the sentence says 'artık … değil'.",
+    ));
+    steps.push(send_n(
+        "e",
+        json!({"type":"query","id":"v3","query":{"kind":"capsule","capsule":"cap.THYAO.continuation.down.84"}}),
+        "The same in English: 'no longer below', glyph `no_longer`.",
+    ));
+    steps.push(query(
+        "t",
+        "v4",
+        json!({"kind":"capsules","open":false,"since_bar":90}),
+    ));
+    run(
+        "47-capsule-validity",
+        "R4/T3 (K42/A28, §20.2): validity today (`valid` / `no_longer` / `closed`) on the capsule item, the opened capsule and its glyph; the story keeps its state condition and its expected resolution in separate fields. A down-trend state whose condition broke while its story is still open is `no_longer` in the list, in the glyph and in the sentence (Turkish and English); closed stories are `closed`.",
+        &["capsules", "capsule", "validity", "glyph", "lang"],
+        init(k, None),
+        steps,
+        None,
+    )
+}
+
+fn t48() -> Value {
+    let b = bars();
+    let k = 121;
+    let mut steps = vec![hello("a", "ana", None)];
+    for (i, bar) in b.iter().enumerate().take(150 + 1).skip(k) {
+        steps.push(bar_ev(k, i, bar, None));
+    }
+    steps.push(send_n(
+        "a",
+        json!({"type":"query","id":"s1","query":{"kind":"capsule","capsule":{"instrument":"THYAO","meaning":"breakout","direction":"up","latest":true}}}),
+        "The `capsule` query takes a capsule selector (§17.1): THYAO's latest up breakout (order: latest transition bar, then birth bar), named in `resolved`.",
+    ));
+    steps.push(send_n(
+        "a",
+        json!({"type":"query","id":"s2","query":{"kind":"capsule","capsule":{"meaning":"breakout","direction":"up"}}}),
+        "Several up breakouts: `ambiguous` with the candidates in latest-transition-bar order.",
+    ));
+    steps.push(send_n(
+        "a",
+        json!({"type":"query","id":"s3","query":{"kind":"capsule","capsule":{"meaning":"breakout","open":true}}}),
+        "No breakout is open at bar 150: `not_found` with the closest capsules (most keys satisfied first).",
+    ));
+    steps.push(send_raw_n(
+        "a",
+        json!({"type":"query","id":"s4","query":{"kind":"capsule","capsule":{"stage":"born","opn":true}}}),
+        "An unknown key: `schema` at its path, with the keys a capsule selector takes.",
+    ));
+    steps.push(send_n(
+        "a",
+        json!({"type":"query","id":"s5","query":{"kind":"capsules","latest":true}}),
+        "`capsules` with `latest`: only the most recently born capsule.",
+    ));
+    steps.push(send_n(
+        "a",
+        json!({"type":"query","id":"s6","query":{"kind":"capsules","born_since_bar":145,"meaning":"breakout"}}),
+        "Birth filter: breakouts born at bar 145 or later (`since_bar` filters on the latest transition instead).",
+    ));
+    steps.push(send_n(
+        "a",
+        json!({"type":"query","id":"s7","query":{"kind":"verify_evidence","item":{"finding":{"meaning":"breakout","stage":"invalidated","latest":true}}}}),
+        "A finding selector with the story keys `meaning` and `stage` (also `instrument`, `open`): the latest invalidated breakout's finding.",
+    ));
+    run(
+        "48-capsule-selector",
+        "R4/T3 (R3 ergonomics, GOAL 13; §17.1, §20.2): the `capsule` query takes a capsule selector (`instrument`, `meaning`, `direction`, `stage`, `open`, `born_bar`, `series`, `first`/`latest`; order: latest transition bar, birth bar, document) with the usual `resolved`, `ambiguous`, `not_found` and `schema` answers; `capsules` takes `latest` (the most recently born) and the birth filters `born_since_bar` / `born_since_t`; the finding selector takes the story keys `instrument`, `meaning`, `stage`, `open`.",
+        &["selectors", "capsule", "capsules", "verify_evidence"],
+        init(k, None),
+        steps,
+        None,
+    )
+}
+
 fn pretty(v: &Value) -> String {
     let mut s = serde_json::to_string_pretty(v).expect("json");
     s.push('\n');
@@ -485,7 +648,19 @@ fn main() {
     let write = std::env::args().any(|a| a == "--write");
     let dir = root().join("fixtures/protocol/conformance");
     let mut stale = 0;
-    for t in [t38(), t39(), t40(), t41(), t42(), t43(), t44()] {
+    for t in [
+        t38(),
+        t39(),
+        t40(),
+        t41(),
+        t42(),
+        t43(),
+        t44(),
+        t45(),
+        t46(),
+        t47(),
+        t48(),
+    ] {
         let name = t["name"].as_str().unwrap().to_owned();
         let path = dir.join(format!("{name}.json"));
         let text = pretty(&t);

@@ -353,6 +353,7 @@ pub fn story_glyph(story: &Story, now_bar: u64) -> GlyphSpec {
         freshness: FRESHNESS_HALF_BARS / (FRESHNESS_HALF_BARS + age),
         confirmations: u8::try_from(story.families.len().clamp(1, 5)).unwrap_or(5),
         server: story.trust == Trust::Server,
+        validity: None,
     }
 }
 

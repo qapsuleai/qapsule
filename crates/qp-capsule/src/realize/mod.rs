@@ -44,9 +44,11 @@ use qp_schema::capsule::{
 };
 use qp_schema::CompareOp;
 
+pub mod elapsed;
 pub mod en;
 pub mod morph;
 pub mod num;
+pub mod parts;
 pub mod tr;
 
 /// Ledger sample size from which counts are stated plainly; below it the sentence says

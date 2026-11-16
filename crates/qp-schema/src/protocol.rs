@@ -17,7 +17,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::capsule::{
     Audience, Direction, EvidenceFamily, GlyphSpec, LedgerStat, LicenseClass, MeaningKind,
-    Sensitivity, Stage, Story, TimeKind, Transition, Trust,
+    Sensitivity, Stage, Story, TimeKind, Transition, Trust, Validity,
 };
 use crate::data::{BindingState, DataBinding, DataEvent, DataPosition, EvidenceRef, FeedKey};
 use crate::grammar::{Layer, View};
@@ -1532,6 +1532,17 @@ pub enum Query {
         /// Only stories with a transition at or after this time (epoch ms).
         #[serde(default, skip_serializing_if = "Option::is_none")]
         since_t: Option<TimestampMs>,
+        /// (R4) Only stories born at or after this bar (of their own bar series).
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        born_since_bar: Option<u64>,
+        /// (R4) Only stories born at or after this time (epoch ms; the birth bar's time).
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        born_since_t: Option<TimestampMs>,
+        /// (R4) Only the most recently born of the matching stories ("the latest
+        /// capsule"): the greatest birth time, then the greatest birth bar, then the
+        /// greatest id. Applied after every other filter, before `limit`.
+        #[serde(default, skip_serializing_if = "std::ops::Not::not")]
+        latest: bool,
         /// Apply the asker's audience: watch list (and positions, intents) and
         /// sensitivity, with the position/intent override (§9.8). Default false: every
         /// story the asker may see.
@@ -1547,10 +1558,13 @@ pub enum Query {
     /// and what it rests on.
     Capsule {
         /// Capsule id, or its finding's id.
+        /// (R4) Also takes a capsule selector (§17, [`CapsuleSel`]).
+        #[schemars(with = "CapsuleRef")]
         capsule: String,
     },
     /// (R3, §20) The ledger: closed capsules and realized ones per ledger key
-    /// (`kind/detector@version`), or summed per kind. Retracted capsules never count.
+    /// (`kind/direction/detector@version`, R4), or summed per kind. Retracted capsules
+    /// never count.
     /// The ledger is license-independent (K33): every principal that may read gets it.
     Ledger {
         /// Only this ledger key.
@@ -1562,7 +1576,11 @@ pub enum Query {
         /// Only this detector.
         #[serde(default, skip_serializing_if = "Option::is_none")]
         detector: Option<String>,
-        /// Group rows per kind instead of per key.
+        /// (R4, K42/A23) Only this direction.
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        direction: Option<Direction>,
+        /// Group rows per kind instead of per key (every direction summed; with
+        /// `direction`, that direction only).
         #[serde(default, skip_serializing_if = "std::ops::Not::not")]
         by_kind: bool,
     },
@@ -1620,7 +1638,13 @@ pub struct CapsuleItem {
     pub ledger_at_birth: LedgerStat,
     /// The sentence as of the series' last closed bar, for this reader (K26).
     pub sentence: CapsuleSentence,
-    /// About the reader's position or active intent (passes any sensitivity).
+    /// (R4, K42/A28) Whether the claim still holds as of the same bar: `valid`,
+    /// `no_longer` (the state condition broke, the story is still open) or `closed`.
+    /// The sentence and the glyph say the same.
+    pub validity: Validity,
+    /// About the reader's position or active intent. (R4, K42/A22) Its **negative
+    /// transitions** (`weakened`, `invalidated`, `retracted`) pass any sensitivity; its
+    /// birth and other transitions go through the sensitivity filter like any story.
     #[serde(default, skip_serializing_if = "std::ops::Not::not")]
     pub relevant: bool,
     /// The sentence carries no digits for this reader (K33).
@@ -1675,10 +1699,13 @@ pub struct CapsuleDetail {
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 #[serde(deny_unknown_fields)]
 pub struct LedgerRow {
-    /// Ledger key (`kind/detector@version`), or the kind when grouped by kind.
+    /// Ledger key (`kind/direction/detector@version`), or the kind when grouped by kind.
     pub key: String,
     /// Meaning kind.
     pub kind: MeaningKind,
+    /// (R4, K42/A23) Direction (absent when grouped by kind without a direction filter).
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub direction: Option<Direction>,
     /// Detector (absent when grouped by kind).
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub detector: Option<String>,
@@ -3308,10 +3335,59 @@ pub struct FindingSel {
     /// State of its capsule (a finding without a capsule has none).
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub state: Option<CapsuleState>,
+    /// (R4) Its capsule's story is about this instrument (symbol).
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub instrument: Option<String>,
+    /// (R4) Its capsule's story has this meaning kind (`breakout`; `kind` is a fact kind
+    /// such as `breakout.range.up`).
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub meaning: Option<MeaningKind>,
+    /// (R4) Its capsule's story is at this stage.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub stage: Option<Stage>,
+    /// (R4) Its capsule's story is open (`true`) or closed (`false`).
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub open: Option<bool>,
     /// Pick the first match (by its latest fact bar: the oldest).
     #[serde(default, skip_serializing_if = "is_false")]
     pub first: bool,
     /// Pick the last match (by its latest fact bar: the most recent).
+    #[serde(default, skip_serializing_if = "is_false")]
+    pub latest: bool,
+}
+
+/// (R4) Selects a capsule with a story, e.g.
+/// `{"instrument":"THYAO","meaning":"breakout","open":true}` ("THYAO's open breakout
+/// capsule"). Order: the latest transition's bar, then the birth bar, then document
+/// order; so `latest` is the one that moved last.
+#[derive(Debug, Clone, Default, PartialEq, Serialize, Deserialize, JsonSchema)]
+#[serde(deny_unknown_fields)]
+pub struct CapsuleSel {
+    /// Instrument symbol.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub instrument: Option<String>,
+    /// Meaning kind.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub meaning: Option<MeaningKind>,
+    /// Direction.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub direction: Option<Direction>,
+    /// Story stage.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub stage: Option<Stage>,
+    /// Open (`true`) or closed (`false`).
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub open: Option<bool>,
+    /// Birth bar.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub born_bar: Option<u64>,
+    /// Bar series of the story.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub series: Option<String>,
+    /// Pick the first match (the one that moved earliest).
+    #[serde(default, skip_serializing_if = "is_false")]
+    pub first: bool,
+    /// Pick the last match (the one that moved last).
     #[serde(default, skip_serializing_if = "is_false")]
     pub latest: bool,
 }
@@ -3422,6 +3498,16 @@ pub enum FindingRef {
     Id(String),
     /// Selector.
     Select(FindingSel),
+}
+
+/// (R4) A capsule id (or its finding's id) or a [`CapsuleSel`].
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
+#[serde(untagged)]
+pub enum CapsuleRef {
+    /// Capsule id or finding id.
+    Id(String),
+    /// Selector.
+    Select(CapsuleSel),
 }
 
 /// A proposal id or a [`ProposalSel`].

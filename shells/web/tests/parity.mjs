@@ -32,8 +32,10 @@ try {
       await page.click('#c_go');
     } else if (step.tap_face) {
       await settle(page);
-      const first = await page.evaluate(() => JSON.parse(window.qp.feed())[0]);
-      if (!first.scene) throw new Error('feed[0] has no face scene');
+      // (R4/S1) `index` counts capsule rows (a feed layout may add group headers).
+      const rows = await page.evaluate(() => JSON.parse(window.qp.feed()));
+      const first = rows.filter((r) => r.id)[step.tap_face.index];
+      if (!first || !first.scene) throw new Error(`face ${step.tap_face.index} has no face scene`);
       await clickIn(page, `#list .face[data-id="${first.id}"] canvas`, step.tap_face.x, step.tap_face.y);
     } else if (step.tap_scene) {
       await clickIn(page, '#scene', step.tap_scene.x, step.tap_scene.y);

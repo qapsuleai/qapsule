@@ -9,7 +9,7 @@
 //! `shells/web/tests/parity.mjs`) is compared with [`shell_less`] by `scripts/verify.sh`.
 //!
 //! Script: a JSON array of steps — `{"seek_step":n}`, `{"tap_face":{"index":i,"x":…,
-//! "y":…}}`, `{"tap_scene":{"x":…,"y":…}}`, `{"drag":{"dx":…}}`, `{"pinch2x":{}}`, `{"wheel":{"dy":…,"x":…}}`, `{"style":{"face"?,
+//! "y":…}}` (R4/S1: `index` counts the capsule rows of the feed layout), `{"tap_scene":{"x":…,"y":…}}`, `{"drag":{"dx":…}}`, `{"pinch2x":{}}`, `{"wheel":{"dy":…,"x":…}}`, `{"style":{"face"?,
 //! "alphabet"?,"theme"?}}`, `{"back":{}}`, `{"digest":"label"}`. Output: `{label:
 //! digests}`.
 
@@ -47,6 +47,8 @@ struct Agent {
     open_headline: Option<String>,
     max_points: u32,
     n: u64,
+    /// The replay clock from the last replay answer (the feed layout may read it).
+    now: Option<i64>,
 }
 
 impl Agent {
@@ -66,6 +68,7 @@ impl Agent {
                 ServerMsg::Welcome { profile, .. } => self.max_points = profile.max_points,
                 ServerMsg::Result { data, .. } => match data {
                     QueryResult::Capsules { capsules, .. } => self.feed.clone_from(capsules),
+                    QueryResult::Replay { replay } => self.now = Some(replay.t),
                     QueryResult::Interaction { interaction } => {
                         self.look = interaction.state.clone();
                         if let Some(o) = &interaction.opening {
@@ -98,6 +101,32 @@ impl Agent {
         self.n += 1;
         let m = json!({"type":"input","id":format!("i{}", self.n),"gesture":g});
         self.send(host, &m);
+    }
+
+    /// (R4/S1) The capsule rows the reader sees, top to bottom, by the connection's feed
+    /// layout (the script's `tap_face.index` counts these, as a user would). The script
+    /// sets no last look, so nothing is fresh.
+    fn face_ids(&self, lang: &str) -> Vec<String> {
+        let lang = if lang == "en" {
+            qp_schema::protocol::Language::En
+        } else {
+            qp_schema::protocol::Language::Tr
+        };
+        let fresh = vec![false; self.feed.len()];
+        crate::shell::feed_rows(
+            self.look.feed.as_deref(),
+            &self.feed,
+            lang,
+            self.look.seen,
+            &fresh,
+            self.now,
+        )
+        .into_iter()
+        .filter_map(|r| match r {
+            qp_grammar::feeds::FeedRow::Capsule { id, .. } => Some(id),
+            qp_grammar::feeds::FeedRow::Header { .. } => None,
+        })
+        .collect()
     }
 
     fn refresh_feed(&mut self, host: &mut ReplayHost) {
@@ -161,6 +190,7 @@ pub fn shell_less(host: &mut ReplayHost, principal: &str, lang: &str, script: &[
         open_headline: None,
         max_points: 60,
         n: 0,
+        now: None,
     };
     a.send(
         host,
@@ -190,7 +220,7 @@ pub fn shell_less(host: &mut ReplayHost, principal: &str, lang: &str, script: &[
         } else if let Some(t) = step.get("tap_face") {
             a.refresh_feed(host);
             let i = usize::try_from(t["index"].as_u64().unwrap_or(0)).unwrap_or(0);
-            let cap = a.feed[i].id.clone();
+            let cap = a.face_ids(lang)[i].clone();
             let fh = qp_grammar::faces::height(a.look.face.as_deref());
             a.input(
                 host,
@@ -290,7 +320,12 @@ pub fn with_core(host: &mut ReplayHost, principal: &str, lang: &str, script: &[V
             feed_core(&mut core, host, Vec::new());
         } else if let Some(t) = step.get("tap_face") {
             let i = usize::try_from(t["index"].as_u64().unwrap_or(0)).unwrap_or(0);
-            let target = format!("face:{}", core.feed()[i].id);
+            let rows = core.feed_json();
+            let ids: Vec<&str> = rows
+                .as_array()
+                .map(|a| a.iter().filter_map(|r| r["id"].as_str()).collect())
+                .unwrap_or_default();
+            let target = format!("face:{}", ids[i]);
             core.pointer(&target, "down", 1, f(t, "x"), f(t, "y"));
             core.pointer(&target, "up", 1, f(t, "x"), f(t, "y"));
             feed_core(&mut core, host, Vec::new());

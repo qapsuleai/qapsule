@@ -399,6 +399,35 @@ fn depth_name(d: OpenDepth) -> &'static str {
     }
 }
 
+/// (R4/S1) The feed rows of `items` by layout `feed` (`qp_grammar::feeds`), with the local
+/// wall times the layout reads filled from the display zone: the shell core's feed and the
+/// shell-less driver use the same rows.
+#[must_use]
+pub fn feed_rows(
+    feed: Option<&str>,
+    items: &[CapsuleItem],
+    lang: Language,
+    seen: Option<i64>,
+    fresh: &[bool],
+    now: Option<i64>,
+) -> Vec<qp_grammar::feeds::FeedRow> {
+    let local: Vec<qp_grammar::feeds::LocalStamp> =
+        items.iter().map(|it| local_stamp(it.t)).collect();
+    qp_grammar::feeds::layout(
+        feed,
+        &qp_grammar::feeds::FeedCtx {
+            items,
+            lang,
+            seen,
+            fresh,
+            now,
+            local: &local,
+            now_local: now.map(local_stamp),
+            seen_local: seen.map(local_stamp),
+        },
+    )
+}
+
 /// (R4/S1) The local wall time of `t` (ms) in the display time zone, from the zone's
 /// embedded rules (`qp_calendar::Zone`); UTC if the zone were missing.
 #[must_use]
@@ -772,20 +801,13 @@ impl ShellCore {
             .iter()
             .map(|it| self.look.seen.is_some_and(|s| self.known_at(it) > s))
             .collect();
-        let local: Vec<qp_grammar::feeds::LocalStamp> =
-            self.feed.iter().map(|it| local_stamp(it.t)).collect();
-        let rows = qp_grammar::feeds::layout(
+        let rows = feed_rows(
             self.look.feed.as_deref(),
-            &qp_grammar::feeds::FeedCtx {
-                items: &self.feed,
-                lang,
-                seen: self.look.seen,
-                fresh: &fresh,
-                now,
-                local: &local,
-                now_local: now.map(local_stamp),
-                seen_local: self.look.seen.map(local_stamp),
-            },
+            &self.feed,
+            lang,
+            self.look.seen,
+            &fresh,
+            now,
         );
         let out: Vec<Value> = rows
             .into_iter()

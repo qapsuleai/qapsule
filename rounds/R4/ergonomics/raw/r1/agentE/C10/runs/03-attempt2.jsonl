@@ -1,0 +1,4 @@
+{"conn":"a","msg":{"type":"hello","protocol":"qp/0","principal":"editor","surface":{"kind":"headless"}}}
+{"conn":"a","msg":{"type":"input","id":"i1","gesture":{"kind":"open","capsule":"cap.THYAO.breakout.down.311","to":"chart"}}}
+{"conn":"a","msg":{"type":"query","id":"q2","query":{"kind":"screen"}}}
+{"conn":"a","msg":{"type":"query","id":"q3","query":{"kind":"capsule","capsule":"cap.THYAO.breakout.down.311"}}}

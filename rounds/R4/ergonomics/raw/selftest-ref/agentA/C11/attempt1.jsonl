@@ -1,0 +1,2 @@
+{"conn": "a", "msg": {"type": "hello", "protocol": "qp/0", "principal": "viewer", "surface": {"kind": "headless"}}}
+{"conn": "a", "msg": {"type": "query", "id": "q", "query": {"kind": "capsules", "instrument": "THYAO", "meaning": "flow"}}}

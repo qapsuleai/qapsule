@@ -1,0 +1,1 @@
+THYAO'daki en son akış kapsülünü (cap.THYAO.flow.down.298, para çıkışı) kanıt derinliğinde açtım. Akış lisansınız olmadığı için lisanslı kurumsal akış verisi gösterilmiyor; yalnızca açık veriye dayanan kanıtı görüyorsunuz: 298. barda hacim (158.361.494) ortalamasının (18.800.127) yaklaşık 8,4 katına çıktı, beklenen sonuç gerçekleşti. Kanıt "bars THYAO 1d" verisine dayanıyor.

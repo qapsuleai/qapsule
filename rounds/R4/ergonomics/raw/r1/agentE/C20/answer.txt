@@ -1,0 +1,1 @@
+THYAO'daki açık kırılım kapsülü (fnd.THYAO.breakout.down.311) işaretli (glyph'li) grafik olarak C20/out.png dosyasına çizildi: mumlar, olgu barında vurgu şeridi, kapsül işareti ve kırılan destek seviyeleri görünüyor.

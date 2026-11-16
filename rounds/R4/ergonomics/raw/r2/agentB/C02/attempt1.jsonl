@@ -1,0 +1,3 @@
+{"conn":"a","msg":{"type":"hello","protocol":"qp/0","principal":"editor","surface":{"kind":"headless"}}}
+{"conn":"a","msg":{"type":"input","id":"i1","gesture":{"kind":"open","capsule":{"instrument":"THYAO","meaning":"breakout","open":true},"to":"evidence"}}}
+{"conn":"a","msg":{"type":"query","id":"q1","query":{"kind":"capsule","capsule":{"instrument":"THYAO","meaning":"breakout","open":true}}}}

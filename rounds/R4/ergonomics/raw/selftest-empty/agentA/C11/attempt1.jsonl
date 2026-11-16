@@ -1,0 +1,1 @@
+{"conn": "a", "msg": {"type": "hello", "protocol": "qp/0", "principal": "viewer", "surface": {"kind": "headless"}}}

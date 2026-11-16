@@ -1,0 +1,4 @@
+bar 309: born
+bar 309: confirmed
+bar 311: strengthened
+bar 313: realized

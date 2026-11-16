@@ -1,0 +1,1 @@
+attempt1: capsules open:true limit 3 + capsules (unfiltered); çalıştı, ama "önemli" için açık-mı-hepsi-mi belirsiz; attempt2: filtresiz limit 3 (önem sırası) -> cevap bu. Belirsiz: "en önemli" açık kapsülleri mi kapsıyor; spec varsayılan sırayı önem verir, kapalı olanlar da gelir.

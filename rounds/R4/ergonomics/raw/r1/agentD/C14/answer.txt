@@ -1,0 +1,1 @@
+THYAO'daki açık kırılım kapsülünün bulgusu (fnd.THYAO.breakout.down.313) bugünkü veriyle doğrulandı: üç olgunun (bar 313, 314, 316) dondurulmuş kanıtı da "verified"; bar sayıları ve veri özetleri aynı, kanıt değerleri değişmemiş. Yani veri sonradan düzeltilmemiş.

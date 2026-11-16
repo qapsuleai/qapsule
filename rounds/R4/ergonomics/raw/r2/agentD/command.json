@@ -1,0 +1,27 @@
+{
+ "cwd": "/private/tmp/claude-501/-Users-arkns-Works-Mchart-qapsule/265365d4-8d03-427a-b423-f7bfaff76607/scratchpad/e3/work/r2/agentD",
+ "argv": [
+  "sandbox-exec",
+  "-f",
+  "/private/tmp/claude-501/-Users-arkns-Works-Mchart-qapsule/265365d4-8d03-427a-b423-f7bfaff76607/scratchpad/e3/profiles/r2_agentD.sb",
+  "claude",
+  "-p",
+  "--model",
+  "sonnet",
+  "--tools",
+  "Read,Write,Bash",
+  "--allowedTools",
+  "Read",
+  "Edit(//private/tmp/claude-501/-Users-arkns-Works-Mchart-qapsule/265365d4-8d03-427a-b423-f7bfaff76607/scratchpad/e3/work/r2/agentD/**)",
+  "Bash(/private/tmp/claude-501/-Users-arkns-Works-Mchart-qapsule/265365d4-8d03-427a-b423-f7bfaff76607/scratchpad/e3/packet/run.sh:*)",
+  "--setting-sources",
+  "local",
+  "--strict-mcp-config",
+  "--disable-slash-commands",
+  "--no-session-persistence",
+  "--output-format",
+  "stream-json",
+  "--verbose",
+  "You are an AI agent that must operate a financial chart document through its protocol. You know NOTHING about the implementation and must not look for it.\n\nSTRICT RULES:\n- The ONLY files you may read are in the packet folder `/private/tmp/claude-501/-Users-arkns-Works-Mchart-qapsule/265365d4-8d03-427a-b423-f7bfaff76607/scratchpad/e3/packet/`: `PROTOCOL.md` and `GRAMMAR.md` (the specification, in Turkish) and `schema/*.schema.json` (generated JSON Schemas of the messages). Do not read any other file on the machine; do not search the file system; do not use the web.\n- The ONLY command you may run is `/private/tmp/claude-501/-Users-arkns-Works-Mchart-qapsule/265365d4-8d03-427a-b423-f7bfaff76607/scratchpad/e3/packet/run.sh <your-file.jsonl> [--png <out.png> (--view <view id> | --present <finding id> [--surface <surface kind>])]`. It runs your message file against a FRESH copy of the live session (each run starts from the same state; earlier runs leave no trace) and prints the messages the authority sends to your connections. With `--png`, after your messages it also draws, with the reference headless renderer, either the document view `--view` or the view the presenter returns for `--present` (as `qp render` does), into `<out.png>` (a path inside your task's work dir).\n- Message file format: one JSON object per line: `{\"conn\": \"<a connection id you choose, not starting with zz->\", \"msg\": <protocol message>}`. Start each connection with `hello`.\n\nYour tasks are listed in `/private/tmp/claude-501/-Users-arkns-Works-Mchart-qapsule/265365d4-8d03-427a-b423-f7bfaff76607/scratchpad/e3/work/r2/agentD/TASKS.txt`. For EACH task, in its work dir:\n1. Read the spec/schema as needed, then write `attempt1.jsonl` with the complete message sequence you believe accomplishes the request, and run it. You may include queries, but remember you cannot see their answers before the run; each run is one shot over the whole file.\n2. Look at the output. If the request is not accomplished (an error, or the result is not what was asked), write `attempt2.jsonl` (a complete new sequence, from the fresh state) and run it; at most `attempt3.jsonl`. Stop as soon as you believe it is done. Never edit an attempt file after running it.\n3. If the request asks a question or asks you to show/list/open something, write the answer you would give the user (a few sentences, in Turkish) to `answer.txt`, based on what the authority returned in your last run.\n4. Write `notes.txt`: one line per attempt — what you tried, what went wrong, and anything in the spec that was unclear or misleading.\n\nAt the end reply with a short table: task, number of attempts, whether you believe it succeeded, and the main difficulty."
+ ]
+}

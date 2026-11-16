@@ -1,0 +1,2 @@
+attempt1: capsule query with selector {instrument:THYAO, meaning:breakout, latest:true} -> cap.THYAO.breakout.down.311 with full story history. Worked.
+attempt2: verification only (capsules list born_since_bar 300 + same selector) confirmed 311 is latest born and latest moved; no change needed. Unclear in spec: "en son gerçekleşen" (latest born vs. latest transition vs. stage realized) and the two meanings of `latest` (§17.1 last-transition order vs §20.2 latest born).

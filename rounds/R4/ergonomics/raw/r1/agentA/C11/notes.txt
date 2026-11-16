@@ -1,0 +1,2 @@
+attempt1: query capsule with selector {instrument THYAO, meaning flow, latest} as viewer -> resolved to cap.THYAO.flow.down.298 (open-world volume-surge story, public values).
+attempt2: input open {capsule: id, to: evidence} -> interaction.opening with to=evidence. I only saw the truncated output (spark huge), so did not verify opening.evidence content; "aç" is ambiguous between query capsule and input open; input open takes no selector so I had to hardcode the id learned from attempt1.

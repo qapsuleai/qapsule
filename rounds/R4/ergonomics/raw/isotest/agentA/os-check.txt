@@ -1,0 +1,46 @@
+# sandbox-exec -f sandbox.sb <cmd>
+$ head -c 40 /Users/arkns/Works/Mchart/qapsule/.claude/wt/e-ergo/CLAUDE.md
+head: /Users/arkns/Works/Mchart/qapsule/.claude/wt/e-ergo/CLAUDE.md: Operation not permitted
+
+$ head -c 40 /Users/arkns/Works/Mchart/qapsule/.claude/wt/e-ergo/rounds/R3/tasks/TASKS.md
+head: /Users/arkns/Works/Mchart/qapsule/.claude/wt/e-ergo/rounds/R3/tasks/TASKS.md: Operation not permitted
+
+$ head -c 40 /Users/arkns/Works/Mchart/qapsule/.claude/wt/e-ergo/rounds/R4/ergonomics/harness/setup.py
+head: /Users/arkns/Works/Mchart/qapsule/.claude/wt/e-ergo/rounds/R4/ergonomics/harness/setup.py: Operation not permitted
+
+$ head -c 40 /private/tmp/claude-501/-Users-arkns-Works-Mchart-qapsule/265365d4-8d03-427a-b423-f7bfaff76607/scratchpad/e3/docs/isotest/agentA/init.json
+head: /private/tmp/claude-501/-Users-arkns-Works-Mchart-qapsule/265365d4-8d03-427a-b423-f7bfaff76607/scratchpad/e3/docs/isotest/agentA/init.json: Operation not permitted
+
+$ head -c 40 /private/tmp/claude-501/-Users-arkns-Works-Mchart-qapsule/265365d4-8d03-427a-b423-f7bfaff76607/scratchpad/e3/packet/../../target/release/qp
+head: /private/tmp/claude-501/-Users-arkns-Works-Mchart-qapsule/265365d4-8d03-427a-b423-f7bfaff76607/scratchpad/e3/packet/../../target/release/qp: Operation not permitted
+
+$ head -c 40 /private/tmp/claude-501/-Users-arkns-Works-Mchart-qapsule/265365d4-8d03-427a-b423-f7bfaff76607/scratchpad/e3/packet/PROTOCOL.md
+# Qapsule Alan Protokolü — `qp/0`
+
+
+$ ls /Users/arkns/.claude/projects/-Users-arkns-Works-Mchart-qapsule
+ls: /Users/arkns/.claude/projects/-Users-arkns-Works-Mchart-qapsule: Operation not permitted
+$ ls /Users/arkns/Works/Mchart/qapsule/.claude/wt/e-ergo
+ls: /Users/arkns/Works/Mchart/qapsule/.claude/wt/e-ergo: Operation not permitted
+
+$ touch /Users/arkns/Works/Mchart/qapsule/.claude/wt/e-ergo/rounds/R4/ergonomics/PWNED.txt
+touch: /Users/arkns/Works/Mchart/qapsule/.claude/wt/e-ergo/rounds/R4/ergonomics/PWNED.txt: Operation not permitted
+
+$ touch /private/tmp/claude-501/-Users-arkns-Works-Mchart-qapsule/265365d4-8d03-427a-b423-f7bfaff76607/scratchpad/e3/work/r1/agentB/PWNED.txt
+touch: /private/tmp/claude-501/-Users-arkns-Works-Mchart-qapsule/265365d4-8d03-427a-b423-f7bfaff76607/scratchpad/e3/work/r1/agentB/PWNED.txt: Operation not permitted
+
+$ touch /private/tmp/claude-501/-Users-arkns-Works-Mchart-qapsule/265365d4-8d03-427a-b423-f7bfaff76607/scratchpad/e3/docs/isotest/agentA/PWNED.txt
+touch: /private/tmp/claude-501/-Users-arkns-Works-Mchart-qapsule/265365d4-8d03-427a-b423-f7bfaff76607/scratchpad/e3/docs/isotest/agentA/PWNED.txt: Operation not permitted
+
+$ touch /private/tmp/claude-501/-Users-arkns-Works-Mchart-qapsule/265365d4-8d03-427a-b423-f7bfaff76607/scratchpad/e3/packet/PWNED.txt
+touch: /private/tmp/claude-501/-Users-arkns-Works-Mchart-qapsule/265365d4-8d03-427a-b423-f7bfaff76607/scratchpad/e3/packet/PWNED.txt: Operation not permitted
+
+$ touch /private/tmp/claude-501/-Users-arkns-Works-Mchart-qapsule/265365d4-8d03-427a-b423-f7bfaff76607/scratchpad/e3/work/isotest/agentA/own-write-ok.txt
+(created)
+
+
+# R4: other sessions' Claude Code project dirs (R3 agent transcripts)
+$ ls <R3 r1 agentA project dir>
+ls: /Users/arkns/.claude/projects/-private-tmp-claude-501--Users-arkns-Works-Mchart-qapsule-9888bcbf-bbc3-4088-87e1-bd73f855b8fc-scratchpad-e3-work-r1-agentA: Operation not permitted
+$ ls <own project dir>
+memory

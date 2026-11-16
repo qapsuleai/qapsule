@@ -1,0 +1,114 @@
+{
+ "label": "selftest-empty",
+ "branch": "r4/e-ergo",
+ "commit": "24fef49476d674b000e8c70142cc82d032052185",
+ "agent": "A",
+ "tasks": [
+  "C01",
+  "C06",
+  "C11",
+  "C16"
+ ],
+ "seed": 2836521784,
+ "mapping": {
+  "THYAO": "ynh3u",
+  "ASELS": "xa5kz",
+  "doc": "ap1ky",
+  "off": 5
+ },
+ "data_seed": 2,
+ "end": 320,
+ "n_bars": 315,
+ "flow_seeds": {
+  "THYAO": 1,
+  "ASELS": 2
+ },
+ "setup": [
+  {
+   "conn": "zz-host",
+   "msg": {
+    "type": "hello",
+    "protocol": "qp/0",
+    "principal": "host",
+    "surface": {
+     "kind": "headless"
+    }
+   }
+  },
+  {
+   "conn": "zz-ark",
+   "msg": {
+    "type": "hello",
+    "protocol": "qp/0",
+    "principal": "arkin",
+    "surface": {
+     "kind": "desktop"
+    }
+   }
+  },
+  {
+   "conn": "zz-host",
+   "msg": {
+    "type": "query",
+    "id": "s-caps",
+    "query": {
+     "kind": "capsules"
+    }
+   }
+  },
+  {
+   "conn": "zz-host",
+   "msg": {
+    "type": "query",
+    "id": "s-ledger",
+    "query": {
+     "kind": "ledger",
+     "by_kind": true
+    }
+   }
+  }
+ ],
+ "epilogue": [
+  {
+   "conn": "zz-host",
+   "msg": {
+    "type": "query",
+    "id": "e-doc",
+    "query": {
+     "kind": "document"
+    }
+   }
+  },
+  {
+   "conn": "zz-host",
+   "msg": {
+    "type": "query",
+    "id": "e-log",
+    "query": {
+     "kind": "log"
+    }
+   }
+  },
+  {
+   "conn": "zz-ed",
+   "msg": {
+    "type": "hello",
+    "protocol": "qp/0",
+    "principal": "editor",
+    "surface": {
+     "kind": "headless"
+    }
+   }
+  },
+  {
+   "conn": "zz-ed",
+   "msg": {
+    "type": "query",
+    "id": "e-ed-doc",
+    "query": {
+     "kind": "document"
+    }
+   }
+  }
+ ]
+}

@@ -1,0 +1,2 @@
+attempt1: capsules(open:true, THYAO, breakout) + capsule selector query -> found only open capsule cap.THYAO.breakout.down.314 (ids unknown beforehand; needed discovery run).
+attempt2: present fnd.THYAO.breakout.down.314 + input open to chart, with --png --present; PNG shows orange level segments below price (breakout level drawn). Worked. Unclear: output of present/open is huge (spark arrays); the seviye is only verified visually since the present result was truncated by me.

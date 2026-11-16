@@ -1,0 +1,2 @@
+attempt1: capsule query with selector {instrument THYAO, meaning flow, latest} as viewer -> capsule_detail cap.THYAO.flow.down.295 with evidence values (license public). Success.
+Unclear: "aç" could also mean input open; I used the capsule query since open takes an id not a selector and evidence is returned by capsule query. Viewer without flow entitlement sees the open-world capsule (public flow fact), so no 'requires' shown.

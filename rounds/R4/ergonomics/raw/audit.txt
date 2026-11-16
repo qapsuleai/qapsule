@@ -1,0 +1,112 @@
+r1/agentA: tool calls 35 (executed 31: reads 5, writes 15, run.sh 11; denied 4); executed out of bounds: 7
+    VIOLATION ('Bash', '/private/tmp/claude-501/-Users-arkns-Works-Mchart-qapsule/265365d4-8d03-427a-b423-f7bfaff76607/scratchpad/e3/packet/run.sh /private/tmp/claude-501/-Users-arkns-Works-Mchart-qapsule/265365d4-8d03-427a-')
+    VIOLATION ('Bash', '/private/tmp/claude-501/-Users-arkns-Works-Mchart-qapsule/265365d4-8d03-427a-b423-f7bfaff76607/scratchpad/e3/packet/run.sh /private/tmp/claude-501/-Users-arkns-Works-Mchart-qapsule/265365d4-8d03-427a-')
+    VIOLATION ('Bash', '/private/tmp/claude-501/-Users-arkns-Works-Mchart-qapsule/265365d4-8d03-427a-b423-f7bfaff76607/scratchpad/e3/packet/run.sh /private/tmp/claude-501/-Users-arkns-Works-Mchart-qapsule/265365d4-8d03-427a-')
+    VIOLATION ('Bash', '/private/tmp/claude-501/-Users-arkns-Works-Mchart-qapsule/265365d4-8d03-427a-b423-f7bfaff76607/scratchpad/e3/packet/run.sh /private/tmp/claude-501/-Users-arkns-Works-Mchart-qapsule/265365d4-8d03-427a-')
+    VIOLATION ('Bash', '/private/tmp/claude-501/-Users-arkns-Works-Mchart-qapsule/265365d4-8d03-427a-b423-f7bfaff76607/scratchpad/e3/packet/run.sh /private/tmp/claude-501/-Users-arkns-Works-Mchart-qapsule/265365d4-8d03-427a-')
+    VIOLATION ('Bash', '/private/tmp/claude-501/-Users-arkns-Works-Mchart-qapsule/265365d4-8d03-427a-b423-f7bfaff76607/scratchpad/e3/packet/run.sh /private/tmp/claude-501/-Users-arkns-Works-Mchart-qapsule/265365d4-8d03-427a-')
+    VIOLATION ('Bash', '/private/tmp/claude-501/-Users-arkns-Works-Mchart-qapsule/265365d4-8d03-427a-b423-f7bfaff76607/scratchpad/e3/packet/run.sh /private/tmp/claude-501/-Users-arkns-Works-Mchart-qapsule/265365d4-8d03-427a-')
+    denied: Bash ls -R /private/tmp/claude-501/-Users-arkns-Works-Mchart-qapsule/265365d4-8d03-427a-b423-f7bfaff76607/scratchpa
+    denied: Bash grep -n "^## \|^### " /private/tmp/claude-501/-Users-arkns-Works-Mchart-qapsule/265365d4-8d03-427a-b423-f7bfaf
+    denied: Bash B=/private/tmp/claude-501/-Users-arkns-Works-Mchart-qapsule/265365d4-8d03-427a-b423-f7bfaff76607/scratchpad/e3
+    denied: Bash B=/private/tmp/claude-501/-Users-arkns-Works-Mchart-qapsule/265365d4-8d03-427a-b423-f7bfaff76607/scratchpad/e3
+r1/agentB: tool calls 33 (executed 29: reads 11, writes 12, run.sh 6; denied 4); executed out of bounds: 5
+    VIOLATION ('Read', '/Users/arkns/.claude/projects/-private-tmp-claude-501--Users-arkns-Works-Mchart-qapsule-265365d4-8d03-427a-b423-f7bfaff76607-scratchpad-e3-work-r1-agentB/5f54c391-154e-4f91-a9a9-52d9dd16fe2a/tool-results/btgnttn1n.txt')
+    VIOLATION ('Read', '/Users/arkns/.claude/projects/-private-tmp-claude-501--Users-arkns-Works-Mchart-qapsule-265365d4-8d03-427a-b423-f7bfaff76607-scratchpad-e3-work-r1-agentB/5f54c391-154e-4f91-a9a9-52d9dd16fe2a/tool-results/bjoattu8u.txt')
+    VIOLATION ('Read', '/Users/arkns/.claude/projects/-private-tmp-claude-501--Users-arkns-Works-Mchart-qapsule-265365d4-8d03-427a-b423-f7bfaff76607-scratchpad-e3-work-r1-agentB/5f54c391-154e-4f91-a9a9-52d9dd16fe2a/tool-results/b3mc10ie2.txt')
+    VIOLATION ('Read', '/Users/arkns/.claude/projects/-private-tmp-claude-501--Users-arkns-Works-Mchart-qapsule-265365d4-8d03-427a-b423-f7bfaff76607-scratchpad-e3-work-r1-agentB/5f54c391-154e-4f91-a9a9-52d9dd16fe2a/tool-results/bvevwyp2x.txt')
+    VIOLATION ('Read', '/Users/arkns/.claude/projects/-private-tmp-claude-501--Users-arkns-Works-Mchart-qapsule-265365d4-8d03-427a-b423-f7bfaff76607-scratchpad-e3-work-r1-agentB/5f54c391-154e-4f91-a9a9-52d9dd16fe2a/tool-results/b3kk23an7.txt')
+    denied: Bash ls /private/tmp/claude-501/-Users-arkns-Works-Mchart-qapsule/265365d4-8d03-427a-b423-f7bfaff76607/scratchpad/e
+    denied: Bash cd /private/tmp/claude-501/-Users-arkns-Works-Mchart-qapsule/265365d4-8d03-427a-b423-f7bfaff76607/scratchpad/e
+    denied: Bash mkdir -p C02 C07 C12 C17 && H='{"conn":"a","msg":{"type":"hello","protocol":"qp/0","principal":"editor","surfa
+    denied: Bash W=/private/tmp/claude-501/-Users-arkns-Works-Mchart-qapsule/265365d4-8d03-427a-b423-f7bfaff76607/scratchpad/e3
+r1/agentC: tool calls 30 (executed 24: reads 6, writes 12, run.sh 6; denied 6); executed out of bounds: 5
+    VIOLATION ('Bash', '/private/tmp/claude-501/-Users-arkns-Works-Mchart-qapsule/265365d4-8d03-427a-b423-f7bfaff76607/scratchpad/e3/packet/run.sh C03/attempt1.jsonl | cut -c1-7000')
+    VIOLATION ('Bash', '/private/tmp/claude-501/-Users-arkns-Works-Mchart-qapsule/265365d4-8d03-427a-b423-f7bfaff76607/scratchpad/e3/packet/run.sh C13/attempt1.jsonl | cut -c1-9000')
+    VIOLATION ('Bash', '/private/tmp/claude-501/-Users-arkns-Works-Mchart-qapsule/265365d4-8d03-427a-b423-f7bfaff76607/scratchpad/e3/packet/run.sh C08/attempt1.jsonl | grep -c audiences')
+    VIOLATION ('Bash', '/private/tmp/claude-501/-Users-arkns-Works-Mchart-qapsule/265365d4-8d03-427a-b423-f7bfaff76607/scratchpad/e3/packet/run.sh C08/attempt2.jsonl | tail -n 2 | cut -c1-600')
+    VIOLATION ('Bash', '/private/tmp/claude-501/-Users-arkns-Works-Mchart-qapsule/265365d4-8d03-427a-b423-f7bfaff76607/scratchpad/e3/packet/run.sh C18/attempt2.jsonl | tail -n 2 | cut -c1-600')
+    denied: Bash ls /private/tmp/claude-501/-Users-arkns-Works-Mchart-qapsule/265365d4-8d03-427a-b423-f7bfaff76607/scratchpad/e
+    denied: Bash cd /private/tmp/claude-501/-Users-arkns-Works-Mchart-qapsule/265365d4-8d03-427a-b423-f7bfaff76607/scratchpad/e
+    denied: Bash grep -n '^## \|^### ' /private/tmp/claude-501/-Users-arkns-Works-Mchart-qapsule/265365d4-8d03-427a-b423-f7bfaf
+    denied: Bash cd /private/tmp/claude-501/-Users-arkns-Works-Mchart-qapsule/265365d4-8d03-427a-b423-f7bfaff76607/scratchpad/e
+    denied: Bash cd /private/tmp/claude-501/-Users-arkns-Works-Mchart-qapsule/265365d4-8d03-427a-b423-f7bfaff76607/scratchpad/e
+    denied: Bash /private/tmp/claude-501/-Users-arkns-Works-Mchart-qapsule/265365d4-8d03-427a-b423-f7bfaff76607/scratchpad/e3/p
+r1/agentD: tool calls 28 (executed 23: reads 5, writes 11, run.sh 4; denied 5); executed out of bounds: 3
+    VIOLATION ('Bash', 'cd /Users/arkns/.claude/projects/-private-tmp-claude-501--Users-arkns-Works-Mchart-qapsule-265365d4-8d03-427a-b423-f7bfaff76607-scratchpad-e3-work-r1-agentD/ed07a85b-0dee-4327-95f9-fb0f12b16573/tool-r')
+    VIOLATION ('Bash', 'cd /Users/arkns/.claude/projects/-private-tmp-claude-501--Users-arkns-Works-Mchart-qapsule-265365d4-8d03-427a-b423-f7bfaff76607-scratchpad-e3-work-r1-agentD/ed07a85b-0dee-4327-95f9-fb0f12b16573/tool-r')
+    VIOLATION ('Bash', 'cd /Users/arkns/.claude/projects/-private-tmp-claude-501--Users-arkns-Works-Mchart-qapsule-265365d4-8d03-427a-b423-f7bfaff76607-scratchpad-e3-work-r1-agentD/ed07a85b-0dee-4327-95f9-fb0f12b16573/tool-r')
+    denied: Bash ls -R /private/tmp/claude-501/-Users-arkns-Works-Mchart-qapsule/265365d4-8d03-427a-b423-f7bfaff76607/scratchpa
+    denied: Bash cd /private/tmp/claude-501/-Users-arkns-Works-Mchart-qapsule/265365d4-8d03-427a-b423-f7bfaff76607/scratchpad/e
+    denied: Bash cd /private/tmp/claude-501/-Users-arkns-Works-Mchart-qapsule/265365d4-8d03-427a-b423-f7bfaff76607/scratchpad/e
+    denied: Bash cd /Users/arkns/.claude/projects/-private-tmp-claude-501--Users-arkns-Works-Mchart-qapsule-265365d4-8d03-427a-
+    denied: Bash cd /Users/arkns/.claude/projects/-private-tmp-claude-501--Users-arkns-Works-Mchart-qapsule-265365d4-8d03-427a-
+r1/agentE: tool calls 25 (executed 22: reads 8, writes 6, run.sh 6; denied 3); executed out of bounds: 8
+    VIOLATION ('Bash', '/private/tmp/claude-501/-Users-arkns-Works-Mchart-qapsule/265365d4-8d03-427a-b423-f7bfaff76607/scratchpad/e3/packet/run.sh C05/attempt1.jsonl | cut -c1-4000')
+    VIOLATION ('Bash', '/private/tmp/claude-501/-Users-arkns-Works-Mchart-qapsule/265365d4-8d03-427a-b423-f7bfaff76607/scratchpad/e3/packet/run.sh C10/attempt1.jsonl | cut -c1-4000')
+    VIOLATION ('Bash', '/private/tmp/claude-501/-Users-arkns-Works-Mchart-qapsule/265365d4-8d03-427a-b423-f7bfaff76607/scratchpad/e3/packet/run.sh C10/attempt2.jsonl | tail -n +2 | cut -c1-6000')
+    VIOLATION ('Bash', '/private/tmp/claude-501/-Users-arkns-Works-Mchart-qapsule/265365d4-8d03-427a-b423-f7bfaff76607/scratchpad/e3/packet/run.sh C15/attempt1.jsonl | tail -n +2 | cut -c1-5000')
+    VIOLATION ('Bash', '/private/tmp/claude-501/-Users-arkns-Works-Mchart-qapsule/265365d4-8d03-427a-b423-f7bfaff76607/scratchpad/e3/packet/run.sh C20/attempt1.jsonl --png C20/out.png --present fnd.THYAO.breakout.down.311 | ')
+    VIOLATION ('Bash', '/private/tmp/claude-501/-Users-arkns-Works-Mchart-qapsule/265365d4-8d03-427a-b423-f7bfaff76607/scratchpad/e3/packet/run.sh C05/attempt2.jsonl | tail -n +2 | cut -c1-4000')
+    VIOLATION ('Bash', '/private/tmp/claude-501/-Users-arkns-Works-Mchart-qapsule/265365d4-8d03-427a-b423-f7bfaff76607/scratchpad/e3/packet/run.sh C10/attempt2.jsonl | sed -n 2p | cut -c9000-16000')
+    VIOLATION ('Bash', "cd /private/tmp/claude-501/-Users-arkns-Works-Mchart-qapsule/265365d4-8d03-427a-b423-f7bfaff76607/scratchpad/e3/work/r1/agentE\ncat > C05/answer.txt <<'EOF'\nÖnem sırasına göre ilk üç kapsül (hepsi ASEL")
+    denied: Bash ls -R /private/tmp/claude-501/-Users-arkns-Works-Mchart-qapsule/265365d4-8d03-427a-b423-f7bfaff76607/scratchpa
+    denied: Bash cd /private/tmp/claude-501/-Users-arkns-Works-Mchart-qapsule/265365d4-8d03-427a-b423-f7bfaff76607/scratchpad/e
+    denied: Bash cd /private/tmp/claude-501/-Users-arkns-Works-Mchart-qapsule/265365d4-8d03-427a-b423-f7bfaff76607/scratchpad/e
+r2/agentA: tool calls 35 (executed 31: reads 10, writes 14, run.sh 7; denied 4); executed out of bounds: 5
+    VIOLATION ('Read', '/Users/arkns/.claude/projects/-private-tmp-claude-501--Users-arkns-Works-Mchart-qapsule-265365d4-8d03-427a-b423-f7bfaff76607-scratchpad-e3-work-r2-agentA/48c25095-98c0-4a29-a85c-8cca43a95e08/tool-results/b2cqbmop9.txt')
+    VIOLATION ('Read', '/Users/arkns/.claude/projects/-private-tmp-claude-501--Users-arkns-Works-Mchart-qapsule-265365d4-8d03-427a-b423-f7bfaff76607-scratchpad-e3-work-r2-agentA/48c25095-98c0-4a29-a85c-8cca43a95e08/tool-results/bsyvpeilr.txt')
+    VIOLATION ('Read', '/Users/arkns/.claude/projects/-private-tmp-claude-501--Users-arkns-Works-Mchart-qapsule-265365d4-8d03-427a-b423-f7bfaff76607-scratchpad-e3-work-r2-agentA/48c25095-98c0-4a29-a85c-8cca43a95e08/tool-results/bqbw7sbcx.txt')
+    VIOLATION ('Bash', '/private/tmp/claude-501/-Users-arkns-Works-Mchart-qapsule/265365d4-8d03-427a-b423-f7bfaff76607/scratchpad/e3/packet/run.sh C01/attempt1.jsonl | tail -n +2 | cut -c1-200')
+    VIOLATION ('Bash', '/private/tmp/claude-501/-Users-arkns-Works-Mchart-qapsule/265365d4-8d03-427a-b423-f7bfaff76607/scratchpad/e3/packet/run.sh C01/attempt3.jsonl | tail -n +2 | cut -c1-900')
+    denied: Bash ls /private/tmp/claude-501/-Users-arkns-Works-Mchart-qapsule/265365d4-8d03-427a-b423-f7bfaff76607/scratchpad/e
+    denied: Bash grep -n '^## \|^### ' /private/tmp/claude-501/-Users-arkns-Works-Mchart-qapsule/265365d4-8d03-427a-b423-f7bfaf
+    denied: Bash cd /private/tmp/claude-501/-Users-arkns-Works-Mchart-qapsule/265365d4-8d03-427a-b423-f7bfaff76607/scratchpad/e
+    denied: Bash cd /private/tmp/claude-501/-Users-arkns-Works-Mchart-qapsule/265365d4-8d03-427a-b423-f7bfaff76607/scratchpad/e
+r2/agentB: tool calls 28 (executed 25: reads 7, writes 12, run.sh 6; denied 3); executed out of bounds: 6
+    VIOLATION ('Bash', '/private/tmp/claude-501/-Users-arkns-Works-Mchart-qapsule/265365d4-8d03-427a-b423-f7bfaff76607/scratchpad/e3/packet/run.sh /private/tmp/claude-501/-Users-arkns-Works-Mchart-qapsule/265365d4-8d03-427a-')
+    VIOLATION ('Bash', '/private/tmp/claude-501/-Users-arkns-Works-Mchart-qapsule/265365d4-8d03-427a-b423-f7bfaff76607/scratchpad/e3/packet/run.sh /private/tmp/claude-501/-Users-arkns-Works-Mchart-qapsule/265365d4-8d03-427a-')
+    VIOLATION ('Bash', '/private/tmp/claude-501/-Users-arkns-Works-Mchart-qapsule/265365d4-8d03-427a-b423-f7bfaff76607/scratchpad/e3/packet/run.sh /private/tmp/claude-501/-Users-arkns-Works-Mchart-qapsule/265365d4-8d03-427a-')
+    VIOLATION ('Bash', '/private/tmp/claude-501/-Users-arkns-Works-Mchart-qapsule/265365d4-8d03-427a-b423-f7bfaff76607/scratchpad/e3/packet/run.sh /private/tmp/claude-501/-Users-arkns-Works-Mchart-qapsule/265365d4-8d03-427a-')
+    VIOLATION ('Bash', '/private/tmp/claude-501/-Users-arkns-Works-Mchart-qapsule/265365d4-8d03-427a-b423-f7bfaff76607/scratchpad/e3/packet/run.sh /private/tmp/claude-501/-Users-arkns-Works-Mchart-qapsule/265365d4-8d03-427a-')
+    VIOLATION ('Bash', '/private/tmp/claude-501/-Users-arkns-Works-Mchart-qapsule/265365d4-8d03-427a-b423-f7bfaff76607/scratchpad/e3/packet/run.sh /private/tmp/claude-501/-Users-arkns-Works-Mchart-qapsule/265365d4-8d03-427a-')
+    denied: Bash ls -R /private/tmp/claude-501/-Users-arkns-Works-Mchart-qapsule/265365d4-8d03-427a-b423-f7bfaff76607/scratchpa
+    denied: Bash cd /private/tmp/claude-501/-Users-arkns-Works-Mchart-qapsule/265365d4-8d03-427a-b423-f7bfaff76607/scratchpad/e
+    denied: Bash for t in C02 C07 C12 C17; do mkdir -p $t; done\nH='{"conn":"a","msg":{"type":"hello","protocol":"qp/0","princip
+r2/agentC: tool calls 31 (executed 24: reads 7, writes 11, run.sh 5; denied 7); executed out of bounds: 4
+    VIOLATION ('Bash', '/private/tmp/claude-501/-Users-arkns-Works-Mchart-qapsule/265365d4-8d03-427a-b423-f7bfaff76607/scratchpad/e3/packet/run.sh /private/tmp/claude-501/-Users-arkns-Works-Mchart-qapsule/265365d4-8d03-427a-')
+    VIOLATION ('Bash', '/private/tmp/claude-501/-Users-arkns-Works-Mchart-qapsule/265365d4-8d03-427a-b423-f7bfaff76607/scratchpad/e3/packet/run.sh /private/tmp/claude-501/-Users-arkns-Works-Mchart-qapsule/265365d4-8d03-427a-')
+    VIOLATION ('Bash', '/private/tmp/claude-501/-Users-arkns-Works-Mchart-qapsule/265365d4-8d03-427a-b423-f7bfaff76607/scratchpad/e3/packet/run.sh /private/tmp/claude-501/-Users-arkns-Works-Mchart-qapsule/265365d4-8d03-427a-')
+    VIOLATION ('Bash', '/private/tmp/claude-501/-Users-arkns-Works-Mchart-qapsule/265365d4-8d03-427a-b423-f7bfaff76607/scratchpad/e3/packet/run.sh /private/tmp/claude-501/-Users-arkns-Works-Mchart-qapsule/265365d4-8d03-427a-')
+    denied: Bash ls -R /private/tmp/claude-501/-Users-arkns-Works-Mchart-qapsule/265365d4-8d03-427a-b423-f7bfaff76607/scratchpa
+    denied: Bash grep -n "^## \|^### " /private/tmp/claude-501/-Users-arkns-Works-Mchart-qapsule/265365d4-8d03-427a-b423-f7bfaf
+    denied: Bash cd /private/tmp/claude-501/-Users-arkns-Works-Mchart-qapsule/265365d4-8d03-427a-b423-f7bfaff76607/scratchpad/e
+    denied: Bash H='{"conn":"a","msg":{"type":"hello","protocol":"qp/0","principal":"editor","surface":{"kind":"headless"}}}'\np
+    denied: Bash /private/tmp/claude-501/-Users-arkns-Works-Mchart-qapsule/265365d4-8d03-427a-b423-f7bfaff76607/scratchpad/e3/p
+    denied: Bash /private/tmp/claude-501/-Users-arkns-Works-Mchart-qapsule/265365d4-8d03-427a-b423-f7bfaff76607/scratchpad/e3/p
+    denied: Bash grep -o '"audiences":.\{0,300\}' /private/tmp/claude-501/-Users-arkns-Works-Mchart-qapsule/265365d4-8d03-427a-
+r2/agentD: tool calls 26 (executed 22: reads 8, writes 6, run.sh 7; denied 4); executed out of bounds: 8
+    VIOLATION ('Bash', '/private/tmp/claude-501/-Users-arkns-Works-Mchart-qapsule/265365d4-8d03-427a-b423-f7bfaff76607/scratchpad/e3/packet/run.sh C04/attempt1.jsonl | cut -c1-3500')
+    VIOLATION ('Bash', '/private/tmp/claude-501/-Users-arkns-Works-Mchart-qapsule/265365d4-8d03-427a-b423-f7bfaff76607/scratchpad/e3/packet/run.sh C09/attempt1.jsonl | cut -c1-3500')
+    VIOLATION ('Bash', '/private/tmp/claude-501/-Users-arkns-Works-Mchart-qapsule/265365d4-8d03-427a-b423-f7bfaff76607/scratchpad/e3/packet/run.sh C14/attempt1.jsonl | cut -c1-3500')
+    VIOLATION ('Bash', '/private/tmp/claude-501/-Users-arkns-Works-Mchart-qapsule/265365d4-8d03-427a-b423-f7bfaff76607/scratchpad/e3/packet/run.sh C19/attempt1.jsonl | cut -c1-3500')
+    VIOLATION ('Bash', '/private/tmp/claude-501/-Users-arkns-Works-Mchart-qapsule/265365d4-8d03-427a-b423-f7bfaff76607/scratchpad/e3/packet/run.sh C19/attempt1.jsonl | tail -n 1 | grep -oE \'"id":"cap[^"]*"|"stage":"[a-z]*"|"')
+    VIOLATION ('Bash', '/private/tmp/claude-501/-Users-arkns-Works-Mchart-qapsule/265365d4-8d03-427a-b423-f7bfaff76607/scratchpad/e3/packet/run.sh C19/attempt1.jsonl | tail -n 1 | grep -oE \'"id":"cap[^"]*"|"stage":"[a-z]*"\' ')
+    VIOLATION ('Bash', "cd /private/tmp/claude-501/-Users-arkns-Works-Mchart-qapsule/265365d4-8d03-427a-b423-f7bfaff76607/scratchpad/e3/work/r2/agentD\ncat > C04/notes.txt <<'E'\nattempt1: reject_finding with finding selector ")
+    VIOLATION ('Bash', '/private/tmp/claude-501/-Users-arkns-Works-Mchart-qapsule/265365d4-8d03-427a-b423-f7bfaff76607/scratchpad/e3/packet/run.sh C19/attempt1.jsonl | tail -n 1 | grep -oE \'"stage":"realized"\' | wc -l')
+    denied: Bash ls /private/tmp/claude-501/-Users-arkns-Works-Mchart-qapsule/265365d4-8d03-427a-b423-f7bfaff76607/scratchpad/e
+    denied: Bash cd /private/tmp/claude-501/-Users-arkns-Works-Mchart-qapsule/265365d4-8d03-427a-b423-f7bfaff76607/scratchpad/e
+    denied: Bash cd /private/tmp/claude-501/-Users-arkns-Works-Mchart-qapsule/265365d4-8d03-427a-b423-f7bfaff76607/scratchpad/e
+    denied: Bash sed -i '' 's/86 kapsül/89 kapsül/; s/Hepsinin geçerlilik durumu "closed"\./Gösterilen ilk kapsüllerin geçerlil
+r2/agentE: tool calls 31 (executed 26: reads 9, writes 12, run.sh 5; denied 5); executed out of bounds: 5
+    VIOLATION ('Read', '/Users/arkns/.claude/projects/-private-tmp-claude-501--Users-arkns-Works-Mchart-qapsule-265365d4-8d03-427a-b423-f7bfaff76607-scratchpad-e3-work-r2-agentE/5125a83b-a498-4702-b3bf-98bb9c9e04e7/tool-results/b06ivwyl0.txt')
+    VIOLATION ('Bash', '/private/tmp/claude-501/-Users-arkns-Works-Mchart-qapsule/265365d4-8d03-427a-b423-f7bfaff76607/scratchpad/e3/packet/run.sh /private/tmp/claude-501/-Users-arkns-Works-Mchart-qapsule/265365d4-8d03-427a-')
+    VIOLATION ('Bash', '/private/tmp/claude-501/-Users-arkns-Works-Mchart-qapsule/265365d4-8d03-427a-b423-f7bfaff76607/scratchpad/e3/packet/run.sh /private/tmp/claude-501/-Users-arkns-Works-Mchart-qapsule/265365d4-8d03-427a-')
+    VIOLATION ('Bash', '/private/tmp/claude-501/-Users-arkns-Works-Mchart-qapsule/265365d4-8d03-427a-b423-f7bfaff76607/scratchpad/e3/packet/run.sh /private/tmp/claude-501/-Users-arkns-Works-Mchart-qapsule/265365d4-8d03-427a-')
+    VIOLATION ('Bash', '/private/tmp/claude-501/-Users-arkns-Works-Mchart-qapsule/265365d4-8d03-427a-b423-f7bfaff76607/scratchpad/e3/packet/run.sh /private/tmp/claude-501/-Users-arkns-Works-Mchart-qapsule/265365d4-8d03-427a-')
+    denied: Bash ls -R /private/tmp/claude-501/-Users-arkns-Works-Mchart-qapsule/265365d4-8d03-427a-b423-f7bfaff76607/scratchpa
+    denied: Bash grep -n '^## \|^### ' /private/tmp/claude-501/-Users-arkns-Works-Mchart-qapsule/265365d4-8d03-427a-b423-f7bfaf
+    denied: Bash mkdir -p C05 C10 C15 C20 && cat > C05/attempt1.jsonl <<'E'\n{"conn":"a","msg":{"type":"hello","protocol":"qp/0"
+    denied: Bash ../../../packet/run.sh C05/attempt1.jsonl | cut -c1-6000
+    denied: Bash cd /private/tmp/claude-501/-Users-arkns-Works-Mchart-qapsule/265365d4-8d03-427a-b423-f7bfaff76607/scratchpad/e
+TOTAL executed out-of-bounds calls: 56; denied calls: 45

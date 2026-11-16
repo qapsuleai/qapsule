@@ -1,0 +1,2 @@
+attempt1: list series + capsules(instrument THYAO) for discovery: series len 316 (last bar 315).
+attempt2: capsules with born_since_bar 306 (and 305 for comparison) across all instruments; counted by `kind` client-side. No count-by-kind query exists for capsules (ledger by_kind counts closed stories only, not births), so counting was manual. Ambiguity: "last ten bars" = 306..315 by series length, but engine's last final bar is 314 (sentences say "3 bars ago" for born 311 / last 314); I chose 306..315.

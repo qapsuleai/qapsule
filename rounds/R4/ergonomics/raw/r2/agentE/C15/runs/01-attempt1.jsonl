@@ -1,0 +1,2 @@
+{"conn":"a","msg":{"type":"hello","protocol":"qp/0","principal":"editor","surface":{"kind":"headless"}}}
+{"conn":"a","msg":{"type":"dispute","id":"d1","claim":{"kind":"capsule","capsule":"cap.THYAO.breakout.down.314","finding":"fnd.THYAO.breakout.down.314"},"t":1711004400000,"values":[{"series":"ex437","t":1711004400000,"value":32.15}],"anchor_t":1672729200000}}

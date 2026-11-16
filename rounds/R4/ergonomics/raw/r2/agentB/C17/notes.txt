@@ -1,0 +1,2 @@
+attempt1: unfiltered capsules query + list series, to learn the last bar (series len 317 -> last bar 316); output was long, so ten-bar window = born_since_bar 307.
+attempt2: capsules {born_since_bar:307} -> 6 capsules, counted by kind by hand (no server-side group-by for capsules; ledger by_kind counts only closed stories). Unclear: no query returns the last bar index directly; had to infer from summary len. I counted both instruments since the request named none.

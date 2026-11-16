@@ -1,0 +1,1 @@
+attempt1: set_audience {group:habituated, positions:{THYAO:100}}; ack applied seq 4. Same fresh state as C08 (no existing audience seen in the document of C08's run; C18's own document query output not inspected). Unclear: whole-object replace semantics; group required though user said nothing about it.

@@ -1,0 +1,29 @@
+{
+ "argv": [
+  "render",
+  "--init",
+  "/private/tmp/claude-501/-Users-arkns-Works-Mchart-qapsule/265365d4-8d03-427a-b423-f7bfaff76607/scratchpad/e3/docs/selftest-sel/agentE/init.json",
+  "--transcript",
+  "/Users/arkns/Works/Mchart/qapsule/.claude/wt/e-ergo/rounds/R4/ergonomics/raw/selftest-sel/agentE/C20/runs/02-attempt1.transcript.json",
+  "--root",
+  "/private/tmp/claude-501/-Users-arkns-Works-Mchart-qapsule/265365d4-8d03-427a-b423-f7bfaff76607/scratchpad/e3/docs/selftest-sel/agentE",
+  "--out",
+  "/Users/arkns/Works/Mchart/qapsule/.claude/wt/e-ergo/rounds/R4/ergonomics/raw/selftest-sel/agentE/C20/runs/02-attempt1.png",
+  "--present",
+  "fnd.THYAO.breakout.down.313",
+  "--surface",
+  "desktop"
+ ],
+ "rc": 0,
+ "stdout": "",
+ "stderr": "",
+ "out": "/private/tmp/claude-501/-Users-arkns-Works-Mchart-qapsule/265365d4-8d03-427a-b423-f7bfaff76607/scratchpad/e3/work/selftest-sel/agentE/C20/k.png",
+ "png": {
+  "out": "/private/tmp/claude-501/-Users-arkns-Works-Mchart-qapsule/265365d4-8d03-427a-b423-f7bfaff76607/scratchpad/e3/work/selftest-sel/agentE/C20/k.png",
+  "view": "",
+  "present": "fnd.THYAO.breakout.down.313",
+  "surface": "desktop"
+ },
+ "bytes": 13220,
+ "sha256": "ba5ec92fdc563d61b5e83b495f10c307cb3f0d71bce34c3c04a5750c996483f6"
+}

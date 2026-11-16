@@ -1,0 +1,1 @@
+attempt1: capsule selector {instrument THYAO, meaning breakout, latest:true} -> capsule_detail with story.history. Worked. "En son gerçekleşen" interpreted as latest born; direction unspecified (it was down).

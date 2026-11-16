@@ -1,0 +1,1 @@
+Hayır, THYAO'daki sıkışma kapsülü artık geçerli değil. 138. barda başlamıştı, 158. barda geçersiz oldu (beklenen genişleme gelmedi); kapsül "invalidated" durumunda ve geçerlilik "kapanmış". Henüz karnesi yok.

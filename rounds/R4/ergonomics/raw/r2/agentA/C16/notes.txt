@@ -1,0 +1,1 @@
+attempt1: capsule query with selector {instrument THYAO, meaning squeeze, latest} -> cap.THYAO.squeeze.neutral.138, stage invalidated, validity closed. Success first try. Minor: `latest` picks newest only; did not verify it is the only squeeze capsule.

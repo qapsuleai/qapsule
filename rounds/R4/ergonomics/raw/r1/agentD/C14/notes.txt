@@ -1,0 +1,1 @@
+attempt1: verify_evidence with item {finding: selector THYAO breakout open}; resolved to fnd.THYAO.breakout.down.313, all 3 facts verified. No problems.

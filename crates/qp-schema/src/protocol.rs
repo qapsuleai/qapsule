@@ -2822,7 +2822,7 @@ pub enum Gesture {
     /// absent field keeps it); unknown names are `invalid` with the known ones.
     /// Answered with an `interaction` (its `state`).
     Style {
-        /// Face design name (`docs/GRAMMAR.md` §18.7; default `card`).
+        /// Face design name (`qp_grammar::depth::FACES`, `docs/PROTOCOL.md` §4.6.2; default `card`).
         #[serde(default, skip_serializing_if = "Option::is_none")]
         face: Option<String>,
         /// Glyph alphabet name (`siluet`, `rozet`; default `siluet`).

@@ -518,6 +518,11 @@ mod shell_binding {
             self.inner.set_style(face, alphabet, theme);
         }
 
+        /// Open the open capsule to `to` (`chart`, `evidence`).
+        pub fn open_to(&mut self, to: &str) {
+            self.inner.open_to(to);
+        }
+
         /// Close one depth.
         pub fn back(&mut self) {
             self.inner.back();

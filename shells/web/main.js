@@ -231,6 +231,7 @@ function renderLayer(force) {
   document.body.classList.toggle('open', open.depth !== 'sentence');
   if (open.depth === 'sentence') return open;
   $('depth').textContent = t(open.depth);
+  $('toevidence').hidden = open.depth === 'evidence';
   $('opentext').textContent = open.text;
   $('hint').textContent = t(HINT[open.depth]);
   const scene = $('scene');
@@ -379,6 +380,9 @@ function wire() {
     flush();
   }, { passive: false });
   $('back').onclick = () => { core.back(); flush(); };
+  $('toevidence').onclick = () => { core.open_to('evidence'); flush(); };
+  $('opentext').dataset.target = 'scene';
+  pointers($('opentext'));
   for (const b of document.querySelectorAll('#tabs button')) {
     b.onclick = () => {
       for (const x of document.querySelectorAll('#tabs button')) x.classList.toggle('on', x === b);

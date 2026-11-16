@@ -709,7 +709,7 @@ fn chart_view_r3(
 }
 
 // ---------------------------------------------------------------------------
-// R4/T5: capsule face designs (`docs/GRAMMAR.md` §18.7)
+// R4/T5: capsule face designs (`docs/PROTOCOL.md` §4.6.2)
 // ---------------------------------------------------------------------------
 
 /// Face design names a connection may choose (`style` gesture, `docs/PROTOCOL.md`

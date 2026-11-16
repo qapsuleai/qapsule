@@ -352,6 +352,34 @@ dört hareket (`look`, `pan`, `zoom`, `tap`) aynen kalır.
   `54-input-evidence`, `55-input-presence` (üretici:
   `cargo run -p qp-session --example make_input_transcripts -- --write`).
 
+#### 4.6.2 Bakış ayarı — `style` (R4/T5)
+
+Bağlantının sahnelerinin **nasıl** kurulacağını seçer: kapsül yüzü tasarımı, işaret alfabesi,
+tema. Bakış durumunun (§7) parçasıdır: günlüğe girmez, dokümanı değiştirmez; aynı bağlantının
+sonraki piksel hareketleri ve açılmaları bu ayarla derlenir (isabet testi dahil), kabuğun yansısı
+aynı adlarla aynı sahneyi derler.
+
+```json
+{"type":"input","id":"i9","gesture":{"kind":"style","face":"card","alphabet":"rozet","theme":"light"}}
+```
+
+| Alan | Değerler | Varsayılan |
+|------|----------|------------|
+| `face` | `qp_grammar::depth::FACES` (bugün `card`: §18.4 kapsül kartı) | `card` |
+| `alphabet` | `qp_grammar::glyph::ALPHABETS` (`siluet`, `rozet`) | `siluet` (ürünün) |
+| `theme` | `dark`, `light`; `view`: görünümün kendisi | `view` |
+
+- Verilmeyen alan değişmez; bilinmeyen ad `invalid` (`/gesture/face`, `/gesture/alphabet`,
+  `/gesture/theme`, `expected` bilinen adlar). Doğrulama her şeyden önce: hatalı istek hiçbir
+  şeyi değiştirmez.
+- Cevap `interaction`; `state` (`ViewState`) yeni `face`, `alphabet`, `theme` alanlarını taşır
+  (varsayılandaysa alan yoktur: eski cevaplar bayt eşit).
+- M8 yüz alternatifleri `FACES`'e ad ve `depth::face_view`'a bir kol olarak eklenir; açılma
+  kuralı ve ortak öğeler değişmez. Alfabe değişimi derleyici seçeneğidir
+  (`CompileOptions::alphabet`); ürünün alfabesi (`glyph::alphabet()`) değişmez.
+- `rozet` R3/M1 deneyinden aynen taşındı; `validity` kanalı yoktur (K42: "artık geçerli
+  değil" yalnız `siluet`'te işarette görünür; insan testi `rozet`'i seçerse eklenmeli).
+
 ### 4.7 Öneri — `command` (öneri kipi) ve karar işlemleri
 
 Ajanlar varsayılan olarak **öneri** yazar; yetkiyle doğrudan yazar (K21-5). `proposer`
@@ -2167,6 +2195,40 @@ bağımsız yazılır); MCP: `replay` ve şemadan üretilen `replay_status`, `re
 `replay_resume`, `replay_speed`, `replay_step`, `replay_seek` araçları. CLI:
 `qp replay` (yerel ya da sentetik, periyot, ince periyot, başlangıç/bitiş tarihi, adım
 sayısı, kayıtlı denetimler; satır akışı; iki koşu bayt eşit).
+
+### 21.4 Gösterim barındırıcısı `qp demo` (R4/T5)
+
+Yerel gösterimin taşıması (`crates/qp-cli/src/demo.rs`; kullanım `shells/web/README.md`).
+Sayfa, protokol ve veri düzlemi **aynı kökendedir**; sayfa başka hiçbir yere istek yapmaz
+(CSP `default-src 'self'`; test `shells/web/tests/parity.mjs`).
+
+- `GET /events?principal=…&lang=…` — sunucu olay akışı (SSE). Bir akış bir protokol
+  bağlantısıdır. Çerçeveler (her `data:` satırı bir JSON nesnesi):
+  - `{"start":{conn, token, principal, lang, data, events, info}}` — ilk çerçeve: bağlantı
+    kimliği, bağlantının gizli değeri, yansının verisi (`data`: barındırıcının ilk barları ve
+    okuyucunun yetkisi, `InitData`; `events`: o ana kadar uygulanan veri olayları) ve sayfanın
+    notları (`info`: adresler, `synthetic`, `note`, `lan`). Geri `seek`'ten sonra (yeni
+    otorite, `epoch + 1`) her bağlantıya yeniden gelir; sayfa yansısını baştan kurar ve
+    yeniden `hello` der.
+  - `{"msg":ServerMsg}` — bu bağlantının protokol mesajları.
+  - `{"data":[DataEvent…],"replay":ReplayState}` — **veri düzlemi** (§18.1): adımların veri
+    olayları, yansının kendi beslemesi. Protokol mesajı değildir, günlüğe girmez; ayrı
+    çerçevedir. Oynatma durumu barındırıcının bilgisidir (sayfanın saati).
+- `POST /send?conn=…` — bağlantının protokol mesajları (JSON dizi, sırayla). Zorunlu:
+  `X-Qp-Token` (yalnız o bağlantının `start` çerçevesinde verilen 128 bitlik gizli değer;
+  işletim sistemi rastgeleliği — barındırıcı kodudur, otoriteye, dokümana ya da özetlere hiç
+  girmez, belirleyiciliği etkilemez), `Content-Type: application/json`, aynı kökenden
+  `Origin`. Eksik ya da yanlışsa `403`/`415`, mesaj otoriteye gitmez. Cevaplar akıştan gelir.
+- Her istekte `Host` bu barındırıcı olmalıdır (`localhost`, `127.0.0.1`, `[::1]`, dinlenen
+  adres ya da basılan yerel ağ adresi, portuyla); değilse `403` (DNS yeniden bağlama).
+  Varsayılan dinleme `127.0.0.1`; `--lan` `0.0.0.0`'ı dinler (aynı ağdaki telefon; yerel
+  ağdaki cihazlar gösterimi görebilir). Test `crates/qp-cli/tests/demo_security.rs`.
+- Gösterim oturumu: `qp_wasm::shell::demo_session_init` (`demo_init` + veri yetkisi olmayan
+  `visitor` sahibi — ayarlardaki "veri yetkisi yok" kipi; yalnız gösterim için).
+- Kabuksuz sürüş: `qp drive --script <adımlar>` aynı oturumu yalnız protokol mesajlarıyla
+  sürer ve kabuğun bildirdiği özetleri (doküman, her yüzün ve açık sahnenin `view_digest`'i,
+  bakış durumu) basar; tarayıcıdaki kabuğun özetleriyle eşitliği `scripts/verify.sh` `demo`
+  adımında denetlenir.
 
 
 ## Ek A — Eski `Command` tipi

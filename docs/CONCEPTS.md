@@ -202,6 +202,7 @@ yeniden oynatma `docs/PROTOCOL.md` §21; kapsülün yüzü `docs/FACE.md`.
 | Akış | feed | Kapsüllerin çekirdekçe seçilmiş ve sıralanmış listesi (kişinin kitlesine göre). Sırayı ve gruplamayı çekirdek verir; kabuk yalnız alt alta dizer (düzen M9). |
 | Açılma | open (depth transition) | Bir kapsülün derinlikler arasında geçişi: cümle → kapsül → işaretli grafik. Kabuktan `input` ile istenir; hangi öğelerin ortak kaldığını çekirdek belirler (M10). |
 | Bakış durumu | view state (`ViewState`, presence) | Bağlantı başına derinlik, açık kapsül, o derinlikteki görünüm, grafik aralığı ve kabuğun bildirdiği çerçeve boyutları. Varlık durumudur; günlüğe girmez, dokümanı değiştirmez (§4.6, §7). Akış listesindeki kaydırma konumu kabuğun düzen öğesidir, bakış durumuna girmez. |
+| Bakış ayarı | style (`style` hareketi; `ViewState.face/alphabet/theme`) | Bağlantının sahnelerinin hangi yüz tasarımı, işaret alfabesi ve temayla kurulacağı. Bakış durumunun parçasıdır (günlüğe girmez); M8 yüzleri ve insan testi alfabeleri buraya ad olarak takılır (PROTOCOL §4.6.2). |
 | Sonuç işareti | outcome mark | Kapanmış kapsülün işaretinde "gerçekleşti" ile "tutmadı"yı ayıran kanal (M11). Renksiz de okunur. |
 | Ölçüm ekranı | metrics page | Gösterimde kare süresi (durağan, kaydırırken), tik maliyeti, açılış süresi ve paket boyutunu gösteren ve kopyalanabilir özet üreten sayfa. |
 | Persona | persona | Ölçümde ekran görüntüsünü okuyan taze alt ajanın rolü: geleceğin yatırımcısı (teknik analiz bilmez, beş saniyesi var) ya da alışkın kullanıcı. İnsan değildir; ön elemedir (K39). |

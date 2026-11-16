@@ -12,7 +12,7 @@ const here = path.dirname(fileURLToPath(import.meta.url));
 export const ALLOWED_CORE = new Set([
   'on_frame', 'take_outbox', 'idle', 'feed', 'face_rgba', 'scene_rgba', 'open', 'evidence',
   'status', 'take_error', 'look', 'instruments', 'audience', 'set_frame', 'replay', 'seek',
-  'set_sensitivity', 'set_audience', 'set_style', 'back', 'pointer', 'wheel', 'transition',
+  'set_sensitivity', 'set_audience', 'set_style', 'back', 'open_to', 'pointer', 'wheel', 'transition',
   'transition_from', 'metric_frame', 'metric_span', 'metric_mark', 'metric_env', 'metrics',
   'metrics_rows', 'digests', 'png', 'sent',
 ]);

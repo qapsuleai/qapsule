@@ -869,6 +869,23 @@ impl ShellCore {
         self.ask("in", Asked::Input, json!({"type":"input","gesture":g}));
     }
 
+    /// Open the open capsule straight to `to` (`chart`, `evidence`): the way down when the
+    /// reader gets no scene to tap (no data entitlement).
+    pub fn open_to(&mut self, to: &str) {
+        let Some(cap) = self.opening.as_ref().map(|o| o.capsule.clone()) else {
+            return;
+        };
+        if !["capsule", "chart", "evidence"].contains(&to) {
+            return;
+        }
+        let (w, h) = self.frames["scene"];
+        self.ask(
+            "in",
+            Asked::Input,
+            json!({"type":"input","gesture":{"kind":"open","capsule":cap,"to":to,"width":w,"height":h}}),
+        );
+    }
+
     /// Back: close one depth (to the feed from the capsule).
     pub fn back(&mut self) {
         if self.opening.is_none() {
@@ -1278,7 +1295,8 @@ fn evidence_row(e: &EvidenceAccess) -> Value {
     let values: Vec<Value> = e
         .values
         .iter()
-        .map(|(k, v)| json!([k, format!("{v}")]))
+        // Two decimals, the grammar's value-label convention (`docs/GRAMMAR.md` §14).
+        .map(|(k, v)| json!([k, format!("{v:.2}")]))
         .collect();
     json!({
         "fact": e.fact,

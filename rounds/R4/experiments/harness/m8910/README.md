@@ -166,6 +166,9 @@ Hepsi depo kökünden (ya da bu klasörden `cargo run --release --`). Çıktıla
 `--salt <n>`). Ekran görüntüleri için önce: `scripts/demo.sh`'in yaptığı gibi
 `wasm-pack build crates/qp-wasm --target web --profile wasm --no-opt --out-dir ../../shells/web/pkg -- --features replica`,
 `cargo build --release -p qp-cli`, `cd shells/web && npm ci`.
+Elle wasm-pack derlemesinden sonra `shells/web/pkg/sizes.json` de yazılmalı (sayfa onu ister; yoksa 404):
+`printf '{"wasm_raw":%s,"wasm_gzip":%s}\n' "$(wc -c <shells/web/pkg/qp_wasm_bg.wasm)" "$(gzip -9 -c shells/web/pkg/qp_wasm_bg.wasm | wc -c)" > shells/web/pkg/sizes.json`
+(`scripts/verify.sh` ve `scripts/demo.sh` aynısını yapar).
 
 ```sh
 (cd rounds/R4/experiments/harness/m8910 && cargo build --release)

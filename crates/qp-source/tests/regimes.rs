@@ -2,15 +2,45 @@
 
 use std::collections::BTreeMap;
 
-use qp_calendar::{builtin, ExchangeCalendar, Interval};
+use qp_calendar::{ExchangeCalendar, Interval};
 use qp_schema::Bar;
 use qp_source::{
-    load_local_bars, load_local_bars_with, regime_at, regime_bars, regime_schedule, synthetic_flow,
-    synthetic_market, synthetic_market_hourly, Regime, RegimeSpan, FLOW_KEYS,
+    load_local_bars, load_local_bars_with, regime_at, regime_bars, regime_schedule,
+    synthetic_calendar, synthetic_flow, synthetic_market, synthetic_market_hourly, Regime,
+    RegimeSpan, FLOW_KEYS,
 };
 
+/// The synthetic market's calendar (XIST sessions, frozen R1 holiday sample).
 fn xist() -> ExchangeCalendar {
-    ExchangeCalendar::new(&builtin("XIST").unwrap()).unwrap()
+    ExchangeCalendar::new(&synthetic_calendar()).unwrap()
+}
+
+/// The synthetic market keeps its own frozen holiday sample: the real XIST holidays
+/// (R4/FIX-E1) do not move synthetic dates.
+#[test]
+fn synthetic_calendar_is_the_frozen_r1_sample() {
+    let syn = synthetic_calendar();
+    let real = qp_calendar::builtin("XIST").unwrap();
+    assert_eq!(
+        syn.holidays,
+        [
+            "2026-01-01",
+            "2026-03-20",
+            "2026-04-23",
+            "2026-05-01",
+            "2026-05-19"
+        ]
+    );
+    assert_eq!(syn.half_days.len(), 1);
+    assert_eq!(
+        (syn.tz.as_str(), &syn.sessions),
+        (real.tz.as_str(), &real.sessions)
+    );
+    assert!(real.holidays.len() > 100);
+    // 2023-04-21 (Ramadan Feast) is a synthetic trading day, a real holiday.
+    let day = qp_calendar::days_from_civil(2023, 4, 21);
+    assert!(xist().is_trading_day(day));
+    assert!(!ExchangeCalendar::new(&real).unwrap().is_trading_day(day));
 }
 
 fn bits(bars: &[Bar]) -> Vec<[u64; 6]> {

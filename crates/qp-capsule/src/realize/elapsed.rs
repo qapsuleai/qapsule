@@ -486,6 +486,134 @@ mod tests {
         );
     }
 
+    /// VERIFY 12 / FIX-E1 B1: real Borsa Istanbul closures outside the R1 sample (feasts,
+    /// 15 July, 29 October, 2023 earthquake closure, half days), answers written from the
+    /// official calendar (`qp_calendar::XIST_HOLIDAYS`).
+    #[test]
+    fn real_xist_holidays() {
+        let c = xist();
+        let day = Period::Daily;
+        let hour = Period::Intraday(60);
+        let cases: &[(Period, i64, i64, &str, &str)] = &[
+            // Feast of the Sacrifice 2026: 26 May half day, 27–29 May closed.
+            (
+                day,
+                ist(2026, 5, 26, 10, 0),
+                ist(2026, 6, 1, 10, 0),
+                "salı günü",
+                "on Tuesday",
+            ),
+            (
+                day,
+                ist(2026, 5, 25, 10, 0),
+                ist(2026, 6, 2, 10, 0),
+                "3 işlem günü önce",
+                "3 trading days ago",
+            ),
+            (
+                hour,
+                ist(2026, 5, 26, 12, 0),
+                ist(2026, 6, 1, 10, 0),
+                "salı 12:00'de",
+                "on Tuesday at 12:00",
+            ),
+            // 15 July 2026 (Wed).
+            (
+                day,
+                ist(2026, 7, 14, 10, 0),
+                ist(2026, 7, 16, 10, 0),
+                "salı günü",
+                "on Tuesday",
+            ),
+            // 2025: 1 May (Thu); Ramadan Feast 31 Mar–1 Apr; Sacrifice 5 Jun half, 6 and 9 Jun;
+            // 28 Oct half, 29 Oct; 15 Jul (Tue).
+            (
+                day,
+                ist(2025, 4, 30, 10, 0),
+                ist(2025, 5, 2, 10, 0),
+                "çarşamba günü",
+                "on Wednesday",
+            ),
+            (
+                hour,
+                ist(2025, 4, 30, 17, 0),
+                ist(2025, 5, 2, 10, 0),
+                "çarşamba 17:00'de",
+                "on Wednesday at 17:00",
+            ),
+            (
+                day,
+                ist(2025, 3, 28, 10, 0),
+                ist(2025, 4, 2, 10, 0),
+                "cuma günü",
+                "on Friday",
+            ),
+            (
+                day,
+                ist(2025, 6, 4, 10, 0),
+                ist(2025, 6, 12, 10, 0),
+                "4 işlem günü önce",
+                "4 trading days ago",
+            ),
+            (
+                hour,
+                ist(2025, 6, 4, 16, 0),
+                ist(2025, 6, 10, 10, 0),
+                "2 işlem günü önce",
+                "2 trading days ago",
+            ),
+            (
+                day,
+                ist(2025, 10, 27, 10, 0),
+                ist(2025, 11, 4, 10, 0),
+                "5 işlem günü önce",
+                "5 trading days ago",
+            ),
+            (
+                day,
+                ist(2025, 7, 14, 10, 0),
+                ist(2025, 7, 23, 10, 0),
+                "geçen hafta",
+                "last week",
+            ),
+            // 2019 Sacrifice 12–14 Aug (Mon–Wed): Fri 9 Aug → Thu 15 Aug.
+            (
+                day,
+                ist(2019, 8, 9, 10, 0),
+                ist(2019, 8, 15, 10, 0),
+                "cuma günü",
+                "on Friday",
+            ),
+            // 2023 earthquake closure 8–14 Feb: Tue 7 Feb → Wed 15 Feb.
+            (
+                day,
+                ist(2023, 2, 7, 10, 0),
+                ist(2023, 2, 15, 10, 0),
+                "salı günü",
+                "on Tuesday",
+            ),
+            // 2027 (provisional): Ramadan Feast 9–11 Mar, 8 Mar half day → Fri 12 Mar.
+            (
+                hour,
+                ist(2027, 3, 8, 12, 0),
+                ist(2027, 3, 12, 11, 0),
+                "pazartesi 12:00'de",
+                "on Monday at 12:00",
+            ),
+        ];
+        for &(p, e, n, tr, en) in cases {
+            assert_eq!(
+                both(elapsed(&c, p, e, n)),
+                (tr.into(), en.into()),
+                "{e} -> {n}"
+            );
+        }
+        // The half day ends at 12:30: the 12:00 bar is its last 60-minute bar.
+        let half = days_from_civil(2026, 5, 26);
+        let span = c.day_span(half).unwrap();
+        assert_eq!(span.close, ist(2026, 5, 26, 12, 30));
+    }
+
     /// VERIFY 12: 60-minute bars across a weekend and a holiday.
     #[test]
     fn hourly_weekend_and_holiday() {

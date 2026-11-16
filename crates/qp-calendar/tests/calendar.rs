@@ -284,3 +284,38 @@ fn builtin_calendars_validate_against_the_schema() {
         );
     }
 }
+
+/// FIX-E1 B1: XIST carries Borsa Istanbul's 2018–2027 closures: weekdays only, ascending,
+/// no day both a holiday and a half day; spot checks of each kind.
+#[test]
+fn xist_holiday_data_is_well_formed() {
+    use qp_calendar::{parse_date, weekday_index, XIST_HALF_DAYS, XIST_HOLIDAYS};
+    for list in [XIST_HOLIDAYS, XIST_HALF_DAYS] {
+        let days: Vec<i64> = list.iter().map(|d| parse_date(d).unwrap()).collect();
+        assert!(days.windows(2).all(|w| w[0] < w[1]), "ascending, unique");
+        assert!(days.iter().all(|&d| weekday_index(d) < 5), "weekdays only");
+        assert!(
+            list.first().unwrap().starts_with("2018") && list.last().unwrap().starts_with("2027")
+        );
+    }
+    assert!(XIST_HALF_DAYS.iter().all(|h| !XIST_HOLIDAYS.contains(h)));
+    assert_eq!((XIST_HOLIDAYS.len(), XIST_HALF_DAYS.len()), (107, 22));
+    let c = cal("XIST");
+    let day = |y, m, d| days_from_civil(y, m, d);
+    for (y, m, d) in [
+        (2023, 2, 10),
+        (2024, 4, 11),
+        (2025, 7, 15),
+        (2026, 5, 28),
+        (2027, 3, 10),
+    ] {
+        assert!(!c.is_trading_day(day(y, m, d)), "{y}-{m}-{d} closed");
+    }
+    // Half day: 2025-10-28 closes 12:30 Istanbul (09:30 UTC).
+    assert_eq!(
+        c.day_span(day(2025, 10, 28)),
+        Some(span(utc(2025, 10, 28, 7, 0), utc(2025, 10, 28, 9, 30)))
+    );
+    // A public-sector bridge day was a trading day (2024-04-08).
+    assert!(c.is_trading_day(day(2024, 4, 8)));
+}

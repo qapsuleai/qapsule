@@ -1,0 +1,10 @@
+{
+  "experiment": "m11",
+  "code": "3566e13a",
+  "persona": "F",
+  "condition": "nolegend",
+  "seed": 3,
+  "reader": "r3",
+  "model": "sonnet",
+  "alphabet": "siluet"
+}

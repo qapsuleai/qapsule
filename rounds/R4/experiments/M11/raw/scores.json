@@ -1,0 +1,1016 @@
+{
+  "harness": "r4-h-m11/1",
+  "chance": 0.3333,
+  "majority": 0.375,
+  "styles": {
+    "muhrak": {
+      "cells": {
+        "F/legend": {
+          "readers": 3,
+          "items": 48,
+          "accuracy": 1.0,
+          "confusion": {
+            "failed": {
+              "failed": 18
+            },
+            "open": {
+              "open": 12
+            },
+            "realized": {
+              "realized": 18
+            }
+          },
+          "per_reader": [
+            {
+              "run": "F_legend_8c365044_r1",
+              "reader": "r1",
+              "code": "8c365044",
+              "alphabet": "siluet",
+              "parsed": true,
+              "items": 16,
+              "correct": 16,
+              "confusion": {
+                "failed": {
+                  "failed": 6
+                },
+                "open": {
+                  "open": 4
+                },
+                "realized": {
+                  "realized": 6
+                }
+              }
+            },
+            {
+              "run": "F_legend_9298c181_r3",
+              "reader": "r3",
+              "code": "9298c181",
+              "alphabet": "siluet",
+              "parsed": true,
+              "items": 16,
+              "correct": 16,
+              "confusion": {
+                "failed": {
+                  "failed": 6
+                },
+                "open": {
+                  "open": 4
+                },
+                "realized": {
+                  "realized": 6
+                }
+              }
+            },
+            {
+              "run": "F_legend_9330026d_r2",
+              "reader": "r2",
+              "code": "9330026d",
+              "alphabet": "siluet",
+              "parsed": true,
+              "items": 16,
+              "correct": 16,
+              "confusion": {
+                "failed": {
+                  "failed": 6
+                },
+                "open": {
+                  "open": 4
+                },
+                "realized": {
+                  "realized": 6
+                }
+              }
+            }
+          ]
+        },
+        "F/nolegend": {
+          "readers": 3,
+          "items": 48,
+          "accuracy": 0.0625,
+          "confusion": {
+            "failed": {
+              "failed": 2,
+              "open": 6,
+              "realized": 4,
+              "unknown": 6
+            },
+            "open": {
+              "failed": 6,
+              "realized": 6
+            },
+            "realized": {
+              "open": 14,
+              "realized": 1,
+              "unknown": 3
+            }
+          },
+          "per_reader": [
+            {
+              "run": "F_nolegend_8c365044_r1",
+              "reader": "r1",
+              "code": "8c365044",
+              "alphabet": "siluet",
+              "parsed": true,
+              "items": 16,
+              "correct": 1,
+              "confusion": {
+                "failed": {
+                  "open": 6
+                },
+                "open": {
+                  "failed": 2,
+                  "realized": 2
+                },
+                "realized": {
+                  "open": 2,
+                  "realized": 1,
+                  "unknown": 3
+                }
+              }
+            },
+            {
+              "run": "F_nolegend_9298c181_r3",
+              "reader": "r3",
+              "code": "9298c181",
+              "alphabet": "siluet",
+              "parsed": true,
+              "items": 16,
+              "correct": 0,
+              "confusion": {
+                "failed": {
+                  "unknown": 6
+                },
+                "open": {
+                  "failed": 2,
+                  "realized": 2
+                },
+                "realized": {
+                  "open": 6
+                }
+              }
+            },
+            {
+              "run": "F_nolegend_9330026d_r2",
+              "reader": "r2",
+              "code": "9330026d",
+              "alphabet": "siluet",
+              "parsed": true,
+              "items": 16,
+              "correct": 2,
+              "confusion": {
+                "failed": {
+                  "failed": 2,
+                  "realized": 4
+                },
+                "open": {
+                  "failed": 2,
+                  "realized": 2
+                },
+                "realized": {
+                  "open": 6
+                }
+              }
+            }
+          ]
+        },
+        "H/legend": {
+          "readers": 3,
+          "items": 48,
+          "accuracy": 1.0,
+          "confusion": {
+            "failed": {
+              "failed": 18
+            },
+            "open": {
+              "open": 12
+            },
+            "realized": {
+              "realized": 18
+            }
+          },
+          "per_reader": [
+            {
+              "run": "H_legend_8c365044_r1",
+              "reader": "r1",
+              "code": "8c365044",
+              "alphabet": "siluet",
+              "parsed": true,
+              "items": 16,
+              "correct": 16,
+              "confusion": {
+                "failed": {
+                  "failed": 6
+                },
+                "open": {
+                  "open": 4
+                },
+                "realized": {
+                  "realized": 6
+                }
+              }
+            },
+            {
+              "run": "H_legend_9298c181_r3",
+              "reader": "r3",
+              "code": "9298c181",
+              "alphabet": "siluet",
+              "parsed": true,
+              "items": 16,
+              "correct": 16,
+              "confusion": {
+                "failed": {
+                  "failed": 6
+                },
+                "open": {
+                  "open": 4
+                },
+                "realized": {
+                  "realized": 6
+                }
+              }
+            },
+            {
+              "run": "H_legend_9330026d_r2",
+              "reader": "r2",
+              "code": "9330026d",
+              "alphabet": "siluet",
+              "parsed": true,
+              "items": 16,
+              "correct": 16,
+              "confusion": {
+                "failed": {
+                  "failed": 6
+                },
+                "open": {
+                  "open": 4
+                },
+                "realized": {
+                  "realized": 6
+                }
+              }
+            }
+          ]
+        },
+        "H/nolegend": {
+          "readers": 3,
+          "items": 48,
+          "accuracy": 0.1667,
+          "confusion": {
+            "failed": {
+              "failed": 8,
+              "open": 6,
+              "realized": 4
+            },
+            "open": {
+              "failed": 6,
+              "realized": 5,
+              "unknown": 1
+            },
+            "realized": {
+              "open": 12,
+              "unknown": 6
+            }
+          },
+          "per_reader": [
+            {
+              "run": "H_nolegend_8c365044_r1",
+              "reader": "r1",
+              "code": "8c365044",
+              "alphabet": "siluet",
+              "parsed": true,
+              "items": 16,
+              "correct": 6,
+              "confusion": {
+                "failed": {
+                  "failed": 6
+                },
+                "open": {
+                  "failed": 1,
+                  "realized": 2,
+                  "unknown": 1
+                },
+                "realized": {
+                  "open": 6
+                }
+              }
+            },
+            {
+              "run": "H_nolegend_9298c181_r3",
+              "reader": "r3",
+              "code": "9298c181",
+              "alphabet": "siluet",
+              "parsed": true,
+              "items": 16,
+              "correct": 0,
+              "confusion": {
+                "failed": {
+                  "open": 6
+                },
+                "open": {
+                  "failed": 2,
+                  "realized": 2
+                },
+                "realized": {
+                  "unknown": 6
+                }
+              }
+            },
+            {
+              "run": "H_nolegend_9330026d_r2",
+              "reader": "r2",
+              "code": "9330026d",
+              "alphabet": "siluet",
+              "parsed": true,
+              "items": 16,
+              "correct": 2,
+              "confusion": {
+                "failed": {
+                  "failed": 2,
+                  "realized": 4
+                },
+                "open": {
+                  "failed": 3,
+                  "realized": 1
+                },
+                "realized": {
+                  "open": 6
+                }
+              }
+            }
+          ]
+        }
+      },
+      "weighted": {
+        "legend": 1.0,
+        "nolegend": 0.0972
+      },
+      "delta_e": {
+        "rozet": 22.9326,
+        "siluet": 40.4945
+      },
+      "delta_e_main": 22.9326,
+      "excluded": null
+    },
+    "r3": {
+      "cells": {
+        "F/legend": {
+          "readers": 3,
+          "items": 48,
+          "accuracy": 1.0,
+          "confusion": {
+            "failed": {
+              "failed": 18
+            },
+            "open": {
+              "open": 12
+            },
+            "realized": {
+              "realized": 18
+            }
+          },
+          "per_reader": [
+            {
+              "run": "F_legend_1e3dcce8_r2",
+              "reader": "r2",
+              "code": "1e3dcce8",
+              "alphabet": "siluet",
+              "parsed": true,
+              "items": 16,
+              "correct": 16,
+              "confusion": {
+                "failed": {
+                  "failed": 6
+                },
+                "open": {
+                  "open": 4
+                },
+                "realized": {
+                  "realized": 6
+                }
+              }
+            },
+            {
+              "run": "F_legend_3566e13a_r3",
+              "reader": "r3",
+              "code": "3566e13a",
+              "alphabet": "siluet",
+              "parsed": true,
+              "items": 16,
+              "correct": 16,
+              "confusion": {
+                "failed": {
+                  "failed": 6
+                },
+                "open": {
+                  "open": 4
+                },
+                "realized": {
+                  "realized": 6
+                }
+              }
+            },
+            {
+              "run": "F_legend_fa015a3f_r1",
+              "reader": "r1",
+              "code": "fa015a3f",
+              "alphabet": "siluet",
+              "parsed": true,
+              "items": 16,
+              "correct": 16,
+              "confusion": {
+                "failed": {
+                  "failed": 6
+                },
+                "open": {
+                  "open": 4
+                },
+                "realized": {
+                  "realized": 6
+                }
+              }
+            }
+          ]
+        },
+        "F/nolegend": {
+          "readers": 3,
+          "items": 48,
+          "accuracy": 1.0,
+          "confusion": {
+            "failed": {
+              "failed": 18
+            },
+            "open": {
+              "open": 12
+            },
+            "realized": {
+              "realized": 18
+            }
+          },
+          "per_reader": [
+            {
+              "run": "F_nolegend_1e3dcce8_r2",
+              "reader": "r2",
+              "code": "1e3dcce8",
+              "alphabet": "siluet",
+              "parsed": true,
+              "items": 16,
+              "correct": 16,
+              "confusion": {
+                "failed": {
+                  "failed": 6
+                },
+                "open": {
+                  "open": 4
+                },
+                "realized": {
+                  "realized": 6
+                }
+              }
+            },
+            {
+              "run": "F_nolegend_3566e13a_r3",
+              "reader": "r3",
+              "code": "3566e13a",
+              "alphabet": "siluet",
+              "parsed": true,
+              "items": 16,
+              "correct": 16,
+              "confusion": {
+                "failed": {
+                  "failed": 6
+                },
+                "open": {
+                  "open": 4
+                },
+                "realized": {
+                  "realized": 6
+                }
+              }
+            },
+            {
+              "run": "F_nolegend_fa015a3f_r1",
+              "reader": "r1",
+              "code": "fa015a3f",
+              "alphabet": "siluet",
+              "parsed": true,
+              "items": 16,
+              "correct": 16,
+              "confusion": {
+                "failed": {
+                  "failed": 6
+                },
+                "open": {
+                  "open": 4
+                },
+                "realized": {
+                  "realized": 6
+                }
+              }
+            }
+          ]
+        },
+        "H/legend": {
+          "readers": 3,
+          "items": 48,
+          "accuracy": 1.0,
+          "confusion": {
+            "failed": {
+              "failed": 18
+            },
+            "open": {
+              "open": 12
+            },
+            "realized": {
+              "realized": 18
+            }
+          },
+          "per_reader": [
+            {
+              "run": "H_legend_1e3dcce8_r2",
+              "reader": "r2",
+              "code": "1e3dcce8",
+              "alphabet": "siluet",
+              "parsed": true,
+              "items": 16,
+              "correct": 16,
+              "confusion": {
+                "failed": {
+                  "failed": 6
+                },
+                "open": {
+                  "open": 4
+                },
+                "realized": {
+                  "realized": 6
+                }
+              }
+            },
+            {
+              "run": "H_legend_3566e13a_r3",
+              "reader": "r3",
+              "code": "3566e13a",
+              "alphabet": "siluet",
+              "parsed": true,
+              "items": 16,
+              "correct": 16,
+              "confusion": {
+                "failed": {
+                  "failed": 6
+                },
+                "open": {
+                  "open": 4
+                },
+                "realized": {
+                  "realized": 6
+                }
+              }
+            },
+            {
+              "run": "H_legend_fa015a3f_r1",
+              "reader": "r1",
+              "code": "fa015a3f",
+              "alphabet": "siluet",
+              "parsed": true,
+              "items": 16,
+              "correct": 16,
+              "confusion": {
+                "failed": {
+                  "failed": 6
+                },
+                "open": {
+                  "open": 4
+                },
+                "realized": {
+                  "realized": 6
+                }
+              }
+            }
+          ]
+        },
+        "H/nolegend": {
+          "readers": 3,
+          "items": 48,
+          "accuracy": 1.0,
+          "confusion": {
+            "failed": {
+              "failed": 18
+            },
+            "open": {
+              "open": 12
+            },
+            "realized": {
+              "realized": 18
+            }
+          },
+          "per_reader": [
+            {
+              "run": "H_nolegend_1e3dcce8_r2",
+              "reader": "r2",
+              "code": "1e3dcce8",
+              "alphabet": "siluet",
+              "parsed": true,
+              "items": 16,
+              "correct": 16,
+              "confusion": {
+                "failed": {
+                  "failed": 6
+                },
+                "open": {
+                  "open": 4
+                },
+                "realized": {
+                  "realized": 6
+                }
+              }
+            },
+            {
+              "run": "H_nolegend_3566e13a_r3",
+              "reader": "r3",
+              "code": "3566e13a",
+              "alphabet": "siluet",
+              "parsed": true,
+              "items": 16,
+              "correct": 16,
+              "confusion": {
+                "failed": {
+                  "failed": 6
+                },
+                "open": {
+                  "open": 4
+                },
+                "realized": {
+                  "realized": 6
+                }
+              }
+            },
+            {
+              "run": "H_nolegend_fa015a3f_r1",
+              "reader": "r1",
+              "code": "fa015a3f",
+              "alphabet": "siluet",
+              "parsed": true,
+              "items": 16,
+              "correct": 16,
+              "confusion": {
+                "failed": {
+                  "failed": 6
+                },
+                "open": {
+                  "open": 4
+                },
+                "realized": {
+                  "realized": 6
+                }
+              }
+            }
+          ]
+        }
+      },
+      "weighted": {
+        "legend": 1.0,
+        "nolegend": 1.0
+      },
+      "delta_e": {
+        "rozet": 11.3302,
+        "siluet": 2.9803
+      },
+      "delta_e_main": 2.9803,
+      "excluded": null
+    },
+    "tg5": {
+      "cells": {
+        "F/legend": {
+          "readers": 3,
+          "items": 48,
+          "accuracy": 1.0,
+          "confusion": {
+            "failed": {
+              "failed": 18
+            },
+            "open": {
+              "open": 12
+            },
+            "realized": {
+              "realized": 18
+            }
+          },
+          "per_reader": [
+            {
+              "run": "F_legend_3884c971_r3",
+              "reader": "r3",
+              "code": "3884c971",
+              "alphabet": "siluet",
+              "parsed": true,
+              "items": 16,
+              "correct": 16,
+              "confusion": {
+                "failed": {
+                  "failed": 6
+                },
+                "open": {
+                  "open": 4
+                },
+                "realized": {
+                  "realized": 6
+                }
+              }
+            },
+            {
+              "run": "F_legend_6662d12a_r1",
+              "reader": "r1",
+              "code": "6662d12a",
+              "alphabet": "siluet",
+              "parsed": true,
+              "items": 16,
+              "correct": 16,
+              "confusion": {
+                "failed": {
+                  "failed": 6
+                },
+                "open": {
+                  "open": 4
+                },
+                "realized": {
+                  "realized": 6
+                }
+              }
+            },
+            {
+              "run": "F_legend_f1dbfffd_r2",
+              "reader": "r2",
+              "code": "f1dbfffd",
+              "alphabet": "siluet",
+              "parsed": true,
+              "items": 16,
+              "correct": 16,
+              "confusion": {
+                "failed": {
+                  "failed": 6
+                },
+                "open": {
+                  "open": 4
+                },
+                "realized": {
+                  "realized": 6
+                }
+              }
+            }
+          ]
+        },
+        "F/nolegend": {
+          "readers": 3,
+          "items": 48,
+          "accuracy": 1.0,
+          "confusion": {
+            "failed": {
+              "failed": 18
+            },
+            "open": {
+              "open": 12
+            },
+            "realized": {
+              "realized": 18
+            }
+          },
+          "per_reader": [
+            {
+              "run": "F_nolegend_3884c971_r3",
+              "reader": "r3",
+              "code": "3884c971",
+              "alphabet": "siluet",
+              "parsed": true,
+              "items": 16,
+              "correct": 16,
+              "confusion": {
+                "failed": {
+                  "failed": 6
+                },
+                "open": {
+                  "open": 4
+                },
+                "realized": {
+                  "realized": 6
+                }
+              }
+            },
+            {
+              "run": "F_nolegend_6662d12a_r1",
+              "reader": "r1",
+              "code": "6662d12a",
+              "alphabet": "siluet",
+              "parsed": true,
+              "items": 16,
+              "correct": 16,
+              "confusion": {
+                "failed": {
+                  "failed": 6
+                },
+                "open": {
+                  "open": 4
+                },
+                "realized": {
+                  "realized": 6
+                }
+              }
+            },
+            {
+              "run": "F_nolegend_f1dbfffd_r2",
+              "reader": "r2",
+              "code": "f1dbfffd",
+              "alphabet": "siluet",
+              "parsed": true,
+              "items": 16,
+              "correct": 16,
+              "confusion": {
+                "failed": {
+                  "failed": 6
+                },
+                "open": {
+                  "open": 4
+                },
+                "realized": {
+                  "realized": 6
+                }
+              }
+            }
+          ]
+        },
+        "H/legend": {
+          "readers": 3,
+          "items": 48,
+          "accuracy": 1.0,
+          "confusion": {
+            "failed": {
+              "failed": 18
+            },
+            "open": {
+              "open": 12
+            },
+            "realized": {
+              "realized": 18
+            }
+          },
+          "per_reader": [
+            {
+              "run": "H_legend_3884c971_r3",
+              "reader": "r3",
+              "code": "3884c971",
+              "alphabet": "siluet",
+              "parsed": true,
+              "items": 16,
+              "correct": 16,
+              "confusion": {
+                "failed": {
+                  "failed": 6
+                },
+                "open": {
+                  "open": 4
+                },
+                "realized": {
+                  "realized": 6
+                }
+              }
+            },
+            {
+              "run": "H_legend_6662d12a_r1",
+              "reader": "r1",
+              "code": "6662d12a",
+              "alphabet": "siluet",
+              "parsed": true,
+              "items": 16,
+              "correct": 16,
+              "confusion": {
+                "failed": {
+                  "failed": 6
+                },
+                "open": {
+                  "open": 4
+                },
+                "realized": {
+                  "realized": 6
+                }
+              }
+            },
+            {
+              "run": "H_legend_f1dbfffd_r2",
+              "reader": "r2",
+              "code": "f1dbfffd",
+              "alphabet": "siluet",
+              "parsed": true,
+              "items": 16,
+              "correct": 16,
+              "confusion": {
+                "failed": {
+                  "failed": 6
+                },
+                "open": {
+                  "open": 4
+                },
+                "realized": {
+                  "realized": 6
+                }
+              }
+            }
+          ]
+        },
+        "H/nolegend": {
+          "readers": 3,
+          "items": 48,
+          "accuracy": 1.0,
+          "confusion": {
+            "failed": {
+              "failed": 18
+            },
+            "open": {
+              "open": 12
+            },
+            "realized": {
+              "realized": 18
+            }
+          },
+          "per_reader": [
+            {
+              "run": "H_nolegend_3884c971_r3",
+              "reader": "r3",
+              "code": "3884c971",
+              "alphabet": "siluet",
+              "parsed": true,
+              "items": 16,
+              "correct": 16,
+              "confusion": {
+                "failed": {
+                  "failed": 6
+                },
+                "open": {
+                  "open": 4
+                },
+                "realized": {
+                  "realized": 6
+                }
+              }
+            },
+            {
+              "run": "H_nolegend_6662d12a_r1",
+              "reader": "r1",
+              "code": "6662d12a",
+              "alphabet": "siluet",
+              "parsed": true,
+              "items": 16,
+              "correct": 16,
+              "confusion": {
+                "failed": {
+                  "failed": 6
+                },
+                "open": {
+                  "open": 4
+                },
+                "realized": {
+                  "realized": 6
+                }
+              }
+            },
+            {
+              "run": "H_nolegend_f1dbfffd_r2",
+              "reader": "r2",
+              "code": "f1dbfffd",
+              "alphabet": "siluet",
+              "parsed": true,
+              "items": 16,
+              "correct": 16,
+              "confusion": {
+                "failed": {
+                  "failed": 6
+                },
+                "open": {
+                  "open": 4
+                },
+                "realized": {
+                  "realized": 6
+                }
+              }
+            }
+          ]
+        }
+      },
+      "weighted": {
+        "legend": 1.0,
+        "nolegend": 1.0
+      },
+      "delta_e": {
+        "rozet": 16.4401,
+        "siluet": 42.1088
+      },
+      "delta_e_main": 16.4401,
+      "excluded": null
+    }
+  },
+  "ranking": [
+    "tg5",
+    "muhrak"
+  ],
+  "selected": "tg5",
+  "rule": [
+    "rule 2: primary `tg5` 1.0000 − `muhrak` 0.0972 = 0.9028 ≥ 0.05 → `tg5`",
+    "for comparison: reference `r3` primary 1.0000, selected `tg5` 1.0000"
+  ]
+}

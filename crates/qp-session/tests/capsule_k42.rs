@@ -1,6 +1,7 @@
 //! R4/T3 (K42): validity on the item, the glyph and the sentence say the same thing in
 //! Turkish and English (A28, VERIFY 11); only negative transitions of a story about a
-//! position pass any sensitivity (A22); the ledger key carries the direction (A23).
+//! position pass any sensitivity (A22); the ledger key carries the direction (A23); a
+//! closed capsule's sentence says how it ended, never "still holds" (FIX-E1 B2).
 //!
 //! The bound THYAO feed of the R3 transcripts (38–44), fed bar by bar.
 
@@ -116,6 +117,67 @@ fn headline_and_glyph_agree_in_both_languages() {
         no_longer > 0 && valid > 0 && closed > 0,
         "{no_longer} {valid} {closed}"
     );
+}
+
+/// FIX-E1 B2 (K42: the glyph and the sentence say the same thing): a closed capsule's
+/// sentence never says the claim still holds (or is still open, or that this is
+/// unknown) and says how the story ended, in Turkish and in English, at every bar.
+#[test]
+fn closed_sentences_say_how_the_story_ended() {
+    let b = bars();
+    let k = 60;
+    let mut s = Session::new(init_k(k), &root()).unwrap();
+    hello(&mut s, "t", "ana", "tr");
+    hello(&mut s, "e", "ana", "en");
+    let mut seen: std::collections::BTreeMap<String, usize> = Default::default();
+    for (i, bar) in b.iter().enumerate().skip(k) {
+        s.data_event(&ev(i - k + 1, bar)).unwrap();
+        for (conn, lang) in [("t", "tr"), ("e", "en")] {
+            let list = q(&mut s, conn, json!({"kind":"capsules"}));
+            for it in list["data"]["capsules"].as_array().unwrap() {
+                if it["validity"] != "closed" {
+                    continue;
+                }
+                let id = it["id"].as_str().unwrap();
+                let stage = it["stage"].as_str().unwrap();
+                let text = it["sentence"][lang].as_str().unwrap().to_owned();
+                let lower = text.to_lowercase();
+                let open_words: &[&str] = match lang {
+                    "tr" => &["hâlâ geçerli", "hâlâ açık", "bugünkü durumu bilinmiyor"],
+                    _ => &["still holds", "still open"],
+                };
+                for w in open_words {
+                    assert!(
+                        !lower.contains(w),
+                        "{id} {stage} at bar {i} ({lang}): {text}"
+                    );
+                }
+                let ending: &[&str] = match (stage, lang) {
+                    ("realized", "tr") => &["gerçekleşti"],
+                    ("realized", _) => &["came true", "counts as played out"],
+                    ("invalidated", "tr") => &["geçersiz oldu", "gerçekleşmedi sayıldı"],
+                    ("invalidated", _) => &["was invalidated", "counts as not played out"],
+                    ("expired", "tr") => &["sonuçsuz doldu"],
+                    ("expired", _) => &["life ran out"],
+                    ("retracted", "tr") => &["geri çekildi"],
+                    _ => &["was withdrawn"],
+                };
+                assert!(
+                    ending.iter().any(|w| text.contains(w)),
+                    "{id} {stage} at bar {i} ({lang}) does not say how it ended: {text}"
+                );
+                *seen.entry(format!("{stage}/{lang}")).or_default() += 1;
+            }
+        }
+    }
+    for want in [
+        "realized/tr",
+        "realized/en",
+        "invalidated/tr",
+        "invalidated/en",
+    ] {
+        assert!(seen.get(want).is_some_and(|&n| n > 0), "{want}: {seen:?}");
+    }
 }
 
 /// A22: with `important` and a position, a tier > 1 birth does not reach the holder; a

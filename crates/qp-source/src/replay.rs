@@ -14,7 +14,8 @@
 //!     fine step lands exactly on the final bar;
 //!   - **ohlc** (no fine data; a labelled, deterministic intra-bar path): open, then the
 //!     first extreme (low for a rising bar, high for a falling one), the second extreme,
-//!     the close — spread over the XIST session; the last step lands on the final bar;
+//!     the close — spread over the session of [`ReplayOptions::calendar`] (real data:
+//!     `XIST`; the synthetic market: its own calendar); the last step lands on the final bar;
 //!   - **bar** (path off): one `bar` event with the whole bar.
 //! - Feeds are merged on virtual time: a **step** is one distinct event time; its events
 //!   are ordered by feed key (symbol, interval, feed) — ties never depend on input order.
@@ -70,6 +71,16 @@ impl Intraday {
     }
 }
 
+/// The calendar whose session spans the OHLC path uses.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
+pub enum ReplayCalendar {
+    /// The built-in `XIST` calendar (real Borsa Istanbul holidays and half days).
+    #[default]
+    Xist,
+    /// The synthetic market's frozen calendar ([`crate::synthetic_calendar`]).
+    Synthetic,
+}
+
 /// Where a replay starts and stops and how a bar is built inside.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct ReplayOptions {
@@ -85,6 +96,9 @@ pub struct ReplayOptions {
     pub path: bool,
     /// Length of a fine bar in ms (a fine step happens at its end); `None`: one hour.
     pub fine_ms: Option<i64>,
+    /// Calendar of the OHLC path's session spans (real data: `Xist`; the synthetic
+    /// market: `Synthetic`).
+    pub calendar: ReplayCalendar,
 }
 
 impl Default for ReplayOptions {
@@ -95,6 +109,7 @@ impl Default for ReplayOptions {
             to_t: None,
             path: true,
             fine_ms: None,
+            calendar: ReplayCalendar::Xist,
         }
     }
 }
@@ -144,6 +159,13 @@ const DAY_MS: i64 = 86_400_000;
 
 fn xist() -> Option<ExchangeCalendar> {
     builtin("XIST").and_then(|c| ExchangeCalendar::new(&c).ok())
+}
+
+fn calendar_of(which: ReplayCalendar) -> Option<ExchangeCalendar> {
+    match which {
+        ReplayCalendar::Xist => xist(),
+        ReplayCalendar::Synthetic => ExchangeCalendar::new(&crate::synthetic_calendar()).ok(),
+    }
 }
 
 fn check_bars(what: &str, bars: &[Bar]) -> Result<(), SourceError> {
@@ -211,7 +233,7 @@ fn day_states(
     if !opts.path {
         return (Intraday::Bar, vec![(d.t, d.clone())]);
     }
-    // Session span from the XIST calendar when `t` opens a session; else eight hours.
+    // Session span from the replay's calendar when `t` opens a session; else eight hours.
     let span = cal
         .and_then(|c| c.day_span(c.local_day(d.t)))
         .filter(|s| s.open == d.t && s.close > s.open)
@@ -260,7 +282,7 @@ impl Replay {
         if feeds.windows(2).any(|w| w[0].key == w[1].key) {
             return Err(SourceError::new("duplicate feed in a replay"));
         }
-        let cal = xist();
+        let cal = calendar_of(opts.calendar);
         let mut timelines = Vec::with_capacity(feeds.len());
         let mut intraday = (0, 0, 0);
         let mut start_t = i64::MIN;
@@ -517,7 +539,7 @@ pub fn synthetic_replay_feeds(
             })
             .collect();
     }
-    let cal = xist();
+    let cal = calendar_of(ReplayCalendar::Synthetic);
     synthetic_market_hourly(n, days, seed)
         .into_iter()
         .map(|i| ReplayFeed {

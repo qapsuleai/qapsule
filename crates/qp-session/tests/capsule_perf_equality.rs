@@ -375,10 +375,13 @@ fn bound_with_flow_and_readers_unchanged() {
     // importance and order; `validity` on items and glyphs; story condition/resolution;
     // negative-transition override). The cache paths are unchanged by K42; the R3
     // recordings above are kept for history. `rounds/R4/experiments/T3.md`.
+    // (R4/FIX-E1 B2) Re-recorded: a closed story's sentence has no validity tail (T3
+    // values: a "a 634 4965011 0bf79d3304bb3560", i "i 1 33382 3803d7e72efd9cce"; f
+    // unchanged). `rounds/R4/experiments/FIX-E1.md`.
     for entitled in [
-        "a 634 4965011 0bf79d3304bb3560",
+        "a 634 4940088 23725df69ce9e46b",
         "f 1 33828 64e687e9ac6e5803",
-        "i 1 33382 3803d7e72efd9cce",
+        "i 1 33374 3d07f785ac18cb32",
     ] {
         assert!(per.lines().any(|l| l == entitled), "{entitled}\n{per}");
     }
@@ -387,7 +390,9 @@ fn bound_with_flow_and_readers_unchanged() {
     assert_eq!(
         got,
         // R3/K1b: "lines 3014 21187649 d43ff5b9b8b70b19 log 1177744 e38025b8f0d9a037 doc 661323 01db88a5bab1d57f"
-        "lines 2996 21725039 712470eec960882f log 1209418 cc26cd5957963e33 doc 674891 d66cf7025043a379"
+        // R4/T3 (K42): "lines 2996 21725039 712470eec960882f log 1209418 cc26cd5957963e33 doc 674891 d66cf7025043a379"
+        // R4/FIX-E1 (B2) re-recorded:
+        "lines 2996 21664421 2ed2ac94d4a71aab log 1206570 e3754e6847abf125 doc 672043 92a079cb66258785"
     );
 }
 
@@ -407,7 +412,8 @@ fn inline_unchanged() {
     assert_eq!(
         got,
         // R3 (a81b5e5): "lines 3747 12944829 9ae44424a6d56893 log 601548 3ef7a6effb39fab4 doc 282007 8a407794a0085f28"
-        // R4/T3 (K42) re-recorded, see `bound_with_flow_and_readers_unchanged`.
-        "lines 3739 13164269 6ba3bbb9a84ac641 log 612798 3a99f85cceae652c doc 288051 fb03e8e6206af0bc"
+        // R4/T3 (K42): "lines 3739 13164269 6ba3bbb9a84ac641 log 612798 3a99f85cceae652c doc 288051 fb03e8e6206af0bc"
+        // R4/FIX-E1 (B2) re-recorded, see `bound_with_flow_and_readers_unchanged`.
+        "lines 3739 13109440 44c28111ab9e8d84 log 611848 8fa8658745f376d0 doc 287101 1c632884ddcf7d58"
     );
 }

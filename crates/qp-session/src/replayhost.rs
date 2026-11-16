@@ -24,7 +24,7 @@ use qp_schema::protocol::{
     ServerMsg, SessionInit,
 };
 use qp_schema::{Instrument, Series, SeriesSource};
-use qp_source::{Replay, ReplayFeed, ReplayOptions, ReplayStep};
+use qp_source::{Replay, ReplayCalendar, ReplayFeed, ReplayOptions, ReplayStep};
 
 use crate::error::E;
 use crate::session::{confine, permissions, read_json, Session};
@@ -300,6 +300,10 @@ impl ReplayHost {
             to_t: r.to_t,
             path: r.path.unwrap_or(true),
             fine_ms: info.fine.as_deref().and_then(interval_ms),
+            calendar: match info.kind {
+                ReplaySourceKind::Local => ReplayCalendar::Xist,
+                ReplaySourceKind::Synthetic => ReplayCalendar::Synthetic,
+            },
         };
         let replay = Replay::new(feeds, &opts).map_err(|e| format!("init.replay: {e}"))?;
         let init = expand_init(init, root, &r, &replay)?;

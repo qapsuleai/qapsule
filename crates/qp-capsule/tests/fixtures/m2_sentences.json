@@ -1,5 +1,5 @@
 {
-  "note": "R3/S-A: `measured` = rounds/R3/experiments/M2/template (85b5b5d) on tests/fixtures/m2_inputs.json (harness m2 inputs, synthetic); `product_changes` = qp_capsule::realize::Template where it differs (rounds/R3/experiments/S/S-A.md). Regenerate: cargo run --release --manifest-path rounds/R3/experiments/S/crosscheck/Cargo.toml -- fixture",
+  "note": "R3/S-A: `measured` = rounds/R3/experiments/M2/template (85b5b5d) on tests/fixtures/m2_inputs.json (harness m2 inputs, synthetic); `product_changes` = qp_capsule::realize::Template where it differs (rounds/R3/experiments/S/S-A.md). Regenerate: cargo run --release --manifest-path rounds/R3/experiments/S/crosscheck/Cargo.toml -- fixture. R4/FIX-E1 B2: a closed story's sentence has no validity tail (s03, s58 added; s66, s67 updated).",
   "measured": {
     "k26": {
       "tr": "THYAO'da RSI 3 bar önce 70'in üstüne çıktı, bugün yeniden altına indi; şu an 55, artık 70'in üstünde değil. Aşırı alım sona erdi. Geçmişte bu sinyal 140 seferin 87'sinde beklendiği gibi sonuçlandı.",
@@ -295,6 +295,10 @@
     }
   },
   "product_changes": {
+    "s03": {
+      "tr": "EREGL'de yaklaşık bir hafta önce hareketli ortalamalar düşüş yönünde dizildi: düşüş eğiliminde devam sinyali. Beklenen sonuç bugün gerçekleşti. Geçmişte bu tür sinyal çoğunlukla beklendiği gibi sonuçlandı. Sunucu doğruladı; rakamlar kurumsal akış lisansı gerektiriyor.",
+      "en": "About a week ago, EREGL's moving averages lined up for a downtrend: a continuation of the downtrend. The expected outcome came true today. Historically, this kind of signal mostly played out. Server-verified; the figures require an institutional flow data license."
+    },
     "s07": {
       "tr": "PGSUS'ta yaklaşık bir hafta önce aşağı dönüş işareti çıktı: fiyat yeni tepe yaparken RSI daha düşük tepe yaptı. Sinyalin ömrü bugün sonuçsuz doldu; artık geçerli değil. Karnesi henüz az örnekli. Sunucu doğruladı; rakamlar kurumsal akış lisansı gerektiriyor.",
       "en": "About a week ago, PGSUS showed a downward reversal signal: price made a new high while RSI made a lower high. Its life ran out today without an outcome; it is no longer valid. Its record is still thin. Server-verified; the figures require an institutional flow data license."
@@ -347,17 +351,21 @@
       "tr": "EREGL'de kurumsal net satış 30 bardır her zamankinden güçlü (son günlerin ortalaması 452.000); şu an 442.960. Para çıkışı sürüyor. Bugün hacim de teyit etti; 2 bağımsız kanıt ailesi destekliyor. Karnesi henüz az örnekli: 8 seferin 5'inde tuttu.",
       "en": "Net institutional selling in EREGL has been stronger than usual (recent average 452,000) for 30 bars and is now 442,960. The money outflow is still in place. Volume confirmed it today; 2 independent evidence families support it. Its record is still thin: it played out in 5 of 8 cases."
     },
+    "s58": {
+      "tr": "EREGL 3 bar içinde 245,84'ün üstünde kapanırsa yukarı kırılım teyit olur. Beklenti bugün gerçekleşti. Karnesi henüz az örnekli: 8 seferin 6'sında tuttu.",
+      "en": "If EREGL closes above 245.84 within 3 bars, the upside breakout would be confirmed. The expectation came true today. Its record is still thin: it played out in 6 of 8 cases."
+    },
     "s65": {
       "tr": "THYAO'da RSI 3 bar içinde 30'un altına inerse aşırı satım teyit olur. Uzama sürmedi: fiyat bugün geri yükseldi; sinyal gerçekleşmedi sayıldı; artık geçerli değil. Geçmişte bu sinyal 140 seferin 93'ünde beklendiği gibi sonuçlandı.",
       "en": "If THYAO's RSI falls below 30 within 3 bars, the oversold state would be confirmed. The stretch did not continue: the price rose back today, so it counts as not played out; it is no longer valid. Historically, this signal played out in 93 of 140 cases."
     },
     "s66": {
-      "tr": "THYAO'da RSI 3 bar içinde 70'in üstüne çıkarsa aşırı alım teyit olur. Uzama sürdü: fiyat bugün yükselmeye devam etti; sinyal gerçekleşti sayıldı. Koşulun bugünkü durumu bilinmiyor. Geçmişte bu sinyal 140 seferin 86'sında beklendiği gibi sonuçlandı.",
-      "en": "If THYAO's RSI rises above 70 within 3 bars, the overbought state would be confirmed. The stretch continued: the price kept rising today, so it counts as played out. Whether the setup is still open is unknown. Historically, this signal played out in 86 of 140 cases."
+      "tr": "THYAO'da RSI 3 bar içinde 70'in üstüne çıkarsa aşırı alım teyit olur. Uzama sürdü: fiyat bugün yükselmeye devam etti; sinyal gerçekleşti sayıldı. Geçmişte bu sinyal 140 seferin 86'sında beklendiği gibi sonuçlandı.",
+      "en": "If THYAO's RSI rises above 70 within 3 bars, the overbought state would be confirmed. The stretch continued: the price kept rising today, so it counts as played out. Historically, this signal played out in 86 of 140 cases."
     },
     "s67": {
-      "tr": "EREGL'de RSI 3 bar içinde 30'un altına inerse aşırı satım teyit olur. Uzama sürdü: fiyat bugün düşmeye devam etti; sinyal gerçekleşti sayıldı. Koşulun bugünkü durumu bilinmiyor. Geçmişte bu sinyal 140 seferin 42'sinde beklendiği gibi sonuçlandı.",
-      "en": "If EREGL's RSI falls below 30 within 3 bars, the oversold state would be confirmed. The stretch continued: the price kept falling today, so it counts as played out. Whether the setup is still open is unknown. Historically, this signal played out in 42 of 140 cases."
+      "tr": "EREGL'de RSI 3 bar içinde 30'un altına inerse aşırı satım teyit olur. Uzama sürdü: fiyat bugün düşmeye devam etti; sinyal gerçekleşti sayıldı. Geçmişte bu sinyal 140 seferin 42'sinde beklendiği gibi sonuçlandı.",
+      "en": "If EREGL's RSI falls below 30 within 3 bars, the oversold state would be confirmed. The stretch continued: the price kept falling today, so it counts as played out. Historically, this signal played out in 42 of 140 cases."
     },
     "s69": {
       "tr": "FROTO'da kurumsal net alış 3 bar içinde her zamankinden güçlü hâle gelirse (son günlerin ortalaması 484.000) para girişi teyit olur. Beklentinin 1 barlık ömrü bugün sonuçsuz doldu; artık geçerli değil. Geçmişte bu sinyal 140 seferin 70'inde beklendiği gibi sonuçlandı.",

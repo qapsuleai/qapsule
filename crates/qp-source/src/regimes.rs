@@ -1,6 +1,6 @@
 //! Regime synthetic market (R3/T2): deterministic daily (and hourly) bars aligned to the
-//! BIST calendar (`qp-calendar`, `XIST`; K14: a daily bar's `t` is the session open in
-//! UTC), driven by a schedule of market regimes — rising, falling, sideways, volatile.
+//! synthetic market's own calendar ([`synthetic_calendar`]: `XIST` sessions and time zone
+//! with a frozen holiday sample; K14: a daily bar's `t` is the session open in UTC), driven by a schedule of market regimes — rising, falling, sideways, volatile.
 //!
 //! Like [`crate::synthetic_bars`] it uses an integer LCG and IEEE basic operations only
 //! (`+ - * /`, `sqrt`, `abs`, `round`, `min`, `max`; no `exp`/`ln`), so results are bit
@@ -18,7 +18,7 @@
 //!   moves and sometimes spikes without a price move.
 
 use qp_calendar::{builtin, days_from_civil, ExchangeCalendar, Interval};
-use qp_schema::Bar;
+use qp_schema::{Bar, Calendar, HalfDay};
 
 use crate::synthetic::{round2, Lcg};
 
@@ -142,13 +142,45 @@ pub struct SyntheticInstrument {
 /// First trading day of the synthetic market: 2023-01-02 (a Monday).
 pub const MARKET_START: (i64, u32, u32) = (2023, 1, 2);
 
-fn xist() -> ExchangeCalendar {
-    // The built-in XIST calendar exists and is valid by construction.
-    let cal = builtin("XIST").expect("built-in XIST calendar");
-    ExchangeCalendar::new(&cal).expect("built-in XIST calendar is valid")
+/// Holidays of the synthetic market's calendar: the five 2026 sample days the built-in
+/// `XIST` calendar carried from R1 to R4 (New Year, 20 Mar, 23 Apr, 1 May, 19 May).
+pub const SYNTHETIC_HOLIDAYS: &[&str] = &[
+    "2026-01-01",
+    "2026-03-20",
+    "2026-04-23",
+    "2026-05-01",
+    "2026-05-19",
+];
+
+/// Half day of the synthetic market's calendar (R1 sample: 2026-03-19, closes 12:30).
+pub const SYNTHETIC_HALF_DAYS: &[(&str, &str)] = &[("2026-03-19", "12:30")];
+
+/// The synthetic market's own, frozen calendar: `XIST` sessions, weekend and time zone
+/// with the R1 sample holidays ([`SYNTHETIC_HOLIDAYS`], [`SYNTHETIC_HALF_DAYS`]).
+///
+/// The synthetic market is not BIST: its dates only need to be stable. It keeps the
+/// holiday sample it was built with, so that completing the real `XIST` holiday data
+/// (R4/FIX-E1) changes no synthetic bar, transcript, golden image or digest.
+#[must_use]
+pub fn synthetic_calendar() -> Calendar {
+    let mut cal = builtin("XIST").expect("built-in XIST calendar");
+    cal.holidays = SYNTHETIC_HOLIDAYS.iter().map(|d| (*d).to_owned()).collect();
+    cal.half_days = SYNTHETIC_HALF_DAYS
+        .iter()
+        .map(|(date, close)| HalfDay {
+            date: (*date).to_owned(),
+            close: (*close).to_owned(),
+        })
+        .collect();
+    cal
 }
 
-/// The open times (UTC ms) of the first `n` XIST trading days from [`MARKET_START`].
+fn xist() -> ExchangeCalendar {
+    // The synthetic calendar is valid by construction.
+    ExchangeCalendar::new(&synthetic_calendar()).expect("synthetic calendar is valid")
+}
+
+/// The open times (UTC ms) of the first `n` synthetic-calendar trading days from [`MARKET_START`].
 #[must_use]
 pub fn trading_day_opens(n: usize) -> Vec<i64> {
     let cal = xist();
@@ -164,7 +196,7 @@ pub fn trading_day_opens(n: usize) -> Vec<i64> {
     out
 }
 
-/// The 60-minute bar opens (UTC ms) of the first `n_days` XIST trading days, grouped by
+/// The 60-minute bar opens (UTC ms) of the first `n_days` synthetic-calendar trading days, grouped by
 /// day (bars aligned to the session open; the last bar is cut at the session close).
 #[must_use]
 pub fn trading_hour_opens(n_days: usize) -> Vec<Vec<i64>> {
@@ -458,8 +490,8 @@ fn profile(rng: &mut Lcg) -> Profile {
 }
 
 /// `n_instruments` instruments (`SYN01`, `SYN02`, …) of `n_days` daily bars each, aligned
-/// to the XIST calendar from [`MARKET_START`], each with its own regime schedule and a
-/// shared market factor. Deterministic in `seed`.
+/// to the synthetic calendar ([`synthetic_calendar`]) from [`MARKET_START`], each with its
+/// own regime schedule and a shared market factor. Deterministic in `seed`.
 #[must_use]
 pub fn synthetic_market(
     n_instruments: usize,

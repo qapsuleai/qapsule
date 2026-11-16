@@ -53,7 +53,8 @@ struct SentenceFixture {
 /// Every M2 harness situation: the product realizer writes exactly the measured
 /// sentence, except the documented fixes (`product_changes`: the 14 situations of S-A, and
 /// the 6 more of the palatal-l fix `Sinyalın` → `Sinyalin` of R3/S-C — s07, s09, s14,
-/// s23, s29, s35; s46 also changed but was already among the 14). The fixture
+/// s23, s29, s35; s46 also changed but was already among the 14; and R4/FIX-E1 B2: a
+/// closed story's sentence has no validity tail — s03, s58 added, s66, s67 updated). The fixture
 /// itself is checked against the measured crate by `rounds/R3/experiments/S/crosscheck`.
 #[test]
 fn realizer_equals_measured_m2_template_except_documented_fixes() {
@@ -63,7 +64,7 @@ fn realizer_equals_measured_m2_template_except_documented_fixes() {
         serde_json::from_str(include_str!("fixtures/m2_sentences.json")).unwrap();
     assert_eq!(sits.len(), 73);
     assert_eq!(fx.measured.len(), 73);
-    assert_eq!(fx.product_changes.len(), 20);
+    assert_eq!(fx.product_changes.len(), 22);
     for s in &sits {
         let inp = SentenceInput {
             story: &s.story,

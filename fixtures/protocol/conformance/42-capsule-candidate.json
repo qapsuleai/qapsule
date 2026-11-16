@@ -1449,9 +1449,9 @@
                     "realized": 3
                   },
                   "sentence": {
-                    "en": "5 bars ago, net institutional buying in THYAO (307,254) clearly exceeded the recent average (145,970): money inflow. The expected outcome came true 3 bars ago. Whether it still holds is unknown. Its record is still thin: it played out in 3 of 6 cases. Server-verified.",
-                    "text": "THYAO'da 5 bar önce kurumsal net alış (307.254) son günlerin ortalamasını (145.970) belirgin biçimde aştı: para girişi. Beklenen sonuç 3 bar önce gerçekleşti. Hâlâ geçerli olup olmadığı bilinmiyor. Karnesi henüz az örnekli: 6 seferin 3'ünde tuttu. Sunucu doğruladı.",
-                    "tr": "THYAO'da 5 bar önce kurumsal net alış (307.254) son günlerin ortalamasını (145.970) belirgin biçimde aştı: para girişi. Beklenen sonuç 3 bar önce gerçekleşti. Hâlâ geçerli olup olmadığı bilinmiyor. Karnesi henüz az örnekli: 6 seferin 3'ünde tuttu. Sunucu doğruladı."
+                    "en": "5 bars ago, net institutional buying in THYAO (307,254) clearly exceeded the recent average (145,970): money inflow. The expected outcome came true 3 bars ago. Its record is still thin: it played out in 3 of 6 cases. Server-verified.",
+                    "text": "THYAO'da 5 bar önce kurumsal net alış (307.254) son günlerin ortalamasını (145.970) belirgin biçimde aştı: para girişi. Beklenen sonuç 3 bar önce gerçekleşti. Karnesi henüz az örnekli: 6 seferin 3'ünde tuttu. Sunucu doğruladı.",
+                    "tr": "THYAO'da 5 bar önce kurumsal net alış (307.254) son günlerin ortalamasını (145.970) belirgin biçimde aştı: para girişi. Beklenen sonuç 3 bar önce gerçekleşti. Karnesi henüz az örnekli: 6 seferin 3'ünde tuttu. Sunucu doğruladı."
                   },
                   "series": "px",
                   "stage": "realized",

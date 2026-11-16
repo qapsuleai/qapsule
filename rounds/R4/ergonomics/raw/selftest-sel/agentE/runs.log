@@ -1,0 +1,8 @@
+{"t": 1794823322.8960881, "task": "C05", "file": "probe.jsonl", "run": 1, "msgs": 2, "shown": 2, "png": null, "png_rc": null, "stderr": ""}
+{"t": 1794823323.0542028, "task": "C05", "file": "attempt1.jsonl", "run": 2, "msgs": 2, "shown": 2, "png": null, "png_rc": null, "stderr": ""}
+{"t": 1794823323.214869, "task": "C10", "file": "probe.jsonl", "run": 1, "msgs": 2, "shown": 2, "png": null, "png_rc": null, "stderr": ""}
+{"t": 1794823323.369026, "task": "C10", "file": "attempt1.jsonl", "run": 2, "msgs": 2, "shown": 2, "png": null, "png_rc": null, "stderr": ""}
+{"t": 1794823323.5286112, "task": "C15", "file": "probe.jsonl", "run": 1, "msgs": 2, "shown": 2, "png": null, "png_rc": null, "stderr": ""}
+{"t": 1794823323.6826398, "task": "C15", "file": "attempt1.jsonl", "run": 2, "msgs": 2, "shown": 2, "png": null, "png_rc": null, "stderr": ""}
+{"t": 1794823323.844487, "task": "C20", "file": "probe.jsonl", "run": 1, "msgs": 2, "shown": 2, "png": null, "png_rc": null, "stderr": ""}
+{"t": 1794823324.029304, "task": "C20", "file": "attempt1.jsonl", "run": 2, "msgs": 1, "shown": 1, "png": {"out": "/private/tmp/claude-501/-Users-arkns-Works-Mchart-qapsule/265365d4-8d03-427a-b423-f7bfaff76607/scratchpad/e3/work/selftest-sel/agentE/C20/k.png", "view": "", "present": "fnd.THYAO.breakout.down.313", "surface": "desktop"}, "png_rc": 0, "stderr": ""}

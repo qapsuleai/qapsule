@@ -1,0 +1,2 @@
+{"conn":"a","msg":{"type":"hello","protocol":"qp/0","principal":"viewer","surface":{"kind":"headless"}}}
+{"conn":"a","msg":{"type":"input","id":"i1","gesture":{"kind":"open","capsule":"cap.THYAO.flow.down.298","to":"evidence"}}}

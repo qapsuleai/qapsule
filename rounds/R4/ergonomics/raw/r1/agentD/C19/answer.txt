@@ -1,0 +1,1 @@
+Gerçekleşen (aşaması "realized") 87 kapsül var; ASELS ve THYAO kırılım kapsülleri, önem sırasıyla. Örneğin en üstte cap.ASELS.breakout.up.64 (yukarı kırılım, 3 seferin 2'sinde tuttu), sonra cap.ASELS.breakout.down.228, cap.THYAO.breakout.up.172, cap.ASELS.breakout.up.299 geliyor.

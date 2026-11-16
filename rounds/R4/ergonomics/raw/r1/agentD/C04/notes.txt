@@ -1,0 +1,1 @@
+attempt1: reject_finding with finding selector {instrument THYAO, meaning breakout, open true}; resolved to fnd.THYAO.breakout.down.313; editor has no decide, so mode auto turned it into proposal prop-4 (status proposed), not an applied rejection. Spec: not obvious whether "reddet" should be forced direct (would be forbidden); I left auto.

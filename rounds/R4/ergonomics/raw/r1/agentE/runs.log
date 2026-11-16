@@ -1,0 +1,7 @@
+{"t": 1794823070.8778932, "task": "C05", "file": "attempt1.jsonl", "run": 1, "msgs": 3, "shown": 3, "png": null, "png_rc": null, "stderr": ""}
+{"t": 1794823071.566375, "task": "C10", "file": "attempt1.jsonl", "run": 1, "msgs": 2, "shown": 2, "png": null, "png_rc": null, "stderr": ""}
+{"t": 1794823096.164782, "task": "C10", "file": "attempt2.jsonl", "run": 2, "msgs": 4, "shown": 4, "png": null, "png_rc": null, "stderr": ""}
+{"t": 1794823097.695293, "task": "C15", "file": "attempt1.jsonl", "run": 1, "msgs": 3, "shown": 3, "png": null, "png_rc": null, "stderr": ""}
+{"t": 1794823099.4332008, "task": "C20", "file": "attempt1.jsonl", "run": 1, "msgs": 1, "shown": 1, "png": {"out": "/private/tmp/claude-501/-Users-arkns-Works-Mchart-qapsule/265365d4-8d03-427a-b423-f7bfaff76607/scratchpad/e3/work/r1/agentE/C20/out.png", "view": "", "present": "fnd.THYAO.breakout.down.311", "surface": ""}, "png_rc": 0, "stderr": ""}
+{"t": 1794823100.8620522, "task": "C05", "file": "attempt2.jsonl", "run": 2, "msgs": 2, "shown": 2, "png": null, "png_rc": null, "stderr": ""}
+{"t": 1794823107.526125, "task": "C10", "file": "attempt2.jsonl", "run": 3, "msgs": 4, "shown": 4, "png": null, "png_rc": null, "stderr": ""}

@@ -1,0 +1,1 @@
+attempt1: ledger {meaning:breakout, by_kind:true} -> one row breakout n=74 realized=42. Worked first time. Slight ambiguity whether to use by_kind or not; "tür" = kind/meaning.

@@ -1,0 +1,1 @@
+THYAO'daki açık kırılım bulgusunun (fnd.THYAO.breakout.down.311) üç olgusunun dondurulmuş kanıtı bugünkü veriyle sınandı ve üçü de "verified" çıktı: bar sayıları (312, 313, 315) ve veri özetleri aynı, kanıt değerleri de aynı. Yani kanıt bugünkü veriyle uyuşuyor, düzeltme yok.

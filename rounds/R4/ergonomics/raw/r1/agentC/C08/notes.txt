@@ -1,0 +1,2 @@
+attempt1: read-only document query to check for existing audience (set_audience replaces everything); none found (no "audiences" key in document).
+attempt2: set_audience {group habituated, watchlist [ASELS]} mode direct -> applied. Unclear: group is required, so I had to pick a default (habituated); cannot tell whether an existing audience existed except by absence from document; no "add to watchlist" op.

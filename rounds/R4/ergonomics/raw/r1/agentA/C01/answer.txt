@@ -1,0 +1,1 @@
+Bugün (son bar, 319) THYAO'da yeni bir kapsül doğmadı ya da hareket etmedi. En son hareket bir bar önce (bar 318): 315. barda doğan aşağı kırılım kapsülü (cap.THYAO.breakout.down.315, 32,64'teki desteğin kırılması) yeni bir kanıtla güçlendi ve hâlâ geçerli; karnesi 8 seferin 3'ünde tuttu. Daha eski kapsüllerin çoğu kapanmış durumda.

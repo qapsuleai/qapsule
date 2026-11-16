@@ -1,0 +1,1 @@
+ASELS'te en son geçersiz olan kapsül cap.ASELS.breakout.up.312 (32,77'deki direncin yukarı kırılımı). 312. barda doğdu, aynı barda kurumsal net satış olgusuyla zayıfladı ve 316. barda "barrier.stop" nedeniyle (stop bariyeri: kırılımın tutması için kapanışın seviyenin üstünde kalması gerekiyordu, 3 bar içinde kalamadı) geçersiz oldu. Karnede "refuted" olarak kayıtlı.

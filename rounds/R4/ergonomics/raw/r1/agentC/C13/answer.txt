@@ -1,0 +1,1 @@
+THYAO'daki en son doğan kırılım kapsülü cap.THYAO.breakout.down.313 (32,64'teki desteğin aşağı kırılımı). Geçmişi: 313. barda doğdu (new_story); 314. barda aynı aileden yeni kanıtla güçlendi (same_family); 316. barda yine güçlendi (same_family). Şu an aşaması "strengthened", durumu canlı ve hâlâ geçerli; karnesi 8 seferin 3'ü.

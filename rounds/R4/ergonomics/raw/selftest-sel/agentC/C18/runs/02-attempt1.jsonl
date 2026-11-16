@@ -1,0 +1,2 @@
+{"conn": "a", "msg": {"type": "hello", "protocol": "qp/0", "principal": "editor", "surface": {"kind": "headless"}}}
+{"conn": "a", "msg": {"type": "command", "id": "c", "ops": [{"op": "set_audience", "audience": {"group": "habituated", "positions": {"THYAO": 100}}}]}}

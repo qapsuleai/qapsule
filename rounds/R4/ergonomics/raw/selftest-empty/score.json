@@ -1,0 +1,693 @@
+{
+ "agents": {
+  "agentA": {
+   "off": 5,
+   "seed": 2836521784
+  },
+  "agentB": {
+   "off": 4,
+   "seed": 3804798394
+  },
+  "agentC": {
+   "off": 3,
+   "seed": 1206893805
+  },
+  "agentD": {
+   "off": 1,
+   "seed": 2030928247
+  },
+  "agentE": {
+   "off": 4,
+   "seed": 4055023709
+  }
+ },
+ "rows": [
+  {
+   "agent": "A",
+   "answer": "",
+   "attempts": 1,
+   "c13_alt_reading": null,
+   "detail": [
+    {
+     "error_codes": [],
+     "errors": 0,
+     "file": "attempt1.jsonl",
+     "how": "run",
+     "ids": [],
+     "msgs": 1,
+     "pass": false,
+     "run": "C01/runs/01-attempt1.jsonl",
+     "why": [
+      "a capsules query whose answer holds every open THYAO capsule",
+      "answer names every open THYAO capsule (missing: ['cap.THYAO.extreme.down.308', 'cap.THYAO.breakout.down.310', 'cap.THYAO.continuation.down.309'])"
+     ]
+    }
+   ],
+   "final": false,
+   "final_idfree": false,
+   "final_lenient": false,
+   "first": false,
+   "first_error": false,
+   "first_idfree": false,
+   "msgs_first": 1,
+   "msgs_total": 1,
+   "notes": "",
+   "other_runs": [],
+   "task": "C01"
+  },
+  {
+   "agent": "B",
+   "answer": "",
+   "attempts": 1,
+   "c13_alt_reading": null,
+   "detail": [
+    {
+     "error_codes": [],
+     "errors": 0,
+     "file": "attempt1.jsonl",
+     "how": "run",
+     "ids": [],
+     "msgs": 1,
+     "pass": false,
+     "run": "C02/runs/01-attempt1.jsonl",
+     "why": [
+      "capsule query on the open THYAO breakout with evidence values returned"
+     ]
+    }
+   ],
+   "final": false,
+   "final_idfree": false,
+   "final_lenient": false,
+   "first": false,
+   "first_error": false,
+   "first_idfree": false,
+   "msgs_first": 1,
+   "msgs_total": 1,
+   "notes": "",
+   "other_runs": [],
+   "task": "C02"
+  },
+  {
+   "agent": "C",
+   "answer": "",
+   "attempts": 1,
+   "c13_alt_reading": null,
+   "detail": [
+    {
+     "error_codes": [],
+     "errors": 0,
+     "file": "attempt1.jsonl",
+     "how": "run",
+     "ids": [],
+     "msgs": 1,
+     "pass": false,
+     "run": "C03/runs/01-attempt1.jsonl",
+     "why": [
+      "capsule query on cap.ASELS.breakout.up.311",
+      "answer names the invalidation",
+      "answer gives the reason (None)"
+     ]
+    }
+   ],
+   "final": false,
+   "final_idfree": false,
+   "final_lenient": false,
+   "first": false,
+   "first_error": false,
+   "first_idfree": false,
+   "msgs_first": 1,
+   "msgs_total": 1,
+   "notes": "",
+   "other_runs": [],
+   "task": "C03"
+  },
+  {
+   "agent": "D",
+   "answer": "",
+   "attempts": 1,
+   "c13_alt_reading": null,
+   "detail": [
+    {
+     "error_codes": [],
+     "errors": 0,
+     "file": "attempt1.jsonl",
+     "how": "run",
+     "ids": [],
+     "msgs": 1,
+     "pass": false,
+     "run": "C04/runs/01-attempt1.jsonl",
+     "why": [
+      "reject_finding on the open THYAO breakout's finding, in the log (applied or proposed)"
+     ]
+    }
+   ],
+   "final": false,
+   "final_idfree": false,
+   "final_lenient": false,
+   "first": false,
+   "first_error": false,
+   "first_idfree": false,
+   "msgs_first": 1,
+   "msgs_total": 1,
+   "notes": "",
+   "other_runs": [],
+   "task": "C04"
+  },
+  {
+   "agent": "E",
+   "answer": "",
+   "attempts": 1,
+   "c13_alt_reading": null,
+   "detail": [
+    {
+     "error_codes": [],
+     "errors": 0,
+     "file": "attempt1.jsonl",
+     "how": "run",
+     "ids": [],
+     "msgs": 1,
+     "pass": false,
+     "run": "C05/runs/01-attempt1.jsonl",
+     "why": [
+      "a capsules query",
+      "answer names the three most important capsules in order (all stories or open ones)"
+     ]
+    }
+   ],
+   "final": false,
+   "final_idfree": false,
+   "final_lenient": false,
+   "first": false,
+   "first_error": false,
+   "first_idfree": false,
+   "msgs_first": 1,
+   "msgs_total": 1,
+   "notes": "",
+   "other_runs": [],
+   "task": "C05"
+  },
+  {
+   "agent": "A",
+   "answer": "",
+   "attempts": 1,
+   "c13_alt_reading": null,
+   "detail": [
+    {
+     "error_codes": [],
+     "errors": 0,
+     "file": "attempt1.jsonl",
+     "how": "run",
+     "ids": [],
+     "msgs": 1,
+     "pass": false,
+     "run": "C06/runs/01-attempt1.jsonl",
+     "why": [
+      "a ledger query",
+      "answer gives n=73 and realized=42"
+     ]
+    }
+   ],
+   "final": false,
+   "final_idfree": false,
+   "final_lenient": false,
+   "first": false,
+   "first_error": false,
+   "first_idfree": false,
+   "msgs_first": 1,
+   "msgs_total": 1,
+   "notes": "",
+   "other_runs": [],
+   "task": "C06"
+  },
+  {
+   "agent": "B",
+   "answer": "",
+   "attempts": 1,
+   "c13_alt_reading": null,
+   "detail": [
+    {
+     "error_codes": [],
+     "errors": 0,
+     "file": "attempt1.jsonl",
+     "how": "run",
+     "ids": [],
+     "msgs": 1,
+     "pass": false,
+     "run": "C07/runs/01-attempt1.jsonl",
+     "why": [
+      "editor's sensitivity important (got None)"
+     ]
+    }
+   ],
+   "final": false,
+   "final_idfree": false,
+   "final_lenient": false,
+   "first": false,
+   "first_error": false,
+   "first_idfree": false,
+   "msgs_first": 1,
+   "msgs_total": 1,
+   "notes": "",
+   "other_runs": [],
+   "task": "C07"
+  },
+  {
+   "agent": "C",
+   "answer": "",
+   "attempts": 1,
+   "c13_alt_reading": null,
+   "detail": [
+    {
+     "error_codes": [],
+     "errors": 0,
+     "file": "attempt1.jsonl",
+     "how": "run",
+     "ids": [],
+     "msgs": 1,
+     "pass": false,
+     "run": "C08/runs/01-attempt1.jsonl",
+     "why": [
+      "ASELS in editor's watch list (got None)"
+     ]
+    }
+   ],
+   "final": false,
+   "final_idfree": false,
+   "final_lenient": false,
+   "first": false,
+   "first_error": false,
+   "first_idfree": false,
+   "msgs_first": 1,
+   "msgs_total": 1,
+   "notes": "",
+   "other_runs": [],
+   "task": "C08"
+  },
+  {
+   "agent": "D",
+   "answer": "",
+   "attempts": 1,
+   "c13_alt_reading": null,
+   "detail": [
+    {
+     "error_codes": [],
+     "errors": 0,
+     "file": "attempt1.jsonl",
+     "how": "run",
+     "ids": [],
+     "msgs": 1,
+     "pass": false,
+     "run": "C09/runs/01-attempt1.jsonl",
+     "why": [
+      "present of the open THYAO extreme capsule at capsule depth"
+     ]
+    }
+   ],
+   "final": false,
+   "final_idfree": false,
+   "final_lenient": false,
+   "first": false,
+   "first_error": false,
+   "first_idfree": false,
+   "msgs_first": 1,
+   "msgs_total": 1,
+   "notes": "",
+   "other_runs": [],
+   "task": "C09"
+  },
+  {
+   "agent": "E",
+   "answer": "",
+   "attempts": 1,
+   "c13_alt_reading": null,
+   "detail": [
+    {
+     "error_codes": [],
+     "errors": 0,
+     "file": "attempt1.jsonl",
+     "how": "run",
+     "ids": [],
+     "msgs": 1,
+     "pass": false,
+     "run": "C10/runs/01-attempt1.jsonl",
+     "why": [
+      "present of the open THYAO breakout at chart depth",
+      "answer says the broken level is not drawn"
+     ]
+    }
+   ],
+   "final": false,
+   "final_idfree": false,
+   "final_lenient": false,
+   "first": false,
+   "first_error": false,
+   "first_idfree": false,
+   "msgs_first": 1,
+   "msgs_total": 1,
+   "notes": "",
+   "other_runs": [],
+   "task": "C10"
+  },
+  {
+   "agent": "A",
+   "answer": "",
+   "attempts": 1,
+   "c13_alt_reading": null,
+   "detail": [
+    {
+     "error_codes": [],
+     "errors": 0,
+     "file": "attempt1.jsonl",
+     "how": "run",
+     "ids": [],
+     "msgs": 1,
+     "pass": false,
+     "run": "C11/runs/01-attempt1.jsonl",
+     "why": [
+      "a capsule / capsules / verify_evidence query as viewer",
+      "answer names the entitlement it needs (flow/…)"
+     ]
+    }
+   ],
+   "final": false,
+   "final_idfree": false,
+   "final_lenient": false,
+   "first": false,
+   "first_error": false,
+   "first_idfree": false,
+   "msgs_first": 1,
+   "msgs_total": 1,
+   "notes": "",
+   "other_runs": [],
+   "task": "C11"
+  },
+  {
+   "agent": "B",
+   "answer": "",
+   "attempts": 1,
+   "c13_alt_reading": null,
+   "detail": [
+    {
+     "error_codes": [],
+     "errors": 0,
+     "file": "attempt1.jsonl",
+     "how": "run",
+     "ids": [],
+     "msgs": 1,
+     "pass": false,
+     "run": "C12/runs/01-attempt1.jsonl",
+     "why": [
+      "subscribe to the capsules topic, instrument THYAO (acked)"
+     ]
+    }
+   ],
+   "final": false,
+   "final_idfree": false,
+   "final_lenient": false,
+   "first": false,
+   "first_error": false,
+   "first_idfree": false,
+   "msgs_first": 1,
+   "msgs_total": 1,
+   "notes": "",
+   "other_runs": [],
+   "task": "C12"
+  },
+  {
+   "agent": "C",
+   "answer": "",
+   "attempts": 1,
+   "c13_alt_reading": false,
+   "detail": [
+    {
+     "error_codes": [],
+     "errors": 0,
+     "file": "attempt1.jsonl",
+     "how": "run",
+     "ids": [],
+     "msgs": 1,
+     "pass": false,
+     "run": "C13/runs/01-attempt1.jsonl",
+     "why": [
+      "capsule query on cap.THYAO.breakout.down.308"
+     ]
+    }
+   ],
+   "final": false,
+   "final_idfree": false,
+   "final_lenient": false,
+   "first": false,
+   "first_error": false,
+   "first_idfree": false,
+   "msgs_first": 1,
+   "msgs_total": 1,
+   "notes": "",
+   "other_runs": [],
+   "task": "C13"
+  },
+  {
+   "agent": "D",
+   "answer": "",
+   "attempts": 1,
+   "c13_alt_reading": null,
+   "detail": [
+    {
+     "error_codes": [],
+     "errors": 0,
+     "file": "attempt1.jsonl",
+     "how": "run",
+     "ids": [],
+     "msgs": 1,
+     "pass": false,
+     "run": "C14/runs/01-attempt1.jsonl",
+     "why": [
+      "verify_evidence on the open THYAO breakout's fact (or its finding)"
+     ]
+    }
+   ],
+   "final": false,
+   "final_idfree": false,
+   "final_lenient": false,
+   "first": false,
+   "first_error": false,
+   "first_idfree": false,
+   "msgs_first": 1,
+   "msgs_total": 1,
+   "notes": "",
+   "other_runs": [],
+   "task": "C14"
+  },
+  {
+   "agent": "E",
+   "answer": "",
+   "attempts": 1,
+   "c13_alt_reading": null,
+   "detail": [
+    {
+     "error_codes": [],
+     "errors": 0,
+     "file": "attempt1.jsonl",
+     "how": "run",
+     "ids": [],
+     "msgs": 1,
+     "pass": false,
+     "run": "C15/runs/01-attempt1.jsonl",
+     "why": [
+      "dispute on the open THYAO breakout capsule, decided (rejected/upheld/pending)"
+     ]
+    }
+   ],
+   "final": false,
+   "final_idfree": false,
+   "final_lenient": false,
+   "first": false,
+   "first_error": false,
+   "first_idfree": false,
+   "msgs_first": 1,
+   "msgs_total": 1,
+   "notes": "",
+   "other_runs": [],
+   "task": "C15"
+  },
+  {
+   "agent": "A",
+   "answer": "",
+   "attempts": 1,
+   "c13_alt_reading": null,
+   "detail": [
+    {
+     "error_codes": [],
+     "errors": 0,
+     "file": "attempt1.jsonl",
+     "how": "run",
+     "ids": [],
+     "msgs": 1,
+     "pass": false,
+     "run": "C16/runs/01-attempt1.jsonl",
+     "why": [
+      "a capsule/capsules query that returned the THYAO squeeze capsule",
+      "answer says no longer valid"
+     ]
+    }
+   ],
+   "final": false,
+   "final_idfree": false,
+   "final_lenient": false,
+   "first": false,
+   "first_error": false,
+   "first_idfree": false,
+   "msgs_first": 1,
+   "msgs_total": 1,
+   "notes": "",
+   "other_runs": [],
+   "task": "C16"
+  },
+  {
+   "agent": "B",
+   "answer": "",
+   "attempts": 1,
+   "c13_alt_reading": null,
+   "detail": [
+    {
+     "error_codes": [],
+     "errors": 0,
+     "file": "attempt1.jsonl",
+     "how": "run",
+     "ids": [],
+     "msgs": 1,
+     "pass": false,
+     "run": "C17/runs/01-attempt1.jsonl",
+     "why": [
+      "a capsules query",
+      "answer counts per kind = {'breakout': 4, 'flow': 1, 'extreme': 1, 'continuation': 1} (or {'breakout': 5, 'flow': 1, 'extreme': 1, 'continuation': 1})"
+     ]
+    }
+   ],
+   "final": false,
+   "final_idfree": false,
+   "final_lenient": false,
+   "first": false,
+   "first_error": false,
+   "first_idfree": false,
+   "msgs_first": 1,
+   "msgs_total": 1,
+   "notes": "",
+   "other_runs": [],
+   "task": "C17"
+  },
+  {
+   "agent": "C",
+   "answer": "",
+   "attempts": 1,
+   "c13_alt_reading": null,
+   "detail": [
+    {
+     "error_codes": [],
+     "errors": 0,
+     "file": "attempt1.jsonl",
+     "how": "run",
+     "ids": [],
+     "msgs": 1,
+     "pass": false,
+     "run": "C18/runs/01-attempt1.jsonl",
+     "why": [
+      "editor's position THYAO = 100 (got None)"
+     ]
+    }
+   ],
+   "final": false,
+   "final_idfree": false,
+   "final_lenient": false,
+   "first": false,
+   "first_error": false,
+   "first_idfree": false,
+   "msgs_first": 1,
+   "msgs_total": 1,
+   "notes": "",
+   "other_runs": [],
+   "task": "C18"
+  },
+  {
+   "agent": "D",
+   "answer": "",
+   "attempts": 1,
+   "c13_alt_reading": null,
+   "detail": [
+    {
+     "error_codes": [],
+     "errors": 0,
+     "file": "attempt1.jsonl",
+     "how": "run",
+     "ids": [],
+     "msgs": 1,
+     "pass": false,
+     "run": "C19/runs/01-attempt1.jsonl",
+     "why": [
+      "capsules query with stages [realized]"
+     ]
+    }
+   ],
+   "final": false,
+   "final_idfree": false,
+   "final_lenient": false,
+   "first": false,
+   "first_error": false,
+   "first_idfree": false,
+   "msgs_first": 1,
+   "msgs_total": 1,
+   "notes": "",
+   "other_runs": [],
+   "task": "C19"
+  },
+  {
+   "agent": "E",
+   "answer": "",
+   "attempts": 1,
+   "c13_alt_reading": null,
+   "detail": [
+    {
+     "error_codes": [],
+     "errors": 0,
+     "file": "attempt1.jsonl",
+     "how": "run",
+     "ids": [],
+     "msgs": 1,
+     "pass": false,
+     "run": "C20/runs/01-attempt1.jsonl",
+     "why": [
+      "a PNG was drawn (run.sh --png)"
+     ]
+    }
+   ],
+   "final": false,
+   "final_idfree": false,
+   "final_lenient": false,
+   "first": false,
+   "first_error": false,
+   "first_idfree": false,
+   "msgs_first": 1,
+   "msgs_total": 1,
+   "notes": "",
+   "other_runs": [],
+   "task": "C20"
+  }
+ ],
+ "summary": {
+  "attempts": 20,
+  "cost_usd": 0,
+  "final": 0,
+  "final_idfree": 0,
+  "final_lenient": 0,
+  "first": 0,
+  "first_error": 0,
+  "first_idfree": 0,
+  "label": "selftest-empty",
+  "msgs_first": 20,
+  "msgs_total": 20,
+  "output_tokens": 0,
+  "tasks": 20,
+  "tokens": 0,
+  "unnumbered_runs": 0,
+  "wall_s": 0.0
+ }
+}

@@ -1,0 +1,4 @@
+attempt1: capsules query with instrument THYAO only (no time filter); result huge (all history), "bugün" not captured; welcome gave now.
+attempt2: since_bar 316 (guess from summary len 317) -> empty, because last bar index is 315 (len counts differently / "3 bar önce" sentence); plus open:true listing gave 3 open capsules.
+attempt3: since_bar 315 -> only breakout.down.312 moved today. Success.
+Unclear: spec does not say how to map "bugün" to a bar/time; welcome.summary series len=317 but last processed bar is 315, off-by-one confusion; need to infer from the sentence.

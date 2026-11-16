@@ -1,0 +1,1 @@
+THYAO'daki açık kırılım bulgusu (fnd.THYAO.breakout.down.311, aşağı kırılım) için ret işlemini gönderdim. Ancak editor rolünün karar (decide) yetkisi olmadığından ret doğrudan uygulanmadı; "prop-4" numaralı bir öneri olarak kaydedildi ve karar yetkisi olan birinin onayını bekliyor.

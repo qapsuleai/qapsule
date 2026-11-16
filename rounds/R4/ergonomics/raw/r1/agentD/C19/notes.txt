@@ -1,0 +1,1 @@
+attempt1: query capsules with stages ["realized"]; got 87 capsules, all stage realized. No problems; output is huge (welcome summary plus list), no limit used.

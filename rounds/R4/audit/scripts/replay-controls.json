@@ -1,0 +1,7 @@
+[{"at":5,"control":{"kind":"speed","steps_per_s":64}},
+ {"at":30,"control":{"kind":"step","n":7}},
+ {"at":60,"control":{"kind":"seek","step":12}},
+ {"at":80,"control":{"kind":"pause"}},
+ {"at":80,"control":{"kind":"resume"}},
+ {"at":140,"control":{"kind":"seek","date":"2023-09-04"}},
+ {"at":200,"control":{"kind":"seek","step":150}}]

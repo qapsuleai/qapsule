@@ -74,7 +74,19 @@ try {
     }
     await page.evaluate(() => { document.activeElement && document.activeElement.blur(); window.qp.repaint(); });
     await settle(page);
-    await page.locator('#phone').screenshot({ path: path.join(out, `${s.name}.page.png`), animations: 'disabled', caret: 'hide' });
+    // Stable capture: under heavy machine load Chromium occasionally rasterises a control's
+    // edge one step differently for a frame; wait for two consecutive identical captures
+    // (what Playwright's toHaveScreenshot does) so the two-run comparison measures the page.
+    const phone = page.locator('#phone');
+    const shot = () => phone.screenshot({ animations: 'disabled', caret: 'hide' });
+    let prev = await shot();
+    for (let k = 0; k < 10; k++) {
+      await page.waitForTimeout(100);
+      const cur = await shot();
+      if (cur.equals(prev)) break;
+      prev = cur;
+    }
+    fs.writeFileSync(path.join(out, `${s.name}.page.png`), prev);
     const feed = await page.evaluate(() => JSON.parse(window.qp.feed()));
     for (const c of s.canvases) {
       const id = c === 'scene' ? 'scene' : feed[Number(c.split('-')[1])].id;

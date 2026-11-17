@@ -29,7 +29,7 @@ use std::collections::BTreeMap;
 
 use qp_schema::scene::{Align, Prim, Rgba, SceneDesc};
 
-use super::{scene_digest, ShellCore};
+use super::ShellCore;
 
 /// Bytes per vertex: `x, y` (`f32` clip space), colour (`unorm8x4`, premultiplied),
 /// `u, v` (`f32` atlas texels). `gpu.js` declares the same layout.
@@ -657,11 +657,9 @@ impl ShellCore {
         let Some(scene) = self.face(id) else {
             return false;
         };
-        let d = scene_digest(&scene);
-        if !force && self.face_shown.get(id) == Some(&d) {
+        if !self.face_changed(id, &scene, force) {
             return false;
         }
-        self.face_shown.insert(id.to_owned(), d);
         gpu.build(&scene, self.scale);
         true
     }
@@ -673,11 +671,9 @@ impl ShellCore {
             self.scene_shown = None;
             return false;
         };
-        let d = scene_digest(&scene);
-        if !force && self.scene_shown.as_deref() == Some(d.as_str()) {
+        if !self.scene_changed(&scene, force) {
             return false;
         }
-        self.scene_shown = Some(d);
         gpu.build(&scene, self.scale);
         true
     }

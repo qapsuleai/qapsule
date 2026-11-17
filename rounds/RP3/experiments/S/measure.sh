@@ -9,7 +9,7 @@
 #   with JIT = PHONE_JIT_EST), cdp4 (Chromium headless shell, CDP 4×, DPR 3, 402×874; the
 #   shell has no WebGPU, so `gpu` is not among its supported paths), cdp4full (the same in
 #   the full Chromium, `--channel chromium`: WebGPU on the machine's GPU).
-#   Env: RUNS (default 3), QP (default target/release/qp), PORT (default 8493), PATHS
+#   Env: RUNS (default 3), ORDERS (default "forward reverse"), QP (default target/release/qp), PORT (default 8493), PATHS
 #   (default ref,canvas,cpu,gpu).
 # The package must be built first (scripts/demo.sh with QP_DEMO_PACK_ONLY=1) and `qp` too.
 set -euo pipefail
@@ -30,7 +30,7 @@ for s in "${settings[@]}"; do
     *) echo "unknown setting $s" >&2; exit 2 ;;
   esac
   for run in $(seq 1 "$runs"); do
-    for order in forward reverse; do
+    for order in ${ORDERS:-forward reverse}; do
       d="$out/$s/$order-$run"
       mkdir -p "$d"
       o=(); [ "$order" = reverse ] && o=(--order reverse)

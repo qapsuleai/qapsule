@@ -176,3 +176,66 @@
 | canvas | 0,5 · 2,2 / 3,1 · 1,8 / 2,2 (2) · 10,3 | 1,7 / 3,8 (10) · 3,8 | 1,4 / 1,8 (128) · 2,9 |
 | cpu | 0,6 · 1,3 / 2,5 · 8,5 / 8,5 (1) · 9,8 | 5,3 / 6,7 (10) · 7,6 | 1,4 / 2,9 (129) · 4,1 |
 | gpu | 0,7 · 2,3 / 4,2 · 2,5 / 3,3 (5) · 11,4 | 1,7 / 2,5 (10) · 4,1 | 1,6 / 2 (128) · 3,1 |
+
+## RP3/S ek: değişiklik sınaması önce (A, JSON özeti) / sonra (B, parmak izi) — ileri sıra, ref ve canvas
+
+### A, PHONE (breakdown.py)
+
+| path | phase | paint_pass p50/p95 (n) · ms/data frame | scene_build p50/p95 (n) · ms/data frame | change_check p50/p95 (n) · ms/data frame | scene p50/p95 (n) · ms/data frame | face p50/p95 (n) · ms/data frame | tick+pass |
+|---|---|---|---|---|---|---|---|
+| ref | idle | 1/130 (32) · 13,36 | —/— (0) · 0 | 0/1 (12) · 0,13 | —/— (0) · 0 | 32/37 (12) · 12,32 | 13,68 |
+| ref | chart_ticks | 16/51 (32) · 19 | 3/5 (31) · 3 | 6/11 (31) · 7 | 40/48 (6) · 8,23 | —/— (0) · 0 | 19,61 |
+| canvas | idle | 0/7 (32) · 0,87 | —/— (0) · 0 | 0/1 (12) · 0,16 | —/— (0) · 0 | 1/2 (4) · 0,16 | 1,29 |
+| canvas | chart_ticks | 14/19 (32) · 13,87 | 3/5 (31) · 3,19 | 8/11 (31) · 7,61 | 8/18 (2) · 0,84 | —/— (0) · 0 | 14,39 |
+
+### B, PHONE ve PHONE_JIT_EST (breakdown.py)
+
+| path | phase | paint_pass p50/p95 (n) · ms/data frame | scene_build p50/p95 (n) · ms/data frame | change_check p50/p95 (n) · ms/data frame | scene p50/p95 (n) · ms/data frame | face p50/p95 (n) · ms/data frame | tick+pass |
+|---|---|---|---|---|---|---|---|
+| ref | idle | 1/45 (32) · 5,23 | —/— (0) · 0 | 0/0 (12) · 0 | —/— (0) · 0 | 33/40 (4) · 4,35 | 5,61 |
+| ref | chart_ticks | 7/10 (32) · 8,68 | 4/5 (31) · 3,19 | 1/1 (31) · 0,58 | 36/42 (1) · 1,81 | —/— (0) · 0 | 9,36 |
+| canvas | idle | 0/5 (32) · 0,9 | —/— (0) · 0 | 0/1 (12) · 0,03 | —/— (0) · 0 | 1/2 (4) · 0,13 | 1,26 |
+| canvas | chart_ticks | 7/10 (32) · 6,62 | 4/5 (31) · 3,22 | 1/1 (31) · 0,72 | 8/9 (1) · 0,32 | —/— (0) · 0 | 7,31 |
+
+| path | phase | paint_pass p50/p95 (n) · ms/data frame | scene_build p50/p95 (n) · ms/data frame | change_check p50/p95 (n) · ms/data frame | scene p50/p95 (n) · ms/data frame | face p50/p95 (n) · ms/data frame | tick+pass |
+|---|---|---|---|---|---|---|---|
+| ref | idle | 0/5 (32) · 0,65 | —/— (0) · 0 | 0/0 (12) · 0 | —/— (0) · 0 | 2/5 (4) · 0,35 | 0,81 |
+| ref | chart_ticks | 1/3 (32) · 1,32 | 0/1 (31) · 0,42 | 0/0 (31) · 0,03 | 7/7 (1) · 0,23 | —/— (0) · 0 | 1,52 |
+| canvas | idle | 0/1 (32) · 0,25 | —/— (0) · 0 | 0/0 (12) · 0 | —/— (0) · 0 | 0/2 (4) · 0,06 | 0,28 |
+| canvas | chart_ticks | 1/1 (32) · 0,65 | 0/1 (31) · 0,29 | 0/0 (31) · 0,03 | 1/1 (2) · 0,03 | —/— (0) · 0 | 0,81 |
+
+### B, tables.py
+
+#### phone, forward (3 runs; path order ref, canvas; load 1 min 7,0–11,3)
+
+| path | tick p50/p95/p99 | paint pass p50/p95/p99 | face p50/p95/p99 (n) | scene p50/p95/p99 (n) | tick+pass idle / chart | WASM MB | JS heap MB |
+|---|---|---|---|---|---|---:|---:|
+| ref | 1 / 1 / 1 | 24 / 36 / 46 | 34 / 43 / 43 (14) | 23 / 25 / 34 (122) | 5,61 / 9,36 | 16,1 | — |
+| canvas | 1 / 1 / 1 | 7 / 12 / 13 | 1 / 9 / 9 (14) | 4 / 6 / 8 (122) | 1,26 / 7,31 | 16,1 | — |
+
+| path | frame idle p50/p95/p99 (long) | scroll | chart_ticks | drag |
+|---|---|---|---|---|
+| ref | 17 / 18 / 36 (0,011) | 17 / 18 / 42 (0,021) | 17 / 17 / 18 (0,002) | 17 / 27 / 28 (0,238) |
+| canvas | 17 / 18 / 18 (0,000) | 17 / 18 / 20 (0,002) | 17 / 18 / 18 (0,000) | 17 / 18 / 20 (0,000) |
+
+| path | chart_ticks: tick p95 · pass p50/p95 · scene p50/p95 (n) · data→paint p95 | scroll: face p50/p95 (n) · pass p95 | drag: scene p50/p95 (n) · pass p95 |
+|---|---|---|---|
+| ref | 1 · 7 / 10 · 36 / 42 (1) · 25 | 34 / 43 (10) · 41 | 23 / 25 (121) · 27 |
+| canvas | 1 · 7 / 10 · 8 / 9 (1) · 23 | 2 / 9 (10) · 9 | 4 / 6 (120) · 12 |
+
+#### phone_jit, forward (3 runs; path order ref, canvas; load 1 min 6,8–11,2)
+
+| path | tick p50/p95/p99 | paint pass p50/p95/p99 | face p50/p95/p99 (n) | scene p50/p95/p99 (n) | tick+pass idle / chart | WASM MB | JS heap MB |
+|---|---|---|---|---|---|---:|---:|
+| ref | 0 / 1 / 1 | 2 / 6 / 7 | 3 / 5 / 5 (14) | 3 / 5 / 6 (124) | 0,81 / 1,52 | 16,1 | — |
+| canvas | 0 / 1 / 1 | 1 / 2 / 2 | 0 / 2 / 2 (14) | 1 / 1 / 1 (123) | 0,28 / 0,81 | 16,1 | — |
+
+| path | frame idle p50/p95/p99 (long) | scroll | chart_ticks | drag |
+|---|---|---|---|---|
+| ref | 17 / 18 / 19 (0,002) | 17 / 18 / 19 (0,002) | 17 / 18 / 18 (0,000) | 17 / 18 / 18 (0,000) |
+| canvas | 17 / 18 / 18 (0,000) | 17 / 18 / 19 (0,000) | 17 / 18 / 18 (0,000) | 17 / 18 / 18 (0,000) |
+
+| path | chart_ticks: tick p95 · pass p50/p95 · scene p50/p95 (n) · data→paint p95 | scroll: face p50/p95 (n) · pass p95 | drag: scene p50/p95 (n) · pass p95 |
+|---|---|---|---|
+| ref | 1 · 1 / 3 · 7 / 7 (1) · 17 | 3 / 5 (10) · 6 | 3 / 5 (123) · 5 |
+| canvas | 1 · 1 / 1 · 1 / 1 (2) · 17 | 1 / 1 (10) · 2 | 1 / 1 (121) · 2 |

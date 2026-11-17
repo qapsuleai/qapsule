@@ -59,6 +59,21 @@ geçerli sayılır ve yazılır.
   (`--paint` seçeneği, varsayılan `ref`) ve verify `demo` adımı altın görsellerle bayt
   eşitliğini korur. `cpu` ve `gpu` `?paint=` ile seçilir.
 
+### 1.5 Ortak değişiklik sınaması: JSON özeti yerine parmak izi (ana oturumun isteği)
+
+`ref`, `canvas`, `gpu` ve boyama listesi yüz/sahne teslimini "son teslimden beri değişti mi"
+diye sınıyordu (`face_shown`/`scene_shown`): anahtar `scene_digest` (bütün `SceneDesc`'in
+JSON'u + FNV-1a). Artık anahtar `qp_render::retained::scene_fingerprint`: boyut, arka plan ve
+`SceneDesc::prims()`'in her ilkelinin her alanı, boyama sırasıyla, bit bit, 64 bit SipHash
+(sabit anahtarlar; `cpu` yolunun ilkel anahtarı); dizileştirme yok. Sınama tek yerde:
+`ShellCore::face_changed` / `scene_changed` (`shell.rs`); süresi `change_check`, sahne kurma
+`scene_build` olarak ölçülür (yalnız wasm'da). **Değişmeyen:** `digests()` (eşlik/`view_digest`,
+§19.6 FNV-JSON), `drive.rs`, protokol ve altın görseller. Yanlış "değişmedi" yalnız 64 bitlik
+bir çakışmayla olur; her piksel alanının değişiminin anahtarı çevirdiği test edildi
+(`qp-render/tests/retained.rs::scene_fingerprint_flips_on_any_pixel_field`: boyut, arka plan,
+sıra, sayı, beş ilkel türünün her alanı, tür değişimi; görünüm adı ve eşleme gibi piksele
+ulaşmayan alanlar anahtarı değiştirmez). Ölçüm ve döküm: §6.1.
+
 ## 2. Testler (ölçüt 4, 10; VERIFY 5, 7, 8)
 
 | Test | Ne sınar | verify | Sonuç (birleşik yapı) |
@@ -182,18 +197,21 @@ Telefonun LAN/HTTP kurulumunda gzip gider (M13): +40 KB ≈ 40 Mbit/s'te +8 ms.
 "Tik" R4'te boyamayı içeriyordu; karşılaştırılabilir sayı **tik + geçiş**. p95 için üst
 sınır: veri çerçevesinin tik p95'i + aynı evrenin geçiş p95'i (`chart_ticks`, sahne açık ve
 tik akıyor — Arkin'in koşusunun durumu). PHONE_BIAS (CALIBRATION §4): yüz ×1,0, sahne ×1,85,
-sahneli tik ×1,6; tik+geçişe ×1,6, sahne süresine ×1,85 uygulandı. İleri/ters ortancası.
+sahneli tik ×1,6; tik+geçişe ×1,6 uygulandı. **Önce** = §3'ün koşuları (JSON özetli değişiklik
+sınaması; ileri/ters, 3+3 koşu ortancası); **sonra** = §6.2'nin parmak izli değişiklik
+sınaması (ileri sıra, 3 koşu ortancası; yollar `ref, canvas`).
 
-| Ölçü | Hedef | PHONE ham | PHONE × PHONE_BIAS | PHONE_JIT_EST | Durum |
+| Ölçü | Hedef | PHONE ham önce → sonra | PHONE × PHONE_BIAS önce → sonra | PHONE_JIT_EST önce → sonra | Durum (sonra) |
 |---|---:|---:|---:|---:|---|
-| Tik p95 (tik + geçiş, `chart_ticks`: grafik açık, tik akıyor) | ≤ 8 ms | **1 + 18–19 ≈ 19–20 ms** (ortalama 13,7–14,3) | **≈ 30–32 ms** (ortalama ≈ 22) | 1 + 2 = **3 ms** | PHONE ✗, JIT ✓ |
-| Tik p95, akış ekranı (`idle`) | ≤ 8 ms | 1 + 6–7 = **7–8 ms** (ortalama 1,4–1,6) | ≈ 11–13 | 1 + 2 = 3 | PHONE ham ✓ (sınırda), yanlılıkla ✗; JIT ✓ |
+| Tik p95 (tik + geçiş, `chart_ticks`: grafik açık, tik akıyor) | ≤ 8 ms | 1 + 18–19 ≈ 19–20 → **1 + 10 = 11 ms** (ortalama 14,0 → **7,3**) | ≈ 30–32 → **≈ 18 ms** (ortalama ≈ 22 → **11,7**) | 1 + 2 = 3 → **1 + 1 = 2 ms** (ortalama 1,3 → 0,8) | PHONE ✗ (ortalama ham ✓), JIT ✓ |
+| Tik p95, akış ekranı (`idle`) | ≤ 8 ms | 1 + 6–7 = 7–8 → **1 + 5 = 6 ms** (ortalama 1,5 → 1,3) | ≈ 11–13 → **≈ 10** | 1 + 2 = 3 → **1 + 1 = 2** | PHONE ham ✓, yanlılıkla ✗; JIT ✓ |
 | Kaydırma karesi p95 | ≤ 16,7 ms | **18 ms** (p99 19–23; uzun pay 0,2–0,4 %) | 18 (yüz ×1,0; geçiş p95 12 → 1 kareye sığar) | 18 (uzun 0) | ✓ kaçan kare yok; 18 = 60 Hz + 1 ms'lik saat (ref de 18; T2 §1a) |
 | İlk kapsül, soğuk | ≤ 1,5 s | 0,18 s döngüde + 1,55 MB aktarım (40 Mbit/s: 0,31 s) + ≈ 4 RTT (0,08 s) ≈ **0,57 s** | (yanlılık açılışa uygulanmaz) | — | ✓ (tahmin; WebKit'te ağ kısıtı yok) |
 | İlk kapsül, Chromium 4× + 40 Mbit/20 ms | — | **540 ms** (ref ile 564) | | | ✓ |
 
-İlk kapsül ölçümü: `tests/startup.mjs` (`QP_JSC`, `QP_VIEWPORT`, `QP_QUERY` eklendi), DPR 3,
-402×874, 5 taze bağlam, ortanca; yük 7,3–8,2.
+İlk kapsül ölçümü (önce; değişiklik sınaması açılışı etkilemez): `tests/startup.mjs`
+(`QP_JSC`, `QP_VIEWPORT`, `QP_QUERY` eklendi), DPR 3, 402×874, 5 taze bağlam, ortanca;
+yük 7,3–8,2.
 
 | Ayar | yol | WASM hazır | bağlandı | akış | ilk kapsül (min–maks) | aktarılan bayt (WASM, kodlama) | istek |
 |---|---|---:|---:|---:|---:|---|---:|
@@ -205,35 +223,52 @@ sahneli tik ×1,6; tik+geçişe ×1,6, sahne süresine ×1,85 uygulandı. İleri
 (Arkin'in R4 ölçümü: ilk kapsül 3,9 s, WASM hazır 1,8 s. Kalan büyük kalemler M13 —
 sıkıştırma, WebKit'in çift indirmesi — ve M15 — başlangıç çerçevesinde bar yok — ile kalktı.)
 
-### 6.1 Tik hedefi neden tutmuyor (PHONE) ve ne gerekir
+### 6.1 Boyama geçişinin dökümü: önce JSON özeti, sonra parmak izi
 
-Ölçüm (PHONE, `chart_ticks`, ileri koşu 1, 31 veri çerçevesi): `canvas` yolunda sahne 31
-çerçevenin yalnız **1'inde** gerçekten değişip boyandı, ama her çerçevenin boyama geçişi
-p50 **16 ms**. Boyamanın kendisi değil, **değişmeyen sahnenin her çerçevede yeniden kurulup
-"değişti mi" diye sınanması** pahalı:
+İlk analizde (`cpu` yoluyla karşılaştırarak) "geçişin ≈ 9 ms'si JSON `scene_digest`
+değişiklik sınaması" çıkarımı yapılmıştı. Doğrulamak için çekirdeğe iki süre eklendi:
+`scene_build` (açık sahnenin kurulması, `ShellCore::scene`) ve `change_check` (yüz/sahne
+teslimindeki "değişti mi" anahtarı, `ShellCore::{face,scene}_changed`). Önce JSON özetiyle
+ölçüldü (A), sonra yalnız anahtar değiştirildi (B). PHONE ve PHONE_JIT_EST, ileri sıra, yollar
+`ref, canvas`, 3 koşu ortancası; ms; "/çerç." = veri çerçevesi başına toplam
+(`rounds/RP3/experiments/S/breakdown.py`). Yük (1 dk): A 7,9–9,5; B PHONE 7,0–11,1, B JIT
+6,8–11,2.
 
-- `cpu` yolu aynı evrede geçiş p50 **7 ms**, tik+geçiş 7,8 ms: kendi süreleri `cpu_compile`
-  (sahne kurma + aygıt ölçeği) p50 **3 ms**, `cpu_raster` (ilkel eşleme, SipHash) 1 ms.
-- `canvas`, `ref` ve `gpu` değişmeyen sahneyi `scene_digest` ile sınıyor:
-  `qp_session::viewer::scene_digest` = bütün `SceneDesc`'in `serde_json::to_vec`'i + FNV-1a.
-  Aradaki fark (16 − 7 ≈ 9 ms/çerçeve) bu JSON dizileştirme ve aygıt ölçeğine çevirmedir
-  (JIT'siz yorumlayıcıda; JIT'li kipte aynı geçiş 1 ms). Bu çıkarım `cpu`'nun aynı evredeki
-  ölçümüne dayanır; JSON özetinin süresi ayrıca enstrümanlanmadı.
+| Ayar | yol | evre | geçiş p50/p95 · /çerç. | sahne kurma p50/p95 · /çerç. | değişiklik sınaması p50/p95 · /çerç. | boyama (sahne/yüz) · /çerç. | tik+geçiş |
+|---|---|---|---|---|---|---|---|
+| PHONE A (JSON) | ref | chart_ticks | 16/51 · 19,0 | 3/5 · 3,0 | **6/11 · 7,0** | sahne 40/48 (n 6) · 8,2 | 19,6 |
+| PHONE A (JSON) | canvas | chart_ticks | 14/19 · 13,9 | 3/5 · 3,2 | **8/11 · 7,6** | sahne 8/18 (n 2) · 0,8 | 14,4 |
+| PHONE B (parmak izi) | ref | chart_ticks | 7/10 · 8,7 | 4/5 · 3,2 | **1/1 · 0,6** | sahne 36/42 (n 1) · 1,8 | **9,4** |
+| PHONE B (parmak izi) | canvas | chart_ticks | 7/10 · 6,6 | 4/5 · 3,2 | **1/1 · 0,7** | sahne 8/9 (n 1) · 0,3 | **7,3** |
+| PHONE A | ref | idle | 1/130 · 13,4 | — | 0/1 · 0,1 | yüz 32/37 (n 12) · 12,3 | 13,7 |
+| PHONE A | canvas | idle | 0/7 · 0,9 | — | 0/1 · 0,2 | yüz 1/2 (n 4) · 0,2 | 1,3 |
+| PHONE B | ref | idle | 1/45 · 5,2 | — | 0/0 · 0 | yüz 33/40 (n 4) · 4,4 | 5,6 |
+| PHONE B | canvas | idle | 0/5 · 0,9 | — | 0/1 · 0 | yüz 1/2 (n 4) · 0,1 | 1,3 |
+| JIT B | ref | chart_ticks | 1/3 · 1,3 | 0/1 · 0,4 | 0/0 · 0,03 | sahne 7/7 (n 1) · 0,2 | 1,5 |
+| JIT B | canvas | chart_ticks | 1/1 · 0,7 | 0/1 · 0,3 | 0/0 · 0,03 | sahne 1/1 (n 2) · 0,03 | 0,8 |
 
-Gereken (büyükten küçüğe, ölçülen değerlere göre):
-1. **Değişmeyen sahneyi ucuz tanımak**: `canvas` yolunun sınaması JSON özeti yerine
-   `retained.rs`'in ilkel parmak iziyle (ya da `CanvasPainter`'ın zaten tuttuğu son
-   listeyle) yapılırsa geçiş ≈ `cpu`'nunki (p50 7–9 ms, tik+geçiş ≈ 8–9 ms) beklenir —
-   hedefin sınırında, yanlılıkla (×1,6) ≈ 13–14 ms.
-2. **Sahneyi hiç kurmamak**: M14 önerisi 1 — derleyici (qp-grammar) okuduğu bar aralığını
-   versin; değişen bar aralık dışındaysa kurma yok. Bu evrede çerçevelerin %97'si
-   (30/31) boyamasız: tik+geçiş tik düzeyine (≈ 1 ms) iner. Hedef ancak bununla JIT'siz
-   kipte de tutar.
-3. **Güvenli bağlam (HTTPS)**: aynı kod JIT'li kipte 3 ms (p95) — bugün tutuyor. iPhone'da
-   JIT ve WebGPU için gösterimin HTTPS ile sunulması (CALIBRATION §9) en büyük tek kaldıraç.
+Okuma:
+- **Çıkarım doğrulandı:** JIT'siz kipte JSON özeti `chart_ticks`'te veri çerçevesi başına
+  7,0–7,6 ms (p50 6–8). Parmak iziyle 0,6–0,7 ms (≈ 11 kat ucuz). `canvas` tik+geçiş
+  14,4 → **7,3 ms** (−%49), geçiş p50 14 → 7; `ref` 19,6 → 9,4.
+- **Kalan 6,6 ms/çerç. (canvas, PHONE):** sahne kurma 3,2 + sınama 0,7 + boyama 0,3 =
+  4,2; geri kalan ≈ 2,4 ms geçişin kabuk tarafı (`core.open()` JSON'u ve çözümlemesi,
+  katman metinleri, `renderEvidence`, akış DOM'u). Sıradaki en büyük kalem sahne kurma.
+- **`ref`'in akış ekranındaki kazancı** (idle 13,7 → 5,6) başka bir etki: JSON özeti,
+  piksellere ulaşmayan alanlar (katman verisi, eşleme) değişince de "değişti" diyordu;
+  `ref` her seferinde yüzü baştan tarıyordu (yüz boyaması n 12 → 4; `canvas` zaten n 4, çünkü
+  ilk analizdeki koşularda da 4'tü). Pikseller aynı kaldığı için görünen bir şey değişmedi
+  (verify `demo` adımı, sahneler = altın görseller; `paint-paths`, `paint-canvas` geçti).
+- Hedef: PHONE'da **ortalama** tik+geçiş artık 8 ms'nin altında (7,3), **p95** (1 + 10 =
+  11 ms) ve yanlılıklı değer (≈ 18) hâlâ üstünde. JIT'li kipte 2 ms.
 
-`idle` evresinde (akış ekranı) geçiş p95 6–7 ms: yeni kapsülde akış DOM'u ve görünen yüzlerin
-boyanması (canvas yüz p50/p95 1/1–3 ms); ortalama 1,4–1,6 ms.
+Gereken (büyükten küçüğe, ölçülene göre):
+1. **Sahneyi hiç kurmamak**: M14 önerisi 1 — derleyici (qp-grammar) okuduğu bar aralığını
+   versin; değişen bar aralık dışındaysa kurma yok. Bu evrede 31 çerçevenin 30'unda sahne
+   değişmiyor: kurma (3,2) + sınama (0,7) kalkar → tik+geçiş ≈ 3 ms (kabuk payı kalır).
+2. **Geçişin kabuk payı** (≈ 2,4 ms): sahne değişmediğinde `open()` JSON'u ve katman metinleri
+   yeniden kurulmasın (değişiklik bayraklarına bağlanabilir).
+3. **Güvenli bağlam (HTTPS)**: aynı kod JIT'li kipte 2 ms (p95).
 
 ## 7. Seçim önerisi (ana oturum kararı, ölçümle)
 
@@ -241,14 +276,16 @@ boyanması (canvas yüz p50/p95 1/1–3 ms); ortalama 1,4–1,6 ms.
 |---|---|---|---|---|
 | PHONE yüz / sahne p50 | 32 / 24 | **2 / 6–7** | 25–26 / 7–8 | 3 / 8 |
 | PHONE sürükleme uzun kare payı | 0,26 | **0,002** | 0,008 | 0 |
-| PHONE tik+geçiş chart | 20 | 14 | **9** | 14–15 |
+| PHONE tik+geçiş chart (§3, JSON sınaması) | 20 | 14 | **9** | 14–15 |
+| PHONE tik+geçiş chart (§6.1, parmak izi) | 9,4 | **7,3** | (ölçülmedi; kendi sınaması zaten SipHash) | (ölçülmedi; aynı sınamayı kullanır) |
 | Güvenli bağlam ister | hayır | **hayır** | hayır | **evet** (HTTP/LAN'da `ref`'e düşer) |
 | Görsel fark | — | > 2 düzey ≤ %1,06 | **0** | > 2 düzey ≤ %0,31 |
 | WASM belleği | taban | **taban** | +~33 MB | taban |
 | Paket (gzip) | — | +~12 KB | +~12 KB | +~13 KB |
 
-`canvas` varsayılan önerisi ölçümle tutarlı. `cpu`'nun tik+geçişteki üstünlüğü yoldan değil,
-değişmeyen sahneyi ucuz tanımasından geliyor (§6.1); aynı teknik `canvas`'a taşınabilir.
+`canvas` varsayılan önerisi ölçümle tutarlı. `cpu`'nun §3'teki tik+geçiş üstünlüğü yoldan
+değil, değişmeyen sahneyi ucuz tanımasından geliyordu; aynı teknik (parmak izi) artık bütün
+yolların ortak değişiklik sınaması (§6.1) ve `canvas` 7,3 ms ile `cpu`'nun §3'teki 9'unun altında.
 Seçim Arkin'in telefon ölçümüne kadar **öneri** (GOAL ölçüt 11).
 
 ## 8. Doğrulama
@@ -262,7 +299,6 @@ Seçim Arkin'in telefon ölçümüne kadar **öneri** (GOAL ölçüt 11).
 ## 9. Yapılmayanlar, açık sorular
 
 - Telefonda ölçülmedi; bütün sayılar kalibre benzetim (PHONE) ve tahmin (PHONE_JIT_EST).
-- §6.1'deki "JSON özeti ≈ 9 ms" çıkarımı doğrudan enstrümanlanmadı (`cpu` yoluyla fark).
 - WebKit'te ağ kısıtı yok; ilk kapsülün telefon tahmini bayttan ve RTT sayısından
   hesaplandı. Playwright WebKit'te HTTP önbelleği çalışmadığı için sıcak açılış ölçülmedi.
 - `gpu` Chromium başsız kabukta (verify'ın tarayıcısı) hiç çalışmıyor; verify yalnız yedeği
@@ -275,8 +311,8 @@ Seçim Arkin'in telefon ölçümüne kadar **öneri** (GOAL ölçüt 11).
 1. `DECISIONS.md`: "Önerilen (RP3): varsayılan boyama yolu `canvas`; `ref` başvuru ve yedek;
    `cpu`, `gpu` `?paint=` ile" (ana akış yazar). K12 için M12c'nin önerisi (vello yerine
    çekirdekte üçgenleme + ince WebGPU) ayrıca.
-2. `canvas` yolunda değişmeyen sahne sınamasını JSON özeti yerine parmak izine almak (§6.1-1);
-   ölçülecek beklenti: PHONE `chart_ticks` geçiş p50 16 → ~7 ms.
+2. (Yapıldı, §6.1.) Sıradaki: değişmeyen sahnede `open()` JSON'u ve katman metinlerinin
+   yeniden kurulmaması (geçişin ≈ 2,4 ms'lik kabuk payı).
 3. qp-grammar derlemesinin bar aralığı bağımlılığı (M14 önerisi 1; §6.1-2).
 4. Gösterimi HTTPS ile sunmak (iPhone'da JIT + WebGPU) — Arkin'in JIT'li ölçümü için şart.
 5. `tests/gpu.mjs`'i (tam Chromium kanalıyla) ve `cpu-pixels.mjs`'i isteğe bağlı bir verify

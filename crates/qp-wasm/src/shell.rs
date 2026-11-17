@@ -55,6 +55,44 @@ pub const DISPLAY_TZ: &str = "Europe/Istanbul";
 // a viewer's faces with the very same code (§22).
 pub use qp_session::viewer::{face_scene, open_scene, scene_digest};
 
+#[cfg(target_arch = "wasm32")]
+mod clock {
+    use wasm_bindgen::prelude::*;
+    #[wasm_bindgen]
+    extern "C" {
+        /// `performance.now()` (ms), for the core's own spans.
+        #[wasm_bindgen(js_namespace = performance, js_name = now)]
+        pub fn now() -> f64;
+    }
+}
+
+/// (RP3/S) `performance.now()` in wasm; 0 elsewhere (no span is recorded there).
+#[must_use]
+pub(crate) fn core_now() -> f64 {
+    #[cfg(target_arch = "wasm32")]
+    {
+        clock::now()
+    }
+    #[cfg(not(target_arch = "wasm32"))]
+    {
+        0.0
+    }
+}
+
+/// (RP3/S) The key of the hand-out change check ("did this face/scene change since it was
+/// last painted?"); internal, never a digest anyone else sees (parity and `digests()` keep
+/// [`scene_digest`], FNV over the JSON).
+pub(crate) type ShownKey = u64;
+
+/// (RP3/S) The change key of `scene`: [`qp_render::retained::scene_fingerprint`], a 64-bit
+/// SipHash of size, background and every primitive's fields in paint order — no JSON
+/// serialisation (measured on the JIT-less phone setting: the JSON digest was 7–8 ms of a
+/// 14 ms paint pass with the chart open, `rounds/RP3/experiments/S.md` §6.2).
+#[must_use]
+pub(crate) fn shown_key(scene: &SceneDesc) -> ShownKey {
+    qp_render::retained::scene_fingerprint(scene)
+}
+
 // ---------------------------------------------------------------------------
 // The shell core
 // ---------------------------------------------------------------------------
@@ -424,9 +462,10 @@ pub struct ShellCore {
     frames: BTreeMap<String, (u32, u32)>,
     gesture: Option<Gesture>,
     metrics: Metrics,
-    /// Last digest of each face handed out (a face is redrawn only when it changed).
-    face_shown: BTreeMap<String, String>,
-    scene_shown: Option<String>,
+    /// Last change key of each face handed out (a face is redrawn only when it changed;
+    /// RP3/S [`shown_key`]).
+    face_shown: BTreeMap<String, ShownKey>,
+    scene_shown: Option<ShownKey>,
     version: u64,
     /// The messages sent, for the record and the parity check: every message of a short
     /// session; (RP3/T4) on a long one only the latest [`SENT_KEEP`] to `2 × SENT_KEEP`
@@ -1246,11 +1285,9 @@ impl ShellCore {
         let Some(scene) = self.face(id) else {
             return Vec::new();
         };
-        let d = scene_digest(&scene);
-        if !force && self.face_shown.get(id) == Some(&d) {
+        if !self.face_changed(id, &scene, force) {
             return Vec::new();
         }
-        self.face_shown.insert(id.to_owned(), d);
         self.pixels(&scene)
     }
 
@@ -1266,13 +1303,54 @@ impl ShellCore {
         let look = self.look.clone();
         let mp = self.max_points;
         let head = self.open_headline.clone();
-        if let Some(v) = self.viewer.as_mut() {
+        // (RP3/S) The build's own time (`scene_build`), apart from the change check.
+        let t0 = core_now();
+        let scene = if let Some(v) = self.viewer.as_mut() {
             // (RP3/M15) The open capsule over the device's own data of its instrument.
             let side = v.open_mut().filter(|s| s.open.capsule == o.capsule)?;
             let s = side.replica_mut().session_mut()?;
-            return open_scene(s, &o, head.as_deref(), &look, mp);
+            open_scene(s, &o, head.as_deref(), &look, mp)
+        } else {
+            open_scene(self.replica.session_mut()?, &o, head.as_deref(), &look, mp)
+        };
+        let t1 = core_now();
+        self.core_span("scene_build", t0, t1);
+        scene
+    }
+
+    /// (RP3/S) Whether capsule `id`'s face `scene` differs from the one last handed out
+    /// (always with `force`); records it. The check's time is the `change_check` span.
+    pub(crate) fn face_changed(&mut self, id: &str, scene: &SceneDesc, force: bool) -> bool {
+        let t0 = core_now();
+        let k = shown_key(scene);
+        let t1 = core_now();
+        self.core_span("change_check", t0, t1);
+        if !force && self.face_shown.get(id) == Some(&k) {
+            return false;
         }
-        open_scene(self.replica.session_mut()?, &o, head.as_deref(), &look, mp)
+        self.face_shown.insert(id.to_owned(), k);
+        true
+    }
+
+    /// (RP3/S) As [`ShellCore::face_changed`], for the open capsule's scene.
+    pub(crate) fn scene_changed(&mut self, scene: &SceneDesc, force: bool) -> bool {
+        let t0 = core_now();
+        let k = shown_key(scene);
+        let t1 = core_now();
+        self.core_span("change_check", t0, t1);
+        if !force && self.scene_shown.as_ref() == Some(&k) {
+            return false;
+        }
+        self.scene_shown = Some(k);
+        true
+    }
+
+    /// (RP3/S) Records a span of the core's own work (in wasm only: elsewhere there is no
+    /// clock and nothing is recorded).
+    pub(crate) fn core_span(&mut self, name: &str, t0: f64, t1: f64) {
+        if cfg!(target_arch = "wasm32") {
+            self.metric_span(name, t0, t1);
+        }
     }
 
     /// Pixels of the open capsule's scene (empty when unchanged or none).
@@ -1281,11 +1359,9 @@ impl ShellCore {
             self.scene_shown = None;
             return Vec::new();
         };
-        let d = scene_digest(&scene);
-        if !force && self.scene_shown.as_deref() == Some(d.as_str()) {
+        if !self.scene_changed(&scene, force) {
             return Vec::new();
         }
-        self.scene_shown = Some(d);
         self.pixels(&scene)
     }
 

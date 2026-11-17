@@ -174,6 +174,25 @@ pub fn fingerprint(w: u32, h: u32, bg: Rgba, prims: &[Prim]) -> u64 {
     s.finish()
 }
 
+/// (RP3/S) A 64-bit fingerprint of everything in `scene` that its pixels depend on: size,
+/// background and every primitive of [`SceneDesc::prims`] in paint order, each field
+/// bit for bit (the same per-primitive key as the retained painter; SipHash with fixed
+/// keys, deterministic). No serialisation: the shell's "did this face/scene change since
+/// it was painted" check. Equal fingerprints mean the same pixels up to a 64-bit hash
+/// collision; it is not a digest for parity (that stays `scene_digest`).
+#[must_use]
+pub fn scene_fingerprint(scene: &qp_schema::scene::SceneDesc) -> u64 {
+    let mut s = DefaultHasher::new();
+    (scene.width, scene.height, scene.background).hash(&mut s);
+    let mut n = 0usize;
+    for p in scene.prims() {
+        key(p).hash(&mut s);
+        n += 1;
+    }
+    n.hash(&mut s);
+    s.finish()
+}
+
 fn copy_region(dst: &mut Pixmap, src: &Pixmap, r: Region) {
     let stride = dst.width() as usize * 4;
     let (a, b) = (r[0] as usize * 4, r[2] as usize * 4);

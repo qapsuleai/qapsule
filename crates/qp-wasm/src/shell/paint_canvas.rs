@@ -23,7 +23,7 @@ use std::collections::BTreeMap;
 
 use qp_schema::scene::{Align, Prim, Rgba, SceneDesc};
 
-use super::{scene_digest, ShellCore};
+use super::ShellCore;
 
 /// Command codes of the stream (`f32`; arguments follow the code).
 pub mod op {
@@ -832,11 +832,9 @@ impl CanvasPainter {
         let Some(scene) = core.face(id) else {
             return Vec::new();
         };
-        let d = scene_digest(&scene);
-        if !force && core.face_shown.get(id) == Some(&d) {
+        if !core.face_changed(id, &scene, force) {
             return Vec::new();
         }
-        core.face_shown.insert(id.to_owned(), d);
         let (prims, size) = scaled(&scene, core.scale);
         let prev = self
             .faces
@@ -863,11 +861,9 @@ impl CanvasPainter {
             self.scene = None;
             return Vec::new();
         };
-        let d = scene_digest(&scene);
-        if !force && core.scene_shown.as_deref() == Some(d.as_str()) {
+        if !core.scene_changed(&scene, force) {
             return Vec::new();
         }
-        core.scene_shown = Some(d);
         let (prims, size) = scaled(&scene, core.scale);
         let prev = self
             .scene

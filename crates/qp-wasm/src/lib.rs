@@ -425,15 +425,53 @@ mod shell_binding {
             self.inner.check_now().to_string()
         }
 
-        /// One frame of the host's stream; returns what changed (JSON).
+        /// One frame of the host's stream, arrived at `t` ms (`performance.now()`; may be
+        /// left out); returns what changed (JSON). (RP3/M14) The changes also wait for the
+        /// next paint pass (`take_changes`).
         ///
         /// # Errors
         /// A malformed frame.
-        pub fn on_frame(&mut self, text: &str) -> Result<String, JsError> {
+        pub fn on_frame(&mut self, text: &str, t: Option<f64>) -> Result<String, JsError> {
             self.inner
-                .on_frame(text)
+                .on_frame_at(text, t)
                 .map(|v| v.to_string())
                 .map_err(err)
+        }
+
+        /// (RP3/M14) The changes accumulated since the last paint pass (JSON), emptied;
+        /// empty text when nothing changed.
+        pub fn take_changes(&mut self) -> String {
+            self.inner
+                .take_changes()
+                .map(|v| v.to_string())
+                .unwrap_or_default()
+        }
+
+        /// (RP3/M14) Whether changes wait for a paint pass.
+        pub fn has_changes(&self) -> bool {
+            self.inner.has_changes()
+        }
+
+        /// (RP3/M14) The paint pass ran from `t0` to `t1` ms (span, counter, latency).
+        pub fn metric_pass(&mut self, t0: f64, t1: f64) {
+            self.inner.metric_pass(t0, t1);
+        }
+
+        /// (RP3/M14) The faces the paint pass repaints when changed (JSON array of ids):
+        /// those on screen, none while the open layer covers the feed.
+        pub fn faces_to_paint(&mut self) -> String {
+            serde_json::Value::from(self.inner.faces_to_paint()).to_string()
+        }
+
+        /// (RP3/M14) A page fact for the summary (`secure_context`, `webgpu`).
+        pub fn metric_flag(&mut self, name: &str, on: bool) {
+            self.inner.metric_flag(name, on);
+        }
+
+        /// (RP3/M14) The JIT probe: a fixed WASM loop the page times once
+        /// (`metric_span('jit_probe', …)`); the result means nothing.
+        pub fn jit_probe(&self) -> u32 {
+            crate::shell::freq::jit_probe()
         }
 
         /// The messages to send (JSON array).

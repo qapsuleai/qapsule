@@ -555,7 +555,11 @@ fn synthetic_rows(n: u64, bars: u64, series: &str) -> Vec<qp_schema::protocol::S
                 closed_t: (!open).then(|| t(last)),
                 stage,
                 outcome: StoryOutcome::of(stage),
-                validity: if open { Validity::Valid } else { Validity::Closed },
+                validity: if open {
+                    Validity::Valid
+                } else {
+                    Validity::Closed
+                },
                 in_feed: true,
                 hidden: None,
                 coin_flip: i % 7 == 0,

@@ -32,8 +32,11 @@ fn frame_summaries_carry_p99_and_long_frame_shares() {
     assert_eq!(z["p50"], 10.0);
     assert_eq!(z["p99"], 20.0, "nearest rank: the 99th of 100");
     assert_eq!(z["max"], 40.0);
-    assert_eq!(z["long_16_7"], 0.02);
-    assert_eq!(z["long_33_3"], 0.01);
+    assert_eq!(
+        z["long"], 0.02,
+        "RP3/T2: 10 ms cadence → 90 Hz class, long > 16.7 ms"
+    );
+    assert_eq!(z["very_long"], 0.01);
     assert!(z.get("gaps_1s").is_none());
     // A 300 ms frame counts; a 2 s gap is only counted.
     c.metric_frame("zoom", t + 300.0);
@@ -46,7 +49,7 @@ fn frame_summaries_carry_p99_and_long_frame_shares() {
     c.metric_span("face", 0.0, 2.0);
     let m = c.metrics_json();
     assert_eq!(m["span_ms"]["face"]["p99"], 2.0);
-    assert!(m["span_ms"]["face"].get("long_16_7").is_none());
+    assert!(m["span_ms"]["face"].get("long").is_none());
     let rows = c.metrics_rows().to_string();
     assert!(rows.contains("frame.zoom.long"), "{rows}");
 }

@@ -28,6 +28,9 @@ use qp_schema::{Bar, Capsule, Fact, Finding, Point, View};
 use qp_session::{Replica, Session};
 use serde_json::{json, Value};
 
+pub mod bench;
+pub mod paint;
+
 /// Face frame height of the default face design (`r3`, 240 CSS px). (R4/H-M8910) The
 /// height a face is laid out at is the design's own (`qp_grammar::faces::height`), read
 /// by [`ShellCore::face_size_json`]; the shell never computes it. Reported with every face
@@ -313,9 +316,15 @@ impl Samples {
         json!({"n": n, "mean": round3(mean), "p50": round3(q(0.5)), "p95": round3(q(0.95)),
                "p99": round3(q(0.99)), "max": round3(s[n - 1])})
     }
-    /// (R4/D) A frame-interval summary: [`Samples::summary`] plus the share of long frames
-    /// (intervals over one and over two 60 Hz frames, 16.7 and 33.3 ms).
-    fn frame_summary(&self) -> Value {
+    /// A frame-interval summary: [`Samples::summary`] plus the share of long frames
+    /// measured against the display's refresh interval `refresh_ms` (RP3/T2, GOAL 9; it
+    /// replaces R4's fixed 16.7 / 33.3 ms thresholds `long_16_7` / `long_33_3`, which
+    /// counted normal 60 Hz frames as long when the browser reports integer intervals
+    /// such as 16 / 17 ms): `long` = share of intervals over [`LONG_FACTOR`] ×
+    /// `refresh_ms` (at least one missed vsync), `very_long` = share over
+    /// [`VERY_LONG_FACTOR`] × `refresh_ms` (two or more missed). The half-interval margin
+    /// covers timer quantisation and jitter.
+    fn frame_summary(&self, refresh_ms: f64) -> Value {
         let mut v = self.summary();
         if let Some(o) = v.as_object_mut() {
             if !self.v.is_empty() {
@@ -323,22 +332,101 @@ impl Samples {
                 let n = self.v.len() as f64;
                 #[allow(clippy::cast_precision_loss)]
                 let share = |limit: f64| self.v.iter().filter(|&&x| x > limit).count() as f64 / n;
-                o.insert("long_16_7".to_owned(), json!(round3(share(LONG_FRAME_MS))));
                 o.insert(
-                    "long_33_3".to_owned(),
-                    json!(round3(share(2.0 * LONG_FRAME_MS))),
+                    "long".to_owned(),
+                    json!(round3(share(LONG_FACTOR * refresh_ms))),
+                );
+                o.insert(
+                    "very_long".to_owned(),
+                    json!(round3(share(VERY_LONG_FACTOR * refresh_ms))),
                 );
             }
         }
         v
+    }
+
+    fn median(&self) -> Option<f64> {
+        if self.v.is_empty() {
+            return None;
+        }
+        let mut s = self.v.clone();
+        s.sort_by(f64::total_cmp);
+        let n = s.len();
+        Some(if n % 2 == 1 {
+            s[n / 2]
+        } else {
+            f64::midpoint(s[n / 2 - 1], s[n / 2])
+        })
     }
 }
 
 /// (R4/D) A frame interval this long or longer is a gap (not a frame): counted apart.
 const FRAME_GAP_MS: f64 = 1000.0;
 
-/// (R4/D) One 60 Hz frame (ms): the long-frame threshold of the metrics page.
-const LONG_FRAME_MS: f64 = 1000.0 / 60.0;
+/// (RP3/T2) The refresh classes a measured frame cadence is snapped to (Hz).
+pub const REFRESH_CLASSES_HZ: [f64; 4] = [60.0, 90.0, 120.0, 144.0];
+/// (RP3/T2) A frame is long when its interval exceeds this many refresh intervals (one
+/// missed vsync; the half interval absorbs integer-millisecond timers and jitter).
+pub const LONG_FACTOR: f64 = 1.5;
+/// (RP3/T2) A frame is very long beyond this many refresh intervals (two missed vsyncs).
+pub const VERY_LONG_FACTOR: f64 = 2.5;
+/// (RP3/T2) Fewest intervals the refresh estimate is made from; below it 60 Hz is assumed.
+pub const REFRESH_MIN_SAMPLES: usize = 20;
+/// (RP3/T2) An opening mark later than this (ms since navigation start) is flagged as
+/// implausible for an opening time.
+pub const OPEN_PLAUSIBLE_MS: f64 = 60_000.0;
+
+/// (RP3/T2) The display's frame cadence (the `requestAnimationFrame` rhythm) estimated
+/// from a frame-interval series: the median interval snapped to the nearest refresh class
+/// ([`REFRESH_CLASSES_HZ`], log distance).
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub struct Refresh {
+    /// The refresh class (Hz).
+    pub hz: f64,
+    /// Its interval (ms).
+    pub ms: f64,
+    /// The measured median interval (`None`: too few samples, 60 Hz assumed).
+    pub median_ms: Option<f64>,
+    /// Intervals the estimate is made from.
+    pub n: usize,
+}
+
+impl Refresh {
+    /// The estimate from `samples` (ms intervals).
+    #[must_use]
+    pub fn estimate(samples: &[f64]) -> Self {
+        let n = samples.len();
+        let median = if n >= REFRESH_MIN_SAMPLES {
+            Samples {
+                v: samples.to_vec(),
+            }
+            .median()
+            .filter(|m| *m > 0.0)
+        } else {
+            None
+        };
+        let hz = median.map_or(60.0, |m| {
+            let f = 1000.0 / m;
+            REFRESH_CLASSES_HZ
+                .iter()
+                .copied()
+                .min_by(|a, b| (a / f).ln().abs().total_cmp(&(b / f).ln().abs()))
+                .unwrap_or(60.0)
+        });
+        Self {
+            hz,
+            ms: 1000.0 / hz,
+            median_ms: median,
+            n,
+        }
+    }
+
+    fn json(&self, source: &str) -> Value {
+        json!({"hz": self.hz, "ms": round3(self.ms), "median_ms": self.median_ms.map(round3),
+               "n": self.n, "source": if self.median_ms.is_some() { source } else { "assumed" },
+               "rule": format!("long: interval > {LONG_FACTOR} x refresh ms; very_long: > {VERY_LONG_FACTOR} x")})
+    }
+}
 
 /// (R4/D) A gauge of the metrics page (device facts, memory): last and largest value.
 #[derive(Debug, Clone, Copy, Default)]
@@ -393,6 +481,13 @@ struct Metrics {
     gaps: BTreeMap<String, u64>,
     /// (R4/D) Memory samples in bytes (`js_heap` from the page, `wasm` from the core).
     memory: BTreeMap<String, Gauge>,
+    /// (RP3/T2) Marks that came again after their first occurrence (a later start frame
+    /// after a reconnect or a backward seek): counted, never overwriting the first.
+    repeats: BTreeMap<String, u64>,
+    /// (RP3/T2) The paint path: `{requested, used, fallback}` (`shells/web/paint/`).
+    paint: Option<Value>,
+    /// (RP3/T2) The automatic comparison (`bench`), when one runs or ran.
+    bench: Option<bench::Bench>,
 }
 
 /// The core of the web shell (see the module docs).
@@ -1624,13 +1719,107 @@ impl ShellCore {
             .push(t1 - t0);
     }
 
-    /// A mark of the opening timeline (`wasm_ready`, `connected`, `first_capsule`) at
-    /// `t` ms since navigation start (first one wins).
+    /// A mark of the opening timeline (`wasm_ready`, `start_frame`, `connected`, `feed`,
+    /// `first_capsule`) at `t` ms since navigation start. The first occurrence per page
+    /// load wins (RP3/T2: the timeline survives a new core, see
+    /// [`ShellCore::metric_inherit`]); a later one is only counted (`open_repeats`).
     pub fn metric_mark(&mut self, name: &str, t: f64) {
-        self.metrics
-            .marks
-            .entry(name.to_owned())
-            .or_insert(round3(t));
+        let m = &mut self.metrics;
+        if m.marks.contains_key(name) {
+            *m.repeats.entry(name.to_owned()).or_default() += 1;
+        } else {
+            m.marks.insert(name.to_owned(), round3(t));
+        }
+    }
+
+    /// (RP3/T2) Takes over the metrics of the page's previous core `prev` (a later start
+    /// frame — reconnect, language change, backward seek — makes the page build a new
+    /// core): the opening timeline, the series, the device facts, memory, the paint path
+    /// and a running comparison carry on; `prev` is left with empty metrics.
+    pub fn metric_inherit(&mut self, prev: &mut ShellCore) {
+        self.metrics = std::mem::take(&mut prev.metrics);
+        // The series of the new core start with its first frame.
+        self.metrics.last_frame = None;
+        if let Some(b) = self.metrics.bench.as_mut() {
+            b.on_new_core();
+        }
+    }
+
+    /// (RP3/T2) The paint path in use (`shells/web/paint/`): the one the page asked for
+    /// (`?paint=`), the one it uses and why it fell back (empty: no fallback).
+    pub fn set_paint(&mut self, requested: &str, used: &str, reason: &str) {
+        self.metrics.paint = Some(json!({
+            "requested": requested,
+            "used": used,
+            "fallback": if reason.is_empty() { Value::Null } else { json!(reason) },
+        }));
+    }
+
+    /// (RP3/T2) The refresh estimate of the page's frames: from the `idle` series when it
+    /// is long enough, else from every mode's intervals together.
+    fn refresh(&self) -> (Refresh, &'static str) {
+        let m = &self.metrics;
+        if let Some(idle) = m.frames.get("idle") {
+            if idle.v.len() >= REFRESH_MIN_SAMPLES {
+                return (Refresh::estimate(&idle.v), "idle");
+            }
+        }
+        let all: Vec<f64> = m
+            .frames
+            .values()
+            .flat_map(|s| s.v.iter().copied())
+            .collect();
+        (Refresh::estimate(&all), "all")
+    }
+
+    /// (RP3/T2) Warnings a reader of the summary must see: browser zoom or fractional
+    /// scaling (device pixel ratio below 1 or not an integer) and a paint scale other
+    /// than the DPR (the browser resamples the scenes). `[{code, text}]`.
+    #[must_use]
+    pub fn warnings(&self) -> Vec<Value> {
+        let mut w = Vec::new();
+        let Some(&dpr) = self.metrics.device.get("dpr") else {
+            return w;
+        };
+        if dpr < 1.0 {
+            w.push(json!({"code": "dpr_below_1",
+                "text": format!("DPR {dpr:.3} < 1: browser zoomed out (or a low-density screen); timings are not those of the default zoom")}));
+        }
+        if (dpr - dpr.round()).abs() > 1e-6 {
+            w.push(json!({"code": "dpr_fraction",
+                "text": format!("DPR {dpr:.3} is not an integer: browser zoom or fractional display scaling")}));
+        }
+        if (f64::from(self.scale) - dpr).abs() > 1e-6 {
+            w.push(json!({"code": "scale_differs",
+                "text": format!("paint scale {} differs from DPR {dpr:.3}: the browser resamples the scenes", self.scale)}));
+        }
+        w
+    }
+
+    /// (RP3/T2) Opening marks that cannot be opening times: later than
+    /// [`OPEN_PLAUSIBLE_MS`] after navigation start, or out of order (`wasm_ready` ≤
+    /// `start_frame` ≤ `connected` ≤ `feed`, `first_capsule` after `start_frame`).
+    fn open_flags(&self) -> Vec<String> {
+        let m = &self.metrics.marks;
+        let mut f: Vec<String> = m
+            .iter()
+            .filter(|(_, v)| **v > OPEN_PLAUSIBLE_MS)
+            .map(|(k, v)| format!("{k} {v} ms > {OPEN_PLAUSIBLE_MS} ms: not an opening time"))
+            .collect();
+        let order = [
+            ("wasm_ready", "start_frame"),
+            ("start_frame", "connected"),
+            ("connected", "feed"),
+            ("start_frame", "first_capsule"),
+        ];
+        for (a, b) in order {
+            if let (Some(x), Some(y)) = (m.get(a), m.get(b)) {
+                if x > y {
+                    f.push(format!("{a} {x} ms after {b} {y} ms"));
+                }
+            }
+        }
+        f
     }
 
     /// The bundle sizes (`pkg/sizes.json`) and the user agent, for the summary.
@@ -1680,11 +1869,12 @@ impl ShellCore {
     #[must_use]
     pub fn metrics_json(&self) -> Value {
         let m = &self.metrics;
+        let (refresh, source) = self.refresh();
         let frames: serde_json::Map<String, Value> = m
             .frames
             .iter()
             .map(|(k, v)| {
-                let mut f = v.frame_summary();
+                let mut f = v.frame_summary(refresh.ms);
                 if let (Some(o), Some(g)) = (f.as_object_mut(), m.gaps.get(k)) {
                     o.insert("gaps_1s".to_owned(), json!(g));
                 }
@@ -1698,9 +1888,14 @@ impl ShellCore {
             .collect();
         json!({
             "kind": "qapsule-demo-metrics",
+            "refresh": refresh.json(source),
             "frame_ms": frames,
             "span_ms": spans,
             "open_ms": m.marks,
+            "open_repeats": m.repeats,
+            "open_flags": self.open_flags(),
+            "warnings": self.warnings(),
+            "paint": m.paint,
             "bundle": m.bundle,
             "agent": m.agent,
             "device": self.device_json(),
@@ -1733,13 +1928,46 @@ impl ShellCore {
                 )
             }
         };
+        // (RP3/T2) Warnings first: a reader must not miss a zoomed page.
+        for w in self.warnings() {
+            rows.push(json!(["uyarı", w["text"].as_str().unwrap_or_default()]));
+        }
+        for f in self.open_flags() {
+            rows.push(json!(["uyarı.open", f]));
+        }
+        if let Some(p) = &m.paint {
+            let used = p["used"].as_str().unwrap_or_default();
+            let text = match p["fallback"].as_str() {
+                Some(r) => format!(
+                    "{used} (istenen {}: {r})",
+                    p["requested"].as_str().unwrap_or_default()
+                ),
+                None => used.to_owned(),
+            };
+            rows.push(json!(["paint", text]));
+        }
+        let (refresh, source) = self.refresh();
+        rows.push(json!([
+            "refresh",
+            match refresh.median_ms {
+                Some(med) => format!(
+                    "{} Hz ({:.2} ms; ortanca {med:.2} ms, {source}, n={})",
+                    refresh.hz, refresh.ms, refresh.n
+                ),
+                None => format!("{} Hz (varsayılan; az kare)", refresh.hz),
+            }
+        ]));
         for (k, v) in &m.frames {
             rows.push(json!([format!("frame.{k}"), fmt(v)]));
-            let f = v.frame_summary();
-            if let (Some(p99), Some(l)) = (f["p99"].as_f64(), f["long_16_7"].as_f64()) {
+            let f = v.frame_summary(refresh.ms);
+            if let (Some(p99), Some(l)) = (f["p99"].as_f64(), f["long"].as_f64()) {
                 rows.push(json!([
                     format!("frame.{k}.long"),
-                    format!("p99 {p99:.2} ms · >16,7 ms %{:.1}", l * 100.0)
+                    format!(
+                        "p99 {p99:.2} ms · >{:.1} ms %{:.1}",
+                        LONG_FACTOR * refresh.ms,
+                        l * 100.0
+                    )
                 ]));
             }
         }
@@ -1748,6 +1976,12 @@ impl ShellCore {
         }
         for (k, v) in &m.marks {
             rows.push(json!([format!("open.{k}"), format!("{v:.1} ms")]));
+        }
+        for (k, n) in &m.repeats {
+            rows.push(json!([
+                format!("open.{k}.tekrar"),
+                format!("{n} (ilk değer korunur)")
+            ]));
         }
         for (k, g) in &m.memory {
             rows.push(json!([

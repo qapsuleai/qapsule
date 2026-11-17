@@ -3,9 +3,11 @@
 
 import ref from './ref.js';
 import fixture from './fixture.js';
+import canvas from './canvas.js';
 
 export const PATHS = new Map([
   [ref.name, ref],
+  [canvas.name, canvas], // RP3/M12b: the browser's Canvas 2D paints the core's command stream
   [fixture.name, fixture], // test fixture (tests/compare.mjs), supported only with ?fixture=1
 ]);
 

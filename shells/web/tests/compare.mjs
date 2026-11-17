@@ -7,9 +7,16 @@
 // fixture that exists only with `?fixture=1`.
 //
 // Usage: node tests/compare.mjs <qp> [--browsers chromium,webkit] [--phase <ms>]
-//          [--dpr 1] [--out <dir>]
-//   --phase  phase length passed as `?bench_phase=` (default: the core's, 8000 ms)
-//   --out    writes compare-<browser>.json (the summary) there
+//          [--dpr 1] [--out <dir>] [--paths ref,canvas,fixture] [--throttle <rate>]
+//          [--viewport 390x844] [--port 8420] [--q <extra query>]
+//   --phase     phase length passed as `?bench_phase=` (default: the core's, 8000 ms)
+//   --out       writes compare-<browser>.json (the summary) there
+//   --paths     (RP3/M12b) the paths the comparison is expected to run, in registry order;
+//               `fixture=1` is put in the address only when the list has `fixture`
+//   --throttle  (RP3/M12b) Chromium CPU throttling rate (CDP Emulation.setCPUThrottlingRate)
+//   --viewport  (RP3/M12b) the page size in CSS px
+//   --q         (RP3/M12b) extra query parameters for the page (e.g. `canvas=full`)
+//   --jsc       (RP3/M12b) WebKit JavaScriptCore options, e.g. `useJIT=false` (T1's PHONE)
 import fs from 'node:fs';
 import path from 'node:path';
 import { chromium, webkit } from 'playwright';
@@ -22,6 +29,12 @@ const browsers = opt('--browsers', 'chromium,webkit').split(',');
 const phase = opt('--phase', '');
 const dpr = Number(opt('--dpr', '1'));
 const out = opt('--out', null);
+const paths = opt('--paths', 'ref,canvas,fixture').split(',');
+const throttle = Number(opt('--throttle', '1'));
+const [vw, vh] = opt('--viewport', '390x844').split('x').map(Number);
+const port0 = Number(opt('--port', '8420'));
+const extraQ = opt('--q', '');
+const jsc = opt('--jsc', '');
 const here = new URL('..', import.meta.url).pathname;
 const ENGINES = { chromium, webkit };
 const LIMIT_MS = 180000;
@@ -42,17 +55,26 @@ async function fallback(browser, base, q, want) {
 
 let failed = 0;
 for (const [k, name] of browsers.entries()) {
-  const { child, base: b } = await startDemo(qp, here, 8420 + k);
+  const { child, base: b } = await startDemo(qp, here, port0 + k);
   const base = b.replace('localhost', '127.0.0.1');
-  const browser = await ENGINES[name].launch();
+  // (RP3/M12b) WebKit JavaScriptCore options reach the WebContent process only as
+  // __XPC_JSC_* variables (RP3/T1, calibrate.mjs): `--jsc useJIT=false` = T1's PHONE setting.
+  const env = { ...process.env };
+  for (const [k, v] of new URLSearchParams(jsc.split(',').join('&'))) if (k) env[`__XPC_JSC_${k}`] = v;
+  const browser = await ENGINES[name].launch(name === 'webkit' ? { env } : {});
   try {
     await fallback(browser, base, 'paint=nope', { requested: 'nope', used: 'ref', fallback: 'unknown' });
     await fallback(browser, base, 'paint=fixture', { requested: 'fixture', used: 'ref', fallback: 'unsupported' });
-    const ctx = await browser.newContext({ viewport: { width: 390, height: 844 }, deviceScaleFactor: dpr });
+    const ctx = await browser.newContext({ viewport: { width: vw, height: vh }, deviceScaleFactor: dpr });
     const page = await ctx.newPage();
     const errors = [];
     page.on('pageerror', (e) => errors.push(String(e)));
-    await page.goto(`${base}?anim=0&fixture=1${phase ? `&bench_phase=${phase}` : ''}`);
+    if (throttle !== 1 && name === 'chromium') {
+      const cdp = await ctx.newCDPSession(page);
+      await cdp.send('Emulation.setCPUThrottlingRate', { rate: throttle });
+    }
+    const fx = paths.includes('fixture') ? '&fixture=1' : '';
+    await page.goto(`${base}?anim=0${fx}${phase ? `&bench_phase=${phase}` : ''}${extraQ ? `&${extraQ}` : ''}`);
     await settle(page);
     await page.click('#tabs button[data-tab="metrics"]');
     const t0 = Date.now();
@@ -69,9 +91,9 @@ for (const [k, name] of browsers.entries()) {
     }
     check(ms < LIMIT_MS, `${name}: took ${ms} ms`);
     check(errors.length === 0, `${name}: page errors ${errors}`);
-    check(JSON.stringify(s.paths.map((p) => p.name)) === '["ref","fixture"]', `${name}: paths ${s.paths.map((p) => p.name)}`);
+    check(JSON.stringify(s.paths.map((p) => p.name)) === JSON.stringify(paths), `${name}: paths ${s.paths.map((p) => p.name)}, want ${paths}`);
     check(table > 10, `${name}: the table has ${table} rows`);
-    check(font, `${name}: the fixture did not register the core's font through FontFace`);
+    check(font || !paths.some((p) => p === 'fixture' || p === 'canvas'), `${name}: the core's font was not registered through FontFace`);
     for (const p of s.paths) {
       check(p.errors.length === 0, `${name}/${p.name}: ${p.errors}`);
       check(p.paint.used === p.name && p.paint.fallback === null, `${name}/${p.name}: paint ${JSON.stringify(p.paint)}`);

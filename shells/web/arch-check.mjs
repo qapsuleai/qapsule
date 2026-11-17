@@ -29,6 +29,8 @@ export const ALLOWED_CORE = new Set([
   // RP3/M14 (ARCH.md): one paint pass per animation frame (changes accumulated in the
   // core), the faces it paints, its metrics; the page's mode (secure context, WebGPU, JIT).
   'take_changes', 'has_changes', 'metric_pass', 'faces_to_paint', 'metric_flag', 'jit_probe',
+  // RP3/M12b (ARCH.md): the `canvas` paint path's command stream, string table, variant, glyph atlas.
+  'canvas_face', 'canvas_scene', 'canvas_strings', 'canvas_config', 'canvas_atlas_px',
 ]);
 
 // R6: which modules a file may import. main.js: the core's package and the paint-path

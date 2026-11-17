@@ -29,6 +29,7 @@ use crate::viewer::{Traffic, Viewer};
 pub mod bench;
 pub mod freq;
 pub mod paint;
+pub mod paint_canvas;
 
 /// Face frame height of the default face design (`r3`, 240 CSS px). (R4/H-M8910) The
 /// height a face is laid out at is the design's own (`qp_grammar::faces::height`), read

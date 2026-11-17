@@ -86,6 +86,86 @@ katmanları, `over`), başvuru çizicinin kendi ölçekleme kuralıyla
 
 Renkler düz (önçarpımsız) RGBA'dır, `#rrggbbaa` biçiminde.
 
+### `canvas` (RP3/M12b): tarayıcının Canvas 2D bağlamı
+
+Çekirdek tarama yapmaz; tarayıcının kendi (WebKit/Chromium'da donanım hızlandırmalı) 2B
+bağlamı boyar. Ayrıntı ve ölçümler: `rounds/RP3/experiments/M12b.md`.
+
+- Bağlam `getContext('2d', {alpha: false})` (her sahne önce opak arka planını boyar).
+  Tuvalin boyutu yalnız değişince atanır (arka tampon yeniden yaratılmaz).
+- Yazı tipi: `init`'te `new FontFace('QpMono', core.font())`; yüklenene kadar hiçbir şey
+  boyanmaz, yüklenince `env.repaint()`. Yüklenemezse tarayıcının yedek yazı tipiyle boyar.
+- `supported()`: `FontFace`, `document.fonts` ve 2B bağlam varsa. Yoksa `ref`'e düşer
+  (`unsupported`; `tests/paint-canvas.mjs` `FontFace`'i silerek sınar).
+- Çeşitler (deney için; `?canvas=` değeri olduğu gibi çekirdeğe gider, `canvas_config`):
+  `glyphs` (metni tarayıcı glif glif çizer), `run` (metni tarayıcı tek parça çizer,
+  `textAlign` ile), `nobatch`, `full` (değişen bölge yok, hep tamamı), `notext` (tanı:
+  metinsiz). Varsayılan: glif atlası + toplu yollar + değişen bölge. Tanı için
+  `?cx_sync=1` her boyamadan sonra bir piksel geri okur (ölçülen süre tarayıcının taramasını
+  da kapsar).
+
+#### Sözleşme eki: canvas komut akışı
+
+Boyama listesi v1'in (JSON) yerine, aynı ilkellerden (aynı sıra, aynı `scale_prim`)
+çekirdekte kurulan düz bir **komut akışı**: `core.canvas_face(id, force)` /
+`core.canvas_scene(force)` → `Float32Array` (değişmediyse boş; `face_rgba`/`scene_rgba` ile
+aynı kısa devre ve kayıt; `force`: tuval yeni, tamamını boya), `core.canvas_strings()` →
+son akışın dizge tablosu (JSON dizisi). Akış `kod, bağımsız değişkenler…` dizisidir; dizge
+bağımsız değişkenleri (`S[i]`) tablonun sırasıdır. Yol akışı bir yineleyiciyle okur
+(dizinle okumak aritmetik ister, R3) ve her kodu tek bir çağrıya çevirir:
+
+| Kod | Ad | Bağımsız değişkenler | Tuval çağrısı |
+|----:|----|----------------------|---------------|
+| 1 | `FILL_STYLE` | s | `fillStyle = S[s]` |
+| 2 | `STROKE_STYLE` | s | `strokeStyle = S[s]` |
+| 3 | `LINE_WIDTH` | v | `lineWidth = v` |
+| 4 | `FONT` | s | `font = S[s]` |
+| 5 | `ALIGN` | s | `textAlign = S[s]` |
+| 6 | `RECT` | x y w h | `fillRect(x, y, w, h)` |
+| 7 | `BEGIN` | — | `beginPath()` |
+| 8 | `MOVE` | x y | `moveTo(x, y)` |
+| 9 | `LINE` | x y | `lineTo(x, y)` |
+| 10 | `CLOSE` | — | `closePath()` |
+| 11 | `ARC` | x y r a1 | `arc(x, y, r, 0, a1)` |
+| 12 | `STROKE` | — | `stroke()` |
+| 13 | `FILL` | — | `fill()` (sıfırdan farklı) |
+| 14 | `TEXT` | s x y | `fillText(S[s], x, y)` |
+| 15 | `CLIP` | x y w h | `save(); beginPath(); rect(x, y, w, h); clip()` |
+| 16 | `RESTORE` | — | `restore()` |
+| 17 | `INIT` | cap join miter base | `lineCap = S[cap]; lineJoin = S[join]; miterLimit = miter; textBaseline = S[base]; imageSmoothingEnabled = false` |
+| 18 | `GLYPH` | sx sy w h dx dy | `drawImage(atlas, sx, sy, w, h, dx, dy, w, h)` |
+| 19 | `ATLAS` | w h y0 rows | atlas tuvali `w × h` (değişince); `putImageData(core.canvas_atlas_px(), 0, y0)` (`w × rows`) |
+
+Çekirdeğin akışa kattıkları (yol yalnız uygular):
+
+- Her akış `INIT` ile başlar. Tam boyama: arka plan `RECT` ile bütün yüzey. Kısmi boyama:
+  `INIT`'ten hemen sonra `CLIP` (değişen bölge, tam piksel), bölgeye arka plan ve sınırları
+  bölgeye değen **bütün** ilkeller sırasıyla, sonda `RESTORE`. Değişen bölge, aynı tuvalin
+  bir önceki listesiyle sıra sıra karşılaştırılarak bulunur (ilkel sınırları kenar
+  yumuşatması, miter birleşimi ve glif taşmasını kapsayacak kadar geniş); bölge tuvalin
+  yarısından büyükse tam boyama.
+- Biçem yalnız değişince yazılır; ardışık, aynı opak renkli (dolgularda aynı sarım yönlü)
+  çizgi/dolgu/daireler tek yol + tek `stroke()`/`fill()` olur. Her dairenin kendi alt yolu
+  vardır (`MOVE` ile başlar).
+- Metin (varsayılan, **glif atlası**): çekirdek her glifi başvuru çizicinin yaptığı gibi
+  fontdue ile aynı boyda tarar, metnin renginde düz RGBA olarak atlasa koyar (raf
+  yerleşimi, 1024 px genişlik, yükseklik 128 → 2048 ikiye katlanarak) ve glifi başvuru
+  çizicinin kalem konumunda (tam piksele yuvarlanmış kalem + fontdue `xmin`, taban çizgisi −
+  yükseklik − `ymin`) `GLYPH` ile basar. Yeni glif gerekince akışta `INIT`'ten (ve varsa
+  `CLIP`'ten) sonra `ATLAS` gelir; yol satırları `core.canvas_atlas_px()`'ten alıp atlas
+  tuvaline koyar (atlas büyüyünce tuval temizlenir; çekirdek o zaman kullanılan bütün
+  satırları yeniden gönderir). Atlas tuvali `willReadFrequently: true` ile alınır (CPU
+  tamponu): GPU tamponlu atlasta başsız WebKit, aynı boyamada yüklenen glifleri ara sıra
+  kırmızı/mavi kanalları yer değiştirmiş çizdi (M12b.md). Atlas dolarsa o glifi tarayıcı
+  `fillText` ile çizer; atlas sonraki akışta baştan başlar (bellek üst sınırı: çekirdekte
+  ve tarayıcıda birer 1024 × 2048 × 4 B = 8 MB).
+- Metin (`glyphs` çeşidi): glif başına `TEXT`, başvuru çizicinin kalem konumunda, sola
+  hizalı; boşluklar atlanır. (`run` çeşidi: metin başına bir `TEXT`, `ALIGN` ile.)
+- Başvuru çizicinin hiçbir şey boyamadığı durumlar aynıdır: genişliği/yüksekliği 0 olan
+  dikdörtgen, 2'den az noktalı çizgi/dolgu, yarıçapı ≤ 0 daire atlanır; geçersiz yazı boyu
+  varsa akış boştur (başvuru da boş döner). Genişliği 0 olan çizgi (tiny-skia'da kıl
+  çizgisi) `lineWidth = 1` olur.
+
 ### Yolun yapamadıkları
 
 Yol yalnızca listedeki ilkelleri, verilen sırada, verilen sayılarla boyar. **Yerleşim,

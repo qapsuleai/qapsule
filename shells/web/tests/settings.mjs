@@ -5,7 +5,9 @@
 //    reaches the view state (R4/S2: the face too);
 //  - `?watch=…&long=…&seen=…` set the audience and the last look, and a backward seek (a new
 //    authority, a new start frame) applies them again;
-//  - "Mark my last look now" sets the last look at the replay clock.
+//  - "Mark my last look now" sets the last look at the replay clock;
+//  - (R5/T3) `?look=ornek` opens the trial look (the chrome's CSS custom properties and the
+//    face height come from the core), and Settings → Look switches back to `r4`.
 // Usage: node tests/settings.mjs <qp binary>
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -33,7 +35,7 @@ try {
     await page.click('#tabs button[data-tab="settings"]');
     const ch = await page.evaluate(() => JSON.parse(window.qp.choices ? window.qp.choices() : '{}'));
     const opts = async (sel) => page.$$eval(`${sel} option`, (os) => os.map((o) => o.value));
-    const sel = { face: '#s_face', alphabet: '#s_alpha', feed: '#s_feed', transition: '#s_transition', outcome: '#s_outcome' };
+    const sel = { face: '#s_face', alphabet: '#s_alpha', feed: '#s_feed', transition: '#s_transition', outcome: '#s_outcome', look: '#s_look' };
     for (const k of Object.keys(sel)) {
       const o = await opts(sel[k]);
       check(o.length >= 2 && (!ch[k] || JSON.stringify(o) === JSON.stringify(ch[k])), `${k}: ${o.join(' ')}`);
@@ -83,6 +85,34 @@ try {
     l = await look(page);
     check(JSON.stringify(a && a.watchlist) === '["SYN02","SYN03"]', `audience again after a backward seek (${JSON.stringify(a)})`);
     check(l.face === 'fotolay' && l.feed === 'vakiro' && Number.isInteger(l.seen) && l.seen < s1, `look and seen again after a backward seek (${l.seen})`);
+    check(errors.length === 0, `no page errors ${errors}`);
+    await ctx.close();
+  }
+  // 3. (R5/T3) Looks: `?look=` and Settings → Look; the chrome follows the core's look.
+  {
+    const { ctx, page, errors } = await phonePage(browser);
+    const css = (k) => page.evaluate((n) => getComputedStyle(document.documentElement).getPropertyValue(n).trim(), k);
+    const faceH = () => page.evaluate(() => JSON.parse(window.qp.faceSize ? window.qp.faceSize() : 'null'));
+    await page.goto(`${origin}/?anim=0`);
+    await settle(page);
+    const bg4 = await css('--bg');
+    check(bg4 === '#0f1115', `r4 chrome background from the core (${bg4})`);
+    const h4 = await faceH();
+    await page.goto(`${origin}/?anim=0&look=ornek`);
+    await settle(page);
+    let l = await look(page);
+    check(l.look === 'ornek', `URL look (${JSON.stringify(l)})`);
+    const bgO = await css('--bg');
+    check(bgO === '#181412', `ornek chrome background (${bgO})`);
+    const hO = await faceH();
+    check(!h4 || !hO || hO.css[1] > h4.css[1], `ornek face is taller (${JSON.stringify(h4)} → ${JSON.stringify(hO)})`);
+    await page.click('#tabs button[data-tab="settings"]');
+    check(await page.$eval('#s_look', (e) => e.value) === 'ornek', 'look select shows ornek');
+    await page.selectOption('#s_look', 'r4');
+    await settle(page);
+    l = await look(page);
+    check(!l.look, `look back to r4 (${JSON.stringify(l)})`);
+    check(await css('--bg') === '#0f1115', 'chrome back to r4');
     check(errors.length === 0, `no page errors ${errors}`);
     await ctx.close();
   }

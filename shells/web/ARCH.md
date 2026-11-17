@@ -95,3 +95,14 @@ genel CSS geçişi; süre ölçümü (ham zaman damgası).
 cevabındaki gibi), metin kurma, sayı/tarih biçimleme, konum hesabı, isabet testi, açılma
 kararı (çekirdek `tap_at` gönderir, otorite karar verir), dış istek. Kabuksuz eşitlik:
 `tests/parity.mjs` (tarayıcı) = `qp drive` (yalnız protokol mesajları).
+
+(R5/T3) Görünüş (tasarım kaydı, `crates/qp-grammar/src/look.rs`, `docs/GRAMMAR.md` §9a) için
+eklenenler. Hiçbir kural gevşetilmedi.
+
+| Yöntem | Neden |
+|--------|-------|
+| `css()` | Kabuğun renkleri, yazı ailesi, köşe yarıçapları ve geçiş süresi bağlantının görünüşünden ve temasından gelir (`look::css_vars`): `{ad: değer}` JSON'u, değişmediyse boş. Sayfa her animasyon karesinde çağırır ve gelen her özelliği kök öğeye **olduğu gibi** yazar (`setProperty`); `style.css` yalnız `var(--…)` okur, renk değeri taşımaz. Açık/koyu da buradan gelir (eski `body[data-theme=light]` kuralları kaldırıldı). |
+| `fonts()`, `font_bytes(id)` | Çekirdeğin gömülü yazı tipi varlıkları (`[{id, family}]`) ve baytları: `canvas` yolu her birini `FontFace(family, bytes)` ile kaydeder (başvuru çizici ve `gpu` yolu aynı dosyaları kullanır; ağ isteği yok). `font()` geriye uyum için kalır (varsayılan varlık). |
+
+Görünüş seçimi `?look=<ad>` ve Ayarlar → Görünüş: öbür ayarlar gibi `set_look({look})`
+(`style` hareketinin `look` alanı); adlar `choices().look`'tan.

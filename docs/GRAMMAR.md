@@ -244,6 +244,84 @@ değerler motordadır. Aynı görünüm başka temayla çizilebilir.
 `did_you_mean`'de). Rengi verilmemiş çizgi/alan/bant katmanları panel içindeki sırayla
 `s1`, `s2`… alır (mumlar sayılmaz).
 
+### 9a. Görünüş (`Look`, R5/T3; Ö44)
+
+Görünüş, bir görsel yönün **bütün tasarım değerlerini** taşıyan çekirdek kaydıdır
+(`crates/qp-grammar/src/look.rs`, `look::LOOKS`). Tema (§9) görünüşün bir renk düzenidir:
+her görünüşün bir `dark` ve bir `light` teması vardır. Bağlantı görünüşü `style`
+hareketinin `look` alanıyla seçer (`ViewState.look`; yoksa `r4`); derleme seçeneği
+`CompileOptions::look`. Görünüm (§1) görünüş adı taşımaz: aynı görünüm her görünüşle
+çizilebilir. Kayıt saf veridir; aynı görünüm, veri ve görünüş aynı sahneyi verir.
+
+| Alan | İçerik | `r4` |
+|------|--------|------|
+| `types` | Tip ölçeği, roller: `headline` (başlık cümlesi), `title` (sahnenin üst satırı: grafik başlığı ve kapanış; yüzün ek bilgisi), `body` (kart cümlesi, grafik notu), `label` (tarih etiketi, açıklama, karne satırı), `figure` (eksen değeri, son değer etiketi), `note` (kanıt etiketi). Her rol: boy (px), satır yüksekliği (boyun katı), yazı tipi varlığı | 20 / 16 / 12 / 11 / 11 / 9 px; satır 1,3; hepsi `plex-mono` |
+| `dark`, `light` | Renk rolleri (`Theme`): §9'daki adlar + `surface` (yüzey), `line`, `neutral` (yönsüz işaret), `valid`, `invalid` (artık geçerli değil: işaret ve cümle), `closed` (kapanmış işaret), `focus` (odak); `chrome` (kabuğun kendi renkleri: zemin, metin, ikincil metin, çizgi, kart, vurgu, vurgu üstü metin, sayfa, bildirim ve hata şeridi, "yetki gerekir") | §9 değerleri; `neutral`=`accent`, `valid`=`text`, `invalid`=`closed`=`muted`; `chrome` = R4 `style.css` renkleri |
+| `scheme` | Okur seçmediğinde düzen | `dark` |
+| `space` | Boşluk ölçeği (kabuk: `--qp-space-0..5`), çizim alanı kenar boşlukları (sol, sağ, üst = başlık satırı, alt), panel arası, işaret ile cümle arası | `[4,6,8,12,16,24]`, `[8,72,34,24]`, 8, 10 |
+| `surface` | Kabuk köşe yarıçapı, telefon çerçevesi ve rozet yarıçapı, çizgi kalınlığı, gölge (yok = düz), vurgu şeridi ve perde saydamlığı | 6, 18, 8 px; 1; düz; 56, 160 |
+| `glyph` | İşaretin boyu: yüzde, kartta, grafikte, boyu verilmemiş katmanda; yüzdeki yeri (`leading`: cümlenin solunda, `above`: üstünde) | 32, 40, 32, 24; `leading` |
+| `motion` | Geçiş süresi çarpanı, eğri (`linear` ya da `cubic-bezier`, sabit adımlı çözüm), kabuk geçiş süresi | 1, `linear`, 0 ms |
+
+**Okuyanlar.** Derleyici (kenar boşlukları, panel arası, başlık/etiket/rakam boyu,
+genişlik tahmini, satır yüksekliği, şerit ve perde), yüz tasarımları (`FaceViewFn` görünüşü
+alır; yüz yüksekliği `faces::height_in(look, face)`), kart ve grafik kuralları
+(`depth::capsule_view_in`, `chart_view_in`), işaret alfabeleri (renk rolleri), geçiş
+ilerlemesi (`transitions::progress_in`), kabuk (CSS özel özellikleri, aşağıda).
+
+**Yazı tipi.** Bir varlık (`look::FONTS`) tek aile ve tek ağırlıklı **statik TTF**
+dosyasıdır (fontdue değişken yazı tipinin yalnız varsayılan örneğini çizer, woff2
+okumaz): kimlik, aile, ağırlık, dosya, lisans dosyası, SPDX, tuvaldeki CSS ailesi,
+ortalama ilerleme (em; derleyicinin genişlik tahmini) ve yükselme (em). Sahnedeki metin
+varlığını `Prim::Text::font` ile adlandırır (yoksa varsayılan `plex-mono`; `r4`
+sahneleri bu alanı hiç yazmaz). Başvuru çizici (`qp_render::fonts`), `canvas` yolu
+(`FontFace`, baytlar çekirdekten: `core.fonts()`, `core.font_bytes(id)`; ağ yok) ve `gpu`
+yolu aynı dosyayı kullanır. Tuval `fontKerning = "none"` ile çizer: fontdue GPOS aralığı
+uygulamaz, iki yol aynı yerleşimi verir. fontdue şekillendirme yapmaz (`tnum`
+uygulanamaz): tablo rakamı gereken aile ya varsayılan rakamları tablo olan bir aile
+olmalı ya da dosya derleme öncesi cmap'te 0–9 tablo gliflerine yeniden eşlenmeli
+(`rounds/R5/RESEARCH.md`).
+
+**Roller sahnede.** `CompileOptions::roles` (ve `qp scene --roles`) her metne rol adını
+yazar (`Prim::Text::role`): derleyicinin metinleri kendi rolüyle; görünümün metin
+katmanları boylarına göre (`headline`, `body`, `label`, `note` boyları her görünüşte
+farklıdır, kayıt sınaması); işaretin metinleri `glyph`. Varsayılan kapalı: ürün
+sahneleri ve özetleri değişmez. Ölçüm düzeneği öğe başına rengi, boyu ve rolü sahneden,
+rolün yazı tipini ve renk rollerini `qp look show <ad>`'dan okur.
+
+**Kabuk.** Kabuğun renkleri, yazı ailesi, yarıçapları ve geçiş süresi çekirdekten CSS
+özel özelliği olarak gelir (`look::css_vars`, `core.css()`; `qp look css <ad>`);
+`style.css` yalnız `var(--…)` okur, renk değeri taşımaz.
+
+**Yeni görünüş ekleme (M16 alt ajanları için tarif):**
+
+1. `crates/qp-grammar/src/look.rs`'te `M16 looks` işaretinin altına bir `const` `Look`
+   yaz (`..R4` ile başla, değişeni yaz; ad `[a-z][a-z0-9_-]*`, sıradan bir kelime değil);
+   `LOOKS` dizisine bir satır ekle. `headline`, `body`, `label`, `note` boyları farklı olmalı.
+2. Renk: iki temayı (`dark`, `light`) ve her birinin `chrome`'unu ver. Karşıtlık
+   (metin ≥ 4,5:1, büyük metin ve işaret ≥ 3:1, `closed` dahil) ölçüm düzeneğinde sınanır.
+3. Yeni yazı tipi gerekiyorsa: statik TTF'yi (ağırlık başına bir dosya) ve lisansını
+   (`OFL.txt` ya da eşdeğeri; aile başına ayrı adla, ör. `OFL-Inter.txt`)
+   `crates/qp-render/assets/fonts/`'a koy; `look::FONTS`'a bir `FontAsset` satırı
+   (kimlik, aile, ağırlık, dosya, lisans, SPDX, `css_family` benzersiz, ölçülmüş ortalama
+   `advance` ve `ascent`), `qp_render::fonts::FILES`'a aynı sırayla bir `include_bytes!`
+   satırı ekle; `cargo test -p qp-render --test fonts` iki listenin, dosyanın, lisansın ve
+   Türkçe harflerin tuttuğunu sınar. Ayrılmış yazı tipi adı (RFN; Plex, Source Sans 3)
+   taşıyan bir dosyanın **alt kümesi alınırsa aile yeniden adlandırılmalıdır**. Paket
+   boyutu: her dosya WASM paketine aynen girer (`plex-mono` 135 580 bayt); `verify.sh`
+   `wasm` adımının boyut notunda önce/sonra yaz.
+4. Gösterimde `?look=<ad>` ya da Ayarlar → Görünüş; `qp look show <ad>` kaydı yazar.
+5. `r4` altınları değişmemeli (`scripts/verify.sh`); yeni görünüş için altın eklenmez
+   (round'un `v2` kararı ayrı).
+
+**Kayıt dışında kalanlar** (bilinen): derleyicinin küçük yerleşim ofsetleri (başlık
+taban çizgisi 23, kapanış metni x+140, etiket ofsetleri, ay etiketi aralığı 72 px), mum
+gövdesi oranı, kanıt noktası çapı (9 px), işaret alfabelerinin iç oranları, `tavrik` ve
+`fotolay` yüzlerinin kendi boyları (elenen M8 tasarımları; renkleri görünüşten), geçiş
+tasarımlarının kendi süreleri (görünüş yalnız çarpar) ve `tutamir`'in iğne boyu, grafik
+derinliğindeki işaret boyu (sunum görünümü protokolde taşındığı için `r4`), kabuğun
+yazı boyları ve iç boşlukları.
+
 ## 10. Köken (`Origin`)
 
 İlke 6: ekrandaki her işaret deterministik kaynağına kadar izlenebilir. Seriye ya da olguya

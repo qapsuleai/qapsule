@@ -848,6 +848,8 @@ window.qp = {
   // (R4/S1) for tests/settings.mjs
   audience: () => core.audience(),
   choices: () => core.choices(),
+  // (R5/T3) for tests/settings.mjs: the face frame the core states (look-dependent).
+  faceSize: () => core.face_size(),
   openCapsule: (id) => { core.open_capsule(id); flush(); },
   openTo: (to) => { core.open_to(to); flush(); },
   // (RP3/M15) for the viewer measurement (rounds/RP3/experiments/M15): the device's data

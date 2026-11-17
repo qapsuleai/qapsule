@@ -5,9 +5,9 @@ Her round sonunda güncellenir.
 
 ## Şu an
 
-- **Aktif round:** yok. R4 tamamlandı (koşullu kabul; koşullar karşılandı, `rounds/R4/REPORT.md` "Denetim").
+- **Aktif round:** RP3 (koşulmayı bekliyor). Tasarımın ikinci turu Arkin'in kullanım izlenimini ve insan testi v2'yi bekliyor.
 - **Son güncelleme:** 2026-11-16
-- **Sıradaki adım:** Arkin gösterimi açar ve telefonda ölçer (`rounds/R4/REPORT.md` son bölüm, `rounds/R4/DEVICE.md` §4); insan testi v2 (`rounds/R4/human-test/`); R4 önerilen kararları (`DECISIONS.md` "Önerilen (R4)") ana akışta kesinleşir; R5 tasarımı ana akış oturumunda.
+- **Sıradaki adım:** `scripts/preflight.sh`; `rounds/RP3/PROMPT.md` yeni bir Claude Code oturumuna verilir.
 
 ## Round geçmişi
 

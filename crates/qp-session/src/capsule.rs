@@ -2473,6 +2473,7 @@ impl Session {
                 let series: Vec<String> = st.by_series.keys().cloned().collect();
                 for s in series {
                     let v = self.bars_snaps(&s);
+                    st.roots.insert(s.clone(), self.bars_root(&s));
                     st.snaps.insert(s, v);
                 }
                 st.built = true;
@@ -2491,10 +2492,25 @@ impl Session {
         )
     }
 
+    /// (RP3/M15) The bar series story series `s` reads its bars from, when the reading
+    /// document and the document agree (a bound series has bars in the reading document
+    /// only; a series change rewrites every headline anyway).
+    fn bars_root(&self, s: &str) -> Option<String> {
+        let a = bar_series(rd!(self), s).map(|x| x.id.clone());
+        let b = bar_series(&self.doc, s).map(|x| x.id.clone());
+        a.filter(|a| b.as_ref().is_none_or(|b| b == a))
+    }
+
     /// The incremental step of [`Session::refresh_headlines`]; `false`: not possible
     /// (rewrite all).
     fn refresh_some(&mut self, st: &mut crate::capidx::HeadState) -> bool {
         let mut dirty: BTreeSet<String> = BTreeSet::new();
+        // (RP3/M15) Bar series whose bars may have changed since the last refresh: those
+        // a data event changed and those a log entry wrote bars of. Only their story
+        // series' snapshots are compared (comparing every series' bars after every engine
+        // entry made a step of a large universe quadratic in its size).
+        let mut bars_changed = std::mem::take(&mut st.dirty);
+        let all = std::mem::take(&mut st.dirty_all);
         for e in &self.log[st.log_len..] {
             for c in &e.changes {
                 match c {
@@ -2506,11 +2522,27 @@ impl Session {
                             dirty.extend(s.iter().cloned());
                         }
                     }
+                    ChangeOp::AppendBars { series, .. }
+                    | ChangeOp::TruncateBars { series, .. }
+                    | ChangeOp::SetLastBar { series, .. } => {
+                        bars_changed.insert(series.clone());
+                    }
                     _ => {}
                 }
             }
         }
-        let series: Vec<String> = st.snaps.keys().cloned().collect();
+        let series: Vec<String> = st
+            .snaps
+            .keys()
+            .filter(|s| {
+                all || bars_changed.contains(*s)
+                    || st
+                        .roots
+                        .get(*s)
+                        .is_none_or(|r| r.as_ref().is_none_or(|r| bars_changed.contains(r)))
+            })
+            .cloned()
+            .collect();
         for s in series {
             let now = self.bars_snaps(&s);
             if st.snaps.get(&s) != Some(&now) {
@@ -2537,6 +2569,7 @@ impl Session {
             }
             if !st.snaps.contains_key(&s.series) {
                 let v = self.bars_snaps(&s.series);
+                st.roots.insert(s.series.clone(), self.bars_root(&s.series));
                 st.snaps.insert(s.series.clone(), v);
             }
             if let Some(t) = self.reader_text_with(&self.doc, c, None, Language::Tr, &mut memo) {

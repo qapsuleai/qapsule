@@ -26,6 +26,9 @@ body[data-theme="light"] #banner { background: #fff1c7; color: #6b4b00; }
 .face .mark { position: absolute; top: 4px; right: 8px; padding: 1px 6px; border-radius: 8px; background: var(--accent); color: #fff; font-size: 11px; }
 .fhead { margin: 10px 12px 0; color: var(--muted); font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em; }
 .face p { margin: 0; padding: 14px 12px; min-height: 60px; }
+/* (RP3/M15, K48) trust mark: the authority's settled claim (feed) or checked here (open) */
+.face .trust { position: absolute; bottom: 4px; right: 8px; font-size: 10px; color: var(--muted); pointer-events: none; }
+#trust { margin-left: 6px; font-size: 11px; color: var(--muted); }
 #empty { color: var(--muted); padding: 24px 12px; }
 #layer { display: none; flex: 1; overflow-y: auto; background: var(--bg); }
 body.open[data-tab="feed"] #layer { display: block; }

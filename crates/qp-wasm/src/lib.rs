@@ -360,6 +360,10 @@ pub use replica::Replica;
 #[cfg(feature = "replica")]
 pub mod shell;
 
+/// RP3/M15: the device as a viewer (feature `replica`; `docs/PROTOCOL.md` §22).
+#[cfg(feature = "replica")]
+pub mod viewer;
+
 /// R4/T5: shell-less driving and the parity check (native only).
 #[cfg(all(feature = "replica", not(target_arch = "wasm32")))]
 pub mod drive;
@@ -387,24 +391,44 @@ mod shell_binding {
 
     #[wasm_bindgen]
     impl Shell {
-        /// From the host's `start` frame (`{conn, principal, lang, data, events}`).
+        /// From the host's `start` frame (`{conn, principal, lang, data, events}`; RP3/M15
+        /// `mode: "viewer"` with `instruments` instead of data: the viewer core).
         ///
         /// # Errors
         /// A malformed frame.
         #[wasm_bindgen(constructor)]
         pub fn new(start_json: &str) -> Result<Shell, JsError> {
             let v: serde_json::Value = serde_json::from_str(start_json).map_err(err)?;
-            let data = serde_json::from_value(v["data"].clone()).map_err(err)?;
-            let events: Vec<qp_schema::data::DataEvent> =
-                serde_json::from_value(v["events"].clone()).unwrap_or_default();
-            let inner = ShellCore::new(
-                v["principal"].as_str().unwrap_or("arkin"),
-                v["lang"].as_str().unwrap_or("tr"),
-                &data,
-                &events,
-            )
-            .map_err(err)?;
+            let principal = v["principal"].as_str().unwrap_or("arkin");
+            let lang = v["lang"].as_str().unwrap_or("tr");
+            let mut inner = if v["mode"] == "viewer" {
+                let instruments: Vec<String> =
+                    serde_json::from_value(v["instruments"].clone()).unwrap_or_default();
+                ShellCore::new_viewer(principal, lang, &instruments).map_err(err)?
+            } else {
+                let data = serde_json::from_value(v["data"].clone()).map_err(err)?;
+                let events: Vec<qp_schema::data::DataEvent> =
+                    serde_json::from_value(v["events"].clone()).unwrap_or_default();
+                ShellCore::new(principal, lang, &data, &events).map_err(err)?
+            };
+            inner.count_frame("start", start_json.len());
             Ok(Self { inner })
+        }
+
+        /// (RP3/M15) The shell says capsule `id`'s face is (or is no longer) on screen.
+        pub fn visible(&mut self, id: &str, on: bool) {
+            self.inner.visible(id, on);
+        }
+
+        /// (RP3/M15, VERIFY 17) The device's data subscriptions, what it holds and the
+        /// bytes it received (JSON).
+        pub fn viewer(&self) -> String {
+            self.inner.viewer_json().to_string()
+        }
+
+        /// (RP3/M15) Runs the open capsule's check on its own data again (JSON).
+        pub fn check(&mut self) -> String {
+            self.inner.check_now().to_string()
         }
 
         /// One frame of the host's stream; returns what changed (JSON).
@@ -444,7 +468,7 @@ mod shell_binding {
         }
 
         /// The open capsule (JSON).
-        pub fn open(&self) -> String {
+        pub fn open(&mut self) -> String {
             self.inner.open_json().to_string()
         }
 

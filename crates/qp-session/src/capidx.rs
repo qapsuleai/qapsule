@@ -262,6 +262,14 @@ pub(crate) struct HeadState {
     pub by_fact: HashMap<String, BTreeSet<String>>,
     /// Finding → the capsule with a story that writes it.
     pub owner: HashMap<String, String>,
+    /// (RP3/M15) Story series → the bar series its bars come from (the same in the
+    /// reading document and the document; `None`: different or none — always compared).
+    pub roots: HashMap<String, Option<String>>,
+    /// (RP3/M15) Bar series whose bars changed since the last refresh (data events;
+    /// `Session::data_changed`): a refresh compares the snapshots of these only.
+    pub dirty: BTreeSet<String>,
+    /// (RP3/M15) The reading document was rebuilt: compare every snapshot.
+    pub dirty_all: bool,
 }
 
 impl HeadState {

@@ -515,8 +515,14 @@ impl crate::session::Session {
                 {
                     continue;
                 }
+                // (RP3/M15, §22) A viewer gets the claims about its open instrument on
+                // its `viewer` subscription (it subscribes to no `claims`).
+                let viewer = self
+                    .viewer_claim_sub(&c.id, &p.evidence.feeds)
+                    .map(str::to_owned);
                 for s in &c.subs {
-                    if !matches!(s.topic, qp_schema::protocol::Topic::Claims {}) {
+                    let to_viewer = viewer.as_deref() == Some(s.id.as_str());
+                    if !matches!(s.topic, qp_schema::protocol::Topic::Claims {}) && !to_viewer {
                         continue;
                     }
                     lines.push(crate::session::out(

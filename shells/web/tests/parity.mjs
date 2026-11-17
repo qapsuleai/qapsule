@@ -3,6 +3,10 @@
 //  - checks that every request of the page goes to the page's own origin (network test);
 //  - compares the digests the page reports (document, every face, the open scene, view
 //    state) with `qp drive` — the same session driven with protocol messages only.
+// RP3/M15 (§22): twice — the full replica (`?mode=replica`) against `qp drive`, and the
+// viewer (the default) against `qp drive --mode viewer` (the open capsule's slice digest,
+// the faces on screen, the open scene, the view state, the data subscriptions); and the
+// viewer driver's faces and open scenes against the full replica driver's.
 // Usage: node tests/parity.mjs <qp binary> <out dir>
 import fs from 'node:fs';
 import path from 'node:path';
@@ -21,9 +25,10 @@ const { child, base } = await startDemo(qp, web, 8397);
 const origin = new URL(base).origin.replace('localhost', '127.0.0.1');
 const browser = await launch();
 let failed = 0;
-try {
-  const { page, requests, errors } = await phonePage(browser);
-  await page.goto(`${origin}/?anim=0`);
+
+async function drive(query) {
+  const { ctx, page, requests, errors } = await phonePage(browser);
+  await page.goto(`${origin}/?${query}`);
   await settle(page);
   const digests = {};
   for (const step of script) {
@@ -64,25 +69,50 @@ try {
     }
     await settle(page);
   }
-  fs.writeFileSync(path.join(out, 'browser.json'), JSON.stringify(digests, null, 2));
-  fs.writeFileSync(path.join(out, 'sent.json'), await page.evaluate(() => window.qp.sent()));
+  const tag = query.includes('mode=replica') ? 'replica' : 'viewer';
+  fs.writeFileSync(path.join(out, `browser-${tag}.json`), JSON.stringify(digests, null, 2));
+  fs.writeFileSync(path.join(out, `sent-${tag}.json`), await page.evaluate(() => window.qp.sent()));
 
   // Network: only the page's own origin.
   const foreign = requests.filter((u) => new URL(u).origin !== origin);
-  console.log(`network: ${requests.length} requests, ${foreign.length} to another origin`);
+  console.log(`${tag} network: ${requests.length} requests, ${foreign.length} to another origin`);
   if (foreign.length) { console.error('foreign requests:', foreign); failed++; }
   if (errors.length) { console.error('page errors:', errors); failed++; }
+  await ctx.close();
+  return digests;
+}
 
-  // Parity with the shell-less driver.
+const same = (a, b) => JSON.stringify(a) === JSON.stringify(b);
+try {
+  // The full replica (R4) against the shell-less driver.
+  const replica = await drive('anim=0&mode=replica');
   const sl = path.join(out, 'shell-less.json');
   execFileSync(qp, ['drive', '--script', scriptPath, '--out', sl], { stdio: 'inherit' });
   const want = JSON.parse(fs.readFileSync(sl, 'utf8'));
   for (const k of Object.keys(want)) {
-    const a = want[k], b = digests[k];
-    const same = b && a.document === b.document && JSON.stringify(a.faces) === JSON.stringify(b.faces)
-      && JSON.stringify(a.open) === JSON.stringify(b.open) && JSON.stringify(a.look) === JSON.stringify(b.look);
-    console.log(`${k}: ${same ? 'equal' : 'DIFFERENT'} (document ${a.document}, ${a.faces.length} faces, open ${a.open.depth} ${a.open.digest})`);
-    if (!same) failed++;
+    const a = want[k], b = replica[k];
+    const ok = b && a.document === b.document && same(a.faces, b.faces) && same(a.open, b.open) && same(a.look, b.look);
+    console.log(`replica ${k}: ${ok ? 'equal' : 'DIFFERENT'} (document ${a.document}, ${a.faces.length} faces, open ${a.open.depth} ${a.open.digest})`);
+    if (!ok) failed++;
+  }
+  // (RP3/M15) The viewer (default) against the shell-less viewer driver.
+  const viewer = await drive('anim=0');
+  const vl = path.join(out, 'viewer-less.json');
+  execFileSync(qp, ['drive', '--mode', 'viewer', '--script', scriptPath, '--out', vl], { stdio: 'inherit' });
+  const vwant = JSON.parse(fs.readFileSync(vl, 'utf8'));
+  for (const k of Object.keys(vwant)) {
+    const a = vwant[k], b = viewer[k];
+    // Faces on the page's screen (the others never came) equal the driver's.
+    const shown = b ? b.faces.filter((f) => f.digest) : [];
+    const facesOk = shown.length > 0 && shown.every((f) => a.faces.some((g) => g.id === f.id && g.digest === f.digest));
+    const ok = b && a.document === b.document && facesOk && same(a.open, b.open) && same(a.look, b.look) && same(a.data, b.data);
+    console.log(`viewer ${k}: ${ok ? 'equal' : 'DIFFERENT'} (slice ${a.document}, ${shown.length} faces on screen, open ${a.open.depth} ${a.open.digest}, data ${JSON.stringify(a.data)})`);
+    if (!ok) failed++;
+    // The viewer driver's faces and open scene are the full replica driver's.
+    const r = want[k];
+    const crossOk = r && same(a.faces, r.faces) && same(a.open, r.open);
+    console.log(`viewer = replica ${k}: ${crossOk ? 'equal' : 'DIFFERENT'}`);
+    if (!crossOk) failed++;
   }
 } finally {
   await browser.close();

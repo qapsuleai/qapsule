@@ -6,7 +6,9 @@
 <title>Qapsule</title>
 <link rel="stylesheet" href="style.css">
 <link rel="modulepreload" href="pkg/qp_wasm.js">
-<link rel="preload" href="pkg/qp_wasm_bg.wasm" as="fetch" type="application/wasm" crossorigin>
+<!-- RP3/M13: no <link rel=preload as=fetch> for the WASM: WebKit (Safari, every iOS
+     browser) does not hand a fetch preload to the page's fetch() and downloads the package
+     twice (WebKit bugs 236009, 268370; measured in rounds/RP3/experiments/M13.md). -->
 </head>
 <body data-theme="dark" data-tab="feed">
 <main id="phone">

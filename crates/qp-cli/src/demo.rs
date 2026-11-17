@@ -24,6 +24,8 @@
 //! digest, so replay determinism is unaffected.
 //! - `GET /<file>` — the shell's static files (`--web`, default `shells/web`), `/` →
 //!   `index.html`. Nothing else is served; the page loads nothing from elsewhere (CSP).
+//!   Pre-compressed `<file>.br`/`<file>.gz` are served by `Accept-Encoding`, with an
+//!   `ETag` and revalidation (RP3/M13, `demo_static.rs`).
 
 use std::collections::BTreeMap;
 use std::io::{BufRead, BufReader, Read, Write};
@@ -476,9 +478,12 @@ Cache-Control: no-store\r\nConnection: keep-alive\r\n\r\n";
             }
         }
         ("GET", p) => {
-            match static_path(web, p).and_then(|f| std::fs::read(&f).ok().map(|b| (f, b))) {
-                Some((f, b)) => respond(&mut s, "200 OK", content_type(&f), &b),
-                None => respond(&mut s, "404 Not Found", "text/plain", b"not found"),
+            // RP3/M13: pre-compressed variants and revalidation (demo_static.rs).
+            let served = static_path(web, p).is_some_and(|f| {
+                crate::demo_static::serve(&mut s, &f, content_type(&f), CSP, &headers)
+            });
+            if !served {
+                respond(&mut s, "404 Not Found", "text/plain", b"not found");
             }
         }
         _ => respond(&mut s, "405 Method Not Allowed", "text/plain", b""),

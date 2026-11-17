@@ -7,7 +7,12 @@ karşılaştırılır.
 
 ## Seçim
 
-- Adres parametresi: `?paint=<ad>`. Varsayılan `ref`.
+- Adres parametresi: `?paint=<ad>`. Varsayılan **`canvas`** (RP3/S, öneri; Arkin'in telefon
+  ölçümüne kadar `DECISIONS.md`'de "Önerilen (RP3)"): güvenli bağlam istemez, JIT'siz
+  telefonda yüz/sahne boyaması en düşük, paket farkı küçük. `canvas` desteklenmezse (ör.
+  `FontFace` yok) `ref`'e düşülür. `ref` deterministik başvuru ve yedek olarak kalır:
+  altın görseller, `screens.mjs` ve eşlik testleri `?paint=ref` ile çalışır. `cpu` ve `gpu`
+  `?paint=` ile seçilebilir.
 - Bilinmeyen ad → `ref`, neden `unknown`; `supported()` yanlış → `ref`, neden
   `unsupported`. Seçim `core.set_paint(istenen, kullanılan, neden)` ile çekirdeğe
   bildirilir; ölçüm özetinde `paint: {requested, used, fallback}` olarak görünür.

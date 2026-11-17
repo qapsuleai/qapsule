@@ -9,6 +9,7 @@
 // Usage: node tests/compare.mjs <qp> [--browsers chromium,webkit] [--phase <ms>]
 //          [--dpr 1] [--out <dir>] [--paths ref,canvas] [--order reverse] [--throttle <rate>]
 //          [--viewport 390x844] [--port 8420] [--q <extra query>] [--jsc useJIT=false]
+//          [--channel chromium]
 //   --phase     phase length passed as `?bench_phase=` (default: the core's, 8000 ms)
 //   --out       writes compare-<browser>.json (the summary) there
 //   --paths     the paths to run (`?bench_paths=`; the core keeps those the browser supports,
@@ -18,6 +19,7 @@
 //   --viewport  (RP3/M12b) the page size in CSS px
 //   --q         (RP3/M12b) extra query parameters for the page (e.g. `canvas=full`)
 //   --jsc       (RP3/M12b) WebKit JavaScriptCore options, e.g. `useJIT=false` (T1's PHONE)
+//   --channel   (RP3/S) Chromium channel, e.g. `chromium` (full browser with WebGPU)
 import fs from 'node:fs';
 import path from 'node:path';
 import { chromium, webkit } from 'playwright';
@@ -38,6 +40,7 @@ const [vw, vh] = opt('--viewport', '390x844').split('x').map(Number);
 const port0 = Number(opt('--port', '8420'));
 const extraQ = opt('--q', '');
 const jsc = opt('--jsc', '');
+const channel = opt('--channel', '');
 const here = new URL('..', import.meta.url).pathname;
 const ENGINES = { chromium, webkit };
 const LIMIT_MS = 180000;
@@ -64,7 +67,9 @@ for (const [k, name] of browsers.entries()) {
   // __XPC_JSC_* variables (RP3/T1, calibrate.mjs): `--jsc useJIT=false` = T1's PHONE setting.
   const env = { ...process.env };
   for (const [k, v] of new URLSearchParams(jsc.split(',').join('&'))) if (k) env[`__XPC_JSC_${k}`] = v;
-  const browser = await ENGINES[name].launch(name === 'webkit' ? { env } : {});
+  // (RP3/S) `--channel chromium`: the full Chromium (new headless, the machine's GPU:
+  // WebGPU has an adapter there); default: the headless shell (no WebGPU adapter).
+  const browser = await ENGINES[name].launch(name === 'webkit' ? { env } : (channel ? { channel } : {}));
   try {
     await fallback(browser, base, 'paint=nope', { requested: 'nope', used: 'ref', fallback: 'unknown' });
     await fallback(browser, base, 'paint=fixture', { requested: 'fixture', used: 'ref', fallback: 'unsupported' });
@@ -108,7 +113,11 @@ for (const [k, name] of browsers.entries()) {
     check(font || !want.some((p) => p === 'fixture' || p === 'canvas'), `${name}: the core's font was not registered through FontFace`);
     for (const p of s.paths) {
       check(p.errors.length === 0, `${name}/${p.name}: ${p.errors}`);
-      check(p.paint.used === p.name && p.paint.fallback === null, `${name}/${p.name}: paint ${JSON.stringify(p.paint)}`);
+      // (RP3/S) `gpu` may report its own fallback where WebGPU has no adapter (Chromium's
+      // headless shell): it then paints with `ref`, and the run is still a valid row.
+      const gpuFell = p.name === 'gpu' && p.paint.used === 'ref' && p.paint.fallback === 'unsupported';
+      check((p.paint.used === p.name && p.paint.fallback === null) || gpuFell, `${name}/${p.name}: paint ${JSON.stringify(p.paint)}`);
+      if (gpuFell) console.log(`  ${name}/gpu: WebGPU unavailable, painted with ref (reported fallback)`);
       for (const ph of s.config.phases) check(p.phases[ph] && p.phases[ph].frame_ms.n > 0, `${name}/${p.name}: no frames in ${ph}`);
       check(p.span_ms.tick.n > 0, `${name}/${p.name}: no ticks`);
       check(p.span_ms.scene.n > 0, `${name}/${p.name}: no scene paints`);

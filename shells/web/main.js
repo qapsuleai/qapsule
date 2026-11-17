@@ -95,7 +95,10 @@ let zoomTimer = 0;
 let painted = false;
 let info = {};
 // (RP3/T2) The paint path (`?paint=`; unknown or unsupported → `ref`, reported).
-let pick = choose(params.get('paint') || 'ref');
+// (RP3/S) Default `canvas` (proposal, rounds/RP3/experiments/S.md); `ref` stays the
+// deterministic reference and the fallback.
+const DEFAULT_PAINT = 'canvas';
+let pick = choose(params.get('paint') || DEFAULT_PAINT);
 let paint = pick.path;
 // (RP3/S) A path's own repaint request (font loaded, GPU device ready, gesture settled)
 // waits for the next paint pass (M14: at most one paint per animation frame).

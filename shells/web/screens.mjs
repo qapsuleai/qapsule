@@ -3,7 +3,10 @@
 // alphabet, open capsule), animations off.
 //
 //   node shells/web/screens.mjs <qp> <out dir> [--at <step|YYYY-MM-DD>] [--data <bars dir>]
-//                               [--only <shot name>]
+//                               [--only <shot name>] [--paint ref]
+//   --paint  (RP3/S) the paint path (`?paint=`, default `ref`: the deterministic reference
+//            renderer whose canvases equal fixtures/golden/demo byte for byte; the page's
+//            own default path, `canvas`, is compared with tolerance by tests/paint-canvas.mjs)
 //
 // For every shot it writes
 //   <shot>.page.png         the phone screen (browser screenshot: chrome + scenes)
@@ -25,6 +28,7 @@ const opt = (k, d) => { const i = argv.indexOf(k); return i >= 0 ? argv[i + 1] :
 const at = opt('--at', '120');
 const data = opt('--data', null);
 const only = opt('--only', null);
+const paintPath = opt('--paint', 'ref');
 const out = path.resolve(outArg);
 if (data && !out.startsWith(path.join(root, 'fixtures', 'local'))) {
   console.error('screens: with --data the output must be under fixtures/local/ (real data stays local)');
@@ -63,7 +67,7 @@ try {
   for (const s of SHOTS) {
     if (only && s.name !== only) continue;
     const { ctx, page, errors } = await phonePage(browser);
-    const q = new URLSearchParams({ anim: '0', lang: s.lang || 'tr', theme: s.theme || 'dark' });
+    const q = new URLSearchParams({ anim: '0', paint: paintPath, lang: s.lang || 'tr', theme: s.theme || 'dark' });
     if (s.alphabet) q.set('alphabet', s.alphabet);
     if (s.face) q.set('face', s.face);
     if (s.principal) q.set('principal', s.principal);

@@ -46,8 +46,15 @@
 #                built with wasm-pack, `qp demo` (synthetic, paused); the page's requests go
 #                only to its own origin; its digests (document, faces, open scene) equal the
 #                shell-less `qp drive` run; screenshots at a fixed replay moment twice: page
-#                screenshots byte-identical, core-painted scenes equal fixtures/golden/demo;
-#                the settings page and URL settings (shells/web/tests/settings.mjs, R4/S2)
+#                screenshots byte-identical, core-painted scenes equal fixtures/golden/demo
+#                (screens.mjs paints with `?paint=ref`, the deterministic reference);
+#                the settings page and URL settings (shells/web/tests/settings.mjs, R4/S2);
+#                (RP3/S) every paint path opens with `?paint=` and paints, `gpu` reports
+#                its fallback where WebGPU has no adapter, the default path is `canvas`,
+#                and the semantic reads (digests, feed, open capsule, the authority's
+#                tap_at/hit and screen answers) are byte-identical on every path
+#                (tests/paint-paths.mjs); the default `canvas` path's scenes against the
+#                reference with tolerance (tests/paint-canvas.mjs, Chromium, DPR 1)
 #
 # Environment:
 #   QP_VERIFY_BROWSER=1  force the browser step (fails if tools are missing)
@@ -496,6 +503,8 @@ step_demo() {
   mkdir -p "$d"
   (cd shells/web && node tests/parity.mjs "$qp" "$d/parity") || fail "parity or network test failed"
   (cd shells/web && node tests/settings.mjs "$qp") || fail "settings page test failed"
+  (cd shells/web && node tests/paint-paths.mjs "$qp" --browsers chromium) || fail "paint path test failed"
+  (cd shells/web && node tests/paint-canvas.mjs "$qp" --browsers chromium) || fail "canvas path screenshot test failed"
   (cd shells/web && node screens.mjs "$qp" "$d/a" && node screens.mjs "$qp" "$d/b") || fail "screenshots failed"
   for f in "$d"/a/*.png; do
     b="$(basename "$f")"
@@ -520,7 +529,7 @@ step_demo() {
     [ -f "$d/a/$(basename "$f")" ] || { echo "$(basename "$f"): golden not produced" >&2; bad=$((bad + 1)); }
   done
   [ "$bad" -eq 0 ] || fail "$bad screenshot check(s) failed"
-  note "same origin only; browser = shell-less digests; settings page; $n images x2 (scenes identical, pages within chrome tolerance), scenes = goldens"
+  note "same origin only; browser = shell-less digests; settings page; paint paths (semantic reads identical); canvas within tolerance; $n images x2 (scenes identical, pages within chrome tolerance), scenes = goldens"
 }
 
 # --- run -------------------------------------------------------------------

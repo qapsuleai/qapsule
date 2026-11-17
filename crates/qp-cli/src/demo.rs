@@ -634,6 +634,9 @@ fn stream_events(s: &mut TcpStream, frx: &Receiver<String>, tx: &Sender<Cmd>) {
 /// # Errors
 /// The host cannot start or the port cannot be bound.
 pub fn demo(a: &DemoArgs) -> Result<(), String> {
+    if a.https_host.as_deref().is_some_and(|n| n.trim().is_empty()) {
+        return Err("--https-host: empty name".to_owned());
+    }
     let host = host(a)?;
     let st = host.state();
     let bind = if a.lan { "0.0.0.0" } else { a.bind.as_str() };

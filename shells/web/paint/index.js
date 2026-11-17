@@ -3,10 +3,12 @@
 
 import ref from './ref.js';
 import fixture from './fixture.js';
+import { entries as cpuEntries } from './cpu.js';
 
 export const PATHS = new Map([
   [ref.name, ref],
   [fixture.name, fixture], // test fixture (tests/compare.mjs), supported only with ?fixture=1
+  ...cpuEntries(), // RP3/M12a: cpu (+ measurement variants with ?cpu_variants=1)
 ]);
 
 /**

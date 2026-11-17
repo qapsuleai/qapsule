@@ -30,6 +30,7 @@ use serde_json::{json, Value};
 
 pub mod bench;
 pub mod paint;
+pub mod paint_cpu;
 
 /// Face frame height of the default face design (`r3`, 240 CSS px). (R4/H-M8910) The
 /// height a face is laid out at is the design's own (`qp_grammar::faces::height`), read
@@ -531,6 +532,8 @@ pub struct ShellCore {
     /// (R4/S2) The symbols of the host's feeds (initial data): what a URL audience list
     /// may name.
     symbols: std::collections::BTreeSet<String>,
+    /// (RP3/M12a) The `cpu` paint path's retained surfaces (`shell/paint_cpu.rs`).
+    cpu: paint_cpu::CpuPaint,
 }
 
 impl std::fmt::Debug for ShellCore {
@@ -665,6 +668,7 @@ impl ShellCore {
             trans_t0: None,
             seen_pending: None,
             symbols: data.feeds.iter().map(|f| f.feed.symbol.clone()).collect(),
+            cpu: paint_cpu::CpuPaint::default(),
         };
         me.push(json!({"type":"hello","protocol":"qp/0","principal":principal,
             "surface":{"kind":"phone","screen":[390,844],"input":["touch"],"lang":lang_name(lang)}}));

@@ -22,6 +22,9 @@ export const ALLOWED_CORE = new Set([
   // for non-pixel paint paths, the automatic comparison.
   'metric_inherit', 'set_paint', 'face_scene', 'scene_desc', 'font',
   'bench_start', 'bench_tick', 'bench_rows', 'bench_summary',
+  // RP3/M12a (ARCH.md): the cpu paint path's retained surfaces, read through a view into
+  // the WASM memory.
+  'cpu_options', 'cpu_face', 'cpu_scene', 'cpu_moving', 'cpu_memory', 'cpu_pixels',
 ]);
 
 // R6: which modules a file may import. main.js: the core's package and the paint-path

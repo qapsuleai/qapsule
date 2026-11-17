@@ -1,0 +1,36 @@
+{"load":"15.59 20.58 22.00","rep":1}
+{"browser":"chromium","variant":"reconnect","step":0,"s":0,"wasm":17498112,"elements":201,"canvases":41,"js_heap":2363832,"js_heap_total":4784128,"nodes":550}
+{"browser":"chromium","variant":"reconnect","step":254,"s":4.2,"wasm":18153472,"elements":202,"canvases":41,"js_heap":3476916,"js_heap_total":6881280,"nodes":743}
+{"browser":"chromium","variant":"reconnect","step":507,"s":8.6,"wasm":26345472,"elements":202,"canvases":41,"js_heap":3849012,"js_heap_total":8716288,"nodes":792}
+{"browser":"chromium","variant":"reconnect","step":760,"s":13.1,"wasm":29818880,"elements":202,"canvases":41,"js_heap":3516968,"js_heap_total":9764864,"nodes":742}
+{"browser":"chromium","variant":"reconnect","step":1013,"s":17.6,"wasm":34865152,"elements":202,"canvases":41,"js_heap":3546612,"js_heap_total":12648448,"nodes":745}
+{"browser":"chromium","variant":"reconnect","step":1266,"s":22.2,"wasm":39518208,"elements":202,"canvases":41,"js_heap":2651264,"js_heap_total":13959168,"nodes":630}
+{"browser":"chromium","variant":"reconnect","step":1519,"s":26.8,"wasm":45809664,"elements":202,"canvases":41,"js_heap":2739008,"js_heap_total":13959168,"nodes":642}
+{"browser":"chromium","variant":"reconnect","step":1773,"s":31.5,"wasm":50593792,"elements":202,"canvases":41,"js_heap":4004764,"js_heap_total":15007744,"nodes":826}
+{"browser":"chromium","variant":"reconnect","step":2026,"s":36.5,"wasm":55377920,"elements":202,"canvases":41,"js_heap":2666744,"js_heap_total":15007744,"nodes":624}
+{"browser":"chromium","variant":"reconnect","step":2278,"s":41.3,"wasm":59244544,"elements":202,"canvases":41,"js_heap":4298144,"js_heap_total":20774912,"nodes":874}
+{"browser":"chromium","variant":"reconnect","step":2530,"s":46.1,"wasm":64487424,"elements":202,"canvases":41,"js_heap":2457644,"js_heap_total":25231360,"nodes":585}
+{"load":"17.82 20.29 21.80","rep":2}
+{"browser":"chromium","variant":"reconnect","step":0,"s":0,"wasm":17498112,"elements":201,"canvases":41,"js_heap":2404644,"js_heap_total":4784128,"nodes":539}
+{"browser":"chromium","variant":"reconnect","step":253,"s":4.1,"wasm":18153472,"elements":202,"canvases":41,"js_heap":3370252,"js_heap_total":6619136,"nodes":732}
+{"browser":"chromium","variant":"reconnect","step":506,"s":8.6,"wasm":26345472,"elements":202,"canvases":41,"js_heap":3817648,"js_heap_total":8192000,"nodes":787}
+{"browser":"chromium","variant":"reconnect","step":759,"s":13.1,"wasm":29818880,"elements":202,"canvases":41,"js_heap":3427368,"js_heap_total":9764864,"nodes":727}
+{"browser":"chromium","variant":"reconnect","step":1012,"s":17.6,"wasm":34865152,"elements":202,"canvases":41,"js_heap":3422120,"js_heap_total":12648448,"nodes":728}
+{"browser":"chromium","variant":"reconnect","step":1266,"s":22.2,"wasm":39518208,"elements":202,"canvases":41,"js_heap":2192476,"js_heap_total":13697024,"nodes":561}
+{"browser":"chromium","variant":"reconnect","step":1519,"s":26.9,"wasm":45809664,"elements":202,"canvases":41,"js_heap":2821552,"js_heap_total":13959168,"nodes":656}
+{"browser":"chromium","variant":"reconnect","step":1772,"s":31.6,"wasm":50593792,"elements":202,"canvases":41,"js_heap":2326096,"js_heap_total":15269888,"nodes":576}
+{"browser":"chromium","variant":"reconnect","step":2025,"s":36.4,"wasm":55377920,"elements":202,"canvases":41,"js_heap":3987168,"js_heap_total":16056320,"nodes":835}
+{"browser":"chromium","variant":"reconnect","step":2278,"s":41.2,"wasm":59113472,"elements":202,"canvases":41,"js_heap":2636460,"js_heap_total":15532032,"nodes":617}
+{"browser":"chromium","variant":"reconnect","step":2533,"s":46.1,"wasm":64487424,"elements":202,"canvases":41,"js_heap":2959580,"js_heap_total":22347776,"nodes":663}
+{"load":"16.30 19.61 21.47","rep":3}
+{"browser":"chromium","variant":"reconnect","step":0,"s":0,"wasm":17498112,"elements":201,"canvases":41,"js_heap":2390752,"js_heap_total":4521984,"nodes":540}
+{"browser":"chromium","variant":"reconnect","step":250,"s":4.1,"wasm":18153472,"elements":202,"canvases":41,"js_heap":3164280,"js_heap_total":7143424,"nodes":706}
+{"browser":"chromium","variant":"reconnect","step":506,"s":8.6,"wasm":26279936,"elements":202,"canvases":41,"js_heap":3698560,"js_heap_total":8454144,"nodes":770}
+{"browser":"chromium","variant":"reconnect","step":759,"s":13.1,"wasm":29818880,"elements":202,"canvases":41,"js_heap":3580272,"js_heap_total":9764864,"nodes":746}
+{"browser":"chromium","variant":"reconnect","step":1012,"s":17.7,"wasm":34865152,"elements":202,"canvases":41,"js_heap":3374348,"js_heap_total":12910592,"nodes":723}
+{"browser":"chromium","variant":"reconnect","step":1265,"s":22.3,"wasm":39518208,"elements":202,"canvases":41,"js_heap":2911664,"js_heap_total":13959168,"nodes":669}
+{"browser":"chromium","variant":"reconnect","step":1518,"s":26.9,"wasm":45809664,"elements":202,"canvases":41,"js_heap":2715004,"js_heap_total":14483456,"nodes":642}
+{"browser":"chromium","variant":"reconnect","step":1770,"s":31.6,"wasm":50593792,"elements":202,"canvases":41,"js_heap":2351984,"js_heap_total":14745600,"nodes":581}
+{"browser":"chromium","variant":"reconnect","step":2024,"s":36.4,"wasm":55377920,"elements":202,"canvases":41,"js_heap":3961188,"js_heap_total":15794176,"nodes":835}
+{"browser":"chromium","variant":"reconnect","step":2277,"s":41.2,"wasm":59113472,"elements":202,"canvases":41,"js_heap":3361796,"js_heap_total":14221312,"nodes":735}
+{"browser":"chromium","variant":"reconnect","step":2530,"s":46.1,"wasm":64159744,"elements":202,"canvases":41,"js_heap":3266664,"js_heap_total":23134208,"nodes":712}

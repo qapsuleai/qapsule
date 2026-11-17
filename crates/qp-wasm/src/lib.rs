@@ -379,6 +379,12 @@ mod shell_binding {
         JsError::new(&e.to_string())
     }
 
+    /// (RP3/S) A core's metrics between two cores (opaque to the page).
+    #[wasm_bindgen]
+    pub struct MetricsCarry {
+        inner: crate::shell::MetricsCarry,
+    }
+
     /// The demo shell's core.
     #[wasm_bindgen]
     pub struct Shell {
@@ -393,17 +399,8 @@ mod shell_binding {
         /// A malformed frame.
         #[wasm_bindgen(constructor)]
         pub fn new(start_json: &str) -> Result<Shell, JsError> {
-            let v: serde_json::Value = serde_json::from_str(start_json).map_err(err)?;
-            let data = serde_json::from_value(v["data"].clone()).map_err(err)?;
-            let events: Vec<qp_schema::data::DataEvent> =
-                serde_json::from_value(v["events"].clone()).unwrap_or_default();
-            let inner = ShellCore::new(
-                v["principal"].as_str().unwrap_or("arkin"),
-                v["lang"].as_str().unwrap_or("tr"),
-                &data,
-                &events,
-            )
-            .map_err(err)?;
+            // (RP3/T4) Typed, without a JSON tree of the frame (see `core_from_start`).
+            let inner = crate::shell::core_from_start(start_json).map_err(err)?;
             Ok(Self { inner })
         }
 
@@ -659,6 +656,19 @@ mod shell_binding {
         /// series, paint path, a running comparison); see `ShellCore::metric_inherit`.
         pub fn metric_inherit(&mut self, prev: &mut Shell) {
             self.inner.metric_inherit(&mut prev.inner);
+        }
+
+        /// (RP3/S) Takes this core's metrics out, so the page can free this core before
+        /// it builds the next one (`ShellCore::metric_detach`).
+        pub fn metric_detach(&mut self) -> MetricsCarry {
+            MetricsCarry {
+                inner: self.inner.metric_detach(),
+            }
+        }
+
+        /// (RP3/S) Takes over the metrics of a freed core (`ShellCore::metric_attach`).
+        pub fn metric_attach(&mut self, carry: MetricsCarry) {
+            self.inner.metric_attach(carry.inner);
         }
 
         /// (RP3/T2) The paint path in use: requested, used, fallback reason (empty: none).

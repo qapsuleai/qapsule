@@ -22,6 +22,8 @@ export const ALLOWED_CORE = new Set([
   // for non-pixel paint paths, the automatic comparison.
   'metric_inherit', 'set_paint', 'face_scene', 'scene_desc', 'font',
   'bench_start', 'bench_tick', 'bench_rows', 'bench_summary',
+  // RP3/T4 (ARCH.md): the replaced core is freed on a new start frame (wasm-bindgen).
+  'free', 'metric_detach', 'metric_attach',
 ]);
 
 // R6: which modules a file may import. main.js: the core's package and the paint-path

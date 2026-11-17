@@ -25,6 +25,7 @@ pub mod glyph;
 mod layer;
 pub mod provider;
 pub mod scale;
+pub mod look;
 pub mod theme;
 pub mod transitions;
 

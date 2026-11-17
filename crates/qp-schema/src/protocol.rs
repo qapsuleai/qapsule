@@ -3009,6 +3009,10 @@ pub enum Gesture {
         /// may mark what changed since; `0` clears it.
         #[serde(default, skip_serializing_if = "Option::is_none")]
         seen: Option<TimestampMs>,
+        /// (R5/T3) Look (design record: type, colour roles, spacing, surface, glyph,
+        /// motion; `qp_grammar::look::LOOKS`; default `r4`).
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        look: Option<String>,
     },
     /// (R4, §4.6) Close the open capsule one depth back, or to `to` (`sentence`: back to
     /// the feed). Answered with an `interaction` carrying the `opening` (the way back).
@@ -3114,6 +3118,9 @@ pub struct ViewState {
     /// (R4/H-M8910) The reader's last look (ms; absent: none).
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub seen: Option<TimestampMs>,
+    /// (R5/T3) Look its scenes are compiled with (absent: the default, `r4`).
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub look: Option<String>,
 }
 
 /// (R4, §4.6) One element both sides of a depth transition show (e.g. the glyph, the

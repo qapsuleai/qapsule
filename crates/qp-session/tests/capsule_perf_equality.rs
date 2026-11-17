@@ -382,8 +382,12 @@ fn bound_with_flow_and_readers_unchanged() {
     // `,"viewer"` = 9 bytes in each of connection a's two `describe` answers (FIX-E1 value
     // "a 634 4940088 23725df69ce9e46b"); with `viewer` left out of `describe` every digest
     // was the FIX-E1 one (checked); log and document unchanged.
+    // (R5/M18) Re-recorded: `describe` lists the `stories` query and topic (§23),
+    // `,"stories"` twice = 20 bytes in each of connection a's two answers (RP3 value
+    // "a 634 4940106 6e4d9bddee9ae5a9"); every other connection, the log and the document
+    // unchanged.
     for entitled in [
-        "a 634 4940106 6e4d9bddee9ae5a9",
+        "a 634 4940146 c47e2bdca42286fd",
         "f 1 33828 64e687e9ac6e5803",
         "i 1 33374 3d07f785ac18cb32",
     ] {
@@ -397,8 +401,10 @@ fn bound_with_flow_and_readers_unchanged() {
         // R4/T3 (K42): "lines 2996 21725039 712470eec960882f log 1209418 cc26cd5957963e33 doc 674891 d66cf7025043a379"
         // R4/FIX-E1 (B2) re-recorded:
         // "lines 2996 21664421 2ed2ac94d4a71aab log 1206570 e3754e6847abf125 doc 672043 92a079cb66258785"
-        // RP3/M15: `describe` lists the `viewer` topic (10 answers x 9 bytes), see above.
-        "lines 2996 21664511 64ee0975d39fcbb1 log 1206570 e3754e6847abf125 doc 672043 92a079cb66258785"
+        // RP3/M15: `describe` lists the `viewer` topic (10 answers x 9 bytes), see above:
+        // "lines 2996 21664511 64ee0975d39fcbb1 log 1206570 e3754e6847abf125 doc 672043 92a079cb66258785"
+        // R5/M18: `describe` lists the `stories` query and topic (10 answers x 20 bytes).
+        "lines 2996 21664711 1dac723c21e8a2fd log 1206570 e3754e6847abf125 doc 672043 92a079cb66258785"
     );
 }
 
@@ -421,7 +427,9 @@ fn inline_unchanged() {
         // R4/T3 (K42): "lines 3739 13164269 6ba3bbb9a84ac641 log 612798 3a99f85cceae652c doc 288051 fb03e8e6206af0bc"
         // R4/FIX-E1 (B2) re-recorded, see `bound_with_flow_and_readers_unchanged`:
         // "lines 3739 13109440 44c28111ab9e8d84 log 611848 8fa8658745f376d0 doc 287101 1c632884ddcf7d58"
-        // RP3/M15: `describe` lists the `viewer` topic (10 answers x 9 bytes).
-        "lines 3739 13109530 3ae3c1fc74746f8e log 611848 8fa8658745f376d0 doc 287101 1c632884ddcf7d58"
+        // RP3/M15: `describe` lists the `viewer` topic (10 answers x 9 bytes):
+        // "lines 3739 13109530 3ae3c1fc74746f8e log 611848 8fa8658745f376d0 doc 287101 1c632884ddcf7d58"
+        // R5/M18: `describe` lists the `stories` query and topic (10 answers x 20 bytes).
+        "lines 3739 13109730 467306a49cf583c6 log 611848 8fa8658745f376d0 doc 287101 1c632884ddcf7d58"
     );
 }

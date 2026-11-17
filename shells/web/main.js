@@ -155,6 +155,10 @@ function start(frame) {
   // new core; it takes over the page's metrics, so the opening timeline stays the first
   // one (R4 lost it: `open_ms.start_frame` 836,034 ms next to `wasm_ready` 79 ms).
   if (core) next.metric_inherit(core);
+  // (RP3/T4) The old core is freed once its metrics moved over, else its whole replica
+  // stays in the WASM memory until a JS GC happens to finalize it (measured: +~30 MB per
+  // restart; rounds/RP3/experiments/T4.md).
+  if (core) core.free();
   core = next;
   core.metric_mark('start_frame', performance.now());
   core.metric_mark('wasm_ready', wasmReady);

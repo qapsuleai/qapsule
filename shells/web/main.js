@@ -864,6 +864,8 @@ window.qp = {
   choices: () => core.choices(),
   // (R5/T3) for tests/settings.mjs: the face frame the core states (look-dependent).
   faceSize: () => core.face_size(),
+  // (R5/m17-int) for tests/settings.mjs: a face's scene as the core holds it (its terms).
+  faceDesc: (id) => JSON.parse(core.face_desc(id) || 'null'),
   openCapsule: (id) => { core.open_capsule(id); flush(); },
   openTo: (to) => { core.open_to(to); flush(); },
   // (RP3/M15) for the viewer measurement (rounds/RP3/experiments/M15): the device's data

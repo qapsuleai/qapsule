@@ -16,12 +16,14 @@
 //! A term's cues, tried in order, are its words, then the same with the last word cut by
 //! one and two letters (Turkish suffixes soften a final consonant: "düşük" → "düşüğü"),
 //! then its first words alone (a multi-word term whose first word has at least four
-//! letters). A cue matches at the start of a word; the mark runs to the end of that word.
+//! letters), then the term without its short first words (under four letters; when the word it then starts with has
+//! at least four letters). A cue matches at the start of a word; the mark runs to the end
+//! of that word.
 //! So "en düşük fiyat" marks "en düşüğünün", "benzer durum" marks "Benzer 74 …" at
 //! "Benzer", "ortalama" marks "ortalamanın". A term found nowhere is not marked; it stays
 //! in the capsule's glossary list. A term is matched within one drawn line (a term that
-//! wraps across two lines is marked by its first words when they have four letters or
-//! more, else not).
+//! wraps across two lines is marked by the part on one line, when that part starts with a
+//! word of four letters or more).
 //!
 //! Positions use the same width estimate the text was wrapped with
 //! ([`crate::draw::est_width`] with the look's advance for that size), so the boxes sit on
@@ -91,6 +93,15 @@ pub fn cues(term: &str) -> Vec<Vec<char>> {
                 push(v);
             }
         }
+    }
+    // Then the term without its first words (a term wrapped after a short first word: "en
+    // / düşük fiyatının"), when the remaining first word has at least four letters.
+    // Only short words are dropped ("en", "the"): "similar cases" never becomes "cases".
+    for j in 1..n {
+        if words[j].len() < 4 || words[..j].iter().any(|w| w.len() >= 4) {
+            continue;
+        }
+        push(join(&words[j..]));
     }
     out
 }
@@ -247,6 +258,11 @@ mod tests {
         assert_eq!(at("abant", "bant"), None);
         // A short first word alone is not a cue.
         assert_eq!(at("en son", "en düşük fiyat"), None);
+        // A term wrapped after its short first word: the rest is marked.
+        assert_eq!(
+            at("düşük fiyatının (110,95) altına indi", "en düşük fiyat").as_deref(),
+            Some("düşük fiyatının")
+        );
     }
 
     #[test]

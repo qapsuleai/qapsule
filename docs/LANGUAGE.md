@@ -84,7 +84,8 @@ Seçim çekirdekte, `?face=` / `?look=` ile aynı yoldan:
   yerini çekirdek bulur (`qp_grammar::terms`): metin ve terim harf harf küçültülerek
   karşılaştırılır; terimin sözcükleri, sonra son sözcüğü bir-iki harf kısaltılmış hali
   (Türkçe ek yumuşaması: "düşük" → "düşüğünün"), sonra ilk sözcüğü (en az dört harfse) sözcük
-  başında aranır; işaret sözcüğün sonuna kadar uzar. Her terimin sahnede ilk geçtiği yer
+  başında aranır, en son ilk sözcükleri atılmış hali (satır sonunda bölünen terim için); işaret
+  sözcüğün sonuna kadar uzar. Her terimin sahnede ilk geçtiği yer
   işaretlenir.
 - Sahne tarifi terimi taşır: altı çizgi katmanın kendi ilkelidir (her boyama yolu çizer) ve
   `SceneDesc.terms` her terimin kutusunu, metnini ve açıklamasını verir. Nokta sorgusu
@@ -238,6 +239,7 @@ hesaplanır, yetkisiz okur onları da yetkili gibi görür):
    da galeriden düşer.
 2. **Metin yüzünde sözlük dokunuşu yok** (yetkisiz okur, A32): sahne olmadığı için terim
    işaretlenmez. Çekirdek metni terim parçalarıyla verebilir (kabuk yalnız boyar); öneri.
-3. **Terim iki satıra bölünürse** yalnız ilk sözcükleri (en az dört harfse) işaretlenir.
+3. **Terim iki satıra bölünürse** yalnız bir satırdaki parçası işaretlenir (o parça en az dört
+   harfli bir sözcükle başlıyorsa: "en / düşük fiyatının" → "düşük fiyatının").
 4. **S1 düzeltmesinin etkisi ölçülmedi** (okuyucu ölçümü koşulmadı).
 5. **Yeni dille altın yok:** `marla` görünümünün `v2` altınlarını bütünleştirme (S) ekler.

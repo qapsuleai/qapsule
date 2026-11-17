@@ -529,6 +529,15 @@ mod shell_binding {
             self.inner.close_gloss();
         }
 
+        /// (R5/m17-int) Capsule `id`'s face scene as the core builds it (JSON `SceneDesc`;
+        /// empty: none): tests read its glossary `terms`.
+        pub fn face_desc(&mut self, id: &str) -> String {
+            self.inner
+                .face(id)
+                .and_then(|s| serde_json::to_string(&s).ok())
+                .unwrap_or_default()
+        }
+
         /// Evidence rows (JSON).
         pub fn evidence(&self) -> String {
             self.inner.evidence_json().to_string()

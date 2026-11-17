@@ -1,0 +1,2333 @@
+{
+  "covers": [
+    "stories",
+    "topic-stories",
+    "story",
+    "live",
+    "server-comment",
+    "set_sensitivity"
+  ],
+  "description": "R5/M18 (§23): live updates of the story list. The `stories` topic sends, after every input, the rows whose key (stage, latest and closing bar, validity, tier, feed place, coin-flip mark, redaction) changed: births, transitions, closings, validity changes, feed-place changes after an audience change; and, to a reader without the licensed flow, the server comments on that instrument. Unsubscribing stops it.",
+  "final": {
+    "log_len": 16
+  },
+  "init": {
+    "capsules": {
+      "flow": [
+        {
+          "seed": 7,
+          "series": "px"
+        }
+      ],
+      "series": [
+        "px"
+      ]
+    },
+    "clock": 1760000000000,
+    "data": {
+      "entitlements": {
+        "ana": [
+          "*"
+        ],
+        "bora": [
+          "bist/THYAO"
+        ],
+        "can": [],
+        "host": [
+          "*"
+        ]
+      },
+      "feeds": [
+        {
+          "feed": {
+            "feed": "bist",
+            "interval": "1d",
+            "symbol": "THYAO"
+          },
+          "synthetic": {
+            "n": 120,
+            "seed": 7
+          }
+        }
+      ]
+    },
+    "document": {
+      "id": "doc-stories",
+      "schema_version": "0",
+      "series": [
+        {
+          "id": "px",
+          "instrument": {
+            "symbol": "THYAO"
+          },
+          "interval": "1d",
+          "source": {
+            "feed": "bist",
+            "interval": "1d",
+            "kind": "bind",
+            "symbol": "THYAO",
+            "window": {
+              "last": 10000
+            }
+          }
+        }
+      ],
+      "title": "Hikâye"
+    },
+    "epoch": 0,
+    "principals": [
+      {
+        "author": {
+          "kind": "human",
+          "name": "host"
+        },
+        "id": "host",
+        "role": "host"
+      },
+      {
+        "author": {
+          "kind": "human",
+          "name": "Ana"
+        },
+        "id": "ana",
+        "role": "viewer"
+      },
+      {
+        "author": {
+          "kind": "human",
+          "name": "Bora"
+        },
+        "id": "bora",
+        "role": "viewer"
+      },
+      {
+        "author": {
+          "kind": "human",
+          "name": "Can"
+        },
+        "id": "can",
+        "role": "viewer"
+      }
+    ]
+  },
+  "name": "63-stories-live",
+  "steps": [
+    {
+      "expect": [
+        {
+          "conn": "a",
+          "msg": {
+            "seq": 2,
+            "type": "welcome"
+          }
+        }
+      ],
+      "send": {
+        "conn": "a",
+        "msg": {
+          "principal": "ana",
+          "protocol": "qp/0",
+          "surface": {
+            "kind": "phone"
+          },
+          "type": "hello"
+        }
+      }
+    },
+    {
+      "expect": [
+        {
+          "conn": "b",
+          "msg": {
+            "seq": 2,
+            "type": "welcome"
+          }
+        }
+      ],
+      "send": {
+        "conn": "b",
+        "msg": {
+          "principal": "bora",
+          "protocol": "qp/0",
+          "surface": {
+            "kind": "phone"
+          },
+          "type": "hello"
+        }
+      }
+    },
+    {
+      "expect": [
+        {
+          "conn": "c",
+          "msg": {
+            "seq": 2,
+            "type": "welcome"
+          }
+        }
+      ],
+      "send": {
+        "conn": "c",
+        "msg": {
+          "principal": "can",
+          "protocol": "qp/0",
+          "surface": {
+            "kind": "phone"
+          },
+          "type": "hello"
+        }
+      }
+    },
+    {
+      "expect": [
+        {
+          "conn": "a",
+          "msg": {
+            "data": {
+              "instrument": "THYAO",
+              "kind": "stories",
+              "series": "px",
+              "stories": [
+                {
+                  "born_bar": 89,
+                  "born_t": 1746576000000,
+                  "closed_bar": 94,
+                  "closed_t": 1747180800000,
+                  "direction": "down",
+                  "face": {
+                    "direction_word": "aşağı",
+                    "event": "para çıkışı",
+                    "few_cases": true,
+                    "ledger_n": 2,
+                    "ledger_short": "2'de 1 tuttu (az örnek)",
+                    "moved": "14 Mayıs'ta",
+                    "validity_phrase": "gerçekleşti",
+                    "when": "7 Mayıs'ta"
+                  },
+                  "finding": "fnd.THYAO.flow.down.89",
+                  "id": "cap.THYAO.flow.down.89",
+                  "in_feed": true,
+                  "kind": "flow",
+                  "last_bar": 94,
+                  "last_t": 1747180800000,
+                  "outcome": "realized",
+                  "series": "px",
+                  "stage": "realized",
+                  "tier": 2,
+                  "validity": "closed"
+                },
+                {
+                  "born_bar": 91,
+                  "born_t": 1746748800000,
+                  "closed_bar": 94,
+                  "closed_t": 1747180800000,
+                  "direction": "down",
+                  "face": {
+                    "direction_word": "aşağı",
+                    "event": "düşüş eğilimi",
+                    "few_cases": true,
+                    "ledger_n": 0,
+                    "ledger_short": "karnesi yok",
+                    "moved": "14 Mayıs'ta",
+                    "validity_phrase": "gerçekleşti",
+                    "when": "9 Mayıs'ta"
+                  },
+                  "finding": "fnd.THYAO.continuation.down.91",
+                  "id": "cap.THYAO.continuation.down.91",
+                  "in_feed": true,
+                  "kind": "continuation",
+                  "last_bar": 94,
+                  "last_t": 1747180800000,
+                  "outcome": "realized",
+                  "series": "px",
+                  "stage": "realized",
+                  "tier": 1,
+                  "validity": "closed"
+                },
+                {
+                  "born_bar": 97,
+                  "born_t": 1747612800000,
+                  "closed_bar": 102,
+                  "closed_t": 1748217600000,
+                  "direction": "up",
+                  "face": {
+                    "direction_word": "yukarı",
+                    "event": "para girişi",
+                    "few_cases": true,
+                    "ledger_n": 2,
+                    "ledger_short": "2'de 1 tuttu (az örnek)",
+                    "moved": "15 işlem günü önce",
+                    "validity_phrase": "tutmadı",
+                    "when": "19 Mayıs'ta"
+                  },
+                  "finding": "fnd.THYAO.flow.up.97",
+                  "id": "cap.THYAO.flow.up.97",
+                  "in_feed": true,
+                  "kind": "flow",
+                  "last_bar": 102,
+                  "last_t": 1748217600000,
+                  "outcome": "invalidated",
+                  "series": "px",
+                  "stage": "invalidated",
+                  "tier": 2,
+                  "validity": "closed"
+                },
+                {
+                  "born_bar": 103,
+                  "born_t": 1748304000000,
+                  "closed_bar": 106,
+                  "closed_t": 1748563200000,
+                  "direction": "up",
+                  "face": {
+                    "direction_word": "yukarı",
+                    "event": "para girişi",
+                    "few_cases": true,
+                    "ledger_n": 3,
+                    "ledger_short": "3'te 1 tuttu (az örnek)",
+                    "moved": "11 işlem günü önce",
+                    "validity_phrase": "gerçekleşti",
+                    "when": "14 işlem günü önce"
+                  },
+                  "finding": "fnd.THYAO.flow.up.103",
+                  "id": "cap.THYAO.flow.up.103",
+                  "in_feed": true,
+                  "kind": "flow",
+                  "last_bar": 106,
+                  "last_t": 1748563200000,
+                  "outcome": "realized",
+                  "series": "px",
+                  "stage": "realized",
+                  "tier": 2,
+                  "validity": "closed"
+                },
+                {
+                  "born_bar": 104,
+                  "born_t": 1748390400000,
+                  "closed_bar": 107,
+                  "closed_t": 1748822400000,
+                  "direction": "down",
+                  "face": {
+                    "direction_word": "aşağı",
+                    "event": "para çıkışı",
+                    "few_cases": true,
+                    "ledger_n": 3,
+                    "ledger_short": "3'te 2 tuttu (az örnek)",
+                    "moved": "10 işlem günü önce",
+                    "validity_phrase": "tutmadı",
+                    "when": "13 işlem günü önce"
+                  },
+                  "finding": "fnd.THYAO.flow.down.104",
+                  "id": "cap.THYAO.flow.down.104",
+                  "in_feed": true,
+                  "kind": "flow",
+                  "last_bar": 107,
+                  "last_t": 1748822400000,
+                  "outcome": "invalidated",
+                  "series": "px",
+                  "stage": "invalidated",
+                  "tier": 2,
+                  "validity": "closed"
+                },
+                {
+                  "born_bar": 110,
+                  "born_t": 1749081600000,
+                  "direction": "down",
+                  "face": {
+                    "direction_word": "aşağı",
+                    "event": "düşüş eğilimi",
+                    "few_cases": true,
+                    "ledger_n": 1,
+                    "ledger_short": "1'de 1 tuttu (az örnek)",
+                    "moved": "2 işlem günü önce",
+                    "validity_phrase": "artık geçerli değil",
+                    "when": "7 işlem günü önce"
+                  },
+                  "finding": "fnd.THYAO.continuation.down.110",
+                  "id": "cap.THYAO.continuation.down.110",
+                  "in_feed": true,
+                  "kind": "continuation",
+                  "last_bar": 117,
+                  "last_t": 1750032000000,
+                  "series": "px",
+                  "stage": "strengthened",
+                  "tier": 3,
+                  "validity": "no_longer"
+                }
+              ],
+              "total": 6
+            },
+            "id": "q",
+            "now": 1760000000000,
+            "seq": 2,
+            "type": "result"
+          }
+        }
+      ],
+      "send": {
+        "conn": "a",
+        "msg": {
+          "id": "q",
+          "query": {
+            "instrument": "THYAO",
+            "kind": "stories",
+            "range": {
+              "last": 30
+            }
+          },
+          "type": "query"
+        }
+      }
+    },
+    {
+      "expect": [
+        {
+          "conn": "a",
+          "msg": {
+            "id": "st",
+            "status": "subscribed",
+            "type": "ack"
+          }
+        }
+      ],
+      "note": "The chart opened: the list was asked for, then its changes (the state at subscription is the answer above: no event).",
+      "send": {
+        "conn": "a",
+        "msg": {
+          "id": "st",
+          "topic": {
+            "instrument": "THYAO",
+            "kind": "stories"
+          },
+          "type": "subscribe"
+        }
+      }
+    },
+    {
+      "expect": [
+        {
+          "conn": "b",
+          "msg": {
+            "id": "st",
+            "status": "subscribed",
+            "type": "ack"
+          }
+        }
+      ],
+      "send": {
+        "conn": "b",
+        "msg": {
+          "id": "st",
+          "topic": {
+            "instrument": "THYAO",
+            "kind": "stories"
+          },
+          "type": "subscribe"
+        }
+      }
+    },
+    {
+      "expect": [
+        {
+          "conn": "c",
+          "msg": {
+            "id": "st",
+            "status": "subscribed",
+            "type": "ack"
+          }
+        }
+      ],
+      "send": {
+        "conn": "c",
+        "msg": {
+          "id": "st",
+          "topic": {
+            "instrument": "THYAO",
+            "kind": "stories"
+          },
+          "type": "subscribe"
+        }
+      }
+    },
+    {
+      "expect": [
+        {
+          "conn": "a",
+          "msg": {
+            "error": {
+              "code": "not_found",
+              "message": "no bar series of instrument `ASELS`",
+              "path": "/topic/instrument"
+            },
+            "id": "bad",
+            "type": "error"
+          }
+        }
+      ],
+      "note": "A topic for an instrument without a bar series: `not_found`.",
+      "send": {
+        "conn": "a",
+        "msg": {
+          "id": "bad",
+          "topic": {
+            "instrument": "ASELS",
+            "kind": "stories"
+          },
+          "type": "subscribe"
+        }
+      }
+    },
+    {
+      "data": {
+        "change": {
+          "bar": {
+            "c": 96.36,
+            "h": 97.05,
+            "l": 96.31,
+            "o": 96.93,
+            "t": 1750291200000,
+            "v": 2349925.23
+          },
+          "kind": "bar"
+        },
+        "feed": {
+          "feed": "bist",
+          "interval": "1d",
+          "symbol": "THYAO"
+        },
+        "seq": 1
+      },
+      "expect": []
+    },
+    {
+      "data": {
+        "change": {
+          "bar": {
+            "c": 97.51,
+            "h": 97.61,
+            "l": 95.04,
+            "o": 96.21,
+            "t": 1750377600000,
+            "v": 1972999.38
+          },
+          "kind": "bar"
+        },
+        "feed": {
+          "feed": "bist",
+          "interval": "1d",
+          "symbol": "THYAO"
+        },
+        "seq": 2
+      },
+      "expect": [],
+      "note": "Each final bar is one engine entry; after it the authority sends a `story` row for every story born, moved, closed, or whose validity changed — for each reader in its own world (Bora and Can: public stories; Bora also the server comments on the topic)."
+    },
+    {
+      "data": {
+        "change": {
+          "bar": {
+            "c": 96.14,
+            "h": 98.33,
+            "l": 94.96,
+            "o": 97.32,
+            "t": 1750636800000,
+            "v": 2485026.57
+          },
+          "kind": "bar"
+        },
+        "feed": {
+          "feed": "bist",
+          "interval": "1d",
+          "symbol": "THYAO"
+        },
+        "seq": 3
+      },
+      "expect": [
+        {
+          "conn": "b",
+          "msg": {
+            "event": {
+              "comment": {
+                "attachments": {
+                  "check": "receipt by server key; replay by entitled auditor",
+                  "entitlement": "flow/*",
+                  "evidence": "flow.institutional/net",
+                  "receipt": "pusuv-tavoz-hiboj-havut-rasig",
+                  "rule": "muhur",
+                  "rule_version": "one"
+                },
+                "bar": 121,
+                "codes": [
+                  "flow_institutional",
+                  "net_buy",
+                  "well_above_usual"
+                ],
+                "en": "Server-verified: institutional net buying in this stock is well above its usual recent level. Raw flow figures require the flow data entitlement.",
+                "instrument": "THYAO",
+                "series": "px",
+                "t": 1750377600000,
+                "tr": "Sunucu doğruladı: bu hissede kurumsal net alış, hissenin yakın dönemdeki olağan düzeyinin belirgin biçimde üzerinde. Ham akış rakamları akış veri yetkisi gerektirir.",
+                "trust": "server"
+              },
+              "kind": "server_comment",
+              "seq": 5
+            },
+            "sub": "st",
+            "type": "notify"
+          }
+        },
+        {
+          "conn": "c",
+          "msg": {
+            "event": {
+              "comment": {
+                "attachments": {
+                  "check": "receipt by server key; replay by entitled auditor",
+                  "entitlement": "flow/*",
+                  "evidence": "flow.institutional/net",
+                  "receipt": "pusuv-tavoz-hiboj-havut-rasig",
+                  "rule": "muhur",
+                  "rule_version": "one"
+                },
+                "bar": 121,
+                "codes": [
+                  "flow_institutional",
+                  "net_buy",
+                  "well_above_usual"
+                ],
+                "en": "Server-verified: institutional net buying in this stock is well above its usual recent level. Raw flow figures require the flow data entitlement.",
+                "instrument": "THYAO",
+                "series": "px",
+                "t": 1750377600000,
+                "tr": "Sunucu doğruladı: bu hissede kurumsal net alış, hissenin yakın dönemdeki olağan düzeyinin belirgin biçimde üzerinde. Ham akış rakamları akış veri yetkisi gerektirir.",
+                "trust": "server"
+              },
+              "kind": "server_comment",
+              "seq": 5
+            },
+            "sub": "st",
+            "type": "notify"
+          }
+        },
+        {
+          "conn": "a",
+          "msg": {
+            "event": {
+              "kind": "story",
+              "seq": 5,
+              "story": {
+                "born_bar": 110,
+                "born_t": 1749081600000,
+                "direction": "down",
+                "face": {
+                  "direction_word": "aşağı",
+                  "event": "düşüş eğilimi",
+                  "few_cases": true,
+                  "ledger_n": 1,
+                  "ledger_short": "1'de 1 tuttu (az örnek)",
+                  "moved": "cuma günü",
+                  "validity_phrase": "artık geçerli değil",
+                  "when": "10 işlem günü önce"
+                },
+                "finding": "fnd.THYAO.continuation.down.110",
+                "id": "cap.THYAO.continuation.down.110",
+                "in_feed": true,
+                "kind": "continuation",
+                "last_bar": 121,
+                "last_t": 1750377600000,
+                "series": "px",
+                "stage": "weakened",
+                "tier": 3,
+                "validity": "no_longer"
+              }
+            },
+            "sub": "st",
+            "type": "notify"
+          }
+        },
+        {
+          "conn": "b",
+          "msg": {
+            "event": {
+              "kind": "story",
+              "seq": 5,
+              "story": {
+                "born_bar": 110,
+                "born_t": 1749081600000,
+                "direction": "down",
+                "face": {
+                  "direction_word": "aşağı",
+                  "event": "düşüş eğilimi",
+                  "few_cases": true,
+                  "ledger_n": 1,
+                  "ledger_short": "1'de 1 tuttu (az örnek)",
+                  "moved": "cuma günü",
+                  "validity_phrase": "artık geçerli değil",
+                  "when": "10 işlem günü önce"
+                },
+                "finding": "fnd.THYAO.continuation.down.110",
+                "id": "cap.THYAO.continuation.down.110",
+                "in_feed": true,
+                "kind": "continuation",
+                "last_bar": 121,
+                "last_t": 1750377600000,
+                "series": "px",
+                "stage": "weakened",
+                "tier": 3,
+                "validity": "no_longer"
+              }
+            },
+            "sub": "st",
+            "type": "notify"
+          }
+        },
+        {
+          "conn": "c",
+          "msg": {
+            "event": {
+              "kind": "story",
+              "seq": 5,
+              "story": {
+                "born_bar": 110,
+                "born_t": 1749081600000,
+                "direction": "down",
+                "face": {
+                  "direction_word": "aşağı",
+                  "event": "düşüş eğilimi",
+                  "few_cases": true,
+                  "ledger_short": "az örnek",
+                  "moved": "cuma günü",
+                  "validity_phrase": "artık geçerli değil",
+                  "when": "birkaç hafta önce"
+                },
+                "finding": "fnd.THYAO.continuation.down.110",
+                "id": "cap.THYAO.continuation.down.110",
+                "in_feed": true,
+                "kind": "continuation",
+                "last_bar": 121,
+                "last_t": 1750377600000,
+                "redacted": true,
+                "series": "px",
+                "stage": "weakened",
+                "tier": 3,
+                "validity": "no_longer"
+              }
+            },
+            "sub": "st",
+            "type": "notify"
+          }
+        }
+      ]
+    },
+    {
+      "data": {
+        "change": {
+          "bar": {
+            "c": 97.0,
+            "h": 97.66,
+            "l": 95.83,
+            "o": 95.91,
+            "t": 1750723200000,
+            "v": 1544767.52
+          },
+          "kind": "bar"
+        },
+        "feed": {
+          "feed": "bist",
+          "interval": "1d",
+          "symbol": "THYAO"
+        },
+        "seq": 4
+      },
+      "expect": []
+    },
+    {
+      "data": {
+        "change": {
+          "bar": {
+            "c": 96.68,
+            "h": 97.38,
+            "l": 96.38,
+            "o": 96.75,
+            "t": 1750809600000,
+            "v": 1264546.26
+          },
+          "kind": "bar"
+        },
+        "feed": {
+          "feed": "bist",
+          "interval": "1d",
+          "symbol": "THYAO"
+        },
+        "seq": 5
+      },
+      "expect": [
+        {
+          "conn": "a",
+          "msg": {
+            "event": {
+              "kind": "story",
+              "seq": 7,
+              "story": {
+                "born_bar": 123,
+                "born_t": 1750723200000,
+                "direction": "up",
+                "face": {
+                  "direction_word": "yukarı",
+                  "event": "para girişi",
+                  "few_cases": true,
+                  "ledger_n": 4,
+                  "ledger_short": "4'te 2 tuttu (az örnek)",
+                  "moved": "dün",
+                  "validity_phrase": "hâlâ geçerli",
+                  "when": "dün"
+                },
+                "finding": "fnd.THYAO.flow.up.123",
+                "id": "cap.THYAO.flow.up.123",
+                "in_feed": true,
+                "kind": "flow",
+                "last_bar": 123,
+                "last_t": 1750723200000,
+                "series": "px",
+                "stage": "born",
+                "tier": 3,
+                "validity": "valid"
+              }
+            },
+            "sub": "st",
+            "type": "notify"
+          }
+        }
+      ]
+    },
+    {
+      "data": {
+        "change": {
+          "bar": {
+            "c": 97.43,
+            "h": 98.57,
+            "l": 95.31,
+            "o": 96.42,
+            "t": 1750896000000,
+            "v": 912504.19
+          },
+          "kind": "bar"
+        },
+        "feed": {
+          "feed": "bist",
+          "interval": "1d",
+          "symbol": "THYAO"
+        },
+        "seq": 6
+      },
+      "expect": [
+        {
+          "conn": "a",
+          "msg": {
+            "event": {
+              "kind": "story",
+              "seq": 8,
+              "story": {
+                "born_bar": 110,
+                "born_t": 1749081600000,
+                "direction": "down",
+                "face": {
+                  "direction_word": "aşağı",
+                  "event": "düşüş eğilimi",
+                  "few_cases": true,
+                  "ledger_n": 1,
+                  "ledger_short": "1'de 1 tuttu (az örnek)",
+                  "moved": "dün",
+                  "validity_phrase": "artık geçerli değil",
+                  "when": "13 işlem günü önce"
+                },
+                "finding": "fnd.THYAO.continuation.down.110",
+                "id": "cap.THYAO.continuation.down.110",
+                "in_feed": true,
+                "kind": "continuation",
+                "last_bar": 124,
+                "last_t": 1750809600000,
+                "series": "px",
+                "stage": "strengthened",
+                "tier": 3,
+                "validity": "no_longer"
+              }
+            },
+            "sub": "st",
+            "type": "notify"
+          }
+        },
+        {
+          "conn": "a",
+          "msg": {
+            "event": {
+              "kind": "story",
+              "seq": 8,
+              "story": {
+                "born_bar": 124,
+                "born_t": 1750809600000,
+                "direction": "up",
+                "face": {
+                  "direction_word": "yukarı",
+                  "event": "yukarı dönüş",
+                  "few_cases": true,
+                  "ledger_n": 1,
+                  "ledger_short": "1'de 1 tuttu (az örnek)",
+                  "moved": "dün",
+                  "validity_phrase": "hâlâ geçerli",
+                  "when": "dün"
+                },
+                "finding": "fnd.THYAO.reversal.up.124",
+                "id": "cap.THYAO.reversal.up.124",
+                "in_feed": true,
+                "kind": "reversal",
+                "last_bar": 124,
+                "last_t": 1750809600000,
+                "series": "px",
+                "stage": "born",
+                "tier": 3,
+                "validity": "valid"
+              }
+            },
+            "sub": "st",
+            "type": "notify"
+          }
+        },
+        {
+          "conn": "b",
+          "msg": {
+            "event": {
+              "kind": "story",
+              "seq": 8,
+              "story": {
+                "born_bar": 110,
+                "born_t": 1749081600000,
+                "direction": "down",
+                "face": {
+                  "direction_word": "aşağı",
+                  "event": "düşüş eğilimi",
+                  "few_cases": true,
+                  "ledger_n": 1,
+                  "ledger_short": "1'de 1 tuttu (az örnek)",
+                  "moved": "dün",
+                  "validity_phrase": "artık geçerli değil",
+                  "when": "13 işlem günü önce"
+                },
+                "finding": "fnd.THYAO.continuation.down.110",
+                "id": "cap.THYAO.continuation.down.110",
+                "in_feed": true,
+                "kind": "continuation",
+                "last_bar": 124,
+                "last_t": 1750809600000,
+                "series": "px",
+                "stage": "strengthened",
+                "tier": 3,
+                "validity": "no_longer"
+              }
+            },
+            "sub": "st",
+            "type": "notify"
+          }
+        },
+        {
+          "conn": "b",
+          "msg": {
+            "event": {
+              "kind": "story",
+              "seq": 8,
+              "story": {
+                "born_bar": 124,
+                "born_t": 1750809600000,
+                "direction": "up",
+                "face": {
+                  "direction_word": "yukarı",
+                  "event": "yukarı dönüş",
+                  "few_cases": true,
+                  "ledger_n": 1,
+                  "ledger_short": "1'de 1 tuttu (az örnek)",
+                  "moved": "dün",
+                  "validity_phrase": "hâlâ geçerli",
+                  "when": "dün"
+                },
+                "finding": "fnd.THYAO.reversal.up.124",
+                "id": "cap.THYAO.reversal.up.124",
+                "in_feed": true,
+                "kind": "reversal",
+                "last_bar": 124,
+                "last_t": 1750809600000,
+                "series": "px",
+                "stage": "born",
+                "tier": 3,
+                "validity": "valid"
+              }
+            },
+            "sub": "st",
+            "type": "notify"
+          }
+        },
+        {
+          "conn": "c",
+          "msg": {
+            "event": {
+              "kind": "story",
+              "seq": 8,
+              "story": {
+                "born_bar": 110,
+                "born_t": 1749081600000,
+                "direction": "down",
+                "face": {
+                  "direction_word": "aşağı",
+                  "event": "düşüş eğilimi",
+                  "few_cases": true,
+                  "ledger_short": "az örnek",
+                  "moved": "dün",
+                  "validity_phrase": "artık geçerli değil",
+                  "when": "birkaç hafta önce"
+                },
+                "finding": "fnd.THYAO.continuation.down.110",
+                "id": "cap.THYAO.continuation.down.110",
+                "in_feed": true,
+                "kind": "continuation",
+                "last_bar": 124,
+                "last_t": 1750809600000,
+                "redacted": true,
+                "series": "px",
+                "stage": "strengthened",
+                "tier": 3,
+                "validity": "no_longer"
+              }
+            },
+            "sub": "st",
+            "type": "notify"
+          }
+        },
+        {
+          "conn": "c",
+          "msg": {
+            "event": {
+              "kind": "story",
+              "seq": 8,
+              "story": {
+                "born_bar": 124,
+                "born_t": 1750809600000,
+                "direction": "up",
+                "face": {
+                  "direction_word": "yukarı",
+                  "event": "yukarı dönüş",
+                  "few_cases": true,
+                  "ledger_short": "az örnek",
+                  "moved": "dün",
+                  "validity_phrase": "hâlâ geçerli",
+                  "when": "dün"
+                },
+                "finding": "fnd.THYAO.reversal.up.124",
+                "id": "cap.THYAO.reversal.up.124",
+                "in_feed": true,
+                "kind": "reversal",
+                "last_bar": 124,
+                "last_t": 1750809600000,
+                "redacted": true,
+                "series": "px",
+                "stage": "born",
+                "tier": 3,
+                "validity": "valid"
+              }
+            },
+            "sub": "st",
+            "type": "notify"
+          }
+        }
+      ]
+    },
+    {
+      "data": {
+        "change": {
+          "bar": {
+            "c": 96.25,
+            "h": 98.86,
+            "l": 94.78,
+            "o": 97.65,
+            "t": 1750982400000,
+            "v": 1040117.8
+          },
+          "kind": "bar"
+        },
+        "feed": {
+          "feed": "bist",
+          "interval": "1d",
+          "symbol": "THYAO"
+        },
+        "seq": 7
+      },
+      "expect": []
+    },
+    {
+      "data": {
+        "change": {
+          "bar": {
+            "c": 95.45,
+            "h": 96.98,
+            "l": 94.53,
+            "o": 96.11,
+            "t": 1751241600000,
+            "v": 2246279.14
+          },
+          "kind": "bar"
+        },
+        "feed": {
+          "feed": "bist",
+          "interval": "1d",
+          "symbol": "THYAO"
+        },
+        "seq": 8
+      },
+      "expect": []
+    },
+    {
+      "data": {
+        "change": {
+          "bar": {
+            "c": 97.15,
+            "h": 98.58,
+            "l": 94.43,
+            "o": 95.68,
+            "t": 1751328000000,
+            "v": 1508958.31
+          },
+          "kind": "bar"
+        },
+        "feed": {
+          "feed": "bist",
+          "interval": "1d",
+          "symbol": "THYAO"
+        },
+        "seq": 9
+      },
+      "expect": []
+    },
+    {
+      "data": {
+        "change": {
+          "bar": {
+            "c": 97.83,
+            "h": 98.74,
+            "l": 96.77,
+            "o": 96.88,
+            "t": 1751414400000,
+            "v": 780161.13
+          },
+          "kind": "bar"
+        },
+        "feed": {
+          "feed": "bist",
+          "interval": "1d",
+          "symbol": "THYAO"
+        },
+        "seq": 10
+      },
+      "expect": []
+    },
+    {
+      "data": {
+        "change": {
+          "bar": {
+            "c": 98.57,
+            "h": 99.12,
+            "l": 97.44,
+            "o": 97.69,
+            "t": 1751500800000,
+            "v": 617798.15
+          },
+          "kind": "bar"
+        },
+        "feed": {
+          "feed": "bist",
+          "interval": "1d",
+          "symbol": "THYAO"
+        },
+        "seq": 11
+      },
+      "expect": [
+        {
+          "conn": "a",
+          "msg": {
+            "event": {
+              "kind": "story",
+              "seq": 13,
+              "story": {
+                "born_bar": 110,
+                "born_t": 1749081600000,
+                "direction": "down",
+                "face": {
+                  "direction_word": "aşağı",
+                  "event": "düşüş eğilimi",
+                  "few_cases": true,
+                  "ledger_n": 1,
+                  "ledger_short": "1'de 1 tuttu (az örnek)",
+                  "moved": "dün",
+                  "validity_phrase": "artık geçerli değil",
+                  "when": "18 işlem günü önce"
+                },
+                "finding": "fnd.THYAO.continuation.down.110",
+                "id": "cap.THYAO.continuation.down.110",
+                "in_feed": true,
+                "kind": "continuation",
+                "last_bar": 129,
+                "last_t": 1751414400000,
+                "series": "px",
+                "stage": "weakened",
+                "tier": 3,
+                "validity": "no_longer"
+              }
+            },
+            "sub": "st",
+            "type": "notify"
+          }
+        },
+        {
+          "conn": "b",
+          "msg": {
+            "event": {
+              "kind": "story",
+              "seq": 13,
+              "story": {
+                "born_bar": 110,
+                "born_t": 1749081600000,
+                "direction": "down",
+                "face": {
+                  "direction_word": "aşağı",
+                  "event": "düşüş eğilimi",
+                  "few_cases": true,
+                  "ledger_n": 1,
+                  "ledger_short": "1'de 1 tuttu (az örnek)",
+                  "moved": "dün",
+                  "validity_phrase": "artık geçerli değil",
+                  "when": "18 işlem günü önce"
+                },
+                "finding": "fnd.THYAO.continuation.down.110",
+                "id": "cap.THYAO.continuation.down.110",
+                "in_feed": true,
+                "kind": "continuation",
+                "last_bar": 129,
+                "last_t": 1751414400000,
+                "series": "px",
+                "stage": "weakened",
+                "tier": 3,
+                "validity": "no_longer"
+              }
+            },
+            "sub": "st",
+            "type": "notify"
+          }
+        },
+        {
+          "conn": "c",
+          "msg": {
+            "event": {
+              "kind": "story",
+              "seq": 13,
+              "story": {
+                "born_bar": 110,
+                "born_t": 1749081600000,
+                "direction": "down",
+                "face": {
+                  "direction_word": "aşağı",
+                  "event": "düşüş eğilimi",
+                  "few_cases": true,
+                  "ledger_short": "az örnek",
+                  "moved": "dün",
+                  "validity_phrase": "artık geçerli değil",
+                  "when": "birkaç hafta önce"
+                },
+                "finding": "fnd.THYAO.continuation.down.110",
+                "id": "cap.THYAO.continuation.down.110",
+                "in_feed": true,
+                "kind": "continuation",
+                "last_bar": 129,
+                "last_t": 1751414400000,
+                "redacted": true,
+                "series": "px",
+                "stage": "weakened",
+                "tier": 3,
+                "validity": "no_longer"
+              }
+            },
+            "sub": "st",
+            "type": "notify"
+          }
+        }
+      ]
+    },
+    {
+      "data": {
+        "change": {
+          "bar": {
+            "c": 98.81,
+            "h": 99.98,
+            "l": 96.82,
+            "o": 98.21,
+            "t": 1751587200000,
+            "v": 1173192.47
+          },
+          "kind": "bar"
+        },
+        "feed": {
+          "feed": "bist",
+          "interval": "1d",
+          "symbol": "THYAO"
+        },
+        "seq": 12
+      },
+      "expect": [
+        {
+          "conn": "a",
+          "msg": {
+            "event": {
+              "kind": "story",
+              "seq": 14,
+              "story": {
+                "born_bar": 110,
+                "born_t": 1749081600000,
+                "closed_bar": 130,
+                "closed_t": 1751500800000,
+                "direction": "down",
+                "face": {
+                  "direction_word": "aşağı",
+                  "event": "düşüş eğilimi",
+                  "few_cases": true,
+                  "ledger_n": 1,
+                  "ledger_short": "1'de 1 tuttu (az örnek)",
+                  "moved": "dün",
+                  "validity_phrase": "süresi doldu",
+                  "when": "19 işlem günü önce"
+                },
+                "finding": "fnd.THYAO.continuation.down.110",
+                "id": "cap.THYAO.continuation.down.110",
+                "in_feed": true,
+                "kind": "continuation",
+                "last_bar": 130,
+                "last_t": 1751500800000,
+                "outcome": "expired",
+                "series": "px",
+                "stage": "expired",
+                "tier": 3,
+                "validity": "closed"
+              }
+            },
+            "sub": "st",
+            "type": "notify"
+          }
+        },
+        {
+          "conn": "a",
+          "msg": {
+            "event": {
+              "kind": "story",
+              "seq": 14,
+              "story": {
+                "born_bar": 124,
+                "born_t": 1750809600000,
+                "direction": "up",
+                "face": {
+                  "direction_word": "yukarı",
+                  "event": "yukarı dönüş",
+                  "few_cases": true,
+                  "ledger_n": 1,
+                  "ledger_short": "1'de 1 tuttu (az örnek)",
+                  "moved": "dün",
+                  "validity_phrase": "hâlâ geçerli",
+                  "when": "geçen hafta"
+                },
+                "finding": "fnd.THYAO.reversal.up.124",
+                "id": "cap.THYAO.reversal.up.124",
+                "in_feed": true,
+                "kind": "reversal",
+                "last_bar": 130,
+                "last_t": 1751500800000,
+                "series": "px",
+                "stage": "strengthened",
+                "tier": 3,
+                "validity": "valid"
+              }
+            },
+            "sub": "st",
+            "type": "notify"
+          }
+        },
+        {
+          "conn": "b",
+          "msg": {
+            "event": {
+              "kind": "story",
+              "seq": 14,
+              "story": {
+                "born_bar": 110,
+                "born_t": 1749081600000,
+                "closed_bar": 130,
+                "closed_t": 1751500800000,
+                "direction": "down",
+                "face": {
+                  "direction_word": "aşağı",
+                  "event": "düşüş eğilimi",
+                  "few_cases": true,
+                  "ledger_n": 1,
+                  "ledger_short": "1'de 1 tuttu (az örnek)",
+                  "moved": "dün",
+                  "validity_phrase": "süresi doldu",
+                  "when": "19 işlem günü önce"
+                },
+                "finding": "fnd.THYAO.continuation.down.110",
+                "id": "cap.THYAO.continuation.down.110",
+                "in_feed": true,
+                "kind": "continuation",
+                "last_bar": 130,
+                "last_t": 1751500800000,
+                "outcome": "expired",
+                "series": "px",
+                "stage": "expired",
+                "tier": 3,
+                "validity": "closed"
+              }
+            },
+            "sub": "st",
+            "type": "notify"
+          }
+        },
+        {
+          "conn": "b",
+          "msg": {
+            "event": {
+              "kind": "story",
+              "seq": 14,
+              "story": {
+                "born_bar": 124,
+                "born_t": 1750809600000,
+                "direction": "up",
+                "face": {
+                  "direction_word": "yukarı",
+                  "event": "yukarı dönüş",
+                  "few_cases": true,
+                  "ledger_n": 1,
+                  "ledger_short": "1'de 1 tuttu (az örnek)",
+                  "moved": "dün",
+                  "validity_phrase": "hâlâ geçerli",
+                  "when": "geçen hafta"
+                },
+                "finding": "fnd.THYAO.reversal.up.124",
+                "id": "cap.THYAO.reversal.up.124",
+                "in_feed": true,
+                "kind": "reversal",
+                "last_bar": 130,
+                "last_t": 1751500800000,
+                "series": "px",
+                "stage": "strengthened",
+                "tier": 3,
+                "validity": "valid"
+              }
+            },
+            "sub": "st",
+            "type": "notify"
+          }
+        },
+        {
+          "conn": "c",
+          "msg": {
+            "event": {
+              "kind": "story",
+              "seq": 14,
+              "story": {
+                "born_bar": 110,
+                "born_t": 1749081600000,
+                "closed_bar": 130,
+                "closed_t": 1751500800000,
+                "direction": "down",
+                "face": {
+                  "direction_word": "aşağı",
+                  "event": "düşüş eğilimi",
+                  "few_cases": true,
+                  "ledger_short": "az örnek",
+                  "moved": "dün",
+                  "validity_phrase": "süresi doldu",
+                  "when": "birkaç hafta önce"
+                },
+                "finding": "fnd.THYAO.continuation.down.110",
+                "id": "cap.THYAO.continuation.down.110",
+                "in_feed": true,
+                "kind": "continuation",
+                "last_bar": 130,
+                "last_t": 1751500800000,
+                "outcome": "expired",
+                "redacted": true,
+                "series": "px",
+                "stage": "expired",
+                "tier": 3,
+                "validity": "closed"
+              }
+            },
+            "sub": "st",
+            "type": "notify"
+          }
+        },
+        {
+          "conn": "c",
+          "msg": {
+            "event": {
+              "kind": "story",
+              "seq": 14,
+              "story": {
+                "born_bar": 124,
+                "born_t": 1750809600000,
+                "direction": "up",
+                "face": {
+                  "direction_word": "yukarı",
+                  "event": "yukarı dönüş",
+                  "few_cases": true,
+                  "ledger_short": "az örnek",
+                  "moved": "dün",
+                  "validity_phrase": "hâlâ geçerli",
+                  "when": "geçen hafta"
+                },
+                "finding": "fnd.THYAO.reversal.up.124",
+                "id": "cap.THYAO.reversal.up.124",
+                "in_feed": true,
+                "kind": "reversal",
+                "last_bar": 130,
+                "last_t": 1751500800000,
+                "redacted": true,
+                "series": "px",
+                "stage": "strengthened",
+                "tier": 3,
+                "validity": "valid"
+              }
+            },
+            "sub": "st",
+            "type": "notify"
+          }
+        }
+      ]
+    },
+    {
+      "expect": [
+        {
+          "conn": "a",
+          "msg": {
+            "id": "s1",
+            "seq": 15,
+            "status": "applied",
+            "type": "ack"
+          }
+        },
+        {
+          "conn": "a",
+          "msg": {
+            "event": {
+              "kind": "story",
+              "seq": 15,
+              "story": {
+                "born_bar": 16,
+                "born_t": 1737676800000,
+                "closed_bar": 26,
+                "closed_t": 1738886400000,
+                "direction": "down",
+                "face": {
+                  "direction_word": "aşağı",
+                  "event": "para çıkışı",
+                  "few_cases": true,
+                  "ledger_n": 0,
+                  "ledger_short": "karnesi yok",
+                  "moved": "7 Şubat'ta",
+                  "validity_phrase": "süresi doldu",
+                  "when": "24 Ocak'ta"
+                },
+                "finding": "fnd.THYAO.flow.down.16",
+                "hidden": "sensitivity",
+                "id": "cap.THYAO.flow.down.16",
+                "in_feed": false,
+                "kind": "flow",
+                "last_bar": 26,
+                "last_t": 1738886400000,
+                "outcome": "expired",
+                "series": "px",
+                "stage": "expired",
+                "tier": 3,
+                "validity": "closed"
+              }
+            },
+            "sub": "st",
+            "type": "notify"
+          }
+        },
+        {
+          "conn": "a",
+          "msg": {
+            "event": {
+              "kind": "story",
+              "seq": 15,
+              "story": {
+                "born_bar": 17,
+                "born_t": 1737936000000,
+                "closed_bar": 27,
+                "closed_t": 1739145600000,
+                "direction": "up",
+                "face": {
+                  "direction_word": "yukarı",
+                  "event": "para girişi",
+                  "few_cases": true,
+                  "ledger_n": 0,
+                  "ledger_short": "karnesi yok",
+                  "moved": "10 Şubat'ta",
+                  "validity_phrase": "süresi doldu",
+                  "when": "27 Ocak'ta"
+                },
+                "finding": "fnd.THYAO.flow.up.17",
+                "hidden": "sensitivity",
+                "id": "cap.THYAO.flow.up.17",
+                "in_feed": false,
+                "kind": "flow",
+                "last_bar": 27,
+                "last_t": 1739145600000,
+                "outcome": "expired",
+                "series": "px",
+                "stage": "expired",
+                "tier": 2,
+                "validity": "closed"
+              }
+            },
+            "sub": "st",
+            "type": "notify"
+          }
+        },
+        {
+          "conn": "a",
+          "msg": {
+            "event": {
+              "kind": "story",
+              "seq": 15,
+              "story": {
+                "born_bar": 24,
+                "born_t": 1738713600000,
+                "closed_bar": 34,
+                "closed_t": 1739923200000,
+                "direction": "down",
+                "face": {
+                  "direction_word": "aşağı",
+                  "event": "aşırı satım",
+                  "few_cases": true,
+                  "ledger_n": 0,
+                  "ledger_short": "karnesi yok",
+                  "moved": "19 Şubat'ta",
+                  "validity_phrase": "süresi doldu",
+                  "when": "5 Şubat'ta"
+                },
+                "finding": "fnd.THYAO.extreme.down.24",
+                "hidden": "sensitivity",
+                "id": "cap.THYAO.extreme.down.24",
+                "in_feed": false,
+                "kind": "extreme",
+                "last_bar": 34,
+                "last_t": 1739923200000,
+                "outcome": "expired",
+                "series": "px",
+                "stage": "expired",
+                "tier": 3,
+                "validity": "closed"
+              }
+            },
+            "sub": "st",
+            "type": "notify"
+          }
+        },
+        {
+          "conn": "a",
+          "msg": {
+            "event": {
+              "kind": "story",
+              "seq": 15,
+              "story": {
+                "born_bar": 27,
+                "born_t": 1739145600000,
+                "closed_bar": 33,
+                "closed_t": 1739836800000,
+                "direction": "down",
+                "face": {
+                  "direction_word": "aşağı",
+                  "event": "aşağı kırılım",
+                  "few_cases": true,
+                  "ledger_n": 0,
+                  "ledger_short": "karnesi yok",
+                  "moved": "18 Şubat'ta",
+                  "validity_phrase": "tutmadı",
+                  "when": "10 Şubat'ta"
+                },
+                "finding": "fnd.THYAO.breakout.down.27",
+                "hidden": "sensitivity",
+                "id": "cap.THYAO.breakout.down.27",
+                "in_feed": false,
+                "kind": "breakout",
+                "last_bar": 33,
+                "last_t": 1739836800000,
+                "outcome": "invalidated",
+                "series": "px",
+                "stage": "invalidated",
+                "tier": 3,
+                "validity": "closed"
+              }
+            },
+            "sub": "st",
+            "type": "notify"
+          }
+        },
+        {
+          "conn": "a",
+          "msg": {
+            "event": {
+              "kind": "story",
+              "seq": 15,
+              "story": {
+                "born_bar": 30,
+                "born_t": 1739404800000,
+                "closed_bar": 35,
+                "closed_t": 1740009600000,
+                "direction": "up",
+                "face": {
+                  "direction_word": "yukarı",
+                  "event": "yukarı dönüş",
+                  "few_cases": true,
+                  "ledger_n": 0,
+                  "ledger_short": "karnesi yok",
+                  "moved": "20 Şubat'ta",
+                  "validity_phrase": "gerçekleşti",
+                  "when": "13 Şubat'ta"
+                },
+                "finding": "fnd.THYAO.reversal.up.30",
+                "hidden": "sensitivity",
+                "id": "cap.THYAO.reversal.up.30",
+                "in_feed": false,
+                "kind": "reversal",
+                "last_bar": 35,
+                "last_t": 1740009600000,
+                "outcome": "realized",
+                "series": "px",
+                "stage": "realized",
+                "tier": 3,
+                "validity": "closed"
+              }
+            },
+            "sub": "st",
+            "type": "notify"
+          }
+        },
+        {
+          "conn": "a",
+          "msg": {
+            "event": {
+              "kind": "story",
+              "seq": 15,
+              "story": {
+                "born_bar": 49,
+                "born_t": 1741737600000,
+                "closed_bar": 56,
+                "closed_t": 1742515200000,
+                "direction": "up",
+                "face": {
+                  "direction_word": "yukarı",
+                  "event": "yukarı kırılım",
+                  "few_cases": true,
+                  "ledger_n": 0,
+                  "ledger_short": "karnesi yok",
+                  "moved": "21 Mart'ta",
+                  "validity_phrase": "gerçekleşti",
+                  "when": "12 Mart'ta"
+                },
+                "finding": "fnd.THYAO.breakout.up.49",
+                "hidden": "sensitivity",
+                "id": "cap.THYAO.breakout.up.49",
+                "in_feed": false,
+                "kind": "breakout",
+                "last_bar": 56,
+                "last_t": 1742515200000,
+                "outcome": "realized",
+                "series": "px",
+                "stage": "realized",
+                "tier": 3,
+                "validity": "closed"
+              }
+            },
+            "sub": "st",
+            "type": "notify"
+          }
+        },
+        {
+          "conn": "a",
+          "msg": {
+            "event": {
+              "kind": "story",
+              "seq": 15,
+              "story": {
+                "born_bar": 51,
+                "born_t": 1741910400000,
+                "closed_bar": 57,
+                "closed_t": 1742774400000,
+                "direction": "up",
+                "face": {
+                  "direction_word": "yukarı",
+                  "event": "yükseliş eğilimi",
+                  "few_cases": true,
+                  "ledger_n": 0,
+                  "ledger_short": "karnesi yok",
+                  "moved": "24 Mart'ta",
+                  "validity_phrase": "gerçekleşti",
+                  "when": "14 Mart'ta"
+                },
+                "finding": "fnd.THYAO.continuation.up.51",
+                "hidden": "sensitivity",
+                "id": "cap.THYAO.continuation.up.51",
+                "in_feed": false,
+                "kind": "continuation",
+                "last_bar": 57,
+                "last_t": 1742774400000,
+                "outcome": "realized",
+                "series": "px",
+                "stage": "realized",
+                "tier": 3,
+                "validity": "closed"
+              }
+            },
+            "sub": "st",
+            "type": "notify"
+          }
+        },
+        {
+          "conn": "a",
+          "msg": {
+            "event": {
+              "kind": "story",
+              "seq": 15,
+              "story": {
+                "born_bar": 53,
+                "born_t": 1742256000000,
+                "closed_bar": 56,
+                "closed_t": 1742515200000,
+                "direction": "up",
+                "face": {
+                  "direction_word": "yukarı",
+                  "event": "para girişi",
+                  "few_cases": true,
+                  "ledger_n": 1,
+                  "ledger_short": "1'de 0 tuttu (az örnek)",
+                  "moved": "21 Mart'ta",
+                  "validity_phrase": "gerçekleşti",
+                  "when": "18 Mart'ta"
+                },
+                "finding": "fnd.THYAO.flow.up.53",
+                "hidden": "sensitivity",
+                "id": "cap.THYAO.flow.up.53",
+                "in_feed": false,
+                "kind": "flow",
+                "last_bar": 56,
+                "last_t": 1742515200000,
+                "outcome": "realized",
+                "series": "px",
+                "stage": "realized",
+                "tier": 2,
+                "validity": "closed"
+              }
+            },
+            "sub": "st",
+            "type": "notify"
+          }
+        },
+        {
+          "conn": "a",
+          "msg": {
+            "event": {
+              "kind": "story",
+              "seq": 15,
+              "story": {
+                "born_bar": 56,
+                "born_t": 1742515200000,
+                "closed_bar": 66,
+                "closed_t": 1743724800000,
+                "direction": "up",
+                "face": {
+                  "direction_word": "yukarı",
+                  "event": "aşırı alım",
+                  "few_cases": true,
+                  "ledger_n": 0,
+                  "ledger_short": "karnesi yok",
+                  "moved": "4 Nisan'da",
+                  "validity_phrase": "süresi doldu",
+                  "when": "21 Mart'ta"
+                },
+                "finding": "fnd.THYAO.extreme.up.56",
+                "hidden": "sensitivity",
+                "id": "cap.THYAO.extreme.up.56",
+                "in_feed": false,
+                "kind": "extreme",
+                "last_bar": 66,
+                "last_t": 1743724800000,
+                "outcome": "expired",
+                "series": "px",
+                "stage": "expired",
+                "tier": 3,
+                "validity": "closed"
+              }
+            },
+            "sub": "st",
+            "type": "notify"
+          }
+        },
+        {
+          "conn": "a",
+          "msg": {
+            "event": {
+              "kind": "story",
+              "seq": 15,
+              "story": {
+                "born_bar": 57,
+                "born_t": 1742774400000,
+                "closed_bar": 62,
+                "closed_t": 1743379200000,
+                "direction": "up",
+                "face": {
+                  "direction_word": "yukarı",
+                  "event": "yukarı kırılım",
+                  "few_cases": true,
+                  "ledger_n": 2,
+                  "ledger_short": "2'de 2 tuttu (az örnek)",
+                  "moved": "31 Mart'ta",
+                  "validity_phrase": "tutmadı",
+                  "when": "24 Mart'ta"
+                },
+                "finding": "fnd.THYAO.breakout.up.57",
+                "hidden": "sensitivity",
+                "id": "cap.THYAO.breakout.up.57",
+                "in_feed": false,
+                "kind": "breakout",
+                "last_bar": 62,
+                "last_t": 1743379200000,
+                "outcome": "invalidated",
+                "series": "px",
+                "stage": "invalidated",
+                "tier": 2,
+                "validity": "closed"
+              }
+            },
+            "sub": "st",
+            "type": "notify"
+          }
+        },
+        {
+          "conn": "a",
+          "msg": {
+            "event": {
+              "kind": "story",
+              "seq": 15,
+              "story": {
+                "born_bar": 66,
+                "born_t": 1743724800000,
+                "closed_bar": 76,
+                "closed_t": 1744934400000,
+                "direction": "down",
+                "face": {
+                  "direction_word": "aşağı",
+                  "event": "para çıkışı",
+                  "few_cases": true,
+                  "ledger_n": 1,
+                  "ledger_short": "1'de 0 tuttu (az örnek)",
+                  "moved": "18 Nisan'da",
+                  "validity_phrase": "gerçekleşti",
+                  "when": "4 Nisan'da"
+                },
+                "finding": "fnd.THYAO.flow.down.66",
+                "hidden": "sensitivity",
+                "id": "cap.THYAO.flow.down.66",
+                "in_feed": false,
+                "kind": "flow",
+                "last_bar": 76,
+                "last_t": 1744934400000,
+                "outcome": "realized",
+                "series": "px",
+                "stage": "realized",
+                "tier": 2,
+                "validity": "closed"
+              }
+            },
+            "sub": "st",
+            "type": "notify"
+          }
+        },
+        {
+          "conn": "a",
+          "msg": {
+            "event": {
+              "kind": "story",
+              "seq": 15,
+              "story": {
+                "born_bar": 83,
+                "born_t": 1745884800000,
+                "closed_bar": 88,
+                "closed_t": 1746489600000,
+                "direction": "down",
+                "face": {
+                  "direction_word": "aşağı",
+                  "event": "aşağı kırılım",
+                  "few_cases": true,
+                  "ledger_n": 1,
+                  "ledger_short": "1'de 0 tuttu (az örnek)",
+                  "moved": "6 Mayıs'ta",
+                  "validity_phrase": "tutmadı",
+                  "when": "29 Nisan'da"
+                },
+                "finding": "fnd.THYAO.breakout.down.83",
+                "hidden": "sensitivity",
+                "id": "cap.THYAO.breakout.down.83",
+                "in_feed": false,
+                "kind": "breakout",
+                "last_bar": 88,
+                "last_t": 1746489600000,
+                "outcome": "invalidated",
+                "series": "px",
+                "stage": "invalidated",
+                "tier": 3,
+                "validity": "closed"
+              }
+            },
+            "sub": "st",
+            "type": "notify"
+          }
+        },
+        {
+          "conn": "a",
+          "msg": {
+            "event": {
+              "kind": "story",
+              "seq": 15,
+              "story": {
+                "born_bar": 89,
+                "born_t": 1746576000000,
+                "closed_bar": 94,
+                "closed_t": 1747180800000,
+                "direction": "down",
+                "face": {
+                  "direction_word": "aşağı",
+                  "event": "para çıkışı",
+                  "few_cases": true,
+                  "ledger_n": 2,
+                  "ledger_short": "2'de 1 tuttu (az örnek)",
+                  "moved": "14 Mayıs'ta",
+                  "validity_phrase": "gerçekleşti",
+                  "when": "7 Mayıs'ta"
+                },
+                "finding": "fnd.THYAO.flow.down.89",
+                "hidden": "sensitivity",
+                "id": "cap.THYAO.flow.down.89",
+                "in_feed": false,
+                "kind": "flow",
+                "last_bar": 94,
+                "last_t": 1747180800000,
+                "outcome": "realized",
+                "series": "px",
+                "stage": "realized",
+                "tier": 2,
+                "validity": "closed"
+              }
+            },
+            "sub": "st",
+            "type": "notify"
+          }
+        },
+        {
+          "conn": "a",
+          "msg": {
+            "event": {
+              "kind": "story",
+              "seq": 15,
+              "story": {
+                "born_bar": 97,
+                "born_t": 1747612800000,
+                "closed_bar": 102,
+                "closed_t": 1748217600000,
+                "direction": "up",
+                "face": {
+                  "direction_word": "yukarı",
+                  "event": "para girişi",
+                  "few_cases": true,
+                  "ledger_n": 2,
+                  "ledger_short": "2'de 1 tuttu (az örnek)",
+                  "moved": "26 Mayıs'ta",
+                  "validity_phrase": "tutmadı",
+                  "when": "19 Mayıs'ta"
+                },
+                "finding": "fnd.THYAO.flow.up.97",
+                "hidden": "sensitivity",
+                "id": "cap.THYAO.flow.up.97",
+                "in_feed": false,
+                "kind": "flow",
+                "last_bar": 102,
+                "last_t": 1748217600000,
+                "outcome": "invalidated",
+                "series": "px",
+                "stage": "invalidated",
+                "tier": 2,
+                "validity": "closed"
+              }
+            },
+            "sub": "st",
+            "type": "notify"
+          }
+        },
+        {
+          "conn": "a",
+          "msg": {
+            "event": {
+              "kind": "story",
+              "seq": 15,
+              "story": {
+                "born_bar": 103,
+                "born_t": 1748304000000,
+                "closed_bar": 106,
+                "closed_t": 1748563200000,
+                "direction": "up",
+                "face": {
+                  "direction_word": "yukarı",
+                  "event": "para girişi",
+                  "few_cases": true,
+                  "ledger_n": 3,
+                  "ledger_short": "3'te 1 tuttu (az örnek)",
+                  "moved": "30 Mayıs'ta",
+                  "validity_phrase": "gerçekleşti",
+                  "when": "27 Mayıs'ta"
+                },
+                "finding": "fnd.THYAO.flow.up.103",
+                "hidden": "sensitivity",
+                "id": "cap.THYAO.flow.up.103",
+                "in_feed": false,
+                "kind": "flow",
+                "last_bar": 106,
+                "last_t": 1748563200000,
+                "outcome": "realized",
+                "series": "px",
+                "stage": "realized",
+                "tier": 2,
+                "validity": "closed"
+              }
+            },
+            "sub": "st",
+            "type": "notify"
+          }
+        },
+        {
+          "conn": "a",
+          "msg": {
+            "event": {
+              "kind": "story",
+              "seq": 15,
+              "story": {
+                "born_bar": 104,
+                "born_t": 1748390400000,
+                "closed_bar": 107,
+                "closed_t": 1748822400000,
+                "direction": "down",
+                "face": {
+                  "direction_word": "aşağı",
+                  "event": "para çıkışı",
+                  "few_cases": true,
+                  "ledger_n": 3,
+                  "ledger_short": "3'te 2 tuttu (az örnek)",
+                  "moved": "2 Haziran'da",
+                  "validity_phrase": "tutmadı",
+                  "when": "28 Mayıs'ta"
+                },
+                "finding": "fnd.THYAO.flow.down.104",
+                "hidden": "sensitivity",
+                "id": "cap.THYAO.flow.down.104",
+                "in_feed": false,
+                "kind": "flow",
+                "last_bar": 107,
+                "last_t": 1748822400000,
+                "outcome": "invalidated",
+                "series": "px",
+                "stage": "invalidated",
+                "tier": 2,
+                "validity": "closed"
+              }
+            },
+            "sub": "st",
+            "type": "notify"
+          }
+        },
+        {
+          "conn": "a",
+          "msg": {
+            "event": {
+              "kind": "story",
+              "seq": 15,
+              "story": {
+                "born_bar": 110,
+                "born_t": 1749081600000,
+                "closed_bar": 130,
+                "closed_t": 1751500800000,
+                "direction": "down",
+                "face": {
+                  "direction_word": "aşağı",
+                  "event": "düşüş eğilimi",
+                  "few_cases": true,
+                  "ledger_n": 1,
+                  "ledger_short": "1'de 1 tuttu (az örnek)",
+                  "moved": "dün",
+                  "validity_phrase": "süresi doldu",
+                  "when": "19 işlem günü önce"
+                },
+                "finding": "fnd.THYAO.continuation.down.110",
+                "hidden": "sensitivity",
+                "id": "cap.THYAO.continuation.down.110",
+                "in_feed": false,
+                "kind": "continuation",
+                "last_bar": 130,
+                "last_t": 1751500800000,
+                "outcome": "expired",
+                "series": "px",
+                "stage": "expired",
+                "tier": 3,
+                "validity": "closed"
+              }
+            },
+            "sub": "st",
+            "type": "notify"
+          }
+        },
+        {
+          "conn": "a",
+          "msg": {
+            "event": {
+              "kind": "story",
+              "seq": 15,
+              "story": {
+                "born_bar": 123,
+                "born_t": 1750723200000,
+                "direction": "up",
+                "face": {
+                  "direction_word": "yukarı",
+                  "event": "para girişi",
+                  "few_cases": true,
+                  "ledger_n": 4,
+                  "ledger_short": "4'te 2 tuttu (az örnek)",
+                  "moved": "geçen hafta",
+                  "validity_phrase": "hâlâ geçerli",
+                  "when": "geçen hafta"
+                },
+                "finding": "fnd.THYAO.flow.up.123",
+                "hidden": "sensitivity",
+                "id": "cap.THYAO.flow.up.123",
+                "in_feed": false,
+                "kind": "flow",
+                "last_bar": 123,
+                "last_t": 1750723200000,
+                "series": "px",
+                "stage": "born",
+                "tier": 3,
+                "validity": "valid"
+              }
+            },
+            "sub": "st",
+            "type": "notify"
+          }
+        },
+        {
+          "conn": "a",
+          "msg": {
+            "event": {
+              "kind": "story",
+              "seq": 15,
+              "story": {
+                "born_bar": 124,
+                "born_t": 1750809600000,
+                "direction": "up",
+                "face": {
+                  "direction_word": "yukarı",
+                  "event": "yukarı dönüş",
+                  "few_cases": true,
+                  "ledger_n": 1,
+                  "ledger_short": "1'de 1 tuttu (az örnek)",
+                  "moved": "dün",
+                  "validity_phrase": "hâlâ geçerli",
+                  "when": "geçen hafta"
+                },
+                "finding": "fnd.THYAO.reversal.up.124",
+                "hidden": "sensitivity",
+                "id": "cap.THYAO.reversal.up.124",
+                "in_feed": false,
+                "kind": "reversal",
+                "last_bar": 130,
+                "last_t": 1751500800000,
+                "series": "px",
+                "stage": "strengthened",
+                "tier": 3,
+                "validity": "valid"
+              }
+            },
+            "sub": "st",
+            "type": "notify"
+          }
+        }
+      ],
+      "note": "Ana's feed level changes: the rows whose feed place changed come again (`in_feed`, `hidden`).",
+      "send": {
+        "conn": "a",
+        "msg": {
+          "id": "s1",
+          "ops": [
+            {
+              "op": "set_sensitivity",
+              "sensitivity": "important"
+            }
+          ],
+          "type": "command"
+        }
+      }
+    },
+    {
+      "expect": [
+        {
+          "conn": "a",
+          "msg": {
+            "id": "u",
+            "status": "unsubscribed",
+            "type": "ack"
+          }
+        }
+      ],
+      "note": "The chart closed: no more rows for Ana.",
+      "send": {
+        "conn": "a",
+        "msg": {
+          "id": "u",
+          "sub": "st",
+          "type": "unsubscribe"
+        }
+      }
+    },
+    {
+      "data": {
+        "change": {
+          "bar": {
+            "c": 98.14,
+            "h": 99.73,
+            "l": 96.96,
+            "o": 98.65,
+            "t": 1751846400000,
+            "v": 876821.45
+          },
+          "kind": "bar"
+        },
+        "feed": {
+          "feed": "bist",
+          "interval": "1d",
+          "symbol": "THYAO"
+        },
+        "seq": 13
+      },
+      "expect": []
+    }
+  ]
+}

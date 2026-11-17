@@ -84,7 +84,7 @@ fn collection_items(doc: &Document, c: Collection) -> Vec<Value> {
 }
 
 /// Resolves a range to `(from, to)` inclusive bar indexes over `t`.
-fn resolve_range(r: Option<&Range>, t: &[i64], path: &str) -> PResult<(usize, usize)> {
+pub(crate) fn resolve_range(r: Option<&Range>, t: &[i64], path: &str) -> PResult<(usize, usize)> {
     let n = t.len();
     if n == 0 {
         return Err(invalid("the series has no bars", path));
@@ -485,6 +485,20 @@ impl Session {
                 })
             }
             Query::Capsules { .. } => self.capsules_query(ci, q),
+            Query::Stories {
+                instrument,
+                series,
+                range,
+                limit,
+                after,
+            } => self.stories_query(
+                ci,
+                instrument,
+                series.as_deref(),
+                range.as_ref(),
+                (*limit, after.as_deref()),
+                qp,
+            ),
             Query::Capsule { capsule } => self.capsule_query(ci, capsule, qp),
             Query::Ledger {
                 key,

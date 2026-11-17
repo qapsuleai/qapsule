@@ -51,12 +51,15 @@ pub mod replayhost;
 pub mod replica;
 mod select;
 mod session;
+mod story;
 mod suggest;
 mod summary;
 #[doc(hidden)]
 pub mod tape;
 mod values;
 pub mod viewer;
+
+pub use story::CoinFlipRule;
 
 pub use apply::{
     apply_all, apply_change, find_collection, keys_overlap, replay, touched_ids, touched_key,

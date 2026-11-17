@@ -1,0 +1,37 @@
+[package]
+name = "r5-lang-harness"
+description = "R5/T2 (M17): capsule language harness — deterministic dump of every product sentence (7 detectors x stages x TR/EN x surfaces), deterministic scans, blind reader/critic setup and scoring. Written before any language alternative existed; it measures languages through the `Language` adapter interface (reference `r4`)."
+version = "0.0.0"
+edition = "2021"
+publish = false
+
+# Not a member of the main workspace (the root workspace only lists `crates/*`).
+[workspace]
+
+[[bin]]
+name = "langh"
+path = "src/main.rs"
+
+[lib]
+name = "langh"
+path = "src/lib.rs"
+
+[dependencies]
+qp-schema = { path = "../../../../../../crates/qp-schema" }
+qp-capsule = { path = "../../../../../../crates/qp-capsule" }
+qp-facts = { path = "../../../../../../crates/qp-facts" }
+qp-source = { path = "../../../../../../crates/qp-source" }
+qp-calendar = { path = "../../../../../../crates/qp-calendar" }
+qp-grammar = { path = "../../../../../../crates/qp-grammar" }
+serde = { version = "1.0.229", features = ["derive"] }
+serde_json = { version = "1.0.154", features = ["float_roundtrip"] }
+regex = "1"
+
+[lints.rust]
+unsafe_code = "forbid"
+
+[profile.release]
+debug = false
+
+[profile.test]
+opt-level = 2

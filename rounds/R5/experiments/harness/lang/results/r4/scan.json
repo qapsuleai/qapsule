@@ -1,0 +1,15 @@
+{
+  "advice": 0,
+  "contradiction": 636,
+  "determinism": 0,
+  "empty": 0,
+  "equivalence": 20,
+  "internal": 2344,
+  "ledger_expect": 1581,
+  "length": 1294,
+  "redacted_digit": 0,
+  "repeat": 76,
+  "threshold": 1002,
+  "unglossed": 1557,
+  "vague": 756
+}

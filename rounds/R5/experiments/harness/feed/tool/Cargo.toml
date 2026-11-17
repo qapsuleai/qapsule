@@ -1,0 +1,34 @@
+[package]
+name = "r5-feed-harness"
+description = "R5/T2 (M19, K53): retrospective feed simulation without look-ahead — hide thresholds x orderings over the engine's story events, ledger as of each decision; deterministic. Written before any feed alternative existed."
+version = "0.0.0"
+edition = "2021"
+publish = false
+
+# Not a member of the main workspace (the root workspace only lists `crates/*`).
+[workspace]
+
+[[bin]]
+name = "feedh"
+path = "src/main.rs"
+
+[lib]
+name = "feedh"
+path = "src/lib.rs"
+
+[dependencies]
+qp-schema = { path = "../../../../../../crates/qp-schema" }
+qp-capsule = { path = "../../../../../../crates/qp-capsule" }
+qp-facts = { path = "../../../../../../crates/qp-facts" }
+qp-source = { path = "../../../../../../crates/qp-source" }
+serde = { version = "1.0.229", features = ["derive"] }
+serde_json = { version = "1.0.154", features = ["float_roundtrip"] }
+
+[lints.rust]
+unsafe_code = "forbid"
+
+[profile.release]
+debug = false
+
+[profile.test]
+opt-level = 2

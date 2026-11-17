@@ -1,0 +1,133 @@
+Bir piyasa bilgi uygulamasının telefonda gösterdiği metinleri değerlendiriyorsun. Uygulama tavsiye vermez; her metin bir hissede olan bir şeyi anlatır. Aşağıda 12 durum var; her durumda aynı olayın iki ayrı yazılışı (Metin A ve Metin B) verildi. Hangisinin kim tarafından ya da ne zaman yazıldığını bilmiyorsun.
+Ölçütler (sırası önem sırası değildir):
+1. Ne olduğunu somut söylüyor mu: hangi eşik, adıyla ve değeriyle?
+2. Ne zaman olduğu ve hâlâ geçerli olup olmadığı ilk okumada anlaşılıyor mu?
+3. Geçmişte kaç örnekte kaç kez tuttuğunu ve neyin beklendiğini dürüstçe söylüyor mu?
+4. İç terim, jargon, belirsiz ifade yok mu ("önemli bir eşik" gibi)?
+5. Bir eylem (al, sat, bekle) önermiyor mu?
+6. Kısa ve hızlı okunuyor mu; ilk satır yeterli mi?
+7. Kısa metin ile açılan ayrıntı birbiriyle çelişmiyor mu?
+
+[1]
+Metin A:
+Karne: bu sinyal geçmişte çoğunlukla beklendiği gibi sonuçlandı.
+SYN15 için önemli bir eşikte güçlü sinyal: düşüş eğilimi olgusu dedektör tarafından bar bazında işaretlendi, teyit süreci ve aile skoru izleniyor.
+Bulgu kademesi yükseldi; kritik seviye civarında olgu tetiklendi ve teyit bekleniyor. Teknik görünüm dikkat çekici. SYN15 bardır kısa ortalamanın () altında; şu an Düşüş eğilimi sürüyor. Beklenen sonuç bugün gerçekleşti. Geçmişte bu sinyal seferin inde beklendiği gibi sonuçlandı.
+Metin B:
+Benzerleri: 24'te 15 tuttu
+SYN15 düşüşünü sürdürdü. Kapandı: bugün gerçekleşti.
+SYN15 3 bardır kısa ortalamanın (110,34) altında; şu an 105,36. Düşüş eğilimi sürüyor. Beklenen sonuç bugün gerçekleşti. Geçmişte bu sinyal 24 seferin 15'inde beklendiği gibi sonuçlandı.
+
+[2]
+Metin A:
+Karne: bu sinyal geçmişte çoğunlukla beklendiği gibi sonuçlandı.
+SYN17 için önemli bir eşikte güçlü sinyal: yukarı dönüş olgusu dedektör tarafından bar bazında işaretlendi, teyit süreci ve aile skoru izleniyor.
+Bulgu kademesi yükseldi; kritik seviye civarında olgu tetiklendi ve teyit bekleniyor. Teknik görünüm dikkat çekici. SYN17'de dün yukarı dönüş işareti çıktı: fiyat yeni dip yaparken RSI daha yüksek dip yaptı (fiyat RSI ). Sinyal bugün geçersiz oldu; artık geçerli değil. Geçmişte bu sinyal seferin sinde beklendiği gibi sonuçlandı.
+Metin B:
+Benzerleri: 20'de 7 tuttu
+SYN17 düşüşten yukarı döndü. Kapandı: bugün tutmadı.
+SYN17'de dün yukarı dönüş işareti çıktı: fiyat yeni dip yaparken RSI daha yüksek dip yaptı (fiyat 102,19, RSI 44,4). Sinyal bugün geçersiz oldu; artık geçerli değil. Geçmişte bu sinyal 20 seferin 7'sinde beklendiği gibi sonuçlandı.
+
+[3]
+Metin A:
+Karne: bu sinyal geçmişte çoğunlukla beklendiği gibi sonuçlandı.
+SYN20 için önemli bir eşikte güçlü sinyal: yukarı kırılım olgusu dedektör tarafından bar bazında işaretlendi, teyit süreci ve aile skoru izleniyor.
+Bulgu kademesi yükseldi; kritik seviye civarında olgu tetiklendi ve teyit bekleniyor. Teknik görünüm dikkat çekici. SYN20 bugün deki direnci yukarı kırdı (kapanış ): yukarı kırılım. Hâlâ geçerli. Geçmişte bu sinyal seferin inde beklendiği gibi sonuçlandı.
+Metin B:
+Benzerleri: 20'de 11 tuttu
+Bugün SYN20 önemli bir eşiğin üstüne çıktı. Hâlâ geçerli.
+SYN20 bugün 227,08'deki direnci yukarı kırdı (kapanış 229,81): yukarı kırılım. Hâlâ geçerli. Geçmişte bu sinyal 20 seferin 11'inde beklendiği gibi sonuçlandı.
+
+[4]
+Metin A:
+Karne: bu sinyal geçmişte çoğunlukla beklendiği gibi sonuçlandı.
+SYN06 için önemli bir eşikte güçlü sinyal: aşağı kırılım olgusu dedektör tarafından bar bazında işaretlendi, teyit süreci ve aile skoru izleniyor.
+Bulgu kademesi yükseldi; kritik seviye civarında olgu tetiklendi ve teyit bekleniyor. Teknik görünüm dikkat çekici. SYN06 bugün teki desteği aşağı kırdı (kapanış ): aşağı kırılım. Bugün hacim de teyit etti; bağımsız kanıt ailesi destekliyor. Hâlâ geçerli. Geçmişte bu sinyal seferin unda beklendiği gibi sonuçlandı.
+Metin B:
+Benzerleri: 21'de 9 tuttu
+SYN06 önemli bir eşiğin altına indi; bugün güçlendi. Hâlâ geçerli.
+SYN06 bugün 95,24'teki desteği aşağı kırdı (kapanış 87,95): aşağı kırılım. Bugün hacim de teyit etti; 3 bağımsız kanıt ailesi destekliyor. Hâlâ geçerli. Geçmişte bu sinyal 21 seferin 9'unda beklendiği gibi sonuçlandı.
+
+[5]
+Metin A:
+Karne: bu sinyal geçmişte çoğunlukla beklendiği gibi sonuçlandı.
+SYN18 için önemli bir eşikte güçlü sinyal: aşırı satım olgusu dedektör tarafından bar bazında işaretlendi, teyit süreci ve aile skoru izleniyor.
+Bulgu kademesi yükseldi; kritik seviye civarında olgu tetiklendi ve teyit bekleniyor. Teknik görünüm dikkat çekici. SYN18'de RSI bar önce un altına indi, bugün yeniden üstüne çıktı; şu an artık un altında değil. Aşırı satım sona erdi. Geçmişte bu sinyal seferin ünde beklendiği gibi sonuçlandı.
+Metin B:
+Benzerleri: 22'de 13 tuttu
+SYN18 kısa sürede aşırı düştü; bugün zayıfladı. Artık geçerli değil.
+SYN18'de RSI 2 bar önce 30'un altına indi, bugün yeniden üstüne çıktı; şu an 30,5, artık 30'un altında değil. Aşırı satım sona erdi. Geçmişte bu sinyal 22 seferin 13'ünde beklendiği gibi sonuçlandı.
+
+[6]
+Metin A:
+Karne: bu sinyal geçmişte çoğunlukla beklendiği gibi sonuçlandı.
+SYN07 için önemli bir eşikte güçlü sinyal: para çıkışı olgusu dedektör tarafından bar bazında işaretlendi, teyit süreci ve aile skoru izleniyor.
+Bulgu kademesi yükseldi; kritik seviye civarında olgu tetiklendi ve teyit bekleniyor. Teknik görünüm dikkat çekici. Bu hisse için sunucunun doğruladığı bir para çıkışı sinyali var; ayrıntılar veri lisansı gerektiriyor.
+Metin B:
+Benzerleri: çoğunlukla tutmadı
+Bugün SYN07 için büyük satış geldi. Hâlâ geçerli.
+Bu hisse için sunucunun doğruladığı bir para çıkışı sinyali var; ayrıntılar veri lisansı gerektiriyor.
+
+[7]
+Metin A:
+Karne: bu sinyal geçmişte çoğunlukla beklendiği gibi sonuçlandı.
+SYN02 için önemli bir eşikte güçlü sinyal: para çıkışı olgusu dedektör tarafından bar bazında işaretlendi, teyit süreci ve aile skoru izleniyor.
+Bulgu kademesi yükseldi; kritik seviye civarında olgu tetiklendi ve teyit bekleniyor. Teknik görünüm dikkat çekici. SYN02'de bar önce kurumsal net satış () son günlerin ortalamasını () belirgin biçimde aştı: para çıkışı. Dayandığı veri düzeltildiği için bugün geri çekildi; karneye yazılmadı; artık geçerli değil. Henüz karnesi yok. Sunucu doğruladı.
+Metin B:
+Benzerleri: henüz örnek yok
+SYN02 için büyük satış geldi. Kapandı: bugün geri çekildi.
+SYN02'de 2 bar önce kurumsal net satış (25.970.934) son günlerin ortalamasını (7.483.323) belirgin biçimde aştı: para çıkışı. Dayandığı veri düzeltildiği için bugün geri çekildi; karneye yazılmadı; artık geçerli değil. Henüz karnesi yok. Sunucu doğruladı.
+
+[8]
+Metin A:
+Karne: bu sinyal geçmişte çoğunlukla beklendiği gibi sonuçlandı.
+SYN14 için önemli bir eşikte güçlü sinyal: sıkışma (yön belirsiz) olgusu dedektör tarafından bar bazında işaretlendi, teyit süreci ve aile skoru izleniyor.
+Bulgu kademesi yükseldi; kritik seviye civarında olgu tetiklendi ve teyit bekleniyor. Teknik görünüm dikkat çekici. SYN14'de bugün itibarıyla sıkışma (yön belirsiz) sürüyor. Geçmişte bu sinyal seferin inde beklendiği gibi sonuçlandı.
+Metin B:
+Benzerleri: 21'de 5 tuttu
+Bugün SYN14 dar bir aralığa sıkıştı. Hâlâ geçerli.
+SYN14'de bugün itibarıyla sıkışma (yön belirsiz) sürüyor. Geçmişte bu sinyal 21 seferin 5'inde beklendiği gibi sonuçlandı.
+
+[9]
+Metin A:
+Karne: bu sinyal geçmişte çoğunlukla beklendiği gibi sonuçlandı.
+SYN08 için önemli bir eşikte güçlü sinyal: yukarı dönüş olgusu dedektör tarafından bar bazında işaretlendi, teyit süreci ve aile skoru izleniyor.
+Bulgu kademesi yükseldi; kritik seviye civarında olgu tetiklendi ve teyit bekleniyor. Teknik görünüm dikkat çekici. SYN08'de dün yukarı dönüş işareti çıktı: fiyat yeni dip yaparken RSI daha yüksek dip yaptı (fiyat RSI ). Bugün para akışı da teyit etti; bağımsız kanıt ailesi destekliyor. Hâlâ geçerli olup olmadığı bilinmiyor. Geçmişte bu sinyal seferin sinde beklendiği gibi sonuçlandı.
+Metin B:
+Benzerleri: 20'de 7 tuttu
+SYN08 düşüşten yukarı döndü; bugün güçlendi. Hâlâ geçerli.
+SYN08'de dün yukarı dönüş işareti çıktı: fiyat yeni dip yaparken RSI daha yüksek dip yaptı (fiyat 215,36, RSI 41,6). Bugün para akışı da teyit etti; 2 bağımsız kanıt ailesi destekliyor. Hâlâ geçerli olup olmadığı bilinmiyor. Geçmişte bu sinyal 20 seferin 7'sinde beklendiği gibi sonuçlandı.
+
+[10]
+Metin A:
+Karne: bu sinyal geçmişte çoğunlukla beklendiği gibi sonuçlandı.
+SYN21 için önemli bir eşikte güçlü sinyal: para girişi olgusu dedektör tarafından bar bazında işaretlendi, teyit süreci ve aile skoru izleniyor.
+Bulgu kademesi yükseldi; kritik seviye civarında olgu tetiklendi ve teyit bekleniyor. Teknik görünüm dikkat çekici. SYN21'de bar önce hacim () ortalamasının () belirgin üstüne çıktı: para girişi. Sinyalin barlık ömrü bugün sonuçsuz doldu; artık geçerli değil. Karnesi henüz az örnekli: seferin sinde tuttu.
+Metin B:
+Benzerleri: 5'te 2 tuttu (az örnek)
+SYN21 için büyük alım geldi. Kapandı: bugün süresi doldu.
+SYN21'de 10 bar önce hacim (1.243.369.826) ortalamasının (379.001.940) belirgin üstüne çıktı: para girişi. Sinyalin 10 barlık ömrü bugün sonuçsuz doldu; artık geçerli değil. Karnesi henüz az örnekli: 5 seferin 2'sinde tuttu.
+
+[11]
+Metin A:
+Karne: bu sinyal geçmişte çoğunlukla beklendiği gibi sonuçlandı.
+SYN04 için önemli bir eşikte güçlü sinyal: düşüş eğilimi olgusu dedektör tarafından bar bazında işaretlendi, teyit süreci ve aile skoru izleniyor.
+Bulgu kademesi yükseldi; kritik seviye civarında olgu tetiklendi ve teyit bekleniyor. Teknik görünüm dikkat çekici. SYN04 bu bar itibarıyla kısa ortalamanın () altında; şu an Düşüş eğilimi sürüyor. Geçmişte bu sinyal seferin unda beklendiği gibi sonuçlandı.
+Metin B:
+Benzerleri: 21'de 10 tuttu
+Az önce SYN04 düşüşünü sürdürdü. Hâlâ geçerli.
+SYN04 bu bar itibarıyla kısa ortalamanın (44,32) altında; şu an 44,23. Düşüş eğilimi sürüyor. Geçmişte bu sinyal 21 seferin 10'unda beklendiği gibi sonuçlandı.
+
+[12]
+Metin A:
+Karne: bu sinyal geçmişte çoğunlukla beklendiği gibi sonuçlandı.
+SYN15 için önemli bir eşikte güçlü sinyal: aşırı alım olgusu dedektör tarafından bar bazında işaretlendi, teyit süreci ve aile skoru izleniyor.
+Bulgu kademesi yükseldi; kritik seviye civarında olgu tetiklendi ve teyit bekleniyor. Teknik görünüm dikkat çekici. SYN15'de RSI bugün itibarıyla in üstünde; şu an Aşırı alım sürüyor. Karnesi henüz az örnekli: seferin inde tuttu.
+Metin B:
+Benzerleri: 1'de 1 tuttu (az örnek)
+Bugün SYN15 kısa sürede aşırı yükseldi. Hâlâ geçerli.
+SYN15'de RSI bugün itibarıyla 70'in üstünde; şu an 74,7. Aşırı alım sürüyor. Karnesi henüz az örnekli: 1 seferin 1'inde tuttu.
+
+Her durum için önce kendi gözlemini EN ÇOK BİR CÜMLE yaz, sonra ölçütlere göre bütün olarak daha iyi olanı seç ("A" ya da "B"; eşitlik yok).
+Cevabını yalnız bir JSON dizisi olarak yaz, başka hiçbir şey yazma:
+[{"no": 1, "gozlem": "…", "secim": "A"}, …]

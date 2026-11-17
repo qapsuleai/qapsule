@@ -89,16 +89,21 @@ const early = []; // frames that arrived before the WASM was ready, in order
 let chain = Promise.resolve();
 const posts = new Set();
 const faces = new Map(); // capsule id -> element
-const visible = new Set();
 let mode = 'idle';
 let scrollTimer = 0;
 let zoomTimer = 0;
 let painted = false;
 let info = {};
 // (RP3/T2) The paint path (`?paint=`; unknown or unsupported → `ref`, reported).
-let pick = choose(params.get('paint') || 'ref');
+// (RP3/S) Default `canvas` (proposal, rounds/RP3/experiments/S.md); `ref` stays the
+// deterministic reference and the fallback.
+const DEFAULT_PAINT = 'canvas';
+let pick = choose(params.get('paint') || DEFAULT_PAINT);
 let paint = pick.path;
-const paintEnv = { repaint: () => { if (core) { renderFeed(); renderLayer(true); } } };
+// (RP3/S) A path's own repaint request (font loaded, GPU device ready, gesture settled)
+// waits for the next paint pass (M14: at most one paint per animation frame).
+let repaintWanted = false;
+const paintEnv = { repaint: () => { repaintWanted = true; } };
 let benching = false;
 
 const $ = (id) => document.getElementById(id);
@@ -181,6 +186,10 @@ function start(frame) {
   core.metric_device('screen_w', screen.width);
   core.metric_device('screen_h', screen.height);
   core.metric_device('dpr', window.devicePixelRatio);
+  // (RP3/M14) The page's mode, as the browser reports it: on iOS a page that is not a
+  // secure context runs without the JIT and without WebGPU (the core warns).
+  core.metric_flag('secure_context', window.isSecureContext);
+  core.metric_flag('webgpu', Boolean(navigator.gpu));
   sampleMemory();
   if (ui.theme === 'light' || ui.alphabet || ui.face) core.set_style(ui.face, ui.alphabet, ui.theme);
   if (ui.feed || ui.transition || ui.outcome) core.set_look(JSON.stringify({ feed: ui.feed, transition: ui.transition, outcome: ui.outcome }));
@@ -196,6 +205,9 @@ function start(frame) {
   flush();
 }
 
+// (RP3/M14) A frame is applied to the core at once; what it changed waits in the core for
+// the next animation frame's paint pass (`paintPass`), so that several frames within one
+// display frame cost one paint. `tick` / `msg` time the core's work of one frame only.
 function onFrame(text) {
   if (text.startsWith('{"start"')) {
     start(text);
@@ -203,11 +215,24 @@ function onFrame(text) {
   }
   if (!core) return;
   const t0 = performance.now();
-  const ch = JSON.parse(core.on_frame(text));
-  repaint(ch);
+  core.on_frame(text, t0);
   flush();
   if (text.startsWith('{"data"')) core.metric_span('tick', t0, performance.now());
   else core.metric_span('msg', t0, performance.now());
+}
+
+// (RP3/M14) The one paint pass of an animation frame, for every change since the last.
+function paintPass() {
+  const text = core.take_changes();
+  if (!text && !repaintWanted) return;
+  const t0 = performance.now();
+  if (text) repaint(JSON.parse(text));
+  if (repaintWanted) {
+    repaintWanted = false;
+    renderFeed();
+    renderLayer(true);
+  }
+  core.metric_pass(t0, performance.now());
 }
 
 // --- painting ---------------------------------------------------------------------
@@ -235,12 +260,7 @@ const io = new IntersectionObserver((entries) => {
     const id = e.target.dataset.id;
     // (RP3/M15) A viewer asks the authority for the faces on screen only.
     core.visible(id, e.isIntersecting);
-    if (e.isIntersecting) {
-      visible.add(id);
-      paintFace(id, true);
-    } else {
-      visible.delete(id);
-    }
+    if (e.isIntersecting) paintFace(id, true);
   }
   flush();
 }, { root: $('feed') });
@@ -308,7 +328,6 @@ function firstFaces(nodes) {
     if (!el.dataset.id) continue; // group headers (M9 feed layouts) are not faces
     const r = el.getBoundingClientRect();
     if (r.bottom > box.top && r.top < box.bottom) {
-      visible.add(el.dataset.id);
       core.visible(el.dataset.id, true);
       paintFace(el.dataset.id, true);
     }
@@ -347,7 +366,6 @@ function renderFeed() {
     if (!keep.has(id)) {
       io.unobserve(el);
       faces.delete(id);
-      visible.delete(id);
       core.visible(id, false);
     }
   }
@@ -355,7 +373,8 @@ function renderFeed() {
   if (nodes.length) core.metric_mark('feed', performance.now());
   $('empty').hidden = nodes.length !== 0;
   if (!painted) firstFaces(nodes);
-  for (const id of visible) paintFace(id, false);
+  // (RP3/M14) The core names the faces to repaint: on screen, not behind the open layer.
+  for (const id of JSON.parse(core.faces_to_paint())) paintFace(id, false);
 }
 
 function renderLayer(force) {
@@ -369,7 +388,9 @@ function renderLayer(force) {
   $('hint').textContent = t(HINT[open.depth]);
   const scene = $('scene');
   scene.hidden = !open.scene;
-  if (open.scene) {
+  // (RP3/M14) The layer shows only on the feed tab; elsewhere the scene is not painted
+  // (it is painted afresh when the feed tab comes back, `showTab`).
+  if (open.scene && document.body.dataset.tab === 'feed') {
     const t0 = performance.now();
     Object.assign(scene.style, open.style);
     if (paint.paintScene(scene, force, open.px)) core.metric_span('scene', t0, performance.now());
@@ -484,7 +505,7 @@ function snapshot(canvas) {
 }
 
 function repaint(ch) {
-  if (ch.welcome) core.metric_mark('connected', performance.now());
+  // (`connected` is marked by the core at the frame's arrival, `on_frame`.)
   if (ch.error) toast(core.take_error());
   if (ch.status) renderStatus();
   let old = null;
@@ -547,6 +568,7 @@ function showTab(tab) {
   for (const x of document.querySelectorAll('#tabs button')) x.classList.toggle('on', x.dataset.tab === tab);
   for (const p of document.querySelectorAll('.page')) p.classList.toggle('on', p.id === tab);
   document.body.dataset.tab = tab;
+  if (tab === 'feed' && core) renderLayer(true);
   if (tab === 'metrics') renderMetrics();
   if (tab === 'settings') renderSettings();
 }
@@ -708,7 +730,6 @@ function usePath(name) {
   core.set_paint(pick.requested, pick.used, pick.reason);
   for (const el of faces.values()) io.unobserve(el);
   faces.clear();
-  visible.clear();
   const old = $('scene');
   const c = document.createElement('canvas');
   c.id = 'scene';
@@ -726,7 +747,11 @@ function usePath(name) {
 // they are, once per animation frame.
 function startBench() {
   if (!core || benching) return;
-  const cfg = { paths: supportedNames(), current: pick.requested, phase_ms: params.get('bench_phase') || '' };
+  // (RP3/S) `?bench_paths=` and `?bench_order=reverse` go to the core as they are (it selects).
+  const cfg = {
+    paths: supportedNames(), current: pick.requested, phase_ms: params.get('bench_phase') || '',
+    only: params.get('bench_paths') || '', order: params.get('bench_order') || '',
+  };
   core.bench_start(JSON.stringify(cfg), performance.now());
   benching = true;
   $('b_start').disabled = true;
@@ -778,6 +803,7 @@ function frame(ts) {
   if (core) {
     core.metric_frame(mode, ts);
     if (benching) benchStep(ts);
+    paintPass();
   }
   requestAnimationFrame(frame);
 }
@@ -785,7 +811,8 @@ function frame(ts) {
 // --- page API for the test harnesses (screens.mjs, tests/*.mjs) -------------------
 
 window.qp = {
-  ready: () => Boolean(core) && core.idle() && posts.size === 0,
+  // (RP3/M14) Not ready while a paint pass is pending.
+  ready: () => Boolean(core) && core.idle() && !core.has_changes() && !repaintWanted && posts.size === 0,
   digests: () => core.digests(),
   metrics: () => { sampleMemory(); return core.metrics(); },
   resetMetrics: () => core.metric_reset(),
@@ -795,7 +822,10 @@ window.qp = {
   sent: () => core.sent(),
   png: (id) => {
     const c = document.getElementById(id) || (faces.get(id) && faces.get(id).firstChild);
-    const img = c.getContext('2d').getImageData(0, 0, c.width, c.height);
+    // (RP3/M12c) A canvas a paint path drew with another context (WebGPU) is read
+    // through a 2D copy (`snapshot`); a 2D canvas is read directly, as before.
+    const g = c.getContext('2d') || snapshot(c).getContext('2d');
+    const img = g.getImageData(0, 0, c.width, c.height);
     return Array.from(core.png(new Uint8Array(img.data.buffer), c.width, c.height));
   },
   repaint: () => { if (core) { renderFeed(); renderLayer(true); renderStatus(); } },
@@ -839,6 +869,14 @@ async function main() {
   wasmReady = performance.now();
   while (early.length) onFrame(early.shift());
   requestAnimationFrame(frame);
+  // (RP3/M14) The JIT probe, once, a few seconds after the start (not during the
+  // opening): the page only gives the core the raw timestamps around one call.
+  setTimeout(() => {
+    if (!core) return;
+    const t0 = performance.now();
+    core.jit_probe();
+    core.metric_span('jit_probe', t0, performance.now());
+  }, 4000);
   setInterval(() => {
     sampleMemory();
     if (document.body.dataset.tab === 'metrics') renderMetrics();

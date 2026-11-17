@@ -14,7 +14,7 @@
 //! ([`face_scene`], [`open_scene`]) are what both the shell and the shell-less driver
 //! digest (`docs/PROTOCOL.md` §19.6 `view_digest`).
 
-use std::collections::{BTreeMap, VecDeque};
+use std::collections::{BTreeMap, BTreeSet, VecDeque};
 
 use qp_schema::data::DataEvent;
 use qp_schema::protocol::{
@@ -27,7 +27,11 @@ use serde_json::{json, Value};
 
 use crate::viewer::{Traffic, Viewer};
 pub mod bench;
+pub mod freq;
 pub mod paint;
+pub mod paint_canvas;
+pub mod paint_cpu;
+pub mod paint_gpu;
 
 /// Face frame height of the default face design (`r3`, 240 CSS px). (R4/H-M8910) The
 /// height a face is laid out at is the design's own (`qp_grammar::faces::height`), read
@@ -50,6 +54,44 @@ pub const DISPLAY_TZ: &str = "Europe/Istanbul";
 // (RP3/M15) The pure scene functions live in `qp_session::viewer`: the authority compiles
 // a viewer's faces with the very same code (§22).
 pub use qp_session::viewer::{face_scene, open_scene, scene_digest};
+
+#[cfg(target_arch = "wasm32")]
+mod clock {
+    use wasm_bindgen::prelude::*;
+    #[wasm_bindgen]
+    extern "C" {
+        /// `performance.now()` (ms), for the core's own spans.
+        #[wasm_bindgen(js_namespace = performance, js_name = now)]
+        pub fn now() -> f64;
+    }
+}
+
+/// (RP3/S) `performance.now()` in wasm; 0 elsewhere (no span is recorded there).
+#[must_use]
+pub(crate) fn core_now() -> f64 {
+    #[cfg(target_arch = "wasm32")]
+    {
+        clock::now()
+    }
+    #[cfg(not(target_arch = "wasm32"))]
+    {
+        0.0
+    }
+}
+
+/// (RP3/S) The key of the hand-out change check ("did this face/scene change since it was
+/// last painted?"); internal, never a digest anyone else sees (parity and `digests()` keep
+/// [`scene_digest`], FNV over the JSON).
+pub(crate) type ShownKey = u64;
+
+/// (RP3/S) The change key of `scene`: [`qp_render::retained::scene_fingerprint`], a 64-bit
+/// SipHash of size, background and every primitive's fields in paint order — no JSON
+/// serialisation (measured on the JIT-less phone setting: the JSON digest was 7–8 ms of a
+/// 14 ms paint pass with the chart open, `rounds/RP3/experiments/S.md` §6.2).
+#[must_use]
+pub(crate) fn shown_key(scene: &SceneDesc) -> ShownKey {
+    qp_render::retained::scene_fingerprint(scene)
+}
 
 // ---------------------------------------------------------------------------
 // The shell core
@@ -386,6 +428,13 @@ struct Metrics {
     paint: Option<Value>,
     /// (RP3/T2) The automatic comparison (`bench`), when one runs or ran.
     bench: Option<bench::Bench>,
+    /// (RP3/M14) Event counters (`data_frames`, `msg_frames`, `paint_passes`,
+    /// `faces_skipped_hidden`); restart with the series.
+    counts: BTreeMap<String, u64>,
+    /// (RP3/M14) The JIT probe's time (ms; kept over a reset of the series).
+    probe: Option<f64>,
+    /// (RP3/M14) Page facts (`secure_context`, `webgpu`).
+    flags: BTreeMap<String, bool>,
 }
 
 /// The core of the web shell (see the module docs).
@@ -413,9 +462,10 @@ pub struct ShellCore {
     frames: BTreeMap<String, (u32, u32)>,
     gesture: Option<Gesture>,
     metrics: Metrics,
-    /// Last digest of each face handed out (a face is redrawn only when it changed).
-    face_shown: BTreeMap<String, String>,
-    scene_shown: Option<String>,
+    /// Last change key of each face handed out (a face is redrawn only when it changed;
+    /// RP3/S [`shown_key`]).
+    face_shown: BTreeMap<String, ShownKey>,
+    scene_shown: Option<ShownKey>,
     version: u64,
     /// The messages sent, for the record and the parity check: every message of a short
     /// session; (RP3/T4) on a long one only the latest [`SENT_KEEP`] to `2 × SENT_KEEP`
@@ -438,6 +488,15 @@ pub struct ShellCore {
     traffic: Traffic,
     /// (RP3/M15) The log position of the last viewer event.
     viewer_seq: u64,
+    /// (RP3/M14) Changes waiting for the page's next paint pass, the arrival time of the
+    /// first of them, and that of the pass being painted.
+    pending: serde_json::Map<String, Value>,
+    pending_since: Option<f64>,
+    pass_since: Option<f64>,
+    /// (RP3/M14) The capsules whose face the page reports on screen (both modes).
+    shown: BTreeSet<String>,
+    /// (RP3/M12a) The `cpu` paint path's retained surfaces (`shell/paint_cpu.rs`).
+    cpu: paint_cpu::CpuPaint,
 }
 
 impl std::fmt::Debug for ShellCore {
@@ -575,6 +634,11 @@ impl ShellCore {
             viewer: None,
             traffic: Traffic::default(),
             viewer_seq: 0,
+            pending: serde_json::Map::new(),
+            pending_since: None,
+            pass_since: None,
+            shown: BTreeSet::new(),
+            cpu: paint_cpu::CpuPaint::default(),
         };
         me.push(json!({"type":"hello","protocol":"qp/0","principal":principal,
             "surface":{"kind":"phone","screen":[390,844],"input":["touch"],"lang":lang_name(lang)}}));
@@ -615,6 +679,12 @@ impl ShellCore {
     /// (RP3/M15) The shell says capsule `id`'s face is (or is no longer) on screen: a
     /// viewer asks the authority for the faces on screen only.
     pub fn visible(&mut self, id: &str, on: bool) {
+        // (RP3/M14) Kept in both modes: the paint pass paints the faces on screen only.
+        if on {
+            self.shown.insert(id.to_owned());
+        } else {
+            self.shown.remove(id);
+        }
         if let Some(v) = self.viewer.as_mut() {
             v.visible(id, on);
         }
@@ -1014,8 +1084,7 @@ impl ShellCore {
                     for ev in evs {
                         self.data_event(ev);
                     }
-                    ch["scene"] = json!(true);
-                    ch["feed"] = json!(true);
+                    self.data_changed(&mut ch, evs.len());
                 }
                 if let Some(st) = f.replay {
                     self.set_replay(st);
@@ -1031,13 +1100,14 @@ impl ShellCore {
         }
         let mut ch = json!({});
         if let Some(evs) = v.get("data").and_then(Value::as_array) {
+            let mut n = 0;
             for e in evs {
                 if let Ok(ev) = serde_json::from_value::<DataEvent>(e.clone()) {
                     self.data_event(&ev);
+                    n += 1;
                 }
             }
-            ch["scene"] = json!(true);
-            ch["feed"] = json!(true);
+            self.data_changed(&mut ch, n);
         }
         if let Some(r) = v.get("replay") {
             if let Ok(st) = serde_json::from_value::<ReplayState>(r.clone()) {
@@ -1046,6 +1116,20 @@ impl ShellCore {
             }
         }
         Ok(ch)
+    }
+
+    /// (RP3/M14) What `n` data events applied by a data frame may have changed: nothing
+    /// when there were none (a frame that only carries the replay state); the open scene
+    /// (it reads the device's own data) and, in the full replica, the feed (its faces are
+    /// compiled from the replica's data; a viewer's faces come ready from the authority).
+    fn data_changed(&self, ch: &mut Value, n: usize) {
+        if n == 0 {
+            return;
+        }
+        ch["scene"] = json!(true);
+        if self.viewer.is_none() {
+            ch["feed"] = json!(true);
+        }
     }
 
     // --- what to show --------------------------------------------------------
@@ -1201,27 +1285,72 @@ impl ShellCore {
         let Some(scene) = self.face(id) else {
             return Vec::new();
         };
-        let d = scene_digest(&scene);
-        if !force && self.face_shown.get(id) == Some(&d) {
+        if !self.face_changed(id, &scene, force) {
             return Vec::new();
         }
-        self.face_shown.insert(id.to_owned(), d);
         self.pixels(&scene)
     }
 
     /// The open capsule's scene.
     pub fn scene(&mut self) -> Option<SceneDesc> {
         let o = self.opening.clone()?;
+        // (RP3/M14) Builds of the open scene (unchanged ones = builds − scene paints).
+        *self
+            .metrics
+            .counts
+            .entry("scene_builds".to_owned())
+            .or_default() += 1;
         let look = self.look.clone();
         let mp = self.max_points;
         let head = self.open_headline.clone();
-        if let Some(v) = self.viewer.as_mut() {
+        // (RP3/S) The build's own time (`scene_build`), apart from the change check.
+        let t0 = core_now();
+        let scene = if let Some(v) = self.viewer.as_mut() {
             // (RP3/M15) The open capsule over the device's own data of its instrument.
             let side = v.open_mut().filter(|s| s.open.capsule == o.capsule)?;
             let s = side.replica_mut().session_mut()?;
-            return open_scene(s, &o, head.as_deref(), &look, mp);
+            open_scene(s, &o, head.as_deref(), &look, mp)
+        } else {
+            open_scene(self.replica.session_mut()?, &o, head.as_deref(), &look, mp)
+        };
+        let t1 = core_now();
+        self.core_span("scene_build", t0, t1);
+        scene
+    }
+
+    /// (RP3/S) Whether capsule `id`'s face `scene` differs from the one last handed out
+    /// (always with `force`); records it. The check's time is the `change_check` span.
+    pub(crate) fn face_changed(&mut self, id: &str, scene: &SceneDesc, force: bool) -> bool {
+        let t0 = core_now();
+        let k = shown_key(scene);
+        let t1 = core_now();
+        self.core_span("change_check", t0, t1);
+        if !force && self.face_shown.get(id) == Some(&k) {
+            return false;
         }
-        open_scene(self.replica.session_mut()?, &o, head.as_deref(), &look, mp)
+        self.face_shown.insert(id.to_owned(), k);
+        true
+    }
+
+    /// (RP3/S) As [`ShellCore::face_changed`], for the open capsule's scene.
+    pub(crate) fn scene_changed(&mut self, scene: &SceneDesc, force: bool) -> bool {
+        let t0 = core_now();
+        let k = shown_key(scene);
+        let t1 = core_now();
+        self.core_span("change_check", t0, t1);
+        if !force && self.scene_shown.as_ref() == Some(&k) {
+            return false;
+        }
+        self.scene_shown = Some(k);
+        true
+    }
+
+    /// (RP3/S) Records a span of the core's own work (in wasm only: elsewhere there is no
+    /// clock and nothing is recorded).
+    pub(crate) fn core_span(&mut self, name: &str, t0: f64, t1: f64) {
+        if cfg!(target_arch = "wasm32") {
+            self.metric_span(name, t0, t1);
+        }
     }
 
     /// Pixels of the open capsule's scene (empty when unchanged or none).
@@ -1230,11 +1359,9 @@ impl ShellCore {
             self.scene_shown = None;
             return Vec::new();
         };
-        let d = scene_digest(&scene);
-        if !force && self.scene_shown.as_deref() == Some(d.as_str()) {
+        if !self.scene_changed(&scene, force) {
             return Vec::new();
         }
-        self.scene_shown = Some(d);
         self.pixels(&scene)
     }
 
@@ -1854,6 +1981,11 @@ impl ShellCore {
 
     /// A timed span (`tick`, `face`, `scene`, …) from `t0` to `t1` ms.
     pub fn metric_span(&mut self, name: &str, t0: f64, t1: f64) {
+        // (RP3/M14) The JIT probe is a fact of the page, not a series: kept apart.
+        if name == "jit_probe" {
+            self.metrics.probe = Some(t1 - t0);
+            return;
+        }
         self.metrics
             .spans
             .entry(name.to_owned())
@@ -1936,6 +2068,7 @@ impl ShellCore {
     pub fn warnings(&self) -> Vec<Value> {
         let mut w = Vec::new();
         let Some(&dpr) = self.metrics.device.get("dpr") else {
+            w.extend(self.mode_warnings());
             return w;
         };
         if dpr < 1.0 {
@@ -1950,6 +2083,7 @@ impl ShellCore {
             w.push(json!({"code": "scale_differs",
                 "text": format!("paint scale {} differs from DPR {dpr:.3}: the browser resamples the scenes", self.scale)}));
         }
+        w.extend(self.mode_warnings());
         w
     }
 
@@ -2019,6 +2153,7 @@ impl ShellCore {
         m.frames.clear();
         m.gaps.clear();
         m.spans.clear();
+        m.counts.clear();
         m.last_frame = None;
     }
 
@@ -2052,6 +2187,8 @@ impl ShellCore {
             "open_repeats": m.repeats,
             "open_flags": self.open_flags(),
             "warnings": self.warnings(),
+            "mode": self.mode_json(),
+            "counts": self.counts_json(),
             "paint": m.paint,
             "bundle": m.bundle,
             "agent": m.agent,
@@ -2103,6 +2240,7 @@ impl ShellCore {
             };
             rows.push(json!(["paint", text]));
         }
+        rows.extend(self.mode_rows());
         let (refresh, source) = self.refresh();
         rows.push(json!([
             "refresh",

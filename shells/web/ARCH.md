@@ -47,6 +47,37 @@ satır; boyama yolu bağlamında ayrıca bir takım) yakalanmazsa adım düşer.
 | `face_scene(id, force)`, `scene_desc(force)` | Piksel almayan boyama yolları için sahnenin aygıt ölçeğinde **boyama listesi** (`paint/README.md`): bütün sayılar, renk ve yazı tipi dizgeleri çekirdekte hazırlanır; yol yalnız çizim çağrısı yapar (R2–R4 yollarda da geçerli). `face_rgba`/`scene_rgba` ile aynı "değişmediyse boş" kısa devresi. |
 | `font()` | Başvuru çizicinin gömülü yazı tipi dosyası (IBM Plex Mono, OFL): tuvalle metin çizen yol aynı dosyayı `FontFace` ile kaydeder (yazı tipi farkı görsel farkın ana kaynağı olmasın; ağ isteği yok, R1). |
 | `bench_start(cfg, t)`, `bench_tick(t, scrollHeight, clientHeight)`, `bench_rows()`, `bench_summary()` | Otomatik karşılaştırma (GOAL 8): senaryo sürücüsü (zamanlama, kaydırma konumu, yapay sürükleme, oynatma denetimi, istatistik, tablo metni) çekirdekte; kabuk dönen eylemleri olduğu gibi uygular. Kaydırma sınırı için `scrollHeight`/`clientHeight` ham verilir; çıkarma çekirdekte. |
+| `cpu_options(seçenekler)`, `cpu_face(id, force)`, `cpu_scene(force)`, `cpu_moving()`, `cpu_memory()`, `cpu_pixels()` | (RP3/M12a) `cpu` boyama yolu (`paint/cpu.js`): çekirdek her yüzün ve açık sahnenin son karesini tutar, yalnız değişen dikdörtgeni başvuru çizicinin kendi koduyla yeniden boyar ve cevapta piksel göstergesini, kare boyutunu ve değişen dikdörtgeni **hazır** verir (`[ptr, len, w, h, dx, dy, dw, dh, settle, reuse, view]`); kabuk hiçbir sayı hesaplamaz, yalnız `putImageData(img, 0, 0, dx, dy, dw, dh)` çağırır. `cpu_memory` WASM belleğinin kendisidir: kare sınırdan kopyalanmadan bir görünümle okunur (kopya ölçümü için `cpu_pixels`). `cpu_moving`: grafikte sürükleme/kıstırma sürüyor mu (çekirdeğin kendi hareket tanıyıcısı); bitince yol `env.repaint()` ile aygıt ölçeğinde yeniden boyatır. `cpu_options`: ölçüm için teknikleri kapatma (`?cpu=`). |
+
+(RP3/M14) Eklenenler ve gerekçeleri (ölçüt 6: kare başına en çok bir boyama, görünmeyeni boyamamak):
+
+| Yöntem | Neden |
+|--------|-------|
+| `on_frame(metin, t)` (ikinci değişken eklendi) | Çerçeve hemen çekirdeğe uygulanır; değişiklik bayrakları **çekirdekte** birikir (kabukta birleştirme yok). `t` ham varış zamanı: `connected` işareti ve "çerçeveden boyamaya" gecikmesi çekirdekte hesaplanır. |
+| `take_changes()`, `has_changes()` | Animasyon karesi başına tek boyama geçişi: kabuk birikmiş değişiklikleri alır ve bir kez boyar (boşsa hiç). `has_changes` sınama düzeneğinin `ready()`'si içindir: boyama bekliyorken sayfa hazır sayılmaz. |
+| `metric_pass(t0, t1)` | Boyama geçişinin süresi (`paint_pass`), sayacı ve gecikme (`frame_to_paint`); kabuk yalnız ham zaman damgası verir. |
+| `faces_to_paint()` | Hangi yüzün yeniden boyanacağı çekirdeğin kararıdır: ekrandakiler (`visible`), açık katman akışı örterken hiçbiri; atlananlar çekirdekte sayılır. |
+| `metric_flag(ad, açık)` | Sayfanın kipi özetle birlikte: `isSecureContext`, `navigator.gpu` var mı (iOS'ta güvenli olmayan bağlamda JIT ve WebGPU yok). Değer olduğu gibi verilir. |
+| `jit_probe()` | Sabit, belirlenimci bir WASM döngüsü; kabuk bir çağrının iki yanını `metric_span('jit_probe', …)` ile verir, sınıflama (JIT açık/kapalı) ve uyarı çekirdekte. |
+
+(RP3/M12b) `canvas` boyama yolu için eklenenler (`paint/canvas.js`; sözleşme `paint/README.md`
+"canvas komut akışı"). Hiçbir kural gevşetilmedi: yol akışı bir yineleyiciyle (`ops.values()`)
+okur, çünkü dizinle okumak aritmetik ister (R3).
+
+| Yöntem | Neden |
+|--------|-------|
+| `canvas_face(id, force)`, `canvas_scene(force)` | Sahnenin aygıt ölçeğinde **Canvas 2D komut akışı** (`Float32Array`): her koordinat, kalınlık, renk ve yazı tipi dizinini, glif konumunu, değişen bölgenin kırpma dikdörtgenini çekirdek hazırlar; yol her komutu tek bir tuval çağrısına çevirir. `face_rgba`/`scene_rgba` ile aynı "değişmediyse boş" kısa devresi ve aynı kayıt. JSON v1'e göre ayrıştırma yok, biçem değişimi yalnız değişince, aynı biçemli yollar tek `stroke()`/`fill()`. |
+| `canvas_strings()` | Son akışın dizge tablosu (renkler, yazı tipi dizgeleri, metinler/glifler, hizalama adları; JSON dizisi). Akıştaki dizge bağımsız değişkenleri bu tablonun sırasıdır (dizinleme aritmetik değildir). |
+| `canvas_config(değer)` | Adresteki `?canvas=` değeri **olduğu gibi** çekirdeğe verilir (deney çeşitleri: `glyphs`, `run`, `nobatch`, `full`, `notext`); ayrıştırma çekirdekte. |
+| `canvas_atlas_px()` | Glif atlası kipinde (varsayılan) akıştaki `ATLAS` komutunun yeni atlas satırları (düz RGBA; fontdue kapsaması metnin renginde, başvuru çizicinin kendi glif pikselleri). Yol bunları `ref.js`'in yaptığı gibi `putImageData` ile atlas tuvaline koyar. |
+
+(RP3/M12c) `gpu` boyama yolu için eklenenler:
+
+| Yöntem | Neden |
+|--------|-------|
+| `gpu_face(id, force)`, `gpu_scene(force)` | Sahneyi çekirdek **üçgenlere** çevirir (`crates/qp-wasm/src/shell/paint_gpu.rs`): kırpma uzayında köşeler, önçarpımlı renk, glif atlası koordinatı; çizgi kalınlığı, birleşim, daire bölümleri, metin yerleşimi (başvuru çizicinin kuralıyla) çekirdekte. `face_rgba` ile aynı "değişmediyse yanlış" kısa devresi ve kaydı. |
+| `gpu_vertices()`, `gpu_capacity()`, `gpu_draws(k)`, `gpu_clear()` | Son kurulan karenin köşe baytları, onu tutan tampon boyutu (yol tamponu yalnız sığmazsa büyütür; büyüklük karşılaştırması aritmetik değildir), çizim listesi sütunları (tür, ilk köşe, köşe sayısı; yol `forEach` ile olduğu gibi uygular) ve temizleme rengi. Yol hiçbir sayıyı hesaplamaz, yalnız GPU'ya yükler. |
+| `gpu_atlas_size()`, `gpu_atlas_dirty(full)`, `gpu_atlas_rows()` | Glif atlası (fontdue kapsama bitmapleri, başvuru çiziciyle aynı): boyutu, değişen satırların `[y, genişlik, yükseklik]`'i ve baytları. Yeni doku yaratıldığında `full` bütün satırları ister. |
 
 Boyama yolları (`paint/*.js`) çekirdeğe `core` adıyla ve yalnız bu listeden erişir; boyama
 listesindeki ilkelleri verilen sırada, verilen sayılarla boyar; yerleşim, metin kurma,

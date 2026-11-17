@@ -393,6 +393,10 @@ mod shell_binding {
     #[wasm_bindgen]
     pub struct Shell {
         inner: ShellCore,
+        // (RP3/M12b) the `canvas` paint path's state (what each canvas shows now)
+        canvas: crate::shell::paint_canvas::CanvasPainter,
+        // (RP3/M12c) The GPU paint path's glyph atlas and last built frame.
+        gpu: crate::shell::paint_gpu::GpuPainter,
     }
 
     #[wasm_bindgen]
@@ -406,7 +410,11 @@ mod shell_binding {
         pub fn new(start_json: &str) -> Result<Shell, JsError> {
             // (RP3/T4) Typed, without a JSON tree of the frame (see `core_from_start`).
             let inner = crate::shell::core_from_start(start_json).map_err(err)?;
-            Ok(Self { inner })
+            Ok(Self {
+                inner,
+                canvas: crate::shell::paint_canvas::CanvasPainter::default(),
+                gpu: crate::shell::paint_gpu::GpuPainter::default(),
+            })
         }
 
         /// (RP3/M15) The shell says capsule `id`'s face is (or is no longer) on screen.
@@ -425,15 +433,53 @@ mod shell_binding {
             self.inner.check_now().to_string()
         }
 
-        /// One frame of the host's stream; returns what changed (JSON).
+        /// One frame of the host's stream, arrived at `t` ms (`performance.now()`; may be
+        /// left out); returns what changed (JSON). (RP3/M14) The changes also wait for the
+        /// next paint pass (`take_changes`).
         ///
         /// # Errors
         /// A malformed frame.
-        pub fn on_frame(&mut self, text: &str) -> Result<String, JsError> {
+        pub fn on_frame(&mut self, text: &str, t: Option<f64>) -> Result<String, JsError> {
             self.inner
-                .on_frame(text)
+                .on_frame_at(text, t)
                 .map(|v| v.to_string())
                 .map_err(err)
+        }
+
+        /// (RP3/M14) The changes accumulated since the last paint pass (JSON), emptied;
+        /// empty text when nothing changed.
+        pub fn take_changes(&mut self) -> String {
+            self.inner
+                .take_changes()
+                .map(|v| v.to_string())
+                .unwrap_or_default()
+        }
+
+        /// (RP3/M14) Whether changes wait for a paint pass.
+        pub fn has_changes(&self) -> bool {
+            self.inner.has_changes()
+        }
+
+        /// (RP3/M14) The paint pass ran from `t0` to `t1` ms (span, counter, latency).
+        pub fn metric_pass(&mut self, t0: f64, t1: f64) {
+            self.inner.metric_pass(t0, t1);
+        }
+
+        /// (RP3/M14) The faces the paint pass repaints when changed (JSON array of ids):
+        /// those on screen, none while the open layer covers the feed.
+        pub fn faces_to_paint(&mut self) -> String {
+            serde_json::Value::from(self.inner.faces_to_paint()).to_string()
+        }
+
+        /// (RP3/M14) A page fact for the summary (`secure_context`, `webgpu`).
+        pub fn metric_flag(&mut self, name: &str, on: bool) {
+            self.inner.metric_flag(name, on);
+        }
+
+        /// (RP3/M14) The JIT probe: a fixed WASM loop the page times once
+        /// (`metric_span('jit_probe', …)`); the result means nothing.
+        pub fn jit_probe(&self) -> u32 {
+            crate::shell::freq::jit_probe()
         }
 
         /// The messages to send (JSON array).
@@ -722,6 +768,71 @@ mod shell_binding {
             qp_render::cpu::FONT_BYTES.to_vec()
         }
 
+        /// (RP3/M12b) The `canvas` paint path's variant (the page's `?canvas=` value as
+        /// it is: `run`, `nobatch`, `full`, comma-separated; empty = the default).
+        pub fn canvas_config(&mut self, value: &str) {
+            self.canvas
+                .configure(crate::shell::paint_canvas::Config::parse(value));
+        }
+
+        /// (RP3/M12b) The Canvas 2D command stream of capsule `id`'s face
+        /// (`shells/web/paint/README.md`); empty when unchanged (as `face_rgba`) or none.
+        /// `force`: the canvas is new, paint all of it.
+        pub fn canvas_face(&mut self, id: &str, force: bool) -> Vec<f32> {
+            self.canvas.face(&mut self.inner, id, force)
+        }
+
+        /// (RP3/M12b) The command stream of the open capsule's scene (as `scene_rgba`).
+        pub fn canvas_scene(&mut self, force: bool) -> Vec<f32> {
+            self.canvas.scene(&mut self.inner, force)
+        }
+
+        /// (RP3/M12b) The glyph atlas rows (straight RGBA) the last command stream's
+        /// `ATLAS` command replaces (`?canvas=atlas`).
+        pub fn canvas_atlas_px(&mut self) -> Vec<u8> {
+            self.canvas.atlas_px()
+        }
+
+        /// (RP3/M12b) The string table (JSON array) of the last command stream.
+        pub fn canvas_strings(&self) -> String {
+            self.canvas.strings_json()
+        }
+
+        /// (RP3/M12a) The `cpu` paint path's techniques (`nodirty,nolayer,noreduce,
+        /// noreuse,noview,off,keep=<n>`; empty: all on); drops its retained surfaces.
+        pub fn cpu_options(&mut self, opts: &str) {
+            self.inner.cpu_options(opts);
+        }
+
+        /// (RP3/M12a) Paints face `id` on its retained surface: `[ptr, len, w, h, dx, dy,
+        /// dw, dh, settle, reuse, view]` (`shells/web/paint/cpu.js`), empty when nothing
+        /// changed. `kept`: the canvas still holds the last frame put on it.
+        pub fn cpu_face(&mut self, id: &str, force: bool, kept: bool) -> Vec<f64> {
+            self.inner.cpu_face(id, force, kept)
+        }
+
+        /// (RP3/M12a) Paints the open scene (as `cpu_face`; reduced scale while a chart
+        /// gesture is in progress, `settle` = 1).
+        pub fn cpu_scene(&mut self, force: bool, kept: bool) -> Vec<f64> {
+            self.inner.cpu_scene(force, kept)
+        }
+
+        /// (RP3/M12a) A drag or pinch on the open chart is in progress.
+        pub fn cpu_moving(&self) -> bool {
+            self.inner.cpu_moving()
+        }
+
+        /// (RP3/M12a) The WASM memory: the `cpu` path reads the frame through a view at
+        /// the answer's pointer (no copy across the boundary).
+        pub fn cpu_memory(&self) -> JsValue {
+            wasm_bindgen::memory()
+        }
+
+        /// (RP3/M12a) The last answer's pixels as a copy (`noview`).
+        pub fn cpu_pixels(&mut self) -> Vec<u8> {
+            self.inner.cpu_pixels()
+        }
+
         /// (RP3/T2) Starts the automatic paint-path comparison (`{paths, current,
         /// phase_ms}` JSON) at `t` ms.
         pub fn bench_start(&mut self, config_json: &str, t: f64) {
@@ -771,6 +882,61 @@ mod shell_binding {
         /// PNG bytes of RGBA pixels (the core's encoder: byte-identical on every target).
         pub fn png(&self, rgba: &[u8], w: u32, h: u32) -> Vec<u8> {
             qp_render::encode_png(rgba, w, h).unwrap_or_default()
+        }
+
+        /// (RP3/M12c) Builds capsule `id`'s face as GPU triangles (`shell/paint_gpu.rs`);
+        /// false when unchanged (as `face_rgba`) or none.
+        pub fn gpu_face(&mut self, id: &str, force: bool) -> bool {
+            self.inner.face_gpu(id, force, &mut self.gpu)
+        }
+
+        /// (RP3/M12c) Builds the open capsule's scene as GPU triangles; false when
+        /// unchanged (as `scene_rgba`) or none.
+        pub fn gpu_scene(&mut self, force: bool) -> bool {
+            self.inner.scene_gpu(force, &mut self.gpu)
+        }
+
+        /// (RP3/M12c) The last built frame's vertex bytes.
+        pub fn gpu_vertices(&self) -> Vec<u8> {
+            self.gpu.vertices().to_vec()
+        }
+
+        /// (RP3/M12c) A vertex buffer size that holds the last frame (bytes).
+        pub fn gpu_capacity(&self) -> u32 {
+            self.gpu.capacity()
+        }
+
+        /// (RP3/M12c) The last frame's draws, column `k`: 0 kinds, 1 first vertices,
+        /// 2 vertex counts.
+        pub fn gpu_draws(&self, k: usize) -> Vec<u32> {
+            self.gpu.draw_column(k)
+        }
+
+        /// (RP3/M12c) The last frame's clear colour (premultiplied RGBA, 0..1).
+        pub fn gpu_clear(&self) -> Vec<f64> {
+            self.gpu.background().to_vec()
+        }
+
+        /// (RP3/M12c) The glyph atlas size `[w, h]` (an `r8unorm` texture).
+        pub fn gpu_atlas_size(&self) -> Vec<u32> {
+            vec![
+                crate::shell::paint_gpu::ATLAS_W,
+                crate::shell::paint_gpu::ATLAS_H,
+            ]
+        }
+
+        /// (RP3/M12c) Atlas rows to upload, `[y, width, height]` (empty: none); `full`
+        /// (a new texture) names every row.
+        pub fn gpu_atlas_dirty(&mut self, full: bool) -> Vec<u32> {
+            if full {
+                self.gpu.mark_atlas();
+            }
+            self.gpu.atlas_dirty()
+        }
+
+        /// (RP3/M12c) The texels of those rows; clears the record.
+        pub fn gpu_atlas_rows(&mut self) -> Vec<u8> {
+            self.gpu.take_atlas_rows()
         }
     }
 }

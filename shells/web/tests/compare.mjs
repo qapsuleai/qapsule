@@ -3,13 +3,23 @@
 // comparative summary; asserts it finished in under 3 minutes and lists every path.
 // Also checks the paint-path fallback (`?paint=` unknown / unsupported → `ref`, reported).
 //
-// The registry's second path here is `fixture` (shells/web/paint/fixture.js), a test
-// fixture that exists only with `?fixture=1`.
+// The test fixture path `fixture` (shells/web/paint/fixture.js) exists only with
+// `?fixture=1` (put in the address when `--paths` names it).
 //
 // Usage: node tests/compare.mjs <qp> [--browsers chromium,webkit] [--phase <ms>]
-//          [--dpr 1] [--out <dir>]
-//   --phase  phase length passed as `?bench_phase=` (default: the core's, 8000 ms)
-//   --out    writes compare-<browser>.json (the summary) there
+//          [--dpr 1] [--out <dir>] [--paths ref,canvas] [--order reverse] [--throttle <rate>]
+//          [--viewport 390x844] [--port 8420] [--q <extra query>] [--jsc useJIT=false]
+//          [--channel chromium]
+//   --phase     phase length passed as `?bench_phase=` (default: the core's, 8000 ms)
+//   --out       writes compare-<browser>.json (the summary) there
+//   --paths     the paths to run (`?bench_paths=`; the core keeps those the browser supports,
+//               in registry order). Default: every registered path the browser supports.
+//   --order     (RP3/S) `reverse` runs the paths in reversed order (`?bench_order=reverse`)
+//   --throttle  (RP3/M12b) Chromium CPU throttling rate (CDP Emulation.setCPUThrottlingRate)
+//   --viewport  (RP3/M12b) the page size in CSS px
+//   --q         (RP3/M12b) extra query parameters for the page (e.g. `canvas=full`)
+//   --jsc       (RP3/M12b) WebKit JavaScriptCore options, e.g. `useJIT=false` (T1's PHONE)
+//   --channel   (RP3/S) Chromium channel, e.g. `chromium` (full browser with WebGPU)
 import fs from 'node:fs';
 import path from 'node:path';
 import { chromium, webkit } from 'playwright';
@@ -22,6 +32,15 @@ const browsers = opt('--browsers', 'chromium,webkit').split(',');
 const phase = opt('--phase', '');
 const dpr = Number(opt('--dpr', '1'));
 const out = opt('--out', null);
+const pathsArg = opt('--paths', '');
+const paths = pathsArg ? pathsArg.split(',') : [];
+const order = opt('--order', '');
+const throttle = Number(opt('--throttle', '1'));
+const [vw, vh] = opt('--viewport', '390x844').split('x').map(Number);
+const port0 = Number(opt('--port', '8420'));
+const extraQ = opt('--q', '');
+const jsc = opt('--jsc', '');
+const channel = opt('--channel', '');
 const here = new URL('..', import.meta.url).pathname;
 const ENGINES = { chromium, webkit };
 const LIMIT_MS = 180000;
@@ -42,18 +61,35 @@ async function fallback(browser, base, q, want) {
 
 let failed = 0;
 for (const [k, name] of browsers.entries()) {
-  const { child, base: b } = await startDemo(qp, here, 8420 + k);
+  const { child, base: b } = await startDemo(qp, here, port0 + k);
   const base = b.replace('localhost', '127.0.0.1');
-  const browser = await ENGINES[name].launch();
+  // (RP3/M12b) WebKit JavaScriptCore options reach the WebContent process only as
+  // __XPC_JSC_* variables (RP3/T1, calibrate.mjs): `--jsc useJIT=false` = T1's PHONE setting.
+  const env = { ...process.env };
+  for (const [k, v] of new URLSearchParams(jsc.split(',').join('&'))) if (k) env[`__XPC_JSC_${k}`] = v;
+  // (RP3/S) `--channel chromium`: the full Chromium (new headless, the machine's GPU:
+  // WebGPU has an adapter there); default: the headless shell (no WebGPU adapter).
+  const browser = await ENGINES[name].launch(name === 'webkit' ? { env } : (channel ? { channel } : {}));
   try {
     await fallback(browser, base, 'paint=nope', { requested: 'nope', used: 'ref', fallback: 'unknown' });
     await fallback(browser, base, 'paint=fixture', { requested: 'fixture', used: 'ref', fallback: 'unsupported' });
-    const ctx = await browser.newContext({ viewport: { width: 390, height: 844 }, deviceScaleFactor: dpr });
+    const ctx = await browser.newContext({ viewport: { width: vw, height: vh }, deviceScaleFactor: dpr });
     const page = await ctx.newPage();
     const errors = [];
     page.on('pageerror', (e) => errors.push(String(e)));
-    await page.goto(`${base}?anim=0&fixture=1${phase ? `&bench_phase=${phase}` : ''}`);
+    if (throttle !== 1 && name === 'chromium') {
+      const cdp = await ctx.newCDPSession(page);
+      await cdp.send('Emulation.setCPUThrottlingRate', { rate: throttle });
+    }
+    const fx = paths.includes('fixture') ? '&fixture=1' : '';
+    const sel = `${pathsArg ? `&bench_paths=${pathsArg}` : ''}${order ? `&bench_order=${order}` : ''}`;
+    await page.goto(`${base}?anim=0${fx}${sel}${phase ? `&bench_phase=${phase}` : ''}${extraQ ? `&${extraQ}` : ''}`);
     await settle(page);
+    // The expected list: the registry's supported paths (the page's own registry), those of
+    // `--paths` among them, reversed with `--order reverse`.
+    let want = await page.evaluate(async () => (await import('/paint/index.js')).supportedNames());
+    if (paths.length) want = want.filter((n) => paths.includes(n));
+    if (order === 'reverse') want.reverse();
     await page.click('#tabs button[data-tab="metrics"]');
     const t0 = Date.now();
     await page.click('#b_start');
@@ -69,12 +105,19 @@ for (const [k, name] of browsers.entries()) {
     }
     check(ms < LIMIT_MS, `${name}: took ${ms} ms`);
     check(errors.length === 0, `${name}: page errors ${errors}`);
-    check(JSON.stringify(s.paths.map((p) => p.name)) === '["ref","fixture"]', `${name}: paths ${s.paths.map((p) => p.name)}`);
+    // (RP3/S) The paths run are the registry's supported ones (or `--paths` among them),
+    // in registry order or reversed (`--order reverse`).
+    const names = s.paths.map((p) => p.name);
+    check(JSON.stringify(names) === JSON.stringify(want), `${name}: paths ${names}, want ${want}`);
     check(table > 10, `${name}: the table has ${table} rows`);
-    check(font, `${name}: the fixture did not register the core's font through FontFace`);
+    check(font || !want.some((p) => p === 'fixture' || p === 'canvas'), `${name}: the core's font was not registered through FontFace`);
     for (const p of s.paths) {
       check(p.errors.length === 0, `${name}/${p.name}: ${p.errors}`);
-      check(p.paint.used === p.name && p.paint.fallback === null, `${name}/${p.name}: paint ${JSON.stringify(p.paint)}`);
+      // (RP3/S) `gpu` may report its own fallback where WebGPU has no adapter (Chromium's
+      // headless shell): it then paints with `ref`, and the run is still a valid row.
+      const gpuFell = p.name === 'gpu' && p.paint.used === 'ref' && p.paint.fallback === 'unsupported';
+      check((p.paint.used === p.name && p.paint.fallback === null) || gpuFell, `${name}/${p.name}: paint ${JSON.stringify(p.paint)}`);
+      if (gpuFell) console.log(`  ${name}/gpu: WebGPU unavailable, painted with ref (reported fallback)`);
       for (const ph of s.config.phases) check(p.phases[ph] && p.phases[ph].frame_ms.n > 0, `${name}/${p.name}: no frames in ${ph}`);
       check(p.span_ms.tick.n > 0, `${name}/${p.name}: no ticks`);
       check(p.span_ms.scene.n > 0, `${name}/${p.name}: no scene paints`);

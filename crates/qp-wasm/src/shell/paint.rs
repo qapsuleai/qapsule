@@ -9,7 +9,7 @@
 use qp_schema::scene::{Align, Prim, Rgba, SceneDesc};
 use serde_json::{json, Value};
 
-use super::{scene_digest, ShellCore};
+use super::ShellCore;
 
 /// Version of the paint list format.
 pub const PAINT_LIST_VERSION: u32 = 1;
@@ -75,11 +75,9 @@ impl ShellCore {
     /// record as [`ShellCore::face_rgba`]) or has no scene.
     pub fn face_paint(&mut self, id: &str, force: bool) -> Option<Value> {
         let scene = self.face(id)?;
-        let d = scene_digest(&scene);
-        if !force && self.face_shown.get(id) == Some(&d) {
+        if !self.face_changed(id, &scene, force) {
             return None;
         }
-        self.face_shown.insert(id.to_owned(), d);
         Some(paint_list(&scene, self.scale))
     }
 
@@ -90,11 +88,9 @@ impl ShellCore {
             self.scene_shown = None;
             return None;
         };
-        let d = scene_digest(&scene);
-        if !force && self.scene_shown.as_deref() == Some(d.as_str()) {
+        if !self.scene_changed(&scene, force) {
             return None;
         }
-        self.scene_shown = Some(d);
         Some(paint_list(&scene, self.scale))
     }
 }

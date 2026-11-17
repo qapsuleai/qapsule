@@ -308,3 +308,44 @@ fn the_comparison_survives_a_new_core() {
     );
     assert!(!b.bench_tick(32.0, 0.0, 0.0).is_null() || b.bench_running());
 }
+
+#[test]
+fn the_comparison_selects_and_reverses_paths() {
+    // (RP3/S) `only` keeps the named supported paths (registry order); `order: reverse`
+    // runs them reversed; an empty selection falls back to `ref`.
+    let order = |cfg: Value| {
+        let mut c = core();
+        c.bench_start(&cfg, 0.0);
+        let mut t = 0.0;
+        let mut first = None;
+        for _ in 0..20_000 {
+            t += 16.0;
+            let a = c.bench_tick(t, 5000.0, 700.0);
+            if a.is_null() {
+                break;
+            }
+            if first.is_none() {
+                first = a.get("paint").cloned();
+            }
+        }
+        let names: Vec<Value> = c.bench_summary()["paths"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .map(|p| p["name"].clone())
+            .collect();
+        (first, names)
+    };
+    let all = json!(["ref", "canvas", "cpu", "gpu"]);
+    let (first, names) = order(json!({"paths": all, "phase_ms": 1000, "only": "gpu, ref"}));
+    assert_eq!(names, [json!("ref"), json!("gpu")]);
+    assert_eq!(first, Some(json!("ref")));
+    let (first, names) = order(json!({"paths": all, "phase_ms": 1000, "order": "reverse"}));
+    assert_eq!(
+        names,
+        [json!("gpu"), json!("cpu"), json!("canvas"), json!("ref")]
+    );
+    assert_eq!(first, Some(json!("gpu")));
+    let (_, names) = order(json!({"paths": all, "phase_ms": 1000, "only": "nope"}));
+    assert_eq!(names, [json!("ref")]);
+}

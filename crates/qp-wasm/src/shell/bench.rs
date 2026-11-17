@@ -66,8 +66,9 @@ pub const DRAG_STEP_PX: f64 = 12.0;
 pub const BENCH_ZOOM_NOTCHES: u32 = 4;
 /// The measured phases, in order.
 pub const PHASES: [&str; 4] = ["idle", "scroll", "chart_ticks", "drag"];
-/// The spans the summary reports per path.
-pub const SPANS: [&str; 3] = ["tick", "face", "scene"];
+/// The spans the summary reports per path ((RP3/M14) `paint_pass`: one coalesced paint
+/// pass; `frame_to_paint`: from a frame's arrival to the end of the pass that painted it).
+pub const SPANS: [&str; 5] = ["tick", "face", "scene", "paint_pass", "frame_to_paint"];
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 enum Stage {
@@ -99,6 +100,8 @@ impl Stage {
 struct Phase {
     frames: Samples,
     spans: BTreeMap<String, Samples>,
+    /// (RP3/M14) The page's counters during the phase.
+    counts: BTreeMap<String, u64>,
     ms: f64,
     steps: [Option<u64>; 2],
 }
@@ -162,6 +165,22 @@ impl Bench {
                     .collect()
             })
             .unwrap_or_default();
+        // (RP3/S) The page's `?bench_paths=a,b` (raw) keeps only those of the supported
+        // paths, in registry order; `?bench_order=reverse` runs them reversed (the order
+        // effect: later paths start with a warm JIT and a grown WASM memory).
+        let only: Vec<&str> = cfg["only"]
+            .as_str()
+            .unwrap_or("")
+            .split(',')
+            .map(str::trim)
+            .filter(|s| !s.is_empty())
+            .collect();
+        if !only.is_empty() {
+            paths.retain(|p| only.contains(&p.as_str()));
+        }
+        if cfg["order"].as_str() == Some("reverse") {
+            paths.reverse();
+        }
         if paths.is_empty() {
             paths.push("ref".to_owned());
         }
@@ -235,8 +254,9 @@ impl Bench {
 
 impl ShellCore {
     /// (RP3/T2) Starts the comparison at `t` (ms) with `config` `{paths: [names],
-    /// current: name, phase_ms}` (phase length optional: [`BENCH_PHASE_MS`], clamped to
-    /// [`BENCH_PHASE_RANGE`]).
+    /// current: name, phase_ms, only?, order?}` (phase length optional: [`BENCH_PHASE_MS`],
+    /// clamped to [`BENCH_PHASE_RANGE`]; RP3/S `only`: the page's raw `?bench_paths=`,
+    /// `order`: `reverse` runs the paths reversed).
     pub fn bench_start(&mut self, config: &Value, t: f64) {
         self.metrics.bench = Some(Bench::new(config, t));
     }
@@ -247,6 +267,7 @@ impl ShellCore {
 
     fn begin_phase(&mut self, b: &mut Bench, s: Stage, t: f64) {
         self.metrics.spans.clear();
+        self.metrics.counts.clear();
         b.phase = Phase {
             steps: [self.step_now(), None],
             ..Phase::default()
@@ -260,6 +281,7 @@ impl ShellCore {
         };
         let mut p = std::mem::take(&mut b.phase);
         p.spans = std::mem::take(&mut self.metrics.spans);
+        p.counts = std::mem::take(&mut self.metrics.counts);
         p.ms = round3(t - b.stage_t0);
         p.steps[1] = self.step_now();
         b.cur.phases.insert(name.to_owned(), p);
@@ -524,6 +546,7 @@ impl ShellCore {
                                 "frame_ms": p.frames.frame_summary(refresh.ms),
                                 "span_ms": p.spans.iter().map(|(s, v)| (s.clone(), v.summary()))
                                     .collect::<Map<String, Value>>(),
+                                "counts": Self::counts_of(&p.counts, &p.spans),
                             }),
                         )
                     })
@@ -564,6 +587,7 @@ impl ShellCore {
             "refresh": refresh.json("bench idle phases"),
             "device": self.device_json(),
             "warnings": self.warnings(),
+            "mode": self.mode_json(),
             "agent": self.metrics.agent,
             "bundle": self.metrics.bundle,
             "replay": self.replay.as_ref().map(|r| json!({"instruments": r.instruments, "synthetic": r.synthetic})),

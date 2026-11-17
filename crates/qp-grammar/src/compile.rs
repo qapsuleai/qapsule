@@ -692,7 +692,7 @@ pub fn compile(
         types.label.px as f32,
         types.figure.px as f32,
     );
-    let adv = |role: &str| look.role_font(role).advance;
+    let adv = |role: &str| look.role_font(role);
     let mut fr = Frame {
         p: provider,
         headline,
@@ -1017,18 +1017,19 @@ pub fn compile(
         pl.panel == panel_ids[0]
             && matches!(&pl.data, DataSource::Series { series } if *series == bar_series)
     });
-    let title_x = left + 4;
-    let close_x = left + 140;
+    let off = &look.offsets;
+    let title_x = left + off.title_x;
+    let close_x = left + off.close_x;
     let title_room = if show_close {
-        close_x - title_x - 8
+        close_x - title_x - off.row_edge
     } else {
-        wi - 8 - title_x
+        wi - off.row_edge - title_x
     };
     let title = fit_text(&title, title_room, f64::from(title_px), adv("title"));
     let mut text_right = title_x + est_width(&title, f64::from(title_px), adv("title"));
     over.push(Prim::Text {
         x: title_x,
-        baseline: 23,
+        baseline: off.title_baseline,
         px: title_px,
         text: title,
         color: theme.text,
@@ -1043,7 +1044,7 @@ pub fn compile(
         text_right = close_x + est_width(&text, f64::from(title_px), adv("title"));
         over.push(Prim::Text {
             x: close_x,
-            baseline: 23,
+            baseline: off.title_baseline,
             px: title_px,
             text,
             color: if lb.c >= lb.o { theme.up } else { theme.down },
@@ -1079,20 +1080,20 @@ pub fn compile(
             // Right-aligned from the right edge; the right-most are kept, and a legend
             // that would reach the title/close text is dropped with all left of it.
             let mut placed: Vec<(String, Rgba, i32)> = Vec::new();
-            let mut x = wi - 8;
+            let mut x = wi - off.row_edge;
             for (text, color) in legends.into_iter().rev() {
                 let w = est_width(&text, f64::from(label_px), adv("label"));
-                if x - w < text_right + 12 {
+                if x - w < text_right + off.legend_gap {
                     break;
                 }
                 placed.push((text, color, x));
-                x -= w + 12;
+                x -= w + off.legend_gap;
             }
             placed.reverse();
             for (text, color, x) in placed {
                 over.push(Prim::Text {
                     x,
-                    baseline: 23,
+                    baseline: off.title_baseline,
                     px: label_px,
                     text,
                     color,
@@ -1102,12 +1103,12 @@ pub fn compile(
                 });
             }
         } else {
-            let mut x = rc.left + 4;
+            let mut x = rc.left + off.legend_x;
             for (text, color) in legends {
                 let w = est_width(&text, f64::from(label_px), adv("label"));
                 over.push(Prim::Text {
                     x,
-                    baseline: rc.top + 12,
+                    baseline: rc.top + off.legend_baseline,
                     px: label_px,
                     text,
                     color,
@@ -1115,7 +1116,7 @@ pub fn compile(
                     font: None,
                     role: Some("label".to_owned()),
                 });
-                x += w + 12;
+                x += w + off.legend_gap;
             }
         }
     }
@@ -1244,9 +1245,9 @@ fn settle_text(p: &mut Prim, look: &crate::look::Look, mark: Option<Mark>, keep:
     }
 }
 
-/// `text` cut to fit `room` pixels at `size` (estimate: `adv` em per char), ending in
+/// `text` cut to fit `room` pixels at `size` in font `adv` ([`est_width`]), ending in
 /// "…" when cut.
-fn fit_text(text: &str, room: i32, size: f64, adv: f64) -> String {
+fn fit_text(text: &str, room: i32, size: f64, adv: &crate::look::FontAsset) -> String {
     if est_width(text, size, adv) <= room {
         return text.to_owned();
     }

@@ -299,6 +299,16 @@ impl AlphabetTrait for Rozet {
         };
         let phase = spec.phase;
         let retracted = phase == GlyphPhase::Retracted;
+        // (R5/T3b) A closed badge keeps the look's least alpha (`r4`: 0, freshness alone).
+        let closed = matches!(
+            phase,
+            GlyphPhase::Realized | GlyphPhase::Failed | GlyphPhase::Retracted
+        );
+        let alpha = if closed && theme.closed_alpha > 0 {
+            alpha.max(f64::from(theme.closed_alpha) / 255.0)
+        } else {
+            alpha
+        };
 
         // Geometry (pixels).
         let r_out = s * 0.5 - 0.35;

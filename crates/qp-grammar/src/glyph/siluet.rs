@@ -24,7 +24,7 @@
 //! target) only; the circle and sine samples are precomputed constants.
 
 use super::{Alphabet as AlphabetTrait, GlyphBox};
-use crate::theme::{with_opacity, Theme};
+use crate::theme::{at_least, with_opacity, Theme};
 use qp_schema::capsule::{Direction, GlyphPhase, GlyphSpec, MeaningKind, Validity};
 use qp_schema::scene::{Prim, Rgba};
 
@@ -423,6 +423,15 @@ impl AlphabetTrait for Siluet {
         let grey_col = if closed { theme.closed } else { theme.invalid };
         let main: Rgba = with_opacity(if grey { grey_col } else { dir_col }, fresh);
         let edge: Rgba = with_opacity(if grey { grey_col } else { theme.text }, fresh);
+        // (R5/T3b) A closed glyph's strokes keep the look's least alpha (`r4`: 0).
+        let (main, edge) = if closed {
+            (
+                at_least(main, theme.closed_alpha),
+                at_least(edge, theme.closed_alpha),
+            )
+        } else {
+            (main, edge)
+        };
         let ink = with_opacity(theme.text, fresh);
         let mut out = Vec::new();
 

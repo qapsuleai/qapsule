@@ -219,7 +219,7 @@ fn open_view(
                 return stored;
             }
             let id = look.view.clone().unwrap_or_else(|| given.id.clone());
-            depth::chart_view(&o.finding, p, &id).ok()
+            depth::chart_view_in(look_of(look), &o.finding, p, &id).ok()
         }
     }
 }

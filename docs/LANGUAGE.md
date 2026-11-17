@@ -85,7 +85,9 @@ Seçim çekirdekte, `?face=` / `?look=` ile aynı yoldan:
   karşılaştırılır; terimin sözcükleri, sonra son sözcüğü bir-iki harf kısaltılmış hali
   (Türkçe ek yumuşaması: "düşük" → "düşüğünün"), sonra ilk sözcüğü (en az dört harfse) sözcük
   başında aranır, en son ilk sözcükleri atılmış hali (satır sonunda bölünen terim için); işaret
-  sözcüğün sonuna kadar uzar. Her terimin sahnede ilk geçtiği yer
+  sözcüğün sonuna kadar uzar. **Yüzün başlığında terim işaretlenmez:** başlığa dokunmak
+  kapsülü açar (yüzün tek eylemi, K43); terimler yüzün karne bandında ve açılmış kapsülün
+  ayrıntı ve karnesinde işaretlenir. Her terimin sahnede ilk geçtiği yer
   işaretlenir.
 - Sahne tarifi terimi taşır: altı çizgi katmanın kendi ilkelidir (her boyama yolu çizer) ve
   `SceneDesc.terms` her terimin kutusunu, metnini ve açıklamasını verir. Nokta sorgusu

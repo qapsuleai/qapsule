@@ -2,8 +2,9 @@
 //! scene's texts.
 //!
 //! Under a voice ([`DataProvider::voice`]) every capsule scene's text layers that draw a
-//! finding (the face's headline and ledger, the card's detail and ledger) are searched for
-//! the voice's glossary terms. The first place each term is drawn gets
+//! finding (the face's ledger band, the open card's detail and ledger) are searched for the
+//! voice's glossary terms. The face's headline is not: a tap on it opens the capsule (the
+//! face's one action, K43), so a term there would take that tap away. The first place each term is drawn gets
 //!
 //! - an underline: a one-pixel [`Prim::Rect`] in the text's colour under the drawn words,
 //!   added to that layer's primitives (every painter draws it, nothing else to know);
@@ -136,7 +137,10 @@ pub(crate) fn mark(panels: &mut [ScenePanel], p: &dyn DataProvider, look: &Look)
             let qp_schema::scene::DataSource::Finding { finding } = &layer.data else {
                 continue;
             };
-            if layer.mark != qp_schema::grammar::Mark::Text {
+            // The face's headline is where a tap opens the capsule (K43, the face's one
+            // action): its terms are not marked there (the open capsule's texts and the
+            // face's ledger band carry them).
+            if layer.mark != qp_schema::grammar::Mark::Text || layer.id == "headline" {
                 continue;
             }
             let Some(voice) = p.voice(finding) else {

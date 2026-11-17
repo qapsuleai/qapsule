@@ -65,7 +65,8 @@ tasarımının kendi başlık şablonu (`vadrel::headline` vb.) yalnız `r4`'te 
 └──────────────────────────────────────────────┘
 ```
 
-- **Sözlük:** sahnedeki terimler altı çizili (`SceneDesc.terms`); dokununca otorite kapsülü
+- **Sözlük:** karne bandındaki terimler altı çizili (`SceneDesc.terms`; başlıkta değil, başlığa
+  dokunmak kapsülü açar); dokununca otorite kapsülü
   açmaz, terimi bildirir (`hit.term`), kabuk açıklamayı gösterir (K49).
 - **`fotolay`, `tavrik`:** başlığı sesten alır; karne bandı yok (açık sorun, `docs/LANGUAGE.md`).
 - **`r3` kartı:** sesin başlığı yerine ayrıntısı ve iki satırlık karnesi (açılmış kapsülün

@@ -64,3 +64,21 @@ fn unentitled_replica_shows_only_pending() {
     assert!(o.shown_counts.2 > 0, "claims arrive and stay pending");
     assert_eq!(o.shown_final, 0);
 }
+
+/// (RP3/M15, §22) The viewer variant: the device opens the capsule and holds only that
+/// instrument's slice, claims and data; no wrong or early claim, no subscription to the
+/// other instrument; in step, its slice and view digests are the authority's.
+#[test]
+fn viewer_open_instrument_shows_no_wrong_or_early_claim() {
+    for lag in [0, 25] {
+        let o = qp_session::tape::run_viewer(lag).unwrap();
+        assert!(o.violations.is_empty(), "lag {lag}: {:?}", o.violations);
+        assert_eq!(o.foreign_steps, 0, "lag {lag}");
+        assert!(o.final_claims > 0, "lag {lag}: no final claim to check");
+        assert_eq!(o.shown_final, o.final_claims, "lag {lag}");
+        if lag == 0 {
+            assert_eq!(o.differing_steps, 0, "in step: digests differ");
+        }
+        eprintln!("viewer lag {lag}: {o:?}");
+    }
+}

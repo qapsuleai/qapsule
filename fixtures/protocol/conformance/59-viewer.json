@@ -1,0 +1,999 @@
+{
+  "covers": [
+    "viewer",
+    "visible",
+    "viewer-feed",
+    "viewer-faces",
+    "viewer-open",
+    "viewer-closed",
+    "duplicate",
+    "not_found"
+  ],
+  "description": "RP3/M15 (§22, K48): the device as a viewer over a replay host (two instruments). A `viewer` subscription gets the reader's feed; `visible` asks for the ready faces of the capsules on screen (the scenes the authority compiled for this reader, with their view digests, trust `server`); opening a capsule (view state) sends its instrument's slice and names one data subscription (that instrument's feed); after a day of steps only what changed comes; closing sends `closed` and no data subscription. One viewer subscription per connection; `visible` on an unknown subscription is `not_found`.",
+  "init": {
+    "clock": 0,
+    "document": {
+      "display_tz": "Europe/Istanbul",
+      "id": "doc-replay",
+      "schema_version": "0",
+      "title": "Yeniden oynatma"
+    },
+    "epoch": 0,
+    "principals": [
+      {
+        "author": {
+          "kind": "engine",
+          "name": "host",
+          "version": "0"
+        },
+        "id": "host",
+        "role": "host"
+      },
+      {
+        "author": {
+          "kind": "human",
+          "name": "Arkın"
+        },
+        "id": "arkin",
+        "role": "owner"
+      },
+      {
+        "author": {
+          "kind": "agent",
+          "name": "scout"
+        },
+        "id": "scout",
+        "role": "proposer"
+      },
+      {
+        "author": {
+          "kind": "human",
+          "name": "Guest"
+        },
+        "id": "guest",
+        "role": "viewer"
+      }
+    ],
+    "replay": {
+      "bind_all": true,
+      "capsules_all": true,
+      "days": 70,
+      "fine": "1h",
+      "history": 50,
+      "instruments": 2,
+      "speed": 8.0
+    }
+  },
+  "name": "59-viewer",
+  "steps": [
+    {
+      "expect": [
+        {
+          "conn": "a",
+          "msg": {
+            "doc": "doc-replay",
+            "epoch": 0,
+            "limits": {
+              "max_bars": 10000,
+              "max_bind_bars": 100000,
+              "max_message_bytes": 1048576,
+              "max_ops": 64,
+              "max_string": 4096,
+              "max_subscriptions": 32
+            },
+            "now": 1678431600000,
+            "permissions": {
+              "attend": true,
+              "decide": true,
+              "feed": false,
+              "propose": true,
+              "read": true,
+              "write": true
+            },
+            "principal": "arkin",
+            "profile": {
+              "depth": "capsule",
+              "max_glyphs": 3,
+              "max_points": 60,
+              "series_data": true,
+              "speech": false
+            },
+            "protocol": "qp/0",
+            "role": "owner",
+            "seq": 3,
+            "summary": {
+              "facts": [
+                {
+                  "bar": 20,
+                  "id": "fx.SYN01.breakout.range.down.20",
+                  "kind": "breakout.range.down",
+                  "series": "syn01",
+                  "text": "breakout.range down at bar 20"
+                },
+                {
+                  "bar": 22,
+                  "id": "fx.SYN02.breakout.range.up.22",
+                  "kind": "breakout.range.up",
+                  "series": "syn02",
+                  "text": "breakout.range up at bar 22"
+                },
+                {
+                  "bar": 23,
+                  "id": "fx.SYN02.breakout.range.up.23",
+                  "kind": "breakout.range.up",
+                  "series": "syn02",
+                  "text": "breakout.range up at bar 23"
+                },
+                {
+                  "bar": 30,
+                  "id": "fx.SYN01.breakout.range.down.30",
+                  "kind": "breakout.range.down",
+                  "series": "syn01",
+                  "text": "breakout.range down at bar 30"
+                },
+                {
+                  "bar": 30,
+                  "id": "fx.SYN01.extreme.rsi.oversold.30",
+                  "kind": "extreme.rsi.oversold",
+                  "series": "syn01",
+                  "text": "extreme.rsi oversold at bar 30"
+                },
+                {
+                  "bar": 30,
+                  "id": "fx.SYN01.flow.volume_surge.surge.30",
+                  "kind": "flow.volume_surge.surge",
+                  "series": "syn01",
+                  "text": "flow.volume_surge surge at bar 30"
+                },
+                {
+                  "bar": 34,
+                  "id": "fx.SYN02.reversal.rsi_divergence.bullish.34",
+                  "kind": "reversal.rsi_divergence.bullish",
+                  "series": "syn02",
+                  "text": "reversal.rsi_divergence bullish at bar 34"
+                },
+                {
+                  "bar": 36,
+                  "id": "fx.SYN01.breakout.range.down.36",
+                  "kind": "breakout.range.down",
+                  "series": "syn01",
+                  "text": "breakout.range down at bar 36"
+                },
+                {
+                  "bar": 36,
+                  "id": "fx.SYN01.extreme.rsi.oversold.36",
+                  "kind": "extreme.rsi.oversold",
+                  "series": "syn01",
+                  "text": "extreme.rsi oversold at bar 36"
+                },
+                {
+                  "bar": 37,
+                  "id": "fx.SYN01.extreme.rsi.oversold_end.37",
+                  "kind": "extreme.rsi.oversold_end",
+                  "series": "syn01",
+                  "text": "extreme.rsi oversold_end at bar 37"
+                },
+                {
+                  "bar": 38,
+                  "id": "fx.SYN02.breakout.range.down.38",
+                  "kind": "breakout.range.down",
+                  "series": "syn02",
+                  "text": "breakout.range down at bar 38"
+                },
+                {
+                  "bar": 39,
+                  "id": "fx.SYN01.extreme.rsi.oversold.39",
+                  "kind": "extreme.rsi.oversold",
+                  "series": "syn01",
+                  "text": "extreme.rsi oversold at bar 39"
+                },
+                {
+                  "bar": 40,
+                  "id": "fx.SYN01.extreme.rsi.oversold_end.40",
+                  "kind": "extreme.rsi.oversold_end",
+                  "series": "syn01",
+                  "text": "extreme.rsi oversold_end at bar 40"
+                },
+                {
+                  "bar": 40,
+                  "id": "fx.SYN01.reversal.rsi_divergence.bullish.40",
+                  "kind": "reversal.rsi_divergence.bullish",
+                  "series": "syn01",
+                  "text": "reversal.rsi_divergence bullish at bar 40"
+                },
+                {
+                  "bar": 44,
+                  "id": "fx.SYN02.breakout.range.down.44",
+                  "kind": "breakout.range.down",
+                  "series": "syn02",
+                  "text": "breakout.range down at bar 44"
+                },
+                {
+                  "bar": 45,
+                  "id": "fx.SYN01.breakout.range.up.45",
+                  "kind": "breakout.range.up",
+                  "series": "syn01",
+                  "text": "breakout.range up at bar 45"
+                },
+                {
+                  "bar": 48,
+                  "id": "fx.SYN02.breakout.range.up.48",
+                  "kind": "breakout.range.up",
+                  "series": "syn02",
+                  "text": "breakout.range up at bar 48"
+                },
+                {
+                  "bar": 48,
+                  "id": "fx.SYN02.extreme.rsi.overbought.48",
+                  "kind": "extreme.rsi.overbought",
+                  "series": "syn02",
+                  "text": "extreme.rsi overbought at bar 48"
+                },
+                {
+                  "bar": 48,
+                  "id": "fx.SYN02.flow.volume_surge.surge.48",
+                  "kind": "flow.volume_surge.surge",
+                  "series": "syn02",
+                  "text": "flow.volume_surge surge at bar 48"
+                }
+              ],
+              "findings": [
+                {
+                  "bar": 20,
+                  "capsule": "cap.SYN01.breakout.down.20 live",
+                  "claim": "SYN01 28 bar önce 4,87'deki desteği aşağı kırdı (kapanış 4,85): aşağı kırılım. Beklenen sonuç 18 bar önce gerçekleşti. …",
+                  "facts": [
+                    "fx.SYN01.breakout.range.down.20"
+                  ],
+                  "id": "fnd.SYN01.breakout.down.20"
+                },
+                {
+                  "bar": 23,
+                  "capsule": "cap.SYN02.breakout.up.22 invalidated",
+                  "claim": "SYN02 26 bar önce 131,32'deki direnci yukarı kırdı (kapanış 131,48): yukarı kırılım. Sinyal 24 bar önce geçersiz oldu; …",
+                  "facts": [
+                    "fx.SYN02.breakout.range.up.22",
+                    "fx.SYN02.breakout.range.up.23"
+                  ],
+                  "id": "fnd.SYN02.breakout.up.22"
+                },
+                {
+                  "bar": 30,
+                  "capsule": "cap.SYN01.breakout.down.30 invalidated",
+                  "claim": "SYN01 18 bar önce 4,83'teki desteği aşağı kırdı (kapanış 4,42): aşağı kırılım. Sinyal 17 bar önce geçersiz oldu; artık …",
+                  "facts": [
+                    "fx.SYN01.breakout.range.down.30",
+                    "fx.SYN01.flow.volume_surge.surge.30"
+                  ],
+                  "id": "fnd.SYN01.breakout.down.30"
+                },
+                {
+                  "bar": 30,
+                  "capsule": "cap.SYN01.extreme.down.30 invalidated",
+                  "claim": "SYN01'de RSI 18 bar önce 30'un altına indi; şu an 54,3, artık 30'un altında değil. Aşırı satım sona erdi. Uzama sürmedi…",
+                  "facts": [
+                    "fx.SYN01.extreme.rsi.oversold.30"
+                  ],
+                  "id": "fnd.SYN01.extreme.down.30"
+                },
+                {
+                  "bar": 34,
+                  "capsule": "cap.SYN02.reversal.up.34 invalidated",
+                  "claim": "SYN02'de 14 bar önce yukarı dönüş işareti çıktı: fiyat yeni dip yaparken RSI daha yüksek dip yaptı (fiyat 127,38, RSI 5…",
+                  "facts": [
+                    "fx.SYN02.reversal.rsi_divergence.bullish.34"
+                  ],
+                  "id": "fnd.SYN02.reversal.up.34"
+                },
+                {
+                  "bar": 36,
+                  "capsule": "cap.SYN01.breakout.down.36 invalidated",
+                  "claim": "SYN01 12 bar önce 4,29'daki desteği aşağı kırdı (kapanış 4,19): aşağı kırılım. Sinyal 7 bar önce geçersiz oldu; artık g…",
+                  "facts": [
+                    "fx.SYN01.breakout.range.down.36"
+                  ],
+                  "id": "fnd.SYN01.breakout.down.36"
+                },
+                {
+                  "bar": 40,
+                  "capsule": "cap.SYN01.extreme.down.36 invalidated",
+                  "claim": "SYN01'de RSI 12 bar önce 30'un altına indi, 8 bar önce yeniden üstüne çıktı; şu an 54,3, artık 30'un altında değil. Aşı…",
+                  "facts": [
+                    "fx.SYN01.extreme.rsi.oversold.36",
+                    "fx.SYN01.extreme.rsi.oversold_end.37",
+                    "fx.SYN01.extreme.rsi.oversold.39",
+                    "fx.SYN01.extreme.rsi.oversold_end.40"
+                  ],
+                  "id": "fnd.SYN01.extreme.down.36"
+                },
+                {
+                  "bar": 40,
+                  "capsule": "cap.SYN01.reversal.up.40 live",
+                  "claim": "SYN01'de 8 bar önce yukarı dönüş işareti çıktı: fiyat yeni dip yaparken RSI daha yüksek dip yaptı (fiyat 4,06, RSI 31).…",
+                  "facts": [
+                    "fx.SYN01.reversal.rsi_divergence.bullish.40"
+                  ],
+                  "id": "fnd.SYN01.reversal.up.40"
+                },
+                {
+                  "bar": 44,
+                  "capsule": "cap.SYN02.breakout.down.38 invalidated",
+                  "claim": "SYN02 10 bar önce 126,89'daki desteği aşağı kırdı (kapanış 126,09): aşağı kırılım. Sinyal bu barda geçersiz oldu; artık…",
+                  "facts": [
+                    "fx.SYN02.breakout.range.down.38",
+                    "fx.SYN02.breakout.range.down.44"
+                  ],
+                  "id": "fnd.SYN02.breakout.down.38"
+                },
+                {
+                  "bar": 45,
+                  "capsule": "cap.SYN01.breakout.up.45 invalidated",
+                  "claim": "SYN01 3 bar önce 4,97'deki direnci yukarı kırdı (kapanış 5,09): yukarı kırılım. Sinyal 1 bar önce geçersiz oldu; artık …",
+                  "facts": [
+                    "fx.SYN01.breakout.range.up.45"
+                  ],
+                  "id": "fnd.SYN01.breakout.up.45"
+                },
+                {
+                  "bar": 48,
+                  "capsule": "cap.SYN02.breakout.up.48 live",
+                  "claim": "SYN02 bu barda 129,62'deki direnci yukarı kırdı (kapanış 134,33): yukarı kırılım. Bu barda hacim de teyit etti; 2 bağım…",
+                  "facts": [
+                    "fx.SYN02.breakout.range.up.48",
+                    "fx.SYN02.flow.volume_surge.surge.48"
+                  ],
+                  "id": "fnd.SYN02.breakout.up.48"
+                },
+                {
+                  "bar": 48,
+                  "capsule": "cap.SYN02.extreme.up.48 live",
+                  "claim": "SYN02'de RSI bu bar itibarıyla 70'in üstünde; şu an 70,6. Aşırı alım sürüyor. Henüz karnesi yok.",
+                  "facts": [
+                    "fx.SYN02.extreme.rsi.overbought.48"
+                  ],
+                  "id": "fnd.SYN02.extreme.up.48"
+                }
+              ],
+              "pending_proposals": 0,
+              "select": {
+                "facts": {
+                  "fx.SYN01.breakout.range.down.20": {
+                    "first": true,
+                    "kind": "breakout.range.down"
+                  },
+                  "fx.SYN01.breakout.range.down.30": {
+                    "bar": 30,
+                    "kind": "breakout.range.down"
+                  },
+                  "fx.SYN01.breakout.range.down.36": {
+                    "bar": 36,
+                    "kind": "breakout.range.down"
+                  },
+                  "fx.SYN01.breakout.range.up.45": {
+                    "bar": 45,
+                    "kind": "breakout.range.up"
+                  },
+                  "fx.SYN01.extreme.rsi.oversold.30": {
+                    "first": true,
+                    "kind": "extreme.rsi.oversold"
+                  },
+                  "fx.SYN01.extreme.rsi.oversold.36": {
+                    "bar": 36,
+                    "kind": "extreme.rsi.oversold"
+                  },
+                  "fx.SYN01.extreme.rsi.oversold.39": {
+                    "kind": "extreme.rsi.oversold",
+                    "latest": true
+                  },
+                  "fx.SYN01.extreme.rsi.oversold_end.37": {
+                    "first": true,
+                    "kind": "extreme.rsi.oversold_end"
+                  },
+                  "fx.SYN01.extreme.rsi.oversold_end.40": {
+                    "kind": "extreme.rsi.oversold_end",
+                    "latest": true
+                  },
+                  "fx.SYN01.flow.volume_surge.surge.30": {
+                    "first": true,
+                    "kind": "flow.volume_surge.surge"
+                  },
+                  "fx.SYN01.reversal.rsi_divergence.bullish.40": {
+                    "kind": "reversal.rsi_divergence.bullish",
+                    "latest": true
+                  },
+                  "fx.SYN02.breakout.range.down.38": {
+                    "bar": 38,
+                    "kind": "breakout.range.down"
+                  },
+                  "fx.SYN02.breakout.range.down.44": {
+                    "kind": "breakout.range.down",
+                    "latest": true
+                  },
+                  "fx.SYN02.breakout.range.up.22": {
+                    "first": true,
+                    "kind": "breakout.range.up"
+                  },
+                  "fx.SYN02.breakout.range.up.23": {
+                    "bar": 23,
+                    "kind": "breakout.range.up"
+                  },
+                  "fx.SYN02.breakout.range.up.48": {
+                    "kind": "breakout.range.up",
+                    "latest": true
+                  },
+                  "fx.SYN02.extreme.rsi.overbought.48": {
+                    "kind": "extreme.rsi.overbought"
+                  },
+                  "fx.SYN02.flow.volume_surge.surge.48": {
+                    "kind": "flow.volume_surge.surge",
+                    "latest": true
+                  },
+                  "fx.SYN02.reversal.rsi_divergence.bullish.34": {
+                    "first": true,
+                    "kind": "reversal.rsi_divergence.bullish"
+                  }
+                },
+                "findings": {
+                  "fnd.SYN01.breakout.down.20": {
+                    "first": true,
+                    "kind": "breakout.range.down"
+                  },
+                  "fnd.SYN01.breakout.down.30": {
+                    "first": true,
+                    "kind": "flow.volume_surge.surge"
+                  },
+                  "fnd.SYN01.breakout.down.36": {
+                    "fact": {
+                      "bar": 36,
+                      "kind": "breakout.range.down"
+                    }
+                  },
+                  "fnd.SYN01.breakout.up.45": {
+                    "fact": {
+                      "bar": 45,
+                      "kind": "breakout.range.up"
+                    }
+                  },
+                  "fnd.SYN01.extreme.down.30": {
+                    "first": true,
+                    "kind": "extreme.rsi.oversold"
+                  },
+                  "fnd.SYN01.extreme.down.36": {
+                    "kind": "extreme.rsi.oversold_end"
+                  },
+                  "fnd.SYN01.reversal.up.40": {
+                    "kind": "reversal.rsi_divergence.bullish",
+                    "latest": true
+                  },
+                  "fnd.SYN02.breakout.down.38": {
+                    "kind": "breakout.range.down",
+                    "latest": true
+                  },
+                  "fnd.SYN02.breakout.up.22": {
+                    "first": true,
+                    "kind": "breakout.range.up"
+                  },
+                  "fnd.SYN02.breakout.up.48": {
+                    "kind": "flow.volume_surge.surge",
+                    "latest": true
+                  },
+                  "fnd.SYN02.extreme.up.48": {
+                    "kind": "extreme.rsi.overbought"
+                  },
+                  "fnd.SYN02.reversal.up.34": {
+                    "first": true,
+                    "kind": "reversal.rsi_divergence.bullish"
+                  }
+                },
+                "series": {
+                  "syn01": {
+                    "kind": "bars",
+                    "symbol": "SYN01"
+                  },
+                  "syn02": {
+                    "kind": "bars",
+                    "symbol": "SYN02"
+                  }
+                }
+              },
+              "series": [
+                {
+                  "binding": "ready",
+                  "fields": [
+                    "o",
+                    "h",
+                    "l",
+                    "c",
+                    "v"
+                  ],
+                  "id": "syn01",
+                  "interval": "1d",
+                  "kind": "bars",
+                  "label": "SYN01 1d",
+                  "len": 50,
+                  "symbol": "SYN01"
+                },
+                {
+                  "binding": "ready",
+                  "fields": [
+                    "o",
+                    "h",
+                    "l",
+                    "c",
+                    "v"
+                  ],
+                  "id": "syn02",
+                  "interval": "1d",
+                  "kind": "bars",
+                  "label": "SYN02 1d",
+                  "len": 50,
+                  "symbol": "SYN02"
+                }
+              ],
+              "views": []
+            },
+            "type": "welcome"
+          }
+        }
+      ],
+      "note": "A viewer connection.",
+      "send": {
+        "conn": "a",
+        "msg": {
+          "principal": "arkin",
+          "protocol": "qp/0",
+          "surface": {
+            "kind": "phone"
+          },
+          "type": "hello"
+        }
+      }
+    },
+    {
+      "expect": [
+        {
+          "conn": "a",
+          "msg": {
+            "data": {
+              "kind": "replay"
+            },
+            "id": "r1",
+            "type": "result"
+          }
+        }
+      ],
+      "note": "Stories exist after 100 steps.",
+      "send": {
+        "conn": "a",
+        "msg": {
+          "control": {
+            "kind": "seek",
+            "step": 100
+          },
+          "id": "r1",
+          "type": "replay"
+        }
+      }
+    },
+    {
+      "expect": [
+        {
+          "conn": "a",
+          "msg": {
+            "id": "v",
+            "status": "subscribed",
+            "type": "ack"
+          }
+        },
+        {
+          "conn": "a",
+          "msg": {
+            "event": {
+              "kind": "viewer",
+              "seq": 27,
+              "viewer": {
+                "data": [],
+                "feed": [
+                  {
+                    "capsule": {
+                      "id": "cap.SYN01.breakout.down.30",
+                      "instrument": "SYN01",
+                      "stage": "invalidated"
+                    },
+                    "face": true
+                  },
+                  {
+                    "capsule": {
+                      "id": "cap.SYN02.breakout.up.48",
+                      "instrument": "SYN02",
+                      "stage": "invalidated"
+                    },
+                    "face": true
+                  },
+                  {
+                    "capsule": {
+                      "id": "cap.SYN02.breakout.up.55",
+                      "instrument": "SYN02",
+                      "stage": "invalidated"
+                    },
+                    "face": true
+                  },
+                  {
+                    "capsule": {
+                      "id": "cap.SYN01.extreme.down.30",
+                      "instrument": "SYN01",
+                      "stage": "invalidated"
+                    },
+                    "face": true
+                  },
+                  {
+                    "capsule": {
+                      "id": "cap.SYN01.breakout.up.45",
+                      "instrument": "SYN01",
+                      "stage": "invalidated"
+                    },
+                    "face": true
+                  }
+                ]
+              }
+            },
+            "sub": "v",
+            "type": "notify"
+          }
+        }
+      ],
+      "note": "The visibility subscription: the first event carries the reader's feed (at most 5), no data subscription.",
+      "send": {
+        "conn": "a",
+        "msg": {
+          "id": "v",
+          "topic": {
+            "kind": "viewer",
+            "limit": 5
+          },
+          "type": "subscribe"
+        }
+      }
+    },
+    {
+      "expect": [
+        {
+          "conn": "a",
+          "msg": {
+            "data": {
+              "kind": "viewer",
+              "viewer": {
+                "data": [],
+                "faces": [
+                  {
+                    "capsule": "cap.SYN01.breakout.down.30",
+                    "digest": "4792860548007657",
+                    "scene": "$any",
+                    "trust": "server"
+                  },
+                  {
+                    "capsule": "cap.SYN02.breakout.up.48",
+                    "digest": "b09fa96a13754956",
+                    "scene": "$any",
+                    "trust": "server"
+                  }
+                ]
+              }
+            },
+            "id": "vis1",
+            "seq": 27,
+            "type": "result"
+          }
+        }
+      ],
+      "note": "Two capsules on screen: their ready faces (scenes, digests, trust server).",
+      "send": {
+        "conn": "a",
+        "msg": {
+          "id": "vis1",
+          "sub": "v",
+          "type": "visible",
+          "visible": [
+            "cap.SYN01.breakout.down.30",
+            "cap.SYN02.breakout.up.48"
+          ]
+        }
+      }
+    },
+    {
+      "expect": [
+        {
+          "conn": "a",
+          "msg": {
+            "data": {
+              "kind": "interaction"
+            },
+            "id": "o1",
+            "type": "result"
+          }
+        },
+        {
+          "conn": "a",
+          "msg": {
+            "event": {
+              "kind": "viewer",
+              "seq": 27,
+              "viewer": {
+                "data": [
+                  {
+                    "interval": "1d",
+                    "symbol": "SYN01"
+                  }
+                ],
+                "open": {
+                  "capsule": "cap.SYN01.breakout.down.30",
+                  "digest": "2f1d90c59f161794",
+                  "document": "$any",
+                  "feeds": [
+                    {
+                      "interval": "1d",
+                      "symbol": "SYN01"
+                    }
+                  ],
+                  "finding": "fnd.SYN01.breakout.down.30",
+                  "instrument": "SYN01",
+                  "series": "syn01"
+                }
+              }
+            },
+            "sub": "v",
+            "type": "notify"
+          }
+        }
+      ],
+      "note": "Opening a capsule: its instrument's slice and one data subscription (its feed).",
+      "send": {
+        "conn": "a",
+        "msg": {
+          "gesture": {
+            "capsule": "cap.SYN01.breakout.down.30",
+            "height": 300,
+            "kind": "open",
+            "to": "capsule",
+            "width": 390
+          },
+          "id": "o1",
+          "type": "input"
+        }
+      }
+    },
+    {
+      "expect": [
+        {
+          "conn": "a",
+          "msg": {
+            "data": {
+              "kind": "replay"
+            },
+            "id": "r2",
+            "type": "result"
+          }
+        },
+        {
+          "conn": "a",
+          "msg": {
+            "event": {
+              "kind": "viewer",
+              "seq": 29,
+              "viewer": {
+                "data": [
+                  {
+                    "interval": "1d",
+                    "symbol": "SYN01"
+                  }
+                ],
+                "faces": [
+                  {
+                    "capsule": "cap.SYN01.breakout.down.30",
+                    "digest": "408dfe0587251d53",
+                    "scene": "$any",
+                    "trust": "server"
+                  },
+                  {
+                    "capsule": "cap.SYN02.breakout.up.48",
+                    "digest": "98112214c12d3818",
+                    "scene": "$any",
+                    "trust": "server"
+                  }
+                ],
+                "feed": [
+                  {
+                    "capsule": {
+                      "id": "cap.SYN01.breakout.down.30",
+                      "instrument": "SYN01",
+                      "stage": "invalidated"
+                    },
+                    "face": true
+                  },
+                  {
+                    "capsule": {
+                      "id": "cap.SYN02.breakout.up.48",
+                      "instrument": "SYN02",
+                      "stage": "invalidated"
+                    },
+                    "face": true
+                  },
+                  {
+                    "capsule": {
+                      "id": "cap.SYN02.breakout.up.55",
+                      "instrument": "SYN02",
+                      "stage": "invalidated"
+                    },
+                    "face": true
+                  },
+                  {
+                    "capsule": {
+                      "id": "cap.SYN01.flow.down.61",
+                      "instrument": "SYN01",
+                      "stage": "born"
+                    },
+                    "face": true
+                  },
+                  {
+                    "capsule": {
+                      "id": "cap.SYN01.extreme.down.30",
+                      "instrument": "SYN01",
+                      "stage": "invalidated"
+                    },
+                    "face": true
+                  }
+                ],
+                "open": {
+                  "capsule": "cap.SYN01.breakout.down.30",
+                  "digest": "6b9c0698b5f559f2",
+                  "document": "$any",
+                  "feeds": [
+                    {
+                      "interval": "1d",
+                      "symbol": "SYN01"
+                    }
+                  ],
+                  "finding": "fnd.SYN01.breakout.down.30",
+                  "instrument": "SYN01",
+                  "series": "syn01"
+                }
+              }
+            },
+            "sub": "v",
+            "type": "notify"
+          }
+        }
+      ],
+      "note": "A day of steps: what changed for the viewer, once after the steps.",
+      "send": {
+        "conn": "a",
+        "msg": {
+          "control": {
+            "kind": "step",
+            "n": 9
+          },
+          "id": "r2",
+          "type": "replay"
+        }
+      }
+    },
+    {
+      "expect": [
+        {
+          "conn": "a",
+          "msg": {
+            "data": {
+              "kind": "interaction"
+            },
+            "id": "c1",
+            "type": "result"
+          }
+        },
+        {
+          "conn": "a",
+          "msg": {
+            "event": {
+              "kind": "viewer",
+              "seq": 29,
+              "viewer": {
+                "closed": true,
+                "data": []
+              }
+            },
+            "sub": "v",
+            "type": "notify"
+          }
+        }
+      ],
+      "note": "Closing: `closed` and no data subscription.",
+      "send": {
+        "conn": "a",
+        "msg": {
+          "gesture": {
+            "height": 300,
+            "kind": "close",
+            "width": 390
+          },
+          "id": "c1",
+          "type": "input"
+        }
+      }
+    },
+    {
+      "expect": [
+        {
+          "conn": "a",
+          "msg": {
+            "error": {
+              "code": "duplicate",
+              "hint": "Send `visible` to change what it shows.",
+              "message": "a connection holds one `viewer` subscription",
+              "path": "/topic/kind"
+            },
+            "id": "v2",
+            "type": "error"
+          }
+        }
+      ],
+      "note": "One viewer subscription per connection.",
+      "send": {
+        "conn": "a",
+        "msg": {
+          "id": "v2",
+          "topic": {
+            "kind": "viewer"
+          },
+          "type": "subscribe"
+        }
+      }
+    },
+    {
+      "expect": [
+        {
+          "conn": "a",
+          "msg": {
+            "error": {
+              "code": "not_found",
+              "hint": "Subscribe to {\"kind\":\"viewer\"} first.",
+              "message": "no `viewer` subscription `nope`",
+              "path": "/sub"
+            },
+            "id": "vis2",
+            "type": "error"
+          }
+        }
+      ],
+      "note": "An unknown subscription.",
+      "send": {
+        "conn": "a",
+        "msg": {
+          "id": "vis2",
+          "sub": "nope",
+          "type": "visible",
+          "visible": []
+        }
+      }
+    },
+    {
+      "expect": [
+        {
+          "conn": "a",
+          "msg": {
+            "id": "u1",
+            "status": "unsubscribed",
+            "type": "ack"
+          }
+        }
+      ],
+      "note": "Unsubscribing ends the viewer.",
+      "send": {
+        "conn": "a",
+        "msg": {
+          "id": "u1",
+          "sub": "v",
+          "type": "unsubscribe"
+        }
+      }
+    }
+  ]
+}

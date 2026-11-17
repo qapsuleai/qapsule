@@ -150,7 +150,9 @@ impl Viewer {
         if on {
             self.want.insert(id.to_owned());
         } else {
+            // The authority forgets it too: a face off screen is not kept up to date.
             self.want.remove(id);
+            self.faces.remove(id);
         }
     }
 

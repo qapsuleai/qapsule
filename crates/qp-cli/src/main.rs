@@ -87,6 +87,11 @@ enum Command {
         /// Output tape (JSON).
         #[arg(short, long)]
         out: PathBuf,
+        /// (RP3/M15, §22) The viewer variant: the device opens the capsule and holds only
+        /// that instrument's slice, claims and data (a second instrument stays on the
+        /// authority); writes the outcome instead of a tape.
+        #[arg(long)]
+        viewer: bool,
     },
     /// Replay historical bars like a live feed (docs/PROTOCOL.md §21): local real data
     /// (`fixtures/local/bars`, or `--local-bars`) or the synthetic market, through the
@@ -359,7 +364,13 @@ fn run(command: Command) -> Result<Outcome, String> {
             transport,
             root,
         } => conform(&inputs, &transport, &root),
-        Command::ReplicaTape { lag, out } => replica_tape(lag, &out),
+        Command::ReplicaTape { lag, out, viewer } => {
+            if viewer {
+                viewer_tape(lag, &out)
+            } else {
+                replica_tape(lag, &out)
+            }
+        }
         Command::Replay(args) => replay_cmd(&args),
         Command::Explain(args) => scene_cmd(&args, true),
         Command::Scene(args) => scene_cmd(&args, false),
@@ -589,6 +600,29 @@ fn replica_tape(lag: usize, out: &std::path::Path) -> Result<Outcome, String> {
     let caught_up = last.is_some_and(|e| e.doc == e.authority_doc && e.view == e.authority_view);
     let ok = o.violations.is_empty()
         && caught_up
+        && o.shown_final == o.final_claims
+        && (lag > 0 || o.differing_steps == 0);
+    Ok(if ok { Outcome::Ok } else { Outcome::Invalid })
+}
+
+/// (RP3/M15) `qp replica-tape --viewer`: the viewer variant of the consistency check;
+/// invalid on a wrong or early claim, on a data subscription to the other instrument, on a
+/// final claim not shown at the end, or (without lag) on a step whose slice or view digest
+/// differs.
+fn viewer_tape(lag: usize, out: &std::path::Path) -> Result<Outcome, String> {
+    let o = qp_session::tape::run_viewer(lag)?;
+    let text = serde_json::to_string_pretty(&o).map_err(|e| e.to_string())?;
+    std::fs::write(out, text).map_err(|e| format!("{}: {e}", out.display()))?;
+    println!(
+        "viewer lag {lag}: {} steps, {} with open-replica digests != authority, {} violations, final claims {} (shown final at end {}), steps subscribed to the other instrument {}, display counts {:?}",
+        o.steps, o.differing_steps, o.violations.len(), o.final_claims, o.shown_final,
+        o.foreign_steps, o.shown_counts,
+    );
+    for v in o.violations.iter().take(10) {
+        eprintln!("violation at step {}: {}", v.step, v.what);
+    }
+    let ok = o.violations.is_empty()
+        && o.foreign_steps == 0
         && o.shown_final == o.final_claims
         && (lag > 0 || o.differing_steps == 0);
     Ok(if ok { Outcome::Ok } else { Outcome::Invalid })

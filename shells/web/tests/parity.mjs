@@ -104,7 +104,9 @@ try {
     const a = vwant[k], b = viewer[k];
     // Faces on the page's screen (the others never came) equal the driver's.
     const shown = b ? b.faces.filter((f) => f.digest) : [];
-    const facesOk = shown.length > 0 && shown.every((f) => a.faces.some((g) => g.id === f.id && g.digest === f.digest));
+    // (Under an open capsule the feed is hidden: no face is on screen then.)
+    const facesOk = (shown.length > 0 || b.open.depth !== 'sentence')
+      && shown.every((f) => a.faces.some((g) => g.id === f.id && g.digest === f.digest));
     const ok = b && a.document === b.document && facesOk && same(a.open, b.open) && same(a.look, b.look) && same(a.data, b.data);
     console.log(`viewer ${k}: ${ok ? 'equal' : 'DIFFERENT'} (slice ${a.document}, ${shown.length} faces on screen, open ${a.open.depth} ${a.open.digest}, data ${JSON.stringify(a.data)})`);
     if (!ok) failed++;

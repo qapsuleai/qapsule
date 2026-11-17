@@ -22,6 +22,7 @@ input      (kaydır, yakınlaştır)  →    result (viewport | at | interaction
 attend     (dikkat yönlendir)     →    ack (delivered); hedefe notify
 clock      (yalnızca host)        →    (cevap yok; süre aşımları işlenir)
 replay     (R4: oynatma denetimi) →    result (replay)            ya da error   (§21)
+visible    (RP3: ekrandaki yüzler) →    result (viewer); viewer konusu notify  (§22)
 ```
 
 Her mesaj tek bir JSON nesnesidir; türü `"type"` alanıdır. Örnek bir konuşma:
@@ -2272,6 +2273,140 @@ Sayfa, protokol ve veri düzlemi **aynı kökendedir**; sayfa başka hiçbir yer
   bakış durumu) basar; tarayıcıdaki kabuğun özetleriyle eşitliği `scripts/verify.sh` `demo`
   adımında denetlenir.
 
+
+## 22. Görüntüleyici (RP3/M15, K48)
+
+> Karar K48: **cihaz görüntüleyicidir, hesap yeri değildir.** Tespit, bulgu, sıralama ve
+> karne otoritededir; akıştaki kapsüller cihaza hazır gelir. Cihaz yalnız kullanıcının o an
+> baktığı şey için veri alır, hesaplar ve çizer: açık kapsülün enstrümanı (grafik,
+> göstergeler, aday, işaretin canlı hareketi). Cihazın tik başına işi ve belleği evrendeki
+> sembol sayısından bağımsızdır. Referans: `crates/qp-session/src/viewer.rs` (otorite ve
+> cihaz tarafı), `crates/qp-wasm/src/viewer.rs` (kabuk çekirdeği), `crates/qp-cli/src/demo.rs`
+> (barındırıcı). Ölçüm `rounds/RP3/experiments/M15.md`. Kavramlar `docs/CONCEPTS.md`
+> "Görüntüleyici (RP3)". Bu bölüm §19'u daraltır: görüntü kuralı (§19.4) yalnız açık
+> enstrüman için geçerlidir; akıştaki kapsül otoritenin kesinleşmiş iddiasıdır.
+
+### 22.1 Görünürlük aboneliği — `viewer` konusu ve `visible` mesajı
+
+```json
+→ {"type":"subscribe","id":"viewer","topic":{"kind":"viewer","limit":40,"width":390}}
+← {"type":"ack","id":"viewer","status":"subscribed"}
+← {"type":"notify","sub":"viewer","event":{"kind":"viewer","viewer":{
+     "feed":[{"capsule":CapsuleItem,"known_at":1688713200000,"face":true}, …],
+     "data":[]},"seq":4501}}
+→ {"type":"visible","id":"v1","sub":"viewer","visible":["cap-a","cap-b","cap-c"]}
+← {"type":"result","id":"v1","seq":4501,"data":{"kind":"viewer","viewer":{
+     "faces":[{"capsule":"cap-a","digest":"…","scene":SceneDesc,"trust":"server"}, …],
+     "data":[]}}}
+```
+
+- `viewer` konusu (bağlantı başına bir tane; ikincisi `duplicate`): `limit` akış uzunluğu
+  (varsayılan 40, 1–200), `width` yüz çerçevesinin CSS genişliği (varsayılan 390, 64–4096;
+  yükseklik yüz tasarımınındır, `qp_grammar::faces::height`). `ack`'ten hemen sonra ilk
+  `viewer` olayı gelir (akışın tamamı).
+- `visible`: aboneliğin ekrandaki kapsülleri (en çok `limit`; öncekinin yerine geçer). Cevap
+  `result` (`kind: "viewer"`), değişeni taşır. Varlık durumudur: dokümana ve günlüğe girmez.
+  Okuma izni yeter. Bilinmeyen `sub`: `not_found` (`/sub`).
+- **Açık kapsül** bağlantının bakış durumudur (`input` `open`/`close`, §4.6.1): ayrı mesaj
+  yoktur. Derinlik `sentence` değilse `look.capsule` açıktır.
+- MCP'de araç değildir (cihazın mesajıdır, `input` gibi doğrudan iletilir); `subscribe`
+  aracı `viewer` konusunu şemadan alır.
+
+### 22.2 `viewer` olayı (`ViewerUpdate`)
+
+Otorite her viewer bağlantısı için cihaza ne gönderdiğini tutar ve her girdiden sonra
+(mesaj; veri olayı — yeniden oynatma barındırıcısında **adım başına bir kez**,
+`Session::set_viewer_batch`) yalnız **değişeni** iter:
+
+| Alan | Ne zaman | İçerik |
+|------|----------|--------|
+| `feed` | akış değiştiğinde (ve ilk olayda) | `ViewerItem` dizisi: `capsule` (`capsules` sorgusunun `audience: true, limit` cevabındaki öğe, okuyucunun dünyasında §20.5), `known_at` (geçişin bilinebildiği an: geçiş barından sonraki barın açılışı; yoksa yok = şimdi), `face` (okuyucu serinin her beslemesine yetkili ve bar var: yüz sahnesi gelir; yoksa cihaz cümleyi metin olarak gösterir) |
+| `faces` | görünür bir kapsülün yüzü yeni ya da özeti değiştiğinde | `ViewerFace`: `capsule`, `digest` (`view_digest`, §19.6), `scene` (`SceneDesc`: okuyucunun yüz tasarımı, bakış ayarı, dili, cümlesi ve başlık parçalarıyla, otoritenin verisi üzerinde derlenmiş — yansının derleyeceği sahnenin aynısı, `qp_session::viewer::face_scene`), `trust: "server"` |
+| `open` | kapsül açıldığında ya da diliminin özeti değiştiğinde | `ViewerOpen` (§22.3) |
+| `closed` | açık kapsül kapandığında | `true` |
+| `audience` | okuyucunun kitle tercihi değiştiğinde | `Audience` |
+| `data` | her olayda | cihazın **veri abonelikleri**: barındırıcının bu bağlantıya sunduğu beslemeler. Akış ekranında boş; kapsül açıkken yalnız açık enstrümanın beslemeleri (okuyucunun yetkili olduğu) |
+
+Hiçbir şey değişmediyse olay yoktur. Hepsi isteğe bağlı alanlardır; `viewer` aboneliği
+olmayan bağlantının akışı değişmez (var olan dökümler bayt bayt aynı).
+
+### 22.3 Açık kapsülün dilimi (`ViewerOpen`)
+
+`{capsule, finding, instrument, series, document, digest, feeds}`: cihazın açık kapsülü
+**kendi verisinde** çizmesi ve sınaması için gereken doküman parçası
+(`qp_session::viewer::slice`): dokümanın kendi alanları; enstrümanın serileri, üzerlerindeki
+hesap serileri ve bunların girdileri; o serilerin olguları; bu olgulara dayanan bulgular ve
+kapsülleri (enstrümanın hikâyeleri); yalnız bu serilere dayanan görünümler ve niyetler; bu
+kapsül ve bulguların karne satırları; okuyucunun kendi kitle tercihi. Doküman sırası korunur;
+bu yüzden dilim üzerinde derlenen sahne bütün doküman üzerinde derlenenle aynıdır (test:
+`crates/qp-wasm/tests/viewer_m15.rs`, `shells/web/tests/parity.mjs`). `digest` dilimin
+`document_digest`'i, `feeds` dilimin dayandığı bağlı beslemeler (yetkili olunanlar).
+Dilim yalnız o enstrümanın kalemleri değiştiğinde yeniden gelir.
+
+### 22.4 Cihaz tarafı: açılışta veri bağı ve doğrulama
+
+Cihaz açık kapsül için bir yansı kurar (`qp_session::viewer::OpenSide`): dilimden başlar
+(`Replica::start`), bağlı serilerini **kendi** verisinden, dokümandaki çapadan çözer (§18.3);
+yalnız o enstrümanın veri olaylarını alır. Otorite açık enstrümanın beslemelerine dayanan
+iddiaları (kapsül, niyet, bağlantının kendi koşulları; §19.3) `viewer` aboneliğine de
+gönderir; yansı bunlara §19.4 görüntü kuralını uygular. Aday (§20.6) yalnız açık enstrümanda,
+yerel veriden hesaplanır.
+
+**Hikâyenin sınanması** (`check_story`): açık kapsülün hikâyesindeki her olgu (sunucu
+olguları hariç, K33) cihazın kendi **kapalı** barlarında açık dedektörlerle aynı kimlik ve
+aynı kanıt değerleriyle çıkmalıdır. Sonuç ve güven işareti:
+
+| Durum | `TrustState` | İşaret metni (TR / EN) |
+|-------|--------------|------------------------|
+| Akıştaki kapsül; ya da açık kapsül cihazda sınanamıyor (yalnız sunucu olguları, veri yetkisi yok) | `server` | Sunucu doğruladı / Verified by the server |
+| Kendi verisi olgunun barını henüz kapalı olarak kapsamıyor | `checking` | Bu cihazda sınanıyor / Checking on this device |
+| Her olgu kendi verisinde çıktı | `device` | Bu cihazda sınandı / Checked on this device |
+| Bir olgu çıkmadı ya da bu kapsül üzerindeki bir iddia `disputed` | `differs` | Kaynaklar farklı / Sources differ |
+
+Metin çekirdekten gelir (`qp_session::viewer::trust_text`); kabuk olduğu gibi gösterir.
+Protokoldeki karşılığı `TrustMark` (`server` | `device`).
+
+### 22.5 Barındırıcının görevleri (veri düzlemi)
+
+Veri protokolün dışındadır (K23, §18.1). Barındırıcı viewer bağlantısının veri düzlemini
+`Session::viewer_data(conn)`'dan kurar:
+
+- Bağlantının `data` listesinde olmayan beslemenin hiçbir olayı gönderilmez.
+- Listeye yeni giren besleme için önce o beslemenin ilk barları ve o ana kadarki olayları
+  verilir (`ReplayHost::feed_data`), sonra protokol mesajları (dilim veriden sonra gelir).
+- Listeden çıkan beslemenin olayları kesilir (cihaz açık yansısını bırakır).
+
+`qp demo` (§21.4): `GET /events?…&mode=viewer|replica`; **varsayılan `viewer`**.
+`mode=replica` R4'ün tam yansısıdır (ölçüm başvurusu, sayfada `?mode=replica`). Viewer
+bağlantısının çerçeveleri:
+
+- `{"start":{conn, token, principal, lang, mode:"viewer", data:{feeds:[], entitlements},
+  events:[], instruments:[sembol…], info}}` — bar yok; `instruments` ayar sayfasının listesi.
+- `{"data":[DataEvent…],"replay":ReplayState}` — yalnız abone olunan beslemelerin olayları
+  (akış ekranında boş dizi + oynatma durumu).
+- `{"bind":{"feeds":[InitFeed…],"events":[DataEvent…]}}` — yeni abone olunan besleme.
+- `{"msg":ServerMsg}` — değişmedi.
+
+Kabuksuz sürüş: `qp drive --mode viewer` (her özetten önce akıştaki bütün kapsülleri
+görünür yapar; özetler: dilimin özeti `document`, yüzler, açık sahne, bakış durumu, `data`).
+`scripts/verify.sh` `demo` adımı tarayıcıdaki iki kipi de sürer: `?mode=replica` = `qp drive`,
+varsayılan = `qp drive --mode viewer`, ve viewer sürücüsünün yüzleri ve açık sahnesi = tam
+yansınınki.
+
+### 22.6 Sınırlar
+
+- Yüz sahnesi okuyucunun dünyasında derlenir (`as_reader`, §20.5); akış lisansı olmayan
+  okuyucunun yüzü de kendi dünyasındandır. Barın veri yetkisi olmayana yüz sahnesi gitmez
+  (sahne veriden türer, K33).
+- Dilim, enstrümanın bütün olgu ve hikâye geçmişini taşır (gösterimde 10–100 KB); dilimin
+  değişen kalemlerini artımlı göndermek öneridir (`M15.md`).
+- Akış sorgusu ve görünür yüzlerin derlenmesi otoritenin bağlantı başına işidir; evrenle
+  büyür (izin verilen), cihazın işi büyümez.
+
+Döküm: `fixtures/protocol/conformance/59-viewer.json` (abonelik ve ilk akış; görünür
+yüzler, özetleriyle; kapsül açılınca dilim ve tek beslemelik veri aboneliği; adım sonrası
+değişen yüzler; kapatınca `closed` ve boş abonelik; ikinci abonelik `duplicate`, bilinmeyen
+`sub` `not_found`).
 
 ## Ek A — Eski `Command` tipi
 

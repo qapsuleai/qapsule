@@ -214,6 +214,19 @@ yeniden oynatma `docs/PROTOCOL.md` §21; kapsülün yüzü `docs/FACE.md`.
 | Ölçüm ekranı | metrics page | Gösterimde kare süresi (durağan, kaydırırken), tik maliyeti, açılış süresi ve paket boyutunu gösteren ve kopyalanabilir özet üreten sayfa. |
 | Persona | persona | Ölçümde ekran görüntüsünü okuyan taze alt ajanın rolü: geleceğin yatırımcısı (teknik analiz bilmez, beş saniyesi var) ya da alışkın kullanıcı. İnsan değildir; ön elemedir (K39). |
 
+### Görüntüleyici (RP3)
+
+Karar K48; ayrıntı `docs/PROTOCOL.md` §22; ölçüm `rounds/RP3/experiments/M15.md`.
+
+| Kavram | Kodda | Tanım |
+|--------|-------|-------|
+| Görüntüleyici | viewer (`Topic::Viewer`, `qp_wasm::viewer::Viewer`) | Bütün dokümanın yansısını tutmayan cihaz: akış ve yüzler otoriteden hazır gelir; yalnız açık kapsülün enstrümanı için veri alır, hesaplar ve çizer. İşi ve belleği evrenin büyüklüğünden bağımsızdır. Gösterimde varsayılan; tam yansı `?mode=replica`. |
+| Görünürlük aboneliği | `viewer` konusu + `visible` mesajı | Cihazın otoriteye ne gösterdiğini söylediği abonelik: ekrandaki kapsüller (`visible`) ve bakış durumundaki açık kapsül. Otorite yalnız değişeni iter (`ViewerUpdate`). Varlık durumudur. |
+| Hazır yüz | ready face (`ViewerFace`) | Otoritenin okuyucu için derlediği yüz sahnesi (`SceneDesc`, özetiyle): yansının kendi verisinde derleyeceğiyle aynı. Yalnız ekrandaki kapsüller için gelir. |
+| Açık dilim | open slice (`ViewerOpen`, `qp_session::viewer::slice`) | Açık kapsülün enstrümanına ait doküman parçası (seriler, hesaplar, olgular, bulgular, kapsüller, görünümler, niyetler, karne satırları): cihaz açık kapsülü bununla ve kendi verisiyle çizer ve sınar. |
+| Veri aboneliği | data subscription (`ViewerUpdate.data`) | Barındırıcının bir görüntüleyiciye sunduğu beslemeler: akış ekranında hiçbiri; kapsül açıkken yalnız o enstrümanınkiler. |
+| Güven işareti | trust mark (`TrustMark`, `qp_session::viewer::TrustState`) | Ekrandaki kapsülün nasıl doğrulandığı: akışta "sunucu doğruladı" (otoritenin kesinleşmiş iddiası); açılınca cihazın kendi verisinde sınanması: "bu cihazda sınanıyor", "bu cihazda sınandı" ya da "kaynaklar farklı". Metin çekirdekten, TR/EN. |
+
 ## Kapsülün yaşam döngüsü
 
 R3'ten itibaren kapsülün hikâye aşamaları `Stage`'dir (yukarıda; `docs/CAPSULE.md` §3).

@@ -30,6 +30,7 @@ pub mod bench;
 pub mod freq;
 pub mod paint;
 pub mod paint_canvas;
+pub mod paint_cpu;
 
 /// Face frame height of the default face design (`r3`, 240 CSS px). (R4/H-M8910) The
 /// height a face is laid out at is the design's own (`qp_grammar::faces::height`), read
@@ -454,6 +455,8 @@ pub struct ShellCore {
     pass_since: Option<f64>,
     /// (RP3/M14) The capsules whose face the page reports on screen (both modes).
     shown: BTreeSet<String>,
+    /// (RP3/M12a) The `cpu` paint path's retained surfaces (`shell/paint_cpu.rs`).
+    cpu: paint_cpu::CpuPaint,
 }
 
 impl std::fmt::Debug for ShellCore {
@@ -595,6 +598,7 @@ impl ShellCore {
             pending_since: None,
             pass_since: None,
             shown: BTreeSet::new(),
+            cpu: paint_cpu::CpuPaint::default(),
         };
         me.push(json!({"type":"hello","protocol":"qp/0","principal":principal,
             "surface":{"kind":"phone","screen":[390,844],"input":["touch"],"lang":lang_name(lang)}}));

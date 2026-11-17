@@ -46,7 +46,8 @@ fn div255(x: u32) -> u32 {
     (x + (x >> 8)) >> 8
 }
 
-type GlyphCache = BTreeMap<(char, u32), (fontdue::Metrics, Vec<u8>)>;
+/// Glyph coverage bitmaps by (character, size bits).
+pub type GlyphCache = BTreeMap<(char, u32), (fontdue::Metrics, Vec<u8>)>;
 
 /// Draws one text line by compositing fontdue coverage masks with integer source-over.
 /// Pen positions are rounded to whole pixels so glyph bitmaps are never resampled.
@@ -228,65 +229,176 @@ fn rasterize_prims<'a>(
         Pixmap::new(width, height).ok_or_else(|| RenderError::new("cannot allocate pixmap"))?;
     pm.fill(color(background));
     let mut cache = GlyphCache::new();
-    let id = Transform::identity();
     for p in prims {
-        match p {
-            Prim::Rect { x, y, w, h, color } => {
-                if let Some(r) = Rect::from_xywh(*x as f32, *y as f32, *w as f32, *h as f32) {
-                    pm.fill_rect(r, &paint(*color, false), id, None);
-                }
-            }
-            Prim::Polyline {
-                points,
-                width,
-                color,
-            } => {
-                if !(width.is_finite() && *width >= 0.0) {
-                    continue;
-                }
-                if let Some(path) = polyline_path(points, false) {
-                    let stroke = Stroke {
-                        width: *width,
-                        line_cap: LineCap::Butt,
-                        line_join: LineJoin::Miter,
-                        ..Stroke::default()
-                    };
-                    pm.stroke_path(&path, &paint(*color, true), &stroke, id, None);
-                }
-            }
-            Prim::Fill { points, color } => {
-                if let Some(path) = polyline_path(points, true) {
-                    pm.fill_path(&path, &paint(*color, true), FillRule::Winding, id, None);
-                }
-            }
-            Prim::Circle { cx, cy, r, color } => {
-                if let Some(path) = PathBuilder::from_circle(*cx, *cy, *r) {
-                    pm.fill_path(&path, &paint(*color, true), FillRule::Winding, id, None);
-                }
-            }
-            Prim::Text {
-                x,
-                baseline,
-                px,
-                text,
-                color,
-                align,
-            } => {
-                if !(px.is_finite() && *px > 0.0 && *px <= MAX_TEXT_PX) {
-                    return Err(RenderError::new(format!(
-                        "text size {px} out of range (0, {MAX_TEXT_PX}]"
-                    )));
-                }
-                draw_text(
-                    &mut pm,
-                    font,
-                    &mut cache,
-                    (*x, *baseline, *px, text, *color, *align),
-                );
-            }
-        }
+        draw_prim(&mut pm, font, &mut cache, p)?;
     }
     Ok(pm)
+}
+
+/// Draws one primitive onto `pm` exactly as [`rasterize`] does (RP3/M12a: the retained
+/// painter, [`crate::retained`], draws with this same function). `cache` holds glyph
+/// coverage bitmaps; it may live across calls (a bitmap depends only on the character and
+/// the size).
+///
+/// # Errors
+/// A text size that is not finite or not in `(0, 512]`.
+pub fn draw_prim(
+    pm: &mut Pixmap,
+    font: &fontdue::Font,
+    cache: &mut GlyphCache,
+    p: &Prim,
+) -> Result<(), RenderError> {
+    let id = Transform::identity();
+    match p {
+        Prim::Rect { x, y, w, h, color } => {
+            if let Some(r) = Rect::from_xywh(*x as f32, *y as f32, *w as f32, *h as f32) {
+                pm.fill_rect(r, &paint(*color, false), id, None);
+            }
+        }
+        Prim::Polyline {
+            points,
+            width,
+            color,
+        } => {
+            if !(width.is_finite() && *width >= 0.0) {
+                return Ok(());
+            }
+            if let Some(path) = polyline_path(points, false) {
+                let stroke = Stroke {
+                    width: *width,
+                    line_cap: LineCap::Butt,
+                    line_join: LineJoin::Miter,
+                    ..Stroke::default()
+                };
+                pm.stroke_path(&path, &paint(*color, true), &stroke, id, None);
+            }
+        }
+        Prim::Fill { points, color } => {
+            if let Some(path) = polyline_path(points, true) {
+                pm.fill_path(&path, &paint(*color, true), FillRule::Winding, id, None);
+            }
+        }
+        Prim::Circle { cx, cy, r, color } => {
+            if let Some(path) = PathBuilder::from_circle(*cx, *cy, *r) {
+                pm.fill_path(&path, &paint(*color, true), FillRule::Winding, id, None);
+            }
+        }
+        Prim::Text {
+            x,
+            baseline,
+            px,
+            text,
+            color,
+            align,
+        } => {
+            if !(px.is_finite() && *px > 0.0 && *px <= MAX_TEXT_PX) {
+                return Err(RenderError::new(format!(
+                    "text size {px} out of range (0, {MAX_TEXT_PX}]"
+                )));
+            }
+            draw_text(pm, font, cache, (*x, *baseline, *px, text, *color, *align));
+        }
+    }
+    Ok(())
+}
+
+/// The pixel box `[x0, y0, x1, y1)` (device px, unclipped) that drawing `p` with
+/// [`draw_prim`] can touch: a conservative bound (RP3/M12a, the retained painter's dirty
+/// rectangles). Exact glyph boxes for text (the same pen walk as `draw_text`, metrics
+/// only); the points' bounds widened by the stroke's miter reach and an antialiasing
+/// margin for lines, fills and circles. `None`: unbounded (non-finite numbers), to be
+/// treated as the whole surface.
+#[must_use]
+pub fn prim_bounds(font: &fontdue::Font, p: &Prim) -> Option<[i64; 4]> {
+    // Antialiasing reaches at most one pixel past a shape's geometry; one more for safety.
+    const AA: f32 = 2.0;
+    match p {
+        Prim::Rect { x, y, w, h, .. } => {
+            let (x, y) = (i64::from(*x), i64::from(*y));
+            Some([x - 1, y - 1, x + i64::from(*w) + 1, y + i64::from(*h) + 1])
+        }
+        Prim::Polyline { points, width, .. } => {
+            if !width.is_finite() {
+                return None;
+            }
+            // A miter join reaches `limit * width / 2` (limit 4, tiny-skia's default); a
+            // butt cap `width / 2`.
+            points_box(points, width.max(0.0) * 2.0 + AA)
+        }
+        Prim::Fill { points, .. } => points_box(points, AA),
+        Prim::Circle { cx, cy, r, .. } => {
+            if !(cx.is_finite() && cy.is_finite() && r.is_finite()) {
+                return None;
+            }
+            let r = r.abs() + AA;
+            Some(float_box(cx - r, cy - r, cx + r, cy + r))
+        }
+        Prim::Text {
+            x,
+            baseline,
+            px,
+            text,
+            align,
+            ..
+        } => {
+            if !(px.is_finite() && *px > 0.0 && *px <= MAX_TEXT_PX) {
+                return None;
+            }
+            let advance: f32 = text
+                .chars()
+                .map(|ch| font.metrics(ch, *px).advance_width)
+                .sum();
+            let mut pen = match align {
+                Align::Left => *x as f32,
+                Align::Right => *x as f32 - advance,
+            };
+            let mut b = [i64::MAX, i64::MAX, i64::MIN, i64::MIN];
+            for ch in text.chars() {
+                let m = font.metrics(ch, *px);
+                if m.width > 0 && m.height > 0 {
+                    let gx = i64::from(pen.round() as i32 + m.xmin);
+                    let gy = i64::from(*baseline - m.height as i32 - m.ymin);
+                    b[0] = b[0].min(gx);
+                    b[1] = b[1].min(gy);
+                    b[2] = b[2].max(gx + m.width as i64);
+                    b[3] = b[3].max(gy + m.height as i64);
+                }
+                pen += m.advance_width;
+            }
+            if b[0] > b[2] {
+                return Some([0, 0, 0, 0]);
+            }
+            Some([b[0] - 1, b[1] - 1, b[2] + 1, b[3] + 1])
+        }
+    }
+}
+
+/// The bounds of `pts` widened by `pad`, rounded outwards (`None`: a non-finite point).
+fn points_box(pts: &[[f32; 2]], pad: f32) -> Option<[i64; 4]> {
+    if pts.is_empty() {
+        return Some([0, 0, 0, 0]);
+    }
+    let (mut x0, mut y0, mut x1, mut y1) = (f32::MAX, f32::MAX, f32::MIN, f32::MIN);
+    for &[x, y] in pts {
+        if !(x.is_finite() && y.is_finite()) {
+            return None;
+        }
+        x0 = x0.min(x);
+        y0 = y0.min(y);
+        x1 = x1.max(x);
+        y1 = y1.max(y);
+    }
+    Some(float_box(x0 - pad, y0 - pad, x1 + pad, y1 + pad))
+}
+
+/// A float box rounded outwards to whole pixels (one more pixel on the far side).
+fn float_box(x0: f32, y0: f32, x1: f32, y1: f32) -> [i64; 4] {
+    [
+        x0.floor() as i64,
+        y0.floor() as i64,
+        x1.ceil() as i64 + 1,
+        y1.ceil() as i64 + 1,
+    ]
 }
 
 /// Converts premultiplied RGBA8 to straight RGBA8 (integer-only, round-to-nearest).

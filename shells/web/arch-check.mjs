@@ -31,6 +31,9 @@ export const ALLOWED_CORE = new Set([
   'take_changes', 'has_changes', 'metric_pass', 'faces_to_paint', 'metric_flag', 'jit_probe',
   // RP3/M12b (ARCH.md): the `canvas` paint path's command stream, string table, variant, glyph atlas.
   'canvas_face', 'canvas_scene', 'canvas_strings', 'canvas_config', 'canvas_atlas_px',
+  // RP3/M12a (ARCH.md): the cpu paint path's retained surfaces, read through a view into
+  // the WASM memory.
+  'cpu_options', 'cpu_face', 'cpu_scene', 'cpu_moving', 'cpu_memory', 'cpu_pixels',
 ]);
 
 // R6: which modules a file may import. main.js: the core's package and the paint-path

@@ -113,6 +113,7 @@ pub fn rasterize(scene: &SceneDesc, cfg: Config) -> Result<Vec<u8>, RenderError>
                 text,
                 color,
                 align,
+                ..
             } => {
                 ctx.set_paint(rgba(*color));
                 let glyphs: Vec<Glyph> = crate::scene::layout_glyphs(text, *px, *x, *align)?

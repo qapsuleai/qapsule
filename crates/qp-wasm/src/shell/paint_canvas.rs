@@ -334,6 +334,7 @@ impl<'a> Enc<'a> {
                 text,
                 color,
                 align,
+                ..
             } => {
                 if self.cfg.no_text {
                     return;

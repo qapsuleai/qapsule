@@ -128,6 +128,7 @@ impl TypeScale {
     /// designs take the sizes from these roles, and the registry test checks the four
     /// sizes differ in every look). `None`: a size no role has.
     #[must_use]
+    #[allow(clippy::cast_possible_truncation)]
     pub fn mark_role(&self, px: f64) -> Option<&'static str> {
         [
             ("headline", &self.headline),
@@ -136,7 +137,8 @@ impl TypeScale {
             ("note", &self.note),
         ]
         .into_iter()
-        .find(|(_, r)| r.px.to_bits() == px.to_bits())
+        // Scenes carry sizes as f32: compared at that precision.
+        .find(|(_, r)| (r.px as f32).to_bits() == (px as f32).to_bits())
         .map(|(n, _)| n)
     }
 }
@@ -175,10 +177,10 @@ pub struct Surface {
 /// Where the glyph sits next to a face's sentence.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum GlyphPlace {
-    /// Before the sentence (left).
+    /// Before the sentence (left), top-aligned.
     Leading,
-    /// After the sentence (right).
-    Trailing,
+    /// Above the sentence; the sentence takes the full width.
+    Above,
 }
 
 /// The glyph's sizes and place.
@@ -536,7 +538,7 @@ impl Look {
             "glyph": {"face_px": self.glyph.face_px, "card_px": self.glyph.card_px,
                 "chart_px": self.glyph.chart_px, "default_px": self.glyph.default_px,
                 "place": match self.glyph.place { GlyphPlace::Leading => "leading",
-                    GlyphPlace::Trailing => "trailing" }},
+                    GlyphPlace::Above => "above" }},
             "motion": {"duration_scale": self.motion.duration_scale,
                 "ease": self.motion.ease.css(), "chrome_ms": self.motion.chrome_ms},
         })

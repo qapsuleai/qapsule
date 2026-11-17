@@ -180,6 +180,7 @@ pub fn scale_prim(p: &Prim, s: u32) -> Prim {
             text,
             color,
             align,
+            ..
         } => Prim::Text {
             x: x * si,
             baseline: baseline * si,
@@ -290,6 +291,7 @@ pub fn draw_prim(
             text,
             color,
             align,
+            ..
         } => {
             if !(px.is_finite() && *px > 0.0 && *px <= MAX_TEXT_PX) {
                 return Err(RenderError::new(format!(

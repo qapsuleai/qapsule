@@ -79,6 +79,8 @@ pub(crate) struct Frame<'a> {
     pub p: &'a dyn DataProvider,
     /// (R4/H-FP) The face design's headline template (`CompileOptions::face`).
     pub headline: Option<crate::faces::HeadlineFn>,
+    /// (R5/T3) The look (`CompileOptions::look`).
+    pub look: &'static crate::look::Look,
     pub theme: Theme,
     pub bar_series: String,
     pub bars: Cow<'a, [Bar]>,

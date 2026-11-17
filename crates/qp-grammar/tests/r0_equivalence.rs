@@ -40,6 +40,7 @@ fn ours(p: &Prim) -> P {
             text,
             color,
             align,
+            ..
         } => P::Text(
             *x,
             *baseline,

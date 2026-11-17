@@ -39,9 +39,6 @@ pub(crate) struct Anchor {
     pub y: Option<PanelPos>,
 }
 
-/// Default glyph size in pixels.
-pub(crate) const GLYPH_SIZE: f64 = 24.0;
-
 /// One drawn element's values.
 #[derive(Debug, Clone)]
 pub(crate) struct PRow {
@@ -1241,7 +1238,7 @@ pub(crate) fn prepare(
                 )
             })?;
             let size = match &enc.size {
-                None => GLYPH_SIZE,
+                None => fr.look.glyph.default_px,
                 Some(SizeSpec::Constant(s)) if s.is_finite() && *s > 0.0 => *s,
                 Some(_) => {
                     return Err(cx.err(

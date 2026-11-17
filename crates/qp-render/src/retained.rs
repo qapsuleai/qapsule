@@ -152,6 +152,7 @@ fn key(p: &Prim) -> u64 {
             text,
             color,
             align,
+            ..
         } => {
             let a = matches!(align, Align::Right);
             (4u8, x, baseline, px.to_bits(), text, color, a).hash(&mut h);

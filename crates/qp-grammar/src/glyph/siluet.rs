@@ -416,10 +416,13 @@ impl AlphabetTrait for Siluet {
         let dir_col = match spec.direction {
             Direction::Up => theme.up,
             Direction::Down => theme.down,
-            Direction::Neutral => theme.accent,
+            Direction::Neutral => theme.neutral,
         };
-        let main: Rgba = with_opacity(if grey { theme.muted } else { dir_col }, fresh);
-        let edge: Rgba = with_opacity(if grey { theme.muted } else { theme.text }, fresh);
+        // (R5/T3) Grey: the look's closed colour for a closed story, its invalid colour for
+        // one that no longer holds (`r4`: both `muted`).
+        let grey_col = if closed { theme.closed } else { theme.invalid };
+        let main: Rgba = with_opacity(if grey { grey_col } else { dir_col }, fresh);
+        let edge: Rgba = with_opacity(if grey { grey_col } else { theme.text }, fresh);
         let ink = with_opacity(theme.text, fresh);
         let mut out = Vec::new();
 
@@ -429,7 +432,7 @@ impl AlphabetTrait for Siluet {
             let c = c.clamp(0.0, 1.0) as f32;
             if c > 0.0 {
                 let top = bx.y + s * (1.0 - c);
-                let tint = if grey { theme.muted } else { dir_col };
+                let tint = if grey { grey_col } else { dir_col };
                 out.push(Prim::Fill {
                     points: vec![
                         [bx.x, top],

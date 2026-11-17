@@ -141,6 +141,7 @@ impl GpuRenderer {
                     text,
                     color: c,
                     align,
+                    ..
                 } => {
                     let glyphs: Vec<Glyph> = crate::scene::layout_glyphs(text, *px, *x, *align)?
                         .into_iter()

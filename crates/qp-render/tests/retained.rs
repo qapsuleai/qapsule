@@ -56,6 +56,7 @@ fn shift(p: &Prim, dx: f32, dy: f32) -> Prim {
             text,
             color,
             align,
+            ..
         } => Prim::Text {
             x: x + dx as i32,
             baseline: baseline + dy as i32,

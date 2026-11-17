@@ -320,7 +320,7 @@ impl AlphabetTrait for Rozet {
 
         // Colours.
         let dir_col = if retracted {
-            theme.muted
+            theme.closed
         } else {
             match spec.direction {
                 Direction::Up => theme.up,
@@ -328,7 +328,9 @@ impl AlphabetTrait for Rozet {
                 Direction::Neutral => theme.text,
             }
         };
-        let ring_col = if retracted || phase == GlyphPhase::Candidate {
+        let ring_col = if retracted {
+            theme.closed
+        } else if phase == GlyphPhase::Candidate {
             theme.muted
         } else {
             theme.text

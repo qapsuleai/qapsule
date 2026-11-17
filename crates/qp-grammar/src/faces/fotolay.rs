@@ -26,6 +26,7 @@ use qp_schema::protocol::Language;
 use qp_schema::{Bar, Fact};
 
 use crate::depth;
+use crate::look::Look;
 use crate::error::{ErrorKind, GrammarError};
 use crate::provider::{DataProvider, HeadlineParts, SeriesKind};
 
@@ -124,6 +125,7 @@ fn in_force(finding: &str, p: &dyn DataProvider) -> bool {
 /// # Errors
 /// Unknown finding/fact, a finding without facts, or a series without bars.
 pub fn view(
+    _look: &Look,
     finding: &str,
     max_points: u32,
     p: &dyn DataProvider,
@@ -476,7 +478,7 @@ mod tests {
             .with_headline("fnd", "The long sentence.")
             .with_glyph("fnd", spec)
             .with_headline_parts("fnd", parts);
-        let v = view("fnd", 120, &p, "capsule-fnd").unwrap();
+        let v = view(&crate::look::R4, "fnd", 120, &p, "capsule-fnd").unwrap();
         for alphabet in crate::glyph::ALPHABETS {
             let mut o = CompileOptions::new(390, HEIGHT);
             o.face = Some("fotolay".into());

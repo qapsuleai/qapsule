@@ -563,6 +563,7 @@ impl GpuPainter {
                     text: t,
                     color,
                     align,
+                    ..
                 } => text(
                     &mut f,
                     &mut self.atlas,

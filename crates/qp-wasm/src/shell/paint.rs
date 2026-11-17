@@ -43,6 +43,7 @@ fn prim_json(p: &Prim) -> Value {
             text,
             color,
             align,
+            ..
         } => json!({"k": "text", "x": x, "y": baseline, "t": text,
             "font": format!("{px}px {PAINT_FONT_FAMILY}"),
             "align": match align { Align::Left => "left", Align::Right => "right" },

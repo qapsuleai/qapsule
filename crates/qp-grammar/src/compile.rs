@@ -18,7 +18,7 @@ use crate::frame::Frame;
 use crate::layer::{prepare, Geom, Prepared};
 use crate::provider::{DataProvider, SeriesKind};
 use crate::scale::value_y;
-use crate::theme::{with_opacity, Theme};
+use crate::theme::with_opacity;
 
 /// Smallest and largest accepted frame sizes (R0's limits).
 pub const MIN_WIDTH: u32 = 200;
@@ -27,20 +27,10 @@ pub const MIN_HEIGHT: u32 = 120;
 /// Largest accepted width or height.
 pub const MAX_DIM: u32 = 16_384;
 
-/// Plot margins (R0): left, right (from `W`), top, bottom (from `H`).
-const LEFT: i32 = 8;
-const RIGHT_MARGIN: i32 = 72;
-const TOP: i32 = 34;
-const BOTTOM_MARGIN: i32 = 24;
-/// Gap between stacked panels.
-const PANEL_GAP: i32 = 8;
+// (R5/T3) Plot margins, panel gap, the title and label sizes and the strip and veil alphas
+// are the look's (`crate::look`, `r4`: R0's values).
 /// Smallest panel height.
 const MIN_PANEL_H: i32 = 10;
-const TITLE_PX: f32 = 16.0;
-const LABEL_PX: f32 = 11.0;
-/// Alpha of emphasis strips (accent) and veils (background).
-const STRIP_ALPHA: u8 = 56;
-const VEIL_ALPHA: u8 = 160;
 /// Hard cap on grid lines per panel, and the largest tick index that is still exact.
 const MAX_TICKS: u32 = 64;
 const MAX_EXACT_TICK: f64 = 4_503_599_627_370_496.0; // 2^52
@@ -77,6 +67,12 @@ pub struct CompileOptions {
     /// the template's output; `None` (every other scene) or a design without one: the
     /// capsule's sentence. An unknown name is `invalid`.
     pub face: Option<String>,
+    /// (R5/T3) The look (`crate::look::LOOKS`) the scene is drawn in; `None`: `r4`. An
+    /// unknown name is `invalid`.
+    pub look: Option<String>,
+    /// (R5/T3) Write each text's type role into the scene (`Prim::Text::role`; the
+    /// measurement harness). Off by default: scenes and their digests stay as they were.
+    pub roles: bool,
 }
 
 impl CompileOptions {
@@ -94,6 +90,8 @@ impl CompileOptions {
             max_points: None,
             alphabet: None,
             face: None,
+            look: None,
+            roles: false,
         }
     }
 }
@@ -301,6 +299,7 @@ fn panel_rects(
     right: i32,
     top: i32,
     bottom: i32,
+    gap: i32,
 ) -> Result<Vec<PixelRect>, GrammarError> {
     let n = i32::try_from(panels.len()).unwrap_or(i32::MAX);
     let mut weights = Vec::with_capacity(panels.len());
@@ -315,7 +314,7 @@ fn panel_rects(
         }
         weights.push(w);
     }
-    let avail = bottom - top - PANEL_GAP * (n - 1);
+    let avail = bottom - top - gap * (n - 1);
     if avail < MIN_PANEL_H * n {
         return Err(GrammarError::new(
             ErrorKind::Invalid,
@@ -348,7 +347,7 @@ fn panel_rects(
             bottom: y + h,
         });
         used += h;
-        y += h + PANEL_GAP;
+        y += h + gap;
     }
     Ok(rects)
 }
@@ -597,10 +596,8 @@ pub fn compile(
             format!("size {width}x{height} out of range ({MIN_WIDTH}x{MIN_HEIGHT} ..= {MAX_DIM}x{MAX_DIM})"),
         ));
     }
-    let theme = match opts.theme.as_deref().or(view.theme.as_deref()) {
-        Some(n) => Theme::by_name(n)?,
-        None => Theme::dark(),
-    };
+    let look = crate::look::by_name(opts.look.as_deref())?;
+    let theme = look.theme(opts.theme.as_deref().or(view.theme.as_deref()))?;
     let outcome = match opts.outcome.as_deref() {
         Some(n) => crate::glyph::outcome::by_name(n)?,
         None => crate::glyph::outcome::default_style(),
@@ -687,10 +684,19 @@ pub fn compile(
     let total = n_bars + ext_times.len() as u64;
 
     let (wi, hi) = (width.cast_signed(), height.cast_signed());
-    let (left, right, top, bottom) = (LEFT, wi - RIGHT_MARGIN, TOP, hi - BOTTOM_MARGIN);
+    let [m_left, m_right, m_top, m_bottom] = look.space.plot;
+    let (left, right, top, bottom) = (m_left, wi - m_right, m_top, hi - m_bottom);
+    let types = &look.types;
+    let (title_px, label_px, figure_px) = (
+        types.title.px as f32,
+        types.label.px as f32,
+        types.figure.px as f32,
+    );
+    let adv = |role: &str| look.role_font(role).advance;
     let mut fr = Frame {
         p: provider,
         headline,
+        look,
         theme,
         bar_series: bar_series.clone(),
         bars,
@@ -770,7 +776,7 @@ pub fn compile(
     }
 
     // Panels: rectangles and value maps.
-    let rects = panel_rects(&panels, left, right, top, bottom)?;
+    let rects = panel_rects(&panels, left, right, top, bottom, look.space.panel_gap)?;
     let mut ymaps = Vec::with_capacity(panels.len());
     for (i, (p, rc)) in panels.iter().zip(&rects).enumerate() {
         let mut vals = Vec::new();
@@ -825,7 +831,7 @@ pub fn compile(
     };
     let strip = with_opacity(
         [theme.accent[0], theme.accent[1], theme.accent[2], 255],
-        f64::from(STRIP_ALPHA) / 255.0,
+        f64::from(look.surface.strip_alpha) / 255.0,
     );
     for e in emph.iter().filter(|e| e.kind == EmphasisKind::Highlight) {
         let span = match e.bars {
@@ -886,20 +892,22 @@ pub fn compile(
             let yy = px(yy);
             if yy > rc.top && yy < rc.bottom {
                 under.push(rect(rc.left, yy, rc.right - rc.left, 1, theme.grid));
-                // The label's box (baseline yy + 4, LABEL_PX tall) under the tag's box
+                // The label's box (baseline yy + 4, figure size tall) under the tag's box
                 // (ly - 8 .. ly + 8): the tag wins, the label is left out.
                 #[allow(clippy::cast_possible_truncation)]
-                let label_top = yy + 4 - LABEL_PX as i32;
+                let label_top = yy + 4 - figure_px as i32;
                 if tag.is_some_and(|(ly, _, _)| label_top < ly + 8 && yy + 4 > ly - 8) {
                     continue;
                 }
                 under.push(Prim::Text {
                     x: rc.right + 6,
                     baseline: yy + 4,
-                    px: LABEL_PX,
+                    px: figure_px,
                     text: format!("{v:.2}"),
                     color: theme.muted,
                     align: Align::Left,
+                    font: None,
+                    role: Some("figure".to_owned()),
                 });
             }
         }
@@ -921,10 +929,12 @@ pub fn compile(
                 under.push(Prim::Text {
                     x: x - 21,
                     baseline: last_rect.bottom + 16,
-                    px: LABEL_PX,
+                    px: label_px,
                     text: format!("{:04}-{:02}", ym.0, ym.1),
                     color: theme.muted,
                     align: Align::Left,
+                    font: None,
+                    role: Some("label".to_owned()),
                 });
                 last_label_x = x;
             }
@@ -965,10 +975,15 @@ pub fn compile(
             k,
             bold: bold.contains(pl.id.as_str()),
             theme,
+            look,
             outcome,
             alphabet,
         };
-        scene_panels[pi].layers.push(draw(pl, &g));
+        let mut sl = draw(pl, &g);
+        for p in &mut sl.prims {
+            settle_text(p, look, Some(sl.mark), opts.roles);
+        }
+        scene_panels[pi].layers.push(sl);
     }
 
     // Last-value tags.
@@ -981,10 +996,12 @@ pub fn compile(
         over.push(Prim::Text {
             x: rc.right + 6,
             baseline: ly + 4,
-            px: LABEL_PX,
+            px: figure_px,
             text: format!("{v:.2}"),
             color: theme.bg,
             align: Align::Left,
+            font: None,
+            role: Some("figure".to_owned()),
         });
     }
     // Title row.
@@ -1007,28 +1024,32 @@ pub fn compile(
     } else {
         wi - 8 - title_x
     };
-    let title = fit_text(&title, title_room, f64::from(TITLE_PX));
-    let mut text_right = title_x + est_width(&title, f64::from(TITLE_PX));
+    let title = fit_text(&title, title_room, f64::from(title_px), adv("title"));
+    let mut text_right = title_x + est_width(&title, f64::from(title_px), adv("title"));
     over.push(Prim::Text {
         x: title_x,
         baseline: 23,
-        px: TITLE_PX,
+        px: title_px,
         text: title,
         color: theme.text,
         align: Align::Left,
+        font: None,
+        role: Some("title".to_owned()),
     });
     if show_close {
         let last_bar = usize::try_from(fr.to.min(n_bars - 1)).unwrap_or(0);
         let lb = &fr.bars[last_bar];
         let text = format!("C {:.2}", lb.c);
-        text_right = close_x + est_width(&text, f64::from(TITLE_PX));
+        text_right = close_x + est_width(&text, f64::from(title_px), adv("title"));
         over.push(Prim::Text {
             x: close_x,
             baseline: 23,
-            px: TITLE_PX,
+            px: title_px,
             text,
             color: if lb.c >= lb.o { theme.up } else { theme.down },
             align: Align::Left,
+            font: None,
+            role: Some("title".to_owned()),
         });
     }
     // Legends: panel 0 right-aligned in the title row; other panels top-left inside.
@@ -1060,7 +1081,7 @@ pub fn compile(
             let mut placed: Vec<(String, Rgba, i32)> = Vec::new();
             let mut x = wi - 8;
             for (text, color) in legends.into_iter().rev() {
-                let w = est_width(&text, f64::from(LABEL_PX));
+                let w = est_width(&text, f64::from(label_px), adv("label"));
                 if x - w < text_right + 12 {
                     break;
                 }
@@ -1072,30 +1093,34 @@ pub fn compile(
                 over.push(Prim::Text {
                     x,
                     baseline: 23,
-                    px: LABEL_PX,
+                    px: label_px,
                     text,
                     color,
                     align: Align::Right,
+                    font: None,
+                    role: Some("label".to_owned()),
                 });
             }
         } else {
             let mut x = rc.left + 4;
             for (text, color) in legends {
-                let w = est_width(&text, f64::from(LABEL_PX));
+                let w = est_width(&text, f64::from(label_px), adv("label"));
                 over.push(Prim::Text {
                     x,
                     baseline: rc.top + 12,
-                    px: LABEL_PX,
+                    px: label_px,
                     text,
                     color,
                     align: Align::Left,
+                    font: None,
+                    role: Some("label".to_owned()),
                 });
                 x += w + 12;
             }
         }
     }
     // Veils (focus, dim).
-    let veil = [theme.bg[0], theme.bg[1], theme.bg[2], VEIL_ALPHA];
+    let veil = [theme.bg[0], theme.bg[1], theme.bg[2], look.surface.veil_alpha];
     let layer_prims = |id: &str| -> Vec<Prim> {
         scene_panels
             .iter()
@@ -1161,6 +1186,13 @@ pub fn compile(
         }
     }
 
+    // (R5/T3) Type roles: each text's font from its role (marks: by size, glyph texts:
+    // `glyph`); the role itself stays in the scene only when asked for.
+    // (Layer texts were settled when drawn, so a focus copy keeps its font.)
+    for p in under.iter_mut().chain(over.iter_mut()) {
+        settle_text(p, look, None, opts.roles);
+    }
+
     Ok(SceneDesc {
         view: view.id.clone(),
         width,
@@ -1185,10 +1217,32 @@ pub fn compile(
     })
 }
 
-/// `text` cut to fit `room` pixels at `size` (estimate: 0.6 · size per char), ending in
+/// (R5/T3) A text primitive's font and role: the role it was made with (compiler texts),
+/// else for a text mark the look's role of that size, for a glyph's text `glyph`; the
+/// font is the role's asset (`None` for the default); the role is kept only if `keep`.
+fn settle_text(p: &mut Prim, look: &crate::look::Look, mark: Option<Mark>, keep: bool) {
+    let Prim::Text { px, font, role, .. } = p else {
+        return;
+    };
+    if role.is_none() {
+        *role = match mark {
+            Some(Mark::Glyph) => Some("glyph".to_owned()),
+            Some(_) => look.types.mark_role(f64::from(*px)).map(str::to_owned),
+            None => None,
+        };
+    }
+    if font.is_none() {
+        *font = role.as_deref().and_then(|r| look.scene_font(r));
+    }
+    if !keep {
+        *role = None;
+    }
+}
+
+/// `text` cut to fit `room` pixels at `size` (estimate: `adv` em per char), ending in
 /// "…" when cut.
-fn fit_text(text: &str, room: i32, size: f64) -> String {
-    if est_width(text, size) <= room {
+fn fit_text(text: &str, room: i32, size: f64, adv: f64) -> String {
+    if est_width(text, size, adv) <= room {
         return text.to_owned();
     }
     let chars: Vec<char> = text.chars().collect();
@@ -1196,7 +1250,7 @@ fn fit_text(text: &str, room: i32, size: f64) -> String {
     while n > 0 {
         let mut t: String = chars[..n].iter().collect::<String>().trim_end().to_owned();
         t.push('…');
-        if est_width(&t, size) <= room {
+        if est_width(&t, size, adv) <= room {
             return t;
         }
         n -= 1;
@@ -1251,6 +1305,8 @@ fn recolor(p: Prim, c: Rgba) -> Prim {
             px,
             text,
             align,
+            font,
+            role,
             ..
         } => Prim::Text {
             x,
@@ -1259,6 +1315,8 @@ fn recolor(p: Prim, c: Rgba) -> Prim {
             text,
             color: c,
             align,
+            font,
+            role,
         },
     }
 }

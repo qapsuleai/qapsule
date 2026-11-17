@@ -27,12 +27,15 @@
 use qp_schema::View;
 
 use crate::depth;
+use crate::look::Look;
 use crate::error::{ErrorKind, GrammarError};
 use crate::provider::{DataProvider, HeadlineParts};
 
-/// Builds a face's view: `(finding, max_points, provider, view id) -> View`. `max_points`
-/// is the connection profile's point budget; the view id is `capsule-<finding>`.
+/// Builds a face's view: `(look, finding, max_points, provider, view id) -> View`.
+/// `max_points` is the connection profile's point budget; the view id is
+/// `capsule-<finding>`. (R5/T3) Sizes, gaps and the glyph's place come from `look`.
 pub type FaceViewFn = fn(
+    look: &Look,
     finding: &str,
     max_points: u32,
     p: &dyn DataProvider,
@@ -51,8 +54,8 @@ pub struct FaceDesign {
     /// Setting name (`[a-z][a-z0-9_-]*`; not an ordinary word, it must not appear in a
     /// reader's prompt).
     pub name: &'static str,
-    /// Face height in CSS px at the phone width (390); 120..=844.
-    pub height: u32,
+    /// (R5/T3) Face height in CSS px at the phone width (390) in a look; 120..=844.
+    pub height: fn(&Look) -> u32,
     /// The view rule.
     pub view: FaceViewFn,
     /// The headline template; `None`: the capsule's sentence (`DataProvider::headline`).
@@ -84,26 +87,26 @@ mod fotolay;
 pub static FACES: &[FaceDesign] = &[
     FaceDesign {
         name: "r3",
-        height: 240,
-        view: depth::capsule_view,
+        height: |_| 240,
+        view: depth::capsule_view_in,
         headline: None,
     },
     // --- M8 alternatives: one line each
     FaceDesign {
         name: "vadrel",
-        height: vadrel::HEIGHT,
+        height: vadrel::height,
         view: vadrel::view,
         headline: Some(vadrel::headline),
     },
     FaceDesign {
         name: "fotolay",
-        height: fotolay::HEIGHT,
+        height: |_| fotolay::HEIGHT,
         view: fotolay::view,
         headline: Some(fotolay::headline),
     },
     FaceDesign {
         name: "tavrik",
-        height: tavrik::HEIGHT,
+        height: |_| tavrik::HEIGHT,
         view: tavrik::view,
         headline: Some(tavrik::headline),
     },
@@ -158,10 +161,16 @@ pub fn by_name(name: Option<&str>) -> Result<&'static FaceDesign, GrammarError> 
     Ok(known().find(|f| f.name == c).unwrap_or(&FACES[0]))
 }
 
-/// The face height of design `name` (`None` or unknown: the default's).
+/// The face height of design `name` (`None` or unknown: the default's) in the `r4` look.
 #[must_use]
 pub fn height(name: Option<&str>) -> u32 {
-    by_name(name).map_or(FACES[0].height, |f| f.height)
+    height_in(&crate::look::R4, name)
+}
+
+/// (R5/T3) The face height of design `name` in `look` (what the shell lays faces out at).
+#[must_use]
+pub fn height_in(look: &Look, name: Option<&str>) -> u32 {
+    (by_name(name).unwrap_or(&FACES[0]).height)(look)
 }
 
 /// The headline template of design `name` (`None`: the default's; `r3` has none).
@@ -197,7 +206,22 @@ pub fn face_view(
     p: &dyn DataProvider,
     id: &str,
 ) -> Result<View, GrammarError> {
-    (by_name(face)?.view)(finding, max_points, p, id)
+    face_view_in(&crate::look::R4, face, finding, max_points, p, id)
+}
+
+/// (R5/T3) [`face_view`] in `look`.
+///
+/// # Errors
+/// As [`face_view`].
+pub fn face_view_in(
+    look: &Look,
+    face: Option<&str>,
+    finding: &str,
+    max_points: u32,
+    p: &dyn DataProvider,
+    id: &str,
+) -> Result<View, GrammarError> {
+    (by_name(face)?.view)(look, finding, max_points, p, id)
 }
 
 #[cfg(test)]
@@ -225,8 +249,8 @@ mod tests {
 
     pub(super) const TEMPLATED: FaceDesign = FaceDesign {
         name: "zz-test-headline",
-        height: 240,
-        view: depth::capsule_card_view,
+        height: |_| 240,
+        view: depth::capsule_card_view_in,
         headline: Some(example_headline),
     };
 
@@ -379,7 +403,10 @@ mod tests {
                 .name
                 .chars()
                 .all(|c| c.is_ascii_lowercase() || c.is_ascii_digit() || c == '_' || c == '-'));
-            assert!((120..=844).contains(&f.height), "{} height", f.name);
+            for l in crate::look::LOOKS {
+                let h = (f.height)(l);
+                assert!((120..=844).contains(&h), "{} height in {}", f.name, l.name);
+            }
         }
         assert_eq!(canonical("card"), Some("r3"));
         assert_eq!(height(None), 240);

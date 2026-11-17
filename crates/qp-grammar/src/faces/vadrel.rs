@@ -5,14 +5,15 @@
 //! line of additional information (the shortened ledger) sits in the face's top row.
 //! Someone who reads only the sentence still gets what, when and still-valid.
 //!
-//! Layout (390 × [`HEIGHT`] CSS px; the compiler's plot margins apply: plot x 8..318,
+//! Layout (390 × [`height`] CSS px, `r4`: 188; the compiler's plot margins apply: plot x 8..318,
 //! top 34, bottom `HEIGHT − 24`):
 //!
 //! - top row (the view's title row, 16 px): the ledger, e.g. "Benzerleri: 74'te 36
 //!   tuttu" / "Past: 36 of 74 played out" — the face's one additional item;
 //! - panel `face` (panel-positioned only, so the compiler draws no grid or axes):
-//!   - `glyph` ([`GLYPH_PX`] px) at the top left;
-//!   - `headline` (the finding's `headline` field = [`headline`], [`HEADLINE_PX`] px)
+//!   - `glyph` (the look's `glyph.face_px`, `r4` 32 px) at the top left;
+//!   - `headline` (the finding's `headline` field = [`headline`], the look's `headline`
+//!     role, `r4` 20 px)
 //!     right of the glyph, wrapping at the panel's edge; full text colour while the claim
 //!     holds, `muted` when it no longer holds or has closed (the words say which).
 //!
@@ -30,19 +31,34 @@ use qp_schema::grammar::{
 use qp_schema::protocol::Language;
 
 use crate::depth;
+use crate::look::{GlyphPlace, Look};
 use crate::error::GrammarError;
 use crate::provider::{DataProvider, HeadlineParts};
 
-/// Face height (CSS px at the phone width 390): title row 34 + five 20 px headline lines
-/// (26 px each; an 80-character headline wraps into at most five beside the glyph) +
-/// bottom margin 24.
-pub const HEIGHT: u32 = 188;
-/// Headline size (CSS px): large text (≥ 18 px).
-pub const HEADLINE_PX: f64 = 20.0;
-/// Glyph size (CSS px).
-pub const GLYPH_PX: f64 = 32.0;
-/// Gap between the glyph and the headline (CSS px).
-const GAP_PX: f64 = 10.0;
+/// Face height in the `r4` look (CSS px at the phone width 390): title row 34 + five 20 px
+/// headline lines (26 px each; an 80-character headline wraps into at most five beside the
+/// glyph) + bottom margin 24. (R5/T3) In any look: [`height`].
+#[cfg(test)]
+const HEIGHT: u32 = 188;
+/// Lines the headline may take.
+const LINES: f64 = 5.0;
+
+/// (R5/T3) The face height in `look`: the plot's top margin (the title row) + five
+/// headline lines (+ the glyph and its gap when the glyph sits above) + the bottom margin.
+#[must_use]
+pub fn height(look: &Look) -> u32 {
+    let h = look.types.headline;
+    let above = match look.glyph.place {
+        GlyphPlace::Leading => 0.0,
+        GlyphPlace::Above => look.glyph.face_px + look.space.glyph_gap,
+    };
+    let total = f64::from(look.space.plot[2] + look.space.plot[3])
+        + LINES * (h.px * h.line).round()
+        + above;
+    #[allow(clippy::cast_possible_truncation, clippy::cast_sign_loss)]
+    let px = total.ceil().clamp(120.0, 844.0) as u32;
+    px
+}
 /// Headline character limit (SPEC §2(b)).
 pub const MAX_CHARS: usize = 80;
 
@@ -62,6 +78,7 @@ fn at(px: f64) -> Position {
 /// # Errors
 /// Unknown finding/fact, a finding without facts, or a series without bars.
 pub fn view(
+    look: &Look,
     finding: &str,
     max_points: u32,
     p: &dyn DataProvider,
@@ -69,24 +86,30 @@ pub fn view(
 ) -> Result<View, GrammarError> {
     let story = p.capsule(finding).is_some_and(|c| c.story.is_some());
     if !story {
-        return depth::capsule_view(finding, max_points, p, id);
+        return depth::capsule_view_in(look, finding, max_points, p, id);
     }
     // The reference card over one point: its x domain is the last bar only.
-    let card = depth::capsule_card_view(finding, 1, p, id)?;
+    let card = depth::capsule_card_view_in(look, finding, 1, p, id)?;
+    let glyph_px = look.glyph.face_px;
+    let (head_x, head_y) = match look.glyph.place {
+        GlyphPlace::Leading => (glyph_px + look.space.glyph_gap, 0.0),
+        GlyphPlace::Above => (0.0, glyph_px + look.space.glyph_gap),
+    };
     let hp = p.headline_parts(finding);
 
     let mut glyph = layer("glyph", Mark::Glyph, finding);
     glyph.encoding.x = Some(at(0.0));
     glyph.encoding.y = Some(at(0.0));
-    glyph.encoding.size = Some(SizeSpec::Constant(GLYPH_PX));
+    glyph.encoding.size = Some(SizeSpec::Constant(glyph_px));
 
     let mut head = layer("headline", Mark::Text, finding);
     head.encoding.text = Some("headline".to_owned());
-    head.encoding.x = Some(at(GLYPH_PX + GAP_PX));
-    head.encoding.y = Some(at(0.0));
-    head.encoding.size = Some(SizeSpec::Constant(HEADLINE_PX));
+    head.encoding.x = Some(at(head_x));
+    head.encoding.y = Some(at(head_y));
+    head.encoding.size = Some(SizeSpec::Constant(look.types.headline.px));
     if hp.as_ref().is_some_and(|h| h.validity != Validity::Valid) {
-        head.encoding.color = Some(ColorSpec::Constant("muted".to_owned()));
+        // (R5/T3) The look's colour of a claim that no longer holds (`r4`: `muted`).
+        head.encoding.color = Some(ColorSpec::Constant("invalid".to_owned()));
     }
 
     Ok(View {
@@ -393,5 +416,11 @@ mod tests {
         }
     }
 
-    const _: () = assert!(HEADLINE_PX >= 18.0 && HEIGHT >= 120 && HEIGHT <= 844);
+    const _: () = assert!(crate::look::R4.types.headline.px >= 18.0);
+
+    /// (R5/T3) The `r4` look reproduces the R4 face height.
+    #[test]
+    fn r4_height_is_the_r4_face_height() {
+        assert_eq!(height(&crate::look::R4), HEIGHT);
+    }
 }

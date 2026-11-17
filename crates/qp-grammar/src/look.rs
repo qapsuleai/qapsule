@@ -350,14 +350,14 @@ pub struct ChromeLook {
     pub head_tracking: f64,
     /// Space above a section head (`--qp-head-gap`).
     pub head_gap: f64,
-    /// Least height of a tab, border box (`--qp-tab-h`; `0`: its text and padding).
+    /// Least height of a tab, border box (`--qp-tab-h`; `0`: `auto`, its text and padding).
     pub tab_h: f64,
     /// Padding of a tab (`--qp-tab-pad`).
     pub tab_pad: f64,
     /// Thickness of the active tab's underline (`--qp-tab-rule`).
     pub tab_rule: f64,
-    /// Least height of a button, select or field, border box (`--qp-control-h`; `0`: its
-    /// text and padding).
+    /// Least height of a button, select or field, border box (`--qp-control-h`; `0`:
+    /// `auto`, its text and padding).
     pub control_h: f64,
     /// Padding of a button, select or field: vertical, horizontal (`--qp-control-pad`).
     pub control_pad: [f64; 2],
@@ -878,6 +878,8 @@ pub fn css_vars(look: &Look, scheme: Option<&str>) -> Vec<(String, String)> {
     // (R5/T3b) The chrome's sizes: the stylesheet holds no length of its own.
     let ch = &look.chrome;
     let px = |x: f64| format!("{x}px");
+    // A least height of 0 is the browser's own `auto` (the computed style stays as before).
+    let least = |x: f64| if x > 0.0 { px(x) } else { "auto".to_owned() };
     let pad = |p: [f64; 2]| format!("{}px {}px", p[0], p[1]);
     v.extend([
         ("--qp-rule".into(), px(look.surface.line)),
@@ -893,10 +895,10 @@ pub fn css_vars(look: &Look, scheme: Option<&str>) -> Vec<(String, String)> {
             format!("{}em", ch.head_tracking),
         ),
         ("--qp-head-gap".into(), px(ch.head_gap)),
-        ("--qp-tab-h".into(), px(ch.tab_h)),
+        ("--qp-tab-h".into(), least(ch.tab_h)),
         ("--qp-tab-pad".into(), px(ch.tab_pad)),
         ("--qp-tab-rule".into(), px(ch.tab_rule)),
-        ("--qp-control-h".into(), px(ch.control_h)),
+        ("--qp-control-h".into(), least(ch.control_h)),
         ("--qp-control-pad".into(), pad(ch.control_pad)),
         ("--qp-date-w".into(), px(ch.date_w)),
         ("--qp-bar-h".into(), px(ch.bar_h)),
@@ -1002,10 +1004,10 @@ mod tests {
             ("--qp-head-weight", "600"),
             ("--qp-head-tracking", "0.04em"),
             ("--qp-head-gap", "10px"),
-            ("--qp-tab-h", "0px"),
+            ("--qp-tab-h", "auto"),
             ("--qp-tab-pad", "6px"),
             ("--qp-tab-rule", "2px"),
-            ("--qp-control-h", "0px"),
+            ("--qp-control-h", "auto"),
             ("--qp-control-pad", "4px 6px"),
             ("--qp-date-w", "120px"),
             ("--qp-bar-h", "48px"),

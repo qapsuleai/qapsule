@@ -679,6 +679,68 @@ mod shell_binding {
             self.inner.metric_reset();
         }
 
+        /// (RP3/T2) Takes over the page's previous core's metrics (opening timeline,
+        /// series, paint path, a running comparison); see `ShellCore::metric_inherit`.
+        pub fn metric_inherit(&mut self, prev: &mut Shell) {
+            self.inner.metric_inherit(&mut prev.inner);
+        }
+
+        /// (RP3/T2) The paint path in use: requested, used, fallback reason (empty: none).
+        pub fn set_paint(&mut self, requested: &str, used: &str, reason: &str) {
+            self.inner.set_paint(requested, used, reason);
+        }
+
+        /// (RP3/T2) The paint list (JSON, `shells/web/paint/README.md`) of capsule `id`'s
+        /// face at the device scale; empty when unchanged (as `face_rgba`) or none.
+        pub fn face_scene(&mut self, id: &str, force: bool) -> String {
+            self.inner
+                .face_paint(id, force)
+                .map(|v| v.to_string())
+                .unwrap_or_default()
+        }
+
+        /// (RP3/T2) The paint list of the open capsule's scene; empty when unchanged or
+        /// none (as `scene_rgba`).
+        pub fn scene_desc(&mut self, force: bool) -> String {
+            self.inner
+                .scene_paint(force)
+                .map(|v| v.to_string())
+                .unwrap_or_default()
+        }
+
+        /// (RP3/T2) The bytes of the font the reference renderer draws text with
+        /// (IBM Plex Mono Regular, OFL): a canvas paint path registers exactly this file
+        /// (`new FontFace('QpMono', core.font())`).
+        pub fn font(&self) -> Vec<u8> {
+            qp_render::cpu::FONT_BYTES.to_vec()
+        }
+
+        /// (RP3/T2) Starts the automatic paint-path comparison (`{paths, current,
+        /// phase_ms}` JSON) at `t` ms.
+        pub fn bench_start(&mut self, config_json: &str, t: f64) {
+            let c = serde_json::from_str(config_json).unwrap_or(serde_json::Value::Null);
+            self.inner.bench_start(&c, t);
+        }
+
+        /// (RP3/T2) One frame of the comparison: the page's actions (JSON), empty when
+        /// none runs.
+        pub fn bench_tick(&mut self, t: f64, scroll_h: f64, client_h: f64) -> String {
+            match self.inner.bench_tick(t, scroll_h, client_h) {
+                serde_json::Value::Null => String::new(),
+                v => v.to_string(),
+            }
+        }
+
+        /// (RP3/T2) The comparison's table for the page (JSON; `null` until finished).
+        pub fn bench_rows(&self) -> String {
+            self.inner.bench_rows().to_string()
+        }
+
+        /// (RP3/T2) The comparison's summary (JSON; `null` until finished).
+        pub fn bench_summary(&self) -> String {
+            self.inner.bench_summary().to_string()
+        }
+
         /// The metrics summary (JSON).
         pub fn metrics(&self) -> String {
             self.inner.metrics_json().to_string()

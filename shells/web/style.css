@@ -49,6 +49,7 @@ label.check { justify-content: flex-start; }
 table { width: 100%; border-collapse: collapse; }
 td, th { padding: 3px 4px; border-bottom: 1px solid var(--line); text-align: left; font-size: 13px; }
 #mrows td:last-child { font-variant-numeric: tabular-nums; }
+#brows td, #brows th { font-size: 11px; font-variant-numeric: tabular-nums; }
 #toast { position: absolute; left: 12px; right: 12px; bottom: 56px; padding: 8px; border-radius: 6px; background: #4a1820; color: #ffd6dc; z-index: 9; font-size: 12px; }
 #fx { position: fixed; inset: 0; pointer-events: none; z-index: 20; }
 #fx canvas { position: fixed; }

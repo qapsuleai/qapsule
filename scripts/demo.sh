@@ -11,7 +11,9 @@
 # 1. builds the web shell's core (qp-wasm, feature `replica`) with wasm-pack into
 #    shells/web/pkg, stripped of function names (skipped when up to date;
 #    QP_DEMO_REBUILD=1 forces it) and writes
-#    shells/web/pkg/sizes.json (raw and gzip -9 sizes, for the metrics page);
+#    shells/web/pkg/sizes.json (raw, gzip -9 and brotli sizes, for the metrics page) and
+#    pre-compressed copies of the package (pkg/*.gz, and pkg/*.br when `brotli` exists)
+#    that the host serves by Accept-Encoding (RP3/M13). QP_DEMO_PACK_ONLY=1 stops here;
 # 2. builds `qp` (release) and runs `qp demo`: a local host on 127.0.0.1:8390 that serves
 #    the page and the protocol on one origin. Without local data (fixtures/local/bars or
 #    QAPSULE_LOCAL_BARS) it runs the synthetic market and the page says so.
@@ -41,12 +43,33 @@ if [ "$stale" = 1 ]; then
     --out-dir ../../shells/web/pkg -- --features replica
   rm -f "$pkg/.gitignore" "$pkg/package.json" "$pkg/README.md"
 fi
+# RP3/M13: pre-compressed package files; `qp demo` serves <file>.br / <file>.gz by the
+# request's Accept-Encoding (and the file itself otherwise). gzip -9 always; brotli -q 11
+# only when the `brotli` tool exists (otherwise a leftover .br is removed). Skipped for a
+# file whose compressed copy is newer than it; the host never serves an older copy.
+have_br=0
+command -v brotli >/dev/null 2>&1 && have_br=1
+for f in "$pkg/qp_wasm_bg.wasm" "$pkg/qp_wasm.js"; do
+  if [ ! -f "$f.gz" ] || [ "$f" -nt "$f.gz" ]; then
+    gzip -9 -n -c "$f" >"$f.gz.tmp" && mv "$f.gz.tmp" "$f.gz"
+  fi
+  if [ "$have_br" = 1 ]; then
+    if [ ! -f "$f.br" ] || [ "$f" -nt "$f.br" ]; then
+      brotli -q 11 -c "$f" >"$f.br.tmp" && mv "$f.br.tmp" "$f.br"
+    fi
+  else
+    rm -f "$f.br"
+  fi
+done
 raw="$(wc -c <"$pkg/qp_wasm_bg.wasm" | tr -d ' ')"
-gz="$(gzip -9 -c "$pkg/qp_wasm_bg.wasm" | wc -c | tr -d ' ')"
+gz="$(wc -c <"$pkg/qp_wasm_bg.wasm.gz" | tr -d ' ')"
+br=null
+[ -f "$pkg/qp_wasm_bg.wasm.br" ] && br="$(wc -c <"$pkg/qp_wasm_bg.wasm.br" | tr -d ' ')"
 js="$(cat shells/web/main.js "$pkg/qp_wasm.js" | wc -c | tr -d ' ')"
 jsgz="$(cat shells/web/main.js "$pkg/qp_wasm.js" | gzip -9 -c | wc -c | tr -d ' ')"
-printf '{"wasm_raw":%s,"wasm_gzip":%s,"js_raw":%s,"js_gzip":%s}\n' "$raw" "$gz" "$js" "$jsgz" >"$pkg/sizes.json"
+printf '{"wasm_raw":%s,"wasm_gzip":%s,"wasm_br":%s,"js_raw":%s,"js_gzip":%s}\n' "$raw" "$gz" "$br" "$js" "$jsgz" >"$pkg/sizes.json"
 echo "== sizes: $(cat "$pkg/sizes.json")"
+[ "${QP_DEMO_PACK_ONLY:-0}" = 1 ] && exit 0
 
 cargo build -q -p qp-cli --release
 exec "$target_dir/release/qp" demo --web shells/web "$@"

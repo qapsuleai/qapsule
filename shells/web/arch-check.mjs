@@ -20,7 +20,18 @@ export const ALLOWED_CORE = new Set([
   'transition_progress', 'transition_frame',
   // RP3/M15 (ARCH.md): the viewer's visibility, its subscriptions/traffic and the check
   'visible', 'viewer', 'check',
+  // RP3/T2 (ARCH.md): metrics across a new core, the paint path, paint lists and the font
+  // for non-pixel paint paths, the automatic comparison.
+  'metric_inherit', 'set_paint', 'face_scene', 'scene_desc', 'font',
+  'bench_start', 'bench_tick', 'bench_rows', 'bench_summary',
 ]);
+
+// R6: which modules a file may import. main.js: the core's package and the paint-path
+// registry; a paint path (shells/web/paint/*.js): only sibling paint files.
+export const IMPORTS = {
+  main: (spec) => spec === './pkg/qp_wasm.js' || spec === './paint/index.js',
+  paint: (spec) => /^\.\/[a-z0-9_-]+\.js$/.test(spec),
+};
 
 // Calls that compute, order, filter or format (R2).
 const FORBIDDEN = [
@@ -63,8 +74,8 @@ export function strip(src) {
   return { code: out, problems };
 }
 
-/** Rule violations of a JS file of the shell: [line, rule]. */
-export function checkJs(src) {
+/** Rule violations of a JS file of the shell: [line, rule]. `kind`: `main` or `paint`. */
+export function checkJs(src, kind = 'main') {
   const { code, problems } = strip(src);
   const lines = code.split('\n');
   lines.forEach((l, k) => {
@@ -80,10 +91,12 @@ export function checkJs(src) {
     }
     for (const m of l.matchAll(/\bimport\b[^;]*from\s*""/g)) void m;
   });
-  // Imports: only the core's package.
+  // Imports: only the core's package and the paint registry (main.js), only sibling
+  // paint files (a paint path). Dynamic import() is not allowed anywhere.
   for (const m of src.matchAll(/import\s+[^;]*?from\s+['"]([^'"]+)['"]/g)) {
-    if (m[1] !== './pkg/qp_wasm.js') problems.push([0, `R6 import from ${m[1]}`]);
+    if (!IMPORTS[kind](m[1])) problems.push([0, `R6 import from ${m[1]}`]);
   }
+  if (/\bimport\s*\(/.test(strip(src).code)) problems.push([0, 'R6 dynamic import()']);
   if (/\bfetch\s*\(\s*['"`]?\s*https?:/.test(src) || /new\s+(WebSocket|EventSource)\s*\(\s*['"`]?\s*(wss?|https?):/.test(src)) {
     problems.push([0, 'R1 request to another origin']);
   }
@@ -115,6 +128,12 @@ if (arg) {
 }
 let bad = 0;
 bad += report('shells/web/main.js', checkJs(fs.readFileSync(path.join(here, 'main.js'), 'utf8')));
+// RP3/T2: every paint path is shell code under the same rules R1–R5 (R6: sibling imports).
+const paintDir = path.join(here, 'paint');
+const paintFiles = fs.existsSync(paintDir) ? fs.readdirSync(paintDir).filter((f) => f.endsWith('.js')).sort() : [];
+for (const f of paintFiles) {
+  bad += report(`shells/web/paint/${f}`, checkJs(fs.readFileSync(path.join(paintDir, f), 'utf8'), 'paint'));
+}
 bad += report('shells/web/index.html', checkStatic(
   fs.readFileSync(path.join(here, 'index.html'), 'utf8'), fs.readFileSync(path.join(here, 'style.css'), 'utf8')));
 // Self-test: each sample breaks one rule and must be caught.
@@ -125,7 +144,17 @@ const samples = [
   'new Intl.NumberFormat("tr").format(x);', 'import x from "https://cdn.example.com/m.js";', 'n++;',
   'const d = new Date(t);', 'el.textContent = names.join(", ");',
 ];
+// RP3/T2: a paint path breaking a rule (each must be caught when checked as a paint file).
+const paintSamples = [
+  'import x from "../main.js";', 'import x from "./pkg/qp_wasm.js";', 'import("./other.js");',
+  'ctx.lineTo(p.x * s, p.y);', 'ctx.fillStyle = "rgba(" + c[0] + ")";', 'core.face_view(id);',
+  'const w = Math.ceil(x);', 'list.sort((a, b) => a.z);',
+];
 let missed = 0;
 for (const s of samples) if (!checkJs(s).length) { console.log(`self-test: not caught: ${s}`); missed++; }
-console.log(`arch: ${bad} violation(s); self-test ${samples.length - missed}/${samples.length} caught`);
+for (const s of paintSamples) if (!checkJs(s, 'paint').length) { console.log(`self-test (paint): not caught: ${s}`); missed++; }
+// …and a correct paint path's import must pass (the rule is not stricter than stated).
+if (checkJs('import { put } from "./ref.js";', 'paint').length) { console.log('self-test (paint): sibling import refused'); missed++; }
+const total = samples.length + paintSamples.length;
+console.log(`arch: ${bad} violation(s) in main.js and ${paintFiles.length} paint file(s); self-test ${total - missed}/${total} caught`);
 process.exit(bad || missed ? 1 : 0);

@@ -1,0 +1,100 @@
+//! (RP3/T2) The paint list: a scene handed to a paint path that does not take pixels
+//! from the core (`shells/web/paint/README.md`). It is the [`SceneDesc`]'s primitives in
+//! paint order (`SceneDesc::prims`), scaled to the device scale with the reference
+//! renderer's own rule (`qp_render::cpu::scale_prim`), every number a painter needs
+//! given (colours as CSS `#rrggbbaa`, the font as a CSS font string, the full turn of a
+//! circle), so that the painter only calls drawing functions: no arithmetic, no layout,
+//! no text building, no sorting.
+
+use qp_schema::scene::{Align, Prim, Rgba, SceneDesc};
+use serde_json::{json, Value};
+
+use super::{scene_digest, ShellCore};
+
+/// Version of the paint list format.
+pub const PAINT_LIST_VERSION: u32 = 1;
+/// The CSS font family a paint path registers the core's font under (`Shell::font`).
+pub const PAINT_FONT_FAMILY: &str = "QpMono";
+/// The miter limit of the reference renderer's strokes (tiny-skia's default; the
+/// canvas default is 10).
+pub const PAINT_MITER_LIMIT: f32 = 4.0;
+
+fn css(c: Rgba) -> String {
+    format!("#{:02x}{:02x}{:02x}{:02x}", c[0], c[1], c[2], c[3])
+}
+
+fn prim_json(p: &Prim) -> Value {
+    match p {
+        Prim::Rect { x, y, w, h, color } => {
+            json!({"k": "rect", "x": x, "y": y, "w": w, "h": h, "c": css(*color)})
+        }
+        Prim::Polyline {
+            points,
+            width,
+            color,
+        } => json!({"k": "line", "pts": points, "lw": width, "c": css(*color)}),
+        Prim::Fill { points, color } => json!({"k": "fill", "pts": points, "c": css(*color)}),
+        Prim::Circle { cx, cy, r, color } => json!({"k": "circle", "x": cx, "y": cy, "r": r,
+            "a1": std::f64::consts::TAU, "c": css(*color)}),
+        Prim::Text {
+            x,
+            baseline,
+            px,
+            text,
+            color,
+            align,
+        } => json!({"k": "text", "x": x, "y": baseline, "t": text,
+            "font": format!("{px}px {PAINT_FONT_FAMILY}"),
+            "align": match align { Align::Left => "left", Align::Right => "right" },
+            "c": css(*color)}),
+    }
+}
+
+/// The paint list of `scene` at the integer device scale `s` (JSON, format v1:
+/// `{v, w, h, scale, bg, miter, prims}`; `shells/web/paint/README.md`).
+#[must_use]
+pub fn paint_list(scene: &SceneDesc, s: u32) -> Value {
+    let prims: Vec<Value> = scene
+        .prims()
+        .map(|p| prim_json(&qp_render::cpu::scale_prim(p, s)))
+        .collect();
+    json!({
+        "v": PAINT_LIST_VERSION,
+        "w": scene.width.saturating_mul(s),
+        "h": scene.height.saturating_mul(s),
+        "scale": s,
+        "bg": css(scene.background),
+        "miter": PAINT_MITER_LIMIT,
+        "prims": prims,
+    })
+}
+
+impl ShellCore {
+    /// (RP3/T2) The paint list of capsule `id`'s face at the device scale, or `None`
+    /// when it has not changed since the last hand-out (same short-circuit and same
+    /// record as [`ShellCore::face_rgba`]) or has no scene.
+    pub fn face_paint(&mut self, id: &str, force: bool) -> Option<Value> {
+        let scene = self.face(id)?;
+        let d = scene_digest(&scene);
+        if !force && self.face_shown.get(id) == Some(&d) {
+            return None;
+        }
+        self.face_shown.insert(id.to_owned(), d);
+        Some(paint_list(&scene, self.scale))
+    }
+
+    /// (RP3/T2) The paint list of the open capsule's scene (`None` when unchanged or
+    /// none; as [`ShellCore::scene_rgba`]).
+    pub fn scene_paint(&mut self, force: bool) -> Option<Value> {
+        let Some(scene) = self.scene() else {
+            self.scene_shown = None;
+            return None;
+        };
+        let d = scene_digest(&scene);
+        if !force && self.scene_shown.as_deref() == Some(d.as_str()) {
+            return None;
+        }
+        self.scene_shown = Some(d);
+        Some(paint_list(&scene, self.scale))
+    }
+}

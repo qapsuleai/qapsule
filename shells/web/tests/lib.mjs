@@ -6,6 +6,9 @@ export const FACE_W = 390;
 
 /** Starts `qp demo` (synthetic unless args say otherwise) and resolves with its base URL. */
 export function startDemo(qp, web, port, extra = []) {
+  // (RP3/M15) QP_DEMO_PORT: every demo on this port (agents sharing a machine use their
+  // own port range; the tests start one demo at a time).
+  if (process.env.QP_DEMO_PORT) port = process.env.QP_DEMO_PORT;
   const data = extra.includes('--data') ? [] : ['--synthetic'];
   const args = ['demo', '--web', web, '--port', String(port), ...data, '--paused', ...extra];
   const child = spawn(qp, args, { stdio: ['ignore', 'pipe', 'inherit'] });

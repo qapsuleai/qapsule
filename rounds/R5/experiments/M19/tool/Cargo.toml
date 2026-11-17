@@ -1,0 +1,21 @@
+[package]
+name = "r5-m19-check"
+description = "R5/M19: the product feed rule (qp_capsule::feedrule) against the M19 harness (feedh): same verdicts, and the feed with the product's no-look-ahead ledger (ledger at birth). Aggregates only."
+version = "0.0.0"
+edition = "2021"
+publish = false
+
+# Not a member of the main workspace.
+[workspace]
+
+[[bin]]
+name = "m19check"
+path = "src/main.rs"
+
+[dependencies]
+feedh = { package = "r5-feed-harness", path = "../../harness/feed/tool" }
+qp-capsule = { path = "../../../../../crates/qp-capsule" }
+qp-schema = { path = "../../../../../crates/qp-schema" }
+
+[lints.rust]
+unsafe_code = "forbid"

@@ -3,13 +3,14 @@
 //! (`docs/ARCHITECTURE.md` "Kabuk sınırı (R4)"). No dependency beyond `std`.
 //!
 //! Transport (same origin, HTTP/1.1):
-//! - `GET /events?principal=…&lang=…&mode=…` — a server-sent event stream; one stream is
+//! - `GET /events?principal=…&lang=…&mode=…&feed_rule=…` — a server-sent event stream; one stream is
 //!   one protocol connection. (RP3/M15, `docs/PROTOCOL.md` §22) `mode=viewer` (the
 //!   default) makes it a viewer: its `start` frame carries no bars (`mode`, the universe's
 //!   `instruments`), its `data` frames only the feeds its `viewer` subscription names (none
 //!   on the feed screen) and a `{"bind":{feeds, events}}` frame brings a feed's initial
 //!   bars and events when it subscribes to one; `mode=replica` is the full replica of R4
-//!   (every bar, every event). Frames (one JSON object per `data:` line):
+//!   (every bar, every event). (R5/M19) `feed_rule=` (`rate55`, `rate55n10`, `none`) sets
+//!   the coin-flip rule for the page's principal over the host's `--feed-rule`. Frames (one JSON object per `data:` line):
 //!   `{"start":{conn, principal, lang, data, events, info}}` first (the replica's data:
 //!   the initial bars and the data events applied since, and the page's notes),
 //!   `{"msg":ServerMsg}` (protocol messages of this connection),
@@ -76,6 +77,10 @@ pub struct DemoArgs {
     /// Use the synthetic market even if local data exists.
     #[arg(long)]
     pub synthetic: bool,
+    /// (R5/M19, K53) The host's feed rule (`rate55`, `rate55n10`, `none`; M19's pick by
+    /// default). A page may ask for another with `?feed_rule=` (for its principal).
+    #[arg(long, default_value = "rate55")]
+    pub feed_rule: String,
     /// Steps per second.
     #[arg(long, default_value_t = 4.0)]
     pub speed: f64,
@@ -137,6 +142,7 @@ fn host(a: &DemoArgs) -> Result<ReplayHost, String> {
         speed: a.speed,
         from_t,
         running: !a.paused,
+        feed_rule: Some(a.feed_rule.clone()),
     };
     let init = demo_session_init(&o);
     let dir = if a.synthetic {
@@ -164,6 +170,8 @@ enum Cmd {
         principal: String,
         lang: String,
         viewer: bool,
+        /// (R5/M19) The page's `?feed_rule=` (a known rule name), if any.
+        feed_rule: Option<String>,
         tx: Sender<String>,
     },
     Send {
@@ -343,11 +351,20 @@ impl Hub {
                 principal,
                 lang,
                 viewer,
+                feed_rule,
                 tx,
             } => {
                 let Ok(token) = secret() else {
                     return;
                 };
+                // (R5/M19) The page's feed rule for its principal (else the host's).
+                match feed_rule
+                    .as_deref()
+                    .and_then(|n| qp_capsule::feedrule::FeedRule::named(n, true))
+                {
+                    Some(r) => self.host.set_principal_coin_flip_rule(&principal, Some(r)),
+                    None => self.host.clear_principal_coin_flip_rule(&principal),
+                }
                 self.next += 1;
                 let conn = format!("c{}", self.next);
                 let _ = tx.send(self.start_frame(&conn, &token, &principal, &lang, viewer));
@@ -522,11 +539,15 @@ fn connection(mut s: TcpStream, web: &Path, tx: &Sender<Cmd>, gate: &Gate) {
             };
             // (RP3/M15) Viewer unless the page asks for the full replica.
             let viewer = query_param(q, "mode").as_deref() != Some("replica");
+            // (R5/M19) `feed_rule=`: one of the host's rule names, else ignored.
+            let feed_rule = query_param(q, "feed_rule")
+                .filter(|n| qp_capsule::feedrule::FEED_RULES.iter().any(|(k, _)| k == n));
             let (ftx, frx) = mpsc::channel::<String>();
             let _ = tx.send(Cmd::Connect {
                 principal,
                 lang: lang.to_owned(),
                 viewer,
+                feed_rule,
                 tx: ftx,
             });
             let head = "HTTP/1.1 200 OK\r\nContent-Type: text/event-stream\r\n\

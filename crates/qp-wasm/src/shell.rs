@@ -451,6 +451,10 @@ pub struct ShellCore {
     welcomed: bool,
     max_points: u32,
     feed: Vec<CapsuleItem>,
+    /// (R5/M19) The authority answered the feed at least once (an empty feed is then
+    /// said, not left blank), and how many stories its coin-flip rule kept out.
+    feed_known: bool,
+    coin_flip_hidden: u32,
     feed_dirty: bool,
     feed_inflight: bool,
     look: ViewState,
@@ -613,6 +617,8 @@ impl ShellCore {
             welcomed: false,
             max_points: 60,
             feed: Vec::new(),
+            feed_known: false,
+            coin_flip_hidden: 0,
             feed_dirty: false,
             feed_inflight: false,
             look: ViewState::default(),
@@ -919,9 +925,18 @@ impl ShellCore {
             ServerMsg::Result { id, data, .. } => {
                 let kind = self.asked.remove(id);
                 match (kind, data) {
-                    (Some(Asked::Feed), QueryResult::Capsules { capsules, .. }) => {
+                    (
+                        Some(Asked::Feed),
+                        QueryResult::Capsules {
+                            capsules,
+                            coin_flip_hidden,
+                            ..
+                        },
+                    ) => {
                         self.feed_inflight = false;
                         self.feed.clone_from(capsules);
+                        self.feed_known = true;
+                        self.coin_flip_hidden = *coin_flip_hidden;
                         // (RP3/T4) Only a face in the feed can be painted: the digests of
                         // the faces that left it are forgotten (bounded by the feed).
                         let feed = &self.feed;
@@ -1152,6 +1167,8 @@ impl ShellCore {
         let scene = v.apply(up, seq);
         if up.feed.is_some() {
             self.feed = v.items();
+            self.feed_known = true;
+            self.coin_flip_hidden = up.coin_flip_hidden;
         }
         if up.feed.is_some() || !up.faces.is_empty() || up.audience.is_some() {
             ch["feed"] = json!(true);
@@ -1282,14 +1299,19 @@ impl ShellCore {
             .iter()
             .map(|it| self.look.seen.is_some_and(|s| self.known_at(it) > s))
             .collect();
-        let rows = feed_rows(
-            self.look.feed.as_deref(),
-            &self.feed,
-            lang,
-            self.look.seen,
-            &fresh,
-            now,
-        );
+        let rows = if self.feed.is_empty() && self.feed_known {
+            // (R5/M19, K53) The empty feed says so, and why (the core writes it).
+            qp_grammar::feeds::empty_rows(lang, self.coin_flip_hidden)
+        } else {
+            feed_rows(
+                self.look.feed.as_deref(),
+                &self.feed,
+                lang,
+                self.look.seen,
+                &fresh,
+                now,
+            )
+        };
         let out: Vec<Value> = rows
             .into_iter()
             .filter_map(|r| match r {
@@ -1363,6 +1385,10 @@ impl ShellCore {
             "transition": qp_grammar::transitions::names(),
             "outcome": qp_grammar::glyph::outcome::names(),
             "look": qp_grammar::look::names(),
+            // (R5/M19) The feed orders (feed layouts) and the host's feed rules M19
+            // measured, best first.
+            "feed_order": qp_grammar::feeds::FEED_ORDERS,
+            "feed_rule": qp_capsule::feedrule::FEED_RULES.iter().map(|(n, _)| *n).collect::<Vec<_>>(),
         })
     }
 
@@ -1811,6 +1837,15 @@ impl ShellCore {
                     g[k] = json!(v);
                 }
             }
+        }
+        // (R5/M19) `feed_order` names one of the M19 feed orders: it is the feed
+        // layout (it wins over `feed`).
+        if let Some(v) = choice
+            .get("feed_order")
+            .and_then(Value::as_str)
+            .filter(|v| qp_grammar::feeds::FEED_ORDERS.contains(v))
+        {
+            g["feed"] = json!(v);
         }
         if g.as_object().is_some_and(|o| o.len() > 1) {
             self.ask("in", Asked::Input, json!({"type":"input","gesture":g}));
@@ -2669,6 +2704,10 @@ pub struct DemoOptions {
     pub from_t: Option<i64>,
     /// Start running (else paused).
     pub running: bool,
+    /// (R5/M19, K53) The host's feed rule by name (`qp_capsule::feedrule::FEED_RULES`;
+    /// default the presentation's, `PRESENTED_FEED_RULE`, with the K42 exemption); `None`:
+    /// no rule (the protocol's default).
+    pub feed_rule: Option<String>,
 }
 
 impl Default for DemoOptions {
@@ -2681,6 +2720,7 @@ impl Default for DemoOptions {
             speed: 4.0,
             from_t: None,
             running: false,
+            feed_rule: Some(qp_capsule::feedrule::PRESENTED_FEED_RULE.to_owned()),
         }
     }
 }
@@ -2716,6 +2756,13 @@ pub fn demo_session_init(o: &DemoOptions) -> qp_schema::protocol::SessionInit {
         {"id": VISITOR, "author": {"kind": "human", "name": VISITOR}, "role": "owner"}))
     .expect("visitor principal");
     init.principals.push(visitor);
+    init.feed_rule = o
+        .feed_rule
+        .as_ref()
+        .map(|rule| qp_schema::protocol::FeedRuleInit {
+            rule: rule.clone(),
+            exempt_negative: true,
+        });
     init
 }
 

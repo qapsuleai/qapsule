@@ -60,6 +60,7 @@ fn main() {
         speed: 4.0,
         from_t: from,
         running: false,
+        ..DemoOptions::default()
     };
     let t = Instant::now();
     let mut host = ReplayHost::with_window(

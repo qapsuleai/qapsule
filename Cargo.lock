@@ -1530,6 +1530,7 @@ version = "0.0.0"
 dependencies = [
  "assert_cmd",
  "clap",
+ "qp-capsule",
  "qp-compute",
  "qp-grammar",
  "qp-mcp",
@@ -1646,6 +1647,7 @@ version = "0.0.0"
 dependencies = [
  "fontdue",
  "qp-calendar",
+ "qp-capsule",
  "qp-compute",
  "qp-grammar",
  "qp-render",

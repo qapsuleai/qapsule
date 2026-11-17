@@ -222,8 +222,12 @@ pub struct Session {
     pub(crate) viewers: BTreeMap<String, crate::viewer::ViewerConn>,
     /// (RP3/M15) The host computes viewer updates after a batch of data events.
     pub(crate) viewer_batch: bool,
-    /// (R5/M18, K53) The host's coin-flip rule (`Session::set_coin_flip_rule`).
+    /// (R5/M18, K53; R5/M19) The host's coin-flip rule (`init.feed_rule`,
+    /// `Session::set_coin_flip_rule`).
     pub(crate) coin_flip: Option<crate::story::CoinFlipRule>,
+    /// (R5/M19) Per-principal rules the host set over its own (`None`: no rule for that
+    /// principal; `Session::set_principal_coin_flip_rule`).
+    pub(crate) coin_flip_for: BTreeMap<String, Option<crate::story::CoinFlipRule>>,
 }
 
 /// (R3/K1b) A writer of a command, for the two-world paths.
@@ -465,6 +469,25 @@ impl Session {
         trust_keys: Option<(Vec<u8>, Vec<u8>)>,
     ) -> Result<Self, String> {
         let capsules = init.capsules.clone();
+        // (R5/M19, K53) The host's feed rule, by name.
+        let coin_flip = match &init.feed_rule {
+            None => None,
+            Some(f) => Some(
+                qp_capsule::feedrule::FeedRule::named(&f.rule, f.exempt_negative).ok_or_else(
+                    || {
+                        let names: Vec<&str> = qp_capsule::feedrule::FEED_RULES
+                            .iter()
+                            .map(|(n, _)| *n)
+                            .collect();
+                        format!(
+                            "init.feed_rule.rule: unknown rule `{}` (one of {})",
+                            f.rule,
+                            names.join(", ")
+                        )
+                    },
+                )?,
+            ),
+        };
         let doc: Document = match init.document {
             DocumentRef::Inline(d) => *d,
             DocumentRef::Path(p) => read_json(&confine(repo_root, &p)?)?,
@@ -530,7 +553,8 @@ impl Session {
             prop_map: BTreeMap::new(),
             viewers: BTreeMap::new(),
             viewer_batch: false,
-            coin_flip: None,
+            coin_flip,
+            coin_flip_for: BTreeMap::new(),
         };
         s.audience_seen = s.doc.audiences.keys().cloned().collect();
         s.start_capsules(capsules.as_ref());

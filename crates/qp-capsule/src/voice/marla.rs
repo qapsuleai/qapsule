@@ -102,14 +102,26 @@ pub fn speak_both(inp: &SentenceInput<'_>, parts: &Parts) -> [Voice; 2] {
     let f = Frame::new(inp, parts);
     let langs = [Lang::Tr, Lang::En];
 
-    // Headline: richest level that fits in both languages.
-    let hl = (0..HEAD_LEVELS)
-        .find(|&lv| {
-            langs
-                .iter()
-                .all(|&l| len(&headline(&f, l, lv)) <= MAX_HEADLINE)
-        })
-        .unwrap_or(HEAD_LEVELS - 1);
+    // Headline: the richest level that fits, per language when both carry the same
+    // numbers and both (or neither) say when; otherwise one level for both.
+    let fit = |l: Lang| {
+        (0..HEAD_LEVELS)
+            .find(|&lv| len(&headline(&f, l, lv)) <= MAX_HEADLINE)
+            .unwrap_or(HEAD_LEVELS - 1)
+    };
+    let (lt, le) = (fit(Lang::Tr), fit(Lang::En));
+    let same = HEAD_PLAN[lt].2 == HEAD_PLAN[le].2
+        && digit_runs(&headline(&f, Lang::Tr, lt)) == digit_runs(&headline(&f, Lang::En, le));
+    let hl = |l: Lang| -> usize {
+        if same {
+            match l {
+                Lang::Tr => lt,
+                Lang::En => le,
+            }
+        } else {
+            lt.max(le)
+        }
+    };
 
     // Detail: richest composition that fits in both languages.
     let dm = DETAIL_MASKS
@@ -131,7 +143,7 @@ pub fn speak_both(inp: &SentenceInput<'_>, parts: &Parts) -> [Voice; 2] {
     langs.map(|l| {
         let (d, concepts) = detail(&f, l, dm);
         Voice {
-            headline: headline(&f, l, hl),
+            headline: headline(&f, l, hl(l)),
             detail: d,
             ledger: ledger(&f, l, ll),
             glossary: concepts
@@ -144,6 +156,18 @@ pub fn speak_both(inp: &SentenceInput<'_>, parts: &Parts) -> [Voice; 2] {
 
 fn len(s: &str) -> usize {
     s.chars().count()
+}
+
+/// The digit runs of a text, sorted ("1.234,56" and "1,234.56" give the same runs):
+/// two texts with equal runs carry the same numbers, clock times and dates.
+fn digit_runs(s: &str) -> Vec<String> {
+    let mut v: Vec<String> = s
+        .split(|c: char| !c.is_ascii_digit())
+        .filter(|t| !t.is_empty())
+        .map(str::to_owned)
+        .collect();
+    v.sort();
+    v
 }
 
 /// Sentences as a reader splits them: after `.`, `;`, `!`, `?` followed by a space or
@@ -603,15 +627,19 @@ use qp_facts::{BandSqueeze, InstitutionalFlow, MaStack, RangeBreakout, VolumeSur
 // Headline: "Ne değişti?" + when + validity
 // ---------------------------------------------------------------------------
 
-const HEAD_LEVELS: usize = 5;
+const HEAD_LEVELS: usize = 6;
 
-/// Levels, richest first: (core tier, long validity, with when).
+/// Levels, richest first: (core tier, long validity, with when). The long validity
+/// ("hâlâ geçerli") is kept before the short one ("sürüyor"), which can read as "the
+/// buying goes on"; dropping "when" is the last resort (never needed on the harness
+/// situations).
 const HEAD_PLAN: [(u8, bool, bool); HEAD_LEVELS] = [
     (0, true, true),
     (1, true, true),
-    (1, false, true),
-    (2, false, true),
-    (2, false, false),
+    (2, true, true),
+    (3, true, true),
+    (3, false, true),
+    (3, false, false),
 ];
 
 fn headline(f: &Frame<'_>, lang: Lang, level: usize) -> String {
@@ -671,7 +699,8 @@ fn validity_chip(f: &Frame<'_>, lang: Lang, long: bool) -> String {
 }
 
 /// The plain change with the threshold by name (and value for an entitled reader).
-/// `tier` 0 = full, 1 = short, 2 = tiny (same numbers in both languages at every tier).
+/// `tier` 0 = full, 1 = short, 2 = tiny, 3 = tiniest (where it differs from tiny); the
+/// numbers of tiers 1–3 are the same in both languages.
 #[allow(clippy::too_many_lines)]
 fn core(f: &Frame<'_>, lang: Lang, tier: u8) -> String {
     let i = f.inst;
@@ -818,6 +847,13 @@ fn core(f: &Frame<'_>, lang: Lang, tier: u8) -> String {
                     tr_adj(&a, u),
                     tr_gen(&b, u)
                 ),
+                (Lang::Tr, 1) => {
+                    format!(
+                        "{i} sıkıştı: {} bant {} en darı",
+                        tr_adj(&a, u),
+                        tr_gen(&b, u)
+                    )
+                }
                 (Lang::Tr, _) => {
                     format!("{i}: {} bant {} en darı", tr_adj(&a, u), tr_gen(&b, u))
                 }
@@ -826,9 +862,11 @@ fn core(f: &Frame<'_>, lang: Lang, tier: u8) -> String {
                     en_adj(&a, u),
                     w.en_pl
                 ),
-                (Lang::En, 1) => {
-                    format!("{i}: {} band narrowest in {b} {}", en_adj(&a, u), w.en_pl)
-                }
+                (Lang::En, 1) => format!(
+                    "{i} went quiet: {} band narrowest in {b} {}",
+                    en_adj(&a, u),
+                    w.en_pl
+                ),
                 (Lang::En, _) => format!("{i}: {} band at a {} low", en_adj(&a, u), en_adj(&b, u)),
             }
         }
@@ -871,6 +909,10 @@ fn core(f: &Frame<'_>, lang: Lang, tier: u8) -> String {
                     tr_adj(&a, u)
                 ),
                 (Lang::Tr, 1) => format!("{i}: kurumsal net {tr_s} ortalamanın {m} katını aştı"),
+                (Lang::Tr, 3) => format!(
+                    "{i}: kurumlar olağanın {m} katı {}",
+                    if up { "aldı" } else { "sattı" }
+                ),
                 (Lang::Tr, _) => format!("{i}: kurumsal {tr_s} ortalamayı {m} kat aştı"),
                 (Lang::En, 0) => format!(
                     "{i}: institutional net {en_s} topped {m} times its {} average",
@@ -950,7 +992,16 @@ fn detail(f: &Frame<'_>, lang: Lang, mask: (bool, bool, bool)) -> (String, Vec<C
     if f.validity == Validity::Closed {
         out.push(closing(f, lang));
     } else {
-        let now = if with_now { now(f, lang) } else { None };
+        // The change sentence already says where an exit left the lead's own measure.
+        let said = with_change
+            && f.latest.as_ref().is_some_and(|l| {
+                l.det == f.det && (l.edge == Edge::Exit || l.code.ends_with("_end"))
+            });
+        let now = if with_now && !said {
+            now(f, lang)
+        } else {
+            None
+        };
         let rem = if with_rem { remaining(f, lang) } else { None };
         match (now, rem) {
             (Some(a), Some(b)) => out.push(format!("{}, {b}.", capitalize(&a))),
@@ -1279,13 +1330,13 @@ fn now(f: &Frame<'_>, lang: Lang) -> Option<String> {
             let ls = n(l, Cat::Osc, lang);
             Some(match lang {
                 Lang::Tr => format!(
-                    "şimdi RSI {}, {} {}",
+                    "şimdi RSI {} ({} {})",
                     n(cur, Cat::Osc, lang),
                     Word::number(&ls).gen(),
                     if above { "üstünde" } else { "altında" }
                 ),
                 Lang::En => format!(
-                    "RSI is now {}, {} {ls}",
+                    "RSI is now {} ({} {ls})",
                     n(cur, Cat::Osc, lang),
                     if above { "above" } else { "below" }
                 ),
@@ -1696,5 +1747,214 @@ mod tests {
         assert_eq!(pct(150.2, 148.9, Lang::Tr), "%0,9");
         assert_eq!(pct(150.2, 148.9, Lang::En), "0.9%");
         assert_eq!(pct(148.91, 148.9, Lang::Tr), "%0,1'den az");
+    }
+}
+
+/// End to end over the engine (synthetic market with licensed flow): every story event,
+/// entitled and redacted, keeps the language's own rules. The M17 harness
+/// (`rounds/R5/experiments/harness/lang`) scans the same surfaces with its 13 scans.
+#[cfg(test)]
+mod engine_tests {
+    use super::*;
+    use crate::engine::EngineConfig;
+    use crate::pipeline::simulate_engine;
+    use crate::realize::parts::parts;
+    use crate::sentence::{closed_override, condition_now, sentence_lead, validity_now, Reader};
+    use crate::InstrumentInput;
+    use qp_facts::{default_detectors, FlowPoint};
+    use qp_schema::Fact;
+
+    fn inputs() -> Vec<InstrumentInput> {
+        qp_source::synthetic_market(8, 320, 3)
+            .into_iter()
+            .enumerate()
+            .map(|(i, inst)| {
+                let flow = qp_source::synthetic_flow(&inst.bars, 11 + i as u64)
+                    .into_iter()
+                    .map(|r| FlowPoint {
+                        t: r.t,
+                        values: r.values,
+                    })
+                    .collect();
+                InstrumentInput {
+                    series: format!("{}.1day", inst.symbol),
+                    symbol: inst.symbol,
+                    bars: inst.bars,
+                    flow: Some(flow),
+                }
+            })
+            .collect()
+    }
+
+    const INTERNAL: [&str; 9] = [
+        " bar",
+        "teyit",
+        "aile",
+        "sinyal",
+        "olgu",
+        "dedektör",
+        "signal",
+        "confirm",
+        "detector",
+    ];
+
+    #[test]
+    fn every_event_keeps_the_rules() {
+        let ins = inputs();
+        let (engine, _) = simulate_engine(&ins, &default_detectors, EngineConfig::r3());
+        let cal = qp_calendar::ExchangeCalendar::new(&qp_source::synthetic_calendar()).unwrap();
+        let mut seen = 0;
+        let mut redacted_seen = 0;
+        for e in engine.events() {
+            let rec = engine
+                .open_stories()
+                .iter()
+                .chain(engine.closed_stories())
+                .find(|s| s.id == e.capsule)
+                .unwrap();
+            let input = ins.iter().find(|i| i.series == e.story.series).unwrap();
+            let now = e.transition.bar;
+            let bars = &input.bars[..=usize::try_from(now).unwrap()];
+            let facts: Vec<Fact> = rec.facts.iter().filter(|f| f.bar <= now).cloned().collect();
+            let lead = &facts[0];
+            let latest = facts.last().unwrap();
+            let (sh, cur) = condition_now(lead, &facts, bars);
+            let sh = closed_override(&e.story, sh);
+            let validity = validity_now(&e.story, sh);
+            let m = lead.meaning.as_ref().unwrap();
+            let lead_view = sentence_lead(lead).unwrap_or_else(|| lead.clone());
+            for reader in [Reader::entitled(), Reader::unentitled()] {
+                let redacted = !reader.may_see(&m.license, &m.instrument);
+                let inp = SentenceInput {
+                    story: &e.story,
+                    lead: &lead_view,
+                    latest: if latest.id == lead.id {
+                        &lead_view
+                    } else {
+                        latest
+                    },
+                    now_bar: now,
+                    now_t: bars[bars.len() - 1].t,
+                    still_holds: sh,
+                    current: if redacted { None } else { cur },
+                    redacted,
+                };
+                let p = parts(&e.story, inp.now_t, validity, &cal, Period::Daily, redacted);
+                let both = speak_both(&inp, &p);
+                assert_eq!(both, speak_both(&inp, &p), "deterministic");
+                let [tr, en] = &both;
+                for v in [tr, en] {
+                    assert!(len(&v.headline) <= MAX_HEADLINE, "{}", v.headline);
+                    assert!(len(&v.detail) <= MAX_DETAIL, "{}", v.detail);
+                    assert!(
+                        sentence_count(&v.detail) <= MAX_DETAIL_SENTENCES,
+                        "{}",
+                        v.detail
+                    );
+                    assert!(len(&v.ledger) <= MAX_LEDGER, "{}", v.ledger);
+                    let all = format!(
+                        "{} {} {} {}",
+                        v.headline,
+                        v.detail,
+                        v.ledger,
+                        v.glossary
+                            .iter()
+                            .map(|g| format!("{} {}", g.term, g.text))
+                            .collect::<Vec<_>>()
+                            .join(" ")
+                    )
+                    .to_lowercase();
+                    for w in INTERNAL {
+                        assert!(!all.contains(w), "{w}: {all}");
+                    }
+                    if redacted {
+                        let digits = all.replace(&e.story.instrument.to_lowercase(), "");
+                        assert!(!digits.bytes().any(|b| b.is_ascii_digit()), "{all}");
+                    }
+                }
+                assert_eq!(tr.glossary.len(), en.glossary.len());
+                for (a, b) in [
+                    (&tr.headline, &en.headline),
+                    (&tr.detail, &en.detail),
+                    (&tr.ledger, &en.ledger),
+                ] {
+                    assert_eq!(digit_runs(a), digit_runs(b), "{a} | {b}");
+                }
+                seen += 1;
+                redacted_seen += usize::from(redacted);
+            }
+        }
+        assert!(seen > 200, "{seen}");
+        assert!(redacted_seen > 10, "{redacted_seen}");
+    }
+
+    #[test]
+    fn examples() {
+        // One readable example per surface, pinned (breakout up, entitled, born today).
+        let ins = inputs();
+        let (engine, _) = simulate_engine(&ins, &default_detectors, EngineConfig::r3());
+        let cal = qp_calendar::ExchangeCalendar::new(&qp_source::synthetic_calendar()).unwrap();
+        let e = engine
+            .events()
+            .iter()
+            .find(|e| {
+                e.story.history.len() == 1
+                    && e.story.direction == Direction::Up
+                    && e.story.kind == MeaningKind::Breakout
+            })
+            .unwrap();
+        let rec = engine
+            .open_stories()
+            .iter()
+            .chain(engine.closed_stories())
+            .find(|s| s.id == e.capsule)
+            .unwrap();
+        let input = ins.iter().find(|i| i.series == e.story.series).unwrap();
+        let now = e.transition.bar;
+        let bars = &input.bars[..=usize::try_from(now).unwrap()];
+        let lead = &rec.facts[0];
+        let (sh, cur) = condition_now(lead, std::slice::from_ref(lead), bars);
+        let validity = validity_now(&e.story, sh);
+        let inp = SentenceInput {
+            story: &e.story,
+            lead,
+            latest: lead,
+            now_bar: now,
+            now_t: bars[bars.len() - 1].t,
+            still_holds: sh,
+            current: cur,
+            redacted: false,
+        };
+        let p = parts(&e.story, inp.now_t, validity, &cal, Period::Daily, false);
+        let tr = speak(&inp, &p, Lang::Tr);
+        let en = speak(&inp, &p, Lang::En);
+        assert!(
+            tr.headline.contains("son 20 günün en yüksek fiyatını ("),
+            "{}",
+            tr.headline
+        );
+        assert!(
+            tr.headline.ends_with("· bugün, hâlâ geçerli"),
+            "{}",
+            tr.headline
+        );
+        assert!(
+            en.headline.contains("rose above its 20-day high ("),
+            "{}",
+            en.headline
+        );
+        assert!(tr.detail.starts_with("O gün kapanış "), "{}", tr.detail);
+        assert!(tr.detail.contains("eşiğin %"), "{}", tr.detail);
+        assert!(
+            tr.detail
+                .contains("sonuç en geç 10 işlem günü içinde belli olacak")
+                || tr
+                    .detail
+                    .contains("Sonuç en geç 10 işlem günü içinde belli olacak"),
+            "{}",
+            tr.detail
+        );
+        assert_eq!(tr.glossary[0].term, "en yüksek fiyat");
+        assert_eq!(en.glossary.last().unwrap().term, "similar cases");
     }
 }

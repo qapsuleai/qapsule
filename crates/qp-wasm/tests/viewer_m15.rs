@@ -192,3 +192,88 @@ fn viewer_traffic_does_not_grow_with_the_universe() {
         "open msgs {om30}, {om300}"
     );
 }
+
+/// (RP3/M15 measurement, `rounds/RP3/experiments/M15.md`) The authority's work per viewer
+/// device per step: one extra `viewer_flush` after each step (it computes everything a
+/// flush computes — feed, visible faces, slice — and sends nothing new), on the feed screen
+/// and with a capsule open; and the step itself. `QP_M15_N` instruments (default 30). Run
+/// `cargo test --release -p qp-wasm --features replica --test viewer_m15 -- --ignored --nocapture`.
+#[test]
+#[ignore = "measurement"]
+fn server_work_per_device() {
+    use std::time::Instant;
+    let n: u32 = std::env::var("QP_M15_N")
+        .ok()
+        .and_then(|v| v.parse().ok())
+        .unwrap_or(30);
+    let t = Instant::now();
+    let mut host = parity_host_n(n);
+    let build = t.elapsed().as_secs_f64() * 1e3;
+    let conn = "m";
+    let send = |h: &mut qp_session::ReplayHost, m: Value| h.handle_raw(conn, &m.to_string());
+    let _ = send(
+        &mut host,
+        json!({"type":"hello","protocol":"qp/0","principal":"arkin","surface":{"kind":"phone"}}),
+    );
+    let _ = send(
+        &mut host,
+        json!({"type":"input","id":"s","gesture":qp_wasm::shell::ShellCore::presented_look()}),
+    );
+    let first = send(
+        &mut host,
+        json!({"type":"subscribe","id":"v","topic":{"kind":"viewer","limit":40}}),
+    );
+    let feed: Vec<String> = first
+        .iter()
+        .find_map(|l| match &l.msg {
+            qp_schema::protocol::ServerMsg::Notify {
+                event: qp_schema::protocol::Event::Viewer { viewer, .. },
+                ..
+            } => viewer
+                .feed
+                .as_ref()
+                .map(|f| f.iter().map(|r| r.capsule.id.clone()).collect()),
+            _ => None,
+        })
+        .expect("feed");
+    let vis: Vec<&String> = feed.iter().take(4).collect();
+    let _ = send(
+        &mut host,
+        json!({"type":"visible","id":"v1","sub":"v","visible":vis}),
+    );
+    let phase = |h: &mut qp_session::ReplayHost| -> (Vec<f64>, Vec<f64>) {
+        let (mut steps, mut flush) = (Vec::new(), Vec::new());
+        for _ in 0..9 {
+            let t = Instant::now();
+            let _ = send(
+                h,
+                json!({"type":"replay","id":"r","control":{"kind":"step","n":1}}),
+            );
+            steps.push(t.elapsed().as_secs_f64() * 1e3);
+            let t = Instant::now();
+            let _ = h.session_mut().viewer_flush();
+            flush.push(t.elapsed().as_secs_f64() * 1e3);
+        }
+        (steps, flush)
+    };
+    let (fs, ff) = phase(&mut host);
+    let _ = send(
+        &mut host,
+        json!({"type":"input","id":"o","gesture":{"kind":"open","capsule":feed[0],"to":"capsule","width":390,"height":300}}),
+    );
+    let (os, of) = phase(&mut host);
+    let med = |v: &[f64]| {
+        let mut s = v.to_vec();
+        s.sort_by(f64::total_cmp);
+        s[s.len() / 2]
+    };
+    let mean = |v: &[f64]| v.iter().sum::<f64>() / 9.0;
+    println!(
+        "{}",
+        json!({"instruments": n, "build_ms": build,
+            "feed": {"step_ms_median": med(&fs), "step_ms_mean": mean(&fs),
+                     "flush_ms_median": med(&ff), "flush_ms_mean": mean(&ff)},
+            "open": {"step_ms_median": med(&os), "step_ms_mean": mean(&os),
+                     "flush_ms_median": med(&of), "flush_ms_mean": mean(&of)}})
+    );
+}

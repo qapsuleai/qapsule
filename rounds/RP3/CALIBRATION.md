@@ -138,7 +138,7 @@ seçimde belirleyici olan JS / WASM maliyet oranını doğru veriyor (CDP bunu b
 |---|---:|---:|---:|:-:|---:|---:|
 | Yüz | 32 | 31 | 0,97 | ✓ | 36,8 | 1,15 ✓ |
 | Sahne | 71 | 38 | 0,54 | ✗ | 50,4 | 0,71 ✓ |
-| Tik (bu senaryonun karışımı, sahne/tik 0,25) | 74 | 12 | 0,16 | ✗ | 14,9 | 0,20 ✗ |
+| Tik (bu senaryonun karışımı, sahne/tik 0,25; §4a: aynı derlemeyle 12–29) | 74 | 12 | 0,16 | ✗ | 14,9 | 0,20 ✗ |
 | Tik, sahne boyanan tikler | 74 | 45 | 0,61 | ✗ | ≈ 61 (tahmin) | ≈ 0,8 |
 | p95: yüz / sahne / tik | 72 / 92 / 118 | 36 / 41 / 47 | 0,50 / 0,45 / 0,40 | ✗ | 42 / 54 / 60 | 0,58 / 0,58 / 0,51 |
 
@@ -164,6 +164,35 @@ okunur (`PHONE_BIAS`): yüz ×1,0, sahne ×1,85, sahneli tik ×1,6. Sıralama ka
 (hangi yol daha hızlı) çarpansız ham sayılarla verilir. CDP16 yalnız sayısal yedek:
 Chromium'a özgü bir yolu (ör. WebGPU) telefonla aynı mertebede görmek için; JS ve WASM
 paylarını karşılaştıran bir kararda kullanılmaz.
+
+## 4a. Tik ortancasının kararsızlığı (son denetim sonrası düzeltme)
+
+Son denetim (`AUDIT.md` B1/K1) PHONE tik p50'sini R4 kodunda (`6877bda`, aynı derleme
+bayrakları) iki koşuda **29 ve 28 ms** buldu. Ana oturum aynı gün T1'in **kendi derlemesiyle**
+(`T1/web-base`, aynı `qp`, aynı `calibrate.mjs`, WebKit 26.5, prizde) tekrarladı:
+
+| koşu | saat | yük önce → sonra | tik p50 / p95 | yüz p50 / p95 | sahne p50 / p95 | sahne/tik | oran tik · yüz · sahne |
+|---|---|---|---:|---:|---:|---:|---:|
+| T1 (§3 tablosu) | 13:50 | 10,2 → 7,9 | 12 / 47 | 31 / 36 | 38 / 41 | 0,253 | 0,16 · 0,97 · 0,54 |
+| T1 denetimi | öğleden sonra | — | 11,5 / 47 | 31 / 36 | 38 / 41 | 0,252 | 0,16 · 0,97 · 0,53 |
+| son denetim #1, #2 (R4 `6877bda`) | 17:50–17:55 | 7,4 → 8,2 | 29 (28) / — | 31 (31) | 39 (39) | 0,253 | 0,39 (0,38) · 0,97 · 0,55 |
+| ana oturum (T1 `web-base`) | 20:56–20:58 | 5,6 → 5,7 | 28 / 73 | 31 / 36 | 39 / 58 | 0,253 | 0,38 · 0,97 · 0,55 |
+
+Aynı derleme, aynı motor sürümü, aynı açık kapsül (`cap.SYN16.breakout.up.200`) ve aynı
+sahne/tik oranıyla yüz ve sahne birebir tekrarlanıyor; **tik ortancası 12'den 28 ms'ye
+kayıyor**. Tik, ¾'ü boyamasız (≈10–14 ms), ¼'ü sahneli (≈45 ms) iki kümeden oluşuyor;
+ortanca bu karışımda boyamasız kümenin üst ucuna düşüyor ve boyamasız tikin maliyetindeki
+gün içi değişime (makinenin o anki durumu; neden bu turda ayrıştırılmadı) çok duyarlı.
+Sonuç:
+
+- Tik oranı **×0,16–0,38** aralığında; her iki uçta da ±%30 dışında. Ölçüt 1'in sonucu (⚠️,
+  yalnız yüz tutuyor) değişmez.
+- "Tik kalıntısı = sahne kalıntısı + karışım" yorumu nitelik olarak geçerli, ama 12 ms'ye
+  dayanan nicel kısmı (boyamasız tik ×14) tek bir koşudan gelir; güvenilir değildir.
+- `PHONE_BIAS.tick_with_scene` (1,6) sahneli tiklerin 45 ms'sinden türetildi; bu küme bu
+  koşularda ayrıca yeniden ölçülmedi. Tahmin olarak kalır, kalibre sayı değildir.
+- Bundan sonra tik için ortanca yerine sahneli / boyamasız tikler ayrı raporlanmalı (REPORT
+  "Öneriler").
 
 ## 5. Ayrıştırma
 

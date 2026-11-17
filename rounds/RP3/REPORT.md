@@ -35,14 +35,14 @@ sayılar benzetimdir; seçim Arkin'in telefon karşılaştırmasına kadar **ön
 | # | Ölçüt | Durum | Kanıt |
 |---|-------|-------|-------|
 | 0 | İş bölümü (K48) | ✅ | `experiments/M15.md`, `M15-verify.md`. Görüntüleyici varsayılan, tam yansı `?mode=replica`. 30 / 300 / 3.000 enstrüman: tik işi (akış) 1,66 / 1,72 / 1,81 ms/adım, (açık) 5,26 / 5,58 / 5,77; WASM 13,8 / 16,4 / 16,6 MB (+%20, tek bellek büyüme adımı; denetçi yeniden üretti). Akış ekranında bar aboneliği yok; açıkken tek besleme (VERIFY 17). Güven işaretleri metinle ayırt ediliyor. `qp replica-tape --viewer` gecikme 0/25: ihlal 0, son iddialar 4/4; RP2/R3 şeritleri ve itiraz testleri geçiyor; viewer şeritleri `verify.sh` `replica` adımında (M14). Protokol eki PROTOCOL §22; yeni döküm `59-viewer.json`; var olan 58 döküm bayt aynı. İki test sabiti `describe`'ın yeni konuyu listelemesi yüzünden değişti (denetçi `viewer` çıkarılınca eski değerlerin döndüğünü gösterdi). |
-| 1 | Kalibrasyon | ⚠️ | `CALIBRATION.md`, `T1-verify.md`. Seçilen ayar `PHONE` (WebKit 26.5, JIT kapalı, DPR 3): yüz 31 / iPhone 32 ms (×0,97 ✓), sahne 38 / 71 (×0,54 ✗), tik 12 / 74 (×0,16 ✗; tik, sahnenin kaç tikte yeniden boyandığına bağlı — telefonda hangi kapsülün açık olduğu bilinmiyor; yalnız sahne boyanan tiklerde 45 / 74 = ×0,61). Hiçbir tek masaüstü ayarı üçünü birden ±%30'a sokmadı (CDP 16× yüz ve sahneyi tutturuyor ama yanlış mekanizmayla). Nedenler ayrıştırıldı ve payları ölçüldü (yukarıda). R4 `DEVICE.md` eşlemesi düzeltildi ("RP3 düzeltmesi"). |
+| 1 | Kalibrasyon | ⚠️ | `CALIBRATION.md`, `T1-verify.md`. Seçilen ayar `PHONE` (WebKit 26.5, JIT kapalı, DPR 3): yüz 31 / iPhone 32 ms (×0,97 ✓), sahne 38 / 71 (×0,54 ✗), tik 12 / 74 (×0,16 ✗; aynı derleme ve aynı kapsülle akşam koşularında 28–29 ms, ×0,38 — tik ortancası kararsız, aşağıda ve `CALIBRATION.md` §4a; tik, sahnenin kaç tikte yeniden boyandığına bağlı — telefonda hangi kapsülün açık olduğu bilinmiyor; yalnız sahne boyanan tiklerde 45 / 74 = ×0,61). Hiçbir tek masaüstü ayarı üçünü birden ±%30'a sokmadı (CDP 16× yüz ve sahneyi tutturuyor ama yanlış mekanizmayla). Nedenler ayrıştırıldı ve payları ölçüldü (yukarıda). R4 `DEVICE.md` eşlemesi düzeltildi ("RP3 düzeltmesi"). |
 | 2 | Üç boyama yolu | ✅ | `experiments/M12a.md`, `M12b.md`, `M12c.md` (dallar `rp3/m12a-cpu`, `rp3/m12b-canvas`, `rp3/m12c-gpu`; ayrı ajanlar, ortak yönerge diğer yolları anlatmıyordu). Düzenek (T2: arayüz, karşılaştırma) yollardan önce `main`'e girdi. Görsel fark: `cpu` 0 piksel (49/49 her motorda); `canvas` > 2 seviye en çok %0,30 (DPR 3) / %1,06 (DPR 1); `gpu` en çok %0,31, düz alanlarda 0. Hepsi aynı `SceneDesc`'i boyuyor. |
 | 3 | Hedefler, kalibre benzetimde | ⚠️ | `experiments/S.md` §6. Görüntüleyici + `canvas`, `PHONE`: tik+boyama p95 grafik açıkken **11 ms (hedef 8 ✗**, ortalama 7,3 ✓), akış ekranında 6 ms ✓; kaydırma karesi p95 18 ms (60 Hz + WebKit'in 1 ms zamanlayıcısı; kayıp kare yok, uzun pay %0,2–0,4); ilk kapsül ≈0,57 s ✓ (tahmin: döngü adresinde 177 ms + 1,55 MB aktarım + 4 gidiş-dönüş). `PHONE_BIAS` ile grafik açık p95 ≈18 ms. `PHONE_JIT_EST`'te tik p95 2 ms ✓. Kalan maliyetin dökümü ölçüldü: sahne kurma 3,2 + değişim sınaması 0,7 + boyama 0,3 + kabuk tarafı ≈2,4 ms/kare; gereken: değişen bar sahnenin aralığı dışındaysa sahneyi kurmamak (A36, ≈3 ms'ye), değişmeyen katman metnini yeniden kurmamak, ya da HTTPS (JIT). |
 | 4 | Varsayılan ve adres parametresi | ✅ | `canvas` varsayılan; `?paint=ref|canvas|cpu|gpu`; desteklenmeyen/bilinmeyen yol `ref`'e düşer ve özet nedenini yazar. `tests/paint-paths.mjs` (verify `demo` adımında): her yol açılıyor ve boyuyor; WebGPU yokken `gpu` → `ref` (`unsupported`). |
 | 5 | Açılış | ✅ | `experiments/M13.md`, `M13-verify.md`. Önce/sonra (DPR 3, 5 koşu medyanı): Chromium 4× + 40 Mbit/20 ms soğuk ilk kapsül 1.907 → 1.230 ms (br), aktarılan 4.472.496 → 935.707 B; sıcak 1.775 → 892 ms; WebKit 8.850.801 B (WASM iki kez) → 1.334.452 B (gzip). Barındırıcı `Accept-Encoding`'e göre br/gzip veriyor (test `crates/qp-cli/tests/demo_static.rs`, tarayıcı testi `tests/compress.mjs`). |
 | 6 | Güncelleme sıklığı | ✅ | `experiments/M14.md`. Kare başına en çok bir boyama geçişi (veri çerçevesi başına 1,00–1,13), çerçeveden boyamaya ≤ 1 kare; görünmeyen ve katman altındaki yüzler boyanmıyor (karar çekirdekte, sayaçlar özette). |
 | 7 | Bellek | ✅ | `experiments/T4.md`, `T4-verify.md`. 5.000 adım: sürekli oturumda WASM 17,5 → 102 MB (≈17,6 KB/adım; takipçi günlüğü %60, doküman %15, okuma kopyası ≈%15) — tam yansıya özgü, görüntüleyicide cihazdan kalkar; karar A34. Masaüstündeki 152 MB'ın kaynağı yeniden başlatmalardı (başlangıç çerçevesi JSON ağacı ≈35× metin, eski çekirdek bırakılmıyordu): tipli okuma + önce bırakma ile 2.500. adımda 331 → 61 MB. |
-| 8 | Cihazda otomatik karşılaştırma | ✅ | Ölçüm sekmesinde **Karşılaştır**: desteklenen her yol aynı senaryoda (durağan + tik, otomatik kaydırma, grafik açık + tik, otomatik sürükleme), sürücü çekirdekte, elle hareket yok; tek özet (**Karşılaştırmayı kopyala**). Süre yol başına ≈34 s (4 yol ≈136 s, `http`'de 3 yol ≈102 s), 175 s'de zorunlu durma. `tests/compare.mjs` Chromium + WebKit başsız: 139 s (denetçi 140 s). |
+| 8 | Cihazda otomatik karşılaştırma | ✅ | Ölçüm sekmesinde **Karşılaştır**: desteklenen her yol aynı senaryoda (durağan + tik, otomatik kaydırma, grafik açık + tik, otomatik sürükleme), sürücü çekirdekte, elle hareket yok; tek özet (**Karşılaştırmayı kopyala**). Süre yol başına ≈34 s (4 yol ≈136 s, `http`'de 3 yol ≈102 s), 175 s'de zorunlu durma. `tests/compare.mjs` başsız, tarayıcı başına: Chromium 101,7 s (3 yol), WebKit 135,6 s (4 yol) (son denetim). |
 | 9 | Ölçüm ekranı hataları | ✅ | `experiments/T2.md`: tazeleme hızı algılanıyor, uzun kare > 1,5 × aralık (60 Hz tamsayı dizisi → 0); açılış işaretleri ilk değer, yeni çekirdeğe taşınıyor (836.034 ms'nin nedeni: her başlangıç çerçevesinde yeni çekirdek); DPR < 1 / kesirli / ölçek farkı uyarısı. |
 | 10 | Değişmeyenler | ✅ | `verify.sh` 18/18 (altınlar bayt eşit, 59 döküm × 3 taşıma, hesap özeti `7b1e99d40889f83c`, mimari testi 0 ihlal). Anlamsal okuma yoldan bağımsız: `paint-paths.mjs` özetleri, akışı, açık durumu ve sunucunun `tap_at`/`screen` cevaplarını `ref` ile bayt karşılaştırıyor. Toleranslı ekran testi seçilen yol için `tests/paint-canvas.mjs` (verify `demo` adımında). |
 | 11 | Arkin için yönerge | ✅ | §8. Seçim `DECISIONS.md` "Önerilen (RP3)". |
@@ -125,6 +125,25 @@ Paket: birleşik WASM gzip 1.463.230 B (+29.961), JS toplam gzip 30.513 B (+10.3
 - `qp-session/src/conform.rs:313` wasm32 hedefinde clippy uyarısı (verify o hedefi denetlemiyor).
 - Sözlüğe (`docs/CONCEPTS.md`) "boyama yolu" ve "karşılaştırma sınaması".
 - Bir orta sınıf Android ölçümü (`MID_ANDROID_EST` bugün yalnız tahmin).
+- Kalibrasyonda tik ortancası yerine boyamasız ve sahneli tikleri ayrı raporlamak; tik ortancası
+  aynı derlemeyle gün içinde 12 ↔ 28 ms oynadı (`CALIBRATION.md` §4a). Ölçüm betiklerine
+  başarısızlıkta yük (`uptime`) ve kalınan evreyi yazdırmak (denetim B8).
+- `viewer-measure.mjs` başlığını M14 sonrasına uydurmak (tik artık boyamayı içermiyor; M15
+  mutlak sayıları M14 öncesi kod, denetim B5).
+
+## 7a. Son denetim
+
+`AUDIT.md`: **KOŞULLU KABUL**. Koşullar ve karşılıkları:
+
+- **K1 (tik kalibrasyonu yeniden üretilmiyor):** ana oturum T1'in kendi derlemesiyle tekrarladı:
+  tik 28 ms, yüz 31, sahne 39 — denetimle aynı. Fark kodda değil; aynı derlemede tik ortancası
+  kararsız. `CALIBRATION.md` §4a, ölçüt 1 satırı ve `RESEARCH.md` iki ölçümle düzeltildi; ölçüt
+  1 ⚠️ kalır.
+- **K2 (CI):** `main` gönderildi; sonuç `STATUS.md`'de.
+- Küçükler: B3 (sekmeler üstte; `http`'de "Kopyalandı" yok) ve B6 (karşılaştırma süreleri) §8 ve
+  ölçüt 8'de düzeltildi; B4 (§4 canvas sahne sütunu eski koşudan, bugün 4 ms — iyi yönde), B5 ve
+  B8 Öneriler'de; B7 (`8952d25` doğrudan `main`'de 3 satır kod, ayrı denetimsiz) kabul edilen
+  süreç sapmasıdır; verify ve son denetim o HEAD'de yeşil.
 
 ## 8. Telefonumda karşılaştırmayı nasıl çalıştırırım (Arkin için)
 
@@ -138,11 +157,11 @@ Kipi kapalı.
    (macOS "gelen bağlantılara izin verilsin mi?" diye sorarsa **İzin Ver**; ayrıntı
    `rounds/R4/DEVICE.md` §4.)
 2. Telefonda o adresi **olduğu gibi** açın (Safari ya da Chrome), 10 sn bekleyin.
-3. Alt sekmelerden **Ölçüm**'e geçin, en alttaki **Karşılaştır** düğmesine **bir kez** dokunun.
+3. Üstteki başlık sekmelerinden **Ölçüm**'e geçin, en alttaki **Karşılaştır** düğmesine **bir kez** dokunun.
    Ekrana dokunmayın: sayfa kendisi akışı oynatır, kaydırır, kapsülü açar ve sürükler; her
    boyama yolunu sırayla dener (http'de `gpu` desteklenmez, bu yüzden 3 yol, ≈1 dk 45 sn).
-4. Bitince tablo görünür ve **Karşılaştırmayı kopyala** düğmesi çıkar; dokunun ("Kopyalandı";
-   pano izni yoksa metin seçili gelir, elle kopyalayın).
+4. Bitince tablo görünür ve **Karşılaştırmayı kopyala** düğmesi çıkar; dokunun (`https`'de "Kopyalandı";
+   `http`'de tarayıcı panoya erişim vermez: bildirim çıkmaz, metin seçili gelir — paylaş/kopyala ile elle kopyalayın).
 5. Özetin `mode` satırı `secure_context:false` ve büyük olasılıkla `jit: likely_off` der — bu
    beklenen durumdur.
 

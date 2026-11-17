@@ -125,7 +125,7 @@ Hedef: PHONE sayılarının iPhone p50'sini (tik 74, yüz 32, sahne 71 ms) ±%30
 
 | Yaklaşım | Sonuç (ölçüm, ayar) | Durum | Kaynak |
 |---|---|---|---|
-| WebKit 26.5, `__XPC_JSC_useJIT=false`, DPR 3 (**PHONE**) | Yüz 31 / tik 12 / sahne 38 ms → oran 0,97 · 0,16 · 0,54. Yalnız yüz ±%30 içinde; sahneli tiklerde tik 45 ms (×0,61). Denetimde %5 içinde yeniden üretildi | alındı (kalibre ayar) | CALIBRATION §3–4, T1-verify C |
+| WebKit 26.5, `__XPC_JSC_useJIT=false`, DPR 3 (**PHONE**) | Yüz 31 / tik 12 / sahne 38 ms → oran 0,97 · 0,16 · 0,54. Yalnız yüz ±%30 içinde; sahneli tiklerde tik 45 ms (×0,61). T1 denetiminde %5 içinde yeniden üretildi; son denetimde ve ana oturumun aynı derlemeli tekrarında tik 28–29 ms (×0,38), yüz ve sahne aynı — tik ortancası kararsız (CALIBRATION §4a) | alındı (kalibre ayar) | CALIBRATION §3–4, T1-verify C |
 | Düz `JSC_*` ortam değişkenleri | WebContent sürecine ulaşmıyor; JS 147–152 ms, WASM 27–28 ms (etkisiz) | alınmadı | CALIBRATION §2, T1-verify B |
 | `__XPC_JSC_useJIT=false` (doğrulama döngüsü) | WASM 28 → 643 ms (23×), JS 147 → 597 ms (4×); WebKit hata kaydındaki telefon oranlarıyla uyumlu (JS 4–5,6×, h3-js ≈ 26×) | alındı | CALIBRATION §2 |
 | `__XPC_JSC_useOMGJIT=false` (yalnız BBQ) | WASM 2,3× yavaş | alınmadı | CALIBRATION §2 |

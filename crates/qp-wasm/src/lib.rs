@@ -393,17 +393,8 @@ mod shell_binding {
         /// A malformed frame.
         #[wasm_bindgen(constructor)]
         pub fn new(start_json: &str) -> Result<Shell, JsError> {
-            let v: serde_json::Value = serde_json::from_str(start_json).map_err(err)?;
-            let data = serde_json::from_value(v["data"].clone()).map_err(err)?;
-            let events: Vec<qp_schema::data::DataEvent> =
-                serde_json::from_value(v["events"].clone()).unwrap_or_default();
-            let inner = ShellCore::new(
-                v["principal"].as_str().unwrap_or("arkin"),
-                v["lang"].as_str().unwrap_or("tr"),
-                &data,
-                &events,
-            )
-            .map_err(err)?;
+            // (RP3/T4) Typed, without a JSON tree of the frame (see `core_from_start`).
+            let inner = crate::shell::core_from_start(start_json).map_err(err)?;
             Ok(Self { inner })
         }
 

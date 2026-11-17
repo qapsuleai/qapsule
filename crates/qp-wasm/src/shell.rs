@@ -278,6 +278,63 @@ struct Gesture {
     cancelled: bool,
 }
 
+/// (RP3/T4) A data frame of the host's stream (`{"data":[…],"replay":…}`), typed. `msg`
+/// only tells a message frame apart (it takes the message path).
+#[derive(serde::Deserialize)]
+struct DataFrame {
+    #[serde(default)]
+    msg: Option<serde::de::IgnoredAny>,
+    #[serde(default)]
+    data: Option<Vec<DataEvent>>,
+    #[serde(default)]
+    replay: Option<ReplayState>,
+}
+
+/// (RP3/T4) The host's `start` frame (`{conn, principal, lang, data, events, …}`), typed.
+#[derive(serde::Deserialize)]
+struct StartFrame {
+    #[serde(default)]
+    principal: Option<String>,
+    #[serde(default)]
+    lang: Option<String>,
+    data: InitData,
+    #[serde(default)]
+    events: Vec<DataEvent>,
+}
+
+/// (RP3/T4) The core of a page from the host's `start` frame (`{conn, principal, lang,
+/// data, events}`; principal `arkin` and language `tr` when absent or not text, no events
+/// when they are malformed), parsed typed in one pass; a frame that does not parse typed
+/// takes the JSON-tree path, with the same result. The tree of a start frame costs some
+/// 35 times its text (natively 200 MB for the 5.8 MB frame at step 1,250) and the WASM
+/// memory keeps that peak (`rounds/RP3/experiments/T4.md`).
+///
+/// # Errors
+/// A malformed frame or provider description.
+pub fn core_from_start(start_json: &str) -> Result<ShellCore, String> {
+    if let Ok(st) = serde_json::from_str::<StartFrame>(start_json) {
+        return ShellCore::new(
+            st.principal.as_deref().unwrap_or("arkin"),
+            st.lang.as_deref().unwrap_or("tr"),
+            &st.data,
+            &st.events,
+        );
+    }
+    let v: Value = serde_json::from_str(start_json).map_err(|e| e.to_string())?;
+    let data: InitData = serde_json::from_value(v["data"].clone()).map_err(|e| e.to_string())?;
+    let events: Vec<DataEvent> = serde_json::from_value(v["events"].clone()).unwrap_or_default();
+    ShellCore::new(
+        v["principal"].as_str().unwrap_or("arkin"),
+        v["lang"].as_str().unwrap_or("tr"),
+        &data,
+        &events,
+    )
+}
+
+/// (RP3/T4) The record of sent messages keeps at least this many of the latest (see
+/// `ShellCore::sent`); a short session (every test) keeps all of them.
+pub const SENT_KEEP: usize = 1024;
+
 /// Running statistics of a series of millisecond samples.
 #[derive(Debug, Clone, Default)]
 struct Samples {
@@ -519,7 +576,9 @@ pub struct ShellCore {
     face_shown: BTreeMap<String, String>,
     scene_shown: Option<String>,
     version: u64,
-    /// Every message sent (for the record and the parity check).
+    /// The messages sent, for the record and the parity check: every message of a short
+    /// session; (RP3/T4) on a long one only the latest [`SENT_KEEP`] to `2 × SENT_KEEP`
+    /// (the oldest are dropped in blocks, so that the record does not grow without bound).
     sent: Vec<Value>,
     /// (R4/H-M8910) Device scale the scenes are painted at (1: CSS px).
     scale: u32,
@@ -728,6 +787,10 @@ impl ShellCore {
         }
         let out = std::mem::take(&mut self.outbox);
         self.sent.extend(out.iter().cloned());
+        if self.sent.len() > 2 * SENT_KEEP {
+            let old = self.sent.len() - SENT_KEEP;
+            self.sent.drain(..old);
+        }
         out
     }
 
@@ -832,6 +895,11 @@ impl ShellCore {
                     (Some(Asked::Feed), QueryResult::Capsules { capsules, .. }) => {
                         self.feed_inflight = false;
                         self.feed.clone_from(capsules);
+                        // (RP3/T4) Only a face in the feed can be painted: the digests of
+                        // the faces that left it are forgotten (bounded by the feed).
+                        let feed = &self.feed;
+                        self.face_shown
+                            .retain(|id, _| feed.iter().any(|i| &i.id == id));
                         ch["feed"] = json!(true);
                     }
                     (Some(Asked::Input), QueryResult::Interaction { interaction }) => {
@@ -920,6 +988,28 @@ impl ShellCore {
         {
             if let Ok(msg) = serde_json::from_str::<ServerMsg>(inner) {
                 return Ok(self.on_message(&msg));
+            }
+        }
+        // (RP3/T4) A data frame parsed typed in one pass: a JSON tree of a large frame (a
+        // forward seek: thousands of events) costs some 20 times its text in memory, and
+        // the WASM memory keeps that peak. A frame that does not parse typed (a malformed
+        // event or replay state) or carries a message takes the general path below, which
+        // skips what is malformed: the result is the same either way.
+        if let Ok(f) = serde_json::from_str::<DataFrame>(text) {
+            if f.msg.is_none() {
+                let mut ch = json!({});
+                if let Some(evs) = &f.data {
+                    for ev in evs {
+                        self.data_event(ev);
+                    }
+                    ch["scene"] = json!(true);
+                    ch["feed"] = json!(true);
+                }
+                if let Some(st) = f.replay {
+                    self.set_replay(st);
+                    ch["status"] = json!(true);
+                }
+                return Ok(ch);
             }
         }
         let v: Value = serde_json::from_str(text).map_err(|e| e.to_string())?;
@@ -2056,7 +2146,8 @@ impl ShellCore {
         })
     }
 
-    /// Every message sent so far.
+    /// The messages sent so far: all of them, or on a long session (more than
+    /// `2 × SENT_KEEP`) the latest `SENT_KEEP` or more.
     #[must_use]
     pub fn sent(&self) -> &[Value] {
         &self.sent

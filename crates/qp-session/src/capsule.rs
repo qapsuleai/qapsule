@@ -230,7 +230,7 @@ impl Runner {
 
 /// Number of final bars of bar series `bs` with `n` bars: all of them when the window is
 /// closed (`to_t`), else all but the live last bar.
-fn final_count(doc: &Document, bs: &str, n: usize) -> usize {
+pub(crate) fn final_count(doc: &Document, bs: &str, n: usize) -> usize {
     final_count_of(find_series(doc, bs), n)
 }
 
@@ -1420,7 +1420,7 @@ impl Session {
     }
 
     /// Instruments of the active intents' triggers (symbols of the series they read).
-    fn intents_on(doc: &Document) -> Vec<String> {
+    pub(crate) fn intents_on(doc: &Document) -> Vec<String> {
         let mut out = Vec::new();
         for i in doc.intents.iter().filter(|i| i.active) {
             let Some(t) = &i.trigger else { continue };
@@ -1449,19 +1449,16 @@ impl Session {
     /// (K42/A22) `stage` is the transition judged: the story's current stage for the
     /// `capsules` query, the notified transition's stage for the topic. Only a negative
     /// transition of a position/intent story passes whatever the level.
-    fn admits(doc: &Document, principal: &str, story: &Story, stage: Stage) -> bool {
-        let a = Self::audience_of(doc, principal);
-        let intents = Self::intents_on(doc);
-        let watched = a.watchlist.is_empty()
-            || a.watchlist.iter().any(|s| s == &story.instrument)
-            || a.positions.contains_key(&story.instrument)
-            || intents.iter().any(|s| s == &story.instrument);
-        watched && qp_capsule::admits_at(&a, story, stage, &intents)
+    ///
+    /// (R5/M18, K53) With the host's coin-flip rule, a marked story passes only at the
+    /// `all` level ([`Session::feed_place`], the same rule the story list states).
+    fn admits(&self, doc: &Document, principal: &str, story: &Story, stage: Stage) -> bool {
+        self.feed_place(doc, principal, story, stage).0
     }
 
     /// Server comments `principal` gets: those on instruments whose licensed flow it may
     /// not read.
-    fn comments_for(&self, principal: &str) -> Vec<ServerComment> {
+    pub(crate) fn comments_for(&self, principal: &str) -> Vec<ServerComment> {
         let Some(r) = self.runner.as_ref() else {
             return Vec::new();
         };
@@ -1504,7 +1501,7 @@ impl Session {
             || since_t.is_some_and(|t| story.history.last().is_none_or(|l| l.t < t))
             || born_since_bar.is_some_and(|b| story.born_bar < b)
             || born_since_t.is_some_and(|t| story.history.first().is_none_or(|h| h.t < t))
-            || (*audience && !Self::admits(doc, principal, story, story.stage)))
+            || (*audience && !self.admits(doc, principal, story, story.stage)))
     }
 
     /// (R4/K42-FEED) Whether `it`'s latest transition is at the latest final bar of its
@@ -1933,14 +1930,18 @@ impl Session {
                     _ => None,
                 })
                 .collect();
-            if subs.is_empty() {
+            let stories = c
+                .subs
+                .iter()
+                .any(|s| matches!(s.topic, Topic::Stories { .. }));
+            if subs.is_empty() && !stories {
                 continue;
             }
             let p = self.proj_for(&c.principal);
             let doc = &self.doc;
             let lang = self.lang_of(ci);
             let mut memo = StudyMemo::default();
-            for e in events {
+            for e in events.iter().filter(|_| !subs.is_empty()) {
                 if p.as_ref().is_some_and(|p| {
                     p.hidden.contains(&e.capsule)
                         || (!e.transition.facts.is_empty()
@@ -1966,7 +1967,7 @@ impl Session {
                             .and_then(|p| p.stories.get(&cap.id))
                             .or(cap.story.as_ref());
                         if !story
-                            .is_some_and(|s| Self::admits(doc, &c.principal, s, e.transition.stage))
+                            .is_some_and(|s| self.admits(doc, &c.principal, s, e.transition.stage))
                         {
                             continue;
                         }
@@ -2010,6 +2011,35 @@ impl Session {
                             &c.id,
                             ServerMsg::Notify {
                                 sub: (*sub).to_owned(),
+                                event: Event::ServerComment {
+                                    comment: sc.clone(),
+                                    seq,
+                                },
+                            },
+                        ),
+                    ));
+                }
+            }
+            // (R5/M18, §23) The `stories` topic: server comments on its instrument.
+            for sc in said {
+                if self.flow_ok(&c.principal, &sc.instrument) {
+                    continue;
+                }
+                for s in &c.subs {
+                    let Topic::Stories { instrument, series } = &s.topic else {
+                        continue;
+                    };
+                    if instrument != &sc.instrument
+                        || series.as_ref().is_some_and(|x| x != &sc.series)
+                    {
+                        continue;
+                    }
+                    lines.push((
+                        ci,
+                        out(
+                            &c.id,
+                            ServerMsg::Notify {
+                                sub: s.id.clone(),
                                 event: Event::ServerComment {
                                     comment: sc.clone(),
                                     seq,

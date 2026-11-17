@@ -815,7 +815,15 @@ pub fn with_viewer_core(
                 core.visible(id, true);
             }
             pump_viewer(&mut core, host, &mut served);
-            out.insert(label.to_owned(), core.digests());
+            let mut d = core.digests();
+            // (R5/M18, §23.5) The story list the device holds and how often it asked.
+            let st = core.stories_json();
+            d["stories"] = json!({
+                "rows": st["stories"].as_array().map(Vec::len),
+                "total": st["total"], "complete": st["complete"],
+                "instrument": st["instrument"], "asked": core.stories_asked(),
+            });
+            out.insert(label.to_owned(), d);
             continue;
         } else {
             panic!("unknown script step {step}");

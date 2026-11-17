@@ -80,6 +80,8 @@ pub(crate) struct Sub {
     /// Where a condition sits in the structure, with the structure generation it was
     /// derived for (incremental live path).
     pub watch: Option<(u64, crate::live::CondInfo)>,
+    /// (R5/M18, §23) A `stories` subscription: what it was last sent.
+    pub stories: Option<crate::story::StoriesSent>,
 }
 
 #[derive(Debug)]
@@ -220,6 +222,8 @@ pub struct Session {
     pub(crate) viewers: BTreeMap<String, crate::viewer::ViewerConn>,
     /// (RP3/M15) The host computes viewer updates after a batch of data events.
     pub(crate) viewer_batch: bool,
+    /// (R5/M18, K53) The host's coin-flip rule (`Session::set_coin_flip_rule`).
+    pub(crate) coin_flip: Option<crate::story::CoinFlipRule>,
 }
 
 /// (R3/K1b) A writer of a command, for the two-world paths.
@@ -526,6 +530,7 @@ impl Session {
             prop_map: BTreeMap::new(),
             viewers: BTreeMap::new(),
             viewer_batch: false,
+            coin_flip: None,
         };
         s.audience_seen = s.doc.audiences.keys().cloned().collect();
         s.start_capsules(capsules.as_ref());
@@ -695,7 +700,7 @@ impl Session {
                 Ok(()) => self.handle_resolved(conn, msg, BTreeMap::new()),
                 Err(e) => vec![err_line(conn, msg_id(&msg), e)],
             };
-            if !self.viewers.is_empty() {
+            if self.has_pushers() {
                 lines.extend(self.viewer_flush());
             }
             return lines;
@@ -751,7 +756,7 @@ impl Session {
         }
         let mut lines = self.handle_resolved(conn, msg, resolved);
         // (RP3/M15, §22) What the message changed for viewers (their feed, faces, slice).
-        if !self.viewers.is_empty() {
+        if self.has_pushers() {
             lines.extend(self.viewer_flush());
         }
         let asker = self
@@ -1103,6 +1108,7 @@ impl Session {
                     Topic::Viewer { limit, width } => Some((*limit, *width)),
                     _ => None,
                 };
+                let stories = matches!(topic, Topic::Stories { .. });
                 let r = self.as_reader(&principal, lang, |s| s.subscribe(ci, &id, topic));
                 match r {
                     Ok(()) => {
@@ -1113,6 +1119,9 @@ impl Session {
                         let mut v = vec![out(conn, a)];
                         if let Some((limit, width)) = viewer {
                             v.extend(self.viewer_start(ci, &id, limit, width));
+                        }
+                        if stories {
+                            self.stories_start(ci, &id);
                         }
                         v
                     }
@@ -2467,7 +2476,7 @@ impl Session {
         let mut lines = self.settle_data();
         lines.extend(self.serve_test_source());
         // (RP3/M15, §22) Viewers, unless the host batches (a replay host: once per step).
-        if !self.viewer_batch && !self.viewers.is_empty() {
+        if !self.viewer_batch && self.has_pushers() {
             lines.extend(self.viewer_flush());
         }
         Ok(DataOutcome { lines, notices })
@@ -3203,6 +3212,9 @@ impl Session {
             | Topic::Intents {}
             | Topic::Claims {}
             | Topic::Capsules { .. } => {}
+            Topic::Stories { instrument, series } => {
+                self.stories_check(instrument, series.as_deref())?;
+            }
         }
         self.conns[ci].subs.push(Sub {
             id: id.to_owned(),
@@ -3210,6 +3222,7 @@ impl Session {
             last,
             memo: None,
             watch: None,
+            stories: None,
         });
         Ok(())
     }

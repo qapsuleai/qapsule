@@ -16,7 +16,9 @@ use std::collections::{BTreeMap, BTreeSet};
 
 use qp_schema::capsule::Audience;
 use qp_schema::data::{DataEvent, FeedKey};
-use qp_schema::protocol::{InitFeed, Language, ServerMsg, ViewerFace, ViewerItem, ViewerUpdate};
+use qp_schema::protocol::{
+    InitFeed, Language, ServerComment, ServerMsg, StoryRow, ViewerFace, ViewerItem, ViewerUpdate,
+};
 use qp_schema::scene::SceneDesc;
 use qp_session::viewer::{open_provider, trust_text, OpenSide, TrustState};
 use serde_json::{json, Value};
@@ -55,6 +57,51 @@ impl Traffic {
     }
 }
 
+/// The `stories` subscription id the shell core uses (R5/M18, §23).
+pub const STORIES_SUB: &str = "stories";
+
+/// (R5/M18, K48, K50; `docs/PROTOCOL.md` §23.5) The open instrument's story list as the
+/// authority sent it: asked for only at chart depth, dropped when the chart closes. No
+/// drawing here: the story chart alternatives read it ([`Stories::json`]).
+#[derive(Debug, Clone, Default, PartialEq)]
+pub struct Stories {
+    /// Instrument symbol.
+    pub instrument: String,
+    /// Its bar series (the rows' bar indexes).
+    pub series: String,
+    /// The rows, by birth (time, bar, id), as the authority orders them.
+    pub rows: Vec<StoryRow>,
+    /// Server comments on the instrument's licensed data (a reader without the flow).
+    pub comments: Vec<ServerComment>,
+    /// The authority's `total` of the last page received.
+    pub total: u32,
+    /// Every page arrived.
+    pub complete: bool,
+}
+
+impl Stories {
+    /// Puts a row in its birth place (a new one) or replaces it (a known one).
+    pub fn upsert(&mut self, row: StoryRow) {
+        if let Some(r) = self.rows.iter_mut().find(|r| r.id == row.id) {
+            *r = row;
+            return;
+        }
+        let key = |r: &StoryRow| (r.born_t, r.born_bar, r.id.clone());
+        let k = key(&row);
+        let at = self.rows.partition_point(|r| key(r) < k);
+        self.rows.insert(at, row);
+    }
+
+    /// `{instrument, series, total, complete, stories, comments}`.
+    #[must_use]
+    pub fn json(&self) -> Value {
+        json!({
+            "instrument": self.instrument, "series": self.series, "total": self.total,
+            "complete": self.complete, "stories": self.rows, "comments": self.comments,
+        })
+    }
+}
+
 /// The viewer state of the shell core.
 pub struct Viewer {
     principal: String,
@@ -78,6 +125,10 @@ pub struct Viewer {
     calendar: Option<qp_schema::Calendar>,
     /// How many checks of the open capsule ran.
     pub checks: u64,
+    /// (R5/M18, §23.5) The open instrument's story list (chart depth only).
+    pub stories: Option<Stories>,
+    /// How many `stories` queries the device sent (pages included).
+    pub stories_asked: u64,
 }
 
 impl std::fmt::Debug for Viewer {
@@ -110,6 +161,8 @@ impl Viewer {
             seq: 0,
             calendar: None,
             checks: 0,
+            stories: None,
+            stories_asked: 0,
         }
     }
 
@@ -267,6 +320,22 @@ impl Viewer {
         if let Some(o) = self.open.as_mut() {
             o.on_message(msg);
         }
+    }
+
+    /// (R5/M18, K48, §23.5) The instrument and bar series the story list should be about
+    /// now: the open capsule's, and only at chart depth (`chart`); `None` otherwise.
+    #[must_use]
+    pub fn stories_target(&self, chart: bool) -> Option<(String, String)> {
+        let o = self.open.as_ref().filter(|_| chart)?;
+        Some((o.open.instrument.clone(), o.open.series.clone()))
+    }
+
+    /// The instrument and series of the story list held now.
+    #[must_use]
+    pub fn stories_held(&self) -> Option<(String, String)> {
+        self.stories
+            .as_ref()
+            .map(|s| (s.instrument.clone(), s.series.clone()))
     }
 
     /// The open side.

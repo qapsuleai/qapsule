@@ -131,7 +131,8 @@ fn describe_lists_everything() {
     let d = &r["data"]["description"];
     assert_eq!(d["ops"].as_array().unwrap().len(), 35); // 22 in qp/0 (RD1) + 10 grammar ops (R2) + split_layer (R2/T8a) + set_audience, set_sensitivity (R3)
     assert!(d["queries"].as_array().unwrap().contains(&json!("present")));
-    assert_eq!(d["topics"].as_array().unwrap().len(), 10); // + view (RP2/T5), claims (RP2/T8), capsules (R3), viewer (RP3/M15)
+    assert_eq!(d["topics"].as_array().unwrap().len(), 11); // + view (RP2/T5), claims (RP2/T8), capsules (R3), viewer (RP3/M15), stories (R5/M18)
+    assert!(d["queries"].as_array().unwrap().contains(&json!("stories")));
     assert_eq!(d["role"], "owner");
     assert_eq!(d["principals"].as_array().unwrap().len(), 6);
 }

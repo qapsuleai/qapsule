@@ -256,6 +256,7 @@ Konular (`topic.kind`):
 | `intents` | — | `intent_triggered` |
 | `view` (RP2) | `view` (seçici de olur) | `view_changed` (görünümün okuduğu bir serinin barları değişti; §18.8) |
 | `claims` (RP2/T8) | — | `claim` (otoritenin veri kaynaklı iddiası, kanıtıyla: geçici, kesin, geri çekildi, temizlik değişti; §19.3). Veri kaynaklı `condition_met`, `intent_triggered`, `finding_state` ve motor girdisinin `change`'i de isteğe bağlı `evidence` (`ClaimEvidence`) taşır |
+| `stories` (R5/M18) | `instrument`, `series?` | `story` (hikâye listesinin değişen satırı: doğum, geçiş, kapanış, geçerlilik, akıştaki yer; §23.4); açık görünüm okuyucusuna o enstrümanın `server_comment`'i |
 
 Abonelik kimliği `subscribe` mesajının `id`'sidir. `unsubscribe {"id":…, "sub":"s2"}`.
 Bir bağlantı en çok `limits.max_subscriptions` abonelik tutar.
@@ -592,6 +593,7 @@ böylece aynı görünümün farklı katmanlarına eşzamanlı yazılar çakış
 | `capsules` | `instrument?`, `stages?`, `open?`, `meaning?`, `since_bar?`, `since_t?`, `audience?`, `limit?` | (R3, §20) `capsules`: soranın görebildiği kapsüller, önem sırasıyla; yetkisi olmayan lisanslı akış için `comments` (sunucu yorumları). |
 | `capsule` | `capsule` (kapsül ya da bulgu kimliği) | (R3, §20) `capsule_detail`: hikâye (geçişler, nedenler), olgular, cümle, karne, işaret tarifi, olgu başına kanıt erişimi (K34). |
 | `ledger` | `key?`, `meaning?`, `detector?`, `by_kind?` | (R3, §20) `ledger`: anahtar (ya da tür) başına kapanan ve gerçekleşen sayısı; lisanstan bağımsız. |
+| `stories` | `instrument`, `series?`, `range?`, `limit?`, `after?` | (R5/M18, §23) `stories`: enstrümanın aralıktaki bütün hikâyeleri (kapsülleri), okuyucunun gördüğü biçimde, doğum sırasıyla, sayfalı; bar yok. |
 
 **Hedef** (`Target`; dikkat, anlatım adımları ve R2'de görünüm vurgusu): `view`, `panel` (panel id'si), `layer` (R2), `series`, `output`
 (serinin çıktısı ya da bar alanı: hacim için `"v"`), `item` (bulgu, olgu…), `from_bar`,
@@ -946,6 +948,9 @@ yeniden oynatma barındırıcısıyla (`qp_session::ReplayHost`) koşar: süreç
 `conform::InProcReplay`, `qp serve` (`init.replay` görünce barındırıcıyı kurar;
 `--no-local-data`), MCP'de `Hub::shared_replay` (`replay_<kind>` araçları). Dökümlerde
 yerel veri hiç okunmaz.
+**R5/M18 (§23):** 60–63 enstrümanın hikâye listesi (yetkili okuyucu, yetkisiz okuyucular,
+~200 hikâyelik aralık, `stories` konusu); `cargo run -p qp-session --example
+make_story_transcripts -- --write` ile üretilir. Var olan dökümler değişmedi.
 
 ## 16. Gömme
 
@@ -2407,6 +2412,188 @@ Döküm: `fixtures/protocol/conformance/59-viewer.json` (abonelik ve ilk akış;
 yüzler, özetleriyle; kapsül açılınca dilim ve tek beslemelik veri aboneliği; adım sonrası
 değişen yüzler; kapatınca `closed` ve boş abonelik; ikinci abonelik `duplicate`, bilinmeyen
 `sub` `not_found`).
+
+## 23. Enstrümanın hikâye listesi (R5/M18)
+
+> Kararlar K50 (grafik derinliği enstrümanın hikâye çizelgesidir), K54 (kapanmışlar
+> varsayılan görünür), K53 (yazı tura kapsüller akışta gizli, çizelgede işaretli), K48
+> (cihaz listeyi grafik açılınca ister), K33/K34 (yetkisize rakam gitmez), K23 (bar
+> taşınmaz). Şema `qp-schema::protocol` (`protocol/story.rs`: `StoryRow`, `StoryFace`,
+> `StoryOutcome`, `FeedHidden`), otorite `crates/qp-session/src/story.rs`, cihaz
+> `crates/qp-wasm/src/viewer.rs` (`Stories`). Bu bölüm çizimi tanımlamaz: liste, hikâye
+> çizelgesinin tasarım alternatiflerinin (M18a–c) ortak girdisidir.
+
+Grafik derinliğinde bir enstrümanın, görünen aralıktaki **bütün** kapsülleri (hikâyeleri)
+çizilir: her biri doğum barında işaretiyle, ömrü (doğumdan kapanışa, açıksa son kesin bara
+kadar) ve sonucuyla. Liste kapsülün kimliğini, türünü, yönünü, doğum ve kapanış barını,
+sonucunu, geçerliliğini, akıştaki yerini ve yüz özetini taşır; **bar taşımaz** (K23): bar
+indeksleri ve zamanlar, cihazın kendi veri aboneliğindeki barlara göre çizilir (§22.4).
+
+### 23.1 Sorgu — `stories`
+
+```json
+→ {"type":"query","id":"r5","query":{"kind":"stories","instrument":"THYAO","range":{"last":25}}}
+← {"type":"result","id":"r5","seq":…,"data":{"kind":"stories","instrument":"THYAO","series":"px",
+   "total":5,"stories":[…,
+   {"id":"cap.THYAO.reversal.up.383","finding":"fnd.THYAO.reversal.up.383","series":"px",
+    "kind":"reversal","direction":"up","tier":3,
+    "born_bar":383,"born_t":1782172800000,"last_bar":398,"last_t":1783987200000,
+    "closed_bar":398,"closed_t":1783987200000,"stage":"expired","outcome":"expired",
+    "validity":"closed","in_feed":false,"hidden":"sensitivity",
+    "face":{"event":"yukarı dönüş","direction_word":"yukarı","when":"15 işlem günü önce",
+            "moved":"dün","validity_phrase":"süresi doldu",
+            "ledger_short":"3'te 3 tuttu (az örnek)","few_cases":true,"ledger_n":3}}]}}
+```
+
+| Alan | Anlamı |
+|------|--------|
+| `instrument` | Enstrüman sembolü (zorunlu). Okuyucunun dokümanında bu sembolün bar serisi yoksa `not_found` (`/query/instrument`, öneriyle). |
+| `series` | Enstrümanın bar serisi; yalnız birden çok bar serisi varsa gerekir (yoksa `ambiguous`, `did_you_mean` seriler). Yanlışsa `not_found` (`/query/series`). |
+| `range` | §5.4 **aralık** biçimi (`{"last":n}`, `{"from_bar","to_bar"}`, `{"from_t","to_t"}`; tam olarak biri), o serinin barlarına göre çözülür. Yoksa enstrümanın bütün hikâyeleri. Boş aralık ya da iki biçim birden `invalid` (`/query/range`). |
+| `limit` | Sayfa boyu: varsayılan **200**, en çok **500** (`STORIES_DEFAULT_LIMIT`, `STORIES_MAX_LIMIT`); `0` ya da 500'den büyük `invalid` (`/query/limit`, `expected`). |
+| `after` | Sonraki sayfa: önceki cevabın `next`'i (bir kapsül kimliği). Bu listede olmayan kimlik `not_found` (`/query/after`) — okuyucunun göremediği kapsülün kimliği de aynı cevabı alır (varlık kâhini yok). |
+
+**Aralığa giriş:** hikâyenin ömrü `[born_bar, son]` aralıkla kesişirse listededir; `son`
+kapanmış hikâyede kapanış barı, açık hikâyede serinin son kesin barıdır (ya da daha büyükse
+son geçiş barı). Böylece aralığın öncesinde doğup içinde süren ya da kapanan hikâye de
+gelir (çizelge onun ömrünü çizer).
+
+**Sıra ve kararlılık (deterministik):** doğum zamanı (doğum geçişinin `t`'si), sonra doğum
+barı, sonra kapsül kimliği — artan. Yeni doğumlar her zaman sona eklendiğinden `after`
+imleci canlı güncellemede kaymaz; geri çekilen hikâye listeden düşmez (`outcome:
+"retracted"`). Aynı doküman ve aynı istek aynı baytları verir.
+
+**Cevap** (`data.kind = "stories"`): `instrument`, `series` (bar indekslerinin serisi),
+`stories` (bu sayfanın satırları), `total` (aralıktaki satır sayısı, bütün sayfalar), `next`
+(sonraki sayfa varsa imleç), `comments` (aşağıda, yetki).
+
+**Satır** (`StoryRow`):
+
+| Alan | Anlamı |
+|------|--------|
+| `id`, `finding`, `series` | Kapsül, bulgu, bar serisi |
+| `kind`, `direction` | Anlam türü, yön |
+| `tier` | Önem kademesi (1 en önemli), okuyucunun dünyasında (§20.5) |
+| `born_bar`, `born_t` | Doğum barı ve zamanı |
+| `last_bar`, `last_t` | Son geçişin barı ve zamanı |
+| `closed_bar`, `closed_t` | Kapanış (yoksa hikâye açık) |
+| `stage` | Şimdiki aşama |
+| `outcome` | Kapanmışsa sonuç: `realized` (gerçekleşti), `invalidated` (tutmadı), `expired` (süresi doldu), `retracted` (geri çekildi; karnede yok) |
+| `validity` | `valid` / `no_longer` / `closed`, serinin son kesin barı itibarıyla (K42/A28; kapsül öğesi ve işaretle aynı değer) |
+| `in_feed`, `hidden` | Hikâye okuyucunun **akış süzgecinden** geçer mi (akışın uzunluğundan bağımsız); geçmiyorsa neden (aşağıda) |
+| `coin_flip` | (K53) Karnesi yazı turaya yakın işareti |
+| `face` | Yüz özeti (`StoryFace`): okuyucunun dilinde başlık yapı taşları — `event`, `direction_word`, `when`, `moved`, `validity_phrase`, `ledger_short`, `few_cases`, `ledger_n` (`docs/CONCEPTS.md` "Başlık yapı taşları"; yüz tasarımı başlığı bunlardan kurar). Metinler satırın yazıldığı an itibarıyla; tam cümle ve kanıt `capsule` sorgusuyla (§20.2) alınır |
+| `redacted` | Okuyucuya rakam gitmez (K33): yüz metinleri rakamsız, `ledger_n` yok |
+
+### 23.2 Akıştaki yer ve gizlilik (K53, hassasiyet)
+
+Çizelge her hikâyeyi gösterir; akış ise okuyucunun kitlesine göre süzer (§20.4). Satır,
+hikâyenin **akışta neden olmadığını** söyler (sıra; ilk tutan neden yazılır):
+
+1. `watchlist` — enstrüman izleme listesinde değil (pozisyon ve etkin niyetin enstrümanı
+   her zaman geçer).
+2. (K42/A22) Pozisyon ya da etkin niyetle ilgili hikâyenin **olumsuz** aşaması (`weakened`,
+   `invalidated`, `retracted`) her durumda akıştadır.
+3. `coin_flip` — (K53) karnesi yazı turaya yakın ve okuyucunun hassasiyeti `all` değil.
+4. `sensitivity` — kademesi seviyenin altında (`important` yalnız 1, `balanced` 1–2).
+
+**Hassasiyetle ilişki (K53 kural 4):** yazı tura işaretli hikâye `important` ve `balanced`
+seviyelerinde akışa girmez (`hidden: "coin_flip"`), **en açık seviyede (`all`) akışta
+işaretli görünür** (`in_feed: true, coin_flip: true`); çizelgede her seviyede işaretiyle
+bulunur. "Az örnekli" (`face.few_cases`) yazı tura değildir: gizlenmez, söylenir (K53 kural
+3). Gizlenen hikâye karneye işlemeye devam eder (K53 kural 2; karne bu süzgeci görmez).
+Akış (`capsules` sorgusunun `audience`'ı, `capsules` konusu, `viewer` akışı) ve satırın
+`in_feed`'i **aynı kuralı** kullanır (`Session::feed_place`).
+
+**Eşik:** yazı tura kuralı geleceğe bakmamalı (K53 kural 1) ve M19'da ölçülerek seçilir. O
+zamana kadar kural barındırıcının yapılandırmasıdır (`Session::set_coin_flip_rule`, protokol
+mesajı değil; mühür anahtarları gibi); verilmezse hiçbir hikâye işaretlenmez ve akış R4'teki
+gibidir (var olan dökümler bayt bayt aynı). Olumsuz geçişin (2) yazı tura gizlemesinden muaf
+tutulması bugünkü davranıştır; M19'un önerisine ve Arkin'in kararına bağlıdır.
+
+### 23.3 Yetki (K33, K34, Ö37)
+
+Sorgu ve konu okuyucunun dünyasında çalışır (§20.5, `as_reader`):
+
+- **Bütün lisanslı akışlara yetkili** okuyucu otoritenin dünyasını alır: lisanslı akış
+  hikâyeleri de listededir, yüzleri rakamlıdır.
+- **Lisanslı akış yetkisi olmayan** (açık görünüm) okuyucu açık dünyanın listesini alır:
+  lisanslı hikâyeler bu okuyucu için **yoktur** (kimliği `after` olarak verilse bile
+  `not_found`); `tier`, karne (`face.ledger_short`, `ledger_n`, `few_cases`), `validity`,
+  `in_feed`/`hidden`/`coin_flip` ve sıra yalnız açık veriden türer. Lisanslı verinin bu
+  okuyucuya tek kanalı, aralıktaki **sunucu yorumlarıdır** (`comments`: mühür iletileri,
+  `trust: "server"`, rakamsız; §20.4 ile aynı öğeler). "Lisanslı kapsülün rakamsız biçimi"
+  budur: varlığı ve zamanı yalnız bu iletilerin söylediği kadar.
+- **Bar beslemesine yetkisi olmayan** okuyucu (`redacted`): yüz metinleri rakamsız, `ledger_n`
+  yok. Satırda kanıt değeri, `confidence`, `importance` (ham önem), karne sayısı ya da veri
+  özeti (`evidence_ref`) **hiç yoktur** (kimse için: çizelge bunlara ihtiyaç duymaz; tam
+  kanıt `capsule` sorgusundadır, §20.2 kuralıyla).
+
+Girişimsizlik testleri: `crates/qp-session/tests/stories.rs` (aynı açık barlar, farklı
+lisanslı akış tohumları → yetkisiz okuyucuya giden `stories` cevapları ve `story` olayları
+sunucu yorumları dışında bayt eşit; lisanslı değer ve kimlik taraması; yazı tura kuralı) ve
+`crates/qp-session/tests/non_interference.rs`'in sorgu ve konu listesi (`stories`).
+
+### 23.4 Canlı güncelleme — `stories` konusu ve `story` olayı
+
+```json
+→ {"type":"subscribe","id":"st","topic":{"kind":"stories","instrument":"THYAO"}}
+← {"type":"ack","id":"st","status":"subscribed"}
+… bir bar kesinleşince:
+← {"type":"notify","sub":"st","event":{"kind":"story","story":StoryRow,"seq":8}}
+← {"type":"notify","sub":"st","event":{"kind":"server_comment","comment":{…},"seq":8}}   (yalnız açık görünüm okuyucusu)
+```
+
+- Konu `{instrument, series?}` (sorgunun `instrument`/`series` kuralı; yanlışsa aynı
+  hatalar, `/topic/...`). Aboneliğin başlangıç durumu `stories` cevabıdır: **abonelik anında
+  olay gelmez**; cihaz sorguyu ve aboneliği aynı turda gönderir (otorite mesajları sırayla
+  işlediğinden aralarında kaçan değişiklik olmaz).
+- Otorite her girdiden sonra (mesaj; veri olayı — yeniden oynatma barındırıcısında adım
+  başına, `viewer` olayıyla aynı ritim, §22.2) her `stories` aboneliği için, **okuyucunun
+  dünyasındaki günlük konumu** ilerlediyse, enstrümanın her satırının **anahtarını** (aşama,
+  son geçiş barı, geçerlilik, kademe, `in_feed`/`hidden`, `coin_flip`, `redacted`) son
+  gönderdiğiyle karşılaştırır ve anahtarı değişen ya da yeni olan her satırı bir `story`
+  olayıyla gönderir (doğum sırasıyla). Böylece doğum, geçiş, kapanış, bar başına değişen
+  geçerlilik ve kitle tercihi değişince akıştaki yer bildirilir. Yüz metinlerinin göreli
+  zamanı ("dün") tek başına olay doğurmaz.
+- Açık görünüm okuyucusuna konunun enstrümanındaki sunucu yorumları `server_comment`
+  olayıyla gelir (§20.4'teki ileti, motor girdisinin olaylarıyla birlikte).
+- Satır listeden hiç çıkmaz; bu yüzden "silindi" olayı yoktur.
+- **Çıktı sırası** (§15'e ek): `story` olayları, girdinin öteki çıktılarından ve `viewer`
+  olayından sonra, bağlantı açılış ve abonelik sırasıyla gelir.
+- Dokümana ve günlüğe girmez; okuma izni yeter. MCP'de `subscribe` aracı konuyu, `query`
+  araçları `query_stories`'i şemadan alır.
+
+### 23.5 Cihaz tarafı (K48)
+
+Görüntüleyici (§22) listeyi **yalnız grafik derinliğinde** ister: bağlantının bakış durumu
+`chart` ya da `evidence` olduğunda ve açık kapsülün dilimi geldiğinde, açık enstrüman için
+`stories` sorgusunu (aralıksız, `limit` 500, `next` varsa sonraki sayfalar) ve `stories`
+aboneliğini gönderir; satırları tutar, `story` olaylarıyla günceller. Derinlik `capsule`'e ya
+da `sentence`'e döndüğünde ya da açık kapsül başka enstrümana geçtiğinde aboneliği bırakır ve
+listeyi siler. Akış ekranında ve kapsül derinliğinde hiçbir şey istenmez. Çizim yoktur:
+satırlar `ShellCore::stories_json` ile çizelge alternatiflerine verilir.
+
+### 23.6 Sınırlar ve ölçüm
+
+- Sayfa en çok 500 satır; `comments` aralıkla sınırlıdır (sayfalanmaz).
+- Konu bütün enstrümanı izler (aralıksız); kitle değişince enstrümanın bütün satırlarının
+  yeri değişebilir ve hepsi gelir (döküm 63).
+- Ölçüm (`cargo run --release -p qp-session --example make_story_transcripts -- --stats`,
+  Apple silicon, release, 1.200 barlık THYAO, son 950 bar): yetkili okuyucuya 202 hikâye →
+  ilk sayfa 200 satır, JSON ~108 KB (gzip -9 ~10 KB), otoritede cevap ortanca ~2,9 ms;
+  akış yetkisiz okuyucuya 124 satır + 177 sunucu yorumu ~192 KB, ~1,9 ms. Konunun bedeli:
+  kesin bar başına otorite işi abonesiz ortanca 0,92 ms, üç aboneyle 2,69 ms (40 barda 76
+  `story` olayı).
+
+Dökümler: `fixtures/protocol/conformance/60-stories-entitled.json` (yetkili okuyucu; ~5 ve
+~50 hikâyelik aralıklar, sayfalama, İngilizce yüz, kapanmış + açık + akışta gizli karışımı,
+hatalar), `61-stories-unentitled.json` (aynı aralık üç okuyucuya: yetkili, akış yetkisiz —
+açık dünya ve sunucu yorumları —, veri yetkisiz — rakamsız yüz; lisanslı kimlik imleç
+olarak `not_found`), `62-stories-200.json` (~200 hikâyelik aralık, iki sayfa),
+`63-stories-live.json` (`stories` konusu: doğum, geçiş, kapanış, geçerlilik, kitle
+değişince yer; açık görünüm okuyucusuna sunucu yorumu; abonelikten çıkış).
+`cargo run -p qp-session --example make_story_transcripts -- --write` ile üretilir.
 
 ## Ek A — Eski `Command` tipi
 

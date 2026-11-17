@@ -25,7 +25,7 @@ use qp_schema::scene::SceneDesc;
 use qp_session::Replica;
 use serde_json::{json, Value};
 
-use crate::viewer::{Traffic, Viewer};
+use crate::viewer::{Stories, Traffic, Viewer, STORIES_SUB};
 pub mod bench;
 pub mod freq;
 pub mod paint;
@@ -105,6 +105,10 @@ enum Asked {
     Command,
     /// (RP3/M15) A `visible` message.
     Visible,
+    /// (R5/M18) A `stories` query (a page of the open instrument's story list).
+    Stories,
+    /// (R5/M18) The `stories` unsubscription.
+    Unsubscribe,
 }
 
 /// The gesture in progress on one target.
@@ -966,6 +970,9 @@ impl ShellCore {
                         let seq = self.viewer_seq;
                         self.apply_viewer(viewer, seq, &mut ch);
                     }
+                    (Some(Asked::Stories), d @ QueryResult::Stories { .. }) => {
+                        self.stories_page(d, &mut ch);
+                    }
                     (Some(Asked::Replay), QueryResult::Replay { replay }) => {
                         self.set_calendar(replay);
                         self.replay = Some(replay.clone());
@@ -997,6 +1004,17 @@ impl ShellCore {
                 self.error = Some(error.message.clone());
                 ch["error"] = json!(true);
             }
+            // (R5/M18, §23.4) The story list's changes.
+            ServerMsg::Notify { event, sub } if sub == STORIES_SUB => {
+                if let Some(st) = self.viewer.as_mut().and_then(|v| v.stories.as_mut()) {
+                    match event {
+                        Event::Story { story, .. } => st.upsert((**story).clone()),
+                        Event::ServerComment { comment, .. } => st.comments.push(comment.clone()),
+                        _ => {}
+                    }
+                    ch["stories"] = json!(true);
+                }
+            }
             ServerMsg::Notify { event, .. } => match event {
                 Event::Capsule { .. } | Event::Change { .. } | Event::ServerComment { .. } => {
                     self.feed_dirty = true;
@@ -1017,7 +1035,109 @@ impl ShellCore {
                 _ => {}
             },
         }
+        self.sync_stories(&mut ch);
         ch
+    }
+
+    /// (R5/M18, K48, §23.5) Asks for the open instrument's story list when the chart
+    /// opens (chart or evidence depth with an open capsule) and drops it when the chart
+    /// closes or the open capsule moves to another instrument. Nothing is asked on the
+    /// feed screen or at capsule depth.
+    fn sync_stories(&mut self, ch: &mut Value) {
+        if !self.welcomed {
+            return;
+        }
+        let chart = matches!(self.look.depth, OpenDepth::Chart | OpenDepth::Evidence);
+        let Some(v) = self.viewer.as_mut() else {
+            return;
+        };
+        let want = v.stories_target(chart);
+        let held = v.stories_held();
+        if want == held {
+            return;
+        }
+        if held.is_some() {
+            v.stories = None;
+            self.ask(
+                "unst",
+                Asked::Unsubscribe,
+                json!({"type":"unsubscribe","sub":STORIES_SUB}),
+            );
+        }
+        if let Some((instrument, series)) = want {
+            if let Some(v) = self.viewer.as_mut() {
+                v.stories_asked += 1;
+                v.stories = Some(Stories {
+                    instrument: instrument.clone(),
+                    series: series.clone(),
+                    ..Stories::default()
+                });
+            }
+            self.ask(
+                "st",
+                Asked::Stories,
+                json!({"type":"query","query":{"kind":"stories","instrument":instrument,
+                    "series":series,"limit":qp_schema::protocol::STORIES_MAX_LIMIT}}),
+            );
+            self.push(json!({"type":"subscribe","id":STORIES_SUB,
+                "topic":{"kind":"stories","instrument":instrument,"series":series}}));
+        }
+        ch["stories"] = json!(true);
+    }
+
+    /// (R5/M18) A page of the story list arrived: kept if it is still the list wanted;
+    /// the next page is asked for.
+    fn stories_page(&mut self, data: &QueryResult, ch: &mut Value) {
+        let QueryResult::Stories {
+            instrument,
+            series,
+            stories,
+            total,
+            next,
+            comments,
+        } = data
+        else {
+            return;
+        };
+        let Some(st) = self
+            .viewer
+            .as_mut()
+            .and_then(|v| v.stories.as_mut())
+            .filter(|s| &s.instrument == instrument && &s.series == series)
+        else {
+            return;
+        };
+        for r in stories {
+            st.upsert(r.clone());
+        }
+        st.comments.clone_from(comments);
+        st.total = *total;
+        st.complete = next.is_none();
+        ch["stories"] = json!(true);
+        if let Some(after) = next {
+            if let Some(v) = self.viewer.as_mut() {
+                v.stories_asked += 1;
+            }
+            let q = json!({"type":"query","query":{"kind":"stories","instrument":instrument,
+                "series":series,"limit":qp_schema::protocol::STORIES_MAX_LIMIT,"after":after}});
+            self.ask("st", Asked::Stories, q);
+        }
+    }
+
+    /// (R5/M18, §23.5) The open instrument's story list as the device holds it (JSON;
+    /// `null`: none — not at chart depth, or the full replica mode).
+    #[must_use]
+    pub fn stories_json(&self) -> Value {
+        self.viewer
+            .as_ref()
+            .and_then(|v| v.stories.as_ref())
+            .map_or(Value::Null, Stories::json)
+    }
+
+    /// (R5/M18) How many `stories` queries this device sent (0 in the full replica mode).
+    #[must_use]
+    pub fn stories_asked(&self) -> u64 {
+        self.viewer.as_ref().map_or(0, |v| v.stories_asked)
     }
 
     /// (RP3/M15) Applies a viewer update: the feed rows (the feed the rest of the core

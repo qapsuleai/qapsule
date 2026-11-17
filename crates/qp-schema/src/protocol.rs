@@ -26,6 +26,9 @@ use crate::types::{
     LedgerEntry, Series, TimestampMs,
 };
 
+mod story;
+pub use story::*;
+
 /// The protocol version string of this module.
 pub const PROTOCOL_VERSION: &str = "qp/0";
 
@@ -1823,6 +1826,26 @@ pub enum Query {
         #[serde(default, skip_serializing_if = "std::ops::Not::not")]
         by_kind: bool,
     },
+    /// (R5/M18, §23, K50) The instrument's story list: every story (capsule) of one
+    /// instrument whose life (birth to closing, or to the last closed bar when open)
+    /// meets `range`, as the reader may receive it — no bars (K23). Ordered by birth
+    /// (time, bar, id), paged with `limit` and `after`.
+    Stories {
+        /// Instrument symbol.
+        instrument: String,
+        /// Its bar series (needed only when the instrument has more than one).
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        series: Option<String>,
+        /// Bars or times of that series the story's life must meet (default: all).
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        range: Option<Range>,
+        /// Rows per answer (default 200, at most 500).
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        limit: Option<u32>,
+        /// The page after this capsule id (the previous answer's `next`).
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        after: Option<String>,
+    },
 }
 
 /// Both sentences of a capsule for one reader (R3, §20).
@@ -2495,6 +2518,24 @@ pub enum QueryResult {
         /// The changes.
         viewer: Box<ViewerUpdate>,
     },
+    /// (R5/M18, §23) Answer to `stories`.
+    Stories {
+        /// Instrument symbol.
+        instrument: String,
+        /// Bar series of the rows' bar indexes.
+        series: String,
+        /// The rows of this page, by birth (time, bar, id).
+        stories: Vec<StoryRow>,
+        /// Rows in the range (every page).
+        total: u32,
+        /// More rows follow: send this as `after` for the next page.
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        next: Option<String>,
+        /// For a reader without the licensed data entitlement: the server comments on
+        /// that data in the range (instead of the licensed stories; K33, Ö37).
+        #[serde(default, skip_serializing_if = "Vec::is_empty")]
+        comments: Vec<ServerComment>,
+    },
 }
 
 /// The verdict on a `dispute` (R3, §19.9).
@@ -2601,6 +2642,18 @@ pub enum Topic {
         /// Face frame width in CSS px (default 390); the height is the face design's.
         #[serde(default, skip_serializing_if = "Option::is_none")]
         width: Option<u32>,
+    },
+    /// (R5/M18, §23) Changes of one instrument's story list: a `story` event with the
+    /// row whenever a story is born, moves, closes, or its validity or feed place for
+    /// the subscriber changes; server comments on that instrument for a subscriber
+    /// without the licensed data entitlement. The state at subscription is the `stories`
+    /// answer (no event for it).
+    Stories {
+        /// Instrument symbol.
+        instrument: String,
+        /// Its bar series (needed only when the instrument has more than one).
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        series: Option<String>,
     },
 }
 
@@ -2746,6 +2799,13 @@ pub enum Event {
     Viewer {
         /// The changes.
         viewer: Box<ViewerUpdate>,
+        /// Log position it reflects.
+        seq: Seq,
+    },
+    /// (R5/M18, §23) A row of the story list changed or is new (topic `stories`).
+    Story {
+        /// The row as the subscriber may receive it now.
+        story: Box<StoryRow>,
         /// Log position it reflects.
         seq: Seq,
     },

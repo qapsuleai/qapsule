@@ -720,6 +720,12 @@ impl Session {
         !self.viewers.is_empty()
     }
 
+    /// Whether anything is pushed after an input: a `viewer` (§22) or a `stories` (§23)
+    /// subscription.
+    pub(crate) fn has_pushers(&self) -> bool {
+        !self.viewers.is_empty() || self.has_stories()
+    }
+
     /// (§22) The data subscriptions of viewer connection `conn`: the feeds its host serves
     /// it (`None`: not a viewer — such a connection gets the whole data plane).
     #[must_use]
@@ -839,16 +845,20 @@ impl Session {
     /// (§22) What changed for every viewer connection since it was last told, as `viewer`
     /// events (none when nothing changed). A host calls it after a batch of data events
     /// ([`Session::set_viewer_batch`]); the authority itself after every message.
+    ///
+    /// (R5/M18, §23) Then the `story` events of the `stories` subscriptions (same rhythm).
     pub fn viewer_flush(&mut self) -> Vec<OutboundLine> {
-        if self.viewers.is_empty() {
-            return Vec::new();
-        }
-        let cis: Vec<usize> = (0..self.conns.len())
-            .filter(|&ci| self.viewers.contains_key(&self.conns[ci].id))
-            .collect();
         let mut lines = Vec::new();
-        for ci in cis {
-            lines.extend(self.viewer_lines(ci, false));
+        if !self.viewers.is_empty() {
+            let cis: Vec<usize> = (0..self.conns.len())
+                .filter(|&ci| self.viewers.contains_key(&self.conns[ci].id))
+                .collect();
+            for ci in cis {
+                lines.extend(self.viewer_lines(ci, false));
+            }
+        }
+        if self.has_stories() {
+            lines.extend(self.stories_flush());
         }
         lines
     }

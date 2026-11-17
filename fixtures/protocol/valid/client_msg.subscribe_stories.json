@@ -1,0 +1,5 @@
+{
+ "type": "subscribe",
+ "id": "st",
+ "topic": {"kind": "stories", "instrument": "THYAO", "series": "px"}
+}

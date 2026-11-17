@@ -7,3 +7,5 @@ pub mod selvi;
 pub mod selvi_glossary;
 pub mod tunca;
 pub mod tunca_glossary;
+pub mod marla;
+pub mod marla_glossary;

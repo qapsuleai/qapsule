@@ -52,7 +52,7 @@ pub const DISPLAY_TZ: &str = "Europe/Istanbul";
 
 // (RP3/M15) The pure scene functions live in `qp_session::viewer`: the authority compiles
 // a viewer's faces with the very same code (§22).
-pub use qp_session::viewer::{face_scene, open_scene, scene_digest};
+pub use qp_session::viewer::{face_scene, open_scene, open_scene_with, scene_digest, story_series};
 
 #[cfg(target_arch = "wasm32")]
 mod clock {
@@ -903,10 +903,14 @@ impl ShellCore {
                     ("transition", &self.look.transition),
                     ("outcome", &self.look.outcome),
                     ("look", &self.look.look),
+                    ("story", &self.look.story),
                 ] {
                     if let Some(v) = v {
                         more[k] = json!(v);
                     }
+                }
+                if self.look.hide_closed {
+                    more["hide_closed"] = json!(true);
                 }
                 if more.as_object().is_some_and(|o| o.len() > 1) {
                     self.ask("in", Asked::Input, json!({"type":"input","gesture":more}));
@@ -1360,6 +1364,7 @@ impl ShellCore {
             "transition": qp_grammar::transitions::names(),
             "outcome": qp_grammar::glyph::outcome::names(),
             "look": qp_grammar::look::names(),
+            "story": qp_grammar::stories::names(),
         })
     }
 
@@ -1481,13 +1486,34 @@ impl ShellCore {
         let head = self.open_headline.clone();
         // (RP3/S) The build's own time (`scene_build`), apart from the change check.
         let t0 = core_now();
+        let lang = self.lang;
+        let story = look.story.is_some() && o.to >= OpenDepth::Chart;
         let scene = if let Some(v) = self.viewer.as_mut() {
+            // (R5/M18, §23.5) The story chart draws the list the authority sent.
+            let rows = if story {
+                v.stories
+                    .as_ref()
+                    .map(|st| st.rows.clone())
+                    .unwrap_or_default()
+            } else {
+                Vec::new()
+            };
             // (RP3/M15) The open capsule over the device's own data of its instrument.
             let side = v.open_mut().filter(|s| s.open.capsule == o.capsule)?;
             let s = side.replica_mut().session_mut()?;
-            open_scene(s, &o, head.as_deref(), &look, mp)
+            open_scene_with(s, &o, head.as_deref(), &look, mp, (&rows, lang))
         } else {
-            open_scene(self.replica.session_mut()?, &o, head.as_deref(), &look, mp)
+            let principal = self.principal.clone();
+            let s = self.replica.session_mut()?;
+            // (R5/M18) The full replica lists the stories itself (the same rule).
+            let rows = if story {
+                story_series(s, &o)
+                    .map(|bs| s.story_rows(&bs, &principal, lang))
+                    .unwrap_or_default()
+            } else {
+                Vec::new()
+            };
+            open_scene_with(s, &o, head.as_deref(), &look, mp, (&rows, lang))
         };
         let t1 = core_now();
         self.core_span("scene_build", t0, t1);
@@ -1783,12 +1809,17 @@ impl ShellCore {
             "transition",
             "outcome",
             "look",
+            "story",
         ] {
             if let Some(v) = choice.get(k).and_then(Value::as_str) {
                 if !v.is_empty() {
                     g[k] = json!(v);
                 }
             }
+        }
+        // (R5/M18, K54) Show or hide the closed stories of the story chart.
+        if let Some(b) = choice.get("hide_closed").and_then(Value::as_bool) {
+            g["hide_closed"] = json!(b);
         }
         if g.as_object().is_some_and(|o| o.len() > 1) {
             self.ask("in", Asked::Input, json!({"type":"input","gesture":g}));

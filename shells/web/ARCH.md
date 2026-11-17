@@ -106,3 +106,12 @@ eklenenler. Hiçbir kural gevşetilmedi.
 
 Görünüş seçimi `?look=<ad>` ve Ayarlar → Görünüş: öbür ayarlar gibi `set_look({look})`
 (`style` hareketinin `look` alanı); adlar `choices().look`'tan.
+
+(R5/M18, `pavka`) Hikâye çizelgesi seçimi `?story=<ad>` ve Ayarlar → Hikâye çizelgesi
+(`set_look({story})`, `style` hareketinin `story` alanı; adlar `choices().story`'den) ve
+Ayarlar → Kapanmış hikâyeleri gizle (`set_look({hide_closed})`). Çizim, odak taşıma,
+kümeleme ve gizleme çekirdekte; sayfa yalnız sahneyi boyar.
+
+| Yöntem | Neden |
+|--------|-------|
+| `stories()` | Yalnız ölçüm düzeneği için (`window.qp.stories`, `rounds/R5/experiments/M18/pavka/k52.mjs`): cihazın tuttuğu hikâye listesi (§23.5). Sayfa onu okumaz, çizmez. |

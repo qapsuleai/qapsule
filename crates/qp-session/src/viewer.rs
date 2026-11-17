@@ -235,6 +235,21 @@ pub fn open_scene(
     look: &ViewState,
     max_points: u32,
 ) -> Option<SceneDesc> {
+    open_scene_with(s, o, headline, look, max_points, (&[], Language::Tr))
+}
+
+/// (R5/M18) [`open_scene`] with the open instrument's story rows and the reader's
+/// language, for a connection with a story chart design (`look.story`; without one the
+/// rows are not read).
+#[must_use]
+pub fn open_scene_with(
+    s: &mut Session,
+    o: &Opening,
+    headline: Option<&str>,
+    look: &ViewState,
+    max_points: u32,
+    stories: (&[qp_schema::protocol::StoryRow], Language),
+) -> Option<SceneDesc> {
     if o.to == OpenDepth::Sentence {
         return None;
     }
@@ -259,7 +274,32 @@ pub fn open_scene(
         .as_ref()
         .filter(|r| o.to >= OpenDepth::Chart && r.view == view.id)
         .map(|r| (r.from_bar, r.to_bar));
-    compile(&view, &p, &options(look, w, h, range)).ok()
+    // (R5/M18) A story chart design: the chart at its price height, then the stories
+    // (the authority's `tap_at` builds the same scene, `interact.rs`).
+    let sd = if o.to >= OpenDepth::Chart {
+        depth::story_design(look.story.as_deref())
+    } else {
+        None
+    };
+    let Some(sd) = sd else {
+        return compile(&view, &p, &options(look, w, h, range)).ok();
+    };
+    let scene = compile(&view, &p, &options(look, w, (sd.price_height)(h), range)).ok()?;
+    let fact_of = |f: &str| p.finding(f).and_then(|x| x.facts.first().cloned());
+    let (rows, lang) = stories;
+    Some((sd.extend)(
+        look_of(look),
+        look.theme.as_deref().or(view.theme.as_deref()),
+        scene,
+        h,
+        &qp_grammar::stories::StoryInput {
+            rows,
+            focus: Some(&o.finding),
+            hide_closed: look.hide_closed,
+            lang,
+            fact_of: &fact_of,
+        },
+    ))
 }
 
 // ---------------------------------------------------------------------------
@@ -1061,4 +1101,15 @@ impl Session {
         (!feeds.is_empty() && !v.data.is_empty() && feeds.iter().all(|k| v.data.contains(k)))
             .then_some(v.sub.as_str())
     }
+}
+
+/// (R5/M18) The bar series whose story list the open capsule's story chart draws: the bar
+/// series under its finding's first fact (`None`: unknown finding, or no bars).
+#[must_use]
+pub fn story_series(s: &Session, o: &Opening) -> Option<String> {
+    let doc = s.document();
+    let f = doc.findings.iter().find(|f| f.id == o.finding)?;
+    let fid = f.facts.first()?;
+    let fact = doc.facts.iter().find(|x| &x.id == fid)?;
+    crate::values::bar_series(doc, &fact.series).map(|b| b.id.clone())
 }

@@ -800,6 +800,19 @@ pub fn face_view_in(
 }
 
 // ---------------------------------------------------------------------------
+// R5/M18: the story chart (`crate::stories`)
+// ---------------------------------------------------------------------------
+
+/// (R5/M18, K50) The story chart design a connection chose (`ViewState.story`), drawn at
+/// `chart`/`evidence` depth around the open capsule's chart; `None` (the default, `r4`):
+/// the open capsule's chart alone. The designs are registered in
+/// [`crate::stories::STORIES`].
+#[must_use]
+pub fn story_design(name: Option<&str>) -> Option<&'static crate::stories::StoryDesign> {
+    crate::stories::by_name(name)
+}
+
+// ---------------------------------------------------------------------------
 // R4: opening between depths (`docs/GRAMMAR.md` §18.6, `docs/PROTOCOL.md` §4.6)
 // ---------------------------------------------------------------------------
 

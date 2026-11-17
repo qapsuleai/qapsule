@@ -26,6 +26,9 @@ use crate::session::Session;
 
 const GP: &str = "/gesture";
 
+/// (R5/M18) Fewest bars a story cluster's tap shows.
+const STORY_ZOOM_MIN: u64 = 20;
+
 /// Default height of a capsule face in the feed when the surface reports none.
 pub const FACE_HEIGHT: u32 = 140;
 
@@ -51,6 +54,8 @@ struct StyleReq<'a> {
     outcome: Option<&'a str>,
     seen: Option<i64>,
     look: Option<&'a str>,
+    story: Option<&'a str>,
+    hide_closed: Option<bool>,
 }
 
 /// The frame key of a target (`ViewState::frames`).
@@ -214,6 +219,8 @@ impl Session {
                 outcome,
                 seen,
                 look,
+                story,
+                hide_closed,
             } => {
                 self.set_style(
                     ci,
@@ -226,6 +233,8 @@ impl Session {
                         outcome: outcome.as_deref(),
                         seen: *seen,
                         look: look.as_deref(),
+                        story: story.as_deref(),
+                        hide_closed: *hide_closed,
                     },
                 )?;
                 (Out::default(), Vec::new())
@@ -376,7 +385,18 @@ impl Session {
                 return Err(unknown("look", l, qp_grammar::look::names()));
             }
         }
+        if let Some(st) = r.story {
+            if !qp_grammar::stories::is_story(st) {
+                return Err(unknown("story", st, qp_grammar::stories::names()));
+            }
+        }
         let look = &mut self.conns[ci].look;
+        if let Some(st) = r.story {
+            look.story = (st != qp_grammar::stories::DEFAULT_STORY).then(|| st.to_owned());
+        }
+        if let Some(h) = r.hide_closed {
+            look.hide_closed = h;
+        }
         if let Some(l) = r.look {
             look.look = (l != qp_grammar::look::DEFAULT_LOOK).then(|| l.to_owned());
         }
@@ -627,8 +647,60 @@ impl Session {
         } else {
             None
         };
-        let (scene, times) = self.reader_scene(ci, &view, frame, range, face)?;
+        // (R5/M18) A story chart design: the chart at its price height, then the stories.
+        let story = if d >= OpenDepth::Chart {
+            depth::story_design(self.conns[ci].look.story.as_deref())
+        } else {
+            None
+        };
+        let Some(sd) = story else {
+            let (scene, times) = self.reader_scene(ci, &view, frame, range, face)?;
+            return Ok(Some((view, scene, times)));
+        };
+        let at = (frame.0, (sd.price_height)(frame.1));
+        let (scene, times) = self.reader_scene(ci, &view, at, range, face)?;
+        let scene = self.story_extend(ci, sd, &view, scene, frame.1, finding);
         Ok(Some((view, scene, times)))
+    }
+
+    /// (R5/M18) Adds the story part of design `sd` to the open capsule's chart `scene`
+    /// (the reader's story rows of the view's bar series; the focus: `finding`).
+    fn story_extend(
+        &mut self,
+        ci: usize,
+        sd: &qp_grammar::stories::StoryDesign,
+        view: &View,
+        scene: SceneDesc,
+        h: u32,
+        finding: &str,
+    ) -> SceneDesc {
+        let Some(series) = view_bar_series(rd!(self), view).map(|s| s.id.clone()) else {
+            return scene;
+        };
+        let principal = self.conns[ci].principal.clone();
+        let lang = self.lang_of(ci);
+        let rows = self.story_rows(&series, &principal, lang);
+        let doc = rd!(self);
+        let fact_of = |f: &str| {
+            doc.findings
+                .iter()
+                .find(|x| x.id == f)
+                .and_then(|x| x.facts.first().cloned())
+        };
+        let look = &self.conns[ci].look;
+        (sd.extend)(
+            crate::viewer::look_of(look),
+            look.theme.as_deref().or(view.theme.as_deref()),
+            scene,
+            h,
+            &qp_grammar::stories::StoryInput {
+                rows: &rows,
+                focus: Some(finding),
+                hide_closed: look.hide_closed,
+                lang,
+                fact_of: &fact_of,
+            },
+        )
     }
 
     /// The visible range of a capsule's chart: the view state's (if it is that view's),
@@ -822,6 +894,23 @@ impl Session {
                 let hit = scene
                     .as_ref()
                     .map(|(_, s, times)| hit_scene(s, x, y, times));
+                // (R5/M18) The story chart's own taps come first (focus, cluster, K54).
+                let story = if d >= OpenDepth::Chart {
+                    depth::story_design(self.conns[ci].look.story.as_deref()).and_then(|sd| {
+                        (sd.tap)(
+                            hit.as_ref().and_then(|h| h.item.as_ref()),
+                            Some(finding.as_str()),
+                        )
+                    })
+                } else {
+                    None
+                };
+                if let Some(t) = story {
+                    let view = scene.as_ref().map(|(v, _, _)| v.clone());
+                    let events = self.story_tap(ci, t, view.as_ref(), &mut out)?;
+                    out.hit = hit;
+                    return Ok((out, events));
+                }
                 if let Some(to) = depth::tap_opens(d, hit.as_ref().and_then(|h| h.item.as_ref())) {
                     out.opening = Some(self.transition(ci, &cap, &finding, d, to)?);
                 } else if let (Some((view, _, times)), Some(h)) = (&scene, &hit) {
@@ -852,6 +941,65 @@ impl Session {
                 }
                 out.hit = hit;
                 Ok((out, Vec::new()))
+            }
+        }
+    }
+
+    /// (R5/M18) A story chart tap: the focus moves to another story (it becomes the open
+    /// capsule, at chart depth, over the same visible range); a cluster shows its bars; the
+    /// checkbox shows or hides the closed stories (K54).
+    fn story_tap(
+        &mut self,
+        ci: usize,
+        t: qp_grammar::stories::StoryTap,
+        view: Option<&View>,
+        out: &mut Out,
+    ) -> PResult<Vec<OutboundLine>> {
+        use qp_grammar::stories::StoryTap;
+        match t {
+            StoryTap::ToggleClosed => {
+                let l = &mut self.conns[ci].look;
+                l.hide_closed = !l.hide_closed;
+                Ok(Vec::new())
+            }
+            StoryTap::Focus(f) => {
+                let (cap, f) = self.find_capsule(&f, GP)?;
+                let from = self.conns[ci].look.depth;
+                let keep = self.conns[ci].look.range.clone();
+                let pr = self.present_at(ci, &f, OpenDepth::Chart)?;
+                if let (Some(r), Some(v)) = (keep, pr.view.as_ref()) {
+                    self.conns[ci].look.range = Some(Viewport {
+                        view: v.id.clone(),
+                        ..r
+                    });
+                }
+                out.opening = Some(self.transition(ci, &cap, &f, from, OpenDepth::Chart)?);
+                Ok(Vec::new())
+            }
+            StoryTap::Zoom(a, b) => {
+                let Some(view) = view else {
+                    return Ok(Vec::new());
+                };
+                let last = self.last_slot(view).unwrap_or(0);
+                let (a, b) = (a.min(b).min(last), a.max(b).min(last));
+                // At least `STORY_ZOOM_MIN` bars, centred on the cluster.
+                let (a, b) = if b - a + 1 < STORY_ZOOM_MIN {
+                    let c = a + (b - a) / 2;
+                    let b = (c.saturating_sub(STORY_ZOOM_MIN / 2) + STORY_ZOOM_MIN - 1).min(last);
+                    (b.saturating_sub(STORY_ZOOM_MIN - 1), b)
+                } else {
+                    (a, b)
+                };
+                let vp = Viewport {
+                    view: view.id.clone(),
+                    from_bar: a,
+                    to_bar: b,
+                };
+                self.conns[ci].look.range = Some(vp.clone());
+                let principal = self.conns[ci].principal.clone();
+                let events = self.viewport_events(&principal, &vp);
+                out.viewport = Some(vp);
+                Ok(events)
             }
         }
     }

@@ -146,7 +146,14 @@ fn options(look: &ViewState, w: u32, h: u32, range: Option<(u64, u64)>) -> Compi
     o.theme.clone_from(&look.theme);
     o.alphabet.clone_from(&look.alphabet);
     o.outcome.clone_from(&look.outcome);
+    o.look.clone_from(&look.look);
     o
+}
+
+/// (R5/T3) The connection's look (`ViewState.look`; absent or unknown: `r4`).
+#[must_use]
+pub fn look_of(look: &ViewState) -> &'static qp_grammar::look::Look {
+    qp_grammar::look::or_default(look.look.as_deref())
 }
 
 /// The scene of a capsule's face in the feed (open depth `sentence`): the connection's
@@ -175,7 +182,15 @@ pub fn face_scene(
         parts,
     };
     let id = format!("capsule-{}", item.finding);
-    let view = depth::face_view(look.face.as_deref(), &item.finding, max_points, &p, &id).ok()?;
+    let view = depth::face_view_in(
+        look_of(look),
+        look.face.as_deref(),
+        &item.finding,
+        max_points,
+        &p,
+        &id,
+    )
+    .ok()?;
     let mut o = options(look, w, h, None);
     o.face.clone_from(&look.face);
     compile(&view, &p, &o).ok()
@@ -196,7 +211,7 @@ fn open_view(
         OpenDepth::Sentence => None,
         OpenDepth::Capsule => {
             let id = o.presentation.capsule_view.as_ref()?.id.clone();
-            depth::capsule_view(&o.finding, max_points, p, &id).ok()
+            depth::capsule_view_in(look_of(look), &o.finding, max_points, p, &id).ok()
         }
         OpenDepth::Chart | OpenDepth::Evidence => {
             let given = o.presentation.view.as_ref()?;
@@ -930,7 +945,7 @@ impl Session {
             up.feed = Some(items.clone());
         }
         // The faces on screen.
-        let fh = qp_grammar::faces::height(look.face.as_deref());
+        let fh = qp_grammar::faces::height_in(look_of(look), look.face.as_deref());
         let mut sent: BTreeMap<String, String> = BTreeMap::new();
         for id in &vc.visible {
             let Some(row) = items.iter().find(|r| &r.capsule.id == id && r.face) else {

@@ -164,6 +164,8 @@ pub struct Surface {
     pub radius: f64,
     /// Corner radius of the phone frame (CSS px).
     pub frame_radius: f64,
+    /// Corner radius of a small badge (CSS px).
+    pub pill_radius: f64,
     /// Width of rules, grid and axis lines (px).
     pub line: f64,
     /// Elevation: `false` = flat (no shadow anywhere).
@@ -313,6 +315,7 @@ pub const R4: Look = Look {
     surface: Surface {
         radius: 6.0,
         frame_radius: 18.0,
+        pill_radius: 8.0,
         line: 1.0,
         shadow: false,
         strip_alpha: 56,
@@ -533,6 +536,7 @@ impl Look {
                 "bottom": self.space.plot[3]}, "panel_gap": self.space.panel_gap,
                 "glyph_gap": self.space.glyph_gap},
             "surface": {"radius": self.surface.radius, "frame_radius": self.surface.frame_radius,
+                "pill_radius": self.surface.pill_radius,
                 "line": self.surface.line, "shadow": self.surface.shadow,
                 "strip_alpha": self.surface.strip_alpha, "veil_alpha": self.surface.veil_alpha},
             "glyph": {"face_px": self.glyph.face_px, "card_px": self.glyph.card_px,
@@ -590,6 +594,10 @@ pub fn css_vars(look: &Look, scheme: Option<&str>) -> Vec<(String, String)> {
         (
             "--frame-radius".into(),
             format!("{}px", look.surface.frame_radius),
+        ),
+        (
+            "--pill-radius".into(),
+            format!("{}px", look.surface.pill_radius),
         ),
         ("--motion".into(), format!("{}ms", look.motion.chrome_ms)),
         ("--ease".into(), look.motion.ease.css()),

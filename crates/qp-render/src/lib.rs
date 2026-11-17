@@ -15,6 +15,7 @@ use std::fmt;
 
 mod bars;
 pub mod cpu;
+pub mod fonts;
 pub mod retained;
 pub mod scene;
 #[cfg(any(feature = "spike-vello-cpu", feature = "spike-vello-gpu"))]

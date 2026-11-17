@@ -334,16 +334,20 @@ impl<'a> Enc<'a> {
                 text,
                 color,
                 align,
+                font,
                 ..
             } => {
                 if self.cfg.no_text {
                     return;
                 }
+                let Some(tf) = super::paint::text_font(font.as_deref()) else {
+                    return;
+                };
                 self.flush();
                 let y = *baseline as f32;
                 if self.cfg.text == Text::Atlas {
-                    for (ch, gx) in glyph_pens(*x, *px, text, *align) {
-                        match self.atlas.slot(ch, *px, *color) {
+                    for (ch, gx) in glyph_pens(tf.1, *x, *px, text, *align) {
+                        match self.atlas.slot((tf.0, tf.1), ch, *px, *color) {
                             Some(g) if g.w == 0 => {}
                             #[allow(clippy::cast_precision_loss)]
                             Some(g) => self.push(&[
@@ -356,18 +360,18 @@ impl<'a> Enc<'a> {
                                 *baseline as f32 - g.h as f32 - g.dy as f32,
                             ]),
                             // the atlas is full: the browser draws this glyph
-                            None => self.glyph_text(ch, gx, y, *px, *color),
+                            None => self.glyph_text(tf.2, ch, gx, y, *px, *color),
                         }
                     }
                     return;
                 }
                 self.fill_style(*color);
-                let font = format!("{px}px {}", super::paint::PAINT_FONT_FAMILY);
+                let font = format!("{px}px {}", tf.2);
                 let f = self.s(&font);
                 Self::set(&mut self.font, f, op::FONT, &mut self.ops);
                 if self.cfg.text == Text::Glyphs {
-                    for (ch, gx) in glyph_pens(*x, *px, text, *align) {
-                        self.glyph_text(ch, gx, y, *px, *color);
+                    for (ch, gx) in glyph_pens(tf.1, *x, *px, text, *align) {
+                        self.glyph_text(tf.2, ch, gx, y, *px, *color);
                     }
                 } else {
                     let a = self.s(match align {
@@ -383,9 +387,9 @@ impl<'a> Enc<'a> {
     }
 
     /// One glyph drawn by the browser (`fillText`) at pen `gx`, baseline `y`.
-    fn glyph_text(&mut self, ch: char, gx: f32, y: f32, px: f32, color: Rgba) {
+    fn glyph_text(&mut self, family: &str, ch: char, gx: f32, y: f32, px: f32, color: Rgba) {
         self.fill_style(color);
-        let font = format!("{px}px {}", super::paint::PAINT_FONT_FAMILY);
+        let font = format!("{px}px {family}");
         let f = self.s(&font);
         Self::set(&mut self.font, f, op::FONT, &mut self.ops);
         let a = self.s("left");
@@ -445,7 +449,7 @@ pub struct Slot {
 pub struct Atlas {
     h: u32,
     px: Vec<u8>,
-    slots: BTreeMap<(char, u32, Rgba), Slot>,
+    slots: BTreeMap<(usize, char, u32, Rgba), Slot>,
     x: u32,
     y: u32,
     row: u32,
@@ -478,12 +482,17 @@ impl Atlas {
 
     /// The slot of `ch` at size `px` in colour `c`, rasterised and packed on first use;
     /// `None` when the atlas is full.
-    fn slot(&mut self, ch: char, px: f32, c: Rgba) -> Option<Slot> {
-        let key = (ch, px.to_bits(), c);
+    fn slot(
+        &mut self,
+        (fi, font): (usize, &fontdue::Font),
+        ch: char,
+        px: f32,
+        c: Rgba,
+    ) -> Option<Slot> {
+        let key = (fi, ch, px.to_bits(), c);
         if let Some(s) = self.slots.get(&key) {
             return Some(*s);
         }
-        let font = qp_render::cpu::font().ok()?;
         let (m, cov) = font.rasterize(ch, px);
         #[allow(clippy::cast_possible_truncation)]
         let (gw, gh) = (m.width as u32, m.height as u32);
@@ -582,10 +591,7 @@ fn winding(pts: &[[f32; 2]]) -> i8 {
 /// The reference renderer's pen positions (`qp_render::cpu`): advances from fontdue at
 /// size `px`, a right-aligned text ends at `x`, every glyph at its pen rounded to a whole
 /// pixel. White space draws nothing and is left out.
-fn glyph_pens(x: i32, px: f32, text: &str, align: Align) -> Vec<(char, f32)> {
-    let Ok(font) = qp_render::cpu::font() else {
-        return Vec::new();
-    };
+fn glyph_pens(font: &fontdue::Font, x: i32, px: f32, text: &str, align: Align) -> Vec<(char, f32)> {
     #[allow(clippy::cast_precision_loss)]
     let x = x as f32;
     let advance: f32 = text
@@ -652,9 +658,10 @@ fn bounds(p: &Prim) -> Option<Bounds> {
             px,
             text,
             align,
+            font,
             ..
         } => {
-            let font = qp_render::cpu::font().ok()?;
+            let font = super::paint::text_font(font.as_deref())?.1;
             let adv: f32 = text
                 .chars()
                 .map(|ch| font.metrics(ch, *px).advance_width)
@@ -915,6 +922,8 @@ mod tests {
             text: t.to_owned(),
             color: [255, 255, 255, 255],
             align,
+            font: None,
+            role: None,
         }
     }
 
@@ -961,11 +970,11 @@ mod tests {
     fn glyphs_sit_at_the_reference_pens() {
         let font = qp_render::cpu::font().unwrap();
         let adv = font.metrics('0', 33.0).advance_width;
-        let g = glyph_pens(10, 33.0, "0 0", Align::Left);
+        let g = glyph_pens(qp_render::cpu::font().unwrap(), 10, 33.0, "0 0", Align::Left);
         assert_eq!(g.len(), 2);
         assert!((g[0].1 - 10.0).abs() < f32::EPSILON);
         assert!((g[1].1 - (10.0 + 2.0 * adv).round()).abs() < f32::EPSILON);
-        let r = glyph_pens(100, 33.0, "00", Align::Right);
+        let r = glyph_pens(qp_render::cpu::font().unwrap(), 100, 33.0, "00", Align::Right);
         assert!((r[0].1 - (100.0 - 2.0 * adv).round()).abs() < f32::EPSILON);
     }
 
@@ -1023,6 +1032,8 @@ mod tests {
             text: "x".into(),
             color: [0; 4],
             align: Align::Left,
+            font: None,
+            role: None,
         };
         assert!(stream(
             Config::default(),
@@ -1061,7 +1072,9 @@ mod tests {
         assert_eq!(px.len(), (s.ops[6] * s.ops[9] * 4.0) as usize);
         // the 'S' glyph: fontdue's coverage times the colour's alpha
         let (m, cov) = qp_render::cpu::font().unwrap().rasterize('S', 33.0);
-        let slot = atlas.slot('S', 33.0, [255, 255, 255, 255]).unwrap();
+        let slot = atlas
+            .slot((0, qp_render::cpu::font().unwrap()), 'S', 33.0, [255, 255, 255, 255])
+            .unwrap();
         assert_eq!((slot.w as usize, slot.h as usize), (m.width, m.height));
         let k = cov.iter().position(|&v| v > 0).unwrap();
         let (r, col) = (k / m.width, k % m.width);

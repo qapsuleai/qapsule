@@ -64,6 +64,8 @@ fn shift(p: &Prim, dx: f32, dy: f32) -> Prim {
             text: format!("{text}{}", (dx as i32).rem_euclid(10)),
             color,
             align,
+            font: None,
+            role: None,
         },
     }
 }
@@ -239,6 +241,8 @@ fn scene_fingerprint_flips_on_any_pixel_field() {
             text: "ab".to_owned(),
             color: c,
             align: Align::Left,
+            font: None,
+            role: None,
         },
     ];
     let sc = |prims: Vec<Prim>| scene_of(40, 30, [0, 0, 0, 255], prims);
@@ -421,6 +425,8 @@ fn scene_fingerprint_flips_on_any_pixel_field() {
                 text: "ab".to_owned(),
                 color: c,
                 align: Align::Left,
+                font: None,
+                role: None,
             },
         ),
         (
@@ -432,6 +438,8 @@ fn scene_fingerprint_flips_on_any_pixel_field() {
                 text: "ab".to_owned(),
                 color: c,
                 align: Align::Left,
+                font: None,
+                role: None,
             },
         ),
         (
@@ -443,6 +451,8 @@ fn scene_fingerprint_flips_on_any_pixel_field() {
                 text: "ab".to_owned(),
                 color: c,
                 align: Align::Left,
+                font: None,
+                role: None,
             },
         ),
         (
@@ -454,6 +464,8 @@ fn scene_fingerprint_flips_on_any_pixel_field() {
                 text: "ac".to_owned(),
                 color: c,
                 align: Align::Left,
+                font: None,
+                role: None,
             },
         ),
         (
@@ -465,6 +477,8 @@ fn scene_fingerprint_flips_on_any_pixel_field() {
                 text: "ab".to_owned(),
                 color: c2,
                 align: Align::Left,
+                font: None,
+                role: None,
             },
         ),
         (
@@ -476,6 +490,8 @@ fn scene_fingerprint_flips_on_any_pixel_field() {
                 text: "ab".to_owned(),
                 color: c,
                 align: Align::Right,
+                font: None,
+                role: None,
             },
         ),
         // A primitive of another kind in the same place.

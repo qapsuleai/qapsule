@@ -255,6 +255,8 @@ fn rejects_bad_sizes_and_text() {
             text: "x".to_owned(),
             color: [255; 4],
             align: Align::Left,
+            font: None,
+            role: None,
         };
         assert!(render_scene_rgba(&scene::scene_of(10, 10, [0; 4], vec![t])).is_err());
     }

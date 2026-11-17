@@ -2,7 +2,6 @@
 //! integer-only compositor for text. Output is premultiplied RGBA8 in a tiny-skia `Pixmap`.
 
 use std::collections::BTreeMap;
-use std::sync::OnceLock;
 
 use crate::RenderError;
 use qp_schema::scene::{Align, Prim, Rgba, SceneDesc};
@@ -10,22 +9,17 @@ use tiny_skia::{
     Color, FillRule, LineCap, LineJoin, Paint, PathBuilder, Pixmap, Rect, Stroke, Transform,
 };
 
-/// IBM Plex Mono Regular, SIL OFL 1.1 (see `assets/fonts/OFL.txt`). Embedded so output never
-/// depends on system fonts.
-pub const FONT_BYTES: &[u8] = include_bytes!("../assets/fonts/IBMPlexMono-Regular.ttf");
+/// The default font: IBM Plex Mono Regular, SIL OFL 1.1 (see `assets/fonts/OFL.txt`).
+/// Embedded so output never depends on system fonts. (R5/T3) Other files:
+/// [`crate::fonts`].
+pub const FONT_BYTES: &[u8] = crate::fonts::FILES[0].1;
 
-/// Parsed embedded font, shared by all renders.
+/// Parsed default font, shared by all renders.
 ///
 /// # Errors
 /// Only if the embedded font is corrupt (a build-time invariant).
 pub fn font() -> Result<&'static fontdue::Font, RenderError> {
-    static FONT: OnceLock<Result<fontdue::Font, String>> = OnceLock::new();
-    FONT.get_or_init(|| {
-        fontdue::Font::from_bytes(FONT_BYTES, fontdue::FontSettings::default())
-            .map_err(str::to_owned)
-    })
-    .as_ref()
-    .map_err(|e| RenderError::new(format!("embedded font: {e}")))
+    crate::fonts::by_index(0)
 }
 
 fn color(c: Rgba) -> Color {
@@ -46,17 +40,19 @@ fn div255(x: u32) -> u32 {
     (x + (x >> 8)) >> 8
 }
 
-/// Glyph coverage bitmaps by (character, size bits).
-pub type GlyphCache = BTreeMap<(char, u32), (fontdue::Metrics, Vec<u8>)>;
+/// Glyph coverage bitmaps by (font index, character, size bits); (R5/T3) the font index
+/// is [`crate::fonts::index`] of the text's `font`.
+pub type GlyphCache = BTreeMap<(usize, char, u32), (fontdue::Metrics, Vec<u8>)>;
 
 /// Draws one text line by compositing fontdue coverage masks with integer source-over.
 /// Pen positions are rounded to whole pixels so glyph bitmaps are never resampled.
 fn draw_text(
     pm: &mut Pixmap,
-    font: &fontdue::Font,
+    font: (usize, &fontdue::Font),
     cache: &mut GlyphCache,
     t: (i32, i32, f32, &str, Rgba, Align),
 ) {
+    let (fi, font) = font;
     let (x, baseline, size, text, c, align) = t;
     let advance: f32 = text
         .chars()
@@ -71,7 +67,7 @@ fn draw_text(
     let data = pm.data_mut();
     for ch in text.chars() {
         let (m, cov) = cache
-            .entry((ch, size.to_bits()))
+            .entry((fi, ch, size.to_bits()))
             .or_insert_with(|| font.rasterize(ch, size));
         let gx = pen.round() as i32 + m.xmin;
         let gy = baseline - m.height as i32 - m.ymin;
@@ -180,7 +176,8 @@ pub fn scale_prim(p: &Prim, s: u32) -> Prim {
             text,
             color,
             align,
-            ..
+            font,
+            role,
         } => Prim::Text {
             x: x * si,
             baseline: baseline * si,
@@ -188,6 +185,8 @@ pub fn scale_prim(p: &Prim, s: u32) -> Prim {
             text: text.clone(),
             color: *color,
             align: *align,
+            font: font.clone(),
+            role: role.clone(),
         },
     }
 }
@@ -291,6 +290,7 @@ pub fn draw_prim(
             text,
             color,
             align,
+            font: face,
             ..
         } => {
             if !(px.is_finite() && *px > 0.0 && *px <= MAX_TEXT_PX) {
@@ -298,7 +298,8 @@ pub fn draw_prim(
                     "text size {px} out of range (0, {MAX_TEXT_PX}]"
                 )));
             }
-            draw_text(pm, font, cache, (*x, *baseline, *px, text, *color, *align));
+            let f = crate::fonts::for_text(font, face.as_deref())?;
+            draw_text(pm, f, cache, (*x, *baseline, *px, text, *color, *align));
         }
     }
     Ok(())
@@ -341,11 +342,13 @@ pub fn prim_bounds(font: &fontdue::Font, p: &Prim) -> Option<[i64; 4]> {
             px,
             text,
             align,
+            font: face,
             ..
         } => {
             if !(px.is_finite() && *px > 0.0 && *px <= MAX_TEXT_PX) {
                 return None;
             }
+            let (_, font) = crate::fonts::for_text(font, face.as_deref()).ok()?;
             let advance: f32 = text
                 .chars()
                 .map(|ch| font.metrics(ch, *px).advance_width)

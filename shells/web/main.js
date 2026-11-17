@@ -14,7 +14,7 @@ const L = {
     empty: 'Henüz kapsül yok. Oynatmayı başlatın.', back: '‹ Geri', lang: 'Dil', theme: 'Tema',
     dark: 'Koyu', light: 'Açık', sensitivity: 'Hassasiyet', default: 'Grubun varsayılanı',
     important: 'Önemli', balanced: 'Dengeli', all: 'Hepsi', alphabet: 'İşaret alfabesi',
-    face: 'Yüz tasarımı', feedl: 'Akış düzeni', transition: 'Geçiş', outcome: 'Sonuç işareti', noent: 'Veri yetkisi yok (gösterim)', audience: 'İzleme listesi ve pozisyonlar',
+    face: 'Yüz tasarımı', lookl: 'Görünüş', feedl: 'Akış düzeni', transition: 'Geçiş', outcome: 'Sonuç işareti', noent: 'Veri yetkisi yok (gösterim)', audience: 'İzleme listesi ve pozisyonlar',
     group: 'Kullanıcı', habituated: 'Alışkın', future: 'Geleceğin yatırımcısı', symbol: 'Sembol',
     watch: 'İzle', position: 'Pozisyon', apply: 'Uygula', phone: 'Telefondan aç:',
     copy: 'Özeti kopyala', copied: 'Kopyalandı', play: '▶', pause: '❚❚', step: '+1', go: 'Git',
@@ -35,7 +35,7 @@ const L = {
     empty: 'No capsules yet. Start the replay.', back: '‹ Back', lang: 'Language', theme: 'Theme',
     dark: 'Dark', light: 'Light', sensitivity: 'Sensitivity', default: "Group's default",
     important: 'Important', balanced: 'Balanced', all: 'All', alphabet: 'Glyph alphabet',
-    face: 'Face design', feedl: 'Feed layout', transition: 'Transition', outcome: 'Outcome mark', noent: 'No data entitlement (demo)', audience: 'Watchlist and positions',
+    face: 'Face design', lookl: 'Look', feedl: 'Feed layout', transition: 'Transition', outcome: 'Outcome mark', noent: 'No data entitlement (demo)', audience: 'Watchlist and positions',
     group: 'User', habituated: 'Habituated', future: 'Future investor', symbol: 'Symbol',
     watch: 'Watch', position: 'Position', apply: 'Apply', phone: 'Open on your phone:',
     copy: 'Copy summary', copied: 'Copied', play: '▶', pause: '❚❚', step: '+1', go: 'Go',
@@ -63,6 +63,8 @@ const ui = {
   feed: params.get('feed') || '',
   transition: params.get('transition') || '',
   outcome: params.get('outcome') || '',
+  // (R5/T3) The look (design record); the names come from the core (`choices().look`).
+  look: params.get('look') || '',
   anim: params.get('anim') !== '0',
   // (R4/S1) Human-test settings: last look (`now` or a step) and the audience, given to
   // the core as they are (it reads the comma lists); applied again on every start frame,
@@ -193,7 +195,7 @@ function start(frame) {
   core.metric_flag('webgpu', Boolean(navigator.gpu));
   sampleMemory();
   if (ui.theme === 'light' || ui.alphabet || ui.face) core.set_style(ui.face, ui.alphabet, ui.theme);
-  if (ui.feed || ui.transition || ui.outcome) core.set_look(JSON.stringify({ feed: ui.feed, transition: ui.transition, outcome: ui.outcome }));
+  if (ui.feed || ui.transition || ui.outcome || ui.look) core.set_look(JSON.stringify({ feed: ui.feed, transition: ui.transition, outcome: ui.outcome, look: ui.look }));
   if (ui.watch || ui.long || ui.short || ui.group) core.set_audience(JSON.stringify({ group: ui.group, watch: ui.watch, long: ui.long, short: ui.short }));
   if (ui.seen) core.seen_at(ui.seen);
   faces.clear();
@@ -609,7 +611,7 @@ function wire() {
   };
   $('s_alpha').onchange = (e) => { core.set_style('', e.target.value, ''); flush(); };
   $('s_face').onchange = (e) => { core.set_style(e.target.value, '', ''); flush(); };
-  const looks = { feed: 's_feed', transition: 's_transition', outcome: 's_outcome' };
+  const looks = { feed: 's_feed', transition: 's_transition', outcome: 's_outcome', look: 's_look' };
   for (const k of Object.keys(looks)) {
     $(looks[k]).onchange = (e) => { core.set_look(JSON.stringify({ [k]: e.target.value })); flush(); };
   }
@@ -628,7 +630,7 @@ function fillChoices() {
   // The names each setting accepts come from the core's registries.
   const ch = JSON.parse(core.choices());
   const look = JSON.parse(core.look());
-  const sel = { face: 's_face', alphabet: 's_alpha', feed: 's_feed', transition: 's_transition', outcome: 's_outcome' };
+  const sel = { face: 's_face', alphabet: 's_alpha', feed: 's_feed', transition: 's_transition', outcome: 's_outcome', look: 's_look' };
   for (const k of Object.keys(sel)) {
     const el = $(sel[k]);
     const opts = [];
@@ -800,8 +802,18 @@ function renderBench() {
   $('b_copy').hidden = false;
 }
 
+// (R5/T3) The chrome's colours, font and radius come from the core's look as CSS custom
+// properties (empty when unchanged); they are set as given.
+function applyCss() {
+  const css = core.css();
+  if (!css) return;
+  const root = document.documentElement.style;
+  for (const [k, v] of Object.entries(JSON.parse(css))) root.setProperty(k, v);
+}
+
 function frame(ts) {
   if (core) {
+    applyCss();
     core.metric_frame(mode, ts);
     if (benching) benchStep(ts);
     paintPass();

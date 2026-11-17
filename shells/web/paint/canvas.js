@@ -38,7 +38,7 @@ const SYNC = new URLSearchParams(location.search).get('cx_sync') === '1';
 
 let core = null;
 let env = null;
-let font = null; // the core's font, registered once per page
+let font = null; // the core's fonts, registered once per page (R5/T3: every embedded asset)
 let ready = false;
 let atlas = null; // the glyph atlas (`?canvas=atlas`): a copy of the core's, on a canvas
 let atlasCtx = null;
@@ -101,6 +101,9 @@ function play(ctx, ops, S) {
       case INIT:
         ctx.lineCap = S[n()]; ctx.lineJoin = S[n()]; ctx.miterLimit = n(); ctx.textBaseline = S[n()];
         ctx.imageSmoothingEnabled = false;
+        // (R5/T3) The reference renderer (fontdue) applies no GPOS kerning: neither does
+        // the canvas, so both place glyphs alike for any font (RESEARCH.md, fonts).
+        ctx.fontKerning = 'none';
         break;
       default: return;
     }
@@ -137,16 +140,18 @@ export default {
     core.canvas_config(new URLSearchParams(location.search).get('canvas') || '');
     if (font) return;
     const t0 = performance.now();
-    font = new FontFace('QpMono', core.font());
-    document.fonts.add(font);
-    // Nothing is painted before the font is in (no flash of a fallback font). Should it
+    // (R5/T3) Every font asset the core embeds, under the family its font strings name,
+    // from the core's own bytes (the reference renderer draws the same files).
+    font = JSON.parse(core.fonts()).map((f) => new FontFace(f.family, core.font_bytes(f.id)));
+    for (const f of font) document.fonts.add(f);
+    // Nothing is painted before the fonts are in (no flash of a fallback font). Should one
     // fail to load, the canvas paints anyway, with the browser's fallback font.
     const go = () => {
       core.metric_span('canvas_font', t0, performance.now());
       ready = true;
       env.repaint();
     };
-    font.load().then(go, go);
+    Promise.all(font.map((f) => f.load())).then(go, go);
   },
   paintFace(canvas, id, force, px) {
     return paint(canvas, id, force, px, (whole) => core.canvas_face(id, whole));

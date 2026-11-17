@@ -71,7 +71,7 @@ struct Glyph {
 /// changed since the last hand-out ([`GpuPainter::atlas_dirty`]).
 struct Atlas {
     pixels: Vec<u8>,
-    glyphs: BTreeMap<(char, u32), Glyph>,
+    glyphs: BTreeMap<(usize, char, u32), Glyph>,
     shelf_x: u32,
     shelf_y: u32,
     shelf_h: u32,
@@ -107,8 +107,8 @@ impl Atlas {
 
     /// The glyph of `ch` at `size` px, rasterised and placed on first use; `None` when the
     /// atlas is full (the caller starts a new atlas and builds the frame again).
-    fn glyph(&mut self, font: &fontdue::Font, ch: char, size: f32) -> Option<Glyph> {
-        if let Some(g) = self.glyphs.get(&(ch, size.to_bits())) {
+    fn glyph(&mut self, (fi, font): (usize, &fontdue::Font), ch: char, size: f32) -> Option<Glyph> {
+        if let Some(g) = self.glyphs.get(&(fi, ch, size.to_bits())) {
             return Some(*g);
         }
         let (m, cov) = font.rasterize(ch, size);
@@ -142,7 +142,7 @@ impl Atlas {
             ax,
             ay,
         };
-        self.glyphs.insert((ch, size.to_bits()), g);
+        self.glyphs.insert((fi, ch, size.to_bits()), g);
         Some(g)
     }
 }
@@ -453,7 +453,7 @@ fn rect(f: &mut Frame, x: i32, y: i32, w: u32, h: u32, col: [u8; 4]) {
 fn text(
     f: &mut Frame,
     atlas: &mut Atlas,
-    font: &fontdue::Font,
+    (fi, font): (usize, &fontdue::Font),
     (x, baseline, size, s, c, align): (i32, i32, f32, &str, Rgba, Align),
 ) -> Result<(), AtlasFull> {
     if !(size.is_finite() && size > 0.0 && size <= qp_render::cpu::MAX_TEXT_PX) {
@@ -470,7 +470,7 @@ fn text(
     };
     let first = f.n;
     for ch in s.chars() {
-        let g = atlas.glyph(font, ch, size).ok_or(AtlasFull)?;
+        let g = atlas.glyph((fi, font), ch, size).ok_or(AtlasFull)?;
         if g.w > 0 && g.h > 0 {
             let gx = (pen.round() as i32 + g.xmin) as f32;
             let gy = (baseline - g.h as i32 - g.ymin) as f32;
@@ -563,11 +563,15 @@ impl GpuPainter {
                     text: t,
                     color,
                     align,
+                    font: face,
                     ..
                 } => text(
                     &mut f,
                     &mut self.atlas,
-                    font,
+                    match super::paint::text_font(face.as_deref()) {
+                        Some((i, ff, _)) if i != 0 => (i, ff),
+                        _ => (0, font),
+                    },
                     (x, baseline, px, &t, color, align),
                 )?,
             }
@@ -806,7 +810,7 @@ mod tests {
         let mut atlas = Atlas::new(0);
         let mut f = frame();
         let t = (10, 30, 16.0, "Ab", [255; 4], Align::Left);
-        assert!(text(&mut f, &mut atlas, font, t).is_ok());
+        assert!(text(&mut f, &mut atlas, (0, font), t).is_ok());
         let m = font.metrics('A', 16.0);
         let top = (30 - m.height as i32 - m.ymin) as f32;
         let left = (10 + m.xmin) as f32;
@@ -818,7 +822,7 @@ mod tests {
         );
         assert_eq!(atlas.glyphs.len(), 2);
         // The same glyph again is not rasterised twice.
-        assert!(text(&mut f, &mut atlas, font, t).is_ok());
+        assert!(text(&mut f, &mut atlas, (0, font), t).is_ok());
         assert_eq!(atlas.glyphs.len(), 2);
     }
 
@@ -828,7 +832,7 @@ mod tests {
         let mut atlas = Atlas::new(0);
         let mut full = false;
         for k in 0..400u32 {
-            if atlas.glyph(font, 'W', 100.0 + k as f32).is_none() {
+            if atlas.glyph((0, font), 'W', 100.0 + k as f32).is_none() {
                 full = true;
                 break;
             }
@@ -845,6 +849,8 @@ mod tests {
             text: "Q".into(),
             color: [255; 4],
             align: Align::Left,
+            font: None,
+            role: None,
         };
         g.build_prims((10, 10, [0, 0, 0, 255]), &[&q], 1);
         assert_eq!(g.atlas_generation(), 1);

@@ -360,6 +360,10 @@ pub use replica::Replica;
 #[cfg(feature = "replica")]
 pub mod shell;
 
+/// RP3/M15: the device as a viewer (feature `replica`; `docs/PROTOCOL.md` §22).
+#[cfg(feature = "replica")]
+pub mod viewer;
+
 /// R4/T5: shell-less driving and the parity check (native only).
 #[cfg(all(feature = "replica", not(target_arch = "wasm32")))]
 pub mod drive;
@@ -393,7 +397,8 @@ mod shell_binding {
 
     #[wasm_bindgen]
     impl Shell {
-        /// From the host's `start` frame (`{conn, principal, lang, data, events}`).
+        /// From the host's `start` frame (`{conn, principal, lang, data, events}`; RP3/M15
+        /// `mode: "viewer"` with `instruments` instead of data: the viewer core).
         ///
         /// # Errors
         /// A malformed frame.
@@ -402,6 +407,22 @@ mod shell_binding {
             // (RP3/T4) Typed, without a JSON tree of the frame (see `core_from_start`).
             let inner = crate::shell::core_from_start(start_json).map_err(err)?;
             Ok(Self { inner })
+        }
+
+        /// (RP3/M15) The shell says capsule `id`'s face is (or is no longer) on screen.
+        pub fn visible(&mut self, id: &str, on: bool) {
+            self.inner.visible(id, on);
+        }
+
+        /// (RP3/M15, VERIFY 17) The device's data subscriptions, what it holds and the
+        /// bytes it received (JSON).
+        pub fn viewer(&self) -> String {
+            self.inner.viewer_json().to_string()
+        }
+
+        /// (RP3/M15) Runs the open capsule's check on its own data again (JSON).
+        pub fn check(&mut self) -> String {
+            self.inner.check_now().to_string()
         }
 
         /// One frame of the host's stream; returns what changed (JSON).
@@ -441,7 +462,7 @@ mod shell_binding {
         }
 
         /// The open capsule (JSON).
-        pub fn open(&self) -> String {
+        pub fn open(&mut self) -> String {
             self.inner.open_json().to_string()
         }
 

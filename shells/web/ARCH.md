@@ -34,7 +34,7 @@ satır; boyama yolu bağlamında ayrıca bir takım) yakalanmazsa adım düşer.
 `set_sensitivity`, `set_audience`, `set_style`, `back`, `open_to`, `pointer`, `wheel`,
 `transition`, `transition_from`, `metric_frame`, `metric_span`, `metric_mark`, `metric_env`,
 `metrics`, `metrics_rows`, `digests`, `png`, `sent`; (R4/H-M8910) `set_look`, `mark_seen`, (R4/S1) `seen_at`,
-`open_capsule`, `set_dpr`, `face_size`, `choices`, `transition_progress`, `transition_frame`; (R4/D) `metric_device`, `metric_memory`, `metric_reset` (ölçüm ekranı: cihaz bilgisi, bellek örneği, seriyi sıfırlama).
+`open_capsule`, `set_dpr`, `face_size`, `choices`, `transition_progress`, `transition_frame`; (R4/D) `metric_device`, `metric_memory`, `metric_reset` (ölçüm ekranı: cihaz bilgisi, bellek örneği, seriyi sıfırlama); (RP3/M15) `visible` (görüntüleyici: hangi yüzün ekranda olduğunu çekirdeğe bildirir — yüzler otoriteden yalnız ekrandakiler için hazır gelir; karar çekirdekte), `viewer`, `check` (ölçüm düzeneği için: cihazın veri abonelikleri ve aldığı bayt, açık kapsülün kendi verisinde yeniden sınanması).
 
 (RP3/T2) Eklenenler ve gerekçeleri:
 

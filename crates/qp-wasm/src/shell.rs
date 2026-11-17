@@ -16,18 +16,16 @@
 
 use std::collections::{BTreeMap, VecDeque};
 
-use qp_grammar::{compile, depth, CompileOptions, DataProvider, SeriesKind};
-use qp_schema::capsule::GlyphSpec;
 use qp_schema::data::DataEvent;
 use qp_schema::protocol::{
     CapsuleItem, Event, EvidenceAccess, InitData, Language, OpenDepth, Opening, QueryResult,
     ReplayState, ServerMsg, ViewState,
 };
 use qp_schema::scene::SceneDesc;
-use qp_schema::{Bar, Capsule, Fact, Finding, Point, View};
-use qp_session::{Replica, Session};
+use qp_session::Replica;
 use serde_json::{json, Value};
 
+use crate::viewer::{Traffic, Viewer};
 pub mod bench;
 pub mod paint;
 
@@ -49,203 +47,9 @@ pub const WHEEL_FACTOR: f64 = 1.25;
 /// The display time zone of the demo (BIST).
 pub const DISPLAY_TZ: &str = "Europe/Istanbul";
 
-/// FNV-1a 64 of a scene's JSON bytes (`view_digest`, §19.6).
-#[must_use]
-pub fn scene_digest(scene: &SceneDesc) -> String {
-    let bytes = serde_json::to_vec(scene).unwrap_or_default();
-    format!("{:016x}", qp_session::replica::fnv1a64(&bytes))
-}
-
-/// A data provider that speaks with the reader's sentences: the follower session's
-/// provider (document, own bars, values) with the headline of each finding replaced by
-/// the sentence the authority wrote for this reader (the `capsules` answer's
-/// `sentence.text`: its language and entitlement). (R4/H-FP) On a face, it also gives the
-/// headline pieces of that capsule for the same reader (`Session::item_headline_parts`).
-struct Reader<'a> {
-    inner: qp_session::DocProvider<'a>,
-    heads: &'a BTreeMap<String, String>,
-    parts: Option<(&'a str, qp_grammar::HeadlineParts)>,
-}
-
-impl DataProvider for Reader<'_> {
-    fn series_kind(&self, s: &str) -> Option<SeriesKind> {
-        self.inner.series_kind(s)
-    }
-    fn bars(&self, s: &str) -> Option<std::borrow::Cow<'_, [Bar]>> {
-        self.inner.bars(s)
-    }
-    fn input_bars(&self, s: &str) -> Option<String> {
-        self.inner.input_bars(s)
-    }
-    fn fields(&self, s: &str) -> Vec<String> {
-        self.inner.fields(s)
-    }
-    fn main_field(&self, s: &str) -> Option<String> {
-        self.inner.main_field(s)
-    }
-    fn plot_fields(&self, s: &str) -> Vec<String> {
-        self.inner.plot_fields(s)
-    }
-    fn values(&self, s: &str, f: &str) -> Option<std::borrow::Cow<'_, [Option<f64>]>> {
-        self.inner.values(s, f)
-    }
-    fn points(&self, s: &str) -> Option<std::borrow::Cow<'_, [Point]>> {
-        self.inner.points(s)
-    }
-    fn label(&self, s: &str) -> Option<String> {
-        self.inner.label(s)
-    }
-    fn symbol(&self, s: &str) -> Option<String> {
-        self.inner.symbol(s)
-    }
-    fn interval(&self, s: &str) -> Option<String> {
-        self.inner.interval(s)
-    }
-    fn fact(&self, id: &str) -> Option<std::borrow::Cow<'_, Fact>> {
-        self.inner.fact(id)
-    }
-    fn finding(&self, id: &str) -> Option<std::borrow::Cow<'_, Finding>> {
-        self.inner.finding(id)
-    }
-    fn headline(&self, finding: &str) -> Option<String> {
-        self.heads
-            .get(finding)
-            .cloned()
-            .or_else(|| self.inner.headline(finding))
-    }
-    fn threshold(&self, name: &str) -> Option<f64> {
-        self.inner.threshold(name)
-    }
-    fn capsule(&self, c: &str) -> Option<std::borrow::Cow<'_, Capsule>> {
-        self.inner.capsule(c)
-    }
-    fn glyph(&self, c: &str) -> Option<std::borrow::Cow<'_, GlyphSpec>> {
-        self.inner.glyph(c)
-    }
-    fn headline_parts(&self, finding: &str) -> Option<qp_grammar::HeadlineParts> {
-        match &self.parts {
-            Some((f, hp)) if *f == finding => Some(hp.clone()),
-            _ => self.inner.headline_parts(finding),
-        }
-    }
-}
-
-/// The language of the reader's sentence in `item`: the authority wrote `sentence.text` in
-/// the reader's language (`en` when it is the English sentence and not the Turkish one).
-fn item_lang(item: &CapsuleItem) -> Language {
-    if item.sentence.text == item.sentence.en && item.sentence.text != item.sentence.tr {
-        Language::En
-    } else {
-        Language::Tr
-    }
-}
-
-fn options(look: &ViewState, w: u32, h: u32, range: Option<(u64, u64)>) -> CompileOptions {
-    let mut o = CompileOptions::new(w, h);
-    o.range = range;
-    o.theme.clone_from(&look.theme);
-    o.alphabet.clone_from(&look.alphabet);
-    o.outcome.clone_from(&look.outcome);
-    o
-}
-
-/// The scene of a capsule's face in the feed (open depth `sentence`): the connection's
-/// face design (`look.face`, `qp_grammar::depth::face_view`) over the replica's own data,
-/// at `w` × `h`, with the reader's sentence. `None` when the reader gets no face scene
-/// (no data for the finding's series: the shell then shows the sentence as text).
-#[must_use]
-pub fn face_scene(
-    s: &mut Session,
-    item: &CapsuleItem,
-    look: &ViewState,
-    max_points: u32,
-    w: u32,
-    h: u32,
-) -> Option<SceneDesc> {
-    let heads = BTreeMap::from([(item.finding.clone(), item.sentence.text.clone())]);
-    // (R4/H-FP) The headline pieces only for a design with a headline template.
-    let parts = qp_grammar::faces::headline_template(look.face.as_deref())
-        .ok()
-        .flatten()
-        .and_then(|_| s.item_headline_parts(item, item_lang(item)))
-        .map(|hp| (item.finding.as_str(), hp));
-    let p = Reader {
-        inner: s.provider(),
-        heads: &heads,
-        parts,
-    };
-    let id = format!("capsule-{}", item.finding);
-    let view = depth::face_view(look.face.as_deref(), &item.finding, max_points, &p, &id).ok()?;
-    let mut o = options(look, w, h, None);
-    o.face.clone_from(&look.face);
-    compile(&view, &p, &o).ok()
-}
-
-/// The open capsule's view at its depth, rebuilt over the replica's current document and
-/// data by the rule the authority's `opening.presentation` used (the card at `capsule`;
-/// at `chart`/`evidence` the capsule's stored view, else the presenter's view with the id
-/// the authority gave it).
-fn open_view(
-    p: &dyn DataProvider,
-    stored: Option<View>,
-    o: &Opening,
-    look: &ViewState,
-    max_points: u32,
-) -> Option<View> {
-    match o.to {
-        OpenDepth::Sentence => None,
-        OpenDepth::Capsule => {
-            let id = o.presentation.capsule_view.as_ref()?.id.clone();
-            depth::capsule_view(&o.finding, max_points, p, &id).ok()
-        }
-        OpenDepth::Chart | OpenDepth::Evidence => {
-            let given = o.presentation.view.as_ref()?;
-            if stored.is_some() {
-                return stored;
-            }
-            let id = look.view.clone().unwrap_or_else(|| given.id.clone());
-            depth::chart_view(&o.finding, p, &id).ok()
-        }
-    }
-}
-
-/// The scene of the open capsule (the opening's depth and frame, the view state's chart
-/// range and style) over the replica's own data; `None` when nothing is open or the
-/// reader gets no scene at that depth (no data: the authority sent no view).
-#[must_use]
-pub fn open_scene(
-    s: &mut Session,
-    o: &Opening,
-    headline: Option<&str>,
-    look: &ViewState,
-    max_points: u32,
-) -> Option<SceneDesc> {
-    if o.to == OpenDepth::Sentence {
-        return None;
-    }
-    let [w, h] = o.frame?;
-    let heads: BTreeMap<String, String> = headline
-        .map(|t| (o.finding.clone(), t.to_owned()))
-        .into_iter()
-        .collect();
-    let stored = o
-        .presentation
-        .view
-        .as_ref()
-        .and_then(|v| s.document().views.iter().find(|x| x.id == v.id).cloned());
-    let p = Reader {
-        inner: s.provider(),
-        heads: &heads,
-        parts: None,
-    };
-    let view = open_view(&p, stored, o, look, max_points)?;
-    let range = look
-        .range
-        .as_ref()
-        .filter(|r| o.to >= OpenDepth::Chart && r.view == view.id)
-        .map(|r| (r.from_bar, r.to_bar));
-    compile(&view, &p, &options(look, w, h, range)).ok()
-}
+// (RP3/M15) The pure scene functions live in `qp_session::viewer`: the authority compiles
+// a viewer's faces with the very same code (§22).
+pub use qp_session::viewer::{face_scene, open_scene, scene_digest};
 
 // ---------------------------------------------------------------------------
 // The shell core
@@ -258,6 +62,8 @@ enum Asked {
     Input,
     Replay,
     Command,
+    /// (RP3/M15) A `visible` message.
+    Visible,
 }
 
 /// The gesture in progress on one target.
@@ -290,6 +96,20 @@ struct DataFrame {
     replay: Option<ReplayState>,
 }
 
+/// (RP3/M15, §22) The host's `bind` frame (`{"bind":{feeds, events}}`), typed.
+#[derive(serde::Deserialize)]
+struct BindFrame {
+    bind: BindBody,
+}
+
+/// (RP3/M15) The body of a `bind` frame.
+#[derive(serde::Deserialize)]
+struct BindBody {
+    feeds: Vec<qp_schema::protocol::InitFeed>,
+    #[serde(default)]
+    events: Vec<DataEvent>,
+}
+
 /// (RP3/T4) The host's `start` frame (`{conn, principal, lang, data, events, …}`), typed.
 #[derive(serde::Deserialize)]
 struct StartFrame {
@@ -300,6 +120,11 @@ struct StartFrame {
     data: InitData,
     #[serde(default)]
     events: Vec<DataEvent>,
+    /// (RP3/M15) `viewer`: the viewer core (no bars, no events; `instruments`).
+    #[serde(default)]
+    mode: Option<String>,
+    #[serde(default)]
+    instruments: Vec<String>,
 }
 
 /// (RP3/T4) The core of a page from the host's `start` frame (`{conn, principal, lang,
@@ -312,15 +137,31 @@ struct StartFrame {
 /// # Errors
 /// A malformed frame or provider description.
 pub fn core_from_start(start_json: &str) -> Result<ShellCore, String> {
+    let mut core = core_from_start_parsed(start_json)?;
+    core.count_frame("start", start_json.len());
+    Ok(core)
+}
+
+fn core_from_start_parsed(start_json: &str) -> Result<ShellCore, String> {
     if let Ok(st) = serde_json::from_str::<StartFrame>(start_json) {
-        return ShellCore::new(
-            st.principal.as_deref().unwrap_or("arkin"),
-            st.lang.as_deref().unwrap_or("tr"),
-            &st.data,
-            &st.events,
-        );
+        let principal = st.principal.as_deref().unwrap_or("arkin");
+        let lang = st.lang.as_deref().unwrap_or("tr");
+        // (RP3/M15, §22) A viewer's start frame carries no data of the universe.
+        if st.mode.as_deref() == Some("viewer") {
+            return ShellCore::new_viewer(principal, lang, &st.instruments);
+        }
+        return ShellCore::new(principal, lang, &st.data, &st.events);
     }
     let v: Value = serde_json::from_str(start_json).map_err(|e| e.to_string())?;
+    if v["mode"] == "viewer" {
+        let instruments: Vec<String> =
+            serde_json::from_value(v["instruments"].clone()).unwrap_or_default();
+        return ShellCore::new_viewer(
+            v["principal"].as_str().unwrap_or("arkin"),
+            v["lang"].as_str().unwrap_or("tr"),
+            &instruments,
+        );
+    }
     let data: InitData = serde_json::from_value(v["data"].clone()).map_err(|e| e.to_string())?;
     let events: Vec<DataEvent> = serde_json::from_value(v["events"].clone()).unwrap_or_default();
     ShellCore::new(
@@ -590,6 +431,13 @@ pub struct ShellCore {
     /// (R4/S2) The symbols of the host's feeds (initial data): what a URL audience list
     /// may name.
     symbols: std::collections::BTreeSet<String>,
+    /// (RP3/M15, §22) Viewer mode: the feed and its faces come ready from the authority,
+    /// only the open instrument's data and slice live here (`None`: the full replica).
+    viewer: Option<Viewer>,
+    /// (RP3/M15) Bytes received by frame kind (both modes; the measurement's).
+    traffic: Traffic,
+    /// (RP3/M15) The log position of the last viewer event.
+    viewer_seq: u64,
 }
 
 impl std::fmt::Debug for ShellCore {
@@ -724,6 +572,9 @@ impl ShellCore {
             trans_t0: None,
             seen_pending: None,
             symbols: data.feeds.iter().map(|f| f.feed.symbol.clone()).collect(),
+            viewer: None,
+            traffic: Traffic::default(),
+            viewer_seq: 0,
         };
         me.push(json!({"type":"hello","protocol":"qp/0","principal":principal,
             "surface":{"kind":"phone","screen":[390,844],"input":["touch"],"lang":lang_name(lang)}}));
@@ -735,6 +586,68 @@ impl ShellCore {
             json!({"type":"input","gesture":Self::presented_look()}),
         );
         Ok(me)
+    }
+
+    /// (RP3/M15, §22) A shell core in viewer mode: no replica of the document and no data
+    /// of the universe; `instruments`: the universe's symbols (the settings page's list).
+    /// Queues the `hello`.
+    ///
+    /// # Errors
+    /// None today (the signature matches [`ShellCore::new`]).
+    pub fn new_viewer(principal: &str, lang: &str, instruments: &[String]) -> Result<Self, String> {
+        let mut me = Self::new(principal, lang, &InitData::default(), &[])?;
+        me.symbols = instruments.iter().cloned().collect();
+        me.viewer = Some(Viewer::new(principal, me.lang, instruments.to_vec()));
+        Ok(me)
+    }
+
+    /// (RP3/M15) Whether the core runs in viewer mode.
+    #[must_use]
+    pub fn is_viewer(&self) -> bool {
+        self.viewer.is_some()
+    }
+
+    /// (RP3/M15) Counts a frame of the host's stream (`start`, `msg`, `data`, `bind`).
+    pub fn count_frame(&mut self, kind: &'static str, bytes: usize) {
+        self.traffic.record(kind, bytes);
+    }
+
+    /// (RP3/M15) The shell says capsule `id`'s face is (or is no longer) on screen: a
+    /// viewer asks the authority for the faces on screen only.
+    pub fn visible(&mut self, id: &str, on: bool) {
+        if let Some(v) = self.viewer.as_mut() {
+            v.visible(id, on);
+        }
+    }
+
+    /// (RP3/M15, VERIFY 17) What the device subscribes to and holds, and the traffic:
+    /// `{mode, data, open, feed, faces, bound, bars, checks, traffic}`.
+    #[must_use]
+    pub fn viewer_json(&self) -> Value {
+        let mut v = match &self.viewer {
+            Some(x) => x.stats(),
+            None => json!({
+                "data": self.symbols.len(),
+                "bars": self.replica.document().map_or(0, |d| d.series.iter()
+                    .filter_map(|s| self.replica.bars(&s.id).map(<[_]>::len)).sum::<usize>()),
+            }),
+        };
+        v["mode"] = json!(if self.viewer.is_some() {
+            "viewer"
+        } else {
+            "replica"
+        });
+        v["traffic"] = self.traffic.json();
+        v
+    }
+
+    /// (RP3/M15) Runs the open capsule's check on its own data again (the measurement's
+    /// handle): `{state, text, candidates}` (`state` null: nothing open or full replica).
+    pub fn check_now(&mut self) -> Value {
+        match self.viewer.as_mut() {
+            Some(v) => v.check_now(),
+            None => json!({"state": null}),
+        }
     }
 
     /// (R4/S1) The `style` gesture of the presentation's defaults: feed layout, depth
@@ -776,6 +689,18 @@ impl ShellCore {
         for m in self.replica.take_outbox() {
             self.outbox.push(m);
         }
+        if self.welcomed {
+            if let Some(list) = self.viewer.as_mut().and_then(Viewer::take_visible) {
+                self.ask(
+                    "vis",
+                    Asked::Visible,
+                    json!({"type":"visible","sub":crate::viewer::SUB,"visible":list}),
+                );
+            }
+        }
+        if self.viewer.is_some() {
+            self.feed_dirty = false;
+        }
         if self.feed_dirty && !self.feed_inflight && self.welcomed {
             self.feed_dirty = false;
             self.feed_inflight = true;
@@ -802,7 +727,12 @@ impl ShellCore {
 
     /// A data event of the replica's own feed (`DataEvent`).
     pub fn data_event(&mut self, ev: &DataEvent) {
-        let _ = self.replica.data_event(ev);
+        match self.viewer.as_mut() {
+            Some(v) => v.data_event(ev),
+            None => {
+                let _ = self.replica.data_event(ev);
+            }
+        }
         self.version += 1;
     }
 
@@ -840,8 +770,11 @@ impl ShellCore {
     /// (R4/H-FP) The replica's headline-piece calendar: the replay source's.
     fn set_calendar(&mut self, st: &ReplayState) {
         if self.replay.as_ref().map(|r| r.source) != Some(st.source) {
-            self.replica
-                .set_headline_calendar(qp_session::headparts::replay_calendar(st.source));
+            let cal = qp_session::headparts::replay_calendar(st.source);
+            if let Some(v) = self.viewer.as_mut() {
+                v.set_calendar(cal.clone());
+            }
+            self.replica.set_headline_calendar(cal);
         }
     }
 
@@ -849,16 +782,26 @@ impl ShellCore {
     /// `feed`, `scene`, `status`, `error`, `transition`.
     pub fn on_message(&mut self, msg: &ServerMsg) -> Value {
         let mut ch = json!({});
-        self.replica.on_message(msg);
+        if self.viewer.is_none() {
+            self.replica.on_message(msg);
+        }
         match msg {
             ServerMsg::Welcome { profile, .. } => {
                 self.welcomed = true;
                 self.max_points = profile.max_points;
                 ch["welcome"] = json!(true);
-                self.push(
-                    json!({"type":"subscribe","id":"feed-topic","topic":{"kind":"capsules"}}),
-                );
-                self.feed_dirty = true;
+                if self.viewer.is_some() {
+                    // (RP3/M15, §22) The visibility subscription instead of the feed
+                    // topic and the document: the feed comes with its faces.
+                    let w = self.frames["face"].0;
+                    self.push(json!({"type":"subscribe","id":crate::viewer::SUB,
+                        "topic":{"kind":"viewer","limit":FEED_LIMIT,"width":w}}));
+                } else {
+                    self.push(
+                        json!({"type":"subscribe","id":"feed-topic","topic":{"kind":"capsules"}}),
+                    );
+                    self.feed_dirty = true;
+                }
                 self.ask(
                     "replay",
                     Asked::Replay,
@@ -935,6 +878,13 @@ impl ShellCore {
                         ch["feed"] = json!(true);
                         self.flush_gesture();
                     }
+                    (Some(Asked::Visible), QueryResult::Viewer { viewer }) => {
+                        if let Some(v) = self.viewer.as_mut() {
+                            v.visible_answered();
+                        }
+                        let seq = self.viewer_seq;
+                        self.apply_viewer(viewer, seq, &mut ch);
+                    }
                     (Some(Asked::Replay), QueryResult::Replay { replay }) => {
                         self.set_calendar(replay);
                         self.replay = Some(replay.clone());
@@ -955,6 +905,11 @@ impl ShellCore {
                     match self.asked.remove(id) {
                         Some(Asked::Feed) => self.feed_inflight = false,
                         Some(Asked::Input) => self.flush_gesture(),
+                        Some(Asked::Visible) => {
+                            if let Some(v) = self.viewer.as_mut() {
+                                v.visible_answered();
+                            }
+                        }
                         _ => {}
                     }
                 }
@@ -967,10 +922,40 @@ impl ShellCore {
                     self.version += 1;
                     ch["scene"] = json!(true);
                 }
+                Event::Viewer { viewer, seq } => {
+                    self.viewer_seq = *seq;
+                    self.apply_viewer(viewer, *seq, &mut ch);
+                }
+                Event::Claim { .. } => {
+                    if let Some(v) = self.viewer.as_mut() {
+                        v.on_message(msg);
+                        self.version += 1;
+                        ch["scene"] = json!(true);
+                    }
+                }
                 _ => {}
             },
         }
         ch
+    }
+
+    /// (RP3/M15) Applies a viewer update: the feed rows (the feed the rest of the core
+    /// reads), the faces, the open capsule's slice.
+    fn apply_viewer(&mut self, up: &qp_schema::protocol::ViewerUpdate, seq: u64, ch: &mut Value) {
+        let Some(v) = self.viewer.as_mut() else {
+            return;
+        };
+        let scene = v.apply(up, seq);
+        if up.feed.is_some() {
+            self.feed = v.items();
+        }
+        if up.feed.is_some() || !up.faces.is_empty() || up.audience.is_some() {
+            ch["feed"] = json!(true);
+        }
+        if scene {
+            ch["scene"] = json!(true);
+        }
+        self.version += 1;
     }
 
     /// One frame of the host's stream (`{"msg":…}`, `{"data":[…],"replay":…}`); returns
@@ -979,6 +964,14 @@ impl ShellCore {
     /// # Errors
     /// Not JSON, or a message that is not a server message.
     pub fn on_frame(&mut self, text: &str) -> Result<Value, String> {
+        let kind = if text.starts_with("{\"msg\"") {
+            "msg"
+        } else if text.starts_with("{\"bind\"") {
+            "bind"
+        } else {
+            "data"
+        };
+        self.traffic.record(kind, text.len());
         // (R4/T6) A message frame as the host writes it (`{"msg":…}`, compact) is parsed
         // straight into the message: no intermediate JSON tree and no copy of it (the
         // document answer is megabytes). Anything else takes the general path.
@@ -989,6 +982,25 @@ impl ShellCore {
             if let Ok(msg) = serde_json::from_str::<ServerMsg>(inner) {
                 return Ok(self.on_message(&msg));
             }
+        }
+        // (RP3/M15, §22) The host serves a feed the viewer now subscribes to (before the
+        // data-frame path, which would take a `bind` frame for an empty data frame).
+        if kind == "bind" {
+            let b: BindFrame = serde_json::from_str(text).map_err(|e| e.to_string())?;
+            if let Some(vw) = self.viewer.as_mut() {
+                for f in b.bind.feeds {
+                    let k = f.feed.clone();
+                    let evs: Vec<DataEvent> = b
+                        .bind
+                        .events
+                        .iter()
+                        .filter(|e| e.feed == k)
+                        .cloned()
+                        .collect();
+                    vw.bind(f, evs);
+                }
+            }
+            return Ok(json!({"scene": true}));
         }
         // (RP3/T4) A data frame parsed typed in one pass: a JSON tree of a large frame (a
         // forward seek: thousands of events) costs some 20 times its text in memory, and
@@ -1066,13 +1078,22 @@ impl ShellCore {
                 qp_grammar::feeds::FeedRow::Header { text } => Some(json!({"header": text})),
                 qp_grammar::feeds::FeedRow::Capsule { id, mark } => {
                     let it = self.feed.iter().find(|i| i.id == id)?;
-                    // A face scene needs the reader's own bars of the capsule's series.
-                    let has = self.replica.bars(&it.series).is_some_and(|b| !b.is_empty());
+                    // A face scene needs the reader's own bars of the capsule's series
+                    // (RP3/M15: a viewer's comes ready when the reader may see them).
+                    let has = match &self.viewer {
+                        Some(v) => v.row(&it.id).is_some_and(|r| r.face),
+                        None => self.replica.bars(&it.series).is_some_and(|b| !b.is_empty()),
+                    };
                     let mut v = json!({"id": it.id, "target": format!("face:{}", it.id),
                         "text": it.sentence.text, "scene": has, "relevant": it.relevant,
                         "closed": it.validity == qp_schema::capsule::Validity::Closed});
                     if let Some(m) = mark {
                         v["mark"] = json!(m);
+                    }
+                    // (RP3/M15, K48) The trust mark of a feed capsule: the authority's
+                    // settled claim (text in the reader's language).
+                    if let Some(vw) = &self.viewer {
+                        v["trust"] = json!(vw.feed_trust());
                     }
                     Some(v)
                 }
@@ -1086,6 +1107,9 @@ impl ShellCore {
     /// transition being on the newest bar — `i64::MAX` (now).
     #[must_use]
     pub fn known_at(&self, it: &CapsuleItem) -> i64 {
+        if let Some(v) = &self.viewer {
+            return v.row(&it.id).and_then(|r| r.known_at).unwrap_or(i64::MAX);
+        }
         let next = usize::try_from(it.last_bar)
             .ok()
             .and_then(|b| b.checked_add(1));
@@ -1161,6 +1185,10 @@ impl ShellCore {
     #[must_use]
     pub fn face(&mut self, id: &str) -> Option<SceneDesc> {
         let (w, h) = self.frames["face"];
+        if let Some(v) = &self.viewer {
+            // (RP3/M15) A viewer's face is the scene the authority compiled.
+            return v.face(id).cloned();
+        }
         let it = self.feed.iter().find(|i| i.id == id)?.clone();
         let look = self.look.clone();
         let mp = self.max_points;
@@ -1187,6 +1215,12 @@ impl ShellCore {
         let look = self.look.clone();
         let mp = self.max_points;
         let head = self.open_headline.clone();
+        if let Some(v) = self.viewer.as_mut() {
+            // (RP3/M15) The open capsule over the device's own data of its instrument.
+            let side = v.open_mut().filter(|s| s.open.capsule == o.capsule)?;
+            let s = side.replica_mut().session_mut()?;
+            return open_scene(s, &o, head.as_deref(), &look, mp);
+        }
         open_scene(self.replica.session_mut()?, &o, head.as_deref(), &look, mp)
     }
 
@@ -1204,11 +1238,21 @@ impl ShellCore {
         self.pixels(&scene)
     }
 
-    /// The open capsule: `{depth, capsule, text, frame:[w,h], scene, px?, style?}`
-    /// (`px`/`style`: the scene's backing size at the device scale and its CSS lengths);
+    /// The open capsule: `{depth, capsule, text, frame:[w,h], scene, px?, style?, trust?}`
+    /// (`px`/`style`: the scene's backing size at the device scale and its CSS lengths;
+    /// RP3/M15 `trust`: a viewer's trust mark of the open capsule, checked on its own data);
     /// depth `sentence` when nothing is open.
-    #[must_use]
-    pub fn open_json(&self) -> Value {
+    pub fn open_json(&mut self) -> Value {
+        let mut v = self.open_json_base();
+        if v["depth"] != "sentence" {
+            if let Some(t) = self.viewer.as_mut().and_then(Viewer::open_trust) {
+                v["trust"] = json!(t);
+            }
+        }
+        v
+    }
+
+    fn open_json_base(&self) -> Value {
         match &self.opening {
             None => json!({"depth": "sentence"}),
             Some(o) => {
@@ -1287,6 +1331,9 @@ impl ShellCore {
     /// watchlist and positions.
     #[must_use]
     pub fn instruments(&self) -> Vec<String> {
+        if let Some(v) = &self.viewer {
+            return v.instruments.clone();
+        }
         let Some(doc) = self.replica.document() else {
             return Vec::new();
         };
@@ -1299,6 +1346,11 @@ impl ShellCore {
     /// The reader's own audience as the document gives it to them (`null` if none).
     #[must_use]
     pub fn audience(&self) -> Value {
+        if let Some(v) = &self.viewer {
+            return v.audience.as_ref().map_or(Value::Null, |a| {
+                serde_json::to_value(a).unwrap_or(Value::Null)
+            });
+        }
         self.replica
             .document()
             .and_then(|d| d.audiences.get(&self.principal))
@@ -2150,6 +2202,21 @@ impl ShellCore {
             .map(|id| json!({"id": id, "digest": self.face(id).map(|s| scene_digest(&s))}))
             .collect();
         let open = self.scene().map(|s| scene_digest(&s));
+        if let Some(v) = &self.viewer {
+            // (RP3/M15) A viewer holds no document: `document` is the open capsule's
+            // slice digest (none on the feed screen); faces only those on screen.
+            return json!({
+                "mode": "viewer",
+                "document": v.open().map(|o| o.open.digest.clone()),
+                "seq": self.viewer_seq,
+                "faces": faces,
+                "open": {"depth": self.opening.as_ref().map_or("sentence", |o| depth_name(o.to)),
+                         "capsule": self.opening.as_ref().map(|o| o.capsule.clone()),
+                         "digest": open},
+                "look": self.look,
+                "data": v.data,
+            });
+        }
         json!({
             "document": self.replica.document_digest(),
             "seq": self.replica.seq(),

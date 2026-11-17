@@ -348,6 +348,8 @@ impl ReplayHost {
         let mut session = Session::new(init.clone(), root)?;
         // (R4/H-FP) The headline pieces' elapsed phrases on the replay's own calendar.
         session.set_headline_calendar(crate::headparts::replay_calendar(info.kind));
+        // (RP3/M15, §22) Viewers are told once per step, not after every event of it.
+        session.set_viewer_batch(true);
         Ok(Self {
             init,
             root: root.to_owned(),
@@ -480,7 +482,31 @@ impl ReplayHost {
     /// # Errors
     /// The authority rejected it.
     pub fn data_event(&mut self, ev: &DataEvent) -> Result<Vec<OutboundLine>, crate::DataError> {
-        self.session.data_event(ev)
+        let mut lines = self.session.data_event(ev)?;
+        lines.extend(self.session.viewer_flush());
+        Ok(lines)
+    }
+
+    /// (RP3/M15, §22) What a host serves a viewer for feed `key` when it subscribes to it:
+    /// the feed's initial bars and the data events applied since (while recording,
+    /// [`ReplayHost::set_record_events`]). `None`: no such feed.
+    #[must_use]
+    pub fn feed_data(&self, key: &qp_schema::data::FeedKey) -> Option<(InitFeed, Vec<DataEvent>)> {
+        let f = self
+            .init
+            .data
+            .as_ref()?
+            .feeds
+            .iter()
+            .find(|f| &f.feed == key)?
+            .clone();
+        let evs = self
+            .recorded
+            .iter()
+            .filter(|e| &e.feed == key)
+            .cloned()
+            .collect();
+        Some((f, evs))
     }
 
     fn as_replay(&self, conn: &str, line: &str) -> Option<(String, ReplayControl)> {
@@ -666,6 +692,7 @@ impl ReplayHost {
         self.session = Session::new(init, &self.root)?;
         self.session
             .set_headline_calendar(crate::headparts::replay_calendar(self.info.kind));
+        self.session.set_viewer_batch(true);
         self.replay.reset();
         self.recorded.clear();
         Ok(())
@@ -707,6 +734,10 @@ impl ReplayHost {
             let Some(st) = self.replay.step() else { break };
             lines.extend(self.apply(&st));
         }
+        // (RP3/M15, §22) Viewers once, after the steps (what they show now).
+        if n > 0 {
+            lines.extend(self.session.viewer_flush());
+        }
         lines
     }
 
@@ -714,7 +745,8 @@ impl ReplayHost {
     /// end): for a host that also feeds a replica from the same steps.
     pub fn take_step(&mut self) -> Option<(ReplayStep, Vec<OutboundLine>)> {
         let st = self.replay.step()?;
-        let lines = self.apply(&st);
+        let mut lines = self.apply(&st);
+        lines.extend(self.session.viewer_flush());
         Some((st, lines))
     }
 

@@ -136,6 +136,9 @@ function connect() {
   const url = new URL('/events', location.href);
   url.searchParams.set('principal', ui.principal);
   url.searchParams.set('lang', ui.lang);
+  // (RP3/M15) `?mode=replica`: the R4 full replica (the measurement's baseline); the host
+  // makes every other connection a viewer.
+  if (params.get('mode')) url.searchParams.set('mode', params.get('mode'));
   source = new EventSource(url);
   source.onmessage = (e) => {
     // (R4/T6) The stream opens while the WASM still loads; its first frames wait here.
@@ -204,6 +207,7 @@ function onFrame(text) {
   repaint(ch);
   flush();
   if (text.startsWith('{"data"')) core.metric_span('tick', t0, performance.now());
+  else core.metric_span('msg', t0, performance.now());
 }
 
 // --- painting ---------------------------------------------------------------------
@@ -229,6 +233,8 @@ function paintFace(id, force) {
 const io = new IntersectionObserver((entries) => {
   for (const e of entries) {
     const id = e.target.dataset.id;
+    // (RP3/M15) A viewer asks the authority for the faces on screen only.
+    core.visible(id, e.isIntersecting);
     if (e.isIntersecting) {
       visible.add(id);
       paintFace(id, true);
@@ -236,6 +242,7 @@ const io = new IntersectionObserver((entries) => {
       visible.delete(id);
     }
   }
+  flush();
 }, { root: $('feed') });
 
 function faceElement(item) {
@@ -262,6 +269,22 @@ function faceElement(item) {
   return el;
 }
 
+// (RP3/M15, K48) The trust mark of a feed capsule (text from the core; absent in the full
+// replica mode).
+function trustOf(el, text) {
+  let m = el.querySelector('.trust');
+  if (!text) {
+    if (m) m.remove();
+    return;
+  }
+  if (!m) {
+    m = document.createElement('span');
+    m.className = 'trust';
+    el.append(m);
+  }
+  m.textContent = text;
+}
+
 function markOf(el, text) {
   let m = el.querySelector('.mark');
   if (!text) {
@@ -286,6 +309,7 @@ function firstFaces(nodes) {
     const r = el.getBoundingClientRect();
     if (r.bottom > box.top && r.top < box.bottom) {
       visible.add(el.dataset.id);
+      core.visible(el.dataset.id, true);
       paintFace(el.dataset.id, true);
     }
   }
@@ -315,6 +339,7 @@ function renderFeed() {
       el.firstChild.textContent = item.text;
     }
     markOf(el, item.mark);
+    trustOf(el, item.trust);
     keep.add(item.id);
     nodes.push(el);
   }
@@ -323,6 +348,7 @@ function renderFeed() {
       io.unobserve(el);
       faces.delete(id);
       visible.delete(id);
+      core.visible(id, false);
     }
   }
   $('list').replaceChildren(...nodes);
@@ -337,6 +363,7 @@ function renderLayer(force) {
   document.body.classList.toggle('open', open.depth !== 'sentence');
   if (open.depth === 'sentence') return open;
   $('depth').textContent = t(open.depth);
+  $('trust').textContent = open.trust || '';
   $('toevidence').hidden = open.depth === 'evidence';
   $('opentext').textContent = open.text;
   $('hint').textContent = t(HINT[open.depth]);
@@ -780,6 +807,10 @@ window.qp = {
   choices: () => core.choices(),
   openCapsule: (id) => { core.open_capsule(id); flush(); },
   openTo: (to) => { core.open_to(to); flush(); },
+  // (RP3/M15) for the viewer measurement (rounds/RP3/experiments/M15): the device's data
+  // subscriptions and traffic, and the open capsule's check run again on its own data.
+  viewer: () => core.viewer(),
+  check: () => core.check(),
   // Shows the last transition frozen at progress `p` (a value the harness gives).
   freeze: (p) => {
     if (window.qp.frozen) clearFrame(window.qp.frozen);

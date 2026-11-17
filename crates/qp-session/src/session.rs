@@ -216,6 +216,10 @@ pub struct Session {
     pub(crate) pub_at: Vec<Seq>,
     /// (R3/K1b) A proposal both worlds hold: the authority's id → the public world's.
     pub(crate) prop_map: BTreeMap<String, String>,
+    /// (RP3/M15, §22) Viewer connections: what each was sent (by connection id).
+    pub(crate) viewers: BTreeMap<String, crate::viewer::ViewerConn>,
+    /// (RP3/M15) The host computes viewer updates after a batch of data events.
+    pub(crate) viewer_batch: bool,
 }
 
 /// (R3/K1b) A writer of a command, for the two-world paths.
@@ -292,7 +296,7 @@ pub(crate) fn out(conn: &str, msg: ServerMsg) -> OutboundLine {
     }
 }
 
-fn err_line(conn: &str, id: Option<String>, error: ProtocolError) -> OutboundLine {
+pub(crate) fn err_line(conn: &str, id: Option<String>, error: ProtocolError) -> OutboundLine {
     out(conn, ServerMsg::Error { id, error })
 }
 
@@ -520,6 +524,8 @@ impl Session {
             full_to_pub: Vec::new(),
             pub_at: Vec::new(),
             prop_map: BTreeMap::new(),
+            viewers: BTreeMap::new(),
+            viewer_batch: false,
         };
         s.audience_seen = s.doc.audiences.keys().cloned().collect();
         s.start_capsules(capsules.as_ref());
@@ -685,10 +691,14 @@ impl Session {
             return vec![err_line(conn, None, e)];
         }
         if let Some(msg) = self.bar_fast_parse(line) {
-            return match self.check_counts(&msg) {
+            let mut lines = match self.check_counts(&msg) {
                 Ok(()) => self.handle_resolved(conn, msg, BTreeMap::new()),
                 Err(e) => vec![err_line(conn, msg_id(&msg), e)],
             };
+            if !self.viewers.is_empty() {
+                lines.extend(self.viewer_flush());
+            }
+            return lines;
         }
         let value: Value = match serde_json::from_str(line) {
             Ok(v) => v,
@@ -740,6 +750,10 @@ impl Session {
             return vec![err_line(conn, id, e)];
         }
         let mut lines = self.handle_resolved(conn, msg, resolved);
+        // (RP3/M15, §22) What the message changed for viewers (their feed, faces, slice).
+        if !self.viewers.is_empty() {
+            lines.extend(self.viewer_flush());
+        }
         let asker = self
             .conn_index(conn)
             .map(|ci| self.conns[ci].principal.clone());
@@ -1085,14 +1099,22 @@ impl Session {
             }
             ClientMsg::Subscribe { id, topic } => {
                 let (principal, lang) = (self.conns[ci].principal.clone(), self.lang_of(ci));
+                let viewer = match &topic {
+                    Topic::Viewer { limit, width } => Some((*limit, *width)),
+                    _ => None,
+                };
                 let r = self.as_reader(&principal, lang, |s| s.subscribe(ci, &id, topic));
                 match r {
                     Ok(()) => {
-                        let mut a = ack(id, AckStatus::Subscribed);
+                        let mut a = ack(id.clone(), AckStatus::Subscribed);
                         if let ServerMsg::Ack { resolved: r, .. } = &mut a {
                             *r = resolved;
                         }
-                        vec![out(conn, a)]
+                        let mut v = vec![out(conn, a)];
+                        if let Some((limit, width)) = viewer {
+                            v.extend(self.viewer_start(ci, &id, limit, width));
+                        }
+                        v
                     }
                     Err(e) => vec![err_line(conn, Some(id), e)],
                 }
@@ -1101,6 +1123,7 @@ impl Session {
                 let c = &mut self.conns[ci];
                 if let Some(i) = c.subs.iter().position(|s| s.id == sub) {
                     c.subs.remove(i);
+                    self.viewer_unsubscribed(conn, &sub);
                     vec![out(conn, ack(id, AckStatus::Unsubscribed))]
                 } else {
                     let e = E::new(ErrorCode::NotFound, format!("no subscription `{sub}`"))
@@ -1182,6 +1205,12 @@ impl Session {
                     Ok(lines) => lines,
                     Err(e) => vec![err_line(conn, Some(id), e)],
                 }
+            }
+            ClientMsg::Visible { id, sub, visible } => {
+                if !permissions(self.conns[ci].role).read {
+                    return vec![err_line(conn, Some(id), forbidden_read())];
+                }
+                self.visible_msg(ci, id, &sub, visible)
             }
             // (R4, §21) Answered by a replay host (`crate::replayhost`) before it gets
             // here; a bare authority has no replay source.
@@ -2255,6 +2284,7 @@ impl Session {
             if let Some(rd) = self.rd.as_mut() {
                 if apply_all(rd, &entry.changes).is_err() {
                     self.rd = reading_doc(&self.doc, &self.plane);
+                    self.head_state.dirty_all = true;
                 }
             }
             if !entry.changes.iter().all(crate::live::keeps_view_reads) {
@@ -2436,6 +2466,10 @@ impl Session {
         self.data_changed(outcome.changed);
         let mut lines = self.settle_data();
         lines.extend(self.serve_test_source());
+        // (RP3/M15, §22) Viewers, unless the host batches (a replay host: once per step).
+        if !self.viewer_batch && !self.viewers.is_empty() {
+            lines.extend(self.viewer_flush());
+        }
         Ok(DataOutcome { lines, notices })
     }
 
@@ -2471,6 +2505,15 @@ impl Session {
     /// incrementally (or is cleared on the reference path), and the change waits for
     /// `view` subscribers.
     pub(crate) fn data_changed(&mut self, changed: Vec<(String, crate::values::Delta)>) {
+        // (RP3/M15) The headlines' refresh compares the bars of these series only.
+        self.head_state
+            .dirty
+            .extend(changed.iter().map(|(id, _)| id.clone()));
+        if let Some(w) = self.other.as_mut() {
+            w.head_state
+                .dirty
+                .extend(changed.iter().map(|(id, _)| id.clone()));
+        }
         match self.rd.as_mut() {
             Some(rd) => {
                 for (id, d) in &changed {
@@ -3151,6 +3194,9 @@ impl Session {
             Topic::View { view } => {
                 crate::expand::need_view(&self.doc, view, "/topic/view")?;
             }
+            Topic::Viewer { limit, width } => {
+                self.viewer_check(ci, *limit, *width)?;
+            }
             Topic::Changes { .. }
             | Topic::Proposals {}
             | Topic::Attention { principal: None }
@@ -3400,6 +3446,7 @@ fn msg_id(m: &ClientMsg) -> Option<String> {
         | ClientMsg::Input { id, .. }
         | ClientMsg::Attend { id, .. }
         | ClientMsg::Dispute { id, .. }
+        | ClientMsg::Visible { id, .. }
         | ClientMsg::Replay { id, .. } => Some(id.clone()),
         ClientMsg::Hello { .. } | ClientMsg::Clock { .. } => None,
     }

@@ -18,6 +18,8 @@ export const ALLOWED_CORE = new Set([
   // R4/H-M8910
   'set_look', 'mark_seen', 'seen_at', 'open_capsule', 'set_dpr', 'face_size', 'choices',
   'transition_progress', 'transition_frame',
+  // RP3/M15 (ARCH.md): the viewer's visibility, its subscriptions/traffic and the check
+  'visible', 'viewer', 'check',
   // RP3/T2 (ARCH.md): metrics across a new core, the paint path, paint lists and the font
   // for non-pixel paint paths, the automatic comparison.
   'metric_inherit', 'set_paint', 'face_scene', 'scene_desc', 'font',

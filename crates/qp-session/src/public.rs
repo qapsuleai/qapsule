@@ -599,6 +599,7 @@ impl Session {
             } else if let Some(rd) = s.rd.as_mut() {
                 if crate::apply::apply_all(rd, &pe.changes).is_err() {
                     s.rd = reading_doc(&s.doc, &s.plane);
+                    s.head_state.dirty_all = true;
                 }
             }
             if !pe.changes.iter().all(crate::live::keeps_view_reads) {

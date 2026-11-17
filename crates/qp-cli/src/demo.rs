@@ -3,8 +3,13 @@
 //! (`docs/ARCHITECTURE.md` "Kabuk sınırı (R4)"). No dependency beyond `std`.
 //!
 //! Transport (same origin, HTTP/1.1):
-//! - `GET /events?principal=…&lang=…` — a server-sent event stream; one stream is one
-//!   protocol connection. Frames (one JSON object per `data:` line):
+//! - `GET /events?principal=…&lang=…&mode=…` — a server-sent event stream; one stream is
+//!   one protocol connection. (RP3/M15, `docs/PROTOCOL.md` §22) `mode=viewer` (the
+//!   default) makes it a viewer: its `start` frame carries no bars (`mode`, the universe's
+//!   `instruments`), its `data` frames only the feeds its `viewer` subscription names (none
+//!   on the feed screen) and a `{"bind":{feeds, events}}` frame brings a feed's initial
+//!   bars and events when it subscribes to one; `mode=replica` is the full replica of R4
+//!   (every bar, every event). Frames (one JSON object per `data:` line):
 //!   `{"start":{conn, principal, lang, data, events, info}}` first (the replica's data:
 //!   the initial bars and the data events applied since, and the page's notes),
 //!   `{"msg":ServerMsg}` (protocol messages of this connection),
@@ -34,6 +39,7 @@ use std::path::{Path, PathBuf};
 use std::sync::mpsc::{self, Receiver, RecvTimeoutError, Sender};
 use std::time::{Duration, Instant};
 
+use qp_schema::data::FeedKey;
 use qp_schema::protocol::InitData;
 use qp_session::ReplayHost;
 use qp_wasm::shell::{demo_session_init, DemoOptions};
@@ -89,6 +95,12 @@ pub struct DemoArgs {
 /// `qp drive` arguments: the shell-less driver.
 #[derive(Debug, clap::Args)]
 pub struct DriveArgs {
+    /// (RP3/M15) `replica` (the R4 full replica, default) or `viewer` (§22).
+    #[arg(long, default_value = "replica")]
+    pub mode: String,
+    /// (RP3/M15) Instruments of the synthetic universe.
+    #[arg(long, default_value_t = 30)]
+    pub instruments: u32,
     /// Script (JSON array of steps; see `qp_wasm::drive`).
     #[arg(long)]
     pub script: PathBuf,
@@ -143,6 +155,7 @@ enum Cmd {
     Connect {
         principal: String,
         lang: String,
+        viewer: bool,
         tx: Sender<String>,
     },
     Send {
@@ -161,6 +174,9 @@ struct Client {
     lang: String,
     token: String,
     tx: Sender<String>,
+    /// (RP3/M15) A viewer connection (§22) and the feeds its data plane carries now.
+    viewer: bool,
+    served: Vec<FeedKey>,
 }
 
 /// 128 bits from the operating system's randomness, as 32 hex digits.
@@ -196,9 +212,28 @@ impl Hub {
         u64::try_from(self.start.elapsed().as_millis()).unwrap_or(u64::MAX)
     }
 
-    fn start_frame(&self, conn: &str, token: &str, principal: &str, lang: &str) -> String {
+    fn start_frame(
+        &self,
+        conn: &str,
+        token: &str,
+        principal: &str,
+        lang: &str,
+        viewer: bool,
+    ) -> String {
         let mut data: InitData = self.host.init().data.clone().unwrap_or_default();
         data.entitlements.retain(|p, _| p == principal);
+        if viewer {
+            // (RP3/M15, §22) No bars and no events: the feed comes from the authority's
+            // viewer subscription; the open instrument's data with a `bind` frame.
+            let instruments: Vec<&str> =
+                data.feeds.iter().map(|f| f.feed.symbol.as_str()).collect();
+            return json!({"start": {
+                "conn": conn, "token": token, "principal": principal, "lang": lang,
+                "mode": "viewer", "data": {"feeds": [], "entitlements": data.entitlements},
+                "events": [], "instruments": instruments, "info": self.info,
+            }})
+            .to_string();
+        }
         json!({"start": {
             "conn": conn, "token": token, "principal": principal, "lang": lang,
             "data": data, "events": self.host.recorded_events(),
@@ -215,7 +250,9 @@ impl Hub {
         }
     }
 
-    /// Sends new data events (or, after a backward seek, a new start) to every client.
+    /// Sends new data events (or, after a backward seek, a new start) to every client;
+    /// (RP3/M15) a viewer gets only the events of the feeds it is served, then a `bind`
+    /// frame for each feed its viewer subscription newly names.
     fn broadcast(&mut self) {
         let st = self.host.state();
         if st.epoch != self.epoch {
@@ -227,10 +264,13 @@ impl Hub {
                 .map(|(id, c)| {
                     (
                         c.tx.clone(),
-                        self.start_frame(id, &c.token, &c.principal, &c.lang),
+                        self.start_frame(id, &c.token, &c.principal, &c.lang, c.viewer),
                     )
                 })
                 .collect();
+            for c in self.clients.values_mut() {
+                c.served.clear();
+            }
             for (tx, f) in frames {
                 let _ = tx.send(f);
             }
@@ -238,10 +278,53 @@ impl Hub {
         }
         let evs = self.host.recorded_events();
         if evs.len() > self.sent_events {
-            let frame = json!({"data": &evs[self.sent_events..], "replay": st}).to_string();
-            self.sent_events = evs.len();
+            let new = &evs[self.sent_events..];
+            let frame = json!({"data": new, "replay": st}).to_string();
             for c in self.clients.values() {
-                let _ = c.tx.send(frame.clone());
+                if c.viewer {
+                    let mine: Vec<&qp_schema::data::DataEvent> =
+                        new.iter().filter(|e| c.served.contains(&e.feed)).collect();
+                    let _ = c.tx.send(json!({"data": mine, "replay": st}).to_string());
+                } else {
+                    let _ = c.tx.send(frame.clone());
+                }
+            }
+            self.sent_events = evs.len();
+        }
+        self.bind();
+    }
+
+    /// (RP3/M15, §22) A `bind` frame for every feed a viewer's subscription newly names
+    /// (its initial bars and the events since); a feed it no longer names is dropped.
+    fn bind(&mut self) {
+        let ids: Vec<String> = self.clients.keys().cloned().collect();
+        for id in ids {
+            let Some(c) = self.clients.get(&id).filter(|c| c.viewer) else {
+                continue;
+            };
+            let want: Vec<FeedKey> = self
+                .host
+                .session()
+                .viewer_data(&id)
+                .map(<[FeedKey]>::to_vec)
+                .unwrap_or_default();
+            if want == c.served {
+                continue;
+            }
+            let mut feeds = Vec::new();
+            let mut events = Vec::new();
+            for k in want.iter().filter(|k| !c.served.contains(k)) {
+                if let Some((f, e)) = self.host.feed_data(k) {
+                    feeds.push(f);
+                    events.extend(e);
+                }
+            }
+            if !feeds.is_empty() {
+                let _ =
+                    c.tx.send(json!({"bind": {"feeds": feeds, "events": events}}).to_string());
+            }
+            if let Some(c) = self.clients.get_mut(&id) {
+                c.served = want;
             }
         }
     }
@@ -251,6 +334,7 @@ impl Hub {
             Cmd::Connect {
                 principal,
                 lang,
+                viewer,
                 tx,
             } => {
                 let Ok(token) = secret() else {
@@ -258,7 +342,7 @@ impl Hub {
                 };
                 self.next += 1;
                 let conn = format!("c{}", self.next);
-                let _ = tx.send(self.start_frame(&conn, &token, &principal, &lang));
+                let _ = tx.send(self.start_frame(&conn, &token, &principal, &lang, viewer));
                 self.clients.insert(
                     conn,
                     Client {
@@ -266,6 +350,8 @@ impl Hub {
                         lang,
                         token,
                         tx,
+                        viewer,
+                        served: Vec::new(),
                     },
                 );
             }
@@ -294,8 +380,10 @@ impl Hub {
                         v => v.to_string(),
                     };
                     let lines = self.host.handle_raw(&conn, &text);
-                    self.route(lines);
+                    // (RP3/M15) Data and `bind` frames first: a viewer's open capsule
+                    // finds its instrument's data when its slice arrives.
                     self.broadcast();
+                    self.route(lines);
                 }
             }
             Cmd::Gone { conn } => {
@@ -414,10 +502,13 @@ fn connection(mut s: TcpStream, web: &Path, tx: &Sender<Cmd>, gate: &Gate) {
             } else {
                 "tr"
             };
+            // (RP3/M15) Viewer unless the page asks for the full replica.
+            let viewer = query_param(q, "mode").as_deref() != Some("replica");
             let (ftx, frx) = mpsc::channel::<String>();
             let _ = tx.send(Cmd::Connect {
                 principal,
                 lang: lang.to_owned(),
+                viewer,
                 tx: ftx,
             });
             let head = "HTTP/1.1 200 OK\r\nContent-Type: text/event-stream\r\n\
@@ -600,8 +691,8 @@ pub fn demo(a: &DemoArgs) -> Result<(), String> {
         }
         let w = hub.wall();
         let lines = hub.host.pump(w);
-        hub.route(lines);
         hub.broadcast();
+        hub.route(lines);
     }
 }
 
@@ -613,8 +704,12 @@ pub fn drive(a: &DriveArgs) -> Result<(), String> {
     let text =
         std::fs::read_to_string(&a.script).map_err(|e| format!("{}: {e}", a.script.display()))?;
     let script: Vec<Value> = serde_json::from_str(&text).map_err(|e| format!("script: {e}"))?;
-    let mut host = qp_wasm::drive::parity_host();
-    let out = qp_wasm::drive::shell_less(&mut host, &a.principal, &a.lang, &script);
+    let mut host = qp_wasm::drive::parity_host_n(a.instruments);
+    let out = match a.mode.as_str() {
+        "replica" => qp_wasm::drive::shell_less(&mut host, &a.principal, &a.lang, &script),
+        "viewer" => qp_wasm::drive::viewer_less(&mut host, &a.principal, &a.lang, &script),
+        m => return Err(format!("--mode: `{m}` (replica or viewer)")),
+    };
     let s = serde_json::to_string_pretty(&out).map_err(|e| e.to_string())?;
     match &a.out {
         Some(p) => std::fs::write(p, s + "\n").map_err(|e| format!("{}: {e}", p.display())),

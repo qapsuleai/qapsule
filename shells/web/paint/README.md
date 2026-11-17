@@ -40,6 +40,21 @@ R4'ün davranışı bayt bayt: çekirdek tiny-skia ile aygıt ölçeğinde tarar
 `scene_rgba`), yol tuvalin boyutunu ayarlar ve `putImageData` ile kopyalar. Altın
 görsellerle uyumlu yol budur.
 
+### `cpu` (RP3/M12a, varsayılan kapalı: `?paint=cpu`)
+
+Başvuru çizicinin kendi kodu (tiny-skia + fontdue), gereksiz işsiz. Çekirdek
+(`crates/qp-wasm/src/shell/paint_cpu.rs`, `crates/qp-render/src/retained.rs`) her yüzün
+ve açık sahnenin son karesini tutar; yalnız değişen ilkellerin dokunduğu dikdörtgeni,
+değişmeyen ön ilkellerin (ızgara, geçmiş barlar) görüntüsünden başlayarak yeniden boyar.
+Pikseller `ref` ile **bayt bayt aynı** (`tests/cpu-pixels.mjs`). Yol, kareyi WASM belleğine
+açılan bir görünümle okur (sınırdan kopya yok), boyutu değişmeyen tuvali yeniden
+ayırmaz, `putImageData(img, 0, 0, dx, dy, dw, dh)` ile yalnız değişen dikdörtgeni koyar.
+Grafikte sürükleme/kıstırma sürerken ölçek 1'de boyar; bitince (`core.cpu_moving()`
+yanlış) `env.repaint()` ile aygıt ölçeğinde yeniden boyatır. Sözleşmeye ek yok; `main.js`
+değişmedi. Ölçüm için teknikler kapatılabilir: `?cpu=nodirty,nolayer,noreduce,noreuse,noview`
+ya da `off`; `?cpu_variants=1` her biri için ayrı bir yol kaydeder (karşılaştırmada hepsi
+koşar). Ayrıntı ve ölçümler: `rounds/RP3/experiments/M12a.md`.
+
 ### `fixture` (sınama demirbaşı)
 
 Seçilecek bir yol değildir. Yalnızca adreste `fixture=1` varken desteklenir;

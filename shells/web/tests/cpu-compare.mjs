@@ -31,7 +31,10 @@ const ENGINES = { chromium, webkit };
 
 const { child, base: b } = await startDemo(qp, web, port);
 const base = b.replace('localhost', '127.0.0.1');
-const browser = await ENGINES[name].launch();
+// --nojit: WebKit's JavaScriptCore without JIT (T1's calibrated `PHONE` setting; JSC
+// options reach the WebContent process only as __XPC_-prefixed variables).
+const nojit = argv.includes('--nojit');
+const browser = await ENGINES[name].launch(nojit ? { env: { ...process.env, __XPC_JSC_useJIT: 'false' } } : {});
 let failed = 0;
 try {
   for (let r = 0; r < runs; r++) {
@@ -55,7 +58,7 @@ try {
     await page.waitForFunction(() => !window.qp.benching() && JSON.parse(window.qp.bench()) !== null,
       null, { timeout: 400000, polling: 1000 });
     const s = JSON.parse(await page.evaluate(() => window.qp.bench()));
-    s.m12a = { load, load_after: execSync('uptime').toString().trim(), throttle, dpr, viewport: [vw, vh], query, browser: name, wall_ms: Date.now() - t0, errors };
+    s.m12a = { load, load_after: execSync('uptime').toString().trim(), throttle, nojit, dpr, viewport: [vw, vh], query, browser: name, wall_ms: Date.now() - t0, errors };
     if (out) {
       fs.mkdirSync(out, { recursive: true });
       fs.writeFileSync(path.join(out, `${tag}-r${r}.json`), JSON.stringify(s, null, 1));

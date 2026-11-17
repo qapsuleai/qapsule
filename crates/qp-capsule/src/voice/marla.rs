@@ -796,45 +796,70 @@ fn core(f: &Frame<'_>, lang: Lang, tier: u8) -> String {
             (Lang::En, false, _) => format!("{i} could turn down: RSI made no new high"),
         },
         "continuation.ma_stack" => {
+            // (R5/m17-int, S1) The event verb first and plain: the trend goes on
+            // ("düşüşünü sürdürdü"), the averages after it as where the price stands —
+            // never "altına indi", which readers took for a threshold crossing.
             let a = param(MaStack::FAST, lang, red);
             let b = param(MaStack::SLOW, lang, red);
             match (lang, up, tier) {
                 (Lang::Tr, true, 0) => format!(
-                    "{i} yükselişe geçti: fiyat {a} ve {} ortalamaların üstüne çıktı",
+                    "{i} yükselişini sürdürdü: fiyat {a} ve {} ortalamaların üstünde",
                     tr_adj(&b, u)
                 ),
                 (Lang::Tr, true, 1) => {
-                    format!("{i} {} ortalamanın üstünde yükselişe geçti", tr_adj(&a, u))
+                    format!(
+                        "{i} yükselişini sürdürdü, {} ortalamanın üstünde",
+                        tr_adj(&a, u)
+                    )
+                }
+                (Lang::Tr, true, 2) => {
+                    format!("{i} yükselişte, {} ortalamanın üstünde", tr_adj(&a, u))
                 }
                 (Lang::Tr, true, _) => {
-                    format!("{i} {} ortalamanın üstüne çıktı", tr_adj(&a, u))
+                    format!("{i} yükselişte: {} ortalama üstü", tr_adj(&a, u))
                 }
                 (Lang::Tr, false, 0) => format!(
-                    "{i} düşüşe geçti: fiyat {a} ve {} ortalamaların altına indi",
+                    "{i} düşüşünü sürdürdü: fiyat {a} ve {} ortalamaların altında",
                     tr_adj(&b, u)
                 ),
                 (Lang::Tr, false, 1) => {
-                    format!("{i} {} ortalamanın altında düşüşe geçti", tr_adj(&a, u))
+                    format!(
+                        "{i} düşüşünü sürdürdü, {} ortalamanın altında",
+                        tr_adj(&a, u)
+                    )
+                }
+                (Lang::Tr, false, 2) => {
+                    format!("{i} düşüşte, {} ortalamanın altında", tr_adj(&a, u))
                 }
                 (Lang::Tr, false, _) => {
-                    format!("{i} {} ortalamanın altına indi", tr_adj(&a, u))
+                    format!("{i} düşüşte: {} ortalama altı", tr_adj(&a, u))
                 }
                 (Lang::En, true, 0) => format!(
-                    "{i} turned up: price moved above its {a}- and {} averages",
+                    "{i} kept rising: price stayed above its {a}- and {} averages",
                     en_adj(&b, u)
                 ),
                 (Lang::En, true, 1) => {
-                    format!("{i} turned up above its {} average", en_adj(&a, u))
+                    format!("{i} kept rising, above its {} average", en_adj(&a, u))
                 }
-                (Lang::En, true, _) => format!("{i} rose above its {} average", en_adj(&a, u)),
+                (Lang::En, true, 2) => {
+                    format!("{i} kept rising above its {} average", en_adj(&a, u))
+                }
+                (Lang::En, true, _) => {
+                    format!("{i} kept rising above {} average", en_adj(&a, u))
+                }
                 (Lang::En, false, 0) => format!(
-                    "{i} turned down: price moved below its {a}- and {} averages",
+                    "{i} kept falling: price stayed below its {a}- and {} averages",
                     en_adj(&b, u)
                 ),
                 (Lang::En, false, 1) => {
-                    format!("{i} turned down below its {} average", en_adj(&a, u))
+                    format!("{i} kept falling, below its {} average", en_adj(&a, u))
                 }
-                (Lang::En, false, _) => format!("{i} fell below its {} average", en_adj(&a, u)),
+                (Lang::En, false, 2) => {
+                    format!("{i} kept falling below its {} average", en_adj(&a, u))
+                }
+                (Lang::En, false, _) => {
+                    format!("{i} kept falling below {} average", en_adj(&a, u))
+                }
             }
         }
         "squeeze.bandwidth" => {

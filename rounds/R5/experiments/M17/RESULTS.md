@@ -280,3 +280,54 @@ Yeniden üretmek: `harness/lang/README.md` komutları; `langh score --run runs/m
   (ya da hangisi isteniyorsa) — sonraki ölçümler için belirsizliği kapatır.
 - Aday çiftlerini ayırmak için okuyucu sayısı artırılabilir (3 → 9 ≈ 2 $ haiku ile), ama eleştirmen
   çelişkisi %36–44 olduğundan insan testi (v3) daha bilgilendirici olur.
+
+## 11. Bütünleştirme (R5/`m17-int`, 2026-11-18)
+
+### 11.1 `tunca` ürün ağacından çıktı
+
+`tunca` elendi (§6). Modülü (`crates/qp-capsule/src/voice/tunca*.rs`) ve düzenek bağdaştırıcısı
+(`harness/lang/tool/src/adapters/tunca.rs`, `lang.rs` kaydı) bütünleştirme dalında silindi.
+**`tunca`'nın koduna `r5/m17-tunca` dalından ulaşılır** (0a37561). Tasarım notu (`M17/tunca/`),
+tarama sonuçları (`harness/lang/results/tunca/`) ve bu ölçümün ham kayıtları (`runs/m17*`) yerinde
+kalır; `langh dump --lang tunca` artık koşmaz (dili yeniden üretmek için o dal).
+
+### 11.2 Bütünleştirme düzeltmesi: S1 (ortalama dizilimi)
+
+**Sorun** (§3.2 "Okuma", §10): `continuation.ma_stack` başlığı ("SYN15 20 günlük ortalamanın altında
+düşüşe geçti" / `selvi` "… ortalamasının altına yerleşti") okuyucuların çoğunda "Fiyat bir sınırın
+altına indi" diye okundu; doğru cevap "Düşüş sürüyor". `r4` olayı düz adlandırdığı için ("düşüşünü
+sürdürdü") S1'de tavandaydı.
+
+**Düzeltme (en küçüğü; yalnız bu dedektörün başlık çekirdeği).** Olay fiili önce ve düz; ortalama
+ondan sonra, fiyatın **durduğu yer** olarak ("altında", "altına indi" değil). İki yönde aynı yapı
+(yalnız aşağıyı düzeltmek dili yönler arasında bakışımsız bırakırdı; sorun aynı kuruluştan):
+
+| dil | önce | sonra |
+|---|---|---|
+| `marla` TR | `SYN15 20 günlük ortalamanın altında düşüşe geçti` | `SYN15 düşüşünü sürdürdü, 20 günlük ortalamanın altında` |
+| `marla` TR (en kısa basamak) | `SYN22 20 günlük ortalamanın altına indi` | `SYN22 düşüşte: 20 günlük ortalama altı` |
+| `marla` EN | `SYN15 turned down below its 20-day average` | `SYN15 kept falling, below its 20-day average` |
+| `selvi` TR | `SYN04 az önce 20 saatlik ortalamasının (44,32) altına yerleşti.` | `SYN04 az önce düşüşte: 20 saatlik ortalama (44,32) altında.` |
+| `selvi` EN | `SYN04 settled below its 20-hour average (44.32) just now.` | `SYN04 kept falling below 20-hour average (44.32) just now.` |
+
+Yukarı yön aynı: "yükselişini sürdürdü" / "yükselişte" / "kept rising". Başka hiçbir metin
+değişmedi: ayrıntı, karne, sözlük ve öteki altı dedektörün başlıkları bayt eşit.
+
+**Denetim** (`langh dump`, 531 durum × 2 dil, düzeltme öncesi ve sonrası karşılaştırıldı):
+
+| | `marla` | `selvi` |
+|---|---:|---:|
+| 13 tarama toplamı | **0** | **0** |
+| değişen durum (yalnız `continuation.ma_stack`) | 97 | 97 |
+| değişen yüzey | yalnız başlık (194 = 97 × 2) | yalnız başlık (194) |
+| "ne zaman"ını kaybeden başlık | 0 | 0 |
+| rakamı değişen başlık | 0 | 16 (hepsi **kazanç**: eşik değeri artık sığıyor; kayıp 0) |
+| başlık+ayrıntı ort. karakter (TR+EN) | 222,43 → 222,93 | 234,91 → 234,98 |
+
+Seçim kuralının 4. adımı (kısa olan) düzeltmeden sonra da aynı sonucu verir (`marla` 222,93 <
+`selvi` 234,98). Güncel tablolar: `M17/marla/TABLE.md`, `M17/selvi/TABLE.md` (yeniden üretildi);
+`SCAN.md` ve `scan.json` değişmedi (hepsi 0).
+
+**Okuyucu ölçümü yeniden koşulmadı** (bütünleştirme görevi kapsamı dışı). Düzeltmenin S1'i
+gerçekten yükseltip yükseltmediği bilinmiyor; bir sonraki ölçümde (ya da insan testi v3'te) bu
+dedektörün S1 hücresi ayrıca okunmalı.

@@ -756,33 +756,33 @@ impl<'a> Cx<'a> {
     }
 
     fn hl_ma(&self, i: &str, w: &Bi) -> Vec<Option<Bi>> {
+        // (R5/m17-int, S1) The event first and plain: the price is in a fall / kept falling
+        // ("düşüşte" / "kept falling"), the average after it as where the price stands —
+        // never "altına yerleşti", which readers took for a threshold crossing.
         let a = self.span(MaStack::FAST).adj();
         let s20 = self.num(self.lead, "sma20", Cat::Price);
-        let (tr_side, en_side) = if up(self.dir) {
-            ("üstüne", "above")
+        let (tr_state, tr_side, en_verb) = if up(self.dir) {
+            ("yükselişte", "üstünde", "kept rising above")
         } else {
-            ("altına", "below")
+            ("düşüşte", "altında", "kept falling below")
         };
         vec![
             s20.as_ref().map(|s| {
                 bi(
                     format!(
-                        "{i} {} {} ortalamasının ({}) {tr_side} yerleşti.",
+                        "{i} {} {tr_state}: {} ortalama ({}) {tr_side}.",
                         w.tr, a.tr, s.tr
                     ),
-                    format!(
-                        "{i} settled {en_side} its {} average ({}) {}.",
-                        a.en, s.en, w.en
-                    ),
+                    format!("{i} {en_verb} {} average ({}) {}.", a.en, s.en, w.en),
                 )
             }),
             Some(bi(
-                format!("{i} {} {} ortalamasının {tr_side} yerleşti.", w.tr, a.tr),
-                format!("{i} settled {en_side} its {} average {}.", a.en, w.en),
+                format!("{i} {} {tr_state}: {} ortalama {tr_side}.", w.tr, a.tr),
+                format!("{i} {en_verb} {} average {}.", a.en, w.en),
             )),
             Some(bi(
-                format!("{i} {} ortalamasının {tr_side} yerleşti.", w.tr),
-                format!("{i} settled {en_side} its average {}.", w.en),
+                format!("{i} {} {tr_state}, ortalamanın {tr_side}.", w.tr),
+                format!("{i} {en_verb} its average {}.", w.en),
             )),
         ]
     }

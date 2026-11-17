@@ -11,6 +11,9 @@
 #      Dallar kalır; yalnız klasör gider.
 #   3. Ortak `target/` içinde: kullanılmayan eski profil/hedef klasörleri ve artımlı
 #      önbellek (`incremental/`). `cargo clean` yapılmaz; güncel profiller kalır.
+#      `target/wt/<görev>`: worktree başına alt klasör (eşzamanlı worktree'ler aynı
+#      klasörde birbirinin çıktısını ezdiği için; K56 notu). Worktree'si kalmamış olan
+#      alt klasörler silinir; `--force` ile hepsi.
 #   4. Worktree'lerdeki `node_modules`; ana ağacınkiler yalnız `--node-modules` ile
 #      (gösterim ve doğrulama onlara bağlı; yeniden kurulum ağ ister).
 #   5. Depo içindeki başsız tarayıcı profilleri (`target/tmp`, `*.chrome-profile`).
@@ -110,7 +113,14 @@ done
 
 # 3. target: güncel profiller kalır; geri kalanı eski.
 say "3. target/ (eski profiller ve artımlı önbellek)"
-keep=" release debug wasm wasm32-unknown-unknown x86_64-apple-darwin wasm-bench web-spike CACHEDIR.TAG .rustc_info.json "
+keep=" release debug wasm wasm32-unknown-unknown x86_64-apple-darwin wasm-bench web-spike wt CACHEDIR.TAG .rustc_info.json "
+if [ -d target/wt ]; then
+  live="$(git worktree list --porcelain | awk '/^worktree /{print substr($0,10)}' | tail -n +2 | wc -l | tr -d ' ')"
+  for d in target/wt/*; do
+    [ -d "$d" ] || continue
+    if [ "$force" = 1 ] || [ "$live" = 0 ]; then del "$root/$d"; else say "  kalır (worktree'ler hâlâ var; --force ile silinir): $d ($(size "$d"))"; fi
+  done
+fi
 if [ -d target ]; then
   for d in target/* target/.[!.]*; do
     [ -e "$d" ] || continue

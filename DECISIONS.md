@@ -237,3 +237,12 @@ kapalı (`__XPC_JSC_useJIT=false`), DPR 3 — Arkin'in iPhone ölçümünü yüz
 | A38 | M15c (yüz için sıkıştırılmış veri dilimi, cihazda derleme) denenmedi | — | `experiments/M15.md`. |
 | A39 | Orta sınıf Android telefon ölçümü ve o sınıfın hedefi | Ölçüm gelince | K52. |
 | A40 | iOS'ta JIT'in hangi koşulda kapandığı (http mi, tarayıcı mı): aynı telefonda `https://` adresi Chrome ile açılıp JIT satırına bakılır. Uygulama içi web görünümü (ör. IQx içinde gömülü kullanım) ayrıca ölçülmeli | R8 öncesi | K51 çekincesi. |
+
+## Önerilen (R5) — kesinleşmedi
+
+R5 bu satırları **önerir**. Tasarım seçimleri ajan okuyucu ve eleştirmenlerle yapılmış ön elemedir
+(ajan insan değildir); son söz Arkin'in telefondaki galeri karşılaştırması ve insan testi v3'tedir.
+
+| # | Öneri | Kanıt |
+|---|-------|-------|
+| Ö61 | **K56 uygulaması: worktree başına ortak `target/` içinde alt klasör** (`CARGO_TARGET_DIR=<ana ağaç>/target/wt/<görev>`). Tek bir ortak klasör eşzamanlı worktree'lerde güvenli değil: cargo yol bağımlılıklarının konumunu çıktı adına katmadığı için farklı kaynaklı aynı crate'ler birbirinin çıktısını eziyor. `scripts/clean.sh` worktree'si kalmayan alt klasörleri siler. Disk kazancı (worktree içinde `target/` yok, her şey tek kökte ve temizleniyor) korunur; paylaşım kazancı kaybolur. | R5/T0: `verify.sh` iki koşuda başka worktree'nin `qp-schema` derlemesine bağlandı (`Prim` içinde olmayan `font`/`role` alanları) ve silinmiş bir worktree'nin fixture yolunu taşıyan test ikilisi üretildi. |

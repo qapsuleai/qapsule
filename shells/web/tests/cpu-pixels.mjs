@@ -9,7 +9,10 @@
 // compared with fixtures/golden/demo.
 //
 // Usage: node tests/cpu-pixels.mjs <qp> [--browsers chromium,webkit] [--port 8444]
-//          [--out <dir>]   (--out writes a JSON report per browser)
+//          [--out <dir>] [--web <dir>] [--save <dir>]
+//   --out   writes a JSON report per browser
+//   --web   the page's folder (default: this shell; e.g. a copy with another core build)
+//   --save  writes every compared cpu canvas as PNG (to compare two core builds)
 import fs from 'node:fs';
 import path from 'node:path';
 import zlib from 'node:zlib';
@@ -25,8 +28,9 @@ const opt = (k, d) => { const i = argv.indexOf(k); return i >= 0 ? argv[i + 1] :
 const browsers = opt('--browsers', 'chromium,webkit').split(',');
 const port = Number(opt('--port', '8444'));
 const out = opt('--out', null);
-const here = new URL('..', import.meta.url).pathname;
-const golden = path.resolve(here, '../../fixtures/golden/demo');
+const save = opt('--save', null);
+const here = opt('--web', new URL('..', import.meta.url).pathname);
+const golden = path.resolve(new URL('..', import.meta.url).pathname, '../../fixtures/golden/demo');
 const ENGINES = { chromium, webkit };
 
 const R3 = { face: 'r3', feed: 'r3', transition: 'r3', outcome: 'r3' };
@@ -116,11 +120,16 @@ async function shotPage(browser, origin, s, paint, dpr) {
   return { ctx, page, errors };
 }
 
-async function grab(page, s, c) {
+async function grab(page, s, c, label) {
   const feed = (await page.evaluate(() => JSON.parse(window.qp.feed()))).filter((r) => r.id);
   const [, i] = c.split('-');
   const id = c === 'scene' ? 'scene' : feed[Number(i)].id;
-  return decode(Buffer.from(await page.evaluate((x) => window.qp.png(x), id)));
+  const png = Buffer.from(await page.evaluate((x) => window.qp.png(x), id));
+  if (save && label) {
+    fs.mkdirSync(save, { recursive: true });
+    fs.writeFileSync(path.join(save, `${label.replace(/[^a-z0-9.-]+/gi, '_')}.png`), png);
+  }
+  return decode(png);
 }
 
 let failed = 0;
@@ -151,7 +160,7 @@ for (const [k, name] of browsers.entries()) {
         const a = await shotPage(browser, origin, s, 'ref', dpr);
         const b = await shotPage(browser, origin, s, 'cpu', dpr);
         for (const c of s.canvases) {
-          const ra = await grab(a.page, s, c), rb = await grab(b.page, s, c);
+          const ra = await grab(a.page, s, c), rb = await grab(b.page, s, c, `${name}-dpr${dpr}-${s.name}.${c}`);
           check(`dpr${dpr} ${s.name}.${c}`, diff(ra, rb));
           const g = path.join(golden, `${s.name}.${c}.png`);
           if (dpr === 1 && fs.existsSync(g)) check(`dpr1 ${s.name}.${c} vs golden`, diff(decode(fs.readFileSync(g)), rb));
@@ -169,7 +178,7 @@ for (const [k, name] of browsers.entries()) {
       await settle(a.page);
       await settle(b.page);
       await b.page.waitForTimeout(100); // the settle repaint (one animation frame) after a drag
-      check(`dpr3 chart ${label}`, diff(await grab(a.page, s, 'scene'), await grab(b.page, s, 'scene')));
+      check(`dpr3 chart ${label}`, diff(await grab(a.page, s, 'scene'), await grab(b.page, s, 'scene', `${name}-dpr3-chart-${label}`)));
     };
     for (const step of [121, 122, 123, 125, 128]) {
       await b.page.evaluate(() => window.qp.resetMetrics());

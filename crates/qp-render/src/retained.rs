@@ -160,6 +160,20 @@ fn key(p: &Prim) -> u64 {
     h.finish()
 }
 
+/// A 64-bit fingerprint of a whole frame (size, background, every primitive in order):
+/// equal fingerprints mean the same pixels, up to a hash collision (SipHash with fixed
+/// keys, deterministic). Lets a caller know that a surface it no longer retains still
+/// shows the frame it would paint.
+#[must_use]
+pub fn fingerprint(w: u32, h: u32, bg: Rgba, prims: &[Prim]) -> u64 {
+    let mut s = DefaultHasher::new();
+    (w, h, bg, prims.len()).hash(&mut s);
+    for p in prims {
+        key(p).hash(&mut s);
+    }
+    s.finish()
+}
+
 fn copy_region(dst: &mut Pixmap, src: &Pixmap, r: Region) {
     let stride = dst.width() as usize * 4;
     let (a, b) = (r[0] as usize * 4, r[2] as usize * 4);

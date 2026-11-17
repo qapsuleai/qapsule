@@ -58,7 +58,7 @@ fn check_all(core: &mut ShellCore, force: bool, what: &str) -> (usize, usize) {
     let ids: Vec<String> = core.feed().iter().map(|i| i.id.clone()).collect();
     let (mut n, mut partial) = (0, 0);
     for id in ids.iter().take(8) {
-        let a = core.cpu_face(id, force);
+        let a = core.cpu_face(id, force, false);
         if a.is_empty() {
             continue;
         }
@@ -75,7 +75,7 @@ fn check_all(core: &mut ShellCore, force: bool, what: &str) -> (usize, usize) {
             partial += 1;
         }
     }
-    let a = core.cpu_scene(force);
+    let a = core.cpu_scene(force, false);
     if !a.is_empty() {
         let s = if a[8] == 1.0 { 1 } else { core.scale() };
         let want = rasterize_scaled(&core.scene().unwrap(), s).unwrap();
@@ -125,7 +125,7 @@ fn the_path_paints_the_reference_pixels_over_a_replay() {
             core.pointer("scene", "move", 1, 195.0 + 12.0 * f64::from(k), 150.0);
             pump(&mut core, &mut host);
             assert!(core.cpu_moving());
-            let a = core.cpu_scene(false);
+            let a = core.cpu_scene(false, false);
             if !a.is_empty() {
                 assert_eq!(
                     a[8] == 1.0,
@@ -140,7 +140,7 @@ fn the_path_paints_the_reference_pixels_over_a_replay() {
         core.pointer("scene", "up", 1, 255.0, 150.0);
         pump(&mut core, &mut host);
         assert!(!core.cpu_moving());
-        let a = core.cpu_scene(false);
+        let a = core.cpu_scene(false, false);
         if !opts.contains("off") {
             assert!(!a.is_empty(), "{opts}: the settle repaint is owed");
             assert_eq!(a[8], 0.0);
@@ -148,7 +148,10 @@ fn the_path_paints_the_reference_pixels_over_a_replay() {
         }
         let want = rasterize_scaled(&core.scene().unwrap(), 3).unwrap();
         assert_eq!(core.cpu_frame().unwrap(), want.data(), "{opts}: settled");
-        assert!(core.cpu_scene(false).is_empty(), "{opts}: nothing more");
+        assert!(
+            core.cpu_scene(false, false).is_empty(),
+            "{opts}: nothing more"
+        );
         core.set_look(&json!({"theme": "light", "alphabet": "rozet"}));
         pump(&mut core, &mut host);
         check_all(&mut core, false, "styled");
@@ -168,16 +171,26 @@ fn faces_beyond_the_keep_limit_are_dropped_and_painted_whole_again() {
     let (mut core, _host) = setup("keep=2");
     let ids: Vec<String> = core.feed().iter().map(|i| i.id.clone()).collect();
     for id in ids.iter().take(3) {
-        assert!(!core.cpu_face(id, false).is_empty());
+        assert!(!core.cpu_face(id, false, false).is_empty());
     }
-    // The first one was dropped: painted again (whole) although nothing changed.
-    let a = core.cpu_face(&ids[0], false);
+    // The first one was dropped, but its canvas still shows the same frame: nothing to do.
+    assert!(core.cpu_face(&ids[0], false, false).is_empty());
+    // Forced on a canvas that lost it (a new canvas): painted whole again.
+    let a = core.cpu_face(&ids[0], true, false);
     assert!(!a.is_empty());
     assert!(core.cpu_stats(Some(&ids[0])).unwrap().full);
-    // The third one is kept: nothing to paint.
-    assert!(core.cpu_face(&ids[2], false).is_empty());
-    // Forced: the kept frame is handed over whole, without painting.
-    let a = core.cpu_face(&ids[2], true);
+    let want = rasterize_scaled(&core.face(&ids[0]).unwrap(), 3).unwrap();
+    assert_eq!(core.cpu_frame().unwrap(), want.data());
+    // Forced on a canvas that still holds it: nothing to do.
+    assert!(core.cpu_face(&ids[0], true, true).is_empty());
+    // Forced on a new canvas while retained: handed over whole, without painting.
+    let a = core.cpu_face(&ids[2], true, false);
     assert_eq!((a[4], a[5], a[6], a[7]), (0.0, 0.0, a[2], a[3]));
     assert!(core.cpu_bytes() > 0);
+    // Without the `reuse` technique a forced paint always hands the frame over.
+    let (mut core, _host) = setup("noreuse");
+    let id = core.feed()[0].id.clone();
+    assert!(!core.cpu_face(&id, true, true).is_empty());
+    assert!(!core.cpu_face(&id, true, true).is_empty());
+    assert!(core.cpu_face(&id, false, true).is_empty());
 }

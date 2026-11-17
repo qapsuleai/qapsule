@@ -22,7 +22,7 @@
 use std::collections::BTreeMap;
 
 use qp_render::cpu::scale_prim;
-use qp_render::retained::{Retained, RetainedOpts, Scratch};
+use qp_render::retained::{fingerprint, Retained, RetainedOpts, Scratch};
 use qp_schema::scene::{Prim, SceneDesc};
 
 use super::ShellCore;
@@ -133,6 +133,9 @@ enum Shown {
 pub struct CpuPaint {
     opts: CpuOpts,
     faces: BTreeMap<String, (u64, Retained)>,
+    /// The fingerprint of the frame last handed over per face (kept after the face's
+    /// surface is dropped: its canvas still shows that frame).
+    shown: BTreeMap<String, u64>,
     face_scratch: Scratch,
     scene: Retained,
     low: Retained,
@@ -214,7 +217,10 @@ impl ShellCore {
 
     /// (RP3/M12a) Paints capsule `id`'s face on its retained surface; the answer (see
     /// [`answer`]) or empty when nothing changed (and not `force`) or there is no face.
-    pub fn cpu_face(&mut self, id: &str, force: bool) -> Vec<f64> {
+    /// `kept`: the canvas still holds the last frame this path put on it (then, with the
+    /// `reuse` technique, `force` does not repaint an unchanged frame).
+    pub fn cpu_face(&mut self, id: &str, force: bool, kept: bool) -> Vec<f64> {
+        let force = force && !(kept && self.cpu.opts.reuse);
         let t0 = self.cpu_now();
         let Some(scene) = self.face(id) else {
             return Vec::new();
@@ -226,6 +232,13 @@ impl ShellCore {
         let c = &mut self.cpu;
         c.clock += 1;
         let opts = c.opts;
+        // The canvas still shows this very frame (also after its surface was dropped):
+        // nothing to do. With `reuse` off the shell forces as `ref` does.
+        let fp = fingerprint(w, h, scene.background, &prims);
+        if opts.reuse && !force && c.shown.get(id) == Some(&fp) {
+            self.cpu_span("cpu_compile", t0, t1);
+            return Vec::new();
+        }
         if !c.faces.contains_key(id) && c.faces.len() >= opts.keep.max(1) {
             if let Some(old) = c
                 .faces
@@ -262,14 +275,19 @@ impl ShellCore {
             None => return Vec::new(),
         };
         self.cpu.last = Some(Shown::Face(id.to_owned()));
-        self.cpu_hand_over(w, h, d, false)
+        let a = self.cpu_hand_over(w, h, d, false);
+        if !a.is_empty() {
+            self.cpu.shown.insert(id.to_owned(), fp);
+        }
+        a
     }
 
     /// (RP3/M12a) Paints the open capsule's scene; the answer or empty (as
     /// [`ShellCore::cpu_face`]). While [`ShellCore::cpu_moving`] (and the `reduce`
     /// technique is on) the frame is painted at scale 1 and the answer asks to be called
     /// again when the gesture ends.
-    pub fn cpu_scene(&mut self, force: bool) -> Vec<f64> {
+    pub fn cpu_scene(&mut self, force: bool, kept: bool) -> Vec<f64> {
+        let force = force && !(kept && self.cpu.opts.reuse);
         let t0 = self.cpu_now();
         let Some(scene) = self.scene() else {
             return Vec::new();

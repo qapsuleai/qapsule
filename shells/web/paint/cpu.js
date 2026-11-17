@@ -67,10 +67,10 @@ function path(name, opts, flag) {
       core.cpu_options(opts === null ? new URLSearchParams(location.search).get('cpu') || '' : opts);
     },
     paintFace(canvas, id, force) {
-      return put(canvas, core.cpu_face(id, force));
+      return put(canvas, core.cpu_face(id, force, drawn.has(canvas)));
     },
     paintScene(canvas, force) {
-      return put(canvas, core.cpu_scene(force));
+      return put(canvas, core.cpu_scene(force, drawn.has(canvas)));
     },
   };
 }

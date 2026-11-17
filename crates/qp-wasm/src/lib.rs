@@ -699,15 +699,15 @@ mod shell_binding {
 
         /// (RP3/M12a) Paints face `id` on its retained surface: `[ptr, len, w, h, dx, dy,
         /// dw, dh, settle, reuse, view]` (`shells/web/paint/cpu.js`), empty when nothing
-        /// changed.
-        pub fn cpu_face(&mut self, id: &str, force: bool) -> Vec<f64> {
-            self.inner.cpu_face(id, force)
+        /// changed. `kept`: the canvas still holds the last frame put on it.
+        pub fn cpu_face(&mut self, id: &str, force: bool, kept: bool) -> Vec<f64> {
+            self.inner.cpu_face(id, force, kept)
         }
 
         /// (RP3/M12a) Paints the open scene (as `cpu_face`; reduced scale while a chart
         /// gesture is in progress, `settle` = 1).
-        pub fn cpu_scene(&mut self, force: bool) -> Vec<f64> {
-            self.inner.cpu_scene(force)
+        pub fn cpu_scene(&mut self, force: bool, kept: bool) -> Vec<f64> {
+            self.inner.cpu_scene(force, kept)
         }
 
         /// (RP3/M12a) A drag or pinch on the open chart is in progress.

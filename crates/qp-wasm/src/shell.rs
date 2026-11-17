@@ -52,7 +52,7 @@ pub const DISPLAY_TZ: &str = "Europe/Istanbul";
 
 // (RP3/M15) The pure scene functions live in `qp_session::viewer`: the authority compiles
 // a viewer's faces with the very same code (§22).
-pub use qp_session::viewer::{face_scene, open_scene, scene_digest};
+pub use qp_session::viewer::{face_scene, open_scene, open_scene_stories, scene_digest, StoryRows};
 
 #[cfg(target_arch = "wasm32")]
 mod clock {
@@ -516,6 +516,76 @@ impl std::fmt::Debug for ShellCore {
     }
 }
 
+/// (R5/M18, K52 measurement) `n` synthetic story rows over `bars` bars of `series`.
+fn synthetic_rows(n: u64, bars: u64, series: &str) -> Vec<qp_schema::protocol::StoryRow> {
+    use qp_schema::capsule::{Direction, MeaningKind, Stage, Validity};
+    use qp_schema::protocol::{StoryFace, StoryOutcome, StoryRow};
+    let outcomes = [
+        Stage::Realized,
+        Stage::Invalidated,
+        Stage::Expired,
+        Stage::Realized,
+        Stage::Retracted,
+    ];
+    let t = |b: u64| i64::try_from(b).unwrap_or(0);
+    (0..n)
+        .map(|i| {
+            let born = (i * (bars - 5) / n.max(1)) % (bars - 5);
+            let len = 3 + (i * 7) % 25;
+            let open = born + len >= bars - 1 || i + 3 >= n;
+            let stage = if open {
+                Stage::Born
+            } else {
+                outcomes[usize::try_from(i % 5).unwrap_or(0)]
+            };
+            let last = if open { born + len / 2 } else { born + len };
+            StoryRow {
+                id: format!("bench.{i}"),
+                finding: format!("bench.f{i}"),
+                series: series.to_owned(),
+                kind: MeaningKind::Breakout,
+                direction: [Direction::Up, Direction::Down, Direction::Neutral]
+                    [usize::try_from(i % 3).unwrap_or(0)],
+                tier: 2,
+                born_bar: born,
+                born_t: t(born),
+                last_bar: last,
+                last_t: t(last),
+                closed_bar: (!open).then_some(last),
+                closed_t: (!open).then(|| t(last)),
+                stage,
+                outcome: StoryOutcome::of(stage),
+                validity: if open { Validity::Valid } else { Validity::Closed },
+                in_feed: true,
+                hidden: None,
+                coin_flip: i % 7 == 0,
+                face: StoryFace {
+                    event: "kırılım".to_owned(),
+                    direction_word: String::new(),
+                    when: String::new(),
+                    moved: String::new(),
+                    validity_phrase: if open { "geçerli" } else { "kapandı" }.to_owned(),
+                    ledger_short: String::new(),
+                    few_cases: false,
+                    ledger_n: None,
+                },
+                redacted: false,
+            }
+        })
+        .collect()
+}
+
+/// (R5/M18) The bar series of an opening's chart view (its first candle layer's).
+fn story_series(o: &Opening) -> Option<String> {
+    o.presentation
+        .view
+        .as_ref()?
+        .layers
+        .iter()
+        .find(|l| l.mark == qp_schema::grammar::Mark::Candle)
+        .and_then(|l| l.series.clone())
+}
+
 fn lang_name(l: Language) -> &'static str {
     match l {
         Language::Tr => "tr",
@@ -903,10 +973,14 @@ impl ShellCore {
                     ("transition", &self.look.transition),
                     ("outcome", &self.look.outcome),
                     ("look", &self.look.look),
+                    ("story", &self.look.story),
                 ] {
                     if let Some(v) = v {
                         more[k] = json!(v);
                     }
+                }
+                if self.look.closed == Some(false) {
+                    more["closed"] = json!(false);
                 }
                 if more.as_object().is_some_and(|o| o.len() > 1) {
                     self.ask("in", Asked::Input, json!({"type":"input","gesture":more}));
@@ -1013,6 +1087,9 @@ impl ShellCore {
                         _ => {}
                     }
                     ch["stories"] = json!(true);
+                    if self.look.story.is_some() {
+                        ch["scene"] = json!(true);
+                    }
                 }
             }
             ServerMsg::Notify { event, .. } => match event {
@@ -1138,6 +1215,25 @@ impl ShellCore {
     #[must_use]
     pub fn stories_asked(&self) -> u64 {
         self.viewer.as_ref().map_or(0, |v| v.stories_asked)
+    }
+
+    /// (R5/M18, K52 measurement only) Replaces the held story list with `n` synthetic
+    /// stories spread over the open chart's bars (deterministic: lives of 3–27 bars,
+    /// outcomes in turn, the last three open, every 7th a coin flip), so that the paint
+    /// budget can be measured with 5 / 50 / 200 stories in view. Returns how many rows
+    /// the list now holds (0: no viewer list, e.g. the chart is not open).
+    pub fn bench_stories(&mut self, n: u32) -> u32 {
+        let bars = self.scene().map_or(0, |s| s.bars);
+        let Some(st) = self.viewer.as_mut().and_then(|v| v.stories.as_mut()) else {
+            return 0;
+        };
+        if bars < 8 {
+            return 0;
+        }
+        st.rows = synthetic_rows(u64::from(n), bars, &st.series);
+        st.total = n;
+        self.version += 1;
+        u32::try_from(st.rows.len()).unwrap_or(u32::MAX)
     }
 
     /// (RP3/M15) Applies a viewer update: the feed rows (the feed the rest of the core
@@ -1360,6 +1456,7 @@ impl ShellCore {
             "transition": qp_grammar::transitions::names(),
             "outcome": qp_grammar::glyph::outcome::names(),
             "look": qp_grammar::look::names(),
+            "story": qp_grammar::stories::names(),
         })
     }
 
@@ -1481,13 +1578,30 @@ impl ShellCore {
         let head = self.open_headline.clone();
         // (RP3/S) The build's own time (`scene_build`), apart from the change check.
         let t0 = core_now();
+        let lang = self.lang;
+        let story = look.story.is_some() && o.to >= OpenDepth::Chart;
         let scene = if let Some(v) = self.viewer.as_mut() {
             // (RP3/M15) The open capsule over the device's own data of its instrument.
-            let side = v.open_mut().filter(|s| s.open.capsule == o.capsule)?;
+            // (R5/M18) The story chart draws the list the authority sent (§23.5).
+            let (side, stories) = v.open_and_stories();
+            let side = side.filter(|s| s.open.capsule == o.capsule)?;
+            let rows = stories.filter(|_| story).map(|st| StoryRows {
+                rows: &st.rows,
+                lang,
+            });
             let s = side.replica_mut().session_mut()?;
-            open_scene(s, &o, head.as_deref(), &look, mp)
+            open_scene_stories(s, &o, head.as_deref(), &look, mp, rows)
         } else {
-            open_scene(self.replica.session_mut()?, &o, head.as_deref(), &look, mp)
+            let principal = self.principal.clone();
+            let s = self.replica.session_mut()?;
+            // (R5/M18) A full replica lists the stories itself, in the reader's world.
+            let rows = if story {
+                story_series(&o).map(|bs| s.story_rows(&principal, lang, &bs))
+            } else {
+                None
+            };
+            let rows = rows.as_deref().map(|r| StoryRows { rows: r, lang });
+            open_scene_stories(s, &o, head.as_deref(), &look, mp, rows)
         };
         let t1 = core_now();
         self.core_span("scene_build", t0, t1);
@@ -1783,6 +1897,7 @@ impl ShellCore {
             "transition",
             "outcome",
             "look",
+            "story",
         ] {
             if let Some(v) = choice.get(k).and_then(Value::as_str) {
                 if !v.is_empty() {

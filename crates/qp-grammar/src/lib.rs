@@ -26,6 +26,7 @@ mod layer;
 pub mod look;
 pub mod provider;
 pub mod scale;
+pub mod stories;
 pub mod theme;
 pub mod transitions;
 

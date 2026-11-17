@@ -106,3 +106,15 @@ eklenenler. Hiçbir kural gevşetilmedi.
 
 Görünüş seçimi `?look=<ad>` ve Ayarlar → Görünüş: öbür ayarlar gibi `set_look({look})`
 (`style` hareketinin `look` alanı); adlar `choices().look`'tan.
+
+(R5/M18) Hikâye çizelgesi (`crates/qp-grammar/src/stories/`) için eklenenler. Hiçbir kural
+gevşetilmedi: çizelgeyi çekirdek çizer, dokunuşu otorite yorumlar (`tap_at`: odak taşıma,
+küme yakınlaştırma, kapanmışları gizle/göster).
+
+| Yöntem | Neden |
+|--------|-------|
+| `stories()` | Cihazın tuttuğu hikâye listesi (JSON; ölçüm ve testler okur, sayfa yorumlamaz). |
+| `bench_stories(n)` | Yalnız ölçüm (K52): tutulan listenin yerine `n` sentetik hikâye; 5 / 50 / 200 hikâyeyle boyama bütçesi. Sayfa yalnız `window.qp.benchStories` olarak verir. |
+
+Seçim `?story=<ad>` ve Ayarlar → Hikâye çizelgesi: `set_look({story})` (`style` hareketinin
+`story` alanı); adlar `choices().story`'den (varsayılan `r4`: çizelge yok).

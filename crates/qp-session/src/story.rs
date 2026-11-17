@@ -289,6 +289,36 @@ impl Session {
         })
     }
 
+    /// (R5/M18) Every story row of bar series `series` for `principal` in its world, by
+    /// birth: the rows the `stories` query gives without a range, all pages (the story
+    /// chart's input, `qp_grammar::stories`). Call inside [`Session::as_reader`].
+    pub(crate) fn story_rows_here(
+        &self,
+        principal: &str,
+        lang: qp_schema::protocol::Language,
+        series: &str,
+    ) -> Vec<StoryRow> {
+        let p = self.proj.as_deref();
+        let mut memo = StudyMemo::default();
+        self.series_stories(series)
+            .into_iter()
+            .filter_map(|(c, s)| self.story_row(c, s, p, lang, principal, &mut memo))
+            .collect()
+    }
+
+    /// (R5/M18) [`Session::story_rows_here`] in `principal`'s world (a replica draws its
+    /// own story chart with it when it is the full document, not a viewer).
+    pub fn story_rows(
+        &mut self,
+        principal: &str,
+        lang: qp_schema::protocol::Language,
+        series: &str,
+    ) -> Vec<StoryRow> {
+        self.as_reader(principal, lang, |s| {
+            s.story_rows_here(principal, lang, series)
+        })
+    }
+
     /// Answer to the `stories` query (run in the asker's world).
     pub(crate) fn stories_query(
         &self,

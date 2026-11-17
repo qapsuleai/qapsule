@@ -3073,6 +3073,13 @@ pub enum Gesture {
         /// motion; `qp_grammar::look::LOOKS`; default `r4`).
         #[serde(default, skip_serializing_if = "Option::is_none")]
         look: Option<String>,
+        /// (R5/M18) Story chart design drawn at chart depth (`qp_grammar::stories::STORIES`;
+        /// default `r4`: the open capsule alone, no story chart).
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        story: Option<String>,
+        /// (R5/M18, K54) Whether the story chart shows closed stories (default `true`).
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        closed: Option<bool>,
     },
     /// (R4, §4.6) Close the open capsule one depth back, or to `to` (`sentence`: back to
     /// the feed). Answered with an `interaction` carrying the `opening` (the way back).
@@ -3181,6 +3188,12 @@ pub struct ViewState {
     /// (R5/T3) Look its scenes are compiled with (absent: the default, `r4`).
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub look: Option<String>,
+    /// (R5/M18) Story chart design at chart depth (absent: the default, `r4`: none).
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub story: Option<String>,
+    /// (R5/M18, K54) `false`: the story chart hides closed stories (absent: shown).
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub closed: Option<bool>,
 }
 
 /// (R4, §4.6) One element both sides of a depth transition show (e.g. the glyph, the

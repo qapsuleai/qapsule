@@ -235,6 +235,31 @@ pub fn open_scene(
     look: &ViewState,
     max_points: u32,
 ) -> Option<SceneDesc> {
+    open_scene_stories(s, o, headline, look, max_points, None)
+}
+
+/// (R5/M18) The story chart's input on the device: the instrument's rows as the device
+/// holds them and the reader's language.
+#[derive(Debug, Clone, Copy)]
+pub struct StoryRows<'a> {
+    /// The rows (the `stories` answer and its topic, or the replica's own).
+    pub rows: &'a [qp_schema::protocol::StoryRow],
+    /// The reader's language.
+    pub lang: qp_schema::protocol::Language,
+}
+
+/// (R5/M18) [`open_scene`] with the open instrument's stories: at chart and evidence depth,
+/// when the view state names a story chart design (`look.story`), the scene is that
+/// design's (`qp_grammar::stories`), the same the authority hit-tests.
+#[must_use]
+pub fn open_scene_stories(
+    s: &mut Session,
+    o: &Opening,
+    headline: Option<&str>,
+    look: &ViewState,
+    max_points: u32,
+    stories: Option<StoryRows<'_>>,
+) -> Option<SceneDesc> {
     if o.to == OpenDepth::Sentence {
         return None;
     }
@@ -259,7 +284,19 @@ pub fn open_scene(
         .as_ref()
         .filter(|r| o.to >= OpenDepth::Chart && r.view == view.id)
         .map(|r| (r.from_bar, r.to_bar));
-    compile(&view, &p, &options(look, w, h, range)).ok()
+    let opts = options(look, w, h, range);
+    if o.to >= OpenDepth::Chart {
+        if let (Some(d), Some(st)) = (qp_grammar::stories::design(look.story.as_deref()), stories) {
+            let input = qp_grammar::stories::StoryInput {
+                rows: st.rows,
+                selected: &o.finding,
+                show_closed: look.closed != Some(false),
+                lang: st.lang,
+            };
+            return (d.scene)(&view, &p, &opts, &input).ok();
+        }
+    }
+    compile(&view, &p, &opts).ok()
 }
 
 // ---------------------------------------------------------------------------

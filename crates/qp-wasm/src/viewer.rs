@@ -338,6 +338,12 @@ impl Viewer {
             .map(|s| (s.instrument.clone(), s.series.clone()))
     }
 
+    /// (R5/M18) The open side and the story list, borrowed together (the story chart is
+    /// drawn over the open side's data from the list).
+    pub fn open_and_stories(&mut self) -> (Option<&mut OpenSide>, Option<&Stories>) {
+        (self.open.as_mut(), self.stories.as_ref())
+    }
+
     /// The open side.
     pub fn open_mut(&mut self) -> Option<&mut OpenSide> {
         self.open.as_mut()

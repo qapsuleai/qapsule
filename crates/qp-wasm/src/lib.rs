@@ -434,6 +434,11 @@ mod shell_binding {
             self.inner.stories_json().to_string()
         }
 
+        /// (R5/M18, K52 measurement only) `n` synthetic stories in place of the held list.
+        pub fn bench_stories(&mut self, n: u32) -> u32 {
+            self.inner.bench_stories(n)
+        }
+
         /// (RP3/M15) Runs the open capsule's check on its own data again (JSON).
         pub fn check(&mut self) -> String {
             self.inner.check_now().to_string()

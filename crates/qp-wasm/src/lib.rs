@@ -428,6 +428,12 @@ mod shell_binding {
             self.inner.viewer_json().to_string()
         }
 
+        /// (R5/M18, §23.5) The open instrument's story list the device holds (JSON; `null`
+        /// unless the chart is open). For the story chart alternatives; no drawing here.
+        pub fn stories(&self) -> String {
+            self.inner.stories_json().to_string()
+        }
+
         /// (RP3/M15) Runs the open capsule's check on its own data again (JSON).
         pub fn check(&mut self) -> String {
             self.inner.check_now().to_string()

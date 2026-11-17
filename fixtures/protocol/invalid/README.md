@@ -29,3 +29,4 @@ Her dosya kendi tipinin üretilen şemasına göre **reddedilmelidir**.
 | `op.set_scale_no_scale.json` | scale id required (R2) |
 | `op.origin_bad_kind.json` | unknown origin kind (R2) |
 | `query.hit_no_x.json` | pixel x required (R2) |
+| `query.stories_no_instrument.json` | instrument required (R5/M18, §23) |

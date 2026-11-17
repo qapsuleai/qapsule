@@ -1,0 +1,6 @@
+{
+ "kind": "stories",
+ "instrument": "THYAO",
+ "range": {"last": 120},
+ "limit": 200
+}

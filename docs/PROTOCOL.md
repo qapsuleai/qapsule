@@ -256,6 +256,7 @@ Konular (`topic.kind`):
 | `intents` | — | `intent_triggered` |
 | `view` (RP2) | `view` (seçici de olur) | `view_changed` (görünümün okuduğu bir serinin barları değişti; §18.8) |
 | `claims` (RP2/T8) | — | `claim` (otoritenin veri kaynaklı iddiası, kanıtıyla: geçici, kesin, geri çekildi, temizlik değişti; §19.3). Veri kaynaklı `condition_met`, `intent_triggered`, `finding_state` ve motor girdisinin `change`'i de isteğe bağlı `evidence` (`ClaimEvidence`) taşır |
+| `stories` (R5/M18) | `instrument`, `series?` | `story` (hikâye listesinin değişen satırı: doğum, geçiş, kapanış, geçerlilik, akıştaki yer; §23.4); açık görünüm okuyucusuna o enstrümanın `server_comment`'i |
 
 Abonelik kimliği `subscribe` mesajının `id`'sidir. `unsubscribe {"id":…, "sub":"s2"}`.
 Bir bağlantı en çok `limits.max_subscriptions` abonelik tutar.
@@ -592,6 +593,7 @@ böylece aynı görünümün farklı katmanlarına eşzamanlı yazılar çakış
 | `capsules` | `instrument?`, `stages?`, `open?`, `meaning?`, `since_bar?`, `since_t?`, `audience?`, `limit?` | (R3, §20) `capsules`: soranın görebildiği kapsüller, önem sırasıyla; yetkisi olmayan lisanslı akış için `comments` (sunucu yorumları). |
 | `capsule` | `capsule` (kapsül ya da bulgu kimliği) | (R3, §20) `capsule_detail`: hikâye (geçişler, nedenler), olgular, cümle, karne, işaret tarifi, olgu başına kanıt erişimi (K34). |
 | `ledger` | `key?`, `meaning?`, `detector?`, `by_kind?` | (R3, §20) `ledger`: anahtar (ya da tür) başına kapanan ve gerçekleşen sayısı; lisanstan bağımsız. |
+| `stories` | `instrument`, `series?`, `range?`, `limit?`, `after?` | (R5/M18, §23) `stories`: enstrümanın aralıktaki bütün hikâyeleri (kapsülleri), okuyucunun gördüğü biçimde, doğum sırasıyla, sayfalı; bar yok. |
 
 **Hedef** (`Target`; dikkat, anlatım adımları ve R2'de görünüm vurgusu): `view`, `panel` (panel id'si), `layer` (R2), `series`, `output`
 (serinin çıktısı ya da bar alanı: hacim için `"v"`), `item` (bulgu, olgu…), `from_bar`,
@@ -946,6 +948,9 @@ yeniden oynatma barındırıcısıyla (`qp_session::ReplayHost`) koşar: süreç
 `conform::InProcReplay`, `qp serve` (`init.replay` görünce barındırıcıyı kurar;
 `--no-local-data`), MCP'de `Hub::shared_replay` (`replay_<kind>` araçları). Dökümlerde
 yerel veri hiç okunmaz.
+**R5/M18 (§23):** 60–63 enstrümanın hikâye listesi (yetkili okuyucu, yetkisiz okuyucular,
+~200 hikâyelik aralık, `stories` konusu); `cargo run -p qp-session --example
+make_story_transcripts -- --write` ile üretilir. Var olan dökümler değişmedi.
 
 ## 16. Gömme
 
@@ -2574,8 +2579,10 @@ satırlar `ShellCore::stories_json` ile çizelge alternatiflerine verilir.
 - Sayfa en çok 500 satır; `comments` aralıkla sınırlıdır (sayfalanmaz).
 - Konu bütün enstrümanı izler (aralıksız); kitle değişince enstrümanın bütün satırlarının
   yeri değişebilir ve hepsi gelir (döküm 63).
-- Ölçüm (`cargo run --release -p qp-session --example make_story_transcripts -- --stats`):
-  `rounds/R5/` raporuna yazılır.
+- Ölçüm (`cargo run --release -p qp-session --example make_story_transcripts -- --stats`,
+  Apple silicon, release, 1.200 barlık THYAO, son 950 bar): yetkili okuyucuya 202 hikâye →
+  ilk sayfa 200 satır, sıkıştırmasız JSON ~108 KB, otoritede cevap ortanca ~2,8 ms; akış
+  yetkisiz okuyucuya 124 satır + 177 sunucu yorumu ~192 KB, ~1,9 ms. Ayrıntı R5 raporunda.
 
 Dökümler: `fixtures/protocol/conformance/60-stories-entitled.json` (yetkili okuyucu; ~5 ve
 ~50 hikâyelik aralıklar, sayfalama, İngilizce yüz, kapanmış + açık + akışta gizli karışımı,

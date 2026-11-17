@@ -95,6 +95,8 @@ fn full_run(bars: &[Bar], n: usize, seed: u64) -> Vec<OutboundLine> {
             json!({"kind":"capsules","instrument":"THYAO"}),
             json!({"kind":"changes"}),
             json!({"kind":"claims"}),
+            // (R5/M18, §23) The story list's changes.
+            json!({"kind":"stories","instrument":"THYAO"}),
         ]
         .iter()
         .enumerate()
@@ -128,6 +130,9 @@ fn full_run(bars: &[Bar], n: usize, seed: u64) -> Vec<OutboundLine> {
             json!({"kind":"present","finding":{"latest":true}}),
             json!({"kind":"present","finding":{"kind":"flow"}}),
             json!({"kind":"verify_evidence","item":{"latest":true}}),
+            // (R5/M18, §23) The story list.
+            json!({"kind":"stories","instrument":"THYAO","limit":500}),
+            json!({"kind":"stories","instrument":"THYAO","range":{"last":30},"limit":3}),
         ] {
             out.extend(send(&mut s, c, &json!({"type":"query","id":"q","query":q})));
         }
@@ -383,6 +388,8 @@ fn oracle_run(
             json!({"kind":"capsules","all":true}),
             json!({"kind":"changes"}),
             json!({"kind":"claims"}),
+            // (R5/M18, §23) The story list's changes.
+            json!({"kind":"stories","instrument":"THYAO"}),
         ]
         .iter()
         .enumerate()

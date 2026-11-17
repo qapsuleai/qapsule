@@ -334,19 +334,21 @@ impl Session {
             .collect();
         let start = match after {
             None => 0,
-            Some(a) => in_range
-                .iter()
-                .position(|(c, _)| c.id == a)
-                .ok_or_else(|| {
-                    E::new(
+            Some(a) => {
+                in_range
+                    .iter()
+                    .position(|(c, _)| c.id == a)
+                    .ok_or_else(|| {
+                        E::new(
                         ErrorCode::NotFound,
                         format!("`{a}` is not a story of this list"),
                     )
                     .at(ptr(qp, "after"))
                     .hint("Send the previous answer's `next`, with the same instrument and range.")
                     .build()
-                })?
-                + 1,
+                    })?
+                    + 1
+            }
         };
         let limit = limit.unwrap_or(STORIES_DEFAULT_LIMIT) as usize;
         let mut memo = StudyMemo::default();

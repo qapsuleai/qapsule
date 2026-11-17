@@ -77,3 +77,27 @@ yüzlerdir.
 2. **Pay:** `fotolay` ile bozuk arasındaki fark küçük (+0,025). Tam koşu 6 tekrar ve 4 dil/tema ile yapılmalı. Bozuk tasarım her M koşusunda yeniden yarışmalı.
 3. **Sert eşikler:** `vadrel` ve `fotolay` dört kapıyı geçemiyor (işaret 1,27; en küçük yazı 10 px; dokunma; renk), bu yüzden uygulanmadı (E6 kuralı). Metin karşıtlığı kapısı artık geçiliyor: T3 kabuk renkleriyle 5,27.
 4. **Model ailesi:** tek aile (haiku/sonnet); ikinci aile yok.
+
+## Ek G3 sonrası yeniden puanlama (aynı run2 verisi, yeni çağrı yok)
+
+Orkestratör kararıyla (SPEC Ek G3) `t_valid` sınıf dengeli puanlandı: bu durum kümesinde açık
+ağırlığı 0,80, kapanmış ağırlığı 1,34. Sonuçlar `broken/run/` dosyalarında güncel; yukarıdaki tablo Ek G3 öncesidir.
+
+| tasarım | tek bakış: kısma (birincil, dengeli) | önce (dengesiz) | `t_valid` ham → dengeli |
+|---|---|---|---|
+| `vadrel` | 0,328 [0,310, 0,347] | 0,314 | 0,220 → 0,270 |
+| `fotolay` | 0,265 [0,247, 0,284] | 0,261 | 0,013 → 0,017 |
+| `kestim` (bozuk) | **0,251** [0,235, 0,268] | 0,236 | 0,164 → 0,218 |
+
+- **Kabul kuralı: hâlâ GEÇİYOR.**
+  - Bozuk tasarım birincilde kesin son (0,251 < 0,265 < 0,328).
+  - Birincil aralığı en iyinin aralığının altında (0,268 < 0,310).
+  - BT'de son (değişmedi: −3,10).
+- **Eşleştirilmiş fark:**
+  - `vadrel − kestim` = +0,078 [+0,056, +0,098] → ayrık.
+  - `fotolay − kestim` = +0,015 [−0,010, +0,041] → **artık ayrık değil**. Dengesiz puanda +0,025 [+0,002, +0,049] idi.
+  - Dengesiz puan bozuk tasarımın `fotolay` karşısındaki geri kalışını biraz büyütüyordu: bozuk tasarım `t_valid`'de "sürüyor"/"bitmiş" cevaplarını karıştırıyor, `fotolay` ise neredeyse hep "bilmiyorum" diyor.
+- **Sonuç:** Kabul kuralı (kesin son) geçiyor. Bozuk tasarım ile ikinci zayıf aday arasındaki pay ise aralığın içinde.
+- **Öneri** (kural değiştirmedim):
+  - Bozuk tasarımın etkisini güçlendirmek M16 tam koşusunun ölçeğiyle (6 aday × 6 tekrar) daha net görülecek.
+  - Kabul kuralına "eşleştirilmiş farkla bütün adaylardan ayrık" şartı eklenirse bu koşu geçmezdi. Bu kararı orkestratöre bırakıyorum.

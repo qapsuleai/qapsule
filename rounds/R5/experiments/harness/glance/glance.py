@@ -41,6 +41,8 @@ from gl import select as SEL  # noqa: E402
 from gl import states as ST  # noqa: E402
 
 SEED = 20261117
+# SPEC Ek G3: replicates per reader set (primary measure 6; BROKEN.md: 3 did not separate).
+DEFAULT_REPS = {"throttle": 6}
 
 
 def jload(p):
@@ -277,7 +279,7 @@ def cmd_read(a):
         if a.states and k["state"] not in a.states.split(","):
             continue
         for persona in a.personas.split(","):
-            for rep in range(a.reps):
+            for rep in range(a.reps or DEFAULT_REPS.get(qs, 3)):
                 cid = code("read", sid, persona, a.model, rep)
                 if (run / "readers" / f"{cid}.json").exists():
                     continue
@@ -397,6 +399,7 @@ def cmd_score(a):
             rows.append({"design": key[c]["design"], "state": key[c]["state"], "lang": key[c]["lang"],
                          "theme": key[c]["theme"], "persona": r["persona"], "qset": r["qset"], "q": q,
                          "code": ans["code"], "credit": K.credit(q, ans["code"], acc), "cut": ans["cut"],
+                         "key": "|".join(sorted(acc)),
                          "stim": r["stim"], "rep": r["rep"], "model": ",".join(r["log"]["models"]),
                          "one_look": r["log"]["one_look"], "cost": r["log"]["cost_usd"]})
     ck = jload(run / "critic_key.json") if (run / "critic_key.json").exists() else {}
@@ -471,7 +474,8 @@ def main():
     for name, fn in (("read", cmd_read), ("critic", cmd_critic)):
         p = add(name, fn)
         p.add_argument("--model", default="haiku" if name == "read" else "sonnet")
-        p.add_argument("--reps", type=int, default=1 if name == "read" else 3)
+        # read: 0 = the per-set default (DEFAULT_REPS: primary 6, others 3; SPEC Ek G3).
+        p.add_argument("--reps", type=int, default=0 if name == "read" else 3)
         p.add_argument("--max", type=int, default=0)
         p.add_argument("--jobs", type=int, default=4)
         p.add_argument("--max-turns", type=int, default=3)

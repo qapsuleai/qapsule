@@ -261,6 +261,35 @@ class Select(unittest.TestCase):
         step = next(s for s in res["steps"] if s["step"] == "1b")
         self.assertEqual(step["eliminated"], ["q"])
 
+    def test_t_valid_balanced_against_response_bias(self):
+        # 5 open states, 3 closed (the fixed set's proportions); one reader always says
+        # "ended", another always "live": both must score 0.5 on t_valid (SPEC Ek G3).
+        rows = []
+        for i, key in enumerate(["live"] * 5 + ["ended"] * 3):
+            for d, ans in (("always_ended", "ended"), ("always_live", "live")):
+                rows.append({"design": d, "qset": "throttle", "stim": f"{d}{i}", "persona": "F", "rep": 0,
+                             "q": "t_valid", "key": key, "code": ans, "credit": 1.0 if ans == key else 0.0})
+        w = SEL.balance_weights(rows)
+        self.assertAlmostEqual(w[("t_valid", "live")], 16 / (2 * 10))
+        self.assertAlmostEqual(w[("t_valid", "ended")], 16 / (2 * 6))
+        for d in ("always_ended", "always_live"):
+            sel = [r for r in rows if r["design"] == d]
+            m = SEL.unit_means(rows, lambda r, d=d: d if r["design"] == d else None, w)
+            self.assertAlmostEqual(m[d], 0.5, places=9)
+            self.assertNotAlmostEqual(sum(r["credit"] for r in sel) / len(sel), 0.5)  # unbalanced share
+
+    def test_other_questions_unweighted(self):
+        rows = [{"design": "a", "qset": "throttle", "stim": "s", "persona": "F", "rep": 0, "q": "t_first",
+                 "key": "mark|sentence", "credit": 1.0},
+                {"design": "a", "qset": "throttle", "stim": "s", "persona": "F", "rep": 0, "q": "t_dir",
+                 "key": "up", "credit": 0.0}]
+        self.assertEqual(SEL.unit_means(rows, lambda r: "u"), {"u": 0.5})
+
+    def test_default_reps(self):
+        import importlib
+        glance = importlib.import_module("glance")
+        self.assertEqual(glance.DEFAULT_REPS["throttle"], 6)
+
     def test_paired_difference(self):
         rows = []
         for i in range(30):

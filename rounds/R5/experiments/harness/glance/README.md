@@ -66,14 +66,14 @@ Tam M16 koşusu, D aday (4 yön + `r4` + bozuk = 6), 2 dil × 2 tema:
 | Kalem | Hesap | Çağrı | ≈ $ |
 |---|---|---:|---:|
 | Görüntü başına uyaranlar | 8 yüz durumu × (yüz + yarım + kısma + gri) + akış + 2 kanıt + 2 × 2 hareket = 39 | | |
-| Okuyucu (haiku) | 6 aday × 4 dil/tema × 39 × 2 persona × 3 tekrar | 5 616 | 5,1 |
+| Okuyucu (haiku) | 6 aday × 4 dil/tema × 2 persona × (8 kısma × **6 tekrar** + 31 öteki × 3 tekrar) (Ek G3) | 6 768 | 6,1 |
 | Boylar arası uyum (sonnet) | 6 × yüz kümesi 8 durum × 2 persona × 1 (tr/açık) | 96 | 1,9 |
 | Eleştirmen (sonnet) | C(6,2) = 15 çift × 8 durum × 2 sıra × 3 tekrar (tr/açık) | 720 | 10,4 |
-| **Toplam M16** | | ≈ 6 430 | **≈ 17,5** |
+| **Toplam M16** | | ≈ 7 580 | **≈ 18,4** |
 
 M18 (3 aday + `r4` + bozuk = 5; 3 derinlik × 2 dil): okuyucu ≈ 5 × 6 × 2 × 3 = 180 haiku (0,2 $) +
 eleştirmen 10 çift × 3 × 2 × 3 = 180 sonnet (2,5 $). M20 (2 + `r4` + bozuk): ≈ 1 $. M21 (2 + hareketsiz
-+ bozuk): ≈ 1 $. Hepsi birlikte ≈ 25 $ ve birkaç saat duvar saati (eleştirmen en yavaşı).
++ bozuk): ≈ 1 $. Hepsi birlikte ≈ 26 $ ve birkaç saat duvar saati (eleştirmen en yavaşı).
 
 ## Bilinen sınırlar
 

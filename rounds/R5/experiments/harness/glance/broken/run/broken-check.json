@@ -4,21 +4,21 @@
   "last_on_bt": true,
   "last_on_primary": true,
   "last_on_reading_info": true,
-  "paired_separated_from_all_info": true,
+  "paired_separated_from_all_info": false,
   "primary_below_best_interval": true
  },
  "paired_primary_info": {
   "fotolay": {
-   "diff": 0.0254,
-   "hi": 0.0486,
-   "lo": 0.0021,
+   "diff": 0.0153,
+   "hi": 0.0411,
+   "lo": -0.0099,
    "n": 378,
-   "separated": true
+   "separated": false
   },
   "vadrel": {
-   "diff": 0.0781,
-   "hi": 0.0978,
-   "lo": 0.0573,
+   "diff": 0.078,
+   "hi": 0.0984,
+   "lo": 0.0563,
    "n": 376,
    "separated": true
   }

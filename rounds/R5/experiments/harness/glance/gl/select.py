@@ -21,15 +21,54 @@ CONFLICT_MAX = 0.30                 # RESEARCH U1: a pair with more order confli
 GATES = ("text_contrast", "nontext_contrast", "min_font", "touch", "colour", "k52")
 
 
-def _units(rows, design, sets):
-    """Mean credit per (stimulus, persona, rep) unit, by persona."""
-    acc = defaultdict(list)
+# SPEC Ek G3: questions whose answer classes are unbalanced in the fixed state set are
+# class-balanced: each key class weighs the same in total, so a reader who always gives one
+# answer scores 1 / (number of classes) on them (BROKEN.md: `t_valid` response bias — "ended"
+# always scored the closed states' share).
+BALANCED = ("t_valid",)
+
+
+def balance_weights(rows):
+    """{(q, key class): weight} = 1 / (classes × share of the class), shares over all rows of
+    the question (the state set is the same for every design)."""
+    n = defaultdict(lambda: defaultdict(int))
     for r in rows:
-        if r["design"] == design and r["qset"] in sets:
-            acc[(r["stim"], r["persona"], r["rep"], r.get("model", ""))].append(r["credit"])
+        if r.get("q") in BALANCED and r.get("key"):
+            n[r.get("q")][r["key"]] += 1
+    w = {}
+    for q, by in n.items():
+        tot = sum(by.values())
+        for k, c in by.items():
+            w[(q, k)] = tot / (len(by) * c)
+    return w
+
+
+def _weight(r, w):
+    return w.get((r.get("q"), r.get("key")), 1.0) if r.get("q") in BALANCED else 1.0
+
+
+def unit_means(rows, keyfn, w=None):
+    """Weighted mean credit per unit (`keyfn(row)`); weights from `balance_weights`."""
+    w = balance_weights(rows) if w is None else w
+    num, den = defaultdict(float), defaultdict(float)
+    for r in rows:
+        k = keyfn(r)
+        if k is None:
+            continue
+        x = _weight(r, w)
+        num[k] += x * r["credit"]
+        den[k] += x
+    return {k: num[k] / den[k] for k in num if den[k] > 0}
+
+
+def _units(rows, design, sets):
+    """Mean credit per (stimulus, persona, rep) unit, by persona (class-balanced, Ek G3)."""
+    sel = [r for r in rows if r["qset"] in sets]
+    w = balance_weights(sel)
+    m = unit_means(sel, lambda r: (r["stim"], r["persona"], r["rep"], r.get("model", "")) if r["design"] == design else None, w)
     by = defaultdict(list)
-    for (stim, persona, _rep, _m), v in sorted(acc.items()):
-        by[persona].append(sum(v) / len(v))
+    for (stim, persona, _rep, _m), v in sorted(m.items()):
+        by[persona].append(v)
     return by
 
 
@@ -209,11 +248,9 @@ def paired_difference(rows, a, b, sets, seed, reps=2000):
     """Paired F2:H1 difference a − b of the unit accuracy over the units both designs share
     (same state, language, theme, persona, replicate); seeded bootstrap 95 % (SPEC §G8:
     how clearly the broken design is behind each other design)."""
-    u = defaultdict(list)
-    for r in rows:
-        if r["qset"] in sets and r["design"] in (a, b):
-            u[(r["design"], r.get("state"), r.get("lang"), r.get("theme"), r["persona"], r["rep"], r.get("model", ""))].append(r["credit"])
-    m = {k: sum(v) / len(v) for k, v in u.items()}
+    sel = [r for r in rows if r["qset"] in sets]
+    m = unit_means(sel, lambda r: (r["design"], r.get("state"), r.get("lang"), r.get("theme"), r["persona"], r["rep"],
+                                   r.get("model", "")) if r["design"] in (a, b) else None, balance_weights(sel))
     keys = sorted(k[1:] for k in m if k[0] == a and (b,) + k[1:] in m)
     if not keys:
         return None

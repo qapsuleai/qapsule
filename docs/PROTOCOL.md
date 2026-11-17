@@ -2265,7 +2265,7 @@ Sayfa, protokol ve veri düzlemi **aynı kökendedir**; sayfa başka hiçbir yer
 - Her istekte `Host` bu barındırıcı olmalıdır (`localhost`, `127.0.0.1`, `[::1]`, dinlenen
   adres ya da basılan yerel ağ adresi, portuyla); değilse `403` (DNS yeniden bağlama).
   Varsayılan dinleme `127.0.0.1`; `--lan` `0.0.0.0`'ı dinler (aynı ağdaki telefon; yerel
-  ağdaki cihazlar gösterimi görebilir). Test `crates/qp-cli/tests/demo_security.rs`.
+  ağdaki cihazlar gösterimi görebilir). Test `crates/qp-cli/tests/demo_security.rs`. (RP3) `--https-host AD` ile, TLS'i sonlandırıp `127.0.0.1:PORT`'a `Host`'u koruyarak ileten bir HTTPS vekilinin adı (`AD` ya da `AD:443`) `Host` olarak, `https://AD` de `/send`'in `Origin`'i olarak kabul edilir; başka hiçbir ad ya da köken eklenmez. Varsayılan kapalı. Gerekçe: iOS 27'de JIT ve WebGPU güvenli bağlam (`https://`) ister (`rounds/RP3/CALIBRATION.md`); vekile erişebilen herkes gösterimi görebilir.
 - Gösterim oturumu: `qp_wasm::shell::demo_session_init` (`demo_init` + veri yetkisi olmayan
   `visitor` sahibi — ayarlardaki "veri yetkisi yok" kipi; yalnız gösterim için).
 - Kabuksuz sürüş: `qp drive --script <adımlar>` aynı oturumu yalnız protokol mesajlarıyla

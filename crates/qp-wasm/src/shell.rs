@@ -455,6 +455,12 @@ pub struct ShellCore {
     /// said, not left blank), and how many stories its coin-flip rule kept out.
     feed_known: bool,
     coin_flip_hidden: u32,
+    /// (R5/M19) The page's feed order (`?feed_order=`, `qp_grammar::feeds::ORDERS`): when
+    /// set, it orders the feed instead of the connection's layout (a presentation setting,
+    /// not a protocol value). And the feed rule the page asked its host for
+    /// (`?feed_rule=`; the host applies it on connect), shown by the settings page.
+    feed_order: Option<String>,
+    feed_rule: Option<String>,
     feed_dirty: bool,
     feed_inflight: bool,
     look: ViewState,
@@ -619,6 +625,8 @@ impl ShellCore {
             feed: Vec::new(),
             feed_known: false,
             coin_flip_hidden: 0,
+            feed_order: None,
+            feed_rule: None,
             feed_dirty: false,
             feed_inflight: false,
             look: ViewState::default(),
@@ -1302,6 +1310,23 @@ impl ShellCore {
         let rows = if self.feed.is_empty() && self.feed_known {
             // (R5/M19, K53) The empty feed says so, and why (the core writes it).
             qp_grammar::feeds::empty_rows(lang, self.coin_flip_hidden)
+        } else if let Some(o) = &self.feed_order {
+            let local: Vec<qp_grammar::feeds::LocalStamp> =
+                self.feed.iter().map(|it| local_stamp(it.t)).collect();
+            qp_grammar::feeds::order(
+                o,
+                &qp_grammar::feeds::FeedCtx {
+                    items: &self.feed,
+                    lang,
+                    seen: self.look.seen,
+                    fresh: &fresh,
+                    now,
+                    local: &local,
+                    now_local: now.map(local_stamp),
+                    seen_local: self.look.seen.map(local_stamp),
+                },
+            )
+            .unwrap_or_default()
         } else {
             feed_rows(
                 self.look.feed.as_deref(),
@@ -1387,7 +1412,8 @@ impl ShellCore {
             "look": qp_grammar::look::names(),
             // (R5/M19) The feed orders (feed layouts) and the host's feed rules M19
             // measured, best first.
-            "feed_order": qp_grammar::feeds::FEED_ORDERS,
+            // `layout`: no order chosen, the feed layout orders the feed.
+            "feed_order": std::iter::once("layout").chain(qp_grammar::feeds::FEED_ORDERS).collect::<Vec<_>>(),
             "feed_rule": qp_capsule::feedrule::FEED_RULES.iter().map(|(n, _)| *n).collect::<Vec<_>>(),
         })
     }
@@ -1678,6 +1704,20 @@ impl ShellCore {
         &self.look
     }
 
+    /// (R5/M19) The view state as JSON with the presentation's feed order and feed rule
+    /// (`feed_order`, `feed_rule`; absent: none chosen) — what the settings page shows.
+    #[must_use]
+    pub fn look_json(&self) -> Value {
+        let mut v = serde_json::to_value(&self.look).unwrap_or(Value::Null);
+        if let Some(o) = &self.feed_order {
+            v["feed_order"] = json!(o);
+        }
+        if let Some(r) = &self.feed_rule {
+            v["feed_rule"] = json!(r);
+        }
+        v
+    }
+
     /// Symbols of the document's bar series (document order): the settings page's
     /// watchlist and positions.
     #[must_use]
@@ -1838,14 +1878,22 @@ impl ShellCore {
                 }
             }
         }
-        // (R5/M19) `feed_order` names one of the M19 feed orders: it is the feed
-        // layout (it wins over `feed`).
-        if let Some(v) = choice
-            .get("feed_order")
-            .and_then(Value::as_str)
-            .filter(|v| qp_grammar::feeds::FEED_ORDERS.contains(v))
-        {
-            g["feed"] = json!(v);
+        // (R5/M19) The feed order and the feed rule (presentation settings, not protocol
+        // values): a known name is kept; `""` leaves it unchanged.
+        if let Some(v) = choice.get("feed_order").and_then(Value::as_str) {
+            if v == "layout" || qp_grammar::feeds::FEED_ORDERS.contains(&v) {
+                self.feed_order = (v != "layout").then(|| v.to_owned());
+                // The page repaints the feed at its next paint pass.
+                self.pending.insert("feed".to_owned(), json!(true));
+            }
+        }
+        if let Some(v) = choice.get("feed_rule").and_then(Value::as_str) {
+            if qp_capsule::feedrule::FEED_RULES
+                .iter()
+                .any(|(n, _)| *n == v)
+            {
+                self.feed_rule = Some(v.to_owned());
+            }
         }
         if g.as_object().is_some_and(|o| o.len() > 1) {
             self.ask("in", Asked::Input, json!({"type":"input","gesture":g}));

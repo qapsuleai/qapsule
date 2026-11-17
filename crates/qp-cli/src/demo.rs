@@ -9,7 +9,7 @@
 //!   `instruments`), its `data` frames only the feeds its `viewer` subscription names (none
 //!   on the feed screen) and a `{"bind":{feeds, events}}` frame brings a feed's initial
 //!   bars and events when it subscribes to one; `mode=replica` is the full replica of R4
-//!   (every bar, every event). (R5/M19) `feed_rule=` (`rate55`, `rate55n10`, `none`) sets
+//!   (every bar, every event). (R5/M19) `feed_rule=` (`rate55`, `none`) sets
 //!   the coin-flip rule for the page's principal over the host's `--feed-rule`. Frames (one JSON object per `data:` line):
 //!   `{"start":{conn, principal, lang, data, events, info}}` first (the replica's data:
 //!   the initial bars and the data events applied since, and the page's notes),
@@ -77,7 +77,7 @@ pub struct DemoArgs {
     /// Use the synthetic market even if local data exists.
     #[arg(long)]
     pub synthetic: bool,
-    /// (R5/M19, K53) The host's feed rule (`rate55`, `rate55n10`, `none`; M19's pick by
+    /// (R5/M19, K53) The host's feed rule (`rate55`, `none`; M19's pick by
     /// default). A page may ask for another with `?feed_rule=` (for its principal).
     #[arg(long, default_value = "rate55")]
     pub feed_rule: String,

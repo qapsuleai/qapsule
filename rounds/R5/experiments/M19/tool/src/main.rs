@@ -37,9 +37,23 @@ fn harness_rule(name: &str) -> Rule {
     }
 }
 
+/// The product's rules, then the harness's runner-up (not in the product: its `min_n` is
+/// below the product's few-cases threshold, 20).
+fn rules() -> Vec<(&'static str, HideRule)> {
+    let mut v: Vec<(&'static str, HideRule)> = FEED_RULES.to_vec();
+    v.push((
+        "rate55n10",
+        HideRule::Rate {
+            min_n: 10,
+            tau: 0.55,
+        },
+    ));
+    v
+}
+
 fn same_verdicts() -> String {
     let mut t = String::new();
-    for (name, hide) in FEED_RULES {
+    for (name, hide) in rules() {
         let h = harness_rule(name);
         let mut cases = 0u32;
         let mut bad = 0u32;
@@ -63,7 +77,8 @@ fn same_verdicts() -> String {
         }
         let _ = writeln!(
             t,
-            "| `{name}` | `{}` | {cases} | {bad} |",
+            "| `{name}`{} | `{}` | {cases} | {bad} |",
+            if FEED_RULES.iter().any(|(n, _)| *n == name) { "" } else { " (üründe yok)" },
             h.label()
         );
         assert_eq!(bad, 0, "{name}: verdicts differ from the harness");
@@ -152,11 +167,11 @@ fn section(title: &str, ps: &[Prepared]) -> String {
     let _ = writeln!(t, "### {title}\n");
     let _ = writeln!(t, "| ürün kuralı | K42 muaf | kalan/gün | gizli/gün | boş gün | kalanların tutma oranı | gizlenenlerinki | T2 görünür | gün sonu karnesiyle ayrışan karar payı |");
     let _ = writeln!(t, "|---|---|---:|---:|---:|---:|---:|---:|---:|");
-    for (name, hide) in FEED_RULES {
+    for (name, hide) in rules() {
         for exempt in [false, true] {
             let mut a = M::default();
             for p in ps {
-                let m = measure(p, *hide, harness_rule(name), exempt);
+                let m = measure(p, hide, harness_rule(name), exempt);
                 a.days += m.days;
                 a.kept += m.kept;
                 a.hidden += m.hidden;

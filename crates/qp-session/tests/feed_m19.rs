@@ -13,7 +13,7 @@ use qp_session::Session;
 use serde_json::{json, Value};
 
 const BARS_SEED: u64 = 7;
-const K: usize = 300;
+const K: usize = 1100;
 
 fn root() -> PathBuf {
     Path::new(env!("CARGO_MANIFEST_DIR")).join("../..")
@@ -114,9 +114,9 @@ fn marked(r: &BTreeMap<String, Value>) -> Vec<&Value> {
         .collect()
 }
 
-const RULE: &str = "rate55n10";
-const SHORT: usize = 420;
-const LONG: usize = 540;
+const RULE: &str = "rate55";
+const SHORT: usize = 1160;
+const LONG: usize = 1260;
 
 fn rule() -> Option<Value> {
     Some(json!({"rule": RULE}))
@@ -162,12 +162,12 @@ fn few_cases_are_never_hidden_and_the_feed_agrees_with_the_list() {
     let mut few = 0;
     for x in r.values() {
         let n = x["face"]["ledger_n"].as_u64().unwrap();
-        if n < 10 {
+        if n < 20 {
             few += 1;
             assert_ne!(x["coin_flip"], json!(true), "{x}");
         }
         if x["coin_flip"] == json!(true) {
-            assert!(n >= 10, "{x}");
+            assert!(n >= 20, "{x}");
         }
     }
     assert!(few > 0, "some stories have few cases");
@@ -239,6 +239,16 @@ fn the_k42_exemption_is_a_parameter() {
         without.len(),
         "the story list is the same, only the feed place differs"
     );
+}
+
+#[test]
+fn no_rule_hides_a_face_that_says_few_cases() {
+    // K53 rule 3: a rule's `min_n` is never below the product's few-cases threshold.
+    for (name, r) in qp_capsule::feedrule::FEED_RULES {
+        if let qp_capsule::feedrule::HideRule::Rate { min_n, .. } = r {
+            assert!(*min_n >= qp_grammar::depth::GLYPH_MIN_LEDGER_N, "{name}");
+        }
+    }
 }
 
 #[test]

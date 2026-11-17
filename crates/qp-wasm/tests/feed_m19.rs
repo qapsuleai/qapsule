@@ -48,23 +48,50 @@ fn the_presentation_host_has_the_m19_rule_and_the_choices_list_it() {
     );
     let ch = ShellCore::choices_json();
     assert_eq!(ch["feed_rule"][0], "rate55", "{ch}");
-    assert_eq!(ch["feed_order"], json!(["grouped", "live_new"]), "{ch}");
+    assert_eq!(
+        ch["feed_order"],
+        json!(["layout", "grouped", "live_new"]),
+        "{ch}"
+    );
     for o in ["grouped", "live_new"] {
-        assert!(ch["feed"].as_array().unwrap().contains(&json!(o)));
+        assert!(!ch["feed"].as_array().unwrap().contains(&json!(o)));
     }
 }
 
 #[test]
-fn feed_order_picks_the_layout() {
+fn feed_order_is_a_presentation_setting() {
     let mut host = parity_host();
-    let core = page(&mut host, |c| {
-        c.set_look(&json!({"feed": "vakiro", "feed_order": "grouped"}));
+    let mut core = page(&mut host, |c| {
+        c.set_look(&json!({"feed_order": "grouped", "feed_rule": "none"}));
     });
-    let look = serde_json::to_value(core.look()).unwrap();
-    assert_eq!(look["feed"], "grouped", "{look}");
-    let core = page(&mut host, |c| c.set_look(&json!({"feed_order": "nope"})));
-    let look = serde_json::to_value(core.look()).unwrap();
+    // Not a protocol value: the connection's layout stays the presentation's.
+    let look = core.look_json();
     assert_eq!(look["feed"], qp_grammar::feeds::PRESENTED_FEED, "{look}");
+    assert_eq!(look["feed_order"], "grouped", "{look}");
+    assert_eq!(look["feed_rule"], "none", "{look}");
+    // Grouped: an instrument's capsules stand together.
+    let r = rows(&mut core);
+    let syms: Vec<String> = r
+        .iter()
+        .filter_map(|x| x["id"].as_str())
+        .map(|id| id.split('.').nth(1).unwrap_or("").to_owned())
+        .collect();
+    assert!(!syms.is_empty());
+    let mut done: Vec<&String> = Vec::new();
+    for (i, s) in syms.iter().enumerate() {
+        if i > 0 && &syms[i - 1] != s {
+            assert!(!done.contains(&s), "{s} split: {syms:?}");
+            done.push(&syms[i - 1]);
+        }
+    }
+    let a = core.feed_json();
+    assert_eq!(core.feed_json(), a, "deterministic");
+    core.set_look(&json!({"feed_order": "live_new"}));
+    assert!(rows(&mut core).iter().all(|x| x.get("header").is_none()));
+    core.set_look(&json!({"feed_order": "nope"}));
+    assert_eq!(core.look_json()["feed_order"], "live_new");
+    core.set_look(&json!({"feed_order": "layout"}));
+    assert!(core.look_json().get("feed_order").is_none());
 }
 
 #[test]

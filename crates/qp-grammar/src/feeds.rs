@@ -145,7 +145,16 @@ pub static LAYOUTS: &[FeedLayout] = &[
         rules: vakiro::RULES,
         layout: vakiro::layout,
     },
-    // --- R5/M19 feed orders (`feeds/m19.rs`; the presentation's `?feed_order=`)
+];
+
+/// (R5/M19) The feed orders M19 measured (`feeds/m19.rs`), best first by its pre-written
+/// rule (`rounds/R5/experiments/M19/RESULTS.md`). A presentation setting
+/// (`?feed_order=`, the settings page), not a protocol `feed` value: the protocol's layout
+/// names stay as they were (transcript 56 lists them). When chosen, the order replaces the
+/// connection's layout in the presentation core. The presentation's default stays
+/// [`PRESENTED_FEED`] (changing it would change the existing demo goldens; Arkin decides,
+/// K46).
+pub static ORDERS: &[FeedLayout] = &[
     FeedLayout {
         name: "grouped",
         rules: m19::GROUPED_RULES,
@@ -158,12 +167,16 @@ pub static LAYOUTS: &[FeedLayout] = &[
     },
 ];
 
-/// (R5/M19) The feed orders M19 measured, best first by its pre-written rule
-/// (`rounds/R5/experiments/M19/RESULTS.md`): the presentation's `?feed_order=` accepts
-/// these names (they are feed layouts too). The presentation's default layout stays
-/// [`PRESENTED_FEED`] (changing it would change the existing demo goldens; Arkin decides,
-/// K46).
+/// The names of [`ORDERS`].
 pub const FEED_ORDERS: [&str; 2] = ["grouped", "live_new"];
+
+/// (R5/M19) The rows of `ctx` by feed order `name` ([`ORDERS`]; `None`: unknown), with the
+/// same clean-up and coin-flip mark as [`layout`].
+#[must_use]
+pub fn order(name: &str, ctx: &FeedCtx<'_>) -> Option<Vec<FeedRow>> {
+    let o = ORDERS.iter().find(|l| l.name == name)?;
+    Some(finish((o.layout)(ctx), ctx))
+}
 
 /// (R5/M19, K53) The rows of an empty feed: it says honestly that there is nothing to tell
 /// now and why — `coin_flip_hidden` stories kept out by the host's coin-flip rule (they
@@ -228,8 +241,12 @@ pub fn by_name(name: Option<&str>) -> &'static FeedLayout {
 /// A capsule marked `coin_flip` carries the coin-flip mark after the layout's own.
 #[must_use]
 pub fn layout(name: Option<&str>, ctx: &FeedCtx<'_>) -> Vec<FeedRow> {
+    finish((by_name(name).layout)(ctx), ctx)
+}
+
+/// Drops rows naming a capsule not in the items and repeats; adds the coin-flip mark.
+fn finish(rows: Vec<FeedRow>, ctx: &FeedCtx<'_>) -> Vec<FeedRow> {
     let mut seen: Vec<&str> = Vec::new();
-    let rows = (by_name(name).layout)(ctx);
     rows.into_iter()
         .map(|r| match r {
             FeedRow::Capsule { id, mark }
@@ -290,9 +307,12 @@ mod tests {
             }
         );
         assert!(!is_feed("nope"));
-        for o in FEED_ORDERS {
-            assert!(is_feed(o), "{o}");
+        for (o, l) in FEED_ORDERS.iter().zip(ORDERS) {
+            assert_eq!(*o, l.name);
+            assert!(!is_feed(o), "an order is not a protocol layout: {o}");
+            assert!(order(o, &ctx).is_some_and(|r| r.is_empty()));
         }
+        assert!(order("nope", &ctx).is_none());
     }
 
     #[test]

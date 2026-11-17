@@ -3631,7 +3631,7 @@ pub struct SessionInit {
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 #[serde(deny_unknown_fields)]
 pub struct FeedRuleInit {
-    /// Rule name (`qp_capsule::feedrule::FEED_RULES`: `rate55`, `rate55n10`, `none`).
+    /// Rule name (`qp_capsule::feedrule::FEED_RULES`: `rate55`, `none`).
     pub rule: String,
     /// (K42) A negative stage of a story about the reader's position or active intent is
     /// never hidden by the rule (default `true`, M19's recommendation).

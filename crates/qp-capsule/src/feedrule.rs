@@ -55,20 +55,17 @@ pub struct FeedRule {
 
 /// The named rules a host may choose (`SessionInit.feed_rule.rule`, the presentation's
 /// `?feed_rule=`), the presentation's default first. Names are `[a-z][a-z0-9]*`.
+///
+/// The harness's runner-up (`rate τ=0.55 N=10`) is not offered: its `min_n` is below the
+/// product's few-cases threshold (`qp_grammar::depth::GLYPH_MIN_LEDGER_N` = 20), so a face
+/// saying "few cases" could be hidden, against K53 rule 3. No rule's `min_n` is below it
+/// (`crates/qp-session/tests/feed_m19.rs`).
 pub const FEED_RULES: &[(&str, HideRule)] = &[
     // M19's pick (rate τ = 0.55, N = 20; `rounds/R5/experiments/M19/RESULTS.md`).
     (
         "rate55",
         HideRule::Rate {
             min_n: 20,
-            tau: 0.55,
-        },
-    ),
-    // The harness's runner-up (same threshold, N = 10).
-    (
-        "rate55n10",
-        HideRule::Rate {
-            min_n: 10,
             tau: 0.55,
         },
     ),
@@ -143,9 +140,6 @@ mod tests {
         assert_eq!(r.verdict(l(20, 10)), FeedVerdict::CoinFlip);
         assert_eq!(r.verdict(l(20, 11)), FeedVerdict::Shown); // 0.55 is not below 0.55
         assert_eq!(r.verdict(l(40, 21)), FeedVerdict::CoinFlip);
-        let r10 = HideRule::by_name("rate55n10").unwrap();
-        assert_eq!(r10.verdict(l(10, 5)), FeedVerdict::CoinFlip);
-        assert_eq!(r10.verdict(l(9, 0)), FeedVerdict::FewCases);
         assert_eq!(
             HideRule::by_name("none").unwrap().verdict(l(100, 50)),
             FeedVerdict::Shown

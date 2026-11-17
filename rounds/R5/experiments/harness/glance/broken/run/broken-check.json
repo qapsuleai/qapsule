@@ -1,0 +1,31 @@
+{
+ "broken": "kestim",
+ "checks": {
+  "last_on_bt": true,
+  "last_on_primary": true,
+  "last_on_reading_info": true,
+  "paired_separated_from_all_info": true,
+  "primary_below_best_interval": true
+ },
+ "paired_primary_info": {
+  "fotolay": {
+   "diff": 0.0254,
+   "hi": 0.0486,
+   "lo": 0.0021,
+   "n": 378,
+   "separated": true
+  },
+  "vadrel": {
+   "diff": 0.0781,
+   "hi": 0.0978,
+   "lo": 0.0573,
+   "n": 376,
+   "separated": true
+  }
+ },
+ "required": [
+  "last_on_primary",
+  "last_on_bt"
+ ],
+ "valid": true
+}

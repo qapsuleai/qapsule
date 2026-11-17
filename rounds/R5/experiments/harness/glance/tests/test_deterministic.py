@@ -261,6 +261,17 @@ class Select(unittest.TestCase):
         step = next(s for s in res["steps"] if s["step"] == "1b")
         self.assertEqual(step["eliminated"], ["q"])
 
+    def test_paired_difference(self):
+        rows = []
+        for i in range(30):
+            for d, c in (("a", 1.0), ("b", 0.0 if i % 3 else 1.0)):
+                rows.append({"design": d, "qset": "throttle", "state": f"s{i}", "lang": "tr", "theme": "light",
+                             "persona": "F", "rep": 0, "credit": c})
+        p = SEL.paired_difference(rows, "a", "b", ("throttle",), seed=1)
+        self.assertAlmostEqual(p["diff"], 20 / 30, places=3)
+        self.assertTrue(p["separated"])
+        self.assertEqual(p["n"], 30)
+
     def test_model_agreement(self):
         rows = [{"stim": "s", "persona": "F", "q": "dir", "rep": 0, "model": "h", "code": "up"},
                 {"stim": "s", "persona": "F", "q": "dir", "rep": 0, "model": "s", "code": "up"},

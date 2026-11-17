@@ -151,6 +151,9 @@ def select(rows, judgements, computed, seed: int, broken: str | None = None, ref
         res["steps"].append({"step": "1b", "rule": "reading non-inferiority vs reference", "reference": reference,
                              "eliminated": lost, "eligible": elig})
     res["model_agreement"] = model_agreement(rows)
+    if broken:
+        res["paired_vs_broken"] = {d: paired_difference(rows, d, broken, PRIMARY_SETS, seed + 31)
+                                   for d in designs if d != broken}
     if not elig:
         res["steps"].append({"step": 1, "note": "no design passes the gates; the rule stops"})
         res["verdict"] = {"winner": None, "told_apart": False, "default": None, "top_two": []}
@@ -202,6 +205,31 @@ def _more_text_share(outcomes, chars):
     return {"share": round(k / n, 3) if n else None, "n": n}
 
 
+def paired_difference(rows, a, b, sets, seed, reps=2000):
+    """Paired F2:H1 difference a − b of the unit accuracy over the units both designs share
+    (same state, language, theme, persona, replicate); seeded bootstrap 95 % (SPEC §G8:
+    how clearly the broken design is behind each other design)."""
+    u = defaultdict(list)
+    for r in rows:
+        if r["qset"] in sets and r["design"] in (a, b):
+            u[(r["design"], r.get("state"), r.get("lang"), r.get("theme"), r["persona"], r["rep"], r.get("model", ""))].append(r["credit"])
+    m = {k: sum(v) / len(v) for k, v in u.items()}
+    keys = sorted(k[1:] for k in m if k[0] == a and (b,) + k[1:] in m)
+    if not keys:
+        return None
+    diffs = [m[(a,) + k] - m[(b,) + k] for k in keys]
+    w = [F_WEIGHT if k[3] == "F" else H_WEIGHT for k in keys]
+    est = sum(x * y for x, y in zip(diffs, w)) / sum(w)
+    rng = random.Random(seed)
+    bs = []
+    for _ in range(reps):
+        idx = [rng.randrange(len(keys)) for _ in keys]
+        bs.append(sum(diffs[i] * w[i] for i in idx) / sum(w[i] for i in idx))
+    bs.sort()
+    lo, hi = bs[int(0.025 * reps)], bs[min(reps - 1, int(0.975 * reps))]
+    return {"diff": round(est, 4), "lo": round(lo, 4), "hi": round(hi, 4), "n": len(keys), "separated": lo > 0}
+
+
 def broken_verdict(res, broken: str) -> dict:
     """SPEC §G8: the harness is valid only if the broken design is last on the primary
     measure and last on the critic BT (point estimates), and its primary interval lies
@@ -222,6 +250,10 @@ def broken_verdict(res, broken: str) -> dict:
     rd = {d: pd[d]["reading"][0] for d in designs if pd[d].get("reading")}
     if broken in rd:
         out["checks"]["last_on_reading_info"] = all(rd[broken] < v for d, v in rd.items() if d != broken)
+    pv = res.get("paired_vs_broken") or {}
+    if pv:
+        out["paired_primary_info"] = pv
+        out["checks"]["paired_separated_from_all_info"] = all(v and v["separated"] for v in pv.values())
     required = ["last_on_primary"] + (["last_on_bt"] if "last_on_bt" in out["checks"] else [])
     out["required"] = required
     out["valid"] = all(out["checks"][c] for c in required)

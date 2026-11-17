@@ -19,12 +19,17 @@ Bağlayıcı şartname: [`SPEC.md`](SPEC.md) (§G0–§G11). Kuru koşu sonucu:
 ```sh
 H=rounds/R5/experiments/harness/glance
 RUN=/path/outside/repo/run1            # ya da $H/raw/run1 (izlenmez)
-export QP_BIN=/path/to/qp QP_DEMO_PORT=8461
+export QP_DEMO_PORT=8461
+# Bozuk tasarım bir görünüş kaydıdır ama ürüne girmez (SPEC §G8 Ek G2): yamalı bir kopyada derlenir
+# ve o koşunun BÜTÜN adayları bu derlemeyle çekilir (aday dallarının kaydı da bu kopyaya yama
+# olarak eklenebilir).
+$H/broken/build.sh /path/outside/repo/brokenbuild     # ≈ 5 dk; QP=... WEB=... yazar
+export QP_BIN=/path/outside/repo/brokenbuild/qp QP_WEB=/path/outside/repo/brokenbuild/src/shells/web
 
 python3 $H/glance.py probe  --run $RUN             # okurun akışı, 64 adım × 2 okur (~30 s)
 python3 $H/glance.py states --run $RUN [--charts]  # durum kümesi → states.json
 # designs.json: [{"name": "<ad>", "look": "<look>", "face": "<face>"}, ...,
-#                {"name": "<gizli ad>", "face": "vadrel", "broken": true}]
+#                {"name": "kestim", "look": "kestim", "face": "vadrel"}]   # bozuk (gizli ad)
 python3 $H/glance.py shoot  --run $RUN --designs designs.json [--langs tr,en] [--themes light,dark]
 python3 $H/glance.py derive --run $RUN            # kısma, gri, yarım boy, hareket çiftleri, eleştirmen çiftleri
 python3 $H/glance.py compute --run $RUN           # sert eşikler → computed.json + computed.md

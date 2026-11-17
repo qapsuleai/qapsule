@@ -30,10 +30,11 @@ const look = opt('--look', '');
 const face = opt('--face', '');
 const reps = Number(opt('--reps', '3'));
 const configs = opt('--configs', 'phone-jit-est,phone').split(',');
+const webSrc = opt('--web', path.join(root, 'shells/web'));
 const CFG = { 'phone-jit-est': cal.PHONE_JIT_EST, phone: cal.PHONE };
 
 function shim() {
-  const web = path.join(root, 'shells/web');
+  const web = webSrc;
   const dir = fs.mkdtempSync(path.join(process.env.QP_SCRATCH || os.tmpdir(), 'k52web-'));
   for (const f of fs.readdirSync(web)) {
     if (f === 'index.html') continue;

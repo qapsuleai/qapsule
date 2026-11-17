@@ -232,6 +232,11 @@ Piksele inilmez (yalnız bozuk süzgeç ve kısma kopyası piksel işidir).
    işaretler kümesi farkı (`reduced_motion_loss`) = 0 olmalı (M21 alternatifleri gelince koşulur).
 8. **Metin yoğunluğu:** yüz başına karakter ve satır (sahne metin ilkelleri), ekran başına
    karakter (yüzler + DOM). Sert eşik değil; U2 için ortak değişkendir.
+   **Roller (Ek G2):** her yüz metninin yazı rolü, tasarımın görünüş kaydından (`qp look show`,
+   `looks/<ad>.json`) boyla eşlenir (T3 `mark_role` kuralı); `computed.json` `roles` rol başına
+   boy ve en kötü karşıtlığı verir. Gösterimin sahnesi rol taşımaz (`qp scene --roles` yalnız
+   oturum görünümlerinde); kabuk renkleri `core.css()` değişkenleri olarak DOM'a yazılır ve
+   düzenek onları hesaplanmış biçemden (`getComputedStyle`) okur.
 9. **Paket boyutu:** `scripts/demo.sh` `pkg/sizes.json` + yazı tipi dosyaları (aday dalında
    derlenir; `bundle/<ad>.json` olarak `compute`'a girer).
 
@@ -247,6 +252,18 @@ başlık/katman metinleri %45 opaklık. T3'ün `?look=` kaydı gelene kadar bu, 
 Canvas 2D süzgecidir (`shoot.mjs` `brokenInit`, `canvas=run` yolu; temel yüz `vadrel`).
 `?look=` gelince aynı tarif bir görünüş kaydı olarak kurulur (büyük ek bilgi, küçük cümle,
 minik soluk işaret, düşük karşıtlık) ve süzgeç yerine o kullanılır.
+
+**Görünüş kaydı (Ek G2; T3 sonrası geçerli yol):** `broken/look.patch` `look.rs`'e `KESTIM`
+kaydını ekler: yazı rolleri ters (başlık cümlesi `headline` 11 px; üst satır/ek bilgi `title`
+24 px, karne/etiket `label` 22 px; `body` 13, `figure` 12, `note` 10), iki temada metin, işaret
+ve anlam renkleri (`text`, `muted`, `axis`, `up`, `down`, `accent`/`s1`, `warn`, `neutral`,
+`valid`, `invalid`, `closed`, `focus`) ve kabuk renkleri (`fg`, `muted`, `accent`, `note_fg`,
+`alert_fg`, `req`) %65 zemine çekilir, işaret boyu yüzde 12 px (kartta 14, grafikte 12).
+**Ürüne girmez:** `broken/build.sh <dış klasör>` HEAD'in `git archive` kopyasına yamayı uygular,
+`qp` ve WASM paketini o kopyada derler; çalışma ağacı ve dallar değişmez, Ayarlar'da yalnız o
+geçici derlemede görünür. O koşudaki **bütün adaylar aynı derlemeyle** çekilir (`QP_BIN`,
+`QP_WEB`); başvuru yüzleri `r4` görünüşüyle `main` ile aynı çizilir. `compute` bozuk değerleri
+artık sahne tarifinden okur. Süzgeç (`"broken": true`) yalnız yedek olarak kalır.
 
 **Kabul kuralı** (`glance.py broken-check`): düzenek geçerlidir ancak ve ancak bozuk tasarım
 (a) birincil ölçüde (kısma kopyasında tek bakış doğruluğu, nokta tahmini) **kesin son** (başka

@@ -60,6 +60,11 @@ def qp_bin(a):
     return a.qp or os.environ.get("QP_BIN") or str(ROOT / "target/release/qp")
 
 
+def web_dir(a):
+    """The shell directory served by `qp demo` (a broken-look build has its own, SPEC §G8)."""
+    return getattr(a, "web", None) or os.environ.get("QP_WEB") or str(ROOT / "shells/web")
+
+
 def node(script, plan_path):
     subprocess.run(["node", str(HERE / script), str(plan_path)], check=True, cwd=ROOT)
 
@@ -68,7 +73,7 @@ def node(script, plan_path):
 
 def cmd_probe(a):
     run = Path(a.run)
-    plan = {"qp": qp_bin(a), "web": str(ROOT / "shells/web"), "port": a.port, "out": str(run / "probe"),
+    plan = {"qp": qp_bin(a), "web": web_dir(a), "port": a.port, "out": str(run / "probe"),
             "sensitivity": "all", "principals": ["arkin", "visitor"], "probe": ST.CANDIDATE_STEPS}
     jdump(run / "probe-plan.json", plan)
     node("shoot.mjs", run / "probe-plan.json")
@@ -124,7 +129,15 @@ def cmd_shoot(a):
     # the page: shots without a watch list go first in each step group, then by watch list
     # (found in the dry run: a watch list hid the next design's target).
     shots.sort(key=lambda s: (s["step"], s.get("watch") or ""))
-    plan = {"qp": qp_bin(a), "web": str(ROOT / "shells/web"), "port": a.port, "out": str(run / "shots"),
+    # The look records (T3, `qp look show`): type roles and colour roles per design, for the
+    # element measures (role of each text, SPEC §G7).
+    (run / "looks").mkdir(parents=True, exist_ok=True)
+    for d in designs:
+        name = d.get("look") or "r4"
+        p = subprocess.run([qp_bin(a), "look", "show", name], capture_output=True, text=True, cwd=ROOT)
+        if p.returncode == 0:
+            (run / "looks" / f"{d['name']}.json").write_text(p.stdout)
+    plan = {"qp": qp_bin(a), "web": web_dir(a), "port": a.port, "out": str(run / "shots"),
             "paint": a.paint, "sensitivity": "all", "shots": shots}
     jdump(run / "shoot-plan.json", plan)
     node("shoot.mjs", run / "shoot-plan.json")
@@ -351,7 +364,8 @@ def cmd_compute(a):
     run = Path(a.run)
     out = {}
     for d, recs in sorted(records_by_design(run).items()):
-        out[d] = CP.gates(recs)
+        lp = run / "looks" / f"{d}.json"
+        out[d] = CP.gates(recs, jload(lp) if lp.exists() else None)
         k52 = run / "k52" / f"{d}.json"
         if k52.exists():
             kj = jload(k52)
@@ -411,7 +425,8 @@ def cmd_k52(a):
     for d in jload(a.designs):
         if d.get("broken"):
             continue  # the broken filter lives in the harness page, not in a design
-        args = ["node", str(HERE / "k52.mjs"), qp_bin(a), str(run / "k52" / f"{d['name']}.json"), "--reps", str(a.reps)]
+        args = ["node", str(HERE / "k52.mjs"), qp_bin(a), str(run / "k52" / f"{d['name']}.json"), "--reps", str(a.reps),
+                "--web", web_dir(a)]
         if d.get("look"):
             args += ["--look", d["look"]]
         if d.get("face"):
@@ -437,6 +452,7 @@ def main():
         p.add_argument("--run", required=True)
         p.add_argument("--qp")
         p.add_argument("--port", type=int, default=int(os.environ.get("QP_DEMO_PORT", "8461")))
+        p.add_argument("--web", help="shell directory (default shells/web or $QP_WEB)")
         p.set_defaults(fn=fn)
         return p
 

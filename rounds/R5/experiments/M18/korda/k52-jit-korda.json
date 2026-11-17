@@ -1,0 +1,149 @@
+{
+ "config": "phone-jit-est",
+ "design": "korda",
+ "chart_ms": 10000,
+ "reps": 3,
+ "browser": "26.5",
+ "by_n": {
+  "0": {
+   "runs": 3,
+   "rows": 38,
+   "depth": [
+    "chart",
+    "chart",
+    "chart"
+   ],
+   "tick": {
+    "n": 39,
+    "p50": 0,
+    "p95": 1
+   },
+   "scene": {
+    "n": 2,
+    "p50": 0,
+    "p95": 1
+   },
+   "data_pass": {
+    "n": 39,
+    "p50": 1,
+    "p95": 1
+   },
+   "paint_pass": {
+    "n": 40,
+    "p50": 1,
+    "p95": 1
+   },
+   "scene_build": {
+    "n": 39,
+    "p50": 0,
+    "p95": 1
+   },
+   "errors": []
+  },
+  "5": {
+   "runs": 3,
+   "rows": 5,
+   "depth": [
+    "chart",
+    "chart",
+    "chart"
+   ],
+   "tick": {
+    "n": 39,
+    "p50": 0,
+    "p95": 1
+   },
+   "scene": {
+    "n": 3,
+    "p50": 1,
+    "p95": 1
+   },
+   "data_pass": {
+    "n": 39,
+    "p50": 1,
+    "p95": 1
+   },
+   "paint_pass": {
+    "n": 40,
+    "p50": 1,
+    "p95": 1
+   },
+   "scene_build": {
+    "n": 39,
+    "p50": 0,
+    "p95": 1
+   },
+   "errors": []
+  },
+  "50": {
+   "runs": 3,
+   "rows": 50,
+   "depth": [
+    "chart",
+    "chart",
+    "chart"
+   ],
+   "tick": {
+    "n": 39,
+    "p50": 0,
+    "p95": 1
+   },
+   "scene": {
+    "n": 3,
+    "p50": 1,
+    "p95": 1
+   },
+   "data_pass": {
+    "n": 39,
+    "p50": 1,
+    "p95": 1
+   },
+   "paint_pass": {
+    "n": 40,
+    "p50": 1,
+    "p95": 1
+   },
+   "scene_build": {
+    "n": 39,
+    "p50": 0,
+    "p95": 1
+   },
+   "errors": []
+  },
+  "200": {
+   "runs": 3,
+   "rows": 200,
+   "depth": [
+    "chart",
+    "chart",
+    "chart"
+   ],
+   "tick": {
+    "n": 39,
+    "p50": 0,
+    "p95": 1
+   },
+   "scene": {
+    "n": 2,
+    "p50": 0,
+    "p95": 1
+   },
+   "data_pass": {
+    "n": 39,
+    "p50": 0,
+    "p95": 1
+   },
+   "paint_pass": {
+    "n": 40,
+    "p50": 0,
+    "p95": 1
+   },
+   "scene_build": {
+    "n": 39,
+    "p50": 0,
+    "p95": 1
+   },
+   "errors": []
+  }
+ }
+}

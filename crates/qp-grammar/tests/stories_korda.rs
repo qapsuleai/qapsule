@@ -473,3 +473,31 @@ fn closed_marks_and_lane_text_keep_their_contrast() {
         }
     }
 }
+
+/// Cost of the story chart over the plain compile (release: `cargo test --release -p
+/// qp-grammar --test stories_korda -- --ignored --nocapture`).
+#[test]
+#[ignore = "timing probe"]
+fn timing_probe() {
+    let p = provider();
+    let v = view();
+    let opts = CompileOptions::new(390, 300);
+    let k = 300;
+    for n in [0u64, 5, 50, 200] {
+        let rs = rows(n);
+        let t0 = std::time::Instant::now();
+        for _ in 0..k {
+            std::hint::black_box(qp_grammar::compile(&v, &p, &opts).unwrap());
+        }
+        let t1 = std::time::Instant::now();
+        for _ in 0..k {
+            std::hint::black_box(draw(&rs, "f1", true, Language::Tr));
+        }
+        let t2 = std::time::Instant::now();
+        eprintln!(
+            "n={n}: compile {:?} korda {:?}",
+            (t1 - t0) / k,
+            (t2 - t1) / k
+        );
+    }
+}

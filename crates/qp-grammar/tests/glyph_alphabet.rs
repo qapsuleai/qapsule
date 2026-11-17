@@ -86,6 +86,7 @@ pub fn digest_prims(h: &mut Fnv, prims: &[Prim]) {
                 text,
                 color,
                 align,
+                ..
             } => {
                 h.bytes(b"T");
                 h.bytes(&x.to_le_bytes());

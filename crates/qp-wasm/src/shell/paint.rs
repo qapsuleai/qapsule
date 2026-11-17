@@ -13,8 +13,22 @@ use super::ShellCore;
 
 /// Version of the paint list format.
 pub const PAINT_LIST_VERSION: u32 = 1;
-/// The CSS font family a paint path registers the core's font under (`Shell::font`).
+/// The CSS font family a paint path registers the core's default font under
+/// (`Shell::font`). (R5/T3) Every embedded asset has its own (`look::FontAsset::css_family`,
+/// [`text_font`]).
 pub const PAINT_FONT_FAMILY: &str = "QpMono";
+
+/// (R5/T3) The font a text prim names (`Prim::Text::font`; absent or unknown: the default):
+/// its index in `qp_render::fonts::FILES`, the parsed file and the CSS family the canvas
+/// path registered it under.
+#[must_use]
+pub fn text_font(id: Option<&str>) -> Option<(usize, &'static fontdue::Font, &'static str)> {
+    let i = qp_render::fonts::index(id);
+    let font = qp_render::fonts::by_index(i).ok()?;
+    let family = qp_grammar::look::font(qp_render::fonts::FILES[i].0)
+        .map_or(PAINT_FONT_FAMILY, |f| f.css_family);
+    Some((i, font, family))
+}
 /// The miter limit of the reference renderer's strokes (tiny-skia's default; the
 /// canvas default is 10).
 pub const PAINT_MITER_LIMIT: f32 = 4.0;
@@ -43,8 +57,10 @@ fn prim_json(p: &Prim) -> Value {
             text,
             color,
             align,
+            font,
+            ..
         } => json!({"k": "text", "x": x, "y": baseline, "t": text,
-            "font": format!("{px}px {PAINT_FONT_FAMILY}"),
+            "font": format!("{px}px {}", text_font(font.as_deref()).map_or(PAINT_FONT_FAMILY, |f| f.2)),
             "align": match align { Align::Left => "left", Align::Right => "right" },
             "c": css(*color)}),
     }

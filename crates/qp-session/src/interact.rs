@@ -50,6 +50,7 @@ struct StyleReq<'a> {
     transition: Option<&'a str>,
     outcome: Option<&'a str>,
     seen: Option<i64>,
+    look: Option<&'a str>,
 }
 
 /// The frame key of a target (`ViewState::frames`).
@@ -212,6 +213,7 @@ impl Session {
                 transition,
                 outcome,
                 seen,
+                look,
             } => {
                 self.set_style(
                     ci,
@@ -223,6 +225,7 @@ impl Session {
                         transition: transition.as_deref(),
                         outcome: outcome.as_deref(),
                         seen: *seen,
+                        look: look.as_deref(),
                     },
                 )?;
                 (Out::default(), Vec::new())
@@ -368,7 +371,15 @@ impl Session {
                 return Err(unknown("outcome", o, qp_grammar::glyph::outcome::names()));
             }
         }
+        if let Some(l) = r.look {
+            if !qp_grammar::look::is_look(l) {
+                return Err(unknown("look", l, qp_grammar::look::names()));
+            }
+        }
         let look = &mut self.conns[ci].look;
+        if let Some(l) = r.look {
+            look.look = (l != qp_grammar::look::DEFAULT_LOOK).then(|| l.to_owned());
+        }
         if let Some(f) = r.face {
             let c = qp_grammar::faces::canonical(f).unwrap_or(qp_grammar::faces::DEFAULT_FACE);
             look.face = (c != qp_grammar::faces::DEFAULT_FACE).then(|| c.to_owned());
@@ -497,7 +508,23 @@ impl Session {
         let pr = self.present_at(ci, finding, face)?;
         // (R4/T5) A face design other than the default card is the connection's choice
         // (view state); built by the same grammar rule the shell's replica uses.
-        if d == OpenDepth::Sentence && self.conns[ci].look.face.is_some() {
+        // (R5/T3) So is a look other than `r4`: the face and the card are rebuilt with
+        // its sizes (the replica's `viewer::face_scene` / `open_scene` do the same).
+        let styled = self.conns[ci].look.face.is_some() || self.conns[ci].look.look.is_some();
+        let look = crate::viewer::look_of(&self.conns[ci].look);
+        if d == OpenDepth::Capsule && self.conns[ci].look.look.is_some() {
+            let Some(id) = pr.capsule_view.as_ref().map(|v| v.id.clone()) else {
+                return Ok(None);
+            };
+            let max_points = self.conns[ci].profile.max_points;
+            let lang = self.lang_of(ci);
+            warm(rd!(self), &mut self.cache);
+            let p = DocProvider::new(rd!(self), &self.cache)
+                .with_headlines(&self.headlines)
+                .with_parts(self, lang);
+            return Ok(depth::capsule_view_in(look, finding, max_points, &p, &id).ok());
+        }
+        if d == OpenDepth::Sentence && styled {
             if pr.capsule_view.is_none() {
                 return Ok(None);
             }
@@ -508,7 +535,8 @@ impl Session {
             let p = DocProvider::new(rd!(self), &self.cache)
                 .with_headlines(&self.headlines)
                 .with_parts(self, lang);
-            return Ok(depth::face_view(
+            return Ok(depth::face_view_in(
+                look,
                 name.as_deref(),
                 finding,
                 max_points,
@@ -559,6 +587,7 @@ impl Session {
         opts.theme.clone_from(&self.conns[ci].look.theme);
         opts.alphabet.clone_from(&self.conns[ci].look.alphabet);
         opts.outcome.clone_from(&self.conns[ci].look.outcome);
+        opts.look.clone_from(&self.conns[ci].look.look);
         opts.face = face;
         let lang = self.lang_of(ci);
         let scene = compile(

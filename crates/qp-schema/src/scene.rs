@@ -88,6 +88,17 @@ pub enum Prim {
         color: Rgba,
         /// Alignment.
         align: Align,
+        /// (R5/T3) Font asset the text is drawn with (`qp_grammar::look::FONTS`, the
+        /// renderers' embedded files); absent: the default asset (`plex-mono`, IBM Plex Mono
+        /// Regular). Set only when a look's type role uses another asset, so `r4` scenes
+        /// are unchanged.
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        font: Option<String>,
+        /// (R5/T3) The look's type role the text is drawn with (`headline`, `label`,
+        /// `figure`...), written only when the compile asks for it
+        /// (`CompileOptions::roles`, the measurement harness); absent otherwise.
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        role: Option<String>,
     },
 }
 

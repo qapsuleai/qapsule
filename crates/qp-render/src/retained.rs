@@ -152,9 +152,15 @@ fn key(p: &Prim) -> u64 {
             text,
             color,
             align,
+            font,
+            ..
         } => {
             let a = matches!(align, Align::Right);
             (4u8, x, baseline, px.to_bits(), text, color, a).hash(&mut h);
+            // (R5/T3) The font asset; absent (the default) hashes as before.
+            if let Some(f) = font {
+                f.hash(&mut h);
+            }
         }
     }
     h.finish()

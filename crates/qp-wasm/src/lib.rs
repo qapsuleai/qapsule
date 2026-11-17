@@ -768,6 +768,27 @@ mod shell_binding {
             qp_render::cpu::FONT_BYTES.to_vec()
         }
 
+        /// (R5/T3) The embedded font assets (JSON `[{id, family}]`): a canvas paint path
+        /// registers each (`new FontFace(family, core.font_bytes(id))`); no network.
+        pub fn fonts(&self) -> String {
+            ShellCore::fonts_json().to_string()
+        }
+
+        /// (R5/T3) The bytes of font asset `id` (empty: unknown).
+        pub fn font_bytes(&self, id: &str) -> Vec<u8> {
+            ShellCore::font_bytes(id)
+        }
+
+        /// (R5/T3) The chrome's CSS custom properties for the connection's look and theme
+        /// (JSON `{name: value}`), or empty when unchanged since the last call: the page
+        /// sets each on its root element verbatim.
+        pub fn css(&mut self) -> String {
+            self.inner
+                .take_css()
+                .map(|v| v.to_string())
+                .unwrap_or_default()
+        }
+
         /// (RP3/M12b) The `canvas` paint path's variant (the page's `?canvas=` value as
         /// it is: `run`, `nobatch`, `full`, comma-separated; empty = the default).
         pub fn canvas_config(&mut self, value: &str) {

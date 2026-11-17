@@ -21,6 +21,7 @@ use qp_schema::{Bar, Depth, Fact, Finding};
 
 use crate::detmath::num;
 use crate::error::{ErrorKind, GrammarError};
+use crate::look::Look;
 use crate::provider::{DataProvider, SeriesKind};
 
 /// Bars shown before the fact bar in the chart view.
@@ -182,8 +183,23 @@ pub fn capsule_view(
     p: &dyn DataProvider,
     id: &str,
 ) -> Result<View, GrammarError> {
+    capsule_view_in(&crate::look::R4, finding, max_points, p, id)
+}
+
+/// (R5/T3) [`capsule_view`] with the sizes of `look` (the card's glyph, sentence and
+/// ledger; `r4`: [`capsule_view`]).
+///
+/// # Errors
+/// As [`capsule_view`].
+pub fn capsule_view_in(
+    look: &Look,
+    finding: &str,
+    max_points: u32,
+    p: &dyn DataProvider,
+    id: &str,
+) -> Result<View, GrammarError> {
     if has_story(finding, p) {
-        return capsule_card_view(finding, max_points, p, id);
+        return capsule_card_view_in(look, finding, max_points, p, id);
     }
     let (_, fact) = finding_and_fact(finding, p)?;
     let (_, bars) = bar_series_bars(&fact, p)?;
@@ -231,9 +247,23 @@ pub fn capsule_view(
 /// # Errors
 /// Unknown finding/fact, a finding without facts, or a series without bars.
 pub fn chart_view(finding: &str, p: &dyn DataProvider, id: &str) -> Result<View, GrammarError> {
+    chart_view_in(&crate::look::R4, finding, p, id)
+}
+
+/// (R5/T3) [`chart_view`] with the sizes of `look` (the glyph over the chart, the note;
+/// `r4`: [`chart_view`]).
+///
+/// # Errors
+/// As [`chart_view`].
+pub fn chart_view_in(
+    look: &Look,
+    finding: &str,
+    p: &dyn DataProvider,
+    id: &str,
+) -> Result<View, GrammarError> {
     let (f, fact) = finding_and_fact(finding, p)?;
     if fact.meaning.is_some() {
-        return chart_view_r3(&f, &fact, p, id);
+        return chart_view_r3(look, &f, &fact, p, id);
     }
     let (bs, bars) = bar_series_bars(&fact, p)?;
     let n = bars.len() as u64;
@@ -326,10 +356,10 @@ pub const GLYPH_MIN_LEDGER_N: u32 = 20;
 /// Bars after the last transition at which a glyph's freshness is one half.
 pub const FRESHNESS_HALF_BARS: f64 = 5.0;
 
-/// Glyph size in the capsule card and over the chart.
-pub const CARD_GLYPH_PX: f64 = 40.0;
-/// Glyph size over the chart at `chart` depth.
-pub const CHART_GLYPH_PX: f64 = 32.0;
+/// Glyph size in the capsule card (the `r4` look's `glyph.card_px`).
+pub const CARD_GLYPH_PX: f64 = crate::look::R4.glyph.card_px;
+/// Glyph size over the chart at `chart` depth (the `r4` look's `glyph.chart_px`).
+pub const CHART_GLYPH_PX: f64 = crate::look::R4.glyph.chart_px;
 
 /// The glyph parameters of a story at bar `now_bar` (K30 channels). The same rule as the
 /// engine's `qp_capsule::glyph_spec(story, now_bar, GLYPH_MIN_LEDGER_N)` (cross-checked in
@@ -460,6 +490,22 @@ pub fn capsule_card_view(
     p: &dyn DataProvider,
     id: &str,
 ) -> Result<View, GrammarError> {
+    capsule_card_view_in(&crate::look::R4, finding, max_points, p, id)
+}
+
+/// (R5/T3) [`capsule_card_view`] with the sizes of `look`: glyph `glyph.card_px`, the
+/// sentence in the `body` role beside it (`space.glyph_gap`), the ledger line in the
+/// `label` role.
+///
+/// # Errors
+/// As [`capsule_card_view`].
+pub fn capsule_card_view_in(
+    look: &Look,
+    finding: &str,
+    max_points: u32,
+    p: &dyn DataProvider,
+    id: &str,
+) -> Result<View, GrammarError> {
     let (_, fact) = finding_and_fact(finding, p)?;
     let (bs, bars) = bar_series_bars(&fact, p)?;
     let n = bars.len() as u64;
@@ -468,19 +514,21 @@ pub fn capsule_card_view(
     glyph.finding = Some(finding.to_owned());
     glyph.encoding.x = Some(panel_at(0.0, 0.0));
     glyph.encoding.y = Some(panel_at(0.0, 0.0));
-    glyph.encoding.size = Some(SizeSpec::Constant(CARD_GLYPH_PX));
+    let card_px = look.glyph.card_px;
+    glyph.encoding.size = Some(SizeSpec::Constant(card_px));
     let mut sentence = layer("sentence", Mark::Text, 0);
     sentence.finding = Some(finding.to_owned());
     sentence.encoding.text = Some("headline".to_owned());
-    sentence.encoding.x = Some(panel_at(0.0, CARD_GLYPH_PX + 10.0));
+    sentence.encoding.x = Some(panel_at(0.0, card_px + look.space.glyph_gap));
     sentence.encoding.y = Some(panel_at(0.0, 0.0));
-    sentence.encoding.size = Some(SizeSpec::Constant(12.0));
+    sentence.encoding.size = Some(SizeSpec::Constant(look.types.body.px));
     let mut ledger = layer("ledger", Mark::Text, 0);
     ledger.finding = Some(finding.to_owned());
     ledger.encoding.text = Some("ledger".to_owned());
     ledger.encoding.x = Some(panel_at(0.0, 0.0));
-    ledger.encoding.y = Some(panel_at(1.0, -13.0));
-    ledger.encoding.size = Some(SizeSpec::Constant(11.0));
+    // The ledger line's top: its size plus 2 px above the panel's bottom.
+    ledger.encoding.y = Some(panel_at(1.0, -(look.types.label.px + 2.0)));
+    ledger.encoding.size = Some(SizeSpec::Constant(look.types.label.px));
     ledger.encoding.color = Some(ColorSpec::Constant("muted".to_owned()));
     let mut line = layer("line", Mark::Line, 1);
     line.series = Some(bs);
@@ -618,6 +666,7 @@ pub fn evidence_layers(fact: &Fact, panel: u32, taken: &mut Vec<String>) -> Vec<
 /// needs. The visible range starts 30 bars before the first fact or at the first
 /// geometry bar, whichever is earlier.
 fn chart_view_r3(
+    look: &Look,
     finding: &Finding,
     fact: &Fact,
     p: &dyn DataProvider,
@@ -666,15 +715,15 @@ fn chart_view_r3(
         t.fact = Some(f.id.clone());
         t.encoding.text = Some("requires".to_owned());
         t.encoding.x = Some(panel_at(0.0, 4.0));
-        t.encoding.y = Some(panel_at(0.0, CHART_GLYPH_PX + 8.0));
-        t.encoding.size = Some(SizeSpec::Constant(12.0));
+        t.encoding.y = Some(panel_at(0.0, look.glyph.chart_px + 8.0));
+        t.encoding.size = Some(SizeSpec::Constant(look.types.body.px));
         t.encoding.color = Some(ColorSpec::Constant("warn".to_owned()));
         layers.push(t);
     }
     if p.glyph(&finding.id).is_some() {
         let mut g = layer(&uniq(&mut taken, "glyph"), Mark::Glyph, 0);
         g.finding = Some(finding.id.clone());
-        g.encoding.size = Some(SizeSpec::Constant(CHART_GLYPH_PX));
+        g.encoding.size = Some(SizeSpec::Constant(look.glyph.chart_px));
         layers.push(g);
     }
     let mut panels = vec![linear_panel(0)];
@@ -733,6 +782,21 @@ pub fn face_view(
     id: &str,
 ) -> Result<View, GrammarError> {
     crate::faces::face_view(face, finding, max_points, p, id)
+}
+
+/// (R5/T3) [`face_view`] in `look`.
+///
+/// # Errors
+/// As [`face_view`].
+pub fn face_view_in(
+    look: &Look,
+    face: Option<&str>,
+    finding: &str,
+    max_points: u32,
+    p: &dyn DataProvider,
+    id: &str,
+) -> Result<View, GrammarError> {
+    crate::faces::face_view_in(look, face, finding, max_points, p, id)
 }
 
 // ---------------------------------------------------------------------------

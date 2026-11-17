@@ -76,6 +76,12 @@ enum Command {
     Explain(SceneArgs),
     /// Print the compiled scene description (`SceneDesc` JSON) of a view.
     Scene(SceneArgs),
+    /// (R5/T3) The looks (design records): list them, show one as JSON, or its CSS
+    /// custom properties.
+    Look {
+        #[command(subcommand)]
+        command: LookCommand,
+    },
     /// Authority ↔ replica check (docs/PROTOCOL.md §19.6): run the reference authority
     /// and a replica on one tick stream (replica data `--lag` events behind), check the
     /// display rule with an independent oracle, and write the replica's input tape with
@@ -220,6 +226,12 @@ struct SceneArgs {
     /// Pretty-print the JSON (`qp scene`).
     #[arg(long)]
     pretty: bool,
+    /// (R5/T3) Look to compile with (`qp look list`; default `r4`).
+    #[arg(long)]
+    look: Option<String>,
+    /// (R5/T3) Write each text's type role into the scene (`role`; for measurement).
+    #[arg(long)]
+    roles: bool,
 }
 
 #[derive(Debug, clap::Args)]
@@ -238,6 +250,9 @@ struct RenderArgs {
     /// Image height in pixels.
     #[arg(long, default_value_t = qp_render::DEFAULT_HEIGHT)]
     height: u32,
+    /// (R5/T3) Look to draw with (`qp look list`; default `r4`).
+    #[arg(long)]
+    look: Option<String>,
 }
 
 #[derive(Debug, clap::Args)]
@@ -272,6 +287,30 @@ struct ComputeArgs {
     /// List the studies with their outputs and default parameters, then exit.
     #[arg(long)]
     list: bool,
+}
+
+/// (R5/T3) `qp look`: the design records (`qp_grammar::look`).
+#[derive(Debug, Subcommand)]
+enum LookCommand {
+    /// The registered looks, one per line: name, default scheme, note (default first).
+    List,
+    /// One look's whole record as JSON (fonts, type roles, colour roles of both schemes,
+    /// spacing, surface, glyph, motion).
+    Show {
+        /// Look name.
+        name: String,
+        /// Pretty-print the JSON.
+        #[arg(long)]
+        pretty: bool,
+    },
+    /// The shell chrome's CSS custom properties of a look in a scheme, one per line.
+    Css {
+        /// Look name.
+        name: String,
+        /// `dark` or `light` (default: the look's own).
+        #[arg(long)]
+        theme: Option<String>,
+    },
 }
 
 #[derive(Debug, Subcommand)]
@@ -374,6 +413,7 @@ fn run(command: Command) -> Result<Outcome, String> {
         Command::Replay(args) => replay_cmd(&args),
         Command::Explain(args) => scene_cmd(&args, true),
         Command::Scene(args) => scene_cmd(&args, false),
+        Command::Look { command } => look_cmd(&command),
     }
 }
 
@@ -712,12 +752,16 @@ fn compile_source(
     src: &ViewSource,
     width: u32,
     height: u32,
+    look: Option<&str>,
+    roles: bool,
 ) -> Result<
     (qp_schema::grammar::View, qp_schema::scene::SceneDesc),
     Result<Box<qp_schema::protocol::ProtocolError>, String>,
 > {
     let (mut session, principal) = scene_session(src).map_err(Err)?;
-    let opts = qp_session::CompileOptions::new(width, height);
+    let mut opts = qp_session::CompileOptions::new(width, height);
+    opts.look = look.map(str::to_owned);
+    opts.roles = roles;
     match (&src.view, &src.present) {
         (Some(view), _) => {
             let scene = session.scene(view, &opts).map_err(|e| Ok(Box::new(e)))?;
@@ -749,7 +793,13 @@ fn print_protocol_error(e: &qp_schema::protocol::ProtocolError) -> Outcome {
 }
 
 fn scene_cmd(args: &SceneArgs, explain: bool) -> Result<Outcome, String> {
-    let (view, scene) = match compile_source(&args.source, args.width, args.height) {
+    let (view, scene) = match compile_source(
+        &args.source,
+        args.width,
+        args.height,
+        args.look.as_deref(),
+        args.roles,
+    ) {
         Ok(x) => x,
         Err(Ok(e)) => return Ok(print_protocol_error(&e)),
         Err(Err(m)) => return Err(m),
@@ -768,8 +818,45 @@ fn scene_cmd(args: &SceneArgs, explain: bool) -> Result<Outcome, String> {
     Ok(Outcome::Ok)
 }
 
+/// (R5/T3) `qp look`.
+fn look_cmd(c: &LookCommand) -> Result<Outcome, String> {
+    use qp_grammar::look;
+    match c {
+        LookCommand::List => {
+            for l in look::LOOKS {
+                println!("{}\t{}\t{}", l.name, l.scheme, l.note);
+            }
+        }
+        LookCommand::Show { name, pretty } => {
+            let l = look::by_name(Some(name)).map_err(|e| e.to_string())?;
+            let v = l.to_json();
+            let text = if *pretty {
+                serde_json::to_string_pretty(&v)
+            } else {
+                serde_json::to_string(&v)
+            }
+            .map_err(|e| e.to_string())?;
+            println!("{text}");
+        }
+        LookCommand::Css { name, theme } => {
+            let l = look::by_name(Some(name)).map_err(|e| e.to_string())?;
+            l.theme(theme.as_deref()).map_err(|e| e.to_string())?;
+            for (k, v) in look::css_vars(l, theme.as_deref()) {
+                println!("{k}: {v};");
+            }
+        }
+    }
+    Ok(Outcome::Ok)
+}
+
 fn render_view(args: &RenderArgs) -> Result<Outcome, String> {
-    let scene = match compile_source(&args.source, args.width, args.height) {
+    let scene = match compile_source(
+        &args.source,
+        args.width,
+        args.height,
+        args.look.as_deref(),
+        false,
+    ) {
         Ok((_, scene)) => scene,
         Err(Ok(e)) => return Ok(print_protocol_error(&e)),
         Err(Err(m)) => return Err(m),

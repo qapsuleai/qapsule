@@ -25,10 +25,10 @@ pub(crate) fn rect(x: i32, y: i32, w: i32, h: i32, color: Rgba) -> Prim {
 
 /// Estimated advance width of `text` at `px` (no font in the compiler): `0.6 · px` per
 /// character, rounded up. Used only to place legends and size text hit boxes.
-pub(crate) fn est_width(text: &str, size: f64) -> i32 {
+pub(crate) fn est_width(text: &str, size: f64, adv: f64) -> i32 {
     let n = text.chars().count();
     #[allow(clippy::cast_precision_loss)]
-    let w = (n as f64 * size * 0.6).ceil();
+    let w = (n as f64 * size * adv).ceil();
     #[allow(clippy::cast_possible_truncation)]
     let w = w as i32;
     w.max(1)
@@ -55,6 +55,8 @@ pub(crate) struct Geo<'a> {
     pub bold: bool,
     /// Theme (glyph colours).
     pub theme: &'a Theme,
+    /// (R5/T3) The look (type roles: width estimate, line height, ascent).
+    pub look: &'static crate::look::Look,
     /// (R4/M11) Outcome style of glyphs (`CompileOptions::outcome`).
     pub outcome: &'a dyn crate::glyph::outcome::OutcomeStyle,
     /// (R4/T5) Glyph alphabet (`CompileOptions::alphabet`).
@@ -556,7 +558,7 @@ fn points(pl: &Prepared, g: &Geo<'_>, out: &mut SceneLayer) {
             (r2, r2)
         } else {
             let text = r.text.clone().unwrap_or_default();
-            let mut w = est_width(&text, r.size);
+            let mut w = est_width(&text, r.size, text_metrics(g.look, r.size).0);
             if w % 2 == 0 {
                 w += 1;
             }
@@ -568,6 +570,8 @@ fn points(pl: &Prepared, g: &Geo<'_>, out: &mut SceneLayer) {
                 text,
                 color: r.color,
                 align: qp_schema::scene::Align::Left,
+                font: None,
+                role: None,
             });
             (w / 2, px((r.size / 2.0).ceil()))
         };
@@ -587,6 +591,18 @@ fn points(pl: &Prepared, g: &Geo<'_>, out: &mut SceneLayer) {
     }
 }
 
+/// (R5/T3) A text mark's metrics at `size` from the look's role of that size
+/// (`TypeScale::mark_role`; the default font at line 1.3 when no role has it):
+/// `(advance em, line height, ascent em)`. `r4`: `(0.6, 1.3, 0.8)`, R3's constants.
+fn text_metrics(look: &crate::look::Look, size: f64) -> (f64, f64, f64) {
+    let role = look.types.mark_role(size);
+    let f = role.map_or(&crate::look::FONTS[0], |r| look.role_font(r));
+    let line = role
+        .and_then(|r| look.types.role(r))
+        .map_or(1.3, |r| r.line);
+    (f.advance, line, f.ascent)
+}
+
 /// Pixel position of a panel-relative coordinate along `[lo, hi)`.
 fn panel_px(pp: PanelPos, lo: i32, hi: i32) -> f64 {
     (f64::from(lo) + pp.panel * f64::from(hi - lo) + pp.px).floor()
@@ -594,7 +610,7 @@ fn panel_px(pp: PanelPos, lo: i32, hi: i32) -> f64 {
 
 /// Words of `text` wrapped into lines of at most `room` pixels at `size` (estimate as in
 /// [`est_width`]); a word longer than a line stands alone.
-fn wrap(text: &str, room: i32, size: f64) -> Vec<String> {
+fn wrap(text: &str, room: i32, size: f64, adv: f64) -> Vec<String> {
     let mut lines: Vec<String> = Vec::new();
     let mut cur = String::new();
     for w in text.split_whitespace() {
@@ -603,7 +619,7 @@ fn wrap(text: &str, room: i32, size: f64) -> Vec<String> {
         } else {
             format!("{cur} {w}")
         };
-        if cur.is_empty() || est_width(&cand, size) <= room {
+        if cur.is_empty() || est_width(&cand, size, adv) <= room {
             cur = cand;
         } else {
             lines.push(std::mem::take(&mut cur));
@@ -624,10 +640,11 @@ fn anchored_text(pl: &Prepared, g: &Geo<'_>, out: &mut SceneLayer) {
     let rc = g.rect;
     for r in &pl.traces[0].rows {
         let size = r.size;
+        let (adv, line, asc) = text_metrics(g.look, size);
         #[allow(clippy::cast_possible_truncation)]
-        let line_h = (size * 1.3).round() as i32;
+        let line_h = (size * line).round() as i32;
         #[allow(clippy::cast_possible_truncation)]
-        let ascent = (size * 0.8).round() as i32;
+        let ascent = (size * asc).round() as i32;
         let top = match pl.anchor.y {
             Some(pp) => {
                 #[allow(clippy::cast_possible_truncation)]
@@ -647,7 +664,7 @@ fn anchored_text(pl: &Prepared, g: &Geo<'_>, out: &mut SceneLayer) {
             Some(pp) => {
                 #[allow(clippy::cast_possible_truncation)]
                 let x = panel_px(pp, rc.left, rc.right) as i32;
-                (x, wrap(&text, rc.right - x, size), true)
+                (x, wrap(&text, rc.right - x, size, adv), true)
             }
             None => {
                 #[allow(clippy::cast_possible_truncation)]
@@ -669,7 +686,7 @@ fn anchored_text(pl: &Prepared, g: &Geo<'_>, out: &mut SceneLayer) {
         let mut right = left;
         let mut x0 = left;
         for (i, l) in kept.iter().enumerate() {
-            let w = est_width(l, size);
+            let w = est_width(l, size, adv);
             let x = if align_left { left } else { left - w / 2 };
             x0 = x0.min(x);
             right = right.max(x + w);
@@ -681,6 +698,8 @@ fn anchored_text(pl: &Prepared, g: &Geo<'_>, out: &mut SceneLayer) {
                 text: l.clone(),
                 color: r.color,
                 align: qp_schema::scene::Align::Left,
+                font: None,
+                role: None,
             });
         }
         let n = i32::try_from(kept.len()).unwrap_or(1).max(1);

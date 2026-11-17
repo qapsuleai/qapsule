@@ -17,6 +17,7 @@ use qp_schema::protocol::Language;
 
 use crate::depth;
 use crate::error::GrammarError;
+use crate::look::Look;
 use crate::provider::{DataProvider, HeadlineParts};
 
 /// Glyph size (CSS px): the face's dominant element.
@@ -43,15 +44,16 @@ fn panel_at(panel: f64, px: f64) -> Position {
 /// # Errors
 /// The card view's errors (unknown finding/fact, no bars).
 pub fn view(
+    look: &Look,
     finding: &str,
     max_points: u32,
     p: &dyn DataProvider,
     id: &str,
 ) -> Result<View, GrammarError> {
     if p.capsule(finding).is_none_or(|c| c.story.is_none()) {
-        return depth::capsule_view(finding, max_points, p, id);
+        return depth::capsule_view_in(look, finding, max_points, p, id);
     }
-    let mut v = depth::capsule_card_view(finding, max_points, p, id)?;
+    let mut v = depth::capsule_card_view_in(look, finding, max_points, p, id)?;
     // Title row: the instrument alone (the default title adds the bar period, "1d").
     let bars_of = v
         .layers

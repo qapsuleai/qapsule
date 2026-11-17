@@ -9,13 +9,14 @@ publish.workspace = true
 
 [dependencies]
 qp-schema = { path = "../qp-schema" }
+# (R5/T3) `look::Look::to_json` (`qp look show`).
+serde_json = { version = "1.0.154", features = ["float_roundtrip"] }
 
 [dev-dependencies]
 # Tests only: study values for the providers and the frozen R0 oracle (tests/r0_oracle).
 qp-compute = { path = "../qp-compute" }
 qp-capsule = { path = "../qp-capsule" }
 proptest = { version = "1.12.0", default-features = false, features = ["std", "bit-set"] }
-serde_json = { version = "1.0.154", features = ["float_roundtrip"] }
 
 [lints]
 workspace = true

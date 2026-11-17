@@ -139,6 +139,8 @@ pub fn stress_scene(width: u32, height: u32) -> SceneDesc {
             text: format!("Qapsule {size:.2}px 0123456789 +-.,:%$ AaBbGgQqWw"),
             color: col(&mut rng, alpha),
             align: Align::Left,
+            font: None,
+            role: None,
         });
         y += size as i32 + 4;
         size += 1.37;

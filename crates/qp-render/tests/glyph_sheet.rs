@@ -63,6 +63,8 @@ fn sheet_of(theme: &Theme, cols: &[Col; 5]) -> Vec<u8> {
             text: (*name).to_owned(),
             color: theme.muted,
             align: Align::Left,
+            font: None,
+            role: None,
         });
     }
     let mut row = 0;
@@ -85,6 +87,8 @@ fn sheet_of(theme: &Theme, cols: &[Col; 5]) -> Vec<u8> {
                 text: format!("{} {dname}", kind.name()),
                 color: theme.text,
                 align: Align::Left,
+                font: None,
+                role: None,
             });
             for (j, (phase, validity, _)) in cols.iter().enumerate() {
                 let spec = GlyphSpec {

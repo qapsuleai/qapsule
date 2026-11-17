@@ -5,97 +5,218 @@ use qp_schema::scene::Rgba;
 
 use crate::error::{ErrorKind, GrammarError};
 
-/// A resolved theme.
-#[derive(Debug, Clone, PartialEq, Eq)]
+/// A resolved theme: the colour roles of one scheme of a look (`crate::look`).
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct Theme {
     /// Theme name.
     pub name: &'static str,
-    /// Background.
+    /// Background (zemin).
     pub bg: Rgba,
     /// Grid lines.
     pub grid: Rgba,
     /// Axis lines.
     pub axis: Rgba,
-    /// Title text.
+    /// Title text (metin).
     pub text: Rgba,
-    /// Axis labels, rules.
+    /// Axis labels, rules (ikincil metin).
     pub muted: Rgba,
-    /// Rising candles, positive values.
+    /// Rising candles, positive values (yukarı).
     pub up: Rgba,
-    /// Falling candles, negative values.
+    /// Falling candles, negative values (aşağı).
     pub down: Rgba,
     /// Accent (emphasis, the first series colour).
     pub accent: Rgba,
-    /// Warning.
+    /// Warning (uyarı).
     pub warn: Rgba,
     /// Series palette `s1`..`s8` (`s1` = `accent`).
     pub series: [Rgba; 8],
+    /// (R5/T3) Surface of a card on the background (yüzey).
+    pub surface: Rgba,
+    /// (R5/T3) Hairlines and separators.
+    pub line: Rgba,
+    /// (R5/T3) A glyph without direction (nötr).
+    pub neutral: Rgba,
+    /// (R5/T3) A claim that still holds (geçerli).
+    pub valid: Rgba,
+    /// (R5/T3) A claim that no longer holds (geçersiz): its glyph and its sentence.
+    pub invalid: Rgba,
+    /// (R5/T3) A closed story's glyph (kapanmış işaret).
+    pub closed: Rgba,
+    /// (R5/T3) Focus and selection (odak).
+    pub focus: Rgba,
+    /// (R5/T3) The shell's own chrome (CSS custom properties, `look::css_vars`).
+    pub chrome: Chrome,
+}
+
+/// (R5/T3) The colours of the shell's chrome (header, tabs, settings, controls) in one
+/// scheme. The chrome is not a scene: these reach the page as CSS custom properties.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct Chrome {
+    /// Phone background.
+    pub bg: Rgba,
+    /// Text.
+    pub fg: Rgba,
+    /// Secondary text.
+    pub muted: Rgba,
+    /// Borders.
+    pub line: Rgba,
+    /// Controls and cards.
+    pub card: Rgba,
+    /// Selection, the active tab.
+    pub accent: Rgba,
+    /// Text on `accent`.
+    pub on_accent: Rgba,
+    /// Page around the phone frame.
+    pub page: Rgba,
+    /// Notice banner (synthetic data) background and text.
+    pub note_bg: Rgba,
+    /// Notice banner text.
+    pub note_fg: Rgba,
+    /// Error toast background.
+    pub alert_bg: Rgba,
+    /// Error toast text.
+    pub alert_fg: Rgba,
+    /// "Requires an entitlement" text.
+    pub req: Rgba,
 }
 
 /// Names of the theme colour tokens, for error hints.
-pub const TOKENS: [&str; 17] = [
+pub const TOKENS: [&str; 24] = [
     "bg", "grid", "axis", "text", "muted", "up", "down", "accent", "warn", "s1", "s2", "s3", "s4",
-    "s5", "s6", "s7", "s8",
+    "s5", "s6", "s7", "s8", "surface", "line", "neutral", "valid", "invalid", "closed", "focus",
 ];
 
 /// The theme names the engine knows.
 pub const THEMES: [&str; 2] = ["dark", "light"];
 
+const DARK_ACCENT: Rgba = [255, 183, 77, 230];
+const LIGHT_ACCENT: Rgba = [0xef, 0x6c, 0x00, 230];
+
 impl Theme {
-    /// The default theme: R0's colours.
+    /// The `r4` dark scheme: R0's colours.
+    pub const DARK: Theme = Theme {
+        name: "dark",
+        bg: [16, 18, 24, 255],
+        grid: [34, 38, 48, 255],
+        axis: [84, 90, 104, 255],
+        text: [200, 205, 215, 255],
+        muted: [130, 136, 150, 255],
+        up: [38, 166, 154, 255],
+        down: [239, 83, 80, 255],
+        accent: DARK_ACCENT,
+        warn: [255, 202, 40, 255],
+        series: [
+            DARK_ACCENT,
+            [0x42, 0xa5, 0xf5, 255],
+            [0xab, 0x47, 0xbc, 255],
+            [0x66, 0xbb, 0x6a, 255],
+            [0xec, 0x40, 0x7a, 255],
+            [0x26, 0xc6, 0xda, 255],
+            [0x8d, 0x6e, 0x63, 255],
+            [0xbd, 0xbd, 0xbd, 255],
+        ],
+        surface: [16, 18, 24, 255],
+        line: [34, 38, 48, 255],
+        neutral: DARK_ACCENT,
+        valid: [200, 205, 215, 255],
+        invalid: [130, 136, 150, 255],
+        closed: [130, 136, 150, 255],
+        focus: DARK_ACCENT,
+        chrome: Chrome {
+            bg: [0x0f, 0x11, 0x15, 255],
+            fg: [0xe6, 0xe8, 0xec, 255],
+            muted: [0x8a, 0x90, 0x9c, 255],
+            line: [0x26, 0x2a, 0x33, 255],
+            card: [0x16, 0x19, 0x21, 255],
+            accent: [0x5b, 0x9c, 0xff, 255],
+            on_accent: [0xff, 0xff, 0xff, 255],
+            page: [0x05, 0x06, 0x0a, 255],
+            note_bg: [0x5a, 0x44, 0x10, 255],
+            note_fg: [0xff, 0xe2, 0xa0, 255],
+            alert_bg: [0x4a, 0x18, 0x20, 255],
+            alert_fg: [0xff, 0xd6, 0xdc, 255],
+            req: [0xff, 0xb4, 0x4c, 255],
+        },
+    };
+
+    /// The `r4` light scheme, same token names.
+    pub const LIGHT: Theme = Theme {
+        name: "light",
+        bg: [0xff, 0xff, 0xff, 255],
+        grid: [0xe8, 0xea, 0xee, 255],
+        axis: [0xa8, 0xad, 0xb8, 255],
+        text: [0x1f, 0x23, 0x28, 255],
+        muted: [0x5f, 0x66, 0x73, 255],
+        up: [0x08, 0x99, 0x81, 255],
+        down: [0xe5, 0x39, 0x35, 255],
+        accent: LIGHT_ACCENT,
+        warn: [0xf9, 0xa8, 0x25, 255],
+        series: [
+            LIGHT_ACCENT,
+            [0x1e, 0x88, 0xe5, 255],
+            [0x8e, 0x24, 0xaa, 255],
+            [0x43, 0xa0, 0x47, 255],
+            [0xd8, 0x1b, 0x60, 255],
+            [0x00, 0xac, 0xc1, 255],
+            [0x6d, 0x4c, 0x41, 255],
+            [0x75, 0x75, 0x75, 255],
+        ],
+        surface: [0xff, 0xff, 0xff, 255],
+        line: [0xe8, 0xea, 0xee, 255],
+        neutral: LIGHT_ACCENT,
+        valid: [0x1f, 0x23, 0x28, 255],
+        invalid: [0x5f, 0x66, 0x73, 255],
+        closed: [0x5f, 0x66, 0x73, 255],
+        focus: LIGHT_ACCENT,
+        chrome: Chrome {
+            bg: [0xf6, 0xf7, 0xf9, 255],
+            fg: [0x15, 0x17, 0x1c, 255],
+            muted: [0x5d, 0x64, 0x70, 255],
+            line: [0xd9, 0xdc, 0xe2, 255],
+            card: [0xff, 0xff, 0xff, 255],
+            accent: [0x25, 0x63, 0xeb, 255],
+            on_accent: [0xff, 0xff, 0xff, 255],
+            page: [0xc9, 0xcc, 0xd3, 255],
+            note_bg: [0xff, 0xf1, 0xc7, 255],
+            note_fg: [0x6b, 0x4b, 0x00, 255],
+            alert_bg: [0x4a, 0x18, 0x20, 255],
+            alert_fg: [0xff, 0xd6, 0xdc, 255],
+            req: [0xff, 0xb4, 0x4c, 255],
+        },
+    };
+
+    /// The default theme: R0's colours (the `r4` look's dark scheme).
     #[must_use]
     pub fn dark() -> Self {
-        let accent = [255, 183, 77, 230];
-        Self {
-            name: "dark",
-            bg: [16, 18, 24, 255],
-            grid: [34, 38, 48, 255],
-            axis: [84, 90, 104, 255],
-            text: [200, 205, 215, 255],
-            muted: [130, 136, 150, 255],
-            up: [38, 166, 154, 255],
-            down: [239, 83, 80, 255],
-            accent,
-            warn: [255, 202, 40, 255],
-            series: [
-                accent,
-                [0x42, 0xa5, 0xf5, 255],
-                [0xab, 0x47, 0xbc, 255],
-                [0x66, 0xbb, 0x6a, 255],
-                [0xec, 0x40, 0x7a, 255],
-                [0x26, 0xc6, 0xda, 255],
-                [0x8d, 0x6e, 0x63, 255],
-                [0xbd, 0xbd, 0xbd, 255],
-            ],
-        }
+        Self::DARK
     }
 
-    /// Light background, same token names.
+    /// Light background, same token names (the `r4` look's light scheme).
     #[must_use]
     pub fn light() -> Self {
-        let accent = [0xef, 0x6c, 0x00, 230];
-        Self {
-            name: "light",
-            bg: [0xff, 0xff, 0xff, 255],
-            grid: [0xe8, 0xea, 0xee, 255],
-            axis: [0xa8, 0xad, 0xb8, 255],
-            text: [0x1f, 0x23, 0x28, 255],
-            muted: [0x5f, 0x66, 0x73, 255],
-            up: [0x08, 0x99, 0x81, 255],
-            down: [0xe5, 0x39, 0x35, 255],
-            accent,
-            warn: [0xf9, 0xa8, 0x25, 255],
-            series: [
-                accent,
-                [0x1e, 0x88, 0xe5, 255],
-                [0x8e, 0x24, 0xaa, 255],
-                [0x43, 0xa0, 0x47, 255],
-                [0xd8, 0x1b, 0x60, 255],
-                [0x00, 0xac, 0xc1, 255],
-                [0x6d, 0x4c, 0x41, 255],
-                [0x75, 0x75, 0x75, 255],
-            ],
+        Self::LIGHT
+    }
+
+    /// The colour roles as JSON (`#rrggbbaa` strings), for `qp look show`.
+    #[must_use]
+    pub fn to_json(&self) -> serde_json::Value {
+        let h = |c: Rgba| format!("#{:02x}{:02x}{:02x}{:02x}", c[0], c[1], c[2], c[3]);
+        let mut m = serde_json::Map::new();
+        for t in TOKENS {
+            if let Some(c) = self.token(t) {
+                m.insert(t.to_owned(), serde_json::Value::String(h(c)));
+            }
         }
+        let c = &self.chrome;
+        m.insert(
+            "chrome".to_owned(),
+            serde_json::json!({"bg": h(c.bg), "fg": h(c.fg), "muted": h(c.muted),
+                "line": h(c.line), "card": h(c.card), "accent": h(c.accent),
+                "on_accent": h(c.on_accent), "page": h(c.page), "note_bg": h(c.note_bg),
+                "note_fg": h(c.note_fg), "alert_bg": h(c.alert_bg), "alert_fg": h(c.alert_fg),
+                "req": h(c.req)}),
+        );
+        serde_json::Value::Object(m)
     }
 
     /// The theme named `name`.
@@ -127,6 +248,13 @@ impl Theme {
             "down" => self.down,
             "accent" => self.accent,
             "warn" => self.warn,
+            "surface" => self.surface,
+            "line" => self.line,
+            "neutral" => self.neutral,
+            "valid" => self.valid,
+            "invalid" => self.invalid,
+            "closed" => self.closed,
+            "focus" => self.focus,
             _ => {
                 let i = name.strip_prefix('s')?.parse::<usize>().ok()?;
                 *self.series.get(i.checked_sub(1)?)?

@@ -34,6 +34,9 @@ export const ALLOWED_CORE = new Set([
   // RP3/M12c (ARCH.md): the GPU paint path's triangles, draws and glyph atlas, made by the core.
   'gpu_face', 'gpu_scene', 'gpu_vertices', 'gpu_capacity', 'gpu_draws', 'gpu_clear',
   'gpu_atlas_size', 'gpu_atlas_dirty', 'gpu_atlas_rows',
+  // R5/T3 (ARCH.md): the look's CSS custom properties for the chrome; the embedded font
+  // assets and their bytes (a canvas path registers each with FontFace, no network).
+  'css', 'fonts', 'font_bytes',
 ]);
 
 // R6: which modules a file may import. main.js: the core's package and the paint-path

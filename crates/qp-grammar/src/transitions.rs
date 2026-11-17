@@ -210,11 +210,25 @@ pub fn by_name(name: Option<&str>) -> &'static TransitionDesign {
 /// Progress of a transition that started at `t0` ms, at `t` ms (0..=1).
 #[must_use]
 pub fn progress(name: Option<&str>, t0: f64, t: f64) -> f64 {
-    let d = by_name(name).duration_ms;
+    progress_in(&crate::look::R4, name, t0, t)
+}
+
+/// (R5/T3) [`progress`] in `look`: the design's duration times the look's
+/// `motion.duration_scale`, the linear progress through the look's easing curve (`r4`:
+/// scale 1, linear: [`progress`] unchanged).
+#[must_use]
+pub fn progress_in(look: &crate::look::Look, name: Option<&str>, t0: f64, t: f64) -> f64 {
+    let d = by_name(name).duration_ms * look.motion.duration_scale;
     if !(t.is_finite() && t0.is_finite()) || d <= 0.0 {
         return 1.0;
     }
-    ((t - t0) / d).clamp(0.0, 1.0)
+    look.motion.ease.apply(((t - t0) / d).clamp(0.0, 1.0))
+}
+
+/// (R5/T3) The duration of design `name` in `look`, ms.
+#[must_use]
+pub fn duration_in(look: &crate::look::Look, name: Option<&str>) -> f64 {
+    by_name(name).duration_ms * look.motion.duration_scale
 }
 
 #[cfg(test)]

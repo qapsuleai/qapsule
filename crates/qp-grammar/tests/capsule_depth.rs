@@ -610,3 +610,104 @@ fn licensed_evidence_never_reaches_an_unentitled_reader() {
     assert_eq!(e.kind, ErrorKind::NotFound, "{e}");
     assert_eq!(e.layer.as_deref(), Some("level"));
 }
+
+/// The `(px, role, font)` of every text of `s`.
+fn text_roles(s: &SceneDesc) -> Vec<(f32, Option<String>, Option<String>, String)> {
+    s.prims()
+        .filter_map(|p| match p {
+            Prim::Text {
+                px,
+                role,
+                font,
+                text,
+                ..
+            } => Some((*px, role.clone(), font.clone(), text.clone())),
+            _ => None,
+        })
+        .collect()
+}
+
+/// (R5/T3) The look is a compile option: `r4` named explicitly draws exactly what no
+/// look draws (views and scenes equal, no `font`/`role` in the scene); another look
+/// changes sizes, colours and the face's height; `roles` writes each text's role;
+/// an unknown look is `invalid`.
+#[test]
+fn looks_are_design_records() {
+    use qp_grammar::depth::{capsule_view_in, face_view, face_view_in};
+    use qp_grammar::faces::{height, height_in};
+    use qp_grammar::look;
+    let p = r3(true);
+    let id = "capsule-fnd-brk";
+    for f in [None, Some("vadrel"), Some("tavrik"), Some("fotolay")] {
+        let v = face_view(f, "fnd-brk", 60, &p, id).unwrap();
+        assert_eq!(
+            v,
+            face_view_in(&look::R4, f, "fnd-brk", 60, &p, id).unwrap()
+        );
+        assert_eq!(height(f), height_in(&look::R4, f));
+        let mut o = CompileOptions::new(390, height(f));
+        o.face = f.map(str::to_owned);
+        let a = compile(&v, &p, &o).unwrap();
+        o.look = Some("r4".into());
+        assert_eq!(a, compile(&v, &p, &o).unwrap(), "{f:?}");
+        assert!(text_roles(&a)
+            .iter()
+            .all(|t| t.1.is_none() && t.2.is_none()));
+        // With roles: the same scene but for the role names.
+        o.roles = true;
+        let r = compile(&v, &p, &o).unwrap();
+        let tr = text_roles(&r);
+        // The reference card and the presented face draw every text in a role; the
+        // eliminated M8 designs keep sizes of their own (no role for those).
+        if matches!(f, None | Some("vadrel")) {
+            assert!(tr.iter().all(|t| t.1.is_some()), "{f:?} {tr:?}");
+        }
+        assert_eq!(texts(&a), texts(&r));
+    }
+    // The `r4` card.
+    let v = capsule_view("fnd-brk", 60, &p, id).unwrap();
+    assert_eq!(
+        v,
+        capsule_view_in(&look::R4, "fnd-brk", 60, &p, id).unwrap()
+    );
+
+    // The trial look `ornek`: larger type, its own colours and face height.
+    let ornek = look::by_name(Some("ornek")).unwrap();
+    let v = face_view_in(ornek, Some("vadrel"), "fnd-brk", 60, &p, id).unwrap();
+    let h = height_in(ornek, Some("vadrel"));
+    assert!(h > height(Some("vadrel")));
+    let mut o = CompileOptions::new(390, h);
+    o.face = Some("vadrel".into());
+    o.look = Some("ornek".into());
+    o.roles = true;
+    let s = compile(&v, &p, &o).unwrap();
+    assert_eq!(s.background, ornek.dark.bg);
+    let tr = text_roles(&s);
+    let headline: Vec<_> = tr
+        .iter()
+        .filter(|t| t.1.as_deref() == Some("headline"))
+        .collect();
+    assert!(!headline.is_empty(), "{tr:?}");
+    #[allow(clippy::cast_possible_truncation)]
+    let hp = ornek.types.headline.px as f32;
+    assert!(headline.iter().all(|t| t.0.to_bits() == hp.to_bits()));
+    // Its card: body-size sentence, label-size ledger.
+    let v = capsule_view_in(ornek, "fnd-brk", 60, &p, id).unwrap();
+    let mut o = CompileOptions::new(390, 300);
+    o.look = Some("ornek".into());
+    o.theme = Some("light".into());
+    o.roles = true;
+    let s = compile(&v, &p, &o).unwrap();
+    assert_eq!(s.background, ornek.light.bg);
+    let tr = text_roles(&s);
+    assert!(tr
+        .iter()
+        .any(|t| t.3 == "Karne 18/30" && t.1.as_deref() == Some("label") && t.0 == 12.0));
+    assert!(tr
+        .iter()
+        .any(|t| t.3.starts_with("SAMPLE") && t.1.as_deref() == Some("body") && t.0 == 13.0));
+    assert_eq!(s, compile(&v, &p, &o).unwrap());
+    o.look = Some("no-such-look".into());
+    let e = compile(&v, &p, &o).unwrap_err();
+    assert_eq!(e.kind, ErrorKind::Invalid);
+}

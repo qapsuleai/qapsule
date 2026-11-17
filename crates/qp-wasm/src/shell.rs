@@ -465,6 +465,9 @@ pub struct ShellCore {
     /// RP3/S [`shown_key`]).
     face_shown: BTreeMap<String, ShownKey>,
     scene_shown: Option<ShownKey>,
+    /// (R5/T3) The (look, theme) whose CSS custom properties were last handed out
+    /// ([`ShellCore::take_css`]).
+    css_shown: Option<(Option<String>, Option<String>)>,
     version: u64,
     /// The messages sent, for the record and the parity check: every message of a short
     /// session; (RP3/T4) on a long one only the latest [`SENT_KEEP`] to `2 × SENT_KEEP`
@@ -626,6 +629,7 @@ impl ShellCore {
             metrics: Metrics::default(),
             face_shown: BTreeMap::new(),
             scene_shown: None,
+            css_shown: None,
             version: 0,
             sent: Vec::new(),
             scale: 1,
@@ -894,6 +898,7 @@ impl ShellCore {
                     ("feed", &self.look.feed),
                     ("transition", &self.look.transition),
                     ("outcome", &self.look.outcome),
+                    ("look", &self.look.look),
                 ] {
                     if let Some(v) = v {
                         more[k] = json!(v);
@@ -919,8 +924,12 @@ impl ShellCore {
                     }
                     (Some(Asked::Input), QueryResult::Interaction { interaction }) => {
                         self.look = interaction.state.clone();
-                        // (R4/H-M8910) The face design states its height.
-                        let fh = qp_grammar::faces::height(self.look.face.as_deref());
+                        // (R4/H-M8910) The face design states its height (R5/T3: in the
+                        // connection's look).
+                        let fh = qp_grammar::faces::height_in(
+                            qp_session::viewer::look_of(&self.look),
+                            self.look.face.as_deref(),
+                        );
                         if let Some(f) = self.frames.get_mut("face") {
                             if f.1 != fh {
                                 f.1 = fh;
@@ -1230,7 +1239,52 @@ impl ShellCore {
             "feed": qp_grammar::feeds::names(),
             "transition": qp_grammar::transitions::names(),
             "outcome": qp_grammar::glyph::outcome::names(),
+            "look": qp_grammar::look::names(),
         })
+    }
+
+    /// (R5/T3) The chrome's CSS custom properties for the connection's look and theme
+    /// (`qp_grammar::look::css_vars`) as a `{name: value}` object, or `None` when they did
+    /// not change since the last hand-out (the page sets them verbatim on its root
+    /// element; its stylesheet holds no colour, font or radius of its own).
+    pub fn take_css(&mut self) -> Option<Value> {
+        let key = (self.look.look.clone(), self.look.theme.clone());
+        if self.css_shown.as_ref() == Some(&key) {
+            return None;
+        }
+        let look = qp_session::viewer::look_of(&self.look);
+        let vars = qp_grammar::look::css_vars(look, self.look.theme.as_deref());
+        self.css_shown = Some(key);
+        let obj: serde_json::Map<String, Value> = vars
+            .into_iter()
+            .map(|(k, v)| (k, Value::String(v)))
+            .collect();
+        Some(Value::Object(obj))
+    }
+
+    /// (R5/T3) The embedded font assets a paint path registers (`FontFace`): `[{id,
+    /// family}]`, `family` being the CSS family the core's font strings name. Every asset
+    /// is listed, so a look change needs no new download; the bytes come from
+    /// [`ShellCore::font_bytes`] (no network).
+    #[must_use]
+    pub fn fonts_json() -> Value {
+        let v: Vec<Value> = qp_render::fonts::FILES
+            .iter()
+            .map(|(id, _)| {
+                let family = qp_grammar::look::font(id)
+                    .map_or(crate::shell::paint::PAINT_FONT_FAMILY, |f| f.css_family);
+                json!({"id": id, "family": family})
+            })
+            .collect();
+        Value::Array(v)
+    }
+
+    /// (R5/T3) The bytes of embedded font asset `id` (empty if unknown).
+    #[must_use]
+    pub fn font_bytes(id: &str) -> Vec<u8> {
+        qp_render::fonts::bytes(id)
+            .map(<[u8]>::to_vec)
+            .unwrap_or_default()
     }
 
     /// (R4/H-M8910) The device pixel ratio the page reports; the core paints at the nearest
@@ -1601,7 +1655,15 @@ impl ShellCore {
     /// feed?, transition?, outcome?}` (absent or `""`: unchanged).
     pub fn set_look(&mut self, choice: &Value) {
         let mut g = json!({"kind":"style"});
-        for k in ["face", "alphabet", "theme", "feed", "transition", "outcome"] {
+        for k in [
+            "face",
+            "alphabet",
+            "theme",
+            "feed",
+            "transition",
+            "outcome",
+            "look",
+        ] {
             if let Some(v) = choice.get(k).and_then(Value::as_str) {
                 if !v.is_empty() {
                     g[k] = json!(v);
@@ -1901,7 +1963,12 @@ impl ShellCore {
     /// (ms, `performance.now()`); the first call after a transition starts the clock.
     pub fn transition_progress(&mut self, t: f64) -> f64 {
         let t0 = *self.trans_t0.get_or_insert(t);
-        qp_grammar::transitions::progress(self.look.transition.as_deref(), t0, t)
+        qp_grammar::transitions::progress_in(
+            qp_session::viewer::look_of(&self.look),
+            self.look.transition.as_deref(),
+            t0,
+            t,
+        )
     }
 
     /// (R4/H-M8910) The last transition's frame at progress `p` by the connection's

@@ -28,9 +28,10 @@ use crate::error::{ptr, PResult, E};
 use crate::session::{out, Session};
 use qp_capsule::sentence::StudyMemo;
 
-/// (K53) A host's coin-flip rule: whether a story's ledger is near a coin flip. M19
-/// chooses it; without one no story is marked.
-pub type CoinFlipRule = fn(&Story) -> bool;
+/// (K53; R5/M19) A host's coin-flip rule (`qp_capsule::feedrule`, `docs/CAPSULE.md`
+/// §9.10): whether a story's ledger at birth is near a coin flip, and the K42 exemption.
+/// Without one no story is marked.
+pub type CoinFlipRule = qp_capsule::feedrule::FeedRule;
 
 /// What a `stories` subscription was last sent: the reader-world log position and each
 /// row's key digest.
@@ -77,9 +78,30 @@ impl Session {
         self.coin_flip = rule;
     }
 
-    /// Whether `story` is marked "coin flip" (K53).
-    pub(crate) fn coin_flip_of(&self, story: &Story) -> bool {
-        self.coin_flip.is_some_and(|f| f(story))
+    /// (R5/M19) Sets the rule for `principal`'s reads over the host's own (`None`: no rule
+    /// for that principal). The presentation host uses it for a page's `?feed_rule=`
+    /// choice. Host configuration, like [`Session::set_coin_flip_rule`].
+    pub fn set_principal_coin_flip_rule(&mut self, principal: &str, rule: Option<CoinFlipRule>) {
+        self.coin_flip_for.insert(principal.to_owned(), rule);
+    }
+
+    /// (R5/M19) Drops `principal`'s own rule: its reads use the host's again.
+    pub fn clear_principal_coin_flip_rule(&mut self, principal: &str) {
+        self.coin_flip_for.remove(principal);
+    }
+
+    /// The rule `principal`'s reads use.
+    pub(crate) fn coin_flip_rule(&self, principal: &str) -> Option<CoinFlipRule> {
+        match self.coin_flip_for.get(principal) {
+            Some(r) => *r,
+            None => self.coin_flip,
+        }
+    }
+
+    /// Whether `story` is marked "coin flip" (K53) for `principal`.
+    pub(crate) fn coin_flip_of(&self, principal: &str, story: &Story) -> bool {
+        self.coin_flip_rule(principal)
+            .is_some_and(|r| r.coin_flip(story))
     }
 
     /// (§23, §20.4) The feed place of `story` for `principal` judged at `stage`: whether it
@@ -87,7 +109,9 @@ impl Session {
     /// instrument; positions and active intents' instruments always pass); then the
     /// position/intent override of a negative transition (K42/A22: whatever the level);
     /// then the coin-flip rule (K53: hidden below the `all` sensitivity); then the
-    /// sensitivity level.
+    /// sensitivity level. (R5/M19) A rule without the K42 exemption
+    /// (`exempt_negative: false`) is judged before the override: a coin-flip story about a
+    /// holding is hidden even on a negative transition.
     pub(crate) fn feed_place(
         &self,
         doc: &Document,
@@ -104,10 +128,16 @@ impl Session {
         if !watched {
             return (false, Some(FeedHidden::Watchlist));
         }
-        if stage.is_negative() && qp_capsule::audience::relevant(&a, story, &intents) {
+        let rule = self.coin_flip_rule(principal);
+        let coin_flip = rule.is_some_and(|r| r.coin_flip(story));
+        let exempt = rule.is_none_or(|r| r.exempt_negative);
+        if stage.is_negative()
+            && (exempt || !coin_flip)
+            && qp_capsule::audience::relevant(&a, story, &intents)
+        {
             return (true, None);
         }
-        if self.coin_flip_of(story) && a.effective() != Sensitivity::All {
+        if coin_flip && a.effective() != Sensitivity::All {
             return (false, Some(FeedHidden::CoinFlip));
         }
         if !qp_capsule::admits_at(&a, story, stage, &intents) {
@@ -235,7 +265,7 @@ impl Session {
             tier: story.tier,
             in_feed,
             hidden,
-            coin_flip: self.coin_flip_of(story),
+            coin_flip: self.coin_flip_of(principal, story),
             redacted,
         })
     }
@@ -274,7 +304,7 @@ impl Session {
             validity: parts.validity,
             in_feed,
             hidden,
-            coin_flip: self.coin_flip_of(story),
+            coin_flip: self.coin_flip_of(principal, story),
             redacted: parts.redacted,
             face: StoryFace {
                 event: parts.event,

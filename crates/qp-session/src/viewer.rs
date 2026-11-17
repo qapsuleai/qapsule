@@ -934,9 +934,13 @@ impl Session {
             audience: true,
             limit: Some(vc.limit),
         };
-        let caps = match self.query(ci, &q) {
-            Ok(QueryResult::Capsules { capsules, .. }) => capsules,
-            _ => Vec::new(),
+        let (caps, coin_flip_hidden) = match self.query(ci, &q) {
+            Ok(QueryResult::Capsules {
+                capsules,
+                coin_flip_hidden,
+                ..
+            }) => (capsules, coin_flip_hidden),
+            _ => (Vec::new(), 0),
         };
         let items: Vec<ViewerItem> = caps
             .into_iter()
@@ -949,10 +953,17 @@ impl Session {
                 }
             })
             .collect();
-        let fd = digest_of(&items);
+        // (R5/M19) The coin-flip count joins the digest only when there is one (without a
+        // host rule the digest is the R4 one).
+        let fd = if coin_flip_hidden == 0 {
+            digest_of(&items)
+        } else {
+            digest_of(&(&items, coin_flip_hidden))
+        };
         if all || vc.feed_sent != Some(fd) {
             vc.feed_sent = Some(fd);
             up.feed = Some(items.clone());
+            up.coin_flip_hidden = coin_flip_hidden;
         }
         // The faces on screen.
         let fh = qp_grammar::faces::height_in(look_of(look), look.face.as_deref());

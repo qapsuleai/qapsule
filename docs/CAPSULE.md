@@ -261,6 +261,43 @@ pozisyon/niyet kapsülünün her geçişi geçiyordu ve `important` seviyesine u
 sentetikte %57 → %0 (`rounds/R4/experiments/T3-sensitivity.md`).
 Varsayılan gruptan gelir; sistem değiştirmez.
 
+(R5/M19) Yazı tura eşiği hassasiyetle birlikte çalışır: §9.10.
+
+### 9.10 Yazı tura eşiği (R5/M19, K53, K42)
+
+Karnesi yazı turaya yakın kapsül akışta gösterilmez (K53). Kural önceden yazılmıştır
+(`rounds/R5/experiments/harness/feed/SPEC.md`, M19 alternatifinden önce) ve ölçümle seçilmiştir
+(`rounds/R5/experiments/M19/RESULTS.md`).
+
+- **Tanım (`rate55`):** kapsülün **doğum karnesinde** (`Story.ledger_at_birth`: doğum barından
+  önce kapanmış kapsüller) kapanmış durum sayısı `n ≥ N = 20` ve tutma oranı `p < τ = 0,55`
+  ise kapsül "yazı tura"dır. `n < 20` **az örneklidir**: gizlenmez, yüzü "az örnek" der (K53
+  kural 3; N, ürünün az örnek eşiğiyle aynıdır, `GLYPH_MIN_LEDGER_N`; daha küçük N "az örnek"
+  diyen yüzü gizlerdi).
+- **Geleceğe bakmaz (K53 kural 1):** karar yalnız doğum anındaki karneye bakar; doğumda verilir
+  ve zaman ilerleyince değişmez; yüzün gösterdiği karne de odur. (Düzenek her günün kararını o
+  günün sonundaki karneyle verir; iki tanım gerçek veride kararların %1,5'inde ayrışır, akış
+  sayıları aynı kalır — RESULTS §3.)
+- **Karneye işler (K53 kural 2):** kural yalnız akıştaki yeri belirler; karne, hikâye listesi,
+  işaret, kapanış değişmez.
+- **Görünür (K53 kural 4):** `important` ve `balanced` seviyelerinde akışa girmez; en açık seviyede
+  (`all`) akışta `coin_flip` işaretiyle görünür; grafik derinliğindeki hikâye listesinde her
+  seviyede işaretlidir (`hidden: coin_flip`).
+- **K42 muafiyeti (`exempt_negative`, varsayılan açık):** pozisyon ya da etkin niyetle ilgili
+  kapsülün olumsuz aşaması (`weakened`, `invalidated`, `retracted`) kuraldan muaftır.
+  Gerekçe: muafiyetsiz kural gerçek veride bu geçişlerin yalnız 0,43'ünü görünür bıraktı
+  (muaf: 1,00). Karar Arkin'in.
+- **Gerekçe ve sınır:** gerçek günlük veride gizleme, kalanların sonradan tutma oranını 0,556'dan
+  0,58'e çıkardı (gizlenenlerinki 0,51); ama kalanların Brier becerisi "hiç gizleme"den ayırt
+  edilemedi (aralıklar örtüşüyor). Kural güveni "yazı turayı göstermemek" yoluyla korur, karnenin
+  öngörü gücünü artırmaz.
+- **Uygulama:** `qp_capsule::feedrule` (`FeedRule`, `FEED_RULES`: `rate55`, `none`); otoritede
+  `SessionInit.feed_rule` ya da `Session::set_coin_flip_rule` (barındırıcı yapılandırması, protokol
+  mesajı değil). Kural yoksa hiçbir kapsül işaretlenmez (protokol varsayılanı; var olan dökümler
+  bayt eşit). Gösterim barındırıcısı (`qp demo`) varsayılan olarak `rate55`'i (muaf) çalıştırır;
+  sayfa `?feed_rule=none` ile kendi okuyucusu için kapatabilir. Akış ve liste aynı kuralı kullanır
+  (PROTOCOL §23.2); akış boşsa çekirdek bunu ve nedenini (gizlenen sayı) yazar.
+
 ### 9.9 Seçimler ve bağlantılar (R3)
 
 | Konu | Seçim (öneri, `DECISIONS.md` Ö29–Ö41) | Uygulama | Kanıt |

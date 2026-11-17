@@ -951,6 +951,10 @@ yerel veri hiç okunmaz.
 **R5/M18 (§23):** 60–63 enstrümanın hikâye listesi (yetkili okuyucu, yetkisiz okuyucular,
 ~200 hikâyelik aralık, `stories` konusu); `cargo run -p qp-session --example
 make_story_transcripts -- --write` ile üretilir. Var olan dökümler değişmedi.
+**R5/M19 (§23.2):** 64 barındırıcının yazı tura kuralı açık (`init.feed_rule`): akış ve liste
+`balanced` ve `all` seviyesinde, gizlenen sayısı, pozisyonla K42 muafiyeti, `story` olayları,
+karne; `cargo run -p qp-session --example make_feed_rule_transcript -- --write` ile üretilir.
+Var olan dökümler değişmedi (kural yokken yeni alanlar hiç yazılmaz).
 
 ## 16. Gömme
 
@@ -2505,11 +2509,21 @@ bulunur. "Az örnekli" (`face.few_cases`) yazı tura değildir: gizlenmez, söyl
 Akış (`capsules` sorgusunun `audience`'ı, `capsules` konusu, `viewer` akışı) ve satırın
 `in_feed`'i **aynı kuralı** kullanır (`Session::feed_place`).
 
-**Eşik:** yazı tura kuralı geleceğe bakmamalı (K53 kural 1) ve M19'da ölçülerek seçilir. O
-zamana kadar kural barındırıcının yapılandırmasıdır (`Session::set_coin_flip_rule`, protokol
-mesajı değil; mühür anahtarları gibi); verilmezse hiçbir hikâye işaretlenmez ve akış R4'teki
-gibidir (var olan dökümler bayt bayt aynı). Olumsuz geçişin (2) yazı tura gizlemesinden muaf
-tutulması bugünkü davranıştır; M19'un önerisine ve Arkin'in kararına bağlıdır.
+**Eşik (R5/M19):** kural `docs/CAPSULE.md` §9.10'dadır (`rate55`: doğum karnesinde `n ≥ 20` ve
+tutma oranı < 0,55; geleceğe bakmaz). Barındırıcının yapılandırmasıdır, protokol mesajı değil:
+`SessionInit.feed_rule` (`{"rule":"rate55","exempt_negative":true}`; bilinmeyen ad başlangıçta
+reddedilir) ya da `Session::set_coin_flip_rule`; gösterim barındırıcısı bir okuyucu için
+`set_principal_coin_flip_rule` ile başka kural kurabilir. Verilmezse hiçbir hikâye işaretlenmez
+ve akış R4'teki gibidir (var olan dökümler bayt bayt aynı). (2)'deki muafiyet kuralın
+`exempt_negative` parametresidir (varsayılan açık, M19 önerisi); kapalıysa yazı tura işaretli
+hikâye pozisyonda olumsuz aşamada da `hidden: coin_flip` olur.
+
+Kural açıkken (yalnız o zaman yazılan alanlar): `capsules` öğesinde `coin_flip: true` (akışta
+yalnız `all` seviyesinde bulunur; gösterim çekirdeği öğeye "karnesi yazı tura" işaretini
+ekler); `audience: true` ile `capsules` cevabında `coin_flip_hidden` (öteki süzgeçlerden geçip
+yalnız bu kuralla akış dışında kalan hikâye sayısı); `viewer` olayında akışla birlikte aynı
+sayı (`coin_flip_hidden`). Akış boşsa gösterim çekirdeği "Şu an anlatacak bir şey yok." ve
+nedenini (bu sayı, ya da izlenenlerde kapsül olmadığı) başlık satırları olarak yazar.
 
 ### 23.3 Yetki (K33, K34, Ö37)
 

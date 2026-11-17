@@ -334,12 +334,13 @@ fn unentitled_bytes_hold_no_licensed_story_value_or_digit() {
         .any(|r| r["face"].get("ledger_n").is_some()));
 }
 
-/// A test rule: a ledger at birth with at least 4 closed rows and a realized share in
-/// 40–60 % (M19 chooses the product's rule).
-fn half(s: &qp_schema::capsule::Story) -> bool {
-    let l = s.ledger_at_birth;
-    l.n >= 4 && (l.realized * 10 >= l.n * 4) && (l.realized * 10 <= l.n * 6)
-}
+/// A test rule: a ledger at birth with at least 4 closed rows and a realized share below
+/// 60 % (R5/M19: the product's rules are `qp_capsule::feedrule::FEED_RULES`; this one marks
+/// more stories on the short test history).
+const HALF: qp_session::CoinFlipRule = qp_session::CoinFlipRule {
+    hide: qp_capsule::feedrule::HideRule::Rate { min_n: 4, tau: 0.6 },
+    exempt_negative: true,
+};
 
 fn query_one(s: &mut Session, conn: &str, q: Value) -> Value {
     let l = send(s, conn, &stories_q(q));
@@ -364,7 +365,7 @@ fn coin_flip_rule_marks_hides_below_all_and_keeps_the_ledger() {
         .unwrap()
         .iter()
         .all(|r| r.get("coin_flip").is_none()));
-    s.set_coin_flip_rule(Some(half));
+    s.set_coin_flip_rule(Some(HALF));
     for (level, shown) in [("important", false), ("balanced", false), ("all", true)] {
         send(
             &mut s,

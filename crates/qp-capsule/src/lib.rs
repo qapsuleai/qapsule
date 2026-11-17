@@ -22,6 +22,7 @@
 //! - [`engine`]: the lifecycle state machine, candidates, ledger, retraction, glyph spec.
 //! - [`pipeline`]: headless simulation (detectors → facts → engine) in global time order.
 //! - [`audience`]: the sensitivity filter (§9.8).
+//! - [`feedrule`]: the feed's coin-flip rule (§9.10, K53; R5/M19).
 //! - [`scaffold`]: trivial strategies for tests only.
 //!
 //! The measured choices (R3/S-A, productized from `rounds/R3/experiments/`):
@@ -41,6 +42,7 @@ use std::collections::BTreeMap;
 
 pub mod audience;
 pub mod engine;
+pub mod feedrule;
 pub mod outcome;
 pub mod pipeline;
 pub mod rank;

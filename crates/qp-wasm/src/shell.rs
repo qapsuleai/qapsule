@@ -1827,7 +1827,22 @@ impl ShellCore {
     /// core): the opening timeline, the series, the device facts, memory, the paint path
     /// and a running comparison carry on; `prev` is left with empty metrics.
     pub fn metric_inherit(&mut self, prev: &mut ShellCore) {
-        self.metrics = std::mem::take(&mut prev.metrics);
+        let carry = prev.metric_detach();
+        self.metric_attach(carry);
+    }
+
+    /// (RP3/S) Takes this core's metrics out (to be given to the next core with
+    /// [`ShellCore::metric_attach`]) so that the page can free this core **before** it
+    /// builds the next one: two replicas never live in the WASM memory at once (a peak
+    /// the memory never gives back; rounds/RP3/experiments/T4-verify.md: 88 → 62 MB).
+    pub fn metric_detach(&mut self) -> MetricsCarry {
+        MetricsCarry(std::mem::take(&mut self.metrics))
+    }
+
+    /// (RP3/S) Takes over the metrics a previous core gave away
+    /// ([`ShellCore::metric_detach`]).
+    pub fn metric_attach(&mut self, carry: MetricsCarry) {
+        self.metrics = carry.0;
         // The series of the new core start with its first frame.
         self.metrics.last_frame = None;
         if let Some(b) = self.metrics.bench.as_mut() {
@@ -2270,3 +2285,8 @@ pub fn demo_session_init(o: &DemoOptions) -> qp_schema::protocol::SessionInit {
     init.principals.push(visitor);
     init
 }
+
+/// (RP3/S) A core's metrics in transit between two cores (`metric_detach` →
+/// `metric_attach`); opaque.
+#[derive(Debug, Default)]
+pub struct MetricsCarry(Metrics);

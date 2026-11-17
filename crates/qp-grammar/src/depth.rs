@@ -526,8 +526,12 @@ pub fn capsule_card_view_in(
     ledger.finding = Some(finding.to_owned());
     ledger.encoding.text = Some("ledger".to_owned());
     ledger.encoding.x = Some(panel_at(0.0, 0.0));
-    // The ledger line's top: its size plus 2 px above the panel's bottom.
-    ledger.encoding.y = Some(panel_at(1.0, -(look.types.label.px + 2.0)));
+    // The ledger line's top: its size plus the look's gap (`r4`: 2 px) above the panel's
+    // bottom.
+    ledger.encoding.y = Some(panel_at(
+        1.0,
+        -(look.types.label.px + look.offsets.ledger_gap),
+    ));
     ledger.encoding.size = Some(SizeSpec::Constant(look.types.label.px));
     ledger.encoding.color = Some(ColorSpec::Constant("muted".to_owned()));
     let mut line = layer("line", Mark::Line, 1);
@@ -596,15 +600,22 @@ fn bind(l: &mut Layer, ptr: &str, fact: &Fact, field: &str) {
 /// `geometry.<i>.…`): the layer carries no number; the compiler resolves each one from
 /// the reader's provider (K33: a view never carries evidence values to a reader). A
 /// geometry whose values are absent from the evidence (redacted) gets no layer at all;
-/// the chart says what the evidence needs instead ([`evidence_note`]).
+/// the chart says what the evidence needs instead ([`evidence_note`]). Colour, widths, the
+/// band's opacity and the point size come from the look (`look.evidence`).
 #[must_use]
-pub fn evidence_layers(fact: &Fact, panel: u32, taken: &mut Vec<String>) -> Vec<Layer> {
+pub fn evidence_layers(
+    look: &Look,
+    fact: &Fact,
+    panel: u32,
+    taken: &mut Vec<String>,
+) -> Vec<Layer> {
     let mut out = Vec::new();
     let Some(m) = &fact.meaning else {
         return out;
     };
     let ev = |k: &str| fact.evidence.get(k).copied();
-    let accent = || Some(ColorSpec::Constant("accent".to_owned()));
+    let ev_look = &look.evidence;
+    let accent = || Some(ColorSpec::Constant(ev_look.color.to_owned()));
     for (gi, g) in m.geometry.iter().enumerate() {
         if geometry_keys(g).iter().any(|k| ev(k).is_none()) {
             continue;
@@ -617,7 +628,7 @@ pub fn evidence_layers(fact: &Fact, panel: u32, taken: &mut Vec<String>) -> Vec<
                 bind(&mut l, "/encoding/x", fact, &gf("from_bar"));
                 bind(&mut l, "/encoding/x2", fact, &gf("to_bar"));
                 l.encoding.color = accent();
-                l.encoding.width = Some(2.0);
+                l.encoding.width = Some(ev_look.rule_w);
                 out.push(l);
             }
             Geometry::Band { upper, lower, .. } => {
@@ -627,8 +638,8 @@ pub fn evidence_layers(fact: &Fact, panel: u32, taken: &mut Vec<String>) -> Vec<
                 bind(&mut l, "/encoding/x", fact, &gf("from_bar"));
                 bind(&mut l, "/encoding/x2", fact, &gf("to_bar"));
                 l.encoding.color = accent();
-                l.encoding.opacity = Some(0.18);
-                l.encoding.width = Some(1.0);
+                l.encoding.opacity = Some(ev_look.band_alpha);
+                l.encoding.width = Some(ev_look.band_w);
                 out.push(l);
             }
             Geometry::Points { points } => {
@@ -642,7 +653,7 @@ pub fn evidence_layers(fact: &Fact, panel: u32, taken: &mut Vec<String>) -> Vec<
                     bind(&mut l, "/encoding/x", fact, &pa);
                     bind(&mut l, "/encoding/x2", fact, &pb);
                     l.encoding.color = accent();
-                    l.encoding.width = Some(2.0);
+                    l.encoding.width = Some(ev_look.rule_w);
                     out.push(l);
                 }
                 for (j, pt) in points.iter().enumerate() {
@@ -650,7 +661,7 @@ pub fn evidence_layers(fact: &Fact, panel: u32, taken: &mut Vec<String>) -> Vec<
                     bind(&mut l, "/encoding/y", fact, &pt.key);
                     bind(&mut l, "/encoding/x", fact, &gf(&format!("points.{j}.bar")));
                     l.encoding.color = accent();
-                    l.encoding.size = Some(SizeSpec::Constant(9.0));
+                    l.encoding.size = Some(SizeSpec::Constant(ev_look.point_px));
                     out.push(l);
                 }
             }
@@ -694,7 +705,7 @@ fn chart_view_r3(
     for f in &facts {
         if f.series == bs {
             // Bands go under the candles, lines and points over them.
-            for l in evidence_layers(f, 0, &mut taken) {
+            for l in evidence_layers(look, f, 0, &mut taken) {
                 if l.mark == Mark::Band {
                     let at = layers
                         .iter()
@@ -714,10 +725,10 @@ fn chart_view_r3(
         let mut t = layer(&uniq(&mut taken, "evidence"), Mark::Text, 0);
         t.fact = Some(f.id.clone());
         t.encoding.text = Some("requires".to_owned());
-        t.encoding.x = Some(panel_at(0.0, 4.0));
-        t.encoding.y = Some(panel_at(0.0, look.glyph.chart_px + 8.0));
+        t.encoding.x = Some(panel_at(0.0, look.offsets.note_x));
+        t.encoding.y = Some(panel_at(0.0, look.glyph.chart_px + look.offsets.note_gap));
         t.encoding.size = Some(SizeSpec::Constant(look.types.body.px));
-        t.encoding.color = Some(ColorSpec::Constant("warn".to_owned()));
+        t.encoding.color = Some(ColorSpec::Constant(look.evidence.note_color.to_owned()));
         layers.push(t);
     }
     if p.glyph(&finding.id).is_some() {

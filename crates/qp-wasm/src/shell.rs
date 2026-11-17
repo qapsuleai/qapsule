@@ -41,6 +41,9 @@ pub const FACE_HEIGHT: u32 = 240;
 pub const MAX_SCALE: u32 = 3;
 /// Phone frame (`screen`'s surface frame for phones).
 pub const PHONE_FRAME: (u32, u32) = (390, 300);
+/// (R5/T3b) The phone surface's screen (`hello` `surface.screen`; the demo page's phone
+/// frame, `--qp-phone-w`/`--qp-phone-h`).
+pub const PHONE_SCREEN: (u32, u32) = (390, 844);
 /// Capsules asked for per feed query.
 pub const FEED_LIMIT: u32 = 40;
 /// Pointer movement below which a press is a tap (CSS px).
@@ -469,9 +472,9 @@ pub struct ShellCore {
     /// RP3/S [`shown_key`]).
     face_shown: BTreeMap<String, ShownKey>,
     scene_shown: Option<ShownKey>,
-    /// (R5/T3) The (look, theme) whose CSS custom properties were last handed out
-    /// ([`ShellCore::take_css`]).
-    css_shown: Option<(Option<String>, Option<String>)>,
+    /// (R5/T3) The (look, theme, (R5/T3b) face and scene frames) whose CSS custom
+    /// properties were last handed out ([`ShellCore::take_css`]).
+    css_shown: Option<(Option<String>, Option<String>, [u32; 4])>,
     version: u64,
     /// The messages sent, for the record and the parity check: every message of a short
     /// session; (RP3/T4) on a long one only the latest [`SENT_KEEP`] to `2 × SENT_KEEP`
@@ -651,7 +654,7 @@ impl ShellCore {
             shown: BTreeSet::new(),
         };
         me.push(json!({"type":"hello","protocol":"qp/0","principal":principal,
-            "surface":{"kind":"phone","screen":[390,844],"input":["touch"],"lang":lang_name(lang)}}));
+            "surface":{"kind":"phone","screen":[PHONE_SCREEN.0, PHONE_SCREEN.1],"input":["touch"],"lang":lang_name(lang)}}));
         // (R4/S1) The presentation's own settings: the shell asks for them right after
         // `hello`; whatever the page chose (URL, settings page) is sent after and wins.
         me.ask(
@@ -1366,14 +1369,33 @@ impl ShellCore {
     /// (R5/T3) The chrome's CSS custom properties for the connection's look and theme
     /// (`qp_grammar::look::css_vars`) as a `{name: value}` object, or `None` when they did
     /// not change since the last hand-out (the page sets them verbatim on its root
-    /// element; its stylesheet holds no colour, font or radius of its own).
+    /// element; its stylesheet holds no colour, font, size or radius of its own).
+    /// (R5/T3b) Also the frames the page lays out: `--qp-phone-w`/`-h` (the phone
+    /// surface), `--qp-face-w`/`-h` and `--qp-scene-w`/`-h` (a canvas's CSS size before
+    /// the page sizes it from [`Self::face_size_json`] or the open scene).
     pub fn take_css(&mut self) -> Option<Value> {
-        let key = (self.look.look.clone(), self.look.theme.clone());
+        let (fw, fh) = self.frames["face"];
+        let (sw, sh) = self.frames["scene"];
+        let key = (
+            self.look.look.clone(),
+            self.look.theme.clone(),
+            [fw, fh, sw, sh],
+        );
         if self.css_shown.as_ref() == Some(&key) {
             return None;
         }
         let look = qp_session::viewer::look_of(&self.look);
-        let vars = qp_grammar::look::css_vars(look, self.look.theme.as_deref());
+        let mut vars = qp_grammar::look::css_vars(look, self.look.theme.as_deref());
+        for (k, v) in [
+            ("--qp-phone-w", PHONE_SCREEN.0),
+            ("--qp-phone-h", PHONE_SCREEN.1),
+            ("--qp-face-w", fw),
+            ("--qp-face-h", fh),
+            ("--qp-scene-w", sw),
+            ("--qp-scene-h", sh),
+        ] {
+            vars.push((k.to_owned(), format!("{v}px")));
+        }
         self.css_shown = Some(key);
         let obj: serde_json::Map<String, Value> = vars
             .into_iter()

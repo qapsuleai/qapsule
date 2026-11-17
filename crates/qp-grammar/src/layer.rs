@@ -1254,7 +1254,7 @@ pub(crate) fn prepare(
                 y: match &enc.y {
                     None => Some(PanelPos {
                         panel: 0.0,
-                        px: 2.0,
+                        px: fr.look.offsets.glyph_top,
                     }),
                     p => panel_pos(p.as_ref()),
                 },

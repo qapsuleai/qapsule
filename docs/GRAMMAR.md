@@ -256,15 +256,18 @@ hareketinin `look` alanıyla seçer (`ViewState.look`; yoksa `r4`); derleme seç
 | Alan | İçerik | `r4` |
 |------|--------|------|
 | `types` | Tip ölçeği, roller: `headline` (başlık cümlesi), `title` (sahnenin üst satırı: grafik başlığı ve kapanış; yüzün ek bilgisi), `body` (kart cümlesi, grafik notu), `label` (tarih etiketi, açıklama, karne satırı), `figure` (eksen değeri, son değer etiketi), `note` (kanıt etiketi). Her rol: boy (px), satır yüksekliği (boyun katı), yazı tipi varlığı | 20 / 16 / 12 / 11 / 11 / 9 px; satır 1,3; hepsi `plex-mono` |
-| `dark`, `light` | Renk rolleri (`Theme`): §9'daki adlar + `surface` (yüzey), `line`, `neutral` (yönsüz işaret), `valid`, `invalid` (artık geçerli değil: işaret ve cümle), `closed` (kapanmış işaret), `focus` (odak); `chrome` (kabuğun kendi renkleri: zemin, metin, ikincil metin, çizgi, kart, vurgu, vurgu üstü metin, sayfa, bildirim ve hata şeridi, "yetki gerekir") | §9 değerleri; `neutral`=`accent`, `valid`=`text`, `invalid`=`closed`=`muted`; `chrome` = R4 `style.css` renkleri |
+| `dark`, `light` | Renk rolleri (`Theme`): §9'daki adlar + `surface` (yüzey), `line`, `neutral` (yönsüz işaret), `valid`, `invalid` (artık geçerli değil: işaret ve cümle), `closed` (kapanmış işaret), (T3b) `closed_alpha` (kapanmış işaretin en düşük saydamlığı, 0–255: alfabe işareti tazeliğe göre soldurur, A31; kapanmış işaret bunun altına inmez, böylece görünüş ≥ 3:1'i tutturabilir; 0 = yalnız tazelik), `focus` (odak); `chrome` (kabuğun kendi renkleri: zemin, metin, ikincil metin, çizgi, kart, vurgu, vurgu üstü metin, sayfa, bildirim ve hata şeridi, "yetki gerekir" = kanıt ekranının turuncu yazısı) | §9 değerleri; `neutral`=`accent`, `valid`=`text`, `invalid`=`closed`=`muted`; `closed_alpha` 0; `chrome` = R4 `style.css` renkleri |
 | `scheme` | Okur seçmediğinde düzen | `dark` |
 | `space` | Boşluk ölçeği (kabuk: `--qp-space-0..5`), çizim alanı kenar boşlukları (sol, sağ, üst = başlık satırı, alt), panel arası, işaret ile cümle arası | `[4,6,8,12,16,24]`, `[8,72,34,24]`, 8, 10 |
 | `surface` | Kabuk köşe yarıçapı, telefon çerçevesi ve rozet yarıçapı, çizgi kalınlığı, gölge (yok = düz), vurgu şeridi ve perde saydamlığı | 6, 18, 8 px; 1; düz; 56, 160 |
 | `glyph` | İşaretin boyu: yüzde, kartta, grafikte, boyu verilmemiş katmanda; yüzdeki yeri (`leading`: cümlenin solunda, `above`: üstünde) | 32, 40, 32, 24; `leading` |
 | `motion` | Geçiş süresi çarpanı, eğri (`linear` ya da `cubic-bezier`, sabit adımlı çözüm), kabuk geçiş süresi | 1, `linear`, 0 ms |
+| `chrome` (T3b) | Kabuğun boyları (CSS px): metin boyu ve satır yüksekliği, küçük yazı (bildirim, ipucu, uyarı, kod, bölüm başı), tablo, en küçük yazı (yüz rozeti, açık katmandaki güven işareti, adım sayacı), yüzün güven işareti ("Sunucu doğruladı"); bölüm başının kalınlığı, harf aralığı (em), üst boşluğu; sekme en düşük yüksekliği, iç boşluğu, alt çizgisi; düğme/seçim/alan en düşük yüksekliği ve iç boşluğu; tarih alanı genişliği; alttaki oynatma çubuğunun yüksekliği; tablo hücresi, rozet ve yüz metni iç boşluğu; yüz metninin en düşük yüksekliği | 14 / 1,35; 12; 13; 11; 10; 600, 0,04 em, 10; sekme 0 (= içerik), 6, 2; denetim 0, 4×6; 120; 48; 3×4, 1×6, 14×12; 60 |
+| `evidence` (T3b) | Kanıt geometrisi: renk rolü, "… gerekir" notunun renk rolü, seviye/salınım çizgi kalınlığı, bant kenarı ve dolgu saydamlığı, salınım noktası çapı | `accent`, `warn`, 2, 1, 0,18, 9 px |
+| `offsets` (T3b) | Sahnenin küçük ofsetleri (px): başlığın soldan içeriği, başlık satırı taban çizgisi, kapanış metninin yeri, satır kenar boşluğu, açıklamalar arası, alt panel açıklamasının içeriği ve taban çizgisi, kart karne satırının alttan boşluğu, kanıt notunun soldan içeriği ve işaret şeridinin altındaki boşluğu, `y`'siz işaret katmanının üstü | 4, 23, 140, 8, 12, 4, 12, 2, 4, 8, 2 |
 
 **Okuyanlar.** Derleyici (kenar boşlukları, panel arası, başlık/etiket/rakam boyu,
-genişlik tahmini, satır yüksekliği, şerit ve perde), yüz tasarımları (`FaceViewFn` görünüşü
+metin genişliği, satır yüksekliği, şerit ve perde, başlık satırı ofsetleri), yüz tasarımları (`FaceViewFn` görünüşü
 alır; yüz yüksekliği `faces::height_in(look, face)`), kart ve grafik kuralları
 (`depth::capsule_view_in`, `chart_view_in`), işaret alfabeleri (renk rolleri), geçiş
 ilerlemesi (`transitions::progress_in`), kabuk (CSS özel özellikleri, aşağıda).
@@ -272,7 +275,16 @@ ilerlemesi (`transitions::progress_in`), kabuk (CSS özel özellikleri, aşağı
 **Yazı tipi.** Bir varlık (`look::FONTS`) tek aile ve tek ağırlıklı **statik TTF**
 dosyasıdır (fontdue değişken yazı tipinin yalnız varsayılan örneğini çizer, woff2
 okumaz): kimlik, aile, ağırlık, dosya, lisans dosyası, SPDX, tuvaldeki CSS ailesi,
-ortalama ilerleme (em; derleyicinin genişlik tahmini) ve yükselme (em). Sahnedeki metin
+ortalama ilerleme (em), yükselme (em) ve (T3b) **glif ilerleme tablosu** (`advances`).
+Tablo dosyadan fontdue'nün ölçüleriyle **üretilir**, elle yazılmaz
+(`crates/qp-grammar/src/advances.rs`, `QP_BLESS=1 cargo test -p qp-render --test fonts`;
+aynı sınama tablo dosyayla uyuşmazsa düşer): eşlenen her kod noktasının ilerlemesi (font
+birimi; ardışık eşit ilerlemeler tek koşu), em başına birim, eksik glifin ilerlemesi.
+Derleyici metin genişliğini (satır kırma, sığdırma, açıklama yeri, metin isabet kutusu)
+bununla ölçer: orantılı ailede karakterlerin ilerlemeleri toplanır, `ceil(toplam · boy /
+em)`; eşit aralıklı ailede (her boşluklu glif eksik glifle aynı) R3'ün `ceil(karakter ·
+boy · advance)` hesabı aynen kalır (`r4` bayt eşit). Aralık (kerning) yok: fontdue
+uygulamaz, tuval `fontKerning = "none"`. Sahnedeki metin
 varlığını `Prim::Text::font` ile adlandırır (yoksa varsayılan `plex-mono`; `r4`
 sahneleri bu alanı hiç yazmaz). Başvuru çizici (`qp_render::fonts`), `canvas` yolu
 (`FontFace`, baytlar çekirdekten: `core.fonts()`, `core.font_bytes(id)`; ağ yok) ve `gpu`
@@ -289,9 +301,14 @@ farklıdır, kayıt sınaması); işaretin metinleri `glyph`. Varsayılan kapal�
 sahneleri ve özetleri değişmez. Ölçüm düzeneği öğe başına rengi, boyu ve rolü sahneden,
 rolün yazı tipini ve renk rollerini `qp look show <ad>`'dan okur.
 
-**Kabuk.** Kabuğun renkleri, yazı ailesi, yarıçapları ve geçiş süresi çekirdekten CSS
-özel özelliği olarak gelir (`look::css_vars`, `core.css()`; `qp look css <ad>`);
-`style.css` yalnız `var(--…)` okur, renk değeri taşımaz.
+**Kabuk.** Kabuğun renkleri, yazı ailesi, yarıçapları, geçiş süresi ve (T3b) bütün
+boyları (yazı boyları, iç boşluklar, sekme/düğme yükseklikleri: `chrome`; boşluklar:
+`space.scale`; çizgi: `surface.line` → `--qp-rule`) çekirdekten CSS özel özelliği olarak
+gelir (`look::css_vars`, `core.css()`; `qp look css <ad>`); `core.css()` ayrıca çerçeveleri
+ekler (`--qp-phone-w/h`, `--qp-face-w/h`, `--qp-scene-w/h`). `style.css` yalnız `var(--…)`
+okur: renk de uzunluk da taşımaz; mimari sınaması (`arch-check.mjs`, R7) px/rem/em/ms ve
+çıplak sayıyı reddeder. İstisnalar gerekçeli: `0`, `100%`, `100vh/vw`, `z-index`, `flex`
+ve iki `@media` genişliği (medya sorgusu özel özellik okuyamaz).
 
 **Yeni görünüş ekleme (M16 alt ajanları için tarif):**
 
@@ -304,23 +321,34 @@ rolün yazı tipini ve renk rollerini `qp look show <ad>`'dan okur.
    (`OFL.txt` ya da eşdeğeri; aile başına ayrı adla, ör. `OFL-Inter.txt`)
    `crates/qp-render/assets/fonts/`'a koy; `look::FONTS`'a bir `FontAsset` satırı
    (kimlik, aile, ağırlık, dosya, lisans, SPDX, `css_family` benzersiz, ölçülmüş ortalama
-   `advance` ve `ascent`), `qp_render::fonts::FILES`'a aynı sırayla bir `include_bytes!`
-   satırı ekle; `cargo test -p qp-render --test fonts` iki listenin, dosyanın, lisansın ve
-   Türkçe harflerin tuttuğunu sınar. Ayrılmış yazı tipi adı (RFN; Plex, Source Sans 3)
+   `advance` ve `ascent`, `advances: &crate::advances::<KİMLİK_BÜYÜK>`),
+   `qp_render::fonts::FILES`'a aynı sırayla bir `include_bytes!` satırı ekle; ilerleme
+   tablosunu üret: `QP_BLESS=1 cargo test -p qp-render --test fonts` (`advances.rs`'i
+   yazar); aynı sınama `QP_BLESS`'siz iki listenin, dosyanın, lisansın, Türkçe harflerin ve
+   tablonun dosyayla tuttuğunu sınar. Ayrılmış yazı tipi adı (RFN; Plex, Source Sans 3)
    taşıyan bir dosyanın **alt kümesi alınırsa aile yeniden adlandırılmalıdır**. Paket
    boyutu: her dosya WASM paketine aynen girer (`plex-mono` 135 580 bayt); `verify.sh`
    `wasm` adımının boyut notunda önce/sonra yaz.
-4. Gösterimde `?look=<ad>` ya da Ayarlar → Görünüş; `qp look show <ad>` kaydı yazar.
-5. `r4` altınları değişmemeli (`scripts/verify.sh`); yeni görünüş için altın eklenmez
+4. Sert eşikler kayıttan tutturulur (`ornek` örnek; `look::tests::ornek_meets_the_hard_thresholds`):
+   en küçük yazı (`types` rolleri ve `chrome` boyları), dokunma hedefi (`chrome.tab_h`,
+   `chrome.control_h` ≥ 44; `bar_h` bir denetimi alacak kadar), kapanmış işaret
+   (`closed` + `closed_alpha`, ≥ 3:1), kanıt yazısı (`warn` ya da `evidence.note_color`
+   rolü; kabukta `chrome.req`).
+5. Gösterimde `?look=<ad>` ya da Ayarlar → Görünüş; `qp look show <ad>` kaydı yazar.
+6. `r4` altınları değişmemeli (`scripts/verify.sh`); yeni görünüş için altın eklenmez
    (round'un `v2` kararı ayrı).
 
-**Kayıt dışında kalanlar** (bilinen): derleyicinin küçük yerleşim ofsetleri (başlık
-taban çizgisi 23, kapanış metni x+140, etiket ofsetleri, ay etiketi aralığı 72 px), mum
-gövdesi oranı, kanıt noktası çapı (9 px), işaret alfabelerinin iç oranları, `tavrik` ve
-`fotolay` yüzlerinin kendi boyları (elenen M8 tasarımları; renkleri görünüşten), geçiş
-tasarımlarının kendi süreleri (görünüş yalnız çarpar) ve `tutamir`'in iğne boyu, grafik
-derinliğindeki işaret boyu (sunum görünümü protokolde taşındığı için `r4`), kabuğun
-yazı boyları ve iç boşlukları.
+**Kayıt dışında kalanlar** (bilinen, T3b sonrası): eksen etiketlerinin iç ofsetleri ve
+ay etiketi aralığı (72 px), son değer etiketinin iç boşluğu, mum gövdesi oranı,
+işaret alfabelerinin iç oranları ve tazelik eğrisi (`siluet` 0,3 + 0,7·tazelik, `rozet`
+0,22 + 0,78·tazelik; kapanmışın tabanı `closed_alpha`), `tavrik` ve `fotolay` yüzlerinin
+kendi boyları (elenen M8 tasarımları; renkleri görünüşten), geçiş tasarımlarının kendi
+süreleri (görünüş yalnız çarpar) ve `tutamir`'in iğne boyu, **grafik derinliğinin
+görünümü**: oturum grafik görünümünü `depth::chart_view` ile (yani `r4` kaydıyla) kurar
+(`qp-session` `viewer.rs`), bu yüzden `glyph.chart_px`, `evidence` ve kanıt notu
+ofsetleri ürünün grafik derinliğinde henüz `r4` değerindedir (renk rolleri ve başlık
+satırı ofsetleri derlemede bağlantının görünüşünden okunur); kabuğun yapısal değerleri
+(`z-index`, `flex`, `@media` genişlikleri) ve telefon çerçevesi boyu (yüzey `390×844`).
 
 ## 10. Köken (`Origin`)
 

@@ -1,0 +1,120 @@
+{
+ "cfg": {
+  "name": "phone",
+  "engine": "chromium",
+  "dpr": 3,
+  "rate": 1,
+  "bg": false,
+  "viewport": {
+   "width": 402,
+   "height": 874
+  },
+  "web": "/Users/arkns/Works/Mchart/qapsule/.claude/worktrees/agent-a6d0c8cec64bef193/rounds/RP3/experiments/T1/web-base"
+ },
+ "browser": "151.0.7922.34",
+ "load_before": "50.01 29.58 24.21",
+ "load_after": "45.81 37.41 28.07",
+ "failed": 0,
+ "summary": {
+  "open_ms": {
+   "wasm_ready": 22.6,
+   "first_capsule": 164.2
+  },
+  "feed": {
+   "tick": {
+    "n": 32,
+    "p50": 1.2,
+    "p95": 10.6
+   },
+   "face": {
+    "n": 65,
+    "p50": 2.4,
+    "p95": 2.9
+   },
+   "frame_idle": {
+    "n": 483,
+    "p50": 8.3,
+    "p95": 9.2,
+    "p99": 9.3
+   },
+   "frame_scroll": {
+    "n": 480,
+    "p50": 8.3,
+    "p95": 9.2,
+    "p99": 9.3
+   }
+  },
+  "chart": {
+   "tick": {
+    "n": 79,
+    "p50": 1,
+    "p95": 4.4
+   },
+   "scene": {
+    "n": 20,
+    "p50": 3.4,
+    "p95": 3.9
+   },
+   "face": {
+    "n": null,
+    "p50": null,
+    "p95": null
+   },
+   "frame_idle": {
+    "n": 2400,
+    "p50": 8.3,
+    "p95": 9.1,
+    "p99": 9.3
+   }
+  },
+  "cal": {
+   "tick": {
+    "n": 79,
+    "p50": 1,
+    "p95": 4.4
+   },
+   "face": {
+    "n": 65,
+    "p50": 2.4,
+    "p95": 2.9
+   },
+   "scene": {
+    "n": 20,
+    "p50": 3.4,
+    "p95": 3.9
+   }
+  },
+  "wasm_mb": 64.125,
+  "scene_px": [
+   1170,
+   900
+  ],
+  "scale": 3,
+  "depth": [
+   "chart",
+   "chart",
+   "chart"
+  ],
+  "capsule": [
+   "cap.SYN16.breakout.up.200",
+   "cap.SYN16.breakout.up.200",
+   "cap.SYN16.breakout.up.200"
+  ],
+  "scenes_per_tick": 0.25316455696202533,
+  "errors": []
+ },
+ "residuals": {
+  "tick": {
+   "p50": 0.013513513513513514,
+   "p95": 0.03728813559322034
+  },
+  "face": {
+   "p50": 0.075,
+   "p95": 0.04027777777777777
+  },
+  "scene": {
+   "p50": 0.04788732394366197,
+   "p95": 0.042391304347826085
+  }
+ }
+}

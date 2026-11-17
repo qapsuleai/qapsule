@@ -1,0 +1,14 @@
+{
+ "broken": "kestim",
+ "checks": {
+  "last_on_bt": true,
+  "last_on_primary": true,
+  "last_on_reading_info": false,
+  "primary_below_best_interval": true
+ },
+ "required": [
+  "last_on_primary",
+  "last_on_bt"
+ ],
+ "valid": true
+}

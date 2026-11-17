@@ -1,0 +1,482 @@
+{
+ "03ce31e90c": {
+  "A": "fotolay",
+  "B": "vadrel",
+  "order": 0,
+  "pair": [
+   "fotolay",
+   "vadrel"
+  ],
+  "state": "no_record"
+ },
+ "0738bc82f4": {
+  "A": "kestim",
+  "B": "vadrel",
+  "order": 0,
+  "pair": [
+   "kestim",
+   "vadrel"
+  ],
+  "state": "no_record"
+ },
+ "0ca3a34d33": {
+  "A": "fotolay",
+  "B": "vadrel",
+  "order": 0,
+  "pair": [
+   "fotolay",
+   "vadrel"
+  ],
+  "state": "closed_failed"
+ },
+ "0dcf8e26fb": {
+  "A": "kestim",
+  "B": "vadrel",
+  "order": 0,
+  "pair": [
+   "kestim",
+   "vadrel"
+  ],
+  "state": "live_event"
+ },
+ "16705cc3ec": {
+  "A": "vadrel",
+  "B": "kestim",
+  "order": 1,
+  "pair": [
+   "kestim",
+   "vadrel"
+  ],
+  "state": "live_event"
+ },
+ "18493bb6ee": {
+  "A": "fotolay",
+  "B": "kestim",
+  "order": 0,
+  "pair": [
+   "fotolay",
+   "kestim"
+  ],
+  "state": "live_event"
+ },
+ "18c705ccd6": {
+  "A": "vadrel",
+  "B": "kestim",
+  "order": 1,
+  "pair": [
+   "kestim",
+   "vadrel"
+  ],
+  "state": "visitor"
+ },
+ "1e7ab43a8b": {
+  "A": "vadrel",
+  "B": "kestim",
+  "order": 1,
+  "pair": [
+   "kestim",
+   "vadrel"
+  ],
+  "state": "closed_failed"
+ },
+ "201b89eefe": {
+  "A": "vadrel",
+  "B": "kestim",
+  "order": 1,
+  "pair": [
+   "kestim",
+   "vadrel"
+  ],
+  "state": "state_live"
+ },
+ "227dfd8ba5": {
+  "A": "kestim",
+  "B": "vadrel",
+  "order": 0,
+  "pair": [
+   "kestim",
+   "vadrel"
+  ],
+  "state": "closed_failed"
+ },
+ "268502582b": {
+  "A": "kestim",
+  "B": "vadrel",
+  "order": 0,
+  "pair": [
+   "kestim",
+   "vadrel"
+  ],
+  "state": "closed_realized"
+ },
+ "29ef839fb3": {
+  "A": "vadrel",
+  "B": "fotolay",
+  "order": 1,
+  "pair": [
+   "fotolay",
+   "vadrel"
+  ],
+  "state": "few_cases"
+ },
+ "354717c138": {
+  "A": "kestim",
+  "B": "fotolay",
+  "order": 1,
+  "pair": [
+   "fotolay",
+   "kestim"
+  ],
+  "state": "live_event"
+ },
+ "38c04f456f": {
+  "A": "kestim",
+  "B": "vadrel",
+  "order": 0,
+  "pair": [
+   "kestim",
+   "vadrel"
+  ],
+  "state": "visitor"
+ },
+ "3de75ec42b": {
+  "A": "fotolay",
+  "B": "kestim",
+  "order": 0,
+  "pair": [
+   "fotolay",
+   "kestim"
+  ],
+  "state": "closed_realized"
+ },
+ "3fa5eefac8": {
+  "A": "fotolay",
+  "B": "kestim",
+  "order": 0,
+  "pair": [
+   "fotolay",
+   "kestim"
+  ],
+  "state": "no_record"
+ },
+ "4b03d21cbe": {
+  "A": "kestim",
+  "B": "vadrel",
+  "order": 0,
+  "pair": [
+   "kestim",
+   "vadrel"
+  ],
+  "state": "state_live"
+ },
+ "51c4f94ae0": {
+  "A": "kestim",
+  "B": "fotolay",
+  "order": 1,
+  "pair": [
+   "fotolay",
+   "kestim"
+  ],
+  "state": "no_longer"
+ },
+ "5505c4de71": {
+  "A": "fotolay",
+  "B": "kestim",
+  "order": 0,
+  "pair": [
+   "fotolay",
+   "kestim"
+  ],
+  "state": "state_live"
+ },
+ "58b5e95a1e": {
+  "A": "kestim",
+  "B": "fotolay",
+  "order": 1,
+  "pair": [
+   "fotolay",
+   "kestim"
+  ],
+  "state": "closed_realized"
+ },
+ "5cb504b3f9": {
+  "A": "vadrel",
+  "B": "kestim",
+  "order": 1,
+  "pair": [
+   "kestim",
+   "vadrel"
+  ],
+  "state": "no_longer"
+ },
+ "6ced2945aa": {
+  "A": "kestim",
+  "B": "fotolay",
+  "order": 1,
+  "pair": [
+   "fotolay",
+   "kestim"
+  ],
+  "state": "few_cases"
+ },
+ "6fd0822f7e": {
+  "A": "fotolay",
+  "B": "kestim",
+  "order": 0,
+  "pair": [
+   "fotolay",
+   "kestim"
+  ],
+  "state": "few_cases"
+ },
+ "7578ba65fe": {
+  "A": "kestim",
+  "B": "vadrel",
+  "order": 0,
+  "pair": [
+   "kestim",
+   "vadrel"
+  ],
+  "state": "few_cases"
+ },
+ "76f4092df6": {
+  "A": "kestim",
+  "B": "vadrel",
+  "order": 0,
+  "pair": [
+   "kestim",
+   "vadrel"
+  ],
+  "state": "no_longer"
+ },
+ "779691f74e": {
+  "A": "vadrel",
+  "B": "fotolay",
+  "order": 1,
+  "pair": [
+   "fotolay",
+   "vadrel"
+  ],
+  "state": "closed_realized"
+ },
+ "81fa7c54d2": {
+  "A": "vadrel",
+  "B": "fotolay",
+  "order": 1,
+  "pair": [
+   "fotolay",
+   "vadrel"
+  ],
+  "state": "closed_failed"
+ },
+ "8380126867": {
+  "A": "fotolay",
+  "B": "vadrel",
+  "order": 0,
+  "pair": [
+   "fotolay",
+   "vadrel"
+  ],
+  "state": "no_longer"
+ },
+ "85f2ddc0a5": {
+  "A": "fotolay",
+  "B": "kestim",
+  "order": 0,
+  "pair": [
+   "fotolay",
+   "kestim"
+  ],
+  "state": "no_longer"
+ },
+ "91a40ea2c4": {
+  "A": "kestim",
+  "B": "fotolay",
+  "order": 1,
+  "pair": [
+   "fotolay",
+   "kestim"
+  ],
+  "state": "no_record"
+ },
+ "9a35e389c9": {
+  "A": "vadrel",
+  "B": "fotolay",
+  "order": 1,
+  "pair": [
+   "fotolay",
+   "vadrel"
+  ],
+  "state": "no_record"
+ },
+ "9bc5fa0c5d": {
+  "A": "vadrel",
+  "B": "fotolay",
+  "order": 1,
+  "pair": [
+   "fotolay",
+   "vadrel"
+  ],
+  "state": "state_live"
+ },
+ "a8c6121155": {
+  "A": "fotolay",
+  "B": "vadrel",
+  "order": 0,
+  "pair": [
+   "fotolay",
+   "vadrel"
+  ],
+  "state": "closed_realized"
+ },
+ "aa705e9aca": {
+  "A": "kestim",
+  "B": "fotolay",
+  "order": 1,
+  "pair": [
+   "fotolay",
+   "kestim"
+  ],
+  "state": "visitor"
+ },
+ "b74d9937ff": {
+  "A": "fotolay",
+  "B": "kestim",
+  "order": 0,
+  "pair": [
+   "fotolay",
+   "kestim"
+  ],
+  "state": "closed_failed"
+ },
+ "b79bdbb455": {
+  "A": "vadrel",
+  "B": "kestim",
+  "order": 1,
+  "pair": [
+   "kestim",
+   "vadrel"
+  ],
+  "state": "no_record"
+ },
+ "cbf8794d44": {
+  "A": "fotolay",
+  "B": "vadrel",
+  "order": 0,
+  "pair": [
+   "fotolay",
+   "vadrel"
+  ],
+  "state": "state_live"
+ },
+ "d3a6343a8a": {
+  "A": "fotolay",
+  "B": "kestim",
+  "order": 0,
+  "pair": [
+   "fotolay",
+   "kestim"
+  ],
+  "state": "visitor"
+ },
+ "d72e0a5283": {
+  "A": "vadrel",
+  "B": "fotolay",
+  "order": 1,
+  "pair": [
+   "fotolay",
+   "vadrel"
+  ],
+  "state": "no_longer"
+ },
+ "d7788334aa": {
+  "A": "vadrel",
+  "B": "kestim",
+  "order": 1,
+  "pair": [
+   "kestim",
+   "vadrel"
+  ],
+  "state": "closed_realized"
+ },
+ "da3622ac3f": {
+  "A": "vadrel",
+  "B": "fotolay",
+  "order": 1,
+  "pair": [
+   "fotolay",
+   "vadrel"
+  ],
+  "state": "visitor"
+ },
+ "dad9cb9a2a": {
+  "A": "fotolay",
+  "B": "vadrel",
+  "order": 0,
+  "pair": [
+   "fotolay",
+   "vadrel"
+  ],
+  "state": "few_cases"
+ },
+ "e28f7cb33a": {
+  "A": "vadrel",
+  "B": "kestim",
+  "order": 1,
+  "pair": [
+   "kestim",
+   "vadrel"
+  ],
+  "state": "few_cases"
+ },
+ "e9cf33a3e3": {
+  "A": "kestim",
+  "B": "fotolay",
+  "order": 1,
+  "pair": [
+   "fotolay",
+   "kestim"
+  ],
+  "state": "state_live"
+ },
+ "eca1a95423": {
+  "A": "fotolay",
+  "B": "vadrel",
+  "order": 0,
+  "pair": [
+   "fotolay",
+   "vadrel"
+  ],
+  "state": "visitor"
+ },
+ "ed329a373a": {
+  "A": "vadrel",
+  "B": "fotolay",
+  "order": 1,
+  "pair": [
+   "fotolay",
+   "vadrel"
+  ],
+  "state": "live_event"
+ },
+ "efa307dd93": {
+  "A": "fotolay",
+  "B": "vadrel",
+  "order": 0,
+  "pair": [
+   "fotolay",
+   "vadrel"
+  ],
+  "state": "live_event"
+ },
+ "f9a67ec65a": {
+  "A": "kestim",
+  "B": "fotolay",
+  "order": 1,
+  "pair": [
+   "fotolay",
+   "kestim"
+  ],
+  "state": "closed_failed"
+ }
+}

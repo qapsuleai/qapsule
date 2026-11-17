@@ -1,0 +1,48 @@
+{
+ "what": "throttle sigma calibration (SPEC §G3): haiku transcribes the top card sentence of the throttle copy (0.5x after Gaussian blur sigma at 402 px); similarity = difflib ratio to the true sentence. Reference designs only, before any alternative.",
+ "model": "claude-haiku-5-5",
+ "runs": [
+  {
+   "sigma": 2.5,
+   "design": "vadrel",
+   "text": "SYN04 önemli bir eşiğin üstüne çıktı; 2 işlem günü önce güçlendi. Hâlâ geçerli.",
+   "similarity": 0.987,
+   "cost": 0.00058008
+  },
+  {
+   "sigma": 2.5,
+   "design": "fotolay",
+   "text": "Yukarı kırılım, 2 işlem günü önce: ? geçmiş.",
+   "similarity": 0.689,
+   "cost": 0.0006904400000000001
+  },
+  {
+   "sigma": 3.5,
+   "design": "vadrel",
+   "text": "SYN06 önemli bir eşiğin üstüne çıktı; 2 işlem günü önce gözlendi.",
+   "similarity": 0.875,
+   "cost": 0.0007552
+  },
+  {
+   "sigma": 3.5,
+   "design": "fotolay",
+   "text": "Yakın kurulum, 2 işlem günü önce: ? ? ? ? ?",
+   "similarity": 0.542,
+   "cost": 0.00059868
+  },
+  {
+   "sigma": 4.5,
+   "design": "vadrel",
+   "text": "SYMBOL ? ? ? ? ? ? ? ? ? ? ? ?",
+   "similarity": 0.183,
+   "cost": 0.00060958
+  },
+  {
+   "sigma": 4.5,
+   "design": "fotolay",
+   "text": "Yabancı hisse, 2 işlem günü ? ? ? ? ? ? ? ?",
+   "similarity": 0.424,
+   "cost": 0.0005900300000000001
+  }
+ ]
+}

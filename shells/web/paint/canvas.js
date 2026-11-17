@@ -28,13 +28,13 @@ const INIT = 17;
 const GLYPH = 18;
 const ATLAS = 19;
 
-// The canvases are opaque (every scene paints its opaque background first).
-const EXP = new URLSearchParams(location.search);
-const OPTIONS = { alpha: EXP.get('cx_alpha') === '1', desynchronized: EXP.get('cx_desync') === '1' };
-const TR = EXP.get('cx_tr');
+// The canvases are opaque (every scene paints its opaque background first). Measured
+// (M12b.md): `alpha: true` and `textRendering` did not change the pixels, `desynchronized:
+// true` did not change the timings (headless Chromium, WebKit), so they are left out.
+const OPTIONS = { alpha: false };
 // Diagnostic: `?cx_sync=1` reads one pixel back after each paint, so the measured span
 // includes the browser's rasterisation (otherwise it covers recording the calls only).
-const SYNC = EXP.get('cx_sync') === '1';
+const SYNC = new URLSearchParams(location.search).get('cx_sync') === '1';
 
 let core = null;
 let env = null;
@@ -49,7 +49,6 @@ function context(canvas) {
   let c = contexts.get(canvas);
   if (!c) {
     c = canvas.getContext('2d', OPTIONS);
-    if (TR) c.textRendering = TR;
     contexts.set(canvas, c);
   }
   return c;
@@ -59,7 +58,10 @@ function context(canvas) {
 function atlasRows(w, h, y0, rows) {
   if (!atlas) {
     atlas = document.createElement('canvas');
-    atlasCtx = atlas.getContext('2d');
+    // A CPU-backed atlas (`willReadFrequently`): with the default (GPU) atlas, headless
+    // WebKit now and then drew glyphs uploaded in the same paint with red and blue
+    // swapped (M12b.md, "WebKit renk takası").
+    atlasCtx = atlas.getContext('2d', { willReadFrequently: true });
   }
   if (atlas.width !== w) atlas.width = w;
   if (atlas.height !== h) atlas.height = h;

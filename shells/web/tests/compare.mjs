@@ -16,6 +16,7 @@
 //   --throttle  (RP3/M12b) Chromium CPU throttling rate (CDP Emulation.setCPUThrottlingRate)
 //   --viewport  (RP3/M12b) the page size in CSS px
 //   --q         (RP3/M12b) extra query parameters for the page (e.g. `canvas=full`)
+//   --jsc       (RP3/M12b) WebKit JavaScriptCore options, e.g. `useJIT=false` (T1's PHONE)
 import fs from 'node:fs';
 import path from 'node:path';
 import { chromium, webkit } from 'playwright';
@@ -33,6 +34,7 @@ const throttle = Number(opt('--throttle', '1'));
 const [vw, vh] = opt('--viewport', '390x844').split('x').map(Number);
 const port0 = Number(opt('--port', '8420'));
 const extraQ = opt('--q', '');
+const jsc = opt('--jsc', '');
 const here = new URL('..', import.meta.url).pathname;
 const ENGINES = { chromium, webkit };
 const LIMIT_MS = 180000;
@@ -55,7 +57,11 @@ let failed = 0;
 for (const [k, name] of browsers.entries()) {
   const { child, base: b } = await startDemo(qp, here, port0 + k);
   const base = b.replace('localhost', '127.0.0.1');
-  const browser = await ENGINES[name].launch();
+  // (RP3/M12b) WebKit JavaScriptCore options reach the WebContent process only as
+  // __XPC_JSC_* variables (RP3/T1, calibrate.mjs): `--jsc useJIT=false` = T1's PHONE setting.
+  const env = { ...process.env };
+  for (const [k, v] of new URLSearchParams(jsc.split(',').join('&'))) if (k) env[`__XPC_JSC_${k}`] = v;
+  const browser = await ENGINES[name].launch(name === 'webkit' ? { env } : {});
   try {
     await fallback(browser, base, 'paint=nope', { requested: 'nope', used: 'ref', fallback: 'unknown' });
     await fallback(browser, base, 'paint=fixture', { requested: 'fixture', used: 'ref', fallback: 'unsupported' });

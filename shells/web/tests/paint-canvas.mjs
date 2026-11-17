@@ -76,7 +76,11 @@ function png(w, h, rgba) {
     chunk('IDAT', zlib.deflateSync(raw)), chunk('IEND', Buffer.alloc(0))]);
 }
 
-async function openShot(browser, base, s, paint, cv) {
+// `o`: `at` (replay step, default 120), `openId` (the capsule to open instead of the
+// first), `then` (a step to seek to after opening, no forced repaint afterwards: what
+// changed is painted as the page paints it), `ids` (the face ids to read instead of the
+// shot's feed positions).
+async function openShot(browser, base, s, paint, cv, o = {}) {
   const ctx = await browser.newContext({ viewport: { width: 390, height: 844 }, deviceScaleFactor: dpr });
   const page = await ctx.newPage();
   const errors = [];
@@ -89,29 +93,40 @@ async function openShot(browser, base, s, paint, cv) {
   for (const [k, v] of Object.entries(s.look || {})) q.set(k, v);
   await page.goto(`${base}/?${q}`);
   await settle(page);
-  await page.fill('#c_date', '120');
+  await page.fill('#c_date', o.at || '120');
   await page.click('#c_go');
   await settle(page);
+  // the canvas path paints after its font is in
+  await page.waitForTimeout(150);
+  await settle(page);
+  let opened = null;
   if (s.open) {
-    const first = await page.evaluate(() => JSON.parse(window.qp.feed())[0]);
-    await clickIn(page, `#list .face[data-id="${first.id}"] canvas`, 120, 60);
+    opened = o.openId || (await page.evaluate(() => JSON.parse(window.qp.feed())[0])).id;
+    await clickIn(page, `#list .face[data-id="${opened}"] canvas`, 120, 60);
     await settle(page);
     if (s.open === 'chart') {
       await clickIn(page, '#scene', 195, 150);
       await settle(page);
     }
   }
-  await page.evaluate(() => { document.activeElement && document.activeElement.blur(); window.qp.repaint(); });
-  await settle(page);
-  // the canvas path paints after its font is in
-  await page.waitForTimeout(150);
-  await settle(page);
+  if (o.then) {
+    await page.fill('#c_date', o.then);
+    await page.click('#c_go');
+    await settle(page);
+    await page.waitForTimeout(300);
+    await settle(page);
+  } else {
+    await page.evaluate(() => { document.activeElement && document.activeElement.blur(); window.qp.repaint(); });
+    await settle(page);
+  }
   const feed = (await page.evaluate(() => JSON.parse(window.qp.feed()))).filter((r) => r.id);
   const closed = feed.filter((r) => r.closed && r.scene).map((r) => r.id);
   const images = {};
+  const ids = {};
   for (const c of s.canvases) {
     const [kind, i] = c.split('-');
-    const id = c === 'scene' ? 'scene' : kind === 'closed' ? closed[Number(i)] : feed[Number(i)].id;
+    const id = o.ids ? o.ids[c] : c === 'scene' ? 'scene' : kind === 'closed' ? closed[Number(i)] : feed[Number(i)].id;
+    ids[c] = id;
     images[c] = await page.evaluate((id) => {
       const el = id === 'scene' ? document.getElementById('scene') : document.querySelector(`#list .face[data-id="${id}"] canvas`);
       const d = el.getContext('2d').getImageData(0, 0, el.width, el.height).data;
@@ -124,8 +139,10 @@ async function openShot(browser, base, s, paint, cv) {
   // many feed queries go out depends on timing; measured).
   const reads = await page.evaluate(() => JSON.stringify([window.qp.digests(), window.qp.feed(), window.qp.open()]));
   const used = await page.evaluate(() => window.qp.paintUsed());
+  const m = JSON.parse(await page.evaluate(() => window.qp.metrics()));
+  const partial = (m.span_ms.canvas_part && m.span_ms.canvas_part.n) || 0;
   await ctx.close();
-  return { images, reads, used, errors };
+  return { images, reads, used, errors, ids, opened, partial };
 }
 
 function compare(a, b, t) {
@@ -220,6 +237,29 @@ for (const [k, name] of browsers.entries()) {
         }
       }
     }
+    // A partial repaint (only the changed region, clipped) must give the same pixels as
+    // painting the whole canvas: two pages go through the same steps (open at 120, seek to
+    // 121), one with partial repaints (default), one with `?canvas=full`. (A page opened
+    // directly at 121 is not the same state: a just-changed text is still emphasised.)
+    let parts = 0;
+    for (const s of SHOTS.filter((x) => x.name === 'feed-tr-dark' || x.name === 'chart-tr-dark' || x.name === 'feed-tr-dark-r4')) {
+      if (only && s.name !== only) continue;
+      const a = await openShot(browser, base, s, 'canvas', variant, { then: '121' });
+      const b = await openShot(browser, base, s, 'canvas', variant ? `${variant},full` : 'full', { then: '121', openId: a.opened, ids: a.ids });
+      parts += a.partial;
+      for (const cv of s.canvases) {
+        const same = a.images[cv].b64 === b.images[cv].b64;
+        console.log(`  ${name} partial ${s.name}.${cv}: ${same ? 'same pixels as a whole repaint' : 'DIFFERS from a whole repaint'}`);
+        if (!same) {
+          failed++;
+          if (out) {
+            fs.mkdirSync(out, { recursive: true });
+            for (const [tag, x] of [["partial", a], ["whole", b]]) fs.writeFileSync(path.join(out, `${name}-${s.name}.${cv}.${tag}.png`), png(x.images[cv].w, x.images[cv].h, Buffer.from(x.images[cv].b64, "base64")));
+          }
+        }
+      }
+    }
+    console.log(`  ${name} partial repaints in those pages: ${parts}`);
   } catch (e) {
     console.error(String(e && e.stack || e));
     failed++;

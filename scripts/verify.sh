@@ -29,7 +29,11 @@
 #  15 replica    authority <-> replica (RP2/T8, PROTOCOL §19.6): `qp replica-tape` with the
 #                replica's data in step (digests equal after every step) and 25 events
 #                behind (no wrong or early claim); the tapes replayed by the WASM replica in
-#                Node reproduce every digest (same tool rule as the browser step)
+#                Node reproduce every digest (same tool rule as the browser step); (RP3/M14)
+#                the viewer variant (`qp replica-tape --viewer`, PROTOCOL §22) at lag 0 and
+#                25: 0 violations, every final claim shown final at the end, never subscribed
+#                to the other instrument, and at lag 0 the open slice's digests equal the
+#                authority's after every step
 #  16 replay     R4/T2 (PROTOCOL §21): `qp replay` (synthetic market, 30 instruments, hourly
 #                path, recorded controls with a forward and a backward seek) twice: the two
 #                line streams are byte-identical, no host notice was raised, no error line,
@@ -439,18 +443,22 @@ step_replica() {
   mkdir -p "$d"
   "$qp" replica-tape --lag 0 --out "$d/tape0.json" || fail "replica in step: digests differ or a claim is wrong"
   "$qp" replica-tape --lag 25 --out "$d/tape25.json" || fail "lagging replica: a wrong or early claim"
+  "$qp" replica-tape --viewer --lag 0 --out "$d/viewer0.json" \
+    || fail "viewer in step: a violation, a digest differs or a final claim is not shown"
+  "$qp" replica-tape --viewer --lag 25 --out "$d/viewer25.json" \
+    || fail "lagging viewer: a wrong or early claim, or a final claim not shown"
   command -v node >/dev/null 2>&1 || have_tools=0
   if ! command -v wasm-pack >/dev/null 2>&1 && [ ! -x "$HOME/.cargo/bin/wasm-pack" ]; then have_tools=0; fi
   if [ "$mode" = 0 ] || { [ "$mode" != 1 ] && [ "$have_tools" = 0 ]; }; then
     echo "wasm32 replica: skipped (QP_VERIFY_BROWSER=${mode:-unset}, tools: $have_tools)"
-    note "native authority = native replica (lag 0, 25); wasm32 skipped"
+    note "native authority = native replica (lag 0, 25), viewer (lag 0, 25); wasm32 skipped"
     return 0
   fi
   wp="$(command -v wasm-pack || echo "$HOME/.cargo/bin/wasm-pack")"
   "$wp" build crates/qp-wasm --target nodejs --profile wasm --no-opt --out-dir "$pkg" -- --features replica
   node crates/qp-wasm/tests/replica_tape.mjs "$pkg" "$d/tape0.json" "$d/tape25.json" \
     || fail "wasm32 replica digests differ from native"
-  note "native authority = native replica = wasm32 replica (lag 0, 25)"
+  note "native authority = native replica = wasm32 replica (lag 0, 25); viewer (lag 0, 25)"
 }
 
 step_shell() {

@@ -48,6 +48,17 @@ satır; boyama yolu bağlamında ayrıca bir takım) yakalanmazsa adım düşer.
 | `font()` | Başvuru çizicinin gömülü yazı tipi dosyası (IBM Plex Mono, OFL): tuvalle metin çizen yol aynı dosyayı `FontFace` ile kaydeder (yazı tipi farkı görsel farkın ana kaynağı olmasın; ağ isteği yok, R1). |
 | `bench_start(cfg, t)`, `bench_tick(t, scrollHeight, clientHeight)`, `bench_rows()`, `bench_summary()` | Otomatik karşılaştırma (GOAL 8): senaryo sürücüsü (zamanlama, kaydırma konumu, yapay sürükleme, oynatma denetimi, istatistik, tablo metni) çekirdekte; kabuk dönen eylemleri olduğu gibi uygular. Kaydırma sınırı için `scrollHeight`/`clientHeight` ham verilir; çıkarma çekirdekte. |
 
+(RP3/M14) Eklenenler ve gerekçeleri (ölçüt 6: kare başına en çok bir boyama, görünmeyeni boyamamak):
+
+| Yöntem | Neden |
+|--------|-------|
+| `on_frame(metin, t)` (ikinci değişken eklendi) | Çerçeve hemen çekirdeğe uygulanır; değişiklik bayrakları **çekirdekte** birikir (kabukta birleştirme yok). `t` ham varış zamanı: `connected` işareti ve "çerçeveden boyamaya" gecikmesi çekirdekte hesaplanır. |
+| `take_changes()`, `has_changes()` | Animasyon karesi başına tek boyama geçişi: kabuk birikmiş değişiklikleri alır ve bir kez boyar (boşsa hiç). `has_changes` sınama düzeneğinin `ready()`'si içindir: boyama bekliyorken sayfa hazır sayılmaz. |
+| `metric_pass(t0, t1)` | Boyama geçişinin süresi (`paint_pass`), sayacı ve gecikme (`frame_to_paint`); kabuk yalnız ham zaman damgası verir. |
+| `faces_to_paint()` | Hangi yüzün yeniden boyanacağı çekirdeğin kararıdır: ekrandakiler (`visible`), açık katman akışı örterken hiçbiri; atlananlar çekirdekte sayılır. |
+| `metric_flag(ad, açık)` | Sayfanın kipi özetle birlikte: `isSecureContext`, `navigator.gpu` var mı (iOS'ta güvenli olmayan bağlamda JIT ve WebGPU yok). Değer olduğu gibi verilir. |
+| `jit_probe()` | Sabit, belirlenimci bir WASM döngüsü; kabuk bir çağrının iki yanını `metric_span('jit_probe', …)` ile verir, sınıflama (JIT açık/kapalı) ve uyarı çekirdekte. |
+
 Boyama yolları (`paint/*.js`) çekirdeğe `core` adıyla ve yalnız bu listeden erişir; boyama
 listesindeki ilkelleri verilen sırada, verilen sayılarla boyar; yerleşim, metin kurma,
 sıralama yapmaz (sözleşme: `paint/README.md`). `paint/fixture.js` bir sınama demirbaşıdır

@@ -14,7 +14,7 @@
 //! ([`face_scene`], [`open_scene`]) are what both the shell and the shell-less driver
 //! digest (`docs/PROTOCOL.md` §19.6 `view_digest`).
 
-use std::collections::{BTreeMap, VecDeque};
+use std::collections::{BTreeMap, BTreeSet, VecDeque};
 
 use qp_schema::data::DataEvent;
 use qp_schema::protocol::{
@@ -27,6 +27,7 @@ use serde_json::{json, Value};
 
 use crate::viewer::{Traffic, Viewer};
 pub mod bench;
+pub mod freq;
 pub mod paint;
 
 /// Face frame height of the default face design (`r3`, 240 CSS px). (R4/H-M8910) The
@@ -386,6 +387,13 @@ struct Metrics {
     paint: Option<Value>,
     /// (RP3/T2) The automatic comparison (`bench`), when one runs or ran.
     bench: Option<bench::Bench>,
+    /// (RP3/M14) Event counters (`data_frames`, `msg_frames`, `paint_passes`,
+    /// `faces_skipped_hidden`); restart with the series.
+    counts: BTreeMap<String, u64>,
+    /// (RP3/M14) The JIT probe's time (ms; kept over a reset of the series).
+    probe: Option<f64>,
+    /// (RP3/M14) Page facts (`secure_context`, `webgpu`).
+    flags: BTreeMap<String, bool>,
 }
 
 /// The core of the web shell (see the module docs).
@@ -438,6 +446,13 @@ pub struct ShellCore {
     traffic: Traffic,
     /// (RP3/M15) The log position of the last viewer event.
     viewer_seq: u64,
+    /// (RP3/M14) Changes waiting for the page's next paint pass, the arrival time of the
+    /// first of them, and that of the pass being painted.
+    pending: serde_json::Map<String, Value>,
+    pending_since: Option<f64>,
+    pass_since: Option<f64>,
+    /// (RP3/M14) The capsules whose face the page reports on screen (both modes).
+    shown: BTreeSet<String>,
 }
 
 impl std::fmt::Debug for ShellCore {
@@ -575,6 +590,10 @@ impl ShellCore {
             viewer: None,
             traffic: Traffic::default(),
             viewer_seq: 0,
+            pending: serde_json::Map::new(),
+            pending_since: None,
+            pass_since: None,
+            shown: BTreeSet::new(),
         };
         me.push(json!({"type":"hello","protocol":"qp/0","principal":principal,
             "surface":{"kind":"phone","screen":[390,844],"input":["touch"],"lang":lang_name(lang)}}));
@@ -615,6 +634,12 @@ impl ShellCore {
     /// (RP3/M15) The shell says capsule `id`'s face is (or is no longer) on screen: a
     /// viewer asks the authority for the faces on screen only.
     pub fn visible(&mut self, id: &str, on: bool) {
+        // (RP3/M14) Kept in both modes: the paint pass paints the faces on screen only.
+        if on {
+            self.shown.insert(id.to_owned());
+        } else {
+            self.shown.remove(id);
+        }
         if let Some(v) = self.viewer.as_mut() {
             v.visible(id, on);
         }
@@ -1014,8 +1039,7 @@ impl ShellCore {
                     for ev in evs {
                         self.data_event(ev);
                     }
-                    ch["scene"] = json!(true);
-                    ch["feed"] = json!(true);
+                    self.data_changed(&mut ch, evs.len());
                 }
                 if let Some(st) = f.replay {
                     self.set_replay(st);
@@ -1031,13 +1055,14 @@ impl ShellCore {
         }
         let mut ch = json!({});
         if let Some(evs) = v.get("data").and_then(Value::as_array) {
+            let mut n = 0;
             for e in evs {
                 if let Ok(ev) = serde_json::from_value::<DataEvent>(e.clone()) {
                     self.data_event(&ev);
+                    n += 1;
                 }
             }
-            ch["scene"] = json!(true);
-            ch["feed"] = json!(true);
+            self.data_changed(&mut ch, n);
         }
         if let Some(r) = v.get("replay") {
             if let Ok(st) = serde_json::from_value::<ReplayState>(r.clone()) {
@@ -1046,6 +1071,20 @@ impl ShellCore {
             }
         }
         Ok(ch)
+    }
+
+    /// (RP3/M14) What `n` data events applied by a data frame may have changed: nothing
+    /// when there were none (a frame that only carries the replay state); the open scene
+    /// (it reads the device's own data) and, in the full replica, the feed (its faces are
+    /// compiled from the replica's data; a viewer's faces come ready from the authority).
+    fn data_changed(&self, ch: &mut Value, n: usize) {
+        if n == 0 {
+            return;
+        }
+        ch["scene"] = json!(true);
+        if self.viewer.is_none() {
+            ch["feed"] = json!(true);
+        }
     }
 
     // --- what to show --------------------------------------------------------
@@ -1212,6 +1251,12 @@ impl ShellCore {
     /// The open capsule's scene.
     pub fn scene(&mut self) -> Option<SceneDesc> {
         let o = self.opening.clone()?;
+        // (RP3/M14) Builds of the open scene (unchanged ones = builds − scene paints).
+        *self
+            .metrics
+            .counts
+            .entry("scene_builds".to_owned())
+            .or_default() += 1;
         let look = self.look.clone();
         let mp = self.max_points;
         let head = self.open_headline.clone();
@@ -1854,6 +1899,11 @@ impl ShellCore {
 
     /// A timed span (`tick`, `face`, `scene`, …) from `t0` to `t1` ms.
     pub fn metric_span(&mut self, name: &str, t0: f64, t1: f64) {
+        // (RP3/M14) The JIT probe is a fact of the page, not a series: kept apart.
+        if name == "jit_probe" {
+            self.metrics.probe = Some(t1 - t0);
+            return;
+        }
         self.metrics
             .spans
             .entry(name.to_owned())
@@ -1936,6 +1986,7 @@ impl ShellCore {
     pub fn warnings(&self) -> Vec<Value> {
         let mut w = Vec::new();
         let Some(&dpr) = self.metrics.device.get("dpr") else {
+            w.extend(self.mode_warnings());
             return w;
         };
         if dpr < 1.0 {
@@ -1950,6 +2001,7 @@ impl ShellCore {
             w.push(json!({"code": "scale_differs",
                 "text": format!("paint scale {} differs from DPR {dpr:.3}: the browser resamples the scenes", self.scale)}));
         }
+        w.extend(self.mode_warnings());
         w
     }
 
@@ -2019,6 +2071,7 @@ impl ShellCore {
         m.frames.clear();
         m.gaps.clear();
         m.spans.clear();
+        m.counts.clear();
         m.last_frame = None;
     }
 
@@ -2052,6 +2105,8 @@ impl ShellCore {
             "open_repeats": m.repeats,
             "open_flags": self.open_flags(),
             "warnings": self.warnings(),
+            "mode": self.mode_json(),
+            "counts": self.counts_json(),
             "paint": m.paint,
             "bundle": m.bundle,
             "agent": m.agent,
@@ -2103,6 +2158,7 @@ impl ShellCore {
             };
             rows.push(json!(["paint", text]));
         }
+        rows.extend(self.mode_rows());
         let (refresh, source) = self.refresh();
         rows.push(json!([
             "refresh",

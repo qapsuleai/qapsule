@@ -361,6 +361,17 @@ pub const ORNEK: Look = Look {
         up: [96, 196, 128, 255],
         down: [240, 112, 96, 255],
         accent: [120, 180, 255, 255],
+        // `s1` is the accent (§9).
+        series: [
+            [120, 180, 255, 255],
+            Theme::DARK.series[1],
+            Theme::DARK.series[2],
+            Theme::DARK.series[3],
+            Theme::DARK.series[4],
+            Theme::DARK.series[5],
+            Theme::DARK.series[6],
+            Theme::DARK.series[7],
+        ],
         surface: [34, 29, 26, 255],
         line: [60, 52, 46, 255],
         neutral: [120, 180, 255, 255],
@@ -627,6 +638,16 @@ mod tests {
                 .all(|c| c.is_ascii_lowercase() || c.is_ascii_digit() || c == '_' || c == '-'));
             assert!(["dark", "light"].contains(&l.scheme), "{}", l.name);
             assert_eq!(l.dark.name, "dark");
+            assert_eq!(
+                l.dark.series[0], l.dark.accent,
+                "{}: s1 is the accent",
+                l.name
+            );
+            assert_eq!(
+                l.light.series[0], l.light.accent,
+                "{}: s1 is the accent",
+                l.name
+            );
             assert_eq!(l.light.name, "light");
             // Every role's font is embedded; the mark roles have distinct sizes.
             let mut sizes = Vec::new();

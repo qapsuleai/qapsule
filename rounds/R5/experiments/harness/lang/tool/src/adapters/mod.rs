@@ -4,3 +4,4 @@
 pub mod bozuk;
 pub mod r4;
 pub mod selvi;
+pub mod tunca;

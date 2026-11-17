@@ -1,0 +1,2103 @@
+{
+  "covers": [
+    "feed-rule",
+    "coin-flip",
+    "stories",
+    "capsules",
+    "feed-hidden",
+    "k42"
+  ],
+  "description": "R5/M19 (K53, K42; PROTOCOL §23.2, CAPSULE §9.10): the host's coin-flip rule on — the feed and the story list at `balanced` and `all`, the hidden count, the K42 exemption with a position, the live `story` events and the ledger, which the rule never touches.",
+  "final": {
+    "log_len": 7
+  },
+  "init": {
+    "capsules": {
+      "series": [
+        "px"
+      ]
+    },
+    "clock": 1760000000000,
+    "data": {
+      "entitlements": {
+        "ana": [
+          "*"
+        ],
+        "host": [
+          "*"
+        ]
+      },
+      "feeds": [
+        {
+          "feed": {
+            "feed": "bist",
+            "interval": "1d",
+            "symbol": "THYAO"
+          },
+          "synthetic": {
+            "n": 1200,
+            "seed": 7
+          }
+        }
+      ]
+    },
+    "document": {
+      "id": "doc-feed-rule",
+      "schema_version": "0",
+      "series": [
+        {
+          "id": "px",
+          "instrument": {
+            "symbol": "THYAO"
+          },
+          "interval": "1d",
+          "source": {
+            "feed": "bist",
+            "interval": "1d",
+            "kind": "bind",
+            "symbol": "THYAO",
+            "window": {
+              "last": 10000
+            }
+          }
+        }
+      ],
+      "title": "Akış kuralı"
+    },
+    "epoch": 0,
+    "feed_rule": {
+      "rule": "rate55"
+    },
+    "principals": [
+      {
+        "author": {
+          "kind": "human",
+          "name": "host"
+        },
+        "id": "host",
+        "role": "host"
+      },
+      {
+        "author": {
+          "kind": "human",
+          "name": "Ana"
+        },
+        "id": "ana",
+        "role": "viewer"
+      }
+    ]
+  },
+  "name": "64-feed-rule",
+  "steps": [
+    {
+      "expect": [
+        {
+          "conn": "a",
+          "msg": {
+            "seq": 2,
+            "type": "welcome"
+          }
+        }
+      ],
+      "note": "The host runs the coin-flip rule `rate55` (hit rate below 0.55 with at least 20 closed cases in the ledger at birth; `init.feed_rule`).",
+      "send": {
+        "conn": "a",
+        "msg": {
+          "principal": "ana",
+          "protocol": "qp/0",
+          "surface": {
+            "kind": "phone"
+          },
+          "type": "hello"
+        }
+      }
+    },
+    {
+      "expect": [
+        {
+          "conn": "a",
+          "msg": {
+            "id": "s1",
+            "seq": 3,
+            "status": "applied",
+            "type": "ack"
+          }
+        }
+      ],
+      "note": "Ana reads tiers 1–2 of THYAO.",
+      "send": {
+        "conn": "a",
+        "msg": {
+          "id": "s1",
+          "ops": [
+            {
+              "audience": {
+                "group": "future",
+                "positions": {},
+                "sensitivity": "balanced",
+                "watchlist": [
+                  "THYAO"
+                ]
+              },
+              "op": "set_audience"
+            }
+          ],
+          "type": "command"
+        }
+      }
+    },
+    {
+      "expect": [
+        {
+          "conn": "a",
+          "msg": {
+            "data": {
+              "instrument": "THYAO",
+              "kind": "stories",
+              "series": "px",
+              "stories": [
+                {
+                  "born_bar": 1145,
+                  "born_t": 1874275200000,
+                  "closed_bar": 1165,
+                  "closed_t": 1876694400000,
+                  "direction": "down",
+                  "face": {
+                    "direction_word": "aşağı",
+                    "event": "düşüş eğilimi",
+                    "few_cases": true,
+                    "ledger_n": 18,
+                    "ledger_short": "18'de 4 tuttu (az örnek)",
+                    "moved": "21 Haziran'da",
+                    "validity_phrase": "süresi doldu",
+                    "when": "24 Mayıs'ta"
+                  },
+                  "finding": "fnd.THYAO.continuation.down.1145",
+                  "hidden": "sensitivity",
+                  "id": "cap.THYAO.continuation.down.1145",
+                  "in_feed": false,
+                  "kind": "continuation",
+                  "last_bar": 1165,
+                  "last_t": 1876694400000,
+                  "outcome": "expired",
+                  "series": "px",
+                  "stage": "expired",
+                  "tier": 3,
+                  "validity": "closed"
+                },
+                {
+                  "born_bar": 1155,
+                  "born_t": 1875484800000,
+                  "closed_bar": 1161,
+                  "closed_t": 1876176000000,
+                  "coin_flip": true,
+                  "direction": "up",
+                  "face": {
+                    "direction_word": "yukarı",
+                    "event": "yukarı kırılım",
+                    "ledger_n": 39,
+                    "ledger_short": "39'da 15 tuttu",
+                    "moved": "15 Haziran'da",
+                    "validity_phrase": "tutmadı",
+                    "when": "7 Haziran'da"
+                  },
+                  "finding": "fnd.THYAO.breakout.up.1155",
+                  "hidden": "coin_flip",
+                  "id": "cap.THYAO.breakout.up.1155",
+                  "in_feed": false,
+                  "kind": "breakout",
+                  "last_bar": 1161,
+                  "last_t": 1876176000000,
+                  "outcome": "invalidated",
+                  "series": "px",
+                  "stage": "invalidated",
+                  "tier": 3,
+                  "validity": "closed"
+                },
+                {
+                  "born_bar": 1164,
+                  "born_t": 1876608000000,
+                  "closed_bar": 1184,
+                  "closed_t": 1879027200000,
+                  "coin_flip": true,
+                  "direction": "up",
+                  "face": {
+                    "direction_word": "yukarı",
+                    "event": "yükseliş eğilimi",
+                    "ledger_n": 25,
+                    "ledger_short": "25'te 13 tuttu",
+                    "moved": "15 işlem günü önce",
+                    "validity_phrase": "süresi doldu",
+                    "when": "20 Haziran'da"
+                  },
+                  "finding": "fnd.THYAO.continuation.up.1164",
+                  "hidden": "coin_flip",
+                  "id": "cap.THYAO.continuation.up.1164",
+                  "in_feed": false,
+                  "kind": "continuation",
+                  "last_bar": 1184,
+                  "last_t": 1879027200000,
+                  "outcome": "expired",
+                  "series": "px",
+                  "stage": "expired",
+                  "tier": 3,
+                  "validity": "closed"
+                },
+                {
+                  "born_bar": 1177,
+                  "born_t": 1878249600000,
+                  "closed_bar": 1180,
+                  "closed_t": 1878508800000,
+                  "coin_flip": true,
+                  "direction": "up",
+                  "face": {
+                    "direction_word": "yukarı",
+                    "event": "yukarı kırılım",
+                    "ledger_n": 40,
+                    "ledger_short": "40'ta 15 tuttu",
+                    "moved": "19 işlem günü önce",
+                    "validity_phrase": "tutmadı",
+                    "when": "9 Temmuz'da"
+                  },
+                  "finding": "fnd.THYAO.breakout.up.1177",
+                  "hidden": "coin_flip",
+                  "id": "cap.THYAO.breakout.up.1177",
+                  "in_feed": false,
+                  "kind": "breakout",
+                  "last_bar": 1180,
+                  "last_t": 1878508800000,
+                  "outcome": "invalidated",
+                  "series": "px",
+                  "stage": "invalidated",
+                  "tier": 3,
+                  "validity": "closed"
+                }
+              ],
+              "total": 4
+            },
+            "id": "l1",
+            "now": 1760000000000,
+            "seq": 3,
+            "type": "result"
+          }
+        }
+      ],
+      "note": "The story list: a coin-flip story is listed with `coin_flip: true` and, below the `all` sensitivity, `in_feed: false, hidden: coin_flip`; a story with fewer than 20 cases (`face.few_cases`) is never hidden.",
+      "send": {
+        "conn": "a",
+        "msg": {
+          "id": "l1",
+          "query": {
+            "instrument": "THYAO",
+            "kind": "stories",
+            "range": {
+              "last": 40
+            }
+          },
+          "type": "query"
+        }
+      }
+    },
+    {
+      "expect": [
+        {
+          "conn": "a",
+          "msg": {
+            "data": {
+              "capsules": [
+                {
+                  "born_bar": 541,
+                  "confirmations": 1,
+                  "direction": "up",
+                  "finding": "fnd.THYAO.continuation.up.541",
+                  "id": "cap.THYAO.continuation.up.541",
+                  "importance": 1.7044650264752905,
+                  "instrument": "THYAO",
+                  "kind": "continuation",
+                  "last_bar": 547,
+                  "ledger_at_birth": {
+                    "n": 14,
+                    "realized": 8
+                  },
+                  "sentence": {
+                    "en": "657 bars ago, THYAO crossed above the short average (116.24); it is now at 164.01, no longer above the short average. The uptrend has ended. The expected outcome came true 651 bars ago. Its record is still thin: it played out in 8 of 14 cases.",
+                    "text": "THYAO 657 bar önce kısa ortalamanın (116,24) üstüne çıktı; şu an 164,01, artık kısa ortalamanın üstünde değil. Yükseliş eğilimi sona erdi. Beklenen sonuç 651 bar önce gerçekleşti. Karnesi henüz az örnekli: 14 seferin 8'inde tuttu.",
+                    "tr": "THYAO 657 bar önce kısa ortalamanın (116,24) üstüne çıktı; şu an 164,01, artık kısa ortalamanın üstünde değil. Yükseliş eğilimi sona erdi. Beklenen sonuç 651 bar önce gerçekleşti. Karnesi henüz az örnekli: 14 seferin 8'inde tuttu."
+                  },
+                  "series": "px",
+                  "stage": "realized",
+                  "state": "live",
+                  "t": 1802044800000,
+                  "tier": 1,
+                  "time": "state",
+                  "trust": "replica",
+                  "validity": "closed"
+                },
+                {
+                  "born_bar": 240,
+                  "confirmations": 1,
+                  "direction": "up",
+                  "finding": "fnd.THYAO.continuation.up.240",
+                  "id": "cap.THYAO.continuation.up.240",
+                  "importance": 1.6925330262249991,
+                  "instrument": "THYAO",
+                  "kind": "continuation",
+                  "last_bar": 244,
+                  "ledger_at_birth": {
+                    "n": 5,
+                    "realized": 4
+                  },
+                  "sentence": {
+                    "en": "958 bars ago, THYAO crossed above the short average (106.96); it is now at 164.01, no longer above the short average. The uptrend has ended. The expected outcome came true 954 bars ago. Its record is still thin: it played out in 4 of 5 cases.",
+                    "text": "THYAO 958 bar önce kısa ortalamanın (106,96) üstüne çıktı; şu an 164,01, artık kısa ortalamanın üstünde değil. Yükseliş eğilimi sona erdi. Beklenen sonuç 954 bar önce gerçekleşti. Karnesi henüz az örnekli: 5 seferin 4'ünde tuttu.",
+                    "tr": "THYAO 958 bar önce kısa ortalamanın (106,96) üstüne çıktı; şu an 164,01, artık kısa ortalamanın üstünde değil. Yükseliş eğilimi sona erdi. Beklenen sonuç 954 bar önce gerçekleşti. Karnesi henüz az örnekli: 5 seferin 4'ünde tuttu."
+                  },
+                  "series": "px",
+                  "stage": "realized",
+                  "state": "live",
+                  "t": 1765324800000,
+                  "tier": 1,
+                  "time": "state",
+                  "trust": "replica",
+                  "validity": "closed"
+                },
+                {
+                  "born_bar": 341,
+                  "confirmations": 1,
+                  "direction": "neutral",
+                  "finding": "fnd.THYAO.squeeze.neutral.341",
+                  "id": "cap.THYAO.squeeze.neutral.341",
+                  "importance": 1.6737821767730665,
+                  "instrument": "THYAO",
+                  "kind": "squeeze",
+                  "last_bar": 361,
+                  "ledger_at_birth": {
+                    "n": 0,
+                    "realized": 0
+                  },
+                  "sentence": {
+                    "en": "857 bars ago, the squeeze (direction open) started in THYAO; it no longer holds. The squeeze (direction open) has ended. The signal was invalidated 837 bars ago. No track record yet.",
+                    "text": "THYAO'da 857 bar önce sıkışma (yön belirsiz) başladı; artık sürmüyor. Sıkışma (yön belirsiz) sona erdi. Sinyal 837 bar önce geçersiz oldu. Henüz karnesi yok.",
+                    "tr": "THYAO'da 857 bar önce sıkışma (yön belirsiz) başladı; artık sürmüyor. Sıkışma (yön belirsiz) sona erdi. Sinyal 837 bar önce geçersiz oldu. Henüz karnesi yok."
+                  },
+                  "series": "px",
+                  "stage": "invalidated",
+                  "state": "invalidated",
+                  "t": 1779408000000,
+                  "tier": 2,
+                  "time": "state",
+                  "trust": "replica",
+                  "validity": "closed"
+                },
+                {
+                  "born_bar": 171,
+                  "confirmations": 1,
+                  "direction": "up",
+                  "finding": "fnd.THYAO.continuation.up.171",
+                  "id": "cap.THYAO.continuation.up.171",
+                  "importance": 1.666240801016669,
+                  "instrument": "THYAO",
+                  "kind": "continuation",
+                  "last_bar": 174,
+                  "ledger_at_birth": {
+                    "n": 3,
+                    "realized": 2
+                  },
+                  "sentence": {
+                    "en": "1027 bars ago, THYAO crossed above the short average (105.98); it is now at 164.01, no longer above the short average. The uptrend has ended. The expected outcome came true 1024 bars ago. Its record is still thin: it played out in 2 of 3 cases.",
+                    "text": "THYAO 1027 bar önce kısa ortalamanın (105,98) üstüne çıktı; şu an 164,01, artık kısa ortalamanın üstünde değil. Yükseliş eğilimi sona erdi. Beklenen sonuç 1024 bar önce gerçekleşti. Karnesi henüz az örnekli: 3 seferin 2'sinde tuttu.",
+                    "tr": "THYAO 1027 bar önce kısa ortalamanın (105,98) üstüne çıktı; şu an 164,01, artık kısa ortalamanın üstünde değil. Yükseliş eğilimi sona erdi. Beklenen sonuç 1024 bar önce gerçekleşti. Karnesi henüz az örnekli: 3 seferin 2'sinde tuttu."
+                  },
+                  "series": "px",
+                  "stage": "realized",
+                  "state": "live",
+                  "t": 1756857600000,
+                  "tier": 2,
+                  "time": "state",
+                  "trust": "replica",
+                  "validity": "closed"
+                },
+                {
+                  "born_bar": 151,
+                  "confirmations": 1,
+                  "direction": "up",
+                  "finding": "fnd.THYAO.continuation.up.151",
+                  "id": "cap.THYAO.continuation.up.151",
+                  "importance": 1.659362184824123,
+                  "instrument": "THYAO",
+                  "kind": "continuation",
+                  "last_bar": 154,
+                  "ledger_at_birth": {
+                    "n": 2,
+                    "realized": 1
+                  },
+                  "sentence": {
+                    "en": "1047 bars ago, THYAO crossed above the short average (102.18); it is now at 164.01, no longer above the short average. The uptrend has ended. The expected outcome came true 1044 bars ago. Its record is still thin: it played out in 1 of 2 cases.",
+                    "text": "THYAO 1047 bar önce kısa ortalamanın (102,18) üstüne çıktı; şu an 164,01, artık kısa ortalamanın üstünde değil. Yükseliş eğilimi sona erdi. Beklenen sonuç 1044 bar önce gerçekleşti. Karnesi henüz az örnekli: 2 seferin 1'inde tuttu.",
+                    "tr": "THYAO 1047 bar önce kısa ortalamanın (102,18) üstüne çıktı; şu an 164,01, artık kısa ortalamanın üstünde değil. Yükseliş eğilimi sona erdi. Beklenen sonuç 1044 bar önce gerçekleşti. Karnesi henüz az örnekli: 2 seferin 1'inde tuttu."
+                  },
+                  "series": "px",
+                  "stage": "realized",
+                  "state": "live",
+                  "t": 1754438400000,
+                  "tier": 2,
+                  "time": "state",
+                  "trust": "replica",
+                  "validity": "closed"
+                },
+                {
+                  "born_bar": 573,
+                  "confirmations": 1,
+                  "direction": "down",
+                  "finding": "fnd.THYAO.reversal.down.573",
+                  "id": "cap.THYAO.reversal.down.573",
+                  "importance": 1.6536334754666429,
+                  "instrument": "THYAO",
+                  "kind": "reversal",
+                  "last_bar": 581,
+                  "ledger_at_birth": {
+                    "n": 3,
+                    "realized": 2
+                  },
+                  "sentence": {
+                    "en": "625 bars ago, THYAO showed a downward reversal signal: price made a new high while RSI made a lower high (price 138.65, RSI 70.5). It was invalidated 617 bars ago and is no longer valid. Its record is still thin: it played out in 2 of 3 cases.",
+                    "text": "THYAO'da 625 bar önce aşağı dönüş işareti çıktı: fiyat yeni tepe yaparken RSI daha düşük tepe yaptı (fiyat 138,65, RSI 70,5). Sinyal 617 bar önce geçersiz oldu; artık geçerli değil. Karnesi henüz az örnekli: 3 seferin 2'sinde tuttu.",
+                    "tr": "THYAO'da 625 bar önce aşağı dönüş işareti çıktı: fiyat yeni tepe yaparken RSI daha düşük tepe yaptı (fiyat 138,65, RSI 70,5). Sinyal 617 bar önce geçersiz oldu; artık geçerli değil. Karnesi henüz az örnekli: 3 seferin 2'sinde tuttu."
+                  },
+                  "series": "px",
+                  "stage": "invalidated",
+                  "state": "invalidated",
+                  "t": 1806019200000,
+                  "tier": 2,
+                  "time": "event",
+                  "trust": "replica",
+                  "validity": "closed"
+                },
+                {
+                  "born_bar": 250,
+                  "confirmations": 1,
+                  "direction": "up",
+                  "finding": "fnd.THYAO.continuation.up.250",
+                  "id": "cap.THYAO.continuation.up.250",
+                  "importance": 1.6431885316761892,
+                  "instrument": "THYAO",
+                  "kind": "continuation",
+                  "last_bar": 254,
+                  "ledger_at_birth": {
+                    "n": 6,
+                    "realized": 5
+                  },
+                  "sentence": {
+                    "en": "948 bars ago, THYAO crossed above the short average (108.05); it is now at 164.01, no longer above the short average. The uptrend has ended. The expected outcome came true 944 bars ago. Its record is still thin: it played out in 5 of 6 cases.",
+                    "text": "THYAO 948 bar önce kısa ortalamanın (108,05) üstüne çıktı; şu an 164,01, artık kısa ortalamanın üstünde değil. Yükseliş eğilimi sona erdi. Beklenen sonuç 944 bar önce gerçekleşti. Karnesi henüz az örnekli: 6 seferin 5'inde tuttu.",
+                    "tr": "THYAO 948 bar önce kısa ortalamanın (108,05) üstüne çıktı; şu an 164,01, artık kısa ortalamanın üstünde değil. Yükseliş eğilimi sona erdi. Beklenen sonuç 944 bar önce gerçekleşti. Karnesi henüz az örnekli: 6 seferin 5'inde tuttu."
+                  },
+                  "series": "px",
+                  "stage": "realized",
+                  "state": "live",
+                  "t": 1766534400000,
+                  "tier": 2,
+                  "time": "state",
+                  "trust": "replica",
+                  "validity": "closed"
+                },
+                {
+                  "born_bar": 472,
+                  "confirmations": 1,
+                  "direction": "up",
+                  "finding": "fnd.THYAO.continuation.up.472",
+                  "id": "cap.THYAO.continuation.up.472",
+                  "importance": 1.608157778114037,
+                  "instrument": "THYAO",
+                  "kind": "continuation",
+                  "last_bar": 475,
+                  "ledger_at_birth": {
+                    "n": 11,
+                    "realized": 7
+                  },
+                  "sentence": {
+                    "en": "726 bars ago, THYAO crossed above the short average (110.11); it is now at 164.01, no longer above the short average. The uptrend has ended. The expected outcome came true 723 bars ago. Its record is still thin: it played out in 7 of 11 cases.",
+                    "text": "THYAO 726 bar önce kısa ortalamanın (110,11) üstüne çıktı; şu an 164,01, artık kısa ortalamanın üstünde değil. Yükseliş eğilimi sona erdi. Beklenen sonuç 723 bar önce gerçekleşti. Karnesi henüz az örnekli: 11 seferin 7'sinde tuttu.",
+                    "tr": "THYAO 726 bar önce kısa ortalamanın (110,11) üstüne çıktı; şu an 164,01, artık kısa ortalamanın üstünde değil. Yükseliş eğilimi sona erdi. Beklenen sonuç 723 bar önce gerçekleşti. Karnesi henüz az örnekli: 11 seferin 7'sinde tuttu."
+                  },
+                  "series": "px",
+                  "stage": "realized",
+                  "state": "live",
+                  "t": 1793232000000,
+                  "tier": 2,
+                  "time": "state",
+                  "trust": "replica",
+                  "validity": "closed"
+                },
+                {
+                  "born_bar": 1136,
+                  "confirmations": 1,
+                  "direction": "neutral",
+                  "finding": "fnd.THYAO.squeeze.neutral.1136",
+                  "id": "cap.THYAO.squeeze.neutral.1136",
+                  "importance": 1.5964997537984893,
+                  "instrument": "THYAO",
+                  "kind": "squeeze",
+                  "last_bar": 1156,
+                  "ledger_at_birth": {
+                    "n": 6,
+                    "realized": 0
+                  },
+                  "sentence": {
+                    "en": "62 bars ago, the squeeze (direction open) started in THYAO; it no longer holds. The squeeze (direction open) has ended. The signal was invalidated 42 bars ago. Its record is still thin: it played out in 0 of 6 cases.",
+                    "text": "THYAO'da 62 bar önce sıkışma (yön belirsiz) başladı; artık sürmüyor. Sıkışma (yön belirsiz) sona erdi. Sinyal 42 bar önce geçersiz oldu. Karnesi henüz az örnekli: 6 seferin 0'ında tuttu.",
+                    "tr": "THYAO'da 62 bar önce sıkışma (yön belirsiz) başladı; artık sürmüyor. Sıkışma (yön belirsiz) sona erdi. Sinyal 42 bar önce geçersiz oldu. Karnesi henüz az örnekli: 6 seferin 0'ında tuttu."
+                  },
+                  "series": "px",
+                  "stage": "invalidated",
+                  "state": "invalidated",
+                  "t": 1875571200000,
+                  "tier": 2,
+                  "time": "state",
+                  "trust": "replica",
+                  "validity": "closed"
+                },
+                {
+                  "born_bar": 209,
+                  "confirmations": 1,
+                  "direction": "up",
+                  "finding": "fnd.THYAO.breakout.up.209",
+                  "id": "cap.THYAO.breakout.up.209",
+                  "importance": 1.5908927137709554,
+                  "instrument": "THYAO",
+                  "kind": "breakout",
+                  "last_bar": 216,
+                  "ledger_at_birth": {
+                    "n": 6,
+                    "realized": 3
+                  },
+                  "sentence": {
+                    "en": "989 bars ago, THYAO broke above resistance at 104.38 (close 106.11): an upside breakout. It was invalidated 982 bars ago and is no longer valid. Its record is still thin: it played out in 3 of 6 cases.",
+                    "text": "THYAO 989 bar önce 104,38'deki direnci yukarı kırdı (kapanış 106,11): yukarı kırılım. Sinyal 982 bar önce geçersiz oldu; artık geçerli değil. Karnesi henüz az örnekli: 6 seferin 3'ünde tuttu.",
+                    "tr": "THYAO 989 bar önce 104,38'deki direnci yukarı kırdı (kapanış 106,11): yukarı kırılım. Sinyal 982 bar önce geçersiz oldu; artık geçerli değil. Karnesi henüz az örnekli: 6 seferin 3'ünde tuttu."
+                  },
+                  "series": "px",
+                  "stage": "invalidated",
+                  "state": "invalidated",
+                  "t": 1761868800000,
+                  "tier": 2,
+                  "time": "event",
+                  "trust": "replica",
+                  "validity": "closed"
+                },
+                {
+                  "born_bar": 1133,
+                  "confirmations": 1,
+                  "direction": "up",
+                  "finding": "fnd.THYAO.reversal.up.1133",
+                  "id": "cap.THYAO.reversal.up.1133",
+                  "importance": 1.583901181409415,
+                  "instrument": "THYAO",
+                  "kind": "reversal",
+                  "last_bar": 1137,
+                  "ledger_at_birth": {
+                    "n": 5,
+                    "realized": 4
+                  },
+                  "sentence": {
+                    "en": "65 bars ago, THYAO showed an upward reversal signal: price made a new low while RSI made a higher low (price 156.86, RSI 48.9). It was invalidated 61 bars ago and is no longer valid. Its record is still thin: it played out in 4 of 5 cases.",
+                    "text": "THYAO'da 65 bar önce yukarı dönüş işareti çıktı: fiyat yeni dip yaparken RSI daha yüksek dip yaptı (fiyat 156,86, RSI 48,9). Sinyal 61 bar önce geçersiz oldu; artık geçerli değil. Karnesi henüz az örnekli: 5 seferin 4'ünde tuttu.",
+                    "tr": "THYAO'da 65 bar önce yukarı dönüş işareti çıktı: fiyat yeni dip yaparken RSI daha yüksek dip yaptı (fiyat 156,86, RSI 48,9). Sinyal 61 bar önce geçersiz oldu; artık geçerli değil. Karnesi henüz az örnekli: 5 seferin 4'ünde tuttu."
+                  },
+                  "series": "px",
+                  "stage": "invalidated",
+                  "state": "invalidated",
+                  "t": 1873411200000,
+                  "tier": 2,
+                  "time": "event",
+                  "trust": "replica",
+                  "validity": "closed"
+                },
+                {
+                  "born_bar": 57,
+                  "confirmations": 1,
+                  "direction": "up",
+                  "finding": "fnd.THYAO.breakout.up.57",
+                  "id": "cap.THYAO.breakout.up.57",
+                  "importance": 1.5813282394918298,
+                  "instrument": "THYAO",
+                  "kind": "breakout",
+                  "last_bar": 62,
+                  "ledger_at_birth": {
+                    "n": 2,
+                    "realized": 2
+                  },
+                  "sentence": {
+                    "en": "1141 bars ago, THYAO broke above resistance at 102.56 (close 104.03): an upside breakout. It was invalidated 1136 bars ago and is no longer valid. Its record is still thin: it played out in 2 of 2 cases.",
+                    "text": "THYAO 1141 bar önce 102,56'daki direnci yukarı kırdı (kapanış 104,03): yukarı kırılım. Sinyal 1136 bar önce geçersiz oldu; artık geçerli değil. Karnesi henüz az örnekli: 2 seferin 2'sinde tuttu.",
+                    "tr": "THYAO 1141 bar önce 102,56'daki direnci yukarı kırdı (kapanış 104,03): yukarı kırılım. Sinyal 1136 bar önce geçersiz oldu; artık geçerli değil. Karnesi henüz az örnekli: 2 seferin 2'sinde tuttu."
+                  },
+                  "series": "px",
+                  "stage": "invalidated",
+                  "state": "invalidated",
+                  "t": 1743379200000,
+                  "tier": 2,
+                  "time": "event",
+                  "trust": "replica",
+                  "validity": "closed"
+                },
+                {
+                  "born_bar": 447,
+                  "confirmations": 1,
+                  "direction": "up",
+                  "finding": "fnd.THYAO.continuation.up.447",
+                  "id": "cap.THYAO.continuation.up.447",
+                  "importance": 1.2206821215451855,
+                  "instrument": "THYAO",
+                  "kind": "continuation",
+                  "last_bar": 467,
+                  "ledger_at_birth": {
+                    "n": 10,
+                    "realized": 7
+                  },
+                  "sentence": {
+                    "en": "751 bars ago, THYAO crossed above the short average (108.72); it fell back below 734 bars ago and is now at 164.01, no longer above the short average. The uptrend has ended. Its 20-bar life ran out 731 bars ago without an outcome. Its record is still thin: it played out in 7 of 10 cases.",
+                    "text": "THYAO 751 bar önce kısa ortalamanın (108,72) üstüne çıktı, 734 bar önce yeniden altına indi; şu an 164,01, artık kısa ortalamanın üstünde değil. Yükseliş eğilimi sona erdi. Sinyalin 20 barlık ömrü 731 bar önce sonuçsuz doldu. Karnesi henüz az örnekli: 10 seferin 7'sinde tuttu.",
+                    "tr": "THYAO 751 bar önce kısa ortalamanın (108,72) üstüne çıktı, 734 bar önce yeniden altına indi; şu an 164,01, artık kısa ortalamanın üstünde değil. Yükseliş eğilimi sona erdi. Sinyalin 20 barlık ömrü 731 bar önce sonuçsuz doldu. Karnesi henüz az örnekli: 10 seferin 7'sinde tuttu."
+                  },
+                  "series": "px",
+                  "stage": "expired",
+                  "state": "expired",
+                  "t": 1792368000000,
+                  "tier": 2,
+                  "time": "state",
+                  "trust": "replica",
+                  "validity": "closed"
+                },
+                {
+                  "born_bar": 800,
+                  "confirmations": 1,
+                  "direction": "up",
+                  "finding": "fnd.THYAO.continuation.up.800",
+                  "id": "cap.THYAO.continuation.up.800",
+                  "importance": 1.2163646936640562,
+                  "instrument": "THYAO",
+                  "kind": "continuation",
+                  "last_bar": 820,
+                  "ledger_at_birth": {
+                    "n": 16,
+                    "realized": 10
+                  },
+                  "sentence": {
+                    "en": "398 bars ago, THYAO crossed above the short average (128.61); it is now at 164.01, no longer above the short average. The uptrend has ended. Its 20-bar life ran out 378 bars ago without an outcome. Its record is still thin: it played out in 10 of 16 cases.",
+                    "text": "THYAO 398 bar önce kısa ortalamanın (128,61) üstüne çıktı; şu an 164,01, artık kısa ortalamanın üstünde değil. Yükseliş eğilimi sona erdi. Sinyalin 20 barlık ömrü 378 bar önce sonuçsuz doldu. Karnesi henüz az örnekli: 16 seferin 10'unda tuttu.",
+                    "tr": "THYAO 398 bar önce kısa ortalamanın (128,61) üstüne çıktı; şu an 164,01, artık kısa ortalamanın üstünde değil. Yükseliş eğilimi sona erdi. Sinyalin 20 barlık ömrü 378 bar önce sonuçsuz doldu. Karnesi henüz az örnekli: 16 seferin 10'unda tuttu."
+                  },
+                  "series": "px",
+                  "stage": "expired",
+                  "state": "expired",
+                  "t": 1834963200000,
+                  "tier": 2,
+                  "time": "state",
+                  "trust": "replica",
+                  "validity": "closed"
+                },
+                {
+                  "born_bar": 517,
+                  "confirmations": 1,
+                  "direction": "up",
+                  "finding": "fnd.THYAO.continuation.up.517",
+                  "id": "cap.THYAO.continuation.up.517",
+                  "importance": 1.2159913727555711,
+                  "instrument": "THYAO",
+                  "kind": "continuation",
+                  "last_bar": 537,
+                  "ledger_at_birth": {
+                    "n": 13,
+                    "realized": 8
+                  },
+                  "sentence": {
+                    "en": "681 bars ago, THYAO crossed above the short average (112.46); it fell back below 668 bars ago and is now at 164.01, no longer above the short average. The uptrend has ended. Its 20-bar life ran out 661 bars ago without an outcome. Its record is still thin: it played out in 8 of 13 cases.",
+                    "text": "THYAO 681 bar önce kısa ortalamanın (112,46) üstüne çıktı, 668 bar önce yeniden altına indi; şu an 164,01, artık kısa ortalamanın üstünde değil. Yükseliş eğilimi sona erdi. Sinyalin 20 barlık ömrü 661 bar önce sonuçsuz doldu. Karnesi henüz az örnekli: 13 seferin 8'inde tuttu.",
+                    "tr": "THYAO 681 bar önce kısa ortalamanın (112,46) üstüne çıktı, 668 bar önce yeniden altına indi; şu an 164,01, artık kısa ortalamanın üstünde değil. Yükseliş eğilimi sona erdi. Sinyalin 20 barlık ömrü 661 bar önce sonuçsuz doldu. Karnesi henüz az örnekli: 13 seferin 8'inde tuttu."
+                  },
+                  "series": "px",
+                  "stage": "expired",
+                  "state": "expired",
+                  "t": 1800835200000,
+                  "tier": 2,
+                  "time": "state",
+                  "trust": "replica",
+                  "validity": "closed"
+                },
+                {
+                  "born_bar": 836,
+                  "confirmations": 1,
+                  "direction": "up",
+                  "finding": "fnd.THYAO.continuation.up.836",
+                  "id": "cap.THYAO.continuation.up.836",
+                  "importance": 1.2084111552390018,
+                  "instrument": "THYAO",
+                  "kind": "continuation",
+                  "last_bar": 856,
+                  "ledger_at_birth": {
+                    "n": 17,
+                    "realized": 10
+                  },
+                  "sentence": {
+                    "en": "362 bars ago, THYAO crossed above the short average (140.19); it fell back below 361 bars ago and is now at 164.01, no longer above the short average. The uptrend has ended. Its 20-bar life ran out 342 bars ago without an outcome. Its record is still thin: it played out in 10 of 17 cases.",
+                    "text": "THYAO 362 bar önce kısa ortalamanın (140,19) üstüne çıktı, 361 bar önce yeniden altına indi; şu an 164,01, artık kısa ortalamanın üstünde değil. Yükseliş eğilimi sona erdi. Sinyalin 20 barlık ömrü 342 bar önce sonuçsuz doldu. Karnesi henüz az örnekli: 17 seferin 10'unda tuttu.",
+                    "tr": "THYAO 362 bar önce kısa ortalamanın (140,19) üstüne çıktı, 361 bar önce yeniden altına indi; şu an 164,01, artık kısa ortalamanın üstünde değil. Yükseliş eğilimi sona erdi. Sinyalin 20 barlık ömrü 342 bar önce sonuçsuz doldu. Karnesi henüz az örnekli: 17 seferin 10'unda tuttu."
+                  },
+                  "series": "px",
+                  "stage": "expired",
+                  "state": "expired",
+                  "t": 1839283200000,
+                  "tier": 2,
+                  "time": "state",
+                  "trust": "replica",
+                  "validity": "closed"
+                },
+                {
+                  "born_bar": 264,
+                  "confirmations": 1,
+                  "direction": "up",
+                  "finding": "fnd.THYAO.continuation.up.264",
+                  "id": "cap.THYAO.continuation.up.264",
+                  "importance": 1.2035255112378662,
+                  "instrument": "THYAO",
+                  "kind": "continuation",
+                  "last_bar": 274,
+                  "ledger_at_birth": {
+                    "n": 7,
+                    "realized": 6
+                  },
+                  "sentence": {
+                    "en": "934 bars ago, THYAO crossed above the short average (111.85); it fell back below 933 bars ago and is now at 164.01, no longer above the short average. The uptrend has ended. The signal was invalidated 924 bars ago. Its record is still thin: it played out in 6 of 7 cases.",
+                    "text": "THYAO 934 bar önce kısa ortalamanın (111,85) üstüne çıktı, 933 bar önce yeniden altına indi; şu an 164,01, artık kısa ortalamanın üstünde değil. Yükseliş eğilimi sona erdi. Sinyal 924 bar önce geçersiz oldu. Karnesi henüz az örnekli: 7 seferin 6'sında tuttu.",
+                    "tr": "THYAO 934 bar önce kısa ortalamanın (111,85) üstüne çıktı, 933 bar önce yeniden altına indi; şu an 164,01, artık kısa ortalamanın üstünde değil. Yükseliş eğilimi sona erdi. Sinyal 924 bar önce geçersiz oldu. Karnesi henüz az örnekli: 7 seferin 6'sında tuttu."
+                  },
+                  "series": "px",
+                  "stage": "invalidated",
+                  "state": "invalidated",
+                  "t": 1768953600000,
+                  "tier": 2,
+                  "time": "state",
+                  "trust": "replica",
+                  "validity": "closed"
+                },
+                {
+                  "born_bar": 886,
+                  "confirmations": 1,
+                  "direction": "up",
+                  "finding": "fnd.THYAO.continuation.up.886",
+                  "id": "cap.THYAO.continuation.up.886",
+                  "importance": 1.1918672251998264,
+                  "instrument": "THYAO",
+                  "kind": "continuation",
+                  "last_bar": 906,
+                  "ledger_at_birth": {
+                    "n": 19,
+                    "realized": 10
+                  },
+                  "sentence": {
+                    "en": "312 bars ago, THYAO crossed above the short average (139.59); it fell back below 295 bars ago and is now at 164.01, no longer above the short average. The uptrend has ended. Its 20-bar life ran out 292 bars ago without an outcome. Its record is still thin: it played out in 10 of 19 cases.",
+                    "text": "THYAO 312 bar önce kısa ortalamanın (139,59) üstüne çıktı, 295 bar önce yeniden altına indi; şu an 164,01, artık kısa ortalamanın üstünde değil. Yükseliş eğilimi sona erdi. Sinyalin 20 barlık ömrü 292 bar önce sonuçsuz doldu. Karnesi henüz az örnekli: 19 seferin 10'unda tuttu.",
+                    "tr": "THYAO 312 bar önce kısa ortalamanın (139,59) üstüne çıktı, 295 bar önce yeniden altına indi; şu an 164,01, artık kısa ortalamanın üstünde değil. Yükseliş eğilimi sona erdi. Sinyalin 20 barlık ömrü 292 bar önce sonuçsuz doldu. Karnesi henüz az örnekli: 19 seferin 10'unda tuttu."
+                  },
+                  "series": "px",
+                  "stage": "expired",
+                  "state": "expired",
+                  "t": 1845331200000,
+                  "tier": 2,
+                  "time": "state",
+                  "trust": "replica",
+                  "validity": "closed"
+                }
+              ],
+              "coin_flip_hidden": 27,
+              "kind": "capsules"
+            },
+            "id": "f1",
+            "now": 1760000000000,
+            "seq": 3,
+            "type": "result"
+          }
+        }
+      ],
+      "note": "The feed leaves the coin-flip stories out and says how many (`coin_flip_hidden`): the empty-feed text counts them.",
+      "send": {
+        "conn": "a",
+        "msg": {
+          "id": "f1",
+          "query": {
+            "audience": true,
+            "kind": "capsules",
+            "limit": 30
+          },
+          "type": "query"
+        }
+      }
+    },
+    {
+      "expect": [
+        {
+          "conn": "a",
+          "msg": {
+            "id": "s2",
+            "seq": 4,
+            "status": "applied",
+            "type": "ack"
+          }
+        }
+      ],
+      "note": "The most open sensitivity.",
+      "send": {
+        "conn": "a",
+        "msg": {
+          "id": "s2",
+          "ops": [
+            {
+              "audience": {
+                "group": "future",
+                "positions": {},
+                "sensitivity": "all",
+                "watchlist": [
+                  "THYAO"
+                ]
+              },
+              "op": "set_audience"
+            }
+          ],
+          "type": "command"
+        }
+      }
+    },
+    {
+      "expect": [
+        {
+          "conn": "a",
+          "msg": {
+            "data": {
+              "capsules": [
+                {
+                  "born_bar": 541,
+                  "confirmations": 1,
+                  "direction": "up",
+                  "finding": "fnd.THYAO.continuation.up.541",
+                  "id": "cap.THYAO.continuation.up.541",
+                  "importance": 1.7044650264752905,
+                  "instrument": "THYAO",
+                  "kind": "continuation",
+                  "last_bar": 547,
+                  "ledger_at_birth": {
+                    "n": 14,
+                    "realized": 8
+                  },
+                  "sentence": {
+                    "en": "657 bars ago, THYAO crossed above the short average (116.24); it is now at 164.01, no longer above the short average. The uptrend has ended. The expected outcome came true 651 bars ago. Its record is still thin: it played out in 8 of 14 cases.",
+                    "text": "THYAO 657 bar önce kısa ortalamanın (116,24) üstüne çıktı; şu an 164,01, artık kısa ortalamanın üstünde değil. Yükseliş eğilimi sona erdi. Beklenen sonuç 651 bar önce gerçekleşti. Karnesi henüz az örnekli: 14 seferin 8'inde tuttu.",
+                    "tr": "THYAO 657 bar önce kısa ortalamanın (116,24) üstüne çıktı; şu an 164,01, artık kısa ortalamanın üstünde değil. Yükseliş eğilimi sona erdi. Beklenen sonuç 651 bar önce gerçekleşti. Karnesi henüz az örnekli: 14 seferin 8'inde tuttu."
+                  },
+                  "series": "px",
+                  "stage": "realized",
+                  "state": "live",
+                  "t": 1802044800000,
+                  "tier": 1,
+                  "time": "state",
+                  "trust": "replica",
+                  "validity": "closed"
+                },
+                {
+                  "born_bar": 240,
+                  "confirmations": 1,
+                  "direction": "up",
+                  "finding": "fnd.THYAO.continuation.up.240",
+                  "id": "cap.THYAO.continuation.up.240",
+                  "importance": 1.6925330262249991,
+                  "instrument": "THYAO",
+                  "kind": "continuation",
+                  "last_bar": 244,
+                  "ledger_at_birth": {
+                    "n": 5,
+                    "realized": 4
+                  },
+                  "sentence": {
+                    "en": "958 bars ago, THYAO crossed above the short average (106.96); it is now at 164.01, no longer above the short average. The uptrend has ended. The expected outcome came true 954 bars ago. Its record is still thin: it played out in 4 of 5 cases.",
+                    "text": "THYAO 958 bar önce kısa ortalamanın (106,96) üstüne çıktı; şu an 164,01, artık kısa ortalamanın üstünde değil. Yükseliş eğilimi sona erdi. Beklenen sonuç 954 bar önce gerçekleşti. Karnesi henüz az örnekli: 5 seferin 4'ünde tuttu.",
+                    "tr": "THYAO 958 bar önce kısa ortalamanın (106,96) üstüne çıktı; şu an 164,01, artık kısa ortalamanın üstünde değil. Yükseliş eğilimi sona erdi. Beklenen sonuç 954 bar önce gerçekleşti. Karnesi henüz az örnekli: 5 seferin 4'ünde tuttu."
+                  },
+                  "series": "px",
+                  "stage": "realized",
+                  "state": "live",
+                  "t": 1765324800000,
+                  "tier": 1,
+                  "time": "state",
+                  "trust": "replica",
+                  "validity": "closed"
+                },
+                {
+                  "born_bar": 341,
+                  "confirmations": 1,
+                  "direction": "neutral",
+                  "finding": "fnd.THYAO.squeeze.neutral.341",
+                  "id": "cap.THYAO.squeeze.neutral.341",
+                  "importance": 1.6737821767730665,
+                  "instrument": "THYAO",
+                  "kind": "squeeze",
+                  "last_bar": 361,
+                  "ledger_at_birth": {
+                    "n": 0,
+                    "realized": 0
+                  },
+                  "sentence": {
+                    "en": "857 bars ago, the squeeze (direction open) started in THYAO; it no longer holds. The squeeze (direction open) has ended. The signal was invalidated 837 bars ago. No track record yet.",
+                    "text": "THYAO'da 857 bar önce sıkışma (yön belirsiz) başladı; artık sürmüyor. Sıkışma (yön belirsiz) sona erdi. Sinyal 837 bar önce geçersiz oldu. Henüz karnesi yok.",
+                    "tr": "THYAO'da 857 bar önce sıkışma (yön belirsiz) başladı; artık sürmüyor. Sıkışma (yön belirsiz) sona erdi. Sinyal 837 bar önce geçersiz oldu. Henüz karnesi yok."
+                  },
+                  "series": "px",
+                  "stage": "invalidated",
+                  "state": "invalidated",
+                  "t": 1779408000000,
+                  "tier": 2,
+                  "time": "state",
+                  "trust": "replica",
+                  "validity": "closed"
+                },
+                {
+                  "born_bar": 171,
+                  "confirmations": 1,
+                  "direction": "up",
+                  "finding": "fnd.THYAO.continuation.up.171",
+                  "id": "cap.THYAO.continuation.up.171",
+                  "importance": 1.666240801016669,
+                  "instrument": "THYAO",
+                  "kind": "continuation",
+                  "last_bar": 174,
+                  "ledger_at_birth": {
+                    "n": 3,
+                    "realized": 2
+                  },
+                  "sentence": {
+                    "en": "1027 bars ago, THYAO crossed above the short average (105.98); it is now at 164.01, no longer above the short average. The uptrend has ended. The expected outcome came true 1024 bars ago. Its record is still thin: it played out in 2 of 3 cases.",
+                    "text": "THYAO 1027 bar önce kısa ortalamanın (105,98) üstüne çıktı; şu an 164,01, artık kısa ortalamanın üstünde değil. Yükseliş eğilimi sona erdi. Beklenen sonuç 1024 bar önce gerçekleşti. Karnesi henüz az örnekli: 3 seferin 2'sinde tuttu.",
+                    "tr": "THYAO 1027 bar önce kısa ortalamanın (105,98) üstüne çıktı; şu an 164,01, artık kısa ortalamanın üstünde değil. Yükseliş eğilimi sona erdi. Beklenen sonuç 1024 bar önce gerçekleşti. Karnesi henüz az örnekli: 3 seferin 2'sinde tuttu."
+                  },
+                  "series": "px",
+                  "stage": "realized",
+                  "state": "live",
+                  "t": 1756857600000,
+                  "tier": 2,
+                  "time": "state",
+                  "trust": "replica",
+                  "validity": "closed"
+                },
+                {
+                  "born_bar": 151,
+                  "confirmations": 1,
+                  "direction": "up",
+                  "finding": "fnd.THYAO.continuation.up.151",
+                  "id": "cap.THYAO.continuation.up.151",
+                  "importance": 1.659362184824123,
+                  "instrument": "THYAO",
+                  "kind": "continuation",
+                  "last_bar": 154,
+                  "ledger_at_birth": {
+                    "n": 2,
+                    "realized": 1
+                  },
+                  "sentence": {
+                    "en": "1047 bars ago, THYAO crossed above the short average (102.18); it is now at 164.01, no longer above the short average. The uptrend has ended. The expected outcome came true 1044 bars ago. Its record is still thin: it played out in 1 of 2 cases.",
+                    "text": "THYAO 1047 bar önce kısa ortalamanın (102,18) üstüne çıktı; şu an 164,01, artık kısa ortalamanın üstünde değil. Yükseliş eğilimi sona erdi. Beklenen sonuç 1044 bar önce gerçekleşti. Karnesi henüz az örnekli: 2 seferin 1'inde tuttu.",
+                    "tr": "THYAO 1047 bar önce kısa ortalamanın (102,18) üstüne çıktı; şu an 164,01, artık kısa ortalamanın üstünde değil. Yükseliş eğilimi sona erdi. Beklenen sonuç 1044 bar önce gerçekleşti. Karnesi henüz az örnekli: 2 seferin 1'inde tuttu."
+                  },
+                  "series": "px",
+                  "stage": "realized",
+                  "state": "live",
+                  "t": 1754438400000,
+                  "tier": 2,
+                  "time": "state",
+                  "trust": "replica",
+                  "validity": "closed"
+                },
+                {
+                  "born_bar": 573,
+                  "confirmations": 1,
+                  "direction": "down",
+                  "finding": "fnd.THYAO.reversal.down.573",
+                  "id": "cap.THYAO.reversal.down.573",
+                  "importance": 1.6536334754666429,
+                  "instrument": "THYAO",
+                  "kind": "reversal",
+                  "last_bar": 581,
+                  "ledger_at_birth": {
+                    "n": 3,
+                    "realized": 2
+                  },
+                  "sentence": {
+                    "en": "625 bars ago, THYAO showed a downward reversal signal: price made a new high while RSI made a lower high (price 138.65, RSI 70.5). It was invalidated 617 bars ago and is no longer valid. Its record is still thin: it played out in 2 of 3 cases.",
+                    "text": "THYAO'da 625 bar önce aşağı dönüş işareti çıktı: fiyat yeni tepe yaparken RSI daha düşük tepe yaptı (fiyat 138,65, RSI 70,5). Sinyal 617 bar önce geçersiz oldu; artık geçerli değil. Karnesi henüz az örnekli: 3 seferin 2'sinde tuttu.",
+                    "tr": "THYAO'da 625 bar önce aşağı dönüş işareti çıktı: fiyat yeni tepe yaparken RSI daha düşük tepe yaptı (fiyat 138,65, RSI 70,5). Sinyal 617 bar önce geçersiz oldu; artık geçerli değil. Karnesi henüz az örnekli: 3 seferin 2'sinde tuttu."
+                  },
+                  "series": "px",
+                  "stage": "invalidated",
+                  "state": "invalidated",
+                  "t": 1806019200000,
+                  "tier": 2,
+                  "time": "event",
+                  "trust": "replica",
+                  "validity": "closed"
+                },
+                {
+                  "born_bar": 250,
+                  "confirmations": 1,
+                  "direction": "up",
+                  "finding": "fnd.THYAO.continuation.up.250",
+                  "id": "cap.THYAO.continuation.up.250",
+                  "importance": 1.6431885316761892,
+                  "instrument": "THYAO",
+                  "kind": "continuation",
+                  "last_bar": 254,
+                  "ledger_at_birth": {
+                    "n": 6,
+                    "realized": 5
+                  },
+                  "sentence": {
+                    "en": "948 bars ago, THYAO crossed above the short average (108.05); it is now at 164.01, no longer above the short average. The uptrend has ended. The expected outcome came true 944 bars ago. Its record is still thin: it played out in 5 of 6 cases.",
+                    "text": "THYAO 948 bar önce kısa ortalamanın (108,05) üstüne çıktı; şu an 164,01, artık kısa ortalamanın üstünde değil. Yükseliş eğilimi sona erdi. Beklenen sonuç 944 bar önce gerçekleşti. Karnesi henüz az örnekli: 6 seferin 5'inde tuttu.",
+                    "tr": "THYAO 948 bar önce kısa ortalamanın (108,05) üstüne çıktı; şu an 164,01, artık kısa ortalamanın üstünde değil. Yükseliş eğilimi sona erdi. Beklenen sonuç 944 bar önce gerçekleşti. Karnesi henüz az örnekli: 6 seferin 5'inde tuttu."
+                  },
+                  "series": "px",
+                  "stage": "realized",
+                  "state": "live",
+                  "t": 1766534400000,
+                  "tier": 2,
+                  "time": "state",
+                  "trust": "replica",
+                  "validity": "closed"
+                },
+                {
+                  "born_bar": 472,
+                  "confirmations": 1,
+                  "direction": "up",
+                  "finding": "fnd.THYAO.continuation.up.472",
+                  "id": "cap.THYAO.continuation.up.472",
+                  "importance": 1.608157778114037,
+                  "instrument": "THYAO",
+                  "kind": "continuation",
+                  "last_bar": 475,
+                  "ledger_at_birth": {
+                    "n": 11,
+                    "realized": 7
+                  },
+                  "sentence": {
+                    "en": "726 bars ago, THYAO crossed above the short average (110.11); it is now at 164.01, no longer above the short average. The uptrend has ended. The expected outcome came true 723 bars ago. Its record is still thin: it played out in 7 of 11 cases.",
+                    "text": "THYAO 726 bar önce kısa ortalamanın (110,11) üstüne çıktı; şu an 164,01, artık kısa ortalamanın üstünde değil. Yükseliş eğilimi sona erdi. Beklenen sonuç 723 bar önce gerçekleşti. Karnesi henüz az örnekli: 11 seferin 7'sinde tuttu.",
+                    "tr": "THYAO 726 bar önce kısa ortalamanın (110,11) üstüne çıktı; şu an 164,01, artık kısa ortalamanın üstünde değil. Yükseliş eğilimi sona erdi. Beklenen sonuç 723 bar önce gerçekleşti. Karnesi henüz az örnekli: 11 seferin 7'sinde tuttu."
+                  },
+                  "series": "px",
+                  "stage": "realized",
+                  "state": "live",
+                  "t": 1793232000000,
+                  "tier": 2,
+                  "time": "state",
+                  "trust": "replica",
+                  "validity": "closed"
+                },
+                {
+                  "born_bar": 1136,
+                  "confirmations": 1,
+                  "direction": "neutral",
+                  "finding": "fnd.THYAO.squeeze.neutral.1136",
+                  "id": "cap.THYAO.squeeze.neutral.1136",
+                  "importance": 1.5964997537984893,
+                  "instrument": "THYAO",
+                  "kind": "squeeze",
+                  "last_bar": 1156,
+                  "ledger_at_birth": {
+                    "n": 6,
+                    "realized": 0
+                  },
+                  "sentence": {
+                    "en": "62 bars ago, the squeeze (direction open) started in THYAO; it no longer holds. The squeeze (direction open) has ended. The signal was invalidated 42 bars ago. Its record is still thin: it played out in 0 of 6 cases.",
+                    "text": "THYAO'da 62 bar önce sıkışma (yön belirsiz) başladı; artık sürmüyor. Sıkışma (yön belirsiz) sona erdi. Sinyal 42 bar önce geçersiz oldu. Karnesi henüz az örnekli: 6 seferin 0'ında tuttu.",
+                    "tr": "THYAO'da 62 bar önce sıkışma (yön belirsiz) başladı; artık sürmüyor. Sıkışma (yön belirsiz) sona erdi. Sinyal 42 bar önce geçersiz oldu. Karnesi henüz az örnekli: 6 seferin 0'ında tuttu."
+                  },
+                  "series": "px",
+                  "stage": "invalidated",
+                  "state": "invalidated",
+                  "t": 1875571200000,
+                  "tier": 2,
+                  "time": "state",
+                  "trust": "replica",
+                  "validity": "closed"
+                },
+                {
+                  "born_bar": 209,
+                  "confirmations": 1,
+                  "direction": "up",
+                  "finding": "fnd.THYAO.breakout.up.209",
+                  "id": "cap.THYAO.breakout.up.209",
+                  "importance": 1.5908927137709554,
+                  "instrument": "THYAO",
+                  "kind": "breakout",
+                  "last_bar": 216,
+                  "ledger_at_birth": {
+                    "n": 6,
+                    "realized": 3
+                  },
+                  "sentence": {
+                    "en": "989 bars ago, THYAO broke above resistance at 104.38 (close 106.11): an upside breakout. It was invalidated 982 bars ago and is no longer valid. Its record is still thin: it played out in 3 of 6 cases.",
+                    "text": "THYAO 989 bar önce 104,38'deki direnci yukarı kırdı (kapanış 106,11): yukarı kırılım. Sinyal 982 bar önce geçersiz oldu; artık geçerli değil. Karnesi henüz az örnekli: 6 seferin 3'ünde tuttu.",
+                    "tr": "THYAO 989 bar önce 104,38'deki direnci yukarı kırdı (kapanış 106,11): yukarı kırılım. Sinyal 982 bar önce geçersiz oldu; artık geçerli değil. Karnesi henüz az örnekli: 6 seferin 3'ünde tuttu."
+                  },
+                  "series": "px",
+                  "stage": "invalidated",
+                  "state": "invalidated",
+                  "t": 1761868800000,
+                  "tier": 2,
+                  "time": "event",
+                  "trust": "replica",
+                  "validity": "closed"
+                },
+                {
+                  "born_bar": 1133,
+                  "confirmations": 1,
+                  "direction": "up",
+                  "finding": "fnd.THYAO.reversal.up.1133",
+                  "id": "cap.THYAO.reversal.up.1133",
+                  "importance": 1.583901181409415,
+                  "instrument": "THYAO",
+                  "kind": "reversal",
+                  "last_bar": 1137,
+                  "ledger_at_birth": {
+                    "n": 5,
+                    "realized": 4
+                  },
+                  "sentence": {
+                    "en": "65 bars ago, THYAO showed an upward reversal signal: price made a new low while RSI made a higher low (price 156.86, RSI 48.9). It was invalidated 61 bars ago and is no longer valid. Its record is still thin: it played out in 4 of 5 cases.",
+                    "text": "THYAO'da 65 bar önce yukarı dönüş işareti çıktı: fiyat yeni dip yaparken RSI daha yüksek dip yaptı (fiyat 156,86, RSI 48,9). Sinyal 61 bar önce geçersiz oldu; artık geçerli değil. Karnesi henüz az örnekli: 5 seferin 4'ünde tuttu.",
+                    "tr": "THYAO'da 65 bar önce yukarı dönüş işareti çıktı: fiyat yeni dip yaparken RSI daha yüksek dip yaptı (fiyat 156,86, RSI 48,9). Sinyal 61 bar önce geçersiz oldu; artık geçerli değil. Karnesi henüz az örnekli: 5 seferin 4'ünde tuttu."
+                  },
+                  "series": "px",
+                  "stage": "invalidated",
+                  "state": "invalidated",
+                  "t": 1873411200000,
+                  "tier": 2,
+                  "time": "event",
+                  "trust": "replica",
+                  "validity": "closed"
+                },
+                {
+                  "born_bar": 57,
+                  "confirmations": 1,
+                  "direction": "up",
+                  "finding": "fnd.THYAO.breakout.up.57",
+                  "id": "cap.THYAO.breakout.up.57",
+                  "importance": 1.5813282394918298,
+                  "instrument": "THYAO",
+                  "kind": "breakout",
+                  "last_bar": 62,
+                  "ledger_at_birth": {
+                    "n": 2,
+                    "realized": 2
+                  },
+                  "sentence": {
+                    "en": "1141 bars ago, THYAO broke above resistance at 102.56 (close 104.03): an upside breakout. It was invalidated 1136 bars ago and is no longer valid. Its record is still thin: it played out in 2 of 2 cases.",
+                    "text": "THYAO 1141 bar önce 102,56'daki direnci yukarı kırdı (kapanış 104,03): yukarı kırılım. Sinyal 1136 bar önce geçersiz oldu; artık geçerli değil. Karnesi henüz az örnekli: 2 seferin 2'sinde tuttu.",
+                    "tr": "THYAO 1141 bar önce 102,56'daki direnci yukarı kırdı (kapanış 104,03): yukarı kırılım. Sinyal 1136 bar önce geçersiz oldu; artık geçerli değil. Karnesi henüz az örnekli: 2 seferin 2'sinde tuttu."
+                  },
+                  "series": "px",
+                  "stage": "invalidated",
+                  "state": "invalidated",
+                  "t": 1743379200000,
+                  "tier": 2,
+                  "time": "event",
+                  "trust": "replica",
+                  "validity": "closed"
+                },
+                {
+                  "born_bar": 662,
+                  "confirmations": 1,
+                  "direction": "up",
+                  "finding": "fnd.THYAO.reversal.up.662",
+                  "id": "cap.THYAO.reversal.up.662",
+                  "importance": 1.5738862774573383,
+                  "instrument": "THYAO",
+                  "kind": "reversal",
+                  "last_bar": 671,
+                  "ledger_at_birth": {
+                    "n": 4,
+                    "realized": 3
+                  },
+                  "sentence": {
+                    "en": "536 bars ago, THYAO showed an upward reversal signal: price made a new low while RSI made a higher low (price 132.63, RSI 40.2). The expected outcome came true 527 bars ago. Its record is still thin: it played out in 3 of 4 cases.",
+                    "text": "THYAO'da 536 bar önce yukarı dönüş işareti çıktı: fiyat yeni dip yaparken RSI daha yüksek dip yaptı (fiyat 132,63, RSI 40,2). Beklenen sonuç 527 bar önce gerçekleşti. Karnesi henüz az örnekli: 4 seferin 3'ünde tuttu.",
+                    "tr": "THYAO'da 536 bar önce yukarı dönüş işareti çıktı: fiyat yeni dip yaparken RSI daha yüksek dip yaptı (fiyat 132,63, RSI 40,2). Beklenen sonuç 527 bar önce gerçekleşti. Karnesi henüz az örnekli: 4 seferin 3'ünde tuttu."
+                  },
+                  "series": "px",
+                  "stage": "realized",
+                  "state": "live",
+                  "t": 1816905600000,
+                  "tier": 3,
+                  "time": "event",
+                  "trust": "replica",
+                  "validity": "closed"
+                },
+                {
+                  "born_bar": 83,
+                  "confirmations": 1,
+                  "direction": "down",
+                  "finding": "fnd.THYAO.breakout.down.83",
+                  "id": "cap.THYAO.breakout.down.83",
+                  "importance": 1.5666671618400474,
+                  "instrument": "THYAO",
+                  "kind": "breakout",
+                  "last_bar": 88,
+                  "ledger_at_birth": {
+                    "n": 1,
+                    "realized": 0
+                  },
+                  "sentence": {
+                    "en": "1115 bars ago, THYAO broke below support at 99.74 (close 98.16): a downside breakout. It was invalidated 1110 bars ago and is no longer valid. Its record is still thin: it played out in 0 of 1 cases.",
+                    "text": "THYAO 1115 bar önce 99,74'teki desteği aşağı kırdı (kapanış 98,16): aşağı kırılım. Sinyal 1110 bar önce geçersiz oldu; artık geçerli değil. Karnesi henüz az örnekli: 1 seferin 0'ında tuttu.",
+                    "tr": "THYAO 1115 bar önce 99,74'teki desteği aşağı kırdı (kapanış 98,16): aşağı kırılım. Sinyal 1110 bar önce geçersiz oldu; artık geçerli değil. Karnesi henüz az örnekli: 1 seferin 0'ında tuttu."
+                  },
+                  "series": "px",
+                  "stage": "invalidated",
+                  "state": "invalidated",
+                  "t": 1746489600000,
+                  "tier": 3,
+                  "time": "event",
+                  "trust": "replica",
+                  "validity": "closed"
+                },
+                {
+                  "born_bar": 383,
+                  "confirmations": 1,
+                  "direction": "up",
+                  "finding": "fnd.THYAO.reversal.up.383",
+                  "id": "cap.THYAO.reversal.up.383",
+                  "importance": 1.5661774133366195,
+                  "instrument": "THYAO",
+                  "kind": "reversal",
+                  "last_bar": 398,
+                  "ledger_at_birth": {
+                    "n": 3,
+                    "realized": 3
+                  },
+                  "sentence": {
+                    "en": "815 bars ago, THYAO showed an upward reversal signal: price made a new low while RSI made a higher low (price 101.42, RSI 42.5). Its 15-bar life ran out 800 bars ago without an outcome; it is no longer valid. Its record is still thin: it played out in 3 of 3 cases.",
+                    "text": "THYAO'da 815 bar önce yukarı dönüş işareti çıktı: fiyat yeni dip yaparken RSI daha yüksek dip yaptı (fiyat 101,42, RSI 42,5). Sinyalin 15 barlık ömrü 800 bar önce sonuçsuz doldu; artık geçerli değil. Karnesi henüz az örnekli: 3 seferin 3'ünde tuttu.",
+                    "tr": "THYAO'da 815 bar önce yukarı dönüş işareti çıktı: fiyat yeni dip yaparken RSI daha yüksek dip yaptı (fiyat 101,42, RSI 42,5). Sinyalin 15 barlık ömrü 800 bar önce sonuçsuz doldu; artık geçerli değil. Karnesi henüz az örnekli: 3 seferin 3'ünde tuttu."
+                  },
+                  "series": "px",
+                  "stage": "expired",
+                  "state": "expired",
+                  "t": 1783987200000,
+                  "tier": 3,
+                  "time": "event",
+                  "trust": "replica",
+                  "validity": "closed"
+                },
+                {
+                  "born_bar": 1064,
+                  "confirmations": 1,
+                  "direction": "down",
+                  "finding": "fnd.THYAO.breakout.down.1064",
+                  "id": "cap.THYAO.breakout.down.1064",
+                  "importance": 1.5652790551203308,
+                  "instrument": "THYAO",
+                  "kind": "breakout",
+                  "last_bar": 1074,
+                  "ledger_at_birth": {
+                    "n": 19,
+                    "realized": 10
+                  },
+                  "sentence": {
+                    "en": "134 bars ago, THYAO broke below support at 157.27 (close 155.50): a downside breakout. Its 10-bar life ran out 124 bars ago without an outcome; it is no longer valid. Its record is still thin: it played out in 10 of 19 cases.",
+                    "text": "THYAO 134 bar önce 157,27'deki desteği aşağı kırdı (kapanış 155,50): aşağı kırılım. Sinyalin 10 barlık ömrü 124 bar önce sonuçsuz doldu; artık geçerli değil. Karnesi henüz az örnekli: 19 seferin 10'unda tuttu.",
+                    "tr": "THYAO 134 bar önce 157,27'deki desteği aşağı kırdı (kapanış 155,50): aşağı kırılım. Sinyalin 10 barlık ömrü 124 bar önce sonuçsuz doldu; artık geçerli değil. Karnesi henüz az örnekli: 19 seferin 10'unda tuttu."
+                  },
+                  "series": "px",
+                  "stage": "expired",
+                  "state": "expired",
+                  "t": 1865721600000,
+                  "tier": 3,
+                  "time": "event",
+                  "trust": "replica",
+                  "validity": "closed"
+                },
+                {
+                  "born_bar": 558,
+                  "confirmations": 1,
+                  "direction": "up",
+                  "finding": "fnd.THYAO.breakout.up.558",
+                  "id": "cap.THYAO.breakout.up.558",
+                  "importance": 1.5594444147173385,
+                  "instrument": "THYAO",
+                  "kind": "breakout",
+                  "last_bar": 560,
+                  "ledger_at_birth": {
+                    "n": 17,
+                    "realized": 6
+                  },
+                  "sentence": {
+                    "en": "640 bars ago, THYAO broke above resistance at 126.63 (close 127.11): an upside breakout. The expected outcome came true 638 bars ago. Its record is still thin: it played out in 6 of 17 cases.",
+                    "text": "THYAO 640 bar önce 126,63'teki direnci yukarı kırdı (kapanış 127,11): yukarı kırılım. Beklenen sonuç 638 bar önce gerçekleşti. Karnesi henüz az örnekli: 17 seferin 6'sında tuttu.",
+                    "tr": "THYAO 640 bar önce 126,63'teki direnci yukarı kırdı (kapanış 127,11): yukarı kırılım. Beklenen sonuç 638 bar önce gerçekleşti. Karnesi henüz az örnekli: 17 seferin 6'sında tuttu."
+                  },
+                  "series": "px",
+                  "stage": "realized",
+                  "state": "live",
+                  "t": 1803513600000,
+                  "tier": 3,
+                  "time": "event",
+                  "trust": "replica",
+                  "validity": "closed"
+                },
+                {
+                  "born_bar": 368,
+                  "confirmations": 1,
+                  "direction": "up",
+                  "finding": "fnd.THYAO.reversal.up.368",
+                  "id": "cap.THYAO.reversal.up.368",
+                  "importance": 1.548209902329599,
+                  "instrument": "THYAO",
+                  "kind": "reversal",
+                  "last_bar": 376,
+                  "ledger_at_birth": {
+                    "n": 2,
+                    "realized": 2
+                  },
+                  "sentence": {
+                    "en": "830 bars ago, THYAO showed an upward reversal signal: price made a new low while RSI made a higher low (price 101.32, RSI 42.1). The expected outcome came true 822 bars ago. Its record is still thin: it played out in 2 of 2 cases.",
+                    "text": "THYAO'da 830 bar önce yukarı dönüş işareti çıktı: fiyat yeni dip yaparken RSI daha yüksek dip yaptı (fiyat 101,32, RSI 42,1). Beklenen sonuç 822 bar önce gerçekleşti. Karnesi henüz az örnekli: 2 seferin 2'sinde tuttu.",
+                    "tr": "THYAO'da 830 bar önce yukarı dönüş işareti çıktı: fiyat yeni dip yaparken RSI daha yüksek dip yaptı (fiyat 101,32, RSI 42,1). Beklenen sonuç 822 bar önce gerçekleşti. Karnesi henüz az örnekli: 2 seferin 2'sinde tuttu."
+                  },
+                  "series": "px",
+                  "stage": "realized",
+                  "state": "live",
+                  "t": 1781222400000,
+                  "tier": 3,
+                  "time": "event",
+                  "trust": "replica",
+                  "validity": "closed"
+                },
+                {
+                  "born_bar": 613,
+                  "confirmations": 1,
+                  "direction": "down",
+                  "finding": "fnd.THYAO.reversal.down.613",
+                  "id": "cap.THYAO.reversal.down.613",
+                  "importance": 1.5435466589207816,
+                  "instrument": "THYAO",
+                  "kind": "reversal",
+                  "last_bar": 622,
+                  "ledger_at_birth": {
+                    "n": 5,
+                    "realized": 2
+                  },
+                  "sentence": {
+                    "en": "585 bars ago, THYAO showed a downward reversal signal: price made a new high while RSI made a lower high (price 158.41, RSI 68.1). The expected outcome came true 576 bars ago. Its record is still thin: it played out in 2 of 5 cases.",
+                    "text": "THYAO'da 585 bar önce aşağı dönüş işareti çıktı: fiyat yeni tepe yaparken RSI daha düşük tepe yaptı (fiyat 158,41, RSI 68,1). Beklenen sonuç 576 bar önce gerçekleşti. Karnesi henüz az örnekli: 5 seferin 2'sinde tuttu.",
+                    "tr": "THYAO'da 585 bar önce aşağı dönüş işareti çıktı: fiyat yeni tepe yaparken RSI daha düşük tepe yaptı (fiyat 158,41, RSI 68,1). Beklenen sonuç 576 bar önce gerçekleşti. Karnesi henüz az örnekli: 5 seferin 2'sinde tuttu."
+                  },
+                  "series": "px",
+                  "stage": "realized",
+                  "state": "live",
+                  "t": 1811116800000,
+                  "tier": 3,
+                  "time": "event",
+                  "trust": "replica",
+                  "validity": "closed"
+                },
+                {
+                  "born_bar": 223,
+                  "confirmations": 1,
+                  "direction": "down",
+                  "finding": "fnd.THYAO.reversal.down.223",
+                  "id": "cap.THYAO.reversal.down.223",
+                  "importance": 1.542997306311613,
+                  "instrument": "THYAO",
+                  "kind": "reversal",
+                  "last_bar": 226,
+                  "ledger_at_birth": {
+                    "n": 1,
+                    "realized": 1
+                  },
+                  "sentence": {
+                    "en": "975 bars ago, THYAO showed a downward reversal signal: price made a new high while RSI made a lower high (price 107.82, RSI 59.8). It was invalidated 972 bars ago and is no longer valid. Its record is still thin: it played out in 1 of 1 cases.",
+                    "text": "THYAO'da 975 bar önce aşağı dönüş işareti çıktı: fiyat yeni tepe yaparken RSI daha düşük tepe yaptı (fiyat 107,82, RSI 59,8). Sinyal 972 bar önce geçersiz oldu; artık geçerli değil. Karnesi henüz az örnekli: 1 seferin 1'inde tuttu.",
+                    "tr": "THYAO'da 975 bar önce aşağı dönüş işareti çıktı: fiyat yeni tepe yaparken RSI daha düşük tepe yaptı (fiyat 107,82, RSI 59,8). Sinyal 972 bar önce geçersiz oldu; artık geçerli değil. Karnesi henüz az örnekli: 1 seferin 1'inde tuttu."
+                  },
+                  "series": "px",
+                  "stage": "invalidated",
+                  "state": "invalidated",
+                  "t": 1763078400000,
+                  "tier": 3,
+                  "time": "event",
+                  "trust": "replica",
+                  "validity": "closed"
+                },
+                {
+                  "born_bar": 825,
+                  "coin_flip": true,
+                  "confirmations": 1,
+                  "direction": "up",
+                  "finding": "fnd.THYAO.breakout.up.825",
+                  "id": "cap.THYAO.breakout.up.825",
+                  "importance": 1.5414924176957059,
+                  "instrument": "THYAO",
+                  "kind": "breakout",
+                  "last_bar": 832,
+                  "ledger_at_birth": {
+                    "n": 28,
+                    "realized": 12
+                  },
+                  "sentence": {
+                    "en": "373 bars ago, THYAO broke above resistance at 142.15 (close 144.10): an upside breakout. It was invalidated 366 bars ago and is no longer valid. Historically, this signal played out in 12 of 28 cases.",
+                    "text": "THYAO 373 bar önce 142,15'teki direnci yukarı kırdı (kapanış 144,10): yukarı kırılım. Sinyal 366 bar önce geçersiz oldu; artık geçerli değil. Geçmişte bu sinyal 28 seferin 12'sinde beklendiği gibi sonuçlandı.",
+                    "tr": "THYAO 373 bar önce 142,15'teki direnci yukarı kırdı (kapanış 144,10): yukarı kırılım. Sinyal 366 bar önce geçersiz oldu; artık geçerli değil. Geçmişte bu sinyal 28 seferin 12'sinde beklendiği gibi sonuçlandı."
+                  },
+                  "series": "px",
+                  "stage": "invalidated",
+                  "state": "invalidated",
+                  "t": 1836518400000,
+                  "tier": 3,
+                  "time": "event",
+                  "trust": "replica",
+                  "validity": "closed"
+                },
+                {
+                  "born_bar": 976,
+                  "confirmations": 1,
+                  "direction": "down",
+                  "finding": "fnd.THYAO.breakout.down.976",
+                  "id": "cap.THYAO.breakout.down.976",
+                  "importance": 1.5410957916779138,
+                  "instrument": "THYAO",
+                  "kind": "breakout",
+                  "last_bar": 982,
+                  "ledger_at_birth": {
+                    "n": 17,
+                    "realized": 8
+                  },
+                  "sentence": {
+                    "en": "222 bars ago, THYAO broke below support at 154.75 (close 153.11): a downside breakout. The expected outcome came true 216 bars ago. Its record is still thin: it played out in 8 of 17 cases.",
+                    "text": "THYAO 222 bar önce 154,75'teki desteği aşağı kırdı (kapanış 153,11): aşağı kırılım. Beklenen sonuç 216 bar önce gerçekleşti. Karnesi henüz az örnekli: 17 seferin 8'inde tuttu.",
+                    "tr": "THYAO 222 bar önce 154,75'teki desteği aşağı kırdı (kapanış 153,11): aşağı kırılım. Beklenen sonuç 216 bar önce gerçekleşti. Karnesi henüz az örnekli: 17 seferin 8'inde tuttu."
+                  },
+                  "series": "px",
+                  "stage": "realized",
+                  "state": "live",
+                  "t": 1854662400000,
+                  "tier": 3,
+                  "time": "event",
+                  "trust": "replica",
+                  "validity": "closed"
+                },
+                {
+                  "born_bar": 982,
+                  "confirmations": 1,
+                  "direction": "down",
+                  "finding": "fnd.THYAO.breakout.down.982",
+                  "id": "cap.THYAO.breakout.down.982",
+                  "importance": 1.5385568479157992,
+                  "instrument": "THYAO",
+                  "kind": "breakout",
+                  "last_bar": 987,
+                  "ledger_at_birth": {
+                    "n": 17,
+                    "realized": 8
+                  },
+                  "sentence": {
+                    "en": "216 bars ago, THYAO broke below support at 149.32 (close 148.82): a downside breakout. The expected outcome came true 211 bars ago. Its record is still thin: it played out in 8 of 17 cases.",
+                    "text": "THYAO 216 bar önce 149,32'deki desteği aşağı kırdı (kapanış 148,82): aşağı kırılım. Beklenen sonuç 211 bar önce gerçekleşti. Karnesi henüz az örnekli: 17 seferin 8'inde tuttu.",
+                    "tr": "THYAO 216 bar önce 149,32'deki desteği aşağı kırdı (kapanış 148,82): aşağı kırılım. Beklenen sonuç 211 bar önce gerçekleşti. Karnesi henüz az örnekli: 17 seferin 8'inde tuttu."
+                  },
+                  "series": "px",
+                  "stage": "realized",
+                  "state": "live",
+                  "t": 1855267200000,
+                  "tier": 3,
+                  "time": "event",
+                  "trust": "replica",
+                  "validity": "closed"
+                },
+                {
+                  "born_bar": 124,
+                  "confirmations": 1,
+                  "direction": "up",
+                  "finding": "fnd.THYAO.reversal.up.124",
+                  "id": "cap.THYAO.reversal.up.124",
+                  "importance": 1.53695781293679,
+                  "instrument": "THYAO",
+                  "kind": "reversal",
+                  "last_bar": 133,
+                  "ledger_at_birth": {
+                    "n": 1,
+                    "realized": 1
+                  },
+                  "sentence": {
+                    "en": "1074 bars ago, THYAO showed an upward reversal signal: price made a new low while RSI made a higher low (price 94.96, RSI 41.9). The expected outcome came true 1065 bars ago. Its record is still thin: it played out in 1 of 1 cases.",
+                    "text": "THYAO'da 1074 bar önce yukarı dönüş işareti çıktı: fiyat yeni dip yaparken RSI daha yüksek dip yaptı (fiyat 94,96, RSI 41,9). Beklenen sonuç 1065 bar önce gerçekleşti. Karnesi henüz az örnekli: 1 seferin 1'inde tuttu.",
+                    "tr": "THYAO'da 1074 bar önce yukarı dönüş işareti çıktı: fiyat yeni dip yaparken RSI daha yüksek dip yaptı (fiyat 94,96, RSI 41,9). Beklenen sonuç 1065 bar önce gerçekleşti. Karnesi henüz az örnekli: 1 seferin 1'inde tuttu."
+                  },
+                  "series": "px",
+                  "stage": "realized",
+                  "state": "live",
+                  "t": 1751932800000,
+                  "tier": 3,
+                  "time": "event",
+                  "trust": "replica",
+                  "validity": "closed"
+                },
+                {
+                  "born_bar": 428,
+                  "confirmations": 1,
+                  "direction": "up",
+                  "finding": "fnd.THYAO.continuation.up.428",
+                  "id": "cap.THYAO.continuation.up.428",
+                  "importance": 1.5352429710264301,
+                  "instrument": "THYAO",
+                  "kind": "continuation",
+                  "last_bar": 432,
+                  "ledger_at_birth": {
+                    "n": 9,
+                    "realized": 6
+                  },
+                  "sentence": {
+                    "en": "770 bars ago, THYAO crossed above the short average (103.01); it is now at 164.01, no longer above the short average. The uptrend has ended. The expected outcome came true 766 bars ago. Its record is still thin: it played out in 6 of 9 cases.",
+                    "text": "THYAO 770 bar önce kısa ortalamanın (103,01) üstüne çıktı; şu an 164,01, artık kısa ortalamanın üstünde değil. Yükseliş eğilimi sona erdi. Beklenen sonuç 766 bar önce gerçekleşti. Karnesi henüz az örnekli: 9 seferin 6'sında tuttu.",
+                    "tr": "THYAO 770 bar önce kısa ortalamanın (103,01) üstüne çıktı; şu an 164,01, artık kısa ortalamanın üstünde değil. Yükseliş eğilimi sona erdi. Beklenen sonuç 766 bar önce gerçekleşti. Karnesi henüz az örnekli: 9 seferin 6'sında tuttu."
+                  },
+                  "series": "px",
+                  "stage": "realized",
+                  "state": "live",
+                  "t": 1788134400000,
+                  "tier": 3,
+                  "time": "state",
+                  "trust": "replica",
+                  "validity": "closed"
+                },
+                {
+                  "born_bar": 256,
+                  "confirmations": 1,
+                  "direction": "down",
+                  "finding": "fnd.THYAO.reversal.down.256",
+                  "id": "cap.THYAO.reversal.down.256",
+                  "importance": 1.5341621597963568,
+                  "instrument": "THYAO",
+                  "kind": "reversal",
+                  "last_bar": 266,
+                  "ledger_at_birth": {
+                    "n": 2,
+                    "realized": 1
+                  },
+                  "sentence": {
+                    "en": "942 bars ago, THYAO showed a downward reversal signal: price made a new high while RSI made a lower high (price 114.54, RSI 66.5). The expected outcome came true 932 bars ago. Its record is still thin: it played out in 1 of 2 cases.",
+                    "text": "THYAO'da 942 bar önce aşağı dönüş işareti çıktı: fiyat yeni tepe yaparken RSI daha düşük tepe yaptı (fiyat 114,54, RSI 66,5). Beklenen sonuç 932 bar önce gerçekleşti. Karnesi henüz az örnekli: 2 seferin 1'inde tuttu.",
+                    "tr": "THYAO'da 942 bar önce aşağı dönüş işareti çıktı: fiyat yeni tepe yaparken RSI daha düşük tepe yaptı (fiyat 114,54, RSI 66,5). Beklenen sonuç 932 bar önce gerçekleşti. Karnesi henüz az örnekli: 2 seferin 1'inde tuttu."
+                  },
+                  "series": "px",
+                  "stage": "realized",
+                  "state": "live",
+                  "t": 1767916800000,
+                  "tier": 3,
+                  "time": "event",
+                  "trust": "replica",
+                  "validity": "closed"
+                },
+                {
+                  "born_bar": 49,
+                  "confirmations": 1,
+                  "direction": "up",
+                  "finding": "fnd.THYAO.breakout.up.49",
+                  "id": "cap.THYAO.breakout.up.49",
+                  "importance": 1.5316685686776146,
+                  "instrument": "THYAO",
+                  "kind": "breakout",
+                  "last_bar": 56,
+                  "ledger_at_birth": {
+                    "n": 0,
+                    "realized": 0
+                  },
+                  "sentence": {
+                    "en": "1149 bars ago, THYAO broke above resistance at 98.89 (close 99.26): an upside breakout. The expected outcome came true 1142 bars ago. No track record yet.",
+                    "text": "THYAO 1149 bar önce 98,89'daki direnci yukarı kırdı (kapanış 99,26): yukarı kırılım. Beklenen sonuç 1142 bar önce gerçekleşti. Henüz karnesi yok.",
+                    "tr": "THYAO 1149 bar önce 98,89'daki direnci yukarı kırdı (kapanış 99,26): yukarı kırılım. Beklenen sonuç 1142 bar önce gerçekleşti. Henüz karnesi yok."
+                  },
+                  "series": "px",
+                  "stage": "realized",
+                  "state": "live",
+                  "t": 1742515200000,
+                  "tier": 3,
+                  "time": "event",
+                  "trust": "replica",
+                  "validity": "closed"
+                },
+                {
+                  "born_bar": 731,
+                  "coin_flip": true,
+                  "confirmations": 1,
+                  "direction": "up",
+                  "finding": "fnd.THYAO.breakout.up.731",
+                  "id": "cap.THYAO.breakout.up.731",
+                  "importance": 1.5282964380040724,
+                  "instrument": "THYAO",
+                  "kind": "breakout",
+                  "last_bar": 741,
+                  "ledger_at_birth": {
+                    "n": 24,
+                    "realized": 10
+                  },
+                  "sentence": {
+                    "en": "467 bars ago, THYAO broke above resistance at 145.06 (close 147.02): an upside breakout. Its 10-bar life ran out 457 bars ago without an outcome; it is no longer valid. Historically, this signal played out in 10 of 24 cases.",
+                    "text": "THYAO 467 bar önce 145,06'daki direnci yukarı kırdı (kapanış 147,02): yukarı kırılım. Sinyalin 10 barlık ömrü 457 bar önce sonuçsuz doldu; artık geçerli değil. Geçmişte bu sinyal 24 seferin 10'unda beklendiği gibi sonuçlandı.",
+                    "tr": "THYAO 467 bar önce 145,06'daki direnci yukarı kırdı (kapanış 147,02): yukarı kırılım. Sinyalin 10 barlık ömrü 457 bar önce sonuçsuz doldu; artık geçerli değil. Geçmişte bu sinyal 24 seferin 10'unda beklendiği gibi sonuçlandı."
+                  },
+                  "series": "px",
+                  "stage": "expired",
+                  "state": "expired",
+                  "t": 1825372800000,
+                  "tier": 3,
+                  "time": "event",
+                  "trust": "replica",
+                  "validity": "closed"
+                },
+                {
+                  "born_bar": 721,
+                  "confirmations": 1,
+                  "direction": "up",
+                  "finding": "fnd.THYAO.continuation.up.721",
+                  "id": "cap.THYAO.continuation.up.721",
+                  "importance": 1.5242838656921098,
+                  "instrument": "THYAO",
+                  "kind": "continuation",
+                  "last_bar": 734,
+                  "ledger_at_birth": {
+                    "n": 15,
+                    "realized": 9
+                  },
+                  "sentence": {
+                    "en": "477 bars ago, THYAO crossed above the short average (137.26); it is now at 164.01, no longer above the short average. The uptrend has ended. The expected outcome came true 464 bars ago. Its record is still thin: it played out in 9 of 15 cases.",
+                    "text": "THYAO 477 bar önce kısa ortalamanın (137,26) üstüne çıktı; şu an 164,01, artık kısa ortalamanın üstünde değil. Yükseliş eğilimi sona erdi. Beklenen sonuç 464 bar önce gerçekleşti. Karnesi henüz az örnekli: 15 seferin 9'unda tuttu.",
+                    "tr": "THYAO 477 bar önce kısa ortalamanın (137,26) üstüne çıktı; şu an 164,01, artık kısa ortalamanın üstünde değil. Yükseliş eğilimi sona erdi. Beklenen sonuç 464 bar önce gerçekleşti. Karnesi henüz az örnekli: 15 seferin 9'unda tuttu."
+                  },
+                  "series": "px",
+                  "stage": "realized",
+                  "state": "live",
+                  "t": 1824595200000,
+                  "tier": 3,
+                  "time": "state",
+                  "trust": "replica",
+                  "validity": "closed"
+                },
+                {
+                  "born_bar": 319,
+                  "confirmations": 1,
+                  "direction": "down",
+                  "finding": "fnd.THYAO.breakout.down.319",
+                  "id": "cap.THYAO.breakout.down.319",
+                  "importance": 1.5237183794656368,
+                  "instrument": "THYAO",
+                  "kind": "breakout",
+                  "last_bar": 329,
+                  "ledger_at_birth": {
+                    "n": 6,
+                    "realized": 2
+                  },
+                  "sentence": {
+                    "en": "879 bars ago, THYAO broke below support at 105.08 (close 104.75): a downside breakout. It was invalidated 869 bars ago and is no longer valid. Its record is still thin: it played out in 2 of 6 cases.",
+                    "text": "THYAO 879 bar önce 105,08'deki desteği aşağı kırdı (kapanış 104,75): aşağı kırılım. Sinyal 869 bar önce geçersiz oldu; artık geçerli değil. Karnesi henüz az örnekli: 6 seferin 2'sinde tuttu.",
+                    "tr": "THYAO 879 bar önce 105,08'deki desteği aşağı kırdı (kapanış 104,75): aşağı kırılım. Sinyal 869 bar önce geçersiz oldu; artık geçerli değil. Karnesi henüz az örnekli: 6 seferin 2'sinde tuttu."
+                  },
+                  "series": "px",
+                  "stage": "invalidated",
+                  "state": "invalidated",
+                  "t": 1775606400000,
+                  "tier": 3,
+                  "time": "event",
+                  "trust": "replica",
+                  "validity": "closed"
+                }
+              ],
+              "kind": "capsules"
+            },
+            "id": "f2",
+            "now": 1760000000000,
+            "seq": 4,
+            "type": "result"
+          }
+        }
+      ],
+      "note": "At `all` the coin-flip stories are in the feed, marked `coin_flip: true` (K53 rule 4); nothing is counted as hidden.",
+      "send": {
+        "conn": "a",
+        "msg": {
+          "id": "f2",
+          "query": {
+            "audience": true,
+            "kind": "capsules",
+            "limit": 30
+          },
+          "type": "query"
+        }
+      }
+    },
+    {
+      "expect": [
+        {
+          "conn": "a",
+          "msg": {
+            "id": "s3",
+            "seq": 5,
+            "status": "applied",
+            "type": "ack"
+          }
+        }
+      ],
+      "note": "A position on THYAO, back at `balanced`.",
+      "send": {
+        "conn": "a",
+        "msg": {
+          "id": "s3",
+          "ops": [
+            {
+              "audience": {
+                "group": "future",
+                "positions": {
+                  "THYAO": 100.0
+                },
+                "sensitivity": "balanced",
+                "watchlist": [
+                  "THYAO"
+                ]
+              },
+              "op": "set_audience"
+            }
+          ],
+          "type": "command"
+        }
+      }
+    },
+    {
+      "expect": [
+        {
+          "conn": "a",
+          "msg": {
+            "data": {
+              "instrument": "THYAO",
+              "kind": "stories",
+              "series": "px",
+              "stories": [
+                {
+                  "born_bar": 1145,
+                  "born_t": 1874275200000,
+                  "closed_bar": 1165,
+                  "closed_t": 1876694400000,
+                  "direction": "down",
+                  "face": {
+                    "direction_word": "aşağı",
+                    "event": "düşüş eğilimi",
+                    "few_cases": true,
+                    "ledger_n": 18,
+                    "ledger_short": "18'de 4 tuttu (az örnek)",
+                    "moved": "21 Haziran'da",
+                    "validity_phrase": "süresi doldu",
+                    "when": "24 Mayıs'ta"
+                  },
+                  "finding": "fnd.THYAO.continuation.down.1145",
+                  "hidden": "sensitivity",
+                  "id": "cap.THYAO.continuation.down.1145",
+                  "in_feed": false,
+                  "kind": "continuation",
+                  "last_bar": 1165,
+                  "last_t": 1876694400000,
+                  "outcome": "expired",
+                  "series": "px",
+                  "stage": "expired",
+                  "tier": 3,
+                  "validity": "closed"
+                },
+                {
+                  "born_bar": 1155,
+                  "born_t": 1875484800000,
+                  "closed_bar": 1161,
+                  "closed_t": 1876176000000,
+                  "coin_flip": true,
+                  "direction": "up",
+                  "face": {
+                    "direction_word": "yukarı",
+                    "event": "yukarı kırılım",
+                    "ledger_n": 39,
+                    "ledger_short": "39'da 15 tuttu",
+                    "moved": "15 Haziran'da",
+                    "validity_phrase": "tutmadı",
+                    "when": "7 Haziran'da"
+                  },
+                  "finding": "fnd.THYAO.breakout.up.1155",
+                  "id": "cap.THYAO.breakout.up.1155",
+                  "in_feed": true,
+                  "kind": "breakout",
+                  "last_bar": 1161,
+                  "last_t": 1876176000000,
+                  "outcome": "invalidated",
+                  "series": "px",
+                  "stage": "invalidated",
+                  "tier": 3,
+                  "validity": "closed"
+                },
+                {
+                  "born_bar": 1164,
+                  "born_t": 1876608000000,
+                  "closed_bar": 1184,
+                  "closed_t": 1879027200000,
+                  "coin_flip": true,
+                  "direction": "up",
+                  "face": {
+                    "direction_word": "yukarı",
+                    "event": "yükseliş eğilimi",
+                    "ledger_n": 25,
+                    "ledger_short": "25'te 13 tuttu",
+                    "moved": "15 işlem günü önce",
+                    "validity_phrase": "süresi doldu",
+                    "when": "20 Haziran'da"
+                  },
+                  "finding": "fnd.THYAO.continuation.up.1164",
+                  "hidden": "coin_flip",
+                  "id": "cap.THYAO.continuation.up.1164",
+                  "in_feed": false,
+                  "kind": "continuation",
+                  "last_bar": 1184,
+                  "last_t": 1879027200000,
+                  "outcome": "expired",
+                  "series": "px",
+                  "stage": "expired",
+                  "tier": 3,
+                  "validity": "closed"
+                },
+                {
+                  "born_bar": 1177,
+                  "born_t": 1878249600000,
+                  "closed_bar": 1180,
+                  "closed_t": 1878508800000,
+                  "coin_flip": true,
+                  "direction": "up",
+                  "face": {
+                    "direction_word": "yukarı",
+                    "event": "yukarı kırılım",
+                    "ledger_n": 40,
+                    "ledger_short": "40'ta 15 tuttu",
+                    "moved": "19 işlem günü önce",
+                    "validity_phrase": "tutmadı",
+                    "when": "9 Temmuz'da"
+                  },
+                  "finding": "fnd.THYAO.breakout.up.1177",
+                  "id": "cap.THYAO.breakout.up.1177",
+                  "in_feed": true,
+                  "kind": "breakout",
+                  "last_bar": 1180,
+                  "last_t": 1878508800000,
+                  "outcome": "invalidated",
+                  "series": "px",
+                  "stage": "invalidated",
+                  "tier": 3,
+                  "validity": "closed"
+                }
+              ],
+              "total": 4
+            },
+            "id": "l2",
+            "now": 1760000000000,
+            "seq": 5,
+            "type": "result"
+          }
+        }
+      ],
+      "note": "(K42) With the exemption (the default), a negative stage (`weakened`, `invalidated`, `retracted`) of a coin-flip story about the position stays in the feed.",
+      "send": {
+        "conn": "a",
+        "msg": {
+          "id": "l2",
+          "query": {
+            "instrument": "THYAO",
+            "kind": "stories",
+            "range": {
+              "last": 40
+            }
+          },
+          "type": "query"
+        }
+      }
+    },
+    {
+      "expect": [
+        {
+          "conn": "a",
+          "msg": {
+            "id": "st",
+            "status": "subscribed",
+            "type": "ack"
+          }
+        }
+      ],
+      "note": "Live updates of the list.",
+      "send": {
+        "conn": "a",
+        "msg": {
+          "id": "st",
+          "topic": {
+            "instrument": "THYAO",
+            "kind": "stories"
+          },
+          "type": "subscribe"
+        }
+      }
+    },
+    {
+      "data": {
+        "change": {
+          "bar": {
+            "c": 159.74,
+            "h": 162.48,
+            "l": 158.2,
+            "o": 161.96,
+            "t": 1880928000000,
+            "v": 547966.4
+          },
+          "kind": "bar"
+        },
+        "feed": {
+          "feed": "bist",
+          "interval": "1d",
+          "symbol": "THYAO"
+        },
+        "seq": 1
+      },
+      "expect": [],
+      "note": "A final bar: changed rows come as `story` events with their feed place and mark."
+    },
+    {
+      "data": {
+        "change": {
+          "bar": {
+            "c": 157.08,
+            "h": 160.39,
+            "l": 154.87,
+            "o": 159.87,
+            "t": 1881014400000,
+            "v": 1391389.35
+          },
+          "kind": "bar"
+        },
+        "feed": {
+          "feed": "bist",
+          "interval": "1d",
+          "symbol": "THYAO"
+        },
+        "seq": 2
+      },
+      "expect": [
+        {
+          "conn": "a",
+          "msg": {
+            "event": {
+              "kind": "story",
+              "seq": 7,
+              "story": {
+                "born_bar": 1200,
+                "born_t": 1880928000000,
+                "coin_flip": true,
+                "direction": "down",
+                "face": {
+                  "direction_word": "aşağı",
+                  "event": "aşağı kırılım",
+                  "ledger_n": 20,
+                  "ledger_short": "20'de 10 tuttu",
+                  "moved": "dün",
+                  "validity_phrase": "hâlâ geçerli",
+                  "when": "dün"
+                },
+                "finding": "fnd.THYAO.breakout.down.1200",
+                "hidden": "coin_flip",
+                "id": "cap.THYAO.breakout.down.1200",
+                "in_feed": false,
+                "kind": "breakout",
+                "last_bar": 1200,
+                "last_t": 1880928000000,
+                "series": "px",
+                "stage": "born",
+                "tier": 3,
+                "validity": "valid"
+              }
+            },
+            "sub": "st",
+            "type": "notify"
+          }
+        }
+      ],
+      "note": "Another bar."
+    },
+    {
+      "expect": [
+        {
+          "conn": "a",
+          "msg": {
+            "data": {
+              "kind": "ledger",
+              "rows": [
+                {
+                  "key": "breakout",
+                  "kind": "breakout",
+                  "n": 61,
+                  "realized": 25
+                },
+                {
+                  "key": "continuation",
+                  "kind": "continuation",
+                  "n": 45,
+                  "realized": 17
+                },
+                {
+                  "key": "extreme",
+                  "kind": "extreme",
+                  "n": 22,
+                  "realized": 7
+                },
+                {
+                  "key": "reversal",
+                  "kind": "reversal",
+                  "n": 20,
+                  "realized": 10
+                },
+                {
+                  "key": "squeeze",
+                  "kind": "squeeze",
+                  "n": 7,
+                  "realized": 0
+                }
+              ],
+              "total": {
+                "n": 155,
+                "realized": 59
+              }
+            },
+            "id": "ld",
+            "now": 1760000000000,
+            "seq": 7,
+            "type": "result"
+          }
+        }
+      ],
+      "note": "The ledger counts every closed story, hidden or not (K53 rule 2).",
+      "send": {
+        "conn": "a",
+        "msg": {
+          "id": "ld",
+          "query": {
+            "by_kind": true,
+            "kind": "ledger"
+          },
+          "type": "query"
+        }
+      }
+    }
+  ]
+}

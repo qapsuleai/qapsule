@@ -1487,6 +1487,7 @@ impl Session {
             validity,
             relevant: self.relevant(doc, principal, &story.instrument),
             redacted,
+            coin_flip: self.coin_flip_of(principal, story),
             voice: None,
         })
     }
@@ -1586,6 +1587,52 @@ impl Session {
             || (*audience && !self.admits(doc, principal, story, story.stage)))
     }
 
+    /// (R5/M19, K53) Whether `story` passes every filter of the `capsules` query `q` but
+    /// the audience, and the audience keeps it out by the coin-flip rule alone.
+    fn coin_flip_hidden_by(
+        &self,
+        doc: &Document,
+        principal: &str,
+        story: &Story,
+        q: &qp_schema::protocol::Query,
+    ) -> bool {
+        let qp_schema::protocol::Query::Capsules {
+            audience: true,
+            instrument,
+            stages,
+            open,
+            meaning,
+            since_bar,
+            since_t,
+            born_since_bar,
+            born_since_t,
+            latest,
+            limit,
+        } = q
+        else {
+            return false;
+        };
+        if self.coin_flip_rule(principal).is_none() {
+            return false;
+        }
+        let rest = qp_schema::protocol::Query::Capsules {
+            audience: false,
+            instrument: instrument.clone(),
+            stages: stages.clone(),
+            open: *open,
+            meaning: *meaning,
+            since_bar: *since_bar,
+            since_t: *since_t,
+            born_since_bar: *born_since_bar,
+            born_since_t: *born_since_t,
+            latest: *latest,
+            limit: *limit,
+        };
+        self.capsule_passes(doc, principal, story, &rest)
+            && self.feed_place(doc, principal, story, story.stage).1
+                == Some(qp_schema::protocol::FeedHidden::CoinFlip)
+    }
+
     /// (R4/K42-FEED) Whether `it`'s latest transition is at the latest final bar of its
     /// series: what became known in the current bar period (for a daily series, the
     /// current session).
@@ -1646,6 +1693,7 @@ impl Session {
                 }
             }
         }
+        let mut coin_flip_hidden = 0u32;
         for c in &doc.capsules {
             if *latest && newest.is_none_or(|n| n.2 != c.id) {
                 continue;
@@ -1654,6 +1702,9 @@ impl Session {
                 continue;
             };
             if !self.capsule_passes(doc, &principal, story, q) {
+                if !*latest && self.coin_flip_hidden_by(doc, &principal, story, q) {
+                    coin_flip_hidden += 1;
+                }
                 continue;
             }
             if let Some(mut it) = self.capsule_item_with(doc, c, p, lang, &principal, &mut memo) {
@@ -1705,6 +1756,7 @@ impl Session {
         Ok(QueryResult::Capsules {
             capsules: items,
             comments,
+            coin_flip_hidden,
         })
     }
 

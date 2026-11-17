@@ -555,7 +555,7 @@ mod shell_binding {
 
         /// The view state (JSON).
         pub fn look(&self) -> String {
-            serde_json::to_string(self.inner.look()).unwrap_or_default()
+            self.inner.look_json().to_string()
         }
 
         /// The document's instruments (JSON array).

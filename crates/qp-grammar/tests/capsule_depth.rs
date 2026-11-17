@@ -524,7 +524,7 @@ fn evidence_layers_for_band_and_points() {
         None,
     ));
     let mut taken = vec!["candles".to_owned()];
-    let ls = evidence_layers(&f, 0, &mut taken);
+    let ls = evidence_layers(&qp_grammar::look::R4, &f, 0, &mut taken);
     let ids: Vec<&str> = ls.iter().filter_map(|l| l.id.as_deref()).collect();
     assert_eq!(ids, ["band", "swing", "swing-point", "swing-point-2"]);
     let p = common::provider().with_fact(f);
@@ -700,13 +700,42 @@ fn looks_are_design_records() {
     let s = compile(&v, &p, &o).unwrap();
     assert_eq!(s.background, ornek.light.bg);
     let tr = text_roles(&s);
-    assert!(tr
-        .iter()
-        .any(|t| t.3 == "Karne 18/30" && t.1.as_deref() == Some("label") && t.0 == 12.0));
-    assert!(tr
-        .iter()
-        .any(|t| t.3.starts_with("SAMPLE") && t.1.as_deref() == Some("body") && t.0 == 13.0));
+    #[allow(clippy::cast_possible_truncation)]
+    let (label_px, body_px) = (ornek.types.label.px as f32, ornek.types.body.px as f32);
+    assert!(tr.iter().any(|t| t.3 == "Karne 18/30"
+        && t.1.as_deref() == Some("label")
+        && t.0.to_bits() == label_px.to_bits()));
+    assert!(tr.iter().any(|t| t.3.starts_with("SAMPLE")
+        && t.1.as_deref() == Some("body")
+        && t.0.to_bits() == body_px.to_bits()));
     assert_eq!(s, compile(&v, &p, &o).unwrap());
+    // (R5/T3b) No scene text under the trial look's smallest role (13 px): the face, the
+    // card and the chart with its evidence note, in both schemes.
+    #[allow(clippy::cast_possible_truncation)]
+    let least = ornek.types.note.px.min(ornek.types.figure.px) as f32;
+    assert!(least >= 13.0);
+    let views = [
+        (
+            face_view_in(ornek, Some("vadrel"), "fnd-brk", 60, &p, id).unwrap(),
+            h,
+        ),
+        (capsule_view_in(ornek, "fnd-brk", 60, &p, id).unwrap(), 300),
+        (
+            qp_grammar::depth::chart_view_in(ornek, "fnd-brk", &p, id).unwrap(),
+            300,
+        ),
+    ];
+    for (v, vh) in &views {
+        for theme in ["dark", "light"] {
+            let mut o = CompileOptions::new(390, *vh);
+            o.look = Some("ornek".into());
+            o.theme = Some(theme.into());
+            let s = compile(v, &p, &o).unwrap();
+            for t in text_roles(&s) {
+                assert!(t.0 >= least, "{}: {t:?}", v.id);
+            }
+        }
+    }
     o.look = Some("no-such-look".into());
     let e = compile(&v, &p, &o).unwrap_err();
     assert_eq!(e.kind, ErrorKind::Invalid);

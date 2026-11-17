@@ -12,6 +12,8 @@
 //!   math; the log scale uses [`detmath::log10`]; numbers are formatted with `core::fmt`.
 //!   The same view and data give the same scene, bit for bit, on every target.
 
+#[rustfmt::skip]
+pub mod advances;
 pub mod compile;
 pub mod depth;
 pub mod detmath;

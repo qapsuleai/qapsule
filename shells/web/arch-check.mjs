@@ -132,6 +132,46 @@ export function checkStatic(html, css) {
   return p;
 }
 
+// R7 (R5/T3b): the style sheet holds no design value. Every length, type size, weight,
+// spacing and duration comes from the core as a custom property (`look::css_vars`, frames
+// from `take_css`); a declaration may hold only var(--…), keywords and these structural
+// values. Exceptions, with their reason:
+//  - `0`, `100%`, `100vh`, `100vw`: structural (no design choice: nothing, all of it);
+//  - `z-index`, `flex`: stacking order and "take the rest", not a look's value;
+//  - the two @media widths: a media query cannot read a custom property (CSS Media
+//    Queries 4: `var()` is not allowed in a media feature), so the phone/desktop switch stays.
+export const CSS_OK_VALUES = new Set(['0', '100%', '100vh', '100vw']);
+export const CSS_OK_PROPS = new Set(['z-index', 'flex']);
+export const CSS_OK_MEDIA = new Set(['(min-width: 500px)', '(max-width: 499px)']);
+
+/** R7 violations of a style sheet: [line, rule]. */
+export function checkCss(css) {
+  const p = [];
+  // Comments out, newlines kept (line numbers).
+  const src = css.replace(/\/\*[\s\S]*?\*\//g, (c) => c.replace(/[^\n]/g, ' '));
+  const lineAt = (i) => src.slice(0, i).split('\n').length;
+  for (const m of src.matchAll(/@media([^{]*)\{/g)) {
+    if (!CSS_OK_MEDIA.has(m[1].trim())) p.push([lineAt(m.index), `R7 media query not in the exception list: ${m[1].trim()}`]);
+  }
+  for (const m of src.matchAll(/\{([^{}]*)\}/g)) {
+    let at = m.index + 1;
+    for (const decl of m[1].split(';')) {
+      const i = decl.indexOf(':');
+      const here = at;
+      at += decl.length + 1;
+      if (i < 0) continue;
+      const prop = decl.slice(0, i).trim();
+      if (CSS_OK_PROPS.has(prop)) continue;
+      const val = decl.slice(i + 1).replace(/var\(--[\w-]+\)/g, ' ');
+      for (const n of val.matchAll(/(?<![\w-])-?(\d*\.)?\d+[a-z%]*/gi)) {
+        if (CSS_OK_VALUES.has(n[0])) continue;
+        p.push([lineAt(here + i), `R7 number in the style sheet (use a core custom property): ${prop}: ${n[0]}`]);
+      }
+    }
+  }
+  return p;
+}
+
 function report(name, problems) {
   for (const [n, r] of problems) console.log(`${name}:${n}: ${r}`);
   return problems.length;
@@ -151,6 +191,7 @@ for (const f of paintFiles) {
 }
 bad += report('shells/web/index.html', checkStatic(
   fs.readFileSync(path.join(here, 'index.html'), 'utf8'), fs.readFileSync(path.join(here, 'style.css'), 'utf8')));
+bad += report('shells/web/style.css', checkCss(fs.readFileSync(path.join(here, 'style.css'), 'utf8')));
 // Self-test: each sample breaks one rule and must be caught.
 const samples = [
   'items.sort((a, b) => a.t - b.t);', 'const x = list.filter((i) => i.open);', 'el.textContent = v.toFixed(2);',
@@ -165,11 +206,21 @@ const paintSamples = [
   'ctx.lineTo(p.x * s, p.y);', 'ctx.fillStyle = "rgba(" + c[0] + ")";', 'core.face_view(id);',
   'const w = Math.ceil(x);', 'list.sort((a, b) => a.z);',
 ];
+// R5/T3b: style sheet samples breaking R7 (each must be caught), and one that keeps it.
+const cssSamples = [
+  'a { padding: 4px; }', 'a { font: 14px/1.35 x; }', 'a { width: 2rem }', 'a { letter-spacing: .04em; }',
+  'a { font-weight: 600; }', 'a { transition: color 120ms; }', '@media (min-width: 640px) { a { color: red } }',
+  'a { margin: var(--qp-space-1) 3px; }',
+];
 let missed = 0;
+for (const s of cssSamples) if (!checkCss(s).length) { console.log(`self-test (css): not caught: ${s}`); missed++; }
+if (checkCss('a { padding: var(--qp-space-0) 0; z-index: 3; width: 100%; bottom: calc(var(--qp-bar-h) + var(--qp-space-2)); }').length) {
+  console.log('self-test (css): a sheet keeping R7 refused'); missed++;
+}
 for (const s of samples) if (!checkJs(s).length) { console.log(`self-test: not caught: ${s}`); missed++; }
 for (const s of paintSamples) if (!checkJs(s, 'paint').length) { console.log(`self-test (paint): not caught: ${s}`); missed++; }
 // …and a correct paint path's import must pass (the rule is not stricter than stated).
 if (checkJs('import { put } from "./ref.js";', 'paint').length) { console.log('self-test (paint): sibling import refused'); missed++; }
-const total = samples.length + paintSamples.length;
-console.log(`arch: ${bad} violation(s) in main.js and ${paintFiles.length} paint file(s); self-test ${total - missed}/${total} caught`);
+const total = samples.length + paintSamples.length + cssSamples.length;
+console.log(`arch: ${bad} violation(s) in main.js, ${paintFiles.length} paint file(s) and style.css; self-test ${total - missed}/${total} caught`);
 process.exit(bad || missed ? 1 : 0);

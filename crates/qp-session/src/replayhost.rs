@@ -270,6 +270,8 @@ pub struct ReplayHost {
     /// a host that also feeds replicas ([`ReplayHost::recorded_events`]).
     record: bool,
     recorded: Vec<DataEvent>,
+    /// (R5/M19) Per-principal feed rules the host set (kept over a backward seek).
+    principal_rules: std::collections::BTreeMap<String, Option<crate::CoinFlipRule>>,
 }
 
 impl std::fmt::Debug for ReplayHost {
@@ -364,7 +366,26 @@ impl ReplayHost {
             notices: Vec::new(),
             record: false,
             recorded: Vec::new(),
+            principal_rules: std::collections::BTreeMap::new(),
         })
+    }
+
+    /// (R5/M19, K53) Sets `principal`'s feed rule over the init's
+    /// ([`Session::set_principal_coin_flip_rule`]; `None`: no rule); kept over a backward
+    /// seek (a new authority). The presentation host uses it for a page's `?feed_rule=`.
+    pub fn set_principal_coin_flip_rule(
+        &mut self,
+        principal: &str,
+        rule: Option<crate::CoinFlipRule>,
+    ) {
+        self.principal_rules.insert(principal.to_owned(), rule);
+        self.session.set_principal_coin_flip_rule(principal, rule);
+    }
+
+    /// (R5/M19) Drops `principal`'s own feed rule: the init's applies again.
+    pub fn clear_principal_coin_flip_rule(&mut self, principal: &str) {
+        self.principal_rules.remove(principal);
+        self.session.clear_principal_coin_flip_rule(principal);
     }
 
     /// The authority.
@@ -693,6 +714,9 @@ impl ReplayHost {
         self.session
             .set_headline_calendar(crate::headparts::replay_calendar(self.info.kind));
         self.session.set_viewer_batch(true);
+        for (p, r) in &self.principal_rules {
+            self.session.set_principal_coin_flip_rule(p, *r);
+        }
         self.replay.reset();
         self.recorded.clear();
         Ok(())

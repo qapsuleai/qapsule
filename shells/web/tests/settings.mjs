@@ -97,11 +97,37 @@ try {
     const { ctx, page, errors } = await phonePage(browser);
     const css = (k) => page.evaluate((n) => getComputedStyle(document.documentElement).getPropertyValue(n).trim(), k);
     const faceH = () => page.evaluate(() => JSON.parse(window.qp.faceSize ? window.qp.faceSize() : 'null'));
+    // (R5/T3b) The chrome's sizes come from the record: the tabs' height, the least height
+    // of the visible controls and the smallest text of the page (feed and settings).
+    const sizes = () => page.evaluate(() => {
+      const box = (e) => e.getBoundingClientRect();
+      const shown = (e) => { const r = box(e); return r.width > 0 && r.height > 0 && getComputedStyle(e).visibility !== 'hidden'; };
+      const tab = box(document.querySelector('#tabs button')).height;
+      let control = Infinity, font = Infinity, fontAt = '';
+      for (const e of document.querySelectorAll('button, select, input')) if (shown(e)) control = Math.min(control, box(e).height);
+      for (const e of document.querySelectorAll('body *')) {
+        if (!shown(e) || !Array.from(e.childNodes).some((n) => n.nodeType === 3 && n.textContent.trim())) continue;
+        const px = parseFloat(getComputedStyle(e).fontSize);
+        if (px < font) { font = px; fontAt = e.id || e.className || e.tagName; }
+      }
+      return { tab, control, font, fontAt };
+    });
+    const pageSizes = async () => {
+      const feed = await sizes();
+      await page.click('#tabs button[data-tab="settings"]');
+      const set = await sizes();
+      await page.click('#tabs button[data-tab="feed"]');
+      return { tab: feed.tab, control: Math.min(feed.control, set.control),
+        font: Math.min(feed.font, set.font), fontAt: feed.font <= set.font ? feed.fontAt : set.fontAt };
+    };
     await page.goto(`${origin}/?anim=0`);
     await settle(page);
     const bg4 = await css('--bg');
     check(bg4 === '#0f1115', `r4 chrome background from the core (${bg4})`);
     const h4 = await faceH();
+    const s4 = await pageSizes();
+    console.log(`     r4 sizes: ${JSON.stringify(s4)}`);
+    check(s4.tab < 44 && s4.font === 10, `r4 keeps its chrome sizes (tab ${s4.tab}, smallest text ${s4.font} px)`);
     await page.goto(`${origin}/?anim=0&look=ornek`);
     await settle(page);
     let l = await look(page);
@@ -110,6 +136,11 @@ try {
     check(bgO === '#181412', `ornek chrome background (${bgO})`);
     const hO = await faceH();
     check(!h4 || !hO || hO.css[1] > h4.css[1], `ornek face is taller (${JSON.stringify(h4)} → ${JSON.stringify(hO)})`);
+    const sO = await pageSizes();
+    console.log(`     ornek sizes: ${JSON.stringify(sO)}`);
+    check(sO.tab >= 44, `ornek tabs ≥ 44 px (${sO.tab})`);
+    check(sO.control >= 44, `ornek controls ≥ 44 px (${sO.control})`);
+    check(sO.font >= 13, `ornek smallest text ≥ 13 px (${sO.font} px, ${sO.fontAt})`);
     await page.click('#tabs button[data-tab="settings"]');
     check(await page.$eval('#s_look', (e) => e.value) === 'ornek', 'look select shows ornek');
     await page.selectOption('#s_look', 'r4');

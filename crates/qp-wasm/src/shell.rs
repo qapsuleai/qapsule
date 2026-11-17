@@ -41,6 +41,9 @@ pub const FACE_HEIGHT: u32 = 240;
 pub const MAX_SCALE: u32 = 3;
 /// Phone frame (`screen`'s surface frame for phones).
 pub const PHONE_FRAME: (u32, u32) = (390, 300);
+/// (R5/T3b) The phone surface's screen (`hello` `surface.screen`; the demo page's phone
+/// frame, `--qp-phone-w`/`--qp-phone-h`).
+pub const PHONE_SCREEN: (u32, u32) = (390, 844);
 /// Capsules asked for per feed query.
 pub const FEED_LIMIT: u32 = 40;
 /// Pointer movement below which a press is a tap (CSS px).
@@ -448,6 +451,16 @@ pub struct ShellCore {
     welcomed: bool,
     max_points: u32,
     feed: Vec<CapsuleItem>,
+    /// (R5/M19) The authority answered the feed at least once (an empty feed is then
+    /// said, not left blank), and how many stories its coin-flip rule kept out.
+    feed_known: bool,
+    coin_flip_hidden: u32,
+    /// (R5/M19) The page's feed order (`?feed_order=`, `qp_grammar::feeds::ORDERS`): when
+    /// set, it orders the feed instead of the connection's layout (a presentation setting,
+    /// not a protocol value). And the feed rule the page asked its host for
+    /// (`?feed_rule=`; the host applies it on connect), shown by the settings page.
+    feed_order: Option<String>,
+    feed_rule: Option<String>,
     feed_dirty: bool,
     feed_inflight: bool,
     look: ViewState,
@@ -476,9 +489,9 @@ pub struct ShellCore {
     /// RP3/S [`shown_key`]).
     face_shown: BTreeMap<String, ShownKey>,
     scene_shown: Option<ShownKey>,
-    /// (R5/T3) The (look, theme) whose CSS custom properties were last handed out
-    /// ([`ShellCore::take_css`]).
-    css_shown: Option<(Option<String>, Option<String>)>,
+    /// (R5/T3) The (look, theme, (R5/T3b) face and scene frames) whose CSS custom
+    /// properties were last handed out ([`ShellCore::take_css`]).
+    css_shown: Option<(Option<String>, Option<String>, [u32; 4])>,
     version: u64,
     /// The messages sent, for the record and the parity check: every message of a short
     /// session; (RP3/T4) on a long one only the latest [`SENT_KEEP`] to `2 × SENT_KEEP`
@@ -617,6 +630,10 @@ impl ShellCore {
             welcomed: false,
             max_points: 60,
             feed: Vec::new(),
+            feed_known: false,
+            coin_flip_hidden: 0,
+            feed_order: None,
+            feed_rule: None,
             feed_dirty: false,
             feed_inflight: false,
             look: ViewState::default(),
@@ -661,7 +678,7 @@ impl ShellCore {
             shown: BTreeSet::new(),
         };
         me.push(json!({"type":"hello","protocol":"qp/0","principal":principal,
-            "surface":{"kind":"phone","screen":[390,844],"input":["touch"],"lang":lang_name(lang)}}));
+            "surface":{"kind":"phone","screen":[PHONE_SCREEN.0, PHONE_SCREEN.1],"input":["touch"],"lang":lang_name(lang)}}));
         // (R4/S1) The presentation's own settings: the shell asks for them right after
         // `hello`; whatever the page chose (URL, settings page) is sent after and wins.
         me.ask(
@@ -929,9 +946,18 @@ impl ShellCore {
             ServerMsg::Result { id, data, .. } => {
                 let kind = self.asked.remove(id);
                 match (kind, data) {
-                    (Some(Asked::Feed), QueryResult::Capsules { capsules, .. }) => {
+                    (
+                        Some(Asked::Feed),
+                        QueryResult::Capsules {
+                            capsules,
+                            coin_flip_hidden,
+                            ..
+                        },
+                    ) => {
                         self.feed_inflight = false;
                         self.feed.clone_from(capsules);
+                        self.feed_known = true;
+                        self.coin_flip_hidden = *coin_flip_hidden;
                         // (RP3/T4) Only a face in the feed can be painted: the digests of
                         // the faces that left it are forgotten (bounded by the feed).
                         let feed = &self.feed;
@@ -1180,6 +1206,8 @@ impl ShellCore {
         let scene = v.apply(up, seq);
         if up.feed.is_some() {
             self.feed = v.items();
+            self.feed_known = true;
+            self.coin_flip_hidden = up.coin_flip_hidden;
         }
         if up.feed.is_some() || !up.faces.is_empty() || up.audience.is_some() {
             ch["feed"] = json!(true);
@@ -1310,14 +1338,36 @@ impl ShellCore {
             .iter()
             .map(|it| self.look.seen.is_some_and(|s| self.known_at(it) > s))
             .collect();
-        let rows = feed_rows(
-            self.look.feed.as_deref(),
-            &self.feed,
-            lang,
-            self.look.seen,
-            &fresh,
-            now,
-        );
+        let rows = if self.feed.is_empty() && self.feed_known {
+            // (R5/M19, K53) The empty feed says so, and why (the core writes it).
+            qp_grammar::feeds::empty_rows(lang, self.coin_flip_hidden)
+        } else if let Some(o) = &self.feed_order {
+            let local: Vec<qp_grammar::feeds::LocalStamp> =
+                self.feed.iter().map(|it| local_stamp(it.t)).collect();
+            qp_grammar::feeds::order(
+                o,
+                &qp_grammar::feeds::FeedCtx {
+                    items: &self.feed,
+                    lang,
+                    seen: self.look.seen,
+                    fresh: &fresh,
+                    now,
+                    local: &local,
+                    now_local: now.map(local_stamp),
+                    seen_local: self.look.seen.map(local_stamp),
+                },
+            )
+            .unwrap_or_default()
+        } else {
+            feed_rows(
+                self.look.feed.as_deref(),
+                &self.feed,
+                lang,
+                self.look.seen,
+                &fresh,
+                now,
+            )
+        };
         let out: Vec<Value> = rows
             .into_iter()
             .filter_map(|r| match r {
@@ -1397,6 +1447,11 @@ impl ShellCore {
             "transition": qp_grammar::transitions::names(),
             "outcome": qp_grammar::glyph::outcome::names(),
             "look": qp_grammar::look::names(),
+            // (R5/M19) The feed orders (feed layouts) and the host's feed rules M19
+            // measured, best first.
+            // `layout`: no order chosen, the feed layout orders the feed.
+            "feed_order": std::iter::once("layout").chain(qp_grammar::feeds::FEED_ORDERS).collect::<Vec<_>>(),
+            "feed_rule": qp_capsule::feedrule::FEED_RULES.iter().map(|(n, _)| *n).collect::<Vec<_>>(),
             "voice": qp_session::voices::names(),
         })
     }
@@ -1420,14 +1475,33 @@ impl ShellCore {
     /// (R5/T3) The chrome's CSS custom properties for the connection's look and theme
     /// (`qp_grammar::look::css_vars`) as a `{name: value}` object, or `None` when they did
     /// not change since the last hand-out (the page sets them verbatim on its root
-    /// element; its stylesheet holds no colour, font or radius of its own).
+    /// element; its stylesheet holds no colour, font, size or radius of its own).
+    /// (R5/T3b) Also the frames the page lays out: `--qp-phone-w`/`-h` (the phone
+    /// surface), `--qp-face-w`/`-h` and `--qp-scene-w`/`-h` (a canvas's CSS size before
+    /// the page sizes it from [`Self::face_size_json`] or the open scene).
     pub fn take_css(&mut self) -> Option<Value> {
-        let key = (self.look.look.clone(), self.look.theme.clone());
+        let (fw, fh) = self.frames["face"];
+        let (sw, sh) = self.frames["scene"];
+        let key = (
+            self.look.look.clone(),
+            self.look.theme.clone(),
+            [fw, fh, sw, sh],
+        );
         if self.css_shown.as_ref() == Some(&key) {
             return None;
         }
         let look = qp_session::viewer::look_of(&self.look);
-        let vars = qp_grammar::look::css_vars(look, self.look.theme.as_deref());
+        let mut vars = qp_grammar::look::css_vars(look, self.look.theme.as_deref());
+        for (k, v) in [
+            ("--qp-phone-w", PHONE_SCREEN.0),
+            ("--qp-phone-h", PHONE_SCREEN.1),
+            ("--qp-face-w", fw),
+            ("--qp-face-h", fh),
+            ("--qp-scene-w", sw),
+            ("--qp-scene-h", sh),
+        ] {
+            vars.push((k.to_owned(), format!("{v}px")));
+        }
         self.css_shown = Some(key);
         let obj: serde_json::Map<String, Value> = vars
             .into_iter()
@@ -1695,6 +1769,20 @@ impl ShellCore {
         &self.look
     }
 
+    /// (R5/M19) The view state as JSON with the presentation's feed order and feed rule
+    /// (`feed_order`, `feed_rule`; absent: none chosen) — what the settings page shows.
+    #[must_use]
+    pub fn look_json(&self) -> Value {
+        let mut v = serde_json::to_value(&self.look).unwrap_or(Value::Null);
+        if let Some(o) = &self.feed_order {
+            v["feed_order"] = json!(o);
+        }
+        if let Some(r) = &self.feed_rule {
+            v["feed_rule"] = json!(r);
+        }
+        v
+    }
+
     /// Symbols of the document's bar series (document order): the settings page's
     /// watchlist and positions.
     #[must_use]
@@ -1854,6 +1942,23 @@ impl ShellCore {
                 if !v.is_empty() {
                     g[k] = json!(v);
                 }
+            }
+        }
+        // (R5/M19) The feed order and the feed rule (presentation settings, not protocol
+        // values): a known name is kept; `""` leaves it unchanged.
+        if let Some(v) = choice.get("feed_order").and_then(Value::as_str) {
+            if v == "layout" || qp_grammar::feeds::FEED_ORDERS.contains(&v) {
+                self.feed_order = (v != "layout").then(|| v.to_owned());
+                // The page repaints the feed at its next paint pass.
+                self.pending.insert("feed".to_owned(), json!(true));
+            }
+        }
+        if let Some(v) = choice.get("feed_rule").and_then(Value::as_str) {
+            if qp_capsule::feedrule::FEED_RULES
+                .iter()
+                .any(|(n, _)| *n == v)
+            {
+                self.feed_rule = Some(v.to_owned());
             }
         }
         if g.as_object().is_some_and(|o| o.len() > 1) {
@@ -2714,6 +2819,10 @@ pub struct DemoOptions {
     pub from_t: Option<i64>,
     /// Start running (else paused).
     pub running: bool,
+    /// (R5/M19, K53) The host's feed rule by name (`qp_capsule::feedrule::FEED_RULES`;
+    /// default the presentation's, `PRESENTED_FEED_RULE`, with the K42 exemption); `None`:
+    /// no rule (the protocol's default).
+    pub feed_rule: Option<String>,
 }
 
 impl Default for DemoOptions {
@@ -2726,6 +2835,7 @@ impl Default for DemoOptions {
             speed: 4.0,
             from_t: None,
             running: false,
+            feed_rule: Some(qp_capsule::feedrule::PRESENTED_FEED_RULE.to_owned()),
         }
     }
 }
@@ -2761,6 +2871,13 @@ pub fn demo_session_init(o: &DemoOptions) -> qp_schema::protocol::SessionInit {
         {"id": VISITOR, "author": {"kind": "human", "name": VISITOR}, "role": "owner"}))
     .expect("visitor principal");
     init.principals.push(visitor);
+    init.feed_rule = o
+        .feed_rule
+        .as_ref()
+        .map(|rule| qp_schema::protocol::FeedRuleInit {
+            rule: rule.clone(),
+            exempt_negative: true,
+        });
     init
 }
 

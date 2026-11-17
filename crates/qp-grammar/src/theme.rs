@@ -42,6 +42,11 @@ pub struct Theme {
     pub invalid: Rgba,
     /// (R5/T3) A closed story's glyph (kapanmış işaret).
     pub closed: Rgba,
+    /// (R5/T3b) The least alpha (0..=255) of a closed story's glyph: the alphabets fade a
+    /// glyph with its freshness (A31: grey and transparent by freshness); a closed one
+    /// never goes below this, so a look can keep it at a contrast it chose. `0`: the
+    /// freshness alone (`r4`).
+    pub closed_alpha: u8,
     /// (R5/T3) Focus and selection (odak).
     pub focus: Rgba,
     /// (R5/T3) The shell's own chrome (CSS custom properties, `look::css_vars`).
@@ -121,6 +126,7 @@ impl Theme {
         valid: [200, 205, 215, 255],
         invalid: [130, 136, 150, 255],
         closed: [130, 136, 150, 255],
+        closed_alpha: 0,
         focus: DARK_ACCENT,
         chrome: Chrome {
             bg: [0x0f, 0x11, 0x15, 255],
@@ -167,6 +173,7 @@ impl Theme {
         valid: [0x1f, 0x23, 0x28, 255],
         invalid: [0x5f, 0x66, 0x73, 255],
         closed: [0x5f, 0x66, 0x73, 255],
+        closed_alpha: 0,
         focus: LIGHT_ACCENT,
         chrome: Chrome {
             bg: [0xf6, 0xf7, 0xf9, 255],
@@ -207,6 +214,10 @@ impl Theme {
                 m.insert(t.to_owned(), serde_json::Value::String(h(c)));
             }
         }
+        m.insert(
+            "closed_alpha".to_owned(),
+            serde_json::Value::from(self.closed_alpha),
+        );
         let c = &self.chrome;
         m.insert(
             "chrome".to_owned(),
@@ -294,6 +305,13 @@ impl Theme {
             )
         })
     }
+}
+
+/// (R5/T3b) `c` with its alpha raised to at least `min` (a closed glyph's floor,
+/// [`Theme::closed_alpha`]); unchanged for `min = 0`.
+#[must_use]
+pub fn at_least(c: Rgba, min: u8) -> Rgba {
+    [c[0], c[1], c[2], c[3].max(min)]
 }
 
 /// Multiplies a colour's alpha by `opacity` (clamped to `0..=1`).

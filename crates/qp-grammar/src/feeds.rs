@@ -124,6 +124,7 @@ fn r3(c: &FeedCtx<'_>) -> Vec<FeedRow> {
 // --- M9 alternatives: layout functions (or `mod <name>;`) go below this line -----------
 
 mod elikov;
+mod m19;
 mod vakiro;
 
 /// Feed layouts a connection may choose; the first is the default.
@@ -146,6 +147,76 @@ pub static LAYOUTS: &[FeedLayout] = &[
     },
 ];
 
+/// (R5/M19) The feed orders M19 measured (`feeds/m19.rs`), best first by its pre-written
+/// rule (`rounds/R5/experiments/M19/RESULTS.md`). A presentation setting
+/// (`?feed_order=`, the settings page), not a protocol `feed` value: the protocol's layout
+/// names stay as they were (transcript 56 lists them). When chosen, the order replaces the
+/// connection's layout in the presentation core. The presentation's default stays
+/// [`PRESENTED_FEED`] (changing it would change the existing demo goldens; Arkin decides,
+/// K46).
+pub static ORDERS: &[FeedLayout] = &[
+    FeedLayout {
+        name: "grouped",
+        rules: m19::GROUPED_RULES,
+        layout: m19::grouped,
+    },
+    FeedLayout {
+        name: "live_new",
+        rules: m19::LIVE_NEW_RULES,
+        layout: m19::live_new,
+    },
+];
+
+/// The names of [`ORDERS`].
+pub const FEED_ORDERS: [&str; 2] = ["grouped", "live_new"];
+
+/// (R5/M19) The rows of `ctx` by feed order `name` ([`ORDERS`]; `None`: unknown), with the
+/// same clean-up and coin-flip mark as [`layout`].
+#[must_use]
+pub fn order(name: &str, ctx: &FeedCtx<'_>) -> Option<Vec<FeedRow>> {
+    let o = ORDERS.iter().find(|l| l.name == name)?;
+    Some(finish((o.layout)(ctx), ctx))
+}
+
+/// (R5/M19, K53) The rows of an empty feed: it says honestly that there is nothing to tell
+/// now and why — `coin_flip_hidden` stories kept out by the host's coin-flip rule (they
+/// show, marked, at the most open sensitivity), or none in what the reader follows. Two
+/// header rows (the shell paints them as it paints group headers); deterministic, no
+/// advice.
+#[must_use]
+pub fn empty_rows(lang: Language, coin_flip_hidden: u32) -> Vec<FeedRow> {
+    let head = match lang {
+        Language::Tr => "Şu an anlatacak bir şey yok.",
+        Language::En => "Nothing to tell right now.",
+    };
+    let why = match (lang, coin_flip_hidden) {
+        (Language::Tr, 0) => "İzlediklerinde akışa girecek bir kapsül yok.".to_owned(),
+        (Language::En, 0) => "No capsule in what you follow reaches the feed.".to_owned(),
+        (Language::Tr, n) => format!(
+            "Karnesi yazı turaya yakın {n} kapsül gizlendi; en açık hassasiyette (Hepsi) işaretli görünür."
+        ),
+        (Language::En, 1) => "1 capsule whose track record is close to a coin flip is hidden; it shows, marked, at the most open sensitivity (All).".to_owned(),
+        (Language::En, n) => format!(
+            "{n} capsules whose track record is close to a coin flip are hidden; they show, marked, at the most open sensitivity (All)."
+        ),
+    };
+    vec![
+        FeedRow::Header {
+            text: head.to_owned(),
+        },
+        FeedRow::Header { text: why },
+    ]
+}
+
+/// (R5/M19, K53 rule 4) The mark of a capsule whose ledger is near a coin flip (in the feed
+/// only at the `all` sensitivity), joined to the layout's own mark.
+fn coin_flip_mark(lang: Language) -> &'static str {
+    match lang {
+        Language::Tr => "karnesi yazı tura",
+        Language::En => "coin-flip record",
+    }
+}
+
 /// Registered names.
 #[must_use]
 pub fn names() -> Vec<&'static str> {
@@ -166,12 +237,30 @@ pub fn by_name(name: Option<&str>) -> &'static FeedLayout {
 }
 
 /// The rows of `ctx` by layout `name`. Rows naming a capsule that is not in the items, and
-/// repeated capsules, are dropped (a layout cannot invent or duplicate a capsule).
+/// repeated capsules, are dropped (a layout cannot invent or duplicate a capsule). (R5/M19)
+/// A capsule marked `coin_flip` carries the coin-flip mark after the layout's own.
 #[must_use]
 pub fn layout(name: Option<&str>, ctx: &FeedCtx<'_>) -> Vec<FeedRow> {
+    finish((by_name(name).layout)(ctx), ctx)
+}
+
+/// Drops rows naming a capsule not in the items and repeats; adds the coin-flip mark.
+fn finish(rows: Vec<FeedRow>, ctx: &FeedCtx<'_>) -> Vec<FeedRow> {
     let mut seen: Vec<&str> = Vec::new();
-    let rows = (by_name(name).layout)(ctx);
     rows.into_iter()
+        .map(|r| match r {
+            FeedRow::Capsule { id, mark }
+                if ctx.items.iter().any(|i| i.id == id && i.coin_flip) =>
+            {
+                let cf = coin_flip_mark(ctx.lang);
+                let mark = Some(match mark {
+                    Some(m) => format!("{m} · {cf}"),
+                    None => cf.to_owned(),
+                });
+                FeedRow::Capsule { id, mark }
+            }
+            r => r,
+        })
         .filter(|r| match r {
             FeedRow::Header { .. } => true,
             FeedRow::Capsule { id, .. } => {
@@ -218,5 +307,39 @@ mod tests {
             }
         );
         assert!(!is_feed("nope"));
+        for (o, l) in FEED_ORDERS.iter().zip(ORDERS) {
+            assert_eq!(*o, l.name);
+            assert!(!is_feed(o), "an order is not a protocol layout: {o}");
+            assert!(order(o, &ctx).is_some_and(|r| r.is_empty()));
+        }
+        assert!(order("nope", &ctx).is_none());
+    }
+
+    #[test]
+    fn empty_feed_says_why_in_both_languages() {
+        let t = |r: &[FeedRow]| -> Vec<String> {
+            r.iter()
+                .map(|x| match x {
+                    FeedRow::Header { text } => text.clone(),
+                    FeedRow::Capsule { id, .. } => id.clone(),
+                })
+                .collect()
+        };
+        assert_eq!(
+            t(&empty_rows(Language::Tr, 3)),
+            [
+                "Şu an anlatacak bir şey yok.",
+                "Karnesi yazı turaya yakın 3 kapsül gizlendi; en açık hassasiyette (Hepsi) işaretli görünür."
+            ]
+        );
+        assert_eq!(
+            t(&empty_rows(Language::En, 0)),
+            [
+                "Nothing to tell right now.",
+                "No capsule in what you follow reaches the feed."
+            ]
+        );
+        assert!(t(&empty_rows(Language::En, 1))[1].starts_with("1 capsule whose"));
+        assert_eq!(empty_rows(Language::Tr, 2), empty_rows(Language::Tr, 2));
     }
 }

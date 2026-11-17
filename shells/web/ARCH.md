@@ -19,6 +19,7 @@ satır; boyama yolu bağlamında ayrıca bir takım) yakalanmazsa adım düşer.
 | R4 | Şablon dizgesinde `${…}` | Alan verisinden metin kurma |
 | R5 | `core.<ad>` yalnız izin listesindeki yöntemler (aşağıda) | WASM yüzeyi dar ve bilinir |
 | R6 | `main.js`'te `./pkg/qp_wasm.js` ve (RP3/T2) `./paint/index.js` dışından `import`; bir boyama yolunda (`paint/*.js`) kardeş dosya (`./ad.js`) dışından `import`; her yerde dinamik `import()`; satır içi betik; `main.js` dışında `<script>`; HTML'de `on…=` | Yüklenen kod yalnız çekirdek paketi, `main.js` ve `paint/` klasörü |
+| R7 | (R5/T3b) `style.css`'te sayı: px/rem/em/pt/ms, çıplak sayı (kalınlık, satır yüksekliği). Bildirim değeri yalnız `var(--…)`, anahtar sözcük ve yapısal değer taşır. Gerekçeli istisnalar: `0`, `100%`, `100vh`, `100vw`; `z-index` ve `flex` özellikleri (dizilim, "kalanı al"); iki `@media` genişliği (medya sorgusu `var()` okuyamaz) | Bütün boylar (yazı, iç boşluk, sekme/düğme yüksekliği, çizgi, çerçeve) görünüş kaydından gelir (`look::css_vars`, `core.css()`): bir görünüş sert eşikleri (dokunma ≥ 44, en küçük yazı) kayıttan tutturabilsin |
 
 **İstisna listesi:** yok. (Ölçüm süreleri ham `performance.now()` olarak çekirdeğe verilir;
 `metric_span(ad, t0, t1)` farkı çekirdekte alır. (R4/H-M8910) Çizim yüzeyi boyutu
@@ -101,7 +102,7 @@ eklenenler. Hiçbir kural gevşetilmedi.
 
 | Yöntem | Neden |
 |--------|-------|
-| `css()` | Kabuğun renkleri, yazı ailesi, köşe yarıçapları ve geçiş süresi bağlantının görünüşünden ve temasından gelir (`look::css_vars`): `{ad: değer}` JSON'u, değişmediyse boş. Sayfa her animasyon karesinde çağırır ve gelen her özelliği kök öğeye **olduğu gibi** yazar (`setProperty`); `style.css` yalnız `var(--…)` okur, renk değeri taşımaz. Açık/koyu da buradan gelir (eski `body[data-theme=light]` kuralları kaldırıldı). |
+| `css()` | Kabuğun renkleri, yazı ailesi, köşe yarıçapları, geçiş süresi ve (R5/T3b) bütün boyları (`chrome`, `space`, `--qp-rule`) bağlantının görünüşünden ve temasından, çerçeve boyları (`--qp-phone-*`, `--qp-face-*`, `--qp-scene-*`) çekirdeğin çerçevelerinden gelir (`look::css_vars`): `{ad: değer}` JSON'u, değişmediyse boş. Sayfa her animasyon karesinde çağırır ve gelen her özelliği kök öğeye **olduğu gibi** yazar (`setProperty`); `style.css` yalnız `var(--…)` okur, renk değeri taşımaz. Açık/koyu da buradan gelir (eski `body[data-theme=light]` kuralları kaldırıldı). |
 | `fonts()`, `font_bytes(id)` | Çekirdeğin gömülü yazı tipi varlıkları (`[{id, family}]`) ve baytları: `canvas` yolu her birini `FontFace(family, bytes)` ile kaydeder (başvuru çizici ve `gpu` yolu aynı dosyaları kullanır; ağ isteği yok). `font()` geriye uyum için kalır (varsayılan varlık). |
 
 Görünüş seçimi `?look=<ad>` ve Ayarlar → Görünüş: öbür ayarlar gibi `set_look({look})`

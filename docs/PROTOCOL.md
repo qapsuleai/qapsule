@@ -384,12 +384,19 @@ aynı adlarla aynı sahneyi derler.
 | `transition` (R4/H-M8910) | `qp_grammar::transitions::TRANSITIONS` (açılma geçişi; `r3`: T4 ortak öğeleri, doğrusal ara kare) | `r3` |
 | `outcome` (R4/H-M8910) | `qp_grammar::glyph::outcome::STYLES` (sonuç işareti, M11) | `r3` |
 | `seen` (R4/H-M8910) | son bakış zamanı (ms); `0` siler | yok |
+| `voice` (R5/m17-int) | `qp_capsule::voice::VOICES` (kapsül dili: `r4` bugünkü metin, `marla`, `selvi`; `docs/LANGUAGE.md`) | `r4` |
 
 - Verilmeyen alan değişmez; bilinmeyen ad `invalid` (`/gesture/face`, `/gesture/alphabet`,
   `/gesture/theme`, `expected` bilinen adlar). Doğrulama her şeyden önce: hatalı istek hiçbir
   şeyi değiştirmez.
 - Cevap `interaction`; `state` (`ViewState`) yeni `face`, `alphabet`, `theme` alanlarını taşır
   (varsayılandaysa alan yoktur: eski cevaplar bayt eşit).
+- (R5/m17-int) `voice`: `ViewState.voice` (varsayılanda yok). Bir dil seçiliyken kapsül
+  öğeleri `voice` taşır (§20.2), kapsül sahneleri (yüz, açılmış kart) metnini o dilden alır ve
+  sözlük terimlerini işaretler: `SceneDesc.terms` (isteğe bağlı; `TermMark`: `term`, `text`,
+  `layer`, `hit` kutusu), nokta sorgusu `HitInfo.term` (isteğe bağlı). `tap_at` bir terimin
+  üstündeyse kapsülü açmaz, cevabın `hit.term`'ünü döner. `r4`'te bu alanların hiçbiri yoktur
+  (dökümler bayt eşit).
 - M8 yüz alternatifleri `qp_grammar::faces` kaydına bir satırdır (ad, **yükseklik**, görünüm
   kuralı); yüz kendi yüksekliğini bildirir, kabuk onu çekirdekten alır. M9 akış düzenleri
   `qp_grammar::feeds`, M10 geçişleri `qp_grammar::transitions` kaydındadır: düzen kabuğun
@@ -951,6 +958,10 @@ yerel veri hiç okunmaz.
 **R5/M18 (§23):** 60–63 enstrümanın hikâye listesi (yetkili okuyucu, yetkisiz okuyucular,
 ~200 hikâyelik aralık, `stories` konusu); `cargo run -p qp-session --example
 make_story_transcripts -- --write` ile üretilir. Var olan dökümler değişmedi.
+**R5/M19 (§23.2):** 64 barındırıcının yazı tura kuralı açık (`init.feed_rule`): akış ve liste
+`balanced` ve `all` seviyesinde, gizlenen sayısı, pozisyonla K42 muafiyeti, `story` olayları,
+karne; `cargo run -p qp-session --example make_feed_rule_transcript -- --write` ile üretilir.
+Var olan dökümler değişmedi (kural yokken yeni alanlar hiç yazılmaz).
 
 ## 16. Gömme
 
@@ -1953,6 +1964,13 @@ Barındırıcı yapılandırması (`SessionInit.capsules`, protokol mesajı değ
 | `capsule` | `capsule_detail`: `item`, `story` (bütün geçişler: bar, zaman, aşama, neden, olgular; R4: `condition` = durum koşulu, `resolution` = beklenen çözüm `{rule, condition?}`), `facts` (okuyucuya göre), `ledger` (anahtarın şimdiki karnesi: son kesin bardan önce kapananlar), `glyph` (R4: `validity` dahil, öğeninkiyle aynı), `evidence` — olgu başına `{fact, family, license, open, values?, evidence_ref?, requires?, rests_on}`: yetkiliye değerler ve dondurulmuş kanıt; yetkisize "şu yetkiyi gerektirir" (`requires`, ör. `bist/THYAO`) ve neye dayandığı (`rests_on`, her zaman) — K34. (R4) `capsule` alanı kapsül kimliği, bulgu kimliği ya da **kapsül seçicisi** alır (§17.1; `result.resolved`'da `/query/capsule`). Görünmeyen ya da olmayan kapsül: `not_found` (ikisi aynı). |
 | `ledger` | `ledger`: `rows` (anahtar ya da `by_kind` ile tür başına `n`, `realized`; R4: satırda `direction`), `total`. Anahtar `<tür>/<yön>/<dedektör>@<sürüm>` (K42/A23). Süzgeçler: `key`, `meaning`, `detector`, (R4) `direction`; `by_kind` yönleri toplar (`direction` verilmişse yalnız o yön, satır `direction`'ı taşır). Geri çekilenler sayılmaz. Lisanstan bağımsız (K33): her lisanslı akışa yetkili okuyucuya motorun karnesi, açık görünüm okuyucusuna (§20.5) açık-yalnız motorun karnesi — lisanslı veriden hiç etkilenmez. |
 
+(R5/m17-int) Bağlantı bir kapsül dili seçtiyse (`style` `voice`, §4.6.2) `capsules`,
+`capsule` ve `capsules` konusu her `CapsuleItem`'a isteğe bağlı `voice` ekler: `CapsuleVoice`
+`{voice, headline, detail, ledger, glossary?, face}` — `glossary` `GlossEntry {term, text}`
+listesi, `face` sahnesi olmayan okurun metin yüzü (başlık, karne, ayrıntı; satır sonlarıyla).
+Okurun dilinde ve aynı izleyici kuralıyla (yetkisize rakamsız, K33). Varsayılan `r4`'te alan
+yoktur.
+
 `capsules` süzgeçleri (hepsi isteğe bağlı, VE'lenir):
 
 | Alan | Anlamı |
@@ -2505,11 +2523,21 @@ bulunur. "Az örnekli" (`face.few_cases`) yazı tura değildir: gizlenmez, söyl
 Akış (`capsules` sorgusunun `audience`'ı, `capsules` konusu, `viewer` akışı) ve satırın
 `in_feed`'i **aynı kuralı** kullanır (`Session::feed_place`).
 
-**Eşik:** yazı tura kuralı geleceğe bakmamalı (K53 kural 1) ve M19'da ölçülerek seçilir. O
-zamana kadar kural barındırıcının yapılandırmasıdır (`Session::set_coin_flip_rule`, protokol
-mesajı değil; mühür anahtarları gibi); verilmezse hiçbir hikâye işaretlenmez ve akış R4'teki
-gibidir (var olan dökümler bayt bayt aynı). Olumsuz geçişin (2) yazı tura gizlemesinden muaf
-tutulması bugünkü davranıştır; M19'un önerisine ve Arkin'in kararına bağlıdır.
+**Eşik (R5/M19):** kural `docs/CAPSULE.md` §9.10'dadır (`rate55`: doğum karnesinde `n ≥ 20` ve
+tutma oranı < 0,55; geleceğe bakmaz). Barındırıcının yapılandırmasıdır, protokol mesajı değil:
+`SessionInit.feed_rule` (`{"rule":"rate55","exempt_negative":true}`; bilinmeyen ad başlangıçta
+reddedilir) ya da `Session::set_coin_flip_rule`; gösterim barındırıcısı bir okuyucu için
+`set_principal_coin_flip_rule` ile başka kural kurabilir. Verilmezse hiçbir hikâye işaretlenmez
+ve akış R4'teki gibidir (var olan dökümler bayt bayt aynı). (2)'deki muafiyet kuralın
+`exempt_negative` parametresidir (varsayılan açık, M19 önerisi); kapalıysa yazı tura işaretli
+hikâye pozisyonda olumsuz aşamada da `hidden: coin_flip` olur.
+
+Kural açıkken (yalnız o zaman yazılan alanlar): `capsules` öğesinde `coin_flip: true` (akışta
+yalnız `all` seviyesinde bulunur; gösterim çekirdeği öğeye "karnesi yazı tura" işaretini
+ekler); `audience: true` ile `capsules` cevabında `coin_flip_hidden` (öteki süzgeçlerden geçip
+yalnız bu kuralla akış dışında kalan hikâye sayısı); `viewer` olayında akışla birlikte aynı
+sayı (`coin_flip_hidden`). Akış boşsa gösterim çekirdeği "Şu an anlatacak bir şey yok." ve
+nedenini (bu sayı, ya da izlenenlerde kapsül olmadığı) başlık satırları olarak yazar.
 
 ### 23.3 Yetki (K33, K34, Ö37)
 

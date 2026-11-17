@@ -323,6 +323,10 @@ pub struct ViewerUpdate {
     /// The device's data subscriptions now: the feeds the host serves this connection
     /// (empty on the feed screen).
     pub data: Vec<FeedKey>,
+    /// (R5/M19, K53) With `feed`: the `capsules` answer's `coin_flip_hidden` (absent:
+    /// none).
+    #[serde(default, skip_serializing_if = "is_zero_u32")]
+    pub coin_flip_hidden: u32,
 }
 
 impl ViewerUpdate {
@@ -1912,6 +1916,11 @@ pub struct CapsuleItem {
     /// The sentence carries no digits for this reader (K33).
     #[serde(default, skip_serializing_if = "std::ops::Not::not")]
     pub redacted: bool,
+    /// (R5/M19, K53) Its ledger at birth is near a coin flip by the host's feed rule: in
+    /// the feed only at the `all` sensitivity, shown with this mark (`docs/PROTOCOL.md`
+    /// §23.2). Never set without a host rule.
+    #[serde(default, skip_serializing_if = "std::ops::Not::not")]
+    pub coin_flip: bool,
     /// (R5/m17-int, `docs/LANGUAGE.md`) The capsule's four surfaces in the voice the
     /// connection chose (`style` `voice`), in the reader's language and by the same
     /// audience rule (redacted: no digits, K33). Absent under the default voice `r4`.
@@ -2527,6 +2536,11 @@ pub enum QueryResult {
         /// that data (instead of the licensed stories).
         #[serde(default, skip_serializing_if = "Vec::is_empty")]
         comments: Vec<ServerComment>,
+        /// (R5/M19, K53) With `audience`: how many stories that pass every other filter of
+        /// the query are kept out of the reader's feed by the host's coin-flip rule (absent:
+        /// none). The empty feed says it (`docs/PROTOCOL.md` §23.2).
+        #[serde(default, skip_serializing_if = "is_zero_u32")]
+        coin_flip_hidden: u32,
     },
     /// Answer to `capsule` (R3, §20).
     CapsuleDetail {
@@ -3655,6 +3669,32 @@ pub struct SessionInit {
     /// and answers `replay` messages. Absent: no replay (`replay` → `unsupported`).
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub replay: Option<ReplayInit>,
+    /// (R5/M19, K53) The host's feed rule: stories whose ledger at birth is near a coin
+    /// flip leave the feed below the `all` sensitivity (`docs/CAPSULE.md` §9.10). Absent:
+    /// no rule (no story is marked; the protocol's default).
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub feed_rule: Option<FeedRuleInit>,
+}
+
+/// (R5/M19, K53, K42) The host's feed rule (host configuration, not a protocol message).
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
+#[serde(deny_unknown_fields)]
+pub struct FeedRuleInit {
+    /// Rule name (`qp_capsule::feedrule::FEED_RULES`: `rate55`, `none`).
+    pub rule: String,
+    /// (K42) A negative stage of a story about the reader's position or active intent is
+    /// never hidden by the rule (default `true`, M19's recommendation).
+    #[serde(default = "yes", skip_serializing_if = "is_true")]
+    pub exempt_negative: bool,
+}
+
+fn yes() -> bool {
+    true
+}
+
+#[allow(clippy::trivially_copy_pass_by_ref)]
+fn is_true(b: &bool) -> bool {
+    *b
 }
 
 /// The replay source of a session (R4, §21; host configuration, not a protocol

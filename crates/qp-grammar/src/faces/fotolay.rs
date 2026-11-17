@@ -125,7 +125,7 @@ fn in_force(finding: &str, p: &dyn DataProvider) -> bool {
 /// # Errors
 /// Unknown finding/fact, a finding without facts, or a series without bars.
 pub fn view(
-    _look: &Look,
+    look: &Look,
     finding: &str,
     max_points: u32,
     p: &dyn DataProvider,
@@ -178,7 +178,7 @@ pub fn view(
     let mut layers = vec![head, glyph, line, moment];
     if fact.series == bs {
         let mut taken: Vec<String> = layers.iter().filter_map(|l| l.id.clone()).collect();
-        for mut l in depth::evidence_layers(&fact, 2, &mut taken) {
+        for mut l in depth::evidence_layers(look, &fact, 2, &mut taken) {
             l.encoding.color = color(mark_ink);
             if l.mark != Mark::Band {
                 l.encoding.width = Some(1.5);

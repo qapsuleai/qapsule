@@ -23,15 +23,11 @@ pub(crate) fn rect(x: i32, y: i32, w: i32, h: i32, color: Rgba) -> Prim {
     }
 }
 
-/// Estimated advance width of `text` at `px` (no font in the compiler): `0.6 · px` per
-/// character, rounded up. Used only to place legends and size text hit boxes.
-pub(crate) fn est_width(text: &str, size: f64, adv: f64) -> i32 {
-    let n = text.chars().count();
-    #[allow(clippy::cast_precision_loss)]
-    let w = (n as f64 * size * adv).ceil();
-    #[allow(clippy::cast_possible_truncation)]
-    let w = w as i32;
-    w.max(1)
+/// Advance width of `text` at `size` px in `font`, rounded up (the font's generated
+/// advance table, [`crate::look::FontAsset::width`]; a monospaced file: R3's `characters ·
+/// size · advance`). Used to wrap and fit text, place legends and size text hit boxes.
+pub(crate) fn est_width(text: &str, size: f64, font: &crate::look::FontAsset) -> i32 {
+    font.width(text, size)
 }
 
 /// Candle body width for a slot (bucket) width: 70 %, at least 1, odd above 2 (R0).
@@ -593,14 +589,17 @@ fn points(pl: &Prepared, g: &Geo<'_>, out: &mut SceneLayer) {
 
 /// (R5/T3) A text mark's metrics at `size` from the look's role of that size
 /// (`TypeScale::mark_role`; the default font at line 1.3 when no role has it):
-/// `(advance em, line height, ascent em)`. `r4`: `(0.6, 1.3, 0.8)`, R3's constants.
-pub(crate) fn text_metrics(look: &crate::look::Look, size: f64) -> (f64, f64, f64) {
+/// `(font asset, line height, ascent em)`. `r4`: `(plex-mono, 1.3, 0.8)`, R3's constants.
+pub(crate) fn text_metrics(
+    look: &crate::look::Look,
+    size: f64,
+) -> (&'static crate::look::FontAsset, f64, f64) {
     let role = look.types.mark_role(size);
     let f = role.map_or(&crate::look::FONTS[0], |r| look.role_font(r));
     let line = role
         .and_then(|r| look.types.role(r))
         .map_or(1.3, |r| r.line);
-    (f.advance, line, f.ascent)
+    (f, line, f.ascent)
 }
 
 /// Pixel position of a panel-relative coordinate along `[lo, hi)`.
@@ -610,7 +609,7 @@ fn panel_px(pp: PanelPos, lo: i32, hi: i32) -> f64 {
 
 /// Words of `text` wrapped into lines of at most `room` pixels at `size` (estimate as in
 /// [`est_width`]); a word longer than a line stands alone.
-fn wrap(text: &str, room: i32, size: f64, adv: f64) -> Vec<String> {
+fn wrap(text: &str, room: i32, size: f64, adv: &crate::look::FontAsset) -> Vec<String> {
     let mut lines: Vec<String> = Vec::new();
     let mut cur = String::new();
     for w in text.split_whitespace() {

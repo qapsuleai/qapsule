@@ -1651,6 +1651,7 @@ dependencies = [
  "qp-schema",
  "qp-session",
  "qp-source",
+ "serde",
  "serde_json",
  "wasm-bindgen",
  "wasm-bindgen-futures",

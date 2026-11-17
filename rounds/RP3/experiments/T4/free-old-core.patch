@@ -1,0 +1,14 @@
+--- a/shells/web/main.js
++++ b/shells/web/main.js
+@@ -138,7 +138,11 @@ function start(frame) {
+   conn = v.conn;
+   token = v.token;
+   info = v.info;
++  // (RP3/T4) A new start (reconnect, backward seek) replaces the core: the old one is
++  // freed first, else its whole replica stays in the WASM memory until a JS GC happens
++  // to finalize it (measured: +~30 MB per restart, 156 MB after 4 restarts at step 1268).
++  if (core) { core.free(); core = null; }
+   core = new Shell(JSON.stringify(v));
+   core.metric_mark('start_frame', performance.now());
+   core.metric_mark('wasm_ready', wasmReady);
+   core.set_dpr(window.devicePixelRatio);

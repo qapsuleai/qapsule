@@ -1,0 +1,12 @@
+{"load":"8.75 13.51 18.30","rep":1}
+{"browser":"chromium","variant":"reconnect","step":0,"s":0,"wasm":17498112,"elements":201,"canvases":41,"js_heap":2400752,"js_heap_total":4521984,"nodes":540}
+{"browser":"chromium","variant":"reconnect","step":1252,"s":19.8,"wasm":37486592,"elements":202,"canvases":41,"js_heap":2688788,"js_heap_total":6881280,"nodes":639}
+{"browser":"chromium","variant":"reconnect","step":2507,"s":40.1,"wasm":48037888,"elements":202,"canvases":41,"js_heap":3291324,"js_heap_total":9240576,"nodes":727}
+{"load":"35.68 20.16 20.54","rep":2}
+{"browser":"chromium","variant":"reconnect","step":0,"s":0,"wasm":17498112,"elements":201,"canvases":41,"js_heap":2405032,"js_heap_total":4784128,"nodes":539}
+{"browser":"chromium","variant":"reconnect","step":1254,"s":19.7,"wasm":37486592,"elements":202,"canvases":41,"js_heap":2739612,"js_heap_total":7143424,"nodes":649}
+{"browser":"chromium","variant":"reconnect","step":2507,"s":40,"wasm":48037888,"elements":202,"canvases":41,"js_heap":2907624,"js_heap_total":8978432,"nodes":663}
+{"load":"22.28 18.77 20.00","rep":3}
+{"browser":"chromium","variant":"reconnect","step":0,"s":0,"wasm":17498112,"elements":201,"canvases":41,"js_heap":2372376,"js_heap_total":4521984,"nodes":539}
+{"browser":"chromium","variant":"reconnect","step":1256,"s":19.8,"wasm":37552128,"elements":202,"canvases":41,"js_heap":3279792,"js_heap_total":6881280,"nodes":733}
+{"browser":"chromium","variant":"reconnect","step":2509,"s":40.1,"wasm":48037888,"elements":202,"canvases":41,"js_heap":3346656,"js_heap_total":8978432,"nodes":742}

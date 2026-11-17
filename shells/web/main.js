@@ -153,11 +153,20 @@ function start(frame) {
   conn = v.conn;
   token = v.token;
   info = v.info;
+  // (RP3/T2, RP3/S) A later start frame (reconnect, language change, backward seek)
+  // builds a new core; it takes over the page's metrics, so the opening timeline stays the
+  // first one (R4 lost it: `open_ms.start_frame` 836,034 ms next to `wasm_ready` 79 ms).
+  // (RP3/T4) The old core is freed **before** the new one is built (its metrics carried
+  // over), else two replicas share the WASM memory, whose peak is never given back
+  // (rounds/RP3/experiments/T4.md, T4-verify.md).
+  let carry = null;
+  if (core) {
+    carry = core.metric_detach();
+    core.free();
+    core = null;
+  }
   const next = new Shell(JSON.stringify(v));
-  // (RP3/T2) A later start frame (reconnect, language change, backward seek) builds a
-  // new core; it takes over the page's metrics, so the opening timeline stays the first
-  // one (R4 lost it: `open_ms.start_frame` 836,034 ms next to `wasm_ready` 79 ms).
-  if (core) next.metric_inherit(core);
+  if (carry) next.metric_attach(carry);
   core = next;
   core.metric_mark('start_frame', performance.now());
   core.metric_mark('wasm_ready', wasmReady);

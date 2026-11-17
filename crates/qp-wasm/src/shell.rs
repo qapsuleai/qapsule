@@ -96,6 +96,20 @@ struct DataFrame {
     replay: Option<ReplayState>,
 }
 
+/// (RP3/M15, §22) The host's `bind` frame (`{"bind":{feeds, events}}`), typed.
+#[derive(serde::Deserialize)]
+struct BindFrame {
+    bind: BindBody,
+}
+
+/// (RP3/M15) The body of a `bind` frame.
+#[derive(serde::Deserialize)]
+struct BindBody {
+    feeds: Vec<qp_schema::protocol::InitFeed>,
+    #[serde(default)]
+    events: Vec<DataEvent>,
+}
+
 /// (RP3/T4) The host's `start` frame (`{conn, principal, lang, data, events, …}`), typed.
 #[derive(serde::Deserialize)]
 struct StartFrame {
@@ -969,6 +983,25 @@ impl ShellCore {
                 return Ok(self.on_message(&msg));
             }
         }
+        // (RP3/M15, §22) The host serves a feed the viewer now subscribes to (before the
+        // data-frame path, which would take a `bind` frame for an empty data frame).
+        if kind == "bind" {
+            let b: BindFrame = serde_json::from_str(text).map_err(|e| e.to_string())?;
+            if let Some(vw) = self.viewer.as_mut() {
+                for f in b.bind.feeds {
+                    let k = f.feed.clone();
+                    let evs: Vec<DataEvent> = b
+                        .bind
+                        .events
+                        .iter()
+                        .filter(|e| e.feed == k)
+                        .cloned()
+                        .collect();
+                    vw.bind(f, evs);
+                }
+            }
+            return Ok(json!({"scene": true}));
+        }
         // (RP3/T4) A data frame parsed typed in one pass: a JSON tree of a large frame (a
         // forward seek: thousands of events) costs some 20 times its text in memory, and
         // the WASM memory keeps that peak. A frame that does not parse typed (a malformed
@@ -997,23 +1030,6 @@ impl ShellCore {
             return Ok(self.on_message(&msg));
         }
         let mut ch = json!({});
-        // (RP3/M15, §22) The host serves a feed the viewer now subscribes to.
-        if let Some(b) = v.get("bind") {
-            let feeds: Vec<qp_schema::protocol::InitFeed> =
-                serde_json::from_value(b["feeds"].clone()).map_err(|e| e.to_string())?;
-            let events: Vec<DataEvent> =
-                serde_json::from_value(b["events"].clone()).unwrap_or_default();
-            if let Some(vw) = self.viewer.as_mut() {
-                for f in feeds {
-                    let k = f.feed.clone();
-                    let evs: Vec<DataEvent> =
-                        events.iter().filter(|e| e.feed == k).cloned().collect();
-                    vw.bind(f, evs);
-                }
-            }
-            ch["scene"] = json!(true);
-            return Ok(ch);
-        }
         if let Some(evs) = v.get("data").and_then(Value::as_array) {
             for e in evs {
                 if let Ok(ev) = serde_json::from_value::<DataEvent>(e.clone()) {

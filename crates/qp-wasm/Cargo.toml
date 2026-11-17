@@ -31,6 +31,8 @@ qp-render = { path = "../qp-render" }
 qp-schema = { path = "../qp-schema" }
 qp-session = { path = "../qp-session", optional = true }
 qp-source = { path = "../qp-source", optional = true }
+# RP3/T4: typed parsing of the large frames (start, data) without a JSON tree.
+serde = { version = "1.0.229", features = ["derive"] }
 serde_json = "1"
 wasm-bindgen = "=0.2.130"
 wasm-bindgen-futures = { version = "0.4", optional = true }

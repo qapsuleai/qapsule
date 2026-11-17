@@ -188,13 +188,26 @@ def dom_texts(rec):
     return out
 
 
-def per_shot(rec):
+def role_of(px: float, look) -> str | None:
+    """The look's type role of a text size (T3 `TypeScale::mark_role` rule: the first of
+    headline, body, label, note with that size; then title, figure)."""
+    if not look:
+        return None
+    types = look.get("type") or look.get("types") or {}
+    for r in ("headline", "body", "label", "note", "title", "figure"):
+        v = types.get(r)
+        if v and abs(float(v.get("px", -1)) - px) < 1e-3:
+            return r
+    return None
+
+
+def per_shot(rec, look=None):
     """Element measures of one shot record."""
     texts, glyphs, taps, glyph_hits = [], [], [], []
     face_chars, face_lines = [], []
     for fid, f in ((rec.get("engine") or {}).get("face_scenes") or {}).items():
         t, g = face_elements(f["scene"])
-        texts += [dict(x, face=fid) for x in t]
+        texts += [dict(x, face=fid, role=role_of(x["px"], look)) for x in t]
         face_chars.append(sum(len(x["text"]) for x in t))
         face_lines.append(len(t))
         if g:
@@ -209,15 +222,21 @@ def per_shot(rec):
             "screen_chars": screen_chars}
 
 
-def gates(records):
-    """Hard gates of one design over all its shots (SPEC §G7, §G9 step 1)."""
+def gates(records, look=None):
+    """Hard gates of one design over all its shots (SPEC §G7, §G9 step 1); `look` = the
+    design's look record (`qp look show`), for text roles."""
     worst_text = None
     worst_glyph = None
     min_font = None
     small_taps = []
     fc, fl, sc = [], [], []
+    by_role = {}
     for r in records:
-        m = per_shot(r)
+        m = per_shot(r, look)
+        for t in m["texts"]:
+            if t.get("role"):
+                b = by_role.setdefault(t["role"], {"px": t["px"], "min_ratio": t["ratio"]})
+                b["min_ratio"] = min(b["min_ratio"], t["ratio"])
         for t in m["texts"]:
             margin = t["ratio"] / t["threshold"]
             if worst_text is None or margin < worst_text["margin"]:
@@ -244,6 +263,7 @@ def gates(records):
         "min_font": {"worst": min_font, "threshold": MIN_FONT, "pass": bool(min_font) and min_font["px"] >= MIN_FONT},
         "touch": {"below_44": small_taps[:30], "count": len(small_taps), "pass": not small_taps},
         "colour": {"classes": sorted(sem), "pairs": table, "pass": bool(table) and all(r["pass"] for r in table)},
+        "roles": {k: {"px": v["px"], "min_ratio": round(v["min_ratio"], 2)} for k, v in sorted(by_role.items())},
         "density": {"face_chars_mean": round(sum(fc) / len(fc), 1) if fc else None, "face_chars_max": max(fc) if fc else None,
                     "face_lines_max": max(fl) if fl else None,
                     "screen_chars_mean": round(sum(sc) / len(sc), 1) if sc else None},

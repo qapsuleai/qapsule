@@ -1,0 +1,82 @@
+diff --git a/crates/qp-grammar/src/look.rs b/crates/qp-grammar/src/look.rs
+index 06f0eac..5fbda5c 100644
+--- a/crates/qp-grammar/src/look.rs
++++ b/crates/qp-grammar/src/look.rs
+@@ -425,8 +425,76 @@ pub const ORNEK: Look = Look {
+     ..R4
+ };
+ 
++// (R5/T2 harness only; never merged) The broken design of the harness self-test
++// (rounds/R5/experiments/harness/glance/SPEC.md §G8): inverted hierarchy, low contrast,
++// a tiny faint glyph.
++const fn kestim_mix(a: u8, b: u8) -> u8 {
++    // 35 % of the colour, 65 % of the background.
++    ((a as u16 * 35 + b as u16 * 65) / 100) as u8
++}
++
++const fn kestim_fade(c: Rgba, bg: Rgba) -> Rgba {
++    [kestim_mix(c[0], bg[0]), kestim_mix(c[1], bg[1]), kestim_mix(c[2], bg[2]), c[3]]
++}
++
++const fn kestim_theme(t: Theme) -> Theme {
++    let bg = t.bg;
++    let accent = kestim_fade(t.accent, bg);
++    let mut series = t.series;
++    series[0] = accent;
++    Theme {
++        text: kestim_fade(t.text, bg),
++        muted: kestim_fade(t.muted, bg),
++        axis: kestim_fade(t.axis, bg),
++        up: kestim_fade(t.up, bg),
++        down: kestim_fade(t.down, bg),
++        accent,
++        series,
++        warn: kestim_fade(t.warn, bg),
++        neutral: kestim_fade(t.neutral, bg),
++        valid: kestim_fade(t.valid, bg),
++        invalid: kestim_fade(t.invalid, bg),
++        closed: kestim_fade(t.closed, bg),
++        focus: kestim_fade(t.focus, bg),
++        chrome: Chrome {
++            fg: kestim_fade(t.chrome.fg, t.chrome.bg),
++            muted: kestim_fade(t.chrome.muted, t.chrome.bg),
++            accent: kestim_fade(t.chrome.accent, t.chrome.bg),
++            note_fg: kestim_fade(t.chrome.note_fg, t.chrome.note_bg),
++            alert_fg: kestim_fade(t.chrome.alert_fg, t.chrome.alert_bg),
++            req: kestim_fade(t.chrome.req, t.chrome.bg),
++            ..t.chrome
++        },
++        ..t
++    }
++}
++
++pub const KESTIM: Look = Look {
++    name: "kestim",
++    note: "",
++    scheme: "dark",
++    types: TypeScale {
++        headline: role(11.0),
++        title: role(24.0),
++        body: role(13.0),
++        label: role(22.0),
++        figure: role(12.0),
++        note: role(10.0),
++    },
++    dark: kestim_theme(Theme::DARK),
++    light: kestim_theme(Theme::LIGHT),
++    glyph: GlyphLook {
++        face_px: 12.0,
++        card_px: 14.0,
++        chart_px: 12.0,
++        default_px: 10.0,
++        ..R4.glyph
++    },
++    ..R4
++};
++
+ /// Looks a connection may choose; the first is the default.
+-pub static LOOKS: &[Look] = &[R4, ORNEK];
++pub static LOOKS: &[Look] = &[R4, ORNEK, KESTIM];
+ 
+ /// The default look's name.
+ pub const DEFAULT_LOOK: &str = "r4";

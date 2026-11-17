@@ -2,8 +2,11 @@
 // the host's stream, the core (WASM) and the screen. It does no arithmetic, sorts nothing,
 // builds no text from domain data and decides no layout of domain elements; every
 // message it sends is made by the core, every pixel of a scene is painted by the core.
+// (RP3/T2) How a scene reaches the canvas is the paint path's (shells/web/paint/,
+// `?paint=<name>`, default `ref` = R4's painting).
 
 import init, { Shell } from './pkg/qp_wasm.js';
+import { choose, supportedNames } from './paint/index.js';
 
 const L = {
   tr: {
@@ -24,6 +27,8 @@ const L = {
     seen: 'Son bakışımı şimdi işaretle', seen_done: 'Son bakış işaretlendi',
     reset: 'Sıfırla',
     m_hint: 'Telefonda: Sıfırla → 10 sn dokunmadan bekleyin → Akış\'ta 10 sn kaydırın → bir kapsülü grafiğe açıp 10 sn sürükleyin ve kıstırın → buraya dönüp Özeti kopyala.',
+    compare: 'Karşılaştır', b_copy: 'Karşılaştırmayı kopyala',
+    b_hint: 'Bütün boyama yollarını sırayla aynı senaryoda çalıştırır (durağan, kaydırma, grafik sürükleme, grafik açıkken tik; yol başına yaklaşık 40 sn, en çok 3 dk). Dokunmayın; bitince tablo ve kopyalama düğmesi çıkar.',
   },
   en: {
     synthetic: 'Synthetic data', tab_feed: 'Feed', tab_settings: 'Settings', tab_metrics: 'Metrics',
@@ -43,6 +48,8 @@ const L = {
     seen: 'Mark my last look now', seen_done: 'Last look marked',
     reset: 'Reset',
     m_hint: 'On a phone: Reset → wait 10 s without touching → scroll the Feed for 10 s → open a capsule to its chart, drag and pinch for 10 s → come back here and Copy summary.',
+    compare: 'Compare', b_copy: 'Copy comparison',
+    b_hint: 'Runs every paint path in turn through the same scenario (idle, scroll, chart drag, ticks with the chart open; about 40 s per path, at most 3 min). Do not touch; a table and a copy button appear at the end.',
   },
 };
 
@@ -88,6 +95,11 @@ let scrollTimer = 0;
 let zoomTimer = 0;
 let painted = false;
 let info = {};
+// (RP3/T2) The paint path (`?paint=`; unknown or unsupported → `ref`, reported).
+let pick = choose(params.get('paint') || 'ref');
+let paint = pick.path;
+const paintEnv = { repaint: () => { if (core) { renderFeed(); renderLayer(true); } } };
+let benching = false;
 
 const $ = (id) => document.getElementById(id);
 const t = (k) => L[ui.lang][k];
@@ -138,11 +150,18 @@ function start(frame) {
   conn = v.conn;
   token = v.token;
   info = v.info;
-  core = new Shell(JSON.stringify(v));
+  const next = new Shell(JSON.stringify(v));
+  // (RP3/T2) A later start frame (reconnect, language change, backward seek) builds a
+  // new core; it takes over the page's metrics, so the opening timeline stays the first
+  // one (R4 lost it: `open_ms.start_frame` 836,034 ms next to `wasm_ready` 79 ms).
+  if (core) next.metric_inherit(core);
+  core = next;
   core.metric_mark('start_frame', performance.now());
   core.metric_mark('wasm_ready', wasmReady);
   core.set_dpr(window.devicePixelRatio);
   sizeFaces();
+  core.set_paint(pick.requested, pick.used, pick.reason);
+  paint.init(core, paintEnv);
   fetch('pkg/sizes.json').then((r) => r.text()).then((s) => core.metric_env(s, navigator.userAgent)).catch(() => {});
   // (R4/D) Device facts for the summary, as the browser reports them (absent: 0).
   core.metric_device('cores', navigator.hardwareConcurrency || 0);
@@ -180,14 +199,6 @@ function onFrame(text) {
 
 // --- painting ---------------------------------------------------------------------
 
-function put(canvas, px, w, h) {
-  if (!px.length) return false;
-  canvas.width = w;
-  canvas.height = h;
-  canvas.getContext('2d').putImageData(new ImageData(new Uint8ClampedArray(px.buffer, px.byteOffset, px.length), w, h), 0, 0);
-  return true;
-}
-
 function sizeFaces() {
   faceKey = core.face_size();
   faceSize = JSON.parse(faceKey);
@@ -197,7 +208,7 @@ function paintFace(id, force) {
   const el = faces.get(id);
   if (!el || !el.firstChild || el.firstChild.tagName !== 'CANVAS') return;
   const t0 = performance.now();
-  if (put(el.firstChild, core.face_rgba(id, force), faceSize.px[0], faceSize.px[1])) {
+  if (paint.paintFace(el.firstChild, id, force, faceSize.px)) {
     core.metric_span('face', t0, performance.now());
     if (!painted) {
       painted = true;
@@ -325,7 +336,7 @@ function renderLayer(force) {
   if (open.scene) {
     const t0 = performance.now();
     Object.assign(scene.style, open.style);
-    if (put(scene, core.scene_rgba(force), open.px[0], open.px[1])) core.metric_span('scene', t0, performance.now());
+    if (paint.paintScene(scene, force, open.px)) core.metric_span('scene', t0, performance.now());
   }
   renderEvidence();
   return open;
@@ -482,8 +493,7 @@ function pointers(el) {
   }
 }
 
-function wire() {
-  const scene = $('scene');
+function wireScene(scene) {
   scene.dataset.target = 'scene';
   pointers(scene);
   scene.addEventListener('wheel', (e) => {
@@ -495,18 +505,24 @@ function wire() {
     core.wheel(e.deltaY, e.offsetX);
     flush();
   }, { passive: false });
+}
+
+function showTab(tab) {
+  for (const x of document.querySelectorAll('#tabs button')) x.classList.toggle('on', x.dataset.tab === tab);
+  for (const p of document.querySelectorAll('.page')) p.classList.toggle('on', p.id === tab);
+  document.body.dataset.tab = tab;
+  if (tab === 'metrics') renderMetrics();
+  if (tab === 'settings') renderSettings();
+}
+
+function wire() {
+  wireScene($('scene'));
   $('back').onclick = () => { core.back(); flush(); };
   $('toevidence').onclick = () => { core.open_to('evidence'); flush(); };
   $('opentext').dataset.target = 'scene';
   pointers($('opentext'));
   for (const b of document.querySelectorAll('#tabs button')) {
-    b.onclick = () => {
-      for (const x of document.querySelectorAll('#tabs button')) x.classList.toggle('on', x === b);
-      for (const p of document.querySelectorAll('.page')) p.classList.toggle('on', p.id === b.dataset.tab);
-      document.body.dataset.tab = b.dataset.tab;
-      if (b.dataset.tab === 'metrics') renderMetrics();
-      if (b.dataset.tab === 'settings') renderSettings();
-    };
+    b.onclick = () => showTab(b.dataset.tab);
   }
   $('feed').addEventListener('scroll', () => {
     mode = 'scroll';
@@ -545,6 +561,8 @@ function wire() {
   $('s_seen').onclick = () => { core.mark_seen(); flush(); toast(t('seen_done')); };
   $('m_copy').onclick = copyMetrics;
   $('m_reset').onclick = () => { if (core) { core.metric_reset(); renderMetrics(); } };
+  $('b_start').onclick = startBench;
+  $('b_copy').onclick = () => copyText(core.bench_summary());
 }
 
 function fillChoices() {
@@ -631,7 +649,10 @@ function sampleMemory() {
 
 function copyMetrics() {
   sampleMemory();
-  const text = core.metrics();
+  copyText(core.metrics());
+}
+
+function copyText(text) {
   const ta = $('m_text');
   ta.value = text;
   ta.hidden = false;
@@ -641,8 +662,87 @@ function copyMetrics() {
   else document.execCommand('copy');
 }
 
+// --- (RP3/T2) paint paths and the automatic comparison -----------------------------
+
+// Switches to paint path `name` (the comparison's `paint` action): fresh canvases (a path
+// may need its own kind of context), then everything visible is painted again.
+function usePath(name) {
+  pick = choose(name);
+  paint = pick.path;
+  core.set_paint(pick.requested, pick.used, pick.reason);
+  for (const el of faces.values()) io.unobserve(el);
+  faces.clear();
+  visible.clear();
+  const old = $('scene');
+  const c = document.createElement('canvas');
+  c.id = 'scene';
+  c.width = old.width;
+  c.height = old.height;
+  old.replaceWith(c);
+  wireScene(c);
+  paint.init(core, paintEnv);
+  renderFeed();
+  firstFaces(Array.from($('list').children));
+  renderLayer(true);
+}
+
+// The comparison (GOAL 8): the core drives the scenario; the page applies its actions as
+// they are, once per animation frame.
+function startBench() {
+  if (!core || benching) return;
+  const cfg = { paths: supportedNames(), current: pick.requested, phase_ms: params.get('bench_phase') || '' };
+  core.bench_start(JSON.stringify(cfg), performance.now());
+  benching = true;
+  $('b_start').disabled = true;
+  $('b_copy').hidden = true;
+}
+
+function benchStep(ts) {
+  const feed = $('feed');
+  const text = core.bench_tick(ts, feed.scrollHeight, feed.clientHeight);
+  if (!text) return;
+  const a = JSON.parse(text);
+  if (a.tab) showTab(a.tab);
+  if (a.paint) usePath(a.paint);
+  if (a.scroll !== undefined) feed.scrollTop = a.scroll;
+  flush();
+  if (a.done) {
+    benching = false;
+    renderBench();
+  }
+}
+
+function renderBench() {
+  const tb = JSON.parse(core.bench_rows());
+  if (!tb) return;
+  const rows = [];
+  for (const r of [tb.head, ...tb.rows]) {
+    const tr = document.createElement('tr');
+    for (const v of r) {
+      const td = document.createElement(r === tb.head ? 'th' : 'td');
+      td.textContent = v;
+      tr.append(td);
+    }
+    rows.push(tr);
+  }
+  $('brows').tBodies[0].replaceChildren(...rows);
+  $('brows').hidden = false;
+  const notes = [];
+  for (const n of tb.notes) {
+    const p = document.createElement('p');
+    p.textContent = n;
+    notes.push(p);
+  }
+  $('bnotes').replaceChildren(...notes);
+  $('b_start').disabled = false;
+  $('b_copy').hidden = false;
+}
+
 function frame(ts) {
-  if (core) core.metric_frame(mode, ts);
+  if (core) {
+    core.metric_frame(mode, ts);
+    if (benching) benchStep(ts);
+  }
   requestAnimationFrame(frame);
 }
 
@@ -681,6 +781,10 @@ window.qp = {
   },
   unfreeze: () => { if (window.qp.frozen) clearFrame(window.qp.frozen); window.qp.frozen = null; },
   frozen: null,
+  // (RP3/T2) for tests/compare.mjs
+  benching: () => benching,
+  bench: () => core.bench_summary(),
+  paintUsed: () => pick.used,
 };
 
 async function main() {

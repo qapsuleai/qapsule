@@ -7,8 +7,9 @@ kıstırma), yüz ve açık kapsül sahneleri, pikseller, oynatma durumu ve kan�
 biçimi, geçiş kutuları, ölçüm istatistikleri.
 
 Denetim: `node shells/web/arch-check.mjs` (`scripts/verify.sh` adım `shell`). Yorumlar ve
-dizge içerikleri çıkarıldıktan sonra `main.js` taranır; kendi kendini sınama örnekleri (her
-kural için bozuk bir satır) yakalanmazsa adım düşer.
+dizge içerikleri çıkarıldıktan sonra `main.js` ve (RP3/T2) **her `paint/*.js` boyama yolu
+dosyası** aynı kurallarla taranır; kendi kendini sınama örnekleri (her kural için bozuk bir
+satır; boyama yolu bağlamında ayrıca bir takım) yakalanmazsa adım düşer.
 
 | Kural | Ne yasak | Neden |
 |-------|----------|-------|
@@ -17,7 +18,7 @@ kural için bozuk bir satır) yakalanmazsa adım düşer.
 | R3 | Aritmetik ve birleştirme işleçleri: `+ - * / %` (`++ -- += …` dahil; `=>` serbest) | Kabuk hiçbir değer hesaplamaz: px → bar, ölçüm farkları, geçiş kutuları çekirdekte |
 | R4 | Şablon dizgesinde `${…}` | Alan verisinden metin kurma |
 | R5 | `core.<ad>` yalnız izin listesindeki yöntemler (aşağıda) | WASM yüzeyi dar ve bilinir |
-| R6 | `./pkg/qp_wasm.js` dışından `import`; satır içi betik; `main.js` dışında betik; HTML'de `on…=` | Yüklenen kod yalnız bu iki dosya |
+| R6 | `main.js`'te `./pkg/qp_wasm.js` ve (RP3/T2) `./paint/index.js` dışından `import`; bir boyama yolunda (`paint/*.js`) kardeş dosya (`./ad.js`) dışından `import`; her yerde dinamik `import()`; satır içi betik; `main.js` dışında `<script>`; HTML'de `on…=` | Yüklenen kod yalnız çekirdek paketi, `main.js` ve `paint/` klasörü |
 
 **İstisna listesi:** yok. (Ölçüm süreleri ham `performance.now()` olarak çekirdeğe verilir;
 `metric_span(ad, t0, t1)` farkı çekirdekte alır. (R4/H-M8910) Çizim yüzeyi boyutu
@@ -34,6 +35,21 @@ kural için bozuk bir satır) yakalanmazsa adım düşer.
 `transition`, `transition_from`, `metric_frame`, `metric_span`, `metric_mark`, `metric_env`,
 `metrics`, `metrics_rows`, `digests`, `png`, `sent`; (R4/H-M8910) `set_look`, `mark_seen`, (R4/S1) `seen_at`,
 `open_capsule`, `set_dpr`, `face_size`, `choices`, `transition_progress`, `transition_frame`; (R4/D) `metric_device`, `metric_memory`, `metric_reset` (ölçüm ekranı: cihaz bilgisi, bellek örneği, seriyi sıfırlama).
+
+(RP3/T2) Eklenenler ve gerekçeleri:
+
+| Yöntem | Neden |
+|--------|-------|
+| `metric_inherit(prev)` | Sonraki bir başlangıç çerçevesi (yeniden bağlanma, dil, geri sarma) yeni çekirdek kurar; ölçümler (açılış zaman çizelgesi, seriler, sürmekte olan karşılaştırma) eskisinden devralınır. R4'te açılış işaretleri dakikalar sonra yeniden alınıyordu (`open_ms.start_frame` 836.034 ms). Kabuk hiçbir değeri taşımaz, yalnız iki nesneyi verir. |
+| `set_paint(istenen, kullanılan, neden)` | Hangi boyama yolunun kullanıldığı ve neden yedeğe düşüldüğü özetin içinde (özet kendini anlatır). |
+| `face_scene(id, force)`, `scene_desc(force)` | Piksel almayan boyama yolları için sahnenin aygıt ölçeğinde **boyama listesi** (`paint/README.md`): bütün sayılar, renk ve yazı tipi dizgeleri çekirdekte hazırlanır; yol yalnız çizim çağrısı yapar (R2–R4 yollarda da geçerli). `face_rgba`/`scene_rgba` ile aynı "değişmediyse boş" kısa devresi. |
+| `font()` | Başvuru çizicinin gömülü yazı tipi dosyası (IBM Plex Mono, OFL): tuvalle metin çizen yol aynı dosyayı `FontFace` ile kaydeder (yazı tipi farkı görsel farkın ana kaynağı olmasın; ağ isteği yok, R1). |
+| `bench_start(cfg, t)`, `bench_tick(t, scrollHeight, clientHeight)`, `bench_rows()`, `bench_summary()` | Otomatik karşılaştırma (GOAL 8): senaryo sürücüsü (zamanlama, kaydırma konumu, yapay sürükleme, oynatma denetimi, istatistik, tablo metni) çekirdekte; kabuk dönen eylemleri olduğu gibi uygular. Kaydırma sınırı için `scrollHeight`/`clientHeight` ham verilir; çıkarma çekirdekte. |
+
+Boyama yolları (`paint/*.js`) çekirdeğe `core` adıyla ve yalnız bu listeden erişir; boyama
+listesindeki ilkelleri verilen sırada, verilen sayılarla boyar; yerleşim, metin kurma,
+sıralama yapmaz (sözleşme: `paint/README.md`). `paint/fixture.js` bir sınama demirbaşıdır
+(yalnız `?fixture=1` ile desteklenir).
 
 **Kabuğun yaptığı:** akışı açar (`EventSource`), çekirdeğin kuyruğunu sırayla gönderir
 (`POST /send`), çerçeveyi çekirdeğe verir; çekirdeğin döndürdüğü pikselleri `putImageData`

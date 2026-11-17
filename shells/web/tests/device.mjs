@@ -131,7 +131,7 @@ function summarize(runs) {
     const gaps = pick((r) => (r[ph].frame_ms[mode] && r[ph].frame_ms[mode].gaps_1s) || 0);
     // Frames delivered per second in the phase (headless Chromium paints at 120 Hz).
     return { n: g('n'), fps: g('n') === null ? 0 : g('n') / (phase / 1000), p50: g('p50'), p95: g('p95'), p99: g('p99'),
-      max: g('max'), long_16_7: g('long_16_7'), long_33_3: g('long_33_3'), gaps_1s: gaps };
+      max: g('max'), long: g('long'), very_long: g('very_long'), gaps_1s: gaps }; // RP3/T2: long = > 1.5 refresh intervals
   };
   const sp = (phases, name) => {
     const g = (k) => median(runs.flatMap((r) => phases.map((ph) => r[ph].span_ms[name] && r[ph].span_ms[name][k])));

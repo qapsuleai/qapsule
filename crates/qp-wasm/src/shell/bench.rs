@@ -165,6 +165,22 @@ impl Bench {
                     .collect()
             })
             .unwrap_or_default();
+        // (RP3/S) The page's `?bench_paths=a,b` (raw) keeps only those of the supported
+        // paths, in registry order; `?bench_order=reverse` runs them reversed (the order
+        // effect: later paths start with a warm JIT and a grown WASM memory).
+        let only: Vec<&str> = cfg["only"]
+            .as_str()
+            .unwrap_or("")
+            .split(',')
+            .map(str::trim)
+            .filter(|s| !s.is_empty())
+            .collect();
+        if !only.is_empty() {
+            paths.retain(|p| only.contains(&p.as_str()));
+        }
+        if cfg["order"].as_str() == Some("reverse") {
+            paths.reverse();
+        }
         if paths.is_empty() {
             paths.push("ref".to_owned());
         }
@@ -238,8 +254,9 @@ impl Bench {
 
 impl ShellCore {
     /// (RP3/T2) Starts the comparison at `t` (ms) with `config` `{paths: [names],
-    /// current: name, phase_ms}` (phase length optional: [`BENCH_PHASE_MS`], clamped to
-    /// [`BENCH_PHASE_RANGE`]).
+    /// current: name, phase_ms, only?, order?}` (phase length optional: [`BENCH_PHASE_MS`],
+    /// clamped to [`BENCH_PHASE_RANGE`]; RP3/S `only`: the page's raw `?bench_paths=`,
+    /// `order`: `reverse` runs the paths reversed).
     pub fn bench_start(&mut self, config: &Value, t: f64) {
         self.metrics.bench = Some(Bench::new(config, t));
     }

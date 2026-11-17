@@ -71,6 +71,14 @@ okur, çünkü dizinle okumak aritmetik ister (R3).
 | `canvas_config(değer)` | Adresteki `?canvas=` değeri **olduğu gibi** çekirdeğe verilir (deney çeşitleri: `glyphs`, `run`, `nobatch`, `full`, `notext`); ayrıştırma çekirdekte. |
 | `canvas_atlas_px()` | Glif atlası kipinde (varsayılan) akıştaki `ATLAS` komutunun yeni atlas satırları (düz RGBA; fontdue kapsaması metnin renginde, başvuru çizicinin kendi glif pikselleri). Yol bunları `ref.js`'in yaptığı gibi `putImageData` ile atlas tuvaline koyar. |
 
+(RP3/M12c) `gpu` boyama yolu için eklenenler:
+
+| Yöntem | Neden |
+|--------|-------|
+| `gpu_face(id, force)`, `gpu_scene(force)` | Sahneyi çekirdek **üçgenlere** çevirir (`crates/qp-wasm/src/shell/paint_gpu.rs`): kırpma uzayında köşeler, önçarpımlı renk, glif atlası koordinatı; çizgi kalınlığı, birleşim, daire bölümleri, metin yerleşimi (başvuru çizicinin kuralıyla) çekirdekte. `face_rgba` ile aynı "değişmediyse yanlış" kısa devresi ve kaydı. |
+| `gpu_vertices()`, `gpu_capacity()`, `gpu_draws(k)`, `gpu_clear()` | Son kurulan karenin köşe baytları, onu tutan tampon boyutu (yol tamponu yalnız sığmazsa büyütür; büyüklük karşılaştırması aritmetik değildir), çizim listesi sütunları (tür, ilk köşe, köşe sayısı; yol `forEach` ile olduğu gibi uygular) ve temizleme rengi. Yol hiçbir sayıyı hesaplamaz, yalnız GPU'ya yükler. |
+| `gpu_atlas_size()`, `gpu_atlas_dirty(full)`, `gpu_atlas_rows()` | Glif atlası (fontdue kapsama bitmapleri, başvuru çiziciyle aynı): boyutu, değişen satırların `[y, genişlik, yükseklik]`'i ve baytları. Yeni doku yaratıldığında `full` bütün satırları ister. |
+
 Boyama yolları (`paint/*.js`) çekirdeğe `core` adıyla ve yalnız bu listeden erişir; boyama
 listesindeki ilkelleri verilen sırada, verilen sayılarla boyar; yerleşim, metin kurma,
 sıralama yapmaz (sözleşme: `paint/README.md`). `paint/fixture.js` bir sınama demirbaşıdır

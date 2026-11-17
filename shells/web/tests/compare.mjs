@@ -3,16 +3,17 @@
 // comparative summary; asserts it finished in under 3 minutes and lists every path.
 // Also checks the paint-path fallback (`?paint=` unknown / unsupported → `ref`, reported).
 //
-// The registry's second path here is `fixture` (shells/web/paint/fixture.js), a test
-// fixture that exists only with `?fixture=1`.
+// The test fixture path `fixture` (shells/web/paint/fixture.js) exists only with
+// `?fixture=1` (put in the address when `--paths` names it).
 //
 // Usage: node tests/compare.mjs <qp> [--browsers chromium,webkit] [--phase <ms>]
-//          [--dpr 1] [--out <dir>] [--paths ref,canvas,fixture] [--throttle <rate>]
-//          [--viewport 390x844] [--port 8420] [--q <extra query>]
+//          [--dpr 1] [--out <dir>] [--paths ref,canvas] [--order reverse] [--throttle <rate>]
+//          [--viewport 390x844] [--port 8420] [--q <extra query>] [--jsc useJIT=false]
 //   --phase     phase length passed as `?bench_phase=` (default: the core's, 8000 ms)
 //   --out       writes compare-<browser>.json (the summary) there
-//   --paths     (RP3/M12b) the paths the comparison is expected to run, in registry order;
-//               `fixture=1` is put in the address only when the list has `fixture`
+//   --paths     the paths to run (`?bench_paths=`; the core keeps those the browser supports,
+//               in registry order). Default: every registered path the browser supports.
+//   --order     (RP3/S) `reverse` runs the paths in reversed order (`?bench_order=reverse`)
 //   --throttle  (RP3/M12b) Chromium CPU throttling rate (CDP Emulation.setCPUThrottlingRate)
 //   --viewport  (RP3/M12b) the page size in CSS px
 //   --q         (RP3/M12b) extra query parameters for the page (e.g. `canvas=full`)
@@ -29,7 +30,9 @@ const browsers = opt('--browsers', 'chromium,webkit').split(',');
 const phase = opt('--phase', '');
 const dpr = Number(opt('--dpr', '1'));
 const out = opt('--out', null);
-const paths = opt('--paths', 'ref,canvas,fixture').split(',');
+const pathsArg = opt('--paths', '');
+const paths = pathsArg ? pathsArg.split(',') : [];
+const order = opt('--order', '');
 const throttle = Number(opt('--throttle', '1'));
 const [vw, vh] = opt('--viewport', '390x844').split('x').map(Number);
 const port0 = Number(opt('--port', '8420'));
@@ -74,8 +77,14 @@ for (const [k, name] of browsers.entries()) {
       await cdp.send('Emulation.setCPUThrottlingRate', { rate: throttle });
     }
     const fx = paths.includes('fixture') ? '&fixture=1' : '';
-    await page.goto(`${base}?anim=0${fx}${phase ? `&bench_phase=${phase}` : ''}${extraQ ? `&${extraQ}` : ''}`);
+    const sel = `${pathsArg ? `&bench_paths=${pathsArg}` : ''}${order ? `&bench_order=${order}` : ''}`;
+    await page.goto(`${base}?anim=0${fx}${sel}${phase ? `&bench_phase=${phase}` : ''}${extraQ ? `&${extraQ}` : ''}`);
     await settle(page);
+    // The expected list: the registry's supported paths (the page's own registry), those of
+    // `--paths` among them, reversed with `--order reverse`.
+    let want = await page.evaluate(async () => (await import('/paint/index.js')).supportedNames());
+    if (paths.length) want = want.filter((n) => paths.includes(n));
+    if (order === 'reverse') want.reverse();
     await page.click('#tabs button[data-tab="metrics"]');
     const t0 = Date.now();
     await page.click('#b_start');
@@ -91,9 +100,12 @@ for (const [k, name] of browsers.entries()) {
     }
     check(ms < LIMIT_MS, `${name}: took ${ms} ms`);
     check(errors.length === 0, `${name}: page errors ${errors}`);
-    check(JSON.stringify(s.paths.map((p) => p.name)) === JSON.stringify(paths), `${name}: paths ${s.paths.map((p) => p.name)}, want ${paths}`);
+    // (RP3/S) The paths run are the registry's supported ones (or `--paths` among them),
+    // in registry order or reversed (`--order reverse`).
+    const names = s.paths.map((p) => p.name);
+    check(JSON.stringify(names) === JSON.stringify(want), `${name}: paths ${names}, want ${want}`);
     check(table > 10, `${name}: the table has ${table} rows`);
-    check(font || !paths.some((p) => p === 'fixture' || p === 'canvas'), `${name}: the core's font was not registered through FontFace`);
+    check(font || !want.some((p) => p === 'fixture' || p === 'canvas'), `${name}: the core's font was not registered through FontFace`);
     for (const p of s.paths) {
       check(p.errors.length === 0, `${name}/${p.name}: ${p.errors}`);
       check(p.paint.used === p.name && p.paint.fallback === null, `${name}/${p.name}: paint ${JSON.stringify(p.paint)}`);

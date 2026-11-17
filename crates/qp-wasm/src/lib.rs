@@ -395,6 +395,8 @@ mod shell_binding {
         inner: ShellCore,
         // (RP3/M12b) the `canvas` paint path's state (what each canvas shows now)
         canvas: crate::shell::paint_canvas::CanvasPainter,
+        // (RP3/M12c) The GPU paint path's glyph atlas and last built frame.
+        gpu: crate::shell::paint_gpu::GpuPainter,
     }
 
     #[wasm_bindgen]
@@ -411,6 +413,7 @@ mod shell_binding {
             Ok(Self {
                 inner,
                 canvas: crate::shell::paint_canvas::CanvasPainter::default(),
+                gpu: crate::shell::paint_gpu::GpuPainter::default(),
             })
         }
 
@@ -879,6 +882,61 @@ mod shell_binding {
         /// PNG bytes of RGBA pixels (the core's encoder: byte-identical on every target).
         pub fn png(&self, rgba: &[u8], w: u32, h: u32) -> Vec<u8> {
             qp_render::encode_png(rgba, w, h).unwrap_or_default()
+        }
+
+        /// (RP3/M12c) Builds capsule `id`'s face as GPU triangles (`shell/paint_gpu.rs`);
+        /// false when unchanged (as `face_rgba`) or none.
+        pub fn gpu_face(&mut self, id: &str, force: bool) -> bool {
+            self.inner.face_gpu(id, force, &mut self.gpu)
+        }
+
+        /// (RP3/M12c) Builds the open capsule's scene as GPU triangles; false when
+        /// unchanged (as `scene_rgba`) or none.
+        pub fn gpu_scene(&mut self, force: bool) -> bool {
+            self.inner.scene_gpu(force, &mut self.gpu)
+        }
+
+        /// (RP3/M12c) The last built frame's vertex bytes.
+        pub fn gpu_vertices(&self) -> Vec<u8> {
+            self.gpu.vertices().to_vec()
+        }
+
+        /// (RP3/M12c) A vertex buffer size that holds the last frame (bytes).
+        pub fn gpu_capacity(&self) -> u32 {
+            self.gpu.capacity()
+        }
+
+        /// (RP3/M12c) The last frame's draws, column `k`: 0 kinds, 1 first vertices,
+        /// 2 vertex counts.
+        pub fn gpu_draws(&self, k: usize) -> Vec<u32> {
+            self.gpu.draw_column(k)
+        }
+
+        /// (RP3/M12c) The last frame's clear colour (premultiplied RGBA, 0..1).
+        pub fn gpu_clear(&self) -> Vec<f64> {
+            self.gpu.background().to_vec()
+        }
+
+        /// (RP3/M12c) The glyph atlas size `[w, h]` (an `r8unorm` texture).
+        pub fn gpu_atlas_size(&self) -> Vec<u32> {
+            vec![
+                crate::shell::paint_gpu::ATLAS_W,
+                crate::shell::paint_gpu::ATLAS_H,
+            ]
+        }
+
+        /// (RP3/M12c) Atlas rows to upload, `[y, width, height]` (empty: none); `full`
+        /// (a new texture) names every row.
+        pub fn gpu_atlas_dirty(&mut self, full: bool) -> Vec<u32> {
+            if full {
+                self.gpu.mark_atlas();
+            }
+            self.gpu.atlas_dirty()
+        }
+
+        /// (RP3/M12c) The texels of those rows; clears the record.
+        pub fn gpu_atlas_rows(&mut self) -> Vec<u8> {
+            self.gpu.take_atlas_rows()
         }
     }
 }

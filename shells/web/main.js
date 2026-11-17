@@ -97,7 +97,10 @@ let info = {};
 // (RP3/T2) The paint path (`?paint=`; unknown or unsupported → `ref`, reported).
 let pick = choose(params.get('paint') || 'ref');
 let paint = pick.path;
-const paintEnv = { repaint: () => { if (core) { renderFeed(); renderLayer(true); } } };
+// (RP3/S) A path's own repaint request (font loaded, GPU device ready, gesture settled)
+// waits for the next paint pass (M14: at most one paint per animation frame).
+let repaintWanted = false;
+const paintEnv = { repaint: () => { repaintWanted = true; } };
 let benching = false;
 
 const $ = (id) => document.getElementById(id);
@@ -218,9 +221,14 @@ function onFrame(text) {
 // (RP3/M14) The one paint pass of an animation frame, for every change since the last.
 function paintPass() {
   const text = core.take_changes();
-  if (!text) return;
+  if (!text && !repaintWanted) return;
   const t0 = performance.now();
-  repaint(JSON.parse(text));
+  if (text) repaint(JSON.parse(text));
+  if (repaintWanted) {
+    repaintWanted = false;
+    renderFeed();
+    renderLayer(true);
+  }
   core.metric_pass(t0, performance.now());
 }
 
@@ -736,7 +744,11 @@ function usePath(name) {
 // they are, once per animation frame.
 function startBench() {
   if (!core || benching) return;
-  const cfg = { paths: supportedNames(), current: pick.requested, phase_ms: params.get('bench_phase') || '' };
+  // (RP3/S) `?bench_paths=` and `?bench_order=reverse` go to the core as they are (it selects).
+  const cfg = {
+    paths: supportedNames(), current: pick.requested, phase_ms: params.get('bench_phase') || '',
+    only: params.get('bench_paths') || '', order: params.get('bench_order') || '',
+  };
   core.bench_start(JSON.stringify(cfg), performance.now());
   benching = true;
   $('b_start').disabled = true;
@@ -797,7 +809,7 @@ function frame(ts) {
 
 window.qp = {
   // (RP3/M14) Not ready while a paint pass is pending.
-  ready: () => Boolean(core) && core.idle() && !core.has_changes() && posts.size === 0,
+  ready: () => Boolean(core) && core.idle() && !core.has_changes() && !repaintWanted && posts.size === 0,
   digests: () => core.digests(),
   metrics: () => { sampleMemory(); return core.metrics(); },
   resetMetrics: () => core.metric_reset(),
@@ -807,7 +819,10 @@ window.qp = {
   sent: () => core.sent(),
   png: (id) => {
     const c = document.getElementById(id) || (faces.get(id) && faces.get(id).firstChild);
-    const img = c.getContext('2d').getImageData(0, 0, c.width, c.height);
+    // (RP3/M12c) A canvas a paint path drew with another context (WebGPU) is read
+    // through a 2D copy (`snapshot`); a 2D canvas is read directly, as before.
+    const g = c.getContext('2d') || snapshot(c).getContext('2d');
+    const img = g.getImageData(0, 0, c.width, c.height);
     return Array.from(core.png(new Uint8Array(img.data.buffer), c.width, c.height));
   },
   repaint: () => { if (core) { renderFeed(); renderLayer(true); renderStatus(); } },

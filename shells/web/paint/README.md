@@ -61,6 +61,21 @@ Seçilecek bir yol değildir. Yalnızca adreste `fixture=1` varken desteklenir;
 `tests/compare.mjs`'nin ikinci yolu odur. Boyama listesi arayüzünü ve yazı tipini gerçek
 tarayıcıda çalıştırır, sonra başvuru piksellerini boyar.
 
+### `gpu` (RP3/M12c, WebGPU)
+
+`?paint=gpu`. Çekirdek sahneyi üçgenlere çevirir (`gpu_face` / `gpu_scene`,
+`crates/qp-wasm/src/shell/paint_gpu.rs`), yol köşe baytlarını ve glif atlasının değişen
+satırlarını yükler, çizim listesini olduğu gibi uygular. Tek GPU aygıtı bütün tuvallere
+hizmet eder; kenar yumuşatma 4× MSAA (K12). `supported()` = `navigator.gpu` var ve
+aygıt isteği başarısız olmadı. Aygıt hazır olana kadar boyamaz (tuvale bağlam almaz),
+hazır olunca `env.repaint()`; bağdaştırıcı/aygıt alınamazsa `ref` ile boyar ve
+`set_paint('gpu', 'ref', 'unsupported')` bildirir; aygıt kaybında yenisini ister.
+Ölçüm ve görsel fark: `rounds/RP3/experiments/M12c.md`, test `tests/gpu.mjs`.
+
+**Sözleşmeye eklenen tek genel değişiklik (`main.js`):** `window.qp.png` başka bağlam
+türüyle (WebGPU) boyanmış bir tuvali `snapshot` ile 2B kopyadan okur; 2B tuval eskisi gibi
+doğrudan okunur.
+
 ## Piksel olmayan yollar için çekirdek arayüzü
 
 - `core.face_scene(id, force)` → yüzün **boyama listesi** (JSON metni); değişmediyse boş

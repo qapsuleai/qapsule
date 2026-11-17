@@ -13,14 +13,14 @@ sütunundadır; sayılar notlardaki gibi, ölçüm ayarıyla birlikte verilmişt
 - **Chromium N×**: Chromium, CDP `setCPUThrottlingRate` N kat, çoğunlukla DPR 3. CDP yalnız
   ana iş parçacığını yavaşlatır; GPU/raster sürecini yavaşlatmaz.
 - WebKit'in `performance.now()`'ı 1 ms adımlıdır: WebKit satırlarında 0 = "1 ms'den az".
-- "Dalda" = kod `main`'de değil, alt görevin dalında (`rp3/m12a-cpu`, `rp3/m12b-canvas`,
+- (Güncelleme, round sonu) M12a/b/c, M14 ve S dalları `main`'e birleşti (`4c7868a`); "dalda" etiketleri kaldırıldı. Varsayılan yol `canvas` (öneri, Ö53), `cpu` ve `gpu` `?paint=` ile seçilir.
   `rp3/m12c-gpu`, `rp3/m14-freq`); not `git show <dal>:rounds/RP3/experiments/<ad>.md` ile okunur.
 - M12a/b/c'nin PHONE sayıları otomatik karşılaştırma senaryosundandır (`compare.mjs` ve
   türevleri; `ref` sahne p50 ≈ 25 ms). T1'in kalibrasyon senaryosu farklıdır (`ref` sahne
   38 ms). İki senaryonun sayıları birbiriyle karşılaştırılmaz; her satırdaki `ref` ile
   karşılaştırılır.
 
-**Durum değerleri:** *alındı* (kodda kaldı; "dalda" ise henüz `main`'de değil) · *alınmadı*
+**Durum değerleri:** *alındı* (kodda kaldı) · *alınmadı*
 (denendi, bırakıldı) · *öneri* (ölçüldü ya da tahmin edildi, uygulanmadı) · *ölçülmedi*.
 
 ---
@@ -110,8 +110,8 @@ T3'ün beklenen kazançları tahmindi. "Doğrulandı" = ölçüm kazancı göste
 
 | # | Aday | Akıbet | Kaynak |
 |---|---|---|---|
-| U1 | Veri olaylarını birleştir, rAF'te tek boyama | **Alındı (dalda).** Bekleme en çok bir kare (PHONE 15–17 ms, Chromium 8,4 ms). 4 adım/sn'de az birleştiriyor (1,00–1,13 geçiş / veri çerçevesi) | M14 |
-| U2 | Görünmeyen yüz/katman boyanmaz | **Alındı (dalda).** Karar çekirdekte (`faces_to_paint`) | M14 |
+| U1 | Veri olaylarını birleştir, rAF'te tek boyama | **Alındı.** Bekleme en çok bir kare (PHONE 15–17 ms, Chromium 8,4 ms). 4 adım/sn'de az birleştiriyor (1,00–1,13 geçiş / veri çerçevesi) | M14 |
+| U2 | Görünmeyen yüz/katman boyanmaz | **Alındı.** Karar çekirdekte (`faces_to_paint`) | M14 |
 | U3 | Ölçüm düzeltmesi: 1 ms nicemleme, 60 Hz, Düşük Güç uyarısı | **Alındı** (yenileme kestirimi, `long` = 1,5 × aralık). Düşük Güç Kipi uyarısı yapılmadı | T2 |
 | U4 | Bütçe uyarlaması (H7) | **Yapılmadı** (yerine sabit "harekette ölçek 1", M12a) | M12a |
 
@@ -172,9 +172,9 @@ varsayılan kapalı. **Hiçbiri telefonda ölçülmedi.**
 
 | Yol | PHONE (ref → yol) | PHONE_JIT_EST | Chromium 20× sahne p50 | Görsel fark | Paket (WASM gzip) | Durum | Kaynak |
 |---|---|---|---|---|---|---|---|
-| `cpu` — akıllı yazılım çizici | Sahne 25 → **6** ms (p95 30 → 15), yüz 33 → 23, sürükleme uzun kare 0,252 → 0,002; tik p50 14 → 23 (açık soru) | sahne 2 → 0 ms, yüz 2 → 2 | 46,4 → 8,4 | **0 piksel** (2 motor × 49 karşılaştırma) | +10.095 B | dalda (`rp3/m12a-cpu`) | M12a §A, §E |
-| `canvas` — Canvas 2D + glif atlası | Yüz 33 → **2**, sahne 25 → **5**, tik p95/p99 48/133 → 22/23, sürükleme uzun kare 0,25 → 0 | yüz 2 → < 1, sahne 2 → < 1 | 46,2 → 8,3 (tarama dahil üst sınır `cx_sync` 13,5) | >2 düzey en kötü %0,30 (DPR 3) / %1,06 (DPR 1) | +9.674 B | dalda (`rp3/m12b-canvas`) | M12b Özet, Ölçüm |
-| `gpu` — çekirdekte üçgenleme + ince WebGPU | Yüz 33 → **4**, sahne 25 → **6**, tik p95 49 → 18; **ama düz HTTP'de WebGPU yok, yol `ref`'e düşüyor** | yüz 2 → 1, sahne 2 → 2 | 45,3 → 9,9 | >2 düzey ≤ %0,31, hepsi kenarda (düz alanda 0) | +8,1 KB | dalda (`rp3/m12c-gpu`) | M12c Özet, §4.7 |
+| `cpu` — akıllı yazılım çizici | Sahne 25 → **6** ms (p95 30 → 15), yüz 33 → 23, sürükleme uzun kare 0,252 → 0,002; tik p50 14 → 23 (açık soru) | sahne 2 → 0 ms, yüz 2 → 2 | 46,4 → 8,4 | **0 piksel** (2 motor × 49 karşılaştırma) | +10.095 B | (`rp3/m12a-cpu`) | M12a §A, §E |
+| `canvas` — Canvas 2D + glif atlası | Yüz 33 → **2**, sahne 25 → **5**, tik p95/p99 48/133 → 22/23, sürükleme uzun kare 0,25 → 0 | yüz 2 → < 1, sahne 2 → < 1 | 46,2 → 8,3 (tarama dahil üst sınır `cx_sync` 13,5) | >2 düzey en kötü %0,30 (DPR 3) / %1,06 (DPR 1) | +9.674 B | (`rp3/m12b-canvas`) | M12b Özet, Ölçüm |
+| `gpu` — çekirdekte üçgenleme + ince WebGPU | Yüz 33 → **4**, sahne 25 → **6**, tik p95 49 → 18; **ama düz HTTP'de WebGPU yok, yol `ref`'e düşüyor** | yüz 2 → 1, sahne 2 → 2 | 45,3 → 9,9 | >2 düzey ≤ %0,31, hepsi kenarda (düz alanda 0) | +8,1 KB | (`rp3/m12c-gpu`) | M12c Özet, §4.7 |
 
 Ölçüm uyarıları: `canvas` ve `gpu` yollarında süre ana iş parçacığındaki **komut kaydıdır**;
 tarama GPU/raster sürecinde olur ve CDP kısıtı onu yavaşlatmaz (Chromium N× satırları bu
@@ -186,12 +186,12 @@ Ablasyon: aynı sayfada 8 yol, evre 4 s. Chromium 20× 3 koşu; PHONE tek koşu 
 
 | Yaklaşım | Sonuç (ölçüm, ayar) | Durum | Kaynak |
 |---|---|---|---|
-| Görünüm + `demultiply`'ın kalkması (`view`): WASM belleğinden doğrudan `Uint8ClampedArray`, opak arka planda dönüşüm yok | Kapatınca (Chromium 20×) yüz 37,6 → 50,2, sahne p95 26,5 → 44,7, kaydırma kare p95 25,8 → 49,3; PHONE sahne 7/14 → 9/26. En büyük tek pay | alındı (dalda) | M12a §B, §E |
-| Harekette ölçek 1 (`reduce`) | Kapatınca sürüklemede sahne 8,2 → 18,8 ms, kare p95 25,3 → 33,9 (Chromium 20×); PHONE drag sahne 7 → 14. Sürerken görüntü bulanık (ürün kararı açık) | alındı (dalda) | M12a §B, §E |
-| Tuvali tutma / "zaten gösteriyor" (`reuse`) | Kapatınca kaydırmada yeniden boyanan yüz 10 → 26, kare p95 25,8 → 41,4 (Chromium 20×) | alındı (dalda) | M12a §B |
+| Görünüm + `demultiply`'ın kalkması (`view`): WASM belleğinden doğrudan `Uint8ClampedArray`, opak arka planda dönüşüm yok | Kapatınca (Chromium 20×) yüz 37,6 → 50,2, sahne p95 26,5 → 44,7, kaydırma kare p95 25,8 → 49,3; PHONE sahne 7/14 → 9/26. En büyük tek pay | alındı | M12a §B, §E |
+| Harekette ölçek 1 (`reduce`) | Kapatınca sürüklemede sahne 8,2 → 18,8 ms, kare p95 25,3 → 33,9 (Chromium 20×); PHONE drag sahne 7 → 14. Sürerken görüntü bulanık (ürün kararı açık) | alındı | M12a §B, §E |
+| Tuvali tutma / "zaten gösteriyor" (`reuse`) | Kapatınca kaydırmada yeniden boyanan yüz 10 → 26, kare p95 25,8 → 41,4 (Chromium 20×) | alındı | M12a §B |
 | İlk sürüm, "zaten gösteriyor" kısa devresi olmadan | Kaydırmada 40 yüz boyaması, `cpu_raster` p50 17,8 ms, yüz p50 25,4 (Chromium 20×); düzeltmeyle 10 boyama, kare scroll p95 32,9 → 25,1 | alınmadı (düzeltildi) | M12a "Denenip bırakılanlar" 1 |
-| Kirli dikdörtgen (`dirty`) | Bu senaryoda **ölçülebilir katkı yok** (`cpu-nodirty` sahne 7,7 ↔ `cpu` 8,2, Chromium 20×; PHONE'da kapalıyken biraz daha iyi, tek koşu). Yerel sayımda yüzlerin değişen alanı %23,6, grafiğin %43 | alındı (dalda; kazanç kanıtlanmadı) | M12a §B, §E |
-| Önek katmanı (`layer`, ≥ 16 ilkel) | Ölçülebilir katkı yok (`cpu-nolayer` 7,9); sahne başına +4,2 MB. Yüzlerde hiç kullanılmadı (16'dan az önek ilkeli) | alındı (dalda; öneri: kapatılabilir) | M12a §B, "Denenip bırakılanlar" 2 |
+| Kirli dikdörtgen (`dirty`) | Bu senaryoda **ölçülebilir katkı yok** (`cpu-nodirty` sahne 7,7 ↔ `cpu` 8,2, Chromium 20×; PHONE'da kapalıyken biraz daha iyi, tek koşu). Yerel sayımda yüzlerin değişen alanı %23,6, grafiğin %43 | alındı (kazanç kanıtlanmadı) | M12a §B, §E |
+| Önek katmanı (`layer`, ≥ 16 ilkel) | Ölçülebilir katkı yok (`cpu-nolayer` 7,9); sahne başına +4,2 MB. Yüzlerde hiç kullanılmadı (16'dan az önek ilkeli) | alındı (öneri: kapatılabilir) | M12a §B, "Denenip bırakılanlar" 2 |
 | Hepsi kapalı (`cpu-off`) | Sahne 43,3 ≈ `ref` 46,3: kalıcı glif önbelleği ve pixmap yeniden kullanımı tek başına küçük | — | M12a §B |
 | Kırpma maskesi / ötelemeli küçük pixmap | Yapılmadı: tiny-skia'da maske memset yolunu kapatıyor, öteleme yuvarlamayı değiştirebilir → bayt eşitliği garanti olmaz | alınmadı | M12a "Denenip bırakılanlar" 3 |
 | SIMD (`+simd128`, tiny-skia `simd`) | Chromium 20× `cpu` sahne 8,4 / 25,1 (skaler 8,4 / 23,7); WebKit `ref` 2 → 4 ms; PHONE (E3) `cpu` sahne 5 / 14 / 15, `ref` 25 / 28. Bayt bayt aynı (70/70 tuval). Paket −174 KB ham | alınmadı | M12a §C, §E |
@@ -204,15 +204,15 @@ Ablasyon: aynı sayfada 8 yol, evre 4 s. Chromium 20× 3 koşu; PHONE tek koşu 
 |---|---|---|---|
 | Metin: `run` (metin başına bir `fillText`) | En kötü fark: DPR 1 `feed-tr-dark.face-1` >2 düzey %10,27 (glyphs %9,63) | alınmadı | M12b "Denenen ve kalanlar" |
 | Metin: `glyphs` (glif başına `fillText`, başvuru kalemi) | Konum aynı, glifler daha kalın: >2 düzey %2,5–10, metinde en büyük fark 187–194; hız atlasla aynı (Chromium 4× yüz 1,7 / sahne 1,7) | alınmadı (çeşit olarak duruyor) | M12b Görsel fark |
-| Metin: **glif atlası** (fontdue pikselleri, `drawImage`) | >2 düzey %0,06–1,06; metin farkı ±1 düzey; hız aynı | alındı (dalda) | M12b |
+| Metin: **glif atlası** (fontdue pikselleri, `drawImage`) | >2 düzey %0,06–1,06; metin farkı ±1 düzey; hız aynı | alındı | M12b |
 | `alpha: true`, `textRendering` (`geometricPrecision` / `optimizeSpeed`) | Hiçbir piksel değişmedi | alınmadı | M12b |
 | `desynchronized: true` | Chromium 4× yüz 1,5 / sahne 1,5 (varsayılan 1,6 / 1,5): etkisiz | alınmadı | M12b Çeşitler |
-| Düz `Float32Array` komut akışı + dizge tablosu (JSON v1 yerine) | Ayrıştırma yok, tek `memcpy`; JSON v1 ayrıca ölçülmedi | alındı (dalda) | M12b |
+| Düz `Float32Array` komut akışı + dizge tablosu (JSON v1 yerine) | Ayrıştırma yok, tek `memcpy`; JSON v1 ayrıca ölçülmedi | alındı | M12b |
 | Toplu yollar kapalı (`nobatch`) | `feed-tr-dark` yüzlerinde piksel farkı yok; süre ölçülmedi | — | M12b |
-| Kısmi boyama (değişen bölge) / kapalı (`full`) | Senaryoda süre farkı yok (Chromium 4× yüz 1,3 ↔ 1,6, sahne 1,5 ↔ 1,5); kısmi = tam 14/14 bayt bayt aynı | alındı (dalda; kazanç kanıtlanmadı) | M12b |
+| Kısmi boyama (değişen bölge) / kapalı (`full`) | Senaryoda süre farkı yok (Chromium 4× yüz 1,3 ↔ 1,6, sahne 1,5 ↔ 1,5); kısmi = tam 14/14 bayt bayt aynı | alındı (kazanç kanıtlanmadı) | M12b |
 | `cx_sync=1` (her boyamadan sonra 1 piksel geri okuma: tarama dahil üst sınır) | Chromium 4× sahne 2,3 (ref 8,7), 20× 13,5 (ref 46,7), WebKit 1 (ref 2): tarama dahil `ref`'in ≈ 1/4'ü | — (ölçüm çeşidi) | M12b Çeşitler |
 | GPU tamponlu atlas tuvali (WebKit) | **Hata:** başsız WebKit 26.5'te 3 koşudan 2'sinde atlas glifleri kırmızı/mavi kanalları takaslı (`#c8cdd7` yerine `#d7cdc8`) | alınmadı | M12b |
-| Atlas tuvali CPU'da (`willReadFrequently: true`) | 3/3 + son tam koşu temiz; Chromium 4× / 20× süre GPU atlasla aynı | alındı (dalda) | M12b |
+| Atlas tuvali CPU'da (`willReadFrequently: true`) | 3/3 + son tam koşu temiz; Chromium 4× / 20× süre GPU atlasla aynı | alındı | M12b |
 | Bellek | JS yığını en çok 79–125 MB → 12–18 MB (Chromium); WASM'da piksel tamponu yok, atlas üst sınırı 2 × 8 MB | — | M12b Bellek |
 
 #### M12c `gpu` — denemeler
@@ -220,9 +220,9 @@ Ablasyon: aynı sayfada 8 yol, evre 4 s. Chromium 20× 3 koşu; PHONE tek koşu 
 | Yaklaşım | Sonuç (ölçüm, ayar) | Durum | Kaynak |
 |---|---|---|---|
 | vello 0.12 + WebGPU (K12'nin seçimi) | Yeniden derlenmedi; R0 ölçümü: soğuk boru hattı 1.567 ms, paket +1,67 MB ham / +534 KB gzip; glifleri kendi taramasıyla çizer (fontdue'den farklı) | alınmadı | M12c §1 |
-| Çekirdekte üçgenleme + fontdue `r8unorm` atlası + tek boru hattı, 4× MSAA | Soğuk başlangıç Chromium 6–9 ms, WebKit 4–6 ms; paket +8,1 KB gzip; WASM hazır ve ilk kapsül değişmedi (Chromium 144,2 → 138,1 ms) | alındı (dalda) | M12c §1, §4.6 |
+| Çekirdekte üçgenleme + fontdue `r8unorm` atlası + tek boru hattı, 4× MSAA | Soğuk başlangıç Chromium 6–9 ms, WebKit 4–6 ms; paket +8,1 KB gzip; WASM hazır ve ilk kapsül değişmedi (Chromium 144,2 → 138,1 ms) | alındı | M12c §1, §4.6 |
 | Doğrudan kip (her yüz tuvaline kendi `webgpu` bağlamı) | Sunulmuş WebGPU tuvali geri okunamıyor: `drawImage` sonrası `0,0,0,0` (Chromium 151, WebKit 26.5) → `qp.png` ve geçiş anlık görüntüsü boş, ilk görsel fark ölçümü %100; tuval `2d` alamadığı için yedek de olmuyor. Hız: Chromium 4× yüz 1,4 (kopya 1,6) | alınmadı (`?gpu_direct=1` ölçüm için) | M12c §2.1, §4.5 |
-| Kopya kipi (paylaşılan ekran dışı WebGPU tuvali → sayfanın 2B tuvaline `drawImage`) | Kopya bedeli Chromium 4×'te ≈ 0,2 ms, WebKit'te ≤ 1 ms; geri okuma, geçiş ve yedek çalışıyor | alındı (dalda) | M12c §2.2, §4.5 |
+| Kopya kipi (paylaşılan ekran dışı WebGPU tuvali → sayfanın 2B tuvaline `drawImage`) | Kopya bedeli Chromium 4×'te ≈ 0,2 ms, WebKit'te ≤ 1 ms; geri okuma, geçiş ve yedek çalışıyor | alındı | M12c §2.2, §4.5 |
 | WebKit'te geçici (memoryless) `stencil8` çoklu örnek hedefi | WebKit 26.5 reddediyor ("depth stencil texture is not renderable"), yüzler boş; geçici kullanım yalnız renk hedefinde | alınmadı | M12c §2.3 |
 | Başsız Chromium kabuğu (varsayılan `launch()`) | `navigator.gpu` var, adaptör `null` → `ref`, `unsupported` | — (ortam bulgusu) | M12c §5 |
 | `--enable-unsafe-webgpu` (SwiftShader) | Yazılım GPU'su; yüz 2,1 → 0,4 ms (yalnız ana iş parçacığı; GPU ölçümü değil) | alınmadı (ölçüm aracı olarak) | M12c §4.2, §5 |
@@ -237,14 +237,14 @@ Ablasyon: aynı sayfada 8 yol, evre 4 s. Chromium 20× 3 koşu; PHONE tek koşu 
 
 | Yaklaşım | Sonuç (ölçüm, ayar) | Durum | Kaynak |
 |---|---|---|---|
-| Kare başına en çok bir boyama (bayraklar çekirdekte birikir, rAF'te tek `repaint`) | Geçiş / veri çerçevesi 1,00–1,13; bekleme en çok 15–17 ms (PHONE) / 8,4 ms (Chromium 4×). **4 adım/sn'de az birleştiriyor**; kazancın çoğu aşağıdaki bayraklardan ve tam yansıdaki çoklu mesajdan | alındı (dalda) | M14 §1.1, §2.4 |
-| Kesin bayraklar: olaysız veri çerçevesi (`{"data":[]}`) `feed`/`scene` kaldırmaz | PHONE görüntüleyici idle: iş / veri çerçevesi 16,0 → 12,9 ms (−%20), tik p50 4 → 0 ms. Chromium 4× idle 5,0 → 3,5 ms (−%30), grafik 5,3 → 4,2 ms (−%21) | alındı (dalda) | M14 §1.2, §2.1–2.2 |
-| Tam yansıda grafik açıkken birleştirme | Chromium 4× `?mode=replica` chart_ticks: 13,5 → 5,8 ms / veri çerçevesi (−%57) | alındı (dalda) | M14 §2.3 |
-| Hangi yüzün boyanacağı çekirdekte (`faces_to_paint`), katman açıkken hiçbiri; sahne yalnız akış sekmesinde | Katman açıkken yüz boyaması iki kodda da 0 (önceki kod da bir kare gecikmeyle aynı sonucu veriyordu) | alındı (dalda) | M14 §1.2 |
+| Kare başına en çok bir boyama (bayraklar çekirdekte birikir, rAF'te tek `repaint`) | Geçiş / veri çerçevesi 1,00–1,13; bekleme en çok 15–17 ms (PHONE) / 8,4 ms (Chromium 4×). **4 adım/sn'de az birleştiriyor**; kazancın çoğu aşağıdaki bayraklardan ve tam yansıdaki çoklu mesajdan | alındı | M14 §1.1, §2.4 |
+| Kesin bayraklar: olaysız veri çerçevesi (`{"data":[]}`) `feed`/`scene` kaldırmaz | PHONE görüntüleyici idle: iş / veri çerçevesi 16,0 → 12,9 ms (−%20), tik p50 4 → 0 ms. Chromium 4× idle 5,0 → 3,5 ms (−%30), grafik 5,3 → 4,2 ms (−%21) | alındı | M14 §1.2, §2.1–2.2 |
+| Tam yansıda grafik açıkken birleştirme | Chromium 4× `?mode=replica` chart_ticks: 13,5 → 5,8 ms / veri çerçevesi (−%57) | alındı | M14 §2.3 |
+| Hangi yüzün boyanacağı çekirdekte (`faces_to_paint`), katman açıkken hiçbiri; sahne yalnız akış sekmesinde | Katman açıkken yüz boyaması iki kodda da 0 (önceki kod da bir kare gecikmeyle aynı sonucu veriyordu) | alındı | M14 §1.2 |
 | Kare süreleri | PHONE p95'ler eşit; chart p99 48 → 41, drag p95 33 → 29, drag uzun kare %26,7 → %25,2: boyamanın kendisi belirleyici (M12'nin işi) | — | M14 §2.1, §2.4 |
 | Grafik açıkken değişmeyen sahnenin kurulmaması | **Çekirdekte güvenle yapılamıyor**: her adımda açık enstrümanın oluşan barına `patch` geliyor, girdiler gerçekten değişiyor; "bu değişiklik çizileni etkilemez" bilgisi derleyiciden gelmeli. Sahne kurulumu 31 / 31 veri çerçevesi, boyanan 6 | alınmadı; öneri (`qp-grammar` okuduğu bar aralığını döndürsün; PHONE'da ~6 ms/tik, adımların ~%80'i) | M14 §1.3, Öneriler 1 |
-| JIT sınaması (`core.jit_probe()`, 1.000.000 adımlık xorshift; eşik 15 ms) | WebKit JIT açık 5 / 2 / 2 ms; PHONE 19–42 ms; Chromium 1× 2,8–4,4; CDP 4× 9,7–11,0; CDP 16× 39,8–43,1. Ayrım payı dar (11 ↔ 19); ≥ 6× kısılmış masaüstü "kapalı" okunur. Telefonda değerleri bilinmiyor | alındı (dalda) | M14 §3 |
-| Özette `secure_context`, `webgpu`, `insecure_context` / `jit_off` uyarıları | Başsız testlerde `secure_context: true`; telefonun LAN adresinde `false` olur | alındı (dalda) | M14 §3 |
+| JIT sınaması (`core.jit_probe()`, 1.000.000 adımlık xorshift; eşik 15 ms) | WebKit JIT açık 5 / 2 / 2 ms; PHONE 19–42 ms; Chromium 1× 2,8–4,4; CDP 4× 9,7–11,0; CDP 16× 39,8–43,1. Ayrım payı dar (11 ↔ 19); ≥ 6× kısılmış masaüstü "kapalı" okunur. Telefonda değerleri bilinmiyor | alındı | M14 §3 |
+| Özette `secure_context`, `webgpu`, `insecure_context` / `jit_off` uyarıları | Başsız testlerde `secure_context: true`; telefonun LAN adresinde `false` olur | alındı | M14 §3 |
 
 ### 3.5 Açılış (M13)
 
@@ -302,6 +302,17 @@ Telefon için tahmin (ölçüm değil): WASM hazır 1,8 s → ≈ 0,3–0,5 s, i
 | Yollar aynı sayfada sırayla | Sonraki yol ısınmış JIT ve büyümüş WASM belleğiyle başlıyor (ref 23,0 → fixture 42,2 MB); bellek karşılaştırması sıraya bağlı | alındı (sınırlı); öneri: taze sayfa / ters sıra | T2 §3, M12a/M12b Öneriler |
 
 ---
+
+### 3.8 Bütünleştirme ve birlikte ölçüm (S)
+
+| Yaklaşım | Sonuç (ölçüm, ayar) | Durum | Kaynak |
+|---|---|---|---|
+| Yolları görüntüleyici kipi ve M14 tek boyama geçişi üstünde birleştirmek | Yolların sahneyi `ShellCore::face()/scene()`'den alması sayesinde görüntüleyici için değişiklik gerekmedi; yolun kendi yeniden boyama isteği (yazı tipi, GPU aygıtı, `cpu` hareket sonu) bir sonraki geçişe ertelendi | alındı | S §1 |
+| Yol sırasının etkisi (ileri / ters, 3'er koşu) | PHONE'da ≈1 ms, Chromium'da ≤ %15 fark; M12a'nın "`cpu` tik `ref`'ten sonra yüksek" sorusu yeniden üretilmedi | ölçüldü | S §3 |
+| "Değişti mi" sınaması: JSON `scene_digest` | PHONE grafik açıkken kare başına 7,0 (ref) / 7,6 ms (canvas) — ölçüldü (`change_check` aralığı) | **bırakıldı** | S §1.5 |
+| "Değişti mi" sınaması: `scene_fingerprint` (SipHash 64, bütün piksel alanları, serileştirme yok); `view_digest` aynı | kontrol 7,6 → 0,7 ms/kare; canvas tik+boyama 14,4 → **7,3** ms/kare (p95 19–20 → 11); ref'in akış ekranında yüz yeniden boyaması 12 → 4 (JSON, piksele girmeyen alanlarda da değişiyordu) | alındı | S §1.5, §6; `S-verify.md` |
+| Kalan maliyet (PHONE, canvas, grafik açık) | sahne kurma 3,2 + kontrol 0,7 + boyama 0,3 + kabuk (açık katman JSON'u, metin, kanıt DOM'u) ≈2,4 ms/kare | öneri: A36, katman metnini yeniden kurmamak | S §7 |
+| Varsayılan yol `canvas`, `ref` yedek; verify altınları `?paint=ref` ile | verify 18/18; toleranslı test `paint-canvas.mjs`, yol bağımsızlığı `paint-paths.mjs` | alındı (öneri Ö53) | S §1 |
 
 ## 4. Açık sorular ve gerçek cihazda doğrulanacaklar
 

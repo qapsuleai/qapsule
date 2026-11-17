@@ -1,0 +1,247 @@
+{
+ "config": "phone",
+ "browser": "26.5",
+ "story": "pavka",
+ "ms": 10000,
+ "phases": [
+  {
+   "target": 5,
+   "n": 12,
+   "range": {
+    "view": "present-fnd.SYN26.breakout.down.47",
+    "from_bar": 595,
+    "to_bar": 638
+   },
+   "total": 206,
+   "tick": {
+    "n": 40,
+    "p50": 0,
+    "p95": 1
+   },
+   "scene": {
+    "n": 63,
+    "p50": 6,
+    "p95": 6
+   },
+   "scene_build": {
+    "n": 102,
+    "p50": 3,
+    "p95": 4
+   },
+   "spans": {
+    "change_check": [
+     102,
+     0,
+     1
+    ],
+    "data_pass": [
+     39,
+     5,
+     8
+    ],
+    "frame_to_paint": [
+     104,
+     16,
+     24
+    ],
+    "msg": [
+     73,
+     0,
+     3
+    ],
+    "paint_pass": [
+     104,
+     8,
+     9
+    ],
+    "pass_wait": [
+     104,
+     9,
+     16
+    ],
+    "scene": [
+     63,
+     6,
+     6
+    ],
+    "scene_build": [
+     102,
+     3,
+     4
+    ],
+    "tick": [
+     40,
+     0,
+     1
+    ]
+   },
+   "paint": {
+    "fallback": null,
+    "requested": "canvas",
+    "used": "canvas"
+   }
+  },
+  {
+   "target": 50,
+   "n": 52,
+   "range": {
+    "view": "present-fnd.SYN26.breakout.down.47",
+    "from_bar": 462,
+    "to_bar": 725
+   },
+   "total": 207,
+   "tick": {
+    "n": 41,
+    "p50": 0,
+    "p95": 1
+   },
+   "scene": {
+    "n": 64,
+    "p50": 12,
+    "p95": 13
+   },
+   "scene_build": {
+    "n": 104,
+    "p50": 6,
+    "p95": 6
+   },
+   "spans": {
+    "change_check": [
+     104,
+     1,
+     1
+    ],
+    "data_pass": [
+     40,
+     9,
+     11
+    ],
+    "frame_to_paint": [
+     106,
+     20,
+     30
+    ],
+    "msg": [
+     74,
+     0,
+     4
+    ],
+    "paint_pass": [
+     106,
+     14,
+     15
+    ],
+    "pass_wait": [
+     106,
+     7,
+     16
+    ],
+    "scene": [
+     64,
+     12,
+     13
+    ],
+    "scene_build": [
+     104,
+     6,
+     6
+    ],
+    "tick": [
+     41,
+     0,
+     1
+    ]
+   },
+   "paint": {
+    "fallback": null,
+    "requested": "canvas",
+    "used": "canvas"
+   }
+  },
+  {
+   "target": 200,
+   "n": 207,
+   "range": {
+    "view": "present-fnd.SYN26.breakout.down.47",
+    "from_bar": 28,
+    "to_bar": 1035
+   },
+   "total": 207,
+   "tick": {
+    "n": 41,
+    "p50": 0,
+    "p95": 1
+   },
+   "scene": {
+    "n": 51,
+    "p50": 16,
+    "p95": 17
+   },
+   "scene_build": {
+    "n": 102,
+    "p50": 9,
+    "p95": 9
+   },
+   "spans": {
+    "canvas_part": [
+     17,
+     0,
+     1
+    ],
+    "change_check": [
+     102,
+     1,
+     1
+    ],
+    "data_pass": [
+     40,
+     14,
+     16
+    ],
+    "frame_to_paint": [
+     103,
+     24,
+     33
+    ],
+    "msg": [
+     73,
+     0,
+     3
+    ],
+    "paint_pass": [
+     103,
+     14,
+     19
+    ],
+    "pass_wait": [
+     103,
+     11,
+     15
+    ],
+    "scene": [
+     51,
+     16,
+     17
+    ],
+    "scene_build": [
+     102,
+     9,
+     9
+    ],
+    "tick": [
+     41,
+     0,
+     1
+    ]
+   },
+   "paint": {
+    "fallback": null,
+    "requested": "canvas",
+    "used": "canvas"
+   }
+  }
+ ],
+ "capsule": "cap.SYN26.breakout.down.47",
+ "paint_used": "canvas",
+ "errors": []
+}

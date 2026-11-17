@@ -58,6 +58,14 @@ pub struct DemoArgs {
     /// the page. Devices on the local network can then see the demo.
     #[arg(long)]
     pub lan: bool,
+    /// (RP3) The name of an HTTPS reverse proxy in front of this host (e.g. a private
+    /// tunnel that terminates TLS and forwards to 127.0.0.1:PORT keeping `Host`): that
+    /// name (with or without `:443`) is accepted as `Host`, and `https://NAME` as the
+    /// `Origin` of `/send`. Off by default. A phone needs a secure context (`https://`)
+    /// for the JIT on iOS 27 and for WebGPU (rounds/RP3/CALIBRATION.md); whoever can
+    /// reach the proxy can see the demo.
+    #[arg(long, value_name = "NAME")]
+    pub https_host: Option<String>,
     /// The web shell's directory (index.html, main.js, pkg/).
     #[arg(long, default_value = "shells/web")]
     pub web: PathBuf,
@@ -448,14 +456,24 @@ fn static_path(web: &Path, path: &str) -> Option<PathBuf> {
 /// What a request must look like to be served (`Host` values allowed).
 struct Gate {
     hosts: Vec<String>,
+    /// (RP3) Host values that arrive through the HTTPS reverse proxy (`--https-host`):
+    /// their pages' origin is `https://NAME`.
+    https_hosts: Vec<String>,
 }
 
 impl Gate {
     fn host_ok(&self, host: Option<&str>) -> bool {
-        host.is_some_and(|h| self.hosts.iter().any(|x| x.eq_ignore_ascii_case(h)))
+        host.is_some_and(|h| {
+            self.hosts.iter().any(|x| x.eq_ignore_ascii_case(h))
+                || self.https_hosts.iter().any(|x| x.eq_ignore_ascii_case(h))
+        })
     }
     fn origin_ok(&self, origin: Option<&str>, host: Option<&str>) -> bool {
         match (origin, host) {
+            (Some(o), Some(h)) if self.https_hosts.iter().any(|x| x.eq_ignore_ascii_case(h)) => {
+                let name = h.strip_suffix(":443").unwrap_or(h);
+                o.eq_ignore_ascii_case(&format!("https://{name}"))
+            }
             (Some(o), Some(h)) => o.eq_ignore_ascii_case(&format!("http://{h}")),
             _ => false,
         }
@@ -638,10 +656,26 @@ pub fn demo(a: &DemoArgs) -> Result<(), String> {
     if let Some(ip) = &lan_ip {
         hosts.push(format!("{ip}:{port}"));
     }
-    let gate = std::sync::Arc::new(Gate { hosts });
+    let https_hosts: Vec<String> = a
+        .https_host
+        .iter()
+        .map(|n| n.trim().to_ascii_lowercase())
+        .filter(|n| !n.is_empty())
+        .flat_map(|n| [n.clone(), format!("{n}:443")])
+        .collect();
+    if let Some(n) = &a.https_host {
+        urls.push(format!("https://{}/", n.trim()));
+    }
+    let gate = std::sync::Arc::new(Gate { hosts, https_hosts });
     let info = json!({"urls": urls, "phone": phone, "lan": bind != "127.0.0.1",
         "synthetic": st.synthetic, "note": st.note});
     println!("qp demo: {}", urls[0]);
+    if let Some(n) = &a.https_host {
+        println!(
+            "https (vekil / proxy): https://{}/ -> 127.0.0.1:{port}",
+            n.trim()
+        );
+    }
     match &phone {
         Some(u) => {
             println!("telefondan aç / open on your phone (same network): {u}");

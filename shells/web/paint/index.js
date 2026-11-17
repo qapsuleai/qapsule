@@ -3,10 +3,12 @@
 
 import ref from './ref.js';
 import fixture from './fixture.js';
+import gpu from './gpu.js';
 
 export const PATHS = new Map([
   [ref.name, ref],
   [fixture.name, fixture], // test fixture (tests/compare.mjs), supported only with ?fixture=1
+  [gpu.name, gpu], // RP3/M12c: WebGPU, geometry from the core (default off: ?paint=gpu)
 ]);
 
 /**

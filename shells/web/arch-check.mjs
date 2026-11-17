@@ -22,6 +22,9 @@ export const ALLOWED_CORE = new Set([
   // for non-pixel paint paths, the automatic comparison.
   'metric_inherit', 'set_paint', 'face_scene', 'scene_desc', 'font',
   'bench_start', 'bench_tick', 'bench_rows', 'bench_summary',
+  // RP3/M12c (ARCH.md): the GPU paint path's triangles, draws and glyph atlas, made by the core.
+  'gpu_face', 'gpu_scene', 'gpu_vertices', 'gpu_capacity', 'gpu_draws', 'gpu_clear',
+  'gpu_atlas_size', 'gpu_atlas_dirty', 'gpu_atlas_rows',
 ]);
 
 // R6: which modules a file may import. main.js: the core's package and the paint-path

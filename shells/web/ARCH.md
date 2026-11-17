@@ -46,6 +46,14 @@ satır; boyama yolu bağlamında ayrıca bir takım) yakalanmazsa adım düşer.
 | `font()` | Başvuru çizicinin gömülü yazı tipi dosyası (IBM Plex Mono, OFL): tuvalle metin çizen yol aynı dosyayı `FontFace` ile kaydeder (yazı tipi farkı görsel farkın ana kaynağı olmasın; ağ isteği yok, R1). |
 | `bench_start(cfg, t)`, `bench_tick(t, scrollHeight, clientHeight)`, `bench_rows()`, `bench_summary()` | Otomatik karşılaştırma (GOAL 8): senaryo sürücüsü (zamanlama, kaydırma konumu, yapay sürükleme, oynatma denetimi, istatistik, tablo metni) çekirdekte; kabuk dönen eylemleri olduğu gibi uygular. Kaydırma sınırı için `scrollHeight`/`clientHeight` ham verilir; çıkarma çekirdekte. |
 
+(RP3/M12c) `gpu` boyama yolu için eklenenler:
+
+| Yöntem | Neden |
+|--------|-------|
+| `gpu_face(id, force)`, `gpu_scene(force)` | Sahneyi çekirdek **üçgenlere** çevirir (`crates/qp-wasm/src/shell/paint_gpu.rs`): kırpma uzayında köşeler, önçarpımlı renk, glif atlası koordinatı; çizgi kalınlığı, birleşim, daire bölümleri, metin yerleşimi (başvuru çizicinin kuralıyla) çekirdekte. `face_rgba` ile aynı "değişmediyse yanlış" kısa devresi ve kaydı. |
+| `gpu_vertices()`, `gpu_capacity()`, `gpu_draws(k)`, `gpu_clear()` | Son kurulan karenin köşe baytları, onu tutan tampon boyutu (yol tamponu yalnız sığmazsa büyütür; büyüklük karşılaştırması aritmetik değildir), çizim listesi sütunları (tür, ilk köşe, köşe sayısı; yol `forEach` ile olduğu gibi uygular) ve temizleme rengi. Yol hiçbir sayıyı hesaplamaz, yalnız GPU'ya yükler. |
+| `gpu_atlas_size()`, `gpu_atlas_dirty(full)`, `gpu_atlas_rows()` | Glif atlası (fontdue kapsama bitmapleri, başvuru çiziciyle aynı): boyutu, değişen satırların `[y, genişlik, yükseklik]`'i ve baytları. Yeni doku yaratıldığında `full` bütün satırları ister. |
+
 Boyama yolları (`paint/*.js`) çekirdeğe `core` adıyla ve yalnız bu listeden erişir; boyama
 listesindeki ilkelleri verilen sırada, verilen sayılarla boyar; yerleşim, metin kurma,
 sıralama yapmaz (sözleşme: `paint/README.md`). `paint/fixture.js` bir sınama demirbaşıdır

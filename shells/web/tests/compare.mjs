@@ -69,7 +69,10 @@ for (const [k, name] of browsers.entries()) {
     }
     check(ms < LIMIT_MS, `${name}: took ${ms} ms`);
     check(errors.length === 0, `${name}: page errors ${errors}`);
-    check(JSON.stringify(s.paths.map((p) => p.name)) === '["ref","fixture"]', `${name}: paths ${s.paths.map((p) => p.name)}`);
+    // (RP3/M12c) Every path the browser supports runs; `ref` first, the fixture among
+    // them (a real path such as `gpu` joins where its feature exists, e.g. WebKit).
+    const names = s.paths.map((p) => p.name);
+    check(names[0] === 'ref' && names.includes('fixture'), `${name}: paths ${names}`);
     check(table > 10, `${name}: the table has ${table} rows`);
     check(font, `${name}: the fixture did not register the core's font through FontFace`);
     for (const p of s.paths) {

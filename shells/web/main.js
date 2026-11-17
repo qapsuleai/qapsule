@@ -759,7 +759,10 @@ window.qp = {
   sent: () => core.sent(),
   png: (id) => {
     const c = document.getElementById(id) || (faces.get(id) && faces.get(id).firstChild);
-    const img = c.getContext('2d').getImageData(0, 0, c.width, c.height);
+    // (RP3/M12c) A canvas a paint path drew with another context (WebGPU) is read
+    // through a 2D copy (`snapshot`); a 2D canvas is read directly, as before.
+    const g = c.getContext('2d') || snapshot(c).getContext('2d');
+    const img = g.getImageData(0, 0, c.width, c.height);
     return Array.from(core.png(new Uint8Array(img.data.buffer), c.width, c.height));
   },
   repaint: () => { if (core) { renderFeed(); renderLayer(true); renderStatus(); } },

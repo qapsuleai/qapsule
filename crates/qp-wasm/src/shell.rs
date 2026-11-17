@@ -275,6 +275,10 @@ struct Gesture {
     cancelled: bool,
 }
 
+/// (RP3/T4) The record of sent messages keeps at least this many of the latest (see
+/// `ShellCore::sent`); a short session (every test) keeps all of them.
+pub const SENT_KEEP: usize = 1024;
+
 /// Running statistics of a series of millisecond samples.
 #[derive(Debug, Clone, Default)]
 struct Samples {
@@ -424,7 +428,9 @@ pub struct ShellCore {
     face_shown: BTreeMap<String, String>,
     scene_shown: Option<String>,
     version: u64,
-    /// Every message sent (for the record and the parity check).
+    /// The messages sent, for the record and the parity check: every message of a short
+    /// session; (RP3/T4) on a long one only the latest [`SENT_KEEP`] to `2 × SENT_KEEP`
+    /// (the oldest are dropped in blocks, so that the record does not grow without bound).
     sent: Vec<Value>,
     /// (R4/H-M8910) Device scale the scenes are painted at (1: CSS px).
     scale: u32,
@@ -633,6 +639,10 @@ impl ShellCore {
         }
         let out = std::mem::take(&mut self.outbox);
         self.sent.extend(out.iter().cloned());
+        if self.sent.len() > 2 * SENT_KEEP {
+            let old = self.sent.len() - SENT_KEEP;
+            self.sent.drain(..old);
+        }
         out
     }
 
@@ -737,6 +747,11 @@ impl ShellCore {
                     (Some(Asked::Feed), QueryResult::Capsules { capsules, .. }) => {
                         self.feed_inflight = false;
                         self.feed.clone_from(capsules);
+                        // (RP3/T4) Only a face in the feed can be painted: the digests of
+                        // the faces that left it are forgotten (bounded by the feed).
+                        let feed = &self.feed;
+                        self.face_shown
+                            .retain(|id, _| feed.iter().any(|i| &i.id == id));
                         ch["feed"] = json!(true);
                     }
                     (Some(Asked::Input), QueryResult::Interaction { interaction }) => {
@@ -1822,7 +1837,8 @@ impl ShellCore {
         })
     }
 
-    /// Every message sent so far.
+    /// The messages sent so far: all of them, or on a long session (more than
+    /// `2 × SENT_KEEP`) the latest `SENT_KEEP` or more.
     #[must_use]
     pub fn sent(&self) -> &[Value] {
         &self.sent

@@ -1,0 +1,123 @@
+{
+ "cfg": {
+  "name": "phone",
+  "engine": "chromium",
+  "dpr": 3,
+  "rate": 16,
+  "bg": false,
+  "jsc": {
+   "useJIT": "false"
+  },
+  "viewport": {
+   "width": 402,
+   "height": 874
+  },
+  "web": "../../rounds/RP3/experiments/T1/web-base"
+ },
+ "browser": "151.0.7922.34",
+ "load_before": "10.87 11.18 17.08",
+ "load_after": "10.04 10.62 16.06",
+ "failed": 0,
+ "summary": {
+  "open_ms": {
+   "wasm_ready": 337.8,
+   "first_capsule": 1942.4
+  },
+  "feed": {
+   "tick": {
+    "n": 32,
+    "p50": 18.1,
+    "p95": 182
+   },
+   "face": {
+    "n": 47,
+    "p50": 36.8,
+    "p95": 41.9
+   },
+   "frame_idle": {
+    "n": 379,
+    "p50": 8.3,
+    "p95": 9.4,
+    "p99": 92.6
+   },
+   "frame_scroll": {
+    "n": 203,
+    "p50": 8.4,
+    "p95": 57.9,
+    "p99": 83.4
+   }
+  },
+  "chart": {
+   "tick": {
+    "n": 80,
+    "p50": 14.9,
+    "p95": 60
+   },
+   "scene": {
+    "n": 20,
+    "p50": 50.4,
+    "p95": 53.8
+   },
+   "face": {
+    "n": null,
+    "p50": null,
+    "p95": null
+   },
+   "frame_idle": {
+    "n": 1926,
+    "p50": 8.3,
+    "p95": 9.3,
+    "p99": 25.9
+   }
+  },
+  "cal": {
+   "tick": {
+    "n": 80,
+    "p50": 14.9,
+    "p95": 60
+   },
+   "face": {
+    "n": 47,
+    "p50": 36.8,
+    "p95": 41.9
+   },
+   "scene": {
+    "n": 20,
+    "p50": 50.4,
+    "p95": 53.8
+   }
+  },
+  "wasm_mb": 64.0625,
+  "scene_px": [
+   1170,
+   900
+  ],
+  "scale": 3,
+  "depth": [
+   "chart",
+   "chart",
+   "chart"
+  ],
+  "capsule": [
+   "cap.SYN16.breakout.up.200",
+   "cap.SYN16.breakout.up.200",
+   "cap.SYN16.breakout.up.200"
+  ],
+  "scenes_per_tick": 0.25,
+  "errors": []
+ },
+ "residuals": {
+  "tick": {
+   "p50": 0.20135135135135135,
+   "p95": 0.5084745762711864
+  },
+  "face": {
+   "p50": 1.15,
+   "p95": 0.5819444444444444
+  },
+  "scene": {
+   "p50": 0.7098591549295774,
+   "p95": 0.5847826086956521
+  }
+ }
+}

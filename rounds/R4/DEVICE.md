@@ -227,3 +227,31 @@ kapsül 460 ms), telefonda Wi-Fi'de ham 4,4 MB ≈0,4–0,9 s ekler. Ayrı yükl
 yerine önce **barındırıcıda sıkıştırma** (gzip/br önceden sıkıştırılmış dosya, `Accept-Encoding`
 ile; yeni bağımlılık istemez: `demo.sh` `.wasm.gz` üretebilir) daha ucuz; telefon ölçümünde
 `open_ms.wasm_ready` bunu gösterecek.
+
+## RP3 düzeltmesi (2026-11-17, RP3/T1)
+
+Arkin'in gerçek telefon ölçümü (`rounds/R4/experiments/D/phone-iphone-ios27-default.json`)
+§3 ve §5'teki eşlemeyi çürüttü. Ayrıntı ve ölçümler: `rounds/RP3/CALIBRATION.md`.
+
+- **§5'teki "4× DPR3 ≈ orta sınıf telefon" eşlemesi geçersiz.** iPhone'da (iOS 27, DPR 3)
+  tik / yüz / sahne p50 74 / 32 / 71 ms ölçüldü; 4× DPR3 benzetimi 3,3 / 7,8 / 10,5 ms
+  vermişti (R4 senaryosu, 16 adım/sn). Telefon koşusunun karşılığı olan RP3 senaryosunda
+  4× DPR3 3,6 / 8,7 / 12,0 ms veriyor: telefondan 20 / 3,7 / 5,9 kat hafif.
+- **Farkın ana nedeni işlemci değil, JIT'in kapalı olması.** iOS 27'de WebKit, güvenli
+  bağlam olmayan (`http://`, yerel ağ IP'si) sayfalarda JS'i ve WASM'ı JIT'siz (yorumlayıcı)
+  çalıştırıyor ("Enhanced Security" politikası; WebKit hata kaydı 324968, WebKit
+  geliştiricileri "kasıtlı" diyor). Telefon ölçümü `scripts/demo.sh --lan` ile
+  `http://192.168.x.y:8390/` üzerinden alındı: tam bu durum. Masaüstünde Playwright
+  WebKit 26.5'i JIT'siz çalıştırmak (`__XPC_JSC_useJIT=false`) telefonun yüz süresini %3
+  içinde (31 / 32 ms), sahne süresini 0,54 katında (38 / 71 ms) yeniden üretiyor; Chromium'un CDP kısıtı bu etkiyi
+  benzetmez (kısıt bütün işi eşit yavaşlatır; yorumlayıcı WASM'ı JS'ten çok daha fazla
+  yavaşlatır: basit döngüde WASM 23×, JS 4×).
+- **Sonuç:** Arkin'in ölçtüğü sayılar, telefonun "JIT'siz WebKit" kipidir; aynı iPhone'un
+  HTTPS üzerinden JIT'li sayıları bilinmiyor (masaüstü JIT'li WebKit ölçümüne göre
+  ≈ 10–20 kat daha hızlı beklenir; doğrulanmalı). Orta sınıf Android (Chrome, V8, JIT
+  açık; bu politika yok) için kalibre bir eşleme yok; CDP 4–6× eşlemesi orada ancak bir
+  tahmin olarak kalır (`CALIBRATION.md` §6).
+- **Bundan sonra:** benzetim `shells/web/tests/calibrate.mjs` içindeki `PHONE` ayarıyla
+  yapılır; §5'teki hedef sütunlarının "≈ 4× / 6×" karşılıkları kullanılmaz. §6'daki GPU
+  tetikleyicisinin "orta sınıf telefon" koşulu da bu eşlemeye dayanıyordu; RP3 M12 ölçümü
+  bunun yerini alır.

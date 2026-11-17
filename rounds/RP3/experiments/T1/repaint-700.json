@@ -1,0 +1,74 @@
+[
+ {
+  "id": "cap.SYN26.breakout.down.47",
+  "closed": true,
+  "depth": "chart",
+  "step": "720 / 1260",
+  "ticks": 20,
+  "scenes": 4,
+  "per_tick": 0.2
+ },
+ {
+  "id": "cap.SYN08.breakout.down.113",
+  "closed": true,
+  "depth": "chart",
+  "step": "740 / 1260",
+  "ticks": 20,
+  "scenes": 3,
+  "per_tick": 0.15
+ },
+ {
+  "id": "cap.SYN26.breakout.down.51",
+  "closed": true,
+  "depth": "chart",
+  "step": "759 / 1260",
+  "ticks": 19,
+  "scenes": 9,
+  "per_tick": 0.47368421052631576
+ },
+ {
+  "id": "cap.SYN12.breakout.down.129",
+  "closed": true,
+  "depth": "chart",
+  "step": "779 / 1260",
+  "ticks": 20,
+  "scenes": 8,
+  "per_tick": 0.4
+ },
+ {
+  "id": "cap.SYN02.breakout.down.126",
+  "closed": true,
+  "depth": "chart",
+  "step": "798 / 1260",
+  "ticks": 19,
+  "scenes": 6,
+  "per_tick": 0.3157894736842105
+ },
+ {
+  "id": "cap.SYN02.breakout.down.127",
+  "closed": true,
+  "depth": "chart",
+  "step": "818 / 1260",
+  "ticks": 20,
+  "scenes": 5,
+  "per_tick": 0.25
+ },
+ {
+  "id": "cap.SYN09.breakout.down.127",
+  "closed": true,
+  "depth": "chart",
+  "step": "838 / 1260",
+  "ticks": 19,
+  "scenes": 3,
+  "per_tick": 0.15789473684210525
+ },
+ {
+  "id": "cap.SYN19.breakout.down.124",
+  "closed": true,
+  "depth": "chart",
+  "step": "858 / 1260",
+  "ticks": 20,
+  "scenes": 10,
+  "per_tick": 0.5
+ }
+]

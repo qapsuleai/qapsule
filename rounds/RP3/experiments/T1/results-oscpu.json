@@ -1,0 +1,103 @@
+{
+ "load": "13:51  up 41 days,  1:35, 8 users, load averages: 7.70 11.48 18.21",
+ "rows": [
+  {
+   "jit": true,
+   "knob": "none",
+   "procs": 1,
+   "wasm_ms": 27,
+   "js_ms": 48
+  },
+  {
+   "jit": true,
+   "knob": "-b",
+   "procs": 1,
+   "wasm_ms": 97,
+   "js_ms": 162
+  },
+  {
+   "jit": true,
+   "knob": "-t 1",
+   "procs": 1,
+   "wasm_ms": 27,
+   "js_ms": 48
+  },
+  {
+   "jit": true,
+   "knob": "-t 2",
+   "procs": 1,
+   "wasm_ms": 27,
+   "js_ms": 47
+  },
+  {
+   "jit": true,
+   "knob": "-t 3",
+   "procs": 1,
+   "wasm_ms": 27,
+   "js_ms": 48
+  },
+  {
+   "jit": true,
+   "knob": "-t 4",
+   "procs": 1,
+   "wasm_ms": 27,
+   "js_ms": 48
+  },
+  {
+   "jit": true,
+   "knob": "-t 5",
+   "procs": 1,
+   "wasm_ms": 27,
+   "js_ms": 47
+  },
+  {
+   "jit": false,
+   "knob": "none",
+   "procs": 1,
+   "wasm_ms": 64,
+   "js_ms": 30
+  },
+  {
+   "jit": false,
+   "knob": "-b",
+   "procs": 1,
+   "wasm_ms": 380,
+   "js_ms": 180
+  },
+  {
+   "jit": false,
+   "knob": "-t 1",
+   "procs": 1,
+   "wasm_ms": 64,
+   "js_ms": 30
+  },
+  {
+   "jit": false,
+   "knob": "-t 2",
+   "procs": 1,
+   "wasm_ms": 63,
+   "js_ms": 31
+  },
+  {
+   "jit": false,
+   "knob": "-t 3",
+   "procs": 1,
+   "wasm_ms": 65,
+   "js_ms": 30
+  },
+  {
+   "jit": false,
+   "knob": "-t 4",
+   "procs": 1,
+   "wasm_ms": 65,
+   "js_ms": 30
+  },
+  {
+   "jit": false,
+   "knob": "-t 5",
+   "procs": 1,
+   "wasm_ms": 65,
+   "js_ms": 31
+  }
+ ]
+}

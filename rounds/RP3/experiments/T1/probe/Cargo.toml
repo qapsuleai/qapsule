@@ -1,0 +1,36 @@
+# RP3/T1 probe: the demo shell's core with the paint path split into timed parts
+# (src/lib.rs). Outside the workspace on purpose (experiment; not built by verify.sh).
+#
+#   cd rounds/RP3/experiments/T1/probe
+#   CARGO_PROFILE_WASM_STRIP=true wasm-pack build . --target web --profile wasm --no-opt \
+#     --out-dir ../web/pkg --out-name qp_wasm [-- --features simd]   # SIMD also needs RUSTFLAGS=+simd128
+[package]
+name = "qp-probe"
+version = "0.0.0"
+edition = "2021"
+publish = false
+
+[workspace]
+
+[lib]
+crate-type = ["cdylib"]
+
+[features]
+simd = ["qp-render/simd"]
+
+[dependencies]
+# Built with `--out-name qp_wasm` so the generated JS is a drop-in for main.js.
+qp-wasm = { path = "../../../../../crates/qp-wasm", features = ["replica"] }
+qp-render = { path = "../../../../../crates/qp-render" }
+qp-schema = { path = "../../../../../crates/qp-schema" }
+serde_json = "1"
+wasm-bindgen = "=0.2.130"
+
+[profile.release]
+lto = "thin"
+codegen-units = 1
+
+[profile.wasm]
+inherits = "release"
+opt-level = "s"
+lto = "fat"

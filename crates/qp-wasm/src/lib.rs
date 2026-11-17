@@ -383,6 +383,8 @@ mod shell_binding {
     #[wasm_bindgen]
     pub struct Shell {
         inner: ShellCore,
+        // (RP3/M12b) the `canvas` paint path's state (what each canvas shows now)
+        canvas: crate::shell::paint_canvas::CanvasPainter,
     }
 
     #[wasm_bindgen]
@@ -404,7 +406,10 @@ mod shell_binding {
                 &events,
             )
             .map_err(err)?;
-            Ok(Self { inner })
+            Ok(Self {
+                inner,
+                canvas: crate::shell::paint_canvas::CanvasPainter::default(),
+            })
         }
 
         /// One frame of the host's stream; returns what changed (JSON).
@@ -689,6 +694,36 @@ mod shell_binding {
         /// (`new FontFace('QpMono', core.font())`).
         pub fn font(&self) -> Vec<u8> {
             qp_render::cpu::FONT_BYTES.to_vec()
+        }
+
+        /// (RP3/M12b) The `canvas` paint path's variant (the page's `?canvas=` value as
+        /// it is: `run`, `nobatch`, `full`, comma-separated; empty = the default).
+        pub fn canvas_config(&mut self, value: &str) {
+            self.canvas
+                .configure(crate::shell::paint_canvas::Config::parse(value));
+        }
+
+        /// (RP3/M12b) The Canvas 2D command stream of capsule `id`'s face
+        /// (`shells/web/paint/README.md`); empty when unchanged (as `face_rgba`) or none.
+        /// `force`: the canvas is new, paint all of it.
+        pub fn canvas_face(&mut self, id: &str, force: bool) -> Vec<f32> {
+            self.canvas.face(&mut self.inner, id, force)
+        }
+
+        /// (RP3/M12b) The command stream of the open capsule's scene (as `scene_rgba`).
+        pub fn canvas_scene(&mut self, force: bool) -> Vec<f32> {
+            self.canvas.scene(&mut self.inner, force)
+        }
+
+        /// (RP3/M12b) The glyph atlas rows (straight RGBA) the last command stream's
+        /// `ATLAS` command replaces (`?canvas=atlas`).
+        pub fn canvas_atlas_px(&mut self) -> Vec<u8> {
+            self.canvas.atlas_px()
+        }
+
+        /// (RP3/M12b) The string table (JSON array) of the last command stream.
+        pub fn canvas_strings(&self) -> String {
+            self.canvas.strings_json()
         }
 
         /// (RP3/T2) Starts the automatic paint-path comparison (`{paths, current,

@@ -183,7 +183,7 @@ Tercih (BT) ile anlama doğruluğu **ayrı** raporlanır; seçimde anlama önce 
 ## §G6 Puanlama
 
 1. Soru puanı 1/0 (anahtardaki kodlardan biri mi; `t_first` ağırlıklı: işaret 1, cümle 0,5).
-   "Bilmiyorum" ve harfsiz cevap 0. Dil modeli puanlamaz (U6).
+   "Bilmiyorum" ve harfsiz cevap 0. Dil modeli puanlamaz (U6). `t_valid` sınıf dengeli ağırlıkla (Ek G3).
 2. Birim = (görüntü, persona, tekrar, model); birim puanı = sorularının ortalaması.
 3. **Şans düzeyi** soru başına 1/k (k = "bilmiyorum" hariç seçenek sayısı): `dir` 0,333 ·
    `kind` 0,167 · `valid` 0,2 · `when` 0,25 · `trust` 0,2 · `advice` 0,25 · `numbers` 0,333 ·
@@ -232,6 +232,11 @@ Piksele inilmez (yalnız bozuk süzgeç ve kısma kopyası piksel işidir).
    işaretler kümesi farkı (`reduced_motion_loss`) = 0 olmalı (M21 alternatifleri gelince koşulur).
 8. **Metin yoğunluğu:** yüz başına karakter ve satır (sahne metin ilkelleri), ekran başına
    karakter (yüzler + DOM). Sert eşik değil; U2 için ortak değişkendir.
+   **Roller (Ek G2):** her yüz metninin yazı rolü, tasarımın görünüş kaydından (`qp look show`,
+   `looks/<ad>.json`) boyla eşlenir (T3 `mark_role` kuralı); `computed.json` `roles` rol başına
+   boy ve en kötü karşıtlığı verir. Gösterimin sahnesi rol taşımaz (`qp scene --roles` yalnız
+   oturum görünümlerinde); kabuk renkleri `core.css()` değişkenleri olarak DOM'a yazılır ve
+   düzenek onları hesaplanmış biçemden (`getComputedStyle`) okur.
 9. **Paket boyutu:** `scripts/demo.sh` `pkg/sizes.json` + yazı tipi dosyaları (aday dalında
    derlenir; `bundle/<ad>.json` olarak `compute`'a girer).
 
@@ -247,6 +252,18 @@ başlık/katman metinleri %45 opaklık. T3'ün `?look=` kaydı gelene kadar bu, 
 Canvas 2D süzgecidir (`shoot.mjs` `brokenInit`, `canvas=run` yolu; temel yüz `vadrel`).
 `?look=` gelince aynı tarif bir görünüş kaydı olarak kurulur (büyük ek bilgi, küçük cümle,
 minik soluk işaret, düşük karşıtlık) ve süzgeç yerine o kullanılır.
+
+**Görünüş kaydı (Ek G2; T3 sonrası geçerli yol):** `broken/look.patch` `look.rs`'e `KESTIM`
+kaydını ekler: yazı rolleri ters (başlık cümlesi `headline` 11 px; üst satır/ek bilgi `title`
+24 px, karne/etiket `label` 22 px; `body` 13, `figure` 12, `note` 10), iki temada metin, işaret
+ve anlam renkleri (`text`, `muted`, `axis`, `up`, `down`, `accent`/`s1`, `warn`, `neutral`,
+`valid`, `invalid`, `closed`, `focus`) ve kabuk renkleri (`fg`, `muted`, `accent`, `note_fg`,
+`alert_fg`, `req`) %65 zemine çekilir, işaret boyu yüzde 12 px (kartta 14, grafikte 12).
+**Ürüne girmez:** `broken/build.sh <dış klasör>` HEAD'in `git archive` kopyasına yamayı uygular,
+`qp` ve WASM paketini o kopyada derler; çalışma ağacı ve dallar değişmez, Ayarlar'da yalnız o
+geçici derlemede görünür. O koşudaki **bütün adaylar aynı derlemeyle** çekilir (`QP_BIN`,
+`QP_WEB`); başvuru yüzleri `r4` görünüşüyle `main` ile aynı çizilir. `compute` bozuk değerleri
+artık sahne tarifinden okur. Süzgeç (`"broken": true`) yalnız yedek olarak kalır.
 
 **Kabul kuralı** (`glance.py broken-check`): düzenek geçerlidir ancak ve ancak bozuk tasarım
 (a) birincil ölçüde (kısma kopyasında tek bakış doğruluğu, nokta tahmini) **kesin son** (başka
@@ -339,3 +356,34 @@ Kanıt ve sayılar: `DRYRUN.md`, `calibration/`, `dryrun/`.
 5. **Çekim sırası:** `?watch=` okurun belgesinde kalıcı; izleme listesiz çekimler önce.
 6. **Tek bakış dışı çağrı** (birden çok `Read`) puanlamadan çıkarılır.
 7. **Bozuk tasarım kabul kuralında "son" kesin sondur** (ilk uygulamada eşitlik son sayılıyordu).
+
+## Ek G2 — bozuk tasarım görünüş kaydı olarak (2026-11-18)
+
+Metni §G8 ("Görünüş kaydı") ve §G7.8 ("Roller") içinde; sonuç `BROKEN.md`.
+
+## Ek G3 — cevap yanlılığı, tekrar sayısı, bozuk tasarımın kalıcılığı (2026-11-18; orkestratör kararı, M16 alternatiflerinden önce)
+
+Gerekçe: `BROKEN.md` "Açık riskler 1–2". `t_valid` ikili bir sorudur ve durum kümesinde sınıflar
+dengesizdir: 8 yüz durumunun 5'i açık, 3'ü kapanmış ya da artık geçerli değil. Hep "bitmiş" diyen
+okuyucu kapanmışların payı kadar, hep "sürüyor" diyen okuyucu açıkların payı kadar puan alıyordu.
+3 tekrarla bozuk tasarım `fotolay`'dan eşleştirilmiş farkla ayrılmıyordu.
+
+1. **Sınıf dengeli puan** (`gl/select.py`: `BALANCED`, `balance_weights`, `unit_means`):
+   - `t_valid` sorusunda her anahtar sınıfı toplamda eşit ağırlık alır. Ağırlık = toplam /
+     (sınıf sayısı × sınıfın satır sayısı); paylar sorunun bütün satırlarından hesaplanır (durum
+     kümesi her adayda aynı).
+   - Birim puanı ağırlıklı ortalamadır; tek cevaba saplanan okuyucu bu soruda 1/2 alır.
+   - Öteki sorular ağırlıksızdır.
+   - Birincil ölçü, eşleştirilmiş fark ve bütün aralıklar bu birim puanından hesaplanır.
+   - Durum kümesi değişmedi: açık/kapalı sayısını eşitlemek kümeyi ve "aynı içerik" kuralını
+     bozardı; ağırlık eşdeğer düzeltmedir.
+2. **Birincil ölçüde 6 tekrar varsayılan:** `glance.py read --reps 0` küme varsayılanını kullanır
+   (`throttle` 6, öteki kümeler 3). README maliyet tablosu buna göre güncellendi.
+3. **Bozuk tasarım her M koşusunda yarışır** (M16, M18, M20, M21):
+   - `broken/look.patch` ile o koşunun derlemesine eklenir; gizli ad yalnız anahtar dosyasındadır.
+   - §G8 kabul kuralı **her koşuda** uygulanır. Geçmeyen koşunun sonucu kullanılmaz, düzenek
+     düzeltilir ve ek yazılır.
+   - Eşleştirilmiş farkın ayrıklığı (`paired_vs_broken`) her koşuda bilgi olarak raporlanır.
+4. **Yeniden puanlama** (yeni çağrı yok; `BROKEN.md` "Ek G3 sonrası"):
+   - Bozuk tasarım birincilde hâlâ kesin son, BT'de son → kabul kuralı geçiyor.
+   - Ama `fotolay` ile eşleştirilmiş fark artık ayrık değil: +0,015 [−0,010, +0,041].

@@ -293,7 +293,8 @@ Seçim Arkin'in telefon ölçümüne kadar **öneri** (GOAL ölçüt 11).
 - `cargo fmt --check`, `cargo clippy --workspace --all-targets -D warnings`, `cargo clippy -p
   qp-wasm --features replica --all-targets -D warnings`: temiz.
 - `node shells/web/arch-check.mjs`: 0 ihlal (main.js + 6 boyama dosyası), öz-sınama 22/22.
-- `QP_VERIFY_BROWSER=1 scripts/verify.sh` (commit `035c76d`, kod bu notla aynı): **18/18 PASS**, 524 s, çıkış 0; `demo` adımı: paint-paths (anlamsal okumalar aynı), canvas tolerans içinde, sahneler = altın görseller; `digest` 7b1e99d40889f83c.
+- `QP_VERIFY_BROWSER=1 scripts/verify.sh`: `035c76d` (JSON sınaması) 18/18 PASS, 524 s;
+  **`9271cc2` (parmak izi sınaması, kod bu notla aynı) 18/18 PASS, 515 s**, çıkış 0; `demo` adımı: paint-paths (anlamsal okumalar aynı), canvas tolerans içinde, sahneler = altın görseller; `digest` 7b1e99d40889f83c.
 - Altın görseller, dökümler, hesap özeti değişmedi (`fixtures/**` dokunulmadı).
 
 ## 9. Yapılmayanlar, açık sorular

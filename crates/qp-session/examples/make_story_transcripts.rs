@@ -494,6 +494,58 @@ fn stats() {
             );
         }
     }
+    live_cost();
+}
+
+/// The authority's cost of the `stories` topic: time per final bar (data event) on the
+/// 1,200-bar instrument with three subscribers (Ana, Bora, Can) against none.
+fn live_cost() {
+    let more = 40;
+    let bars = qp_source::synthetic_bars(K200 + more, SEED);
+    let mut per = Vec::new();
+    for subscribed in [false, true] {
+        let init: SessionInit = serde_json::from_value(init(K200)).expect("init");
+        let mut s = Session::new(init, &root()).expect("session");
+        for (c, who) in [("a", "ana"), ("b", "bora"), ("c", "can")] {
+            s.handle_raw(
+                c,
+                &json!({"type":"hello","protocol":"qp/0","principal":who,"surface":{"kind":"phone"}})
+                    .to_string(),
+            );
+            if subscribed {
+                s.handle_raw(
+                    c,
+                    &json!({"type":"subscribe","id":"st","topic":{"kind":"stories","instrument":"THYAO"}})
+                        .to_string(),
+                );
+            }
+        }
+        let mut times = Vec::new();
+        let mut events = 0;
+        for (i, b) in bars.iter().enumerate().skip(K200) {
+            let e: DataEvent = serde_json::from_value(
+                json!({"feed": feed(), "seq": i - K200 + 1, "change": {"kind":"bar","bar": b}}),
+            )
+            .expect("event");
+            let t = Instant::now();
+            let lines = s.data_event(&e).expect("event applies");
+            times.push(t.elapsed().as_secs_f64() * 1e3);
+            events += lines
+                .iter()
+                .filter(|l| {
+                    serde_json::to_string(&l.msg)
+                        .unwrap()
+                        .contains("\"kind\":\"story\"")
+                })
+                .count();
+        }
+        times.sort_by(f64::total_cmp);
+        per.push((times[times.len() / 2], times[times.len() * 9 / 10], events));
+    }
+    println!(
+        "live: per final bar, 1200-bar instrument: no stories subscriber median {:.2} ms p90 {:.2} ms; three subscribers median {:.2} ms p90 {:.2} ms, {} story events over {more} bars",
+        per[0].0, per[0].1, per[1].0, per[1].1, per[1].2
+    );
 }
 
 fn main() {

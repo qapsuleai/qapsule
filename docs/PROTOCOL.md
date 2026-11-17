@@ -2581,8 +2581,10 @@ satırlar `ShellCore::stories_json` ile çizelge alternatiflerine verilir.
   yeri değişebilir ve hepsi gelir (döküm 63).
 - Ölçüm (`cargo run --release -p qp-session --example make_story_transcripts -- --stats`,
   Apple silicon, release, 1.200 barlık THYAO, son 950 bar): yetkili okuyucuya 202 hikâye →
-  ilk sayfa 200 satır, sıkıştırmasız JSON ~108 KB, otoritede cevap ortanca ~2,8 ms; akış
-  yetkisiz okuyucuya 124 satır + 177 sunucu yorumu ~192 KB, ~1,9 ms. Ayrıntı R5 raporunda.
+  ilk sayfa 200 satır, JSON ~108 KB (gzip -9 ~10 KB), otoritede cevap ortanca ~2,9 ms;
+  akış yetkisiz okuyucuya 124 satır + 177 sunucu yorumu ~192 KB, ~1,9 ms. Konunun bedeli:
+  kesin bar başına otorite işi abonesiz ortanca 0,92 ms, üç aboneyle 2,69 ms (40 barda 76
+  `story` olayı).
 
 Dökümler: `fixtures/protocol/conformance/60-stories-entitled.json` (yetkili okuyucu; ~5 ve
 ~50 hikâyelik aralıklar, sayfalama, İngilizce yüz, kapanmış + açık + akışta gizli karışımı,

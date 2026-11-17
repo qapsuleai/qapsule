@@ -346,9 +346,14 @@ fn grammar_ops_and_hit_are_generated_tools() {
     for k in r4 {
         assert!(names.contains(&k), "missing tool {k}");
     }
+    // R5/M18 (§23): the story list query.
+    let r5 = ["query_stories"];
+    for k in r5 {
+        assert!(names.contains(&k), "missing tool {k}");
+    }
     assert_eq!(
         names.len(),
-        37 + grammar.len() + 1 + 2 + r3.len() + r4.len(),
+        37 + grammar.len() + 1 + 2 + r3.len() + r4.len() + r5.len(),
         "{names:?}"
     );
 }

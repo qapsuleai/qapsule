@@ -798,41 +798,6 @@ mod shell_binding {
             self.canvas.strings_json()
         }
 
-        /// (RP3/M12a) The `cpu` paint path's techniques (`nodirty,nolayer,noreduce,
-        /// noreuse,noview,off,keep=<n>`; empty: all on); drops its retained surfaces.
-        pub fn cpu_options(&mut self, opts: &str) {
-            self.inner.cpu_options(opts);
-        }
-
-        /// (RP3/M12a) Paints face `id` on its retained surface: `[ptr, len, w, h, dx, dy,
-        /// dw, dh, settle, reuse, view]` (`shells/web/paint/cpu.js`), empty when nothing
-        /// changed. `kept`: the canvas still holds the last frame put on it.
-        pub fn cpu_face(&mut self, id: &str, force: bool, kept: bool) -> Vec<f64> {
-            self.inner.cpu_face(id, force, kept)
-        }
-
-        /// (RP3/M12a) Paints the open scene (as `cpu_face`; reduced scale while a chart
-        /// gesture is in progress, `settle` = 1).
-        pub fn cpu_scene(&mut self, force: bool, kept: bool) -> Vec<f64> {
-            self.inner.cpu_scene(force, kept)
-        }
-
-        /// (RP3/M12a) A drag or pinch on the open chart is in progress.
-        pub fn cpu_moving(&self) -> bool {
-            self.inner.cpu_moving()
-        }
-
-        /// (RP3/M12a) The WASM memory: the `cpu` path reads the frame through a view at
-        /// the answer's pointer (no copy across the boundary).
-        pub fn cpu_memory(&self) -> JsValue {
-            wasm_bindgen::memory()
-        }
-
-        /// (RP3/M12a) The last answer's pixels as a copy (`noview`).
-        pub fn cpu_pixels(&mut self) -> Vec<u8> {
-            self.inner.cpu_pixels()
-        }
-
         /// (RP3/T2) Starts the automatic paint-path comparison (`{paths, current,
         /// phase_ms}` JSON) at `t` ms.
         pub fn bench_start(&mut self, config_json: &str, t: f64) {

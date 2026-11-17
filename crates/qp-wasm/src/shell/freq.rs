@@ -54,6 +54,32 @@ pub fn jit_probe() -> u32 {
     x
 }
 
+/// (R5/T0) The per-data-frame rates need at least this many data frames; fewer give
+/// "insufficient samples" (`null`), not a number. One data frame in a phase of scrolling
+/// is not a rate (a bench phase at 4 steps/s has ≈30).
+pub const RATE_MIN_DATA_FRAMES: u64 = 10;
+
+/// (R5/T0) The per-data-frame rates `(passes_per_data_frame, tick_plus_pass_ms)` from
+/// the data frames, the passes that painted their changes, the timed ticks (count, total
+/// ms) and those passes' total ms; `None` ("insufficient samples") below
+/// [`RATE_MIN_DATA_FRAMES`] data frames or without a timed tick. Always finite.
+#[must_use]
+pub fn rates(
+    frames: u64,
+    data_passes: u64,
+    ticks: usize,
+    tick_ms: f64,
+    data_pass_ms: f64,
+) -> Option<(f64, f64)> {
+    if frames < RATE_MIN_DATA_FRAMES || ticks == 0 {
+        return None;
+    }
+    #[allow(clippy::cast_precision_loss)]
+    let (f, t, p) = (frames as f64, ticks as f64, data_passes as f64);
+    let r = (p / f, tick_ms / t + data_pass_ms / f);
+    (r.0.is_finite() && r.1.is_finite()).then_some(r)
+}
+
 /// The probe's verdict for probe time `ms`.
 fn jit_state(ms: Option<f64>) -> &'static str {
     match ms {
@@ -86,6 +112,9 @@ impl ShellCore {
             if !o.is_empty() && self.pending.is_empty() {
                 self.pending_since = t;
             }
+            if !o.is_empty() && kind == "data_frames" {
+                self.pending_data = true;
+            }
             for (k, v) in o {
                 self.pending.insert(k.clone(), v.clone());
             }
@@ -107,12 +136,15 @@ impl ShellCore {
             return None;
         }
         self.pass_since = self.pending_since.take();
+        self.pass_data = std::mem::take(&mut self.pending_data);
         Some(Value::Object(std::mem::take(&mut self.pending)))
     }
 
     /// (RP3/M14) The page's paint pass for the changes it took ran from `t0` to `t1` ms:
     /// the `paint_pass` span, the pass counter and the latency `frame_to_paint` (from the
-    /// arrival of the first frame whose change it painted to its end).
+    /// arrival of the first frame whose change it painted to its end). (R5/T0) A pass
+    /// that painted a data frame's changes is also a `data_pass` (span and counter): the
+    /// per-data-frame rates count only those.
     pub fn metric_pass(&mut self, t0: f64, t1: f64) {
         self.metric_span("paint_pass", t0, t1);
         *self
@@ -120,6 +152,14 @@ impl ShellCore {
             .counts
             .entry("paint_passes".to_owned())
             .or_default() += 1;
+        if std::mem::take(&mut self.pass_data) {
+            self.metric_span("data_pass", t0, t1);
+            *self
+                .metrics
+                .counts
+                .entry("data_passes".to_owned())
+                .or_default() += 1;
+        }
         if let Some(since) = self.pass_since.take() {
             self.metric_span("frame_to_paint", since, t1);
             // The wait for the animation frame alone (the latency the coalescing adds).
@@ -163,11 +203,18 @@ impl ShellCore {
     }
 
     /// (RP3/M14) The counters with the derived rates: `{data_frames, msg_frames,
-    /// paint_passes, faces_painted, faces_skipped_hidden, passes_per_data_frame,
-    /// tick_plus_pass_ms}` — `faces_painted` is the `face` span's count (one per face
-    /// painted, whatever the paint path); `tick_plus_pass_ms` the mean core work per data
-    /// frame including its share of the paint passes (`tick` mean + `paint_pass` total /
-    /// data frames; R4's `tick` included the repaint, so this is the comparable number).
+    /// paint_passes, data_passes, faces_painted, faces_skipped_hidden, scene_builds,
+    /// scenes_painted, passes_per_data_frame, tick_plus_pass_ms, rate_frames_min}` —
+    /// `faces_painted` is the `face` span's count (one per face painted, whatever the paint
+    /// path); `passes_per_data_frame` the passes that painted a data frame's changes per
+    /// data frame (coalescing: at most 1); `tick_plus_pass_ms` the mean core work per data
+    /// frame including its share of those passes (`tick` mean + `data_pass` total / data
+    /// frames; R4's `tick` included the repaint, so this is the comparable number).
+    ///
+    /// (R5/T0) Both rates are `null` ("insufficient samples") below
+    /// [`RATE_MIN_DATA_FRAMES`] data frames or without a timed tick. Before, every pass
+    /// (also those of scrolling, taps and the opening) was divided by the data frames: a
+    /// phone's scroll phase with one data frame read 42 passes and 466 ms per data frame.
     pub(super) fn counts_json(&self) -> Value {
         Self::counts_of(&self.metrics.counts, &self.metrics.spans)
     }
@@ -184,6 +231,7 @@ impl ShellCore {
             "data_frames",
             "msg_frames",
             "paint_passes",
+            "data_passes",
             "faces_skipped_hidden",
             "scene_builds",
         ] {
@@ -191,28 +239,21 @@ impl ShellCore {
         }
         o.insert("faces_painted".to_owned(), json!(n("face")));
         o.insert("scenes_painted".to_owned(), json!(n("scene")));
-        // Rates per data frame (`null` without data frames or ticks).
-        #[allow(clippy::cast_precision_loss)]
-        let (frames, ticks) = (c("data_frames") as f64, n("tick") as f64);
-        let rate = |x: f64| {
-            if frames > 0.0 {
-                json!(round3(x / frames))
-            } else {
-                Value::Null
-            }
-        };
-        #[allow(clippy::cast_precision_loss)]
+        o.insert("rate_frames_min".to_owned(), json!(RATE_MIN_DATA_FRAMES));
+        let rates = rates(
+            c("data_frames"),
+            c("data_passes"),
+            n("tick"),
+            sum("tick"),
+            sum("data_pass"),
+        );
         o.insert(
             "passes_per_data_frame".to_owned(),
-            rate(c("paint_passes") as f64),
+            rates.map_or(Value::Null, |r| json!(round3(r.0))),
         );
         o.insert(
             "tick_plus_pass_ms".to_owned(),
-            if frames > 0.0 && ticks > 0.0 {
-                json!(round3(sum("tick") / ticks + sum("paint_pass") / frames))
-            } else {
-                Value::Null
-            },
+            rates.map_or(Value::Null, |r| json!(round3(r.1))),
         );
         Value::Object(o)
     }
@@ -275,16 +316,34 @@ impl ShellCore {
         rows.push(json!([
             "güncelleme",
             format!(
-                "veri çerçevesi {} · mesaj {} · boyama geçişi {} ({} / veri çerçevesi) · yüz boyandı {} · görünmediği için atlandı {}",
+                "veri çerçevesi {} · mesaj {} · boyama geçişi {} (veri için {}) · yüz boyandı {} · görünmediği için atlandı {}",
                 c["data_frames"],
                 c["msg_frames"],
                 c["paint_passes"],
-                c["passes_per_data_frame"],
+                c["data_passes"],
                 c["faces_painted"],
                 c["faces_skipped_hidden"]
             )
         ]));
+        rows.push(json!(["tik + geçiş", rate_text(&c)]));
         rows
+    }
+}
+
+/// (R5/T0) The metrics page's "tik + geçiş" row: the core work per data frame and the
+/// passes per data frame, or "insufficient samples" with the count it has.
+fn rate_text(c: &Value) -> String {
+    match (
+        c["tick_plus_pass_ms"].as_f64(),
+        c["passes_per_data_frame"].as_f64(),
+    ) {
+        (Some(ms), Some(per)) => {
+            format!("{ms:.2} ms / veri çerçevesi · {per:.2} geçiş / veri çerçevesi")
+        }
+        _ => format!(
+            "yetersiz örnek (veri çerçevesi {}, en az {RATE_MIN_DATA_FRAMES} gerekir)",
+            c["data_frames"]
+        ),
     }
 }
 
@@ -295,6 +354,38 @@ mod tests {
     #[test]
     fn the_probe_is_deterministic() {
         assert_eq!(jit_probe(), jit_probe());
+    }
+
+    #[test]
+    fn rates_need_enough_data_frames() {
+        // No data frame, one, or just below the minimum: insufficient, never a number.
+        assert_eq!(rates(0, 0, 0, 0.0, 0.0), None);
+        assert_eq!(rates(1, 1, 1, 2.0, 466.0), None);
+        assert_eq!(rates(RATE_MIN_DATA_FRAMES - 1, 9, 9, 9.0, 9.0), None);
+        // Enough data frames but no timed tick (frames counted, ticks not): insufficient.
+        assert_eq!(rates(RATE_MIN_DATA_FRAMES, 10, 0, 0.0, 30.0), None);
+        // Enough: tick mean + data-pass total / data frames; passes / data frames.
+        let (per, ms) = rates(20, 10, 20, 40.0, 30.0).expect("rates");
+        assert!((per - 0.5).abs() < 1e-12);
+        assert!((ms - (2.0 + 1.5)).abs() < 1e-12);
+    }
+
+    #[test]
+    fn the_rate_row_is_honest() {
+        let thin =
+            json!({"data_frames": 1, "passes_per_data_frame": null, "tick_plus_pass_ms": null});
+        let t = rate_text(&thin);
+        assert!(t.starts_with("yetersiz örnek"), "{t}");
+        assert!(
+            !t.contains("null") && !t.contains("NaN") && !t.contains("inf"),
+            "{t}"
+        );
+        let ok =
+            json!({"data_frames": 31, "passes_per_data_frame": 0.968, "tick_plus_pass_ms": 7.3});
+        assert_eq!(
+            rate_text(&ok),
+            "7.30 ms / veri çerçevesi · 0.97 geçiş / veri çerçevesi"
+        );
     }
 
     #[test]

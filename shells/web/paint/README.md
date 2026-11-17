@@ -11,10 +11,12 @@ karşılaştırılır.
   ölçümüne kadar `DECISIONS.md`'de "Önerilen (RP3)"): güvenli bağlam istemez, JIT'siz
   telefonda yüz/sahne boyaması en düşük, paket farkı küçük. `canvas` desteklenmezse (ör.
   `FontFace` yok) `ref`'e düşülür. `ref` deterministik başvuru ve yedek olarak kalır:
-  altın görseller, `screens.mjs` ve eşlik testleri `?paint=ref` ile çalışır. `cpu` ve `gpu`
-  `?paint=` ile seçilebilir.
+  altın görseller, `screens.mjs` ve eşlik testleri `?paint=ref` ile çalışır. `gpu`
+  (deneysel) `?paint=gpu` ile seçilebilir.
 - Bilinmeyen ad → `ref`, neden `unknown`; `supported()` yanlış → `ref`, neden
-  `unsupported`. Seçim `core.set_paint(istenen, kullanılan, neden)` ile çekirdeğe
+  `unsupported`. (R5/T0) Kaldırılmış ad (`cpu`, K51) → yerine geçen yol (`canvas`;
+  desteklenmezse `ref`), neden `removed`; özette ve ölçüm ekranında `paint_removed` uyarısı
+  çıkar (`tests/paint-paths.mjs` sınar). Seçim `core.set_paint(istenen, kullanılan, neden)` ile çekirdeğe
   bildirilir; ölçüm özetinde `paint: {requested, used, fallback}` olarak görünür.
 - Kayıt: `paint/index.js` içindeki `PATHS`. Yeni bir yol = bu klasörde bir dosya + `PATHS`'e
   bir satır. Başka dosyaya dokunulmaz.
@@ -45,20 +47,12 @@ R4'ün davranışı bayt bayt: çekirdek tiny-skia ile aygıt ölçeğinde tarar
 `scene_rgba`), yol tuvalin boyutunu ayarlar ve `putImageData` ile kopyalar. Altın
 görsellerle uyumlu yol budur.
 
-### `cpu` (RP3/M12a, varsayılan kapalı: `?paint=cpu`)
+### `cpu` (kaldırıldı)
 
-Başvuru çizicinin kendi kodu (tiny-skia + fontdue), gereksiz işsiz. Çekirdek
-(`crates/qp-wasm/src/shell/paint_cpu.rs`, `crates/qp-render/src/retained.rs`) her yüzün
-ve açık sahnenin son karesini tutar; yalnız değişen ilkellerin dokunduğu dikdörtgeni,
-değişmeyen ön ilkellerin (ızgara, geçmiş barlar) görüntüsünden başlayarak yeniden boyar.
-Pikseller `ref` ile **bayt bayt aynı** (`tests/cpu-pixels.mjs`). Yol, kareyi WASM belleğine
-açılan bir görünümle okur (sınırdan kopya yok), boyutu değişmeyen tuvali yeniden
-ayırmaz, `putImageData(img, 0, 0, dx, dy, dw, dh)` ile yalnız değişen dikdörtgeni koyar.
-Grafikte sürükleme/kıstırma sürerken ölçek 1'de boyar; bitince (`core.cpu_moving()`
-yanlış) `env.repaint()` ile aygıt ölçeğinde yeniden boyatır. Sözleşmeye ek yok; `main.js`
-değişmedi. Ölçüm için teknikler kapatılabilir: `?cpu=nodirty,nolayer,noreduce,noreuse,noview`
-ya da `off`; `?cpu_variants=1` her biri için ayrı bir yol kaydeder (karşılaştırmada hepsi
-koşar). Ayrıntı ve ölçümler: `rounds/RP3/experiments/M12a.md`.
+RP3/M12a'nın `cpu` yolu (başvuru çizicinin tutulan yüzeyli, değişen dikdörtgenli hali)
+R5/T0'da kaldırıldı (K51: `canvas` + `ref` yeter). `?paint=cpu` sayfayı `canvas` ile açar ve
+bunu söyler (yukarıda "Seçim"). Ölçümler ve kod: `rounds/RP3/experiments/M12a.md`, git
+geçmişi.
 
 ### `fixture` (sınama demirbaşı)
 

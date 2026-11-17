@@ -170,14 +170,23 @@ fn cpu_path_work() {
             core.cpu_face(id, true, false);
         }
         let mut f = Work::default();
+        let mut ref_ms = 0.0;
+        for id in &ids {
+            core.face_rgba(id, true);
+        }
         for step in 121..161 {
             seek(&mut core, &mut host, step);
             for id in &ids {
                 let t = Instant::now();
                 let a = core.cpu_face(id, false, true);
                 f.add(&core, Some(id), &a, t);
+                // The reference path's call on the same state, for comparison.
+                let t = Instant::now();
+                let _ = core.face_rgba(id, false);
+                ref_ms += t.elapsed().as_secs_f64() * 1e3;
             }
         }
+        println!("  ref face_rgba, same 200 calls: {ref_ms:.2} ms");
         let id = ids[0].clone();
         core.open_capsule(&id);
         pump(&mut core, &mut host);

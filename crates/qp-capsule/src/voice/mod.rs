@@ -3,9 +3,9 @@
 //! named module with one entry point; the R3 sentence ([`crate::realize::Template`]) and
 //! the R4 face pieces ([`crate::realize::parts`]) stay as they are.
 
+pub mod marla;
+pub mod marla_glossary;
 pub mod selvi;
 pub mod selvi_glossary;
 pub mod tunca;
 pub mod tunca_glossary;
-pub mod marla;
-pub mod marla_glossary;

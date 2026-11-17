@@ -78,11 +78,73 @@ fn frames_within_one_display_frame_cost_one_paint_pass() {
     let m = core.metrics_json();
     assert_eq!(m["counts"]["data_frames"], json!(2));
     assert_eq!(m["counts"]["paint_passes"], json!(1));
-    assert_eq!(m["counts"]["passes_per_data_frame"], json!(0.5));
+    assert_eq!(m["counts"]["data_passes"], json!(1));
+    // (R5/T0) Two data frames are too few for a rate: "insufficient samples", not 0.5.
+    assert_eq!(m["counts"]["passes_per_data_frame"], Value::Null);
+    assert_eq!(m["counts"]["tick_plus_pass_ms"], Value::Null);
     // From the first frame's arrival (100) to the end of the pass (113); its wait (110).
     assert_eq!(m["span_ms"]["frame_to_paint"]["max"], json!(13.0));
     assert_eq!(m["span_ms"]["pass_wait"]["max"], json!(10.0));
     assert_eq!(m["span_ms"]["paint_pass"]["max"], json!(3.0));
+}
+
+#[test]
+fn the_per_data_frame_rates_count_only_data_passes_and_need_enough_frames() {
+    // (R5/T0) The metrics page's "tik + geçiş": RP3's phone scroll phase had one data
+    // frame and 42 passes (scrolling, taps), and read 42 passes and 466 ms per data
+    // frame. Passes without a data frame's changes no longer count; one data frame is
+    // "insufficient samples".
+    let (mut core, mut h) = page(120);
+    let _ = core.take_changes();
+    core.metric_reset();
+    let mut t = 1000.0;
+    // One data frame among 41 passes of its own (a path's repaint request, scrolling).
+    let f = data_frame(&mut h);
+    core.on_frame_at(&f, Some(t)).expect("frame");
+    core.metric_span("tick", t, t + 2.0);
+    assert!(core.take_changes().is_some());
+    core.metric_pass(t + 3.0, t + 13.0);
+    for _ in 0..41 {
+        t += 16.0;
+        assert!(core.take_changes().is_none());
+        core.metric_pass(t, t + 11.0);
+    }
+    let c = core.metrics_json()["counts"].clone();
+    assert_eq!(c["data_frames"], json!(1));
+    assert_eq!(c["paint_passes"], json!(42));
+    assert_eq!(c["data_passes"], json!(1));
+    assert_eq!(c["passes_per_data_frame"], Value::Null);
+    assert_eq!(c["tick_plus_pass_ms"], Value::Null);
+    let rows = core.metrics_rows().to_string();
+    assert!(
+        rows.contains("yetersiz örnek (veri çerçevesi 1, en az 10 gerekir)"),
+        "{rows}"
+    );
+    assert!(!rows.contains("null") && !rows.contains("NaN"), "{rows}");
+    // Ten more data frames, each painted by its own pass (tick 2 ms, pass 4 ms), with
+    // non-data passes in between: rates over the data passes only.
+    core.metric_reset();
+    for _ in 0..10 {
+        t += 16.0;
+        let f = data_frame(&mut h);
+        core.on_frame_at(&f, Some(t)).expect("frame");
+        core.metric_span("tick", t, t + 2.0);
+        assert!(core.take_changes().is_some());
+        core.metric_pass(t + 3.0, t + 7.0);
+        t += 16.0;
+        core.metric_pass(t, t + 50.0);
+    }
+    let c = core.metrics_json()["counts"].clone();
+    assert_eq!(c["data_frames"], json!(10));
+    assert_eq!(c["paint_passes"], json!(20));
+    assert_eq!(c["data_passes"], json!(10));
+    assert_eq!(c["passes_per_data_frame"], json!(1.0));
+    assert_eq!(c["tick_plus_pass_ms"], json!(6.0));
+    let rows = core.metrics_rows().to_string();
+    assert!(
+        rows.contains("6.00 ms / veri çerçevesi · 1.00 geçiş / veri çerçevesi"),
+        "{rows}"
+    );
 }
 
 #[test]

@@ -154,8 +154,11 @@ bağımsız değişkenleri (`S[i]`) tablonun sırasıdır. Yol akışı bir yine
   yükseklik − `ymin`) `GLYPH` ile basar. Yeni glif gerekince akışta `INIT`'ten (ve varsa
   `CLIP`'ten) sonra `ATLAS` gelir; yol satırları `core.canvas_atlas_px()`'ten alıp atlas
   tuvaline koyar (atlas büyüyünce tuval temizlenir; çekirdek o zaman kullanılan bütün
-  satırları yeniden gönderir). Atlas dolarsa o glifi tarayıcı `fillText` ile çizer; atlas
-  sonraki akışta baştan başlar.
+  satırları yeniden gönderir). Atlas tuvali `willReadFrequently: true` ile alınır (CPU
+  tamponu): GPU tamponlu atlasta başsız WebKit, aynı boyamada yüklenen glifleri ara sıra
+  kırmızı/mavi kanalları yer değiştirmiş çizdi (M12b.md). Atlas dolarsa o glifi tarayıcı
+  `fillText` ile çizer; atlas sonraki akışta baştan başlar (bellek üst sınırı: çekirdekte
+  ve tarayıcıda birer 1024 × 2048 × 4 B = 8 MB).
 - Metin (`glyphs` çeşidi): glif başına `TEXT`, başvuru çizicinin kalem konumunda, sola
   hizalı; boşluklar atlanır. (`run` çeşidi: metin başına bir `TEXT`, `ALIGN` ile.)
 - Başvuru çizicinin hiçbir şey boyamadığı durumlar aynıdır: genişliği/yüksekliği 0 olan

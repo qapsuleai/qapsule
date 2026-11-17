@@ -158,8 +158,8 @@ fn tr(c: Concept, u: UnitWords) -> (String, String) {
         ),
         Concept::Similar => (
             "benzer durum".into(),
-            "Aynı tür ve yönde, bu iddiadan önce kapanmış iddialar. Fiyat süresi içinde olağan \
-             oynaklığı kadar o yöne gittiyse tuttu sayılır; rastgele gün yarı yarıya tutar."
+            "Aynı tür ve yönde, bundan önce kapanmış iddialar. Fiyat süresinde olağan oynaklığı \
+             kadar o yöne gittiyse tuttu sayılır; rastgele bir gün de yarı yarıya tutar."
                 .into(),
         ),
     }
@@ -254,8 +254,8 @@ fn en(c: Concept, u: UnitWords) -> (String, String) {
         ),
         Concept::Similar => (
             "similar cases".into(),
-            "Earlier claims of the same kind and direction, closed before this one. One counts \
-             if the price moved its usual swing that way in time; a random day: about half."
+            "Earlier claims of the same kind and direction, closed before this one. A case \
+             counts if the price moved its usual swing that way in time; a random day: half."
                 .into(),
         ),
     }

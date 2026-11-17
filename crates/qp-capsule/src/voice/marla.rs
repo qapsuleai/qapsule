@@ -1498,6 +1498,14 @@ fn latest_clause(f: &Frame<'_>, l: &Latest<'_>, lang: Lang) -> (String, Vec<Conc
         }
     };
     let exit = l.edge == Edge::Exit || l.code.ends_with("_end");
+    // The same detector again without numbers: say "again" so the sentence does not
+    // read as the headline once more.
+    let again = l.det == f.det;
+    let (tr_again, en_again) = if again {
+        ("yeniden ", "again ")
+    } else {
+        ("", "")
+    };
     let concepts = det_concepts(l.det, up);
     let s = match l.det {
         "breakout.range" => {
@@ -1609,11 +1617,11 @@ fn latest_clause(f: &Frame<'_>, l: &Latest<'_>, lang: Lang) -> (String, Vec<Conc
                 format!("volume reached {} times its average", n(r, Cat::Osc, lang))
             }
             (Lang::Tr, None) => format!(
-                "hacim ortalamanın {} katını aştı",
+                "hacim {tr_again}ortalamanın {} katını aştı",
                 mult(VolumeSurge::MULT, lang, red)
             ),
             (Lang::En, None) => format!(
-                "volume topped {} times its average",
+                "volume {en_again}topped {} times its average",
                 mult(VolumeSurge::MULT, lang, red)
             ),
         },
@@ -1637,11 +1645,11 @@ fn latest_clause(f: &Frame<'_>, l: &Latest<'_>, lang: Lang) -> (String, Vec<Conc
                     n(r, Cat::Osc, lang)
                 ),
                 (Lang::Tr, None) => format!(
-                    "kurumsal net {ts} ortalamanın {} katını aştı",
+                    "kurumsal net {ts} {tr_again}ortalamanın {} katını aştı",
                     mult(InstitutionalFlow::MULT, lang, red)
                 ),
                 (Lang::En, None) => format!(
-                    "institutional net {es} topped {} times its average",
+                    "institutional net {es} {en_again}topped {} times its average",
                     mult(InstitutionalFlow::MULT, lang, red)
                 ),
             }

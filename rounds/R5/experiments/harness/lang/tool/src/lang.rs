@@ -83,7 +83,6 @@ pub fn registry() -> Vec<Box<dyn Language>> {
         Box::new(crate::adapters::bozuk::Bozuk),
         // --- M17 alternatives: one line each (Box::new(crate::adapters::<name>::<Type>)),
         Box::new(crate::adapters::selvi::Selvi),
-        Box::new(crate::adapters::tunca::Tunca),
         Box::new(crate::adapters::marla::Marla),
     ]
 }

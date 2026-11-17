@@ -46,6 +46,17 @@ satır; boyama yolu bağlamında ayrıca bir takım) yakalanmazsa adım düşer.
 | `font()` | Başvuru çizicinin gömülü yazı tipi dosyası (IBM Plex Mono, OFL): tuvalle metin çizen yol aynı dosyayı `FontFace` ile kaydeder (yazı tipi farkı görsel farkın ana kaynağı olmasın; ağ isteği yok, R1). |
 | `bench_start(cfg, t)`, `bench_tick(t, scrollHeight, clientHeight)`, `bench_rows()`, `bench_summary()` | Otomatik karşılaştırma (GOAL 8): senaryo sürücüsü (zamanlama, kaydırma konumu, yapay sürükleme, oynatma denetimi, istatistik, tablo metni) çekirdekte; kabuk dönen eylemleri olduğu gibi uygular. Kaydırma sınırı için `scrollHeight`/`clientHeight` ham verilir; çıkarma çekirdekte. |
 
+(RP3/M12b) `canvas` boyama yolu için eklenenler (`paint/canvas.js`; sözleşme `paint/README.md`
+"canvas komut akışı"). Hiçbir kural gevşetilmedi: yol akışı bir yineleyiciyle (`ops.values()`)
+okur, çünkü dizinle okumak aritmetik ister (R3).
+
+| Yöntem | Neden |
+|--------|-------|
+| `canvas_face(id, force)`, `canvas_scene(force)` | Sahnenin aygıt ölçeğinde **Canvas 2D komut akışı** (`Float32Array`): her koordinat, kalınlık, renk ve yazı tipi dizinini, glif konumunu, değişen bölgenin kırpma dikdörtgenini çekirdek hazırlar; yol her komutu tek bir tuval çağrısına çevirir. `face_rgba`/`scene_rgba` ile aynı "değişmediyse boş" kısa devresi ve aynı kayıt. JSON v1'e göre ayrıştırma yok, biçem değişimi yalnız değişince, aynı biçemli yollar tek `stroke()`/`fill()`. |
+| `canvas_strings()` | Son akışın dizge tablosu (renkler, yazı tipi dizgeleri, metinler/glifler, hizalama adları; JSON dizisi). Akıştaki dizge bağımsız değişkenleri bu tablonun sırasıdır (dizinleme aritmetik değildir). |
+| `canvas_config(değer)` | Adresteki `?canvas=` değeri **olduğu gibi** çekirdeğe verilir (deney çeşitleri: `glyphs`, `run`, `nobatch`, `full`, `notext`); ayrıştırma çekirdekte. |
+| `canvas_atlas_px()` | Glif atlası kipinde (varsayılan) akıştaki `ATLAS` komutunun yeni atlas satırları (düz RGBA; fontdue kapsaması metnin renginde, başvuru çizicinin kendi glif pikselleri). Yol bunları `ref.js`'in yaptığı gibi `putImageData` ile atlas tuvaline koyar. |
+
 Boyama yolları (`paint/*.js`) çekirdeğe `core` adıyla ve yalnız bu listeden erişir; boyama
 listesindeki ilkelleri verilen sırada, verilen sayılarla boyar; yerleşim, metin kurma,
 sıralama yapmaz (sözleşme: `paint/README.md`). `paint/fixture.js` bir sınama demirbaşıdır

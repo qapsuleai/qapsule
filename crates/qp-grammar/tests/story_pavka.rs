@@ -511,3 +511,22 @@ fn registry_and_price_height() {
         assert!(p >= qp_grammar::compile::MIN_HEIGHT && p <= h, "{h} -> {p}");
     }
 }
+
+#[test]
+#[ignore = "timing helper"]
+fn extend_timing() {
+    let r = rows_life(200, 950, 300);
+    let range = (BARS - 950, BARS - 1);
+    let f = r[100].finding.clone();
+    let t = std::time::Instant::now();
+    for _ in 0..200 {
+        let _ = draw(&R4, None, &r, &f, false, range);
+    }
+    eprintln!("extend 200 long: {:?}", t.elapsed() / 200);
+    let r = rows(200, 950);
+    let t = std::time::Instant::now();
+    for _ in 0..200 {
+        let _ = draw(&R4, None, &r, &f, false, range);
+    }
+    eprintln!("extend 200 short: {:?}", t.elapsed() / 200);
+}

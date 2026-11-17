@@ -1490,18 +1490,27 @@ impl ShellCore {
         let story = look.story.is_some() && o.to >= OpenDepth::Chart;
         let scene = if let Some(v) = self.viewer.as_mut() {
             // (R5/M18, §23.5) The story chart draws the list the authority sent.
+            // (Taken out and put back: not copied on every build.)
             let rows = if story {
                 v.stories
-                    .as_ref()
-                    .map(|st| st.rows.clone())
+                    .as_mut()
+                    .map(|st| std::mem::take(&mut st.rows))
                     .unwrap_or_default()
             } else {
                 Vec::new()
             };
             // (RP3/M15) The open capsule over the device's own data of its instrument.
-            let side = v.open_mut().filter(|s| s.open.capsule == o.capsule)?;
-            let s = side.replica_mut().session_mut()?;
-            open_scene_with(s, &o, head.as_deref(), &look, mp, (&rows, lang))
+            let scene = v
+                .open_mut()
+                .filter(|s| s.open.capsule == o.capsule)
+                .and_then(|side| side.replica_mut().session_mut())
+                .and_then(|s| open_scene_with(s, &o, head.as_deref(), &look, mp, (&rows, lang)));
+            if let Some(st) = v.stories.as_mut() {
+                if st.rows.is_empty() {
+                    st.rows = rows;
+                }
+            }
+            scene
         } else {
             let principal = self.principal.clone();
             let s = self.replica.session_mut()?;

@@ -284,6 +284,22 @@ fn story_density() {
         );
         if history == 1000 {
             r.png("dense");
+            // Build time with and without the story part (native; the ratio matters).
+            let t = std::time::Instant::now();
+            for _ in 0..50 {
+                let _ = r.scene();
+            }
+            let with = t.elapsed() / 50;
+            r.core.set_look(&json!({"story": "r4"}));
+            r.pump();
+            let t = std::time::Instant::now();
+            for _ in 0..50 {
+                let _ = r.scene();
+            }
+            let without = t.elapsed() / 50;
+            eprintln!("scene build: pavka {with:?}, r4 {without:?}");
+            r.core.set_look(&json!({"story": "pavka"}));
+            r.pump();
             // Primitives by kind: the story part vs the whole scene.
             let kind = |p: &qp_schema::scene::Prim| match p {
                 qp_schema::scene::Prim::Rect { .. } => "rect",

@@ -34,7 +34,7 @@
 //! Values this design adds beyond the `r4` look (to be recorded in the look registry):
 //! [`PRICE_SHARE`], [`PRICE_MIN_H`], [`STORY_MIN_H`], [`LANE_H`], [`LANE_MIN`], [`LANE_MAX`], [`CLUSTER_W`],
 //! [`CLUSTER_H`], [`HIT_MIN`], [`FOCUS_ROW_ALPHA`], [`GUIDE_ALPHA`], the lane and marker
-//! sizes ([`BAR_FOCUS`], [`BAR_LIVE`], [`BAR_CLOSED`], [`MARK`]) and [`DASH`].
+//! sizes ([`BAR_FOCUS`], [`BAR_LIVE`], [`BAR_CLOSED`], [`MARK`]), [`DASH`] and [`DASH_MAX`].
 
 use std::collections::BTreeMap;
 
@@ -96,6 +96,8 @@ pub const BAR_CLOSED: i32 = 2;
 pub const MARK: f32 = 5.0;
 /// Dash and gap of a coin-flip lane (px).
 pub const DASH: (i32, i32) = (5, 3);
+/// Most dashes in one coin-flip lane (a longer lane gets longer dashes).
+pub const DASH_MAX: i32 = 12;
 
 /// Layer id prefix of a story's lane (followed by the capsule id).
 pub const STORY_LAYER: &str = "story:";
@@ -450,47 +452,52 @@ pub fn extend(
             .then(b.row.born_bar.cmp(&a.row.born_bar))
             .then(a.row.id.cmp(&b.row.id))
     });
-    let place = |cap_lanes: i32| -> (Vec<(bool, Vec<usize>)>, Vec<usize>) {
-        // Lanes: (live?, stories); live stories keep a lane each.
-        let mut lanes: Vec<(bool, Vec<usize>)> = Vec::new();
-        let mut over = Vec::new();
-        let cap_lanes = usize::try_from(cap_lanes.max(1)).unwrap_or(1);
-        for &i in &order {
-            let p = &vis[i];
-            let fits = |l: &(bool, Vec<usize>)| {
-                !l.0 && l.1.iter().all(|&k| {
-                    let s = vis[k].span;
-                    s.1 + 4 <= p.span.0 || p.span.1 + 4 <= s.0
-                })
-            };
-            if !p.live {
-                if let Some(l) = lanes.iter_mut().find(|l| fits(l)) {
-                    l.1.push(i);
+    // First fit, uncapped: lanes are opened in placement order and a story never moves
+    // into a later lane, so a capacity of `c` lanes is the first `c` lanes of this result
+    // (the rest are clustered). Each lane keeps its spans sorted by start (overlap test
+    // by binary search). Live stories keep a lane each.
+    let mut lanes: Vec<(bool, Vec<usize>)> = Vec::new();
+    let mut spans: Vec<Vec<(i32, i32)>> = Vec::new();
+    for &i in &order {
+        let p = &vis[i];
+        let (s0, s1) = p.span;
+        let mut placed = false;
+        if !p.live {
+            for (l, sp) in lanes.iter_mut().zip(spans.iter_mut()) {
+                if l.0 {
                     continue;
                 }
-            }
-            if lanes.len() < cap_lanes || p.focus {
-                lanes.push((p.live, vec![i]));
-            } else {
-                over.push(i);
+                let at = sp.partition_point(|q| q.0 < s0);
+                let left_ok = at == 0 || sp[at - 1].1 + 4 <= s0;
+                let right_ok = at == sp.len() || s1 + 4 <= sp[at].0;
+                if left_ok && right_ok {
+                    sp.insert(at, (s0, s1));
+                    l.1.push(i);
+                    placed = true;
+                    break;
+                }
             }
         }
-        (lanes, over)
-    };
-    let avail = bottom - lanes_top;
-    // Thin out first (lanes down to LANE_MIN), then cluster what still does not fit.
-    let (mut lanes, mut over) = place(avail / LANE_H);
-    let n0 = i32::try_from(lanes.len()).unwrap_or(1).max(1);
-    let mut lane_h = (avail / n0).clamp(LANE_H, LANE_MAX);
-    if !over.is_empty() {
-        (lanes, over) = place(avail / LANE_MIN);
-        let n = i32::try_from(lanes.len()).unwrap_or(1).max(1);
-        lane_h = (avail / n).clamp(LANE_MIN, LANE_H);
-        if !over.is_empty() {
-            (lanes, over) = place((avail - CLUSTER_H) / LANE_MIN);
-            lane_h = LANE_MIN;
+        if !placed {
+            lanes.push((p.live, vec![i]));
+            spans.push(vec![(s0, s1)]);
         }
     }
+    let avail = bottom - lanes_top;
+    // Thin out first (lanes down to LANE_MIN), then cluster what still does not fit.
+    let n = i32::try_from(lanes.len()).unwrap_or(i32::MAX).max(1);
+    let mut over: Vec<usize> = Vec::new();
+    let lane_h = if n <= avail / LANE_H {
+        (avail / n).clamp(LANE_H, LANE_MAX)
+    } else if n <= avail / LANE_MIN {
+        (avail / n).clamp(LANE_MIN, LANE_H)
+    } else {
+        let cap = usize::try_from(((avail - CLUSTER_H) / LANE_MIN).max(1)).unwrap_or(1);
+        for l in lanes.drain(cap.min(lanes.len())..) {
+            over.extend(l.1);
+        }
+        LANE_MIN
+    };
     // Live lanes on top, then closed (each group in placement order).
     lanes.sort_by_key(|l| !l.0);
     let n_lanes = i32::try_from(lanes.len()).unwrap_or(0);
@@ -674,9 +681,12 @@ pub fn extend(
             let (a, b) = ends(r.born_bar, p.end);
             let (y0, y1) = (cy_i - thick / 2, cy_i - thick / 2 + thick);
             if r.coin_flip {
+                // At most DASH_MAX dashes: a long lane gets longer dashes, same gap.
+                let len = b.max(a + 1) - a;
+                let dash = DASH.0.max(len / DASH_MAX - DASH.1);
                 let mut s = a;
                 while s < b.max(a + 1) {
-                    let e = (s + DASH.0).min(b.max(a + 1));
+                    let e = (s + dash).min(b.max(a + 1));
                     prims.extend(rect(s, y0, e, y1, color));
                     s = e + DASH.1;
                 }
@@ -746,7 +756,6 @@ pub fn extend(
                     t: Some(r.born_t),
                     #[allow(clippy::cast_precision_loss)]
                     values: BTreeMap::from([
-                        ("born_bar".to_owned(), r.born_bar as f64),
                         ("end_bar".to_owned(), p.end as f64),
                         ("lane".to_owned(), li as f64),
                     ]),

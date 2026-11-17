@@ -680,13 +680,8 @@ impl Session {
         let principal = self.conns[ci].principal.clone();
         let lang = self.lang_of(ci);
         let rows = self.story_rows(&series, &principal, lang);
-        let doc = rd!(self);
-        let fact_of = |f: &str| {
-            doc.findings
-                .iter()
-                .find(|x| x.id == f)
-                .and_then(|x| x.facts.first().cloned())
-        };
+        let firsts = crate::viewer::first_facts(rd!(self), &rows);
+        let fact_of = |f: &str| firsts.get(f).cloned();
         let look = &self.conns[ci].look;
         (sd.extend)(
             crate::viewer::look_of(look),

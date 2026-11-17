@@ -263,6 +263,12 @@ pub fn open_scene_with(
         .view
         .as_ref()
         .and_then(|v| s.document().views.iter().find(|x| x.id == v.id).cloned());
+    // (R5/M18) The first fact of each listed story's finding, looked up once.
+    let firsts = if look.story.is_some() && o.to >= OpenDepth::Chart {
+        first_facts(s.document(), stories.0)
+    } else {
+        BTreeMap::new()
+    };
     let p = Reader {
         inner: s.provider(),
         heads: &heads,
@@ -285,7 +291,7 @@ pub fn open_scene_with(
         return compile(&view, &p, &options(look, w, h, range)).ok();
     };
     let scene = compile(&view, &p, &options(look, w, (sd.price_height)(h), range)).ok()?;
-    let fact_of = |f: &str| p.finding(f).and_then(|x| x.facts.first().cloned());
+    let fact_of = |f: &str| firsts.get(f).cloned();
     let (rows, lang) = stories;
     Some((sd.extend)(
         look_of(look),
@@ -1101,6 +1107,21 @@ impl Session {
         (!feeds.is_empty() && !v.data.is_empty() && feeds.iter().all(|k| v.data.contains(k)))
             .then_some(v.sub.as_str())
     }
+}
+
+/// (R5/M18) The first fact of the finding of every row in `rows` (one pass over the
+/// document's findings; a story chart's cluster names its stories by these facts).
+#[must_use]
+pub fn first_facts(
+    doc: &qp_schema::Document,
+    rows: &[qp_schema::protocol::StoryRow],
+) -> BTreeMap<String, String> {
+    let want: BTreeSet<&str> = rows.iter().map(|r| r.finding.as_str()).collect();
+    doc.findings
+        .iter()
+        .filter(|f| want.contains(f.id.as_str()))
+        .filter_map(|f| Some((f.id.clone(), f.facts.first()?.clone())))
+        .collect()
 }
 
 /// (R5/M18) The bar series whose story list the open capsule's story chart draws: the bar

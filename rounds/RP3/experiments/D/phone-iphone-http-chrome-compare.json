@@ -1,0 +1,1372 @@
+{
+ "agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 27_0_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) CriOS/157.0.8103.37 Mobile/15E148 Safari/604.1",
+ "bundle": {
+  "js_gzip": 21966,
+  "js_raw": 119601,
+  "wasm_br": 966645,
+  "wasm_gzip": 1463647,
+  "wasm_raw": 4958369
+ },
+ "config": {
+  "drag_sweep_ms": 1000.0,
+  "paths": [
+   "ref",
+   "canvas",
+   "cpu"
+  ],
+  "phase_ms": 8000.0,
+  "phases": [
+   "idle",
+   "scroll",
+   "chart_ticks",
+   "drag"
+  ],
+  "scroll_amplitude_px": 2000.0,
+  "scroll_period_ms": 4000.0,
+  "seek_step": 120,
+  "speed_steps_per_s": 4.0
+ },
+ "device": {
+  "cores": 4.0,
+  "device_memory_gb": 0.0,
+  "dpr": 3.0,
+  "scale": 3,
+  "screen_h": 874.0,
+  "screen_w": 402.0
+ },
+ "kind": "qapsule-paint-compare",
+ "look": {
+  "alphabet": null,
+  "face": "vadrel",
+  "feed": "elikov",
+  "outcome": "tg5",
+  "transition": "zumlak"
+ },
+ "mode": {
+  "jit": {
+   "iterations": 1000000,
+   "off_above_ms": 15.0,
+   "probe_ms": 52.0,
+   "state": "likely_off"
+  },
+  "secure_context": false,
+  "webgpu": false
+ },
+ "paths": [
+  {
+   "errors": [],
+   "memory_bytes": {
+    "wasm": 16908288.0
+   },
+   "ms": 34358.0,
+   "name": "ref",
+   "paint": {
+    "fallback": null,
+    "requested": "ref",
+    "used": "ref"
+   },
+   "phases": {
+    "chart_ticks": {
+     "counts": {
+      "data_frames": 31,
+      "faces_painted": 0,
+      "faces_skipped_hidden": 160,
+      "msg_frames": 5,
+      "paint_passes": 33,
+      "passes_per_data_frame": 1.065,
+      "scene_builds": 31,
+      "scenes_painted": 2,
+      "tick_plus_pass_ms": 19.968
+     },
+     "frame_ms": {
+      "long": 0.011,
+      "max": 82.0,
+      "mean": 16.88,
+      "n": 474,
+      "p50": 17.0,
+      "p95": 18.0,
+      "p99": 26.0,
+      "very_long": 0.004
+     },
+     "ms": 8001.0,
+     "span_ms": {
+      "change_check": {
+       "max": 2.0,
+       "mean": 1.129,
+       "n": 31,
+       "p50": 1.0,
+       "p95": 2.0,
+       "p99": 2.0
+      },
+      "frame_to_paint": {
+       "max": 91.0,
+       "mean": 26.576,
+       "n": 33,
+       "p50": 23.0,
+       "p95": 88.0,
+       "p99": 91.0
+      },
+      "msg": {
+       "max": 15.0,
+       "mean": 9.2,
+       "n": 5,
+       "p50": 10.0,
+       "p95": 15.0,
+       "p99": 15.0
+      },
+      "paint_pass": {
+       "max": 80.0,
+       "mean": 17.273,
+       "n": 33,
+       "p50": 14.0,
+       "p95": 77.0,
+       "p99": 80.0
+      },
+      "pass_wait": {
+       "max": 19.0,
+       "mean": 9.303,
+       "n": 33,
+       "p50": 10.0,
+       "p95": 17.0,
+       "p99": 19.0
+      },
+      "scene": {
+       "max": 75.0,
+       "mean": 74.0,
+       "n": 2,
+       "p50": 73.0,
+       "p95": 75.0,
+       "p99": 75.0
+      },
+      "scene_build": {
+       "max": 8.0,
+       "mean": 6.645,
+       "n": 31,
+       "p50": 7.0,
+       "p95": 8.0,
+       "p99": 8.0
+      },
+      "tick": {
+       "max": 2.0,
+       "mean": 1.581,
+       "n": 31,
+       "p50": 2.0,
+       "p95": 2.0,
+       "p99": 2.0
+      }
+     },
+     "steps": [
+      151,
+      182
+     ]
+    },
+    "drag": {
+     "counts": {
+      "data_frames": 0,
+      "faces_painted": 0,
+      "faces_skipped_hidden": 5000,
+      "msg_frames": 125,
+      "paint_passes": 125,
+      "passes_per_data_frame": null,
+      "scene_builds": 125,
+      "scenes_painted": 125,
+      "tick_plus_pass_ms": null
+     },
+     "frame_ms": {
+      "long": 0.258,
+      "max": 69.0,
+      "mean": 17.2,
+      "n": 466,
+      "p50": 17.0,
+      "p95": 31.0,
+      "p99": 34.0,
+      "very_long": 0.002
+     },
+     "ms": 8015.0,
+     "span_ms": {
+      "change_check": {
+       "max": 1.0,
+       "mean": 0.144,
+       "n": 125,
+       "p50": 0.0,
+       "p95": 1.0,
+       "p99": 1.0
+      },
+      "frame_to_paint": {
+       "max": 72.0,
+       "mean": 36.336,
+       "n": 125,
+       "p50": 37.0,
+       "p95": 46.0,
+       "p99": 51.0
+      },
+      "msg": {
+       "max": 2.0,
+       "mean": 0.32,
+       "n": 125,
+       "p50": 0.0,
+       "p95": 1.0,
+       "p99": 1.0
+      },
+      "paint_pass": {
+       "max": 65.0,
+       "mean": 27.728,
+       "n": 125,
+       "p50": 28.0,
+       "p95": 31.0,
+       "p99": 37.0
+      },
+      "pass_wait": {
+       "max": 17.0,
+       "mean": 8.608,
+       "n": 125,
+       "p50": 9.0,
+       "p95": 16.0,
+       "p99": 17.0
+      },
+      "scene": {
+       "max": 55.0,
+       "mean": 25.224,
+       "n": 125,
+       "p50": 25.0,
+       "p95": 28.0,
+       "p99": 35.0
+      },
+      "scene_build": {
+       "max": 4.0,
+       "mean": 1.12,
+       "n": 125,
+       "p50": 1.0,
+       "p95": 2.0,
+       "p99": 2.0
+      }
+     },
+     "steps": [
+      182,
+      182
+     ]
+    },
+    "idle": {
+     "counts": {
+      "data_frames": 31,
+      "faces_painted": 4,
+      "faces_skipped_hidden": 108,
+      "msg_frames": 4,
+      "paint_passes": 32,
+      "passes_per_data_frame": 1.032,
+      "scene_builds": 0,
+      "scenes_painted": 0,
+      "tick_plus_pass_ms": 8.645
+     },
+     "frame_ms": {
+      "long": 0.013,
+      "max": 92.0,
+      "mean": 17.098,
+      "n": 468,
+      "p50": 17.0,
+      "p95": 17.0,
+      "p99": 30.0,
+      "very_long": 0.006
+     },
+     "ms": 8002.0,
+     "span_ms": {
+      "change_check": {
+       "max": 1.0,
+       "mean": 0.083,
+       "n": 12,
+       "p50": 0.0,
+       "p95": 1.0,
+       "p99": 1.0
+      },
+      "face": {
+       "max": 51.0,
+       "mean": 46.0,
+       "n": 4,
+       "p50": 48.0,
+       "p95": 51.0,
+       "p99": 51.0
+      },
+      "frame_to_paint": {
+       "max": 116.0,
+       "mean": 18.938,
+       "n": 32,
+       "p50": 11.0,
+       "p95": 86.0,
+       "p99": 116.0
+      },
+      "msg": {
+       "max": 24.0,
+       "mean": 18.0,
+       "n": 4,
+       "p50": 23.0,
+       "p95": 24.0,
+       "p99": 24.0
+      },
+      "paint_pass": {
+       "max": 89.0,
+       "mean": 7.25,
+       "n": 32,
+       "p50": 1.0,
+       "p95": 59.0,
+       "p99": 89.0
+      },
+      "pass_wait": {
+       "max": 28.0,
+       "mean": 11.688,
+       "n": 32,
+       "p50": 10.0,
+       "p95": 27.0,
+       "p99": 28.0
+      },
+      "tick": {
+       "max": 2.0,
+       "mean": 1.161,
+       "n": 31,
+       "p50": 1.0,
+       "p95": 2.0,
+       "p99": 2.0
+      }
+     },
+     "steps": [
+      120,
+      151
+     ]
+    },
+    "scroll": {
+     "counts": {
+      "data_frames": 0,
+      "faces_painted": 10,
+      "faces_skipped_hidden": 1405,
+      "msg_frames": 81,
+      "paint_passes": 41,
+      "passes_per_data_frame": null,
+      "scene_builds": 0,
+      "scenes_painted": 0,
+      "tick_plus_pass_ms": null
+     },
+     "frame_ms": {
+      "long": 0.022,
+      "max": 70.0,
+      "mean": 17.393,
+      "n": 460,
+      "p50": 17.0,
+      "p95": 20.0,
+      "p99": 56.0,
+      "very_long": 0.022
+     },
+     "ms": 8001.0,
+     "span_ms": {
+      "change_check": {
+       "max": 1.0,
+       "mean": 0.128,
+       "n": 195,
+       "p50": 0.0,
+       "p95": 1.0,
+       "p99": 1.0
+      },
+      "face": {
+       "max": 55.0,
+       "mean": 47.3,
+       "n": 10,
+       "p50": 47.0,
+       "p95": 55.0,
+       "p99": 55.0
+      },
+      "frame_to_paint": {
+       "max": 74.0,
+       "mean": 30.317,
+       "n": 41,
+       "p50": 20.0,
+       "p95": 71.0,
+       "p99": 74.0
+      },
+      "msg": {
+       "max": 8.0,
+       "mean": 2.802,
+       "n": 81,
+       "p50": 2.0,
+       "p95": 7.0,
+       "p99": 8.0
+      },
+      "paint_pass": {
+       "max": 64.0,
+       "mean": 20.732,
+       "n": 41,
+       "p50": 11.0,
+       "p95": 57.0,
+       "p99": 64.0
+      },
+      "pass_wait": {
+       "max": 17.0,
+       "mean": 9.585,
+       "n": 41,
+       "p50": 9.0,
+       "p95": 15.0,
+       "p99": 17.0
+      }
+     },
+     "steps": [
+      151,
+      151
+     ]
+    }
+   },
+   "span_ms": {
+    "face": {
+     "max": 55.0,
+     "mean": 46.929,
+     "n": 14,
+     "p50": 47.0,
+     "p95": 55.0,
+     "p99": 55.0
+    },
+    "frame_to_paint": {
+     "max": 116.0,
+     "mean": 31.463,
+     "n": 231,
+     "p50": 30.0,
+     "p95": 60.0,
+     "p99": 88.0
+    },
+    "paint_pass": {
+     "max": 89.0,
+     "mean": 22.156,
+     "n": 231,
+     "p50": 26.0,
+     "p95": 53.0,
+     "p99": 77.0
+    },
+    "scene": {
+     "max": 75.0,
+     "mean": 25.992,
+     "n": 127,
+     "p50": 25.0,
+     "p95": 29.0,
+     "p99": 73.0
+    },
+    "tick": {
+     "max": 2.0,
+     "mean": 1.371,
+     "n": 62,
+     "p50": 1.0,
+     "p95": 2.0,
+     "p99": 2.0
+    }
+   }
+  },
+  {
+   "errors": [],
+   "memory_bytes": {
+    "wasm": 16908288.0
+   },
+   "ms": 34313.0,
+   "name": "canvas",
+   "paint": {
+    "fallback": null,
+    "requested": "canvas",
+    "used": "canvas"
+   },
+   "phases": {
+    "chart_ticks": {
+     "counts": {
+      "data_frames": 31,
+      "faces_painted": 0,
+      "faces_skipped_hidden": 160,
+      "msg_frames": 5,
+      "paint_passes": 33,
+      "passes_per_data_frame": 1.065,
+      "scene_builds": 31,
+      "scenes_painted": 1,
+      "tick_plus_pass_ms": 16.097
+     },
+     "frame_ms": {
+      "long": 0.006,
+      "max": 28.0,
+      "mean": 16.669,
+      "n": 480,
+      "p50": 17.0,
+      "p95": 18.0,
+      "p99": 22.0,
+      "very_long": 0.0
+     },
+     "ms": 8001.0,
+     "span_ms": {
+      "canvas_part": {
+       "max": 1.0,
+       "mean": 1.0,
+       "n": 1,
+       "p50": 1.0,
+       "p95": 1.0,
+       "p99": 1.0
+      },
+      "change_check": {
+       "max": 2.0,
+       "mean": 1.129,
+       "n": 31,
+       "p50": 1.0,
+       "p95": 2.0,
+       "p99": 2.0
+      },
+      "frame_to_paint": {
+       "max": 35.0,
+       "mean": 22.0,
+       "n": 33,
+       "p50": 20.0,
+       "p95": 34.0,
+       "p99": 35.0
+      },
+      "msg": {
+       "max": 15.0,
+       "mean": 10.8,
+       "n": 5,
+       "p50": 14.0,
+       "p95": 15.0,
+       "p99": 15.0
+      },
+      "paint_pass": {
+       "max": 17.0,
+       "mean": 13.545,
+       "n": 33,
+       "p50": 14.0,
+       "p95": 16.0,
+       "p99": 17.0
+      },
+      "pass_wait": {
+       "max": 19.0,
+       "mean": 8.455,
+       "n": 33,
+       "p50": 7.0,
+       "p95": 18.0,
+       "p99": 19.0
+      },
+      "scene": {
+       "max": 14.0,
+       "mean": 14.0,
+       "n": 1,
+       "p50": 14.0,
+       "p95": 14.0,
+       "p99": 14.0
+      },
+      "scene_build": {
+       "max": 8.0,
+       "mean": 6.806,
+       "n": 31,
+       "p50": 7.0,
+       "p95": 8.0,
+       "p99": 8.0
+      },
+      "tick": {
+       "max": 2.0,
+       "mean": 1.677,
+       "n": 31,
+       "p50": 2.0,
+       "p95": 2.0,
+       "p99": 2.0
+      }
+     },
+     "steps": [
+      152,
+      183
+     ]
+    },
+    "drag": {
+     "counts": {
+      "data_frames": 0,
+      "faces_painted": 0,
+      "faces_skipped_hidden": 4920,
+      "msg_frames": 123,
+      "paint_passes": 123,
+      "passes_per_data_frame": null,
+      "scene_builds": 123,
+      "scenes_painted": 123,
+      "tick_plus_pass_ms": null
+     },
+     "frame_ms": {
+      "long": 0.063,
+      "max": 33.0,
+      "mean": 16.718,
+      "n": 479,
+      "p50": 17.0,
+      "p95": 27.0,
+      "p99": 29.0,
+      "very_long": 0.0
+     },
+     "ms": 8008.0,
+     "span_ms": {
+      "change_check": {
+       "max": 1.0,
+       "mean": 0.374,
+       "n": 123,
+       "p50": 0.0,
+       "p95": 1.0,
+       "p99": 1.0
+      },
+      "frame_to_paint": {
+       "max": 36.0,
+       "mean": 21.276,
+       "n": 123,
+       "p50": 20.0,
+       "p95": 32.0,
+       "p99": 34.0
+      },
+      "msg": {
+       "max": 2.0,
+       "mean": 0.789,
+       "n": 123,
+       "p50": 1.0,
+       "p95": 1.0,
+       "p99": 2.0
+      },
+      "paint_pass": {
+       "max": 22.0,
+       "mean": 12.293,
+       "n": 123,
+       "p50": 11.0,
+       "p95": 18.0,
+       "p99": 21.0
+      },
+      "pass_wait": {
+       "max": 17.0,
+       "mean": 8.984,
+       "n": 123,
+       "p50": 9.0,
+       "p95": 16.0,
+       "p99": 17.0
+      },
+      "scene": {
+       "max": 10.0,
+       "mean": 6.016,
+       "n": 123,
+       "p50": 5.0,
+       "p95": 9.0,
+       "p99": 9.0
+      },
+      "scene_build": {
+       "max": 4.0,
+       "mean": 2.577,
+       "n": 123,
+       "p50": 2.0,
+       "p95": 4.0,
+       "p99": 4.0
+      }
+     },
+     "steps": [
+      183,
+      183
+     ]
+    },
+    "idle": {
+     "counts": {
+      "data_frames": 31,
+      "faces_painted": 4,
+      "faces_skipped_hidden": 108,
+      "msg_frames": 4,
+      "paint_passes": 32,
+      "passes_per_data_frame": 1.032,
+      "scene_builds": 0,
+      "scenes_painted": 0,
+      "tick_plus_pass_ms": 3.129
+     },
+     "frame_ms": {
+      "long": 0.008,
+      "max": 37.0,
+      "mean": 16.774,
+      "n": 477,
+      "p50": 17.0,
+      "p95": 17.0,
+      "p99": 21.0,
+      "very_long": 0.0
+     },
+     "ms": 8001.0,
+     "span_ms": {
+      "canvas_part": {
+       "max": 2.0,
+       "mean": 0.5,
+       "n": 4,
+       "p50": 0.0,
+       "p95": 2.0,
+       "p99": 2.0
+      },
+      "change_check": {
+       "max": 1.0,
+       "mean": 0.167,
+       "n": 12,
+       "p50": 0.0,
+       "p95": 1.0,
+       "p99": 1.0
+      },
+      "face": {
+       "max": 4.0,
+       "mean": 2.25,
+       "n": 4,
+       "p50": 2.0,
+       "p95": 4.0,
+       "p99": 4.0
+      },
+      "frame_to_paint": {
+       "max": 40.0,
+       "mean": 13.375,
+       "n": 32,
+       "p50": 11.0,
+       "p95": 39.0,
+       "p99": 40.0
+      },
+      "msg": {
+       "max": 26.0,
+       "mean": 19.0,
+       "n": 4,
+       "p50": 24.0,
+       "p95": 26.0,
+       "p99": 26.0
+      },
+      "paint_pass": {
+       "max": 14.0,
+       "mean": 1.938,
+       "n": 32,
+       "p50": 1.0,
+       "p95": 10.0,
+       "p99": 14.0
+      },
+      "pass_wait": {
+       "max": 29.0,
+       "mean": 11.438,
+       "n": 32,
+       "p50": 10.0,
+       "p95": 26.0,
+       "p99": 29.0
+      },
+      "tick": {
+       "max": 2.0,
+       "mean": 1.129,
+       "n": 31,
+       "p50": 1.0,
+       "p95": 2.0,
+       "p99": 2.0
+      }
+     },
+     "steps": [
+      120,
+      151
+     ]
+    },
+    "scroll": {
+     "counts": {
+      "data_frames": 1,
+      "faces_painted": 10,
+      "faces_skipped_hidden": 1403,
+      "msg_frames": 81,
+      "paint_passes": 42,
+      "passes_per_data_frame": 42.0,
+      "scene_builds": 0,
+      "scenes_painted": 0,
+      "tick_plus_pass_ms": 466.0
+     },
+     "frame_ms": {
+      "long": 0.021,
+      "max": 41.0,
+      "mean": 16.741,
+      "n": 478,
+      "p50": 17.0,
+      "p95": 21.0,
+      "p99": 32.0,
+      "very_long": 0.0
+     },
+     "ms": 8002.0,
+     "span_ms": {
+      "change_check": {
+       "max": 1.0,
+       "mean": 0.127,
+       "n": 197,
+       "p50": 0.0,
+       "p95": 1.0,
+       "p99": 1.0
+      },
+      "face": {
+       "max": 13.0,
+       "mean": 3.8,
+       "n": 10,
+       "p50": 3.0,
+       "p95": 13.0,
+       "p99": 13.0
+      },
+      "frame_to_paint": {
+       "max": 30.0,
+       "mean": 19.81,
+       "n": 42,
+       "p50": 19.0,
+       "p95": 27.0,
+       "p99": 30.0
+      },
+      "msg": {
+       "max": 7.0,
+       "mean": 2.926,
+       "n": 81,
+       "p50": 1.0,
+       "p95": 6.0,
+       "p99": 7.0
+      },
+      "paint_pass": {
+       "max": 23.0,
+       "mean": 11.071,
+       "n": 42,
+       "p50": 11.0,
+       "p95": 14.0,
+       "p99": 23.0
+      },
+      "pass_wait": {
+       "max": 16.0,
+       "mean": 8.738,
+       "n": 42,
+       "p50": 8.0,
+       "p95": 15.0,
+       "p99": 16.0
+      },
+      "tick": {
+       "max": 1.0,
+       "mean": 1.0,
+       "n": 1,
+       "p50": 1.0,
+       "p95": 1.0,
+       "p99": 1.0
+      }
+     },
+     "steps": [
+      151,
+      152
+     ]
+    }
+   },
+   "span_ms": {
+    "face": {
+     "max": 13.0,
+     "mean": 3.357,
+     "n": 14,
+     "p50": 3.0,
+     "p95": 13.0,
+     "p99": 13.0
+    },
+    "frame_to_paint": {
+     "max": 40.0,
+     "mean": 20.013,
+     "n": 230,
+     "p50": 19.0,
+     "p95": 33.0,
+     "p99": 36.0
+    },
+    "paint_pass": {
+     "max": 23.0,
+     "mean": 10.809,
+     "n": 230,
+     "p50": 11.0,
+     "p95": 18.0,
+     "p99": 21.0
+    },
+    "scene": {
+     "max": 14.0,
+     "mean": 6.081,
+     "n": 124,
+     "p50": 5.0,
+     "p95": 9.0,
+     "p99": 10.0
+    },
+    "tick": {
+     "max": 2.0,
+     "mean": 1.397,
+     "n": 63,
+     "p50": 1.0,
+     "p95": 2.0,
+     "p99": 2.0
+    }
+   }
+  },
+  {
+   "errors": [],
+   "memory_bytes": {
+    "wasm": 51183616.0
+   },
+   "ms": 34322.0,
+   "name": "cpu",
+   "paint": {
+    "fallback": null,
+    "requested": "cpu",
+    "used": "cpu"
+   },
+   "phases": {
+    "chart_ticks": {
+     "counts": {
+      "data_frames": 31,
+      "faces_painted": 0,
+      "faces_skipped_hidden": 160,
+      "msg_frames": 5,
+      "paint_passes": 32,
+      "passes_per_data_frame": 1.032,
+      "scene_builds": 31,
+      "scenes_painted": 2,
+      "tick_plus_pass_ms": 18.677
+     },
+     "frame_ms": {
+      "long": 0.008,
+      "max": 64.0,
+      "mean": 16.811,
+      "n": 476,
+      "p50": 17.0,
+      "p95": 19.0,
+      "p99": 25.0,
+      "very_long": 0.002
+     },
+     "ms": 8002.0,
+     "span_ms": {
+      "cpu_compile": {
+       "max": 9.0,
+       "mean": 7.806,
+       "n": 31,
+       "p50": 8.0,
+       "p95": 9.0,
+       "p99": 9.0
+      },
+      "cpu_put": {
+       "max": 3.0,
+       "mean": 2.5,
+       "n": 2,
+       "p50": 2.0,
+       "p95": 3.0,
+       "p99": 3.0
+      },
+      "cpu_raster": {
+       "max": 43.0,
+       "mean": 3.032,
+       "n": 31,
+       "p50": 2.0,
+       "p95": 6.0,
+       "p99": 43.0
+      },
+      "frame_to_paint": {
+       "max": 60.0,
+       "mean": 25.781,
+       "n": 32,
+       "p50": 23.0,
+       "p95": 36.0,
+       "p99": 60.0
+      },
+      "msg": {
+       "max": 16.0,
+       "mean": 12.4,
+       "n": 5,
+       "p50": 15.0,
+       "p95": 16.0,
+       "p99": 16.0
+      },
+      "paint_pass": {
+       "max": 57.0,
+       "mean": 16.531,
+       "n": 32,
+       "p50": 15.0,
+       "p95": 22.0,
+       "p99": 57.0
+      },
+      "pass_wait": {
+       "max": 19.0,
+       "mean": 9.25,
+       "n": 32,
+       "p50": 8.0,
+       "p95": 18.0,
+       "p99": 19.0
+      },
+      "scene": {
+       "max": 54.0,
+       "mean": 35.5,
+       "n": 2,
+       "p50": 17.0,
+       "p95": 54.0,
+       "p99": 54.0
+      },
+      "scene_build": {
+       "max": 8.0,
+       "mean": 7.0,
+       "n": 31,
+       "p50": 7.0,
+       "p95": 8.0,
+       "p99": 8.0
+      },
+      "tick": {
+       "max": 2.0,
+       "mean": 1.613,
+       "n": 31,
+       "p50": 2.0,
+       "p95": 2.0,
+       "p99": 2.0
+      }
+     },
+     "steps": [
+      151,
+      182
+     ]
+    },
+    "drag": {
+     "counts": {
+      "data_frames": 0,
+      "faces_painted": 0,
+      "faces_skipped_hidden": 5240,
+      "msg_frames": 124,
+      "paint_passes": 129,
+      "passes_per_data_frame": null,
+      "scene_builds": 131,
+      "scenes_painted": 126,
+      "tick_plus_pass_ms": null
+     },
+     "frame_ms": {
+      "long": 0.032,
+      "max": 49.0,
+      "mean": 16.915,
+      "n": 473,
+      "p50": 17.0,
+      "p95": 20.0,
+      "p99": 33.0,
+      "very_long": 0.006
+     },
+     "ms": 8001.0,
+     "span_ms": {
+      "cpu_compile": {
+       "max": 4.0,
+       "mean": 2.443,
+       "n": 131,
+       "p50": 2.0,
+       "p95": 4.0,
+       "p99": 4.0
+      },
+      "cpu_put": {
+       "max": 1.0,
+       "mean": 0.111,
+       "n": 126,
+       "p50": 0.0,
+       "p95": 1.0,
+       "p99": 1.0
+      },
+      "cpu_raster": {
+       "max": 34.0,
+       "mean": 7.137,
+       "n": 131,
+       "p50": 6.0,
+       "p95": 19.0,
+       "p99": 34.0
+      },
+      "frame_to_paint": {
+       "max": 59.0,
+       "mean": 24.081,
+       "n": 124,
+       "p50": 23.0,
+       "p95": 38.0,
+       "p99": 58.0
+      },
+      "msg": {
+       "max": 1.0,
+       "mean": 0.508,
+       "n": 124,
+       "p50": 1.0,
+       "p95": 1.0,
+       "p99": 1.0
+      },
+      "paint_pass": {
+       "max": 47.0,
+       "mean": 15.682,
+       "n": 129,
+       "p50": 14.0,
+       "p95": 29.0,
+       "p99": 46.0
+      },
+      "pass_wait": {
+       "max": 17.0,
+       "mean": 9.065,
+       "n": 124,
+       "p50": 9.0,
+       "p95": 16.0,
+       "p99": 17.0
+      },
+      "scene": {
+       "max": 37.0,
+       "mean": 10.381,
+       "n": 126,
+       "p50": 9.0,
+       "p95": 23.0,
+       "p99": 36.0
+      },
+      "scene_build": {
+       "max": 4.0,
+       "mean": 2.115,
+       "n": 131,
+       "p50": 2.0,
+       "p95": 3.0,
+       "p99": 4.0
+      }
+     },
+     "steps": [
+      183,
+      183
+     ]
+    },
+    "idle": {
+     "counts": {
+      "data_frames": 31,
+      "faces_painted": 4,
+      "faces_skipped_hidden": 108,
+      "msg_frames": 4,
+      "paint_passes": 32,
+      "passes_per_data_frame": 1.032,
+      "scene_builds": 0,
+      "scenes_painted": 0,
+      "tick_plus_pass_ms": 6.065
+     },
+     "frame_ms": {
+      "long": 0.013,
+      "max": 61.0,
+      "mean": 16.905,
+      "n": 474,
+      "p50": 17.0,
+      "p95": 17.0,
+      "p99": 38.0,
+      "very_long": 0.004
+     },
+     "ms": 8013.0,
+     "span_ms": {
+      "cpu_compile": {
+       "max": 1.0,
+       "mean": 0.083,
+       "n": 12,
+       "p50": 0.0,
+       "p95": 1.0,
+       "p99": 1.0
+      },
+      "cpu_put": {
+       "max": 2.0,
+       "mean": 1.0,
+       "n": 4,
+       "p50": 1.0,
+       "p95": 2.0,
+       "p99": 2.0
+      },
+      "cpu_raster": {
+       "max": 27.0,
+       "mean": 24.0,
+       "n": 4,
+       "p50": 24.0,
+       "p95": 27.0,
+       "p99": 27.0
+      },
+      "face": {
+       "max": 28.0,
+       "mean": 25.25,
+       "n": 4,
+       "p50": 25.0,
+       "p95": 28.0,
+       "p99": 28.0
+      },
+      "frame_to_paint": {
+       "max": 90.0,
+       "mean": 14.219,
+       "n": 32,
+       "p50": 8.0,
+       "p95": 63.0,
+       "p99": 90.0
+      },
+      "msg": {
+       "max": 26.0,
+       "mean": 19.75,
+       "n": 4,
+       "p50": 25.0,
+       "p95": 26.0,
+       "p99": 26.0
+      },
+      "paint_pass": {
+       "max": 58.0,
+       "mean": 4.813,
+       "n": 32,
+       "p50": 1.0,
+       "p95": 34.0,
+       "p99": 58.0
+      },
+      "pass_wait": {
+       "max": 32.0,
+       "mean": 9.406,
+       "n": 32,
+       "p50": 7.0,
+       "p95": 29.0,
+       "p99": 32.0
+      },
+      "tick": {
+       "max": 2.0,
+       "mean": 1.097,
+       "n": 31,
+       "p50": 1.0,
+       "p95": 2.0,
+       "p99": 2.0
+      }
+     },
+     "steps": [
+      120,
+      151
+     ]
+    },
+    "scroll": {
+     "counts": {
+      "data_frames": 0,
+      "faces_painted": 10,
+      "faces_skipped_hidden": 1404,
+      "msg_frames": 81,
+      "paint_passes": 41,
+      "passes_per_data_frame": null,
+      "scene_builds": 0,
+      "scenes_painted": 0,
+      "tick_plus_pass_ms": null
+     },
+     "frame_ms": {
+      "long": 0.022,
+      "max": 63.0,
+      "mean": 17.32,
+      "n": 462,
+      "p50": 17.0,
+      "p95": 21.0,
+      "p99": 58.0,
+      "very_long": 0.022
+     },
+     "ms": 8002.0,
+     "span_ms": {
+      "cpu_compile": {
+       "max": 1.0,
+       "mean": 0.122,
+       "n": 196,
+       "p50": 0.0,
+       "p95": 1.0,
+       "p99": 1.0
+      },
+      "cpu_put": {
+       "max": 2.0,
+       "mean": 1.3,
+       "n": 10,
+       "p50": 2.0,
+       "p95": 2.0,
+       "p99": 2.0
+      },
+      "cpu_raster": {
+       "max": 47.0,
+       "mean": 40.6,
+       "n": 10,
+       "p50": 42.0,
+       "p95": 47.0,
+       "p99": 47.0
+      },
+      "face": {
+       "max": 49.0,
+       "mean": 42.4,
+       "n": 10,
+       "p50": 44.0,
+       "p95": 49.0,
+       "p99": 49.0
+      },
+      "frame_to_paint": {
+       "max": 72.0,
+       "mean": 29.732,
+       "n": 41,
+       "p50": 20.0,
+       "p95": 68.0,
+       "p99": 72.0
+      },
+      "msg": {
+       "max": 7.0,
+       "mean": 2.753,
+       "n": 81,
+       "p50": 1.0,
+       "p95": 6.0,
+       "p99": 7.0
+      },
+      "paint_pass": {
+       "max": 57.0,
+       "mean": 20.415,
+       "n": 41,
+       "p50": 11.0,
+       "p95": 55.0,
+       "p99": 57.0
+      },
+      "pass_wait": {
+       "max": 17.0,
+       "mean": 9.317,
+       "n": 41,
+       "p50": 8.0,
+       "p95": 16.0,
+       "p99": 17.0
+      }
+     },
+     "steps": [
+      151,
+      151
+     ]
+    }
+   },
+   "span_ms": {
+    "face": {
+     "max": 49.0,
+     "mean": 37.5,
+     "n": 14,
+     "p50": 39.0,
+     "p95": 49.0,
+     "p99": 49.0
+    },
+    "frame_to_paint": {
+     "max": 90.0,
+     "mean": 23.952,
+     "n": 229,
+     "p50": 22.0,
+     "p95": 58.0,
+     "p99": 71.0
+    },
+    "paint_pass": {
+     "max": 58.0,
+     "mean": 15.141,
+     "n": 234,
+     "p50": 14.0,
+     "p95": 46.0,
+     "p99": 57.0
+    },
+    "scene": {
+     "max": 54.0,
+     "mean": 10.773,
+     "n": 128,
+     "p50": 9.0,
+     "p95": 24.0,
+     "p99": 37.0
+    },
+    "tick": {
+     "max": 2.0,
+     "mean": 1.355,
+     "n": 62,
+     "p50": 1.0,
+     "p95": 2.0,
+     "p99": 2.0
+    }
+   }
+  }
+ ],
+ "refresh": {
+  "hz": 60.0,
+  "median_ms": 17.0,
+  "ms": 16.667,
+  "n": 1419,
+  "rule": "long: interval > 1.5 x refresh ms; very_long: > 2.5 x",
+  "source": "bench idle phases"
+ },
+ "replay": {
+  "instruments": 30,
+  "synthetic": true
+ },
+ "total_ms": 103008.0,
+ "v": 1,
+ "warnings": [
+  {
+   "code": "insecure_context",
+   "text": "page is not a secure context (plain http:// to a LAN address): on iOS such a page runs JS and WASM without the JIT and has no WebGPU; both need HTTPS (or localhost)"
+  },
+  {
+   "code": "jit_off",
+   "text": "JIT probe 52.0 ms > 15 ms: WASM seems to run without the JIT (an interpreter); timings are those of the slow mode (on iOS: open the page over HTTPS)"
+  }
+ ]
+}

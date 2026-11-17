@@ -5,9 +5,9 @@ Her round sonunda güncellenir.
 
 ## Şu an
 
-- **Aktif round:** yok. RP3 tamamlandı (10 ✅ / 2 ⚠️; seçimler öneri, Arkin'in telefon karşılaştırmasını bekliyor). Tasarımın ikinci turu Arkin'in kullanım izlenimini ve insan testi v2'yi bekliyor.
+- **Aktif round:** R5 (dil ve tasarım) başlatılmayı bekliyor; paket `rounds/R5/`. RP3 kabul edildi (K51–K52).
 - **Son güncelleme:** 2026-11-17
-- **Sıradaki adım:** Arkin telefonda tek dokunuşla karşılaştırmayı http ve (mümkünse) https ile çalıştırır (`rounds/RP3/REPORT.md` §8); sonuçla Ö52–Ö60 kesinleşir ve K17'nin telefon hedefleri yazılır; R5 tasarımı ana akış oturumunda.
+- **Sıradaki adım:** Arkin yeni bir Claude Code oturumunda `rounds/R5/PROMPT.md` ile R5'i başlatır. İnsan testi v2 koşulmaz; R5 yeni tasarımla v3 paketini üretir.
 
 ## Round geçmişi
 
@@ -46,7 +46,7 @@ Her round sonunda güncellenir.
 
 ## Arkin'den beklenenler
 
-- **RP3:** telefonda karşılaştırma (`rounds/RP3/REPORT.md` §8: http ve https, mümkünse bir eski Android); açık sorular (telefon hedeflerinin kipi, yerel HTTPS yolu, `cpu` hareket bulanıklığı, K12/Ö54); önerilen kararlar Ö52–Ö60, açık A34–A38.
+- **RP3:** kapandı (K51–K52). Kalan: A39 (orta sınıf Android ölçümü), A40 (aynı telefonda `https://` adresini Chrome ile açıp JIT satırına bakmak).
 
 - **R4:** gösterimi açıp telefonda ölçmek (`rounds/R4/REPORT.md` son bölüm); insan testi v2 (5–10 kişi, ~20 dk; `rounds/R4/human-test/GUIDE.md`) — A21 ve yüz seçimini kapatır, M9–M11'i onaylar ya da değiştirir; önerilen kararlar Ö39–Ö51, açık A31–A33; R4 açık soruları (`rounds/R4/REPORT.md`).
 

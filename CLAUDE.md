@@ -72,9 +72,30 @@ edilmemiş olarak durur.
   varsa bu yolla commit edilir. Yoksa dur ve Arkin'e sor.
 - Doküman dışındaki (kod, betik, test verisi) sahipsiz değişiklikleri commit etme; sor.
 
+## Disk hijyeni (K56)
+
+Worktree başına ayrı `target/` klasörü diski hızla doldurur (bir kez 400 GB elle temizlendi).
+
+- Bütün worktree'ler tek bir ortak derleme klasörü kullanır: alt ajanı başlatırken
+  `CARGO_TARGET_DIR` ana ağacın `target/` klasörünü göstersin. Worktree içinde ayrı
+  `target/` oluşturma. Eşzamanlı derlemeler kilit bekler; bu kabul edilir.
+- Bir alt görev birleştirildiğinde ya da elendiğinde worktree'sini hemen kaldır
+  (`git worktree remove`), dalı raporda adıyla bırak. Elenen alternatifin kodu dalda
+  kalır, klasörü kalmaz.
+- Geçici dosyalar (`/tmp`, scratchpad, başsız tarayıcı profilleri, ekran görüntüsü
+  yığınları) iş bitince silinir. Kanıt olarak gerekenler `rounds/Rn/experiments/` altına
+  küçük boyutta taşınır.
+- Round kapanışında `scripts/clean.sh` çalıştırılır (yoksa yaz: `git worktree prune`,
+  kalan worktree'lerin listesi ve kaldırılması, `cargo clean` yerine yalnız eski
+  profillerin ve artımlı önbelleğin silinmesi, `node_modules` ve tarayıcı önbelleği,
+  önce/sonra boyut). `--dry-run` ne sileceğini gösterir. Betik depo dışına ve
+  `fixtures/local/`, `.env.local` dosyalarına dokunmaz.
+- Raporun sonunda kalan boyut yazılır: `target/`, `.claude/worktrees/`, depo toplamı.
+
 ## Round kapanışı
 
 1. `scripts/verify.sh` yeşil.
 2. `rounds/Rn/REPORT.md` yazıldı: ne yapıldı, ne yapılamadı, ölçümler, açık sorular, öneriler.
 3. `STATUS.md` ve `ROADMAP.md` durum sütunu güncellendi.
-4. Sonraki round'u kendin başlatma; round tasarımı ana akış oturumunda yapılır.
+4. Disk hijyeni: worktree'ler kaldırıldı, `scripts/clean.sh` çalıştı, kalan boyut raporda.
+5. Sonraki round'u kendin başlatma; round tasarımı ana akış oturumunda yapılır.

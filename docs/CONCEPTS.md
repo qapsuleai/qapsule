@@ -65,6 +65,7 @@ Ayrıntı ve örnekler `docs/GRAMMAR.md`.
 | Vurgu | `Emphasis` | Görünümün bir parçasını (bulgu, katman, bar aralığı) öne çıkarma, odaklama ya da karartma. Kalıcısı görünümde; dikkat yönergesi ve anlatım adımı aynı hedefle geçici olarak çizilir. |
 | Kalıcı aralık | `x.domain` | Görünümün herkes için sabit yatay aralığı; komutla değişir, günlüğe girer. Bağlantının geçici bakışı (viewport) varlık durumudur. |
 | Tema | `theme` | Renklerin ve yazı boyutlarının motor tarafındaki tanımı (`dark`, `light`). Görünüm yalnızca tema adını ve tema renk adlarını (`up`, `down`, `accent`…) taşır. |
+| Görünüş | `Look` (`qp-grammar::look`) | Bir görsel yönün çekirdekteki tasarım kaydı (R5/T3): yazı tipi varlıkları ve tip ölçeği (rollerle: başlık, gövde, etiket, rakam, not), açık ve koyu renk rolleri (anlam renkleri ve kabuğun renkleri dahil), boşluk, yüzey, işaretin yeri ve boyu, hareket süreleri. Tema, görünüşün açık ya da koyu renk düzenidir. `?look=` ile seçilir; `r4` bugünkü değerleri bayt eşit taşır. |
 | Sahne tarifi | `SceneDesc` | Görünüm + veri derlendikten sonraki, çizimden bağımsız ara biçim: paneller, ölçek eşlemeleri, katmanlar, veri öğeleri ve çizim ilkelleri. Çizici ve anlamsal okuma aynı tarifi okur (tek doğruluk kaynağı). |
 | Gramer derleyicisi | `qp-grammar` | Görünüm + veri sağlayıcı → sahne tarifi. Hesap yapmaz; değerleri otoriteden (`qp-compute`) alır. |
 | Sahne öğesi | `Item` | Sahne tarifinde veriye bağlı tek eleman (bir mum, bir çizgi noktası, bir çubuk): bar, zaman, değerler, piksel kutusu. |

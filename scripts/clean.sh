@@ -8,7 +8,9 @@
 #   2. Ana ağaç dışındaki worktree'leri listeler. Depo içindeki (`.claude/`) worktree'leri
 #      kaldırır; commit edilmemiş değişikliği olanları yalnız `--force` ile kaldırır
 #      (yoksa atlar ve söyler). Depo DIŞINDAKİ worktree'lere dokunmaz, yalnız listeler.
-#      Dallar kalır; yalnız klasör gider.
+#      Dallar kalır; yalnız klasör gider. Kilitli worktree: kilidi tutan süreç yaşıyorsa
+#      hiçbir koşulda kaldırılmaz; değilse yalnız --force ile (Claude Code alt ajan kilitleri
+#      oturum sürecinin pid'ini taşır: biten ajanınkini `git worktree unlock` ile açın).
 #   3. Ortak `target/` içinde: kullanılmayan eski profil/hedef klasörleri ve artımlı
 #      önbellek (`incremental/`). `cargo clean` yapılmaz; güncel profiller kalır.
 #      `target/wt/<görev>`: worktree başına alt klasör (eşzamanlı worktree'ler aynı
@@ -89,6 +91,18 @@ git worktree list --porcelain | awk '/^worktree /{print substr($0,10)}' | tail -
     "$root"/*) ;;
     *) say "  depo dışı, dokunulmadı: $w"; continue ;;
   esac
+  lock="$(git worktree list --porcelain | awk -v w="$w" '$0=="worktree "w{f=1;next} /^worktree /{f=0} f&&/^locked/{sub(/^locked ?/,"");print;exit}')"
+  if [ -n "$lock" ] || git worktree list --porcelain | awk -v w="$w" '$0=="worktree "w{f=1;next} /^worktree /{f=0} f&&/^locked/{e=1} END{exit !e}'; then
+    pid="$(printf '%s' "$lock" | sed -n 's/.*pid \([0-9][0-9]*\).*/\1/p')"
+    if [ -n "$pid" ] && kill -0 "$pid" 2>/dev/null; then
+      say "  ATLANDI (kilitli, sahibi çalışıyor: pid $pid): ${w#"$root"/}"
+      continue
+    fi
+    if [ "$force" != 1 ]; then
+      say "  ATLANDI (kilitli; --force ile kaldırılır): ${w#"$root"/}"
+      continue
+    fi
+  fi
   dirty="$(git -C "$w" status --porcelain --untracked-files=no 2>/dev/null | wc -l | tr -d ' ')"
   if [ "$dirty" != 0 ] && [ "$force" != 1 ]; then
     say "  ATLANDI (commit edilmemiş $dirty değişiklik; --force ile kaldırılır): ${w#"$root"/}"
@@ -99,7 +113,7 @@ git worktree list --porcelain | awk '/^worktree /{print substr($0,10)}' | tail -
     say "  [dry-run] kaldırılacak: ${w#"$root"/} (dal $br kalır, $(size "$w"))"
   else
     say "  kaldırılıyor: ${w#"$root"/} (dal $br kalır, $(size "$w"))"
-    git worktree remove --force "$w" || say "  UYARI: kaldırılamadı: $w"
+    git worktree remove -f -f "$w" || say "  UYARI: kaldırılamadı: $w"
   fi
 done
 # Kayıtsız kalmış boş worktree klasörleri

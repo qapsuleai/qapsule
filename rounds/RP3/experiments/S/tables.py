@@ -44,7 +44,9 @@ def load(d):
 def runs_of(root):
     """{setting: {order: [(summary, loads)]}}"""
     res = {}
-    for sdir in sorted(p for p in root.iterdir() if p.is_dir()):
+    known = ["phone", "phone_jit", "cdp4", "cdp4full"]
+    dirs = [p for p in root.iterdir() if p.is_dir() and p.name in known]
+    for sdir in sorted(dirs, key=lambda p: known.index(p.name)):
         for rdir in sorted(p for p in sdir.iterdir() if p.is_dir()):
             order = rdir.name.split("-")[0]
             js = list(rdir.glob("compare-*.json"))
@@ -72,7 +74,7 @@ def path_stats(runs, name):
         for q in ("p50", "p95", "p99", "long"):
             o[f"frame.{ph}.{q}"] = med([p["phases"].get(ph, {}).get("frame_ms", {}).get(q) for p in ps])
         o[f"tpp.{ph}"] = med([p["phases"].get(ph, {}).get("counts", {}).get("tick_plus_pass_ms") for p in ps])
-        for sp in ("face", "scene", "tick", "paint_pass"):
+        for sp in ("face", "scene", "tick", "paint_pass", "frame_to_paint"):
             for q in ("p50", "p95", "n"):
                 o[f"{ph}.{sp}.{q}"] = med([p["phases"].get(ph, {}).get("span_ms", {}).get(sp, {}).get(q) for p in ps])
     o["wasm_mb"] = med([(p["memory_bytes"] or {}).get("wasm", 0) / 1048576 for p in ps])
@@ -114,6 +116,16 @@ def main():
                 o = path_stats(runs, n)
                 cells = [f"{ppp(o, 'frame.' + ph)} ({f(o['frame.' + ph + '.long'], 3)})" for ph in PHASES]
                 print(f"| {n} | " + " | ".join(cells) + " |")
+            print()
+            print("| path | chart_ticks: tick p95 · pass p50/p95 · scene p50/p95 (n) · data→paint p95 | scroll: face p50/p95 (n) · pass p95 | drag: scene p50/p95 (n) · pass p95 |")
+            print("|---|---|---|---|")
+            for n in ref_names:
+                o = path_stats(runs, n)
+                g = lambda k: f(o[k])  # noqa: E731
+                print(f"| {n} | {g('chart_ticks.tick.p95')} · {g('chart_ticks.paint_pass.p50')} / {g('chart_ticks.paint_pass.p95')} · "
+                      f"{g('chart_ticks.scene.p50')} / {g('chart_ticks.scene.p95')} ({g('chart_ticks.scene.n')}) · {g('chart_ticks.frame_to_paint.p95')} | "
+                      f"{g('scroll.face.p50')} / {g('scroll.face.p95')} ({g('scroll.face.n')}) · {g('scroll.paint_pass.p95')} | "
+                      f"{g('drag.scene.p50')} / {g('drag.scene.p95')} ({g('drag.scene.n')}) · {g('drag.paint_pass.p95')} |")
     if "--json" in sys.argv:
         Path(sys.argv[sys.argv.index("--json") + 1]).write_text(json.dumps(dump, indent=1))
 

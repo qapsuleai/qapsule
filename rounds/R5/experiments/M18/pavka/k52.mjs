@@ -8,7 +8,7 @@
 // range is set with the wheel so that ≈ N stories meet it (N = 5, 50, 200; the count is
 // read from the device's story list and the view state's range). Then, per N, for `ms`
 // milliseconds the replay plays (4 steps/s: ticks; the chart's last bar moves) and the
-// chart is dragged by ±8 px every 300 ms (scene builds and paints over the same range).
+// chart is dragged by ±40 px (`--drag`) every 300 ms (scene builds and paints over the same range).
 // Metrics are reset at the start of each phase and read at its end
 // (`window.qp.metrics()`: span p50/p95 of `tick`, `scene` (paint), `scene_build`).
 //
@@ -27,6 +27,7 @@ const cfg = CONFIGS[opt('--config', 'phone')] || PHONE;
 const story = opt('--story', 'pavka');
 const ms = Number(opt('--ms', '10000'));
 const port = Number(opt('--port', '8471'));
+const DRAG = Number(opt('--drag', '40'));
 const web = new URL('../../../../../shells/web/', import.meta.url).pathname;
 
 const visible = (st, look) => {
@@ -63,7 +64,7 @@ async function phase(page, target) {
     const y = box.y + 60;
     await page.mouse.move(x, y);
     await page.mouse.down();
-    await page.mouse.move(x + (k % 2 ? -8 : 8), y, { steps: 2 });
+    await page.mouse.move(x + (k % 2 ? -DRAG : DRAG), y, { steps: 4 });
     await page.mouse.up();
     k += 1;
     await page.waitForTimeout(300);
@@ -72,7 +73,7 @@ async function phase(page, target) {
   await settle(page, 60000);
   const m = JSON.parse(await page.evaluate(() => window.qp.metrics()));
   const sp = (n) => m.span_ms[n] && { n: m.span_ms[n].n, p50: m.span_ms[n].p50, p95: m.span_ms[n].p95 };
-  return { target, ...(await read(page)), tick: sp('tick'), scene: sp('scene'), scene_build: sp('scene_build'), paint: m.paint };
+  return { target, ...(await read(page)), tick: sp('tick'), scene: sp('scene'), scene_build: sp('scene_build'), spans: Object.fromEntries(Object.entries(m.span_ms).map(([k, v]) => [k, [v.n, v.p50, v.p95]])), counts: m.counts, paint: m.paint };
 }
 
 const browser = await launchFor(cfg);
@@ -108,6 +109,7 @@ try {
       r = r2;
     }
     out.phases.push(await phase(page, target));
+    if (process.env.K52_SHOT) await page.screenshot({ path: `${process.env.K52_SHOT}/k52-${story}-${target}.png` });
   }
   out.errors = errors;
   await ctx.close();

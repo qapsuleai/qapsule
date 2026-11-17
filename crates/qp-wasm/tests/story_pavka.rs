@@ -284,6 +284,29 @@ fn story_density() {
         );
         if history == 1000 {
             r.png("dense");
+            // Primitives by kind: the story part vs the whole scene.
+            let kind = |p: &qp_schema::scene::Prim| match p {
+                qp_schema::scene::Prim::Rect { .. } => "rect",
+                qp_schema::scene::Prim::Fill { .. } => "fill",
+                qp_schema::scene::Prim::Circle { .. } => "circle",
+                qp_schema::scene::Prim::Polyline { .. } => "line",
+                qp_schema::scene::Prim::Text { .. } => "text",
+            };
+            let mut all = std::collections::BTreeMap::new();
+            for p in s.prims() {
+                *all.entry(kind(p)).or_insert(0) += 1;
+            }
+            let mut story = std::collections::BTreeMap::new();
+            for p in s
+                .panels
+                .iter()
+                .filter(|p| p.name.as_deref() == Some("stories"))
+                .flat_map(|p| &p.layers)
+                .flat_map(|l| &l.prims)
+            {
+                *story.entry(kind(p)).or_insert(0) += 1;
+            }
+            eprintln!("prims: scene {all:?}; story panel {story:?}");
         }
     }
 }

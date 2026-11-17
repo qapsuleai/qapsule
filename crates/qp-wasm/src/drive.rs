@@ -153,7 +153,8 @@ impl Agent {
         let look = self.look.clone();
         let mp = self.max_points;
         let items = self.feed.clone();
-        let fh = qp_grammar::faces::height_in(qp_session::viewer::look_of(&look), look.face.as_deref());
+        let fh =
+            qp_grammar::faces::height_in(qp_session::viewer::look_of(&look), look.face.as_deref());
         let faces: Vec<Value> = items
             .iter()
             .map(|it| {
@@ -235,7 +236,10 @@ pub fn shell_less(host: &mut ReplayHost, principal: &str, lang: &str, script: &[
             a.refresh_feed(host);
             let i = usize::try_from(t["index"].as_u64().unwrap_or(0)).unwrap_or(0);
             let cap = a.face_ids(lang)[i].clone();
-            let fh = qp_grammar::faces::height_in(qp_session::viewer::look_of(&a.look), a.look.face.as_deref());
+            let fh = qp_grammar::faces::height_in(
+                qp_session::viewer::look_of(&a.look),
+                a.look.face.as_deref(),
+            );
             a.input(
                 host,
                 json!({"kind":"tap_at","x":f(t,"x"),"y":f(t,"y"),"width":fw,"height":fh,
@@ -671,7 +675,10 @@ pub fn viewer_less(host: &mut ReplayHost, principal: &str, lang: &str, script: &
         } else if let Some(t) = step.get("tap_face") {
             let i = usize::try_from(t["index"].as_u64().unwrap_or(0)).unwrap_or(0);
             let cap = a.face_ids(lang)[i].clone();
-            let fh = qp_grammar::faces::height_in(qp_session::viewer::look_of(&a.look), a.look.face.as_deref());
+            let fh = qp_grammar::faces::height_in(
+                qp_session::viewer::look_of(&a.look),
+                a.look.face.as_deref(),
+            );
             a.input(
                 host,
                 json!({"kind":"tap_at","x":f(t,"x"),"y":f(t,"y"),"width":fw,"height":fh,

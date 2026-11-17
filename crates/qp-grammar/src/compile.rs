@@ -1120,7 +1120,12 @@ pub fn compile(
         }
     }
     // Veils (focus, dim).
-    let veil = [theme.bg[0], theme.bg[1], theme.bg[2], look.surface.veil_alpha];
+    let veil = [
+        theme.bg[0],
+        theme.bg[1],
+        theme.bg[2],
+        look.surface.veil_alpha,
+    ];
     let layer_prims = |id: &str| -> Vec<Prim> {
         scene_panels
             .iter()

@@ -1255,8 +1255,10 @@ impl ShellCore {
         let look = qp_session::viewer::look_of(&self.look);
         let vars = qp_grammar::look::css_vars(look, self.look.theme.as_deref());
         self.css_shown = Some(key);
-        let obj: serde_json::Map<String, Value> =
-            vars.into_iter().map(|(k, v)| (k, Value::String(v))).collect();
+        let obj: serde_json::Map<String, Value> = vars
+            .into_iter()
+            .map(|(k, v)| (k, Value::String(v)))
+            .collect();
         Some(Value::Object(obj))
     }
 
@@ -1280,7 +1282,9 @@ impl ShellCore {
     /// (R5/T3) The bytes of embedded font asset `id` (empty if unknown).
     #[must_use]
     pub fn font_bytes(id: &str) -> Vec<u8> {
-        qp_render::fonts::bytes(id).map(<[u8]>::to_vec).unwrap_or_default()
+        qp_render::fonts::bytes(id)
+            .map(<[u8]>::to_vec)
+            .unwrap_or_default()
     }
 
     /// (R4/H-M8910) The device pixel ratio the page reports; the core paints at the nearest

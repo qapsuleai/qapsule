@@ -970,11 +970,23 @@ mod tests {
     fn glyphs_sit_at_the_reference_pens() {
         let font = qp_render::cpu::font().unwrap();
         let adv = font.metrics('0', 33.0).advance_width;
-        let g = glyph_pens(qp_render::cpu::font().unwrap(), 10, 33.0, "0 0", Align::Left);
+        let g = glyph_pens(
+            qp_render::cpu::font().unwrap(),
+            10,
+            33.0,
+            "0 0",
+            Align::Left,
+        );
         assert_eq!(g.len(), 2);
         assert!((g[0].1 - 10.0).abs() < f32::EPSILON);
         assert!((g[1].1 - (10.0 + 2.0 * adv).round()).abs() < f32::EPSILON);
-        let r = glyph_pens(qp_render::cpu::font().unwrap(), 100, 33.0, "00", Align::Right);
+        let r = glyph_pens(
+            qp_render::cpu::font().unwrap(),
+            100,
+            33.0,
+            "00",
+            Align::Right,
+        );
         assert!((r[0].1 - (100.0 - 2.0 * adv).round()).abs() < f32::EPSILON);
     }
 
@@ -1073,7 +1085,12 @@ mod tests {
         // the 'S' glyph: fontdue's coverage times the colour's alpha
         let (m, cov) = qp_render::cpu::font().unwrap().rasterize('S', 33.0);
         let slot = atlas
-            .slot((0, qp_render::cpu::font().unwrap()), 'S', 33.0, [255, 255, 255, 255])
+            .slot(
+                (0, qp_render::cpu::font().unwrap()),
+                'S',
+                33.0,
+                [255, 255, 255, 255],
+            )
             .unwrap();
         assert_eq!((slot.w as usize, slot.h as usize), (m.width, m.height));
         let k = cov.iter().position(|&v| v > 0).unwrap();

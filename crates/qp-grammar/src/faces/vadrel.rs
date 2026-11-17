@@ -31,8 +31,8 @@ use qp_schema::grammar::{
 use qp_schema::protocol::Language;
 
 use crate::depth;
-use crate::look::{GlyphPlace, Look};
 use crate::error::GrammarError;
+use crate::look::{GlyphPlace, Look};
 use crate::provider::{DataProvider, HeadlineParts};
 
 /// Face height in the `r4` look (CSS px at the phone width 390): title row 34 + five 20 px

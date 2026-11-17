@@ -9,12 +9,25 @@ fn font_registry_matches_the_looks() {
     let dir = Path::new(env!("CARGO_MANIFEST_DIR")).join("assets/fonts");
     let files: Vec<&str> = qp_render::fonts::FILES.iter().map(|(id, _)| *id).collect();
     let assets: Vec<&str> = qp_grammar::look::FONTS.iter().map(|f| f.id).collect();
-    assert_eq!(files, assets, "fonts::FILES and look::FONTS must list the same ids");
+    assert_eq!(
+        files, assets,
+        "fonts::FILES and look::FONTS must list the same ids"
+    );
     assert_eq!(files[0], qp_grammar::look::DEFAULT_FONT);
     for (i, a) in qp_grammar::look::FONTS.iter().enumerate() {
         let bytes = std::fs::read(dir.join(a.file)).expect("font file in assets/fonts");
-        assert_eq!(bytes, qp_render::fonts::FILES[i].1, "{}: file differs", a.id);
-        assert!(dir.join(a.license).is_file(), "{}: licence {}", a.id, a.license);
+        assert_eq!(
+            bytes,
+            qp_render::fonts::FILES[i].1,
+            "{}: file differs",
+            a.id
+        );
+        assert!(
+            dir.join(a.license).is_file(),
+            "{}: licence {}",
+            a.id,
+            a.license
+        );
         let f = qp_render::fonts::by_index(i).expect("parses");
         // Turkish letters and figures are in the file.
         for ch in "ğşıİöüçĞŞÖÜÇ0123456789".chars() {

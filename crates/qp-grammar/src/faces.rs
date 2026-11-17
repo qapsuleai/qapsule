@@ -27,8 +27,8 @@
 use qp_schema::View;
 
 use crate::depth;
-use crate::look::Look;
 use crate::error::{ErrorKind, GrammarError};
+use crate::look::Look;
 use crate::provider::{DataProvider, HeadlineParts};
 
 /// Builds a face's view: `(look, finding, max_points, provider, view id) -> View`.

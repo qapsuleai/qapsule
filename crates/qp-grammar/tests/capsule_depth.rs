@@ -640,24 +640,36 @@ fn looks_are_design_records() {
     let id = "capsule-fnd-brk";
     for f in [None, Some("vadrel"), Some("tavrik"), Some("fotolay")] {
         let v = face_view(f, "fnd-brk", 60, &p, id).unwrap();
-        assert_eq!(v, face_view_in(&look::R4, f, "fnd-brk", 60, &p, id).unwrap());
+        assert_eq!(
+            v,
+            face_view_in(&look::R4, f, "fnd-brk", 60, &p, id).unwrap()
+        );
         assert_eq!(height(f), height_in(&look::R4, f));
         let mut o = CompileOptions::new(390, height(f));
         o.face = f.map(str::to_owned);
         let a = compile(&v, &p, &o).unwrap();
         o.look = Some("r4".into());
         assert_eq!(a, compile(&v, &p, &o).unwrap(), "{f:?}");
-        assert!(text_roles(&a).iter().all(|t| t.1.is_none() && t.2.is_none()));
+        assert!(text_roles(&a)
+            .iter()
+            .all(|t| t.1.is_none() && t.2.is_none()));
         // With roles: the same scene but for the role names.
         o.roles = true;
         let r = compile(&v, &p, &o).unwrap();
         let tr = text_roles(&r);
-        assert!(tr.iter().all(|t| t.1.is_some()), "{f:?} {tr:?}");
+        // The reference card and the presented face draw every text in a role; the
+        // eliminated M8 designs keep sizes of their own (no role for those).
+        if matches!(f, None | Some("vadrel")) {
+            assert!(tr.iter().all(|t| t.1.is_some()), "{f:?} {tr:?}");
+        }
         assert_eq!(texts(&a), texts(&r));
     }
     // The `r4` card.
     let v = capsule_view("fnd-brk", 60, &p, id).unwrap();
-    assert_eq!(v, capsule_view_in(&look::R4, "fnd-brk", 60, &p, id).unwrap());
+    assert_eq!(
+        v,
+        capsule_view_in(&look::R4, "fnd-brk", 60, &p, id).unwrap()
+    );
 
     // The trial look `ornek`: larger type, its own colours and face height.
     let ornek = look::by_name(Some("ornek")).unwrap();

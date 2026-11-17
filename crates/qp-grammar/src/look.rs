@@ -632,7 +632,12 @@ mod tests {
             let mut sizes = Vec::new();
             for r in ROLES {
                 let role = l.types.role(r).unwrap();
-                assert!(font(role.font).is_some(), "{} {r}: font {}", l.name, role.font);
+                assert!(
+                    font(role.font).is_some(),
+                    "{} {r}: font {}",
+                    l.name,
+                    role.font
+                );
                 assert!(role.px > 0.0 && role.line >= 1.0, "{} {r}", l.name);
                 if ["headline", "body", "label", "note"].contains(&r) {
                     assert!(!sizes.contains(&role.px.to_bits()), "{} {r}", l.name);

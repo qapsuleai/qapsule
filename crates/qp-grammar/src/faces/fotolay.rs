@@ -26,8 +26,8 @@ use qp_schema::protocol::Language;
 use qp_schema::{Bar, Fact};
 
 use crate::depth;
-use crate::look::Look;
 use crate::error::{ErrorKind, GrammarError};
+use crate::look::Look;
 use crate::provider::{DataProvider, HeadlineParts, SeriesKind};
 
 /// Face height in CSS px at the phone width.

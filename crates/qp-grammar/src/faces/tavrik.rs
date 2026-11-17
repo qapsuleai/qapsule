@@ -16,8 +16,8 @@ use qp_schema::grammar::{Layer, Mark, PanelPos, Position, SizeSpec, View};
 use qp_schema::protocol::Language;
 
 use crate::depth;
-use crate::look::Look;
 use crate::error::GrammarError;
+use crate::look::Look;
 use crate::provider::{DataProvider, HeadlineParts};
 
 /// Glyph size (CSS px): the face's dominant element.

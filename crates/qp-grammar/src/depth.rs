@@ -19,9 +19,9 @@ use qp_schema::protocol::{HitItem, OpenDepth, Profile, SharedElement, Target};
 use qp_schema::scene::{DataSource, PixelRect, SceneDesc};
 use qp_schema::{Bar, Depth, Fact, Finding};
 
-use crate::look::Look;
 use crate::detmath::num;
 use crate::error::{ErrorKind, GrammarError};
+use crate::look::Look;
 use crate::provider::{DataProvider, SeriesKind};
 
 /// Bars shown before the fact bar in the chart view.

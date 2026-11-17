@@ -1,0 +1,59 @@
+Kırk beş yaşındasın. Yıllardır borsada işlem yapıyorsun; terminal ekranlarına, teknik analize ve indikatörlere alışkınsın; ayrıntıya güvenirsin. Telefonunda bir piyasa uygulamasına bakıyorsun. Okuyup cevapla.
+
+Aşağıda bir piyasa bilgi uygulamasının telefonda gösterdiği 6 kısa metin var; her biri ayrı bir hisse hakkında. Her metin, bildirime dokununca açılan ekranın tamamıdır; parantez içindekiler terime dokununca açılan açıklamalardır.
+
+[1]
+Benzer 22 durumun 13'ünde 10 işlem gününde daha da düştü.
+SYN18 hızla düştü: RSI 30'un altına indi · 2 işlem günü önce, artık sürmüyor
+RSI o gün 33'ten 28,6'ya indi. Sonuç en geç 8 işlem günü içinde belli olacak. Bugün zayıfladı: RSI 30,5 ile 30'un üstüne çıktı.
+(RSI: Göreceli güç endeksi: son yükselişlerin düşüşlere göre ağırlığını sıfırdan yüze ölçer. Yetmiş üstü hızlı yükselmiş, otuz altı hızlı düşmüş sayılır.)
+(artık geçerli değil: İddiayı doğuran koşul bugün tutmuyor, ama süresi dolmadı; sonucu henüz belli değil.)
+(benzer durum: Aynı tür ve yönde, bundan önce kapanmış iddialar. Fiyat süresinde olağan oynaklığı kadar o yöne gittiyse tuttu sayılır; rastgele bir gün de yarı yarıya tutar.)
+
+[2]
+Benzer 20 durumun 7'sinde fiyat 15 işlem günü içinde yukarı döndü.
+SYN17 yukarı dönebilir: fiyat yeni dip yaptı, RSI yapmadı · bugün tutmadı
+Fiyat önceki dibin (105,19) altına, 102,19'a indi, RSI ise 21,8'den 44,4'e çıktı. Dün başladı, fiyat 15 işlem günü dolmadan ters yöne aynı ölçüde gitti.
+(RSI: Göreceli güç endeksi: son yükselişlerin düşüşlere göre ağırlığını sıfırdan yüze ölçer. Yetmiş üstü hızlı yükselmiş, otuz altı hızlı düşmüş sayılır.)
+(dip: Fiyatın, iki önceki ve iki sonraki günden daha aşağıda kaldığı nokta. Yeni dip öncekinin altındadır.)
+(benzer durum: Aynı tür ve yönde, bundan önce kapanmış iddialar. Fiyat süresinde olağan oynaklığı kadar o yöne gittiyse tuttu sayılır; rastgele bir gün de yarı yarıya tutar.)
+
+[3]
+Benzer 21 durumun 5'inde 20 işlem gününde dar aralıktan çıktı.
+SYN14 sıkıştı: 20 günlük bant 120 günün en darı · bugün, hâlâ geçerli
+Bant 174,43 ile 188,82 arasında (genişliği fiyatın %7,9 kadarı). Sonuç en geç 20 işlem günü içinde belli olacak.
+(bant: Fiyatın yirmi günlük ortalamasının iki yanında, son oynaklığa göre açılıp daralan aralık (Bollinger bandı). Dar bant fiyatın sakinleştiğini gösterir.)
+(benzer durum: Aynı tür ve yönde, bundan önce kapanmış iddialar. Fiyat süresinde olağan oynaklığı kadar o yöne gittiyse tuttu sayılır; rastgele bir gün de yarı yarıya tutar.)
+
+[4]
+Benzer 21 durumun 9'unda fiyat 10 işlem günü içinde düştü.
+SYN06 son 20 günün en düşük fiyatının (95,24) altına indi · bugün, hâlâ geçerli
+O gün kapanış 87,95 oldu, eşiğin %7,7 altında. Sonuç en geç 10 işlem günü içinde belli olacak. Bugün başka bir ölçü de aynı yönü gösterdi: hacim ortalamanın 4,1 katına çıktı.
+(en düşük fiyat: Sayılan dönemde görülen en düşük fiyat; içinde bulunulan gün hariç. Onun altına inmek, fiyatın o dönemin bütün fiyatlarının altına düşmesi demektir.)
+(hacim: Bir günde el değiştiren hisse adedi. Ortalamasının birkaç katı, olağandan çok daha fazla işlem yapıldığı anlamına gelir.)
+(benzer durum: Aynı tür ve yönde, bundan önce kapanmış iddialar. Fiyat süresinde olağan oynaklığı kadar o yöne gittiyse tuttu sayılır; rastgele bir gün de yarı yarıya tutar.)
+
+[5]
+Benzer 20 durumun 11'inde fiyat 10 işlem günü içinde yükseldi.
+SYN20 son 20 günün en yüksek fiyatını (227,08) aştı · bugün, hâlâ geçerli
+O gün kapanış 229,81 oldu, eşiğin %1,2 üstünde. Sonuç en geç 10 işlem günü içinde belli olacak.
+(en yüksek fiyat: Sayılan dönemde görülen en yüksek fiyat; içinde bulunulan gün hariç. Onu aşmak, fiyatın o dönemin bütün fiyatlarının üstüne çıkması demektir.)
+(benzer durum: Aynı tür ve yönde, bundan önce kapanmış iddialar. Fiyat süresinde olağan oynaklığı kadar o yöne gittiyse tuttu sayılır; rastgele bir gün de yarı yarıya tutar.)
+
+[6]
+Benzer 24 durumun 15'inde 20 işlem gününde düşüşünü sürdürdü.
+SYN15 20 günlük ortalamanın altında düşüşe geçti · bugün gerçekleşti
+Kapanış (109,71) 20 günlük ortalamanın (110,34), o da 50 günlüğün (111,46) altındaydı. 3 işlem günü önce başladı, fiyat 20 işlem günü dolmadan düşüşünü sürdürdü.
+(ortalama: Son belirtilen sayıda kapanış fiyatının ortalaması, her gün yeniden hesaplanır. Fiyat kısa ortalamanın, kısa da uzunun üstündeyse yükseliş düzeni sayılır.)
+(benzer durum: Aynı tür ve yönde, bundan önce kapanmış iddialar. Fiyat süresinde olağan oynaklığı kadar o yöne gittiyse tuttu sayılır; rastgele bir gün de yarı yarıya tutar.)
+
+Her metin için şu soruları yalnız metne dayanarak cevapla. Seçmeli sorularda yalnız harfi yaz. Açık sorularda EN ÇOK BİR CÜMLE yaz; metinde yoksa "yok" yaz. Tahmin etme.
+S1 Ne oldu? A) Fiyat bir sınırın üstüne çıktı  B) Fiyat bir sınırın altına indi  C) Düşüş yukarı dönüyor olabilir  D) Yükseliş aşağı dönüyor olabilir  E) Yükseliş sürüyor  F) Düşüş sürüyor  G) Fiyat dar bir aralığa sıkıştı, yön belli değil  H) Fiyat kısa sürede çok yükseldi  I) Fiyat kısa sürede çok düştü  J) Alışılmadık güçlü alım (para girişi) oldu  K) Alışılmadık güçlü satış (para çıkışı) oldu  L) Bilmiyorum
+S2 Hangi eşik ya da sınır söz konusu ve değeri kaç? (bir cümle)
+S3 Anlatılan şey ne zaman oldu? A) Bugün  B) Dün  C) 2–4 işlem günü önce  D) Bir haftaya yakın ya da daha önce  E) Birkaç saat önce  F) Bilmiyorum
+S4 Hâlâ geçerli mi? A) Evet, hâlâ geçerli  B) Hayır, artık geçerli değil (ama henüz kapanmadı)  C) Kapandı: gerçekleşti  D) Kapandı: tutmadı  E) Kapandı: süresi doldu  F) Geri çekildi (veri hatalıydı)  G) Bilmiyorum
+S5 Geçmişte benzerleri kaç örnekte kaç kez tuttu? (bir cümle; ör. "10 örnekte 7")
+S6 Bu metin sana ne yapmanı söylüyor? A) Almamı  B) Satmamı  C) Beklememi  D) Hiçbir şey; yalnız bilgi veriyor  E) Bilmiyorum
+
+Cevabını yalnız bir JSON dizisi olarak yaz, başka hiçbir şey yazma:
+[{"no": 1, "S1": "…", "S2": "…", "S3": "…", "S4": "…", "S5": "…", "S6": "…"}, …]

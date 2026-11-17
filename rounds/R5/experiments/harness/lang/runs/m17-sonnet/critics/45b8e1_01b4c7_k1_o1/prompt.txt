@@ -1,0 +1,169 @@
+Bir piyasa bilgi uygulamasının telefonda gösterdiği metinleri değerlendiriyorsun. Uygulama tavsiye vermez; her metin bir hissede olan bir şeyi anlatır. Aşağıda 12 durum var; her durumda aynı olayın iki ayrı yazılışı (Metin A ve Metin B) verildi. Hangisinin kim tarafından ya da ne zaman yazıldığını bilmiyorsun.
+Ölçütler (sırası önem sırası değildir):
+1. Ne olduğunu somut söylüyor mu: hangi eşik, adıyla ve değeriyle?
+2. Ne zaman olduğu ve hâlâ geçerli olup olmadığı ilk okumada anlaşılıyor mu?
+3. Geçmişte kaç örnekte kaç kez tuttuğunu ve neyin beklendiğini dürüstçe söylüyor mu?
+4. İç terim, jargon, belirsiz ifade yok mu ("önemli bir eşik" gibi)?
+5. Bir eylem (al, sat, bekle) önermiyor mu?
+6. Kısa ve hızlı okunuyor mu; ilk satır yeterli mi?
+7. Kısa metin ile açılan ayrıntı birbiriyle çelişmiyor mu?
+
+[1]
+Metin A:
+Benzerleri: 21'de 10 tuttu
+Az önce SYN04 düşüşünü sürdürdü. Hâlâ geçerli.
+SYN04 bu bar itibarıyla kısa ortalamanın (44,32) altında; şu an 44,23. Düşüş eğilimi sürüyor. Geçmişte bu sinyal 21 seferin 10'unda beklendiği gibi sonuçlandı.
+Metin B:
+Karne: 21'de 10 tuttu · 20 işlem saati içinde düşüş
+SYN04 düşüş eğilimine girdi · az önce · hâlâ geçerli
+Eşik: 20 saatlik ortalama 44,32 · 50 saatlik ortalama 44,32 · fiyat ikisinin de altına indi. Zaman: az önce başladı. Durum: hâlâ geçerli · son kapanış 44,23 · bu cihazda sınandı.
+(Ortalama: 20 saatlik ortalama, son 20 işlem saatinin kapanış fiyatlarının ortalamasıdır (50 saatlik de öyle). Fiyat ikisinin de üstündeyse eğilim yukarı sayılır.)
+(Karne: Geçmişteki benzer durumların sayımı: fiyat süre içinde, olağan oynaklığına göre ölçülen mesafeyi yazılan yönde gittiyse tuttu sayılır.)
+(Hâlâ geçerli: İddia henüz kapanmadı ve bugüne kadar onu bozan bir şey olmadı.)
+
+[2]
+Metin A:
+Benzerleri: çoğunlukla tutmadı
+Bugün SYN07 için büyük satış geldi. Hâlâ geçerli.
+Bu hisse için sunucunun doğruladığı bir para çıkışı sinyali var; ayrıntılar veri lisansı gerektiriyor.
+Metin B:
+Karne: çoğunlukla tutmadı · on işlem günü içinde düşüş
+SYN07'de kurumsal net satış ortalamanın iki katını aştı · bugün · hâlâ geçerli
+Eşik: kurumsal net satışta beş günlük ortalamanın iki katı. Zaman: bugün başladı. Durum: hâlâ geçerli · sunucu doğruladı · rakamlar kurumsal akış lisansıyla açılır.
+(Kurumsal: Kurumsal net alış ya da satış: kurumsal yatırımcıların aldığı ile sattığı hisse arasındaki fark. Lisanslı veridir, rakamları lisansla görülür.)
+(Karne: Geçmişteki benzer durumların sayımı: fiyat süre içinde, olağan oynaklığına göre ölçülen mesafeyi yazılan yönde gittiyse tuttu sayılır.)
+(Hâlâ geçerli: İddia henüz kapanmadı ve bugüne kadar onu bozan bir şey olmadı.)
+
+[3]
+Metin A:
+Benzerleri: 20'de 11 tuttu
+Bugün SYN20 önemli bir eşiğin üstüne çıktı. Hâlâ geçerli.
+SYN20 bugün 227,08'deki direnci yukarı kırdı (kapanış 229,81): yukarı kırılım. Hâlâ geçerli. Geçmişte bu sinyal 20 seferin 11'inde beklendiği gibi sonuçlandı.
+Metin B:
+Karne: 20'de 11 tuttu · 10 işlem günü içinde yükseliş
+SYN20 son 20 günün zirvesini aştı (227,08) · bugün · hâlâ geçerli
+Eşik: son 20 işlem gününün en yükseği, 227,08. Zaman: bugün başladı. Durum: hâlâ geçerli · son kapanış 229,81 · bu cihazda sınandı.
+(Son 20 günün zirvesi: son 20 işlem gününün en yüksek fiyatı. Fiyatın onu aşması, yakın dönemin üst sınırını geçmesi demektir.)
+(Karne: Geçmişteki benzer durumların sayımı: fiyat süre içinde, olağan oynaklığına göre ölçülen mesafeyi yazılan yönde gittiyse tuttu sayılır.)
+(Hâlâ geçerli: İddia henüz kapanmadı ve bugüne kadar onu bozan bir şey olmadı.)
+
+[4]
+Metin A:
+Benzerleri: 20'de 7 tuttu
+SYN17 düşüşten yukarı döndü. Kapandı: bugün tutmadı.
+SYN17'de dün yukarı dönüş işareti çıktı: fiyat yeni dip yaparken RSI daha yüksek dip yaptı (fiyat 102,19, RSI 44,4). Sinyal bugün geçersiz oldu; artık geçerli değil. Geçmişte bu sinyal 20 seferin 7'sinde beklendiği gibi sonuçlandı.
+Metin B:
+Karne: 20'de 7 tuttu · 15 işlem günü içinde yükseliş
+SYN17'de dipten yukarı dönüş izi · dün · tutmadı
+Eşik: önceki dip 105,19 (RSI 21,8) · yeni dip 102,19 (RSI 44,4). Zaman: dün başladı · bugün kapandı. Durum: tutmadı · fiyat ters yöne gitti · bu cihazda sınandı.
+(RSI: Göreceli güç endeksi: son 14 işlem gününün yükseliş ve düşüşlerini 0 ile 100 arasında özetler. 70 üstü hızlı yükseliş, 30 altı hızlı düşüş sayılır.)
+(Karne: Geçmişteki benzer durumların sayımı: fiyat süre içinde, olağan oynaklığına göre ölçülen mesafeyi yazılan yönde gittiyse tuttu sayılır.)
+(Tutmadı: Fiyat süre dolmadan aynı mesafeyi ters yönde gitti ve iddia kapandı.)
+
+[5]
+Metin A:
+Benzerleri: 22'de 13 tuttu
+SYN18 kısa sürede aşırı düştü; bugün zayıfladı. Artık geçerli değil.
+SYN18'de RSI 2 bar önce 30'un altına indi, bugün yeniden üstüne çıktı; şu an 30,5, artık 30'un altında değil. Aşırı satım sona erdi. Geçmişte bu sinyal 22 seferin 13'ünde beklendiği gibi sonuçlandı.
+Metin B:
+Karne: 22'de 13 tuttu · 10 işlem günü içinde düşüşün sürmesi
+SYN18 hızlı düştü (RSI) · 2 işlem günü önce · artık geçerli değil
+Eşik: 30 çizgisi (14 günlük RSI). Zaman: 2 işlem günü önce başladı · bugün zayıfladı. Durum: artık geçerli değil · RSI şu an 30,5 · bu cihazda sınandı.
+(RSI: Göreceli güç endeksi: son 14 işlem gününün yükseliş ve düşüşlerini 0 ile 100 arasında özetler. 70 üstü hızlı yükseliş, 30 altı hızlı düşüş sayılır.)
+(Karne: Geçmişteki benzer durumların sayımı: fiyat süre içinde, olağan oynaklığına göre ölçülen mesafeyi yazılan yönde gittiyse tuttu sayılır.)
+(Artık geçerli değil: İddianın dayandığı koşul bugün sağlanmıyor. İddia henüz kapanmadı, sonucu açık.)
+
+[6]
+Metin A:
+Benzerleri: 21'de 9 tuttu
+SYN06 önemli bir eşiğin altına indi; bugün güçlendi. Hâlâ geçerli.
+SYN06 bugün 95,24'teki desteği aşağı kırdı (kapanış 87,95): aşağı kırılım. Bugün hacim de teyit etti; 3 bağımsız kanıt ailesi destekliyor. Hâlâ geçerli. Geçmişte bu sinyal 21 seferin 9'unda beklendiği gibi sonuçlandı.
+Metin B:
+Karne: 21'de 9 tuttu · 10 işlem günü içinde düşüş
+SYN06 son 20 günün dibini kırdı (95,24) · bugün · hâlâ geçerli
+Eşik: son 20 işlem gününün en düşüğü, 95,24. Zaman: bugün başladı · bugün alım satım miktarı da aynı yönü gösterdi. Durum: hâlâ geçerli · son kapanış 87,95 · bu cihazda sınandı.
+(Son 20 günün dibi: son 20 işlem gününün en düşük fiyatı. Fiyatın onun altına inmesi, yakın dönemin alt sınırını geçmesi demektir.)
+(Karne: Geçmişteki benzer durumların sayımı: fiyat süre içinde, olağan oynaklığına göre ölçülen mesafeyi yazılan yönde gittiyse tuttu sayılır.)
+(Hâlâ geçerli: İddia henüz kapanmadı ve bugüne kadar onu bozan bir şey olmadı.)
+
+[7]
+Metin A:
+Benzerleri: 20'de 7 tuttu
+SYN08 düşüşten yukarı döndü; bugün güçlendi. Hâlâ geçerli.
+SYN08'de dün yukarı dönüş işareti çıktı: fiyat yeni dip yaparken RSI daha yüksek dip yaptı (fiyat 215,36, RSI 41,6). Bugün para akışı da teyit etti; 2 bağımsız kanıt ailesi destekliyor. Hâlâ geçerli olup olmadığı bilinmiyor. Geçmişte bu sinyal 20 seferin 7'sinde beklendiği gibi sonuçlandı.
+Metin B:
+Karne: 20'de 7 tuttu · 15 işlem günü içinde yükseliş
+SYN08'de dipten yukarı dönüş izi · dün · hâlâ geçerli
+Eşik: önceki dip 219,11 (RSI 41,4) · yeni dip 215,36 (RSI 41,6). Zaman: dün başladı · bugün para akışı da aynı yönü gösterdi. Durum: hâlâ geçerli · bu cihazda sınandı.
+(RSI: Göreceli güç endeksi: son 14 işlem gününün yükseliş ve düşüşlerini 0 ile 100 arasında özetler. 70 üstü hızlı yükseliş, 30 altı hızlı düşüş sayılır.)
+(Karne: Geçmişteki benzer durumların sayımı: fiyat süre içinde, olağan oynaklığına göre ölçülen mesafeyi yazılan yönde gittiyse tuttu sayılır.)
+(Hâlâ geçerli: İddia henüz kapanmadı ve bugüne kadar onu bozan bir şey olmadı.)
+
+[8]
+Metin A:
+Benzerleri: henüz örnek yok
+SYN02 için büyük satış geldi. Kapandı: bugün geri çekildi.
+SYN02'de 2 bar önce kurumsal net satış (25.970.934) son günlerin ortalamasını (7.483.323) belirgin biçimde aştı: para çıkışı. Dayandığı veri düzeltildiği için bugün geri çekildi; karneye yazılmadı; artık geçerli değil. Henüz karnesi yok. Sunucu doğruladı.
+Metin B:
+Karne: henüz örnek yok · 10 işlem günü içinde düşüş
+SYN02'de kurumsal net satış 2 katı aştı · 2 işlem günü önce · geri çekildi
+Eşik: kurumsal net satışta 5 günlük ortalamanın 2 katı · ortalama 7.483.323. Zaman: 2 işlem günü önce başladı · bugün kapandı. Durum: geri çekildi · sunucu doğruladı.
+(Kurumsal: Kurumsal net alış ya da satış: kurumsal yatırımcıların aldığı ile sattığı hisse arasındaki fark. Lisanslı veridir, rakamları lisansla görülür.)
+(Karne: Geçmişteki benzer durumların sayımı: fiyat süre içinde, olağan oynaklığına göre ölçülen mesafeyi yazılan yönde gittiyse tuttu sayılır.)
+(Geri çekildi: Dayandığı veri sonradan düzeltildi. Karneye sayılmaz.)
+
+[9]
+Metin A:
+Benzerleri: 1'de 1 tuttu (az örnek)
+Bugün SYN15 kısa sürede aşırı yükseldi. Hâlâ geçerli.
+SYN15'de RSI bugün itibarıyla 70'in üstünde; şu an 74,7. Aşırı alım sürüyor. Karnesi henüz az örnekli: 1 seferin 1'inde tuttu.
+Metin B:
+Az örnek: 1'de 1 tuttu · 10 işlem günü içinde yükselişin sürmesi
+SYN15 hızlı yükseldi: RSI 70'i aştı · bugün · hâlâ geçerli
+Eşik: 70 çizgisi (14 günlük RSI). Zaman: bugün başladı. Durum: hâlâ geçerli · RSI şu an 74,7 · bu cihazda sınandı.
+(RSI: Göreceli güç endeksi: son 14 işlem gününün yükseliş ve düşüşlerini 0 ile 100 arasında özetler. 70 üstü hızlı yükseliş, 30 altı hızlı düşüş sayılır.)
+(Karne: Geçmişteki benzer durumların sayımı: fiyat süre içinde, olağan oynaklığına göre ölçülen mesafeyi yazılan yönde gittiyse tuttu sayılır.)
+(Hâlâ geçerli: İddia henüz kapanmadı ve bugüne kadar onu bozan bir şey olmadı.)
+
+[10]
+Metin A:
+Benzerleri: 5'te 2 tuttu (az örnek)
+SYN21 için büyük alım geldi. Kapandı: bugün süresi doldu.
+SYN21'de 10 bar önce hacim (1.243.369.826) ortalamasının (379.001.940) belirgin üstüne çıktı: para girişi. Sinyalin 10 barlık ömrü bugün sonuçsuz doldu; artık geçerli değil. Karnesi henüz az örnekli: 5 seferin 2'sinde tuttu.
+Metin B:
+Az örnek: 5'te 2 tuttu · 10 işlem günü içinde yükseliş
+SYN21 ortalamanın 3,28 katı hacimle yükseldi · 10 işlem günü önce · süresi doldu
+Eşik: 20 günlük ortalama hacmin 2,5 katı · o gün 3,28 katı. Zaman: 10 işlem günü önce başladı · bugün kapandı. Durum: süresi doldu · 10 işlem günü içinde sonuç çıkmadı · bu cihazda sınandı.
+(Hacim: Bir dönemde el değiştiren hisse adedi. Ortalamasının katlarına çıkması, o dönem olağandan çok alım satım olduğunu gösterir.)
+(Karne: Geçmişteki benzer durumların sayımı: fiyat süre içinde, olağan oynaklığına göre ölçülen mesafeyi yazılan yönde gittiyse tuttu sayılır.)
+(Süresi doldu: Süre içinde fiyat ölçülen mesafeye iki yönde de ulaşmadı. İddia sonuçsuz kapandı.)
+
+[11]
+Metin A:
+Benzerleri: 24'te 15 tuttu
+SYN15 düşüşünü sürdürdü. Kapandı: bugün gerçekleşti.
+SYN15 3 bardır kısa ortalamanın (110,34) altında; şu an 105,36. Düşüş eğilimi sürüyor. Beklenen sonuç bugün gerçekleşti. Geçmişte bu sinyal 24 seferin 15'inde beklendiği gibi sonuçlandı.
+Metin B:
+Karne: 24'te 15 tuttu · 20 işlem günü içinde düşüş
+SYN15 düşüş eğilimine girdi · 3 işlem günü önce · gerçekleşti
+Eşik: 20 günlük ortalama 110,34 · 50 günlük ortalama 111,46. Zaman: 3 işlem günü önce başladı · bugün kapandı. Durum: gerçekleşti · fiyat 20 işlem günü içinde düştü · bu cihazda sınandı.
+(Ortalama: 20 günlük ortalama, son 20 işlem gününün kapanış fiyatlarının ortalamasıdır (50 günlük de öyle). Fiyat ikisinin de üstündeyse eğilim yukarı sayılır.)
+(Karne: Geçmişteki benzer durumların sayımı: fiyat süre içinde, olağan oynaklığına göre ölçülen mesafeyi yazılan yönde gittiyse tuttu sayılır.)
+(Gerçekleşti: Fiyat süre dolmadan ölçülen mesafeyi yazılan yönde gitti ve iddia kapandı.)
+
+[12]
+Metin A:
+Benzerleri: 21'de 5 tuttu
+Bugün SYN14 dar bir aralığa sıkıştı. Hâlâ geçerli.
+SYN14'de bugün itibarıyla sıkışma (yön belirsiz) sürüyor. Geçmişte bu sinyal 21 seferin 5'inde beklendiği gibi sonuçlandı.
+Metin B:
+Karne: 21'de 5 tuttu · 20 işlem günü içinde aralığın kırılması
+SYN14 dar bir aralığa sıkıştı · bugün · hâlâ geçerli
+Eşik: 20 günlük bant 120 işlem gününün en darı · bant 174,43–188,82. Zaman: bugün başladı. Durum: hâlâ geçerli · bu cihazda sınandı.
+(Bant: 20 günlük ortalamanın iki yanına, fiyatın olağan oynaklığına göre çizilen üst ve alt sınır. Bant daralınca fiyat dar bir aralıkta gider.)
+(Karne: Geçmişteki benzer durumların sayımı: fiyat süre içinde, olağan oynaklığına göre ölçülen mesafeyi herhangi bir yönde gittiyse tuttu sayılır.)
+(Hâlâ geçerli: İddia henüz kapanmadı ve bugüne kadar onu bozan bir şey olmadı.)
+
+Her durum için önce kendi gözlemini EN ÇOK BİR CÜMLE yaz, sonra ölçütlere göre bütün olarak daha iyi olanı seç ("A" ya da "B"; eşitlik yok).
+Cevabını yalnız bir JSON dizisi olarak yaz, başka hiçbir şey yazma:
+[{"no": 1, "gozlem": "…", "secim": "A"}, …]

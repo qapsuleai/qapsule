@@ -1,0 +1,62 @@
+[
+  {
+    "cell": "syn-d|breakout.range|up|born|valid|entitled|counts",
+    "label": "kırılım yukarı, doğdu, geçerli",
+    "situation": "s117"
+  },
+  {
+    "cell": "syn-d|breakout.range|down|confirmed|valid|entitled|counts",
+    "label": "kırılım aşağı, açık, geçerli",
+    "situation": "s135"
+  },
+  {
+    "cell": "syn-d|extreme.rsi|down|weakened|no_longer|entitled|counts",
+    "label": "aşırılık (RSI), artık geçerli değil",
+    "situation": "s190"
+  },
+  {
+    "cell": "syn-d|squeeze.bandwidth|neutral|born|valid|entitled|counts",
+    "label": "sıkışma, sürüyor",
+    "situation": "s247"
+  },
+  {
+    "cell": "syn-d|continuation.ma_stack|down|realized|closed|entitled|counts",
+    "label": "ortalama dizilimi, kapandı: gerçekleşti",
+    "situation": "s195"
+  },
+  {
+    "cell": "syn-d|reversal.rsi_divergence|up|invalidated|closed|entitled|counts",
+    "label": "uyumsuzluk dönüşü, kapandı: tutmadı",
+    "situation": "s202"
+  },
+  {
+    "cell": "syn-d|flow.volume_surge|up|expired|closed|entitled|thin",
+    "label": "hacim, kapandı: süresi doldu",
+    "situation": "s239"
+  },
+  {
+    "cell": "syn-d|flow.institutional|down|retracted|closed|entitled|empty",
+    "label": "geri çekildi (kurgu)",
+    "situation": "s518"
+  },
+  {
+    "cell": "syn-d|flow.institutional|down|born|valid|redacted|counts",
+    "label": "kurumsal akış, yetkisiz okur",
+    "situation": "s035"
+  },
+  {
+    "cell": "syn-d|extreme.rsi|up|born|valid|entitled|thin",
+    "label": "az örnekli karne",
+    "situation": "s031"
+  },
+  {
+    "cell": "syn-h|continuation.ma_stack|down|born|valid|entitled|counts",
+    "label": "saatlik, geçerli",
+    "situation": "s432"
+  },
+  {
+    "cell": "syn-d|reversal.rsi_divergence|up|confirmed|valid|entitled|counts",
+    "label": "teyit edilmiş (iki aile), açık",
+    "situation": "s201"
+  }
+]

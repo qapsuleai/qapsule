@@ -1,0 +1,38 @@
+Yirmi yaşındasın. Hisse senedi alıp satıyorsun ama teknik analiz bilmiyorsun; grafik, indikatör, RSI, ortalama gibi terimler sana bir şey ifade etmiyor. Telefonuna bir bildirim geldi; her metne yalnızca birkaç saniye bakacaksın. İlk bakışta ne anladığını cevapla; geri dönüp uzun uzun inceleme.
+
+Aşağıda bir piyasa bilgi uygulamasının telefonda gösterdiği 6 kısa metin var; her biri ayrı bir hisse hakkında. Her metin, bildirimde ilk görünen kısımdır.
+
+[1]
+Geçmişte 21 benzerinin 9'unda fiyat 10 işlem günü içinde düştü.
+SYN06 bugün son 20 günün en düşüğü olan 95,24'ün altına indi. Hâlâ geçerli.
+
+[2]
+Geçmişte 21 benzerinin 5'inde 20 işlem günü içinde bir yöne kırıldı.
+SYN14 bugün 120 günün en dar bant aralığına sıkıştı. Hâlâ geçerli.
+
+[3]
+Geçmişte 24 benzerinin 15'inde fiyat 20 işlem günü içinde düştü.
+SYN15 3 işlem günü önce 20 günlük ortalamasının altına yerleşti. Gerçekleşti.
+
+[4]
+Geçmişte 22 benzerinin 13'ünde fiyat 10 işlem günü içinde düştü.
+SYN18'de RSI 2 işlem günü önce 30'un altına indi. Artık geçerli değil.
+
+[5]
+Geçmişte 20 benzerinin 11'inde fiyat 10 işlem günü içinde yükseldi.
+SYN20 bugün son 20 günün en yükseği olan 227,08'i aştı. Hâlâ geçerli.
+
+[6]
+Geçmişte 20 benzerinin 7'sinde fiyat 15 işlem günü içinde yükseldi.
+SYN17 dün daha derin bir dip yaptı ama RSI yukarıda kaldı. Tutmadı.
+
+Her metin için şu soruları yalnız metne dayanarak cevapla. Seçmeli sorularda yalnız harfi yaz. Açık sorularda EN ÇOK BİR CÜMLE yaz; metinde yoksa "yok" yaz. Tahmin etme.
+S1 Ne oldu? A) Fiyat bir sınırın üstüne çıktı  B) Fiyat bir sınırın altına indi  C) Düşüş yukarı dönüyor olabilir  D) Yükseliş aşağı dönüyor olabilir  E) Yükseliş sürüyor  F) Düşüş sürüyor  G) Fiyat dar bir aralığa sıkıştı, yön belli değil  H) Fiyat kısa sürede çok yükseldi  I) Fiyat kısa sürede çok düştü  J) Alışılmadık güçlü alım (para girişi) oldu  K) Alışılmadık güçlü satış (para çıkışı) oldu  L) Bilmiyorum
+S2 Hangi eşik ya da sınır söz konusu ve değeri kaç? (bir cümle)
+S3 Anlatılan şey ne zaman oldu? A) Bugün  B) Dün  C) 2–4 işlem günü önce  D) Bir haftaya yakın ya da daha önce  E) Birkaç saat önce  F) Bilmiyorum
+S4 Hâlâ geçerli mi? A) Evet, hâlâ geçerli  B) Hayır, artık geçerli değil (ama henüz kapanmadı)  C) Kapandı: gerçekleşti  D) Kapandı: tutmadı  E) Kapandı: süresi doldu  F) Geri çekildi (veri hatalıydı)  G) Bilmiyorum
+S5 Geçmişte benzerleri kaç örnekte kaç kez tuttu? (bir cümle; ör. "10 örnekte 7")
+S6 Bu metin sana ne yapmanı söylüyor? A) Almamı  B) Satmamı  C) Beklememi  D) Hiçbir şey; yalnız bilgi veriyor  E) Bilmiyorum
+
+Cevabını yalnız bir JSON dizisi olarak yaz, başka hiçbir şey yazma:
+[{"no": 1, "S1": "…", "S2": "…", "S3": "…", "S4": "…", "S5": "…", "S6": "…"}, …]

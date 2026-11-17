@@ -1,0 +1,62 @@
+Kırk beş yaşındasın. Yıllardır borsada işlem yapıyorsun; terminal ekranlarına, teknik analize ve indikatörlere alışkınsın; ayrıntıya güvenirsin. Telefonunda bir piyasa uygulamasına bakıyorsun. Okuyup cevapla.
+
+Aşağıda bir piyasa bilgi uygulamasının telefonda gösterdiği 6 kısa metin var; her biri ayrı bir hisse hakkında. Her metin, bildirime dokununca açılan ekranın tamamıdır; parantez içindekiler terime dokununca açılan açıklamalardır.
+
+[1]
+Karne: 20'de 11 tuttu · 10 işlem günü içinde yükseliş
+SYN20 son 20 günün zirvesini aştı (227,08) · bugün · hâlâ geçerli
+Eşik: son 20 işlem gününün en yükseği, 227,08. Zaman: bugün başladı. Durum: hâlâ geçerli · son kapanış 229,81 · bu cihazda sınandı.
+(Son 20 günün zirvesi: son 20 işlem gününün en yüksek fiyatı. Fiyatın onu aşması, yakın dönemin üst sınırını geçmesi demektir.)
+(Karne: Geçmişteki benzer durumların sayımı: fiyat süre içinde, olağan oynaklığına göre ölçülen mesafeyi yazılan yönde gittiyse tuttu sayılır.)
+(Hâlâ geçerli: İddia henüz kapanmadı ve bugüne kadar onu bozan bir şey olmadı.)
+
+[2]
+Karne: 22'de 13 tuttu · 10 işlem günü içinde düşüşün sürmesi
+SYN18 hızlı düştü (RSI) · 2 işlem günü önce · artık geçerli değil
+Eşik: 30 çizgisi (14 günlük RSI). Zaman: 2 işlem günü önce başladı · bugün zayıfladı. Durum: artık geçerli değil · RSI şu an 30,5 · bu cihazda sınandı.
+(RSI: Göreceli güç endeksi: son 14 işlem gününün yükseliş ve düşüşlerini 0 ile 100 arasında özetler. 70 üstü hızlı yükseliş, 30 altı hızlı düşüş sayılır.)
+(Karne: Geçmişteki benzer durumların sayımı: fiyat süre içinde, olağan oynaklığına göre ölçülen mesafeyi yazılan yönde gittiyse tuttu sayılır.)
+(Artık geçerli değil: İddianın dayandığı koşul bugün sağlanmıyor. İddia henüz kapanmadı, sonucu açık.)
+
+[3]
+Karne: 21'de 5 tuttu · 20 işlem günü içinde aralığın kırılması
+SYN14 dar bir aralığa sıkıştı · bugün · hâlâ geçerli
+Eşik: 20 günlük bant 120 işlem gününün en darı · bant 174,43–188,82. Zaman: bugün başladı. Durum: hâlâ geçerli · bu cihazda sınandı.
+(Bant: 20 günlük ortalamanın iki yanına, fiyatın olağan oynaklığına göre çizilen üst ve alt sınır. Bant daralınca fiyat dar bir aralıkta gider.)
+(Karne: Geçmişteki benzer durumların sayımı: fiyat süre içinde, olağan oynaklığına göre ölçülen mesafeyi herhangi bir yönde gittiyse tuttu sayılır.)
+(Hâlâ geçerli: İddia henüz kapanmadı ve bugüne kadar onu bozan bir şey olmadı.)
+
+[4]
+Karne: 20'de 7 tuttu · 15 işlem günü içinde yükseliş
+SYN17'de dipten yukarı dönüş izi · dün · tutmadı
+Eşik: önceki dip 105,19 (RSI 21,8) · yeni dip 102,19 (RSI 44,4). Zaman: dün başladı · bugün kapandı. Durum: tutmadı · fiyat ters yöne gitti · bu cihazda sınandı.
+(RSI: Göreceli güç endeksi: son 14 işlem gününün yükseliş ve düşüşlerini 0 ile 100 arasında özetler. 70 üstü hızlı yükseliş, 30 altı hızlı düşüş sayılır.)
+(Karne: Geçmişteki benzer durumların sayımı: fiyat süre içinde, olağan oynaklığına göre ölçülen mesafeyi yazılan yönde gittiyse tuttu sayılır.)
+(Tutmadı: Fiyat süre dolmadan aynı mesafeyi ters yönde gitti ve iddia kapandı.)
+
+[5]
+Karne: 24'te 15 tuttu · 20 işlem günü içinde düşüş
+SYN15 düşüş eğilimine girdi · 3 işlem günü önce · gerçekleşti
+Eşik: 20 günlük ortalama 110,34 · 50 günlük ortalama 111,46. Zaman: 3 işlem günü önce başladı · bugün kapandı. Durum: gerçekleşti · fiyat 20 işlem günü içinde düştü · bu cihazda sınandı.
+(Ortalama: 20 günlük ortalama, son 20 işlem gününün kapanış fiyatlarının ortalamasıdır (50 günlük de öyle). Fiyat ikisinin de üstündeyse eğilim yukarı sayılır.)
+(Karne: Geçmişteki benzer durumların sayımı: fiyat süre içinde, olağan oynaklığına göre ölçülen mesafeyi yazılan yönde gittiyse tuttu sayılır.)
+(Gerçekleşti: Fiyat süre dolmadan ölçülen mesafeyi yazılan yönde gitti ve iddia kapandı.)
+
+[6]
+Karne: 21'de 9 tuttu · 10 işlem günü içinde düşüş
+SYN06 son 20 günün dibini kırdı (95,24) · bugün · hâlâ geçerli
+Eşik: son 20 işlem gününün en düşüğü, 95,24. Zaman: bugün başladı · bugün alım satım miktarı da aynı yönü gösterdi. Durum: hâlâ geçerli · son kapanış 87,95 · bu cihazda sınandı.
+(Son 20 günün dibi: son 20 işlem gününün en düşük fiyatı. Fiyatın onun altına inmesi, yakın dönemin alt sınırını geçmesi demektir.)
+(Karne: Geçmişteki benzer durumların sayımı: fiyat süre içinde, olağan oynaklığına göre ölçülen mesafeyi yazılan yönde gittiyse tuttu sayılır.)
+(Hâlâ geçerli: İddia henüz kapanmadı ve bugüne kadar onu bozan bir şey olmadı.)
+
+Her metin için şu soruları yalnız metne dayanarak cevapla. Seçmeli sorularda yalnız harfi yaz. Açık sorularda EN ÇOK BİR CÜMLE yaz; metinde yoksa "yok" yaz. Tahmin etme.
+S1 Ne oldu? A) Fiyat bir sınırın üstüne çıktı  B) Fiyat bir sınırın altına indi  C) Düşüş yukarı dönüyor olabilir  D) Yükseliş aşağı dönüyor olabilir  E) Yükseliş sürüyor  F) Düşüş sürüyor  G) Fiyat dar bir aralığa sıkıştı, yön belli değil  H) Fiyat kısa sürede çok yükseldi  I) Fiyat kısa sürede çok düştü  J) Alışılmadık güçlü alım (para girişi) oldu  K) Alışılmadık güçlü satış (para çıkışı) oldu  L) Bilmiyorum
+S2 Hangi eşik ya da sınır söz konusu ve değeri kaç? (bir cümle)
+S3 Anlatılan şey ne zaman oldu? A) Bugün  B) Dün  C) 2–4 işlem günü önce  D) Bir haftaya yakın ya da daha önce  E) Birkaç saat önce  F) Bilmiyorum
+S4 Hâlâ geçerli mi? A) Evet, hâlâ geçerli  B) Hayır, artık geçerli değil (ama henüz kapanmadı)  C) Kapandı: gerçekleşti  D) Kapandı: tutmadı  E) Kapandı: süresi doldu  F) Geri çekildi (veri hatalıydı)  G) Bilmiyorum
+S5 Geçmişte benzerleri kaç örnekte kaç kez tuttu? (bir cümle; ör. "10 örnekte 7")
+S6 Bu metin sana ne yapmanı söylüyor? A) Almamı  B) Satmamı  C) Beklememi  D) Hiçbir şey; yalnız bilgi veriyor  E) Bilmiyorum
+
+Cevabını yalnız bir JSON dizisi olarak yaz, başka hiçbir şey yazma:
+[{"no": 1, "S1": "…", "S2": "…", "S3": "…", "S4": "…", "S5": "…", "S6": "…"}, …]

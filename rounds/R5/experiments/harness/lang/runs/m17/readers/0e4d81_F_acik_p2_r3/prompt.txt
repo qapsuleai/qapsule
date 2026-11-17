@@ -1,0 +1,56 @@
+Yirmi yaşındasın. Hisse senedi alıp satıyorsun ama teknik analiz bilmiyorsun; grafik, indikatör, RSI, ortalama gibi terimler sana bir şey ifade etmiyor. Telefonuna bir bildirim geldi; her metne yalnızca birkaç saniye bakacaksın. İlk bakışta ne anladığını cevapla; geri dönüp uzun uzun inceleme.
+
+Aşağıda bir piyasa bilgi uygulamasının telefonda gösterdiği 6 kısa metin var; her biri ayrı bir hisse hakkında. Her metin, bildirime dokununca açılan ekranın tamamıdır; parantez içindekiler terime dokununca açılan açıklamalardır.
+
+[1]
+Henüz benzeri yok, 10 işlem günü içinde düşerse tutmuş sayılacak.
+Kurumlar 2 işlem günü önce SYN02'de her zamankinden çok net sattı. Geri çekildi.
+En çok işlem yapan kurumun net satışı 25.970.934 TL, 5 günlük ortalama 7.483.323 TL, eşik 2 kat. Dayandığı veri bugün düzeltildi, bu yüzden geri çekildi ve sayılmadı. Bunu sunucu doğruladı.
+(kurum: Hisse işlemlerine aracılık eden aracı kurumlar. Burada o gün en çok net işlem yapan kurum sayılır, bu veri lisanslıdır.)
+(benzer: Bütün hisselerde görülmüş aynı tür ve yönde durumlar. Tutan: fiyatın önce ters yöne dönmeden günlük ortalama salınımının 0,9 katı düşmesi.)
+
+[2]
+Geçmişte 21 benzerinin 10'unda fiyat 20 işlem saati içinde düştü.
+SYN04 az önce 20 saatlik ortalamasının (44,32) altına yerleşti. Hâlâ geçerli.
+Az önce fiyat 44,23, 20 saatlik ortalama 44,32, 50 saatlik ortalama 44,32 idi: sıra aşağı doğru. Kapanış 20 saatlik ortalamanın altında kaldıkça geçerli.
+(benzer: Bütün hisselerde görülmüş aynı tür ve yönde durumlar. Tutan: fiyatın önce ters yöne dönmeden saatlik ortalama salınımının 1,3 katı düşmesi.)
+
+[3]
+Geçmişteki benzerlerinin azında fiyat sonradan düştü.
+Kurumlar bugün SYN07'de her zamankinden çok net sattı. Hâlâ geçerli.
+En çok net işlem yapan kurumun net satışı son günlerdeki olağan düzeyinin çok üstündeydi. Sonuç önümüzdeki günlerde belli olur. Rakamlar kurum akışı verisi yetkisiyle açılır, bunu sunucu doğruladı.
+(kurum: Hisse işlemlerine aracılık eden aracı kurumlar. Burada o gün en çok net işlem yapan kurum sayılır, bu veri lisanslıdır.)
+(benzer: Bütün hisselerde görülmüş aynı tür ve yönde durumlar. Tutan: fiyatın önce ters yöne dönmeden olağan günlük salınımını aşacak kadar düşmesi.)
+
+[4]
+Geçmişte 20 benzerinin 7'sinde fiyat 15 işlem günü içinde yükseldi.
+SYN08 dün 215,36 ile daha derin dip yaptı, RSI yukarıda kaldı. Hâlâ geçerli.
+Önceki dip 219,11 (RSI 41,4), yeni dip 215,36 (RSI 41,6). Bugün kurumlar da her zamankinden çok net aldı. Sonuç en geç 14 işlem günü içinde belli olur.
+(RSI: Göreceli güç endeksi: son 14 işlem günündeki kazançları kayıplarla tartar, 0 ile 100 arası. 70 üstü hızlı yükseliş, 30 altı hızlı düşüş sayılır.)
+(kurum: Hisse işlemlerine aracılık eden aracı kurumlar. Burada o gün en çok net işlem yapan kurum sayılır, bu veri lisanslıdır.)
+(benzer: Bütün hisselerde görülmüş aynı tür ve yönde durumlar. Tutan: fiyatın önce ters yöne dönmeden günlük ortalama salınımının 1,2 katı yükselmesi.)
+
+[5]
+Az örnek: 5 benzerinin 2'sinde fiyat 10 işlem günü içinde yükseldi.
+SYN21 10 işlem günü önce ortalamanın 3,3 katı hacimle yükseldi. Süresi doldu.
+Hacim 20 günlük ortalamanın 3,3 katıydı, eşik 2,5 kat. 10 işlem günü içinde yeterli hareket olmadı, bugün süresi doldu.
+(hacim: Bir gün içinde el değiştiren hisse adedi.)
+(benzer: Bütün hisselerde görülmüş aynı tür ve yönde durumlar. Tutan: fiyatın önce ters yöne dönmeden günlük ortalama salınımının 0,9 katı yükselmesi.)
+
+[6]
+Az örnek: 1 benzerinin 1'inde fiyat 10 işlem günü içinde yükseldi.
+SYN15 kısa sürede çok yükseldi: RSI bugün 70'in üstüne çıktı. Hâlâ geçerli.
+Bugün RSI 74,7 oldu ve 70 çizgisini geçti. RSI 70'in üstünde kaldıkça geçerli, sonuç en geç 10 işlem günü içinde belli olur.
+(RSI: Göreceli güç endeksi: son 14 işlem günündeki kazançları kayıplarla tartar, 0 ile 100 arası. 70 üstü hızlı yükseliş, 30 altı hızlı düşüş sayılır.)
+(benzer: Bütün hisselerde görülmüş aynı tür ve yönde durumlar. Tutan: fiyatın önce ters yöne dönmeden günlük ortalama salınımının 0,9 katı yükselmesi.)
+
+Her metin için şu soruları yalnız metne dayanarak cevapla. Seçmeli sorularda yalnız harfi yaz. Açık sorularda EN ÇOK BİR CÜMLE yaz; metinde yoksa "yok" yaz. Tahmin etme.
+S1 Ne oldu? A) Fiyat bir sınırın üstüne çıktı  B) Fiyat bir sınırın altına indi  C) Düşüş yukarı dönüyor olabilir  D) Yükseliş aşağı dönüyor olabilir  E) Yükseliş sürüyor  F) Düşüş sürüyor  G) Fiyat dar bir aralığa sıkıştı, yön belli değil  H) Fiyat kısa sürede çok yükseldi  I) Fiyat kısa sürede çok düştü  J) Alışılmadık güçlü alım (para girişi) oldu  K) Alışılmadık güçlü satış (para çıkışı) oldu  L) Bilmiyorum
+S2 Hangi eşik ya da sınır söz konusu ve değeri kaç? (bir cümle)
+S3 Anlatılan şey ne zaman oldu? A) Bugün  B) Dün  C) 2–4 işlem günü önce  D) Bir haftaya yakın ya da daha önce  E) Birkaç saat önce  F) Bilmiyorum
+S4 Hâlâ geçerli mi? A) Evet, hâlâ geçerli  B) Hayır, artık geçerli değil (ama henüz kapanmadı)  C) Kapandı: gerçekleşti  D) Kapandı: tutmadı  E) Kapandı: süresi doldu  F) Geri çekildi (veri hatalıydı)  G) Bilmiyorum
+S5 Geçmişte benzerleri kaç örnekte kaç kez tuttu? (bir cümle; ör. "10 örnekte 7")
+S6 Bu metin sana ne yapmanı söylüyor? A) Almamı  B) Satmamı  C) Beklememi  D) Hiçbir şey; yalnız bilgi veriyor  E) Bilmiyorum
+
+Cevabını yalnız bir JSON dizisi olarak yaz, başka hiçbir şey yazma:
+[{"no": 1, "S1": "…", "S2": "…", "S3": "…", "S4": "…", "S5": "…", "S6": "…"}, …]

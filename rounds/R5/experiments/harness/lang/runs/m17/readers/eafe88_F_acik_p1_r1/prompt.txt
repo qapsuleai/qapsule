@@ -1,0 +1,44 @@
+Yirmi yaşındasın. Hisse senedi alıp satıyorsun ama teknik analiz bilmiyorsun; grafik, indikatör, RSI, ortalama gibi terimler sana bir şey ifade etmiyor. Telefonuna bir bildirim geldi; her metne yalnızca birkaç saniye bakacaksın. İlk bakışta ne anladığını cevapla; geri dönüp uzun uzun inceleme.
+
+Aşağıda bir piyasa bilgi uygulamasının telefonda gösterdiği 6 kısa metin var; her biri ayrı bir hisse hakkında. Her metin, bildirime dokununca açılan ekranın tamamıdır; parantez içindekiler terime dokununca açılan açıklamalardır.
+
+[1]
+Karne: bu sinyal geçmişte çoğunlukla beklendiği gibi sonuçlandı.
+SYN17 için önemli bir eşikte güçlü sinyal: yukarı dönüş olgusu dedektör tarafından bar bazında işaretlendi, teyit süreci ve aile skoru izleniyor.
+Bulgu kademesi yükseldi; kritik seviye civarında olgu tetiklendi ve teyit bekleniyor. Teknik görünüm dikkat çekici. SYN17'de dün yukarı dönüş işareti çıktı: fiyat yeni dip yaparken RSI daha yüksek dip yaptı (fiyat RSI ). Sinyal bugün geçersiz oldu; artık geçerli değil. Geçmişte bu sinyal seferin sinde beklendiği gibi sonuçlandı.
+
+[2]
+Karne: bu sinyal geçmişte çoğunlukla beklendiği gibi sonuçlandı.
+SYN14 için önemli bir eşikte güçlü sinyal: sıkışma (yön belirsiz) olgusu dedektör tarafından bar bazında işaretlendi, teyit süreci ve aile skoru izleniyor.
+Bulgu kademesi yükseldi; kritik seviye civarında olgu tetiklendi ve teyit bekleniyor. Teknik görünüm dikkat çekici. SYN14'de bugün itibarıyla sıkışma (yön belirsiz) sürüyor. Geçmişte bu sinyal seferin inde beklendiği gibi sonuçlandı.
+
+[3]
+Karne: bu sinyal geçmişte çoğunlukla beklendiği gibi sonuçlandı.
+SYN20 için önemli bir eşikte güçlü sinyal: yukarı kırılım olgusu dedektör tarafından bar bazında işaretlendi, teyit süreci ve aile skoru izleniyor.
+Bulgu kademesi yükseldi; kritik seviye civarında olgu tetiklendi ve teyit bekleniyor. Teknik görünüm dikkat çekici. SYN20 bugün deki direnci yukarı kırdı (kapanış ): yukarı kırılım. Hâlâ geçerli. Geçmişte bu sinyal seferin inde beklendiği gibi sonuçlandı.
+
+[4]
+Karne: bu sinyal geçmişte çoğunlukla beklendiği gibi sonuçlandı.
+SYN15 için önemli bir eşikte güçlü sinyal: düşüş eğilimi olgusu dedektör tarafından bar bazında işaretlendi, teyit süreci ve aile skoru izleniyor.
+Bulgu kademesi yükseldi; kritik seviye civarında olgu tetiklendi ve teyit bekleniyor. Teknik görünüm dikkat çekici. SYN15 bardır kısa ortalamanın () altında; şu an Düşüş eğilimi sürüyor. Beklenen sonuç bugün gerçekleşti. Geçmişte bu sinyal seferin inde beklendiği gibi sonuçlandı.
+
+[5]
+Karne: bu sinyal geçmişte çoğunlukla beklendiği gibi sonuçlandı.
+SYN06 için önemli bir eşikte güçlü sinyal: aşağı kırılım olgusu dedektör tarafından bar bazında işaretlendi, teyit süreci ve aile skoru izleniyor.
+Bulgu kademesi yükseldi; kritik seviye civarında olgu tetiklendi ve teyit bekleniyor. Teknik görünüm dikkat çekici. SYN06 bugün teki desteği aşağı kırdı (kapanış ): aşağı kırılım. Bugün hacim de teyit etti; bağımsız kanıt ailesi destekliyor. Hâlâ geçerli. Geçmişte bu sinyal seferin unda beklendiği gibi sonuçlandı.
+
+[6]
+Karne: bu sinyal geçmişte çoğunlukla beklendiği gibi sonuçlandı.
+SYN18 için önemli bir eşikte güçlü sinyal: aşırı satım olgusu dedektör tarafından bar bazında işaretlendi, teyit süreci ve aile skoru izleniyor.
+Bulgu kademesi yükseldi; kritik seviye civarında olgu tetiklendi ve teyit bekleniyor. Teknik görünüm dikkat çekici. SYN18'de RSI bar önce un altına indi, bugün yeniden üstüne çıktı; şu an artık un altında değil. Aşırı satım sona erdi. Geçmişte bu sinyal seferin ünde beklendiği gibi sonuçlandı.
+
+Her metin için şu soruları yalnız metne dayanarak cevapla. Seçmeli sorularda yalnız harfi yaz. Açık sorularda EN ÇOK BİR CÜMLE yaz; metinde yoksa "yok" yaz. Tahmin etme.
+S1 Ne oldu? A) Fiyat bir sınırın üstüne çıktı  B) Fiyat bir sınırın altına indi  C) Düşüş yukarı dönüyor olabilir  D) Yükseliş aşağı dönüyor olabilir  E) Yükseliş sürüyor  F) Düşüş sürüyor  G) Fiyat dar bir aralığa sıkıştı, yön belli değil  H) Fiyat kısa sürede çok yükseldi  I) Fiyat kısa sürede çok düştü  J) Alışılmadık güçlü alım (para girişi) oldu  K) Alışılmadık güçlü satış (para çıkışı) oldu  L) Bilmiyorum
+S2 Hangi eşik ya da sınır söz konusu ve değeri kaç? (bir cümle)
+S3 Anlatılan şey ne zaman oldu? A) Bugün  B) Dün  C) 2–4 işlem günü önce  D) Bir haftaya yakın ya da daha önce  E) Birkaç saat önce  F) Bilmiyorum
+S4 Hâlâ geçerli mi? A) Evet, hâlâ geçerli  B) Hayır, artık geçerli değil (ama henüz kapanmadı)  C) Kapandı: gerçekleşti  D) Kapandı: tutmadı  E) Kapandı: süresi doldu  F) Geri çekildi (veri hatalıydı)  G) Bilmiyorum
+S5 Geçmişte benzerleri kaç örnekte kaç kez tuttu? (bir cümle; ör. "10 örnekte 7")
+S6 Bu metin sana ne yapmanı söylüyor? A) Almamı  B) Satmamı  C) Beklememi  D) Hiçbir şey; yalnız bilgi veriyor  E) Bilmiyorum
+
+Cevabını yalnız bir JSON dizisi olarak yaz, başka hiçbir şey yazma:
+[{"no": 1, "S1": "…", "S2": "…", "S3": "…", "S4": "…", "S5": "…", "S6": "…"}, …]

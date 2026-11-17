@@ -1,0 +1,155 @@
+Bir piyasa bilgi uygulamasının telefonda gösterdiği metinleri değerlendiriyorsun. Uygulama tavsiye vermez; her metin bir hissede olan bir şeyi anlatır. Aşağıda 12 durum var; her durumda aynı olayın iki ayrı yazılışı (Metin A ve Metin B) verildi. Hangisinin kim tarafından ya da ne zaman yazıldığını bilmiyorsun.
+Ölçütler (sırası önem sırası değildir):
+1. Ne olduğunu somut söylüyor mu: hangi eşik, adıyla ve değeriyle?
+2. Ne zaman olduğu ve hâlâ geçerli olup olmadığı ilk okumada anlaşılıyor mu?
+3. Geçmişte kaç örnekte kaç kez tuttuğunu ve neyin beklendiğini dürüstçe söylüyor mu?
+4. İç terim, jargon, belirsiz ifade yok mu ("önemli bir eşik" gibi)?
+5. Bir eylem (al, sat, bekle) önermiyor mu?
+6. Kısa ve hızlı okunuyor mu; ilk satır yeterli mi?
+7. Kısa metin ile açılan ayrıntı birbiriyle çelişmiyor mu?
+
+[1]
+Metin A:
+Henüz benzeri yok, 10 işlem günü içinde düşerse tutmuş sayılacak.
+Kurumlar 2 işlem günü önce SYN02'de her zamankinden çok net sattı. Geri çekildi.
+En çok işlem yapan kurumun net satışı 25.970.934 TL, 5 günlük ortalama 7.483.323 TL, eşik 2 kat. Dayandığı veri bugün düzeltildi, bu yüzden geri çekildi ve sayılmadı. Bunu sunucu doğruladı.
+(kurum: Hisse işlemlerine aracılık eden aracı kurumlar. Burada o gün en çok net işlem yapan kurum sayılır, bu veri lisanslıdır.)
+(benzer: Bütün hisselerde görülmüş aynı tür ve yönde durumlar. Tutan: fiyatın önce ters yöne dönmeden günlük ortalama salınımının 0,9 katı düşmesi.)
+Metin B:
+Benzerleri: henüz örnek yok
+SYN02 için büyük satış geldi. Kapandı: bugün geri çekildi.
+SYN02'de 2 bar önce kurumsal net satış (25.970.934) son günlerin ortalamasını (7.483.323) belirgin biçimde aştı: para çıkışı. Dayandığı veri düzeltildiği için bugün geri çekildi; karneye yazılmadı; artık geçerli değil. Henüz karnesi yok. Sunucu doğruladı.
+
+[2]
+Metin A:
+Geçmişte 21 benzerinin 9'unda fiyat 10 işlem günü içinde düştü.
+SYN06 bugün son 20 günün en düşüğü olan 95,24'ün altına indi. Hâlâ geçerli.
+Bugün kapanış 87,95 oldu, önceki 20 işlem gününün en düşüğü 95,24 idi. Bugün hacim de 20 günlük ortalamanın 4,1 katına çıktı. Kapanış 95,24'ün altında kaldıkça geçerli.
+(hacim: Bir gün içinde el değiştiren hisse adedi.)
+(benzer: Bütün hisselerde görülmüş aynı tür ve yönde durumlar. Tutan: fiyatın önce ters yöne dönmeden günlük ortalama salınımının 0,9 katı düşmesi.)
+Metin B:
+Benzerleri: 21'de 9 tuttu
+SYN06 önemli bir eşiğin altına indi; bugün güçlendi. Hâlâ geçerli.
+SYN06 bugün 95,24'teki desteği aşağı kırdı (kapanış 87,95): aşağı kırılım. Bugün hacim de teyit etti; 3 bağımsız kanıt ailesi destekliyor. Hâlâ geçerli. Geçmişte bu sinyal 21 seferin 9'unda beklendiği gibi sonuçlandı.
+
+[3]
+Metin A:
+Geçmişte 20 benzerinin 11'inde fiyat 10 işlem günü içinde yükseldi.
+SYN20 bugün son 20 günün en yükseği olan 227,08'i aştı. Hâlâ geçerli.
+Bugün kapanış 229,81 oldu, önceki 20 işlem gününün en yükseği 227,08 idi. Kapanış 227,08'in üstünde kaldıkça geçerli, sonuç en geç 10 işlem günü içinde belli olur.
+(benzer: Bütün hisselerde görülmüş aynı tür ve yönde durumlar. Tutan: fiyatın önce ters yöne dönmeden günlük ortalama salınımının 0,9 katı yükselmesi.)
+Metin B:
+Benzerleri: 20'de 11 tuttu
+Bugün SYN20 önemli bir eşiğin üstüne çıktı. Hâlâ geçerli.
+SYN20 bugün 227,08'deki direnci yukarı kırdı (kapanış 229,81): yukarı kırılım. Hâlâ geçerli. Geçmişte bu sinyal 20 seferin 11'inde beklendiği gibi sonuçlandı.
+
+[4]
+Metin A:
+Geçmişte 21 benzerinin 10'unda fiyat 20 işlem saati içinde düştü.
+SYN04 az önce 20 saatlik ortalamasının (44,32) altına yerleşti. Hâlâ geçerli.
+Az önce fiyat 44,23, 20 saatlik ortalama 44,32, 50 saatlik ortalama 44,32 idi: sıra aşağı doğru. Kapanış 20 saatlik ortalamanın altında kaldıkça geçerli.
+(benzer: Bütün hisselerde görülmüş aynı tür ve yönde durumlar. Tutan: fiyatın önce ters yöne dönmeden saatlik ortalama salınımının 1,3 katı düşmesi.)
+Metin B:
+Benzerleri: 21'de 10 tuttu
+Az önce SYN04 düşüşünü sürdürdü. Hâlâ geçerli.
+SYN04 bu bar itibarıyla kısa ortalamanın (44,32) altında; şu an 44,23. Düşüş eğilimi sürüyor. Geçmişte bu sinyal 21 seferin 10'unda beklendiği gibi sonuçlandı.
+
+[5]
+Metin A:
+Geçmişteki benzerlerinin azında fiyat sonradan düştü.
+Kurumlar bugün SYN07'de her zamankinden çok net sattı. Hâlâ geçerli.
+En çok net işlem yapan kurumun net satışı son günlerdeki olağan düzeyinin çok üstündeydi. Sonuç önümüzdeki günlerde belli olur. Rakamlar kurum akışı verisi yetkisiyle açılır, bunu sunucu doğruladı.
+(kurum: Hisse işlemlerine aracılık eden aracı kurumlar. Burada o gün en çok net işlem yapan kurum sayılır, bu veri lisanslıdır.)
+(benzer: Bütün hisselerde görülmüş aynı tür ve yönde durumlar. Tutan: fiyatın önce ters yöne dönmeden olağan günlük salınımını aşacak kadar düşmesi.)
+Metin B:
+Benzerleri: çoğunlukla tutmadı
+Bugün SYN07 için büyük satış geldi. Hâlâ geçerli.
+Bu hisse için sunucunun doğruladığı bir para çıkışı sinyali var; ayrıntılar veri lisansı gerektiriyor.
+
+[6]
+Metin A:
+Geçmişte 20 benzerinin 7'sinde fiyat 15 işlem günü içinde yükseldi.
+SYN08 dün 215,36 ile daha derin dip yaptı, RSI yukarıda kaldı. Hâlâ geçerli.
+Önceki dip 219,11 (RSI 41,4), yeni dip 215,36 (RSI 41,6). Bugün kurumlar da her zamankinden çok net aldı. Sonuç en geç 14 işlem günü içinde belli olur.
+(RSI: Göreceli güç endeksi: son 14 işlem günündeki kazançları kayıplarla tartar, 0 ile 100 arası. 70 üstü hızlı yükseliş, 30 altı hızlı düşüş sayılır.)
+(kurum: Hisse işlemlerine aracılık eden aracı kurumlar. Burada o gün en çok net işlem yapan kurum sayılır, bu veri lisanslıdır.)
+(benzer: Bütün hisselerde görülmüş aynı tür ve yönde durumlar. Tutan: fiyatın önce ters yöne dönmeden günlük ortalama salınımının 1,2 katı yükselmesi.)
+Metin B:
+Benzerleri: 20'de 7 tuttu
+SYN08 düşüşten yukarı döndü; bugün güçlendi. Hâlâ geçerli.
+SYN08'de dün yukarı dönüş işareti çıktı: fiyat yeni dip yaparken RSI daha yüksek dip yaptı (fiyat 215,36, RSI 41,6). Bugün para akışı da teyit etti; 2 bağımsız kanıt ailesi destekliyor. Hâlâ geçerli olup olmadığı bilinmiyor. Geçmişte bu sinyal 20 seferin 7'sinde beklendiği gibi sonuçlandı.
+
+[7]
+Metin A:
+Geçmişte 21 benzerinin 5'inde 20 işlem günü içinde bir yöne kırıldı.
+SYN14 bugün 120 günün en dar bant aralığına sıkıştı. Hâlâ geçerli.
+Bugün bant 174,43 ile 188,82 arasına daraldı, bu son 120 günün en darı. Bant yeniden açılana kadar geçerli, sonuç en geç 20 işlem günü içinde belli olur.
+(bant: Bollinger bandı: 20 günlük ortalama fiyatın iki yanına, fiyatın olağan salınımına göre çizilen alt ve üst sınır. Daraldıkça fiyat durgunlaşmış demektir.)
+(benzer: Bütün hisselerde görülmüş aynı tür ve yönde durumlar. Tutan: fiyatın süre içinde uzun dönem günlük ortalama salınımının 2,9 katı bir yöne gitmesi.)
+Metin B:
+Benzerleri: 21'de 5 tuttu
+Bugün SYN14 dar bir aralığa sıkıştı. Hâlâ geçerli.
+SYN14'de bugün itibarıyla sıkışma (yön belirsiz) sürüyor. Geçmişte bu sinyal 21 seferin 5'inde beklendiği gibi sonuçlandı.
+
+[8]
+Metin A:
+Geçmişte 22 benzerinin 13'ünde fiyat 10 işlem günü içinde düştü.
+SYN18'de RSI 2 işlem günü önce 30'un altına indi. Artık geçerli değil.
+2 işlem günü önce RSI 28,6 oldu ve 30 çizgisinin altına indi. Bugün RSI 30'un üstüne döndü.
+(RSI: Göreceli güç endeksi: son 14 işlem günündeki kazançları kayıplarla tartar, 0 ile 100 arası. 70 üstü hızlı yükseliş, 30 altı hızlı düşüş sayılır.)
+(benzer: Bütün hisselerde görülmüş aynı tür ve yönde durumlar. Tutan: fiyatın önce ters yöne dönmeden günlük ortalama salınımının 0,9 katı düşmesi.)
+Metin B:
+Benzerleri: 22'de 13 tuttu
+SYN18 kısa sürede aşırı düştü; bugün zayıfladı. Artık geçerli değil.
+SYN18'de RSI 2 bar önce 30'un altına indi, bugün yeniden üstüne çıktı; şu an 30,5, artık 30'un altında değil. Aşırı satım sona erdi. Geçmişte bu sinyal 22 seferin 13'ünde beklendiği gibi sonuçlandı.
+
+[9]
+Metin A:
+Az örnek: 1 benzerinin 1'inde fiyat 10 işlem günü içinde yükseldi.
+SYN15 kısa sürede çok yükseldi: RSI bugün 70'in üstüne çıktı. Hâlâ geçerli.
+Bugün RSI 74,7 oldu ve 70 çizgisini geçti. RSI 70'in üstünde kaldıkça geçerli, sonuç en geç 10 işlem günü içinde belli olur.
+(RSI: Göreceli güç endeksi: son 14 işlem günündeki kazançları kayıplarla tartar, 0 ile 100 arası. 70 üstü hızlı yükseliş, 30 altı hızlı düşüş sayılır.)
+(benzer: Bütün hisselerde görülmüş aynı tür ve yönde durumlar. Tutan: fiyatın önce ters yöne dönmeden günlük ortalama salınımının 0,9 katı yükselmesi.)
+Metin B:
+Benzerleri: 1'de 1 tuttu (az örnek)
+Bugün SYN15 kısa sürede aşırı yükseldi. Hâlâ geçerli.
+SYN15'de RSI bugün itibarıyla 70'in üstünde; şu an 74,7. Aşırı alım sürüyor. Karnesi henüz az örnekli: 1 seferin 1'inde tuttu.
+
+[10]
+Metin A:
+Az örnek: 5 benzerinin 2'sinde fiyat 10 işlem günü içinde yükseldi.
+SYN21 10 işlem günü önce ortalamanın 3,3 katı hacimle yükseldi. Süresi doldu.
+Hacim 20 günlük ortalamanın 3,3 katıydı, eşik 2,5 kat. 10 işlem günü içinde yeterli hareket olmadı, bugün süresi doldu.
+(hacim: Bir gün içinde el değiştiren hisse adedi.)
+(benzer: Bütün hisselerde görülmüş aynı tür ve yönde durumlar. Tutan: fiyatın önce ters yöne dönmeden günlük ortalama salınımının 0,9 katı yükselmesi.)
+Metin B:
+Benzerleri: 5'te 2 tuttu (az örnek)
+SYN21 için büyük alım geldi. Kapandı: bugün süresi doldu.
+SYN21'de 10 bar önce hacim (1.243.369.826) ortalamasının (379.001.940) belirgin üstüne çıktı: para girişi. Sinyalin 10 barlık ömrü bugün sonuçsuz doldu; artık geçerli değil. Karnesi henüz az örnekli: 5 seferin 2'sinde tuttu.
+
+[11]
+Metin A:
+Geçmişte 24 benzerinin 15'inde fiyat 20 işlem günü içinde düştü.
+SYN15 3 işlem günü önce 20 günlük ortalamasının altına yerleşti. Gerçekleşti.
+3 işlem günü önce fiyat 109,71, 20 günlük ortalama 110,34, 50 günlük ortalama 111,46 idi: sıra aşağı doğru. Bugün fiyat yeterince düştü ve gerçekleşti.
+(benzer: Bütün hisselerde görülmüş aynı tür ve yönde durumlar. Tutan: fiyatın önce ters yöne dönmeden günlük ortalama salınımının 1,3 katı düşmesi.)
+Metin B:
+Benzerleri: 24'te 15 tuttu
+SYN15 düşüşünü sürdürdü. Kapandı: bugün gerçekleşti.
+SYN15 3 bardır kısa ortalamanın (110,34) altında; şu an 105,36. Düşüş eğilimi sürüyor. Beklenen sonuç bugün gerçekleşti. Geçmişte bu sinyal 24 seferin 15'inde beklendiği gibi sonuçlandı.
+
+[12]
+Metin A:
+Geçmişte 20 benzerinin 7'sinde fiyat 15 işlem günü içinde yükseldi.
+SYN17 dün daha derin bir dip yaptı ama RSI yukarıda kaldı. Tutmadı.
+Önceki dipte fiyat 105,19 ve RSI 21,8 idi, yeni dipte fiyat 102,19 ve RSI 44,4: düşüş hız kesiyor. Bugün fiyat ters yöne yeterince gitti ve tutmadı.
+(RSI: Göreceli güç endeksi: son 14 işlem günündeki kazançları kayıplarla tartar, 0 ile 100 arası. 70 üstü hızlı yükseliş, 30 altı hızlı düşüş sayılır.)
+(benzer: Bütün hisselerde görülmüş aynı tür ve yönde durumlar. Tutan: fiyatın önce ters yöne dönmeden günlük ortalama salınımının 1,2 katı yükselmesi.)
+Metin B:
+Benzerleri: 20'de 7 tuttu
+SYN17 düşüşten yukarı döndü. Kapandı: bugün tutmadı.
+SYN17'de dün yukarı dönüş işareti çıktı: fiyat yeni dip yaparken RSI daha yüksek dip yaptı (fiyat 102,19, RSI 44,4). Sinyal bugün geçersiz oldu; artık geçerli değil. Geçmişte bu sinyal 20 seferin 7'sinde beklendiği gibi sonuçlandı.
+
+Her durum için önce kendi gözlemini EN ÇOK BİR CÜMLE yaz, sonra ölçütlere göre bütün olarak daha iyi olanı seç ("A" ya da "B"; eşitlik yok).
+Cevabını yalnız bir JSON dizisi olarak yaz, başka hiçbir şey yazma:
+[{"no": 1, "gozlem": "…", "secim": "A"}, …]

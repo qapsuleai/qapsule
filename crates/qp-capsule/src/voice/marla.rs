@@ -393,7 +393,7 @@ fn n(v: f64, cat: Cat, lang: Lang) -> String {
     fmt(v, cat, lang)
 }
 
-fn words_tr(x: u32) -> String {
+pub(super) fn words_tr(x: u32) -> String {
     const ONES: [&str; 10] = [
         "", "bir", "iki", "üç", "dört", "beş", "altı", "yedi", "sekiz", "dokuz",
     ];
@@ -427,7 +427,7 @@ fn words_tr(x: u32) -> String {
     out.join(" ")
 }
 
-fn words_en(x: u32) -> String {
+pub(super) fn words_en(x: u32) -> String {
     const SMALL: [&str; 20] = [
         "zero",
         "one",

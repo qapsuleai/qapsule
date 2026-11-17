@@ -497,6 +497,12 @@ pub fn capsule_card_view(
 /// sentence in the `body` role beside it (`space.glyph_gap`), the ledger line in the
 /// `label` role.
 ///
+/// (R5/m17-int, `docs/LANGUAGE.md`) Under a voice ([`DataProvider::voice`]) the card is the
+/// open capsule's voice: the `sentence` layer writes the voice's **detail** (the headline
+/// is the open layer's title, and the face's), the `ledger` layer its track-record
+/// sentence in a two-line band at the card's bottom, and the card panel takes four fifths
+/// of the height (the mini price line one fifth).
+///
 /// # Errors
 /// As [`capsule_card_view`].
 pub fn capsule_card_view_in(
@@ -516,9 +522,10 @@ pub fn capsule_card_view_in(
     glyph.encoding.y = Some(panel_at(0.0, 0.0));
     let card_px = look.glyph.card_px;
     glyph.encoding.size = Some(SizeSpec::Constant(card_px));
+    let voiced = p.voice(finding).is_some();
     let mut sentence = layer("sentence", Mark::Text, 0);
     sentence.finding = Some(finding.to_owned());
-    sentence.encoding.text = Some("headline".to_owned());
+    sentence.encoding.text = Some(if voiced { "detail" } else { "headline" }.to_owned());
     sentence.encoding.x = Some(panel_at(0.0, card_px + look.space.glyph_gap));
     sentence.encoding.y = Some(panel_at(0.0, 0.0));
     sentence.encoding.size = Some(SizeSpec::Constant(look.types.body.px));
@@ -526,8 +533,14 @@ pub fn capsule_card_view_in(
     ledger.finding = Some(finding.to_owned());
     ledger.encoding.text = Some("ledger".to_owned());
     ledger.encoding.x = Some(panel_at(0.0, 0.0));
-    // The ledger line's top: its size plus 2 px above the panel's bottom.
-    ledger.encoding.y = Some(panel_at(1.0, -(look.types.label.px + 2.0)));
+    // The ledger line's top: its size plus 2 px above the panel's bottom. (R5/m17-int)
+    // Under a voice, a sentence: a band of two lines.
+    let band = if voiced {
+        2.0 * (look.types.label.px * look.types.label.line).round()
+    } else {
+        look.types.label.px
+    };
+    ledger.encoding.y = Some(panel_at(1.0, -(band + 2.0)));
     ledger.encoding.size = Some(SizeSpec::Constant(look.types.label.px));
     ledger.encoding.color = Some(ColorSpec::Constant("muted".to_owned()));
     let mut line = layer("line", Mark::Line, 1);
@@ -554,7 +567,11 @@ pub fn capsule_card_view_in(
         theme: None,
         x: time_scale(bars[i(from)].t, bars[i(n - 1)].t),
         y: Vec::new(),
-        panels: vec![named_panel(0, "card", 3.0), named_panel(1, "price", 2.0)],
+        panels: if voiced {
+            vec![named_panel(0, "card", 4.0), named_panel(1, "price", 1.0)]
+        } else {
+            vec![named_panel(0, "card", 3.0), named_panel(1, "price", 2.0)]
+        },
         layers,
         emphasis: Vec::new(),
     })

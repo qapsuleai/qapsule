@@ -51,6 +51,7 @@ struct StyleReq<'a> {
     outcome: Option<&'a str>,
     seen: Option<i64>,
     look: Option<&'a str>,
+    voice: Option<&'a str>,
 }
 
 /// The frame key of a target (`ViewState::frames`).
@@ -214,6 +215,7 @@ impl Session {
                 outcome,
                 seen,
                 look,
+                voice,
             } => {
                 self.set_style(
                     ci,
@@ -226,6 +228,7 @@ impl Session {
                         outcome: outcome.as_deref(),
                         seen: *seen,
                         look: look.as_deref(),
+                        voice: voice.as_deref(),
                     },
                 )?;
                 (Out::default(), Vec::new())
@@ -376,7 +379,15 @@ impl Session {
                 return Err(unknown("look", l, qp_grammar::look::names()));
             }
         }
+        if let Some(v) = r.voice {
+            if !qp_capsule::voice::is_voice(v) {
+                return Err(unknown("voice", v, qp_capsule::voice::names()));
+            }
+        }
         let look = &mut self.conns[ci].look;
+        if let Some(v) = r.voice {
+            look.voice = (v != qp_capsule::voice::DEFAULT_VOICE).then(|| v.to_owned());
+        }
         if let Some(l) = r.look {
             look.look = (l != qp_grammar::look::DEFAULT_LOOK).then(|| l.to_owned());
         }
@@ -510,9 +521,13 @@ impl Session {
         // (view state); built by the same grammar rule the shell's replica uses.
         // (R5/T3) So is a look other than `r4`: the face and the card are rebuilt with
         // its sizes (the replica's `viewer::face_scene` / `open_scene` do the same).
-        let styled = self.conns[ci].look.face.is_some() || self.conns[ci].look.look.is_some();
+        // (R5/m17-int) So is a voice other than `r4`: the face and the card speak from it.
+        let voice = self.conns[ci].look.voice.clone();
+        let styled = self.conns[ci].look.face.is_some()
+            || self.conns[ci].look.look.is_some()
+            || voice.is_some();
         let look = crate::viewer::look_of(&self.conns[ci].look);
-        if d == OpenDepth::Capsule && self.conns[ci].look.look.is_some() {
+        if d == OpenDepth::Capsule && (self.conns[ci].look.look.is_some() || voice.is_some()) {
             let Some(id) = pr.capsule_view.as_ref().map(|v| v.id.clone()) else {
                 return Ok(None);
             };
@@ -521,7 +536,8 @@ impl Session {
             warm(rd!(self), &mut self.cache);
             let p = DocProvider::new(rd!(self), &self.cache)
                 .with_headlines(&self.headlines)
-                .with_parts(self, lang);
+                .with_parts(self, lang)
+                .with_voice(voice.as_deref());
             return Ok(depth::capsule_view_in(look, finding, max_points, &p, &id).ok());
         }
         if d == OpenDepth::Sentence && styled {
@@ -534,7 +550,8 @@ impl Session {
             warm(rd!(self), &mut self.cache);
             let p = DocProvider::new(rd!(self), &self.cache)
                 .with_headlines(&self.headlines)
-                .with_parts(self, lang);
+                .with_parts(self, lang)
+                .with_voice(voice.as_deref());
             return Ok(depth::face_view_in(
                 look,
                 name.as_deref(),
@@ -590,11 +607,13 @@ impl Session {
         opts.look.clone_from(&self.conns[ci].look.look);
         opts.face = face;
         let lang = self.lang_of(ci);
+        let voice = self.conns[ci].look.voice.clone();
         let scene = compile(
             view,
             &DocProvider::new(rd!(self), &self.cache)
                 .with_headlines(&self.headlines)
-                .with_parts(self, lang),
+                .with_parts(self, lang)
+                .with_voice(voice.as_deref()),
             &opts,
         )
         .map_err(|e| E::new(ErrorCode::Invalid, e.to_string()).at(GP).build())?;
@@ -822,6 +841,13 @@ impl Session {
                 let hit = scene
                     .as_ref()
                     .map(|(_, s, times)| hit_scene(s, x, y, times));
+                // (R5/m17-int, K49) A tap on a glossary term opens its explanation (the
+                // hit's `term`; the shell shows it), not the capsule.
+                let on_term = hit.as_ref().is_some_and(|h| h.term.is_some());
+                if on_term {
+                    out.hit = hit;
+                    return Ok((out, Vec::new()));
+                }
                 if let Some(to) = depth::tap_opens(d, hit.as_ref().and_then(|h| h.item.as_ref())) {
                     out.opening = Some(self.transition(ci, &cap, &finding, d, to)?);
                 } else if let (Some((view, _, times)), Some(h)) = (&scene, &hit) {

@@ -35,7 +35,41 @@ Kod `crates/qp-grammar/src/faces/vadrel.rs`; kayıt `faces.rs` (`FACES`). Göste
 - **Dürüstlük:** karne her zaman görünür; az örnekte "(az örnek)" düşmez; karne yoksa
   "henüz örnek yok". Tavsiye yok.
 - **Yetkisiz okuyucu:** yüz sahnesi çizilmez; kabuk çekirdeğin rakamsız cümlesini metin
-  olarak gösterir (bütün tasarımlarda aynı ürün kuralı).
+  olarak gösterir (bütün tasarımlarda aynı ürün kuralı). (R5) Bir kapsül dili seçiliyken bu
+  metin dilin şablonlu rakamsız yüzüdür (başlık, karne, ayrıntı; aşağıda).
+
+### Kapsül dili ile (R5/`m17-int`, `docs/LANGUAGE.md`)
+
+Bağlantı bir kapsül dili seçtiyse (`style` `voice`: `marla` gösterimin varsayılanı, `selvi`;
+`r4` protokolün varsayılanı ve bugünkü metin) yüz başlığı ve karnesi o dilden gelir; yüz
+tasarımının kendi başlık şablonu (`vadrel::headline` vb.) yalnız `r4`'te çalışır.
+
+- **Kaynak:** sahne sağlayıcısının `DataProvider::voice` yöntemi (otoritede
+  `Session::reader_voice`; kopyada kapsül öğesinin `voice`'u — otoritenin aynı işlevle yazdığı).
+  `headline` metin alanı sesin başlığıdır (her yüz tasarımında), `ledger` metin alanı karne
+  cümlesi, `detail` ayrıntı (açılmış kapsülün kartı).
+- **`vadrel`:** başlık aynı yerde (en çok 80 karakter, beş satır); karne tam bir cümle (en çok
+  70 karakter) olduğu için başlık satırından çıkar, başlığın altında `title` rolünde (16 px)
+  üç satırlık bir banda geçer, `muted` renkte. Başlık satırı boş kalır. Yükseklik
+  `vadrel::voiced_height` (`r4` görünüşte **259 px**; kabuk sayıyı `faces::height_for`'dan
+  alır).
+
+```
+┌──────────────────────────────────────────────┐
+│ ┌──┐ SYN20 son 20 günün en yüksek            │
+│ │◆ │ fiyatını (227,08) aştı · bugün,         │  başlık cümlesi (sesin başlığı)
+│ └──┘ hâlâ geçerli                            │
+│                                              │
+│ Benzer 20 durumun 11'inde fiyat 10 işlem     │  karne cümlesi (16 px, en çok 3 satır)
+│ günü içinde yükseldi.                        │
+└──────────────────────────────────────────────┘
+```
+
+- **Sözlük:** sahnedeki terimler altı çizili (`SceneDesc.terms`); dokununca otorite kapsülü
+  açmaz, terimi bildirir (`hit.term`), kabuk açıklamayı gösterir (K49).
+- **`fotolay`, `tavrik`:** başlığı sesten alır; karne bandı yok (açık sorun, `docs/LANGUAGE.md`).
+- **`r3` kartı:** sesin başlığı yerine ayrıntısı ve iki satırlık karnesi (açılmış kapsülün
+  kartıyla aynı kural).
 
 Örnekler (S8 durumları, sentetik veri):
 
@@ -102,7 +136,9 @@ Ek bilgi sayımı bir yoruma dayanır (grafiğin etiketleri ayrı sayılsaydı 4
    önce" yazıyor; okuyucuların 23/24'ü "birkaç saat önce" seçti. Tasarımları ayırmıyor; anahtar
    ya da süre ifadesi kuralı (T3-5) insan testinde gözlenmeli.
 3. **#9 yetkisiz okuyucu:** düz metin zaman, geçerlilik ve karne vermiyor (0/6 her tasarımda).
-   Yetkisiz okuyucu için şablonlu rakamsız yüz önerisi.
+   Yetkisiz okuyucu için şablonlu rakamsız yüz önerisi. (R5/`m17-int`) Kapsül dili seçiliyken
+   metin, dilin rakamsız yüzüdür: zaman, geçerlilik, nitel karne ve neyin hangi yetkiyle
+   açıldığı (`docs/LANGUAGE.md` "Yetkisiz okurun yüzü"); insan testinde yeniden ölçülmeli.
 4. **Gri kopya kanıtı (§6) eksik:** bir eleştirmen gri kopyaları açmadı; gri ΔE ölçüsü
    düzenekte yok. Erişilebilirlik insan testinde (renk körü katılımcı varsa) ayrıca bakılmalı.
 5. **Olay sözcüğü eşlemesi** ürünün ad öbeği metnine bağlı (kırılgan); `HeadlineParts`'a olay

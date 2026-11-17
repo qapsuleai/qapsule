@@ -706,18 +706,31 @@ pub(crate) fn prepare(
         }
         // R3 capsule texts (the capsule card): its sentence and its ledger line. (R4/H-FP)
         // In a face scene whose design has a headline template, the template's sentence.
-        let headline = crate::faces::headline_text(fr.headline, f, fr.p);
-        let ledger = fr.p.capsule(f).and_then(|c| {
-            c.story
-                .as_ref()
-                .map(|s| crate::depth::ledger_text(&s.ledger_at_birth))
-        });
+        // (R5/m17-int) Under a voice every capsule scene speaks from it: its headline,
+        // its ledger sentence and its detail (`docs/LANGUAGE.md`).
+        let voice = fr.p.voice(f);
+        let headline = match &voice {
+            Some(v) => Some(v.headline.clone()),
+            None => crate::faces::headline_text(fr.headline, f, fr.p),
+        };
+        let ledger = match &voice {
+            Some(v) => Some(v.ledger.clone()),
+            None => fr.p.capsule(f).and_then(|c| {
+                c.story
+                    .as_ref()
+                    .map(|s| crate::depth::ledger_text(&s.ledger_at_birth))
+            }),
+        };
+        let detail = voice.map(|v| v.detail);
         for row in &mut all_rows {
             if let Some(h) = &headline {
                 row.texts.insert("headline".to_owned(), h.clone());
             }
             if let Some(l) = &ledger {
                 row.texts.insert("ledger".to_owned(), l.clone());
+            }
+            if let Some(d) = &detail {
+                row.texts.insert("detail".to_owned(), d.clone());
             }
         }
         (Src::Rows, DataSource::Finding { finding: f.clone() })

@@ -91,8 +91,85 @@ pub struct Input<'a> {
 
 /// The surfaces of voice `name` in Turkish and English (`[tr, en]`); `None` for `r4`
 /// (and an unknown name). Deterministic: no clock, no randomness, no model.
+///
+/// **Licence guard (K33, A32).** For a redacted reader every surface leaves here without a
+/// single digit (the instrument label aside): a voice writes its public rule parameters in
+/// words for a redacted reader, and any digit run a voice still wrote (a public parameter
+/// such as "20 günlük") is turned into number words here ([`unnumber`]).
 #[must_use]
 pub fn speak(name: &str, inp: &Input<'_>) -> Option<[Surfaces; 2]> {
+    let out = speak_raw(name, inp)?;
+    if !(inp.sentence.redacted || inp.parts.redacted) {
+        return Some(out);
+    }
+    let sym = inp.parts.instrument.as_str();
+    let [tr, en] = out;
+    Some([
+        unnumber_all(tr, sym, Lang::Tr),
+        unnumber_all(en, sym, Lang::En),
+    ])
+}
+
+fn unnumber_all(s: Surfaces, sym: &str, lang: Lang) -> Surfaces {
+    Surfaces {
+        headline: unnumber(&s.headline, sym, lang),
+        detail: unnumber(&s.detail, sym, lang),
+        ledger: unnumber(&s.ledger, sym, lang),
+        glossary: s
+            .glossary
+            .into_iter()
+            .map(|g| Gloss {
+                term: unnumber(&g.term, sym, lang),
+                text: unnumber(&g.text, sym, lang),
+            })
+            .collect(),
+    }
+}
+
+/// `text` with every run of ASCII digits outside the instrument label `sym` written as
+/// number words (Turkish: a suffix after an apostrophe joins the word, "20'nin" →
+/// "yirminin", the suffix already follows the spoken numeral). Runs of four or more digits
+/// and digits joined by a decimal or thousands mark do not occur in a redacted voice; they
+/// are written digit by digit in words all the same, so no digit ever leaves.
+#[must_use]
+pub fn unnumber(text: &str, sym: &str, lang: Lang) -> String {
+    let mut out = String::new();
+    let mut rest = text;
+    while !rest.is_empty() {
+        if !sym.is_empty() && rest.starts_with(sym) {
+            out.push_str(sym);
+            rest = &rest[sym.len()..];
+            continue;
+        }
+        let c = rest.chars().next().unwrap_or(' ');
+        if c.is_ascii_digit() {
+            let n = rest.bytes().take_while(u8::is_ascii_digit).count();
+            let run = &rest[..n];
+            rest = &rest[n..];
+            let words = |x: u32| match lang {
+                Lang::Tr => marla::words_tr(x),
+                Lang::En => marla::words_en(x),
+            };
+            match run.parse::<u32>() {
+                Ok(x) if x < 1000 => out.push_str(&words(x)),
+                _ => {
+                    let w: Vec<String> = run.bytes().map(|b| words(u32::from(b - b'0'))).collect();
+                    out.push_str(&w.join(" "));
+                }
+            }
+            if lang == Lang::Tr && (rest.starts_with('\'') || rest.starts_with('’')) {
+                let a = rest.chars().next().map_or(0, char::len_utf8);
+                rest = &rest[a..];
+            }
+            continue;
+        }
+        out.push(c);
+        rest = &rest[c.len_utf8()..];
+    }
+    out
+}
+
+fn speak_raw(name: &str, inp: &Input<'_>) -> Option<[Surfaces; 2]> {
     match name {
         "marla" => Some(marla::speak_both(inp.sentence, inp.parts).map(|v| {
             Surfaces {
@@ -159,5 +236,27 @@ mod tests {
         assert!(!is_voice("tunca"), "tunca was eliminated (M17)");
         assert!(!is_voice("r3"));
         assert_eq!(names(), ["r4", "marla", "selvi"]);
+    }
+
+    #[test]
+    fn unnumber_leaves_no_digit_but_the_label() {
+        assert_eq!(
+            unnumber(
+                "SYN04 20 günlük ortalamanın altında; RSI 70'in üstü",
+                "SYN04",
+                Lang::Tr
+            ),
+            "SYN04 yirmi günlük ortalamanın altında; RSI yetmişin üstü"
+        );
+        assert_eq!(
+            unnumber(
+                "SYN04 kept falling below its 20-day average",
+                "SYN04",
+                Lang::En
+            ),
+            "SYN04 kept falling below its twenty-day average"
+        );
+        let t = unnumber("1234 ve 3,5", "", Lang::Tr);
+        assert!(!t.bytes().any(|b| b.is_ascii_digit()), "{t}");
     }
 }

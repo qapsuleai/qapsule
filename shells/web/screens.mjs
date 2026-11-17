@@ -71,6 +71,10 @@ try {
     if (s.alphabet) q.set('alphabet', s.alphabet);
     if (s.face) q.set('face', s.face);
     if (s.principal) q.set('principal', s.principal);
+    // (R5/m17-int) The v1 goldens predate the capsule voice: they are drawn with today's
+    // text (`?voice=r4`); the presentation's default voice (`marla`) gets new goldens in
+    // the integration (S), not here.
+    q.set('voice', s.voice || 'r4');
     for (const [k, v] of Object.entries(s.look || {})) q.set(k, v);
     await page.goto(`${origin}/?${q}`);
     await settle(page);

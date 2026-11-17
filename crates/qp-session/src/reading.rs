@@ -92,10 +92,18 @@ pub fn hit_scene(scene: &SceneDesc, x: f64, y: f64, times: &[i64]) -> HitInfo {
         t: None,
         value: None,
         item: None,
+        term: None,
     };
     let inside = |left: i32, top: i32, right: i32, bottom: i32| {
         x >= f64::from(left) && x < f64::from(right) && y >= f64::from(top) && y < f64::from(bottom)
     };
+    // (R5/m17-int, K49) A glossary term drawn under the pixel (last drawn wins).
+    out.term = scene
+        .terms
+        .iter()
+        .rev()
+        .find(|t| inside(t.hit.left, t.hit.top, t.hit.right, t.hit.bottom))
+        .cloned();
     let Some(panel) = scene
         .panels
         .iter()

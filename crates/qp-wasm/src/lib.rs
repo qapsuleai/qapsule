@@ -518,6 +518,17 @@ mod shell_binding {
             self.inner.open_json().to_string()
         }
 
+        /// (R5/m17-int, K49) The glossary explanation to show (JSON `{term, text, target}`
+        /// or `null`).
+        pub fn gloss(&self) -> String {
+            self.inner.gloss_json().to_string()
+        }
+
+        /// (R5/m17-int) Closes the glossary explanation.
+        pub fn close_gloss(&mut self) {
+            self.inner.close_gloss();
+        }
+
         /// Evidence rows (JSON).
         pub fn evidence(&self) -> String {
             self.inner.evidence_json().to_string()

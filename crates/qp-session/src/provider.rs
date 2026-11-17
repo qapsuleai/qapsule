@@ -28,6 +28,9 @@ pub struct DocProvider<'a> {
     /// (R4/H-FP) The session and reader language the headline pieces are written for
     /// (inside [`crate::Session::as_reader`]: with the reader's projection).
     parts: Option<(&'a crate::Session, qp_schema::protocol::Language)>,
+    /// (R5/m17-int) The voice the reader's connection chose (with [`Self::parts`]'s
+    /// session and language); `None`: `r4`.
+    voice: Option<&'a str>,
 }
 
 impl<'a> DocProvider<'a> {
@@ -38,6 +41,7 @@ impl<'a> DocProvider<'a> {
             headlines: None,
             reader: None,
             parts: None,
+            voice: None,
         }
     }
 
@@ -66,6 +70,13 @@ impl<'a> DocProvider<'a> {
         lang: qp_schema::protocol::Language,
     ) -> Self {
         self.parts = Some((s, lang));
+        self
+    }
+
+    /// (R5/m17-int) The same provider speaking in voice `voice` (with the session and
+    /// language of [`Self::with_parts`]); `None`: `r4`.
+    pub(crate) fn with_voice(mut self, voice: Option<&'a str>) -> Self {
+        self.voice = voice;
         self
     }
 }
@@ -232,6 +243,21 @@ impl DataProvider for DocProvider<'_> {
             c,
             s.proj.as_deref(),
             lang,
+            &mut qp_capsule::sentence::StudyMemo::default(),
+        )
+    }
+
+    /// (R5/m17-int) The reader's voice surfaces (see [`DocProvider::with_voice`]).
+    fn voice(&self, finding: &str) -> Option<qp_schema::protocol::CapsuleVoice> {
+        let (s, lang) = self.parts?;
+        let v = self.voice?;
+        let c = s.doc.capsules.iter().find(|c| c.finding == finding)?;
+        s.reader_voice(
+            &s.doc,
+            c,
+            s.proj.as_deref(),
+            lang,
+            v,
             &mut qp_capsule::sentence::StudyMemo::default(),
         )
     }

@@ -594,7 +594,7 @@ fn points(pl: &Prepared, g: &Geo<'_>, out: &mut SceneLayer) {
 /// (R5/T3) A text mark's metrics at `size` from the look's role of that size
 /// (`TypeScale::mark_role`; the default font at line 1.3 when no role has it):
 /// `(advance em, line height, ascent em)`. `r4`: `(0.6, 1.3, 0.8)`, R3's constants.
-fn text_metrics(look: &crate::look::Look, size: f64) -> (f64, f64, f64) {
+pub(crate) fn text_metrics(look: &crate::look::Look, size: f64) -> (f64, f64, f64) {
     let role = look.types.mark_role(size);
     let f = role.map_or(&crate::look::FONTS[0], |r| look.role_font(r));
     let line = role

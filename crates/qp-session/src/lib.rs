@@ -74,6 +74,8 @@ pub use explain::explain_scene;
 pub use plane::{DataError, DataOutcome, HostNotice};
 pub use present::profile_for;
 pub use provider::DocProvider;
+/// (R5/m17-int) The capsule voices a connection may choose (`style` `voice`).
+pub use qp_capsule::voice as voices;
 pub use qp_grammar::CompileOptions;
 pub use reading::{hit_scene, screen_frame, HIT_HEIGHT, HIT_WIDTH};
 pub use replayhost::{demo_init, ReplayHost};

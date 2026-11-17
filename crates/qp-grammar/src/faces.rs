@@ -60,6 +60,9 @@ pub struct FaceDesign {
     pub view: FaceViewFn,
     /// The headline template; `None`: the capsule's sentence (`DataProvider::headline`).
     pub headline: Option<HeadlineFn>,
+    /// (R5/m17-int) The face height in a look under a voice (`DataProvider::voice`), when
+    /// the design lays the voice out taller; `None`: [`FaceDesign::height`].
+    pub voiced_height: Option<fn(&Look) -> u32>,
 }
 
 /// The default face design.
@@ -90,6 +93,7 @@ pub static FACES: &[FaceDesign] = &[
         height: |_| 240,
         view: depth::capsule_view_in,
         headline: None,
+        voiced_height: None,
     },
     // --- M8 alternatives: one line each
     FaceDesign {
@@ -97,18 +101,21 @@ pub static FACES: &[FaceDesign] = &[
         height: vadrel::height,
         view: vadrel::view,
         headline: Some(vadrel::headline),
+        voiced_height: Some(vadrel::voiced_height),
     },
     FaceDesign {
         name: "fotolay",
         height: |_| fotolay::HEIGHT,
         view: fotolay::view,
         headline: Some(fotolay::headline),
+        voiced_height: None,
     },
     FaceDesign {
         name: "tavrik",
         height: |_| tavrik::HEIGHT,
         view: tavrik::view,
         headline: Some(tavrik::headline),
+        voiced_height: None,
     },
 ];
 
@@ -171,6 +178,18 @@ pub fn height(name: Option<&str>) -> u32 {
 #[must_use]
 pub fn height_in(look: &Look, name: Option<&str>) -> u32 {
     (by_name(name).unwrap_or(&FACES[0]).height)(look)
+}
+
+/// (R5/m17-int) The face height of design `name` in `look`, under a voice when `voiced`
+/// (the connection chose a voice other than `r4`): the design's
+/// [`FaceDesign::voiced_height`] if it has one, else [`height_in`].
+#[must_use]
+pub fn height_for(look: &Look, name: Option<&str>, voiced: bool) -> u32 {
+    let d = by_name(name).unwrap_or(&FACES[0]);
+    match (voiced, d.voiced_height) {
+        (true, Some(h)) => h(look),
+        _ => (d.height)(look),
+    }
 }
 
 /// The headline template of design `name` (`None`: the default's; `r3` has none).
@@ -252,6 +271,7 @@ mod tests {
         height: |_| 240,
         view: depth::capsule_card_view_in,
         headline: Some(example_headline),
+        voiced_height: None,
     };
 
     fn hp(lang: Language) -> HeadlineParts {

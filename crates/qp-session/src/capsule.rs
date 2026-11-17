@@ -363,6 +363,47 @@ pub(crate) fn sentence_pair_memo(
     Some(v)
 }
 
+/// (R5/m17-int) `f` over the sentence input of a story for one reader as of bar `now` of
+/// `bars`: the same input [`sentence_pair_memo`] gives the R3 sentence (lead and latest
+/// fact, still-holds, the condition's current value, redaction). A capsule voice
+/// (`qp_capsule::voice`) speaks from it. `None` as [`sentence_pair_memo`].
+pub(crate) fn with_sentence_input<R>(
+    story: &Story,
+    facts: &[&Fact],
+    bars: &[Bar],
+    now: u64,
+    redacted: bool,
+    memo: &mut StudyMemo,
+    f: impl FnOnce(&SentenceInput<'_>) -> R,
+) -> Option<R> {
+    let now_i = usize::try_from(now).ok()?;
+    let bars = bars.get(..=now_i)?;
+    let facts: Vec<&Fact> = facts.iter().copied().filter(|f| f.bar <= now).collect();
+    let lead = *facts.first()?;
+    let latest = *facts.last()?;
+    let (still_holds, current) = condition_now_memo(lead, &facts, bars, memo);
+    let still_holds = qp_capsule::sentence::closed_override(story, still_holds);
+    lead.meaning.as_ref()?;
+    let current = if redacted { None } else { current };
+    let lead_view = qp_capsule::sentence::sentence_lead(lead);
+    let lead_ref = lead_view.as_ref().unwrap_or(lead);
+    let inp = SentenceInput {
+        story,
+        lead: lead_ref,
+        latest: if latest.id == lead.id {
+            lead_ref
+        } else {
+            latest
+        },
+        now_bar: now,
+        now_t: bars[now_i].t,
+        still_holds,
+        current,
+        redacted,
+    };
+    Some(f(&inp))
+}
+
 /// (R4, K42/A28) Validity of `story` as of bar `now` over `facts` (the reader's) and
 /// `bars`: the same `still_holds` the sentence reads ([`sentence_pair_memo`]), so the
 /// item's `validity`, the glyph and the sentence agree.
@@ -1039,6 +1080,46 @@ impl Session {
         )
     }
 
+    /// (R5/m17-int, `docs/LANGUAGE.md`) The surfaces of capsule `c` in voice `voice` for a
+    /// reader with projection `p` in `lang`: the same story, facts, "now", validity and
+    /// redaction as [`Session::reader_parts`] (the voice's pieces are those parts, A33).
+    /// `None` under `r4`, or without the story's bars or a known period.
+    pub(crate) fn reader_voice(
+        &self,
+        doc: &Document,
+        c: &Capsule,
+        p: Option<&Proj>,
+        lang: Language,
+        voice: &str,
+        memo: &mut StudyMemo,
+    ) -> Option<qp_schema::protocol::CapsuleVoice> {
+        if !qp_capsule::voice::is_voice(voice) || voice == qp_capsule::voice::DEFAULT_VOICE {
+            return None;
+        }
+        let story = p.and_then(|p| p.stories.get(&c.id)).or(c.story.as_ref())?;
+        let hidden = p.map(|p| &p.hidden);
+        let facts: Vec<&Fact> = story_fact_ids(story)
+            .iter()
+            .filter(|i| hidden.is_none_or(|h| !h.contains(*i)))
+            .filter_map(|i| self.fact_by_id(i))
+            .collect();
+        let redacted = p.is_some_and(|p| facts.iter().any(|f| p.redact.contains(&f.id)));
+        let (now, bars, bs) =
+            Self::now_series(rd!(self), story).or_else(|| Self::now_series(doc, story))?;
+        let validity = story_validity(story, &facts, bars, now, memo);
+        crate::headparts::story_voice(
+            voice,
+            story,
+            &facts,
+            (bs, bars, now),
+            validity,
+            redacted,
+            lang,
+            self.headline_cal.as_ref(),
+            memo,
+        )
+    }
+
     /// [`Session::now_bar`] with the bar series it read.
     fn now_series<'d>(
         doc: &'d Document,
@@ -1406,6 +1487,7 @@ impl Session {
             validity,
             relevant: self.relevant(doc, principal, &story.instrument),
             redacted,
+            voice: None,
         })
     }
 
@@ -1539,6 +1621,7 @@ impl Session {
         };
         let principal = self.conns[ci].principal.clone();
         let lang = self.lang_of(ci);
+        let voice = self.conns[ci].look.voice.clone();
         let p = self.proj.as_deref();
         let doc = &self.doc;
         let mut items: Vec<CapsuleItem> = Vec::new();
@@ -1573,7 +1656,11 @@ impl Session {
             if !self.capsule_passes(doc, &principal, story, q) {
                 continue;
             }
-            if let Some(it) = self.capsule_item_with(doc, c, p, lang, &principal, &mut memo) {
+            if let Some(mut it) = self.capsule_item_with(doc, c, p, lang, &principal, &mut memo) {
+                // (R5/m17-int) The connection's voice speaks every listed capsule.
+                if let Some(v) = voice.as_deref() {
+                    it.voice = self.reader_voice(doc, c, p, lang, v, &mut memo);
+                }
                 items.push(it);
             }
         }
@@ -1647,11 +1734,14 @@ impl Session {
             )
             .build());
         };
-        let item = self
+        let mut item = self
             .capsule_item(doc, c, p, lang, &principal)
             .ok_or_else(|| {
                 E::new(ErrorCode::NoData, "the capsule's bars are not available").build()
             })?;
+        if let Some(v) = self.conns[ci].look.voice.as_deref() {
+            item.voice = self.reader_voice(doc, c, p, lang, v, &mut StudyMemo::default());
+        }
         let story = p
             .and_then(|p| p.stories.get(&c.id))
             .or(c.story.as_ref())
@@ -1952,11 +2042,14 @@ impl Session {
                 let Some(cap) = self.doc_capsule(&e.capsule) else {
                     continue;
                 };
-                let Some(item) =
+                let Some(mut item) =
                     self.capsule_item_with(doc, cap, p.as_deref(), lang, &c.principal, &mut memo)
                 else {
                     continue;
                 };
+                if let Some(v) = c.look.voice.as_deref() {
+                    item.voice = self.reader_voice(doc, cap, p.as_deref(), lang, v, &mut memo);
+                }
                 for (sub, inst, all) in &subs {
                     if inst.is_some_and(|i| i != &item.instrument) {
                         continue;

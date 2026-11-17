@@ -1912,6 +1912,42 @@ pub struct CapsuleItem {
     /// The sentence carries no digits for this reader (K33).
     #[serde(default, skip_serializing_if = "std::ops::Not::not")]
     pub redacted: bool,
+    /// (R5/m17-int, `docs/LANGUAGE.md`) The capsule's four surfaces in the voice the
+    /// connection chose (`style` `voice`), in the reader's language and by the same
+    /// audience rule (redacted: no digits, K33). Absent under the default voice `r4`.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub voice: Option<CapsuleVoice>,
+}
+
+/// (R5/m17-int, `docs/LANGUAGE.md`) A capsule's surfaces in one voice and language: what
+/// the face, the open capsule and the glossary show.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
+#[serde(deny_unknown_fields)]
+pub struct CapsuleVoice {
+    /// Voice name (`marla`, `selvi`).
+    pub voice: String,
+    /// Başlık: what changed, with the threshold, when and whether it still holds.
+    pub headline: String,
+    /// Ayrıntı: why, and where things stand now (built from the face's pieces, A33).
+    pub detail: String,
+    /// Karne: the expectation and how often it played out before.
+    pub ledger: String,
+    /// Sözlük: the terms on this capsule's screens, each opened on touch.
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub glossary: Vec<GlossEntry>,
+    /// The text face of a reader without a face scene (A32): headline, ledger and detail,
+    /// one per line.
+    pub face: String,
+}
+
+/// (R5/m17-int) One glossary entry: a term and its short explanation (no numerals).
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
+#[serde(deny_unknown_fields)]
+pub struct GlossEntry {
+    /// The term as the screen writes it.
+    pub term: String,
+    /// Its explanation.
+    pub text: String,
 }
 
 /// One fact's evidence as a reader may open it (R3, §20; K34).
@@ -2243,6 +2279,10 @@ pub struct HitInfo {
     /// The topmost element at the pixel, if any ("no item" when absent).
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub item: Option<HitItem>,
+    /// (R5/m17-int, K49) A glossary term under the pixel (the scene's `terms`): a tap
+    /// there opens its explanation instead of the capsule.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub term: Option<crate::scene::TermMark>,
 }
 
 /// The element found by a point query (R2).
@@ -3073,6 +3113,12 @@ pub enum Gesture {
         /// motion; `qp_grammar::look::LOOKS`; default `r4`).
         #[serde(default, skip_serializing_if = "Option::is_none")]
         look: Option<String>,
+        /// (R5/m17-int) Capsule voice: the language of the face's headline and ledger,
+        /// the open capsule's detail and ledger, and the glossary
+        /// (`qp_capsule::voice::VOICES`: `r4`, `marla`, `selvi`; default `r4`, today's
+        /// text).
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        voice: Option<String>,
     },
     /// (R4, §4.6) Close the open capsule one depth back, or to `to` (`sentence`: back to
     /// the feed). Answered with an `interaction` carrying the `opening` (the way back).
@@ -3181,6 +3227,9 @@ pub struct ViewState {
     /// (R5/T3) Look its scenes are compiled with (absent: the default, `r4`).
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub look: Option<String>,
+    /// (R5/m17-int) Capsule voice its capsules speak in (absent: the default, `r4`).
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub voice: Option<String>,
 }
 
 /// (R4, §4.6) One element both sides of a depth transition show (e.g. the glyph, the

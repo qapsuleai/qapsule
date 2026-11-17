@@ -30,7 +30,6 @@ pub mod bench;
 pub mod freq;
 pub mod paint;
 pub mod paint_canvas;
-pub mod paint_cpu;
 pub mod paint_gpu;
 
 /// Face frame height of the default face design (`r3`, 240 CSS px). (R4/H-M8910) The
@@ -493,10 +492,12 @@ pub struct ShellCore {
     pending: serde_json::Map<String, Value>,
     pending_since: Option<f64>,
     pass_since: Option<f64>,
+    /// (R5/T0) A data frame raised some of the waiting changes / of those the pass being
+    /// painted took (the pass is then a data frame's cost, `data_pass`).
+    pending_data: bool,
+    pass_data: bool,
     /// (RP3/M14) The capsules whose face the page reports on screen (both modes).
     shown: BTreeSet<String>,
-    /// (RP3/M12a) The `cpu` paint path's retained surfaces (`shell/paint_cpu.rs`).
-    cpu: paint_cpu::CpuPaint,
 }
 
 impl std::fmt::Debug for ShellCore {
@@ -637,8 +638,9 @@ impl ShellCore {
             pending: serde_json::Map::new(),
             pending_since: None,
             pass_since: None,
+            pending_data: false,
+            pass_data: false,
             shown: BTreeSet::new(),
-            cpu: paint_cpu::CpuPaint::default(),
         };
         me.push(json!({"type":"hello","protocol":"qp/0","principal":principal,
             "surface":{"kind":"phone","screen":[390,844],"input":["touch"],"lang":lang_name(lang)}}));
@@ -2067,6 +2069,7 @@ impl ShellCore {
     #[must_use]
     pub fn warnings(&self) -> Vec<Value> {
         let mut w = Vec::new();
+        w.extend(self.paint_warnings());
         let Some(&dpr) = self.metrics.device.get("dpr") else {
             w.extend(self.mode_warnings());
             return w;
@@ -2085,6 +2088,22 @@ impl ShellCore {
         }
         w.extend(self.mode_warnings());
         w
+    }
+
+    /// (R5/T0) The paint path the page asked for was removed (K51: `cpu`); the page
+    /// paints with its stand-in (`canvas`). A reader of an old address must not take the
+    /// numbers for the removed path's.
+    fn paint_warnings(&self) -> Vec<Value> {
+        let Some(p) = &self.metrics.paint else {
+            return Vec::new();
+        };
+        if p["fallback"].as_str() != Some("removed") {
+            return Vec::new();
+        }
+        vec![json!({"code": "paint_removed",
+            "text": format!("paint path `{}` was removed (K51); the page paints with `{}`",
+                p["requested"].as_str().unwrap_or_default(),
+                p["used"].as_str().unwrap_or_default())})]
     }
 
     /// (RP3/T2) Opening marks that cannot be opening times: later than

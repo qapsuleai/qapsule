@@ -198,6 +198,34 @@ fn the_paint_path_is_in_the_summary() {
 }
 
 #[test]
+fn a_removed_paint_path_is_reported() {
+    // (R5/T0, K51) `?paint=cpu` opens with `canvas`; the summary and the metrics page say
+    // so (a warning first, then the paint row).
+    let mut c = core();
+    c.metric_device("dpr", 3.0);
+    c.set_dpr(3.0);
+    c.set_paint("cpu", "canvas", "removed");
+    assert_eq!(
+        c.metrics_json()["paint"],
+        json!({"requested":"cpu","used":"canvas","fallback":"removed"})
+    );
+    let w = c.warnings();
+    assert_eq!(w.len(), 1, "{w:?}");
+    assert_eq!(w[0]["code"], json!("paint_removed"));
+    let text = w[0]["text"].as_str().unwrap();
+    assert!(
+        text.contains("`cpu`") && text.contains("`canvas`"),
+        "{text}"
+    );
+    let rows = c.metrics_rows().to_string();
+    assert!(rows.contains("canvas (istenen cpu: removed)"), "{rows}");
+    assert!(rows.contains("was removed (K51)"), "{rows}");
+    // Other fallbacks are not a removal.
+    c.set_paint("gpu", "ref", "unsupported");
+    assert!(c.warnings().is_empty());
+}
+
+#[test]
 fn paint_lists_follow_the_scene_and_its_short_circuit() {
     let mut host = parity_host();
     let mut c = core_on(&host);
@@ -336,14 +364,19 @@ fn the_comparison_selects_and_reverses_paths() {
             .collect();
         (first, names)
     };
-    let all = json!(["ref", "canvas", "cpu", "gpu"]);
+    let all = json!(["ref", "canvas", "fixture", "gpu"]);
     let (first, names) = order(json!({"paths": all, "phase_ms": 1000, "only": "gpu, ref"}));
     assert_eq!(names, [json!("ref"), json!("gpu")]);
     assert_eq!(first, Some(json!("ref")));
     let (first, names) = order(json!({"paths": all, "phase_ms": 1000, "order": "reverse"}));
     assert_eq!(
         names,
-        [json!("gpu"), json!("cpu"), json!("canvas"), json!("ref")]
+        [
+            json!("gpu"),
+            json!("fixture"),
+            json!("canvas"),
+            json!("ref")
+        ]
     );
     assert_eq!(first, Some(json!("gpu")));
     let (_, names) = order(json!({"paths": all, "phase_ms": 1000, "only": "nope"}));

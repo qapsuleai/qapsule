@@ -94,7 +94,8 @@ let scrollTimer = 0;
 let zoomTimer = 0;
 let painted = false;
 let info = {};
-// (RP3/T2) The paint path (`?paint=`; unknown or unsupported → `ref`, reported).
+// (RP3/T2) The paint path (`?paint=`; unknown or unsupported → `ref`, reported; R5/T0: the
+// removed `cpu` → `canvas`, reported).
 // (RP3/S) Default `canvas` (proposal, rounds/RP3/experiments/S.md); `ref` stays the
 // deterministic reference and the fallback.
 const DEFAULT_PAINT = 'canvas';

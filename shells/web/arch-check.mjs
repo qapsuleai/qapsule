@@ -31,9 +31,6 @@ export const ALLOWED_CORE = new Set([
   'take_changes', 'has_changes', 'metric_pass', 'faces_to_paint', 'metric_flag', 'jit_probe',
   // RP3/M12b (ARCH.md): the `canvas` paint path's command stream, string table, variant, glyph atlas.
   'canvas_face', 'canvas_scene', 'canvas_strings', 'canvas_config', 'canvas_atlas_px',
-  // RP3/M12a (ARCH.md): the cpu paint path's retained surfaces, read through a view into
-  // the WASM memory.
-  'cpu_options', 'cpu_face', 'cpu_scene', 'cpu_moving', 'cpu_memory', 'cpu_pixels',
   // RP3/M12c (ARCH.md): the GPU paint path's triangles, draws and glyph atlas, made by the core.
   'gpu_face', 'gpu_scene', 'gpu_vertices', 'gpu_capacity', 'gpu_draws', 'gpu_clear',
   'gpu_atlas_size', 'gpu_atlas_dirty', 'gpu_atlas_rows',

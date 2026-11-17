@@ -15,12 +15,15 @@
 //    and the request `id` are left out: they count the page's other messages, whose number
 //    depends on timing);
 //  - without `?paint=` the page uses `canvas` (the default), reported as such, with the
-//    same semantic reads.
+//    same semantic reads;
+//  - (R5/T0, K51) `?paint=cpu` (a removed path) opens with `canvas`, reported as
+//    `{requested: cpu, used: canvas, fallback: removed}` with a `paint_removed` warning in
+//    the summary (the metrics page shows the summary's warnings first), paints, and gives the same semantic reads.
 // No page errors anywhere. The page's stream is recorded by an init script of this test
 // (the shell is unchanged).
 //
 // Usage: node tests/paint-paths.mjs <qp> [--browsers chromium,webkit] [--dpr 1]
-//          [--paths ref,canvas,cpu,gpu] [--port 8491] [--out <dir>]
+//          [--paths ref,canvas,gpu] [--port 8491] [--out <dir>]
 import fs from 'node:fs';
 import path from 'node:path';
 import { chromium, webkit } from 'playwright';
@@ -31,7 +34,7 @@ const qp = argv.shift();
 const opt = (k, d) => { const i = argv.indexOf(k); return i >= 0 ? argv[i + 1] : d; };
 const browsers = opt('--browsers', 'chromium,webkit').split(',');
 const dpr = Number(opt('--dpr', '1'));
-const PATHS = opt('--paths', 'ref,canvas,cpu,gpu').split(',');
+const PATHS = opt('--paths', 'ref,canvas,gpu').split(',');
 const port = Number(opt('--port', '8491'));
 const out = opt('--out', null);
 const here = new URL('..', import.meta.url).pathname;
@@ -128,7 +131,7 @@ async function run(browser, paint) {
       open: await page.evaluate(() => window.qp.open()),
       answers: frames,
     };
-    return { paint: m.paint, faceOk, sceneOk, reads, errors };
+    return { paint: m.paint, warnings: m.warnings, faceOk, sceneOk, reads, errors };
   } finally {
     await ctx.close();
     child.kill();
@@ -174,6 +177,14 @@ for (const name of browsers) {
     check(d.faceOk && d.sceneOk && d.errors.length === 0, `${name}/default: painted ${d.faceOk}/${d.sceneOk}, errors ${d.errors}`);
     if (res.ref) check(JSON.stringify(d.reads) === JSON.stringify(res.ref.reads), `${name}/default: semantic reads differ from ref`);
     console.log(`${name}/default: paint ${JSON.stringify(d.paint)}`);
+    // (R5/T0) The removed `cpu` path: `canvas` stands in, and the page says so.
+    const g = await run(browser, 'cpu');
+    const gw = (g.warnings || []).filter((w) => w.code === 'paint_removed');
+    check(g.paint.requested === 'cpu' && g.paint.used === 'canvas' && g.paint.fallback === 'removed', `${name}/cpu (removed): paint ${JSON.stringify(g.paint)}`);
+    check(gw.length === 1, `${name}/cpu (removed): warnings ${JSON.stringify(g.warnings)}`);
+    check(g.faceOk && g.sceneOk && g.errors.length === 0, `${name}/cpu (removed): painted ${g.faceOk}/${g.sceneOk}, errors ${g.errors}`);
+    if (res.ref) check(JSON.stringify(g.reads) === JSON.stringify(res.ref.reads), `${name}/cpu (removed): semantic reads differ from ref`);
+    console.log(`${name}/cpu (removed): paint ${JSON.stringify(g.paint)}; warning ${gw.length ? JSON.stringify(gw[0].text) : 'MISSING'}`);
     if (out) {
       fs.mkdirSync(out, { recursive: true });
       fs.writeFileSync(path.join(out, `paint-paths-${name}.json`), JSON.stringify(res.ref ? res.ref.reads : d.reads, null, 1));

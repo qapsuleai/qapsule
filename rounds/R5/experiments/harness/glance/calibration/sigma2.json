@@ -1,0 +1,242 @@
+[
+ {
+  "sigma": 0.0,
+  "scale": 0.5,
+  "design": "fotolay",
+  "state": "closed_failed",
+  "text": "Aşağı kırılım, 10 Mart'ta: tutmadı. Benzerleri 41'de 24 tuttu.",
+  "truth": "Aşağı kırılım, 10 Mart'ta: tutmadı. Benzerleri 41'de 24 tuttu.",
+  "similarity": 1.0,
+  "cost": 0.0005441700000000001
+ },
+ {
+  "sigma": 0.0,
+  "scale": 0.5,
+  "design": "fotolay",
+  "state": "live_event",
+  "text": "Yukarı kırılım, 2 işlem günü önce: hâlâ geçerli. Benzerleri 31'de 12 tuttu.",
+  "truth": "Yukarı kırılım, 2 işlem günü önce: hâlâ geçerli. Benzerleri 31'de 12 tuttu.",
+  "similarity": 1.0,
+  "cost": 0.00042132
+ },
+ {
+  "sigma": 0.0,
+  "scale": 0.5,
+  "design": "kestim",
+  "state": "closed_failed",
+  "text": "SYN26 önemli bir eşiğin altına indi. Kapandı: 10 Mart'ta tutmadı.",
+  "truth": "SYN26 önemli bir eşiğin altına indi. Kapandı: 10 Mart'ta tutmadı.",
+  "similarity": 1.0,
+  "cost": 0.00057508
+ },
+ {
+  "sigma": 0.0,
+  "scale": 0.5,
+  "design": "kestim",
+  "state": "live_event",
+  "text": "SYN006 önemli bir eşiğin üstüne çıktı; 2 işlem günü önce güçlendi. Hâlâ geçerli.",
+  "truth": "SYN06 önemli bir eşiğin üstüne çıktı; 2 işlem günü önce güçlendi. Hâlâ geçerli.",
+  "similarity": 0.994,
+  "cost": 0.0005513600000000001
+ },
+ {
+  "sigma": 0.0,
+  "scale": 0.5,
+  "design": "vadrel",
+  "state": "closed_failed",
+  "text": "SYN26 önemli bir eşiğin altına indi. Kapanış: 10 Mart'ta tutmadı.",
+  "truth": "SYN26 önemli bir eşiğin altına indi. Kapandı: 10 Mart'ta tutmadı.",
+  "similarity": 0.985,
+  "cost": 0.00044304
+ },
+ {
+  "sigma": 0.0,
+  "scale": 0.5,
+  "design": "vadrel",
+  "state": "live_event",
+  "text": "SYN06 önemli bir eşiğin üstüne çıktı; 2 işlem günü önce güçlendi. Hâlâ geçerli.",
+  "truth": "SYN06 önemli bir eşiğin üstüne çıktı; 2 işlem günü önce güçlendi. Hâlâ geçerli.",
+  "similarity": 1.0,
+  "cost": 0.0006337700000000001
+ },
+ {
+  "sigma": 1.0,
+  "scale": 0.5,
+  "design": "fotolay",
+  "state": "closed_failed",
+  "text": "Aşağı kırılım, 10 Mart'ta: tutmadı. Benzerleri 41'de 24 tuttu.",
+  "truth": "Aşağı kırılım, 10 Mart'ta: tutmadı. Benzerleri 41'de 24 tuttu.",
+  "similarity": 1.0,
+  "cost": 0.00055847
+ },
+ {
+  "sigma": 1.0,
+  "scale": 0.5,
+  "design": "fotolay",
+  "state": "live_event",
+  "text": "Yukarı kırılım, 2 işlem günü önce: hâlâ geçerli. Benzerleri 31'de 12 tuttu.",
+  "truth": "Yukarı kırılım, 2 işlem günü önce: hâlâ geçerli. Benzerleri 31'de 12 tuttu.",
+  "similarity": 1.0,
+  "cost": 0.00048439
+ },
+ {
+  "sigma": 1.0,
+  "scale": 0.5,
+  "design": "kestim",
+  "state": "closed_failed",
+  "text": "SYN26 önemli bir eşiğin altına indi.",
+  "truth": "SYN26 önemli bir eşiğin altına indi. Kapandı: 10 Mart'ta tutmadı.",
+  "similarity": 0.713,
+  "cost": 0.00051567
+ },
+ {
+  "sigma": 1.0,
+  "scale": 0.5,
+  "design": "kestim",
+  "state": "live_event",
+  "text": "SYN006 önemli bir eşiğin üstüne çıktı; 2 işlem günü önce güçlendi. Hâlâ geçerli.",
+  "truth": "SYN06 önemli bir eşiğin üstüne çıktı; 2 işlem günü önce güçlendi. Hâlâ geçerli.",
+  "similarity": 0.994,
+  "cost": 0.00046373
+ },
+ {
+  "sigma": 1.0,
+  "scale": 0.5,
+  "design": "vadrel",
+  "state": "closed_failed",
+  "text": "SYN26 önemli bir eşiğin altına indi. Kapanış: 10 Mart'ta tutmadı.",
+  "truth": "SYN26 önemli bir eşiğin altına indi. Kapandı: 10 Mart'ta tutmadı.",
+  "similarity": 0.985,
+  "cost": 0.00040072999999999997
+ },
+ {
+  "sigma": 1.0,
+  "scale": 0.5,
+  "design": "vadrel",
+  "state": "live_event",
+  "text": "SYN06 önemli bir eşiğin üstüne çıktı; 2 işlem günü önce güçlendi. Hâlâ geçerli.",
+  "truth": "SYN06 önemli bir eşiğin üstüne çıktı; 2 işlem günü önce güçlendi. Hâlâ geçerli.",
+  "similarity": 1.0,
+  "cost": 0.00043714
+ },
+ {
+  "sigma": 1.5,
+  "scale": 0.5,
+  "design": "fotolay",
+  "state": "closed_failed",
+  "text": "Aşağı kırılım, 10 Mart'ta: tutmadı. Benzerleri 41'de 24 tuttu.",
+  "truth": "Aşağı kırılım, 10 Mart'ta: tutmadı. Benzerleri 41'de 24 tuttu.",
+  "similarity": 1.0,
+  "cost": 0.00058958
+ },
+ {
+  "sigma": 1.5,
+  "scale": 0.5,
+  "design": "fotolay",
+  "state": "live_event",
+  "text": "Yukarı kırılım, 2 işlem günü önce: hâlâ geçerli. Benzerleri 31'de 12 tuttu.",
+  "truth": "Yukarı kırılım, 2 işlem günü önce: hâlâ geçerli. Benzerleri 31'de 12 tuttu.",
+  "similarity": 1.0,
+  "cost": 0.00043444999999999996
+ },
+ {
+  "sigma": 1.5,
+  "scale": 0.5,
+  "design": "kestim",
+  "state": "closed_failed",
+  "text": "SYN26 önemli bir eşiğin altına indi. Kapandı: 16 Mart'ta tutmadı.",
+  "truth": "SYN26 önemli bir eşiğin altına indi. Kapandı: 10 Mart'ta tutmadı.",
+  "similarity": 0.985,
+  "cost": 0.00074817
+ },
+ {
+  "sigma": 1.5,
+  "scale": 0.5,
+  "design": "kestim",
+  "state": "live_event",
+  "text": "SYN06 önemli bir ? üstüne çıktı; 2 işlem günü önce göçlendi. ?",
+  "truth": "SYN06 önemli bir eşiğin üstüne çıktı; 2 işlem günü önce güçlendi. Hâlâ geçerli.",
+  "similarity": 0.837,
+  "cost": 0.00063351
+ },
+ {
+  "sigma": 1.5,
+  "scale": 0.5,
+  "design": "vadrel",
+  "state": "closed_failed",
+  "text": "SYN26 önemli bir eşiğin altına indi.",
+  "truth": "SYN26 önemli bir eşiğin altına indi. Kapandı: 10 Mart'ta tutmadı.",
+  "similarity": 0.713,
+  "cost": 0.00056201
+ },
+ {
+  "sigma": 1.5,
+  "scale": 0.5,
+  "design": "vadrel",
+  "state": "live_event",
+  "text": "SYN06 önemli bir eşiğin üstüne çıktı; 2 işlem günü önce güçlendi. Hâlâ geçerli.",
+  "truth": "SYN06 önemli bir eşiğin üstüne çıktı; 2 işlem günü önce güçlendi. Hâlâ geçerli.",
+  "similarity": 1.0,
+  "cost": 0.00047901
+ },
+ {
+  "sigma": 2.0,
+  "scale": 0.5,
+  "design": "fotolay",
+  "state": "closed_failed",
+  "text": "Aşağı kırılım, 10 Mart'ta: tutmadı. Benzerleri 41'de 24 tuttu.",
+  "truth": "Aşağı kırılım, 10 Mart'ta: tutmadı. Benzerleri 41'de 24 tuttu.",
+  "similarity": 1.0,
+  "cost": 0.00061479
+ },
+ {
+  "sigma": 2.0,
+  "scale": 0.5,
+  "design": "fotolay",
+  "state": "live_event",
+  "text": "Yukarı kırılım, 2 işlem günü önce: hâlâ geçerli. Benzerleri 31'de 12 tuttu.",
+  "truth": "Yukarı kırılım, 2 işlem günü önce: hâlâ geçerli. Benzerleri 31'de 12 tuttu.",
+  "similarity": 1.0,
+  "cost": 0.00049097
+ },
+ {
+  "sigma": 2.0,
+  "scale": 0.5,
+  "design": "kestim",
+  "state": "closed_failed",
+  "text": "? ? ? ? eşiğin altına indi. Kapandı: 16 Mart'ta tutmadı.",
+  "truth": "SYN26 önemli bir eşiğin altına indi. Kapandı: 10 Mart'ta tutmadı.",
+  "similarity": 0.826,
+  "cost": 0.0007373500000000001
+ },
+ {
+  "sigma": 2.0,
+  "scale": 0.5,
+  "design": "kestim",
+  "state": "live_event",
+  "text": "? önemli bilgi eşiğin üstüne çıktı. 2 işlem günü önce gösterildi. ?",
+  "truth": "SYN06 önemli bir eşiğin üstüne çıktı; 2 işlem günü önce güçlendi. Hâlâ geçerli.",
+  "similarity": 0.753,
+  "cost": 0.0007341
+ },
+ {
+  "sigma": 2.0,
+  "scale": 0.5,
+  "design": "vadrel",
+  "state": "closed_failed",
+  "text": "SYN26 önemli bir eşiğin altına indi.",
+  "truth": "SYN26 önemli bir eşiğin altına indi. Kapandı: 10 Mart'ta tutmadı.",
+  "similarity": 0.713,
+  "cost": 0.0005169199999999999
+ },
+ {
+  "sigma": 2.0,
+  "scale": 0.5,
+  "design": "vadrel",
+  "state": "live_event",
+  "text": "SYN06 önemli bir eşiğin üstüne çıktı; 2 işlem günü önce güçlendi. Hâlâ geçerli.",
+  "truth": "SYN06 önemli bir eşiğin üstüne çıktı; 2 işlem günü önce güçlendi. Hâlâ geçerli.",
+  "similarity": 1.0,
+  "cost": 0.0009231300000000001
+ }
+]

@@ -81,6 +81,11 @@ function phaseRow(p) {
     frame_long: pick(p.frame_ms, 'long'),
     tick_n: pick(sp('tick'), 'n'), tick_p50: pick(sp('tick'), 'p50'), tick_p95: pick(sp('tick'), 'p95'),
     msg_n: pick(sp('msg'), 'n'), msg_p50: pick(sp('msg'), 'p50'),
+    // All the page's frame work of the phase per data frame (before: tick + msg, each with
+    // its repaint; after: tick + msg + paint passes); R4's `tick` was the first term.
+    work_per_data_frame: sp('tick').n
+      ? ['tick', 'msg', 'paint_pass'].map((k) => (sp(k).n || 0) * (sp(k).mean || 0)).reduce((a, b) => a + b, 0) / sp('tick').n
+      : null,
     pass_n: pick(sp('paint_pass'), 'n'), pass_p50: pick(sp('paint_pass'), 'p50'), pass_p95: pick(sp('paint_pass'), 'p95'),
     wait_p50: pick(sp('pass_wait'), 'p50'), wait_p95: pick(sp('pass_wait'), 'p95'), wait_max: pick(sp('pass_wait'), 'max'),
     lat_p50: pick(sp('frame_to_paint'), 'p50'), lat_p95: pick(sp('frame_to_paint'), 'p95'), lat_max: pick(sp('frame_to_paint'), 'max'),

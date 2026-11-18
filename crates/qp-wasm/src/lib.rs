@@ -805,6 +805,22 @@ mod shell_binding {
             self.inner.transition_progress(t)
         }
 
+        /// (R5/M21) The reader's reduce-motion preference (`prefers-reduced-motion`, or
+        /// `?anim=0`), as the page reads it: the core then paints no motion overlay and
+        /// ends a depth transition at once.
+        pub fn set_reduced_motion(&mut self, on: bool) {
+            self.inner.set_reduced_motion(on);
+        }
+
+        /// (R5/M21) The motion overlay of the display frame at page time `t` (JSON
+        /// `{"marks": [{face, key, style}]}`), or empty text when nothing changes.
+        pub fn motion_marks(&mut self, t: f64) -> String {
+            self.inner
+                .motion_marks(t)
+                .map(|v| v.to_string())
+                .unwrap_or_default()
+        }
+
         /// (R4/H-M8910) The last transition's frame at progress `p` (JSON).
         pub fn transition_frame(
             &self,

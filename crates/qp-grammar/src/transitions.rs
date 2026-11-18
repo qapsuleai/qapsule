@@ -159,6 +159,7 @@ pub fn r3_frame(shared: &[SharedElement], from: (f64, f64), to: (f64, f64), p: f
 
 // --- M10 alternatives: shared / frame functions (or `mod <name>;`) go below this line --
 
+pub mod nabiz;
 mod tutamir;
 mod zumlak;
 
@@ -183,7 +184,81 @@ pub static TRANSITIONS: &[TransitionDesign] = &[
         shared: zumlak::shared,
         frame: zumlak::frame,
     },
+    // (R5/M21) `nabiz`'s opening: a short cross-fade with a slight deepening.
+    TransitionDesign {
+        name: "nabiz",
+        duration_ms: 220.0,
+        shared: nabiz::shared,
+        frame: nabiz::frame,
+    },
 ];
+
+// --- (R5/M21) motion designs -----------------------------------------------------------
+
+/// (R5/M21) The live marks of a motion design: the still marks drawn into a face (the same
+/// with and without reduce motion) and the overlay boxes of a frame (pulse, beat, trail;
+/// none under reduce motion). Types: [`nabiz`].
+#[derive(Debug, Clone, Copy)]
+pub struct LiveMarks {
+    /// Draws the still marks (live dot, change label) into a face scene.
+    pub draw_face: fn(
+        &mut qp_schema::scene::SceneDesc,
+        &nabiz::FaceMarks<'_>,
+        &crate::look::Look,
+        &crate::theme::Theme,
+    ),
+    /// Where a face's marks go (`None`: no glyph).
+    pub places: fn(&qp_schema::scene::SceneDesc, &crate::look::Look) -> Option<nabiz::Places>,
+    /// The overlay boxes of one face at a frame.
+    pub overlay:
+        fn(&nabiz::FaceMotion, &crate::look::Look, &crate::theme::Theme) -> Vec<nabiz::OverlayBox>,
+}
+
+/// (R5/M21) One motion design (`?motion=<name>`, Settings → Motion): the depth transition
+/// it asks for and its live marks (live updates and state changes on the feed's faces).
+#[derive(Debug, Clone, Copy)]
+pub struct MotionDesign {
+    /// Setting name (`[a-z][a-z0-9_-]*`, not an ordinary word).
+    pub name: &'static str,
+    /// The transition design it selects (`None`: the connection's transition unchanged).
+    pub transition: Option<&'static str>,
+    /// Its live marks (`None`: the faces carry none, today's behaviour).
+    pub marks: Option<LiveMarks>,
+}
+
+/// (R5/M21) The default motion design: today's (the chosen transition, no live marks).
+pub const DEFAULT_MOTION: &str = "r4";
+
+/// (R5/M21) Motion designs; the first is the default. Alternatives: one line each.
+pub static MOTIONS: &[MotionDesign] = &[
+    MotionDesign {
+        name: "r4",
+        transition: None,
+        marks: None,
+    },
+    MotionDesign {
+        name: "nabiz",
+        transition: Some("nabiz"),
+        marks: Some(LiveMarks {
+            draw_face: nabiz::draw_face,
+            places: nabiz::places,
+            overlay: nabiz::overlay,
+        }),
+    },
+];
+
+/// (R5/M21) Registered motion design names.
+#[must_use]
+pub fn motion_names() -> Vec<&'static str> {
+    MOTIONS.iter().map(|m| m.name).collect()
+}
+
+/// (R5/M21) The motion design named `name` (`None` or unknown: the default).
+#[must_use]
+pub fn motion(name: Option<&str>) -> &'static MotionDesign {
+    let n = name.unwrap_or(DEFAULT_MOTION);
+    MOTIONS.iter().find(|m| m.name == n).unwrap_or(&MOTIONS[0])
+}
 
 /// Registered names.
 #[must_use]

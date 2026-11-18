@@ -39,6 +39,9 @@ export const ALLOWED_CORE = new Set([
   'css', 'fonts', 'font_bytes',
   // R5/m17-int (ARCH.md): the glossary explanation the core opened on a tap, and its dismiss.
   'gloss', 'close_gloss', 'face_desc',
+  // R5/M21 (ARCH.md): the reader's reduce-motion preference, and the motion overlay of a
+  // display frame (boxes and their CSS values, made by the core).
+  'set_reduced_motion', 'motion_marks',
 ]);
 
 // R5/G (ARCH.md "Galeri"): the gallery page's core (`Gallery`, crates/qp-wasm/src/lib.rs).

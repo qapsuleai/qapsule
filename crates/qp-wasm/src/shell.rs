@@ -28,6 +28,7 @@ use serde_json::{json, Value};
 use crate::viewer::{Stories, Traffic, Viewer, STORIES_SUB};
 pub mod bench;
 pub mod freq;
+pub mod motion;
 pub mod paint;
 pub mod paint_canvas;
 pub mod paint_gpu;
@@ -525,6 +526,8 @@ pub struct ShellCore {
     pass_data: bool,
     /// (RP3/M14) The capsules whose face the page reports on screen (both modes).
     shown: BTreeSet<String>,
+    /// (R5/M21) The motion design and the reduce-motion flag; beats seen on the feed.
+    motion: motion::MotionState,
 }
 
 impl std::fmt::Debug for ShellCore {
@@ -708,6 +711,7 @@ impl ShellCore {
             pending_data: false,
             pass_data: false,
             shown: BTreeSet::new(),
+            motion: motion::MotionState::default(),
         };
         me.push(json!({"type":"hello","protocol":"qp/0","principal":principal,
             "surface":{"kind":"phone","screen":[PHONE_SCREEN.0, PHONE_SCREEN.1],"input":["touch"],"lang":lang_name(lang)}}));
@@ -990,6 +994,7 @@ impl ShellCore {
                         self.feed.clone_from(capsules);
                         self.feed_known = true;
                         self.coin_flip_hidden = *coin_flip_hidden;
+                        self.observe_feed();
                         // (RP3/T4) Only a face in the feed can be painted: the digests of
                         // the faces that left it are forgotten (bounded by the feed).
                         let feed = &self.feed;
@@ -1240,6 +1245,7 @@ impl ShellCore {
             self.feed = v.items();
             self.feed_known = true;
             self.coin_flip_hidden = up.coin_flip_hidden;
+            self.observe_feed();
         }
         if up.feed.is_some() || !up.faces.is_empty() || up.audience.is_some() {
             ch["feed"] = json!(true);
@@ -1485,6 +1491,8 @@ impl ShellCore {
             "feed_order": std::iter::once("layout").chain(qp_grammar::feeds::FEED_ORDERS).collect::<Vec<_>>(),
             "feed_rule": qp_capsule::feedrule::FEED_RULES.iter().map(|(n, _)| *n).collect::<Vec<_>>(),
             "voice": qp_session::voices::names(),
+            // (R5/M21) The motion designs (default first).
+            "motion": qp_grammar::transitions::motion_names(),
         })
     }
 
@@ -1605,14 +1613,18 @@ impl ShellCore {
     #[must_use]
     pub fn face(&mut self, id: &str) -> Option<SceneDesc> {
         let (w, h) = self.frames["face"];
-        if let Some(v) = &self.viewer {
+        let mut scene = if let Some(v) = &self.viewer {
             // (RP3/M15) A viewer's face is the scene the authority compiled.
-            return v.face(id).cloned();
-        }
-        let it = self.feed.iter().find(|i| i.id == id)?.clone();
-        let look = self.look.clone();
-        let mp = self.max_points;
-        face_scene(self.replica.session_mut()?, &it, &look, mp, w, h)
+            v.face(id).cloned()?
+        } else {
+            let it = self.feed.iter().find(|i| i.id == id)?.clone();
+            let look = self.look.clone();
+            let mp = self.max_points;
+            face_scene(self.replica.session_mut()?, &it, &look, mp, w, h)?
+        };
+        // (R5/M21) The motion design's still marks (none by default).
+        self.decorate_face(id, &mut scene);
+        Some(scene)
     }
 
     /// Pixels (RGBA) of capsule `id`'s face, or empty when it has not changed since the
@@ -1812,6 +1824,9 @@ impl ShellCore {
         if let Some(r) = &self.feed_rule {
             v["feed_rule"] = json!(r);
         }
+        if let Some(m) = self.motion_name() {
+            v["motion"] = json!(m);
+        }
         v
     }
 
@@ -1991,6 +2006,15 @@ impl ShellCore {
                 .any(|(n, _)| *n == v)
             {
                 self.feed_rule = Some(v.to_owned());
+            }
+        }
+        // (R5/M21) The motion design (a presentation setting of the device, not a protocol
+        // value): it may ask for its own depth transition (unless one is given here).
+        if let Some(v) = choice.get("motion").and_then(Value::as_str) {
+            if let Some(tr) = self.set_motion(v) {
+                if g.get("transition").is_none() {
+                    g["transition"] = json!(tr);
+                }
             }
         }
         if g.as_object().is_some_and(|o| o.len() > 1) {
@@ -2302,6 +2326,10 @@ impl ShellCore {
     /// (R4/H-M8910) Progress (0..=1) of the last transition's animation at shell time `t`
     /// (ms, `performance.now()`); the first call after a transition starts the clock.
     pub fn transition_progress(&mut self, t: f64) -> f64 {
+        // (R5/M21) Reduce motion: a depth change shows its end at once.
+        if self.motion.reduced {
+            return 1.0;
+        }
         let t0 = *self.trans_t0.get_or_insert(t);
         qp_grammar::transitions::progress_in(
             qp_session::viewer::look_of(&self.look),

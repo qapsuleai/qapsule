@@ -14,7 +14,7 @@ const L = {
     empty: 'Henüz kapsül yok. Oynatmayı başlatın.', back: '‹ Geri', lang: 'Dil', theme: 'Tema',
     dark: 'Koyu', light: 'Açık', sensitivity: 'Hassasiyet', default: 'Grubun varsayılanı',
     important: 'Önemli', balanced: 'Dengeli', all: 'Hepsi', alphabet: 'İşaret alfabesi',
-    face: 'Yüz tasarımı', lookl: 'Görünüş', voicel: 'Dil', feedl: 'Akış düzeni', orderl: 'Akış sırası (M19)', rulel: 'Yazı tura eşiği (M19)', transition: 'Geçiş', outcome: 'Sonuç işareti', noent: 'Veri yetkisi yok (gösterim)', audience: 'İzleme listesi ve pozisyonlar',
+    face: 'Yüz tasarımı', lookl: 'Görünüş', voicel: 'Dil', feedl: 'Akış düzeni', orderl: 'Akış sırası (M19)', rulel: 'Yazı tura eşiği (M19)', transition: 'Geçiş', motionl: 'Hareket', outcome: 'Sonuç işareti', noent: 'Veri yetkisi yok (gösterim)', audience: 'İzleme listesi ve pozisyonlar',
     group: 'Kullanıcı', habituated: 'Alışkın', future: 'Geleceğin yatırımcısı', symbol: 'Sembol',
     watch: 'İzle', position: 'Pozisyon', apply: 'Uygula', phone: 'Telefondan aç:',
     copy: 'Özeti kopyala', copied: 'Kopyalandı', play: '▶', pause: '❚❚', step: '+1', go: 'Git',
@@ -35,7 +35,7 @@ const L = {
     empty: 'No capsules yet. Start the replay.', back: '‹ Back', lang: 'Language', theme: 'Theme',
     dark: 'Dark', light: 'Light', sensitivity: 'Sensitivity', default: "Group's default",
     important: 'Important', balanced: 'Balanced', all: 'All', alphabet: 'Glyph alphabet',
-    face: 'Face design', lookl: 'Look', voicel: 'Voice', feedl: 'Feed layout', orderl: 'Feed order (M19)', rulel: 'Coin-flip threshold (M19)', transition: 'Transition', outcome: 'Outcome mark', noent: 'No data entitlement (demo)', audience: 'Watchlist and positions',
+    face: 'Face design', lookl: 'Look', voicel: 'Voice', feedl: 'Feed layout', orderl: 'Feed order (M19)', rulel: 'Coin-flip threshold (M19)', transition: 'Transition', motionl: 'Motion', outcome: 'Outcome mark', noent: 'No data entitlement (demo)', audience: 'Watchlist and positions',
     group: 'User', habituated: 'Habituated', future: 'Future investor', symbol: 'Symbol',
     watch: 'Watch', position: 'Position', apply: 'Apply', phone: 'Open on your phone:',
     copy: 'Copy summary', copied: 'Copied', play: '▶', pause: '❚❚', step: '+1', go: 'Go',
@@ -71,6 +71,8 @@ const ui = {
   look: params.get('look') || '',
   // (R5/m17-int) The capsule voice (`?voice=marla|selvi|r4`; the core's default: `marla`).
   voice: params.get('voice') || '',
+  // (R5/M21) The motion design (`?motion=<name>`; names from `choices().motion`).
+  motion: params.get('motion') || '',
   anim: params.get('anim') !== '0',
   // (R4/S1) Human-test settings: last look (`now` or a step) and the audience, given to
   // the core as they are (it reads the comma lists); applied again on every start frame,
@@ -87,6 +89,10 @@ const HINT = { capsule: 'hint_capsule', chart: 'hint_chart', evidence: 'hint_evi
 let faceSize = null;
 let faceKey = '';
 let lastMove = null; // the last transition's canvases, for the harness's frozen frames
+// (R5/M21) The motion overlay's box elements by key (the core names and styles them).
+const marks = new Map();
+// (R5/M21) The reader's reduce-motion preference, passed to the core as it is.
+const reduceQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
 
 let core = null;
 let conn = '';
@@ -202,7 +208,8 @@ function start(frame) {
   core.metric_flag('webgpu', Boolean(navigator.gpu));
   sampleMemory();
   if (ui.theme === 'light' || ui.alphabet || ui.face) core.set_style(ui.face, ui.alphabet, ui.theme);
-  if (ui.feed || ui.transition || ui.outcome || ui.look || ui.feed_order || ui.feed_rule || ui.voice) core.set_look(JSON.stringify({ feed: ui.feed, transition: ui.transition, outcome: ui.outcome, look: ui.look, feed_order: ui.feed_order, feed_rule: ui.feed_rule, voice: ui.voice }));
+  core.set_reduced_motion(!ui.anim || reduceQuery.matches);
+  if (ui.feed || ui.transition || ui.outcome || ui.look || ui.feed_order || ui.feed_rule || ui.voice || ui.motion) core.set_look(JSON.stringify({ feed: ui.feed, transition: ui.transition, outcome: ui.outcome, look: ui.look, feed_order: ui.feed_order, feed_rule: ui.feed_rule, voice: ui.voice, motion: ui.motion }));
   if (ui.watch || ui.long || ui.short || ui.group) core.set_audience(JSON.stringify({ group: ui.group, watch: ui.watch, long: ui.long, short: ui.short }));
   if (ui.seen) core.seen_at(ui.seen);
   faces.clear();
@@ -629,7 +636,7 @@ function wire() {
   };
   $('s_alpha').onchange = (e) => { core.set_style('', e.target.value, ''); flush(); };
   $('s_face').onchange = (e) => { core.set_style(e.target.value, '', ''); flush(); };
-  const looks = { feed: 's_feed', transition: 's_transition', outcome: 's_outcome', look: 's_look', feed_order: 's_order', voice: 's_voice' };
+  const looks = { feed: 's_feed', transition: 's_transition', outcome: 's_outcome', look: 's_look', feed_order: 's_order', voice: 's_voice', motion: 's_motion' };
   for (const k of Object.keys(looks)) {
     $(looks[k]).onchange = (e) => { core.set_look(JSON.stringify({ [k]: e.target.value })); flush(); };
   }
@@ -651,7 +658,7 @@ function fillChoices() {
   // The names each setting accepts come from the core's registries.
   const ch = JSON.parse(core.choices());
   const look = JSON.parse(core.look());
-  const sel = { face: 's_face', alphabet: 's_alpha', feed: 's_feed', transition: 's_transition', outcome: 's_outcome', look: 's_look', feed_order: 's_order', feed_rule: 's_rule', voice: 's_voice' };
+  const sel = { face: 's_face', alphabet: 's_alpha', feed: 's_feed', transition: 's_transition', outcome: 's_outcome', look: 's_look', feed_order: 's_order', feed_rule: 's_rule', voice: 's_voice', motion: 's_motion' };
   for (const k of Object.keys(sel)) {
     const el = $(sel[k]);
     const opts = [];
@@ -832,12 +839,45 @@ function applyCss() {
   for (const [k, v] of Object.entries(JSON.parse(css))) root.setProperty(k, v);
 }
 
+// (R5/M21) The motion overlay of this display frame: the core names each box (by face and
+// key) and gives its CSS values; the page creates one element per key inside its face and
+// applies the values as they are; a key the core no longer names is removed.
+function applyMarks(m) {
+  const keep = new Set();
+  for (const b of m.marks) {
+    const face = faces.get(b.face);
+    if (!face) continue;
+    let el = marks.get(b.key);
+    if (!el || el.parentNode !== face) {
+      if (el) el.remove();
+      el = document.createElement('div');
+      el.className = 'mk';
+      face.append(el);
+      marks.set(b.key, el);
+    }
+    Object.assign(el.style, b.style);
+    keep.add(b.key);
+  }
+  for (const [k, el] of marks) {
+    if (!keep.has(k)) {
+      el.remove();
+      marks.delete(k);
+    }
+  }
+}
+
+function motionPass(ts) {
+  const text = core.motion_marks(ts);
+  if (text) applyMarks(JSON.parse(text));
+}
+
 function frame(ts) {
   if (core) {
     applyCss();
     core.metric_frame(mode, ts);
     if (benching) benchStep(ts);
     paintPass();
+    motionPass(ts);
   }
   requestAnimationFrame(frame);
 }
@@ -889,6 +929,9 @@ window.qp = {
   },
   unfreeze: () => { if (window.qp.frozen) clearFrame(window.qp.frozen); window.qp.frozen = null; },
   frozen: null,
+  // (R5/M21) The motion overlay the core would hand out at page time `t` (JSON), for the
+  // harness's frozen frames of pulse, beat and trail.
+  marks: (t) => core.motion_marks(t),
   // (RP3/T2) for tests/compare.mjs
   benching: () => benching,
   bench: () => core.bench_summary(),
@@ -898,6 +941,7 @@ window.qp = {
 async function main() {
   document.body.dataset.theme = ui.theme;
   if (!ui.anim) document.body.classList.add('noanim');
+  reduceQuery.addEventListener('change', () => { if (core) core.set_reduced_motion(!ui.anim || reduceQuery.matches); });
   labels();
   wire();
   // (R4/T6) Connect first: the host prepares the start frame while the WASM downloads

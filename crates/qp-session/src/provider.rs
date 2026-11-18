@@ -247,6 +247,11 @@ impl DataProvider for DocProvider<'_> {
         )
     }
 
+    /// (R5/M20) The reader's language (see [`DocProvider::with_parts`]).
+    fn reader_lang(&self) -> Option<qp_schema::protocol::Language> {
+        self.parts.map(|(_, l)| l)
+    }
+
     /// (R5/m17-int) The reader's voice surfaces (see [`DocProvider::with_voice`]).
     fn voice(&self, finding: &str) -> Option<qp_schema::protocol::CapsuleVoice> {
         let (s, lang) = self.parts?;

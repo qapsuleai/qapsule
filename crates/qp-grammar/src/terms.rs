@@ -143,6 +143,44 @@ pub(crate) fn mark(panels: &mut [ScenePanel], p: &dyn DataProvider, look: &Look)
             if layer.mark != qp_schema::grammar::Mark::Text || layer.id == "headline" {
                 continue;
             }
+            // (R5/M20) A design's layer with its own entry: the whole panel opens it, the
+            // first line is underlined (`crate::open::layer_term`).
+            if let Some(g) = crate::open::layer_term(&layer.id, finding, p) {
+                if !out.iter().any(|t| t.term == g.term) {
+                    if let Some(Prim::Text {
+                        x,
+                        baseline,
+                        px,
+                        text,
+                        color,
+                        ..
+                    }) = layer.prims.iter().find(|q| matches!(q, Prim::Text { .. }))
+                    {
+                        let size = f64::from(*px);
+                        let (adv, _, _) = text_metrics(look, size);
+                        #[allow(clippy::cast_possible_truncation)]
+                        let under = baseline + (size * 0.18).round().max(2.0) as i32;
+                        let w = u32::try_from(est_width(text, size, adv).max(1)).unwrap_or(1);
+                        let line = Prim::Rect {
+                            x: *x,
+                            y: under,
+                            w,
+                            h: 1,
+                            color: *color,
+                        };
+                        out.push(TermMark {
+                            term: g.term,
+                            text: g.text,
+                            layer: layer.id.clone(),
+                            hit: panel.rect,
+                        });
+                        layer.prims.push(line);
+                    }
+                }
+            }
+            if !crate::open::voice_terms_in(&layer.id) {
+                continue;
+            }
             let Some(voice) = p.voice(finding) else {
                 continue;
             };

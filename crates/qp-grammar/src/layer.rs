@@ -37,6 +37,9 @@ pub(crate) enum Geom {
 pub(crate) struct Anchor {
     pub x: Option<PanelPos>,
     pub y: Option<PanelPos>,
+    /// (R5/M20) A panel-positioned text's right wrap edge (`x2`, panel-relative; it may
+    /// reach past the panel's right edge into the plot margin). `None`: the panel's right.
+    pub x2: Option<PanelPos>,
 }
 
 /// One drawn element's values.
@@ -733,6 +736,14 @@ pub(crate) fn prepare(
                 row.texts.insert("detail".to_owned(), d.clone());
             }
         }
+        // (R5/M20) An open capsule design's own field (`open.*`, `crate::open::text`).
+        if let Some(k) = layer.encoding.text.as_deref() {
+            if let Some(t) = crate::open::text(k, f, fr.p) {
+                for row in &mut all_rows {
+                    row.texts.insert(k.to_owned(), t.clone());
+                }
+            }
+        }
         (Src::Rows, DataSource::Finding { finding: f.clone() })
     } else {
         (Src::Nothing, DataSource::Constant {})
@@ -774,14 +785,18 @@ pub(crate) fn prepare(
             "`x` is used by `rule` (vertical rule, or with `x2` a segment), by `band`/`area` with `x2` (a bar extent), by a data-less `point` (its bar) and, panel-relative, by `text` and `glyph`; other marks are placed at their row's bar",
         ));
     }
-    if x2_given && !matches!(layer.mark, Mark::Rule | Mark::Band | Mark::Area) {
+    // (R5/M20) A panel-positioned `text` may take a panel-relative `x2`: its wrap edge.
+    let text_edge = layer.mark == Mark::Text
+        && is_panel(enc.x.as_ref())
+        && is_panel(enc.x2.as_ref());
+    if x2_given && !text_edge && !matches!(layer.mark, Mark::Rule | Mark::Band | Mark::Area) {
         return Err(cx.err(
             ErrorKind::Invalid,
             "/encoding/x2",
             "`x2` (the last bar of an extent) is used by `rule`, `band` and `area`",
         ));
     }
-    let extent = if x2_given && layer.mark != Mark::Rule {
+    let extent = if x2_given && layer.mark != Mark::Rule && !text_edge {
         let a = cx
             .bar_const("/encoding/x", enc.x.as_ref())?
             .ok_or_else(|| {
@@ -1146,6 +1161,7 @@ pub(crate) fn prepare(
             anchor = Anchor {
                 x: panel_pos(enc.x.as_ref()),
                 y: panel_pos(enc.y.as_ref()),
+                x2: panel_pos(enc.x2.as_ref()),
             };
             if !matches!(cx.src, Src::Rows) {
                 return Err(cx.err(
@@ -1271,6 +1287,7 @@ pub(crate) fn prepare(
                     }),
                     p => panel_pos(p.as_ref()),
                 },
+                x2: None,
             };
             let y = if anchor.y.is_some() {
                 None

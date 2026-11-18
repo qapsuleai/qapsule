@@ -52,6 +52,7 @@ struct StyleReq<'a> {
     seen: Option<i64>,
     look: Option<&'a str>,
     voice: Option<&'a str>,
+    open: Option<&'a str>,
 }
 
 /// The frame key of a target (`ViewState::frames`).
@@ -216,6 +217,7 @@ impl Session {
                 seen,
                 look,
                 voice,
+                open,
             } => {
                 self.set_style(
                     ci,
@@ -229,6 +231,7 @@ impl Session {
                         seen: *seen,
                         look: look.as_deref(),
                         voice: voice.as_deref(),
+                        open: open.as_deref(),
                     },
                 )?;
                 (Out::default(), Vec::new())
@@ -384,7 +387,15 @@ impl Session {
                 return Err(unknown("voice", v, qp_capsule::voice::names()));
             }
         }
+        if let Some(o) = r.open {
+            if !qp_grammar::open::is_open(o) {
+                return Err(unknown("open", o, qp_grammar::open::names()));
+            }
+        }
         let look = &mut self.conns[ci].look;
+        if let Some(o) = r.open {
+            look.open = (o != qp_grammar::open::DEFAULT_OPEN).then(|| o.to_owned());
+        }
         if let Some(v) = r.voice {
             look.voice = (v != qp_capsule::voice::DEFAULT_VOICE).then(|| v.to_owned());
         }
@@ -527,7 +538,11 @@ impl Session {
             || self.conns[ci].look.look.is_some()
             || voice.is_some();
         let look = crate::viewer::look_of(&self.conns[ci].look);
-        if d == OpenDepth::Capsule && (self.conns[ci].look.look.is_some() || voice.is_some()) {
+        // (R5/M20) An open capsule design other than `r4` builds the capsule depth.
+        let open = self.conns[ci].look.open.clone();
+        if d == OpenDepth::Capsule
+            && (self.conns[ci].look.look.is_some() || voice.is_some() || open.is_some())
+        {
             let Some(id) = pr.capsule_view.as_ref().map(|v| v.id.clone()) else {
                 return Ok(None);
             };
@@ -538,7 +553,8 @@ impl Session {
                 .with_headlines(&self.headlines)
                 .with_parts(self, lang)
                 .with_voice(voice.as_deref());
-            return Ok(depth::capsule_view_in(look, finding, max_points, &p, &id).ok());
+            let design = qp_grammar::open::by_name(open.as_deref());
+            return Ok((design.view)(look, finding, max_points, &p, &id).ok());
         }
         if d == OpenDepth::Sentence && styled {
             if pr.capsule_view.is_none() {

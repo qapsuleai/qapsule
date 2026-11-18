@@ -68,6 +68,33 @@ struct Reader<'a> {
     /// (R5/m17-int) The voice surfaces the authority wrote for this reader (the item's
     /// `voice`), for that finding.
     voice: Option<(&'a str, &'a qp_schema::protocol::CapsuleVoice)>,
+    /// (R5/M20) The reader's language and the device's check of the open capsule (an
+    /// open capsule design's labels and trust row).
+    extra: OpenExtra,
+}
+
+/// (R5/M20) What the shell core adds to the open capsule's scene: the reader's language
+/// and the device's own check of it (the viewer, K48). Default: neither (the authority's
+/// view of it: "verified by the server").
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq)]
+pub struct OpenExtra {
+    /// The reader's language.
+    pub lang: Option<qp_schema::protocol::Language>,
+    /// The device's check of the open capsule.
+    pub check: Option<TrustState>,
+}
+
+impl TrustState {
+    /// The grammar's form of it (an open capsule design's trust row).
+    #[must_use]
+    pub fn device_check(self) -> qp_grammar::open::DeviceCheck {
+        match self {
+            TrustState::Server => qp_grammar::open::DeviceCheck::Server,
+            TrustState::Checking => qp_grammar::open::DeviceCheck::Checking,
+            TrustState::Device => qp_grammar::open::DeviceCheck::Device,
+            TrustState::Differs => qp_grammar::open::DeviceCheck::Differs,
+        }
+    }
 }
 
 impl DataProvider for Reader<'_> {
@@ -137,6 +164,13 @@ impl DataProvider for Reader<'_> {
             _ => None,
         }
     }
+    fn reader_lang(&self) -> Option<qp_schema::protocol::Language> {
+        self.extra.lang.or_else(|| self.inner.reader_lang())
+    }
+    fn device_check(&self, finding: &str) -> Option<qp_grammar::open::DeviceCheck> {
+        let _ = finding;
+        self.extra.check.map(TrustState::device_check)
+    }
 }
 
 /// The language of the reader's sentence in `item`: the authority wrote `sentence.text` in
@@ -192,6 +226,7 @@ pub fn face_scene(
         heads: &heads,
         parts,
         voice: item.voice.as_ref().map(|v| (item.finding.as_str(), v)),
+        extra: OpenExtra::default(),
     };
     let id = format!("capsule-{}", item.finding);
     let view = depth::face_view_in(
@@ -223,7 +258,9 @@ fn open_view(
         OpenDepth::Sentence => None,
         OpenDepth::Capsule => {
             let id = o.presentation.capsule_view.as_ref()?.id.clone();
-            depth::capsule_view_in(look_of(look), &o.finding, max_points, p, &id).ok()
+            // (R5/M20) The connection's open capsule design (`r4`: today's card).
+            let design = qp_grammar::open::by_name(look.open.as_deref());
+            (design.view)(look_of(look), &o.finding, max_points, p, &id).ok()
         }
         OpenDepth::Chart | OpenDepth::Evidence => {
             let given = o.presentation.view.as_ref()?;
@@ -248,6 +285,29 @@ pub fn open_scene(
     look: &ViewState,
     max_points: u32,
 ) -> Option<SceneDesc> {
+    open_scene_with(
+        s,
+        o,
+        headline,
+        voice,
+        look,
+        max_points,
+        OpenExtra::default(),
+    )
+}
+
+/// (R5/M20) [`open_scene`] with the reader's language and the device's check
+/// ([`OpenExtra`]), which an open capsule design reads.
+#[must_use]
+pub fn open_scene_with(
+    s: &mut Session,
+    o: &Opening,
+    headline: Option<&str>,
+    voice: Option<&qp_schema::protocol::CapsuleVoice>,
+    look: &ViewState,
+    max_points: u32,
+    extra: OpenExtra,
+) -> Option<SceneDesc> {
     if o.to == OpenDepth::Sentence {
         return None;
     }
@@ -266,6 +326,7 @@ pub fn open_scene(
         heads: &heads,
         parts: None,
         voice: voice.map(|v| (o.finding.as_str(), v)),
+        extra,
     };
     let view = open_view(&p, stored, o, look, max_points)?;
     let range = look

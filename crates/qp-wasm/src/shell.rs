@@ -55,7 +55,7 @@ pub const DISPLAY_TZ: &str = "Europe/Istanbul";
 
 // (RP3/M15) The pure scene functions live in `qp_session::viewer`: the authority compiles
 // a viewer's faces with the very same code (§22).
-pub use qp_session::viewer::{face_scene, open_scene, scene_digest};
+pub use qp_session::viewer::{face_scene, open_scene, open_scene_with, scene_digest};
 
 #[cfg(target_arch = "wasm32")]
 mod clock {
@@ -965,6 +965,7 @@ impl ShellCore {
                     ("outcome", &self.look.outcome),
                     ("look", &self.look.look),
                     ("voice", &self.look.voice),
+                    ("open", &self.look.open),
                 ] {
                     if let Some(v) = v {
                         more[k] = json!(v);
@@ -1485,6 +1486,8 @@ impl ShellCore {
             "feed_order": std::iter::once("layout").chain(qp_grammar::feeds::FEED_ORDERS).collect::<Vec<_>>(),
             "feed_rule": qp_capsule::feedrule::FEED_RULES.iter().map(|(n, _)| *n).collect::<Vec<_>>(),
             "voice": qp_session::voices::names(),
+            // (R5/M20) The open capsule designs (`r4`: today's).
+            "open": qp_grammar::open::names(),
         })
     }
 
@@ -1642,19 +1645,30 @@ impl ShellCore {
         let voice = self.open_voice.clone();
         // (RP3/S) The build's own time (`scene_build`), apart from the change check.
         let t0 = core_now();
+        // (R5/M20) An open capsule design reads the reader's language and (viewer) the
+        // device's own check; today's card reads neither.
+        let designed = look.open.is_some();
+        let mut extra = qp_session::viewer::OpenExtra {
+            lang: designed.then_some(self.lang),
+            check: None,
+        };
         let scene = if let Some(v) = self.viewer.as_mut() {
             // (RP3/M15) The open capsule over the device's own data of its instrument.
             let side = v.open_mut().filter(|s| s.open.capsule == o.capsule)?;
+            if designed {
+                extra.check = Some(side.trust());
+            }
             let s = side.replica_mut().session_mut()?;
-            open_scene(s, &o, head.as_deref(), voice.as_ref(), &look, mp)
+            open_scene_with(s, &o, head.as_deref(), voice.as_ref(), &look, mp, extra)
         } else {
-            open_scene(
+            open_scene_with(
                 self.replica.session_mut()?,
                 &o,
                 head.as_deref(),
                 voice.as_ref(),
                 &look,
                 mp,
+                extra,
             )
         };
         let t1 = core_now();
@@ -1716,11 +1730,54 @@ impl ShellCore {
     pub fn open_json(&mut self) -> Value {
         let mut v = self.open_json_base();
         if v["depth"] != "sentence" {
-            if let Some(t) = self.viewer.as_mut().and_then(Viewer::open_trust) {
-                v["trust"] = json!(t);
+            let state = self.viewer.as_mut().and_then(Viewer::trust);
+            if let Some(t) = state {
+                v["trust"] = json!(qp_session::viewer::trust_text(t, self.lang));
             }
+            self.open_design_text(&mut v, state);
         }
         v
+    }
+
+    /// (R5/M20) Under an open capsule design, the open layer's text at the capsule depth:
+    /// above a scene the design's (`tesir`: none, the scene writes the headline); without
+    /// a scene (no data entitlement, A32) the design's text column from the feed item and
+    /// the opening (the same reader rule). The scene's CSS lets the page scroll the layer
+    /// over it (`touch-action: pan-y`) when the design states its own height.
+    fn open_design_text(&self, v: &mut Value, state: Option<qp_session::viewer::TrustState>) {
+        let Some(o) = self.opening.as_ref().filter(|o| o.to == OpenDepth::Capsule) else {
+            return;
+        };
+        let design = qp_grammar::open::by_name(self.look.open.as_deref());
+        if self.look.open.is_none() {
+            return;
+        }
+        if o.frame.is_some() {
+            if let Some(f) = design.scene_text {
+                v["text"] = json!(f());
+            }
+            if design.height.is_some() {
+                v["style"]["touchAction"] = json!("pan-y");
+            }
+            return;
+        }
+        let (Some(f), Some(it)) = (
+            design.text,
+            self.feed.iter().find(|i| i.id == o.capsule),
+        ) else {
+            return;
+        };
+        let t = qp_grammar::open::TextInput {
+            lang: self.lang,
+            headline: &it.sentence.text,
+            voice: self.open_voice.as_ref(),
+            facts: &o.presentation.facts,
+            trust: it.trust,
+            check: state.map(qp_session::viewer::TrustState::device_check),
+            ledger: it.ledger_at_birth,
+            validity: it.validity,
+        };
+        v["text"] = json!(f(&t));
     }
 
     fn open_json_base(&self) -> Value {
@@ -1969,6 +2026,7 @@ impl ShellCore {
             "outcome",
             "look",
             "voice",
+            "open",
         ] {
             if let Some(v) = choice.get(k).and_then(Value::as_str) {
                 if !v.is_empty() {
@@ -2030,7 +2088,7 @@ impl ShellCore {
     /// (R4/H-M8910) Open capsule `id` from the feed to its capsule depth (the `open`
     /// gesture; what a tap on its face does, by id).
     pub fn open_capsule(&mut self, id: &str) {
-        let (w, h) = self.frames["scene"];
+        let (w, h) = self.frame_at(OpenDepth::Capsule);
         self.ask(
             "in",
             Asked::Input,
@@ -2047,7 +2105,11 @@ impl ShellCore {
         if !["capsule", "chart", "evidence"].contains(&to) {
             return;
         }
-        let (w, h) = self.frames["scene"];
+        let (w, h) = self.frame_at(if to == "capsule" {
+            OpenDepth::Capsule
+        } else {
+            OpenDepth::Chart
+        });
         self.ask(
             "in",
             Asked::Input,
@@ -2057,10 +2119,14 @@ impl ShellCore {
 
     /// Back: close one depth (to the feed from the capsule).
     pub fn back(&mut self) {
-        if self.opening.is_none() {
+        let Some(to) = self.opening.as_ref().map(|o| match o.to {
+            OpenDepth::Evidence => OpenDepth::Chart,
+            OpenDepth::Chart => OpenDepth::Capsule,
+            _ => OpenDepth::Sentence,
+        }) else {
             return;
-        }
-        let (w, h) = self.frames["scene"];
+        };
+        let (w, h) = self.frame_at(to);
         self.ask(
             "in",
             Asked::Input,
@@ -2072,8 +2138,20 @@ impl ShellCore {
         if target.starts_with("face:") {
             self.frames["face"]
         } else {
-            self.frames["scene"]
+            self.frame_at(self.opening.as_ref().map_or(OpenDepth::Chart, |o| o.to))
         }
+    }
+
+    /// (R5/M20) The scene frame at open depth `d`: the surface's scene frame, except at
+    /// the capsule depth under an open capsule design that states its own height
+    /// (`qp_grammar::open::height_in`; the page scrolls the layer).
+    fn frame_at(&self, d: OpenDepth) -> (u32, u32) {
+        let (w, h) = self.frames["scene"];
+        if d != OpenDepth::Capsule {
+            return (w, h);
+        }
+        let look = qp_session::viewer::look_of(&self.look);
+        qp_grammar::open::height_in(look, self.look.open.as_deref()).map_or((w, h), |oh| (w, oh))
     }
 
     fn tap(&mut self, target: &str, x: f64, y: f64) {

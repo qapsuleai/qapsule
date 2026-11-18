@@ -69,7 +69,7 @@ fn not_found(path: &str, why: String) -> GrammarError {
     GrammarError::new(ErrorKind::NotFound, path, why)
 }
 
-fn finding_and_fact<'p>(
+pub(crate) fn finding_and_fact<'p>(
     id: &str,
     p: &'p dyn DataProvider,
 ) -> Result<(Cow<'p, Finding>, Cow<'p, Fact>), GrammarError> {
@@ -90,7 +90,7 @@ fn finding_and_fact<'p>(
 
 /// The bar series a fact's series sits on, and its bars (borrowed from the provider;
 /// only the first/last visible bar times are read).
-fn bar_series_bars<'p>(
+pub(crate) fn bar_series_bars<'p>(
     fact: &Fact,
     p: &'p dyn DataProvider,
 ) -> Result<(String, Cow<'p, [Bar]>), GrammarError> {
@@ -106,7 +106,7 @@ fn bar_series_bars<'p>(
     }
 }
 
-fn main_field(series: &str, p: &dyn DataProvider) -> Option<String> {
+pub(crate) fn main_field(series: &str, p: &dyn DataProvider) -> Option<String> {
     match p.series_kind(series)? {
         SeriesKind::Bars => Some("c".to_owned()),
         SeriesKind::Points => Some("v".to_owned()),
@@ -114,7 +114,7 @@ fn main_field(series: &str, p: &dyn DataProvider) -> Option<String> {
     }
 }
 
-fn layer(id: &str, mark: Mark, panel: u32) -> Layer {
+pub(crate) fn layer(id: &str, mark: Mark, panel: u32) -> Layer {
     let mut l = Layer::new(mark, panel);
     l.id = Some(id.to_owned());
     l
@@ -137,7 +137,7 @@ fn level_rule(fact: &Fact, panel: u32) -> Option<Layer> {
 }
 
 #[allow(clippy::cast_precision_loss)]
-fn time_scale(t0: i64, t1: i64) -> Scale {
+pub(crate) fn time_scale(t0: i64, t1: i64) -> Scale {
     Scale {
         kind: ScaleKind::Time,
         domain: Some([t0 as f64, t1 as f64]),
@@ -453,15 +453,15 @@ pub fn evidence_note(fact: &Fact) -> Option<String> {
 }
 
 /// Whether an R3 capsule with a story presents `finding`.
-fn has_story(finding: &str, p: &dyn DataProvider) -> bool {
+pub(crate) fn has_story(finding: &str, p: &dyn DataProvider) -> bool {
     p.capsule(finding).is_some_and(|c| c.story.is_some())
 }
 
-fn panel_at(panel: f64, px: f64) -> Position {
+pub(crate) fn panel_at(panel: f64, px: f64) -> Position {
     Position::Panel(PanelPos { panel, px })
 }
 
-fn named_panel(id: u32, name: &str, weight: f64) -> Panel {
+pub(crate) fn named_panel(id: u32, name: &str, weight: f64) -> Panel {
     let mut p = linear_panel(id);
     p.name = Some(name.to_owned());
     p.weight = Some(weight);
@@ -588,7 +588,7 @@ impl FactExt for Fact {
 }
 
 /// Unique layer ids: `base`, then `base-2`, `base-3`… (K25: the presenter's own names).
-fn uniq(taken: &mut Vec<String>, base: &str) -> String {
+pub(crate) fn uniq(taken: &mut Vec<String>, base: &str) -> String {
     let mut id = base.to_owned();
     let mut k = 2;
     while taken.contains(&id) {

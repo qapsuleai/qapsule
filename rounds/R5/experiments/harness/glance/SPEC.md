@@ -818,3 +818,38 @@ haiku ≈ 3 $; eleştirmen 360 sonnet ≈ 6 $; boylar arası uyum (sonnet, `moti
 uyum alt kümesi, sonra eleştirmenin üçüncü tekrarı düşer (yazılır). Kullanım sınırına takılıp cevapsız
 dönen çağrı (sonuç metni sınır iletisi ya da boş, maliyet 0) yanlış sayılmaz: kaydı silinir, yeniden
 koşulur, sayısı raporlanır.
+
+**G8-9 (mekanik denemeden sonra, hiçbir okumadan önce; 2026-11-18).** Kancaları sınamak için yalnız
+tr/açık'ta 5 tasarımın açılış ve değişim çekimleri alındı (sayılmaz, silindi; hiçbir okuyucu ya da
+eleştirmen çağrısı yok). Üç uygulama düzeltmesi ve durum listesi:
+1. *Şerit geometrisi:* akış pencerenin değil sayfa öğesinin (`.page`) içinde kayar ve üst çubuğun
+   (`#top`, alt kenarı y ≈ 91 px) altında başlar; yüz 226 px boyunda. Ekranın tamamına çizilen dört şeritte
+   1. şeridin ortasına yüz yerleştirilemez (yarısı üst çubuğun altında kalır). Bu yüzden **`m_from`'un
+   şeritleri akış alanının** (üst çubuğun alt kenarı `y0`'dan ekranın altına, kayıttaki `top_bar_bottom`)
+   **dört eşit şerididir**; yerleştirme (`band_k`) yüzün dikey ortasını o şeridin ortasına getirir
+   (`.page` kaydırılır), çizgiler ve anahtar aynı `y0`'la. Gerçekleşen kutular: yüz üstü 76 / 272 / 468 /
+   663 px, orta yarısı tek şeritte (1–4). Fark edilme sorusunun şeritleri (Ek G6-2) değişmedi (tam ekran).
+2. *`fail` hedefi:* `cap.SYN26.breakout.down.47` akışın 2. satırı; 4. şeride yerleştirmek için üstünde en az
+   3 yüz gerekir. Ek G6 aday listesinde bu şartı sağlayan ilk aday **`cap.SYN26.breakout.down.51`** (5.
+   satır, tutmadı). `live` hedefi (`cap.SYN06.breakout.up.118`, 15. satır) aynı.
+3. *Bozuk hareket:* G8-2'nin aynalaması (y → 874 − y − h) ekranın ortasına binen ikinci yüzü (değişimde)
+   yerinde bırakıyordu (orta çizgi yüzün içinden geçiyor). Süzgeç parçayı **yarım ekran sıçratır**: merkezi üst
+   yarıdaysa +437 px, alt yarıdaysa −437 px (dört şeritte her zaman en az iki şerit öte), titreme ve yüz
+   saydamlığı G8-2'deki gibi. Mekanik denemede bütün açılış ve değişim parçaları yanlış şeritte.
+4. *Fark edilme durumları* (G8-3 kuralıyla; `m21v2_states.json`): Ek G6-2'nin dört değişim adımı ve iki
+   denetimi kurala hâlâ uyuyor; canlılı iki denetim, adım ≥ 201'den başlayarak değişimsiz, Ek G6 adımlarına
+   bitişik olmayan ve aralarında ≥ 10 adım olan ilk iki adım (canlı kapsül biri ilk, biri ikinci yüz):
+
+| durum | adım N → N+1 | çapa satırı | sınıf | ekranda (tam görünen 3 yüz) |
+|---|---|---|---|---|
+| `c_born` | 216 → 217 | 18 | değişim, hedef canlı | `SYN09.143` doğdu, ikinci yüz |
+| `c_strengthened` | 225 → 226 | 19 | değişim, hedef canlı | `SYN09.143` güçlendi, ilk yüz |
+| `c_failed` | 333 → 334 | 10 | değişim, hedef kapanmış | `SYN20.154` tutmadı, ikinci yüz |
+| `c_realized` | 207 → 208 | 19 | değişim, hedef kapanmış | `SYN11.140` gerçekleşti, ilk yüz |
+| `n_live1` | 201 → 202 | 19 | denetim, canlılı | `SYN11.140` canlı, ilk yüz |
+| `n_live2` | 218 → 219 | 18 | denetim, canlılı | `SYN09.143` canlı, ikinci yüz |
+| `n_still1` | 211 → 212 | 18 | denetim, canlısız | — |
+| `n_still2` | 300 → 301 | 10 | denetim, canlısız | — |
+
+   Mekanik denemede (bilgi; tasarım farkı okunmadı, yalnız kancalar): `nabiz`'in canlılı denetimlerde nabız
+   kutusu var, canlısızlarda yok; `surek` doğumda değişim parçası üretmiyor (ilk koşudaki gibi).

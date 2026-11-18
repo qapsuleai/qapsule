@@ -80,6 +80,15 @@ MOTION_NOTE = {
           "in-between frame from the transition that follows it (the lettered regions are guides).",
 }
 
+# (M21, Ek G8) two in-between frames, numbered bands on each.
+MOTION2_NOTE = {
+    "tr": "Görüntüde iki kare yan yana: solda I, sağda II. Her karenin solundaki 1, 2, 3, 4 numaraları ve ince gri "
+          "yatay çizgiler uygulamanın değil, bu sorunun yardımcı çizgileridir: ekranı yukarıdan aşağıya dört eşit şeride böler.",
+    "en": "The image shows two frames side by side: I on the left, II on the right. The numbers 1, 2, 3, 4 on the left of "
+          "each frame and the thin grey horizontal lines are not part of the app; they are guides for this question: they "
+          "split the screen into four equal bands, top to bottom.",
+}
+
 # (M21, Ek G6) the numbered bands over a feed frame are the harness's.
 NOTICE_NOTE = {
     "tr": "Ekranın solundaki 1, 2, 3, 4 numaraları ve ince gri yatay çizgiler uygulamanın değil, bu sorunun "

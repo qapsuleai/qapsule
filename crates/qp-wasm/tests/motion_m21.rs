@@ -210,3 +210,36 @@ fn reduce_motion_loses_no_fact_and_paints_no_overlay() {
     let after = core.face(&id).expect("face");
     assert!(!texts(&after).contains(word), "{id}: seen");
 }
+
+#[test]
+fn the_marks_find_room_in_every_look() {
+    for look in qp_grammar::look::names() {
+        let mut core = page(
+            &mut parity_host(),
+            &json!({"feed_order": "live_new", "look": look}),
+        );
+        let l = qp_grammar::look::or_default(Some(look));
+        let mut n = 0;
+        for id in ids(&core).iter().take(8) {
+            let Some(s) = core.face(id) else { continue };
+            let Some(p) = qp_grammar::transitions::nabiz::places(&s, l) else {
+                continue;
+            };
+            n += 1;
+            // The label row clears the glyph (above it, or in the bottom margin below
+            // everything) and lies inside the face.
+            assert!(
+                p.row.1 <= p.glyph.top || p.row.0 >= p.glyph.bottom,
+                "{look} {id}: {p:?}"
+            );
+            let (w, h) = (
+                i32::try_from(s.width).unwrap(),
+                i32::try_from(s.height).unwrap(),
+            );
+            assert!(p.row.0 >= 0 && p.row.1 <= h, "{look} {id}: {p:?}");
+            let lw = qp_grammar::transitions::nabiz::label_width("artık tutmuyor", l);
+            assert!(p.label_at.0 + lw <= w, "{look} {id}");
+        }
+        assert!(n > 0, "{look}: some face has a glyph");
+    }
+}

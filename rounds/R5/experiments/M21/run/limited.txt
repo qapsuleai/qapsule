@@ -1,0 +1,1 @@
+Kullanım sınırına takılıp cevapsız dönen ve yeniden koşulan okuyucu çağrıları: 2654 (notice 2121, notice_pair 533); kayıtları puanlamaya girmedi.

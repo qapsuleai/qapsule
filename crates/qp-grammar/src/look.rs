@@ -758,6 +758,10 @@ pub const ZEMRE: Look = Look {
         invalid: [115, 110, 103, 255],
         closed: [115, 110, 103, 255],
         closed_alpha: 255,
+        // (R5/M16 rebase) An open glyph at freshness 0 keeps ≥ 3:1 (`down` needs ≥ 165).
+        fresh_alpha_min: 172,
+        // The confidence plate fades with freshness alone (not a sign; the strokes are).
+        plate_alpha_min: 0,
         focus: [95, 208, 184, 255],
         chrome: Chrome {
             bg: [18, 20, 25, 255],
@@ -803,6 +807,9 @@ pub const ZEMRE: Look = Look {
         invalid: [128, 122, 114, 255],
         closed: [128, 122, 114, 255],
         closed_alpha: 255,
+        // (R5/M16 rebase) An open glyph at freshness 0 keeps ≥ 3:1 (`up` needs ≥ 172).
+        fresh_alpha_min: 180,
+        plate_alpha_min: 0,
         focus: [0, 105, 92, 255],
         chrome: Chrome {
             bg: [246, 243, 236, 255],
@@ -1344,7 +1351,8 @@ mod tests {
     /// (R5/M16) `zemre` meets the hard thresholds from its record alone: no text under
     /// 12 px (scene roles 13 px and up), tabs and controls 44 px or more, text colours at
     /// least 4.5:1 on the background and the surface, meaning colours and the closed
-    /// glyph at least 3:1, the evidence note and the chrome's "requires" text 4.5:1.
+    /// glyph and an open glyph at freshness 0 at least 3:1, the evidence note and the
+    /// chrome's "requires" text 4.5:1.
     #[test]
     fn zemre_meets_the_hard_thresholds() {
         let z = &ZEMRE;
@@ -1381,10 +1389,19 @@ mod tests {
             }
             let floor = [t.closed[0], t.closed[1], t.closed[2], t.closed_alpha];
             assert!(contrast(floor, t.bg) >= 3.0, "{}: closed", t.name);
-            // The presented outcome style (`tg5`) draws a failed claim in `muted` at 0.55.
-            let failed = [t.muted[0], t.muted[1], t.muted[2], 140];
-            let k = contrast(failed, t.bg);
-            assert!(k >= 3.0, "{}: failed glyph {k:.2}:1", t.name);
+            // (R5/T3c) An open glyph at the least freshness keeps ≥ 3:1 in every direction
+            // colour (the rozet's neutral is `text`); the alphabets' own check is
+            // `tg5::tests::zemre_signs_keep_3_to_1_at_freshness_zero`.
+            for (what, c) in [
+                ("up", t.up),
+                ("down", t.down),
+                ("neutral", t.neutral),
+                ("text", t.text),
+            ] {
+                let floor = [c[0], c[1], c[2], t.fresh_alpha_min];
+                let k = contrast(floor, t.bg);
+                assert!(k >= 3.0, "{} open {what} at freshness 0: {k:.2}:1", t.name);
+            }
             let ch = t.chrome;
             for (what, fg, bg) in [
                 ("fg", ch.fg, ch.bg),

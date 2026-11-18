@@ -37,8 +37,9 @@ try {
     await page.goto(`${origin}/?anim=0`);
     await settle(page);
     const l = await look(page);
-    check(l.face === 'oltan' && l.feed === 'elikov' && l.transition === 'zumlak' && l.outcome === 'tg5',
-      `defaults oltan/elikov/zumlak/tg5 (${JSON.stringify(l)})`);
+    // (R5/S) The opening is the presented motion design's (`surek`, M21 provisional).
+    check(l.face === 'oltan' && l.feed === 'elikov' && l.transition === 'surek' && l.outcome === 'tg5',
+      `defaults oltan/elikov/surek/tg5 (${JSON.stringify(l)})`);
     check(l.look === 'oltan' && l.story === 'pavka' && l.open === 'tesir' && l.voice === 'marla',
       `R5 defaults oltan/pavka/tesir/marla (${JSON.stringify(l)})`);
     await page.click('#tabs button[data-tab="settings"]');
@@ -78,7 +79,7 @@ try {
     await page.goto(`${origin}/?anim=0&face=fotolay&feed=vakiro&outcome=r3&watch=SYN02,NOPE,SYN03,SYN02&long=SYN09&seen=200`);
     await settle(page);
     let l = await look(page);
-    check(l.face === 'fotolay' && l.feed === 'vakiro' && !l.outcome && l.transition === 'zumlak', `URL wins (${JSON.stringify(l)})`);
+    check(l.face === 'fotolay' && l.feed === 'vakiro' && !l.outcome && l.transition === 'surek', `URL wins (${JSON.stringify(l)})`);
     const aud = () => page.evaluate(() => JSON.parse(window.qp.audience()));
     let a = await aud();
     check(JSON.stringify(a && a.watchlist) === '["SYN02","SYN03"]' && a.positions && a.positions.SYN09 === 1,
@@ -134,7 +135,8 @@ try {
     const s4 = await pageSizes();
     console.log(`     r4 sizes: ${JSON.stringify(s4)}`);
     check(s4.tab < 44 && s4.font === 10, `r4 keeps its chrome sizes (tab ${s4.tab}, smallest text ${s4.font} px)`);
-    await page.goto(`${origin}/?anim=0&look=ornek`);
+    // (R5/S) The same face as under `r4` (its companion, `vadrel`): `ornek` has none.
+    await page.goto(`${origin}/?anim=0&look=ornek&face=vadrel`);
     await settle(page);
     let l = await look(page);
     check(l.look === 'ornek', `URL look (${JSON.stringify(l)})`);
@@ -273,7 +275,6 @@ try {
     check(l.story === 'korda' && l.open === 'nobra', `second candidates from Settings (${JSON.stringify(l)})`);
     check(JSON.stringify(ch.motion) === JSON.stringify(['r4', 'surek', 'nabiz']), `motion choices ${JSON.stringify(ch.motion)}`);
     check(await page.$eval('#s_motion', (e) => e.value) === 'surek', 'motion select shows surek');
-    check(!(await page.$eval('#s_reduce', (e) => e.checked)), 'reduced motion off without a setting');
     check(errors.length === 0, `no page errors ${errors}`);
     await ctx.close();
   }

@@ -120,6 +120,18 @@ hareketinin `voice` alanı); adlar `choices().voice`'tan; gösterimin varsayıla
 (`presented_look`, `marla`). Sahnesi olmayan yüzün metni (`feed()` satırının `text`'i)
 seçili dilde çekirdeğin metin yüzüdür (başlık, karne, ayrıntı; satır sonlarıyla).
 
+(R5/M21) Hareket (`qp_grammar::motion`) için eklenenler. Hiçbir kural gevşetilmedi.
+
+| Yöntem | Neden |
+|--------|-------|
+| `set_reduced_motion(on)` | Sayfa okurun ayarını (`prefers-reduced-motion`, ya da `?reduce=1|0` / Ayarlar → Hareketi azalt) çekirdeğe **iletir**; neyin hareket edeceğine çekirdek karar verir (açılış anında olur, yüz değişimi kalıcı bir etiketle söylenir, etiket sahnenin kendi ilkelidir). |
+| `take_face_motion()`, `face_change_progress(id, t)`, `face_change_frame(id, p, left, top)`, `face_before_rgba(id)` | Akıştaki bir yüzün kendi değişimi (canlı değer, durum): çekirdek hangi yüzlerin canlandırılacağını, ilerlemeyi (görünüşün süresi ve eğrisi) ve her karede değişimden önceki (çekirdeğin sakladığı sahnenin pikselleri) ya da sonraki yüzün hangi parçasının nereye, hangi saydamlıkta kopyalanacağını söyler; kabuk geçişteki gibi yalnız piksel kopyalar (`#fx`), hesap yapmaz. |
+| `face_changes()` | Son değişimler olgu olarak (`[{id, kind, label}]`; iki kipte aynı): ölçüm düzeneğinin bilgi eşitliği sınaması ve `window.qp.faceChanges()` için. |
+
+Hareket seçimi `?motion=<ad>` ve Ayarlar → Hareket: `set_look({motion})` (bir sunum ayarı, akış
+sırası gibi; tasarımın açılış geçişini `style` hareketinin `transition` alanıyla ister); adlar
+`choices().motion`'dan. `window.qp.freezeChange(id, p)` bir yüz değişimini `p`'de dondurur.
+
 (R5/G) **Galeri** (`gallery.html`, `gallery.js`, `gallery.css`; `README.md` "Galeri"). Aynı
 kurallar (R1–R4, R6, R7) bu üç dosyaya da uygulanır (`arch-check.mjs`): `gallery.html` yalnız
 `gallery.js`'i yükler, `gallery.js` yalnız `./pkg/qp_wasm.js`'ten içe aktarır, `gallery.css`

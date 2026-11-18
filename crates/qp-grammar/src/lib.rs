@@ -26,6 +26,7 @@ pub mod gesture;
 pub mod glyph;
 mod layer;
 pub mod look;
+pub mod motion;
 pub mod provider;
 pub mod scale;
 pub mod terms;

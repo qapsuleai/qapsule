@@ -1,5 +1,8 @@
 # M18 — hikâye çizelgesi: ölçüm sonucu
 
+> **Güncel seçim (2026-11-18 eki, dosyanın sonunda):** `pavka` başarım düzeltmesinden (sahne bayt eşit) sonra K52'yi geçti; önceden yazılı kural yeniden uygulandı → varsayılan **`pavka`**, ilk iki **`pavka`, `korda`**. Aşağıdaki özet ilk koşunun (düzeltme öncesi) sonucudur.
+
+
 Ölçüm ajanı `r5/m18-measure`, 2026-11-18. Düzenek: `rounds/R5/experiments/harness/glance/`
 (SPEC §G değişmedi; M18 için eklenen kod aşağıda "Düzenek ekleri"). Ham koşu (ekran görüntüleri
 hariç): [`run/`](run/); bütün tablolar `run/tables.md` (aynı sayılar, `tables.py` ile üretildi).

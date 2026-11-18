@@ -442,3 +442,113 @@ ajanın raporu (M16 alternatifi). Testler `tests/test_g4.py`.
   `selen` 5/6 (eski 45 çiftte 23), `r4` 1/2 (eski 15 çiftte 7), `kestim` 3/3 (eski 15 çiftte 6).
   Hiçbir tasarım geçmiyor; M18 sonucu ve kararı değişmez. Gövde düzeltmesi grafik yolunu etkilemez
   (grafik kapısı işaret katmanını değil rol renkli ilkelleri ölçer).
+
+## Ek G6 — M21 (hareket) ölçümünden önce (2026-11-18; ölçüm ajanı `r5/m21-measure`, hiçbir M21 okuyucu/eleştirmen çağrısından ve sayılan çekimden önce)
+
+Gerekçe: §G'de M21 için yalnız açılış ara karesi (`motion`, §G6.4) yazılıydı; GOAL M21 satırındaki
+"durum değişiminin fark edilmesi", "geçiş sırasında kare süresi" ve hareketi azalt bilgi kaybının
+uygulaması yoktu. Kod: `m21.py` (sürücü), `shoot.mjs` (`change` çekimi, `m21probe`, `params`,
+`reducedMotion`, sayfa saat kancası), `k52motion.mjs`, `k52.mjs --param`, `gl/keys.py`
+(`n_where`, `n_where2`, `n_what`; `motion_final` = `m_same` + `m_where`), `gl/readers.py`
+(`NOTICE_NOTE`, `NOTICE_PAIR_NOTE`, `CRITIC_M21`). Mekanik bir deneme (r4, surek, nabiz; tr/açık;
+hiç okuma yok) kancaların çalıştığını gösterdi; o deneme sayılmaz, silindi.
+
+**G6-0 Tasarımlar ve derlemeler.** Her aday kendi dalının `git archive` kopyasından ayrı derlenir;
+başvurular ve bozuk tasarım `main` + `broken/look.patch` derlemesinden. Hepsi `look=r4`,
+`voice=marla` (görünüş seçilmedi: adaylar renk/süreyi görünüşten okur — sonuç notu bunu sınır yazar).
+
+| ad | derleme | adres | not |
+|---|---|---|---|
+| `r4` (bugünkü hareket) | main | `anim=1` | açılış `zumlak`, yüz değişimi hareketsiz |
+| `still` (hareketsiz) | main | `anim=0` | ara kare yok: her "kare" ekranın kendisi (son kare) |
+| `surek` | `r5/m21-surek` | `anim=1&motion=surek&reduce=0` | |
+| `nabiz` | `r5/m21-nabiz` | `anim=1&motion=nabiz` | |
+| `kestim` (bozuk, gizli) | main | `anim=1&look=kestim` | Ek G3; bugünkü hareketle |
+| `surek-az`, `nabiz-az` | aday dalı | aday adresi + sistemin `prefers-reduced-motion: reduce` ayarı (Playwright `reducedMotion`) | yalnız bilgi ve bilgi kaybı; seçime girmez |
+
+`r4`'ün hareketi azalt hâli `still`'dir (bugün ürünün tek azaltma yolu `anim=0`). Öteki çekimler
+`reducedMotion: no-preference` ile.
+
+**G6-1 Süreklilik (birincil, §G9 M21) ve geçerlilik sınaması.** `motion` kümesi §G1/§G4'teki gibi
+(`live_event`, `closed_failed` açılışı; önce + p = 0,25 karesi; 2 dil × 2 tema). Ek:
+(a) `motion_final` kümesi `m_same`'i de sorar (önce + son kare); (b) geçerlilik **soru × tasarım**
+başına uygulanır: son kareyle doğruluğun Wilson %95 alt sınırı şansın (m_same 0,5, m_where 0,25)
+**üstündeyse** o soru o tasarım için "son kareyle cevaplanabilir" = geçersizdir ve o tasarımın
+birincilinden çıkarılır. Sınama tek yönlüdür (son karenin şansın altında kalması, son karenin soruyu
+cevaplayamadığını gösterir); §G6.4'ün lafzı (aralığın şansı içermesi) de raporlanır. `still`'in ara
+karesi son karesidir: soruları yapısal olarak son kareyle cevaplanır. Geçerli sorusu kalmayan
+tasarımın birincili yoktur; adım 2'de birincili olanların arkasına dizilir (sürekliliği
+gösterilmemiş tasarım süreklilikte ilk gruba giremez). Tekrar 6 (`motion` ve `motion_final`).
+Ayrıca bilgi: ara karede ve son karede "aynı nesne taşınıyor" deme payı.
+
+**G6-2 Durum değişiminin fark edilmesi (`change` çekimi).** Durumlar tasarımdan bağımsız, okurun
+bütün akışında ardışık adımları tarayan bir sondadan (`m21probe`, main derlemesi, adım 1–500,
+duyarlılık `all`) seçildi; sabit liste `m21.py` `CHANGE_STATES`:
+
+| durum | adım N → N+1 | değişen kapsül | ekrandaki yeri |
+|---|---|---|---|
+| `c_born` | 216 → 217 | `cap.SYN09.breakout.up.143` doğdu | ikinci yüz |
+| `c_strengthened` | 225 → 226 | aynı kapsül güçlendi | ilk yüz |
+| `c_failed` | 333 → 334 | `cap.SYN20.breakout.down.154` tutmadı | ikinci yüz |
+| `c_realized` | 207 → 208 | `cap.SYN11.breakout.up.140` gerçekleşti | ilk yüz |
+| `n_still1`, `n_still2` | 211 → 212, 300 → 301 | değişim yok (denetim) | — |
+
+Yöntem: sayfa N'de açılır (ilk akış = taban; hiçbir şey işaretli değil), akışın N'deki
+`anchor_index` satırı ekranın üstüne kaydırılır, düzenek sayfanın görüntü karesi saatini
+(`requestAnimationFrame` zaman damgası) eline alır, tekrarı bir adım ilerletir ve saati 16 ms'lik
+adımlarla sürer. Kareler: `before` (adımdan önce), `mid` (adımı uygulayan kareden sonra tasarımın
+kendi değişim süresinin yarısı: `surek` 180 ms = `change_ms` 360 / 2; `nabiz` 450 ms = vuruş 900 / 2;
+değişim hareketi olmayanlarda 180 ms), `after` (1000 ms; iki adayın da değişim hareketi bitmiş),
+`end` (5000 ms; bütün geçici izler bitmiş; bilgi kaybı karşılaştırması). Tasarıma özgü kanca
+gerekmez; kayıtta adayların kancaları (`changed()`, `faceChanges()`, `.mk` kutuları, `#fx`
+parçaları, yüz saydamlığı) yalnız okunur.
+
+Sorular (`gl/keys.py`; ekranın soluna düzeneğin çizdiği 1–4 numaralı dört eşit yatay şerit):
+- `notice` (tek kare, `mid` ve `after`; **fark edilme ölçüsü**): `n_where` "Bu ekranda az önce değişen
+  (yeni çıkan ya da durumu yeni değişen) bir kapsül var mı? Varsa çoğunlukla hangi numaralı şeritte?"
+  (1–4 / hayır). Anahtar: değişen yüzün DOM kutusunun dikey orta yarısının değdiği şeritler (o
+  karenin kaydından; ekranda değilse puanlanmaz); denetimde "hayır". **Sınıf dengeli** (Ek G3 gibi;
+  sınıflar "değişim" / "yok"). Tekrar 6.
+- `notice_pair` (önce | `mid`; bilgi): `n_where2` (aynı soru, sağdaki kare) ve `n_what` (yeni kapsül
+  çıktı / var olan kapsülün durumu değişti / hiçbir şey değişmedi; anahtar motorun değişiminden).
+  Tekrar 3.
+Hareketi azalt hâlleri (`surek-az`, `nabiz-az`) aynı sorularla okunur (bilgi: okuyucu gözüyle
+azaltmada fark edilme).
+
+**G6-3 Eleştirmen.** Görüntü üç kare yan yana: "0" başlangıç (`r4`'ün `before` karesi; hepsinde aynı
+içerik) | A | B (açılışta p = 0,25 karesi, değişimde `mid` karesi); 402 × 3 + 48 = 1254 px < 1568.
+İstem `CRITIC_M21` (beş önceden yazılı ölçüt: izlenebilirlik, değişenin görülmesi, dikkat
+dağıtmama, ara karede okunaklılık, eylem önermeme; "daha çok hareket daha iyi demek değildir").
+Durumlar: 2 açılış + 4 değişim; tr/açık; seçime giren 5 tasarım → 10 çift × 6 × 2 sıra × 3 tekrar.
+Birleştirme, çelişki, BT ve önyükleme §G5'teki gibi.
+
+**G6-4 K52.** (a) `k52.mjs` tasarımın adres parametreleriyle (`--param`, kabuk kopyasında
+`look-shim.js`), §G7.6'daki gibi; (b) `k52motion.mjs` geçiş sırasında kare aralıkları: kalibre
+benzetim (`phone-jit-est`, `phone` JIT kapalı), adım 120'de 6 kez akış → kapsül → grafik → geri →
+geri (her dokunuştan sonra 700 ms) ve 8 s oynatma (akıştaki yüz değişimleri); uzun kare > 33,4 ms;
+3 koşunun ortancası. **Kapı:** `phone-jit-est` (bağlayıcı) (a) geçer ve (b) geçiş pencerelerinde ve
+oynatmada uzun kare payı ≤ %1; `phone` (JIT kapalı, "kullanılabilir") (b) ≤ %10 (M18 örneği).
+Hiçbir tasarım (başvurular dahil) bir eşiği geçemiyorsa o eşik uygulanmaz (§G9.1).
+
+**G6-5 Hareketi azalt bilgi kaybı (sert, 0 olmalı) — tek yönlü.** Tasarım d ve azaltılmış hâli d′
+(`r4`→`still`, `surek`→`surek-az`, `nabiz`→`nabiz-az`), aynı durum/dil/tema:
+(a) §G7.7: son ekranların (açılış sonu; değişimde `end`) durağan içeriği — çekirdeğin boyadığı yüz
+sahnelerinin (`face_scene`) metinleri ve işaret varlığı + DOM metinleri — `içerik(d) − içerik(d′)`
+boş olmalı; (b) hareketin taşıdığı olgular: `mid` karesinde hareket katmanı olan (üstünde `.mk`
+kutusu, `#fx` parçası ya da saydamlığı < 1 olan) her yüz için d′'nün `end` karesinde o yüzün,
+bugünkü (`r4`) `end` yüzünde olmayan en az bir durağan metni (etiket) bulunmalıdır; yoksa kayıp.
+**Hareketi azalt'ta fazladan duran etiket kayıp değildir** (bir aday ajanın önerisi; tanım tek
+yönlü). Açılış geçişi olgu taşımaz (son ekran aynı; (a) bunu denetler). `still` azaltılmış hâlin
+kendisidir (kayıp tanım gereği 0).
+
+**G6-6 Bozuk tasarım.** Ek G3 ve §G8 aynen: `kestim` birincilde (birincili olan tasarımlar arasında)
+ve BT'de **kesin son** olmalı; değilse koşu kullanılmaz. Fark edilmede ve bütün `motion`
+doğruluğunda son olup olmadığı bilgi olarak yazılır.
+
+**G6-7 Seçim kuralı (M21).** 1. Sert eşikler: K52 (G6-4), bilgi kaybı = 0 (G6-5); §G7.1–5 görünüş
+kapıları M21'de uygulanmaz (bütün tasarımlar aynı `r4` görünüşüyle; M16'nın konusu). 1b. Tam boy
+okuma kapısı uygulanmaz (yüz okuma kümesi yok). 2. Birincil: süreklilik (G6-1, geçerli sorular, F2:H1,
+%95 önyükleme); en iyinin aralığıyla örtüşenler ilk grup. 2b. Fark edilme (G6-2 `notice`, F2:H1);
+grupta en iyinin aralığıyla örtüşenler kalır. 3. Eleştirmen BT. 4. Tek aday kalırsa kazanan; yoksa
+"ayırt edilemedi". **Varsayılan için bağ çözme** (nokta tahminleri): birincili olan önce → birincil →
+fark edilme → BT → daha az ekran metni (`end` ekranları) → ad. İlk iki bu sıradan.

@@ -126,13 +126,35 @@ async function engine(page) {
   });
 }
 
+// (M21, Ek G6) The page's display-frame clock, held by the harness when asked: before
+// `__vraf.on()` every requestAnimationFrame runs as usual (its timestamp recorded); after it,
+// callbacks wait for `__vraf.tick(dt)`, which runs them with the virtual time advanced by
+// `dt` ms. The shell's frame loop, the transition and the motion designs' change animations
+// all take their time from this timestamp, so a frame at "change + D ms" is reproducible.
+function vrafInit() {
+  const real = window.requestAnimationFrame.bind(window);
+  let manual = false; let q = []; let last = 0;
+  window.requestAnimationFrame = (cb) => {
+    if (manual) { q.push(cb); return q.length; }
+    return real((ts) => { if (!manual) last = Math.max(last, ts); cb(manual ? last : ts); });
+  };
+  window.__vraf = {
+    on() { manual = true; },
+    tick(dt) { last += dt; const run = q; q = []; for (const cb of run) cb(last); return last; },
+    now() { return last; },
+  };
+}
+
 async function newPage(browser, s) {
-  const ctx = await browser.newContext({ viewport: VIEW, deviceScaleFactor: 1 });
+  // (M21, Ek G6) reduced motion as the system setting (`prefers-reduced-motion`): the
+  // product's own path in every motion design; the other shots say `no-preference`.
+  const ctx = await browser.newContext({ viewport: VIEW, deviceScaleFactor: 1, reducedMotion: s.reduce ? 'reduce' : 'no-preference' });
   await ctx.route('**/pkg/qp_wasm.js', async (route) => {
     const r = await route.fetch();
     route.fulfill({ response: r, body: (await r.text()) + HOOK, headers: { ...r.headers(), 'content-type': 'text/javascript' } });
   });
   await ctx.addInitScript(recordFrames);
+  if (s.vraf) await ctx.addInitScript(vrafInit);
   if (s.broken) await ctx.addInitScript(brokenInit);
   const page = await ctx.newPage();
   const errors = [];
@@ -152,6 +174,11 @@ function query(s) {
   // (Ek G4-1) The capsule voice (`?voice=`; none: the product's presentation default).
   const voice = s.voice || plan.voice;
   if (voice) q.set('voice', voice);
+  // (M21, Ek G6) A design's own address parameters (`motion=`, `anim=`, `reduce=`), applied
+  // last; null removes a parameter.
+  for (const [k, v] of Object.entries(s.params || {})) {
+    if (v === null) q.delete(k); else q.set(k, String(v));
+  }
   return q;
 }
 
@@ -418,6 +445,12 @@ async function run() {
     for (const [step, shots] of groups) {
       let seeked = false;
       for (const s of shots) {
+        if (s.kind === 'change') {
+          // (M21, Ek G6) a change shot seeks on its own and leaves the replay one step on.
+          await changeShot(browser, origin, s, log);
+          seeked = false;
+          continue;
+        }
         const { ctx, page, errors } = await newPage(browser, s);
         await page.goto(`${origin}/?${query(s)}`);
         await settle(page);
@@ -473,14 +506,16 @@ async function run() {
             await settle(page);
             meta.frames = [];
             for (const p of s.progress || [0.5]) {
-              const n = await page.evaluate((x) => window.qp.freeze(x), p);
+              // (M21, Ek G6) a design without a transition (the still reference, `anim=0`):
+              // nothing is frozen, every "frame" is the screen as it is (the final one).
+              const n = s.freeze === false ? 0 : await page.evaluate((x) => window.qp.freeze(x), p);
               const boxes = await page.evaluate(() => [...document.querySelectorAll('#fx canvas')].map((c) => {
                 const r = c.getBoundingClientRect(); return [r.left, r.top, r.width, r.height, Number(getComputedStyle(c).opacity)];
               }));
               const f = path.join(out, `${s.id}.p${Math.round(p * 100)}.png`);
               await page.screenshot({ path: f, animations: 'disabled', caret: 'hide' });
               meta.frames.push({ p, elements: n, boxes, file: path.basename(f) });
-              await page.evaluate(() => window.qp.unfreeze());
+              if (s.freeze !== false) await page.evaluate(() => window.qp.unfreeze());
             }
             await settle(page);
           }
@@ -498,4 +533,132 @@ async function run() {
   console.log(`shoot: ${plan.shots.length} shots in ${out}; problems: ${log.length}`);
 }
 
-if (plan.chart_probe) await chartProbe(); else if (plan.probe) await probe(); else await run();
+// --- M21 (SPEC Ek G6) -----------------------------------------------------------------
+
+// The motion layers on screen: the motion designs' overlay boxes (`.mk`), the copied pieces
+// (`#fx canvas`) and each face canvas's opacity (a face change fades its canvas).
+async function overlay(page) {
+  return page.evaluate(() => {
+    const box = (el) => { const r = el.getBoundingClientRect(); return [r.left, r.top, r.width, r.height]; };
+    const faceOf = (el) => { const f = el.closest('.face'); return f ? f.dataset.id : null; };
+    return {
+      mk: [...document.querySelectorAll('.mk')].map((el) => ({ face: faceOf(el), rect: box(el), opacity: Number(getComputedStyle(el).opacity) })),
+      fx: [...document.querySelectorAll('#fx canvas')].map((el) => ({ rect: box(el), opacity: Number(getComputedStyle(el).opacity) })),
+      face_opacity: Object.fromEntries([...document.querySelectorAll('#list .face')].map((el) => {
+        const c = el.querySelector('canvas'); return [el.dataset.id, c ? Number(getComputedStyle(c).opacity || 1) : 1];
+      })),
+      changed: (window.qp.changed ? window.qp.changed() : null),
+      face_changes: (window.qp.faceChanges ? window.qp.faceChanges() : null),
+    };
+  });
+}
+
+// One state change seen on the feed (GOAL M21 "durum değişiminin fark edilmesi"): the page
+// opens at step N as its first feed (no earlier feed to compare with: nothing marked), the
+// harness takes the display-frame clock, steps the replay by one and shoots the screen just
+// before the step (`before`), half way through the design's change animation (`mid`,
+// `s.mid_ms` after the frame that applied the step), just after it (`after`, 1000 ms) and
+// when every transient is over (`end`, 5000 ms; the reduced-motion comparison).
+async function changeShot(browser, origin, s, log) {
+  {
+    const { ctx, page } = await newPage(browser, { ...s, vraf: false });
+    await page.goto(`${origin}/?${query(s)}`);
+    await settle(page);
+    await setSens(page, s.sensitivity ?? plan.sensitivity);
+    await seek(page, s.step);
+    await ctx.close();
+  }
+  const { ctx, page, errors } = await newPage(browser, { ...s, vraf: true });
+  await page.goto(`${origin}/?${query(s)}`);
+  await settle(page);
+  const sens = await page.evaluate(() => document.getElementById('s_sens').value);
+  await page.addStyleTag({ content: SCAFFOLD_CSS });
+  await settle(page);
+  // The feed row the reader looks at (Ek G6.2): scrolled to the top of the screen.
+  if (s.anchor) await scrollTo(page, s.anchor); else await page.evaluate(() => window.scrollTo(0, 0));
+  await settle(page);
+  const st0 =JSON.parse(await page.evaluate(() => window.qp.status()));
+  const meta = { step: Number(s.step), status_before: st0.step, sens_on_load: sens, frames: {} };
+  await shoot(page, { ...s, id: `${s.id}.before` }, { step: Number(s.step), overlay: await overlay(page) });
+  await page.evaluate(() => window.__vraf.on());
+  await page.waitForTimeout(120);
+  meta.t_on = await page.evaluate(() => window.__vraf.now());
+  await page.evaluate(() => document.getElementById('c_step').click());
+  const passes = [];
+  let ready = false;
+  for (let n = 0; n < 600 && !ready; n++) {
+    const r = await page.evaluate(() => {
+      const had = globalThis.__qpcore.has_changes();
+      const t = window.__vraf.tick(16);
+      return { had, t, ready: window.qp.ready(), step: JSON.parse(window.qp.status()).step };
+    });
+    if (r.had) passes.push(r.t);
+    ready = r.ready && r.step !== st0.step && passes.length > 0;
+    if (!ready) await page.waitForTimeout(20);
+  }
+  if (!ready) { log.push({ id: s.id, error: 'step not applied' }); await ctx.close(); return; }
+  const tc = passes[0];
+  meta.t_change = tc;
+  meta.passes = passes;
+  meta.status_after = JSON.parse(await page.evaluate(() => window.qp.status())).step;
+  const at = async (ms) => {
+    for (let n = 0; n < 2000; n++) {
+      const t = await page.evaluate(() => window.__vraf.now());
+      if (t >= tc + ms - 1e-6) return t;
+      await page.evaluate(() => window.__vraf.tick(16));
+      await page.waitForTimeout(4);
+    }
+    return null;
+  };
+  for (const [name, ms] of [['mid', s.mid_ms || 180], ['after', 1000], ['end', 5000]]) {
+    const t = await at(ms);
+    const ov = await overlay(page);
+    meta.frames[name] = { ms, t, overlay: ov };
+    await shoot(page, { ...s, id: `${s.id}.${name}` }, { step: Number(s.step), t, overlay: ov });
+  }
+  fs.writeFileSync(path.join(out, `${s.id}.json`), `${JSON.stringify({ shot: s, ...meta })}\n`);
+  if (errors.length) log.push({ id: s.id, errors });
+  await ctx.close();
+}
+
+// (M21, Ek G6) The change probe: consecutive steps from `plan.m21probe.from` to `.to`, the
+// faces fully on screen at the top of the reader's feed and their engine items after
+// every step (the same for every design: the authority's feed), for the change-state rule.
+async function m21Probe() {
+  const { child, base } = await startDemo(plan.qp, plan.web, plan.port || 8461, plan.demo_args || []);
+  const origin = new URL(base).origin.replace('localhost', '127.0.0.1');
+  const browser = await launch();
+  const res = { steps: {} };
+  try {
+    const s0 = { kind: 'feed', principal: 'arkin', theme: 'light', lang: 'tr', params: plan.params || {} };
+    const { ctx, page } = await newPage(browser, s0);
+    await page.goto(`${origin}/?${query(s0)}`);
+    await settle(page);
+    await setSens(page, plan.sensitivity);
+    await seek(page, plan.m21probe.from);
+    await page.addStyleTag({ content: SCAFFOLD_CSS });
+    await page.evaluate(() => window.scrollTo(0, 0));
+    for (let st = plan.m21probe.from; st <= plan.m21probe.to; st++) {
+      if (st > plan.m21probe.from) {
+        await page.evaluate(() => document.getElementById('c_step').click());
+        await settle(page);
+      }
+      const dom = await domInfo(page);
+      const eng = await engine(page);
+      const full = dom.faces.filter((f) => f.full);
+      const pick = (it) => (it ? (({ stage, validity, direction, kind, time, born_bar, last_bar, state }) => ({ stage, validity, direction, kind, time, born_bar, last_bar, state }))(it) : null);
+      const rows = JSON.parse(await page.evaluate(() => window.qp.feed())).filter((r) => r.id).map((r) => ({ id: r.id, item: pick(eng.items[r.id]) }));
+      res.steps[st] = { status: JSON.parse(await page.evaluate(() => window.qp.status())).step, rows,
+        faces: full.map((f) => ({ id: f.id, rect: f.rect, item: eng.items[f.id] ? (({ stage, validity, direction, kind, time, born_bar, last_bar, state }) => ({ stage, validity, direction, kind, time, born_bar, last_bar, state }))(eng.items[f.id]) : null })) };
+    }
+    await ctx.close();
+  } finally {
+    await browser.close();
+    child.kill();
+  }
+  fs.writeFileSync(path.join(out, 'm21probe.json'), `${JSON.stringify(res)}\n`);
+  console.log(`m21 probe: ${Object.keys(res.steps).length} steps`);
+}
+
+if (plan.m21probe) await m21Probe();
+else if (plan.chart_probe) await chartProbe(); else if (plan.probe) await probe(); else await run();

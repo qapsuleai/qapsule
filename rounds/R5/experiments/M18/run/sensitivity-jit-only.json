@@ -1,0 +1,51 @@
+{
+ "note": "sensitivity: K52 gate = JIT-on estimate only (SPEC §G7.6 literal)",
+ "steps": [
+  {
+   "step": 1,
+   "rule": "hard gates",
+   "eligible": [
+    "korda",
+    "pavka",
+    "r4",
+    "selen"
+   ],
+   "waived": [
+    "text_contrast",
+    "nontext_contrast",
+    "touch",
+    "colour"
+   ],
+   "eliminated": {}
+  },
+  {
+   "step": 2,
+   "rule": "primary: chart accuracy (F2:H1)",
+   "order": [
+    "pavka",
+    "korda",
+    "selen",
+    "r4"
+   ],
+   "top_group": [
+    "pavka"
+   ]
+  }
+ ],
+ "verdict": {
+  "winner": "pavka",
+  "told_apart": true,
+  "not_told_apart": [],
+  "default": "pavka",
+  "top_two": [
+   "pavka",
+   "korda"
+  ],
+  "ranking_point_estimates": [
+   "pavka",
+   "korda",
+   "selen",
+   "r4"
+  ]
+ }
+}

@@ -96,5 +96,25 @@ def regions(src, dst) -> None:
     save(im, dst)
 
 
+def columns(src, dst, plot) -> None:
+    """(M18 `c_live`) Four numbered columns 1-4 over the price plot's x extent (the visible
+    bar range in four equal parts): thin grey lines at the three inner borders and at both
+    ends, a small letter at the top of each column; the same for every design. `plot` =
+    [x0, x1, y0, y1] in image px (gl.compute.chart_plot)."""
+    im = Image.open(src).convert("RGB")
+    x0, x1, y0, y1 = plot
+    d = ImageDraw.Draw(im)
+    f = _font(14)
+    for i in range(5):
+        x = round(x0 + (x1 - x0) * i / 4)
+        d.line([(x, y0), (x, y1)], fill=(128, 128, 128), width=1)
+    for i, t in enumerate("1234"):  # numbered: the reader's answer options are lettered
+        x = round(x0 + (x1 - x0) * (i + 0.5) / 4) - 6
+        y = round(y1) + 2
+        d.rectangle([x - 2, y - 1, x + 13, y + 16], fill=(128, 128, 128))
+        d.text((x, y), t, fill=(255, 255, 255), font=f)
+    save(im, dst)
+
+
 def quadrant(x: float, y: float, w: float, h: float) -> str:
     return ("A" if x < w / 2 else "B") if y < h / 2 else ("C" if x < w / 2 else "D")

@@ -1,0 +1,29 @@
+k52chart: korda phone-jit-est depth 5: {"tick":true,"scene":true,"drag_long":true} tick 1 scene 1 long 0
+k52chart: korda phone-jit-est depth 50: {"tick":true,"scene":true,"drag_long":true} tick 1 scene 2 long 0
+k52chart: korda phone-jit-est depth 200: {"tick":true,"scene":true,"drag_long":true} tick 1 scene 2 long 0
+k52chart: korda phone depth 5: {"drag_long_usable":true} tick 1 scene 5 long 0
+k52chart: korda phone depth 50: {"drag_long_usable":true} tick 1 scene 13 long 0
+k52chart: korda phone depth 200: {"drag_long_usable":true} tick 1 scene 13 long 0
+{"story":"korda","pass":true}
+k52chart: selen phone-jit-est depth 5: {"tick":true,"scene":true,"drag_long":true} tick 1 scene 1 long 0
+k52chart: selen phone-jit-est depth 50: {"tick":true,"scene":true,"drag_long":true} tick 1 scene 2 long 0
+k52chart: selen phone-jit-est depth 200: {"tick":true,"scene":true,"drag_long":true} tick 1 scene 2 long 0
+k52chart: selen phone depth 5: {"drag_long_usable":true} tick 1 scene 5 long 0
+k52chart: selen phone depth 50: {"drag_long_usable":true} tick 1 scene 13 long 0.003
+k52chart: selen phone depth 200: {"drag_long_usable":false} tick 1 scene 20 long 0.133
+{"story":"selen","pass":false}
+k52chart: pavka phone-jit-est depth 5: {"tick":true,"scene":true,"drag_long":true} tick 1 scene 1 long 0
+k52chart: pavka phone-jit-est depth 50: {"tick":true,"scene":true,"drag_long":true} tick 1 scene 3 long 0
+k52chart: pavka phone-jit-est depth 200: {"tick":true,"scene":true,"drag_long":true} tick 1 scene 2 long 0
+k52chart: pavka phone depth 5: {"drag_long_usable":true} tick 1 scene 11 long 0
+k52chart: pavka phone depth 50: {"drag_long_usable":false} tick 1 scene 18 long 0.218
+k52chart: pavka phone depth 200: {"drag_long_usable":false} tick 1 scene 23 long 0.14
+{"story":"pavka","pass":false}
+k52chart: r4 phone-jit-est depth 5: {"tick":true,"scene":true,"drag_long":true} tick 1 scene 1 long 0
+k52chart: r4 phone-jit-est depth 50: {"tick":true,"scene":true,"drag_long":true} tick 1 scene 2 long 0
+k52chart: r4 phone-jit-est depth 200: {"tick":true,"scene":true,"drag_long":true} tick 1 scene 1 long 0
+k52chart: r4 phone depth 5: {"drag_long_usable":true} tick 1 scene 4 long 0
+k52chart: r4 phone depth 50: {"drag_long_usable":true} tick 1 scene 9 long 0
+k52chart: r4 phone depth 200: {"drag_long_usable":true} tick 1 scene 10 long 0
+{"story":null,"pass":true}
+ 3:23  up 41 days, 15:08, 9 users, load averages: 7.47 12.41 14.59

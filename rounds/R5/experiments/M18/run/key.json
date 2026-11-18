@@ -1,0 +1,542 @@
+{
+ "008d9a3e10": {
+  "design": "pavka",
+  "instrument": "SYN02",
+  "kind": "chart",
+  "lang": "tr",
+  "principal": "arkin",
+  "state": "chart5",
+  "theme": "light"
+ },
+ "00ce3256d0": {
+  "design": "kestim",
+  "instrument": "SYN02",
+  "kind": "chart",
+  "lang": "en",
+  "principal": "arkin",
+  "state": "chart200",
+  "theme": "dark"
+ },
+ "0446268330": {
+  "design": "pavka",
+  "instrument": "SYN02",
+  "kind": "chart",
+  "lang": "en",
+  "principal": "arkin",
+  "state": "chart50",
+  "theme": "light"
+ },
+ "0b5d852568": {
+  "design": "pavka",
+  "instrument": "SYN02",
+  "kind": "chart",
+  "lang": "tr",
+  "principal": "arkin",
+  "state": "chart50",
+  "theme": "light"
+ },
+ "0dccfe3864": {
+  "design": "pavka",
+  "instrument": "SYN02",
+  "kind": "chart",
+  "lang": "en",
+  "principal": "arkin",
+  "state": "chart200",
+  "theme": "light"
+ },
+ "0e0ed5733d": {
+  "design": "selen",
+  "instrument": "SYN02",
+  "kind": "chart",
+  "lang": "tr",
+  "principal": "arkin",
+  "state": "chart200",
+  "theme": "light"
+ },
+ "106852e34e": {
+  "design": "selen",
+  "instrument": "SYN02",
+  "kind": "chart",
+  "lang": "tr",
+  "principal": "arkin",
+  "state": "chart5",
+  "theme": "dark"
+ },
+ "1424006571": {
+  "design": "kestim",
+  "instrument": "SYN02",
+  "kind": "chart",
+  "lang": "tr",
+  "principal": "arkin",
+  "state": "chart5",
+  "theme": "light"
+ },
+ "1493b45685": {
+  "design": "korda",
+  "instrument": "SYN02",
+  "kind": "chart",
+  "lang": "tr",
+  "principal": "arkin",
+  "state": "chart50",
+  "theme": "light"
+ },
+ "206342513b": {
+  "design": "kestim",
+  "instrument": "SYN02",
+  "kind": "chart",
+  "lang": "en",
+  "principal": "arkin",
+  "state": "chart200",
+  "theme": "light"
+ },
+ "24082ca07d": {
+  "design": "korda",
+  "instrument": "SYN02",
+  "kind": "chart",
+  "lang": "tr",
+  "principal": "arkin",
+  "state": "chart200",
+  "theme": "dark"
+ },
+ "2bfa4f70d7": {
+  "design": "korda",
+  "instrument": "SYN02",
+  "kind": "chart",
+  "lang": "en",
+  "principal": "arkin",
+  "state": "chart5",
+  "theme": "dark"
+ },
+ "2deaa784af": {
+  "design": "r4",
+  "instrument": "SYN02",
+  "kind": "chart",
+  "lang": "en",
+  "principal": "arkin",
+  "state": "chart5",
+  "theme": "dark"
+ },
+ "33bceca206": {
+  "design": "selen",
+  "instrument": "SYN02",
+  "kind": "chart",
+  "lang": "tr",
+  "principal": "arkin",
+  "state": "chart50",
+  "theme": "dark"
+ },
+ "365b0b0977": {
+  "design": "kestim",
+  "instrument": "SYN02",
+  "kind": "chart",
+  "lang": "en",
+  "principal": "arkin",
+  "state": "chart50",
+  "theme": "dark"
+ },
+ "3d2b78a4b3": {
+  "design": "kestim",
+  "instrument": "SYN02",
+  "kind": "chart",
+  "lang": "tr",
+  "principal": "arkin",
+  "state": "chart5",
+  "theme": "dark"
+ },
+ "3e702923c2": {
+  "design": "pavka",
+  "instrument": "SYN02",
+  "kind": "chart",
+  "lang": "tr",
+  "principal": "arkin",
+  "state": "chart50",
+  "theme": "dark"
+ },
+ "3ef3e0b0a7": {
+  "design": "selen",
+  "instrument": "SYN02",
+  "kind": "chart",
+  "lang": "en",
+  "principal": "arkin",
+  "state": "chart5",
+  "theme": "light"
+ },
+ "4559f28efa": {
+  "design": "selen",
+  "instrument": "SYN02",
+  "kind": "chart",
+  "lang": "en",
+  "principal": "arkin",
+  "state": "chart50",
+  "theme": "light"
+ },
+ "46137ac9cb": {
+  "design": "pavka",
+  "instrument": "SYN02",
+  "kind": "chart",
+  "lang": "tr",
+  "principal": "arkin",
+  "state": "chart200",
+  "theme": "light"
+ },
+ "48403c5816": {
+  "design": "r4",
+  "instrument": "SYN02",
+  "kind": "chart",
+  "lang": "tr",
+  "principal": "arkin",
+  "state": "chart200",
+  "theme": "light"
+ },
+ "48a8291fb6": {
+  "design": "korda",
+  "instrument": "SYN02",
+  "kind": "chart",
+  "lang": "en",
+  "principal": "arkin",
+  "state": "chart50",
+  "theme": "light"
+ },
+ "4b22dac051": {
+  "design": "pavka",
+  "instrument": "SYN02",
+  "kind": "chart",
+  "lang": "tr",
+  "principal": "arkin",
+  "state": "chart5",
+  "theme": "dark"
+ },
+ "4e72e8f783": {
+  "design": "pavka",
+  "instrument": "SYN02",
+  "kind": "chart",
+  "lang": "en",
+  "principal": "arkin",
+  "state": "chart5",
+  "theme": "light"
+ },
+ "525890e2a9": {
+  "design": "selen",
+  "instrument": "SYN02",
+  "kind": "chart",
+  "lang": "tr",
+  "principal": "arkin",
+  "state": "chart200",
+  "theme": "dark"
+ },
+ "5a47d7544a": {
+  "design": "r4",
+  "instrument": "SYN02",
+  "kind": "chart",
+  "lang": "tr",
+  "principal": "arkin",
+  "state": "chart5",
+  "theme": "dark"
+ },
+ "6583a962cc": {
+  "design": "selen",
+  "instrument": "SYN02",
+  "kind": "chart",
+  "lang": "en",
+  "principal": "arkin",
+  "state": "chart5",
+  "theme": "dark"
+ },
+ "671632148a": {
+  "design": "kestim",
+  "instrument": "SYN02",
+  "kind": "chart",
+  "lang": "en",
+  "principal": "arkin",
+  "state": "chart5",
+  "theme": "light"
+ },
+ "6823a7a5e2": {
+  "design": "kestim",
+  "instrument": "SYN02",
+  "kind": "chart",
+  "lang": "tr",
+  "principal": "arkin",
+  "state": "chart200",
+  "theme": "light"
+ },
+ "684c624b98": {
+  "design": "korda",
+  "instrument": "SYN02",
+  "kind": "chart",
+  "lang": "tr",
+  "principal": "arkin",
+  "state": "chart200",
+  "theme": "light"
+ },
+ "6e04591e6b": {
+  "design": "selen",
+  "instrument": "SYN02",
+  "kind": "chart",
+  "lang": "en",
+  "principal": "arkin",
+  "state": "chart50",
+  "theme": "dark"
+ },
+ "71b8cd861b": {
+  "design": "korda",
+  "instrument": "SYN02",
+  "kind": "chart",
+  "lang": "en",
+  "principal": "arkin",
+  "state": "chart50",
+  "theme": "dark"
+ },
+ "75de88f85e": {
+  "design": "pavka",
+  "instrument": "SYN02",
+  "kind": "chart",
+  "lang": "en",
+  "principal": "arkin",
+  "state": "chart5",
+  "theme": "dark"
+ },
+ "760936c238": {
+  "design": "kestim",
+  "instrument": "SYN02",
+  "kind": "chart",
+  "lang": "en",
+  "principal": "arkin",
+  "state": "chart5",
+  "theme": "dark"
+ },
+ "761ffedbda": {
+  "design": "korda",
+  "instrument": "SYN02",
+  "kind": "chart",
+  "lang": "tr",
+  "principal": "arkin",
+  "state": "chart50",
+  "theme": "dark"
+ },
+ "7e654b4916": {
+  "design": "selen",
+  "instrument": "SYN02",
+  "kind": "chart",
+  "lang": "en",
+  "principal": "arkin",
+  "state": "chart200",
+  "theme": "dark"
+ },
+ "8428223da5": {
+  "design": "kestim",
+  "instrument": "SYN02",
+  "kind": "chart",
+  "lang": "en",
+  "principal": "arkin",
+  "state": "chart50",
+  "theme": "light"
+ },
+ "85363818ad": {
+  "design": "r4",
+  "instrument": "SYN02",
+  "kind": "chart",
+  "lang": "en",
+  "principal": "arkin",
+  "state": "chart200",
+  "theme": "dark"
+ },
+ "8697c902a2": {
+  "design": "pavka",
+  "instrument": "SYN02",
+  "kind": "chart",
+  "lang": "tr",
+  "principal": "arkin",
+  "state": "chart200",
+  "theme": "dark"
+ },
+ "8ee8a1e661": {
+  "design": "r4",
+  "instrument": "SYN02",
+  "kind": "chart",
+  "lang": "en",
+  "principal": "arkin",
+  "state": "chart5",
+  "theme": "light"
+ },
+ "8fd87f391f": {
+  "design": "korda",
+  "instrument": "SYN02",
+  "kind": "chart",
+  "lang": "en",
+  "principal": "arkin",
+  "state": "chart200",
+  "theme": "light"
+ },
+ "91baee1fd2": {
+  "design": "r4",
+  "instrument": "SYN02",
+  "kind": "chart",
+  "lang": "en",
+  "principal": "arkin",
+  "state": "chart50",
+  "theme": "dark"
+ },
+ "944520aa9a": {
+  "design": "selen",
+  "instrument": "SYN02",
+  "kind": "chart",
+  "lang": "tr",
+  "principal": "arkin",
+  "state": "chart5",
+  "theme": "light"
+ },
+ "98dca52de2": {
+  "design": "kestim",
+  "instrument": "SYN02",
+  "kind": "chart",
+  "lang": "tr",
+  "principal": "arkin",
+  "state": "chart200",
+  "theme": "dark"
+ },
+ "99a1bc2aff": {
+  "design": "pavka",
+  "instrument": "SYN02",
+  "kind": "chart",
+  "lang": "en",
+  "principal": "arkin",
+  "state": "chart50",
+  "theme": "dark"
+ },
+ "a2cd074117": {
+  "design": "korda",
+  "instrument": "SYN02",
+  "kind": "chart",
+  "lang": "en",
+  "principal": "arkin",
+  "state": "chart5",
+  "theme": "light"
+ },
+ "a437994307": {
+  "design": "r4",
+  "instrument": "SYN02",
+  "kind": "chart",
+  "lang": "tr",
+  "principal": "arkin",
+  "state": "chart200",
+  "theme": "dark"
+ },
+ "b0b9c60c5b": {
+  "design": "kestim",
+  "instrument": "SYN02",
+  "kind": "chart",
+  "lang": "tr",
+  "principal": "arkin",
+  "state": "chart50",
+  "theme": "light"
+ },
+ "b9c0c164f0": {
+  "design": "pavka",
+  "instrument": "SYN02",
+  "kind": "chart",
+  "lang": "en",
+  "principal": "arkin",
+  "state": "chart200",
+  "theme": "dark"
+ },
+ "bc72b19974": {
+  "design": "selen",
+  "instrument": "SYN02",
+  "kind": "chart",
+  "lang": "tr",
+  "principal": "arkin",
+  "state": "chart50",
+  "theme": "light"
+ },
+ "c066bfd363": {
+  "design": "korda",
+  "instrument": "SYN02",
+  "kind": "chart",
+  "lang": "tr",
+  "principal": "arkin",
+  "state": "chart5",
+  "theme": "light"
+ },
+ "c137020692": {
+  "design": "r4",
+  "instrument": "SYN02",
+  "kind": "chart",
+  "lang": "tr",
+  "principal": "arkin",
+  "state": "chart50",
+  "theme": "dark"
+ },
+ "c4a70e777a": {
+  "design": "kestim",
+  "instrument": "SYN02",
+  "kind": "chart",
+  "lang": "tr",
+  "principal": "arkin",
+  "state": "chart50",
+  "theme": "dark"
+ },
+ "ce1dbccd2e": {
+  "design": "korda",
+  "instrument": "SYN02",
+  "kind": "chart",
+  "lang": "en",
+  "principal": "arkin",
+  "state": "chart200",
+  "theme": "dark"
+ },
+ "d223395d32": {
+  "design": "r4",
+  "instrument": "SYN02",
+  "kind": "chart",
+  "lang": "tr",
+  "principal": "arkin",
+  "state": "chart5",
+  "theme": "light"
+ },
+ "d3021b8e38": {
+  "design": "r4",
+  "instrument": "SYN02",
+  "kind": "chart",
+  "lang": "tr",
+  "principal": "arkin",
+  "state": "chart50",
+  "theme": "light"
+ },
+ "dfd7e0065f": {
+  "design": "r4",
+  "instrument": "SYN02",
+  "kind": "chart",
+  "lang": "en",
+  "principal": "arkin",
+  "state": "chart50",
+  "theme": "light"
+ },
+ "e8516c7143": {
+  "design": "selen",
+  "instrument": "SYN02",
+  "kind": "chart",
+  "lang": "en",
+  "principal": "arkin",
+  "state": "chart200",
+  "theme": "light"
+ },
+ "eada3e609f": {
+  "design": "r4",
+  "instrument": "SYN02",
+  "kind": "chart",
+  "lang": "en",
+  "principal": "arkin",
+  "state": "chart200",
+  "theme": "light"
+ },
+ "ff9745c694": {
+  "design": "korda",
+  "instrument": "SYN02",
+  "kind": "chart",
+  "lang": "tr",
+  "principal": "arkin",
+  "state": "chart5",
+  "theme": "dark"
+ }
+}

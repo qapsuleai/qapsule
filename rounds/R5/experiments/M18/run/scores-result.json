@@ -1,0 +1,572 @@
+{
+ "broken": "kestim",
+ "bt": {
+  "kestim": [
+   -4.195,
+   -4.697,
+   -3.821
+  ],
+  "korda": [
+   1.368,
+   0.899,
+   2.014
+  ],
+  "pavka": [
+   3.822,
+   3.179,
+   4.625
+  ],
+  "r4": [
+   -0.248,
+   -0.907,
+   0.356
+  ],
+  "selen": [
+   -0.747,
+   -1.453,
+   -0.218
+  ]
+ },
+ "conflicts": {
+  "kestim|korda": {
+   "not_told_apart": false,
+   "rate": 0.0,
+   "split": 0,
+   "total": 9
+  },
+  "kestim|pavka": {
+   "not_told_apart": false,
+   "rate": 0.0,
+   "split": 0,
+   "total": 9
+  },
+  "kestim|r4": {
+   "not_told_apart": false,
+   "rate": 0.0,
+   "split": 0,
+   "total": 9
+  },
+  "kestim|selen": {
+   "not_told_apart": false,
+   "rate": 0.0,
+   "split": 0,
+   "total": 9
+  },
+  "korda|pavka": {
+   "not_told_apart": false,
+   "rate": 0.111,
+   "split": 1,
+   "total": 9
+  },
+  "korda|r4": {
+   "not_told_apart": true,
+   "rate": 0.333,
+   "split": 3,
+   "total": 9
+  },
+  "korda|selen": {
+   "not_told_apart": false,
+   "rate": 0.111,
+   "split": 1,
+   "total": 9
+  },
+  "pavka|r4": {
+   "not_told_apart": false,
+   "rate": 0.0,
+   "split": 0,
+   "total": 9
+  },
+  "pavka|selen": {
+   "not_told_apart": false,
+   "rate": 0.0,
+   "split": 0,
+   "total": 9
+  },
+  "r4|selen": {
+   "not_told_apart": false,
+   "rate": 0.111,
+   "split": 1,
+   "total": 9
+  }
+ },
+ "designs": [
+  "kestim",
+  "korda",
+  "pavka",
+  "r4",
+  "selen"
+ ],
+ "excluded_not_one_look": [],
+ "gates": {
+  "korda": {
+   "computed": true,
+   "failed": [],
+   "pass": true
+  },
+  "pavka": {
+   "computed": true,
+   "failed": [
+    "k52"
+   ],
+   "pass": false
+  },
+  "r4": {
+   "computed": true,
+   "failed": [],
+   "pass": true
+  },
+  "selen": {
+   "computed": true,
+   "failed": [],
+   "pass": true
+  }
+ },
+ "length_bias": {
+  "decisive_won_by_more_text": {
+   "n": 84,
+   "share": 0.845
+  },
+  "spearman_bt_vs_chars": 0.7
+ },
+ "model_agreement": {
+  "agree": 0.875,
+  "models": [
+   "claude-haiku-5-5",
+   "claude-sonnet-5-5"
+  ],
+  "n": 120
+ },
+ "paired_vs_broken": {
+  "korda": {
+   "diff": 0.5222,
+   "hi": 0.5536,
+   "lo": 0.4899,
+   "n": 150,
+   "separated": true
+  },
+  "pavka": {
+   "diff": 0.5811,
+   "hi": 0.6114,
+   "lo": 0.5504,
+   "n": 150,
+   "separated": true
+  },
+  "r4": {
+   "diff": 0.0056,
+   "hi": 0.0391,
+   "lo": -0.0283,
+   "n": 150,
+   "separated": false
+  },
+  "selen": {
+   "diff": 0.4622,
+   "hi": 0.5,
+   "lo": 0.4243,
+   "n": 150,
+   "separated": true
+  }
+ },
+ "per_design": {
+  "kestim": {
+   "cut_answers": 3,
+   "evidence": null,
+   "feed": null,
+   "gray": null,
+   "half": null,
+   "motion": null,
+   "motion_final": null,
+   "not_one_look": 0,
+   "primary": [
+    0.4055555555555555,
+    0.3766666666666667,
+    0.43555555555555553,
+    75,
+    75
+   ],
+   "questions": {
+    "chart/c_evid/F": {
+     "hi": 0.998,
+     "lo": 0.928,
+     "n": 75,
+     "p": 0.987
+    },
+    "chart/c_evid/H": {
+     "hi": 1.0,
+     "lo": 0.951,
+     "n": 75,
+     "p": 1.0
+    },
+    "chart/c_held/F": {
+     "hi": 0.473,
+     "lo": 0.261,
+     "n": 75,
+     "p": 0.36
+    },
+    "chart/c_held/H": {
+     "hi": 0.418,
+     "lo": 0.214,
+     "n": 75,
+     "p": 0.307
+    },
+    "chart/c_live/F": {
+     "hi": 0.049,
+     "lo": 0.0,
+     "n": 75,
+     "p": 0.0
+    },
+    "chart/c_live/H": {
+     "hi": 0.049,
+     "lo": 0.0,
+     "n": 75,
+     "p": 0.0
+    },
+    "chart/c_recent/F": {
+     "hi": 0.404,
+     "lo": 0.202,
+     "n": 75,
+     "p": 0.293
+    },
+    "chart/c_recent/H": {
+     "hi": 0.39,
+     "lo": 0.191,
+     "n": 75,
+     "p": 0.28
+    }
+   },
+   "reading": null
+  },
+  "korda": {
+   "cut_answers": 77,
+   "evidence": null,
+   "feed": null,
+   "gray": null,
+   "half": null,
+   "motion": null,
+   "motion_final": null,
+   "not_one_look": 0,
+   "primary": [
+    0.9277777777777777,
+    0.9066666666666667,
+    0.9477777777777777,
+    75,
+    75
+   ],
+   "questions": {
+    "chart/c_evid/F": {
+     "hi": 0.993,
+     "lo": 0.908,
+     "n": 75,
+     "p": 0.973
+    },
+    "chart/c_evid/H": {
+     "hi": 0.998,
+     "lo": 0.928,
+     "n": 75,
+     "p": 0.987
+    },
+    "chart/c_held/F": {
+     "hi": 0.936,
+     "lo": 0.787,
+     "n": 75,
+     "p": 0.88
+    },
+    "chart/c_held/H": {
+     "hi": 0.727,
+     "lo": 0.514,
+     "n": 75,
+     "p": 0.627
+    },
+    "chart/c_live/F": {
+     "hi": 0.986,
+     "lo": 0.889,
+     "n": 75,
+     "p": 0.96
+    },
+    "chart/c_live/H": {
+     "hi": 0.986,
+     "lo": 0.889,
+     "n": 75,
+     "p": 0.96
+    },
+    "chart/c_recent/F": {
+     "hi": 1.0,
+     "lo": 0.951,
+     "n": 75,
+     "p": 1.0
+    },
+    "chart/c_recent/H": {
+     "hi": 0.971,
+     "lo": 0.853,
+     "n": 75,
+     "p": 0.933
+    }
+   },
+   "reading": null
+  },
+  "pavka": {
+   "cut_answers": 76,
+   "evidence": null,
+   "feed": null,
+   "gray": null,
+   "half": null,
+   "motion": null,
+   "motion_final": null,
+   "not_one_look": 0,
+   "primary": [
+    0.9866666666666667,
+    0.9766666666666667,
+    0.9955555555555556,
+    75,
+    75
+   ],
+   "questions": {
+    "chart/c_evid/F": {
+     "hi": 1.0,
+     "lo": 0.951,
+     "n": 75,
+     "p": 1.0
+    },
+    "chart/c_evid/H": {
+     "hi": 1.0,
+     "lo": 0.951,
+     "n": 75,
+     "p": 1.0
+    },
+    "chart/c_held/F": {
+     "hi": 0.986,
+     "lo": 0.889,
+     "n": 75,
+     "p": 0.96
+    },
+    "chart/c_held/H": {
+     "hi": 0.986,
+     "lo": 0.889,
+     "n": 75,
+     "p": 0.96
+    },
+    "chart/c_live/F": {
+     "hi": 0.998,
+     "lo": 0.928,
+     "n": 75,
+     "p": 0.987
+    },
+    "chart/c_live/H": {
+     "hi": 1.0,
+     "lo": 0.951,
+     "n": 75,
+     "p": 1.0
+    },
+    "chart/c_recent/F": {
+     "hi": 1.0,
+     "lo": 0.951,
+     "n": 75,
+     "p": 1.0
+    },
+    "chart/c_recent/H": {
+     "hi": 0.998,
+     "lo": 0.928,
+     "n": 75,
+     "p": 0.987
+    }
+   },
+   "reading": null
+  },
+  "r4": {
+   "cut_answers": 2,
+   "evidence": null,
+   "feed": null,
+   "gray": null,
+   "half": null,
+   "motion": null,
+   "motion_final": null,
+   "not_one_look": 0,
+   "primary": [
+    0.41111111111111115,
+    0.3844444444444444,
+    0.43777777777777777,
+    75,
+    75
+   ],
+   "questions": {
+    "chart/c_evid/F": {
+     "hi": 1.0,
+     "lo": 0.951,
+     "n": 75,
+     "p": 1.0
+    },
+    "chart/c_evid/H": {
+     "hi": 1.0,
+     "lo": 0.951,
+     "n": 75,
+     "p": 1.0
+    },
+    "chart/c_held/F": {
+     "hi": 0.526,
+     "lo": 0.309,
+     "n": 75,
+     "p": 0.413
+    },
+    "chart/c_held/H": {
+     "hi": 0.244,
+     "lo": 0.084,
+     "n": 75,
+     "p": 0.147
+    },
+    "chart/c_live/F": {
+     "hi": 0.072,
+     "lo": 0.002,
+     "n": 75,
+     "p": 0.013
+    },
+    "chart/c_live/H": {
+     "hi": 0.049,
+     "lo": 0.0,
+     "n": 75,
+     "p": 0.0
+    },
+    "chart/c_recent/F": {
+     "hi": 0.432,
+     "lo": 0.225,
+     "n": 75,
+     "p": 0.32
+    },
+    "chart/c_recent/H": {
+     "hi": 0.404,
+     "lo": 0.202,
+     "n": 75,
+     "p": 0.293
+    }
+   },
+   "reading": null
+  },
+  "selen": {
+   "cut_answers": 46,
+   "evidence": null,
+   "feed": null,
+   "gray": null,
+   "half": null,
+   "motion": null,
+   "motion_final": null,
+   "not_one_look": 0,
+   "primary": [
+    0.8677777777777779,
+    0.8422222222222223,
+    0.8922222222222222,
+    75,
+    75
+   ],
+   "questions": {
+    "chart/c_evid/F": {
+     "hi": 0.998,
+     "lo": 0.928,
+     "n": 75,
+     "p": 0.987
+    },
+    "chart/c_evid/H": {
+     "hi": 0.998,
+     "lo": 0.928,
+     "n": 75,
+     "p": 0.987
+    },
+    "chart/c_held/F": {
+     "hi": 1.0,
+     "lo": 0.951,
+     "n": 75,
+     "p": 1.0
+    },
+    "chart/c_held/H": {
+     "hi": 1.0,
+     "lo": 0.951,
+     "n": 75,
+     "p": 1.0
+    },
+    "chart/c_live/F": {
+     "hi": 0.763,
+     "lo": 0.554,
+     "n": 75,
+     "p": 0.667
+    },
+    "chart/c_live/H": {
+     "hi": 0.526,
+     "lo": 0.309,
+     "n": 75,
+     "p": 0.413
+    },
+    "chart/c_recent/F": {
+     "hi": 0.936,
+     "lo": 0.787,
+     "n": 75,
+     "p": 0.88
+    },
+    "chart/c_recent/H": {
+     "hi": 0.979,
+     "lo": 0.871,
+     "n": 75,
+     "p": 0.947
+    }
+   },
+   "reading": null
+  }
+ },
+ "sets": {
+  "primary": [
+   "chart"
+  ],
+  "reading": []
+ },
+ "steps": [
+  {
+   "eligible": [
+    "korda",
+    "r4",
+    "selen"
+   ],
+   "eliminated": {
+    "pavka": [
+     "k52"
+    ]
+   },
+   "rule": "hard gates",
+   "step": 1,
+   "waived": [
+    "text_contrast",
+    "nontext_contrast",
+    "touch",
+    "colour"
+   ]
+  },
+  {
+   "order": [
+    "korda",
+    "selen",
+    "r4"
+   ],
+   "rule": "primary: chart accuracy (F2:H1)",
+   "step": 2,
+   "top_group": [
+    "korda"
+   ]
+  }
+ ],
+ "verdict": {
+  "default": "korda",
+  "not_told_apart": [],
+  "ranking_point_estimates": [
+   "korda",
+   "selen",
+   "r4"
+  ],
+  "told_apart": true,
+  "top_two": [
+   "korda",
+   "selen"
+  ],
+  "winner": "korda"
+ },
+ "waived_gates": [
+  "text_contrast",
+  "nontext_contrast",
+  "touch",
+  "colour"
+ ]
+}

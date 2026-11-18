@@ -142,6 +142,42 @@ QUESTIONS = {
         "options": [("A", {"tr": "A (sol üst)", "en": "A (top left)"}), ("B", {"tr": "B (sağ üst)", "en": "B (top right)"}),
                     ("C", {"tr": "C (sol alt)", "en": "C (bottom left)"}), ("D", {"tr": "D (sağ alt)", "en": "D (bottom right)"})],
     },
+    # --- story chart (M18; SPEC §G9 "M18 görevleri"; written before any M18 reading) --------
+    # Keys from the engine's story list (PROTOCOL §23: id, born bar/time, closing, outcome)
+    # and the visible bar range of the open scene; never from a design's drawing.
+    # "Bu hissede (görünen dönemde) ne oldu": the visible window is set by the 5 / 50 / 200
+    # rule, so the count is of the stories whose life meets the visible range (§23.1 rule).
+    "c_recent": {
+        "tr": "Grafikte görünen dönemde bu hissede kaç olay (hikâye) var?",
+        "en": "How many events (stories) does this stock have in the period shown on the chart?",
+        "options": [("0", {"tr": "hiç", "en": "none"}), ("1-9", {"tr": "1 ile 9 arası", "en": "1 to 9"}),
+                    ("10-29", {"tr": "10 ile 29 arası", "en": "10 to 29"}),
+                    ("30-99", {"tr": "30 ile 99 arası", "en": "30 to 99"}),
+                    ("100+", {"tr": "100 ya da daha fazla", "en": "100 or more"})],
+    },
+    "c_held": {
+        "tr": "Grafikte görünen, bitmiş (kapanmış) olayların kaçı tuttu (beklenen gerçekleşti)?",
+        "en": "Of the finished (closed) events visible on the chart, how many played out?",
+        "options": [("most", {"tr": "çoğu tuttu", "en": "most played out"}),
+                    ("half", {"tr": "yaklaşık yarısı", "en": "about half"}),
+                    ("few", {"tr": "çoğu tutmadı", "en": "most did not"}),
+                    ("none_closed", {"tr": "grafikte bitmiş olay yok", "en": "there is no finished event on the chart"})],
+    },
+    "c_live": {
+        # Regions are numbered (1-4), not lettered: the answer options are lettered.
+        "tr": "Şu an hâlâ süren (canlı) olay grafikte hangi numaralı bölgede başladı? (Birden çok varsa herhangi biri.)",
+        "en": "In which numbered region of the chart did the event that is still ongoing (live) start? (If there are several, any one.)",
+        "options": [("A", {"tr": "1. bölge (en sol)", "en": "region 1 (leftmost)"}),
+                    ("B", {"tr": "2. bölge", "en": "region 2"}),
+                    ("C", {"tr": "3. bölge", "en": "region 3"}),
+                    ("D", {"tr": "4. bölge (en sağ)", "en": "region 4 (rightmost)"}),
+                    ("none", {"tr": "şu an süren olay yok", "en": "no event is ongoing now"})],
+    },
+    "c_evid": {
+        "tr": "Vurgulanan (seçili) işaret neye dayanıyor; ne tür bir şey gösteriyor?",
+        "en": "What does the highlighted (selected) mark rest on; what kind of thing does it show?",
+        "options": [(k, v) for k, v in KINDS.items()],
+    },
 }
 
 # Question sets per stimulus kind (SPEC §G4.1).
@@ -159,7 +195,50 @@ SETS = {
     # RESEARCH F10), same questions.
     "face_half": ["dir", "kind", "valid", "when", "trust", "advice"],
     "face_visitor_half": ["dir", "kind", "valid", "trust", "numbers", "advice"],  # validity control (RESEARCH U10): final frame only
+    # M18 story chart at 5 / 50 / 200 stories (SPEC §G9): last three months, which held, the
+    # live one (lettered columns over the plot), the selected mark's evidence kind.
+    "chart": ["c_recent", "c_held", "c_live", "c_evid"],
 }
+
+# M18 (SPEC §G9): held share buckets as the trust question (>= 0.6 / 0.4-0.6 / < 0.4).
+CHART_COLUMNS = "ABCD"
+COLUMN_MARGIN = 0.10   # a birth within 10 % of a column width from a column line is ambiguous
+
+
+def count_key(visible: list) -> str:
+    """Bucket of the number of stories whose life meets the visible range."""
+    n = len(visible)
+    return "0" if n == 0 else "1-9" if n <= 9 else "10-29" if n <= 29 else "30-99" if n <= 99 else "100+"
+
+
+def held_key(stories: list) -> str:
+    closed = [s for s in stories if s.get("outcome") in ("realized", "invalidated", "expired")]
+    if not closed:
+        return "none_closed"
+    rate = sum(1 for s in closed if s["outcome"] == "realized") / len(closed)
+    return "most" if rate >= 0.6 else "half" if rate >= 0.4 else "few"
+
+
+def live_keys(stories: list, rng: tuple[int, int]) -> set[str]:
+    """Columns (A-D over the visible bar range) where a live story was born; a birth outside
+    the range or near a column line is not scorable (empty set if no scorable live story but
+    some live story exists)."""
+    lo, hi = rng
+    live = [s for s in stories if s.get("validity") != "closed" and not s.get("closed_bar")]
+    if not live:
+        return {"none"}
+    out = set()
+    span = max(1, hi - lo)
+    for s in live:
+        f = (int(s["born_bar"]) - lo) / span
+        if not 0.0 <= f <= 1.0:
+            continue
+        c = min(3, int(f * 4))
+        r = f * 4 - c
+        if (c > 0 and r < COLUMN_MARGIN) or (c < 3 and r > 1 - COLUMN_MARGIN):
+            continue
+        out.add(CHART_COLUMNS[c])
+    return out
 
 # Throttle: which first-seen element counts as a correct hierarchy (SPEC §G3: K7, the mark
 # is the fastest-read element; the sentence is accepted as second best with weight 0.5).
@@ -274,6 +353,14 @@ def keys_for(qset: str, rec: dict) -> dict[str, set[str]]:
             out[q] = {"moving" if rec.get("shared") else "cut"}
         elif q == "m_where":
             out[q] = {rec["region"]} if rec.get("region") else set()
+        elif q == "c_recent":
+            out[q] = {count_key(rec.get("stories_visible") or [])} if "stories_visible" in rec else set()
+        elif q == "c_held":
+            out[q] = {held_key(rec.get("stories_visible") or [])}
+        elif q == "c_live":
+            out[q] = live_keys(rec.get("stories") or [], tuple(rec["range"])) if rec.get("range") else set()
+        elif q == "c_evid":
+            out[q] = {item["kind"]} if item.get("kind") else set()
     return out
 
 

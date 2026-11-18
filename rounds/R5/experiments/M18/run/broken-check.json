@@ -1,0 +1,44 @@
+{
+ "broken": "kestim",
+ "checks": {
+  "last_on_bt": true,
+  "last_on_primary": true,
+  "paired_separated_from_all_info": false,
+  "primary_below_best_interval": true
+ },
+ "paired_primary_info": {
+  "korda": {
+   "diff": 0.5222,
+   "hi": 0.5536,
+   "lo": 0.4899,
+   "n": 150,
+   "separated": true
+  },
+  "pavka": {
+   "diff": 0.5811,
+   "hi": 0.6114,
+   "lo": 0.5504,
+   "n": 150,
+   "separated": true
+  },
+  "r4": {
+   "diff": 0.0056,
+   "hi": 0.0391,
+   "lo": -0.0283,
+   "n": 150,
+   "separated": false
+  },
+  "selen": {
+   "diff": 0.4622,
+   "hi": 0.5,
+   "lo": 0.4243,
+   "n": 150,
+   "separated": true
+  }
+ },
+ "required": [
+  "last_on_primary",
+  "last_on_bt"
+ ],
+ "valid": true
+}

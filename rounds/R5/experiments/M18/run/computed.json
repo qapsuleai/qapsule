@@ -1,0 +1,3568 @@
+{
+ "kestim": {
+  "colour": {
+   "classes": [
+    "down",
+    "down",
+    "up",
+    "up",
+    "valid",
+    "valid"
+   ],
+   "pairs": [
+    {
+     "a": "up",
+     "b": "valid",
+     "colour_coded": true,
+     "deutan": 7.67,
+     "gray": 6.96,
+     "min": 6.33,
+     "normal": 17.11,
+     "pass": false,
+     "protan": 6.33,
+     "threshold": 15.0,
+     "tritan": 12.77
+    },
+    {
+     "a": "up",
+     "b": "down",
+     "colour_coded": true,
+     "deutan": 16.19,
+     "gray": 1.79,
+     "min": 1.79,
+     "normal": 38.97,
+     "pass": false,
+     "protan": 8.43,
+     "threshold": 15.0,
+     "tritan": 38.01
+    },
+    {
+     "a": "up",
+     "b": "up",
+     "colour_coded": true,
+     "deutan": 55.1,
+     "gray": 54.33,
+     "min": 53.38,
+     "normal": 54.45,
+     "pass": true,
+     "protan": 53.38,
+     "threshold": 15.0,
+     "tritan": 53.92
+    },
+    {
+     "a": "up",
+     "b": "valid",
+     "colour_coded": true,
+     "deutan": 47.04,
+     "gray": 46.04,
+     "min": 44.65,
+     "normal": 48.28,
+     "pass": true,
+     "protan": 44.65,
+     "threshold": 15.0,
+     "tritan": 47.64
+    },
+    {
+     "a": "up",
+     "b": "down",
+     "colour_coded": true,
+     "deutan": 56.81,
+     "gray": 52.5,
+     "min": 49.29,
+     "normal": 64.78,
+     "pass": true,
+     "protan": 49.29,
+     "threshold": 15.0,
+     "tritan": 64.44
+    },
+    {
+     "a": "valid",
+     "b": "down",
+     "colour_coded": true,
+     "deutan": 16.46,
+     "gray": 8.74,
+     "min": 8.74,
+     "normal": 23.53,
+     "pass": false,
+     "protan": 14.18,
+     "threshold": 15.0,
+     "tritan": 23.64
+    },
+    {
+     "a": "valid",
+     "b": "up",
+     "colour_coded": true,
+     "deutan": 42.53,
+     "gray": 42.96,
+     "min": 42.53,
+     "normal": 46.49,
+     "pass": true,
+     "protan": 43.97,
+     "threshold": 15.0,
+     "tritan": 44.35
+    },
+    {
+     "a": "valid",
+     "b": "valid",
+     "colour_coded": true,
+     "deutan": 36.09,
+     "gray": 35.83,
+     "min": 35.78,
+     "normal": 36.01,
+     "pass": true,
+     "protan": 35.78,
+     "threshold": 15.0,
+     "tritan": 35.82
+    },
+    {
+     "a": "valid",
+     "b": "down",
+     "colour_coded": true,
+     "deutan": 44.32,
+     "gray": 41.02,
+     "min": 40.26,
+     "normal": 45.84,
+     "pass": true,
+     "protan": 40.26,
+     "threshold": 15.0,
+     "tritan": 46.34
+    },
+    {
+     "a": "down",
+     "b": "up",
+     "colour_coded": true,
+     "deutan": 56.11,
+     "gray": 57.7,
+     "min": 56.11,
+     "normal": 70.74,
+     "pass": true,
+     "protan": 62.97,
+     "threshold": 15.0,
+     "tritan": 69.39
+    },
+    {
+     "a": "down",
+     "b": "valid",
+     "colour_coded": true,
+     "deutan": 47.78,
+     "gray": 48.04,
+     "min": 47.78,
+     "normal": 52.4,
+     "pass": true,
+     "protan": 50.51,
+     "threshold": 15.0,
+     "tritan": 52.31
+    },
+    {
+     "a": "down",
+     "b": "down",
+     "colour_coded": true,
+     "deutan": 54.24,
+     "gray": 55.78,
+     "min": 54.24,
+     "normal": 55.81,
+     "pass": true,
+     "protan": 57.23,
+     "threshold": 15.0,
+     "tritan": 55.64
+    },
+    {
+     "a": "up",
+     "b": "valid",
+     "colour_coded": true,
+     "deutan": 7.55,
+     "gray": 8.0,
+     "min": 7.55,
+     "normal": 18.1,
+     "pass": false,
+     "protan": 9.25,
+     "threshold": 15.0,
+     "tritan": 14.96
+    },
+    {
+     "a": "up",
+     "b": "down",
+     "colour_coded": true,
+     "deutan": 11.94,
+     "gray": 2.22,
+     "min": 2.22,
+     "normal": 39.99,
+     "pass": false,
+     "protan": 5.68,
+     "threshold": 15.0,
+     "tritan": 37.95
+    },
+    {
+     "a": "valid",
+     "b": "down",
+     "colour_coded": true,
+     "deutan": 12.15,
+     "gray": 5.79,
+     "min": 5.79,
+     "normal": 20.7,
+     "pass": false,
+     "protan": 6.51,
+     "threshold": 15.0,
+     "tritan": 20.15
+    }
+   ],
+   "pass": false
+  },
+  "density": {
+   "face_chars_max": 60,
+   "face_chars_mean": 47.7,
+   "face_lines_max": null,
+   "screen_chars_mean": 406.7
+  },
+  "min_font": {
+   "pass": true,
+   "threshold": 11.0,
+   "worst": {
+    "px": 11,
+    "shot": "00ce3256d0",
+    "text": "Checked on this device"
+   }
+  },
+  "nontext_contrast": {
+   "pass": false,
+   "threshold": 3.0,
+   "worst_glyph": {
+    "prim": "rect",
+    "ratio": 1.27,
+    "roles": [
+     "up"
+    ],
+    "shot": "206342513b"
+   }
+  },
+  "pass": false,
+  "roles": {},
+  "text_contrast": {
+   "pass": false,
+   "worst": {
+    "margin": 0.3399328382171664,
+    "px": 12.0,
+    "ratio": 1.53,
+    "shot": "1424006571",
+    "text": "36.32",
+    "threshold": 4.5
+   }
+  },
+  "touch": {
+   "below_44": [
+    {
+     "h": 32.9,
+     "shot": "00ce3256d0",
+     "w": 123.3,
+     "what": "button#feed"
+    },
+    {
+     "h": 32.9,
+     "shot": "00ce3256d0",
+     "w": 123.3,
+     "what": "button#settings"
+    },
+    {
+     "h": 32.9,
+     "shot": "00ce3256d0",
+     "w": 123.3,
+     "what": "button#metrics"
+    },
+    {
+     "h": 28.9,
+     "shot": "00ce3256d0",
+     "w": 64.4,
+     "what": "button#back"
+    },
+    {
+     "h": 28.9,
+     "shot": "00ce3256d0",
+     "w": 81.2,
+     "what": "button#toevidence"
+    },
+    {
+     "h": 32.9,
+     "shot": "1424006571",
+     "w": 123.3,
+     "what": "button#feed"
+    },
+    {
+     "h": 32.9,
+     "shot": "1424006571",
+     "w": 123.3,
+     "what": "button#settings"
+    },
+    {
+     "h": 32.9,
+     "shot": "1424006571",
+     "w": 123.3,
+     "what": "button#metrics"
+    },
+    {
+     "h": 28.9,
+     "shot": "1424006571",
+     "w": 64.4,
+     "what": "button#back"
+    },
+    {
+     "h": 28.9,
+     "shot": "1424006571",
+     "w": 56,
+     "what": "button#toevidence"
+    },
+    {
+     "h": 32.9,
+     "shot": "206342513b",
+     "w": 123.3,
+     "what": "button#feed"
+    },
+    {
+     "h": 32.9,
+     "shot": "206342513b",
+     "w": 123.3,
+     "what": "button#settings"
+    },
+    {
+     "h": 32.9,
+     "shot": "206342513b",
+     "w": 123.3,
+     "what": "button#metrics"
+    },
+    {
+     "h": 28.9,
+     "shot": "206342513b",
+     "w": 64.4,
+     "what": "button#back"
+    },
+    {
+     "h": 28.9,
+     "shot": "206342513b",
+     "w": 81.2,
+     "what": "button#toevidence"
+    },
+    {
+     "h": 32.9,
+     "shot": "365b0b0977",
+     "w": 123.3,
+     "what": "button#feed"
+    },
+    {
+     "h": 32.9,
+     "shot": "365b0b0977",
+     "w": 123.3,
+     "what": "button#settings"
+    },
+    {
+     "h": 32.9,
+     "shot": "365b0b0977",
+     "w": 123.3,
+     "what": "button#metrics"
+    },
+    {
+     "h": 28.9,
+     "shot": "365b0b0977",
+     "w": 64.4,
+     "what": "button#back"
+    },
+    {
+     "h": 28.9,
+     "shot": "365b0b0977",
+     "w": 81.2,
+     "what": "button#toevidence"
+    },
+    {
+     "h": 32.9,
+     "shot": "3d2b78a4b3",
+     "w": 123.3,
+     "what": "button#feed"
+    },
+    {
+     "h": 32.9,
+     "shot": "3d2b78a4b3",
+     "w": 123.3,
+     "what": "button#settings"
+    },
+    {
+     "h": 32.9,
+     "shot": "3d2b78a4b3",
+     "w": 123.3,
+     "what": "button#metrics"
+    },
+    {
+     "h": 28.9,
+     "shot": "3d2b78a4b3",
+     "w": 64.4,
+     "what": "button#back"
+    },
+    {
+     "h": 28.9,
+     "shot": "3d2b78a4b3",
+     "w": 56,
+     "what": "button#toevidence"
+    },
+    {
+     "h": 32.9,
+     "shot": "671632148a",
+     "w": 123.3,
+     "what": "button#feed"
+    },
+    {
+     "h": 32.9,
+     "shot": "671632148a",
+     "w": 123.3,
+     "what": "button#settings"
+    },
+    {
+     "h": 32.9,
+     "shot": "671632148a",
+     "w": 123.3,
+     "what": "button#metrics"
+    },
+    {
+     "h": 28.9,
+     "shot": "671632148a",
+     "w": 64.4,
+     "what": "button#back"
+    },
+    {
+     "h": 28.9,
+     "shot": "671632148a",
+     "w": 81.2,
+     "what": "button#toevidence"
+    }
+   ],
+   "count": 60,
+   "note": "DOM boxes only; story hit boxes are not in the paint list (SPEC §G11.5)",
+   "pass": false
+  }
+ },
+ "korda": {
+  "colour": {
+   "classes": [
+    "closed",
+    "closed",
+    "down",
+    "down",
+    "focus",
+    "focus",
+    "invalid",
+    "invalid",
+    "neutral",
+    "neutral",
+    "up",
+    "up",
+    "valid",
+    "valid"
+   ],
+   "pairs": [
+    {
+     "a": "up",
+     "b": "valid",
+     "colour_coded": true,
+     "deutan": 33.69,
+     "gray": 35.37,
+     "min": 33.69,
+     "normal": 42.72,
+     "pass": true,
+     "protan": 39.62,
+     "threshold": 15.0,
+     "tritan": 39.04
+    },
+    {
+     "a": "up",
+     "b": "up",
+     "colour_coded": true,
+     "deutan": 7.42,
+     "gray": 4.6,
+     "min": 4.6,
+     "normal": 6.38,
+     "pass": false,
+     "protan": 7.25,
+     "threshold": 15.0,
+     "tritan": 4.63
+    },
+    {
+     "a": "up",
+     "b": "closed/invalid",
+     "colour_coded": true,
+     "deutan": 13.74,
+     "gray": 13.48,
+     "min": 13.48,
+     "normal": 28.48,
+     "pass": false,
+     "protan": 21.34,
+     "threshold": 15.0,
+     "tritan": 20.22
+    },
+    {
+     "a": "up",
+     "b": "closed/invalid",
+     "colour_coded": true,
+     "deutan": 7.26,
+     "gray": 0.13,
+     "min": 0.13,
+     "normal": 25.47,
+     "pass": false,
+     "protan": 14.75,
+     "threshold": 15.0,
+     "tritan": 15.68
+    },
+    {
+     "a": "up",
+     "b": "valid",
+     "colour_coded": true,
+     "deutan": 22.29,
+     "gray": 20.09,
+     "min": 20.09,
+     "normal": 31.84,
+     "pass": true,
+     "protan": 21.8,
+     "threshold": 15.0,
+     "tritan": 26.25
+    },
+    {
+     "a": "up",
+     "b": "down",
+     "colour_coded": true,
+     "deutan": 23.63,
+     "gray": 4.66,
+     "min": 4.66,
+     "normal": 63.0,
+     "pass": false,
+     "protan": 20.53,
+     "threshold": 15.0,
+     "tritan": 61.29
+    },
+    {
+     "a": "up",
+     "b": "down",
+     "colour_coded": true,
+     "deutan": 22.53,
+     "gray": 0.63,
+     "min": 0.63,
+     "normal": 62.23,
+     "pass": false,
+     "protan": 12.95,
+     "threshold": 15.0,
+     "tritan": 59.71
+    },
+    {
+     "a": "up",
+     "b": "focus/neutral",
+     "colour_coded": true,
+     "deutan": 28.5,
+     "gray": 3.89,
+     "min": 3.89,
+     "normal": 53.0,
+     "pass": false,
+     "protan": 20.34,
+     "threshold": 15.0,
+     "tritan": 58.13
+    },
+    {
+     "a": "up",
+     "b": "focus/neutral",
+     "colour_coded": true,
+     "deutan": 33.87,
+     "gray": 18.17,
+     "min": 18.17,
+     "normal": 44.76,
+     "pass": true,
+     "protan": 23.43,
+     "threshold": 15.0,
+     "tritan": 52.47
+    },
+    {
+     "a": "valid",
+     "b": "up",
+     "colour_coded": true,
+     "deutan": 38.92,
+     "gray": 40.98,
+     "min": 38.92,
+     "normal": 46.92,
+     "pass": true,
+     "protan": 44.36,
+     "threshold": 15.0,
+     "tritan": 44.36
+    },
+    {
+     "a": "valid",
+     "b": "closed/invalid",
+     "colour_coded": true,
+     "deutan": 22.49,
+     "gray": 22.37,
+     "min": 22.37,
+     "normal": 22.64,
+     "pass": true,
+     "protan": 22.8,
+     "threshold": 15.0,
+     "tritan": 22.47
+    },
+    {
+     "a": "valid",
+     "b": "closed/invalid",
+     "colour_coded": true,
+     "deutan": 35.52,
+     "gray": 35.51,
+     "min": 35.51,
+     "normal": 35.71,
+     "pass": true,
+     "protan": 35.85,
+     "threshold": 15.0,
+     "tritan": 35.57
+    },
+    {
+     "a": "valid",
+     "b": "valid",
+     "colour_coded": true,
+     "deutan": 67.74,
+     "gray": 67.88,
+     "min": 67.74,
+     "normal": 67.9,
+     "pass": true,
+     "protan": 68.04,
+     "threshold": 15.0,
+     "tritan": 67.9
+    },
+    {
+     "a": "valid",
+     "b": "down",
+     "colour_coded": true,
+     "deutan": 45.54,
+     "gray": 30.44,
+     "min": 29.99,
+     "normal": 43.88,
+     "pass": true,
+     "protan": 29.99,
+     "threshold": 15.0,
+     "tritan": 42.13
+    },
+    {
+     "a": "valid",
+     "b": "down",
+     "colour_coded": true,
+     "deutan": 48.87,
+     "gray": 36.09,
+     "min": 32.96,
+     "normal": 47.18,
+     "pass": true,
+     "protan": 32.96,
+     "threshold": 15.0,
+     "tritan": 42.85
+    },
+    {
+     "a": "valid",
+     "b": "focus/neutral",
+     "colour_coded": true,
+     "deutan": 55.02,
+     "gray": 40.06,
+     "min": 40.06,
+     "normal": 51.54,
+     "pass": true,
+     "protan": 43.89,
+     "threshold": 15.0,
+     "tritan": 45.78
+    },
+    {
+     "a": "valid",
+     "b": "focus/neutral",
+     "colour_coded": true,
+     "deutan": 73.93,
+     "gray": 63.81,
+     "min": 63.81,
+     "normal": 70.54,
+     "pass": true,
+     "protan": 65.71,
+     "threshold": 15.0,
+     "tritan": 65.99
+    },
+    {
+     "a": "up",
+     "b": "closed/invalid",
+     "colour_coded": true,
+     "deutan": 16.9,
+     "gray": 18.35,
+     "min": 16.9,
+     "normal": 29.92,
+     "pass": true,
+     "protan": 21.92,
+     "threshold": 15.0,
+     "tritan": 24.03
+    },
+    {
+     "a": "up",
+     "b": "closed/invalid",
+     "colour_coded": true,
+     "deutan": 3.25,
+     "gray": 4.48,
+     "min": 3.25,
+     "normal": 24.54,
+     "pass": false,
+     "protan": 10.73,
+     "threshold": 15.0,
+     "tritan": 16.7
+    },
+    {
+     "a": "up",
+     "b": "valid",
+     "colour_coded": true,
+     "deutan": 17.11,
+     "gray": 15.59,
+     "min": 14.92,
+     "normal": 28.24,
+     "pass": false,
+     "protan": 14.92,
+     "threshold": 15.0,
+     "tritan": 23.25
+    },
+    {
+     "a": "up",
+     "b": "down",
+     "colour_coded": true,
+     "deutan": 30.86,
+     "gray": 9.24,
+     "min": 9.24,
+     "normal": 60.64,
+     "pass": false,
+     "protan": 27.31,
+     "threshold": 15.0,
+     "tritan": 62.95
+    },
+    {
+     "a": "up",
+     "b": "down",
+     "colour_coded": true,
+     "deutan": 28.8,
+     "gray": 3.97,
+     "min": 3.97,
+     "normal": 59.49,
+     "pass": false,
+     "protan": 19.85,
+     "threshold": 15.0,
+     "tritan": 60.98
+    },
+    {
+     "a": "up",
+     "b": "focus/neutral",
+     "colour_coded": true,
+     "deutan": 34.7,
+     "gray": 0.71,
+     "min": 0.71,
+     "normal": 51.5,
+     "pass": false,
+     "protan": 25.8,
+     "threshold": 15.0,
+     "tritan": 59.13
+    },
+    {
+     "a": "up",
+     "b": "focus/neutral",
+     "colour_coded": true,
+     "deutan": 37.51,
+     "gray": 13.64,
+     "min": 13.64,
+     "normal": 43.5,
+     "pass": false,
+     "protan": 25.25,
+     "threshold": 15.0,
+     "tritan": 51.95
+    },
+    {
+     "a": "closed/invalid",
+     "b": "closed/invalid",
+     "colour_coded": true,
+     "deutan": 13.64,
+     "gray": 13.62,
+     "min": 13.56,
+     "normal": 13.63,
+     "pass": false,
+     "protan": 13.56,
+     "threshold": 15.0,
+     "tritan": 13.63
+    },
+    {
+     "a": "closed/invalid",
+     "b": "valid",
+     "colour_coded": true,
+     "deutan": 33.5,
+     "gray": 33.31,
+     "min": 33.07,
+     "normal": 33.37,
+     "pass": true,
+     "protan": 33.07,
+     "threshold": 15.0,
+     "tritan": 33.32
+    },
+    {
+     "a": "closed/invalid",
+     "b": "down",
+     "colour_coded": true,
+     "deutan": 35.25,
+     "gray": 8.46,
+     "min": 8.46,
+     "normal": 34.59,
+     "pass": false,
+     "protan": 25.93,
+     "threshold": 15.0,
+     "tritan": 33.02
+    },
+    {
+     "a": "closed/invalid",
+     "b": "down",
+     "colour_coded": true,
+     "deutan": 35.67,
+     "gray": 14.16,
+     "min": 14.16,
+     "normal": 35.2,
+     "pass": false,
+     "protan": 23.56,
+     "threshold": 15.0,
+     "tritan": 33.35
+    },
+    {
+     "a": "closed/invalid",
+     "b": "focus/neutral",
+     "colour_coded": true,
+     "deutan": 41.92,
+     "gray": 17.62,
+     "min": 17.62,
+     "normal": 39.21,
+     "pass": true,
+     "protan": 35.28,
+     "threshold": 15.0,
+     "tritan": 34.43
+    },
+    {
+     "a": "closed/invalid",
+     "b": "focus/neutral",
+     "colour_coded": true,
+     "deutan": 48.36,
+     "gray": 31.48,
+     "min": 31.48,
+     "normal": 45.92,
+     "pass": true,
+     "protan": 44.7,
+     "threshold": 15.0,
+     "tritan": 40.3
+    },
+    {
+     "a": "closed/invalid",
+     "b": "valid",
+     "colour_coded": true,
+     "deutan": 20.16,
+     "gray": 19.97,
+     "min": 19.91,
+     "normal": 20.09,
+     "pass": true,
+     "protan": 19.91,
+     "threshold": 15.0,
+     "tritan": 19.98
+    },
+    {
+     "a": "closed/invalid",
+     "b": "down",
+     "colour_coded": true,
+     "deutan": 32.3,
+     "gray": 4.78,
+     "min": 4.78,
+     "normal": 33.48,
+     "pass": false,
+     "protan": 30.01,
+     "threshold": 15.0,
+     "tritan": 31.65
+    },
+    {
+     "a": "closed/invalid",
+     "b": "down",
+     "colour_coded": true,
+     "deutan": 30.66,
+     "gray": 0.5,
+     "min": 0.5,
+     "normal": 31.8,
+     "pass": false,
+     "protan": 24.43,
+     "threshold": 15.0,
+     "tritan": 30.16
+    },
+    {
+     "a": "closed/invalid",
+     "b": "focus/neutral",
+     "colour_coded": true,
+     "deutan": 36.76,
+     "gray": 3.77,
+     "min": 3.77,
+     "normal": 35.07,
+     "pass": false,
+     "protan": 34.04,
+     "threshold": 15.0,
+     "tritan": 29.26
+    },
+    {
+     "a": "closed/invalid",
+     "b": "focus/neutral",
+     "colour_coded": true,
+     "deutan": 40.28,
+     "gray": 18.04,
+     "min": 18.04,
+     "normal": 38.03,
+     "pass": true,
+     "protan": 37.68,
+     "threshold": 15.0,
+     "tritan": 30.71
+    },
+    {
+     "a": "valid",
+     "b": "down",
+     "colour_coded": true,
+     "deutan": 35.74,
+     "gray": 24.59,
+     "min": 24.59,
+     "normal": 40.34,
+     "pass": true,
+     "protan": 41.87,
+     "threshold": 15.0,
+     "tritan": 38.24
+    },
+    {
+     "a": "valid",
+     "b": "down",
+     "colour_coded": true,
+     "deutan": 31.76,
+     "gray": 19.48,
+     "min": 19.48,
+     "normal": 36.37,
+     "pass": true,
+     "protan": 34.47,
+     "threshold": 15.0,
+     "tritan": 34.4
+    },
+    {
+     "a": "valid",
+     "b": "focus/neutral",
+     "colour_coded": true,
+     "deutan": 35.78,
+     "gray": 16.29,
+     "min": 16.29,
+     "normal": 37.04,
+     "pass": true,
+     "protan": 38.88,
+     "threshold": 15.0,
+     "tritan": 32.06
+    },
+    {
+     "a": "valid",
+     "b": "focus/neutral",
+     "colour_coded": true,
+     "deutan": 32.52,
+     "gray": 1.97,
+     "min": 1.97,
+     "normal": 31.45,
+     "pass": false,
+     "protan": 32.45,
+     "threshold": 15.0,
+     "tritan": 23.98
+    },
+    {
+     "a": "down",
+     "b": "down",
+     "colour_coded": true,
+     "deutan": 5.23,
+     "gray": 5.28,
+     "min": 5.14,
+     "normal": 6.1,
+     "pass": false,
+     "protan": 7.18,
+     "threshold": 15.0,
+     "tritan": 5.14
+    },
+    {
+     "a": "down",
+     "b": "focus/neutral",
+     "colour_coded": true,
+     "deutan": 8.42,
+     "gray": 8.54,
+     "min": 7.18,
+     "normal": 19.23,
+     "pass": false,
+     "protan": 15.25,
+     "threshold": 15.0,
+     "tritan": 7.18
+    },
+    {
+     "a": "down",
+     "b": "focus/neutral",
+     "colour_coded": true,
+     "deutan": 19.86,
+     "gray": 22.68,
+     "min": 19.86,
+     "normal": 37.63,
+     "pass": true,
+     "protan": 31.95,
+     "threshold": 15.0,
+     "tritan": 23.94
+    },
+    {
+     "a": "down",
+     "b": "focus/neutral",
+     "colour_coded": true,
+     "deutan": 7.75,
+     "gray": 3.26,
+     "min": 3.26,
+     "normal": 19.46,
+     "pass": false,
+     "protan": 13.86,
+     "threshold": 15.0,
+     "tritan": 3.65
+    },
+    {
+     "a": "down",
+     "b": "focus/neutral",
+     "colour_coded": true,
+     "deutan": 16.43,
+     "gray": 17.55,
+     "min": 16.43,
+     "normal": 35.58,
+     "pass": true,
+     "protan": 26.69,
+     "threshold": 15.0,
+     "tritan": 19.99
+    },
+    {
+     "a": "focus/neutral",
+     "b": "focus/neutral",
+     "colour_coded": true,
+     "deutan": 12.57,
+     "gray": 14.34,
+     "min": 12.57,
+     "normal": 20.9,
+     "pass": false,
+     "protan": 18.16,
+     "threshold": 15.0,
+     "tritan": 16.45
+    }
+   ],
+   "pass": false
+  },
+  "density": {
+   "face_chars_max": 168,
+   "face_chars_mean": 110.3,
+   "face_lines_max": null,
+   "screen_chars_mean": 469.3
+  },
+  "k52": {
+   "configs": {
+    "phone": {
+     "200": {
+      "drag_long": 0,
+      "pass": true,
+      "scene_p95": 13,
+      "tick_p95": 1
+     },
+     "5": {
+      "drag_long": 0,
+      "pass": true,
+      "scene_p95": 5,
+      "tick_p95": 1
+     },
+     "50": {
+      "drag_long": 0,
+      "pass": true,
+      "scene_p95": 13,
+      "tick_p95": 1
+     }
+    },
+    "phone-jit-est": {
+     "200": {
+      "drag_long": 0,
+      "pass": true,
+      "scene_p95": 2,
+      "tick_p95": 1
+     },
+     "5": {
+      "drag_long": 0,
+      "pass": true,
+      "scene_p95": 1,
+      "tick_p95": 1
+     },
+     "50": {
+      "drag_long": 0,
+      "pass": true,
+      "scene_p95": 2,
+      "tick_p95": 1
+     }
+    }
+   },
+   "pass": true,
+   "rerun": true
+  },
+  "min_font": {
+   "pass": true,
+   "threshold": 11.0,
+   "worst": {
+    "px": 11.0,
+    "shot": "1493b45685",
+    "text": "40.00"
+   }
+  },
+  "nontext_contrast": {
+   "pass": false,
+   "threshold": 3.0,
+   "worst_glyph": {
+    "prim": "line",
+    "ratio": 1.1,
+    "roles": [
+     "focus",
+     "neutral"
+    ],
+    "shot": "8fd87f391f"
+   }
+  },
+  "pass": false,
+  "roles": {},
+  "text_contrast": {
+   "pass": false,
+   "worst": {
+    "margin": 0.7931363717960205,
+    "px": 11.0,
+    "ratio": 3.57,
+    "shot": "1493b45685",
+    "text": "36.32",
+    "threshold": 4.5
+   }
+  },
+  "touch": {
+   "below_44": [
+    {
+     "h": 32.9,
+     "shot": "1493b45685",
+     "w": 123.3,
+     "what": "button#feed"
+    },
+    {
+     "h": 32.9,
+     "shot": "1493b45685",
+     "w": 123.3,
+     "what": "button#settings"
+    },
+    {
+     "h": 32.9,
+     "shot": "1493b45685",
+     "w": 123.3,
+     "what": "button#metrics"
+    },
+    {
+     "h": 28.9,
+     "shot": "1493b45685",
+     "w": 50.5,
+     "what": "button#back"
+    },
+    {
+     "h": 28.9,
+     "shot": "1493b45685",
+     "w": 46.8,
+     "what": "button#toevidence"
+    },
+    {
+     "h": 32.9,
+     "shot": "24082ca07d",
+     "w": 123.3,
+     "what": "button#feed"
+    },
+    {
+     "h": 32.9,
+     "shot": "24082ca07d",
+     "w": 123.3,
+     "what": "button#settings"
+    },
+    {
+     "h": 32.9,
+     "shot": "24082ca07d",
+     "w": 123.3,
+     "what": "button#metrics"
+    },
+    {
+     "h": 28.9,
+     "shot": "24082ca07d",
+     "w": 50.5,
+     "what": "button#back"
+    },
+    {
+     "h": 28.9,
+     "shot": "24082ca07d",
+     "w": 46.8,
+     "what": "button#toevidence"
+    },
+    {
+     "h": 32.9,
+     "shot": "2bfa4f70d7",
+     "w": 123.3,
+     "what": "button#feed"
+    },
+    {
+     "h": 32.9,
+     "shot": "2bfa4f70d7",
+     "w": 123.3,
+     "what": "button#settings"
+    },
+    {
+     "h": 32.9,
+     "shot": "2bfa4f70d7",
+     "w": 123.3,
+     "what": "button#metrics"
+    },
+    {
+     "h": 28.9,
+     "shot": "2bfa4f70d7",
+     "w": 55.6,
+     "what": "button#back"
+    },
+    {
+     "h": 28.9,
+     "shot": "2bfa4f70d7",
+     "w": 72.8,
+     "what": "button#toevidence"
+    },
+    {
+     "h": 32.9,
+     "shot": "48a8291fb6",
+     "w": 123.3,
+     "what": "button#feed"
+    },
+    {
+     "h": 32.9,
+     "shot": "48a8291fb6",
+     "w": 123.3,
+     "what": "button#settings"
+    },
+    {
+     "h": 32.9,
+     "shot": "48a8291fb6",
+     "w": 123.3,
+     "what": "button#metrics"
+    },
+    {
+     "h": 28.9,
+     "shot": "48a8291fb6",
+     "w": 55.6,
+     "what": "button#back"
+    },
+    {
+     "h": 28.9,
+     "shot": "48a8291fb6",
+     "w": 72.8,
+     "what": "button#toevidence"
+    },
+    {
+     "h": 32.9,
+     "shot": "684c624b98",
+     "w": 123.3,
+     "what": "button#feed"
+    },
+    {
+     "h": 32.9,
+     "shot": "684c624b98",
+     "w": 123.3,
+     "what": "button#settings"
+    },
+    {
+     "h": 32.9,
+     "shot": "684c624b98",
+     "w": 123.3,
+     "what": "button#metrics"
+    },
+    {
+     "h": 28.9,
+     "shot": "684c624b98",
+     "w": 50.5,
+     "what": "button#back"
+    },
+    {
+     "h": 28.9,
+     "shot": "684c624b98",
+     "w": 46.8,
+     "what": "button#toevidence"
+    },
+    {
+     "h": 32.9,
+     "shot": "71b8cd861b",
+     "w": 123.3,
+     "what": "button#feed"
+    },
+    {
+     "h": 32.9,
+     "shot": "71b8cd861b",
+     "w": 123.3,
+     "what": "button#settings"
+    },
+    {
+     "h": 32.9,
+     "shot": "71b8cd861b",
+     "w": 123.3,
+     "what": "button#metrics"
+    },
+    {
+     "h": 28.9,
+     "shot": "71b8cd861b",
+     "w": 55.6,
+     "what": "button#back"
+    },
+    {
+     "h": 28.9,
+     "shot": "71b8cd861b",
+     "w": 72.8,
+     "what": "button#toevidence"
+    }
+   ],
+   "count": 60,
+   "note": "DOM boxes only; story hit boxes are not in the paint list (SPEC §G11.5)",
+   "pass": false
+  }
+ },
+ "pavka": {
+  "colour": {
+   "classes": [
+    "closed",
+    "closed",
+    "down",
+    "down",
+    "focus",
+    "focus",
+    "invalid",
+    "invalid",
+    "neutral",
+    "neutral",
+    "up",
+    "up",
+    "valid",
+    "valid"
+   ],
+   "pairs": [
+    {
+     "a": "up",
+     "b": "valid",
+     "colour_coded": true,
+     "deutan": 33.69,
+     "gray": 35.37,
+     "min": 33.69,
+     "normal": 42.72,
+     "pass": true,
+     "protan": 39.62,
+     "threshold": 15.0,
+     "tritan": 39.04
+    },
+    {
+     "a": "up",
+     "b": "up",
+     "colour_coded": true,
+     "deutan": 7.42,
+     "gray": 4.6,
+     "min": 4.6,
+     "normal": 6.38,
+     "pass": false,
+     "protan": 7.25,
+     "threshold": 15.0,
+     "tritan": 4.63
+    },
+    {
+     "a": "up",
+     "b": "closed/invalid",
+     "colour_coded": true,
+     "deutan": 13.74,
+     "gray": 13.48,
+     "min": 13.48,
+     "normal": 28.48,
+     "pass": false,
+     "protan": 21.34,
+     "threshold": 15.0,
+     "tritan": 20.22
+    },
+    {
+     "a": "up",
+     "b": "closed/invalid",
+     "colour_coded": true,
+     "deutan": 7.26,
+     "gray": 0.13,
+     "min": 0.13,
+     "normal": 25.47,
+     "pass": false,
+     "protan": 14.75,
+     "threshold": 15.0,
+     "tritan": 15.68
+    },
+    {
+     "a": "up",
+     "b": "valid",
+     "colour_coded": true,
+     "deutan": 22.29,
+     "gray": 20.09,
+     "min": 20.09,
+     "normal": 31.84,
+     "pass": true,
+     "protan": 21.8,
+     "threshold": 15.0,
+     "tritan": 26.25
+    },
+    {
+     "a": "up",
+     "b": "down",
+     "colour_coded": true,
+     "deutan": 23.63,
+     "gray": 4.66,
+     "min": 4.66,
+     "normal": 63.0,
+     "pass": false,
+     "protan": 20.53,
+     "threshold": 15.0,
+     "tritan": 61.29
+    },
+    {
+     "a": "up",
+     "b": "down",
+     "colour_coded": true,
+     "deutan": 22.53,
+     "gray": 0.63,
+     "min": 0.63,
+     "normal": 62.23,
+     "pass": false,
+     "protan": 12.95,
+     "threshold": 15.0,
+     "tritan": 59.71
+    },
+    {
+     "a": "up",
+     "b": "focus/neutral",
+     "colour_coded": true,
+     "deutan": 28.5,
+     "gray": 3.89,
+     "min": 3.89,
+     "normal": 53.0,
+     "pass": false,
+     "protan": 20.34,
+     "threshold": 15.0,
+     "tritan": 58.13
+    },
+    {
+     "a": "up",
+     "b": "focus/neutral",
+     "colour_coded": true,
+     "deutan": 33.87,
+     "gray": 18.17,
+     "min": 18.17,
+     "normal": 44.76,
+     "pass": true,
+     "protan": 23.43,
+     "threshold": 15.0,
+     "tritan": 52.47
+    },
+    {
+     "a": "valid",
+     "b": "up",
+     "colour_coded": true,
+     "deutan": 38.92,
+     "gray": 40.98,
+     "min": 38.92,
+     "normal": 46.92,
+     "pass": true,
+     "protan": 44.36,
+     "threshold": 15.0,
+     "tritan": 44.36
+    },
+    {
+     "a": "valid",
+     "b": "closed/invalid",
+     "colour_coded": true,
+     "deutan": 22.49,
+     "gray": 22.37,
+     "min": 22.37,
+     "normal": 22.64,
+     "pass": true,
+     "protan": 22.8,
+     "threshold": 15.0,
+     "tritan": 22.47
+    },
+    {
+     "a": "valid",
+     "b": "closed/invalid",
+     "colour_coded": true,
+     "deutan": 35.52,
+     "gray": 35.51,
+     "min": 35.51,
+     "normal": 35.71,
+     "pass": true,
+     "protan": 35.85,
+     "threshold": 15.0,
+     "tritan": 35.57
+    },
+    {
+     "a": "valid",
+     "b": "valid",
+     "colour_coded": true,
+     "deutan": 67.74,
+     "gray": 67.88,
+     "min": 67.74,
+     "normal": 67.9,
+     "pass": true,
+     "protan": 68.04,
+     "threshold": 15.0,
+     "tritan": 67.9
+    },
+    {
+     "a": "valid",
+     "b": "down",
+     "colour_coded": true,
+     "deutan": 45.54,
+     "gray": 30.44,
+     "min": 29.99,
+     "normal": 43.88,
+     "pass": true,
+     "protan": 29.99,
+     "threshold": 15.0,
+     "tritan": 42.13
+    },
+    {
+     "a": "valid",
+     "b": "down",
+     "colour_coded": true,
+     "deutan": 48.87,
+     "gray": 36.09,
+     "min": 32.96,
+     "normal": 47.18,
+     "pass": true,
+     "protan": 32.96,
+     "threshold": 15.0,
+     "tritan": 42.85
+    },
+    {
+     "a": "valid",
+     "b": "focus/neutral",
+     "colour_coded": true,
+     "deutan": 55.02,
+     "gray": 40.06,
+     "min": 40.06,
+     "normal": 51.54,
+     "pass": true,
+     "protan": 43.89,
+     "threshold": 15.0,
+     "tritan": 45.78
+    },
+    {
+     "a": "valid",
+     "b": "focus/neutral",
+     "colour_coded": true,
+     "deutan": 73.93,
+     "gray": 63.81,
+     "min": 63.81,
+     "normal": 70.54,
+     "pass": true,
+     "protan": 65.71,
+     "threshold": 15.0,
+     "tritan": 65.99
+    },
+    {
+     "a": "up",
+     "b": "closed/invalid",
+     "colour_coded": true,
+     "deutan": 16.9,
+     "gray": 18.35,
+     "min": 16.9,
+     "normal": 29.92,
+     "pass": true,
+     "protan": 21.92,
+     "threshold": 15.0,
+     "tritan": 24.03
+    },
+    {
+     "a": "up",
+     "b": "closed/invalid",
+     "colour_coded": true,
+     "deutan": 3.25,
+     "gray": 4.48,
+     "min": 3.25,
+     "normal": 24.54,
+     "pass": false,
+     "protan": 10.73,
+     "threshold": 15.0,
+     "tritan": 16.7
+    },
+    {
+     "a": "up",
+     "b": "valid",
+     "colour_coded": true,
+     "deutan": 17.11,
+     "gray": 15.59,
+     "min": 14.92,
+     "normal": 28.24,
+     "pass": false,
+     "protan": 14.92,
+     "threshold": 15.0,
+     "tritan": 23.25
+    },
+    {
+     "a": "up",
+     "b": "down",
+     "colour_coded": true,
+     "deutan": 30.86,
+     "gray": 9.24,
+     "min": 9.24,
+     "normal": 60.64,
+     "pass": false,
+     "protan": 27.31,
+     "threshold": 15.0,
+     "tritan": 62.95
+    },
+    {
+     "a": "up",
+     "b": "down",
+     "colour_coded": true,
+     "deutan": 28.8,
+     "gray": 3.97,
+     "min": 3.97,
+     "normal": 59.49,
+     "pass": false,
+     "protan": 19.85,
+     "threshold": 15.0,
+     "tritan": 60.98
+    },
+    {
+     "a": "up",
+     "b": "focus/neutral",
+     "colour_coded": true,
+     "deutan": 34.7,
+     "gray": 0.71,
+     "min": 0.71,
+     "normal": 51.5,
+     "pass": false,
+     "protan": 25.8,
+     "threshold": 15.0,
+     "tritan": 59.13
+    },
+    {
+     "a": "up",
+     "b": "focus/neutral",
+     "colour_coded": true,
+     "deutan": 37.51,
+     "gray": 13.64,
+     "min": 13.64,
+     "normal": 43.5,
+     "pass": false,
+     "protan": 25.25,
+     "threshold": 15.0,
+     "tritan": 51.95
+    },
+    {
+     "a": "closed/invalid",
+     "b": "closed/invalid",
+     "colour_coded": true,
+     "deutan": 13.64,
+     "gray": 13.62,
+     "min": 13.56,
+     "normal": 13.63,
+     "pass": false,
+     "protan": 13.56,
+     "threshold": 15.0,
+     "tritan": 13.63
+    },
+    {
+     "a": "closed/invalid",
+     "b": "valid",
+     "colour_coded": true,
+     "deutan": 33.5,
+     "gray": 33.31,
+     "min": 33.07,
+     "normal": 33.37,
+     "pass": true,
+     "protan": 33.07,
+     "threshold": 15.0,
+     "tritan": 33.32
+    },
+    {
+     "a": "closed/invalid",
+     "b": "down",
+     "colour_coded": true,
+     "deutan": 35.25,
+     "gray": 8.46,
+     "min": 8.46,
+     "normal": 34.59,
+     "pass": false,
+     "protan": 25.93,
+     "threshold": 15.0,
+     "tritan": 33.02
+    },
+    {
+     "a": "closed/invalid",
+     "b": "down",
+     "colour_coded": true,
+     "deutan": 35.67,
+     "gray": 14.16,
+     "min": 14.16,
+     "normal": 35.2,
+     "pass": false,
+     "protan": 23.56,
+     "threshold": 15.0,
+     "tritan": 33.35
+    },
+    {
+     "a": "closed/invalid",
+     "b": "focus/neutral",
+     "colour_coded": true,
+     "deutan": 41.92,
+     "gray": 17.62,
+     "min": 17.62,
+     "normal": 39.21,
+     "pass": true,
+     "protan": 35.28,
+     "threshold": 15.0,
+     "tritan": 34.43
+    },
+    {
+     "a": "closed/invalid",
+     "b": "focus/neutral",
+     "colour_coded": true,
+     "deutan": 48.36,
+     "gray": 31.48,
+     "min": 31.48,
+     "normal": 45.92,
+     "pass": true,
+     "protan": 44.7,
+     "threshold": 15.0,
+     "tritan": 40.3
+    },
+    {
+     "a": "closed/invalid",
+     "b": "valid",
+     "colour_coded": true,
+     "deutan": 20.16,
+     "gray": 19.97,
+     "min": 19.91,
+     "normal": 20.09,
+     "pass": true,
+     "protan": 19.91,
+     "threshold": 15.0,
+     "tritan": 19.98
+    },
+    {
+     "a": "closed/invalid",
+     "b": "down",
+     "colour_coded": true,
+     "deutan": 32.3,
+     "gray": 4.78,
+     "min": 4.78,
+     "normal": 33.48,
+     "pass": false,
+     "protan": 30.01,
+     "threshold": 15.0,
+     "tritan": 31.65
+    },
+    {
+     "a": "closed/invalid",
+     "b": "down",
+     "colour_coded": true,
+     "deutan": 30.66,
+     "gray": 0.5,
+     "min": 0.5,
+     "normal": 31.8,
+     "pass": false,
+     "protan": 24.43,
+     "threshold": 15.0,
+     "tritan": 30.16
+    },
+    {
+     "a": "closed/invalid",
+     "b": "focus/neutral",
+     "colour_coded": true,
+     "deutan": 36.76,
+     "gray": 3.77,
+     "min": 3.77,
+     "normal": 35.07,
+     "pass": false,
+     "protan": 34.04,
+     "threshold": 15.0,
+     "tritan": 29.26
+    },
+    {
+     "a": "closed/invalid",
+     "b": "focus/neutral",
+     "colour_coded": true,
+     "deutan": 40.28,
+     "gray": 18.04,
+     "min": 18.04,
+     "normal": 38.03,
+     "pass": true,
+     "protan": 37.68,
+     "threshold": 15.0,
+     "tritan": 30.71
+    },
+    {
+     "a": "valid",
+     "b": "down",
+     "colour_coded": true,
+     "deutan": 35.74,
+     "gray": 24.59,
+     "min": 24.59,
+     "normal": 40.34,
+     "pass": true,
+     "protan": 41.87,
+     "threshold": 15.0,
+     "tritan": 38.24
+    },
+    {
+     "a": "valid",
+     "b": "down",
+     "colour_coded": true,
+     "deutan": 31.76,
+     "gray": 19.48,
+     "min": 19.48,
+     "normal": 36.37,
+     "pass": true,
+     "protan": 34.47,
+     "threshold": 15.0,
+     "tritan": 34.4
+    },
+    {
+     "a": "valid",
+     "b": "focus/neutral",
+     "colour_coded": true,
+     "deutan": 35.78,
+     "gray": 16.29,
+     "min": 16.29,
+     "normal": 37.04,
+     "pass": true,
+     "protan": 38.88,
+     "threshold": 15.0,
+     "tritan": 32.06
+    },
+    {
+     "a": "valid",
+     "b": "focus/neutral",
+     "colour_coded": true,
+     "deutan": 32.52,
+     "gray": 1.97,
+     "min": 1.97,
+     "normal": 31.45,
+     "pass": false,
+     "protan": 32.45,
+     "threshold": 15.0,
+     "tritan": 23.98
+    },
+    {
+     "a": "down",
+     "b": "down",
+     "colour_coded": true,
+     "deutan": 5.23,
+     "gray": 5.28,
+     "min": 5.14,
+     "normal": 6.1,
+     "pass": false,
+     "protan": 7.18,
+     "threshold": 15.0,
+     "tritan": 5.14
+    },
+    {
+     "a": "down",
+     "b": "focus/neutral",
+     "colour_coded": true,
+     "deutan": 8.42,
+     "gray": 8.54,
+     "min": 7.18,
+     "normal": 19.23,
+     "pass": false,
+     "protan": 15.25,
+     "threshold": 15.0,
+     "tritan": 7.18
+    },
+    {
+     "a": "down",
+     "b": "focus/neutral",
+     "colour_coded": true,
+     "deutan": 19.86,
+     "gray": 22.68,
+     "min": 19.86,
+     "normal": 37.63,
+     "pass": true,
+     "protan": 31.95,
+     "threshold": 15.0,
+     "tritan": 23.94
+    },
+    {
+     "a": "down",
+     "b": "focus/neutral",
+     "colour_coded": true,
+     "deutan": 7.75,
+     "gray": 3.26,
+     "min": 3.26,
+     "normal": 19.46,
+     "pass": false,
+     "protan": 13.86,
+     "threshold": 15.0,
+     "tritan": 3.65
+    },
+    {
+     "a": "down",
+     "b": "focus/neutral",
+     "colour_coded": true,
+     "deutan": 16.43,
+     "gray": 17.55,
+     "min": 16.43,
+     "normal": 35.58,
+     "pass": true,
+     "protan": 26.69,
+     "threshold": 15.0,
+     "tritan": 19.99
+    },
+    {
+     "a": "focus/neutral",
+     "b": "focus/neutral",
+     "colour_coded": true,
+     "deutan": 12.57,
+     "gray": 14.34,
+     "min": 12.57,
+     "normal": 20.9,
+     "pass": false,
+     "protan": 18.16,
+     "threshold": 15.0,
+     "tritan": 16.45
+    }
+   ],
+   "pass": false
+  },
+  "density": {
+   "face_chars_max": 214,
+   "face_chars_mean": 179.8,
+   "face_lines_max": null,
+   "screen_chars_mean": 538.8
+  },
+  "k52": {
+   "configs": {
+    "phone": {
+     "200": {
+      "drag_long": 0.086,
+      "pass": true,
+      "scene_p95": 22,
+      "tick_p95": 1
+     },
+     "5": {
+      "drag_long": 0,
+      "pass": true,
+      "scene_p95": 11,
+      "tick_p95": 1
+     },
+     "50": {
+      "drag_long": 0.135,
+      "pass": false,
+      "scene_p95": 18,
+      "tick_p95": 1
+     }
+    },
+    "phone-jit-est": {
+     "200": {
+      "drag_long": 0,
+      "pass": true,
+      "scene_p95": 2,
+      "tick_p95": 1
+     },
+     "5": {
+      "drag_long": 0,
+      "pass": true,
+      "scene_p95": 1,
+      "tick_p95": 1
+     },
+     "50": {
+      "drag_long": 0,
+      "pass": true,
+      "scene_p95": 3,
+      "tick_p95": 1
+     }
+    }
+   },
+   "pass": false,
+   "rerun": true
+  },
+  "min_font": {
+   "pass": true,
+   "threshold": 11.0,
+   "worst": {
+    "px": 11.0,
+    "shot": "008d9a3e10",
+    "text": "35.00"
+   }
+  },
+  "nontext_contrast": {
+   "pass": false,
+   "threshold": 3.0,
+   "worst_glyph": {
+    "prim": "fill",
+    "ratio": 1.08,
+    "roles": [
+     "focus",
+     "neutral"
+    ],
+    "shot": "008d9a3e10"
+   }
+  },
+  "pass": false,
+  "roles": {},
+  "text_contrast": {
+   "pass": false,
+   "worst": {
+    "margin": 0.7931363717960205,
+    "px": 11.0,
+    "ratio": 3.57,
+    "shot": "008d9a3e10",
+    "text": "36.32",
+    "threshold": 4.5
+   }
+  },
+  "touch": {
+   "below_44": [
+    {
+     "h": 32.9,
+     "shot": "008d9a3e10",
+     "w": 123.3,
+     "what": "button#feed"
+    },
+    {
+     "h": 32.9,
+     "shot": "008d9a3e10",
+     "w": 123.3,
+     "what": "button#settings"
+    },
+    {
+     "h": 32.9,
+     "shot": "008d9a3e10",
+     "w": 123.3,
+     "what": "button#metrics"
+    },
+    {
+     "h": 28.9,
+     "shot": "008d9a3e10",
+     "w": 50.5,
+     "what": "button#back"
+    },
+    {
+     "h": 28.9,
+     "shot": "008d9a3e10",
+     "w": 46.8,
+     "what": "button#toevidence"
+    },
+    {
+     "h": 32.9,
+     "shot": "0446268330",
+     "w": 123.3,
+     "what": "button#feed"
+    },
+    {
+     "h": 32.9,
+     "shot": "0446268330",
+     "w": 123.3,
+     "what": "button#settings"
+    },
+    {
+     "h": 32.9,
+     "shot": "0446268330",
+     "w": 123.3,
+     "what": "button#metrics"
+    },
+    {
+     "h": 28.9,
+     "shot": "0446268330",
+     "w": 55.6,
+     "what": "button#back"
+    },
+    {
+     "h": 28.9,
+     "shot": "0446268330",
+     "w": 72.8,
+     "what": "button#toevidence"
+    },
+    {
+     "h": 32.9,
+     "shot": "0b5d852568",
+     "w": 123.3,
+     "what": "button#feed"
+    },
+    {
+     "h": 32.9,
+     "shot": "0b5d852568",
+     "w": 123.3,
+     "what": "button#settings"
+    },
+    {
+     "h": 32.9,
+     "shot": "0b5d852568",
+     "w": 123.3,
+     "what": "button#metrics"
+    },
+    {
+     "h": 28.9,
+     "shot": "0b5d852568",
+     "w": 50.5,
+     "what": "button#back"
+    },
+    {
+     "h": 28.9,
+     "shot": "0b5d852568",
+     "w": 46.8,
+     "what": "button#toevidence"
+    },
+    {
+     "h": 32.9,
+     "shot": "0dccfe3864",
+     "w": 123.3,
+     "what": "button#feed"
+    },
+    {
+     "h": 32.9,
+     "shot": "0dccfe3864",
+     "w": 123.3,
+     "what": "button#settings"
+    },
+    {
+     "h": 32.9,
+     "shot": "0dccfe3864",
+     "w": 123.3,
+     "what": "button#metrics"
+    },
+    {
+     "h": 28.9,
+     "shot": "0dccfe3864",
+     "w": 55.6,
+     "what": "button#back"
+    },
+    {
+     "h": 28.9,
+     "shot": "0dccfe3864",
+     "w": 72.8,
+     "what": "button#toevidence"
+    },
+    {
+     "h": 32.9,
+     "shot": "3e702923c2",
+     "w": 123.3,
+     "what": "button#feed"
+    },
+    {
+     "h": 32.9,
+     "shot": "3e702923c2",
+     "w": 123.3,
+     "what": "button#settings"
+    },
+    {
+     "h": 32.9,
+     "shot": "3e702923c2",
+     "w": 123.3,
+     "what": "button#metrics"
+    },
+    {
+     "h": 28.9,
+     "shot": "3e702923c2",
+     "w": 50.5,
+     "what": "button#back"
+    },
+    {
+     "h": 28.9,
+     "shot": "3e702923c2",
+     "w": 46.8,
+     "what": "button#toevidence"
+    },
+    {
+     "h": 32.9,
+     "shot": "46137ac9cb",
+     "w": 123.3,
+     "what": "button#feed"
+    },
+    {
+     "h": 32.9,
+     "shot": "46137ac9cb",
+     "w": 123.3,
+     "what": "button#settings"
+    },
+    {
+     "h": 32.9,
+     "shot": "46137ac9cb",
+     "w": 123.3,
+     "what": "button#metrics"
+    },
+    {
+     "h": 28.9,
+     "shot": "46137ac9cb",
+     "w": 50.5,
+     "what": "button#back"
+    },
+    {
+     "h": 28.9,
+     "shot": "46137ac9cb",
+     "w": 46.8,
+     "what": "button#toevidence"
+    }
+   ],
+   "count": 60,
+   "note": "DOM boxes only; story hit boxes are not in the paint list (SPEC §G11.5)",
+   "pass": false
+  }
+ },
+ "r4": {
+  "colour": {
+   "classes": [
+    "down",
+    "down",
+    "up",
+    "up",
+    "valid",
+    "valid"
+   ],
+   "pairs": [
+    {
+     "a": "up",
+     "b": "valid",
+     "colour_coded": true,
+     "deutan": 33.69,
+     "gray": 35.37,
+     "min": 33.69,
+     "normal": 42.72,
+     "pass": true,
+     "protan": 39.62,
+     "threshold": 15.0,
+     "tritan": 39.04
+    },
+    {
+     "a": "up",
+     "b": "up",
+     "colour_coded": true,
+     "deutan": 7.42,
+     "gray": 4.6,
+     "min": 4.6,
+     "normal": 6.38,
+     "pass": false,
+     "protan": 7.25,
+     "threshold": 15.0,
+     "tritan": 4.63
+    },
+    {
+     "a": "up",
+     "b": "valid",
+     "colour_coded": true,
+     "deutan": 22.29,
+     "gray": 20.09,
+     "min": 20.09,
+     "normal": 31.84,
+     "pass": true,
+     "protan": 21.8,
+     "threshold": 15.0,
+     "tritan": 26.25
+    },
+    {
+     "a": "up",
+     "b": "down",
+     "colour_coded": true,
+     "deutan": 23.63,
+     "gray": 4.66,
+     "min": 4.66,
+     "normal": 63.0,
+     "pass": false,
+     "protan": 20.53,
+     "threshold": 15.0,
+     "tritan": 61.29
+    },
+    {
+     "a": "up",
+     "b": "down",
+     "colour_coded": true,
+     "deutan": 22.53,
+     "gray": 0.63,
+     "min": 0.63,
+     "normal": 62.23,
+     "pass": false,
+     "protan": 12.95,
+     "threshold": 15.0,
+     "tritan": 59.71
+    },
+    {
+     "a": "valid",
+     "b": "up",
+     "colour_coded": true,
+     "deutan": 38.92,
+     "gray": 40.98,
+     "min": 38.92,
+     "normal": 46.92,
+     "pass": true,
+     "protan": 44.36,
+     "threshold": 15.0,
+     "tritan": 44.36
+    },
+    {
+     "a": "valid",
+     "b": "valid",
+     "colour_coded": true,
+     "deutan": 67.74,
+     "gray": 67.88,
+     "min": 67.74,
+     "normal": 67.9,
+     "pass": true,
+     "protan": 68.04,
+     "threshold": 15.0,
+     "tritan": 67.9
+    },
+    {
+     "a": "valid",
+     "b": "down",
+     "colour_coded": true,
+     "deutan": 45.54,
+     "gray": 30.44,
+     "min": 29.99,
+     "normal": 43.88,
+     "pass": true,
+     "protan": 29.99,
+     "threshold": 15.0,
+     "tritan": 42.13
+    },
+    {
+     "a": "valid",
+     "b": "down",
+     "colour_coded": true,
+     "deutan": 48.87,
+     "gray": 36.09,
+     "min": 32.96,
+     "normal": 47.18,
+     "pass": true,
+     "protan": 32.96,
+     "threshold": 15.0,
+     "tritan": 42.85
+    },
+    {
+     "a": "up",
+     "b": "valid",
+     "colour_coded": true,
+     "deutan": 17.11,
+     "gray": 15.59,
+     "min": 14.92,
+     "normal": 28.24,
+     "pass": false,
+     "protan": 14.92,
+     "threshold": 15.0,
+     "tritan": 23.25
+    },
+    {
+     "a": "up",
+     "b": "down",
+     "colour_coded": true,
+     "deutan": 30.86,
+     "gray": 9.24,
+     "min": 9.24,
+     "normal": 60.64,
+     "pass": false,
+     "protan": 27.31,
+     "threshold": 15.0,
+     "tritan": 62.95
+    },
+    {
+     "a": "up",
+     "b": "down",
+     "colour_coded": true,
+     "deutan": 28.8,
+     "gray": 3.97,
+     "min": 3.97,
+     "normal": 59.49,
+     "pass": false,
+     "protan": 19.85,
+     "threshold": 15.0,
+     "tritan": 60.98
+    },
+    {
+     "a": "valid",
+     "b": "down",
+     "colour_coded": true,
+     "deutan": 35.74,
+     "gray": 24.59,
+     "min": 24.59,
+     "normal": 40.34,
+     "pass": true,
+     "protan": 41.87,
+     "threshold": 15.0,
+     "tritan": 38.24
+    },
+    {
+     "a": "valid",
+     "b": "down",
+     "colour_coded": true,
+     "deutan": 31.76,
+     "gray": 19.48,
+     "min": 19.48,
+     "normal": 36.37,
+     "pass": true,
+     "protan": 34.47,
+     "threshold": 15.0,
+     "tritan": 34.4
+    },
+    {
+     "a": "down",
+     "b": "down",
+     "colour_coded": true,
+     "deutan": 5.23,
+     "gray": 5.28,
+     "min": 5.14,
+     "normal": 6.1,
+     "pass": false,
+     "protan": 7.18,
+     "threshold": 15.0,
+     "tritan": 5.14
+    }
+   ],
+   "pass": false
+  },
+  "density": {
+   "face_chars_max": 60,
+   "face_chars_mean": 49.3,
+   "face_lines_max": null,
+   "screen_chars_mean": 408.3
+  },
+  "k52": {
+   "configs": {
+    "phone": {
+     "200": {
+      "drag_long": 0,
+      "pass": true,
+      "scene_p95": 10,
+      "tick_p95": 1
+     },
+     "5": {
+      "drag_long": 0,
+      "pass": true,
+      "scene_p95": 4,
+      "tick_p95": 1
+     },
+     "50": {
+      "drag_long": 0,
+      "pass": true,
+      "scene_p95": 9,
+      "tick_p95": 1
+     }
+    },
+    "phone-jit-est": {
+     "200": {
+      "drag_long": 0,
+      "pass": true,
+      "scene_p95": 1,
+      "tick_p95": 1
+     },
+     "5": {
+      "drag_long": 0,
+      "pass": true,
+      "scene_p95": 1,
+      "tick_p95": 1
+     },
+     "50": {
+      "drag_long": 0,
+      "pass": true,
+      "scene_p95": 2,
+      "tick_p95": 1
+     }
+    }
+   },
+   "pass": true,
+   "rerun": true
+  },
+  "min_font": {
+   "pass": true,
+   "threshold": 11.0,
+   "worst": {
+    "px": 11.0,
+    "shot": "2deaa784af",
+    "text": "36.00"
+   }
+  },
+  "nontext_contrast": {
+   "pass": false,
+   "threshold": 3.0,
+   "worst_glyph": {
+    "prim": "rect",
+    "ratio": 2.8,
+    "roles": [
+     "up"
+    ],
+    "shot": "eada3e609f"
+   }
+  },
+  "pass": false,
+  "roles": {},
+  "text_contrast": {
+   "pass": false,
+   "worst": {
+    "margin": 0.7931363717960205,
+    "px": 16.0,
+    "ratio": 3.57,
+    "shot": "48403c5816",
+    "text": "C 36.32",
+    "threshold": 4.5
+   }
+  },
+  "touch": {
+   "below_44": [
+    {
+     "h": 32.9,
+     "shot": "2deaa784af",
+     "w": 123.3,
+     "what": "button#feed"
+    },
+    {
+     "h": 32.9,
+     "shot": "2deaa784af",
+     "w": 123.3,
+     "what": "button#settings"
+    },
+    {
+     "h": 32.9,
+     "shot": "2deaa784af",
+     "w": 123.3,
+     "what": "button#metrics"
+    },
+    {
+     "h": 28.9,
+     "shot": "2deaa784af",
+     "w": 55.6,
+     "what": "button#back"
+    },
+    {
+     "h": 28.9,
+     "shot": "2deaa784af",
+     "w": 72.8,
+     "what": "button#toevidence"
+    },
+    {
+     "h": 32.9,
+     "shot": "48403c5816",
+     "w": 123.3,
+     "what": "button#feed"
+    },
+    {
+     "h": 32.9,
+     "shot": "48403c5816",
+     "w": 123.3,
+     "what": "button#settings"
+    },
+    {
+     "h": 32.9,
+     "shot": "48403c5816",
+     "w": 123.3,
+     "what": "button#metrics"
+    },
+    {
+     "h": 28.9,
+     "shot": "48403c5816",
+     "w": 50.5,
+     "what": "button#back"
+    },
+    {
+     "h": 28.9,
+     "shot": "48403c5816",
+     "w": 46.8,
+     "what": "button#toevidence"
+    },
+    {
+     "h": 32.9,
+     "shot": "5a47d7544a",
+     "w": 123.3,
+     "what": "button#feed"
+    },
+    {
+     "h": 32.9,
+     "shot": "5a47d7544a",
+     "w": 123.3,
+     "what": "button#settings"
+    },
+    {
+     "h": 32.9,
+     "shot": "5a47d7544a",
+     "w": 123.3,
+     "what": "button#metrics"
+    },
+    {
+     "h": 28.9,
+     "shot": "5a47d7544a",
+     "w": 50.5,
+     "what": "button#back"
+    },
+    {
+     "h": 28.9,
+     "shot": "5a47d7544a",
+     "w": 46.8,
+     "what": "button#toevidence"
+    },
+    {
+     "h": 32.9,
+     "shot": "85363818ad",
+     "w": 123.3,
+     "what": "button#feed"
+    },
+    {
+     "h": 32.9,
+     "shot": "85363818ad",
+     "w": 123.3,
+     "what": "button#settings"
+    },
+    {
+     "h": 32.9,
+     "shot": "85363818ad",
+     "w": 123.3,
+     "what": "button#metrics"
+    },
+    {
+     "h": 28.9,
+     "shot": "85363818ad",
+     "w": 55.6,
+     "what": "button#back"
+    },
+    {
+     "h": 28.9,
+     "shot": "85363818ad",
+     "w": 72.8,
+     "what": "button#toevidence"
+    },
+    {
+     "h": 32.9,
+     "shot": "8ee8a1e661",
+     "w": 123.3,
+     "what": "button#feed"
+    },
+    {
+     "h": 32.9,
+     "shot": "8ee8a1e661",
+     "w": 123.3,
+     "what": "button#settings"
+    },
+    {
+     "h": 32.9,
+     "shot": "8ee8a1e661",
+     "w": 123.3,
+     "what": "button#metrics"
+    },
+    {
+     "h": 28.9,
+     "shot": "8ee8a1e661",
+     "w": 55.6,
+     "what": "button#back"
+    },
+    {
+     "h": 28.9,
+     "shot": "8ee8a1e661",
+     "w": 72.8,
+     "what": "button#toevidence"
+    },
+    {
+     "h": 32.9,
+     "shot": "91baee1fd2",
+     "w": 123.3,
+     "what": "button#feed"
+    },
+    {
+     "h": 32.9,
+     "shot": "91baee1fd2",
+     "w": 123.3,
+     "what": "button#settings"
+    },
+    {
+     "h": 32.9,
+     "shot": "91baee1fd2",
+     "w": 123.3,
+     "what": "button#metrics"
+    },
+    {
+     "h": 28.9,
+     "shot": "91baee1fd2",
+     "w": 55.6,
+     "what": "button#back"
+    },
+    {
+     "h": 28.9,
+     "shot": "91baee1fd2",
+     "w": 72.8,
+     "what": "button#toevidence"
+    }
+   ],
+   "count": 60,
+   "note": "DOM boxes only; story hit boxes are not in the paint list (SPEC §G11.5)",
+   "pass": false
+  }
+ },
+ "selen": {
+  "colour": {
+   "classes": [
+    "closed",
+    "closed",
+    "down",
+    "down",
+    "focus",
+    "focus",
+    "invalid",
+    "invalid",
+    "neutral",
+    "neutral",
+    "up",
+    "up",
+    "valid",
+    "valid"
+   ],
+   "pairs": [
+    {
+     "a": "up",
+     "b": "valid",
+     "colour_coded": true,
+     "deutan": 33.69,
+     "gray": 35.37,
+     "min": 33.69,
+     "normal": 42.72,
+     "pass": true,
+     "protan": 39.62,
+     "threshold": 15.0,
+     "tritan": 39.04
+    },
+    {
+     "a": "up",
+     "b": "up",
+     "colour_coded": true,
+     "deutan": 7.42,
+     "gray": 4.6,
+     "min": 4.6,
+     "normal": 6.38,
+     "pass": false,
+     "protan": 7.25,
+     "threshold": 15.0,
+     "tritan": 4.63
+    },
+    {
+     "a": "up",
+     "b": "closed/invalid",
+     "colour_coded": true,
+     "deutan": 13.74,
+     "gray": 13.48,
+     "min": 13.48,
+     "normal": 28.48,
+     "pass": false,
+     "protan": 21.34,
+     "threshold": 15.0,
+     "tritan": 20.22
+    },
+    {
+     "a": "up",
+     "b": "closed/invalid",
+     "colour_coded": true,
+     "deutan": 7.26,
+     "gray": 0.13,
+     "min": 0.13,
+     "normal": 25.47,
+     "pass": false,
+     "protan": 14.75,
+     "threshold": 15.0,
+     "tritan": 15.68
+    },
+    {
+     "a": "up",
+     "b": "valid",
+     "colour_coded": true,
+     "deutan": 22.29,
+     "gray": 20.09,
+     "min": 20.09,
+     "normal": 31.84,
+     "pass": true,
+     "protan": 21.8,
+     "threshold": 15.0,
+     "tritan": 26.25
+    },
+    {
+     "a": "up",
+     "b": "down",
+     "colour_coded": true,
+     "deutan": 23.63,
+     "gray": 4.66,
+     "min": 4.66,
+     "normal": 63.0,
+     "pass": false,
+     "protan": 20.53,
+     "threshold": 15.0,
+     "tritan": 61.29
+    },
+    {
+     "a": "up",
+     "b": "down",
+     "colour_coded": true,
+     "deutan": 22.53,
+     "gray": 0.63,
+     "min": 0.63,
+     "normal": 62.23,
+     "pass": false,
+     "protan": 12.95,
+     "threshold": 15.0,
+     "tritan": 59.71
+    },
+    {
+     "a": "up",
+     "b": "focus/neutral",
+     "colour_coded": true,
+     "deutan": 28.5,
+     "gray": 3.89,
+     "min": 3.89,
+     "normal": 53.0,
+     "pass": false,
+     "protan": 20.34,
+     "threshold": 15.0,
+     "tritan": 58.13
+    },
+    {
+     "a": "up",
+     "b": "focus/neutral",
+     "colour_coded": true,
+     "deutan": 33.87,
+     "gray": 18.17,
+     "min": 18.17,
+     "normal": 44.76,
+     "pass": true,
+     "protan": 23.43,
+     "threshold": 15.0,
+     "tritan": 52.47
+    },
+    {
+     "a": "valid",
+     "b": "up",
+     "colour_coded": true,
+     "deutan": 38.92,
+     "gray": 40.98,
+     "min": 38.92,
+     "normal": 46.92,
+     "pass": true,
+     "protan": 44.36,
+     "threshold": 15.0,
+     "tritan": 44.36
+    },
+    {
+     "a": "valid",
+     "b": "closed/invalid",
+     "colour_coded": true,
+     "deutan": 22.49,
+     "gray": 22.37,
+     "min": 22.37,
+     "normal": 22.64,
+     "pass": true,
+     "protan": 22.8,
+     "threshold": 15.0,
+     "tritan": 22.47
+    },
+    {
+     "a": "valid",
+     "b": "closed/invalid",
+     "colour_coded": true,
+     "deutan": 35.52,
+     "gray": 35.51,
+     "min": 35.51,
+     "normal": 35.71,
+     "pass": true,
+     "protan": 35.85,
+     "threshold": 15.0,
+     "tritan": 35.57
+    },
+    {
+     "a": "valid",
+     "b": "valid",
+     "colour_coded": true,
+     "deutan": 67.74,
+     "gray": 67.88,
+     "min": 67.74,
+     "normal": 67.9,
+     "pass": true,
+     "protan": 68.04,
+     "threshold": 15.0,
+     "tritan": 67.9
+    },
+    {
+     "a": "valid",
+     "b": "down",
+     "colour_coded": true,
+     "deutan": 45.54,
+     "gray": 30.44,
+     "min": 29.99,
+     "normal": 43.88,
+     "pass": true,
+     "protan": 29.99,
+     "threshold": 15.0,
+     "tritan": 42.13
+    },
+    {
+     "a": "valid",
+     "b": "down",
+     "colour_coded": true,
+     "deutan": 48.87,
+     "gray": 36.09,
+     "min": 32.96,
+     "normal": 47.18,
+     "pass": true,
+     "protan": 32.96,
+     "threshold": 15.0,
+     "tritan": 42.85
+    },
+    {
+     "a": "valid",
+     "b": "focus/neutral",
+     "colour_coded": true,
+     "deutan": 55.02,
+     "gray": 40.06,
+     "min": 40.06,
+     "normal": 51.54,
+     "pass": true,
+     "protan": 43.89,
+     "threshold": 15.0,
+     "tritan": 45.78
+    },
+    {
+     "a": "valid",
+     "b": "focus/neutral",
+     "colour_coded": true,
+     "deutan": 73.93,
+     "gray": 63.81,
+     "min": 63.81,
+     "normal": 70.54,
+     "pass": true,
+     "protan": 65.71,
+     "threshold": 15.0,
+     "tritan": 65.99
+    },
+    {
+     "a": "up",
+     "b": "closed/invalid",
+     "colour_coded": true,
+     "deutan": 16.9,
+     "gray": 18.35,
+     "min": 16.9,
+     "normal": 29.92,
+     "pass": true,
+     "protan": 21.92,
+     "threshold": 15.0,
+     "tritan": 24.03
+    },
+    {
+     "a": "up",
+     "b": "closed/invalid",
+     "colour_coded": true,
+     "deutan": 3.25,
+     "gray": 4.48,
+     "min": 3.25,
+     "normal": 24.54,
+     "pass": false,
+     "protan": 10.73,
+     "threshold": 15.0,
+     "tritan": 16.7
+    },
+    {
+     "a": "up",
+     "b": "valid",
+     "colour_coded": true,
+     "deutan": 17.11,
+     "gray": 15.59,
+     "min": 14.92,
+     "normal": 28.24,
+     "pass": false,
+     "protan": 14.92,
+     "threshold": 15.0,
+     "tritan": 23.25
+    },
+    {
+     "a": "up",
+     "b": "down",
+     "colour_coded": true,
+     "deutan": 30.86,
+     "gray": 9.24,
+     "min": 9.24,
+     "normal": 60.64,
+     "pass": false,
+     "protan": 27.31,
+     "threshold": 15.0,
+     "tritan": 62.95
+    },
+    {
+     "a": "up",
+     "b": "down",
+     "colour_coded": true,
+     "deutan": 28.8,
+     "gray": 3.97,
+     "min": 3.97,
+     "normal": 59.49,
+     "pass": false,
+     "protan": 19.85,
+     "threshold": 15.0,
+     "tritan": 60.98
+    },
+    {
+     "a": "up",
+     "b": "focus/neutral",
+     "colour_coded": true,
+     "deutan": 34.7,
+     "gray": 0.71,
+     "min": 0.71,
+     "normal": 51.5,
+     "pass": false,
+     "protan": 25.8,
+     "threshold": 15.0,
+     "tritan": 59.13
+    },
+    {
+     "a": "up",
+     "b": "focus/neutral",
+     "colour_coded": true,
+     "deutan": 37.51,
+     "gray": 13.64,
+     "min": 13.64,
+     "normal": 43.5,
+     "pass": false,
+     "protan": 25.25,
+     "threshold": 15.0,
+     "tritan": 51.95
+    },
+    {
+     "a": "closed/invalid",
+     "b": "closed/invalid",
+     "colour_coded": true,
+     "deutan": 13.64,
+     "gray": 13.62,
+     "min": 13.56,
+     "normal": 13.63,
+     "pass": false,
+     "protan": 13.56,
+     "threshold": 15.0,
+     "tritan": 13.63
+    },
+    {
+     "a": "closed/invalid",
+     "b": "valid",
+     "colour_coded": true,
+     "deutan": 33.5,
+     "gray": 33.31,
+     "min": 33.07,
+     "normal": 33.37,
+     "pass": true,
+     "protan": 33.07,
+     "threshold": 15.0,
+     "tritan": 33.32
+    },
+    {
+     "a": "closed/invalid",
+     "b": "down",
+     "colour_coded": true,
+     "deutan": 35.25,
+     "gray": 8.46,
+     "min": 8.46,
+     "normal": 34.59,
+     "pass": false,
+     "protan": 25.93,
+     "threshold": 15.0,
+     "tritan": 33.02
+    },
+    {
+     "a": "closed/invalid",
+     "b": "down",
+     "colour_coded": true,
+     "deutan": 35.67,
+     "gray": 14.16,
+     "min": 14.16,
+     "normal": 35.2,
+     "pass": false,
+     "protan": 23.56,
+     "threshold": 15.0,
+     "tritan": 33.35
+    },
+    {
+     "a": "closed/invalid",
+     "b": "focus/neutral",
+     "colour_coded": true,
+     "deutan": 41.92,
+     "gray": 17.62,
+     "min": 17.62,
+     "normal": 39.21,
+     "pass": true,
+     "protan": 35.28,
+     "threshold": 15.0,
+     "tritan": 34.43
+    },
+    {
+     "a": "closed/invalid",
+     "b": "focus/neutral",
+     "colour_coded": true,
+     "deutan": 48.36,
+     "gray": 31.48,
+     "min": 31.48,
+     "normal": 45.92,
+     "pass": true,
+     "protan": 44.7,
+     "threshold": 15.0,
+     "tritan": 40.3
+    },
+    {
+     "a": "closed/invalid",
+     "b": "valid",
+     "colour_coded": true,
+     "deutan": 20.16,
+     "gray": 19.97,
+     "min": 19.91,
+     "normal": 20.09,
+     "pass": true,
+     "protan": 19.91,
+     "threshold": 15.0,
+     "tritan": 19.98
+    },
+    {
+     "a": "closed/invalid",
+     "b": "down",
+     "colour_coded": true,
+     "deutan": 32.3,
+     "gray": 4.78,
+     "min": 4.78,
+     "normal": 33.48,
+     "pass": false,
+     "protan": 30.01,
+     "threshold": 15.0,
+     "tritan": 31.65
+    },
+    {
+     "a": "closed/invalid",
+     "b": "down",
+     "colour_coded": true,
+     "deutan": 30.66,
+     "gray": 0.5,
+     "min": 0.5,
+     "normal": 31.8,
+     "pass": false,
+     "protan": 24.43,
+     "threshold": 15.0,
+     "tritan": 30.16
+    },
+    {
+     "a": "closed/invalid",
+     "b": "focus/neutral",
+     "colour_coded": true,
+     "deutan": 36.76,
+     "gray": 3.77,
+     "min": 3.77,
+     "normal": 35.07,
+     "pass": false,
+     "protan": 34.04,
+     "threshold": 15.0,
+     "tritan": 29.26
+    },
+    {
+     "a": "closed/invalid",
+     "b": "focus/neutral",
+     "colour_coded": true,
+     "deutan": 40.28,
+     "gray": 18.04,
+     "min": 18.04,
+     "normal": 38.03,
+     "pass": true,
+     "protan": 37.68,
+     "threshold": 15.0,
+     "tritan": 30.71
+    },
+    {
+     "a": "valid",
+     "b": "down",
+     "colour_coded": true,
+     "deutan": 35.74,
+     "gray": 24.59,
+     "min": 24.59,
+     "normal": 40.34,
+     "pass": true,
+     "protan": 41.87,
+     "threshold": 15.0,
+     "tritan": 38.24
+    },
+    {
+     "a": "valid",
+     "b": "down",
+     "colour_coded": true,
+     "deutan": 31.76,
+     "gray": 19.48,
+     "min": 19.48,
+     "normal": 36.37,
+     "pass": true,
+     "protan": 34.47,
+     "threshold": 15.0,
+     "tritan": 34.4
+    },
+    {
+     "a": "valid",
+     "b": "focus/neutral",
+     "colour_coded": true,
+     "deutan": 35.78,
+     "gray": 16.29,
+     "min": 16.29,
+     "normal": 37.04,
+     "pass": true,
+     "protan": 38.88,
+     "threshold": 15.0,
+     "tritan": 32.06
+    },
+    {
+     "a": "valid",
+     "b": "focus/neutral",
+     "colour_coded": true,
+     "deutan": 32.52,
+     "gray": 1.97,
+     "min": 1.97,
+     "normal": 31.45,
+     "pass": false,
+     "protan": 32.45,
+     "threshold": 15.0,
+     "tritan": 23.98
+    },
+    {
+     "a": "down",
+     "b": "down",
+     "colour_coded": true,
+     "deutan": 5.23,
+     "gray": 5.28,
+     "min": 5.14,
+     "normal": 6.1,
+     "pass": false,
+     "protan": 7.18,
+     "threshold": 15.0,
+     "tritan": 5.14
+    },
+    {
+     "a": "down",
+     "b": "focus/neutral",
+     "colour_coded": true,
+     "deutan": 8.42,
+     "gray": 8.54,
+     "min": 7.18,
+     "normal": 19.23,
+     "pass": false,
+     "protan": 15.25,
+     "threshold": 15.0,
+     "tritan": 7.18
+    },
+    {
+     "a": "down",
+     "b": "focus/neutral",
+     "colour_coded": true,
+     "deutan": 19.86,
+     "gray": 22.68,
+     "min": 19.86,
+     "normal": 37.63,
+     "pass": true,
+     "protan": 31.95,
+     "threshold": 15.0,
+     "tritan": 23.94
+    },
+    {
+     "a": "down",
+     "b": "focus/neutral",
+     "colour_coded": true,
+     "deutan": 7.75,
+     "gray": 3.26,
+     "min": 3.26,
+     "normal": 19.46,
+     "pass": false,
+     "protan": 13.86,
+     "threshold": 15.0,
+     "tritan": 3.65
+    },
+    {
+     "a": "down",
+     "b": "focus/neutral",
+     "colour_coded": true,
+     "deutan": 16.43,
+     "gray": 17.55,
+     "min": 16.43,
+     "normal": 35.58,
+     "pass": true,
+     "protan": 26.69,
+     "threshold": 15.0,
+     "tritan": 19.99
+    },
+    {
+     "a": "focus/neutral",
+     "b": "focus/neutral",
+     "colour_coded": true,
+     "deutan": 12.57,
+     "gray": 14.34,
+     "min": 12.57,
+     "normal": 20.9,
+     "pass": false,
+     "protan": 18.16,
+     "threshold": 15.0,
+     "tritan": 16.45
+    }
+   ],
+   "pass": false
+  },
+  "density": {
+   "face_chars_max": 166,
+   "face_chars_mean": 113.8,
+   "face_lines_max": null,
+   "screen_chars_mean": 472.8
+  },
+  "k52": {
+   "configs": {
+    "phone": {
+     "200": {
+      "drag_long": 0.086,
+      "pass": true,
+      "scene_p95": 16,
+      "tick_p95": 1
+     },
+     "5": {
+      "drag_long": 0,
+      "pass": true,
+      "scene_p95": 6,
+      "tick_p95": 1
+     },
+     "50": {
+      "drag_long": 0,
+      "pass": true,
+      "scene_p95": 13,
+      "tick_p95": 1
+     }
+    },
+    "phone-jit-est": {
+     "200": {
+      "drag_long": 0,
+      "pass": true,
+      "scene_p95": 2,
+      "tick_p95": 1
+     },
+     "5": {
+      "drag_long": 0,
+      "pass": true,
+      "scene_p95": 1,
+      "tick_p95": 1
+     },
+     "50": {
+      "drag_long": 0,
+      "pass": true,
+      "scene_p95": 2,
+      "tick_p95": 1
+     }
+    }
+   },
+   "pass": true,
+   "rerun": true
+  },
+  "min_font": {
+   "pass": true,
+   "threshold": 11.0,
+   "worst": {
+    "px": 11.0,
+    "shot": "0e0ed5733d",
+    "text": "50.00"
+   }
+  },
+  "nontext_contrast": {
+   "pass": false,
+   "threshold": 3.0,
+   "worst_glyph": {
+    "prim": "circle",
+    "ratio": 1.02,
+    "roles": [
+     "closed",
+     "invalid"
+    ],
+    "shot": "7e654b4916"
+   }
+  },
+  "pass": false,
+  "roles": {},
+  "text_contrast": {
+   "pass": false,
+   "worst": {
+    "margin": 0.41787432181497075,
+    "px": 11.0,
+    "ratio": 1.88,
+    "shot": "525890e2a9",
+    "text": "5",
+    "threshold": 4.5
+   }
+  },
+  "touch": {
+   "below_44": [
+    {
+     "h": 32.9,
+     "shot": "0e0ed5733d",
+     "w": 123.3,
+     "what": "button#feed"
+    },
+    {
+     "h": 32.9,
+     "shot": "0e0ed5733d",
+     "w": 123.3,
+     "what": "button#settings"
+    },
+    {
+     "h": 32.9,
+     "shot": "0e0ed5733d",
+     "w": 123.3,
+     "what": "button#metrics"
+    },
+    {
+     "h": 28.9,
+     "shot": "0e0ed5733d",
+     "w": 50.5,
+     "what": "button#back"
+    },
+    {
+     "h": 28.9,
+     "shot": "0e0ed5733d",
+     "w": 46.8,
+     "what": "button#toevidence"
+    },
+    {
+     "h": 32.9,
+     "shot": "106852e34e",
+     "w": 123.3,
+     "what": "button#feed"
+    },
+    {
+     "h": 32.9,
+     "shot": "106852e34e",
+     "w": 123.3,
+     "what": "button#settings"
+    },
+    {
+     "h": 32.9,
+     "shot": "106852e34e",
+     "w": 123.3,
+     "what": "button#metrics"
+    },
+    {
+     "h": 28.9,
+     "shot": "106852e34e",
+     "w": 50.5,
+     "what": "button#back"
+    },
+    {
+     "h": 28.9,
+     "shot": "106852e34e",
+     "w": 46.8,
+     "what": "button#toevidence"
+    },
+    {
+     "h": 32.9,
+     "shot": "33bceca206",
+     "w": 123.3,
+     "what": "button#feed"
+    },
+    {
+     "h": 32.9,
+     "shot": "33bceca206",
+     "w": 123.3,
+     "what": "button#settings"
+    },
+    {
+     "h": 32.9,
+     "shot": "33bceca206",
+     "w": 123.3,
+     "what": "button#metrics"
+    },
+    {
+     "h": 28.9,
+     "shot": "33bceca206",
+     "w": 50.5,
+     "what": "button#back"
+    },
+    {
+     "h": 28.9,
+     "shot": "33bceca206",
+     "w": 46.8,
+     "what": "button#toevidence"
+    },
+    {
+     "h": 32.9,
+     "shot": "3ef3e0b0a7",
+     "w": 123.3,
+     "what": "button#feed"
+    },
+    {
+     "h": 32.9,
+     "shot": "3ef3e0b0a7",
+     "w": 123.3,
+     "what": "button#settings"
+    },
+    {
+     "h": 32.9,
+     "shot": "3ef3e0b0a7",
+     "w": 123.3,
+     "what": "button#metrics"
+    },
+    {
+     "h": 28.9,
+     "shot": "3ef3e0b0a7",
+     "w": 55.6,
+     "what": "button#back"
+    },
+    {
+     "h": 28.9,
+     "shot": "3ef3e0b0a7",
+     "w": 72.8,
+     "what": "button#toevidence"
+    },
+    {
+     "h": 32.9,
+     "shot": "4559f28efa",
+     "w": 123.3,
+     "what": "button#feed"
+    },
+    {
+     "h": 32.9,
+     "shot": "4559f28efa",
+     "w": 123.3,
+     "what": "button#settings"
+    },
+    {
+     "h": 32.9,
+     "shot": "4559f28efa",
+     "w": 123.3,
+     "what": "button#metrics"
+    },
+    {
+     "h": 28.9,
+     "shot": "4559f28efa",
+     "w": 55.6,
+     "what": "button#back"
+    },
+    {
+     "h": 28.9,
+     "shot": "4559f28efa",
+     "w": 72.8,
+     "what": "button#toevidence"
+    },
+    {
+     "h": 32.9,
+     "shot": "525890e2a9",
+     "w": 123.3,
+     "what": "button#feed"
+    },
+    {
+     "h": 32.9,
+     "shot": "525890e2a9",
+     "w": 123.3,
+     "what": "button#settings"
+    },
+    {
+     "h": 32.9,
+     "shot": "525890e2a9",
+     "w": 123.3,
+     "what": "button#metrics"
+    },
+    {
+     "h": 28.9,
+     "shot": "525890e2a9",
+     "w": 50.5,
+     "what": "button#back"
+    },
+    {
+     "h": 28.9,
+     "shot": "525890e2a9",
+     "w": 46.8,
+     "what": "button#toevidence"
+    }
+   ],
+   "count": 60,
+   "note": "DOM boxes only; story hit boxes are not in the paint list (SPEC §G11.5)",
+   "pass": false
+  }
+ }
+}

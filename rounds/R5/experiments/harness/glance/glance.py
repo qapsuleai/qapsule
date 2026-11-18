@@ -42,7 +42,7 @@ from gl import states as ST  # noqa: E402
 
 SEED = 20261117
 # SPEC Ek G3: replicates per reader set (primary measure 6; BROKEN.md: 3 did not separate).
-DEFAULT_REPS = {"throttle": 6}
+DEFAULT_REPS = {"throttle": 6, "chart": 6}  # M18: `chart` is the primary set (SPEC §G9)
 
 
 def jload(p):
@@ -91,16 +91,109 @@ def cmd_states(a):
         print(s["state"], s.get("found"), s.get("step"), s.get("watch") or "", (s.get("candidates") or [""])[0])
 
 
+# (M18) Chart states (GOAL M18: "görünen aralıkta 5 / 50 / 200 kapsül"). One synthetic market
+# long enough for 200 stories in view (`--days`, `--history`: the story list holds the
+# history's stories, so the replay itself stays short); the depths are visible-range story
+# counts reached by zooming the same opened chart (shoot.mjs `zoomTo`). Rule, written before
+# any shot of an alternative:
+#   instrument = the first by symbol (among the reader's feed at the last step) whose list has
+#     >= 200 stories, at least one live (not closed) story, and whose most recently closed
+#     story closed within the last 10 bars (in view at every depth);
+#   target (the opened capsule) = that most recently closed story (ties: later born, id).
+CHART_MARKET = ["--days", "2600", "--history", "2500"]
+CHART_DEPTHS = (5, 50, 200)
+
+
+def cmd_chartstates(a):
+    run = Path(a.run)
+    plan = {"qp": qp_bin(a), "web": web_dir(a), "port": a.port, "out": str(run / "probe"), "sensitivity": "all",
+            "demo_args": CHART_MARKET, "chart_probe": True}
+    jdump(run / "chart-probe-plan.json", plan)
+    if not (run / "probe" / "chart-probe.json").exists():
+        node("shoot.mjs", run / "chart-probe-plan.json")
+    pr = jload(run / "probe" / "chart-probe.json")
+    chosen = None
+    for inst in sorted(pr["instruments"]):
+        st = pr["instruments"][inst].get("stories") or {}
+        rows = st.get("stories") or []
+        if len(rows) < 200:
+            continue
+        last = max(int(r["last_bar"]) for r in rows)
+        live = [r for r in rows if r.get("closed_bar") is None]
+        closed = [r for r in rows if r.get("closed_bar") is not None]
+        if not live or not closed:
+            continue
+        tgt = max(closed, key=lambda r: (int(r["closed_bar"]), int(r["born_bar"]), r["id"]))
+        if last - int(tgt["closed_bar"]) > 10:
+            continue
+        chosen = (inst, tgt, rows, live, last, st)
+        break
+    if not chosen:
+        raise SystemExit("chartstates: no instrument satisfies the rule")
+    inst, tgt, rows, live, last, st = chosen
+    d = jload(run / "states.json") if (run / "states.json").exists() else {"states": []}
+    d["charts"] = [{"target": n, "market": CHART_MARKET, "instrument": inst, "candidates": [tgt["id"]],
+                    "opened": tgt, "live": [r["id"] for r in live], "stories_total": len(rows), "last_bar": last,
+                    "status": pr.get("status")} for n in CHART_DEPTHS]
+    d["chart_stories"] = st
+    jdump(run / "states.json", d)
+    print(f"chartstates: {inst}, {len(rows)} stories, live {[r['id'] for r in live]}, target {tgt['id']} "
+          f"(closed bar {tgt['closed_bar']}, last {last})")
+
+
 # --- shoot -------------------------------------------------------------------------------
 
 FACE_STATES = ["live_event", "no_longer", "closed_realized", "closed_failed", "few_cases", "no_record",
                "state_live", "visitor"]
 
 
+def shoot_charts(a, run, designs, key):
+    """(M18) One plan per design: each design may come from its own build (`qp`, `web` in
+    designs.json: the M18 alternatives cannot be merged). Same market, same replay step (the
+    last), same opened capsule, same zoom rule for every design; the canonical story list
+    (states.json) is passed for the zoom count (the reference device may hold none)."""
+    sj = jload(run / "states.json")
+    charts = sj.get("charts") or []
+    canon = (sj.get("chart_stories") or {}).get("stories")
+    for d in designs:
+        shots = []
+        for ch in charts:
+            for lang in a.langs.split(","):
+                for theme in a.themes.split(","):
+                    name = f"chart{ch['target']}"
+                    c = code(d["name"], name, "chart", lang, theme)
+                    key[c] = {"design": d["name"], "state": name, "kind": "chart", "lang": lang, "theme": theme,
+                              "principal": "arkin", "instrument": ch["instrument"]}
+                    if (run / "shots" / f"{c}.png").exists():
+                        continue
+                    shots.append({"id": c, "kind": "chart", "step": -1, "principal": "arkin", "lang": lang,
+                                  "theme": theme, "look": d.get("look"), "face": d.get("face"), "story": d.get("story"),
+                                  "broken": bool(d.get("broken")), "candidates": ch["candidates"],
+                                  "watch": ch["instrument"], "zoom_to": ch["target"], "story_rows": canon,
+                                  "open_direct": True})
+        jdump(run / "key.json", key)
+        if shots:
+            plan = {"qp": d.get("qp") or qp_bin(a), "web": d.get("web") or web_dir(a), "port": a.port,
+                    "out": str(run / "shots"), "paint": a.paint, "sensitivity": "all",
+                    "demo_args": charts[0]["market"], "shots": shots}
+            pp = run / "plans" / f"chart-{d['name']}.json"
+            jdump(pp, plan)
+            node("shoot.mjs", pp)
+        p = subprocess.run([d.get("qp") or qp_bin(a), "look", "show", d.get("look") or "r4"],
+                           capture_output=True, text=True, cwd=ROOT)
+        if p.returncode == 0:
+            (run / "looks").mkdir(parents=True, exist_ok=True)
+            (run / "looks" / f"{d['name']}.json").write_text(p.stdout)
+    jdump(run / "key.json", key)
+
+
 def cmd_shoot(a):
     run = Path(a.run)
-    st = {s["state"]: s for s in jload(run / "states.json")["states"]}
     designs = jload(a.designs)
+    if a.kinds == "chart":
+        key = jload(run / "key.json") if (run / "key.json").exists() else {}
+        return shoot_charts(a, run, designs, key)
+    st = {s["state"]: s for s in jload(run / "states.json")["states"]}
     key = jload(run / "key.json") if (run / "key.json").exists() else {}
     shots = []
     kinds = a.kinds.split(",")
@@ -166,6 +259,8 @@ def stimuli(run: Path):
             out.append((f"{c}.feed", png, "feed", rec))
         elif k["kind"] == "evidence":
             out.append((f"{c}.evidence", png, "evidence_visitor" if k["principal"] == "visitor" else "evidence", rec))
+        elif k["kind"] == "chart":
+            out.append((f"{c}.chart", stim / f"{c}.chart.png", "chart", rec))
         elif k["kind"] == "motion":
             out.append((f"{c}.motion", stim / f"{c}.motion.png", "motion", rec))
             out.append((f"{c}.motion_final", stim / f"{c}.motion_final.png", "motion_final", rec))
@@ -185,6 +280,15 @@ def cmd_derive(a):
             IO.throttle(png, stim / f"{c}.throttle.png")
             IO.half(png, stim / f"{c}.half.png")
             IO.grey(png, stim / f"{c}.gray.png")
+        if k["kind"] == "chart":
+            # (M18) lettered columns A-D over the visible bar range of the plot (c_live).
+            r = jload(run / "shots" / f"{c}.json")
+            lp = run / "looks" / f"{k['design']}.json"
+            r["look_record"] = jload(lp) if lp.exists() else None
+            plot = CP.chart_plot(r)
+            if plot is None:
+                raise SystemExit(f"derive: no price plot found in {c}")
+            IO.columns(png, stim / f"{c}.chart.png", plot)
         if k["kind"] == "motion":
             before = run / "shots" / f"{c}.before.png"
             mid = run / "shots" / f"{c}.p25.png"
@@ -197,7 +301,7 @@ def cmd_derive(a):
     # orders; the A/B key is in critic_key.json.
     groups = {}
     for c, k in key.items():
-        if k["kind"] != "face" or k["lang"] != a.pair_lang or k["theme"] != a.pair_theme:
+        if k["kind"] not in ("face", "chart") or k["lang"] != a.pair_lang or k["theme"] != a.pair_theme:
             continue
         if (run / "shots" / f"{c}.png").exists():
             groups.setdefault(k["state"], {})[k["design"]] = c
@@ -228,6 +332,23 @@ def key_record(rec: dict, qset: str) -> dict:
         trust = (rec.get("open") or {}).get("trust")
         if trust is not None:
             out["item"] = dict(item, trust="server" if "server" in json.dumps(trust).lower() or "sunucu" in json.dumps(trust, ensure_ascii=False).lower() else item.get("trust"))
+    if qset == "chart":
+        # (M18) the story list (PROTOCOL §23, the engine's; the canonical list of the state
+        # when this design's device did not hold one) and the visible bar range.
+        st = rec.get("stories_canon") or rec.get("stories") or {}
+        rows = st.get("stories") or []
+        rng = ((rec.get("view") or {}).get("range") or {})
+        out["stories"] = rows
+        if "from_bar" in rng:
+            a, b = int(rng["from_bar"]), int(rng["to_bar"])
+            out["range"] = [a, b]
+            last = max([int(r.get("last_bar", 0)) for r in rows] + [b])
+            out["stories_visible"] = [r for r in rows if int(r["born_bar"]) <= b
+                                      and int(r.get("closed_bar", last)) >= a]
+        tgt = next((r for r in rows if r["id"] == rec.get("target")), None)
+        if tgt:
+            out["item"] = dict(item, kind=tgt["kind"])
+        out["now_t"] = max([int(r.get("last_t", 0)) for r in rows] + [int(eng.get("replay_t") or 0)])
     if qset.startswith("motion"):
         # M21 (SPEC §G4, §G6.4): the frame shown is p = 0.25; the region key is where the
         # carried pieces are then. A state whose p = 0.25 region equals the end region
@@ -291,7 +412,7 @@ def cmd_read(a):
         cid, sid, img, qs, rec, persona, rep, lang = job
         seed = int(cid[:8], 16)
         note = {"throttle": R.THROTTLE_NOTE, "face_half": R.HALF_NOTE, "face_visitor_half": R.HALF_NOTE, "gray": R.GRAY_NOTE, "motion": R.MOTION_NOTE,
-                "motion_final": R.MOTION_NOTE}.get(qs, {}).get(lang, "")
+                "motion_final": R.MOTION_NOTE, "chart": R.CHART_NOTE}.get(qs, {}).get(lang, "")
         holder = {}
 
         def pf(name):
@@ -367,11 +488,25 @@ def cmd_compute(a):
     out = {}
     for d, recs in sorted(records_by_design(run).items()):
         lp = run / "looks" / f"{d}.json"
-        out[d] = CP.gates(recs, jload(lp) if lp.exists() else None)
+        look = jload(lp) if lp.exists() else None
+        # (M18) chart-depth shots: element measures from the open scene's paint list.
+        out[d] = CP.chart_gates(recs, look) if all(r["shot"]["kind"] == "chart" for r in recs) else CP.gates(recs, look)
         k52 = run / "k52" / f"{d}.json"
         if k52.exists():
             kj = jload(k52)
-            out[d]["k52"] = {"pass": kj["pass"], "configs": {c: v["values"] for c, v in kj["configs"].items()}}
+            if all("by_depth" in v for v in kj["configs"].values()):
+                # (M18, k52chart.mjs) per depth; a JIT-off re-run (k52-rerun/, more reps, no
+                # model calls in parallel) replaces the first JIT-off run when present.
+                cfgs = dict(kj["configs"])
+                rr = run / "k52-rerun" / f"{d}.json"
+                if rr.exists():
+                    cfgs.update({c: dict(v, rerun=True) for c, v in jload(rr)["configs"].items()})
+                out[d]["k52"] = {"pass": all(v["pass"] for v in cfgs.values()),
+                                 "configs": {c: {dep: {k: x[k] for k in ("tick_p95", "scene_p95", "drag_long", "pass")}
+                                                 for dep, x in v["by_depth"].items()} for c, v in cfgs.items()},
+                                 "rerun": rr.exists()}
+            else:
+                out[d]["k52"] = {"pass": kj["pass"], "configs": {c: v["values"] for c, v in kj["configs"].items()}}
         size = run / "bundle" / f"{d}.json"
         if size.exists():
             out[d]["bundle"] = jload(size)
@@ -385,11 +520,16 @@ def cmd_score(a):
     key = jload(run / "key.json")
     recs = {}
     rows = []
+    # (M18) the canonical story list of the chart state (the engine's, same for every design).
+    sj = jload(run / "states.json") if (run / "states.json").exists() else {}
+    canon = sj.get("chart_stories")
     for p in sorted((run / "readers").glob("*.json")):
         r = jload(p)
         c = r["stim"].split(".")[0]
         if c not in recs:
             recs[c] = jload(run / "shots" / f"{c}.json")
+            if canon is not None:
+                recs[c]["stories_canon"] = canon
         kr = key_record(recs[c], r["qset"])
         keys = K.keys_for(r["qset"], kr)
         for q, ans in r["answer"].items():
@@ -416,15 +556,46 @@ def cmd_score(a):
     excluded = sorted({r["stim"] + "/" + r["persona"] for r in rows if not r["one_look"]})
     rows = [r for r in rows if r["one_look"]]
     judg = [j for j in judg if j["one_look"]]
-    res = SEL.select(rows, judg, computed, seed=SEED, broken=a.broken, reference=a.reference)
+    prim = tuple(a.primary.split(",")) if a.primary else SEL.PRIMARY_SETS
+    readg = tuple(x for x in a.reading.split(",") if x) if a.reading is not None else SEL.READING_SETS
+    res = SEL.select(rows, judg, computed, seed=SEED, broken=a.broken, reference=a.reference,
+                     primary_sets=prim, reading_sets=readg)
     res["excluded_not_one_look"] = excluded
     jdump(run / "scores.json", {"rows": rows, "judgements": judg, "result": res})
     (run / "scores.md").write_text(SEL.scores_md(res))
     print((run / "scores.md").read_text())
 
 
+def k52_charts(a, run):
+    """(M18) K52 at 5 / 50 / 200 stories in view, per design build (k52chart.mjs)."""
+    sj = jload(run / "states.json")
+    ch = sj["charts"][0]
+    rows = sj["chart_stories"]["stories"]
+    # A capsule that exists at every replay step: stories born in the history (before the
+    # first replayed bar), latest first.
+    first_replayed = int(ch["last_bar"]) - 100
+    hist = sorted((r for r in rows if int(r["born_bar"]) < first_replayed - 5),
+                  key=lambda r: (-int(r["born_bar"]), r["id"]))
+    for d in jload(a.designs):
+        if d.get("broken") or d["name"] in (a.skip or "").split(","):
+            continue
+        out = run / "k52" / f"{d['name']}.json"
+        if out.exists():
+            continue
+        plan = {"story": d.get("story"), "look": d.get("look"), "market": ch["market"], "instrument": ch["instrument"],
+                "open": [r["id"] for r in hist[:5]], "depths": [c["target"] for c in sj["charts"]], "rows": rows,
+                "configs": a.configs.split(","), "reps": a.reps, "play_ms": 5000, "drag_ms": 6000, "back_steps": 400}
+        pp = run / "plans" / f"k52-{d['name']}.json"
+        jdump(pp, plan)
+        out.parent.mkdir(parents=True, exist_ok=True)
+        subprocess.run(["node", str(HERE / "k52chart.mjs"), d.get("qp") or qp_bin(a), d.get("web") or web_dir(a), str(out),
+                        "--plan", str(pp)], check=True, cwd=ROOT)
+
+
 def cmd_k52(a):
     run = Path(a.run)
+    if a.charts:
+        return k52_charts(a, run)
     for d in jload(a.designs):
         if d.get("broken"):
             continue  # the broken filter lives in the harness page, not in a design
@@ -461,6 +632,7 @@ def main():
 
     add("probe", cmd_probe)
     add("states", cmd_states).add_argument("--charts", action="store_true")
+    add("chartstates", cmd_chartstates)
     p = add("shoot", cmd_shoot)
     p.add_argument("--designs", required=True)
     p.add_argument("--langs", default="tr,en")
@@ -492,9 +664,14 @@ def main():
     p = add("score", cmd_score)
     p.add_argument("--broken")
     p.add_argument("--reference", default="r4")
+    p.add_argument("--primary", help="primary reader sets (default throttle; M18: chart)")
+    p.add_argument("--reading", help="full-size reading sets (default face,face_visitor; M18: empty)")
     p = add("k52", cmd_k52)
     p.add_argument("--designs", required=True)
     p.add_argument("--reps", type=int, default=3)
+    p.add_argument("--charts", action="store_true", help="(M18) 5/50/200 stories in view, per design build")
+    p.add_argument("--configs", default="phone-jit-est,phone")
+    p.add_argument("--skip", help="design names to skip")
     add("broken-check", cmd_broken).add_argument("--broken", required=True)
     a = ap.parse_args()
     a.fn(a)

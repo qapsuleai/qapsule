@@ -268,16 +268,15 @@ fn text(look: &Look, role: &str, x: i32, baseline: i32, s: String, color: Rgba) 
     }
 }
 
-/// Width estimate of `s` in `role` (the compiler's rule: characters × advance × size).
-#[allow(
-    clippy::cast_possible_truncation,
-    clippy::cast_precision_loss,
-    clippy::cast_possible_wrap
-)]
+/// Width of `s` in `role`: the compiler's text measure (`FontAsset::width`; a monospaced
+/// file: characters × advance × size, as before; (R5/S) a proportional one: its advance
+/// table, not the mean advance, so a word measured to fit does fit).
 fn text_w(look: &Look, role: &str, s: &str) -> i32 {
+    if s.is_empty() {
+        return 0;
+    }
     let px = look.types.role(role).map_or(11.0, |r| r.px);
-    let adv = look.role_font(role).advance;
-    (s.chars().count() as f64 * adv * px).ceil() as i32
+    look.role_font(role).width(s, px)
 }
 
 /// `s` cut to at most `w` px in `role`, with `…` when cut.
@@ -291,7 +290,19 @@ fn fit(look: &Look, role: &str, s: &str, w: i32) -> String {
         return s.to_owned();
     }
     let px = look.types.role(role).map_or(11.0, |r| r.px);
-    let adv = look.role_font(role).advance;
+    let font = look.role_font(role);
+    if !font.advances.mono {
+        // (R5/S) A proportional file: the longest prefix that fits with its `…`.
+        let chars: Vec<char> = s.chars().collect();
+        for n in (0..chars.len()).rev() {
+            let mut out: String = chars[..n].iter().collect();
+            out.push('…');
+            if text_w(look, role, &out) <= w || n == 0 {
+                return out;
+            }
+        }
+    }
+    let adv = font.advance;
     let n = (f64::from(w.max(0)) / (adv * px)).floor() as usize;
     let mut out: String = s.chars().take(n.saturating_sub(1)).collect();
     out.push('…');
@@ -536,7 +547,14 @@ pub fn extend(
 
     // Summary line: counts, each with its shape (the legend).
     let mut sum: Vec<Prim> = Vec::new();
-    let toggle_x = right + 4;
+    // (R5/S) The checkbox and its word sit in the right margin; a word wider than the
+    // margin moves the checkbox left so that the word is whole (`r4`: it fits, as before).
+    let closed_w = text_w(look, "label", wd.closed);
+    let toggle_x = if closed_w <= w - (right + 4) - 14 {
+        right + 4
+    } else {
+        w - 14 - closed_w - 2
+    };
     let limit = toggle_x - 8;
     let mut cx = left;
     let first = (wd.stories)(n_all);

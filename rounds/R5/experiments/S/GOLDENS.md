@@ -38,8 +38,12 @@ Toplam 16 çekim, 28 sahne PNG'si (772 KB) (sayfa ekran görüntüleri `*.page.p
 varsayılan hareket `surek`, hareketi azalt'ta yüz değişimini kalıcı etiketle söyler; etiket
 sahnenin kendi ilkelidir ve altın görüntüye girer (deterministik). Grafik derinliğinin fiyat
 şeridi R4'ün grafik görünümüyle kurulur (`depth::chart_view`, LOOK_RECIPE "kayıt dışında
-kalanlar"); `pavka`'nın başlık satırındaki "Kapanmışları gizle" yazısı `oltan` boylarında sağ
-kenarda kesiliyor (bilinen, rapor "kalan sorunlar").
+kalanlar"); `pavka`'nın özet satırındaki kapanmışları gizle kutusunun yazısı ("kapanmış"/"closed")
+`oltan` boylarında sağ kenarda kesiliyordu: `pavka` sözcükleri ortalama ilerlemeyle ölçüyordu.
+Düzeltme (`stories/pavka.rs` `text_w`/`fit`): derleyicinin ölçüsü (`FontAsset::width`, orantılı
+ailede ilerleme tablosu) ve kenar boşluğuna sığmayan sözcükte kutu sola kayar; `r4` bayt eşit
+(`story_pavka_equal`, r4); dört `chart-*` v2 altını bu düzeltmeyle yeniden üretildi. 28 v2
+çekiminin hepsine bakıldı: başka kesilen ya da taşan metin görülmedi.
 
 Doğrulama: v1 16/16 altınla bayt eşit (`?look=r4&voice=r4&face=vadrel&story=r4&open=r4&motion=r4`),
 v2 28/28 iki koşuda bayt eşit (bu ajanın koşusu, 2026-11-18).

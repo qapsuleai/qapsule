@@ -218,10 +218,16 @@ fn extend_draws_byte_for_byte_what_it_drew_before() {
             ],
         ),
     ];
+    // (R5/S) `r4` only: the design now measures its words with the compiler's measure
+    // (`FontAsset::width`) and keeps the "closed" checkbox's word whole by moving the box
+    // left when the margin is too narrow for it (it was cut at the right edge under
+    // `oltan`, and ended in "…" under `ornek`) — a deliberate change for the other looks.
     let looks: Vec<&Look> = look::names()
         .into_iter()
         .map(|n| look::by_name(Some(n)).unwrap())
+        .filter(|l| l.name == "r4")
         .collect();
+    assert!(looks.iter().any(|l| l.name == "r4"));
     let mut n = 0;
     let (mut clustered, mut hidden, mut early) = (0, 0, 0);
     for (name, rows, ranges) in &sets {

@@ -1,0 +1,88 @@
+== düzenek / ek commit'leri
+fa0487d 2026-11-18 00:07:40 +0300 Merge R5/T2 (dil + akış düzeneği): M17 ve M19 düzenek ve puanlama kuralı, alternatiflerden önce
+70d8e11 2026-11-18 00:20:40 +0300 Merge R5/T2 (görsel düzenek): M16/M18/M20/M21 tek bakış düzeneği ve puanlama kuralı, alternatiflerden önce
+0e85cb6 2026-11-18 01:10:16 +0300 Merge R5/T2 bozuk tasarım kaydı (yalnız düzenekte yama) ve Ek G3 (t_valid dengesi, 6 tekrar, bozuk her koşuda); bozu
+9c01848 2026-11-18 04:34:41 +0300 Merge R5/T2 Ek G4 (M16 öncesi uygulama hataları): voice aktarımı, anlam renkleri tema başına, işaret rengi = en opak
+85338e2 2026-11-18 06:00:34 +0300 R5/m16-measure: düzenek Ek G5 — anlam rengi kapısı görünüş kaydının rollerinden (tema başına, paylaşılan roller list
+fca8f33 2026-11-18 07:54:17 +0300 R5/m21-measure: SPEC Ek G6 (M21) ölçümden önce — süreklilik geçerliliği soru × tasarım, durum değişimi çekimi ve far
+655e93e 2026-11-18 08:06:27 +0300 R5/m20-measure: SPEC Ek G7 (M20: kapsül/kanıt derinliği, deterministik dokunma sayısı, K52 aynı ekranda, e_who anaht
+69d27cc 2026-11-18 08:10:58 +0300 R5/m21-measure: Ek G6-8 — bilgi kaybı uygulama düzeltmesi (metin = öğe) ve nabız/canlı noktası tanım boşluğu (ana: h
+== dallar
+r5/audit               first=[(main'de) 7d7c934 2026-11-14 14:35:06 +0300 qp-schema: schema v0 types and JSON Schema export]
+   anc: fa0487d+ 70d8e11+ 0e85cb6+ 85338e2+ fca8f33+ 655e93e+
+r5/d-density           first=[d04b64a 2026-11-18 04:48:34 +0300 R5/m16-oltan: look oltan (mark leads / watch face), face oltan (120 px glyph]
+   anc: fa0487d+ 70d8e11+ 0e85cb6+ 85338e2+ fca8f33- 655e93e+
+r5/docs-design         first=[(main'de) 7d7c934 2026-11-14 14:35:06 +0300 qp-schema: schema v0 types and JSON Schema export]
+   anc: fa0487d+ 70d8e11+ 0e85cb6+ 85338e2+ fca8f33- 655e93e+
+r5/g-gallery           first=[(main'de) 7d7c934 2026-11-14 14:35:06 +0300 qp-schema: schema v0 types and JSON Schema export]
+   anc: fa0487d+ 70d8e11+ 0e85cb6+ 85338e2- fca8f33- 655e93e-
+r5/h-human             first=[(main'de) 7d7c934 2026-11-14 14:35:06 +0300 qp-schema: schema v0 types and JSON Schema export]
+   anc: fa0487d+ 70d8e11+ 0e85cb6+ 85338e2- fca8f33- 655e93e-
+r5/m16-bertan          first=[b1660b2 2026-11-18 04:48:42 +0300 R5/m16-bertan: görünüş bertan (sakin editoryal) ve yüz bertan; Bertan Sans (]
+   anc: fa0487d+ 70d8e11+ 0e85cb6+ 85338e2- fca8f33- 655e93e-
+r5/m16-kivra           first=[2a628b2 2026-11-18 04:48:36 +0300 R5/m16-kivra: look kivra (Plex Sans Condensed, lightness-ladder meaning colo]
+   anc: fa0487d+ 70d8e11+ 0e85cb6+ 85338e2- fca8f33- 655e93e-
+r5/m16-measure         first=[(main'de) 7d7c934 2026-11-14 14:35:06 +0300 qp-schema: schema v0 types and JSON Schema export]
+   anc: fa0487d+ 70d8e11+ 0e85cb6+ 85338e2+ fca8f33- 655e93e-
+r5/m16-oltan           first=[(main'de) 7d7c934 2026-11-14 14:35:06 +0300 qp-schema: schema v0 types and JSON Schema export]
+   anc: fa0487d+ 70d8e11+ 0e85cb6+ 85338e2- fca8f33- 655e93e-
+r5/m16-zemre           first=[(main'de) 7d7c934 2026-11-14 14:35:06 +0300 qp-schema: schema v0 types and JSON Schema export]
+   anc: fa0487d+ 70d8e11+ 0e85cb6+ 85338e2- fca8f33- 655e93e-
+r5/m17-int             first=[(main'de) 7d7c934 2026-11-14 14:35:06 +0300 qp-schema: schema v0 types and JSON Schema export]
+   anc: fa0487d+ 70d8e11+ 0e85cb6+ 85338e2- fca8f33- 655e93e-
+r5/m17-marla           first=[(main'de) 7d7c934 2026-11-14 14:35:06 +0300 qp-schema: schema v0 types and JSON Schema export]
+   anc: fa0487d+ 70d8e11- 0e85cb6- 85338e2- fca8f33- 655e93e-
+r5/m17-measure         first=[(main'de) 7d7c934 2026-11-14 14:35:06 +0300 qp-schema: schema v0 types and JSON Schema export]
+   anc: fa0487d+ 70d8e11+ 0e85cb6- 85338e2- fca8f33- 655e93e-
+r5/m17-selvi           first=[(main'de) 7d7c934 2026-11-14 14:35:06 +0300 qp-schema: schema v0 types and JSON Schema export]
+   anc: fa0487d+ 70d8e11- 0e85cb6- 85338e2- fca8f33- 655e93e-
+r5/m17-tunca           first=[(main'de) 7d7c934 2026-11-14 14:35:06 +0300 qp-schema: schema v0 types and JSON Schema export]
+   anc: fa0487d+ 70d8e11- 0e85cb6- 85338e2- fca8f33- 655e93e-
+r5/m18-korda           first=[(main'de) 7d7c934 2026-11-14 14:35:06 +0300 qp-schema: schema v0 types and JSON Schema export]
+   anc: fa0487d+ 70d8e11+ 0e85cb6- 85338e2- fca8f33- 655e93e-
+r5/m18-measure         first=[(main'de) 7d7c934 2026-11-14 14:35:06 +0300 qp-schema: schema v0 types and JSON Schema export]
+   anc: fa0487d+ 70d8e11+ 0e85cb6+ 85338e2- fca8f33- 655e93e-
+r5/m18-pavka           first=[(main'de) 7d7c934 2026-11-14 14:35:06 +0300 qp-schema: schema v0 types and JSON Schema export]
+   anc: fa0487d+ 70d8e11+ 0e85cb6- 85338e2- fca8f33- 655e93e-
+r5/m18-pavka-perf      first=[(main'de) 7d7c934 2026-11-14 14:35:06 +0300 qp-schema: schema v0 types and JSON Schema export]
+   anc: fa0487d+ 70d8e11+ 0e85cb6- 85338e2- fca8f33- 655e93e-
+r5/m18-protocol        first=[(main'de) 7d7c934 2026-11-14 14:35:06 +0300 qp-schema: schema v0 types and JSON Schema export]
+   anc: fa0487d+ 70d8e11+ 0e85cb6- 85338e2- fca8f33- 655e93e-
+r5/m18-selen           first=[b4f435d 2026-11-18 01:40:12 +0300 R5/m18-selen: hikâye çizelgesi 'selen' (fiyatın üstünde işaret ve iz): grame]
+   anc: fa0487d+ 70d8e11+ 0e85cb6- 85338e2- fca8f33- 655e93e-
+r5/m19-feed            first=[(main'de) 7d7c934 2026-11-14 14:35:06 +0300 qp-schema: schema v0 types and JSON Schema export]
+   anc: fa0487d+ 70d8e11+ 0e85cb6+ 85338e2- fca8f33- 655e93e-
+r5/m20-measure         first=[(main'de) 7d7c934 2026-11-14 14:35:06 +0300 qp-schema: schema v0 types and JSON Schema export]
+   anc: fa0487d+ 70d8e11+ 0e85cb6+ 85338e2- fca8f33- 655e93e+
+r5/m20-nobra           first=[(main'de) 7d7c934 2026-11-14 14:35:06 +0300 qp-schema: schema v0 types and JSON Schema export]
+   anc: fa0487d+ 70d8e11+ 0e85cb6+ 85338e2- fca8f33- 655e93e-
+r5/m20-tesir           first=[(main'de) 7d7c934 2026-11-14 14:35:06 +0300 qp-schema: schema v0 types and JSON Schema export]
+   anc: fa0487d+ 70d8e11+ 0e85cb6+ 85338e2- fca8f33- 655e93e-
+r5/m21-measure         first=[(main'de) 7d7c934 2026-11-14 14:35:06 +0300 qp-schema: schema v0 types and JSON Schema export]
+   anc: fa0487d+ 70d8e11+ 0e85cb6+ 85338e2- fca8f33+ 655e93e-
+r5/m21-nabiz           first=[(main'de) 7d7c934 2026-11-14 14:35:06 +0300 qp-schema: schema v0 types and JSON Schema export]
+   anc: fa0487d+ 70d8e11+ 0e85cb6+ 85338e2- fca8f33- 655e93e-
+r5/m21-surek           first=[(main'de) 7d7c934 2026-11-14 14:35:06 +0300 qp-schema: schema v0 types and JSON Schema export]
+   anc: fa0487d+ 70d8e11+ 0e85cb6+ 85338e2- fca8f33- 655e93e-
+r5/report              first=[(main'de) 7d7c934 2026-11-14 14:35:06 +0300 qp-schema: schema v0 types and JSON Schema export]
+   anc: fa0487d+ 70d8e11+ 0e85cb6+ 85338e2+ fca8f33+ 655e93e+
+r5/s-int               first=[(main'de) 7d7c934 2026-11-14 14:35:06 +0300 qp-schema: schema v0 types and JSON Schema export]
+   anc: fa0487d+ 70d8e11+ 0e85cb6+ 85338e2+ fca8f33+ 655e93e+
+r5/t0-small            first=[(main'de) 7d7c934 2026-11-14 14:35:06 +0300 qp-schema: schema v0 types and JSON Schema export]
+   anc: fa0487d- 70d8e11- 0e85cb6- 85338e2- fca8f33- 655e93e-
+r5/t1-research         first=[(main'de) 7d7c934 2026-11-14 14:35:06 +0300 qp-schema: schema v0 types and JSON Schema export]
+   anc: fa0487d- 70d8e11- 0e85cb6- 85338e2- fca8f33- 655e93e-
+r5/t2-broken           first=[(main'de) 7d7c934 2026-11-14 14:35:06 +0300 qp-schema: schema v0 types and JSON Schema export]
+   anc: fa0487d+ 70d8e11+ 0e85cb6- 85338e2- fca8f33- 655e93e-
+r5/t2-g4               first=[(main'de) 7d7c934 2026-11-14 14:35:06 +0300 qp-schema: schema v0 types and JSON Schema export]
+   anc: fa0487d+ 70d8e11+ 0e85cb6+ 85338e2- fca8f33- 655e93e-
+r5/t2-glance           first=[(main'de) 7d7c934 2026-11-14 14:35:06 +0300 qp-schema: schema v0 types and JSON Schema export]
+   anc: fa0487d- 70d8e11- 0e85cb6- 85338e2- fca8f33- 655e93e-
+r5/t2-lang             first=[(main'de) 7d7c934 2026-11-14 14:35:06 +0300 qp-schema: schema v0 types and JSON Schema export]
+   anc: fa0487d- 70d8e11- 0e85cb6- 85338e2- fca8f33- 655e93e-
+r5/t3-look             first=[(main'de) 7d7c934 2026-11-14 14:35:06 +0300 qp-schema: schema v0 types and JSON Schema export]
+   anc: fa0487d+ 70d8e11- 0e85cb6- 85338e2- fca8f33- 655e93e-
+r5/t3b-look            first=[(main'de) 7d7c934 2026-11-14 14:35:06 +0300 qp-schema: schema v0 types and JSON Schema export]
+   anc: fa0487d+ 70d8e11+ 0e85cb6+ 85338e2- fca8f33- 655e93e-
+r5/t3c-glyph           first=[(main'de) 7d7c934 2026-11-14 14:35:06 +0300 qp-schema: schema v0 types and JSON Schema export]
+   anc: fa0487d+ 70d8e11+ 0e85cb6+ 85338e2- fca8f33- 655e93e-

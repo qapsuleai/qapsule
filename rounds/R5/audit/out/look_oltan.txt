@@ -1,0 +1,76 @@
+== look oltan (mark 120.0 px → ΔE threshold 10)
+-- dark: contrast (role vs background)
+   text               on bg           17.13
+   muted              on bg            9.77
+   valid              on bg           17.13
+   invalid            on bg            3.75  (<4.5 if used as small text)
+   closed             on bg            3.75  (<4.5 if used as small text)
+   neutral            on bg            3.75  (<4.5 if used as small text)
+   up                 on bg           10.97
+   down               on bg            5.67
+   accent             on bg            8.20
+   warn               on bg           12.05
+   chrome.fg          on chrome.bg    18.69
+   chrome.fg          on chrome.card  17.13
+   chrome.muted       on chrome.bg     9.01
+   chrome.muted       on chrome.card   8.26
+   chrome.accent      on chrome.card   8.20
+   chrome.accent      on chrome.bg     8.94
+   chrome.on_accent   on chrome.accent  8.94
+   chrome.note_fg     on chrome.note_bg 10.55
+   chrome.alert_fg    on chrome.alert_bg 11.02
+   chrome.req         on chrome.card  11.28
+   non-text up           10.97
+   non-text down          5.67
+   non-text closed        3.75
+   non-text invalid       3.75
+   non-text neutral       3.75
+   non-text focus         8.20
+   non-text accent        8.20
+   non-text axis          2.95  <3
+   non-text line          1.37  <3
+   non-text grid          1.23  <3
+   non-text chrome.line   1.29  <3
+-- dark: ΔE00 meaning pairs: 17 counted, shared ['neutral=invalid', 'neutral=closed', 'valid=text', 'invalid=closed']; fails (<10): 0
+   up      ↔text     min  10.53 (gray)  normal=27.52 gray=10.53 protan=19.69 deutan=17.77 tritan=27.62
+   up      ↔valid    min  10.53 (gray)  normal=27.52 gray=10.53 protan=19.69 deutan=17.77 tritan=27.62
+   down    ↔closed   min  11.47 (gray)  normal=31.84 gray=11.47 protan=21.76 deutan=31.27 tritan=27.46
+   down    ↔invalid  min  11.47 (gray)  normal=31.84 gray=11.47 protan=21.76 deutan=31.27 tritan=27.46
+-- light: contrast (role vs background)
+   text               on bg           18.72
+   muted              on bg           14.35
+   valid              on bg           18.72
+   invalid            on bg            3.46  (<4.5 if used as small text)
+   closed             on bg            3.46  (<4.5 if used as small text)
+   neutral            on bg            3.46  (<4.5 if used as small text)
+   up                 on bg            5.69
+   down               on bg           10.22
+   accent             on bg            6.42
+   warn               on bg            5.59
+   chrome.fg          on chrome.bg    16.09
+   chrome.fg          on chrome.card  18.72
+   chrome.muted       on chrome.bg     6.33
+   chrome.muted       on chrome.card   7.36
+   chrome.accent      on chrome.card   6.42
+   chrome.accent      on chrome.bg     5.52
+   chrome.on_accent   on chrome.accent  6.42
+   chrome.note_fg     on chrome.note_bg  7.09
+   chrome.alert_fg    on chrome.alert_bg 11.02
+   chrome.req         on chrome.card   6.10
+   non-text up            5.69
+   non-text down         10.22
+   non-text closed        3.46
+   non-text invalid       3.46
+   non-text neutral       3.46
+   non-text focus         6.42
+   non-text accent        6.42
+   non-text axis          2.88  <3
+   non-text line          1.35  <3
+   non-text grid          1.23  <3
+   non-text chrome.line   1.46  <3
+-- light: ΔE00 meaning pairs: 17 counted, shared ['neutral=invalid', 'neutral=closed', 'valid=text', 'invalid=closed']; fails (<10): 0
+   up      ↔down     min  11.66 (deutan)  normal=60.35 gray=13.19 protan=20.46 deutan=11.66 tritan=55.58
+   up      ↔closed   min  13.97 (gray)  normal=29.04 gray=13.97 protan=23.02 deutan=21.97 tritan=24.59
+   up      ↔invalid  min  13.97 (gray)  normal=29.04 gray=13.97 protan=23.02 deutan=21.97 tritan=24.59
+   up      ↔neutral  min  13.97 (gray)  normal=29.04 gray=13.97 protan=23.02 deutan=21.97 tritan=24.59
+== oltan: worst counted meaning pair ΔE00 10.53 (dark up↔text, gray)

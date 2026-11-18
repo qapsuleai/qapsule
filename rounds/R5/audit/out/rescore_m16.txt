@@ -1,0 +1,7 @@
+t_valid classes {'live': 1437, 'ended': 860} weights {'live': 0.7992345163535143, 'ended': 1.3354651162790698}
+oltan    n=F190/H192 primary=0.471 [0.445, 0.497]
+bertan   n=F191/H191 primary=0.345 [0.321, 0.371]
+r4       n=F192/H192 primary=0.318 [0.295, 0.343]
+zemre    n=F191/H191 primary=0.279 [0.256, 0.300]
+kivra    n=F192/H192 primary=0.243 [0.225, 0.261]
+kestim   n=F191/H192 primary=0.183 [0.171, 0.197]

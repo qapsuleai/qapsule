@@ -1,0 +1,6 @@
+step 1 faces 0 {} open: {"depth":"sentence"}
+   on-screen DOM texts 15 with digit (excl. demo clock/step): []
+   sample: ['Qapsule', 'Sentetik veri', 'Akış', 'Ayarlar', 'Ölçüm', 'Diğerleri, geçmişte en çok tutan önce', 'SYN21 düşüşte, yirmi günlük ortalamanın altında · birkaç haf', 'Sunucu doğruladı', 'SYN26 yirmi günün en düşüğünün altına indi · bir aydan uzun ', 'Sunucu doğruladı', 'SYN26 yirmi günün en düşüğünü kırdı · bir aydan uzun süre ön', 'Sunucu doğruladı', 'SYN08 yirmi günün en düşüğünün altına indi · birkaç hafta ön', '▶']
+step 120 faces 0 {} open: {"depth":"sentence"}
+   on-screen DOM texts 16 with digit (excl. demo clock/step): []
+   sample: ['Qapsule', 'Sentetik veri', 'Akış', 'Ayarlar', 'Ölçüm', 'Diğerleri, geçmişte en çok tutan önce', 'SYN26 yirmi günün en düşüğünün altına indi · bir aydan uzun ', 'Sunucu doğruladı', 'SYN26 yirmi günün en düşüğünü kırdı · bir aydan uzun süre ön', 'Sunucu doğruladı', 'SYN08 yirmi günün en düşüğünün altına indi · birkaç hafta ön', 'Sunucu doğruladı', 'SYN26 yirmi günün en düşüğünün altına indi · bir aydan uzun ', 'karnesi yazı tura']

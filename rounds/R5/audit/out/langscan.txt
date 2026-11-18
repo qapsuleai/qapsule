@@ -1,0 +1,67 @@
+== marla: 531 rows x 2 langs
+   vague_hard  61
+   vague_soft  509
+   advice      402
+   internal    0
+   repeat      0
+   soft_info   383
+   [advice en 'buying'] x212 e.g. s003 headline: : institutional net buying topped 2 times its average
+   [advice en 'selling'] x190 e.g. s001 headline: : institutional net selling topped 2 times its average
+   [vague_soft en 'high'] x149 e.g. s033 glossary: high: the highest price of the counted period, not counting the current day
+   [vague_soft en 'low'] x144 e.g. s053 glossary: low: the lowest price of the counted period, not counting the current day
+   [vague_soft tr 'düşük'] x110 e.g. s053 glossary: en düşük fiyat: sayılan dönemde görülen en düşük fiyat
+   [vague_soft tr 'yüksek'] x106 e.g. s033 glossary: en yüksek fiyat: sayılan dönemde görülen en yüksek fiyat
+   [vague_hard en 'could'] x60 e.g. s058 headline: could turn up: new price low, not matched by rsi
+   [vague_hard en 'may'] x1 e.g. s219 detail: it began on 9 may, and 20 trading days passed with too small a move either way
+   soft_info (word with a number in the sentence; allowed): {('en', 'low'): 158, ('en', 'high'): 147, ('tr', 'yüksek'): 47, ('tr', 'düşük'): 31}
+== selvi: 531 rows x 2 langs
+   vague_hard  1
+   vague_soft  22
+   advice      130
+   internal    0
+   repeat      0
+   soft_info   480
+   [advice en 'buying'] x67 e.g. s003 detail: today, the top institution's net buying was try 308,017,469 against a 5-day average of try 13,390,003, and the mark is 2
+   [advice en 'selling'] x63 e.g. s001 detail: today, the top institution's net selling was try 119,027,846 against a 5-day average of try 18,366,831, and the mark is 
+   [vague_soft en 'large'] x12 e.g. s012 detail: no large enough move came within the set time, so it ran out of time today
+   [vague_soft en 'low'] x6 e.g. s174 headline: made a lower low on friday, but its rsi stayed higher
+   [vague_soft tr 'yüksek'] x2 e.g. s137 headline: dün daha yüksek bir tepe yaptı ama rsı aşağıda kaldı
+   [vague_soft en 'high'] x2 e.g. s137 headline: made a higher high yesterday, but its rsi stayed lower
+   [vague_hard en 'may'] x1 e.g. s219 headline: kept rising above 20-day average (8.27) on 9 may
+   soft_info (word with a number in the sentence; allowed): {('en', 'high'): 214, ('en', 'low'): 209, ('en', 'large'): 42, ('tr', 'yüksek'): 15}
+== r4: 531 rows x 2 langs
+   vague_hard  204
+   vague_soft  636
+   advice      240
+   internal    2367
+   repeat      76
+   soft_info   198
+   [internal en 'signal'] x361 e.g. s002 detail: there is a server-verified money outflow signal for this stock
+   [internal tr 'bar'] x351 e.g. s005 detail: 'de 2 bar önce kurumsal net satış (115.472.453) son günlerin ortalamasını (45.112.934) belirgin biçimde aştı: para çıkış
+   [internal en 'bar'] x332 e.g. s011 detail: its 10-bar life ran out today without an outcome
+   [internal tr 'sinyal'] x299 e.g. s013 detail: sinyal bugün geçersiz oldu
+   [internal en 'bars'] x289 e.g. s005 detail: 2 bars ago, net institutional selling in  (115,472,453) clearly exceeded the recent average (45,112,934): money outflow
+   [internal tr 'barda'] x202 e.g. s262 detail: 'de bu barda kurumsal net alış (508.377) son günlerin ortalamasını (82.713) belirgin biçimde aştı: para girişi
+   [vague_soft tr 'büyük'] x174 e.g. s001 headline: bugün  için büyük satış geldi
+   [vague_soft en 'unusually'] x174 e.g. s001 headline: today,  saw unusually heavy selling
+   [vague_soft en 'heavy'] x174 e.g. s001 headline: today,  saw unusually heavy selling
+   [advice en 'buying'] x123 e.g. s003 headline: today,  saw unusually heavy buying
+   [advice en 'selling'] x117 e.g. s001 headline: today,  saw unusually heavy selling
+   [vague_hard en 'key level'] x108 e.g. s033 headline: broke above a key level
+   [vague_hard tr 'önemli bir'] x96 e.g. s033 headline: önemli bir eşiğin üstüne çıktı
+   [vague_soft tr 'önemli'] x96 e.g. s033 headline: önemli bir eşiğin üstüne çıktı
+   [internal tr 'sinyali'] x64 e.g. s002 detail: bu hisse için sunucunun doğruladığı bir para çıkışı sinyali var
+   [internal tr 'aileden'] x63 e.g. s005 detail: bugün aynı aileden yeni bir kanıtla güçlendi
+   [internal en 'family'] x63 e.g. s005 detail: it strengthened today with new evidence from the same family
+   [internal tr 'teyit'] x59 e.g. s033 detail: bugün hacim de teyit etti
+   [internal tr 'ailesi'] x59 e.g. s033 detail: 3 bağımsız kanıt ailesi destekliyor
+   [internal en 'confirmed'] x59 e.g. s033 detail: volume confirmed it today
+   [internal en 'families'] x59 e.g. s033 detail: 3 independent evidence families support it
+   [repeat tr 'hâlâ geçerli'] x43 e.g. s033
+   [internal tr 'barlık'] x42 e.g. s011 detail: sinyalin 10 barlık ömrü bugün sonuçsuz doldu
+   [internal tr 'sinyalin'] x42 e.g. s011 detail: sinyalin 10 barlık ömrü bugün sonuçsuz doldu
+   [repeat tr 'artık geçerli değil'] x33 e.g. s054
+   [internal tr 'bardır'] x23 e.g. s059 detail: 'de rsı 3 bardır 70'in üstünde
+   [vague_soft tr 'olağandışı'] x9 e.g. s246 headline: bugün  için olağandışı para hareketi oldu
+   [vague_soft en 'unusual'] x9 e.g. s246 headline: today,  saw unusual money flow
+   soft_info (word with a number in the sentence; allowed): {('en', 'high'): 62, ('en', 'low'): 58, ('tr', 'düşük'): 31, ('tr', 'yüksek'): 29, ('tr', 'olağandışı'): 9, ('en', 'unusual'): 9}

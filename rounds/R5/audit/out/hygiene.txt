@@ -1,0 +1,26 @@
+== secret patterns in main since 4ccd4d6:
+0
+== secret patterns in every r5/ branch's own diff (vs main):
+0
+== .env / key-like files tracked:
+none
+== fixtures/local in any commit on any branch:
+       0
+== files added since 4ccd4d6 larger than 300 KB:
+  354935 rounds/R5/experiments/M16/run/computed.json
+ 1118556 rounds/R5/experiments/M16/run/readers.jsonl.gz
+  354439 rounds/R5/experiments/M17/marla/TABLE.md
+ 1153097 rounds/R5/experiments/M21/run/readers.jsonl.gz
+  355580 rounds/R5/experiments/harness/lang/results/tunca/TABLE.md
+== added binary files since 4ccd4d6 by folder:
+   3 crates/qp-render/assets/fonts
+  28 fixtures/golden/demo/v2
+   6 rounds/R5/experiments/D/samples
+   2 rounds/R5/experiments/M16/run
+   5 rounds/R5/experiments/M16/samples
+   3 rounds/R5/experiments/M18/run
+   3 rounds/R5/experiments/M18/samples
+   2 rounds/R5/experiments/M20/run
+   4 rounds/R5/experiments/M20/tesir
+   3 rounds/R5/experiments/M21/run
+== real-symbol scan (BIST tickers, not SYNnn) in added R5 experiment files:

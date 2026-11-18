@@ -1,0 +1,32 @@
+marla  none           unentitled lines b/c/d = 294/293/292; hidden:true seen by c,d = 0; text fields (c,d) = 6560, with digit = 230; entitled differs = true
+  digit marla rate55+exempt c text: continuation.ma_stack bear at bar 114
+  digit marla rate55+exempt c text: continuation.ma_stack bear_end at bar 115
+  digit marla rate55+exempt c text: continuation.ma_stack bear at bar 117
+marla  rate55+exempt  unentitled lines b/c/d = 294/293/292; hidden:true seen by c,d = 0; text fields (c,d) = 6560, with digit = 230; entitled differs = true
+  digit marla rate55 c text: continuation.ma_stack bear at bar 114
+  digit marla rate55 c text: continuation.ma_stack bear_end at bar 115
+  digit marla rate55 c text: continuation.ma_stack bear at bar 117
+marla  rate55         unentitled lines b/c/d = 294/293/292; hidden:true seen by c,d = 0; text fields (c,d) = 6560, with digit = 230; entitled differs = true
+  digit marla test-n4-t0.6 c text: continuation.ma_stack bear at bar 114
+  digit marla test-n4-t0.6 c text: continuation.ma_stack bear_end at bar 115
+  digit marla test-n4-t0.6 c text: continuation.ma_stack bear at bar 117
+marla  test-n4-t0.6   unentitled lines b/c/d = 294/293/292; hidden:true seen by c,d = 0; text fields (c,d) = 6560, with digit = 230; entitled differs = true
+  digit selvi none c text: continuation.ma_stack bear at bar 114
+  digit selvi none c text: continuation.ma_stack bear_end at bar 115
+  digit selvi none c text: continuation.ma_stack bear at bar 117
+selvi  none           unentitled lines b/c/d = 294/293/292; hidden:true seen by c,d = 0; text fields (c,d) = 5608, with digit = 230; entitled differs = true
+  digit selvi rate55+exempt c text: continuation.ma_stack bear at bar 114
+  digit selvi rate55+exempt c text: continuation.ma_stack bear_end at bar 115
+  digit selvi rate55+exempt c text: continuation.ma_stack bear at bar 117
+selvi  rate55+exempt  unentitled lines b/c/d = 294/293/292; hidden:true seen by c,d = 0; text fields (c,d) = 5608, with digit = 230; entitled differs = true
+  digit selvi rate55 c text: continuation.ma_stack bear at bar 114
+  digit selvi rate55 c text: continuation.ma_stack bear_end at bar 115
+  digit selvi rate55 c text: continuation.ma_stack bear at bar 117
+selvi  rate55         unentitled lines b/c/d = 294/293/292; hidden:true seen by c,d = 0; text fields (c,d) = 5608, with digit = 230; entitled differs = true
+  digit selvi test-n4-t0.6 c text: continuation.ma_stack bear at bar 114
+  digit selvi test-n4-t0.6 c text: continuation.ma_stack bear_end at bar 115
+  digit selvi test-n4-t0.6 c text: continuation.ma_stack bear at bar 117
+selvi  test-n4-t0.6   unentitled lines b/c/d = 294/293/292; hidden:true seen by c,d = 0; text fields (c,d) = 5608, with digit = 230; entitled differs = true
+NI PROBE: FAIL
+
+[exited with code 0]

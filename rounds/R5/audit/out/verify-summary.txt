@@ -1,0 +1,24 @@
+== summary
+================================================================
+#   step       result   time  note
+1   fmt        PASS       1s  
+2   clippy     PASS      19s  
+3   test       PASS     464s  
+4   schema     PASS     216s  28 schemas, deterministic
+5   fixtures   PASS       0s  4 fixtures valid
+6   golden     PASS       0s  byte-identical to golden
+7   views      PASS       1s  12 views x2 byte-identical to goldens (V0 = sample.png)
+8   wasm       PASS      15s  raw 2280587 B, gzip -9 745443 B
+9   hygiene    PASS       0s  
+10  browser    PASS      16s  headless Chromium matches golden
+11  compute    PASS       0s  rsi(14), macd: valid StudyOutput
+12  digest     PASS      34s  arm64, x86_64, wasm32: 7b1e99d40889f83c
+13  protocol   PASS       1s  69 examples as expected; transcripts and init valid
+14  conform    PASS       2s  64 transcripts x inproc, serve, mcp
+15  replica    PASS      32s  native authority = native replica = wasm32 replica (lag 0, 25); viewer (lag 0, 25)
+16  replay     PASS       1s  two runs byte-identical (1816 lines; 1120 notifications after the last backward seek)
+17  shell      PASS       0s  no domain logic in shells/web; self-test passes
+18  demo       PASS     156s  same origin only; browser = shell-less digests; settings page; gallery; paint paths (semantic reads identical); canvas within tolerance; 70 images x2 (scenes identical, pages within chrome tolerance), scenes = goldens (v1 pinned to the pre-R5 designs, v2 = R5 defaults)
+total: 958s
+verify: OK
+exit=0

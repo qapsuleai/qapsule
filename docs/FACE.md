@@ -50,6 +50,14 @@ görünüş kaydı `crates/qp-grammar/src/look.rs` (`OLTAN`).
 - **İşaret tabanları** (T3c, GRAMMAR §9a): `closed_alpha` 255, `fresh_alpha_min` 255,
   `plate_alpha_min` 61. İşaret tazelikle solmuyor; yaş ve geçerlilik cümlede ("bugün, hâlâ
   geçerli"). Sahnenin öğe değerleri gerçek tazeliği taşımayı sürdürüyor; yalnız çizim solmuyor.
+  (R5/fix47) Gri işaretin plakası en çok `grey_plate_alpha_max` (koyu 49, açık 29): gri çizgiler
+  plakaya karşı da ≥ 3:1. Açılmış kapsülün (`tesir`) geçerli olmayan başlığı da `muted`.
+- **Akış sırası** (R5/fix47, kabul 7): gösterim `live_new` ile açılır — hâlâ geçerli olanlar önce,
+  sonra artık geçerli olmayanlar, sonra kapanmışlar; her grupta en yeni önce. `grouped` ölçümde
+  öndeydi ama enstrümanları geçerlilikten bağımsız en yeni geçişle sıralıyor (yalnız kapanmış
+  hikâyesi olan bir enstrüman canlı iddialı birinin üstüne çıkabiliyor). `?feed_order=grouped`
+  ve `?feed_order=layout` (bağlantının düzeni, R5 öncesi) seçilebilir; protokol varsayılanı
+  değişmedi.
 - **Yüzey:** kadran karoları (köşe 14, gölge yok); dokunma hedefi ≥ 44 CSS px (sekme 48).
 - **Yetkisiz okuyucu:** yüz sahnesi çizilmez; kabuk dilin şablonlu rakamsız yüzünü metin olarak
   gösterir (zaman, geçerlilik, nitel karne ve neyin hangi yetkiyle açıldığı; A32,

@@ -621,9 +621,11 @@ fn depth_name(d: OpenDepth) -> &'static str {
 
 /// (R4/S1) The feed rows of `items` by layout `feed` (`qp_grammar::feeds`), with the local
 /// wall times the layout reads filled from the display zone: the shell core's feed and the
-/// shell-less driver use the same rows.
+/// shell-less driver use the same rows. (R5/fix47) `order`: the presentation's feed order
+/// (`qp_grammar::feeds::ORDERS`), which replaces the layout when it names one.
 #[must_use]
 pub fn feed_rows(
+    order: Option<&str>,
     feed: Option<&str>,
     items: &[CapsuleItem],
     lang: Language,
@@ -633,19 +635,20 @@ pub fn feed_rows(
 ) -> Vec<qp_grammar::feeds::FeedRow> {
     let local: Vec<qp_grammar::feeds::LocalStamp> =
         items.iter().map(|it| local_stamp(it.t)).collect();
-    qp_grammar::feeds::layout(
-        feed,
-        &qp_grammar::feeds::FeedCtx {
-            items,
-            lang,
-            seen,
-            fresh,
-            now,
-            local: &local,
-            now_local: now.map(local_stamp),
-            seen_local: seen.map(local_stamp),
-        },
-    )
+    let ctx = qp_grammar::feeds::FeedCtx {
+        items,
+        lang,
+        seen,
+        fresh,
+        now,
+        local: &local,
+        now_local: now.map(local_stamp),
+        seen_local: seen.map(local_stamp),
+    };
+    match order {
+        Some(o) => qp_grammar::feeds::order(o, &ctx).unwrap_or_default(),
+        None => qp_grammar::feeds::layout(feed, &ctx),
+    }
 }
 
 /// (R4/S1) The local wall time of `t` (ms) in the display time zone, from the zone's
@@ -731,7 +734,9 @@ impl ShellCore {
             feed: Vec::new(),
             feed_known: false,
             coin_flip_hidden: 0,
-            feed_order: None,
+            // (R5/fix47) The presentation's feed order (live and new first); `?feed_order=
+            // layout` gives the connection's layout back.
+            feed_order: Some(qp_grammar::feeds::PRESENTED_FEED_ORDER.to_owned()),
             feed_rule: None,
             feed_dirty: false,
             feed_inflight: false,
@@ -1468,8 +1473,9 @@ impl ShellCore {
 
     // --- what to show --------------------------------------------------------
 
-    /// The feed rows, top to bottom, by the connection's feed layout (`look.feed`,
-    /// `qp_grammar::feeds`; `r3`: the authority's `capsules` order): a capsule row is
+    /// The feed rows, top to bottom, by the presentation's feed order (`feed_order`; R5/fix47
+    /// default `live_new`) or, with none (`?feed_order=layout`), the connection's feed layout
+    /// (`look.feed`, `qp_grammar::feeds`; `r3`: the authority's `capsules` order): a capsule row is
     /// `{id, target, text, scene, relevant, closed, mark?}` (R4/S1 `closed`: the story is
     /// closed, its glyph shows the outcome mark) — `text` is the reader's sentence (shown
     /// as text when there is no face scene), `mark` the layout's short mark; a layout row
@@ -1485,25 +1491,9 @@ impl ShellCore {
         let rows = if self.feed.is_empty() && self.feed_known {
             // (R5/M19, K53) The empty feed says so, and why (the core writes it).
             qp_grammar::feeds::empty_rows(lang, self.coin_flip_hidden)
-        } else if let Some(o) = &self.feed_order {
-            let local: Vec<qp_grammar::feeds::LocalStamp> =
-                self.feed.iter().map(|it| local_stamp(it.t)).collect();
-            qp_grammar::feeds::order(
-                o,
-                &qp_grammar::feeds::FeedCtx {
-                    items: &self.feed,
-                    lang,
-                    seen: self.look.seen,
-                    fresh: &fresh,
-                    now,
-                    local: &local,
-                    now_local: now.map(local_stamp),
-                    seen_local: self.look.seen.map(local_stamp),
-                },
-            )
-            .unwrap_or_default()
         } else {
             feed_rows(
+                self.feed_order.as_deref(),
                 self.look.feed.as_deref(),
                 &self.feed,
                 lang,

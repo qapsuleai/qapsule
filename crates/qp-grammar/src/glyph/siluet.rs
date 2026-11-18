@@ -455,6 +455,14 @@ impl AlphabetTrait for Siluet {
             if c > 0.0 {
                 let top = bx.y + s * (1.0 - c);
                 let tint = if grey { grey_col } else { dir_col };
+                // (R5/T3c) The plate keeps the look's least opacity (`r4`: 0); (R5/fix47) a
+                // grey plate (grey strokes on it) at most the look's grey ceiling, so its
+                // strokes keep 3:1 against it.
+                let mut o = opacity_at_least(0.24 * fresh, theme.plate_alpha_min);
+                if theme.grey_plate_alpha_max > 0 && (grey || spec.direction == Direction::Neutral)
+                {
+                    o = o.min(f64::from(theme.grey_plate_alpha_max) / 255.0);
+                }
                 out.push(Prim::Fill {
                     points: vec![
                         [bx.x, top],
@@ -462,11 +470,7 @@ impl AlphabetTrait for Siluet {
                         [bx.x + s, bx.y + s],
                         [bx.x, bx.y + s],
                     ],
-                    // (R5/T3c) The plate keeps the look's least opacity (`r4`: 0).
-                    color: with_opacity(
-                        tint,
-                        opacity_at_least(0.24 * fresh, theme.plate_alpha_min),
-                    ),
+                    color: with_opacity(tint, o),
                 });
             }
         }

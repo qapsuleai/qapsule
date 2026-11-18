@@ -52,7 +52,7 @@ body.open[data-tab="feed"] #feed { display: none; }
 #controls { display: flex; gap: var(--qp-space-0); align-items: center; padding: var(--qp-space-1) var(--qp-space-2); height: var(--qp-bar-h); border-top: var(--qp-rule) solid var(--line); background: var(--bg); z-index: 6; }
 #controls input[type=date] { width: var(--qp-date-w); }
 #c_step_n { color: var(--muted); font-size: var(--qp-fs-tiny); margin-left: auto; font-variant-numeric: tabular-nums; }
-button, select, input { font: inherit; color: var(--fg); background: var(--card); border: var(--qp-rule) solid var(--line); border-radius: var(--radius); padding: var(--qp-control-pad);
+button, select, input { font: inherit; color: var(--fg); background: var(--card); border: var(--qp-rule) solid var(--control); border-radius: var(--radius); padding: var(--qp-control-pad);
   min-height: var(--qp-control-h); }
 label { display: flex; justify-content: space-between; align-items: center; gap: var(--qp-space-2); margin: var(--qp-space-2) 0; }
 label.check { justify-content: flex-start; }

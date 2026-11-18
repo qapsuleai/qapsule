@@ -55,6 +55,29 @@ ailede ilerleme tablosu) ve kenar boşluğuna sığmayan sözcükte kutu sola ka
 Doğrulama: v1 16/16 altınla bayt eşit (`?look=r4&voice=r4&face=vadrel&story=r4&open=r4&motion=r4`),
 v2 28/28 iki koşuda bayt eşit (bu ajanın koşusu, 2026-11-18).
 
+## R5/fix47 — v1 adresine `feed_order=layout`, v2 yeniden üretildi
+
+Gösterim artık akışını `live_new` ile sıralıyor (kabul 7; `feeds::PRESENTED_FEED_ORDER`), bu
+yüzden `v1` çekimleri adreste bağlantının düzenini açıkça adlandırır (`screens.mjs` `V1`):
+
+    ?look=r4&voice=r4&face=vadrel&story=r4&open=r4&motion=r4&feed_order=layout
+
+v1 16/16 altınla **bayt eşit** (dosyalara dokunulmadı). v2'nin **28/28** sahnesi değişti; iki koşu
+bayt eşit, yenileri `fixtures/golden/demo/v2/`'ye yazıldı (700 KB):
+
+| çekim | değişiklik | gerekçe |
+|---|---|---|
+| `feed-*` `face-0..2` | akışın ilk üç yüzü başka kapsüller (canlı ve en yeni önce); gri işaretlerin plakası daha açık | kabul 7 (`live_new`); A46 `grey_plate_alpha_max` |
+| `closed-*` `closed-0..1` | kapanmışların sırası `live_new`'e göre (en yeni önce); "tutmadı" izinin gri plakası 61 → 49 (koyu) / 29 (açık) | kabul 7; A46 (gri çizgiler plakada 2,93 / 2,70 → 3,09 / 3,08) |
+| `capsule-*` `scene` | açılan kapsül akışın yeni ilk satırı (canlı SYN12; eskiden kapanmış SYN26); küçük grafiğin eksen çizgisi | kabul 7; A46 `axis` 2,95 / 2,88 → 3,23 / 3,19 |
+| `chart-*` `scene` | aynı kapsülün grafiği ve hikâye çizelgesi; eksen; seçili satır bandı alfa 40 → 20 | kabul 7; A46 (bant üstündeki kapanmış şeritler 2,85 / 2,73 → 3,33 / 3,07) |
+
+Açılmış kapsülün geçersiz başlığı (`invalid` → `muted`) v2 `capsule-*` çekiminde artık görünmüyor
+(ilk satır canlı); kural `look::tests::oltan_meets_the_hard_thresholds` ve
+`experiments/S/CONTRAST.md` ölçümüyle sınanıyor. Sayfa ekran görüntülerinde kabuk denetimlerinin
+sınırı `--control` (altın değil). Gözle bakılanlar: `capsule-tr-dark` (sayfa), `closed-tr-light`
+(sayfa), `chart-tr-light` (sahne); kesilen ya da taşan metin görülmedi.
+
 ## Değişen sınama kayıtları
 
 - `crates/qp-wasm/tests/data/pavka_scene_digests.txt`: bkz. rapor (pavka performans eşitliği).

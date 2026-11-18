@@ -114,7 +114,10 @@ Merdivenin kuralları:
   benzetiminde koyu yeşille çakışıyordu (ΔE 7,8, denendi).
 - **Geçerli olmayan başlık `muted` renginde yazılıyor.** `invalid` 3,75:1 ile metin eşiğinin
   altında kalırdı. Geçerlilik üç yoldan okunuyor: işaretin rengi ve rozeti, sözcük, cümlenin
-  rengi.
+  rengi. (R5/fix47, A46) Açılmış kapsül (`tesir`) de aynı kuralı izliyor
+  (`open::tesir::NO_LONGER_HEADLINE`); önceden `invalid` ile yazıyordu (3,75 / 3,46, 19 px yarı
+  kalın: 600'ü kalın saymayan tanımla eşik altı). Açık temada `muted` metne yakın (14,4 ↔ 18,7);
+  ayrım orada işaret, rozet ve sözcükte.
 
 | rol | koyu | açık |
 |---|---|---|
@@ -125,6 +128,9 @@ Merdivenin kuralları:
 | yukarı | `#4EE094` (11,0:1) | `#107642` (5,7:1) |
 | aşağı | `#F6584A` (5,7:1) | `#840E16` (10,2:1) |
 | gri: `neutral` = `invalid` = `closed` | `#6E7076` (3,75:1) | `#888A8E` (3,46:1) |
+| `axis` (grafik eksen çizgisi; R5/fix47) | `#626670` (3,23:1; önce `#5C606A` 2,95) | `#8E9096` (3,19:1; önce `#96989E` 2,88) |
+| `grid` (ızgara, süs) | `#24262C` (1,23:1) | `#E8E8E4` (1,23:1) |
+| `chrome.control` (denetim sınırı; R5/fix47) | `#6E7076` (kabukta 4,09, kartta 3,75) | `#7E8084` (kabukta 3,40, kartta 3,96) |
 | vurgu, odak, `s1` | `#8AAAFF` | `#2850DC` |
 | `warn` (kanıt notu) | `#FFC850` (12,1:1) | `#965A00` (5,6:1) |
 
@@ -143,6 +149,7 @@ Düzeneğin ölçtüğü değerler §1.6'da.
 | `closed_alpha` | **255** | Kapanmış işaret solmuyor. `tg5`'in "tutmadı" izi `closed` renginde, en opak çizgisi bu tabanda; gerçekleşti plakası opak mürekkep. |
 | `fresh_alpha_min` | **255** | Açık işaret de tazelikle solmuyor. |
 | `plate_alpha_min` | **61** | Güven plakası taze bir işaretinkinin (0,24) altına inmiyor. |
+| `grey_plate_alpha_max` (R5/fix47) | **49** koyu / **29** açık | Gri işaretin (kapanmış, artık geçerli değil, yönsüz) plakası bundan koyu olmuyor: gri çizgiler plakanın üstünde de ≥ 3:1 (3,09 / 3,08; 61'de 2,93 / 2,70). Renkli plakalar değişmedi. |
 
 - **Tazelik solması yok, yaş cümleyle söyleniyor.** Alfabeler eski işareti saydamlıkla
   soldururdu (opaklık 0,3 + 0,7·tazelik); 0,3 opaklıkta hiçbir renk 3:1'e ulaşamaz. Gösterimdeki
@@ -181,6 +188,7 @@ Düzeneğin `compute` adımı (§G7 + Ek G5), M16 koşusu, 2 dil × 2 tema:
 |---|---|---|---|
 | Metin karşıtlığı (WCAG 1.4.3) | ≥ 4,5:1 (büyük metin 3:1), en kötü öğe | **6,33** | 2,75 (`karnesi yazı tura`, 11 px) |
 | İşaret karşıtlığı (1.4.11, kapanmış dahil, A31) | ≥ 3:1, işaretin en opak ilkeli | **3,46** (tutmadı izi, açık) | 2,06 |
+| Bütün öğeler (R5/fix47; yüz, akış, açılmış kapsül, kanıt, hikâye çizelgesi, kabuk) | metin 4,5:1 (600 kalın sayılmadan; ≥ 24 px 3:1), metin dışı 3:1 bitişik renge karşı; ızgara, ayraç ve saydam bant süs | eşik altı **0**; en kötü metin 5,67, metin dışı **3,07** (açık, seçili hikâye satırındaki kapanmış şerit); `rounds/R5/experiments/S/CONTRAST.md` | — |
 | En küçük yazı | ≥ 11 CSS px | **13** | 10 |
 | Dokunma hedefi | ≥ 44 CSS px; eşiğin altındaki hedef sayısı | **0** | 108 |
 | Anlam renkleri ΔE00 | **beş koşulda** ≥ 10 (normal, gri, protan, deutan, tritan; CVD'de Viénot/Brettel ile Machado'nun küçüğü), işaret ≤ 16 px ise ≥ 15; tema başına | en kötü **10,53** (koyu `up ↔ valid`) | 0,50 (koyu `down ↔ invalid`) |
@@ -530,6 +538,7 @@ sekiz serili bir sınama görünümü (`s8`) kullanıldı. Boylar: telefon 402 �
    çizgisinden daha yüksek karşıtlıkla çiziliyor: açıkta kural 14,35, RSI çizgisi 6,42. Yüzdeki
    "işaret önde" ilkesinin grafikteki karşılığı "veri önde" olurdu.
 5. **Eksen çizgisi 1.4.11'in altında:** 2,88 / 2,95. `r4` de altında (2,25 / 2,71).
+   (R5/fix47: `oltan`'da 3,19 / 3,23'e çıkarıldı; `r4` değişmedi, v1 altınları.)
 6. **Mum telefonda 1 px.** Yön yalnız renkle okunuyor. Bu gramerden geliyor, iki görünüşte aynı.
 
 **R7 için açık sorular** (D/RESULTS §4):

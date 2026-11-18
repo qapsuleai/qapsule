@@ -28,8 +28,8 @@ html, body { margin: 0; background: var(--page); color: var(--fg);
 .note { flex: 1; min-width: 0; }
 #gfoot { padding: var(--qp-space-2) var(--qp-space-3); }
 #gfoot h2 { font-size: var(--qp-fs); margin: var(--qp-space-2) 0; }
-#gsummary { width: 100%; font: inherit; font-size: var(--qp-fs-small); color: var(--fg); background: var(--card); border: var(--qp-rule) solid var(--line); border-radius: var(--radius); padding: var(--qp-space-2); white-space: pre-wrap; }
+#gsummary { width: 100%; font: inherit; font-size: var(--qp-fs-small); color: var(--fg); background: var(--card); border: var(--qp-rule) solid var(--control); border-radius: var(--radius); padding: var(--qp-space-2); white-space: pre-wrap; }
 #gcopyrow { display: flex; gap: var(--qp-space-2); align-items: center; margin: var(--qp-space-2) 0; }
 #gshare { color: var(--accent); word-break: break-all; }
-button, select, input { font: inherit; color: var(--fg); background: var(--card); border: var(--qp-rule) solid var(--line); border-radius: var(--radius); padding: var(--qp-control-pad);
+button, select, input { font: inherit; color: var(--fg); background: var(--card); border: var(--qp-rule) solid var(--control); border-radius: var(--radius); padding: var(--qp-control-pad);
   min-height: var(--qp-control-h); }

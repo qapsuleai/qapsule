@@ -746,6 +746,7 @@ pub const ORNEK: Look = Look {
         fresh_alpha_min: 168,
         // (R5/T3c) The confidence plate never fades below a fresh glyph's (0.24).
         plate_alpha_min: 61,
+        grey_plate_alpha_max: 0,
         invalid: [176, 160, 148, 255],
         focus: [120, 180, 255, 255],
         chrome: Chrome {
@@ -753,6 +754,7 @@ pub const ORNEK: Look = Look {
             fg: [240, 230, 220, 255],
             muted: [176, 160, 148, 255],
             line: [60, 52, 46, 255],
+            control: [60, 52, 46, 255],
             card: [34, 29, 26, 255],
             accent: [120, 180, 255, 255],
             on_accent: [24, 20, 18, 255],
@@ -775,6 +777,7 @@ pub const ORNEK: Look = Look {
         // ≥ 229); the r4 light accent (2.9:1 even opaque) is too light for a neutral glyph.
         fresh_alpha_min: 236,
         plate_alpha_min: 61,
+        grey_plate_alpha_max: 0,
         neutral: [0xb4, 0x53, 0x09, 230],
         invalid: [100, 88, 80, 255],
         chrome: Chrome {
@@ -783,6 +786,7 @@ pub const ORNEK: Look = Look {
             muted: [100, 88, 80, 255],
             line: [222, 212, 202, 255],
             req: [138, 74, 0, 255],
+            control: [222, 212, 202, 255],
             ..Theme::LIGHT.chrome
         },
         ..Theme::LIGHT
@@ -878,7 +882,9 @@ pub const OLTAN: Look = Look {
         name: "dark",
         bg: [18, 19, 23, 255],
         grid: [36, 38, 44, 255],
-        axis: [92, 96, 106, 255],
+        // (R5/fix47, A46) A chart's axis line is a non-text element: ≥ 3:1 (WCAG 1.4.11),
+        // 3.23:1 here (was 2.95). The grid stays decorative (1.23:1).
+        axis: [98, 102, 112, 255],
         text: [246, 246, 242, 255],
         muted: [185, 188, 196, 255],
         up: [78, 224, 148, 255],
@@ -914,6 +920,8 @@ pub const OLTAN: Look = Look {
         fresh_alpha_min: 255,
         // The confidence plate never fades below a fresh glyph's (0.24).
         plate_alpha_min: 61,
+        // (R5/fix47, A46) A grey glyph's plate (3.09:1 for its strokes; 61 gave 2.93).
+        grey_plate_alpha_max: 49,
         focus: [138, 170, 255, 255],
         chrome: Chrome {
             bg: [6, 6, 8, 255],
@@ -929,13 +937,17 @@ pub const OLTAN: Look = Look {
             alert_bg: [74, 24, 32, 255],
             alert_fg: [255, 214, 220, 255],
             req: [255, 190, 90, 255],
+            // (R5/fix47, A46) Control boundary (WCAG 1.4.11): 4.09:1 on the chrome, 3.75:1
+            // on a card (`line` stays a quiet divider).
+            control: [110, 112, 118, 255],
         },
     },
     light: Theme {
         name: "light",
         bg: [255, 255, 255, 255],
         grid: [232, 232, 228, 255],
-        axis: [150, 152, 158, 255],
+        // (R5/fix47) 3.19:1 (was 2.88); the grid decorative (1.23:1).
+        axis: [142, 144, 150, 255],
         text: [17, 18, 22, 255],
         muted: [39, 42, 50, 255],
         up: [16, 118, 66, 255],
@@ -963,6 +975,8 @@ pub const OLTAN: Look = Look {
         // ≥ 3:1 at freshness 0 from 232 up (`neutral`); 255 as in the dark scheme.
         fresh_alpha_min: 255,
         plate_alpha_min: 61,
+        // (R5/fix47) 3.08:1 for the grey strokes on their plate (61 gave 2.70).
+        grey_plate_alpha_max: 29,
         focus: [40, 80, 220, 255],
         chrome: Chrome {
             bg: [238, 238, 234, 255],
@@ -978,6 +992,8 @@ pub const OLTAN: Look = Look {
             alert_bg: [74, 24, 32, 255],
             alert_fg: [255, 214, 220, 255],
             req: [150, 80, 0, 255],
+            // (R5/fix47) Control boundary: 3.40:1 on the chrome, 3.96:1 on a card.
+            control: [126, 128, 132, 255],
         },
     },
     space: Space {
@@ -1045,8 +1061,13 @@ pub const OLTAN: Look = Look {
         ledger_gap: 4.0,
         ..R4.offsets
     },
-    // (R5/S) The story chart and open capsule counts as `r4`.
-    story: R4.story,
+    // (R5/S) The story chart and open capsule counts as `r4`; (R5/fix47, A46) the selected
+    // story's row band fainter (20, `r4` 40), so the grey lanes of other closed stories in
+    // that row keep 3:1 against it (3.33 / 3.08; 40 gave 2.85 / 2.73).
+    story: StoryLook {
+        focus_row_alpha: 20,
+        ..R4.story
+    },
     open: R4.open,
 };
 
@@ -1106,6 +1127,7 @@ pub const ZEMRE: Look = Look {
         fresh_alpha_min: 172,
         // The confidence plate fades with freshness alone (not a sign; the strokes are).
         plate_alpha_min: 0,
+        grey_plate_alpha_max: 0,
         focus: [95, 208, 184, 255],
         chrome: Chrome {
             bg: [18, 20, 25, 255],
@@ -1121,6 +1143,7 @@ pub const ZEMRE: Look = Look {
             alert_bg: [74, 28, 20, 255],
             alert_fg: [255, 217, 204, 255],
             req: [242, 191, 90, 255],
+            control: [44, 48, 57, 255],
         },
     },
     light: Theme {
@@ -1154,6 +1177,7 @@ pub const ZEMRE: Look = Look {
         // (R5/M16 rebase) An open glyph at freshness 0 keeps ≥ 3:1 (`up` needs ≥ 172).
         fresh_alpha_min: 180,
         plate_alpha_min: 0,
+        grey_plate_alpha_max: 0,
         focus: [0, 105, 92, 255],
         chrome: Chrome {
             bg: [246, 243, 236, 255],
@@ -1169,6 +1193,7 @@ pub const ZEMRE: Look = Look {
             alert_bg: [247, 217, 207, 255],
             alert_fg: [107, 29, 5, 255],
             req: [138, 75, 0, 255],
+            control: [217, 210, 196, 255],
         },
     },
     space: Space {
@@ -1457,6 +1482,7 @@ pub fn css_vars(look: &Look, scheme: Option<&str>) -> Vec<(String, String)> {
         ("--alert-bg".into(), hex(c.alert_bg)),
         ("--alert-fg".into(), hex(c.alert_fg)),
         ("--req".into(), hex(c.req)),
+        ("--control".into(), hex(c.control)),
         (
             "--qp-font".into(),
             if body.id == DEFAULT_FONT && look.name == DEFAULT_LOOK {
@@ -1773,6 +1799,49 @@ mod tests {
             ] {
                 let k = contrast(fg, bg);
                 assert!(k >= 4.5, "{} {what}: {k:.2}", t.name);
+            }
+            // (R5/fix47, A46) The open capsule's headline when the claim no longer holds is
+            // text (19 px semibold, 600 not counted as bold): 4.5:1 on the ground and the
+            // surface. The chart's axis line is a non-text element: 3:1 (WCAG 1.4.11).
+            let head = t
+                .token(crate::open::tesir::NO_LONGER_HEADLINE)
+                .unwrap_or([0; 4]);
+            for bg in [t.bg, t.surface] {
+                let k = contrast(head, bg);
+                assert!(k >= 4.5, "{}: no-longer headline {k:.2}", t.name);
+                let k = contrast(t.axis, bg);
+                assert!(k >= 3.0, "{}: axis {k:.2}", t.name);
+            }
+            // (R5/fix47) Marks on a translucent band keep 3:1 against the band: the grey
+            // strokes on a grey glyph's plate (at its ceiling), and every lane colour on the
+            // story chart's selected row band.
+            let over = |c: Rgba, a: u8| {
+                let k = f64::from(a) / 255.0;
+                let m = |i: usize| {
+                    (f64::from(t.bg[i]) + k * (f64::from(c[i]) - f64::from(t.bg[i]))).round()
+                };
+                #[allow(clippy::cast_possible_truncation, clippy::cast_sign_loss)]
+                let px = [m(0) as u8, m(1) as u8, m(2) as u8, 255];
+                px
+            };
+            // (R5/fix47) A control's boundary: 3:1 on the chrome and on a card.
+            for bg in [ch.bg, ch.card] {
+                let k = contrast(ch.control, bg);
+                assert!(k >= 3.0, "{}: control boundary {k:.2}", t.name);
+            }
+            assert!(t.grey_plate_alpha_max > 0, "{}", t.name);
+            let plate = over(t.invalid, t.grey_plate_alpha_max);
+            let k = contrast(t.invalid, plate);
+            assert!(k >= 3.0, "{}: grey on its plate {k:.2}", t.name);
+            let row = over(t.focus, o.story.focus_row_alpha);
+            for (what, c) in [
+                ("closed", t.closed),
+                ("up", t.up),
+                ("down", t.down),
+                ("text", t.text),
+            ] {
+                let k = contrast(c, row);
+                assert!(k >= 3.0, "{} {what} on the focus row {k:.2}", t.name);
             }
             assert_eq!(t.neutral, t.invalid, "{}: grey means no direction", t.name);
             // (M16 rebase) `tg5` draws a failed glyph's strongest stroke in `closed` at the

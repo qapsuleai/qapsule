@@ -239,7 +239,7 @@ fn closed_stories_hide_and_show() {
         Some(qp_grammar::stories::korda::TOGGLE_LAYER)
     );
     d.tap(x, y);
-    assert_eq!(d.core.look().hide_closed, true);
+    assert!(d.core.look().hide_closed);
     let s = d.scene();
     dump(&s, "hidden");
     let cur = d.open_capsule();
@@ -268,7 +268,7 @@ fn closed_stories_hide_and_show() {
     assert_eq!(hdr.items[0].values["closed"], closed);
     let (x, y) = center(&hdr.items[0].hit);
     d.tap(x, y);
-    assert_eq!(d.core.look().hide_closed, false);
+    assert!(!d.core.look().hide_closed);
     assert_eq!(lanes(&d.scene()).len(), shown);
 }
 

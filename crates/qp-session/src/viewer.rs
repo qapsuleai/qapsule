@@ -320,6 +320,7 @@ pub fn open_scene(
 /// rows are not read); (R5/M20) and the reader's language and the device's check
 /// ([`OpenExtra`]), which an open capsule design reads.
 #[must_use]
+#[allow(clippy::too_many_arguments)] // (R5/S) story rows (M18) and open extra (M20) both
 pub fn open_scene_with(
     s: &mut Session,
     o: &Opening,

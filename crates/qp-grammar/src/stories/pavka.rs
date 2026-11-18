@@ -300,6 +300,7 @@ fn fit(look: &Look, role: &str, s: &str, w: i32) -> String {
 
 /// The small shape of `s` centred at (`cx`, `cy`), half size `r`, in `color` (the lane's
 /// end cap, and the summary's legend).
+#[allow(clippy::too_many_arguments)]
 fn cap(
     out: &mut Vec<Prim>,
     s: Shape,

@@ -1,0 +1,286 @@
+{
+ "config": "phone-jit-est",
+ "browser": "26.5",
+ "story": "pavka",
+ "ms": 10000,
+ "phases": [
+  {
+   "target": 5,
+   "n": 13,
+   "range": {
+    "from_bar": 594,
+    "to_bar": 637,
+    "view": "present-fnd.SYN26.breakout.down.47"
+   },
+   "total": 206,
+   "tick": {
+    "n": 40,
+    "p50": 0,
+    "p95": 1
+   },
+   "scene": {
+    "n": 53,
+    "p50": 0,
+    "p95": 1
+   },
+   "scene_build": {
+    "n": 94,
+    "p50": 0,
+    "p95": 1
+   },
+   "spans": {
+    "change_check": [
+     94,
+     0,
+     0
+    ],
+    "data_pass": [
+     40,
+     1,
+     1
+    ],
+    "frame_to_paint": [
+     95,
+     10,
+     17
+    ],
+    "msg": [
+     62,
+     0,
+     1
+    ],
+    "paint_pass": [
+     95,
+     1,
+     1
+    ],
+    "pass_wait": [
+     95,
+     9,
+     16
+    ],
+    "scene": [
+     53,
+     0,
+     1
+    ],
+    "scene_build": [
+     94,
+     0,
+     1
+    ],
+    "tick": [
+     40,
+     0,
+     1
+    ]
+   },
+   "counts": {
+    "data_frames": 40,
+    "data_passes": 40,
+    "faces_painted": 0,
+    "faces_skipped_hidden": 2280,
+    "msg_frames": 62,
+    "paint_passes": 95,
+    "passes_per_data_frame": 1,
+    "rate_frames_min": 10,
+    "scene_builds": 94,
+    "scenes_painted": 53,
+    "tick_plus_pass_ms": 0.65
+   },
+   "paint": {
+    "fallback": null,
+    "requested": "canvas",
+    "used": "canvas"
+   }
+  },
+  {
+   "target": 50,
+   "n": 52,
+   "range": {
+    "from_bar": 461,
+    "to_bar": 724,
+    "view": "present-fnd.SYN26.breakout.down.47"
+   },
+   "total": 207,
+   "tick": {
+    "n": 41,
+    "p50": 0,
+    "p95": 1
+   },
+   "scene": {
+    "n": 54,
+    "p50": 1,
+    "p95": 1
+   },
+   "scene_build": {
+    "n": 95,
+    "p50": 0,
+    "p95": 1
+   },
+   "spans": {
+    "change_check": [
+     95,
+     0,
+     0
+    ],
+    "data_pass": [
+     41,
+     1,
+     1
+    ],
+    "frame_to_paint": [
+     96,
+     9,
+     17
+    ],
+    "msg": [
+     64,
+     0,
+     1
+    ],
+    "paint_pass": [
+     96,
+     1,
+     1
+    ],
+    "pass_wait": [
+     96,
+     8,
+     16
+    ],
+    "scene": [
+     54,
+     1,
+     1
+    ],
+    "scene_build": [
+     95,
+     0,
+     1
+    ],
+    "tick": [
+     41,
+     0,
+     1
+    ]
+   },
+   "counts": {
+    "data_frames": 41,
+    "data_passes": 41,
+    "faces_painted": 0,
+    "faces_skipped_hidden": 2360,
+    "msg_frames": 64,
+    "paint_passes": 96,
+    "passes_per_data_frame": 1,
+    "rate_frames_min": 10,
+    "scene_builds": 95,
+    "scenes_painted": 54,
+    "tick_plus_pass_ms": 0.78
+   },
+   "paint": {
+    "fallback": null,
+    "requested": "canvas",
+    "used": "canvas"
+   }
+  },
+  {
+   "target": 200,
+   "n": 207,
+   "range": {
+    "from_bar": 28,
+    "to_bar": 1035,
+    "view": "present-fnd.SYN26.breakout.down.47"
+   },
+   "total": 207,
+   "tick": {
+    "n": 40,
+    "p50": 0,
+    "p95": 0
+   },
+   "scene": {
+    "n": 51,
+    "p50": 1,
+    "p95": 1
+   },
+   "scene_build": {
+    "n": 91,
+    "p50": 0,
+    "p95": 1
+   },
+   "spans": {
+    "canvas_part": [
+     17,
+     0,
+     1
+    ],
+    "change_check": [
+     91,
+     0,
+     0
+    ],
+    "data_pass": [
+     40,
+     1,
+     1
+    ],
+    "frame_to_paint": [
+     92,
+     10,
+     17
+    ],
+    "msg": [
+     60,
+     0,
+     1
+    ],
+    "paint_pass": [
+     92,
+     1,
+     2
+    ],
+    "pass_wait": [
+     92,
+     9,
+     16
+    ],
+    "scene": [
+     51,
+     1,
+     1
+    ],
+    "scene_build": [
+     91,
+     0,
+     1
+    ],
+    "tick": [
+     40,
+     0,
+     0
+    ]
+   },
+   "counts": {
+    "data_frames": 40,
+    "data_passes": 40,
+    "faces_painted": 0,
+    "faces_skipped_hidden": 2200,
+    "msg_frames": 60,
+    "paint_passes": 92,
+    "passes_per_data_frame": 1,
+    "rate_frames_min": 10,
+    "scene_builds": 91,
+    "scenes_painted": 51,
+    "tick_plus_pass_ms": 0.85
+   },
+   "paint": {
+    "fallback": null,
+    "requested": "canvas",
+    "used": "canvas"
+   }
+  }
+ ],
+ "capsule": "cap.SYN26.breakout.down.47",
+ "paint_used": "canvas",
+ "errors": []
+}

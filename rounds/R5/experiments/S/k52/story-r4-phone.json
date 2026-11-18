@@ -1,0 +1,281 @@
+{
+ "config": "phone",
+ "browser": "26.5",
+ "story": "r4",
+ "ms": 10000,
+ "phases": [
+  {
+   "target": 5,
+   "n": 13,
+   "range": {
+    "from_bar": 591,
+    "to_bar": 634,
+    "view": "present-fnd.SYN26.breakout.down.47"
+   },
+   "total": 206,
+   "tick": {
+    "n": 40,
+    "p50": 0,
+    "p95": 1
+   },
+   "scene": {
+    "n": 64,
+    "p50": 3,
+    "p95": 4
+   },
+   "scene_build": {
+    "n": 102,
+    "p50": 1,
+    "p95": 2
+   },
+   "spans": {
+    "change_check": [
+     102,
+     0,
+     1
+    ],
+    "data_pass": [
+     40,
+     3,
+     6
+    ],
+    "frame_to_paint": [
+     103,
+     13,
+     22
+    ],
+    "msg": [
+     73,
+     0,
+     4
+    ],
+    "paint_pass": [
+     103,
+     5,
+     7
+    ],
+    "pass_wait": [
+     103,
+     8,
+     15
+    ],
+    "scene": [
+     64,
+     3,
+     4
+    ],
+    "scene_build": [
+     102,
+     1,
+     2
+    ],
+    "tick": [
+     40,
+     0,
+     1
+    ]
+   },
+   "counts": {
+    "data_frames": 40,
+    "data_passes": 40,
+    "faces_painted": 0,
+    "faces_skipped_hidden": 2640,
+    "msg_frames": 73,
+    "paint_passes": 103,
+    "passes_per_data_frame": 1,
+    "rate_frames_min": 10,
+    "scene_builds": 102,
+    "scenes_painted": 64,
+    "tick_plus_pass_ms": 3.725
+   },
+   "paint": {
+    "fallback": null,
+    "requested": "canvas",
+    "used": "canvas"
+   }
+  },
+  {
+   "target": 50,
+   "n": 52,
+   "range": {
+    "from_bar": 458,
+    "to_bar": 721,
+    "view": "present-fnd.SYN26.breakout.down.47"
+   },
+   "total": 207,
+   "tick": {
+    "n": 41,
+    "p50": 0,
+    "p95": 1
+   },
+   "scene": {
+    "n": 64,
+    "p50": 8,
+    "p95": 9
+   },
+   "scene_build": {
+    "n": 103,
+    "p50": 3,
+    "p95": 4
+   },
+   "spans": {
+    "change_check": [
+     103,
+     1,
+     1
+    ],
+    "data_pass": [
+     40,
+     6,
+     8
+    ],
+    "frame_to_paint": [
+     104,
+     16,
+     27
+    ],
+    "msg": [
+     74,
+     0,
+     4
+    ],
+    "paint_pass": [
+     104,
+     10,
+     12
+    ],
+    "pass_wait": [
+     104,
+     7,
+     16
+    ],
+    "scene": [
+     64,
+     8,
+     9
+    ],
+    "scene_build": [
+     103,
+     3,
+     4
+    ],
+    "tick": [
+     41,
+     0,
+     1
+    ]
+   },
+   "counts": {
+    "data_frames": 41,
+    "data_passes": 40,
+    "faces_painted": 0,
+    "faces_skipped_hidden": 2720,
+    "msg_frames": 74,
+    "paint_passes": 104,
+    "passes_per_data_frame": 0.976,
+    "rate_frames_min": 10,
+    "scene_builds": 103,
+    "scenes_painted": 64,
+    "tick_plus_pass_ms": 6.683
+   },
+   "paint": {
+    "fallback": null,
+    "requested": "canvas",
+    "used": "canvas"
+   }
+  },
+  {
+   "target": 200,
+   "n": 207,
+   "range": {
+    "from_bar": 28,
+    "to_bar": 1035,
+    "view": "present-fnd.SYN26.breakout.down.47"
+   },
+   "total": 207,
+   "tick": {
+    "n": 41,
+    "p50": 0,
+    "p95": 1
+   },
+   "scene": {
+    "n": 49,
+    "p50": 8,
+    "p95": 11
+   },
+   "scene_build": {
+    "n": 104,
+    "p50": 3,
+    "p95": 4
+   },
+   "spans": {
+    "change_check": [
+     104,
+     1,
+     1
+    ],
+    "data_pass": [
+     40,
+     8,
+     12
+    ],
+    "frame_to_paint": [
+     105,
+     18,
+     27
+    ],
+    "msg": [
+     73,
+     0,
+     3
+    ],
+    "paint_pass": [
+     105,
+     8,
+     14
+    ],
+    "pass_wait": [
+     105,
+     7,
+     16
+    ],
+    "scene": [
+     49,
+     8,
+     11
+    ],
+    "scene_build": [
+     104,
+     3,
+     4
+    ],
+    "tick": [
+     41,
+     0,
+     1
+    ]
+   },
+   "counts": {
+    "data_frames": 41,
+    "data_passes": 40,
+    "faces_painted": 0,
+    "faces_skipped_hidden": 2720,
+    "msg_frames": 73,
+    "paint_passes": 105,
+    "passes_per_data_frame": 0.976,
+    "rate_frames_min": 10,
+    "scene_builds": 104,
+    "scenes_painted": 49,
+    "tick_plus_pass_ms": 8.537
+   },
+   "paint": {
+    "fallback": null,
+    "requested": "canvas",
+    "used": "canvas"
+   }
+  }
+ ],
+ "capsule": "cap.SYN26.breakout.down.47",
+ "paint_used": "canvas",
+ "errors": []
+}

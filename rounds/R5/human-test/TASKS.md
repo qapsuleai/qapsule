@@ -15,14 +15,14 @@ seçeneğin numarasını söyler; açık uçlu sorularda kendi sözüyle bir cü
 | # | Görev | Karşılaştırma (aday 1 / aday 2) | Süre |
 |---|---|---|---:|
 | G0 | Giriş, onam, alıştırma (puanlanmaz) | — | 1:30 |
-| G1 | Tek bakış: kapsülün yüzü (5 sn) + kısma sorusu | Görünüş `<GÖRÜNÜŞ-1>` / `<GÖRÜNÜŞ-2>` (M16) | 2:30 |
+| G1 | Tek bakış: kapsülün yüzü (5 sn) + kısma sorusu | Görünüş `oltan` / `zemre` (M16) | 2:30 |
 | G2 | Kapsülün dili: açılmış kapsülü okuma, sözlük, yüzle tutarlılık | Dil `marla` / `selvi` (M17; A33) | 3:00 |
 | G3 | İşaret alfabesi (yazılar örtülü) | `siluet` / `rozet` (A21) | 1:30 |
-| G4 | Açılmış kapsül ve kanıt; yetkisiz okuyucu | `<OPEN-1>` / `<OPEN-2>` (M20; A32) | 2:30 |
+| G4 | Açılmış kapsül ve kanıt; yetkisiz okuyucu | `tesir` / `nobra` (M20; A32) | 2:30 |
 | G5 | Hikâye çizelgesi | `pavka` / `korda` (M18) | 2:30 |
 | G6 | Akış: son bakıştan beri, elimdekinde olumsuz | Akış sırası `grouped` / `live_new` (M19) | 2:30 |
 | G7 | Akış: yazı tura eşiği; boş akış | `rate55` / `none` (K53) | 1:30 |
-| G8 | Hareket: canlı güncelleme, açılma; hareketi azalt | `<MOTION-1>` / `<MOTION-2>` (M21) + hareketsiz | 2:00 |
+| G8 | Hareket: canlı güncelleme, açılma; hareketi azalt | `surek` / `nabiz` (M21) + hareketsiz | 2:00 |
 | T | Tercihler ve nedenleri | hepsi | 1:00 |
 | | **Toplam** | | **~20:30** |
 
@@ -214,28 +214,28 @@ hep aynı sırayla görmesi yalnız 01'de olur, 02 onun tersidir).
 | 09 | 1 | 1 | 1 | 1 | 2 | 2 | 2 | 2 |
 | 10 | 2 | 2 | 2 | 2 | 1 | 1 | 1 | 1 |
 
-Ör. G03 satırı: G1'de 1. set `<GÖRÜNÜŞ-1>` (U11), 2. set `<GÖRÜNÜŞ-2>` (U12); G2'de 1. set `selvi`
+Ör. G03 satırı: G1'de 1. set `oltan` (U11), 2. set `zemre` (U12); G2'de 1. set `selvi`
 (U22), 2. set `marla` (U21). G8'in 3. seti (hareketi azalt) her zaman en sondadır.
 
 ## Bağlantı kartı (yalnız yürütücü; katılımcı görmez)
 
-Taban (U00): `http://<adres>:8390/?lang=tr&theme=dark&voice=marla&look=<GÖRÜNÜŞ-1>&story=pavka&feed_order=grouped&feed_rule=rate55&open=<OPEN-1>&motion=<MOTION-1>&alphabet=siluet`
+Taban (U00): `http://<adres>:8390/?lang=tr&theme=dark&voice=marla&look=oltan&story=pavka&feed_order=grouped&feed_rule=rate55&open=tesir&motion=surek&alphabet=siluet`
 
 Her kod tabandan yalnız bir parametreyi değiştirir:
 
 | kod | değişen | kod | değişen |
 |---|---|---|---|
-| U11 | `look=<GÖRÜNÜŞ-1>` | U12 | `look=<GÖRÜNÜŞ-2>` |
+| U11 | `look=oltan` | U12 | `look=zemre` |
 | U21 | `voice=marla` | U22 | `voice=selvi` |
 | U31 | `alphabet=siluet` | U32 | `alphabet=rozet` |
-| U41 | `open=<OPEN-1>` | U42 | `open=<OPEN-2>` |
-| U43 | `open=<OPEN-1>&principal=visitor` | U44 | `open=<OPEN-2>&principal=visitor` |
+| U41 | `open=tesir` | U42 | `open=nobra` |
+| U43 | `open=tesir&principal=visitor` | U44 | `open=nobra&principal=visitor` |
 | U51 | `story=pavka` | U52 | `story=korda` |
 | U61 | `feed_order=grouped` + G6 kitlesi | U62 | `feed_order=live_new` + G6 kitlesi |
 | U71 | `feed_rule=rate55` | U72 | `feed_rule=none` |
 | U70 | taban + `<KİTLE-BOŞ>` (boş akış) | | |
-| U81 | `motion=<MOTION-1>` | U82 | `motion=<MOTION-2>` |
-| U83 | `motion=<MOTION-1>&anim=0` (ya da işletim sistemi ayarı) | | |
+| U81 | `motion=surek` | U82 | `motion=nabiz` |
+| U83 | `motion=surek&anim=0` (ya da işletim sistemi ayarı) | | |
 
 Bağlantılar yer imi olarak telefona eklenir; adres çubuğu katılımcıya gösterilmez (tasarım adı URL'de).
 

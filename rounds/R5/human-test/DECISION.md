@@ -25,11 +25,11 @@ Kararlar `DECISIONS.md`'ye bu paket tarafından değil, orkestratör / ana akı�
 | **K42 muafiyeti** (K53 içinde) | G6 `f_neg` | muaf (gösterimin tek biçimi) | — | §5.3 mutlak | yalnız muaf biçim için kanıt |
 | **Akış sırası** (M19) | G6 | `grouped` | `live_new` | §2 | onaylanır ya da değişir |
 | **Boş akış** (GOAL kabul 7) | G7 `x_empty` | — | — | §6 mutlak | anlaşılıyor / yeniden tasarım |
-| **M16** görünüş | G1 | `<GÖRÜNÜŞ-1>` | `<GÖRÜNÜŞ-2>` | §2 + §7 | onaylanır ya da değişir |
+| **M16** görünüş | G1 | `oltan` | `zemre` | §2 + §7 | onaylanır ya da değişir |
 | **M17** dil | G2 | `marla` | `selvi` | §2 + tavsiye kapısı | onaylanır ya da değişir |
 | **M18** hikâye çizelgesi | G5 | `pavka` | `korda` | §2 (süre adımı `c_live`) | onaylanır ya da değişir |
-| **M20** açılmış kapsül | G4 (a) | `<OPEN-1>` | `<OPEN-2>` | §2 + §8 | onaylanır ya da değişir |
-| **M21** hareket | G8 | `<MOTION-1>` | `<MOTION-2>` | §2 + §9 | onaylanır ya da değişir |
+| **M20** açılmış kapsül | G4 (a) | `tesir` | `nobra` | §2 + §8 | onaylanır ya da değişir |
+| **M21** hareket | G8 | `surek` | `nabiz` | §2 + §9 | onaylanır ya da değişir |
 
 ## 2. Eşli kural (iki aday; her karşılaştırma için ayrı)
 

@@ -109,14 +109,14 @@ edemedi**, **ikisi de ayırt edemedi**.
 
 | Konu | Adaylar (1 / 2) | Ajan: ölçü, sonuç [aralık] | Ajan kararı | İnsan: birincil eşli fark (ağırlıklı), +/−/= | İnsan: tercih (1 : 2 : fark yok) | İnsan kararı (kural adımı) | Uyum |
 |---|---|---|---|---|---|---|---|
-| M16 görünüş | `<GÖRÜNÜŞ-1>` / `<GÖRÜNÜŞ-2>` | | | | | | |
+| M16 görünüş | `oltan` / `zemre` | | | | | | |
 | M17 dil | `marla` / `selvi` | birincil 0,889 [0,856; 0,915] / 0,898 [0,866; 0,924]; BT 1,41 / 1,69 | ayırt edilemedi; kısa olan `marla` (SPEC §5 adım 4) | | | | |
 | A21 alfabe | `siluet` / `rozet` | — (R3 v1 / Ö32) | `siluet` ön seçim | | | | |
-| M20 açılmış kapsül | `<OPEN-1>` / `<OPEN-2>` | | | | | | |
+| M20 açılmış kapsül | `tesir` / `nobra` | | | | | | |
 | M18 hikâye çizelgesi | `pavka` / `korda` | `chart` doğruluğu 0,987 / 0,928; BT 3,82 / 1,37 | `pavka` (son düzeltmeden sonra; RESULTS ve sonraki commit) | | | | |
 | M19 akış sırası | `grouped` / `live_new` | persona görev ortalaması 0,881 / 0,727 (muaf) | `grouped` | | | | |
 | K53 eşik | `rate55` / `none` | kalan Brier becerisi 0,024 [−0,000; 0,047] / 0,019 [0,003; 0,036] | ayırt edilemedi; eşitlik bozucu ile `rate55` | | | | |
-| M21 hareket | `<MOTION-1>` / `<MOTION-2>` | | | | | | |
+| M21 hareket | `surek` / `nabiz` | | | | | | |
 
 Ajan sayıları burada tablonun nasıl doldurulacağını göstermek için o günkü `RESULTS.md`'den
 alınmıştır; rapor yazılırken kaynaktan yeniden okunur.

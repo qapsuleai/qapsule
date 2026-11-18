@@ -138,7 +138,9 @@ impl Agent {
             qp_schema::protocol::Language::Tr
         };
         let fresh = vec![false; self.feed.len()];
+        // (R5/fix47) The presentation's feed order, as the shell core orders its feed.
         crate::shell::feed_rows(
+            Some(qp_grammar::feeds::PRESENTED_FEED_ORDER),
             self.look.feed.as_deref(),
             &self.feed,
             lang,
@@ -703,7 +705,9 @@ impl ViewerAgent {
         };
         let items = self.v.items();
         let fresh = vec![false; items.len()];
+        // (R5/fix47) The presentation's feed order, as the shell core orders its feed.
         crate::shell::feed_rows(
+            Some(qp_grammar::feeds::PRESENTED_FEED_ORDER),
             self.look.feed.as_deref(),
             &items,
             lang,

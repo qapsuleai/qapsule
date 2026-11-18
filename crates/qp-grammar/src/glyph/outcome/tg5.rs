@@ -237,6 +237,17 @@ impl OutcomeStyle for Tg5 {
                 } else {
                     recolor(open, |c| scale_alpha(rgb_of(theme.closed, c), k))
                 };
+                // (R5/fix47, A46) The trace's plate is grey now: at most the look's grey
+                // plate opacity, so the grey strokes on it keep 3:1 (`r4`: no ceiling).
+                if theme.grey_plate_alpha_max > 0 {
+                    for p in &mut out {
+                        if let Prim::Fill { color, .. } = p {
+                            if color[3] < 255 {
+                                color[3] = color[3].min(theme.grey_plate_alpha_max);
+                            }
+                        }
+                    }
+                }
                 cross(&mut out, bx, theme.bg, ink);
                 out
             }

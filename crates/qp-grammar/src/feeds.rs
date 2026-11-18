@@ -151,9 +151,9 @@ pub static LAYOUTS: &[FeedLayout] = &[
 /// rule (`rounds/R5/experiments/M19/RESULTS.md`). A presentation setting
 /// (`?feed_order=`, the settings page), not a protocol `feed` value: the protocol's layout
 /// names stay as they were (transcript 56 lists them). When chosen, the order replaces the
-/// connection's layout in the presentation core. The presentation's default stays
-/// [`PRESENTED_FEED`] (changing it would change the existing demo goldens; Arkin decides,
-/// K46).
+/// connection's layout in the presentation core. (R5/fix47) The presentation orders its
+/// feed by [`PRESENTED_FEED_ORDER`]; the protocol's layout ([`DEFAULT_FEED`]) and the
+/// presented layout ([`PRESENTED_FEED`], `?feed_order=layout`) do not change.
 pub static ORDERS: &[FeedLayout] = &[
     FeedLayout {
         name: "grouped",
@@ -169,6 +169,15 @@ pub static ORDERS: &[FeedLayout] = &[
 
 /// The names of [`ORDERS`].
 pub const FEED_ORDERS: [&str; 2] = ["grouped", "live_new"];
+
+/// (R5/fix47, acceptance criterion 7) The feed order the presentation opens with: `live_new`,
+/// live and new first. M19 measured `grouped` first (0.881 against 0.727), but `grouped`
+/// orders instruments by their newest transition whatever its validity, so an instrument
+/// whose only news is a closed story stands above one with a live claim
+/// (`m19::tests::grouped_can_put_a_closed_instrument_above_a_live_one`); `live_new` puts
+/// every claim that still holds first, newest first. A presentation setting: the protocol's
+/// default layout does not change; `?feed_order=layout` gives the connection's layout.
+pub const PRESENTED_FEED_ORDER: &str = "live_new";
 
 /// (R5/M19) The rows of `ctx` by feed order `name` ([`ORDERS`]; `None`: unknown), with the
 /// same clean-up and coin-flip mark as [`layout`].

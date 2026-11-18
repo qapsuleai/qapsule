@@ -152,4 +152,27 @@ mod tests {
         assert_eq!(grouped(&ctx(&rev)), grouped(&ctx(&items)));
         assert!(grouped(&ctx(&[])).is_empty());
     }
+
+    /// (R5/fix47) Why the presentation's default is `live_new` and not `grouped`
+    /// (`feeds::PRESENTED_FEED_ORDER`): `grouped` is live-first inside an instrument but
+    /// orders instruments by their newest transition whatever its validity: an instrument
+    /// whose only news is a closed (or no longer holding) story stands above one with a
+    /// live claim. `live_new` puts every live claim first.
+    #[test]
+    fn grouped_can_put_a_closed_instrument_above_a_live_one() {
+        let items = [
+            item("live", "AAA", 20, Validity::Valid),
+            item("gone", "BBB", 30, Validity::Closed),
+            item("lapsed", "CCC", 25, Validity::NoLonger),
+        ];
+        assert_eq!(ids(&grouped(&ctx(&items))), ["gone", "lapsed", "live"]);
+        assert_eq!(ids(&live_new(&ctx(&items))), ["live", "lapsed", "gone"]);
+        // Inside an instrument both are live first.
+        let one = [
+            item("x1", "AAA", 30, Validity::Closed),
+            item("x2", "AAA", 10, Validity::Valid),
+        ];
+        assert_eq!(ids(&grouped(&ctx(&one))), ["#AAA", "x2", "x1"]);
+        assert_eq!(ids(&live_new(&ctx(&one))), ["x2", "x1"]);
+    }
 }

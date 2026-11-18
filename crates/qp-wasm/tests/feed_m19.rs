@@ -94,6 +94,42 @@ fn feed_order_is_a_presentation_setting() {
     assert!(core.look_json().get("feed_order").is_none());
 }
 
+/// (R5/fix47, acceptance criterion 7) The presentation opens with its feed order,
+/// `live_new`: every claim that still holds before one that no longer holds before a closed
+/// one, the newest first inside each; `layout` gives the connection's layout back.
+#[test]
+fn the_presentation_opens_live_and_new_first() {
+    use qp_schema::capsule::Validity;
+    let mut host = parity_host();
+    let mut core = page(&mut host, |_| {});
+    assert_eq!(
+        core.look_json()["feed_order"],
+        qp_grammar::feeds::PRESENTED_FEED_ORDER
+    );
+    assert_eq!(qp_grammar::feeds::PRESENTED_FEED_ORDER, "live_new");
+    let r = rows(&mut core);
+    let items = core.feed().to_vec();
+    let key = |id: &str| {
+        let it = items.iter().find(|i| i.id == id).expect("item");
+        let rank = match it.validity {
+            Validity::Valid => 0,
+            Validity::NoLonger => 1,
+            Validity::Closed => 2,
+        };
+        (rank, -it.t)
+    };
+    let keys: Vec<(u8, i64)> = r.iter().filter_map(|x| x["id"].as_str()).map(key).collect();
+    assert!(keys.len() > 1, "{r:?}");
+    assert!(keys.windows(2).all(|w| w[0] <= w[1]), "{keys:?}");
+    assert!(
+        keys.iter().any(|k| k.0 == 0),
+        "a live claim on top: {keys:?}"
+    );
+    assert!(r.iter().all(|x| x.get("header").is_none()));
+    core.set_look(&json!({"feed_order": "layout"}));
+    assert!(core.look_json().get("feed_order").is_none());
+}
+
 #[test]
 fn an_empty_feed_says_so_and_why() {
     let mut host = parity_host();

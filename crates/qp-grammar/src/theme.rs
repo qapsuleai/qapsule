@@ -55,6 +55,11 @@ pub struct Theme {
     /// rising with the confidence): it fades with the glyph's freshness, never below this.
     /// `0`: the freshness alone (`r4`).
     pub plate_alpha_min: u8,
+    /// (R5/fix47, A46) The greatest opacity (0..=255) of a **grey** glyph's confidence plate
+    /// (a closed story, one that no longer holds, no direction: the plate is tinted with the
+    /// grey its strokes are drawn in). The plate sits under the strokes, so the strokes keep
+    /// 3:1 against it, not only against the ground (WCAG 1.4.11). `0`: no ceiling (`r4`).
+    pub grey_plate_alpha_max: u8,
     /// (R5/T3) Focus and selection (odak).
     pub focus: Rgba,
     /// (R5/T3) The shell's own chrome (CSS custom properties, `look::css_vars`).
@@ -91,6 +96,10 @@ pub struct Chrome {
     pub alert_fg: Rgba,
     /// "Requires an entitlement" text.
     pub req: Rgba,
+    /// (R5/fix47, A46) The boundary of a control (button, select, input): 3:1 against the
+    /// chrome background and the card where a look meets WCAG 1.4.11 (`oltan`); `r4` keeps
+    /// its `line`.
+    pub control: Rgba,
 }
 
 /// Names of the theme colour tokens, for error hints.
@@ -137,6 +146,7 @@ impl Theme {
         closed_alpha: 0,
         fresh_alpha_min: 0,
         plate_alpha_min: 0,
+        grey_plate_alpha_max: 0,
         focus: DARK_ACCENT,
         chrome: Chrome {
             bg: [0x0f, 0x11, 0x15, 255],
@@ -152,6 +162,7 @@ impl Theme {
             alert_bg: [0x4a, 0x18, 0x20, 255],
             alert_fg: [0xff, 0xd6, 0xdc, 255],
             req: [0xff, 0xb4, 0x4c, 255],
+            control: [0x26, 0x2a, 0x33, 255],
         },
     };
 
@@ -186,6 +197,7 @@ impl Theme {
         closed_alpha: 0,
         fresh_alpha_min: 0,
         plate_alpha_min: 0,
+        grey_plate_alpha_max: 0,
         focus: LIGHT_ACCENT,
         chrome: Chrome {
             bg: [0xf6, 0xf7, 0xf9, 255],
@@ -201,6 +213,7 @@ impl Theme {
             alert_bg: [0x4a, 0x18, 0x20, 255],
             alert_fg: [0xff, 0xd6, 0xdc, 255],
             req: [0xff, 0xb4, 0x4c, 255],
+            control: [0xd9, 0xdc, 0xe2, 255],
         },
     };
 
@@ -238,6 +251,10 @@ impl Theme {
             "plate_alpha_min".to_owned(),
             serde_json::Value::from(self.plate_alpha_min),
         );
+        m.insert(
+            "grey_plate_alpha_max".to_owned(),
+            serde_json::Value::from(self.grey_plate_alpha_max),
+        );
         let c = &self.chrome;
         m.insert(
             "chrome".to_owned(),
@@ -245,7 +262,7 @@ impl Theme {
                 "line": h(c.line), "card": h(c.card), "accent": h(c.accent),
                 "on_accent": h(c.on_accent), "page": h(c.page), "note_bg": h(c.note_bg),
                 "note_fg": h(c.note_fg), "alert_bg": h(c.alert_bg), "alert_fg": h(c.alert_fg),
-                "req": h(c.req)}),
+                "req": h(c.req), "control": h(c.control)}),
         );
         serde_json::Value::Object(m)
     }

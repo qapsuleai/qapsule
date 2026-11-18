@@ -13,7 +13,8 @@
 //   <shot>.<canvas>.png     each scene the core painted (face-0, face-1, …, scene), PNG
 //                           bytes from the core's encoder (identical on every platform)
 // (R5/S) The `v1` shots (fixtures/golden/demo/*.png) are pinned to the designs before R5
-// (`V1`: `?look=r4&voice=r4&face=vadrel&story=r4&open=r4&motion=r4`) and stay byte-identical;
+// (`V1`: `?look=r4&voice=r4&face=vadrel&story=r4&open=r4&motion=r4&feed_order=layout`) and
+// stay byte-identical;
 // the `v2` shots (fixtures/golden/demo/v2/*.png, written under <out dir>/v2/) are the
 // presentation as it opens now (R5's picks, no design setting in the URL).
 // Synthetic data by default (the goldens in fixtures/golden/demo are the canvas PNGs of
@@ -46,7 +47,9 @@ fs.mkdirSync(path.join(out, 'v2'), { recursive: true });
 // (no design setting in the URL); `-fotolay`: M8's second face.
 const R3 = { face: 'r3', feed: 'r3', transition: 'r3', outcome: 'r3' };
 // (R5/S) The designs the `v1` goldens were drawn with (before R5's presentation defaults).
-const V1 = { look: 'r4', voice: 'r4', face: 'vadrel', story: 'r4', open: 'r4', motion: 'r4' };
+// (R5/fix47) `feed_order: 'layout'`: the connection's layout orders the feed, as before the
+// presentation's feed order (`live_new`).
+const V1 = { look: 'r4', voice: 'r4', face: 'vadrel', story: 'r4', open: 'r4', motion: 'r4', feed_order: 'layout' };
 // (R5/S) The `v2` shots: R5's presentation defaults in both languages and schemes — the
 // feed's faces (open and closed), the open capsule (`tesir`) and the story chart (`pavka`).
 const V2 = [];

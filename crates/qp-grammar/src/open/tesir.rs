@@ -4,9 +4,11 @@
 //! question before the next one is asked:
 //!
 //! 1. **İddia** (the claim): the glyph and the capsule's headline (in the reader's voice:
-//!    what changed, the threshold, when, whether it still holds), coloured `invalid` when
-//!    it no longer holds — the same text and rule as the face, so opening it changes
-//!    nothing the reader already read.
+//!    what changed, the threshold, when, whether it still holds), coloured
+//!    [`NO_LONGER_HEADLINE`] (`muted`) when it no longer holds — the same text and rule as
+//!    the face `oltan`, so opening it changes nothing the reader already read. (R5/fix47)
+//!    Not `invalid`: that grey is a mark colour (≥ 3:1, the meaning ladder), the headline
+//!    is text and keeps 4.5:1 without counting 600 as bold (A46).
 //! 2. **Dayanak** (what it rests on): the threshold by its name (the voice's glossary term
 //!    the claim uses) and its value from the evidence, the evidence family and its licence,
 //!    the evidence in small (the price or study line with the evidence geometry, bound by
@@ -38,6 +40,10 @@ use crate::depth::{self, layer, named_panel, panel_at, uniq};
 use crate::error::GrammarError;
 use crate::look::{Look, TypeRole};
 use crate::provider::{DataProvider, SeriesKind};
+
+/// (R5/fix47, A46) The colour role of the claim's headline when it no longer holds: a text
+/// role (4.5:1 on the ground in every look, `look::tests`), as on the face `oltan`.
+pub const NO_LONGER_HEADLINE: &str = "muted";
 
 /// The design.
 pub const DESIGN: OpenDesign = OpenDesign {
@@ -623,7 +629,7 @@ pub fn view(
         0,
         (look.glyph.card_px + look.space.glyph_gap, 0.0),
         t.headline.px,
-        (!valid).then_some("invalid"),
+        (!valid).then_some(NO_LONGER_HEADLINE),
         edge,
     ));
 

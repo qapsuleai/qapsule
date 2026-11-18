@@ -28,7 +28,7 @@ function registerFonts() {
   if (typeof FontFace === 'undefined') return;
   for (const f of JSON.parse(core.fonts())) {
     try {
-      const face = new FontFace(f.family, core.font_bytes(f.id));
+      const face = new FontFace(f.family, core.font_bytes(f.id), { weight: f.weight });
       document.fonts.add(face);
       face.load().catch(() => {});
     } catch (e) { /* the fallback family stays */ }

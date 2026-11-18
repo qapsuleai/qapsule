@@ -51,6 +51,10 @@ pub struct Theme {
     /// an open glyph with its freshness too; it never goes below this, so a look can keep
     /// an aging open glyph at a contrast it chose. `0`: the freshness alone (`r4`).
     pub fresh_alpha_min: u8,
+    /// (R5/T3c) The least opacity (0..=255) of a glyph's confidence plate (the pale fill
+    /// rising with the confidence): it fades with the glyph's freshness, never below this.
+    /// `0`: the freshness alone (`r4`).
+    pub plate_alpha_min: u8,
     /// (R5/T3) Focus and selection (odak).
     pub focus: Rgba,
     /// (R5/T3) The shell's own chrome (CSS custom properties, `look::css_vars`).
@@ -132,6 +136,7 @@ impl Theme {
         closed: [130, 136, 150, 255],
         closed_alpha: 0,
         fresh_alpha_min: 0,
+        plate_alpha_min: 0,
         focus: DARK_ACCENT,
         chrome: Chrome {
             bg: [0x0f, 0x11, 0x15, 255],
@@ -180,6 +185,7 @@ impl Theme {
         closed: [0x5f, 0x66, 0x73, 255],
         closed_alpha: 0,
         fresh_alpha_min: 0,
+        plate_alpha_min: 0,
         focus: LIGHT_ACCENT,
         chrome: Chrome {
             bg: [0xf6, 0xf7, 0xf9, 255],
@@ -227,6 +233,10 @@ impl Theme {
         m.insert(
             "fresh_alpha_min".to_owned(),
             serde_json::Value::from(self.fresh_alpha_min),
+        );
+        m.insert(
+            "plate_alpha_min".to_owned(),
+            serde_json::Value::from(self.plate_alpha_min),
         );
         let c = &self.chrome;
         m.insert(
@@ -325,7 +335,7 @@ pub fn at_least(c: Rgba, min: u8) -> Rgba {
 }
 
 /// (R5/T3c) The opacity `o` raised to at least `min / 255` (a glyph's floor,
-/// [`Theme::closed_alpha`] or [`Theme::fresh_alpha_min`]); exactly `o` for `min = 0`.
+/// [`Theme::closed_alpha`], [`Theme::fresh_alpha_min`], [`Theme::plate_alpha_min`]); exactly `o` for `min = 0`.
 #[must_use]
 pub fn opacity_at_least(o: f64, min: u8) -> f64 {
     if min == 0 {

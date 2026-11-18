@@ -142,7 +142,9 @@ export default {
     const t0 = performance.now();
     // (R5/T3) Every font asset the core embeds, under the family its font strings name,
     // from the core's own bytes (the reference renderer draws the same files).
-    font = JSON.parse(core.fonts()).map((f) => new FontFace(f.family, core.font_bytes(f.id)));
+    // (R5/T3c) Each at the weight the core gives (a semibold file is also the body
+    // family's 600 face, so the browser does not synthesize bold).
+    font = JSON.parse(core.fonts()).map((f) => new FontFace(f.family, core.font_bytes(f.id), { weight: f.weight }));
     for (const f of font) document.fonts.add(f);
     // Nothing is painted before the fonts are in (no flash of a fallback font). Should one
     // fail to load, the canvas paints anyway, with the browser's fallback font.

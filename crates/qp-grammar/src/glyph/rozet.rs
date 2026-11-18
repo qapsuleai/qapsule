@@ -366,7 +366,9 @@ impl AlphabetTrait for Rozet {
             d.pop();
             let poly = clip_below(&d, level);
             if poly.len() >= 3 {
-                fill(&mut out, &poly, with_alpha(theme.muted, alpha * 0.42));
+                // (R5/T3c) The level keeps the look's least opacity (`r4`: 0).
+                let o = opacity_at_least(alpha * 0.42, theme.plate_alpha_min);
+                fill(&mut out, &poly, with_alpha(theme.muted, o));
             }
             // the water line: a crisp edge at the level
             let dy = level - c[1];

@@ -192,14 +192,17 @@ impl TypeScale {
     }
 
     /// The role a view's text mark of size `px` is drawn in: the first of `headline`,
-    /// `body`, `label`, `note` with that size (a view names sizes, not roles; the face
-    /// designs take the sizes from these roles, and the registry test checks the four
-    /// sizes differ in every look). `None`: a size no role has.
+    /// `title` (R5/T3c), `body`, `label`, `note` with that size (a view names sizes, not
+    /// roles; the face designs take the sizes from these roles, and the registry test
+    /// checks the five sizes differ in every look). `None`: a size no role has.
     #[must_use]
     #[allow(clippy::cast_possible_truncation)]
     pub fn mark_role(&self, px: f64) -> Option<&'static str> {
         [
             ("headline", &self.headline),
+            // (R5/T3c) A view's text at the title size (`vadrel`'s ledger band) is drawn
+            // in the title's font (`r4`: Plex Mono, as before).
+            ("title", &self.title),
             ("body", &self.body),
             ("label", &self.label),
             ("note", &self.note),
@@ -596,6 +599,8 @@ pub const ORNEK: Look = Look {
         closed_alpha: 184,
         // (R5/T3c) An open glyph at freshness 0 keeps ≥ 3:1 (`down` needs ≥ 153).
         fresh_alpha_min: 168,
+        // (R5/T3c) The confidence plate never fades below a fresh glyph's (0.24).
+        plate_alpha_min: 61,
         invalid: [176, 160, 148, 255],
         focus: [120, 180, 255, 255],
         chrome: Chrome {
@@ -624,6 +629,7 @@ pub const ORNEK: Look = Look {
         // (R5/T3c) An open glyph at freshness 0 keeps ≥ 3:1 (`up` needs ≥ 231, `neutral`
         // ≥ 229); the r4 light accent (2.9:1 even opaque) is too light for a neutral glyph.
         fresh_alpha_min: 236,
+        plate_alpha_min: 61,
         neutral: [0xb4, 0x53, 0x09, 230],
         invalid: [100, 88, 80, 255],
         chrome: Chrome {
@@ -958,7 +964,7 @@ mod tests {
                     role.font
                 );
                 assert!(role.px > 0.0 && role.line >= 1.0, "{} {r}", l.name);
-                if ["headline", "body", "label", "note"].contains(&r) {
+                if ["headline", "title", "body", "label", "note"].contains(&r) {
                     assert!(!sizes.contains(&role.px.to_bits()), "{} {r}", l.name);
                     sizes.push(role.px.to_bits());
                     assert_eq!(l.types.mark_role(role.px), Some(r));

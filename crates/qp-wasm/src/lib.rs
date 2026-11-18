@@ -506,7 +506,7 @@ mod gallery_binding {
             self.inner.css().to_string()
         }
 
-        /// The embedded font assets `[{id, family}]` (JSON text).
+        /// The embedded font assets `[{id, family, weight}]` (JSON text).
         #[must_use]
         pub fn fonts(&self) -> String {
             crate::shell::ShellCore::fonts_json().to_string()
@@ -943,8 +943,9 @@ mod shell_binding {
             qp_render::cpu::FONT_BYTES.to_vec()
         }
 
-        /// (R5/T3) The embedded font assets (JSON `[{id, family}]`): a canvas paint path
-        /// registers each (`new FontFace(family, core.font_bytes(id))`); no network.
+        /// (R5/T3) The embedded font assets (JSON `[{id, family, weight}]`): a canvas paint
+        /// path registers each (`new FontFace(family, core.font_bytes(id), {weight})`); no
+        /// network.
         pub fn fonts(&self) -> String {
             ShellCore::fonts_json().to_string()
         }

@@ -256,7 +256,7 @@ hareketinin `look` alanıyla seçer (`ViewState.look`; yoksa `r4`); derleme seç
 | Alan | İçerik | `r4` |
 |------|--------|------|
 | `types` | Tip ölçeği, roller: `headline` (başlık cümlesi), `title` (sahnenin üst satırı: grafik başlığı ve kapanış; yüzün ek bilgisi), `body` (kart cümlesi, grafik notu), `label` (tarih etiketi, açıklama, karne satırı), `figure` (eksen değeri, son değer etiketi), `note` (kanıt etiketi). Her rol: boy (px), satır yüksekliği (boyun katı), yazı tipi varlığı | 20 / 16 / 12 / 11 / 11 / 9 px; satır 1,3; hepsi `plex-mono` |
-| `dark`, `light` | Renk rolleri (`Theme`): §9'daki adlar + `surface` (yüzey), `line`, `neutral` (yönsüz işaret), `valid`, `invalid` (artık geçerli değil: işaret ve cümle), `closed` (kapanmış işaret), (T3b) `closed_alpha` (kapanmış işaretin en düşük saydamlığı, 0–255: alfabe işareti tazeliğe göre soldurur, A31; kapanmış işaret bunun altına inmez, böylece görünüş ≥ 3:1'i tutturabilir; (T3c) bu taban alfabelerde (`siluet`, `rozet`) ve her sonuç biçiminde geçerlidir: `tg5`'in "gerçekleşti" plakası ve köşe işaretleri bu tabandadır, "tutmadı" izi `closed` renginde çizilir ve en güçlü çizgisi tabana çıkacak biçimde soldurulur (soluk güven plakası oranını korur); 0 = yalnız tazelik), (T3c) `fresh_alpha_min` (açık işaretin tazelik solmasının tabanı, 0–255: açık işaret de tazeliğe göre solar ama bunun altına inmez; 0 = yalnız tazelik), `focus` (odak); `chrome` (kabuğun kendi renkleri: zemin, metin, ikincil metin, çizgi, kart, vurgu, vurgu üstü metin, sayfa, bildirim ve hata şeridi, "yetki gerekir" = kanıt ekranının turuncu yazısı) | §9 değerleri; `neutral`=`accent`, `valid`=`text`, `invalid`=`closed`=`muted`; `closed_alpha` ve `fresh_alpha_min` 0; `chrome` = R4 `style.css` renkleri |
+| `dark`, `light` | Renk rolleri (`Theme`): §9'daki adlar + `surface` (yüzey), `line`, `neutral` (yönsüz işaret), `valid`, `invalid` (artık geçerli değil: işaret ve cümle), `closed` (kapanmış işaret), (T3b) `closed_alpha` (kapanmış işaretin en düşük saydamlığı, 0–255: alfabe işareti tazeliğe göre soldurur, A31; kapanmış işaret bunun altına inmez, böylece görünüş ≥ 3:1'i tutturabilir; (T3c) bu taban alfabelerde (`siluet`, `rozet`) ve her sonuç biçiminde geçerlidir: `tg5`'in "gerçekleşti" plakası ve köşe işaretleri bu tabandadır, "tutmadı" izi `closed` renginde çizilir ve en güçlü çizgisi tabana çıkacak biçimde soldurulur (soluk güven plakası oranını korur); 0 = yalnız tazelik), (T3c) `fresh_alpha_min` (açık işaretin tazelik solmasının tabanı, 0–255: açık işaret de tazeliğe göre solar ama bunun altına inmez; 0 = yalnız tazelik), (T3c) `plate_alpha_min` (işaretin güven plakasının — `siluet`'in alttan dolan soluk dolgusu, `rozet`'in seviyesi — en düşük saydamlığı, 0–255; plaka tazelikle solar ama bunun altına inmez; 0 = yalnız tazelik), `focus` (odak); `chrome` (kabuğun kendi renkleri: zemin, metin, ikincil metin, çizgi, kart, vurgu, vurgu üstü metin, sayfa, bildirim ve hata şeridi, "yetki gerekir" = kanıt ekranının turuncu yazısı) | §9 değerleri; `neutral`=`accent`, `valid`=`text`, `invalid`=`closed`=`muted`; `closed_alpha`, `fresh_alpha_min` ve `plate_alpha_min` 0; `chrome` = R4 `style.css` renkleri |
 | `scheme` | Okur seçmediğinde düzen | `dark` |
 | `space` | Boşluk ölçeği (kabuk: `--qp-space-0..5`), çizim alanı kenar boşlukları (sol, sağ, üst = başlık satırı, alt), panel arası, işaret ile cümle arası | `[4,6,8,12,16,24]`, `[8,72,34,24]`, 8, 10 |
 | `surface` | Kabuk köşe yarıçapı, telefon çerçevesi ve rozet yarıçapı, çizgi kalınlığı, gölge (yok = düz), vurgu şeridi ve perde saydamlığı | 6, 18, 8 px; 1; düz; 56, 160 |
@@ -287,7 +287,7 @@ boy · advance)` hesabı aynen kalır (`r4` bayt eşit). Aralık (kerning) yok: 
 uygulamaz, tuval `fontKerning = "none"`. Sahnedeki metin
 varlığını `Prim::Text::font` ile adlandırır (yoksa varsayılan `plex-mono`; `r4`
 sahneleri bu alanı hiç yazmaz). Başvuru çizici (`qp_render::fonts`), `canvas` yolu
-(`FontFace`, baytlar çekirdekten: `core.fonts()`, `core.font_bytes(id)`; ağ yok) ve `gpu`
+(`FontFace`, baytlar çekirdekten: `core.fonts()` = `[{id, family, weight}]`, `core.font_bytes(id)`; ağ yok; T3c: 400 dışı ağırlıktaki bir dosya, aynı yayımlanmış ailenin dik 400 dosyasının CSS ailesi altında kendi ağırlığıyla da listelenir — kabuğun gövde ailesindeki `font-weight: 600` sentezlenmez, gerçek dosyayla çizilir; kaydı çekirdek belirler, kabuk aynen uygular) ve `gpu`
 yolu aynı dosyayı kullanır. Tuval `fontKerning = "none"` ile çizer: fontdue GPOS aralığı
 uygulamaz, iki yol aynı yerleşimi verir. fontdue şekillendirme yapmaz (`tnum`
 uygulanamaz): tablo rakamı gereken aile ya varsayılan rakamları tablo olan bir aile
@@ -296,8 +296,9 @@ olmalı ya da dosya derleme öncesi cmap'te 0–9 tablo gliflerine yeniden eşle
 
 **Roller sahnede.** `CompileOptions::roles` (ve `qp scene --roles`) her metne rol adını
 yazar (`Prim::Text::role`): derleyicinin metinleri kendi rolüyle; görünümün metin
-katmanları boylarına göre (`headline`, `body`, `label`, `note` boyları her görünüşte
-farklıdır, kayıt sınaması); işaretin metinleri `glyph`. Varsayılan kapalı: ürün
+katmanları boylarına göre (`headline`, (T3c) `title`, `body`, `label`, `note` boyları her
+görünüşte farklıdır, kayıt sınaması; `title` boyundaki metin — `vadrel`'in dil seçiliyken
+çizilen karne bandı — görünüşün `title` yazı tipiyle çizilir, `r4`'te Plex Mono); işaretin metinleri `glyph`. Varsayılan kapalı: ürün
 sahneleri ve özetleri değişmez. Ölçüm düzeneği öğe başına rengi, boyu ve rolü sahneden,
 rolün yazı tipini ve renk rollerini `qp look show <ad>`'dan okur.
 
@@ -314,7 +315,7 @@ ve iki `@media` genişliği (medya sorgusu özel özellik okuyamaz).
 
 1. `crates/qp-grammar/src/look.rs`'te `M16 looks` işaretinin altına bir `const` `Look`
    yaz (`..R4` ile başla, değişeni yaz; ad `[a-z][a-z0-9_-]*`, sıradan bir kelime değil);
-   `LOOKS` dizisine bir satır ekle. `headline`, `body`, `label`, `note` boyları farklı olmalı.
+   `LOOKS` dizisine bir satır ekle. `headline`, `title`, `body`, `label`, `note` boyları farklı olmalı.
 2. Renk: iki temayı (`dark`, `light`) ve her birinin `chrome`'unu ver. Karşıtlık
    (metin ≥ 4,5:1, büyük metin ve işaret ≥ 3:1, `closed` dahil) ölçüm düzeneğinde sınanır.
 3. Yeni yazı tipi gerekiyorsa: statik TTF'yi (ağırlık başına bir dosya) ve lisansını

@@ -462,7 +462,11 @@ impl AlphabetTrait for Siluet {
                         [bx.x + s, bx.y + s],
                         [bx.x, bx.y + s],
                     ],
-                    color: with_opacity(tint, 0.24 * fresh),
+                    // (R5/T3c) The plate keeps the look's least opacity (`r4`: 0).
+                    color: with_opacity(
+                        tint,
+                        opacity_at_least(0.24 * fresh, theme.plate_alpha_min),
+                    ),
                 });
             }
         }
@@ -762,5 +766,52 @@ mod tests {
         assert_eq!(d.len(), 2);
         assert_eq!(d[0], vec![[0.0, 0.0], [3.0, 0.0]]);
         assert_eq!(d[1], vec![[5.0, 0.0], [8.0, 0.0]]);
+    }
+
+    /// (R5/T3c) The confidence plate's floor: `r4` fades it with freshness alone
+    /// (0.24 · 0.3 at freshness 0), the trial look keeps a fresh glyph's plate (0.24) at
+    /// every freshness; the rozet's level likewise never goes below the floor.
+    #[test]
+    fn confidence_plate_keeps_the_look_floor() {
+        use crate::glyph::rozet::Rozet;
+        use crate::look::{ORNEK, R4};
+        let bx = GlyphBox {
+            x: 0.0,
+            y: 0.0,
+            size: 32.0,
+        };
+        let spec = |freshness: f64| GlyphSpec {
+            kind: MeaningKind::Flow,
+            direction: Direction::Down,
+            strength: 0.2,
+            confidence: Some(0.6),
+            phase: GlyphPhase::Final,
+            freshness,
+            confirmations: 1,
+            server: false,
+            validity: None,
+        };
+        let plate = |t: &Theme, f: f64| match &Siluet.draw(&spec(f), bx, t)[0] {
+            Prim::Fill { color, .. } => *color,
+            p => panic!("{p:?}"),
+        };
+        for t in [R4.dark, R4.light] {
+            assert_eq!(t.plate_alpha_min, 0);
+            assert_eq!(plate(&t, 0.0), with_opacity(t.down, 0.24 * 0.3));
+        }
+        for t in [ORNEK.dark, ORNEK.light] {
+            assert!(t.plate_alpha_min > 0);
+            assert_eq!(plate(&t, 0.0), plate(&t, 1.0), "{}", t.name);
+            assert!(plate(&t, 0.0)[3] >= t.plate_alpha_min);
+            let level = Rozet
+                .draw(&spec(0.0), bx, &t)
+                .iter()
+                .find_map(|p| match p {
+                    Prim::Fill { color, .. } if color[..3] == t.muted[..3] => Some(*color),
+                    _ => None,
+                })
+                .unwrap();
+            assert!(level[3] >= t.plate_alpha_min, "{}: {level:?}", t.name);
+        }
     }
 }

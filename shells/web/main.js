@@ -568,6 +568,9 @@ function faceMotion(id) {
   const el = faces.get(id);
   if (!el || !el.firstChild || el.firstChild.tagName !== 'CANVAS') return;
   paintFace(id, false);
+  // (R5/M21, K52) The start of a face change: the face before (the core's pixels), the
+  // copy after and the pieces (`face_motion` span).
+  const t0 = performance.now();
   const snap = beforeCanvas(id);
   const canvas = el.firstChild;
   const box = canvas.getBoundingClientRect();
@@ -575,6 +578,7 @@ function faceMotion(id) {
   changes.set(id, m);
   if (!ui.anim) return;
   const els = changeCanvases(m);
+  core.metric_span('face_motion', t0, performance.now());
   if (!els.length) return;
   const step = (ts) => {
     if (showChange(m, els, core.face_change_progress(id, ts))) clearChange(m, els);

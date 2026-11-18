@@ -599,6 +599,38 @@ pub fn display_time(t: i64) -> String {
     }
 }
 
+/// (R5/T3c) The `FontFace` registrations of the embedded `files` (`(id, asset)`; an id
+/// without an asset is the paint path's default family at 400): each file under its own
+/// CSS family and weight, and a file of another weight than 400 also under the CSS family
+/// of the upright 400 file of the same published family in `assets` (if that family is a
+/// different CSS family), so that family's `font-weight` uses the real file.
+#[must_use]
+pub fn font_faces(
+    files: &[(&str, Option<&qp_grammar::look::FontAsset>)],
+    assets: &[qp_grammar::look::FontAsset],
+) -> Vec<Value> {
+    let mut out = Vec::new();
+    for (id, asset) in files {
+        let Some(f) = asset else {
+            out.push(
+                json!({"id": id, "family": crate::shell::paint::PAINT_FONT_FAMILY,
+                "weight": "400"}),
+            );
+            continue;
+        };
+        out.push(json!({"id": id, "family": f.css_family, "weight": f.weight.to_string()}));
+        if f.weight != 400 && !f.italic {
+            if let Some(base) = assets.iter().find(|g| {
+                g.family == f.family && g.weight == 400 && !g.italic && g.css_family != f.css_family
+            }) {
+                out.push(json!({"id": id, "family": base.css_family,
+                    "weight": f.weight.to_string()}));
+            }
+        }
+    }
+    out
+}
+
 impl ShellCore {
     /// A shell core for `principal` reading in `lang` whose replica's data comes from
     /// `data` (the host's initial bars and entitlements) plus the `events` the host
@@ -1511,20 +1543,20 @@ impl ShellCore {
     }
 
     /// (R5/T3) The embedded font assets a paint path registers (`FontFace`): `[{id,
-    /// family}]`, `family` being the CSS family the core's font strings name. Every asset
+    /// family, weight}]`, `family` being the CSS family the core's font strings name and
+    /// `weight` the file's CSS weight (the `FontFace` descriptor, a string). Every asset
     /// is listed, so a look change needs no new download; the bytes come from
-    /// [`ShellCore::font_bytes`] (no network).
+    /// [`ShellCore::font_bytes`] (no network). (R5/T3c) A file of another weight than 400
+    /// whose published family has a 400 file is listed once more under that file's CSS
+    /// family with its weight ([`font_faces`]): the chrome's body family then has a real
+    /// semibold face and the browser does not synthesize one.
     #[must_use]
     pub fn fonts_json() -> Value {
-        let v: Vec<Value> = qp_render::fonts::FILES
+        let files: Vec<(&str, Option<&qp_grammar::look::FontAsset>)> = qp_render::fonts::FILES
             .iter()
-            .map(|(id, _)| {
-                let family = qp_grammar::look::font(id)
-                    .map_or(crate::shell::paint::PAINT_FONT_FAMILY, |f| f.css_family);
-                json!({"id": id, "family": family})
-            })
+            .map(|(id, _)| (*id, qp_grammar::look::font(id)))
             .collect();
-        Value::Array(v)
+        Value::Array(font_faces(&files, qp_grammar::look::FONTS))
     }
 
     /// (R5/T3) The bytes of embedded font asset `id` (empty if unknown).
@@ -2901,3 +2933,59 @@ pub fn demo_session_init(o: &DemoOptions) -> qp_schema::protocol::SessionInit {
 /// `metric_attach`); opaque.
 #[derive(Debug, Default)]
 pub struct MetricsCarry(Metrics);
+
+#[cfg(test)]
+mod font_tests {
+    use super::*;
+    use qp_grammar::look::FontAsset;
+
+    fn asset(id: &'static str, family: &'static str, weight: u16, css: &'static str) -> FontAsset {
+        FontAsset {
+            id,
+            family,
+            weight,
+            css_family: css,
+            ..qp_grammar::look::FONTS[0]
+        }
+    }
+
+    /// (R5/T3c) A semibold file is also the body family's `font-weight: 600` face; the
+    /// embedded set lists each file with its weight.
+    #[test]
+    fn semibold_is_registered_under_the_body_family() {
+        let assets = [
+            qp_grammar::look::FONTS[0],
+            asset("sans", "Some Sans", 400, "QpSans"),
+            asset("sans-600", "Some Sans", 600, "QpSansSemi"),
+        ];
+        let files: Vec<(&str, Option<&FontAsset>)> =
+            assets.iter().map(|a| (a.id, Some(a))).collect();
+        let faces = font_faces(&files, &assets);
+        let got: Vec<(String, String, String)> = faces
+            .iter()
+            .map(|f| {
+                (
+                    f["id"].as_str().unwrap().to_owned(),
+                    f["family"].as_str().unwrap().to_owned(),
+                    f["weight"].as_str().unwrap().to_owned(),
+                )
+            })
+            .collect();
+        let row = |a: &str, b: &str, c: &str| (a.to_owned(), b.to_owned(), c.to_owned());
+        assert_eq!(
+            got,
+            vec![
+                row("plex-mono", "QpMono", "400"),
+                row("sans", "QpSans", "400"),
+                row("sans-600", "QpSansSemi", "600"),
+                row("sans-600", "QpSans", "600"),
+            ]
+        );
+        let real = ShellCore::fonts_json();
+        let real = real.as_array().unwrap();
+        assert!(real.len() >= qp_render::fonts::FILES.len());
+        for f in real {
+            assert!(f["weight"].is_string() && f["family"].is_string(), "{f}");
+        }
+    }
+}

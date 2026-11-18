@@ -24,7 +24,7 @@
 //! target) only; the circle and sine samples are precomputed constants.
 
 use super::{Alphabet as AlphabetTrait, GlyphBox};
-use crate::theme::{at_least, with_opacity, Theme};
+use crate::theme::{at_least, opacity_at_least, with_opacity, Theme};
 use qp_schema::capsule::{Direction, GlyphPhase, GlyphSpec, MeaningKind, Validity};
 use qp_schema::scene::{Prim, Rgba};
 
@@ -405,8 +405,15 @@ impl AlphabetTrait for Siluet {
         let s = bx.size;
         #[allow(clippy::cast_possible_truncation)]
         let st = spec.strength.clamp(0.0, 1.0) as f32;
-        let fresh = 0.3 + 0.7 * spec.freshness.clamp(0.0, 1.0);
         let closed = is_closed(spec.phase);
+        // (R5/T3c) An open glyph fades with its freshness down to the look's floor
+        // (`r4`: 0, freshness alone).
+        let fresh = 0.3 + 0.7 * spec.freshness.clamp(0.0, 1.0);
+        let fresh = if closed {
+            fresh
+        } else {
+            opacity_at_least(fresh, theme.fresh_alpha_min)
+        };
         let candidate = spec.phase == GlyphPhase::Candidate;
         // (R4, K42/A28) "No longer holds": only an open story whose state condition broke.
         // Absent / valid / closed validity draws exactly as in R3.
@@ -433,6 +440,12 @@ impl AlphabetTrait for Siluet {
             (main, edge)
         };
         let ink = with_opacity(theme.text, fresh);
+        // (R5/T3c) So do a closed glyph's outcome marks and confirmation blocks.
+        let ink = if closed {
+            at_least(ink, theme.closed_alpha)
+        } else {
+            ink
+        };
         let mut out = Vec::new();
 
         // Confidence: pale plate filled from the bottom up to the confidence level.
@@ -449,7 +462,11 @@ impl AlphabetTrait for Siluet {
                         [bx.x + s, bx.y + s],
                         [bx.x, bx.y + s],
                     ],
-                    color: with_opacity(tint, 0.24 * fresh),
+                    // (R5/T3c) The plate keeps the look's least opacity (`r4`: 0).
+                    color: with_opacity(
+                        tint,
+                        opacity_at_least(0.24 * fresh, theme.plate_alpha_min),
+                    ),
                 });
             }
         }
@@ -749,5 +766,52 @@ mod tests {
         assert_eq!(d.len(), 2);
         assert_eq!(d[0], vec![[0.0, 0.0], [3.0, 0.0]]);
         assert_eq!(d[1], vec![[5.0, 0.0], [8.0, 0.0]]);
+    }
+
+    /// (R5/T3c) The confidence plate's floor: `r4` fades it with freshness alone
+    /// (0.24 · 0.3 at freshness 0), the trial look keeps a fresh glyph's plate (0.24) at
+    /// every freshness; the rozet's level likewise never goes below the floor.
+    #[test]
+    fn confidence_plate_keeps_the_look_floor() {
+        use crate::glyph::rozet::Rozet;
+        use crate::look::{ORNEK, R4};
+        let bx = GlyphBox {
+            x: 0.0,
+            y: 0.0,
+            size: 32.0,
+        };
+        let spec = |freshness: f64| GlyphSpec {
+            kind: MeaningKind::Flow,
+            direction: Direction::Down,
+            strength: 0.2,
+            confidence: Some(0.6),
+            phase: GlyphPhase::Final,
+            freshness,
+            confirmations: 1,
+            server: false,
+            validity: None,
+        };
+        let plate = |t: &Theme, f: f64| match &Siluet.draw(&spec(f), bx, t)[0] {
+            Prim::Fill { color, .. } => *color,
+            p => panic!("{p:?}"),
+        };
+        for t in [R4.dark, R4.light] {
+            assert_eq!(t.plate_alpha_min, 0);
+            assert_eq!(plate(&t, 0.0), with_opacity(t.down, 0.24 * 0.3));
+        }
+        for t in [ORNEK.dark, ORNEK.light] {
+            assert!(t.plate_alpha_min > 0);
+            assert_eq!(plate(&t, 0.0), plate(&t, 1.0), "{}", t.name);
+            assert!(plate(&t, 0.0)[3] >= t.plate_alpha_min);
+            let level = Rozet
+                .draw(&spec(0.0), bx, &t)
+                .iter()
+                .find_map(|p| match p {
+                    Prim::Fill { color, .. } if color[..3] == t.muted[..3] => Some(*color),
+                    _ => None,
+                })
+                .unwrap();
+            assert!(level[3] >= t.plate_alpha_min, "{}: {level:?}", t.name);
+        }
     }
 }

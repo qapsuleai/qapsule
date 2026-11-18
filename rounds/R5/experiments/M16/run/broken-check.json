@@ -1,0 +1,52 @@
+{
+ "broken": "kestim",
+ "checks": {
+  "last_on_bt": true,
+  "last_on_primary": true,
+  "last_on_reading_info": false,
+  "paired_separated_from_all_info": true,
+  "primary_below_best_interval": true
+ },
+ "paired_primary_info": {
+  "bertan": {
+   "diff": 0.1594,
+   "hi": 0.1874,
+   "lo": 0.1313,
+   "n": 381,
+   "separated": true
+  },
+  "kivra": {
+   "diff": 0.0596,
+   "hi": 0.0802,
+   "lo": 0.0395,
+   "n": 383,
+   "separated": true
+  },
+  "oltan": {
+   "diff": 0.2861,
+   "hi": 0.313,
+   "lo": 0.2583,
+   "n": 381,
+   "separated": true
+  },
+  "r4": {
+   "diff": 0.1354,
+   "hi": 0.1606,
+   "lo": 0.1094,
+   "n": 383,
+   "separated": true
+  },
+  "zemre": {
+   "diff": 0.0966,
+   "hi": 0.1211,
+   "lo": 0.0724,
+   "n": 381,
+   "separated": true
+  }
+ },
+ "required": [
+  "last_on_primary",
+  "last_on_bt"
+ ],
+ "valid": true
+}

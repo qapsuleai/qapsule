@@ -443,6 +443,54 @@ ajanın raporu (M16 alternatifi). Testler `tests/test_g4.py`.
   Hiçbir tasarım geçmiyor; M18 sonucu ve kararı değişmez. Gövde düzeltmesi grafik yolunu etkilemez
   (grafik kapısı işaret katmanını değil rol renkli ilkelleri ölçer).
 
+## Ek G5 — M16 ölçümünden önce; anlam rengi kapısı rollerden, K52 JIT'siz madde (2026-11-18)
+
+Tetikleyen: bir aday ajanın raporu. Ek G4-3'ten sonra işaret rengi "en opak çizgi" oldu; `siluet`
+alfabesi gövde kenarını metin renginde (`text`) çizdiği için yönlü ve yönsüz işaretler aynı
+"mürekkep" rengine ölçülüyor, §G7.4 tablosu işaretin dış çizgisini karşılaştırıyordu, anlam rengini
+değil. GOAL'ın ölçütü ("anlam renkleri gri tonlamada ve renk körlüğü benzetimlerinde ayrılıyor") ve
+VERIFY 7 ("ayrım eşiğin üstünde; biçimle de okunuyor") renk rolünü ölçmeyi ister. Testler
+`tests/test_g5.py`; yeniden puanlama `g5_rescore.py`.
+
+1. **Renk kapısı (§G7.4) görünüş kaydının anlam rengi ROLLERİNDEN.** Tema başına (`qp look show
+   <ad>`, `looks/<ad>.json`) roller: `up`, `down`, `neutral`, `valid`, `invalid`, `closed` ve
+   kaydın işaret için kullandığı roller (çekim kayıtlarındaki işaret katmanı ilkellerinin RGB'si
+   kaydın bir rolüne eşitse o rol; zemin, yüzey, ızgara, çizgi, eksen, kabuk ve dizi rolleri
+   `s1…s8` sayılmaz; ör. `siluet` kenarı ve `tg5` mürekkebi → `text`). Her rol kendi alfasıyla
+   tema zeminine bindirilir. Çiftler aynı tema içinde; ΔE00 beş koşulda (normal, gri, Viénot
+   protan/deutan, Brettel tritan; Machado ile küçüğü, §G7.4 gibi). Eşik ≥ 10; yüzdeki en küçük
+   işaret ≤ 16 px ise 15 (işaret boyu çekimlerin isabet kutularından; yoksa kaydın `glyph.face_px`).
+   **Aynı rengi bilerek paylaşan roller** (normal görüşte ΔE00 < 5, ör. `invalid` = `closed`)
+   çift sayılmaz, raporda listelenir (`colour.shared`); o çiftin anlamının biçimle ayrıldığı
+   gri kopya okuyucu sorusuyla sınanır (madde 3). Tasarım her temada geçerse geçer. Sahne tabanlı
+   eski tablo (Ek G4-3 gövde rengi, anlam sınıfı başına) `colour_scene` olarak bilgi kalır;
+   görünüş kaydı olmayan koşuda kapı odur (önceki davranış).
+2. **İşaret karşıtlığı kapısı (1.4.11)** değişmedi: Ek G4-3'teki gibi en opak çizgi, tazelik
+   dahil sahneden.
+3. **"Biçimle de okunur":** gri kopyadaki `dir` ve `valid` doğruluğu (§G3'te var olan gri koşu)
+   birincil ölçüden ayrı raporlanır; paylaşılan renk çiftlerinin durumlarında (ör. `no_longer`,
+   `closed_failed`) ayrıca durum başına.
+4. **K52 JIT'siz "kullanılabilir" maddesi** (K52: "JIT'siz en kötü durumda gösterim kullanılabilir
+   kalır, sürüklemede uzun kare ≤ %10"): `k52.mjs` `phone` koşusunda bu madde kayıttı, kapı
+   değildi. M18'de grafik için kapı olarak uygulandı (`k52chart.mjs`); yüz ölçümünde (akış
+   kaydırması) aynı biçimde: çekirdeğin kendi uzun kare payı `frame_ms.scroll.long` (koşuların
+   ortancası) ≤ 0,10. JIT açık tahmini (bağlayıcı) değişmedi (p99 vekili; `scroll_long` kayda girer).
+
+**Kayıtlı sonuçlara etkisi** (yeni çağrı yok; `g5_rescore.py`; çekim kayıtları saklanmadığından
+işaretin rolleri sahneden okunamadı: kayıtlı alfabelerin mürekkebi/kenarı `text` olduğu için altı
+role `text` eklendi; işaret boyu kayıtlı tablonun `mark_px`'i, M18 grafiği için 16 → eşik 15). Roller
+`main`'in `qp look show r4` çıktısından ve `broken/run/look-kestim.json`'dan (renkleri bugünkü
+yamalı derlemeyle birebir aynı). Her temada 7 rol → 21 çift; `valid` = `text` ve `invalid` =
+`closed` iki temada da bilerek paylaşılıyor (listelendi, sayılmadı) → 19 çift.
+
+- *Bozuk tasarım koşusu* (`broken/run/computed.json` yeniden yazıldı; eski tablo `colour_scene`):
+  başarısız çift açık/koyu `vadrel` ve `fotolay` (ikisi de `r4` görünüşü) 4/8 (en kötü koyu
+  `down ↔ invalid` 0,50; açık `up ↔ down` 4,66), `kestim` 19/19. Hiçbiri geçmiyor (önce de
+  geçmiyordu); bütün tasarımlar sert eşiklerde önce de sonra da kalıyor, `score` ve karar aynı.
+- *M18* (`M18/run`; dosyaya dokunulmadı, grafik kapısı ayrı kural): yüz kuralıyla eşik 15'te
+  `r4` görünüşü (korda, pavka, selen, r4) açık/koyu 7/13 başarısız, `kestim` 19/19. Hiçbir tasarım
+  geçmiyor → E6 ile renk eşiği yine uygulanmaz; M18 sonucu ve kararı değişmez.
+
 ## Ek G7 — M20 ölçümünden önce: derinlik, dokunma sayısı, K52 ekranı (2026-11-18)
 
 Tetikleyen: M20 aday ajanlarının raporları (iki aday da M20 sorularının cevabını kanıt

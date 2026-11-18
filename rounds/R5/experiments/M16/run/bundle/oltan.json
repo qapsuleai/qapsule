@@ -1,0 +1,14 @@
+{
+ "wasm_raw": 5499388,
+ "wasm_gzip": 1639746,
+ "wasm_br": 1066543,
+ "js_raw": 137404,
+ "js_gzip": 23957,
+ "font_files": {
+  "AtkinsonHyperlegibleNext-Regular.ttf": 36768,
+  "AtkinsonHyperlegibleNext-SemiBold.ttf": 36804,
+  "IBMPlexMono-Regular.ttf": 135580
+ },
+ "fonts_total": 209152,
+ "note": "fonts embedded in the wasm (qp-render include_bytes)"
+}

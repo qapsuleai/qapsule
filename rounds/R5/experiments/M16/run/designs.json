@@ -1,0 +1,34 @@
+[
+ {
+  "name": "bertan",
+  "look": "bertan",
+  "face": "bertan"
+ },
+ {
+  "name": "kivra",
+  "look": "kivra",
+  "face": "kivra"
+ },
+ {
+  "name": "oltan",
+  "look": "oltan",
+  "face": "oltan"
+ },
+ {
+  "name": "zemre",
+  "look": "zemre",
+  "face": "zemre"
+ },
+ {
+  "name": "r4",
+  "look": "r4",
+  "face": "vadrel",
+  "reference": true
+ },
+ {
+  "name": "kestim",
+  "look": "kestim",
+  "face": "vadrel",
+  "broken_look": true
+ }
+]

@@ -643,6 +643,31 @@ impl Session {
             )
             .ok());
         }
+        // (R5/S) The chart depth under a look other than `r4`: the presenter's chart rule
+        // with the look's sizes (`depth::chart_view_in`), as the device builds it
+        // (`viewer::open_view`): a view stored in the document (a capsule's own) is kept,
+        // the presenter's generated one is rebuilt. `r4`: the presentation's view as before.
+        if matches!(
+            depth::presenter_depth(face),
+            Depth::Chart | Depth::Workspace
+        ) && self.conns[ci].look.look.is_some()
+        {
+            if let Some(given) = pr.view.as_ref() {
+                if !rd!(self).views.iter().any(|x| x.id == given.id) {
+                    let id = self.conns[ci]
+                        .look
+                        .view
+                        .clone()
+                        .unwrap_or_else(|| given.id.clone());
+                    warm(rd!(self), &mut self.cache);
+                    let p =
+                        DocProvider::new(rd!(self), &self.cache).with_headlines(&self.headlines);
+                    if let Ok(v) = depth::chart_view_in(look, finding, &p, &id) {
+                        return Ok(Some(v));
+                    }
+                }
+            }
+        }
         Ok(match depth::presenter_depth(face) {
             Depth::Capsule => pr.capsule_view.map(|v| *v),
             Depth::Chart | Depth::Workspace => pr.view,

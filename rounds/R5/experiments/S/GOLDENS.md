@@ -36,9 +36,16 @@ Toplam 16 çekim, 28 sahne PNG'si (772 KB) (sayfa ekran görüntüleri `*.page.p
 
 Çekimler `?anim=0` ile alınır (= hareketi azalt, `?reduced_motion=1`'in eski adı): `v2`'de
 varsayılan hareket `surek`, hareketi azalt'ta yüz değişimini kalıcı etiketle söyler; etiket
-sahnenin kendi ilkelidir ve altın görüntüye girer (deterministik). Grafik derinliğinin fiyat
-şeridi R4'ün grafik görünümüyle kurulur (`depth::chart_view`, LOOK_RECIPE "kayıt dışında
-kalanlar"); `pavka`'nın özet satırındaki kapanmışları gizle kutusunun yazısı ("kapanmış"/"closed")
+sahnenin kendi ilkelidir ve altın görüntüye girer (deterministik). Grafik derinliği: cihaz
+(`viewer::open_view`) görünümü zaten bağlantının görünüşüyle kuruyordu
+(`depth::chart_view_in(look_of(look), …)`); `r4` ile kurulan yalnız otoritenin `tap_at`/`hit`
+görünümüydü (sunucunun `Presentation.view`'ı, `depth::chart_view`). R5/S son düzeltme:
+otorite de `r4` dışındaki görünüşte belgede saklı olmayan sunucu görünümünü
+`chart_view_in(look, …)` ile yeniden kurar (`interact.rs` `depth_view`; aynı kural, aynı kimlik);
+`r4`'te ve saklı görünümde eskisi gibi. Bu yüzden `chart-*` v2 altınları yeniden üretildiğinde
+bayt eşit çıktı (değişen cihazın çizdiği değil, otoritenin dokunuşu çözdüğü sahne); v1 16/16
+bayt eşit. (Önceki raporumdaki "fiyat şeridi `r4` ile kuruluyor" ifadesi cihaz için yanlıştı.)
+`pavka`'nın özet satırındaki kapanmışları gizle kutusunun yazısı ("kapanmış"/"closed")
 `oltan` boylarında sağ kenarda kesiliyordu: `pavka` sözcükleri ortalama ilerlemeyle ölçüyordu.
 Düzeltme (`stories/pavka.rs` `text_w`/`fit`): derleyicinin ölçüsü (`FontAsset::width`, orantılı
 ailede ilerleme tablosu) ve kenar boşluğuna sığmayan sözcükte kutu sola kayar; `r4` bayt eşit

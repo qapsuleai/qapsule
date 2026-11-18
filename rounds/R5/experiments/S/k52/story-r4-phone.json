@@ -6,87 +6,87 @@
  "phases": [
   {
    "target": 5,
-   "n": 13,
+   "n": 12,
    "range": {
-    "from_bar": 591,
-    "to_bar": 634,
+    "from_bar": 595,
+    "to_bar": 638,
     "view": "present-fnd.SYN26.breakout.down.47"
    },
    "total": 206,
    "tick": {
-    "n": 40,
+    "n": 41,
     "p50": 0,
     "p95": 1
    },
    "scene": {
     "n": 64,
-    "p50": 3,
-    "p95": 4
+    "p50": 2,
+    "p95": 3
    },
    "scene_build": {
-    "n": 102,
+    "n": 106,
     "p50": 1,
     "p95": 2
    },
    "spans": {
     "change_check": [
-     102,
+     106,
      0,
      1
     ],
     "data_pass": [
-     40,
+     41,
      3,
-     6
+     4
     ],
     "frame_to_paint": [
-     103,
+     107,
      13,
      22
     ],
     "msg": [
      73,
      0,
-     4
+     3
     ],
     "paint_pass": [
-     103,
+     107,
      5,
      7
     ],
     "pass_wait": [
-     103,
-     8,
-     15
+     107,
+     9,
+     16
     ],
     "scene": [
      64,
-     3,
-     4
+     2,
+     3
     ],
     "scene_build": [
-     102,
+     106,
      1,
      2
     ],
     "tick": [
-     40,
+     41,
      0,
      1
     ]
    },
    "counts": {
-    "data_frames": 40,
-    "data_passes": 40,
+    "data_frames": 41,
+    "data_passes": 41,
     "faces_painted": 0,
-    "faces_skipped_hidden": 2640,
+    "faces_skipped_hidden": 2720,
     "msg_frames": 73,
-    "paint_passes": 103,
+    "paint_passes": 107,
     "passes_per_data_frame": 1,
     "rate_frames_min": 10,
-    "scene_builds": 102,
+    "scene_builds": 106,
     "scenes_painted": 64,
-    "tick_plus_pass_ms": 3.725
+    "tick_plus_pass_ms": 3.756
    },
    "paint": {
     "fallback": null,
@@ -98,8 +98,8 @@
    "target": 50,
    "n": 52,
    "range": {
-    "from_bar": 458,
-    "to_bar": 721,
+    "from_bar": 462,
+    "to_bar": 725,
     "view": "present-fnd.SYN26.breakout.down.47"
    },
    "total": 207,
@@ -114,96 +114,6 @@
     "p95": 9
    },
    "scene_build": {
-    "n": 103,
-    "p50": 3,
-    "p95": 4
-   },
-   "spans": {
-    "change_check": [
-     103,
-     1,
-     1
-    ],
-    "data_pass": [
-     40,
-     6,
-     8
-    ],
-    "frame_to_paint": [
-     104,
-     16,
-     27
-    ],
-    "msg": [
-     74,
-     0,
-     4
-    ],
-    "paint_pass": [
-     104,
-     10,
-     12
-    ],
-    "pass_wait": [
-     104,
-     7,
-     16
-    ],
-    "scene": [
-     64,
-     8,
-     9
-    ],
-    "scene_build": [
-     103,
-     3,
-     4
-    ],
-    "tick": [
-     41,
-     0,
-     1
-    ]
-   },
-   "counts": {
-    "data_frames": 41,
-    "data_passes": 40,
-    "faces_painted": 0,
-    "faces_skipped_hidden": 2720,
-    "msg_frames": 74,
-    "paint_passes": 104,
-    "passes_per_data_frame": 0.976,
-    "rate_frames_min": 10,
-    "scene_builds": 103,
-    "scenes_painted": 64,
-    "tick_plus_pass_ms": 6.683
-   },
-   "paint": {
-    "fallback": null,
-    "requested": "canvas",
-    "used": "canvas"
-   }
-  },
-  {
-   "target": 200,
-   "n": 207,
-   "range": {
-    "from_bar": 28,
-    "to_bar": 1035,
-    "view": "present-fnd.SYN26.breakout.down.47"
-   },
-   "total": 207,
-   "tick": {
-    "n": 41,
-    "p50": 0,
-    "p95": 1
-   },
-   "scene": {
-    "n": 49,
-    "p50": 8,
-    "p95": 11
-   },
-   "scene_build": {
     "n": 104,
     "p50": 3,
     "p95": 4
@@ -216,33 +126,33 @@
     ],
     "data_pass": [
      40,
-     8,
-     12
+     6,
+     8
     ],
     "frame_to_paint": [
-     105,
-     18,
-     27
+     106,
+     16,
+     26
     ],
     "msg": [
-     73,
+     74,
      0,
      3
     ],
     "paint_pass": [
-     105,
-     8,
-     14
+     106,
+     10,
+     13
     ],
     "pass_wait": [
-     105,
+     106,
      7,
      16
     ],
     "scene": [
-     49,
+     64,
      8,
-     11
+     9
     ],
     "scene_build": [
      104,
@@ -259,14 +169,104 @@
     "data_frames": 41,
     "data_passes": 40,
     "faces_painted": 0,
-    "faces_skipped_hidden": 2720,
-    "msg_frames": 73,
-    "paint_passes": 105,
+    "faces_skipped_hidden": 2760,
+    "msg_frames": 74,
+    "paint_passes": 106,
     "passes_per_data_frame": 0.976,
     "rate_frames_min": 10,
     "scene_builds": 104,
-    "scenes_painted": 49,
-    "tick_plus_pass_ms": 8.537
+    "scenes_painted": 64,
+    "tick_plus_pass_ms": 6.561
+   },
+   "paint": {
+    "fallback": null,
+    "requested": "canvas",
+    "used": "canvas"
+   }
+  },
+  {
+   "target": 200,
+   "n": 202,
+   "range": {
+    "from_bar": 0,
+    "to_bar": 1007,
+    "view": "present-fnd.SYN26.breakout.down.47"
+   },
+   "total": 207,
+   "tick": {
+    "n": 40,
+    "p50": 0,
+    "p95": 1
+   },
+   "scene": {
+    "n": 47,
+    "p50": 8,
+    "p95": 10
+   },
+   "scene_build": {
+    "n": 100,
+    "p50": 3,
+    "p95": 4
+   },
+   "spans": {
+    "change_check": [
+     100,
+     1,
+     1
+    ],
+    "data_pass": [
+     40,
+     8,
+     11
+    ],
+    "frame_to_paint": [
+     101,
+     15,
+     27
+    ],
+    "msg": [
+     71,
+     0,
+     3
+    ],
+    "paint_pass": [
+     101,
+     8,
+     13
+    ],
+    "pass_wait": [
+     101,
+     6,
+     17
+    ],
+    "scene": [
+     47,
+     8,
+     10
+    ],
+    "scene_build": [
+     100,
+     3,
+     4
+    ],
+    "tick": [
+     40,
+     0,
+     1
+    ]
+   },
+   "counts": {
+    "data_frames": 40,
+    "data_passes": 40,
+    "faces_painted": 0,
+    "faces_skipped_hidden": 2600,
+    "msg_frames": 71,
+    "paint_passes": 101,
+    "passes_per_data_frame": 1,
+    "rate_frames_min": 10,
+    "scene_builds": 100,
+    "scenes_painted": 47,
+    "tick_plus_pass_ms": 8.575
    },
    "paint": {
     "fallback": null,

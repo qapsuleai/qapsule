@@ -789,7 +789,13 @@ pub const OLTAN: Look = Look {
         valid: [246, 246, 242, 255],
         invalid: [110, 112, 118, 255],
         closed: [170, 173, 180, 255],
-        closed_alpha: 170,
+        // (M16 rebase) `tg5`'s failed trace is `closed` at this floor: 154 lands it on
+        // `invalid` (3.75:1), so "did not hold" and "no longer valid" stay one grey.
+        closed_alpha: 154,
+        // An open glyph at freshness 0 keeps ≥ 3:1 (`neutral` needs ≥ 214).
+        fresh_alpha_min: 216,
+        // The confidence plate never fades below a fresh glyph's (0.24).
+        plate_alpha_min: 61,
         focus: [138, 170, 255, 255],
         chrome: Chrome {
             bg: [6, 6, 8, 255],
@@ -834,7 +840,11 @@ pub const OLTAN: Look = Look {
         valid: [17, 18, 22, 255],
         invalid: [136, 138, 142, 255],
         closed: [100, 103, 110, 255],
-        closed_alpha: 200,
+        // (M16 rebase) 196 lands `tg5`'s failed trace on `invalid` (3.45:1).
+        closed_alpha: 196,
+        // An open glyph at freshness 0 keeps ≥ 3:1 (`neutral` needs ≥ 232).
+        fresh_alpha_min: 234,
+        plate_alpha_min: 61,
         focus: [40, 80, 220, 255],
         chrome: Chrome {
             bg: [238, 238, 234, 255],
@@ -1425,11 +1435,11 @@ mod tests {
                 assert!(k >= 4.5, "{} {what}: {k:.2}", t.name);
             }
             assert_eq!(t.neutral, t.invalid, "{}: grey means no direction", t.name);
-            // `tg5` fades a failed glyph to `muted` at 0.55: it lands on `invalid`.
-            let faded = [t.muted[0], t.muted[1], t.muted[2], 140];
-            let mix = |i: usize| {
-                f64::from(t.bg[i]) + 140.0 / 255.0 * (f64::from(faded[i]) - f64::from(t.bg[i]))
-            };
+            // (M16 rebase) `tg5` draws a failed glyph's strongest stroke in `closed` at the
+            // closed floor: it lands on `invalid`.
+            let a = f64::from(t.closed_alpha) / 255.0;
+            let mix =
+                |i: usize| f64::from(t.bg[i]) + a * (f64::from(t.closed[i]) - f64::from(t.bg[i]));
             for i in 0..3 {
                 assert!(
                     (mix(i) - f64::from(t.invalid[i])).abs() <= 2.0,

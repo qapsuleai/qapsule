@@ -211,8 +211,20 @@ struct Placed<'r> {
     end: u64,
     /// Pixel span (packing box).
     span: (i32, i32),
+    /// Lane ends (birth column, closing column; `ends` of the extend).
+    ends: (i32, i32),
     live: bool,
     focus: bool,
+}
+
+/// `parts` joined (what `format!` of them gives, without its machinery: a story chart
+/// names every lane this way, and on the JIT-less phone setting that machinery costs).
+fn join(parts: &[&str]) -> String {
+    let mut s = String::with_capacity(parts.iter().map(|p| p.len()).sum());
+    for p in parts {
+        s.push_str(p);
+    }
+    s
 }
 
 fn with_alpha(c: Rgba, a: u8) -> Rgba {
@@ -436,6 +448,7 @@ pub fn extend(
             row: r,
             end,
             span: (a - m - 1, b + tail),
+            ends: (a, b),
             live,
             focus,
         });
@@ -624,6 +637,7 @@ pub fn extend(
     }
 
     // Lanes.
+    let live_word = fit(look, "label", wd.live, w - right - 6);
     let mut focus_layer: Option<SceneLayer> = None;
     let mut live_end = None;
     for (li, (is_live, members)) in lanes.iter().enumerate() {
@@ -633,7 +647,7 @@ pub fn extend(
         let cy = cy_i as f32;
         if *is_live {
             live_end = Some(lt + lane_h);
-            let t = fit(look, "label", wd.live, w - right - 6);
+            let t = live_word.clone();
             layers.push(SceneLayer {
                 id: format!("story-live:{li}"),
                 mark: Mark::Text,
@@ -677,8 +691,8 @@ pub fn extend(
             } else {
                 BAR_CLOSED
             };
-            let mut prims = Vec::new();
-            let (a, b) = ends(r.born_bar, p.end);
+            let mut prims = Vec::with_capacity(4);
+            let (a, b) = p.ends;
             let (y0, y1) = (cy_i - thick / 2, cy_i - thick / 2 + thick);
             if r.coin_flip {
                 // At most DASH_MAX dashes: a long lane gets longer dashes, same gap.
@@ -697,18 +711,18 @@ pub fn extend(
             #[allow(clippy::cast_precision_loss)]
             let (fa, fb) = (a as f32, b as f32);
             if r.born_bar >= x.from_bar {
-                let pts = match r.direction {
+                let points = match r.direction {
                     Direction::Up => {
-                        vec![(fa, cy - m), (fa + m, cy + m * 0.8), (fa - m, cy + m * 0.8)]
+                        vec![[fa, cy - m], [fa + m, cy + m * 0.8], [fa - m, cy + m * 0.8]]
                     }
                     Direction::Down => {
-                        vec![(fa, cy + m), (fa + m, cy - m * 0.8), (fa - m, cy - m * 0.8)]
+                        vec![[fa, cy + m], [fa + m, cy - m * 0.8], [fa - m, cy - m * 0.8]]
                     }
                     Direction::Neutral => {
-                        vec![(fa, cy - m), (fa + m, cy), (fa, cy + m), (fa - m, cy)]
+                        vec![[fa, cy - m], [fa + m, cy], [fa, cy + m], [fa - m, cy]]
                     }
                 };
-                prims.push(fill(&pts, color));
+                prims.push(Prim::Fill { points, color });
             } else {
                 prims.push(fill(
                     &[(fa - 4.0, cy), (fa + 2.0, cy - 4.0), (fa + 2.0, cy + 4.0)],
@@ -743,14 +757,14 @@ pub fn extend(
                 h1 = h0 + HIT_MIN;
             }
             let layer = SceneLayer {
-                id: format!("{STORY_LAYER}{}", r.id),
+                id: join(&[STORY_LAYER, &r.id]),
                 mark: Mark::Glyph,
                 data: DataSource::Finding {
                     finding: r.finding.clone(),
                 },
                 fields: Vec::new(),
                 constants: BTreeMap::new(),
-                label: Some(format!("{} · {}", r.face.event, r.face.validity_phrase)),
+                label: Some(join(&[&r.face.event, " · ", &r.face.validity_phrase])),
                 items: vec![Item {
                     bar: Some(r.born_bar),
                     t: Some(r.born_t),
@@ -842,7 +856,7 @@ pub fn extend(
                 if let Some(fact) = (input.fact_of)(&r.finding) {
                     #[allow(clippy::cast_precision_loss)]
                     constants.insert(
-                        format!("/stories/{}", r.id),
+                        join(&["/stories/", &r.id]),
                         ResolvedConstant {
                             origin: Origin::Fact {
                                 fact,

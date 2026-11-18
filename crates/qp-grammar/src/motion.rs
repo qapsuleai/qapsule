@@ -41,7 +41,7 @@ use crate::theme::Theme;
 use crate::transitions::{self, Frame, FrameElement, Source};
 
 /// One motion design.
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy)]
 pub struct MotionDesign {
     /// Setting name (`[a-z][a-z0-9_-]*`).
     pub name: &'static str,
@@ -50,6 +50,15 @@ pub struct MotionDesign {
     /// Whether it marks a face's own changes (live value, state) with motion — and, under
     /// reduced motion, with a lasting label.
     pub marks: bool,
+    /// (R5/S, `nabiz`) Its live marks: still marks drawn into each face (live dot, change
+    /// label) and the overlay boxes of a display frame (pulse, beat, trail); `None`: none.
+    pub live: Option<transitions::LiveMarks>,
+}
+
+impl PartialEq for MotionDesign {
+    fn eq(&self, other: &Self) -> bool {
+        self.name == other.name
+    }
 }
 
 /// The default design: today's motion.
@@ -61,14 +70,33 @@ pub static MOTIONS: &[MotionDesign] = &[
         name: "r4",
         transition: transitions::PRESENTED_TRANSITION,
         marks: false,
+        live: None,
     },
     // --- M21 alternatives: one line each
     MotionDesign {
         name: "surek",
         transition: "surek",
         marks: true,
+        live: None,
+    },
+    // (R5/S) M21's second: `nabiz` (a short deepening cross-fade; a live capsule pulses,
+    // a state change beats once and leaves a trail; still marks under reduced motion).
+    MotionDesign {
+        name: "nabiz",
+        transition: "nabiz",
+        marks: false,
+        live: Some(transitions::LiveMarks {
+            draw_face: transitions::nabiz::draw_face,
+            places: transitions::nabiz::places,
+            overlay: transitions::nabiz::overlay,
+        }),
     },
 ];
+
+/// (R5/S) The motion design the presentation shell starts with (M21: no winner was
+/// measured; `surek` by the pre-written rule, `rounds/R5/experiments/M21/RESULTS.md`).
+/// The protocol has no motion setting (a device presentation setting).
+pub const PRESENTED_MOTION: &str = "surek";
 
 /// Registered names.
 #[must_use]

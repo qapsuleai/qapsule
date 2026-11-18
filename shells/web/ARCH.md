@@ -115,6 +115,18 @@ gevşetilmedi.
 |--------|-------|
 | `gloss()`, `close_gloss()` | Son dokunuş bir sözlük terimine geldiyse (otoritenin `tap_at` cevabındaki `hit.term`; terimin kutusu sahne tarifinde, `SceneDesc.terms`) çekirdek açıklamayı tutar: `{term, text, target}` ya da `null`. Sayfa `take_changes().gloss` geldiğinde iki metni `#gloss` öğesine **olduğu gibi** yazar; dokununca `close_gloss()`. Terimin altı çizgisi sahnenin kendi ilkelidir (her boyama yolu çizer); kabuk konum hesaplamaz. |
 
+(R5/M21) Hareket (`?motion=<ad>`, Ayarlar → Hareket; `qp_grammar::transitions::MOTIONS`) için
+eklenenler. Hiçbir kural gevşetilmedi.
+
+| Yöntem | Neden |
+|--------|-------|
+| `set_reduced_motion(açık)` | Okurun hareketi azalt tercihi (`prefers-reduced-motion` ya da `?anim=0`) **olduğu gibi** çekirdeğe verilir (başlangıçta ve tercih değişince); karar çekirdekte: hareket katmanı boş, derinlik geçişi anında biter. Durağan işaretler (canlı noktası, değişim etiketi) iki kipte de aynı sahnede. |
+| `motion_marks(t)` | Bir animasyon karesinin hareket katmanı (`nabiz`: nabız, vuruş, iz): çekirdek yüz başına kutuları adlandırır (`face`, `key`) ve CSS değerlerini (konum, boy, saydamlık, ölçek, çerçeve, zemin) hazır verir; sayfa anahtar başına bir öğe yaratır, değerleri **olduğu gibi** uygular, adı geçmeyen anahtarı kaldırır. Değişiklik yoksa boş. Yüz yeniden boyanmaz (değişim körlüğü: işaret yerel). |
+
+Hareket seçimi `?motion=<ad>` ve Ayarlar → Hareket: öbür ayarlar gibi `set_look({motion})`; bir cihaz
+sunum ayarıdır (protokol değeri değil; `feed_order` gibi), seçilen tasarım kendi derinlik geçişini
+`style` hareketinin `transition` alanıyla ister. Adlar `choices().motion`'dan.
+
 Dil seçimi `?voice=<ad>` ve Ayarlar → Dil: öbür ayarlar gibi `set_look({voice})` (`style`
 hareketinin `voice` alanı); adlar `choices().voice`'tan; gösterimin varsayılanı çekirdekte
 (`presented_look`, `marla`). Sahnesi olmayan yüzün metni (`feed()` satırının `text`'i)
@@ -182,3 +194,9 @@ eşlik eden yüz `oltan`, dil `marla`, hikâye çizelgesi `pavka`, açılmış k
 taşır; bir görünüş seçilince eşlik eden yüzü (`look::companion_face`) çekirdek ekler, aynı seçimde
 bir yüz adı varsa o kalır. `?feed_exempt=0` olay akışı adresine olduğu gibi geçer; K42 muafiyetsiz
 kuralı barındırıcı kurar (`qp demo`).
+
+(R5/S, M21) Tek hareket kaydı (`qp_grammar::motion::MOTIONS`: `r4`, `surek` — geçici gösterim
+varsayılanı —, `nabiz`) ve tek hareket durumu (`shell/motion.rs`; `nabiz`'in canlı işaretleri
+`shell/live.rs`). Hareketi azalt tek adres parametresiyle: `?reduced_motion=1|0`; `?reduce=1|0` ve
+`?anim=0` eski adları olarak çalışır; yoksa `prefers-reduced-motion` (sayfa olduğu gibi iletir).
+`nabiz` hareketi azalt'ta canlı noktasının yanına "canlı" yazar (bilgi metin olarak durur).

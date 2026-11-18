@@ -159,6 +159,7 @@ pub fn r3_frame(shared: &[SharedElement], from: (f64, f64), to: (f64, f64), p: f
 
 // --- M10 alternatives: shared / frame functions (or `mod <name>;`) go below this line --
 
+pub mod nabiz;
 pub mod surek;
 mod tutamir;
 mod zumlak;
@@ -191,7 +192,35 @@ pub static TRANSITIONS: &[TransitionDesign] = &[
         shared: surek::shared,
         frame: surek::frame,
     },
+    // (R5/M21) `nabiz`'s opening: a short cross-fade with a slight deepening.
+    TransitionDesign {
+        name: "nabiz",
+        duration_ms: 220.0,
+        shared: nabiz::shared,
+        frame: nabiz::frame,
+    },
 ];
+
+// --- (R5/M21) motion designs -----------------------------------------------------------
+
+/// (R5/M21) The live marks of a motion design: the still marks drawn into a face (the same
+/// with and without reduce motion) and the overlay boxes of a frame (pulse, beat, trail;
+/// none under reduce motion). Types: [`nabiz`].
+#[derive(Debug, Clone, Copy)]
+pub struct LiveMarks {
+    /// Draws the still marks (live dot, change label) into a face scene.
+    pub draw_face: fn(
+        &mut qp_schema::scene::SceneDesc,
+        &nabiz::FaceMarks<'_>,
+        &crate::look::Look,
+        &crate::theme::Theme,
+    ),
+    /// Where a face's marks go (`None`: no glyph).
+    pub places: fn(&qp_schema::scene::SceneDesc, &crate::look::Look) -> Option<nabiz::Places>,
+    /// The overlay boxes of one face at a frame.
+    pub overlay:
+        fn(&nabiz::FaceMotion, &crate::look::Look, &crate::theme::Theme) -> Vec<nabiz::OverlayBox>,
+}
 
 /// Registered names.
 #[must_use]

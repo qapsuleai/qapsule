@@ -132,6 +132,7 @@ pub const FINALISTS: &[(&str, &[&str])] = &[
     ("look", &["oltan", "zemre", "r4"]),
     ("story", &["pavka", "korda", "r4"]),
     ("open", &["tesir", "nobra", "r4"]),
+    ("motion", &["surek", "nabiz", "r4"]),
 ];
 
 /// The replay step every candidate is shown at (synthetic, paused host).

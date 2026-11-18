@@ -43,6 +43,8 @@ pub struct MotionState {
     pub stable: BTreeMap<String, SceneDesc>,
     /// Capsules whose change the page has not started animating yet.
     pub queue: Vec<String>,
+    /// (R5/S) The live marks' state (`nabiz`, `super::live`).
+    pub live: super::live::LiveState,
 }
 
 impl ShellCore {
@@ -64,6 +66,8 @@ impl ShellCore {
             return None;
         }
         self.mo.design = (name != motion::DEFAULT_MOTION).then(|| name.to_owned());
+        // (R5/S) The live marks start again (or go).
+        self.mo.live = super::live::LiveState::default();
         if !self.marks() {
             self.mo.recent.clear();
             self.mo.moves.clear();

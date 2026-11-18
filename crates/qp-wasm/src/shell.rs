@@ -28,6 +28,7 @@ use serde_json::{json, Value};
 use crate::viewer::{Stories, Traffic, Viewer, STORIES_SUB};
 pub mod bench;
 pub mod freq;
+pub mod live;
 pub mod motion;
 pub mod paint;
 pub mod paint_canvas;
@@ -770,7 +771,12 @@ impl ShellCore {
             viewer_seq: 0,
             pending: serde_json::Map::new(),
             pending_since: None,
-            mo: motion::MotionState::default(),
+            // (R5/S) The presentation's motion design (M21: `surek`, provisional); its
+            // transition goes with the presented `style` gesture (`presented_look`).
+            mo: motion::MotionState {
+                design: Some(qp_grammar::motion::PRESENTED_MOTION.to_owned()),
+                ..motion::MotionState::default()
+            },
             pass_since: None,
             pending_data: false,
             pass_data: false,
@@ -869,7 +875,8 @@ impl ShellCore {
         json!({"kind":"style",
                "face": qp_grammar::faces::PRESENTED_FACE,
                "feed": qp_grammar::feeds::PRESENTED_FEED,
-               "transition": qp_grammar::transitions::PRESENTED_TRANSITION,
+               // (R5/S) The presented motion design's opening (M21, `surek`).
+               "transition": qp_grammar::motion::by_name(Some(qp_grammar::motion::PRESENTED_MOTION)).transition,
                "outcome": qp_grammar::glyph::outcome::PRESENTED_OUTCOME,
                // (R5/m17-int) M17's voice (`qp_session::voices::PRESENTED_VOICE`).
                "voice": qp_session::voices::PRESENTED_VOICE,
@@ -1070,6 +1077,7 @@ impl ShellCore {
                         self.changes_after(changes);
                         self.feed_known = true;
                         self.coin_flip_hidden = *coin_flip_hidden;
+                        self.observe_feed();
                         // (RP3/T4) Only a face in the feed can be painted: the digests of
                         // the faces that left it are forgotten (bounded by the feed).
                         let feed = &self.feed;
@@ -1343,6 +1351,7 @@ impl ShellCore {
             self.changes_after(changes);
             self.feed_known = true;
             self.coin_flip_hidden = up.coin_flip_hidden;
+            self.observe_feed();
         }
         if up.feed.is_some() || !up.faces.is_empty() || up.audience.is_some() {
             ch["feed"] = json!(true);
@@ -1720,14 +1729,18 @@ impl ShellCore {
     /// The face scene of capsule `id` as its face design compiles it.
     pub(crate) fn face_plain(&mut self, id: &str) -> Option<SceneDesc> {
         let (w, h) = self.frames["face"];
-        if let Some(v) = &self.viewer {
+        let mut scene = if let Some(v) = &self.viewer {
             // (RP3/M15) A viewer's face is the scene the authority compiled.
-            return v.face(id).cloned();
-        }
-        let it = self.feed.iter().find(|i| i.id == id)?.clone();
-        let look = self.look.clone();
-        let mp = self.max_points;
-        face_scene(self.replica.session_mut()?, &it, &look, mp, w, h)
+            v.face(id).cloned()?
+        } else {
+            let it = self.feed.iter().find(|i| i.id == id)?.clone();
+            let look = self.look.clone();
+            let mp = self.max_points;
+            face_scene(self.replica.session_mut()?, &it, &look, mp, w, h)?
+        };
+        // (R5/M21) The motion design's still marks (none by default).
+        self.decorate_face(id, &mut scene);
+        Some(scene)
     }
 
     /// Pixels (RGBA) of capsule `id`'s face, or empty when it has not changed since the

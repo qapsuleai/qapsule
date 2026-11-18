@@ -271,6 +271,20 @@ try {
     await settle(page);
     l = await look(page);
     check(l.story === 'korda' && l.open === 'nobra', `second candidates from Settings (${JSON.stringify(l)})`);
+    check(JSON.stringify(ch.motion) === JSON.stringify(['r4', 'surek', 'nabiz']), `motion choices ${JSON.stringify(ch.motion)}`);
+    check(await page.$eval('#s_motion', (e) => e.value) === 'surek', 'motion select shows surek');
+    check(!(await page.$eval('#s_reduce', (e) => e.checked)), 'reduced motion off without a setting');
+    check(errors.length === 0, `no page errors ${errors}`);
+    await ctx.close();
+  }
+  // 7. (R5/S) Reduced motion: one parameter (`?reduced_motion=1`), `?reduce=1` and `?anim=0`
+  //    its earlier names.
+  for (const q of ['reduced_motion=1', 'reduce=1', 'anim=0']) {
+    const { ctx, page, errors } = await phonePage(browser);
+    await page.goto(`${origin}/?${q}`);
+    await settle(page);
+    await page.click('#tabs button[data-tab="settings"]');
+    check(await page.$eval('#s_reduce', (e) => e.checked), `?${q} turns reduced motion on`);
     check(errors.length === 0, `no page errors ${errors}`);
     await ctx.close();
   }

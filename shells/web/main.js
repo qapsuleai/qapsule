@@ -75,12 +75,12 @@ const ui = {
   story: params.get('story') || '',
   // (R5/M20) The open capsule design (`?open=tesir`; the core's default: `r4`, today's).
   open: params.get('open') || '',
-  anim: params.get('anim') !== '0',
   // (R5/M21) The motion design (`?motion=`, names from `choices().motion`) and reduced
-  // motion: `?reduce=1|0` or the settings page override the system setting, which the page
-  // only forwards to the core (the core decides what moves).
+  // motion: the address or the settings page override the system setting, which the page
+  // only forwards to the core (the core decides what moves). (R5/S) One parameter,
+  // `?reduced_motion=1|0`; `?reduce=1|0` and `?anim=0` are its earlier names.
   motion: params.get('motion') || '',
-  reduce: params.get('reduce') || '',
+  reduce: params.get('reduced_motion') || params.get('reduce') || (params.get('anim') === '0' ? '1' : ''),
   // (R4/S1) Human-test settings: last look (`now` or a step) and the audience, given to
   // the core as they are (it reads the comma lists); applied again on every start frame,
   // so a backward seek (a new authority) keeps them.
@@ -98,6 +98,8 @@ let faceKey = '';
 let lastMove = null; // the last transition's canvases, for the harness's frozen frames
 const changes = new Map(); // (R5/M21) capsule id -> its last change's sources, for frozen frames
 const reducedQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
+// (R5/M21) The motion overlay's box elements by key (the core names and styles them).
+const marks = new Map();
 
 let core = null;
 let conn = '';
@@ -536,7 +538,7 @@ function transition(oldCanvas, snap, a) {
   if (!oldCanvas) return;
   const b = $('scene').getBoundingClientRect();
   lastMove = { a, b, snap, after: snapshot($('scene')) };
-  if (!ui.anim) return;
+  if (reducedMotion()) return;
   const m = lastMove;
   const els = moveCanvases(m);
   if (!els.length) return;
@@ -609,7 +611,7 @@ function faceMotion(id) {
   const box = canvas.getBoundingClientRect();
   const m = { id, snap, canvas, after: snapshot(canvas), left: box.left, top: box.top };
   changes.set(id, m);
-  if (!ui.anim) return;
+  if (reducedMotion()) return;
   const els = changeCanvases(m);
   core.metric_span('face_motion', t0, performance.now());
   if (!els.length) return;
@@ -968,12 +970,45 @@ function applyCss() {
   for (const [k, v] of Object.entries(JSON.parse(css))) root.setProperty(k, v);
 }
 
+// (R5/M21) The motion overlay of this display frame: the core names each box (by face and
+// key) and gives its CSS values; the page creates one element per key inside its face and
+// applies the values as they are; a key the core no longer names is removed.
+function applyMarks(m) {
+  const keep = new Set();
+  for (const b of m.marks) {
+    const face = faces.get(b.face);
+    if (!face) continue;
+    let el = marks.get(b.key);
+    if (!el || el.parentNode !== face) {
+      if (el) el.remove();
+      el = document.createElement('div');
+      el.className = 'mk';
+      face.append(el);
+      marks.set(b.key, el);
+    }
+    Object.assign(el.style, b.style);
+    keep.add(b.key);
+  }
+  for (const [k, el] of marks) {
+    if (!keep.has(k)) {
+      el.remove();
+      marks.delete(k);
+    }
+  }
+}
+
+function motionPass(ts) {
+  const text = core.motion_marks(ts);
+  if (text) applyMarks(JSON.parse(text));
+}
+
 function frame(ts) {
   if (core) {
     applyCss();
     core.metric_frame(mode, ts);
     if (benching) benchStep(ts);
     paintPass();
+    motionPass(ts);
   }
   requestAnimationFrame(frame);
 }
@@ -1055,6 +1090,9 @@ window.qp = {
   frozenChange: null,
   faceChanges: () => JSON.parse(core.face_changes()),
   changed: () => Array.from(changes.keys()),
+  // (R5/M21) The motion overlay the core would hand out at page time `t` (JSON), for the
+  // harness's frozen frames of pulse, beat and trail.
+  marks: (t) => core.motion_marks(t),
   // (RP3/T2) for tests/compare.mjs
   benching: () => benching,
   bench: () => core.bench_summary(),
@@ -1063,7 +1101,7 @@ window.qp = {
 
 async function main() {
   document.body.dataset.theme = ui.theme;
-  if (!ui.anim) document.body.classList.add('noanim');
+  if (reducedMotion()) document.body.classList.add('noanim');
   labels();
   wire();
   // (R4/T6) Connect first: the host prepares the start frame while the WASM downloads

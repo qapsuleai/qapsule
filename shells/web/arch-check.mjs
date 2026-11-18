@@ -47,6 +47,9 @@ export const ALLOWED_CORE = new Set([
   'open_desc',
   // R5/M21 (ARCH.md): reduced motion forwarded to the core; a face's own change frames.
   'set_reduced_motion', 'take_face_motion', 'face_change_progress', 'face_change_frame', 'face_changes', 'face_before_rgba',
+  // R5/M21 `nabiz` (ARCH.md): the motion overlay of a display frame (boxes and their CSS
+  // values, made by the core).
+  'motion_marks',
 ]);
 
 // R5/G (ARCH.md "Galeri"): the gallery page's core (`Gallery`, crates/qp-wasm/src/lib.rs).

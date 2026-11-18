@@ -145,6 +145,54 @@ function vrafInit() {
   };
 }
 
+// (M21, SPEC Ek G8-2) The broken MOTION (a harness filter, never in the product): every time
+// the page sets the style of a motion piece (`#fx canvas`: the opening transition's and a face
+// change's pieces), the piece (a) jumps half a screen (Ek G8-9: +H/2 when its centre is in the
+// upper half, -H/2 in the lower; always >= 2 bands of four away; the first trial's mirror left a
+// face straddling the centre line in place) and (b) is shaken by a seeded offset (x +-24 px,
+// y +-16 px, rotation +-6 deg; seed = the piece's index and the page's style-set count for
+// it); (c) the face canvases stay at opacity 1 (no in-place fade of the changed face). It uses
+// the independent CSS `translate`/`rotate` properties; the page's own code and drawing are
+// unchanged.
+function brokenMotionInit() {
+  const H = 874;
+  const rnd = (n) => { const x = Math.sin(n * 12.9898 + 78.233) * 43758.5453; return x - Math.floor(x); };
+  let nextIdx = 0;
+  const fix = (el) => {
+    if (el.tagName !== 'CANVAS') return;
+    if (el.__bmIdx == null) el.__bmIdx = nextIdx++;
+    if (el.__bmCss === el.style.cssText) return; // our own write
+    el.__bmN = (el.__bmN || 0) + 1;
+    el.style.translate = '';
+    el.style.rotate = '';
+    const r = el.getBoundingClientRect();
+    const seed = el.__bmIdx * 1009 + el.__bmN * 7;
+    const dx = (rnd(seed) * 2 - 1) * 24;
+    const dy = (r.top + r.height / 2 < H / 2 ? H / 2 : -H / 2) + (rnd(seed + 1) * 2 - 1) * 16;
+    const rot = (rnd(seed + 2) * 2 - 1) * 6;
+    el.style.translate = `${dx.toFixed(1)}px ${dy.toFixed(1)}px`;
+    el.style.rotate = `${rot.toFixed(2)}deg`;
+    el.__bmCss = el.style.cssText;
+  };
+  const start = () => {
+    const fx = document.getElementById('fx');
+    const st = document.createElement('style');
+    st.textContent = '#list .face canvas { opacity: 1 !important; }';
+    document.head.append(st);
+    if (!fx) return;
+    new MutationObserver((recs) => {
+      const seen = new Set();
+      for (const m of recs) {
+        if (m.type === 'childList') m.addedNodes.forEach((n) => seen.add(n));
+        else seen.add(m.target);
+      }
+      for (const el of seen) if (el.isConnected) fix(el);
+    }).observe(fx, { childList: true, subtree: true, attributes: true, attributeFilter: ['style'] });
+    window.__brokenMotion = true;
+  };
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start); else start();
+}
+
 async function newPage(browser, s) {
   // (M21, Ek G6) reduced motion as the system setting (`prefers-reduced-motion`): the
   // product's own path in every motion design; the other shots say `no-preference`.
@@ -155,6 +203,7 @@ async function newPage(browser, s) {
   });
   await ctx.addInitScript(recordFrames);
   if (s.vraf) await ctx.addInitScript(vrafInit);
+  if (s.broken_motion) await ctx.addInitScript(brokenMotionInit);
   if (s.broken) await ctx.addInitScript(brokenInit);
   const page = await ctx.newPage();
   const errors = [];
@@ -382,10 +431,11 @@ async function depth(page) { return (await page.evaluate(() => JSON.parse(window
 
 // Taps the harness needs from the feed to a depth (SPEC §G7, M18/M20 "dokunma sayısı"):
 // tap the target face, then the open scene's centre, until the depth is reached (at most 4).
-async function tapTo(page, id, want) {
+async function tapTo(page, id, want, centre = false) {
   let taps = 0;
   const box = await page.locator(`#list .face[data-id="${id}"]`).boundingBox();
-  await page.mouse.click(box.x + box.width / 2, box.y + Math.min(box.height / 2, 60));
+  // (Ek G8-1) a face placed in a band is tapped at its centre (its top may be under the bar).
+  await page.mouse.click(box.x + box.width / 2, box.y + (centre ? box.height / 2 : Math.min(box.height / 2, 60)));
   taps++;
   await settle(page);
   while ((await depth(page)) !== want && taps < 4) {
@@ -469,6 +519,25 @@ async function run() {
           meta.target = target || s.candidates[0];
           meta.row_text = row ? row.text : null;
           if (target) await scrollTo(page, target);
+          if (target && s.band_k != null) {
+            // (M21, Ek G8-1, G8-9) the target face's vertical centre at the centre of band k of
+            // the feed area (below the top bar, four equal bands); the feed scrolls in its page
+            // element (`.page`), not the window. The record keeps the box reached.
+            await page.evaluate(({ id, k }) => {
+              const el = document.querySelector(`#list .face[data-id="${id}"]`);
+              const y0 = document.getElementById('top').getBoundingClientRect().bottom;
+              const y = y0 + (innerHeight - y0) * (k - 0.5) / 4;
+              const sc = el.closest('.page') || document.scrollingElement;
+              const r = el.getBoundingClientRect();
+              sc.scrollTop += r.top + r.height / 2 - y;
+            }, { id: target, k: s.band_k });
+            await settle(page);
+            meta.target_rect_before = await page.evaluate((id) => {
+              const r = document.querySelector(`#list .face[data-id="${id}"]`).getBoundingClientRect();
+              return [r.left, r.top, r.width, r.height];
+            }, target);
+            meta.top_bar_bottom = await page.evaluate(() => { const t = document.getElementById('top'); return t ? t.getBoundingClientRect().bottom : 0; });
+          }
           if (s.kind === 'evidence' || s.kind === 'chart') {
             if (target) meta.taps = await tapTo(page, target, s.kind);
             else {
@@ -504,7 +573,7 @@ async function run() {
             // frozen pieces' boxes (#fx canvases) give the M21 region key (SPEC §G4.6).
             const before = path.join(out, `${s.id}.before.png`);
             await page.screenshot({ path: before, animations: 'disabled', caret: 'hide' });
-            meta.taps = await tapTo(page, target, s.to || 'capsule');
+            meta.taps = await tapTo(page, target, s.to || 'capsule', s.band_k != null);
             await settle(page);
             meta.frames = [];
             for (const p of s.progress || [0.5]) {
@@ -628,7 +697,7 @@ async function changeShot(browser, origin, s, log) {
     }
     return null;
   };
-  for (const [name, ms] of [['mid', s.mid_ms || 180], ['after', 1000], ['end', 5000]]) {
+  for (const [name, ms] of [['mid', s.mid_ms || 180], ['after', 1000], ['end', s.end_ms || 5000]]) {
     const t = await at(ms);
     const ov = await overlay(page);
     meta.frames[name] = { ms, t, overlay: ov };

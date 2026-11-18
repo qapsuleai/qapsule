@@ -1,0 +1,13 @@
+{
+ "note": "SPEC Ek G8-3 / G8-9: the fixed state changes of the M21 re-measurement (probe of this build, look oltan, steps 1-500). step = N (page opens at N, the harness steps to N + 1); anchor_index = the feed row at N scrolled to the top; cls: change_live / change_closed / control_live / control_nolive.",
+ "states": [
+  {"state": "c_born", "step": 216, "target": "cap.SYN09.breakout.up.143", "anchor_index": 18, "kind": "born", "cls": "change_live"},
+  {"state": "c_strengthened", "step": 225, "target": "cap.SYN09.breakout.up.143", "anchor_index": 19, "kind": "state", "cls": "change_live"},
+  {"state": "c_failed", "step": 333, "target": "cap.SYN20.breakout.down.154", "anchor_index": 10, "kind": "state", "cls": "change_closed"},
+  {"state": "c_realized", "step": 207, "target": "cap.SYN11.breakout.up.140", "anchor_index": 19, "kind": "state", "cls": "change_closed"},
+  {"state": "n_live1", "step": 201, "target": null, "anchor_index": 19, "kind": "none", "cls": "control_live"},
+  {"state": "n_live2", "step": 218, "target": null, "anchor_index": 18, "kind": "none", "cls": "control_live"},
+  {"state": "n_still1", "step": 211, "target": null, "anchor_index": 18, "kind": "none", "cls": "control_nolive"},
+  {"state": "n_still2", "step": 300, "target": null, "anchor_index": 10, "kind": "none", "cls": "control_nolive"}
+ ]
+}

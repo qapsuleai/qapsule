@@ -142,6 +142,15 @@ QUESTIONS = {
         "options": [("A", {"tr": "A (sol üst)", "en": "A (top left)"}), ("B", {"tr": "B (sağ üst)", "en": "B (top right)"}),
                     ("C", {"tr": "C (sol alt)", "en": "C (bottom left)"}), ("D", {"tr": "D (sağ alt)", "en": "D (bottom right)"})],
     },
+    # (M21, SPEC Ek G8) position-based continuity: two in-between frames (I p = 0.25, II p = 0.5),
+    # no "before" frame; numbered bands 1-4 (top to bottom) drawn by the harness; options lettered.
+    "m_from": {
+        "tr": "Bu iki kare aynı geçişin art arda iki anı (I önce, II biraz sonra). Açılan kapsül ekranın hangi numaralı şeridinden geliyor; geçiş nereden başlıyor?",
+        "en": "These two frames are two consecutive moments of the same transition (I first, II a moment later). From which numbered band of the screen does the opening capsule come; where does the transition start?",
+        "options": [("1", {"tr": "1. şerit (en üst)", "en": "band 1 (top)"}), ("2", {"tr": "2. şerit", "en": "band 2"}),
+                    ("3", {"tr": "3. şerit", "en": "band 3"}), ("4", {"tr": "4. şerit (en alt)", "en": "band 4 (bottom)"}),
+                    ("none", {"tr": "bir yerden gelmiyor; olduğu yerde beliriyor", "en": "it does not come from anywhere; it appears in place"})],
+    },
     # --- state change on the feed (M21, SPEC Ek G6; written before any M21 reading) ---------
     # Numbered horizontal bands 1-4 (top to bottom) drawn by the harness; options lettered.
     "n_where": {
@@ -220,6 +229,9 @@ SETS = {
     "motion_final": ["m_same", "m_where"],
     # (M21, Ek G6) a single frame of the feed half way through / just after a state change,
     # and the pair (before | half way).
+    # (Ek G8) the position question on two in-between frames, and its final-frame control.
+    "motion2": ["m_from"],
+    "motion2_final": ["m_from"],
     "notice": ["n_where"],
     "notice_pair": ["n_where2", "n_what"],
     # The glance copy (SPEC §G3a): the same face at 0.5x (arm's-length / one-second proxy,

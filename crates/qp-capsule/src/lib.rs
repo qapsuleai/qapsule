@@ -51,6 +51,7 @@ pub mod scaffold;
 pub mod sentence;
 pub mod theme;
 pub mod trust;
+pub mod voice;
 
 pub use audience::{admits, admits_at};
 pub use engine::{

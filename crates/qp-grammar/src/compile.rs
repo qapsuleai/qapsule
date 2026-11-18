@@ -1192,6 +1192,9 @@ pub fn compile(
         }
     }
 
+    // (R5/m17-int, K49) Glossary terms of a capsule scene under a voice.
+    let terms = crate::terms::mark(&mut scene_panels, provider, look);
+
     // (R5/T3) Type roles: each text's font from its role (marks: by size, glyph texts:
     // `glyph`); the role itself stays in the scene only when asked for.
     // (Layer texts were settled when drawn, so a focus copy keeps its font.)
@@ -1220,6 +1223,7 @@ pub fn compile(
             .collect(),
         under,
         over,
+        terms,
     })
 }
 

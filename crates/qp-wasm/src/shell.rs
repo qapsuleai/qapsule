@@ -467,6 +467,13 @@ pub struct ShellCore {
     opening: Option<Opening>,
     /// The open capsule's sentence (from the feed when it was opened).
     open_headline: Option<String>,
+    /// (R5/m17-int) The open capsule's voice surfaces (from the feed when it was opened).
+    open_voice: Option<qp_schema::protocol::CapsuleVoice>,
+    /// (R5/m17-int, K49) The glossary term the last tap landed on (the authority's
+    /// `hit.term`) and the target tapped: the page shows its explanation.
+    gloss: Option<(String, qp_schema::scene::TermMark)>,
+    /// The target of the last tap (`face:<capsule>` or `scene`).
+    tapped: String,
     /// The shared elements of the last transition.
     shared: Vec<qp_schema::protocol::SharedElement>,
     shared_from: String,
@@ -632,6 +639,9 @@ impl ShellCore {
             look: ViewState::default(),
             opening: None,
             open_headline: None,
+            open_voice: None,
+            gloss: None,
+            tapped: String::new(),
             shared: Vec::new(),
             shared_from: String::new(),
             replay: None,
@@ -758,7 +768,9 @@ impl ShellCore {
                "face": qp_grammar::faces::PRESENTED_FACE,
                "feed": qp_grammar::feeds::PRESENTED_FEED,
                "transition": qp_grammar::transitions::PRESENTED_TRANSITION,
-               "outcome": qp_grammar::glyph::outcome::PRESENTED_OUTCOME})
+               "outcome": qp_grammar::glyph::outcome::PRESENTED_OUTCOME,
+               // (R5/m17-int) M17's voice (`qp_session::voices::PRESENTED_VOICE`).
+               "voice": qp_session::voices::PRESENTED_VOICE})
     }
 
     fn id(&mut self, prefix: &str) -> String {
@@ -920,6 +932,7 @@ impl ShellCore {
                     ("transition", &self.look.transition),
                     ("outcome", &self.look.outcome),
                     ("look", &self.look.look),
+                    ("voice", &self.look.voice),
                 ] {
                     if let Some(v) = v {
                         more[k] = json!(v);
@@ -954,11 +967,23 @@ impl ShellCore {
                     }
                     (Some(Asked::Input), QueryResult::Interaction { interaction }) => {
                         self.look = interaction.state.clone();
+                        // (R5/m17-int, K49) A tap on a glossary term: its explanation
+                        // shows (any other answer closes it).
+                        let g = interaction
+                            .hit
+                            .as_ref()
+                            .and_then(|h| h.term.clone())
+                            .map(|t| (self.tapped.clone(), t));
+                        if g != self.gloss {
+                            self.gloss = g;
+                            ch["gloss"] = json!(true);
+                        }
                         // (R4/H-M8910) The face design states its height (R5/T3: in the
                         // connection's look).
-                        let fh = qp_grammar::faces::height_in(
+                        let fh = qp_grammar::faces::height_for(
                             qp_session::viewer::look_of(&self.look),
                             self.look.face.as_deref(),
+                            self.look.voice.is_some(),
                         );
                         if let Some(f) = self.frames.get_mut("face") {
                             if f.1 != fh {
@@ -976,10 +1001,16 @@ impl ShellCore {
                                     .iter()
                                     .find(|i| i.id == o.capsule)
                                     .map(|i| i.sentence.text.clone());
+                                self.open_voice = self
+                                    .feed
+                                    .iter()
+                                    .find(|i| i.id == o.capsule)
+                                    .and_then(|i| i.voice.clone());
                             }
                             if o.to == OpenDepth::Sentence {
                                 self.opening = None;
                                 self.open_headline = None;
+                                self.open_voice = None;
                             } else {
                                 self.opening = Some(o.clone());
                             }
@@ -1349,8 +1380,14 @@ impl ShellCore {
                         Some(v) => v.row(&it.id).is_some_and(|r| r.face),
                         None => self.replica.bars(&it.series).is_some_and(|b| !b.is_empty()),
                     };
+                    // (R5/m17-int, A32) Without a face scene the text is the voice's text
+                    // face (headline, ledger, detail; no digits for a redacted reader).
+                    let text = it
+                        .voice
+                        .as_ref()
+                        .map_or_else(|| it.sentence.text.clone(), |v| v.face.clone());
                     let mut v = json!({"id": it.id, "target": format!("face:{}", it.id),
-                        "text": it.sentence.text, "scene": has, "relevant": it.relevant,
+                        "text": text, "scene": has, "relevant": it.relevant,
                         "closed": it.validity == qp_schema::capsule::Validity::Closed});
                     if let Some(m) = mark {
                         v["mark"] = json!(m);
@@ -1400,7 +1437,7 @@ impl ShellCore {
 
     /// (R4/H-M8910) The names each setting accepts, from the registries (the settings
     /// page lists them; nothing is hard-coded in the shell): `{face, alphabet, feed,
-    /// transition, outcome}`, the default first.
+    /// transition, outcome, look, voice}`, the default first.
     #[must_use]
     pub fn choices_json() -> Value {
         json!({
@@ -1415,7 +1452,24 @@ impl ShellCore {
             // `layout`: no order chosen, the feed layout orders the feed.
             "feed_order": std::iter::once("layout").chain(qp_grammar::feeds::FEED_ORDERS).collect::<Vec<_>>(),
             "feed_rule": qp_capsule::feedrule::FEED_RULES.iter().map(|(n, _)| *n).collect::<Vec<_>>(),
+            "voice": qp_session::voices::names(),
         })
+    }
+
+    /// (R5/m17-int, K49) The glossary explanation to show: `{term, text, target}` (the
+    /// target tapped, `face:<capsule>` or `scene`), or `null` when none is open. The page
+    /// shows it as it is; the texts are the voice's (`docs/LANGUAGE.md`).
+    #[must_use]
+    pub fn gloss_json(&self) -> Value {
+        match &self.gloss {
+            Some((target, t)) => json!({"term": t.term, "text": t.text, "target": target}),
+            None => Value::Null,
+        }
+    }
+
+    /// (R5/m17-int) Closes the glossary explanation (the page's dismiss).
+    pub fn close_gloss(&mut self) {
+        self.gloss = None;
     }
 
     /// (R5/T3) The chrome's CSS custom properties for the connection's look and theme
@@ -1553,15 +1607,23 @@ impl ShellCore {
         let look = self.look.clone();
         let mp = self.max_points;
         let head = self.open_headline.clone();
+        let voice = self.open_voice.clone();
         // (RP3/S) The build's own time (`scene_build`), apart from the change check.
         let t0 = core_now();
         let scene = if let Some(v) = self.viewer.as_mut() {
             // (RP3/M15) The open capsule over the device's own data of its instrument.
             let side = v.open_mut().filter(|s| s.open.capsule == o.capsule)?;
             let s = side.replica_mut().session_mut()?;
-            open_scene(s, &o, head.as_deref(), &look, mp)
+            open_scene(s, &o, head.as_deref(), voice.as_ref(), &look, mp)
         } else {
-            open_scene(self.replica.session_mut()?, &o, head.as_deref(), &look, mp)
+            open_scene(
+                self.replica.session_mut()?,
+                &o,
+                head.as_deref(),
+                voice.as_ref(),
+                &look,
+                mp,
+            )
         };
         let t1 = core_now();
         self.core_span("scene_build", t0, t1);
@@ -1636,7 +1698,10 @@ impl ShellCore {
                 let mut v = json!({
                     "depth": depth_name(o.to),
                     "capsule": o.capsule,
-                    "text": self.open_headline.clone().unwrap_or_else(|| o.presentation.text.clone()),
+                    // (R5/m17-int) Under a voice the open layer's title is its headline.
+                    "text": self.open_voice.as_ref().map(|v| v.headline.clone())
+                        .or_else(|| self.open_headline.clone())
+                        .unwrap_or_else(|| o.presentation.text.clone()),
                     "frame": o.frame,
                     "scene": o.frame.is_some(),
                 });
@@ -1871,6 +1936,7 @@ impl ShellCore {
             "transition",
             "outcome",
             "look",
+            "voice",
         ] {
             if let Some(v) = choice.get(k).and_then(Value::as_str) {
                 if !v.is_empty() {
@@ -1963,6 +2029,7 @@ impl ShellCore {
     }
 
     fn tap(&mut self, target: &str, x: f64, y: f64) {
+        target.clone_into(&mut self.tapped);
         let (w, h) = self.frame_of(target);
         let mut g = json!({"kind":"tap_at","x":x,"y":y,"width":w,"height":h});
         if let Some(cap) = target.strip_prefix("face:") {

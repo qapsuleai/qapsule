@@ -68,6 +68,7 @@ pub fn scene_of(width: u32, height: u32, background: Rgba, prims: Vec<Prim>) -> 
         emphasis: Vec::new(),
         under: prims,
         over: Vec::new(),
+        terms: Vec::new(),
     }
 }
 

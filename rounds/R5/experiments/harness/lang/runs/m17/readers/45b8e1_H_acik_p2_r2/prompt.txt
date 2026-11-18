@@ -1,0 +1,44 @@
+Kırk beş yaşındasın. Yıllardır borsada işlem yapıyorsun; terminal ekranlarına, teknik analize ve indikatörlere alışkınsın; ayrıntıya güvenirsin. Telefonunda bir piyasa uygulamasına bakıyorsun. Okuyup cevapla.
+
+Aşağıda bir piyasa bilgi uygulamasının telefonda gösterdiği 6 kısa metin var; her biri ayrı bir hisse hakkında. Her metin, bildirime dokununca açılan ekranın tamamıdır; parantez içindekiler terime dokununca açılan açıklamalardır.
+
+[1]
+Benzerleri: 5'te 2 tuttu (az örnek)
+SYN21 için büyük alım geldi. Kapandı: bugün süresi doldu.
+SYN21'de 10 bar önce hacim (1.243.369.826) ortalamasının (379.001.940) belirgin üstüne çıktı: para girişi. Sinyalin 10 barlık ömrü bugün sonuçsuz doldu; artık geçerli değil. Karnesi henüz az örnekli: 5 seferin 2'sinde tuttu.
+
+[2]
+Benzerleri: çoğunlukla tutmadı
+Bugün SYN07 için büyük satış geldi. Hâlâ geçerli.
+Bu hisse için sunucunun doğruladığı bir para çıkışı sinyali var; ayrıntılar veri lisansı gerektiriyor.
+
+[3]
+Benzerleri: 1'de 1 tuttu (az örnek)
+Bugün SYN15 kısa sürede aşırı yükseldi. Hâlâ geçerli.
+SYN15'de RSI bugün itibarıyla 70'in üstünde; şu an 74,7. Aşırı alım sürüyor. Karnesi henüz az örnekli: 1 seferin 1'inde tuttu.
+
+[4]
+Benzerleri: henüz örnek yok
+SYN02 için büyük satış geldi. Kapandı: bugün geri çekildi.
+SYN02'de 2 bar önce kurumsal net satış (25.970.934) son günlerin ortalamasını (7.483.323) belirgin biçimde aştı: para çıkışı. Dayandığı veri düzeltildiği için bugün geri çekildi; karneye yazılmadı; artık geçerli değil. Henüz karnesi yok. Sunucu doğruladı.
+
+[5]
+Benzerleri: 20'de 7 tuttu
+SYN08 düşüşten yukarı döndü; bugün güçlendi. Hâlâ geçerli.
+SYN08'de dün yukarı dönüş işareti çıktı: fiyat yeni dip yaparken RSI daha yüksek dip yaptı (fiyat 215,36, RSI 41,6). Bugün para akışı da teyit etti; 2 bağımsız kanıt ailesi destekliyor. Hâlâ geçerli olup olmadığı bilinmiyor. Geçmişte bu sinyal 20 seferin 7'sinde beklendiği gibi sonuçlandı.
+
+[6]
+Benzerleri: 21'de 10 tuttu
+Az önce SYN04 düşüşünü sürdürdü. Hâlâ geçerli.
+SYN04 bu bar itibarıyla kısa ortalamanın (44,32) altında; şu an 44,23. Düşüş eğilimi sürüyor. Geçmişte bu sinyal 21 seferin 10'unda beklendiği gibi sonuçlandı.
+
+Her metin için şu soruları yalnız metne dayanarak cevapla. Seçmeli sorularda yalnız harfi yaz. Açık sorularda EN ÇOK BİR CÜMLE yaz; metinde yoksa "yok" yaz. Tahmin etme.
+S1 Ne oldu? A) Fiyat bir sınırın üstüne çıktı  B) Fiyat bir sınırın altına indi  C) Düşüş yukarı dönüyor olabilir  D) Yükseliş aşağı dönüyor olabilir  E) Yükseliş sürüyor  F) Düşüş sürüyor  G) Fiyat dar bir aralığa sıkıştı, yön belli değil  H) Fiyat kısa sürede çok yükseldi  I) Fiyat kısa sürede çok düştü  J) Alışılmadık güçlü alım (para girişi) oldu  K) Alışılmadık güçlü satış (para çıkışı) oldu  L) Bilmiyorum
+S2 Hangi eşik ya da sınır söz konusu ve değeri kaç? (bir cümle)
+S3 Anlatılan şey ne zaman oldu? A) Bugün  B) Dün  C) 2–4 işlem günü önce  D) Bir haftaya yakın ya da daha önce  E) Birkaç saat önce  F) Bilmiyorum
+S4 Hâlâ geçerli mi? A) Evet, hâlâ geçerli  B) Hayır, artık geçerli değil (ama henüz kapanmadı)  C) Kapandı: gerçekleşti  D) Kapandı: tutmadı  E) Kapandı: süresi doldu  F) Geri çekildi (veri hatalıydı)  G) Bilmiyorum
+S5 Geçmişte benzerleri kaç örnekte kaç kez tuttu? (bir cümle; ör. "10 örnekte 7")
+S6 Bu metin sana ne yapmanı söylüyor? A) Almamı  B) Satmamı  C) Beklememi  D) Hiçbir şey; yalnız bilgi veriyor  E) Bilmiyorum
+
+Cevabını yalnız bir JSON dizisi olarak yaz, başka hiçbir şey yazma:
+[{"no": 1, "S1": "…", "S2": "…", "S3": "…", "S4": "…", "S5": "…", "S6": "…"}, …]

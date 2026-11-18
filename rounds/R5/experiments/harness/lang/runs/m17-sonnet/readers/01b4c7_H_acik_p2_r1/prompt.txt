@@ -1,0 +1,62 @@
+Kırk beş yaşındasın. Yıllardır borsada işlem yapıyorsun; terminal ekranlarına, teknik analize ve indikatörlere alışkınsın; ayrıntıya güvenirsin. Telefonunda bir piyasa uygulamasına bakıyorsun. Okuyup cevapla.
+
+Aşağıda bir piyasa bilgi uygulamasının telefonda gösterdiği 6 kısa metin var; her biri ayrı bir hisse hakkında. Her metin, bildirime dokununca açılan ekranın tamamıdır; parantez içindekiler terime dokununca açılan açıklamalardır.
+
+[1]
+Az örnek: 5'te 2 tuttu · 10 işlem günü içinde yükseliş
+SYN21 ortalamanın 3,28 katı hacimle yükseldi · 10 işlem günü önce · süresi doldu
+Eşik: 20 günlük ortalama hacmin 2,5 katı · o gün 3,28 katı. Zaman: 10 işlem günü önce başladı · bugün kapandı. Durum: süresi doldu · 10 işlem günü içinde sonuç çıkmadı · bu cihazda sınandı.
+(Hacim: Bir dönemde el değiştiren hisse adedi. Ortalamasının katlarına çıkması, o dönem olağandan çok alım satım olduğunu gösterir.)
+(Karne: Geçmişteki benzer durumların sayımı: fiyat süre içinde, olağan oynaklığına göre ölçülen mesafeyi yazılan yönde gittiyse tuttu sayılır.)
+(Süresi doldu: Süre içinde fiyat ölçülen mesafeye iki yönde de ulaşmadı. İddia sonuçsuz kapandı.)
+
+[2]
+Karne: 21'de 10 tuttu · 20 işlem saati içinde düşüş
+SYN04 düşüş eğilimine girdi · az önce · hâlâ geçerli
+Eşik: 20 saatlik ortalama 44,32 · 50 saatlik ortalama 44,32 · fiyat ikisinin de altına indi. Zaman: az önce başladı. Durum: hâlâ geçerli · son kapanış 44,23 · bu cihazda sınandı.
+(Ortalama: 20 saatlik ortalama, son 20 işlem saatinin kapanış fiyatlarının ortalamasıdır (50 saatlik de öyle). Fiyat ikisinin de üstündeyse eğilim yukarı sayılır.)
+(Karne: Geçmişteki benzer durumların sayımı: fiyat süre içinde, olağan oynaklığına göre ölçülen mesafeyi yazılan yönde gittiyse tuttu sayılır.)
+(Hâlâ geçerli: İddia henüz kapanmadı ve bugüne kadar onu bozan bir şey olmadı.)
+
+[3]
+Karne: 20'de 7 tuttu · 15 işlem günü içinde yükseliş
+SYN08'de dipten yukarı dönüş izi · dün · hâlâ geçerli
+Eşik: önceki dip 219,11 (RSI 41,4) · yeni dip 215,36 (RSI 41,6). Zaman: dün başladı · bugün para akışı da aynı yönü gösterdi. Durum: hâlâ geçerli · bu cihazda sınandı.
+(RSI: Göreceli güç endeksi: son 14 işlem gününün yükseliş ve düşüşlerini 0 ile 100 arasında özetler. 70 üstü hızlı yükseliş, 30 altı hızlı düşüş sayılır.)
+(Karne: Geçmişteki benzer durumların sayımı: fiyat süre içinde, olağan oynaklığına göre ölçülen mesafeyi yazılan yönde gittiyse tuttu sayılır.)
+(Hâlâ geçerli: İddia henüz kapanmadı ve bugüne kadar onu bozan bir şey olmadı.)
+
+[4]
+Karne: henüz örnek yok · 10 işlem günü içinde düşüş
+SYN02'de kurumsal net satış 2 katı aştı · 2 işlem günü önce · geri çekildi
+Eşik: kurumsal net satışta 5 günlük ortalamanın 2 katı · ortalama 7.483.323. Zaman: 2 işlem günü önce başladı · bugün kapandı. Durum: geri çekildi · sunucu doğruladı.
+(Kurumsal: Kurumsal net alış ya da satış: kurumsal yatırımcıların aldığı ile sattığı hisse arasındaki fark. Lisanslı veridir, rakamları lisansla görülür.)
+(Karne: Geçmişteki benzer durumların sayımı: fiyat süre içinde, olağan oynaklığına göre ölçülen mesafeyi yazılan yönde gittiyse tuttu sayılır.)
+(Geri çekildi: Dayandığı veri sonradan düzeltildi. Karneye sayılmaz.)
+
+[5]
+Az örnek: 1'de 1 tuttu · 10 işlem günü içinde yükselişin sürmesi
+SYN15 hızlı yükseldi: RSI 70'i aştı · bugün · hâlâ geçerli
+Eşik: 70 çizgisi (14 günlük RSI). Zaman: bugün başladı. Durum: hâlâ geçerli · RSI şu an 74,7 · bu cihazda sınandı.
+(RSI: Göreceli güç endeksi: son 14 işlem gününün yükseliş ve düşüşlerini 0 ile 100 arasında özetler. 70 üstü hızlı yükseliş, 30 altı hızlı düşüş sayılır.)
+(Karne: Geçmişteki benzer durumların sayımı: fiyat süre içinde, olağan oynaklığına göre ölçülen mesafeyi yazılan yönde gittiyse tuttu sayılır.)
+(Hâlâ geçerli: İddia henüz kapanmadı ve bugüne kadar onu bozan bir şey olmadı.)
+
+[6]
+Karne: çoğunlukla tutmadı · on işlem günü içinde düşüş
+SYN07'de kurumsal net satış ortalamanın iki katını aştı · bugün · hâlâ geçerli
+Eşik: kurumsal net satışta beş günlük ortalamanın iki katı. Zaman: bugün başladı. Durum: hâlâ geçerli · sunucu doğruladı · rakamlar kurumsal akış lisansıyla açılır.
+(Kurumsal: Kurumsal net alış ya da satış: kurumsal yatırımcıların aldığı ile sattığı hisse arasındaki fark. Lisanslı veridir, rakamları lisansla görülür.)
+(Karne: Geçmişteki benzer durumların sayımı: fiyat süre içinde, olağan oynaklığına göre ölçülen mesafeyi yazılan yönde gittiyse tuttu sayılır.)
+(Hâlâ geçerli: İddia henüz kapanmadı ve bugüne kadar onu bozan bir şey olmadı.)
+
+Her metin için şu soruları yalnız metne dayanarak cevapla. Seçmeli sorularda yalnız harfi yaz. Açık sorularda EN ÇOK BİR CÜMLE yaz; metinde yoksa "yok" yaz. Tahmin etme.
+S1 Ne oldu? A) Fiyat bir sınırın üstüne çıktı  B) Fiyat bir sınırın altına indi  C) Düşüş yukarı dönüyor olabilir  D) Yükseliş aşağı dönüyor olabilir  E) Yükseliş sürüyor  F) Düşüş sürüyor  G) Fiyat dar bir aralığa sıkıştı, yön belli değil  H) Fiyat kısa sürede çok yükseldi  I) Fiyat kısa sürede çok düştü  J) Alışılmadık güçlü alım (para girişi) oldu  K) Alışılmadık güçlü satış (para çıkışı) oldu  L) Bilmiyorum
+S2 Hangi eşik ya da sınır söz konusu ve değeri kaç? (bir cümle)
+S3 Anlatılan şey ne zaman oldu? A) Bugün  B) Dün  C) 2–4 işlem günü önce  D) Bir haftaya yakın ya da daha önce  E) Birkaç saat önce  F) Bilmiyorum
+S4 Hâlâ geçerli mi? A) Evet, hâlâ geçerli  B) Hayır, artık geçerli değil (ama henüz kapanmadı)  C) Kapandı: gerçekleşti  D) Kapandı: tutmadı  E) Kapandı: süresi doldu  F) Geri çekildi (veri hatalıydı)  G) Bilmiyorum
+S5 Geçmişte benzerleri kaç örnekte kaç kez tuttu? (bir cümle; ör. "10 örnekte 7")
+S6 Bu metin sana ne yapmanı söylüyor? A) Almamı  B) Satmamı  C) Beklememi  D) Hiçbir şey; yalnız bilgi veriyor  E) Bilmiyorum
+
+Cevabını yalnız bir JSON dizisi olarak yaz, başka hiçbir şey yazma:
+[{"no": 1, "S1": "…", "S2": "…", "S3": "…", "S4": "…", "S5": "…", "S6": "…"}, …]

@@ -1,0 +1,44 @@
+Yirmi yaşındasın. Hisse senedi alıp satıyorsun ama teknik analiz bilmiyorsun; grafik, indikatör, RSI, ortalama gibi terimler sana bir şey ifade etmiyor. Telefonuna bir bildirim geldi; her metne yalnızca birkaç saniye bakacaksın. İlk bakışta ne anladığını cevapla; geri dönüp uzun uzun inceleme.
+
+Aşağıda bir piyasa bilgi uygulamasının telefonda gösterdiği 6 kısa metin var; her biri ayrı bir hisse hakkında. Her metin, bildirime dokununca açılan ekranın tamamıdır; parantez içindekiler terime dokununca açılan açıklamalardır.
+
+[1]
+Benzerleri: 21'de 9 tuttu
+SYN06 önemli bir eşiğin altına indi; bugün güçlendi. Hâlâ geçerli.
+SYN06 bugün 95,24'teki desteği aşağı kırdı (kapanış 87,95): aşağı kırılım. Bugün hacim de teyit etti; 3 bağımsız kanıt ailesi destekliyor. Hâlâ geçerli. Geçmişte bu sinyal 21 seferin 9'unda beklendiği gibi sonuçlandı.
+
+[2]
+Benzerleri: 20'de 11 tuttu
+Bugün SYN20 önemli bir eşiğin üstüne çıktı. Hâlâ geçerli.
+SYN20 bugün 227,08'deki direnci yukarı kırdı (kapanış 229,81): yukarı kırılım. Hâlâ geçerli. Geçmişte bu sinyal 20 seferin 11'inde beklendiği gibi sonuçlandı.
+
+[3]
+Benzerleri: 22'de 13 tuttu
+SYN18 kısa sürede aşırı düştü; bugün zayıfladı. Artık geçerli değil.
+SYN18'de RSI 2 bar önce 30'un altına indi, bugün yeniden üstüne çıktı; şu an 30,5, artık 30'un altında değil. Aşırı satım sona erdi. Geçmişte bu sinyal 22 seferin 13'ünde beklendiği gibi sonuçlandı.
+
+[4]
+Benzerleri: 21'de 5 tuttu
+Bugün SYN14 dar bir aralığa sıkıştı. Hâlâ geçerli.
+SYN14'de bugün itibarıyla sıkışma (yön belirsiz) sürüyor. Geçmişte bu sinyal 21 seferin 5'inde beklendiği gibi sonuçlandı.
+
+[5]
+Benzerleri: 20'de 7 tuttu
+SYN17 düşüşten yukarı döndü. Kapandı: bugün tutmadı.
+SYN17'de dün yukarı dönüş işareti çıktı: fiyat yeni dip yaparken RSI daha yüksek dip yaptı (fiyat 102,19, RSI 44,4). Sinyal bugün geçersiz oldu; artık geçerli değil. Geçmişte bu sinyal 20 seferin 7'sinde beklendiği gibi sonuçlandı.
+
+[6]
+Benzerleri: 24'te 15 tuttu
+SYN15 düşüşünü sürdürdü. Kapandı: bugün gerçekleşti.
+SYN15 3 bardır kısa ortalamanın (110,34) altında; şu an 105,36. Düşüş eğilimi sürüyor. Beklenen sonuç bugün gerçekleşti. Geçmişte bu sinyal 24 seferin 15'inde beklendiği gibi sonuçlandı.
+
+Her metin için şu soruları yalnız metne dayanarak cevapla. Seçmeli sorularda yalnız harfi yaz. Açık sorularda EN ÇOK BİR CÜMLE yaz; metinde yoksa "yok" yaz. Tahmin etme.
+S1 Ne oldu? A) Fiyat bir sınırın üstüne çıktı  B) Fiyat bir sınırın altına indi  C) Düşüş yukarı dönüyor olabilir  D) Yükseliş aşağı dönüyor olabilir  E) Yükseliş sürüyor  F) Düşüş sürüyor  G) Fiyat dar bir aralığa sıkıştı, yön belli değil  H) Fiyat kısa sürede çok yükseldi  I) Fiyat kısa sürede çok düştü  J) Alışılmadık güçlü alım (para girişi) oldu  K) Alışılmadık güçlü satış (para çıkışı) oldu  L) Bilmiyorum
+S2 Hangi eşik ya da sınır söz konusu ve değeri kaç? (bir cümle)
+S3 Anlatılan şey ne zaman oldu? A) Bugün  B) Dün  C) 2–4 işlem günü önce  D) Bir haftaya yakın ya da daha önce  E) Birkaç saat önce  F) Bilmiyorum
+S4 Hâlâ geçerli mi? A) Evet, hâlâ geçerli  B) Hayır, artık geçerli değil (ama henüz kapanmadı)  C) Kapandı: gerçekleşti  D) Kapandı: tutmadı  E) Kapandı: süresi doldu  F) Geri çekildi (veri hatalıydı)  G) Bilmiyorum
+S5 Geçmişte benzerleri kaç örnekte kaç kez tuttu? (bir cümle; ör. "10 örnekte 7")
+S6 Bu metin sana ne yapmanı söylüyor? A) Almamı  B) Satmamı  C) Beklememi  D) Hiçbir şey; yalnız bilgi veriyor  E) Bilmiyorum
+
+Cevabını yalnız bir JSON dizisi olarak yaz, başka hiçbir şey yazma:
+[{"no": 1, "S1": "…", "S2": "…", "S3": "…", "S4": "…", "S5": "…", "S6": "…"}, …]

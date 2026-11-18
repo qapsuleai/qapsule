@@ -1,0 +1,38 @@
+Kırk beş yaşındasın. Yıllardır borsada işlem yapıyorsun; terminal ekranlarına, teknik analize ve indikatörlere alışkınsın; ayrıntıya güvenirsin. Telefonunda bir piyasa uygulamasına bakıyorsun. Okuyup cevapla.
+
+Aşağıda bir piyasa bilgi uygulamasının telefonda gösterdiği 6 kısa metin var; her biri ayrı bir hisse hakkında. Her metin, bildirimde ilk görünen kısımdır.
+
+[1]
+Karne: bu sinyal geçmişte çoğunlukla beklendiği gibi sonuçlandı.
+SYN18 için önemli bir eşikte güçlü sinyal: aşırı satım olgusu dedektör tarafından bar bazında işaretlendi, teyit süreci ve aile skoru izleniyor.
+
+[2]
+Karne: bu sinyal geçmişte çoğunlukla beklendiği gibi sonuçlandı.
+SYN06 için önemli bir eşikte güçlü sinyal: aşağı kırılım olgusu dedektör tarafından bar bazında işaretlendi, teyit süreci ve aile skoru izleniyor.
+
+[3]
+Karne: bu sinyal geçmişte çoğunlukla beklendiği gibi sonuçlandı.
+SYN20 için önemli bir eşikte güçlü sinyal: yukarı kırılım olgusu dedektör tarafından bar bazında işaretlendi, teyit süreci ve aile skoru izleniyor.
+
+[4]
+Karne: bu sinyal geçmişte çoğunlukla beklendiği gibi sonuçlandı.
+SYN17 için önemli bir eşikte güçlü sinyal: yukarı dönüş olgusu dedektör tarafından bar bazında işaretlendi, teyit süreci ve aile skoru izleniyor.
+
+[5]
+Karne: bu sinyal geçmişte çoğunlukla beklendiği gibi sonuçlandı.
+SYN15 için önemli bir eşikte güçlü sinyal: düşüş eğilimi olgusu dedektör tarafından bar bazında işaretlendi, teyit süreci ve aile skoru izleniyor.
+
+[6]
+Karne: bu sinyal geçmişte çoğunlukla beklendiği gibi sonuçlandı.
+SYN14 için önemli bir eşikte güçlü sinyal: sıkışma (yön belirsiz) olgusu dedektör tarafından bar bazında işaretlendi, teyit süreci ve aile skoru izleniyor.
+
+Her metin için şu soruları yalnız metne dayanarak cevapla. Seçmeli sorularda yalnız harfi yaz. Açık sorularda EN ÇOK BİR CÜMLE yaz; metinde yoksa "yok" yaz. Tahmin etme.
+S1 Ne oldu? A) Fiyat bir sınırın üstüne çıktı  B) Fiyat bir sınırın altına indi  C) Düşüş yukarı dönüyor olabilir  D) Yükseliş aşağı dönüyor olabilir  E) Yükseliş sürüyor  F) Düşüş sürüyor  G) Fiyat dar bir aralığa sıkıştı, yön belli değil  H) Fiyat kısa sürede çok yükseldi  I) Fiyat kısa sürede çok düştü  J) Alışılmadık güçlü alım (para girişi) oldu  K) Alışılmadık güçlü satış (para çıkışı) oldu  L) Bilmiyorum
+S2 Hangi eşik ya da sınır söz konusu ve değeri kaç? (bir cümle)
+S3 Anlatılan şey ne zaman oldu? A) Bugün  B) Dün  C) 2–4 işlem günü önce  D) Bir haftaya yakın ya da daha önce  E) Birkaç saat önce  F) Bilmiyorum
+S4 Hâlâ geçerli mi? A) Evet, hâlâ geçerli  B) Hayır, artık geçerli değil (ama henüz kapanmadı)  C) Kapandı: gerçekleşti  D) Kapandı: tutmadı  E) Kapandı: süresi doldu  F) Geri çekildi (veri hatalıydı)  G) Bilmiyorum
+S5 Geçmişte benzerleri kaç örnekte kaç kez tuttu? (bir cümle; ör. "10 örnekte 7")
+S6 Bu metin sana ne yapmanı söylüyor? A) Almamı  B) Satmamı  C) Beklememi  D) Hiçbir şey; yalnız bilgi veriyor  E) Bilmiyorum
+
+Cevabını yalnız bir JSON dizisi olarak yaz, başka hiçbir şey yazma:
+[{"no": 1, "S1": "…", "S2": "…", "S3": "…", "S4": "…", "S5": "…", "S6": "…"}, …]

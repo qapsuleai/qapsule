@@ -233,6 +233,15 @@ yok; yetkisize rakamsız) `qp_capsule::realize::parts`'tadır; başlığın kend
 Karne cümlenin parçası olabilir ("bu durum geçmişte 100 seferin 62'sinde …"); lisanslı
 olgunun cümlesi **hiç rakam içermez** (karne ayrı alanda gider). Üretim yöntemi M2 seçimi: belirleyici şablon dilbilgisi (`qp_capsule::realize::Template`), dil modeli yok.
 
+**Kapsül dili (R5, M17).** Kapsülün okura görünen dört yüzeyi — başlık, ayrıntı, karne cümlesi,
+sözlük — bağlantının seçtiği **kapsül dilinden** gelir (`qp_capsule::voice`; `style` hareketinin
+`voice` alanı). Gösterimin dili `marla`, ikinci aday `selvi`; protokolün varsayılanı `r4`
+(yukarıdaki R3 cümlesi ve yüz şablonları, dökümler değişmez). Dil, cümlenin girdisinden (aynı
+hikâye, olgular, "şimdi", geçerlilik, gizleme) ve yüzün yapı taşlarından (`realize::parts`)
+konuşur; ayrıntı yüzle çelişemez (A33). Eşik adıyla ve değeriyle, karne beklentinin kendisiyle
+söylenir (K49); terimler dokununca açılır; yetkisiz okura dilin rakamsız yüzü gider (A32).
+Tasarım, seçim, uzunluk sınırları ve dedektör × aşama × dil tablosu: `docs/LANGUAGE.md`.
+
 ### 9.6 İşaret
 
 `GlyphSpec` kanalları §4'teki tablodur; alfabe (çizim kuralları) M1 ile seçilir ve gramere

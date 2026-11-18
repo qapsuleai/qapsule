@@ -76,6 +76,7 @@ name = "qp-grammar"
 version = "0.0.0"
 dependencies = [
  "qp-schema",
+ "serde_json",
 ]
 
 [[package]]

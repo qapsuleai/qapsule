@@ -75,6 +75,12 @@ fn hello(s: &mut Session, conn: &str, who: &str, lang: Option<&str>) -> Vec<Outb
 /// One run (the probe's `full_run`): hellos, audiences and subscriptions of the
 /// unentitled readers, the bars `k..n` one by one, then 16 queries per connection.
 fn full_run(bars: &[Bar], n: usize, seed: u64) -> Vec<OutboundLine> {
+    full_run_voiced(bars, n, seed, None)
+}
+
+/// [`full_run`] with every connection speaking in capsule voice `voice` (R5/m17-int,
+/// the `style` gesture's `voice`), when given.
+fn full_run_voiced(bars: &[Bar], n: usize, seed: u64, voice: Option<&str>) -> Vec<OutboundLine> {
     let k = 60;
     let mut s = Session::new(init(bars, k, seed), &root()).unwrap();
     let mut out = Vec::new();
@@ -82,6 +88,15 @@ fn full_run(bars: &[Bar], n: usize, seed: u64) -> Vec<OutboundLine> {
     out.extend(hello(&mut s, "e", "ana", Some("en")));
     out.extend(hello(&mut s, "b", "bora", None));
     out.extend(hello(&mut s, "c", "can", Some("en")));
+    if let Some(v) = voice {
+        for c in ["t", "e", "b", "c"] {
+            out.extend(send(
+                &mut s,
+                c,
+                &json!({"type":"input","id":"v","gesture":{"kind":"style","voice":v}}),
+            ));
+        }
+    }
     for c in ["b", "c"] {
         out.extend(send(
             &mut s,
@@ -243,6 +258,80 @@ fn licensed_flow_does_not_interfere_with_unentitled_readers() {
     // and the mühür messages (the one channel left) do vary with it.
     assert!(ana_differs, "the entitled reader's lines never changed");
     assert!(comments_differ, "the server comments never changed");
+}
+
+/// (R5/m17-int, K33/K34, A32) The same under a capsule voice: every line an unentitled
+/// reader receives — now with the voice's four surfaces on every listed capsule
+/// (`CapsuleItem.voice`: headline, detail, ledger, glossary and the text face) — is
+/// byte-identical whatever the licensed flow, and holds no digit of the licensed data
+/// (only the voice's own words; the instrument label aside, its redacted texts carry no
+/// digit at all). Positive controls: the voice reaches the readers, and the entitled
+/// reader's lines still change with the flow.
+#[test]
+fn voiced_readers_are_not_interfered_with_either() {
+    let n = 200;
+    let bars = qp_source::synthetic_market(1, n, 1)[0].bars.clone();
+    for voice in ["marla", "selvi"] {
+        let base = full_run_voiced(&bars, n, 1, Some(voice));
+        let mut ana_differs = false;
+        for seed in [2_u64, 42] {
+            let other = full_run_voiced(&bars, n, seed, Some(voice));
+            for c in ["b", "c"] {
+                let x = stripped(&base, c);
+                let y = stripped(&other, c);
+                assert!(x.len() > 50, "{voice} {c}: {} lines", x.len());
+                assert!(
+                    x == y,
+                    "{voice}: seed 1 vs {seed}: {c} differs: {}",
+                    first_diff(&x, &y)
+                );
+            }
+            ana_differs |= lines_of(&base, "t") != lines_of(&other, "t");
+        }
+        assert!(
+            ana_differs,
+            "{voice}: the entitled reader's lines never changed"
+        );
+        // The voice reached every reader, in its language.
+        let mut voiced = 0;
+        let mut redacted = 0;
+        for c in ["t", "e", "b", "c"] {
+            for l in stripped(&base, c) {
+                let v: Value = serde_json::from_str(&l).unwrap();
+                let Some(caps) = v.pointer("/data/capsules").and_then(Value::as_array) else {
+                    continue;
+                };
+                for it in caps {
+                    let Some(vo) = it.get("voice") else {
+                        continue;
+                    };
+                    voiced += 1;
+                    assert_eq!(vo["voice"], voice);
+                    for k in ["headline", "detail", "ledger", "face"] {
+                        assert!(!vo[k].as_str().unwrap().is_empty(), "{c}: {k} {vo}");
+                    }
+                    if it.get("redacted") == Some(&json!(true)) {
+                        redacted += 1;
+                        let sym = it["instrument"].as_str().unwrap();
+                        for k in ["headline", "detail", "ledger", "face"] {
+                            let t = vo[k].as_str().unwrap().replace(sym, "");
+                            assert!(
+                                !t.bytes().any(|b| b.is_ascii_digit()),
+                                "{voice} {c}: a digit in a redacted {k}: {t}"
+                            );
+                        }
+                        for g in vo["glossary"].as_array().into_iter().flatten() {
+                            let t = g["text"].as_str().unwrap();
+                            assert!(!t.bytes().any(|b| b.is_ascii_digit()), "{t}");
+                        }
+                    }
+                }
+            }
+        }
+        assert!(voiced > 0, "{voice}: no capsule carried the voice");
+        // (Whether a redacted item occurs depends on the construction; counted only.)
+        let _ = redacted;
+    }
 }
 
 /// Transcript 43's run (a bad print, a dispute by Bora, settled data that corrects it and

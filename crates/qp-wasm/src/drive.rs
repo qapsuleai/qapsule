@@ -45,6 +45,7 @@ struct Agent {
     look: ViewState,
     opening: Option<Opening>,
     open_headline: Option<String>,
+    open_voice: Option<qp_schema::protocol::CapsuleVoice>,
     max_points: u32,
     n: u64,
     /// The replay clock from the last replay answer (the feed layout may read it).
@@ -91,10 +92,16 @@ impl Agent {
                                     .iter()
                                     .find(|i| i.id == o.capsule)
                                     .map(|i| i.sentence.text.clone());
+                                self.open_voice = self
+                                    .feed
+                                    .iter()
+                                    .find(|i| i.id == o.capsule)
+                                    .and_then(|i| i.voice.clone());
                             }
                             if o.to == OpenDepth::Sentence {
                                 self.opening = None;
                                 self.open_headline = None;
+                                self.open_voice = None;
                             } else {
                                 self.opening = Some(o.clone());
                             }
@@ -153,8 +160,11 @@ impl Agent {
         let look = self.look.clone();
         let mp = self.max_points;
         let items = self.feed.clone();
-        let fh =
-            qp_grammar::faces::height_in(qp_session::viewer::look_of(&look), look.face.as_deref());
+        let fh = qp_grammar::faces::height_for(
+            qp_session::viewer::look_of(&look),
+            look.face.as_deref(),
+            look.voice.is_some(),
+        );
         let faces: Vec<Value> = items
             .iter()
             .map(|it| {
@@ -167,9 +177,15 @@ impl Agent {
             })
             .collect();
         let open = match (&self.opening, self.replica.session_mut()) {
-            (Some(o), Some(s)) => {
-                open_scene(s, o, self.open_headline.as_deref(), &look, mp).map(|s| scene_digest(&s))
-            }
+            (Some(o), Some(s)) => open_scene(
+                s,
+                o,
+                self.open_headline.as_deref(),
+                self.open_voice.as_ref(),
+                &look,
+                mp,
+            )
+            .map(|s| scene_digest(&s)),
             _ => None,
         };
         json!({
@@ -202,6 +218,7 @@ pub fn shell_less(host: &mut ReplayHost, principal: &str, lang: &str, script: &[
         look: ViewState::default(),
         opening: None,
         open_headline: None,
+        open_voice: None,
         max_points: 60,
         n: 0,
         now: None,
@@ -236,9 +253,10 @@ pub fn shell_less(host: &mut ReplayHost, principal: &str, lang: &str, script: &[
             a.refresh_feed(host);
             let i = usize::try_from(t["index"].as_u64().unwrap_or(0)).unwrap_or(0);
             let cap = a.face_ids(lang)[i].clone();
-            let fh = qp_grammar::faces::height_in(
+            let fh = qp_grammar::faces::height_for(
                 qp_session::viewer::look_of(&a.look),
                 a.look.face.as_deref(),
+                a.look.voice.is_some(),
             );
             a.input(
                 host,
@@ -456,6 +474,7 @@ struct ViewerAgent {
     look: ViewState,
     opening: Option<Opening>,
     open_headline: Option<String>,
+    open_voice: Option<qp_schema::protocol::CapsuleVoice>,
     max_points: u32,
     n: u64,
     now: Option<i64>,
@@ -522,10 +541,13 @@ impl ViewerAgent {
                                     .v
                                     .row(&o.capsule)
                                     .map(|i| i.capsule.sentence.text.clone());
+                                self.open_voice =
+                                    self.v.row(&o.capsule).and_then(|i| i.capsule.voice.clone());
                             }
                             if o.to == OpenDepth::Sentence {
                                 self.opening = None;
                                 self.open_headline = None;
+                                self.open_voice = None;
                             } else {
                                 self.opening = Some(o.clone());
                             }
@@ -595,11 +617,12 @@ impl ViewerAgent {
             .map(|it| json!({"id": it.id, "digest": self.v.face_digest(&it.id)}))
             .collect();
         let head = self.open_headline.clone();
+        let voice = self.open_voice.clone();
         let open = match (&self.opening, self.v.open_mut()) {
             (Some(o), Some(side)) if side.open.capsule == o.capsule => side
                 .replica_mut()
                 .session_mut()
-                .and_then(|s| open_scene(s, o, head.as_deref(), &look, mp))
+                .and_then(|s| open_scene(s, o, head.as_deref(), voice.as_ref(), &look, mp))
                 .map(|s| scene_digest(&s)),
             _ => None,
         };
@@ -641,6 +664,7 @@ pub fn viewer_less(host: &mut ReplayHost, principal: &str, lang: &str, script: &
         look: ViewState::default(),
         opening: None,
         open_headline: None,
+        open_voice: None,
         max_points: 60,
         n: 0,
         now: None,
@@ -675,9 +699,10 @@ pub fn viewer_less(host: &mut ReplayHost, principal: &str, lang: &str, script: &
         } else if let Some(t) = step.get("tap_face") {
             let i = usize::try_from(t["index"].as_u64().unwrap_or(0)).unwrap_or(0);
             let cap = a.face_ids(lang)[i].clone();
-            let fh = qp_grammar::faces::height_in(
+            let fh = qp_grammar::faces::height_for(
                 qp_session::viewer::look_of(&a.look),
                 a.look.face.as_deref(),
+                a.look.voice.is_some(),
             );
             a.input(
                 host,

@@ -311,6 +311,26 @@ pub struct SceneDesc {
     /// Paint order: primitives drawn **after** the layers (last-value tags, title,
     /// legends, dimming veils).
     pub over: Vec<Prim>,
+    /// (R5/m17-int, K49) Glossary terms drawn in this scene's texts, with their boxes
+    /// (each also underlined in its layer's primitives): a tap inside a box opens the
+    /// explanation. Only a capsule scene under a voice has them.
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub terms: Vec<TermMark>,
+}
+
+/// (R5/m17-int, K49) A glossary term as drawn: where it is in the scene, its text and its
+/// explanation.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
+#[serde(deny_unknown_fields)]
+pub struct TermMark {
+    /// The glossary term.
+    pub term: String,
+    /// Its explanation.
+    pub text: String,
+    /// The layer whose text holds it (`headline`, `ledger`, `detail`).
+    pub layer: String,
+    /// The drawn words' box (inclusive-exclusive like [`PixelRect`]).
+    pub hit: PixelRect,
 }
 
 impl SceneDesc {

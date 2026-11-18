@@ -107,3 +107,15 @@ eklenenler. Hiçbir kural gevşetilmedi.
 
 Görünüş seçimi `?look=<ad>` ve Ayarlar → Görünüş: öbür ayarlar gibi `set_look({look})`
 (`style` hareketinin `look` alanı); adlar `choices().look`'tan.
+
+(R5/m17-int) Kapsül dili (`docs/LANGUAGE.md`) ve sözlük (K49) için eklenenler. Hiçbir kural
+gevşetilmedi.
+
+| Yöntem | Neden |
+|--------|-------|
+| `gloss()`, `close_gloss()` | Son dokunuş bir sözlük terimine geldiyse (otoritenin `tap_at` cevabındaki `hit.term`; terimin kutusu sahne tarifinde, `SceneDesc.terms`) çekirdek açıklamayı tutar: `{term, text, target}` ya da `null`. Sayfa `take_changes().gloss` geldiğinde iki metni `#gloss` öğesine **olduğu gibi** yazar; dokununca `close_gloss()`. Terimin altı çizgisi sahnenin kendi ilkelidir (her boyama yolu çizer); kabuk konum hesaplamaz. |
+
+Dil seçimi `?voice=<ad>` ve Ayarlar → Dil: öbür ayarlar gibi `set_look({voice})` (`style`
+hareketinin `voice` alanı); adlar `choices().voice`'tan; gösterimin varsayılanı çekirdekte
+(`presented_look`, `marla`). Sahnesi olmayan yüzün metni (`feed()` satırının `text`'i)
+seçili dilde çekirdeğin metin yüzüdür (başlık, karne, ayrıntı; satır sonlarıyla).

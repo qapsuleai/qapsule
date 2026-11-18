@@ -384,12 +384,19 @@ aynı adlarla aynı sahneyi derler.
 | `transition` (R4/H-M8910) | `qp_grammar::transitions::TRANSITIONS` (açılma geçişi; `r3`: T4 ortak öğeleri, doğrusal ara kare) | `r3` |
 | `outcome` (R4/H-M8910) | `qp_grammar::glyph::outcome::STYLES` (sonuç işareti, M11) | `r3` |
 | `seen` (R4/H-M8910) | son bakış zamanı (ms); `0` siler | yok |
+| `voice` (R5/m17-int) | `qp_capsule::voice::VOICES` (kapsül dili: `r4` bugünkü metin, `marla`, `selvi`; `docs/LANGUAGE.md`) | `r4` |
 
 - Verilmeyen alan değişmez; bilinmeyen ad `invalid` (`/gesture/face`, `/gesture/alphabet`,
   `/gesture/theme`, `expected` bilinen adlar). Doğrulama her şeyden önce: hatalı istek hiçbir
   şeyi değiştirmez.
 - Cevap `interaction`; `state` (`ViewState`) yeni `face`, `alphabet`, `theme` alanlarını taşır
   (varsayılandaysa alan yoktur: eski cevaplar bayt eşit).
+- (R5/m17-int) `voice`: `ViewState.voice` (varsayılanda yok). Bir dil seçiliyken kapsül
+  öğeleri `voice` taşır (§20.2), kapsül sahneleri (yüz, açılmış kart) metnini o dilden alır ve
+  sözlük terimlerini işaretler: `SceneDesc.terms` (isteğe bağlı; `TermMark`: `term`, `text`,
+  `layer`, `hit` kutusu), nokta sorgusu `HitInfo.term` (isteğe bağlı). `tap_at` bir terimin
+  üstündeyse kapsülü açmaz, cevabın `hit.term`'ünü döner. `r4`'te bu alanların hiçbiri yoktur
+  (dökümler bayt eşit).
 - M8 yüz alternatifleri `qp_grammar::faces` kaydına bir satırdır (ad, **yükseklik**, görünüm
   kuralı); yüz kendi yüksekliğini bildirir, kabuk onu çekirdekten alır. M9 akış düzenleri
   `qp_grammar::feeds`, M10 geçişleri `qp_grammar::transitions` kaydındadır: düzen kabuğun
@@ -1956,6 +1963,13 @@ Barındırıcı yapılandırması (`SessionInit.capsules`, protokol mesajı değ
 | `capsules` | `capsules`: `CapsuleItem` listesi — kimlik, bulgu, enstrüman, seri, tür, yön, zaman türü, aşama, durum, kademe, önem, teyit, güven, doğum/son bar, son geçiş zamanı, `ledger_at_birth`, `sentence {text, tr, en}`, (R4) `validity` (`valid` / `no_longer` / `closed`, cümleyle aynı bar itibarıyla; K42/A28), `relevant` (pozisyon/niyet; anlamı §20.4), `redacted`. Sıra: önem azalan, sonra son geçiş zamanı azalan, sonra kimlik. Süzgeçler VE'lenir (aşağıdaki tablo); `audience: true` soranın kitlesini uygular (§20.4, hikâyenin şimdiki aşamasıyla). Cevabın ayrıca `comments` alanı vardır: soranın akış yetkisi olmayan enstrümanlarda sunucu yorumları. |
 | `capsule` | `capsule_detail`: `item`, `story` (bütün geçişler: bar, zaman, aşama, neden, olgular; R4: `condition` = durum koşulu, `resolution` = beklenen çözüm `{rule, condition?}`), `facts` (okuyucuya göre), `ledger` (anahtarın şimdiki karnesi: son kesin bardan önce kapananlar), `glyph` (R4: `validity` dahil, öğeninkiyle aynı), `evidence` — olgu başına `{fact, family, license, open, values?, evidence_ref?, requires?, rests_on}`: yetkiliye değerler ve dondurulmuş kanıt; yetkisize "şu yetkiyi gerektirir" (`requires`, ör. `bist/THYAO`) ve neye dayandığı (`rests_on`, her zaman) — K34. (R4) `capsule` alanı kapsül kimliği, bulgu kimliği ya da **kapsül seçicisi** alır (§17.1; `result.resolved`'da `/query/capsule`). Görünmeyen ya da olmayan kapsül: `not_found` (ikisi aynı). |
 | `ledger` | `ledger`: `rows` (anahtar ya da `by_kind` ile tür başına `n`, `realized`; R4: satırda `direction`), `total`. Anahtar `<tür>/<yön>/<dedektör>@<sürüm>` (K42/A23). Süzgeçler: `key`, `meaning`, `detector`, (R4) `direction`; `by_kind` yönleri toplar (`direction` verilmişse yalnız o yön, satır `direction`'ı taşır). Geri çekilenler sayılmaz. Lisanstan bağımsız (K33): her lisanslı akışa yetkili okuyucuya motorun karnesi, açık görünüm okuyucusuna (§20.5) açık-yalnız motorun karnesi — lisanslı veriden hiç etkilenmez. |
+
+(R5/m17-int) Bağlantı bir kapsül dili seçtiyse (`style` `voice`, §4.6.2) `capsules`,
+`capsule` ve `capsules` konusu her `CapsuleItem`'a isteğe bağlı `voice` ekler: `CapsuleVoice`
+`{voice, headline, detail, ledger, glossary?, face}` — `glossary` `GlossEntry {term, text}`
+listesi, `face` sahnesi olmayan okurun metin yüzü (başlık, karne, ayrıntı; satır sonlarıyla).
+Okurun dilinde ve aynı izleyici kuralıyla (yetkisize rakamsız, K33). Varsayılan `r4`'te alan
+yoktur.
 
 `capsules` süzgeçleri (hepsi isteğe bağlı, VE'lenir):
 

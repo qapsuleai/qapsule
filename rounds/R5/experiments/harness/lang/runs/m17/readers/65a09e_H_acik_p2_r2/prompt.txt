@@ -1,0 +1,58 @@
+Kırk beş yaşındasın. Yıllardır borsada işlem yapıyorsun; terminal ekranlarına, teknik analize ve indikatörlere alışkınsın; ayrıntıya güvenirsin. Telefonunda bir piyasa uygulamasına bakıyorsun. Okuyup cevapla.
+
+Aşağıda bir piyasa bilgi uygulamasının telefonda gösterdiği 6 kısa metin var; her biri ayrı bir hisse hakkında. Her metin, bildirime dokununca açılan ekranın tamamıdır; parantez içindekiler terime dokununca açılan açıklamalardır.
+
+[1]
+Az örnek: 5 benzerin 2'sinde fiyat 10 işlem günü içinde yükseldi.
+SYN21: hacim ortalamanın 2,5 katını aştı, fiyat yükseldi · bugün süresi doldu
+Hacim 1.243.369.826, son 20 günün ortalaması 379.001.940: 3,3 katı. 10 işlem günü önce başladı, 10 işlem günü doldu, fiyat iki yöne de yeterince gitmedi.
+(hacim: Bir günde el değiştiren hisse adedi. Ortalamasının birkaç katı, olağandan çok daha fazla işlem yapıldığı anlamına gelir.)
+(benzer durum: Aynı tür ve yönde, bundan önce kapanmış iddialar. Fiyat süresinde olağan oynaklığı kadar o yöne gittiyse tuttu sayılır; rastgele bir gün de yarı yarıya tutar.)
+
+[2]
+Henüz kapanmış benzer durum yok, ne sıklıkla tuttuğu bilinmiyor.
+SYN02: kurumsal net satım ortalamanın 2 katını aştı · bugün geri çekildi
+Net satım 25.970.934, son 5 günün ortalaması 7.483.323: 3,5 katı (sunucu doğruladı). 2 işlem günü önce başladı, dayandığı veri sonradan düzeltildi.
+(kurumsal net satım: Aracı kurumların alışları ile satışları arasındaki fark, satış yönünde. Lisanslı veridir: sunucuda hesaplanır, bu cihaz kendisi sınayamaz.)
+(benzer durum: Aynı tür ve yönde, bundan önce kapanmış iddialar. Fiyat süresinde olağan oynaklığı kadar o yöne gittiyse tuttu sayılır; rastgele bir gün de yarı yarıya tutar.)
+
+[3]
+Az örnek: 1 benzerin 1'inde 10 işlem gününde daha da yükseldi.
+SYN15 kısa sürede çok yükseldi: RSI 70'i aştı · bugün, hâlâ geçerli
+RSI o gün 68,8'den 74,7'ye çıktı. Sonuç en geç 10 işlem günü içinde belli olacak.
+(RSI: Göreceli güç endeksi: son yükselişlerin düşüşlere göre ağırlığını sıfırdan yüze ölçer. Yetmiş üstü hızlı yükselmiş, otuz altı hızlı düşmüş sayılır.)
+(benzer durum: Aynı tür ve yönde, bundan önce kapanmış iddialar. Fiyat süresinde olağan oynaklığı kadar o yöne gittiyse tuttu sayılır; rastgele bir gün de yarı yarıya tutar.)
+
+[4]
+Benzer 21 durumun 10'unda 20 işlem saatinde düşüşünü sürdürdü.
+SYN04 20 saatlik ortalamanın altında düşüşe geçti · az önce, hâlâ geçerli
+Kapanış (44,23) 20 saatlik ortalamanın (44,32), o da 50 saatliğin (44,32) altındaydı. Sonuç en geç 20 işlem saati içinde belli olacak.
+(ortalama: Son belirtilen sayıda kapanış fiyatının ortalaması, her saat yeniden hesaplanır. Fiyat kısa ortalamanın, kısa da uzunun üstündeyse yükseliş düzeni sayılır.)
+(benzer durum: Aynı tür ve yönde, bundan önce kapanmış iddialar. Fiyat süresinde olağan oynaklığı kadar o yöne gittiyse tuttu sayılır; rastgele bir gün de yarı yarıya tutar.)
+
+[5]
+Benzer durumların azında fiyat on işlem günü içinde düştü.
+SYN07: kurumsal net satım ortalamanın iki katını aştı · bugün, hâlâ geçerli
+Tutarlar lisanslı veridir: sunucu hesapladı ve doğruladı, kurumsal akış veri yetkisiyle görünür. Sonuç en geç on işlem günü içinde belli olacak.
+(kurumsal net satım: Aracı kurumların alışları ile satışları arasındaki fark, satış yönünde. Lisanslı veridir: sunucuda hesaplanır, bu cihaz kendisi sınayamaz.)
+(benzer durum: Aynı tür ve yönde, bundan önce kapanmış iddialar. Fiyat süresinde olağan oynaklığı kadar o yöne gittiyse tuttu sayılır; rastgele bir gün de yarı yarıya tutar.)
+
+[6]
+Benzer 20 durumun 7'sinde fiyat 15 işlem günü içinde yukarı döndü.
+SYN08 yukarı dönebilir: fiyat yeni dip yaptı, RSI yapmadı · dün, hâlâ geçerli
+Fiyat önceki dibin (219,11) altına, 215,36'ya indi, RSI ise 41,4'ten 41,6'ya çıktı. Bugün başka bir ölçü de aynı yönü gösterdi: kurumsal net alım ortalamanın iki katını aştı.
+(RSI: Göreceli güç endeksi: son yükselişlerin düşüşlere göre ağırlığını sıfırdan yüze ölçer. Yetmiş üstü hızlı yükselmiş, otuz altı hızlı düşmüş sayılır.)
+(dip: Fiyatın, iki önceki ve iki sonraki günden daha aşağıda kaldığı nokta. Yeni dip öncekinin altındadır.)
+(kurumsal net alım: Aracı kurumların alışları ile satışları arasındaki fark, alış yönünde. Lisanslı veridir: sunucuda hesaplanır, bu cihaz kendisi sınayamaz.)
+(benzer durum: Aynı tür ve yönde, bundan önce kapanmış iddialar. Fiyat süresinde olağan oynaklığı kadar o yöne gittiyse tuttu sayılır; rastgele bir gün de yarı yarıya tutar.)
+
+Her metin için şu soruları yalnız metne dayanarak cevapla. Seçmeli sorularda yalnız harfi yaz. Açık sorularda EN ÇOK BİR CÜMLE yaz; metinde yoksa "yok" yaz. Tahmin etme.
+S1 Ne oldu? A) Fiyat bir sınırın üstüne çıktı  B) Fiyat bir sınırın altına indi  C) Düşüş yukarı dönüyor olabilir  D) Yükseliş aşağı dönüyor olabilir  E) Yükseliş sürüyor  F) Düşüş sürüyor  G) Fiyat dar bir aralığa sıkıştı, yön belli değil  H) Fiyat kısa sürede çok yükseldi  I) Fiyat kısa sürede çok düştü  J) Alışılmadık güçlü alım (para girişi) oldu  K) Alışılmadık güçlü satış (para çıkışı) oldu  L) Bilmiyorum
+S2 Hangi eşik ya da sınır söz konusu ve değeri kaç? (bir cümle)
+S3 Anlatılan şey ne zaman oldu? A) Bugün  B) Dün  C) 2–4 işlem günü önce  D) Bir haftaya yakın ya da daha önce  E) Birkaç saat önce  F) Bilmiyorum
+S4 Hâlâ geçerli mi? A) Evet, hâlâ geçerli  B) Hayır, artık geçerli değil (ama henüz kapanmadı)  C) Kapandı: gerçekleşti  D) Kapandı: tutmadı  E) Kapandı: süresi doldu  F) Geri çekildi (veri hatalıydı)  G) Bilmiyorum
+S5 Geçmişte benzerleri kaç örnekte kaç kez tuttu? (bir cümle; ör. "10 örnekte 7")
+S6 Bu metin sana ne yapmanı söylüyor? A) Almamı  B) Satmamı  C) Beklememi  D) Hiçbir şey; yalnız bilgi veriyor  E) Bilmiyorum
+
+Cevabını yalnız bir JSON dizisi olarak yaz, başka hiçbir şey yazma:
+[{"no": 1, "S1": "…", "S2": "…", "S3": "…", "S4": "…", "S5": "…", "S6": "…"}, …]

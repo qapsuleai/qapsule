@@ -65,6 +65,9 @@ struct Reader<'a> {
     inner: crate::DocProvider<'a>,
     heads: &'a BTreeMap<String, String>,
     parts: Option<(&'a str, qp_grammar::HeadlineParts)>,
+    /// (R5/m17-int) The voice surfaces the authority wrote for this reader (the item's
+    /// `voice`), for that finding.
+    voice: Option<(&'a str, &'a qp_schema::protocol::CapsuleVoice)>,
 }
 
 impl DataProvider for Reader<'_> {
@@ -128,6 +131,12 @@ impl DataProvider for Reader<'_> {
             _ => self.inner.headline_parts(finding),
         }
     }
+    fn voice(&self, finding: &str) -> Option<qp_schema::protocol::CapsuleVoice> {
+        match self.voice {
+            Some((f, v)) if f == finding => Some(v.clone()),
+            _ => None,
+        }
+    }
 }
 
 /// The language of the reader's sentence in `item`: the authority wrote `sentence.text` in
@@ -176,10 +185,13 @@ pub fn face_scene(
         .flatten()
         .and_then(|_| s.item_headline_parts(item, item_lang(item)))
         .map(|hp| (item.finding.as_str(), hp));
+    // (R5/m17-int) The voice the authority wrote for this reader (the same function the
+    // authority's own compile calls, `Session::reader_voice`).
     let p = Reader {
         inner: s.provider(),
         heads: &heads,
         parts,
+        voice: item.voice.as_ref().map(|v| (item.finding.as_str(), v)),
     };
     let id = format!("capsule-{}", item.finding);
     let view = depth::face_view_in(
@@ -232,6 +244,7 @@ pub fn open_scene(
     s: &mut Session,
     o: &Opening,
     headline: Option<&str>,
+    voice: Option<&qp_schema::protocol::CapsuleVoice>,
     look: &ViewState,
     max_points: u32,
 ) -> Option<SceneDesc> {
@@ -252,6 +265,7 @@ pub fn open_scene(
         inner: s.provider(),
         heads: &heads,
         parts: None,
+        voice: voice.map(|v| (o.finding.as_str(), v)),
     };
     let view = open_view(&p, stored, o, look, max_points)?;
     let range = look
@@ -966,7 +980,11 @@ impl Session {
             up.coin_flip_hidden = coin_flip_hidden;
         }
         // The faces on screen.
-        let fh = qp_grammar::faces::height_in(look_of(look), look.face.as_deref());
+        let fh = qp_grammar::faces::height_for(
+            look_of(look),
+            look.face.as_deref(),
+            look.voice.is_some(),
+        );
         let mut sent: BTreeMap<String, String> = BTreeMap::new();
         for id in &vc.visible {
             let Some(row) = items.iter().find(|r| &r.capsule.id == id && r.face) else {

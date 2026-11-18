@@ -8,10 +8,14 @@
 //  - "Mark my last look now" sets the last look at the replay clock;
 //  - (R5/T3) `?look=ornek` opens the trial look (the chrome's CSS custom properties and the
 //    face height come from the core), and Settings → Look switches back to `r4`.
+//  - (R5/m17-int) the capsule voice: the page opens with `marla` (the core's
+//    `PRESENTED_VOICE`), `?voice=selvi` wins, Settings → Dil switches to `r4` (no voice);
+//    a tap on a glossary term of a face (its box from the scene the core holds) shows the
+//    explanation the core gives and opens no capsule; a tap on it closes it.
 // Usage: node tests/settings.mjs <qp binary>
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { startDemo, phonePage, settle, launch } from './lib.mjs';
+import { startDemo, phonePage, settle, launch, clickIn } from './lib.mjs';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const web = path.resolve(here, '..');
@@ -144,6 +148,52 @@ try {
     l = await look(page);
     check(!l.look, `look back to r4 (${JSON.stringify(l)})`);
     check(await css('--bg') === '#0f1115', 'chrome back to r4');
+    check(errors.length === 0, `no page errors ${errors}`);
+    await ctx.close();
+  }
+  // 4. (R5/m17-int) The capsule voice and the glossary (K49).
+  {
+    const { ctx, page, errors } = await phonePage(browser);
+    await page.goto(`${origin}/?anim=0&paint=ref`);
+    await settle(page);
+    let l = await look(page);
+    check(l.voice === 'marla', `presented voice (${JSON.stringify(l)})`);
+    const ch = await page.evaluate(() => JSON.parse(window.qp.choices()));
+    check(JSON.stringify(ch.voice) === JSON.stringify(['r4', 'marla', 'selvi']), `voice choices ${JSON.stringify(ch.voice)}`);
+    // A face whose scene marks a term: tap the term's box.
+    const hit = await page.evaluate(() => {
+      for (const r of JSON.parse(window.qp.feed())) {
+        if (!r.id || !r.scene) continue;
+        const s = window.qp.faceDesc(r.id);
+        if (s && s.terms && s.terms.length) return { id: r.id, t: s.terms[0] };
+      }
+      return null;
+    });
+    check(Boolean(hit), `a face marks a glossary term (${JSON.stringify(hit)})`);
+    if (hit) {
+      const x = (hit.t.hit.left + hit.t.hit.right) / 2;
+      const y = (hit.t.hit.top + hit.t.hit.bottom) / 2;
+      await page.locator(`#list .face[data-id="${hit.id}"] canvas`).scrollIntoViewIfNeeded();
+      await clickIn(page, `#list .face[data-id="${hit.id}"] canvas`, x, y);
+      await settle(page);
+      const shown = await page.evaluate(() => ({ hidden: document.getElementById('gloss').hidden,
+        term: document.getElementById('gloss_term').textContent, text: document.getElementById('gloss_text').textContent }));
+      check(!shown.hidden && shown.term === hit.t.term && shown.text === hit.t.text, `the term's explanation shows (${JSON.stringify(shown)})`);
+      check(!(await page.evaluate(() => document.body.classList.contains('open'))), 'a tap on a term opens no capsule');
+      await page.click('#gloss');
+      await settle(page);
+      check(await page.evaluate(() => document.getElementById('gloss').hidden), 'a tap closes the explanation');
+    }
+    await page.goto(`${origin}/?anim=0&voice=selvi`);
+    await settle(page);
+    l = await look(page);
+    check(l.voice === 'selvi', `URL voice (${JSON.stringify(l)})`);
+    await page.click('#tabs button[data-tab="settings"]');
+    check(await page.$eval('#s_voice', (e) => e.value) === 'selvi', 'voice select shows selvi');
+    await page.selectOption('#s_voice', 'r4');
+    await settle(page);
+    l = await look(page);
+    check(!l.voice, `voice back to r4 (${JSON.stringify(l)})`);
     check(errors.length === 0, `no page errors ${errors}`);
     await ctx.close();
   }

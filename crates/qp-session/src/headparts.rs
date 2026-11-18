@@ -26,7 +26,7 @@ use qp_capsule::Lang;
 use qp_grammar::depth::GLYPH_MIN_LEDGER_N;
 use qp_grammar::HeadlineParts;
 use qp_schema::capsule::{Story, Validity};
-use qp_schema::protocol::{Language, ReplaySourceKind};
+use qp_schema::protocol::{CapsuleVoice, GlossEntry, Language, ReplaySourceKind};
 use qp_schema::{Bar, Calendar, Series};
 
 /// The calendar a replay of `kind` builds its bars on: the synthetic market's frozen
@@ -74,6 +74,62 @@ pub(crate) fn story_parts(
     let cal = calendar_of(bs, fallback)?;
     let p = parts(story, now_t, validity, &cal, period, redacted);
     Some(from_parts(&p, lang))
+}
+
+/// (R5/m17-int, `docs/LANGUAGE.md`) The surfaces of `story` in voice `voice` for a reader
+/// in `lang`: the voice speaks from the sentence's input
+/// ([`crate::capsule::with_sentence_input`]) and the same headline pieces as
+/// [`story_parts`] (same "now", calendar, period, validity, redaction), so the open
+/// capsule's detail is built from the face's pieces and cannot contradict it (A33).
+/// `None` under `r4`, without a known interval, a valid calendar or the lead fact.
+#[allow(clippy::too_many_arguments)]
+pub(crate) fn story_voice(
+    voice: &str,
+    story: &Story,
+    facts: &[&qp_schema::Fact],
+    at: (&Series, &[Bar], u64),
+    validity: Validity,
+    redacted: bool,
+    lang: Language,
+    fallback: Option<&Calendar>,
+    memo: &mut qp_capsule::sentence::StudyMemo,
+) -> Option<CapsuleVoice> {
+    let (bs, bars, now) = at;
+    let now_t = bars.get(usize::try_from(now).ok()?)?.t.max(bars.last()?.t);
+    let period = Period::parse(bs.interval.as_deref()?)?;
+    let calendar = calendar_of(bs, fallback)?;
+    let p = parts(story, now_t, validity, &calendar, period, redacted);
+    let [tr, en] =
+        crate::capsule::with_sentence_input(story, facts, bars, now, redacted, memo, |s| {
+            qp_capsule::voice::speak(
+                voice,
+                &qp_capsule::voice::Input {
+                    sentence: s,
+                    parts: &p,
+                    calendar: &calendar,
+                    period,
+                },
+            )
+        })??;
+    let s = match lang {
+        Language::Tr => tr,
+        Language::En => en,
+    };
+    Some(CapsuleVoice {
+        voice: voice.to_owned(),
+        face: qp_capsule::voice::text_face(&s),
+        headline: s.headline,
+        detail: s.detail,
+        ledger: s.ledger,
+        glossary: s
+            .glossary
+            .into_iter()
+            .map(|g| GlossEntry {
+                term: g.term,
+                text: g.text,
+            })
+            .collect(),
+    })
 }
 
 /// The grammar's plain pieces from the realizer's.

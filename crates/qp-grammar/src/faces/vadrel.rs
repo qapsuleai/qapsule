@@ -23,6 +23,14 @@
 //! Without a capsule story the face falls back to the reference card rule
 //! ([`depth::capsule_view`]); without headline pieces the headline is the capsule's
 //! sentence (`faces::headline_text`) and the top row is empty.
+//!
+//! **Under a voice** (R5/m17-int, `docs/LANGUAGE.md`; the provider's
+//! [`DataProvider::voice`]): the headline is the voice's (at most 80 characters, so the
+//! same five lines hold it) and the ledger is the voice's track-record sentence — a whole
+//! sentence (at most 70 characters) that the one-line title row would cut, so it moves
+//! below the headline: a `ledger` text layer in the look's `title` role, wrapped at the
+//! panel's edge, in a band of [`LEDGER_LINES`] lines at the panel's bottom. The title row
+//! stays empty and the face is taller by that band ([`voiced_height`]).
 
 use qp_schema::capsule::{Stage, Validity};
 use qp_schema::grammar::{
@@ -62,6 +70,26 @@ pub fn height(look: &Look) -> u32 {
 /// Headline character limit (SPEC §2(b)).
 pub const MAX_CHARS: usize = 80;
 
+/// (R5/m17-int) Lines of the ledger band under a voice: a 70-character sentence in the
+/// `title` role wraps into at most three lines at the phone width.
+pub const LEDGER_LINES: f64 = 3.0;
+
+/// (R5/m17-int) The ledger band's height in `look` (lines of the `title` role).
+fn ledger_band(look: &Look) -> f64 {
+    let t = look.types.title;
+    LEDGER_LINES * (t.px * t.line).round()
+}
+
+/// (R5/m17-int) The face height in `look` under a voice: [`height`] plus the panel gap
+/// and the ledger band.
+#[must_use]
+pub fn voiced_height(look: &Look) -> u32 {
+    let extra = f64::from(look.space.panel_gap) + ledger_band(look);
+    #[allow(clippy::cast_possible_truncation, clippy::cast_sign_loss)]
+    let px = (f64::from(height(look)) + extra).ceil().clamp(120.0, 844.0) as u32;
+    px
+}
+
 fn layer(id: &str, mark: Mark, finding: &str) -> Layer {
     let mut l = Layer::new(mark, 0);
     l.id = Some(id.to_owned());
@@ -96,6 +124,7 @@ pub fn view(
         GlyphPlace::Above => (0.0, glyph_px + look.space.glyph_gap),
     };
     let hp = p.headline_parts(finding);
+    let voiced = p.voice(finding).is_some();
 
     let mut glyph = layer("glyph", Mark::Glyph, finding);
     glyph.encoding.x = Some(at(0.0));
@@ -111,10 +140,29 @@ pub fn view(
         // (R5/T3) The look's colour of a claim that no longer holds (`r4`: `muted`).
         head.encoding.color = Some(ColorSpec::Constant("invalid".to_owned()));
     }
+    let mut layers = vec![glyph, head];
+    // (R5/m17-int) Under a voice: the ledger sentence in a band at the panel's bottom.
+    if voiced {
+        let mut ledger = layer("ledger", Mark::Text, finding);
+        ledger.encoding.text = Some("ledger".to_owned());
+        ledger.encoding.x = Some(at(0.0));
+        ledger.encoding.y = Some(Position::Panel(PanelPos {
+            panel: 1.0,
+            px: -ledger_band(look),
+        }));
+        ledger.encoding.size = Some(SizeSpec::Constant(look.types.title.px));
+        ledger.encoding.color = Some(ColorSpec::Constant("muted".to_owned()));
+        layers.push(ledger);
+    }
+    let title = if voiced {
+        String::new()
+    } else {
+        hp.as_ref().map(ledger_row).unwrap_or_default()
+    };
 
     Ok(View {
         id: id.to_owned(),
-        title: Some(hp.as_ref().map(ledger_row).unwrap_or_default()),
+        title: Some(title),
         display_tz: None,
         theme: None,
         x: card.x,
@@ -129,7 +177,7 @@ pub fn view(
                 id: Some("y0".to_owned()),
             },
         }],
-        layers: vec![glyph, head],
+        layers,
         emphasis: Vec::new(),
     })
 }

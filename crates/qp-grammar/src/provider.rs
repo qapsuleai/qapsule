@@ -131,6 +131,15 @@ pub trait DataProvider {
         let _ = finding;
         None
     }
+    /// (R5/m17-int, `docs/LANGUAGE.md`) The surfaces of the capsule presenting `finding`
+    /// in the voice the reader's connection chose (its language and entitlement, like
+    /// [`Self::headline`]). When given, every capsule scene speaks from it: the face's
+    /// headline and ledger, the open capsule's detail and ledger, and the glossary terms
+    /// marked in those texts. Default: none (today's text, the `r4` voice).
+    fn voice(&self, finding: &str) -> Option<qp_schema::protocol::CapsuleVoice> {
+        let _ = finding;
+        None
+    }
 }
 
 #[derive(Debug, Clone, Default)]
@@ -163,6 +172,7 @@ pub struct MemProvider {
     capsules: Vec<Capsule>,
     glyphs: BTreeMap<String, GlyphSpec>,
     parts: BTreeMap<String, HeadlineParts>,
+    voices: BTreeMap<String, qp_schema::protocol::CapsuleVoice>,
 }
 
 impl Default for MemProvider {
@@ -188,6 +198,7 @@ impl MemProvider {
             capsules: Vec::new(),
             glyphs: BTreeMap::new(),
             parts: BTreeMap::new(),
+            voices: BTreeMap::new(),
         }
     }
 
@@ -295,6 +306,13 @@ impl MemProvider {
     #[must_use]
     pub fn with_headline_parts(mut self, finding: &str, parts: HeadlineParts) -> Self {
         self.parts.insert(finding.to_owned(), parts);
+        self
+    }
+
+    /// (R5/m17-int) Sets the voice surfaces of the capsule presenting `finding`.
+    #[must_use]
+    pub fn with_voice(mut self, finding: &str, voice: qp_schema::protocol::CapsuleVoice) -> Self {
+        self.voices.insert(finding.to_owned(), voice);
         self
     }
 
@@ -413,5 +431,9 @@ impl DataProvider for MemProvider {
 
     fn headline_parts(&self, finding: &str) -> Option<HeadlineParts> {
         self.parts.get(finding).cloned()
+    }
+
+    fn voice(&self, finding: &str) -> Option<qp_schema::protocol::CapsuleVoice> {
+        self.voices.get(finding).cloned()
     }
 }

@@ -37,6 +37,8 @@ export const ALLOWED_CORE = new Set([
   // R5/T3 (ARCH.md): the look's CSS custom properties for the chrome; the embedded font
   // assets and their bytes (a canvas path registers each with FontFace, no network).
   'css', 'fonts', 'font_bytes',
+  // R5/m17-int (ARCH.md): the glossary explanation the core opened on a tap, and its dismiss.
+  'gloss', 'close_gloss', 'face_desc',
 ]);
 
 // R6: which modules a file may import. main.js: the core's package and the paint-path

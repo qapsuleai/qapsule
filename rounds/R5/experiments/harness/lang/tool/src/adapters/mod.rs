@@ -2,4 +2,6 @@
 //! functions (or, for `bozuk`, transforms another adapter's text).
 
 pub mod bozuk;
+pub mod marla;
 pub mod r4;
+pub mod selvi;

@@ -85,6 +85,9 @@ mod vadrel;
 
 mod fotolay;
 
+// --- M16 faces (R5): `mod <name>;` below this line
+mod zemre;
+
 /// Face designs a connection may choose; the first is the default. (R4/S2) After the
 /// reference, M8's ranking: the first two (`vadrel`, `fotolay`) go to the human test.
 pub static FACES: &[FaceDesign] = &[
@@ -115,6 +118,14 @@ pub static FACES: &[FaceDesign] = &[
         height: |_| tavrik::HEIGHT,
         view: tavrik::view,
         headline: Some(tavrik::headline),
+        voiced_height: None,
+    },
+    // --- M16 faces (R5): one line each
+    FaceDesign {
+        name: "zemre",
+        height: zemre::height,
+        view: zemre::view,
+        headline: Some(zemre::headline),
         voiced_height: None,
     },
 ];

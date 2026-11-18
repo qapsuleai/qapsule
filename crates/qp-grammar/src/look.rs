@@ -136,6 +136,35 @@ pub static FONTS: &[FontAsset] = &[FontAsset {
     advance: 0.6,
     ascent: 0.8,
     advances: &crate::advances::PLEX_MONO,
+},
+// (R5/M16 `zemre`) Atkinson Hyperlegible Next 2.001 (OFL-1.1, no Reserved Font Name):
+// static instances, digits remapped to the tabular figures, Latin subset without layout
+// features (`rounds/R5/experiments/M16/zemre/build_font.py`).
+FontAsset {
+    id: "atkinson-next",
+    family: "Atkinson Hyperlegible Next",
+    weight: 400,
+    italic: false,
+    file: "AtkinsonHyperlegibleNext-Regular.ttf",
+    license: "OFL-AtkinsonHyperlegibleNext.txt",
+    spdx: "OFL-1.1",
+    css_family: "QpAtkinsonNext",
+    advance: 0.487,
+    ascent: 0.8,
+    advances: &crate::advances::ATKINSON_NEXT,
+},
+FontAsset {
+    id: "atkinson-next-bold",
+    family: "Atkinson Hyperlegible Next",
+    weight: 700,
+    italic: false,
+    file: "AtkinsonHyperlegibleNext-Bold.ttf",
+    license: "OFL-AtkinsonHyperlegibleNext.txt",
+    spdx: "OFL-1.1",
+    css_family: "QpAtkinsonNextBold",
+    advance: 0.526,
+    ascent: 0.8,
+    advances: &crate::advances::ATKINSON_NEXT_BOLD,
 }];
 
 /// The font asset `id`, if embedded.
@@ -675,8 +704,193 @@ pub const ORNEK: Look = Look {
     ..R4
 };
 
+const fn zrole(px: f64, line: f64, font: &'static str) -> TypeRole {
+    TypeRole { px, line, font }
+}
+
+/// (R5/M16) `zemre` — the "time strip" direction (`rounds/R5/experiments/M16/zemre/DESIGN.md`):
+/// ink on paper (light by default), a humanist hyperlegible family (Atkinson Hyperlegible
+/// Next, tabular figures) with IBM Plex Mono kept for the figures of axes and tags; meaning
+/// colours chosen as blue (up) / vermilion (down) / ink (no direction) / grey (closed, no
+/// longer) so that every pair stays apart (ΔE00 ≥ 10) in grey and in the three colour-vision
+/// simulations; a closed glyph never fades under its full colour (`closed_alpha` 255: the
+/// face's life strip carries time instead). Pair it with the `zemre` face.
+pub const ZEMRE: Look = Look {
+    name: "zemre",
+    note: "M16 time strip: ink on paper, Atkinson Hyperlegible Next, blue/vermilion meaning colours",
+    scheme: "light",
+    types: TypeScale {
+        headline: zrole(19.0, 1.25, "atkinson-next-bold"),
+        title: zrole(15.0, 1.3, "atkinson-next-bold"),
+        body: zrole(16.0, 1.4, "atkinson-next"),
+        label: zrole(14.0, 1.36, "atkinson-next"),
+        figure: zrole(13.0, 1.3, DEFAULT_FONT),
+        note: zrole(13.0, 1.3, "atkinson-next"),
+    },
+    dark: Theme {
+        name: "dark",
+        bg: [18, 20, 25, 255],
+        grid: [37, 41, 50, 255],
+        axis: [108, 111, 120, 255],
+        text: [236, 231, 221, 255],
+        muted: [163, 157, 146, 255],
+        up: [151, 184, 242, 255],
+        down: [232, 105, 58, 255],
+        accent: [95, 208, 184, 255],
+        warn: [242, 191, 90, 255],
+        series: [
+            [95, 208, 184, 255],
+            [201, 164, 245, 255],
+            [230, 192, 106, 255],
+            [143, 209, 143, 255],
+            [244, 143, 177, 255],
+            [111, 214, 224, 255],
+            [200, 160, 138, 255],
+            [189, 189, 189, 255],
+        ],
+        surface: [26, 29, 36, 255],
+        line: [44, 48, 57, 255],
+        neutral: [243, 238, 251, 255],
+        valid: [236, 231, 221, 255],
+        invalid: [111, 106, 99, 255],
+        closed: [111, 106, 99, 255],
+        closed_alpha: 255,
+        focus: [95, 208, 184, 255],
+        chrome: Chrome {
+            bg: [18, 20, 25, 255],
+            fg: [236, 231, 221, 255],
+            muted: [163, 157, 146, 255],
+            line: [44, 48, 57, 255],
+            card: [26, 29, 36, 255],
+            accent: [95, 208, 184, 255],
+            on_accent: [11, 23, 20, 255],
+            page: [8, 9, 12, 255],
+            note_bg: [74, 58, 18, 255],
+            note_fg: [255, 230, 168, 255],
+            alert_bg: [74, 28, 20, 255],
+            alert_fg: [255, 217, 204, 255],
+            req: [242, 191, 90, 255],
+        },
+    },
+    light: Theme {
+        name: "light",
+        bg: [246, 243, 236, 255],
+        grid: [227, 221, 209, 255],
+        axis: [138, 131, 120, 255],
+        text: [28, 26, 23, 255],
+        muted: [91, 86, 78, 255],
+        up: [20, 61, 120, 255],
+        down: [184, 67, 28, 255],
+        accent: [0, 105, 92, 255],
+        warn: [122, 74, 0, 255],
+        series: [
+            [0, 105, 92, 255],
+            [107, 63, 160, 255],
+            [125, 88, 0, 255],
+            [47, 125, 50, 255],
+            [173, 20, 87, 255],
+            [0, 131, 143, 255],
+            [109, 76, 65, 255],
+            [97, 97, 97, 255],
+        ],
+        surface: [255, 253, 248, 255],
+        line: [217, 210, 196, 255],
+        neutral: [30, 22, 48, 255],
+        valid: [28, 26, 23, 255],
+        invalid: [140, 134, 125, 255],
+        closed: [140, 134, 125, 255],
+        closed_alpha: 255,
+        focus: [0, 105, 92, 255],
+        chrome: Chrome {
+            bg: [246, 243, 236, 255],
+            fg: [28, 26, 23, 255],
+            muted: [91, 86, 78, 255],
+            line: [217, 210, 196, 255],
+            card: [255, 253, 248, 255],
+            accent: [0, 105, 92, 255],
+            on_accent: [255, 255, 255, 255],
+            page: [216, 209, 195, 255],
+            note_bg: [246, 231, 196, 255],
+            note_fg: [90, 59, 0, 255],
+            alert_bg: [247, 217, 207, 255],
+            alert_fg: [107, 29, 5, 255],
+            req: [138, 75, 0, 255],
+        },
+    },
+    space: Space {
+        scale: [4, 8, 12, 16, 24, 32],
+        plot: [16, 64, 34, 24],
+        panel_gap: 10,
+        glyph_gap: 14.0,
+    },
+    surface: Surface {
+        radius: 14.0,
+        frame_radius: 28.0,
+        pill_radius: 10.0,
+        line: 1.0,
+        shadow: false,
+        strip_alpha: 48,
+        veil_alpha: 170,
+    },
+    glyph: GlyphLook {
+        face_px: 56.0,
+        card_px: 48.0,
+        chart_px: 32.0,
+        default_px: 28.0,
+        place: GlyphPlace::Leading,
+    },
+    motion: Motion {
+        duration_scale: 1.0,
+        ease: Ease::Bezier([0.2, 0.0, 0.0, 1.0]),
+        chrome_ms: 180.0,
+    },
+    chrome: ChromeLook {
+        text_px: 15.0,
+        line: 1.4,
+        small_px: 13.0,
+        table_px: 13.0,
+        tiny_px: 12.0,
+        trust_px: 12.0,
+        head_weight: 700,
+        head_tracking: 0.02,
+        head_gap: 12.0,
+        tab_h: 48.0,
+        tab_pad: 8.0,
+        tab_rule: 3.0,
+        control_h: 44.0,
+        control_pad: [8.0, 12.0],
+        date_w: 140.0,
+        bar_h: 60.0,
+        cell_pad: [4.0, 6.0],
+        badge_pad: [2.0, 8.0],
+        face_pad: [14.0, 16.0],
+        face_min_h: 64.0,
+    },
+    evidence: EvidenceLook {
+        color: "accent",
+        note_color: "warn",
+        rule_w: 2.0,
+        band_w: 1.0,
+        band_alpha: 0.16,
+        point_px: 10.0,
+    },
+    offsets: Offsets {
+        title_x: 0,
+        title_baseline: 23,
+        close_x: 140,
+        row_edge: 8,
+        legend_gap: 12,
+        legend_x: 4,
+        legend_baseline: 14,
+        ledger_gap: 4.0,
+        note_x: 4.0,
+        note_gap: 8.0,
+        glyph_top: 2.0,
+    },
+};
+
 /// Looks a connection may choose; the first is the default.
-pub static LOOKS: &[Look] = &[R4, ORNEK];
+pub static LOOKS: &[Look] = &[R4, ORNEK, ZEMRE];
 
 /// The default look's name.
 pub const DEFAULT_LOOK: &str = "r4";
@@ -1122,5 +1336,62 @@ mod tests {
         }
         // r4 keeps freshness alone.
         assert_eq!((R4.dark.closed_alpha, R4.light.closed_alpha), (0, 0));
+    }
+
+    /// (R5/M16) `zemre` meets the hard thresholds from its record alone: no text under
+    /// 12 px (scene roles 13 px and up), tabs and controls 44 px or more, text colours at
+    /// least 4.5:1 on the background and the surface, meaning colours and the closed
+    /// glyph at least 3:1, the evidence note and the chrome's "requires" text 4.5:1.
+    #[test]
+    fn zemre_meets_the_hard_thresholds() {
+        let z = &ZEMRE;
+        for r in ROLES {
+            assert!(z.types.role(r).unwrap().px >= 13.0, "{r}");
+        }
+        let c = &z.chrome;
+        for px in [c.text_px, c.small_px, c.table_px, c.tiny_px, c.trust_px] {
+            assert!(px >= 12.0);
+        }
+        assert!(c.tab_h >= 44.0 && c.control_h >= 44.0);
+        assert!(c.bar_h >= c.control_h + 2.0 * 6.0);
+        for t in [z.dark, z.light] {
+            for bg in [t.bg, t.surface] {
+                for (what, fg) in [("text", t.text), ("muted", t.muted), ("warn", t.warn)] {
+                    let k = contrast(fg, bg);
+                    assert!(k >= 4.5, "{} {what}: {k:.2}:1", t.name);
+                }
+                for (what, fg) in [
+                    ("up", t.up),
+                    ("down", t.down),
+                    ("neutral", t.neutral),
+                    ("invalid", t.invalid),
+                    ("axis", t.axis),
+                    ("accent", t.accent),
+                ] {
+                    let k = contrast(fg, bg);
+                    assert!(k >= 3.0, "{} {what}: {k:.2}:1", t.name);
+                }
+            }
+            // The title row's close is drawn in `up`/`down` at the title size: text.
+            for fg in [t.up, t.down] {
+                assert!(contrast(fg, t.bg) >= 4.5, "{}", t.name);
+            }
+            let floor = [t.closed[0], t.closed[1], t.closed[2], t.closed_alpha];
+            assert!(contrast(floor, t.bg) >= 3.0, "{}: closed", t.name);
+            let ch = t.chrome;
+            for (what, fg, bg) in [
+                ("fg", ch.fg, ch.bg),
+                ("fg/card", ch.fg, ch.card),
+                ("muted", ch.muted, ch.bg),
+                ("muted/card", ch.muted, ch.card),
+                ("req", ch.req, ch.bg),
+                ("note", ch.note_fg, ch.note_bg),
+                ("alert", ch.alert_fg, ch.alert_bg),
+                ("on_accent", ch.on_accent, ch.accent),
+            ] {
+                let k = contrast(fg, bg);
+                assert!(k >= 4.5, "{} chrome {what}: {k:.2}:1", t.name);
+            }
+        }
     }
 }

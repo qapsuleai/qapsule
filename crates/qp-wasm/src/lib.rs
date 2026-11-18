@@ -872,6 +872,39 @@ mod shell_binding {
             self.inner.transition_from().to_owned()
         }
 
+        /// (R5/M21) The reader's reduced-motion setting (`prefers-reduced-motion` or the
+        /// settings page): openings happen at once, face changes carry a lasting label.
+        pub fn set_reduced_motion(&mut self, on: bool) {
+            self.inner.set_reduced_motion(on);
+        }
+
+        /// (R5/M21) The faces whose change to animate now (JSON array of ids; emptied).
+        pub fn take_face_motion(&mut self) -> String {
+            self.inner.take_face_motion().to_string()
+        }
+
+        /// (R5/M21) Progress of capsule `id`'s change animation at shell time `t`.
+        pub fn face_change_progress(&mut self, id: &str, t: f64) -> f64 {
+            self.inner.face_change_progress(id, t)
+        }
+
+        /// (R5/M21) Capsule `id`'s change frame at progress `p`, the face at page
+        /// (`left`, `top`) (JSON; `null` without a change).
+        pub fn face_change_frame(&self, id: &str, p: f64, left: f64, top: f64) -> String {
+            self.inner.face_change_frame(id, p, left, top).to_string()
+        }
+
+        /// (R5/M21) Pixels of capsule `id`'s face before its change (RGBA at the device
+        /// scale; empty when none).
+        pub fn face_before_rgba(&self, id: &str) -> Vec<u8> {
+            self.inner.face_before_rgba(id)
+        }
+
+        /// (R5/M21) The faces' latest changes as facts (JSON `[{id, kind, label}]`).
+        pub fn face_changes(&self) -> String {
+            self.inner.face_changes_json().to_string()
+        }
+
         /// A frame sample.
         pub fn metric_frame(&mut self, mode: &str, t: f64) {
             self.inner.metric_frame(mode, t);

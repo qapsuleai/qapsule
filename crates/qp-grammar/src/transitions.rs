@@ -159,6 +159,7 @@ pub fn r3_frame(shared: &[SharedElement], from: (f64, f64), to: (f64, f64), p: f
 
 // --- M10 alternatives: shared / frame functions (or `mod <name>;`) go below this line --
 
+pub mod surek;
 mod tutamir;
 mod zumlak;
 
@@ -182,6 +183,13 @@ pub static TRANSITIONS: &[TransitionDesign] = &[
         duration_ms: 480.0,
         shared: zumlak::shared,
         frame: zumlak::frame,
+    },
+    // (R5/M21) The `surek` motion design's opening (`crate::motion`).
+    TransitionDesign {
+        name: "surek",
+        duration_ms: surek::DURATION_MS,
+        shared: surek::shared,
+        frame: surek::frame,
     },
 ];
 

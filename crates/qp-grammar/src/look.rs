@@ -374,6 +374,11 @@ pub struct Motion {
     pub ease: Ease,
     /// Duration of the shell chrome's own changes (tabs, banners), ms; `0`: none.
     pub chrome_ms: f64,
+    /// (R5/M21) Duration of a face's own change in the feed (a live value or a state
+    /// change: `crate::motion`), ms, before [`Self::duration_scale`]. Read only by a motion
+    /// design that marks changes (`motion::MOTIONS`); `r4`'s own motion marks none, so
+    /// this value changes nothing under it.
+    pub change_ms: f64,
 }
 
 /// (R5/T3b) The shell chrome's sizes (CSS px unless noted): type sizes, paddings, control
@@ -617,6 +622,7 @@ pub const R4: Look = Look {
         duration_scale: 1.0,
         ease: Ease::Linear,
         chrome_ms: 0.0,
+        change_ms: 360.0,
     },
     chrome: ChromeLook {
         text_px: 14.0,
@@ -793,6 +799,7 @@ pub const ORNEK: Look = Look {
         duration_scale: 1.25,
         ease: Ease::Bezier([0.2, 0.0, 0.0, 1.0]),
         chrome_ms: 160.0,
+        ..R4.motion
     },
     chrome: ChromeLook {
         text_px: 15.0,
@@ -999,6 +1006,7 @@ pub const OLTAN: Look = Look {
         duration_scale: 0.85,
         ease: Ease::Bezier([0.2, 0.0, 0.0, 1.0]),
         chrome_ms: 140.0,
+        ..R4.motion
     },
     chrome: ChromeLook {
         text_px: 16.0,
@@ -1189,6 +1197,7 @@ pub const ZEMRE: Look = Look {
         duration_scale: 1.0,
         ease: Ease::Bezier([0.2, 0.0, 0.0, 1.0]),
         chrome_ms: 180.0,
+        ..R4.motion
     },
     chrome: ChromeLook {
         text_px: 15.0,
@@ -1388,7 +1397,8 @@ impl Look {
                 "place": match self.glyph.place { GlyphPlace::Leading => "leading",
                     GlyphPlace::Above => "above" }},
             "motion": {"duration_scale": self.motion.duration_scale,
-                "ease": self.motion.ease.css(), "chrome_ms": self.motion.chrome_ms},
+                "ease": self.motion.ease.css(), "chrome_ms": self.motion.chrome_ms,
+                "change_ms": self.motion.change_ms},
             "chrome": self.chrome_json(),
             "evidence": {"color": self.evidence.color, "note_color": self.evidence.note_color,
                 "rule_w": self.evidence.rule_w, "band_w": self.evidence.band_w,

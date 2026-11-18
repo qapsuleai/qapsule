@@ -14,7 +14,7 @@ const L = {
     empty: 'Henüz kapsül yok. Oynatmayı başlatın.', back: '‹ Geri', lang: 'Dil', theme: 'Tema',
     dark: 'Koyu', light: 'Açık', sensitivity: 'Hassasiyet', default: 'Grubun varsayılanı',
     important: 'Önemli', balanced: 'Dengeli', all: 'Hepsi', alphabet: 'İşaret alfabesi',
-    face: 'Yüz tasarımı', lookl: 'Görünüş', voicel: 'Dil', openl: 'Açılmış kapsül (M20)', feedl: 'Akış düzeni', orderl: 'Akış sırası (M19)', rulel: 'Yazı tura eşiği (M19)', transition: 'Geçiş', outcome: 'Sonuç işareti', storyl: 'Hikâye çizelgesi', hideclosed: 'Kapanmış hikâyeleri gizle', noent: 'Veri yetkisi yok (gösterim)', audience: 'İzleme listesi ve pozisyonlar',
+    face: 'Yüz tasarımı', lookl: 'Görünüş', voicel: 'Dil', openl: 'Açılmış kapsül (M20)', feedl: 'Akış düzeni', orderl: 'Akış sırası (M19)', rulel: 'Yazı tura eşiği (M19)', transition: 'Geçiş', motionl: 'Hareket (M21)', reduce: 'Hareketi azalt', outcome: 'Sonuç işareti', storyl: 'Hikâye çizelgesi', hideclosed: 'Kapanmış hikâyeleri gizle', noent: 'Veri yetkisi yok (gösterim)', audience: 'İzleme listesi ve pozisyonlar',
     group: 'Kullanıcı', habituated: 'Alışkın', future: 'Geleceğin yatırımcısı', symbol: 'Sembol',
     watch: 'İzle', position: 'Pozisyon', apply: 'Uygula', phone: 'Telefondan aç:',
     copy: 'Özeti kopyala', copied: 'Kopyalandı', play: '▶', pause: '❚❚', step: '+1', go: 'Git',
@@ -35,7 +35,7 @@ const L = {
     empty: 'No capsules yet. Start the replay.', back: '‹ Back', lang: 'Language', theme: 'Theme',
     dark: 'Dark', light: 'Light', sensitivity: 'Sensitivity', default: "Group's default",
     important: 'Important', balanced: 'Balanced', all: 'All', alphabet: 'Glyph alphabet',
-    face: 'Face design', lookl: 'Look', voicel: 'Voice', openl: 'Open capsule (M20)', feedl: 'Feed layout', orderl: 'Feed order (M19)', rulel: 'Coin-flip threshold (M19)', transition: 'Transition', outcome: 'Outcome mark', storyl: 'Story chart', hideclosed: 'Hide closed stories', noent: 'No data entitlement (demo)', audience: 'Watchlist and positions',
+    face: 'Face design', lookl: 'Look', voicel: 'Voice', openl: 'Open capsule (M20)', feedl: 'Feed layout', orderl: 'Feed order (M19)', rulel: 'Coin-flip threshold (M19)', transition: 'Transition', motionl: 'Motion (M21)', reduce: 'Reduce motion', outcome: 'Outcome mark', storyl: 'Story chart', hideclosed: 'Hide closed stories', noent: 'No data entitlement (demo)', audience: 'Watchlist and positions',
     group: 'User', habituated: 'Habituated', future: 'Future investor', symbol: 'Symbol',
     watch: 'Watch', position: 'Position', apply: 'Apply', phone: 'Open on your phone:',
     copy: 'Copy summary', copied: 'Copied', play: '▶', pause: '❚❚', step: '+1', go: 'Go',
@@ -76,6 +76,11 @@ const ui = {
   // (R5/M20) The open capsule design (`?open=tesir`; the core's default: `r4`, today's).
   open: params.get('open') || '',
   anim: params.get('anim') !== '0',
+  // (R5/M21) The motion design (`?motion=`, names from `choices().motion`) and reduced
+  // motion: `?reduce=1|0` or the settings page override the system setting, which the page
+  // only forwards to the core (the core decides what moves).
+  motion: params.get('motion') || '',
+  reduce: params.get('reduce') || '',
   // (R4/S1) Human-test settings: last look (`now` or a step) and the audience, given to
   // the core as they are (it reads the comma lists); applied again on every start frame,
   // so a backward seek (a new authority) keeps them.
@@ -91,6 +96,8 @@ const HINT = { capsule: 'hint_capsule', chart: 'hint_chart', evidence: 'hint_evi
 let faceSize = null;
 let faceKey = '';
 let lastMove = null; // the last transition's canvases, for the harness's frozen frames
+const changes = new Map(); // (R5/M21) capsule id -> its last change's sources, for frozen frames
+const reducedQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
 
 let core = null;
 let conn = '';
@@ -211,7 +218,8 @@ function start(frame) {
   if (ui.theme === 'light' || ui.alphabet || ui.face) core.set_style(ui.face, ui.alphabet, ui.theme);
   // (R5/S) `face` goes with the look too: a look brings its companion face unless the
   // reader named one (the core decides).
-  if (ui.feed || ui.transition || ui.outcome || ui.look || ui.feed_order || ui.feed_rule || ui.voice || ui.story || ui.open) core.set_look(JSON.stringify({ face: ui.face, feed: ui.feed, transition: ui.transition, outcome: ui.outcome, look: ui.look, feed_order: ui.feed_order, feed_rule: ui.feed_rule, voice: ui.voice, story: ui.story, open: ui.open }));
+  if (ui.feed || ui.transition || ui.outcome || ui.look || ui.feed_order || ui.feed_rule || ui.voice || ui.story || ui.open || ui.motion) core.set_look(JSON.stringify({ face: ui.face, feed: ui.feed, transition: ui.transition, outcome: ui.outcome, look: ui.look, feed_order: ui.feed_order, feed_rule: ui.feed_rule, voice: ui.voice, story: ui.story, open: ui.open, motion: ui.motion }));
+  core.set_reduced_motion(reducedMotion());
   if (ui.watch || ui.long || ui.short || ui.group) core.set_audience(JSON.stringify({ group: ui.group, watch: ui.watch, long: ui.long, short: ui.short }));
   if (ui.seen) core.seen_at(ui.seen);
   faces.clear();
@@ -539,6 +547,79 @@ function transition(oldCanvas, snap, a) {
   requestAnimationFrame(step);
 }
 
+// (R5/M21) Reduced motion as the reader set it: the page's override, else the system's.
+function reducedMotion() {
+  if (ui.reduce) return ui.reduce === '1';
+  return reducedQuery.matches;
+}
+
+// (R5/M21) A face's own change (live value, state): the core's motion design says, per
+// frame, which piece of the face before (the page's copy of its canvas) or after the change
+// is drawn where and how opaque, and how opaque the repainted face is; the shell copies
+// those pixels. Nothing runs under reduced motion (the core queues no face then).
+function changeCanvases(m) {
+  const els = [];
+  const frame = JSON.parse(core.face_change_frame(m.id, 0, m.left, m.top));
+  if (!frame) return els;
+  for (const e of frame.elements) {
+    const src = e.source === 'after' ? m.after : m.snap;
+    const c = document.createElement('canvas');
+    c.width = e.src[2];
+    c.height = e.src[3];
+    if (src) c.getContext('2d').drawImage(src, e.src[0], e.src[1], e.src[2], e.src[3], 0, 0, e.src[2], e.src[3]);
+    $('fx').append(c);
+    els.push(c);
+  }
+  return els;
+}
+
+function showChange(m, els, p) {
+  const frame = JSON.parse(core.face_change_frame(m.id, p, m.left, m.top));
+  if (!frame) return true;
+  frame.elements.forEach((e, i) => { if (els[i]) Object.assign(els[i].style, e.style); });
+  m.canvas.style.opacity = frame.scene_opacity;
+  return frame.done;
+}
+
+function clearChange(m, els) {
+  for (const c of els) c.remove();
+  m.canvas.style.opacity = '';
+}
+
+// The face before its change, as the core kept it (the canvas already shows the bar's).
+function beforeCanvas(id) {
+  const px = core.face_before_rgba(id);
+  if (!px.length) return null;
+  const c = document.createElement('canvas');
+  c.width = faceSize.px[0];
+  c.height = faceSize.px[1];
+  c.getContext('2d').putImageData(new ImageData(new Uint8ClampedArray(px.buffer, px.byteOffset, px.length), faceSize.px[0], faceSize.px[1]), 0, 0);
+  return c;
+}
+
+function faceMotion(id) {
+  const el = faces.get(id);
+  if (!el || !el.firstChild || el.firstChild.tagName !== 'CANVAS') return;
+  paintFace(id, false);
+  // (R5/M21, K52) The start of a face change: the face before (the core's pixels), the
+  // copy after and the pieces (`face_motion` span).
+  const t0 = performance.now();
+  const snap = beforeCanvas(id);
+  const canvas = el.firstChild;
+  const box = canvas.getBoundingClientRect();
+  const m = { id, snap, canvas, after: snapshot(canvas), left: box.left, top: box.top };
+  changes.set(id, m);
+  if (!ui.anim) return;
+  const els = changeCanvases(m);
+  core.metric_span('face_motion', t0, performance.now());
+  if (!els.length) return;
+  const step = (ts) => {
+    if (showChange(m, els, core.face_change_progress(id, ts))) clearChange(m, els);
+    else requestAnimationFrame(step);
+  };
+  requestAnimationFrame(step);
+}
+
 function snapshot(canvas) {
   const s = document.createElement('canvas');
   s.width = canvas.width;
@@ -564,7 +645,10 @@ function repaint(ch) {
       rect = old.getBoundingClientRect(); // before the layer covers the feed
     } else old = null;
   }
+  // (R5/M21) The faces whose change the core animates.
+  const moving = JSON.parse(core.take_face_motion());
   if (ch.feed) renderFeed();
+  for (const id of moving) faceMotion(id);
   if (ch.scene || ch.transition) renderLayer(Boolean(ch.transition));
   if (ch.transition) transition(old, snap, rect);
   if (ch.gloss) renderGloss();
@@ -670,11 +754,20 @@ function wire() {
   };
   $('s_alpha').onchange = (e) => { core.set_style('', e.target.value, ''); flush(); };
   $('s_face').onchange = (e) => { core.set_style(e.target.value, '', ''); flush(); };
-  const looks = { feed: 's_feed', transition: 's_transition', outcome: 's_outcome', look: 's_look', feed_order: 's_order', voice: 's_voice', story: 's_story', open: 's_open' };
+  const looks = { feed: 's_feed', transition: 's_transition', outcome: 's_outcome', look: 's_look', feed_order: 's_order', voice: 's_voice', story: 's_story', open: 's_open', motion: 's_motion' };
   for (const k of Object.keys(looks)) {
     $(looks[k]).onchange = (e) => { core.set_look(JSON.stringify({ [k]: e.target.value })); flush(); };
   }
   $('s_hideclosed').onchange = (e) => { core.set_look(JSON.stringify({ hide_closed: e.target.checked })); flush(); };
+  $('s_reduce').checked = reducedMotion();
+  $('s_reduce').onchange = (e) => {
+    ui.reduce = e.target.checked ? '1' : '0';
+    if (core) { core.set_reduced_motion(reducedMotion()); flush(); }
+  };
+  reducedQuery.addEventListener('change', () => {
+    $('s_reduce').checked = reducedMotion();
+    if (core) { core.set_reduced_motion(reducedMotion()); flush(); }
+  });
   $('s_sens').onchange = (e) => { core.set_sensitivity(e.target.value); flush(); };
   // (R5/M19) The host applies the feed rule on connect: a new connection.
   $('s_rule').onchange = (e) => { ui.feed_rule = e.target.value; connect(); };
@@ -693,7 +786,7 @@ function fillChoices() {
   // The names each setting accepts come from the core's registries.
   const ch = JSON.parse(core.choices());
   const look = JSON.parse(core.look());
-  const sel = { face: 's_face', alphabet: 's_alpha', feed: 's_feed', transition: 's_transition', outcome: 's_outcome', look: 's_look', feed_order: 's_order', feed_rule: 's_rule', voice: 's_voice', story: 's_story', open: 's_open' };
+  const sel = { face: 's_face', alphabet: 's_alpha', feed: 's_feed', transition: 's_transition', outcome: 's_outcome', look: 's_look', feed_order: 's_order', feed_rule: 's_rule', voice: 's_voice', story: 's_story', open: 's_open', motion: 's_motion' };
   for (const k of Object.keys(sel)) {
     const el = $(sel[k]);
     const opts = [];
@@ -938,6 +1031,30 @@ window.qp = {
   },
   unfreeze: () => { if (window.qp.frozen) clearFrame(window.qp.frozen); window.qp.frozen = null; },
   frozen: null,
+  // (R5/M21) A face's last change frozen at progress `p` (the change animation's frames
+  // are the core's, from the scene descriptions; returns the pieces drawn), its release,
+  // the latest changes as facts (both modes alike) and the faces' ids that changed.
+  freezeChange: (id, p) => {
+    window.qp.unfreezeChange();
+    const m = changes.get(id);
+    if (!m) return 0;
+    // The face where it is now (the feed may have scrolled since).
+    const box = m.canvas.getBoundingClientRect();
+    m.left = box.left;
+    m.top = box.top;
+    const els = changeCanvases(m);
+    showChange(m, els, p);
+    window.qp.frozenChange = { m, els };
+    return els.length;
+  },
+  unfreezeChange: () => {
+    const f = window.qp.frozenChange;
+    if (f) clearChange(f.m, f.els);
+    window.qp.frozenChange = null;
+  },
+  frozenChange: null,
+  faceChanges: () => JSON.parse(core.face_changes()),
+  changed: () => Array.from(changes.keys()),
   // (RP3/T2) for tests/compare.mjs
   benching: () => benching,
   bench: () => core.bench_summary(),

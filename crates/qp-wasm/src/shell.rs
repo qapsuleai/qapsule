@@ -28,6 +28,7 @@ use serde_json::{json, Value};
 use crate::viewer::{Stories, Traffic, Viewer, STORIES_SUB};
 pub mod bench;
 pub mod freq;
+pub mod motion;
 pub mod paint;
 pub mod paint_canvas;
 pub mod paint_gpu;
@@ -518,6 +519,8 @@ pub struct ShellCore {
     /// first of them, and that of the pass being painted.
     pending: serde_json::Map<String, Value>,
     pending_since: Option<f64>,
+    /// (R5/M21) The motion design, reduced motion and the faces' changes (`motion`).
+    pub(crate) mo: motion::MotionState,
     pass_since: Option<f64>,
     /// (R5/T0) A data frame raised some of the waiting changes / of those the pass being
     /// painted took (the pass is then a data frame's cost, `data_pass`).
@@ -767,6 +770,7 @@ impl ShellCore {
             viewer_seq: 0,
             pending: serde_json::Map::new(),
             pending_since: None,
+            mo: motion::MotionState::default(),
             pass_since: None,
             pending_data: false,
             pass_data: false,
@@ -1061,7 +1065,9 @@ impl ShellCore {
                         },
                     ) => {
                         self.feed_inflight = false;
+                        let changes = self.changes_before(capsules);
                         self.feed.clone_from(capsules);
+                        self.changes_after(changes);
                         self.feed_known = true;
                         self.coin_flip_hidden = *coin_flip_hidden;
                         // (RP3/T4) Only a face in the feed can be painted: the digests of
@@ -1102,6 +1108,7 @@ impl ShellCore {
                             self.shared_from = depth_name(o.from).to_owned();
                             self.shared.clone_from(&o.shared);
                             if o.from == OpenDepth::Sentence {
+                                self.changes_seen(Some(&o.capsule));
                                 self.open_headline = self
                                     .feed
                                     .iter()
@@ -1330,7 +1337,10 @@ impl ShellCore {
         };
         let scene = v.apply(up, seq);
         if up.feed.is_some() {
-            self.feed = v.items();
+            let items = v.items();
+            let changes = self.changes_before(&items);
+            self.feed = items;
+            self.changes_after(changes);
             self.feed_known = true;
             self.coin_flip_hidden = up.coin_flip_hidden;
         }
@@ -1581,6 +1591,8 @@ impl ShellCore {
             "story": qp_grammar::stories::names(),
             // (R5/M20) The open capsule designs (`r4`: today's).
             "open": qp_grammar::open::names(),
+            // (R5/M21) Motion designs (the default first).
+            "motion": qp_grammar::motion::names(),
         })
     }
 
@@ -1693,13 +1705,20 @@ impl ShellCore {
         self.scale
     }
 
-    fn pixels(&self, scene: &SceneDesc) -> Vec<u8> {
+    pub(crate) fn pixels(&self, scene: &SceneDesc) -> Vec<u8> {
         qp_render::render_scene_rgba_scaled(scene, self.scale).unwrap_or_default()
     }
 
-    /// The face scene of capsule `id` at the face frame.
+    /// The face scene of capsule `id` at the face frame (R5/M21: with its change label
+    /// under reduced motion, `motion`).
     #[must_use]
     pub fn face(&mut self, id: &str) -> Option<SceneDesc> {
+        let sc = self.face_plain(id)?;
+        Some(self.stamped(id, sc))
+    }
+
+    /// The face scene of capsule `id` as its face design compiles it.
+    pub(crate) fn face_plain(&mut self, id: &str) -> Option<SceneDesc> {
         let (w, h) = self.frames["face"];
         if let Some(v) = &self.viewer {
             // (RP3/M15) A viewer's face is the scene the authority compiled.
@@ -1824,6 +1843,8 @@ impl ShellCore {
             return false;
         }
         self.face_shown.insert(id.to_owned(), k);
+        // (R5/M21) The face as handed out (a marking motion design keeps it).
+        self.face_shown_now(id, scene);
         true
     }
 
@@ -2035,6 +2056,13 @@ impl ShellCore {
         if let Some(r) = &self.feed_rule {
             v["feed_rule"] = json!(r);
         }
+        // (R5/M21) The motion design (absent: the default) and reduced motion.
+        if let Some(m) = &self.mo.design {
+            v["motion"] = json!(m);
+        }
+        if self.mo.reduced {
+            v["reduced_motion"] = json!(true);
+        }
         v
     }
 
@@ -2183,6 +2211,13 @@ impl ShellCore {
     /// feed?, transition?, outcome?}` (absent or `""`: unchanged).
     pub fn set_look(&mut self, choice: &Value) {
         let mut g = json!({"kind":"style"});
+        // (R5/M21) The motion design (a presentation setting): it names the transition it
+        // opens with; a transition given in the same choice still wins.
+        if let Some(v) = choice.get("motion").and_then(Value::as_str) {
+            if let Some(t) = self.set_motion(v) {
+                g["transition"] = json!(t);
+            }
+        }
         for k in [
             "face",
             "alphabet",
@@ -2256,6 +2291,8 @@ impl ShellCore {
     /// (R4/H-M8910) "I looked now": the `style` gesture's `seen` at the replay clock (the
     /// feed layout may mark what changed since). Nothing without a replay state.
     pub fn mark_seen(&mut self) {
+        // (R5/M21) "I looked now": the change labels go.
+        self.changes_seen(None);
         let Some(t) = self.replay.as_ref().map(|r| r.t) else {
             return;
         };
@@ -2565,6 +2602,10 @@ impl ShellCore {
     /// (ms, `performance.now()`); the first call after a transition starts the clock.
     pub fn transition_progress(&mut self, t: f64) -> f64 {
         let t0 = *self.trans_t0.get_or_insert(t);
+        // (R5/M21) Reduced motion: every opening happens at once.
+        if self.mo.reduced {
+            return 1.0;
+        }
         qp_grammar::transitions::progress_in(
             qp_session::viewer::look_of(&self.look),
             self.look.transition.as_deref(),

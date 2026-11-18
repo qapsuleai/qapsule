@@ -1,8 +1,8 @@
 # R5 — Rapor: Dil ve Tasarım
 
-- **Durum:** Ölçümler ve seçimler bitti; bütünleştirme (S) `r5/s-int` dalında, birleştirme ve
-  bağımsız son denetim (A) bekliyor. Kabul ölçütleri (kendi değerlendirmem; S ve A'ya bağlı
-  olanlar yer tutuculu): aşağıdaki tablo. Bağımsız denetim: `<S:denetim-hükmü>`.
+- **Durum:** Ölçümler, seçimler ve bütünleştirme bitti; S `main`'de (`2965a95`, bağımsız verify
+  18/18). Bağımsız son denetim (A) ve round sonu temizliği bekliyor. Kabul ölçütleri (kendi
+  değerlendirmem; A'ya bağlı olanlar yer tutuculu): aşağıdaki tablo. Bağımsız denetim: `<A:denetim-hükmü>`.
 - **Tarih:** 2026-11-17 / 2026-11-18
 - **Alt ajanlar:** Başlatılabildi (ilk iş deneme alt ajanı, haiku, cevap verdi). Bütün alt görevler
   (T0–T3c, 11 tasarım alternatifi, 6 ölçüm, D, G, H, S, belgeler) ayrı alt ajanlarla, ayrı
@@ -45,7 +45,7 @@ gizli bir bozuk tasarım da düzeneğin kendi sınaması olarak yarıştı.
 tarama, 531 durum × 2 dil) iki seçilen dilde 0 bulgu (`r4` 9 266). Seçilen görsel dil bütün sert
 eşikleri geçiyor: metin karşıtlığı en kötü 6,33; kapanmış işaret dahil işaret karşıtlığı 3,46 (A31
 kapandı); en küçük yazı 13 px; 44 px'ten küçük dokunma hedefi 0; anlam renkleri beş görüş koşulunda
-ΔE00 ≥ 10. Gösterim varsayılanları bir arada K52: `<S:K52-özet>`. Paket: `<S:paket-özet>`.
+ΔE00 ≥ 10. Gösterim varsayılanları bir arada K52: JIT açık tahmininde (bağlayıcı) tik / yüz / sahne p95 1 / 1 / 3 ms, ilk kapsül 212 ms, kaydırmada uzun kare 0; hikâye çizelgesi 200 hikâyede ≤ 1 ms (JIT kapalı sahne boyaması 14,8 ms, bu kipte bağlayıcı değil, uzun kare 0). Paket: WASM gzip 1 463 643 → 1 771 943 B (+%21,1), brotli 967 161 → 1 146 726 B (+%18,6); gömülü yazı tipleri +97 604 B ham.
 
 ## Ne yapıldı
 
@@ -65,8 +65,8 @@ kapandı); en küçük yazı 13 px; 44 px'ten küçük dokunma hedefi 0; anlam r
 | G | Karşılaştırma galerisi (`scripts/demo.sh --gallery`, `/gallery.html`): adaylar alt alta, aynı içerik, "bunu seçerdim" + not, tek dokunuşla özet, `?pick=` | alt ajan | verify adım 18 `tests/gallery.mjs` | `crates/qp-wasm/src/gallery.rs`, `shells/web/gallery.js`; birleşme `a4bbc50` |
 | H | İnsan testi v3 paketi (GUIDE, TASKS, FORM, SCORING, DECISION, README) | alt ajan | — | `human-test/`; birleşme `89bba78` |
 | — | `docs/DESIGN.md` | alt ajan | — | `eca289a`, `ded7b65` |
-| S | Bütünleştirme: `oltan`+`zemre`, `pavka` (perf) + `korda`, `tesir`+`nobra`, `surek`+`nabiz`; gösterim varsayılanları; görünüş eşlik eden yüzünü getirir; `?feed_exempt=0`; galeri `FINALISTS`; v1 sabitleme + v2 altınlar; K52 önce/sonra; paket | alt ajan | `<S:verify-sonucu>` | `r5/s-int` (`rounds/R5/experiments/S/{K52,GOLDENS}.md`); main'e birleşme `<S:birleşme-commit>` |
-| A | Bağımsız son denetim | `<S:denetim>` | — | `AUDIT.md` (`<S:denetim>`) |
+| S | Bütünleştirme: `oltan`+`zemre`, `pavka` (perf) + `korda`, `tesir`+`nobra`, `surek`+`nabiz`; gösterim varsayılanları; görünüş eşlik eden yüzünü getirir; `?feed_exempt=0`; galeri `FINALISTS`; v1 sabitleme + v2 altınlar; K52 önce/sonra; paket | alt ajan | bağımsız verify 18/18 | `r5/s-int` (`rounds/R5/experiments/S/{K52,GOLDENS}.md`, `k52/`); main'e birleşme `2965a95` |
+| A | Bağımsız son denetim | `<A:denetim>` | — | `AUDIT.md` (`<A:denetim>`) |
 
 ## Kabul ölçütleri
 
@@ -77,16 +77,16 @@ kapandı); en küçük yazı 13 px; 44 px'ten küçük dokunma hedefi 0; anlam r
 | 3 | M17: taramalar 0; eşik adıyla ve değeriyle; karne beklentinin kendisi; ayrıntı yüzün yapı taşlarından (A33); sözlük iki dilde, dokununca; tablo LANGUAGE.md'de | ✅ | `M17/RESULTS.md` §2 (13 tarama `marla`/`selvi` 0, `contradiction` dahil), §11 (S1 düzeltmesinden sonra yine 0); `docs/LANGUAGE.md` "Yedi dedektör × yaşam döngüsü aşaması × iki dil", "Sözlük"; döküm `langh dump` ile bayt bayt yeniden üretilir |
 | 4 | M16: dört yön; kayıtlar çekirdekte; kabukta biçem yok; bütün eşikler (kapanmış işaret dahil); gri + renk körlüğü ayrımı; DESIGN.md | ✅ | `M16/RESULTS.md` (dört yön; `oltan` metin 6,33, işaret 3,46, en küçük 13 px, dokunma 0, ΔE00 en kötü 10,53); gri kopya `dir`+`valid` 1,00; `crates/qp-grammar/src/look.rs`; arch-check R7; `docs/DESIGN.md` |
 | 5 | Yoğunluk: altı görünüm, okunabilirlik, R7 soruları | ✅ | `D/RESULTS.md` (+ek: okuyucu kapsamı tam; `oltan` 0,983 = `r4` 0,983), §4 R7 soruları 1–9 |
-| 6 | M18: bütün kapsüller, seçili vurgulu, kanıt yalnız seçiliye, odak taşıma, kümeleme, kapanmışlar görünür ve gizlenebilir; liste sunucudan (K48); protokol eki ve dökümler; 200 kapsülde K52 | ✅ | `M18/RESULTS.md` (+ek); PROTOCOL §23, dökümler 60–63 (3 taşıma); `pavka` JIT açık 5/50/200 bütçe içinde, JIT kapalı 50'de uzun kare 0,058/0,073; S: `<S:K52-hikâye>` |
+| 6 | M18: bütün kapsüller, seçili vurgulu, kanıt yalnız seçiliye, odak taşıma, kümeleme, kapanmışlar görünür ve gizlenebilir; liste sunucudan (K48); protokol eki ve dökümler; 200 kapsülde K52 | ✅ | `M18/RESULTS.md` (+ek); PROTOCOL §23, dökümler 60–63 (3 taşıma); `pavka` JIT açık 5/50/200 bütçe içinde, JIT kapalı 50'de uzun kare 0,058/0,073; S: JIT açık 12 / 52 / 207 hikâyede tik, sahne boyama ve kurma p95 ≤ 1 ms; JIT kapalı (ham benzetim) sahne boyama p95 4 / 11 / 13 ms (`r4` 3 / 9 / 10) |
 | 7 | M19: canlı ve yeni önce; eşik önceden yazılı, geleceğe bakmıyor; gizlenenler karnede; az örnekli söyleniyor; gizlenenler grafikte ve "Hepsi"nde işaretli; tablo; boş akış | ⚠️ | Kural, geleceğe bakmama, karne, az örnek, işaret, benzetim tablosu, boş akış ✅ (`M19/RESULTS.md` §2–6, `feed_m19.rs`, döküm 64). **Sıra:** `grouped`/`live_new` seçilebilir ama gösterim varsayılanı `elikov` kaldı (değişseydi v1 demo altınları ve `settings.mjs` değişirdi); sıra bir akış tasarım kararı olarak Arkin'e (Ö65) |
 | 8 | M20: seçildi; sunucu/cihaz ayrımı anlaşılıyor; yetkisize şablonlu rakamsız yüz (A32); girişimsizlik testleri | ✅ (notla) | `M20/RESULTS.md`: `tesir` 0,968; yetkisizde rakam 0; `tesir` yetkisiz okur 0,993 (`r4` 0,500). Not: sonuç `e_who` anahtarına duyarlı; ölçüm `look=r4` ile |
 | 9 | M21: seçildi; hareketi azalt'ta bilgi kaybı yok; ara kare ölçümü | ⚠️ | Ara kare ölçümü yapıldı ama **süreklilik sorusu geçersiz** çıktı ve bozuk tasarım sınaması geçmedi → kazanan ilan edilmedi; geçici varsayılan `surek` (önceden yazılı G6-5 kapısı), ikinci `nabiz`. Bilgi kaybı `surek` 0 (`nabiz` ana tanımda 0, lafzî tanımda 4). `M21/RESULTS.md` (+ek), A43 |
-| 10 | Performans: seçilen tasarım `canvas`'ta PHONE ve JIT açık tahmininde K52; önce/sonra tablosu; paket önce/sonra | `<S:ölçüt10>` | `rounds/R5/experiments/S/K52.md` (`r5/s-int`): `<S:K52-tablo-özeti>`; paket `<S:paket-özet>` |
-| 11 | İlk iki aday Ayarlar'dan ve adresle; galeri sentetikte, alt alta, "bunu seçerdim" + not, tek dokunuşla özet | ✅ (S ile) | `gallery.rs` `FINALISTS` (dil, görünüş, hikâye, açılmış kapsül, hareket: ilk iki + `r4`), akış sırası ve kuralında bütün adaylar; `?voice= ?look= ?story= ?open= ?motion= ?feed_order= ?feed_rule= ?feed_exempt=0`; verify 18 `tests/gallery.mjs`; S birleşince main'de |
-| 12 | İnsan testi v3: görevler, form, puanlama; A21 dahil hangi kararı nasıl kapatacağı | ✅ (notla) | `human-test/` (G0–G9; DECISION.md: A21, A32, A33, K53 + K42 muafiyeti, akış sırası, M16–M21). Aday yer tutucuları (`<GÖRÜNÜŞ-1>` …): `<S:insan-testi-yer-tutucuları>` |
-| 13 | `cpu` yolu kaldırıldı; bölme hatası; `clean.sh` (`--dry-run`), round sonunda çalıştı | ✅ / `<S:disk>` | T0 (`ce3f55c`, `f5a480d`, `4574c42`, `8587b0d`); round sonu koşusu `<S:disk>` |
-| 14 | v1 altınlar yerinde; v2 eklendi; değişenler gerekçeli; hesap özeti aynı; dökümler 3 taşımada | `<S:ölçüt14>` | v1: `fixtures/golden` R5 boyunca değişmedi; v2: `<S:v2-altın-listesi>`; dökümler 64 × 3 taşıma (`<S:conform>`); hesap özeti `<S:digest>` |
-| 15 | REPORT, RESEARCH, AUDIT; DESIGN, LANGUAGE, FACE; STATUS, ROADMAP; Önerilen (R5); Arkin için galeri bölümü; disk | `<S:ölçüt15>` (AUDIT bekliyor) | bu dosya; `RESEARCH.md`; `docs/DESIGN.md`, `docs/LANGUAGE.md`, `docs/FACE.md`; `STATUS.md`, `ROADMAP.md`; `DECISIONS.md` Ö61–Ö69, A41–A44; son bölüm; `AUDIT.md` `<S:denetim>` |
+| 10 | Performans: seçilen tasarım `canvas`'ta PHONE ve JIT açık tahmininde K52; önce/sonra tablosu; paket önce/sonra | ✅ (notla) | `rounds/R5/experiments/S/K52.md`: gösterim varsayılanları birlikte, `canvas`, JIT açık tahmini (bağlayıcı) önce → sonra tik 1 → 1, yüz 1 → 1, sahne 4 → 3 ms p95, ilk kapsül 164 → 212 ms, kaydırmada uzun kare 0 → 0; PHONE (JIT kapalı) tik 1,6 → 3,2, yüz 2 → 1, sahne 9,25 → 14,8 ms (bu kipte K52 "kullanılabilir kalır" ister: uzun kare 0); hikâye çizelgesi 12 / 52 / 207 hikâyede JIT açık her ölçü ≤ 1 ms. Not: JIT kapalı sahne boyaması ve ilk kapsül kötüleşti (bütçe içinde); paket WASM gzip 1 463 643 → 1 771 943 B (+%21,1), brotli 967 161 → 1 146 726 B (+%18,6); gömülü yazı tipleri +97 604 B ham |
+| 11 | İlk iki aday Ayarlar'dan ve adresle; galeri sentetikte, alt alta, "bunu seçerdim" + not, tek dokunuşla özet | ✅ | `gallery.rs` `FINALISTS` (dil, görünüş, hikâye, açılmış kapsül, hareket: ilk iki + `r4`), akış sırası ve kuralında bütün adaylar; `?voice= ?look= ?story= ?open= ?motion= ?feed_order= ?feed_rule= ?feed_exempt=0`; verify 18 `tests/gallery.mjs`; `main` `2965a95` |
+| 12 | İnsan testi v3: görevler, form, puanlama; A21 dahil hangi kararı nasıl kapatacağı | ✅ (notla) | `human-test/` (G0–G9; DECISION.md: A21, A32, A33, K53 + K42 muafiyeti, akış sırası, M16–M21). Aday yer tutucuları (`<GÖRÜNÜŞ-1>` …): aday adları dolduruldu (`c301602`: `oltan`/`zemre`, `tesir`/`nobra`, `surek`/`nabiz`); içerik anları (`<ADIM-…>`, `<SATIR-…>`, `<KİTLE-…>`) yürütücünün provasında doldurulur (`GUIDE.md`) |
+| 13 | `cpu` yolu kaldırıldı; bölme hatası; `clean.sh` (`--dry-run`), round sonunda çalıştı | ✅ / `<A:disk>` | T0 (`ce3f55c`, `f5a480d`, `4574c42`, `8587b0d`); round sonu koşusu `<A:disk>` |
+| 14 | v1 altınlar yerinde; v2 eklendi; değişenler gerekçeli; hesap özeti aynı; dökümler 3 taşımada | ✅ | v1: `fixtures/golden` R5 boyunca değişmedi; v2: 16 çekim, 28 sahne PNG'si (772 KB): `feed-*` (akışın ilk üç yüzü), `closed-*` (kapanmış iki yüz), `capsule-*` (`tesir`), `chart-*` (`pavka`) × TR/EN × koyu/açık; iki koşuda bayt eşit; dökümler 64 × 3 taşıma (verify `conform` (bağımsız verify 18/18)); hesap özeti `7b1e99d40889f83c` (değişmedi) |
+| 15 | REPORT, RESEARCH, AUDIT; DESIGN, LANGUAGE, FACE; STATUS, ROADMAP; Önerilen (R5); Arkin için galeri bölümü; disk | `<A:ölçüt15>` (AUDIT bekliyor) | bu dosya; `RESEARCH.md`; `docs/DESIGN.md`, `docs/LANGUAGE.md`, `docs/FACE.md`; `STATUS.md`, `ROADMAP.md`; `DECISIONS.md` Ö61–Ö70, A41–A44; son bölüm; `AUDIT.md` `<A:denetim>` |
 
 ## Konu konu: seçim, ilk iki, ölçüm, duyarlılıklar
 
@@ -298,10 +298,11 @@ R4'te persona ajanları görüntüyü büyütüp uzun okuyabildi ve ölçüm met
    için gerekmedi), bütünleştirmedeki tasarım ayarları.
 9. **K52 makinesi paylaşımlıydı** (başka ajanların derlemeleri ve okuyucu çağrıları sürerken; yük
    7–15); JIT kapalı değerler WebKit benzetimi (RP3 kalibrasyonu, `PHONE`).
-10. **Grafik derinliğinin fiyat şeridi** hâlâ R4 grafik görünümüyle kuruluyor (LOOK_RECIPE "kayıt
-    dışında kalanlar"); `pavka`'nın "Kapanmışları gizle" yazısı `oltan` boylarında sağ kenarda
-    kesiliyor (S, bilinen).
-11. **S'nin kalan sorunları:** `<S:kalan-sorunlar>`.
+10. **Grafik derinliği ve `pavka` yazısı (S'de düzeltildi):** cihaz grafik görünümünü zaten
+    görünüşten kuruyordu; otoritenin `tap_at`/`hit` görünümü `r4` ile kuruluyordu, artık o da
+    görünüşten (`e447571`; v2 altınlar bayt eşit kaldı). `pavka`'nın "kapanmış" kutusu `oltan`
+    boylarında kesiliyordu; sözcükler derleyicinin ölçüsüyle ölçülüyor (`55f0884`; `r4` bayt eşit).
+11. **S'nin kalan sorunları:** JIT kapalı (PHONE) kipte gösterim varsayılanlarıyla sahne boyaması 9,25 → 14,8 ms ve hikâye çizelgesinde 50/200 hikâyede `r4`'ten 2–3 ms fazla (bu kipte bağlayıcı değil, uzun kare 0); ilk kapsül 164 → 212 ms (bütçe 1 500). K52 ölçümü başka işler sürerken tek koşu dizisi (`S/K52.md`).
 
 ## Ölçümler (önce / sonra)
 
@@ -316,10 +317,10 @@ R4'te persona ajanları görüntüyü büyütüp uzun okuyabildi ve ölçüm met
 | Tek bakış, kısma kopyası | 0,318 (`r4`) | 0,471 (`oltan`) | `M16/RESULTS.md` |
 | Grafikte "kaç olay / kaçı tuttu / canlı hangisi / kanıtı" | 0,411 (`r4`) | 0,987 (`pavka`) | `M18/RESULTS.md` |
 | Açılmış kapsül: dayanak / kim / neden rakam yok | 0,732 (`r4`) | 0,968 (`tesir`) | `M20/RESULTS.md` |
-| K52, akış + yüz + grafik (gösterim varsayılanları) | `<S:K52-önce>` | `<S:K52-sonra>` | `S/K52.md` |
-| K52, hikâye çizelgesi 5 / 50 / 200 | — | `<S:K52-hikâye>` | `S/K52.md` |
-| WASM gzip / brotli | `<S:paket-önce>` | `<S:paket-sonra>` | `S/K52.md` §3 |
-| Uygunluk dökümleri | 59 × 3 taşıma | 64 × 3 taşıma (60–63 hikâye listesi, 64 akış kuralı) | `<S:conform>` |
+| K52, akış + yüz + grafik (gösterim varsayılanları) | tik / yüz / sahne p95 1 / 1 / 4 ms (JIT açık); ilk kapsül 164 ms; JIT kapalı sahne 9,25 ms | 1 / 1 / 3 ms; 212 ms; 14,8 ms (uzun kare 0) | `S/K52.md` |
+| K52, hikâye çizelgesi 5 / 50 / 200 | — | JIT açık 12 / 52 / 207 hikâyede tik, sahne boyama ve kurma p95 ≤ 1 ms; JIT kapalı (ham benzetim) sahne boyama p95 4 / 11 / 13 ms (`r4` 3 / 9 / 10) | `S/K52.md` |
+| WASM gzip / brotli | 1 463 643 / 967 161 B | 1 771 943 / 1 146 726 B (+%21,1 / +%18,6) | `S/K52.md` §3 |
+| Uygunluk dökümleri | 59 × 3 taşıma | 64 × 3 taşıma (60–63 hikâye listesi, 64 akış kuralı) | verify `conform` (bağımsız verify 18/18) |
 
 ## Değişen dökümler ve görseller
 
@@ -331,11 +332,11 @@ R4'te persona ajanları görüntüyü büyütüp uzun okuyabildi ve ölçüm met
 - **v1 altınlar değişmedi** (`fixtures/golden/**`). Gösterim varsayılanları R5 seçimlerine geçtiği
   için v1 demo çekimleri adreste R5 öncesini açıkça adlandırır:
   `?look=r4&voice=r4&face=vadrel&story=r4&open=r4&motion=r4` (S).
-- **v2 altınlar (yeni):** `<S:v2-altın-listesi>` (`fixtures/golden/demo/v2/`; ayrıntı
+- **v2 altınlar (yeni):** 16 çekim, 28 sahne PNG'si (772 KB): `feed-*` (akışın ilk üç yüzü), `closed-*` (kapanmış iki yüz), `capsule-*` (`tesir`), `chart-*` (`pavka`) × TR/EN × koyu/açık; iki koşuda bayt eşit (`fixtures/golden/demo/v2/`; ayrıntı
   `rounds/R5/experiments/S/GOLDENS.md`).
-- Değişen sınama kayıtları: `<S:değişen-sınama-kayıtları>`.
+- Değişen sınama kayıtları: `crates/qp-wasm/tests/data/pavka_scene_digests.txt` (`pavka` başarım eşitliği); `crates/qp-grammar/tests/story_pavka_equal.rs`'e `r4` bayt eşitlik sınaması eklendi (`pavka` ölçü düzeltmesi, `55f0884`). Dört `chart-*` v2 altını o düzeltmeyle üretildi; otoritenin grafik görünümü düzeltmesinden (`e447571`) sonra v2 altınları bayt eşit kaldı.
 - Protokol varsayılanları değişmedi (Ö51): çıplak bağlantılar `r3`/`r4`; dökümler bayt eşit. Hesap
-  özeti: `<S:digest>`.
+  özeti: `7b1e99d40889f83c` (değişmedi).
 
 ## Maliyet
 
@@ -406,12 +407,12 @@ Tasarım, uygulama ve bütünleştirme alt ajanlarının oturum maliyeti bu tabl
 
 ## Önerilen kararlar
 
-`DECISIONS.md` "Önerilen (R5) — kesinleşmedi": Ö61–Ö69, açık A41–A44. Kesinleştirme ana akış
+`DECISIONS.md` "Önerilen (R5) — kesinleşmedi": Ö61–Ö70, açık A41–A44. Kesinleştirme ana akış
 oturumunda yapılır.
 
 ## Disk (K56)
 
-`<S:disk>` — round sonu `scripts/clean.sh` koşusu (önce/sonra), kalan `target/`,
+`<A:disk>` — round sonu `scripts/clean.sh` koşusu (önce/sonra), kalan `target/`,
 `.claude/worktrees/`, depo toplamı. Round başında (T0): `target/` 1,9 G → 1,7 G, depo 4,1 G →
 2,6 G (19 eski worktree kaldırıldı).
 
@@ -517,7 +518,7 @@ da adresle tek tek değiştir:
 | `voice` | `marla`, `selvi`, `r4` | kapsül dili |
 | `story` | `pavka`, `korda`, `r4` | hikâye çizelgesi (bir kapsüle iki kez dokun) |
 | `open` | `tesir`, `nobra`, `r4` | açılmış kapsül (bir kez dokun; sonra **Kanıt**) |
-| `motion` | `surek`, `nabiz`, `r4` | hareket; `&anim=0` hareketi azalt (bilgi aynı kalmalı) |
+| `motion` | `surek`, `nabiz`, `r4` | hareket; `&reduced_motion=1` hareketi azalt (eski `anim=0` da çalışır; bilgi aynı kalmalı) |
 | `feed_order` | `grouped`, `live_new`, `layout` | akış sırası |
 | `feed_rule` | `rate55`, `none` | yazı tura eşiği |
 | `feed_exempt` | `0` | kuralı K42 muafiyetsiz çalıştırır (elindeki hissenin olumsuz geçişi de gizlenebilir) |

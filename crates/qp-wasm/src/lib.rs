@@ -843,9 +843,10 @@ mod shell_binding {
             self.inner.pointer(target, phase, id, x, y)
         }
 
-        /// A wheel notch.
-        pub fn wheel(&mut self, dy: f64, x: f64) {
-            self.inner.wheel(dy, x);
+        /// A wheel notch; (R5/M20) `true` when it was the chart's zoom (else the page
+        /// scrolls).
+        pub fn wheel(&mut self, dy: f64, x: f64) -> bool {
+            self.inner.wheel(dy, x)
         }
 
         /// The last transition in page coordinates (JSON).

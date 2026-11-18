@@ -59,7 +59,8 @@ const LEDGER_LINES: f64 = 3.0;
 const THUMB_LINES: f64 = 7.0;
 /// Lines under a block's main row (the label role).
 const NOTE_LINES: f64 = 2.0;
-/// Bars the thumbnail shows before the evidence starts (as the chart depth, R3).
+/// Bars the thumbnail shows before the evidence starts and after it ends (as the chart
+/// depth before it, R3).
 const THUMB_LEAD: u64 = 5;
 
 fn no_text() -> String {
@@ -688,19 +689,27 @@ pub fn view(
         }
     }
     layers.push(line);
-    let mut first = fact.bar;
+    let (mut first, mut last) = (fact.bar, fact.bar);
     for f in &s.facts {
         if f.series != fact.series {
             continue;
         }
+        last = last.max(f.bar);
         for g in f.meaning.iter().flat_map(|m| &m.geometry) {
-            let b = match g {
-                Geometry::Level { from_bar, .. } | Geometry::Band { from_bar, .. } => *from_bar,
-                Geometry::Points { points } => {
-                    points.iter().map(|q| q.bar).min().unwrap_or(f.bar)
+            let (a, b) = match g {
+                Geometry::Level {
+                    from_bar, to_bar, ..
                 }
+                | Geometry::Band {
+                    from_bar, to_bar, ..
+                } => (*from_bar, *to_bar),
+                Geometry::Points { points } => (
+                    points.iter().map(|q| q.bar).min().unwrap_or(f.bar),
+                    points.iter().map(|q| q.bar).max().unwrap_or(f.bar),
+                ),
             };
-            first = first.min(b);
+            first = first.min(a);
+            last = last.max(b);
         }
         for l in depth::evidence_layers(look, f, 2, &mut taken) {
             layers.push(l);
@@ -713,12 +722,21 @@ pub fn view(
         point.encoding.color = Some(ColorSpec::Constant(look.evidence.color.to_owned()));
         layers.push(point);
     }
-    // From a few bars before the evidence starts, and at least the chart's look-back.
+    // The evidence's own window: from a few bars before it starts to a few bars after it
+    // ends (at least the chart's look-back), not to the live bar — the picture of what the
+    // claim rests on does not move with every tick (a repaint of the tall column while it
+    // scrolls costs long frames, K52; where things stand now is the detail's and the
+    // chart's).
     let _ = max_points;
+    // The newest bar may still be forming (a live tick moves it): left out unless the
+    // evidence itself reaches it.
+    let to = last
+        .saturating_add(THUMB_LEAD)
+        .min(n.saturating_sub(2).max(last))
+        .min(n - 1);
     let from = first
         .saturating_sub(THUMB_LEAD)
-        .min(n.saturating_sub(depth::CHART_LOOKBACK))
-        .min(n - 1);
+        .min(to.saturating_sub(depth::CHART_LOOKBACK));
 
     // 3 — why, and where things stand (under the thumbnail's month labels).
     layers.push(text(
@@ -793,7 +811,7 @@ pub fn view(
         title: None,
         display_tz: None,
         theme: None,
-        x: depth::time_scale(bars[i(from)].t, bars[i(n - 1)].t),
+        x: depth::time_scale(bars[i(from)].t, bars[i(to)].t),
         y: Vec::new(),
         panels: names
             .iter()

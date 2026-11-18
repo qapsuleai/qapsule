@@ -2319,9 +2319,11 @@ impl ShellCore {
     }
 
     /// A wheel notch on the open chart (`dy` < 0: zoom in) at column `x`.
-    pub fn wheel(&mut self, dy: f64, x: f64) {
+    /// (R5/M20) Returns whether the wheel was the chart's (zoom); otherwise the page lets
+    /// it scroll (the open capsule's column).
+    pub fn wheel(&mut self, dy: f64, x: f64) -> bool {
         if !self.chart_open() || !dy.is_finite() || dy == 0.0 {
-            return;
+            return false;
         }
         let f = if dy < 0.0 {
             WHEEL_FACTOR
@@ -2339,6 +2341,7 @@ impl ShellCore {
         } else {
             self.send_pinch(f, Some(x));
         }
+        true
     }
 
     // --- transition ------------------------------------------------------------

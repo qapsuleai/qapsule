@@ -577,12 +577,14 @@ function wireScene(scene) {
   scene.dataset.target = 'scene';
   pointers(scene);
   scene.addEventListener('wheel', (e) => {
+    // (R5/M20) The core says whether the wheel is the chart's zoom; otherwise (the open
+    // capsule's column) the layer scrolls.
+    if (!core.wheel(e.deltaY, e.offsetX)) return;
     e.preventDefault();
     // (R4/D) Wheel on the chart is its zoom: its frames are measured as `zoom`.
     mode = 'zoom';
     clearTimeout(zoomTimer);
     zoomTimer = setTimeout(() => { mode = 'idle'; }, 150);
-    core.wheel(e.deltaY, e.offsetX);
     flush();
   }, { passive: false });
 }
@@ -606,6 +608,12 @@ function wire() {
     b.onclick = () => showTab(b.dataset.tab);
   }
   $('feed').addEventListener('scroll', () => {
+    mode = 'scroll';
+    clearTimeout(scrollTimer);
+    scrollTimer = setTimeout(() => { mode = 'idle'; }, 150);
+  }, { passive: true });
+  // (R5/M20) The open layer scrolls (a tall capsule column): measured as `scroll`.
+  $('layer').addEventListener('scroll', () => {
     mode = 'scroll';
     clearTimeout(scrollTimer);
     scrollTimer = setTimeout(() => { mode = 'idle'; }, 150);

@@ -740,3 +740,98 @@ fn looks_are_design_records() {
     let e = compile(&v, &p, &o).unwrap_err();
     assert_eq!(e.kind, ErrorKind::Invalid);
 }
+
+/// (R5/M20) `nobra` question cards over the R3 breakout: the entitled reader sees the
+/// evidence geometry inside "Neye dayanıyor?" and the counted track record; the reader
+/// whose evidence values are withheld (licensed `flow/SAMPLE`) gets "Neden rakam
+/// göremiyorum?", no geometry layer and no digit in any question card; in both looks.
+#[test]
+fn nobra_question_cards_over_entitled_and_withheld_evidence() {
+    use qp_grammar::open::{capsule_view as open_view, OpenCtx};
+    use qp_schema::protocol::Language;
+    for look in [&qp_grammar::look::R4, &qp_grammar::look::ORNEK] {
+        for (evidence, ask) in [(true, None), (true, Some("before")), (false, Some("why"))] {
+            let p = r3(evidence);
+            let ctx = OpenCtx {
+                ask,
+                lang: Language::Tr,
+                check: None,
+                frame: [390, 620],
+            };
+            let v = open_view(
+                Some("nobra"),
+                look,
+                "fnd-brk",
+                60,
+                &p,
+                "capsule-fnd-brk",
+                &ctx,
+            )
+            .unwrap();
+            let mut o = CompileOptions::new(390, 620);
+            o.look = Some(look.name.to_owned());
+            let s = compile(&v, &p, &o).unwrap();
+            let names: Vec<&str> = s.panels.iter().filter_map(|x| x.name.as_deref()).collect();
+            let has_level = v.layers.iter().any(|l| l.id.as_deref() == Some("level"));
+            let card_texts: Vec<String> = s
+                .panels
+                .iter()
+                .filter(|x| x.name.as_deref() != Some("ask:chart"))
+                .flat_map(|x| &x.layers)
+                .flat_map(|l| &l.prims)
+                .filter_map(|x| match x {
+                    Prim::Text { text, .. } => Some(text.clone()),
+                    _ => None,
+                })
+                .collect();
+            let all = card_texts.join(" | ");
+            if evidence {
+                assert_eq!(
+                    names,
+                    [
+                        "ask:what",
+                        "ask:who",
+                        "ask:before",
+                        "ask:basis",
+                        "ask:chart"
+                    ]
+                );
+                assert!(has_level, "{:?}", layer_ids(&v));
+                if ask == Some("before") {
+                    assert!(
+                        all.contains("30 hikâyenin") && all.contains("18 tanesinde"),
+                        "{all}"
+                    );
+                }
+                assert!(all.contains("Fiyat ve hacim verisine"), "{all}");
+            } else {
+                assert_eq!(
+                    names,
+                    [
+                        "ask:what",
+                        "ask:who",
+                        "ask:before",
+                        "ask:why",
+                        "ask:basis",
+                        "ask:chart"
+                    ]
+                );
+                assert!(!has_level, "{:?}", layer_ids(&v));
+                assert!(all.contains("Neden rakam göremiyorum?"), "{all}");
+                assert!(all.contains("flow/SAMPLE"), "{all}");
+                let digits = all.bytes().filter(u8::is_ascii_digit).count();
+                assert_eq!(digits, 0, "{all}");
+                // Not a number of the redacted fact anywhere in the scene.
+                assert!(!texts(&s).iter().any(|x| x.contains("121.5")));
+            }
+            // Every text of the cards starts inside its card.
+            for x in &s.panels {
+                for l in &x.layers {
+                    for it in &l.items {
+                        assert!(it.hit.top >= x.rect.top, "{}: {:?}", l.id, it.hit);
+                    }
+                }
+            }
+        }
+    }
+}

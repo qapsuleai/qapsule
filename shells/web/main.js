@@ -399,7 +399,8 @@ function renderLayer(force) {
   $('trust').textContent = open.trust || '';
   $('toevidence').hidden = open.depth === 'evidence';
   $('opentext').textContent = open.text;
-  $('hint').textContent = t(HINT[open.depth]);
+  // (R5/M20 nobra) An open capsule design may give its own hint (text from the core).
+  $('hint').textContent = open.hint || t(HINT[open.depth]);
   const scene = $('scene');
   scene.hidden = !open.scene;
   // (RP3/M14) The layer shows only on the feed tab; elsewhere the scene is not painted
@@ -410,7 +411,30 @@ function renderLayer(force) {
     if (paint.paintScene(scene, force, open.px)) core.metric_span('scene', t0, performance.now());
   }
   renderEvidence();
+  renderAsks(open.asks || []);
   return open;
+}
+
+// (R5/M20 nobra) An open capsule design's question cards for a reader without a scene (no
+// data of the instrument, A32): question, answer and detail as the core wrote them; the
+// detail opens on touch (a native disclosure).
+function renderAsks(rows) {
+  const out = [];
+  for (const r of rows) {
+    const d = document.createElement('details');
+    d.className = 'ask';
+    const s = document.createElement('summary');
+    const q = document.createElement('b');
+    q.textContent = r.q;
+    const a = document.createElement('span');
+    a.textContent = r.a;
+    s.append(q, ' ', a);
+    const p = document.createElement('p');
+    p.textContent = r.d;
+    d.append(s, p);
+    out.push(d);
+  }
+  $('asks').replaceChildren(...out);
 }
 
 function renderEvidence() {

@@ -42,7 +42,10 @@ use crate::provider::{DataProvider, SeriesKind};
 /// The design.
 pub const DESIGN: OpenDesign = OpenDesign {
     name: "tesir",
+    note: "one column: the claim, what it rests on, who verified it, the track record; the evidence in small",
     view,
+    view_ctx: None,
+    tap: None,
     height: Some(height),
     text: Some(text_column),
     scene_text: Some(no_text),

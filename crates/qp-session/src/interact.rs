@@ -416,9 +416,11 @@ impl Session {
         let look = &mut self.conns[ci].look;
         if let Some(o) = r.open {
             let next = (o != qp_grammar::open::DEFAULT_OPEN).then(|| o.to_owned());
-            // Another design: the capsule frame a design's height set no longer holds.
+            // Another design: the capsule frame a design's height set no longer holds, nor
+            // the question `nobra` had opened.
             if next != look.open {
                 look.frames.remove("capsule");
+                look.ask = None;
             }
             look.open = next;
         }
@@ -593,13 +595,31 @@ impl Session {
             };
             let max_points = self.conns[ci].profile.max_points;
             let lang = self.lang_of(ci);
+            let (w, h) = self.frame(ci, depth_key(d));
+            let ask = self.conns[ci].look.ask.clone();
             warm(rd!(self), &mut self.cache);
             let p = DocProvider::new(rd!(self), &self.cache)
                 .with_headlines(&self.headlines)
                 .with_parts(self, lang)
                 .with_voice(voice.as_deref());
-            let design = qp_grammar::open::by_name(open.as_deref());
-            return Ok((design.view)(look, finding, max_points, &p, &id).ok());
+            // (R5/M20) The design's view; `nobra` also reads the opened question and the
+            // frame (the authority has no device check: "verified by the server").
+            let ctx = qp_grammar::open::OpenCtx {
+                ask: ask.as_deref(),
+                lang,
+                check: None,
+                frame: [w, h],
+            };
+            return Ok(qp_grammar::open::capsule_view(
+                open.as_deref(),
+                look,
+                finding,
+                max_points,
+                &p,
+                &id,
+                &ctx,
+            )
+            .ok());
         }
         if d == OpenDepth::Sentence && styled {
             if pr.capsule_view.is_none() {
@@ -885,6 +905,10 @@ impl Session {
         };
         {
             let look = &mut self.conns[ci].look;
+            // (R5/M20) The opened question belongs to the open capsule.
+            if to == OpenDepth::Sentence || look.capsule.as_deref() != Some(cap) {
+                look.ask = None;
+            }
             if to == OpenDepth::Sentence {
                 look.capsule = None;
                 look.finding = None;
@@ -1011,7 +1035,20 @@ impl Session {
                     out.hit = hit;
                     return Ok((out, events));
                 }
-                if let Some(to) = depth::tap_opens(d, hit.as_ref().and_then(|h| h.item.as_ref())) {
+                // (R5/M20) The open capsule design's tap rule (the reference: `tap_opens`).
+                let rule = qp_grammar::open::tap(
+                    self.conns[ci].look.open.as_deref(),
+                    d,
+                    scene.as_ref().map(|(v, _, _)| v),
+                    hit.as_ref(),
+                    self.conns[ci].look.ask.as_deref(),
+                );
+                if let qp_grammar::open::OpenTap::Ask(a) = rule {
+                    self.conns[ci].look.ask = a;
+                    out.hit = hit;
+                    return Ok((out, Vec::new()));
+                }
+                if let qp_grammar::open::OpenTap::Open(to) = rule {
                     out.opening = Some(self.transition(ci, &cap, &finding, d, to)?);
                 } else if let (Some((view, _, times)), Some(h)) = (&scene, &hit) {
                     if let (Some(panel), Some(bar)) = (h.panel, h.bar) {

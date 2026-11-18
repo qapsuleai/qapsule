@@ -3142,7 +3142,7 @@ pub enum Gesture {
         #[serde(default, skip_serializing_if = "Option::is_none")]
         hide_closed: Option<bool>,
         /// (R5/M20) Open capsule design: what the capsule depth shows
-        /// (`qp_grammar::open::OPENS`: `r4`, `tesir`; default `r4`, today's card).
+        /// (`qp_grammar::open::OPENS`: `r4`, `tesir`, `nobra`; default `r4`, today's card).
         #[serde(default, skip_serializing_if = "Option::is_none")]
         open: Option<String>,
     },
@@ -3265,6 +3265,11 @@ pub struct ViewState {
     /// (R5/M20) Open capsule design of its capsule depth (absent: the default, `r4`).
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub open: Option<String>,
+    /// (R5/M20 `nobra`) The question the open capsule's design shows opened (a design with
+    /// questions: `what`, `basis`, `who`, `before`, `why`; absent: none). Reset when the
+    /// capsule closes or another one opens.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub ask: Option<String>,
 }
 
 /// (R4, §4.6) One element both sides of a depth transition show (e.g. the glyph, the

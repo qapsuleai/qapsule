@@ -725,7 +725,17 @@ pub(crate) fn prepare(
             }),
         };
         let detail = voice.map(|v| v.detail);
+        // (R5/M20) An open capsule design's text field (`ask/…`, `crate::open`): resolved
+        // here from the provider, only for the field the layer reads.
+        let asked = layer
+            .encoding
+            .text
+            .as_deref()
+            .and_then(|k| crate::open::field_text(k, f, fr.p).map(|t| (k.to_owned(), t)));
         for row in &mut all_rows {
+            if let Some((k, t)) = &asked {
+                row.texts.insert(k.clone(), t.clone());
+            }
             if let Some(h) = &headline {
                 row.texts.insert("headline".to_owned(), h.clone());
             }

@@ -253,14 +253,32 @@ fn open_view(
     o: &Opening,
     look: &ViewState,
     max_points: u32,
+    extra: OpenExtra,
 ) -> Option<View> {
     match o.to {
         OpenDepth::Sentence => None,
         OpenDepth::Capsule => {
             let id = o.presentation.capsule_view.as_ref()?.id.clone();
             // (R5/M20) The connection's open capsule design (`r4`: today's card).
-            let design = qp_grammar::open::by_name(look.open.as_deref());
-            (design.view)(look_of(look), &o.finding, max_points, p, &id).ok()
+            let [w, h] = o.frame?;
+            let ctx = qp_grammar::open::OpenCtx {
+                ask: look.ask.as_deref(),
+                lang: extra.lang.unwrap_or(Language::Tr),
+                check: extra
+                    .check
+                    .and_then(|c| qp_grammar::open::Check::of(c.device_check())),
+                frame: [w, h],
+            };
+            qp_grammar::open::capsule_view(
+                look.open.as_deref(),
+                look_of(look),
+                &o.finding,
+                max_points,
+                p,
+                &id,
+                &ctx,
+            )
+            .ok()
         }
         OpenDepth::Chart | OpenDepth::Evidence => {
             let given = o.presentation.view.as_ref()?;
@@ -332,7 +350,7 @@ pub fn open_scene_with(
         voice: voice.map(|v| (o.finding.as_str(), v)),
         extra,
     };
-    let view = open_view(&p, stored, o, look, max_points)?;
+    let view = open_view(&p, stored, o, look, max_points, extra)?;
     let range = look
         .range
         .as_ref()

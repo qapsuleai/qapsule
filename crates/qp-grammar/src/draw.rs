@@ -609,7 +609,7 @@ fn panel_px(pp: PanelPos, lo: i32, hi: i32) -> f64 {
 
 /// Words of `text` wrapped into lines of at most `room` pixels at `size` (estimate as in
 /// [`est_width`]); a word longer than a line stands alone.
-fn wrap(text: &str, room: i32, size: f64, adv: &crate::look::FontAsset) -> Vec<String> {
+pub(crate) fn wrap(text: &str, room: i32, size: f64, adv: &crate::look::FontAsset) -> Vec<String> {
     let mut lines: Vec<String> = Vec::new();
     let mut cur = String::new();
     for w in text.split_whitespace() {

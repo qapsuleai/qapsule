@@ -1923,6 +1923,37 @@ impl ShellCore {
                     "frame": o.frame,
                     "scene": o.frame.is_some(),
                 });
+                // (R5/M20 `nobra`) The open capsule design's own hint for its depth (absent:
+                // the page's).
+                if let Some(h) = o.frame.and_then(|_| {
+                    qp_grammar::open::hint(self.look.open.as_deref(), o.to, self.lang)
+                }) {
+                    v["hint"] = json!(h);
+                }
+                // (R5/M20 `nobra`) Without a scene (no data of the instrument, A32) the
+                // design's question cards as text, `[{key, q, a, d}]`, from the feed item.
+                if o.frame.is_none() {
+                    let rows = self
+                        .feed
+                        .iter()
+                        .find(|i| i.id == o.capsule)
+                        .map(|i| {
+                            qp_grammar::open::text_rows(
+                                self.look.open.as_deref(),
+                                o.to,
+                                i,
+                                self.lang,
+                            )
+                        })
+                        .unwrap_or_default();
+                    if !rows.is_empty() {
+                        v["asks"] = Value::Array(
+                            rows.iter()
+                                .map(|r| json!({"key": r.key, "q": r.q, "a": r.a, "d": r.d}))
+                                .collect(),
+                        );
+                    }
+                }
                 if let Some([w, h]) = o.frame {
                     let sz = self.size_json(w, h);
                     v["px"] = sz["px"].clone();

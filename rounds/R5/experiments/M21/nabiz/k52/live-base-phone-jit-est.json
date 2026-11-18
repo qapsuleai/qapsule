@@ -1,0 +1,40 @@
+{
+ "idle": {
+  "n": 300,
+  "p50": 17,
+  "p95": 18,
+  "p99": 18,
+  "max": 19,
+  "long": 0
+ },
+ "scroll": {
+  "n": 187,
+  "p50": 17,
+  "p95": 18,
+  "p99": 18,
+  "max": 19,
+  "long": 0
+ },
+ "marks_live": 0,
+ "motion": "",
+ "transition": "",
+ "config": "phone-jit-est",
+ "open": {
+  "n": 174,
+  "p50": 17,
+  "p95": 18,
+  "p99": 28,
+  "max": 29,
+  "long": 0
+ },
+ "chart": {
+  "n": 175,
+  "p50": 17,
+  "p95": 18,
+  "p99": 19,
+  "max": 19,
+  "long": 0
+ },
+ "marks_us": 0,
+ "marks_sample": ""
+}

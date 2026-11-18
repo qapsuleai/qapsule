@@ -51,7 +51,15 @@ pub struct MotionState {
     places: BTreeMap<String, (Places, i32)>,
     /// The last overlay handed out was not empty.
     shown: bool,
+    /// The pulse step of the last overlay handed out (pulse-only frames are built once per
+    /// [`PULSE_STEP_MS`]; a beat or trail is built every frame).
+    last_step: Option<i64>,
 }
+
+/// (R5/M21) Pulse-only frames are built at most once per this many ms: the pulse is slow
+/// (2.6 s), 20 steps a second keep it smooth while the core's work per display frame drops
+/// (measured: one overlay with two live faces ≈ 0.43 ms on the JIT-less phone setting).
+pub const PULSE_STEP_MS: f64 = 50.0;
 
 fn css_color(c: Rgba, opacity: f64) -> String {
     let a = f64::from(c[3]) / 255.0 * opacity;
@@ -215,6 +223,14 @@ impl ShellCore {
         self.motion
             .beats
             .retain(|_, (_, t0)| nabiz::beat_running(t - t0.unwrap_or(t), look));
+        // A frame with no beat running changes only the pulse: built once per step.
+        #[allow(clippy::cast_possible_truncation)]
+        let step = (t / PULSE_STEP_MS).floor() as i64;
+        let pulse_only = self.motion.beats.is_empty();
+        if pulse_only && self.motion.last_step == Some(step) {
+            return None;
+        }
+        self.motion.last_step = pulse_only.then_some(step);
         let covered = self.opening.is_some();
         let mut out = Vec::new();
         if !covered {

@@ -51,7 +51,16 @@ function shim() {
 }
 
 const LONG = 33.4;
-function verdict(name, s) {
+// (M16) The core's own long-frame share of the feed scroll (`frame_ms.scroll.long`, RP3/T2),
+// median of the runs: the JIT-off "usable" clause of K52 (<= 10 %) is gated with it (as
+// k52chart.mjs does for dragging); recorded for JIT on too (the gate there stays the p99 proxy).
+function scrollLong(runs) {
+  const v = (runs || []).map((r) => r.feed && r.feed.frame_ms && r.feed.frame_ms.scroll && r.feed.frame_ms.scroll.long)
+    .filter((x) => typeof x === 'number').sort((a, b) => a - b);
+  return v.length ? v[Math.floor((v.length - 1) / 2)] : null;
+}
+
+function verdict(name, s, runs) {
   const jit = name !== 'phone';
   const bias = jit ? { face: 1, scene: 1, tick: 1 } : { face: cal.PHONE_BIAS.face, scene: cal.PHONE_BIAS.scene, tick: cal.PHONE_BIAS.tick_with_scene };
   const v = {
@@ -60,10 +69,11 @@ function verdict(name, s) {
     scene_p95: s.cal.scene.p95 * bias.scene,
     first_capsule_ms: s.open_ms.first_capsule,
     frame_scroll_p99: s.feed.frame_scroll.p99,
+    scroll_long: scrollLong(runs),
   };
   const checks = jit
     ? { tick: v.tick_p95 <= 8, face: v.face_p95 <= 8, scene: v.scene_p95 <= 8, long_frames: v.frame_scroll_p99 <= LONG, first_capsule: v.first_capsule_ms <= 1500 }
-    : { usable_long_frames: true }; // JIT-off: <= 10 % long frames; p90 is not reported -> recorded, not gated
+    : { usable_long_frames: v.scroll_long !== null && v.scroll_long <= 0.10 }; // JIT-off: <= 10 % long frames while scrolling (M16)
   return { values: v, checks, pass: Object.values(checks).every(Boolean), phone_bias_applied: !jit };
 }
 
@@ -71,8 +81,8 @@ const dir = shim();
 const res = { look, face, voice: voice || null, reps, configs: {} };
 try {
   for (const c of configs) {
-    const r = await cal.runCalibrated(CFG[c], { qp, web: dir, port: Number(process.env.QP_DEMO_PORT || 8471), reps, feedMs: 8000, chartMs: 20000, seek: 700 });
-    res.configs[c] = { summary: r.summary, failed: r.failed, browser: r.browser, ...verdict(c, r.summary) };
+    const r = await cal.runCalibrated(CFG[c], { qp, web: dir, port: Number(process.env.QP_DEMO_PORT || 8471), reps, feedMs: 8000, chartMs: 20000, seek: 700, raw: true });
+    res.configs[c] = { summary: r.summary, failed: r.failed, browser: r.browser, ...verdict(c, r.summary, r.runs) };
   }
 } finally {
   fs.rmSync(dir, { recursive: true, force: true });

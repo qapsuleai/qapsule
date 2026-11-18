@@ -209,6 +209,93 @@ def colour_gate(tables):
             "pass": bool(themes) and all(t["pass"] for t in themes.values())}
 
 
+# --- Ek G5: the meaning-colour gate from the look record's ROLES --------------------------
+# After Ek G4 the glyph's colour is its most opaque prim; an alphabet that draws its body
+# edge in the text colour (`siluet`) then measures directional and non-directional marks as
+# the same ink, and the scene-based table compares the marks' outline instead of their
+# meaning colour. Ek G5: the pairs come from the look record's meaning roles per theme
+# (`qp look show <name>`), plus the roles the design's marks are actually drawn in (glyph
+# prims of the shots matched to the record's roles by RGB). The scene-based table stays as
+# information (`colour_scene`).
+MEANING_ROLES = ("up", "down", "neutral", "valid", "invalid", "closed")
+_NOT_MEANING = {"bg", "surface", "grid", "line", "axis", "chrome"}
+
+
+def _role_hex(look, theme):
+    cols = ((look or {}).get("colors") or {}).get(theme) or {}
+    return {r: _hex(v) for r, v in cols.items() if isinstance(v, str)}
+
+
+def mark_roles(records, look):
+    """{theme: sorted roles} the marks are drawn in: every glyph prim of every face scene whose
+    RGB equals a role colour of the record (not background/surface/grid/series roles)."""
+    out = {}
+    for r in records:
+        th = _theme(r)
+        roles = {k: v for k, v in _role_hex(look, th).items()
+                 if k not in _NOT_MEANING and not re.fullmatch(r"s\d+", k)}
+        for f in ((r.get("engine") or {}).get("face_scenes") or {}).values():
+            for lid, p in scene_prims(f["scene"]):
+                if lid != "glyph" or p.get("prim") == "text" or "color" not in p:
+                    continue
+                rgb = tuple(_rgba(p["color"])[:3])
+                for k, v in roles.items():
+                    if tuple(v[:3]) == rgb:
+                        out.setdefault(th, set()).add(k)
+    return {th: sorted(v) for th, v in out.items()}
+
+
+def mark_sizes(records):
+    """{theme: smallest glyph size (CSS px) over the face scenes} (threshold 15 when <= 16)."""
+    out = {}
+    for r in records:
+        for f in ((r.get("engine") or {}).get("face_scenes") or {}).values():
+            _, g = face_elements(f["scene"])
+            if g and g.get("size"):
+                th = _theme(r)
+                out[th] = min(out.get(th, 1e9), g["size"])
+    return out
+
+
+def role_colour_gate(look, themes, used=None, sizes=None):
+    """Ek G5 colour gate: ΔE00 of every pair of meaning roles (MEANING_ROLES + the roles the
+    marks are drawn in, `used` {theme: [roles]}) of ONE look, per theme, five conditions.
+    Each role colour is composited over the theme background at its own alpha. A pair whose
+    roles share (nearly) one colour (normal ΔE00 < 5) is a deliberate share: not counted,
+    listed (`shared`), its meaning carried by shape (grey reader question)."""
+    tables, shared, sem = {}, {}, {}
+    for th in themes:
+        hx = _role_hex(look, th)
+        if not hx:
+            continue
+        bg = (hx.get("bg") or (255, 255, 255, 255))[:3]
+        roles = [r for r in MEANING_ROLES if r in hx]
+        roles += [r for r in (used or {}).get(th, []) if r in hx and r not in roles]
+        size = (sizes or {}).get(th) or float((look.get("glyph") or {}).get("face_px") or 0) or 99
+        thr = DE_MIN_SMALL if size <= SMALL_MARK else DE_MIN
+        fg = {r: C.composite(hx[r], bg) for r in roles}
+        sem[th] = {r: "#%02x%02x%02x" % tuple(round(x) for x in fg[r]) for r in roles}
+        rows, sh = [], []
+        for a, b in combinations(roles, 2):
+            row = {"a": a, "b": b, "theme": th, "threshold": thr, "mark_px": size}
+            for cond in C.CONDITIONS:
+                row[cond] = round(C.pair_de(fg[a], fg[b], cond), 2)
+            row["gray_lum_ratio"] = round(C.contrast(C.gray(fg[a]), C.gray(fg[b])), 3)
+            row["min"] = min(row[c] for c in C.CONDITIONS)
+            row["colour_coded"] = row["normal"] >= COLOUR_CODED
+            row["pass"] = (not row["colour_coded"]) or row["min"] >= thr
+            (rows if row["colour_coded"] else sh).append(row)
+        tables[th] = rows
+        shared[th] = [{"a": r["a"], "b": r["b"], "normal": r["normal"]} for r in sh]
+    gate = colour_gate(tables)
+    for th in gate["themes"]:
+        gate["themes"][th]["shared"] = shared.get(th, [])
+        gate["themes"][th]["roles"] = sem.get(th, {})
+    gate["rule"] = "Ek G5 (roles)"
+    gate["shared"] = [dict(s, theme=th) for th, v in shared.items() for s in v]
+    return gate
+
+
 def dom_texts(rec):
     out = []
     for t in rec["dom"]["texts"]:
@@ -293,10 +380,16 @@ def gates(records, look=None):
         fl += m["face_lines"]
         sc.append(m["screen_chars"])
     sem = semantic_colours(records)
-    colour = colour_gate({th: colour_table(s, th) for th, s in sem.items()})
+    colour_scene = colour_gate({th: colour_table(s, th) for th, s in sem.items()})
     for th, s in sem.items():
-        colour["themes"][th]["classes"] = sorted(s)
-    colour["classes"] = sorted({c for s in sem.values() for c in s})
+        colour_scene["themes"][th]["classes"] = sorted(s)
+    colour_scene["classes"] = sorted({c for s in sem.values() for c in s})
+    themes = sorted({_theme(r) for r in records})
+    if look and look.get("colors"):
+        # Ek G5: the gate from the look record's meaning roles; the scene table is information.
+        colour = role_colour_gate(look, themes, mark_roles(records, look), mark_sizes(records))
+    else:
+        colour = colour_scene
     out = {
         "text_contrast": {"worst": worst_text, "pass": bool(worst_text) and worst_text["margin"] >= 1.0},
         "nontext_contrast": {"worst_glyph": worst_glyph, "threshold": NONTEXT_MIN,
@@ -307,6 +400,7 @@ def gates(records, look=None):
         "min_font": {"worst": min_font, "threshold": MIN_FONT, "pass": bool(min_font) and min_font["px"] >= MIN_FONT},
         "touch": {"below_44": small_taps[:30], "count": len(small_taps), "pass": not small_taps},
         "colour": colour,
+        "colour_scene": colour_scene,
         "roles": {k: {"px": v["px"], "min_ratio": round(v["min_ratio"], 2)} for k, v in sorted(by_role.items())},
         "density": {"face_chars_mean": round(sum(fc) / len(fc), 1) if fc else None, "face_chars_max": max(fc) if fc else None,
                     "face_lines_max": max(fl) if fl else None,

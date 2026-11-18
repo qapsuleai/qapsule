@@ -350,5 +350,10 @@ def computed_md(out) -> str:
         L.append(f"| `{d}` | {tc.get('ratio')} / {tc.get('threshold')} | {gl.get('ratio')} | {mf.get('px')} | {g['touch']['count']} | "
                  f"{(str(cm['min']) + ' / ' + str(cm['threshold']) + ' (' + cm['a'] + ' ↔ ' + cm['b'] + ')') if cm else '—'} | "
                  f"{dn['face_chars_mean']} / {dn['face_chars_max']} | {dn['screen_chars_mean']} | {k52} | {g['pass']} |")
+    sh = [(d, g["colour"].get("shared")) for d, g in sorted(out.items()) if g["colour"].get("rule")]
+    if sh:
+        L += ["", "Renk kapısı Ek G5 (görünüş kaydının rolleri). Bilerek paylaşılan roller (sayılmaz; gri soruyla sınanır):", ""]
+        for d, s in sh:
+            L.append(f"- `{d}`: " + (", ".join(f"{x['theme']}: {x['a']} = {x['b']}" for x in s) or "yok"))
     L.append("")
     return "\n".join(L)

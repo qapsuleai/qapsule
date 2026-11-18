@@ -788,12 +788,17 @@ pub const OLTAN: Look = Look {
         neutral: [110, 112, 118, 255],
         valid: [246, 246, 242, 255],
         invalid: [110, 112, 118, 255],
-        closed: [170, 173, 180, 255],
-        // (M16 rebase) `tg5`'s failed trace is `closed` at this floor: 154 lands it on
-        // `invalid` (3.75:1), so "did not hold" and "no longer valid" stay one grey.
-        closed_alpha: 154,
-        // An open glyph at freshness 0 keeps ≥ 3:1 (`neutral` needs ≥ 214).
-        fresh_alpha_min: 216,
+        // (M16 rebase) `tg5` draws a closed glyph at this floor: the failed trace in
+        // `closed` = `invalid` (3.75:1: "did not hold" and "no longer valid" stay one grey),
+        // the realized plate in opaque ink. The ladder of DESIGN.md decision 2, at any
+        // freshness.
+        closed: [110, 112, 118, 255],
+        closed_alpha: 255,
+        // An open glyph keeps ≥ 3:1 at freshness 0 from 214 up (`neutral`); 255 keeps the
+        // ladder itself: below it the faded `down` slides onto the grey (harness `compute`,
+        // grey ΔE00 4.2 at 216; the presented capsules sit at freshness ≈ 0). Freshness is
+        // read from the sentence ("bugün, hâlâ geçerli"), not from the glyph's opacity.
+        fresh_alpha_min: 255,
         // The confidence plate never fades below a fresh glyph's (0.24).
         plate_alpha_min: 61,
         focus: [138, 170, 255, 255],
@@ -839,11 +844,11 @@ pub const OLTAN: Look = Look {
         neutral: [136, 138, 142, 255],
         valid: [17, 18, 22, 255],
         invalid: [136, 138, 142, 255],
-        closed: [100, 103, 110, 255],
-        // (M16 rebase) 196 lands `tg5`'s failed trace on `invalid` (3.45:1).
-        closed_alpha: 196,
-        // An open glyph at freshness 0 keeps ≥ 3:1 (`neutral` needs ≥ 232).
-        fresh_alpha_min: 234,
+        // (M16 rebase) As in the dark scheme: `closed` = `invalid` (3.46:1), opaque.
+        closed: [136, 138, 142, 255],
+        closed_alpha: 255,
+        // ≥ 3:1 at freshness 0 from 232 up (`neutral`); 255 as in the dark scheme.
+        fresh_alpha_min: 255,
         plate_alpha_min: 61,
         focus: [40, 80, 220, 255],
         chrome: Chrome {

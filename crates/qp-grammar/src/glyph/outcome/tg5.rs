@@ -373,7 +373,7 @@ mod tests {
     #[test]
     fn ornek_signs_keep_3_to_1_at_freshness_zero() {
         use crate::look::{ORNEK, R4};
-        signs_keep_3_to_1_at_freshness_zero(&ORNEK);
+        assert_eq!(signs_keep_3_to_1(&ORNEK), 2 * 2 * 6 * 3 * 5);
         // r4 keeps freshness alone (its glyphs stay byte-identical).
         for t in [R4.dark, R4.light] {
             assert_eq!((t.closed_alpha, t.fresh_alpha_min), (0, 0));
@@ -383,10 +383,18 @@ mod tests {
     /// (R5/M16) The same for `oltan` (its 120 px face glyph and the card glyphs).
     #[test]
     fn oltan_signs_keep_3_to_1_at_freshness_zero() {
-        signs_keep_3_to_1_at_freshness_zero(&crate::look::OLTAN);
+        assert_eq!(signs_keep_3_to_1(&crate::look::OLTAN), 2 * 2 * 6 * 3 * 5);
     }
 
-    fn signs_keep_3_to_1_at_freshness_zero(look: &crate::look::Look) {
+    /// (R5/M16) The same for `zemre` (its floors: `closed_alpha` 255, `fresh_alpha_min`).
+    #[test]
+    fn zemre_signs_keep_3_to_1_at_freshness_zero() {
+        assert_eq!(signs_keep_3_to_1(&crate::look::ZEMRE), 2 * 2 * 6 * 3 * 5);
+    }
+
+    /// Asserts every sign of `look`'s two schemes at freshness 0 (see above); returns how
+    /// many signs it checked.
+    fn signs_keep_3_to_1(look: &crate::look::Look) -> usize {
         use crate::glyph::rozet::Rozet;
         let alphabets: [&dyn Alphabet; 2] = [&Siluet, &Rozet];
         let bx = GlyphBox {
@@ -452,7 +460,7 @@ mod tests {
                 }
             }
         }
-        assert_eq!(checked, 2 * 2 * 6 * 3 * 5);
+        checked
     }
 
     /// (R5/T3c) Without floors the failed trace is exactly the faded open look (`r4`).

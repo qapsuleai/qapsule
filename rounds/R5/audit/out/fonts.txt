@@ -1,0 +1,44 @@
+== AtkinsonHyperlegibleNext-Bold.ttf (24032 B, 298 cmap codepoints, tables: OS/2 cmap gasp glyf head hhea hmtx loca maxp name post)
+   name 0: Copyright 2020-2024 The Atkinson Hyperlegible Next Project Authors (https://github.com/googlefonts/atkinson-hy
+   name 1: Atkinson Hyperlegible Next
+   name 2: Bold
+   name 3: 2.001;NONE;AtkinsonHyperlegibleNext-Regular
+   name 4: Atkinson Hyperlegible Next Bold
+   name 5: Version 2.001
+   name 6: AtkinsonHyperlegibleNext-Bold
+   name 13: This Font Software is licensed under the SIL Open Font License, Version 1.1. This license is available with a 
+   name 14: https://openfontlicense.org
+   Turkish missing: none; extra missing: ['₺', '✓', '✗']; digit advances: [632]
+== AtkinsonHyperlegibleNext-Regular.ttf (36768 B, 297 cmap codepoints, tables: GDEF GPOS GSUB OS/2 cmap gasp glyf head hhea hmtx loca maxp name post)
+   name 0: Copyright 2020-2024 The Atkinson Hyperlegible Next Project Authors (https://github.com/googlefonts/atkinson-hy
+   name 1: Atkinson Hyperlegible Next
+   name 2: Regular
+   name 3: 2.001;NONE;AtkinsonHyperlegibleNext-Regular
+   name 4: Atkinson Hyperlegible Next Regular
+   name 5: Version 2.001
+   name 6: AtkinsonHyperlegibleNext-Regular
+   name 13: This Font Software is licensed under the SIL Open Font License, Version 1.1. This license is available with a 
+   name 14: https://openfontlicense.org
+   Turkish missing: none; extra missing: ['₺', '✓', '✗']; digit advances: [632]
+== AtkinsonHyperlegibleNext-SemiBold.ttf (36804 B, 297 cmap codepoints, tables: GDEF GPOS GSUB OS/2 cmap gasp glyf head hhea hmtx loca maxp name post)
+   name 0: Copyright 2020-2024 The Atkinson Hyperlegible Next Project Authors (https://github.com/googlefonts/atkinson-hy
+   name 1: Atkinson Hyperlegible Next SemiBold
+   name 2: Regular
+   name 3: 2.001;NONE;AtkinsonHyperlegibleNext-SemiBold
+   name 4: Atkinson Hyperlegible Next SemiBold
+   name 5: Version 2.001
+   name 6: AtkinsonHyperlegibleNext-SemiBold
+   name 13: This Font Software is licensed under the SIL Open Font License, Version 1.1. This license is available with a 
+   name 14: https://openfontlicense.org
+   Turkish missing: none; extra missing: ['₺', '✓', '✗']; digit advances: [632]
+== IBMPlexMono-Regular.ttf (135580 B, 930 cmap codepoints, tables: DSIG GDEF GPOS GSUB OS/2 cmap cvt  fpgm gasp glyf head hhea hmtx loca maxp meta name post prep)
+   name 0: Copyright 2017 IBM Corp. All rights reserved.
+   name 1: IBM Plex Mono
+   name 2: Regular
+   name 3: 2.3;IBM ;IBMPlexMono-Regular
+   name 4: IBM Plex Mono Regular
+   name 5: Version 2.3
+   name 6: IBMPlexMono-Regular
+   name 13: This Font Software is licensed under the SIL Open Font License, Version 1.1. This license is available with a 
+   name 14: http://scripts.sil.org/OFL
+   Turkish missing: none; extra missing: ['✗']; digit advances: [600]

@@ -1,0 +1,38 @@
+== capsule: text colours (vs scene bg)
+   dark  #6e7076ff  19px   3.75 n=  16 <4.5  e.g. capsule cap.SYN26.breakout.down.47 'SYN26 son 20 günün en düşük'
+   dark  #8aaaffff  14px   8.20 n=   6   e.g. capsule cap.SYN26.breakout.down.47 'SYN26 1d 99.50'
+   dark  #b9bcc4ff  13px   9.77 n=   6   e.g. capsule cap.SYN26.breakout.down.47 '120.00'
+   dark  #b9bcc4ff  14px   9.77 n=  44   e.g. capsule cap.SYN26.breakout.down.47 '2023-03'
+   dark  #f6f6f2ff  15px  17.13 n=  18   e.g. capsule cap.SYN26.breakout.down.47 'En düşük fiyat · 110,95'
+   dark  #f6f6f2ff  16px  17.13 n=  26   e.g. capsule cap.SYN26.breakout.down.47 '8 Mart'ta kapanış 108,38 oldu,'
+   light #111216ff  15px  18.72 n=  18   e.g. capsule cap.SYN26.breakout.down.47 'En düşük fiyat · 110,95'
+   light #111216ff  16px  18.72 n=  26   e.g. capsule cap.SYN26.breakout.down.47 '8 Mart'ta kapanış 108,38 oldu,'
+   light #272a32ff  13px  14.35 n=   6   e.g. capsule cap.SYN26.breakout.down.47 '120.00'
+   light #272a32ff  14px  14.35 n=  44   e.g. capsule cap.SYN26.breakout.down.47 '2023-03'
+   light #2850dcff  14px   6.42 n=   6   e.g. capsule cap.SYN26.breakout.down.47 'SYN26 1d 99.50'
+   light #888a8eff  19px   3.46 n=  16 <4.5  e.g. capsule cap.SYN26.breakout.down.47 'SYN26 son 20 günün en düşük'
+== capsule: non-text colours (vs scene bg), alpha shown in hex
+   dark  circle #8aaaffff  8.20 n=   6   e.g. capsule cap.SYN26.breakout.down.47 lw=None r=3 pts=0
+   dark  circle #f6f6f2ff 17.13 n=   4   e.g. capsule cap.SYN26.breakout.down.46 lw=None r=17.600000381469727 pts=0
+   dark  fill   #6e70763d  1.28 n=   2 <3  e.g. capsule cap.SYN26.breakout.down.47 lw=None r=None pts=4
+   dark  fill   #6e7076ff  3.75 n=   6   e.g. capsule cap.SYN26.breakout.down.47 lw=None r=None pts=3
+   dark  fill   #f6f6f2ff 17.13 n=   4   e.g. capsule cap.SYN26.breakout.down.46 lw=None r=None pts=28
+   dark  line   #6e7076ff  3.75 n=   4   e.g. capsule cap.SYN26.breakout.down.47 lw=9.600000381469727 r=None pts=2
+   dark  line   #8aaaffff  8.20 n=   6   e.g. capsule cap.SYN26.breakout.down.47 lw=1.5 r=None pts=31
+   dark  line   #f6f6f2ff 17.13 n=   8   e.g. capsule cap.SYN26.breakout.down.47 lw=4.9536004066467285 r=None pts=2
+   dark  rect   #24262cff  1.23 n=  16 <3  e.g. capsule cap.SYN26.breakout.down.47 lw=None r=None pts=0
+   dark  rect   #5c606aff  2.95 n=  12 <3  e.g. capsule cap.SYN26.breakout.down.47 lw=None r=None pts=0
+   dark  rect   #8aaaffff  8.20 n=  12   e.g. capsule cap.SYN26.breakout.down.47 lw=None r=None pts=0
+   dark  rect   #f6f6f2ff 17.13 n=  18   e.g. capsule cap.SYN26.breakout.down.47 lw=None r=None pts=0
+   light circle #111216ff 18.72 n=   4   e.g. capsule cap.SYN26.breakout.down.46 lw=None r=17.600000381469727 pts=0
+   light circle #2850dcff  6.42 n=   6   e.g. capsule cap.SYN26.breakout.down.47 lw=None r=3 pts=0
+   light fill   #111216ff 18.72 n=   4   e.g. capsule cap.SYN26.breakout.down.46 lw=None r=None pts=28
+   light fill   #888a8e3d  1.28 n=   2 <3  e.g. capsule cap.SYN26.breakout.down.47 lw=None r=None pts=4
+   light fill   #888a8eff  3.46 n=   6   e.g. capsule cap.SYN26.breakout.down.47 lw=None r=None pts=3
+   light line   #111216ff 18.72 n=   8   e.g. capsule cap.SYN26.breakout.down.47 lw=4.9536004066467285 r=None pts=2
+   light line   #2850dcff  6.42 n=   6   e.g. capsule cap.SYN26.breakout.down.47 lw=1.5 r=None pts=31
+   light line   #888a8eff  3.46 n=   4   e.g. capsule cap.SYN26.breakout.down.47 lw=9.600000381469727 r=None pts=2
+   light rect   #111216ff 18.72 n=  18   e.g. capsule cap.SYN26.breakout.down.47 lw=None r=None pts=0
+   light rect   #2850dcff  6.42 n=  12   e.g. capsule cap.SYN26.breakout.down.47 lw=None r=None pts=0
+   light rect   #96989eff  2.88 n=  12 <3  e.g. capsule cap.SYN26.breakout.down.47 lw=None r=None pts=0
+   light rect   #e8e8e4ff  1.23 n=  16 <3  e.g. capsule cap.SYN26.breakout.down.47 lw=None r=None pts=0

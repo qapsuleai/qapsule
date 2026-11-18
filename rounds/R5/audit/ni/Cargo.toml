@@ -1,0 +1,20 @@
+[package]
+name = "r5-audit-ni"
+description = "R5/A: auditor's own non-interference probe (story list + voices + coin-flip rule)."
+version = "0.0.0"
+edition = "2021"
+publish = false
+
+# Not a member of the main workspace.
+[workspace]
+
+[[bin]]
+name = "r5-audit-ni"
+path = "main.rs"
+
+[dependencies]
+qp-schema = { path = "../../../../crates/qp-schema" }
+qp-session = { path = "../../../../crates/qp-session" }
+qp-capsule = { path = "../../../../crates/qp-capsule" }
+qp-source = { path = "../../../../crates/qp-source" }
+serde_json = { version = "1.0.154", features = ["float_roundtrip"] }

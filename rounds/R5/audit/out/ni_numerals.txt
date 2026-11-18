@@ -1,0 +1,4 @@
+== /private/tmp/claude-501/-Users-arkns-Works-Mchart-qapsule/5a43680d-1da3-48dd-ba6a-07c2dfe1a480/scratchpad/agents/audit/ni/c.jsonl: 115 text fields with a digit
+     50  welcome/summary/facts/[]/text   e.g. 'continuation.ma_stack bear at bar 114'
+     38  notify/event/changes/[]/finding/invalidation/text   e.g. 'outcome rule (qp-capsule barrier, docs/CAPSULE.md §9.3)'
+     27  notify/event/changes/[]/fact/text   e.g. 'continuation.ma_stack bull at bar 305'

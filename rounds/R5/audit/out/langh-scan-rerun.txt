@@ -1,0 +1,4 @@
+marla {"advice":0,"contradiction":0,"determinism":0,"empty":0,"equivalence":0,"internal":0,"ledger_expect":0,"length":0,"redacted_digit":0,"repeat":0,"threshold":0,"unglossed":0,"vague":0}
+selvi {"advice":0,"contradiction":0,"determinism":0,"empty":0,"equivalence":0,"internal":0,"ledger_expect":0,"length":0,"redacted_digit":0,"repeat":0,"threshold":0,"unglossed":0,"vague":0}
+r4 {"advice":0,"contradiction":636,"determinism":0,"empty":0,"equivalence":20,"internal":2344,"ledger_expect":1581,"length":1294,"redacted_digit":0,"repeat":76,"threshold":1002,"unglossed":1557,"vague":756}
+bozuk {"advice":0,"contradiction":396,"determinism":0,"empty":0,"equivalence":14,"internal":15088,"ledger_expect":3375,"length":3184,"redacted_digit":0,"repeat":0,"threshold":1854,"unglossed":2414,"vague":7681}

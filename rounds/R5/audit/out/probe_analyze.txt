@@ -1,0 +1,51 @@
+text prims: faces 374, all 1130
+  faces: below threshold 0; worst 9.77 (need 4.5) 19px 'SYN21 düşüşte, 20' #b9bcc4ff [face tr step1 cap.SYN21.continuation.down.104 dark]; min px 15.0
+  faces+open+evidence+chart: below threshold 32; worst 3.46 (need 4.5) 19px 'SYN26 son 20 günün en düşük' #888a8eff [capsule tr cap.SYN26.breakout.down.47 light]; min px 13.0
+     BELOW 3.46<4.5 19px '(110.95) · did not play out on 10' #888a8eff [capsule en cap.SYN26.breakout.down.47 light]
+     BELOW 3.46<4.5 19px '(111,73) altına indi · 8 Mart'ta' #888a8eff [capsule tr cap.SYN26.breakout.down.46 light]
+     BELOW 3.46<4.5 19px '(111.73) · played out on 8 March' #888a8eff [capsule en cap.SYN26.breakout.down.46 light]
+     BELOW 3.46<4.5 19px '(160,04) altına indi · 9' #888a8eff [capsule tr cap.SYN08.breakout.down.113 light]
+     BELOW 3.46<4.5 19px '(160.04) · played out on 9 June' #888a8eff [capsule en cap.SYN08.breakout.down.113 light]
+     BELOW 3.46<4.5 19px 'Haziran'da gerçekleşti' #888a8eff [capsule tr cap.SYN08.breakout.down.113 light]
+     BELOW 3.46<4.5 19px 'March' #888a8eff [capsule en cap.SYN26.breakout.down.47 light]
+     BELOW 3.46<4.5 19px 'Mart'ta tutmadı' #888a8eff [capsule tr cap.SYN26.breakout.down.47 light]
+non-text prims by colour role (min contrast, count):
+  dark  circle accent,focus,s1              min  1.00 n=  14 <3   e.g. evidence tr cap.SYN26.breakout.down.46
+  dark  fill   accent,focus,s1              min  8.20 n=  12   e.g. evidence tr cap.SYN26.breakout.down.47
+  dark  line   accent,focus,s1              min  6.24 n=   8   e.g. evidence tr cap.SYN26.breakout.down.47
+  dark  circle bg,surface                   min  1.28 n=  42 <3   e.g. face tr step1 cap.SYN26.breakout.down.47
+  dark  fill   bg,surface                   min  1.00 n= 110 <3   e.g. face tr step1 cap.SYN21.continuation.down.104
+  dark  line   bg,surface                   min 17.13 n=  54   e.g. face tr step1 cap.SYN21.continuation.down.104
+  dark  circle closed,invalid,neutral       min  1.00 n=  76 <3   e.g. evidence tr cap.SYN26.breakout.down.47
+  dark  fill   closed,invalid,neutral       min  1.28 n= 204 <3   e.g. face tr step1 cap.SYN26.breakout.down.47
+  dark  line   closed,invalid,neutral       min  1.17 n= 164 <3   e.g. evidence tr cap.SYN26.breakout.down.47
+  dark  circle text,valid                   min  1.69 n=  40 <3   e.g. face tr step1 cap.SYN21.continuation.down.104
+  dark  fill   text,valid                   min 17.13 n=  56   e.g. face tr step1 cap.SYN21.continuation.down.104
+  dark  line   text,valid                   min  1.69 n=  80 <3   e.g. face tr step1 cap.SYN21.continuation.down.104
+  light circle accent,focus,s1              min  1.00 n=  14 <3   e.g. evidence tr cap.SYN26.breakout.down.46
+  light fill   accent,focus,s1              min  6.42 n=  12   e.g. evidence tr cap.SYN26.breakout.down.47
+  light line   accent,focus,s1              min  5.06 n=   8   e.g. evidence tr cap.SYN26.breakout.down.47
+  light circle bg,surface                   min  1.28 n=  42 <3   e.g. face tr step1 cap.SYN26.breakout.down.47
+  light fill   bg,surface                   min  1.00 n= 110 <3   e.g. face tr step1 cap.SYN21.continuation.down.104
+  light line   bg,surface                   min 18.72 n=  54   e.g. face tr step1 cap.SYN21.continuation.down.104
+  light circle closed,invalid,neutral       min  1.00 n=  76 <3   e.g. evidence tr cap.SYN26.breakout.down.47
+  light fill   closed,invalid,neutral       min  1.28 n= 204 <3   e.g. face tr step1 cap.SYN26.breakout.down.47
+  light line   closed,invalid,neutral       min  1.39 n= 164 <3   e.g. evidence tr cap.SYN26.breakout.down.47
+  light circle text,valid                   min  2.15 n=  40 <3   e.g. face tr step1 cap.SYN21.continuation.down.104
+  light fill   text,valid                   min 18.72 n=  56   e.g. face tr step1 cap.SYN21.continuation.down.104
+  light line   text,valid                   min  2.15 n=  80 <3   e.g. face tr step1 cap.SYN21.continuation.down.104
+faces only, meaning-role non-text min: {('dark', 'bg,surface'): 1.0, ('dark', 'text,valid'): 1.69, ('light', 'bg,surface'): 1.0, ('light', 'text,valid'): 2.15, ('dark', 'closed,invalid,neutral'): 1.28, ('light', 'closed,invalid,neutral'): 1.28}
+DOM text nodes on screen: 224; below threshold: 0
+paint=cpu: {'fallback': 'removed', 'requested': 'cpu', 'used': 'canvas'}
+foreign requests: 0 []
+pages: [('/?theme=dark&lang=tr&anim=0', 40, 0), ('/?theme=dark&lang=en&anim=0', 44, 0), ('/?theme=light&lang=tr&anim=0', 44, 0), ('/?theme=light&lang=en&anim=0', 44, 0), ('/?theme=dark&principal=visitor&anim=0', 24, 0), ('/?paint=cpu', 15, 0), ('/?theme=dark', 18, 0), ('/?theme=dark', 22, 0), ('/gallery.html', 61, 0)]
+gallery: {'canvases': 55, 'reqs': 61}
+reduced motion: same face ids True ; texts equal True ; extra texts under reduce: {} ; missing under reduce: {}
+reduced motion DOM texts missing under reduce: []
+   visitor DOM digit: 2023-06-19 10:00 clock
+   visitor DOM digit: +1 c_step
+   visitor DOM digit: 1 / 1260 c_step_n
+   visitor DOM digit: 2023-07-06 12:00 clock
+   visitor DOM digit: +1 c_step
+   visitor DOM digit: 120 / 1260 c_step_n
+visitor face texts 0, with digit 0

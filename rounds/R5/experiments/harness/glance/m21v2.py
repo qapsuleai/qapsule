@@ -165,7 +165,8 @@ def cmd_shoot(a):
                         c = code(d["name"], cs["state"], "change", lang, theme)
                         anchor = pr[str(cs["step"])]["rows"][cs["anchor_index"]]["id"]
                         shots.append(dict(base, id=c, kind="change", step=cs["step"], principal="arkin", target=cs["target"],
-                                          anchor=anchor, change_kind=cs["kind"], mid_ms=d.get("mid_ms", 225)))
+                                          anchor=anchor, change_kind=cs["kind"], mid_ms=d.get("mid_ms", 225),
+                                          end_ms=int(os.environ.get("QP_M21_END_MS", "5000"))))
                         key[c] = {"design": d["name"], "state": cs["state"], "kind": "change", "lang": lang, "theme": theme}
         jdump(run / "key.json", key)
         if a.max:

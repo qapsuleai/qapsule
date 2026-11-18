@@ -697,7 +697,7 @@ async function changeShot(browser, origin, s, log) {
     }
     return null;
   };
-  for (const [name, ms] of [['mid', s.mid_ms || 180], ['after', 1000], ['end', 5000]]) {
+  for (const [name, ms] of [['mid', s.mid_ms || 180], ['after', 1000], ['end', s.end_ms || 5000]]) {
     const t = await at(ms);
     const ov = await overlay(page);
     meta.frames[name] = { ms, t, overlay: ov };

@@ -57,6 +57,7 @@ struct StyleReq<'a> {
     voice: Option<&'a str>,
     story: Option<&'a str>,
     hide_closed: Option<bool>,
+    open: Option<&'a str>,
 }
 
 /// (R5/S) A story design's whole-scene compile, the reader's story rows and the focus.
@@ -230,6 +231,7 @@ impl Session {
                 voice,
                 story,
                 hide_closed,
+                open,
             } => {
                 self.set_style(
                     ci,
@@ -245,6 +247,7 @@ impl Session {
                         voice: voice.as_deref(),
                         story: story.as_deref(),
                         hide_closed: *hide_closed,
+                        open: open.as_deref(),
                     },
                 )?;
                 (Out::default(), Vec::new())
@@ -405,7 +408,20 @@ impl Session {
                 return Err(unknown("story", st, qp_grammar::stories::names()));
             }
         }
+        if let Some(o) = r.open {
+            if !qp_grammar::open::is_open(o) {
+                return Err(unknown("open", o, qp_grammar::open::names()));
+            }
+        }
         let look = &mut self.conns[ci].look;
+        if let Some(o) = r.open {
+            let next = (o != qp_grammar::open::DEFAULT_OPEN).then(|| o.to_owned());
+            // Another design: the capsule frame a design's height set no longer holds.
+            if next != look.open {
+                look.frames.remove("capsule");
+            }
+            look.open = next;
+        }
         if let Some(v) = r.voice {
             look.voice = (v != qp_capsule::voice::DEFAULT_VOICE).then(|| v.to_owned());
         }
@@ -476,6 +492,19 @@ impl Session {
     /// a face is that wide and [`FACE_HEIGHT`] high).
     fn frame(&self, ci: usize, key: &str) -> (u32, u32) {
         let c = &self.conns[ci];
+        // (R5/M20) An open capsule design that states its height opens the capsule depth
+        // at it, whichever frame the surface reported (a tap on a face opens it too).
+        if key == "capsule" {
+            let look = crate::viewer::look_of(&c.look);
+            if let Some(h) = qp_grammar::open::height_in(look, c.look.open.as_deref()) {
+                let w = c
+                    .look
+                    .frames
+                    .get(key)
+                    .map_or_else(|| screen_frame(c.surface.kind).0, |f| f[0]);
+                return (w, h);
+            }
+        }
         if let Some([w, h]) = c.look.frames.get(key) {
             return (*w, *h);
         }
@@ -554,7 +583,11 @@ impl Session {
             || self.conns[ci].look.look.is_some()
             || voice.is_some();
         let look = crate::viewer::look_of(&self.conns[ci].look);
-        if d == OpenDepth::Capsule && (self.conns[ci].look.look.is_some() || voice.is_some()) {
+        // (R5/M20) An open capsule design other than `r4` builds the capsule depth.
+        let open = self.conns[ci].look.open.clone();
+        if d == OpenDepth::Capsule
+            && (self.conns[ci].look.look.is_some() || voice.is_some() || open.is_some())
+        {
             let Some(id) = pr.capsule_view.as_ref().map(|v| v.id.clone()) else {
                 return Ok(None);
             };
@@ -565,7 +598,8 @@ impl Session {
                 .with_headlines(&self.headlines)
                 .with_parts(self, lang)
                 .with_voice(voice.as_deref());
-            return Ok(depth::capsule_view_in(look, finding, max_points, &p, &id).ok());
+            let design = qp_grammar::open::by_name(open.as_deref());
+            return Ok((design.view)(look, finding, max_points, &p, &id).ok());
         }
         if d == OpenDepth::Sentence && styled {
             if pr.capsule_view.is_none() {
@@ -820,7 +854,19 @@ impl Session {
         }
         // The scene before, as it was shown (the face when nothing was open).
         let before = self.side_scene(ci, finding, from)?;
-        let presentation = self.present_at(ci, finding, to)?;
+        let mut presentation = self.present_at(ci, finding, to)?;
+        // (R5/M20) An open capsule design that writes a text column for a reader without
+        // a scene reads the facts at the capsule depth too (as the chart depth gives them
+        // to this reader: redacted evidence without the entitlement, K33).
+        if to == OpenDepth::Capsule
+            && presentation.capsule_view.is_none()
+            && presentation.facts.is_empty()
+            && qp_grammar::open::by_name(self.conns[ci].look.open.as_deref())
+                .text
+                .is_some()
+        {
+            presentation.facts = self.present_at(ci, finding, OpenDepth::Chart)?.facts;
+        }
         // Update the view state.
         let view_id = match to {
             OpenDepth::Sentence => None,

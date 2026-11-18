@@ -3141,6 +3141,10 @@ pub enum Gesture {
         /// default). The selected story stays drawn.
         #[serde(default, skip_serializing_if = "Option::is_none")]
         hide_closed: Option<bool>,
+        /// (R5/M20) Open capsule design: what the capsule depth shows
+        /// (`qp_grammar::open::OPENS`: `r4`, `tesir`; default `r4`, today's card).
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        open: Option<String>,
     },
     /// (R4, §4.6) Close the open capsule one depth back, or to `to` (`sentence`: back to
     /// the feed). Answered with an `interaction` carrying the `opening` (the way back).
@@ -3258,6 +3262,9 @@ pub struct ViewState {
     /// (R5/M18, K54) The story chart hides closed stories (absent/`false`: shown).
     #[serde(default, skip_serializing_if = "std::ops::Not::not")]
     pub hide_closed: bool,
+    /// (R5/M20) Open capsule design of its capsule depth (absent: the default, `r4`).
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub open: Option<String>,
 }
 
 /// (R4, §4.6) One element both sides of a depth transition show (e.g. the glyph, the

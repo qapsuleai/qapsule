@@ -692,6 +692,15 @@ mod shell_binding {
                 .unwrap_or_default()
         }
 
+        /// (R5/M20) The open capsule's scene as the core builds it (JSON `SceneDesc`;
+        /// empty: none): tests read its panels and `terms`.
+        pub fn open_desc(&mut self) -> String {
+            self.inner
+                .scene()
+                .and_then(|s| serde_json::to_string(&s).ok())
+                .unwrap_or_default()
+        }
+
         /// Evidence rows (JSON).
         pub fn evidence(&self) -> String {
             self.inner.evidence_json().to_string()
@@ -839,9 +848,10 @@ mod shell_binding {
             self.inner.pointer(target, phase, id, x, y)
         }
 
-        /// A wheel notch.
-        pub fn wheel(&mut self, dy: f64, x: f64) {
-            self.inner.wheel(dy, x);
+        /// A wheel notch; (R5/M20) `true` when it was the chart's zoom (else the page
+        /// scrolls).
+        pub fn wheel(&mut self, dy: f64, x: f64) -> bool {
+            self.inner.wheel(dy, x)
         }
 
         /// The last transition in page coordinates (JSON).

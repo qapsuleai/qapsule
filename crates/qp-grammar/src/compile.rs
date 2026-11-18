@@ -913,7 +913,18 @@ pub fn compile(
         }
     }
     // Vertical grid and month labels (labels under the bottom panel only).
-    let last_rect = rects[rects.len() - 1];
+    // (R5/M20) Under a bottom card panel (text only) the labels go under the last panel
+    // with a value scale instead (a column of text blocks under a small chart).
+    let last_rect = if card[rects.len() - 1] {
+        rects
+            .iter()
+            .zip(&card)
+            .rev()
+            .find(|(_, c)| !**c)
+            .map_or(rects[rects.len() - 1], |(r, _)| *r)
+    } else {
+        rects[rects.len() - 1]
+    };
     let mut prev_month: Option<(i64, i64)> = None;
     let mut last_label_x = i32::MIN;
     for s in fr.from..=fr.to {

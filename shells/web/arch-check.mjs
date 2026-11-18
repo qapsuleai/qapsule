@@ -43,6 +43,8 @@ export const ALLOWED_CORE = new Set([
   'stories',
   // R5/M18 korda (ARCH.md): synthetic stories for the K52 measurement (5 / 50 / 200).
   'bench_stories',
+  // R5/M20 (ARCH.md): the open capsule's scene as the core holds it (tests read its terms).
+  'open_desc',
 ]);
 
 // R5/G (ARCH.md "Galeri"): the gallery page's core (`Gallery`, crates/qp-wasm/src/lib.rs).

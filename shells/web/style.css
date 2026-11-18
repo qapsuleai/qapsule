@@ -39,7 +39,7 @@ body.open[data-tab="feed"] #layer { display: block; }
 body.open[data-tab="feed"] #feed { display: none; }
 #layerbar { display: flex; gap: var(--qp-space-2); align-items: center; padding: var(--qp-space-2) var(--qp-space-3); border-bottom: var(--qp-rule) solid var(--line); }
 #depth { color: var(--muted); }
-#opentext { margin: var(--qp-space-2) var(--qp-space-3); }
+#opentext { margin: var(--qp-space-2) var(--qp-space-3); white-space: pre-line; }
 #scene { display: block; width: var(--qp-scene-w); height: var(--qp-scene-h); touch-action: none; }
 #hint { color: var(--muted); margin: var(--qp-space-1) var(--qp-space-3); font-size: var(--qp-fs-small); }
 #evidence .ev { margin: var(--qp-space-1) var(--qp-space-3); padding: var(--qp-space-2); border: var(--qp-rule) solid var(--line); border-radius: var(--radius); }

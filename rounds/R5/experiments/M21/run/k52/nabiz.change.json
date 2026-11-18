@@ -1,0 +1,119 @@
+{
+ "params": [
+  "anim=1",
+  "look=r4",
+  "motion=nabiz",
+  "voice=marla"
+ ],
+ "reduce": false,
+ "runs": 3,
+ "reps": 0,
+ "seek": "120",
+ "play_ms": 8000,
+ "configs": {
+  "phone-jit-est": {
+   "runs": [
+    {
+     "change": {
+      "n": 543,
+      "p50": 17,
+      "p95": 18,
+      "p99": 19,
+      "max": 19,
+      "long": 0,
+      "long_share": 0
+     },
+     "changed_faces": null
+    },
+    {
+     "change": {
+      "n": 541,
+      "p50": 17,
+      "p95": 18,
+      "p99": 19,
+      "max": 21,
+      "long": 0,
+      "long_share": 0
+     },
+     "changed_faces": null
+    },
+    {
+     "change": {
+      "n": 543,
+      "p50": 17,
+      "p95": 18,
+      "p99": 19,
+      "max": 22,
+      "long": 0,
+      "long_share": 0
+     },
+     "changed_faces": null
+    }
+   ],
+   "summary": {
+    "change_long_share": 0,
+    "change_p99": 19,
+    "change_max": 21
+   },
+   "limit_long_share": 0.01,
+   "pass": true,
+   "pool": [
+    0,
+    0,
+    0
+   ]
+  },
+  "phone": {
+   "runs": [
+    {
+     "change": {
+      "n": 542,
+      "p50": 17,
+      "p95": 18,
+      "p99": 20,
+      "max": 24,
+      "long": 0,
+      "long_share": 0
+     },
+     "changed_faces": null
+    },
+    {
+     "change": {
+      "n": 541,
+      "p50": 17,
+      "p95": 18,
+      "p99": 20,
+      "max": 28,
+      "long": 0,
+      "long_share": 0
+     },
+     "changed_faces": null
+    },
+    {
+     "change": {
+      "n": 542,
+      "p50": 17,
+      "p95": 18,
+      "p99": 21,
+      "max": 24,
+      "long": 0,
+      "long_share": 0
+     },
+     "changed_faces": null
+    }
+   ],
+   "summary": {
+    "change_long_share": 0,
+    "change_p99": 20,
+    "change_max": 24
+   },
+   "limit_long_share": 0.1,
+   "pass": true,
+   "pool": [
+    0,
+    0,
+    0
+   ]
+  }
+ }
+}

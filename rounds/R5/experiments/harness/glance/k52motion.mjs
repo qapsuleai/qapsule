@@ -80,6 +80,23 @@ async function once(cfg) {
       w.back.push(...await take(() => page.evaluate(() => document.getElementById('back').click()), 700));
       await settle(page, 60000);
     }
+    // (Ek G6, supplement) face changes in view: seek to N, the changing capsule scrolled into
+    // view, one replay step, 1000 ms window (`--changes N:id,...`).
+    w.change = [];
+    for (const spec of (opt('--changes', '') || '').split(',').filter(Boolean)) {
+      const [n, cid] = spec.split(':');
+      for (let r = 0; r < Number(opt('--change-reps', '3')); r++) {
+        await page.evaluate((s) => { document.getElementById('c_date').value = s; document.getElementById('c_go').click(); }, n);
+        await page.waitForTimeout(500);
+        await settle(page, 120000);
+        await page.evaluate((id) => { const e = document.querySelector(`#list .face[data-id="${id}"]`); if (e) e.scrollIntoView({ block: 'center' }); }, cid);
+        await page.waitForTimeout(300);
+        await settle(page, 60000);
+        w.change.push(...await take(() => page.evaluate(() => document.getElementById('c_step').click()), 1000));
+      }
+    }
+    changes = await page.evaluate(() => (window.qp.changed ? window.qp.changed().length : null));
+    if (w.change.length) { await ctx.close(); return { change: stat(w.change), changed_faces: changes }; }
     await page.evaluate(() => window.scrollTo(0, 0));
     w.play = await take(() => page.evaluate(() => document.getElementById('c_play').click()), playMs);
     await page.evaluate(() => document.getElementById('c_play').click());
@@ -98,6 +115,13 @@ for (const c of configs) {
   const rr = [];
   for (let i = 0; i < runs; i++) rr.push(await once(CFG[c]));
   const med = (f) => { const v = rr.map(f).sort((a, b) => a - b); return v[Math.floor(v.length / 2)]; };
+  if (rr[0].change) {
+    const pool = rr.flatMap((r) => [r.change.long_share]);
+    const med2 = (f) => { const v = rr.map(f).sort((a, b) => a - b); return v[Math.floor(v.length / 2)]; };
+    res.configs[c] = { runs: rr, summary: { change_long_share: med2((r) => r.change.long_share), change_p99: med2((r) => r.change.p99), change_max: med2((r) => r.change.max) },
+      limit_long_share: c === 'phone' ? 0.10 : 0.01, pass: med2((r) => r.change.long_share) <= (c === 'phone' ? 0.10 : 0.01), pool };
+    continue;
+  }
   const summary = {
     transitions_long_share: med((r) => r.transitions.long_share), transitions_p99: med((r) => r.transitions.p99),
     transitions_max: med((r) => r.transitions.max), play_long_share: med((r) => r.play.long_share),

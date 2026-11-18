@@ -1,0 +1,225 @@
+{
+ "look": "r4",
+ "face": "",
+ "voice": "marla",
+ "params": [
+  "anim=1",
+  "motion=nabiz"
+ ],
+ "reps": 3,
+ "configs": {
+  "phone-jit-est": {
+   "summary": {
+    "open_ms": {
+     "wasm_ready": 119,
+     "first_capsule": 212
+    },
+    "feed": {
+     "tick": {
+      "n": 31,
+      "p50": 0,
+      "p95": 0
+     },
+     "face": {
+      "n": 9,
+      "p50": 0,
+      "p95": 1
+     },
+     "frame_idle": {
+      "n": 241,
+      "p50": 17,
+      "p95": 18,
+      "p99": 19
+     },
+     "frame_scroll": {
+      "n": 238,
+      "p50": 17,
+      "p95": 18,
+      "p99": 19
+     }
+    },
+    "chart": {
+     "tick": {
+      "n": 79,
+      "p50": 0,
+      "p95": 1
+     },
+     "scene": {
+      "n": 18,
+      "p50": 0,
+      "p95": 2
+     },
+     "face": {
+      "n": null,
+      "p50": null,
+      "p95": null
+     },
+     "frame_idle": {
+      "n": 1200,
+      "p50": 17,
+      "p95": 18,
+      "p99": 19
+     }
+    },
+    "cal": {
+     "tick": {
+      "n": 79,
+      "p50": 0,
+      "p95": 1
+     },
+     "face": {
+      "n": 9,
+      "p50": 0,
+      "p95": 1
+     },
+     "scene": {
+      "n": 18,
+      "p50": 0,
+      "p95": 2
+     }
+    },
+    "wasm_mb": 9.5,
+    "scene_px": [
+     1170,
+     900
+    ],
+    "scale": 3,
+    "depth": [
+     "chart",
+     "chart",
+     "chart"
+    ],
+    "capsule": [
+     "cap.SYN16.breakout.up.200",
+     "cap.SYN16.breakout.up.200",
+     "cap.SYN16.breakout.up.200"
+    ],
+    "scenes_per_tick": 0.22784810126582278,
+    "errors": []
+   },
+   "failed": 0,
+   "browser": "26.5",
+   "values": {
+    "tick_p95": 1,
+    "face_p95": 1,
+    "scene_p95": 2,
+    "first_capsule_ms": 212,
+    "frame_scroll_p99": 19
+   },
+   "checks": {
+    "tick": true,
+    "face": true,
+    "scene": true,
+    "long_frames": true,
+    "first_capsule": true
+   },
+   "pass": true,
+   "phone_bias_applied": false
+  },
+  "phone": {
+   "summary": {
+    "open_ms": {
+     "wasm_ready": 59,
+     "first_capsule": 207
+    },
+    "feed": {
+     "tick": {
+      "n": 31,
+      "p50": 0,
+      "p95": 1
+     },
+     "face": {
+      "n": 9,
+      "p50": 1,
+      "p95": 2
+     },
+     "frame_idle": {
+      "n": 241,
+      "p50": 17,
+      "p95": 18,
+      "p99": 20
+     },
+     "frame_scroll": {
+      "n": 239,
+      "p50": 17,
+      "p95": 18,
+      "p99": 21
+     }
+    },
+    "chart": {
+     "tick": {
+      "n": 79,
+      "p50": 0,
+      "p95": 1
+     },
+     "scene": {
+      "n": 18,
+      "p50": 2,
+      "p95": 3
+     },
+     "face": {
+      "n": null,
+      "p50": null,
+      "p95": null
+     },
+     "frame_idle": {
+      "n": 1196,
+      "p50": 17,
+      "p95": 18,
+      "p99": 19
+     }
+    },
+    "cal": {
+     "tick": {
+      "n": 79,
+      "p50": 0,
+      "p95": 1
+     },
+     "face": {
+      "n": 9,
+      "p50": 1,
+      "p95": 2
+     },
+     "scene": {
+      "n": 18,
+      "p50": 2,
+      "p95": 3
+     }
+    },
+    "wasm_mb": 9.5,
+    "scene_px": [
+     1170,
+     900
+    ],
+    "scale": 3,
+    "depth": [
+     "chart",
+     "chart",
+     "chart"
+    ],
+    "capsule": [
+     "cap.SYN16.breakout.up.200",
+     "cap.SYN16.breakout.up.200",
+     "cap.SYN16.breakout.up.200"
+    ],
+    "scenes_per_tick": 0.22784810126582278,
+    "errors": []
+   },
+   "failed": 0,
+   "browser": "26.5",
+   "values": {
+    "tick_p95": 1.6,
+    "face_p95": 2,
+    "scene_p95": 5.550000000000001,
+    "first_capsule_ms": 207,
+    "frame_scroll_p99": 21
+   },
+   "checks": {
+    "usable_long_frames": true
+   },
+   "pass": true,
+   "phone_bias_applied": true
+  }
+ },
+ "pass": true
+}

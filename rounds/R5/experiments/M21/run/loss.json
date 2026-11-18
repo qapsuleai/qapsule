@@ -1,0 +1,495 @@
+{
+ "nabiz": {
+  "animated": [
+   {
+    "face": "cap.SYN09.breakout.up.143",
+    "lang": "en",
+    "reduced_marker": [],
+    "reduced_prim_kinds": [
+     "circle"
+    ],
+    "reduced_prims": 1,
+    "state": "c_born",
+    "target": true,
+    "theme": "dark"
+   },
+   {
+    "face": "cap.SYN09.breakout.up.143",
+    "lang": "en",
+    "reduced_marker": [],
+    "reduced_prim_kinds": [
+     "circle"
+    ],
+    "reduced_prims": 1,
+    "state": "c_born",
+    "target": true,
+    "theme": "light"
+   },
+   {
+    "face": "cap.SYN09.breakout.up.143",
+    "lang": "tr",
+    "reduced_marker": [],
+    "reduced_prim_kinds": [
+     "circle"
+    ],
+    "reduced_prims": 1,
+    "state": "c_born",
+    "target": true,
+    "theme": "dark"
+   },
+   {
+    "face": "cap.SYN09.breakout.up.143",
+    "lang": "tr",
+    "reduced_marker": [],
+    "reduced_prim_kinds": [
+     "circle"
+    ],
+    "reduced_prims": 1,
+    "state": "c_born",
+    "target": true,
+    "theme": "light"
+   },
+   {
+    "face": "cap.SYN20.breakout.down.154",
+    "lang": "en",
+    "reduced_marker": [
+     "invalidated"
+    ],
+    "reduced_prim_kinds": [
+     "text"
+    ],
+    "reduced_prims": 1,
+    "state": "c_failed",
+    "target": true,
+    "theme": "dark"
+   },
+   {
+    "face": "cap.SYN20.breakout.down.154",
+    "lang": "en",
+    "reduced_marker": [
+     "invalidated"
+    ],
+    "reduced_prim_kinds": [
+     "text"
+    ],
+    "reduced_prims": 1,
+    "state": "c_failed",
+    "target": true,
+    "theme": "light"
+   },
+   {
+    "face": "cap.SYN20.breakout.down.154",
+    "lang": "tr",
+    "reduced_marker": [
+     "geçersiz"
+    ],
+    "reduced_prim_kinds": [
+     "text"
+    ],
+    "reduced_prims": 1,
+    "state": "c_failed",
+    "target": true,
+    "theme": "dark"
+   },
+   {
+    "face": "cap.SYN20.breakout.down.154",
+    "lang": "tr",
+    "reduced_marker": [
+     "geçersiz"
+    ],
+    "reduced_prim_kinds": [
+     "text"
+    ],
+    "reduced_prims": 1,
+    "state": "c_failed",
+    "target": true,
+    "theme": "light"
+   },
+   {
+    "face": "cap.SYN11.breakout.up.140",
+    "lang": "en",
+    "reduced_marker": [
+     "played out"
+    ],
+    "reduced_prim_kinds": [
+     "text"
+    ],
+    "reduced_prims": 1,
+    "state": "c_realized",
+    "target": true,
+    "theme": "dark"
+   },
+   {
+    "face": "cap.SYN11.breakout.up.140",
+    "lang": "en",
+    "reduced_marker": [
+     "played out"
+    ],
+    "reduced_prim_kinds": [
+     "text"
+    ],
+    "reduced_prims": 1,
+    "state": "c_realized",
+    "target": true,
+    "theme": "light"
+   },
+   {
+    "face": "cap.SYN11.breakout.up.140",
+    "lang": "tr",
+    "reduced_marker": [],
+    "reduced_prim_kinds": [
+     "text"
+    ],
+    "reduced_prims": 1,
+    "state": "c_realized",
+    "target": true,
+    "theme": "dark"
+   },
+   {
+    "face": "cap.SYN11.breakout.up.140",
+    "lang": "tr",
+    "reduced_marker": [],
+    "reduced_prim_kinds": [
+     "text"
+    ],
+    "reduced_prims": 1,
+    "state": "c_realized",
+    "target": true,
+    "theme": "light"
+   },
+   {
+    "face": "cap.SYN09.breakout.up.143",
+    "lang": "en",
+    "reduced_marker": [
+     "strengthened"
+    ],
+    "reduced_prim_kinds": [
+     "circle",
+     "text"
+    ],
+    "reduced_prims": 2,
+    "state": "c_strengthened",
+    "target": true,
+    "theme": "dark"
+   },
+   {
+    "face": "cap.SYN09.breakout.up.143",
+    "lang": "en",
+    "reduced_marker": [
+     "strengthened"
+    ],
+    "reduced_prim_kinds": [
+     "circle",
+     "text"
+    ],
+    "reduced_prims": 2,
+    "state": "c_strengthened",
+    "target": true,
+    "theme": "light"
+   },
+   {
+    "face": "cap.SYN09.breakout.up.143",
+    "lang": "tr",
+    "reduced_marker": [
+     "güçlendi"
+    ],
+    "reduced_prim_kinds": [
+     "circle",
+     "text"
+    ],
+    "reduced_prims": 2,
+    "state": "c_strengthened",
+    "target": true,
+    "theme": "dark"
+   },
+   {
+    "face": "cap.SYN09.breakout.up.143",
+    "lang": "tr",
+    "reduced_marker": [
+     "güçlendi"
+    ],
+    "reduced_prim_kinds": [
+     "circle",
+     "text"
+    ],
+    "reduced_prims": 2,
+    "state": "c_strengthened",
+    "target": true,
+    "theme": "light"
+   }
+  ],
+  "carried_lost": [
+   [
+    "c_born",
+    "en",
+    "dark",
+    "cap.SYN09.breakout.up.143"
+   ],
+   [
+    "c_born",
+    "en",
+    "light",
+    "cap.SYN09.breakout.up.143"
+   ],
+   [
+    "c_born",
+    "tr",
+    "dark",
+    "cap.SYN09.breakout.up.143"
+   ],
+   [
+    "c_born",
+    "tr",
+    "light",
+    "cap.SYN09.breakout.up.143"
+   ]
+  ],
+  "carried_lost_any_prim": [],
+  "carried_lost_bare_string": [
+   [
+    "c_born",
+    "en",
+    "dark",
+    "cap.SYN09.breakout.up.143"
+   ],
+   [
+    "c_born",
+    "en",
+    "light",
+    "cap.SYN09.breakout.up.143"
+   ],
+   [
+    "c_born",
+    "tr",
+    "dark",
+    "cap.SYN09.breakout.up.143"
+   ],
+   [
+    "c_born",
+    "tr",
+    "light",
+    "cap.SYN09.breakout.up.143"
+   ],
+   [
+    "c_realized",
+    "tr",
+    "dark",
+    "cap.SYN11.breakout.up.140"
+   ],
+   [
+    "c_realized",
+    "tr",
+    "light",
+    "cap.SYN11.breakout.up.140"
+   ]
+  ],
+  "count": 4,
+  "count_any_prim": 0,
+  "pass": false,
+  "reduced": "nabiz-az",
+  "static_lost": []
+ },
+ "r4": {
+  "animated": [],
+  "carried_lost": [],
+  "carried_lost_any_prim": [],
+  "carried_lost_bare_string": [],
+  "count": 0,
+  "count_any_prim": 0,
+  "pass": true,
+  "reduced": "still",
+  "static_lost": []
+ },
+ "surek": {
+  "animated": [
+   {
+    "face": "cap.SYN20.breakout.down.154",
+    "lang": "en",
+    "reduced_marker": [
+     "just failed"
+    ],
+    "reduced_prim_kinds": [
+     "rect",
+     "text"
+    ],
+    "reduced_prims": 2,
+    "state": "c_failed",
+    "target": true,
+    "theme": "dark"
+   },
+   {
+    "face": "cap.SYN20.breakout.down.154",
+    "lang": "en",
+    "reduced_marker": [
+     "just failed"
+    ],
+    "reduced_prim_kinds": [
+     "rect",
+     "text"
+    ],
+    "reduced_prims": 2,
+    "state": "c_failed",
+    "target": true,
+    "theme": "light"
+   },
+   {
+    "face": "cap.SYN20.breakout.down.154",
+    "lang": "tr",
+    "reduced_marker": [
+     "az önce tutmadı"
+    ],
+    "reduced_prim_kinds": [
+     "rect",
+     "text"
+    ],
+    "reduced_prims": 2,
+    "state": "c_failed",
+    "target": true,
+    "theme": "dark"
+   },
+   {
+    "face": "cap.SYN20.breakout.down.154",
+    "lang": "tr",
+    "reduced_marker": [
+     "az önce tutmadı"
+    ],
+    "reduced_prim_kinds": [
+     "rect",
+     "text"
+    ],
+    "reduced_prims": 2,
+    "state": "c_failed",
+    "target": true,
+    "theme": "light"
+   },
+   {
+    "face": "cap.SYN11.breakout.up.140",
+    "lang": "en",
+    "reduced_marker": [
+     "just came true"
+    ],
+    "reduced_prim_kinds": [
+     "rect",
+     "text"
+    ],
+    "reduced_prims": 2,
+    "state": "c_realized",
+    "target": true,
+    "theme": "dark"
+   },
+   {
+    "face": "cap.SYN11.breakout.up.140",
+    "lang": "en",
+    "reduced_marker": [
+     "just came true"
+    ],
+    "reduced_prim_kinds": [
+     "rect",
+     "text"
+    ],
+    "reduced_prims": 2,
+    "state": "c_realized",
+    "target": true,
+    "theme": "light"
+   },
+   {
+    "face": "cap.SYN11.breakout.up.140",
+    "lang": "tr",
+    "reduced_marker": [
+     "az önce gerçekleşti"
+    ],
+    "reduced_prim_kinds": [
+     "rect",
+     "text"
+    ],
+    "reduced_prims": 2,
+    "state": "c_realized",
+    "target": true,
+    "theme": "dark"
+   },
+   {
+    "face": "cap.SYN11.breakout.up.140",
+    "lang": "tr",
+    "reduced_marker": [
+     "az önce gerçekleşti"
+    ],
+    "reduced_prim_kinds": [
+     "rect",
+     "text"
+    ],
+    "reduced_prims": 2,
+    "state": "c_realized",
+    "target": true,
+    "theme": "light"
+   },
+   {
+    "face": "cap.SYN09.breakout.up.143",
+    "lang": "en",
+    "reduced_marker": [
+     "just strengthened"
+    ],
+    "reduced_prim_kinds": [
+     "rect",
+     "text"
+    ],
+    "reduced_prims": 2,
+    "state": "c_strengthened",
+    "target": true,
+    "theme": "dark"
+   },
+   {
+    "face": "cap.SYN09.breakout.up.143",
+    "lang": "en",
+    "reduced_marker": [
+     "just strengthened"
+    ],
+    "reduced_prim_kinds": [
+     "rect",
+     "text"
+    ],
+    "reduced_prims": 2,
+    "state": "c_strengthened",
+    "target": true,
+    "theme": "light"
+   },
+   {
+    "face": "cap.SYN09.breakout.up.143",
+    "lang": "tr",
+    "reduced_marker": [
+     "az önce güçlendi"
+    ],
+    "reduced_prim_kinds": [
+     "rect",
+     "text"
+    ],
+    "reduced_prims": 2,
+    "state": "c_strengthened",
+    "target": true,
+    "theme": "dark"
+   },
+   {
+    "face": "cap.SYN09.breakout.up.143",
+    "lang": "tr",
+    "reduced_marker": [
+     "az önce güçlendi"
+    ],
+    "reduced_prim_kinds": [
+     "rect",
+     "text"
+    ],
+    "reduced_prims": 2,
+    "state": "c_strengthened",
+    "target": true,
+    "theme": "light"
+   }
+  ],
+  "carried_lost": [],
+  "carried_lost_any_prim": [],
+  "carried_lost_bare_string": [],
+  "count": 0,
+  "count_any_prim": 0,
+  "pass": true,
+  "reduced": "surek-az",
+  "static_lost": []
+ }
+}

@@ -1,0 +1,35 @@
+/* R5/G: the gallery page's chrome. As in style.css (R7) no design value lives here: every
+   var(--…) is set by the core (`Gallery.css()`: the default look's colours, fonts, sizes,
+   spacing and radii in the chosen theme, and the page width `--qp-gallery-w`). Only
+   structural values remain; arch-check.mjs enforces it. */
+* { box-sizing: border-box; }
+html, body { margin: 0; background: var(--page); color: var(--fg);
+  font-family: var(--qp-font); font-size: var(--qp-fs); line-height: var(--qp-lh); }
+#gallery { max-width: var(--qp-gallery-w); margin: 0 auto; background: var(--bg); padding-bottom: var(--qp-space-5); }
+#ghead { padding: var(--qp-space-2) var(--qp-space-3); border-bottom: var(--qp-rule) solid var(--line); }
+#ghead h1 { margin: 0; font-size: var(--qp-fs); }
+#gtools { display: flex; gap: var(--qp-space-2); margin: var(--qp-space-2) 0; }
+#gtools button, #gtools select { flex: 1; }
+#gintro { margin: var(--qp-space-1) 0; }
+.muted { color: var(--muted); font-size: var(--qp-fs-small); }
+#gstatus { margin: var(--qp-space-2) var(--qp-space-3); }
+.topic { border-bottom: var(--qp-rule) solid var(--line); padding: var(--qp-space-2) 0; }
+.tlabel { margin: var(--qp-head-gap) var(--qp-space-3) 0; font-size: var(--qp-fs); font-weight: var(--qp-head-weight); text-transform: uppercase; letter-spacing: var(--qp-head-tracking); }
+.thint { margin: var(--qp-space-1) var(--qp-space-3); font-size: var(--qp-fs-small); }
+.tcontent { margin: 0 var(--qp-space-3) var(--qp-space-2); font-variant-numeric: tabular-nums; }
+.cand { margin: var(--qp-space-2) 0; background: var(--card); border-top: var(--qp-rule) solid var(--line); border-bottom: var(--qp-rule) solid var(--line); }
+.cname { margin: 0; padding: var(--qp-space-1) var(--qp-space-3); font-size: var(--qp-fs); color: var(--accent); }
+.shots { display: flex; flex-direction: column; gap: var(--qp-space-0); }
+.shot { display: block; width: 100%; height: auto; }
+.shead { margin: var(--qp-space-1) var(--qp-space-3) 0; color: var(--muted); font-size: var(--qp-fs-small); }
+.stext { margin: 0; padding: var(--qp-face-pad); white-space: pre-line; font-size: var(--qp-fs-small); }
+.choose { display: flex; gap: var(--qp-space-2); padding: var(--qp-space-2) var(--qp-space-3); align-items: center; }
+.pick.on { background: var(--accent); color: var(--on-accent); border-color: var(--accent); }
+.note { flex: 1; min-width: 0; }
+#gfoot { padding: var(--qp-space-2) var(--qp-space-3); }
+#gfoot h2 { font-size: var(--qp-fs); margin: var(--qp-space-2) 0; }
+#gsummary { width: 100%; font: inherit; font-size: var(--qp-fs-small); color: var(--fg); background: var(--card); border: var(--qp-rule) solid var(--line); border-radius: var(--radius); padding: var(--qp-space-2); white-space: pre-wrap; }
+#gcopyrow { display: flex; gap: var(--qp-space-2); align-items: center; margin: var(--qp-space-2) 0; }
+#gshare { color: var(--accent); word-break: break-all; }
+button, select, input { font: inherit; color: var(--fg); background: var(--card); border: var(--qp-rule) solid var(--line); border-radius: var(--radius); padding: var(--qp-control-pad);
+  min-height: var(--qp-control-h); }

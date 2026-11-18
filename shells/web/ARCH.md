@@ -119,3 +119,25 @@ Dil seçimi `?voice=<ad>` ve Ayarlar → Dil: öbür ayarlar gibi `set_look({voi
 hareketinin `voice` alanı); adlar `choices().voice`'tan; gösterimin varsayılanı çekirdekte
 (`presented_look`, `marla`). Sahnesi olmayan yüzün metni (`feed()` satırının `text`'i)
 seçili dilde çekirdeğin metin yüzüdür (başlık, karne, ayrıntı; satır sonlarıyla).
+
+(R5/G) **Galeri** (`gallery.html`, `gallery.js`, `gallery.css`; `README.md` "Galeri"). Aynı
+kurallar (R1–R4, R6, R7) bu üç dosyaya da uygulanır (`arch-check.mjs`): `gallery.html` yalnız
+`gallery.js`'i yükler, `gallery.js` yalnız `./pkg/qp_wasm.js`'ten içe aktarır, `gallery.css`
+yalnız `var(--…)` okur. Kabuk ince: konular, adaylar, görüntü adresleri ve CSS boyları, her
+metin (etiketler, aynı-içerik satırı, özet, paylaşım bağlantısı, yerel depolamaya yazılacak
+durum) çekirdekten gelir; görüntüleri çekirdek (`qp_wasm::gallery::build`, ana makinede
+`qp demo --gallery`) boyar. Sayfa çekirdeğe dokunuşları ve yazılan notu **olduğu gibi** verir.
+Sayfa yalnız aynı kökene `fetch` yapar (düzen) ve `<img>` yükler.
+
+`gallery.js` yalnız şu `Gallery` yöntemlerini çağırır (ayrı izin listesi, `ALLOWED_GALLERY`):
+
+| Yöntem | Neden |
+|--------|-------|
+| `new Gallery(kayıt, lang, theme, pick, now)` | Yerel depolamadaki durum ve adres değişkenleri **olduğu gibi**; ayrıştırma, doğrulama çekirdekte. |
+| `layout_url()`, `load(metin)` | Düzenin adresi (dil ve temaya göre, çekirdek kurar) ve ana makinenin düzeni. |
+| `view()`, `marks()` | Boyanacak her şey (etiketler, konular, adaylar, görüntüler, not, seçili mi) ve seçim işaretleri. |
+| `pick(konu, aday)`, `note(konu, aday, metin)` | "Bunu seçerdim" ve not; konu başına tek seçim, notun temizlenmesi çekirdekte. |
+| `summary()`, `share()`, `state()` | Kopyalanacak özet (cihaz/tarih satırı dahil; tarih `Date.now()` çekirdekte okunur), `?pick=` bağlantısı, saklanacak durum. |
+| `set_device(ua, w, h, dpr)` | Ham `navigator.userAgent`, `innerWidth/Height`, `devicePixelRatio`; kısaltma çekirdekte. |
+| `toggle_lang()`, `set_theme(değer)`, `lang()`, `theme()` | Dil ve tema seçimi. |
+| `css()`, `fonts()`, `font_bytes(id)` | Varsayılan görünüşün seçilen temadaki CSS özellikleri ve sayfa genişliği; gömülü yazı tipleri (`FontFace`, ağ yok). |

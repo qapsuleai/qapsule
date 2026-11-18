@@ -7,6 +7,9 @@
 #   --lan  listens on 0.0.0.0 so that a phone on the same network can open the page
 #          (printed address). Devices on the local network can then see the demo.
 #          Without it the demo listens on 127.0.0.1 (this machine only).
+#   --gallery  (R5/G) also serves the comparison gallery at /gallery.html (printed
+#          address; with --lan / --https-host also the phone's): every topic's candidates
+#          one under the other over the synthetic world, "I'd pick this", notes, copy.
 #
 # 1. builds the web shell's core (qp-wasm, feature `replica`) with wasm-pack into
 #    shells/web/pkg, stripped of function names (skipped when up to date;

@@ -89,7 +89,10 @@ pub fn window(born: u64, horizon: u32, now: u64) -> (u64, u64) {
 }
 
 /// Where the birth bar sits in the window, as a fraction of its width from the left
-/// (`0` left edge, `1` right edge = now): the channel the strip adds (DESIGN.md "Yaş").
+/// (`0` left edge, `1` right edge = now): the channel the strip adds (DESIGN.md "Yaş"). The
+/// compiler places the birth rule by the window and the bar itself; this is the same
+/// quantity, for the tests and the measurement.
+#[cfg(test)]
 #[must_use]
 pub fn birth_fraction(born: u64, horizon: u32, now: u64) -> f64 {
     let (first, len) = window(born, horizon, now);

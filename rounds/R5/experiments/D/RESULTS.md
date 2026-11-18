@@ -258,3 +258,11 @@ Kırılmayanlar: metin karşıtlığı (R2 görünümlerinde her öğe ≥ 5,67)
 
 `render.py` (çizim + sahne dökümü), `measure.py` (hesap), `summarize.py` → `computed.md`,
 `readers_d.py` (okuyucu ve puanlama) → `readers.md`, `samples/`.
+
+## Ek (2026-11-18, orkestratör): okuyucu kapsamı tamamlandı
+
+Kullanım sınırı yüzünden cevapsız kalan 354 çağrı (yanlış sayılmamış, puanlamadan çıkarılmıştı) silinip aynı
+tohum ve istemlerle yeniden koşuldu. Kapsam artık altı görünümde de tam (haiku 40/40, sonnet 24/24 her hücrede;
+başarısız çağrı 0; toplam maliyet 4,09 $). Sonuç değişmedi: haiku eşleşmiş v0–v5 `oltan` 0,983 [0,971; 0,990],
+`r4` 0,983 [0,971; 0,990] — **ayırt edilemedi**; hiçbir kesimde (boy, tema, persona, boy × tema, görünüm) bir taraf
+ayrılmıyor. Okuma tavanda; sorular dil farkını ölçecek kadar zor değil (R7 sorusu 9). Tam tablo: `readers.md`.

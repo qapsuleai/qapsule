@@ -294,3 +294,11 @@ durur) `nabiz`'i doğum değişiminde eler (nabız → metinsiz canlı noktası)
 kaybı 0). **Geçici varsayılan `surek`; ikinci `nabiz`** (fark edilme ve eleştirmende önde; metin eksiği küçük bir
 düzeltmeyle giderilebilir); hareketsiz başvuru `?anim=0`. Son söz insan testi v3'tedir (G8). Ek G6-8'in "herhangi bir
 durağan ilke" okuması kayıp sonuçları görüldükten sonra yazıldığı için seçimde kullanılmadı, duyarlılık olarak durur.
+
+## Ek düzeltme (2026-11-18, bağımsız denetim koşulu 4)
+
+Önceden yazılı G6-5 lafzıyla ilk iki **`surek` ve hareketsiz (`still`)**'dir; `nabiz` bu lafızla elenir. `nabiz`
+gösterimde seçilebilir kalır (Arkin'in karşılaştırması için) ama ölçüme dayalı ikinci aday değildir: sıralaması
+geçersiz sayılan ajan okumasından gelir, bütünleştirmede eklenen "canlı" etiketi sonradan bir düzeltmedir ve yeniden
+ölçülmedi. Ek G6-8'in "ana karar herhangi bir durağan ilke" cümlesi kayıp sonuçlarından sonra yazıldığı için seçimde
+kullanılmaz; yalnız duyarlılıktır.

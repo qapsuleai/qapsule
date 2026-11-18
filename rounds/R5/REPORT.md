@@ -2,7 +2,7 @@
 
 - **Durum:** Ölçümler, seçimler ve bütünleştirme bitti; S `main`'de (`2965a95`, bağımsız verify
   18/18). Bağımsız son denetim (A) ve round sonu temizliği bekliyor. Kabul ölçütleri (kendi
-  değerlendirmem; A'ya bağlı olanlar yer tutuculu): aşağıdaki tablo. Bağımsız denetim: `<A:denetim-hükmü>`.
+  değerlendirmem; A'ya bağlı olanlar yer tutuculu): aşağıdaki tablo. Bağımsız denetim: **koşullu kabul**, engelleyici bulgu yok (`AUDIT.md`); dört koşul aşağıda "Denetim koşulları" bölümünde karşılandı.
 - **Tarih:** 2026-11-17 / 2026-11-18
 - **Alt ajanlar:** Başlatılabildi (ilk iş deneme alt ajanı, haiku, cevap verdi). Bütün alt görevler
   (T0–T3c, 11 tasarım alternatifi, 6 ölçüm, D, G, H, S, belgeler) ayrı alt ajanlarla, ayrı
@@ -66,7 +66,7 @@ kapandı); en küçük yazı 13 px; 44 px'ten küçük dokunma hedefi 0; anlam r
 | H | İnsan testi v3 paketi (GUIDE, TASKS, FORM, SCORING, DECISION, README) | alt ajan | — | `human-test/`; birleşme `89bba78` |
 | — | `docs/DESIGN.md` | alt ajan | — | `eca289a`, `ded7b65` |
 | S | Bütünleştirme: `oltan`+`zemre`, `pavka` (perf) + `korda`, `tesir`+`nobra`, `surek`+`nabiz`; gösterim varsayılanları; görünüş eşlik eden yüzünü getirir; `?feed_exempt=0`; galeri `FINALISTS`; v1 sabitleme + v2 altınlar; K52 önce/sonra; paket | alt ajan | bağımsız verify 18/18 | `r5/s-int` (`rounds/R5/experiments/S/{K52,GOLDENS}.md`, `k52/`); main'e birleşme `2965a95` |
-| A | Bağımsız son denetim | `<A:denetim>` | — | `AUDIT.md` (`<A:denetim>`) |
+| A | Bağımsız son denetim | koşullu kabul, engelleyici yok | — | `AUDIT.md` (`r5/audit` `de27e4e`; verify 18/18, M16 birincil ve M17 taramaları yeniden üretildi, kendi karşıtlık/ΔE/tarama kodu, girişimsizlik denemesi) |
 
 ## Kabul ölçütleri
 
@@ -75,7 +75,7 @@ kapandı); en küçük yazı 13 px; 44 px'ten küçük dokunma hedefi 0; anlam r
 | 1 | Araştırma: bağlantılı kaynaklar, aday ve elenen fikirler, ölçüm planı | ✅ | `RESEARCH.md` (72 bağlantı, kaynak durumu [A]/[Ö]/[Y]; §15 aday fikirler, §16 elenenler, §17 düzenek uyarıları) |
 | 2 | Düzenek önce (commit sırası); bozuk tasarım sınaması; körlük kayıtlardan | ✅ (notlarla) | Düzenek `fa0487d` 00:07, `70d8e11` 00:20, `0e85cb6` 01:10 (18 Kasım) < ilk alternatif commit'leri (M17 `657a9b2` 00:30, M19 `2fa4931` 01:23, M18 `5db01d8` 01:28, M16 `a816424` 03:26, M20 `9cd323f` 06:09, M21 `a361aee` 06:13); ölçüme özgü ekler ölçümden önce (Ek G5 `85338e2`, G6 `fca8f33`, G7 `655e93e`). Bozuk tasarım M16, M17, M18, M20'de kesin son; M21'de fark edilmede son değil → o koşunun ajan sıralaması kullanılmadı (kural gereği). Körlük: her istemde `check_prompt` (M17 180 istemde yasak ad 0; M16 `prompts.md`'de aday adı 0). Not: bir tasarım ajanı paylaşılan scratchpad'i gördü ("Sınırlar" 2) |
 | 3 | M17: taramalar 0; eşik adıyla ve değeriyle; karne beklentinin kendisi; ayrıntı yüzün yapı taşlarından (A33); sözlük iki dilde, dokununca; tablo LANGUAGE.md'de | ✅ | `M17/RESULTS.md` §2 (13 tarama `marla`/`selvi` 0, `contradiction` dahil), §11 (S1 düzeltmesinden sonra yine 0); `docs/LANGUAGE.md` "Yedi dedektör × yaşam döngüsü aşaması × iki dil", "Sözlük"; döküm `langh dump` ile bayt bayt yeniden üretilir |
-| 4 | M16: dört yön; kayıtlar çekirdekte; kabukta biçem yok; bütün eşikler (kapanmış işaret dahil); gri + renk körlüğü ayrımı; DESIGN.md | ✅ | `M16/RESULTS.md` (dört yön; `oltan` metin 6,33, işaret 3,46, en küçük 13 px, dokunma 0, ΔE00 en kötü 10,53); gri kopya `dir`+`valid` 1,00; `crates/qp-grammar/src/look.rs`; arch-check R7; `docs/DESIGN.md` |
+| 4 | M16: dört yön; kayıtlar çekirdekte; kabukta biçem yok; bütün eşikler (kapanmış işaret dahil); gri + renk körlüğü ayrımı; DESIGN.md |⚠️ | `M16/RESULTS.md` (dört yön; `oltan` metin 6,33, işaret 3,46, en küçük 13 px, dokunma 0, ΔE00 en kötü 10,53); gri kopya `dir`+`valid` 1,00; `crates/qp-grammar/src/look.rs`; arch-check R7; `docs/DESIGN.md`. **Denetim koşulu 2:** "bütün öğelerde" yalnız yüz ve akış için kanıtlı; `oltan` altında açılmış kapsül başlığı (kapanmışta 3,46 / 3,75, 19 px yarı kalın — düzenek 600'ü kalın sayıyor, yaygın tanımda 4,5 altı) ve grafik eksen çizgisi (2,88 / 2,95 < 3) açık; R7/A46 |
 | 5 | Yoğunluk: altı görünüm, okunabilirlik, R7 soruları | ✅ | `D/RESULTS.md` (+ek: okuyucu kapsamı tam; `oltan` 0,983 = `r4` 0,983), §4 R7 soruları 1–9 |
 | 6 | M18: bütün kapsüller, seçili vurgulu, kanıt yalnız seçiliye, odak taşıma, kümeleme, kapanmışlar görünür ve gizlenebilir; liste sunucudan (K48); protokol eki ve dökümler; 200 kapsülde K52 | ✅ | `M18/RESULTS.md` (+ek); PROTOCOL §23, dökümler 60–63 (3 taşıma); `pavka` JIT açık 5/50/200 bütçe içinde, JIT kapalı 50'de uzun kare 0,058/0,073; S: JIT açık 12 / 52 / 207 hikâyede tik, sahne boyama ve kurma p95 ≤ 1 ms; JIT kapalı (ham benzetim) sahne boyama p95 4 / 11 / 13 ms (`r4` 3 / 9 / 10) |
 | 7 | M19: canlı ve yeni önce; eşik önceden yazılı, geleceğe bakmıyor; gizlenenler karnede; az örnekli söyleniyor; gizlenenler grafikte ve "Hepsi"nde işaretli; tablo; boş akış | ⚠️ | Kural, geleceğe bakmama, karne, az örnek, işaret, benzetim tablosu, boş akış ✅ (`M19/RESULTS.md` §2–6, `feed_m19.rs`, döküm 64). **Sıra:** `grouped`/`live_new` seçilebilir ama gösterim varsayılanı `elikov` kaldı (değişseydi v1 demo altınları ve `settings.mjs` değişirdi); sıra bir akış tasarım kararı olarak Arkin'e (Ö65) |
@@ -84,9 +84,9 @@ kapandı); en küçük yazı 13 px; 44 px'ten küçük dokunma hedefi 0; anlam r
 | 10 | Performans: seçilen tasarım `canvas`'ta PHONE ve JIT açık tahmininde K52; önce/sonra tablosu; paket önce/sonra | ✅ (notla) | `rounds/R5/experiments/S/K52.md`: gösterim varsayılanları birlikte, `canvas`, JIT açık tahmini (bağlayıcı) önce → sonra tik 1 → 1, yüz 1 → 1, sahne 4 → 3 ms p95, ilk kapsül 164 → 212 ms, kaydırmada uzun kare 0 → 0; PHONE (JIT kapalı) tik 1,6 → 3,2, yüz 2 → 1, sahne 9,25 → 14,8 ms (bu kipte K52 "kullanılabilir kalır" ister: uzun kare 0); hikâye çizelgesi 12 / 52 / 207 hikâyede JIT açık her ölçü ≤ 1 ms. Not: JIT kapalı sahne boyaması ve ilk kapsül kötüleşti (bütçe içinde); paket WASM gzip 1 463 643 → 1 771 943 B (+%21,1), brotli 967 161 → 1 146 726 B (+%18,6); gömülü yazı tipleri +97 604 B ham |
 | 11 | İlk iki aday Ayarlar'dan ve adresle; galeri sentetikte, alt alta, "bunu seçerdim" + not, tek dokunuşla özet | ✅ | `gallery.rs` `FINALISTS` (dil, görünüş, hikâye, açılmış kapsül, hareket: ilk iki + `r4`), akış sırası ve kuralında bütün adaylar; `?voice= ?look= ?story= ?open= ?motion= ?feed_order= ?feed_rule= ?feed_exempt=0`; verify 18 `tests/gallery.mjs`; `main` `2965a95` |
 | 12 | İnsan testi v3: görevler, form, puanlama; A21 dahil hangi kararı nasıl kapatacağı | ✅ (notla) | `human-test/` (G0–G9; DECISION.md: A21, A32, A33, K53 + K42 muafiyeti, akış sırası, M16–M21). Aday yer tutucuları (`<GÖRÜNÜŞ-1>` …): aday adları dolduruldu (`c301602`: `oltan`/`zemre`, `tesir`/`nobra`, `surek`/`nabiz`); içerik anları (`<ADIM-…>`, `<SATIR-…>`, `<KİTLE-…>`) yürütücünün provasında doldurulur (`GUIDE.md`) |
-| 13 | `cpu` yolu kaldırıldı; bölme hatası; `clean.sh` (`--dry-run`), round sonunda çalıştı | ✅ / `<A:disk>` | T0 (`ce3f55c`, `f5a480d`, `4574c42`, `8587b0d`); round sonu koşusu `<A:disk>` |
+| 13 | `cpu` yolu kaldırıldı; bölme hatası; `clean.sh` (`--dry-run`), round sonunda çalıştı | ✅ | T0 (`ce3f55c`, `f5a480d`, `4574c42`, `8587b0d`); round sonu koşusu: `--dry-run`, sonra gerçek koşu; depo 23 G → 15 G |
 | 14 | v1 altınlar yerinde; v2 eklendi; değişenler gerekçeli; hesap özeti aynı; dökümler 3 taşımada | ✅ | v1: `fixtures/golden` R5 boyunca değişmedi; v2: 16 çekim, 28 sahne PNG'si (772 KB): `feed-*` (akışın ilk üç yüzü), `closed-*` (kapanmış iki yüz), `capsule-*` (`tesir`), `chart-*` (`pavka`) × TR/EN × koyu/açık; iki koşuda bayt eşit; dökümler 64 × 3 taşıma (verify `conform` (bağımsız verify 18/18)); hesap özeti `7b1e99d40889f83c` (değişmedi) |
-| 15 | REPORT, RESEARCH, AUDIT; DESIGN, LANGUAGE, FACE; STATUS, ROADMAP; Önerilen (R5); Arkin için galeri bölümü; disk | `<A:ölçüt15>` (AUDIT bekliyor) | bu dosya; `RESEARCH.md`; `docs/DESIGN.md`, `docs/LANGUAGE.md`, `docs/FACE.md`; `STATUS.md`, `ROADMAP.md`; `DECISIONS.md` Ö61–Ö70, A41–A44; son bölüm; `AUDIT.md` `<A:denetim>` |
+| 15 | REPORT, RESEARCH, AUDIT; DESIGN, LANGUAGE, FACE; STATUS, ROADMAP; Önerilen (R5); Arkin için galeri bölümü; disk | ✅ | bu dosya; `RESEARCH.md`; `docs/DESIGN.md`, `docs/LANGUAGE.md`, `docs/FACE.md`; `STATUS.md`, `ROADMAP.md`; `DECISIONS.md` Ö61–Ö70, A41–A44; son bölüm; `AUDIT.md` (koşullu kabul) |
 
 ## Konu konu: seçim, ilk iki, ölçüm, duyarlılıklar
 
@@ -410,10 +410,39 @@ Tasarım, uygulama ve bütünleştirme alt ajanlarının oturum maliyeti bu tabl
 `DECISIONS.md` "Önerilen (R5) — kesinleşmedi": Ö61–Ö70, açık A41–A44. Kesinleştirme ana akış
 oturumunda yapılır.
 
+## Denetim koşulları ve karşılanması
+
+Bağımsız denetim (`AUDIT.md`) **koşullu kabul** verdi, engelleyici bulgu yok. Koşullar:
+
+1. **Round kapanışı** (yer tutucular, `clean.sh`, preflight + CI): yapıldı — bu bölüm, "Disk", STATUS/ROADMAP; CI sonucu
+   STATUS'ta.
+2. **Ölçüt 4'ün kapsamı:** beyan daraltıldı, ölçüt 4 ⚠️. Karşıtlık yüz ve akışta bütün öğelerde kanıtlı (374 metin +
+   224 DOM öğesi, eşik altı 0). `oltan` altında ölçülmemiş iki yer denetçinin ölçümüyle açık: kapanmış kapsülün açılmış
+   başlığı 3,46 (açık) / 3,75 (koyu), 19 px yarı kalın — 600'ü kalın sayan düzenek tanımıyla geçer, saymayan tanımla 4,5
+   altı; grafik eksen çizgisi 2,88 / 2,95 < 3. Açık karar A46; düzeltme bir sonraki tasarım işinde (`invalid` ya da
+   `closed` başlık rengi ve `axis` rolü görünüş kaydından).
+3. **`marla`'da kaçamak kip:** sapma başlıklarında "yukarı dönebilir" / "could turn up" (531 durumun 60'ı, iki dilde).
+   Düzeneğin listesi yakalamıyor; listenin gerekçesi (sözel olasılık sözcükleri) kapsıyor. Bilinen sınır olarak yazıldı;
+   cümlenin iddianın beklentisi mi tahmin mi olduğu Arkin'in kararı (A45). `selvi`'de 0.
+4. **M21 ikinci aday:** önceden yazılı G6-5 lafzıyla ilk iki **`surek` ve hareketsiz (`still`, `?reduced_motion=1`)**
+   olur; `nabiz` bu lafızla elenir (doğumda 4 kayıp). `nabiz` gösterimde seçilebilir kalır ama ölçüme dayalı ikinci
+   değildir: sıralaması geçersiz sayılan ajan okumasından gelir ve bütünleştirmede eklenen "canlı" etiketi sonradan bir
+   düzeltmedir (yeniden ölçülmedi). SPEC Ek G6-8'in "ana karar herhangi bir durağan ilke" cümlesi kayıp sonuçlarından
+   sonra yazıldığı için seçimde kullanılmadı; `M21/RESULTS.md` eki ve Ö67 buna göre düzeltildi.
+
+Küçük bulgular (`AUDIT.md`): M18'in ilk alternatif commit'i `pavka` `7520a1c` (01:17), rapordaki `korda` saati yazar
+zamanı; M18 grafik soru kümesi ve K52 kapı yorumu alternatiflerden sonra (ek tablosuna eklenmeli — bu not onu kayda
+geçirir); M19'un yazılı ikinci sırası `Trust`, ürüne `live_new` girdi (RESULTS'ta yazılı); hiç yetkisi olmayan okura
+giden makine olgu metinlerinde bar sırası rakamı (değer değil; R5 öncesinden olabilir, doğrulanmadı — R6 öncesi bakılmalı);
+Atkinson Bold kimliği "…-Regular" adını taşıyor (kozmetik).
+
 ## Disk (K56)
 
-`<A:disk>` — round sonu `scripts/clean.sh` koşusu (önce/sonra), kalan `target/`,
-`.claude/worktrees/`, depo toplamı. Round başında (T0): `target/` 1,9 G → 1,7 G, depo 4,1 G →
+Round sonu `scripts/clean.sh` (önce `--dry-run`, sonra gerçek koşu): `target/` 22 G → **15 G**, `.claude/worktrees/`
+28 K (yalnız ana ağaç; `git worktree list` tek satır), depo toplamı 23 G → **15 G**. Silinen: `target/debug/incremental`
+(9,8 G), eski `wasm-replica`, `tmp`; bütün `target/wt/*` alt klasörleri worktree'leri kaldırılınca silindi. `node_modules`
+ana ağaçta bırakıldı (gösterim ve doğrulama ona bağlı). Dallar kalır (elenen alternatiflerin kodu: `r5/m16-bertan`,
+`r5/m16-kivra`, `r5/m17-tunca`, `r5/m18-selen`, `r5/m18-pavka` (perf öncesi), ölçüm dalları). Round başında (T0): `target/` 1,9 G → 1,7 G, depo 4,1 G →
 2,6 G (19 eski worktree kaldırıldı).
 
 ## Arkin için: galeriyi telefonumda nasıl açarım, neye bakarım

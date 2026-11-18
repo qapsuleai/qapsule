@@ -1966,6 +1966,22 @@ impl ShellCore {
         }
     }
 
+    /// (R5/G) How many capsules the authority's feed rule hid from the last feed answer
+    /// (`coin_flip_hidden`, K53).
+    #[must_use]
+    pub fn coin_flip_hidden(&self) -> u32 {
+        self.coin_flip_hidden
+    }
+
+    /// (R5/G) Asks for the feed again at the next outbox (a replica core: the feed items
+    /// carry the connection's voice, which a `style` change alone does not resend). The
+    /// gallery's painter calls it after applying a candidate's setting.
+    pub fn requery_feed(&mut self) {
+        if self.viewer.is_none() {
+            self.feed_dirty = true;
+        }
+    }
+
     /// (R4/H-M8910) "I looked now": the `style` gesture's `seen` at the replay clock (the
     /// feed layout may mark what changed since). Nothing without a replay state.
     pub fn mark_seen(&mut self) {

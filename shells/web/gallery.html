@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Qapsule · R5 galeri</title>
+<link rel="stylesheet" href="gallery.css">
+<link rel="modulepreload" href="pkg/qp_wasm.js">
+</head>
+<body>
+<!-- R5/G: the comparison gallery. Every text, image address and size comes from the core
+     (`crates/qp-wasm/src/gallery.rs`, `Gallery`); gallery.js only paints it. -->
+<main id="gallery">
+  <header id="ghead">
+    <h1 id="gtitle"></h1>
+    <div id="gtools">
+      <button id="glang" type="button"></button>
+      <select id="gtheme"><option id="gdark" value="dark"></option><option id="glight" value="light"></option></select>
+    </div>
+    <p id="gintro"></p>
+    <p id="gmoment" class="muted"></p>
+  </header>
+  <p id="gstatus" class="muted"></p>
+  <div id="topics"></div>
+  <footer id="gfoot">
+    <h2 id="gsumh"></h2>
+    <textarea id="gsummary" readonly rows="6"></textarea>
+    <div id="gcopyrow">
+      <button id="gcopy" type="button"></button>
+      <span id="gcopied" class="muted" role="status"></span>
+    </div>
+    <p><a id="gshare" href="gallery.html"></a></p>
+  </footer>
+</main>
+<script type="module" src="gallery.js"></script>
+</body>
+</html>

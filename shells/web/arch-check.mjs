@@ -41,11 +41,19 @@ export const ALLOWED_CORE = new Set([
   'gloss', 'close_gloss', 'face_desc',
 ]);
 
+// R5/G (ARCH.md "Galeri"): the gallery page's core (`Gallery`, crates/qp-wasm/src/lib.rs).
+// gallery.js calls only these (its own allow-list: the page talks to no other core).
+export const ALLOWED_GALLERY = new Set([
+  'layout_url', 'load', 'view', 'marks', 'pick', 'note', 'summary', 'share', 'state',
+  'set_device', 'toggle_lang', 'set_theme', 'lang', 'theme', 'css', 'fonts', 'font_bytes',
+]);
+
 // R6: which modules a file may import. main.js: the core's package and the paint-path
 // registry; a paint path (shells/web/paint/*.js): only sibling paint files.
 export const IMPORTS = {
   main: (spec) => spec === './pkg/qp_wasm.js' || spec === './paint/index.js',
   paint: (spec) => /^\.\/[a-z0-9_-]+\.js$/.test(spec),
+  gallery: (spec) => spec === './pkg/qp_wasm.js',
 };
 
 // Calls that compute, order, filter or format (R2).
@@ -101,8 +109,9 @@ export function checkJs(src, kind = 'main') {
     const arith = l.replace(/=>/g, '').match(/[+\-*/%]/);
     if (arith) problems.push([n, `R3 arithmetic or concatenation (${arith[0]})`]);
     if (/https?:\/\//.test(src.split('\n')[k] || '')) problems.push([n, 'R1 external address']);
+    const allowed = kind === 'gallery' ? ALLOWED_GALLERY : ALLOWED_CORE;
     for (const m of l.matchAll(/\bcore\s*\.\s*([A-Za-z_]\w*)/g)) {
-      if (!ALLOWED_CORE.has(m[1])) problems.push([n, `R5 core method not allowed: ${m[1]}`]);
+      if (!allowed.has(m[1])) problems.push([n, `R5 core method not allowed: ${m[1]}`]);
     }
     for (const m of l.matchAll(/\bimport\b[^;]*from\s*""/g)) void m;
   });
@@ -119,14 +128,14 @@ export function checkJs(src, kind = 'main') {
 }
 
 /** Rule violations of the page and the style sheet. */
-export function checkStatic(html, css) {
+export function checkStatic(html, css, script = 'main.js') {
   const p = [];
-  if (/https?:\/\/|\/\/[a-z0-9-]+\.[a-z]/i.test(html)) p.push([0, 'R1 external address in index.html']);
-  if (/https?:\/\/|@import|url\(\s*['"]?\s*(https?:)?\/\//i.test(css)) p.push([0, 'R1 external address in style.css']);
+  if (/https?:\/\/|\/\/[a-z0-9-]+\.[a-z]/i.test(html)) p.push([0, 'R1 external address in the page']);
+  if (/https?:\/\/|@import|url\(\s*['"]?\s*(https?:)?\/\//i.test(css)) p.push([0, 'R1 external address in the style sheet']);
   const scripts = [...html.matchAll(/<script\b([^>]*)>([\s\S]*?)<\/script>/gi)];
   for (const [, attrs, body] of scripts) {
     if (body.trim()) p.push([0, 'R6 inline script']);
-    if (!/src="main\.js"/.test(attrs)) p.push([0, `R6 script other than main.js: ${attrs.trim()}`]);
+    if (!attrs.includes(`src="${script}"`)) p.push([0, `R6 script other than ${script}: ${attrs.trim()}`]);
   }
   if (/\son[a-z]+\s*=/i.test(html)) p.push([0, 'R6 inline event handler']);
   return p;
@@ -192,6 +201,12 @@ for (const f of paintFiles) {
 bad += report('shells/web/index.html', checkStatic(
   fs.readFileSync(path.join(here, 'index.html'), 'utf8'), fs.readFileSync(path.join(here, 'style.css'), 'utf8')));
 bad += report('shells/web/style.css', checkCss(fs.readFileSync(path.join(here, 'style.css'), 'utf8')));
+// R5/G: the gallery page (gallery.html, gallery.js, gallery.css) under the same rules; its
+// script calls only the gallery core's methods and imports only the core's package.
+bad += report('shells/web/gallery.js', checkJs(fs.readFileSync(path.join(here, 'gallery.js'), 'utf8'), 'gallery'));
+bad += report('shells/web/gallery.html', checkStatic(
+  fs.readFileSync(path.join(here, 'gallery.html'), 'utf8'), fs.readFileSync(path.join(here, 'gallery.css'), 'utf8'), 'gallery.js'));
+bad += report('shells/web/gallery.css', checkCss(fs.readFileSync(path.join(here, 'gallery.css'), 'utf8')));
 // Self-test: each sample breaks one rule and must be caught.
 const samples = [
   'items.sort((a, b) => a.t - b.t);', 'const x = list.filter((i) => i.open);', 'el.textContent = v.toFixed(2);',
@@ -221,6 +236,14 @@ for (const s of samples) if (!checkJs(s).length) { console.log(`self-test: not c
 for (const s of paintSamples) if (!checkJs(s, 'paint').length) { console.log(`self-test (paint): not caught: ${s}`); missed++; }
 // …and a correct paint path's import must pass (the rule is not stricter than stated).
 if (checkJs('import { put } from "./ref.js";', 'paint').length) { console.log('self-test (paint): sibling import refused'); missed++; }
-const total = samples.length + paintSamples.length + cssSamples.length;
-console.log(`arch: ${bad} violation(s) in main.js, ${paintFiles.length} paint file(s) and style.css; self-test ${total - missed}/${total} caught`);
+// R5/G: the gallery script breaking a rule (each must be caught as a gallery file).
+const gallerySamples = [
+  'core.on_frame(x);', 'import x from "./main.js";', 'el.textContent = c.id + ": " + c.note;',
+  'const text = `${topic}=${cand}`;', 'list.sort((a, b) => a.k);', 'fetch("https://example.com/x");',
+];
+for (const s of gallerySamples) if (!checkJs(s, 'gallery').length) { console.log(`self-test (gallery): not caught: ${s}`); missed++; }
+if (checkJs('core.pick(c.topic, c.id);', 'gallery').length) { console.log('self-test (gallery): allowed method refused'); missed++; }
+if (!checkStatic('<script src="main.js"></script>', '', 'gallery.js').length) { console.log('self-test (gallery): other script not caught'); missed++; }
+const total = samples.length + paintSamples.length + cssSamples.length + gallerySamples.length + 1;
+console.log(`arch: ${bad} violation(s) in main.js, ${paintFiles.length} paint file(s), style.css and the gallery page; self-test ${total - missed}/${total} caught`);
 process.exit(bad || missed ? 1 : 0);

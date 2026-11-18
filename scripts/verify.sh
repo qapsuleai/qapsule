@@ -49,6 +49,8 @@
 #                screenshots byte-identical, core-painted scenes equal fixtures/golden/demo
 #                (screens.mjs paints with `?paint=ref`, the deterministic reference);
 #                the settings page and URL settings (shells/web/tests/settings.mjs, R4/S2);
+#                (R5/G) the comparison gallery at phone size: same content per topic, a pick
+#                and a note, the copied summary (shells/web/tests/gallery.mjs, VERIFY 15/18);
 #                (RP3/S) every paint path opens with `?paint=` and paints, `gpu` reports
 #                its fallback where WebGPU has no adapter, the default path is `canvas`,
 #                and the semantic reads (digests, feed, open capsule, the authority's
@@ -503,6 +505,7 @@ step_demo() {
   mkdir -p "$d"
   (cd shells/web && node tests/parity.mjs "$qp" "$d/parity") || fail "parity or network test failed"
   (cd shells/web && node tests/settings.mjs "$qp") || fail "settings page test failed"
+  (cd shells/web && node tests/gallery.mjs "$qp") || fail "gallery test failed"
   (cd shells/web && node tests/paint-paths.mjs "$qp" --browsers chromium) || fail "paint path test failed"
   (cd shells/web && node tests/paint-canvas.mjs "$qp" --browsers chromium) || fail "canvas path screenshot test failed"
   (cd shells/web && node screens.mjs "$qp" "$d/a" && node screens.mjs "$qp" "$d/b") || fail "screenshots failed"
@@ -529,7 +532,7 @@ step_demo() {
     [ -f "$d/a/$(basename "$f")" ] || { echo "$(basename "$f"): golden not produced" >&2; bad=$((bad + 1)); }
   done
   [ "$bad" -eq 0 ] || fail "$bad screenshot check(s) failed"
-  note "same origin only; browser = shell-less digests; settings page; paint paths (semantic reads identical); canvas within tolerance; $n images x2 (scenes identical, pages within chrome tolerance), scenes = goldens"
+  note "same origin only; browser = shell-less digests; settings page; gallery; paint paths (semantic reads identical); canvas within tolerance; $n images x2 (scenes identical, pages within chrome tolerance), scenes = goldens"
 }
 
 # --- run -------------------------------------------------------------------

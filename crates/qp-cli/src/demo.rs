@@ -28,6 +28,11 @@
 //! The per-connection secret is 128 bits from the operating system (`/dev/urandom`):
 //! host code, not compute code — it never reaches the authority, the document or any
 //! digest, so replay determinism is unaffected.
+//! - (R5/G, `--gallery`) `GET /gallery/layout?lang=…&theme=…` — the comparison gallery's
+//!   layout (JSON, `qp_wasm::gallery::Layout`) and `GET /gallery/img/<name>.png` — the
+//!   images it names, painted by the core over the synthetic world at a fixed moment
+//!   (`qp_wasm::gallery::build`; built once per language and theme, kept in memory). The
+//!   page is the static `gallery.html`.
 //! - `GET /<file>` — the shell's static files (`--web`, default `shells/web`), `/` →
 //!   `index.html`. Nothing else is served; the page loads nothing from elsewhere (CSP).
 //!   Pre-compressed `<file>.br`/`<file>.gz` are served by `Accept-Encoding`, with an
@@ -100,6 +105,11 @@ pub struct DemoArgs {
     /// Start paused.
     #[arg(long)]
     pub paused: bool,
+    /// (R5/G) Also serve the comparison gallery (`/gallery.html`): every topic's
+    /// candidates one under the other, painted by the core over the synthetic, paused
+    /// world (independent of this demo's data), in both languages and themes.
+    #[arg(long)]
+    pub gallery: bool,
     /// Repository root (relative paths of the session init).
     #[arg(long, default_value = ".")]
     pub root: PathBuf,
@@ -497,7 +507,13 @@ impl Gate {
     }
 }
 
-fn connection(mut s: TcpStream, web: &Path, tx: &Sender<Cmd>, gate: &Gate) {
+fn connection(
+    mut s: TcpStream,
+    web: &Path,
+    tx: &Sender<Cmd>,
+    gate: &Gate,
+    gallery: Option<&GalleryStore>,
+) {
     let Ok(peer) = s.try_clone() else { return };
     let mut r = BufReader::new(peer);
     let mut line = String::new();
@@ -607,6 +623,7 @@ Cache-Control: no-store\r\nConnection: keep-alive\r\n\r\n";
                 );
             }
         }
+        ("GET", p) if gallery_route(&mut s, p, q, gallery) => {}
         ("GET", p) => {
             // RP3/M13: pre-compressed variants and revalidation (demo_static.rs).
             let served = static_path(web, p).is_some_and(|f| {
@@ -648,6 +665,70 @@ fn stream_events(s: &mut TcpStream, frx: &Receiver<String>, tx: &Sender<Cmd>) {
     if !conn.is_empty() {
         let _ = tx.send(Cmd::Gone { conn });
     }
+}
+
+/// (R5/G) The gallery builds, by `(lang, theme)`, made on first request (or ahead, in the
+/// background) and kept.
+#[derive(Default)]
+struct GalleryStore {
+    builds: std::sync::Mutex<BTreeMap<(String, String), std::sync::Arc<qp_wasm::gallery::Build>>>,
+}
+
+impl GalleryStore {
+    fn get(&self, lang: &str, theme: &str) -> std::sync::Arc<qp_wasm::gallery::Build> {
+        let lang = if lang == "en" { "en" } else { "tr" };
+        let theme = if theme == "light" { "light" } else { "dark" };
+        // One build at a time (the lock is held while building: a second request for the
+        // same key waits and then finds it).
+        let mut m = self
+            .builds
+            .lock()
+            .unwrap_or_else(std::sync::PoisonError::into_inner);
+        m.entry((lang.to_owned(), theme.to_owned()))
+            .or_insert_with(|| std::sync::Arc::new(qp_wasm::gallery::build(lang, theme)))
+            .clone()
+    }
+
+    /// `/gallery/img/<lang>-<theme>-…png`: the image, from the build its name starts with.
+    fn image(&self, name: &str) -> Option<Vec<u8>> {
+        let mut it = name.splitn(3, '-');
+        let (lang, theme) = (it.next()?, it.next()?);
+        if !["tr", "en"].contains(&lang) || !["dark", "light"].contains(&theme) {
+            return None;
+        }
+        self.get(lang, theme).images.get(name).cloned()
+    }
+}
+
+/// (R5/G) The gallery's routes; `false` when `path` is not one of them.
+fn gallery_route(s: &mut TcpStream, path: &str, q: &str, store: Option<&GalleryStore>) -> bool {
+    let is_layout = path == "/gallery/layout";
+    let img = path.strip_prefix("/gallery/img/");
+    if !is_layout && img.is_none() {
+        return false;
+    }
+    let Some(store) = store else {
+        respond(
+            s,
+            "404 Not Found",
+            "text/plain",
+            b"gallery off (qp demo --gallery)",
+        );
+        return true;
+    };
+    if is_layout {
+        let lang = query_param(q, "lang").unwrap_or_default();
+        let theme = query_param(q, "theme").unwrap_or_default();
+        let b = store.get(&lang, &theme);
+        let body = serde_json::to_vec(&b.layout).unwrap_or_default();
+        respond(s, "200 OK", "application/json", &body);
+    } else {
+        match img.and_then(|n| store.image(n)) {
+            Some(png) => respond(s, "200 OK", "image/png", &png),
+            None => respond(s, "404 Not Found", "text/plain", b"not found"),
+        }
+    }
+    true
 }
 
 /// Runs the demo host until interrupted.
@@ -694,6 +775,11 @@ pub fn demo(a: &DemoArgs) -> Result<(), String> {
     let info = json!({"urls": urls, "phone": phone, "lan": bind != "127.0.0.1",
         "synthetic": st.synthetic, "note": st.note});
     println!("qp demo: {}", urls[0]);
+    if a.gallery {
+        for u in &urls {
+            println!("galeri / gallery: {u}gallery.html");
+        }
+    }
     if let Some(n) = &a.https_host {
         println!(
             "https (vekil / proxy): https://{}/ -> 127.0.0.1:{port}",
@@ -722,12 +808,29 @@ pub fn demo(a: &DemoArgs) -> Result<(), String> {
         );
     }
     let _ = std::io::stdout().flush();
+    let gallery = a
+        .gallery
+        .then(|| std::sync::Arc::new(GalleryStore::default()));
+    if let Some(g) = &gallery {
+        // Built ahead in the background (the page's first language and theme first).
+        let g = g.clone();
+        std::thread::spawn(move || {
+            for (l, t) in [
+                ("tr", "dark"),
+                ("tr", "light"),
+                ("en", "dark"),
+                ("en", "light"),
+            ] {
+                let _ = g.get(l, t);
+            }
+        });
+    }
     let (tx, rx) = mpsc::channel::<Cmd>();
     let web = a.web.clone();
     std::thread::spawn(move || {
         for s in listener.incoming().flatten() {
-            let (web, tx, gate) = (web.clone(), tx.clone(), gate.clone());
-            std::thread::spawn(move || connection(s, &web, &tx, &gate));
+            let (web, tx, gate, gallery) = (web.clone(), tx.clone(), gate.clone(), gallery.clone());
+            std::thread::spawn(move || connection(s, &web, &tx, &gate, gallery.as_deref()));
         }
     });
     let mut hub = Hub {

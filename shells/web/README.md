@@ -57,6 +57,46 @@ akışı 10 sn kaydır → grafiği 10 sn sürükle/kıstır → **Özeti kopyal
   sayısı, ekran, DPR); **Sıfırla** kare ve süre serilerini baştan başlatır; **Özeti kopyala**
   JSON özeti panoya koyar (pano izni yoksa metin kutusunda seçili gelir).
 
+## Galeri (R5/G) — adayları telefonda karşılaştırmak
+
+```sh
+scripts/demo.sh --gallery                          # bu bilgisayarda
+scripts/demo.sh --gallery --lan                    # telefon aynı ağda
+scripts/demo.sh --gallery --https-host AD.ornek    # önünde bir HTTPS vekili varsa
+```
+
+Konsol galeri adreslerini yazar: `galeri / gallery: http://localhost:8390/gallery.html`,
+`--lan` ile ayrıca `http://192.168.x.y:8390/gallery.html` (telefonda bunu açın), `--https-host`
+ile `https://AD/gallery.html`. Gösterimin kendisi aynı adreste çalışmaya devam eder (`/`).
+Galeri her zaman **sentetik**, duraklatılmış dünyayı kullanır (gösterimin verisinden bağımsız;
+gerçek veri galeriye girmez). İlk açılışta çekirdek adayları boyar (sürüm derlemesinde dil ve
+tema başına bir saniye kadar; arka planda önceden başlar).
+
+**Ne görülür:** konu konu (Dil `voice`, Görünüş `look`, Akış sırası `feed_order`, Yazı tura
+eşiği `feed_rule`; Hikâye çizelgesi `story`, Hareket `motion`, Açılmış kapsül `open` kayıtları
+çekirdeğe girince kendiliğinden) adaylar **alt alta**. Hepsi **aynı içerikte**: aynı yeniden
+oynatma anı (adım 120), aynı açık kapsül ve derinlik; konunun altındaki gri satır bunu yazar.
+Her adayın çekirdeğin boyadığı görüntüleri (konuya göre: yüz, açılmış kapsül, grafik, kanıt ya
+da akışın ilk satırları), altında **Bunu seçerdim** (konu başına bir; ikinci dokunuş geri alır)
+ve **Kısa not**. En altta **Özet** ve **Özeti kopyala**: örn.
+
+```
+R5 galeri · voice=selvi (not: kısa ve net) · look=r4 · feed_order=— · feed_rule=rate55
+notlar: look/ornek: soluk
+an: adım 120 / 1260 · 2023-07-06 12:00 · tr · koyu
+cihaz: iPhone iOS 27.0 · Safari · 402×874 @3 · tarih: 2026-11-18 14:05 (İstanbul)
+```
+
+Pano yalnız güvenli bağlamda (HTTPS ya da localhost) çalışır; düz `http://` LAN adresinde metin
+kutusu seçili gelir, elle kopyalanır. Seçimler ve notlar bu tarayıcıda saklanır (yenileyince
+kaybolmaz; gizli sekmede saklanmaz ama sayfa çalışır). **Seçimlerin bağlantısı** aynı seçimleri
+`?pick=voice.selvi,look.r4` olarak taşır (notlar bağlantıya girmez). Üstte tema ve dil
+(TR/EN) seçilir. Sayfa dış ağa istek yapmaz.
+
+Finalistler tek yerde: `crates/qp-wasm/src/gallery.rs` `FINALISTS` (boşsa her konunun
+kayıttaki bütün adayları). Konular ve gösterdikleri derinlik: aynı dosyada `TOPICS`. Yeni bir
+konunun adayları görünsün diye çekirdekte: `choices()` anahtarı ve `set_look` alanı.
+
 ## Testler
 
 ```sh
@@ -64,6 +104,7 @@ node shells/web/arch-check.mjs                        # mimari testi (ARCH.md)
 cd shells/web && npm ci
 node tests/parity.mjs ../../target/release/qp /tmp/p  # ağ + kabuksuz eşitlik
 node tests/settings.mjs ../../target/release/qp       # (R4/S1) Ayarlar, varsayılanlar, ?seen= ?watch= ?long= (verify adım 18)
+node tests/gallery.mjs ../../target/release/qp        # (R5/G) galeri: 402 px, aynı içerik, seçim + not, kopyalanan özet (verify adım 18)
 node screens.mjs ../../target/release/qp /tmp/s       # sabit anda ekran görüntüleri
 node tests/metrics.mjs ../../target/release/qp 4      # ölçüm (4× işlemci kısıtı)
 node tests/device.mjs ../../target/release/qp          # (R4/D) cihaz ölçümü: 1×/4×/6× kısıt, DPR 1/3, varsayılan ve r3, 3 tekrar, medyan (~20 dk)

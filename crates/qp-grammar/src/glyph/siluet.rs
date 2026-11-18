@@ -24,7 +24,7 @@
 //! target) only; the circle and sine samples are precomputed constants.
 
 use super::{Alphabet as AlphabetTrait, GlyphBox};
-use crate::theme::{at_least, with_opacity, Theme};
+use crate::theme::{at_least, opacity_at_least, with_opacity, Theme};
 use qp_schema::capsule::{Direction, GlyphPhase, GlyphSpec, MeaningKind, Validity};
 use qp_schema::scene::{Prim, Rgba};
 
@@ -405,8 +405,15 @@ impl AlphabetTrait for Siluet {
         let s = bx.size;
         #[allow(clippy::cast_possible_truncation)]
         let st = spec.strength.clamp(0.0, 1.0) as f32;
-        let fresh = 0.3 + 0.7 * spec.freshness.clamp(0.0, 1.0);
         let closed = is_closed(spec.phase);
+        // (R5/T3c) An open glyph fades with its freshness down to the look's floor
+        // (`r4`: 0, freshness alone).
+        let fresh = 0.3 + 0.7 * spec.freshness.clamp(0.0, 1.0);
+        let fresh = if closed {
+            fresh
+        } else {
+            opacity_at_least(fresh, theme.fresh_alpha_min)
+        };
         let candidate = spec.phase == GlyphPhase::Candidate;
         // (R4, K42/A28) "No longer holds": only an open story whose state condition broke.
         // Absent / valid / closed validity draws exactly as in R3.
@@ -433,6 +440,12 @@ impl AlphabetTrait for Siluet {
             (main, edge)
         };
         let ink = with_opacity(theme.text, fresh);
+        // (R5/T3c) So do a closed glyph's outcome marks and confirmation blocks.
+        let ink = if closed {
+            at_least(ink, theme.closed_alpha)
+        } else {
+            ink
+        };
         let mut out = Vec::new();
 
         // Confidence: pale plate filled from the bottom up to the confidence level.

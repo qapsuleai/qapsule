@@ -256,7 +256,7 @@ hareketinin `look` alanıyla seçer (`ViewState.look`; yoksa `r4`); derleme seç
 | Alan | İçerik | `r4` |
 |------|--------|------|
 | `types` | Tip ölçeği, roller: `headline` (başlık cümlesi), `title` (sahnenin üst satırı: grafik başlığı ve kapanış; yüzün ek bilgisi), `body` (kart cümlesi, grafik notu), `label` (tarih etiketi, açıklama, karne satırı), `figure` (eksen değeri, son değer etiketi), `note` (kanıt etiketi). Her rol: boy (px), satır yüksekliği (boyun katı), yazı tipi varlığı | 20 / 16 / 12 / 11 / 11 / 9 px; satır 1,3; hepsi `plex-mono` |
-| `dark`, `light` | Renk rolleri (`Theme`): §9'daki adlar + `surface` (yüzey), `line`, `neutral` (yönsüz işaret), `valid`, `invalid` (artık geçerli değil: işaret ve cümle), `closed` (kapanmış işaret), (T3b) `closed_alpha` (kapanmış işaretin en düşük saydamlığı, 0–255: alfabe işareti tazeliğe göre soldurur, A31; kapanmış işaret bunun altına inmez, böylece görünüş ≥ 3:1'i tutturabilir; 0 = yalnız tazelik), `focus` (odak); `chrome` (kabuğun kendi renkleri: zemin, metin, ikincil metin, çizgi, kart, vurgu, vurgu üstü metin, sayfa, bildirim ve hata şeridi, "yetki gerekir" = kanıt ekranının turuncu yazısı) | §9 değerleri; `neutral`=`accent`, `valid`=`text`, `invalid`=`closed`=`muted`; `closed_alpha` 0; `chrome` = R4 `style.css` renkleri |
+| `dark`, `light` | Renk rolleri (`Theme`): §9'daki adlar + `surface` (yüzey), `line`, `neutral` (yönsüz işaret), `valid`, `invalid` (artık geçerli değil: işaret ve cümle), `closed` (kapanmış işaret), (T3b) `closed_alpha` (kapanmış işaretin en düşük saydamlığı, 0–255: alfabe işareti tazeliğe göre soldurur, A31; kapanmış işaret bunun altına inmez, böylece görünüş ≥ 3:1'i tutturabilir; (T3c) bu taban alfabelerde (`siluet`, `rozet`) ve her sonuç biçiminde geçerlidir: `tg5`'in "gerçekleşti" plakası ve köşe işaretleri bu tabandadır, "tutmadı" izi `closed` renginde çizilir ve en güçlü çizgisi tabana çıkacak biçimde soldurulur (soluk güven plakası oranını korur); 0 = yalnız tazelik), (T3c) `fresh_alpha_min` (açık işaretin tazelik solmasının tabanı, 0–255: açık işaret de tazeliğe göre solar ama bunun altına inmez; 0 = yalnız tazelik), `focus` (odak); `chrome` (kabuğun kendi renkleri: zemin, metin, ikincil metin, çizgi, kart, vurgu, vurgu üstü metin, sayfa, bildirim ve hata şeridi, "yetki gerekir" = kanıt ekranının turuncu yazısı) | §9 değerleri; `neutral`=`accent`, `valid`=`text`, `invalid`=`closed`=`muted`; `closed_alpha` ve `fresh_alpha_min` 0; `chrome` = R4 `style.css` renkleri |
 | `scheme` | Okur seçmediğinde düzen | `dark` |
 | `space` | Boşluk ölçeği (kabuk: `--qp-space-0..5`), çizim alanı kenar boşlukları (sol, sağ, üst = başlık satırı, alt), panel arası, işaret ile cümle arası | `[4,6,8,12,16,24]`, `[8,72,34,24]`, 8, 10 |
 | `surface` | Kabuk köşe yarıçapı, telefon çerçevesi ve rozet yarıçapı, çizgi kalınlığı, gölge (yok = düz), vurgu şeridi ve perde saydamlığı | 6, 18, 8 px; 1; düz; 56, 160 |
@@ -332,7 +332,9 @@ ve iki `@media` genişliği (medya sorgusu özel özellik okuyamaz).
 4. Sert eşikler kayıttan tutturulur (`ornek` örnek; `look::tests::ornek_meets_the_hard_thresholds`):
    en küçük yazı (`types` rolleri ve `chrome` boyları), dokunma hedefi (`chrome.tab_h`,
    `chrome.control_h` ≥ 44; `bar_h` bir denetimi alacak kadar), kapanmış işaret
-   (`closed` + `closed_alpha`, ≥ 3:1), kanıt yazısı (`warn` ya da `evidence.note_color`
+   (`closed` + `closed_alpha`, ≥ 3:1), (T3c) açık işaret en düşük tazelikte (0) (yön rengi
+   + `fresh_alpha_min`, ≥ 3:1; `glyph::outcome::tg5::tests::ornek_signs_keep_3_to_1_at_freshness_zero`),
+   kanıt yazısı (`warn` ya da `evidence.note_color`
    rolü; kabukta `chrome.req`).
 5. Gösterimde `?look=<ad>` ya da Ayarlar → Görünüş; `qp look show <ad>` kaydı yazar.
 6. `r4` altınları değişmemeli (`scripts/verify.sh`); yeni görünüş için altın eklenmez
@@ -341,7 +343,7 @@ ve iki `@media` genişliği (medya sorgusu özel özellik okuyamaz).
 **Kayıt dışında kalanlar** (bilinen, T3b sonrası): eksen etiketlerinin iç ofsetleri ve
 ay etiketi aralığı (72 px), son değer etiketinin iç boşluğu, mum gövdesi oranı,
 işaret alfabelerinin iç oranları ve tazelik eğrisi (`siluet` 0,3 + 0,7·tazelik, `rozet`
-0,22 + 0,78·tazelik; kapanmışın tabanı `closed_alpha`), `tavrik` ve `fotolay` yüzlerinin
+0,22 + 0,78·tazelik; kapanmışın tabanı `closed_alpha`, açığın `fresh_alpha_min`), `tavrik` ve `fotolay` yüzlerinin
 kendi boyları (elenen M8 tasarımları; renkleri görünüşten), geçiş tasarımlarının kendi
 süreleri (görünüş yalnız çarpar) ve `tutamir`'in iğne boyu, **grafik derinliğinin
 görünümü**: oturum grafik görünümünü `depth::chart_view` ile (yani `r4` kaydıyla) kurar

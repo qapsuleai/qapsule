@@ -554,6 +554,7 @@ pub const R4: Look = Look {
 /// Not a design proposal. (R5/T3b) It also proves the hard thresholds can be met from a
 /// record alone: no text under 13 px (scenes and chrome), tabs and controls 44 px high,
 /// a closed glyph at least 3:1 against the background in both schemes (`closed_alpha`),
+/// (R5/T3c) an open glyph too at freshness 0 (`fresh_alpha_min`),
 /// the evidence's "requires" text in the light scheme at least 4.5:1 (`warn`, `req`).
 pub const ORNEK: Look = Look {
     name: "ornek",
@@ -593,6 +594,8 @@ pub const ORNEK: Look = Look {
         neutral: [120, 180, 255, 255],
         closed: [150, 138, 128, 255],
         closed_alpha: 184,
+        // (R5/T3c) An open glyph at freshness 0 keeps ≥ 3:1 (`down` needs ≥ 153).
+        fresh_alpha_min: 168,
         invalid: [176, 160, 148, 255],
         focus: [120, 180, 255, 255],
         chrome: Chrome {
@@ -618,6 +621,10 @@ pub const ORNEK: Look = Look {
         warn: [138, 84, 0, 255],
         closed: [110, 98, 90, 255],
         closed_alpha: 204,
+        // (R5/T3c) An open glyph at freshness 0 keeps ≥ 3:1 (`up` needs ≥ 231, `neutral`
+        // ≥ 229); the r4 light accent (2.9:1 even opaque) is too light for a neutral glyph.
+        fresh_alpha_min: 236,
+        neutral: [0xb4, 0x53, 0x09, 230],
         invalid: [100, 88, 80, 255],
         chrome: Chrome {
             bg: [252, 248, 242, 255],

@@ -23,7 +23,7 @@
 //! All colours come from the [`Theme`].
 
 use super::{Alphabet as AlphabetTrait, GlyphBox};
-use crate::theme::Theme;
+use crate::theme::{opacity_at_least, Theme};
 use qp_schema::capsule::{Direction, GlyphPhase, GlyphSpec, MeaningKind};
 use qp_schema::scene::{Prim, Rgba};
 
@@ -299,16 +299,20 @@ impl AlphabetTrait for Rozet {
         };
         let phase = spec.phase;
         let retracted = phase == GlyphPhase::Retracted;
-        // (R5/T3b) A closed badge keeps the look's least alpha (`r4`: 0, freshness alone).
+        // (R5/T3b) A closed badge keeps the look's least alpha; (R5/T3c) an open one its
+        // least freshness opacity (`r4`: both 0, freshness alone).
         let closed = matches!(
             phase,
             GlyphPhase::Realized | GlyphPhase::Failed | GlyphPhase::Retracted
         );
-        let alpha = if closed && theme.closed_alpha > 0 {
-            alpha.max(f64::from(theme.closed_alpha) / 255.0)
-        } else {
-            alpha
-        };
+        let alpha = opacity_at_least(
+            alpha,
+            if closed {
+                theme.closed_alpha
+            } else {
+                theme.fresh_alpha_min
+            },
+        );
 
         // Geometry (pixels).
         let r_out = s * 0.5 - 0.35;

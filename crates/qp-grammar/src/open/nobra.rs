@@ -475,7 +475,9 @@ fn text(x: &Facts, key: &str, part: &str, l: Language, check: Option<Check>) -> 
         return None;
     }
     Some(match (key, part) {
-        (_, "q") => question(key, l).to_owned(),
+        // A closed card says it opens ("+"), the open one that it closes ("−").
+        (_, "q") => format!("+ {}", question(key, l)),
+        (_, "qo") => format!("\u{2212} {}", question(key, l)),
         ("what", "a") => what_answer(x, l),
         ("what", "d") => match &x.voice {
             Some(v) => v.detail.clone(),
@@ -697,7 +699,8 @@ pub fn view(
             t.encoding.color = Some(ColorSpec::Constant(color.to_owned()));
             t
         };
-        layers.push(text_layer("q", 0.0, m.q_px, "muted", None));
+        let q_part = if opened { "qo" } else { "q" };
+        layers.push(text_layer(q_part, 0.0, m.q_px, "accent", None));
         let a_y = m.q_h + m.inner;
         let check = if *k == "who" { ctx.check } else { None };
         let a_color = if check == Some(Check::Differs) {
@@ -782,6 +785,19 @@ pub fn view(
     })
 }
 
+/// The capsule depth's frame height: every card answered and one detail open above an
+/// evidence chart that can be read. `r4`: 560 px (a phone's height under the page's bars);
+/// other looks scale it with their body type (`types.body.px`).
+/// To be registered in the look record (a design constant derived from `r4`).
+#[must_use]
+pub fn height(look: &Look) -> u32 {
+    const R4_HEIGHT: f64 = 560.0;
+    let k = look.types.body.px / crate::look::R4.types.body.px;
+    #[allow(clippy::cast_possible_truncation, clippy::cast_sign_loss)]
+    let h = (R4_HEIGHT * k).round() as u32;
+    h
+}
+
 /// The hint line under the open capsule.
 #[must_use]
 pub fn hint(l: Language) -> &'static str {
@@ -838,7 +854,7 @@ pub fn text_rows(item: &CapsuleItem, l: Language, check: Option<Check>) -> Vec<A
             let c = if *k == "who" { check } else { None };
             Some(AskRow {
                 key: k,
-                q: text(&x, k, "q", l, c)?,
+                q: question(k, l).to_owned(),
                 a: text(&x, k, "a", l, c)?,
                 d: text(&x, k, "d", l, c)?,
             })

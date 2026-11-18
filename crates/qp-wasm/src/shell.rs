@@ -2082,7 +2082,7 @@ impl ShellCore {
     /// (R4/H-M8910) Open capsule `id` from the feed to its capsule depth (the `open`
     /// gesture; what a tap on its face does, by id).
     pub fn open_capsule(&mut self, id: &str) {
-        let (w, h) = self.frames["scene"];
+        let (w, h) = self.capsule_frame();
         self.ask(
             "in",
             Asked::Input,
@@ -2099,12 +2099,27 @@ impl ShellCore {
         if !["capsule", "chart", "evidence"].contains(&to) {
             return;
         }
-        let (w, h) = self.frames["scene"];
+        let (w, h) = if to == "capsule" {
+            self.capsule_frame()
+        } else {
+            self.frames["scene"]
+        };
         self.ask(
             "in",
             Asked::Input,
             json!({"type":"input","gesture":{"kind":"open","capsule":cap,"to":to,"width":w,"height":h}}),
         );
+    }
+
+    /// (R5/M20) The capsule depth's frame: the scene's, at the open capsule design's own
+    /// height when it states one.
+    fn capsule_frame(&self) -> (u32, u32) {
+        let (w, h) = self.frames["scene"];
+        let look = qp_session::viewer::look_of(&self.look);
+        (
+            w,
+            qp_grammar::open::frame_height(self.look.open.as_deref(), look).unwrap_or(h),
+        )
     }
 
     /// Back: close one depth (to the feed from the capsule).

@@ -111,6 +111,9 @@ pub struct OpenDesign {
     /// the opened question; `None`: the reference rule ([`crate::depth::tap_opens`]).
     #[allow(clippy::type_complexity)]
     pub tap: Option<fn(&View, &HitInfo, Option<&str>) -> OpenTap>,
+    /// The capsule depth's frame height in a look (the design states it, as a face design
+    /// does); `None`: the surface's frame.
+    pub height: Option<fn(&Look) -> u32>,
 }
 
 impl std::fmt::Debug for OpenDesign {
@@ -128,6 +131,7 @@ pub static OPENS: &[OpenDesign] = &[
         note: "R4 reference: the capsule card (glyph, sentence, track record, mini price line); any tap opens the chart",
         view: None,
         tap: None,
+        height: None,
     },
     // --- M20 alternatives below this line ------------------------------------------------
     OpenDesign {
@@ -135,6 +139,7 @@ pub static OPENS: &[OpenDesign] = &[
         note: "question cards: one short answer per reader question, details on touch; the evidence geometry inside \"what does it rest on?\"",
         view: Some(nobra::view),
         tap: Some(nobra::tap),
+        height: Some(nobra::height),
     },
 ];
 
@@ -172,6 +177,13 @@ pub fn by_name(name: Option<&str>) -> Result<&'static OpenDesign, GrammarError> 
 #[must_use]
 pub fn is_styled(name: Option<&str>) -> bool {
     by_name(name).is_ok_and(|d| d.view.is_some())
+}
+
+/// The capsule depth's frame height by design `name` in `look` (`None`: the surface's
+/// frame, the reference).
+#[must_use]
+pub fn frame_height(name: Option<&str>, look: &Look) -> Option<u32> {
+    by_name(name).ok().and_then(|d| d.height).map(|f| f(look))
 }
 
 /// The capsule-depth view by design `name` (`None` or `r4`: the reference card).

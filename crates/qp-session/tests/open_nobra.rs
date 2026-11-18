@@ -183,7 +183,12 @@ fn question_cards_answer_and_open_on_touch() {
         .next()
         .expect("a capsule");
     let (o, state) = open(&mut h, "a", &cap);
-    assert_eq!(o.frame, Some([W, H]));
+    // The design states its height (560 px in `r4`); the width is the surface's.
+    assert_eq!(
+        o.frame,
+        Some([W, qp_grammar::open::nobra::height(&qp_grammar::look::R4)])
+    );
+    assert_eq!(o.frame, Some([W, 560]));
     let reader = OpenReader::default();
     let scene =
         open_scene_in(h.session_mut(), &o, None, None, &state, 60, &reader).expect("a scene");

@@ -464,6 +464,21 @@ impl Session {
     /// a face is that wide and [`FACE_HEIGHT`] high).
     fn frame(&self, ci: usize, key: &str) -> (u32, u32) {
         let c = &self.conns[ci];
+        // (R5/M20) An open capsule design states its capsule depth's height (the width is
+        // the surface's).
+        if key == "capsule" {
+            if let Some(h) = qp_grammar::open::frame_height(
+                c.look.open.as_deref(),
+                crate::viewer::look_of(&c.look),
+            ) {
+                let w = c
+                    .look
+                    .frames
+                    .get(key)
+                    .map_or_else(|| screen_frame(c.surface.kind).0, |f| f[0]);
+                return (w, h.clamp(MIN_HEIGHT, MAX_DIM));
+            }
+        }
         if let Some([w, h]) = c.look.frames.get(key) {
             return (*w, *h);
         }

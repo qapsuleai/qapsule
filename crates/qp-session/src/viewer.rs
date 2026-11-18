@@ -218,11 +218,33 @@ fn open_view(
     o: &Opening,
     look: &ViewState,
     max_points: u32,
+    reader: &OpenReader,
 ) -> Option<View> {
     match o.to {
         OpenDepth::Sentence => None,
         OpenDepth::Capsule => {
             let id = o.presentation.capsule_view.as_ref()?.id.clone();
+            // (R5/M20) The connection's open capsule design (the authority's
+            // `depth_view` builds the same view, without the device's check).
+            if qp_grammar::open::is_styled(look.open.as_deref()) {
+                let [w, h] = o.frame?;
+                let ctx = qp_grammar::open::OpenCtx {
+                    ask: look.ask.as_deref(),
+                    lang: reader.lang,
+                    check: reader.check,
+                    frame: [w, h],
+                };
+                return qp_grammar::open::capsule_view(
+                    look.open.as_deref(),
+                    look_of(look),
+                    &o.finding,
+                    max_points,
+                    p,
+                    &id,
+                    &ctx,
+                )
+                .ok();
+            }
             depth::capsule_view_in(look_of(look), &o.finding, max_points, p, &id).ok()
         }
         OpenDepth::Chart | OpenDepth::Evidence => {
@@ -233,6 +255,36 @@ fn open_view(
             let id = look.view.clone().unwrap_or_else(|| given.id.clone());
             depth::chart_view_in(look_of(look), &o.finding, p, &id).ok()
         }
+    }
+}
+
+/// (R5/M20) What an open capsule design reads of the reader besides the data: the
+/// language and the device's own check of the open capsule (K48).
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct OpenReader {
+    /// The reader's language.
+    pub lang: Language,
+    /// The device's check (`None`: the authority's claim, "verified by the server").
+    pub check: Option<qp_grammar::open::Check>,
+}
+
+impl Default for OpenReader {
+    fn default() -> Self {
+        Self {
+            lang: Language::Tr,
+            check: None,
+        }
+    }
+}
+
+/// The open capsule design's check state for a viewer's trust state (`Server`: none).
+#[must_use]
+pub fn open_check(t: TrustState) -> Option<qp_grammar::open::Check> {
+    match t {
+        TrustState::Server => None,
+        TrustState::Checking => Some(qp_grammar::open::Check::Checking),
+        TrustState::Device => Some(qp_grammar::open::Check::Device),
+        TrustState::Differs => Some(qp_grammar::open::Check::Differs),
     }
 }
 
@@ -247,6 +299,29 @@ pub fn open_scene(
     voice: Option<&qp_schema::protocol::CapsuleVoice>,
     look: &ViewState,
     max_points: u32,
+) -> Option<SceneDesc> {
+    open_scene_in(
+        s,
+        o,
+        headline,
+        voice,
+        look,
+        max_points,
+        &OpenReader::default(),
+    )
+}
+
+/// (R5/M20) [`open_scene`] for `reader` (its language and the device's check, which an
+/// open capsule design may write).
+#[must_use]
+pub fn open_scene_in(
+    s: &mut Session,
+    o: &Opening,
+    headline: Option<&str>,
+    voice: Option<&qp_schema::protocol::CapsuleVoice>,
+    look: &ViewState,
+    max_points: u32,
+    reader: &OpenReader,
 ) -> Option<SceneDesc> {
     if o.to == OpenDepth::Sentence {
         return None;
@@ -267,7 +342,7 @@ pub fn open_scene(
         parts: None,
         voice: voice.map(|v| (o.finding.as_str(), v)),
     };
-    let view = open_view(&p, stored, o, look, max_points)?;
+    let view = open_view(&p, stored, o, look, max_points, reader)?;
     let range = look
         .range
         .as_ref()

@@ -52,6 +52,7 @@ struct StyleReq<'a> {
     seen: Option<i64>,
     look: Option<&'a str>,
     voice: Option<&'a str>,
+    open: Option<&'a str>,
 }
 
 /// The frame key of a target (`ViewState::frames`).
@@ -216,6 +217,7 @@ impl Session {
                 seen,
                 look,
                 voice,
+                open,
             } => {
                 self.set_style(
                     ci,
@@ -229,6 +231,7 @@ impl Session {
                         seen: *seen,
                         look: look.as_deref(),
                         voice: voice.as_deref(),
+                        open: open.as_deref(),
                     },
                 )?;
                 (Out::default(), Vec::new())
@@ -384,7 +387,19 @@ impl Session {
                 return Err(unknown("voice", v, qp_capsule::voice::names()));
             }
         }
+        if let Some(o) = r.open {
+            if !qp_grammar::open::is_open(o) {
+                return Err(unknown("open", o, qp_grammar::open::names()));
+            }
+        }
         let look = &mut self.conns[ci].look;
+        if let Some(o) = r.open {
+            let o = (o != qp_grammar::open::DEFAULT_OPEN).then(|| o.to_owned());
+            if o != look.open {
+                look.ask = None;
+            }
+            look.open = o;
+        }
         if let Some(v) = r.voice {
             look.voice = (v != qp_capsule::voice::DEFAULT_VOICE).then(|| v.to_owned());
         }
@@ -527,6 +542,39 @@ impl Session {
             || self.conns[ci].look.look.is_some()
             || voice.is_some();
         let look = crate::viewer::look_of(&self.conns[ci].look);
+        // (R5/M20) An open capsule design other than the reference card builds the capsule
+        // depth (the replica's `viewer::open_scene` does the same, with the device's check).
+        let open = self.conns[ci].look.open.clone();
+        if d == OpenDepth::Capsule && qp_grammar::open::is_styled(open.as_deref()) {
+            let Some(id) = pr.capsule_view.as_ref().map(|v| v.id.clone()) else {
+                return Ok(None);
+            };
+            let max_points = self.conns[ci].profile.max_points;
+            let lang = self.lang_of(ci);
+            let (w, h) = self.frame(ci, depth_key(d));
+            let ask = self.conns[ci].look.ask.clone();
+            warm(rd!(self), &mut self.cache);
+            let p = DocProvider::new(rd!(self), &self.cache)
+                .with_headlines(&self.headlines)
+                .with_parts(self, lang)
+                .with_voice(voice.as_deref());
+            let ctx = qp_grammar::open::OpenCtx {
+                ask: ask.as_deref(),
+                lang,
+                check: None,
+                frame: [w, h],
+            };
+            return Ok(qp_grammar::open::capsule_view(
+                open.as_deref(),
+                look,
+                finding,
+                max_points,
+                &p,
+                &id,
+                &ctx,
+            )
+            .ok());
+        }
         if d == OpenDepth::Capsule && (self.conns[ci].look.look.is_some() || voice.is_some()) {
             let Some(id) = pr.capsule_view.as_ref().map(|v| v.id.clone()) else {
                 return Ok(None);
@@ -739,6 +787,10 @@ impl Session {
         };
         {
             let look = &mut self.conns[ci].look;
+            // (R5/M20) The opened question belongs to the open capsule.
+            if to == OpenDepth::Sentence || look.capsule.as_deref() != Some(cap) {
+                look.ask = None;
+            }
             if to == OpenDepth::Sentence {
                 look.capsule = None;
                 look.finding = None;
@@ -848,7 +900,20 @@ impl Session {
                     out.hit = hit;
                     return Ok((out, Vec::new()));
                 }
-                if let Some(to) = depth::tap_opens(d, hit.as_ref().and_then(|h| h.item.as_ref())) {
+                // (R5/M20) The open capsule design's tap rule (the reference: `tap_opens`).
+                let rule = qp_grammar::open::tap(
+                    self.conns[ci].look.open.as_deref(),
+                    d,
+                    scene.as_ref().map(|(v, _, _)| v),
+                    hit.as_ref(),
+                    self.conns[ci].look.ask.as_deref(),
+                );
+                if let qp_grammar::open::OpenTap::Ask(a) = rule {
+                    self.conns[ci].look.ask = a;
+                    out.hit = hit;
+                    return Ok((out, Vec::new()));
+                }
+                if let qp_grammar::open::OpenTap::Open(to) = rule {
                     out.opening = Some(self.transition(ci, &cap, &finding, d, to)?);
                 } else if let (Some((view, _, times)), Some(h)) = (&scene, &hit) {
                     if let (Some(panel), Some(bar)) = (h.panel, h.bar) {

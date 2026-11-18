@@ -14,7 +14,7 @@ const L = {
     empty: 'Henüz kapsül yok. Oynatmayı başlatın.', back: '‹ Geri', lang: 'Dil', theme: 'Tema',
     dark: 'Koyu', light: 'Açık', sensitivity: 'Hassasiyet', default: 'Grubun varsayılanı',
     important: 'Önemli', balanced: 'Dengeli', all: 'Hepsi', alphabet: 'İşaret alfabesi',
-    face: 'Yüz tasarımı', lookl: 'Görünüş', voicel: 'Dil', feedl: 'Akış düzeni', orderl: 'Akış sırası (M19)', rulel: 'Yazı tura eşiği (M19)', transition: 'Geçiş', outcome: 'Sonuç işareti', noent: 'Veri yetkisi yok (gösterim)', audience: 'İzleme listesi ve pozisyonlar',
+    face: 'Yüz tasarımı', lookl: 'Görünüş', voicel: 'Dil', openl: 'Açılmış kapsül (M20)', feedl: 'Akış düzeni', orderl: 'Akış sırası (M19)', rulel: 'Yazı tura eşiği (M19)', transition: 'Geçiş', outcome: 'Sonuç işareti', noent: 'Veri yetkisi yok (gösterim)', audience: 'İzleme listesi ve pozisyonlar',
     group: 'Kullanıcı', habituated: 'Alışkın', future: 'Geleceğin yatırımcısı', symbol: 'Sembol',
     watch: 'İzle', position: 'Pozisyon', apply: 'Uygula', phone: 'Telefondan aç:',
     copy: 'Özeti kopyala', copied: 'Kopyalandı', play: '▶', pause: '❚❚', step: '+1', go: 'Git',
@@ -35,7 +35,7 @@ const L = {
     empty: 'No capsules yet. Start the replay.', back: '‹ Back', lang: 'Language', theme: 'Theme',
     dark: 'Dark', light: 'Light', sensitivity: 'Sensitivity', default: "Group's default",
     important: 'Important', balanced: 'Balanced', all: 'All', alphabet: 'Glyph alphabet',
-    face: 'Face design', lookl: 'Look', voicel: 'Voice', feedl: 'Feed layout', orderl: 'Feed order (M19)', rulel: 'Coin-flip threshold (M19)', transition: 'Transition', outcome: 'Outcome mark', noent: 'No data entitlement (demo)', audience: 'Watchlist and positions',
+    face: 'Face design', lookl: 'Look', voicel: 'Voice', openl: 'Open capsule (M20)', feedl: 'Feed layout', orderl: 'Feed order (M19)', rulel: 'Coin-flip threshold (M19)', transition: 'Transition', outcome: 'Outcome mark', noent: 'No data entitlement (demo)', audience: 'Watchlist and positions',
     group: 'User', habituated: 'Habituated', future: 'Future investor', symbol: 'Symbol',
     watch: 'Watch', position: 'Position', apply: 'Apply', phone: 'Open on your phone:',
     copy: 'Copy summary', copied: 'Copied', play: '▶', pause: '❚❚', step: '+1', go: 'Go',
@@ -71,6 +71,8 @@ const ui = {
   look: params.get('look') || '',
   // (R5/m17-int) The capsule voice (`?voice=marla|selvi|r4`; the core's default: `marla`).
   voice: params.get('voice') || '',
+  // (R5/M20) The open capsule design (`?open=<name>`; names from `choices().open`).
+  open: params.get('open') || '',
   anim: params.get('anim') !== '0',
   // (R4/S1) Human-test settings: last look (`now` or a step) and the audience, given to
   // the core as they are (it reads the comma lists); applied again on every start frame,
@@ -202,7 +204,7 @@ function start(frame) {
   core.metric_flag('webgpu', Boolean(navigator.gpu));
   sampleMemory();
   if (ui.theme === 'light' || ui.alphabet || ui.face) core.set_style(ui.face, ui.alphabet, ui.theme);
-  if (ui.feed || ui.transition || ui.outcome || ui.look || ui.feed_order || ui.feed_rule || ui.voice) core.set_look(JSON.stringify({ feed: ui.feed, transition: ui.transition, outcome: ui.outcome, look: ui.look, feed_order: ui.feed_order, feed_rule: ui.feed_rule, voice: ui.voice }));
+  if (ui.feed || ui.transition || ui.outcome || ui.look || ui.feed_order || ui.feed_rule || ui.voice || ui.open) core.set_look(JSON.stringify({ feed: ui.feed, transition: ui.transition, outcome: ui.outcome, look: ui.look, feed_order: ui.feed_order, feed_rule: ui.feed_rule, voice: ui.voice, open: ui.open }));
   if (ui.watch || ui.long || ui.short || ui.group) core.set_audience(JSON.stringify({ group: ui.group, watch: ui.watch, long: ui.long, short: ui.short }));
   if (ui.seen) core.seen_at(ui.seen);
   faces.clear();
@@ -395,7 +397,8 @@ function renderLayer(force) {
   $('trust').textContent = open.trust || '';
   $('toevidence').hidden = open.depth === 'evidence';
   $('opentext').textContent = open.text;
-  $('hint').textContent = t(HINT[open.depth]);
+  // (R5/M20) An open capsule design may give its own hint (text from the core).
+  $('hint').textContent = open.hint || t(HINT[open.depth]);
   const scene = $('scene');
   scene.hidden = !open.scene;
   // (RP3/M14) The layer shows only on the feed tab; elsewhere the scene is not painted
@@ -406,7 +409,30 @@ function renderLayer(force) {
     if (paint.paintScene(scene, force, open.px)) core.metric_span('scene', t0, performance.now());
   }
   renderEvidence();
+  renderAsks(open.asks || []);
   return open;
+}
+
+// (R5/M20) An open capsule design's question cards for a reader without a scene (no data
+// of the instrument, A32): question, answer and detail as the core wrote them; the detail
+// opens on touch (a native disclosure).
+function renderAsks(rows) {
+  const out = [];
+  for (const r of rows) {
+    const d = document.createElement('details');
+    d.className = 'ask';
+    const s = document.createElement('summary');
+    const q = document.createElement('b');
+    q.textContent = r.q;
+    const a = document.createElement('span');
+    a.textContent = r.a;
+    s.append(q, ' ', a);
+    const p = document.createElement('p');
+    p.textContent = r.d;
+    d.append(s, p);
+    out.push(d);
+  }
+  $('asks').replaceChildren(...out);
 }
 
 function renderEvidence() {
@@ -629,7 +655,7 @@ function wire() {
   };
   $('s_alpha').onchange = (e) => { core.set_style('', e.target.value, ''); flush(); };
   $('s_face').onchange = (e) => { core.set_style(e.target.value, '', ''); flush(); };
-  const looks = { feed: 's_feed', transition: 's_transition', outcome: 's_outcome', look: 's_look', feed_order: 's_order', voice: 's_voice' };
+  const looks = { feed: 's_feed', transition: 's_transition', outcome: 's_outcome', look: 's_look', feed_order: 's_order', voice: 's_voice', open: 's_open' };
   for (const k of Object.keys(looks)) {
     $(looks[k]).onchange = (e) => { core.set_look(JSON.stringify({ [k]: e.target.value })); flush(); };
   }
@@ -651,7 +677,7 @@ function fillChoices() {
   // The names each setting accepts come from the core's registries.
   const ch = JSON.parse(core.choices());
   const look = JSON.parse(core.look());
-  const sel = { face: 's_face', alphabet: 's_alpha', feed: 's_feed', transition: 's_transition', outcome: 's_outcome', look: 's_look', feed_order: 's_order', feed_rule: 's_rule', voice: 's_voice' };
+  const sel = { face: 's_face', alphabet: 's_alpha', feed: 's_feed', transition: 's_transition', outcome: 's_outcome', look: 's_look', feed_order: 's_order', feed_rule: 's_rule', voice: 's_voice', open: 's_open' };
   for (const k of Object.keys(sel)) {
     const el = $(sel[k]);
     const opts = [];

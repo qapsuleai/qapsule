@@ -3133,6 +3133,10 @@ pub enum Gesture {
         /// text).
         #[serde(default, skip_serializing_if = "Option::is_none")]
         voice: Option<String>,
+        /// (R5/M20) Open capsule design: how the capsule depth is laid out
+        /// (`qp_grammar::open::OPENS`; default `r4`, today's capsule card).
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        open: Option<String>,
     },
     /// (R4, §4.6) Close the open capsule one depth back, or to `to` (`sentence`: back to
     /// the feed). Answered with an `interaction` carrying the `opening` (the way back).
@@ -3244,6 +3248,15 @@ pub struct ViewState {
     /// (R5/m17-int) Capsule voice its capsules speak in (absent: the default, `r4`).
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub voice: Option<String>,
+    /// (R5/M20) Open capsule design (`qp_grammar::open::OPENS`; absent: the default,
+    /// `r4`, the capsule card).
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub open: Option<String>,
+    /// (R5/M20) The question the open capsule's design shows opened (a design with
+    /// questions, e.g. `nobra`: `what`, `basis`, `who`, `before`, `why`; absent: none).
+    /// Reset when the capsule closes or another one opens.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub ask: Option<String>,
 }
 
 /// (R4, §4.6) One element both sides of a depth transition show (e.g. the glyph, the

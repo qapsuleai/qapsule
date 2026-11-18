@@ -55,7 +55,7 @@ pub const DISPLAY_TZ: &str = "Europe/Istanbul";
 
 // (RP3/M15) The pure scene functions live in `qp_session::viewer`: the authority compiles
 // a viewer's faces with the very same code (§22).
-pub use qp_session::viewer::{face_scene, open_scene, scene_digest};
+pub use qp_session::viewer::{face_scene, open_scene, open_scene_in, scene_digest};
 
 #[cfg(target_arch = "wasm32")]
 mod clock {
@@ -965,6 +965,7 @@ impl ShellCore {
                     ("outcome", &self.look.outcome),
                     ("look", &self.look.look),
                     ("voice", &self.look.voice),
+                    ("open", &self.look.open),
                 ] {
                     if let Some(v) = v {
                         more[k] = json!(v);
@@ -1485,6 +1486,8 @@ impl ShellCore {
             "feed_order": std::iter::once("layout").chain(qp_grammar::feeds::FEED_ORDERS).collect::<Vec<_>>(),
             "feed_rule": qp_capsule::feedrule::FEED_RULES.iter().map(|(n, _)| *n).collect::<Vec<_>>(),
             "voice": qp_session::voices::names(),
+            // (R5/M20) The open capsule designs.
+            "open": qp_grammar::open::names(),
         })
     }
 
@@ -1640,21 +1643,38 @@ impl ShellCore {
         let mp = self.max_points;
         let head = self.open_headline.clone();
         let voice = self.open_voice.clone();
+        // (R5/M20) An open capsule design reads the reader's language and, at the capsule
+        // depth, the device's own check of the open capsule (K48; asked only then, so the
+        // check count of the reference design is unchanged).
+        let check =
+            if o.to == OpenDepth::Capsule && qp_grammar::open::is_styled(look.open.as_deref()) {
+                self.viewer
+                    .as_mut()
+                    .and_then(Viewer::trust)
+                    .and_then(qp_session::viewer::open_check)
+            } else {
+                None
+            };
+        let reader = qp_session::viewer::OpenReader {
+            lang: self.lang,
+            check,
+        };
         // (RP3/S) The build's own time (`scene_build`), apart from the change check.
         let t0 = core_now();
         let scene = if let Some(v) = self.viewer.as_mut() {
             // (RP3/M15) The open capsule over the device's own data of its instrument.
             let side = v.open_mut().filter(|s| s.open.capsule == o.capsule)?;
             let s = side.replica_mut().session_mut()?;
-            open_scene(s, &o, head.as_deref(), voice.as_ref(), &look, mp)
+            open_scene_in(s, &o, head.as_deref(), voice.as_ref(), &look, mp, &reader)
         } else {
-            open_scene(
+            open_scene_in(
                 self.replica.session_mut()?,
                 &o,
                 head.as_deref(),
                 voice.as_ref(),
                 &look,
                 mp,
+                &reader,
             )
         };
         let t1 = core_now();
@@ -1737,6 +1757,37 @@ impl ShellCore {
                     "frame": o.frame,
                     "scene": o.frame.is_some(),
                 });
+                // (R5/M20) The open capsule design's own hint for its depth (absent: the
+                // page's).
+                if let Some(h) = o.frame.and_then(|_| {
+                    qp_grammar::open::hint(self.look.open.as_deref(), o.to, self.lang)
+                }) {
+                    v["hint"] = json!(h);
+                }
+                // (R5/M20) Without a scene (no data of the instrument, A32) the design's
+                // question cards as text, `[{key, q, a, d}]`, from the opened feed item.
+                if o.frame.is_none() {
+                    let rows = self
+                        .feed
+                        .iter()
+                        .find(|i| i.id == o.capsule)
+                        .map(|i| {
+                            qp_grammar::open::text_rows(
+                                self.look.open.as_deref(),
+                                o.to,
+                                i,
+                                self.lang,
+                            )
+                        })
+                        .unwrap_or_default();
+                    if !rows.is_empty() {
+                        v["asks"] = Value::Array(
+                            rows.iter()
+                                .map(|r| json!({"key": r.key, "q": r.q, "a": r.a, "d": r.d}))
+                                .collect(),
+                        );
+                    }
+                }
                 if let Some([w, h]) = o.frame {
                     let sz = self.size_json(w, h);
                     v["px"] = sz["px"].clone();
@@ -1969,6 +2020,7 @@ impl ShellCore {
             "outcome",
             "look",
             "voice",
+            "open",
         ] {
             if let Some(v) = choice.get(k).and_then(Value::as_str) {
                 if !v.is_empty() {

@@ -1,0 +1,602 @@
+{
+ "022d373af0": {
+  "A": "r4",
+  "B": "pavka",
+  "order": 1,
+  "pair": [
+   "pavka",
+   "r4"
+  ],
+  "state": "chart200"
+ },
+ "05c64efbfc": {
+  "A": "pavka",
+  "B": "r4",
+  "order": 0,
+  "pair": [
+   "pavka",
+   "r4"
+  ],
+  "state": "chart50"
+ },
+ "0c467c6e01": {
+  "A": "korda",
+  "B": "kestim",
+  "order": 1,
+  "pair": [
+   "kestim",
+   "korda"
+  ],
+  "state": "chart200"
+ },
+ "1a89fdb582": {
+  "A": "r4",
+  "B": "kestim",
+  "order": 1,
+  "pair": [
+   "kestim",
+   "r4"
+  ],
+  "state": "chart5"
+ },
+ "1b2b3edefc": {
+  "A": "r4",
+  "B": "pavka",
+  "order": 1,
+  "pair": [
+   "pavka",
+   "r4"
+  ],
+  "state": "chart50"
+ },
+ "1c4d8ea65c": {
+  "A": "korda",
+  "B": "pavka",
+  "order": 0,
+  "pair": [
+   "korda",
+   "pavka"
+  ],
+  "state": "chart200"
+ },
+ "1e2e1549e5": {
+  "A": "r4",
+  "B": "selen",
+  "order": 0,
+  "pair": [
+   "r4",
+   "selen"
+  ],
+  "state": "chart200"
+ },
+ "2f49e5df6d": {
+  "A": "selen",
+  "B": "korda",
+  "order": 1,
+  "pair": [
+   "korda",
+   "selen"
+  ],
+  "state": "chart200"
+ },
+ "30fb00c9e6": {
+  "A": "pavka",
+  "B": "kestim",
+  "order": 1,
+  "pair": [
+   "kestim",
+   "pavka"
+  ],
+  "state": "chart50"
+ },
+ "3293aafe7c": {
+  "A": "selen",
+  "B": "kestim",
+  "order": 1,
+  "pair": [
+   "kestim",
+   "selen"
+  ],
+  "state": "chart5"
+ },
+ "3537f02ac2": {
+  "A": "kestim",
+  "B": "korda",
+  "order": 0,
+  "pair": [
+   "kestim",
+   "korda"
+  ],
+  "state": "chart50"
+ },
+ "3651b1c0c0": {
+  "A": "selen",
+  "B": "r4",
+  "order": 1,
+  "pair": [
+   "r4",
+   "selen"
+  ],
+  "state": "chart5"
+ },
+ "36c94cfd72": {
+  "A": "selen",
+  "B": "r4",
+  "order": 1,
+  "pair": [
+   "r4",
+   "selen"
+  ],
+  "state": "chart50"
+ },
+ "3fb9a9f5bb": {
+  "A": "korda",
+  "B": "pavka",
+  "order": 0,
+  "pair": [
+   "korda",
+   "pavka"
+  ],
+  "state": "chart5"
+ },
+ "40c1b893c7": {
+  "A": "selen",
+  "B": "r4",
+  "order": 1,
+  "pair": [
+   "r4",
+   "selen"
+  ],
+  "state": "chart200"
+ },
+ "41c28e65fe": {
+  "A": "korda",
+  "B": "r4",
+  "order": 0,
+  "pair": [
+   "korda",
+   "r4"
+  ],
+  "state": "chart50"
+ },
+ "43e5d58215": {
+  "A": "pavka",
+  "B": "selen",
+  "order": 0,
+  "pair": [
+   "pavka",
+   "selen"
+  ],
+  "state": "chart200"
+ },
+ "43f62a130a": {
+  "A": "korda",
+  "B": "r4",
+  "order": 0,
+  "pair": [
+   "korda",
+   "r4"
+  ],
+  "state": "chart5"
+ },
+ "4d50f29967": {
+  "A": "kestim",
+  "B": "selen",
+  "order": 0,
+  "pair": [
+   "kestim",
+   "selen"
+  ],
+  "state": "chart5"
+ },
+ "4de9b811d9": {
+  "A": "r4",
+  "B": "korda",
+  "order": 1,
+  "pair": [
+   "korda",
+   "r4"
+  ],
+  "state": "chart200"
+ },
+ "4f6b818577": {
+  "A": "korda",
+  "B": "kestim",
+  "order": 1,
+  "pair": [
+   "kestim",
+   "korda"
+  ],
+  "state": "chart50"
+ },
+ "507a6763ec": {
+  "A": "korda",
+  "B": "pavka",
+  "order": 0,
+  "pair": [
+   "korda",
+   "pavka"
+  ],
+  "state": "chart50"
+ },
+ "523a57173a": {
+  "A": "kestim",
+  "B": "r4",
+  "order": 0,
+  "pair": [
+   "kestim",
+   "r4"
+  ],
+  "state": "chart5"
+ },
+ "53483cdcfe": {
+  "A": "korda",
+  "B": "selen",
+  "order": 0,
+  "pair": [
+   "korda",
+   "selen"
+  ],
+  "state": "chart200"
+ },
+ "5a09d05544": {
+  "A": "kestim",
+  "B": "korda",
+  "order": 0,
+  "pair": [
+   "kestim",
+   "korda"
+  ],
+  "state": "chart200"
+ },
+ "5cda0f8567": {
+  "A": "pavka",
+  "B": "selen",
+  "order": 0,
+  "pair": [
+   "pavka",
+   "selen"
+  ],
+  "state": "chart5"
+ },
+ "638697fddd": {
+  "A": "r4",
+  "B": "korda",
+  "order": 1,
+  "pair": [
+   "korda",
+   "r4"
+  ],
+  "state": "chart5"
+ },
+ "6673c83abe": {
+  "A": "pavka",
+  "B": "r4",
+  "order": 0,
+  "pair": [
+   "pavka",
+   "r4"
+  ],
+  "state": "chart5"
+ },
+ "67837b8156": {
+  "A": "pavka",
+  "B": "korda",
+  "order": 1,
+  "pair": [
+   "korda",
+   "pavka"
+  ],
+  "state": "chart5"
+ },
+ "7789b52f13": {
+  "A": "korda",
+  "B": "selen",
+  "order": 0,
+  "pair": [
+   "korda",
+   "selen"
+  ],
+  "state": "chart5"
+ },
+ "7ad0bc0eae": {
+  "A": "selen",
+  "B": "pavka",
+  "order": 1,
+  "pair": [
+   "pavka",
+   "selen"
+  ],
+  "state": "chart5"
+ },
+ "7fe0df592b": {
+  "A": "r4",
+  "B": "kestim",
+  "order": 1,
+  "pair": [
+   "kestim",
+   "r4"
+  ],
+  "state": "chart50"
+ },
+ "8dfaeb06f7": {
+  "A": "pavka",
+  "B": "korda",
+  "order": 1,
+  "pair": [
+   "korda",
+   "pavka"
+  ],
+  "state": "chart50"
+ },
+ "9036d795aa": {
+  "A": "pavka",
+  "B": "korda",
+  "order": 1,
+  "pair": [
+   "korda",
+   "pavka"
+  ],
+  "state": "chart200"
+ },
+ "934e6a8175": {
+  "A": "kestim",
+  "B": "pavka",
+  "order": 0,
+  "pair": [
+   "kestim",
+   "pavka"
+  ],
+  "state": "chart200"
+ },
+ "95d855cefd": {
+  "A": "r4",
+  "B": "selen",
+  "order": 0,
+  "pair": [
+   "r4",
+   "selen"
+  ],
+  "state": "chart5"
+ },
+ "99151d2535": {
+  "A": "korda",
+  "B": "kestim",
+  "order": 1,
+  "pair": [
+   "kestim",
+   "korda"
+  ],
+  "state": "chart5"
+ },
+ "9dbf913470": {
+  "A": "pavka",
+  "B": "kestim",
+  "order": 1,
+  "pair": [
+   "kestim",
+   "pavka"
+  ],
+  "state": "chart200"
+ },
+ "9e44899308": {
+  "A": "r4",
+  "B": "korda",
+  "order": 1,
+  "pair": [
+   "korda",
+   "r4"
+  ],
+  "state": "chart50"
+ },
+ "a741ddcc66": {
+  "A": "korda",
+  "B": "r4",
+  "order": 0,
+  "pair": [
+   "korda",
+   "r4"
+  ],
+  "state": "chart200"
+ },
+ "aa86d833e0": {
+  "A": "kestim",
+  "B": "r4",
+  "order": 0,
+  "pair": [
+   "kestim",
+   "r4"
+  ],
+  "state": "chart200"
+ },
+ "aac952e92c": {
+  "A": "kestim",
+  "B": "pavka",
+  "order": 0,
+  "pair": [
+   "kestim",
+   "pavka"
+  ],
+  "state": "chart50"
+ },
+ "b2b57910b6": {
+  "A": "pavka",
+  "B": "kestim",
+  "order": 1,
+  "pair": [
+   "kestim",
+   "pavka"
+  ],
+  "state": "chart5"
+ },
+ "b8570bfbcf": {
+  "A": "r4",
+  "B": "pavka",
+  "order": 1,
+  "pair": [
+   "pavka",
+   "r4"
+  ],
+  "state": "chart5"
+ },
+ "bb05bab1bd": {
+  "A": "kestim",
+  "B": "selen",
+  "order": 0,
+  "pair": [
+   "kestim",
+   "selen"
+  ],
+  "state": "chart200"
+ },
+ "c11dcb10e4": {
+  "A": "selen",
+  "B": "pavka",
+  "order": 1,
+  "pair": [
+   "pavka",
+   "selen"
+  ],
+  "state": "chart50"
+ },
+ "c37b2cc4e8": {
+  "A": "selen",
+  "B": "korda",
+  "order": 1,
+  "pair": [
+   "korda",
+   "selen"
+  ],
+  "state": "chart50"
+ },
+ "c5c4407f76": {
+  "A": "korda",
+  "B": "selen",
+  "order": 0,
+  "pair": [
+   "korda",
+   "selen"
+  ],
+  "state": "chart50"
+ },
+ "c97c4f606e": {
+  "A": "pavka",
+  "B": "r4",
+  "order": 0,
+  "pair": [
+   "pavka",
+   "r4"
+  ],
+  "state": "chart200"
+ },
+ "cf8e94416f": {
+  "A": "kestim",
+  "B": "r4",
+  "order": 0,
+  "pair": [
+   "kestim",
+   "r4"
+  ],
+  "state": "chart50"
+ },
+ "d0f079499f": {
+  "A": "selen",
+  "B": "pavka",
+  "order": 1,
+  "pair": [
+   "pavka",
+   "selen"
+  ],
+  "state": "chart200"
+ },
+ "d879434714": {
+  "A": "pavka",
+  "B": "selen",
+  "order": 0,
+  "pair": [
+   "pavka",
+   "selen"
+  ],
+  "state": "chart50"
+ },
+ "d8801bbaf3": {
+  "A": "selen",
+  "B": "kestim",
+  "order": 1,
+  "pair": [
+   "kestim",
+   "selen"
+  ],
+  "state": "chart50"
+ },
+ "d8a9604062": {
+  "A": "kestim",
+  "B": "pavka",
+  "order": 0,
+  "pair": [
+   "kestim",
+   "pavka"
+  ],
+  "state": "chart5"
+ },
+ "e312761131": {
+  "A": "selen",
+  "B": "korda",
+  "order": 1,
+  "pair": [
+   "korda",
+   "selen"
+  ],
+  "state": "chart5"
+ },
+ "e80d48ad1a": {
+  "A": "kestim",
+  "B": "selen",
+  "order": 0,
+  "pair": [
+   "kestim",
+   "selen"
+  ],
+  "state": "chart50"
+ },
+ "e96f213604": {
+  "A": "r4",
+  "B": "selen",
+  "order": 0,
+  "pair": [
+   "r4",
+   "selen"
+  ],
+  "state": "chart50"
+ },
+ "efa7635710": {
+  "A": "selen",
+  "B": "kestim",
+  "order": 1,
+  "pair": [
+   "kestim",
+   "selen"
+  ],
+  "state": "chart200"
+ },
+ "fba7112f3e": {
+  "A": "r4",
+  "B": "kestim",
+  "order": 1,
+  "pair": [
+   "kestim",
+   "r4"
+  ],
+  "state": "chart200"
+ },
+ "ff748edc25": {
+  "A": "kestim",
+  "B": "korda",
+  "order": 0,
+  "pair": [
+   "kestim",
+   "korda"
+  ],
+  "state": "chart5"
+ }
+}

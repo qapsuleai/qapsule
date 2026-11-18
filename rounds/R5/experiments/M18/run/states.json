@@ -1,0 +1,196 @@
+{
+ "chart_stories": {
+  "comments": [],
+  "complete": true,
+  "instrument": "SYN02",
+  "series": "syn02",
+  "stories_count": 533,
+  "total": 533
+ },
+ "charts": [
+  {
+   "candidates": [
+    "cap.SYN02.flow.up.2586"
+   ],
+   "instrument": "SYN02",
+   "last_bar": 2594,
+   "live": [
+    "cap.SYN02.continuation.down.2582",
+    "cap.SYN02.reversal.down.2589",
+    "cap.SYN02.reversal.up.2594"
+   ],
+   "market": [
+    "--days",
+    "2600",
+    "--history",
+    "2500"
+   ],
+   "opened": {
+    "born_bar": 2586,
+    "born_t": 1986015600000,
+    "closed_bar": 2587,
+    "closed_t": 1986102000000,
+    "coin_flip": true,
+    "direction": "up",
+    "face": {
+     "direction_word": "yukarı",
+     "event": "para girişi",
+     "ledger_n": 457,
+     "ledger_short": "457'de 207 tuttu",
+     "moved": "12 işlem günü önce",
+     "validity_phrase": "tutmadı",
+     "when": "13 işlem günü önce"
+    },
+    "finding": "fnd.SYN02.flow.up.2586",
+    "id": "cap.SYN02.flow.up.2586",
+    "in_feed": true,
+    "kind": "flow",
+    "last_bar": 2587,
+    "last_t": 1986102000000,
+    "outcome": "invalidated",
+    "series": "syn02",
+    "stage": "invalidated",
+    "tier": 3,
+    "validity": "closed"
+   },
+   "status": {
+    "days": "3000 / 0 / 0",
+    "done": true,
+    "epoch": 0,
+    "instruments": "30",
+    "note": null,
+    "paused": true,
+    "source": "synthetic",
+    "speed": "4",
+    "step": "900 / 900",
+    "synthetic": true,
+    "time": "2032-12-24 18:00"
+   },
+   "stories_total": 533,
+   "target": 5
+  },
+  {
+   "candidates": [
+    "cap.SYN02.flow.up.2586"
+   ],
+   "instrument": "SYN02",
+   "last_bar": 2594,
+   "live": [
+    "cap.SYN02.continuation.down.2582",
+    "cap.SYN02.reversal.down.2589",
+    "cap.SYN02.reversal.up.2594"
+   ],
+   "market": [
+    "--days",
+    "2600",
+    "--history",
+    "2500"
+   ],
+   "opened": {
+    "born_bar": 2586,
+    "born_t": 1986015600000,
+    "closed_bar": 2587,
+    "closed_t": 1986102000000,
+    "coin_flip": true,
+    "direction": "up",
+    "face": {
+     "direction_word": "yukarı",
+     "event": "para girişi",
+     "ledger_n": 457,
+     "ledger_short": "457'de 207 tuttu",
+     "moved": "12 işlem günü önce",
+     "validity_phrase": "tutmadı",
+     "when": "13 işlem günü önce"
+    },
+    "finding": "fnd.SYN02.flow.up.2586",
+    "id": "cap.SYN02.flow.up.2586",
+    "in_feed": true,
+    "kind": "flow",
+    "last_bar": 2587,
+    "last_t": 1986102000000,
+    "outcome": "invalidated",
+    "series": "syn02",
+    "stage": "invalidated",
+    "tier": 3,
+    "validity": "closed"
+   },
+   "status": {
+    "days": "3000 / 0 / 0",
+    "done": true,
+    "epoch": 0,
+    "instruments": "30",
+    "note": null,
+    "paused": true,
+    "source": "synthetic",
+    "speed": "4",
+    "step": "900 / 900",
+    "synthetic": true,
+    "time": "2032-12-24 18:00"
+   },
+   "stories_total": 533,
+   "target": 50
+  },
+  {
+   "candidates": [
+    "cap.SYN02.flow.up.2586"
+   ],
+   "instrument": "SYN02",
+   "last_bar": 2594,
+   "live": [
+    "cap.SYN02.continuation.down.2582",
+    "cap.SYN02.reversal.down.2589",
+    "cap.SYN02.reversal.up.2594"
+   ],
+   "market": [
+    "--days",
+    "2600",
+    "--history",
+    "2500"
+   ],
+   "opened": {
+    "born_bar": 2586,
+    "born_t": 1986015600000,
+    "closed_bar": 2587,
+    "closed_t": 1986102000000,
+    "coin_flip": true,
+    "direction": "up",
+    "face": {
+     "direction_word": "yukarı",
+     "event": "para girişi",
+     "ledger_n": 457,
+     "ledger_short": "457'de 207 tuttu",
+     "moved": "12 işlem günü önce",
+     "validity_phrase": "tutmadı",
+     "when": "13 işlem günü önce"
+    },
+    "finding": "fnd.SYN02.flow.up.2586",
+    "id": "cap.SYN02.flow.up.2586",
+    "in_feed": true,
+    "kind": "flow",
+    "last_bar": 2587,
+    "last_t": 1986102000000,
+    "outcome": "invalidated",
+    "series": "syn02",
+    "stage": "invalidated",
+    "tier": 3,
+    "validity": "closed"
+   },
+   "status": {
+    "days": "3000 / 0 / 0",
+    "done": true,
+    "epoch": 0,
+    "instruments": "30",
+    "note": null,
+    "paused": true,
+    "source": "synthetic",
+    "speed": "4",
+    "step": "900 / 900",
+    "synthetic": true,
+    "time": "2032-12-24 18:00"
+   },
+   "stories_total": 533,
+   "target": 200
+  }
+ ],
+ "states": []
+}

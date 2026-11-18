@@ -80,6 +80,14 @@ MOTION_NOTE = {
           "in-between frame from the transition that follows it (the lettered regions are guides).",
 }
 
+# (M18) the lettered columns over the chart are the harness's, not the app's.
+CHART_NOTE = {
+    "tr": "Grafiğin üstündeki ince gri dikey çizgiler ve altındaki 1, 2, 3, 4 numaraları uygulamanın değil, "
+          "bu sorunun yardımcı çizgileridir: grafiği soldan sağa dört eşit zaman dilimine böler.",
+    "en": "The thin grey vertical lines over the chart and the numbers 1, 2, 3, 4 below it are not part of "
+          "the app; they are guides for this question: they split the chart into four equal time slices, left to right.",
+}
+
 # Words that must never reach a reader or critic (design and branch names are added at
 # run time from the key file; SPEC §G9).
 FORBIDDEN = ["r4", "r5", "eski", "yeni tasarım", "old design", "new design", "variant", "alternatif",

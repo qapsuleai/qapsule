@@ -141,13 +141,17 @@ def model_agreement(rows):
     return {"n": len(pairs), "agree": round(same / len(pairs), 3), "models": sorted({m for v in pairs for m in v})}
 
 
-def select(rows, judgements, computed, seed: int, broken: str | None = None, reference: str | None = None):
+def select(rows, judgements, computed, seed: int, broken: str | None = None, reference: str | None = None,
+           primary_sets=PRIMARY_SETS, reading_sets=READING_SETS):
+    # (M18, SPEC §G9 "M18 görevleri") the primary set is per topic: `chart` for M18; the
+    # face reading sets do not exist there (the story chart is only at chart depth).
+    res_sets = {"primary": list(primary_sets), "reading": list(reading_sets)}
     designs = sorted({r["design"] for r in rows} | {j["a"] for j in judgements} | {j["b"] for j in judgements} | set(computed))
-    res = {"designs": designs, "broken": broken, "per_design": {}, "steps": []}
+    res = {"designs": designs, "broken": broken, "per_design": {}, "steps": [], "sets": res_sets}
     for i, d in enumerate(designs):
         res["per_design"][d] = {
-            "primary": weighted_accuracy(rows, d, PRIMARY_SETS, seed + i),
-            "reading": weighted_accuracy(rows, d, READING_SETS, seed + 100 + i),
+            "primary": weighted_accuracy(rows, d, primary_sets, seed + i),
+            "reading": weighted_accuracy(rows, d, reading_sets, seed + 100 + i) if reading_sets else None,
             "half": weighted_accuracy(rows, d, HALF_SETS, seed + 700 + i),
             "gray": weighted_accuracy(rows, d, ("gray",), seed + 200 + i),
             "feed": weighted_accuracy(rows, d, ("feed",), seed + 300 + i),
@@ -191,7 +195,7 @@ def select(rows, judgements, computed, seed: int, broken: str | None = None, ref
                              "eliminated": lost, "eligible": elig})
     res["model_agreement"] = model_agreement(rows)
     if broken:
-        res["paired_vs_broken"] = {d: paired_difference(rows, d, broken, PRIMARY_SETS, seed + 31)
+        res["paired_vs_broken"] = {d: paired_difference(rows, d, broken, primary_sets, seed + 31)
                                    for d in designs if d != broken}
     if not elig:
         res["steps"].append({"step": 1, "note": "no design passes the gates; the rule stops"})
@@ -201,7 +205,7 @@ def select(rows, judgements, computed, seed: int, broken: str | None = None, ref
     prim = {d: res["per_design"][d]["primary"] for d in elig if res["per_design"][d]["primary"]}
     order = sorted(prim, key=lambda d: -prim[d][0])
     group = [d for d in order if S.overlaps(prim[d], prim[order[0]])] if order else elig
-    res["steps"].append({"step": 2, "rule": "primary: glance (throttle copy) accuracy (F2:H1)", "order": order,
+    res["steps"].append({"step": 2, "rule": f"primary: {','.join(primary_sets)} accuracy (F2:H1)", "order": order,
                          "top_group": group})
     # Step 3: secondary within the group (critic BT), then step 4 (throttle).
     group2 = group
@@ -306,7 +310,7 @@ def _fmt(t):
 def scores_md(res) -> str:
     L = ["# Tek bakış düzeneği — puanlar", "",
          "> Ajan okuyucu insan değildir; bu ölçüm ön elemedir (SPEC §G0).", "",
-         "| tasarım | tek bakış: kısma kopyası (birincil, F2:H1) | okuma: tam boy | okuma: yarım boy | gri | akış | kanıt | hareket | hareket (yalnız son kare) | BT [%95] | kesilen |",
+         f"| tasarım | birincil: {','.join((res.get('sets') or {}).get('primary', ['throttle']))} (F2:H1) | okuma: tam boy | okuma: yarım boy | gri | akış | kanıt | hareket | hareket (yalnız son kare) | BT [%95] | kesilen |",
          "|---|---|---|---|---|---|---|---|---|---|---:|"]
     for d in res["designs"]:
         p = res["per_design"][d]

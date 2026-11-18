@@ -145,6 +145,8 @@ function query(s) {
   if (s.look) q.set('look', s.look);
   if (s.face) q.set('face', s.face);
   if (s.watch) q.set('watch', s.watch);
+  // (M18) the story chart design at chart depth (`?story=`; a shell without it ignores it).
+  if (s.story) q.set('story', s.story);
   return q;
 }
 
@@ -156,6 +158,8 @@ async function setSens(page, sens) {
 
 async function seek(page, step) {
   await page.evaluate(() => { window.__frames.length = 0; });
+  // (M18) step < 0: the replay's last step (the page's status says `step / steps`).
+  if (step < 0) step = Number(JSON.parse(await page.evaluate(() => window.qp.status())).step.split('/')[1]);
   await page.fill('#c_date', String(step));
   await page.click('#c_go');
   await settle(page);
@@ -243,6 +247,97 @@ async function scrollTo(page, id) {
   await settle(page);
 }
 
+// (M18, GOAL "görünen aralıkta 5 / 50 / 200 kapsül") Stories whose life meets the visible
+// range (PROTOCOL §23.1 rule: born <= to, end >= from; an open story ends at the last bar),
+// from the device's own list and the view state's range; null when either is missing.
+async function visibleStories(page, list) {
+  return page.evaluate((rows) => {
+    let st = null;
+    try { st = JSON.parse(globalThis.__qpcore.stories()); } catch (e) { /* none */ }
+    const all = rows || (st && st.stories);
+    let look = null;
+    try { look = JSON.parse(window.qp.look()); } catch (e) { /* none */ }
+    if (!all || !look || !look.range) return null;
+    const { from_bar: a, to_bar: b } = look.range;
+    let last = 0;
+    for (const r of all) last = Math.max(last, r.last_bar);
+    const n = all.filter((r) => r.born_bar <= b && (r.closed_bar === undefined || r.closed_bar === null ? last : r.closed_bar) >= a).length;
+    return { n, range: [a, b], rows: all.length };
+  }, list || null);
+}
+
+// Wheel over the right end of the price plot (the last bar stays in view) until the visible
+// story count is the smallest >= `want` the wheel reaches (or the range stops moving);
+// `list`: the canonical story list (a design whose device holds none, e.g. the reference).
+async function zoomTo(page, want, list) {
+  const b = await page.locator('#scene').boundingBox();
+  const x = b.x + b.width * 0.78; const y = b.y + b.height * 0.3;
+  await page.mouse.move(x, y);
+  let v = await visibleStories(page, list);
+  const trail = [v];
+  if (!v) return { error: 'no story list or range', trail };
+  let n = 0;
+  // Out while too few (positive wheel = out), in while more than enough; stop at the first
+  // state that has >= want stories after a zoom-in would drop below want.
+  for (; n < 80; n++) {
+    const dir = v.n < want ? 1 : -1;
+    await page.mouse.wheel(0, 120 * dir);
+    await settle(page);
+    const w = await visibleStories(page, list);
+    trail.push(w);
+    if (!w || (w.range[0] === v.range[0] && w.range[1] === v.range[1])) { v = w || v; break; }
+    if (dir === -1 && w.n < want) {
+      // one notch back out: the smallest count >= want
+      await page.mouse.wheel(0, 120);
+      await settle(page);
+      v = await visibleStories(page, list);
+      trail.push(v);
+      break;
+    }
+    v = w;
+    if (dir === 1 && v.n >= want) break;
+  }
+  return { want, notches: n, visible: v, trail: trail.slice(-6) };
+}
+
+// (M18) Chart-state probe: at the last step, the story list of every instrument in the
+// reader's feed (the device's list at chart depth), for the state rule in glance.py.
+async function chartProbe() {
+  const { child, base } = await startDemo(plan.qp, plan.web, plan.port || 8461, plan.demo_args || []);
+  const origin = new URL(base).origin.replace('localhost', '127.0.0.1');
+  const browser = await launch();
+  const res = { instruments: {} };
+  try {
+    const { ctx, page } = await newPage(browser, {});
+    const url = `${origin}/?${query({ kind: 'feed', principal: 'arkin', theme: 'light' })}`;
+    await page.goto(url);
+    await settle(page);
+    await setSens(page, plan.sensitivity);
+    await seek(page, -1);
+    res.status = JSON.parse(await page.evaluate(() => window.qp.status()));
+    const feed = JSON.parse(await page.evaluate(() => window.qp.feed())).filter((r) => r.id);
+    const firsts = {};
+    for (const r of feed) { const i = r.id.split('.')[1]; if (!firsts[i]) firsts[i] = r.id; }
+    for (const [inst, id] of Object.entries(firsts)) {
+      await page.evaluate((id) => window.qp.openCapsule(id), id);
+      await settle(page);
+      const b = await page.locator('#scene').boundingBox();
+      await page.mouse.click(b.x + b.width / 2, b.y + b.height / 2);
+      await settle(page);
+      const st = await page.evaluate(() => { try { return JSON.parse(globalThis.__qpcore.stories()); } catch (e) { return null; } });
+      res.instruments[inst] = { opened: id, stories: st };
+      await page.goto(url);
+      await settle(page);
+    }
+    await ctx.close();
+  } finally {
+    await browser.close();
+    child.kill();
+  }
+  fs.writeFileSync(path.join(out, 'chart-probe.json'), `${JSON.stringify(res)}\n`);
+  console.log(`chart probe: ${Object.keys(res.instruments).length} instruments`);
+}
+
 async function depth(page) { return (await page.evaluate(() => JSON.parse(window.qp.open()))).depth; }
 
 // Taps the harness needs from the feed to a depth (SPEC §G7, M18/M20 "dokunma sayısı"):
@@ -324,12 +419,23 @@ async function run() {
         const meta = { step: Number(step) };
         if (s.kind !== 'feed') {
           const { target, row } = await targetOf(page, s);
-          if (!target) { log.push({ id: s.id, error: 'no candidate in the feed' }); await ctx.close(); continue; }
-          meta.target = target;
-          meta.row_text = row.text;
-          await scrollTo(page, target);
+          if (!target && !(s.kind === 'chart' && s.open_direct)) { log.push({ id: s.id, error: 'no candidate in the feed' }); await ctx.close(); continue; }
+          meta.target = target || s.candidates[0];
+          meta.row_text = row ? row.text : null;
+          if (target) await scrollTo(page, target);
           if (s.kind === 'evidence' || s.kind === 'chart') {
-            meta.taps = await tapTo(page, target, s.kind);
+            if (target) meta.taps = await tapTo(page, target, s.kind);
+            else {
+              // (M18) the target is not in the reader's feed: opened through the page API
+              // (the core's `open_capsule`, the path of a tap on its face), then one tap on
+              // the scene; the taps are recorded as 1 + 1 and the record says so.
+              await page.evaluate((id) => window.qp.openCapsule(id), meta.target);
+              await settle(page);
+              const b = await page.locator('#scene').boundingBox();
+              await page.mouse.click(b.x + b.width / 2, b.y + b.height / 2);
+              await settle(page);
+              meta.taps = 2; meta.opened_direct = true;
+            }
             meta.depth = await depth(page);
             if (s.kind === 'evidence') meta.evidence = await page.evaluate(() => (globalThis.__qpcore ? JSON.parse(globalThis.__qpcore.evidence()) : []));
             for (let i = 0; i < (s.wheel_out || 0); i++) {
@@ -337,6 +443,13 @@ async function run() {
               await page.mouse.move(b.x + b.width / 2, b.y + b.height / 2);
               await page.mouse.wheel(0, 240);
               await settle(page);
+            }
+            if (s.kind === 'chart' && s.zoom_to) meta.zoom = await zoomTo(page, s.zoom_to, s.story_rows || null);
+            if (s.kind === 'chart') {
+              meta.view = await page.evaluate(() => { try { return JSON.parse(window.qp.look()); } catch (e) { return null; } });
+              meta.stories = await page.evaluate(() => { try { return JSON.parse(globalThis.__qpcore.stories()); } catch (e) { return null; } });
+              const sb = await page.locator('#scene').boundingBox();
+              meta.scene_rect = sb ? [sb.x, sb.y, sb.width, sb.height] : null;
             }
           }
           if (s.kind === 'motion') {
@@ -374,4 +487,4 @@ async function run() {
   console.log(`shoot: ${plan.shots.length} shots in ${out}; problems: ${log.length}`);
 }
 
-if (plan.probe) await probe(); else await run();
+if (plan.chart_probe) await chartProbe(); else if (plan.probe) await probe(); else await run();

@@ -12,6 +12,10 @@
 //   <shot>.page.png         the phone screen (browser screenshot: chrome + scenes)
 //   <shot>.<canvas>.png     each scene the core painted (face-0, face-1, …, scene), PNG
 //                           bytes from the core's encoder (identical on every platform)
+// (R5/S) The `v1` shots (fixtures/golden/demo/*.png) are pinned to the designs before R5
+// (`V1`: `?look=r4&voice=r4&face=vadrel&story=r4&open=r4&motion=r4`) and stay byte-identical;
+// the `v2` shots (fixtures/golden/demo/v2/*.png, written under <out dir>/v2/) are the
+// presentation as it opens now (R5's picks, no design setting in the URL).
 // Synthetic data by default (the goldens in fixtures/golden/demo are the canvas PNGs of
 // the synthetic run at step 120). With --data (real local data) the output must be under
 // fixtures/local/: real data and its images never enter the repository.
@@ -34,13 +38,27 @@ if (data && !out.startsWith(path.join(root, 'fixtures', 'local'))) {
   console.error('screens: with --data the output must be under fixtures/local/ (real data stays local)');
   process.exit(2);
 }
-fs.mkdirSync(out, { recursive: true });
+fs.mkdirSync(path.join(out, 'v2'), { recursive: true });
 
 // The R4/T5 shots are pinned to the R3 designs (`R3`): their goldens predate the R4
 // presentation defaults (face `vadrel` (S2), feed `elikov`, transition `zumlak`, outcome
 // `tg5` (S1)) and do not change. The `-r4` shots show the presentation as it opens now
 // (no design setting in the URL); `-fotolay`: M8's second face.
 const R3 = { face: 'r3', feed: 'r3', transition: 'r3', outcome: 'r3' };
+// (R5/S) The designs the `v1` goldens were drawn with (before R5's presentation defaults).
+const V1 = { look: 'r4', voice: 'r4', face: 'vadrel', story: 'r4', open: 'r4', motion: 'r4' };
+// (R5/S) The `v2` shots: R5's presentation defaults in both languages and schemes — the
+// feed's faces (open and closed), the open capsule (`tesir`) and the story chart (`pavka`).
+const V2 = [];
+for (const lang of ['tr', 'en']) {
+  for (const theme of ['dark', 'light']) {
+    const k = `${lang}-${theme}`;
+    V2.push({ v2: true, name: `feed-${k}`, lang, theme, canvases: ['face-0', 'face-1', 'face-2'] });
+    V2.push({ v2: true, name: `closed-${k}`, lang, theme, canvases: ['closed-0', 'closed-1'] });
+    V2.push({ v2: true, name: `capsule-${k}`, lang, theme, open: 'capsule', canvases: ['scene'] });
+    V2.push({ v2: true, name: `chart-${k}`, lang, theme, open: 'chart', canvases: ['scene'] });
+  }
+}
 export const SHOTS = [
   { name: 'feed-tr-dark', look: R3, canvases: ['face-0', 'face-1', 'face-2'] },
   { name: 'feed-en-light', look: R3, lang: 'en', theme: 'light', canvases: ['face-0'] },
@@ -55,6 +73,7 @@ export const SHOTS = [
   // second face (`fotolay`, the human test's Y2).
   { name: 'feed-en-light-r4', lang: 'en', theme: 'light', canvases: ['face-0', 'face-1'] },
   { name: 'feed-tr-dark-fotolay', face: 'fotolay', canvases: ['face-0', 'face-1'] },
+  ...V2,
 ];
 
 const extra = data ? ['--data', data] : [];
@@ -69,12 +88,11 @@ try {
     const { ctx, page, errors } = await phonePage(browser);
     const q = new URLSearchParams({ anim: '0', paint: paintPath, lang: s.lang || 'tr', theme: s.theme || 'dark' });
     if (s.alphabet) q.set('alphabet', s.alphabet);
-    if (s.face) q.set('face', s.face);
     if (s.principal) q.set('principal', s.principal);
-    // (R5/m17-int) The v1 goldens predate the capsule voice: they are drawn with today's
-    // text (`?voice=r4`); the presentation's default voice (`marla`) gets new goldens in
-    // the integration (S), not here.
-    q.set('voice', s.voice || 'r4');
+    // (R5/m17-int, R5/S) The v1 goldens predate R5's designs: they are drawn with the
+    // designs before it (`V1`, today's text `?voice=r4`); the v2 shots name none.
+    if (!s.v2) for (const [k, v] of Object.entries(V1)) q.set(k, v);
+    if (s.face) q.set('face', s.face);
     for (const [k, v] of Object.entries(s.look || {})) q.set(k, v);
     await page.goto(`${origin}/?${q}`);
     await settle(page);
@@ -84,7 +102,16 @@ try {
       await settle(page);
       seeked = true;
     }
-    if (s.open) {
+    if (s.open && s.v2) {
+      // (R5/S) Through the core's own handles (a tap's place depends on the design).
+      const first = await page.evaluate(() => JSON.parse(window.qp.feed()).filter((r) => r.id && r.scene)[0]);
+      await page.evaluate((id) => window.qp.openCapsule(id), first.id);
+      await settle(page);
+      if (s.open === 'chart') {
+        await page.evaluate(() => window.qp.openTo('chart'));
+        await settle(page);
+      }
+    } else if (s.open) {
       const first = await page.evaluate(() => JSON.parse(window.qp.feed())[0]);
       await clickIn(page, `#list .face[data-id="${first.id}"] canvas`, 120, 60);
       await settle(page);
@@ -95,7 +122,8 @@ try {
     }
     await page.evaluate(() => { document.activeElement && document.activeElement.blur(); window.qp.repaint(); });
     await settle(page);
-    await page.locator('#phone').screenshot({ path: path.join(out, `${s.name}.page.png`), animations: 'disabled', caret: 'hide' });
+    const dir = s.v2 ? path.join(out, 'v2') : out;
+    await page.locator('#phone').screenshot({ path: path.join(dir, `${s.name}.page.png`), animations: 'disabled', caret: 'hide' });
     // Capsule rows only (a feed layout may add group headers); `closed-<i>`: the i-th
     // capsule whose story is closed (its outcome mark shows; the row's `closed`).
     const feed = (await page.evaluate(() => JSON.parse(window.qp.feed()))).filter((r) => r.id);
@@ -105,7 +133,7 @@ try {
       const id = c === 'scene' ? 'scene' : kind === 'closed' ? closed[Number(i)] : feed[Number(i)].id;
       if (!id) throw new Error(`${s.name}: no ${c}`);
       const bytes = await page.evaluate((i) => window.qp.png(i), id);
-      fs.writeFileSync(path.join(out, `${s.name}.${c}.png`), Buffer.from(bytes));
+      fs.writeFileSync(path.join(dir, `${s.name}.${c}.png`), Buffer.from(bytes));
       n++;
     }
     if (errors.length) throw new Error(`${s.name}: page errors ${errors}`);

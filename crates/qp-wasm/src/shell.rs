@@ -855,8 +855,11 @@ impl ShellCore {
     /// (R4/S1) The `style` gesture of the presentation's defaults: feed layout, depth
     /// transition and outcome mark picked in M9–M11 (`qp_grammar::feeds::PRESENTED_FEED`,
     /// `transitions::PRESENTED_TRANSITION`, `glyph::outcome::PRESENTED_OUTCOME`) and the
-    /// face picked in M8 (`qp_grammar::faces::PRESENTED_FACE`, R4/S2). The protocol's own
-    /// defaults (a bare connection) stay `r3`.
+    /// face (`qp_grammar::faces::PRESENTED_FACE`). (R5/S) R5's picks: the look and its
+    /// companion face (M16, `look::PRESENTED_LOOK`), the voice (M17), the story chart
+    /// (M18, `stories::PRESENTED_STORY`) and the open capsule design (M20,
+    /// `open::PRESENTED_OPEN`). The protocol's own defaults (a bare connection) stay `r3`
+    /// / `r4`.
     #[must_use]
     pub fn presented_look() -> Value {
         json!({"kind":"style",
@@ -865,7 +868,10 @@ impl ShellCore {
                "transition": qp_grammar::transitions::PRESENTED_TRANSITION,
                "outcome": qp_grammar::glyph::outcome::PRESENTED_OUTCOME,
                // (R5/m17-int) M17's voice (`qp_session::voices::PRESENTED_VOICE`).
-               "voice": qp_session::voices::PRESENTED_VOICE})
+               "voice": qp_session::voices::PRESENTED_VOICE,
+               "look": qp_grammar::look::PRESENTED_LOOK,
+               "story": qp_grammar::stories::PRESENTED_STORY,
+               "open": qp_grammar::open::PRESENTED_OPEN})
     }
 
     fn id(&mut self, prefix: &str) -> String {
@@ -2215,6 +2221,16 @@ impl ShellCore {
         // (R5/M18, K54) Show or hide the closed stories of the story chart.
         if let Some(b) = choice.get("hide_closed").and_then(Value::as_bool) {
             g["hide_closed"] = json!(b);
+        }
+        // (R5/S) A look brings its companion face, unless the same choice names a face.
+        if g.get("face").is_none() {
+            if let Some(f) = g
+                .get("look")
+                .and_then(Value::as_str)
+                .and_then(qp_grammar::look::companion_face)
+            {
+                g["face"] = json!(f);
+            }
         }
         if g.as_object().is_some_and(|o| o.len() > 1) {
             self.ask("in", Asked::Input, json!({"type":"input","gesture":g}));

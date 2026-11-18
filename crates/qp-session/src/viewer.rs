@@ -377,7 +377,12 @@ pub fn open_scene_with(
         };
         return c(&view, &p, &options(look, w, h, range), &input).ok();
     }
-    let scene = compile(&view, &p, &options(look, w, (sd.price_height)(h), range)).ok()?;
+    let scene = compile(
+        &view,
+        &p,
+        &options(look, w, (sd.price_height)(look_of(look), h), range),
+    )
+    .ok()?;
     // (R5/M18) The first fact of each listed story's finding (R5/m18-pavka-perf: looked
     // up only if the story chart asks, i.e. when it clusters; compiling does not change
     // the document).

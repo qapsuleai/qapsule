@@ -72,8 +72,9 @@ pub const DEFAULT_FACE: &str = "r3";
 /// pick, `docs/FACE.md`, `rounds/R4/experiments/M8/RESULTS.md`). The shell core sends it
 /// with the `style` gesture at start, like `feeds::PRESENTED_FEED`; the protocol default
 /// ([`DEFAULT_FACE`]) does not change, so bare connections, transcripts and existing
-/// goldens stay byte-identical.
-pub const PRESENTED_FACE: &str = "vadrel";
+/// goldens stay byte-identical. (R5/S) M16's pick: `oltan`, the presented look's
+/// companion (`look::companion_face`); the `v1` goldens name `vadrel` (`?face=vadrel`).
+pub const PRESENTED_FACE: &str = "oltan";
 
 /// Earlier names still accepted: `(alias, name)`.
 pub const ALIASES: [(&str, &str); 1] = [("card", "r3")];

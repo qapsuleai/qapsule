@@ -158,6 +158,9 @@ function connect() {
   // makes every other connection a viewer.
   if (params.get('mode')) url.searchParams.set('mode', params.get('mode'));
   if (ui.feed_rule) url.searchParams.set('feed_rule', ui.feed_rule);
+  // (R5/S) `?feed_exempt=0`: the feed rule without the K42 exemption (human test form B;
+  // the host reads it as it is).
+  if (params.get('feed_exempt')) url.searchParams.set('feed_exempt', params.get('feed_exempt'));
   source = new EventSource(url);
   source.onmessage = (e) => {
     // (R4/T6) The stream opens while the WASM still loads; its first frames wait here.
@@ -206,7 +209,9 @@ function start(frame) {
   core.metric_flag('webgpu', Boolean(navigator.gpu));
   sampleMemory();
   if (ui.theme === 'light' || ui.alphabet || ui.face) core.set_style(ui.face, ui.alphabet, ui.theme);
-  if (ui.feed || ui.transition || ui.outcome || ui.look || ui.feed_order || ui.feed_rule || ui.voice || ui.story || ui.open) core.set_look(JSON.stringify({ feed: ui.feed, transition: ui.transition, outcome: ui.outcome, look: ui.look, feed_order: ui.feed_order, feed_rule: ui.feed_rule, voice: ui.voice, story: ui.story, open: ui.open }));
+  // (R5/S) `face` goes with the look too: a look brings its companion face unless the
+  // reader named one (the core decides).
+  if (ui.feed || ui.transition || ui.outcome || ui.look || ui.feed_order || ui.feed_rule || ui.voice || ui.story || ui.open) core.set_look(JSON.stringify({ face: ui.face, feed: ui.feed, transition: ui.transition, outcome: ui.outcome, look: ui.look, feed_order: ui.feed_order, feed_rule: ui.feed_rule, voice: ui.voice, story: ui.story, open: ui.open }));
   if (ui.watch || ui.long || ui.short || ui.group) core.set_audience(JSON.stringify({ group: ui.group, watch: ui.watch, long: ui.long, short: ui.short }));
   if (ui.seen) core.seen_at(ui.seen);
   faces.clear();

@@ -51,20 +51,7 @@ pub const DESIGN: OpenDesign = OpenDesign {
     scene_text: Some(no_text),
 };
 
-// Line counts (kayda alınmalı: `Look`'ta bir `open` kaydı olabilir).
-/// Lines of the claim (the headline role).
-const CLAIM_LINES: f64 = 4.0;
-/// Lines of the detail (the body role).
-const WHY_LINES: f64 = 5.0;
-/// Lines of the track-record sentence (the body role).
-const LEDGER_LINES: f64 = 3.0;
-/// Height of the evidence thumbnail in body lines.
-const THUMB_LINES: f64 = 7.0;
-/// Lines under a block's main row (the label role).
-const NOTE_LINES: f64 = 2.0;
-/// Bars the thumbnail shows before the evidence starts and after it ends (as the chart
-/// depth before it, R3).
-const THUMB_LEAD: u64 = 5;
+// (R5/S) Line and bar counts: the look's `open` record (`look::OpenLook`).
 
 fn no_text() -> String {
     String::new()
@@ -92,18 +79,18 @@ fn slots(look: &Look) -> Slots {
     // Room under the thumbnail for its month labels (the compiler writes them under the
     // last panel with a value scale).
     let month = lh(&t.label) + f64::from(s[1]);
-    let block = sec + head + tight + lh(&t.title) + tight + NOTE_LINES * lh(&t.label);
+    let block = sec + head + tight + lh(&t.title) + tight + look.open.note_lines * lh(&t.label);
     Slots {
         sec,
         tight,
         month,
         h: [
-            (CLAIM_LINES * lh(&t.headline)).max(look.glyph.card_px),
+            (look.open.claim_lines * lh(&t.headline)).max(look.glyph.card_px),
             block,
-            THUMB_LINES * lh(&t.body),
-            month + WHY_LINES * lh(&t.body),
+            look.open.thumb_lines * lh(&t.body),
+            month + look.open.why_lines * lh(&t.body),
             block,
-            sec + head + tight + LEDGER_LINES * lh(&t.body),
+            sec + head + tight + look.open.ledger_lines * lh(&t.body),
         ],
     }
 }
@@ -732,11 +719,11 @@ pub fn view(
     // The newest bar may still be forming (a live tick moves it): left out unless the
     // evidence itself reaches it.
     let to = last
-        .saturating_add(THUMB_LEAD)
+        .saturating_add(look.open.thumb_lead)
         .min(n.saturating_sub(2).max(last))
         .min(n - 1);
     let from = first
-        .saturating_sub(THUMB_LEAD)
+        .saturating_sub(look.open.thumb_lead)
         .min(to.saturating_sub(depth::CHART_LOOKBACK));
 
     // 3 — why, and where things stand (under the thumbnail's month labels).

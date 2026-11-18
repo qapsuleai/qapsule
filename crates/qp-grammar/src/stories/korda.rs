@@ -283,7 +283,7 @@ pub const TOGGLE_LAYER: &str = "story-toggle";
 pub const DESIGN: StoryDesign = StoryDesign {
     name: "korda",
     note: "lifelines: one time-aligned lane per story under the price, birth mark to outcome",
-    price_height: |h| h,
+    price_height: |_, h| h,
     extend: |_, _, scene, _, _| scene,
     tap,
     compile: Some(scene),

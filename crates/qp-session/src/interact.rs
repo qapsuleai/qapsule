@@ -763,7 +763,10 @@ impl Session {
                 self.reader_scene(ci, &view, frame, range, face, Some((c, &rows, finding)))?;
             return Ok(Some((view, scene, times)));
         }
-        let at = (frame.0, (sd.price_height)(frame.1));
+        let at = (
+            frame.0,
+            (sd.price_height)(crate::viewer::look_of(&self.conns[ci].look), frame.1),
+        );
         let (scene, times) = self.reader_scene(ci, &view, at, range, face, None)?;
         let scene = self.story_extend(ci, sd, &view, scene, frame.1, finding);
         Ok(Some((view, scene, times)))

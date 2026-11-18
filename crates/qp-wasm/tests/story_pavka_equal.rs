@@ -111,7 +111,10 @@ fn states(
 ) -> Vec<(String, String)> {
     let mut out = Vec::new();
     for &(lang, theme) in openings {
-        let mut look = json!({"story": "pavka"});
+        // (R5/S) Pinned to the designs the record was taken with (before R5's presentation
+        // defaults: look, face, voice, open capsule).
+        let mut look =
+            json!({"story": "pavka", "look": "r4", "face": "vadrel", "voice": "r4", "open": "r4"});
         if !theme.is_empty() {
             look["theme"] = json!(theme);
         }

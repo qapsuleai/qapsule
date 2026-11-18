@@ -219,6 +219,10 @@ pub static OPENS: &[OpenDesign] = &[R4_OPEN, tesir::DESIGN, nobra::DESIGN];
 /// The default design (`ViewState.open` absent).
 pub const DEFAULT_OPEN: &str = "r4";
 
+/// (R5/S) The open capsule design the presentation shell asks for (M20's pick, `tesir`;
+/// `rounds/R5/experiments/M20/RESULTS.md`); the protocol default stays [`DEFAULT_OPEN`].
+pub const PRESENTED_OPEN: &str = "tesir";
+
 /// Registered names, in registry order.
 #[must_use]
 pub fn names() -> Vec<&'static str> {

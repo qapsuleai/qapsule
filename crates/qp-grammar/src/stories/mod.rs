@@ -61,7 +61,7 @@ pub struct StoryDesign {
     /// One line on the idea.
     pub note: &'static str,
     /// The height the open capsule's chart is compiled at, for a frame `h` high.
-    pub price_height: fn(u32) -> u32,
+    pub price_height: fn(&Look, u32) -> u32,
     /// Adds the story part below/around the chart scene, making it `h` high.
     pub extend: fn(&Look, Option<&str>, SceneDesc, u32, &StoryInput<'_>) -> SceneDesc,
     /// The tap rule of the story part (`None`: not a story element; the opening rule
@@ -82,6 +82,10 @@ pub type StoryCompile = fn(
 
 /// The default: no story chart (the open capsule's chart alone, as in R4).
 pub const DEFAULT_STORY: &str = "r4";
+
+/// (R5/S) The story chart the presentation shell asks for (M18's pick, `pavka`;
+/// `rounds/R5/experiments/M18/RESULTS.md`); the protocol default stays [`DEFAULT_STORY`].
+pub const PRESENTED_STORY: &str = "pavka";
 
 /// Registered designs (the default is not one: it draws nothing more).
 pub static STORIES: &[StoryDesign] = &[pavka::DESIGN, korda::DESIGN];

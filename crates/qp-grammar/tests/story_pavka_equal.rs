@@ -22,7 +22,7 @@ const BARS: u64 = 1000;
 
 /// The chart part as the compiler would leave it: one price panel over `[from, to]`.
 fn chart(from: u64, to: u64) -> SceneDesc {
-    let ph = (pavka::DESIGN.price_height)(H);
+    let ph = (pavka::DESIGN.price_height)(&R4, H);
     let [l, r, t, b] = R4.space.plot;
     #[allow(clippy::cast_precision_loss)]
     let slot = f64::from(W.cast_signed() - r - l) / (to - from + 1) as f64;

@@ -472,6 +472,66 @@ pub struct Offsets {
     pub glyph_top: f64,
 }
 
+/// (R5/S) The story chart `pavka`'s sizes and alphas (`crate::stories::pavka`; M18's
+/// "values to record", `rounds/R5/experiments/M18/pavka/DESIGN.md`). `r4`: the design's
+/// own values, so every scene stays byte-identical.
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub struct StoryLook {
+    /// Share of the frame height the price context strip takes.
+    pub price_share: f64,
+    /// Least height of the price strip (px).
+    pub price_min_h: u32,
+    /// Least height left for the stories (px).
+    pub story_min_h: u32,
+    /// Lane height when every story fits (px).
+    pub lane_h: i32,
+    /// Thinnest lane before clustering (px).
+    pub lane_min: i32,
+    /// Thickest lane (px).
+    pub lane_max: i32,
+    /// Width of a cluster bucket (px).
+    pub cluster_w: i32,
+    /// Height of the cluster row (px).
+    pub cluster_h: i32,
+    /// Least hit box width of a lane (px).
+    pub hit_min: i32,
+    /// Alpha of the selected story's row band.
+    pub focus_row_alpha: u8,
+    /// Alpha of the selected story's guide lines.
+    pub guide_alpha: u8,
+    /// Lane bar thickness: selected, live, closed (px).
+    pub bar_focus: i32,
+    /// Lane bar thickness of a live story (px).
+    pub bar_live: i32,
+    /// Lane bar thickness of a closed story (px).
+    pub bar_closed: i32,
+    /// Half size of a lane's end mark (px).
+    pub mark: f32,
+    /// A coin-flip lane's dash and gap (px).
+    pub dash: (i32, i32),
+    /// Most dashes in one coin-flip lane.
+    pub dash_max: i32,
+}
+
+/// (R5/S) The open capsule design `tesir`'s line and bar counts (`crate::open::tesir`;
+/// M20's "values to record", `rounds/R5/experiments/M20/tesir/DESIGN.md`). Sizes,
+/// colours and spacing already come from the look.
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub struct OpenLook {
+    /// Lines of the claim (the headline role).
+    pub claim_lines: f64,
+    /// Lines of the "why" detail (body role).
+    pub why_lines: f64,
+    /// Lines of the track record (body role).
+    pub ledger_lines: f64,
+    /// Height of the evidence thumbnail, in body lines.
+    pub thumb_lines: f64,
+    /// Lines of a block's note (label role).
+    pub note_lines: f64,
+    /// Bars the thumbnail shows on each side of the evidence's own window.
+    pub thumb_lead: u64,
+}
+
 /// One look.
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub struct Look {
@@ -501,6 +561,10 @@ pub struct Look {
     pub evidence: EvidenceLook,
     /// (R5/T3b) Small scene offsets.
     pub offsets: Offsets,
+    /// (R5/S) The story chart's sizes (`pavka`).
+    pub story: StoryLook,
+    /// (R5/S) The open capsule design's counts (`tesir`).
+    pub open: OpenLook,
 }
 
 const fn role(px: f64) -> TypeRole {
@@ -596,6 +660,33 @@ pub const R4: Look = Look {
         note_x: 4.0,
         note_gap: 8.0,
         glyph_top: 2.0,
+    },
+    story: StoryLook {
+        price_share: 0.38,
+        price_min_h: 150,
+        story_min_h: 120,
+        lane_h: 20,
+        lane_min: 14,
+        lane_max: 28,
+        cluster_w: 36,
+        cluster_h: 24,
+        hit_min: 24,
+        focus_row_alpha: 40,
+        guide_alpha: 110,
+        bar_focus: 6,
+        bar_live: 4,
+        bar_closed: 2,
+        mark: 5.0,
+        dash: (5, 3),
+        dash_max: 12,
+    },
+    open: OpenLook {
+        claim_lines: 4.0,
+        why_lines: 5.0,
+        ledger_lines: 3.0,
+        thumb_lines: 7.0,
+        note_lines: 2.0,
+        thumb_lead: 5,
     },
 };
 
@@ -946,6 +1037,9 @@ pub const OLTAN: Look = Look {
         ledger_gap: 4.0,
         ..R4.offsets
     },
+    // (R5/S) The story chart and open capsule counts as `r4`.
+    story: R4.story,
+    open: R4.open,
 };
 
 const fn zrole(px: f64, line: f64, font: &'static str) -> TypeRole {
@@ -1139,6 +1233,9 @@ pub const ZEMRE: Look = Look {
         note_gap: 8.0,
         glyph_top: 2.0,
     },
+    // (R5/S) The story chart and open capsule counts as `r4`.
+    story: R4.story,
+    open: R4.open,
 };
 
 /// Looks a connection may choose; the first is the default.
@@ -1146,6 +1243,26 @@ pub static LOOKS: &[Look] = &[R4, ORNEK, OLTAN, ZEMRE];
 
 /// The default look's name.
 pub const DEFAULT_LOOK: &str = "r4";
+
+/// (R5/S) The look the presentation shell asks for when the reader chose none (M16's pick,
+/// `rounds/R5/experiments/M16/RESULTS.md`); the protocol default ([`DEFAULT_LOOK`]) does
+/// not change, so bare connections, transcripts and the `v1` goldens stay byte-identical.
+pub const PRESENTED_LOOK: &str = "oltan";
+
+/// (R5/S) Each look's companion face design (`qp_grammar::faces`): choosing a look in the
+/// presentation chooses its face too, unless the reader names a face (`?face=`). `r4`:
+/// R4's presented face. A look without one keeps the face as it is.
+pub const COMPANION_FACES: &[(&str, &str)] =
+    &[("r4", "vadrel"), ("oltan", "oltan"), ("zemre", "zemre")];
+
+/// (R5/S) The companion face of look `look` ([`COMPANION_FACES`]), if it has one.
+#[must_use]
+pub fn companion_face(look: &str) -> Option<&'static str> {
+    COMPANION_FACES
+        .iter()
+        .find(|(l, _)| *l == look)
+        .map(|(_, f)| *f)
+}
 
 /// Registered names, in registry order.
 #[must_use]

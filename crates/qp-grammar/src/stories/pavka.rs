@@ -65,40 +65,43 @@ pub const DESIGN: StoryDesign = StoryDesign {
     compile: None,
 };
 
+// (R5/S) The sizes below are `r4`'s values of the look's story record
+// (`look::StoryLook`, `look::R4.story`); the design reads the look's.
+
 /// Share of the frame height the price context strip takes.
-pub const PRICE_SHARE: f64 = 0.38;
+pub const PRICE_SHARE: f64 = crate::look::R4.story.price_share;
 /// Smallest price strip (px).
-pub const PRICE_MIN_H: u32 = 150;
+pub const PRICE_MIN_H: u32 = crate::look::R4.story.price_min_h;
 /// Smallest story part (px).
-pub const STORY_MIN_H: u32 = 120;
+pub const STORY_MIN_H: u32 = crate::look::R4.story.story_min_h;
 /// Height of one lane (px; `r4` `space.scale[5]` − 4).
-pub const LANE_H: i32 = 20;
+pub const LANE_H: i32 = crate::look::R4.story.lane_h;
 /// Smallest lane height before stories are clustered (px).
-pub const LANE_MIN: i32 = 14;
+pub const LANE_MIN: i32 = crate::look::R4.story.lane_min;
 /// Largest lane height, when few lanes leave room (px; a larger touch target).
-pub const LANE_MAX: i32 = 28;
+pub const LANE_MAX: i32 = crate::look::R4.story.lane_max;
 /// Width of a cluster's time bucket (px).
-pub const CLUSTER_W: i32 = 36;
+pub const CLUSTER_W: i32 = crate::look::R4.story.cluster_w;
 /// Height of the cluster row (px).
-pub const CLUSTER_H: i32 = 24;
+pub const CLUSTER_H: i32 = crate::look::R4.story.cluster_h;
 /// Smallest width of a story's hit box (px), centred on its span.
-pub const HIT_MIN: i32 = 24;
+pub const HIT_MIN: i32 = crate::look::R4.story.hit_min;
 /// Alpha of the selected story's row tint (`focus` role).
-pub const FOCUS_ROW_ALPHA: u8 = 40;
+pub const FOCUS_ROW_ALPHA: u8 = crate::look::R4.story.focus_row_alpha;
 /// Alpha of the selected story's guide through the price strip (`focus` role).
-pub const GUIDE_ALPHA: u8 = 110;
+pub const GUIDE_ALPHA: u8 = crate::look::R4.story.guide_alpha;
 /// Lane thickness of the selected story (px).
-pub const BAR_FOCUS: i32 = 6;
+pub const BAR_FOCUS: i32 = crate::look::R4.story.bar_focus;
 /// Lane thickness of a live story (px).
-pub const BAR_LIVE: i32 = 4;
+pub const BAR_LIVE: i32 = crate::look::R4.story.bar_live;
 /// Lane thickness of a closed story, or a live one that no longer holds (px).
-pub const BAR_CLOSED: i32 = 2;
+pub const BAR_CLOSED: i32 = crate::look::R4.story.bar_closed;
 /// Half size of a birth or outcome marker (px).
-pub const MARK: f32 = 5.0;
+pub const MARK: f32 = crate::look::R4.story.mark;
 /// Dash and gap of a coin-flip lane (px).
-pub const DASH: (i32, i32) = (5, 3);
+pub const DASH: (i32, i32) = crate::look::R4.story.dash;
 /// Most dashes in one coin-flip lane (a longer lane gets longer dashes).
-pub const DASH_MAX: i32 = 12;
+pub const DASH_MAX: i32 = crate::look::R4.story.dash_max;
 
 /// Layer id prefix of a story's lane (followed by the capsule id).
 pub const STORY_LAYER: &str = "story:";
@@ -118,11 +121,12 @@ pub const PANEL_NAME: &str = "stories";
     clippy::cast_sign_loss,
     clippy::cast_precision_loss
 )]
-pub fn price_height(h: u32) -> u32 {
-    let share = (f64::from(h) * PRICE_SHARE).floor() as u32;
+pub fn price_height(look: &Look, h: u32) -> u32 {
+    let sl = &look.story;
+    let share = (f64::from(h) * sl.price_share).floor() as u32;
     share
-        .max(PRICE_MIN_H)
-        .min(h.saturating_sub(STORY_MIN_H))
+        .max(sl.price_min_h)
+        .min(h.saturating_sub(sl.story_min_h))
         .max(MIN_HEIGHT)
 }
 
@@ -296,7 +300,16 @@ fn fit(look: &Look, role: &str, s: &str, w: i32) -> String {
 
 /// The small shape of `s` centred at (`cx`, `cy`), half size `r`, in `color` (the lane's
 /// end cap, and the summary's legend).
-fn cap(out: &mut Vec<Prim>, s: Shape, cx: f32, cy: f32, r: f32, color: Rgba, bg: Rgba) {
+fn cap(
+    out: &mut Vec<Prim>,
+    s: Shape,
+    cx: f32,
+    cy: f32,
+    r: f32,
+    color: Rgba,
+    bg: Rgba,
+    dash: (i32, i32),
+) {
     match s {
         Shape::Live => out.push(fill(
             &[(cx + r, cy), (cx - r * 0.6, cy - r), (cx - r * 0.6, cy + r)],
@@ -352,9 +365,9 @@ fn cap(out: &mut Vec<Prim>, s: Shape, cx: f32, cy: f32, r: f32, color: Rgba, bg:
             #[allow(clippy::cast_possible_truncation)]
             let end = (cx + r).floor() as i32;
             while a < end {
-                let b = (a + DASH.0).min(end);
+                let b = (a + dash.0).min(end);
                 out.extend(rect(a, y, b, y + 2, color));
-                a = b + DASH.1;
+                a = b + dash.1;
             }
         }
     }
@@ -380,6 +393,7 @@ pub fn extend(
     h: u32,
     input: &StoryInput<'_>,
 ) -> SceneDesc {
+    let sl = &look.story;
     if h <= scene.height {
         return scene;
     }
@@ -403,7 +417,7 @@ pub fn extend(
     // A lane's pixel ends: birth column to closing column, at least two markers apart (a
     // story closed a bar after its birth still shows both shapes).
     #[allow(clippy::cast_possible_truncation)]
-    let gap = 2 * (MARK.ceil() as i32) + 3;
+    let gap = 2 * (sl.mark.ceil() as i32) + 3;
     let ends = |born: u64, end: u64| -> (i32, i32) {
         #[allow(clippy::cast_possible_truncation)]
         let (a, b) = (
@@ -443,7 +457,7 @@ pub fn extend(
         }
         let (a, b) = ends(r.born_bar, end);
         #[allow(clippy::cast_possible_truncation)]
-        let m = MARK.ceil() as i32;
+        let m = sl.mark.ceil() as i32;
         let tail = if live { m + 4 } else { m + 1 };
         vis.push(Placed {
             row: r,
@@ -498,19 +512,19 @@ pub fn extend(
         }
     }
     let avail = bottom - lanes_top;
-    // Thin out first (lanes down to LANE_MIN), then cluster what still does not fit.
+    // Thin out first (lanes down to `lane_min`), then cluster what still does not fit.
     let n = i32::try_from(lanes.len()).unwrap_or(i32::MAX).max(1);
     let mut over: Vec<usize> = Vec::new();
-    let lane_h = if n <= avail / LANE_H {
-        (avail / n).clamp(LANE_H, LANE_MAX)
-    } else if n <= avail / LANE_MIN {
-        (avail / n).clamp(LANE_MIN, LANE_H)
+    let lane_h = if n <= avail / sl.lane_h {
+        (avail / n).clamp(sl.lane_h, sl.lane_max)
+    } else if n <= avail / sl.lane_min {
+        (avail / n).clamp(sl.lane_min, sl.lane_h)
     } else {
-        let cap = usize::try_from(((avail - CLUSTER_H) / LANE_MIN).max(1)).unwrap_or(1);
+        let cap = usize::try_from(((avail - sl.cluster_h) / sl.lane_min).max(1)).unwrap_or(1);
         for l in lanes.drain(cap.min(lanes.len())..) {
             over.extend(l.1);
         }
-        LANE_MIN
+        sl.lane_min
     };
     // Live lanes on top, then closed (each group in placement order).
     lanes.sort_by_key(|l| !l.0);
@@ -548,7 +562,16 @@ pub fn extend(
         cx += 8;
         if let Some(s) = s {
             #[allow(clippy::cast_precision_loss)]
-            cap(&mut sum, s, (cx + 4) as f32, ly, 4.0, theme.text, theme.bg);
+            cap(
+                &mut sum,
+                s,
+                (cx + 4) as f32,
+                ly,
+                4.0,
+                theme.text,
+                theme.bg,
+                sl.dash,
+            );
             cx += 11;
         }
         sum.push(text(look, "label", cx, line1, t.clone(), theme.muted));
@@ -683,32 +706,32 @@ pub fn extend(
             };
             let thick = if p.focus {
                 if p.live {
-                    BAR_FOCUS
+                    sl.bar_focus
                 } else {
-                    BAR_LIVE
+                    sl.bar_live
                 }
             } else if p.live && !no_longer {
-                BAR_LIVE
+                sl.bar_live
             } else {
-                BAR_CLOSED
+                sl.bar_closed
             };
             let mut prims = Vec::with_capacity(4);
             let (a, b) = p.ends;
             let (y0, y1) = (cy_i - thick / 2, cy_i - thick / 2 + thick);
             if r.coin_flip {
-                // At most DASH_MAX dashes: a long lane gets longer dashes, same gap.
+                // At most `dash_max` dashes: a long lane gets longer dashes, same gap.
                 let len = b.max(a + 1) - a;
-                let dash = DASH.0.max(len / DASH_MAX - DASH.1);
+                let dash = sl.dash.0.max(len / sl.dash_max - sl.dash.1);
                 let mut s = a;
                 while s < b.max(a + 1) {
                     let e = (s + dash).min(b.max(a + 1));
                     prims.extend(rect(s, y0, e, y1, color));
-                    s = e + DASH.1;
+                    s = e + sl.dash.1;
                 }
             } else {
                 prims.extend(rect(a, y0, b.max(a + 1), y1, color));
             }
-            let m = if p.focus { MARK * 1.3 } else { MARK };
+            let m = if p.focus { sl.mark * 1.3 } else { sl.mark };
             #[allow(clippy::cast_precision_loss)]
             let (fa, fb) = (a as f32, b as f32);
             if r.born_bar >= x.from_bar {
@@ -732,7 +755,16 @@ pub fn extend(
             }
             if p.end <= x.to_bar {
                 if p.live {
-                    cap(&mut prims, Shape::Live, fb + 4.0, cy, m, color, theme.bg);
+                    cap(
+                        &mut prims,
+                        Shape::Live,
+                        fb + 4.0,
+                        cy,
+                        m,
+                        color,
+                        theme.bg,
+                        sl.dash,
+                    );
                     if no_longer {
                         prims.push(Prim::Circle {
                             cx: fb + 3.0,
@@ -742,7 +774,16 @@ pub fn extend(
                         });
                     }
                 } else {
-                    cap(&mut prims, outcome_shape(r), fb, cy, m, color, theme.bg);
+                    cap(
+                        &mut prims,
+                        outcome_shape(r),
+                        fb,
+                        cy,
+                        m,
+                        color,
+                        theme.bg,
+                        sl.dash,
+                    );
                 }
             } else {
                 prims.push(fill(
@@ -750,12 +791,12 @@ pub fn extend(
                     color,
                 ));
             }
-            // Hit box: the lane over the span, at least HIT_MIN wide.
+            // Hit box: the lane over the span, at least `hit_min` wide.
             let (mut h0, mut h1) = p.span;
-            if h1 - h0 < HIT_MIN {
+            if h1 - h0 < sl.hit_min {
                 let c = (h0 + h1) / 2;
-                h0 = c - HIT_MIN / 2;
-                h1 = h0 + HIT_MIN;
+                h0 = c - sl.hit_min / 2;
+                h1 = h0 + sl.hit_min;
             }
             let layer = SceneLayer {
                 id: join(&[STORY_LAYER, &r.id]),
@@ -791,7 +832,7 @@ pub fn extend(
                     lt,
                     right,
                     lt + lane_h,
-                    with_alpha(theme.focus, FOCUS_ROW_ALPHA),
+                    with_alpha(theme.focus, sl.focus_row_alpha),
                 ));
                 if r.born_bar >= x.from_bar {
                     let price_top = scene.panels.first().map_or(0, |pp| pp.rect.top);
@@ -800,7 +841,7 @@ pub fn extend(
                         price_top,
                         a + 1,
                         cy_i,
-                        with_alpha(theme.focus, GUIDE_ALPHA),
+                        with_alpha(theme.focus, sl.guide_alpha),
                     ));
                 }
                 focus_layer = Some(layer);
@@ -818,15 +859,15 @@ pub fn extend(
 
     // Clusters: the closed stories without a lane, by time bucket.
     if !over.is_empty() {
-        let ct = bottom - CLUSTER_H;
+        let ct = bottom - sl.cluster_h;
         let mut buckets: BTreeMap<i32, Vec<usize>> = BTreeMap::new();
         for &i in &over {
-            let b = (vis[i].span.0.max(left) - left) / CLUSTER_W;
+            let b = (vis[i].span.0.max(left) - left) / sl.cluster_w;
             buckets.entry(b).or_default().push(i);
         }
         for (k, (b, members)) in buckets.iter().enumerate() {
-            let x0 = left + b * CLUSTER_W + 2;
-            let x1 = (x0 + CLUSTER_W - 4).min(right);
+            let x0 = left + b * sl.cluster_w + 2;
+            let x1 = (x0 + sl.cluster_w - 4).min(right);
             let from = members
                 .iter()
                 .map(|&i| vis[i].row.born_bar)
@@ -841,13 +882,19 @@ pub fn extend(
                 .min(x.to_bar);
             let t = format!("+{}", members.len());
             let mut prims = Vec::new();
-            prims.extend(rect(x0, ct + 3, x1, ct + CLUSTER_H - 3, theme.line));
-            prims.extend(rect(x0, ct + 3, x0 + 2, ct + CLUSTER_H - 3, theme.closed));
+            prims.extend(rect(x0, ct + 3, x1, ct + sl.cluster_h - 3, theme.line));
+            prims.extend(rect(
+                x0,
+                ct + 3,
+                x0 + 2,
+                ct + sl.cluster_h - 3,
+                theme.closed,
+            ));
             prims.push(text(
                 look,
                 "label",
                 x0 + 5,
-                ct + CLUSTER_H / 2 + lp / 2 - 1,
+                ct + sl.cluster_h / 2 + lp / 2 - 1,
                 t,
                 theme.text,
             ));

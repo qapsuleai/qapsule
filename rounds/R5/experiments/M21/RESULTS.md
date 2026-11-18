@@ -1,5 +1,8 @@
 # M21 — hareket: ölçüm sonucu
 
+> **Güncel (2026-11-18): yeniden ölçüm geçerli → `RESULTS-v2.md`.** Ek G8 ile (konuma dayalı süreklilik, bozuk hareket, dengeli fark edilme; okumalardan önce) koşu geçerli; önceden yazılı kuralla kazanan **`surek`**, ilk iki **`surek`, `r4`**. Aşağısı ilk (geçersiz) koşudur.
+
+
 Ölçüm ajanı `r5/m21-measure`, 2026-11-18. Düzenek: `rounds/R5/experiments/harness/glance/`, SPEC §G +
 **Ek G6** (M21; okumalardan önce commit `fca8f33`) + **Ek G6-8** (bilgi kaybı uygulama düzeltmesi ve
 tanım boşluğu; okuyucu/eleştirmen sonuçlarından önce, kayıp sonuçları görüldükten sonra, `69d27cc`).

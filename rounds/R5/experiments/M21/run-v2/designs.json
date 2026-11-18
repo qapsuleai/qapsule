@@ -1,0 +1,91 @@
+[
+ {
+  "mid_ms": 225,
+  "name": "surek",
+  "params": {
+   "look": "oltan",
+   "motion": "surek",
+   "reduced_motion": "0"
+  },
+  "qp": "main-4fd0840/qp",
+  "web": "main-4fd0840/shells/web"
+ },
+ {
+  "mid_ms": 562,
+  "name": "nabiz",
+  "params": {
+   "look": "oltan",
+   "motion": "nabiz",
+   "reduced_motion": "0"
+  },
+  "qp": "main-4fd0840/qp",
+  "web": "main-4fd0840/shells/web"
+ },
+ {
+  "mid_ms": 225,
+  "name": "r4",
+  "params": {
+   "look": "oltan",
+   "motion": "r4",
+   "reduced_motion": "0"
+  },
+  "qp": "main-4fd0840/qp",
+  "web": "main-4fd0840/shells/web"
+ },
+ {
+  "freeze": false,
+  "mid_ms": 225,
+  "name": "still",
+  "no_primary": true,
+  "params": {
+   "look": "oltan",
+   "motion": "r4",
+   "reduced_motion": "1"
+  },
+  "qp": "main-4fd0840/qp",
+  "reduced_by_definition": true,
+  "reduced_of": "r4",
+  "web": "main-4fd0840/shells/web"
+ },
+ {
+  "broken": true,
+  "broken_motion": true,
+  "mid_ms": 225,
+  "name": "tirvan",
+  "params": {
+   "look": "oltan",
+   "motion": "surek",
+   "reduced_motion": "0"
+  },
+  "qp": "main-4fd0840/qp",
+  "web": "main-4fd0840/shells/web"
+ },
+ {
+  "freeze": false,
+  "info": true,
+  "mid_ms": 225,
+  "name": "surek-az",
+  "params": {
+   "look": "oltan",
+   "motion": "surek",
+   "reduced_motion": "1"
+  },
+  "qp": "main-4fd0840/qp",
+  "reduced_of": "surek",
+  "web": "main-4fd0840/shells/web"
+ },
+ {
+  "freeze": false,
+  "info": true,
+  "mid_ms": 562,
+  "name": "nabiz-az",
+  "params": {
+   "look": "oltan",
+   "motion": "nabiz",
+   "reduced_motion": "1"
+  },
+  "qp": "main-4fd0840/qp",
+  "reduced_of": "nabiz",
+  "web": "main-4fd0840/shells/web"
+ }
+]

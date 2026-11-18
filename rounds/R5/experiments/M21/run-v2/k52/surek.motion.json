@@ -1,0 +1,331 @@
+{
+ "params": [
+  "look=oltan",
+  "motion=surek",
+  "reduced_motion=0",
+  "voice=marla"
+ ],
+ "reduce": false,
+ "runs": 3,
+ "reps": 6,
+ "seek": "120",
+ "play_ms": 8000,
+ "configs": {
+  "phone-jit-est": {
+   "runs": [
+    {
+     "open": {
+      "n": 249,
+      "p50": 17,
+      "p95": 18,
+      "p99": 63,
+      "max": 73,
+      "long": 6,
+      "long_share": 0.024096385542168676
+     },
+     "chart": {
+      "n": 259,
+      "p50": 17,
+      "p95": 18,
+      "p99": 20,
+      "max": 24,
+      "long": 0,
+      "long_share": 0
+     },
+     "back": {
+      "n": 493,
+      "p50": 17,
+      "p95": 18,
+      "p99": 60,
+      "max": 64,
+      "long": 6,
+      "long_share": 0.012170385395537525
+     },
+     "transitions": {
+      "n": 1001,
+      "p50": 17,
+      "p95": 18,
+      "p99": 59,
+      "max": 73,
+      "long": 12,
+      "long_share": 0.011988011988011988
+     },
+     "play": {
+      "n": 481,
+      "p50": 17,
+      "p95": 18,
+      "p99": 18,
+      "max": 26,
+      "long": 0,
+      "long_share": 0
+     },
+     "changed_faces": 0
+    },
+    {
+     "open": {
+      "n": 250,
+      "p50": 17,
+      "p95": 18,
+      "p99": 65,
+      "max": 77,
+      "long": 6,
+      "long_share": 0.024
+     },
+     "chart": {
+      "n": 260,
+      "p50": 17,
+      "p95": 18,
+      "p99": 24,
+      "max": 26,
+      "long": 0,
+      "long_share": 0
+     },
+     "back": {
+      "n": 495,
+      "p50": 17,
+      "p95": 18,
+      "p99": 61,
+      "max": 65,
+      "long": 6,
+      "long_share": 0.012121212121212121
+     },
+     "transitions": {
+      "n": 1005,
+      "p50": 17,
+      "p95": 18,
+      "p99": 61,
+      "max": 77,
+      "long": 12,
+      "long_share": 0.011940298507462687
+     },
+     "play": {
+      "n": 479,
+      "p50": 17,
+      "p95": 18,
+      "p99": 18,
+      "max": 54,
+      "long": 1,
+      "long_share": 0.0020876826722338203
+     },
+     "changed_faces": 0
+    },
+    {
+     "open": {
+      "n": 249,
+      "p50": 17,
+      "p95": 18,
+      "p99": 61,
+      "max": 81,
+      "long": 6,
+      "long_share": 0.024096385542168676
+     },
+     "chart": {
+      "n": 265,
+      "p50": 17,
+      "p95": 18,
+      "p99": 22,
+      "max": 26,
+      "long": 0,
+      "long_share": 0
+     },
+     "back": {
+      "n": 495,
+      "p50": 17,
+      "p95": 18,
+      "p99": 57,
+      "max": 70,
+      "long": 6,
+      "long_share": 0.012121212121212121
+     },
+     "transitions": {
+      "n": 1009,
+      "p50": 17,
+      "p95": 18,
+      "p99": 57,
+      "max": 81,
+      "long": 12,
+      "long_share": 0.011892963330029732
+     },
+     "play": {
+      "n": 482,
+      "p50": 17,
+      "p95": 18,
+      "p99": 19,
+      "max": 24,
+      "long": 0,
+      "long_share": 0
+     },
+     "changed_faces": 0
+    }
+   ],
+   "summary": {
+    "transitions_long_share": 0.011940298507462687,
+    "transitions_p99": 59,
+    "transitions_max": 77,
+    "play_long_share": 0,
+    "play_p99": 18,
+    "play_max": 26
+   },
+   "limit_long_share": 0.01,
+   "pass": false
+  },
+  "phone": {
+   "runs": [
+    {
+     "open": {
+      "n": 241,
+      "p50": 17,
+      "p95": 22,
+      "p99": 70,
+      "max": 83,
+      "long": 8,
+      "long_share": 0.03319502074688797
+     },
+     "chart": {
+      "n": 261,
+      "p50": 17,
+      "p95": 18,
+      "p99": 25,
+      "max": 31,
+      "long": 0,
+      "long_share": 0
+     },
+     "back": {
+      "n": 491,
+      "p50": 17,
+      "p95": 18,
+      "p99": 66,
+      "max": 71,
+      "long": 6,
+      "long_share": 0.012219959266802444
+     },
+     "transitions": {
+      "n": 993,
+      "p50": 17,
+      "p95": 18,
+      "p99": 67,
+      "max": 83,
+      "long": 14,
+      "long_share": 0.014098690835850957
+     },
+     "play": {
+      "n": 479,
+      "p50": 17,
+      "p95": 18,
+      "p99": 21,
+      "max": 34,
+      "long": 1,
+      "long_share": 0.0020876826722338203
+     },
+     "changed_faces": 0
+    },
+    {
+     "open": {
+      "n": 235,
+      "p50": 17,
+      "p95": 35,
+      "p99": 70,
+      "max": 79,
+      "long": 12,
+      "long_share": 0.05106382978723404
+     },
+     "chart": {
+      "n": 260,
+      "p50": 17,
+      "p95": 18,
+      "p99": 25,
+      "max": 26,
+      "long": 0,
+      "long_share": 0
+     },
+     "back": {
+      "n": 492,
+      "p50": 17,
+      "p95": 18,
+      "p99": 65,
+      "max": 82,
+      "long": 6,
+      "long_share": 0.012195121951219513
+     },
+     "transitions": {
+      "n": 987,
+      "p50": 17,
+      "p95": 18,
+      "p99": 64,
+      "max": 82,
+      "long": 18,
+      "long_share": 0.0182370820668693
+     },
+     "play": {
+      "n": 481,
+      "p50": 17,
+      "p95": 18,
+      "p99": 21,
+      "max": 23,
+      "long": 0,
+      "long_share": 0
+     },
+     "changed_faces": 0
+    },
+    {
+     "open": {
+      "n": 239,
+      "p50": 17,
+      "p95": 32,
+      "p99": 68,
+      "max": 81,
+      "long": 11,
+      "long_share": 0.04602510460251046
+     },
+     "chart": {
+      "n": 261,
+      "p50": 17,
+      "p95": 18,
+      "p99": 29,
+      "max": 34,
+      "long": 1,
+      "long_share": 0.0038314176245210726
+     },
+     "back": {
+      "n": 493,
+      "p50": 17,
+      "p95": 18,
+      "p99": 66,
+      "max": 75,
+      "long": 6,
+      "long_share": 0.012170385395537525
+     },
+     "transitions": {
+      "n": 993,
+      "p50": 17,
+      "p95": 18,
+      "p99": 66,
+      "max": 81,
+      "long": 18,
+      "long_share": 0.01812688821752266
+     },
+     "play": {
+      "n": 481,
+      "p50": 17,
+      "p95": 18,
+      "p99": 21,
+      "max": 31,
+      "long": 0,
+      "long_share": 0
+     },
+     "changed_faces": 0
+    }
+   ],
+   "summary": {
+    "transitions_long_share": 0.01812688821752266,
+    "transitions_p99": 66,
+    "transitions_max": 82,
+    "play_long_share": 0,
+    "play_p99": 21,
+    "play_max": 31
+   },
+   "limit_long_share": 0.1,
+   "pass": true
+  }
+ }
+}

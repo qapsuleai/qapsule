@@ -683,3 +683,173 @@ yazıldı).** İki bulgu, ikisi de açıkça işaretlenir:
    taşınıp hareketi azalt'ta eksik olan olgu = kayıp") buna kayıp demez. **Ana karar** işaret olarak
    metin ya da metin dışı herhangi bir durağan ilkeyi kabul eder (`--loss-rule any_prim`: `nabiz` 0);
    **duyarlılık** G6-5'in lafzını uygular (yalnız metin: `nabiz` 4 → elenir). İki sonuç da raporlanır.
+
+## Ek G8 — M21 yeniden ölçüm (2026-11-18; ölçüm ajanı `r5/m21-remeasure`, hiçbir yeni okuyucu/eleştirmen çağrısından ve sayılan çekimden önce)
+
+Gerekçe: ilk M21 koşusu geçersizdi (`rounds/R5/experiments/M21/RESULTS.md`): (a) süreklilik sorusu
+(`m_same`) son kareyle de cevaplanıyordu (hareketsiz başvuruda bile 0,98 "aynı nesne": açılan kapsül aynı
+cümleyi taşıdığı için okuyucu metin benzerliğiyle cevaplıyordu); `m_where` hiçbir tasarımda puanlanamadı;
+(b) bozuk tasarım bir *görünüş*tü (`kestim`), hareketi bozmuyordu, fark edilmede son değildi; (c) denetim
+karelerinde yanlış alarm %77–79 idi ve denetim kareleri değişim karelerinin yarısıydı; `nabiz`'in fark
+edilme puanının bir kısmı değişimden değil canlı kapsüllerdeki sürekli nabızdan geliyordu. Bu ek o üç
+sorunu giderir; geri kalanı (Ek G6) aynen geçerlidir, aşağıda değişen her şey yazılıdır. Ek G6'nın
+kayıtlarına bakılarak yazıldı; yeni hiçbir okuma yapılmadı. Kod: `m21v2.py` (sürücü), `shoot.mjs`
+(`band` yerleştirme, `brokenMotionInit` süzgeci), `gl/keys.py` (`m_from`, `motion2`, `motion2_final`),
+`gl/readers.py` (`MOTION2_NOTE`).
+
+**G8-0 Tasarımlar ve tek derleme.** Hareket tasarımları artık `main`'de birleşik: bütün tasarımlar
+`main`'in **tek** derlemesinden (`qp` release + `scripts/demo.sh` WASM paketi), adres parametresiyle,
+aynı içerikle. Görünüş seçildi: hepsi `look=oltan`, `voice=marla` (gösterim varsayılanları; öteki
+seçimler — yüz, akış, açılmış kapsül — gösterim varsayılanı). Hareketi azalt adresle verilir
+(`reduced_motion=0|1`; sistem ayarı Playwright'ta hep `no-preference`).
+
+| ad | adres | rol |
+|---|---|---|
+| `surek` | `motion=surek&reduced_motion=0` | aday |
+| `nabiz` | `motion=nabiz&reduced_motion=0` | aday |
+| `r4` | `motion=r4&reduced_motion=0` | başvuru (bugünkü hareket: açılış geçişi, yüz değişimi hareketsiz) |
+| `still` | `motion=r4&reduced_motion=1` | başvuru (hareketsiz; etiket de yok) |
+| bozuk hareket (gizli ad, yalnız anahtar dosyasında) | `motion=surek&reduced_motion=0` + düzenek süzgeci (G8-2) | düzeneğin sınaması |
+| `surek-az`, `nabiz-az` | aday adresi, `reduced_motion=1` | yalnız bilgi kaybı; seçime girmez |
+
+`r4`'ün azaltılmış hâli `still`'dir (bilgi kaybı tanım gereği 0).
+
+**G8-1 Konuma dayalı süreklilik sorusu (`m_from`; birincil).**
+- *Uyaran (`motion2`):* yalnız iki ara kare yan yana: solda "I" = p = 0,25, sağda "II" = p = 0,5 (açılış
+  geçişi `window.qp.freeze(p)` ile; hareketsizde kare = ekranın kendisi). **"Önce" karesi gösterilmez**
+  (ilk koşuda okuyucu açılan kapsülü önceki ekrandaki aynı metinle eşliyordu). Her karenin soluna
+  düzenek 1–4 numaralı dört eşit yatay şerit çizer (fark edilme sorusundaki şeritlerin aynısı; bölgeler
+  sayıyla, seçenekler harfle — harf eşleme karışıklığı yok).
+- *Soru:* "Bu iki kare aynı geçişin art arda iki anı (I önce, II biraz sonra). Açılan kapsül ekranın
+  hangi numaralı şeridinden geliyor; geçiş nereden başlıyor?" Seçenekler: 1. şerit (en üst) · 2. şerit ·
+  3. şerit · 4. şerit (en alt) · "bir yerden gelmiyor; olduğu yerde beliriyor" (`none`) · bilmiyorum.
+- *Anahtar (tasarımdan bağımsız):* geçişten önceki ekranda hedef yüzün DOM kutusunun dikey ortasının
+  bulunduğu şerit (çekim kaydından). Bunu tasarımdan bağımsız kılmak için **açılış durumları şeride
+  yerleştirilir**: iki hedef kapsül (Ek G6'daki `live_event` ve `closed_failed` hedefleri, aynı adım) ve
+  her biri için akış, hedef yüzün dikey ortası `k`. şeridin ortasına (y = 874·(k − ½)/4) gelecek biçimde
+  kaydırılır, k = 1–4 → **8 açılış durumu** (`o_live_1..4`, `o_fail_1..4`). Kabul şartı (çekimden
+  sonra kayıtla denetlenir): yüz kutusunun dikey orta yarısı tek bir şeritte (k) kalır; kalmazsa o durum
+  için en yakın kaydırma kullanılır ve anahtar gerçekleşen kutudan alınır (kayıtta yazılır). Sınıflar
+  dengeli: her şerit 2 durumda anahtardır.
+- *Son kare (geçerlilik denetimi, `motion2_final`):* aynı soru, aynı biçimde, iki panel de **son kare**
+  (açılış bitmiş ekran) ile. Aynı hedefin dört şerit durumunda son ekran aynı içeriği gösterir (açılan
+  kapsül); son karede geçişin nereden başladığının cevabı yoktur.
+- *Geçerlilik sınaması (tek yönlü, eşik önceden yazılı):* şans düzeyi **0,25** (anahtar her zaman dört
+  şeritten biri ve şeritler dengeli: anahtardan bağımsız her cevap dağılımı beklenen değerde en çok 0,25
+  alır; `none` ve bilmiyorum 0). (i) Tasarım başına: `motion2_final` doğruluğunun Wilson %95 **alt sınırı
+  0,25'in üstündeyse** soru o tasarım için son kareyle cevaplanabilir = **geçersiz**, o tasarım için
+  puanlanmaz (birincili yok). (ii) Hareketsiz başvuru: `still`'in `motion2` doğruluğu (kareleri zaten
+  son kare) aynı sınamadan geçer; alt sınırı 0,25'in üstündeyse soru **bütün tasarımlar için**
+  geçersizdir ve M21 sonucu "geçersiz soru" yazılır. Sınama tek yönlüdür; iki yönlü lafız (aralığın
+  0,25'i içermesi) bilgi olarak raporlanır.
+- `still`'in ara karesi yoktur: yapısal olarak birincili yoktur (ara karesi olmayan tasarım süreklilik
+  gösteremez; Ek G6-1'deki gibi adım 2'de birincili olanların arkasına dizilir). `still`'in `motion2`
+  okumaları yalnız geçerlilik sınamasının (ii) girdisidir.
+- Tekrar 6 (`motion2` ve `motion2_final`), personalar F ve H, haiku, 2 dil × 2 tema. `m_same` ve
+  `m_where` artık sorulmaz.
+
+**G8-2 Bozuk hareket (düzenek süzgeci; ürüne girmez).** `shoot.mjs` `brokenMotionInit`: yalnız bozuk
+tasarımın sayfasına eklenen bir başlatma betiği; temel tasarım `surek` (taşınan parçaları olan
+tasarım). Sayfa her hareket parçasının (`#fx canvas`: açılış geçişinin ve yüz değişiminin parçaları)
+biçemini her ayarladığında süzgeç o parçayı (a) ekranın yatay orta çizgisine göre **aynalanmış yere
+sıçratır** (y → 874 − y − h; 1↔4, 2↔3. şerit) ve (b) **titretir**: tohumlu sapma (yatay ±24 px, dikey
+±16 px, dönme ±6°; tohum = parçanın sırası ve sayfanın o parçaya biçem ayarlama sayısı; aynı kare her
+çekimde aynı). (c) Yüz tuvallerinin saydamlığı 1'de tutulur (değişen yüzün yerinde solması kalkar).
+Sonuç: açılış yanlış şeritten başlıyor görünür, durum değişiminde vuruş **yanlış yerde** olur. Süzgeç
+CSS'in bağımsız `translate`/`rotate` özelliklerini kullanır; sayfanın kendi kodu ve çizimi değişmez.
+**Kabul kuralı (her koşuda):** bozuk hareket (1) birincil ölçüde (`m_from`, birincili olan tasarımlar
+arasında, nokta tahmini) ve (2) eleştirmen BT'de **kesin son** olmalıdır (eşitlik son sayılmaz;
+birincili yoksa (1) sağlanmamış sayılır). Biri tutmazsa **koşu geçersizdir**, seçim yapılmaz. Fark
+edilme puanında (G8-3) son olup olmadığı bilgi olarak yazılır.
+
+**G8-3 Fark edilme (`notice`; seçimde 2b).**
+- *Durumlar:* 4 değişim + **4 denetim** (dengeli; ilk koşuda 4 + 2). Değişimler Ek G6-2'deki dört sınıf:
+  doğum, güçlenme, tutmama, gerçekleşme; denetimler değişim olmayan adımlar. Durumlar bu derlemenin
+  (look `oltan`) ardışık adım sondasından (`m21probe`, adım 1–500) şu kuralla seçilir: değişen kapsül
+  ekranda (çapa satırı en üste kaydırılınca) ilk ya da ikinci tam görünen yüzdür; Ek G6-2'nin adımları
+  hâlâ kurala uyuyorsa aynen kullanılır. **Canlılık ile değişim ayrı sınıflarda:** denetimlerin ikisinde
+  ekranda tam görünen en az bir canlı kapsül vardır (`nabiz`'in nabzı denetim karesinde de görünür;
+  orada "değişti" demek yanlış alarmdır), ikisinde ekranda canlı kapsül yoktur; bu derlemede canlısız
+  ekran yoksa dördü de canlılı olur (yazılır). Değişimler de iki sınıfta raporlanır: hedef canlı
+  (doğum, güçlenme) / hedef kapanmış (tutmama, gerçekleşme). Seçilen liste `m21v2.py`
+  `CHANGE_STATES`'e yazılır ve bu eke tablo olarak eklenir (okumalardan önce).
+- *Kareler:* `mid` (tasarımın değişim süresinin yarısı, `oltan`'ın `duration_scale` 1,25'iyle:
+  `surek` ve bozuk 225 ms = 360·1,25/2; `nabiz` 562 ms = 900·1,25/2; değişim hareketi olmayanlarda
+  225 ms) ve `after` (1000 ms) tek kareler, 1–4 şeritli; `end` (5000 ms) yalnız bilgi kaybı için.
+  Soru `n_where` (Ek G6-2 metni aynen). `notice_pair` sorulmaz (bütçe).
+- *Birincil fark edilme puanı (önceden yazılı):* **isabet − yanlış alarm**. İsabet = değişim
+  karelerinde doğru şerit payı (durum başına ortalama, sonra 4 değişim durumunun ortalaması); yanlış
+  alarm = denetim karelerinde herhangi bir şerit deme payı (aynı biçimde 4 denetim durumunun
+  ortalaması); bilmiyorum/harfsiz cevap denetimde yanlış alarm sayılmaz, değişimde isabet sayılmaz.
+  Persona başına hesaplanır, F2:H1 ağırlıklı; %95 önyükleme (2000; birimler persona × durum katmanında
+  yeniden örneklenir; tohum `20261118`). Sınıf ayrıntısı raporlanır: isabet (hedef canlı / kapanmış),
+  yanlış alarm (canlılı / canlısız denetim).
+- Tekrar 6, F ve H, haiku, 2 dil × 2 tema; `surek-az` ve `nabiz-az` fark edilmede okunmaz (bütçe;
+  bilgi kaybı hesapla ölçülür).
+
+**G8-4 Eleştirmen.** Ek G6-3 aynen (üç kare "0" | A | B, `CRITIC_M21`, tr/açık), durumlar: 2 açılış
+(`o_live_2`, `o_fail_3`; ara kare p = 0,25; "0" = `r4`'ün geçişten önceki ekranı) + 4 değişim (`mid`;
+"0" = `r4`'ün `before` karesi); seçime giren 4 tasarım + bozuk = 5 → 10 çift × 6 durum × 2 sıra × 3 tekrar
+= 360 çağrı. Birleştirme, çelişki (> %30 → ayırt edilemedi), BT ve önyükleme §G5'teki gibi.
+
+**G8-5 K52.** Ek G6-4 aynen, tek derlemede `surek`, `nabiz`, `r4`, `still` için (`k52.mjs --look oltan
+--param ...`, `k52motion.mjs`).
+
+**G8-6 Hareketi azalt bilgi kaybı (sert kapı).** Ek G6-5 **lafzıyla**: hareketin taşıdığı olgu
+hareketi azalt hâlinde **metin olarak** durmalıdır (`r4` → `still` 0 tanım gereği; `surek` →
+`surek-az`, `nabiz` → `nabiz-az`). Öğe = (metin, x, y) (Ek G6-8.1'in uygulama düzeltmesi). Ek G6-8.2'nin
+"herhangi bir durağan ilke" okuması kapı değildir, yalnız duyarlılık olarak raporlanır
+(`--loss-rule text`).
+
+**G8-7 Seçim kuralı (Ek G6-7 aynen, yeni ölçülerle).** 1. Sert eşikler: K52 (G8-5), bilgi kaybı = 0
+(G8-6, metin). Hiçbir tasarım bir eşiği geçemiyorsa o eşik uygulanmaz (§G9.1). 2. Birincil: süreklilik
+`m_from` (G8-1; yalnız sorunun geçerli olduğu tasarımlar; F2:H1, %95 önyükleme); en iyinin aralığıyla
+örtüşenler ilk grup; birincili olmayanlar arkada. 2b. Fark edilme (G8-3, isabet − yanlış alarm, F2:H1);
+grupta en iyinin aralığıyla örtüşenler kalır. 3. Eleştirmen BT; en iyinin aralığıyla örtüşenler kalır.
+4. Tek aday kalırsa "kazanan"; kalmazsa **"ayırt edilemedi"** (kazanan ilan edilmez). **Varsayılan için
+bağ çözme** (nokta tahminleri): birincili olan önce → birincil → fark edilme → BT → daha az ekran metni
+(`end` ekranları) → ad. **İlk iki** bu sıradan. Koşu G8-2 kabul kuralını geçmezse ya da G8-1 (ii)
+soruyu bütün tasarımlar için geçersiz kılarsa seçim yapılmaz.
+
+**G8-8 Bütçe ve kullanım sınırı.** Tahmin (Ek G6 koşusunun birim maliyetleriyle): okuyucu `motion2` +
+`motion2_final` 5 × 8 × 4 × 2 × 2 × 6 = 3 840 haiku ≈ 4 $; `notice` 5 × 8 × 4 × 2 kare × 2 × 6 = 3 840
+haiku ≈ 3 $; eleştirmen 360 sonnet ≈ 6 $; boylar arası uyum (sonnet, `motion2`, tr/açık, F, 1 tekrar,
+`o_*_2` ve `o_*_3`, 5 tasarım = 20) ≈ 0,4 $; toplam ≈ 13,5 $ ≤ 15 $. Bütçe aşılacak gibi olursa önce
+uyum alt kümesi, sonra eleştirmenin üçüncü tekrarı düşer (yazılır). Kullanım sınırına takılıp cevapsız
+dönen çağrı (sonuç metni sınır iletisi ya da boş, maliyet 0) yanlış sayılmaz: kaydı silinir, yeniden
+koşulur, sayısı raporlanır.
+
+**G8-9 (mekanik denemeden sonra, hiçbir okumadan önce; 2026-11-18).** Kancaları sınamak için yalnız
+tr/açık'ta 5 tasarımın açılış ve değişim çekimleri alındı (sayılmaz, silindi; hiçbir okuyucu ya da
+eleştirmen çağrısı yok). Üç uygulama düzeltmesi ve durum listesi:
+1. *Şerit geometrisi:* akış pencerenin değil sayfa öğesinin (`.page`) içinde kayar ve üst çubuğun
+   (`#top`, alt kenarı y ≈ 91 px) altında başlar; yüz 226 px boyunda. Ekranın tamamına çizilen dört şeritte
+   1. şeridin ortasına yüz yerleştirilemez (yarısı üst çubuğun altında kalır). Bu yüzden **`m_from`'un
+   şeritleri akış alanının** (üst çubuğun alt kenarı `y0`'dan ekranın altına, kayıttaki `top_bar_bottom`)
+   **dört eşit şerididir**; yerleştirme (`band_k`) yüzün dikey ortasını o şeridin ortasına getirir
+   (`.page` kaydırılır), çizgiler ve anahtar aynı `y0`'la. Gerçekleşen kutular: yüz üstü 76 / 272 / 468 /
+   663 px, orta yarısı tek şeritte (1–4). Fark edilme sorusunun şeritleri (Ek G6-2) değişmedi (tam ekran).
+2. *`fail` hedefi:* `cap.SYN26.breakout.down.47` akışın 2. satırı; 4. şeride yerleştirmek için üstünde en az
+   3 yüz gerekir. Ek G6 aday listesinde bu şartı sağlayan ilk aday **`cap.SYN26.breakout.down.51`** (5.
+   satır, tutmadı). `live` hedefi (`cap.SYN06.breakout.up.118`, 15. satır) aynı.
+3. *Bozuk hareket:* G8-2'nin aynalaması (y → 874 − y − h) ekranın ortasına binen ikinci yüzü (değişimde)
+   yerinde bırakıyordu (orta çizgi yüzün içinden geçiyor). Süzgeç parçayı **yarım ekran sıçratır**: merkezi üst
+   yarıdaysa +437 px, alt yarıdaysa −437 px (dört şeritte her zaman en az iki şerit öte), titreme ve yüz
+   saydamlığı G8-2'deki gibi. Mekanik denemede bütün açılış ve değişim parçaları yanlış şeritte.
+4. *Fark edilme durumları* (G8-3 kuralıyla; `m21v2_states.json`): Ek G6-2'nin dört değişim adımı ve iki
+   denetimi kurala hâlâ uyuyor; canlılı iki denetim, adım ≥ 201'den başlayarak değişimsiz, Ek G6 adımlarına
+   bitişik olmayan ve aralarında ≥ 10 adım olan ilk iki adım (canlı kapsül biri ilk, biri ikinci yüz):
+
+| durum | adım N → N+1 | çapa satırı | sınıf | ekranda (tam görünen 3 yüz) |
+|---|---|---|---|---|
+| `c_born` | 216 → 217 | 18 | değişim, hedef canlı | `SYN09.143` doğdu, ikinci yüz |
+| `c_strengthened` | 225 → 226 | 19 | değişim, hedef canlı | `SYN09.143` güçlendi, ilk yüz |
+| `c_failed` | 333 → 334 | 10 | değişim, hedef kapanmış | `SYN20.154` tutmadı, ikinci yüz |
+| `c_realized` | 207 → 208 | 19 | değişim, hedef kapanmış | `SYN11.140` gerçekleşti, ilk yüz |
+| `n_live1` | 201 → 202 | 19 | denetim, canlılı | `SYN11.140` canlı, ilk yüz |
+| `n_live2` | 218 → 219 | 18 | denetim, canlılı | `SYN09.143` canlı, ikinci yüz |
+| `n_still1` | 211 → 212 | 18 | denetim, canlısız | — |
+| `n_still2` | 300 → 301 | 10 | denetim, canlısız | — |
+
+   Mekanik denemede (bilgi; tasarım farkı okunmadı, yalnız kancalar): `nabiz`'in canlılı denetimlerde nabız
+   kutusu var, canlısızlarda yok; `surek` doğumda değişim parçası üretmiyor (ilk koşudaki gibi).

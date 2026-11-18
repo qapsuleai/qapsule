@@ -1,0 +1,331 @@
+{
+ "params": [
+  "look=oltan",
+  "motion=nabiz",
+  "reduced_motion=0",
+  "voice=marla"
+ ],
+ "reduce": false,
+ "runs": 3,
+ "reps": 6,
+ "seek": "120",
+ "play_ms": 8000,
+ "configs": {
+  "phone-jit-est": {
+   "runs": [
+    {
+     "open": {
+      "n": 251,
+      "p50": 17,
+      "p95": 18,
+      "p99": 59,
+      "max": 75,
+      "long": 6,
+      "long_share": 0.02390438247011952
+     },
+     "chart": {
+      "n": 263,
+      "p50": 17,
+      "p95": 18,
+      "p99": 19,
+      "max": 23,
+      "long": 0,
+      "long_share": 0
+     },
+     "back": {
+      "n": 489,
+      "p50": 17,
+      "p95": 18,
+      "p99": 57,
+      "max": 84,
+      "long": 7,
+      "long_share": 0.014314928425357873
+     },
+     "transitions": {
+      "n": 1003,
+      "p50": 17,
+      "p95": 18,
+      "p99": 57,
+      "max": 84,
+      "long": 13,
+      "long_share": 0.01296111665004985
+     },
+     "play": {
+      "n": 480,
+      "p50": 17,
+      "p95": 18,
+      "p99": 22,
+      "max": 39,
+      "long": 1,
+      "long_share": 0.0020833333333333333
+     },
+     "changed_faces": 0
+    },
+    {
+     "open": {
+      "n": 251,
+      "p50": 17,
+      "p95": 18,
+      "p99": 65,
+      "max": 76,
+      "long": 6,
+      "long_share": 0.02390438247011952
+     },
+     "chart": {
+      "n": 260,
+      "p50": 17,
+      "p95": 18,
+      "p99": 23,
+      "max": 40,
+      "long": 1,
+      "long_share": 0.0038461538461538464
+     },
+     "back": {
+      "n": 494,
+      "p50": 17,
+      "p95": 18,
+      "p99": 55,
+      "max": 64,
+      "long": 6,
+      "long_share": 0.012145748987854251
+     },
+     "transitions": {
+      "n": 1005,
+      "p50": 17,
+      "p95": 18,
+      "p99": 55,
+      "max": 76,
+      "long": 13,
+      "long_share": 0.012935323383084577
+     },
+     "play": {
+      "n": 480,
+      "p50": 17,
+      "p95": 18,
+      "p99": 21,
+      "max": 25,
+      "long": 0,
+      "long_share": 0
+     },
+     "changed_faces": 0
+    },
+    {
+     "open": {
+      "n": 248,
+      "p50": 17,
+      "p95": 18,
+      "p99": 60,
+      "max": 73,
+      "long": 6,
+      "long_share": 0.024193548387096774
+     },
+     "chart": {
+      "n": 262,
+      "p50": 17,
+      "p95": 18,
+      "p99": 24,
+      "max": 25,
+      "long": 0,
+      "long_share": 0
+     },
+     "back": {
+      "n": 493,
+      "p50": 17,
+      "p95": 18,
+      "p99": 63,
+      "max": 71,
+      "long": 7,
+      "long_share": 0.014198782961460446
+     },
+     "transitions": {
+      "n": 1003,
+      "p50": 17,
+      "p95": 18,
+      "p99": 57,
+      "max": 73,
+      "long": 13,
+      "long_share": 0.01296111665004985
+     },
+     "play": {
+      "n": 480,
+      "p50": 17,
+      "p95": 18,
+      "p99": 20,
+      "max": 24,
+      "long": 0,
+      "long_share": 0
+     },
+     "changed_faces": 0
+    }
+   ],
+   "summary": {
+    "transitions_long_share": 0.01296111665004985,
+    "transitions_p99": 57,
+    "transitions_max": 76,
+    "play_long_share": 0,
+    "play_p99": 21,
+    "play_max": 25
+   },
+   "limit_long_share": 0.01,
+   "pass": false
+  },
+  "phone": {
+   "runs": [
+    {
+     "open": {
+      "n": 239,
+      "p50": 17,
+      "p95": 34,
+      "p99": 72,
+      "max": 91,
+      "long": 12,
+      "long_share": 0.0502092050209205
+     },
+     "chart": {
+      "n": 263,
+      "p50": 17,
+      "p95": 18,
+      "p99": 26,
+      "max": 31,
+      "long": 0,
+      "long_share": 0
+     },
+     "back": {
+      "n": 488,
+      "p50": 17,
+      "p95": 18,
+      "p99": 68,
+      "max": 76,
+      "long": 6,
+      "long_share": 0.012295081967213115
+     },
+     "transitions": {
+      "n": 990,
+      "p50": 17,
+      "p95": 19,
+      "p99": 69,
+      "max": 91,
+      "long": 18,
+      "long_share": 0.01818181818181818
+     },
+     "play": {
+      "n": 480,
+      "p50": 17,
+      "p95": 18,
+      "p99": 22,
+      "max": 27,
+      "long": 0,
+      "long_share": 0
+     },
+     "changed_faces": 0
+    },
+    {
+     "open": {
+      "n": 241,
+      "p50": 17,
+      "p95": 22,
+      "p99": 72,
+      "max": 89,
+      "long": 10,
+      "long_share": 0.04149377593360996
+     },
+     "chart": {
+      "n": 262,
+      "p50": 17,
+      "p95": 18,
+      "p99": 29,
+      "max": 35,
+      "long": 1,
+      "long_share": 0.003816793893129771
+     },
+     "back": {
+      "n": 491,
+      "p50": 17,
+      "p95": 18,
+      "p99": 69,
+      "max": 71,
+      "long": 7,
+      "long_share": 0.014256619144602852
+     },
+     "transitions": {
+      "n": 994,
+      "p50": 17,
+      "p95": 18,
+      "p99": 68,
+      "max": 89,
+      "long": 18,
+      "long_share": 0.018108651911468814
+     },
+     "play": {
+      "n": 480,
+      "p50": 17,
+      "p95": 18,
+      "p99": 18,
+      "max": 21,
+      "long": 0,
+      "long_share": 0
+     },
+     "changed_faces": 0
+    },
+    {
+     "open": {
+      "n": 240,
+      "p50": 17,
+      "p95": 32,
+      "p99": 71,
+      "max": 93,
+      "long": 10,
+      "long_share": 0.041666666666666664
+     },
+     "chart": {
+      "n": 263,
+      "p50": 17,
+      "p95": 18,
+      "p99": 29,
+      "max": 34,
+      "long": 1,
+      "long_share": 0.0038022813688212928
+     },
+     "back": {
+      "n": 495,
+      "p50": 17,
+      "p95": 18,
+      "p99": 66,
+      "max": 80,
+      "long": 6,
+      "long_share": 0.012121212121212121
+     },
+     "transitions": {
+      "n": 998,
+      "p50": 17,
+      "p95": 18,
+      "p99": 66,
+      "max": 93,
+      "long": 17,
+      "long_share": 0.017034068136272545
+     },
+     "play": {
+      "n": 480,
+      "p50": 17,
+      "p95": 18,
+      "p99": 18,
+      "max": 28,
+      "long": 0,
+      "long_share": 0
+     },
+     "changed_faces": 0
+    }
+   ],
+   "summary": {
+    "transitions_long_share": 0.018108651911468814,
+    "transitions_p99": 68,
+    "transitions_max": 91,
+    "play_long_share": 0,
+    "play_p99": 18,
+    "play_max": 27
+   },
+   "limit_long_share": 0.1,
+   "pass": true
+  }
+ }
+}

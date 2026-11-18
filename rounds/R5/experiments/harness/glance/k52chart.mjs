@@ -5,7 +5,7 @@
 //
 //   node k52chart.mjs <qp> <web> <out.json> --plan <plan.json>
 //
-// plan = {story, look, market: [qp demo args], open: [capsule ids], depths: [5, 50, 200],
+// plan = {story, look, voice, market: [qp demo args], open: [capsule ids], depths: [5, 50, 200],
 //         rows: [canonical story rows], configs: [...], reps, play_ms, drag_ms, back_steps}
 //
 // Per config: one `qp demo` (the market), the replay sought once to `steps - back_steps`
@@ -103,6 +103,7 @@ async function oneRun(browser, cfg, base, depth, first) {
     const q = new URLSearchParams({ x: '1', watch: plan.instrument });
     if (plan.story) q.set('story', plan.story);
     if (plan.look) q.set('look', plan.look);
+    if (plan.voice) q.set('voice', plan.voice); // (Ek G4-1) none: the product default
     await page.goto(`${base.replace('localhost', '127.0.0.1')}?${q}`);
     await page.waitForFunction(() => {
       try { return JSON.parse(window.qp.metrics()).open_ms.first_capsule > 0; } catch { return false; }
@@ -168,7 +169,7 @@ async function oneRun(browser, cfg, base, depth, first) {
 
 function pick(m, ph, name, k) { return m[ph].span_ms[name] && m[ph].span_ms[name][k]; }
 
-const res = { story: plan.story || null, look: plan.look || null, market: plan.market, configs: {} };
+const res = { story: plan.story || null, look: plan.look || null, voice: plan.voice || null, market: plan.market, configs: {} };
 for (const c of plan.configs || ['phone-jit-est', 'phone']) {
   const cfg = CFG[c];
   const browser = await cal.launchFor(cfg);

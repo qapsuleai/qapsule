@@ -67,6 +67,17 @@ def web_dir(a):
     return getattr(a, "web", None) or os.environ.get("QP_WEB") or str(ROOT / "shells/web")
 
 
+VOICE_HELP = ("capsule voice for `?voice=` (marla, selvi, r4); default: none sent, the product's "
+              "presentation default (the core sends marla); the same voice for every design")
+
+
+def voice_of(a, d=None):
+    """(Ek G4-1) The capsule voice of a shot or K52 run, the same for every design: `--voice`,
+    else None = no `?voice=` (the product's presentation default). M16 is measured with one
+    text for every design (`--voice marla`). `d` is accepted for call-site symmetry."""
+    return getattr(a, "voice", None) or None
+
+
 def node(script, plan_path):
     subprocess.run(["node", str(HERE / script), str(plan_path)], check=True, cwd=ROOT)
 
@@ -76,7 +87,7 @@ def node(script, plan_path):
 def cmd_probe(a):
     run = Path(a.run)
     plan = {"qp": qp_bin(a), "web": web_dir(a), "port": a.port, "out": str(run / "probe"),
-            "sensitivity": "all", "principals": ["arkin", "visitor"], "probe": ST.CANDIDATE_STEPS}
+            "sensitivity": "all", "voice": voice_of(a), "principals": ["arkin", "visitor"], "probe": ST.CANDIDATE_STEPS}
     jdump(run / "probe-plan.json", plan)
     node("shoot.mjs", run / "probe-plan.json")
 
@@ -107,7 +118,7 @@ CHART_DEPTHS = (5, 50, 200)
 def cmd_chartstates(a):
     run = Path(a.run)
     plan = {"qp": qp_bin(a), "web": web_dir(a), "port": a.port, "out": str(run / "probe"), "sensitivity": "all",
-            "demo_args": CHART_MARKET, "chart_probe": True}
+            "demo_args": CHART_MARKET, "chart_probe": True, "voice": voice_of(a)}
     jdump(run / "chart-probe-plan.json", plan)
     if not (run / "probe" / "chart-probe.json").exists():
         node("shoot.mjs", run / "chart-probe-plan.json")
@@ -163,11 +174,11 @@ def shoot_charts(a, run, designs, key):
                     name = f"chart{ch['target']}"
                     c = code(d["name"], name, "chart", lang, theme)
                     key[c] = {"design": d["name"], "state": name, "kind": "chart", "lang": lang, "theme": theme,
-                              "principal": "arkin", "instrument": ch["instrument"]}
+                              "principal": "arkin", "instrument": ch["instrument"], "voice": voice_of(a, d)}
                     if (run / "shots" / f"{c}.png").exists():
                         continue
                     shots.append({"id": c, "kind": "chart", "step": -1, "principal": "arkin", "lang": lang,
-                                  "theme": theme, "look": d.get("look"), "face": d.get("face"), "story": d.get("story"),
+                                  "theme": theme, "look": d.get("look"), "face": d.get("face"), "story": d.get("story"), "voice": voice_of(a, d),
                                   "broken": bool(d.get("broken")), "candidates": ch["candidates"],
                                   "watch": ch["instrument"], "zoom_to": ch["target"], "story_rows": canon,
                                   "open_direct": True})
@@ -200,7 +211,7 @@ def cmd_shoot(a):
     for d in designs:
         for lang in a.langs.split(","):
             for theme in a.themes.split(","):
-                base = {"lang": lang, "theme": theme, "look": d.get("look"), "face": d.get("face"),
+                base = {"lang": lang, "theme": theme, "look": d.get("look"), "face": d.get("face"), "voice": voice_of(a, d),
                         "broken": bool(d.get("broken"))}
                 todo = []
                 if "face" in kinds:
@@ -218,7 +229,7 @@ def cmd_shoot(a):
                                 candidates=s.get("candidates", []), watch=s.get("watch"), progress=[0.25, 0.5, 0.75, 1.0])
                     shots.append(shot)
                     key[c] = {"design": d["name"], "state": name, "kind": kind, "lang": lang, "theme": theme,
-                              "principal": shot["principal"]}
+                              "principal": shot["principal"], "voice": shot["voice"]}
     jdump(run / "key.json", key)
     # The reader's audience (`?watch=`) is the authority's per-principal state and outlives
     # the page: shots without a watch list go first in each step group, then by watch list
@@ -582,7 +593,7 @@ def k52_charts(a, run):
         out = run / "k52" / f"{d['name']}.json"
         if out.exists():
             continue
-        plan = {"story": d.get("story"), "look": d.get("look"), "market": ch["market"], "instrument": ch["instrument"],
+        plan = {"story": d.get("story"), "look": d.get("look"), "voice": voice_of(a, d), "market": ch["market"], "instrument": ch["instrument"],
                 "open": [r["id"] for r in hist[:5]], "depths": [c["target"] for c in sj["charts"]], "rows": rows,
                 "configs": a.configs.split(","), "reps": a.reps, "play_ms": 5000, "drag_ms": 6000, "back_steps": 400}
         pp = run / "plans" / f"k52-{d['name']}.json"
@@ -605,6 +616,8 @@ def cmd_k52(a):
             args += ["--look", d["look"]]
         if d.get("face"):
             args += ["--face", d["face"]]
+        if voice_of(a, d):
+            args += ["--voice", voice_of(a, d)]
         (run / "k52").mkdir(parents=True, exist_ok=True)
         subprocess.run(args, check=True, cwd=ROOT, env=dict(os.environ, QP_SCRATCH=str(run)))
 
@@ -630,15 +643,16 @@ def main():
         p.set_defaults(fn=fn)
         return p
 
-    add("probe", cmd_probe)
+    add("probe", cmd_probe).add_argument("--voice", help=VOICE_HELP)
     add("states", cmd_states).add_argument("--charts", action="store_true")
-    add("chartstates", cmd_chartstates)
+    add("chartstates", cmd_chartstates).add_argument("--voice", help=VOICE_HELP)
     p = add("shoot", cmd_shoot)
     p.add_argument("--designs", required=True)
     p.add_argument("--langs", default="tr,en")
     p.add_argument("--themes", default="light,dark")
     p.add_argument("--kinds", default="face,feed,evidence,motion")
     p.add_argument("--paint", default="canvas")
+    p.add_argument("--voice", help=VOICE_HELP)
     p = add("derive", cmd_derive)
     p.add_argument("--pair-lang", default="tr")
     p.add_argument("--pair-theme", default="light")
@@ -672,6 +686,7 @@ def main():
     p.add_argument("--charts", action="store_true", help="(M18) 5/50/200 stories in view, per design build")
     p.add_argument("--configs", default="phone-jit-est,phone")
     p.add_argument("--skip", help="design names to skip")
+    p.add_argument("--voice", help=VOICE_HELP)
     add("broken-check", cmd_broken).add_argument("--broken", required=True)
     a = ap.parse_args()
     a.fn(a)

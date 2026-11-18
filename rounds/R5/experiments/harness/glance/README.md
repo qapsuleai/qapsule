@@ -30,10 +30,12 @@ python3 $H/glance.py probe  --run $RUN             # okurun akışı, 64 adım �
 python3 $H/glance.py states --run $RUN [--charts]  # durum kümesi → states.json
 # designs.json: [{"name": "<ad>", "look": "<look>", "face": "<face>"}, ...,
 #                {"name": "kestim", "look": "kestim", "face": "vadrel"}]   # bozuk (gizli ad)
-python3 $H/glance.py shoot  --run $RUN --designs designs.json [--langs tr,en] [--themes light,dark]
+python3 $H/glance.py shoot  --run $RUN --designs designs.json [--langs tr,en] [--themes light,dark] [--voice marla]
+# --voice (Ek G4-1; probe, chartstates, shoot, k52): adrese `?voice=`; verilmezse ürünün gösterim
+# varsayılanı. M16 her adayda aynı metinle: --voice marla. Kayıtta `voice` {requested, used}.
 python3 $H/glance.py derive --run $RUN            # kısma, gri, yarım boy, hareket çiftleri, eleştirmen çiftleri
 python3 $H/glance.py compute --run $RUN           # sert eşikler → computed.json + computed.md
-python3 $H/glance.py k52    --run $RUN --designs designs.json [--reps 3]
+python3 $H/glance.py k52    --run $RUN --designs designs.json [--reps 3] [--voice marla]
 python3 $H/glance.py read   --run $RUN --model haiku  [--personas F,H] [--reps 3] [--sets ...] [--states ...]
 python3 $H/glance.py read   --run $RUN --model sonnet --sets face --lang tr --theme light   # boylar arası uyum
 python3 $H/glance.py critic --run $RUN --model sonnet [--reps 3]

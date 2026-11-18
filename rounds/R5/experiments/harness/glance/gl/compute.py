@@ -87,6 +87,37 @@ def _area(p) -> float:
     return 0.0
 
 
+def glyph_body(gl_prims, background):
+    """The glyph's body (SPEC §G7.2, Ek G4-3): its most opaque prim, i.e. the fill/stroke prim
+    of the glyph layer with the highest alpha. Prims that vanish into the background (e.g. a
+    knockout in the background colour, ΔE00 < 2) are skipped. Ties (same alpha, different
+    colours) go to the colour with the largest area among the tied prims. Its contrast against
+    the scene background is the 1.4.11 gate and its colour the meaning colour (§G7.4).
+
+    The dominant colour by alpha-weighted area (the rule applied before Ek G4, under which a
+    large translucent plate won) is reported as `aux` when it differs from the body: a
+    non-text helper, reported, never gated."""
+    bgc = tuple(float(v) for v in background[:3])
+    vis = [p for p in gl_prims if C.de(C.composite(_rgba(p["color"]), bgc), bgc) >= 2.0]
+    if not vis:
+        return None
+    top = max(_rgba(p["color"])[3] for p in vis)
+    tied, weight = {}, {}
+    for p in vis:
+        col = _rgba(p["color"])
+        if col[3] == top:
+            tied[col] = tied.get(col, 0.0) + _area(p)
+        weight[col] = weight.get(col, 0.0) + _area(p) * col[3] / 255.0
+    col = max(sorted(tied), key=lambda c: tied[c])
+    fg = C.composite(col, bgc)
+    body = {"color": col, "bg": bgc, "fg": fg, "ratio": C.contrast(fg, bgc)}
+    aux = max(sorted(weight), key=lambda c: weight[c])
+    if aux != col:
+        afg = C.composite(aux, bgc)
+        body["aux"] = {"color": aux, "fg": afg, "ratio": C.contrast(afg, bgc)}
+    return body
+
+
 def face_elements(scene):
     """Element-level colours of one face scene: text runs (colour over what is under them)
     and the glyph's body (its most opaque prim) over the background."""
@@ -103,22 +134,7 @@ def face_elements(scene):
                           "ratio": C.contrast(fg, bg), "threshold": C.text_threshold(px, False)})
         elif lid == "glyph" and p.get("prim") in ("fill", "polyline", "rect", "circle"):
             gl_prims.append(p)
-    # The glyph's colour (SPEC §G7.2, §G7.4): the dominant visible colour of the glyph layer
-    # (largest alpha-weighted area; prims that vanish into the background, e.g. a knockout
-    # in the background colour, are skipped). Its contrast against the scene background.
-    bgc = tuple(float(v) for v in scene["background"][:3])
-    weight = {}
-    for p in gl_prims:
-        col = _rgba(p["color"])
-        fg = C.composite(col, bgc)
-        if C.de(fg, bgc) < 2.0:
-            continue
-        w = _area(p) * col[3] / 255.0
-        weight[col] = weight.get(col, 0.0) + w
-    if weight:
-        col = max(sorted(weight), key=lambda c: weight[c])
-        fg = C.composite(col, bgc)
-        glyph = {"color": col, "bg": bgc, "fg": fg, "ratio": C.contrast(fg, bgc)}
+    glyph = glyph_body(gl_prims, scene["background"])
     hits = []
     for panel in scene.get("panels", []):
         for layer in panel.get("layers", []):
@@ -140,8 +156,14 @@ def meaning_class(item) -> tuple[str, str]:
     return ("open", f"{v}:{ {'up': 'up', 'down': 'down'}.get(item['direction'], 'flat')}")
 
 
+def _theme(r) -> str:
+    return (r.get("shot") or {}).get("theme") or "light"
+
+
 def semantic_colours(records):
-    """Glyph body colour (composited) per meaning class from the shots' target faces."""
+    """Glyph body colour (composited) per theme and meaning class from the shots' target
+    faces: {theme: {class: colour}}. Classes are compared only within one theme (Ek G4-2:
+    the separation of meaning colours is a separation inside one screen)."""
     out = {}
     for r in records:
         it = (r.get("engine") or {}).get("target_item")
@@ -152,17 +174,20 @@ def semantic_colours(records):
         if not g:
             continue
         axis, val = meaning_class(it)
-        out.setdefault(f"{axis}/{val}", {"fg": g["fg"], "bg": g["bg"], "size": g.get("size", 0)})
+        out.setdefault(_theme(r), {}).setdefault(f"{axis}/{val}", {"fg": g["fg"], "bg": g["bg"], "size": g.get("size", 0)})
     return out
 
 
-def colour_table(sem):
-    """ΔE00 of every meaning-colour pair under normal, grey and three CVD conditions."""
+def colour_table(sem, theme=None):
+    """ΔE00 of every meaning-colour pair of ONE theme (`sem`: {class: colour}) under normal,
+    grey and three CVD conditions."""
     rows = []
     for (a, ca), (b, cb) in combinations(sorted(sem.items()), 2):
         size = min(ca["size"] or 99, cb["size"] or 99)
         thr = DE_MIN_SMALL if size <= SMALL_MARK else DE_MIN
         r = {"a": a, "b": b, "threshold": thr, "mark_px": size}
+        if theme is not None:
+            r["theme"] = theme
         for cond in C.CONDITIONS:
             r[cond] = round(C.pair_de(ca["fg"], cb["fg"], cond), 2)
         r["gray_lum_ratio"] = round(C.contrast(C.gray(ca["fg"]), C.gray(cb["fg"])), 3)
@@ -173,6 +198,15 @@ def colour_table(sem):
         r["pass"] = (not r["colour_coded"]) or r["min"] >= thr
         rows.append(r)
     return rows
+
+
+def colour_gate(tables):
+    """The meaning-colour gate applied to each theme separately (Ek G4-2). `tables`:
+    {theme: [pair rows of that theme]}. A theme passes when it has pairs and all pass."""
+    themes = {th: {"pairs": rows, "pass": bool(rows) and all(r["pass"] for r in rows)}
+              for th, rows in sorted(tables.items())}
+    return {"pairs": [r for t in themes.values() for r in t["pairs"]], "themes": themes,
+            "pass": bool(themes) and all(t["pass"] for t in themes.values())}
 
 
 def dom_texts(rec):
@@ -227,6 +261,7 @@ def gates(records, look=None):
     design's look record (`qp look show`), for text roles."""
     worst_text = None
     worst_glyph = None
+    worst_aux = None
     min_font = None
     small_taps = []
     fc, fl, sc = [], [], []
@@ -247,6 +282,9 @@ def gates(records, look=None):
         for g in m["glyphs"]:
             if worst_glyph is None or g["ratio"] < worst_glyph["ratio"]:
                 worst_glyph = {"ratio": round(g["ratio"], 2), "shot": r["shot"]["id"], "face": g["face"]}
+            a = g.get("aux")
+            if a and (worst_aux is None or a["ratio"] < worst_aux["ratio"]):
+                worst_aux = {"ratio": round(a["ratio"], 2), "shot": r["shot"]["id"], "face": g["face"]}
         for t in m["taps"]:
             # Only targets that act: the face (opens), the glyph hit box, buttons and fields.
             if min(t["w"], t["h"]) < TOUCH_MIN:
@@ -255,14 +293,20 @@ def gates(records, look=None):
         fl += m["face_lines"]
         sc.append(m["screen_chars"])
     sem = semantic_colours(records)
-    table = colour_table(sem)
+    colour = colour_gate({th: colour_table(s, th) for th, s in sem.items()})
+    for th, s in sem.items():
+        colour["themes"][th]["classes"] = sorted(s)
+    colour["classes"] = sorted({c for s in sem.values() for c in s})
     out = {
         "text_contrast": {"worst": worst_text, "pass": bool(worst_text) and worst_text["margin"] >= 1.0},
         "nontext_contrast": {"worst_glyph": worst_glyph, "threshold": NONTEXT_MIN,
-                             "pass": bool(worst_glyph) and worst_glyph["ratio"] >= NONTEXT_MIN},
+                             "pass": bool(worst_glyph) and worst_glyph["ratio"] >= NONTEXT_MIN,
+                             # the largest translucent part when it is not the body (a plate):
+                             # a non-text helper, reported, never gated (Ek G4-3)
+                             "worst_aux": worst_aux},
         "min_font": {"worst": min_font, "threshold": MIN_FONT, "pass": bool(min_font) and min_font["px"] >= MIN_FONT},
         "touch": {"below_44": small_taps[:30], "count": len(small_taps), "pass": not small_taps},
-        "colour": {"classes": sorted(sem), "pairs": table, "pass": bool(table) and all(r["pass"] for r in table)},
+        "colour": colour,
         "roles": {k: {"px": v["px"], "min_ratio": round(v["min_ratio"], 2)} for k, v in sorted(by_role.items())},
         "density": {"face_chars_mean": round(sum(fc) / len(fc), 1) if fc else None, "face_chars_max": max(fc) if fc else None,
                     "face_lines_max": max(fl) if fl else None,
@@ -433,20 +477,29 @@ def chart_gates(records, look=None):
             if min(t["rect"][2], t["rect"][3]) < TOUCH_MIN:
                 small_taps.append({"what": f"{t['tag']}#{t['id']}", "w": round(t["rect"][2], 1),
                                    "h": round(t["rect"][3], 1), "shot": r["shot"]["id"]})
+        # Per theme (Ek G4-2): a light-theme colour is never paired with a dark-theme one.
         for role, hx in _role_colours(r).items():
             if _hex(hx)[:3] in u:
-                used.setdefault(_hex(hx)[:3], set()).add(role)
+                used.setdefault(_theme(r), {}).setdefault(_hex(hx)[:3], set()).add(role)
         sc.append(sum(len(t["text"]) for t in texts))
         chars.append(sum(len(t["text"]) for t in stexts))
-    table = []
-    for (ca, ra), (cb, rb) in combinations(sorted(used.items()), 2):
-        row = {"a": "/".join(sorted(ra)), "b": "/".join(sorted(rb)), "threshold": DE_MIN_SMALL}
-        for cond in C.CONDITIONS:
-            row[cond] = round(C.pair_de(ca, cb, cond), 2)
-        row["min"] = min(row[c] for c in C.CONDITIONS)
-        row["colour_coded"] = row["normal"] >= COLOUR_CODED
-        row["pass"] = (not row["colour_coded"]) or row["min"] >= row["threshold"]
-        table.append(row)
+    tables = {}
+    for th, cols in sorted(used.items()):
+        table = tables.setdefault(th, [])
+        for (ca, ra), (cb, rb) in combinations(sorted(cols.items()), 2):
+            row = {"a": "/".join(sorted(ra)), "b": "/".join(sorted(rb)), "theme": th, "threshold": DE_MIN_SMALL}
+            for cond in C.CONDITIONS:
+                row[cond] = round(C.pair_de(ca, cb, cond), 2)
+            row["min"] = min(row[c] for c in C.CONDITIONS)
+            row["colour_coded"] = row["normal"] >= COLOUR_CODED
+            row["pass"] = (not row["colour_coded"]) or row["min"] >= row["threshold"]
+            table.append(row)
+    colour = colour_gate(tables)
+    # A chart that paints a single meaning colour in a theme has no pair to fail (as before).
+    for t in colour["themes"].values():
+        t["pass"] = all(r["pass"] for r in t["pairs"])
+    colour["pass"] = all(t["pass"] for t in colour["themes"].values())
+    colour["classes"] = sorted({p for cols in used.values() for v in cols.values() for p in v})
     out = {
         "text_contrast": {"worst": worst_text, "pass": bool(worst_text) and worst_text["margin"] >= 1.0},
         "nontext_contrast": {"worst_glyph": worst_mark, "threshold": NONTEXT_MIN,
@@ -454,8 +507,7 @@ def chart_gates(records, look=None):
         "min_font": {"worst": min_font, "threshold": MIN_FONT, "pass": bool(min_font) and min_font["px"] >= MIN_FONT},
         "touch": {"below_44": small_taps[:30], "count": len(small_taps), "pass": not small_taps,
                   "note": "DOM boxes only; story hit boxes are not in the paint list (SPEC §G11.5)"},
-        "colour": {"classes": sorted(p for v in used.values() for p in v), "pairs": table,
-                   "pass": all(r["pass"] for r in table)},
+        "colour": colour,
         "roles": {},
         "density": {"face_chars_mean": round(sum(chars) / len(chars), 1) if chars else None,
                     "face_chars_max": max(chars) if chars else None, "face_lines_max": None,

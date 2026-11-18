@@ -339,8 +339,12 @@ def computed_md(out) -> str:
         tc = g["text_contrast"]["worst"] or {}
         gl = g["nontext_contrast"]["worst_glyph"] or {}
         mf = g["min_font"]["worst"] or {}
-        pairs = g["colour"]["pairs"]
+        # The gate's worst pair: colour-coded pairs first (the others are not gated), per
+        # theme (Ek G4-2: pairs are within one theme).
+        pairs = [r for r in g["colour"]["pairs"] if r.get("colour_coded", True)] or g["colour"]["pairs"]
         cm = min(pairs, key=lambda r: r["min"] - r["threshold"]) if pairs else None
+        if cm and cm.get("theme"):
+            cm = dict(cm, a=f"{cm['theme']}: {cm['a']}")
         k52 = g.get("k52", {}).get("pass", "—")
         dn = g["density"]
         L.append(f"| `{d}` | {tc.get('ratio')} / {tc.get('threshold')} | {gl.get('ratio')} | {mf.get('px')} | {g['touch']['count']} | "

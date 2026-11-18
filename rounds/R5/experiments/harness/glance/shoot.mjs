@@ -3,13 +3,15 @@
 //
 //   node shoot.mjs <plan.json>
 //
-// plan = {qp, web, port, out, paint, demo_args, shots: [{
+// plan = {qp, web, port, out, paint, demo_args, voice, shots: [{
 //   id,                       output file stem (a blinded code; the name↔code key is elsewhere)
 //   kind,                     face | feed | evidence | chart | motion
 //   step,                     replay step (all shots of one plan with the same step share one seek)
 //   candidates: [capsule ids] the first one the page lists is the target (face/evidence/chart/motion)
 //   lang, theme, principal,   tr|en, light|dark, arkin|visitor
 //   look, face,               design selection: `?look=` (T3; ignored by a shell without it), `?face=`
+//   voice,                    capsule voice `?voice=` (else plan.voice; neither: the product default;
+//                             the record's `voice` says which voice was asked for and which was sent)
 //   broken,                   true: the broken-design filter (SPEC §G8) is applied in the page
 //   wheel_out                 chart: wheel-out notches before the shot (M18 depth)
 // }]}
@@ -147,6 +149,9 @@ function query(s) {
   if (s.watch) q.set('watch', s.watch);
   // (M18) the story chart design at chart depth (`?story=`; a shell without it ignores it).
   if (s.story) q.set('story', s.story);
+  // (Ek G4-1) The capsule voice (`?voice=`; none: the product's presentation default).
+  const voice = s.voice || plan.voice;
+  if (voice) q.set('voice', voice);
   return q;
 }
 
@@ -226,7 +231,13 @@ async function shoot(page, s, meta) {
     visible_items: full.map((id) => eng.items[id]).filter(Boolean),
     face_scenes: Object.fromEntries(full.filter((id) => eng.faces[id]).map((id) => [id, eng.faces[id]])),
   };
-  fs.writeFileSync(path.join(out, `${s.id}.json`), `${JSON.stringify({ shot: s, ...meta, open, look, paint_used: used, engine: engineOut, dom, paints })}\n`);
+  // (Ek G4-1) Which voice the shot speaks: the one asked for in the address (null: the
+  // product default) and the one the core actually sent with the target capsule
+  // (`CapsuleItem.voice.voice`; absent = the schema's default `r4`).
+  const ti = engineOut.target_item;
+  const voice = { requested: s.voice || plan.voice || null,
+    used: ti ? ((ti.voice && ti.voice.voice) || 'r4') : null };
+  fs.writeFileSync(path.join(out, `${s.id}.json`), `${JSON.stringify({ shot: s, ...meta, voice, open, look, paint_used: used, engine: engineOut, dom, paints })}\n`);
 }
 
 async function targetOf(page, s) {

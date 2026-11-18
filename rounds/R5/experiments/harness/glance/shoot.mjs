@@ -149,6 +149,8 @@ function query(s) {
   if (s.watch) q.set('watch', s.watch);
   // (M18) the story chart design at chart depth (`?story=`; a shell without it ignores it).
   if (s.story) q.set('story', s.story);
+  // (M20, Ek G7) the open-capsule design (`?open=`; a shell without it ignores it).
+  if (s.open) q.set('open', s.open);
   // (Ek G4-1) The capsule voice (`?voice=`; none: the product's presentation default).
   const voice = s.voice || plan.voice;
   if (voice) q.set('voice', voice);
@@ -484,8 +486,24 @@ async function run() {
             }
             await settle(page);
           }
+          if (s.kind === 'capsule') {
+            // (M20, Ek G7a) capsule depth: one tap on the target face (the open capsule).
+            meta.taps = await tapTo(page, target, 'capsule');
+            meta.depth = await depth(page);
+          }
         }
         await shoot(page, s, meta);
+        if (s.kind === 'capsule' && meta.target) {
+          // (M20) the capsule's evidence rows (engine data, for the e_rests key only): read at
+          // evidence depth AFTER the shot; the record gets them as `evidence_key`.
+          await page.evaluate(() => window.qp.openTo('evidence'));
+          await settle(page);
+          const ev = await page.evaluate(() => (globalThis.__qpcore ? JSON.parse(globalThis.__qpcore.evidence()) : []));
+          const f = path.join(out, `${s.id}.json`);
+          const rec = JSON.parse(fs.readFileSync(f, 'utf8'));
+          rec.evidence_key = ev;
+          fs.writeFileSync(f, `${JSON.stringify(rec)}\n`);
+        }
         if (errors.length) log.push({ id: s.id, errors });
         await ctx.close();
       }

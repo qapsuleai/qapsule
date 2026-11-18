@@ -516,3 +516,35 @@ def chart_gates(records, look=None):
     out["pass"] = all(out[k]["pass"] for k in ("text_contrast", "nontext_contrast", "min_font", "touch", "colour"))
     return out
 
+
+
+# (M20, SPEC Ek G7e) Digits shown to an unentitled reader: words with a digit in the DOM text
+# and the open scene's text primitives of the `visitor` shots, the instrument symbol (SYNnn)
+# and an entitlement name holding it (`<family>/SYNnn`) excepted. Hard: must be 0 (K33/K34).
+_SYM = re.compile(r"(?:[a-z_]+/)?SYN\d+", re.I)
+
+
+def digit_words(text: str) -> list[str]:
+    t = _SYM.sub(" ", text)
+    return [w for w in re.split(r"\s+", t) if re.search(r"\d", w)]
+
+
+def visitor_digits(records):
+    hits = []
+    n = 0
+    for r in records:
+        if r["shot"].get("principal") != "visitor":
+            continue
+        n += 1
+        # Not capsule values (applied to every design alike; RESULTS M20 "uygulama notu"): the
+        # app clock (`#clock`, the replay time in the header) and the evidence rows' data names
+        # as the authority writes them (`requires`, `rests_on`: a series id such as
+        # "bars SYN28 1d (feed default)").
+        names = {e.get(k) for e in (r.get("evidence") or r.get("evidence_key") or []) for k in ("requires", "rests_on")}
+        texts = [t["t"] for t in r["dom"]["texts"] if t.get("id") != "clock" and t["t"] not in names]
+        paint = (r.get("paints") or {}).get("scene") or {}
+        texts += [p.get("t", "") for p in paint.get("prims", []) if p.get("k") == "text"]
+        for t in texts:
+            for w in digit_words(t):
+                hits.append({"shot": r["shot"]["id"], "kind": r["shot"]["kind"], "word": w, "text": t[:60]})
+    return {"shots": n, "count": len(hits), "hits": hits[:20], "pass": n > 0 and not hits}

@@ -1,0 +1,38 @@
+{
+ "broken": "kestim",
+ "checks": {
+  "last_on_bt": true,
+  "last_on_primary": true,
+  "last_on_reading_info": false,
+  "paired_separated_from_all_info": false,
+  "primary_below_best_interval": true
+ },
+ "paired_primary_info": {
+  "nobra": {
+   "diff": 0.1208,
+   "hi": 0.2045,
+   "lo": 0.0356,
+   "n": 99,
+   "separated": true
+  },
+  "r4": {
+   "diff": 0.0067,
+   "hi": 0.0203,
+   "lo": -0.0064,
+   "n": 100,
+   "separated": false
+  },
+  "tesir": {
+   "diff": 0.2422,
+   "hi": 0.2976,
+   "lo": 0.1829,
+   "n": 100,
+   "separated": true
+  }
+ },
+ "required": [
+  "last_on_primary",
+  "last_on_bt"
+ ],
+ "valid": true
+}

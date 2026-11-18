@@ -1,0 +1,140 @@
+{
+ "primary": {
+  "kestim": [
+   0.7255555555555556,
+   0.6733333333333333,
+   0.7766666666666667,
+   50,
+   50
+  ],
+  "nobra": [
+   0.9977324263038548,
+   0.9931972789115647,
+   1.0,
+   50,
+   49
+  ],
+  "r4": [
+   0.7322222222222222,
+   0.6788888888888889,
+   0.7844444444444445,
+   50,
+   50
+  ],
+  "tesir": [
+   0.9788888888888888,
+   0.9633333333333334,
+   0.9922222222222222,
+   50,
+   50
+  ]
+ },
+ "secondary_evidence_depth": {
+  "kestim": [
+   0.9722222222222222,
+   0.9467592592592592,
+   0.9930555555555555,
+   24,
+   24
+  ],
+  "nobra": [
+   0.9745370370370371,
+   0.9537037037037037,
+   0.9930555555555555,
+   24,
+   24
+  ],
+  "r4": [
+   0.9722222222222222,
+   0.9537037037037037,
+   0.9907407407407408,
+   24,
+   24
+  ],
+  "tesir": [
+   0.9522946859903382,
+   0.9148550724637681,
+   0.9806763285024155,
+   24,
+   23
+  ]
+ },
+ "bt": {
+  "kestim": [
+   -3.406,
+   -3.803,
+   -2.801
+  ],
+  "nobra": [
+   2.413,
+   1.803,
+   3.351
+  ],
+  "r4": [
+   -0.817,
+   -1.229,
+   -0.456
+  ],
+  "tesir": [
+   1.81,
+   1.195,
+   2.463
+  ]
+ },
+ "steps": [
+  {
+   "step": 1,
+   "rule": "hard gates",
+   "eligible": [
+    "nobra",
+    "r4",
+    "tesir"
+   ],
+   "waived": [
+    "text_contrast",
+    "nontext_contrast",
+    "touch",
+    "colour"
+   ],
+   "eliminated": {}
+  },
+  {
+   "step": "1b",
+   "rule": "reading non-inferiority vs reference",
+   "reference": "r4",
+   "eliminated": [],
+   "eligible": [
+    "nobra",
+    "r4",
+    "tesir"
+   ]
+  },
+  {
+   "step": 2,
+   "rule": "primary: cap_evidence,cap_evidence_visitor accuracy (F2:H1)",
+   "order": [
+    "nobra",
+    "tesir",
+    "r4"
+   ],
+   "top_group": [
+    "nobra"
+   ]
+  }
+ ],
+ "verdict": {
+  "winner": "nobra",
+  "told_apart": true,
+  "not_told_apart": [],
+  "default": "nobra",
+  "top_two": [
+   "nobra",
+   "tesir"
+  ],
+  "ranking_point_estimates": [
+   "nobra",
+   "tesir",
+   "r4"
+  ]
+ }
+}

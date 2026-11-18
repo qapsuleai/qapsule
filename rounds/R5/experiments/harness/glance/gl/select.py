@@ -18,7 +18,7 @@ PRIMARY_SETS = ("throttle",)
 READING_SETS = ("face", "face_visitor")
 HALF_SETS = ("face_half", "face_visitor_half")
 CONFLICT_MAX = 0.30                 # RESEARCH U1: a pair with more order conflicts is "not told apart"
-GATES = ("text_contrast", "nontext_contrast", "min_font", "touch", "colour", "k52")
+GATES = ("text_contrast", "nontext_contrast", "min_font", "touch", "colour", "k52", "numbers_visitor")  # M20: Ek G7e
 
 
 # SPEC Ek G3: questions whose answer classes are unbalanced in the fixed state set are

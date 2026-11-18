@@ -1,0 +1,118 @@
+{
+ "open": null,
+ "look": null,
+ "voice": "marla",
+ "seek": 700,
+ "configs": {
+  "phone-jit-est": {
+   "runs": 3,
+   "frame": [
+    [
+     390,
+     300
+    ],
+    [
+     390,
+     300
+    ],
+    [
+     390,
+     300
+    ]
+   ],
+   "depth_after_wheel": [
+    "capsule",
+    "capsule",
+    "capsule"
+   ],
+   "tick_p95": 1,
+   "tick_n": 39,
+   "scene_play_p95": 2,
+   "scene_play_n": 37,
+   "scene_wheel_p95": null,
+   "scene_wheel_n": null,
+   "idle_long": 0,
+   "wheel_mode": [
+    "zoom",
+    "zoom",
+    "zoom"
+   ],
+   "wheel_frames_n": 364,
+   "wheel_frame_p99": 18,
+   "wheel_long": 0,
+   "wheel_long_runs": [
+    0,
+    0,
+    0
+   ],
+   "first_capsule_ms": 336,
+   "errors": [],
+   "scene_p95": 2,
+   "biased": {
+    "tick_p95": 1,
+    "scene_p95": 2
+   },
+   "checks": {
+    "tick": true,
+    "scene": true,
+    "wheel_long": true,
+    "first_capsule": true
+   },
+   "pass": true
+  },
+  "phone": {
+   "runs": 3,
+   "frame": [
+    [
+     390,
+     300
+    ],
+    [
+     390,
+     300
+    ],
+    [
+     390,
+     300
+    ]
+   ],
+   "depth_after_wheel": [
+    "capsule",
+    "capsule",
+    "capsule"
+   ],
+   "tick_p95": 1,
+   "tick_n": 39,
+   "scene_play_p95": 4,
+   "scene_play_n": 37,
+   "scene_wheel_p95": null,
+   "scene_wheel_n": null,
+   "idle_long": 0.002,
+   "wheel_mode": [
+    "zoom",
+    "zoom",
+    "zoom"
+   ],
+   "wheel_frames_n": 364,
+   "wheel_frame_p99": 19,
+   "wheel_long": 0,
+   "wheel_long_runs": [
+    0,
+    0.003,
+    0
+   ],
+   "first_capsule_ms": 354,
+   "errors": [],
+   "scene_p95": 4,
+   "biased": {
+    "tick_p95": 1.6,
+    "scene_p95": 7.4
+   },
+   "checks": {
+    "wheel_long_usable": true
+   },
+   "pass": true
+  }
+ },
+ "pass": true
+}

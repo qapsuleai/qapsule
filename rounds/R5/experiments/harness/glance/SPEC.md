@@ -47,6 +47,7 @@ Araç: `shoot.mjs` (Playwright Chromium, `qp demo --synthetic --paused`, `shells
 | Boyama yolu | `?paint=canvas&canvas=run` (parametre: `--paint`) | ürünün varsayılan yolu (RP3/S) Arkin'in telefonda gördüğüdür; `run` metni `fillText` ile çizer (bozuk tasarım süzgeci buna bağlanır, §G8). Bütün adaylar aynı yolla çekilir. `ref` (deterministik) `--paint ref` ile seçilebilir |
 | Tasarım seçimi | `?look=<ad>` (T3; kabuk tanımıyorsa yok sayılır), `?face=<ad>` | düzenek parametresi; adaylar `designs.json`'da |
 | Dil, tema | `tr`/`en`, `light`/`dark` | dört birleşim; kuru koşu `tr`+`light` |
+| Kapsül dili (Ek G4-1) | `?voice=<ad>` (`--voice`; verilmezse ürünün gösterim varsayılanı) | bütün adaylar aynı metinle; kayıt `voice` {istenen, çekirdeğin gönderdiği} |
 | Hareket | `?anim=0`; M21 ara kareleri `window.qp.freeze(p)` ile | durağan ve tekrarlanabilir |
 | Duyarlılık | `all` (Ayarlar seçicisiyle) | akış kuralı M19'un konusudur; M16 yüzü ölçer |
 | İzleme listesi | durumun gerektirdiği yerde `?watch=<sembol>` | varsayılan akışın 40 kapsül sınırı az örnekli/karnesizleri dışarıda bırakıyor (kuru koşuda bulundu); bütün adaylara aynı |
@@ -206,7 +207,8 @@ Piksele inilmez (yalnız bozuk süzgeç ve kısma kopyası piksel işidir).
    çapa noktasını içeren her dolgu. Eşik 4,5:1, büyük metin (≥ 24 px ya da ≥ 18,66 px kalın)
    3:1. DOM metninde saydamlık zincirlenir. Ölçü: en kötü öğe (oran/eşik).
 2. **Metin dışı karşıtlık (1.4.11)**: işaret katmanının (`glyph`) gövdesi (en opak ilkel)
-   zemine karşı ≥ 3:1, **kapanmış işaret dahil** (A31). En kötü işaret.
+   zemine karşı ≥ 3:1, **kapanmış işaret dahil** (A31). En kötü işaret. (Ek G4-3: uygulama bu
+   tanıma uyduruldu; eşitlikte en büyük alanlı renk.)
 3. **En küçük yazı** ≥ 11 CSS px (sahne `px` ve DOM `font-size`).
 4. **Anlam renkleri ayrımı:** her tasarımın görüntülerinden işaret gövde rengi anlam sınıfına
    göre toplanır (açık: geçerlilik × yön; kapanmış: gerçekleşti / tutmadı / süresi doldu). Her
@@ -218,6 +220,9 @@ Piksele inilmez (yalnız bozuk süzgeç ve kısma kopyası piksel işidir).
    **renkle kodlanmış** çiftlere uygulanır (normal görüşte ΔE00 ≥ 5); aynı renkte çizilen çiftin
    anlamı biçimle taşınmalıdır ve gri okuyucu sorusuyla denetlenir (Ek G1-4). İşaret rengi =
    işaret katmanının baskın görünür rengi (alfa ağırlıklı alan; zemine karışan ilkeller atlanır).
+   **Ek G4-3:** işaret rengi = gövde rengi (madde 2'deki en opak ilkel); alfa ağırlıklı alanın
+   baskın rengi gövdeden farklıysa "metin dışı yardımcı" olarak raporlanır, kapıya girmez.
+   **Ek G4-2:** çiftler yalnız aynı tema içinde kurulur; kapı her temaya ayrı uygulanır.
    Gri ışıklık oranı (çift başına, F7 ≥ 1,5) bilgi sütunudur.
 5. **Dokunma hedefi** ≥ 44 CSS px (= pt; Apple HIG): düğmeler, alanlar, yüzler, açık sahne
    (DOM kutuları) ve yüz sahnelerindeki işaret isabet kutuları. Grafik derinliğindeki işaret
@@ -387,3 +392,53 @@ okuyucu kapanmışların payı kadar, hep "sürüyor" diyen okuyucu açıkların
 4. **Yeniden puanlama** (yeni çağrı yok; `BROKEN.md` "Ek G3 sonrası"):
    - Bozuk tasarım birincilde hâlâ kesin son, BT'de son → kabul kuralı geçiyor.
    - Ama `fotolay` ile eşleştirilmiş fark artık ayrık değil: +0,015 [−0,010, +0,041].
+
+## Ek G4 — M16 ölçümünden önce; uygulama hataları (2026-11-18)
+
+Üçü de kural değişikliği değil: uygulama SPEC'in yazılı cümlelerine uyduruldu. Bulan: bir aday
+ajanın raporu (M16 alternatifi). Testler `tests/test_g4.py`.
+
+1. **Kapsül dili (`voice`) aktarılmıyordu.** §G1 "Aynı içerik: ... her adayda aynıdır" der; düzenek
+   `?voice=` geçiremiyordu, okunan metin ürünün o anki varsayılanına bağlı kalıyordu. Şimdi
+   `probe`, `chartstates`, `shoot`, `k52` (ve `k52chart.mjs`) `--voice <ad>` alır; verilmezse
+   adrese parametre konmaz (ürünün gösterim varsayılanı). Bütün adaylara aynı dil. Kayıt:
+   `<kod>.json` `voice` = {`requested`: istenen ya da null, `used`: çekirdeğin hedef kapsülle
+   gönderdiği dil (`CapsuleItem.voice.voice`; yoksa şemanın varsayılanı `r4`)}; `key.json` ve K52
+   çıktısı da `voice` yazar. Deneme (bu dalın derlemesi, sentetik gösterim, `live_event` yüzü):
+   parametresiz → `used: marla`; `--voice marla` → `marla`; `--voice r4` → `r4`. **M16 `--voice marla`
+   ile ölçülür.**
+2. **Anlam rengi tablosu temaları karıştırıyordu.** §G7.4 "her tasarımın görüntülerinden işaret gövde
+   rengi anlam sınıfına göre toplanır" — ayrım bir ekranın içindeki ayrımdır, ekran tek temadadır.
+   Uygulama sınıf başına ilk görülen kaydı alıyordu (tema fark etmeksizin), çiftler açık tema
+   rengini koyu tema rengiyle karşılaştırabiliyordu; M18 grafik tablosunda (`chart_gates`) aynı rol
+   iki temanın renkleri olarak kendisiyle eşleşiyordu (`up ↔ up`, `down ↔ down`). Şimdi çiftler
+   yalnız aynı tema içinde kurulur (`pairs[].theme`), kapı her tema için ayrı uygulanır
+   (`colour.themes.<tema>.pass`); tasarım ancak her temada geçerse geçer.
+3. **İşaret rengi gövde değildi.** §G7.2 gövdeyi "en opak ilkel" diye tanımlar; uygulama işaret
+   katmanının alfa ağırlıklı en büyük alanlı rengini alıyordu (§G7.4'ün son cümlesi, Ek G1-4),
+   böylece büyük, saydam bir güven plakası gövdenin yerine geçebiliyordu (adayın raporunda
+   ≈ 1,3:1). Şimdi gövde = işaret katmanındaki en yüksek alfalı dolgu/çizgi ilkeli (`fill`,
+   `polyline`, `rect`, `circle`); zemine karışan ilkel (ΔE00 < 2, ör. zemin renginde delik) yine
+   atlanır; aynı alfada birden çok renk varsa o ilkellerin toplam alanı en büyük olan renk.
+   1.4.11 kapısı ve §G7.4 anlam rengi gövdeden. Alfa ağırlıklı alanın baskın rengi gövdeden
+   farklıysa `aux` olarak, `nontext_contrast.worst_aux` "metin dışı yardımcı" diye raporlanır;
+   hiçbir kapıya girmez. §G7.4'ün son cümlesi ve Ek G1-4'ün ikinci yarısı bu maddeyle §G7.4'ün
+   ilk cümlesine ("işaret gövde rengi") ve §G7.2 tanımına bağlanır.
+
+**Kayıtlı sonuçlara etkisi** (yeni çağrı yok; `compute` kayıtlı sahne verisinden yeniden koşuldu):
+
+- *Bozuk tasarım koşusu* (`broken/run`; run2 çekim kayıtları; `computed.json`/`computed.md`
+  güncellendi): işaret karşıtlığı en kötü `vadrel` 1,27 → 2,06, `fotolay` 1,27 → 2,06, `kestim`
+  1,07 → 1,26 (eski değerler şimdi `worst_aux`); üçü de < 3, kapı sonucu değişmedi. Renk: eski
+  karışık tablo 15 çift (başarısız `fotolay` 8, `kestim` 7, `vadrel` 4); yeni tema başına 15'er
+  çift, başarısız açık/koyu `fotolay` 3/2, `kestim` 10/11, `vadrel` 3/2 — hiçbiri iki temada da
+  geçmiyor (yalnız tema ayrımıyla, eski renk kuralında: 5/5, 13/14, 5/5). Bütün tasarımlar sert
+  eşiklerde önce de sonra da kalıyor; `score` aynı verilerle yeniden koşuldu: sayılar ve karar
+  aynı (`scores.md` yalnız sonradan değişen etiket metninde farklı; dosyaya dokunulmadı).
+- *M18* (`M18/run`): grafik çekim kayıtları (sahne boyama listeleri) saklanmamış; tam yeniden
+  hesap yapılamadı. Renk kapısı kayıtlı `computed.json`'daki boyanan roller ve görünüş kayıtları
+  (`qp look show r4`; bozuk için `broken/run/look-kestim.json`) ile yeniden kuruldu (eski karışık
+  tablo bu yolla birebir yeniden üretildi). Tema başına başarısız çift açık/koyu: `korda`, `pavka`,
+  `selen` 5/6 (eski 45 çiftte 23), `r4` 1/2 (eski 15 çiftte 7), `kestim` 3/3 (eski 15 çiftte 6).
+  Hiçbir tasarım geçmiyor; M18 sonucu ve kararı değişmez. Gövde düzeltmesi grafik yolunu etkilemez
+  (grafik kapısı işaret katmanını değil rol renkli ilkelleri ölçer).

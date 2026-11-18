@@ -1,7 +1,7 @@
 // R5/T2: the K52 budget of one design (SPEC §G7.6), with the calibrated phone simulation
 // of RP3 (shells/web/tests/calibrate.mjs, rounds/RP3/CALIBRATION.md).
 //
-//   node k52.mjs <qp> <out.json> [--look NAME] [--face NAME] [--reps 3] [--configs phone-jit-est,phone]
+//   node k52.mjs <qp> <out.json> [--look NAME] [--face NAME] [--voice NAME] [--reps 3] [--configs phone-jit-est,phone]
 //
 // calibrate.mjs opens the page without design parameters; to measure a design the harness
 // serves a copy of the shell directory (symbolic links; nothing in the repository changes)
@@ -28,6 +28,7 @@ const [qp, outFile] = argv;
 const opt = (k, d) => { const i = argv.indexOf(k); return i >= 0 ? argv[i + 1] : d; };
 const look = opt('--look', '');
 const face = opt('--face', '');
+const voice = opt('--voice', ''); // (Ek G4-1) capsule voice; empty: the product default
 const reps = Number(opt('--reps', '3'));
 const configs = opt('--configs', 'phone-jit-est,phone').split(',');
 const webSrc = opt('--web', path.join(root, 'shells/web'));
@@ -40,7 +41,7 @@ function shim() {
     if (f === 'index.html') continue;
     fs.symlinkSync(path.join(web, f), path.join(dir, f));
   }
-  const q = [look && `look=${encodeURIComponent(look)}`, face && `face=${encodeURIComponent(face)}`].filter(Boolean).join('&');
+  const q = [look && `look=${encodeURIComponent(look)}`, face && `face=${encodeURIComponent(face)}`, voice && `voice=${encodeURIComponent(voice)}`].filter(Boolean).join('&');
   fs.writeFileSync(path.join(dir, 'look-shim.js'),
     `if (${JSON.stringify(q)} && !location.search.includes(${JSON.stringify(q)})) history.replaceState(null, '', location.pathname + (location.search ? location.search + '&' : '?') + ${JSON.stringify(q)});\n`);
   const html = fs.readFileSync(path.join(web, 'index.html'), 'utf8')
@@ -67,7 +68,7 @@ function verdict(name, s) {
 }
 
 const dir = shim();
-const res = { look, face, reps, configs: {} };
+const res = { look, face, voice: voice || null, reps, configs: {} };
 try {
   for (const c of configs) {
     const r = await cal.runCalibrated(CFG[c], { qp, web: dir, port: Number(process.env.QP_DEMO_PORT || 8471), reps, feedMs: 8000, chartMs: 20000, seek: 700 });
@@ -78,4 +79,4 @@ try {
 }
 res.pass = Object.values(res.configs).every((c) => c.pass);
 fs.writeFileSync(outFile, `${JSON.stringify(res, null, 1)}\n`);
-console.log(JSON.stringify({ look, face, pass: res.pass, configs: Object.fromEntries(Object.entries(res.configs).map(([k, v]) => [k, v.values])) }));
+console.log(JSON.stringify({ look, face, voice: voice || null, pass: res.pass, configs: Object.fromEntries(Object.entries(res.configs).map(([k, v]) => [k, v.values])) }));

@@ -197,6 +197,51 @@ try {
     check(errors.length === 0, `no page errors ${errors}`);
     await ctx.close();
   }
+  // 5. (R5/M20) The open capsule design: `?open=tesir` opens the capsule depth as one
+  //    column at the design's height (the layer scrolls), the scene writes the headline
+  //    (no text above it), a tap on the trust block shows its explanation, Settings →
+  //    Açılmış kapsül switches back to today's card.
+  {
+    const { ctx, page, errors } = await phonePage(browser);
+    await page.goto(`${origin}/?anim=0&paint=ref&open=tesir`);
+    await settle(page);
+    let l = await look(page);
+    check(l.open === 'tesir', `URL open design (${JSON.stringify(l)})`);
+    const ch = await page.evaluate(() => JSON.parse(window.qp.choices()));
+    check(JSON.stringify(ch.open) === JSON.stringify(['r4', 'tesir']), `open choices ${JSON.stringify(ch.open)}`);
+    const id = await page.evaluate(() => JSON.parse(window.qp.feed()).find((r) => r.id && r.scene).id);
+    await page.evaluate((c) => window.qp.openCapsule(c), id);
+    await settle(page);
+    const o = await page.evaluate(() => JSON.parse(window.qp.open()));
+    check(o.depth === 'capsule' && o.frame && o.frame[1] > 600, `the column's frame (${JSON.stringify(o.frame)})`);
+    check(o.text === '' && o.style && o.style.touchAction === 'pan-y', `no text above the column, the layer scrolls (${JSON.stringify(o.style)})`);
+    const d = await page.evaluate(() => window.qp.openDesc());
+    const t = d && d.terms.find((x) => x.layer === 'open-trust');
+    check(Boolean(t), 'the trust block carries its explanation');
+    if (t) {
+      const x = (t.hit.left + t.hit.right) / 2;
+      const y = (t.hit.top + t.hit.bottom) / 2;
+      await page.locator('#scene').evaluate((e, yy) => { e.parentElement.scrollTop = e.offsetTop + yy - 200; }, y);
+      await clickIn(page, '#scene', x, y);
+      await settle(page);
+      const shown = await page.evaluate(() => ({ hidden: document.getElementById('gloss').hidden,
+        term: document.getElementById('gloss_term').textContent }));
+      check(!shown.hidden && shown.term === t.term, `the trust explanation shows (${JSON.stringify(shown)})`);
+      check((await page.evaluate(() => JSON.parse(window.qp.open()))).depth === 'capsule', 'a tap on the trust block opens nothing');
+      await page.click('#gloss');
+      await settle(page);
+    }
+    await page.click('#back');
+    await settle(page);
+    await page.click('#tabs button[data-tab="settings"]');
+    check(await page.$eval('#s_open', (e) => e.value) === 'tesir', 'open select shows tesir');
+    await page.selectOption('#s_open', 'r4');
+    await settle(page);
+    l = await look(page);
+    check(!l.open, `open design back to r4 (${JSON.stringify(l)})`);
+    check(errors.length === 0, `no page errors ${errors}`);
+    await ctx.close();
+  }
 } finally {
   await browser.close();
   child.kill();

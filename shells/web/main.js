@@ -875,6 +875,8 @@ window.qp = {
   faceSize: () => core.face_size(),
   // (R5/m17-int) for tests/settings.mjs: a face's scene as the core holds it (its terms).
   faceDesc: (id) => JSON.parse(core.face_desc(id) || 'null'),
+  // (R5/M20) for tests/settings.mjs: the open capsule's scene as the core holds it.
+  openDesc: () => JSON.parse(core.open_desc() || 'null'),
   openCapsule: (id) => { core.open_capsule(id); flush(); },
   openTo: (to) => { core.open_to(to); flush(); },
   // (RP3/M15) for the viewer measurement (rounds/RP3/experiments/M15): the device's data

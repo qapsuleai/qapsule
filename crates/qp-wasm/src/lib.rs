@@ -687,6 +687,15 @@ mod shell_binding {
                 .unwrap_or_default()
         }
 
+        /// (R5/M20) The open capsule's scene as the core builds it (JSON `SceneDesc`;
+        /// empty: none): tests read its panels and `terms`.
+        pub fn open_desc(&mut self) -> String {
+            self.inner
+                .scene()
+                .and_then(|s| serde_json::to_string(&s).ok())
+                .unwrap_or_default()
+        }
+
         /// Evidence rows (JSON).
         pub fn evidence(&self) -> String {
             self.inner.evidence_json().to_string()

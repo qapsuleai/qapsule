@@ -394,7 +394,12 @@ impl Session {
         }
         let look = &mut self.conns[ci].look;
         if let Some(o) = r.open {
-            look.open = (o != qp_grammar::open::DEFAULT_OPEN).then(|| o.to_owned());
+            let next = (o != qp_grammar::open::DEFAULT_OPEN).then(|| o.to_owned());
+            // Another design: the capsule frame a design's height set no longer holds.
+            if next != look.open {
+                look.frames.remove("capsule");
+            }
+            look.open = next;
         }
         if let Some(v) = r.voice {
             look.voice = (v != qp_capsule::voice::DEFAULT_VOICE).then(|| v.to_owned());

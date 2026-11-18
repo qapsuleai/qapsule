@@ -120,6 +120,18 @@ hareketinin `voice` alanı); adlar `choices().voice`'tan; gösterimin varsayıla
 (`presented_look`, `marla`). Sahnesi olmayan yüzün metni (`feed()` satırının `text`'i)
 seçili dilde çekirdeğin metin yüzüdür (başlık, karne, ayrıntı; satır sonlarıyla).
 
+(R5/M20) Açılmış kapsül tasarımı (`?open=<ad>`, Ayarlar → Açılmış kapsül): öbür ayarlar gibi
+`set_look({open})` (`style` hareketinin `open` alanı); adlar `choices().open`'dan; varsayılan
+`r4` (bugünkü kart). Hiçbir kural gevşetilmedi. Kapsül derinliğinin çerçeve yüksekliğini,
+açılmış katmanın metnini (`open().text`: sahnenin üstünde boş, sahnesiz okurda tasarımın satır
+sonlu metin sütunu) ve sahnenin `touch-action` değerini (`open().style`, katman kaydırılsın diye
+`pan-y`) çekirdek verir; sayfa olduğu gibi uygular. `#opentext` satır sonlarını korur
+(`white-space: pre-line`, yapısal; sayı yok).
+
+| Yöntem | Neden |
+|--------|-------|
+| `open_desc()` | Açılmış kapsülün sahnesi, çekirdeğin tuttuğu gibi (JSON); yalnız sınamalar okur (`window.qp.openDesc`: güven bölümünün terim kutusu). |
+
 (R5/G) **Galeri** (`gallery.html`, `gallery.js`, `gallery.css`; `README.md` "Galeri"). Aynı
 kurallar (R1–R4, R6, R7) bu üç dosyaya da uygulanır (`arch-check.mjs`): `gallery.html` yalnız
 `gallery.js`'i yükler, `gallery.js` yalnız `./pkg/qp_wasm.js`'ten içe aktarır, `gallery.css`

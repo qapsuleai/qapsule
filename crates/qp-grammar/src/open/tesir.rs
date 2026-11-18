@@ -349,11 +349,13 @@ fn basis(s: &Src) -> String {
             (Some(e), true) => format!("Kilitli: {e} yetkisi"),
             (Some(e), false) => format!("Locked: the {e} entitlement"),
             (None, true) => format!(
-                "Kilitli: {} verisi yetkisi",
+                "Kilitli: {} {} verisi yetkisi",
+                m.instrument,
                 family(m.family, s.lang).to_lowercase()
             ),
             (None, false) => format!(
-                "Locked: a {} data entitlement",
+                "Locked: the {} {} data entitlement",
+                m.instrument,
                 family(m.family, s.lang).to_lowercase()
             ),
         };
@@ -525,8 +527,19 @@ fn text_column(t: &TextInput<'_>) -> String {
     out.push(String::new());
     out.push(header("trust", s.lang).to_owned());
     out.push(trust(&s).to_owned());
-    // No tap on a text: the explanation is written out.
-    out.push(trust_gloss(&s).text);
+    // No scene: this reader gets no data of its own to check it on.
+    out.push(
+        match (s.check, tr(s.lang)) {
+            (Some(DeviceCheck::Device | DeviceCheck::Checking | DeviceCheck::Differs), _) => {
+                trust2(&s)
+            }
+            (_, true) => "Sunucu hesapladı ve doğruladı; bu cihaz veriyi almadığı için kendisi sınayamaz.",
+            (_, false) => {
+                "The server computed and verified it; this device gets no data to check it itself."
+            }
+        }
+        .to_owned(),
+    );
     out.push(String::new());
     out.push(header("ledger", s.lang).to_owned());
     out.push(ledger(&s));

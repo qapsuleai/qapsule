@@ -495,11 +495,9 @@ panelli görünümüne `qp render` ile uygulandı. Başvuru aynı görünümleri
 sekiz serili bir sınama görünümü (`s8`) kullanıldı. Boylar: telefon 402 × 600, masaüstü
 1280 × 720, dar 320 × 480, çeyrek 640 × 360.
 
-> **Okuyucu kapsamı tamamlanıyor; okuma sonuçları değişebilir.** Okuyucu koşusu kullanım
-> sınırına takıldı. 768 çağrının 354'ü cevapsız döndü ve puanlamadan çıkarıldı. haiku v3–v5 ve
-> sonnet v4–v5 kapsamı eksik. Karşılaştırma yalnız iki görünüşte de kapsamı ≥ %90 olan
-> görünümlerde yapıldı. Tamamlama komutu D/RESULTS'ta. Hesapla ölçülen bulgular deterministik,
-> bu nottan etkilenmiyor.
+> **Okuyucu kapsamı tamamlandı (2026-11-18).** Kullanım sınırı yüzünden cevapsız kalan 354 çağrı aynı tohum ve
+> istemlerle yeniden koşuldu; altı görünümde de kapsam tam (haiku 40/40, sonnet 24/24). Sonuç değişmedi: `oltan`
+> 0,983 [0,971; 0,990], `r4` 0,983 [0,971; 0,990] — ayırt edilemedi (D/RESULTS ek, `readers.md`).
 
 **Taşınanlar:**
 

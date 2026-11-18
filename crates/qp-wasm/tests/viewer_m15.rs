@@ -14,6 +14,19 @@ use qp_wasm::drive::{parity_host, parity_host_n, shell_less, viewer_less, with_v
 use serde_json::{json, Value};
 
 fn script() -> Vec<Value> {
+    script_with(&json!({}))
+}
+
+/// The parity script after a first `style` step `first` (empty: none).
+fn script_with(first: &Value) -> Vec<Value> {
+    let mut s = script_steps();
+    if first.as_object().is_some_and(|o| !o.is_empty()) {
+        s.insert(0, json!({ "style": first }));
+    }
+    s
+}
+
+fn script_steps() -> Vec<Value> {
     serde_json::from_value(json!([
         {"seek_step": 120},
         {"digest": "feed"},
@@ -42,8 +55,14 @@ const STEPS: [&str; 8] = [
 
 #[test]
 fn viewer_faces_and_open_scene_equal_the_full_replica() {
-    let a = shell_less(&mut parity_host(), "arkin", "tr", &script());
-    let v = viewer_less(&mut parity_host(), "arkin", "tr", &script());
+    // (R5/S) Under the presented open capsule design (`tesir`) the capsule depth says what
+    // the device's own check found (K48), which the full replica does not have: the two
+    // are compared under today's card (`r4`); the viewer core and driver below are
+    // compared under the presentation's defaults. The story chart likewise: the full
+    // replica has no host coin-flip rule (`pavka` DESIGN, "Sınırlar").
+    let pin = json!({"open": "r4", "story": "r4"});
+    let a = shell_less(&mut parity_host(), "arkin", "tr", &script_with(&pin));
+    let v = viewer_less(&mut parity_host(), "arkin", "tr", &script_with(&pin));
     for k in STEPS {
         assert_eq!(a[k]["faces"], v[k]["faces"], "faces at {k}");
         assert_eq!(a[k]["open"], v[k]["open"], "open at {k}");

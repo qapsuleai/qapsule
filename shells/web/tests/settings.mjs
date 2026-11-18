@@ -12,6 +12,9 @@
 //    `PRESENTED_VOICE`), `?voice=selvi` wins, Settings → Dil switches to `r4` (no voice);
 //    a tap on a glossary term of a face (its box from the scene the core holds) shows the
 //    explanation the core gives and opens no capsule; a tap on it closes it.
+//  - (R5/S) the presentation opens with R5's picks (look and face `oltan`, story chart
+//    `pavka`, open capsule `tesir`); `?look=zemre` brings its face, `?face=` wins over it;
+//    the second candidates (`korda`, `nobra`) are offered.
 // Usage: node tests/settings.mjs <qp binary>
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -34,8 +37,10 @@ try {
     await page.goto(`${origin}/?anim=0`);
     await settle(page);
     const l = await look(page);
-    check(l.face === 'vadrel' && l.feed === 'elikov' && l.transition === 'zumlak' && l.outcome === 'tg5',
-      `defaults vadrel/elikov/zumlak/tg5 (${JSON.stringify(l)})`);
+    check(l.face === 'oltan' && l.feed === 'elikov' && l.transition === 'zumlak' && l.outcome === 'tg5',
+      `defaults oltan/elikov/zumlak/tg5 (${JSON.stringify(l)})`);
+    check(l.look === 'oltan' && l.story === 'pavka' && l.open === 'tesir' && l.voice === 'marla',
+      `R5 defaults oltan/pavka/tesir/marla (${JSON.stringify(l)})`);
     await page.click('#tabs button[data-tab="settings"]');
     const ch = await page.evaluate(() => JSON.parse(window.qp.choices ? window.qp.choices() : '{}'));
     const opts = async (sel) => page.$$eval(`${sel} option`, (os) => os.map((o) => o.value));
@@ -47,7 +52,7 @@ try {
     // (R4/S2) M8's first two faces are offered; r3 and tavrik stay registered.
     const fo = await opts('#s_face');
     check(['r3', 'vadrel', 'fotolay', 'tavrik'].every((f) => fo.includes(f)), `faces offered: ${fo.join(' ')}`);
-    check(await page.$eval('#s_face', (e) => e.value) === 'vadrel', 'face select shows vadrel');
+    check(await page.$eval('#s_face', (e) => e.value) === 'oltan', 'face select shows oltan');
     await page.selectOption('#s_face', 'fotolay');
     await settle(page);
     check((await look(page)).face === 'fotolay', 'face change reaches the view state');
@@ -120,7 +125,8 @@ try {
       return { tab: feed.tab, control: Math.min(feed.control, set.control),
         font: Math.min(feed.font, set.font), fontAt: feed.font <= set.font ? feed.fontAt : set.fontAt };
     };
-    await page.goto(`${origin}/?anim=0`);
+    // (R5/S) `r4` is no longer the presentation's look: asked for by name.
+    await page.goto(`${origin}/?anim=0&look=r4`);
     await settle(page);
     const bg4 = await css('--bg');
     check(bg4 === '#0f1115', `r4 chrome background from the core (${bg4})`);
@@ -208,7 +214,7 @@ try {
     let l = await look(page);
     check(l.open === 'tesir', `URL open design (${JSON.stringify(l)})`);
     const ch = await page.evaluate(() => JSON.parse(window.qp.choices()));
-    check(JSON.stringify(ch.open) === JSON.stringify(['r4', 'tesir']), `open choices ${JSON.stringify(ch.open)}`);
+    check(JSON.stringify(ch.open) === JSON.stringify(['r4', 'tesir', 'nobra']), `open choices ${JSON.stringify(ch.open)}`);
     const id = await page.evaluate(() => JSON.parse(window.qp.feed()).find((r) => r.id && r.scene).id);
     await page.evaluate((c) => window.qp.openCapsule(c), id);
     await settle(page);
@@ -239,6 +245,32 @@ try {
     await settle(page);
     l = await look(page);
     check(!l.open, `open design back to r4 (${JSON.stringify(l)})`);
+    check(errors.length === 0, `no page errors ${errors}`);
+    await ctx.close();
+  }
+  // 6. (R5/S) A look brings its companion face; `?face=` wins; the second candidates.
+  {
+    const { ctx, page, errors } = await phonePage(browser);
+    await page.goto(`${origin}/?anim=0&look=zemre`);
+    await settle(page);
+    let l = await look(page);
+    check(l.look === 'zemre' && l.face === 'zemre', `?look=zemre brings face zemre (${JSON.stringify(l)})`);
+    await page.goto(`${origin}/?anim=0&look=zemre&face=vadrel`);
+    await settle(page);
+    l = await look(page);
+    check(l.look === 'zemre' && l.face === 'vadrel', `?face= wins (${JSON.stringify(l)})`);
+    await page.click('#tabs button[data-tab="settings"]');
+    await page.selectOption('#s_look', 'r4');
+    await settle(page);
+    l = await look(page);
+    check(!l.look && l.face === 'vadrel', `Settings → Look r4 brings vadrel (${JSON.stringify(l)})`);
+    const ch = await page.evaluate(() => JSON.parse(window.qp.choices()));
+    check(JSON.stringify(ch.story) === JSON.stringify(['r4', 'pavka', 'korda']), `story choices ${JSON.stringify(ch.story)}`);
+    await page.selectOption('#s_story', 'korda');
+    await page.selectOption('#s_open', 'nobra');
+    await settle(page);
+    l = await look(page);
+    check(l.story === 'korda' && l.open === 'nobra', `second candidates from Settings (${JSON.stringify(l)})`);
     check(errors.length === 0, `no page errors ${errors}`);
     await ctx.close();
   }

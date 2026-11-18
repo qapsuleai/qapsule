@@ -217,8 +217,11 @@ fn story_chart_end_to_end() {
 
 #[test]
 fn without_a_story_design_the_chart_is_unchanged() {
-    let mut a = chart(&json!({}), "tr", 160);
-    let mut b = chart(&json!({"story": "r4"}), "tr", 160);
+    // (R5/S) The presentation asks for `pavka`; `r4` (none) is the protocol default.
+    let mut a = chart(&json!({"story": "r4"}), "tr", 160);
+    let mut b = chart(&json!({"story": "pavka"}), "tr", 160);
+    b.core.set_look(&json!({"story": "r4"}));
+    b.pump();
     assert_eq!(b.core.look().story, None, "r4 is the default (not stored)");
     let (sa, sb) = (a.scene(), b.scene());
     assert_eq!(sa, sb);
@@ -236,7 +239,8 @@ fn an_unknown_story_design_is_refused() {
     r.pump();
     let e = r.core.take_error().unwrap_or_default();
     assert!(e.contains("unknown story"), "{e}");
-    assert_eq!(r.core.look().story, None);
+    // (R5/S) Unchanged: the presentation's `pavka`.
+    assert_eq!(r.core.look().story.as_deref(), Some("pavka"));
 }
 
 /// Story counts of a longer synthetic history (for the K52 measurement's setting).

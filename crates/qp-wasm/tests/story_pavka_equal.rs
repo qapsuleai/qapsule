@@ -9,6 +9,14 @@
 //! ~200 stories in view and clusters) is checked the same way.
 //!
 //! `QP_PAVKA_RECORD=1` writes the file instead of comparing (only ever with the old code).
+//!
+//! (R5/S) Re-recorded on the integration branch with the settings pinned (`look`, `face`,
+//! `voice`, `open` as before R5): of the 76 states the 36 that show the widest ranges
+//! changed and every lane/cluster/range shape stayed the same — the base the record was
+//! taken on moved (the M20 `tesir` merge writes month labels under the last chart panel,
+//! the M19 host rule marks coin flips), which the old `pavka` code would draw alike. The
+//! performance change's equality with the old code stays proven in-process by
+//! `qp-grammar`'s `story_pavka_equal` (7,488 scenes against a copy of the old `extend`).
 #![cfg(feature = "replica")]
 
 use qp_session::ReplayHost;

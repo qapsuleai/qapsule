@@ -163,3 +163,10 @@ kümeleme ve gizleme çekirdekte; sayfa yalnız sahneyi boyar.
 |--------|-------|
 | `stories()` | Yalnız ölçüm düzeneği için (`window.qp.stories`, `rounds/R5/experiments/M18/pavka/k52.mjs`): cihazın tuttuğu hikâye listesi (§23.5). Sayfa onu okumaz, çizmez. |
 | `bench_stories(n)` | (R5/M18 `korda`) Yalnız ölçüm (K52): tutulan listenin yerine `n` sentetik hikâye; 5 / 50 / 200 hikâyeyle boyama bütçesi. Sayfa yalnız `window.qp.benchStories` olarak verir. |
+
+(R5/S) Bütünleştirme. Hiçbir kural gevşetilmedi. Gösterimin varsayılanları (görünüş `oltan` ve
+eşlik eden yüz `oltan`, dil `marla`, hikâye çizelgesi `pavka`, açılmış kapsül `tesir`) çekirdekte
+(`presented_look`). Sayfa adres parametrelerini **olduğu gibi** verir: `set_look` artık `face`'i de
+taşır; bir görünüş seçilince eşlik eden yüzü (`look::companion_face`) çekirdek ekler, aynı seçimde
+bir yüz adı varsa o kalır. `?feed_exempt=0` olay akışı adresine olduğu gibi geçer; K42 muafiyetsiz
+kuralı barındırıcı kurar (`qp demo`).

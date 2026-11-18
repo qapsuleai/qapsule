@@ -386,6 +386,8 @@ aynı adlarla aynı sahneyi derler.
 | `seen` (R4/H-M8910) | son bakış zamanı (ms); `0` siler | yok |
 | `voice` (R5/m17-int) | `qp_capsule::voice::VOICES` (kapsül dili: `r4` bugünkü metin, `marla`, `selvi`; `docs/LANGUAGE.md`) | `r4` |
 | `open` (R5/M20) | `qp_grammar::open::OPENS` (açılmış kapsül tasarımı: `r4` bugünkü kart, `tesir` tek sütun, `nobra` soru kartları) | `r4` |
+| `story` (R5/M18) | `qp_grammar::stories::STORIES` (hikâye çizelgesi, grafik derinliğinde: `r4` yok, `pavka` hikâye omurgası, `korda` ömür şeritleri) | `r4` |
+| `hide_closed` (R5/M18, K54) | `true` / `false`: hikâye çizelgesinde kapanmış hikâyeleri gizle (seçili hikâye kalır; R5/S tek ad, `ViewState.hide_closed`) | `false` |
 
 - Verilmeyen alan değişmez; bilinmeyen ad `invalid` (`/gesture/face`, `/gesture/alphabet`,
   `/gesture/theme`, `expected` bilinen adlar). Doğrulama her şeyden önce: hatalı istek hiçbir

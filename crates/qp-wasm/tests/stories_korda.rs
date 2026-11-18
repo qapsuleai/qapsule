@@ -134,7 +134,9 @@ fn selected_on_top(s: &SceneDesc, cap: &str) {
 
 #[test]
 fn default_chart_has_no_story_panel() {
+    // (R5/S) The presentation asks for `pavka`: the protocol default (`r4`, none) by name.
     let mut d = Dev::new(700, "tr");
+    d.core.set_look(&serde_json::json!({"story": "r4"}));
     d.open_chart();
     let s = d.scene();
     assert!(s

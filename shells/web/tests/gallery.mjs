@@ -1,6 +1,6 @@
 // R5/G: the comparison gallery in headless Chromium at phone size (402 CSS px; VERIFY 15, 18).
 //  - `qp demo --gallery` serves /gallery.html; every request stays on the page's origin;
-//  - the topics voice, look, feed_order and feed_rule are shown, each with at least two
+//  - the topics voice, look, story, open (R5/S), feed_order and feed_rule are shown, each with at least two
 //    candidates whose content (replay moment, open capsule, depth) is the same — read from
 //    the page (data-content, as the core gave it) and from the core's own view — and whose
 //    images loaded;
@@ -62,7 +62,7 @@ try {
     const view = JSON.parse(await page.evaluate(() => window.gallery.view()));
     layout = view;
     const keys = ts.map((t) => t.key);
-    check(['voice', 'look', 'feed_order', 'feed_rule'].every((k) => keys.includes(k)), `topics: ${keys.join(' ')}`);
+    check(['voice', 'look', 'story', 'open', 'feed_order', 'feed_rule'].every((k) => keys.includes(k)), `topics: ${keys.join(' ')}`);
     for (const t of ts) {
       const v = view.topics.find((x) => x.key === t.key);
       const same = t.cands.every((c) => c.content === t.cands[0].content);

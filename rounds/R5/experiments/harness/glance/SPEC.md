@@ -442,3 +442,71 @@ ajanın raporu (M16 alternatifi). Testler `tests/test_g4.py`.
   `selen` 5/6 (eski 45 çiftte 23), `r4` 1/2 (eski 15 çiftte 7), `kestim` 3/3 (eski 15 çiftte 6).
   Hiçbir tasarım geçmiyor; M18 sonucu ve kararı değişmez. Gövde düzeltmesi grafik yolunu etkilemez
   (grafik kapısı işaret katmanını değil rol renkli ilkelleri ölçer).
+
+## Ek G7 — M20 ölçümünden önce: derinlik, dokunma sayısı, K52 ekranı (2026-11-18)
+
+Tetikleyen: M20 aday ajanlarının raporları (iki aday da M20 sorularının cevabını kanıt
+derinliğinde değil açılmış kapsülde veriyor; kalibrasyonun sabit dokunuş noktası tasarıma göre
+farklı ekran açıyor). Yazan: `r5/m20-measure`, **hiçbir M20 görüntüsü çekilmeden ve hiçbir okuyucu
+çağrısı yapılmadan önce**. Tekrar, persona, kısma kopyası, eleştirmen çiftleri (iki sıra +
+tekrar), BT + önyükleme, "ayırt edilemedi" kuralı ve §G9 seçim kuralı aynen geçerlidir.
+
+**(a) İki derinlik; birincil kapsül derinliği.** M20 görüntüleri §G2'nin iki durumunda
+(`live_event`, `visitor`; aynı hedef kapsül) iki derinlikte çekilir:
+- **kapsül derinliği** (`capsule`): akıştan bir dokunuş — hedef yüze dokunulur, açılmış kapsül;
+- **kanıt derinliği** (`evidence`): §G2'deki gibi (`tapTo(..., 'evidence')`).
+
+Soru kümeleri iki derinlikte aynı (`evidence`: `e_rests`, `e_who`, `valid`; `evidence_visitor`:
+`numbers`, `e_who`). §G9'un M20 satırındaki birincil ölçü (`evidence` + `evidence_visitor`
+doğruluğu, F 2 : H 1, %95 önyükleme) **kapsül derinliğindeki** görüntülerden hesaplanır (6 tekrar,
+Ek G3-2). Kanıt derinliği **ikincildir** (3 tekrar): §G9 adım 4'ün ("tam boy okuma") yerine geçer
+ve varsayılan bağ çözme sırası birincil → BT → kanıt derinliği doğruluğu → daha az ekran metni → ad
+olur. Adım 1b (yüz okuma kapısı) M20'de uygulanmaz: M20 tasarımları yüzü değiştirmez (M18 gibi).
+Kapsül derinliği görüntülerinin **kısma kopyası** (§G3, σ 4,5; `t_first`, `t_dir`, `t_valid`, 6
+tekrar) sorulur ve bilgi olarak raporlanır. **Eleştirmen çiftleri** kapsül derinliği görüntülerinden
+(iki durum, tr/açık), iki sıra, 3 tekrar.
+
+**(b) Dokunma sayısı deterministik.** Her soru için: akıştan, cevabın göründüğü ekrana en az
+dokunuş. Akıştaki hedef yüze kaydırmak dokunuş sayılmaz; açılmış katmanın içinde kaydırma gerekirse
+"n + kaydırma" yazılır. Sayım düzeneğin kestirmesiyle değil çekirdeğin kararıyla yapılır (`taps.mjs`):
+her ekranda aday dokunuşlar = açık sahne üzerinde 20 × 16 CSS px ızgaranın her noktası (sonucu
+çekirdeğin `tap_at`/`hit` bölgeleri verir: derinlik, açılan soru kartı, sözlük açıklaması) ve açık
+katmandaki DOM dokunma hedefleri (düğme, `summary`; Geri, sekmeler ve Ayarlar hariç). Genişlik
+öncelikli arama, en çok 4 dokunuş; her dalda durum akıştan yeniden kurulur. `nobra`'da bir kartı
+açmak bir dokunuştur (çekirdeğin `ask` durumu). tr/açık, iki okur (`arkin`, `visitor`).
+"Cevap görünür" yüklemi, görünüm penceresindeki metin üzerinde (DOM metni + açık sahnenin metin
+ilkelleri, 402×874 içinde), büyük/küçük harf duyarsız:
+- `e_rests`: anahtar ailenin adı (kök): price → `fiyat`/`price`; volume → `hacim`/`volume`;
+  flow → `akış`/`takas`/`flow`; news → `haber`/`bilanço`/`news`;
+- `e_who`: çekirdeğin güven metinlerinden biri (`trust_text`, dört durum, TR/EN) ya da
+  `sunucu doğruladı`, `cihazda sınan`, `verified by the server`, `checked on this device`;
+- `numbers` ("neden rakam göremiyorum", yalnız `visitor`): `yetki`, `lisans`, `abonelik`,
+  `entitle`, `licen`, `subscri`.
+
+**(c) K52 iki aday ve başvuru için aynı ekranda** (`k52open.mjs`): kalibrasyonun sabit dokunuş
+noktası `r4`'te grafiği, `nobra`'da bir soru kartını açıyor; bu yüzden ölçü ekranı herkese aynı
+kurulur: sentetik gösterim adım 700'e aranır, okurun akışındaki ilk kapsül `open_capsule` ile
+**kapsül derinliğinde** açılır (`?open=<ad>`; `r4` parametresiz), (1) oynatma 10 s (tik, veriyle
+sahne boyama, dururken uzun kare), (2) duraklatılıp açık katmanın üstünde 6 s tekerlek kaydırma
+(100 ms'de bir 120 px, her saniye yön değişir). Kayıt: tik p95, sahne boyama p95 (iki evre),
+tekerlek evresinde uzun kare payı (çekirdeğin `frame_ms` `long` payı; kabuğun o evreye verdiği kip —
+`scroll` ya da `zoom` — hangisinde kare varsa), ilk kapsül. Eşikler K52: `phone-jit-est` tik p95 ≤ 8 ms,
+sahne p95 ≤ 8 ms, uzun kare ≤ %1, ilk kapsül ≤ 1,5 s; `phone` (JIT kapalı) uzun kare ≤ %10
+(M18'deki K52 okuması). 3 tekrarın ortancası.
+
+**(d) `e_who` anahtarı SPEC metnine uyduruldu** (Ek G4 gibi uygulama düzeltmesi): §G4 "`e_who` = açık
+kapsülün güven iddiası (`open().trust`, sunucu dediyse sunucu)" der; uygulama `open().trust` sunucu
+demediğinde akış öğesinin güvenine düşüyordu, oysa akış öğeleri hep `server` gelir (Ö52) — anahtar
+"Bu cihazda sınandı" diyen kapsülde de `server` oluyordu. Şimdi: `open().trust` "sunucu/server" →
+`server`; "cihaz/device" (sınandı, sınanıyor) → `device`; "farklı/differ" → `device`;
+`open().trust` yoksa (veri yetkisiz okur) akış öğesinin güveni. K48'e göre açılmış açık-veri kapsülünde
+iki ifade de doğru olduğundan (`server` ∪ `device`) gevşek puan da **bilgi** olarak raporlanır.
+
+**(e) Yetkisizde rakam taraması (sert).** `visitor` görüntülerinde (iki derinlik) DOM metni ve açık
+sahnenin metin ilkellerinde rakam içeren sözcük sayısı; enstrüman sembolü (`SYN\d+`) ve onu içeren
+yetki adı (`<aile>/SYN\d+`) hariç. > 0 olan tasarım elenir (K33/K34, §G9 M20 satırı).
+
+**(f) Sınırlar.** Sentetik dünyada "değerleri gizli ama barları açık" (lisanslı sunucu olgusu) okur
+yoktur; yetkisiz okur yalnız `visitor` (veri yetkisi yok). Görünüş ve dil seçilmemiştir: bütün
+adaylar `look=r4`, `voice=marla` ile çekilir. Bozuk tasarım Ek G3 gibi (başvurunun derlemesine
+`broken/look.patch`, `?look=kestim`, açılmış kapsül `r4`).

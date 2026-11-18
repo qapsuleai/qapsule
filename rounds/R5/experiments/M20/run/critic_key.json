@@ -1,0 +1,242 @@
+{
+ "1c34247315": {
+  "A": "kestim",
+  "B": "nobra",
+  "order": 0,
+  "pair": [
+   "kestim",
+   "nobra"
+  ],
+  "state": "live_event"
+ },
+ "2c74ee3bed": {
+  "A": "nobra",
+  "B": "tesir",
+  "order": 0,
+  "pair": [
+   "nobra",
+   "tesir"
+  ],
+  "state": "live_event"
+ },
+ "62b268fe2f": {
+  "A": "kestim",
+  "B": "tesir",
+  "order": 0,
+  "pair": [
+   "kestim",
+   "tesir"
+  ],
+  "state": "live_event"
+ },
+ "62c87ca7f8": {
+  "A": "kestim",
+  "B": "r4",
+  "order": 0,
+  "pair": [
+   "kestim",
+   "r4"
+  ],
+  "state": "live_event"
+ },
+ "64c65fe449": {
+  "A": "tesir",
+  "B": "r4",
+  "order": 1,
+  "pair": [
+   "r4",
+   "tesir"
+  ],
+  "state": "live_event"
+ },
+ "669904c1df": {
+  "A": "tesir",
+  "B": "kestim",
+  "order": 1,
+  "pair": [
+   "kestim",
+   "tesir"
+  ],
+  "state": "visitor"
+ },
+ "6bf204dc38": {
+  "A": "nobra",
+  "B": "r4",
+  "order": 0,
+  "pair": [
+   "nobra",
+   "r4"
+  ],
+  "state": "visitor"
+ },
+ "799fb40ecb": {
+  "A": "kestim",
+  "B": "r4",
+  "order": 0,
+  "pair": [
+   "kestim",
+   "r4"
+  ],
+  "state": "visitor"
+ },
+ "94771326f0": {
+  "A": "r4",
+  "B": "kestim",
+  "order": 1,
+  "pair": [
+   "kestim",
+   "r4"
+  ],
+  "state": "live_event"
+ },
+ "94a58282b4": {
+  "A": "r4",
+  "B": "tesir",
+  "order": 0,
+  "pair": [
+   "r4",
+   "tesir"
+  ],
+  "state": "visitor"
+ },
+ "95ad7d0bc6": {
+  "A": "r4",
+  "B": "tesir",
+  "order": 0,
+  "pair": [
+   "r4",
+   "tesir"
+  ],
+  "state": "live_event"
+ },
+ "97990be418": {
+  "A": "tesir",
+  "B": "nobra",
+  "order": 1,
+  "pair": [
+   "nobra",
+   "tesir"
+  ],
+  "state": "visitor"
+ },
+ "a8c3513650": {
+  "A": "tesir",
+  "B": "r4",
+  "order": 1,
+  "pair": [
+   "r4",
+   "tesir"
+  ],
+  "state": "visitor"
+ },
+ "a8e59173b8": {
+  "A": "r4",
+  "B": "nobra",
+  "order": 1,
+  "pair": [
+   "nobra",
+   "r4"
+  ],
+  "state": "live_event"
+ },
+ "aaaa5859d5": {
+  "A": "kestim",
+  "B": "tesir",
+  "order": 0,
+  "pair": [
+   "kestim",
+   "tesir"
+  ],
+  "state": "visitor"
+ },
+ "b0cbaf9403": {
+  "A": "r4",
+  "B": "nobra",
+  "order": 1,
+  "pair": [
+   "nobra",
+   "r4"
+  ],
+  "state": "visitor"
+ },
+ "b3cf910ccd": {
+  "A": "nobra",
+  "B": "r4",
+  "order": 0,
+  "pair": [
+   "nobra",
+   "r4"
+  ],
+  "state": "live_event"
+ },
+ "c9bc72d20c": {
+  "A": "nobra",
+  "B": "tesir",
+  "order": 0,
+  "pair": [
+   "nobra",
+   "tesir"
+  ],
+  "state": "visitor"
+ },
+ "ddd82317dd": {
+  "A": "tesir",
+  "B": "kestim",
+  "order": 1,
+  "pair": [
+   "kestim",
+   "tesir"
+  ],
+  "state": "live_event"
+ },
+ "e3fc07fa6b": {
+  "A": "r4",
+  "B": "kestim",
+  "order": 1,
+  "pair": [
+   "kestim",
+   "r4"
+  ],
+  "state": "visitor"
+ },
+ "f972efd7c9": {
+  "A": "kestim",
+  "B": "nobra",
+  "order": 0,
+  "pair": [
+   "kestim",
+   "nobra"
+  ],
+  "state": "visitor"
+ },
+ "faadf24fc0": {
+  "A": "nobra",
+  "B": "kestim",
+  "order": 1,
+  "pair": [
+   "kestim",
+   "nobra"
+  ],
+  "state": "visitor"
+ },
+ "fb977c0997": {
+  "A": "nobra",
+  "B": "kestim",
+  "order": 1,
+  "pair": [
+   "kestim",
+   "nobra"
+  ],
+  "state": "live_event"
+ },
+ "fff95ef6bc": {
+  "A": "tesir",
+  "B": "nobra",
+  "order": 1,
+  "pair": [
+   "nobra",
+   "tesir"
+  ],
+  "state": "live_event"
+ }
+}

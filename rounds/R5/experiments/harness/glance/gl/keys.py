@@ -189,6 +189,9 @@ SETS = {
     "feed": ["f_live", "f_down"],
     "evidence": ["e_rests", "e_who", "valid"],
     "evidence_visitor": ["numbers", "e_who"],
+    # (M20, Ek G7a) the same questions on the capsule-depth shot (the primary measure).
+    "cap_evidence": ["e_rests", "e_who", "valid"],
+    "cap_evidence_visitor": ["numbers", "e_who"],
     "motion": ["m_same", "m_where"],
     "motion_final": ["m_where"],
     # The glance copy (SPEC §G3a): the same face at 0.5x (arm's-length / one-second proxy,

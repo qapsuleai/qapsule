@@ -42,7 +42,7 @@ from gl import states as ST  # noqa: E402
 
 SEED = 20261117
 # SPEC Ek G3: replicates per reader set (primary measure 6; BROKEN.md: 3 did not separate).
-DEFAULT_REPS = {"throttle": 6, "chart": 6}  # M18: `chart` is the primary set (SPEC §G9)
+DEFAULT_REPS = {"throttle": 6, "chart": 6, "cap_evidence": 6, "cap_evidence_visitor": 6}  # M20: Ek G7a  # M18: `chart` is the primary set (SPEC §G9)
 
 
 def jload(p):
@@ -212,7 +212,7 @@ def cmd_shoot(a):
         for lang in a.langs.split(","):
             for theme in a.themes.split(","):
                 base = {"lang": lang, "theme": theme, "look": d.get("look"), "face": d.get("face"), "voice": voice_of(a, d),
-                        "broken": bool(d.get("broken"))}
+                        "broken": bool(d.get("broken")), "open": d.get("open")}
                 todo = []
                 if "face" in kinds:
                     todo += [(n, "face") for n in FACE_STATES if st.get(n, {}).get("found")]
@@ -220,6 +220,8 @@ def cmd_shoot(a):
                     todo.append(("feed", "feed"))
                 if "evidence" in kinds:
                     todo += [("live_event", "evidence"), ("visitor", "evidence")]
+                if "capsule" in kinds:  # (M20, Ek G7a) capsule depth
+                    todo += [("live_event", "capsule"), ("visitor", "capsule")]
                 if "motion" in kinds:
                     todo += [("live_event", "motion"), ("closed_failed", "motion")]
                 for name, kind in todo:
@@ -227,6 +229,7 @@ def cmd_shoot(a):
                     c = code(d["name"], name, kind, lang, theme)
                     shot = dict(base, id=c, kind=kind, step=s["step"], principal=s.get("principal", "arkin"),
                                 candidates=s.get("candidates", []), watch=s.get("watch"), progress=[0.25, 0.5, 0.75, 1.0])
+                    shot["_design"] = d["name"]
                     shots.append(shot)
                     key[c] = {"design": d["name"], "state": name, "kind": kind, "lang": lang, "theme": theme,
                               "principal": shot["principal"], "voice": shot["voice"]}
@@ -240,13 +243,24 @@ def cmd_shoot(a):
     (run / "looks").mkdir(parents=True, exist_ok=True)
     for d in designs:
         name = d.get("look") or "r4"
-        p = subprocess.run([qp_bin(a), "look", "show", name], capture_output=True, text=True, cwd=ROOT)
+        p = subprocess.run([d.get("qp") or qp_bin(a), "look", "show", name], capture_output=True, text=True, cwd=ROOT)
         if p.returncode == 0:
             (run / "looks" / f"{d['name']}.json").write_text(p.stdout)
-    plan = {"qp": qp_bin(a), "web": web_dir(a), "port": a.port, "out": str(run / "shots"),
-            "paint": a.paint, "sensitivity": "all", "shots": shots}
-    jdump(run / "shoot-plan.json", plan)
-    node("shoot.mjs", run / "shoot-plan.json")
+    # (M20) a design may come from its own build (`qp`, `web` in designs.json; the
+    # alternatives are not merged): one plan per build; already shot codes are skipped.
+    builds = {}
+    for s in shots:
+        dn = s.pop("_design")
+        d = next(x for x in designs if x["name"] == dn)
+        if (run / "shots" / f"{s['id']}.png").exists():
+            continue
+        builds.setdefault((d.get("qp") or qp_bin(a), d.get("web") or web_dir(a)), []).append(s)
+    for i, ((qp, web), ss) in enumerate(sorted(builds.items())):
+        plan = {"qp": qp, "web": web, "port": a.port, "out": str(run / "shots"),
+                "paint": a.paint, "sensitivity": "all", "shots": ss}
+        pp = run / "shoot-plan.json" if len(builds) == 1 else run / "plans" / f"shoot-{i}.json"
+        jdump(pp, plan)
+        node("shoot.mjs", pp)
 
 
 # --- derive ------------------------------------------------------------------------------
@@ -270,6 +284,9 @@ def stimuli(run: Path):
             out.append((f"{c}.feed", png, "feed", rec))
         elif k["kind"] == "evidence":
             out.append((f"{c}.evidence", png, "evidence_visitor" if k["principal"] == "visitor" else "evidence", rec))
+        elif k["kind"] == "capsule":  # (M20, Ek G7a) capsule depth + its throttle copy
+            out.append((f"{c}.capsule", png, "cap_evidence_visitor" if k["principal"] == "visitor" else "cap_evidence", rec))
+            out.append((f"{c}.throttle", stim / f"{c}.throttle.png", "throttle", rec))
         elif k["kind"] == "chart":
             out.append((f"{c}.chart", stim / f"{c}.chart.png", "chart", rec))
         elif k["kind"] == "motion":
@@ -287,6 +304,8 @@ def cmd_derive(a):
         png = run / "shots" / f"{c}.png"
         if not png.exists():
             continue
+        if k["kind"] == "capsule":
+            IO.throttle(png, stim / f"{c}.throttle.png")
         if k["kind"] == "face":
             IO.throttle(png, stim / f"{c}.throttle.png")
             IO.half(png, stim / f"{c}.half.png")
@@ -312,7 +331,7 @@ def cmd_derive(a):
     # orders; the A/B key is in critic_key.json.
     groups = {}
     for c, k in key.items():
-        if k["kind"] not in ("face", "chart") or k["lang"] != a.pair_lang or k["theme"] != a.pair_theme:
+        if k["kind"] not in ("face", "chart", "capsule") or k["lang"] != a.pair_lang or k["theme"] != a.pair_theme:
             continue
         if (run / "shots" / f"{c}.png").exists():
             groups.setdefault(k["state"], {})[k["design"]] = c
@@ -332,17 +351,32 @@ def cmd_derive(a):
 
 # --- record for keys ---------------------------------------------------------------------
 
+def who_key(rec: dict, item: dict):
+    """(Ek G7d) The e_who key: the open capsule's trust claim (`open().trust`, SPEC §G4) --
+    server when it says so, device when it names the device (checked / checking) or the
+    sources differ; without one (no data entitlement) the feed item's trust."""
+    t = (rec.get("open") or {}).get("trust")
+    if not t:
+        return item.get("trust")
+    t = json.dumps(t, ensure_ascii=False).lower()
+    if "server" in t or "sunucu" in t:
+        return "server"
+    if any(w in t for w in ("cihaz", "device", "farklı", "differ")):
+        return "device"
+    return item.get("trust")
+
+
 def key_record(rec: dict, qset: str) -> dict:
     eng = rec.get("engine") or {}
     item = eng.get("target_item") or {}
     out = {"item": item, "now_t": eng.get("replay_t"), "redacted": bool(item.get("redacted")),
            "visible": eng.get("visible_items") or []}
-    if qset.startswith("evidence"):
+    if "evidence" in qset:
         fam = {"price": "price", "volume": "volume", "flow": "flow", "news": "news"}
-        out["families"] = sorted({fam[e["family"]] for e in rec.get("evidence") or [] if e.get("family") in fam})
-        trust = (rec.get("open") or {}).get("trust")
-        if trust is not None:
-            out["item"] = dict(item, trust="server" if "server" in json.dumps(trust).lower() or "sunucu" in json.dumps(trust, ensure_ascii=False).lower() else item.get("trust"))
+        # (M20) a capsule-depth shot carries the capsule's evidence rows as `evidence_key`.
+        rows = rec.get("evidence") or rec.get("evidence_key") or []
+        out["families"] = sorted({fam[e["family"]] for e in rows if e.get("family") in fam})
+        out["item"] = dict(item, trust=who_key(rec, item))
     if qset == "chart":
         # (M18) the story list (PROTOCOL §23, the engine's; the canonical list of the state
         # when this design's device did not hold one) and the visible bar range.
@@ -501,11 +535,20 @@ def cmd_compute(a):
         lp = run / "looks" / f"{d}.json"
         look = jload(lp) if lp.exists() else None
         # (M18) chart-depth shots: element measures from the open scene's paint list.
-        out[d] = CP.chart_gates(recs, look) if all(r["shot"]["kind"] == "chart" for r in recs) else CP.gates(recs, look)
+        # (M20) capsule- and evidence-depth shots: the same open-scene measures.
+        out[d] = (CP.chart_gates(recs, look) if all(r["shot"]["kind"] in ("chart", "capsule", "evidence") for r in recs)
+                  else CP.gates(recs, look))
+        if any(r["shot"]["kind"] in ("capsule", "evidence") for r in recs):
+            out[d]["numbers_visitor"] = CP.visitor_digits(recs)  # (Ek G7e) hard
         k52 = run / "k52" / f"{d}.json"
         if k52.exists():
             kj = jload(k52)
-            if all("by_depth" in v for v in kj["configs"].values()):
+            if kj.get("open", "absent") != "absent" and all("checks" in v for v in kj["configs"].values()):
+                # (M20, k52open.mjs, Ek G7c) the same screen (capsule depth) for every design.
+                out[d]["k52"] = {"pass": kj["pass"], "configs": {c: {k: v.get(k) for k in (
+                    "tick_p95", "scene_p95", "scene_play_n", "scene_wheel_n", "wheel_long", "wheel_mode", "wheel_frame_p99",
+                    "idle_long", "first_capsule_ms", "biased", "pass")} for c, v in kj["configs"].items()}}
+            elif all("by_depth" in v for v in kj["configs"].values()):
                 # (M18, k52chart.mjs) per depth; a JIT-off re-run (k52-rerun/, more reps, no
                 # model calls in parallel) replaces the first JIT-off run when present.
                 cfgs = dict(kj["configs"])

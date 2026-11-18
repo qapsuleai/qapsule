@@ -1,0 +1,578 @@
+{
+ "05535ce729": {
+  "design": "kestim",
+  "kind": "capsule",
+  "lang": "tr",
+  "principal": "arkin",
+  "state": "live_event",
+  "theme": "dark",
+  "voice": "marla"
+ },
+ "0db25ebc4b": {
+  "design": "r4",
+  "kind": "evidence",
+  "lang": "tr",
+  "principal": "visitor",
+  "state": "visitor",
+  "theme": "dark",
+  "voice": "marla"
+ },
+ "0e4777d1f3": {
+  "design": "tesir",
+  "kind": "capsule",
+  "lang": "en",
+  "principal": "visitor",
+  "state": "visitor",
+  "theme": "dark",
+  "voice": "marla"
+ },
+ "1374dd07ff": {
+  "design": "nobra",
+  "kind": "capsule",
+  "lang": "en",
+  "principal": "visitor",
+  "state": "visitor",
+  "theme": "dark",
+  "voice": "marla"
+ },
+ "1612525088": {
+  "design": "tesir",
+  "kind": "evidence",
+  "lang": "tr",
+  "principal": "visitor",
+  "state": "visitor",
+  "theme": "light",
+  "voice": "marla"
+ },
+ "16b09acc46": {
+  "design": "tesir",
+  "kind": "evidence",
+  "lang": "tr",
+  "principal": "arkin",
+  "state": "live_event",
+  "theme": "light",
+  "voice": "marla"
+ },
+ "1870d6485e": {
+  "design": "r4",
+  "kind": "capsule",
+  "lang": "en",
+  "principal": "visitor",
+  "state": "visitor",
+  "theme": "light",
+  "voice": "marla"
+ },
+ "19c07fde53": {
+  "design": "nobra",
+  "kind": "evidence",
+  "lang": "tr",
+  "principal": "arkin",
+  "state": "live_event",
+  "theme": "light",
+  "voice": "marla"
+ },
+ "1afbcd95d9": {
+  "design": "nobra",
+  "kind": "capsule",
+  "lang": "tr",
+  "principal": "arkin",
+  "state": "live_event",
+  "theme": "dark",
+  "voice": "marla"
+ },
+ "1b3bc096a0": {
+  "design": "r4",
+  "kind": "evidence",
+  "lang": "tr",
+  "principal": "arkin",
+  "state": "live_event",
+  "theme": "light",
+  "voice": "marla"
+ },
+ "1ef17ee3d9": {
+  "design": "tesir",
+  "kind": "evidence",
+  "lang": "en",
+  "principal": "visitor",
+  "state": "visitor",
+  "theme": "light",
+  "voice": "marla"
+ },
+ "22d506fe73": {
+  "design": "tesir",
+  "kind": "capsule",
+  "lang": "en",
+  "principal": "arkin",
+  "state": "live_event",
+  "theme": "light",
+  "voice": "marla"
+ },
+ "27fc074e53": {
+  "design": "nobra",
+  "kind": "evidence",
+  "lang": "tr",
+  "principal": "visitor",
+  "state": "visitor",
+  "theme": "dark",
+  "voice": "marla"
+ },
+ "2dada9824b": {
+  "design": "r4",
+  "kind": "evidence",
+  "lang": "en",
+  "principal": "visitor",
+  "state": "visitor",
+  "theme": "light",
+  "voice": "marla"
+ },
+ "340722b6d5": {
+  "design": "tesir",
+  "kind": "capsule",
+  "lang": "tr",
+  "principal": "visitor",
+  "state": "visitor",
+  "theme": "light",
+  "voice": "marla"
+ },
+ "372fbb514b": {
+  "design": "kestim",
+  "kind": "evidence",
+  "lang": "en",
+  "principal": "arkin",
+  "state": "live_event",
+  "theme": "dark",
+  "voice": "marla"
+ },
+ "387b19bae6": {
+  "design": "nobra",
+  "kind": "evidence",
+  "lang": "tr",
+  "principal": "arkin",
+  "state": "live_event",
+  "theme": "dark",
+  "voice": "marla"
+ },
+ "393a83379a": {
+  "design": "nobra",
+  "kind": "evidence",
+  "lang": "en",
+  "principal": "visitor",
+  "state": "visitor",
+  "theme": "light",
+  "voice": "marla"
+ },
+ "394637f8b1": {
+  "design": "kestim",
+  "kind": "capsule",
+  "lang": "tr",
+  "principal": "arkin",
+  "state": "live_event",
+  "theme": "light",
+  "voice": "marla"
+ },
+ "4023dc4a24": {
+  "design": "nobra",
+  "kind": "capsule",
+  "lang": "tr",
+  "principal": "visitor",
+  "state": "visitor",
+  "theme": "dark",
+  "voice": "marla"
+ },
+ "480c153212": {
+  "design": "nobra",
+  "kind": "evidence",
+  "lang": "tr",
+  "principal": "visitor",
+  "state": "visitor",
+  "theme": "light",
+  "voice": "marla"
+ },
+ "4891cbabbc": {
+  "design": "r4",
+  "kind": "capsule",
+  "lang": "tr",
+  "principal": "arkin",
+  "state": "live_event",
+  "theme": "dark",
+  "voice": "marla"
+ },
+ "4cea7f54d8": {
+  "design": "r4",
+  "kind": "evidence",
+  "lang": "en",
+  "principal": "visitor",
+  "state": "visitor",
+  "theme": "dark",
+  "voice": "marla"
+ },
+ "56689cb6fe": {
+  "design": "r4",
+  "kind": "capsule",
+  "lang": "en",
+  "principal": "visitor",
+  "state": "visitor",
+  "theme": "dark",
+  "voice": "marla"
+ },
+ "61dae8b404": {
+  "design": "nobra",
+  "kind": "capsule",
+  "lang": "en",
+  "principal": "arkin",
+  "state": "live_event",
+  "theme": "dark",
+  "voice": "marla"
+ },
+ "6436b5c976": {
+  "design": "tesir",
+  "kind": "capsule",
+  "lang": "en",
+  "principal": "arkin",
+  "state": "live_event",
+  "theme": "dark",
+  "voice": "marla"
+ },
+ "68a32d61b3": {
+  "design": "r4",
+  "kind": "capsule",
+  "lang": "en",
+  "principal": "arkin",
+  "state": "live_event",
+  "theme": "dark",
+  "voice": "marla"
+ },
+ "6c0aa5a1ff": {
+  "design": "nobra",
+  "kind": "evidence",
+  "lang": "en",
+  "principal": "visitor",
+  "state": "visitor",
+  "theme": "dark",
+  "voice": "marla"
+ },
+ "6d17f23755": {
+  "design": "kestim",
+  "kind": "capsule",
+  "lang": "en",
+  "principal": "visitor",
+  "state": "visitor",
+  "theme": "dark",
+  "voice": "marla"
+ },
+ "6d686e1166": {
+  "design": "r4",
+  "kind": "capsule",
+  "lang": "tr",
+  "principal": "visitor",
+  "state": "visitor",
+  "theme": "dark",
+  "voice": "marla"
+ },
+ "6f1a587e0b": {
+  "design": "kestim",
+  "kind": "evidence",
+  "lang": "tr",
+  "principal": "visitor",
+  "state": "visitor",
+  "theme": "dark",
+  "voice": "marla"
+ },
+ "71a9ca2d91": {
+  "design": "kestim",
+  "kind": "evidence",
+  "lang": "en",
+  "principal": "visitor",
+  "state": "visitor",
+  "theme": "light",
+  "voice": "marla"
+ },
+ "72b2977484": {
+  "design": "kestim",
+  "kind": "capsule",
+  "lang": "en",
+  "principal": "arkin",
+  "state": "live_event",
+  "theme": "dark",
+  "voice": "marla"
+ },
+ "7fb894e7a2": {
+  "design": "tesir",
+  "kind": "capsule",
+  "lang": "tr",
+  "principal": "visitor",
+  "state": "visitor",
+  "theme": "dark",
+  "voice": "marla"
+ },
+ "7fda3a73de": {
+  "design": "tesir",
+  "kind": "capsule",
+  "lang": "en",
+  "principal": "visitor",
+  "state": "visitor",
+  "theme": "light",
+  "voice": "marla"
+ },
+ "82a6421e76": {
+  "design": "nobra",
+  "kind": "evidence",
+  "lang": "en",
+  "principal": "arkin",
+  "state": "live_event",
+  "theme": "light",
+  "voice": "marla"
+ },
+ "83b3ac49fc": {
+  "design": "tesir",
+  "kind": "evidence",
+  "lang": "en",
+  "principal": "arkin",
+  "state": "live_event",
+  "theme": "dark",
+  "voice": "marla"
+ },
+ "848448e64b": {
+  "design": "tesir",
+  "kind": "evidence",
+  "lang": "en",
+  "principal": "visitor",
+  "state": "visitor",
+  "theme": "dark",
+  "voice": "marla"
+ },
+ "930f100b47": {
+  "design": "kestim",
+  "kind": "capsule",
+  "lang": "tr",
+  "principal": "visitor",
+  "state": "visitor",
+  "theme": "light",
+  "voice": "marla"
+ },
+ "942bf70a94": {
+  "design": "kestim",
+  "kind": "evidence",
+  "lang": "tr",
+  "principal": "arkin",
+  "state": "live_event",
+  "theme": "light",
+  "voice": "marla"
+ },
+ "990ad08ca4": {
+  "design": "r4",
+  "kind": "capsule",
+  "lang": "en",
+  "principal": "arkin",
+  "state": "live_event",
+  "theme": "light",
+  "voice": "marla"
+ },
+ "a4c14b530e": {
+  "design": "kestim",
+  "kind": "capsule",
+  "lang": "en",
+  "principal": "visitor",
+  "state": "visitor",
+  "theme": "light",
+  "voice": "marla"
+ },
+ "a70d20a991": {
+  "design": "nobra",
+  "kind": "capsule",
+  "lang": "tr",
+  "principal": "arkin",
+  "state": "live_event",
+  "theme": "light",
+  "voice": "marla"
+ },
+ "aa129d12f5": {
+  "design": "kestim",
+  "kind": "evidence",
+  "lang": "tr",
+  "principal": "arkin",
+  "state": "live_event",
+  "theme": "dark",
+  "voice": "marla"
+ },
+ "adfa099b54": {
+  "design": "nobra",
+  "kind": "capsule",
+  "lang": "en",
+  "principal": "arkin",
+  "state": "live_event",
+  "theme": "light",
+  "voice": "marla"
+ },
+ "b0d333d44e": {
+  "design": "r4",
+  "kind": "evidence",
+  "lang": "en",
+  "principal": "arkin",
+  "state": "live_event",
+  "theme": "dark",
+  "voice": "marla"
+ },
+ "b24126e036": {
+  "design": "r4",
+  "kind": "capsule",
+  "lang": "tr",
+  "principal": "arkin",
+  "state": "live_event",
+  "theme": "light",
+  "voice": "marla"
+ },
+ "b896cad3ff": {
+  "design": "r4",
+  "kind": "evidence",
+  "lang": "tr",
+  "principal": "visitor",
+  "state": "visitor",
+  "theme": "light",
+  "voice": "marla"
+ },
+ "bca0b6a2e9": {
+  "design": "nobra",
+  "kind": "capsule",
+  "lang": "tr",
+  "principal": "visitor",
+  "state": "visitor",
+  "theme": "light",
+  "voice": "marla"
+ },
+ "bd333e8e32": {
+  "design": "nobra",
+  "kind": "capsule",
+  "lang": "en",
+  "principal": "visitor",
+  "state": "visitor",
+  "theme": "light",
+  "voice": "marla"
+ },
+ "beda3efe43": {
+  "design": "nobra",
+  "kind": "evidence",
+  "lang": "en",
+  "principal": "arkin",
+  "state": "live_event",
+  "theme": "dark",
+  "voice": "marla"
+ },
+ "bf17cff46a": {
+  "design": "r4",
+  "kind": "capsule",
+  "lang": "tr",
+  "principal": "visitor",
+  "state": "visitor",
+  "theme": "light",
+  "voice": "marla"
+ },
+ "bfe9d5f9d1": {
+  "design": "kestim",
+  "kind": "evidence",
+  "lang": "tr",
+  "principal": "visitor",
+  "state": "visitor",
+  "theme": "light",
+  "voice": "marla"
+ },
+ "c271d9bf93": {
+  "design": "kestim",
+  "kind": "evidence",
+  "lang": "en",
+  "principal": "visitor",
+  "state": "visitor",
+  "theme": "dark",
+  "voice": "marla"
+ },
+ "c810003155": {
+  "design": "tesir",
+  "kind": "evidence",
+  "lang": "tr",
+  "principal": "arkin",
+  "state": "live_event",
+  "theme": "dark",
+  "voice": "marla"
+ },
+ "ca00b8c00c": {
+  "design": "kestim",
+  "kind": "capsule",
+  "lang": "tr",
+  "principal": "visitor",
+  "state": "visitor",
+  "theme": "dark",
+  "voice": "marla"
+ },
+ "ca142aee82": {
+  "design": "tesir",
+  "kind": "capsule",
+  "lang": "tr",
+  "principal": "arkin",
+  "state": "live_event",
+  "theme": "light",
+  "voice": "marla"
+ },
+ "cd677263c2": {
+  "design": "tesir",
+  "kind": "capsule",
+  "lang": "tr",
+  "principal": "arkin",
+  "state": "live_event",
+  "theme": "dark",
+  "voice": "marla"
+ },
+ "d4d20c74fd": {
+  "design": "r4",
+  "kind": "evidence",
+  "lang": "tr",
+  "principal": "arkin",
+  "state": "live_event",
+  "theme": "dark",
+  "voice": "marla"
+ },
+ "da073f2ea0": {
+  "design": "tesir",
+  "kind": "evidence",
+  "lang": "tr",
+  "principal": "visitor",
+  "state": "visitor",
+  "theme": "dark",
+  "voice": "marla"
+ },
+ "e82ee8d3c0": {
+  "design": "kestim",
+  "kind": "capsule",
+  "lang": "en",
+  "principal": "arkin",
+  "state": "live_event",
+  "theme": "light",
+  "voice": "marla"
+ },
+ "f20e41814d": {
+  "design": "r4",
+  "kind": "evidence",
+  "lang": "en",
+  "principal": "arkin",
+  "state": "live_event",
+  "theme": "light",
+  "voice": "marla"
+ },
+ "f819dc4435": {
+  "design": "tesir",
+  "kind": "evidence",
+  "lang": "en",
+  "principal": "arkin",
+  "state": "live_event",
+  "theme": "light",
+  "voice": "marla"
+ },
+ "fa4243b372": {
+  "design": "kestim",
+  "kind": "evidence",
+  "lang": "en",
+  "principal": "arkin",
+  "state": "live_event",
+  "theme": "light",
+  "voice": "marla"
+ }
+}

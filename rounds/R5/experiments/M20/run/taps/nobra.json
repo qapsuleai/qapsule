@@ -1,0 +1,87 @@
+{
+ "grid": [
+  20,
+  16
+ ],
+ "max_taps": 4,
+ "readers": {
+  "arkin": {
+   "target": "cap.SYN06.breakout.up.118",
+   "families": [
+    "price",
+    "volume"
+   ],
+   "first_screen_depth": "capsule",
+   "best": {
+    "e_rests": {
+     "taps": 1,
+     "depth": "capsule",
+     "path": []
+    },
+    "e_who": {
+     "taps": 1,
+     "depth": "capsule",
+     "path": []
+    }
+   },
+   "best_with_scroll": {
+    "e_rests": {
+     "taps": 1,
+     "depth": "capsule",
+     "path": []
+    },
+    "e_who": {
+     "taps": 1,
+     "depth": "capsule",
+     "path": []
+    }
+   },
+   "screens_seen": 1,
+   "taps_tried": 0
+  },
+  "visitor": {
+   "target": "cap.SYN28.continuation.down.118",
+   "families": [
+    "price",
+    "volume"
+   ],
+   "first_screen_depth": "capsule",
+   "best": {
+    "e_rests": {
+     "taps": 1,
+     "depth": "capsule",
+     "path": []
+    },
+    "e_who": {
+     "taps": 1,
+     "depth": "capsule",
+     "path": []
+    },
+    "numbers": {
+     "taps": 1,
+     "depth": "capsule",
+     "path": []
+    }
+   },
+   "best_with_scroll": {
+    "e_rests": {
+     "taps": 1,
+     "depth": "capsule",
+     "path": []
+    },
+    "e_who": {
+     "taps": 1,
+     "depth": "capsule",
+     "path": []
+    },
+    "numbers": {
+     "taps": 1,
+     "depth": "capsule",
+     "path": []
+    }
+   },
+   "screens_seen": 1,
+   "taps_tried": 0
+  }
+ }
+}

@@ -1,0 +1,1187 @@
+{
+ "face_step": 1,
+ "harness": "r5-glance/1",
+ "method": "probe the reader feed (shoot.mjs) at CANDIDATE_STEPS; S* = step whose feed satisfies most rules",
+ "problems": [],
+ "states": [
+  {
+   "candidates": [
+    "cap.SYN06.breakout.up.118"
+   ],
+   "found": true,
+   "items": {
+    "cap.SYN06.breakout.up.118": {
+     "born_bar": 118,
+     "coin_flip": true,
+     "confirmations": 2,
+     "direction": "up",
+     "finding": "fnd.SYN06.breakout.up.118",
+     "id": "cap.SYN06.breakout.up.118",
+     "importance": 2.557784738097699,
+     "instrument": "SYN06",
+     "kind": "breakout",
+     "known_at": 1686898800000,
+     "last_bar": 118,
+     "ledger_at_birth": {
+      "n": 31,
+      "realized": 12
+     },
+     "sentence": {
+      "en": "1 bar ago, SYN06 broke above resistance at 114.27 (close 116.27): an upside breakout. Volume confirmed it 1 bar ago; 2 independent evidence families support it. It still holds. Historically, this signal played out in 12 of 31 cases.",
+      "text": "SYN06 1 bar önce 114,27'deki direnci yukarı kırdı (kapanış 116,27): yukarı kırılım. 1 bar önce hacim de teyit etti; 2 bağımsız kanıt ailesi destekliyor. Hâlâ geçerli. Geçmişte bu sinyal 31 seferin 12'sinde beklendiği gibi sonuçlandı.",
+      "tr": "SYN06 1 bar önce 114,27'deki direnci yukarı kırdı (kapanış 116,27): yukarı kırılım. 1 bar önce hacim de teyit etti; 2 bağımsız kanıt ailesi destekliyor. Hâlâ geçerli. Geçmişte bu sinyal 31 seferin 12'sinde beklendiği gibi sonuçlandı."
+     },
+     "series": "syn06",
+     "stage": "confirmed",
+     "state": "live",
+     "t": 1686812400000,
+     "tier": 1,
+     "time": "event",
+     "trust": "replica",
+     "validity": "valid",
+     "voice": {
+      "detail": "O gün kapanış 116,27 oldu, eşiğin %1,8 üstünde. Şimdi 116,11 (eşiğin %1,6 üstünde). 2 işlem günü önce başka bir ölçü de aynı yönü gösterdi: hacim ortalamanın 7,4 katına çıktı.",
+      "face": "SYN06 20 günün zirvesini (114,27) aştı · 2 işlem günü önce, hâlâ geçerli\nBenzer 31 durumun 12'sinde fiyat 10 işlem günü içinde yükseldi.\nO gün kapanış 116,27 oldu, eşiğin %1,8 üstünde. Şimdi 116,11 (eşiğin %1,6 üstünde). 2 işlem günü önce başka bir ölçü de aynı yönü gösterdi: hacim ortalamanın 7,4 katına çıktı.",
+      "glossary": [
+       {
+        "term": "en yüksek fiyat",
+        "text": "Sayılan dönemde görülen en yüksek fiyat; içinde bulunulan gün hariç. Onu aşmak, fiyatın o dönemin bütün fiyatlarının üstüne çıkması demektir."
+       },
+       {
+        "term": "hacim",
+        "text": "Bir günde el değiştiren hisse adedi. Ortalamasının birkaç katı, olağandan çok daha fazla işlem yapıldığı anlamına gelir."
+       },
+       {
+        "term": "benzer durum",
+        "text": "Aynı tür ve yönde, bundan önce kapanmış iddialar. Fiyat süresinde olağan oynaklığı kadar o yöne gittiyse tuttu sayılır; rastgele bir gün de yarı yarıya tutar."
+       }
+      ],
+      "headline": "SYN06 20 günün zirvesini (114,27) aştı · 2 işlem günü önce, hâlâ geçerli",
+      "ledger": "Benzer 31 durumun 12'sinde fiyat 10 işlem günü içinde yükseldi.",
+      "voice": "marla"
+     }
+    }
+   },
+   "now_t": 1687158000000,
+   "principal": "arkin",
+   "state": "live_event",
+   "step": 1
+  },
+  {
+   "candidates": [
+    "cap.SYN28.continuation.down.118"
+   ],
+   "found": true,
+   "items": {
+    "cap.SYN28.continuation.down.118": {
+     "born_bar": 118,
+     "confirmations": 2,
+     "direction": "down",
+     "finding": "fnd.SYN28.continuation.down.118",
+     "id": "cap.SYN28.continuation.down.118",
+     "importance": 2.197100188425248,
+     "instrument": "SYN28",
+     "kind": "continuation",
+     "known_at": 1687503600000,
+     "last_bar": 123,
+     "ledger_at_birth": {
+      "n": 54,
+      "realized": 30
+     },
+     "sentence": {
+      "en": "5 bars ago, SYN28 crossed below the short average (95.70); it rose back above on this bar and is now at 95.16, no longer below the short average. The downtrend has ended. Historically, this signal played out in 30 of 54 cases.",
+      "text": "SYN28 5 bar önce kısa ortalamanın (95,70) altına indi, bu barda yeniden üstüne çıktı; şu an 95,16, artık kısa ortalamanın altında değil. Düşüş eğilimi sona erdi. Geçmişte bu sinyal 54 seferin 30'unda beklendiği gibi sonuçlandı.",
+      "tr": "SYN28 5 bar önce kısa ortalamanın (95,70) altına indi, bu barda yeniden üstüne çıktı; şu an 95,16, artık kısa ortalamanın altında değil. Düşüş eğilimi sona erdi. Geçmişte bu sinyal 54 seferin 30'unda beklendiği gibi sonuçlandı."
+     },
+     "series": "syn28",
+     "stage": "weakened",
+     "state": "live",
+     "t": 1687417200000,
+     "tier": 1,
+     "time": "state",
+     "trust": "replica",
+     "validity": "no_longer",
+     "voice": {
+      "detail": "Kapanış (93,83) 20 günlük ortalamanın (95,70), o da 50 günlüğün (98,22) altındaydı. Sonuç en geç 15 işlem günü içinde belli olacak. Dün zayıfladı: ortalamaların sırası bozuldu.",
+      "face": "SYN28 düşüşte, 20 günlük ortalamanın altında · geçen hafta, artık geçerli değil\nBenzer 54 durumun 30'unda 20 işlem gününde düşüşünü sürdürdü.\nKapanış (93,83) 20 günlük ortalamanın (95,70), o da 50 günlüğün (98,22) altındaydı. Sonuç en geç 15 işlem günü içinde belli olacak. Dün zayıfladı: ortalamaların sırası bozuldu.",
+      "glossary": [
+       {
+        "term": "ortalama",
+        "text": "Son belirtilen sayıda kapanış fiyatının ortalaması, her gün yeniden hesaplanır. Fiyat kısa ortalamanın, kısa da uzunun üstündeyse yükseliş düzeni sayılır."
+       },
+       {
+        "term": "artık geçerli değil",
+        "text": "İddiayı doğuran koşul bugün tutmuyor, ama süresi dolmadı; sonucu henüz belli değil."
+       },
+       {
+        "term": "benzer durum",
+        "text": "Aynı tür ve yönde, bundan önce kapanmış iddialar. Fiyat süresinde olağan oynaklığı kadar o yöne gittiyse tuttu sayılır; rastgele bir gün de yarı yarıya tutar."
+       }
+      ],
+      "headline": "SYN28 düşüşte, 20 günlük ortalamanın altında · geçen hafta, artık geçerli değil",
+      "ledger": "Benzer 54 durumun 30'unda 20 işlem gününde düşüşünü sürdürdü.",
+      "voice": "marla"
+     }
+    }
+   },
+   "now_t": 1687514400000,
+   "principal": "arkin",
+   "state": "no_longer",
+   "step": 40
+  },
+  {
+   "candidates": [
+    "cap.SYN21.continuation.down.104",
+    "cap.SYN26.breakout.down.46",
+    "cap.SYN08.breakout.down.113",
+    "cap.SYN25.breakout.down.93",
+    "cap.SYN14.breakout.down.103",
+    "cap.SYN27.breakout.down.99",
+    "cap.SYN14.breakout.down.70",
+    "cap.SYN30.breakout.down.98"
+   ],
+   "found": true,
+   "items": {
+    "cap.SYN08.breakout.down.113": {
+     "born_bar": 113,
+     "confirmations": 2,
+     "direction": "down",
+     "finding": "fnd.SYN08.breakout.down.113",
+     "id": "cap.SYN08.breakout.down.113",
+     "importance": 2.674638347276507,
+     "instrument": "SYN08",
+     "kind": "breakout",
+     "known_at": 1686553200000,
+     "last_bar": 114,
+     "ledger_at_birth": {
+      "n": 46,
+      "realized": 26
+     },
+     "sentence": {
+      "en": "6 bars ago, SYN08 broke below support at 160.04 (close 146.40): a downside breakout. The expected outcome came true 5 bars ago. Historically, this signal played out in 26 of 46 cases.",
+      "text": "SYN08 6 bar önce 160,04'teki desteği aşağı kırdı (kapanış 146,40): aşağı kırılım. Beklenen sonuç 5 bar önce gerçekleşti. Geçmişte bu sinyal 46 seferin 26'sında beklendiği gibi sonuçlandı.",
+      "tr": "SYN08 6 bar önce 160,04'teki desteği aşağı kırdı (kapanış 146,40): aşağı kırılım. Beklenen sonuç 5 bar önce gerçekleşti. Geçmişte bu sinyal 46 seferin 26'sında beklendiği gibi sonuçlandı."
+     },
+     "series": "syn08",
+     "stage": "realized",
+     "state": "live",
+     "t": 1686294000000,
+     "tier": 1,
+     "time": "event",
+     "trust": "replica",
+     "validity": "closed",
+     "voice": {
+      "detail": "7 işlem günü önce kapanış 146,40 oldu, eşiğin %8,5 altında. Fiyat 10 işlem günü dolmadan düştü.",
+      "face": "SYN08 20 günün en düşüğünün (160,04) altına indi · 6 işlem günü önce gerçekleşti\nBenzer 46 durumun 26'sında fiyat 10 işlem günü içinde düştü.\n7 işlem günü önce kapanış 146,40 oldu, eşiğin %8,5 altında. Fiyat 10 işlem günü dolmadan düştü.",
+      "glossary": [
+       {
+        "term": "en düşük fiyat",
+        "text": "Sayılan dönemde görülen en düşük fiyat; içinde bulunulan gün hariç. Onun altına inmek, fiyatın o dönemin bütün fiyatlarının altına düşmesi demektir."
+       },
+       {
+        "term": "benzer durum",
+        "text": "Aynı tür ve yönde, bundan önce kapanmış iddialar. Fiyat süresinde olağan oynaklığı kadar o yöne gittiyse tuttu sayılır; rastgele bir gün de yarı yarıya tutar."
+       }
+      ],
+      "headline": "SYN08 20 günün en düşüğünün (160,04) altına indi · 6 işlem günü önce gerçekleşti",
+      "ledger": "Benzer 46 durumun 26'sında fiyat 10 işlem günü içinde düştü.",
+      "voice": "marla"
+     }
+    },
+    "cap.SYN14.breakout.down.103": {
+     "born_bar": 103,
+     "coin_flip": true,
+     "confirmations": 2,
+     "direction": "down",
+     "finding": "fnd.SYN14.breakout.down.103",
+     "id": "cap.SYN14.breakout.down.103",
+     "importance": 2.583574026657462,
+     "instrument": "SYN14",
+     "kind": "breakout",
+     "known_at": 1685516400000,
+     "last_bar": 106,
+     "ledger_at_birth": {
+      "n": 58,
+      "realized": 30
+     },
+     "sentence": {
+      "en": "16 bars ago, SYN14 broke below support at 121.97 (close 113.64): a downside breakout. The expected outcome came true 13 bars ago. Historically, this signal played out in 30 of 58 cases.",
+      "text": "SYN14 16 bar önce 121,97'deki desteği aşağı kırdı (kapanış 113,64): aşağı kırılım. Beklenen sonuç 13 bar önce gerçekleşti. Geçmişte bu sinyal 58 seferin 30'unda beklendiği gibi sonuçlandı.",
+      "tr": "SYN14 16 bar önce 121,97'deki desteği aşağı kırdı (kapanış 113,64): aşağı kırılım. Beklenen sonuç 13 bar önce gerçekleşti. Geçmişte bu sinyal 58 seferin 30'unda beklendiği gibi sonuçlandı."
+     },
+     "series": "syn14",
+     "stage": "realized",
+     "state": "live",
+     "t": 1685430000000,
+     "tier": 1,
+     "time": "event",
+     "trust": "replica",
+     "validity": "closed",
+     "voice": {
+      "detail": "17 işlem günü önce kapanış 113,64 oldu, eşiğin %6,8 altında. Fiyat 10 işlem günü dolmadan düştü.",
+      "face": "SYN14 20 günün en düşüğünü (121,97) kırdı · 14 işlem günü önce gerçekleşti\nBenzer 58 durumun 30'unda fiyat 10 işlem günü içinde düştü.\n17 işlem günü önce kapanış 113,64 oldu, eşiğin %6,8 altında. Fiyat 10 işlem günü dolmadan düştü.",
+      "glossary": [
+       {
+        "term": "en düşük fiyat",
+        "text": "Sayılan dönemde görülen en düşük fiyat; içinde bulunulan gün hariç. Onun altına inmek, fiyatın o dönemin bütün fiyatlarının altına düşmesi demektir."
+       },
+       {
+        "term": "benzer durum",
+        "text": "Aynı tür ve yönde, bundan önce kapanmış iddialar. Fiyat süresinde olağan oynaklığı kadar o yöne gittiyse tuttu sayılır; rastgele bir gün de yarı yarıya tutar."
+       }
+      ],
+      "headline": "SYN14 20 günün en düşüğünü (121,97) kırdı · 14 işlem günü önce gerçekleşti",
+      "ledger": "Benzer 58 durumun 30'unda fiyat 10 işlem günü içinde düştü.",
+      "voice": "marla"
+     }
+    },
+    "cap.SYN14.breakout.down.70": {
+     "born_bar": 70,
+     "coin_flip": true,
+     "confirmations": 2,
+     "direction": "down",
+     "finding": "fnd.SYN14.breakout.down.70",
+     "id": "cap.SYN14.breakout.down.70",
+     "importance": 2.649913421315185,
+     "instrument": "SYN14",
+     "kind": "breakout",
+     "known_at": 1681974000000,
+     "last_bar": 77,
+     "ledger_at_birth": {
+      "n": 33,
+      "realized": 17
+     },
+     "sentence": {
+      "en": "49 bars ago, SYN14 broke below support at 158.96 (close 150.42): a downside breakout. The expected outcome came true 42 bars ago. Historically, this signal played out in 17 of 33 cases.",
+      "text": "SYN14 49 bar önce 158,96'daki desteği aşağı kırdı (kapanış 150,42): aşağı kırılım. Beklenen sonuç 42 bar önce gerçekleşti. Geçmişte bu sinyal 33 seferin 17'sinde beklendiği gibi sonuçlandı.",
+      "tr": "SYN14 49 bar önce 158,96'daki desteği aşağı kırdı (kapanış 150,42): aşağı kırılım. Beklenen sonuç 42 bar önce gerçekleşti. Geçmişte bu sinyal 33 seferin 17'sinde beklendiği gibi sonuçlandı."
+     },
+     "series": "syn14",
+     "stage": "realized",
+     "state": "live",
+     "t": 1681887600000,
+     "tier": 1,
+     "time": "event",
+     "trust": "replica",
+     "validity": "closed",
+     "voice": {
+      "detail": "10 Nisan'da kapanış 150,42 oldu, eşiğin %5,4 altında. Fiyat 10 işlem günü dolmadan düştü.",
+      "face": "SYN14 20 günün en düşüğünün (158,96) altına indi · 19 Nisan'da gerçekleşti\nBenzer 33 durumun 17'sinde fiyat 10 işlem günü içinde düştü.\n10 Nisan'da kapanış 150,42 oldu, eşiğin %5,4 altında. Fiyat 10 işlem günü dolmadan düştü.",
+      "glossary": [
+       {
+        "term": "en düşük fiyat",
+        "text": "Sayılan dönemde görülen en düşük fiyat; içinde bulunulan gün hariç. Onun altına inmek, fiyatın o dönemin bütün fiyatlarının altına düşmesi demektir."
+       },
+       {
+        "term": "benzer durum",
+        "text": "Aynı tür ve yönde, bundan önce kapanmış iddialar. Fiyat süresinde olağan oynaklığı kadar o yöne gittiyse tuttu sayılır; rastgele bir gün de yarı yarıya tutar."
+       }
+      ],
+      "headline": "SYN14 20 günün en düşüğünün (158,96) altına indi · 19 Nisan'da gerçekleşti",
+      "ledger": "Benzer 33 durumun 17'sinde fiyat 10 işlem günü içinde düştü.",
+      "voice": "marla"
+     }
+    },
+    "cap.SYN21.continuation.down.104": {
+     "born_bar": 104,
+     "confirmations": 1,
+     "direction": "down",
+     "finding": "fnd.SYN21.continuation.down.104",
+     "id": "cap.SYN21.continuation.down.104",
+     "importance": 1.769020006937517,
+     "instrument": "SYN21",
+     "kind": "continuation",
+     "known_at": 1685689200000,
+     "last_bar": 108,
+     "ledger_at_birth": {
+      "n": 28,
+      "realized": 17
+     },
+     "sentence": {
+      "en": "SYN21 has been below the short average (159.86) for 15 bars and is now at 134.33. The downtrend is still in place. The expected outcome came true 11 bars ago. Historically, this signal played out in 17 of 28 cases.",
+      "text": "SYN21 15 bardır kısa ortalamanın (159,86) altında; şu an 134,33. Düşüş eğilimi sürüyor. Beklenen sonuç 11 bar önce gerçekleşti. Geçmişte bu sinyal 28 seferin 17'sinde beklendiği gibi sonuçlandı.",
+      "tr": "SYN21 15 bardır kısa ortalamanın (159,86) altında; şu an 134,33. Düşüş eğilimi sürüyor. Beklenen sonuç 11 bar önce gerçekleşti. Geçmişte bu sinyal 28 seferin 17'sinde beklendiği gibi sonuçlandı."
+     },
+     "series": "syn21",
+     "stage": "realized",
+     "state": "live",
+     "t": 1685602800000,
+     "tier": 1,
+     "time": "state",
+     "trust": "replica",
+     "validity": "closed",
+     "voice": {
+      "detail": "Kapanış (157,86) 20 günlük ortalamanın (159,86), o da 50 günlüğün (171,65) altındaydı. 16 işlem günü önce başladı, fiyat 20 işlem günü dolmadan düşüşünü sürdürdü.",
+      "face": "SYN21 düşüşte, 20 günlük ortalamanın altında · 12 işlem günü önce gerçekleşti\nBenzer 28 durumun 17'sinde 20 işlem gününde düşüşünü sürdürdü.\nKapanış (157,86) 20 günlük ortalamanın (159,86), o da 50 günlüğün (171,65) altındaydı. 16 işlem günü önce başladı, fiyat 20 işlem günü dolmadan düşüşünü sürdürdü.",
+      "glossary": [
+       {
+        "term": "ortalama",
+        "text": "Son belirtilen sayıda kapanış fiyatının ortalaması, her gün yeniden hesaplanır. Fiyat kısa ortalamanın, kısa da uzunun üstündeyse yükseliş düzeni sayılır."
+       },
+       {
+        "term": "benzer durum",
+        "text": "Aynı tür ve yönde, bundan önce kapanmış iddialar. Fiyat süresinde olağan oynaklığı kadar o yöne gittiyse tuttu sayılır; rastgele bir gün de yarı yarıya tutar."
+       }
+      ],
+      "headline": "SYN21 düşüşte, 20 günlük ortalamanın altında · 12 işlem günü önce gerçekleşti",
+      "ledger": "Benzer 28 durumun 17'sinde 20 işlem gününde düşüşünü sürdürdü.",
+      "voice": "marla"
+     }
+    },
+    "cap.SYN25.breakout.down.93": {
+     "born_bar": 93,
+     "coin_flip": true,
+     "confirmations": 2,
+     "direction": "down",
+     "finding": "fnd.SYN25.breakout.down.93",
+     "id": "cap.SYN25.breakout.down.93",
+     "importance": 2.6894906904939813,
+     "instrument": "SYN25",
+     "kind": "breakout",
+     "known_at": 1684220400000,
+     "last_bar": 95,
+     "ledger_at_birth": {
+      "n": 104,
+      "realized": 54
+     },
+     "sentence": {
+      "en": "26 bars ago, SYN25 broke below support at 173.47 (close 160.80): a downside breakout. The expected outcome came true 24 bars ago. Historically, this signal played out in 54 of 104 cases.",
+      "text": "SYN25 26 bar önce 173,47'deki desteği aşağı kırdı (kapanış 160,80): aşağı kırılım. Beklenen sonuç 24 bar önce gerçekleşti. Geçmişte bu sinyal 104 seferin 54'ünde beklendiği gibi sonuçlandı.",
+      "tr": "SYN25 26 bar önce 173,47'deki desteği aşağı kırdı (kapanış 160,80): aşağı kırılım. Beklenen sonuç 24 bar önce gerçekleşti. Geçmişte bu sinyal 104 seferin 54'ünde beklendiği gibi sonuçlandı."
+     },
+     "series": "syn25",
+     "stage": "realized",
+     "state": "live",
+     "t": 1684134000000,
+     "tier": 1,
+     "time": "event",
+     "trust": "replica",
+     "validity": "closed",
+     "voice": {
+      "detail": "11 Mayıs'ta kapanış 160,80 oldu, eşiğin %7,3 altında. Fiyat 10 işlem günü dolmadan düştü.",
+      "face": "SYN25 20 günün en düşüğünün (173,47) altına indi · 15 Mayıs'ta gerçekleşti\nBenzer 104 durumun 54'ünde fiyat 10 işlem günü içinde düştü.\n11 Mayıs'ta kapanış 160,80 oldu, eşiğin %7,3 altında. Fiyat 10 işlem günü dolmadan düştü.",
+      "glossary": [
+       {
+        "term": "en düşük fiyat",
+        "text": "Sayılan dönemde görülen en düşük fiyat; içinde bulunulan gün hariç. Onun altına inmek, fiyatın o dönemin bütün fiyatlarının altına düşmesi demektir."
+       },
+       {
+        "term": "benzer durum",
+        "text": "Aynı tür ve yönde, bundan önce kapanmış iddialar. Fiyat süresinde olağan oynaklığı kadar o yöne gittiyse tuttu sayılır; rastgele bir gün de yarı yarıya tutar."
+       }
+      ],
+      "headline": "SYN25 20 günün en düşüğünün (173,47) altına indi · 15 Mayıs'ta gerçekleşti",
+      "ledger": "Benzer 104 durumun 54'ünde fiyat 10 işlem günü içinde düştü.",
+      "voice": "marla"
+     }
+    },
+    "cap.SYN26.breakout.down.46": {
+     "born_bar": 46,
+     "confirmations": 2,
+     "direction": "down",
+     "finding": "fnd.SYN26.breakout.down.46",
+     "id": "cap.SYN26.breakout.down.46",
+     "importance": 2.5955299149270314,
+     "instrument": "SYN26",
+     "kind": "breakout",
+     "known_at": 1678345200000,
+     "last_bar": 47,
+     "ledger_at_birth": {
+      "n": 40,
+      "realized": 23
+     },
+     "sentence": {
+      "en": "73 bars ago, SYN26 broke below support at 111.73 (close 111.20): a downside breakout. The expected outcome came true 72 bars ago. Historically, this signal played out in 23 of 40 cases.",
+      "text": "SYN26 73 bar önce 111,73'teki desteği aşağı kırdı (kapanış 111,20): aşağı kırılım. Beklenen sonuç 72 bar önce gerçekleşti. Geçmişte bu sinyal 40 seferin 23'ünde beklendiği gibi sonuçlandı.",
+      "tr": "SYN26 73 bar önce 111,73'teki desteği aşağı kırdı (kapanış 111,20): aşağı kırılım. Beklenen sonuç 72 bar önce gerçekleşti. Geçmişte bu sinyal 40 seferin 23'ünde beklendiği gibi sonuçlandı."
+     },
+     "series": "syn26",
+     "stage": "realized",
+     "state": "live",
+     "t": 1678258800000,
+     "tier": 1,
+     "time": "event",
+     "trust": "replica",
+     "validity": "closed",
+     "voice": {
+      "detail": "7 Mart'ta kapanış 111,20 oldu, eşiğin %0,5 altında. Fiyat 10 işlem günü dolmadan düştü.",
+      "face": "SYN26 20 günün en düşüğünün (111,73) altına indi · 8 Mart'ta gerçekleşti\nBenzer 40 durumun 23'ünde fiyat 10 işlem günü içinde düştü.\n7 Mart'ta kapanış 111,20 oldu, eşiğin %0,5 altında. Fiyat 10 işlem günü dolmadan düştü.",
+      "glossary": [
+       {
+        "term": "en düşük fiyat",
+        "text": "Sayılan dönemde görülen en düşük fiyat; içinde bulunulan gün hariç. Onun altına inmek, fiyatın o dönemin bütün fiyatlarının altına düşmesi demektir."
+       },
+       {
+        "term": "benzer durum",
+        "text": "Aynı tür ve yönde, bundan önce kapanmış iddialar. Fiyat süresinde olağan oynaklığı kadar o yöne gittiyse tuttu sayılır; rastgele bir gün de yarı yarıya tutar."
+       }
+      ],
+      "headline": "SYN26 20 günün en düşüğünün (111,73) altına indi · 8 Mart'ta gerçekleşti",
+      "ledger": "Benzer 40 durumun 23'ünde fiyat 10 işlem günü içinde düştü.",
+      "voice": "marla"
+     }
+    },
+    "cap.SYN27.breakout.down.99": {
+     "born_bar": 99,
+     "coin_flip": true,
+     "confirmations": 2,
+     "direction": "down",
+     "finding": "fnd.SYN27.breakout.down.99",
+     "id": "cap.SYN27.breakout.down.99",
+     "importance": 2.680282016767861,
+     "instrument": "SYN27",
+     "kind": "breakout",
+     "known_at": 1684998000000,
+     "last_bar": 102,
+     "ledger_at_birth": {
+      "n": 122,
+      "realized": 63
+     },
+     "sentence": {
+      "en": "20 bars ago, SYN27 broke below support at 64.10 (close 60.48): a downside breakout. The expected outcome came true 17 bars ago. Historically, this signal played out in 63 of 122 cases.",
+      "text": "SYN27 20 bar önce 64,10'daki desteği aşağı kırdı (kapanış 60,48): aşağı kırılım. Beklenen sonuç 17 bar önce gerçekleşti. Geçmişte bu sinyal 122 seferin 63'ünde beklendiği gibi sonuçlandı.",
+      "tr": "SYN27 20 bar önce 64,10'daki desteği aşağı kırdı (kapanış 60,48): aşağı kırılım. Beklenen sonuç 17 bar önce gerçekleşti. Geçmişte bu sinyal 122 seferin 63'ünde beklendiği gibi sonuçlandı."
+     },
+     "series": "syn27",
+     "stage": "realized",
+     "state": "live",
+     "t": 1684911600000,
+     "tier": 1,
+     "time": "event",
+     "trust": "replica",
+     "validity": "closed",
+     "voice": {
+      "detail": "19 Mayıs'ta kapanış 60,48 oldu, eşiğin %5,6 altında. Fiyat 10 işlem günü dolmadan düştü.",
+      "face": "SYN27 20 günün en düşüğünün (64,10) altına indi · 18 işlem günü önce gerçekleşti\nBenzer 122 durumun 63'ünde fiyat 10 işlem günü içinde düştü.\n19 Mayıs'ta kapanış 60,48 oldu, eşiğin %5,6 altında. Fiyat 10 işlem günü dolmadan düştü.",
+      "glossary": [
+       {
+        "term": "en düşük fiyat",
+        "text": "Sayılan dönemde görülen en düşük fiyat; içinde bulunulan gün hariç. Onun altına inmek, fiyatın o dönemin bütün fiyatlarının altına düşmesi demektir."
+       },
+       {
+        "term": "benzer durum",
+        "text": "Aynı tür ve yönde, bundan önce kapanmış iddialar. Fiyat süresinde olağan oynaklığı kadar o yöne gittiyse tuttu sayılır; rastgele bir gün de yarı yarıya tutar."
+       }
+      ],
+      "headline": "SYN27 20 günün en düşüğünün (64,10) altına indi · 18 işlem günü önce gerçekleşti",
+      "ledger": "Benzer 122 durumun 63'ünde fiyat 10 işlem günü içinde düştü.",
+      "voice": "marla"
+     }
+    },
+    "cap.SYN30.breakout.down.98": {
+     "born_bar": 98,
+     "coin_flip": true,
+     "confirmations": 2,
+     "direction": "down",
+     "finding": "fnd.SYN30.breakout.down.98",
+     "id": "cap.SYN30.breakout.down.98",
+     "importance": 2.59275700230684,
+     "instrument": "SYN30",
+     "kind": "breakout",
+     "known_at": 1685602800000,
+     "last_bar": 107,
+     "ledger_at_birth": {
+      "n": 134,
+      "realized": 69
+     },
+     "sentence": {
+      "en": "21 bars ago, SYN30 broke below support at 4.05 (close 3.68): a downside breakout. The expected outcome came true 12 bars ago. Historically, this signal played out in 69 of 134 cases.",
+      "text": "SYN30 21 bar önce 4,05'teki desteği aşağı kırdı (kapanış 3,68): aşağı kırılım. Beklenen sonuç 12 bar önce gerçekleşti. Geçmişte bu sinyal 134 seferin 69'unda beklendiği gibi sonuçlandı.",
+      "tr": "SYN30 21 bar önce 4,05'teki desteği aşağı kırdı (kapanış 3,68): aşağı kırılım. Beklenen sonuç 12 bar önce gerçekleşti. Geçmişte bu sinyal 134 seferin 69'unda beklendiği gibi sonuçlandı."
+     },
+     "series": "syn30",
+     "stage": "realized",
+     "state": "live",
+     "t": 1685516400000,
+     "tier": 1,
+     "time": "event",
+     "trust": "replica",
+     "validity": "closed",
+     "voice": {
+      "detail": "18 Mayıs'ta kapanış 3,68 oldu, eşiğin %9,1 altında. Fiyat 10 işlem günü dolmadan düştü.",
+      "face": "SYN30 20 günün en düşüğünün (4,05) altına indi · 13 işlem günü önce gerçekleşti\nBenzer 134 durumun 69'unda fiyat 10 işlem günü içinde düştü.\n18 Mayıs'ta kapanış 3,68 oldu, eşiğin %9,1 altında. Fiyat 10 işlem günü dolmadan düştü.",
+      "glossary": [
+       {
+        "term": "en düşük fiyat",
+        "text": "Sayılan dönemde görülen en düşük fiyat; içinde bulunulan gün hariç. Onun altına inmek, fiyatın o dönemin bütün fiyatlarının altına düşmesi demektir."
+       },
+       {
+        "term": "benzer durum",
+        "text": "Aynı tür ve yönde, bundan önce kapanmış iddialar. Fiyat süresinde olağan oynaklığı kadar o yöne gittiyse tuttu sayılır; rastgele bir gün de yarı yarıya tutar."
+       }
+      ],
+      "headline": "SYN30 20 günün en düşüğünün (4,05) altına indi · 13 işlem günü önce gerçekleşti",
+      "ledger": "Benzer 134 durumun 69'unda fiyat 10 işlem günü içinde düştü.",
+      "voice": "marla"
+     }
+    }
+   },
+   "now_t": 1687158000000,
+   "principal": "arkin",
+   "state": "closed_realized",
+   "step": 1
+  },
+  {
+   "candidates": [
+    "cap.SYN26.breakout.down.47",
+    "cap.SYN26.breakout.down.51",
+    "cap.SYN20.breakout.down.48",
+    "cap.SYN23.breakout.down.106",
+    "cap.SYN21.breakout.down.64",
+    "cap.SYN11.breakout.up.107",
+    "cap.SYN11.breakout.up.105",
+    "cap.SYN16.breakout.up.94"
+   ],
+   "found": true,
+   "items": {
+    "cap.SYN11.breakout.up.105": {
+     "born_bar": 105,
+     "coin_flip": true,
+     "confirmations": 2,
+     "direction": "up",
+     "finding": "fnd.SYN11.breakout.up.105",
+     "id": "cap.SYN11.breakout.up.105",
+     "importance": 2.5777312350452766,
+     "instrument": "SYN11",
+     "kind": "breakout",
+     "known_at": 1685516400000,
+     "last_bar": 106,
+     "ledger_at_birth": {
+      "n": 38,
+      "realized": 14
+     },
+     "sentence": {
+      "en": "14 bars ago, SYN11 broke above resistance at 279.79 (close 298.94): an upside breakout. It was invalidated 13 bars ago and is no longer valid. Historically, this signal played out in 14 of 38 cases.",
+      "text": "SYN11 14 bar önce 279,79'daki direnci yukarı kırdı (kapanış 298,94): yukarı kırılım. Sinyal 13 bar önce geçersiz oldu; artık geçerli değil. Geçmişte bu sinyal 38 seferin 14'ünde beklendiği gibi sonuçlandı.",
+      "tr": "SYN11 14 bar önce 279,79'daki direnci yukarı kırdı (kapanış 298,94): yukarı kırılım. Sinyal 13 bar önce geçersiz oldu; artık geçerli değil. Geçmişte bu sinyal 38 seferin 14'ünde beklendiği gibi sonuçlandı."
+     },
+     "series": "syn11",
+     "stage": "invalidated",
+     "state": "invalidated",
+     "t": 1685430000000,
+     "tier": 1,
+     "time": "event",
+     "trust": "replica",
+     "validity": "closed",
+     "voice": {
+      "detail": "15 işlem günü önce kapanış 298,94 oldu, eşiğin %6,8 üstünde. Fiyat 10 işlem günü dolmadan ters yöne aynı ölçüde gitti.",
+      "face": "SYN11 son 20 günün en yüksek fiyatını (279,79) aştı · 14 işlem günü önce tutmadı\nBenzer 38 durumun 14'ünde fiyat 10 işlem günü içinde yükseldi.\n15 işlem günü önce kapanış 298,94 oldu, eşiğin %6,8 üstünde. Fiyat 10 işlem günü dolmadan ters yöne aynı ölçüde gitti.",
+      "glossary": [
+       {
+        "term": "en yüksek fiyat",
+        "text": "Sayılan dönemde görülen en yüksek fiyat; içinde bulunulan gün hariç. Onu aşmak, fiyatın o dönemin bütün fiyatlarının üstüne çıkması demektir."
+       },
+       {
+        "term": "benzer durum",
+        "text": "Aynı tür ve yönde, bundan önce kapanmış iddialar. Fiyat süresinde olağan oynaklığı kadar o yöne gittiyse tuttu sayılır; rastgele bir gün de yarı yarıya tutar."
+       }
+      ],
+      "headline": "SYN11 son 20 günün en yüksek fiyatını (279,79) aştı · 14 işlem günü önce tutmadı",
+      "ledger": "Benzer 38 durumun 14'ünde fiyat 10 işlem günü içinde yükseldi.",
+      "voice": "marla"
+     }
+    },
+    "cap.SYN11.breakout.up.107": {
+     "born_bar": 107,
+     "coin_flip": true,
+     "confirmations": 2,
+     "direction": "up",
+     "finding": "fnd.SYN11.breakout.up.107",
+     "id": "cap.SYN11.breakout.up.107",
+     "importance": 2.5765039619192063,
+     "instrument": "SYN11",
+     "kind": "breakout",
+     "known_at": 1685689200000,
+     "last_bar": 108,
+     "ledger_at_birth": {
+      "n": 40,
+      "realized": 15
+     },
+     "sentence": {
+      "en": "12 bars ago, SYN11 broke above resistance at 303.79 (close 309.63): an upside breakout. It was invalidated 11 bars ago and is no longer valid. Historically, this signal played out in 15 of 40 cases.",
+      "text": "SYN11 12 bar önce 303,79'daki direnci yukarı kırdı (kapanış 309,63): yukarı kırılım. Sinyal 11 bar önce geçersiz oldu; artık geçerli değil. Geçmişte bu sinyal 40 seferin 15'inde beklendiği gibi sonuçlandı.",
+      "tr": "SYN11 12 bar önce 303,79'daki direnci yukarı kırdı (kapanış 309,63): yukarı kırılım. Sinyal 11 bar önce geçersiz oldu; artık geçerli değil. Geçmişte bu sinyal 40 seferin 15'inde beklendiği gibi sonuçlandı."
+     },
+     "series": "syn11",
+     "stage": "invalidated",
+     "state": "invalidated",
+     "t": 1685602800000,
+     "tier": 1,
+     "time": "event",
+     "trust": "replica",
+     "validity": "closed",
+     "voice": {
+      "detail": "13 işlem günü önce kapanış 309,63 oldu, eşiğin %1,9 üstünde. Fiyat 10 işlem günü dolmadan ters yöne aynı ölçüde gitti.",
+      "face": "SYN11 son 20 günün en yüksek fiyatını (303,79) aştı · 12 işlem günü önce tutmadı\nBenzer 40 durumun 15'inde fiyat 10 işlem günü içinde yükseldi.\n13 işlem günü önce kapanış 309,63 oldu, eşiğin %1,9 üstünde. Fiyat 10 işlem günü dolmadan ters yöne aynı ölçüde gitti.",
+      "glossary": [
+       {
+        "term": "en yüksek fiyat",
+        "text": "Sayılan dönemde görülen en yüksek fiyat; içinde bulunulan gün hariç. Onu aşmak, fiyatın o dönemin bütün fiyatlarının üstüne çıkması demektir."
+       },
+       {
+        "term": "benzer durum",
+        "text": "Aynı tür ve yönde, bundan önce kapanmış iddialar. Fiyat süresinde olağan oynaklığı kadar o yöne gittiyse tuttu sayılır; rastgele bir gün de yarı yarıya tutar."
+       }
+      ],
+      "headline": "SYN11 son 20 günün en yüksek fiyatını (303,79) aştı · 12 işlem günü önce tutmadı",
+      "ledger": "Benzer 40 durumun 15'inde fiyat 10 işlem günü içinde yükseldi.",
+      "voice": "marla"
+     }
+    },
+    "cap.SYN16.breakout.up.94": {
+     "born_bar": 94,
+     "coin_flip": true,
+     "confirmations": 2,
+     "direction": "up",
+     "finding": "fnd.SYN16.breakout.up.94",
+     "id": "cap.SYN16.breakout.up.94",
+     "importance": 2.6011079615166603,
+     "instrument": "SYN16",
+     "kind": "breakout",
+     "known_at": 1684220400000,
+     "last_bar": 95,
+     "ledger_at_birth": {
+      "n": 45,
+      "realized": 16
+     },
+     "sentence": {
+      "en": "25 bars ago, SYN16 broke above resistance at 44.99 (close 48.91): an upside breakout. It was invalidated 24 bars ago and is no longer valid. Historically, this signal played out in 16 of 45 cases.",
+      "text": "SYN16 25 bar önce 44,99'daki direnci yukarı kırdı (kapanış 48,91): yukarı kırılım. Sinyal 24 bar önce geçersiz oldu; artık geçerli değil. Geçmişte bu sinyal 45 seferin 16'sında beklendiği gibi sonuçlandı.",
+      "tr": "SYN16 25 bar önce 44,99'daki direnci yukarı kırdı (kapanış 48,91): yukarı kırılım. Sinyal 24 bar önce geçersiz oldu; artık geçerli değil. Geçmişte bu sinyal 45 seferin 16'sında beklendiği gibi sonuçlandı."
+     },
+     "series": "syn16",
+     "stage": "invalidated",
+     "state": "invalidated",
+     "t": 1684134000000,
+     "tier": 1,
+     "time": "event",
+     "trust": "replica",
+     "validity": "closed",
+     "voice": {
+      "detail": "12 Mayıs'ta kapanış 48,91 oldu, eşiğin %8,7 üstünde. Fiyat 10 işlem günü dolmadan ters yöne aynı ölçüde gitti.",
+      "face": "SYN16 son 20 günün en yüksek fiyatını (44,99) aştı · 15 Mayıs'ta tutmadı\nBenzer 45 durumun 16'sında fiyat 10 işlem günü içinde yükseldi.\n12 Mayıs'ta kapanış 48,91 oldu, eşiğin %8,7 üstünde. Fiyat 10 işlem günü dolmadan ters yöne aynı ölçüde gitti.",
+      "glossary": [
+       {
+        "term": "en yüksek fiyat",
+        "text": "Sayılan dönemde görülen en yüksek fiyat; içinde bulunulan gün hariç. Onu aşmak, fiyatın o dönemin bütün fiyatlarının üstüne çıkması demektir."
+       },
+       {
+        "term": "benzer durum",
+        "text": "Aynı tür ve yönde, bundan önce kapanmış iddialar. Fiyat süresinde olağan oynaklığı kadar o yöne gittiyse tuttu sayılır; rastgele bir gün de yarı yarıya tutar."
+       }
+      ],
+      "headline": "SYN16 son 20 günün en yüksek fiyatını (44,99) aştı · 15 Mayıs'ta tutmadı",
+      "ledger": "Benzer 45 durumun 16'sında fiyat 10 işlem günü içinde yükseldi.",
+      "voice": "marla"
+     }
+    },
+    "cap.SYN20.breakout.down.48": {
+     "born_bar": 48,
+     "coin_flip": true,
+     "confirmations": 2,
+     "direction": "down",
+     "finding": "fnd.SYN20.breakout.down.48",
+     "id": "cap.SYN20.breakout.down.48",
+     "importance": 2.677297309584847,
+     "instrument": "SYN20",
+     "kind": "breakout",
+     "known_at": 1678690800000,
+     "last_bar": 49,
+     "ledger_at_birth": {
+      "n": 29,
+      "realized": 15
+     },
+     "sentence": {
+      "en": "71 bars ago, SYN20 broke below support at 192.66 (close 190.04): a downside breakout. It was invalidated 70 bars ago and is no longer valid. Historically, this signal played out in 15 of 29 cases.",
+      "text": "SYN20 71 bar önce 192,66'daki desteği aşağı kırdı (kapanış 190,04): aşağı kırılım. Sinyal 70 bar önce geçersiz oldu; artık geçerli değil. Geçmişte bu sinyal 29 seferin 15'inde beklendiği gibi sonuçlandı.",
+      "tr": "SYN20 71 bar önce 192,66'daki desteği aşağı kırdı (kapanış 190,04): aşağı kırılım. Sinyal 70 bar önce geçersiz oldu; artık geçerli değil. Geçmişte bu sinyal 29 seferin 15'inde beklendiği gibi sonuçlandı."
+     },
+     "series": "syn20",
+     "stage": "invalidated",
+     "state": "invalidated",
+     "t": 1678431600000,
+     "tier": 1,
+     "time": "event",
+     "trust": "replica",
+     "validity": "closed",
+     "voice": {
+      "detail": "9 Mart'ta kapanış 190,04 oldu, eşiğin %1,4 altında. Fiyat 10 işlem günü dolmadan ters yöne aynı ölçüde gitti.",
+      "face": "SYN20 son 20 günün en düşük fiyatının (192,66) altına indi · 10 Mart'ta tutmadı\nBenzer 29 durumun 15'inde fiyat 10 işlem günü içinde düştü.\n9 Mart'ta kapanış 190,04 oldu, eşiğin %1,4 altında. Fiyat 10 işlem günü dolmadan ters yöne aynı ölçüde gitti.",
+      "glossary": [
+       {
+        "term": "en düşük fiyat",
+        "text": "Sayılan dönemde görülen en düşük fiyat; içinde bulunulan gün hariç. Onun altına inmek, fiyatın o dönemin bütün fiyatlarının altına düşmesi demektir."
+       },
+       {
+        "term": "benzer durum",
+        "text": "Aynı tür ve yönde, bundan önce kapanmış iddialar. Fiyat süresinde olağan oynaklığı kadar o yöne gittiyse tuttu sayılır; rastgele bir gün de yarı yarıya tutar."
+       }
+      ],
+      "headline": "SYN20 son 20 günün en düşük fiyatının (192,66) altına indi · 10 Mart'ta tutmadı",
+      "ledger": "Benzer 29 durumun 15'inde fiyat 10 işlem günü içinde düştü.",
+      "voice": "marla"
+     }
+    },
+    "cap.SYN21.breakout.down.64": {
+     "born_bar": 64,
+     "coin_flip": true,
+     "confirmations": 2,
+     "direction": "down",
+     "finding": "fnd.SYN21.breakout.down.64",
+     "id": "cap.SYN21.breakout.down.64",
+     "importance": 2.6594613554566617,
+     "instrument": "SYN21",
+     "kind": "breakout",
+     "known_at": 1680678000000,
+     "last_bar": 66,
+     "ledger_at_birth": {
+      "n": 48,
+      "realized": 22
+     },
+     "sentence": {
+      "en": "55 bars ago, SYN21 broke below support at 186.04 (close 184.33): a downside breakout. It was invalidated 53 bars ago and is no longer valid. Historically, this signal played out in 22 of 48 cases.",
+      "text": "SYN21 55 bar önce 186,04'teki desteği aşağı kırdı (kapanış 184,33): aşağı kırılım. Sinyal 53 bar önce geçersiz oldu; artık geçerli değil. Geçmişte bu sinyal 48 seferin 22'sinde beklendiği gibi sonuçlandı.",
+      "tr": "SYN21 55 bar önce 186,04'teki desteği aşağı kırdı (kapanış 184,33): aşağı kırılım. Sinyal 53 bar önce geçersiz oldu; artık geçerli değil. Geçmişte bu sinyal 48 seferin 22'sinde beklendiği gibi sonuçlandı."
+     },
+     "series": "syn21",
+     "stage": "invalidated",
+     "state": "invalidated",
+     "t": 1680591600000,
+     "tier": 1,
+     "time": "event",
+     "trust": "replica",
+     "validity": "closed",
+     "voice": {
+      "detail": "31 Mart'ta kapanış 184,33 oldu, eşiğin %0,9 altında. Fiyat 10 işlem günü dolmadan ters yöne aynı ölçüde gitti.",
+      "face": "SYN21 son 20 günün en düşük fiyatının (186,04) altına indi · 4 Nisan'da tutmadı\nBenzer 48 durumun 22'sinde fiyat 10 işlem günü içinde düştü.\n31 Mart'ta kapanış 184,33 oldu, eşiğin %0,9 altında. Fiyat 10 işlem günü dolmadan ters yöne aynı ölçüde gitti.",
+      "glossary": [
+       {
+        "term": "en düşük fiyat",
+        "text": "Sayılan dönemde görülen en düşük fiyat; içinde bulunulan gün hariç. Onun altına inmek, fiyatın o dönemin bütün fiyatlarının altına düşmesi demektir."
+       },
+       {
+        "term": "benzer durum",
+        "text": "Aynı tür ve yönde, bundan önce kapanmış iddialar. Fiyat süresinde olağan oynaklığı kadar o yöne gittiyse tuttu sayılır; rastgele bir gün de yarı yarıya tutar."
+       }
+      ],
+      "headline": "SYN21 son 20 günün en düşük fiyatının (186,04) altına indi · 4 Nisan'da tutmadı",
+      "ledger": "Benzer 48 durumun 22'sinde fiyat 10 işlem günü içinde düştü.",
+      "voice": "marla"
+     }
+    },
+    "cap.SYN23.breakout.down.106": {
+     "born_bar": 106,
+     "coin_flip": true,
+     "confirmations": 2,
+     "direction": "down",
+     "finding": "fnd.SYN23.breakout.down.106",
+     "id": "cap.SYN23.breakout.down.106",
+     "importance": 2.6877039179580517,
+     "instrument": "SYN23",
+     "kind": "breakout",
+     "known_at": 1686639600000,
+     "last_bar": 115,
+     "ledger_at_birth": {
+      "n": 104,
+      "realized": 51
+     },
+     "sentence": {
+      "en": "13 bars ago, SYN23 broke below support at 7.18 (close 7.16): a downside breakout. It was invalidated 4 bars ago and is no longer valid. Historically, this signal played out in 51 of 104 cases.",
+      "text": "SYN23 13 bar önce 7,18'deki desteği aşağı kırdı (kapanış 7,16): aşağı kırılım. Sinyal 4 bar önce geçersiz oldu; artık geçerli değil. Geçmişte bu sinyal 104 seferin 51'inde beklendiği gibi sonuçlandı.",
+      "tr": "SYN23 13 bar önce 7,18'deki desteği aşağı kırdı (kapanış 7,16): aşağı kırılım. Sinyal 4 bar önce geçersiz oldu; artık geçerli değil. Geçmişte bu sinyal 104 seferin 51'inde beklendiği gibi sonuçlandı."
+     },
+     "series": "syn23",
+     "stage": "invalidated",
+     "state": "invalidated",
+     "t": 1686553200000,
+     "tier": 1,
+     "time": "event",
+     "trust": "replica",
+     "validity": "closed",
+     "voice": {
+      "detail": "14 işlem günü önce kapanış 7,16 oldu, eşiğin %0,3 altında. Fiyat 10 işlem günü dolmadan ters yöne aynı ölçüde gitti.",
+      "face": "SYN23 20 günün en düşüğünün (7,18) altına indi · 5 işlem günü önce tutmadı\nBenzer 104 durumun 51'inde fiyat 10 işlem günü içinde düştü.\n14 işlem günü önce kapanış 7,16 oldu, eşiğin %0,3 altında. Fiyat 10 işlem günü dolmadan ters yöne aynı ölçüde gitti.",
+      "glossary": [
+       {
+        "term": "en düşük fiyat",
+        "text": "Sayılan dönemde görülen en düşük fiyat; içinde bulunulan gün hariç. Onun altına inmek, fiyatın o dönemin bütün fiyatlarının altına düşmesi demektir."
+       },
+       {
+        "term": "benzer durum",
+        "text": "Aynı tür ve yönde, bundan önce kapanmış iddialar. Fiyat süresinde olağan oynaklığı kadar o yöne gittiyse tuttu sayılır; rastgele bir gün de yarı yarıya tutar."
+       }
+      ],
+      "headline": "SYN23 20 günün en düşüğünün (7,18) altına indi · 5 işlem günü önce tutmadı",
+      "ledger": "Benzer 104 durumun 51'inde fiyat 10 işlem günü içinde düştü.",
+      "voice": "marla"
+     }
+    },
+    "cap.SYN26.breakout.down.47": {
+     "born_bar": 47,
+     "confirmations": 2,
+     "direction": "down",
+     "finding": "fnd.SYN26.breakout.down.47",
+     "id": "cap.SYN26.breakout.down.47",
+     "importance": 2.6854512581431846,
+     "instrument": "SYN26",
+     "kind": "breakout",
+     "known_at": 1678690800000,
+     "last_bar": 49,
+     "ledger_at_birth": {
+      "n": 41,
+      "realized": 24
+     },
+     "sentence": {
+      "en": "72 bars ago, SYN26 broke below support at 110.95 (close 108.38): a downside breakout. It was invalidated 70 bars ago and is no longer valid. Historically, this signal played out in 24 of 41 cases.",
+      "text": "SYN26 72 bar önce 110,95'teki desteği aşağı kırdı (kapanış 108,38): aşağı kırılım. Sinyal 70 bar önce geçersiz oldu; artık geçerli değil. Geçmişte bu sinyal 41 seferin 24'ünde beklendiği gibi sonuçlandı.",
+      "tr": "SYN26 72 bar önce 110,95'teki desteği aşağı kırdı (kapanış 108,38): aşağı kırılım. Sinyal 70 bar önce geçersiz oldu; artık geçerli değil. Geçmişte bu sinyal 41 seferin 24'ünde beklendiği gibi sonuçlandı."
+     },
+     "series": "syn26",
+     "stage": "invalidated",
+     "state": "invalidated",
+     "t": 1678431600000,
+     "tier": 1,
+     "time": "event",
+     "trust": "replica",
+     "validity": "closed",
+     "voice": {
+      "detail": "8 Mart'ta kapanış 108,38 oldu, eşiğin %2,3 altında. Fiyat 10 işlem günü dolmadan ters yöne aynı ölçüde gitti.",
+      "face": "SYN26 son 20 günün en düşük fiyatının (110,95) altına indi · 10 Mart'ta tutmadı\nBenzer 41 durumun 24'ünde fiyat 10 işlem günü içinde düştü.\n8 Mart'ta kapanış 108,38 oldu, eşiğin %2,3 altında. Fiyat 10 işlem günü dolmadan ters yöne aynı ölçüde gitti.",
+      "glossary": [
+       {
+        "term": "en düşük fiyat",
+        "text": "Sayılan dönemde görülen en düşük fiyat; içinde bulunulan gün hariç. Onun altına inmek, fiyatın o dönemin bütün fiyatlarının altına düşmesi demektir."
+       },
+       {
+        "term": "benzer durum",
+        "text": "Aynı tür ve yönde, bundan önce kapanmış iddialar. Fiyat süresinde olağan oynaklığı kadar o yöne gittiyse tuttu sayılır; rastgele bir gün de yarı yarıya tutar."
+       }
+      ],
+      "headline": "SYN26 son 20 günün en düşük fiyatının (110,95) altına indi · 10 Mart'ta tutmadı",
+      "ledger": "Benzer 41 durumun 24'ünde fiyat 10 işlem günü içinde düştü.",
+      "voice": "marla"
+     }
+    },
+    "cap.SYN26.breakout.down.51": {
+     "born_bar": 51,
+     "coin_flip": true,
+     "confirmations": 2,
+     "direction": "down",
+     "finding": "fnd.SYN26.breakout.down.51",
+     "id": "cap.SYN26.breakout.down.51",
+     "importance": 2.684858487274787,
+     "instrument": "SYN26",
+     "kind": "breakout",
+     "known_at": 1679295600000,
+     "last_bar": 54,
+     "ledger_at_birth": {
+      "n": 51,
+      "realized": 28
+     },
+     "sentence": {
+      "en": "68 bars ago, SYN26 broke below support at 108.31 (close 100.90): a downside breakout. It was invalidated 65 bars ago and is no longer valid. Historically, this signal played out in 28 of 51 cases.",
+      "text": "SYN26 68 bar önce 108,31'deki desteği aşağı kırdı (kapanış 100,90): aşağı kırılım. Sinyal 65 bar önce geçersiz oldu; artık geçerli değil. Geçmişte bu sinyal 51 seferin 28'inde beklendiği gibi sonuçlandı.",
+      "tr": "SYN26 68 bar önce 108,31'deki desteği aşağı kırdı (kapanış 100,90): aşağı kırılım. Sinyal 65 bar önce geçersiz oldu; artık geçerli değil. Geçmişte bu sinyal 51 seferin 28'inde beklendiği gibi sonuçlandı."
+     },
+     "series": "syn26",
+     "stage": "invalidated",
+     "state": "invalidated",
+     "t": 1679036400000,
+     "tier": 1,
+     "time": "event",
+     "trust": "replica",
+     "validity": "closed",
+     "voice": {
+      "detail": "14 Mart'ta kapanış 100,90 oldu, eşiğin %6,8 altında. Fiyat 10 işlem günü dolmadan ters yöne aynı ölçüde gitti.",
+      "face": "SYN26 son 20 günün en düşük fiyatının (108,31) altına indi · 17 Mart'ta tutmadı\nBenzer 51 durumun 28'inde fiyat 10 işlem günü içinde düştü.\n14 Mart'ta kapanış 100,90 oldu, eşiğin %6,8 altında. Fiyat 10 işlem günü dolmadan ters yöne aynı ölçüde gitti.",
+      "glossary": [
+       {
+        "term": "en düşük fiyat",
+        "text": "Sayılan dönemde görülen en düşük fiyat; içinde bulunulan gün hariç. Onun altına inmek, fiyatın o dönemin bütün fiyatlarının altına düşmesi demektir."
+       },
+       {
+        "term": "benzer durum",
+        "text": "Aynı tür ve yönde, bundan önce kapanmış iddialar. Fiyat süresinde olağan oynaklığı kadar o yöne gittiyse tuttu sayılır; rastgele bir gün de yarı yarıya tutar."
+       }
+      ],
+      "headline": "SYN26 son 20 günün en düşük fiyatının (108,31) altına indi · 17 Mart'ta tutmadı",
+      "ledger": "Benzer 51 durumun 28'inde fiyat 10 işlem günü içinde düştü.",
+      "voice": "marla"
+     }
+    }
+   },
+   "now_t": 1687158000000,
+   "principal": "arkin",
+   "state": "closed_failed",
+   "step": 1
+  },
+  {
+   "candidates": [
+    "cap.SYN04.flow.down.127"
+   ],
+   "found": true,
+   "items": {
+    "cap.SYN04.flow.down.127": {
+     "born_bar": 127,
+     "confirmations": 1,
+     "direction": "down",
+     "finding": "fnd.SYN04.flow.down.127",
+     "id": "cap.SYN04.flow.down.127",
+     "importance": 1.4626699356119586,
+     "instrument": "SYN04",
+     "kind": "flow",
+     "last_bar": 127,
+     "ledger_at_birth": {
+      "n": 14,
+      "realized": 4
+     },
+     "sentence": {
+      "en": "On this bar, volume in SYN04 (1,131,341,705) jumped well above its average (394,832,180): money outflow. Whether it still holds is unknown. Its record is still thin: it played out in 4 of 14 cases.",
+      "text": "SYN04'de bu barda hacim (1.131.341.705) ortalamasının (394.832.180) belirgin üstüne çıktı: para çıkışı. Hâlâ geçerli olup olmadığı bilinmiyor. Karnesi henüz az örnekli: 14 seferin 4'ünde tuttu.",
+      "tr": "SYN04'de bu barda hacim (1.131.341.705) ortalamasının (394.832.180) belirgin üstüne çıktı: para çıkışı. Hâlâ geçerli olup olmadığı bilinmiyor. Karnesi henüz az örnekli: 14 seferin 4'ünde tuttu."
+     },
+     "series": "syn04",
+     "stage": "born",
+     "state": "live",
+     "t": 1687935600000,
+     "tier": 3,
+     "time": "event",
+     "trust": "replica",
+     "validity": "valid"
+    }
+   },
+   "note": "from qp replay; target listed through ?watch=",
+   "now_t": 1688022000000,
+   "principal": "arkin",
+   "state": "few_cases",
+   "step": 80,
+   "watch": "SYN04"
+  },
+  {
+   "candidates": [
+    "cap.SYN09.flow.neutral.122"
+   ],
+   "found": true,
+   "items": {
+    "cap.SYN09.flow.neutral.122": {
+     "born_bar": 122,
+     "confirmations": 1,
+     "direction": "neutral",
+     "finding": "fnd.SYN09.flow.neutral.122",
+     "id": "cap.SYN09.flow.neutral.122",
+     "importance": 1.61347715469283,
+     "instrument": "SYN09",
+     "kind": "flow",
+     "last_bar": 122,
+     "ledger_at_birth": {
+      "n": 0,
+      "realized": 0
+     },
+     "sentence": {
+      "en": "On this bar, volume in SYN09 (1,098,606,902) jumped well above its average (283,447,540): unusual money flow. Whether it still holds is unknown. No track record yet.",
+      "text": "SYN09'de bu barda hacim (1.098.606.902) ortalamasının (283.447.540) belirgin üstüne çıktı: olağandışı para akışı. Hâlâ geçerli olup olmadığı bilinmiyor. Henüz karnesi yok.",
+      "tr": "SYN09'de bu barda hacim (1.098.606.902) ortalamasının (283.447.540) belirgin üstüne çıktı: olağandışı para akışı. Hâlâ geçerli olup olmadığı bilinmiyor. Henüz karnesi yok."
+     },
+     "series": "syn09",
+     "stage": "born",
+     "state": "live",
+     "t": 1687330800000,
+     "tier": 2,
+     "time": "event",
+     "trust": "replica",
+     "validity": "valid"
+    }
+   },
+   "note": "from qp replay; target listed through ?watch=",
+   "now_t": 1687503600000,
+   "principal": "arkin",
+   "state": "no_record",
+   "step": 40,
+   "watch": "SYN09"
+  },
+  {
+   "candidates": [
+    "cap.SYN28.continuation.down.118"
+   ],
+   "found": true,
+   "items": {
+    "cap.SYN28.continuation.down.118": {
+     "born_bar": 118,
+     "confirmations": 2,
+     "direction": "down",
+     "finding": "fnd.SYN28.continuation.down.118",
+     "id": "cap.SYN28.continuation.down.118",
+     "importance": 2.720702660566816,
+     "instrument": "SYN28",
+     "kind": "continuation",
+     "known_at": 1686898800000,
+     "last_bar": 118,
+     "ledger_at_birth": {
+      "n": 54,
+      "realized": 30
+     },
+     "sentence": {
+      "en": "SYN28 has been below the short average (95.70) for 1 bar and is now at 93.42. The downtrend is still in place. Volume confirmed it 1 bar ago; 2 independent evidence families support it. Historically, this signal played out in 30 of 54 cases.",
+      "text": "SYN28 1 bardır kısa ortalamanın (95,70) altında; şu an 93,42. Düşüş eğilimi sürüyor. 1 bar önce hacim de teyit etti; 2 bağımsız kanıt ailesi destekliyor. Geçmişte bu sinyal 54 seferin 30'unda beklendiği gibi sonuçlandı.",
+      "tr": "SYN28 1 bardır kısa ortalamanın (95,70) altında; şu an 93,42. Düşüş eğilimi sürüyor. 1 bar önce hacim de teyit etti; 2 bağımsız kanıt ailesi destekliyor. Geçmişte bu sinyal 54 seferin 30'unda beklendiği gibi sonuçlandı."
+     },
+     "series": "syn28",
+     "stage": "confirmed",
+     "state": "live",
+     "t": 1686812400000,
+     "tier": 1,
+     "time": "state",
+     "trust": "replica",
+     "validity": "valid",
+     "voice": {
+      "detail": "Kapanış (93,83) 20 günlük ortalamanın (95,70), o da 50 günlüğün (98,22) altındaydı. 2 işlem günü önce başka bir ölçü de aynı yönü gösterdi: hacim ortalamanın 7,3 katına çıktı.",
+      "face": "SYN28 düşüşte, 20 günlük ortalamanın altında · 2 işlem günü önce, hâlâ geçerli\nBenzer 54 durumun 30'unda 20 işlem gününde düşüşünü sürdürdü.\nKapanış (93,83) 20 günlük ortalamanın (95,70), o da 50 günlüğün (98,22) altındaydı. 2 işlem günü önce başka bir ölçü de aynı yönü gösterdi: hacim ortalamanın 7,3 katına çıktı.",
+      "glossary": [
+       {
+        "term": "ortalama",
+        "text": "Son belirtilen sayıda kapanış fiyatının ortalaması, her gün yeniden hesaplanır. Fiyat kısa ortalamanın, kısa da uzunun üstündeyse yükseliş düzeni sayılır."
+       },
+       {
+        "term": "hacim",
+        "text": "Bir günde el değiştiren hisse adedi. Ortalamasının birkaç katı, olağandan çok daha fazla işlem yapıldığı anlamına gelir."
+       },
+       {
+        "term": "benzer durum",
+        "text": "Aynı tür ve yönde, bundan önce kapanmış iddialar. Fiyat süresinde olağan oynaklığı kadar o yöne gittiyse tuttu sayılır; rastgele bir gün de yarı yarıya tutar."
+       }
+      ],
+      "headline": "SYN28 düşüşte, 20 günlük ortalamanın altında · 2 işlem günü önce, hâlâ geçerli",
+      "ledger": "Benzer 54 durumun 30'unda 20 işlem gününde düşüşünü sürdürdü.",
+      "voice": "marla"
+     }
+    }
+   },
+   "now_t": 1687158000000,
+   "principal": "arkin",
+   "state": "state_live",
+   "step": 1
+  },
+  {
+   "candidates": [
+    "cap.SYN28.continuation.down.118",
+    "cap.SYN06.breakout.up.118"
+   ],
+   "found": true,
+   "items": {
+    "cap.SYN06.breakout.up.118": {
+     "born_bar": 118,
+     "coin_flip": true,
+     "confirmations": 2,
+     "direction": "up",
+     "finding": "fnd.SYN06.breakout.up.118",
+     "id": "cap.SYN06.breakout.up.118",
+     "importance": 2.557784738097699,
+     "instrument": "SYN06",
+     "kind": "breakout",
+     "last_bar": 118,
+     "ledger_at_birth": {
+      "n": 31,
+      "realized": 12
+     },
+     "redacted": true,
+     "sentence": {
+      "en": "There is a server-verified upside breakout signal for This stock; the details require a data license.",
+      "text": "Bu hisse için sunucunun doğruladığı bir yukarı kırılım sinyali var; ayrıntılar veri lisansı gerektiriyor.",
+      "tr": "Bu hisse için sunucunun doğruladığı bir yukarı kırılım sinyali var; ayrıntılar veri lisansı gerektiriyor."
+     },
+     "series": "syn06",
+     "stage": "confirmed",
+     "state": "live",
+     "t": 1686812400000,
+     "tier": 1,
+     "time": "event",
+     "trust": "replica",
+     "validity": "valid",
+     "voice": {
+      "detail": "Değerler lisanslı veridir: sunucu hesapladı ve doğruladı, veri yetkisiyle görünür. Birkaç işlem günü önce başka bir ölçü de aynı yönü gösterdi: hacim ortalamanın iki buçuk katını aştı.",
+      "face": "SYN06 yirmi günün zirvesini aştı · birkaç işlem günü önce, hâlâ geçerli\nBenzer durumların azında fiyat on işlem günü içinde yükseldi.\nDeğerler lisanslı veridir: sunucu hesapladı ve doğruladı, veri yetkisiyle görünür. Birkaç işlem günü önce başka bir ölçü de aynı yönü gösterdi: hacim ortalamanın iki buçuk katını aştı.",
+      "glossary": [
+       {
+        "term": "en yüksek fiyat",
+        "text": "Sayılan dönemde görülen en yüksek fiyat; içinde bulunulan gün hariç. Onu aşmak, fiyatın o dönemin bütün fiyatlarının üstüne çıkması demektir."
+       },
+       {
+        "term": "hacim",
+        "text": "Bir günde el değiştiren hisse adedi. Ortalamasının birkaç katı, olağandan çok daha fazla işlem yapıldığı anlamına gelir."
+       },
+       {
+        "term": "benzer durum",
+        "text": "Aynı tür ve yönde, bundan önce kapanmış iddialar. Fiyat süresinde olağan oynaklığı kadar o yöne gittiyse tuttu sayılır; rastgele bir gün de yarı yarıya tutar."
+       }
+      ],
+      "headline": "SYN06 yirmi günün zirvesini aştı · birkaç işlem günü önce, hâlâ geçerli",
+      "ledger": "Benzer durumların azında fiyat on işlem günü içinde yükseldi.",
+      "voice": "marla"
+     }
+    },
+    "cap.SYN28.continuation.down.118": {
+     "born_bar": 118,
+     "confirmations": 2,
+     "direction": "down",
+     "finding": "fnd.SYN28.continuation.down.118",
+     "id": "cap.SYN28.continuation.down.118",
+     "importance": 2.720702660566816,
+     "instrument": "SYN28",
+     "kind": "continuation",
+     "last_bar": 118,
+     "ledger_at_birth": {
+      "n": 54,
+      "realized": 30
+     },
+     "redacted": true,
+     "sentence": {
+      "en": "There is a server-verified downtrend signal for This stock; the details require a data license.",
+      "text": "Bu hisse için sunucunun doğruladığı bir düşüş eğilimi sinyali var; ayrıntılar veri lisansı gerektiriyor.",
+      "tr": "Bu hisse için sunucunun doğruladığı bir düşüş eğilimi sinyali var; ayrıntılar veri lisansı gerektiriyor."
+     },
+     "series": "syn28",
+     "stage": "confirmed",
+     "state": "live",
+     "t": 1686812400000,
+     "tier": 1,
+     "time": "state",
+     "trust": "replica",
+     "validity": "valid",
+     "voice": {
+      "detail": "Değerler lisanslı veridir: sunucu hesapladı ve doğruladı, veri yetkisiyle görünür. Birkaç işlem günü önce başka bir ölçü de aynı yönü gösterdi: hacim ortalamanın iki buçuk katını aştı.",
+      "face": "SYN28 düşüşte: yirmi günlük ortalama altı · sürüyor\nBenzer durumların yarısına yakınında yirmi işlem gününde düşüşünü sürdürdü.\nDeğerler lisanslı veridir: sunucu hesapladı ve doğruladı, veri yetkisiyle görünür. Birkaç işlem günü önce başka bir ölçü de aynı yönü gösterdi: hacim ortalamanın iki buçuk katını aştı.",
+      "glossary": [
+       {
+        "term": "ortalama",
+        "text": "Son belirtilen sayıda kapanış fiyatının ortalaması, her gün yeniden hesaplanır. Fiyat kısa ortalamanın, kısa da uzunun üstündeyse yükseliş düzeni sayılır."
+       },
+       {
+        "term": "hacim",
+        "text": "Bir günde el değiştiren hisse adedi. Ortalamasının birkaç katı, olağandan çok daha fazla işlem yapıldığı anlamına gelir."
+       },
+       {
+        "term": "benzer durum",
+        "text": "Aynı tür ve yönde, bundan önce kapanmış iddialar. Fiyat süresinde olağan oynaklığı kadar o yöne gittiyse tuttu sayılır; rastgele bir gün de yarı yarıya tutar."
+       }
+      ],
+      "headline": "SYN28 düşüşte: yirmi günlük ortalama altı · sürüyor",
+      "ledger": "Benzer durumların yarısına yakınında yirmi işlem gününde düşüşünü sürdürdü.",
+      "voice": "marla"
+     }
+    }
+   },
+   "now_t": 1687158000000,
+   "principal": "visitor",
+   "redacted": true,
+   "state": "visitor",
+   "step": 1
+  },
+  {
+   "found": true,
+   "now_t": 1687158000000,
+   "principal": "arkin",
+   "state": "feed",
+   "step": 1
+  }
+ ]
+}

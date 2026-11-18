@@ -62,6 +62,7 @@ pub const DESIGN: StoryDesign = StoryDesign {
     price_height,
     extend,
     tap,
+    compile: None,
 };
 
 /// Share of the frame height the price context strip takes.

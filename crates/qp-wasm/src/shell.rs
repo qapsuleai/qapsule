@@ -536,6 +536,69 @@ impl std::fmt::Debug for ShellCore {
     }
 }
 
+/// (R5/M18, K52 measurement) `n` synthetic story rows over `bars` bars of `series`.
+fn synthetic_rows(n: u64, bars: u64, series: &str) -> Vec<qp_schema::protocol::StoryRow> {
+    use qp_schema::capsule::{Direction, MeaningKind, Stage, Validity};
+    use qp_schema::protocol::{StoryFace, StoryOutcome, StoryRow};
+    let outcomes = [
+        Stage::Realized,
+        Stage::Invalidated,
+        Stage::Expired,
+        Stage::Realized,
+        Stage::Retracted,
+    ];
+    let t = |b: u64| i64::try_from(b).unwrap_or(0);
+    (0..n)
+        .map(|i| {
+            let born = (i * (bars - 5) / n.max(1)) % (bars - 5);
+            let len = 3 + (i * 7) % 25;
+            let open = born + len >= bars - 1 || i + 3 >= n;
+            let stage = if open {
+                Stage::Born
+            } else {
+                outcomes[usize::try_from(i % 5).unwrap_or(0)]
+            };
+            let last = if open { born + len / 2 } else { born + len };
+            StoryRow {
+                id: format!("bench.{i}"),
+                finding: format!("bench.f{i}"),
+                series: series.to_owned(),
+                kind: MeaningKind::Breakout,
+                direction: [Direction::Up, Direction::Down, Direction::Neutral]
+                    [usize::try_from(i % 3).unwrap_or(0)],
+                tier: 2,
+                born_bar: born,
+                born_t: t(born),
+                last_bar: last,
+                last_t: t(last),
+                closed_bar: (!open).then_some(last),
+                closed_t: (!open).then(|| t(last)),
+                stage,
+                outcome: StoryOutcome::of(stage),
+                validity: if open {
+                    Validity::Valid
+                } else {
+                    Validity::Closed
+                },
+                in_feed: true,
+                hidden: None,
+                coin_flip: i % 7 == 0,
+                face: StoryFace {
+                    event: "kırılım".to_owned(),
+                    direction_word: String::new(),
+                    when: String::new(),
+                    moved: String::new(),
+                    validity_phrase: if open { "geçerli" } else { "kapandı" }.to_owned(),
+                    ledger_short: String::new(),
+                    few_cases: false,
+                    ledger_n: None,
+                },
+                redacted: false,
+            }
+        })
+        .collect()
+}
+
 fn lang_name(l: Language) -> &'static str {
     match l {
         Language::Tr => "tr",
@@ -1231,6 +1294,25 @@ impl ShellCore {
     #[must_use]
     pub fn stories_asked(&self) -> u64 {
         self.viewer.as_ref().map_or(0, |v| v.stories_asked)
+    }
+
+    /// (R5/M18, K52 measurement only) Replaces the held story list with `n` synthetic
+    /// stories spread over the open chart's bars (deterministic: lives of 3–27 bars,
+    /// outcomes in turn, the last three open, every 7th a coin flip), so that the paint
+    /// budget can be measured with 5 / 50 / 200 stories in view. Returns how many rows
+    /// the list now holds (0: no viewer list, e.g. the chart is not open).
+    pub fn bench_stories(&mut self, n: u32) -> u32 {
+        let bars = self.scene().map_or(0, |s| s.bars);
+        let Some(st) = self.viewer.as_mut().and_then(|v| v.stories.as_mut()) else {
+            return 0;
+        };
+        if bars < 8 {
+            return 0;
+        }
+        st.rows = synthetic_rows(u64::from(n), bars, &st.series);
+        st.total = n;
+        self.version += 1;
+        u32::try_from(st.rows.len()).unwrap_or(u32::MAX)
     }
 
     /// (RP3/M15) Applies a viewer update: the feed rows (the feed the rest of the core

@@ -1,0 +1,44 @@
+{
+ "config": "phone",
+ "design": "r4",
+ "chart_ms": 10000,
+ "reps": 3,
+ "browser": "26.5",
+ "by_n": {
+  "0": {
+   "runs": 3,
+   "rows": 38,
+   "depth": [
+    "chart",
+    "chart",
+    "chart"
+   ],
+   "tick": {
+    "n": 39,
+    "p50": 0,
+    "p95": 1
+   },
+   "scene": {
+    "n": 2,
+    "p50": 5,
+    "p95": 7
+   },
+   "data_pass": {
+    "n": 39,
+    "p50": 5,
+    "p95": 7
+   },
+   "paint_pass": {
+    "n": 40,
+    "p50": 5,
+    "p95": 7
+   },
+   "scene_build": {
+    "n": 39,
+    "p50": 2,
+    "p95": 3
+   },
+   "errors": []
+  }
+ }
+}

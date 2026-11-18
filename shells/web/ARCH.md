@@ -150,3 +150,4 @@ kümeleme ve gizleme çekirdekte; sayfa yalnız sahneyi boyar.
 | Yöntem | Neden |
 |--------|-------|
 | `stories()` | Yalnız ölçüm düzeneği için (`window.qp.stories`, `rounds/R5/experiments/M18/pavka/k52.mjs`): cihazın tuttuğu hikâye listesi (§23.5). Sayfa onu okumaz, çizmez. |
+| `bench_stories(n)` | (R5/M18 `korda`) Yalnız ölçüm (K52): tutulan listenin yerine `n` sentetik hikâye; 5 / 50 / 200 hikâyeyle boyama bütçesi. Sayfa yalnız `window.qp.benchStories` olarak verir. |

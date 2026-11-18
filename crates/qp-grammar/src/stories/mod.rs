@@ -10,12 +10,22 @@
 //! [`StoryDesign::extend`] adds the story part to that scene (pure: the scene, the rows,
 //! the focus, the look). A tap on the story part is resolved by [`StoryDesign::tap`]
 //! before the opening rule ([`crate::depth::tap_opens`]).
+//!
+//! (R5/S) A design may instead compile the whole scene itself from the view
+//! ([`StoryDesign::compile`]; `korda`): then the chart is not compiled first and
+//! `price_height`/`extend` are unused.
 
 use qp_schema::protocol::{HitItem, Language, StoryRow};
 use qp_schema::scene::SceneDesc;
 
-use crate::look::Look;
+use qp_schema::grammar::View;
 
+use crate::compile::CompileOptions;
+use crate::error::GrammarError;
+use crate::look::Look;
+use crate::provider::DataProvider;
+
+pub mod korda;
 pub mod pavka;
 
 /// What a story design draws from.
@@ -57,13 +67,24 @@ pub struct StoryDesign {
     /// The tap rule of the story part (`None`: not a story element; the opening rule
     /// applies).
     pub tap: fn(Option<&HitItem>, Option<&str>) -> Option<StoryTap>,
+    /// (R5/S) The whole scene compiled by the design from the chart view (`None`: the
+    /// chart is compiled at `price_height`, then `extend`ed).
+    pub compile: Option<StoryCompile>,
 }
+
+/// (R5/S) A design that compiles the chart view and its stories into one scene.
+pub type StoryCompile = fn(
+    &View,
+    &dyn DataProvider,
+    &CompileOptions,
+    &StoryInput<'_>,
+) -> Result<SceneDesc, GrammarError>;
 
 /// The default: no story chart (the open capsule's chart alone, as in R4).
 pub const DEFAULT_STORY: &str = "r4";
 
 /// Registered designs (the default is not one: it draws nothing more).
-pub static STORIES: &[StoryDesign] = &[pavka::DESIGN];
+pub static STORIES: &[StoryDesign] = &[pavka::DESIGN, korda::DESIGN];
 
 /// Every name `story` accepts, the default first.
 #[must_use]

@@ -299,6 +299,17 @@ pub fn open_scene_with(
     let Some(sd) = sd else {
         return compile(&view, &p, &options(look, w, h, range)).ok();
     };
+    // (R5/S) A design that compiles the whole scene (`korda`; it reads no first facts).
+    if let Some(c) = sd.compile {
+        let input = qp_grammar::stories::StoryInput {
+            rows: stories.0,
+            focus: Some(&o.finding),
+            hide_closed: look.hide_closed,
+            lang: stories.1,
+            fact_of: &|_| None,
+        };
+        return c(&view, &p, &options(look, w, h, range), &input).ok();
+    }
     let scene = compile(&view, &p, &options(look, w, (sd.price_height)(h), range)).ok()?;
     // (R5/M18) The first fact of each listed story's finding (R5/m18-pavka-perf: looked
     // up only if the story chart asks, i.e. when it clusters; compiling does not change

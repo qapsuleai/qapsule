@@ -41,6 +41,8 @@ export const ALLOWED_CORE = new Set([
   'gloss', 'close_gloss', 'face_desc',
   // R5/M18 (ARCH.md): the device's story list, for the measurement harness only.
   'stories',
+  // R5/M18 korda (ARCH.md): synthetic stories for the K52 measurement (5 / 50 / 200).
+  'bench_stories',
 ]);
 
 // R5/G (ARCH.md "Galeri"): the gallery page's core (`Gallery`, crates/qp-wasm/src/lib.rs).

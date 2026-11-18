@@ -503,7 +503,7 @@ fn shapes_carry_the_outcome_and_closed_marks_keep_contrast() {
 
 #[test]
 fn registry_and_price_height() {
-    assert_eq!(stories::names(), vec!["r4", "pavka"]);
+    assert_eq!(stories::names(), vec!["r4", "pavka", "korda"]);
     assert!(stories::by_name(Some("r4")).is_none());
     assert!(stories::by_name(None).is_none());
     assert!(stories::is_story("pavka"));

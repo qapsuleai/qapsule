@@ -885,6 +885,8 @@ window.qp = {
   check: () => core.check(),
   // (R5/M18) for the story chart measurement (rounds/R5/experiments/M18/pavka).
   stories: () => core.stories(),
+  // (R5/M18 korda) `n` synthetic stories in place of the held list (K52 with 5 / 50 / 200).
+  benchStories: (n) => { const k = core.bench_stories(n); renderLayer(true); return k; },
   // Shows the last transition frozen at progress `p` (a value the harness gives).
   freeze: (p) => {
     if (window.qp.frozen) clearFrame(window.qp.frozen);

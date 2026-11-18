@@ -59,6 +59,13 @@ struct StyleReq<'a> {
     hide_closed: Option<bool>,
 }
 
+/// (R5/S) A story design's whole-scene compile, the reader's story rows and the focus.
+type StoryCompiled<'a> = (
+    qp_grammar::stories::StoryCompile,
+    &'a [qp_schema::protocol::StoryRow],
+    &'a str,
+);
+
 /// The frame key of a target (`ViewState::frames`).
 fn frame_key(on: &On) -> String {
     match on {
@@ -602,6 +609,7 @@ impl Session {
         frame: (u32, u32),
         range: Option<(u64, u64)>,
         face: Option<String>,
+        story: Option<StoryCompiled<'_>>,
     ) -> PResult<(SceneDesc, Vec<i64>)> {
         warm(rd!(self), &mut self.cache);
         let asker = self.conns[ci].principal.clone();
@@ -628,14 +636,26 @@ impl Session {
         opts.face = face;
         let lang = self.lang_of(ci);
         let voice = self.conns[ci].look.voice.clone();
-        let scene = compile(
-            view,
-            &DocProvider::new(rd!(self), &self.cache)
-                .with_headlines(&self.headlines)
-                .with_parts(self, lang)
-                .with_voice(voice.as_deref()),
-            &opts,
-        )
+        let p = DocProvider::new(rd!(self), &self.cache)
+            .with_headlines(&self.headlines)
+            .with_parts(self, lang)
+            .with_voice(voice.as_deref());
+        // (R5/S) A story chart design that compiles the whole scene (`korda`).
+        let scene = match story {
+            Some((c, rows, finding)) => c(
+                view,
+                &p,
+                &opts,
+                &qp_grammar::stories::StoryInput {
+                    rows,
+                    focus: Some(finding),
+                    hide_closed: self.conns[ci].look.hide_closed,
+                    lang,
+                    fact_of: &|_| None,
+                },
+            ),
+            None => compile(view, &p, &opts),
+        }
         .map_err(|e| E::new(ErrorCode::Invalid, e.to_string()).at(GP).build())?;
         let times = view_bar_series(rd!(self), view)
             .and_then(Series::bars)
@@ -673,11 +693,24 @@ impl Session {
             None
         };
         let Some(sd) = story else {
-            let (scene, times) = self.reader_scene(ci, &view, frame, range, face)?;
+            let (scene, times) = self.reader_scene(ci, &view, frame, range, face, None)?;
             return Ok(Some((view, scene, times)));
         };
+        if let Some(c) = sd.compile {
+            let rows = match view_bar_series(rd!(self), &view).map(|s| s.id.clone()) {
+                Some(series) => {
+                    let principal = self.conns[ci].principal.clone();
+                    let lang = self.lang_of(ci);
+                    self.story_rows(&series, &principal, lang)
+                }
+                None => Vec::new(),
+            };
+            let (scene, times) =
+                self.reader_scene(ci, &view, frame, range, face, Some((c, &rows, finding)))?;
+            return Ok(Some((view, scene, times)));
+        }
         let at = (frame.0, (sd.price_height)(frame.1));
-        let (scene, times) = self.reader_scene(ci, &view, at, range, face)?;
+        let (scene, times) = self.reader_scene(ci, &view, at, range, face, None)?;
         let scene = self.story_extend(ci, sd, &view, scene, frame.1, finding);
         Ok(Some((view, scene, times)))
     }
@@ -868,7 +901,7 @@ impl Session {
                 let view = need_view(rd!(self), vid, GP)?.clone();
                 let frame = self.frame(ci, &frame_key(on));
                 let range = self.hit_range(&self.conns[ci], vid);
-                let (scene, times) = self.reader_scene(ci, &view, frame, range, None)?;
+                let (scene, times) = self.reader_scene(ci, &view, frame, range, None, None)?;
                 let hit = hit_scene(&scene, x, y, &times);
                 let mut out = Out::default();
                 // A glyph (or any layer drawing a finding) presented by a capsule: the tap
@@ -1041,7 +1074,7 @@ impl Session {
                 let view = need_view(rd!(self), vid, GP)?.clone();
                 let frame = self.frame(ci, &frame_key(on));
                 let range = self.hit_range(&self.conns[ci], vid);
-                let (scene, _) = self.reader_scene(ci, &view, frame, range, None)?;
+                let (scene, _) = self.reader_scene(ci, &view, frame, range, None, None)?;
                 let g = match m {
                     Move::Drag(dx) => Gesture::Pan {
                         view: vid.clone(),

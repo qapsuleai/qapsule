@@ -314,3 +314,19 @@ Yeniden üretim (özet): `glance.py chartstates` (main derlemesi) → `shoot --k
 başına) → `derive` → `compute` → `k52 --charts` → `read --sets chart` (haiku; sonnet tr/açık 1
 tekrar) → `critic` → `score --broken <gizli> --primary chart --reading ""` → `broken-check` →
 `tables.py <run>`.
+
+## Ek (2026-11-18, orkestratör): `pavka` başarım düzeltmesi sonrası seçim kuralının yeniden uygulanışı
+
+Bu koşuda `pavka` yalnız K52'nin JIT kapalı maddesinde (sürüklemede uzun kare ≤ %10) elenmişti. Tasarımı değiştirmeden
+yapılan bir başarım düzeltmesi (`r5/m18-pavka-perf`, `PAVKA-PERF.md`): sahne tarifi eski kodla **bayt eşit**
+(dilbilgisi düzeyinde 7.488 sahne, cihaz düzeyinde 76 sahne özeti). Okuyucu ve eleştirmen sonuçları bu yüzden aynen
+geçerlidir; yeni okuma yapılmadı.
+
+K52 aynı yöntemle, aynı oturumda (`korda` ve `r4` başvurulu, iki geçiş, 5 tekrar): `pavka` 50 hikâyede uzun kare
+0,131 / 0,129 → **0,058 / 0,073** (10 koşunun 1'inde 0,115; yük 9,9–14,3), 200'de 0,064 / 0,068; `korda` ve `r4` 0.
+JIT açık kipte dördü de geçiyor. Ortanca ölçüyle `pavka` K52'yi geçer; tek aşan koşu rapora açıkça yazılır.
+
+Önceden yazılı kural yeniden: (1) K52 kapısı artık kimseyi elemiyor (`selen` 212'de sınırda geçmişti); (2) birincil
+ölçüde `pavka` 0,987 [0,977; 0,996], `korda` 0,928 [0,907; 0,948] — aralıklar ayrık; (3) kazanan **`pavka`**; ilk iki
+**`pavka`, `korda`**; bağ çözme gerekmedi. Not: telefonda JIT kapalı sürüklemede `pavka`'nın kare p99'u 27–28 ms
+(`korda` 21) — kullanılabilir ama `korda`'dan ağır; insan testinde gözlenmeli.

@@ -1,0 +1,26 @@
+[
+ {
+  "name": "pavka-old",
+  "story": "pavka",
+  "qp": "/Users/arkns/Works/Mchart/qapsule/target/wt/m18-pp-old/release/qp",
+  "web": "/private/tmp/claude-501/-Users-arkns-Works-Mchart-qapsule/5a43680d-1da3-48dd-ba6a-07c2dfe1a480/scratchpad/agents/m18-pavka-perf/trees/old/shells/web"
+ },
+ {
+  "name": "pavka-new",
+  "story": "pavka",
+  "qp": "/Users/arkns/Works/Mchart/qapsule/target/wt/m18-pp-new/release/qp",
+  "web": "/private/tmp/claude-501/-Users-arkns-Works-Mchart-qapsule/5a43680d-1da3-48dd-ba6a-07c2dfe1a480/scratchpad/agents/m18-pavka-perf/trees/new/shells/web"
+ },
+ {
+  "name": "korda",
+  "story": "korda",
+  "qp": "/Users/arkns/Works/Mchart/qapsule/target/wt/m18-pp-korda/release/qp",
+  "web": "/private/tmp/claude-501/-Users-arkns-Works-Mchart-qapsule/5a43680d-1da3-48dd-ba6a-07c2dfe1a480/scratchpad/agents/m18-pavka-perf/trees/korda/shells/web"
+ },
+ {
+  "name": "r4",
+  "story": null,
+  "qp": "/Users/arkns/Works/Mchart/qapsule/target/wt/m18-pp-r4/release/qp",
+  "web": "/private/tmp/claude-501/-Users-arkns-Works-Mchart-qapsule/5a43680d-1da3-48dd-ba6a-07c2dfe1a480/scratchpad/agents/m18-pavka-perf/trees/r4/shells/web"
+ }
+]

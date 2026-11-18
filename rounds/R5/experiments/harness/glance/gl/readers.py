@@ -80,6 +80,20 @@ MOTION_NOTE = {
           "in-between frame from the transition that follows it (the lettered regions are guides).",
 }
 
+# (M21, Ek G6) the numbered bands over a feed frame are the harness's.
+NOTICE_NOTE = {
+    "tr": "Ekranın solundaki 1, 2, 3, 4 numaraları ve ince gri yatay çizgiler uygulamanın değil, bu sorunun "
+          "yardımcı çizgileridir: ekranı yukarıdan aşağıya dört eşit şeride böler.",
+    "en": "The numbers 1, 2, 3, 4 on the left and the thin grey horizontal lines are not part of the app; they "
+          "are guides for this question: they split the screen into four equal bands, top to bottom.",
+}
+NOTICE_PAIR_NOTE = {
+    "tr": "Görüntüde iki kare yan yana: solda bir ekran, sağda aynı ekranın kısa bir süre sonraki hâli. Sağdaki "
+          "karenin solundaki 1, 2, 3, 4 numaraları ve ince gri çizgiler düzeneğin yardımcı çizgileridir (dört eşit yatay şerit).",
+    "en": "The image shows two frames side by side: a screen on the left and the same screen a moment later on "
+          "the right. The numbers 1, 2, 3, 4 and thin grey lines on the right frame are guides (four equal horizontal bands).",
+}
+
 # (M18) the lettered columns over the chart are the harness's, not the app's.
 CHART_NOTE = {
     "tr": "Grafiğin üstündeki ince gri dikey çizgiler ve altındaki 1, 2, 3, 4 numaraları uygulamanın değil, "
@@ -242,6 +256,37 @@ CRITIC = {
           "(5) colour does not carry meaning alone (direction and outcome also read by shape); (6) legibility "
           "(contrast, text size); (7) the screen does not suggest an action (buy/sell). More text is not "
           "better.\n"
+          "Reply only with this JSON: {{\"observation\": \"<one sentence>\", \"verdict\": \"A\" | \"B\" | "
+          "\"cannot tell\", \"why\": \"<one sentence>\"}}",
+}
+
+
+# (M21, Ek G6) the motion critic: three frames (start | A | B), A and B frozen at the same
+# moment after the same start. Same JSON keys as CRITIC (parse_critic).
+CRITIC_M21 = {
+    "tr": "Bir telefon uygulamasının iki hareket tasarımını karşılaştıran bir tasarım eleştirmenisin. "
+          "Bu klasörde tek bir görüntü var: {file}. Read aracıyla bir kez aç. Görüntüde üç kare yan yana: "
+          "solda \"0\" başlangıç ekranı, ortada A, sağda B. A ve B aynı başlangıçtan sonra aynı anda (bir "
+          "geçişin ya da ekrandaki bir değişimin ortasında) dondurulmuş karelerdir ve iki farklı hareket "
+          "tasarımına aittir. Uygulama piyasada olan biteni gündelik dille anlatır, tavsiye vermez.\n"
+          "Önce, ölçütlere bakmadan, karelerde ilk ne gördüğünü tek cümleyle yaz (\"gozlem\"). Sonra şu "
+          "ölçütlerle hangisinin daha iyi olduğuna karar ver: (1) başlangıç ekranındaki nesnenin nereye "
+          "gittiği, aynı nesne olduğu izlenebiliyor mu; (2) bir kapsülde bir değişiklik olduysa hangisinde "
+          "olduğu ilk bakışta görülüyor mu; (3) hareket dikkat dağıtmıyor, ekranı karmaşıklaştırmıyor mu; "
+          "(4) ara karede bile içerik okunaklı mı; (5) hareket bir eylem (al/sat) önermiyor mu. Daha çok "
+          "hareket daha iyi demek değildir.\n"
+          "Yalnız şu JSON'u yaz: {{\"gozlem\": \"<bir cümle>\", \"karar\": \"A\" | \"B\" | \"ayırt edemiyorum\", "
+          "\"neden\": \"<bir cümle>\"}}",
+    "en": "You are a design critic comparing two motion designs for a phone app. This folder holds one "
+          "image: {file}. Open it once with the Read tool. It shows three frames side by side: \"0\" the start "
+          "screen on the left, A in the middle, B on the right. A and B are frozen at the same moment after the "
+          "same start (in the middle of a transition or of a change on the screen) and belong to two different "
+          "motion designs. The app tells what happens in the market in everyday words and gives no advice.\n"
+          "First, before the criteria, write in one sentence what you see first (\"observation\"). Then decide "
+          "which is better by these criteria: (1) can you follow where the object of the start screen went, that "
+          "it is the same object; (2) if a capsule changed, is it clear at first sight which one; (3) the motion "
+          "does not distract or clutter the screen; (4) the content stays legible even in the in-between frame; "
+          "(5) the motion does not suggest an action (buy/sell). More motion is not better.\n"
           "Reply only with this JSON: {{\"observation\": \"<one sentence>\", \"verdict\": \"A\" | \"B\" | "
           "\"cannot tell\", \"why\": \"<one sentence>\"}}",
 }

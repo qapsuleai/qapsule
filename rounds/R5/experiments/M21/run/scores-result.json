@@ -1,0 +1,1065 @@
+{
+ "broken_check": {
+  "bt": -3.7642118009893863,
+  "bt_strict_last": true,
+  "motion_all_strict_last": false,
+  "notice": 0.3101851851851852,
+  "notice_strict_last": false,
+  "pass": false,
+  "primary": null,
+  "primary_strict_last": false
+ },
+ "bt": {
+  "kestim": [
+   -3.764,
+   -4.424,
+   -3.135
+  ],
+  "nabiz": [
+   1.723,
+   1.411,
+   2.122
+  ],
+  "r4": [
+   0.335,
+   0.034,
+   0.646
+  ],
+  "still": [
+   1.139,
+   0.853,
+   1.465
+  ],
+  "surek": [
+   0.568,
+   0.275,
+   0.892
+  ]
+ },
+ "chars": {
+  "kestim": 565.6,
+  "nabiz": 580.5,
+  "r4": 576.4,
+  "still": 576.4,
+  "surek": 576.4
+ },
+ "conflicts": {
+  "kestim|nabiz": {
+   "not_told_apart": false,
+   "rate": 0.0,
+   "split": 0,
+   "total": 24
+  },
+  "kestim|r4": {
+   "not_told_apart": false,
+   "rate": 0.042,
+   "split": 1,
+   "total": 24
+  },
+  "kestim|still": {
+   "not_told_apart": false,
+   "rate": 0.0,
+   "split": 0,
+   "total": 24
+  },
+  "kestim|surek": {
+   "not_told_apart": false,
+   "rate": 0.0,
+   "split": 0,
+   "total": 24
+  },
+  "nabiz|r4": {
+   "not_told_apart": false,
+   "rate": 0.042,
+   "split": 1,
+   "total": 24
+  },
+  "nabiz|still": {
+   "not_told_apart": false,
+   "rate": 0.042,
+   "split": 1,
+   "total": 24
+  },
+  "nabiz|surek": {
+   "not_told_apart": false,
+   "rate": 0.167,
+   "split": 4,
+   "total": 24
+  },
+  "r4|still": {
+   "not_told_apart": false,
+   "rate": 0.0,
+   "split": 0,
+   "total": 24
+  },
+  "r4|surek": {
+   "not_told_apart": false,
+   "rate": 0.087,
+   "split": 2,
+   "total": 23
+  },
+  "still|surek": {
+   "not_told_apart": false,
+   "rate": 0.125,
+   "split": 3,
+   "total": 24
+  }
+ },
+ "cost": {
+  "critic_calls": 479,
+  "critics": 8.0318,
+  "reader_calls": 6015,
+  "readers": 5.3599
+ },
+ "excluded_not_one_look": [
+  "53654c9fb0.pair/F",
+  "c8369c8d46.mid/H",
+  "d6daba60a5.after/F",
+  "dbae0a7dfe.motion_final/F",
+  "ea577c6e4e.mid/H"
+ ],
+ "gates": {
+  "nabiz": {
+   "k52_jit": true,
+   "k52_motion_jit": true,
+   "k52_motion_nojit": true,
+   "reduced_motion_loss": true
+  },
+  "r4": {
+   "k52_jit": true,
+   "k52_motion_jit": true,
+   "k52_motion_nojit": true,
+   "reduced_motion_loss": true
+  },
+  "still": {
+   "k52_jit": true,
+   "k52_motion_jit": true,
+   "k52_motion_nojit": true,
+   "reduced_motion_loss": true
+  },
+  "surek": {
+   "k52_jit": true,
+   "k52_motion_jit": true,
+   "k52_motion_nojit": true,
+   "reduced_motion_loss": true
+  }
+ },
+ "loss_rule": "any_prim",
+ "model_agreement": {
+  "agree": 0.85,
+  "models": [
+   "claude-haiku-5-5",
+   "claude-sonnet-5-5"
+  ],
+  "n": 20
+ },
+ "paired_vs_broken": {
+  "nabiz": {
+   "diff": -0.0467,
+   "hi": 0.0261,
+   "lo": -0.1224,
+   "n": 100,
+   "separated": false
+  },
+  "r4": {
+   "diff": 0.0933,
+   "hi": 0.1523,
+   "lo": 0.0411,
+   "n": 100,
+   "separated": true
+  },
+  "still": {
+   "diff": -0.9067,
+   "hi": -0.8477,
+   "lo": -0.9589,
+   "n": 100,
+   "separated": false
+  },
+  "surek": {
+   "diff": 0.0933,
+   "hi": 0.1523,
+   "lo": 0.0411,
+   "n": 100,
+   "separated": true
+  }
+ },
+ "per_design": {
+  "kestim": {
+   "cut_answers": 168,
+   "false_alarm_control": 0.635,
+   "motion_all": [
+    0.9066666666666666,
+    0.8466666666666667,
+    0.96,
+    50,
+    50
+   ],
+   "motion_final": [
+    0.9441489361702127,
+    0.89524231678487,
+    0.9791666666666666,
+    47,
+    48
+   ],
+   "moving_share_final": 0.926,
+   "moving_share_mid": 0.89,
+   "none_share_change": 0.37,
+   "notice": [
+    0.3101851851851852,
+    0.2708333333333333,
+    0.34953703703703703,
+    288,
+    288
+   ],
+   "notice_after": [
+    0.28935185185185186,
+    0.23379629629629628,
+    0.34722222222222215,
+    144,
+    144
+   ],
+   "notice_mid": [
+    0.33101851851851855,
+    0.27546296296296297,
+    0.3888888888888889,
+    144,
+    144
+   ],
+   "notice_pair": [
+    0.8244598234265057,
+    0.7596450086116909,
+    0.8813413926011421,
+    72,
+    72
+   ],
+   "primary": null,
+   "questions": {
+    "motion/m_same/F": {
+     "hi": 0.979,
+     "lo": 0.838,
+     "n": 50,
+     "p": 0.94
+    },
+    "motion/m_same/H": {
+     "hi": 0.917,
+     "lo": 0.715,
+     "n": 50,
+     "p": 0.84
+    },
+    "motion_final/m_same/F": {
+     "hi": 0.996,
+     "lo": 0.889,
+     "n": 47,
+     "p": 0.979
+    },
+    "motion_final/m_same/H": {
+     "hi": 0.941,
+     "lo": 0.753,
+     "n": 48,
+     "p": 0.875
+    },
+    "notice/n_where/F": {
+     "hi": 0.375,
+     "lo": 0.268,
+     "n": 288,
+     "p": 0.319
+    },
+    "notice/n_where/H": {
+     "hi": 0.347,
+     "lo": 0.242,
+     "n": 288,
+     "p": 0.292
+    },
+    "notice_pair/n_what/F": {
+     "hi": 0.891,
+     "lo": 0.715,
+     "n": 72,
+     "p": 0.819
+    },
+    "notice_pair/n_what/H": {
+     "hi": 0.869,
+     "lo": 0.684,
+     "n": 72,
+     "p": 0.792
+    },
+    "notice_pair/n_where2/F": {
+     "hi": 0.902,
+     "lo": 0.731,
+     "n": 72,
+     "p": 0.833
+    },
+    "notice_pair/n_where2/H": {
+     "hi": 0.891,
+     "lo": 0.715,
+     "n": 72,
+     "p": 0.819
+    }
+   },
+   "valid_questions": [],
+   "validity": {
+    "m_same": {
+     "chance": 0.5,
+     "hi": 0.964,
+     "lo": 0.856,
+     "n": 95,
+     "p": 0.926,
+     "two_sided_within": false,
+     "valid": false
+    },
+    "m_where": {
+     "n": 0,
+     "note": "not scored (no key)",
+     "valid": false
+    }
+   }
+  },
+  "nabiz": {
+   "cut_answers": 190,
+   "false_alarm_control": 0.771,
+   "motion_all": [
+    0.86,
+    0.7866666666666667,
+    0.9266666666666666,
+    50,
+    50
+   ],
+   "motion_final": [
+    1.0,
+    1.0,
+    1.0,
+    48,
+    48
+   ],
+   "moving_share_final": 1.0,
+   "moving_share_mid": 0.85,
+   "none_share_change": 0.078,
+   "notice": [
+    0.5150462962962963,
+    0.4710648148148148,
+    0.5590277777777778,
+    288,
+    288
+   ],
+   "notice_after": [
+    0.46527777777777773,
+    0.40740740740740744,
+    0.5231481481481481,
+    144,
+    144
+   ],
+   "notice_mid": [
+    0.5648148148148148,
+    0.5046296296296297,
+    0.6226851851851852,
+    144,
+    144
+   ],
+   "notice_pair": [
+    0.9166666666666666,
+    0.8657407407407408,
+    0.9583333333333334,
+    72,
+    72
+   ],
+   "primary": null,
+   "questions": {
+    "motion/m_same/F": {
+     "hi": 0.944,
+     "lo": 0.762,
+     "n": 50,
+     "p": 0.88
+    },
+    "motion/m_same/H": {
+     "hi": 0.902,
+     "lo": 0.692,
+     "n": 50,
+     "p": 0.82
+    },
+    "motion_final/m_same/F": {
+     "hi": 1.0,
+     "lo": 0.926,
+     "n": 48,
+     "p": 1.0
+    },
+    "motion_final/m_same/H": {
+     "hi": 1.0,
+     "lo": 0.926,
+     "n": 48,
+     "p": 1.0
+    },
+    "notice/n_where/F": {
+     "hi": 0.581,
+     "lo": 0.467,
+     "n": 288,
+     "p": 0.524
+    },
+    "notice/n_where/H": {
+     "hi": 0.554,
+     "lo": 0.439,
+     "n": 288,
+     "p": 0.497
+    },
+    "notice_pair/n_what/F": {
+     "hi": 0.97,
+     "lo": 0.848,
+     "n": 72,
+     "p": 0.931
+    },
+    "notice_pair/n_what/H": {
+     "hi": 0.943,
+     "lo": 0.796,
+     "n": 72,
+     "p": 0.889
+    },
+    "notice_pair/n_where2/F": {
+     "hi": 0.97,
+     "lo": 0.848,
+     "n": 72,
+     "p": 0.931
+    },
+    "notice_pair/n_where2/H": {
+     "hi": 0.943,
+     "lo": 0.796,
+     "n": 72,
+     "p": 0.889
+    }
+   },
+   "valid_questions": [],
+   "validity": {
+    "m_same": {
+     "chance": 0.5,
+     "hi": 1.0,
+     "lo": 0.962,
+     "n": 96,
+     "p": 1.0,
+     "two_sided_within": false,
+     "valid": false
+    },
+    "m_where": {
+     "n": 0,
+     "note": "not scored (no key)",
+     "valid": false
+    }
+   }
+  },
+  "nabiz-az": {
+   "cut_answers": 205,
+   "false_alarm_control": 0.766,
+   "motion_all": null,
+   "motion_final": null,
+   "moving_share_final": null,
+   "moving_share_mid": null,
+   "none_share_change": 0.109,
+   "notice": [
+    0.4398148148148148,
+    0.39699074074074076,
+    0.4837962962962963,
+    288,
+    288
+   ],
+   "notice_after": [
+    0.4375,
+    0.3773148148148148,
+    0.5,
+    144,
+    144
+   ],
+   "notice_mid": [
+    0.4421296296296296,
+    0.38425925925925924,
+    0.5046296296296297,
+    144,
+    144
+   ],
+   "notice_pair": [
+    0.8925892837447335,
+    0.8342515386142546,
+    0.9435152096706595,
+    72,
+    72
+   ],
+   "primary": null,
+   "questions": {
+    "notice/n_where/F": {
+     "hi": 0.516,
+     "lo": 0.402,
+     "n": 288,
+     "p": 0.458
+    },
+    "notice/n_where/H": {
+     "hi": 0.46,
+     "lo": 0.348,
+     "n": 288,
+     "p": 0.403
+    },
+    "notice_pair/n_what/F": {
+     "hi": 0.933,
+     "lo": 0.779,
+     "n": 72,
+     "p": 0.875
+    },
+    "notice_pair/n_what/H": {
+     "hi": 0.952,
+     "lo": 0.813,
+     "n": 72,
+     "p": 0.903
+    },
+    "notice_pair/n_where2/F": {
+     "hi": 0.943,
+     "lo": 0.796,
+     "n": 72,
+     "p": 0.889
+    },
+    "notice_pair/n_where2/H": {
+     "hi": 0.961,
+     "lo": 0.83,
+     "n": 72,
+     "p": 0.917
+    }
+   },
+   "valid_questions": [],
+   "validity": {
+    "m_same": {
+     "n": 0,
+     "note": "not scored (no key)",
+     "valid": false
+    },
+    "m_where": {
+     "n": 0,
+     "note": "not scored (no key)",
+     "valid": false
+    }
+   }
+  },
+  "r4": {
+   "cut_answers": 188,
+   "false_alarm_control": 0.792,
+   "motion_all": [
+    1.0,
+    1.0,
+    1.0,
+    50,
+    50
+   ],
+   "motion_final": [
+    0.9861111111111112,
+    0.9652777777777778,
+    1.0,
+    48,
+    48
+   ],
+   "moving_share_final": 0.979,
+   "moving_share_mid": 1.0,
+   "none_share_change": 0.294,
+   "notice": [
+    0.2650462962962963,
+    0.22569444444444445,
+    0.30439814814814814,
+    288,
+    288
+   ],
+   "notice_after": [
+    0.26851851851851855,
+    0.21527777777777776,
+    0.3263888888888889,
+    144,
+    144
+   ],
+   "notice_mid": [
+    0.261574074074074,
+    0.20833333333333334,
+    0.3171296296296296,
+    144,
+    144
+   ],
+   "notice_pair": [
+    0.7376990223624681,
+    0.6616441999794209,
+    0.8103208622683792,
+    72,
+    72
+   ],
+   "primary": null,
+   "questions": {
+    "motion/m_same/F": {
+     "hi": 1.0,
+     "lo": 0.929,
+     "n": 50,
+     "p": 1.0
+    },
+    "motion/m_same/H": {
+     "hi": 1.0,
+     "lo": 0.929,
+     "n": 50,
+     "p": 1.0
+    },
+    "motion_final/m_same/F": {
+     "hi": 1.0,
+     "lo": 0.926,
+     "n": 48,
+     "p": 1.0
+    },
+    "motion_final/m_same/H": {
+     "hi": 0.988,
+     "lo": 0.86,
+     "n": 48,
+     "p": 0.958
+    },
+    "notice/n_where/F": {
+     "hi": 0.31,
+     "lo": 0.21,
+     "n": 288,
+     "p": 0.257
+    },
+    "notice/n_where/H": {
+     "hi": 0.336,
+     "lo": 0.232,
+     "n": 288,
+     "p": 0.281
+    },
+    "notice_pair/n_what/F": {
+     "hi": 0.836,
+     "lo": 0.639,
+     "n": 72,
+     "p": 0.75
+    },
+    "notice_pair/n_what/H": {
+     "hi": 0.765,
+     "lo": 0.552,
+     "n": 72,
+     "p": 0.667
+    },
+    "notice_pair/n_where2/F": {
+     "hi": 0.858,
+     "lo": 0.669,
+     "n": 72,
+     "p": 0.778
+    },
+    "notice_pair/n_where2/H": {
+     "hi": 0.801,
+     "lo": 0.595,
+     "n": 72,
+     "p": 0.708
+    }
+   },
+   "valid_questions": [],
+   "validity": {
+    "m_same": {
+     "chance": 0.5,
+     "hi": 0.994,
+     "lo": 0.927,
+     "n": 96,
+     "p": 0.979,
+     "two_sided_within": false,
+     "valid": false
+    },
+    "m_where": {
+     "n": 0,
+     "note": "not scored (no key)",
+     "valid": false
+    }
+   }
+  },
+  "still": {
+   "cut_answers": 206,
+   "false_alarm_control": 0.771,
+   "motion_all": [
+    0.0,
+    0.0,
+    0.0,
+    50,
+    50
+   ],
+   "motion_final": [
+    0.0,
+    0.0,
+    0.0,
+    48,
+    48
+   ],
+   "moving_share_final": 0.979,
+   "moving_share_mid": 0.98,
+   "none_share_change": 0.263,
+   "notice": [
+    0.2650462962962963,
+    0.22800925925925927,
+    0.3020833333333333,
+    288,
+    288
+   ],
+   "notice_after": [
+    0.25925925925925924,
+    0.20833333333333334,
+    0.3125,
+    144,
+    144
+   ],
+   "notice_mid": [
+    0.2708333333333333,
+    0.2152777777777778,
+    0.3240740740740741,
+    144,
+    144
+   ],
+   "notice_pair": [
+    0.7290036515388628,
+    0.6495174752217006,
+    0.8039906103286385,
+    71,
+    72
+   ],
+   "primary": [
+    0.0,
+    0.0,
+    0.0,
+    50,
+    50
+   ],
+   "questions": {
+    "motion/m_same/F": {
+     "hi": 0.071,
+     "lo": 0.0,
+     "n": 50,
+     "p": 0.0
+    },
+    "motion/m_same/H": {
+     "hi": 0.071,
+     "lo": 0.0,
+     "n": 50,
+     "p": 0.0
+    },
+    "motion_final/m_same/F": {
+     "hi": 0.074,
+     "lo": 0.0,
+     "n": 48,
+     "p": 0.0
+    },
+    "motion_final/m_same/H": {
+     "hi": 0.074,
+     "lo": 0.0,
+     "n": 48,
+     "p": 0.0
+    },
+    "notice/n_where/F": {
+     "hi": 0.325,
+     "lo": 0.223,
+     "n": 288,
+     "p": 0.271
+    },
+    "notice/n_where/H": {
+     "hi": 0.307,
+     "lo": 0.207,
+     "n": 288,
+     "p": 0.253
+    },
+    "notice_pair/n_what/F": {
+     "hi": 0.821,
+     "lo": 0.619,
+     "n": 71,
+     "p": 0.732
+    },
+    "notice_pair/n_what/H": {
+     "hi": 0.812,
+     "lo": 0.61,
+     "n": 72,
+     "p": 0.722
+    },
+    "notice_pair/n_where2/F": {
+     "hi": 0.821,
+     "lo": 0.619,
+     "n": 71,
+     "p": 0.732
+    },
+    "notice_pair/n_where2/H": {
+     "hi": 0.812,
+     "lo": 0.61,
+     "n": 72,
+     "p": 0.722
+    }
+   },
+   "valid_questions": [
+    "m_same"
+   ],
+   "validity": {
+    "m_same": {
+     "chance": 0.5,
+     "hi": 0.038,
+     "lo": 0.0,
+     "n": 96,
+     "p": 0.0,
+     "two_sided_within": false,
+     "valid": true
+    },
+    "m_where": {
+     "n": 0,
+     "note": "not scored (no key)",
+     "valid": false
+    }
+   }
+  },
+  "surek": {
+   "cut_answers": 187,
+   "false_alarm_control": 0.786,
+   "motion_all": [
+    1.0,
+    1.0,
+    1.0,
+    50,
+    50
+   ],
+   "motion_final": [
+    0.9861111111111112,
+    0.9652777777777778,
+    1.0,
+    48,
+    48
+   ],
+   "moving_share_final": 0.979,
+   "moving_share_mid": 1.0,
+   "none_share_change": 0.257,
+   "notice": [
+    0.29732868757259,
+    0.2590011614401858,
+    0.33565621370499416,
+    287,
+    287
+   ],
+   "notice_after": [
+    0.25582750582750585,
+    0.20007770007770007,
+    0.30723905723905726,
+    143,
+    144
+   ],
+   "notice_mid": [
+    0.33877233877233875,
+    0.2784900284900285,
+    0.39669127169127166,
+    144,
+    143
+   ],
+   "notice_pair": [
+    0.8876961835240751,
+    0.832008892673005,
+    0.9358454346215096,
+    72,
+    72
+   ],
+   "primary": null,
+   "questions": {
+    "motion/m_same/F": {
+     "hi": 1.0,
+     "lo": 0.929,
+     "n": 50,
+     "p": 1.0
+    },
+    "motion/m_same/H": {
+     "hi": 1.0,
+     "lo": 0.929,
+     "n": 50,
+     "p": 1.0
+    },
+    "motion_final/m_same/F": {
+     "hi": 1.0,
+     "lo": 0.926,
+     "n": 48,
+     "p": 1.0
+    },
+    "motion_final/m_same/H": {
+     "hi": 0.988,
+     "lo": 0.86,
+     "n": 48,
+     "p": 0.958
+    },
+    "notice/n_where/F": {
+     "hi": 0.351,
+     "lo": 0.246,
+     "n": 287,
+     "p": 0.296
+    },
+    "notice/n_where/H": {
+     "hi": 0.355,
+     "lo": 0.25,
+     "n": 287,
+     "p": 0.3
+    },
+    "notice_pair/n_what/F": {
+     "hi": 0.961,
+     "lo": 0.83,
+     "n": 72,
+     "p": 0.917
+    },
+    "notice_pair/n_what/H": {
+     "hi": 0.902,
+     "lo": 0.731,
+     "n": 72,
+     "p": 0.833
+    },
+    "notice_pair/n_where2/F": {
+     "hi": 0.961,
+     "lo": 0.83,
+     "n": 72,
+     "p": 0.917
+    },
+    "notice_pair/n_where2/H": {
+     "hi": 0.891,
+     "lo": 0.715,
+     "n": 72,
+     "p": 0.819
+    }
+   },
+   "valid_questions": [],
+   "validity": {
+    "m_same": {
+     "chance": 0.5,
+     "hi": 0.994,
+     "lo": 0.927,
+     "n": 96,
+     "p": 0.979,
+     "two_sided_within": false,
+     "valid": false
+    },
+    "m_where": {
+     "n": 0,
+     "note": "not scored (no key)",
+     "valid": false
+    }
+   }
+  },
+  "surek-az": {
+   "cut_answers": 230,
+   "false_alarm_control": 0.724,
+   "motion_all": null,
+   "motion_final": null,
+   "moving_share_final": null,
+   "moving_share_mid": null,
+   "none_share_change": 0.078,
+   "notice": [
+    0.5747193186217577,
+    0.5272454510259389,
+    0.6152810040005162,
+    288,
+    287
+   ],
+   "notice_after": [
+    0.5694444444444444,
+    0.5115740740740741,
+    0.6273148148148149,
+    144,
+    144
+   ],
+   "notice_mid": [
+    0.5799663299663299,
+    0.5197487697487697,
+    0.6403133903133903,
+    144,
+    143
+   ],
+   "notice_pair": [
+    0.8810802908390404,
+    0.8256619853254312,
+    0.9334639656795614,
+    72,
+    72
+   ],
+   "primary": null,
+   "questions": {
+    "notice/n_where/F": {
+     "hi": 0.639,
+     "lo": 0.526,
+     "n": 288,
+     "p": 0.583
+    },
+    "notice/n_where/H": {
+     "hi": 0.614,
+     "lo": 0.5,
+     "n": 287,
+     "p": 0.557
+    },
+    "notice_pair/n_what/F": {
+     "hi": 0.923,
+     "lo": 0.763,
+     "n": 72,
+     "p": 0.861
+    },
+    "notice_pair/n_what/H": {
+     "hi": 0.912,
+     "lo": 0.747,
+     "n": 72,
+     "p": 0.847
+    },
+    "notice_pair/n_where2/F": {
+     "hi": 0.952,
+     "lo": 0.813,
+     "n": 72,
+     "p": 0.903
+    },
+    "notice_pair/n_where2/H": {
+     "hi": 0.952,
+     "lo": 0.813,
+     "n": 72,
+     "p": 0.903
+    }
+   },
+   "valid_questions": [],
+   "validity": {
+    "m_same": {
+     "n": 0,
+     "note": "not scored (no key)",
+     "valid": false
+    },
+    "m_where": {
+     "n": 0,
+     "note": "not scored (no key)",
+     "valid": false
+    }
+   }
+  }
+ },
+ "steps": [
+  {
+   "eligible": [
+    "r4",
+    "still",
+    "surek",
+    "nabiz"
+   ],
+   "eliminated": {},
+   "rule": "hard gates (K52 JIT on, K52 during motion JIT on / off, reduced-motion loss)",
+   "step": 1,
+   "waived": []
+  },
+  {
+   "no_primary": [
+    "r4",
+    "surek",
+    "nabiz"
+   ],
+   "order": [
+    "still"
+   ],
+   "rule": "continuity (motion, valid questions only, F2:H1)",
+   "step": 2,
+   "top_group": [
+    "still"
+   ]
+  }
+ ],
+ "verdict": {
+  "default": "still",
+  "not_told_apart": [],
+  "ranking": [
+   "still",
+   "nabiz",
+   "surek",
+   "r4"
+  ],
+  "told_apart": true,
+  "top_two": [
+   "still",
+   "nabiz"
+  ],
+  "winner": "still"
+ },
+ "waived": []
+}

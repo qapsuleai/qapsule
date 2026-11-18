@@ -1,0 +1,1602 @@
+{
+ "000c3600eb": {
+  "A": "still",
+  "B": "nabiz",
+  "order": 1,
+  "pair": [
+   "nabiz",
+   "still"
+  ],
+  "state": "closed_failed"
+ },
+ "02edd3b011": {
+  "A": "surek",
+  "B": "r4",
+  "order": 1,
+  "pair": [
+   "r4",
+   "surek"
+  ],
+  "state": "c_realized"
+ },
+ "06712f6e3f": {
+  "A": "nabiz",
+  "B": "still",
+  "order": 0,
+  "pair": [
+   "nabiz",
+   "still"
+  ],
+  "state": "n_still1"
+ },
+ "07a2fdbe80": {
+  "A": "kestim",
+  "B": "surek",
+  "order": 0,
+  "pair": [
+   "kestim",
+   "surek"
+  ],
+  "state": "c_strengthened"
+ },
+ "08ba7af8e9": {
+  "A": "surek",
+  "B": "still",
+  "order": 1,
+  "pair": [
+   "still",
+   "surek"
+  ],
+  "state": "n_still1"
+ },
+ "09392d1524": {
+  "A": "nabiz",
+  "B": "kestim",
+  "order": 1,
+  "pair": [
+   "kestim",
+   "nabiz"
+  ],
+  "state": "n_still1"
+ },
+ "0adb90980a": {
+  "A": "r4",
+  "B": "kestim",
+  "order": 1,
+  "pair": [
+   "kestim",
+   "r4"
+  ],
+  "state": "c_realized"
+ },
+ "0f50e00b4c": {
+  "A": "still",
+  "B": "nabiz",
+  "order": 1,
+  "pair": [
+   "nabiz",
+   "still"
+  ],
+  "state": "c_strengthened"
+ },
+ "11477e87a2": {
+  "A": "r4",
+  "B": "kestim",
+  "order": 1,
+  "pair": [
+   "kestim",
+   "r4"
+  ],
+  "state": "c_born"
+ },
+ "11e79e42ff": {
+  "A": "still",
+  "B": "r4",
+  "order": 1,
+  "pair": [
+   "r4",
+   "still"
+  ],
+  "state": "n_still2"
+ },
+ "11fcfc329e": {
+  "A": "r4",
+  "B": "still",
+  "order": 0,
+  "pair": [
+   "r4",
+   "still"
+  ],
+  "state": "closed_failed"
+ },
+ "13e979db21": {
+  "A": "r4",
+  "B": "nabiz",
+  "order": 1,
+  "pair": [
+   "nabiz",
+   "r4"
+  ],
+  "state": "c_failed"
+ },
+ "1453862ffa": {
+  "A": "kestim",
+  "B": "surek",
+  "order": 0,
+  "pair": [
+   "kestim",
+   "surek"
+  ],
+  "state": "c_realized"
+ },
+ "14cf27458f": {
+  "A": "still",
+  "B": "surek",
+  "order": 0,
+  "pair": [
+   "still",
+   "surek"
+  ],
+  "state": "c_realized"
+ },
+ "1922b5c6fb": {
+  "A": "still",
+  "B": "kestim",
+  "order": 1,
+  "pair": [
+   "kestim",
+   "still"
+  ],
+  "state": "live_event"
+ },
+ "1bf3454ada": {
+  "A": "still",
+  "B": "r4",
+  "order": 1,
+  "pair": [
+   "r4",
+   "still"
+  ],
+  "state": "c_strengthened"
+ },
+ "2085f39a6b": {
+  "A": "kestim",
+  "B": "surek",
+  "order": 0,
+  "pair": [
+   "kestim",
+   "surek"
+  ],
+  "state": "live_event"
+ },
+ "23a5a151d0": {
+  "A": "nabiz",
+  "B": "still",
+  "order": 0,
+  "pair": [
+   "nabiz",
+   "still"
+  ],
+  "state": "c_failed"
+ },
+ "2513b53904": {
+  "A": "nabiz",
+  "B": "surek",
+  "order": 0,
+  "pair": [
+   "nabiz",
+   "surek"
+  ],
+  "state": "c_failed"
+ },
+ "2661a4ce8a": {
+  "A": "surek",
+  "B": "still",
+  "order": 1,
+  "pair": [
+   "still",
+   "surek"
+  ],
+  "state": "c_realized"
+ },
+ "281adf576d": {
+  "A": "kestim",
+  "B": "nabiz",
+  "order": 0,
+  "pair": [
+   "kestim",
+   "nabiz"
+  ],
+  "state": "c_strengthened"
+ },
+ "2b7ad6b2b1": {
+  "A": "nabiz",
+  "B": "r4",
+  "order": 0,
+  "pair": [
+   "nabiz",
+   "r4"
+  ],
+  "state": "c_realized"
+ },
+ "2c35d5fb2a": {
+  "A": "nabiz",
+  "B": "still",
+  "order": 0,
+  "pair": [
+   "nabiz",
+   "still"
+  ],
+  "state": "closed_failed"
+ },
+ "2f93044d0f": {
+  "A": "still",
+  "B": "r4",
+  "order": 1,
+  "pair": [
+   "r4",
+   "still"
+  ],
+  "state": "c_failed"
+ },
+ "3283e73d70": {
+  "A": "surek",
+  "B": "r4",
+  "order": 1,
+  "pair": [
+   "r4",
+   "surek"
+  ],
+  "state": "c_strengthened"
+ },
+ "33cd8a0565": {
+  "A": "kestim",
+  "B": "still",
+  "order": 0,
+  "pair": [
+   "kestim",
+   "still"
+  ],
+  "state": "c_realized"
+ },
+ "3467b92002": {
+  "A": "surek",
+  "B": "kestim",
+  "order": 1,
+  "pair": [
+   "kestim",
+   "surek"
+  ],
+  "state": "closed_failed"
+ },
+ "34c55bb017": {
+  "A": "still",
+  "B": "kestim",
+  "order": 1,
+  "pair": [
+   "kestim",
+   "still"
+  ],
+  "state": "closed_failed"
+ },
+ "34ef74f543": {
+  "A": "still",
+  "B": "nabiz",
+  "order": 1,
+  "pair": [
+   "nabiz",
+   "still"
+  ],
+  "state": "c_failed"
+ },
+ "359135707c": {
+  "A": "r4",
+  "B": "kestim",
+  "order": 1,
+  "pair": [
+   "kestim",
+   "r4"
+  ],
+  "state": "live_event"
+ },
+ "373a7b2498": {
+  "A": "surek",
+  "B": "still",
+  "order": 1,
+  "pair": [
+   "still",
+   "surek"
+  ],
+  "state": "closed_failed"
+ },
+ "39a62863c0": {
+  "A": "surek",
+  "B": "r4",
+  "order": 1,
+  "pair": [
+   "r4",
+   "surek"
+  ],
+  "state": "c_failed"
+ },
+ "3f02b74078": {
+  "A": "kestim",
+  "B": "r4",
+  "order": 0,
+  "pair": [
+   "kestim",
+   "r4"
+  ],
+  "state": "c_born"
+ },
+ "400adc37a3": {
+  "A": "r4",
+  "B": "still",
+  "order": 0,
+  "pair": [
+   "r4",
+   "still"
+  ],
+  "state": "c_strengthened"
+ },
+ "42548b5175": {
+  "A": "r4",
+  "B": "still",
+  "order": 0,
+  "pair": [
+   "r4",
+   "still"
+  ],
+  "state": "n_still2"
+ },
+ "438caaf862": {
+  "A": "nabiz",
+  "B": "r4",
+  "order": 0,
+  "pair": [
+   "nabiz",
+   "r4"
+  ],
+  "state": "n_still1"
+ },
+ "439884ef5b": {
+  "A": "nabiz",
+  "B": "surek",
+  "order": 0,
+  "pair": [
+   "nabiz",
+   "surek"
+  ],
+  "state": "closed_failed"
+ },
+ "44896c3ca3": {
+  "A": "kestim",
+  "B": "surek",
+  "order": 0,
+  "pair": [
+   "kestim",
+   "surek"
+  ],
+  "state": "c_born"
+ },
+ "4544311c5c": {
+  "A": "still",
+  "B": "kestim",
+  "order": 1,
+  "pair": [
+   "kestim",
+   "still"
+  ],
+  "state": "c_born"
+ },
+ "459752cb18": {
+  "A": "surek",
+  "B": "kestim",
+  "order": 1,
+  "pair": [
+   "kestim",
+   "surek"
+  ],
+  "state": "live_event"
+ },
+ "49c0121ee0": {
+  "A": "still",
+  "B": "kestim",
+  "order": 1,
+  "pair": [
+   "kestim",
+   "still"
+  ],
+  "state": "c_strengthened"
+ },
+ "4c9dbf1952": {
+  "A": "r4",
+  "B": "kestim",
+  "order": 1,
+  "pair": [
+   "kestim",
+   "r4"
+  ],
+  "state": "n_still1"
+ },
+ "50c77e346f": {
+  "A": "kestim",
+  "B": "r4",
+  "order": 0,
+  "pair": [
+   "kestim",
+   "r4"
+  ],
+  "state": "c_strengthened"
+ },
+ "517d7d9512": {
+  "A": "still",
+  "B": "r4",
+  "order": 1,
+  "pair": [
+   "r4",
+   "still"
+  ],
+  "state": "n_still1"
+ },
+ "53a64015a1": {
+  "A": "nabiz",
+  "B": "kestim",
+  "order": 1,
+  "pair": [
+   "kestim",
+   "nabiz"
+  ],
+  "state": "closed_failed"
+ },
+ "56068c3fd1": {
+  "A": "r4",
+  "B": "still",
+  "order": 0,
+  "pair": [
+   "r4",
+   "still"
+  ],
+  "state": "c_born"
+ },
+ "58cc76d97b": {
+  "A": "kestim",
+  "B": "r4",
+  "order": 0,
+  "pair": [
+   "kestim",
+   "r4"
+  ],
+  "state": "n_still1"
+ },
+ "58d96d5cb1": {
+  "A": "still",
+  "B": "surek",
+  "order": 0,
+  "pair": [
+   "still",
+   "surek"
+  ],
+  "state": "n_still1"
+ },
+ "59c8283c25": {
+  "A": "r4",
+  "B": "nabiz",
+  "order": 1,
+  "pair": [
+   "nabiz",
+   "r4"
+  ],
+  "state": "n_still1"
+ },
+ "5a1c6e5ed1": {
+  "A": "surek",
+  "B": "nabiz",
+  "order": 1,
+  "pair": [
+   "nabiz",
+   "surek"
+  ],
+  "state": "c_failed"
+ },
+ "5b53c679c5": {
+  "A": "kestim",
+  "B": "nabiz",
+  "order": 0,
+  "pair": [
+   "kestim",
+   "nabiz"
+  ],
+  "state": "c_failed"
+ },
+ "5b82cb7e9e": {
+  "A": "surek",
+  "B": "kestim",
+  "order": 1,
+  "pair": [
+   "kestim",
+   "surek"
+  ],
+  "state": "n_still1"
+ },
+ "5c7a35d113": {
+  "A": "kestim",
+  "B": "surek",
+  "order": 0,
+  "pair": [
+   "kestim",
+   "surek"
+  ],
+  "state": "n_still1"
+ },
+ "5e76e577ad": {
+  "A": "surek",
+  "B": "kestim",
+  "order": 1,
+  "pair": [
+   "kestim",
+   "surek"
+  ],
+  "state": "c_born"
+ },
+ "5ee49ac39d": {
+  "A": "kestim",
+  "B": "surek",
+  "order": 0,
+  "pair": [
+   "kestim",
+   "surek"
+  ],
+  "state": "closed_failed"
+ },
+ "603dd2e380": {
+  "A": "r4",
+  "B": "still",
+  "order": 0,
+  "pair": [
+   "r4",
+   "still"
+  ],
+  "state": "n_still1"
+ },
+ "608faf2862": {
+  "A": "kestim",
+  "B": "r4",
+  "order": 0,
+  "pair": [
+   "kestim",
+   "r4"
+  ],
+  "state": "c_failed"
+ },
+ "626bafe163": {
+  "A": "surek",
+  "B": "kestim",
+  "order": 1,
+  "pair": [
+   "kestim",
+   "surek"
+  ],
+  "state": "c_strengthened"
+ },
+ "646e5639f6": {
+  "A": "nabiz",
+  "B": "still",
+  "order": 0,
+  "pair": [
+   "nabiz",
+   "still"
+  ],
+  "state": "live_event"
+ },
+ "6626d6b03e": {
+  "A": "nabiz",
+  "B": "r4",
+  "order": 0,
+  "pair": [
+   "nabiz",
+   "r4"
+  ],
+  "state": "live_event"
+ },
+ "66e1cebb83": {
+  "A": "still",
+  "B": "surek",
+  "order": 0,
+  "pair": [
+   "still",
+   "surek"
+  ],
+  "state": "live_event"
+ },
+ "66ee9499eb": {
+  "A": "kestim",
+  "B": "still",
+  "order": 0,
+  "pair": [
+   "kestim",
+   "still"
+  ],
+  "state": "closed_failed"
+ },
+ "6710b69333": {
+  "A": "nabiz",
+  "B": "surek",
+  "order": 0,
+  "pair": [
+   "nabiz",
+   "surek"
+  ],
+  "state": "n_still2"
+ },
+ "677832e956": {
+  "A": "nabiz",
+  "B": "still",
+  "order": 0,
+  "pair": [
+   "nabiz",
+   "still"
+  ],
+  "state": "n_still2"
+ },
+ "68516f6128": {
+  "A": "surek",
+  "B": "still",
+  "order": 1,
+  "pair": [
+   "still",
+   "surek"
+  ],
+  "state": "live_event"
+ },
+ "695afe7225": {
+  "A": "surek",
+  "B": "r4",
+  "order": 1,
+  "pair": [
+   "r4",
+   "surek"
+  ],
+  "state": "n_still2"
+ },
+ "698e0c9905": {
+  "A": "r4",
+  "B": "kestim",
+  "order": 1,
+  "pair": [
+   "kestim",
+   "r4"
+  ],
+  "state": "c_failed"
+ },
+ "6a2777a40d": {
+  "A": "still",
+  "B": "nabiz",
+  "order": 1,
+  "pair": [
+   "nabiz",
+   "still"
+  ],
+  "state": "c_realized"
+ },
+ "6aac606f1d": {
+  "A": "nabiz",
+  "B": "kestim",
+  "order": 1,
+  "pair": [
+   "kestim",
+   "nabiz"
+  ],
+  "state": "c_failed"
+ },
+ "6f51e2d0e3": {
+  "A": "r4",
+  "B": "still",
+  "order": 0,
+  "pair": [
+   "r4",
+   "still"
+  ],
+  "state": "c_realized"
+ },
+ "72ba90808b": {
+  "A": "r4",
+  "B": "surek",
+  "order": 0,
+  "pair": [
+   "r4",
+   "surek"
+  ],
+  "state": "c_realized"
+ },
+ "735d0a2025": {
+  "A": "nabiz",
+  "B": "r4",
+  "order": 0,
+  "pair": [
+   "nabiz",
+   "r4"
+  ],
+  "state": "n_still2"
+ },
+ "75f35a1cf3": {
+  "A": "still",
+  "B": "kestim",
+  "order": 1,
+  "pair": [
+   "kestim",
+   "still"
+  ],
+  "state": "c_realized"
+ },
+ "77fce3cd20": {
+  "A": "kestim",
+  "B": "still",
+  "order": 0,
+  "pair": [
+   "kestim",
+   "still"
+  ],
+  "state": "c_born"
+ },
+ "79627e8bd1": {
+  "A": "still",
+  "B": "kestim",
+  "order": 1,
+  "pair": [
+   "kestim",
+   "still"
+  ],
+  "state": "n_still1"
+ },
+ "7afd8f7532": {
+  "A": "nabiz",
+  "B": "r4",
+  "order": 0,
+  "pair": [
+   "nabiz",
+   "r4"
+  ],
+  "state": "closed_failed"
+ },
+ "7b0e46da3d": {
+  "A": "still",
+  "B": "nabiz",
+  "order": 1,
+  "pair": [
+   "nabiz",
+   "still"
+  ],
+  "state": "n_still1"
+ },
+ "7b264f7154": {
+  "A": "kestim",
+  "B": "nabiz",
+  "order": 0,
+  "pair": [
+   "kestim",
+   "nabiz"
+  ],
+  "state": "closed_failed"
+ },
+ "7e1103ea8d": {
+  "A": "surek",
+  "B": "kestim",
+  "order": 1,
+  "pair": [
+   "kestim",
+   "surek"
+  ],
+  "state": "c_realized"
+ },
+ "7e7b5a888f": {
+  "A": "nabiz",
+  "B": "r4",
+  "order": 0,
+  "pair": [
+   "nabiz",
+   "r4"
+  ],
+  "state": "c_strengthened"
+ },
+ "814f07ae4b": {
+  "A": "r4",
+  "B": "kestim",
+  "order": 1,
+  "pair": [
+   "kestim",
+   "r4"
+  ],
+  "state": "closed_failed"
+ },
+ "827cfe9c6f": {
+  "A": "still",
+  "B": "r4",
+  "order": 1,
+  "pair": [
+   "r4",
+   "still"
+  ],
+  "state": "c_born"
+ },
+ "837174067e": {
+  "A": "r4",
+  "B": "surek",
+  "order": 0,
+  "pair": [
+   "r4",
+   "surek"
+  ],
+  "state": "c_strengthened"
+ },
+ "83a8fe6718": {
+  "A": "kestim",
+  "B": "nabiz",
+  "order": 0,
+  "pair": [
+   "kestim",
+   "nabiz"
+  ],
+  "state": "n_still1"
+ },
+ "8653f60f66": {
+  "A": "surek",
+  "B": "still",
+  "order": 1,
+  "pair": [
+   "still",
+   "surek"
+  ],
+  "state": "n_still2"
+ },
+ "87fc16b285": {
+  "A": "nabiz",
+  "B": "surek",
+  "order": 0,
+  "pair": [
+   "nabiz",
+   "surek"
+  ],
+  "state": "live_event"
+ },
+ "8c94d7a4a7": {
+  "A": "still",
+  "B": "surek",
+  "order": 0,
+  "pair": [
+   "still",
+   "surek"
+  ],
+  "state": "c_born"
+ },
+ "8e3e6bbd23": {
+  "A": "kestim",
+  "B": "nabiz",
+  "order": 0,
+  "pair": [
+   "kestim",
+   "nabiz"
+  ],
+  "state": "c_born"
+ },
+ "8effced527": {
+  "A": "surek",
+  "B": "nabiz",
+  "order": 1,
+  "pair": [
+   "nabiz",
+   "surek"
+  ],
+  "state": "n_still2"
+ },
+ "909df0f92f": {
+  "A": "kestim",
+  "B": "nabiz",
+  "order": 0,
+  "pair": [
+   "kestim",
+   "nabiz"
+  ],
+  "state": "n_still2"
+ },
+ "9199182bc4": {
+  "A": "still",
+  "B": "nabiz",
+  "order": 1,
+  "pair": [
+   "nabiz",
+   "still"
+  ],
+  "state": "c_born"
+ },
+ "935c7f7638": {
+  "A": "r4",
+  "B": "surek",
+  "order": 0,
+  "pair": [
+   "r4",
+   "surek"
+  ],
+  "state": "n_still2"
+ },
+ "94bdc6803c": {
+  "A": "nabiz",
+  "B": "kestim",
+  "order": 1,
+  "pair": [
+   "kestim",
+   "nabiz"
+  ],
+  "state": "n_still2"
+ },
+ "9599391928": {
+  "A": "nabiz",
+  "B": "still",
+  "order": 0,
+  "pair": [
+   "nabiz",
+   "still"
+  ],
+  "state": "c_born"
+ },
+ "96dcdb68f6": {
+  "A": "still",
+  "B": "nabiz",
+  "order": 1,
+  "pair": [
+   "nabiz",
+   "still"
+  ],
+  "state": "live_event"
+ },
+ "9a83c6f42c": {
+  "A": "surek",
+  "B": "kestim",
+  "order": 1,
+  "pair": [
+   "kestim",
+   "surek"
+  ],
+  "state": "c_failed"
+ },
+ "9d0443ecfc": {
+  "A": "r4",
+  "B": "surek",
+  "order": 0,
+  "pair": [
+   "r4",
+   "surek"
+  ],
+  "state": "c_born"
+ },
+ "9e757d6c36": {
+  "A": "r4",
+  "B": "surek",
+  "order": 0,
+  "pair": [
+   "r4",
+   "surek"
+  ],
+  "state": "closed_failed"
+ },
+ "9f098b7eb0": {
+  "A": "surek",
+  "B": "nabiz",
+  "order": 1,
+  "pair": [
+   "nabiz",
+   "surek"
+  ],
+  "state": "closed_failed"
+ },
+ "9f17dadeb3": {
+  "A": "surek",
+  "B": "still",
+  "order": 1,
+  "pair": [
+   "still",
+   "surek"
+  ],
+  "state": "c_strengthened"
+ },
+ "a539e968f0": {
+  "A": "r4",
+  "B": "kestim",
+  "order": 1,
+  "pair": [
+   "kestim",
+   "r4"
+  ],
+  "state": "n_still2"
+ },
+ "a62a5799dd": {
+  "A": "r4",
+  "B": "still",
+  "order": 0,
+  "pair": [
+   "r4",
+   "still"
+  ],
+  "state": "c_failed"
+ },
+ "a99d794ce7": {
+  "A": "kestim",
+  "B": "still",
+  "order": 0,
+  "pair": [
+   "kestim",
+   "still"
+  ],
+  "state": "n_still2"
+ },
+ "ab0624b34b": {
+  "A": "nabiz",
+  "B": "still",
+  "order": 0,
+  "pair": [
+   "nabiz",
+   "still"
+  ],
+  "state": "c_strengthened"
+ },
+ "ab1e678087": {
+  "A": "kestim",
+  "B": "r4",
+  "order": 0,
+  "pair": [
+   "kestim",
+   "r4"
+  ],
+  "state": "n_still2"
+ },
+ "b06b747edf": {
+  "A": "nabiz",
+  "B": "still",
+  "order": 0,
+  "pair": [
+   "nabiz",
+   "still"
+  ],
+  "state": "c_realized"
+ },
+ "b16cfbc29c": {
+  "A": "still",
+  "B": "surek",
+  "order": 0,
+  "pair": [
+   "still",
+   "surek"
+  ],
+  "state": "closed_failed"
+ },
+ "b2637e42ba": {
+  "A": "nabiz",
+  "B": "kestim",
+  "order": 1,
+  "pair": [
+   "kestim",
+   "nabiz"
+  ],
+  "state": "c_born"
+ },
+ "b3071ae54d": {
+  "A": "r4",
+  "B": "nabiz",
+  "order": 1,
+  "pair": [
+   "nabiz",
+   "r4"
+  ],
+  "state": "closed_failed"
+ },
+ "b35d3aa5c2": {
+  "A": "r4",
+  "B": "surek",
+  "order": 0,
+  "pair": [
+   "r4",
+   "surek"
+  ],
+  "state": "live_event"
+ },
+ "b4ddd11b1d": {
+  "A": "kestim",
+  "B": "r4",
+  "order": 0,
+  "pair": [
+   "kestim",
+   "r4"
+  ],
+  "state": "live_event"
+ },
+ "b758d9379a": {
+  "A": "nabiz",
+  "B": "kestim",
+  "order": 1,
+  "pair": [
+   "kestim",
+   "nabiz"
+  ],
+  "state": "live_event"
+ },
+ "b82fb49069": {
+  "A": "surek",
+  "B": "nabiz",
+  "order": 1,
+  "pair": [
+   "nabiz",
+   "surek"
+  ],
+  "state": "c_realized"
+ },
+ "ba20c29960": {
+  "A": "surek",
+  "B": "kestim",
+  "order": 1,
+  "pair": [
+   "kestim",
+   "surek"
+  ],
+  "state": "n_still2"
+ },
+ "bbb79ea0bc": {
+  "A": "surek",
+  "B": "nabiz",
+  "order": 1,
+  "pair": [
+   "nabiz",
+   "surek"
+  ],
+  "state": "c_strengthened"
+ },
+ "bece301be1": {
+  "A": "nabiz",
+  "B": "kestim",
+  "order": 1,
+  "pair": [
+   "kestim",
+   "nabiz"
+  ],
+  "state": "c_strengthened"
+ },
+ "bf4442e921": {
+  "A": "still",
+  "B": "kestim",
+  "order": 1,
+  "pair": [
+   "kestim",
+   "still"
+  ],
+  "state": "n_still2"
+ },
+ "c0eb388726": {
+  "A": "surek",
+  "B": "nabiz",
+  "order": 1,
+  "pair": [
+   "nabiz",
+   "surek"
+  ],
+  "state": "n_still1"
+ },
+ "c3ec6ce7c2": {
+  "A": "kestim",
+  "B": "nabiz",
+  "order": 0,
+  "pair": [
+   "kestim",
+   "nabiz"
+  ],
+  "state": "live_event"
+ },
+ "c3fb4154cc": {
+  "A": "kestim",
+  "B": "surek",
+  "order": 0,
+  "pair": [
+   "kestim",
+   "surek"
+  ],
+  "state": "c_failed"
+ },
+ "c4077a5fb7": {
+  "A": "surek",
+  "B": "r4",
+  "order": 1,
+  "pair": [
+   "r4",
+   "surek"
+  ],
+  "state": "live_event"
+ },
+ "c67061f7ef": {
+  "A": "nabiz",
+  "B": "surek",
+  "order": 0,
+  "pair": [
+   "nabiz",
+   "surek"
+  ],
+  "state": "c_strengthened"
+ },
+ "c841f9b706": {
+  "A": "kestim",
+  "B": "r4",
+  "order": 0,
+  "pair": [
+   "kestim",
+   "r4"
+  ],
+  "state": "c_realized"
+ },
+ "c9aa95e240": {
+  "A": "still",
+  "B": "r4",
+  "order": 1,
+  "pair": [
+   "r4",
+   "still"
+  ],
+  "state": "live_event"
+ },
+ "caf834263a": {
+  "A": "kestim",
+  "B": "still",
+  "order": 0,
+  "pair": [
+   "kestim",
+   "still"
+  ],
+  "state": "n_still1"
+ },
+ "cdb5c1b984": {
+  "A": "nabiz",
+  "B": "kestim",
+  "order": 1,
+  "pair": [
+   "kestim",
+   "nabiz"
+  ],
+  "state": "c_realized"
+ },
+ "cec4678fcb": {
+  "A": "r4",
+  "B": "nabiz",
+  "order": 1,
+  "pair": [
+   "nabiz",
+   "r4"
+  ],
+  "state": "c_strengthened"
+ },
+ "cf9986c82c": {
+  "A": "still",
+  "B": "surek",
+  "order": 0,
+  "pair": [
+   "still",
+   "surek"
+  ],
+  "state": "n_still2"
+ },
+ "cff0513f89": {
+  "A": "still",
+  "B": "nabiz",
+  "order": 1,
+  "pair": [
+   "nabiz",
+   "still"
+  ],
+  "state": "n_still2"
+ },
+ "d024ebad7a": {
+  "A": "still",
+  "B": "r4",
+  "order": 1,
+  "pair": [
+   "r4",
+   "still"
+  ],
+  "state": "c_realized"
+ },
+ "d22f0e3b75": {
+  "A": "r4",
+  "B": "kestim",
+  "order": 1,
+  "pair": [
+   "kestim",
+   "r4"
+  ],
+  "state": "c_strengthened"
+ },
+ "d5168e0af0": {
+  "A": "nabiz",
+  "B": "r4",
+  "order": 0,
+  "pair": [
+   "nabiz",
+   "r4"
+  ],
+  "state": "c_born"
+ },
+ "da902fa98b": {
+  "A": "kestim",
+  "B": "nabiz",
+  "order": 0,
+  "pair": [
+   "kestim",
+   "nabiz"
+  ],
+  "state": "c_realized"
+ },
+ "dd777b7036": {
+  "A": "kestim",
+  "B": "surek",
+  "order": 0,
+  "pair": [
+   "kestim",
+   "surek"
+  ],
+  "state": "n_still2"
+ },
+ "e14d819253": {
+  "A": "surek",
+  "B": "still",
+  "order": 1,
+  "pair": [
+   "still",
+   "surek"
+  ],
+  "state": "c_born"
+ },
+ "e1a51eb9ad": {
+  "A": "still",
+  "B": "surek",
+  "order": 0,
+  "pair": [
+   "still",
+   "surek"
+  ],
+  "state": "c_strengthened"
+ },
+ "e265be07f6": {
+  "A": "still",
+  "B": "r4",
+  "order": 1,
+  "pair": [
+   "r4",
+   "still"
+  ],
+  "state": "closed_failed"
+ },
+ "e2ceb3c63e": {
+  "A": "r4",
+  "B": "nabiz",
+  "order": 1,
+  "pair": [
+   "nabiz",
+   "r4"
+  ],
+  "state": "c_born"
+ },
+ "e3be21916b": {
+  "A": "r4",
+  "B": "nabiz",
+  "order": 1,
+  "pair": [
+   "nabiz",
+   "r4"
+  ],
+  "state": "c_realized"
+ },
+ "e52b8e84fe": {
+  "A": "r4",
+  "B": "still",
+  "order": 0,
+  "pair": [
+   "r4",
+   "still"
+  ],
+  "state": "live_event"
+ },
+ "e56de63352": {
+  "A": "nabiz",
+  "B": "surek",
+  "order": 0,
+  "pair": [
+   "nabiz",
+   "surek"
+  ],
+  "state": "n_still1"
+ },
+ "e5db8a3659": {
+  "A": "surek",
+  "B": "nabiz",
+  "order": 1,
+  "pair": [
+   "nabiz",
+   "surek"
+  ],
+  "state": "live_event"
+ },
+ "e6dd1ab0cc": {
+  "A": "r4",
+  "B": "nabiz",
+  "order": 1,
+  "pair": [
+   "nabiz",
+   "r4"
+  ],
+  "state": "live_event"
+ },
+ "e8a0f5bd57": {
+  "A": "r4",
+  "B": "surek",
+  "order": 0,
+  "pair": [
+   "r4",
+   "surek"
+  ],
+  "state": "c_failed"
+ },
+ "e8b9c180b9": {
+  "A": "nabiz",
+  "B": "r4",
+  "order": 0,
+  "pair": [
+   "nabiz",
+   "r4"
+  ],
+  "state": "c_failed"
+ },
+ "eadcc84ec7": {
+  "A": "still",
+  "B": "surek",
+  "order": 0,
+  "pair": [
+   "still",
+   "surek"
+  ],
+  "state": "c_failed"
+ },
+ "ec376d4bce": {
+  "A": "surek",
+  "B": "r4",
+  "order": 1,
+  "pair": [
+   "r4",
+   "surek"
+  ],
+  "state": "closed_failed"
+ },
+ "ecc5ae9cd5": {
+  "A": "nabiz",
+  "B": "surek",
+  "order": 0,
+  "pair": [
+   "nabiz",
+   "surek"
+  ],
+  "state": "c_born"
+ },
+ "ed10907253": {
+  "A": "still",
+  "B": "kestim",
+  "order": 1,
+  "pair": [
+   "kestim",
+   "still"
+  ],
+  "state": "c_failed"
+ },
+ "ef0d253fda": {
+  "A": "r4",
+  "B": "nabiz",
+  "order": 1,
+  "pair": [
+   "nabiz",
+   "r4"
+  ],
+  "state": "n_still2"
+ },
+ "f00636bf15": {
+  "A": "surek",
+  "B": "still",
+  "order": 1,
+  "pair": [
+   "still",
+   "surek"
+  ],
+  "state": "c_failed"
+ },
+ "f2d55b5708": {
+  "A": "r4",
+  "B": "surek",
+  "order": 0,
+  "pair": [
+   "r4",
+   "surek"
+  ],
+  "state": "n_still1"
+ },
+ "f3b30b6023": {
+  "A": "surek",
+  "B": "r4",
+  "order": 1,
+  "pair": [
+   "r4",
+   "surek"
+  ],
+  "state": "n_still1"
+ },
+ "f511d6a745": {
+  "A": "nabiz",
+  "B": "surek",
+  "order": 0,
+  "pair": [
+   "nabiz",
+   "surek"
+  ],
+  "state": "c_realized"
+ },
+ "f69f09055e": {
+  "A": "surek",
+  "B": "r4",
+  "order": 1,
+  "pair": [
+   "r4",
+   "surek"
+  ],
+  "state": "c_born"
+ },
+ "f7ce122a2f": {
+  "A": "kestim",
+  "B": "r4",
+  "order": 0,
+  "pair": [
+   "kestim",
+   "r4"
+  ],
+  "state": "closed_failed"
+ },
+ "f836640689": {
+  "A": "kestim",
+  "B": "still",
+  "order": 0,
+  "pair": [
+   "kestim",
+   "still"
+  ],
+  "state": "c_strengthened"
+ },
+ "f97154f8a8": {
+  "A": "kestim",
+  "B": "still",
+  "order": 0,
+  "pair": [
+   "kestim",
+   "still"
+  ],
+  "state": "live_event"
+ },
+ "fd50e44aba": {
+  "A": "surek",
+  "B": "nabiz",
+  "order": 1,
+  "pair": [
+   "nabiz",
+   "surek"
+  ],
+  "state": "c_born"
+ },
+ "fdeb839650": {
+  "A": "kestim",
+  "B": "still",
+  "order": 0,
+  "pair": [
+   "kestim",
+   "still"
+  ],
+  "state": "c_failed"
+ }
+}

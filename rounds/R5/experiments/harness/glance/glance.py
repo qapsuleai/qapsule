@@ -457,7 +457,8 @@ def cmd_read(a):
         cid, sid, img, qs, rec, persona, rep, lang = job
         seed = int(cid[:8], 16)
         note = {"throttle": R.THROTTLE_NOTE, "face_half": R.HALF_NOTE, "face_visitor_half": R.HALF_NOTE, "gray": R.GRAY_NOTE, "motion": R.MOTION_NOTE,
-                "motion_final": R.MOTION_NOTE, "chart": R.CHART_NOTE}.get(qs, {}).get(lang, "")
+                "motion_final": R.MOTION_NOTE, "chart": R.CHART_NOTE, "notice": R.NOTICE_NOTE,
+                "notice_pair": R.NOTICE_PAIR_NOTE}.get(qs, {}).get(lang, "")
         holder = {}
 
         def pf(name):

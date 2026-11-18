@@ -1,0 +1,89 @@
+[
+ {
+  "name": "r4",
+  "qp": "main/qp",
+  "web": "main/src/shells/web",
+  "params": {
+   "anim": "1",
+   "look": "r4"
+  },
+  "mid_ms": 180
+ },
+ {
+  "name": "still",
+  "qp": "main/qp",
+  "web": "main/src/shells/web",
+  "params": {
+   "anim": "0",
+   "look": "r4"
+  },
+  "freeze": false,
+  "mid_ms": 180,
+  "reduced_of": "r4",
+  "reduced_by_definition": true
+ },
+ {
+  "name": "surek",
+  "qp": "surek/qp",
+  "web": "surek/src/shells/web",
+  "params": {
+   "anim": "1",
+   "look": "r4",
+   "motion": "surek",
+   "reduce": "0"
+  },
+  "mid_ms": 180
+ },
+ {
+  "name": "nabiz",
+  "qp": "nabiz/qp",
+  "web": "nabiz/src/shells/web",
+  "params": {
+   "anim": "1",
+   "look": "r4",
+   "motion": "nabiz"
+  },
+  "mid_ms": 450
+ },
+ {
+  "name": "kestim",
+  "qp": "main/qp",
+  "web": "main/src/shells/web",
+  "params": {
+   "anim": "1",
+   "look": "kestim"
+  },
+  "mid_ms": 180,
+  "broken": true
+ },
+ {
+  "name": "surek-az",
+  "qp": "surek/qp",
+  "web": "surek/src/shells/web",
+  "params": {
+   "anim": "1",
+   "look": "r4",
+   "motion": "surek"
+  },
+  "reduce": true,
+  "freeze": false,
+  "mid_ms": 180,
+  "info": true,
+  "reduced_of": "surek"
+ },
+ {
+  "name": "nabiz-az",
+  "qp": "nabiz/qp",
+  "web": "nabiz/src/shells/web",
+  "params": {
+   "anim": "1",
+   "look": "r4",
+   "motion": "nabiz"
+  },
+  "reduce": true,
+  "freeze": false,
+  "mid_ms": 450,
+  "info": true,
+  "reduced_of": "nabiz"
+ }
+]

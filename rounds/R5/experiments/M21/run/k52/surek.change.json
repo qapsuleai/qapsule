@@ -1,0 +1,120 @@
+{
+ "params": [
+  "anim=1",
+  "look=r4",
+  "motion=surek",
+  "reduce=0",
+  "voice=marla"
+ ],
+ "reduce": false,
+ "runs": 3,
+ "reps": 0,
+ "seek": "120",
+ "play_ms": 8000,
+ "configs": {
+  "phone-jit-est": {
+   "runs": [
+    {
+     "change": {
+      "n": 541,
+      "p50": 17,
+      "p95": 18,
+      "p99": 22,
+      "max": 25,
+      "long": 0,
+      "long_share": 0
+     },
+     "changed_faces": 3
+    },
+    {
+     "change": {
+      "n": 542,
+      "p50": 17,
+      "p95": 18,
+      "p99": 22,
+      "max": 27,
+      "long": 0,
+      "long_share": 0
+     },
+     "changed_faces": 3
+    },
+    {
+     "change": {
+      "n": 543,
+      "p50": 17,
+      "p95": 18,
+      "p99": 22,
+      "max": 24,
+      "long": 0,
+      "long_share": 0
+     },
+     "changed_faces": 3
+    }
+   ],
+   "summary": {
+    "change_long_share": 0,
+    "change_p99": 22,
+    "change_max": 25
+   },
+   "limit_long_share": 0.01,
+   "pass": true,
+   "pool": [
+    0,
+    0,
+    0
+   ]
+  },
+  "phone": {
+   "runs": [
+    {
+     "change": {
+      "n": 524,
+      "p50": 17,
+      "p95": 18,
+      "p99": 49,
+      "max": 52,
+      "long": 9,
+      "long_share": 0.01717557251908397
+     },
+     "changed_faces": 3
+    },
+    {
+     "change": {
+      "n": 524,
+      "p50": 17,
+      "p95": 18,
+      "p99": 50,
+      "max": 52,
+      "long": 9,
+      "long_share": 0.01717557251908397
+     },
+     "changed_faces": 3
+    },
+    {
+     "change": {
+      "n": 526,
+      "p50": 17,
+      "p95": 18,
+      "p99": 50,
+      "max": 54,
+      "long": 9,
+      "long_share": 0.017110266159695818
+     },
+     "changed_faces": 3
+    }
+   ],
+   "summary": {
+    "change_long_share": 0.01717557251908397,
+    "change_p99": 50,
+    "change_max": 52
+   },
+   "limit_long_share": 0.1,
+   "pass": true,
+   "pool": [
+    0.01717557251908397,
+    0.01717557251908397,
+    0.017110266159695818
+   ]
+  }
+ }
+}

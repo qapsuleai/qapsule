@@ -142,6 +142,29 @@ QUESTIONS = {
         "options": [("A", {"tr": "A (sol üst)", "en": "A (top left)"}), ("B", {"tr": "B (sağ üst)", "en": "B (top right)"}),
                     ("C", {"tr": "C (sol alt)", "en": "C (bottom left)"}), ("D", {"tr": "D (sağ alt)", "en": "D (bottom right)"})],
     },
+    # --- state change on the feed (M21, SPEC Ek G6; written before any M21 reading) ---------
+    # Numbered horizontal bands 1-4 (top to bottom) drawn by the harness; options lettered.
+    "n_where": {
+        "tr": "Bu ekranda az önce değişen (yeni çıkan ya da durumu yeni değişen) bir kapsül var mı? Varsa çoğunlukla hangi numaralı şeritte?",
+        "en": "Is there a capsule on this screen that just changed (newly appeared, or whose state just changed)? If so, in which numbered band is it mostly?",
+        "options": [("1", {"tr": "1. şerit (en üst)", "en": "band 1 (top)"}), ("2", {"tr": "2. şerit", "en": "band 2"}),
+                    ("3", {"tr": "3. şerit", "en": "band 3"}), ("4", {"tr": "4. şerit (en alt)", "en": "band 4 (bottom)"}),
+                    ("none", {"tr": "hayır; az önce değişen bir şey görmüyorum", "en": "no; I see nothing that just changed"})],
+    },
+    "n_where2": {
+        "tr": "Sağdaki karede az önce değişen (yeni çıkan ya da durumu yeni değişen) bir kapsül var mı? Varsa çoğunlukla hangi numaralı şeritte?",
+        "en": "In the right-hand frame, is there a capsule that just changed (newly appeared, or whose state just changed)? If so, in which numbered band is it mostly?",
+        "options": [("1", {"tr": "1. şerit (en üst)", "en": "band 1 (top)"}), ("2", {"tr": "2. şerit", "en": "band 2"}),
+                    ("3", {"tr": "3. şerit", "en": "band 3"}), ("4", {"tr": "4. şerit (en alt)", "en": "band 4 (bottom)"}),
+                    ("none", {"tr": "hayır; değişen bir şey görmüyorum", "en": "no; I see nothing that changed"})],
+    },
+    "n_what": {
+        "tr": "Soldaki ekrandan sağdakine ne oldu?",
+        "en": "What happened from the left screen to the right one?",
+        "options": [("born", {"tr": "yeni bir kapsül çıktı", "en": "a new capsule appeared"}),
+                    ("state", {"tr": "var olan bir kapsülün durumu değişti", "en": "an existing capsule's state changed"}),
+                    ("none", {"tr": "hiçbir şey değişmedi", "en": "nothing changed"})],
+    },
     # --- story chart (M18; SPEC §G9 "M18 görevleri"; written before any M18 reading) --------
     # Keys from the engine's story list (PROTOCOL §23: id, born bar/time, closing, outcome)
     # and the visible bar range of the open scene; never from a design's drawing.
@@ -193,7 +216,12 @@ SETS = {
     "cap_evidence": ["e_rests", "e_who", "valid"],
     "cap_evidence_visitor": ["numbers", "e_who"],
     "motion": ["m_same", "m_where"],
-    "motion_final": ["m_where"],
+    # (Ek G6) the validity control asks both motion questions with the final frame.
+    "motion_final": ["m_same", "m_where"],
+    # (M21, Ek G6) a single frame of the feed half way through / just after a state change,
+    # and the pair (before | half way).
+    "notice": ["n_where"],
+    "notice_pair": ["n_where2", "n_what"],
     # The glance copy (SPEC §G3a): the same face at 0.5x (arm's-length / one-second proxy,
     # RESEARCH F10), same questions.
     "face_half": ["dir", "kind", "valid", "when", "trust", "advice"],

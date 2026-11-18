@@ -32,6 +32,8 @@ const voice = opt('--voice', ''); // (Ek G4-1) capsule voice; empty: the product
 const reps = Number(opt('--reps', '3'));
 const configs = opt('--configs', 'phone-jit-est,phone').split(',');
 const webSrc = opt('--web', path.join(root, 'shells/web'));
+// (M21, Ek G6) further address parameters of a design: `--param motion=surek` (repeatable).
+const extra = argv.flatMap((a, i) => (a === '--param' ? [argv[i + 1]] : []));
 const CFG = { 'phone-jit-est': cal.PHONE_JIT_EST, phone: cal.PHONE };
 
 function shim() {
@@ -41,7 +43,7 @@ function shim() {
     if (f === 'index.html') continue;
     fs.symlinkSync(path.join(web, f), path.join(dir, f));
   }
-  const q = [look && `look=${encodeURIComponent(look)}`, face && `face=${encodeURIComponent(face)}`, voice && `voice=${encodeURIComponent(voice)}`].filter(Boolean).join('&');
+  const q = [look && `look=${encodeURIComponent(look)}`, face && `face=${encodeURIComponent(face)}`, voice && `voice=${encodeURIComponent(voice)}`, ...extra].filter(Boolean).join('&');
   fs.writeFileSync(path.join(dir, 'look-shim.js'),
     `if (${JSON.stringify(q)} && !location.search.includes(${JSON.stringify(q)})) history.replaceState(null, '', location.pathname + (location.search ? location.search + '&' : '?') + ${JSON.stringify(q)});\n`);
   const html = fs.readFileSync(path.join(web, 'index.html'), 'utf8')
@@ -78,7 +80,7 @@ function verdict(name, s, runs) {
 }
 
 const dir = shim();
-const res = { look, face, voice: voice || null, reps, configs: {} };
+const res = { look, face, voice: voice || null, params: extra, reps, configs: {} };
 try {
   for (const c of configs) {
     const r = await cal.runCalibrated(CFG[c], { qp, web: dir, port: Number(process.env.QP_DEMO_PORT || 8471), reps, feedMs: 8000, chartMs: 20000, seek: 700, raw: true });

@@ -22,7 +22,7 @@ use qp_schema::scene::{Prim, Rgba};
 
 use super::{open_look, OutcomeStyle};
 use crate::glyph::{Alphabet, GlyphBox};
-use crate::theme::{with_opacity, Theme};
+use crate::theme::{at_least, with_opacity, Theme};
 
 /// The "seal / broken seal" outcome style.
 #[derive(Debug, Clone, Copy, Default)]
@@ -71,6 +71,45 @@ fn recolor(c: Rgba, to: Rgba, bg: Rgba) -> Rgba {
     #[allow(clippy::cast_possible_truncation)]
     let a = ((u16::from(c[3]) * u16::from(to[3]) + 127) / 255) as u8;
     [to[0], to[1], to[2], a]
+}
+
+/// The colour of a primitive.
+fn color_of(p: &mut Prim) -> &mut Rgba {
+    match p {
+        Prim::Rect { color, .. }
+        | Prim::Polyline { color, .. }
+        | Prim::Fill { color, .. }
+        | Prim::Circle { color, .. }
+        | Prim::Text { color, .. } => color,
+    }
+}
+
+/// (R5/S) Raises the trace's alphas so its strongest stroke (not in the background colour)
+/// reaches `floor`, the fainter parts keeping their ratio to it (as `tg5`'s fade factor);
+/// nothing for `floor = 0` (`r4`).
+fn raise_to_floor(prims: &mut [Prim], bg: Rgba, floor: u8) {
+    if floor == 0 {
+        return;
+    }
+    let top = prims
+        .iter_mut()
+        .map(|p| *color_of(p))
+        .filter(|c| !same_rgb(*c, bg))
+        .map(|c| c[3])
+        .max()
+        .unwrap_or(0);
+    if top == 0 || top >= floor {
+        return;
+    }
+    let k = f64::from(floor) / f64::from(top);
+    for p in prims.iter_mut() {
+        let c = color_of(p);
+        if !same_rgb(*c, bg) {
+            #[allow(clippy::cast_possible_truncation, clippy::cast_sign_loss)]
+            let a = (f64::from(c[3]) * k).round().clamp(0.0, 255.0) as u8;
+            c[3] = a;
+        }
+    }
 }
 
 /// Scales every primitive around `(cx, cy)` by `k` (points, widths, radii) and recolours
@@ -159,7 +198,12 @@ impl Muhrak {
         let s = bx.size;
         let (cx, cy) = (bx.x + 0.5 * s, bx.y + 0.5 * s);
         let rozet = alphabet.name() == "rozet";
-        let plate = with_opacity(t.text, fresh_of(alphabet.name(), spec));
+        // (R5/S) The plate keeps the look's closed floor (`Theme::closed_alpha`, as `tg5`;
+        // `r4`: 0, freshness alone).
+        let plate = at_least(
+            with_opacity(t.text, fresh_of(alphabet.name(), spec)),
+            t.closed_alpha,
+        );
         let mut out = Vec::new();
         if rozet {
             out.push(Prim::Circle {
@@ -190,13 +234,16 @@ impl Muhrak {
         let (cx, cy) = (bx.x + 0.5 * s, bx.y + 0.5 * s);
         let rozet = alphabet.name() == "rozet";
         let fresh = fresh_of(alphabet.name(), spec);
-        let (muted, bg) = (t.muted, t.bg);
+        // (R5/S) The trace is the look's closed colour (`r4`: `closed` = `muted`) at or
+        // above the closed floor (`Theme::closed_alpha`; `r4`: 0), as in `tg5`.
+        let (closed, bg, floor) = (t.closed, t.bg, t.closed_alpha);
         // rozet keeps its own ring at full size (it is the frame); siluet shrinks into a
         // thin frame of its own.
         let k = if rozet { 1.0 } else { SHRINK };
         let mut out = transform(open_look(alphabet, spec, bx, t), cx, cy, k, |c| {
-            recolor(c, muted, bg)
+            recolor(c, closed, bg)
         });
+        raise_to_floor(&mut out, bg, floor);
         if !rozet {
             let fw = (0.06 * s).max(1.0);
             let mut ring = rounded_square(bx, 0.02 * s + 0.5 * fw, 0.2 * s);
@@ -207,7 +254,7 @@ impl Muhrak {
             out.push(Prim::Polyline {
                 points: ring,
                 width: fw,
-                color: with_opacity(t.text, fresh),
+                color: at_least(with_opacity(t.text, fresh), floor),
             });
         }
         // The crack: background stroke from top to bottom, ends kept inside the box.

@@ -39,6 +39,17 @@ export const ALLOWED_CORE = new Set([
   'css', 'fonts', 'font_bytes',
   // R5/m17-int (ARCH.md): the glossary explanation the core opened on a tap, and its dismiss.
   'gloss', 'close_gloss', 'face_desc',
+  // R5/M18 (ARCH.md): the device's story list, for the measurement harness only.
+  'stories',
+  // R5/M18 korda (ARCH.md): synthetic stories for the K52 measurement (5 / 50 / 200).
+  'bench_stories',
+  // R5/M20 (ARCH.md): the open capsule's scene as the core holds it (tests read its terms).
+  'open_desc',
+  // R5/M21 (ARCH.md): reduced motion forwarded to the core; a face's own change frames.
+  'set_reduced_motion', 'take_face_motion', 'face_change_progress', 'face_change_frame', 'face_changes', 'face_before_rgba',
+  // R5/M21 `nabiz` (ARCH.md): the motion overlay of a display frame (boxes and their CSS
+  // values, made by the core).
+  'motion_marks',
 ]);
 
 // R5/G (ARCH.md "Galeri"): the gallery page's core (`Gallery`, crates/qp-wasm/src/lib.rs).

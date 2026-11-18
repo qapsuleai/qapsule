@@ -72,8 +72,9 @@ pub const DEFAULT_FACE: &str = "r3";
 /// pick, `docs/FACE.md`, `rounds/R4/experiments/M8/RESULTS.md`). The shell core sends it
 /// with the `style` gesture at start, like `feeds::PRESENTED_FEED`; the protocol default
 /// ([`DEFAULT_FACE`]) does not change, so bare connections, transcripts and existing
-/// goldens stay byte-identical.
-pub const PRESENTED_FACE: &str = "vadrel";
+/// goldens stay byte-identical. (R5/S) M16's pick: `oltan`, the presented look's
+/// companion (`look::companion_face`); the `v1` goldens name `vadrel` (`?face=vadrel`).
+pub const PRESENTED_FACE: &str = "oltan";
 
 /// Earlier names still accepted: `(alias, name)`.
 pub const ALIASES: [(&str, &str); 1] = [("card", "r3")];
@@ -84,6 +85,10 @@ mod tavrik;
 mod vadrel;
 
 mod fotolay;
+
+// --- M16 faces (R5): `mod <name>;` below this line
+mod oltan;
+mod zemre;
 
 /// Face designs a connection may choose; the first is the default. (R4/S2) After the
 /// reference, M8's ranking: the first two (`vadrel`, `fotolay`) go to the human test.
@@ -115,6 +120,21 @@ pub static FACES: &[FaceDesign] = &[
         height: |_| tavrik::HEIGHT,
         view: tavrik::view,
         headline: Some(tavrik::headline),
+        voiced_height: None,
+    },
+    // --- M16 faces (R5): one line each
+    FaceDesign {
+        name: "oltan",
+        height: oltan::height,
+        view: oltan::view,
+        headline: Some(vadrel::headline),
+        voiced_height: None,
+    },
+    FaceDesign {
+        name: "zemre",
+        height: zemre::height,
+        view: zemre::view,
+        headline: Some(zemre::headline),
         voiced_height: None,
     },
 ];

@@ -10,7 +10,7 @@
 //!
 //! Script: a JSON array of steps — `{"seek_step":n}`, `{"tap_face":{"index":i,"x":…,
 //! "y":…}}` (R4/S1: `index` counts the capsule rows of the feed layout), `{"tap_scene":{"x":…,"y":…}}`, `{"drag":{"dx":…}}`, `{"pinch2x":{}}`, `{"wheel":{"dy":…,"x":…}}`, `{"style":{"face"?,
-//! "alphabet"?,"theme"?}}`, `{"back":{}}`, `{"digest":"label"}`. Output: `{label:
+//! "alphabet"?,"theme"?, (R5/S) "look"?,"voice"?,"story"?,"open"?}}`, `{"back":{}}`, `{"digest":"label"}`. Output: `{label:
 //! digests}`.
 
 use std::collections::{BTreeMap, VecDeque};
@@ -21,7 +21,9 @@ use qp_schema::protocol::{
 use qp_session::{ReplayHost, Replica};
 use serde_json::{json, Value};
 
-use crate::shell::{face_scene, open_scene, scene_digest, ShellCore, PHONE_FRAME};
+use crate::shell::{
+    face_scene, open_scene_with, scene_digest, story_series, ShellCore, PHONE_FRAME,
+};
 
 const CONN: &str = "w";
 
@@ -40,6 +42,9 @@ fn provider(host: &ReplayHost, principal: &str) -> qp_source::MemoryProvider {
 
 /// A bare protocol client: a replica plus what the answers said.
 struct Agent {
+    /// (R5/S) The reader and its language (the story chart's rows, the open design).
+    principal: String,
+    lang: qp_schema::protocol::Language,
     replica: Replica,
     feed: Vec<CapsuleItem>,
     look: ViewState,
@@ -176,16 +181,34 @@ impl Agent {
                 json!({"id": it.id, "digest": d})
             })
             .collect();
+        // (R5/S) As the shell core builds it: the full replica lists the stories itself
+        // (a story chart design at chart depth), an open capsule design reads the language.
+        let (principal, lang) = (self.principal.clone(), self.lang);
         let open = match (&self.opening, self.replica.session_mut()) {
-            (Some(o), Some(s)) => open_scene(
-                s,
-                o,
-                self.open_headline.as_deref(),
-                self.open_voice.as_ref(),
-                &look,
-                mp,
-            )
-            .map(|s| scene_digest(&s)),
+            (Some(o), Some(s)) => {
+                let rows = if look.story.is_some() && o.to >= OpenDepth::Chart {
+                    story_series(s, o)
+                        .map(|bs| s.story_rows(&bs, &principal, lang))
+                        .unwrap_or_default()
+                } else {
+                    Vec::new()
+                };
+                let extra = qp_session::viewer::OpenExtra {
+                    lang: look.open.is_some().then_some(lang),
+                    check: None,
+                };
+                open_scene_with(
+                    s,
+                    o,
+                    self.open_headline.as_deref(),
+                    self.open_voice.as_ref(),
+                    &look,
+                    mp,
+                    (&rows, lang),
+                    extra,
+                )
+                .map(|s| scene_digest(&s))
+            }
             _ => None,
         };
         json!({
@@ -202,6 +225,25 @@ impl Agent {
     }
 }
 
+/// (R5/S) The scene frame at open depth `d` (`ShellCore::frame_at`): `phone`, except at the
+/// capsule depth under an open capsule design that states its own height.
+fn scene_frame(look: &ViewState, d: OpenDepth, phone: (u32, u32)) -> (u32, u32) {
+    if d != OpenDepth::Capsule {
+        return phone;
+    }
+    qp_grammar::open::height_in(qp_session::viewer::look_of(look), look.open.as_deref())
+        .map_or(phone, |h| (phone.0, h))
+}
+
+/// The protocol language of a page's `lang` (`en`, else Turkish).
+fn lang_of(lang: &str) -> qp_schema::protocol::Language {
+    if lang == "en" {
+        qp_schema::protocol::Language::En
+    } else {
+        qp_schema::protocol::Language::Tr
+    }
+}
+
 fn f(v: &Value, k: &str) -> f64 {
     v.get(k).and_then(Value::as_f64).unwrap_or(0.0)
 }
@@ -213,6 +255,8 @@ fn f(v: &Value, k: &str) -> f64 {
 pub fn shell_less(host: &mut ReplayHost, principal: &str, lang: &str, script: &[Value]) -> Value {
     host.set_record_events(true);
     let mut a = Agent {
+        principal: principal.to_owned(),
+        lang: lang_of(lang),
         replica: Replica::with_memory(principal, provider(host, principal)),
         feed: Vec::new(),
         look: ViewState::default(),
@@ -239,6 +283,10 @@ pub fn shell_less(host: &mut ReplayHost, principal: &str, lang: &str, script: &[
     let fw = PHONE_FRAME.0;
     let (sw, sh) = PHONE_FRAME;
     for step in script {
+        // (R5/S) The scene frame as the shell core reports it (`ShellCore::frame_at`): an
+        // open capsule design may state the capsule depth's height.
+        let cur = a.opening.as_ref().map_or(OpenDepth::Chart, |o| o.to);
+        let (sw, sh) = scene_frame(&a.look, cur, (sw, sh));
         if let Some(n) = step.get("seek_step").and_then(Value::as_u64) {
             let before = host.recorded_events().len();
             a.n += 1;
@@ -291,14 +339,31 @@ pub fn shell_less(host: &mut ReplayHost, principal: &str, lang: &str, script: &[
             );
         } else if let Some(t) = step.get("style") {
             let mut g = json!({"kind":"style"});
-            for k in ["face", "alphabet", "theme", "feed", "transition", "outcome"] {
+            for k in [
+                "face",
+                "alphabet",
+                "theme",
+                "feed",
+                "transition",
+                "outcome",
+                "look",
+                "voice",
+                "story",
+                "open",
+            ] {
                 if let Some(v) = t.get(k) {
                     g[k] = v.clone();
                 }
             }
             a.input(host, g);
         } else if step.get("back").is_some() {
-            a.input(host, json!({"kind":"close","width":sw,"height":sh}));
+            let to = match cur {
+                OpenDepth::Evidence => OpenDepth::Chart,
+                OpenDepth::Chart => OpenDepth::Capsule,
+                _ => OpenDepth::Sentence,
+            };
+            let (cw, ch) = scene_frame(&a.look, to, PHONE_FRAME);
+            a.input(host, json!({"kind":"close","width":cw,"height":ch}));
         } else if let Some(label) = step.get("digest").and_then(Value::as_str) {
             a.refresh_feed(host);
             out.insert(label.to_owned(), a.digests());
@@ -481,9 +546,65 @@ struct ViewerAgent {
     source: Option<qp_schema::protocol::ReplaySourceKind>,
     served: Vec<qp_schema::data::FeedKey>,
     seq: u64,
+    /// (R5/S) The reader's language and the open instrument's story list (as the shell
+    /// core asks for it at chart depth, §23.5).
+    lang: qp_schema::protocol::Language,
+    stories: Option<crate::viewer::Stories>,
 }
 
 impl ViewerAgent {
+    /// (R5/S) The open instrument's story list at chart depth, every page, as the shell
+    /// core holds it (`crate::viewer::Stories::upsert`); `None` elsewhere.
+    fn fetch_stories(&mut self, host: &mut ReplayHost) {
+        let chart = self
+            .opening
+            .as_ref()
+            .is_some_and(|o| o.to >= OpenDepth::Chart);
+        let Some((instrument, series)) = self.v.stories_target(chart) else {
+            self.stories = None;
+            return;
+        };
+        let mut st = crate::viewer::Stories {
+            instrument: instrument.clone(),
+            series: series.clone(),
+            ..crate::viewer::Stories::default()
+        };
+        let mut after: Option<Value> = None;
+        loop {
+            self.n += 1;
+            let mut q = json!({"kind":"stories","instrument":instrument,"series":series,
+                "limit":qp_schema::protocol::STORIES_MAX_LIMIT});
+            if let Some(a) = &after {
+                q["after"] = a.clone();
+            }
+            let m = json!({"type":"query","id":format!("st{}", self.n),"query":q});
+            let mut next = None;
+            for l in host.handle_raw(CONN, &m.to_string()) {
+                if l.conn != CONN {
+                    continue;
+                }
+                if let ServerMsg::Result {
+                    data:
+                        QueryResult::Stories {
+                            stories, next: n, ..
+                        },
+                    ..
+                } = &l.msg
+                {
+                    for r in stories {
+                        st.upsert(r.clone());
+                    }
+                    next = n.as_ref().map(|x| json!(x));
+                }
+            }
+            match next {
+                Some(n) => after = Some(n),
+                None => break,
+            }
+        }
+        self.stories = Some(st);
+    }
+
     fn send(&mut self, host: &mut ReplayHost, m: &Value) {
         let before = host.recorded_events().len();
         let lines = host.handle_raw(CONN, &m.to_string());
@@ -618,12 +739,38 @@ impl ViewerAgent {
             .collect();
         let head = self.open_headline.clone();
         let voice = self.open_voice.clone();
+        // (R5/S) As the shell core builds it: the story list the device holds, the open
+        // design's language and the device's check.
+        let lang = self.lang;
+        let rows: Vec<qp_schema::protocol::StoryRow> = match (&self.opening, &self.stories) {
+            (Some(o), Some(st)) if look.story.is_some() && o.to >= OpenDepth::Chart => {
+                st.rows.clone()
+            }
+            _ => Vec::new(),
+        };
+        let designed = look.open.is_some();
         let open = match (&self.opening, self.v.open_mut()) {
-            (Some(o), Some(side)) if side.open.capsule == o.capsule => side
-                .replica_mut()
-                .session_mut()
-                .and_then(|s| open_scene(s, o, head.as_deref(), voice.as_ref(), &look, mp))
-                .map(|s| scene_digest(&s)),
+            (Some(o), Some(side)) if side.open.capsule == o.capsule => {
+                let extra = qp_session::viewer::OpenExtra {
+                    lang: designed.then_some(lang),
+                    check: designed.then(|| side.trust()),
+                };
+                side.replica_mut()
+                    .session_mut()
+                    .and_then(|s| {
+                        open_scene_with(
+                            s,
+                            o,
+                            head.as_deref(),
+                            voice.as_ref(),
+                            &look,
+                            mp,
+                            (&rows, lang),
+                            extra,
+                        )
+                    })
+                    .map(|s| scene_digest(&s))
+            }
             _ => None,
         };
         let trust = self.v.trust();
@@ -671,6 +818,8 @@ pub fn viewer_less(host: &mut ReplayHost, principal: &str, lang: &str, script: &
         source: None,
         served: Vec::new(),
         seq: 0,
+        lang: l,
+        stories: None,
     };
     a.send(
         host,
@@ -691,6 +840,10 @@ pub fn viewer_less(host: &mut ReplayHost, principal: &str, lang: &str, script: &
     let fw = PHONE_FRAME.0;
     let (sw, sh) = PHONE_FRAME;
     for step in script {
+        // (R5/S) The scene frame as the shell core reports it (`ShellCore::frame_at`): an
+        // open capsule design may state the capsule depth's height.
+        let cur = a.opening.as_ref().map_or(OpenDepth::Chart, |o| o.to);
+        let (sw, sh) = scene_frame(&a.look, cur, (sw, sh));
         if let Some(n) = step.get("seek_step").and_then(Value::as_u64) {
             a.n += 1;
             let m = json!({"type":"replay","id":format!("r{}", a.n),
@@ -736,16 +889,34 @@ pub fn viewer_less(host: &mut ReplayHost, principal: &str, lang: &str, script: &
             );
         } else if let Some(t) = step.get("style") {
             let mut g = json!({"kind":"style"});
-            for k in ["face", "alphabet", "theme", "feed", "transition", "outcome"] {
+            for k in [
+                "face",
+                "alphabet",
+                "theme",
+                "feed",
+                "transition",
+                "outcome",
+                "look",
+                "voice",
+                "story",
+                "open",
+            ] {
                 if let Some(v) = t.get(k) {
                     g[k] = v.clone();
                 }
             }
             a.input(host, g);
         } else if step.get("back").is_some() {
-            a.input(host, json!({"kind":"close","width":sw,"height":sh}));
+            let to = match cur {
+                OpenDepth::Evidence => OpenDepth::Chart,
+                OpenDepth::Chart => OpenDepth::Capsule,
+                _ => OpenDepth::Sentence,
+            };
+            let (cw, ch) = scene_frame(&a.look, to, PHONE_FRAME);
+            a.input(host, json!({"kind":"close","width":cw,"height":ch}));
         } else if let Some(label) = step.get("digest").and_then(Value::as_str) {
             a.show_all(host);
+            a.fetch_stories(host);
             out.insert(label.to_owned(), a.digests());
         } else {
             panic!("unknown script step {step}");
@@ -755,7 +926,8 @@ pub fn viewer_less(host: &mut ReplayHost, principal: &str, lang: &str, script: &
 }
 
 /// Passes everything the core queues to `host`, with the viewer's frames, until idle.
-fn pump_viewer(
+/// (R5/M18: public for the story chart tests.)
+pub fn pump_viewer(
     core: &mut ShellCore,
     host: &mut ReplayHost,
     served: &mut Vec<qp_schema::data::FeedKey>,

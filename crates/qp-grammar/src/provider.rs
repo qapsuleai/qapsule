@@ -140,6 +140,17 @@ pub trait DataProvider {
         let _ = finding;
         None
     }
+    /// (R5/M20) The language of the reader this provider speaks for: an open capsule
+    /// design's own labels follow it. Default: none (Turkish).
+    fn reader_lang(&self) -> Option<Language> {
+        None
+    }
+    /// (R5/M20, K48) The device's own check of the capsule presenting `finding` (a viewer
+    /// that checked it on its own data). Default: none (the authority).
+    fn device_check(&self, finding: &str) -> Option<crate::open::DeviceCheck> {
+        let _ = finding;
+        None
+    }
 }
 
 #[derive(Debug, Clone, Default)]
@@ -173,6 +184,8 @@ pub struct MemProvider {
     glyphs: BTreeMap<String, GlyphSpec>,
     parts: BTreeMap<String, HeadlineParts>,
     voices: BTreeMap<String, qp_schema::protocol::CapsuleVoice>,
+    lang: Option<Language>,
+    checks: BTreeMap<String, crate::open::DeviceCheck>,
 }
 
 impl Default for MemProvider {
@@ -199,6 +212,8 @@ impl MemProvider {
             glyphs: BTreeMap::new(),
             parts: BTreeMap::new(),
             voices: BTreeMap::new(),
+            lang: None,
+            checks: BTreeMap::new(),
         }
     }
 
@@ -313,6 +328,20 @@ impl MemProvider {
     #[must_use]
     pub fn with_voice(mut self, finding: &str, voice: qp_schema::protocol::CapsuleVoice) -> Self {
         self.voices.insert(finding.to_owned(), voice);
+        self
+    }
+
+    /// (R5/M20) Sets the reader's language.
+    #[must_use]
+    pub fn with_lang(mut self, lang: Language) -> Self {
+        self.lang = Some(lang);
+        self
+    }
+
+    /// (R5/M20) Sets the device's check of the capsule presenting `finding`.
+    #[must_use]
+    pub fn with_check(mut self, finding: &str, check: crate::open::DeviceCheck) -> Self {
+        self.checks.insert(finding.to_owned(), check);
         self
     }
 
@@ -435,5 +464,11 @@ impl DataProvider for MemProvider {
 
     fn voice(&self, finding: &str) -> Option<qp_schema::protocol::CapsuleVoice> {
         self.voices.get(finding).cloned()
+    }
+    fn reader_lang(&self) -> Option<Language> {
+        self.lang
+    }
+    fn device_check(&self, finding: &str) -> Option<crate::open::DeviceCheck> {
+        self.checks.get(finding).copied()
     }
 }

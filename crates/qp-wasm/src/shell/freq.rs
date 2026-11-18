@@ -104,6 +104,10 @@ impl ShellCore {
             "data_frames"
         };
         *self.metrics.counts.entry(kind.to_owned()).or_default() += 1;
+        // (R5/M21) The faces as shown before this bar (a marking motion design).
+        if kind == "data_frames" {
+            self.data_arrives();
+        }
         let ch = self.on_frame(text)?;
         if let Some(o) = ch.as_object() {
             if let (Some(t), Some(true)) = (t, o.get("welcome").and_then(Value::as_bool)) {

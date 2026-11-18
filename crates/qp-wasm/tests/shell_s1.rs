@@ -49,7 +49,8 @@ fn the_presentation_asks_for_the_m8_m11_picks_and_the_page_overrides_them() {
     assert_eq!(look["feed"], qp_grammar::feeds::PRESENTED_FEED, "{look}");
     assert_eq!(
         look["transition"],
-        qp_grammar::transitions::PRESENTED_TRANSITION
+        // (R5/S) The presented motion design's opening (`surek`).
+        qp_grammar::motion::by_name(Some(qp_grammar::motion::PRESENTED_MOTION)).transition
     );
     assert_eq!(
         look["outcome"],

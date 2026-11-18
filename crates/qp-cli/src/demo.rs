@@ -10,7 +10,9 @@
 //!   on the feed screen) and a `{"bind":{feeds, events}}` frame brings a feed's initial
 //!   bars and events when it subscribes to one; `mode=replica` is the full replica of R4
 //!   (every bar, every event). (R5/M19) `feed_rule=` (`rate55`, `none`) sets
-//!   the coin-flip rule for the page's principal over the host's `--feed-rule`. Frames (one JSON object per `data:` line):
+//!   the coin-flip rule for the page's principal over the host's `--feed-rule`;
+//!   (R5/S) `feed_exempt=0` drops the rule's K42 exemption for that principal (the human
+//!   test's second form; with no `feed_rule=`, the host's rule without it). Frames (one JSON object per `data:` line):
 //!   `{"start":{conn, principal, lang, data, events, info}}` first (the replica's data:
 //!   the initial bars and the data events applied since, and the page's notes),
 //!   `{"msg":ServerMsg}` (protocol messages of this connection),
@@ -182,6 +184,8 @@ enum Cmd {
         viewer: bool,
         /// (R5/M19) The page's `?feed_rule=` (a known rule name), if any.
         feed_rule: Option<String>,
+        /// (R5/S) The page's `?feed_exempt=0`: the rule without the K42 exemption.
+        no_exempt: bool,
         tx: Sender<String>,
     },
     Send {
@@ -231,6 +235,8 @@ struct Hub {
     epoch: u64,
     info: Value,
     start: Instant,
+    /// (R5/S) The host's feed rule name (`--feed-rule`), for a page's `feed_exempt=0`.
+    feed_rule: String,
 }
 
 impl Hub {
@@ -362,15 +368,19 @@ impl Hub {
                 lang,
                 viewer,
                 feed_rule,
+                no_exempt,
                 tx,
             } => {
                 let Ok(token) = secret() else {
                     return;
                 };
-                // (R5/M19) The page's feed rule for its principal (else the host's).
-                match feed_rule
+                // (R5/M19) The page's feed rule for its principal (else the host's);
+                // (R5/S) `feed_exempt=0`: that rule (or the host's) without the K42
+                // exemption.
+                let name = feed_rule.or_else(|| no_exempt.then(|| self.feed_rule.clone()));
+                match name
                     .as_deref()
-                    .and_then(|n| qp_capsule::feedrule::FeedRule::named(n, true))
+                    .and_then(|n| qp_capsule::feedrule::FeedRule::named(n, !no_exempt))
                 {
                     Some(r) => self.host.set_principal_coin_flip_rule(&principal, Some(r)),
                     None => self.host.clear_principal_coin_flip_rule(&principal),
@@ -558,12 +568,15 @@ fn connection(
             // (R5/M19) `feed_rule=`: one of the host's rule names, else ignored.
             let feed_rule = query_param(q, "feed_rule")
                 .filter(|n| qp_capsule::feedrule::FEED_RULES.iter().any(|(k, _)| k == n));
+            // (R5/S) `feed_exempt=0`: the rule without the K42 exemption.
+            let no_exempt = query_param(q, "feed_exempt").as_deref() == Some("0");
             let (ftx, frx) = mpsc::channel::<String>();
             let _ = tx.send(Cmd::Connect {
                 principal,
                 lang: lang.to_owned(),
                 viewer,
                 feed_rule,
+                no_exempt,
                 tx: ftx,
             });
             let head = "HTTP/1.1 200 OK\r\nContent-Type: text/event-stream\r\n\
@@ -841,6 +854,7 @@ pub fn demo(a: &DemoArgs) -> Result<(), String> {
         next: 0,
         info,
         start: Instant::now(),
+        feed_rule: a.feed_rule.clone(),
     };
     loop {
         let w = hub.wall();

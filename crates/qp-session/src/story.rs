@@ -319,6 +319,24 @@ impl Session {
         })
     }
 
+    /// (R5/M18) Every story row of bar series `series` for `principal` reading in `lang`,
+    /// in the current world (inside [`Session::as_reader`]: the reader's): the rows of an
+    /// unpaged, rangeless `stories` answer, in its order. What the story chart draws.
+    #[must_use]
+    pub fn story_rows(
+        &self,
+        series: &str,
+        principal: &str,
+        lang: qp_schema::protocol::Language,
+    ) -> Vec<StoryRow> {
+        let p = self.proj.as_deref();
+        let mut memo = StudyMemo::default();
+        self.series_stories(series)
+            .into_iter()
+            .filter_map(|(c, s)| self.story_row(c, s, p, lang, principal, &mut memo))
+            .collect()
+    }
+
     /// Answer to the `stories` query (run in the asker's world).
     pub(crate) fn stories_query(
         &self,

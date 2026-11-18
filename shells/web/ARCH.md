@@ -115,10 +115,46 @@ gevşetilmedi.
 |--------|-------|
 | `gloss()`, `close_gloss()` | Son dokunuş bir sözlük terimine geldiyse (otoritenin `tap_at` cevabındaki `hit.term`; terimin kutusu sahne tarifinde, `SceneDesc.terms`) çekirdek açıklamayı tutar: `{term, text, target}` ya da `null`. Sayfa `take_changes().gloss` geldiğinde iki metni `#gloss` öğesine **olduğu gibi** yazar; dokununca `close_gloss()`. Terimin altı çizgisi sahnenin kendi ilkelidir (her boyama yolu çizer); kabuk konum hesaplamaz. |
 
+(R5/M21) Hareket (`?motion=<ad>`, Ayarlar → Hareket; `qp_grammar::transitions::MOTIONS`) için
+eklenenler. Hiçbir kural gevşetilmedi.
+
+| Yöntem | Neden |
+|--------|-------|
+| `set_reduced_motion(açık)` | Okurun hareketi azalt tercihi (`prefers-reduced-motion` ya da `?anim=0`) **olduğu gibi** çekirdeğe verilir (başlangıçta ve tercih değişince); karar çekirdekte: hareket katmanı boş, derinlik geçişi anında biter. Durağan işaretler (canlı noktası, değişim etiketi) iki kipte de aynı sahnede. |
+| `motion_marks(t)` | Bir animasyon karesinin hareket katmanı (`nabiz`: nabız, vuruş, iz): çekirdek yüz başına kutuları adlandırır (`face`, `key`) ve CSS değerlerini (konum, boy, saydamlık, ölçek, çerçeve, zemin) hazır verir; sayfa anahtar başına bir öğe yaratır, değerleri **olduğu gibi** uygular, adı geçmeyen anahtarı kaldırır. Değişiklik yoksa boş. Yüz yeniden boyanmaz (değişim körlüğü: işaret yerel). |
+
+Hareket seçimi `?motion=<ad>` ve Ayarlar → Hareket: öbür ayarlar gibi `set_look({motion})`; bir cihaz
+sunum ayarıdır (protokol değeri değil; `feed_order` gibi), seçilen tasarım kendi derinlik geçişini
+`style` hareketinin `transition` alanıyla ister. Adlar `choices().motion`'dan.
+
 Dil seçimi `?voice=<ad>` ve Ayarlar → Dil: öbür ayarlar gibi `set_look({voice})` (`style`
 hareketinin `voice` alanı); adlar `choices().voice`'tan; gösterimin varsayılanı çekirdekte
 (`presented_look`, `marla`). Sahnesi olmayan yüzün metni (`feed()` satırının `text`'i)
 seçili dilde çekirdeğin metin yüzüdür (başlık, karne, ayrıntı; satır sonlarıyla).
+
+(R5/M20) Açılmış kapsül tasarımı (`?open=<ad>`, Ayarlar → Açılmış kapsül): öbür ayarlar gibi
+`set_look({open})` (`style` hareketinin `open` alanı); adlar `choices().open`'dan; varsayılan
+`r4` (bugünkü kart). Hiçbir kural gevşetilmedi. Kapsül derinliğinin çerçeve yüksekliğini,
+açılmış katmanın metnini (`open().text`: sahnenin üstünde boş, sahnesiz okurda tasarımın satır
+sonlu metin sütunu) ve sahnenin `touch-action` değerini (`open().style`, katman kaydırılsın diye
+`pan-y`) çekirdek verir; sayfa olduğu gibi uygular. `#opentext` satır sonlarını korur
+(`white-space: pre-line`, yapısal; sayı yok).
+
+| Yöntem | Neden |
+|--------|-------|
+| `open_desc()` | Açılmış kapsülün sahnesi, çekirdeğin tuttuğu gibi (JSON); yalnız sınamalar okur (`window.qp.openDesc`: güven bölümünün terim kutusu). |
+
+(R5/M21) Hareket (`qp_grammar::motion`) için eklenenler. Hiçbir kural gevşetilmedi.
+
+| Yöntem | Neden |
+|--------|-------|
+| `set_reduced_motion(on)` | Sayfa okurun ayarını (`prefers-reduced-motion`, ya da `?reduce=1|0` / Ayarlar → Hareketi azalt) çekirdeğe **iletir**; neyin hareket edeceğine çekirdek karar verir (açılış anında olur, yüz değişimi kalıcı bir etiketle söylenir, etiket sahnenin kendi ilkelidir). |
+| `take_face_motion()`, `face_change_progress(id, t)`, `face_change_frame(id, p, left, top)`, `face_before_rgba(id)` | Akıştaki bir yüzün kendi değişimi (canlı değer, durum): çekirdek hangi yüzlerin canlandırılacağını, ilerlemeyi (görünüşün süresi ve eğrisi) ve her karede değişimden önceki (çekirdeğin sakladığı sahnenin pikselleri) ya da sonraki yüzün hangi parçasının nereye, hangi saydamlıkta kopyalanacağını söyler; kabuk geçişteki gibi yalnız piksel kopyalar (`#fx`), hesap yapmaz. |
+| `face_changes()` | Son değişimler olgu olarak (`[{id, kind, label}]`; iki kipte aynı): ölçüm düzeneğinin bilgi eşitliği sınaması ve `window.qp.faceChanges()` için. |
+
+Hareket seçimi `?motion=<ad>` ve Ayarlar → Hareket: `set_look({motion})` (bir sunum ayarı, akış
+sırası gibi; tasarımın açılış geçişini `style` hareketinin `transition` alanıyla ister); adlar
+`choices().motion`'dan. `window.qp.freezeChange(id, p)` bir yüz değişimini `p`'de dondurur.
 
 (R5/G) **Galeri** (`gallery.html`, `gallery.js`, `gallery.css`; `README.md` "Galeri"). Aynı
 kurallar (R1–R4, R6, R7) bu üç dosyaya da uygulanır (`arch-check.mjs`): `gallery.html` yalnız
@@ -141,3 +177,26 @@ Sayfa yalnız aynı kökene `fetch` yapar (düzen) ve `<img>` yükler.
 | `set_device(ua, w, h, dpr)` | Ham `navigator.userAgent`, `innerWidth/Height`, `devicePixelRatio`; kısaltma çekirdekte. |
 | `toggle_lang()`, `set_theme(değer)`, `lang()`, `theme()` | Dil ve tema seçimi. |
 | `css()`, `fonts()`, `font_bytes(id)` | Varsayılan görünüşün seçilen temadaki CSS özellikleri ve sayfa genişliği; gömülü yazı tipleri (`FontFace`, ağ yok). |
+
+(R5/M18, `pavka`) Hikâye çizelgesi seçimi `?story=<ad>` ve Ayarlar → Hikâye çizelgesi
+(`set_look({story})`, `style` hareketinin `story` alanı; adlar `choices().story`'den) ve
+Ayarlar → Kapanmış hikâyeleri gizle (`set_look({hide_closed})`). Çizim, odak taşıma,
+kümeleme ve gizleme çekirdekte; sayfa yalnız sahneyi boyar.
+
+| Yöntem | Neden |
+|--------|-------|
+| `stories()` | Yalnız ölçüm düzeneği için (`window.qp.stories`, `rounds/R5/experiments/M18/pavka/k52.mjs`): cihazın tuttuğu hikâye listesi (§23.5). Sayfa onu okumaz, çizmez. |
+| `bench_stories(n)` | (R5/M18 `korda`) Yalnız ölçüm (K52): tutulan listenin yerine `n` sentetik hikâye; 5 / 50 / 200 hikâyeyle boyama bütçesi. Sayfa yalnız `window.qp.benchStories` olarak verir. |
+
+(R5/S) Bütünleştirme. Hiçbir kural gevşetilmedi. Gösterimin varsayılanları (görünüş `oltan` ve
+eşlik eden yüz `oltan`, dil `marla`, hikâye çizelgesi `pavka`, açılmış kapsül `tesir`) çekirdekte
+(`presented_look`). Sayfa adres parametrelerini **olduğu gibi** verir: `set_look` artık `face`'i de
+taşır; bir görünüş seçilince eşlik eden yüzü (`look::companion_face`) çekirdek ekler, aynı seçimde
+bir yüz adı varsa o kalır. `?feed_exempt=0` olay akışı adresine olduğu gibi geçer; K42 muafiyetsiz
+kuralı barındırıcı kurar (`qp demo`).
+
+(R5/S, M21) Tek hareket kaydı (`qp_grammar::motion::MOTIONS`: `r4`, `surek` — geçici gösterim
+varsayılanı —, `nabiz`) ve tek hareket durumu (`shell/motion.rs`; `nabiz`'in canlı işaretleri
+`shell/live.rs`). Hareketi azalt tek adres parametresiyle: `?reduced_motion=1|0`; `?reduce=1|0` ve
+`?anim=0` eski adları olarak çalışır; yoksa `prefers-reduced-motion` (sayfa olduğu gibi iletir).
+`nabiz` hareketi azalt'ta canlı noktasının yanına "canlı" yazar (bilgi metin olarak durur).

@@ -13,10 +13,29 @@ use std::sync::OnceLock;
 use crate::RenderError;
 
 /// `(asset id, file bytes)`; index 0 is the default font.
-pub const FILES: [(&str, &[u8]); 1] = [(
-    "plex-mono",
-    include_bytes!("../assets/fonts/IBMPlexMono-Regular.ttf"),
-)];
+pub const FILES: [(&str, &[u8]); 4] = [
+    (
+        "plex-mono",
+        include_bytes!("../assets/fonts/IBMPlexMono-Regular.ttf"),
+    ),
+    // (R5/M16 `oltan`, `zemre`) Atkinson Hyperlegible Next, static instances (wght 400,
+    // 600 for `oltan`, 700 for `zemre`), Latin subset, figures remapped to their tabular
+    // glyphs (fontdue applies no `tnum`; `rounds/R5/experiments/M16/zemre/build_font.py`).
+    // (R5/S) The two looks share the 400 file (`oltan`'s; `zemre`'s differed only in
+    // three code points' coverage).
+    (
+        "atkinson-next",
+        include_bytes!("../assets/fonts/AtkinsonHyperlegibleNext-Regular.ttf"),
+    ),
+    (
+        "atkinson-next-semibold",
+        include_bytes!("../assets/fonts/AtkinsonHyperlegibleNext-SemiBold.ttf"),
+    ),
+    (
+        "atkinson-next-bold",
+        include_bytes!("../assets/fonts/AtkinsonHyperlegibleNext-Bold.ttf"),
+    ),
+];
 
 /// The index of asset `id` (`None` or an unknown id: 0, the default).
 #[must_use]

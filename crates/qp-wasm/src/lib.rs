@@ -583,6 +583,11 @@ mod shell_binding {
             self.inner.stories_json().to_string()
         }
 
+        /// (R5/M18, K52 measurement only) `n` synthetic stories in place of the held list.
+        pub fn bench_stories(&mut self, n: u32) -> u32 {
+            self.inner.bench_stories(n)
+        }
+
         /// (RP3/M15) Runs the open capsule's check on its own data again (JSON).
         pub fn check(&mut self) -> String {
             self.inner.check_now().to_string()
@@ -683,6 +688,15 @@ mod shell_binding {
         pub fn face_desc(&mut self, id: &str) -> String {
             self.inner
                 .face(id)
+                .and_then(|s| serde_json::to_string(&s).ok())
+                .unwrap_or_default()
+        }
+
+        /// (R5/M20) The open capsule's scene as the core builds it (JSON `SceneDesc`;
+        /// empty: none): tests read its panels and `terms`.
+        pub fn open_desc(&mut self) -> String {
+            self.inner
+                .scene()
                 .and_then(|s| serde_json::to_string(&s).ok())
                 .unwrap_or_default()
         }
@@ -805,6 +819,15 @@ mod shell_binding {
             self.inner.transition_progress(t)
         }
 
+        /// (R5/M21) The motion overlay of the display frame at page time `t` (JSON
+        /// `{"marks": [{face, key, style}]}`), or empty text when nothing changes.
+        pub fn motion_marks(&mut self, t: f64) -> String {
+            self.inner
+                .motion_marks(t)
+                .map(|v| v.to_string())
+                .unwrap_or_default()
+        }
+
         /// (R4/H-M8910) The last transition's frame at progress `p` (JSON).
         pub fn transition_frame(
             &self,
@@ -834,9 +857,10 @@ mod shell_binding {
             self.inner.pointer(target, phase, id, x, y)
         }
 
-        /// A wheel notch.
-        pub fn wheel(&mut self, dy: f64, x: f64) {
-            self.inner.wheel(dy, x);
+        /// A wheel notch; (R5/M20) `true` when it was the chart's zoom (else the page
+        /// scrolls).
+        pub fn wheel(&mut self, dy: f64, x: f64) -> bool {
+            self.inner.wheel(dy, x)
         }
 
         /// The last transition in page coordinates (JSON).
@@ -855,6 +879,39 @@ mod shell_binding {
         /// Where the last transition started (`sentence`, `capsule`, …).
         pub fn transition_from(&self) -> String {
             self.inner.transition_from().to_owned()
+        }
+
+        /// (R5/M21) The reader's reduced-motion setting (`prefers-reduced-motion` or the
+        /// settings page): openings happen at once, face changes carry a lasting label.
+        pub fn set_reduced_motion(&mut self, on: bool) {
+            self.inner.set_reduced_motion(on);
+        }
+
+        /// (R5/M21) The faces whose change to animate now (JSON array of ids; emptied).
+        pub fn take_face_motion(&mut self) -> String {
+            self.inner.take_face_motion().to_string()
+        }
+
+        /// (R5/M21) Progress of capsule `id`'s change animation at shell time `t`.
+        pub fn face_change_progress(&mut self, id: &str, t: f64) -> f64 {
+            self.inner.face_change_progress(id, t)
+        }
+
+        /// (R5/M21) Capsule `id`'s change frame at progress `p`, the face at page
+        /// (`left`, `top`) (JSON; `null` without a change).
+        pub fn face_change_frame(&self, id: &str, p: f64, left: f64, top: f64) -> String {
+            self.inner.face_change_frame(id, p, left, top).to_string()
+        }
+
+        /// (R5/M21) Pixels of capsule `id`'s face before its change (RGBA at the device
+        /// scale; empty when none).
+        pub fn face_before_rgba(&self, id: &str) -> Vec<u8> {
+            self.inner.face_before_rgba(id)
+        }
+
+        /// (R5/M21) The faces' latest changes as facts (JSON `[{id, kind, label}]`).
+        pub fn face_changes(&self) -> String {
+            self.inner.face_changes_json().to_string()
         }
 
         /// A frame sample.

@@ -609,7 +609,7 @@ fn panel_px(pp: PanelPos, lo: i32, hi: i32) -> f64 {
 
 /// Words of `text` wrapped into lines of at most `room` pixels at `size` (estimate as in
 /// [`est_width`]); a word longer than a line stands alone.
-fn wrap(text: &str, room: i32, size: f64, adv: &crate::look::FontAsset) -> Vec<String> {
+pub(crate) fn wrap(text: &str, room: i32, size: f64, adv: &crate::look::FontAsset) -> Vec<String> {
     let mut lines: Vec<String> = Vec::new();
     let mut cur = String::new();
     for w in text.split_whitespace() {
@@ -663,7 +663,13 @@ fn anchored_text(pl: &Prepared, g: &Geo<'_>, out: &mut SceneLayer) {
             Some(pp) => {
                 #[allow(clippy::cast_possible_truncation)]
                 let x = panel_px(pp, rc.left, rc.right) as i32;
-                (x, wrap(&text, rc.right - x, size, adv), true)
+                // (R5/M20) A panel-relative `x2` sets the wrap edge.
+                #[allow(clippy::cast_possible_truncation)]
+                let edge = pl
+                    .anchor
+                    .x2
+                    .map_or(rc.right, |e| panel_px(e, rc.left, rc.right) as i32);
+                (x, wrap(&text, edge - x, size, adv), true)
             }
             None => {
                 #[allow(clippy::cast_possible_truncation)]

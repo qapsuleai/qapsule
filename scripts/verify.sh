@@ -531,8 +531,30 @@ step_demo() {
   for f in fixtures/golden/demo/*.png; do
     [ -f "$d/a/$(basename "$f")" ] || { echo "$(basename "$f"): golden not produced" >&2; bad=$((bad + 1)); }
   done
+  # (R5/S) The v2 goldens: R5's presentation defaults (screens.mjs `V2`), the same checks.
+  for f in "$d"/a/v2/*.png; do
+    b="v2/$(basename "$f")"
+    n=$((n + 1))
+    case "$b" in
+      *.page.png)
+        (cd shells/web && node tests/pagecmp.mjs "$f" "$d/b/$b" 2>/dev/null) ||
+          { echo "$b: two runs differ" >&2; bad=$((bad + 1)); }
+        continue
+        ;;
+    esac
+    cmp -s "$f" "$d/b/$b" || { echo "$b: two runs differ" >&2; bad=$((bad + 1)); continue; }
+    if ! cmp -s "$f" "fixtures/golden/demo/$b"; then
+      mkdir -p "$target_dir/golden-actual/demo/v2"
+      cp "$f" "$target_dir/golden-actual/demo/$b"
+      echo "$b: differs from fixtures/golden/demo/$b (actual: $target_dir/golden-actual/demo/$b)" >&2
+      bad=$((bad + 1))
+    fi
+  done
+  for f in fixtures/golden/demo/v2/*.png; do
+    [ -f "$d/a/v2/$(basename "$f")" ] || { echo "v2/$(basename "$f"): golden not produced" >&2; bad=$((bad + 1)); }
+  done
   [ "$bad" -eq 0 ] || fail "$bad screenshot check(s) failed"
-  note "same origin only; browser = shell-less digests; settings page; gallery; paint paths (semantic reads identical); canvas within tolerance; $n images x2 (scenes identical, pages within chrome tolerance), scenes = goldens"
+  note "same origin only; browser = shell-less digests; settings page; gallery; paint paths (semantic reads identical); canvas within tolerance; $n images x2 (scenes identical, pages within chrome tolerance), scenes = goldens (v1 pinned to the pre-R5 designs, v2 = R5 defaults)"
 }
 
 # --- run -------------------------------------------------------------------

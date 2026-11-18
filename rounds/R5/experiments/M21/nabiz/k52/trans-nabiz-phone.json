@@ -1,0 +1,23 @@
+{
+ "motion": "nabiz",
+ "transition": "",
+ "config": "phone",
+ "open": {
+  "n": 323,
+  "p50": 17,
+  "p95": 19,
+  "p99": 70,
+  "max": 77,
+  "long": 8
+ },
+ "chart": {
+  "n": 345,
+  "p50": 17,
+  "p95": 18,
+  "p99": 20,
+  "max": 36,
+  "long": 2
+ },
+ "marks_us": 24,
+ "marks_sample": ""
+}

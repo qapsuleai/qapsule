@@ -14,7 +14,7 @@ const L = {
     empty: 'Henüz kapsül yok. Oynatmayı başlatın.', back: '‹ Geri', lang: 'Dil', theme: 'Tema',
     dark: 'Koyu', light: 'Açık', sensitivity: 'Hassasiyet', default: 'Grubun varsayılanı',
     important: 'Önemli', balanced: 'Dengeli', all: 'Hepsi', alphabet: 'İşaret alfabesi',
-    face: 'Yüz tasarımı', lookl: 'Görünüş', voicel: 'Dil', feedl: 'Akış düzeni', orderl: 'Akış sırası (M19)', rulel: 'Yazı tura eşiği (M19)', transition: 'Geçiş', outcome: 'Sonuç işareti', noent: 'Veri yetkisi yok (gösterim)', audience: 'İzleme listesi ve pozisyonlar',
+    face: 'Yüz tasarımı', lookl: 'Görünüş', voicel: 'Dil', openl: 'Açılmış kapsül (M20)', feedl: 'Akış düzeni', orderl: 'Akış sırası (M19)', rulel: 'Yazı tura eşiği (M19)', transition: 'Geçiş', motionl: 'Hareket (M21)', reduce: 'Hareketi azalt', outcome: 'Sonuç işareti', storyl: 'Hikâye çizelgesi', hideclosed: 'Kapanmış hikâyeleri gizle', noent: 'Veri yetkisi yok (gösterim)', audience: 'İzleme listesi ve pozisyonlar',
     group: 'Kullanıcı', habituated: 'Alışkın', future: 'Geleceğin yatırımcısı', symbol: 'Sembol',
     watch: 'İzle', position: 'Pozisyon', apply: 'Uygula', phone: 'Telefondan aç:',
     copy: 'Özeti kopyala', copied: 'Kopyalandı', play: '▶', pause: '❚❚', step: '+1', go: 'Git',
@@ -35,7 +35,7 @@ const L = {
     empty: 'No capsules yet. Start the replay.', back: '‹ Back', lang: 'Language', theme: 'Theme',
     dark: 'Dark', light: 'Light', sensitivity: 'Sensitivity', default: "Group's default",
     important: 'Important', balanced: 'Balanced', all: 'All', alphabet: 'Glyph alphabet',
-    face: 'Face design', lookl: 'Look', voicel: 'Voice', feedl: 'Feed layout', orderl: 'Feed order (M19)', rulel: 'Coin-flip threshold (M19)', transition: 'Transition', outcome: 'Outcome mark', noent: 'No data entitlement (demo)', audience: 'Watchlist and positions',
+    face: 'Face design', lookl: 'Look', voicel: 'Voice', openl: 'Open capsule (M20)', feedl: 'Feed layout', orderl: 'Feed order (M19)', rulel: 'Coin-flip threshold (M19)', transition: 'Transition', motionl: 'Motion (M21)', reduce: 'Reduce motion', outcome: 'Outcome mark', storyl: 'Story chart', hideclosed: 'Hide closed stories', noent: 'No data entitlement (demo)', audience: 'Watchlist and positions',
     group: 'User', habituated: 'Habituated', future: 'Future investor', symbol: 'Symbol',
     watch: 'Watch', position: 'Position', apply: 'Apply', phone: 'Open on your phone:',
     copy: 'Copy summary', copied: 'Copied', play: '▶', pause: '❚❚', step: '+1', go: 'Go',
@@ -71,7 +71,16 @@ const ui = {
   look: params.get('look') || '',
   // (R5/m17-int) The capsule voice (`?voice=marla|selvi|r4`; the core's default: `marla`).
   voice: params.get('voice') || '',
-  anim: params.get('anim') !== '0',
+  // (R5/M18) The story chart design at chart depth (`choices().story`; default `r4`: none).
+  story: params.get('story') || '',
+  // (R5/M20) The open capsule design (`?open=tesir`; the core's default: `r4`, today's).
+  open: params.get('open') || '',
+  // (R5/M21) The motion design (`?motion=`, names from `choices().motion`) and reduced
+  // motion: the address or the settings page override the system setting, which the page
+  // only forwards to the core (the core decides what moves). (R5/S) One parameter,
+  // `?reduced_motion=1|0`; `?reduce=1|0` and `?anim=0` are its earlier names.
+  motion: params.get('motion') || '',
+  reduce: params.get('reduced_motion') || params.get('reduce') || (params.get('anim') === '0' ? '1' : ''),
   // (R4/S1) Human-test settings: last look (`now` or a step) and the audience, given to
   // the core as they are (it reads the comma lists); applied again on every start frame,
   // so a backward seek (a new authority) keeps them.
@@ -87,6 +96,10 @@ const HINT = { capsule: 'hint_capsule', chart: 'hint_chart', evidence: 'hint_evi
 let faceSize = null;
 let faceKey = '';
 let lastMove = null; // the last transition's canvases, for the harness's frozen frames
+const changes = new Map(); // (R5/M21) capsule id -> its last change's sources, for frozen frames
+const reducedQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
+// (R5/M21) The motion overlay's box elements by key (the core names and styles them).
+const marks = new Map();
 
 let core = null;
 let conn = '';
@@ -154,6 +167,9 @@ function connect() {
   // makes every other connection a viewer.
   if (params.get('mode')) url.searchParams.set('mode', params.get('mode'));
   if (ui.feed_rule) url.searchParams.set('feed_rule', ui.feed_rule);
+  // (R5/S) `?feed_exempt=0`: the feed rule without the K42 exemption (human test form B;
+  // the host reads it as it is).
+  if (params.get('feed_exempt')) url.searchParams.set('feed_exempt', params.get('feed_exempt'));
   source = new EventSource(url);
   source.onmessage = (e) => {
     // (R4/T6) The stream opens while the WASM still loads; its first frames wait here.
@@ -202,7 +218,10 @@ function start(frame) {
   core.metric_flag('webgpu', Boolean(navigator.gpu));
   sampleMemory();
   if (ui.theme === 'light' || ui.alphabet || ui.face) core.set_style(ui.face, ui.alphabet, ui.theme);
-  if (ui.feed || ui.transition || ui.outcome || ui.look || ui.feed_order || ui.feed_rule || ui.voice) core.set_look(JSON.stringify({ feed: ui.feed, transition: ui.transition, outcome: ui.outcome, look: ui.look, feed_order: ui.feed_order, feed_rule: ui.feed_rule, voice: ui.voice }));
+  // (R5/S) `face` goes with the look too: a look brings its companion face unless the
+  // reader named one (the core decides).
+  if (ui.feed || ui.transition || ui.outcome || ui.look || ui.feed_order || ui.feed_rule || ui.voice || ui.story || ui.open || ui.motion) core.set_look(JSON.stringify({ face: ui.face, feed: ui.feed, transition: ui.transition, outcome: ui.outcome, look: ui.look, feed_order: ui.feed_order, feed_rule: ui.feed_rule, voice: ui.voice, story: ui.story, open: ui.open, motion: ui.motion }));
+  core.set_reduced_motion(reducedMotion());
   if (ui.watch || ui.long || ui.short || ui.group) core.set_audience(JSON.stringify({ group: ui.group, watch: ui.watch, long: ui.long, short: ui.short }));
   if (ui.seen) core.seen_at(ui.seen);
   faces.clear();
@@ -395,7 +414,8 @@ function renderLayer(force) {
   $('trust').textContent = open.trust || '';
   $('toevidence').hidden = open.depth === 'evidence';
   $('opentext').textContent = open.text;
-  $('hint').textContent = t(HINT[open.depth]);
+  // (R5/M20 nobra) An open capsule design may give its own hint (text from the core).
+  $('hint').textContent = open.hint || t(HINT[open.depth]);
   const scene = $('scene');
   scene.hidden = !open.scene;
   // (RP3/M14) The layer shows only on the feed tab; elsewhere the scene is not painted
@@ -406,7 +426,30 @@ function renderLayer(force) {
     if (paint.paintScene(scene, force, open.px)) core.metric_span('scene', t0, performance.now());
   }
   renderEvidence();
+  renderAsks(open.asks || []);
   return open;
+}
+
+// (R5/M20 nobra) An open capsule design's question cards for a reader without a scene (no
+// data of the instrument, A32): question, answer and detail as the core wrote them; the
+// detail opens on touch (a native disclosure).
+function renderAsks(rows) {
+  const out = [];
+  for (const r of rows) {
+    const d = document.createElement('details');
+    d.className = 'ask';
+    const s = document.createElement('summary');
+    const q = document.createElement('b');
+    q.textContent = r.q;
+    const a = document.createElement('span');
+    a.textContent = r.a;
+    s.append(q, ' ', a);
+    const p = document.createElement('p');
+    p.textContent = r.d;
+    d.append(s, p);
+    out.push(d);
+  }
+  $('asks').replaceChildren(...out);
 }
 
 function renderEvidence() {
@@ -495,12 +538,85 @@ function transition(oldCanvas, snap, a) {
   if (!oldCanvas) return;
   const b = $('scene').getBoundingClientRect();
   lastMove = { a, b, snap, after: snapshot($('scene')) };
-  if (!ui.anim) return;
+  if (reducedMotion()) return;
   const m = lastMove;
   const els = moveCanvases(m);
   if (!els.length) return;
   const step = (ts) => {
     if (showFrame(m, els, core.transition_progress(ts))) clearFrame(els);
+    else requestAnimationFrame(step);
+  };
+  requestAnimationFrame(step);
+}
+
+// (R5/M21) Reduced motion as the reader set it: the page's override, else the system's.
+function reducedMotion() {
+  if (ui.reduce) return ui.reduce === '1';
+  return reducedQuery.matches;
+}
+
+// (R5/M21) A face's own change (live value, state): the core's motion design says, per
+// frame, which piece of the face before (the page's copy of its canvas) or after the change
+// is drawn where and how opaque, and how opaque the repainted face is; the shell copies
+// those pixels. Nothing runs under reduced motion (the core queues no face then).
+function changeCanvases(m) {
+  const els = [];
+  const frame = JSON.parse(core.face_change_frame(m.id, 0, m.left, m.top));
+  if (!frame) return els;
+  for (const e of frame.elements) {
+    const src = e.source === 'after' ? m.after : m.snap;
+    const c = document.createElement('canvas');
+    c.width = e.src[2];
+    c.height = e.src[3];
+    if (src) c.getContext('2d').drawImage(src, e.src[0], e.src[1], e.src[2], e.src[3], 0, 0, e.src[2], e.src[3]);
+    $('fx').append(c);
+    els.push(c);
+  }
+  return els;
+}
+
+function showChange(m, els, p) {
+  const frame = JSON.parse(core.face_change_frame(m.id, p, m.left, m.top));
+  if (!frame) return true;
+  frame.elements.forEach((e, i) => { if (els[i]) Object.assign(els[i].style, e.style); });
+  m.canvas.style.opacity = frame.scene_opacity;
+  return frame.done;
+}
+
+function clearChange(m, els) {
+  for (const c of els) c.remove();
+  m.canvas.style.opacity = '';
+}
+
+// The face before its change, as the core kept it (the canvas already shows the bar's).
+function beforeCanvas(id) {
+  const px = core.face_before_rgba(id);
+  if (!px.length) return null;
+  const c = document.createElement('canvas');
+  c.width = faceSize.px[0];
+  c.height = faceSize.px[1];
+  c.getContext('2d').putImageData(new ImageData(new Uint8ClampedArray(px.buffer, px.byteOffset, px.length), faceSize.px[0], faceSize.px[1]), 0, 0);
+  return c;
+}
+
+function faceMotion(id) {
+  const el = faces.get(id);
+  if (!el || !el.firstChild || el.firstChild.tagName !== 'CANVAS') return;
+  paintFace(id, false);
+  // (R5/M21, K52) The start of a face change: the face before (the core's pixels), the
+  // copy after and the pieces (`face_motion` span).
+  const t0 = performance.now();
+  const snap = beforeCanvas(id);
+  const canvas = el.firstChild;
+  const box = canvas.getBoundingClientRect();
+  const m = { id, snap, canvas, after: snapshot(canvas), left: box.left, top: box.top };
+  changes.set(id, m);
+  if (reducedMotion()) return;
+  const els = changeCanvases(m);
+  core.metric_span('face_motion', t0, performance.now());
+  if (!els.length) return;
+  const step = (ts) => {
+    if (showChange(m, els, core.face_change_progress(id, ts))) clearChange(m, els);
     else requestAnimationFrame(step);
   };
   requestAnimationFrame(step);
@@ -531,7 +647,10 @@ function repaint(ch) {
       rect = old.getBoundingClientRect(); // before the layer covers the feed
     } else old = null;
   }
+  // (R5/M21) The faces whose change the core animates.
+  const moving = JSON.parse(core.take_face_motion());
   if (ch.feed) renderFeed();
+  for (const id of moving) faceMotion(id);
   if (ch.scene || ch.transition) renderLayer(Boolean(ch.transition));
   if (ch.transition) transition(old, snap, rect);
   if (ch.gloss) renderGloss();
@@ -575,12 +694,14 @@ function wireScene(scene) {
   scene.dataset.target = 'scene';
   pointers(scene);
   scene.addEventListener('wheel', (e) => {
+    // (R5/M20) The core says whether the wheel is the chart's zoom; otherwise (the open
+    // capsule's column) the layer scrolls.
+    if (!core.wheel(e.deltaY, e.offsetX)) return;
     e.preventDefault();
     // (R4/D) Wheel on the chart is its zoom: its frames are measured as `zoom`.
     mode = 'zoom';
     clearTimeout(zoomTimer);
     zoomTimer = setTimeout(() => { mode = 'idle'; }, 150);
-    core.wheel(e.deltaY, e.offsetX);
     flush();
   }, { passive: false });
 }
@@ -608,6 +729,12 @@ function wire() {
     clearTimeout(scrollTimer);
     scrollTimer = setTimeout(() => { mode = 'idle'; }, 150);
   }, { passive: true });
+  // (R5/M20) The open layer scrolls (a tall capsule column): measured as `scroll`.
+  $('layer').addEventListener('scroll', () => {
+    mode = 'scroll';
+    clearTimeout(scrollTimer);
+    scrollTimer = setTimeout(() => { mode = 'idle'; }, 150);
+  }, { passive: true });
   $('c_play').onclick = () => {
     core.replay($('c_play').dataset.paused ? '{"kind":"resume"}' : '{"kind":"pause"}');
     flush();
@@ -629,10 +756,20 @@ function wire() {
   };
   $('s_alpha').onchange = (e) => { core.set_style('', e.target.value, ''); flush(); };
   $('s_face').onchange = (e) => { core.set_style(e.target.value, '', ''); flush(); };
-  const looks = { feed: 's_feed', transition: 's_transition', outcome: 's_outcome', look: 's_look', feed_order: 's_order', voice: 's_voice' };
+  const looks = { feed: 's_feed', transition: 's_transition', outcome: 's_outcome', look: 's_look', feed_order: 's_order', voice: 's_voice', story: 's_story', open: 's_open', motion: 's_motion' };
   for (const k of Object.keys(looks)) {
     $(looks[k]).onchange = (e) => { core.set_look(JSON.stringify({ [k]: e.target.value })); flush(); };
   }
+  $('s_hideclosed').onchange = (e) => { core.set_look(JSON.stringify({ hide_closed: e.target.checked })); flush(); };
+  $('s_reduce').checked = reducedMotion();
+  $('s_reduce').onchange = (e) => {
+    ui.reduce = e.target.checked ? '1' : '0';
+    if (core) { core.set_reduced_motion(reducedMotion()); flush(); }
+  };
+  reducedQuery.addEventListener('change', () => {
+    $('s_reduce').checked = reducedMotion();
+    if (core) { core.set_reduced_motion(reducedMotion()); flush(); }
+  });
   $('s_sens').onchange = (e) => { core.set_sensitivity(e.target.value); flush(); };
   // (R5/M19) The host applies the feed rule on connect: a new connection.
   $('s_rule').onchange = (e) => { ui.feed_rule = e.target.value; connect(); };
@@ -651,7 +788,7 @@ function fillChoices() {
   // The names each setting accepts come from the core's registries.
   const ch = JSON.parse(core.choices());
   const look = JSON.parse(core.look());
-  const sel = { face: 's_face', alphabet: 's_alpha', feed: 's_feed', transition: 's_transition', outcome: 's_outcome', look: 's_look', feed_order: 's_order', feed_rule: 's_rule', voice: 's_voice' };
+  const sel = { face: 's_face', alphabet: 's_alpha', feed: 's_feed', transition: 's_transition', outcome: 's_outcome', look: 's_look', feed_order: 's_order', feed_rule: 's_rule', voice: 's_voice', story: 's_story', open: 's_open', motion: 's_motion' };
   for (const k of Object.keys(sel)) {
     const el = $(sel[k]);
     const opts = [];
@@ -664,6 +801,7 @@ function fillChoices() {
     el.replaceChildren(...opts);
     el.value = look[k] || ch[k][0];
   }
+  $('s_hideclosed').checked = Boolean(look.hide_closed);
 }
 
 function renderSettings() {
@@ -832,12 +970,45 @@ function applyCss() {
   for (const [k, v] of Object.entries(JSON.parse(css))) root.setProperty(k, v);
 }
 
+// (R5/M21) The motion overlay of this display frame: the core names each box (by face and
+// key) and gives its CSS values; the page creates one element per key inside its face and
+// applies the values as they are; a key the core no longer names is removed.
+function applyMarks(m) {
+  const keep = new Set();
+  for (const b of m.marks) {
+    const face = faces.get(b.face);
+    if (!face) continue;
+    let el = marks.get(b.key);
+    if (!el || el.parentNode !== face) {
+      if (el) el.remove();
+      el = document.createElement('div');
+      el.className = 'mk';
+      face.append(el);
+      marks.set(b.key, el);
+    }
+    Object.assign(el.style, b.style);
+    keep.add(b.key);
+  }
+  for (const [k, el] of marks) {
+    if (!keep.has(k)) {
+      el.remove();
+      marks.delete(k);
+    }
+  }
+}
+
+function motionPass(ts) {
+  const text = core.motion_marks(ts);
+  if (text) applyMarks(JSON.parse(text));
+}
+
 function frame(ts) {
   if (core) {
     applyCss();
     core.metric_frame(mode, ts);
     if (benching) benchStep(ts);
     paintPass();
+    motionPass(ts);
   }
   requestAnimationFrame(frame);
 }
@@ -873,12 +1044,18 @@ window.qp = {
   faceSize: () => core.face_size(),
   // (R5/m17-int) for tests/settings.mjs: a face's scene as the core holds it (its terms).
   faceDesc: (id) => JSON.parse(core.face_desc(id) || 'null'),
+  // (R5/M20) for tests/settings.mjs: the open capsule's scene as the core holds it.
+  openDesc: () => JSON.parse(core.open_desc() || 'null'),
   openCapsule: (id) => { core.open_capsule(id); flush(); },
   openTo: (to) => { core.open_to(to); flush(); },
   // (RP3/M15) for the viewer measurement (rounds/RP3/experiments/M15): the device's data
   // subscriptions and traffic, and the open capsule's check run again on its own data.
   viewer: () => core.viewer(),
   check: () => core.check(),
+  // (R5/M18) for the story chart measurement (rounds/R5/experiments/M18/pavka).
+  stories: () => core.stories(),
+  // (R5/M18 korda) `n` synthetic stories in place of the held list (K52 with 5 / 50 / 200).
+  benchStories: (n) => { const k = core.bench_stories(n); renderLayer(true); return k; },
   // Shows the last transition frozen at progress `p` (a value the harness gives).
   freeze: (p) => {
     if (window.qp.frozen) clearFrame(window.qp.frozen);
@@ -889,6 +1066,33 @@ window.qp = {
   },
   unfreeze: () => { if (window.qp.frozen) clearFrame(window.qp.frozen); window.qp.frozen = null; },
   frozen: null,
+  // (R5/M21) A face's last change frozen at progress `p` (the change animation's frames
+  // are the core's, from the scene descriptions; returns the pieces drawn), its release,
+  // the latest changes as facts (both modes alike) and the faces' ids that changed.
+  freezeChange: (id, p) => {
+    window.qp.unfreezeChange();
+    const m = changes.get(id);
+    if (!m) return 0;
+    // The face where it is now (the feed may have scrolled since).
+    const box = m.canvas.getBoundingClientRect();
+    m.left = box.left;
+    m.top = box.top;
+    const els = changeCanvases(m);
+    showChange(m, els, p);
+    window.qp.frozenChange = { m, els };
+    return els.length;
+  },
+  unfreezeChange: () => {
+    const f = window.qp.frozenChange;
+    if (f) clearChange(f.m, f.els);
+    window.qp.frozenChange = null;
+  },
+  frozenChange: null,
+  faceChanges: () => JSON.parse(core.face_changes()),
+  changed: () => Array.from(changes.keys()),
+  // (R5/M21) The motion overlay the core would hand out at page time `t` (JSON), for the
+  // harness's frozen frames of pulse, beat and trail.
+  marks: (t) => core.motion_marks(t),
   // (RP3/T2) for tests/compare.mjs
   benching: () => benching,
   bench: () => core.bench_summary(),
@@ -897,7 +1101,7 @@ window.qp = {
 
 async function main() {
   document.body.dataset.theme = ui.theme;
-  if (!ui.anim) document.body.classList.add('noanim');
+  if (reducedMotion()) document.body.classList.add('noanim');
   labels();
   wire();
   // (R4/T6) Connect first: the host prepares the start frame while the WASM downloads

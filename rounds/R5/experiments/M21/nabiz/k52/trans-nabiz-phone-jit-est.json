@@ -1,0 +1,23 @@
+{
+ "motion": "nabiz",
+ "transition": "",
+ "config": "phone-jit-est",
+ "open": {
+  "n": 347,
+  "p50": 17,
+  "p95": 18,
+  "p99": 19,
+  "max": 26,
+  "long": 0
+ },
+ "chart": {
+  "n": 346,
+  "p50": 17,
+  "p95": 18,
+  "p99": 18,
+  "max": 19,
+  "long": 0
+ },
+ "marks_us": 1.5,
+ "marks_sample": ""
+}

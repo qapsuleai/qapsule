@@ -1,0 +1,23 @@
+{
+ "motion": "",
+ "transition": "",
+ "config": "phone",
+ "open": {
+  "n": 326,
+  "p50": 17,
+  "p95": 19,
+  "p99": 66,
+  "max": 71,
+  "long": 9
+ },
+ "chart": {
+  "n": 349,
+  "p50": 17,
+  "p95": 18,
+  "p99": 18,
+  "max": 19,
+  "long": 0
+ },
+ "marks_us": 1,
+ "marks_sample": ""
+}

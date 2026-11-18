@@ -469,6 +469,10 @@ paneller ağırlıklarına göre bölünür, aralarında 8 px; tek panelde alan 
 Bar yuvası `slot = (sağ − sol) / yuva sayısı`, yuva merkezi
 `floor(sol + (i − from + 0.5) · slot)`. Fiyat etiketleri sağda (`{:.2}`), ay etiketleri
 yalnız en alttaki panelin altında, ay değişiminde dikey ızgara (etiketler arası ≥ 72 px).
+(R5/M20) En alttaki panel bir kart paneliyse (§18.2; yalnız metin) ay etiketleri değer
+ölçeği olan son panelin altına yazılır (küçük bir grafiğin altında metin blokları); bütün
+paneller kartsa yine en alttakinin altına. Var olan görünümlerde (en alttaki panel kart
+değil ya da görünen aralıkta ay değişimi yok) çıktı aynıdır.
 Başlık satırı: sol `başlık`, `C <son kapanış>` (yön rengi); sağda panel 0'ın çizgi/alan/bant
 açıklamaları sağa yaslı (`SMA20 <son değer>`), alt panellerde açıklamalar panelin sol
 üstünde. Her panelde ilk veri katmanının son değeri sağ eksende etiketlenir.
@@ -581,6 +585,8 @@ kesri artı `d` piksel. **Düzen sabitidir**, veri iddiası değildir; köken is
 - `text`: panele göre `x` → metin o noktaya sola yaslanır, panelin sağ kenarında satır
   kırılır, panelin altını aşan satırlar düşer (son kalan satır "…" ile biter); bir bara
   bağlı olmadığı için katman ilk satırını çizer. Panele göre `y` → ilk satırın üstü.
+  (R5/M20) Panele göre `x2` verilirse satır orada kırılır (panelin sağ kenarını aşıp sağ
+  boşluğa uzanabilir: kart panelinde değer ölçeği yoktur); `x2` olmadan bugünkü kural.
 - **Kart paneli:** bütün katmanları panele göre `y` kullanan bir panelin değer ölçeği
   gösterilmez (ızgara, değer etiketi, eksen çizgisi yok).
 - Bulgu satırlarının yeni metin alanları: `headline` (kapsül cümlesi), `ledger` (karne
@@ -626,6 +632,16 @@ değerleri veri yetkisi gerektirir: `<entitlement>`") ve grafik onu panelin sol 
 yetkisiz sağlayıcıyla derlenirse sıfır çizilmez, `not_found` döner. Not: `show_finding`
 görünümü dokümana yazarken otorite kökenli değeri sabit olarak yazar (§10 kural 4); lisanslı
 olgunun saklanan görünümünü okuyucuya göre ayıklamak oturumun işidir (R3 bütünleştirme).
+
+**(R5/M20) Açılmış kapsül tasarımları** (`qp_grammar::open`, `OPENS`; `style` `open`,
+`ViewState.open`): kapsül derinliğinin görünümünü seçilen tasarım kurar; `r4` (varsayılan)
+yukarıdaki karttır. Bir tasarım kendi çerçeve yüksekliğini söyleyebilir (`height`; kabuk
+çekirdeği kapsül derinliğini o yükseklikte açar, sayfa katmanı kaydırır), kendi metin
+alanlarını okur (bulgu satırında `open.*`, `open::text`), bir metin katmanının bütün panelini
+bir sözlük girdisine bağlayabilir (`open::layer_term`: panel dokunma hedefi, ilk satır altı
+çizili) ve sahnesi olmayan okur için açılmış katmanın metnini yazabilir (`text`). Sağlayıcının
+iki yeni okuması: `reader_lang` (okurun dili) ve `device_check` (cihazın kendi verisinde
+sınaması, K48; otoritede yok). `tesir`: `rounds/R5/experiments/M20/tesir/DESIGN.md`.
 
 ### 18.5 Elenen seçenekler
 

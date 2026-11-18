@@ -110,10 +110,23 @@ try {
     const ok = b && a.document === b.document && facesOk && same(a.open, b.open) && same(a.look, b.look) && same(a.data, b.data);
     console.log(`viewer ${k}: ${ok ? 'equal' : 'DIFFERENT'} (slice ${a.document}, ${shown.length} faces on screen, open ${a.open.depth} ${a.open.digest}, data ${JSON.stringify(a.data)})`);
     if (!ok) failed++;
-    // The viewer driver's faces and open scene are the full replica driver's.
-    const r = want[k];
+  }
+  // The viewer driver's faces and open scene are the full replica driver's. (R5/S) Under
+  // today's card and no story chart: the presented open design (`tesir`) says what the
+  // device's own check found and the story chart marks the host's coin flips, neither of
+  // which the full replica has (`crates/qp-wasm/tests/viewer_m15.rs`).
+  const pinned = path.join(out, 'parity-script-pinned.json');
+  fs.writeFileSync(pinned, JSON.stringify([{ style: { open: 'r4', story: 'r4' } }, ...script]));
+  const slp = path.join(out, 'shell-less-pinned.json');
+  const vlp = path.join(out, 'viewer-less-pinned.json');
+  execFileSync(qp, ['drive', '--script', pinned, '--out', slp], { stdio: 'inherit' });
+  execFileSync(qp, ['drive', '--mode', 'viewer', '--script', pinned, '--out', vlp], { stdio: 'inherit' });
+  const rp = JSON.parse(fs.readFileSync(slp, 'utf8'));
+  const vp = JSON.parse(fs.readFileSync(vlp, 'utf8'));
+  for (const k of Object.keys(vp)) {
+    const a = vp[k], r = rp[k];
     const crossOk = r && same(a.faces, r.faces) && same(a.open, r.open);
-    console.log(`viewer = replica ${k}: ${crossOk ? 'equal' : 'DIFFERENT'}`);
+    console.log(`viewer = replica ${k} (open r4, story r4): ${crossOk ? 'equal' : 'DIFFERENT'}`);
     if (!crossOk) failed++;
   }
 } finally {

@@ -31,6 +31,7 @@ html, body { margin: 0; height: 100%; background: var(--page); color: var(--fg);
 .fhead { margin: var(--qp-head-gap) var(--qp-space-3) 0; color: var(--muted); font-size: var(--qp-fs-small); font-weight: var(--qp-head-weight); text-transform: uppercase; letter-spacing: var(--qp-head-tracking); }
 .face p { margin: 0; padding: var(--qp-face-pad); min-height: var(--qp-face-min-h); white-space: pre-line; }
 /* (RP3/M15, K48) trust mark: the authority's settled claim (feed) or checked here (open) */
+.face .mk { position: absolute; pointer-events: none; box-sizing: border-box; }
 .face .trust { position: absolute; bottom: var(--qp-space-0); right: var(--qp-space-2); font-size: var(--qp-fs-trust); color: var(--muted); pointer-events: none; }
 #trust { margin-left: var(--qp-space-1); font-size: var(--qp-fs-tiny); color: var(--muted); }
 #empty { color: var(--muted); padding: var(--qp-space-5) var(--qp-space-3); }
@@ -39,11 +40,15 @@ body.open[data-tab="feed"] #layer { display: block; }
 body.open[data-tab="feed"] #feed { display: none; }
 #layerbar { display: flex; gap: var(--qp-space-2); align-items: center; padding: var(--qp-space-2) var(--qp-space-3); border-bottom: var(--qp-rule) solid var(--line); }
 #depth { color: var(--muted); }
-#opentext { margin: var(--qp-space-2) var(--qp-space-3); }
+#opentext { margin: var(--qp-space-2) var(--qp-space-3); white-space: pre-line; }
 #scene { display: block; width: var(--qp-scene-w); height: var(--qp-scene-h); touch-action: none; }
 #hint { color: var(--muted); margin: var(--qp-space-1) var(--qp-space-3); font-size: var(--qp-fs-small); }
 #evidence .ev { margin: var(--qp-space-1) var(--qp-space-3); padding: var(--qp-space-2); border: var(--qp-rule) solid var(--line); border-radius: var(--radius); }
 #evidence .req { color: var(--req); }
+#asks .ask { margin: var(--qp-space-1) var(--qp-space-3); padding: var(--qp-space-2); border: var(--qp-rule) solid var(--line); border-radius: var(--radius); }
+#asks .ask b { color: var(--muted); font-size: var(--qp-fs-small); font-weight: inherit; }
+#asks .ask summary span { display: block; }
+#asks .ask p { margin: var(--qp-space-1) 0 0; font-size: var(--qp-fs-small); }
 #controls { display: flex; gap: var(--qp-space-0); align-items: center; padding: var(--qp-space-1) var(--qp-space-2); height: var(--qp-bar-h); border-top: var(--qp-rule) solid var(--line); background: var(--bg); z-index: 6; }
 #controls input[type=date] { width: var(--qp-date-w); }
 #c_step_n { color: var(--muted); font-size: var(--qp-fs-tiny); margin-left: auto; font-variant-numeric: tabular-nums; }

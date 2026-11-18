@@ -28,6 +28,8 @@ use serde_json::{json, Value};
 use crate::viewer::{Stories, Traffic, Viewer, STORIES_SUB};
 pub mod bench;
 pub mod freq;
+pub mod live;
+pub mod motion;
 pub mod paint;
 pub mod paint_canvas;
 pub mod paint_gpu;
@@ -55,7 +57,7 @@ pub const DISPLAY_TZ: &str = "Europe/Istanbul";
 
 // (RP3/M15) The pure scene functions live in `qp_session::viewer`: the authority compiles
 // a viewer's faces with the very same code (§22).
-pub use qp_session::viewer::{face_scene, open_scene, scene_digest};
+pub use qp_session::viewer::{face_scene, open_scene, open_scene_with, scene_digest, story_series};
 
 #[cfg(target_arch = "wasm32")]
 mod clock {
@@ -518,6 +520,8 @@ pub struct ShellCore {
     /// first of them, and that of the pass being painted.
     pending: serde_json::Map<String, Value>,
     pending_since: Option<f64>,
+    /// (R5/M21) The motion design, reduced motion and the faces' changes (`motion`).
+    pub(crate) mo: motion::MotionState,
     pass_since: Option<f64>,
     /// (R5/T0) A data frame raised some of the waiting changes / of those the pass being
     /// painted took (the pass is then a data frame's cost, `data_pass`).
@@ -534,6 +538,69 @@ impl std::fmt::Debug for ShellCore {
             .field("feed", &self.feed.len())
             .finish_non_exhaustive()
     }
+}
+
+/// (R5/M18, K52 measurement) `n` synthetic story rows over `bars` bars of `series`.
+fn synthetic_rows(n: u64, bars: u64, series: &str) -> Vec<qp_schema::protocol::StoryRow> {
+    use qp_schema::capsule::{Direction, MeaningKind, Stage, Validity};
+    use qp_schema::protocol::{StoryFace, StoryOutcome, StoryRow};
+    let outcomes = [
+        Stage::Realized,
+        Stage::Invalidated,
+        Stage::Expired,
+        Stage::Realized,
+        Stage::Retracted,
+    ];
+    let t = |b: u64| i64::try_from(b).unwrap_or(0);
+    (0..n)
+        .map(|i| {
+            let born = (i * (bars - 5) / n.max(1)) % (bars - 5);
+            let len = 3 + (i * 7) % 25;
+            let open = born + len >= bars - 1 || i + 3 >= n;
+            let stage = if open {
+                Stage::Born
+            } else {
+                outcomes[usize::try_from(i % 5).unwrap_or(0)]
+            };
+            let last = if open { born + len / 2 } else { born + len };
+            StoryRow {
+                id: format!("bench.{i}"),
+                finding: format!("bench.f{i}"),
+                series: series.to_owned(),
+                kind: MeaningKind::Breakout,
+                direction: [Direction::Up, Direction::Down, Direction::Neutral]
+                    [usize::try_from(i % 3).unwrap_or(0)],
+                tier: 2,
+                born_bar: born,
+                born_t: t(born),
+                last_bar: last,
+                last_t: t(last),
+                closed_bar: (!open).then_some(last),
+                closed_t: (!open).then(|| t(last)),
+                stage,
+                outcome: StoryOutcome::of(stage),
+                validity: if open {
+                    Validity::Valid
+                } else {
+                    Validity::Closed
+                },
+                in_feed: true,
+                hidden: None,
+                coin_flip: i % 7 == 0,
+                face: StoryFace {
+                    event: "kırılım".to_owned(),
+                    direction_word: String::new(),
+                    when: String::new(),
+                    moved: String::new(),
+                    validity_phrase: if open { "geçerli" } else { "kapandı" }.to_owned(),
+                    ledger_short: String::new(),
+                    few_cases: false,
+                    ledger_n: None,
+                },
+                redacted: false,
+            }
+        })
+        .collect()
 }
 
 fn lang_name(l: Language) -> &'static str {
@@ -704,6 +771,12 @@ impl ShellCore {
             viewer_seq: 0,
             pending: serde_json::Map::new(),
             pending_since: None,
+            // (R5/S) The presentation's motion design (M21: `surek`, provisional); its
+            // transition goes with the presented `style` gesture (`presented_look`).
+            mo: motion::MotionState {
+                design: Some(qp_grammar::motion::PRESENTED_MOTION.to_owned()),
+                ..motion::MotionState::default()
+            },
             pass_since: None,
             pending_data: false,
             pass_data: false,
@@ -792,17 +865,24 @@ impl ShellCore {
     /// (R4/S1) The `style` gesture of the presentation's defaults: feed layout, depth
     /// transition and outcome mark picked in M9–M11 (`qp_grammar::feeds::PRESENTED_FEED`,
     /// `transitions::PRESENTED_TRANSITION`, `glyph::outcome::PRESENTED_OUTCOME`) and the
-    /// face picked in M8 (`qp_grammar::faces::PRESENTED_FACE`, R4/S2). The protocol's own
-    /// defaults (a bare connection) stay `r3`.
+    /// face (`qp_grammar::faces::PRESENTED_FACE`). (R5/S) R5's picks: the look and its
+    /// companion face (M16, `look::PRESENTED_LOOK`), the voice (M17), the story chart
+    /// (M18, `stories::PRESENTED_STORY`) and the open capsule design (M20,
+    /// `open::PRESENTED_OPEN`). The protocol's own defaults (a bare connection) stay `r3`
+    /// / `r4`.
     #[must_use]
     pub fn presented_look() -> Value {
         json!({"kind":"style",
                "face": qp_grammar::faces::PRESENTED_FACE,
                "feed": qp_grammar::feeds::PRESENTED_FEED,
-               "transition": qp_grammar::transitions::PRESENTED_TRANSITION,
+               // (R5/S) The presented motion design's opening (M21, `surek`).
+               "transition": qp_grammar::motion::by_name(Some(qp_grammar::motion::PRESENTED_MOTION)).transition,
                "outcome": qp_grammar::glyph::outcome::PRESENTED_OUTCOME,
                // (R5/m17-int) M17's voice (`qp_session::voices::PRESENTED_VOICE`).
-               "voice": qp_session::voices::PRESENTED_VOICE})
+               "voice": qp_session::voices::PRESENTED_VOICE,
+               "look": qp_grammar::look::PRESENTED_LOOK,
+               "story": qp_grammar::stories::PRESENTED_STORY,
+               "open": qp_grammar::open::PRESENTED_OPEN})
     }
 
     fn id(&mut self, prefix: &str) -> String {
@@ -965,10 +1045,15 @@ impl ShellCore {
                     ("outcome", &self.look.outcome),
                     ("look", &self.look.look),
                     ("voice", &self.look.voice),
+                    ("story", &self.look.story),
+                    ("open", &self.look.open),
                 ] {
                     if let Some(v) = v {
                         more[k] = json!(v);
                     }
+                }
+                if self.look.hide_closed {
+                    more["hide_closed"] = json!(true);
                 }
                 if more.as_object().is_some_and(|o| o.len() > 1) {
                     self.ask("in", Asked::Input, json!({"type":"input","gesture":more}));
@@ -987,9 +1072,12 @@ impl ShellCore {
                         },
                     ) => {
                         self.feed_inflight = false;
+                        let changes = self.changes_before(capsules);
                         self.feed.clone_from(capsules);
+                        self.changes_after(changes);
                         self.feed_known = true;
                         self.coin_flip_hidden = *coin_flip_hidden;
+                        self.observe_feed();
                         // (RP3/T4) Only a face in the feed can be painted: the digests of
                         // the faces that left it are forgotten (bounded by the feed).
                         let feed = &self.feed;
@@ -1028,6 +1116,7 @@ impl ShellCore {
                             self.shared_from = depth_name(o.from).to_owned();
                             self.shared.clone_from(&o.shared);
                             if o.from == OpenDepth::Sentence {
+                                self.changes_seen(Some(&o.capsule));
                                 self.open_headline = self
                                     .feed
                                     .iter()
@@ -1229,6 +1318,25 @@ impl ShellCore {
         self.viewer.as_ref().map_or(0, |v| v.stories_asked)
     }
 
+    /// (R5/M18, K52 measurement only) Replaces the held story list with `n` synthetic
+    /// stories spread over the open chart's bars (deterministic: lives of 3–27 bars,
+    /// outcomes in turn, the last three open, every 7th a coin flip), so that the paint
+    /// budget can be measured with 5 / 50 / 200 stories in view. Returns how many rows
+    /// the list now holds (0: no viewer list, e.g. the chart is not open).
+    pub fn bench_stories(&mut self, n: u32) -> u32 {
+        let bars = self.scene().map_or(0, |s| s.bars);
+        let Some(st) = self.viewer.as_mut().and_then(|v| v.stories.as_mut()) else {
+            return 0;
+        };
+        if bars < 8 {
+            return 0;
+        }
+        st.rows = synthetic_rows(u64::from(n), bars, &st.series);
+        st.total = n;
+        self.version += 1;
+        u32::try_from(st.rows.len()).unwrap_or(u32::MAX)
+    }
+
     /// (RP3/M15) Applies a viewer update: the feed rows (the feed the rest of the core
     /// reads), the faces, the open capsule's slice.
     fn apply_viewer(&mut self, up: &qp_schema::protocol::ViewerUpdate, seq: u64, ch: &mut Value) {
@@ -1237,9 +1345,13 @@ impl ShellCore {
         };
         let scene = v.apply(up, seq);
         if up.feed.is_some() {
-            self.feed = v.items();
+            let items = v.items();
+            let changes = self.changes_before(&items);
+            self.feed = items;
+            self.changes_after(changes);
             self.feed_known = true;
             self.coin_flip_hidden = up.coin_flip_hidden;
+            self.observe_feed();
         }
         if up.feed.is_some() || !up.faces.is_empty() || up.audience.is_some() {
             ch["feed"] = json!(true);
@@ -1485,6 +1597,11 @@ impl ShellCore {
             "feed_order": std::iter::once("layout").chain(qp_grammar::feeds::FEED_ORDERS).collect::<Vec<_>>(),
             "feed_rule": qp_capsule::feedrule::FEED_RULES.iter().map(|(n, _)| *n).collect::<Vec<_>>(),
             "voice": qp_session::voices::names(),
+            "story": qp_grammar::stories::names(),
+            // (R5/M20) The open capsule designs (`r4`: today's).
+            "open": qp_grammar::open::names(),
+            // (R5/M21) Motion designs (the default first).
+            "motion": qp_grammar::motion::names(),
         })
     }
 
@@ -1597,22 +1714,33 @@ impl ShellCore {
         self.scale
     }
 
-    fn pixels(&self, scene: &SceneDesc) -> Vec<u8> {
+    pub(crate) fn pixels(&self, scene: &SceneDesc) -> Vec<u8> {
         qp_render::render_scene_rgba_scaled(scene, self.scale).unwrap_or_default()
     }
 
-    /// The face scene of capsule `id` at the face frame.
+    /// The face scene of capsule `id` at the face frame (R5/M21: with its change label
+    /// under reduced motion, `motion`).
     #[must_use]
     pub fn face(&mut self, id: &str) -> Option<SceneDesc> {
+        let sc = self.face_plain(id)?;
+        Some(self.stamped(id, sc))
+    }
+
+    /// The face scene of capsule `id` as its face design compiles it.
+    pub(crate) fn face_plain(&mut self, id: &str) -> Option<SceneDesc> {
         let (w, h) = self.frames["face"];
-        if let Some(v) = &self.viewer {
+        let mut scene = if let Some(v) = &self.viewer {
             // (RP3/M15) A viewer's face is the scene the authority compiled.
-            return v.face(id).cloned();
-        }
-        let it = self.feed.iter().find(|i| i.id == id)?.clone();
-        let look = self.look.clone();
-        let mp = self.max_points;
-        face_scene(self.replica.session_mut()?, &it, &look, mp, w, h)
+            v.face(id).cloned()?
+        } else {
+            let it = self.feed.iter().find(|i| i.id == id)?.clone();
+            let look = self.look.clone();
+            let mp = self.max_points;
+            face_scene(self.replica.session_mut()?, &it, &look, mp, w, h)?
+        };
+        // (R5/M21) The motion design's still marks (none by default).
+        self.decorate_face(id, &mut scene);
+        Some(scene)
     }
 
     /// Pixels (RGBA) of capsule `id`'s face, or empty when it has not changed since the
@@ -1642,19 +1770,74 @@ impl ShellCore {
         let voice = self.open_voice.clone();
         // (RP3/S) The build's own time (`scene_build`), apart from the change check.
         let t0 = core_now();
+        let lang = self.lang;
+        let story = look.story.is_some() && o.to >= OpenDepth::Chart;
+        // (R5/M20) An open capsule design reads the reader's language and (viewer) the
+        // device's own check; today's card reads neither.
+        let designed = look.open.is_some();
+        let mut extra = qp_session::viewer::OpenExtra {
+            lang: designed.then_some(self.lang),
+            check: None,
+        };
         let scene = if let Some(v) = self.viewer.as_mut() {
+            // (R5/M18, §23.5) The story chart draws the list the authority sent.
+            // (Taken out and put back: not copied on every build.)
+            let rows = if story {
+                v.stories
+                    .as_mut()
+                    .map(|st| std::mem::take(&mut st.rows))
+                    .unwrap_or_default()
+            } else {
+                Vec::new()
+            };
             // (RP3/M15) The open capsule over the device's own data of its instrument.
-            let side = v.open_mut().filter(|s| s.open.capsule == o.capsule)?;
-            let s = side.replica_mut().session_mut()?;
-            open_scene(s, &o, head.as_deref(), voice.as_ref(), &look, mp)
+            let scene = v
+                .open_mut()
+                .filter(|s| s.open.capsule == o.capsule)
+                .and_then(|side| {
+                    if designed {
+                        extra.check = Some(side.trust());
+                    }
+                    side.replica_mut().session_mut()
+                })
+                .and_then(|s| {
+                    open_scene_with(
+                        s,
+                        &o,
+                        head.as_deref(),
+                        voice.as_ref(),
+                        &look,
+                        mp,
+                        (&rows, lang),
+                        extra,
+                    )
+                });
+            if let Some(st) = v.stories.as_mut() {
+                if st.rows.is_empty() {
+                    st.rows = rows;
+                }
+            }
+            scene
         } else {
-            open_scene(
-                self.replica.session_mut()?,
+            let principal = self.principal.clone();
+            let s = self.replica.session_mut()?;
+            // (R5/M18) The full replica lists the stories itself (the same rule).
+            let rows = if story {
+                story_series(s, &o)
+                    .map(|bs| s.story_rows(&bs, &principal, lang))
+                    .unwrap_or_default()
+            } else {
+                Vec::new()
+            };
+            open_scene_with(
+                s,
                 &o,
                 head.as_deref(),
                 voice.as_ref(),
                 &look,
                 mp,
+                (&rows, lang),
+                extra,
             )
         };
         let t1 = core_now();
@@ -1673,6 +1856,8 @@ impl ShellCore {
             return false;
         }
         self.face_shown.insert(id.to_owned(), k);
+        // (R5/M21) The face as handed out (a marking motion design keeps it).
+        self.face_shown_now(id, scene);
         true
     }
 
@@ -1716,11 +1901,52 @@ impl ShellCore {
     pub fn open_json(&mut self) -> Value {
         let mut v = self.open_json_base();
         if v["depth"] != "sentence" {
-            if let Some(t) = self.viewer.as_mut().and_then(Viewer::open_trust) {
-                v["trust"] = json!(t);
+            let state = self.viewer.as_mut().and_then(Viewer::trust);
+            if let Some(t) = state {
+                v["trust"] = json!(qp_session::viewer::trust_text(t, self.lang));
             }
+            self.open_design_text(&mut v, state);
         }
         v
+    }
+
+    /// (R5/M20) Under an open capsule design, the open layer's text at the capsule depth:
+    /// above a scene the design's (`tesir`: none, the scene writes the headline); without
+    /// a scene (no data entitlement, A32) the design's text column from the feed item and
+    /// the opening (the same reader rule). The scene's CSS lets the page scroll the layer
+    /// over it (`touch-action: pan-y`) when the design states its own height.
+    fn open_design_text(&self, v: &mut Value, state: Option<qp_session::viewer::TrustState>) {
+        let Some(o) = self.opening.as_ref().filter(|o| o.to == OpenDepth::Capsule) else {
+            return;
+        };
+        let design = qp_grammar::open::by_name(self.look.open.as_deref());
+        if self.look.open.is_none() {
+            return;
+        }
+        if o.frame.is_some() {
+            if let Some(f) = design.scene_text {
+                v["text"] = json!(f());
+            }
+            if design.height.is_some() {
+                v["style"]["touchAction"] = json!("pan-y");
+            }
+            return;
+        }
+        let (Some(f), Some(it)) = (design.text, self.feed.iter().find(|i| i.id == o.capsule))
+        else {
+            return;
+        };
+        let t = qp_grammar::open::TextInput {
+            lang: self.lang,
+            headline: &it.sentence.text,
+            voice: self.open_voice.as_ref(),
+            facts: &o.presentation.facts,
+            trust: it.trust,
+            check: state.map(qp_session::viewer::TrustState::device_check),
+            ledger: it.ledger_at_birth,
+            validity: it.validity,
+        };
+        v["text"] = json!(f(&t));
     }
 
     fn open_json_base(&self) -> Value {
@@ -1737,6 +1963,37 @@ impl ShellCore {
                     "frame": o.frame,
                     "scene": o.frame.is_some(),
                 });
+                // (R5/M20 `nobra`) The open capsule design's own hint for its depth (absent:
+                // the page's).
+                if let Some(h) = o.frame.and_then(|_| {
+                    qp_grammar::open::hint(self.look.open.as_deref(), o.to, self.lang)
+                }) {
+                    v["hint"] = json!(h);
+                }
+                // (R5/M20 `nobra`) Without a scene (no data of the instrument, A32) the
+                // design's question cards as text, `[{key, q, a, d}]`, from the feed item.
+                if o.frame.is_none() {
+                    let rows = self
+                        .feed
+                        .iter()
+                        .find(|i| i.id == o.capsule)
+                        .map(|i| {
+                            qp_grammar::open::text_rows(
+                                self.look.open.as_deref(),
+                                o.to,
+                                i,
+                                self.lang,
+                            )
+                        })
+                        .unwrap_or_default();
+                    if !rows.is_empty() {
+                        v["asks"] = Value::Array(
+                            rows.iter()
+                                .map(|r| json!({"key": r.key, "q": r.q, "a": r.a, "d": r.d}))
+                                .collect(),
+                        );
+                    }
+                }
                 if let Some([w, h]) = o.frame {
                     let sz = self.size_json(w, h);
                     v["px"] = sz["px"].clone();
@@ -1811,6 +2068,13 @@ impl ShellCore {
         }
         if let Some(r) = &self.feed_rule {
             v["feed_rule"] = json!(r);
+        }
+        // (R5/M21) The motion design (absent: the default) and reduced motion.
+        if let Some(m) = &self.mo.design {
+            v["motion"] = json!(m);
+        }
+        if self.mo.reduced {
+            v["reduced_motion"] = json!(true);
         }
         v
     }
@@ -1960,6 +2224,13 @@ impl ShellCore {
     /// feed?, transition?, outcome?}` (absent or `""`: unchanged).
     pub fn set_look(&mut self, choice: &Value) {
         let mut g = json!({"kind":"style"});
+        // (R5/M21) The motion design (a presentation setting): it names the transition it
+        // opens with; a transition given in the same choice still wins.
+        if let Some(v) = choice.get("motion").and_then(Value::as_str) {
+            if let Some(t) = self.set_motion(v) {
+                g["transition"] = json!(t);
+            }
+        }
         for k in [
             "face",
             "alphabet",
@@ -1969,6 +2240,8 @@ impl ShellCore {
             "outcome",
             "look",
             "voice",
+            "story",
+            "open",
         ] {
             if let Some(v) = choice.get(k).and_then(Value::as_str) {
                 if !v.is_empty() {
@@ -1991,6 +2264,20 @@ impl ShellCore {
                 .any(|(n, _)| *n == v)
             {
                 self.feed_rule = Some(v.to_owned());
+            }
+        }
+        // (R5/M18, K54) Show or hide the closed stories of the story chart.
+        if let Some(b) = choice.get("hide_closed").and_then(Value::as_bool) {
+            g["hide_closed"] = json!(b);
+        }
+        // (R5/S) A look brings its companion face, unless the same choice names a face.
+        if g.get("face").is_none() {
+            if let Some(f) = g
+                .get("look")
+                .and_then(Value::as_str)
+                .and_then(qp_grammar::look::companion_face)
+            {
+                g["face"] = json!(f);
             }
         }
         if g.as_object().is_some_and(|o| o.len() > 1) {
@@ -2017,6 +2304,8 @@ impl ShellCore {
     /// (R4/H-M8910) "I looked now": the `style` gesture's `seen` at the replay clock (the
     /// feed layout may mark what changed since). Nothing without a replay state.
     pub fn mark_seen(&mut self) {
+        // (R5/M21) "I looked now": the change labels go.
+        self.changes_seen(None);
         let Some(t) = self.replay.as_ref().map(|r| r.t) else {
             return;
         };
@@ -2030,7 +2319,7 @@ impl ShellCore {
     /// (R4/H-M8910) Open capsule `id` from the feed to its capsule depth (the `open`
     /// gesture; what a tap on its face does, by id).
     pub fn open_capsule(&mut self, id: &str) {
-        let (w, h) = self.frames["scene"];
+        let (w, h) = self.frame_at(OpenDepth::Capsule);
         self.ask(
             "in",
             Asked::Input,
@@ -2047,7 +2336,11 @@ impl ShellCore {
         if !["capsule", "chart", "evidence"].contains(&to) {
             return;
         }
-        let (w, h) = self.frames["scene"];
+        let (w, h) = self.frame_at(if to == "capsule" {
+            OpenDepth::Capsule
+        } else {
+            OpenDepth::Chart
+        });
         self.ask(
             "in",
             Asked::Input,
@@ -2057,10 +2350,14 @@ impl ShellCore {
 
     /// Back: close one depth (to the feed from the capsule).
     pub fn back(&mut self) {
-        if self.opening.is_none() {
+        let Some(to) = self.opening.as_ref().map(|o| match o.to {
+            OpenDepth::Evidence => OpenDepth::Chart,
+            OpenDepth::Chart => OpenDepth::Capsule,
+            _ => OpenDepth::Sentence,
+        }) else {
             return;
-        }
-        let (w, h) = self.frames["scene"];
+        };
+        let (w, h) = self.frame_at(to);
         self.ask(
             "in",
             Asked::Input,
@@ -2072,8 +2369,20 @@ impl ShellCore {
         if target.starts_with("face:") {
             self.frames["face"]
         } else {
-            self.frames["scene"]
+            self.frame_at(self.opening.as_ref().map_or(OpenDepth::Chart, |o| o.to))
         }
+    }
+
+    /// (R5/M20) The scene frame at open depth `d`: the surface's scene frame, except at
+    /// the capsule depth under an open capsule design that states its own height
+    /// (`qp_grammar::open::height_in`; the page scrolls the layer).
+    fn frame_at(&self, d: OpenDepth) -> (u32, u32) {
+        let (w, h) = self.frames["scene"];
+        if d != OpenDepth::Capsule {
+            return (w, h);
+        }
+        let look = qp_session::viewer::look_of(&self.look);
+        qp_grammar::open::height_in(look, self.look.open.as_deref()).map_or((w, h), |oh| (w, oh))
     }
 
     fn tap(&mut self, target: &str, x: f64, y: f64) {
@@ -2241,9 +2550,11 @@ impl ShellCore {
     }
 
     /// A wheel notch on the open chart (`dy` < 0: zoom in) at column `x`.
-    pub fn wheel(&mut self, dy: f64, x: f64) {
+    /// (R5/M20) Returns whether the wheel was the chart's (zoom); otherwise the page lets
+    /// it scroll (the open capsule's column).
+    pub fn wheel(&mut self, dy: f64, x: f64) -> bool {
         if !self.chart_open() || !dy.is_finite() || dy == 0.0 {
-            return;
+            return false;
         }
         let f = if dy < 0.0 {
             WHEEL_FACTOR
@@ -2261,6 +2572,7 @@ impl ShellCore {
         } else {
             self.send_pinch(f, Some(x));
         }
+        true
     }
 
     // --- transition ------------------------------------------------------------
@@ -2303,6 +2615,10 @@ impl ShellCore {
     /// (ms, `performance.now()`); the first call after a transition starts the clock.
     pub fn transition_progress(&mut self, t: f64) -> f64 {
         let t0 = *self.trans_t0.get_or_insert(t);
+        // (R5/M21) Reduced motion: every opening happens at once.
+        if self.mo.reduced {
+            return 1.0;
+        }
         qp_grammar::transitions::progress_in(
             qp_session::viewer::look_of(&self.look),
             self.look.transition.as_deref(),

@@ -3133,6 +3133,18 @@ pub enum Gesture {
         /// text).
         #[serde(default, skip_serializing_if = "Option::is_none")]
         voice: Option<String>,
+        /// (R5/M18) Story chart design drawn at chart depth (`qp_grammar::stories::STORIES`;
+        /// `r4`: none, the chart of the open capsule alone — the default).
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        story: Option<String>,
+        /// (R5/M18, K54) Hide the closed stories in the story chart (`false`: shown, the
+        /// default). The selected story stays drawn.
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        hide_closed: Option<bool>,
+        /// (R5/M20) Open capsule design: what the capsule depth shows
+        /// (`qp_grammar::open::OPENS`: `r4`, `tesir`, `nobra`; default `r4`, today's card).
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        open: Option<String>,
     },
     /// (R4, §4.6) Close the open capsule one depth back, or to `to` (`sentence`: back to
     /// the feed). Answered with an `interaction` carrying the `opening` (the way back).
@@ -3244,6 +3256,20 @@ pub struct ViewState {
     /// (R5/m17-int) Capsule voice its capsules speak in (absent: the default, `r4`).
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub voice: Option<String>,
+    /// (R5/M18) Story chart design drawn at chart depth (absent: none, the default).
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub story: Option<String>,
+    /// (R5/M18, K54) The story chart hides closed stories (absent/`false`: shown).
+    #[serde(default, skip_serializing_if = "std::ops::Not::not")]
+    pub hide_closed: bool,
+    /// (R5/M20) Open capsule design of its capsule depth (absent: the default, `r4`).
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub open: Option<String>,
+    /// (R5/M20 `nobra`) The question the open capsule's design shows opened (a design with
+    /// questions: `what`, `basis`, `who`, `before`, `why`; absent: none). Reset when the
+    /// capsule closes or another one opens.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub ask: Option<String>,
 }
 
 /// (R4, §4.6) One element both sides of a depth transition show (e.g. the glyph, the

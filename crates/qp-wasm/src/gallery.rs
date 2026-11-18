@@ -126,7 +126,14 @@ pub const TOPICS: &[Topic] = &[
 /// candidates"). A topic not listed here shows every candidate its registry has. **The
 /// orchestrator updates this one table** when a topic's finalists are chosen; a name the
 /// registry does not know is skipped.
-pub const FINALISTS: &[(&str, &[&str])] = &[];
+/// (R5/S) Each R5 topic's first two (best first) and the `r4` reference.
+pub const FINALISTS: &[(&str, &[&str])] = &[
+    ("voice", &["marla", "selvi", "r4"]),
+    ("look", &["oltan", "zemre", "r4"]),
+    ("story", &["pavka", "korda", "r4"]),
+    ("open", &["tesir", "nobra", "r4"]),
+    ("motion", &["surek", "nabiz", "r4"]),
+];
 
 /// The replay step every candidate is shown at (synthetic, paused host).
 pub const STEP: u64 = 120;

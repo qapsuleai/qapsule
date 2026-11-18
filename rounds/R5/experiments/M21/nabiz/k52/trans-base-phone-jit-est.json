@@ -1,0 +1,23 @@
+{
+ "motion": "",
+ "transition": "",
+ "config": "phone-jit-est",
+ "open": {
+  "n": 349,
+  "p50": 17,
+  "p95": 18,
+  "p99": 22,
+  "max": 27,
+  "long": 0
+ },
+ "chart": {
+  "n": 346,
+  "p50": 17,
+  "p95": 18,
+  "p99": 19,
+  "max": 19,
+  "long": 0
+ },
+ "marks_us": 0.5,
+ "marks_sample": ""
+}

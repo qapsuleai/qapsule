@@ -385,18 +385,34 @@ aynı adlarla aynı sahneyi derler.
 | `outcome` (R4/H-M8910) | `qp_grammar::glyph::outcome::STYLES` (sonuç işareti, M11) | `r3` |
 | `seen` (R4/H-M8910) | son bakış zamanı (ms); `0` siler | yok |
 | `voice` (R5/m17-int) | `qp_capsule::voice::VOICES` (kapsül dili: `r4` bugünkü metin, `marla`, `selvi`; `docs/LANGUAGE.md`) | `r4` |
+| `open` (R5/M20) | `qp_grammar::open::OPENS` (açılmış kapsül tasarımı: `r4` bugünkü kart, `tesir` tek sütun, `nobra` soru kartları) | `r4` |
+| `story` (R5/M18) | `qp_grammar::stories::STORIES` (hikâye çizelgesi, grafik derinliğinde: `r4` yok, `pavka` hikâye omurgası, `korda` ömür şeritleri) | `r4` |
+| `hide_closed` (R5/M18, K54) | `true` / `false`: hikâye çizelgesinde kapanmış hikâyeleri gizle (seçili hikâye kalır; R5/S tek ad, `ViewState.hide_closed`) | `false` |
 
 - Verilmeyen alan değişmez; bilinmeyen ad `invalid` (`/gesture/face`, `/gesture/alphabet`,
   `/gesture/theme`, `expected` bilinen adlar). Doğrulama her şeyden önce: hatalı istek hiçbir
   şeyi değiştirmez.
 - Cevap `interaction`; `state` (`ViewState`) yeni `face`, `alphabet`, `theme` alanlarını taşır
   (varsayılandaysa alan yoktur: eski cevaplar bayt eşit).
+- (R5/M20) `open`: `ViewState.open` (varsayılanda yok). Kapsül derinliğinin görünümünü
+  seçilen tasarım kurar (`docs/GRAMMAR.md` §18.4). Kendi yüksekliğini söyleyen bir tasarımda
+  otorite kapsül derinliğini o yükseklikte açar (`frames.capsule`'ün genişliği, tasarımın
+  yüksekliği; yüze dokunarak açmada da); tasarım değişince hatırlanan `capsule` çerçevesi
+  unutulur. Sahnesi olmayan okur için (veri yetkisi yok) metin sütunu yazan bir tasarımda
+  kapsül derinliğindeki `presentation.facts` de dolar (grafik derinliğindeki gibi, okura göre
+  ayıklanmış).
 - (R5/m17-int) `voice`: `ViewState.voice` (varsayılanda yok). Bir dil seçiliyken kapsül
   öğeleri `voice` taşır (§20.2), kapsül sahneleri (yüz, açılmış kart) metnini o dilden alır ve
   sözlük terimlerini işaretler: `SceneDesc.terms` (isteğe bağlı; `TermMark`: `term`, `text`,
   `layer`, `hit` kutusu), nokta sorgusu `HitInfo.term` (isteğe bağlı). `tap_at` bir terimin
   üstündeyse kapsülü açmaz, cevabın `hit.term`'ünü döner. `r4`'te bu alanların hiçbiri yoktur
   (dökümler bayt eşit).
+- (R5/M20) `open`: `ViewState.open` (varsayılanda yok). Kapsül derinliğini o tasarım kurar
+  (otorite `tap_at`/`hit` için, cihaz boyamak için aynı kuralla) ve kendi yüksekliğini
+  bildirebilir (`capsule` çerçevesi). Soru kartlı tasarımda (`nobra`) açık soru
+  `ViewState.ask`'tadır: kart paneline `tap_at` onu açar/kapatır (açılma yok), kanıt grafiğine
+  dokunuş grafiği açar; kapsül kapanınca ya da başkası açılınca `ask` silinir. Sahnesiz okuyucuya
+  (A32) kabuk aynı soruları çekirdeğin metniyle listeler. `r4`'te alanların hiçbiri yoktur.
 - M8 yüz alternatifleri `qp_grammar::faces` kaydına bir satırdır (ad, **yükseklik**, görünüm
   kuralı); yüz kendi yüksekliğini bildirir, kabuk onu çekirdekten alır. M9 akış düzenleri
   `qp_grammar::feeds`, M10 geçişleri `qp_grammar::transitions` kaydındadır: düzen kabuğun

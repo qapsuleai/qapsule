@@ -262,7 +262,13 @@ fn paint_lists_follow_the_scene_and_its_short_circuit() {
     };
     if let (Some(a), Some(b)) = (first_text(&list), first_text(&l3)) {
         assert_eq!(b["x"].as_i64().unwrap(), a["x"].as_i64().unwrap() * 3);
-        assert!(b["font"].as_str().unwrap().ends_with("px QpMono"), "{b}");
+        // (R5/S) The family is the look's (the presented `oltan`: `QpAtkinson…`), always an
+        // embedded `Qp…` face.
+        let f = b["font"].as_str().unwrap();
+        assert!(
+            f.contains("px Qp") && f.split("px ").next().unwrap().parse::<u32>().is_ok(),
+            "{b}"
+        );
         assert!(b["c"].as_str().unwrap().len() == 9, "#rrggbbaa: {b}");
     }
 }

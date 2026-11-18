@@ -1,0 +1,14 @@
+{
+ "wasm_raw": 5455990,
+ "wasm_gzip": 1627496,
+ "wasm_br": 1067733,
+ "js_raw": 137404,
+ "js_gzip": 23957,
+ "font_files": {
+  "BertanSans-Regular.ttf": 25476,
+  "BertanSans-SemiBold.ttf": 25468,
+  "IBMPlexMono-Regular.ttf": 135580
+ },
+ "fonts_total": 186524,
+ "note": "fonts embedded in the wasm (qp-render include_bytes)"
+}

@@ -1,0 +1,47 @@
+{
+ "look": "kivra",
+ "face": "kivra",
+ "voice": "marla",
+ "reps": 3,
+ "configs": {
+  "phone-jit-est": {
+   "failed": 0,
+   "browser": "26.5",
+   "values": {
+    "tick_p95": 1,
+    "face_p95": 1,
+    "scene_p95": 1,
+    "first_capsule_ms": 203,
+    "frame_scroll_p99": 19,
+    "scroll_long": 0
+   },
+   "checks": {
+    "tick": true,
+    "face": true,
+    "scene": true,
+    "long_frames": true,
+    "first_capsule": true
+   },
+   "pass": true,
+   "phone_bias_applied": false
+  },
+  "phone": {
+   "failed": 0,
+   "browser": "26.5",
+   "values": {
+    "tick_p95": 1.6,
+    "face_p95": 1,
+    "scene_p95": 7.4,
+    "first_capsule_ms": 238,
+    "frame_scroll_p99": 19,
+    "scroll_long": 0
+   },
+   "checks": {
+    "usable_long_frames": true
+   },
+   "pass": true,
+   "phone_bias_applied": true
+  }
+ },
+ "pass": true
+}

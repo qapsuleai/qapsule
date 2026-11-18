@@ -1,0 +1,12 @@
+{
+ "wasm_raw": 5342433,
+ "wasm_gzip": 1566385,
+ "wasm_br": 1038710,
+ "js_raw": 137404,
+ "js_gzip": 23957,
+ "font_files": {
+  "IBMPlexMono-Regular.ttf": 135580
+ },
+ "fonts_total": 135580,
+ "note": "fonts embedded in the wasm (qp-render include_bytes)"
+}

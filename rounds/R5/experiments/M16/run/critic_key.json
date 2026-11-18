@@ -1,0 +1,2402 @@
+{
+ "00e517d116": {
+  "A": "zemre",
+  "B": "kivra",
+  "order": 1,
+  "pair": [
+   "kivra",
+   "zemre"
+  ],
+  "state": "few_cases"
+ },
+ "032745c706": {
+  "A": "oltan",
+  "B": "r4",
+  "order": 0,
+  "pair": [
+   "oltan",
+   "r4"
+  ],
+  "state": "closed_realized"
+ },
+ "0342270b97": {
+  "A": "kivra",
+  "B": "bertan",
+  "order": 1,
+  "pair": [
+   "bertan",
+   "kivra"
+  ],
+  "state": "closed_realized"
+ },
+ "039f4875a6": {
+  "A": "bertan",
+  "B": "kestim",
+  "order": 0,
+  "pair": [
+   "bertan",
+   "kestim"
+  ],
+  "state": "closed_failed"
+ },
+ "0493ac8bb8": {
+  "A": "bertan",
+  "B": "kestim",
+  "order": 0,
+  "pair": [
+   "bertan",
+   "kestim"
+  ],
+  "state": "live_event"
+ },
+ "0553731052": {
+  "A": "r4",
+  "B": "kivra",
+  "order": 1,
+  "pair": [
+   "kivra",
+   "r4"
+  ],
+  "state": "few_cases"
+ },
+ "06083ac905": {
+  "A": "kivra",
+  "B": "zemre",
+  "order": 0,
+  "pair": [
+   "kivra",
+   "zemre"
+  ],
+  "state": "closed_failed"
+ },
+ "065f504e57": {
+  "A": "kestim",
+  "B": "zemre",
+  "order": 0,
+  "pair": [
+   "kestim",
+   "zemre"
+  ],
+  "state": "no_record"
+ },
+ "073f3dd6f4": {
+  "A": "kivra",
+  "B": "oltan",
+  "order": 0,
+  "pair": [
+   "kivra",
+   "oltan"
+  ],
+  "state": "live_event"
+ },
+ "07467fc32c": {
+  "A": "r4",
+  "B": "oltan",
+  "order": 1,
+  "pair": [
+   "oltan",
+   "r4"
+  ],
+  "state": "live_event"
+ },
+ "07eaab3d65": {
+  "A": "r4",
+  "B": "zemre",
+  "order": 0,
+  "pair": [
+   "r4",
+   "zemre"
+  ],
+  "state": "closed_failed"
+ },
+ "0ae5d84058": {
+  "A": "bertan",
+  "B": "zemre",
+  "order": 0,
+  "pair": [
+   "bertan",
+   "zemre"
+  ],
+  "state": "closed_failed"
+ },
+ "0bd3d5b902": {
+  "A": "zemre",
+  "B": "r4",
+  "order": 1,
+  "pair": [
+   "r4",
+   "zemre"
+  ],
+  "state": "closed_failed"
+ },
+ "0c163d777f": {
+  "A": "kestim",
+  "B": "r4",
+  "order": 0,
+  "pair": [
+   "kestim",
+   "r4"
+  ],
+  "state": "state_live"
+ },
+ "0fbb0bf417": {
+  "A": "bertan",
+  "B": "zemre",
+  "order": 0,
+  "pair": [
+   "bertan",
+   "zemre"
+  ],
+  "state": "closed_realized"
+ },
+ "11e94f9903": {
+  "A": "kivra",
+  "B": "zemre",
+  "order": 0,
+  "pair": [
+   "kivra",
+   "zemre"
+  ],
+  "state": "visitor"
+ },
+ "14c412d3cc": {
+  "A": "zemre",
+  "B": "r4",
+  "order": 1,
+  "pair": [
+   "r4",
+   "zemre"
+  ],
+  "state": "visitor"
+ },
+ "1510570fbf": {
+  "A": "zemre",
+  "B": "kestim",
+  "order": 1,
+  "pair": [
+   "kestim",
+   "zemre"
+  ],
+  "state": "no_longer"
+ },
+ "1556ff97af": {
+  "A": "zemre",
+  "B": "bertan",
+  "order": 1,
+  "pair": [
+   "bertan",
+   "zemre"
+  ],
+  "state": "no_record"
+ },
+ "155826daa1": {
+  "A": "kivra",
+  "B": "oltan",
+  "order": 0,
+  "pair": [
+   "kivra",
+   "oltan"
+  ],
+  "state": "state_live"
+ },
+ "191a47648e": {
+  "A": "bertan",
+  "B": "oltan",
+  "order": 0,
+  "pair": [
+   "bertan",
+   "oltan"
+  ],
+  "state": "live_event"
+ },
+ "19c068c547": {
+  "A": "kestim",
+  "B": "oltan",
+  "order": 0,
+  "pair": [
+   "kestim",
+   "oltan"
+  ],
+  "state": "live_event"
+ },
+ "1a30c717e8": {
+  "A": "oltan",
+  "B": "r4",
+  "order": 0,
+  "pair": [
+   "oltan",
+   "r4"
+  ],
+  "state": "few_cases"
+ },
+ "1a5ec13169": {
+  "A": "zemre",
+  "B": "kivra",
+  "order": 1,
+  "pair": [
+   "kivra",
+   "zemre"
+  ],
+  "state": "live_event"
+ },
+ "1a7350a362": {
+  "A": "r4",
+  "B": "oltan",
+  "order": 1,
+  "pair": [
+   "oltan",
+   "r4"
+  ],
+  "state": "closed_realized"
+ },
+ "1c403c48a6": {
+  "A": "bertan",
+  "B": "kivra",
+  "order": 0,
+  "pair": [
+   "bertan",
+   "kivra"
+  ],
+  "state": "live_event"
+ },
+ "1c86a51fc9": {
+  "A": "kivra",
+  "B": "kestim",
+  "order": 1,
+  "pair": [
+   "kestim",
+   "kivra"
+  ],
+  "state": "no_longer"
+ },
+ "1ce188987a": {
+  "A": "kestim",
+  "B": "oltan",
+  "order": 0,
+  "pair": [
+   "kestim",
+   "oltan"
+  ],
+  "state": "state_live"
+ },
+ "1d3509136d": {
+  "A": "kivra",
+  "B": "zemre",
+  "order": 0,
+  "pair": [
+   "kivra",
+   "zemre"
+  ],
+  "state": "few_cases"
+ },
+ "1d6b29b0e9": {
+  "A": "kivra",
+  "B": "kestim",
+  "order": 1,
+  "pair": [
+   "kestim",
+   "kivra"
+  ],
+  "state": "few_cases"
+ },
+ "1f1956c987": {
+  "A": "zemre",
+  "B": "r4",
+  "order": 1,
+  "pair": [
+   "r4",
+   "zemre"
+  ],
+  "state": "closed_realized"
+ },
+ "200bdb8d75": {
+  "A": "bertan",
+  "B": "r4",
+  "order": 0,
+  "pair": [
+   "bertan",
+   "r4"
+  ],
+  "state": "live_event"
+ },
+ "225bf8c6db": {
+  "A": "oltan",
+  "B": "zemre",
+  "order": 0,
+  "pair": [
+   "oltan",
+   "zemre"
+  ],
+  "state": "no_record"
+ },
+ "2295d7c127": {
+  "A": "bertan",
+  "B": "kestim",
+  "order": 0,
+  "pair": [
+   "bertan",
+   "kestim"
+  ],
+  "state": "no_record"
+ },
+ "22dd3a18f2": {
+  "A": "oltan",
+  "B": "r4",
+  "order": 0,
+  "pair": [
+   "oltan",
+   "r4"
+  ],
+  "state": "state_live"
+ },
+ "2314734cc3": {
+  "A": "zemre",
+  "B": "kestim",
+  "order": 1,
+  "pair": [
+   "kestim",
+   "zemre"
+  ],
+  "state": "no_record"
+ },
+ "23188a2489": {
+  "A": "bertan",
+  "B": "oltan",
+  "order": 0,
+  "pair": [
+   "bertan",
+   "oltan"
+  ],
+  "state": "state_live"
+ },
+ "2376b502bb": {
+  "A": "oltan",
+  "B": "kivra",
+  "order": 1,
+  "pair": [
+   "kivra",
+   "oltan"
+  ],
+  "state": "visitor"
+ },
+ "2385e47193": {
+  "A": "kestim",
+  "B": "kivra",
+  "order": 0,
+  "pair": [
+   "kestim",
+   "kivra"
+  ],
+  "state": "closed_failed"
+ },
+ "23a239d90e": {
+  "A": "oltan",
+  "B": "kestim",
+  "order": 1,
+  "pair": [
+   "kestim",
+   "oltan"
+  ],
+  "state": "no_longer"
+ },
+ "25b21da113": {
+  "A": "kivra",
+  "B": "r4",
+  "order": 0,
+  "pair": [
+   "kivra",
+   "r4"
+  ],
+  "state": "few_cases"
+ },
+ "282257b64f": {
+  "A": "r4",
+  "B": "zemre",
+  "order": 0,
+  "pair": [
+   "r4",
+   "zemre"
+  ],
+  "state": "no_longer"
+ },
+ "2954a7d049": {
+  "A": "oltan",
+  "B": "r4",
+  "order": 0,
+  "pair": [
+   "oltan",
+   "r4"
+  ],
+  "state": "no_record"
+ },
+ "2abd78e153": {
+  "A": "r4",
+  "B": "bertan",
+  "order": 1,
+  "pair": [
+   "bertan",
+   "r4"
+  ],
+  "state": "state_live"
+ },
+ "2b02770966": {
+  "A": "oltan",
+  "B": "bertan",
+  "order": 1,
+  "pair": [
+   "bertan",
+   "oltan"
+  ],
+  "state": "closed_failed"
+ },
+ "2ca182a628": {
+  "A": "kestim",
+  "B": "oltan",
+  "order": 0,
+  "pair": [
+   "kestim",
+   "oltan"
+  ],
+  "state": "closed_failed"
+ },
+ "2e7f52eefc": {
+  "A": "zemre",
+  "B": "kestim",
+  "order": 1,
+  "pair": [
+   "kestim",
+   "zemre"
+  ],
+  "state": "live_event"
+ },
+ "331c291fbd": {
+  "A": "kivra",
+  "B": "r4",
+  "order": 0,
+  "pair": [
+   "kivra",
+   "r4"
+  ],
+  "state": "closed_realized"
+ },
+ "331d5f3f3d": {
+  "A": "kivra",
+  "B": "oltan",
+  "order": 0,
+  "pair": [
+   "kivra",
+   "oltan"
+  ],
+  "state": "no_record"
+ },
+ "348989f5e6": {
+  "A": "zemre",
+  "B": "r4",
+  "order": 1,
+  "pair": [
+   "r4",
+   "zemre"
+  ],
+  "state": "live_event"
+ },
+ "3673866887": {
+  "A": "kivra",
+  "B": "r4",
+  "order": 0,
+  "pair": [
+   "kivra",
+   "r4"
+  ],
+  "state": "live_event"
+ },
+ "36ee3c4276": {
+  "A": "kestim",
+  "B": "r4",
+  "order": 0,
+  "pair": [
+   "kestim",
+   "r4"
+  ],
+  "state": "no_longer"
+ },
+ "386d92b18d": {
+  "A": "zemre",
+  "B": "oltan",
+  "order": 1,
+  "pair": [
+   "oltan",
+   "zemre"
+  ],
+  "state": "no_longer"
+ },
+ "3893f94a90": {
+  "A": "kestim",
+  "B": "zemre",
+  "order": 0,
+  "pair": [
+   "kestim",
+   "zemre"
+  ],
+  "state": "few_cases"
+ },
+ "3a0acdc515": {
+  "A": "kestim",
+  "B": "bertan",
+  "order": 1,
+  "pair": [
+   "bertan",
+   "kestim"
+  ],
+  "state": "state_live"
+ },
+ "3b9c00114f": {
+  "A": "r4",
+  "B": "oltan",
+  "order": 1,
+  "pair": [
+   "oltan",
+   "r4"
+  ],
+  "state": "visitor"
+ },
+ "3cb2660fd1": {
+  "A": "bertan",
+  "B": "zemre",
+  "order": 0,
+  "pair": [
+   "bertan",
+   "zemre"
+  ],
+  "state": "live_event"
+ },
+ "3d5a877da8": {
+  "A": "oltan",
+  "B": "bertan",
+  "order": 1,
+  "pair": [
+   "bertan",
+   "oltan"
+  ],
+  "state": "few_cases"
+ },
+ "3db3ac418f": {
+  "A": "kivra",
+  "B": "oltan",
+  "order": 0,
+  "pair": [
+   "kivra",
+   "oltan"
+  ],
+  "state": "visitor"
+ },
+ "3dbc48818e": {
+  "A": "zemre",
+  "B": "bertan",
+  "order": 1,
+  "pair": [
+   "bertan",
+   "zemre"
+  ],
+  "state": "closed_realized"
+ },
+ "3ec0f037d4": {
+  "A": "r4",
+  "B": "zemre",
+  "order": 0,
+  "pair": [
+   "r4",
+   "zemre"
+  ],
+  "state": "state_live"
+ },
+ "3f0c4b99a7": {
+  "A": "kestim",
+  "B": "bertan",
+  "order": 1,
+  "pair": [
+   "bertan",
+   "kestim"
+  ],
+  "state": "few_cases"
+ },
+ "430f08229d": {
+  "A": "kestim",
+  "B": "zemre",
+  "order": 0,
+  "pair": [
+   "kestim",
+   "zemre"
+  ],
+  "state": "no_longer"
+ },
+ "439a46b37f": {
+  "A": "kestim",
+  "B": "kivra",
+  "order": 0,
+  "pair": [
+   "kestim",
+   "kivra"
+  ],
+  "state": "no_record"
+ },
+ "47912e936d": {
+  "A": "zemre",
+  "B": "oltan",
+  "order": 1,
+  "pair": [
+   "oltan",
+   "zemre"
+  ],
+  "state": "closed_failed"
+ },
+ "480845abbe": {
+  "A": "r4",
+  "B": "kestim",
+  "order": 1,
+  "pair": [
+   "kestim",
+   "r4"
+  ],
+  "state": "closed_failed"
+ },
+ "49d541b804": {
+  "A": "zemre",
+  "B": "kestim",
+  "order": 1,
+  "pair": [
+   "kestim",
+   "zemre"
+  ],
+  "state": "visitor"
+ },
+ "4a71e10af2": {
+  "A": "zemre",
+  "B": "oltan",
+  "order": 1,
+  "pair": [
+   "oltan",
+   "zemre"
+  ],
+  "state": "state_live"
+ },
+ "4a7d5e82c0": {
+  "A": "zemre",
+  "B": "bertan",
+  "order": 1,
+  "pair": [
+   "bertan",
+   "zemre"
+  ],
+  "state": "state_live"
+ },
+ "4ba57a3a70": {
+  "A": "oltan",
+  "B": "kestim",
+  "order": 1,
+  "pair": [
+   "kestim",
+   "oltan"
+  ],
+  "state": "live_event"
+ },
+ "4cad30c1c4": {
+  "A": "zemre",
+  "B": "r4",
+  "order": 1,
+  "pair": [
+   "r4",
+   "zemre"
+  ],
+  "state": "state_live"
+ },
+ "4d3cb75ea2": {
+  "A": "r4",
+  "B": "oltan",
+  "order": 1,
+  "pair": [
+   "oltan",
+   "r4"
+  ],
+  "state": "closed_failed"
+ },
+ "4ec07bea21": {
+  "A": "kivra",
+  "B": "r4",
+  "order": 0,
+  "pair": [
+   "kivra",
+   "r4"
+  ],
+  "state": "state_live"
+ },
+ "4fa468de39": {
+  "A": "kestim",
+  "B": "zemre",
+  "order": 0,
+  "pair": [
+   "kestim",
+   "zemre"
+  ],
+  "state": "state_live"
+ },
+ "504c2f4e07": {
+  "A": "bertan",
+  "B": "zemre",
+  "order": 0,
+  "pair": [
+   "bertan",
+   "zemre"
+  ],
+  "state": "no_record"
+ },
+ "50c3f7d8d8": {
+  "A": "kestim",
+  "B": "kivra",
+  "order": 0,
+  "pair": [
+   "kestim",
+   "kivra"
+  ],
+  "state": "no_longer"
+ },
+ "50f2db7585": {
+  "A": "bertan",
+  "B": "oltan",
+  "order": 0,
+  "pair": [
+   "bertan",
+   "oltan"
+  ],
+  "state": "few_cases"
+ },
+ "51a0e27d37": {
+  "A": "kivra",
+  "B": "r4",
+  "order": 0,
+  "pair": [
+   "kivra",
+   "r4"
+  ],
+  "state": "no_record"
+ },
+ "51a12e2650": {
+  "A": "kestim",
+  "B": "kivra",
+  "order": 0,
+  "pair": [
+   "kestim",
+   "kivra"
+  ],
+  "state": "visitor"
+ },
+ "536d1d3162": {
+  "A": "kivra",
+  "B": "bertan",
+  "order": 1,
+  "pair": [
+   "bertan",
+   "kivra"
+  ],
+  "state": "closed_failed"
+ },
+ "53df0efeee": {
+  "A": "zemre",
+  "B": "kivra",
+  "order": 1,
+  "pair": [
+   "kivra",
+   "zemre"
+  ],
+  "state": "visitor"
+ },
+ "54dfb7125d": {
+  "A": "kivra",
+  "B": "r4",
+  "order": 0,
+  "pair": [
+   "kivra",
+   "r4"
+  ],
+  "state": "visitor"
+ },
+ "550fae4703": {
+  "A": "r4",
+  "B": "oltan",
+  "order": 1,
+  "pair": [
+   "oltan",
+   "r4"
+  ],
+  "state": "few_cases"
+ },
+ "5541185e61": {
+  "A": "kestim",
+  "B": "oltan",
+  "order": 0,
+  "pair": [
+   "kestim",
+   "oltan"
+  ],
+  "state": "few_cases"
+ },
+ "5697fd126f": {
+  "A": "zemre",
+  "B": "bertan",
+  "order": 1,
+  "pair": [
+   "bertan",
+   "zemre"
+  ],
+  "state": "live_event"
+ },
+ "5b21d4b381": {
+  "A": "r4",
+  "B": "bertan",
+  "order": 1,
+  "pair": [
+   "bertan",
+   "r4"
+  ],
+  "state": "closed_failed"
+ },
+ "5b25b142df": {
+  "A": "r4",
+  "B": "bertan",
+  "order": 1,
+  "pair": [
+   "bertan",
+   "r4"
+  ],
+  "state": "live_event"
+ },
+ "5c57646566": {
+  "A": "kivra",
+  "B": "kestim",
+  "order": 1,
+  "pair": [
+   "kestim",
+   "kivra"
+  ],
+  "state": "no_record"
+ },
+ "5f0cbebbe1": {
+  "A": "oltan",
+  "B": "kivra",
+  "order": 1,
+  "pair": [
+   "kivra",
+   "oltan"
+  ],
+  "state": "closed_failed"
+ },
+ "5f0e121883": {
+  "A": "kivra",
+  "B": "bertan",
+  "order": 1,
+  "pair": [
+   "bertan",
+   "kivra"
+  ],
+  "state": "live_event"
+ },
+ "60c22154e7": {
+  "A": "r4",
+  "B": "kestim",
+  "order": 1,
+  "pair": [
+   "kestim",
+   "r4"
+  ],
+  "state": "no_record"
+ },
+ "6132ddb995": {
+  "A": "r4",
+  "B": "zemre",
+  "order": 0,
+  "pair": [
+   "r4",
+   "zemre"
+  ],
+  "state": "few_cases"
+ },
+ "62c87ca7f8": {
+  "A": "kestim",
+  "B": "r4",
+  "order": 0,
+  "pair": [
+   "kestim",
+   "r4"
+  ],
+  "state": "live_event"
+ },
+ "63e4c46e2a": {
+  "A": "zemre",
+  "B": "r4",
+  "order": 1,
+  "pair": [
+   "r4",
+   "zemre"
+  ],
+  "state": "few_cases"
+ },
+ "65d05c5376": {
+  "A": "kivra",
+  "B": "oltan",
+  "order": 0,
+  "pair": [
+   "kivra",
+   "oltan"
+  ],
+  "state": "no_longer"
+ },
+ "6637fca5e8": {
+  "A": "oltan",
+  "B": "kestim",
+  "order": 1,
+  "pair": [
+   "kestim",
+   "oltan"
+  ],
+  "state": "closed_realized"
+ },
+ "6638b927ac": {
+  "A": "oltan",
+  "B": "bertan",
+  "order": 1,
+  "pair": [
+   "bertan",
+   "oltan"
+  ],
+  "state": "no_record"
+ },
+ "6654a88c81": {
+  "A": "bertan",
+  "B": "oltan",
+  "order": 0,
+  "pair": [
+   "bertan",
+   "oltan"
+  ],
+  "state": "closed_realized"
+ },
+ "68cb0025da": {
+  "A": "oltan",
+  "B": "kestim",
+  "order": 1,
+  "pair": [
+   "kestim",
+   "oltan"
+  ],
+  "state": "few_cases"
+ },
+ "6a11f85331": {
+  "A": "kestim",
+  "B": "zemre",
+  "order": 0,
+  "pair": [
+   "kestim",
+   "zemre"
+  ],
+  "state": "closed_realized"
+ },
+ "6b2fdb177f": {
+  "A": "zemre",
+  "B": "oltan",
+  "order": 1,
+  "pair": [
+   "oltan",
+   "zemre"
+  ],
+  "state": "no_record"
+ },
+ "6b66e2ccc5": {
+  "A": "kivra",
+  "B": "oltan",
+  "order": 0,
+  "pair": [
+   "kivra",
+   "oltan"
+  ],
+  "state": "few_cases"
+ },
+ "6be1abea7f": {
+  "A": "zemre",
+  "B": "bertan",
+  "order": 1,
+  "pair": [
+   "bertan",
+   "zemre"
+  ],
+  "state": "closed_failed"
+ },
+ "6c51883a50": {
+  "A": "r4",
+  "B": "kivra",
+  "order": 1,
+  "pair": [
+   "kivra",
+   "r4"
+  ],
+  "state": "no_record"
+ },
+ "6c5e3e0e0c": {
+  "A": "r4",
+  "B": "zemre",
+  "order": 0,
+  "pair": [
+   "r4",
+   "zemre"
+  ],
+  "state": "no_record"
+ },
+ "6c655125f3": {
+  "A": "kivra",
+  "B": "zemre",
+  "order": 0,
+  "pair": [
+   "kivra",
+   "zemre"
+  ],
+  "state": "state_live"
+ },
+ "6c768da716": {
+  "A": "kivra",
+  "B": "r4",
+  "order": 0,
+  "pair": [
+   "kivra",
+   "r4"
+  ],
+  "state": "no_longer"
+ },
+ "6d2a466179": {
+  "A": "r4",
+  "B": "kivra",
+  "order": 1,
+  "pair": [
+   "kivra",
+   "r4"
+  ],
+  "state": "closed_realized"
+ },
+ "6d3381712f": {
+  "A": "kivra",
+  "B": "bertan",
+  "order": 1,
+  "pair": [
+   "bertan",
+   "kivra"
+  ],
+  "state": "state_live"
+ },
+ "6d41a15c77": {
+  "A": "bertan",
+  "B": "kestim",
+  "order": 0,
+  "pair": [
+   "bertan",
+   "kestim"
+  ],
+  "state": "closed_realized"
+ },
+ "6ec5505fb1": {
+  "A": "kestim",
+  "B": "zemre",
+  "order": 0,
+  "pair": [
+   "kestim",
+   "zemre"
+  ],
+  "state": "closed_failed"
+ },
+ "714e1da588": {
+  "A": "kivra",
+  "B": "kestim",
+  "order": 1,
+  "pair": [
+   "kestim",
+   "kivra"
+  ],
+  "state": "visitor"
+ },
+ "74059f3e74": {
+  "A": "kestim",
+  "B": "bertan",
+  "order": 1,
+  "pair": [
+   "bertan",
+   "kestim"
+  ],
+  "state": "no_longer"
+ },
+ "74e98922e5": {
+  "A": "zemre",
+  "B": "kivra",
+  "order": 1,
+  "pair": [
+   "kivra",
+   "zemre"
+  ],
+  "state": "closed_failed"
+ },
+ "7595e71e17": {
+  "A": "bertan",
+  "B": "r4",
+  "order": 0,
+  "pair": [
+   "bertan",
+   "r4"
+  ],
+  "state": "no_record"
+ },
+ "76b746010b": {
+  "A": "zemre",
+  "B": "oltan",
+  "order": 1,
+  "pair": [
+   "oltan",
+   "zemre"
+  ],
+  "state": "live_event"
+ },
+ "798d567382": {
+  "A": "r4",
+  "B": "bertan",
+  "order": 1,
+  "pair": [
+   "bertan",
+   "r4"
+  ],
+  "state": "no_record"
+ },
+ "799fb40ecb": {
+  "A": "kestim",
+  "B": "r4",
+  "order": 0,
+  "pair": [
+   "kestim",
+   "r4"
+  ],
+  "state": "visitor"
+ },
+ "7a0c67297c": {
+  "A": "zemre",
+  "B": "oltan",
+  "order": 1,
+  "pair": [
+   "oltan",
+   "zemre"
+  ],
+  "state": "few_cases"
+ },
+ "7b54c124ce": {
+  "A": "kestim",
+  "B": "r4",
+  "order": 0,
+  "pair": [
+   "kestim",
+   "r4"
+  ],
+  "state": "closed_realized"
+ },
+ "7cb2a46bee": {
+  "A": "zemre",
+  "B": "bertan",
+  "order": 1,
+  "pair": [
+   "bertan",
+   "zemre"
+  ],
+  "state": "visitor"
+ },
+ "7d62d45958": {
+  "A": "kestim",
+  "B": "bertan",
+  "order": 1,
+  "pair": [
+   "bertan",
+   "kestim"
+  ],
+  "state": "closed_failed"
+ },
+ "7ee23cf849": {
+  "A": "oltan",
+  "B": "kivra",
+  "order": 1,
+  "pair": [
+   "kivra",
+   "oltan"
+  ],
+  "state": "closed_realized"
+ },
+ "7efc861946": {
+  "A": "oltan",
+  "B": "kivra",
+  "order": 1,
+  "pair": [
+   "kivra",
+   "oltan"
+  ],
+  "state": "no_longer"
+ },
+ "7f243f977b": {
+  "A": "r4",
+  "B": "zemre",
+  "order": 0,
+  "pair": [
+   "r4",
+   "zemre"
+  ],
+  "state": "closed_realized"
+ },
+ "8003656dc9": {
+  "A": "oltan",
+  "B": "zemre",
+  "order": 0,
+  "pair": [
+   "oltan",
+   "zemre"
+  ],
+  "state": "closed_realized"
+ },
+ "8113ad8e5e": {
+  "A": "kivra",
+  "B": "oltan",
+  "order": 0,
+  "pair": [
+   "kivra",
+   "oltan"
+  ],
+  "state": "closed_failed"
+ },
+ "81bc12260a": {
+  "A": "bertan",
+  "B": "r4",
+  "order": 0,
+  "pair": [
+   "bertan",
+   "r4"
+  ],
+  "state": "visitor"
+ },
+ "842a2cf7b5": {
+  "A": "kivra",
+  "B": "zemre",
+  "order": 0,
+  "pair": [
+   "kivra",
+   "zemre"
+  ],
+  "state": "live_event"
+ },
+ "8465329815": {
+  "A": "r4",
+  "B": "bertan",
+  "order": 1,
+  "pair": [
+   "bertan",
+   "r4"
+  ],
+  "state": "no_longer"
+ },
+ "84db77e42b": {
+  "A": "kestim",
+  "B": "oltan",
+  "order": 0,
+  "pair": [
+   "kestim",
+   "oltan"
+  ],
+  "state": "no_longer"
+ },
+ "860675207e": {
+  "A": "oltan",
+  "B": "kivra",
+  "order": 1,
+  "pair": [
+   "kivra",
+   "oltan"
+  ],
+  "state": "state_live"
+ },
+ "870dcad235": {
+  "A": "oltan",
+  "B": "bertan",
+  "order": 1,
+  "pair": [
+   "bertan",
+   "oltan"
+  ],
+  "state": "visitor"
+ },
+ "889a2869f7": {
+  "A": "r4",
+  "B": "zemre",
+  "order": 0,
+  "pair": [
+   "r4",
+   "zemre"
+  ],
+  "state": "visitor"
+ },
+ "8ac84d78ff": {
+  "A": "bertan",
+  "B": "kivra",
+  "order": 0,
+  "pair": [
+   "bertan",
+   "kivra"
+  ],
+  "state": "closed_realized"
+ },
+ "8aeb37098d": {
+  "A": "oltan",
+  "B": "zemre",
+  "order": 0,
+  "pair": [
+   "oltan",
+   "zemre"
+  ],
+  "state": "state_live"
+ },
+ "8c02662f23": {
+  "A": "zemre",
+  "B": "kivra",
+  "order": 1,
+  "pair": [
+   "kivra",
+   "zemre"
+  ],
+  "state": "state_live"
+ },
+ "8c1fc0dad0": {
+  "A": "oltan",
+  "B": "kestim",
+  "order": 1,
+  "pair": [
+   "kestim",
+   "oltan"
+  ],
+  "state": "visitor"
+ },
+ "8d3627aead": {
+  "A": "oltan",
+  "B": "bertan",
+  "order": 1,
+  "pair": [
+   "bertan",
+   "oltan"
+  ],
+  "state": "closed_realized"
+ },
+ "906d85c6f3": {
+  "A": "bertan",
+  "B": "zemre",
+  "order": 0,
+  "pair": [
+   "bertan",
+   "zemre"
+  ],
+  "state": "few_cases"
+ },
+ "92449428cf": {
+  "A": "oltan",
+  "B": "kivra",
+  "order": 1,
+  "pair": [
+   "kivra",
+   "oltan"
+  ],
+  "state": "few_cases"
+ },
+ "9301e3667c": {
+  "A": "bertan",
+  "B": "kivra",
+  "order": 0,
+  "pair": [
+   "bertan",
+   "kivra"
+  ],
+  "state": "few_cases"
+ },
+ "9326dd7a75": {
+  "A": "kestim",
+  "B": "oltan",
+  "order": 0,
+  "pair": [
+   "kestim",
+   "oltan"
+  ],
+  "state": "closed_realized"
+ },
+ "934bfa6170": {
+  "A": "bertan",
+  "B": "r4",
+  "order": 0,
+  "pair": [
+   "bertan",
+   "r4"
+  ],
+  "state": "closed_failed"
+ },
+ "94771326f0": {
+  "A": "r4",
+  "B": "kestim",
+  "order": 1,
+  "pair": [
+   "kestim",
+   "r4"
+  ],
+  "state": "live_event"
+ },
+ "977cd33165": {
+  "A": "r4",
+  "B": "bertan",
+  "order": 1,
+  "pair": [
+   "bertan",
+   "r4"
+  ],
+  "state": "visitor"
+ },
+ "9885995272": {
+  "A": "kivra",
+  "B": "kestim",
+  "order": 1,
+  "pair": [
+   "kestim",
+   "kivra"
+  ],
+  "state": "closed_failed"
+ },
+ "994208beaa": {
+  "A": "zemre",
+  "B": "kivra",
+  "order": 1,
+  "pair": [
+   "kivra",
+   "zemre"
+  ],
+  "state": "no_longer"
+ },
+ "9a21c347da": {
+  "A": "kivra",
+  "B": "zemre",
+  "order": 0,
+  "pair": [
+   "kivra",
+   "zemre"
+  ],
+  "state": "closed_realized"
+ },
+ "9acd1fd372": {
+  "A": "oltan",
+  "B": "bertan",
+  "order": 1,
+  "pair": [
+   "bertan",
+   "oltan"
+  ],
+  "state": "no_longer"
+ },
+ "9b9a183d94": {
+  "A": "kestim",
+  "B": "kivra",
+  "order": 0,
+  "pair": [
+   "kestim",
+   "kivra"
+  ],
+  "state": "closed_realized"
+ },
+ "9ea2ff248b": {
+  "A": "bertan",
+  "B": "oltan",
+  "order": 0,
+  "pair": [
+   "bertan",
+   "oltan"
+  ],
+  "state": "no_longer"
+ },
+ "9ea3b0826b": {
+  "A": "kestim",
+  "B": "r4",
+  "order": 0,
+  "pair": [
+   "kestim",
+   "r4"
+  ],
+  "state": "few_cases"
+ },
+ "9fe942f63c": {
+  "A": "oltan",
+  "B": "zemre",
+  "order": 0,
+  "pair": [
+   "oltan",
+   "zemre"
+  ],
+  "state": "visitor"
+ },
+ "a05c4f01ef": {
+  "A": "kestim",
+  "B": "kivra",
+  "order": 0,
+  "pair": [
+   "kestim",
+   "kivra"
+  ],
+  "state": "state_live"
+ },
+ "a2f1e83039": {
+  "A": "r4",
+  "B": "kivra",
+  "order": 1,
+  "pair": [
+   "kivra",
+   "r4"
+  ],
+  "state": "closed_failed"
+ },
+ "a5526b909c": {
+  "A": "bertan",
+  "B": "oltan",
+  "order": 0,
+  "pair": [
+   "bertan",
+   "oltan"
+  ],
+  "state": "closed_failed"
+ },
+ "a5743ec90b": {
+  "A": "zemre",
+  "B": "r4",
+  "order": 1,
+  "pair": [
+   "r4",
+   "zemre"
+  ],
+  "state": "no_record"
+ },
+ "a870a25029": {
+  "A": "oltan",
+  "B": "zemre",
+  "order": 0,
+  "pair": [
+   "oltan",
+   "zemre"
+  ],
+  "state": "few_cases"
+ },
+ "a9940705a1": {
+  "A": "r4",
+  "B": "oltan",
+  "order": 1,
+  "pair": [
+   "oltan",
+   "r4"
+  ],
+  "state": "state_live"
+ },
+ "a9e94f815d": {
+  "A": "kestim",
+  "B": "r4",
+  "order": 0,
+  "pair": [
+   "kestim",
+   "r4"
+  ],
+  "state": "no_record"
+ },
+ "aa03955aba": {
+  "A": "r4",
+  "B": "kivra",
+  "order": 1,
+  "pair": [
+   "kivra",
+   "r4"
+  ],
+  "state": "state_live"
+ },
+ "ab02e06554": {
+  "A": "zemre",
+  "B": "kestim",
+  "order": 1,
+  "pair": [
+   "kestim",
+   "zemre"
+  ],
+  "state": "few_cases"
+ },
+ "acd1c6f491": {
+  "A": "oltan",
+  "B": "kestim",
+  "order": 1,
+  "pair": [
+   "kestim",
+   "oltan"
+  ],
+  "state": "closed_failed"
+ },
+ "ace6f05a03": {
+  "A": "r4",
+  "B": "kestim",
+  "order": 1,
+  "pair": [
+   "kestim",
+   "r4"
+  ],
+  "state": "closed_realized"
+ },
+ "aec307f683": {
+  "A": "r4",
+  "B": "kivra",
+  "order": 1,
+  "pair": [
+   "kivra",
+   "r4"
+  ],
+  "state": "visitor"
+ },
+ "b028bd9f4d": {
+  "A": "oltan",
+  "B": "zemre",
+  "order": 0,
+  "pair": [
+   "oltan",
+   "zemre"
+  ],
+  "state": "no_longer"
+ },
+ "b111f1bf6c": {
+  "A": "oltan",
+  "B": "bertan",
+  "order": 1,
+  "pair": [
+   "bertan",
+   "oltan"
+  ],
+  "state": "live_event"
+ },
+ "b1d23fb539": {
+  "A": "kestim",
+  "B": "oltan",
+  "order": 0,
+  "pair": [
+   "kestim",
+   "oltan"
+  ],
+  "state": "visitor"
+ },
+ "b38e9b503c": {
+  "A": "oltan",
+  "B": "r4",
+  "order": 0,
+  "pair": [
+   "oltan",
+   "r4"
+  ],
+  "state": "live_event"
+ },
+ "b5a04e7c7a": {
+  "A": "kivra",
+  "B": "bertan",
+  "order": 1,
+  "pair": [
+   "bertan",
+   "kivra"
+  ],
+  "state": "no_record"
+ },
+ "b677079bf3": {
+  "A": "oltan",
+  "B": "r4",
+  "order": 0,
+  "pair": [
+   "oltan",
+   "r4"
+  ],
+  "state": "no_longer"
+ },
+ "b6f82ed761": {
+  "A": "oltan",
+  "B": "r4",
+  "order": 0,
+  "pair": [
+   "oltan",
+   "r4"
+  ],
+  "state": "visitor"
+ },
+ "b81389200a": {
+  "A": "r4",
+  "B": "oltan",
+  "order": 1,
+  "pair": [
+   "oltan",
+   "r4"
+  ],
+  "state": "no_longer"
+ },
+ "b8338994af": {
+  "A": "oltan",
+  "B": "kestim",
+  "order": 1,
+  "pair": [
+   "kestim",
+   "oltan"
+  ],
+  "state": "state_live"
+ },
+ "b9d5ae1920": {
+  "A": "kivra",
+  "B": "kestim",
+  "order": 1,
+  "pair": [
+   "kestim",
+   "kivra"
+  ],
+  "state": "closed_realized"
+ },
+ "bb20a54c54": {
+  "A": "bertan",
+  "B": "kestim",
+  "order": 0,
+  "pair": [
+   "bertan",
+   "kestim"
+  ],
+  "state": "few_cases"
+ },
+ "bc6d85524c": {
+  "A": "r4",
+  "B": "kestim",
+  "order": 1,
+  "pair": [
+   "kestim",
+   "r4"
+  ],
+  "state": "no_longer"
+ },
+ "c0b6d2a978": {
+  "A": "bertan",
+  "B": "zemre",
+  "order": 0,
+  "pair": [
+   "bertan",
+   "zemre"
+  ],
+  "state": "visitor"
+ },
+ "c2bc6be6cb": {
+  "A": "bertan",
+  "B": "r4",
+  "order": 0,
+  "pair": [
+   "bertan",
+   "r4"
+  ],
+  "state": "no_longer"
+ },
+ "c2ff9115d8": {
+  "A": "zemre",
+  "B": "bertan",
+  "order": 1,
+  "pair": [
+   "bertan",
+   "zemre"
+  ],
+  "state": "no_longer"
+ },
+ "c3cf4a48bc": {
+  "A": "zemre",
+  "B": "kivra",
+  "order": 1,
+  "pair": [
+   "kivra",
+   "zemre"
+  ],
+  "state": "closed_realized"
+ },
+ "c3e1211d01": {
+  "A": "kivra",
+  "B": "zemre",
+  "order": 0,
+  "pair": [
+   "kivra",
+   "zemre"
+  ],
+  "state": "no_longer"
+ },
+ "c4335aff51": {
+  "A": "zemre",
+  "B": "kestim",
+  "order": 1,
+  "pair": [
+   "kestim",
+   "zemre"
+  ],
+  "state": "closed_realized"
+ },
+ "c4ff1f5fe1": {
+  "A": "kivra",
+  "B": "bertan",
+  "order": 1,
+  "pair": [
+   "bertan",
+   "kivra"
+  ],
+  "state": "few_cases"
+ },
+ "c53685fd0a": {
+  "A": "r4",
+  "B": "kestim",
+  "order": 1,
+  "pair": [
+   "kestim",
+   "r4"
+  ],
+  "state": "few_cases"
+ },
+ "c5acf101a2": {
+  "A": "bertan",
+  "B": "r4",
+  "order": 0,
+  "pair": [
+   "bertan",
+   "r4"
+  ],
+  "state": "state_live"
+ },
+ "cb5c7146b3": {
+  "A": "zemre",
+  "B": "bertan",
+  "order": 1,
+  "pair": [
+   "bertan",
+   "zemre"
+  ],
+  "state": "few_cases"
+ },
+ "cb95fe879b": {
+  "A": "r4",
+  "B": "zemre",
+  "order": 0,
+  "pair": [
+   "r4",
+   "zemre"
+  ],
+  "state": "live_event"
+ },
+ "cc2ed54180": {
+  "A": "kestim",
+  "B": "zemre",
+  "order": 0,
+  "pair": [
+   "kestim",
+   "zemre"
+  ],
+  "state": "visitor"
+ },
+ "cd3b543ad0": {
+  "A": "zemre",
+  "B": "oltan",
+  "order": 1,
+  "pair": [
+   "oltan",
+   "zemre"
+  ],
+  "state": "visitor"
+ },
+ "cda538dba7": {
+  "A": "r4",
+  "B": "kestim",
+  "order": 1,
+  "pair": [
+   "kestim",
+   "r4"
+  ],
+  "state": "state_live"
+ },
+ "ce0b2db2f8": {
+  "A": "r4",
+  "B": "kivra",
+  "order": 1,
+  "pair": [
+   "kivra",
+   "r4"
+  ],
+  "state": "live_event"
+ },
+ "ce7aacb026": {
+  "A": "oltan",
+  "B": "kestim",
+  "order": 1,
+  "pair": [
+   "kestim",
+   "oltan"
+  ],
+  "state": "no_record"
+ },
+ "ceced7d0c1": {
+  "A": "bertan",
+  "B": "r4",
+  "order": 0,
+  "pair": [
+   "bertan",
+   "r4"
+  ],
+  "state": "closed_realized"
+ },
+ "cfd6f30e61": {
+  "A": "bertan",
+  "B": "kestim",
+  "order": 0,
+  "pair": [
+   "bertan",
+   "kestim"
+  ],
+  "state": "no_longer"
+ },
+ "d0d1533e9f": {
+  "A": "oltan",
+  "B": "r4",
+  "order": 0,
+  "pair": [
+   "oltan",
+   "r4"
+  ],
+  "state": "closed_failed"
+ },
+ "d2ca388398": {
+  "A": "kestim",
+  "B": "kivra",
+  "order": 0,
+  "pair": [
+   "kestim",
+   "kivra"
+  ],
+  "state": "live_event"
+ },
+ "d3618c92bc": {
+  "A": "oltan",
+  "B": "zemre",
+  "order": 0,
+  "pair": [
+   "oltan",
+   "zemre"
+  ],
+  "state": "live_event"
+ },
+ "d5b3fee306": {
+  "A": "kivra",
+  "B": "oltan",
+  "order": 0,
+  "pair": [
+   "kivra",
+   "oltan"
+  ],
+  "state": "closed_realized"
+ },
+ "d75403617f": {
+  "A": "kestim",
+  "B": "bertan",
+  "order": 1,
+  "pair": [
+   "bertan",
+   "kestim"
+  ],
+  "state": "visitor"
+ },
+ "d96a3ce7ff": {
+  "A": "kestim",
+  "B": "kivra",
+  "order": 0,
+  "pair": [
+   "kestim",
+   "kivra"
+  ],
+  "state": "few_cases"
+ },
+ "da7da5c8e2": {
+  "A": "bertan",
+  "B": "kestim",
+  "order": 0,
+  "pair": [
+   "bertan",
+   "kestim"
+  ],
+  "state": "visitor"
+ },
+ "db150318e9": {
+  "A": "bertan",
+  "B": "oltan",
+  "order": 0,
+  "pair": [
+   "bertan",
+   "oltan"
+  ],
+  "state": "no_record"
+ },
+ "db5abbcb39": {
+  "A": "zemre",
+  "B": "oltan",
+  "order": 1,
+  "pair": [
+   "oltan",
+   "zemre"
+  ],
+  "state": "closed_realized"
+ },
+ "dcb1435466": {
+  "A": "bertan",
+  "B": "kivra",
+  "order": 0,
+  "pair": [
+   "bertan",
+   "kivra"
+  ],
+  "state": "no_record"
+ },
+ "dec58b4279": {
+  "A": "bertan",
+  "B": "kestim",
+  "order": 0,
+  "pair": [
+   "bertan",
+   "kestim"
+  ],
+  "state": "state_live"
+ },
+ "dede2e313d": {
+  "A": "oltan",
+  "B": "zemre",
+  "order": 0,
+  "pair": [
+   "oltan",
+   "zemre"
+  ],
+  "state": "closed_failed"
+ },
+ "e1ac4e0a21": {
+  "A": "kestim",
+  "B": "bertan",
+  "order": 1,
+  "pair": [
+   "bertan",
+   "kestim"
+  ],
+  "state": "live_event"
+ },
+ "e1dbe3eab7": {
+  "A": "zemre",
+  "B": "kivra",
+  "order": 1,
+  "pair": [
+   "kivra",
+   "zemre"
+  ],
+  "state": "no_record"
+ },
+ "e29ddd6085": {
+  "A": "zemre",
+  "B": "kestim",
+  "order": 1,
+  "pair": [
+   "kestim",
+   "zemre"
+  ],
+  "state": "state_live"
+ },
+ "e3c5cba386": {
+  "A": "r4",
+  "B": "bertan",
+  "order": 1,
+  "pair": [
+   "bertan",
+   "r4"
+  ],
+  "state": "few_cases"
+ },
+ "e3fc07fa6b": {
+  "A": "r4",
+  "B": "kestim",
+  "order": 1,
+  "pair": [
+   "kestim",
+   "r4"
+  ],
+  "state": "visitor"
+ },
+ "e4106e67d5": {
+  "A": "oltan",
+  "B": "kivra",
+  "order": 1,
+  "pair": [
+   "kivra",
+   "oltan"
+  ],
+  "state": "live_event"
+ },
+ "e4651a076e": {
+  "A": "kivra",
+  "B": "zemre",
+  "order": 0,
+  "pair": [
+   "kivra",
+   "zemre"
+  ],
+  "state": "no_record"
+ },
+ "e4e319477b": {
+  "A": "bertan",
+  "B": "kivra",
+  "order": 0,
+  "pair": [
+   "bertan",
+   "kivra"
+  ],
+  "state": "state_live"
+ },
+ "e77b24899f": {
+  "A": "r4",
+  "B": "oltan",
+  "order": 1,
+  "pair": [
+   "oltan",
+   "r4"
+  ],
+  "state": "no_record"
+ },
+ "e79f990c9b": {
+  "A": "bertan",
+  "B": "oltan",
+  "order": 0,
+  "pair": [
+   "bertan",
+   "oltan"
+  ],
+  "state": "visitor"
+ },
+ "e7a950cb2f": {
+  "A": "bertan",
+  "B": "kivra",
+  "order": 0,
+  "pair": [
+   "bertan",
+   "kivra"
+  ],
+  "state": "visitor"
+ },
+ "e94104ef7e": {
+  "A": "kestim",
+  "B": "zemre",
+  "order": 0,
+  "pair": [
+   "kestim",
+   "zemre"
+  ],
+  "state": "live_event"
+ },
+ "ea8ef68b16": {
+  "A": "zemre",
+  "B": "kestim",
+  "order": 1,
+  "pair": [
+   "kestim",
+   "zemre"
+  ],
+  "state": "closed_failed"
+ },
+ "eaf10f3830": {
+  "A": "kestim",
+  "B": "bertan",
+  "order": 1,
+  "pair": [
+   "bertan",
+   "kestim"
+  ],
+  "state": "no_record"
+ },
+ "ec14256770": {
+  "A": "bertan",
+  "B": "kivra",
+  "order": 0,
+  "pair": [
+   "bertan",
+   "kivra"
+  ],
+  "state": "closed_failed"
+ },
+ "ecc649adb7": {
+  "A": "bertan",
+  "B": "zemre",
+  "order": 0,
+  "pair": [
+   "bertan",
+   "zemre"
+  ],
+  "state": "no_longer"
+ },
+ "eee17b584e": {
+  "A": "kivra",
+  "B": "kestim",
+  "order": 1,
+  "pair": [
+   "kestim",
+   "kivra"
+  ],
+  "state": "state_live"
+ },
+ "eefb867bf8": {
+  "A": "bertan",
+  "B": "zemre",
+  "order": 0,
+  "pair": [
+   "bertan",
+   "zemre"
+  ],
+  "state": "state_live"
+ },
+ "f068d2a393": {
+  "A": "kivra",
+  "B": "r4",
+  "order": 0,
+  "pair": [
+   "kivra",
+   "r4"
+  ],
+  "state": "closed_failed"
+ },
+ "f3c193be72": {
+  "A": "oltan",
+  "B": "kivra",
+  "order": 1,
+  "pair": [
+   "kivra",
+   "oltan"
+  ],
+  "state": "no_record"
+ },
+ "f3ed249090": {
+  "A": "r4",
+  "B": "kivra",
+  "order": 1,
+  "pair": [
+   "kivra",
+   "r4"
+  ],
+  "state": "no_longer"
+ },
+ "f6be8508ea": {
+  "A": "r4",
+  "B": "bertan",
+  "order": 1,
+  "pair": [
+   "bertan",
+   "r4"
+  ],
+  "state": "closed_realized"
+ },
+ "f75e03532b": {
+  "A": "kestim",
+  "B": "bertan",
+  "order": 1,
+  "pair": [
+   "bertan",
+   "kestim"
+  ],
+  "state": "closed_realized"
+ },
+ "f8b6a12a5f": {
+  "A": "kestim",
+  "B": "oltan",
+  "order": 0,
+  "pair": [
+   "kestim",
+   "oltan"
+  ],
+  "state": "no_record"
+ },
+ "f9973da7a5": {
+  "A": "kestim",
+  "B": "r4",
+  "order": 0,
+  "pair": [
+   "kestim",
+   "r4"
+  ],
+  "state": "closed_failed"
+ },
+ "f9b3d48973": {
+  "A": "bertan",
+  "B": "kivra",
+  "order": 0,
+  "pair": [
+   "bertan",
+   "kivra"
+  ],
+  "state": "no_longer"
+ },
+ "fcb1f29d91": {
+  "A": "kivra",
+  "B": "bertan",
+  "order": 1,
+  "pair": [
+   "bertan",
+   "kivra"
+  ],
+  "state": "visitor"
+ },
+ "fd14d57577": {
+  "A": "zemre",
+  "B": "r4",
+  "order": 1,
+  "pair": [
+   "r4",
+   "zemre"
+  ],
+  "state": "no_longer"
+ },
+ "fe9ef104c6": {
+  "A": "oltan",
+  "B": "bertan",
+  "order": 1,
+  "pair": [
+   "bertan",
+   "oltan"
+  ],
+  "state": "state_live"
+ },
+ "ffcada4edf": {
+  "A": "bertan",
+  "B": "r4",
+  "order": 0,
+  "pair": [
+   "bertan",
+   "r4"
+  ],
+  "state": "few_cases"
+ },
+ "ffcba905a6": {
+  "A": "kivra",
+  "B": "bertan",
+  "order": 1,
+  "pair": [
+   "bertan",
+   "kivra"
+  ],
+  "state": "no_longer"
+ },
+ "ffdcda53e8": {
+  "A": "kivra",
+  "B": "kestim",
+  "order": 1,
+  "pair": [
+   "kestim",
+   "kivra"
+  ],
+  "state": "live_event"
+ }
+}

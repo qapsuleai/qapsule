@@ -296,18 +296,25 @@ def judgements_of(run: Path):
 
 # --- reduced-motion loss (Ek G6.5) -----------------------------------------------------------
 
+def _paint_texts(sc) -> set:
+    """Text runs of a painted scene (the core's flat paint list: prims with `k`, `t`)."""
+    if not isinstance(sc, dict) or "error" in sc:
+        return set()
+    return {p["t"] for p in sc.get("prims", []) if p.get("k") == "text" and p.get("t")}
+
+
 def content(rec: dict) -> set:
-    """Static content of a screen: face texts and glyph presence from the core's painted face
-    scenes (`paints`, what the page drew), the open scene's texts and the DOM text runs."""
+    """Static content of a screen: the text runs of the core's painted face scenes and open
+    scene (`paints`, what the page drew), glyph presence of the authority's face scenes, and
+    the DOM text runs (Ek G6.5 a)."""
     s = set()
     for fid, sc in (rec.get("paints") or {}).items():
-        if not isinstance(sc, dict) or "error" in sc:
-            continue
+        s |= {("text", fid, t) for t in _paint_texts(sc)}
+    for fid, f in ((rec.get("engine") or {}).get("face_scenes") or {}).items():
         try:
-            t, g = CP.face_elements(sc)
-        except Exception:  # noqa: BLE001 - the open scene has another shape
-            t, g = [], None
-        s |= {("text", fid, x["text"]) for x in t}
+            _, g = CP.face_elements(f["scene"])
+        except Exception:  # noqa: BLE001
+            g = None
         if g:
             s.add(("glyph", fid))
     s |= {("dom", t["t"]) for t in rec["dom"]["texts"]}
@@ -315,11 +322,24 @@ def content(rec: dict) -> set:
 
 
 def face_texts(rec: dict, fid: str) -> set:
+    return _paint_texts((rec.get("paints") or {}).get(fid))
+
+
+def face_prims(rec: dict, fid: str) -> set:
+    """Every painted prim of a face as a comparable key: texts by (text, x, y) — the same
+    word can be a wrapped sentence line — and non-text prims by kind and rounded geometry
+    (a static dot is a marker too). Reported beside the pre-registered text rule (RESULTS)."""
     sc = (rec.get("paints") or {}).get(fid)
     if not isinstance(sc, dict) or "error" in sc:
         return set()
-    t, _ = CP.face_elements(sc)
-    return {x["text"] for x in t}
+    out = set()
+    for p in sc.get("prims", []):
+        if p.get("k") == "text":
+            out.add(("text", p.get("t"), round(p.get("x", 0)), round(p.get("y", 0))))
+        else:
+            geo = json.dumps({k: v for k, v in p.items() if k not in ("c",)}, sort_keys=True)
+            out.add((p.get("k"), geo[:400]))
+    return out
 
 
 def animated_faces(meta: dict) -> set:
@@ -344,7 +364,7 @@ def cmd_loss(a):
         red = next((n for n, w in ds.items() if w.get("reduced_of") == d), None)
         if not red or v.get("broken"):
             continue
-        static, carried, detail = [], [], []
+        static, carried, carried_p, carried_str, detail = [], [], [], [], []
         for (dd, state, kind, lang, theme), c in sorted(idx.items()):
             if dd != d:
                 continue
@@ -366,16 +386,25 @@ def cmd_loss(a):
                 refrec = jload(run / "shots" / f"{ref}.end.json") if ref else None
                 for fid in sorted(animated_faces(meta)):
                     marker = face_texts(B, fid) - (face_texts(refrec, fid) if refrec else set())
+                    pm = face_prims(B, fid) - (face_prims(refrec, fid) if refrec else set())
                     detail.append({"state": state, "lang": lang, "theme": theme, "face": fid,
-                                   "target": fid == css[state]["target"], "reduced_marker": sorted(marker)})
-                    if not marker:
+                                   "target": fid == css[state]["target"], "reduced_marker": sorted(marker),
+                                   "reduced_prims": len(pm), "reduced_prim_kinds": sorted({x[0] for x in pm})})
+                    # (pre-registered text rule; a text is an element: (text, x, y), not a bare
+                    # string — the label "gerçekleşti" equals a wrapped sentence line)
+                    if not any(x[0] == "text" for x in pm):
                         carried.append([state, lang, theme, fid])
+                    if not marker:
+                        carried_str.append([state, lang, theme, fid])
+                    if not pm:
+                        carried_p.append([state, lang, theme, fid])
         out[d] = {"reduced": red, "static_lost": static, "carried_lost": carried, "animated": detail,
+                  "carried_lost_any_prim": carried_p, "carried_lost_bare_string": carried_str, "count_any_prim": len(static) + len(carried_p),
                   "count": len(static) + len(carried), "pass": not static and not carried}
     jdump(run / "loss.json", out)
     for d, v in out.items():
         print(d, "vs", v["reduced"], "static", len(v["static_lost"]), "carried", len(v["carried_lost"]),
-              "animated faces", len(v["animated"]), "pass", v["pass"])
+              "animated faces", len(v["animated"]), "pass", v["pass"], "| any-prim carried", len(v["carried_lost_any_prim"]), "| bare-string carried", len(v["carried_lost_bare_string"]))
 
 
 # --- K52 ---------------------------------------------------------------------------------
@@ -480,7 +509,7 @@ def cmd_score(a):
             g["k52_motion_jit"] = km.get("phone-jit-est", {}).get("pass")
             g["k52_motion_nojit"] = km.get("phone", {}).get("pass")
         if d in loss:
-            g["reduced_motion_loss"] = loss[d]["pass"]
+            g["reduced_motion_loss"] = (loss[d]["count_any_prim"] == 0) if a.loss_rule == "any_prim" else loss[d]["pass"]
         elif ds[d].get("reduced_by_definition"):
             g["reduced_motion_loss"] = True
         gates[d] = g
@@ -545,7 +574,8 @@ def cmd_score(a):
     res["model_agreement"] = SEL.model_agreement(rows)
     res["cost"] = {"readers": round(sum(r["cost"] or 0 for r in _uniq(rows)), 4), "reader_calls": len({r["stim"] + r["persona"] + str(r["rep"]) + r["model"] for r in rows}),
                    "critics": round(sum(j["cost"] or 0 for j in judg), 4), "critic_calls": len(judg)}
-    jdump(run / "scores.json", {"rows": rows, "judgements": judg, "result": res})
+    res["loss_rule"] = a.loss_rule
+    jdump(run / a.out, {"rows": rows, "judgements": judg, "result": res})
     print(json.dumps({k: res[k] for k in ("steps", "verdict", "bt", "gates", "waived")}, indent=1))
     if br:
         print(json.dumps(res["broken_check"], indent=1))
@@ -617,6 +647,8 @@ def main():
     p.add_argument("--skip-std", action="store_true")
     p = add("score", cmd_score)
     p.add_argument("--broken", default="kestim")
+    p.add_argument("--loss-rule", default="any_prim", choices=("any_prim", "text"))
+    p.add_argument("--out", default="scores.json")
     a = ap.parse_args()
     a.fn(a)
 

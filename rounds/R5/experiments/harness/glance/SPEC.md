@@ -552,3 +552,18 @@ okuma kapısı uygulanmaz (yüz okuma kümesi yok). 2. Birincil: süreklilik (G6
 grupta en iyinin aralığıyla örtüşenler kalır. 3. Eleştirmen BT. 4. Tek aday kalırsa kazanan; yoksa
 "ayırt edilemedi". **Varsayılan için bağ çözme** (nokta tahminleri): birincili olan önce → birincil →
 fark edilme → BT → daha az ekran metni (`end` ekranları) → ad. İlk iki bu sıradan.
+
+**G6-8 (sonradan; bilgi kaybı sonuçları görüldükten sonra, okuyucu/eleştirmen sonuçlarından önce
+yazıldı).** İki bulgu, ikisi de açıkça işaretlenir:
+1. *Uygulama hatası (Ek G4 türü):* (b)'nin ilk uygulaması yüz metinlerini çıplak dizgi kümesi olarak
+   karşılaştırıyordu; `nabiz`'in TR etiketi "gerçekleşti", `r4` yüzünde satır kırılmasıyla tek başına
+   duran cümle satırıyla aynı dizgi olduğu için "yok" sayıldı. G6-5'in metni "yüzde olmayan durağan
+   metin"dir (bir öğe); öğe = (metin, x, y). Düzeltilmiş metin kuralıyla kayıp: `nabiz` 4 (yalnız
+   `c_born`), `surek` 0, `r4` 0. Çıplak dizgi sonucu (6) de raporlanır.
+2. *Tanım boşluğu:* (b) "mid karesinde hareket katmanı olan her yüz"ü sayıyor; `nabiz`'in `c_born`
+   yüzündeki katman doğumun vuruşu değil, her canlı kapsüldeki sürekli **nabız**dır (vuruş yok; yüz
+   önceden yoktu). Nabzın taşıdığı olgu "canlı"dır ve azaltılmış hâlde metin değil **canlı noktası**
+   (dolu daire ilkeli) olarak durur (yüzde `r4`'te olmayan bir ilke). Orkestratörün tanımı ("hareketle
+   taşınıp hareketi azalt'ta eksik olan olgu = kayıp") buna kayıp demez. **Ana karar** işaret olarak
+   metin ya da metin dışı herhangi bir durağan ilkeyi kabul eder (`--loss-rule any_prim`: `nabiz` 0);
+   **duyarlılık** G6-5'in lafzını uygular (yalnız metin: `nabiz` 4 → elenir). İki sonuç da raporlanır.

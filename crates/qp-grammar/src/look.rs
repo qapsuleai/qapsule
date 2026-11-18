@@ -124,48 +124,50 @@ impl FontAsset {
 pub const DEFAULT_FONT: &str = "plex-mono";
 
 /// Embedded font assets (the renderers embed the same files, `qp_render::fonts`).
-pub static FONTS: &[FontAsset] = &[FontAsset {
-    id: "plex-mono",
-    family: "IBM Plex Mono",
-    weight: 400,
-    italic: false,
-    file: "IBMPlexMono-Regular.ttf",
-    license: "OFL.txt",
-    spdx: "OFL-1.1",
-    css_family: "QpMono",
-    advance: 0.6,
-    ascent: 0.8,
-    advances: &crate::advances::PLEX_MONO,
-},
-// (R5/M16 `zemre`) Atkinson Hyperlegible Next 2.001 (OFL-1.1, no Reserved Font Name):
-// static instances, digits remapped to the tabular figures, Latin subset without layout
-// features (`rounds/R5/experiments/M16/zemre/build_font.py`).
-FontAsset {
-    id: "atkinson-next",
-    family: "Atkinson Hyperlegible Next",
-    weight: 400,
-    italic: false,
-    file: "AtkinsonHyperlegibleNext-Regular.ttf",
-    license: "OFL-AtkinsonHyperlegibleNext.txt",
-    spdx: "OFL-1.1",
-    css_family: "QpAtkinsonNext",
-    advance: 0.487,
-    ascent: 0.8,
-    advances: &crate::advances::ATKINSON_NEXT,
-},
-FontAsset {
-    id: "atkinson-next-bold",
-    family: "Atkinson Hyperlegible Next",
-    weight: 700,
-    italic: false,
-    file: "AtkinsonHyperlegibleNext-Bold.ttf",
-    license: "OFL-AtkinsonHyperlegibleNext.txt",
-    spdx: "OFL-1.1",
-    css_family: "QpAtkinsonNextBold",
-    advance: 0.526,
-    ascent: 0.8,
-    advances: &crate::advances::ATKINSON_NEXT_BOLD,
-}];
+pub static FONTS: &[FontAsset] = &[
+    FontAsset {
+        id: "plex-mono",
+        family: "IBM Plex Mono",
+        weight: 400,
+        italic: false,
+        file: "IBMPlexMono-Regular.ttf",
+        license: "OFL.txt",
+        spdx: "OFL-1.1",
+        css_family: "QpMono",
+        advance: 0.6,
+        ascent: 0.8,
+        advances: &crate::advances::PLEX_MONO,
+    },
+    // (R5/M16 `zemre`) Atkinson Hyperlegible Next 2.001 (OFL-1.1, no Reserved Font Name):
+    // static instances, digits remapped to the tabular figures, Latin subset without layout
+    // features (`rounds/R5/experiments/M16/zemre/build_font.py`).
+    FontAsset {
+        id: "atkinson-next",
+        family: "Atkinson Hyperlegible Next",
+        weight: 400,
+        italic: false,
+        file: "AtkinsonHyperlegibleNext-Regular.ttf",
+        license: "OFL-AtkinsonHyperlegibleNext.txt",
+        spdx: "OFL-1.1",
+        css_family: "QpAtkinsonNext",
+        advance: 0.487,
+        ascent: 0.8,
+        advances: &crate::advances::ATKINSON_NEXT,
+    },
+    FontAsset {
+        id: "atkinson-next-bold",
+        family: "Atkinson Hyperlegible Next",
+        weight: 700,
+        italic: false,
+        file: "AtkinsonHyperlegibleNext-Bold.ttf",
+        license: "OFL-AtkinsonHyperlegibleNext.txt",
+        spdx: "OFL-1.1",
+        css_family: "QpAtkinsonNextBold",
+        advance: 0.526,
+        ascent: 0.8,
+        advances: &crate::advances::ATKINSON_NEXT_BOLD,
+    },
+];
 
 /// The font asset `id`, if embedded.
 #[must_use]
@@ -717,7 +719,8 @@ const fn zrole(px: f64, line: f64, font: &'static str) -> TypeRole {
 /// face's life strip carries time instead). Pair it with the `zemre` face.
 pub const ZEMRE: Look = Look {
     name: "zemre",
-    note: "M16 time strip: ink on paper, Atkinson Hyperlegible Next, blue/vermilion meaning colours",
+    note:
+        "M16 time strip: ink on paper, Atkinson Hyperlegible Next, blue/vermilion meaning colours",
     scheme: "light",
     types: TypeScale {
         headline: zrole(19.0, 1.25, "atkinson-next-bold"),
@@ -733,9 +736,9 @@ pub const ZEMRE: Look = Look {
         grid: [37, 41, 50, 255],
         axis: [108, 111, 120, 255],
         text: [236, 231, 221, 255],
-        muted: [163, 157, 146, 255],
-        up: [151, 184, 242, 255],
-        down: [232, 105, 58, 255],
+        muted: [181, 175, 164, 255],
+        up: [147, 179, 236, 255],
+        down: [230, 104, 60, 255],
         accent: [95, 208, 184, 255],
         warn: [242, 191, 90, 255],
         series: [
@@ -750,16 +753,16 @@ pub const ZEMRE: Look = Look {
         ],
         surface: [26, 29, 36, 255],
         line: [44, 48, 57, 255],
-        neutral: [243, 238, 251, 255],
+        neutral: [236, 231, 221, 255],
         valid: [236, 231, 221, 255],
-        invalid: [111, 106, 99, 255],
-        closed: [111, 106, 99, 255],
+        invalid: [115, 110, 103, 255],
+        closed: [115, 110, 103, 255],
         closed_alpha: 255,
         focus: [95, 208, 184, 255],
         chrome: Chrome {
             bg: [18, 20, 25, 255],
             fg: [236, 231, 221, 255],
-            muted: [163, 157, 146, 255],
+            muted: [181, 175, 164, 255],
             line: [44, 48, 57, 255],
             card: [26, 29, 36, 255],
             accent: [95, 208, 184, 255],
@@ -778,9 +781,9 @@ pub const ZEMRE: Look = Look {
         grid: [227, 221, 209, 255],
         axis: [138, 131, 120, 255],
         text: [28, 26, 23, 255],
-        muted: [91, 86, 78, 255],
-        up: [20, 61, 120, 255],
-        down: [184, 67, 28, 255],
+        muted: [52, 48, 43, 255],
+        up: [42, 94, 172, 255],
+        down: [112, 30, 6, 255],
         accent: [0, 105, 92, 255],
         warn: [122, 74, 0, 255],
         series: [
@@ -795,16 +798,16 @@ pub const ZEMRE: Look = Look {
         ],
         surface: [255, 253, 248, 255],
         line: [217, 210, 196, 255],
-        neutral: [30, 22, 48, 255],
+        neutral: [28, 26, 23, 255],
         valid: [28, 26, 23, 255],
-        invalid: [140, 134, 125, 255],
-        closed: [140, 134, 125, 255],
+        invalid: [128, 122, 114, 255],
+        closed: [128, 122, 114, 255],
         closed_alpha: 255,
         focus: [0, 105, 92, 255],
         chrome: Chrome {
             bg: [246, 243, 236, 255],
             fg: [28, 26, 23, 255],
-            muted: [91, 86, 78, 255],
+            muted: [52, 48, 43, 255],
             line: [217, 210, 196, 255],
             card: [255, 253, 248, 255],
             accent: [0, 105, 92, 255],
@@ -819,7 +822,7 @@ pub const ZEMRE: Look = Look {
     },
     space: Space {
         scale: [4, 8, 12, 16, 24, 32],
-        plot: [16, 64, 34, 24],
+        plot: [16, 64, 34, 42],
         panel_gap: 10,
         glyph_gap: 14.0,
     },
@@ -1378,6 +1381,10 @@ mod tests {
             }
             let floor = [t.closed[0], t.closed[1], t.closed[2], t.closed_alpha];
             assert!(contrast(floor, t.bg) >= 3.0, "{}: closed", t.name);
+            // The presented outcome style (`tg5`) draws a failed claim in `muted` at 0.55.
+            let failed = [t.muted[0], t.muted[1], t.muted[2], 140];
+            let k = contrast(failed, t.bg);
+            assert!(k >= 3.0, "{}: failed glyph {k:.2}:1", t.name);
             let ch = t.chrome;
             for (what, fg, bg) in [
                 ("fg", ch.fg, ch.bg),

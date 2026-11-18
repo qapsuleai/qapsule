@@ -9,8 +9,9 @@
 //! - **`life`** (a time strip): the bars of the claim's **natural life window** — its
 //!   horizon (`Story::horizon_bars`) plus a quarter of it before birth, or, once the claim
 //!   is older than its horizon, its whole age plus that quarter — with the close price
-//!   (`muted`), the claim's evidence geometry (`depth::evidence_layers`, bound to the fact by
-//!   origin only) and a vertical rule at the birth bar (`born`, origin: the fact's `bar`).
+//!   (`muted`) and a vertical rule at the birth bar (`born`, origin: the fact's `bar`). The
+//!   evidence geometry is left to the open capsule and the chart: a level's rule would cross
+//!   the strip's legend.
 //!   The right edge is now. Because the window is measured in the claim's own life, the
 //!   birth rule's place reads the same on every face: at the right edge a claim born now,
 //!   at a fifth of the width one at the end of its natural life, further left one past it
@@ -216,19 +217,14 @@ pub fn view(
     layers.push(ledger);
 
     // Panel 1, `life`: the natural life window.
-    // The evidence geometry is in the price's units only when the fact sits on the bars
-    // themselves (a study's level, e.g. RSI 70, would not fit the price scale).
-    let on_bars = fact.series == bs;
     let mut price = layer("price", Mark::Line, 1);
     price.series = Some(bs);
     price.encoding.y = Some(Position::Name("c".to_owned()));
     price.encoding.color = Some(ColorSpec::Constant("muted".to_owned()));
     price.encoding.width = Some(1.5);
+    // The strip's legend: the close, as on the capsule card ("C …").
+    price.label = Some("C".to_owned());
     layers.push(price);
-    let mut taken: Vec<String> = layers.iter().filter_map(|l| l.id.clone()).collect();
-    if on_bars {
-        layers.extend(crate::depth::evidence_layers(look, &fact, 1, &mut taken));
-    }
     let mut born = layer("born", Mark::Rule, 1);
     born.origin = BTreeMap::from([(
         "/encoding/x".to_owned(),
@@ -248,10 +244,7 @@ pub fn view(
         theme: None,
         x,
         y: Vec::new(),
-        panels: vec![
-            panel(0, "card", card_px(look)),
-            panel(1, "life", STRIP_PX),
-        ],
+        panels: vec![panel(0, "card", card_px(look)), panel(1, "life", STRIP_PX)],
         layers,
         emphasis: Vec::new(),
     })

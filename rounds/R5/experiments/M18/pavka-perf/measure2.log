@@ -1,0 +1,21 @@
+== 04:53:55 6.54 6.82 8.39 r4 phone reps 5
+k52chart: r4 phone depth 5: {"drag_long_usable":true} tick 1 scene 4 long 0
+k52chart: r4 phone depth 50: {"drag_long_usable":true} tick 1 scene 9 long 0
+k52chart: r4 phone depth 200: {"drag_long_usable":true} tick 1 scene 10 long 0
+{"story":null,"pass":true}
+== 04:58:52 6.23 6.82 8.02 korda phone reps 5
+k52chart: korda phone depth 5: {"drag_long_usable":true} tick 1 scene 5 long 0
+k52chart: korda phone depth 50: {"drag_long_usable":true} tick 1 scene 12 long 0
+k52chart: korda phone depth 200: {"drag_long_usable":true} tick 1 scene 12 long 0
+{"story":"korda","pass":true}
+== 05:03:29 14.71 9.24 8.55 pavka-new phone reps 5
+k52chart: pavka phone depth 5: {"drag_long_usable":true} tick 1 scene 4 long 0
+k52chart: pavka phone depth 50: {"drag_long_usable":true} tick 1 scene 13 long 0.073
+k52chart: pavka phone depth 200: {"drag_long_usable":true} tick 1 scene 16 long 0.068
+{"story":"pavka","pass":true}
+== 05:08:05 8.48 11.31 9.98 pavka-old phone reps 5
+k52chart: pavka phone depth 5: {"drag_long_usable":true} tick 1 scene 11 long 0
+k52chart: pavka phone depth 50: {"drag_long_usable":false} tick 1 scene 18 long 0.129
+k52chart: pavka phone depth 200: {"drag_long_usable":true} tick 1 scene 22 long 0.088
+{"story":"pavka","pass":false}
+== 05:12:44 7.13 9.26 9.46 done

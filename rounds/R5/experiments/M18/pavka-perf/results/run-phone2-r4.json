@@ -1,0 +1,244 @@
+{
+ "story": null,
+ "look": null,
+ "market": [
+  "--days",
+  "2600",
+  "--history",
+  "2500"
+ ],
+ "configs": {
+  "phone": {
+   "browser": "26.5",
+   "by_depth": {
+    "5": {
+     "runs": 5,
+     "visible": [
+      6,
+      5,
+      6,
+      6,
+      5
+     ],
+     "range": [
+      [
+       2531,
+       2553
+      ],
+      [
+       2533,
+       2555
+      ],
+      [
+       2529,
+       2556
+      ],
+      [
+       2532,
+       2559
+      ],
+      [
+       2544,
+       2561
+      ]
+     ],
+     "tick_p95": 1,
+     "tick_n": 19,
+     "scene_play_p95": null,
+     "scene_play_n": null,
+     "scene_drag_p95": 4,
+     "scene_drag_n": 77,
+     "paint_pass_drag_p95": 7,
+     "scene_build_drag_p95": 3,
+     "drag_frames_n": 322,
+     "drag_frame_p99": 19,
+     "drag_long": 0,
+     "drag_long_runs": [
+      0,
+      0.009,
+      0,
+      0,
+      0
+     ],
+     "scene_drag_p95_runs": [
+      4,
+      4,
+      4,
+      4,
+      3
+     ],
+     "first_capsule_ms": 638,
+     "errors": [],
+     "steps": [
+      "519 / 900",
+      "539 / 900",
+      "559 / 900",
+      "580 / 900",
+      "600 / 900"
+     ],
+     "scene_p95": 4,
+     "biased": {
+      "tick_p95": 1.6,
+      "scene_p95": 7.4
+     },
+     "checks": {
+      "drag_long_usable": true
+     },
+     "pass": true
+    },
+    "50": {
+     "runs": 5,
+     "visible": [
+      52,
+      54,
+      55,
+      56,
+      56
+     ],
+     "range": [
+      [
+       2348,
+       2566
+      ],
+      [
+       2345,
+       2568
+      ],
+      [
+       2343,
+       2571
+      ],
+      [
+       2341,
+       2573
+      ],
+      [
+       2340,
+       2575
+      ]
+     ],
+     "tick_p95": 1,
+     "tick_n": 19,
+     "scene_play_p95": 9,
+     "scene_play_n": 4,
+     "scene_drag_p95": 9,
+     "scene_drag_n": 30,
+     "paint_pass_drag_p95": 12,
+     "scene_build_drag_p95": 4,
+     "drag_frames_n": 319,
+     "drag_frame_p99": 19,
+     "drag_long": 0,
+     "drag_long_runs": [
+      0,
+      0,
+      0,
+      0.003,
+      0
+     ],
+     "scene_drag_p95_runs": [
+      9,
+      9,
+      9,
+      9,
+      9
+     ],
+     "first_capsule_ms": 1319,
+     "errors": [],
+     "steps": [
+      "620 / 900",
+      "640 / 900",
+      "661 / 900",
+      "680 / 900",
+      "699 / 900"
+     ],
+     "scene_p95": 9,
+     "biased": {
+      "tick_p95": 1.6,
+      "scene_p95": 16.650000000000002
+     },
+     "checks": {
+      "drag_long_usable": true
+     },
+     "pass": true
+    },
+    "200": {
+     "runs": 5,
+     "visible": [
+      234,
+      237,
+      201,
+      203,
+      206
+     ],
+     "range": [
+      [
+       1429,
+       2577
+      ],
+      [
+       1417,
+       2579
+      ],
+      [
+       1632,
+       2581
+      ],
+      [
+       1624,
+       2583
+      ],
+      [
+       1610,
+       2585
+      ]
+     ],
+     "tick_p95": 1,
+     "tick_n": 13,
+     "scene_play_p95": 9.5,
+     "scene_play_n": 2,
+     "scene_drag_p95": 10,
+     "scene_drag_n": 18,
+     "paint_pass_drag_p95": 13,
+     "scene_build_drag_p95": 5,
+     "drag_frames_n": 318,
+     "drag_frame_p99": 19,
+     "drag_long": 0,
+     "drag_long_runs": [
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "scene_drag_p95_runs": [
+      10,
+      10,
+      10,
+      10,
+      21
+     ],
+     "first_capsule_ms": 1982,
+     "errors": [],
+     "steps": [
+      "718 / 900",
+      "736 / 900",
+      "755 / 900",
+      "774 / 900",
+      "793 / 900"
+     ],
+     "scene_p95": 10,
+     "biased": {
+      "tick_p95": 1.6,
+      "scene_p95": 18.5
+     },
+     "checks": {
+      "drag_long_usable": true
+     },
+     "pass": true
+    }
+   },
+   "pass": true
+  }
+ },
+ "pass": true
+}

@@ -372,8 +372,22 @@ mod tests {
     /// rozet: `up`/`down`/`text`).
     #[test]
     fn ornek_signs_keep_3_to_1_at_freshness_zero() {
-        use crate::glyph::rozet::Rozet;
         use crate::look::{ORNEK, R4};
+        signs_keep_3_to_1_at_freshness_zero(&ORNEK);
+        // r4 keeps freshness alone (its glyphs stay byte-identical).
+        for t in [R4.dark, R4.light] {
+            assert_eq!((t.closed_alpha, t.fresh_alpha_min), (0, 0));
+        }
+    }
+
+    /// (R5/M16) The same for `oltan` (its 120 px face glyph and the card glyphs).
+    #[test]
+    fn oltan_signs_keep_3_to_1_at_freshness_zero() {
+        signs_keep_3_to_1_at_freshness_zero(&crate::look::OLTAN);
+    }
+
+    fn signs_keep_3_to_1_at_freshness_zero(look: &crate::look::Look) {
+        use crate::glyph::rozet::Rozet;
         let alphabets: [&dyn Alphabet; 2] = [&Siluet, &Rozet];
         let bx = GlyphBox {
             x: 0.0,
@@ -381,7 +395,7 @@ mod tests {
             size: 32.0,
         };
         let mut checked = 0;
-        for t in [ORNEK.dark, ORNEK.light] {
+        for t in [look.dark, look.light] {
             for a in alphabets {
                 for kind in [
                     MeaningKind::Continuation,
@@ -439,10 +453,6 @@ mod tests {
             }
         }
         assert_eq!(checked, 2 * 2 * 6 * 3 * 5);
-        // r4 keeps freshness alone (its glyphs stay byte-identical).
-        for t in [R4.dark, R4.light] {
-            assert_eq!((t.closed_alpha, t.fresh_alpha_min), (0, 0));
-        }
     }
 
     /// (R5/T3c) Without floors the failed trace is exactly the faded open look (`r4`).

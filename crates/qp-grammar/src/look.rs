@@ -124,19 +124,52 @@ impl FontAsset {
 pub const DEFAULT_FONT: &str = "plex-mono";
 
 /// Embedded font assets (the renderers embed the same files, `qp_render::fonts`).
-pub static FONTS: &[FontAsset] = &[FontAsset {
-    id: "plex-mono",
-    family: "IBM Plex Mono",
-    weight: 400,
-    italic: false,
-    file: "IBMPlexMono-Regular.ttf",
-    license: "OFL.txt",
-    spdx: "OFL-1.1",
-    css_family: "QpMono",
-    advance: 0.6,
-    ascent: 0.8,
-    advances: &crate::advances::PLEX_MONO,
-}];
+pub static FONTS: &[FontAsset] = &[
+    FontAsset {
+        id: "plex-mono",
+        family: "IBM Plex Mono",
+        weight: 400,
+        italic: false,
+        file: "IBMPlexMono-Regular.ttf",
+        license: "OFL.txt",
+        spdx: "OFL-1.1",
+        css_family: "QpMono",
+        advance: 0.6,
+        ascent: 0.8,
+        advances: &crate::advances::PLEX_MONO,
+    },
+    // (R5/M16 `oltan`) Atkinson Hyperlegible Next 2.001 (Braille Institute; OFL-1.1, no
+    // Reserved Font Name): static instances of the variable file at wght 400 and 600, Latin
+    // subset, the figures 0–9 remapped in the cmap to the tabular glyphs (632 units each).
+    // `advance`: the mean advance over a marla headline; `ascent`: the accented capitals'
+    // top (İ, Ü: 861 units), so a wrapped block's first line stays inside its box.
+    FontAsset {
+        id: "atkinson-next",
+        family: "Atkinson Hyperlegible Next",
+        weight: 400,
+        italic: false,
+        file: "AtkinsonHyperlegibleNext-Regular.ttf",
+        license: "OFL-AtkinsonHyperlegibleNext.txt",
+        spdx: "OFL-1.1",
+        css_family: "QpAtkinson",
+        advance: 0.46,
+        ascent: 0.86,
+        advances: &crate::advances::ATKINSON_NEXT,
+    },
+    FontAsset {
+        id: "atkinson-next-semibold",
+        family: "Atkinson Hyperlegible Next",
+        weight: 600,
+        italic: false,
+        file: "AtkinsonHyperlegibleNext-SemiBold.ttf",
+        license: "OFL-AtkinsonHyperlegibleNext.txt",
+        spdx: "OFL-1.1",
+        css_family: "QpAtkinsonSemi",
+        advance: 0.47,
+        ascent: 0.86,
+        advances: &crate::advances::ATKINSON_NEXT_SEMIBOLD,
+    },
+];
 
 /// The font asset `id`, if embedded.
 #[must_use]
@@ -675,8 +708,233 @@ pub const ORNEK: Look = Look {
     ..R4
 };
 
+/// (R5/M16) **`oltan`** — "the mark leads / watch face" (`rounds/R5/experiments/M16/oltan/
+/// DESIGN.md`). The meaning glyph is the face's hero: the largest and highest-contrast
+/// thing on the screen (with the face design `oltan`, 120 px), its colour a lightness
+/// ladder so direction and validity survive grey and the three colour-blind simulations
+/// (ΔE00 ≥ 10 between every meaning pair, `oltan_meets_the_hard_thresholds`); the
+/// sentence is secondary but easy to read: Atkinson Hyperlegible Next (a typeface made
+/// for legibility at a glance, open shapes, distinct 0/O, 1/l/I), semibold headline, no
+/// text under 13 px. Faces are tiles on a near-black ground (dark, the default) or on a
+/// warm grey page (light), like complications on a watch face.
+///
+/// The ladder (CIE L*): dark — failed/no longer/no direction 47 < down 59 < up 80 < ink
+/// 97; light — the same order reversed in salience: grey 57 > up 43 > down 28 > ink 6.
+/// "No direction" (`neutral`) is the same grey as "no longer holds" (`invalid`): colour
+/// means direction; grey means none (the badge and the words say which). `invalid` is
+/// what `tg5`'s faded `muted` glyph composites to (`muted` × 0.55 over the ground), so a
+/// failed and a lapsed story are one colour told apart by shape (✗ / ring with a bar).
+pub const OLTAN: Look = Look {
+    name: "oltan",
+    note: "M16: the mark leads (watch face): 120 px glyph, lightness-ladder meaning colours, \
+           Atkinson Hyperlegible Next",
+    scheme: "dark",
+    types: TypeScale {
+        headline: TypeRole {
+            px: 19.0,
+            line: 1.27,
+            font: "atkinson-next-semibold",
+        },
+        title: TypeRole {
+            px: 15.0,
+            line: 1.3,
+            font: "atkinson-next",
+        },
+        body: TypeRole {
+            px: 16.0,
+            line: 1.375,
+            font: "atkinson-next",
+        },
+        label: TypeRole {
+            px: 14.0,
+            line: 1.3,
+            font: "atkinson-next",
+        },
+        figure: TypeRole {
+            px: 13.0,
+            line: 1.3,
+            font: "atkinson-next",
+        },
+        note: TypeRole {
+            px: 13.0,
+            line: 1.3,
+            font: "atkinson-next",
+        },
+    },
+    dark: Theme {
+        name: "dark",
+        bg: [18, 19, 23, 255],
+        grid: [36, 38, 44, 255],
+        axis: [92, 96, 106, 255],
+        text: [246, 246, 242, 255],
+        muted: [185, 188, 196, 255],
+        up: [78, 224, 148, 255],
+        down: [246, 88, 74, 255],
+        accent: [138, 170, 255, 255],
+        warn: [255, 200, 80, 255],
+        // `s1` is the accent (§9).
+        series: [
+            [138, 170, 255, 255],
+            [255, 176, 64, 255],
+            [196, 140, 255, 255],
+            [92, 214, 230, 255],
+            [255, 128, 196, 255],
+            [214, 214, 120, 255],
+            [176, 150, 130, 255],
+            [200, 200, 200, 255],
+        ],
+        surface: [18, 19, 23, 255],
+        line: [44, 46, 54, 255],
+        neutral: [110, 112, 118, 255],
+        valid: [246, 246, 242, 255],
+        invalid: [110, 112, 118, 255],
+        // (M16 rebase) `tg5` draws a closed glyph at this floor: the failed trace in
+        // `closed` = `invalid` (3.75:1: "did not hold" and "no longer valid" stay one grey),
+        // the realized plate in opaque ink. The ladder of DESIGN.md decision 2, at any
+        // freshness.
+        closed: [110, 112, 118, 255],
+        closed_alpha: 255,
+        // An open glyph keeps ≥ 3:1 at freshness 0 from 214 up (`neutral`); 255 keeps the
+        // ladder itself: below it the faded `down` slides onto the grey (harness `compute`,
+        // grey ΔE00 4.2 at 216; the presented capsules sit at freshness ≈ 0). Freshness is
+        // read from the sentence ("bugün, hâlâ geçerli"), not from the glyph's opacity.
+        fresh_alpha_min: 255,
+        // The confidence plate never fades below a fresh glyph's (0.24).
+        plate_alpha_min: 61,
+        focus: [138, 170, 255, 255],
+        chrome: Chrome {
+            bg: [6, 6, 8, 255],
+            fg: [246, 246, 242, 255],
+            muted: [170, 173, 180, 255],
+            line: [40, 42, 48, 255],
+            card: [18, 19, 23, 255],
+            accent: [138, 170, 255, 255],
+            on_accent: [6, 6, 8, 255],
+            page: [0, 0, 0, 255],
+            note_bg: [58, 46, 14, 255],
+            note_fg: [255, 226, 160, 255],
+            alert_bg: [74, 24, 32, 255],
+            alert_fg: [255, 214, 220, 255],
+            req: [255, 190, 90, 255],
+        },
+    },
+    light: Theme {
+        name: "light",
+        bg: [255, 255, 255, 255],
+        grid: [232, 232, 228, 255],
+        axis: [150, 152, 158, 255],
+        text: [17, 18, 22, 255],
+        muted: [39, 42, 50, 255],
+        up: [16, 118, 66, 255],
+        down: [132, 14, 22, 255],
+        accent: [40, 80, 220, 255],
+        warn: [150, 90, 0, 255],
+        series: [
+            [40, 80, 220, 255],
+            [196, 104, 0, 255],
+            [126, 52, 196, 255],
+            [0, 128, 150, 255],
+            [196, 40, 120, 255],
+            [120, 120, 20, 255],
+            [110, 82, 64, 255],
+            [96, 96, 96, 255],
+        ],
+        surface: [255, 255, 255, 255],
+        line: [222, 222, 216, 255],
+        neutral: [136, 138, 142, 255],
+        valid: [17, 18, 22, 255],
+        invalid: [136, 138, 142, 255],
+        // (M16 rebase) As in the dark scheme: `closed` = `invalid` (3.46:1), opaque.
+        closed: [136, 138, 142, 255],
+        closed_alpha: 255,
+        // ≥ 3:1 at freshness 0 from 232 up (`neutral`); 255 as in the dark scheme.
+        fresh_alpha_min: 255,
+        plate_alpha_min: 61,
+        focus: [40, 80, 220, 255],
+        chrome: Chrome {
+            bg: [238, 238, 234, 255],
+            fg: [17, 18, 22, 255],
+            muted: [82, 86, 94, 255],
+            line: [214, 214, 208, 255],
+            card: [255, 255, 255, 255],
+            accent: [40, 80, 220, 255],
+            on_accent: [255, 255, 255, 255],
+            page: [200, 200, 194, 255],
+            note_bg: [255, 241, 199, 255],
+            note_fg: [107, 75, 0, 255],
+            alert_bg: [74, 24, 32, 255],
+            alert_fg: [255, 214, 220, 255],
+            req: [150, 80, 0, 255],
+        },
+    },
+    space: Space {
+        scale: [4, 8, 12, 16, 20, 28],
+        plot: [8, 72, 28, 24],
+        panel_gap: 10,
+        glyph_gap: 14.0,
+    },
+    surface: Surface {
+        radius: 14.0,
+        frame_radius: 32.0,
+        pill_radius: 10.0,
+        line: 1.0,
+        shadow: false,
+        strip_alpha: 48,
+        veil_alpha: 170,
+    },
+    glyph: GlyphLook {
+        face_px: 120.0,
+        card_px: 64.0,
+        chart_px: 32.0,
+        default_px: 28.0,
+        place: GlyphPlace::Leading,
+    },
+    motion: Motion {
+        duration_scale: 0.85,
+        ease: Ease::Bezier([0.2, 0.0, 0.0, 1.0]),
+        chrome_ms: 140.0,
+    },
+    chrome: ChromeLook {
+        text_px: 16.0,
+        line: 1.4,
+        small_px: 14.0,
+        table_px: 14.0,
+        tiny_px: 13.0,
+        trust_px: 13.0,
+        head_weight: 600,
+        head_tracking: 0.06,
+        head_gap: 14.0,
+        tab_h: 48.0,
+        tab_pad: 8.0,
+        tab_rule: 3.0,
+        control_h: 44.0,
+        control_pad: [8.0, 8.0],
+        date_w: 100.0,
+        bar_h: 60.0,
+        cell_pad: [6.0, 6.0],
+        badge_pad: [3.0, 8.0],
+        face_pad: [14.0, 14.0],
+        face_min_h: 72.0,
+    },
+    evidence: EvidenceLook {
+        color: "accent",
+        note_color: "warn",
+        rule_w: 2.5,
+        band_w: 1.5,
+        band_alpha: 0.16,
+        point_px: 11.0,
+    },
+    offsets: Offsets {
+        title_baseline: 20,
+        legend_gap: 14,
+        legend_baseline: 14,
+        ledger_gap: 4.0,
+        ..R4.offsets
+    },
+};
+
 /// Looks a connection may choose; the first is the default.
-pub static LOOKS: &[Look] = &[R4, ORNEK];
+pub static LOOKS: &[Look] = &[R4, ORNEK, OLTAN];
 
 /// The default look's name.
 pub const DEFAULT_LOOK: &str = "r4";
@@ -1122,5 +1380,88 @@ mod tests {
         }
         // r4 keeps freshness alone.
         assert_eq!((R4.dark.closed_alpha, R4.light.closed_alpha), (0, 0));
+    }
+
+    /// CIE L* of an opaque colour (D65; what a grey filter keeps).
+    fn lstar(c: Rgba) -> f64 {
+        let y = lum([f64::from(c[0]), f64::from(c[1]), f64::from(c[2])]);
+        if y > 216.0 / 24389.0 {
+            116.0 * y.cbrt() - 16.0
+        } else {
+            y * 24389.0 / 27.0
+        }
+    }
+
+    /// CIEDE2000 of two greys (a* = b* = 0): the lightness term alone.
+    fn de00_grey(l1: f64, l2: f64) -> f64 {
+        let lm = (l1 + l2) / 2.0;
+        let s = 1.0 + 0.015 * (lm - 50.0).powi(2) / (20.0 + (lm - 50.0).powi(2)).sqrt();
+        (l1 - l2).abs() / s
+    }
+
+    /// (R5/M16) `oltan` meets the hard thresholds from its record: type and touch sizes,
+    /// the closed glyph's floor, the evidence note, every chrome text pair; the meaning
+    /// colours (ink = `tg5` realized plate, up, down, the grey of no direction / no longer
+    /// / `tg5` failed) at least 3:1 on the ground and ΔE00 ≥ 10 apart in grey. (The CVD
+    /// simulations and the full table: `rounds/R5/experiments/M16/oltan/DESIGN.md`.)
+    #[test]
+    fn oltan_meets_the_hard_thresholds() {
+        let o = &OLTAN;
+        for r in ROLES {
+            assert!(o.types.role(r).unwrap().px >= 13.0, "{r}");
+        }
+        let c = &o.chrome;
+        for px in [c.text_px, c.small_px, c.table_px, c.tiny_px, c.trust_px] {
+            assert!(px >= 13.0);
+        }
+        assert!(c.tab_h >= 44.0 && c.control_h >= 44.0);
+        assert!(c.bar_h >= c.control_h + 2.0 * 6.0);
+        // The headline and the ledger are drawn in different files' widths (semibold, regular).
+        assert_eq!(o.role_font("headline").weight, 600);
+        assert_eq!(o.role_font("body").weight, 400);
+        for t in [o.dark, o.light] {
+            let floor = [t.closed[0], t.closed[1], t.closed[2], t.closed_alpha];
+            assert!(contrast(floor, t.bg) >= 3.0, "{}: closed floor", t.name);
+            assert!(contrast(t.warn, t.bg) >= 4.5, "{}: evidence note", t.name);
+            let ch = t.chrome;
+            assert!(contrast(ch.req, ch.bg) >= 4.5, "{}: req", t.name);
+            for (fg, bg, what) in [
+                (t.text, t.bg, "text"),
+                (t.muted, t.bg, "muted"),
+                (ch.fg, ch.bg, "chrome fg"),
+                (ch.muted, ch.bg, "chrome muted"),
+                (ch.fg, ch.card, "chrome fg on card"),
+                (ch.muted, ch.card, "chrome muted on card"),
+                (ch.on_accent, ch.accent, "on accent"),
+                (ch.note_fg, ch.note_bg, "note"),
+                (ch.alert_fg, ch.alert_bg, "alert"),
+            ] {
+                let k = contrast(fg, bg);
+                assert!(k >= 4.5, "{} {what}: {k:.2}", t.name);
+            }
+            assert_eq!(t.neutral, t.invalid, "{}: grey means no direction", t.name);
+            // (M16 rebase) `tg5` draws a failed glyph's strongest stroke in `closed` at the
+            // closed floor: it lands on `invalid`.
+            let a = f64::from(t.closed_alpha) / 255.0;
+            let mix =
+                |i: usize| f64::from(t.bg[i]) + a * (f64::from(t.closed[i]) - f64::from(t.bg[i]));
+            for i in 0..3 {
+                assert!(
+                    (mix(i) - f64::from(t.invalid[i])).abs() <= 2.0,
+                    "{}",
+                    t.name
+                );
+            }
+            let ladder = [t.text, t.up, t.down, t.invalid];
+            for m in ladder {
+                assert!(contrast(m, t.bg) >= 3.0, "{}: {m:?}", t.name);
+            }
+            for i in 0..ladder.len() {
+                for j in i + 1..ladder.len() {
+                    let d = de00_grey(lstar(ladder[i]), lstar(ladder[j]));
+                    assert!(d >= 10.0, "{}: {i}/{j} grey ΔE00 {d:.1}", t.name);
+                }
+            }
+        }
     }
 }

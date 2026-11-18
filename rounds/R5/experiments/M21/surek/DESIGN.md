@@ -112,9 +112,44 @@ yoksa kayıptır; azaltılmış kipte fazladan duran etiket kayıp değildir (d�
 | Etiket yeri (sol alt, içeri `offsets.title_x`), rolü (`label`), renkleri (`text` / `bg`) | kayıttan okunuyor | — |
 | Plaka pikseli (yüzün sol üst köşesi zemindir varsayımı) | `motion::PLATE` | yüz tasarımı kaydı "zemin noktası" verebilir |
 
-## Ölçümler
+## Ölçümler (2026-11-18, bu makine; okuyucu/eleştirmen ölçümü koşulmadı — düzeneğin işi)
 
-(aşağıda; `K52` bölümü)
+**K52, kalibre benzetim** (`rounds/R5/experiments/harness/glance/k52.mjs`, 3 tekrar ortancası;
+`motion=surek` düzeneğin `--web` kopyasına eklenen bir adres kaydırıcıyla, depo değişmeden):
+
+| Yapılandırma | Tasarım | tik p95 | yüz p95 | sahne p95 | ilk kapsül | kaydırma kare p99 | Sonuç |
+|---|---|---|---|---|---|---|---|
+| `phone-jit-est` | `r4` | 1 ms | 1 ms | 2 ms | 416 ms | 19 ms | geçer |
+| `phone-jit-est` | `surek` | 1 ms | 1 ms | 2 ms | 430 ms | 21 ms | geçer |
+| `phone` (JIT kapalı, kayıt) | `r4` | 1,6 ms | 2 ms | 5,55 ms | 443 ms | 19 ms | geçer |
+| `phone` (JIT kapalı, kayıt) | `surek` | 1,6 ms | 1 ms | 5,55 ms | 451 ms | 18 ms | geçer |
+
+**Hareket sırasında kare süresi** (WebKit, DPR 3, `phone-jit-est`'in motoru ve ölçeği, CPU
+kısması yok; 8 kez akış → kapsül → grafik → geri → geri; ardından 60 oynatma adımı; WebKit
+zamanlayıcısı 1 ms çözünürlüklü):
+
+| Durum | kare p50 | p95 | p99 | uzun kare (> 33,4 ms) |
+|---|---|---|---|---|
+| `r4`, açılışlar (viewer) | 17 | 18 | 19 | 0 |
+| `surek`, açılışlar (viewer) | 17 | 18 | 20 | 0 |
+| `surek`, açılışlar (replica) | 17 | 18 | 19 | %0,09 |
+| `surek`, 60 adım, 10 yüz değişimi canlandı (replica) | 17 | 18 | 19 | %0,06 |
+
+Bir yüz değişiminin başlangıcı (`face_motion` aralığı: çekirdeğin önceki yüzü DPR 3'te
+başvuru çizicisiyle piksele çevirmesi + kopyalar): p50 6 ms, p95 8 ms, en çok 8 ms (n = 10).
+Bütçenin sınırında; değişim başına bir kez olur (60 adımda 10 kez). İyileştirme yolu:
+önceki yüzün yalnız değişen kutularını (işaret + metin kutuları) çizmek, ya da önceki
+pikselleri veri karesinde değil değişimde, boşta (`requestIdleCallback` benzeri) hazırlamak.
+
+**Bilgi eşitliği:** `motion_m21.rs` (60 adım; doğdu, güçlendi, gerçekleşti, zayıfladı, tutmadı
+görüldü) — iki kipte olgular aynı, azaltılmış kipte her olgu yüzde yazılı. Kayıp 0.
+
+**Görünüşler:** `r4` (koyu) ve `ornek` (açık) ile denendi: açılış kareleri ve etiket iki
+görünüşte de okunur; etiketin boyu/rengi/yazı tipi görünüşten gelir (birim sınaması bütün
+görünüşler × iki tema × iki dilde etiketin yüzün içinde kaldığını sınar).
+
+**Paket:** `wasm` adımı ham 2 103 472 B, gzip -9 670 368 B (yeni yazı tipi yok; eklenen kod
+küçük).
 
 ## Bilinen sınırlar
 

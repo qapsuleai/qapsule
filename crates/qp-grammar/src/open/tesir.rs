@@ -298,8 +298,7 @@ fn value(f: &Fact, key: &str, lang: Language) -> Option<String> {
     let v = *f.evidence.get(key)?;
     let m = f.meaning.as_ref()?;
     let rsi = m.detector.contains("rsi")
-        || m
-            .condition
+        || m.condition
             .as_ref()
             .is_some_and(|c| c.subject == "rsi" || c.subject == "value");
     let (dec, trim) = key_digits(key, rsi);
@@ -361,10 +360,7 @@ fn basis(s: &Src) -> String {
             ),
         };
     }
-    let vals: Vec<String> = keys(f)
-        .iter()
-        .filter_map(|k| value(f, k, s.lang))
-        .collect();
+    let vals: Vec<String> = keys(f).iter().filter_map(|k| value(f, k, s.lang)).collect();
     let sep = match m.geometry.first() {
         Some(Geometry::Points { .. }) => " → ",
         _ => " – ",
@@ -401,7 +397,10 @@ fn basis2(s: &Src) -> String {
 }
 
 fn why(s: &Src) -> String {
-    s.voice.as_ref().map(|v| v.detail.clone()).unwrap_or_default()
+    s.voice
+        .as_ref()
+        .map(|v| v.detail.clone())
+        .unwrap_or_default()
 }
 
 /// The trust row: the same words as the open layer's trust mark.
@@ -534,7 +533,9 @@ fn text_column(t: &TextInput<'_>) -> String {
             (Some(DeviceCheck::Device | DeviceCheck::Checking | DeviceCheck::Differs), _) => {
                 trust2(&s)
             }
-            (_, true) => "Sunucu hesapladı ve doğruladı; bu cihaz veriyi almadığı için kendisi sınayamaz.",
+            (_, true) => {
+                "Sunucu hesapladı ve doğruladı; bu cihaz veriyi almadığı için kendisi sınayamaz."
+            }
             (_, false) => {
                 "The server computed and verified it; this device gets no data to check it itself."
             }
@@ -617,17 +618,14 @@ pub fn view(
     glyph.encoding.y = Some(panel_at(0.0, 0.0));
     glyph.encoding.size = Some(SizeSpec::Constant(look.glyph.card_px));
     layers.push(glyph);
-    let valid = p
-        .glyph(finding)
-        .and_then(|g| g.validity)
-        .map_or_else(
-            || {
-                p.capsule(finding)
-                    .and_then(|c| c.story.as_ref().map(|st| !st.stage.is_closed()))
-                    .unwrap_or(true)
-            },
-            |v| v == Validity::Valid,
-        );
+    let valid = p.glyph(finding).and_then(|g| g.validity).map_or_else(
+        || {
+            p.capsule(finding)
+                .and_then(|c| c.story.as_ref().map(|st| !st.stage.is_closed()))
+                .unwrap_or(true)
+        },
+        |v| v == Validity::Valid,
+    );
     layers.push(text(
         "headline",
         "headline",

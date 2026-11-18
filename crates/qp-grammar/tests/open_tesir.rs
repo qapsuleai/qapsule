@@ -36,8 +36,9 @@ fn voice(redacted: bool) -> CapsuleVoice {
         } else {
             "SAMPLE son 20 günün en yüksek fiyatını (121,46) aştı · bugün, hâlâ geçerli".into()
         },
-        detail: "O gün kapanış eşiğin üstünde oldu. Sonuç en geç on işlem günü içinde belli olacak."
-            .into(),
+        detail:
+            "O gün kapanış eşiğin üstünde oldu. Sonuç en geç on işlem günü içinde belli olacak."
+                .into(),
         ledger: "Benzer otuz durumun çoğunda fiyat yükseldi.".into(),
         glossary: vec![
             GlossEntry {
@@ -264,7 +265,11 @@ fn trust_row_opens_its_explanation_and_follows_the_device() {
         .expect("trust term");
     assert_eq!(term.term, "Kim doğruladı?");
     assert!(term.text.chars().count() <= 160 && !term.text.chars().any(|c| c.is_ascii_digit()));
-    let panel = s.panels.iter().find(|p| p.name.as_deref() == Some("trust")).unwrap();
+    let panel = s
+        .panels
+        .iter()
+        .find(|p| p.name.as_deref() == Some("trust"))
+        .unwrap();
     assert_eq!(term.hit, panel.rect, "the whole block is the tap target");
 
     // The device's check changes the words, not the layout nor the tap target.
@@ -288,7 +293,11 @@ fn an_unentitled_reader_gets_the_templated_basis_and_no_number() {
         .collect();
     assert_eq!(basis[0], "Kilitli: flow/SAMPLE yetkisi");
     assert!(basis[1].contains("lisanslı"), "{basis:?}");
-    assert!(!s.panels.iter().flat_map(|p| &p.layers).any(|l| l.id == "level"));
+    assert!(!s
+        .panels
+        .iter()
+        .flat_map(|p| &p.layers)
+        .any(|l| l.id == "level"));
     let json = serde_json::to_string(&s).unwrap();
     assert!(!json.contains("121.4"), "the evidence value leaked");
     // No digit in any text but the instrument and the entitlement name.
@@ -311,7 +320,10 @@ fn the_text_column_says_the_same_without_a_scene() {
         facts: std::slice::from_ref(&f),
         trust: Trust::Server,
         check: None,
-        ledger: LedgerStat { n: 30, realized: 18 },
+        ledger: LedgerStat {
+            n: 30,
+            realized: 18,
+        },
         validity: Validity::Valid,
     };
     let col = (open::by_name(Some("tesir")).text.unwrap())(&t);

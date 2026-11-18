@@ -1761,10 +1761,8 @@ impl ShellCore {
             }
             return;
         }
-        let (Some(f), Some(it)) = (
-            design.text,
-            self.feed.iter().find(|i| i.id == o.capsule),
-        ) else {
+        let (Some(f), Some(it)) = (design.text, self.feed.iter().find(|i| i.id == o.capsule))
+        else {
             return;
         };
         let t = qp_grammar::open::TextInput {

@@ -786,9 +786,8 @@ pub(crate) fn prepare(
         ));
     }
     // (R5/M20) A panel-positioned `text` may take a panel-relative `x2`: its wrap edge.
-    let text_edge = layer.mark == Mark::Text
-        && is_panel(enc.x.as_ref())
-        && is_panel(enc.x2.as_ref());
+    let text_edge =
+        layer.mark == Mark::Text && is_panel(enc.x.as_ref()) && is_panel(enc.x2.as_ref());
     if x2_given && !text_edge && !matches!(layer.mark, Mark::Rule | Mark::Band | Mark::Area) {
         return Err(cx.err(
             ErrorKind::Invalid,

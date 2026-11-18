@@ -84,7 +84,10 @@ fn style_open_is_validated_and_remembered() {
     let m = input(&mut h, json!({"kind":"style","open":"tesir"}));
     assert_eq!(m["data"]["interaction"]["state"]["open"], "tesir", "{m}");
     let m = input(&mut h, json!({"kind":"style","open":"r4"}));
-    assert!(m["data"]["interaction"]["state"].get("open").is_none(), "{m}");
+    assert!(
+        m["data"]["interaction"]["state"].get("open").is_none(),
+        "{m}"
+    );
 }
 
 #[test]
@@ -98,7 +101,10 @@ fn the_column_is_one_scene_on_both_sides_and_its_trust_block_explains() {
     for _ in 0..60 {
         assert!(h.take_step().is_some());
     }
-    input(&mut h, json!({"kind":"style","open":"tesir","voice":"marla"}));
+    input(
+        &mut h,
+        json!({"kind":"style","open":"tesir","voice":"marla"}),
+    );
     let items = capsules(&mut h);
     let it = items
         .iter()
@@ -130,7 +136,10 @@ fn the_column_is_one_scene_on_both_sides_and_its_trust_block_explains() {
     )
     .expect("the shell's scene");
     let names: Vec<_> = shell.panels.iter().filter_map(|p| p.name.clone()).collect();
-    assert_eq!(names, ["claim", "basis", "evidence", "why", "trust", "record"]);
+    assert_eq!(
+        names,
+        ["claim", "basis", "evidence", "why", "trust", "record"]
+    );
     let trust = shell
         .terms
         .iter()
@@ -148,7 +157,10 @@ fn the_column_is_one_scene_on_both_sides_and_its_trust_block_explains() {
     );
     let i = &m["data"]["interaction"];
     assert_eq!(i["hit"]["term"]["term"], json!(trust.term), "{m}");
-    assert_eq!(i["hit"]["term"]["hit"], serde_json::to_value(trust.hit).unwrap());
+    assert_eq!(
+        i["hit"]["term"]["hit"],
+        serde_json::to_value(trust.hit).unwrap()
+    );
     assert!(i.get("opening").is_none(), "{m}");
     // The device's check: other words, the same layout and terms.
     let checked = open_scene_with(
@@ -165,7 +177,8 @@ fn the_column_is_one_scene_on_both_sides_and_its_trust_block_explains() {
     )
     .unwrap();
     assert_eq!(checked.terms, shell.terms);
-    let rects = |s: &qp_schema::scene::SceneDesc| s.panels.iter().map(|p| p.rect).collect::<Vec<_>>();
+    let rects =
+        |s: &qp_schema::scene::SceneDesc| s.panels.iter().map(|p| p.rect).collect::<Vec<_>>();
     assert_eq!(rects(&checked), rects(&shell));
     assert_ne!(
         qp_session::viewer::scene_digest(&checked),

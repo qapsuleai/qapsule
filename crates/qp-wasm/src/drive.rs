@@ -755,7 +755,8 @@ pub fn viewer_less(host: &mut ReplayHost, principal: &str, lang: &str, script: &
 }
 
 /// Passes everything the core queues to `host`, with the viewer's frames, until idle.
-fn pump_viewer(
+/// (R5/M18: public for the story chart tests.)
+pub fn pump_viewer(
     core: &mut ShellCore,
     host: &mut ReplayHost,
     served: &mut Vec<qp_schema::data::FeedKey>,

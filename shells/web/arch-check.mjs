@@ -39,6 +39,8 @@ export const ALLOWED_CORE = new Set([
   'css', 'fonts', 'font_bytes',
   // R5/m17-int (ARCH.md): the glossary explanation the core opened on a tap, and its dismiss.
   'gloss', 'close_gloss', 'face_desc',
+  // R5/M18 (ARCH.md): the device's story list, for the measurement harness only.
+  'stories',
 ]);
 
 // R5/G (ARCH.md "Galeri"): the gallery page's core (`Gallery`, crates/qp-wasm/src/lib.rs).

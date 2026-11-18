@@ -55,7 +55,7 @@ pub const DISPLAY_TZ: &str = "Europe/Istanbul";
 
 // (RP3/M15) The pure scene functions live in `qp_session::viewer`: the authority compiles
 // a viewer's faces with the very same code (§22).
-pub use qp_session::viewer::{face_scene, open_scene, scene_digest};
+pub use qp_session::viewer::{face_scene, open_scene, open_scene_with, scene_digest, story_series};
 
 #[cfg(target_arch = "wasm32")]
 mod clock {
@@ -965,10 +965,14 @@ impl ShellCore {
                     ("outcome", &self.look.outcome),
                     ("look", &self.look.look),
                     ("voice", &self.look.voice),
+                    ("story", &self.look.story),
                 ] {
                     if let Some(v) = v {
                         more[k] = json!(v);
                     }
+                }
+                if self.look.hide_closed {
+                    more["hide_closed"] = json!(true);
                 }
                 if more.as_object().is_some_and(|o| o.len() > 1) {
                     self.ask("in", Asked::Input, json!({"type":"input","gesture":more}));
@@ -1485,6 +1489,7 @@ impl ShellCore {
             "feed_order": std::iter::once("layout").chain(qp_grammar::feeds::FEED_ORDERS).collect::<Vec<_>>(),
             "feed_rule": qp_capsule::feedrule::FEED_RULES.iter().map(|(n, _)| *n).collect::<Vec<_>>(),
             "voice": qp_session::voices::names(),
+            "story": qp_grammar::stories::names(),
         })
     }
 
@@ -1642,19 +1647,60 @@ impl ShellCore {
         let voice = self.open_voice.clone();
         // (RP3/S) The build's own time (`scene_build`), apart from the change check.
         let t0 = core_now();
+        let lang = self.lang;
+        let story = look.story.is_some() && o.to >= OpenDepth::Chart;
         let scene = if let Some(v) = self.viewer.as_mut() {
+            // (R5/M18, §23.5) The story chart draws the list the authority sent.
+            // (Taken out and put back: not copied on every build.)
+            let rows = if story {
+                v.stories
+                    .as_mut()
+                    .map(|st| std::mem::take(&mut st.rows))
+                    .unwrap_or_default()
+            } else {
+                Vec::new()
+            };
             // (RP3/M15) The open capsule over the device's own data of its instrument.
-            let side = v.open_mut().filter(|s| s.open.capsule == o.capsule)?;
-            let s = side.replica_mut().session_mut()?;
-            open_scene(s, &o, head.as_deref(), voice.as_ref(), &look, mp)
+            let scene = v
+                .open_mut()
+                .filter(|s| s.open.capsule == o.capsule)
+                .and_then(|side| side.replica_mut().session_mut())
+                .and_then(|s| {
+                    open_scene_with(
+                        s,
+                        &o,
+                        head.as_deref(),
+                        voice.as_ref(),
+                        &look,
+                        mp,
+                        (&rows, lang),
+                    )
+                });
+            if let Some(st) = v.stories.as_mut() {
+                if st.rows.is_empty() {
+                    st.rows = rows;
+                }
+            }
+            scene
         } else {
-            open_scene(
-                self.replica.session_mut()?,
+            let principal = self.principal.clone();
+            let s = self.replica.session_mut()?;
+            // (R5/M18) The full replica lists the stories itself (the same rule).
+            let rows = if story {
+                story_series(s, &o)
+                    .map(|bs| s.story_rows(&bs, &principal, lang))
+                    .unwrap_or_default()
+            } else {
+                Vec::new()
+            };
+            open_scene_with(
+                s,
                 &o,
                 head.as_deref(),
                 voice.as_ref(),
                 &look,
                 mp,
+                (&rows, lang),
             )
         };
         let t1 = core_now();
@@ -1969,6 +2015,7 @@ impl ShellCore {
             "outcome",
             "look",
             "voice",
+            "story",
         ] {
             if let Some(v) = choice.get(k).and_then(Value::as_str) {
                 if !v.is_empty() {
@@ -1992,6 +2039,10 @@ impl ShellCore {
             {
                 self.feed_rule = Some(v.to_owned());
             }
+        }
+        // (R5/M18, K54) Show or hide the closed stories of the story chart.
+        if let Some(b) = choice.get("hide_closed").and_then(Value::as_bool) {
+            g["hide_closed"] = json!(b);
         }
         if g.as_object().is_some_and(|o| o.len() > 1) {
             self.ask("in", Asked::Input, json!({"type":"input","gesture":g}));

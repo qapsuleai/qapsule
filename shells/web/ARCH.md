@@ -141,3 +141,12 @@ Sayfa yalnız aynı kökene `fetch` yapar (düzen) ve `<img>` yükler.
 | `set_device(ua, w, h, dpr)` | Ham `navigator.userAgent`, `innerWidth/Height`, `devicePixelRatio`; kısaltma çekirdekte. |
 | `toggle_lang()`, `set_theme(değer)`, `lang()`, `theme()` | Dil ve tema seçimi. |
 | `css()`, `fonts()`, `font_bytes(id)` | Varsayılan görünüşün seçilen temadaki CSS özellikleri ve sayfa genişliği; gömülü yazı tipleri (`FontFace`, ağ yok). |
+
+(R5/M18, `pavka`) Hikâye çizelgesi seçimi `?story=<ad>` ve Ayarlar → Hikâye çizelgesi
+(`set_look({story})`, `style` hareketinin `story` alanı; adlar `choices().story`'den) ve
+Ayarlar → Kapanmış hikâyeleri gizle (`set_look({hide_closed})`). Çizim, odak taşıma,
+kümeleme ve gizleme çekirdekte; sayfa yalnız sahneyi boyar.
+
+| Yöntem | Neden |
+|--------|-------|
+| `stories()` | Yalnız ölçüm düzeneği için (`window.qp.stories`, `rounds/R5/experiments/M18/pavka/k52.mjs`): cihazın tuttuğu hikâye listesi (§23.5). Sayfa onu okumaz, çizmez. |

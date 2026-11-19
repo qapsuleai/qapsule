@@ -1713,7 +1713,7 @@ impl Session {
                     it.voice = self.reader_voice(doc, c, p, lang, v, &mut memo);
                 }
                 // (R6/T3, §24) The market note, when the host gave a market status.
-                self.market_item(&mut it, lang);
+                self.market_item(&mut it, lang, &principal);
                 items.push(it);
             }
         }
@@ -1796,7 +1796,7 @@ impl Session {
         if let Some(v) = self.conns[ci].look.voice.as_deref() {
             item.voice = self.reader_voice(doc, c, p, lang, v, &mut StudyMemo::default());
         }
-        self.market_item(&mut item, lang);
+        self.market_item(&mut item, lang, &principal);
         let story = p
             .and_then(|p| p.stories.get(&c.id))
             .or(c.story.as_ref())
@@ -2105,7 +2105,7 @@ impl Session {
                 if let Some(v) = c.look.voice.as_deref() {
                     item.voice = self.reader_voice(doc, cap, p.as_deref(), lang, v, &mut memo);
                 }
-                self.market_item(&mut item, lang);
+                self.market_item(&mut item, lang, &c.principal);
                 for (sub, inst, all) in &subs {
                     if inst.is_some_and(|i| i != &item.instrument) {
                         continue;

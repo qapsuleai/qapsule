@@ -3282,6 +3282,44 @@ impl Session {
         self.viewer_flush()
     }
 
+    /// (R6/T3, §24, §20.5) Whether `principal` may see the bars of instrument `symbol`: a
+    /// bound series of it whose every feed the reader is entitled to.
+    pub(crate) fn symbol_entitled(&self, principal: &str, symbol: &str) -> bool {
+        self.doc
+            .series
+            .iter()
+            .filter(|s| s.instrument.as_ref().is_some_and(|i| i.symbol == symbol))
+            .any(|s| {
+                crate::claims::feeds_of(&self.doc, &[s.id.as_str()]).is_some_and(|ks| {
+                    !ks.is_empty() && ks.iter().all(|k| self.plane.entitled(principal, k))
+                })
+            })
+    }
+
+    /// (R6/T3, §24, §20.5) The market status as reader `principal` gets it: the phases of
+    /// the instruments whose bars it may see, without the feed's numeric codes (`code`
+    /// 0, not sent); open/closed, holiday, delayed and stale for everyone.
+    #[must_use]
+    pub fn market_for(&self, principal: &str) -> Option<qp_schema::market::MarketStatus> {
+        let m = self.market.as_ref()?;
+        let mut v = m.clone();
+        v.phases = m
+            .phases
+            .iter()
+            .filter(|(sym, _)| self.symbol_entitled(principal, sym))
+            .map(|(sym, p)| {
+                (
+                    sym.clone(),
+                    qp_schema::market::PhaseCode {
+                        code: 0,
+                        key: p.key.clone(),
+                    },
+                )
+            })
+            .collect();
+        Some(v)
+    }
+
     /// (R6/T3) The market status the host last gave.
     #[must_use]
     pub fn market_status(&self) -> Option<&qp_schema::market::MarketStatus> {
@@ -3296,14 +3334,27 @@ impl Session {
         &self,
         it: &mut qp_schema::protocol::CapsuleItem,
         lang: qp_schema::protocol::Language,
+        principal: &str,
     ) {
         use qp_capsule::market::{note_of, with_clause, with_sentence};
         use qp_schema::protocol::Language;
-        let Some(note) = self
-            .market
-            .as_ref()
-            .and_then(|m| note_of(m, &it.instrument))
-        else {
+        let Some(m) = self.market.as_ref() else {
+            return;
+        };
+        // (§24, §20.5) An instrument's phase speaks only to a reader entitled to its bars;
+        // the others hear the market's open/closed and stale only.
+        let note = if !m.phases.contains_key(&it.instrument)
+            || self.symbol_entitled(principal, &it.instrument)
+        {
+            note_of(m, &it.instrument)
+        } else {
+            let general = qp_schema::market::MarketStatus {
+                phases: BTreeMap::new(),
+                ..m.clone()
+            };
+            note_of(&general, &it.instrument)
+        };
+        let Some(note) = note else {
             return;
         };
         let red = it.redacted;

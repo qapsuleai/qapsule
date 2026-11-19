@@ -36,11 +36,18 @@ pub enum MarketSource {
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 #[serde(deny_unknown_fields)]
 pub struct PhaseCode {
-    /// The feed's code (`stockStatus`, e.g. 2). Never shown to the reader.
+    /// The feed's code (`stockStatus`, e.g. 2). Never shown to the reader; the authority
+    /// does not pass it to readers (0, not sent).
+    #[serde(default, skip_serializing_if = "is_zero")]
     pub code: i32,
     /// The phase's machine key (`continuous`, `closing_session`, …;
     /// `qp_matriks::status::SessionPhase::key`).
     pub key: String,
+}
+
+#[allow(clippy::trivially_copy_pass_by_ref)]
+fn is_zero(v: &i32) -> bool {
+    *v == 0
 }
 
 impl PhaseCode {

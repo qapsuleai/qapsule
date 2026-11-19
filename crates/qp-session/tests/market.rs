@@ -272,3 +272,47 @@ fn status_survives_a_backward_seek() {
         assert!(it.sentence.text.contains("Seans kapalı"));
     }
 }
+
+/// (Security review, §20.5) The status is projected per reader: an unentitled reader gets
+/// no other instrument's phase (only open/closed and stale), its capsules do not speak of
+/// the phase, and nobody gets the feed's numeric codes.
+#[test]
+fn unentitled_reader_gets_no_phases() {
+    let mut h = host();
+    hello(&mut h, "a", "arkin", "tr");
+    hello(&mut h, "v", "visitor", "tr");
+    let syms = symbols(&capsules(&mut h, "a"));
+    let sym = syms[0].clone();
+    for c in ["a", "v"] {
+        send(
+            &mut h,
+            c,
+            &json!({"type":"subscribe","id":"viewer","topic":{"kind":"viewer","limit":40}}),
+        );
+    }
+    let lines = h.set_market_status(status(Some(true), false, &[(&sym, 10, "suspend")]));
+    let market_of = |conn: &str| -> Value {
+        let l = lines.iter().find(|l| l.conn == conn).expect("viewer event");
+        serde_json::to_value(&l.msg).unwrap()["event"]["viewer"]["market"].clone()
+    };
+    let a = market_of("a");
+    assert_eq!(a["phases"][&sym], json!({"key": "suspend"}), "{a}");
+    let v = market_of("v");
+    assert!(v.get("phases").is_none(), "{v}");
+    assert_eq!(v["open"], true);
+    assert!(!serde_json::to_string(&lines).unwrap().contains("\"code\""));
+    for it in capsules(&mut h, "v") {
+        assert!(
+            !it.sentence.text.contains("durduruldu"),
+            "{}",
+            it.sentence.text
+        );
+    }
+    for it in capsules(&mut h, "a").iter().filter(|i| i.instrument == sym) {
+        assert!(
+            it.sentence.text.contains("durduruldu"),
+            "{}",
+            it.sentence.text
+        );
+    }
+}

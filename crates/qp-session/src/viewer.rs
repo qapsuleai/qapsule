@@ -1192,11 +1192,13 @@ impl Session {
         }
         up.data.clone_from(&vc.data);
         // (R6/T3, §24) The market status (only once the host gave one).
-        if let Some(m) = &self.market {
-            let md = digest_of(m);
+        // Projected for this reader (§20.5): only the phases of instruments it may see;
+        // the digest is of the projected value, per connection.
+        if let Some(m) = self.market_for(&principal) {
+            let md = digest_of(&m);
             if all || vc.market_sent != Some(md) {
                 vc.market_sent = Some(md);
-                up.market = Some(m.clone());
+                up.market = Some(m);
             }
         }
         (up, vc)

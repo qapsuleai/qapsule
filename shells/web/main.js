@@ -494,6 +494,13 @@ function renderEvidence() {
 
 function renderStatus() {
   const s = JSON.parse(core.status());
+  // (R6/T3) The market's status line: text and state from the core, shown as they are.
+  const m = s.market;
+  $('market').hidden = !m;
+  if (m) {
+    $('market').textContent = m.text;
+    $('market').dataset.state = m.state;
+  }
   if (!s.time) return;
   $('clock').textContent = s.time;
   $('c_step_n').textContent = s.step;

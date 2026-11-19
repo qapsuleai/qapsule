@@ -275,6 +275,8 @@ pub struct ReplayHost {
     /// (R6/T7) A live host ([`ReplayHost::live`]): the data provider the authority
     /// resolves from, shared with the host (initial bars + every recorded event).
     live: Option<std::sync::Arc<std::sync::Mutex<qp_source::MemoryProvider>>>,
+    /// (R6/T3) The market status the host gave (kept over a backward seek).
+    market: Option<qp_schema::market::MarketStatus>,
 }
 
 /// (R6/T7) The authority's provider of a live host: the host's own store (initial bars +
@@ -396,6 +398,7 @@ impl ReplayHost {
             recorded: Vec::new(),
             principal_rules: std::collections::BTreeMap::new(),
             live: None,
+            market: None,
         })
     }
 
@@ -463,6 +466,7 @@ impl ReplayHost {
             recorded: Vec::new(),
             principal_rules: std::collections::BTreeMap::new(),
             live: Some(shared),
+            market: None,
         })
     }
 
@@ -599,6 +603,17 @@ impl ReplayHost {
                     .is_some_and(|b| b != qp_schema::data::BindingState::Ready)
             })
             .count()
+    }
+
+    /// (R6/T3, §24) The host's market status input
+    /// ([`Session::set_market_status`]): the `viewer` events it causes. Kept over a
+    /// backward seek (the new authority gets it again).
+    pub fn set_market_status(
+        &mut self,
+        status: qp_schema::market::MarketStatus,
+    ) -> Vec<OutboundLine> {
+        self.market = Some(status.clone());
+        self.session.set_market_status(status)
     }
 
     /// (R5/M19, K53) Sets `principal`'s feed rule over the init's
@@ -956,6 +971,10 @@ impl ReplayHost {
         self.session.set_viewer_batch(true);
         for (p, r) in &self.principal_rules {
             self.session.set_principal_coin_flip_rule(p, *r);
+        }
+        if let Some(m) = &self.market {
+            // No viewer yet on the new authority: nothing to tell.
+            let _ = self.session.set_market_status(m.clone());
         }
         self.replay.reset();
         self.recorded.clear();

@@ -146,7 +146,8 @@ impl ShellCore {
             None
         };
         let marks = FaceMarks {
-            live: nabiz::is_live(it.stage, it.validity),
+            // (R6/T3) Not live while its market is closed, halted… or the data stale.
+            live: nabiz::is_live(it.stage, it.validity) && self.market_live(&it.instrument),
             label,
             change: Change::of(it.stage, it.validity),
             direction: it.direction,
@@ -200,7 +201,8 @@ impl ShellCore {
                 let Some(&(places, label_w)) = self.mo.live.places.get(&it.id) else {
                     continue;
                 };
-                let live = nabiz::is_live(it.stage, it.validity);
+                let live =
+                    nabiz::is_live(it.stage, it.validity) && self.market_live(&it.instrument);
                 let beat = self.mo.live.beats.get(&it.id).map(|(c, t0)| Beat {
                     change: *c,
                     age: t - t0.unwrap_or(t),

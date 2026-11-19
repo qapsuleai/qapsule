@@ -1574,6 +1574,7 @@ mod tests {
             broker.wait_until(Duration::from_secs(5), |s| s.subscribe_packets.len() >= 2
                 || s.subscribe_packets.iter().map(Vec::len).sum::<usize>() >= 2)
         );
+        #[allow(clippy::needless_range_loop)]
         for i in 30..35 {
             for s in ["AAA", "BBB"] {
                 broker.publish(s, &serde_json::to_vec(&full[s][i]).expect("json"));

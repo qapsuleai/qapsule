@@ -146,6 +146,12 @@ struct DataFrame {
     replay: Option<ReplayState>,
 }
 
+/// (R6/T3, §24) The host's market status frame (`{"market":MarketStatus}`).
+#[derive(serde::Deserialize)]
+struct MarketFrame {
+    market: qp_schema::market::MarketStatus,
+}
+
 /// (RP3/M15, §22) The host's `bind` frame (`{"bind":{feeds, events}}`), typed.
 #[derive(serde::Deserialize)]
 struct BindFrame {
@@ -529,6 +535,9 @@ pub struct ShellCore {
     pass_data: bool,
     /// (RP3/M14) The capsules whose face the page reports on screen (both modes).
     shown: BTreeSet<String>,
+    /// (R6/T3, §24) The market status the host gave (a `{"market":…}` frame or the
+    /// `viewer` event's `market`); `None`: never given (everything as before).
+    market: Option<qp_schema::market::MarketStatus>,
 }
 
 impl std::fmt::Debug for ShellCore {
@@ -786,6 +795,7 @@ impl ShellCore {
             pending_data: false,
             pass_data: false,
             shown: BTreeSet::new(),
+            market: None,
         };
         me.push(json!({"type":"hello","protocol":"qp/0","principal":principal,
             "surface":{"kind":"phone","screen":[PHONE_SCREEN.0, PHONE_SCREEN.1],"input":["touch"],"lang":lang_name(lang)}}));
@@ -1364,7 +1374,43 @@ impl ShellCore {
         if scene {
             ch["scene"] = json!(true);
         }
+        if let Some(m) = &up.market {
+            self.set_market(m.clone(), ch);
+        }
         self.version += 1;
+    }
+
+    /// (R6/T3, §24) Takes the host's market status: the status line changes, and the faces
+    /// (a capsule whose instrument is not trading continuously on fresh data shows no live
+    /// mark).
+    pub fn set_market(&mut self, m: qp_schema::market::MarketStatus, ch: &mut Value) {
+        if self.market.as_ref() == Some(&m) {
+            return;
+        }
+        self.market = Some(m);
+        ch["status"] = json!(true);
+        ch["feed"] = json!(true);
+        self.version += 1;
+    }
+
+    /// (R6/T3) Whether capsules on `symbol` may show as live: no market status, or the
+    /// instrument trades continuously on fresh data (`qp_capsule::market::note_of`).
+    #[must_use]
+    pub fn market_live(&self, symbol: &str) -> bool {
+        self.market
+            .as_ref()
+            .is_none_or(|m| qp_capsule::market::note_of(m, symbol).is_none())
+    }
+
+    /// (R6/T3, §24) The status line in the reader's language: `{text, state}` (`state`:
+    /// `live`, `delayed`, `closed`, `stale`); `null` without a market status. The text is
+    /// the core's (`qp_capsule::market::status_line`); the shell shows it as it is.
+    #[must_use]
+    pub fn market_json(&self) -> Value {
+        self.market.as_ref().map_or(Value::Null, |m| {
+            let (text, state) = qp_capsule::market::status_line(m, self.lang);
+            json!({"text": text, "state": state.key()})
+        })
     }
 
     /// One frame of the host's stream (`{"msg":…}`, `{"data":[…],"replay":…}`); returns
@@ -1373,6 +1419,14 @@ impl ShellCore {
     /// # Errors
     /// Not JSON, or a message that is not a server message.
     pub fn on_frame(&mut self, text: &str) -> Result<Value, String> {
+        // (R6/T3, §24) The host's market status frame (`{"market":MarketStatus}`).
+        if text.starts_with("{\"market\"") {
+            self.traffic.record("market", text.len());
+            let f: MarketFrame = serde_json::from_str(text).map_err(|e| e.to_string())?;
+            let mut ch = json!({});
+            self.set_market(f.market, &mut ch);
+            return Ok(ch);
+        }
         let kind = if text.starts_with("{\"msg\"") {
             "msg"
         } else if text.starts_with("{\"bind\"") {
@@ -2013,6 +2067,15 @@ impl ShellCore {
     /// source, days}`.
     #[must_use]
     pub fn status_json(&self) -> Value {
+        let mut v = self.replay_status_json();
+        // (R6/T3) The market's status line, only once the host gave one.
+        if self.market.is_some() {
+            v["market"] = self.market_json();
+        }
+        v
+    }
+
+    fn replay_status_json(&self) -> Value {
         let Some(r) = &self.replay else {
             return json!({});
         };

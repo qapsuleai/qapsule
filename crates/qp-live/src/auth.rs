@@ -64,6 +64,11 @@ impl fmt::Debug for AccessToken {
 }
 
 impl AccessToken {
+    /// The bearer value, for this crate's own HTTP calls (never printed).
+    pub(crate) fn bearer(&self) -> &str {
+        self.value.expose()
+    }
+
     pub fn expires_at(&self) -> SystemTime {
         self.expires_at
     }

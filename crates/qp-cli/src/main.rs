@@ -10,6 +10,7 @@ use clap::{Parser, Subcommand};
 
 mod demo;
 mod demo_static;
+mod live;
 
 #[derive(Debug, Parser)]
 #[command(name = "qp", version, about = "Qapsule command line", long_about = None)]
@@ -113,6 +114,12 @@ enum Command {
     /// (R4/T5) Drive the demo session with protocol messages only (no shell) and print
     /// the document and scene digests the web shell reports (parity check).
     Drive(demo::DriveArgs),
+    /// (R6) The live Matriks connection: record raw messages, inspect a raw log
+    /// (`docs/matriks/LIVE.md`). Values come from the environment (`scripts/live.sh`).
+    Live {
+        #[command(subcommand)]
+        command: live::LiveCommand,
+    },
     /// Run protocol conformance transcripts (docs/PROTOCOL.md §15).
     Conform {
         /// Transcript files or directories of `*.json` transcripts.
@@ -368,6 +375,7 @@ fn run(command: Command) -> Result<Outcome, String> {
         Command::Compute(args) => compute(&args),
         Command::Demo(args) => demo::demo(&args).map(|()| Outcome::Ok),
         Command::Drive(args) => demo::drive(&args).map(|()| Outcome::Ok),
+        Command::Live { command } => live::run(&command).map(|()| Outcome::Ok),
         Command::Render(args) => match &args.input {
             Some(input) => render(input, &args.out, args.width, args.height),
             None => render_view(&args),

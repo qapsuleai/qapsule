@@ -15,6 +15,8 @@
 //! - [`notice`]: `MessengerMessage` classification (multi-connect = stop).
 //! - [`status`]: `stockStatus` codes → session phase ("seans evresi").
 //! - [`rawlog`]: binary, appendable raw message log for record and replay.
+//! - [`feed`]: [`LiveFeed`], the one pipeline from raw records to §18.4 data events,
+//!   shared by the live connector and replay.
 
 #![deny(missing_docs)]
 
@@ -30,6 +32,7 @@ pub mod messages {
 }
 
 pub mod clock;
+pub mod feed;
 pub mod fields;
 pub mod notice;
 pub mod rawlog;
@@ -39,6 +42,10 @@ pub mod topic;
 pub mod wire;
 
 pub use clock::{decode_time, ClockEvent, MarketClock, TimeTick};
+pub use feed::{
+    parse_update_date, ConnChange, FeedOut, FeedStats, LiveFeed, LiveFeedConfig, TimeSource,
+    VolumeField,
+};
 pub use fields::FieldSet;
 pub use notice::{classify_notice, BrokerNotice, NoticeInfo};
 pub use rawlog::{RawError, RawReader, RawRecord, RawWriter, RecordKind};

@@ -191,6 +191,14 @@ struct ReplayArgs {
     /// Directory that document paths in `--init` are relative to.
     #[arg(long, default_value = ".")]
     root: PathBuf,
+    /// (R6/T5) Replay a Matriks raw log (`*.qpraw`, under `fixtures/local/`) through the
+    /// live feed (`qp_matriks::LiveFeed`, the same pipeline as the live connector): one
+    /// JSON line per output (data event, clock, connection, phase, final bar). The other
+    /// flags above do not apply; see `--intervals`, `--method`, `--volume-field`, `--time`.
+    #[arg(long)]
+    raw: Option<PathBuf>,
+    #[command(flatten)]
+    feed: Box<live::FeedArgs>,
 }
 
 /// Which view of which session: the session starts from `--init` (or the transcript's
@@ -429,6 +437,9 @@ fn run(command: Command) -> Result<Outcome, String> {
 /// `qp replay` (§21): see [`ReplayArgs`].
 #[allow(clippy::too_many_lines)]
 fn replay_cmd(a: &ReplayArgs) -> Result<Outcome, String> {
+    if let Some(raw) = &a.raw {
+        return live::replay_raw(raw, &a.feed, a.out.as_deref(), a.stats).map(|()| Outcome::Ok);
+    }
     use qp_schema::protocol::{ReplayControl, ReplayInit, ReplaySourceKind};
     use std::io::Write;
     let init = match &a.init {

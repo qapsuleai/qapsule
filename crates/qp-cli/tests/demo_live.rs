@@ -113,6 +113,7 @@ fn wait(port: u16, what: &str, f: impl Fn(&serde_json::Value) -> bool) -> serde_
     }
 }
 
+#[allow(clippy::zombie_processes)] // Drop kills it; the error path waits.
 fn start(
     tokens: &MockTokenService,
     broker: &MockBroker,

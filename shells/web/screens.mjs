@@ -16,7 +16,8 @@
 // (`V1`: `?look=r4&voice=r4&face=vadrel&story=r4&open=r4&motion=r4&feed_order=layout`) and
 // stay byte-identical;
 // the `v2` shots (fixtures/golden/demo/v2/*.png, written under <out dir>/v2/) are the
-// presentation as it opens now (R5's picks, no design setting in the URL).
+// presentation as R5 opened it (R5's picks; `V2_PIN` names the one that has since changed,
+// so the v2 goldens stay byte-identical).
 // Synthetic data by default (the goldens in fixtures/golden/demo are the canvas PNGs of
 // the synthetic run at step 120). With --data (real local data) the output must be under
 // fixtures/local/: real data and its images never enter the repository.
@@ -52,6 +53,9 @@ const R3 = { face: 'r3', feed: 'r3', transition: 'r3', outcome: 'r3' };
 const V1 = { look: 'r4', voice: 'r4', face: 'vadrel', story: 'r4', open: 'r4', motion: 'r4', feed_order: 'layout' };
 // (R5/S) The `v2` shots: R5's presentation defaults in both languages and schemes — the
 // feed's faces (open and closed), the open capsule (`tesir`) and the story chart (`pavka`).
+// (R6/T0, K57) The presentation's story chart is now `korda`; the v2 goldens were drawn
+// with `pavka`, so the v2 shots name it (`?story=pavka`) and stay byte-identical.
+const V2_PIN = { story: 'pavka' };
 const V2 = [];
 for (const lang of ['tr', 'en']) {
   for (const theme of ['dark', 'light']) {
@@ -95,6 +99,7 @@ try {
     // (R5/m17-int, R5/S) The v1 goldens predate R5's designs: they are drawn with the
     // designs before it (`V1`, today's text `?voice=r4`); the v2 shots name none.
     if (!s.v2) for (const [k, v] of Object.entries(V1)) q.set(k, v);
+    else for (const [k, v] of Object.entries(V2_PIN)) q.set(k, v);
     if (s.face) q.set('face', s.face);
     for (const [k, v] of Object.entries(s.look || {})) q.set(k, v);
     await page.goto(`${origin}/?${q}`);

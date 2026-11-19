@@ -13,6 +13,31 @@ Tarayıcıda **http://localhost:8390/** adresini açın. İlk koşuda kabuğun �
 `rustup target add wasm32-unknown-unknown`). Yerel veri yoksa sayfanın üstünde
 **"Sentetik veri"** yazar.
 
+## Canlı veriyle (R6)
+
+```sh
+scripts/demo.sh --live                                 # evren: fixtures/local/live/u30.txt, 5m, 120 bar
+scripts/demo.sh --live --symbols THYAO,GARAN --interval 1m --history 200
+```
+
+Açılışta her sembolün son `--history` barı REST'ten (düzeltilmemiş, gecikmeli kipte 15 dk
+geriden kesilmiş) ilk çözüm olur; sonra **tek** canlı Matriks bağlantısı açılır (değişkenler
+ortamdan ya da `.env.local`'dan; yazdırılmaz). Kapsül motoru her beslemede açıktır; cihaz
+görüntüleyicidir (yalnız açık enstrümanın verisi). Sayfanın üstünde piyasa durumu
+("Canlı · gecikmeli 15 dk", "Seans kapalı", "Bağlantı yok — veri bayat") yazar.
+
+- **Yalnız bu bilgisayar:** `--live` ile `--lan` ve `--https-host` reddedilir (gerçek veri
+  yerel ağa açılmaz). Başka cihazdan görmek isteyen kendi özel vekilini (ör. Tailscale →
+  `127.0.0.1:8390`) kendisi kurar.
+- **Ctrl-C** bağlantıyı düzgün kapatır (DISCONNECT) ve özet yazar.
+- **Denetim** (yalnız bu bilgisayardan; belirteç konsolda `live control secret`):
+  `curl -s localhost:8390/live/stats` (toplu sayılar: ileti/sn, hub işlemci, RSS,
+  tikten çerçeveye gecikme p50/p95, onarımlar, kapsül olayları; değer yok),
+  `curl -s -X POST -H "X-Qp-Live-Control: $T" 'localhost:8390/live/drop?secs=20'`
+  (bağlantıyı kapatır, bekler, yeniden açar: kopma → bayat → REST onarımı, M23).
+- Ham iletiler `fixtures/local/live/raw/<zaman>-demo.qpraw` dosyasına yazılır (commit edilmez).
+  Ayrıntı: `docs/matriks/LIVE.md`.
+
 ## Telefondan açmak
 
 ```sh

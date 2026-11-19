@@ -1506,6 +1506,9 @@ mod tests {
         lines.extend(rt.on_in(&mut host, LiveIn::Record(conn(RecordKind::ConnectionLost))));
         assert_eq!(rt.link(), "stale");
         assert_eq!(host.live_not_ready(), 2, "every live feed is stale");
+        lines.extend(rt.tick(&mut host));
+        let m = host.session().market_for("arkin").expect("market status");
+        assert!(m.stale, "the market status says stale");
         // A late message while stale is not applied.
         lines.extend(rt.on_in(&mut host, LiveIn::Record(msg("AAA", &full["AAA"][46]))));
         assert_eq!(rt.dropped_while_stale, 1);
@@ -1526,6 +1529,8 @@ mod tests {
         rt.watch_capsules(&host);
         assert_eq!(rt.link(), "live");
         assert_eq!(host.live_not_ready(), 0, "resolved again");
+        lines.extend(rt.tick(&mut host));
+        assert!(!host.session().market_for("arkin").expect("market").stale);
         // The repaired series: the settled bars (all complete by the exchange clock); the
         // buffered message for an already settled bar changes nothing.
         for s in syms {

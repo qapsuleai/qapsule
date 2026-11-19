@@ -5,9 +5,9 @@ Her round sonunda güncellenir.
 
 ## Şu an
 
-- **Aktif round:** R5 (dil ve tasarım) tamamlandı; rapor `rounds/R5/REPORT.md`. Bütünleştirme `r5/s-int` → `main`: `2965a95`; bağımsız son denetim: `bağımsız denetim koşullu kabul (engelleyici yok; dört koşul karşılandı, `rounds/R5/AUDIT.md`)`.
-- **Son güncelleme:** 2026-11-18
-- **Sıradaki adım:** Arkin finalistleri telefonda galeride karşılaştırır (`rounds/R5/REPORT.md` son bölüm: `scripts/demo.sh --gallery --lan --synthetic`, özeti ana akışa gönderir) ve insan testi v3'ü koşar (`rounds/R5/human-test/GUIDE.md`). Gösterim varsayılanları R5'in ajan ön elemesidir (`oltan` + yüz `oltan`, `marla`, `pavka`, `tesir`, geçici `surek`, `rate55`); son söz galeri ve insan testinde. Sonraki round ana akış oturumunda tasarlanır.
+- **Aktif round:** RI1 (keşif: Matriks bağlantısı ve Quantex servisleri) başlatılmayı bekliyor; paket `rounds/RI1/`. R5 kapandı (K57): altyapı ve dil kuralları kabul, tasarım seçimleri kabul edilmedi; tasarım RD2'de (K58).
+- **Son güncelleme:** 2026-11-19
+- **Sıradaki adım:** Arkin yeni bir Claude Code oturumunu `quantex` klasörüne okuma erişimiyle açar (`rounds/RI1/PROMPT.md`). R6 paketi RI1 raporundan sonra yazılır. R6'nın ilk işi: gösterim varsayılanları `korda` ve `live_new` (K57). İnsan testi v3 koşulmaz; RD2'yi bekler.
 
 ## Round geçmişi
 

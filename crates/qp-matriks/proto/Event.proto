@@ -1,0 +1,17 @@
+syntax="proto2";
+package messages;
+
+option java_package = "com.matriksdata.radix.messages";
+option java_outer_classname = "Event";
+
+message EventMessage {
+   required int64 id = 1;
+   repeated string symbol = 2;
+   optional string category = 3;
+   optional string content = 4;
+}
+
+/*
+content-type:
+  text/json
+*/

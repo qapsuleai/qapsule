@@ -1,0 +1,16 @@
+syntax="proto2";
+package messages;
+
+option java_package = "com.matriksdata.radix.messages";
+option java_outer_classname = "RatingScore";
+
+message RatingScoreMessage {
+    optional string symbol = 1;
+    optional double generalScore = 2;
+    optional double sectoralScore = 3;
+    optional double valuationScore = 4;
+    optional double growthScore = 5;
+    optional double profitScore = 6;
+    optional double finScore = 7;
+    optional int64 timestamp = 8;
+}

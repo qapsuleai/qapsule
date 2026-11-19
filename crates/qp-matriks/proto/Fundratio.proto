@@ -1,0 +1,12 @@
+syntax="proto2";
+package messages;
+
+option java_package = "com.matriksdata.radix.messages";
+option java_outer_classname = "Fundratio";
+
+message FundratioMessage {
+    optional string symbol = 1;
+    optional double emkfon = 2;
+    optional double yatfon = 3;
+    optional int64 timestamp = 4;
+}

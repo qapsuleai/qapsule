@@ -16,6 +16,9 @@ html, body { margin: 0; height: 100%; background: var(--page); color: var(--fg);
 #title { display: flex; gap: var(--qp-space-2); align-items: baseline; }
 #clock { color: var(--muted); font-variant-numeric: tabular-nums; }
 #banner { margin: var(--qp-space-1) 0; padding: var(--qp-space-0) var(--qp-space-2); border-radius: var(--radius); background: var(--note-bg); color: var(--note-fg); font-size: var(--qp-fs-small); }
+/* (R6/T3) The market's status line (text from the core). Closed and stale are muted. */
+#market { margin: var(--qp-space-1) 0; padding: var(--qp-space-0) var(--qp-space-2); border-radius: var(--radius); background: var(--note-bg); color: var(--note-fg); font-size: var(--qp-fs-small); }
+#market[data-state="closed"], #market[data-state="stale"] { font-weight: bold; }
 #tabs { display: flex; gap: var(--qp-space-0); margin-top: var(--qp-space-1); }
 #tabs button { flex: 1; background: none; color: var(--muted); border: 0; border-bottom: var(--qp-tab-rule) solid transparent; padding: var(--qp-tab-pad); font: inherit;
   min-height: var(--qp-tab-h);

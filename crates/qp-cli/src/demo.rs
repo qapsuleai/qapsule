@@ -1071,6 +1071,9 @@ fn gallery_route(s: &mut TcpStream, path: &str, q: &str, store: Option<&GalleryS
 ///
 /// # Errors
 /// The host cannot start or the port cannot be bound.
+/// (R6/M24) Least interval between two viewer recomputations in a live host.
+const VIEWER_FLUSH_MS: u64 = 250;
+
 pub fn demo(a: &DemoArgs) -> Result<(), String> {
     if a.https_host.as_deref().is_some_and(|n| n.trim().is_empty()) {
         return Err("--https-host: empty name".to_owned());
@@ -1220,6 +1223,7 @@ private proxy, e.g. Tailscale, to 127.0.0.1 — see docs/matriks/LIVE.md)"
         hub.live = Some(rt);
         hub.conn_ctl = Some(ctl);
     }
+    let mut last_flush = Instant::now();
     loop {
         let w = hub.wall();
         let wait = hub.host.next_due_in(w).unwrap_or(40).clamp(1, 40);
@@ -1244,7 +1248,14 @@ private proxy, e.g. Tailscale, to 127.0.0.1 — see docs/matriks/LIVE.md)"
         if let Some(l) = hub.live.as_mut() {
             lines.extend(std::mem::take(&mut hub.pending));
             lines.extend(l.tick(&mut hub.host));
-            lines.extend(hub.host.live_flush());
+            // (R6/M24) Viewers' feeds and faces are recomputed at most every
+            // VIEWER_FLUSH_MS (the profile: recomputing every reader's capsule sentences
+            // after each live batch dominated the host's CPU); data frames still go out
+            // every turn, so tick-to-frame for the open instrument is unchanged.
+            if last_flush.elapsed() >= Duration::from_millis(VIEWER_FLUSH_MS) {
+                lines.extend(hub.host.live_flush());
+                last_flush = Instant::now();
+            }
         }
         hub.broadcast();
         hub.route(lines);

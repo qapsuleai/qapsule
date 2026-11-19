@@ -208,7 +208,7 @@ impl LiveParts {
         ),
         String,
     > {
-        let feed = Box::new(crate::livehost::CardFeed::new(
+        let feed = Box::new(crate::livehost::MatriksFeed::new(
             self.cal.clone(),
             &self.interval,
         ));

@@ -40,47 +40,30 @@ use serde_json::{json, Value};
 
 use crate::live::RawSink;
 
-/// A connection change seen by the feed.
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub enum ConnChange {
-    /// Connected (again); `session` counts the connection's sessions.
-    Opened {
-        /// Session number.
-        session: u32,
-    },
-    /// The connection is gone.
-    Lost,
-}
+pub use qp_matriks::{ConnChange, FeedOut};
 
-/// What one raw record (or a clock advance) gives.
-#[derive(Debug, Clone, Default)]
-pub struct FeedOut {
-    /// Data events (field level, `seq` per feed).
-    pub events: Vec<DataEvent>,
-    /// Exchange time this record carried (UTC ms).
-    pub clock_ms: Option<i64>,
-    /// A connection change.
-    pub connection: Option<ConnChange>,
-    /// Session phases seen (symbol, `stockStatus`).
-    pub phases: Vec<(String, i32)>,
-    /// Bars that became final (feed, bar `t`).
-    pub finalized: Vec<(FeedKey, i64)>,
-}
+/// A feed's seam: symbol, last bar, the first live event's `seq`, the day's cumulative
+/// counter at the seam (`None`: the first snapshot's counter is the base).
+pub type Seed = (String, Option<Bar>, u64, Option<f64>);
 
-/// The feed: raw records in, data events out (the shared feed line of R6; a stand-in
-/// until `qp_matriks::feed::LiveFeed` lands, and the tests' fake).
+/// The feed: raw records in, data events out ([`MatriksFeed`] over the shared
+/// `qp_matriks::LiveFeed`; a fake in tests).
 pub trait FeedEngine: Send {
-    /// Starts (or restarts, after a repair) `symbol`'s feed after its last historical bar,
-    /// numbering events from `next_seq` (§18.4: the initial bars hold every event up to
-    /// `next_seq - 1`).
+    /// Starts every feed after its last historical bar, numbering its events from the
+    /// given `seq` (§18.4: the initial bars hold every event before it). Called at the
+    /// start and again after a repair (then on feeds that already had live ticks).
     ///
     /// # Errors
-    /// Unknown symbol or a bar the builder refuses.
-    fn seed(&mut self, symbol: &str, last: Option<Bar>, next_seq: u64) -> Result<(), String>;
+    /// A bar the builder refuses.
+    fn seed_all(&mut self, seeds: &[Seed]) -> Result<(), String>;
     /// One raw record.
     fn push(&mut self, rec: &RawRecord) -> FeedOut;
     /// The exchange clock reached `now_ms` (bars close).
     fn advance_clock(&mut self, now_ms: i64) -> FeedOut;
+    /// Counters for the stats (no values).
+    fn stats_json(&self) -> Value {
+        Value::Null
+    }
 }
 
 /// Settled bars for history and repair (REST; a fake in tests).
@@ -437,6 +420,12 @@ pub struct LiveRuntime {
     pub drops_asked: u64,
     pub halted: Option<String>,
     conn_events: Vec<String>,
+    /// (T3, §24) The market status last given to the authority, the phases by symbol and
+    /// when it was last given.
+    market: Option<qp_schema::market::MarketStatus>,
+    sym_phase: BTreeMap<String, i32>,
+    market_at: Instant,
+    market_dirty: bool,
 }
 
 /// Most latency samples kept (a ring).
@@ -484,10 +473,24 @@ impl LiveRuntime {
             .iter()
             .flat_map(|d| d.feeds.iter().map(|f| f.feed.clone()))
             .collect();
+        let today = cal.local_day(now_us() / 1000 - delay_ms);
+        let mut seeds = Vec::new();
         for k in &feeds {
             let (bars, seq) = host.live_feed(k).ok_or("live: feed without store")?;
-            feed.seed(&k.symbol, bars.last().cloned(), seq + 1)?;
+            // The day's traded value so far, when history reaches into today (REST
+            // `volume` is TL, like the card's `dailyVolume`).
+            let cum = bars
+                .last()
+                .filter(|b| cal.local_day(b.t) == today && iv != Interval::Day)
+                .map(|_| {
+                    bars.iter()
+                        .filter(|b| cal.local_day(b.t) == today)
+                        .map(|b| b.v)
+                        .sum::<f64>()
+                });
+            seeds.push((k.symbol.clone(), bars.last().cloned(), seq + 1, cum));
         }
+        feed.seed_all(&seeds)?;
         Ok(Self {
             feed,
             source,
@@ -526,6 +529,10 @@ impl LiveRuntime {
             drops_asked: 0,
             halted: None,
             conn_events: Vec::new(),
+            market: None,
+            sym_phase: BTreeMap::new(),
+            market_at: Instant::now(),
+            market_dirty: true,
         })
     }
 
@@ -601,6 +608,7 @@ impl LiveRuntime {
     }
 
     fn go_stale(&mut self, host: &mut ReplayHost) -> Vec<OutboundLine> {
+        self.market_dirty = true;
         self.generation += 1;
         self.link = Link::Stale;
         self.stale_since = Some(Instant::now());
@@ -631,7 +639,10 @@ impl LiveRuntime {
                         crate::live::utc_stamp(now_us())
                     ));
                     match self.link {
-                        Link::Connecting => self.link = Link::Live,
+                        Link::Connecting => {
+                            self.link = Link::Live;
+                            self.market_dirty = true;
+                        }
                         Link::Stale => self.start_repair(),
                         _ => {}
                     }
@@ -650,8 +661,10 @@ impl LiveRuntime {
                 }
             }
         }
-        for (_, code) in &out.phases {
+        for (sym, code) in &out.phases {
             *self.phases.entry(*code).or_default() += 1;
+            self.sym_phase.insert(sym.clone(), *code);
+            self.market_dirty = true;
         }
         self.finalized += out.finalized.len() as u64;
         if !out.events.is_empty() {
@@ -733,14 +746,19 @@ impl LiveRuntime {
             }
         }
         let mut lines = host.live_refresh();
-        for k in self.feeds.clone() {
-            if let Some((store, seq)) = host.live_feed(&k) {
-                if let Err(e) = self.feed.seed(&k.symbol, store.last().cloned(), seq + 1) {
-                    self.conn_events.push(format!("seed {}: {e}", k.symbol));
-                }
-            }
+        let seeds: Vec<Seed> = self
+            .feeds
+            .iter()
+            .filter_map(|k| {
+                let (store, seq) = host.live_feed(k)?;
+                Some((k.symbol.clone(), store.last().cloned(), seq + 1, None))
+            })
+            .collect();
+        if let Err(e) = self.feed.seed_all(&seeds) {
+            self.conn_events.push(format!("seed: {e}"));
         }
         self.link = Link::Live;
+        self.market_dirty = true;
         let buffered = std::mem::take(&mut self.buffer);
         let n_buf = buffered.len();
         for rec in buffered {
@@ -767,10 +785,75 @@ impl LiveRuntime {
         lines
     }
 
-    /// Periodic work (call often): closes bars by the exchange clock once a second.
-    pub fn tick(&mut self, host: &mut ReplayHost) -> Vec<OutboundLine> {
-        if self.last_advance.elapsed() < Duration::from_secs(1) || self.link != Link::Live {
+    /// (T3, §24) The market status now: exchange time (the feed's clock), open and
+    /// holiday from the XIST calendar, delayed, stale, each symbol's phase.
+    #[must_use]
+    pub fn market_status(&self) -> qp_schema::market::MarketStatus {
+        let t = if self.is_stale() || self.clock > 0 && self.link == Link::Live {
+            self.clock
+        } else {
+            self.exchange_now()
+        };
+        let now = if self.is_stale() {
+            self.clock
+        } else {
+            self.exchange_now().max(self.clock)
+        };
+        let day = self.cal.local_day(now);
+        let trading = self.cal.is_trading_day(day);
+        let open = trading
+            && self
+                .cal
+                .sessions_on(day)
+                .iter()
+                .any(|s| s.open <= now && now < s.close);
+        let phases = self
+            .sym_phase
+            .iter()
+            .filter_map(|(s, c)| {
+                let p = qp_matriks::session_phase(*c)?;
+                Some((
+                    s.clone(),
+                    qp_schema::market::PhaseCode {
+                        code: *c,
+                        key: p.key.to_owned(),
+                    },
+                ))
+            })
+            .collect();
+        qp_schema::market::MarketStatus {
+            exchange_time: t.max(0),
+            open: Some(open),
+            holiday: Some(!trading),
+            source: qp_schema::market::MarketSource::Calendar,
+            delayed: self.delayed,
+            stale: self.is_stale(),
+            phases,
+        }
+    }
+
+    /// Gives the authority the market status when it changed (phases, link) or every
+    /// 10 s (exchange time, open).
+    fn publish_market(&mut self, host: &mut ReplayHost) -> Vec<OutboundLine> {
+        if !self.market_dirty && self.market_at.elapsed() < Duration::from_secs(10) {
             return Vec::new();
+        }
+        let m = self.market_status();
+        self.market_dirty = false;
+        self.market_at = Instant::now();
+        if self.market.as_ref() == Some(&m) {
+            return Vec::new();
+        }
+        self.market = Some(m.clone());
+        host.set_market_status(m)
+    }
+
+    /// Periodic work (call often): the market status when due; closes bars by the
+    /// exchange clock once a second.
+    pub fn tick(&mut self, host: &mut ReplayHost) -> Vec<OutboundLine> {
+        let mut lines = self.publish_market(host);
+        if self.last_advance.elapsed() < Duration::from_secs(1) || self.link != Link::Live {
+            return lines;
         }
         self.last_advance = Instant::now();
         if self.last_print.elapsed() >= Duration::from_secs(30) {
@@ -786,7 +869,7 @@ impl LiveRuntime {
         let t0 = Instant::now();
         let now = self.exchange_now();
         let out = self.feed.advance_clock(now);
-        let lines = self.apply(host, out, None);
+        lines.extend(self.apply(host, out, None));
         self.busy += t0.elapsed();
         lines
     }
@@ -920,6 +1003,10 @@ impl LiveRuntime {
             },
             "exchange_lag_ms": self.lag_ms,
             "bindings_not_ready": host.live_not_ready(),
+            "feed": self.feed.stats_json(),
+            "market": self.market.as_ref().map(|m| json!({"open": m.open, "holiday": m.holiday,
+                "stale": m.stale, "delayed": m.delayed, "exchange_time": m.exchange_time,
+                "phase_symbols": m.phases.len()})),
             "repairs": repairs,
             "drops_asked": self.drops_asked,
             "connection_events": self.conn_events,
@@ -1104,114 +1191,95 @@ pub fn spawn_connection(
 }
 
 // ---------------------------------------------------------------------------------------
-// The stand-in feed: price cards → live bars (qp-matriks decoder, qp-source live bars).
+// The feed: `qp_matriks::LiveFeed` (the one pipeline shared with raw-log replay).
 
-/// The stand-in feed (until the shared `LiveFeed`): `SymbolBook` merge, `updateDate` as
-/// the exchange time, [`qp_source::LiveBars`] per symbol.
-pub struct CardFeed {
+/// [`FeedEngine`] over `qp_matriks::LiveFeed` on one interval.
+pub struct MatriksFeed {
+    cfg: qp_matriks::LiveFeedConfig,
     cal: ExchangeCalendar,
     interval: String,
-    book: qp_matriks::SymbolBook,
-    bars: BTreeMap<String, qp_source::LiveBars>,
+    inner: qp_matriks::LiveFeed,
+    /// Stats of the feeds replaced by a repair (records, events).
+    pub retired: (u64, u64),
 }
 
-impl CardFeed {
-    /// A feed on `interval` over the XIST calendar `cal`.
+impl MatriksFeed {
+    /// A feed building `interval` bars (other settings: `LiveFeedConfig` defaults —
+    /// ticks, TL value, `dailyVolume`, `updateDate` time).
     #[must_use]
     pub fn new(cal: ExchangeCalendar, interval: &str) -> Self {
+        let cfg = qp_matriks::LiveFeedConfig {
+            intervals: vec![interval.to_owned()],
+            ..Default::default()
+        };
         Self {
+            inner: qp_matriks::LiveFeed::new(cfg.clone(), cal.clone()),
+            cfg,
             cal,
             interval: interval.to_owned(),
-            book: qp_matriks::SymbolBook::new(),
-            bars: BTreeMap::new(),
+            retired: (0, 0),
         }
     }
 }
 
-impl FeedEngine for CardFeed {
-    fn seed(&mut self, symbol: &str, last: Option<Bar>, next_seq: u64) -> Result<(), String> {
-        let key = FeedKey {
-            symbol: symbol.to_owned(),
-            interval: self.interval.clone(),
-            feed: None,
-        };
-        let cfg = qp_source::LiveConfig {
-            first_seq: next_seq,
-            ..Default::default()
-        };
-        let mut b =
-            qp_source::LiveBars::new(key, self.cal.clone(), cfg).map_err(|e| e.to_string())?;
-        // After a repair the day's counter goes on from the card's current value.
-        let cum = self.book.state(symbol).and_then(|s| s.daily_volume);
-        b.resume(last, cum).map_err(|e| e.to_string())?;
-        self.bars.insert(symbol.to_owned(), b);
+impl FeedEngine for MatriksFeed {
+    fn seed_all(&mut self, seeds: &[Seed]) -> Result<(), String> {
+        let started = self.inner.feeds().any(|(_, lb)| lb.stats().ticks > 0);
+        if started {
+            // After a repair: a new feed seeded at the repaired bars (`LiveFeed` seeds
+            // only before a feed's first tick); each day's counter goes on from the
+            // card's last value; the next message per symbol is its initial (as after any
+            // reconnect).
+            let old = std::mem::replace(
+                &mut self.inner,
+                qp_matriks::LiveFeed::new(self.cfg.clone(), self.cal.clone()),
+            );
+            let st = old.stats();
+            self.retired.0 += st.records;
+            self.retired.1 += st.events;
+            for (sym, last, seq, _) in seeds {
+                let cum = old.book().state(sym).and_then(|c| c.daily_volume);
+                self.inner
+                    .seed_with_counter(sym, &self.interval, last.clone(), *seq, cum)?;
+            }
+            return Ok(());
+        }
+        for (sym, last, seq, cum) in seeds {
+            self.inner
+                .seed_with_counter(sym, &self.interval, last.clone(), *seq, *cum)?;
+        }
         Ok(())
     }
 
     fn push(&mut self, rec: &RawRecord) -> FeedOut {
-        let mut out = FeedOut::default();
-        match rec.kind {
-            RecordKind::ConnectionOpened => {
-                self.book.resubscribed_all();
-                let session = String::from_utf8_lossy(&rec.payload)
-                    .trim_start_matches("session ")
-                    .parse()
-                    .unwrap_or(0);
-                out.connection = Some(ConnChange::Opened { session });
-            }
-            RecordKind::ConnectionLost => out.connection = Some(ConnChange::Lost),
-            RecordKind::Message => {
-                let topic = qp_matriks::parse_topic(&rec.topic);
-                let qp_matriks::Topic::Symbol { symbol, .. } = topic.unwrap_mirror() else {
-                    return out;
-                };
-                let Ok(u) = self.book.apply(symbol, &rec.payload) else {
-                    return out;
-                };
-                let Some(st) = self.book.state(symbol) else {
-                    return out;
-                };
-                let t = st
-                    .update_date
-                    .as_deref()
-                    .and_then(crate::live::parse_iso_ms)
-                    .map(|(ms, _)| ms);
-                if u.fields.contains_name("updateDate") {
-                    out.clock_ms = t;
-                }
-                if let Some(p) = u.stock_status {
-                    out.phases.push((symbol.clone(), p));
-                }
-                let Some(b) = self.bars.get_mut(symbol) else {
-                    return out;
-                };
-                let has = |n: &str| u.fields.contains_name(n);
-                let tick = qp_source::CardTick {
-                    t_ms: t.unwrap_or(rec.t_us / 1000),
-                    initial: u.kind == qp_matriks::UpdateKind::Initial,
-                    last: has("last").then_some(st.last).flatten(),
-                    day_open: has("open").then_some(st.open).flatten(),
-                    day_high: has("dailyHigh").then_some(st.daily_high).flatten(),
-                    day_low: has("dailyLow").then_some(st.daily_low).flatten(),
-                    cum_volume: has("dailyVolume").then_some(st.daily_volume).flatten(),
-                    cum_quantity: has("dailyQuantity").then_some(st.daily_quantity).flatten(),
-                    phase: u.stock_status,
-                };
-                out.events = b.push(&tick);
-            }
-            _ => {}
-        }
-        out
+        self.inner.push(rec)
     }
 
     fn advance_clock(&mut self, now_ms: i64) -> FeedOut {
-        let mut out = FeedOut::default();
-        for b in self.bars.values_mut() {
-            if let Some(bar) = b.close_until(now_ms) {
-                out.finalized.push((b.feed().clone(), bar.t));
-            }
-        }
-        out
+        self.inner.advance_clock(now_ms)
+    }
+
+    fn stats_json(&self) -> Value {
+        let s = self.inner.stats();
+        json!({
+            "records": s.records + self.retired.0, "events": s.events + self.retired.1,
+            "current": {
+                "records": s.records, "symbol_messages": s.symbol_messages,
+                "initials": s.initials, "decode_errors": s.decode_errors,
+                "no_bar_fields": s.no_bar_fields, "time_direct": s.time_direct,
+                "time_derived": s.time_derived, "time_unknown": s.time_unknown,
+                "behind_clock": s.behind_clock, "max_behind_ms": s.max_behind_ms,
+                "bad_update_date": s.bad_update_date,
+                "clock_lead_rejected": s.clock_lead_rejected, "ticks": s.ticks,
+                "connections_opened": s.connections_opened,
+                "connections_lost": s.connections_lost, "resubscribes": s.resubscribes,
+                "feeds": s.feeds, "finalized": s.finalized, "off_session": s.off_session,
+                "late": s.late, "no_price": s.no_price, "invalid_fields": s.invalid_fields,
+                "volume_regressions": s.volume_regressions,
+                "volume_rebases": s.volume_rebases, "bars_opened": s.bars_opened,
+                "events": s.events,
+            },
+        })
     }
 }
 
@@ -1261,8 +1329,10 @@ mod tests {
     }
 
     impl FeedEngine for FakeFeed {
-        fn seed(&mut self, symbol: &str, last: Option<Bar>, next_seq: u64) -> Result<(), String> {
-            self.last.insert(symbol.to_owned(), (last, next_seq));
+        fn seed_all(&mut self, seeds: &[Seed]) -> Result<(), String> {
+            for (symbol, last, next_seq, _) in seeds {
+                self.last.insert(symbol.clone(), (last.clone(), *next_seq));
+            }
             Ok(())
         }
         fn push(&mut self, rec: &RawRecord) -> FeedOut {

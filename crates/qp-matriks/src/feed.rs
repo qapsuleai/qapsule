@@ -204,12 +204,16 @@ pub struct FeedStats {
     pub other_messages: u64,
     /// Card messages without any bar field (not pushed to the builders).
     pub no_bar_fields: u64,
-    /// Ticks timed by their own `updateDate` (or arrival in `Arrival` mode).
+    /// Pushed ticks timed by their own `updateDate` (or arrival in `Arrival` mode).
     pub time_direct: u64,
-    /// Ticks timed by the anchor rule (no / unreadable `updateDate`).
+    /// Pushed ticks timed by the anchor rule (no / unreadable `updateDate`).
     pub time_derived: u64,
     /// Ticks dropped: no time known yet.
     pub time_unknown: u64,
+    /// Ticks whose time was before the clock when they arrived (out of order).
+    pub behind_clock: u64,
+    /// Largest such lag (ms); the finalize grace should cover most of it.
+    pub max_behind_ms: i64,
     /// Unreadable `updateDate` values.
     pub bad_update_date: u64,
     /// `updateDate` values too far ahead of arrival to move the clock.
@@ -624,17 +628,13 @@ impl LiveFeed {
         // Time (rule 3) and the clock candidate (rule 4).
         let mut clock_t = None;
         let t = match self.cfg.time {
-            TimeSource::Arrival => {
-                self.stats.time_direct += 1;
-                Some(arrival)
-            }
+            TimeSource::Arrival => Some((arrival, false)),
             TimeSource::UpdateDate => {
                 let ud = m.update_date.as_deref().map(parse_update_date);
                 if matches!(ud, Some(None)) {
                     self.stats.bad_update_date += 1;
                 }
                 if let Some(Some(ms)) = ud {
-                    self.stats.time_direct += 1;
                     if ms <= arrival + MAX_LEAD_MS {
                         clock_t = Some(ms);
                     } else {
@@ -643,10 +643,9 @@ impl LiveFeed {
                     if !initial {
                         self.anchor = Some((ms, arrival));
                     }
-                    Some(ms)
+                    Some((ms, false))
                 } else if let Some((ud0, a0)) = self.anchor {
-                    self.stats.time_derived += 1;
-                    Some(ud0 + (arrival - a0))
+                    Some((ud0 + (arrival - a0), true))
                 } else {
                     None
                 }
@@ -665,8 +664,17 @@ impl LiveFeed {
             || cum_q.is_some();
         if !(has_bar_fields || initial) {
             self.stats.no_bar_fields += 1;
-        } else if let Some(t) = t {
+        } else if let Some((t, derived)) = t {
             self.stats.ticks += 1;
+            if derived {
+                self.stats.time_derived += 1;
+            } else {
+                self.stats.time_direct += 1;
+            }
+            if let Some(c) = self.clock_ms.filter(|&c| c > t) {
+                self.stats.behind_clock += 1;
+                self.stats.max_behind_ms = self.stats.max_behind_ms.max(c - t);
+            }
             let tick = CardTick {
                 t_ms: t,
                 initial,

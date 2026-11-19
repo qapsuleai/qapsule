@@ -228,6 +228,9 @@ pub struct Session {
     /// (R5/M19) Per-principal rules the host set over its own (`None`: no rule for that
     /// principal; `Session::set_principal_coin_flip_rule`).
     pub(crate) coin_flip_for: BTreeMap<String, Option<crate::story::CoinFlipRule>>,
+    /// (R6/T3, §24) The market status the host gave (`Session::set_market_status`);
+    /// `None`: never given (every output as before).
+    pub(crate) market: Option<qp_schema::market::MarketStatus>,
 }
 
 /// (R3/K1b) A writer of a command, for the two-world paths.
@@ -555,6 +558,7 @@ impl Session {
             viewer_batch: false,
             coin_flip,
             coin_flip_for: BTreeMap::new(),
+            market: None,
         };
         s.audience_seen = s.doc.audiences.keys().cloned().collect();
         s.start_capsules(capsules.as_ref());
@@ -3259,6 +3263,66 @@ impl Session {
     /// The clock would go back (`invalid`).
     pub fn host_clock(&mut self, now: i64) -> Result<Vec<OutboundLine>, ProtocolError> {
         self.advance_clock(now)
+    }
+
+    /// (R6/T3, §24) The host's market status input: the exchange time, whether the market
+    /// is open, each instrument's session phase, delayed/stale. Not the clock (that is
+    /// still [`Session::host_clock`]); it changes no document and enters no log. When it
+    /// differs from the last one, every `viewer` subscription is told (`market` in its
+    /// event, and the capsules whose sentences now speak of the market); the `capsules`
+    /// answers and events carry the market note from then on (`docs/LANGUAGE.md`).
+    pub fn set_market_status(
+        &mut self,
+        status: qp_schema::market::MarketStatus,
+    ) -> Vec<OutboundLine> {
+        if self.market.as_ref() == Some(&status) {
+            return Vec::new();
+        }
+        self.market = Some(status);
+        self.viewer_flush()
+    }
+
+    /// (R6/T3) The market status the host last gave.
+    #[must_use]
+    pub fn market_status(&self) -> Option<&qp_schema::market::MarketStatus> {
+        self.market.as_ref()
+    }
+
+    /// (R6/T3, §24) Writes the market note into a capsule item for its reader: the R4
+    /// sentence (`text`, `tr`, `en`) ends with the note's sentence; a voice's headline with
+    /// its clause, its detail with its sentence, and its text face is rebuilt. Nothing
+    /// without a market status or when the instrument trades continuously on fresh data.
+    pub(crate) fn market_item(
+        &self,
+        it: &mut qp_schema::protocol::CapsuleItem,
+        lang: qp_schema::protocol::Language,
+    ) {
+        use qp_capsule::market::{note_of, with_clause, with_sentence};
+        use qp_schema::protocol::Language;
+        let Some(note) = self
+            .market
+            .as_ref()
+            .and_then(|m| note_of(m, &it.instrument))
+        else {
+            return;
+        };
+        let red = it.redacted;
+        it.sentence.tr = with_sentence(&it.sentence.tr, note, Language::Tr, red);
+        it.sentence.en = with_sentence(&it.sentence.en, note, Language::En, red);
+        it.sentence.text = match lang {
+            Language::Tr => it.sentence.tr.clone(),
+            Language::En => it.sentence.en.clone(),
+        };
+        if let Some(v) = it.voice.as_mut() {
+            v.headline = with_clause(&v.headline, note, lang);
+            v.detail = with_sentence(&v.detail, note, lang, red);
+            v.face = qp_capsule::voice::text_face(&qp_capsule::voice::Surfaces {
+                headline: v.headline.clone(),
+                detail: v.detail.clone(),
+                ledger: v.ledger.clone(),
+                glossary: Vec::new(),
+            });
+        }
     }
 
     fn tick(&mut self, ci: usize, now: i64) -> PResult<Vec<OutboundLine>> {

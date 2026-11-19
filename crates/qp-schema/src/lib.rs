@@ -8,6 +8,7 @@ use std::path::{Path, PathBuf};
 pub mod capsule;
 pub mod data;
 pub mod grammar;
+pub mod market;
 pub mod protocol;
 pub mod scene;
 mod types;
@@ -50,6 +51,7 @@ pub fn json_schemas() -> Vec<(&'static str, serde_json::Value)> {
         ("OutboundLine", schema_of::<protocol::OutboundLine>()),
         ("SessionInit", schema_of::<protocol::SessionInit>()),
         ("Transcript", schema_of::<protocol::Transcript>()),
+        ("MarketStatus", schema_of::<market::MarketStatus>()),
     ]
 }
 

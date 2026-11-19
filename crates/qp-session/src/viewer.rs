@@ -850,6 +850,8 @@ pub(crate) struct ViewerConn {
     audience_sent: Option<u64>,
     /// The data subscriptions last named.
     pub data: Vec<FeedKey>,
+    /// (R6/T3) Digest of the market status last sent.
+    market_sent: Option<u64>,
 }
 
 fn digest_of(x: &impl Serialize) -> u64 {
@@ -1189,6 +1191,14 @@ impl Session {
             }
         }
         up.data.clone_from(&vc.data);
+        // (R6/T3, §24) The market status (only once the host gave one).
+        if let Some(m) = &self.market {
+            let md = digest_of(m);
+            if all || vc.market_sent != Some(md) {
+                vc.market_sent = Some(md);
+                up.market = Some(m.clone());
+            }
+        }
         (up, vc)
     }
 

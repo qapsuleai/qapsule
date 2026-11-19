@@ -272,6 +272,8 @@ pub struct ReplayHost {
     recorded: Vec<DataEvent>,
     /// (R5/M19) Per-principal feed rules the host set (kept over a backward seek).
     principal_rules: std::collections::BTreeMap<String, Option<crate::CoinFlipRule>>,
+    /// (R6/T3) The market status the host gave (kept over a backward seek).
+    market: Option<qp_schema::market::MarketStatus>,
 }
 
 impl std::fmt::Debug for ReplayHost {
@@ -367,7 +369,19 @@ impl ReplayHost {
             record: false,
             recorded: Vec::new(),
             principal_rules: std::collections::BTreeMap::new(),
+            market: None,
         })
+    }
+
+    /// (R6/T3, §24) The host's market status input
+    /// ([`Session::set_market_status`]): the `viewer` events it causes. Kept over a
+    /// backward seek (the new authority gets it again).
+    pub fn set_market_status(
+        &mut self,
+        status: qp_schema::market::MarketStatus,
+    ) -> Vec<OutboundLine> {
+        self.market = Some(status.clone());
+        self.session.set_market_status(status)
     }
 
     /// (R5/M19, K53) Sets `principal`'s feed rule over the init's
@@ -716,6 +730,10 @@ impl ReplayHost {
         self.session.set_viewer_batch(true);
         for (p, r) in &self.principal_rules {
             self.session.set_principal_coin_flip_rule(p, *r);
+        }
+        if let Some(m) = &self.market {
+            // No viewer yet on the new authority: nothing to tell.
+            let _ = self.session.set_market_status(m.clone());
         }
         self.replay.reset();
         self.recorded.clear();

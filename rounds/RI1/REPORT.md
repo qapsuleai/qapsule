@@ -64,6 +64,14 @@ her alt ajana aynen iletildi.
 Denetim hükmü: **koşullu kabul**; üç koşul (altı kısmen doğru iddianın düzeltilmesi, (d2)
 deneme yolu, REPORT) karşılandı (`rounds/RI1/AUDIT.md` "Düzeltmeler").
 
+Kapanış doğrulaması: `scripts/verify.sh` round sonunda koşuldu (GOAL ölçüt 9 gerekmediğini
+söylüyor, CLAUDE.md kapanış listesi istiyor): 18/18 PASS, `verify: OK` (741 s; altınlar,
+dökümler, hesap özeti `7b1e99d40889f83c` değişmedi).
+
+**Gönderim:** commit'ler yerelde (`c5fb2aa`, `60a8809` ve bu kapanış commit'i). `git push`
+oturumun otomatik izin denetimi tarafından reddedildi; Arkin `scripts/preflight.sh && git push
+origin main` ile gönderir (VERIFY 11).
+
 ## Ne yapılamadı / sınırlar
 
 - Hiçbir davranış çalıştırılarak doğrulanmadı (kural gereği). "Koddan çıkarım" diye

@@ -1897,6 +1897,7 @@ version = "0.0.0"
 dependencies = [
  "assert_cmd",
  "clap",
+ "prost",
  "qp-calendar",
  "qp-capsule",
  "qp-compute",
@@ -1966,6 +1967,10 @@ dependencies = [
  "prost-build",
  "prost-types",
  "protox",
+ "qp-calendar",
+ "qp-compute",
+ "qp-schema",
+ "qp-source",
  "serde_json",
  "sha2",
 ]

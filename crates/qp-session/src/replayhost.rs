@@ -272,6 +272,34 @@ pub struct ReplayHost {
     recorded: Vec<DataEvent>,
     /// (R5/M19) Per-principal feed rules the host set (kept over a backward seek).
     principal_rules: std::collections::BTreeMap<String, Option<crate::CoinFlipRule>>,
+    /// (R6/T7) A live host ([`ReplayHost::live`]): the data provider the authority
+    /// resolves from, shared with the host (initial bars + every recorded event).
+    live: Option<std::sync::Arc<std::sync::Mutex<qp_source::MemoryProvider>>>,
+}
+
+/// (R6/T7) The authority's provider of a live host: the host's own store (initial bars +
+/// every data event it recorded), so that a re-resolution after a gap (§18.4) sees the
+/// repaired feed. The host never gives it the deliberate gap that marks a feed stale.
+struct SharedProvider(std::sync::Arc<std::sync::Mutex<qp_source::MemoryProvider>>);
+
+impl qp_source::SourceProvider for SharedProvider {
+    fn entitled(&self, principal: &str, feed: &qp_schema::data::FeedKey) -> bool {
+        self.0
+            .lock()
+            .unwrap_or_else(std::sync::PoisonError::into_inner)
+            .entitled(principal, feed)
+    }
+
+    fn resolve(
+        &self,
+        principal: &str,
+        binding: &qp_schema::data::DataBinding,
+    ) -> qp_source::Resolution {
+        self.0
+            .lock()
+            .unwrap_or_else(std::sync::PoisonError::into_inner)
+            .resolve(principal, binding)
+    }
 }
 
 impl std::fmt::Debug for ReplayHost {
@@ -367,7 +395,210 @@ impl ReplayHost {
             record: false,
             recorded: Vec::new(),
             principal_rules: std::collections::BTreeMap::new(),
+            live: None,
         })
+    }
+
+    /// (R6/T7) A live host: `feeds` are the initial bars (history, e.g. REST) and nothing
+    /// is replayed; the host gives the data events itself ([`ReplayHost::live_event`]) and
+    /// the clock ([`Session::host_clock`]). `init.replay` (as [`demo_init`] makes it) says
+    /// which feeds are bound and run by the capsule engine; its replay fields are ignored.
+    /// Events are recorded (viewers' `bind`, replicas' `start`). The authority resolves
+    /// from the host's store, so a feed made stale ([`ReplayHost::live_mark_stale`]) is
+    /// resolved again on the repaired bars ([`ReplayHost::live_refresh`]). Replay controls
+    /// other than `status` are refused.
+    ///
+    /// # Errors
+    /// No `init.replay`, no feeds, invalid bars, or the session's own errors.
+    pub fn live(
+        mut init: SessionInit,
+        root: &Path,
+        feeds: Vec<ReplayFeed>,
+    ) -> Result<Self, String> {
+        let mut r = init
+            .replay
+            .clone()
+            .ok_or("a live host needs init.replay (bind_all, capsules_all)")?;
+        r.source = ReplaySourceKind::Local;
+        init.replay = Some(r.clone());
+        let history = feeds.iter().map(|f| f.bars.len()).max().unwrap_or(0);
+        let opts = ReplayOptions {
+            history,
+            from_t: None,
+            to_t: None,
+            path: false,
+            fine_ms: None,
+            calendar: ReplayCalendar::Xist,
+        };
+        let replay = Replay::new(feeds, &opts).map_err(|e| format!("live: {e}"))?;
+        let init = expand_init(init, root, &r, &replay)?;
+        let data = init.data.clone().ok_or("live: no initial data")?;
+        let provider =
+            qp_source::MemoryProvider::from_init(&data, root).map_err(|e| format!("live: {e}"))?;
+        let shared = std::sync::Arc::new(std::sync::Mutex::new(provider));
+        let mut session_init = init.clone();
+        session_init.data = None;
+        let mut session =
+            Session::with_provider(session_init, root, Box::new(SharedProvider(shared.clone())))?;
+        session.set_headline_calendar(crate::headparts::replay_calendar(ReplaySourceKind::Local));
+        session.set_viewer_batch(true);
+        Ok(Self {
+            init,
+            root: root.to_owned(),
+            session,
+            replay,
+            info: SourceInfo {
+                kind: ReplaySourceKind::Local,
+                note: None,
+                interval: r.interval.clone().unwrap_or_else(|| "1d".to_owned()),
+                fine: None,
+            },
+            speed: DEFAULT_SPEED,
+            paused: false,
+            anchor: None,
+            resets: 0,
+            controls: Vec::new(),
+            notices: Vec::new(),
+            record: true,
+            recorded: Vec::new(),
+            principal_rules: std::collections::BTreeMap::new(),
+            live: Some(shared),
+        })
+    }
+
+    /// (R6/T7) True for a live host ([`ReplayHost::live`]).
+    #[must_use]
+    pub fn is_live(&self) -> bool {
+        self.live.is_some()
+    }
+
+    /// (R6/T7) Sets the note the replay state carries (a live host: "live, delayed…").
+    pub fn set_note(&mut self, note: Option<String>) {
+        self.info.note = note;
+    }
+
+    /// (R6/T7) A live data event: recorded, given to the host's store and to the
+    /// authority ([`Session::host_data_event`]; gap / stale notices go to
+    /// [`ReplayHost::notices`]). Viewers are not told until [`ReplayHost::live_flush`].
+    ///
+    /// # Errors
+    /// Not a live host, or the store rejected the event (nothing recorded).
+    pub fn live_event(&mut self, ev: &DataEvent) -> Result<Vec<OutboundLine>, String> {
+        let Some(p) = &self.live else {
+            return Err("not a live host".to_owned());
+        };
+        p.lock()
+            .unwrap_or_else(std::sync::PoisonError::into_inner)
+            .apply(ev)
+            .map_err(|e| {
+                format!(
+                    "event {}/{} seq {}: {e}",
+                    ev.feed.symbol, ev.feed.interval, ev.seq
+                )
+            })?;
+        self.recorded.push(ev.clone());
+        match self.session.host_data_event(ev) {
+            Ok(o) => {
+                for n in &o.notices {
+                    self.notices.push(n.frame().to_string());
+                }
+                Ok(o.lines)
+            }
+            Err(e) => {
+                self.notices.push(format!(
+                    "event {}/{} seq {}: {e}",
+                    ev.feed.symbol, ev.feed.interval, ev.seq
+                ));
+                Ok(Vec::new())
+            }
+        }
+    }
+
+    /// (R6/T7) The viewers' notifications after a batch of live events.
+    pub fn live_flush(&mut self) -> Vec<OutboundLine> {
+        self.session.viewer_flush()
+    }
+
+    /// (R6/T7) The host's current bars and last `seq` of a live feed.
+    #[must_use]
+    pub fn live_feed(&self, key: &qp_schema::data::FeedKey) -> Option<(Vec<qp_schema::Bar>, u64)> {
+        let p = self
+            .live
+            .as_ref()?
+            .lock()
+            .unwrap_or_else(std::sync::PoisonError::into_inner);
+        let f = p.feed(key)?;
+        Some((f.bars().to_vec(), f.seq()))
+    }
+
+    /// (R6/T7, M23) Marks every live feed `stale` in the authority (the connection was
+    /// lost): the §18.4 gap rule, used on purpose — each feed gets an event one `seq`
+    /// past the next, which the authority does not apply; its bindings become `stale`
+    /// and give no values (no capsule is judged on them) until
+    /// [`ReplayHost::live_refresh`]. The event is not recorded and never reaches the
+    /// host's store or a device: the number it skips is the next real event's. Returns
+    /// the notifications (binding state changes).
+    pub fn live_mark_stale(&mut self) -> Vec<OutboundLine> {
+        let Some(p) = &self.live else {
+            return Vec::new();
+        };
+        let marks: Vec<DataEvent> = {
+            let p = p.lock().unwrap_or_else(std::sync::PoisonError::into_inner);
+            self.init
+                .data
+                .iter()
+                .flat_map(|d| d.feeds.iter())
+                .filter_map(|f| {
+                    let store = p.feed(&f.feed)?;
+                    let last = store.bars().last()?;
+                    Some(DataEvent {
+                        feed: f.feed.clone(),
+                        seq: store.seq() + 2,
+                        change: qp_schema::data::DataChange::Patch {
+                            t: last.t,
+                            fields: qp_schema::data::BarPatch {
+                                c: Some(last.c),
+                                ..Default::default()
+                            },
+                        },
+                    })
+                })
+                .collect()
+        };
+        let mut lines = Vec::new();
+        for ev in &marks {
+            match self.session.host_data_event(ev) {
+                Ok(o) => lines.extend(o.lines),
+                Err(e) => self.notices.push(format!("stale mark: {e}")),
+            }
+        }
+        lines.extend(self.session.viewer_flush());
+        lines
+    }
+
+    /// (R6/T7, M23) Resolves the stale feeds again from the host's store (after the
+    /// repair events went in with [`ReplayHost::live_event`]); returns the
+    /// notifications.
+    pub fn live_refresh(&mut self) -> Vec<OutboundLine> {
+        let mut lines = self.session.refresh_bindings();
+        lines.extend(self.session.viewer_flush());
+        lines
+    }
+
+    /// (R6/T7) How many bound series are not `ready` in the authority.
+    #[must_use]
+    pub fn live_not_ready(&self) -> usize {
+        self.session
+            .document()
+            .series
+            .iter()
+            .filter(|s| s.binding().is_some())
+            .filter(|s| {
+                self.session
+                    .binding_state(&s.id)
+                    .is_some_and(|b| b != qp_schema::data::BindingState::Ready)
+            })
+            .count()
     }
 
     /// (R5/M19, K53) Sets `principal`'s feed rule over the init's
@@ -444,15 +675,16 @@ impl ReplayHost {
     pub fn state(&self) -> ReplayState {
         let c = self.replay.cursor();
         let (fine, ohlc, bar) = self.replay.intraday();
+        let live = self.live.is_some();
         ReplayState {
-            t: c.t,
+            t: if live { self.session.clock() } else { c.t },
             step: c.step,
             steps: self.replay.total_steps(),
             events: self.replay.given_events(),
             from_t: self.replay.first_t(),
             to_t: self.replay.last_t(),
             paused: self.paused,
-            done: self.replay.is_done(),
+            done: !live && self.replay.is_done(),
             speed: self.speed,
             synthetic: self.info.kind == ReplaySourceKind::Synthetic,
             source: self.info.kind,
@@ -626,6 +858,14 @@ impl ReplayHost {
         let at = self.replay.cursor().step;
         let mut lines = Vec::new();
         let mut reset = false;
+        if self.live.is_some() && !matches!(control, ReplayControl::Status) {
+            return Err(
+                E::new(ErrorCode::Invalid, "a live host has no timeline to control")
+                    .at("/control")
+                    .expected(["status"])
+                    .build(),
+            );
+        }
         match control {
             ReplayControl::Status => return Ok((self.state(), lines)),
             ReplayControl::Pause => {

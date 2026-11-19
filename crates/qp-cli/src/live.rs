@@ -107,7 +107,7 @@ pub fn run(cmd: &LiveCommand) -> Result<(), String> {
 }
 
 /// Repository root: the directory holding `fixtures/` (walks up from the current dir).
-fn repo_root() -> PathBuf {
+pub fn repo_root() -> PathBuf {
     let cwd = std::env::current_dir().unwrap_or_else(|_| PathBuf::from("."));
     let mut d = cwd.as_path();
     loop {
@@ -215,6 +215,11 @@ impl RawSink {
         if w.write(rec).is_err() {
             self.errors.fetch_add(1, Ordering::Relaxed);
         }
+    }
+
+    /// Appends one record (a local note, e.g. a deliberate drop).
+    pub fn put_record(&self, rec: &RawRecord) {
+        self.put(rec);
     }
 
     pub fn flush(&self) {

@@ -45,6 +45,7 @@ use std::io::{BufRead, BufReader, Read, Write};
 use std::net::{TcpListener, TcpStream, UdpSocket};
 use std::path::{Path, PathBuf};
 use std::sync::mpsc::{self, Receiver, RecvTimeoutError, Sender};
+use std::sync::Mutex;
 use std::time::{Duration, Instant};
 
 use qp_schema::data::FeedKey;
@@ -115,6 +116,18 @@ pub struct DemoArgs {
     /// Repository root (relative paths of the session init).
     #[arg(long, default_value = ".")]
     pub root: PathBuf,
+    /// (R6/T7) Live data: the universe's history from REST (`--history` bars of
+    /// `--interval`), then one live connection (environment variables,
+    /// `docs/DATA_ACCESS.md`). This machine only: refused with `--lan`, `--https-host`
+    /// or another `--bind` (real data does not go to the local network).
+    #[arg(long, conflicts_with_all = ["synthetic", "data", "from", "gallery"])]
+    pub live: bool,
+    /// (R6/T7) The live universe: comma-separated symbols or `@file` (one per line).
+    #[arg(long, default_value = "@fixtures/local/live/u30.txt")]
+    pub symbols: String,
+    /// (R6/T7) The live bars' interval (`1m`, `5m`, `15m`, `30m`, `1h`, `1d`).
+    #[arg(long, default_value = "5m")]
+    pub interval: String,
 }
 
 /// `qp drive` arguments: the shell-less driver.
@@ -169,6 +182,184 @@ fn host(a: &DemoArgs) -> Result<ReplayHost, String> {
     Ok(h)
 }
 
+/// (R6/T7) What the live demo needs once the hub exists.
+struct LiveParts {
+    control: String,
+    delayed: bool,
+    symbols: usize,
+    interval: String,
+    delay_ms: i64,
+    cal: qp_calendar::ExchangeCalendar,
+    source: std::sync::Arc<dyn crate::livehost::BarSource>,
+    to_hub: std::sync::Arc<dyn Fn(crate::livehost::LiveIn) + Send + Sync>,
+    spec: crate::livehost::ConnSpec,
+    sink: std::sync::Arc<crate::livehost::HubSink>,
+}
+
+impl LiveParts {
+    /// The runtime (feeds seeded at the history's last bars) and the connection thread.
+    fn start(
+        self,
+        host: &ReplayHost,
+    ) -> Result<
+        (
+            crate::livehost::LiveRuntime,
+            Sender<crate::livehost::ConnCtl>,
+        ),
+        String,
+    > {
+        let feed = Box::new(crate::livehost::CardFeed::new(
+            self.cal.clone(),
+            &self.interval,
+        ));
+        let mut rt = crate::livehost::LiveRuntime::new(
+            host,
+            feed,
+            self.source,
+            self.to_hub.clone(),
+            self.cal,
+            &self.interval,
+            self.delay_ms,
+        )?;
+        rt.baseline_capsules(host);
+        let ctl = crate::livehost::spawn_connection(self.spec, self.sink, self.to_hub)?;
+        Ok((rt, ctl))
+    }
+}
+
+/// (R6/T7) The live demo's host: the universe's history from REST is the initial
+/// resolution; the connection is opened later ([`LiveParts::start`]).
+fn live_setup(a: &DemoArgs, tx: &Sender<Cmd>) -> Result<(ReplayHost, LiveParts), String> {
+    use std::sync::Arc;
+    let symbols = crate::live::parse_symbols(&a.symbols).map_err(|e| {
+        format!("--symbols: {e} (default: the universe file fixtures/local/live/u30.txt)")
+    })?;
+    crate::livehost::rest_period(&a.interval)
+        .ok_or_else(|| format!("--interval: no REST period for `{}`", a.interval))?;
+    let cfg = qp_live::LiveConfig::from_env().map_err(|e| format!("--live: {e}"))?;
+    if cfg.hardware_id_warning() {
+        eprintln!("live: warning: MATRIKS_HARDWARE_ID does not start with `qapsule-`");
+    }
+    let xist = qp_calendar::builtin("XIST").ok_or("no XIST calendar")?;
+    let cal = qp_calendar::ExchangeCalendar::new(&xist).map_err(|e| e.to_string())?;
+    let delayed = cfg.mode() == qp_live::Mode::Delayed;
+    let delay_ms = if delayed { 15 * 60_000 } else { 0 };
+    let auth = Arc::new(qp_live::AuthClient::new(
+        &cfg,
+        qp_live::AuthPolicy::default(),
+    ));
+    let source = Arc::new(crate::livehost::RestSource {
+        cfg: cfg.clone(),
+        auth: auth.clone(),
+        cal: cal.clone(),
+    });
+    println!(
+        "geçmiş / history: {} symbols x {} bars of {} (REST, unadjusted)…",
+        symbols.len(),
+        a.history,
+        a.interval
+    );
+    let _ = std::io::stdout().flush();
+    let cutoff = crate::live::now_us() / 1000 - delay_ms;
+    let (hist, missing) = crate::livehost::history(
+        source.as_ref(),
+        &symbols,
+        &a.interval,
+        a.history as usize,
+        cutoff,
+        &cal,
+    )?;
+    if !missing.is_empty() {
+        println!("geçmiş yok / no history: {}", missing.join(", "));
+    }
+    if hist.is_empty() {
+        return Err("--live: no symbol has history".to_owned());
+    }
+    let n = hist.len();
+    let topics: Vec<String> = hist
+        .iter()
+        .map(|(s, _)| format!("mx/symbol/{s}@lvl2"))
+        .collect();
+    let feeds: Vec<qp_source::ReplayFeed> = hist
+        .into_iter()
+        .map(|(s, bars)| qp_source::ReplayFeed {
+            key: FeedKey {
+                symbol: s,
+                interval: a.interval.clone(),
+                feed: None,
+            },
+            bars,
+            fine: Vec::new(),
+        })
+        .collect();
+    let mut init = demo_session_init(&DemoOptions {
+        local: true,
+        instruments: u32::try_from(n).unwrap_or(u32::MAX),
+        history: a.history,
+        days: a.days,
+        speed: a.speed,
+        from_t: None,
+        running: true,
+        feed_rule: Some(a.feed_rule.clone()),
+    });
+    if let Some(r) = init.replay.as_mut() {
+        r.interval = Some(a.interval.clone());
+        r.fine = None;
+    }
+    let mut h = ReplayHost::live(init, &a.root, feeds)?;
+    h.set_note(Some(format!(
+        "canlı / live · {n} · {}{}",
+        a.interval,
+        if delayed {
+            " · gecikmeli 15 dk / delayed 15 min"
+        } else {
+            ""
+        }
+    )));
+    let root = crate::live::repo_root();
+    let raw_path = root.join("fixtures/local/live/raw").join(format!(
+        "{}-demo.qpraw",
+        crate::live::utc_stamp(crate::live::now_us())
+    ));
+    let txc = Mutex::new(tx.clone());
+    let to_hub: Arc<dyn Fn(crate::livehost::LiveIn) + Send + Sync> = Arc::new(move |i| {
+        let _ = txc
+            .lock()
+            .unwrap_or_else(std::sync::PoisonError::into_inner)
+            .send(Cmd::Live(i));
+    });
+    let sink = Arc::new(crate::livehost::HubSink::new(
+        crate::live::RawSink::create(&raw_path)?,
+        to_hub.clone(),
+    ));
+    let control = match std::env::var("QP_LIVE_CONTROL") {
+        Ok(v) if v.len() >= 16 => v,
+        _ => {
+            let s = secret()?;
+            println!("canlı denetim belirteci / live control secret: {s}");
+            s
+        }
+    };
+    let parts = LiveParts {
+        control,
+        delayed,
+        symbols: n,
+        interval: a.interval.clone(),
+        delay_ms,
+        cal,
+        source,
+        to_hub,
+        spec: crate::livehost::ConnSpec {
+            cfg,
+            auth,
+            topics,
+            lock_dir: root.join("fixtures/local"),
+        },
+        sink,
+    };
+    Ok((h, parts))
+}
+
 /// The machine's address on the local network (a routing lookup; no packet is sent).
 fn local_ip() -> Option<String> {
     let s = UdpSocket::bind("0.0.0.0:0").ok()?;
@@ -196,6 +387,17 @@ enum Cmd {
     },
     Gone {
         conn: String,
+    },
+    /// (R6/T7) The live side's input (connection thread, repair thread).
+    Live(crate::livehost::LiveIn),
+    /// (R6/T7) `GET /live/stats`.
+    LiveStats {
+        reply: Sender<String>,
+    },
+    /// (R6/T7) `POST /live/drop` (`secs`) and `POST /live/quit` (`None`).
+    LiveControl {
+        drop_secs: Option<u64>,
+        reply: Sender<String>,
     },
 }
 
@@ -237,6 +439,12 @@ struct Hub {
     start: Instant,
     /// (R5/S) The host's feed rule name (`--feed-rule`), for a page's `feed_exempt=0`.
     feed_rule: String,
+    /// (R6/T7) The live side, its connection thread's control and the notifications
+    /// its inputs caused since the last broadcast.
+    live: Option<crate::livehost::LiveRuntime>,
+    conn_ctl: Option<Sender<crate::livehost::ConnCtl>>,
+    pending: Vec<qp_schema::protocol::OutboundLine>,
+    quit: bool,
 }
 
 impl Hub {
@@ -434,6 +642,53 @@ impl Hub {
             Cmd::Gone { conn } => {
                 self.clients.remove(&conn);
             }
+            Cmd::Live(input) => {
+                if let Some(l) = self.live.as_mut() {
+                    let lines = l.on_in(&mut self.host, input);
+                    self.pending.extend(lines);
+                }
+            }
+            Cmd::LiveStats { reply } => {
+                let v = self
+                    .live
+                    .as_ref()
+                    .map_or(Value::Null, |l| l.stats(&self.host));
+                let _ = reply.send(v.to_string());
+            }
+            Cmd::LiveControl { drop_secs, reply } => {
+                let Some(ctl) = &self.conn_ctl else {
+                    let _ = reply.send(r#"{"error":"not live"}"#.to_owned());
+                    return;
+                };
+                match drop_secs {
+                    Some(secs) => {
+                        if let Some(l) = self.live.as_mut() {
+                            l.drops_asked += 1;
+                        }
+                        let _ = ctl.send(crate::livehost::ConnCtl::Drop(Duration::from_secs(
+                            secs.min(600),
+                        )));
+                        let _ = reply.send(json!({"drop": secs.min(600)}).to_string());
+                    }
+                    None => {
+                        self.quit = true;
+                        let _ = reply.send(r#"{"quit":true}"#.to_owned());
+                    }
+                }
+            }
+        }
+    }
+
+    /// (R6/T7) Closes the live connection (DISCONNECT) and prints the summary.
+    fn shutdown_live(&mut self) {
+        if let Some(ctl) = self.conn_ctl.take() {
+            let (tx, rx) = mpsc::channel();
+            let _ = ctl.send(crate::livehost::ConnCtl::Stop(tx));
+            let _ = rx.recv_timeout(Duration::from_secs(10));
+        }
+        if let Some(l) = &self.live {
+            let st = l.stats(&self.host);
+            println!("canlı özet / live summary: {st}");
         }
     }
 }
@@ -492,6 +747,8 @@ fn static_path(web: &Path, path: &str) -> Option<PathBuf> {
 
 /// What a request must look like to be served (`Host` values allowed).
 struct Gate {
+    /// (R6/T7) The live control secret (`X-Qp-Live-Control`); `None`: not live.
+    live_control: Option<String>,
     hosts: Vec<String>,
     /// (RP3) Host values that arrive through the HTTPS reverse proxy (`--https-host`):
     /// their pages' origin is `https://NAME`.
@@ -636,6 +893,9 @@ Cache-Control: no-store\r\nConnection: keep-alive\r\n\r\n";
                 );
             }
         }
+        ("GET", "/live/stats") | ("POST", "/live/drop" | "/live/quit") => {
+            live_route(&mut s, method, path, q, &headers, tx, gate);
+        }
         ("GET", p) if gallery_route(&mut s, p, q, gallery) => {}
         ("GET", p) => {
             // RP3/M13: pre-compressed variants and revalidation (demo_static.rs).
@@ -647,6 +907,56 @@ Cache-Control: no-store\r\nConnection: keep-alive\r\n\r\n";
             }
         }
         _ => respond(&mut s, "405 Method Not Allowed", "text/plain", b""),
+    }
+}
+
+/// (R6/T7) The live host's local routes: `GET /live/stats` (aggregate counts, no values),
+/// `POST /live/drop?secs=N` (close the connection, wait N s, open again: M23 by hand) and
+/// `POST /live/quit` (close the connection and end). Only from this machine (a loopback
+/// peer) and, for the two `POST`s, with the control secret in `X-Qp-Live-Control`.
+fn live_route(
+    s: &mut TcpStream,
+    method: &str,
+    path: &str,
+    q: &str,
+    headers: &BTreeMap<String, String>,
+    tx: &Sender<Cmd>,
+    gate: &Gate,
+) {
+    let local = s.peer_addr().is_ok_and(|a| a.ip().is_loopback());
+    let Some(secret) = gate.live_control.as_deref().filter(|_| local) else {
+        respond(s, "404 Not Found", "text/plain", b"not found");
+        return;
+    };
+    let (rtx, rrx) = mpsc::channel();
+    if method == "GET" {
+        let _ = tx.send(Cmd::LiveStats { reply: rtx });
+    } else {
+        let ok = headers
+            .get("x-qp-live-control")
+            .is_some_and(|t| same_secret(t, secret));
+        if !ok {
+            respond(
+                s,
+                "403 Forbidden",
+                "text/plain",
+                b"live control secret needed",
+            );
+            return;
+        }
+        let drop_secs = (path == "/live/drop").then(|| {
+            query_param(q, "secs")
+                .and_then(|x| x.parse().ok())
+                .unwrap_or(30)
+        });
+        let _ = tx.send(Cmd::LiveControl {
+            drop_secs,
+            reply: rtx,
+        });
+    }
+    match rrx.recv_timeout(Duration::from_secs(10)) {
+        Ok(body) => respond(s, "200 OK", "application/json", body.as_bytes()),
+        Err(_) => respond(s, "503 Service Unavailable", "text/plain", b"busy"),
     }
 }
 
@@ -752,7 +1062,23 @@ pub fn demo(a: &DemoArgs) -> Result<(), String> {
     if a.https_host.as_deref().is_some_and(|n| n.trim().is_empty()) {
         return Err("--https-host: empty name".to_owned());
     }
-    let host = host(a)?;
+    if a.live && (a.lan || a.https_host.is_some() || a.bind != "127.0.0.1") {
+        return Err(
+            "--live: real market data stays on this machine; --lan, --https-host and \
+--bind other than 127.0.0.1 are refused with --live (to view it elsewhere, run your own \
+private proxy, e.g. Tailscale, to 127.0.0.1 — see docs/matriks/LIVE.md)"
+                .to_owned(),
+        );
+    }
+    let (tx, rx) = mpsc::channel::<Cmd>();
+    let mut live_parts = None;
+    let host = if a.live {
+        let (h, parts) = live_setup(a, &tx)?;
+        live_parts = Some(parts);
+        h
+    } else {
+        host(a)?
+    };
     let st = host.state();
     let bind = if a.lan { "0.0.0.0" } else { a.bind.as_str() };
     let listener =
@@ -784,9 +1110,18 @@ pub fn demo(a: &DemoArgs) -> Result<(), String> {
     if let Some(n) = &a.https_host {
         urls.push(format!("https://{}/", n.trim()));
     }
-    let gate = std::sync::Arc::new(Gate { hosts, https_hosts });
-    let info = json!({"urls": urls, "phone": phone, "lan": bind != "127.0.0.1",
+    let gate = std::sync::Arc::new(Gate {
+        live_control: live_parts.as_ref().map(|p| p.control.clone()),
+        hosts,
+        https_hosts,
+    });
+    let mut info = json!({"urls": urls, "phone": phone, "lan": bind != "127.0.0.1",
         "synthetic": st.synthetic, "note": st.note});
+    if let Some(p) = &live_parts {
+        info["live"] = json!(true);
+        info["delayed"] = json!(p.delayed);
+        info["symbols"] = json!(p.symbols);
+    }
     println!("qp demo: {}", urls[0]);
     if a.gallery {
         for u in &urls {
@@ -806,7 +1141,15 @@ pub fn demo(a: &DemoArgs) -> Result<(), String> {
         }
         None => println!("telefondan açmak için: scripts/demo.sh --lan / to open on a phone: scripts/demo.sh --lan"),
     }
-    if st.synthetic {
+    if let Some(p) = &live_parts {
+        println!(
+            "veri: canlı / data: live ({} symbols, {}, {})",
+            p.symbols,
+            a.interval,
+            if p.delayed { "delayed" } else { "real time" }
+        );
+        println!("canlı denetim / live control: GET /live/stats ; POST /live/drop?secs=N, POST /live/quit (header X-Qp-Live-Control)");
+    } else if st.synthetic {
         println!(
             "veri: sentetik pazar / data: synthetic market{}",
             st.note
@@ -838,7 +1181,6 @@ pub fn demo(a: &DemoArgs) -> Result<(), String> {
             }
         });
     }
-    let (tx, rx) = mpsc::channel::<Cmd>();
     let web = a.web.clone();
     std::thread::spawn(move || {
         for s in listener.incoming().flatten() {
@@ -855,19 +1197,52 @@ pub fn demo(a: &DemoArgs) -> Result<(), String> {
         info,
         start: Instant::now(),
         feed_rule: a.feed_rule.clone(),
+        live: None,
+        conn_ctl: None,
+        pending: Vec::new(),
+        quit: false,
     };
+    if let Some(p) = live_parts {
+        let (rt, ctl) = p.start(&hub.host)?;
+        hub.live = Some(rt);
+        hub.conn_ctl = Some(ctl);
+    }
     loop {
         let w = hub.wall();
         let wait = hub.host.next_due_in(w).unwrap_or(40).clamp(1, 40);
         match rx.recv_timeout(Duration::from_millis(wait)) {
-            Ok(cmd) => hub.handle(cmd),
+            Ok(cmd) => {
+                hub.handle(cmd);
+                // (R6/T7) A live burst is taken as one batch: one broadcast.
+                if hub.live.is_some() {
+                    for _ in 0..5000 {
+                        match rx.try_recv() {
+                            Ok(c) => hub.handle(c),
+                            Err(_) => break,
+                        }
+                    }
+                }
+            }
             Err(RecvTimeoutError::Timeout) => {}
             Err(RecvTimeoutError::Disconnected) => return Ok(()),
         }
         let w = hub.wall();
-        let lines = hub.host.pump(w);
+        let mut lines = hub.host.pump(w);
+        if let Some(l) = hub.live.as_mut() {
+            lines.extend(std::mem::take(&mut hub.pending));
+            lines.extend(l.tick(&mut hub.host));
+            lines.extend(hub.host.live_flush());
+        }
         hub.broadcast();
         hub.route(lines);
+        if let Some(l) = hub.live.as_mut() {
+            l.after_broadcast();
+            l.watch_capsules(&hub.host);
+        }
+        if hub.quit {
+            hub.shutdown_live();
+            return Ok(());
+        }
     }
 }
 

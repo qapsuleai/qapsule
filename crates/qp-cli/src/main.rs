@@ -11,6 +11,7 @@ use clap::{Parser, Subcommand};
 mod demo;
 mod demo_static;
 mod live;
+mod livehost;
 
 #[derive(Debug, Parser)]
 #[command(name = "qp", version, about = "Qapsule command line", long_about = None)]

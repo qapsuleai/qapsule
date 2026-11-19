@@ -511,22 +511,14 @@ impl LiveRuntime {
             .iter()
             .flat_map(|d| d.feeds.iter().map(|f| f.feed.clone()))
             .collect();
-        let today = cal.local_day(now_us() / 1000 - delay_ms);
+        // The seam's day counter is not given: which card counter equals REST `volume`
+        // is still open (M22), so the first snapshot's counter is the day's base
+        // (`LiveFeed::seed`); the bar the first tick falls in misses the volume traded
+        // in it before that snapshot.
         let mut seeds = Vec::new();
         for k in &feeds {
             let (bars, seq) = host.live_feed(k).ok_or("live: feed without store")?;
-            // The day's traded value so far, when history reaches into today (REST
-            // `volume` is TL, like the card's `dailyVolume`).
-            let cum = bars
-                .last()
-                .filter(|b| cal.local_day(b.t) == today && iv != Interval::Day)
-                .map(|_| {
-                    bars.iter()
-                        .filter(|b| cal.local_day(b.t) == today)
-                        .map(|b| b.v)
-                        .sum::<f64>()
-                });
-            seeds.push((k.symbol.clone(), bars.last().cloned(), seq + 1, cum));
+            seeds.push((k.symbol.clone(), bars.last().cloned(), seq + 1, None));
         }
         feed.seed_all(&seeds)?;
         Ok(Self {

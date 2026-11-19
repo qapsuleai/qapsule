@@ -13,8 +13,8 @@
 //    a tap on a glossary term of a face (its box from the scene the core holds) shows the
 //    explanation the core gives and opens no capsule; a tap on it closes it.
 //  - (R5/S) the presentation opens with R5's picks (look and face `oltan`, story chart
-//    `pavka`, open capsule `tesir`); `?look=zemre` brings its face, `?face=` wins over it;
-//    the second candidates (`korda`, `nobra`) are offered.
+//    `korda` — R6/T0, K57: Arkin's pick —, open capsule `tesir`); `?look=zemre` brings its
+//    face, `?face=` wins over it; the other candidates (`pavka`, `nobra`) are offered.
 // Usage: node tests/settings.mjs <qp binary>
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -40,8 +40,9 @@ try {
     // (R5/S) The opening is the presented motion design's (`surek`, M21 provisional).
     check(l.face === 'oltan' && l.feed === 'elikov' && l.transition === 'surek' && l.outcome === 'tg5',
       `defaults oltan/elikov/surek/tg5 (${JSON.stringify(l)})`);
-    check(l.look === 'oltan' && l.story === 'pavka' && l.open === 'tesir' && l.voice === 'marla',
-      `R5 defaults oltan/pavka/tesir/marla (${JSON.stringify(l)})`);
+    // (R6/T0, K57) The story chart Arkin picked: `korda`.
+    check(l.look === 'oltan' && l.story === 'korda' && l.open === 'tesir' && l.voice === 'marla',
+      `R5 defaults oltan/korda/tesir/marla (${JSON.stringify(l)})`);
     await page.click('#tabs button[data-tab="settings"]');
     const ch = await page.evaluate(() => JSON.parse(window.qp.choices ? window.qp.choices() : '{}'));
     const opts = async (sel) => page.$$eval(`${sel} option`, (os) => os.map((o) => o.value));
@@ -268,11 +269,12 @@ try {
     check(!l.look && l.face === 'vadrel', `Settings → Look r4 brings vadrel (${JSON.stringify(l)})`);
     const ch = await page.evaluate(() => JSON.parse(window.qp.choices()));
     check(JSON.stringify(ch.story) === JSON.stringify(['r4', 'pavka', 'korda']), `story choices ${JSON.stringify(ch.story)}`);
-    await page.selectOption('#s_story', 'korda');
+    check(await page.$eval('#s_story', (e) => e.value) === 'korda', 'story select shows korda');
+    await page.selectOption('#s_story', 'pavka');
     await page.selectOption('#s_open', 'nobra');
     await settle(page);
     l = await look(page);
-    check(l.story === 'korda' && l.open === 'nobra', `second candidates from Settings (${JSON.stringify(l)})`);
+    check(l.story === 'pavka' && l.open === 'nobra', `other candidates from Settings (${JSON.stringify(l)})`);
     check(JSON.stringify(ch.motion) === JSON.stringify(['r4', 'surek', 'nabiz']), `motion choices ${JSON.stringify(ch.motion)}`);
     check(await page.$eval('#s_motion', (e) => e.value) === 'surek', 'motion select shows surek');
     check(errors.length === 0, `no page errors ${errors}`);

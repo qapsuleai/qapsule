@@ -83,9 +83,10 @@ pub type StoryCompile = fn(
 /// The default: no story chart (the open capsule's chart alone, as in R4).
 pub const DEFAULT_STORY: &str = "r4";
 
-/// (R5/S) The story chart the presentation shell asks for (M18's pick, `pavka`;
-/// `rounds/R5/experiments/M18/RESULTS.md`); the protocol default stays [`DEFAULT_STORY`].
-pub const PRESENTED_STORY: &str = "pavka";
+/// (R5/S) The story chart the presentation shell asks for; the protocol default stays
+/// [`DEFAULT_STORY`]. (R6/T0, K57) Arkin's pick `korda` (M18 had picked `pavka`;
+/// `rounds/R5/experiments/M18/RESULTS.md`); `pavka` stays selectable (`?story=pavka`).
+pub const PRESENTED_STORY: &str = "korda";
 
 /// Registered designs (the default is not one: it draws nothing more).
 pub static STORIES: &[StoryDesign] = &[pavka::DESIGN, korda::DESIGN];

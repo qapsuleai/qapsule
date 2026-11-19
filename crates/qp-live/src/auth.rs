@@ -79,6 +79,11 @@ impl AccessToken {
         self.remaining() == Duration::ZERO
     }
 
+    /// True if both hold the same token value.
+    pub fn same_value(&self, other: &AccessToken) -> bool {
+        self.value == other.value
+    }
+
     pub(crate) fn expose(&self) -> &str {
         self.value.expose()
     }

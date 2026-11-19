@@ -166,12 +166,21 @@ pub fn acquire_machine_lock(dir: &Path, key: &EndpointKey) -> Result<MachineLock
             Ok(MachineLock { file, path })
         }
         Err(TryLockError::WouldBlock) => {
-            let mut text = String::new();
-            let _ = file.read_to_string(&mut text);
-            let pid = text
-                .lines()
-                .find_map(|l| l.strip_prefix("pid="))
-                .and_then(|p| p.trim().parse().ok());
+            // The holder writes its PID right after locking; give it a moment.
+            let mut pid = None;
+            for _ in 0..25 {
+                let mut text = String::new();
+                let _ = file.seek(SeekFrom::Start(0));
+                let _ = file.read_to_string(&mut text);
+                pid = text
+                    .lines()
+                    .find_map(|l| l.strip_prefix("pid="))
+                    .and_then(|p| p.trim().parse().ok());
+                if pid.is_some() {
+                    break;
+                }
+                std::thread::sleep(std::time::Duration::from_millis(20));
+            }
             Err(LockError::HeldByOtherProcess {
                 key: key.clone(),
                 pid,

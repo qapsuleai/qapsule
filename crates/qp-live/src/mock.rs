@@ -57,8 +57,13 @@ pub fn test_classifier() -> NoticeClassifier {
 /// A configuration pointing at the mocks, with fake credentials, read through
 /// [`LiveConfig::from_lookup`] (the process environment is not touched).
 pub fn mock_config(tokens: &MockTokenService, broker_url: &str) -> Result<LiveConfig, ConfigError> {
+    mock_config_urls(&tokens.url(), broker_url)
+}
+
+/// Like [`mock_config`] with explicit addresses (e.g. a closed port, to test failures).
+pub fn mock_config_urls(token_url: &str, broker_url: &str) -> Result<LiveConfig, ConfigError> {
     let vars: BTreeMap<&str, String> = [
-        (VAR_TOKEN_SERVICE_URL, tokens.url()),
+        (VAR_TOKEN_SERVICE_URL, token_url.to_string()),
         (VAR_API_USERNAME, FAKE_USERNAME.to_string()),
         (VAR_API_PASSWORD, FAKE_PASSWORD.to_string()),
         (VAR_HARDWARE_ID, FAKE_HARDWARE_ID.to_string()),

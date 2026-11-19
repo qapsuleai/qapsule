@@ -491,7 +491,8 @@ enum SessionEnd {
     Stopped,
     Halt(HaltReason),
     AuthRefused(u8),
-    Renew,
+    /// Closed to reconnect with this (already obtained) token.
+    Renew(AccessToken),
     Lost {
         reason: DisconnectReason,
         stable: bool,
@@ -531,11 +532,14 @@ impl Worker {
 
     fn run(mut self) {
         let mut backoff = Backoff::new(self.opts.backoff.clone());
+        let mut renewed: Option<AccessToken> = None;
         loop {
             if self.drain_commands() {
                 break;
             }
-            let token = if self.force_refresh {
+            let token = if let Some(t) = renewed.take() {
+                Ok(t)
+            } else if self.force_refresh {
                 self.auth.refresh()
             } else {
                 self.auth.token()
@@ -577,7 +581,8 @@ impl Worker {
                     self.force_refresh = true;
                     self.event(LiveEvent::TokenRefreshForced { code });
                 }
-                SessionEnd::Renew => {
+                SessionEnd::Renew(t) => {
+                    renewed = Some(t);
                     self.event(LiveEvent::Disconnected {
                         reason: DisconnectReason::TokenRenewal,
                     });
@@ -845,12 +850,19 @@ impl Worker {
                     }
                 }
             }
-            // Token renewal on an open connection (opt-in).
+            // Token renewal on an open connection (opt-in). The new token is obtained first
+            // (rate limited by the auth client); only a token different from the current one
+            // closes the connection, so a refused / rate-limited request never causes a
+            // reconnect loop. Old connection closed before the new one is opened.
             if self.opts.renewal == TokenRenewal::ReconnectBeforeExpiry
                 && token.remaining() <= self.auth.policy().refresh_before
             {
-                self.close_ws(&mut ws);
-                return SessionEnd::Renew;
+                if let Ok(fresh) = self.auth.token() {
+                    if !fresh.same_value(token) {
+                        self.close_ws(&mut ws);
+                        return SessionEnd::Renew(fresh);
+                    }
+                }
             }
             // Keepalive.
             match ping_sent {
@@ -963,9 +975,11 @@ impl Worker {
     fn ws_error(&self, e: tungstenite::Error) -> DisconnectReason {
         use std::io::ErrorKind as K;
         match e {
-            tungstenite::Error::ConnectionClosed | tungstenite::Error::AlreadyClosed => {
-                DisconnectReason::ServerClosed
-            }
+            tungstenite::Error::ConnectionClosed
+            | tungstenite::Error::AlreadyClosed
+            | tungstenite::Error::Protocol(
+                tungstenite::error::ProtocolError::ResetWithoutClosingHandshake,
+            ) => DisconnectReason::ServerClosed,
             tungstenite::Error::Io(io)
                 if matches!(
                     io.kind(),

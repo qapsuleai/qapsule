@@ -327,6 +327,10 @@ pub struct ViewerUpdate {
     /// none).
     #[serde(default, skip_serializing_if = "is_zero_u32")]
     pub coin_flip_hidden: u32,
+    /// (R6/T3, §24) The market status (when it changed, and in the first event once the
+    /// host gave one). Absent while the host gave none.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub market: Option<crate::market::MarketStatus>,
 }
 
 impl ViewerUpdate {
@@ -338,6 +342,7 @@ impl ViewerUpdate {
             && self.open.is_none()
             && !self.closed
             && self.audience.is_none()
+            && self.market.is_none()
     }
 }
 

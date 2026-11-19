@@ -223,6 +223,29 @@ hesaplanır, yetkisiz okur onları da yetkili gibi görür):
 |---|---|---|
 | `flow.institutional` | SYN03: kurumsal net satım ortalamanın iki katını aştı · bugün, hâlâ geçerli / Henüz kapanmış benzer durum yok, ne sıklıkla tuttuğu bilinmiyor. / Tutarlar lisanslı veridir: sunucu hesapladı ve doğruladı, kurumsal akış veri yetkisiyle görünür. Sonuç en geç on işlem günü içinde belli olacak. | SYN03: institutions sold twice the usual · today, still holds / No similar closed cases yet, so no hit rate. / The amounts are licensed, computed and verified by the server, shown with institutional flow access. The outcome is due within ten trading days. |
 
+## Piyasa durumu (R6/T3)
+
+Kod `crates/qp-capsule/src/market.rs` (`note_of`, `clause`, `sentence`, `status_line`);
+otorite `Session::market_item` (`docs/PROTOCOL.md` §24). Yalnız barındırıcı piyasa durumu
+verdiyse ve kapsülün enstrümanı **sürekli işlemde değilse** (kendi evresi; evresi yoksa
+piyasanın `open: false`'u) ya da **veri bayatsa** konuşulur; yoksa her yüzey bugünküyle
+bayt eşittir. Evre numarası hiçbir zaman söylenmez. Yetkisiz okur başka enstrümanın evresini
+duymaz (yalnız kapalılık ve bayatlık) ve bayatlık saatini rakamsız alır (K33).
+
+| Not | Başlık sonu (" · …") | Ayrıntı / R4 cümlesi sonu |
+|-----|----------------------|---------------------------|
+| kapalı | seans kapalı / session closed | Seans kapalı; son seansın verisiyle. / The session is closed; as of the last session. |
+| açılış emir toplama | açılış emir toplamada / in the opening auction | Açılış emir toplamada; fiyat seans açılınca kesinleşir. / In the opening auction; the price settles when trading opens. |
+| kapanış emir toplama | kapanış seansında / in the closing auction | Kapanış seansında; kapanış fiyatı emir toplamayla belirleniyor. / In the closing auction; the closing price is being set. |
+| kapanış fiyatından işlem | kapanış fiyatından işlemde / trading at the closing price | Kapanış fiyatından işlemde; fiyat artık değişmez. / Trading at the closing price; the price no longer moves. |
+| durdurma | işlem durduruldu / trading halted | İşlem durduruldu; fiyat durdurulduğu andaki gibi. / Trading is halted; the price is as of the halt. |
+| öteki | sürekli işlem dışında / outside continuous trading | Sürekli işlem dışında. / Outside continuous trading. |
+| bayat | veri bayat / data stale | Bağlantı yok, veri bayat (son veri 18:10); yazılanlar o ana göre. / No connection, data stale (last data 18:10); this is as of then. (yetkisize saatsiz) |
+
+Örnek (`marla`, kapalı): "SYN28 son 20 günün en yüksek fiyatını (82,99) aştı · bugün, hâlâ
+geçerli · seans kapalı". Ek, başlığın 80 ve ayrıntının 200 karakter sınırının **dışındadır**
+(sınırlar sesin kendi yüzeylerine uygulanır; not sonradan eklenir); açık sorun aşağıda.
+
 ## Doğrulama
 
 - 13 deterministik tarama (`langh dump --lang marla|selvi`): hepsi 0 (S1 düzeltmesinden sonra
@@ -245,3 +268,5 @@ hesaplanır, yetkisiz okur onları da yetkili gibi görür):
    harfli bir sözcükle başlıyorsa: "en / düşük fiyatının" → "düşük fiyatının").
 4. **S1 düzeltmesinin etkisi ölçülmedi** (okuyucu ölçümü koşulmadı).
 5. **Yeni dille altın yok:** `marla` görünümünün `v2` altınlarını bütünleştirme (S) ekler.
+6. **Piyasa notu sınır dışında.** Başlığa eklenen " · seans kapalı" 80 karakter sınırını aşabilir;
+   yüz başlığı satırı taşarsa kısaltma sesin içinde yapılmalı (notu bir katman olarak sese vermek). Öneri.

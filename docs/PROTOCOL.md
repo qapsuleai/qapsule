@@ -23,6 +23,7 @@ attend     (dikkat yönlendir)     →    ack (delivered); hedefe notify
 clock      (yalnızca host)        →    (cevap yok; süre aşımları işlenir)
 replay     (R4: oynatma denetimi) →    result (replay)            ya da error   (§21)
 visible    (RP3: ekrandaki yüzler) →    result (viewer); viewer konusu notify  (§22)
+(barındırıcı girdisi: piyasa durumu, R6)  →  viewer olayında market      (§24)
 ```
 
 Her mesaj tek bir JSON nesnesidir; türü `"type"` alanıdır. Örnek bir konuşma:
@@ -2638,6 +2639,83 @@ olarak `not_found`), `62-stories-200.json` (~200 hikâyelik aralık, iki sayfa),
 `63-stories-live.json` (`stories` konusu: doğum, geçiş, kapanış, geçerlilik, kitle
 değişince yer; açık görünüm okuyucusuna sunucu yorumu; abonelikten çıkış).
 `cargo run -p qp-session --example make_story_transcripts -- --write` ile üretilir.
+
+## 24. Piyasa durumu (R6)
+
+Kavramlar `docs/CONCEPTS.md` "Canlı veri (R6)" (borsa saati, seans evresi, bayat); dil
+`docs/LANGUAGE.md` "Piyasa durumu". Şema `qp_schema::market` (`MarketStatus`, `PhaseCode`,
+`PhaseClass`, `MarketSource`), metin `qp_capsule::market`, otorite
+`Session::set_market_status` (`crates/qp-session/src/session.rs`), kabuk çekirdeği
+`ShellCore::market_json` (`crates/qp-wasm/src/shell.rs`). Testler
+`crates/qp-session/tests/market.rs`, `crates/qp-wasm/tests/market_r6.rs`.
+
+### 24.1 Barındırıcı girdisi
+
+Piyasa durumu bir **barındırıcı girdisidir**, protokol mesajı değildir (saat gibi; §11):
+`Session::set_market_status(MarketStatus) -> Vec<OutboundLine>` (yeniden oynatmada
+`ReplayHost::set_market_status`, geri `seek`'te yeni otoriteye yeniden verilir). Saat yine
+`host_clock`'tur; piyasa durumu onun yerine geçmez. Dokümanı değiştirmez, günlüğe girmez.
+Aynı durum ikinci kez verilirse hiçbir şey olmaz.
+
+```json
+{"exchange_time":1795101000000,"open":false,"holiday":false,"source":"calendar",
+ "delayed":true,"stale":false,"phases":{"THYAO":{"code":1,"key":"closed"}}}
+```
+
+| Alan | Anlam |
+|------|-------|
+| `exchange_time` | Borsa zamanı (UTC ms): `mx/timestamp` geldiyse onun; gelmiyorsa (gecikmeli kipte `SUBACK 0x80`) en yeni fiyat kartının `updateDate`'i. Bayatken son verinin zamanı. |
+| `open`, `holiday` | Pay piyasası açık mı, bugün tatil mi (`null`: bilinmiyor). |
+| `source` | `clock` (MX kaynaklı borsa saati iletisi) ya da `calendar` (XIST takvimi, `qp-calendar`). |
+| `delayed` | Gecikmeli besleme (15 dk). |
+| `stale` | Bağlantı yok ya da durdu: veri bayat (§18.3 `stale`). |
+| `phases` | Sembol → seans evresi (`stockStatus`): `code` beslemenin numarası, `key` makine adı (`qp_matriks::status::SessionPhase::key`). |
+
+**Evre sınıfı** (`PhaseClass`: `closed`, `pre_open`, `continuous`, `closing_auction`,
+`closing_price_trades`, `halted`, `other`) evrenin **anahtarından** türetilir
+(`PhaseClass::of_key`), numarasından değil: şema çözücünün kod tablosunu kopyalamaz ve
+çözücüye bağlanmaz; anahtarlar proto'nun sabit adlarının yılan yazımıdır (K62), bilinmeyen
+anahtar `other`'dır.
+
+### 24.2 Okuyucuya izdüşüm (§20.5)
+
+Otorite durumu her okuyucuya **kendi dünyasında** verir (`Session::market_for`):
+`open`, `holiday`, `source`, `delayed`, `stale`, `exchange_time` herkese; `phases` yalnız
+okuyucunun barlarına veri yetkisi olduğu enstrümanlar için (o enstrümanın bir bağlı serisinin
+bütün beslemelerine yetkili). Beslemenin numarası (`code`) okuyucuya gitmez (0 yazılır,
+alan gönderilmez). Kapsül cümlesi de aynı kuralla: yetkisiz okuyucunun kapsülü o enstrümanın
+evresini söylemez, yalnız piyasanın kapalılığını ve bayatlığı.
+
+### 24.3 Bildirimler
+
+- `viewer` olayı (§22.2) isteğe bağlı `market` alanını taşır: ilk olayda (durum verildiyse)
+  ve okuyucunun izdüşülmüş durumu değiştiğinde. Özet bağlantı başına, izdüşülmüş değerden.
+- Kapsül öğeleri (`capsules` sorgusu, `capsule` sorgusu, `capsules` konusu, `viewer`
+  akışı ve yüzleri) piyasa notunu taşır (`docs/LANGUAGE.md` "Piyasa durumu"): enstrümanın
+  evresi sürekli işlem değilse ya da veri bayatsa R4 cümlesinin sonunda bir cümle, sesin
+  başlığının sonunda " · <söz>", ayrıntısının sonunda bir cümle, metin yüzü yeniden kurulur.
+  Durum değişince `viewer` aboneleri değişen akışı ve yüzleri alır; `capsules` konusu yalnız
+  hikâye geçişlerinde yayar (durum değişimi geçiş değildir).
+- Durum hiç verilmemişse hiçbir alan yoktur: var olan dökümler bayt bayt aynı.
+
+### 24.4 Gösterim (`qp demo`) çerçevesi
+
+Barındırıcı viewer bağlantısına `viewer` olayıyla zaten gönderir. Ayrıca (tam yansı kipi ya
+da `viewer` aboneliğinden önce) ayrı bir SSE çerçevesi yazabilir:
+
+```
+{"market": MarketStatus}
+```
+
+Okuyucuya izdüşülmüş değer (`Session::market_for(principal)`) yazılmalıdır, ham durum değil.
+Kabuk çerçeveyi olduğu gibi `core.on_frame`'e verir; çekirdek durumu tutar ve
+`core.status()` cevabına `market: {text, state}` ekler (`state`: `live`, `delayed`,
+`closed`, `stale`); kabuk metni `#market` satırında olduğu gibi gösterir. Metin
+`qp_capsule::market::status_line`: "Canlı · gecikmeli 15 dk" / "Live · delayed 15 min",
+"Seans kapalı" (tatilse "· tatil") / "Session closed", "Bağlantı yok — veri bayat · son veri
+18:10" / "No connection — data stale · last data 18:10". Enstrümanı sürekli işlemde olmayan
+ya da veri bayatken hiçbir kapsül canlı işaretini (nabız) göstermez
+(`ShellCore::market_live`).
 
 ## Ek A — Eski `Command` tipi
 

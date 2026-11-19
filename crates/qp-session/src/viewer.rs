@@ -850,6 +850,8 @@ pub(crate) struct ViewerConn {
     audience_sent: Option<u64>,
     /// The data subscriptions last named.
     pub data: Vec<FeedKey>,
+    /// (R6/T3) Digest of the market status last sent.
+    market_sent: Option<u64>,
 }
 
 fn digest_of(x: &impl Serialize) -> u64 {
@@ -1189,6 +1191,16 @@ impl Session {
             }
         }
         up.data.clone_from(&vc.data);
+        // (R6/T3, §24) The market status (only once the host gave one).
+        // Projected for this reader (§20.5): only the phases of instruments it may see;
+        // the digest is of the projected value, per connection.
+        if let Some(m) = self.market_for(&principal) {
+            let md = digest_of(&m);
+            if all || vc.market_sent != Some(md) {
+                vc.market_sent = Some(md);
+                up.market = Some(m);
+            }
+        }
         (up, vc)
     }
 

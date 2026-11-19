@@ -32,5 +32,6 @@ workspace = true
 
 [dev-dependencies]
 qp-compute = { path = "../qp-compute" }
+qp-live = { path = "../qp-live", features = ["mock"] }
 assert_cmd = "2.2.2"
 tempfile = "3.27.0"

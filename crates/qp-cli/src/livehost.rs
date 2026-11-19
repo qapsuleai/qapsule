@@ -1499,6 +1499,125 @@ mod tests {
         let _ = lines;
     }
 
+    /// The connection path end to end on the loopback mock broker and token service: the
+    /// sink feeds the runtime, a local drop closes the one connection (DISCONNECT) before
+    /// opening again (never two at once), the feeds go stale and are repaired.
+    #[test]
+    fn local_drop_on_mock_broker_keeps_one_connection_and_repairs() {
+        use qp_live::mock::{mock_config, BrokerScript, MockBroker, MockTokenService};
+        let dir = tempfile::tempdir().expect("tmp");
+        let tokens = MockTokenService::start_default(3600);
+        let broker = MockBroker::start(BrokerScript::default());
+        let cfg = mock_config(&tokens, &broker.url("market")).expect("cfg");
+        let full: BTreeMap<String, Vec<Bar>> = [
+            ("AAA".to_owned(), truth(60, 0.0)),
+            ("BBB".to_owned(), truth(60, 2.0)),
+        ]
+        .into_iter()
+        .collect();
+        let hist: BTreeMap<String, Vec<Bar>> = full
+            .iter()
+            .map(|(s, b)| (s.clone(), b[..30].to_vec()))
+            .collect();
+        let mut host = live_host(&hist);
+        let (tx, rx) = mpsc::channel::<LiveIn>();
+        let tx = std::sync::Mutex::new(tx);
+        let to_hub: Arc<dyn Fn(LiveIn) + Send + Sync> = Arc::new(move |i| {
+            let _ = tx
+                .lock()
+                .unwrap_or_else(std::sync::PoisonError::into_inner)
+                .send(i);
+        });
+        let mut rt = LiveRuntime::new(
+            &host,
+            Box::new(FakeFeed::default()),
+            Arc::new(FakeSource(full.clone())),
+            to_hub.clone(),
+            cal(),
+            "1d",
+            0,
+        )
+        .expect("runtime");
+        let sink = Arc::new(HubSink::new(
+            RawSink::create(&dir.path().join("raw.qpraw")).expect("raw"),
+            to_hub.clone(),
+        ));
+        let auth = Arc::new(qp_live::AuthClient::new(
+            &cfg,
+            qp_live::AuthPolicy::default(),
+        ));
+        let spec = ConnSpec {
+            cfg,
+            auth,
+            topics: vec!["AAA".to_owned(), "BBB".to_owned()],
+            lock_dir: dir.path().to_owned(),
+        };
+        let ctl = spawn_connection(spec, sink, to_hub).expect("open");
+        let pump =
+            |rt: &mut LiveRuntime, host: &mut ReplayHost, until: &dyn Fn(&LiveRuntime) -> bool| {
+                let deadline = Instant::now() + Duration::from_secs(20);
+                while Instant::now() < deadline {
+                    if let Ok(i) = rx.recv_timeout(Duration::from_millis(50)) {
+                        let _ = rt.on_in(host, i);
+                    }
+                    if until(rt) {
+                        return true;
+                    }
+                }
+                false
+            };
+        assert!(
+            pump(&mut rt, &mut host, &|r| r.link() == "live"),
+            "connected"
+        );
+        assert!(
+            broker.wait_until(Duration::from_secs(5), |s| s.subscribe_packets.len() >= 2
+                || s.subscribe_packets.iter().map(Vec::len).sum::<usize>() >= 2)
+        );
+        for i in 30..35 {
+            for s in ["AAA", "BBB"] {
+                broker.publish(s, &serde_json::to_vec(&full[s][i]).expect("json"));
+            }
+        }
+        assert!(pump(&mut rt, &mut host, &|r| r.events >= 10), "live events");
+        ctl.send(ConnCtl::Drop(Duration::from_millis(300)))
+            .expect("drop");
+        assert!(
+            pump(&mut rt, &mut host, &|r| r.is_stale()),
+            "stale after drop"
+        );
+        assert_eq!(host.live_not_ready(), 2);
+        assert!(
+            pump(&mut rt, &mut host, &|r| r.link() == "live"
+                && !r.repairs.is_empty()),
+            "reconnected and repaired"
+        );
+        assert_eq!(host.live_not_ready(), 0);
+        let st = broker.stats();
+        assert_eq!(st.max_concurrent, 1, "never two connections at once");
+        assert!(st.disconnects >= 1, "the drop sent DISCONNECT");
+        for s in ["AAA", "BBB"] {
+            let k = FeedKey {
+                symbol: s.to_owned(),
+                interval: "1d".to_owned(),
+                feed: None,
+            };
+            // Bars here open in 2025 and arrive now: the exchange clock (arrival minus
+            // the observed lag) closes only the bars up to the last one seen, so the
+            // repair stops there; what it wrote equals the settled bars.
+            let bars = host.live_feed(&k).expect("feed").0;
+            assert!(bars.len() >= 35, "{s}: live bars kept");
+            assert_eq!(bars[..], full[s][..bars.len()], "{s} repaired");
+        }
+        assert_eq!(rt.capsule_counts().1, 0);
+        let (done_tx, done_rx) = mpsc::channel();
+        ctl.send(ConnCtl::Stop(done_tx)).expect("stop");
+        done_rx
+            .recv_timeout(Duration::from_secs(10))
+            .expect("closed");
+        assert!(broker.wait_until(Duration::from_secs(5), |s| s.current == 0));
+    }
+
     #[test]
     fn rest_bars_are_aligned_and_closing_session_merged() {
         let c = cal();

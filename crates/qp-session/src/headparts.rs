@@ -41,16 +41,48 @@ pub fn replay_calendar(kind: ReplaySourceKind) -> Option<Calendar> {
 }
 
 /// The calendar of bar series `bs`'s elapsed phrases (see the module).
+///
+/// (R6) Built calendars are cached per thread: building one parses every holiday date,
+/// and this runs for every capsule sentence of every reader (the live demo profile showed
+/// it as the hottest path). The result is the same calendar, so outputs do not change.
 fn calendar_of(bs: &Series, fallback: Option<&Calendar>) -> Option<ExchangeCalendar> {
-    let named = bs
-        .instrument
-        .as_ref()
-        .and_then(|i| i.calendar.as_deref())
-        .and_then(builtin);
-    let cal = named
-        .or_else(|| fallback.cloned())
-        .or_else(|| builtin("XIST"))?;
-    ExchangeCalendar::new(&cal).ok()
+    thread_local! {
+        static BY_NAME: std::cell::RefCell<std::collections::BTreeMap<String, Option<ExchangeCalendar>>> =
+            const { std::cell::RefCell::new(std::collections::BTreeMap::new()) };
+        static BY_VALUE: std::cell::RefCell<Vec<(Calendar, Option<ExchangeCalendar>)>> =
+            const { std::cell::RefCell::new(Vec::new()) };
+    }
+    let by_name = |id: &str| -> Option<Option<ExchangeCalendar>> {
+        BY_NAME.with(|c| {
+            if let Some(v) = c.borrow().get(id) {
+                return Some(v.clone());
+            }
+            let cal = builtin(id)?;
+            let built = ExchangeCalendar::new(&cal).ok();
+            c.borrow_mut().insert(id.to_owned(), built.clone());
+            Some(built)
+        })
+    };
+    if let Some(id) = bs.instrument.as_ref().and_then(|i| i.calendar.as_deref()) {
+        if let Some(v) = by_name(id) {
+            return v;
+        }
+    }
+    if let Some(cal) = fallback {
+        return BY_VALUE.with(|c| {
+            if let Some((_, v)) = c.borrow().iter().find(|(k, _)| k == cal) {
+                return v.clone();
+            }
+            let built = ExchangeCalendar::new(cal).ok();
+            let mut c = c.borrow_mut();
+            if c.len() >= 8 {
+                c.remove(0);
+            }
+            c.push((cal.clone(), built.clone()));
+            built
+        });
+    }
+    by_name("XIST").flatten()
 }
 
 /// The headline pieces of `story` as of bar `now` of `bars` (bar series `bs`; `at` =

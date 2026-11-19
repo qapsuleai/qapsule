@@ -1,0 +1,22 @@
+syntax="proto2";
+package messages;
+
+option java_package = "com.matriksdata.radix.messages";
+option java_outer_classname = "Depthv2";
+
+message DepthRowMessage {
+    required int64 date = 1;
+    required double price = 2;
+    required int64 quantity = 3;
+    required int64 timestamp = 4;
+    optional int64 actionOrderCount = 5;
+    enum BidAsk {
+        A = 0;
+        B = 1;
+    }
+    optional BidAsk bidAsk = 6;
+}
+
+message DepthV2Message {
+    repeated DepthRowMessage rows = 1;
+}

@@ -1,0 +1,80 @@
+syntax="proto2";
+package messages;
+
+option java_package = "com.matriksdata.radix.messages";
+option java_outer_classname = "Meta";
+
+message MetaMessage {
+   optional sint32 symbolId = 1;
+   optional string symbolCode = 2;
+   optional bool deleted = 3 [default = false];
+   optional int64 modifiedAt = 4;
+   optional string description = 5;
+   optional int32 sectorId = 6;
+   optional string sectorCode = 7;
+   optional int32 exchangeId = 8;
+   optional string exchangeCode = 9;
+   optional string marketCode = 10;
+   optional string submarketCode = 11;
+   optional int32 fraction = 12;
+   optional int32 tradeFraction = 13;
+   repeated string indexes = 14;
+   optional string underlying = 15;
+   optional string optionType = 16;
+   optional string maturity = 17;
+   optional string optionClass = 18;
+   optional double strikePrice = 19;
+   optional string contractGroupName = 20;
+   optional string contractGroupId = 21;
+   optional double multiplier = 22;
+   optional string settlementType = 23;
+   optional string preSettlementCode = 24;
+   optional int32 cloneId = 25;
+   optional string issuer = 26;
+   optional string openingDate = 27;
+   optional string symbolGroup = 28;
+   optional string symbolType = 29;
+   optional string stockSymbolCode = 30;
+   optional int32 marketId = 31;
+   optional int32 tradeStatus = 32;
+   optional int32 tradeableStatus = 33;
+   optional int32 submarketId = 34;
+   optional bool isProxy = 35;
+   optional string marketMaker = 36;
+   optional double ratio = 37;
+   optional int32 fxSymbolId = 38;
+   optional string actionType = 39;
+   optional string swapType = 40;
+   optional string isinCode = 41;
+   optional bool multiSession = 42;
+   optional int32 delay = 43;
+}
+
+/* BIST nasdaq gecis sonrası tradestatus
+1 Closed (Kapalı)
+2 Continuous (Sürekli İşlem)
+3 Uncrossing (Eşleştirme)
+4 OpeningSession (Açılış Emir Toplama)
+5 ClosingSession (Kapanış Emir Toplama)
+6 Break (Ara)
+7 ContinuousLastTrdPr (Kapanış Fiyatından İşlemler)
+8 SinglePriceAuction (Tek Fiyat Emir Toplama)
+9 PrimaryContinuous (Birincil Piyasa Sürekli İşlem)
+10 Suspend (Geçici Durdurma)
+11 OddContLastTrdPr (KesirKapanış Fiyatından İşlemler)
+12 OddContClosePr (Kesir Sürekli İşlemler)
+13 OrderCollectionPeriodAfterCB (Devre Kesiciden sonra Tek Fiyat Emir Toplama)
+14 UncrossOneSidedBuyBackHidden (Tek Taraflı Geri Alım Eşleştirme-Bilgiler Gizli)
+15 UncrossOneSidedBuyBackOpen (Tek Taraflı Geri Alım Eşleştirme-Bilgiler Açık)
+16 UncrossOneSidedIssueHidden (Tek Taraflı İhraç Eşleştirme-Bilgiler Gizli)
+17 UncrossOneSidedIssueOpen (Tek Taraflı İhraç Eşleştirme-Bilgiler Açık)
+18 AfterOneSidedAuctionPeriod (Birincil Piyasa Tek Taraf Emir Toplama Sonlandırma)
+20 SinglePriceUncrossingProcessStarted (Tek Fiyat Eşleştirme)
+21 OneSidedAuctionPeriod (Birincil Piyasa Tek Taraf Emir Toplama Başlangıç )
+22 UncrossIssuingOpen (Tek Taraflı İhraç Eşleştirme-Uzatma-Bilgiler Açık)
+23 UncrossIssuingHidden (Tek Taraflı İhraç Eşleştirme-Uzatma-Bilgiler Gizli)
+24 UncrossBuyBackOpen (Tek Taraflı Geri Alım Eşleştirme-Uzatma-Bilgiler Açık)
+25 UncrossBuyBackHidden (Tek Taraflı Geri Alım Eşleştirme-Uzatma-Bilgiler Gizli)
+26 NonTradablePeriod (Seans dışı Periyot)
+99 StateResetStart (Durum Resetleme Başlama)
+*/

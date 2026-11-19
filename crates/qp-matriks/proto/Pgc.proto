@@ -1,0 +1,13 @@
+syntax="proto2";
+package messages;
+
+option java_package = "com.matriksdata.radix.messages";
+option java_outer_classname = "Pgc";
+
+message PgcMessage {
+    optional int64 timestamp = 1;
+    optional double pgc5 = 2;
+    optional double pgc8 = 3;
+    optional double pgc10 = 4;
+    optional string symbol = 5;
+}

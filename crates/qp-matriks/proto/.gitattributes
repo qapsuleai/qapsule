@@ -1,0 +1,2 @@
+# Byte-exact copies of Matriks protos (K62). Never normalize line endings or whitespace.
+*.proto -text -diff linguist-vendored

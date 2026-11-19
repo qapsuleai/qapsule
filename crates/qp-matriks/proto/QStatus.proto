@@ -1,0 +1,20 @@
+// QStream Status Message
+syntax = "proto3";
+
+package messages;
+
+message QStatus {
+    enum StatusType {
+        START = 0;
+        END = 1;
+        PAUSED = 2;
+        RESUMED = 3;
+        CANCELED = 4;
+        INFO = 5;
+        WARNING = 6;
+        ERROR = 7;
+    }
+    StatusType status = 1;
+    string queryId = 2;
+    string statusText = 3;
+}

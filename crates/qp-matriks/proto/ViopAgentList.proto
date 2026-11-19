@@ -1,0 +1,12 @@
+syntax="proto3";
+package messages;
+
+option java_package = "com.matriksdata.radix.messages";
+option java_outer_classname = "ViopAgentList";
+
+message ViopAgentListMessage {
+   int32 order_no = 1;
+   int32 order_count = 2; 
+   repeated string buyers = 3;
+   repeated string sellers = 4;
+}

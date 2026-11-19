@@ -1,0 +1,12 @@
+syntax="proto2";
+package messages;
+
+option java_package = "com.matriksdata.radix.messages";
+
+option java_outer_classname = "Tradedate";
+
+message TradeDateMessage {
+        required string symbol = 1 ;
+        optional string tradedate = 2;
+        optional int64 timestamp = 3;
+}

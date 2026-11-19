@@ -33,4 +33,5 @@ workspace = true
 [dev-dependencies]
 qp-compute = { path = "../qp-compute" }
 assert_cmd = "2.2.2"
+prost = "0.14.6"
 tempfile = "3.27.0"

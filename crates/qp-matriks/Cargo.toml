@@ -1,6 +1,6 @@
 [package]
 name = "qp-matriks"
-description = "Matriks MQTT message layer: byte-exact Matriks protos (K62), generated prost types, field-presence-preserving decoders, market clock, broker notices, raw message log. No network, no clock."
+description = "Matriks MQTT message layer: byte-exact Matriks protos (K62), generated prost types, field-presence-preserving decoders, market clock, broker notices, raw message log, live feed (raw records to data events). No network, no clock."
 version.workspace = true
 edition.workspace = true
 rust-version.workspace = true
@@ -9,6 +9,9 @@ publish.workspace = true
 
 [dependencies]
 prost = "0.14.6"
+qp-calendar = { version = "0.0.0", path = "../qp-calendar" }
+qp-schema = { version = "0.0.0", path = "../qp-schema" }
+qp-source = { version = "0.0.0", path = "../qp-source" }
 
 [build-dependencies]
 prost-build = "0.14.6"
@@ -16,6 +19,7 @@ prost-types = "0.14.6"
 protox = "0.10.0"
 
 [dev-dependencies]
+qp-compute = { path = "../qp-compute" }
 serde_json = "1.0.154"
 sha2 = "0.11.1"
 

@@ -704,6 +704,173 @@ fn bars(
     Ok(())
 }
 
+/// Live feed settings shared by `qp replay --raw` and `qp live compare` (R6/T5).
+#[derive(Debug, Clone, Args)]
+pub struct FeedArgs {
+    /// Bar intervals (comma-separated).
+    #[arg(long, default_value = "1m,5m,1h,1d")]
+    pub intervals: String,
+    /// Bar method: `ticks`, `card` (card day fields on `1d`, ticks elsewhere) or `mixed`.
+    #[arg(long, default_value = "ticks")]
+    pub method: String,
+    /// Volume counters: `daily` (`dailyVolume`/`dailyQuantity`) or `volume`
+    /// (`volume`/`quantity`).
+    #[arg(long, default_value = "daily")]
+    pub volume_field: String,
+    /// Volume unit: `value` (TL, like REST `volume`) or `quantity` (lots).
+    #[arg(long, default_value = "value")]
+    pub volume_unit: String,
+    /// Tick time: `update_date` (exchange time from `updateDate`) or `arrival`.
+    #[arg(long, default_value = "update_date")]
+    pub time: String,
+}
+
+pub fn parse_method(s: &str) -> Result<qp_source::BarMethod, String> {
+    use qp_source::BarMethod;
+    Ok(match s {
+        "ticks" => BarMethod::Ticks,
+        "card" | "card_daily" => BarMethod::CardDaily,
+        "mixed" => BarMethod::Mixed,
+        _ => return Err(format!("method `{s}`: expected ticks, card or mixed")),
+    })
+}
+
+pub fn parse_volume_field(s: &str) -> Result<qp_matriks::VolumeField, String> {
+    match s {
+        "daily" | "daily_volume" => Ok(qp_matriks::VolumeField::DailyVolume),
+        "volume" => Ok(qp_matriks::VolumeField::Volume),
+        _ => Err(format!("volume field `{s}`: expected daily or volume")),
+    }
+}
+
+fn split_list(s: &str) -> Vec<String> {
+    s.split(',')
+        .map(str::trim)
+        .filter(|x| !x.is_empty())
+        .map(str::to_owned)
+        .collect()
+}
+
+impl FeedArgs {
+    /// The feed configuration.
+    pub fn config(&self) -> Result<qp_matriks::LiveFeedConfig, String> {
+        let intervals = split_list(&self.intervals);
+        for iv in &intervals {
+            qp_calendar::Interval::parse(iv).map_err(|e| format!("interval `{iv}`: {e}"))?;
+        }
+        Ok(qp_matriks::LiveFeedConfig {
+            intervals,
+            method: parse_method(&self.method)?,
+            volume: match self.volume_unit.as_str() {
+                "value" => qp_source::VolumeUnit::Value,
+                "quantity" => qp_source::VolumeUnit::Quantity,
+                s => return Err(format!("volume unit `{s}`: expected value or quantity")),
+            },
+            volume_field: parse_volume_field(&self.volume_field)?,
+            time: match self.time.as_str() {
+                "update_date" | "updatedate" => qp_matriks::TimeSource::UpdateDate,
+                "arrival" => qp_matriks::TimeSource::Arrival,
+                s => return Err(format!("time `{s}`: expected update_date or arrival")),
+            },
+            feed_name: None,
+        })
+    }
+}
+
+/// The XIST exchange calendar.
+pub fn xist() -> Result<qp_calendar::ExchangeCalendar, String> {
+    let cal = qp_calendar::builtin("XIST").ok_or("no XIST calendar")?;
+    qp_calendar::ExchangeCalendar::new(&cal).map_err(|e| e.to_string())
+}
+
+/// JSON lines of one [`qp_matriks::FeedOut`], in a fixed order: connection, phases, data
+/// events, clock, final bars.
+pub fn feed_out_lines(out: &qp_matriks::FeedOut) -> Vec<String> {
+    use serde_json::json;
+    let mut lines = Vec::new();
+    match out.connection {
+        Some(qp_matriks::ConnChange::Opened { session }) => {
+            lines.push(json!({"conn": {"opened": {"session": session}}}).to_string());
+        }
+        Some(qp_matriks::ConnChange::Lost) => lines.push(json!({"conn": "lost"}).to_string()),
+        None => {}
+    }
+    for (symbol, code) in &out.phases {
+        lines.push(json!({"phase": {"symbol": symbol, "code": code}}).to_string());
+    }
+    for e in &out.events {
+        lines.push(json!({ "data": e }).to_string());
+    }
+    if let Some(c) = out.clock_ms {
+        lines.push(json!({ "clock": c }).to_string());
+    }
+    for (feed, t) in &out.finalized {
+        lines.push(json!({"final": {"feed": feed, "t": t}}).to_string());
+    }
+    lines
+}
+
+/// Warns (stderr) when a raw log is outside `fixtures/local/` (real data belongs there).
+fn warn_outside_local(path: &Path) {
+    let abs = std::fs::canonicalize(path).unwrap_or_else(|_| path.to_path_buf());
+    if !abs
+        .components()
+        .collect::<Vec<_>>()
+        .windows(2)
+        .any(|w| w[0].as_os_str() == "fixtures" && w[1].as_os_str() == "local")
+    {
+        eprintln!(
+            "warning: {} is not under fixtures/local/ (raw logs with real data belong there)",
+            path.display()
+        );
+    }
+}
+
+/// `qp replay --raw`: the raw log through [`qp_matriks::LiveFeed`], one JSON line per
+/// output. Same records → byte-equal output.
+pub fn replay_raw(
+    path: &Path,
+    args: &FeedArgs,
+    out: Option<&Path>,
+    stats: bool,
+) -> Result<(), String> {
+    use std::io::Write;
+    warn_outside_local(path);
+    let cfg = args.config()?;
+    let mut feed = qp_matriks::LiveFeed::new(cfg, xist()?);
+    let f = File::open(path).map_err(|e| format!("{}: {e}", path.display()))?;
+    let mut reader = RawReader::new(BufReader::new(f)).map_err(|e| e.to_string())?;
+    let mut w: Box<dyn Write> = match out {
+        Some(p) => Box::new(BufWriter::new(
+            File::create(p).map_err(|e| format!("{}: {e}", p.display()))?,
+        )),
+        None => Box::new(BufWriter::new(std::io::stdout().lock())),
+    };
+    let mut tail = None;
+    loop {
+        match reader.next_record() {
+            Ok(Some(rec)) => {
+                for line in feed_out_lines(&feed.push(&rec)) {
+                    writeln!(w, "{line}").map_err(|e| e.to_string())?;
+                }
+            }
+            Ok(None) => break,
+            Err(e) => {
+                tail = Some(e.to_string());
+                break;
+            }
+        }
+    }
+    w.flush().map_err(|e| e.to_string())?;
+    if let Some(t) = tail {
+        eprintln!("raw log ends early ({t}); records before it were replayed");
+    }
+    if stats {
+        eprintln!("{:#?}", feed.stats());
+    }
+    Ok(())
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -739,5 +906,148 @@ mod tests {
         );
         assert!(parse_symbols("a/b").is_err());
         assert!(parse_symbols(" , ").is_err());
+    }
+
+    /// Hand-built records (made-up symbol and prices): a connection, a snapshot, trades
+    /// with ask-only updates in between, a lost connection and a reconnect.
+    pub(crate) fn fake_records() -> Vec<RawRecord> {
+        use prost::Message as _;
+        use qp_matriks::messages::SymbolMessage;
+        let base = qp_calendar::days_from_civil(2026, 11, 18) * 86_400_000 - 3 * 3_600_000;
+        let at = |h: i64, m: i64, s: i64| base + ((h * 60 + m) * 60 + s) * 1000;
+        let ud = |t: i64| {
+            let l = t + 3 * 3_600_000 - qp_calendar::days_from_civil(2026, 11, 18) * 86_400_000;
+            format!(
+                "2026-11-18T{:02}:{:02}:{:02}.{:03}+03",
+                l / 3_600_000,
+                l / 60_000 % 60,
+                l / 1000 % 60,
+                l % 1000
+            )
+        };
+        let topic = "mx/symbol/TEST1@lvl2";
+        let delay = 900_000;
+        let r = |kind, t: i64| RawRecord {
+            t_us: t * 1000,
+            kind,
+            topic: String::new(),
+            payload: Vec::new(),
+        };
+        let mut out = vec![r(RecordKind::ConnectionOpened, at(10, 0, 0))];
+        let snap = SymbolMessage {
+            symbol_id: 7,
+            update_date: Some(ud(at(9, 58, 0))),
+            last: Some(10.0),
+            open: Some(10.0),
+            daily_volume: Some(0.0),
+            daily_quantity: Some(0.0),
+            stock_status: Some(2),
+            ..SymbolMessage::default()
+        };
+        out.push(RawRecord::message(
+            at(10, 0, 1) * 1000,
+            topic,
+            snap.encode_to_vec(),
+        ));
+        let mut cum = 0.0;
+        for i in 0..40i32 {
+            let t = at(10, 0, 5) + i64::from(i) * 17_000;
+            cum += 100.0 + f64::from(i);
+            let m = SymbolMessage {
+                symbol_id: 7,
+                update_date: Some(ud(t)),
+                last: Some(10.0 + f64::from(i % 7) * 0.05),
+                daily_volume: Some(cum),
+                volume: Some(cum * 2.0),
+                daily_quantity: Some(cum / 10.0),
+                ..SymbolMessage::default()
+            };
+            out.push(RawRecord::message(
+                (t + delay) * 1000,
+                topic,
+                m.encode_to_vec(),
+            ));
+            let ask = SymbolMessage {
+                symbol_id: 7,
+                ask_size: Some(i64::from(i)),
+                ..SymbolMessage::default()
+            };
+            out.push(RawRecord::message(
+                (t + delay + 200) * 1000,
+                topic,
+                ask.encode_to_vec(),
+            ));
+            if i == 20 {
+                let lost = (t + delay + 500) * 1000;
+                out.push(RawRecord {
+                    t_us: lost,
+                    kind: RecordKind::ConnectionLost,
+                    topic: String::new(),
+                    payload: b"test".to_vec(),
+                });
+                out.push(RawRecord {
+                    t_us: lost + 1000,
+                    kind: RecordKind::ConnectionOpened,
+                    topic: "market".into(),
+                    payload: Vec::new(),
+                });
+                out.push(RawRecord {
+                    t_us: lost + 2000,
+                    kind: RecordKind::Subscribed,
+                    topic: topic.into(),
+                    payload: Vec::new(),
+                });
+            }
+        }
+        out
+    }
+
+    pub(crate) fn write_raw(path: &Path, recs: &[RawRecord]) {
+        let mut w = RawWriter::new(File::create(path).unwrap()).unwrap();
+        for r in recs {
+            w.write(r).unwrap();
+        }
+        w.flush().unwrap();
+    }
+
+    fn feed_args() -> FeedArgs {
+        FeedArgs {
+            intervals: "1m,5m,1d".into(),
+            method: "ticks".into(),
+            volume_field: "daily".into(),
+            volume_unit: "value".into(),
+            time: "update_date".into(),
+        }
+    }
+
+    /// Replay output = the live path (`LiveFeed::push` record by record), byte for byte,
+    /// and two replays are byte-equal.
+    #[test]
+    fn replay_raw_equals_the_live_path() {
+        let dir = tempfile::tempdir().unwrap();
+        let raw = dir.path().join("fake.qpraw");
+        let recs = fake_records();
+        write_raw(&raw, &recs);
+        let out1 = dir.path().join("a.jsonl");
+        let out2 = dir.path().join("b.jsonl");
+        replay_raw(&raw, &feed_args(), Some(&out1), false).unwrap();
+        replay_raw(&raw, &feed_args(), Some(&out2), false).unwrap();
+        let a = std::fs::read(&out1).unwrap();
+        assert_eq!(a, std::fs::read(&out2).unwrap());
+
+        let mut feed = qp_matriks::LiveFeed::new(feed_args().config().unwrap(), xist().unwrap());
+        let mut live = String::new();
+        for r in &recs {
+            for l in feed_out_lines(&feed.push(r)) {
+                live.push_str(&l);
+                live.push('\n');
+            }
+        }
+        assert_eq!(String::from_utf8(a).unwrap(), live);
+        assert!(live.contains("\"conn\":\"lost\""));
+        assert!(live.contains("\"final\""));
+        assert!(live.contains("\"clock\""));
+        assert!(live.contains("\"phase\""));
+        assert_eq!(feed.stats().resubscribes, 1);
     }
 }

@@ -222,6 +222,42 @@ impl BarSource for RestSource {
     }
 }
 
+/// Settled bars from local files instead of REST (`<dir>/<SYMBOL>.<period>.unadj.json`,
+/// the `fetch-bars.sh` / `qp_source::load_local_bars_with` form): for tests without the
+/// network and for a cached history. History and repair both read it.
+pub struct DirSource {
+    pub dir: std::path::PathBuf,
+}
+
+impl BarSource for DirSource {
+    fn fetch(
+        &self,
+        symbols: &[String],
+        interval: &str,
+        from_ms: i64,
+        to_ms: i64,
+    ) -> Vec<(String, Result<Vec<Bar>, String>)> {
+        let period = rest_period(interval).unwrap_or("?");
+        let all = qp_source::load_local_bars_with(&self.dir, period, false);
+        symbols
+            .iter()
+            .map(|s| {
+                let r = all
+                    .iter()
+                    .find(|(x, _)| x == s)
+                    .map(|(_, b)| {
+                        b.iter()
+                            .filter(|x| x.t >= from_ms && x.t <= to_ms)
+                            .cloned()
+                            .collect()
+                    })
+                    .ok_or_else(|| format!("no local {period} file"));
+                (s.clone(), r)
+            })
+            .collect()
+    }
+}
+
 /// Bars complete by exchange time `cutoff` (their span closed).
 fn complete_by(bars: Vec<Bar>, iv: Interval, cal: &ExchangeCalendar, cutoff: i64) -> Vec<Bar> {
     bars.into_iter()
@@ -327,6 +363,8 @@ pub enum LiveIn {
     },
     /// The connection stopped for good (halt: multi-connect, too many failures).
     Halted(String),
+    /// A connection event worth showing (backoff, auth failure, notice; masked text).
+    Note(String),
 }
 
 /// Link state of the live side.
@@ -579,6 +617,13 @@ impl LiveRuntime {
                 bars,
                 fetch_ms,
             } => self.on_repaired(host, generation, &bars, fetch_ms),
+            LiveIn::Note(n) => {
+                if self.conn_events.len() < 500 {
+                    self.conn_events
+                        .push(format!("{} {n}", crate::live::utc_stamp(now_us())));
+                }
+                Vec::new()
+            }
             LiveIn::Halted(r) => {
                 self.conn_events.push(format!("halted: {r}"));
                 self.halted = Some(r);
@@ -1081,7 +1126,11 @@ impl LiveSink for HubSink {
             LiveEvent::Disconnected { .. } => {
                 Some((RecordKind::ConnectionLost, "disconnected".to_owned()))
             }
-            _ => None,
+            LiveEvent::Subscribed { .. } | LiveEvent::Connecting { .. } => None,
+            other => {
+                (self.to_hub)(LiveIn::Note(other.to_string()));
+                None
+            }
         };
         if let Some((kind, note)) = kind {
             (self.to_hub)(LiveIn::Record(RawRecord {

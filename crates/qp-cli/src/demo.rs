@@ -128,6 +128,10 @@ pub struct DemoArgs {
     /// (R6/T7) The live bars' interval (`1m`, `5m`, `15m`, `30m`, `1h`, `1d`).
     #[arg(long, default_value = "5m")]
     pub interval: String,
+    /// (R6/T7) Read history and repair bars from this directory
+    /// (`<SYMBOL>.<period>.unadj.json`) instead of REST: offline tests, a cached history.
+    #[arg(long, requires = "live", value_name = "DIR")]
+    pub live_bars: Option<PathBuf>,
 }
 
 /// `qp drive` arguments: the shell-less driver.
@@ -248,16 +252,24 @@ fn live_setup(a: &DemoArgs, tx: &Sender<Cmd>) -> Result<(ReplayHost, LiveParts),
         &cfg,
         qp_live::AuthPolicy::default(),
     ));
-    let source = Arc::new(crate::livehost::RestSource {
-        cfg: cfg.clone(),
-        auth: auth.clone(),
-        cal: cal.clone(),
-    });
+    let source: Arc<dyn crate::livehost::BarSource> = match &a.live_bars {
+        Some(dir) => Arc::new(crate::livehost::DirSource { dir: dir.clone() }),
+        None => Arc::new(crate::livehost::RestSource {
+            cfg: cfg.clone(),
+            auth: auth.clone(),
+            cal: cal.clone(),
+        }),
+    };
     println!(
-        "geçmiş / history: {} symbols x {} bars of {} (REST, unadjusted)…",
+        "geçmiş / history: {} symbols x {} bars of {} ({}, unadjusted)…",
         symbols.len(),
         a.history,
-        a.interval
+        a.interval,
+        if a.live_bars.is_some() {
+            "local files"
+        } else {
+            "REST"
+        }
     );
     let _ = std::io::stdout().flush();
     let cutoff = crate::live::now_us() / 1000 - delay_ms;
@@ -316,7 +328,8 @@ fn live_setup(a: &DemoArgs, tx: &Sender<Cmd>) -> Result<(ReplayHost, LiveParts),
             ""
         }
     )));
-    let root = crate::live::repo_root();
+    // Raw log and lock under `--root` (the repository root: `scripts/demo.sh` runs there).
+    let root = a.root.clone();
     let raw_path = root.join("fixtures/local/live/raw").join(format!(
         "{}-demo.qpraw",
         crate::live::utc_stamp(crate::live::now_us())

@@ -158,3 +158,24 @@ Sol menüde başka veri aileleri de var; R6 ve sonrasında değerlendirilecek:
 | MQTT, Discovery, Topach | Canlı veri bağlayıcısı (R6) |
 | Meta Veriler | Enstrüman, fiyat adımı, takvim |
 | Alarm Yapısı | Niyetler (R9) |
+
+## Canlı bağlantı değişkenleri (R6, K61)
+
+Canlı Matriks bağlantısı için `.env.local`'a Arkin'in gireceği değişkenler (adlar öteki
+sistemlerle aynıdır; değerler ve adresler bu depoda yazılmaz):
+
+| Değişken | Ne |
+|---|---|
+| `MATRIKS_TOKEN_SERVICE_URL` | Belirteç servisi adresi |
+| `MATRIKS_API_USERNAME`, `MATRIKS_API_PASSWORD` | Servis hesabı |
+| `MATRIKS_HARDWARE_ID` | Örnek kimliği. Boşsa makine adından türetilir. Qapsule'e özgü bir değer önerilir (ör. `qapsule-dev`); başka bir sistemin kullandığı değer **kullanılmaz** |
+| `MATRIKS_SERVICE_TYPE_CODE` | Servis tipi kodu (servis hesapları için) |
+| `MATRIKS_MQTT_RT_HOST`, `MATRIKS_MQTT_DL_HOST` | Anlık ve gecikmeli piyasa uç noktaları |
+| `MATRIKS_MQTT_MODE` | `realtime` ya da `delayed` |
+| `MATRIKS_MQTT_STATS_HOST`, `MATRIKS_MQTT_NEWS_HOST` | İkincil uç noktalar (R6'da kullanılmaz) |
+
+Kurallar: değerler yalnız ortamdan okunur; belirteç bellekte tutulur, diske yazılmaz;
+günlüklerde belirteç, parola ve yetki başlığı görünmez; uç nokta başına tek bağlantı;
+"çoklu bağlantı" bildirimi gelirse bağlantı kapanır ve kendiliğinden yeniden denenmez.
+Ayrıntı: `docs/matriks/CONNECTIVITY.md`.
+

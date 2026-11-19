@@ -5,9 +5,9 @@ Her round sonunda güncellenir.
 
 ## Şu an
 
-- **Aktif round:** RI1 (keşif: Matriks bağlantısı ve Quantex servisleri) tamamlandı; rapor `rounds/RI1/REPORT.md`, belgeler `docs/matriks/`. Bağımsız denetim koşullu kabul, koşullar karşılandı (`rounds/RI1/AUDIT.md`). R5 kapandı (K57); tasarım RD2'de (K58).
+- **Aktif round:** R6 (canlı veri) başlatılmayı bekliyor; paket `rounds/R6/`. RI1 tamamlandı; kararlar K60–K63.
 - **Son güncelleme:** 2026-11-19
-- **Sıradaki adım:** Arkin RI1 raporunun sonundaki soruları cevaplar ya da ilgili ekiplere iletir (özellikle Qapsule için ayrı Matriks kimliği, test/gecikmeli uç nokta, gösterimsiz kullanım lisansı). R6 paketi ana akışta, `docs/matriks/INTEGRATION.md` §4 ve §8'e göre yazılır (öneri: kayıt-önce → doğrudan Matriks bağlantısı; karar verilmedi). R6'nın ilk işi: gösterim varsayılanları `korda` ve `live_new` (K57). İnsan testi v3 koşulmaz; RD2'yi bekler.
+- **Sıradaki adım:** Arkin `.env.local`'a canlı bağlantı değişkenlerini girer (`docs/DATA_ACCESS.md` "Canlı bağlantı değişkenleri"; `MATRIKS_HARDWARE_ID` için Qapsule'e özgü bir değer), sonra yeni bir Claude Code oturumunda `rounds/R6/PROMPT.md` ile R6'yı başlatır (borsa açıkken).
 
 ## Round geçmişi
 

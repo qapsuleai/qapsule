@@ -153,8 +153,15 @@ mod tests {
         let dir = tempfile::tempdir().unwrap();
         let (key, cert) = (dir.path().join("k.pem"), dir.path().join("c.pem"));
         let ok = Command::new("openssl")
-            .args(["req", "-x509", "-newkey", "rsa:2048", "-nodes", "-days", "1"])
-            .args(["-subj", "/CN=localhost", "-addext", "subjectAltName=DNS:localhost"])
+            .args([
+                "req", "-x509", "-newkey", "rsa:2048", "-nodes", "-days", "1",
+            ])
+            .args([
+                "-subj",
+                "/CN=localhost",
+                "-addext",
+                "subjectAltName=DNS:localhost",
+            ])
             .args(["-addext", "basicConstraints=critical,CA:FALSE"])
             .arg("-keyout")
             .arg(&key)

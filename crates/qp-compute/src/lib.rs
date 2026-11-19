@@ -28,6 +28,7 @@
 //! bit-identical by construction (and tested). Both operations are O(1); ring buffers
 //! hold windows.
 
+pub mod address;
 mod chain;
 mod core;
 pub mod graph;
@@ -42,6 +43,7 @@ pub mod sweep;
 use std::collections::BTreeMap;
 use std::fmt;
 
+pub use address::{Address, AddressError};
 pub use chain::Chain;
 pub use core::{Core, Streaming};
 pub use studies::{Atr, Bollinger, Ema, Highest, Lowest, Macd, Rsi, Sma};

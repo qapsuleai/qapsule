@@ -1,0 +1,3 @@
+ M services/quantex-ai-insights/.env
+ M services/quantex-news-visual/.env
+?? services/quantex_indicators_crypto_cpp/

@@ -504,3 +504,23 @@ Matriks servis hesabı, belirteç ve MQTT için kodda ya da dağıtım tanımlar
 değer görülmedi; hepsi ortam değişkeni / k8s Secret üzerinden geliyor
 (`services/quantex-stream/k8s/matriks-adapter-deploy.yml:72-76`,
 `services/quantex_indicators_price_cpp/cpp-indicator-deploy.yml:56-68`).
+
+---
+
+## 8. R6 canlı gözlemleri (2026-11-19, gecikmeli kip, Qapsule kimliği)
+
+Kaynak: `rounds/R6/experiments/LIVE-LOG.md` (her deneme), `qp live inspect` / `/live/stats`
+toplu sayıları. Değer, adres, belirteç yazılmadı.
+
+| §7 soru | Cevap | Nasıl gözlendi |
+|---|---|---|
+| 1 (çoklu bağlantının anahtarı) | **Cevaplanamadı.** Round boyunca hiçbir "çoklu bağlantı" bildirimi ya da açıklanamayan sunucu kapatması olmadı; anahtarı sınamak için bilerek ikinci bağlantı açmak koruma kuralına aykırı. | L1–L7, tek bağlantı; kilit dosyası her denemede tek süreç. |
+| 4 (süresi dolan belirteçle açık bağlantı) | **Kısmen:** en uzun tek oturum (L6) 2 sa 13 dk kesintisiz sürdü, düşmedi; belirtecin ömrü bu süreyi aşıyor mu bilinmiyor (A50). Kod iki yolu da destekliyor (`TokenRenewal`). | L6. |
+| 5 (abonelik sınırı, toplu abonelik) | **Bağlantı başına 580 sembol (bütün BISTTUM) sınıra ulaşmadan** kabul edildi; tek tek abonelik (100 sembol ~4 sn). Toplu (çok konulu) SUBSCRIBE denenmedi. | L2a (30), L2b (100), L2c (580): SUBACK ret yalnız işlem görmeyen 1 sembolde ve `mx/timestamp`/`mx/messenger`'da. |
+| 6 (`@lvl2` ile eksiz konu) | Bkz. `MESSAGES.md` §10. | — |
+| 13 (test kimliği) | Gerekmedi: Qapsule'e özgü `MATRIKS_HARDWARE_ID` ile gecikmeli uca bağlanıldı; Quantex sistemlerinde bir etki gözlenmedi (çoklu bağlantı bildirimi yok). | — |
+| — MQTT sürümü | MQTT 3.1 (`MQIsdp`, WebSocket alt protokolü `mqttv3.1`) kabul edildi; TLS sertifikası webpki kökleriyle **doğrulandı** (Quantex'in kapattığı denetim gerekmiyor). | L1. |
+| — `mx/timestamp` | **Gecikmeli market ucunda SUBACK 0x80 (ret).** Borsa saati/açıklık iletisi gecikmeli kipte yok; anlık kipte denenmedi. | L1–L2c. |
+| — `mx/messenger` | Market ucunda SUBACK 0x80 (ret); bildirim konusu `arf` ucunda (§2.2). Çoklu bağlantı bu yüzden market ucunda ileti olarak değil, en çok bağlantı kapanması olarak görülebilir. | L2a. |
+| — İşlem görmeyen sembol | SUBACK 0x80. | L2a (1 sembol). |
+| — Kopma ve yeniden bağlanma | Yeniden bağlanınca bütün sembollerin **ilk durumu yeniden geliyor** (30/30). Bir kez yerel ağ hatası (`os error 49`) kopma yaptı; 2 sn geri çekilmeyle döndü. | L3 (iki bilerek kesme + bir planlanmamış). |

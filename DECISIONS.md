@@ -274,3 +274,25 @@ R5 bu satırları **önerir**. Tasarım seçimleri ajan okuyucu ve eleştirmenle
 | A44 | `oltan`'da akışta canlıyı bulma 0,65 (bozuk dışındaki en düşük, n 23) | İnsan testi v3 | `M16/RESULTS.md`. |
 | A45 | `marla` sapma başlıklarında "yukarı dönebilir" / "could turn up" (60/531): iddianın beklentisi mi, tahmin dili mi; yasak belirsiz ifade listesine girmeli mi | İnsan testi v3 / sonraki dil işi | `AUDIT.md` koşul 3. |
 | ~~A46~~ | **Kapandı (2026-11-18, `r5/fix47`):** başlık `muted` ile (9,77 / 14,35), eksen 3,23 / 3,19, gri plaka ve satır bandı tabanları, kabuk denetim sınırı rolü `chrome.control`; bütün öğelerde eşik altı 0 (`rounds/R5/experiments/S/CONTRAST.md`; 600 kalın sayılmaz). Eski metin: `oltan` altında açılmış kapsül başlığı (kapanmışta 3,46/3,75, 19 px yarı kalın) ve grafik eksen çizgisi (2,88/2,95 < 3): eşik tanımı (600 kalın mı) ve düzeltme | Sonraki tasarım işi / R7 | `AUDIT.md` koşul 2; `rounds/R5/experiments/D/RESULTS.md`. |
+
+## R6 önerileri (2026-11-19) — Arkin'in onayını bekliyor
+
+R6 bu satırları **önerir**; ölçümler `rounds/R6/REPORT.md` ve `experiments/LIVE-LOG.md`.
+
+| # | Öneri | Gerekçe |
+|---|-------|---------|
+| Ö72 | **Canlı bar (M22) = (c) karma:** günlük bar kartın günlük alanlarından (`open`, `dailyHigh`, `dailyLow`, `last`, `dailyVolume`); gün içi barlar tiklerden (`last` + `dailyVolume` farkı), bar zamanı `updateDate` (borsa zamanı). Hacim birimi TL (`dailyVolume` = REST `volume`), fiyat ve hacim **düzeltilmemiş**; geçmiş REST `divide=false`. Kesinleşmiş gün içi barlar seans sonunda REST'ten kesinleştirilir (A17'ye öneri). | L6 (100 sembol, ~2 sa): günlük bar 90/100 tüm alanlarda, hacim 100/100 REST'e tam eşit; gün içi tiklerden fiyat %91–95 tam, hacim %95–97 ≤ %1 (kart ileti birleştirmesi: iki kart güncellemesi arasındaki işlemlerin uçları ve bar sınırındaki paylaşım görünmüyor). |
+| Ö73 | **Kopma onarımı (M23) = (c) ikisi:** kopmada bütün beslemeler bayat (§18.4 boşluk kuralıyla), yeniden bağlanınca gelen ilk durumla canlı devam + kopma aralığı REST'ten yeniden çözülür (yalnız tamamlanmış barlar); bayatken kapsül yargılanmaz. | L3: 20 sn ve 330 sn kesmede bayatken kapsül 0; onarım 30 beslemede 20,4 sn; yeniden abonelikte ilk durum 30/30 geldi. |
+| Ö74 | **Evren aboneliği (M24) = sembol başına konu, tek tek, tek bağlantı.** 580 sembol (bütün pay piyasası) sınırsız kabul; joker gereksiz. Canlı barındırıcıda görüntüleyici yeniden hesabı en çok 4/sn. | L2c (580, ~175 ileti/sn, kayıtçıda işlemci %0,3); L4c/L5. |
+| Ö75 | **Matriks bağlayıcısı:** kendi MQTT 3.1 kodlayıcısı + tungstenite + rustls/ring (sertifika doğrulaması açık) + ureq; tokio yok; protolar `protox` + `prost-build` ile derlemede (protoc gereksiz). Çoklu bağlantıdan sonra süreçler arası kalıcı yasak (`.halted`). | T1/T2; CI ek kurulum istemiyor. |
+| Ö76 | **Borsa saati kaynağı gecikmeli kipte `updateDate` + XIST takvimi** (`mx/timestamp` gecikmeli uçta reddediliyor); anlık kipte `mx/timestamp` MX kaynağı denenmeli. | L1–L5: SUBACK 0x80. |
+
+### Açık (R6)
+
+| # | Soru | Ne zaman | Kanıt |
+|---|------|----------|-------|
+| A47 | `volume` ile `dailyVolume` hangi durumda ayrışıyor (L2d'de bazı sembollerde farklı artış)? | Matriks veri ekibi | `rounds/R6/experiments/` (feed ajanı raporu). |
+| A48 | Kapanış emir toplama (18:00–18:10) sırasında genel durum satırı "Seans kapalı" yerine "kapanış seansında" mı demeli? | RD2 / R7 | L6 kapanış gözlemi. |
+| A49 | Anlık kip (`realtime`): `mx/timestamp`, eksiz konu, ileti hızı ve gecikme | Arkin kipi değiştirince | Gecikmeli kipte ölçüldü yalnız. |
+| A50 | Belirteç süresi dolunca açık bağlantı düşer mi (en uzun oturum 2 sa 13 dk, düşmedi)? Belirtecin ömrü? | Uzun oturum | L6. |
+| A51 | `MATRIKS_HARDWARE_ID` `qapsule-` önekiyle başlamıyor (uyarı); değer Arkin'in seçimi, çakışma görülmedi. Önek zorunlu olsun mu? | Arkin | Her denemede uyarı. |

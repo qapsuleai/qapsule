@@ -530,3 +530,46 @@ kullanıcıya gösterme). Sorulacak: Matriks lisans/ürün ekibi ve Arkin.
 | S12 | AN'nin `BISTPP` kaynağını yedek kabul etmesi ile fiyat servisinin reddetmesi arasındaki fark bilinçli mi? | Quantex ekibi |
 | S13 | Fiyat servisinde günlük/haftalık bar hizasının (UTC tabanı) REST barlarıyla uyuşmaması ve canlı hacim biriminin (adet) geçmiş hacimle (TL) karışması bilinen bir durum mu? | Quantex ekibi |
 | S14 | AI haber akışı (`mx/news@ai*`) AINEWS lisansı gerektiriyor mu (belge evet, kod yorumu hayır diyor)? | Matriks |
+
+---
+
+## 10. R6 canlı gözlemleri (2026-11-19, gecikmeli kip)
+
+Soru → cevap → nasıl gözlendi. Kaynak `rounds/R6/experiments/LIVE-LOG.md`; sayılar toplu.
+
+| Soru (§9) | Cevap | Nasıl gözlendi |
+|---|---|---|
+| S2 — yeniden abonelikte ilk durum | **Evet.** Bağlantı kopup yeniden kurulunca abone olunan her sembolün ilk (tam) iletisi yeniden geliyor (30/30). Sıra/sürüm numarası yine yok; kayıp aralık REST'ten onarılır. | L3: iki bilerek kesme + bir yerel ağ kopması. |
+| S3 — `incrementalQuantity`, `quantity`/`volume` | `incrementalQuantity` **hiç gelmedi** (L2d: 351.394 iletide 0). İşlemli her güncellemede `last`, `updateDate`, `volume`, `dailyVolume`, `quantity`, `dailyQuantity`, `lastQuantity` birlikte geliyor. Hangi alanın REST `volume` (TL) ile eşit olduğu: §10.1. | `qp live inspect` (alan varlığı sayıları). |
+| S4/S5 — `TimeMessage` birimi, sıklığı | **Gecikmeli uçta ölçülemedi:** `mx/timestamp` SUBACK 0x80 ile reddediliyor. Anlık kipte denenmedi. | L1–L5. |
+| — `updateDate` | Biçim `YYYY-MM-DDTHH:MM:SS.fff+03` (her iletide `+03`, milisaniyeli). Borsa zamanıdır: gecikmeli kipte varış − `updateDate` p50 900,8 s, p95 901,3 s. Varış sırasında monoton (saatin gerisinde kalan tik 0). İşlem görmemiş sembolün ilk durumundaki `updateDate` son işlem zamanıdır (saatler önce olabilir). | L1 `inspect`; `LiveFeed` sayaçları. |
+| — `stockStatus` | İlk durumda ve **evre değişince güncellemede** geliyor (L2d: 580 ilk durum + 529 güncelleme). Seans içinde 2 (sürekli işlem) dışında 3 (eşleştirme), 13 ve 53 (devre kesici sonrası emir toplama), 55 (tek fiyat emir toplama) görüldü. Kapanış: §10.2. | `qp live inspect` (L2d, 580 sembol, 31 dk). |
+| — `publishReason` | Hiç gelmedi. | `inspect`. |
+| S6 — `@lvl2` ile eksiz `mx/symbol` | §10.3. | — |
+| — İşlem görmeyen sembol | SUBACK 0x80. | L2a. |
+
+### 10.1 Hacim birimi ve düzeltme (M22)
+
+- Fiyat kartının `dailyVolume` alanı **günün birikimli işlem tutarıdır (TL)** ve seans sonunda REST
+  günlük barının `volume` alanına (`divide=false`, düzeltilmemiş) **bayt düzeyinde eşittir**: 100 sembolün
+  100'ünde hacim farkı 0 (L6, `qp live compare`). Kartın fiyatları düzeltilmemiştir: günlük açılış /
+  yüksek / düşük / kapanış düzeltilmemiş REST'le 95–98/100 tam eşit, en büyük göreli fark 8e-8
+  (ondalık gösterim). Karar önerisi: canlı hacim = `dailyVolume` farkı (TL), geçmiş = REST
+  `volume` (TL), ikisi de düzeltilmemiş (Ö72).
+- `volume` alanı da birikimli tutardır; bu kayıtlardaki 100 sembolde `dailyVolume` ile aynı sonucu
+  verdi (L2d'de 580 sembolün bazılarında farklı artış görüldü — açık soru A47).
+- `quantity`/`dailyQuantity` adettir (lot); REST `totalQuantity` ile karşılaştırılmadı.
+
+### 10.2 Seans kapanışı
+
+Gecikmeli akışta borsa saati 18:00'den sonra sembol başına evre sırası: 5 (kapanış emir toplama) →
+3 (eşleştirme) → 7 → 27 → 1 (kapalı) → 26 (seans dışı); her biri 100/100 sembolde
+`stockStatus` güncellemesiyle geldi. Kapanış seansı işlemleri (tek fiyat) `updateDate` 18:0x ile
+geliyor ve canlı bar üreticisinde günün son barına katılıyor (K14, R3 REST kuralıyla aynı). Gösterim
+borsa saati 18:00'ı geçince piyasa durumunu "Seans kapalı" yaptı (takvim kaynağı); kapanış emir
+toplama süresince genel satırın "kapanış seansında" demesi önerilir (A48).
+
+### 10.3 `@lvl2` ile eksiz konu (S6)
+
+Gecikmeli market ucunda eksiz `mx/symbol/<SYM>` **SUBACK 0x80 ile reddedildi** (3/3); `@lvl2`
+kabul edildi. Anlık uçta denenmedi. (L7)

@@ -16,6 +16,7 @@ pub mod lock;
 pub mod mock;
 pub mod mqtt;
 pub mod redact;
+pub mod rest;
 mod transport;
 
 pub use auth::{AccessToken, AuthClient, AuthPolicy};

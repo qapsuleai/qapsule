@@ -17,6 +17,7 @@ dependency of `qp-wasm`.
 | `notice` | `classify_notice`: multi-connect / disconnect / alert / metaupdate |
 | `status` | `stockStatus` code → session phase ("seans evresi") |
 | `rawlog` | `RawWriter` / `RawReader`: raw message log for record and replay |
+| `feed` | `LiveFeed`: raw records → §18.4 data events, clock, connection, phase, final bars; the one pipeline of the live connector and `qp replay --raw` |
 
 ## Proto origin (K62)
 
@@ -59,3 +60,24 @@ market data: they belong under `fixtures/local/` only.
 
 Tests use hand-built messages with made-up symbols (`TEST1`) and prices; no
 real data, no network.
+
+## Live feed (`feed`, R6/T5)
+
+`LiveFeed::push(&RawRecord) -> FeedOut` is the only path from Matriks records to
+data events; the live connector and `qp replay --raw` both use it, so the same
+records give byte-equal output. Rules (full text in `src/feed.rs`):
+
+- Only `mx/symbol/...` builds bars; one `qp_source::LiveBars` per symbol ×
+  interval, opened on the symbol's first message or by `seed` (the seam with REST
+  history, T4). An update without bar fields (e.g. only `askSize`) builds nothing.
+- Time: `updateDate` (exchange time, `+03`) by default; without it, the last
+  known exchange time plus the arrival difference. An initial is timed
+  `max(updateDate, clock)` (its `updateDate` is the last trade, possibly hours
+  old). `TimeSource::Arrival` uses arrival times.
+- Clock: monotone; moved by `updateDate` (not more than 60 s ahead of arrival)
+  and `mx/timestamp`; bars close through `clock − 2 s` (`set_finalize_grace`).
+- Connection: `ConnectionLost` → every symbol waits for a new initial;
+  `Subscribed` counts as re-subscription only after a loss and only for a symbol
+  with no message since (a first message may be logged before its `Subscribed`).
+- Volume counters: `dailyVolume`/`dailyQuantity` or `volume`/`quantity`
+  (`VolumeField`); which equals REST `volume` is measured by `qp live compare`.

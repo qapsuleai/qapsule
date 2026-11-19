@@ -561,3 +561,42 @@ fn seed_rules() {
     assert_eq!(out.events[0].seq, 5);
     assert!(feed.seed(SYM, "1m", None, 9).is_err());
 }
+
+/// An initial whose `updateDate` is the symbol's old last trade (hours before the clock)
+/// still becomes the day's volume base: the next trade's bar carries only its increment.
+#[test]
+fn stale_initial_still_sets_the_volume_base() {
+    let mut feed = LiveFeed::new(cfg(&["1m"]), xist());
+    let now = at(14, 0, 0);
+    let other = SymbolMessage {
+        symbol_id: 8,
+        update_date: Some(ud(now)),
+        last: Some(5.0),
+        daily_volume: Some(10.0),
+        ..SymbolMessage::default()
+    };
+    feed.push(&RawRecord::message(
+        (now + DELAY_MS) * 1000,
+        "mx/symbol/TEST2@lvl2",
+        other.encode_to_vec(),
+    ));
+    assert_eq!(feed.clock_ms(), Some(now));
+    feed.push(&msg(
+        now + DELAY_MS + 10,
+        &snapshot(at(10, 35, 0), 50.0, 5000.0),
+    ));
+    let t = at(14, 0, 30);
+    let out = feed.push(&msg(t + DELAY_MS, &trade(t, 50.5, 5100.0)));
+    let bar = out
+        .events
+        .iter()
+        .find_map(|e| match &e.change {
+            DataChange::Bar { bar } if e.feed.symbol == SYM => Some(bar.clone()),
+            _ => None,
+        })
+        .expect("a TEST1 bar");
+    assert_eq!(bar.t, at(14, 0, 0));
+    assert_eq!(bar.v.to_bits(), 100.0f64.to_bits());
+    assert_eq!(feed.stats().late, 0);
+    assert_eq!(feed.stats().behind_clock, 0);
+}

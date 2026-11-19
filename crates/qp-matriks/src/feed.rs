@@ -23,7 +23,11 @@
 //!    field equals REST `volume` is an open question (M22); `qp live compare` measures it.
 //! 3. **Time ([`TimeSource`]).** `UpdateDate` (default): a tick's time is the message's
 //!    `updateDate` (`YYYY-MM-DDTHH:MM:SS[.fff][Z|±HH[:MM]]`, no offset = Istanbul UTC+3;
-//!    the delayed endpoint sends `+03`). A message without `updateDate` (or with an
+//!    the delayed endpoint sends `+03`). An **initial**'s `updateDate` is the symbol's last
+//!    trade (possibly hours old) while the snapshot describes the present, so an initial
+//!    is timed `max(updateDate, clock)`: otherwise it would fall into a final bar, be
+//!    dropped as late, and its counter would not become the day's volume base (the next
+//!    trade would then carry the whole day's volume). A message without `updateDate` (or with an
 //!    unreadable one) takes the **last known exchange time plus the arrival difference**:
 //!    `t = ud₀ + (arrival − arrival₀)`, where `(ud₀, arrival₀)` is the latest *update*
 //!    message (not an initial: an initial's `updateDate` is the symbol's last trade, which
@@ -643,7 +647,14 @@ impl LiveFeed {
                     if !initial {
                         self.anchor = Some((ms, arrival));
                     }
-                    Some((ms, false))
+                    // An initial's `updateDate` is the symbol's last trade, possibly long
+                    // ago: the snapshot describes now, so it is not placed before the clock.
+                    let t = if initial {
+                        self.clock_ms.map_or(ms, |c| c.max(ms))
+                    } else {
+                        ms
+                    };
+                    Some((t, false))
                 } else if let Some((ud0, a0)) = self.anchor {
                     Some((ud0 + (arrival - a0), true))
                 } else {
@@ -671,7 +682,7 @@ impl LiveFeed {
             } else {
                 self.stats.time_direct += 1;
             }
-            if let Some(c) = self.clock_ms.filter(|&c| c > t) {
+            if let Some(c) = self.clock_ms.filter(|&c| c > t && !initial) {
                 self.stats.behind_clock += 1;
                 self.stats.max_behind_ms = self.stats.max_behind_ms.max(c - t);
             }

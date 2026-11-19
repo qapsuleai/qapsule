@@ -292,7 +292,20 @@ fn record(a: &RecordArgs) -> Result<(), String> {
         root.join("fixtures/local/live/raw")
             .join(format!("{}.qpraw", utc_stamp(start_us)))
     });
-    if !out.starts_with(root.join("fixtures/local")) {
+    // A relative `--out` is taken from the current directory; `..` is refused so the
+    // prefix check below cannot be walked around.
+    let out = if out.is_relative() {
+        std::env::current_dir()
+            .map_err(|e| e.to_string())?
+            .join(out)
+    } else {
+        out
+    };
+    if out
+        .components()
+        .any(|c| matches!(c, std::path::Component::ParentDir))
+        || !out.starts_with(root.join("fixtures/local"))
+    {
         return Err("live: the raw log must stay under fixtures/local/ (K23)".to_owned());
     }
     let mut topics = vec!["mx/timestamp".to_owned()];

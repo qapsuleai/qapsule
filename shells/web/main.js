@@ -230,7 +230,9 @@ function start(frame) {
   $('note').textContent = info.note || '';
   $('url').textContent = info.phone || info.urls[0];
   $('lanwarn').hidden = !info.lan;
-  $('lanhint').hidden = Boolean(info.lan);
+  $('lanhint').hidden = Boolean(info.lan) || Boolean(info.live);
+  // (R6/T7) Live data has no timeline: the replay controls are not shown.
+  for (const el of $('controls').children) el.hidden = Boolean(info.live);
   flush();
 }
 

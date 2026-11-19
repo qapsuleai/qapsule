@@ -138,3 +138,60 @@ pub(crate) fn open_websocket(
         Err(HandshakeError::Interrupted(_)) => Err("websocket handshake timed out".into()),
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    /// Certificate verification is on: a self-signed loopback TLS server is refused.
+    /// Needs the `openssl` CLI, so it is ignored by default:
+    /// `cargo test -p qp-live -- --ignored tls_rejects_self_signed`.
+    #[test]
+    #[ignore]
+    fn tls_rejects_self_signed_certificate() {
+        use std::process::{Command, Stdio};
+        let dir = tempfile::tempdir().unwrap();
+        let (key, cert) = (dir.path().join("k.pem"), dir.path().join("c.pem"));
+        let ok = Command::new("openssl")
+            .args(["req", "-x509", "-newkey", "rsa:2048", "-nodes", "-days", "1"])
+            .args(["-subj", "/CN=localhost", "-addext", "subjectAltName=DNS:localhost"])
+            .args(["-addext", "basicConstraints=critical,CA:FALSE"])
+            .arg("-keyout")
+            .arg(&key)
+            .arg("-out")
+            .arg(&cert)
+            .stdout(Stdio::null())
+            .stderr(Stdio::null())
+            .status()
+            .unwrap()
+            .success();
+        assert!(ok);
+        let port = std::net::TcpListener::bind("127.0.0.1:0")
+            .unwrap()
+            .local_addr()
+            .unwrap()
+            .port();
+        let mut server = Command::new("openssl")
+            .args(["s_server", "-quiet", "-www", "-accept"])
+            .arg(format!("127.0.0.1:{port}"))
+            .arg("-key")
+            .arg(&key)
+            .arg("-cert")
+            .arg(&cert)
+            .stdout(Stdio::null())
+            .stderr(Stdio::null())
+            .spawn()
+            .unwrap();
+        std::thread::sleep(Duration::from_millis(500));
+        let r = open_websocket(
+            &format!("wss://localhost:{port}/market"),
+            "mqttv3.1",
+            Duration::from_secs(3),
+        );
+        let _ = server.kill();
+        let _ = server.wait();
+        let err = r.err().expect("self-signed certificate must be refused");
+        println!("tls error: {err}");
+        assert!(err.contains("certificate"), "{err}");
+    }
+}

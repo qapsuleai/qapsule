@@ -21,6 +21,9 @@
 //! R4 (K44, `docs/PROTOCOL.md` §21): [`Replay`] delivers historical bars (local real
 //! data or the synthetic market) like a live feed, as data events on a virtual timeline.
 //!
+//! R6 (M22): [`LiveBars`] builds calendar-aligned live bars from price-card updates
+//! ([`CardTick`]) as data events; [`compare_bars`] measures them against REST bars.
+//!
 //! [`DataEvent`]: qp_schema::data::DataEvent
 //!
 //! Note on names: `qp_schema::SeriesSource` is the *description* of a binding inside a
@@ -35,6 +38,7 @@ use qp_schema::{Bar, Instrument, Series, SeriesData};
 mod events;
 mod feed;
 mod flow;
+mod livebar;
 mod local;
 mod provider;
 mod regimes;
@@ -47,6 +51,10 @@ pub use events::{
 };
 pub use feed::{Applied, EventError, FeedStore, StaleReason, TimeBounds};
 pub use flow::{synthetic_flow, FlowRecord, FLOW_KEYS};
+pub use livebar::{
+    compare_bars, compare_bars_with, BarDiff, BarMethod, CardTick, DiffTolerance, FieldDiff,
+    LiveBars, LiveConfig, LiveError, LiveStats, VolumeUnit,
+};
 pub use local::{load_local_bars, load_local_bars_with, local_bars_dir, LOCAL_BARS_ENV};
 pub use provider::{
     bind, entitlement_matches, validate_binding, validate_entitlement, validate_id,

@@ -242,6 +242,10 @@ duymaz (yalnız kapalılık ve bayatlık) ve bayatlık saatini rakamsız alır (
 | öteki | sürekli işlem dışında / outside continuous trading | Sürekli işlem dışında. / Outside continuous trading. |
 | bayat | veri bayat / data stale | Bağlantı yok, veri bayat (son veri 18:10); yazılanlar o ana göre. / No connection, data stale (last data 18:10); this is as of then. (yetkisize saatsiz) |
 
+Kabuğun genel satırı (`status_line`) kapanış emir toplamada (fiyat kartlarına göre
+enstrümanların çoğu kapanış seansındayken) "Seans kapalı" değil "Kapanış seansında" /
+"Closing auction" der (A48, RP4/T7).
+
 Örnek (`marla`, kapalı): "SYN28 son 20 günün en yüksek fiyatını (82,99) aştı · bugün, hâlâ
 geçerli · seans kapalı". Ek, başlığın 80 ve ayrıntının 200 karakter sınırının **dışındadır**
 (sınırlar sesin kendi yüzeylerine uygulanır; not sonradan eklenir); açık sorun aşağıda.

@@ -115,3 +115,40 @@ fn market_frame_and_stale_data() {
         .unwrap();
     assert_eq!(ch, json!({}));
 }
+
+/// (RP4/T7, A48) The closing auction (18:00–18:10): the calendar says the continuous
+/// session is over, the price cards put the instruments in the closing auction; the
+/// status line says "Kapanış seansında" / "Closing auction", not "closed".
+#[test]
+fn closing_auction_is_not_closed() {
+    for (lang, want) in [("tr", "Kapanış seansında"), ("en", "Closing auction")] {
+        let (mut core, _, _) = viewer(lang);
+        let mut st = status(Some(false), false);
+        for i in core.feed() {
+            st.phases.insert(
+                i.instrument.clone(),
+                PhaseCode {
+                    code: 5,
+                    key: "closing_session".to_owned(),
+                },
+            );
+        }
+        assert!(!st.phases.is_empty());
+        core.on_frame(&json!({ "market": st }).to_string())
+            .expect("frame");
+        assert_eq!(core.market_json(), json!({"text": want, "state": "closed"}));
+        // No capsule shows as live in the auction.
+        assert!(core.feed().iter().all(|i| !core.market_live(&i.instrument)));
+        // The auction over (the cards say closed): the line says closed again.
+        for p in st.phases.values_mut() {
+            *p = PhaseCode {
+                code: 1,
+                key: "closed".to_owned(),
+            };
+        }
+        core.on_frame(&json!({ "market": st }).to_string())
+            .expect("frame");
+        assert_eq!(core.market_json()["state"], "closed");
+        assert_ne!(core.market_json()["text"], want);
+    }
+}

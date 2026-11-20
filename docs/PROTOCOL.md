@@ -2712,7 +2712,9 @@ Kabuk çerçeveyi olduğu gibi `core.on_frame`'e verir; çekirdek durumu tutar v
 `core.status()` cevabına `market: {text, state}` ekler (`state`: `live`, `delayed`,
 `closed`, `stale`); kabuk metni `#market` satırında olduğu gibi gösterir. Metin
 `qp_capsule::market::status_line`: "Canlı · gecikmeli 15 dk" / "Live · delayed 15 min",
-"Seans kapalı" (tatilse "· tatil") / "Session closed", "Bağlantı yok — veri bayat · son veri
+"Seans kapalı" (tatilse "· tatil") / "Session closed", kapanış emir toplamada (evrelerin
+çoğu kapanış seansındayken, takvimin `open`'ı ne derse desin; A48, RP4/T7) "Kapanış
+seansında" / "Closing auction" (durum `closed`), "Bağlantı yok — veri bayat · son veri
 18:10" / "No connection — data stale · last data 18:10". Enstrümanı sürekli işlemde olmayan
 ya da veri bayatken hiçbir kapsül canlı işaretini (nabız) göstermez
 (`ShellCore::market_live`).

@@ -41,7 +41,7 @@ birleştirmeden önce fmt + clippy + test yeşil; main'de tam `QP_VERIFY_BROWSER
 
 | # | Durum | Kanıt |
 |---|---|---|
-| 1 | ✅ | Süreç içi tek bağlantı (`second_open_in_same_process_is_refused`), makine kilidi iki süreçle (`tests/two_process.rs`: ikincisi PID'li nedenle başlamaz), çoklu bağlantı bildiriminde dur + yeniden deneme yok (`multiconnect_notice_halts_without_retry_until_reset`), kimlik `qapsule-<makine adı>` belirleyici (`config::tests`), maskeleme (`no_secret_reaches_any_log_or_error_text`). **Round boyunca çoklu bağlantı bildirimi: 0.** Kimlik değişkeni Arkin tarafından dolu ve `qapsule-` ile başlamıyor (her denemede uyarı; A51). |
+| 1 | ✅ (denetim koşulları B1/B2 kapatıldı, B3 açık karar) | Süreç içi tek bağlantı (`second_open_in_same_process_is_refused`), makine kilidi iki süreçle (`tests/two_process.rs`: ikincisi PID'li nedenle başlamaz), çoklu bağlantı bildiriminde dur + yeniden deneme yok (`multiconnect_notice_halts_without_retry_until_reset`), kimlik `qapsule-<makine adı>` belirleyici (`config::tests`), maskeleme (`no_secret_reaches_any_log_or_error_text`). **Round boyunca çoklu bağlantı bildirimi: 0.** Kimlik değişkeni Arkin tarafından dolu ve `qapsule-` ile başlamıyor (her denemede uyarı; A51). |
 | 2 | ✅ | 22 proto bayt eşit (`tests/provenance.rs`; kaynakla karşılaştırma yerelde, CI'da atlanır ve söyler); tipler derlemede üretiliyor, elle yazılmış mesaj tipi yok; alan varlığı testleri (`tests/presence.rs`, VERIFY 7); ilk durum + güncelleme; CI ağsız. |
 | 3 | ✅ | Gecikmeli uçta `mx/timestamp` reddediliyor (ölçüldü); saat girdisi `updateDate` borsa zamanı + XIST takvimi + sembol başına `stockStatus`. Kapsül dili ve kabuk satırı (T3; VERIFY 11 testi `crates/qp-session/tests/market.rs`). **Canlıda gözlendi** (L6): borsa saati 18:00'ı geçince ekran "Seans kapalı" dedi; kapanış evreleri 5→3→7→27→1→26 her sembolde geldi. Bayat veri canlı gösterilmiyor (M23, aşağıda). Not: kapanış emir toplamada genel satır "kapalı" diyor (A48). |
 | 4 | ⚠️ | M22 ölçüldü (§4), 100 sembol, 1m/5m/1h/1d, üç yöntem, iki hacim alanı; farklar açıklandı. **Tam seans değil:** en uzun kesintisiz kayıt borsa saatiyle ~16:08 → kapanış (L6; round 13:48'de başladı). Günlük bar kart alanlarından olduğu için tam günü kapsıyor. Tam seans için komut "Arkin'den beklenenler"de. |
@@ -53,8 +53,8 @@ birleştirmeden önce fmt + clippy + test yeşil; main'de tam `QP_VERIFY_BROWSER
 | 10 | ✅ | `CONNECTIVITY.md` §8, `MESSAGES.md` §10 (soru → cevap → nasıl gözlendi); cevaplanamayanlar listeli (çoklu bağlantının anahtarı, `TimeMessage` birimi, belirteç ömrü, anlık kip). |
 | 11 | ✅ | `crates/qp-compute/tests/address.rs`: `RSI:14`, `ISCTR:5m:EMA[RSI:18]:20`, `SMA[EMA[RSI:14]:10]:5`, üç düzey; doğrudan zincirle `to_bits` eşit (toplu, akışkan, son barı düzelt, tarama). |
 | 12 | ✅ | Gösterim varsayılanları `korda` + `live_new`; sözlük güncel. |
-| 13 | ⚠️→ | `verify.sh` 18/18 main'de; hesap özeti `7b1e99d40889f83c` aynı; altınlar ve 64 döküm bayt eşit; gizli tarama denetimde. WASM: bağlayıcı bağımlılıklarından hiçbiri pakette yok; temel paket ham boyut aynı (2.280.681 B, gzip +13 B), gösterim (replica) paketi +72,7 KB ham / +16,1 KB gzip (+%0,77; T3'ün piyasa durumu metni). CI sonucu §9'da. |
-| 14 | ✅ | Bu rapor, `AUDIT.md`, `docs/matriks/LIVE.md`, `STATUS.md`, `ROADMAP.md`, önerilen kararlar Ö72–Ö76 / açık A47–A51 (`DECISIONS.md`), disk hijyeni (§10). |
+| 13 | ⚠️ | `verify.sh` 18/18 main'de; hesap özeti `7b1e99d40889f83c` aynı; altınlar ve 64 döküm bayt eşit; gizli tarama denetimde. WASM: bağlayıcı bağımlılıklarından hiçbiri pakette yok; temel paket ham boyut aynı (2.280.681 B, gzip +13 B), gösterim (replica) paketi +72,7 KB ham / +16,1 KB gzip (+%0,77; T3'ün piyasa durumu metni) — VERIFY 13'ün "değişmedi" beklentisi bu paket için kısmen tutuyor. **CI çalışmadı:** ajanın `git push`'u otomatik izinle reddedildi; gönderim ve CI Arkin'de (§13). |
+| 14 | ✅ | Bu rapor, `AUDIT.md` (bağımsız denetim: koşullu kabul; koşullar §12), `docs/matriks/LIVE.md`, `STATUS.md`, `ROADMAP.md`, önerilen kararlar Ö72–Ö76 / açık A47–A52 (`DECISIONS.md`), disk hijyeni (§10). |
 
 ## 4. M22 — canlı bar ↔ REST (L6 kaydı, 100 sembol, borsa saati ~16:08 → kapanış)
 
@@ -105,7 +105,7 @@ belirliyor (580 sembolde ~7 dk olur; Öneriler). Kesilme anında süren bar onar
 | 3 / 30 / 100 / 580 | kayıtçı (`qp live record`, L1–L2c) | ~6 / ~25 / ~50 / ~175 | 300 sn'de 0,5 / 0,77 sn (100 / 580) | 16,5 / 17,0 MB | — | 3 / 29 / 100 / 580 kabul; 100 sembol ~4 sn |
 | 30 | gösterim L3 (önce, onarımlar dahil) | ~25 | %17 | 93 MB | 13,4 / 5.468 ms (onarım tamponu) | 30 |
 | 100 | gösterim L4 (önce) | ~50 | %82 | 173 MB | 84 / 151 ms | 100 |
-| 100 | gösterim L4c (perf sonrası) | ~71–76 | **%17** | 142 MB | **0,27 / 51 ms** | 100 |
+| 100 | gösterim L4c (perf sonrası) | ~71–76 | **%17** | 142–150 MB | **0,27 / 51 ms** | 100 |
 | 100 | gösterim L6 (perf sonrası, 2 sa 13 dk) | ~62 | — | 214 MB | 0,28 / 57 ms | 100 |
 | 580 | gösterim L5 (perf sonrası) | ~146–152 | %69 | 864–897 MB | 159 / 835 ms | 579/580 (1 sembolün REST geçmişi yok) |
 
@@ -127,7 +127,7 @@ ayrışması (A47).
 
 ## 8. Ne yapılamadı
 
-- Tam seans kaydı (ölçüt 4): round 13:48'de başladı. Komut aşağıda.
+- Tam seans kaydı (ölçüt 4): round 13:48'de başladı. Komut §13'te.
 - Anlık kip: gecikmeli kipte bütün denemeler geçti; anlık kip için `.env.local`'da
   `MATRIKS_MQTT_MODE=realtime` yapmanı bekliyorum (ajan değiştirmez).
 - Akış ailesi (lisanslı) canlıda veri bulmuyor (kapsam dışı; sentetik akış canlı gösterime karışmıyor).
@@ -136,7 +136,7 @@ ayrışması (A47).
 
 `DECISIONS.md` "R6 önerileri": Ö72 (M22 karma), Ö73 (M23 bayat + yeniden abonelik + REST onarımı),
 Ö74 (sembol başına abonelik, tek bağlantı; görüntüleyici ≤4/sn), Ö75 (bağlayıcı kitaplıkları), Ö76
-(gecikmeli kipte saat kaynağı). Açık: A47–A51.
+(gecikmeli kipte saat kaynağı). Açık: A47–A52.
 
 ## 10. Öneriler (kapsam dışı, yapılmadı)
 
@@ -149,11 +149,36 @@ ayrışması (A47).
 - `live-<uç>.halted` için insan onaylı sıfırlama komutu.
 - `scripts/qapsule-gh.env` izlenmesi (eski öneri) korunuyor.
 
-## 11. Disk
+## 11. Disk ve saklama
 
-<!-- clean.sh sonrası doldurulur -->
+`scripts/clean.sh` round sonunda çalıştı: worktree'lerin hepsi kaldırıldı (`git worktree list` yalnız ana ağaç; dallar `r6/*` adlarıyla duruyor), eski profiller ve artımlı önbellek silindi. Kalan: `target/` 17 GB, `.claude/worktrees/` 28 KB, depo toplamı 18 GB (önce ~43 GB). `fixtures/local/` toplamı 123 MB (canlı kayıtlar 86 MB).
 
-## 12. Arkin için: canlı gösterimi nasıl açarım
+**Ham kayıt saklama kuralı (öneri):** `fixtures/local/live/raw/` altındaki kayıtlar 30 gün tutulur,
+toplam 2 GB'ı aşarsa en eskiler silinir; M22/M23 kanıtı olan kayıtlar (bu round: L2d ve L6) ilgili
+karar verilene kadar saklanır. Kayıtlar hiçbir zaman depoya girmez (K23). Bugün: 86 MB.
+
+**Not (denetim B7):** farklı commit'lerdeki worktree'ler aynı `CARGO_TARGET_DIR`'ı paylaşınca cargo'nun
+zaman damgasına dayalı yeniden derleme denetimi eski commit'in çıktısını yeniden kullanabiliyor (Ö61'in
+gerekçesiyle aynı); denetimde replica derlemesi bu yüzden hata verdi. K56 uygulamasında görev başına
+ayrı `target/wt/<görev>` kuralı korunmalı.
+
+## 12. Bağımsız denetim ve koşulları
+
+`AUDIT.md`: **koşullu kabul**, engelleyici yok; verify 18/18 (denetçinin worktree'sinde), 883 test, kayıttan
+yeniden üretim (replay bayt eşit, M22 tablosu basamağına kadar aynı), protolar 22/22, `quantex` durumu
+aynı, depo taraması 0 gerçek bulgu.
+
+| Koşul | Durum |
+|---|---|
+| B1 — kilit çalışma köküne bağlıydı (worktree'den iki süreç) | **Kapatıldı** (13d9cec): bütün canlı komutlar `qp_live::lock::default_lock_dir()` (ana ağacın `fixtures/local`). |
+| B2 — kilit belirteç isteğinden sonra; `bars/symbols` kilitsiz | **Kapatıldı** (13d9cec): belirteç isteyen her süreç önce makine çapında kimlik kilidini alır (`live-identity.lock`), test `identity_lock_is_exclusive`. |
+| B3 — market ucunda çoklu bağlantı bildirimi gelemez; açıklanamayan sunucu kapatmasında geri çekilip yeniden bağlanılıyor | **Arkin kararı (A52).** Öneri: sunucunun bağlantıyı açıklamasız kapatması 10 dk içinde 2 kez olursa dur (`Halted`), insan onayı iste. Round boyunca açıklanamayan sunucu kapatması 0. |
+| B4 — L3 kopma nedeni tutarsız | Düzeltildi (LIVE-LOG: yerel ağ, `os error 49`). |
+| B5 — `symbols` u30/utum yazmıyordu; `qp live compare` yolu | Düzeltildi (13d9cec; §13). |
+| B6 — CI atfı, L4c RSS, Disk bölümü, saklama kuralı | Düzeltildi (§3, §6, §11). |
+| B7 — ortak hedef klasörü tuzağı | Not (§11). |
+
+## 13. Arkin için: canlı gösterimi nasıl açarım
 
 1. `.env.local`'da canlı değişkenler dolu olsun (`scripts/live-env.sh` hangisinin eksik olduğunu
    söyler, değer yazmaz). Gecikmeli kip: `MATRIKS_MQTT_MODE=delayed`.
@@ -176,7 +201,7 @@ ayrışması (A47).
    ```sh
    scripts/live.sh record --symbols @fixtures/local/live/u30.txt --seconds 31800
    scripts/live.sh bars --symbols @fixtures/local/live/u30.txt --period 1min --start <gün> --unadjusted   # 1min, 5min, 1hour, 1day için tekrarla
-   qp live compare --raw fixtures/local/live/raw/<kayıt>.qpraw
+   scripts/live.sh compare --raw fixtures/local/live/raw/<kayıt>.qpraw
    ```
 8. **Anlık kip** için `.env.local`'da `MATRIKS_MQTT_MODE=realtime` yap ve haber ver; aynı denemeleri
    (L1–L6) anlık uçta tekrarlarım.

@@ -295,4 +295,5 @@ R6 bu satırları **önerir**; ölçümler `rounds/R6/REPORT.md` ve `experiments
 | A48 | Kapanış emir toplama (18:00–18:10) sırasında genel durum satırı "Seans kapalı" yerine "kapanış seansında" mı demeli? | RD2 / R7 | L6 kapanış gözlemi. |
 | A49 | Anlık kip (`realtime`): `mx/timestamp`, eksiz konu, ileti hızı ve gecikme | Arkin kipi değiştirince | Gecikmeli kipte ölçüldü yalnız. |
 | A50 | Belirteç süresi dolunca açık bağlantı düşer mi (en uzun oturum 2 sa 13 dk, düşmedi)? Belirtecin ömrü? | Uzun oturum | L6. |
+| A52 | Market ucunda çoklu bağlantı bildirimi (`mx/messenger`) alınamıyor; açıklanamayan sunucu kapatmasında bağlayıcı geri çekilip yeniden bağlanıyor. Öneri: 10 dk içinde 2 açıklamasız kapatmada dur ve insan onayı iste. | Arkin | `AUDIT.md` B3. |
 | A51 | `MATRIKS_HARDWARE_ID` `qapsule-` önekiyle başlamıyor (uyarı); değer Arkin'in seçimi, çakışma görülmedi. Önek zorunlu olsun mu? | Arkin | Her denemede uyarı. |

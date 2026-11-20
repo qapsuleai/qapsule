@@ -11,7 +11,7 @@ belirteçler burada yazılmaz; yalnız değişken adları (K61). Ölçümler ve 
 |---|---|---|---|
 | Matriks çözücü | `qp-matriks` | yok | 22 Matriks protosunun bayt eşit kopyası (`proto/`, köken `proto/PROVENANCE.md`), derlemede üretilen prost tipleri (`protox` + `prost-build`, protoc gerekmez); fiyat kartı kitabı (`SymbolBook`, protobuf birleştirme anlamı: **gelmeyen alan değişmedi**, 0 yazılmaz); borsa saati (`MarketClock`, yalnız `MX` kaynağı); bildirim sınıflayıcı (`MULTICONNECT`); seans evresi tablosu (`stockStatus`); ham ileti kaydı (`rawlog`); ortak besleme hattı (`feed::LiveFeed`). |
 | Canlı bar üretici | `qp-source::livebar` | yok | Fiyat kartından XIST takvimine hizalı bar (K14): açılış emir toplama günün ilk barına, kapanış seansı son barına; hacim günlük birikimli tutarın farkı; yöntemler `Ticks`, `CardDaily`, `Mixed`; ek yeri (`resume`); `compare_bars`. |
-| Canlı bağlayıcı | `qp-live` | **var** | Belirteç (bellekte, istek sıklığı sınırlı), MQTT 3.1 (`MQIsdp`, WebSocket alt protokolü `mqttv3.1`) WebSocket + TLS (rustls + ring, sertifika doğrulaması açık) üstünde, kendi küçük MQTT kodlayıcısı; uç nokta başına tek bağlantı (süreç içi kayıt + `fixtures/local/live-<uç>.lock` işletim sistemi kilidi); çoklu bağlantı bildiriminde dur ve yeniden deneme yok (`.halted` işaret dosyası); üstel geri çekilme (2→60 sn, 6 ardışık hatada dur); günlük maskeleme (`Redactor`); REST istemcisi (`rest::RestClient`: kesin barlar ve sembol listesi, aynı servis belirteciyle); sahte sunucu (`mock` özelliği). |
+| Canlı bağlayıcı | `qp-live` | **var** | Belirteç (bellekte, istek sıklığı sınırlı), MQTT 3.1 (`MQIsdp`, WebSocket alt protokolü `mqttv3.1`) WebSocket + TLS (rustls + ring, sertifika doğrulaması açık) üstünde, kendi küçük MQTT kodlayıcısı; uç nokta başına tek bağlantı (süreç içi kayıt + ana ağacın `fixtures/local/live-<uç>.lock` işletim sistemi kilidi; ayrıca belirteç isteyen her süreç için makine çapında `live-identity.lock`); çoklu bağlantı bildiriminde dur ve yeniden deneme yok (`.halted` işaret dosyası); üstel geri çekilme (2→60 sn, 6 ardışık hatada dur); günlük maskeleme (`Redactor`); REST istemcisi (`rest::RestClient`: kesin barlar ve sembol listesi, aynı servis belirteciyle); sahte sunucu (`mock` özelliği). |
 | CLI ve gösterim | `qp-cli` | var | `qp live record|inspect|symbols|bars|compare`, `qp replay --raw`, `qp demo --live`. |
 
 `qp-wasm` (cihaz paketi) bu crate'lerin hiçbirine bağlanmaz; hesap çekirdeği (`qp-compute`)
@@ -84,6 +84,7 @@ qp demo (SSE, görüntüleyici: yalnız açık enstrümanın verisi; piyasa duru
 
 | Belirti | Neden / ne yapılır |
 |---|---|
+| `… another qp process holds the Matriks identity` | Belirteç isteyen başka bir `qp` süreci (record, symbols, bars, demo --live) çalışıyor; kimlik kilidi `fixtures/local/live-identity.lock` (ana ağaç). Aynı kimlikle eşzamanlı belirteç istenmez. |
 | `lock: endpoint … is locked by another process (pid N)` | Aynı makinede başka bir Qapsule süreci bağlı. O süreci kapatın; ikinci bağlantı açmayın. |
 | `HALTED (multi-connect)` | Aynı kimlikle başka bir oturum aynı uç noktaya bağlandı. Yeniden denemeyin; Arkin'e bildirin. `fixtures/local/live-<uç>.halted` dosyası notla sıfırlanana kadar bağlantı açılmaz. |
 | `subscription refused mx/timestamp (code 0x80)` | Gecikmeli uçta borsa saati konusu yok (ölçüldü). Saat `updateDate`'ten ve takvimden kurulur. |

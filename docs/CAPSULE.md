@@ -231,7 +231,8 @@ yok; yetkisize rakamsız) `qp_capsule::realize::parts`'tadır; başlığın kend
 (M8) işidir.
 
 **Satır zamanı (RP4/T7).** Bağlantı isterse (`style` `clock`, sunum kabuğu açık açar) kapsül
-satırının başlığı ve hikâye çizelgesinin şerit etiketi olayın zamanıyla başlar:
+satırının başlığı olayın zamanıyla başlar, hikâye çizelgesinin şerit etiketi onu olaydan sonra
+taşır:
 `qp_capsule::realize::stamp` gün içi periyotta ve olay "şimdi"yle aynı gündeyse `14:35`, değilse
 tarih (`12 Kas` / `Nov 12`); günlük periyotta hep tarih. Olay, açık hikâyede doğuş, kapanmışta
 kapanış barıdır (başlığın "ne zaman"ının söylediği an). Yetkisize verilmez (K33). Kapalıyken

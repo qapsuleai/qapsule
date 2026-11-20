@@ -134,14 +134,15 @@ pub(crate) fn story_voice(
     let p = parts(story, now_t, validity, &calendar, period, redacted);
     // (RP4/T7) The row's time before the headline, when the connection asked for it
     // (`clock`: `Some(display zone)`); never for a redacted reader (K33).
-    let stamp = clock
+    let stamps = clock
         .filter(|_| !redacted)
         .and_then(|tz| story_event_t(story).map(|ev| (ev, tz)))
         .map(|(ev, tz)| {
             let zone = tz
                 .and_then(qp_calendar::Zone::get)
                 .unwrap_or_else(|| calendar.zone());
-            qp_capsule::realize::stamp::stamp(zone, period, ev, now_t, lang_of(lang))
+            [Lang::Tr, Lang::En]
+                .map(|l| qp_capsule::realize::stamp::stamp(zone, period, ev, now_t, l))
         });
     let [tr, en] =
         crate::capsule::with_sentence_input(story, facts, bars, now, redacted, memo, |s| {
@@ -152,16 +153,14 @@ pub(crate) fn story_voice(
                     parts: &p,
                     calendar: &calendar,
                     period,
+                    stamp: stamps.as_ref().map(|[t, e]| [t.as_str(), e.as_str()]),
                 },
             )
         })??;
-    let mut s = match lang {
+    let s = match lang {
         Language::Tr => tr,
         Language::En => en,
     };
-    if let Some(st) = stamp {
-        s.headline = qp_capsule::realize::stamp::with_stamp(&st, &s.headline);
-    }
     Some(CapsuleVoice {
         voice: voice.to_owned(),
         face: qp_capsule::voice::text_face(&s),

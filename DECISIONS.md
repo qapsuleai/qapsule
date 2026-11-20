@@ -302,3 +302,10 @@ R6 bu satırları **önerir**; ölçümler `rounds/R6/REPORT.md` ve `experiments
 | A50 | Belirteç süresi dolunca açık bağlantı düşer mi (en uzun oturum 2 sa 13 dk, düşmedi)? Belirtecin ömrü? | Uzun oturum | L6. |
 | A52 | Market ucunda çoklu bağlantı bildirimi (`mx/messenger`) alınamıyor; açıklanamayan sunucu kapatmasında bağlayıcı geri çekilip yeniden bağlanıyor. Öneri: 10 dk içinde 2 açıklamasız kapatmada dur ve insan onayı iste. | Arkin | `AUDIT.md` B3. |
 | A51 | `MATRIKS_HARDWARE_ID` `qapsule-` önekiyle başlamıyor (uyarı); değer Arkin'in seçimi, çakışma görülmedi. Önek zorunlu olsun mu? | Arkin | Her denemede uyarı. |
+
+## RP4 önerileri — T7 (satır zamanı, A48); numaralar bütünleştirmede verilir
+
+| # | Öneri | Gerekçe |
+|---|-------|---------|
+| Ö-T7a | **A48 kapatılır:** kapanış emir toplamada genel satır "Kapanış seansında" / "Closing auction" der (durum `closed`, kabuk görünümü aynı). Karar fiyat kartlarının evrelerinden: evreli enstrümanların yarıdan çoğu `closing_session(_wo_eq)` ise; takvimin `open`'ı ne derse desin, tatil ve bayat veri önce gelir (`qp_capsule::market::in_closing_auction`). | R6 L6: 18:00'da takvim `open: false`, bütün semboller kapanış evresinde (5) iken ekran "Seans kapalı" dedi. Testler `market.rs`, `qp-wasm/tests/market_r6.rs`. Canlı doğrulama ilk iş gününde 18:00–18:10. |
+| Ö-T7b | **Satır zamanı adlandırılmış seçenek arkasında:** `style` `clock` / `ViewState.clock` (varsayılan kapalı; protokol dökümleri bayt eşit); sunum kabuğu açar (`ShellCore::presented_look`), `?clock=0` kapatır. Zaman: açık hikâyede doğuş, kapanmışta kapanış barının açılış zamanı; gün içinde ve bugünse `SS:DD`, değilse tarih; "şimdi" serinin son barı; gösterim dilimi dokümanın `display_tz`'si, yoksa borsanınki. Ses başlığının başına (ses 80 karakter sınırını zamanla birlikte korur), `korda` şerit etiketinin olaydan sonrasına. Yetkisize yok (K33). | Var olan altınlar (v1, v2) ve dökümler bayt eşit kaldı; yeni görünüm yeni altınlarla (`fixtures/golden/demo/p4-*`). `rounds/RP4/experiments/T7.md`. |

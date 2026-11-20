@@ -99,6 +99,14 @@ pub fn speak(inp: &SentenceInput<'_>, parts: &Parts, lang: Lang) -> Voice {
 /// both carry the same numbers.
 #[must_use]
 pub fn speak_both(inp: &SentenceInput<'_>, parts: &Parts) -> [Voice; 2] {
+    speak_both_in(inp, parts, MAX_HEADLINE)
+}
+
+/// (RP4/T7) [`speak_both`] with the headline kept within `room` characters (a row stamp
+/// goes before it, `crate::voice::Input::stamp`).
+#[must_use]
+pub fn speak_both_in(inp: &SentenceInput<'_>, parts: &Parts, room: usize) -> [Voice; 2] {
+    let room = room.min(MAX_HEADLINE);
     let f = Frame::new(inp, parts);
     let langs = [Lang::Tr, Lang::En];
 
@@ -106,7 +114,7 @@ pub fn speak_both(inp: &SentenceInput<'_>, parts: &Parts) -> [Voice; 2] {
     // numbers and both (or neither) say when; otherwise one level for both.
     let fit = |l: Lang| {
         (0..HEAD_LEVELS)
-            .find(|&lv| len(&headline(&f, l, lv)) <= MAX_HEADLINE)
+            .find(|&lv| len(&headline(&f, l, lv)) <= room)
             .unwrap_or(HEAD_LEVELS - 1)
     };
     let (lt, le) = (fit(Lang::Tr), fit(Lang::En));

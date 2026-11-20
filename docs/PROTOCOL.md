@@ -412,8 +412,9 @@ aynı adlarla aynı sahneyi derler.
 - (RP4/T7) `clock`: `ViewState.clock` (varsayılanda yok). Açıkken satırlar olayın zamanını
   taşır (`qp_capsule::realize::stamp`): bir dil seçiliyse kapsül öğesinin `voice.headline`'ı
   "`<zaman> · `" ile başlar (yüz ve açılmış kart aynı başlığı çizer; `voice.face` yeniden
-  kurulur), hikâye çizelgesinin (`korda`) şerit etiketleri de aynı zamanla başlar
-  (`Session::row_stamp`). Zaman, satırın olayıdır: açık hikâyede doğuş, kapanmışta kapanış
+  kurulur; ses zamanla birlikte başlığı kendi 80 karakter sınırında tutar, gerekirse daha kısa
+  başlık biçimini seçer), hikâye çizelgesinin (`korda`) şerit etiketleri de aynı zamanı taşır (olaydan sonra; etiket
+  sığmazsa kesilen uç zamandır, şeridin yeri zamanı zaten gösterir; `Session::row_stamp`). Zaman, satırın olayıdır: açık hikâyede doğuş, kapanmışta kapanış
   barı (barın açılış zamanı). Gün içi periyotta ve "şimdi"yle aynı gündeyse `SS:DD`, değilse
   tarih (`12 Kas` / `Nov 12`; başka yılsa yılıyla); günlük, haftalık, aylık periyotta tarih.
   "Şimdi" serinin son barıdır (verinin saati; sistem saati değil). Gösterim saat dilimi

@@ -3,8 +3,9 @@
 //!
 //! - Without `clock` (absent or `false`) every answer is byte-identical to before.
 //! - With `clock`, a voiced capsule's headline starts with its stamp (`14:35 · …` on
-//!   today's intraday bars, else the date), the rest unchanged; the same stamp as the
-//!   story chart's row (`Session::row_stamp`).
+//!   today's intraday bars, else the date) and stays within the voice's 80 characters
+//!   (the same headline when it fits, else a shorter form); the same stamp as the story
+//!   chart's row (`Session::row_stamp`).
 //! - A redacted reader gets no stamp (K33).
 //! - "Now" is the data's (the series' last bar): the same answer twice.
 
@@ -155,11 +156,20 @@ fn clock_puts_the_stamp_before_the_headline() {
         let (p, t) = (voiced(&plain), voiced(&timed));
         assert!(!p.is_empty());
         assert_eq!(p.len(), t.len());
-        let (mut clocks, mut dates) = (0, 0);
+        let (mut clocks, mut dates, mut same) = (0, 0, 0);
         for ((pid, ph), (tid, th)) in p.iter().zip(&t) {
             assert_eq!(pid, tid);
             let (stamp, rest) = th.split_once(" · ").expect("a stamp");
-            assert_eq!(rest, ph, "only the stamp is added");
+            // The voice keeps the whole within its headline limit: the same headline when
+            // it fits beside the stamp, else a shorter form of it.
+            let n = |x: &str| x.chars().count();
+            assert!(n(th) <= 80, "{th}");
+            // (The voice chooses one form for both languages, so a headline that would
+            // fit may still take the other language's shorter form.)
+            assert!(n(rest) <= n(ph), "{rest:?} / {ph:?}");
+            if rest == ph {
+                same += 1;
+            }
             assert!(is_stamp(stamp, l), "{stamp:?} in {th:?}");
             if stamp.contains(':') {
                 clocks += 1;
@@ -168,6 +178,10 @@ fn clock_puts_the_stamp_before_the_headline() {
             }
         }
         assert!(dates > 0, "daily capsules carry their date");
+        assert!(
+            same > 0,
+            "a headline that fits beside its stamp is kept as it was"
+        );
         // Only the headline changes: the text face is rebuilt from it, the rest is equal.
         for (a, b) in plain.iter().zip(&timed) {
             let (va, vb) = (a.voice.as_ref().unwrap(), b.voice.as_ref().unwrap());

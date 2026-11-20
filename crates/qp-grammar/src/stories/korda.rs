@@ -646,18 +646,20 @@ impl Draw<'_> {
         }
     }
 
-    /// A lane's label: what happened and how it stands (and the coin-flip mark), after
-    /// its time when the rows carry one (RP4/T7).
+    /// A lane's label: what happened and how it stands, then its time when the rows carry
+    /// one (RP4/T7; last, so a label cut to its room keeps what happened — the lane's
+    /// place on the time axis says when too), then the coin-flip mark.
     fn label(&self, r: &StoryRow) -> String {
         let mut s = format!("{} · {}", r.face.event, r.face.validity_phrase);
+        if let Some(t) = self.stamp_of.and_then(|f| f(r)) {
+            s.push_str(" · ");
+            s.push_str(&t);
+        }
         if r.coin_flip {
             s.push_str(" · ");
             s.push_str(words(self.lang).coin);
         }
-        match self.stamp_of.and_then(|f| f(r)) {
-            Some(t) => format!("{t} · {s}"),
-            None => s,
-        }
+        s
     }
 
     fn label_px(&self) -> f64 {

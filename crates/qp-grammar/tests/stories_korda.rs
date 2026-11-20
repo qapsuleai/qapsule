@@ -507,8 +507,8 @@ fn timing_probe() {
     }
 }
 
-/// (RP4/T7) With the rows' time (`StoryInput::stamp_of`) every lane's label starts with
-/// its stamp and nothing else changes; without it the scene is byte-identical to before.
+/// (RP4/T7) With the rows' time (`StoryInput::stamp_of`) every lane's label carries its
+/// stamp (after what happened) and nothing else changes; without it the scene is byte-identical to before.
 #[test]
 fn rows_carry_their_time_only_when_asked() {
     let rs = rows(5);
@@ -532,11 +532,17 @@ fn rows_carry_their_time_only_when_asked() {
     assert_eq!(a.len(), b.len());
     for (x, y) in a.iter().zip(&b) {
         let r = rs.iter().find(|r| x.id.ends_with(&r.id)).expect("row");
-        let want = format!("{} · {}", stamp(r).unwrap(), x.label.as_deref().unwrap());
+        let plain = x.label.as_deref().unwrap();
+        let t = stamp(r).unwrap();
+        // After what happened and how it stands, before the coin-flip mark.
+        let want = match plain.strip_suffix(" · yazı tura") {
+            Some(head) => format!("{head} · {t} · yazı tura"),
+            None => format!("{plain} · {t}"),
+        };
         assert_eq!(y.label.as_deref(), Some(want.as_str()));
         assert_eq!(x.items, y.items, "the lane's geometry is the same");
     }
-    // The drawn labels carry it too (the selected story's at least).
+    // The drawn labels carry it too (where the room allows).
     let texts: Vec<&str> = panel(&s)
         .layers
         .iter()
@@ -546,10 +552,7 @@ fn rows_carry_their_time_only_when_asked() {
             _ => None,
         })
         .collect();
-    assert!(
-        texts.iter().any(|t| t.len() > 5 && t.as_bytes()[2] == b':'),
-        "{texts:?}"
-    );
+    assert!(texts.iter().any(|t| t.ends_with(":30")), "{texts:?}");
     // No stamp for a row (a redacted one): its label as before.
     let none = |_: &StoryRow| None;
     let s2 = korda::scene(

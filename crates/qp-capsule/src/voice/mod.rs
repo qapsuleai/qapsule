@@ -87,6 +87,10 @@ pub struct Input<'a> {
     pub calendar: &'a ExchangeCalendar,
     /// The bar period of the story's series.
     pub period: Period,
+    /// (RP4/T7) The row's time stamp (`[tr, en]`, `crate::realize::stamp`) to put before
+    /// the headline (`"<stamp> · <headline>"`); the voice keeps the whole within its
+    /// headline limit. `None`: the headline as before.
+    pub stamp: Option<[&'a str; 2]>,
 }
 
 /// The surfaces of voice `name` in Turkish and English (`[tr, en]`); `None` for `r4`
@@ -98,7 +102,17 @@ pub struct Input<'a> {
 /// such as "20 günlük") is turned into number words here ([`unnumber`]).
 #[must_use]
 pub fn speak(name: &str, inp: &Input<'_>) -> Option<[Surfaces; 2]> {
-    let out = speak_raw(name, inp)?;
+    let out = match inp.stamp {
+        None => speak_raw(name, inp, marla::MAX_HEADLINE)?,
+        Some(st) => {
+            // The stamp and its separator take their characters off the headline's room.
+            let take = st.iter().map(|s| s.chars().count()).max().unwrap_or(0) + 3;
+            let [mut tr, mut en] = speak_raw(name, inp, marla::MAX_HEADLINE.saturating_sub(take))?;
+            tr.headline = crate::realize::stamp::with_stamp(st[0], &tr.headline);
+            en.headline = crate::realize::stamp::with_stamp(st[1], &en.headline);
+            [tr, en]
+        }
+    };
     if !(inp.sentence.redacted || inp.parts.redacted) {
         return Some(out);
     }
@@ -169,10 +183,10 @@ pub fn unnumber(text: &str, sym: &str, lang: Lang) -> String {
     out
 }
 
-fn speak_raw(name: &str, inp: &Input<'_>) -> Option<[Surfaces; 2]> {
+fn speak_raw(name: &str, inp: &Input<'_>, room: usize) -> Option<[Surfaces; 2]> {
     match name {
-        "marla" => Some(marla::speak_both(inp.sentence, inp.parts).map(|v| {
-            Surfaces {
+        "marla" => Some(
+            marla::speak_both_in(inp.sentence, inp.parts, room).map(|v| Surfaces {
                 headline: v.headline,
                 detail: v.detail,
                 ledger: v.ledger,
@@ -184,15 +198,18 @@ fn speak_raw(name: &str, inp: &Input<'_>) -> Option<[Surfaces; 2]> {
                         text: g.text,
                     })
                     .collect(),
-            }
-        })),
+            }),
+        ),
         "selvi" => {
-            let v = selvi::speak(&selvi::VoiceInput {
-                sentence: inp.sentence,
-                parts: inp.parts,
-                calendar: inp.calendar,
-                period: inp.period,
-            });
+            let v = selvi::speak_in(
+                &selvi::VoiceInput {
+                    sentence: inp.sentence,
+                    parts: inp.parts,
+                    calendar: inp.calendar,
+                    period: inp.period,
+                },
+                room,
+            );
             Some([Lang::Tr, Lang::En].map(|l| {
                 let s = v.get(l);
                 Surfaces {

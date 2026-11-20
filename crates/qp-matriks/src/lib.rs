@@ -15,6 +15,8 @@
 //! - [`notice`]: `MessengerMessage` classification (multi-connect = stop).
 //! - [`status`]: `stockStatus` codes → session phase ("seans evresi").
 //! - [`rawlog`]: binary, appendable raw message log for record and replay.
+//! - [`trade`]: `TradeMessage` → [`Trade`] (level 1 only; buyer / seller never kept),
+//!   configurable time unit, de-duplication key, the [`TradeHistory`] repair interface.
 //! - [`feed`]: [`LiveFeed`], the one pipeline from raw records to §18.4 data events,
 //!   shared by the live connector and replay.
 
@@ -39,6 +41,7 @@ pub mod rawlog;
 pub mod status;
 pub mod symbol;
 pub mod topic;
+pub mod trade;
 pub mod wire;
 
 pub use clock::{decode_time, ClockEvent, MarketClock, TimeTick};
@@ -51,7 +54,14 @@ pub use notice::{classify_notice, BrokerNotice, NoticeInfo};
 pub use rawlog::{RawError, RawReader, RawRecord, RawWriter, RecordKind};
 pub use status::{session_phase, SessionPhase, SESSION_PHASES};
 pub use symbol::{InitialPolicy, SymbolBook, SymbolUpdate, UpdateKind};
-pub use topic::{parse_topic, Topic};
+pub use topic::{
+    parse_topic, trade_topic, trade_topic_at, trade_topics, Topic, TopicError, TradeLevel,
+    TradeStream,
+};
+pub use trade::{
+    decode_trade, sanitize_trade_payload, Aggressor, Trade, TradeDecodeConfig, TradeError,
+    TradeHistory, TradeKey, TradeTimeUnit,
+};
 
 /// Decoding error for a Matriks payload.
 #[derive(Debug, Clone, PartialEq, Eq)]

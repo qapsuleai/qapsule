@@ -169,6 +169,7 @@ fn draw(
         hide_closed: hide,
         lang: Language::Tr,
         fact_of: &fact_of,
+        stamp_of: None,
     };
     (pavka::DESIGN.extend)(look, theme, chart(range.0, range.1), H, &inp)
 }

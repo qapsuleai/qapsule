@@ -75,6 +75,8 @@ const ui = {
   story: params.get('story') || '',
   // (R5/M20) The open capsule design (`?open=tesir`; the core's default: `r4`, today's).
   open: params.get('open') || '',
+  // (RP4/T7) Rows carry the event's time (`1`, the presentation's; `0`: as before).
+  clock: params.get('clock') || '',
   // (R5/M21) The motion design (`?motion=`, names from `choices().motion`) and reduced
   // motion: the address or the settings page override the system setting, which the page
   // only forwards to the core (the core decides what moves). (R5/S) One parameter,
@@ -220,7 +222,7 @@ function start(frame) {
   if (ui.theme === 'light' || ui.alphabet || ui.face) core.set_style(ui.face, ui.alphabet, ui.theme);
   // (R5/S) `face` goes with the look too: a look brings its companion face unless the
   // reader named one (the core decides).
-  if (ui.feed || ui.transition || ui.outcome || ui.look || ui.feed_order || ui.feed_rule || ui.voice || ui.story || ui.open || ui.motion) core.set_look(JSON.stringify({ face: ui.face, feed: ui.feed, transition: ui.transition, outcome: ui.outcome, look: ui.look, feed_order: ui.feed_order, feed_rule: ui.feed_rule, voice: ui.voice, story: ui.story, open: ui.open, motion: ui.motion }));
+  if (ui.feed || ui.transition || ui.outcome || ui.look || ui.feed_order || ui.feed_rule || ui.voice || ui.story || ui.open || ui.motion || ui.clock) core.set_look(JSON.stringify({ face: ui.face, feed: ui.feed, transition: ui.transition, outcome: ui.outcome, look: ui.look, feed_order: ui.feed_order, feed_rule: ui.feed_rule, voice: ui.voice, story: ui.story, open: ui.open, motion: ui.motion, clock: ui.clock }));
   core.set_reduced_motion(reducedMotion());
   if (ui.watch || ui.long || ui.short || ui.group) core.set_audience(JSON.stringify({ group: ui.group, watch: ui.watch, long: ui.long, short: ui.short }));
   if (ui.seen) core.seen_at(ui.seen);

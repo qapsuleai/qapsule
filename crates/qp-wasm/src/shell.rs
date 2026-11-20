@@ -877,7 +877,8 @@ impl ShellCore {
         }
     }
 
-    /// (R4/S1) The `style` gesture of the presentation's defaults: feed layout, depth
+    /// (R4/S1) The `style` gesture of the presentation's defaults (RP4/T7: and the rows'
+    /// time, `clock`): feed layout, depth
     /// transition and outcome mark picked in M9–M11 (`qp_grammar::feeds::PRESENTED_FEED`,
     /// `transitions::PRESENTED_TRANSITION`, `glyph::outcome::PRESENTED_OUTCOME`) and the
     /// face (`qp_grammar::faces::PRESENTED_FACE`). (R5/S) R5's picks: the look and its
@@ -897,7 +898,9 @@ impl ShellCore {
                "voice": qp_session::voices::PRESENTED_VOICE,
                "look": qp_grammar::look::PRESENTED_LOOK,
                "story": qp_grammar::stories::PRESENTED_STORY,
-               "open": qp_grammar::open::PRESENTED_OPEN})
+               "open": qp_grammar::open::PRESENTED_OPEN,
+               // (RP4/T7) Rows carry the event's time (`?clock=0`: as before).
+               "clock": true})
     }
 
     fn id(&mut self, prefix: &str) -> String {
@@ -2322,6 +2325,13 @@ impl ShellCore {
         // (R5/M18, K54) Show or hide the closed stories of the story chart.
         if let Some(b) = choice.get("hide_closed").and_then(Value::as_bool) {
             g["hide_closed"] = json!(b);
+        }
+        // (RP4/T7) Rows carry the event's time: `true`/`false`, or the URL's `"1"`/`"0"`
+        // (`""`: unchanged).
+        match choice.get("clock") {
+            Some(Value::Bool(b)) => g["clock"] = json!(b),
+            Some(Value::String(v)) if v == "1" || v == "0" => g["clock"] = json!(v == "1"),
+            _ => {}
         }
         // (R5/S) A look brings its companion face, unless the same choice names a face.
         if g.get("face").is_none() {

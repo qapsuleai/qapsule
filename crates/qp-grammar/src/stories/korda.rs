@@ -491,6 +491,7 @@ pub fn scene(
         b: sc.x.to_bar,
         price_top,
         lang: inp.lang,
+        stamp_of: inp.stamp_of,
     };
     let mut layers: Vec<SceneLayer> = Vec::new();
     // Lanes, top to bottom: selected, open, closed (closed painted first).
@@ -576,6 +577,8 @@ struct Draw<'a> {
     b: u64,
     price_top: i32,
     lang: Language,
+    /// (RP4/T7) The rows' time stamps ([`StoryInput::stamp_of`]).
+    stamp_of: Option<&'a super::StampFn<'a>>,
 }
 
 #[allow(clippy::cast_possible_truncation)]
@@ -640,6 +643,20 @@ impl Draw<'_> {
             align: Align::Left,
             font: self.look.scene_font("label"),
             role: self.roles.then(|| "label".to_owned()),
+        }
+    }
+
+    /// A lane's label: what happened and how it stands (and the coin-flip mark), after
+    /// its time when the rows carry one (RP4/T7).
+    fn label(&self, r: &StoryRow) -> String {
+        let mut s = format!("{} · {}", r.face.event, r.face.validity_phrase);
+        if r.coin_flip {
+            s.push_str(" · ");
+            s.push_str(words(self.lang).coin);
+        }
+        match self.stamp_of.and_then(|f| f(r)) {
+            Some(t) => format!("{t} · {s}"),
+            None => s,
         }
     }
 
@@ -808,11 +825,7 @@ impl Draw<'_> {
         // line; a full lane's after its end mark or, when there is more room on its life,
         // over the line (on a background patch).
         if above || full {
-            let mut s = format!("{} · {}", r.face.event, r.face.validity_phrase);
-            if r.coin_flip {
-                s.push_str(" · ");
-                s.push_str(words(self.lang).coin);
-            }
+            let s = self.label(r);
             let c = if role == Role::Closed {
                 self.theme.closed
             } else {
@@ -868,11 +881,7 @@ impl Draw<'_> {
             ("open".to_owned(), if l.open { 1.0 } else { 0.0 }),
             ("tier".to_owned(), f64::from(r.tier)),
         ]);
-        let mut label = format!("{} · {}", r.face.event, r.face.validity_phrase);
-        if r.coin_flip {
-            label.push_str(" · ");
-            label.push_str(words(self.lang).coin);
-        }
+        let label = self.label(r);
         SceneLayer {
             id: format!("{STORY_LAYER}{}", r.id),
             mark: Mark::Rule,

@@ -7,12 +7,13 @@
 //!   handshake) before a new one is opened, also for token renewal;
 //! - multi-connect notice = stop: DISCONNECT, no retry, permanent `Halted(MultiConnect)`,
 //!   endpoint banned for the process and by a marker file until a person resets it;
+//! - (A52, K64) unexplained server closes: 2 within a sliding 10 minutes = the same stop
+//!   (`Halted(UnexplainedServerClose)`); what counts is in [`crate::halt`];
 //! - measured reconnects: deterministic exponential back-off, stop after N failures; no new
 //!   token on reconnect unless it expired or the server refused it (CONNACK 4/5, once).
 
 use std::collections::{BTreeSet, VecDeque};
 use std::fmt;
-use std::io::Write as _;
 use std::path::{Path, PathBuf};
 use std::sync::atomic::{AtomicU32, AtomicU64, Ordering};
 use std::sync::mpsc::{self, Receiver, RecvTimeoutError, Sender, TryRecvError};
@@ -26,6 +27,10 @@ use crate::auth::{AccessToken, AuthClient};
 use crate::backoff::{Backoff, BackoffPolicy, BackoffStep};
 use crate::config::{Endpoint, LiveConfig, MqttSettings};
 use crate::error::{AuthError, HaltReason, LiveError, Masked};
+use crate::halt::{
+    halt_status, is_unexplained_server_close, mark_halted, system_clock, Clock, ServerCloseRule,
+    ServerCloseWindow,
+};
 use crate::lock::{default_lock_dir, lock_endpoint, EndpointKey, EndpointLock};
 use crate::mqtt::{Connect, Decoder, Packet, SUBACK_FAILURE};
 use crate::redact::Redactor;
@@ -166,6 +171,9 @@ pub struct ConnectOptions {
     pub poll_interval: Duration,
     /// How long to wait for the server's WebSocket close reply.
     pub close_timeout: Duration,
+    /// (A52) Unexplained server closes that halt, and the clock their window is read on.
+    pub server_close: ServerCloseRule,
+    pub clock: Clock,
 }
 
 impl fmt::Debug for ConnectOptions {
@@ -179,7 +187,8 @@ impl fmt::Debug for ConnectOptions {
             .field("renewal", &self.renewal)
             .field("poll_interval", &self.poll_interval)
             .field("close_timeout", &self.close_timeout)
-            .finish()
+            .field("server_close", &self.server_close)
+            .finish_non_exhaustive()
     }
 }
 
@@ -195,6 +204,8 @@ impl ConnectOptions {
             renewal: TokenRenewal::default(),
             poll_interval: Duration::from_millis(200),
             close_timeout: Duration::from_secs(2),
+            server_close: ServerCloseRule::default(),
+            clock: system_clock(),
         }
     }
 }
@@ -223,53 +234,8 @@ impl ConnState {
     }
 }
 
-// ---------------------------------------------------------------------------------------
-// Multi-connect ban (process registry + marker file).
-
-static BANNED: Mutex<BTreeSet<String>> = Mutex::new(BTreeSet::new());
-
-/// True if the endpoint halted on a multi-connect notice (this process, or the marker file
-/// written by any process) and was not reset.
-pub fn is_multiconnect_halted(lock_dir: &Path, key: &EndpointKey) -> bool {
-    BANNED
-        .lock()
-        .unwrap_or_else(|e| e.into_inner())
-        .contains(key.as_str())
-        || key.halt_marker(lock_dir).exists()
-}
-
-fn ban_endpoint(lock_dir: &Path, key: &EndpointKey) {
-    BANNED
-        .lock()
-        .unwrap_or_else(|e| e.into_inner())
-        .insert(key.as_str().to_string());
-    let at = SystemTime::now()
-        .duration_since(UNIX_EPOCH)
-        .map(|d| d.as_secs())
-        .unwrap_or(0);
-    if let Ok(mut f) = std::fs::File::create(key.halt_marker(lock_dir)) {
-        let _ = writeln!(
-            f,
-            "halted=multiconnect\nendpoint={key}\nat_unix={at}\npid={}\n\
-             Remove only after a person checked why (qp_live::conn::reset_multiconnect_halt).",
-            std::process::id()
-        );
-    }
-}
-
-/// Explicit, person-confirmed reset of a multi-connect halt. Requires a non-empty note
-/// (who / why); returns false and changes nothing without one.
-pub fn reset_multiconnect_halt(lock_dir: &Path, key: &EndpointKey, operator_note: &str) -> bool {
-    if operator_note.trim().is_empty() {
-        return false;
-    }
-    BANNED
-        .lock()
-        .unwrap_or_else(|e| e.into_inner())
-        .remove(key.as_str());
-    let _ = std::fs::remove_file(key.halt_marker(lock_dir));
-    true
-}
+// Person-reset halts (multi-connect, A52): process registry + marker file, in `halt`.
+pub use crate::halt::{is_multiconnect_halted, reset_multiconnect_halt};
 
 // ---------------------------------------------------------------------------------------
 
@@ -325,16 +291,12 @@ impl LiveConnection {
         sink: Arc<dyn LiveSink>,
     ) -> Result<Self, LiveError> {
         let key = endpoint.key();
-        let halted = |key: &EndpointKey| LiveError::Halted {
-            key: key.clone(),
-            reason: HaltReason::MultiConnect,
-        };
-        if is_multiconnect_halted(&opts.lock_dir, &key) {
-            return Err(halted(&key));
+        if let Some(reason) = halt_status(&opts.lock_dir, &key) {
+            return Err(LiveError::Halted { key, reason });
         }
         let lock = lock_endpoint(&opts.lock_dir, &key)?;
-        if is_multiconnect_halted(&opts.lock_dir, &key) {
-            return Err(halted(&key));
+        if let Some(reason) = halt_status(&opts.lock_dir, &key) {
+            return Err(LiveError::Halted { key, reason });
         }
         let lock_file = lock.lock_file().to_path_buf();
         let shared = Arc::new(Shared {
@@ -346,6 +308,7 @@ impl LiveConnection {
         let (tx, rx) = mpsc::channel();
         let redactor = cfg.redactor().clone();
         let topics: BTreeSet<String> = opts.topics.iter().cloned().collect();
+        let server_closes = ServerCloseWindow::new(opts.server_close.clone());
         let worker = Worker {
             key: key.clone(),
             url: endpoint.url().to_string(),
@@ -362,6 +325,7 @@ impl LiveConnection {
             session: 0,
             auth_retry_used: false,
             force_refresh: false,
+            server_closes,
             lock: Some(lock),
         };
         let thread = std::thread::Builder::new()
@@ -515,6 +479,8 @@ struct Worker {
     session: u32,
     auth_retry_used: bool,
     force_refresh: bool,
+    /// (A52) Unexplained server closes in the sliding window.
+    server_closes: ServerCloseWindow,
     // Held until the worker reaches a final state.
     lock: Option<EndpointLock>,
 }
@@ -588,7 +554,13 @@ impl Worker {
                     });
                 }
                 SessionEnd::Lost { reason, stable } => {
+                    let unexplained = is_unexplained_server_close(&reason);
                     self.event(LiveEvent::Disconnected { reason });
+                    if unexplained {
+                        if let Some(halt) = self.server_closes.record((self.opts.clock)()) {
+                            return self.halt(halt);
+                        }
+                    }
                     if stable {
                         backoff.reset();
                     }
@@ -627,10 +599,11 @@ impl Worker {
         }
     }
 
-    /// Bans (multi-connect), releases the locks, then publishes the final `Halted` state.
+    /// Bans (multi-connect, unexplained server closes), releases the locks, then publishes
+    /// the final `Halted` state.
     fn halt(&mut self, reason: HaltReason) {
-        if reason == HaltReason::MultiConnect {
-            ban_endpoint(&self.opts.lock_dir, &self.key);
+        if reason.needs_person_reset() {
+            mark_halted(&self.opts.lock_dir, &self.key, &reason);
         }
         self.lock = None;
         self.shared.set(ConnState::Halted(reason.clone()));
@@ -1076,7 +1049,7 @@ mod tests {
     fn reset_requires_a_note() {
         let dir = tempfile::tempdir().unwrap();
         let key = EndpointKey::new("unit-ban");
-        ban_endpoint(dir.path(), &key);
+        mark_halted(dir.path(), &key, &HaltReason::MultiConnect);
         assert!(is_multiconnect_halted(dir.path(), &key));
         assert!(!reset_multiconnect_halt(dir.path(), &key, "  "));
         assert!(is_multiconnect_halted(dir.path(), &key));

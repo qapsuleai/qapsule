@@ -63,6 +63,27 @@ pub enum LiveCommand {
         /// Raw log file (`*.qpraw`).
         file: PathBuf,
     },
+    /// (RP4/T5, K64) A person's reset of an endpoint halt — a multi-connect notice or
+    /// unexplained server closes (A52) — after they checked why. Removes
+    /// `fixtures/local/live-<key>.halted` only with a non-empty `--note`, which goes with
+    /// the time into `live-<key>.halted.log`. Asks to type the key on a terminal; without
+    /// one it needs `--i-am-human`. An agent never runs this on its own
+    /// (`docs/matriks/LIVE.md`). No network.
+    Reset(ResetArgs),
+}
+
+/// `qp live reset`.
+#[derive(Debug, Args)]
+pub struct ResetArgs {
+    /// Endpoint key as the halt names it (e.g. `delayed-market`).
+    #[arg(long)]
+    pub endpoint: String,
+    /// Who resets and what was checked (required, non-empty).
+    #[arg(long, default_value = "")]
+    pub note: String,
+    /// Confirms a person runs this when there is no terminal to ask on.
+    #[arg(long)]
+    pub i_am_human: bool,
 }
 
 /// `qp live record`.
@@ -92,6 +113,7 @@ pub fn run(cmd: &LiveCommand) -> Result<(), String> {
     match cmd {
         LiveCommand::Record(a) => record(a),
         LiveCommand::Inspect { file } => inspect(file),
+        LiveCommand::Reset(a) => reset(a, &qp_live::lock::default_lock_dir()),
         LiveCommand::Compare(a) => compare(a),
         LiveCommand::Symbols => symbols(),
         LiveCommand::Bars {
@@ -107,6 +129,54 @@ pub fn run(cmd: &LiveCommand) -> Result<(), String> {
             end.as_deref().unwrap_or(start),
             *unadjusted,
         ),
+    }
+}
+
+/// `qp live reset` against the marker directory `dir`.
+fn reset(a: &ResetArgs, dir: &Path) -> Result<(), String> {
+    use std::io::{BufRead as _, IsTerminal as _, Write as _};
+    let key = qp_live::EndpointKey::new(&a.endpoint);
+    if a.note.trim().is_empty() {
+        return Err(format!(
+            "reset {key}: --note is required (who resets, what was checked); nothing changed"
+        ));
+    }
+    let Some(reason) = qp_live::halt::halt_status(dir, &key) else {
+        println!(
+            "reset {key}: not halted ({} absent); nothing changed",
+            key.halt_marker(dir).display()
+        );
+        return Ok(());
+    };
+    println!("{key} halted: {reason}");
+    if !a.i_am_human {
+        let stdin = std::io::stdin();
+        if !stdin.is_terminal() {
+            return Err(format!(
+                "reset {key}: no terminal to confirm on; a person adds --i-am-human \
+                 (an agent never resets a halt on its own); nothing changed"
+            ));
+        }
+        print!("Type the endpoint key `{key}` to confirm that you, a person, reset it: ");
+        let _ = std::io::stdout().flush();
+        let mut line = String::new();
+        stdin
+            .lock()
+            .read_line(&mut line)
+            .map_err(|e| e.to_string())?;
+        if line.trim() != key.as_str() {
+            return Err(format!("reset {key}: not confirmed; nothing changed"));
+        }
+    }
+    match qp_live::halt::reset_halt(dir, &key, &a.note) {
+        Ok(_) => {
+            println!(
+                "reset {key}: halt lifted; note logged in {}",
+                qp_live::halt::halt_log(dir, &key).display()
+            );
+            Ok(())
+        }
+        Err(e) => Err(format!("reset {key}: {e}; nothing changed")),
     }
 }
 
@@ -1386,7 +1456,7 @@ fn merge_diff(acc: &mut qp_source::BarDiff, d: &qp_source::BarDiff) {
 }
 
 #[cfg(test)]
-mod tests {
+pub(crate) mod tests {
     use super::*;
 
     #[test]
@@ -1423,6 +1493,42 @@ mod tests {
         drop(first);
         assert!(identity_lock().is_ok(), "released with its holder");
         std::env::remove_var("QP_LIVE_LOCK_DIR");
+    }
+
+    #[test]
+    fn reset_needs_a_note_and_a_person() {
+        let dir = tempfile::tempdir().unwrap();
+        let key = qp_live::EndpointKey::new("delayed-market");
+        let marker = key.halt_marker(dir.path());
+        std::fs::write(
+            &marker,
+            "halted=unexplained-server-close\ncloses=2\nwindow_secs=600\n",
+        )
+        .unwrap();
+        let args = |note: &str, human: bool| ResetArgs {
+            endpoint: "delayed-market".into(),
+            note: note.into(),
+            i_am_human: human,
+        };
+        let e = reset(&args("  ", true), dir.path()).unwrap_err();
+        assert!(e.contains("--note is required"), "{e}");
+        assert!(marker.exists());
+        // Tests run without a terminal on stdin: the flag is required.
+        if !std::io::IsTerminal::is_terminal(&std::io::stdin()) {
+            let e = reset(&args("checked", false), dir.path()).unwrap_err();
+            assert!(e.contains("--i-am-human"), "{e}");
+            assert!(marker.exists());
+        }
+        reset(&args("Arkin: no other session", true), dir.path()).unwrap();
+        assert!(!marker.exists());
+        let log = std::fs::read_to_string(qp_live::halt::halt_log(dir.path(), &key)).unwrap();
+        assert!(
+            log.contains("RESET previous=unexplained-server-close"),
+            "{log}"
+        );
+        assert!(log.contains("Arkin: no other session"), "{log}");
+        // Not halted: nothing to do.
+        reset(&args("again", true), dir.path()).unwrap();
     }
 
     #[test]

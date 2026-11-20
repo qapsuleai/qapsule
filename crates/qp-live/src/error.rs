@@ -57,6 +57,21 @@ pub enum HaltReason {
     AuthUnavailable,
     /// CONNACK refused the protocol version (1) or client identifier (2): configuration fault.
     ProtocolRejected { code: u8 },
+    /// (A52, K64) The server closed the open connection without explanation `closes` times
+    /// within `window_secs` (no multi-connect notice; not our close, not a local network
+    /// error): possibly another session with the same identity. Kept like `MultiConnect`
+    /// (process registry + marker file) until a person resets it.
+    UnexplainedServerClose { closes: u32, window_secs: u64 },
+}
+
+impl HaltReason {
+    /// True for the halts only a person may lift (marker file + `qp live reset`).
+    pub fn needs_person_reset(&self) -> bool {
+        matches!(
+            self,
+            HaltReason::MultiConnect | HaltReason::UnexplainedServerClose { .. }
+        )
+    }
 }
 
 impl fmt::Display for HaltReason {
@@ -79,6 +94,16 @@ impl fmt::Display for HaltReason {
             HaltReason::ProtocolRejected { code } => write!(
                 f,
                 "server refused protocol or client id (CONNACK {code}); check configuration"
+            ),
+            HaltReason::UnexplainedServerClose {
+                closes,
+                window_secs,
+            } => write!(
+                f,
+                "unexplained server close: the server closed the connection {closes} times \
+                 within {} min without a notice (possibly another session with the same \
+                 identity); not retrying; needs a person to reset",
+                window_secs / 60
             ),
         }
     }

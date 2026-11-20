@@ -3,12 +3,16 @@
 # environment or, if unset, from ./.env.local (never printed, never on a command line).
 # Usage: scripts/live.sh record --symbols THYAO,GARAN,ASELS --seconds 120
 #        scripts/live.sh inspect fixtures/local/live/raw/<file>.qpraw
+#        scripts/live.sh reset --endpoint delayed-market --note "<who, what was checked>"
+#          (RP4/T5, K64: lifts a `.halted` endpoint; a PERSON runs it after checking why —
+#          an agent never does on its own. Asks on a terminal, else needs --i-am-human.
+#          No network, no connection variables.)
 # Only the orchestrator opens a live connection, one at a time (the lock file under
 # fixtures/local/ refuses a second process anyway). Log every attempt in
 # rounds/R6/experiments/LIVE-LOG.md.
 set -euo pipefail
 cd "$(dirname "$0")/.."
-if [ -z "${MATRIKS_TOKEN_SERVICE_URL:-}" ] && [ -f ./.env.local ]; then
+if [ "${1:-}" != "reset" ] && [ -z "${MATRIKS_TOKEN_SERVICE_URL:-}" ] && [ -f ./.env.local ]; then
   set -a
   # shellcheck disable=SC1091
   . ./.env.local >/dev/null 2>&1

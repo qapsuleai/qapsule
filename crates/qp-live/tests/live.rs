@@ -12,6 +12,7 @@ use qp_live::conn::{
     LiveConnection, LiveEvent, TokenRenewal,
 };
 use qp_live::error::{HaltReason, LiveError};
+use qp_live::halt::{halt_log, halt_status, reset_halt, ManualClock, ResetError, ResetOutcome};
 use qp_live::lock::LockError;
 use qp_live::mock::{
     mock_config, test_classifier, BrokerScript, MockBroker, MockTokenService, RecordingSink,
@@ -315,6 +316,175 @@ fn multiconnect_notice_halts_without_retry_until_reset() {
     let conn = rig.open(rig.opts(&["mx/timestamp"])).unwrap();
     assert!(conn.wait_for(WAIT, connected).is_some());
     conn.close().unwrap();
+}
+
+const MIN: Duration = Duration::from_secs(60);
+
+fn a52() -> HaltReason {
+    HaltReason::UnexplainedServerClose {
+        closes: 2,
+        window_secs: 600,
+    }
+}
+
+/// A52 (K64): two unexplained server closes within 10 minutes (sliding; the injected clock
+/// moves 5 minutes, nobody waits) halt for good: no retry, a marker file naming the reason
+/// (not multi-connect), reopening refused before any network activity; only a reset with
+/// a note opens it again.
+#[test]
+fn two_unexplained_server_closes_within_ten_minutes_halt_until_reset() {
+    let rig = Rig::new("t-a52", BrokerScript::default());
+    let clock = ManualClock::new();
+    let mut o = rig.opts(&["mx/timestamp"]);
+    o.clock = clock.clock();
+    let conn = rig.open(o).unwrap();
+    assert!(conn.wait_for(WAIT, connected).is_some());
+    rig.broker.drop_connections();
+    // The first one: back off and reconnect, as before.
+    assert!(conn.wait_for(WAIT, session(2)).is_some());
+    clock.advance(5 * MIN);
+    rig.broker.drop_connections();
+    let st = conn.wait_for(WAIT, halted).unwrap();
+    assert_eq!(st, ConnState::Halted(a52()));
+    std::thread::sleep(Duration::from_millis(1200));
+    assert_eq!(
+        rig.broker.stats().connections_total,
+        2,
+        "no retry after the halt"
+    );
+    assert!(rig.broker.wait_until(WAIT, |s| s.current == 0));
+    let texts = rig.sink.event_texts();
+    assert!(
+        texts.iter().any(|t| t.contains("unexplained server close")),
+        "{texts:?}"
+    );
+    assert!(
+        !texts.iter().any(|t| t.contains("multi-connect")),
+        "{texts:?}"
+    );
+    let key = conn.key().clone();
+    match conn.close() {
+        Err(LiveError::Halted { reason, .. }) => assert_eq!(reason, a52()),
+        other => panic!("expected the halt, got {other:?}"),
+    }
+    // The marker says why (told apart from multi-connect) and is logged.
+    let marker = std::fs::read_to_string(key.halt_marker(rig.dir.path())).unwrap();
+    assert!(
+        marker.contains("halted=unexplained-server-close"),
+        "{marker}"
+    );
+    assert!(marker.contains("closes=2") && marker.contains("window_secs=600"));
+    let log = std::fs::read_to_string(halt_log(rig.dir.path(), &key)).unwrap();
+    assert!(log.contains("HALT unexplained-server-close"), "{log}");
+    match rig.open(rig.opts(&["mx/timestamp"])) {
+        Err(LiveError::Halted { reason, .. }) => assert_eq!(reason, a52()),
+        other => panic!("expected refusal, got {other:?}"),
+    }
+    assert_eq!(rig.broker.stats().connections_total, 2);
+    assert_eq!(rig.tokens.requests(), 1);
+
+    assert_eq!(
+        reset_halt(rig.dir.path(), &key, "   "),
+        Err(ResetError::EmptyNote)
+    );
+    assert!(rig.open(rig.opts(&["mx/timestamp"])).is_err());
+    assert_eq!(
+        reset_halt(rig.dir.path(), &key, "test: a person checked"),
+        Ok(ResetOutcome::Reset { previous: a52() })
+    );
+    assert_eq!(halt_status(rig.dir.path(), &key), None);
+    let log = std::fs::read_to_string(halt_log(rig.dir.path(), &key)).unwrap();
+    assert!(log.contains("note=\"test: a person checked\""), "{log}");
+    let conn = rig.open(rig.opts(&["mx/timestamp"])).unwrap();
+    assert!(conn.wait_for(WAIT, connected).is_some());
+    conn.close().unwrap();
+}
+
+/// Two unexplained closes more than 10 minutes apart: no halt; back-off and reconnect.
+#[test]
+fn unexplained_server_closes_further_apart_do_not_halt() {
+    let rig = Rig::new("t-a52-apart", BrokerScript::default());
+    let clock = ManualClock::new();
+    let mut o = rig.opts(&["mx/timestamp"]);
+    o.clock = clock.clock();
+    let conn = rig.open(o).unwrap();
+    assert!(conn.wait_for(WAIT, connected).is_some());
+    rig.broker.drop_connections();
+    assert!(conn.wait_for(WAIT, session(2)).is_some());
+    clock.advance(10 * MIN + Duration::from_secs(1));
+    rig.broker.drop_connections();
+    assert!(conn.wait_for(WAIT, session(3)).is_some());
+    clock.advance(11 * MIN);
+    rig.broker.drop_connections();
+    assert!(conn.wait_for(WAIT, session(4)).is_some());
+    assert!(connected(&conn.state()));
+    assert_eq!(rig.sink.count(|e| matches!(e, LiveEvent::Halted { .. })), 0);
+    assert!(!conn.key().halt_marker(rig.dir.path()).exists());
+    assert_eq!(rig.broker.stats().max_concurrent, 1);
+    conn.close().unwrap();
+}
+
+/// Local network / path failures do not count: a dead path (no PINGRESP: keepalive
+/// timeout, the server closed nothing) and failed handshakes (connect failures), even
+/// within the window and next to one real server close.
+#[test]
+fn local_network_errors_do_not_count_as_server_closes() {
+    let mut rig = Rig::new("t-a52-local", BrokerScript::default());
+    rig.cfg.mqtt.keepalive_secs = 1;
+    let clock = ManualClock::new();
+    let mut o = rig.opts(&["mx/timestamp"]);
+    o.clock = clock.clock();
+    o.backoff.max_failures = 10;
+    let conn = rig.open(o).unwrap();
+    assert!(conn.wait_for(WAIT, connected).is_some());
+    // One real server close (1 of 2).
+    rig.broker.drop_connections();
+    assert!(conn.wait_for(WAIT, session(2)).is_some());
+    // A dead path twice (keepalive timeouts), with two failed handshakes in between.
+    let keepalive_timeouts = |sink: &RecordingSink| {
+        sink.count(|e| {
+            matches!(
+                e,
+                LiveEvent::Disconnected {
+                    reason: DisconnectReason::KeepaliveTimeout
+                }
+            )
+        })
+    };
+    rig.broker.script(|s| {
+        s.ignore_pings = true;
+        s.refuse_handshakes = 2;
+    });
+    let deadline = std::time::Instant::now() + WAIT;
+    while keepalive_timeouts(&rig.sink) < 2 {
+        assert!(
+            std::time::Instant::now() < deadline,
+            "two keepalive timeouts"
+        );
+        std::thread::sleep(Duration::from_millis(10));
+    }
+    rig.broker.script(|s| s.ignore_pings = false);
+    assert!(conn.wait_for(WAIT, session(4)).is_some());
+    clock.advance(MIN);
+    assert_eq!(rig.sink.count(|e| matches!(e, LiveEvent::Halted { .. })), 0);
+    assert!(rig.broker.stats().refused_handshakes >= 2);
+    assert!(
+        rig.sink.count(|e| matches!(
+            e,
+            LiveEvent::Disconnected {
+                reason: DisconnectReason::ConnectFailed(_)
+            }
+        )) >= 2
+    );
+    assert!(connected(&conn.state()));
+    assert!(!conn.key().halt_marker(rig.dir.path()).exists());
+    // The second real server close within the window halts.
+    rig.broker.drop_connections();
+    assert_eq!(
+        conn.wait_for(WAIT, halted).unwrap(),
+        ConnState::Halted(a52())
+    );
+    let _ = conn.close();
 }
 
 #[test]

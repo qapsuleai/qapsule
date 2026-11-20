@@ -308,6 +308,9 @@ pub struct BrokerScript {
     pub initial: BTreeMap<String, Vec<Vec<u8>>>,
     /// The next `n` TCP connections are closed before the WebSocket handshake.
     pub refuse_handshakes: u32,
+    /// (RP4/T5) PINGREQ is counted but not answered: the path looks dead to the client
+    /// (its keepalive times out), the server never closes anything.
+    pub ignore_pings: bool,
 }
 
 /// One CONNECT as the broker saw it.
@@ -720,7 +723,9 @@ fn serve_connection(
                         }
                         Packet::PingReq => {
                             s.stats.lock().unwrap().pings += 1;
-                            send(&mut ws, &Packet::PingResp);
+                            if !s.script.lock().unwrap().ignore_pings {
+                                send(&mut ws, &Packet::PingResp);
+                            }
                         }
                         Packet::Disconnect => {
                             s.stats.lock().unwrap().disconnects += 1;

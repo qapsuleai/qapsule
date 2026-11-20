@@ -11,6 +11,7 @@ pub mod backoff;
 pub mod config;
 pub mod conn;
 pub mod error;
+pub mod halt;
 pub mod lock;
 #[cfg(any(test, feature = "mock"))]
 pub mod mock;

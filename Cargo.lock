@@ -1897,6 +1897,7 @@ version = "0.0.0"
 dependencies = [
  "assert_cmd",
  "clap",
+ "flate2",
  "prost",
  "qp-calendar",
  "qp-capsule",

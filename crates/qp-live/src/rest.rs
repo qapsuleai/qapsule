@@ -188,3 +188,118 @@ impl<'a> RestClient<'a> {
         serde_json::from_slice(&body).map_err(|e| self.err(path, e))
     }
 }
+
+/// (RP4/T1) Columns of the historical trade CSV that may be kept (level 1 only, K66).
+/// Anything else — in particular `buyer` and `seller` (level 2, AKDE) — is dropped
+/// before the bytes leave this module; the trade endpoint used here does not serve them,
+/// and `trade_bs` is never called.
+pub const TRADE_KEEP_COLUMNS: [&str; 7] = [
+    "symbol",
+    "date_time",
+    "timestamp_ns",
+    "bidask",
+    "mx_id",
+    "price",
+    "quantity",
+];
+
+/// Keep only [`TRADE_KEEP_COLUMNS`] of a trade CSV (header row first). Rows are copied
+/// field by field in the kept columns' header order; a header without any kept column
+/// yields an empty result.
+#[must_use]
+pub fn trade_csv_level1(csv: &[u8]) -> Vec<u8> {
+    let text = String::from_utf8_lossy(csv);
+    let mut lines = text.lines();
+    let Some(header) = lines.next() else {
+        return Vec::new();
+    };
+    let cols: Vec<&str> = header.split(',').map(str::trim).collect();
+    let keep: Vec<usize> = cols
+        .iter()
+        .enumerate()
+        .filter(|(_, c)| TRADE_KEEP_COLUMNS.contains(c))
+        .map(|(i, _)| i)
+        .collect();
+    if keep.is_empty() {
+        return Vec::new();
+    }
+    let mut out = String::with_capacity(csv.len());
+    let pick = |fields: &[&str], out: &mut String| {
+        for (n, &i) in keep.iter().enumerate() {
+            if n > 0 {
+                out.push(',');
+            }
+            out.push_str(fields.get(i).copied().unwrap_or(""));
+        }
+        out.push('\n');
+    };
+    pick(&cols, &mut out);
+    for l in lines {
+        if l.trim().is_empty() {
+            continue;
+        }
+        let f: Vec<&str> = l.split(',').collect();
+        pick(&f, &mut out);
+    }
+    out.into_bytes()
+}
+
+/// Paces and retries for the trade history (RP4: "ölçülü": limited retries).
+const TRADE_RETRIES: [Duration; 2] = [Duration::from_secs(5), Duration::from_secs(20)];
+
+impl RestClient<'_> {
+    /// (RP4/T1) Historical trades of `symbol` over local dates `start..=end`
+    /// (`YYYY-MM-DD`, at most 15 days, `GET /dumrul/v1/tick/trade.gz`) as a level-1 CSV
+    /// ([`trade_csv_level1`]). Retries at most twice on a server error or a transport
+    /// failure (5 s, 20 s), never on HTTP 4xx.
+    ///
+    /// # Errors
+    /// Token, HTTP or decode failure after the retries (masked text).
+    pub fn trades_csv(&self, symbol: &str, start: &str, end: &str) -> Result<Vec<u8>, RestError> {
+        let path = "/dumrul/v1/tick/trade.gz";
+        let q = [
+            ("symbol", symbol.to_owned()),
+            ("start", start.to_owned()),
+            ("end", end.to_owned()),
+        ];
+        let mut attempt = 0;
+        loop {
+            match self.get(path, &q) {
+                Ok(body) => return Ok(trade_csv_level1(&body)),
+                Err(e) => {
+                    let client_error = e.0.contains("HTTP 4");
+                    if client_error || attempt >= TRADE_RETRIES.len() {
+                        return Err(e);
+                    }
+                    std::thread::sleep(TRADE_RETRIES[attempt]);
+                    attempt += 1;
+                }
+            }
+        }
+    }
+}
+
+#[cfg(test)]
+mod trade_tests {
+    use super::*;
+
+    #[test]
+    fn level2_columns_never_survive() {
+        let csv = b"symbol,date_time,timestamp_ns,bidask,mx_id,price,quantity,buyer,seller\n\
+                    AAA,2026-11-20 10:00:00,36000000000000,B,1,10.5,100,X1,Y2\n";
+        let out = String::from_utf8(trade_csv_level1(csv)).unwrap();
+        assert!(!out.contains("buyer") && !out.contains("seller"));
+        assert!(!out.contains("X1") && !out.contains("Y2"));
+        assert_eq!(
+            out,
+            "symbol,date_time,timestamp_ns,bidask,mx_id,price,quantity\n\
+             AAA,2026-11-20 10:00:00,36000000000000,B,1,10.5,100\n"
+        );
+    }
+
+    #[test]
+    fn unknown_header_keeps_nothing() {
+        assert!(trade_csv_level1(b"a,b\n1,2\n").is_empty());
+        assert!(trade_csv_level1(b"").is_empty());
+    }
+}

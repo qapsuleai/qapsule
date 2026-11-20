@@ -90,7 +90,23 @@ Worktree başına ayrı `target/` klasörü diski hızla doldurur (bir kez 400 G
   profillerin ve artımlı önbelleğin silinmesi, `node_modules` ve tarayıcı önbelleği,
   önce/sonra boyut). `--dry-run` ne sileceğini gösterir. Betik depo dışına ve
   `fixtures/local/`, `.env.local` dosyalarına dokunmaz.
-- Raporun sonunda kalan boyut yazılır: `target/`, `.claude/worktrees/`, depo toplamı.
+- **Kapanış temizliği zorunludur (K68).** Round'un ürettiği geçici her şey silinir:
+  worktree'ler ve `target/wt/*`; scratchpad ve `/tmp` altındaki oturum klasörleri; başsız
+  tarayıcı profilleri, ekran görüntüsü ve video yığınları; ara ölçüm dökümleri ve günlükler;
+  yarım indirmeler; kullanılmayan derleme profilleri ve artımlı önbellek. Kanıt olarak
+  gereken, küçültülerek `rounds/Rn/experiments/` altına taşınır (tek dosya 1 MB'ı, klasör
+  20 MB'ı geçmez; geçiyorsa özet tablo bırakılır).
+- **`target/` bütçesi:** round sonunda en çok 6 GB (ana ağacın güncel derlemeleri).
+  Aşıyorsa `scripts/clean.sh --deep` (gerekirse `cargo clean` + yalnız `verify.sh`'ın
+  gerektirdiği yeniden derleme). `clean.sh` bu seçenekleri taşımıyorsa ekle.
+- **`fixtures/local/` saklama:** ham canlı kayıtlar 30 gün ya da toplam 2 GB; geçmiş veri
+  önbelleği toplam 5 GB; aşan en eskiler silinir. Kanıt olan kayıtlar raporda adıyla sayılır.
+- **Rapor "Disk" bölümü üç liste verir:** silinenler (ne, kaç GB), bilerek bırakılanlar
+  (neden), kalan boyutlar (`target/`, `.claude/worktrees/`, `fixtures/local/`, depo toplamı,
+  depo dışı oturum klasörleri). `git worktree list` yalnız ana ağaç;
+  `git status --porcelain --ignored` özetinde beklenmeyen artık dosya yok.
+- Temizlik depo dışına (oturumun kendi geçici klasörleri hariç), `.env.local`'a ve başka
+  projelere dokunmaz. Emin olmadığın dosyayı silme; raporda sor.
 
 ## Round kapanışı
 

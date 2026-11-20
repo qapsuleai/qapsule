@@ -5,9 +5,9 @@ Her round sonunda güncellenir.
 
 ## Şu an
 
-- **Aktif round:** yok. R6 (canlı veri) tamamlandı (gecikmeli kip); rapor `rounds/R6/REPORT.md`, denetim `rounds/R6/AUDIT.md`.
-- **Son güncelleme:** 2026-11-19
-- **Sıradaki adım:** Arkin: R6 önerilerini (Ö72–Ö76, A47–A51) değerlendirmek; anlık kip için `MATRIKS_MQTT_MODE=realtime`; tam seans M22 kaydı (`rounds/R6/REPORT.md` §13). Sonraki round ana akışta tasarlanır.
+- **Aktif round:** RP4 (gün içi kalibrasyon, işlem akışı, sağlamlaştırma) başlatılmayı bekliyor; paket `rounds/RP4/`. R6 kabul edildi (K64). Sıra: RP4 → R5B → RD2 → R7 (K65).
+- **Son güncelleme:** 2026-11-20
+- **Sıradaki adım:** Arkin yeni bir Claude Code oturumunda `rounds/RP4/PROMPT.md` ile RP4'ü başlatır (hafta sonu: borsa kapalı, REST geçmişinden hızlandırılmış benzetimle; canlı doğrulamalar ilk iş gününe). RP4 bitince, ayrı bir oturumda `rounds/R5B/PROMPT.md` (paketi hazır; önce `.env.local`'a Matriks MCP değişkenleri). İki round aynı çalışma ağacında aynı anda koşmaz.
 
 ## Round geçmişi
 

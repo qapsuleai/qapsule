@@ -45,3 +45,18 @@ seçenekler ölçülerek yapılır ve bu tabloya o zaman işlenir.
   koymaz. Betikler değişkeni ortamdan okur.
 - Anahtarı Arkin girer; ajan yalnızca hangi değişkenin gerektiğini söyler.
 - Ölçümlerde harcama sınırı round tasarımında yazılır; sınır aşılacaksa ajan durur ve sorar.
+
+## Matriks MCP (R5B, K67)
+
+Ajanlar bağlam için Matriks'in MCP sunucusunu kullanır (temel veriler, haberler, kurum
+raporları). Kimlik `.env.local`'da, Arkin girer:
+
+| Değişken | Ne |
+|---|---|
+| `MATRIKS_MCP_URL` | MCP sunucu adresi |
+| `MATRIKS_MCP_CLIENT_ID` | `X-Client-ID` başlığı |
+| `MATRIKS_MCP_API_KEY` | `X-API-Key` başlığı |
+
+MCP yapılandırma dosyası gizli değer taşımaz; ortam değişkenine başvurur. Sorgular
+Arkin'in lisansıyla koşar: ölçülü kullanılır, sonuçlar depoya yazılmaz.
+

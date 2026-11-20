@@ -179,3 +179,31 @@ günlüklerde belirteç, parola ve yetki başlığı görünmez; uç nokta baş�
 "çoklu bağlantı" bildirimi gelirse bağlantı kapanır ve kendiliğinden yeniden denenmez.
 Ayrıntı: `docs/matriks/CONNECTIVITY.md`.
 
+## İşlem (trade) verisi (RP4, K66)
+
+Kaynak: Matriks Analist belgeleri (`mqtt/trade`, `tarihsel-tick-veriler/trade`, `Topach`,
+`Discovery`). Belgedeki örnek adresler test ortamını gösterir; bar verisinde olduğu gibi
+`apitest` değil `api.matriksdata.com` kullanılır. Adres değerleri `.env.local`'dan ya da
+Discovery servisinden gelir; depoya yazılmaz.
+
+**Canlı (MQTT):**
+
+- Ayrı uç nokta yolu: `/trade` (piyasa ucundan ayrı bağlantı; uç nokta başına tek bağlantı kuralı ayrıca geçerlidir).
+- Konular: `mx/trade/<SEMBOL>` (standart), `mx/tradeex/<SEMBOL>` (özel işlemler). Düzey eki: `@lvl0`, eksiz, `@lvl2`.
+- İlk durum **yoktur**; yalnız anlık yayınlanır. Geçmiş REST'ten alınır.
+- Alanlar: `symbol`, `price`, `timestamp` (her düzeyde); `orderNo`, `quantity`, `activeBidOrAsk` (düzey 1 ve üstü); `buyer`, `seller` (düzey 2); `isTradeEx`.
+- Lisans: KD1 → düzey 0; PD1P / PD2 / PD2P → düzey 1; AKDE → düzey 2.
+- `timestamp` örneklerde gün başından bu yana nanosaniye görünüyor (varsayım; canlıda doğrulanacak).
+
+**Geçmiş (REST, `Authorization: jwt <belirteç>`):**
+
+| Uç | İçerik | Not |
+|---|---|---|
+| `GET /dumrul/v1/tick/trade.gz?symbol=&start=&end=` | `symbol,date_time,timestamp_ns,bidask,mx_id,price,quantity` (CSV) | `start`–`end` en çok 15 gün |
+| `GET /dumrul/v1/tick/trade_bs` | yukarıdakine ek `buyer,seller` | AKD / VAKD lisansı gerekir; RP4'te kullanılmaz |
+| `GET /dumrul/v1/tick/trade_ex` | özel (raporlanmış) işlemler | en çok 16 gün |
+
+**Lisansa göre konu keşfi:** `GET /dumrul/v2/topach` kullanıcının lisansının izin verdiği
+veri tiplerini, konu kalıplarını (`%s` yerine sembol) ve hangi uç noktaya (anlık / gecikmeli)
+bağlanılacağını döner; adresler Discovery servisinden okunur.
+

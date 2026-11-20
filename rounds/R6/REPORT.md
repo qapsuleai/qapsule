@@ -148,6 +148,19 @@ ayrışması (A47).
 - Kapanış emir toplamada genel satırın "kapanış seansında" demesi (A48).
 - `live-<uç>.halted` için insan onaylı sıfırlama komutu.
 - `scripts/qapsule-gh.env` izlenmesi (eski öneri) korunuyor.
+- **Çıkış kuralını gün içi gerçek veriyle yeniden ölçmek (M5'in canlı karşılığı).** Kapanıştan sonra
+  Arkin'in ekran incelemesi (2026-11-20, anlık kip, 5m): bir düşüş iddiası ertesi barda "tutmadı" diye
+  kapandı, fiyat süre içinde iddia yönünde eşiği yine de aştı. Çevrimdışı yeniden hesap kuralın yazıldığı
+  gibi çalıştığını gösterdi (eşik `0,3·√h·ATR14`, ilk değen kapanış karar verir, kapanan hikâye yeniden
+  açılmaz). Sorun ölçekte: 5m'de bu eşik yaklaşık 4 fiyat adımı, fiyatın ~%0,3'ü; tek barlık gürültü
+  hikâyeyi bitirebiliyor. Sabitler R3'te sentetik veriyle ayarlandı, gün içi gerçek veride ölçülmedi.
+  Ölçülecekler: 5m ve 1h'te gerçekleşti/tutmadı/süresi doldu oranları ve "tutmadı dedikten sonra süre
+  içinde iddia yönünde eşiği aştı" oranı. Seçenekler: eşiğe en az N fiyat adımı tabanı, durağı iki kapanışla
+  teyit, kapanış yerine yüksek/düşükle karar. Sabitler yeni ölçüm olmadan değiştirilmez.
+- Olay ve kapsül satırlarında saat göstermek (Arkin, aynı inceleme; UI/UX işinin parçası).
+- Tam kopya (`mode=replica`) bağlantısının açılış görüntüsünde yalnız ilk geçmiş vardı, sonradan eklenen
+  canlı barlar yoktu (aynı gün, gözlem; doğrulanmadı). Geç katılan istemcinin eksik seri alıp almadığına
+  bakmak.
 
 ## 11. Disk ve saklama
 

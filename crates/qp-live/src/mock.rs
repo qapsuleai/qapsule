@@ -338,6 +338,19 @@ impl fmt::Debug for ConnectRecord {
     }
 }
 
+/// Per-path (endpoint) counters of the broker, e.g. `market` and `trade`.
+#[derive(Clone, Debug, Default, PartialEq, Eq)]
+pub struct PathStats {
+    /// WebSocket connections accepted on this path.
+    pub connections_total: usize,
+    /// Open right now.
+    pub current: usize,
+    /// Largest number of simultaneously open connections on this path.
+    pub max_concurrent: usize,
+    /// Every topic in every SUBSCRIBE packet on this path, in order.
+    pub subscribed_topics: Vec<String>,
+}
+
 #[derive(Clone, Debug, Default)]
 pub struct MockStats {
     /// TCP connections handled (refused handshakes not included).
@@ -354,6 +367,18 @@ pub struct MockStats {
     pub unsubscribe_packets: Vec<Vec<String>>,
     pub pings: usize,
     pub disconnects: usize,
+    /// The same counters per request path (without slashes: `market`, `trade`).
+    pub by_path: BTreeMap<String, PathStats>,
+}
+
+impl MockStats {
+    /// Counters of one path (empty if never used).
+    pub fn path(&self, path: &str) -> PathStats {
+        self.by_path
+            .get(path.trim_matches('/'))
+            .cloned()
+            .unwrap_or_default()
+    }
 }
 
 enum BrokerCmd {
@@ -523,6 +548,8 @@ impl Drop for MockBroker {
 struct Gauge {
     shared: Arc<BrokerShared>,
     open: bool,
+    /// Request path, once the WebSocket handshake told it.
+    path: Option<String>,
 }
 
 impl Gauge {
@@ -533,13 +560,39 @@ impl Gauge {
             st.current += 1;
             st.max_concurrent = st.max_concurrent.max(st.current);
         }
-        Self { shared, open: true }
+        Self {
+            shared,
+            open: true,
+            path: None,
+        }
+    }
+
+    /// Counts this connection under `path` too (called once, after the handshake).
+    fn set_path(&mut self, path: &str) {
+        if !self.open || self.path.is_some() {
+            return;
+        }
+        let p = path.trim_matches('/').to_string();
+        {
+            let mut st = self.shared.stats.lock().unwrap();
+            let ps = st.by_path.entry(p.clone()).or_default();
+            ps.connections_total += 1;
+            ps.current += 1;
+            ps.max_concurrent = ps.max_concurrent.max(ps.current);
+        }
+        self.path = Some(p);
     }
 
     fn close(&mut self) {
         if self.open {
             self.open = false;
-            self.shared.stats.lock().unwrap().current -= 1;
+            let mut st = self.shared.stats.lock().unwrap();
+            st.current -= 1;
+            if let Some(p) = &self.path {
+                if let Some(ps) = st.by_path.get_mut(p) {
+                    ps.current -= 1;
+                }
+            }
         }
     }
 }
@@ -558,7 +611,9 @@ fn serve_connection(
 ) {
     let _ = stream.set_read_timeout(Some(Duration::from_secs(2)));
     let mut chosen: Option<String> = None;
+    let mut req_path = String::new();
     let callback = |req: &Request, mut resp: Response| {
+        req_path = req.uri().path().to_string();
         if let Some(p) = req.headers().get("Sec-WebSocket-Protocol") {
             let first = p
                 .to_str()
@@ -579,6 +634,8 @@ fn serve_connection(
         Ok(ws) => ws,
         Err(_) => return,
     };
+    gauge.set_path(&req_path);
+    let path_key = req_path.trim_matches('/').to_string();
     let _ = ws
         .get_ref()
         .set_read_timeout(Some(Duration::from_millis(20)));
@@ -670,11 +727,15 @@ fn serve_connection(
                         Packet::Subscribe { packet_id, topics } => {
                             let names: Vec<String> =
                                 topics.iter().map(|(t, _)| t.clone()).collect();
-                            s.stats
-                                .lock()
-                                .unwrap()
-                                .subscribe_packets
-                                .push(names.clone());
+                            {
+                                let mut st = s.stats.lock().unwrap();
+                                st.subscribe_packets.push(names.clone());
+                                st.by_path
+                                    .entry(path_key.clone())
+                                    .or_default()
+                                    .subscribed_topics
+                                    .extend(names.iter().cloned());
+                            }
                             let (codes, initial) = {
                                 let sc = s.script.lock().unwrap();
                                 let codes: Vec<u8> = names

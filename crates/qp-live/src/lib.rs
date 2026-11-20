@@ -17,14 +17,15 @@ pub mod mock;
 pub mod mqtt;
 pub mod redact;
 pub mod rest;
+pub mod topach;
 mod transport;
 
 pub use auth::{AccessToken, AuthClient, AuthPolicy};
 pub use backoff::BackoffPolicy;
-pub use config::{Endpoint, LiveConfig, Mode, MqttProtocol, MqttSettings};
+pub use config::{Endpoint, LiveConfig, Mode, MqttProtocol, MqttSettings, TRADE_PATH};
 pub use conn::{
-    ConnState, ConnectOptions, DisconnectReason, LiveConnection, LiveEvent, LiveMessage, LiveSink,
-    Notice, NoticeClassifier, TokenRenewal,
+    is_level2_trade_topic, ConnState, ConnectOptions, DisconnectReason, LiveConnection, LiveEvent,
+    LiveMessage, LiveSink, Notice, NoticeClassifier, TokenRenewal,
 };
 pub use error::{AuthError, HaltReason, LiveError};
 pub use lock::{EndpointKey, LockError};

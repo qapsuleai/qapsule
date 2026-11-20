@@ -226,7 +226,24 @@ impl Endpoint {
     pub(crate) fn url(&self) -> &str {
         self.url.expose()
     }
+
+    /// The same scheme, host and port with another path (e.g. `/trade` beside `/market`).
+    /// The query, if any, is not carried over. The new address is secret like this one.
+    pub fn with_path(&self, path: &str) -> Endpoint {
+        let url = self.url.expose();
+        let (scheme, rest) = url.split_once("://").unwrap_or(("wss", url));
+        let authority = rest.split(['/', '?', '#']).next().unwrap_or(rest);
+        let bare = path.trim_matches('/');
+        Endpoint {
+            mode: self.mode,
+            path: bare.to_string(),
+            url: Secret::new(format!("{scheme}://{authority}/{bare}")),
+        }
+    }
 }
+
+/// Path of the trade (işlem) endpoint (RP4, K66): same host as the market endpoint.
+pub const TRADE_PATH: &str = "/trade";
 
 fn is_loopback(host: &str) -> bool {
     let bare = host.trim_start_matches('[').trim_end_matches(']');
@@ -245,6 +262,7 @@ pub struct LiveConfig {
     hardware_id_source: HardwareIdSource,
     mode: Mode,
     market: Endpoint,
+    trade: Endpoint,
     /// Wire settings; may be changed by the caller after loading.
     pub mqtt: MqttSettings,
     redactor: Redactor,
@@ -255,6 +273,7 @@ impl fmt::Debug for LiveConfig {
         f.debug_struct("LiveConfig")
             .field("mode", &self.mode)
             .field("market", &self.market)
+            .field("trade", &self.trade)
             .field("hardware_id_source", &self.hardware_id_source)
             .field("hardware_id_prefix_ok", &!self.hardware_id_warning())
             .field("mqtt", &self.mqtt)
@@ -317,6 +336,8 @@ impl LiveConfig {
         let host_var = mode.host_var();
         let market = Endpoint::parse(mode, &req(host_var)?, "/market", host_var)?;
         redactor.add_url(market.url());
+        let trade = market.with_path(TRADE_PATH);
+        redactor.add_url(trade.url());
 
         let (hardware_id, hardware_id_source) = match get(VAR_HARDWARE_ID) {
             Some(h) => (h, HardwareIdSource::Explicit),
@@ -367,6 +388,7 @@ impl LiveConfig {
             hardware_id_source,
             mode,
             market,
+            trade,
             mqtt,
             redactor,
         })
@@ -379,6 +401,15 @@ impl LiveConfig {
     /// The market endpoint of the configured mode.
     pub fn market_endpoint(&self) -> &Endpoint {
         &self.market
+    }
+
+    /// The trade (işlem) endpoint of the configured mode: the market endpoint's host with
+    /// the path `/trade` (K66). Its lock key is `<mode>-trade`, so it takes its own
+    /// in-process and machine lock (`live-<mode>-trade.lock`), independent of the market
+    /// endpoint's. It is opened with the same [`crate::AuthClient`] (same identity) as the
+    /// market endpoint, by the process that holds the identity lock.
+    pub fn trade_endpoint(&self) -> &Endpoint {
+        &self.trade
     }
 
     pub fn hardware_id(&self) -> &str {
@@ -560,6 +591,44 @@ mod tests {
         assert!(Endpoint::parse(Mode::Delayed, "ws://127.0.0.1:9/market", "/market", v).is_ok());
         assert!(Endpoint::parse(Mode::Delayed, "https://x.test/market", "/market", v).is_err());
         assert!(Endpoint::parse(Mode::Delayed, "u:p@x.test/market", "/market", v).is_err());
+    }
+
+    #[test]
+    fn trade_endpoint_shares_the_market_host_with_its_own_key() {
+        let c = LiveConfig::from_lookup(env(BASE), "box").unwrap();
+        assert_eq!(
+            c.market_endpoint().url(),
+            "wss://dl.fake-vendor.test/market"
+        );
+        assert_eq!(c.trade_endpoint().url(), "wss://dl.fake-vendor.test/trade");
+        assert_eq!(c.trade_endpoint().path(), "trade");
+        assert_eq!(c.trade_endpoint().mode(), Mode::Delayed);
+        assert_eq!(c.trade_endpoint().key().as_str(), "delayed-trade");
+        assert_ne!(c.trade_endpoint().key(), c.market_endpoint().key());
+        let dir = std::path::Path::new("/x");
+        assert_eq!(
+            c.trade_endpoint().key().lock_file(dir),
+            dir.join("live-delayed-trade.lock")
+        );
+        // Real-time mode: the real-time host; a full URL with a port and a query.
+        let mut pairs = BASE.to_vec();
+        pairs[4] = (VAR_MQTT_MODE, "realtime");
+        pairs.push((
+            VAR_MQTT_RT_HOST,
+            "wss://rt.fake-vendor.test:8443/market?x=1",
+        ));
+        let r = LiveConfig::from_lookup(env(&pairs), "box").unwrap();
+        assert_eq!(
+            r.trade_endpoint().url(),
+            "wss://rt.fake-vendor.test:8443/trade"
+        );
+        assert_eq!(r.trade_endpoint().key().as_str(), "realtime-trade");
+        // Masked like the market address.
+        let text = r
+            .redactor()
+            .scrub("at wss://rt.fake-vendor.test:8443/trade now");
+        assert!(!text.contains("rt.fake-vendor"), "{text}");
+        assert!(!format!("{r:?}").contains("rt.fake-vendor"));
     }
 
     #[test]

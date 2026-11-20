@@ -224,6 +224,26 @@ impl ConnState {
 }
 
 // ---------------------------------------------------------------------------------------
+// Level-2 trade topics (RP4, K66): never subscribed.
+
+/// True for a level-2 trade topic: `mx/trade/<SYM>@lvl2` or `mx/tradeex/<SYM>@lvl2`, also
+/// inside a `mx/user/<sub>/` mirror. Level 2 carries the buyer and seller brokers (AKDE),
+/// which Qapsule does not take (K66, RP4 GOAL "Veri"), whatever the licence allows. Such a
+/// topic is refused locally by [`LiveConnection`] (a `SubscribeRejected` event with code
+/// `0x80`) and never reaches the server. The price card `mx/symbol/<SYM>@lvl2` is not a
+/// trade topic and is not affected.
+pub fn is_level2_trade_topic(topic: &str) -> bool {
+    let t = topic.trim();
+    let is_trade = t.starts_with("mx/trade/")
+        || t.starts_with("mx/tradeex/")
+        || t.contains("/mx/trade/")
+        || t.contains("/mx/tradeex/");
+    is_trade
+        && t.rsplit_once('@')
+            .is_some_and(|(_, lvl)| lvl.trim().eq_ignore_ascii_case("lvl2"))
+}
+
+// ---------------------------------------------------------------------------------------
 // Multi-connect ban (process registry + marker file).
 
 static BANNED: Mutex<BTreeSet<String>> = Mutex::new(BTreeSet::new());
@@ -345,7 +365,12 @@ impl LiveConnection {
         });
         let (tx, rx) = mpsc::channel();
         let redactor = cfg.redactor().clone();
-        let topics: BTreeSet<String> = opts.topics.iter().cloned().collect();
+        let (refused, topics): (Vec<String>, Vec<String>) = opts
+            .topics
+            .iter()
+            .cloned()
+            .partition(|t| is_level2_trade_topic(t));
+        let topics: BTreeSet<String> = topics.into_iter().collect();
         let worker = Worker {
             key: key.clone(),
             url: endpoint.url().to_string(),
@@ -358,6 +383,7 @@ impl LiveConnection {
             rx,
             redactor: redactor.clone(),
             topics,
+            refused_at_start: refused,
             seq: 0,
             session: 0,
             auth_retry_used: false,
@@ -511,6 +537,8 @@ struct Worker {
     rx: Receiver<Command>,
     redactor: Redactor,
     topics: BTreeSet<String>,
+    /// Level-2 trade topics given to `open`; reported (refused) when the worker starts.
+    refused_at_start: Vec<String>,
     seq: u64,
     session: u32,
     auth_retry_used: bool,
@@ -531,6 +559,9 @@ impl Worker {
     }
 
     fn run(mut self) {
+        for topic in std::mem::take(&mut self.refused_at_start) {
+            self.refuse_level2(topic);
+        }
         let mut backoff = Backoff::new(self.opts.backoff.clone());
         let mut renewed: Option<AccessToken> = None;
         loop {
@@ -638,10 +669,23 @@ impl Worker {
     }
 
     fn add_topics(&mut self, topics: Vec<String>) -> Vec<String> {
-        topics
-            .into_iter()
-            .filter(|t| !t.is_empty() && self.topics.insert(t.clone()))
-            .collect()
+        let mut added = Vec::new();
+        for t in topics {
+            if is_level2_trade_topic(&t) {
+                self.refuse_level2(t);
+            } else if !t.is_empty() && self.topics.insert(t.clone()) {
+                added.push(t);
+            }
+        }
+        added
+    }
+
+    /// A level-2 trade topic is refused here; nothing goes to the server.
+    fn refuse_level2(&self, topic: String) {
+        self.event(LiveEvent::SubscribeRejected {
+            topic,
+            code: SUBACK_FAILURE,
+        });
     }
 
     fn remove_topics(&mut self, topics: Vec<String>) -> Vec<String> {
@@ -1070,6 +1114,27 @@ mod tests {
         assert!(a.len() <= 23, "{a}");
         assert!(a.starts_with("qp-"));
         assert!(!a.contains("box"));
+    }
+
+    #[test]
+    fn level2_trade_topics_are_recognised() {
+        for t in [
+            "mx/trade/TEST1@lvl2",
+            "mx/tradeex/TEST1@lvl2",
+            "mx/trade/TEST1@LVL2",
+            "mx/user/u1/mx/trade/TEST1@lvl2",
+        ] {
+            assert!(is_level2_trade_topic(t), "{t}");
+        }
+        for t in [
+            "mx/trade/TEST1",
+            "mx/trade/TEST1@lvl0",
+            "mx/tradeex/TEST1",
+            "mx/symbol/TEST1@lvl2",
+            "mx/timestamp",
+        ] {
+            assert!(!is_level2_trade_topic(t), "{t}");
+        }
     }
 
     #[test]

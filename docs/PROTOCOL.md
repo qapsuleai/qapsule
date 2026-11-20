@@ -389,6 +389,7 @@ aynı adlarla aynı sahneyi derler.
 | `open` (R5/M20) | `qp_grammar::open::OPENS` (açılmış kapsül tasarımı: `r4` bugünkü kart, `tesir` tek sütun, `nobra` soru kartları) | `r4` |
 | `story` (R5/M18) | `qp_grammar::stories::STORIES` (hikâye çizelgesi, grafik derinliğinde: `r4` yok, `pavka` hikâye omurgası, `korda` ömür şeritleri) | `r4` |
 | `hide_closed` (R5/M18, K54) | `true` / `false`: hikâye çizelgesinde kapanmış hikâyeleri gizle (seçili hikâye kalır; R5/S tek ad, `ViewState.hide_closed`) | `false` |
+| `clock` (RP4/T7) | `true` / `false`: satırlarda olayın zamanı (`ViewState.clock`) | `false` |
 
 - Verilmeyen alan değişmez; bilinmeyen ad `invalid` (`/gesture/face`, `/gesture/alphabet`,
   `/gesture/theme`, `expected` bilinen adlar). Doğrulama her şeyden önce: hatalı istek hiçbir
@@ -408,6 +409,18 @@ aynı adlarla aynı sahneyi derler.
   `layer`, `hit` kutusu), nokta sorgusu `HitInfo.term` (isteğe bağlı). `tap_at` bir terimin
   üstündeyse kapsülü açmaz, cevabın `hit.term`'ünü döner. `r4`'te bu alanların hiçbiri yoktur
   (dökümler bayt eşit).
+- (RP4/T7) `clock`: `ViewState.clock` (varsayılanda yok). Açıkken satırlar olayın zamanını
+  taşır (`qp_capsule::realize::stamp`): bir dil seçiliyse kapsül öğesinin `voice.headline`'ı
+  "`<zaman> · `" ile başlar (yüz ve açılmış kart aynı başlığı çizer; `voice.face` yeniden
+  kurulur; ses zamanla birlikte başlığı kendi 80 karakter sınırında tutar, gerekirse daha kısa
+  başlık biçimini seçer), hikâye çizelgesinin (`korda`) şerit etiketleri de aynı zamanı taşır (olaydan sonra; etiket
+  sığmazsa kesilen uç zamandır, şeridin yeri zamanı zaten gösterir; `Session::row_stamp`). Zaman, satırın olayıdır: açık hikâyede doğuş, kapanmışta kapanış
+  barı (barın açılış zamanı). Gün içi periyotta ve "şimdi"yle aynı gündeyse `SS:DD`, değilse
+  tarih (`12 Kas` / `Nov 12`; başka yılsa yılıyla); günlük, haftalık, aylık periyotta tarih.
+  "Şimdi" serinin son barıdır (verinin saati; sistem saati değil). Gösterim saat dilimi
+  dokümanın `display_tz`'si, yoksa borsanınki (K14). Yetkisiz okur (K33) zaman almaz. `r4`
+  sesinde (ses yok) kapsül satırı değişmez. Kapalıyken her döküm bayt eşittir; sunum kabuğu
+  açar (`ShellCore::presented_look`, `?clock=0` kapatır).
 - (R5/M20) `open`: `ViewState.open` (varsayılanda yok). Kapsül derinliğini o tasarım kurar
   (otorite `tap_at`/`hit` için, cihaz boyamak için aynı kuralla) ve kendi yüksekliğini
   bildirebilir (`capsule` çerçevesi). Soru kartlı tasarımda (`nobra`) açık soru
@@ -2712,7 +2725,9 @@ Kabuk çerçeveyi olduğu gibi `core.on_frame`'e verir; çekirdek durumu tutar v
 `core.status()` cevabına `market: {text, state}` ekler (`state`: `live`, `delayed`,
 `closed`, `stale`); kabuk metni `#market` satırında olduğu gibi gösterir. Metin
 `qp_capsule::market::status_line`: "Canlı · gecikmeli 15 dk" / "Live · delayed 15 min",
-"Seans kapalı" (tatilse "· tatil") / "Session closed", "Bağlantı yok — veri bayat · son veri
+"Seans kapalı" (tatilse "· tatil") / "Session closed", kapanış emir toplamada (evrelerin
+çoğu kapanış seansındayken, takvimin `open`'ı ne derse desin; A48, RP4/T7) "Kapanış
+seansında" / "Closing auction" (durum `closed`), "Bağlantı yok — veri bayat · son veri
 18:10" / "No connection — data stale · last data 18:10". Enstrümanı sürekli işlemde olmayan
 ya da veri bayatken hiçbir kapsül canlı işaretini (nabız) göstermez
 (`ShellCore::market_live`).

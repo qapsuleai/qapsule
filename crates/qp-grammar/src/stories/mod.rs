@@ -28,6 +28,9 @@ use crate::provider::DataProvider;
 pub mod korda;
 pub mod pavka;
 
+/// (RP4/T7) A story row's time stamp, if it has one ([`StoryInput::stamp_of`]).
+pub type StampFn<'a> = dyn Fn(&StoryRow) -> Option<String> + 'a;
+
 /// What a story design draws from.
 pub struct StoryInput<'a> {
     /// The instrument's story rows as the reader received them (birth order).
@@ -41,6 +44,10 @@ pub struct StoryInput<'a> {
     pub lang: Language,
     /// The first fact of a finding (the origin of a cluster's constants), if known.
     pub fact_of: &'a dyn Fn(&str) -> Option<String>,
+    /// (RP4/T7) A row's time stamp ("14:35", "12 Kas"), when the connection asked rows to
+    /// carry their time (`ViewState.clock`; the core computes it from the exchange
+    /// calendar, `qp_capsule::realize::stamp`); `None`: rows as before.
+    pub stamp_of: Option<&'a StampFn<'a>>,
 }
 
 /// What a tap on the story part of a scene does (resolved in the core).

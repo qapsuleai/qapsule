@@ -31,6 +31,8 @@ pub struct DocProvider<'a> {
     /// (R5/m17-int) The voice the reader's connection chose (with [`Self::parts`]'s
     /// session and language); `None`: `r4`.
     voice: Option<&'a str>,
+    /// (RP4/T7) The voice's headline carries the row's time (the connection's `clock`).
+    clock: bool,
 }
 
 impl<'a> DocProvider<'a> {
@@ -42,6 +44,7 @@ impl<'a> DocProvider<'a> {
             reader: None,
             parts: None,
             voice: None,
+            clock: false,
         }
     }
 
@@ -77,6 +80,12 @@ impl<'a> DocProvider<'a> {
     /// language of [`Self::with_parts`]); `None`: `r4`.
     pub(crate) fn with_voice(mut self, voice: Option<&'a str>) -> Self {
         self.voice = voice;
+        self
+    }
+
+    /// (RP4/T7) The same provider whose voice headlines carry the row's time.
+    pub(crate) fn with_clock(mut self, clock: bool) -> Self {
+        self.clock = clock;
         self
     }
 }
@@ -263,6 +272,7 @@ impl DataProvider for DocProvider<'_> {
             s.proj.as_deref(),
             lang,
             v,
+            self.clock,
             &mut qp_capsule::sentence::StudyMemo::default(),
         )
     }

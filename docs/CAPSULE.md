@@ -230,6 +230,14 @@ yapı taşları (olay adı, ne zaman, geçerlilik, yön, kısaltılmış karne; 
 yok; yetkisize rakamsız) `qp_capsule::realize::parts`'tadır; başlığın kendisi yüz tasarımının
 (M8) işidir.
 
+**Satır zamanı (RP4/T7).** Bağlantı isterse (`style` `clock`, sunum kabuğu açık açar) kapsül
+satırının başlığı olayın zamanıyla başlar, hikâye çizelgesinin şerit etiketi onu olaydan sonra
+taşır:
+`qp_capsule::realize::stamp` gün içi periyotta ve olay "şimdi"yle aynı gündeyse `14:35`, değilse
+tarih (`12 Kas` / `Nov 12`); günlük periyotta hep tarih. Olay, açık hikâyede doğuş, kapanmışta
+kapanış barıdır (başlığın "ne zaman"ının söylediği an). Yetkisize verilmez (K33). Kapalıyken
+bütün çıktılar bugünküyle bayt eşittir.
+
 Karne cümlenin parçası olabilir ("bu durum geçmişte 100 seferin 62'sinde …"); lisanslı
 olgunun cümlesi **hiç rakam içermez** (karne ayrı alanda gider). Üretim yöntemi M2 seçimi: belirleyici şablon dilbilgisi (`qp_capsule::realize::Template`), dil modeli yok.
 

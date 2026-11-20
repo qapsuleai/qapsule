@@ -129,7 +129,15 @@ impl Voice {
 /// Writes the four surfaces (see the module docs). The single entry point.
 #[must_use]
 pub fn speak(inp: &VoiceInput<'_>) -> Voice {
-    let cx = Cx::new(inp);
+    speak_in(inp, MAX_HEADLINE)
+}
+
+/// (RP4/T7) [`speak`] with the headline kept within `room` characters (a row stamp goes
+/// before it, `crate::voice::Input::stamp`).
+#[must_use]
+pub fn speak_in(inp: &VoiceInput<'_>, room: usize) -> Voice {
+    let mut cx = Cx::new(inp);
+    cx.room = room.min(MAX_HEADLINE);
     let headline = cx.headline();
     let detail = cx.detail();
     let ledger = cx.ledger();
@@ -396,6 +404,8 @@ struct Cx<'a> {
     dir: Direction,
     red: bool,
     inst: String,
+    /// Headline length limit ([`MAX_HEADLINE`]; less when a row stamp goes before it).
+    room: usize,
 }
 
 /// Which way a detector's line was crossed / what the story's direction is.
@@ -468,6 +478,7 @@ impl<'a> Cx<'a> {
             dir: s.story.direction,
             red: s.redacted || inp.parts.redacted,
             inst: s.story.instrument.clone(),
+            room: MAX_HEADLINE,
         }
     }
 
@@ -600,7 +611,7 @@ impl<'a> Cx<'a> {
                 cands.push(Bi::join(&[m.clone(), vs.clone()]));
             }
         }
-        first_fit(cands, |b| b.fits(MAX_HEADLINE))
+        first_fit(cands, |b| b.fits(self.room))
     }
 
     /// Main sentences, most preferred first (each ends with a full stop).

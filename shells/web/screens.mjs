@@ -50,12 +50,14 @@ const R3 = { face: 'r3', feed: 'r3', transition: 'r3', outcome: 'r3' };
 // (R5/S) The designs the `v1` goldens were drawn with (before R5's presentation defaults).
 // (R5/fix47) `feed_order: 'layout'`: the connection's layout orders the feed, as before the
 // presentation's feed order (`live_new`).
-const V1 = { look: 'r4', voice: 'r4', face: 'vadrel', story: 'r4', open: 'r4', motion: 'r4', feed_order: 'layout' };
+// (RP4/T7) `clock: '0'`: the rows as before the row time (the presentation's `clock`).
+const V1 = { look: 'r4', voice: 'r4', face: 'vadrel', story: 'r4', open: 'r4', motion: 'r4', feed_order: 'layout', clock: '0' };
 // (R5/S) The `v2` shots: R5's presentation defaults in both languages and schemes — the
 // feed's faces (open and closed), the open capsule (`tesir`) and the story chart (`pavka`).
 // (R6/T0, K57) The presentation's story chart is now `korda`; the v2 goldens were drawn
 // with `pavka`, so the v2 shots name it (`?story=pavka`) and stay byte-identical.
-const V2_PIN = { story: 'pavka' };
+// (RP4/T7) The rows' time (`clock`) came after them: the v2 shots name it off.
+const V2_PIN = { story: 'pavka', clock: '0' };
 const V2 = [];
 for (const lang of ['tr', 'en']) {
   for (const theme of ['dark', 'light']) {
@@ -81,6 +83,13 @@ export const SHOTS = [
   { name: 'feed-en-light-r4', lang: 'en', theme: 'light', canvases: ['face-0', 'face-1'] },
   { name: 'feed-tr-dark-fotolay', face: 'fotolay', canvases: ['face-0', 'face-1'] },
   ...V2,
+  // (RP4/T7) The presentation as it opens now (no design setting in the URL): the rows
+  // carry the event's time (`clock`). New goldens (`p4-*`); the v1/v2 ones stay as they were.
+  { present: true, name: 'p4-feed-tr-dark', canvases: ['face-0', 'face-1', 'face-2'] },
+  { present: true, name: 'p4-feed-en-light', lang: 'en', theme: 'light', canvases: ['face-0', 'face-1'] },
+  { present: true, name: 'p4-closed-tr-light', theme: 'light', canvases: ['closed-0'] },
+  { present: true, name: 'p4-chart-tr-dark', open: 'chart', canvases: ['scene'] },
+  { present: true, name: 'p4-chart-en-light', lang: 'en', theme: 'light', open: 'chart', canvases: ['scene'] },
 ];
 
 const extra = data ? ['--data', data] : [];
@@ -98,7 +107,8 @@ try {
     if (s.principal) q.set('principal', s.principal);
     // (R5/m17-int, R5/S) The v1 goldens predate R5's designs: they are drawn with the
     // designs before it (`V1`, today's text `?voice=r4`); the v2 shots name none.
-    if (!s.v2) for (const [k, v] of Object.entries(V1)) q.set(k, v);
+    // (RP4/T7) `present`: the presentation's own defaults, nothing pinned.
+    if (s.present) { /* as the page opens */ } else if (!s.v2) for (const [k, v] of Object.entries(V1)) q.set(k, v);
     else for (const [k, v] of Object.entries(V2_PIN)) q.set(k, v);
     if (s.face) q.set('face', s.face);
     for (const [k, v] of Object.entries(s.look || {})) q.set(k, v);
@@ -110,7 +120,7 @@ try {
       await settle(page);
       seeked = true;
     }
-    if (s.open && s.v2) {
+    if (s.open && (s.v2 || s.present)) {
       // (R5/S) Through the core's own handles (a tap's place depends on the design).
       const first = await page.evaluate(() => JSON.parse(window.qp.feed()).filter((r) => r.id && r.scene)[0]);
       await page.evaluate((id) => window.qp.openCapsule(id), first.id);

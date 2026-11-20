@@ -344,6 +344,17 @@ pub fn open_scene_with(
         .view
         .as_ref()
         .and_then(|v| s.document().views.iter().find(|x| x.id == v.id).cloned());
+    // (RP4/T7) The story rows' time, when the connection asked for it (the authority's
+    // `tap_at` gives the same, `interact.rs`); computed before the provider borrows `s`.
+    let stamps: BTreeMap<String, String> = if look.clock && o.to >= OpenDepth::Chart {
+        stories
+            .0
+            .iter()
+            .filter_map(|r| s.row_stamp(r, stories.1).map(|t| (r.id.clone(), t)))
+            .collect()
+    } else {
+        BTreeMap::new()
+    };
     let p = Reader {
         inner: s.provider(),
         heads: &heads,
@@ -367,6 +378,8 @@ pub fn open_scene_with(
     let Some(sd) = sd else {
         return compile(&view, &p, &options(look, w, h, range)).ok();
     };
+    let stamp = |r: &qp_schema::protocol::StoryRow| stamps.get(&r.id).cloned();
+    let stamp_of: Option<&qp_grammar::stories::StampFn<'_>> = look.clock.then_some(&stamp);
     // (R5/S) A design that compiles the whole scene (`korda`; it reads no first facts).
     if let Some(c) = sd.compile {
         let input = qp_grammar::stories::StoryInput {
@@ -375,6 +388,7 @@ pub fn open_scene_with(
             hide_closed: look.hide_closed,
             lang: stories.1,
             fact_of: &|_| None,
+            stamp_of,
         };
         return c(&view, &p, &options(look, w, h, range), &input).ok();
     }
@@ -401,6 +415,7 @@ pub fn open_scene_with(
             hide_closed: look.hide_closed,
             lang,
             fact_of: &fact_of,
+            stamp_of,
         },
     ))
 }

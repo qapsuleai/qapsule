@@ -554,7 +554,7 @@ step_demo() {
     [ -f "$d/a/v2/$(basename "$f")" ] || { echo "v2/$(basename "$f"): golden not produced" >&2; bad=$((bad + 1)); }
   done
   [ "$bad" -eq 0 ] || fail "$bad screenshot check(s) failed"
-  note "same origin only; browser = shell-less digests; settings page; gallery; paint paths (semantic reads identical); canvas within tolerance; $n images x2 (scenes identical, pages within chrome tolerance), scenes = goldens (v1 pinned to the pre-R5 designs, v2 = R5 defaults with story pinned to pavka)"
+  note "same origin only; browser = shell-less digests; settings page; gallery; paint paths (semantic reads identical); canvas within tolerance; $n images x2 (scenes identical, pages within chrome tolerance), scenes = goldens (v1 pinned to the pre-R5 designs, v2 = R5 defaults with story pinned to pavka, both with clock off; p4 = the presentation now, rows with their time)"
 }
 
 # --- run -------------------------------------------------------------------

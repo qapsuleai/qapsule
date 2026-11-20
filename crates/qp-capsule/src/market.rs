@@ -190,8 +190,24 @@ impl MarketState {
     }
 }
 
+/// (RP4/T7, A48) Whether the market as a whole is in its closing auction: the price cards
+/// put more instruments in the closing auction (order collection for the close) than in
+/// any other phase. A few instruments that have no closing session, or one halted, do not
+/// make the line say "closed".
+#[must_use]
+pub fn in_closing_auction(status: &MarketStatus) -> bool {
+    let auction = status
+        .phases
+        .values()
+        .filter(|p| p.class() == PhaseClass::ClosingAuction)
+        .count();
+    auction > 0 && 2 * auction > status.phases.len()
+}
+
 /// The shell's one-line market status in `lang` and its state: "Canlı · gecikmeli 15 dk",
-/// "Seans kapalı", "Bağlantı yok — veri bayat · son veri HH:MM".
+/// "Seans kapalı", "Kapanış seansında" (the closing auction, A48), "Bağlantı yok — veri
+/// bayat · son veri HH:MM". The closing auction's state is `closed` (no continuous
+/// trading; the shell's styling does not change).
 #[must_use]
 pub fn status_line(status: &MarketStatus, lang: Language) -> (String, MarketState) {
     let tr = lang == Language::Tr;
@@ -203,6 +219,17 @@ pub fn status_line(status: &MarketStatus, lang: Language) -> (String, MarketStat
             format!("No connection — data stale · last data {t}")
         };
         return (s, MarketState::Stale);
+    }
+    // (RP4/T7, A48) The continuous session is over but the closing auction is running
+    // (18:00–18:10 on BIST): the market is neither "closed" nor live. The phases decide,
+    // whatever the calendar's `open` says about that minute.
+    if status.holiday != Some(true) && in_closing_auction(status) {
+        let s = if tr {
+            "Kapanış seansında"
+        } else {
+            "Closing auction"
+        };
+        return (s.to_owned(), MarketState::Closed);
     }
     if status.open == Some(false) {
         let s = match (status.holiday == Some(true), tr) {
@@ -334,6 +361,43 @@ mod tests {
             status_line(&closed, Language::Tr),
             ("Seans kapalı".to_owned(), MarketState::Closed)
         );
+        // (A48) The closing auction: the line says so, not "closed".
+        let auction = status(
+            Some(false),
+            false,
+            &[
+                ("THYAO", 5, "closing_session"),
+                ("GARAN", 5, "closing_session"),
+                ("AKBNK", 1, "closed"),
+            ],
+        );
+        assert_eq!(
+            status_line(&auction, Language::Tr),
+            ("Kapanış seansında".to_owned(), MarketState::Closed)
+        );
+        assert_eq!(status_line(&auction, Language::En).0, "Closing auction");
+        // Fewer than half in the auction (the session has ended for most): closed.
+        let ended = status(
+            Some(false),
+            false,
+            &[
+                ("THYAO", 5, "closing_session"),
+                ("GARAN", 1, "closed"),
+                ("AKBNK", 1, "closed"),
+            ],
+        );
+        assert_eq!(status_line(&ended, Language::Tr).0, "Seans kapalı");
+        // A holiday is a holiday; the phases decide whatever the calendar's `open` says.
+        let mut hol = auction.clone();
+        hol.holiday = Some(true);
+        assert_eq!(status_line(&hol, Language::Tr).0, "Seans kapalı · tatil");
+        let mut open = auction.clone();
+        open.open = Some(true);
+        assert_eq!(status_line(&open, Language::Tr).0, "Kapanış seansında");
+        // Stale data wins over the auction.
+        let mut st = auction.clone();
+        st.stale = true;
+        assert_eq!(status_line(&st, Language::Tr).1, MarketState::Stale);
         let stale = status(Some(true), true, &[]);
         assert_eq!(
             status_line(&stale, Language::Tr),

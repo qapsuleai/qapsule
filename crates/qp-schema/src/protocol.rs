@@ -3150,6 +3150,12 @@ pub enum Gesture {
         /// (`qp_grammar::open::OPENS`: `r4`, `tesir`, `nobra`; default `r4`, today's card).
         #[serde(default, skip_serializing_if = "Option::is_none")]
         open: Option<String>,
+        /// (RP4/T7) Row time: the capsule rows (the voice's headline) and the story chart's
+        /// rows carry the event's time — `14:35` on today's intraday bars, else the date
+        /// (`12 Kas` / `Nov 12`), in the exchange's time zone (`false`: none, the default;
+        /// `qp_capsule::realize::stamp`).
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        clock: Option<bool>,
     },
     /// (R4, §4.6) Close the open capsule one depth back, or to `to` (`sentence`: back to
     /// the feed). Answered with an `interaction` carrying the `opening` (the way back).
@@ -3275,6 +3281,10 @@ pub struct ViewState {
     /// capsule closes or another one opens.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub ask: Option<String>,
+    /// (RP4/T7) Rows carry the event's time (the `style` gesture's `clock`; absent/`false`:
+    /// none, every surface as before).
+    #[serde(default, skip_serializing_if = "std::ops::Not::not")]
+    pub clock: bool,
 }
 
 /// (R4, §4.6) One element both sides of a depth transition show (e.g. the glyph, the

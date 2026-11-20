@@ -177,6 +177,7 @@ fn both(c: &Case<'_>) -> (SceneDesc, SceneDesc) {
         hide_closed: c.hide,
         lang: c.lang,
         fact_of: &fact_of,
+        stamp_of: None,
     };
     let old = pavka_ref::extend(c.look, c.theme, chart(c.range.0, c.range.1), c.h, &inp);
     let new = pavka::extend(c.look, c.theme, chart(c.range.0, c.range.1), c.h, &inp);

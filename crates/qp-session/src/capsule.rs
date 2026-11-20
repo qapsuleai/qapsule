@@ -1084,6 +1084,7 @@ impl Session {
     /// reader with projection `p` in `lang`: the same story, facts, "now", validity and
     /// redaction as [`Session::reader_parts`] (the voice's pieces are those parts, A33).
     /// `None` under `r4`, or without the story's bars or a known period.
+    #[allow(clippy::too_many_arguments)] // (RP4/T7) the connection's `clock`
     pub(crate) fn reader_voice(
         &self,
         doc: &Document,
@@ -1091,6 +1092,7 @@ impl Session {
         p: Option<&Proj>,
         lang: Language,
         voice: &str,
+        clock: bool,
         memo: &mut StudyMemo,
     ) -> Option<qp_schema::protocol::CapsuleVoice> {
         if !qp_capsule::voice::is_voice(voice) || voice == qp_capsule::voice::DEFAULT_VOICE {
@@ -1116,7 +1118,30 @@ impl Session {
             redacted,
             lang,
             self.headline_cal.as_ref(),
+            clock.then_some(doc.display_tz.as_deref()),
             memo,
+        )
+    }
+
+    /// (RP4/T7) The time stamp of story row `row` for a reader in `lang` (the story chart's
+    /// rows): its event's time (birth, or close once closed) as of the series' last bar,
+    /// in the document's display zone (else the exchange's); `None` for a redacted row
+    /// (K33) or without the series' bars.
+    #[must_use]
+    pub fn row_stamp(&self, row: &qp_schema::protocol::StoryRow, lang: Language) -> Option<String> {
+        if row.redacted {
+            return None;
+        }
+        let (doc, bs) = [rd!(self), &self.doc]
+            .into_iter()
+            .find_map(|d| bar_series(d, &row.series).map(|bs| (d, bs)))?;
+        crate::headparts::event_stamp(
+            row.closed_t.unwrap_or(row.born_t),
+            bs,
+            bs.bars()?,
+            lang,
+            self.headline_cal.as_ref(),
+            doc.display_tz.as_deref(),
         )
     }
 
@@ -1669,6 +1694,7 @@ impl Session {
         let principal = self.conns[ci].principal.clone();
         let lang = self.lang_of(ci);
         let voice = self.conns[ci].look.voice.clone();
+        let clock = self.conns[ci].look.clock;
         let p = self.proj.as_deref();
         let doc = &self.doc;
         let mut items: Vec<CapsuleItem> = Vec::new();
@@ -1710,7 +1736,7 @@ impl Session {
             if let Some(mut it) = self.capsule_item_with(doc, c, p, lang, &principal, &mut memo) {
                 // (R5/m17-int) The connection's voice speaks every listed capsule.
                 if let Some(v) = voice.as_deref() {
-                    it.voice = self.reader_voice(doc, c, p, lang, v, &mut memo);
+                    it.voice = self.reader_voice(doc, c, p, lang, v, clock, &mut memo);
                 }
                 // (R6/T3, §24) The market note, when the host gave a market status.
                 self.market_item(&mut it, lang, &principal);
@@ -1794,7 +1820,8 @@ impl Session {
                 E::new(ErrorCode::NoData, "the capsule's bars are not available").build()
             })?;
         if let Some(v) = self.conns[ci].look.voice.as_deref() {
-            item.voice = self.reader_voice(doc, c, p, lang, v, &mut StudyMemo::default());
+            let clock = self.conns[ci].look.clock;
+            item.voice = self.reader_voice(doc, c, p, lang, v, clock, &mut StudyMemo::default());
         }
         self.market_item(&mut item, lang, &principal);
         let story = p
@@ -2103,7 +2130,9 @@ impl Session {
                     continue;
                 };
                 if let Some(v) = c.look.voice.as_deref() {
-                    item.voice = self.reader_voice(doc, cap, p.as_deref(), lang, v, &mut memo);
+                    let clock = c.look.clock;
+                    item.voice =
+                        self.reader_voice(doc, cap, p.as_deref(), lang, v, clock, &mut memo);
                 }
                 self.market_item(&mut item, lang, &c.principal);
                 for (sub, inst, all) in &subs {

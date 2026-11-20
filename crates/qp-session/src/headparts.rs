@@ -124,6 +124,7 @@ pub(crate) fn story_voice(
     redacted: bool,
     lang: Language,
     fallback: Option<&Calendar>,
+    clock: Option<Option<&str>>,
     memo: &mut qp_capsule::sentence::StudyMemo,
 ) -> Option<CapsuleVoice> {
     let (bs, bars, now) = at;
@@ -131,6 +132,18 @@ pub(crate) fn story_voice(
     let period = Period::parse(bs.interval.as_deref()?)?;
     let calendar = calendar_of(bs, fallback)?;
     let p = parts(story, now_t, validity, &calendar, period, redacted);
+    // (RP4/T7) The row's time before the headline, when the connection asked for it
+    // (`clock`: `Some(display zone)`); never for a redacted reader (K33).
+    let stamps = clock
+        .filter(|_| !redacted)
+        .and_then(|tz| story_event_t(story).map(|ev| (ev, tz)))
+        .map(|(ev, tz)| {
+            let zone = tz
+                .and_then(qp_calendar::Zone::get)
+                .unwrap_or_else(|| calendar.zone());
+            [Lang::Tr, Lang::En]
+                .map(|l| qp_capsule::realize::stamp::stamp(zone, period, ev, now_t, l))
+        });
     let [tr, en] =
         crate::capsule::with_sentence_input(story, facts, bars, now, redacted, memo, |s| {
             qp_capsule::voice::speak(
@@ -140,6 +153,7 @@ pub(crate) fn story_voice(
                     parts: &p,
                     calendar: &calendar,
                     period,
+                    stamp: stamps.as_ref().map(|[t, e]| [t.as_str(), e.as_str()]),
                 },
             )
         })??;
@@ -162,6 +176,51 @@ pub(crate) fn story_voice(
             })
             .collect(),
     })
+}
+
+fn lang_of(lang: Language) -> Lang {
+    match lang {
+        Language::Tr => Lang::Tr,
+        Language::En => Lang::En,
+    }
+}
+
+/// (RP4/T7) The time a story's row is about: its birth while open, its close once closed
+/// (the moment the headline's "when" names: the birth phrase, or the closing chip).
+#[must_use]
+pub(crate) fn story_event_t(story: &Story) -> Option<i64> {
+    if story.stage.is_closed() {
+        story.history.last().map(|h| h.t)
+    } else {
+        story.history.first().map(|h| h.t)
+    }
+}
+
+/// (RP4/T7) The stamp of an event at bar time `event_t` on bar series `bs` (`bars`: its
+/// bars; "now" is the last one's time, the authority's data time) for a reader in `lang`,
+/// in display zone `display_tz` (`None` or unknown: the exchange calendar's zone, K14).
+/// `None` without a known interval or a valid calendar.
+pub(crate) fn event_stamp(
+    event_t: i64,
+    bs: &Series,
+    bars: &[Bar],
+    lang: Language,
+    fallback: Option<&Calendar>,
+    display_tz: Option<&str>,
+) -> Option<String> {
+    let now_t = bars.last()?.t;
+    let period = Period::parse(bs.interval.as_deref()?)?;
+    let cal = calendar_of(bs, fallback)?;
+    let zone = display_tz
+        .and_then(qp_calendar::Zone::get)
+        .unwrap_or_else(|| cal.zone());
+    Some(qp_capsule::realize::stamp::stamp(
+        zone,
+        period,
+        event_t,
+        now_t,
+        lang_of(lang),
+    ))
 }
 
 /// The grammar's plain pieces from the realizer's.

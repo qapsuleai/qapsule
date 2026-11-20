@@ -153,6 +153,7 @@ fn draw(rows: &[StoryRow], selected: &str, show_closed: bool, lang: Language) ->
             hide_closed: !show_closed,
             lang,
             fact_of: &|_| None,
+            stamp_of: None,
         },
     )
     .expect("scene")
@@ -384,6 +385,7 @@ fn range_limits_the_stories_and_english_words() {
             hide_closed: false,
             lang: Language::En,
             fact_of: &|_| None,
+            stamp_of: None,
         },
     )
     .expect("scene");
@@ -503,4 +505,72 @@ fn timing_probe() {
             (t2 - t1) / k
         );
     }
+}
+
+/// (RP4/T7) With the rows' time (`StoryInput::stamp_of`) every lane's label carries its
+/// stamp (after what happened) and nothing else changes; without it the scene is byte-identical to before.
+#[test]
+fn rows_carry_their_time_only_when_asked() {
+    let rs = rows(5);
+    let plain = draw(&rs, "f1", true, Language::Tr);
+    let stamp = |r: &StoryRow| Some(format!("{:02}:30", 10 + r.born_bar % 8));
+    let s = korda::scene(
+        &view(),
+        &provider(),
+        &CompileOptions::new(390, 300),
+        &StoryInput {
+            rows: &rs,
+            focus: Some("f1"),
+            hide_closed: false,
+            lang: Language::Tr,
+            fact_of: &|_| None,
+            stamp_of: Some(&stamp),
+        },
+    )
+    .expect("scene");
+    let (a, b) = (lanes(&plain), lanes(&s));
+    assert_eq!(a.len(), b.len());
+    for (x, y) in a.iter().zip(&b) {
+        let r = rs.iter().find(|r| x.id.ends_with(&r.id)).expect("row");
+        let plain = x.label.as_deref().unwrap();
+        let t = stamp(r).unwrap();
+        // After what happened and how it stands, before the coin-flip mark.
+        let want = match plain.strip_suffix(" · yazı tura") {
+            Some(head) => format!("{head} · {t} · yazı tura"),
+            None => format!("{plain} · {t}"),
+        };
+        assert_eq!(y.label.as_deref(), Some(want.as_str()));
+        assert_eq!(x.items, y.items, "the lane's geometry is the same");
+    }
+    // The drawn labels carry it too (where the room allows).
+    let texts: Vec<&str> = panel(&s)
+        .layers
+        .iter()
+        .flat_map(|l| &l.prims)
+        .filter_map(|p| match p {
+            Prim::Text { text, .. } => Some(text.as_str()),
+            _ => None,
+        })
+        .collect();
+    assert!(texts.iter().any(|t| t.ends_with(":30")), "{texts:?}");
+    // No stamp for a row (a redacted one): its label as before.
+    let none = |_: &StoryRow| None;
+    let s2 = korda::scene(
+        &view(),
+        &provider(),
+        &CompileOptions::new(390, 300),
+        &StoryInput {
+            rows: &rs,
+            focus: Some("f1"),
+            hide_closed: false,
+            lang: Language::Tr,
+            fact_of: &|_| None,
+            stamp_of: Some(&none),
+        },
+    )
+    .expect("scene");
+    assert_eq!(
+        serde_json::to_string(&plain).unwrap(),
+        serde_json::to_string(&s2).unwrap()
+    );
 }

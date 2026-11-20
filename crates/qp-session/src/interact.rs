@@ -58,6 +58,7 @@ struct StyleReq<'a> {
     story: Option<&'a str>,
     hide_closed: Option<bool>,
     open: Option<&'a str>,
+    clock: Option<bool>,
 }
 
 /// (R5/S) A story design's whole-scene compile, the reader's story rows and the focus.
@@ -232,6 +233,7 @@ impl Session {
                 story,
                 hide_closed,
                 open,
+                clock,
             } => {
                 self.set_style(
                     ci,
@@ -248,6 +250,7 @@ impl Session {
                         story: story.as_deref(),
                         hide_closed: *hide_closed,
                         open: open.as_deref(),
+                        clock: *clock,
                     },
                 )?;
                 (Out::default(), Vec::new())
@@ -433,6 +436,9 @@ impl Session {
         if let Some(h) = r.hide_closed {
             look.hide_closed = h;
         }
+        if let Some(c) = r.clock {
+            look.clock = c;
+        }
         if let Some(l) = r.look {
             look.look = (l != qp_grammar::look::DEFAULT_LOOK).then(|| l.to_owned());
         }
@@ -601,7 +607,8 @@ impl Session {
             let p = DocProvider::new(rd!(self), &self.cache)
                 .with_headlines(&self.headlines)
                 .with_parts(self, lang)
-                .with_voice(voice.as_deref());
+                .with_voice(voice.as_deref())
+                .with_clock(self.conns[ci].look.clock);
             // (R5/M20) The design's view; `nobra` also reads the opened question and the
             // frame (the authority has no device check: "verified by the server").
             let ctx = qp_grammar::open::OpenCtx {
@@ -632,7 +639,8 @@ impl Session {
             let p = DocProvider::new(rd!(self), &self.cache)
                 .with_headlines(&self.headlines)
                 .with_parts(self, lang)
-                .with_voice(voice.as_deref());
+                .with_voice(voice.as_deref())
+                .with_clock(self.conns[ci].look.clock);
             return Ok(depth::face_view_in(
                 look,
                 name.as_deref(),
@@ -718,7 +726,12 @@ impl Session {
         let p = DocProvider::new(rd!(self), &self.cache)
             .with_headlines(&self.headlines)
             .with_parts(self, lang)
-            .with_voice(voice.as_deref());
+            .with_voice(voice.as_deref())
+            .with_clock(self.conns[ci].look.clock);
+        // (RP4/T7) The rows' time, when the connection asked for it.
+        let stamp = |r: &qp_schema::protocol::StoryRow| self.row_stamp(r, lang);
+        let stamp_of: Option<&qp_grammar::stories::StampFn<'_>> =
+            self.conns[ci].look.clock.then_some(&stamp);
         // (R5/S) A story chart design that compiles the whole scene (`korda`).
         let scene = match story {
             Some((c, rows, finding)) => c(
@@ -731,6 +744,7 @@ impl Session {
                     hide_closed: self.conns[ci].look.hide_closed,
                     lang,
                     fact_of: &|_| None,
+                    stamp_of,
                 },
             ),
             None => compile(view, &p, &opts),
@@ -817,6 +831,8 @@ impl Session {
         let firsts = crate::viewer::FirstFacts::new(rd!(self), &rows);
         let fact_of = |f: &str| firsts.get(f);
         let look = &self.conns[ci].look;
+        let stamp = |r: &qp_schema::protocol::StoryRow| self.row_stamp(r, lang);
+        let stamp_of: Option<&qp_grammar::stories::StampFn<'_>> = look.clock.then_some(&stamp);
         (sd.extend)(
             crate::viewer::look_of(look),
             look.theme.as_deref().or(view.theme.as_deref()),
@@ -828,6 +844,7 @@ impl Session {
                 hide_closed: look.hide_closed,
                 lang,
                 fact_of: &fact_of,
+                stamp_of,
             },
         )
     }

@@ -55,6 +55,25 @@ pub enum LiveCommand {
         #[arg(long)]
         unadjusted: bool,
     },
+    /// (RP4/T1) Fetch historical trades (`trade.gz`, level 1 only) into
+    /// `fixtures/local/trades/<SYM>/<start>_<end>.csv.gz`, in windows of at most
+    /// `--window-days` calendar days (≤ 15, the endpoint's limit). A window already in the
+    /// cache is never fetched again; every request is appended to
+    /// `fixtures/local/trades/requests.jsonl` (counts only).
+    Trades {
+        /// Comma-separated symbols or `@file`.
+        #[arg(long)]
+        symbols: String,
+        /// First local date `YYYY-MM-DD`.
+        #[arg(long)]
+        start: String,
+        /// Last local date.
+        #[arg(long)]
+        end: String,
+        /// Window length in calendar days (1–15).
+        #[arg(long, default_value_t = 14)]
+        window_days: u32,
+    },
     /// M22: build bars from raw logs with the live feed and compare them with REST bars
     /// (`qp live bars` files); prints only an aggregate table.
     Compare(CompareArgs),
@@ -94,6 +113,12 @@ pub fn run(cmd: &LiveCommand) -> Result<(), String> {
         LiveCommand::Inspect { file } => inspect(file),
         LiveCommand::Compare(a) => compare(a),
         LiveCommand::Symbols => symbols(),
+        LiveCommand::Trades {
+            symbols,
+            start,
+            end,
+            window_days,
+        } => trades(symbols, start, end, *window_days),
         LiveCommand::Bars {
             symbols,
             period,
@@ -732,7 +757,21 @@ fn bars(
     let mut total = 0usize;
     for sym in &syms {
         let path = dir.join(format!("{sym}.{period}.{start}.{end}.{tag}.json"));
-        match rest.bars(sym, period, start, end, !unadjusted) {
+        if path.exists() {
+            println!("bars {sym} {period}: cached");
+            continue;
+        }
+        let t0 = Instant::now();
+        let got = rest.bars(sym, period, start, end, !unadjusted);
+        log_request(
+            &repo_root().join("fixtures/local/live/rest/requests.jsonl"),
+            "bars",
+            sym,
+            &format!("{period}:{start}:{end}:{tag}"),
+            got.as_ref().map(Vec::len).map_err(ToString::to_string),
+            t0.elapsed(),
+        );
+        match got {
             Ok(b) => {
                 total += b.len();
                 let rows: Vec<serde_json::Value> = b
@@ -753,6 +792,166 @@ fn bars(
         "bars: {} symbols, {total} rows, {} calls",
         syms.len(),
         rest.calls.load(Ordering::Relaxed)
+    );
+    Ok(())
+}
+
+/// Append one request line (counts only; no values, no addresses) to a JSONL log.
+fn log_request(
+    log: &Path,
+    what: &str,
+    sym: &str,
+    range: &str,
+    rows: Result<usize, String>,
+    took: Duration,
+) {
+    let line = serde_json::json!({
+        "what": what, "symbol": sym, "range": range,
+        "ok": rows.is_ok(), "rows": rows.as_ref().ok(),
+        "error": rows.as_ref().err().map(|e| e.chars().take(80).collect::<String>()),
+        "ms": u64::try_from(took.as_millis()).unwrap_or(u64::MAX),
+    });
+    if let Some(d) = log.parent() {
+        let _ = std::fs::create_dir_all(d);
+    }
+    if let Ok(mut f) = std::fs::OpenOptions::new()
+        .create(true)
+        .append(true)
+        .open(log)
+    {
+        use std::io::Write as _;
+        let _ = writeln!(f, "{line}");
+    }
+}
+
+/// Calendar-day windows `[a, b]` of at most `days` days covering `start..=end`.
+fn date_windows(start: &str, end: &str, days: u32) -> Result<Vec<(String, String)>, String> {
+    if !(1..=15).contains(&days) {
+        return Err("window-days must be 1..=15".into());
+    }
+    let (mut a, z) = (civil_days(start)?, civil_days(end)?);
+    let mut out = Vec::new();
+    while a <= z {
+        let b = (a + i64::from(days) - 1).min(z);
+        out.push((civil_date(a), civil_date(b)));
+        a = b + 1;
+    }
+    Ok(out)
+}
+
+/// Days since 1970-01-01 of a `YYYY-MM-DD` date (proleptic Gregorian).
+fn civil_days(s: &str) -> Result<i64, String> {
+    let bad = || format!("date `{s}`: expected YYYY-MM-DD");
+    let mut it = s.split('-');
+    let (Some(y), Some(m), Some(d), None) = (it.next(), it.next(), it.next(), it.next()) else {
+        return Err(bad());
+    };
+    let (y, m, d): (i64, i64, i64) = (
+        y.parse().map_err(|_| bad())?,
+        m.parse().map_err(|_| bad())?,
+        d.parse().map_err(|_| bad())?,
+    );
+    if !(1..=12).contains(&m) || !(1..=31).contains(&d) {
+        return Err(bad());
+    }
+    let y = if m <= 2 { y - 1 } else { y };
+    let era = y.div_euclid(400);
+    let yoe = y - era * 400;
+    let mp = (m + 9) % 12;
+    let doy = (153 * mp + 2) / 5 + d - 1;
+    let doe = yoe * 365 + yoe / 4 - yoe / 100 + doy;
+    Ok(era * 146_097 + doe - 719_468)
+}
+
+fn civil_date(z: i64) -> String {
+    let z = z + 719_468;
+    let era = z.div_euclid(146_097);
+    let doe = z - era * 146_097;
+    let yoe = (doe - doe / 1460 + doe / 36_524 - doe / 146_096) / 365;
+    let doy = doe - (365 * yoe + yoe / 4 - yoe / 100);
+    let mp = (5 * doy + 2) / 153;
+    let d = doy - (153 * mp + 2) / 5 + 1;
+    let m = if mp < 10 { mp + 3 } else { mp - 9 };
+    let y = yoe + era * 400 + i64::from(m <= 2);
+    format!("{y:04}-{m:02}-{d:02}")
+}
+
+fn trades(symbols: &str, start: &str, end: &str, window_days: u32) -> Result<(), String> {
+    let syms = parse_symbols(symbols)?;
+    let windows = date_windows(start, end, window_days)?;
+    let root = repo_root().join("fixtures/local/trades");
+    let log = root.join("requests.jsonl");
+    // Only open the identity (token) when something is missing from the cache.
+    let missing: Vec<(&String, &(String, String))> = syms
+        .iter()
+        .flat_map(|s| windows.iter().map(move |w| (s, w)))
+        .filter(|(s, (a, b))| {
+            !root
+                .join(s.as_str())
+                .join(format!("{a}_{b}.csv.gz"))
+                .exists()
+        })
+        .collect();
+    println!(
+        "trades: {} symbols x {} windows; {} cached, {} to fetch",
+        syms.len(),
+        windows.len(),
+        syms.len() * windows.len() - missing.len(),
+        missing.len()
+    );
+    if missing.is_empty() {
+        return Ok(());
+    }
+    let (cfg, auth, _identity) = rest_ctx()?;
+    let rest = qp_live::rest::RestClient::new(&auth, cfg.redactor().clone());
+    let (mut rows_total, mut bytes_total, mut errors) = (0usize, 0usize, 0usize);
+    for (n, (sym, (a, b))) in missing.iter().enumerate() {
+        let dir = root.join(sym.as_str());
+        std::fs::create_dir_all(&dir).map_err(|e| e.to_string())?;
+        let t0 = Instant::now();
+        let got = rest.trades_csv(sym, a, b);
+        let rows = got
+            .as_ref()
+            .map(|c| c.iter().filter(|&&x| x == b'\n').count().saturating_sub(1))
+            .map_err(ToString::to_string);
+        log_request(
+            &log,
+            "trades",
+            sym,
+            &format!("{a}:{b}"),
+            rows.clone(),
+            t0.elapsed(),
+        );
+        match got {
+            Ok(csv) => {
+                let path = dir.join(format!("{a}_{b}.csv.gz"));
+                let tmp = path.with_extension("part");
+                let f = File::create(&tmp).map_err(|e| e.to_string())?;
+                let mut gz = flate2::write::GzEncoder::new(f, flate2::Compression::default());
+                std::io::Write::write_all(&mut gz, &csv).map_err(|e| e.to_string())?;
+                gz.finish().map_err(|e| e.to_string())?;
+                std::fs::rename(&tmp, &path).map_err(|e| e.to_string())?;
+                rows_total += rows.unwrap_or(0);
+                bytes_total += csv.len();
+            }
+            Err(e) => {
+                errors += 1;
+                println!("trades {sym} {a}..{b}: error {e}");
+            }
+        }
+        if (n + 1) % 25 == 0 {
+            println!(
+                "trades: {}/{} requests, {rows_total} rows, {} MB csv, {errors} errors",
+                n + 1,
+                missing.len(),
+                bytes_total / 1_000_000
+            );
+        }
+    }
+    println!(
+        "trades: done; {} calls, {rows_total} rows, {} MB csv, {errors} errors",
+        rest.calls.load(Ordering::Relaxed),
+        bytes_total / 1_000_000
     );
     Ok(())
 }
@@ -779,6 +978,28 @@ pub struct FeedArgs {
     /// Bars are closed this long after the clock passes their end (ms).
     #[arg(long, default_value_t = qp_matriks::feed::DEFAULT_FINALIZE_GRACE_MS)]
     pub finalize_grace_ms: i64,
+}
+
+#[cfg(test)]
+mod window_tests {
+    use super::*;
+
+    #[test]
+    fn windows_cover_the_range_without_overlap() {
+        let w = date_windows("2026-10-05", "2026-11-20", 14).unwrap();
+        assert_eq!(
+            w,
+            vec![
+                ("2026-10-05".into(), "2026-10-18".into()),
+                ("2026-10-19".into(), "2026-11-01".into()),
+                ("2026-11-02".into(), "2026-11-15".into()),
+                ("2026-11-16".into(), "2026-11-20".into()),
+            ]
+        );
+        assert!(date_windows("2026-01-01", "2026-01-02", 16).is_err());
+        assert_eq!(civil_date(civil_days("2024-02-29").unwrap()), "2024-02-29");
+        assert_eq!(civil_days("1970-01-01").unwrap(), 0);
+    }
 }
 
 pub fn parse_method(s: &str) -> Result<qp_source::BarMethod, String> {

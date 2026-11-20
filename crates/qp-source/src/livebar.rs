@@ -38,6 +38,19 @@
 //!    and starts the cumulative counter at the history's value, so history + live equals a
 //!    series built live from the start.
 //! 7. **Determinism.** The same ticks give the same events, byte for byte.
+//! 8. **Trades (RP4, K66).** [`BarMethod::Trades`]: bars from the trade stream
+//!    ([`LiveBars::push_trade`], one [`TradeTick`] per trade) instead of the price card.
+//!    Alignment, opening auction (first bar), closing session (last bar), late and
+//!    off-session handling are rule 1 and 5 unchanged. A trade sets `c`, raises `h`, lowers
+//!    `l`; the first trade of a bar is `o = h = l = c`. Volume: [`VolumeUnit::Value`] adds
+//!    `price · quantity` (TL), [`VolumeUnit::Quantity`] adds `quantity` (lots); the bar's
+//!    lots are also kept apart ([`LiveBars::current_quantity`]). Special (reported)
+//!    trades (`isTradeEx`, `mx/tradeex`) join only with [`SpecialTrades::Include`]
+//!    (default: excluded; the final rule is measured elsewhere, RP4 M27). Under `Trades`
+//!    a price-card tick builds nothing (the card still gives the day fields and the
+//!    session phase to its other readers); under the card methods a trade builds nothing.
+//!    Trades are pushed in exchange order (time, then trade number); summation order is
+//!    push order, so the same trades in the same order give bit-equal bars.
 //!
 //! [`compare_bars`] measures live bars against REST bars (M22 table: counts only).
 
@@ -91,6 +104,30 @@ impl CardTick {
     }
 }
 
+/// One trade (işlem) for [`LiveBars::push_trade`] (rule 8). The translator (Matriks
+/// `TradeMessage`, REST `trade.gz`) fills it; buyer / seller are never part of it.
+#[derive(Debug, Clone, Copy, Default, PartialEq)]
+pub struct TradeTick {
+    /// Trade time, UTC milliseconds (exchange time).
+    pub t_ms: TimestampMs,
+    /// Trade price.
+    pub price: f64,
+    /// Traded quantity (lots); `None` when the source did not send it (level 0).
+    pub quantity: Option<f64>,
+    /// A special (reported) trade (`isTradeEx`, `mx/tradeex`).
+    pub special: bool,
+}
+
+/// Whether special (reported) trades join the bars (rule 8).
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
+pub enum SpecialTrades {
+    /// Not in the bars (counted). Default until measured (RP4 M27).
+    #[default]
+    Exclude,
+    /// In the bars like any trade.
+    Include,
+}
+
 /// Which cumulative counter is the bar volume.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
 pub enum VolumeUnit {
@@ -112,6 +149,8 @@ pub enum BarMethod {
     /// (c) `CardDaily` on `1d`; `Ticks` elsewhere plus new day extremes reflected into
     /// the current bar.
     Mixed,
+    /// (RP4) From the trade stream only ([`LiveBars::push_trade`]), every interval.
+    Trades,
 }
 
 impl BarMethod {
@@ -122,6 +161,7 @@ impl BarMethod {
             Self::Ticks => "ticks",
             Self::CardDaily => "card_daily",
             Self::Mixed => "mixed",
+            Self::Trades => "trades",
         }
     }
 }
@@ -141,6 +181,8 @@ pub struct LiveConfig {
     pub post_close_ms: i64,
     /// Sequence number of the first emitted event (the data layer's next number).
     pub first_seq: u64,
+    /// `Trades` only: whether special (reported) trades join the bars.
+    pub special_trades: SpecialTrades,
 }
 
 impl Default for LiveConfig {
@@ -151,6 +193,7 @@ impl Default for LiveConfig {
             pre_open_ms: 30 * MS_PER_MIN,
             post_close_ms: 30 * MS_PER_MIN,
             first_seq: 1,
+            special_trades: SpecialTrades::Exclude,
         }
     }
 }
@@ -180,6 +223,15 @@ pub struct LiveStats {
     pub events: u64,
     /// Last session phase code seen.
     pub last_phase: Option<i32>,
+    /// Trades pushed (`Trades` method).
+    pub trades: u64,
+    /// Special trades left out of the bars ([`SpecialTrades::Exclude`]).
+    pub special_excluded: u64,
+    /// Trades without a quantity (no volume added).
+    pub no_quantity: u64,
+    /// Price-card ticks ignored because bars come from trades, or trades ignored because
+    /// bars come from the card.
+    pub wrong_source: u64,
 }
 
 /// A live bar builder error.
@@ -217,6 +269,8 @@ pub struct LiveBars {
     day_high: Option<f64>,
     day_low: Option<f64>,
     seam_cum: Option<f64>,
+    /// Lots of the last bar (rule 8).
+    cur_qty: f64,
     stats: LiveStats,
 }
 
@@ -271,6 +325,7 @@ impl LiveBars {
             day_high: None,
             day_low: None,
             seam_cum: None,
+            cur_qty: 0.0,
             stats: LiveStats::default(),
         })
     }
@@ -361,6 +416,12 @@ impl LiveBars {
         self.cur.as_ref().map(|(b, _)| (b, self.cur_final))
     }
 
+    /// Lots traded in the last bar (`Trades` method; 0 otherwise or for a seam bar).
+    #[must_use]
+    pub fn current_quantity(&self) -> Option<f64> {
+        self.cur.as_ref().map(|_| self.cur_qty)
+    }
+
     /// Open time of the latest final bar.
     #[must_use]
     pub fn last_final_t(&self) -> Option<TimestampMs> {
@@ -431,6 +492,13 @@ impl LiveBars {
     /// Applies one price-card update; returns the data events it causes (possibly none).
     pub fn push(&mut self, tick: &CardTick) -> Vec<DataEvent> {
         let mut out = Vec::new();
+        if self.cfg.method == BarMethod::Trades {
+            self.stats.wrong_source += 1;
+            if tick.phase.is_some() {
+                self.stats.last_phase = tick.phase;
+            }
+            return out;
+        }
         self.started = true;
         self.stats.ticks += 1;
         if tick.phase.is_some() {
@@ -576,6 +644,83 @@ impl LiveBars {
             }
             self.cur = Some((b.clone(), span));
             self.cur_final = false;
+            self.stats.bars_opened += 1;
+            self.emit(DataChange::Bar { bar: b }, &mut out);
+        }
+        out
+    }
+
+    /// Applies one trade (rule 8); returns the data events it causes (possibly none).
+    pub fn push_trade(&mut self, tr: &TradeTick) -> Vec<DataEvent> {
+        let mut out = Vec::new();
+        if self.cfg.method != BarMethod::Trades {
+            self.stats.wrong_source += 1;
+            return out;
+        }
+        self.started = true;
+        self.stats.trades += 1;
+        if tr.special && self.cfg.special_trades == SpecialTrades::Exclude {
+            self.stats.special_excluded += 1;
+            return out;
+        }
+        let Some(span) = self.bar_of(tr.t_ms) else {
+            self.stats.off_session += 1;
+            return out;
+        };
+        let cur_span = self.cur.as_ref().map(|(_, s)| *s);
+        let late = self.final_at(span) <= self.closed_through
+            || cur_span.is_some_and(|c| span.open < c.open || (span == c && self.cur_final));
+        if late {
+            self.stats.late += 1;
+            return out;
+        }
+        let bad = &mut self.stats.invalid_fields;
+        let Some(p) = price(Some(tr.price), bad) else {
+            return out;
+        };
+        let qty = match tr.quantity {
+            None => {
+                self.stats.no_quantity += 1;
+                0.0
+            }
+            Some(q) => counter(Some(q), bad).unwrap_or(0.0),
+        };
+        let inc = match self.cfg.volume {
+            VolumeUnit::Value => p * qty,
+            VolumeUnit::Quantity => qty,
+        };
+        self.known_last = Some(p);
+        if cur_span == Some(span) {
+            let Some((old, _)) = self.cur.as_mut() else {
+                return out;
+            };
+            let mut b = old.clone();
+            b.c = p;
+            b.h = b.h.max(p);
+            b.l = b.l.min(p);
+            b.v += inc;
+            let fields = bar_patch_diff(old, &b);
+            *old = b;
+            self.cur_qty += qty;
+            if !fields.is_empty() {
+                let t = span.open;
+                self.emit(DataChange::Patch { t, fields }, &mut out);
+            }
+        } else {
+            if let Some((prev, _)) = &self.cur {
+                self.last_final_t = Some(prev.t);
+            }
+            let b = Bar {
+                t: span.open,
+                o: p,
+                h: p,
+                l: p,
+                c: p,
+                v: inc,
+            };
+            self.cur = Some((b.clone(), span));
+            self.cur_final = false;
+            self.cur_qty = qty;
             self.stats.bars_opened += 1;
             self.emit(DataChange::Bar { bar: b }, &mut out);
         }

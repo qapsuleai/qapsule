@@ -34,8 +34,8 @@ pub enum LiveCommand {
     /// `fixtures/local/live/raw/` and print counts. Ends after `--seconds` or on halt.
     Record(RecordArgs),
     /// Fetch the symbol list (REST meta) into `fixtures/local/live/meta.json` and write
-    /// universe lists `u100.txt` (XU100 members) and `uall.txt` (BIST equities); prints
-    /// only counts.
+    /// universe lists `u30.txt` (BIST30), `u100.txt` (BIST100), `utum.txt` (BISTTUM) and
+    /// `uall.txt` (all BIST equities); prints only counts.
     Symbols,
     /// Fetch settled REST bars into `fixtures/local/live/rest/` (sequential, paced).
     Bars {
@@ -174,6 +174,18 @@ pub fn now_us() -> i64 {
         .unwrap_or(0)
 }
 
+/// (R6 audit B1/B2) The machine-wide "Matriks identity" lock: every `qp` process that
+/// requests a token (record, symbols, bars, demo --live) takes it first and holds it for its
+/// whole life, so no second process can ask for a token with the same identity while a
+/// live connection is open. The directory is `qp_live::lock::default_lock_dir()` (the main
+/// tree's `fixtures/local`, also from a worktree; `QP_LIVE_LOCK_DIR` overrides), never the
+/// current working root.
+pub fn identity_lock() -> Result<qp_live::lock::MachineLock, String> {
+    let dir = qp_live::lock::default_lock_dir();
+    qp_live::lock::acquire_machine_lock(&dir, &qp_live::EndpointKey::new("identity"))
+        .map_err(|e| format!("live: {e} (another qp process holds the Matriks identity)"))
+}
+
 /// The classifier wired into the connection: Matriks `MessengerMessage` decoding.
 pub fn classifier() -> NoticeClassifier {
     Arc::new(|topic: &str, payload: &[u8]| {
@@ -282,6 +294,7 @@ impl LiveSink for RawSink {
 
 fn record(a: &RecordArgs) -> Result<(), String> {
     let symbols = parse_symbols(&a.symbols)?;
+    let _identity = identity_lock()?;
     let cfg = LiveConfig::from_env().map_err(|e| e.to_string())?;
     if cfg.hardware_id_warning() {
         eprintln!("live: warning: MATRIKS_HARDWARE_ID does not start with `qapsule-`");
@@ -317,7 +330,7 @@ fn record(a: &RecordArgs) -> Result<(), String> {
     let auth = Arc::new(AuthClient::new(&cfg, AuthPolicy::default()));
     let mut opts = ConnectOptions::new(topics.clone());
     opts.classifier = Some(classifier());
-    opts.lock_dir = root.join("fixtures/local");
+    opts.lock_dir = qp_live::lock::default_lock_dir();
     println!(
         "live: mode {:?}, endpoint {}, {} symbols, {} topics, {} s",
         cfg.mode(),
@@ -625,14 +638,15 @@ fn inspect(path: &Path) -> Result<(), String> {
     Ok(())
 }
 
-fn rest_ctx() -> Result<(LiveConfig, AuthClient), String> {
+fn rest_ctx() -> Result<(LiveConfig, AuthClient, qp_live::lock::MachineLock), String> {
+    let lock = identity_lock()?;
     let cfg = LiveConfig::from_env().map_err(|e| e.to_string())?;
     let auth = AuthClient::new(&cfg, AuthPolicy::default());
-    Ok((cfg, auth))
+    Ok((cfg, auth, lock))
 }
 
 fn symbols() -> Result<(), String> {
-    let (cfg, auth) = rest_ctx()?;
+    let (cfg, auth, _identity) = rest_ctx()?;
     let rest = qp_live::rest::RestClient::new(&auth, cfg.redactor().clone());
     let v = rest.symbols().map_err(|e| e.to_string())?;
     let dir = repo_root().join("fixtures/local/live");
@@ -651,7 +665,7 @@ fn symbols() -> Result<(), String> {
         |r: &serde_json::Value, k: &str| r.get(k).and_then(|x| x.as_str()).unwrap_or("").to_owned();
     let mut by_type: BTreeMap<String, u64> = BTreeMap::new();
     let mut by_ex: BTreeMap<String, u64> = BTreeMap::new();
-    let (mut u100, mut uall) = (Vec::new(), Vec::new());
+    let (mut u30, mut u100, mut utum, mut uall) = (Vec::new(), Vec::new(), Vec::new(), Vec::new());
     for r in &rows {
         if r.get("d").and_then(serde_json::Value::as_bool) == Some(true) {
             continue;
@@ -670,18 +684,35 @@ fn symbols() -> Result<(), String> {
             .unwrap_or_default();
         if t == "S" && ex.contains("BIST") {
             uall.push(code.clone());
+            if idx.iter().any(|i| i == "BIST30") {
+                u30.push(code.clone());
+            }
+            if idx.iter().any(|i| i == "BISTTUM") {
+                utum.push(code.clone());
+            }
             if idx.iter().any(|i| i == "BIST100") {
                 u100.push(code);
             }
         }
     }
-    u100.sort();
-    uall.sort();
-    std::fs::write(dir.join("u100.txt"), u100.join("\n") + "\n").map_err(|e| e.to_string())?;
-    std::fs::write(dir.join("uall.txt"), uall.join("\n") + "\n").map_err(|e| e.to_string())?;
+    for (name, list) in [
+        ("u30.txt", &mut u30),
+        ("u100.txt", &mut u100),
+        ("utum.txt", &mut utum),
+        ("uall.txt", &mut uall),
+    ] {
+        list.sort();
+        std::fs::write(dir.join(name), list.join("\n") + "\n").map_err(|e| e.to_string())?;
+    }
     println!("meta rows {} ; by type {by_type:?}", rows.len());
     println!("by exchange {by_ex:?}");
-    println!("u100 {} ; uall (BIST equities) {}", u100.len(), uall.len());
+    println!(
+        "u30 {} ; u100 {} ; utum {} ; uall (BIST equities) {}",
+        u30.len(),
+        u100.len(),
+        utum.len(),
+        uall.len()
+    );
     Ok(())
 }
 
@@ -693,7 +724,7 @@ fn bars(
     unadjusted: bool,
 ) -> Result<(), String> {
     let syms = parse_symbols(symbols)?;
-    let (cfg, auth) = rest_ctx()?;
+    let (cfg, auth, _identity) = rest_ctx()?;
     let rest = qp_live::rest::RestClient::new(&auth, cfg.redactor().clone());
     let dir = repo_root().join("fixtures/local/live/rest");
     std::fs::create_dir_all(&dir).map_err(|e| e.to_string())?;
@@ -1379,6 +1410,19 @@ mod tests {
             shape("2026-11-19T14:02:03.123+03"),
             "dddd-dd-ddTdd:dd:dd.ddd+dd"
         );
+    }
+
+    #[test]
+    fn identity_lock_is_exclusive() {
+        let dir = tempfile::tempdir().unwrap();
+        std::env::set_var("QP_LIVE_LOCK_DIR", dir.path());
+        let first = identity_lock().expect("first holder");
+        let second = identity_lock();
+        assert!(second.is_err(), "a second token holder must be refused");
+        assert!(second.unwrap_err().contains("identity"));
+        drop(first);
+        assert!(identity_lock().is_ok(), "released with its holder");
+        std::env::remove_var("QP_LIVE_LOCK_DIR");
     }
 
     #[test]

@@ -240,6 +240,9 @@ fn live_setup(a: &DemoArgs, tx: &Sender<Cmd>) -> Result<(ReplayHost, LiveParts),
     })?;
     crate::livehost::rest_period(&a.interval)
         .ok_or_else(|| format!("--interval: no REST period for `{}`", a.interval))?;
+    // (R6 audit B2) The identity lock before any token request (REST history included);
+    // held for the life of the process (released by the OS on exit).
+    std::mem::forget(crate::live::identity_lock()?);
     let cfg = qp_live::LiveConfig::from_env().map_err(|e| format!("--live: {e}"))?;
     if cfg.hardware_id_warning() {
         eprintln!("live: warning: MATRIKS_HARDWARE_ID does not start with `qapsule-`");
@@ -366,7 +369,7 @@ fn live_setup(a: &DemoArgs, tx: &Sender<Cmd>) -> Result<(ReplayHost, LiveParts),
             cfg,
             auth,
             topics,
-            lock_dir: root.join("fixtures/local"),
+            lock_dir: qp_live::lock::default_lock_dir(),
         },
         sink,
     };

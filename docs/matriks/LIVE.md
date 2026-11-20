@@ -10,9 +10,9 @@ belirteçler burada yazılmaz; yalnız değişken adları (K61). Ölçümler ve 
 | Parça | Crate | Ağ | Ne yapar |
 |---|---|---|---|
 | Matriks çözücü | `qp-matriks` | yok | 22 Matriks protosunun bayt eşit kopyası (`proto/`, köken `proto/PROVENANCE.md`), derlemede üretilen prost tipleri (`protox` + `prost-build`, protoc gerekmez); fiyat kartı kitabı (`SymbolBook`, protobuf birleştirme anlamı: **gelmeyen alan değişmedi**, 0 yazılmaz); borsa saati (`MarketClock`, yalnız `MX` kaynağı); bildirim sınıflayıcı (`MULTICONNECT`); seans evresi tablosu (`stockStatus`); ham ileti kaydı (`rawlog`); ortak besleme hattı (`feed::LiveFeed`). |
-| Canlı bar üretici | `qp-source::livebar` | yok | Fiyat kartından XIST takvimine hizalı bar (K14): açılış emir toplama günün ilk barına, kapanış seansı son barına; hacim günlük birikimli tutarın farkı; yöntemler `Ticks`, `CardDaily`, `Mixed`; ek yeri (`resume`); `compare_bars`. |
-| Canlı bağlayıcı | `qp-live` | **var** | Belirteç (bellekte, istek sıklığı sınırlı), MQTT 3.1 (`MQIsdp`, WebSocket alt protokolü `mqttv3.1`) WebSocket + TLS (rustls + ring, sertifika doğrulaması açık) üstünde, kendi küçük MQTT kodlayıcısı; uç nokta başına tek bağlantı (süreç içi kayıt + ana ağacın `fixtures/local/live-<uç>.lock` işletim sistemi kilidi; ayrıca belirteç isteyen her süreç için makine çapında `live-identity.lock`); çoklu bağlantı bildiriminde ya da kayan 10 dakikada 2 açıklamasız sunucu kapatmasında dur ve yeniden deneme yok (`.halted` işaret dosyası, K64/A52); üstel geri çekilme (2→60 sn, 6 ardışık hatada dur); günlük maskeleme (`Redactor`); REST istemcisi (`rest::RestClient`: kesin barlar ve sembol listesi, aynı servis belirteciyle); sahte sunucu (`mock` özelliği). |
-| CLI ve gösterim | `qp-cli` | var | `qp live record|inspect|symbols|bars|compare`, `qp live reset` (ağ yok; yalnız insan), `qp replay --raw`, `qp demo --live`. |
+| Canlı bar üretici | `qp-source::livebar` | yok | Fiyat kartından XIST takvimine hizalı bar (K14): açılış emir toplama günün ilk barına, kapanış seansı son barına; hacim günlük birikimli tutarın farkı; yöntemler `Ticks`, `CardDaily`, `Mixed`, `Trades` (RP4, §6); ek yeri (`resume`); `compare_bars`. |
+| Canlı bağlayıcı | `qp-live` | **var** | Belirteç (bellekte, istek sıklığı sınırlı), MQTT 3.1 (`MQIsdp`, WebSocket alt protokolü `mqttv3.1`) WebSocket + TLS (rustls + ring, sertifika doğrulaması açık) üstünde, kendi küçük MQTT kodlayıcısı; uç nokta başına tek bağlantı (süreç içi kayıt + ana ağacın `fixtures/local/live-<uç>.lock` işletim sistemi kilidi; ayrıca belirteç isteyen her süreç için makine çapında `live-identity.lock`); çoklu bağlantı bildiriminde ya da kayan 10 dakikada 2 açıklamasız sunucu kapatmasında dur ve yeniden deneme yok (`.halted` işaret dosyası, K64/A52); üstel geri çekilme (2→60 sn, 6 ardışık hatada dur); günlük maskeleme (`Redactor`); REST istemcisi (`rest::RestClient`: kesin barlar, sembol listesi ve RP4 geçmiş işlemler (`trades_csv`, yalnız düzey 1 sütunlar), aynı servis belirteciyle); işlem ucu `/trade` kendi kilidiyle (§6); sahte sunucu (`mock` özelliği). |
+| CLI ve gösterim | `qp-cli` | var | `qp live record|inspect|symbols|bars|compare|trades`, `qp live reset` (ağ yok; yalnız insan), `qp replay --raw`, `qp demo --live`. |
 
 `qp-wasm` (cihaz paketi) bu crate'lerin hiçbirine bağlanmaz; hesap çekirdeği (`qp-compute`)
 ağ ve saat bilmez (K3).
@@ -109,7 +109,31 @@ qp demo (SSE, görüntüleyici: yalnız açık enstrümanın verisi; piyasa duru
   bayt eşittir (RP4/T5 testleri: `livehost::tests::late_full_replica_*`,
   `tests/demo_live.rs::late_replica_gets_the_live_bars_of_an_early_one`).
 
-## 6. Sorun giderme
+## 6. İşlem ucu (RP4, K66)
+
+Kesin gün içi bar için işlem (trade) akışı. Kod ve sahte sunucu testleri hazır; gerçek
+bağlantı ilk iş gününde (işlem akışı yalnız anlık uçta yayınlanır, K67).
+
+| Konu | Kural | Kodda |
+|---|---|---|
+| Uç nokta | Piyasa ucuyla aynı ana makine, yol `/trade`; kip `MATRIKS_MQTT_MODE`'a göre (RT/DL değişkeni). Ayrı değişken yok. | `qp_live::LiveConfig::trade_endpoint` |
+| Kilit | Anahtar `<kip>-trade` → kendi süreç içi kilidi ve makine kilidi `fixtures/local/live-<kip>-trade.lock`; piyasa ucunun kilidinden bağımsız. Uç nokta başına tek bağlantı ve çoklu bağlantı durması aynen geçerli. Aynı `AuthClient` (aynı kimlik) ile, kimlik kilidini tutan süreç açar (R6 B2). | `LiveConnection::open` |
+| Konular | `mx/trade/<SEMBOL>` (düzey 1, eksiz), özel işlemler `mx/tradeex/<SEMBOL>`. `@lvl0` kurulabilir. **`@lvl2` hiç kurulmaz ve abone olunmaz:** konu kurucu reddeder, bağlantı da yerelde reddeder (`SubscribeRejected`, sunucuya gitmez). Fiyat kartının `mx/symbol/<SEMBOL>@lvl2` konusu etkilenmez. | `qp_matriks::{trade_topic, trade_topic_at, trade_topics}`, `qp_live::is_level2_trade_topic` |
+| Alanlar | Yalnız düzey 1: sembol, fiyat, adet, yön (`activeBidOrAsk`), zaman, işlem no (`orderNo`), `isTradeEx`. **Alıcı ve satıcı (alan 7, 8) çözülmez**: hiçbir yapıya girmez, saklanmaz, günlüğe yazılmaz. Ham kayıt için `sanitize_trade_payload` yükü bu iki alan olmadan yeniden kodlar. | `qp_matriks::trade` |
+| Fiyat | Telde 32 bitlik kayan sayı; en kısa ondalık yazımıyla `f64`'e genişletilir (`12.34f32` → `12.34`), böylece REST metninden okunan fiyata bit eşit olur. | `widen_price` |
+| Zaman | Belgeye göre gün başından nanosaniye (İstanbul), **doğrulanmadı**. Birim seçenek: `ns_from_midnight` (varsayılan; tarih varış zamanının yerel tarihi), `epoch_ms`, `epoch_us`, `epoch_ns`, `auto` (her iletide varışa en yakın okuma). Hangi birimin kullanıldığı ve varıştan 60 sn'den uzak işlem sayısı sayaçta (`FeedStats.trades`). | `TradeTimeUnit` |
+| İlk durum | **Yok.** İzlenen her sembol bir boşlukla başlar (`watch_trades(sembol, geçmişin_başı)`; izlenmeyen sembolde yerel gece yarısı). Boşluk REST işlem geçmişinden doldurulana kadar sembol bayattır; o arada gelen canlı işlemler bekletilir, barlar kesinleşmez. | `LiveFeed::watch_trades` |
+| Bar | `BarMethod::Trades`: XIST takvimine hizalı (K14), açılış emir toplama işlemi günün ilk barına, kapanış seansı işlemleri son bara (kart kuralıyla aynı). Hacim Σ fiyat·adet (TL) ya da Σ adet; barın adedi ayrıca tutulur. Özel işlemler varsayılan olarak bara girmez (`SpecialTrades::Include` seçeneği; kesin karar M27 ölçümünde). Kart bu kipte bar kurmaz; günlük alanlar, seans evresi ve saat için kalır. | `qp_source::livebar` kural 8, `LiveFeed::with_trades` |
+| Kopma | İşlem bağlantısı koparsa bütün izlenen semboller bayat; boşluk "işlemlerin tam olduğu son an"dan açılır. Yeniden bağlanınca `pending_trade_repairs` boşlukları verir (bağlantı kapalıyken boş), `repair_trades(&dyn TradeHistory)` ya da `apply_trade_history` doldurur: geçmiş ∪ bekletilenler, işlem no ile tekilleştirilir, borsa sırasıyla (zaman, işlem no) uygulanır; sonuç baştan işlemle kurulan barla bit eşittir (test). Başarısız istek boşluğu açık bırakır. | `LiveFeed::{pending_trade_repairs, apply_trade_history, repair_trades}` |
+| Aynı hat | Kart ve işlem aynı `LiveFeed`'den geçer; işlem ucunun bağlantı kayıtları `push_from(FeedSource::Trade, …)` ile girer (piyasa durumunu değiştirmez). | `FeedSource` |
+| Topach | `GET /dumrul/v2/topach` yanıtının biçimi bilinmiyor; `parse_topach` herhangi bir JSON'dan konu kalıplarını, veri tipini, uç nokta yolunu ve anlık/gecikmeli ipucunu toplar, ana makine adresini atar. Ağ çağrısı yazılmadı (`RestClient`'e eklenecek). | `qp_live::topach` |
+
+Orkestratörün bağlaması gerekenler: `RestClient::trades` → `TradeHistory` uyarlayıcısı (her
+`RestTrade` bir `qp_matriks::Trade`'e; fiyat metinden `f64`), onarım öncesi `advance_clock`
+ile borsa zamanı (sessiz sembolün boşluğu "şimdi"ye kadar uzansın), ham kayıtta
+`sanitize_trade_payload`.
+
+## 7. Sorun giderme
 
 | Belirti | Neden / ne yapılır |
 |---|---|
@@ -124,6 +148,8 @@ qp demo (SSE, görüntüleyici: yalnız açık enstrümanın verisi; piyasa duru
 | `mode=replica` sayfası sonradan açılınca yalnız geçmiş görünüyor | RP4/T5'te ağsız üç düzeyde yeniden üretilemedi (başlangıç çerçevesi bütün olayları taşıyor, seri bayt eşit). Yeniden görülürse sayfanın gerçekten `mode=replica` olduğunu (varsayılan görüntüleyicidir), tarayıcı konsolunda hata olmadığını ve `/live/stats` olay sayısını not edin. |
 | `subscription refused mx/timestamp (code 0x80)` | Gecikmeli uçta borsa saati konusu yok (ölçüldü). Saat `updateDate`'ten ve takvimden kurulur. |
 | `subscription refused mx/symbol/<SYM>@lvl2` | Sembol işlem görmüyor ya da yetki yok. |
+| `subscription refused mx/trade/<SYM>@lvl2 (code 0x80)` | Düzey 2 işlem konusu yerelde reddedildi (K66); sunucuya gitmedi. Konuyu eksiz kurun (`trade_topics`). |
+| İşlem sayacında `far_from_arrival` yüksek | İşlem zaman birimi yanlış olabilir; `TradeTimeUnit::Auto` ile ölçüp birimi sabitleyin. |
 | `retrying in …` | Kopma; ölçülü geri çekilme. 6 ardışık hatada durur (`TooManyFailures`). |
 | `token request failed: HTTP 401` | Servis hesabı değişkenleri yanlış. |
 | `missing: MATRIKS_…` | `.env.local`'a o değişkeni girin. |

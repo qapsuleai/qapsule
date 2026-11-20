@@ -53,7 +53,7 @@ pub use feed::{Applied, EventError, FeedStore, StaleReason, TimeBounds};
 pub use flow::{synthetic_flow, FlowRecord, FLOW_KEYS};
 pub use livebar::{
     compare_bars, compare_bars_with, BarDiff, BarMethod, CardTick, DiffTolerance, FieldDiff,
-    LiveBars, LiveConfig, LiveError, LiveStats, VolumeUnit,
+    LiveBars, LiveConfig, LiveError, LiveStats, SpecialTrades, TradeTick, VolumeUnit,
 };
 pub use local::{load_local_bars, load_local_bars_with, local_bars_dir, LOCAL_BARS_ENV};
 pub use provider::{

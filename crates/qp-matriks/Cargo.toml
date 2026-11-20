@@ -20,6 +20,9 @@ protox = "0.10.0"
 
 [dev-dependencies]
 qp-compute = { path = "../qp-compute" }
+# Loopback mock broker for the trade endpoint tests (no network beyond 127.0.0.1).
+qp-live = { path = "../qp-live", features = ["mock"] }
+tempfile = "3.27.0"
 serde_json = "1.0.154"
 sha2 = "0.11.1"
 

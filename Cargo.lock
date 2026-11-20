@@ -1969,10 +1969,12 @@ dependencies = [
  "protox",
  "qp-calendar",
  "qp-compute",
+ "qp-live",
  "qp-schema",
  "qp-source",
  "serde_json",
  "sha2",
+ "tempfile",
 ]
 
 [[package]]

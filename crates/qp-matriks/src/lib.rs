@@ -46,8 +46,8 @@ pub mod wire;
 
 pub use clock::{decode_time, ClockEvent, MarketClock, TimeTick};
 pub use feed::{
-    parse_update_date, ConnChange, FeedOut, FeedStats, LiveFeed, LiveFeedConfig, TimeSource,
-    VolumeField,
+    parse_update_date, ConnChange, FeedOut, FeedSource, FeedStats, LiveFeed, LiveFeedConfig,
+    TimeSource, TradeFeedConfig, TradeFeedStats, TradeGap, VolumeField,
 };
 pub use fields::FieldSet;
 pub use notice::{classify_notice, BrokerNotice, NoticeInfo};

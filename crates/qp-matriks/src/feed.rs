@@ -58,20 +58,38 @@
 //! 7. **Sequence.** Each feed (symbol × interval) numbers its events 1, 2, 3… without
 //!    gaps; a [`seed`](LiveFeed::seed)ed feed starts at the given number.
 //! 8. **Phase.** `stockStatus` is reported per symbol when it first arrives or changes.
+//! 9. **Trades (RP4, K66).** A feed made with [`LiveFeed::with_trades`] builds every bar
+//!    from the trade stream (`mx/trade/<SYM>`, `mx/tradeex/<SYM>`; [`crate::trade`]) with
+//!    [`BarMethod::Trades`]; the price card keeps the day fields, the session phase and the
+//!    clock but builds no bar. Trade-endpoint connection records go in through
+//!    [`LiveFeed::push_from`] with [`FeedSource::Trade`] (same pipeline, same `LiveFeed`).
+//!    There is **no initial state** on the trade stream: every watched symbol starts with
+//!    a **gap** (from [`LiveFeed::watch_trades`]'s `history_from_ms`, or the local midnight
+//!    of its first trade) and a lost trade connection opens a gap at the time trades were
+//!    known complete. While a symbol has a gap its trades are buffered, its bars are not
+//!    finalized and it is **stale** ([`LiveFeed::trade_stale_symbols`]). Once the trade
+//!    connection is open, [`LiveFeed::pending_trade_repairs`] lists the gaps and
+//!    [`LiveFeed::apply_trade_history`] (or [`LiveFeed::repair_trades`] with a
+//!    [`TradeHistory`]) fills them: history ∪ buffer, de-duplicated by trade number
+//!    ([`crate::trade::Trade::dedup_key`]), applied in exchange order, so the bars equal
+//!    those built from the full trade list. Buyer and seller never enter the feed.
 
-use std::collections::{BTreeMap, BTreeSet};
+use std::collections::{BTreeMap, BTreeSet, VecDeque};
 
 use prost::Message as _;
 use qp_calendar::{ExchangeCalendar, Interval};
 use qp_schema::data::{DataChange, DataEvent, FeedKey};
 use qp_schema::Bar;
-use qp_source::{BarMethod, CardTick, LiveBars, LiveConfig, VolumeUnit};
+use qp_source::{BarMethod, CardTick, LiveBars, LiveConfig, SpecialTrades, VolumeUnit};
 
 use crate::clock::decode_time;
 use crate::messages::SymbolMessage;
 use crate::rawlog::{RawRecord, RecordKind};
 use crate::symbol::{InitialPolicy, SymbolBook, UpdateKind};
 use crate::topic::{parse_topic, Topic};
+use crate::trade::{
+    decode_trade, Trade, TradeDecodeConfig, TradeError, TradeHistory, TradeKey, TradeTimeUnit,
+};
 
 /// Default lag between the clock and the instant bars are closed through (rule 4).
 pub const DEFAULT_FINALIZE_GRACE_MS: i64 = 2_000;
@@ -177,6 +195,8 @@ pub struct FeedOut {
     pub phases: Vec<(String, i32)>,
     /// Bars that became final: feed and bar open time.
     pub finalized: Vec<(FeedKey, i64)>,
+    /// A trade-endpoint connection change (rule 9).
+    pub trade_connection: Option<ConnChange>,
 }
 
 impl FeedOut {
@@ -188,6 +208,7 @@ impl FeedOut {
             && self.connection.is_none()
             && self.phases.is_empty()
             && self.finalized.is_empty()
+            && self.trade_connection.is_none()
     }
 }
 
@@ -260,6 +281,137 @@ pub struct FeedStats {
     pub bars_opened: u64,
     /// Sum over feeds: data events.
     pub events: u64,
+    /// Trade stream counters (rule 9).
+    pub trades: TradeFeedStats,
+}
+
+/// Trade stream counters (no market values).
+#[derive(Debug, Clone, Default, PartialEq, Eq)]
+pub struct TradeFeedStats {
+    /// Trade messages received.
+    pub messages: u64,
+    /// Payloads that are not a `TradeMessage`.
+    pub decode_errors: u64,
+    /// Trades without a valid price.
+    pub no_price: u64,
+    /// Trades without a usable timestamp.
+    pub no_time: u64,
+    /// Trades whose topic symbol and payload symbol differ (the topic wins).
+    pub symbol_mismatch: u64,
+    /// Decoded trades, by the time unit actually used (`Auto` shows which one won).
+    pub unit_ns_from_midnight: u64,
+    /// See `unit_ns_from_midnight`.
+    pub unit_epoch_ms: u64,
+    /// See `unit_ns_from_midnight`.
+    pub unit_epoch_us: u64,
+    /// See `unit_ns_from_midnight`.
+    pub unit_epoch_ns: u64,
+    /// Live trades whose time is more than 60 s from their arrival (a wrong unit shows
+    /// here first).
+    pub far_from_arrival: u64,
+    /// Special trades seen (`isTradeEx` or `mx/tradeex`).
+    pub special: u64,
+    /// Trades dropped as duplicates (same trade number).
+    pub duplicates: u64,
+    /// Live trades held while their symbol had a gap.
+    pub buffered: u64,
+    /// History trades before the gap start (already covered): dropped.
+    pub history_before_gap: u64,
+    /// History trades received inside gaps (before de-duplication).
+    pub history_applied: u64,
+    /// Gaps filled.
+    pub repairs: u64,
+    /// History requests that failed (the gap stays).
+    pub repair_errors: u64,
+    /// Trade-endpoint connections opened.
+    pub connections_opened: u64,
+    /// Trade-endpoint connections lost.
+    pub connections_lost: u64,
+}
+
+/// Which connection a record came from (rule 9).
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
+pub enum FeedSource {
+    /// The market endpoint (price cards, clock, notices).
+    #[default]
+    Market,
+    /// The trade endpoint (`/trade`).
+    Trade,
+}
+
+/// Trade input settings (rule 9).
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct TradeFeedConfig {
+    /// Decoding (time unit).
+    pub decode: TradeDecodeConfig,
+    /// Whether special (reported) trades join the bars (default: no).
+    pub special: SpecialTrades,
+    /// How long trade numbers are remembered behind the newest trade, for de-duplication
+    /// (ms; default 30 minutes).
+    pub dedup_window_ms: i64,
+}
+
+impl Default for TradeFeedConfig {
+    fn default() -> Self {
+        Self {
+            decode: TradeDecodeConfig::default(),
+            special: SpecialTrades::Exclude,
+            dedup_window_ms: 30 * 60_000,
+        }
+    }
+}
+
+/// A trade gap to fill from history: `[from_ms, to_ms]`, UTC ms, inclusive.
+#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord)]
+pub struct TradeGap {
+    /// Symbol.
+    pub symbol: String,
+    /// From (the time trades were known complete).
+    pub from_ms: i64,
+    /// To (the clock or the newest buffered trade, whichever is later).
+    pub to_ms: i64,
+}
+
+/// Per-symbol trade state.
+#[derive(Debug, Clone, Default)]
+struct TradeSym {
+    /// Open gap: trades before this are known; after it, until repaired, they are not.
+    gap_from: Option<i64>,
+    /// Live trades received during the gap.
+    buffer: Vec<Trade>,
+    /// Trades are complete up to here (UTC ms).
+    covered_ms: Option<i64>,
+    /// De-duplication: keys seen, with their times, oldest first.
+    seen: BTreeSet<TradeKey>,
+    recent: VecDeque<(i64, TradeKey)>,
+}
+
+impl TradeSym {
+    fn remember(&mut self, t_ms: i64, key: TradeKey, window_ms: i64) {
+        if self.seen.insert(key.clone()) {
+            self.recent.push_back((t_ms, key));
+        }
+        let newest = self.recent.back().map_or(t_ms, |(t, _)| *t).max(t_ms);
+        let keep_from = newest - window_ms;
+        let keep_from = self
+            .gap_from
+            .map_or(keep_from, |g| keep_from.min(g - window_ms));
+        while self.recent.front().is_some_and(|(t, _)| *t < keep_from) {
+            if let Some((_, k)) = self.recent.pop_front() {
+                self.seen.remove(&k);
+            }
+        }
+    }
+}
+
+/// Trade stream state of a feed.
+#[derive(Debug, Clone)]
+struct TradeState {
+    cfg: TradeFeedConfig,
+    /// The trade connection is open (after `ConnectionOpened`, until `ConnectionLost`).
+    live: bool,
+    sessions: u32,
+    syms: BTreeMap<String, TradeSym>,
 }
 
 /// Parses a Matriks `updateDate` (`YYYY-MM-DDTHH:MM:SS[.fff][Z|±HH[:MM]]`) to UTC ms. A
@@ -347,6 +499,7 @@ pub struct LiveFeed {
     fresh_since_lost: BTreeSet<String>,
     grace_ms: i64,
     stats: FeedStats,
+    trades: Option<TradeState>,
 }
 
 impl LiveFeed {
@@ -378,7 +531,192 @@ impl LiveFeed {
             fresh_since_lost: BTreeSet::new(),
             grace_ms: DEFAULT_FINALIZE_GRACE_MS,
             stats,
+            trades: None,
         }
+    }
+
+    /// A feed whose bars come from the trade stream (rule 9). `cfg.method` is ignored
+    /// (every builder uses [`BarMethod::Trades`]); `cfg.volume` applies.
+    #[must_use]
+    pub fn with_trades(
+        cfg: LiveFeedConfig,
+        cal: ExchangeCalendar,
+        trades: TradeFeedConfig,
+    ) -> Self {
+        let mut f = Self::new(cfg, cal);
+        f.trades = Some(TradeState {
+            cfg: trades,
+            live: false,
+            sessions: 0,
+            syms: BTreeMap::new(),
+        });
+        f
+    }
+
+    /// Whether bars come from trades.
+    #[must_use]
+    pub fn trades_enabled(&self) -> bool {
+        self.trades.is_some()
+    }
+
+    /// Starts watching `symbol`'s trades: everything from `history_from_ms` (UTC ms; e.g.
+    /// the close of the last complete REST bar, or the day's start) until the trade
+    /// connection delivers is a gap to fill from history. A symbol already watched is
+    /// unchanged. No effect without trades.
+    pub fn watch_trades(&mut self, symbol: &str, history_from_ms: i64) {
+        if let Some(ts) = self.trades.as_mut() {
+            ts.syms
+                .entry(symbol.to_owned())
+                .or_insert_with(|| TradeSym {
+                    gap_from: Some(history_from_ms),
+                    covered_ms: Some(history_from_ms),
+                    ..TradeSym::default()
+                });
+        }
+    }
+
+    /// Whether the trade connection is open.
+    #[must_use]
+    pub fn trade_connected(&self) -> bool {
+        self.trades.as_ref().is_some_and(|t| t.live)
+    }
+
+    /// Symbols whose trade data is stale: all watched symbols while the trade connection is
+    /// down, else those with an open gap. Empty without trades.
+    #[must_use]
+    pub fn trade_stale_symbols(&self) -> Vec<String> {
+        let Some(ts) = &self.trades else {
+            return Vec::new();
+        };
+        ts.syms
+            .iter()
+            .filter(|(_, s)| !ts.live || s.gap_from.is_some())
+            .map(|(k, _)| k.clone())
+            .collect()
+    }
+
+    /// The gaps to fill now (only while the trade connection is open; rule 9). A gap ends
+    /// at the later of the clock and the newest buffered trade: give the feed the exchange
+    /// time first ([`advance_clock`](Self::advance_clock)) or a quiet symbol's gap ends
+    /// where it starts. Trades between that end and the first live trade are covered only
+    /// if the history already has them (de-duplication makes a second request harmless).
+    #[must_use]
+    pub fn pending_trade_repairs(&self) -> Vec<TradeGap> {
+        let Some(ts) = self.trades.as_ref().filter(|t| t.live) else {
+            return Vec::new();
+        };
+        ts.syms
+            .iter()
+            .filter_map(|(sym, s)| {
+                let from = s.gap_from?;
+                let newest = s.buffer.iter().map(Trade::t_ms).max();
+                let to = [Some(from), self.clock_ms, newest]
+                    .into_iter()
+                    .flatten()
+                    .max()
+                    .unwrap_or(from);
+                Some(TradeGap {
+                    symbol: sym.clone(),
+                    from_ms: from,
+                    to_ms: to,
+                })
+            })
+            .collect()
+    }
+
+    /// Fills `gap` with `history` (any order, duplicates allowed): history trades of the
+    /// symbol at or after the gap start and the trades buffered during the gap are
+    /// de-duplicated, sorted into exchange order and applied. The gap closes if the trade
+    /// connection is open (else a new one starts where trades are now complete). Trades of
+    /// another symbol are ignored.
+    pub fn apply_trade_history(&mut self, gap: &TradeGap, history: Vec<Trade>) -> FeedOut {
+        let mut out = FeedOut::default();
+        let Some(ts) = self.trades.as_mut() else {
+            return out;
+        };
+        let live = ts.live;
+        let window = ts.cfg.dedup_window_ms;
+        let Some(st) = ts.syms.get_mut(&gap.symbol) else {
+            return out;
+        };
+        let from = st.gap_from.unwrap_or(gap.from_ms);
+        let mut all: Vec<Trade> = Vec::with_capacity(history.len() + st.buffer.len());
+        for t in history {
+            if t.symbol != gap.symbol {
+                continue;
+            }
+            if t.t_ms() < from {
+                self.stats.trades.history_before_gap += 1;
+                continue;
+            }
+            all.push(t);
+        }
+        let n_hist = all.len();
+        let buffered = std::mem::take(&mut st.buffer);
+        all.extend(buffered);
+        all.sort_by(Trade::exchange_cmp);
+        let mut to_apply = Vec::with_capacity(all.len());
+        for t in all {
+            let k = t.dedup_key();
+            if st.seen.contains(&k) {
+                self.stats.trades.duplicates += 1;
+                continue;
+            }
+            st.remember(t.t_ms(), k, window);
+            to_apply.push(t);
+        }
+        let newest = to_apply.iter().map(Trade::t_ms).max();
+        let covered = [st.covered_ms, Some(gap.to_ms), newest]
+            .into_iter()
+            .flatten()
+            .max();
+        st.covered_ms = covered;
+        st.gap_from = if live { None } else { covered };
+        self.stats.trades.repairs += 1;
+        self.stats.trades.history_applied += n_hist as u64;
+        let symbol = gap.symbol.clone();
+        for t in &to_apply {
+            self.push_trade_tick(&symbol, t, &mut out);
+        }
+        if live {
+            if let Some(c) = self.clock_ms {
+                let until = c - self.grace_ms;
+                for (k, lb) in &mut self.feeds {
+                    if k.symbol == symbol {
+                        if let Some(b) = lb.close_until(until) {
+                            out.finalized.push((k.clone(), b.t));
+                            self.stats.finalized += 1;
+                        }
+                    }
+                }
+            }
+        }
+        out
+    }
+
+    /// Fills every pending gap from `history` ([`pending_trade_repairs`](Self::pending_trade_repairs)
+    /// then [`apply_trade_history`](Self::apply_trade_history)). A failed request leaves its
+    /// gap open (counted); its error text is returned with the symbol.
+    pub fn repair_trades(
+        &mut self,
+        history: &dyn TradeHistory,
+    ) -> (FeedOut, Vec<(String, String)>) {
+        let mut out = FeedOut::default();
+        let mut errors = Vec::new();
+        for gap in self.pending_trade_repairs() {
+            match history.trades(&gap.symbol, gap.from_ms, gap.to_ms) {
+                Ok(trades) => {
+                    let o = self.apply_trade_history(&gap, trades);
+                    out.events.extend(o.events);
+                    out.finalized.extend(o.finalized);
+                }
+                Err(e) => {
+                    self.stats.trades.repair_errors += 1;
+                    errors.push((gap.symbol.clone(), e));
+                }
+            }
+        }
+        (out, errors)
     }
 
     /// The settings.
@@ -428,6 +766,7 @@ impl LiveFeed {
     fn builder(&self, key: &FeedKey, first_seq: u64) -> Result<LiveBars, String> {
         let interval = Interval::parse(&key.interval).map_err(|e| e.to_string())?;
         let method = match self.cfg.method {
+            _ if self.trades.is_some() => BarMethod::Trades,
             BarMethod::CardDaily if interval != Interval::Day => BarMethod::Ticks,
             m => m,
         };
@@ -438,6 +777,10 @@ impl LiveFeed {
                 method,
                 volume: self.cfg.volume,
                 first_seq,
+                special_trades: self
+                    .trades
+                    .as_ref()
+                    .map_or(SpecialTrades::Exclude, |t| t.cfg.special),
                 ..LiveConfig::default()
             },
         )
@@ -479,7 +822,7 @@ impl LiveFeed {
     ) -> Result<(), String> {
         let key = self.key(symbol, interval);
         if let Some(lb) = self.feeds.get(&key) {
-            if lb.stats().ticks > 0 {
+            if lb.stats().ticks > 0 || lb.stats().trades > 0 {
                 return Err(format!(
                     "seed {symbol} {interval}: live ticks already applied"
                 ));
@@ -495,11 +838,25 @@ impl LiveFeed {
         Ok(())
     }
 
-    /// Applies one record (message or connection event).
+    /// Applies one record (message or connection event) from the market endpoint.
     pub fn push(&mut self, rec: &RawRecord) -> FeedOut {
+        self.push_from(FeedSource::Market, rec)
+    }
+
+    /// Applies one record from `source`. Messages are routed by topic whatever the
+    /// source; connection records of [`FeedSource::Trade`] change the trade connection
+    /// (rule 9) and leave the market state alone.
+    pub fn push_from(&mut self, source: FeedSource, rec: &RawRecord) -> FeedOut {
         let mut out = FeedOut::default();
         self.stats.records += 1;
         let arrival = rec.t_us.div_euclid(1000);
+        if source == FeedSource::Trade && rec.kind != RecordKind::Message {
+            self.on_trade_conn(rec.kind, &mut out);
+            if self.cfg.time == TimeSource::Arrival {
+                self.move_clock(arrival, self.grace_ms, &mut out);
+            }
+            return out;
+        }
         match rec.kind {
             RecordKind::Message => self.on_message(rec, arrival, &mut out),
             RecordKind::ConnectionOpened => {
@@ -573,7 +930,17 @@ impl LiveFeed {
         self.clock_ms = Some(t);
         out.clock_ms = Some(t);
         let until = t - grace;
+        let gaps: BTreeSet<&str> = self.trades.as_ref().map_or_else(BTreeSet::new, |ts| {
+            ts.syms
+                .iter()
+                .filter(|(_, s)| s.gap_from.is_some())
+                .map(|(k, _)| k.as_str())
+                .collect()
+        });
         for (k, lb) in &mut self.feeds {
+            if gaps.contains(k.symbol.as_str()) {
+                continue;
+            }
             if let Some(b) = lb.close_until(until) {
                 out.finalized.push((k.clone(), b.t));
                 self.stats.finalized += 1;
@@ -587,6 +954,12 @@ impl LiveFeed {
             Topic::Symbol { symbol, .. } => {
                 let symbol = symbol.clone();
                 self.on_symbol(&symbol, &rec.payload, arrival, out);
+            }
+            Topic::Trade {
+                symbol, special, ..
+            } => {
+                let (symbol, special) = (symbol.clone(), *special);
+                self.on_trade(&symbol, special, &rec.payload, arrival, out);
             }
             Topic::Timestamp => {
                 self.stats.time_messages += 1;
@@ -667,6 +1040,13 @@ impl LiveFeed {
             VolumeField::DailyVolume => (m.daily_volume, m.daily_quantity),
             VolumeField::Volume => (m.volume, m.quantity),
         };
+        if self.trades.is_some() {
+            // Rule 9: bars come from trades; the card gives the phase and the clock only.
+            if let Some(c) = clock_t {
+                self.move_clock(c, self.grace_ms, out);
+            }
+            return;
+        }
         let has_bar_fields = m.last.is_some()
             || m.open.is_some()
             || m.daily_high.is_some()
@@ -704,6 +1084,151 @@ impl LiveFeed {
 
         if let Some(c) = clock_t {
             self.move_clock(c, self.grace_ms, out);
+        }
+    }
+
+    fn on_trade_conn(&mut self, kind: RecordKind, out: &mut FeedOut) {
+        let Some(ts) = self.trades.as_mut() else {
+            self.stats.other_messages += 1;
+            return;
+        };
+        match kind {
+            RecordKind::ConnectionOpened => {
+                ts.sessions += 1;
+                ts.live = true;
+                self.stats.trades.connections_opened += 1;
+                out.trade_connection = Some(ConnChange::Opened {
+                    session: ts.sessions,
+                });
+            }
+            RecordKind::ConnectionLost => {
+                ts.live = false;
+                for s in ts.syms.values_mut() {
+                    if s.gap_from.is_none() {
+                        s.gap_from = s.covered_ms.or(self.clock_ms);
+                    }
+                }
+                self.stats.trades.connections_lost += 1;
+                out.trade_connection = Some(ConnChange::Lost);
+            }
+            RecordKind::SubscribeRejected => self.stats.subscribe_rejected += 1,
+            RecordKind::Note => self.stats.notes += 1,
+            RecordKind::Subscribed | RecordKind::Message => {}
+        }
+    }
+
+    fn on_trade(
+        &mut self,
+        symbol: &str,
+        special_topic: bool,
+        payload: &[u8],
+        arrival: i64,
+        out: &mut FeedOut,
+    ) {
+        let Some(ts) = self.trades.as_mut() else {
+            self.stats.other_messages += 1;
+            return;
+        };
+        let st = &mut self.stats.trades;
+        st.messages += 1;
+        let (mut trade, unit) = match decode_trade(payload, &ts.cfg.decode, arrival, special_topic)
+        {
+            Ok(x) => x,
+            Err(TradeError::Decode(_)) => {
+                st.decode_errors += 1;
+                return;
+            }
+            Err(TradeError::NoPrice) => {
+                st.no_price += 1;
+                return;
+            }
+            Err(TradeError::NoTime) => {
+                st.no_time += 1;
+                return;
+            }
+        };
+        match unit {
+            TradeTimeUnit::NanosFromMidnight => st.unit_ns_from_midnight += 1,
+            TradeTimeUnit::EpochMillis => st.unit_epoch_ms += 1,
+            TradeTimeUnit::EpochMicros => st.unit_epoch_us += 1,
+            TradeTimeUnit::EpochNanos => st.unit_epoch_ns += 1,
+            TradeTimeUnit::Auto => {}
+        }
+        if trade.symbol != symbol {
+            st.symbol_mismatch += 1;
+            symbol.clone_into(&mut trade.symbol);
+        }
+        if trade.is_trade_ex {
+            st.special += 1;
+        }
+        let t = trade.t_ms();
+        if (t - arrival).abs() > 60_000 {
+            st.far_from_arrival += 1;
+        }
+        let window = ts.cfg.dedup_window_ms;
+        let live = ts.live;
+        let sym = ts.syms.entry(symbol.to_owned()).or_insert_with(|| {
+            // Not watched: the day so far is a gap (no initial state on this stream).
+            let off = i64::from(ts.cfg.decode.utc_offset_min) * 60_000;
+            let midnight = (t + off).div_euclid(86_400_000) * 86_400_000 - off;
+            TradeSym {
+                gap_from: Some(midnight),
+                covered_ms: Some(midnight),
+                ..TradeSym::default()
+            }
+        });
+        if !live && sym.gap_from.is_none() {
+            sym.gap_from = sym.covered_ms;
+        }
+        if sym.gap_from.is_some() {
+            st.buffered += 1;
+            sym.buffer.push(trade);
+        } else {
+            let k = trade.dedup_key();
+            if sym.seen.contains(&k) {
+                st.duplicates += 1;
+            } else {
+                sym.remember(t, k, window);
+                sym.covered_ms = Some(sym.covered_ms.map_or(t, |c| c.max(t)));
+                self.push_trade_tick(symbol, &trade, out);
+            }
+        }
+        if self.cfg.time == TimeSource::UpdateDate {
+            if t <= arrival + MAX_LEAD_MS {
+                self.move_clock(t, self.grace_ms, out);
+            } else {
+                self.stats.clock_lead_rejected += 1;
+            }
+        }
+    }
+
+    fn push_trade_tick(&mut self, symbol: &str, trade: &Trade, out: &mut FeedOut) {
+        let tick = trade.tick();
+        self.stats.ticks += 1;
+        for i in 0..self.intervals.len() {
+            let key = self.key(symbol, &self.intervals[i]);
+            if !self.feeds.contains_key(&key) {
+                let Ok(lb) = self.builder(&key, 1) else {
+                    continue;
+                };
+                self.feeds.insert(key.clone(), lb);
+                self.stats.feeds += 1;
+            }
+            let Some(lb) = self.feeds.get_mut(&key) else {
+                continue;
+            };
+            let prev = lb.current().map(|(b, fin)| (b.t, fin));
+            let events = lb.push_trade(&tick);
+            if let Some((pt, false)) = prev {
+                if events
+                    .iter()
+                    .any(|e| matches!(e.change, DataChange::Bar { .. }))
+                {
+                    out.finalized.push((key.clone(), pt));
+                    self.stats.finalized += 1;
+                }
+            }
+            out.events.extend(events);
         }
     }
 

@@ -9,7 +9,10 @@ publish.workspace = true
 
 [dependencies]
 qp-schema = { version = "0.0.0", path = "../qp-schema" }
+qp-render = { version = "0.0.0", path = "../qp-render" }
 qp-session = { version = "0.0.0", path = "../qp-session" }
+schemars = "1.2.3"
+serde = { version = "1.0.229", features = ["derive"] }
 serde_json = { version = "1.0.154", features = ["float_roundtrip"] }
 
 [dev-dependencies]

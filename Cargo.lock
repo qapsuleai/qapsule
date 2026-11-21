@@ -1984,8 +1984,11 @@ dependencies = [
 name = "qp-mcp"
 version = "0.0.0"
 dependencies = [
+ "qp-render",
  "qp-schema",
  "qp-session",
+ "schemars",
+ "serde",
  "serde_json",
 ]
 

@@ -284,7 +284,26 @@ impl AuthClient {
             .map_err(|e| AuthError::Transport(Masked::new(&self.redactor, &e.to_string())))?;
         let status = resp.status().as_u16();
         if status != 200 {
-            return Err(AuthError::Http { status });
+            // Keep only the service's sanitized error code, never the body text.
+            let code = resp
+                .body_mut()
+                .with_config()
+                .limit(64 * 1024)
+                .read_to_string()
+                .ok()
+                .and_then(|t| serde_json::from_str::<serde_json::Value>(&t).ok())
+                .and_then(|v| {
+                    v.get("code").map(|c| match c {
+                        serde_json::Value::String(s) => s.clone(),
+                        other => other.to_string(),
+                    })
+                })
+                .map(|c| sanitize_code(&c))
+                .filter(|c| !c.is_empty());
+            return Err(match code {
+                Some(code) => AuthError::HttpCode { status, code },
+                None => AuthError::Http { status },
+            });
         }
         let text = resp
             .body_mut()

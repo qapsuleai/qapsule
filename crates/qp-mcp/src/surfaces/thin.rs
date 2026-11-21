@@ -11,12 +11,33 @@ use crate::{tool_result, RpcError};
 
 /// The thin surface.
 #[derive(Debug, Default)]
-pub struct Thin;
+pub struct Thin {
+    /// (R5B, §25.2) An agent's endpoint: the human decision tools are not offered (a
+    /// call to one is an unknown tool; the authority refuses the op on any other path
+    /// too, `human_only`).
+    agent: bool,
+}
 
-/// Registry constructor.
+/// The tools only a person may use: deciding proposals and findings (§25.2).
+pub const HUMAN_DECISION_TOOLS: [&str; 4] = [
+    "op_accept_proposal",
+    "op_reject_proposal",
+    "op_approve_finding",
+    "op_reject_finding",
+];
+
+/// Registry constructor: the surface an agent's endpoint serves (`qp mcp serve`), with
+/// no human decision tool.
 #[must_use]
 pub fn new() -> Box<dyn ToolSurface> {
-    Box::new(Thin)
+    Box::new(Thin { agent: true })
+}
+
+/// The RD1 surface with every generated tool, for adapters a person speaks through
+/// ([`crate::McpServer::connect`], the conformance runner).
+#[must_use]
+pub fn with_decisions() -> Box<dyn ToolSurface> {
+    Box::new(Thin { agent: false })
 }
 
 /// The annotations of a generated tool: queries and status reads are read-only.
@@ -93,6 +114,7 @@ impl ToolSurface for Thin {
     fn tools(&self) -> Vec<ToolDef> {
         tools::tools()
             .iter()
+            .filter(|t| !(self.agent && HUMAN_DECISION_TOOLS.contains(&t.name.as_str())))
             .map(|t| ToolDef {
                 name: t.name.clone(),
                 description: t.description.clone(),
@@ -104,6 +126,9 @@ impl ToolSurface for Thin {
     }
 
     fn call(&mut self, ctx: &mut Ctx<'_>, name: &str, args: Value) -> Result<Value, RpcError> {
+        if self.agent && HUMAN_DECISION_TOOLS.contains(&name) {
+            return Err(RpcError::new(-32602, format!("Unknown tool: {name}")));
+        }
         let msg = build_message(name, args, || ctx.request_id())?;
         Ok(tool_result(ctx.send(&msg)))
     }

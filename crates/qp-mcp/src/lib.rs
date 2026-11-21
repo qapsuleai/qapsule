@@ -477,7 +477,13 @@ impl McpServer {
     /// # Errors
     /// The authority's reply when it is not `welcome` (normally a `handshake` error).
     pub fn connect(hub: SharedHub, conn: &str, config: Config) -> Result<Self, Value> {
-        Self::open(hub, conn, config, surfaces::thin::new(), Options::default())
+        Self::open(
+            hub,
+            conn,
+            config,
+            surfaces::thin::with_decisions(),
+            Options::default(),
+        )
     }
 
     /// Opens protocol connection `conn` with a tool surface and options. With

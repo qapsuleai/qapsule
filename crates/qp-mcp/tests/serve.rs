@@ -66,7 +66,13 @@ fn registry_has_thin_first_and_it_mirrors_the_generated_tools() {
     let thin = surfaces::by_name("thin").unwrap();
     let defs = thin.tools();
     let names: Vec<&str> = defs.iter().map(|t| t.name.as_str()).collect();
-    let generated: Vec<&str> = tools::tools().iter().map(|t| t.name.as_str()).collect();
+    // (R5B, §25.2) The agent's endpoint offers every generated tool but the human
+    // decision tools.
+    let generated: Vec<&str> = tools::tools()
+        .iter()
+        .map(|t| t.name.as_str())
+        .filter(|n| !surfaces::thin::HUMAN_DECISION_TOOLS.contains(n))
+        .collect();
     assert_eq!(names, generated);
     for t in &defs {
         let read = t.name.starts_with("query_") || t.name == "query" || t.name == "replay_status";
@@ -91,7 +97,11 @@ fn served_endpoint_lists_common_tools_and_the_notifications_resource() {
     let mut s = served(&h, "m", "scout", None);
     let l = rpc(&mut s, 1, "tools/list", json!({}));
     let tools = l[0]["result"]["tools"].as_array().unwrap();
-    assert_eq!(tools.len(), tools::tools().len() + 2);
+    // Every generated tool but the four human decision tools, and the two common ones.
+    assert_eq!(
+        tools.len(),
+        tools::tools().len() - surfaces::thin::HUMAN_DECISION_TOOLS.len() + 2
+    );
     assert_eq!(tools[tools.len() - 2]["name"], "render");
     assert_eq!(tools[tools.len() - 1]["name"], "notifications");
     assert!(l[0]["result"]["ttlMs"].is_u64());

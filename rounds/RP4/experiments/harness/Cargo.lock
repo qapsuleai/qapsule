@@ -430,6 +430,7 @@ dependencies = [
 name = "qp-facts"
 version = "0.0.0"
 dependencies = [
+ "qp-calendar",
  "qp-compute",
  "qp-schema",
 ]

@@ -193,7 +193,7 @@ Kural: alternatif yalnız trait'i uygular; saat, ağ, rastgelelik, dosya okuma y
 oynatılmış barlarla yeniden koşar; kendi kendini doğrulama sayacı `sens_replay_mismatch`
 saf olmayan kuralı yakalar).
 
-## Testler (`cargo test`, 15)
+## Testler (`cargo test`, 15 + `tests/rp4_product.rs` 4)
 
 Sentetik veri (`src/synth.rs`: XIST takviminde 5 dk barlar + ayrı 18:00 kapanış barı, ondan
 1 sa; günlük gece yarısı zamanlı; pencere dosyaları üst üste biner):
@@ -214,6 +214,31 @@ Sentetik veri (`src/synth.rs`: XIST takviminde 5 dk barlar + ayrı 18:00 kapanı
 - Hizalama (K14): her bar takvim barının açılışında; 18:00 barı 17:55'e birleşir, günde 96
   bar; 15 dk = 3 × 5 dk; günlük 10:00. Kalibrasyon kopyasında kesim sonrası bar yok. Sınama
   kipinde 24 gün. Gün konumu (açılış/kapanış). Fiyat adımı tablosu ve sınırları.
+
+## RP4/S: ürün kaydı `rp4` (bütünleştirme)
+
+Kayıtta `rp4` kuralı (`qp_capsule::outcome::Rp4`: gün içinde `HighLow` = `yukdus`, günlükte
+`Barrier` = `r3`; `levels` = `registry::rp4_levels`) ve `rp4` dedektör seti
+(`qp_facts::rp4_detectors` = `mevsim`) var. Ürünün deney crate'leriyle eşitliği iki yoldan:
+
+- `tests/rp4_product.rs` (sentetik XIST barları): her hikâyenin geçişleri (aşama, bar) ve
+  karar nedenleri (önek dışında) `yukdus` ile 5 dk / 15 dk / 1 sa'te, `r3` ile günlükte aynı;
+  her hikâyenin her bardaki `judge`'ı ve `levels`'ı tek tek aynı; `rp4` dedektör setinin
+  bütün algılamaları (kimlik, sürüm, kanıt, güç) ve olguları `mevsim` ile dört periyotta aynı.
+- Kalibrasyon verisinde (`--split calib`; sınama açılmadan) sonuç dosyaları **bayt eşit**,
+  yalnız ad satırı farklı:
+
+  ```sh
+  $H m25 --data fixtures/local/rp4/calib --rule rp4 --period <5m|15m|1h|1d> --out <dir>
+  $H m26 --data fixtures/local/rp4/calib --detectors rp4 --period <5m|15m|1h|1d> --out <dir>
+  diff <dir>/M25/rp4.5m.calib.json fixtures/local/rp4/eval/M25/yukdus.5m.calib.json   # yalnız "rule"
+  diff <dir>/M25/rp4.1d.calib.json fixtures/local/rp4/eval/M25/r3.1d.calib.json       # yalnız "rule"
+  diff <dir>/M26/rp4.r3.1h.calib.json fixtures/local/rp4/eval/M26/mevsim.r3.1h.calib.json  # yalnız "detectors"
+  ```
+
+  2026-11-21: `rp4` 5 dk / 15 dk / 1 sa = `yukdus`, 1 gün = `r3` (M25); `rp4` = `mevsim`
+  dört periyotta (M26); hem `eval/` dosyalarına hem aynı derlemeyle yeniden koşulan
+  `yukdus`/`r3`/`mevsim` dosyalarına karşı.
 
 ## Süre (Apple silicon, 16 çekirdek, `--release`)
 

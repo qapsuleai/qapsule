@@ -4,6 +4,8 @@
 //!
 //! `r3` is the reference: the product's outcome rule (`qp_capsule::outcome::Barrier`
 //! with its defaults) and the product's detector set (`qp_facts::default_detectors`).
+//! (RP4/S) `rp4` is the product's second named record (`qp_capsule::outcome::Rp4`,
+//! `qp_facts::rp4_detectors`), productized from `yukdus` / `r3` and `mevsim`.
 
 use qp_capsule::outcome::{base_params, wilder_atr, Barrier, ATR_FAST, ATR_SLOW};
 use qp_capsule::{OpenStory, OutcomeRule};
@@ -133,7 +135,26 @@ pub fn rules() -> Vec<RuleEntry> {
             levels: |s, b| m25_umut::levels(s, b).map(Levels::from),
             constants: 9,
         },
+        // RP4/S: the product's `rp4` rule (`qp_capsule::outcome::Rp4`: `HighLow` = `yukdus`
+        // on intraday bars, `Barrier` = `r3` on daily bars). Constants: 7 in any one
+        // period, as `yukdus` (intraday) and `r3` (daily); the intraday step limit (12 h)
+        // is not tuned.
+        RuleEntry {
+            name: "rp4",
+            make: || Box::new(qp_capsule::outcome::Rp4::default()),
+            levels: rp4_levels,
+            constants: 7,
+        },
     ]
+}
+
+/// `rp4` levels: the product rule's own ([`qp_capsule::outcome::Rp4::levels`]; `yukdus`'s
+/// on intraday bars, `r3`'s on daily bars).
+#[must_use]
+pub fn rp4_levels(s: &OpenStory, bars: &[Bar]) -> Option<Levels> {
+    qp_capsule::outcome::Rp4::default()
+        .levels(s, bars)
+        .map(Levels::from)
 }
 
 /// M26 detector sets.
@@ -166,6 +187,11 @@ pub fn detector_sets() -> Vec<DetectorEntry> {
         DetectorEntry {
             name: "mevsim_t2g",
             make: m26_mevsim::trial_gate,
+        },
+        // RP4/S: the product's `rp4` set (`qp_facts::rp4_detectors` = `mevsim`).
+        DetectorEntry {
+            name: "rp4",
+            make: qp_facts::rp4_detectors,
         },
     ]
 }

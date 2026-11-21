@@ -17,11 +17,11 @@ rapora girmedi; burada yalnız toplu sayılar var. Her ağ işlemi `experiments/
   süresi dolan 0,11 → 0,30 ve küçük bir kalibrasyon kötüleşmesi (+0,007). Arkin'in gördüğü durum
   benzetimde ve düzenekte yeniden üretildi: 2026-11-20'de 22 durum; `rp4` ile 7'si gerçekleşti, 7'si
   yine tutmadı (daha geç, geniş eşikte), 5'i süresi doldu (§5).
-- **M26:** gün içinde 5 dk/15 dk'da aday yok; 1 sa'te `mevsim` (sınırda). **Gün içinde hiçbir dedektör
-  0,55'e ulaşmıyor** (kalibrasyon havuzu 5 dk 0,41, 1 sa 0,47; günlük 0,51); periyot sınırı önerisi.
+- **M26:** gün içinde 5 dk/15 dk'da aday yok; 1 sa'te `mevsim` (sınırda). **Kalibrasyonda gün içinde hiçbir dedektör
+  0,55'e ulaşmıyor** (sınamada 1 sa `rp4` kırılımı 0,575) (kalibrasyon havuzu 5 dk 0,41, 1 sa 0,47; günlük 0,51); periyot sınırı önerisi.
 - **M27 (bar kaynağı):** işlemden bar 1 dk/5 dk/1 sa'te REST'le fiyat ve lot hacimde **≥ %99,999
-  bit eşit** (hedef ≥ %99 tuttu); günlükte %88,6 → kalan fark özel işlemlerdi (`trade_ex`, yalnız
-  günlüğe girer). Fiyat kartı yolu (R6) gün içinde %83–85.
+  bit eşit**, günlükte **%100** (hedef ≥ %99 tuttu); özel işlemler (`trade_ex`) yalnız günlük bara ve
+  yalnız hacimleriyle girer (ölçülerek). Fiyat kartı yolu (R6) gün içinde %83–85.
 - **Benzetim:** canlı yolun kendisi (aynı `LiveFeed`/`LiveRuntime`/otorite; test), bayt eşit, 1 gün ×
   100 sembol × 5 dk `max` hızda **42–49 s** (hedef ≤ 2 dk). `scripts/demo.sh --sim`; `--lan` reddi.
 - **Sağlamlaştırma:** A52 durma kuralı (10 dk'da 2 açıklamasız sunucu kapatması → dur), insan onaylı
@@ -70,7 +70,7 @@ sonuç dosyalarını gördüğünü bildirdi (sınama verisi değil; seçimlerin
 | # | Durum | Kanıt |
 |---|---|---|
 | 1 | ✅ | `qp live trades` (14 günlük pencereler, önbellek, `requests.jsonl`), 2026-10-05→11-20, BIST100 + 480 sembol (1 gün), 1.933 REST veri isteği (LIVE-LOG); veri yalnız `fixtures/local/` (izlenmiyor). Düzey 2: `trade_csv_level1` (test `level2_columns_never_survive`), `trade_bs` hiç çağrılmıyor, `@lvl2` işlem konusu kurulamaz/yerelde reddedilir (testler), ham kayıtta ve hub'da her işlem yükü temizlenir; kod taraması: `trade_bs` yalnız bir yorumda, `@lvl2` işlem konusu yalnız ayrıştırıcı testinin girdisinde. |
-| 2 | ✅ | `experiments/M27/RESULTS.md`: 30 sembol, 34 gün; 1 dk/5 dk/1 sa ≥ %99,999 bit eşit (o/h/l/c/lot); 1 gün %88,6 → `trade_ex` eksikliği (tam `trade_ex` çekildi, D1f). Zaman `timestamp_ns` = gün başından ns (44,86 M satırın hepsi [0, 1 gün)); açılış eşleşmesi ilk bara, kapanış seansı son bara (REST 1 dk 18:04 barı 300/300); özel işlemler yalnız günlüğe — kalibrasyon günlerinde ölçülerek. |
+| 2 | ✅ (denetim K1 sonrası) | `experiments/M27/RESULTS.md`: 30 sembol, 34 gün; 1 dk/5 dk/1 sa ≥ %99,999 bit eşit (o/h/l/c/lot); 1 gün ilk tabloda %88,6 idi (sınama günlerinin `trade_ex`'i yoktu) → D1f ile %99,90, kalan bir barın düşüğü özel işlemin fiyatıydı → kural "özel işlem yalnız hacim" → **%100** (1.020/1.020). Zaman `timestamp_ns` = gün başından ns (44,86 M satırın hepsi [0, 1 gün)); açılış eşleşmesi ilk bara, kapanış seansı son bara (REST 1 dk 18:04 barı 300/300); özel işlemler yalnız günlüğe — kalibrasyon günlerinde ölçülerek. |
 | 3 | ✅ (canlı: ilk iş günü) | T3 + L-prep: kod, kendi kilidi, sahte sunucu testleri (ilk durum yok; kopmada bayat; REST işlem geçmişiyle onarım bit eşit; piyasa ucuyla birlikte her uçta tek bağlantı). Gerçek bağlantı: §13 adım 2–7. |
 | 4 | ✅ | `qp sim` canlı yolun aynısı (test `simulation_path_is_the_live_path`); iki koşu aynı özet (§7); 1 gün × 100 sembol × 5 dk: 42–49 s (≤ 2 dk); `scripts/demo.sh --sim --lan` reddi (`tests/demo_sim.rs`). |
 | 5 | ✅ | SPLIT (`cc476de`) → SPEC (`eb1a8c3`) → alternatif dalları → seçim (`8bb7571`) → sınama. Beş alternatif; dört periyot tabloları (`M25/RESULTS.md`, `S/RESULTS.md`); erken kapanma önce/sonra; duyarlılık; öneri gerekçeli (Ö77, A53). Arkin'in durumu: §5. |
@@ -95,7 +95,7 @@ fiyatları 0,001'e yuvarlanarak (REST tek duyarlıklı sayıyı fazla basamakla 
 | 1 dk | 464.890 | %99,9998 | 100 | 100 | 100 |
 | 5 dk | 95.871 | %99,999 | 100 | 100 | 100 |
 | 1 sa | 8.010 | %100 | 100 | 100 | 100 |
-| 1 gün | 1.020 | %88,6 (kalibrasyon günlerinde %100) | 100 | 88,6 | 88,5 |
+| 1 gün | 1.020 | **%100** (ilk tabloda %88,6; denetim K1, §11) | 100 | 100 | (bkz. RESULTS) |
 
 Kaynak karşılaştırması (R6 kayıt günleri): fiyat kartı 1 dk %84,8, işlem %100, karma %100; günlükte
 kart %100 (özel işlemleri içeriyor). İki kaynaktan doğan kapsüllerin farkı (sınama, 100 sembol): 5 dk
@@ -140,7 +140,8 @@ hikâyeler `rp4` ile: **7 gerçekleşti, 7 tutmadı, 5 süresi doldu, 2 açık, 
 **Dürüst sonuç:** önceden yazılı kural `yukdus`'u seçti ve hedef tuttu; ama (1) `yukdus`'un düşük SENS'i
 kısmen yapısal (kapanış oynatılır, fitil değil), (2) Arkin'in desenini en iyi `umut` çözüyor (22'nin 13'ü
 gerçekleşti, süresi dolan 0,14), (3) bütün adaylarda kazancın çoğu bariyerin genişlemesinden. Karar
-Arkin'in (Ö77, A53).
+Arkin'in (Ö77, A53). **Denetim K2:** `umut` gözlemi sınama aralığından geldiği için `umut`'a geçiş ancak
+2026-11-20 sonrasındaki yeni bir sınama aralığında doğrulanırsa yapılabilir.
 
 ## 6. M26 — dedektör eşikleri
 
@@ -183,7 +184,27 @@ yük sıçramasında geçersiz sayılıp yinelendi. Tam seans (8 sa) bellek büy
 
 ## 9. Doğrulama
 
-(verify, CI, taramalar, quantex.)
+| VERIFY | Sonuç |
+|---|---|
+| 1 `QP_VERIFY_BROWSER=1 scripts/verify.sh`, ağsız | **18/18 PASS** (main `0750ee6`, test 505 s; 29 şema, 64 döküm × 3 taşıma, 12 görünüm, altınlar bayt eşit, `p4-*` sahneleri) |
+| 2 preflight, CI | preflight TAMAM; CI: §9 sonu |
+| 3 commit sırası | SPLIT `cc476de` → SPEC `eb1a8c3` → alternatif dalları → seçim `8bb7571` → sınama (`S/RESULTS.md`) |
+| 4 alternatiflere verilen dosyalar | yalnız `fixtures/local/rp4/calib/` (tam klasör bu evrede `chmod 000`); harness kalibrasyon kipi `t`'ye göre de keser (test) |
+| 5 düzey 2 taraması | `trade_bs` yalnız bir yorumda; `@lvl2` işlem konusu yalnız testlerde (ayrıştırıcı girdisi ve uçtan uca ret testleri) ve yerelde reddedilir; alıcı/satıcı alanı hiçbir yapıda yok |
+| 6 M27 yeniden | `qp live compare-trades` (M27 RESULTS komutları) |
+| 7 benzetim iki kez | `qp sim --start 2026-11-18 --rule rp4` iki koşu: özet `78ca365e…` = `78ca365e…`; `--rule r3` `6ee09b68…` (T6 birleşmesinden önce ve sonra aynı) |
+| 8 benzetim = canlı yol | `sim::tests::simulation_path_is_the_live_path` (sahte sunucu işlem ucu → aynı veri olayları bayt eşit) |
+| 9–11 M25, Arkin'in durumu, duyarlılık | harness (`S/RESULTS.md` komutları); `rp4` sınamada deneylerle bayt eşit |
+| 12 günlük | `rp4` günlükte `r3` ile bayt eşit sonuç |
+| 13 eski sabitler | protokol varsayılanı `r3`; dökümler ve v1/v2 altınlar bayt eşit (verify) |
+| 14 durma kuralı | `two_unexplained_server_closes_within_ten_minutes_halt_until_reset` ve 3 test daha |
+| 15 geç katılan | 3 test (bayt eşit) |
+| 16 580 sembol | §8 (T6, yan yana ölçüm) |
+| 17 `--sim --lan` | `tests/demo_sim.rs` reddeder |
+| 18 gerçek veri/gizli | `c92b011..HEAD` taraması: adres/belirteç 0 (yalnız `*.fake-vendor.test` test adresleri), sembol adları yalnız test etiketi ve belge örneği; `git ls-files fixtures/local` 0 |
+| 19 ağ disiplini | LIVE-LOG: canlı deneme 0; REST 1.933 veri isteği, sıralı, tek süreç |
+| 20 `quantex` | round başı ve sonu `status --porcelain` + HEAD aynı |
+| 21 hesap özeti, WASM | `7b1e99d40889f83c` aynı; temel paket ham 2.281.001 B (R6 2.280.681; +320 B: T7 satır saati ve S kayıt seçeneği — hangisinin ne kadar olduğu ayrıca ölçülmedi), bağlayıcı crate'leri pakette yok |
 
 ## 10. Disk
 

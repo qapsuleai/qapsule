@@ -117,13 +117,13 @@ fn trades_build_calendar_aligned_bars_with_auctions_in_first_and_last() {
     assert_eq!(st.off_session, 0);
 
     // Daily bar: one bar, the regular trades and (default `DayOnly`, RP4 M27) the
-    // special trade.
+    // special trade's volume — not its price (REST's daily high stays the regular one).
     let mut d = live("1d", trades_cfg());
     let db = bars_of("1d", &run(&mut d, &day()));
     assert_eq!(db.len(), 1);
     assert_eq!(
         (db[0].o, db[0].h, db[0].l, db[0].c),
-        (100.0, 150.0, 99.75, 102.5)
+        (100.0, 102.5, 99.75, 102.5)
     );
     assert_eq!(d.current_quantity(), Some(1882.0));
     assert_eq!(d.stats().special_excluded, 0);
@@ -173,6 +173,41 @@ fn special_trades_join_only_when_included_and_quantity_unit() {
     );
     let b = bars_of("5m", &run(&mut q, &day()));
     assert_eq!(b[0].v, 530.0);
+}
+
+#[test]
+fn day_only_special_trades_add_volume_but_never_price() {
+    // RP4 M27: REST's daily bar holds a special trade's quantity, not its price.
+    let mut d = live(
+        "1d",
+        LiveConfig {
+            volume: VolumeUnit::Quantity,
+            ..trades_cfg()
+        },
+    );
+    let special = |t, p, q| TradeTick {
+        special: true,
+        ..tr(t, p, q)
+    };
+    let evs = run(
+        &mut d,
+        &[
+            // Before the day's first regular trade: waits for the bar.
+            special(at(10, 0, 1), 1.0, 7.0),
+            tr(at(10, 0, 2), 100.0, 3.0),
+            // Far outside the day's range: no price field moves.
+            special(at(11, 0, 0), 500.0, 5.0),
+            tr(at(12, 0, 0), 101.0, 2.0),
+        ],
+    );
+    let b = bars_of("1d", &evs);
+    assert_eq!(b.len(), 1);
+    assert_eq!(
+        (b[0].o, b[0].h, b[0].l, b[0].c),
+        (100.0, 101.0, 100.0, 101.0)
+    );
+    assert_eq!(b[0].v, 17.0);
+    assert_eq!(d.current_quantity(), Some(17.0));
 }
 
 #[test]

@@ -47,7 +47,8 @@
 //!    lots are also kept apart ([`LiveBars::current_quantity`]). Special (reported)
 //!    trades (`isTradeEx`, `mx/tradeex`) join the `1d` bar only
 //!    ([`SpecialTrades::DayOnly`], the default; measured in RP4 M27: REST's daily bar
-//!    holds them, its intraday bars do not); [`SpecialTrades::Exclude`] and
+//!    holds them, its intraday bars do not), and there **only with their volume**: a
+//!    special trade never sets `o`/`h`/`l`/`c` (REST's daily price fields exclude it); [`SpecialTrades::Exclude`] and
 //!    [`SpecialTrades::Include`] keep them out of / in every interval. Under `Trades`
 //!    a price-card tick builds nothing (the card still gives the day fields and the
 //!    session phase to its other readers); under the card methods a trade builds nothing.
@@ -300,6 +301,9 @@ pub struct LiveBars {
     seam_cum: Option<f64>,
     /// Lots of the last bar (rule 8).
     cur_qty: f64,
+    /// (RP4 M27) Special-trade volume / lots waiting for the bar of this open time to open
+    /// with a regular trade (special trades never set a price).
+    pending_special: Option<(i64, f64, f64)>,
     stats: LiveStats,
 }
 
@@ -355,6 +359,7 @@ impl LiveBars {
             day_low: None,
             seam_cum: None,
             cur_qty: 0.0,
+            pending_special: None,
             stats: LiveStats::default(),
         })
     }
@@ -718,6 +723,32 @@ impl LiveBars {
             VolumeUnit::Value => p * qty,
             VolumeUnit::Quantity => qty,
         };
+        if tr.special && self.cfg.special_trades == SpecialTrades::DayOnly {
+            // (RP4 M27) A special (reported) trade adds to the bar's volume only: REST's
+            // daily bar holds its quantity but not its price (one daily low 3.6 % off when
+            // its price was taken, 0 otherwise; `M27/RESULTS.md`).
+            if cur_span == Some(span) {
+                let Some((old, _)) = self.cur.as_mut() else {
+                    return out;
+                };
+                let mut b = old.clone();
+                b.v += inc;
+                let fields = bar_patch_diff(old, &b);
+                *old = b;
+                self.cur_qty += qty;
+                if !fields.is_empty() {
+                    let t = span.open;
+                    self.emit(DataChange::Patch { t, fields }, &mut out);
+                }
+            } else {
+                let (v0, q0) = match self.pending_special {
+                    Some((t, v, q)) if t == span.open => (v, q),
+                    _ => (0.0, 0.0),
+                };
+                self.pending_special = Some((span.open, v0 + inc, q0 + qty));
+            }
+            return out;
+        }
         self.known_last = Some(p);
         if cur_span == Some(span) {
             let Some((old, _)) = self.cur.as_mut() else {
@@ -739,17 +770,21 @@ impl LiveBars {
             if let Some((prev, _)) = &self.cur {
                 self.last_final_t = Some(prev.t);
             }
+            let (pv, pq) = match self.pending_special.take() {
+                Some((t, v, q)) if t == span.open => (v, q),
+                _ => (0.0, 0.0),
+            };
             let b = Bar {
                 t: span.open,
                 o: p,
                 h: p,
                 l: p,
                 c: p,
-                v: inc,
+                v: pv + inc,
             };
             self.cur = Some((b.clone(), span));
             self.cur_final = false;
-            self.cur_qty = qty;
+            self.cur_qty = pq + qty;
             self.stats.bars_opened += 1;
             self.emit(DataChange::Bar { bar: b }, &mut out);
         }

@@ -57,10 +57,10 @@ REST fiyatı `mill` (0,001'e yuvarlanmış; aşağıda (e)). Kapanış barı RES
 | 5m | TL | 95.871 | 0 | 0 | %24,09 | %99,999 | 100 / 100 / 100 / 100 | 24,09 | 100 | 4,6e-4 / 5,6e-8 |
 | 1h | lot | 8.010 | 0 | 0 | **%100** | %100 | 100 / 100 / 100 / 100 | 100 | 100 | 0 / 0 |
 | 1h | TL | 8.010 | 0 | 0 | %23,97 | %100 | 100 / 100 / 100 / 100 | 23,97 | 100 | 0 / 3,8e-8 |
-| 1d | lot | 1.020 | 0 | 0 | %88,63 | %91,57 | 100 / 100 / 100 / 100 | 88,63 | 91,57 | 0 / 0,44 |
-| 1d | TL | 1.020 | 0 | 0 | %19,80 | %91,57 | 100 / 100 / 100 / 100 | 19,80 | 91,57 | 0 / 0,44 |
+| 1d | lot | 1.020 | 0 | 0 | **%100** (ilk: %88,63) | %100 | 100 / 100 / 100 / 100 | 100 | 100 | 0 / 0 |
+| 1d | TL | 1.020 | 0 | 0 | %24,22 (ilk: %19,80) | %100 | 100 / 100 / 100 / 100 | 24,22 | 100 | 0 / 1,8e-5 |
 
-TL hacim, "fiyatlar bit eşit ve v ≤ 1e-6 göreli": 1m %100, 5m %100, 1h %100, 1d %88,53.
+TL hacim, "fiyatlar bit eşit ve v ≤ 1e-6 göreli": 1m %100, 5m %100, 1h %100, 1d %99,90 (ilk: %88,53).
 
 Aynı tablo REST fiyatı **olduğu gibi** (`raw`): tümü tam eşit 1m %88,00, 5m %87,20, 1h %87,02,
 1d %78,04 (lot); bütün fark REST'in fiyat yazımından (e).
@@ -70,8 +70,7 @@ Aynı tablo REST fiyatı **olduğu gibi** (`raw`): tümü tam eşit 1m %88,00, 5
 - Gün içi (1m, 5m, 1h): **tuttu** — fiyat 4 alanda %100 (1m'de 464.890 barın 1'i, 5m'de
   95.871'in 1'i kapanışta farklı), hacim lot olarak %100 bit eşit; TL olarak bit eşitlik %24–25,
   ama göreli fark en çok 7,7e-8 (aşağıda (f)).
-- Günlük (1d): **tutmadı, %88,63** (fiyat %100; hacim). Neden ölçüldü: (c) ve (d1).
-  Kalibrasyon günlerinde (özel işlemler önbellekte) 1d %100.
+- Günlük (1d): ilk ölçümde **%88,63** (sınama günlerinin özel işlemleri önbellekte yoktu); aşağıdaki "Denetim K1 sonrası" bölümünde **%100**.
 
 ## Kararlar (kalibrasyon günleri 2026-10-05 → 10-16; 30 sembol, 143.664 1m bar)
 
@@ -226,3 +225,28 @@ REST fiyatı olduğu gibi (`raw`): fiyatlar tam ve v ≤ 1e-6 5m %90,99, 15m %90
    önceki REST barına koyuyor; canlı kural takvimin son barına. Önerim: REST eşlemesi de son
    seans barına (son dakikada işlem yoksa o barı kapanıştan yaratarak). Bütün aralıkta 3 gün-sembol.
 5. Özel işlemin fiyatı günlük barın h/l'sini değiştirir mi (57 örneğin hepsi aralık içinde)?
+
+
+## Denetim K1 sonrası (2026-11-21, orkestratör)
+
+Bağımsız denetim (`../../AUDIT.md`, K1) bu dosyanın 1d satırının D1f'den (sınama günlerinin
+`trade_ex`'i, 90 istek, 208 satır) önce yazıldığını buldu. Önbellek tamamlanınca 1d lotta %99,90
+oldu: 1.020 barın birinde günün **düşüğü** REST'ten %3,6 farklıydı. `--special exclude` ile fiyatlar
+1.020/1.020 tam (hacim %84,6), `day_only` ile o bir düşük farklı → özel işlemin fiyatı REST'in günlük
+fiyat alanlarına girmiyor, hacmi giriyor. Ürün kuralı buna göre düzeltildi
+(`qp_source::livebar`: `DayOnly` altında özel işlem yalnız hacim ve lot ekler, `o/h/l/c`'yi
+değiştirmez; günün ilk normal işleminden önce gelirse hacmi barın açılışını bekler; test
+`day_only_special_trades_add_volume_but_never_price`). Yeniden ölçüm (`qp live compare-trades`,
+varsayılanlar, 30 sembol, 34 gün, `mill`):
+
+| Periyot | Bar | Tümü tam (lot) | o/h/l/c | lot | TL ≤ 1e-6 |
+|---|---|---|---|---|---|
+| 1m | 464.890 | %100,00 | 100 | 100 | 100 |
+| 5m | 95.871 | %100,00 | 100 | 100 | 100 |
+| 1h | 8.010 | %100 | 100 | 100 | 100 |
+| 1d | 1.020 | **%100** | 100 | 100 | 99,90 |
+
+(1m ve 5m'deki tek kapanış farkı (c) yuvarlamada %100,00 görünür.) Kanıt tek bir bar olduğu için
+kural "en az bir gözlemle tutarlı" düzeyindedir; ilk iş günü tam seans karşılaştırmasında yeniden
+bakılır. `export-trade-bars`'ın 1d dosyaları bu düzeltmeden önce üretildi (son ölçüm gün içi
+periyotları kullandı; 1d işlem barları kullanılmadı).

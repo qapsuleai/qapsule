@@ -14,6 +14,7 @@ path = "src/main.rs"
 [dependencies]
 clap = { version = "4.6.7", features = ["derive"] }
 flate2 = "1"
+prost = "0.14.6"
 qp-capsule = { version = "0.0.0", path = "../qp-capsule" }
 qp-compute = { version = "0.0.0", path = "../qp-compute" }
 qp-calendar = { version = "0.0.0", path = "../qp-calendar" }
@@ -27,6 +28,7 @@ qp-session = { version = "0.0.0", path = "../qp-session" }
 qp-source = { version = "0.0.0", path = "../qp-source" }
 qp-wasm = { version = "0.0.0", path = "../qp-wasm", features = ["replica"] }
 serde_json = { version = "1.0.154", features = ["float_roundtrip"] }
+sha2 = "0.11.1"
 
 [lints]
 workspace = true
@@ -35,5 +37,4 @@ workspace = true
 qp-compute = { path = "../qp-compute" }
 qp-live = { path = "../qp-live", features = ["mock"] }
 assert_cmd = "2.2.2"
-prost = "0.14.6"
 tempfile = "3.27.0"

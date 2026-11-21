@@ -1912,6 +1912,7 @@ dependencies = [
  "qp-source",
  "qp-wasm",
  "serde_json",
+ "sha2",
  "tempfile",
 ]
 

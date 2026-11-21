@@ -300,10 +300,19 @@ fn http_initialize_list_and_read_on_a_real_socket() {
     assert_eq!(code, 200);
     let v: Value = serde_json::from_str(&body).unwrap();
     assert_eq!(v["result"]["structuredContent"]["type"], "result", "{v}");
-    // A modern, stateless request (no session) works too, as another agent principal.
+    // A modern, stateless request (no session) works too.
     let modern = json!({"jsonrpc":"2.0","id":4,"method":"tools/call","params":{
         "name":"query_describe","arguments":{},
         "_meta":{"io.modelcontextprotocol/protocolVersion":"2026-07-28"}}});
+    let (code, _, body) = http(
+        srv.port,
+        "POST",
+        &[("MCP-Protocol-Version", "2026-07-28")],
+        Some(&modern),
+    );
+    assert_eq!(code, 200, "{body}");
+    // Without `--principals`, another agent principal cannot be picked (R5B security
+    // fix); nor can a human one; an unknown session is 404.
     let (code, _, body) = http(
         srv.port,
         "POST",
@@ -313,9 +322,7 @@ fn http_initialize_list_and_read_on_a_real_socket() {
         ],
         Some(&modern),
     );
-    assert_eq!(code, 200, "{body}");
-    assert!(body.contains("claude-guest"), "{body}");
-    // A human principal cannot be picked; an unknown session is 404.
+    assert_eq!(code, 403, "{body}");
     let (code, _, _) = http(
         srv.port,
         "POST",
@@ -401,9 +408,197 @@ fn http_with_a_token_needs_the_right_bearer() {
     assert_eq!(code, 200, "{body}");
 }
 
+/// `initialize` with `headers`: (status, session id, the welcome's principal).
+fn init_as(port: u16, headers: &[(&str, &str)]) -> (u16, Option<String>, Value) {
+    let (code, hs, body) = http(port, "POST", headers, Some(&initialize(1)));
+    let v: Value = serde_json::from_str(&body).unwrap_or(Value::Null);
+    let who = v["result"]["_meta"]["dev.qapsule/welcome"]["principal"].clone();
+    (code, header(&hs, "mcp-session-id").map(str::to_owned), who)
+}
+
+fn ping_in(port: u16, sid: &str, extra: &[(&str, &str)]) -> u16 {
+    let mut hs = vec![("Mcp-Session-Id", sid)];
+    hs.extend_from_slice(extra);
+    http(
+        port,
+        "POST",
+        &hs,
+        Some(&json!({"jsonrpc":"2.0","id":9,"method":"ping"})),
+    )
+    .0
+}
+
+#[test]
+fn http_another_principal_by_header_needs_principals() {
+    // Default: only `--principal` (claude); the header cannot pick another agent.
+    let srv = Http::start(&[], &[]);
+    let (code, _, who) = init_as(srv.port, &[]);
+    assert_eq!((code, who), (200, json!("claude")));
+    let (code, _, _) = init_as(srv.port, &[("X-Qp-Principal", "claude")]);
+    assert_eq!(code, 200);
+    for p in ["claude-guest", "arkin", "nobody"] {
+        let (code, sid, _) = init_as(srv.port, &[("X-Qp-Principal", p)]);
+        assert_eq!((code, sid), (403, None), "{p}");
+    }
+    drop(srv);
+    // With `--principals` on loopback: the listed agents only.
+    let srv = Http::start(&["--principals", "claude,claude-guest"], &[]);
+    let (code, _, who) = init_as(srv.port, &[("X-Qp-Principal", "claude-guest")]);
+    assert_eq!((code, who), (200, json!("claude-guest")));
+    let (code, _, who) = init_as(srv.port, &[]);
+    assert_eq!((code, who), (200, json!("claude")));
+    let (code, _, _) = init_as(srv.port, &[("X-Qp-Principal", "arkin")]);
+    assert_eq!(code, 403);
+}
+
+#[test]
+fn principals_need_a_loopback_address_and_agents() {
+    let token = "0123456789abcdef0123456789abcdef";
+    for (args, why) in [
+        (
+            vec![
+                "--http",
+                "--listen",
+                "0.0.0.0",
+                "--token-env",
+                "QP_MCP_TEST_TOKEN",
+                "--principals",
+                "claude,claude-guest",
+            ],
+            "loopback",
+        ),
+        (
+            vec![
+                "--http",
+                "--listen",
+                "192.168.1.10",
+                "--token-env",
+                "QP_MCP_TEST_TOKEN",
+                "--principals",
+                "claude-guest",
+            ],
+            "loopback",
+        ),
+        (vec!["--principals", "claude-guest"], "HTTP only"),
+        (
+            vec!["--http", "--principals", "claude,arkin"],
+            "not an agent",
+        ),
+        (
+            vec![
+                "--http",
+                "--listen",
+                "0.0.0.0",
+                "--token-env",
+                "claude=QP_MCP_TEST_TOKEN,arkin=QP_MCP_TEST_TOKEN2",
+            ],
+            "not an agent",
+        ),
+    ] {
+        let out = qp()
+            .args(["mcp", "serve"])
+            .args(SMALL)
+            .args(&args)
+            .env("QP_MCP_TEST_TOKEN", token)
+            .env("QP_MCP_TEST_TOKEN2", "fedcba9876543210fedcba9876543210")
+            .stdin(Stdio::null())
+            .output()
+            .unwrap();
+        assert_eq!(out.status.code(), Some(2), "{args:?}");
+        let err = String::from_utf8_lossy(&out.stderr);
+        assert!(err.contains(why), "{args:?}: {err}");
+    }
+}
+
+#[test]
+fn http_per_token_principal_ignores_the_header() {
+    let (ta, tb) = (
+        "0123456789abcdef0123456789abcdef",
+        "fedcba9876543210fedcba9876543210",
+    );
+    let srv = Http::start(
+        &["--token-env", "claude=QP_MCP_TA,claude-guest=QP_MCP_TB"],
+        &[("QP_MCP_TA", ta), ("QP_MCP_TB", tb)],
+    );
+    let (a, b) = (format!("Bearer {ta}"), format!("Bearer {tb}"));
+    // No token, or an unknown one: 401.
+    let (code, _, _) = init_as(srv.port, &[]);
+    assert_eq!(code, 401);
+    let (code, _, _) = init_as(srv.port, &[("Authorization", "Bearer nope-nope-nope-nope")]);
+    assert_eq!(code, 401);
+    // The token names the principal; the header is ignored.
+    let (code, sid_b, who) = init_as(
+        srv.port,
+        &[("Authorization", b.as_str()), ("X-Qp-Principal", "claude")],
+    );
+    assert_eq!((code, who), (200, json!("claude-guest")));
+    let (code, _, who) = init_as(
+        srv.port,
+        &[
+            ("Authorization", a.as_str()),
+            ("X-Qp-Principal", "claude-guest"),
+        ],
+    );
+    assert_eq!((code, who), (200, json!("claude")));
+    let (code, _, who) = init_as(
+        srv.port,
+        &[("Authorization", a.as_str()), ("X-Qp-Principal", "arkin")],
+    );
+    assert_eq!((code, who), (200, json!("claude")));
+    // A session of `claude-guest` cannot be used with `claude`'s token.
+    let sid_b = sid_b.unwrap();
+    assert_eq!(
+        ping_in(srv.port, &sid_b, &[("Authorization", b.as_str())]),
+        200
+    );
+    assert_eq!(
+        ping_in(srv.port, &sid_b, &[("Authorization", a.as_str())]),
+        403
+    );
+}
+
+#[test]
+fn http_a_session_keeps_its_principal() {
+    let srv = Http::start(&["--principals", "claude,claude-guest"], &[]);
+    let (code, sid, who) = init_as(srv.port, &[("X-Qp-Principal", "claude-guest")]);
+    assert_eq!((code, who), (200, json!("claude-guest")));
+    let sid = sid.unwrap();
+    // The same session: no header (the bound principal) or the same one is fine.
+    assert_eq!(ping_in(srv.port, &sid, &[]), 200);
+    assert_eq!(
+        ping_in(srv.port, &sid, &[("X-Qp-Principal", "claude-guest")]),
+        200
+    );
+    // Another principal in it is refused, even an allowed one.
+    assert_eq!(
+        ping_in(srv.port, &sid, &[("X-Qp-Principal", "claude")]),
+        403
+    );
+    // The session still speaks as `claude-guest`.
+    let (code, _, body) = http(
+        srv.port,
+        "POST",
+        &[("Mcp-Session-Id", sid.as_str())],
+        Some(&tool(5, "query_describe", json!({}))),
+    );
+    assert_eq!(code, 200, "{body}");
+    assert!(body.contains("claude-guest"), "{body}");
+    // A session initialized as `claude` (default) cannot switch to `claude-guest`.
+    let (_, sid2, who) = init_as(srv.port, &[]);
+    assert_eq!(who, json!("claude"));
+    assert_eq!(
+        ping_in(
+            srv.port,
+            &sid2.unwrap(),
+            &[("X-Qp-Principal", "claude-guest")]
+        ),
+        403
+    );
+}
+
 #[test]
 fn http_listen_streams_a_resource_update() {
-    let srv = Http::start(&[], &[]);
+    let srv = Http::start(&["--principals", "claude,claude-guest"], &[]);
     let meta = json!({"io.modelcontextprotocol/protocolVersion":"2026-07-28"});
     // `claude` subscribes to proposals through the thin surface.
     let sub = json!({"jsonrpc":"2.0","id":1,"method":"tools/call","params":{

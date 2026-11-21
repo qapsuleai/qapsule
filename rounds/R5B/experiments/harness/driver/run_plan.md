@@ -20,15 +20,18 @@ başlangıç her seferinde aynı, `../SPEC.md` §2):
 
 ```sh
 PORT=<boş port>
-$QP mcp serve --http --port $PORT \
+$QP mcp serve --http --listen 127.0.0.1 --port $PORT \
     --init $H/session/init.r5b.json --root $H/session --source synthetic \
+    --principal claude --principals claude,claude-guest \
     --surface <thin|task|query|mixed> [--capsule-format <json|card|layered>] \
     --log $OUT/<koşu>/server.log.jsonl \
     --dump $OUT/<koşu>/state/document.json
 ```
 
 - Kimlik HTTP'de istek başına (`X-Qp-Principal: claude | claude-guest`); iki ajan kimliği
-  `init.r5b.json`'da (`on_behalf` arkin / guest).
+  `init.r5b.json`'da (`on_behalf` arkin / guest). İkinci kimlik yalnız `--principals` ile
+  ve yalnız loopback adreste sunulur; oturum (`QMCP_STATE`) `initialize`'daki kimliğe
+  bağlıdır, görev başına ayrı `.sid` dosyası bunu sağlar.
 - `--dump` (düzeneğin M'den isteği, ürün değil): sunucu kapanırken (SIGTERM ya da stdin
   EOF) otoritenin dokümanını (`document` sorgusunun `host` gözüyle cevabı) yazar. Yoksa
   bkz. SPEC §9 yedek yolu.

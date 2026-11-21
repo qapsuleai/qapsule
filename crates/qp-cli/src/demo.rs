@@ -126,7 +126,7 @@ pub struct DemoArgs {
     pub root: PathBuf,
     /// (R5B) Also serve the session to agents at `/mcp` (Streamable HTTP, the same rules
     /// as `qp mcp serve --http`: this machine's origins only), as principal `claude`
-    /// (`X-Qp-Principal`: another agent principal). The person in the web shell and the
+    /// (only; another `X-Qp-Principal` is refused). The person in the web shell and the
     /// agent read and write the same document.
     #[arg(long, conflicts_with_all = ["live", "sim"])]
     pub mcp: bool,
@@ -1468,6 +1468,7 @@ private proxy, e.g. Tailscale, to 127.0.0.1 — see docs/matriks/LIVE.md)"
             // `Host` is checked for every request above.
             hosts: None,
             token: None,
+            principal_tokens: Vec::new(),
         }),
     });
     let mut info = json!({"urls": urls, "phone": phone, "lan": bind != "127.0.0.1",
@@ -1565,7 +1566,8 @@ private proxy, e.g. Tailscale, to 127.0.0.1 — see docs/matriks/LIVE.md)"
         println!("mcp (ajan / agent): http://127.0.0.1:{port}/mcp (claude)");
         Some(crate::mcp_serve::McpHost::new(crate::mcp_serve::HostCfg {
             default_principal: "claude".to_owned(),
-            agents: crate::mcp_serve::agent_principals(init),
+            // Only `claude`: another `X-Qp-Principal` is 403 (`qp mcp serve` rule 1).
+            allowed: vec!["claude".to_owned()],
             surface: "thin".to_owned(),
             device: serde_json::from_value(json!({"kind": "headless"}))
                 .map_err(|e| e.to_string())?,

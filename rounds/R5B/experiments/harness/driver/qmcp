@@ -1,0 +1,295 @@
+#!/usr/bin/env python3
+"""qmcp: a minimal Streamable HTTP MCP client for the R5B measurements (stdlib only).
+
+  qmcp list                           tools, one per line: name, description, parameters
+                                      (top-level names; `?` = optional)
+  qmcp schema <tool>                  the tool's full input schema (JSON)
+  qmcp list --json                    every tool's full definition, one JSON per line
+                                      (measurement: the surface's definition size)
+  qmcp list --names                   names only
+  qmcp call <tool> ['<json args>']    calls a tool, prints its result (structuredContent if any)
+
+  `list` + `schema` is how the measured agent sees a surface (SPEC.md §5.3): the same
+  deferred-definition mechanism for every surface, so a large schema costs only when read.
+  qmcp listen [--seconds S]           opens the GET stream, prints notifications for S seconds
+
+Environment:
+  QMCP_URL         server endpoint (default http://127.0.0.1:8765/mcp)
+  QMCP_PRINCIPAL   sent as X-Qp-Principal (the agent identity the call speaks as)
+  QMCP_RUN         sent as X-Qp-Run (the measurement run / task id; ends up in the server log)
+  QMCP_PROTOCOL    MCP revision asked for (default 2025-11-25: initialize + Mcp-Session-Id;
+                   a stateless revision such as 2026-07-28 skips initialize and sends the
+                   revision in every request's _meta)
+  QMCP_STATE       file that keeps the Mcp-Session-Id between invocations (optional; without
+                   it every invocation initializes a fresh MCP session)
+  QMCP_LOG         client-side measurement log (optional): one JSON line per call
+                   {run, principal, tool, args, args_bytes, result_bytes, ok, ms, error?}
+                   (ok = false: transport error, isError, or a qp/0 `error` reply)
+  QMCP_IMAGES      directory for image contents (default: current directory)
+
+Exit status: 0 when the call returned a result (even a qp/0 `error` inside it: that is an
+answer the agent reads), 1 on a transport or JSON-RPC error, 2 on bad usage.
+"""
+import base64
+import json
+import os
+import sys
+import time
+import urllib.error
+import urllib.request
+
+URL = os.environ.get("QMCP_URL", "http://127.0.0.1:8765/mcp")
+PRINCIPAL = os.environ.get("QMCP_PRINCIPAL", "")
+RUN = os.environ.get("QMCP_RUN", "")
+PROTOCOL = os.environ.get("QMCP_PROTOCOL", "2025-11-25")
+STATELESS = PROTOCOL >= "2026"
+STATE = os.environ.get("QMCP_STATE", "")
+LOG = os.environ.get("QMCP_LOG", "")
+IMAGES = os.environ.get("QMCP_IMAGES", ".")
+CLIENT = {"name": "qmcp", "version": "0.1"}
+
+
+class Fail(Exception):
+    pass
+
+
+def headers(session=None):
+    h = {"Content-Type": "application/json",
+         "Accept": "application/json, text/event-stream"}
+    if PRINCIPAL:
+        h["X-Qp-Principal"] = PRINCIPAL
+    if RUN:
+        h["X-Qp-Run"] = RUN
+    if not STATELESS:
+        h["MCP-Protocol-Version"] = PROTOCOL
+    if session:
+        h["Mcp-Session-Id"] = session
+    return h
+
+
+def parse_body(ctype, body, want_id):
+    """A JSON body, or an SSE stream: the JSON-RPC message answering `want_id`."""
+    if "text/event-stream" in (ctype or ""):
+        data = []
+        for line in body.splitlines() + [""]:
+            if line.startswith("data:"):
+                data.append(line[5:].lstrip())
+            elif line == "" and data:
+                msg = json.loads("\n".join(data))
+                data = []
+                if want_id is None or msg.get("id") == want_id:
+                    return msg
+        return None
+    if not body.strip():
+        return None
+    return json.loads(body)
+
+
+def post(payload, session=None):
+    raw = json.dumps(payload, ensure_ascii=False).encode("utf-8")
+    req = urllib.request.Request(URL, data=raw, headers=headers(session), method="POST")
+    try:
+        with urllib.request.urlopen(req, timeout=120) as r:
+            body = r.read().decode("utf-8")
+            return r.status, r.headers, parse_body(r.headers.get("Content-Type"), body,
+                                                   payload.get("id"))
+    except urllib.error.HTTPError as e:
+        body = e.read().decode("utf-8", "replace")
+        return e.code, e.headers, (parse_body(e.headers.get("Content-Type"), body,
+                                              payload.get("id")) if body else None)
+    except urllib.error.URLError as e:
+        raise Fail(f"cannot reach {URL}: {e.reason}")
+
+
+def load_session():
+    if STATE and os.path.exists(STATE):
+        with open(STATE, encoding="utf-8") as f:
+            return f.read().strip() or None
+    return None
+
+
+def save_session(sid):
+    if STATE and sid:
+        with open(STATE, "w", encoding="utf-8") as f:
+            f.write(sid)
+
+
+def initialize():
+    status, h, msg = post({"jsonrpc": "2.0", "id": 0, "method": "initialize",
+                           "params": {"protocolVersion": PROTOCOL, "capabilities": {},
+                                      "clientInfo": CLIENT}})
+    if status >= 400 or msg is None or "error" in msg:
+        raise Fail(f"initialize failed: HTTP {status} {json.dumps(msg)[:500]}")
+    sid = h.get("Mcp-Session-Id")
+    post({"jsonrpc": "2.0", "method": "notifications/initialized"}, sid)
+    save_session(sid)
+    return sid
+
+
+def rpc(method, params, _retry=True):
+    if STATELESS:
+        params = dict(params)
+        meta = dict(params.get("_meta", {}))
+        meta["io.modelcontextprotocol/protocolVersion"] = PROTOCOL
+        meta["io.modelcontextprotocol/clientInfo"] = CLIENT
+        params["_meta"] = meta
+        sid = None
+    else:
+        sid = load_session() or initialize()
+    status, _h, msg = post({"jsonrpc": "2.0", "id": 1, "method": method, "params": params}, sid)
+    if status == 404 and sid and _retry:      # the server forgot the session: start again
+        if STATE and os.path.exists(STATE):
+            os.remove(STATE)
+        return rpc(method, params, False)
+    if msg is None:
+        raise Fail(f"{method}: HTTP {status}, empty body")
+    if "error" in msg:
+        raise Fail(f"{method}: {json.dumps(msg['error'], ensure_ascii=False)}")
+    return msg["result"]
+
+
+def log(tool, args, args_bytes, result_bytes, ok, ms, error=None):
+    if not LOG:
+        return
+    row = {"run": RUN, "principal": PRINCIPAL, "tool": tool, "args": args,
+           "args_bytes": args_bytes, "result_bytes": result_bytes, "ok": ok, "ms": ms,
+           "side": "client"}
+    if error:
+        row["error"] = error
+    with open(LOG, "a", encoding="utf-8") as f:
+        f.write(json.dumps(row, ensure_ascii=False, sort_keys=True) + "\n")
+
+
+def qp_error(res):
+    """The qp/0 error code inside a tool result, if the reply is an `error`."""
+    sc = res.get("structuredContent")
+    if isinstance(sc, dict) and sc.get("type") == "error":
+        err = sc.get("error")
+        return (err.get("code") if isinstance(err, dict) else None) or sc.get("code") or "error"
+    return None
+
+
+def all_tools():
+    tools, cursor = [], None
+    while True:
+        res = rpc("tools/list", {"cursor": cursor} if cursor else {})
+        tools += res.get("tools", [])
+        cursor = res.get("nextCursor")
+        if not cursor:
+            return tools
+
+
+def params_of(schema):
+    props = (schema or {}).get("properties", {})
+    req = set((schema or {}).get("required", []))
+    return ", ".join(k if k in req else k + "?" for k in props)
+
+
+def cmd_list(mode):
+    for t in all_tools():
+        if mode == "names":
+            print(t["name"])
+        elif mode == "json":
+            print(json.dumps(t, ensure_ascii=False, separators=(",", ":")))
+        else:
+            desc = " ".join((t.get("description") or "").split())
+            print(f"{t['name']}: {desc} | params: {params_of(t.get('inputSchema'))}")
+    return 0
+
+
+def cmd_schema(name):
+    for t in all_tools():
+        if t["name"] == name:
+            print(json.dumps(t.get("inputSchema", {}), ensure_ascii=False, separators=(",", ":")))
+            return 0
+    print(f"qmcp: no tool `{name}`", file=sys.stderr)
+    return 1
+
+
+def print_result(res):
+    shown = False
+    if "structuredContent" in res:
+        print(json.dumps(res["structuredContent"], ensure_ascii=False, separators=(",", ":")))
+        shown = True
+    for i, c in enumerate(res.get("content", [])):
+        if c.get("type") == "text" and not shown:
+            print(c["text"])
+        elif c.get("type") == "image":
+            ext = {"image/png": "png", "image/jpeg": "jpg"}.get(c.get("mimeType"), "bin")
+            path = os.path.join(IMAGES, f"qmcp-{int(time.time() * 1000)}-{i}.{ext}")
+            with open(path, "wb") as f:
+                f.write(base64.b64decode(c["data"]))
+            print(json.dumps({"image": path, "mimeType": c.get("mimeType")}))
+    if res.get("isError"):
+        print(json.dumps({"isError": True}))
+
+
+def cmd_call(tool, args_text):
+    try:
+        args = json.loads(args_text) if args_text else {}
+    except ValueError as e:
+        print(f"qmcp: arguments are not JSON: {e}", file=sys.stderr)
+        return 2
+    t0 = time.monotonic()
+    a_bytes = len(json.dumps(args, ensure_ascii=False).encode("utf-8"))
+    try:
+        res = rpc("tools/call", {"name": tool, "arguments": args})
+    except Fail as e:
+        log(tool, args, a_bytes, 0, False, int((time.monotonic() - t0) * 1000), "transport")
+        print(f"qmcp: {e}", file=sys.stderr)
+        return 1
+    r_bytes = len(json.dumps(res, ensure_ascii=False).encode("utf-8"))
+    err = qp_error(res) or ("is_error" if res.get("isError") else None)
+    log(tool, args, a_bytes, r_bytes, err is None, int((time.monotonic() - t0) * 1000), err)
+    print_result(res)
+    return 0
+
+
+def cmd_listen(seconds):
+    sid = None if STATELESS else (load_session() or initialize())
+    h = headers(sid)
+    h["Accept"] = "text/event-stream"
+    req = urllib.request.Request(URL, headers=h, method="GET")
+    deadline = time.monotonic() + seconds
+    try:
+        with urllib.request.urlopen(req, timeout=seconds + 5) as r:
+            data = []
+            while time.monotonic() < deadline:
+                line = r.readline().decode("utf-8")
+                if not line:
+                    break
+                line = line.rstrip("\n")
+                if line.startswith("data:"):
+                    data.append(line[5:].lstrip())
+                elif line == "" and data:
+                    print("\n".join(data), flush=True)
+                    data = []
+    except (TimeoutError, OSError):
+        pass
+    return 0
+
+
+def main(argv):
+    if not argv or argv[0] in ("-h", "--help"):
+        print(__doc__)
+        return 2
+    try:
+        if argv[0] == "list":
+            mode = "names" if "--names" in argv[1:] else "json" if "--json" in argv[1:] else "text"
+            return cmd_list(mode)
+        if argv[0] == "schema" and len(argv) == 2:
+            return cmd_schema(argv[1])
+        if argv[0] == "call" and len(argv) in (2, 3):
+            return cmd_call(argv[1], argv[2] if len(argv) == 3 else "")
+        if argv[0] == "listen":
+            s = float(argv[2]) if len(argv) == 3 and argv[1] == "--seconds" else 10.0
+            return cmd_listen(s)
+    except Fail as e:
+        print(f"qmcp: {e}", file=sys.stderr)
+        return 1
+    print(__doc__)
+    return 2
+
+
+if __name__ == "__main__":
+    sys.exit(main(sys.argv[1:]))

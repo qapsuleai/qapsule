@@ -1,0 +1,167 @@
+{
+ "agent_policy": "r5b",
+ "capsules": {
+  "engine": "rp4",
+  "flow": [
+   {
+    "feed": "flow",
+    "seed": 7,
+    "series": "syn03"
+   },
+   {
+    "feed": "flow",
+    "seed": 11,
+    "series": "syn07"
+   }
+  ],
+  "series": []
+ },
+ "clock": 0,
+ "comment_strictness": "cites_numbers",
+ "document": {
+  "audiences": {
+   "arkin": {
+    "group": "habituated",
+    "positions": {
+     "SYN02": 100,
+     "SYN05": 40,
+     "SYN11": -20
+    },
+    "sensitivity": "balanced",
+    "watchlist": [
+     "SYN01",
+     "SYN02",
+     "SYN03",
+     "SYN04",
+     "SYN05",
+     "SYN06"
+    ]
+   },
+   "guest": {
+    "group": "future"
+   }
+  },
+  "display_tz": "Europe/Istanbul",
+  "id": "doc-r5b-harness",
+  "schema_version": "0",
+  "title": "R5B ölçüm oturumu (sentetik)",
+  "views": [
+   {
+    "id": "main",
+    "layers": [
+     {
+      "encoding": {},
+      "mark": "candle",
+      "panel": 0,
+      "series": "syn04"
+     }
+    ],
+    "title": "SYN04 1G",
+    "x": {
+     "kind": "time"
+    },
+    "y": [
+     {
+      "kind": "linear"
+     }
+    ]
+   }
+  ]
+ },
+ "epoch": 0,
+ "feed_rule": {
+  "exempt_negative": true,
+  "rule": "rate55"
+ },
+ "principals": [
+  {
+   "author": {
+    "kind": "engine",
+    "name": "host",
+    "version": "0"
+   },
+   "id": "host",
+   "role": "host"
+  },
+  {
+   "author": {
+    "kind": "human",
+    "name": "arkin"
+   },
+   "id": "arkin",
+   "role": "owner"
+  },
+  {
+   "author": {
+    "kind": "human",
+    "name": "guest"
+   },
+   "id": "guest",
+   "role": "viewer"
+  },
+  {
+   "author": {
+    "kind": "agent",
+    "name": "claude"
+   },
+   "id": "claude",
+   "on_behalf": "arkin",
+   "role": "proposer"
+  },
+  {
+   "author": {
+    "kind": "agent",
+    "name": "claude-guest"
+   },
+   "id": "claude-guest",
+   "on_behalf": "guest",
+   "role": "proposer"
+  }
+ ],
+ "replay": {
+  "bind_all": true,
+  "capsules_all": true,
+  "days": 170,
+  "entitlements": {
+   "arkin": [
+    "*"
+   ],
+   "claude": [
+    "*"
+   ],
+   "claude-guest": [
+    "bist/SYN01",
+    "bist/SYN02",
+    "bist/SYN03",
+    "bist/SYN04",
+    "bist/SYN05",
+    "bist/SYN06",
+    "bist/SYN07",
+    "bist/SYN08",
+    "bist/SYN09"
+   ],
+   "guest": [
+    "bist/SYN01",
+    "bist/SYN02",
+    "bist/SYN03",
+    "bist/SYN04",
+    "bist/SYN05",
+    "bist/SYN06",
+    "bist/SYN07",
+    "bist/SYN08",
+    "bist/SYN09"
+   ],
+   "host": [
+    "*"
+   ]
+  },
+  "feed": "bist",
+  "history": 160,
+  "instruments": 12,
+  "interval": "1d",
+  "path": false,
+  "seed": 5,
+  "source": "synthetic",
+  "speed": 4.0
+ }
+}

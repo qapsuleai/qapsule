@@ -249,7 +249,7 @@
           "conn": "b",
           "msg": {
             "created": [
-              "w-any"
+              "watch-3-0"
             ],
             "id": "w1",
             "seq": 3,
@@ -265,7 +265,6 @@
           "id": "w1",
           "ops": [
             {
-              "id": "w-any",
               "match": {
                 "instrument": "THYAO"
               },
@@ -284,7 +283,7 @@
           "conn": "b",
           "msg": {
             "created": [
-              "w-neg"
+              "watch-4-0"
             ],
             "id": "w2",
             "seq": 4,
@@ -300,7 +299,6 @@
           "id": "w2",
           "ops": [
             {
-              "id": "w-neg",
               "match": {
                 "instrument": "THYAO",
                 "negative": true
@@ -319,7 +317,7 @@
           "conn": "b",
           "msg": {
             "created": [
-              "w-old"
+              "watch-5-0"
             ],
             "id": "w3",
             "seq": 5,
@@ -336,7 +334,6 @@
           "ops": [
             {
               "expires_t": 0,
-              "id": "w-old",
               "match": {
                 "instrument": "THYAO"
               },
@@ -388,7 +385,7 @@
           "msg": {
             "error": {
               "code": "not_found",
-              "message": "no watch `w-any`",
+              "message": "no watch `watch-3-0`",
               "path": "/ops/0/intent"
             },
             "id": "w5",
@@ -403,7 +400,7 @@
           "id": "w5",
           "ops": [
             {
-              "intent": "w-any",
+              "intent": "watch-3-0",
               "op": "remove_watch"
             }
           ],
@@ -438,7 +435,7 @@
             "event": {
               "bar": 299,
               "capsule": "cap.THYAO.breakout.up.297",
-              "intent": "w-any",
+              "intent": "watch-3-0",
               "kind": "intent_matched",
               "seq": 6,
               "stage": "invalidated",
@@ -454,7 +451,7 @@
             "event": {
               "bar": 299,
               "capsule": "cap.THYAO.breakout.up.297",
-              "intent": "w-neg",
+              "intent": "watch-4-0",
               "kind": "intent_matched",
               "seq": 6,
               "stage": "invalidated",
@@ -470,7 +467,7 @@
             "event": {
               "bar": 299,
               "capsule": "cap.THYAO.breakout.up.297",
-              "intent": "w-any",
+              "intent": "watch-3-0",
               "kind": "intent_matched",
               "seq": 6,
               "stage": "invalidated",
@@ -486,7 +483,7 @@
             "event": {
               "bar": 299,
               "capsule": "cap.THYAO.breakout.up.297",
-              "intent": "w-neg",
+              "intent": "watch-4-0",
               "kind": "intent_matched",
               "seq": 6,
               "stage": "invalidated",
@@ -641,7 +638,7 @@
             "event": {
               "bar": 305,
               "capsule": "cap.THYAO.continuation.up.305",
-              "intent": "w-any",
+              "intent": "watch-3-0",
               "kind": "intent_matched",
               "seq": 12,
               "stage": "born",
@@ -657,7 +654,7 @@
             "event": {
               "bar": 305,
               "capsule": "cap.THYAO.continuation.up.305",
-              "intent": "w-any",
+              "intent": "watch-3-0",
               "kind": "intent_matched",
               "seq": 12,
               "stage": "born",
@@ -720,7 +717,7 @@
             "event": {
               "bar": 307,
               "capsule": "cap.THYAO.continuation.up.305",
-              "intent": "w-neg",
+              "intent": "watch-4-0",
               "kind": "intent_matched",
               "seq": 14,
               "stage": "weakened",
@@ -736,7 +733,7 @@
             "event": {
               "bar": 307,
               "capsule": "cap.THYAO.continuation.up.305",
-              "intent": "w-neg",
+              "intent": "watch-4-0",
               "kind": "intent_matched",
               "seq": 14,
               "stage": "weakened",
@@ -1006,7 +1003,7 @@
             "event": {
               "bar": 318,
               "capsule": "cap.THYAO.continuation.up.305",
-              "intent": "w-neg",
+              "intent": "watch-4-0",
               "kind": "intent_matched",
               "seq": 25,
               "stage": "invalidated",
@@ -1022,7 +1019,7 @@
             "event": {
               "bar": 318,
               "capsule": "cap.THYAO.continuation.up.305",
-              "intent": "w-neg",
+              "intent": "watch-4-0",
               "kind": "intent_matched",
               "seq": 25,
               "stage": "invalidated",
@@ -1246,7 +1243,7 @@
             "event": {
               "bar": 327,
               "capsule": "cap.THYAO.continuation.down.323",
-              "intent": "w-neg",
+              "intent": "watch-4-0",
               "kind": "intent_matched",
               "seq": 34,
               "stage": "weakened",
@@ -1262,7 +1259,7 @@
             "event": {
               "bar": 327,
               "capsule": "cap.THYAO.continuation.down.323",
-              "intent": "w-neg",
+              "intent": "watch-4-0",
               "kind": "intent_matched",
               "seq": 34,
               "stage": "weakened",
@@ -1325,7 +1322,7 @@
             "event": {
               "bar": 329,
               "capsule": "cap.THYAO.breakout.down.319",
-              "intent": "w-neg",
+              "intent": "watch-4-0",
               "kind": "intent_matched",
               "seq": 36,
               "stage": "invalidated",
@@ -1341,7 +1338,7 @@
             "event": {
               "bar": 329,
               "capsule": "cap.THYAO.breakout.down.319",
-              "intent": "w-neg",
+              "intent": "watch-4-0",
               "kind": "intent_matched",
               "seq": 36,
               "stage": "invalidated",
@@ -1496,7 +1493,7 @@
             "event": {
               "bar": 335,
               "capsule": "cap.THYAO.continuation.down.323",
-              "intent": "w-neg",
+              "intent": "watch-4-0",
               "kind": "intent_matched",
               "seq": 42,
               "stage": "invalidated",
@@ -1512,7 +1509,7 @@
             "event": {
               "bar": 335,
               "capsule": "cap.THYAO.continuation.down.323",
-              "intent": "w-neg",
+              "intent": "watch-4-0",
               "kind": "intent_matched",
               "seq": 42,
               "stage": "invalidated",
@@ -1613,7 +1610,7 @@
           "id": "w6",
           "ops": [
             {
-              "intent": "w-neg",
+              "intent": "watch-4-0",
               "op": "remove_watch"
             }
           ],
@@ -1631,7 +1628,7 @@
               "items": [
                 {
                   "active": false,
-                  "id": "w-any",
+                  "id": "watch-3-0",
                   "matches": 2,
                   "provenance": {
                     "at": 1760000000000,
@@ -1653,7 +1650,7 @@
                 },
                 {
                   "active": false,
-                  "id": "w-neg",
+                  "id": "watch-4-0",
                   "matches": 6,
                   "provenance": {
                     "at": 1760000000000,
@@ -1675,7 +1672,7 @@
                 },
                 {
                   "active": false,
-                  "id": "w-old",
+                  "id": "watch-5-0",
                   "provenance": {
                     "at": 1760000000000,
                     "author": {

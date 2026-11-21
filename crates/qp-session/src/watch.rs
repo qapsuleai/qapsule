@@ -78,11 +78,8 @@ pub(crate) fn expand_watch(
         .get(ctx.speaker)
         .cloned()
         .unwrap_or_else(|| ctx.speaker.to_owned());
-    let may =
-        |who: &str, ctx: &Ctx<'_>| who == ctx.speaker || who == person_of_speaker || ctx.is_owner;
     match op {
         Op::AddWatch {
-            id,
             for_,
             text,
             match_,
@@ -90,7 +87,13 @@ pub(crate) fn expand_watch(
             max_matches,
         } => {
             let person = for_.clone().unwrap_or_else(|| person_of_speaker.clone());
-            if !may(&person, ctx) {
+            let probe = Watch {
+                for_: person.clone(),
+                match_: WatchMatch::default(),
+                expires_t: None,
+                max_matches: None,
+            };
+            if !watch_visible(&probe, ctx) {
                 return Err(E::new(
                     ErrorCode::Forbidden,
                     format!("a watch for `{person}` is theirs to leave"),
@@ -126,7 +129,7 @@ pub(crate) fn expand_watch(
                 .hint("Remove a watch (`remove_watch`) first.")
                 .build());
             }
-            let iid = ctx.new_id(doc, "intent", id.as_ref(), &ptr(p, "id"))?;
+            let iid = ctx.new_id(doc, "watch", None, &ptr(p, "id"))?;
             Ok(vec![ChangeOp::PutIntent {
                 index: None,
                 intent: Intent {
@@ -150,7 +153,7 @@ pub(crate) fn expand_watch(
             let ip = ptr(p, "intent");
             // (Privacy) Another person's watch reads as a missing one; suggestions come
             // from the speaker's own watches only.
-            let mine = |i: &&Intent| i.watch.as_ref().is_some_and(|w| may(&w.for_, ctx));
+            let mine = |i: &&Intent| i.watch.as_ref().is_some_and(|w| watch_visible(w, ctx));
             let Some(i) = doc.intents.iter().filter(mine).find(|i| &i.id == intent) else {
                 return Err(E::new(ErrorCode::NotFound, format!("no watch `{intent}`"))
                     .at(ip)
@@ -179,6 +182,35 @@ pub(crate) fn expand_watch(
         _ => unreachable!("only watch ops"),
     }
 }
+
+/// (Privacy, §25.5) The one rule for who may see (and so touch, or learn the existence
+/// of) a watch: an `owner`, its person, or an agent working for its person.
+pub(crate) fn watch_visible(w: &Watch, ctx: &Ctx<'_>) -> bool {
+    ctx.is_owner || w.for_ == ctx.speaker || w.for_ == person_of(ctx.plane, ctx.speaker)
+}
+
+/// Whether intent `i` is visible to the speaker of `ctx` (an intent without a watch is).
+pub(crate) fn intent_visible(i: &Intent, ctx: &Ctx<'_>) -> bool {
+    i.watch.as_ref().is_none_or(|w| watch_visible(w, ctx))
+}
+
+/// Every item id of `doc` the speaker of `ctx` may learn of (another person's watches
+/// left out), for `did_you_mean`.
+pub(crate) fn visible_ids<'d>(doc: &'d Document, ctx: &Ctx<'_>) -> Vec<&'d str> {
+    let hidden: std::collections::BTreeSet<&str> = doc
+        .intents
+        .iter()
+        .filter(|i| !intent_visible(i, ctx))
+        .map(|i| i.id.as_str())
+        .collect();
+    crate::apply::all_ids(doc)
+        .into_iter()
+        .filter(|x| !hidden.contains(x))
+        .collect()
+}
+
+/// The reserved prefix of the authority's watch ids.
+pub(crate) const WATCH_PREFIX: &str = "watch-";
 
 /// The person principal `p` reads for (an agent: its `on_behalf`).
 pub(crate) fn person_of<'a>(plane: &'a crate::plane::DataPlane, p: &'a str) -> &'a str {

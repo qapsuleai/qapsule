@@ -549,7 +549,7 @@ Kalıcı, adım adım bir **anlatım çizelgesi** dikkat değil, dokümandır: `
 | `set_audience` | `principal?`, `audience` | (R3, §20.3) Kişinin kapsül tercihleri (grup, hassasiyet, izleme listesi, pozisyonlar). Kendi: `read`; başkası: `owner`. Öneri olamaz. |
 | `set_sensitivity` | `principal?`, `sensitivity` | (R3, §20.3) Yalnız hassasiyet seviyesi (`null`: grubun varsayılanı). |
 | `add_comment` | `id?`, `about {capsule \| instrument}`, `lang`, `text`, `cites`, `external?` | (R5B, §25.4) Doğrulanmış yorum; yetki `propose` ya da `write`, doğrudan (öneri olmaz). Ret: `comment_rejected` + `reasons`. Değişim: `put_comment`. |
-| `add_watch` | `id?`, `for?`, `text`, `match`, `expires_t?`, `max_matches?` | (R5B, §25.5) İzleme niyeti; yetki `read`, öneri olmaz; kişi başına 32. Değişim: `put_intent` (`watch`). |
+| `add_watch` | `for?`, `text`, `match`, `expires_t?`, `max_matches?` | (R5B, §25.5) İzleme niyeti; yetki `read`, öneri olmaz; kişi başına 32. Değişim: `put_intent` (`watch`). |
 | `remove_watch` | `intent` | (R5B, §25.5) İzlemeyi kaldırır (`state: removed`). |
 
 Atanan kimlikler: `<tür>-<seq>-<n>`; `tür` ∈ `series`, `view`, `fact`, `fnd`, `cap`,
@@ -2875,21 +2875,28 @@ karne ve hikâye durumu yalnız motordan (ya da insandan) gelir.
 `Intent` korunur; yeni alanlar `watch`, `state`, `matches`:
 
 ```json
-{"op":"add_watch","id?":"…","for?":"arkin","text":"THYAO'da olumsuz bir şey olursa",
+{"op":"add_watch","for?":"arkin","text":"THYAO'da olumsuz bir şey olursa",
  "match":{"instrument":"THYAO","holdings":false,"meaning":["breakout"],"direction":"up",
           "stages":["born","weakened"],"negative":false},
  "expires_t?":1760100000000,"max_matches?":1}
-{"op":"remove_watch","intent":"intent-7-0"}
+{"op":"remove_watch","intent":"watch-7-0"}
 ```
 
-- `add_watch` → `put_intent` (`watch` dolu, `trigger` yok, `state: "active"`). `for`
+- `add_watch` → `put_intent` (`watch` dolu, `trigger` yok, `state: "active"`). Kimliği
+  otorite atar (`watch-<seq>-<n>`); `watch-` ile başlayan kimlik hiçbir işlemde istemciden
+  kabul edilmez (`invalid`, var olsun olmasın aynı cevap). `for`
   yoksa konuşan (ajan: `on_behalf` kişisi); başkası için yalnız `owner` (`forbidden`).
   Yetki `read` (kişisel tercih gibi); öneri olmaz. Kişi başına en çok 32 etkin izleme
   (`limit`, `expected: ["32"]`); `welcome.limits.max_watches` yalnız ajan politikası açık
   oturumda yazılır (eski `welcome`'lar değişmez). `max_matches: 0` → `invalid`.
-- `remove_watch` → `put_intent` (`active: false`, `state: "removed"`). Başkasının
-  izlemesi olmayanla aynı `not_found` (öneriler yalnız kendi izlemelerinden); etkin değilse
-  `invalid`.
+- `remove_watch` → `put_intent` (`active: false`, `state: "removed"`); etkin değilse
+  `invalid`. Kendi izlemesine `remove` ya da `set_intent_active` → `invalid` (`remove_watch`'a
+  yönlendirir).
+- **Görünürlük tek kuralla** (`watch_visible`: `owner`, izlemenin kişisi ya da onun adına
+  çalışan ajan): başkasının izlemesinin kimliği `remove_watch`, `remove`,
+  `set_intent_active`, `get`, `list`, kimlik çakışması ve `did_you_mean` yollarında var
+  olmayan kimlikle aynı cevabı alır (test: `agent_watch.rs`, her yol için iki cevap bayt
+  eşit). Belgede başkasının izlemesi varken komut önce okuyucunun dokümanında kuru koşulur.
 - **Yaşam döngüsü:** `active → matched` (`max_matches` dolunca) `| expired` (saat ≥
   `expires_t`) `| removed`. `matches` eşleşme sayısıdır.
 - **Eşleşme motorda, deterministik:** kapsül motorunun her bakışında (seri başına tek motor

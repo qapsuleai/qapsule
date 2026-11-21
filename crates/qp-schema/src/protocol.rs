@@ -1380,11 +1380,9 @@ pub enum Op {
     /// (R5B, §25.5) Leave a watch: the engine matches story transitions against it and
     /// sends `intent_matched` on the `intents` topic. For the speaker (an agent: the
     /// person it works for) unless `for` names another person (an owner only). At most
-    /// `limits.max_watches` (32) active watches per person.
+    /// `limits.max_watches` (32) active watches per person. The authority assigns the id
+    /// (`watch-<seq>-<n>`; ids starting with `watch-` are reserved).
     AddWatch {
-        /// Id; assigned if absent (`intent-<seq>-<n>`).
-        #[serde(default, skip_serializing_if = "Option::is_none")]
-        id: Option<String>,
         /// The person it is for; default: the speaker's person.
         #[serde(default, rename = "for", skip_serializing_if = "Option::is_none")]
         for_: Option<String>,

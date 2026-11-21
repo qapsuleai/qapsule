@@ -693,13 +693,14 @@ fn a_watch_ends_with_remove_watch_not_set_intent_active() {
     let r = h.cmd(
         "a",
         "w",
-        json!([{"op":"add_watch","id":"mine","text":"x","match":{"instrument":"THYAO"}}]),
+        json!([{"op":"add_watch","text":"x","match":{"instrument":"THYAO"}}]),
     );
     assert_eq!(r["status"], "applied", "{r}");
+    let mine = r["created"][0].as_str().unwrap().to_owned();
     let r = h.cmd(
         "a",
         "s",
-        json!([{"op":"set_intent_active","intent":"mine","active":false}]),
+        json!([{"op":"set_intent_active","intent":mine,"active":false}]),
     );
     assert_eq!(code(&r), "invalid", "{r}");
     assert!(r["error"]["hint"]
@@ -711,7 +712,7 @@ fn a_watch_ends_with_remove_watch_not_set_intent_active() {
     let r = h.cmd(
         "e",
         "s",
-        json!([{"op":"set_intent_active","intent":"mine","active":false}]),
+        json!([{"op":"set_intent_active","intent":mine,"active":false}]),
     );
     assert_eq!(code(&r), "not_found", "{r}");
 }

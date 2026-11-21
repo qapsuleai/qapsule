@@ -1539,7 +1539,11 @@ impl Session {
         // (R3, §20) A principal that may not see some engine items gets the errors the
         // document it sees would give (no existence oracle): a dry run on it first.
         let public = self.public_view(&principal);
-        if self.runner.is_some() && (public || self.proj_for(&principal).is_some()) {
+        // (R5B, §25.5) With another person's watches in the document, the reader's own
+        // document answers too (no existence oracle through errors or suggestions).
+        let watches = self.doc.intents.iter().any(|i| i.watch.is_some())
+            && self.reader_proj(&principal).is_some();
+        if (self.runner.is_some() && (public || self.proj_for(&principal).is_some())) || watches {
             let lang = self.lang_of(ci);
             let author = author.clone();
             let pr = principal.clone();

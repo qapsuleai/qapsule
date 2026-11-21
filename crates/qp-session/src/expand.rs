@@ -128,6 +128,20 @@ pub(crate) fn valid_id(id: &str) -> bool {
 }
 
 fn check_id(id: &str, path: &str) -> PResult<()> {
+    // (R5B, §25.5) The authority's watch ids are reserved: no given id may take (or
+    // probe) one.
+    if id.starts_with(crate::watch::WATCH_PREFIX) {
+        return Err(E::new(
+            ErrorCode::Invalid,
+            format!(
+                "ids starting with `{}` are reserved",
+                crate::watch::WATCH_PREFIX
+            ),
+        )
+        .at(path)
+        .hint("Choose another id or omit it to have one assigned.")
+        .build());
+    }
     if valid_id(id) {
         Ok(())
     } else {
@@ -869,12 +883,7 @@ pub(crate) fn expand_op(
         Op::SetIntentActive { intent, active } => {
             // (R5B, §25.5) Another person's watch reads as a missing intent; suggestions
             // come from the intents the speaker may see.
-            let person = crate::watch::person_of(ctx.plane, ctx.speaker);
-            let visible = |x: &&Intent| {
-                x.watch
-                    .as_ref()
-                    .is_none_or(|w| ctx.is_owner || w.for_ == person || w.for_ == ctx.speaker)
-            };
+            let visible = |x: &&Intent| crate::watch::intent_visible(x, ctx);
             let i = doc
                 .intents
                 .iter()
@@ -1066,7 +1075,40 @@ pub(crate) fn expand_op(
             }
             Ok(out)
         }
-        Op::Remove { id } => expand_remove(doc, id, p),
+        Op::Remove { id } => {
+            // (R5B, §25.5) A watch: another person's reads as missing; one's own ends
+            // with `remove_watch`.
+            if let Some(i) = doc
+                .intents
+                .iter()
+                .find(|i| &i.id == id && i.watch.is_some())
+            {
+                if !crate::watch::intent_visible(i, ctx) {
+                    return Err(
+                        E::new(ErrorCode::NotFound, format!("item `{id}` does not exist"))
+                            .at(ptr(p, "id"))
+                            .dym(id, crate::watch::visible_ids(doc, ctx))
+                            .build(),
+                    );
+                }
+                return Err(E::new(
+                    ErrorCode::Invalid,
+                    format!("`{id}` is a watch: it ends with `remove_watch`"),
+                )
+                .at(ptr(p, "id"))
+                .hint("Send remove_watch with this intent id to end a watch.")
+                .build());
+            }
+            if find_collection(doc, id).is_none() {
+                return Err(
+                    E::new(ErrorCode::NotFound, format!("item `{id}` does not exist"))
+                        .at(ptr(p, "id"))
+                        .dym(id, crate::watch::visible_ids(doc, ctx))
+                        .build(),
+                );
+            }
+            expand_remove(doc, id, p)
+        }
         Op::AppendBars { series, bars } => {
             let s = need_series(doc, series, &ptr(p, "series"))?;
             bound_no_bar_writes(s, &ptr(p, "series"))?;

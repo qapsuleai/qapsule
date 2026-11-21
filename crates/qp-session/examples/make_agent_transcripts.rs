@@ -252,6 +252,12 @@ fn bar(i: usize) -> Value {
 }
 
 fn t69() -> Value {
+    // The authority assigns watch ids (`watch-<seq>-0`): the first three commands follow
+    // the load's engine entries.
+    let si: SessionInit = serde_json::from_value(watch_init()).expect("init");
+    let l = Session::new(si, &root()).expect("session").log().len();
+    let w_any = format!("watch-{}-0", l + 1);
+    let w_neg = format!("watch-{}-0", l + 2);
     let mut steps = vec![
         hello("a", "ana", "The person."),
         hello("b", "bot", "Her agent (`on_behalf: ana`); `welcome.limits.max_watches` is 32 with the agent policy."),
@@ -259,11 +265,11 @@ fn t69() -> Value {
         In::Send("a", json!({"type":"subscribe","id":"w","topic":{"kind":"intents"}}), "ana's intents."),
         In::Send("b", json!({"type":"subscribe","id":"w","topic":{"kind":"intents"}}), "The agent's."),
         In::Send("e", json!({"type":"subscribe","id":"w","topic":{"kind":"intents"}}), "eve's: she gets none of ana's matches."),
-        cmd("b", "w1", None, json!([{"op":"add_watch","id":"w-any","text":"THYAO'da bir şey olursa","match":{"instrument":"THYAO"},"max_matches":2}]), "A watch for ana (the agent's person), at most two matches."),
-        cmd("b", "w2", None, json!([{"op":"add_watch","id":"w-neg","text":"THYAO'da olumsuz geçiş","match":{"instrument":"THYAO","negative":true}}]), "Negative transitions only."),
-        cmd("b", "w3", None, json!([{"op":"add_watch","id":"w-old","text":"süresi dolan","match":{"instrument":"THYAO"},"expires_t":0}]), "Already past its time: expires at the next engine look."),
+        cmd("b", "w1", None, json!([{"op":"add_watch","text":"THYAO'da bir şey olursa","match":{"instrument":"THYAO"},"max_matches":2}]), "A watch for ana (the agent's person), at most two matches."),
+        cmd("b", "w2", None, json!([{"op":"add_watch","text":"THYAO'da olumsuz geçiş","match":{"instrument":"THYAO","negative":true}}]), "Negative transitions only."),
+        cmd("b", "w3", None, json!([{"op":"add_watch","text":"süresi dolan","match":{"instrument":"THYAO"},"expires_t":0}]), "Already past its time: expires at the next engine look."),
         cmd("b", "w4", None, json!([{"op":"add_watch","for":"eve","text":"x","match":{}}]), "Another person's watch: `forbidden`."),
-        cmd("e", "w5", None, json!([{"op":"remove_watch","intent":"w-any"}]), "eve cannot see ana's watch: `not_found`."),
+        cmd("e", "w5", None, json!([{"op":"remove_watch","intent":w_any}]), "eve cannot see ana's watch: `not_found`."),
     ];
     for i in K..K + 40 {
         steps.push(In::Data(bar(i), "A final bar: the engine's look; matching watches send `intent_matched` to ana and her agent."));
@@ -272,7 +278,7 @@ fn t69() -> Value {
         "b",
         "w6",
         None,
-        json!([{"op":"remove_watch","intent":"w-neg"}]),
+        json!([{"op":"remove_watch","intent":w_neg}]),
         "Removed (`state: removed`).",
     ));
     steps.push(q(

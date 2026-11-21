@@ -242,9 +242,42 @@ Geri yüklenenler (§6): `recovered/worktree-agent/{0474490800, 155233fafa, 1564
 5175f67c62, 5361b219f1, 5b2f82cdb2, 5d339288b6, 618f5a53ec, 72cec3080d, 89a998e380,
 8c3593435e, bba97ec414, c2f41fe759, c3621b72f7, ddc99df301, f4ae3368b5, f6fa700a4f}`.
 
-## 9. Disk
+## 9. Doğrulama
 
-(Kapanış temizliğinden sonra doldurulur; aşağıdaki "Disk (kapanış)" bölümü.)
+- `QP_VERIFY_BROWSER=1 CARGO_TARGET_DIR=<mutlak>/target scripts/verify.sh` son ağaçta
+  (`6dbdac7`): **18/18 PASS** (969 s; hesap özeti `7b1e99d40889f83c` arm64 = x86_64 = wasm32,
+  değişmedi; altınlar ve 70 döküm × 3 taşıma; tarayıcı ve demo adımı). Ağsız.
+- CI: `bcb6619` için `44952957547` yeşil; son itme `6dbdac7` için `44962958203` (sonucu
+  "Kapanış" satırında).
+- Gizli bilgi taraması (`6f4cb19..HEAD`): temiz (yalnız testlerdeki yer tutucu belirteçler);
+  denetçi de bağımsız taradı. `.mcp.json` yalnız ortam değişkenine başvurur.
+
+## 10. Disk (kapanış, K56/K68)
+
+**Silinenler:**
+- `target/` 40 GB → 0 (`scripts/clean.sh --deep`: artımlı önbellek 16 GB, `target/wt/v` 4 GB,
+  `cargo clean` 32 GiB / 175 542 dosya).
+- Worktree'ler: V, S, M, H, M28 b–d, M31, T6, R1–R3 (her biri birleşince kaldırıldı);
+  `git worktree list` yalnız ana ağaç.
+- `crates/qp-wasm/target/` 293 MB (göreli `CARGO_TARGET_DIR` ile verify'ın yan ürünü; B9).
+- Ölçüm dökümleri (scratchpad: 106 koşunun sunucu günlükleri, belge dökümleri, cevaplar,
+  geçersiz M29 koşusu) ≈ 262 MB; özet tablolar `rounds/R5B/experiments/` altında (en büyük
+  klasör harness 552 KB).
+- Kalan `qp mcp serve` süreçleri (10), `__pycache__` (`agents/`, R5B harness), scratchpad
+  dosyaları.
+
+**Bilerek bırakılanlar:**
+- `fixtures/local/agent-runs/` 23 MB: ölçüt 9'un gerçek veri koşuları (Soru/Yorumcu,
+  `*-local-mx`, `*-local-mx-ctx`); kanıt, depoya girmez.
+- `fixtures/local/agent-cache/matriks/` 252 KB: Matriks önbelleği ve sorgu sayacı (`count.jsonl`).
+- `shells/web/node_modules`, `shells/web/pkg`: `clean.sh` ana ağaçta bırakır (`--node-modules`).
+- Önceki round'ların artıkları (benim değil, dokunmadım; silinsin mi?): `rounds/R3/experiments/harness/target/`
+  140 MB, `rounds/R5/experiments/harness/glance/**/__pycache__`.
+- Dallar: §8 (birleşenler ve geri yüklenen 24 `recovered/worktree-agent/*`).
+
+**Kalan boyutlar:** `target/` 0 (sonraki derleme yeniden kurar); `.claude/worktrees/` 28 KB;
+`fixtures/local/` 1,5 GB (bu round +23 MB); `.git` 254 MB; depo toplamı 2,2 GB; depo dışı
+oturum klasörü < 3 MB (yalnız görev çıktı kayıtları).
 
 ## Arkin için: kendi Claude'uma Qapsule'ü nasıl bağlarım ve ne sorarım
 

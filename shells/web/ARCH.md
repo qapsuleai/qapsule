@@ -200,3 +200,22 @@ varsayılanı —, `nabiz`) ve tek hareket durumu (`shell/motion.rs`; `nabiz`'in
 `shell/live.rs`). Hareketi azalt tek adres parametresiyle: `?reduced_motion=1|0`; `?reduce=1|0` ve
 `?anim=0` eski adları olarak çalışır; yoksa `prefers-reduced-motion` (sayfa olduğu gibi iletir).
 `nabiz` hareketi azalt'ta canlı noktasının yanına "canlı" yazar (bilgi metin olarak durur).
+
+(R5B, GOAL kapsam 6 "Gösterimde en az iz"; `docs/PROTOCOL.md` §25) Ajan yüzeyinin kabuktaki
+izi (`crates/qp-wasm/src/shell/agent.rs`). Hiçbir kural gevşetilmedi. Çekirdek karşılamada
+`proposals` konusuna abone olur ve bekleyen önerileri ister (`list`, `state: pending`; öneri
+olayı ya da karar cevabından sonra yeniden); akıştan bir kapsül açılınca `capsule` sorgusunu
+gönderir ve cevabın yalnız `comments`'ini tutar. Etiket ("ajan yorumu" / "agent comment"),
+köken ("aa, arkin adına"), önerenin adı ve önerinin özeti (işlem adları, gerekçe) okurun
+dilinde çekirdekte yazılır; sayfa **olduğu gibi** `textContent`'e koyar. Karar komutunu
+(`accept_proposal` / `reject_proposal`) çekirdek kurar ve sayfanın kendi bağlantısından
+(insan, işaretsiz; §25.2) gider. Bu sorguların hatası okura gösterilmez (iz boş kalır).
+
+| Yöntem | Neden |
+|--------|-------|
+| `comments()` | Açık kapsülün doğrulanmış yorumları: `[{id, label, origin, text}]` (kapsül kapalıyken boş). |
+| `proposals()` | Bekleyen öneriler: `[{id, author, ops, reason}]`. `ops`: işlem başına bir satır, adı ve bütün bağımsız değişkenleriyle (`set_view_range from_bar=100 to_bar=150 view="main"`; kabulün gerçek etkisi; değerler JSON olarak, dizgeler tırnaklı — `x view=other` gibi bir dizge başka bir değişken gibi görünemez; hiçbir şey kesilmez, sayfa satırı kaydırır); `reason`: ajanın kendi sözü, "ajan gerekçesi: …" etiketiyle ayrı satırda, hiçbir zaman tek açıklama değil (güvenlik incelemesi: vekil karışıklığı). |
+| `decide(id, kabul)` | Okurun kararı; bekleyen listede olmayan kimlik için hiçbir şey gönderilmez. |
+
+Değişiklik bayrağı `take_changes().agent`: sayfa iki listeyi yeniden çizer (`#comments`
+açık katmanda ipucunun altında, `#proposals` akışın üstünde; boşken yer kaplamaz).

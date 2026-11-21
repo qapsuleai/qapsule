@@ -706,6 +706,23 @@ mod shell_binding {
             self.inner.evidence_json().to_string()
         }
 
+        /// (R5B) The open capsule's comments, written for the page (JSON `[{id, label,
+        /// origin, text}]`).
+        pub fn comments(&self) -> String {
+            self.inner.comments_json().to_string()
+        }
+
+        /// (R5B) The pending proposals, written for the page (JSON `[{id, author, ops, reason}]`: each op with its arguments, the proposer's reason labelled as theirs).
+        pub fn proposals(&self) -> String {
+            self.inner.proposals_json().to_string()
+        }
+
+        /// (R5B, §25.2) The reader accepts (`true`) or rejects pending proposal `id` on
+        /// this connection.
+        pub fn decide(&mut self, id: &str, accept: bool) {
+            self.inner.decide(id, accept);
+        }
+
         /// The replay state, formatted (JSON).
         pub fn status(&self) -> String {
             self.inner.status_json().to_string()

@@ -299,3 +299,39 @@ fn a_preview_draws_only_what_the_asker_may_read() {
         assert!(!text.contains("last c="), "{text}");
     }
 }
+
+#[test]
+fn the_writer_finds_its_comment_by_list_and_get() {
+    let mut h = H::new();
+    let out = h.comment(
+        "A",
+        "THYAO kısa ortalamanın (5,23) altında kalıyor [1].",
+        json!([CAP]),
+    );
+    assert_eq!(out[0]["msg"]["status"], "applied", "{out:?}");
+    let id = h.0.document().comments.last().unwrap().id.clone();
+    for conn in ["A", "a"] {
+        let l = h.send(
+            conn,
+            json!({"type":"query","id":"l","query":{"kind":"list","collection":"comments"}}),
+        );
+        let ids: Vec<String> = l[0]["msg"]["data"]["items"]
+            .as_array()
+            .map(|a| {
+                a.iter()
+                    .filter_map(|c| c["id"].as_str().map(str::to_owned))
+                    .collect()
+            })
+            .unwrap_or_default();
+        assert!(ids.contains(&id), "{conn} list: {l:?}");
+        let g = h.send(
+            conn,
+            json!({"type":"query","id":"g","query":{"kind":"get","id":id}}),
+        );
+        assert_eq!(
+            g[0]["msg"]["data"]["item"]["id"],
+            id.as_str(),
+            "{conn} get: {g:?}"
+        );
+    }
+}

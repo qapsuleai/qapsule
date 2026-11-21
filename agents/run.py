@@ -382,8 +382,12 @@ def local_tasks(role, symbols, matriks):
     """Criterion 9 (real data, local source): one task per symbol, built here; the
     expected ids come from the server at start (never stored in the repo)."""
     out = []
-    ctx = (" Gerekirse Matriks MCP'den aynı günün haberini ya da bilanço takvimini bağlam "
-           "olarak ekle; dış sayıyı `external`'da kaynağıyla işaretle.") if matriks else ""
+    # (criterion 9) the context is asked for, not left to "if needed": with "gerekirse"
+    # the first run's agents made no Matriks call at all.
+    ctx = (" Matriks MCP'den bu hisseyle ilgili bağlamı (son haber, bilanço takvimi ya da "
+           "temel veri; en çok 3 çağrı) **mutlaka** al ve kaynağını adlandırarak ekle; "
+           "Qapsule'ün replay tarihiyle Matriks verisinin tarihi farklıysa bunu söyle. Dış "
+           "sayıyı `external`'da kaynağıyla işaretle.") if matriks else ""
     for s in symbols:
         if role == "yorumcu":
             out.append({"id": f"Y-{s}", "role": "yorumcu", "principal": "claude", "instrument": s,

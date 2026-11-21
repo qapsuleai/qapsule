@@ -56,3 +56,4 @@ sinyalini alır ve kaynağı okur. Akış açamayan istemci `notifications` arac
 | Ad | Dosya | Tarif |
 |----|-------|-------|
 | `thin` | `thin.rs` | Protokolü birebir yansıtan, şemadan üretilmiş araçlar (RD1). Varsayılan. |
+| `task` | `task.rs` | (M28 b) Görev düzeyi 9 araç: `whats_new`, `find`, `explain`, `instrument`, `track_record`, `watch`, `comment`, `propose`, `glossary`; karar aracı yok; kapsül veren araçlarda `format` (`card`/`json`/`layered`). |

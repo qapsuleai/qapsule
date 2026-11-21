@@ -142,6 +142,10 @@ pub fn detector_sets() -> Vec<DetectorEntry> {
         },
         // M26 alternatifleri: bir satır, ör.
         // DetectorEntry { name: "a1", make: m26_a1::detectors },
+        DetectorEntry {
+            name: "olcek26",
+            make: m26_olcek26::detectors,
+        },
     ]
 }
 

@@ -1,0 +1,16 @@
+# RP4 M26 alternatifi `olcek26`: periyoda göre ölçeklenen dedektör eşikleri (NOTES.md).
+[package]
+name = "m26-olcek26"
+version = "0.1.0"
+edition = "2021"
+publish = false
+description = "RP4 M26 alternative: detector thresholds and windows scaled by bar period. Deterministic."
+
+[workspace]
+
+[dependencies]
+qp-facts = { path = "../../../../../crates/qp-facts" }
+qp-schema = { path = "../../../../../crates/qp-schema" }
+
+[lints.rust]
+unsafe_code = "forbid"

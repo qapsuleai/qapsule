@@ -89,6 +89,10 @@ pub struct DemoArgs {
     /// default). A page may ask for another with `?feed_rule=` (for its principal).
     #[arg(long, default_value = "rate55")]
     pub feed_rule: String,
+    /// (RP4, `docs/CAPSULE.md` §9.9) The capsule engine's named constant record (`r3`,
+    /// the protocol default; `rp4`), in every mode (replay, `--live`, `--sim`).
+    #[arg(long, default_value = "r3", value_parser = crate::sim::check_rule_arg)]
+    pub rule: String,
     /// Steps per second.
     #[arg(long, default_value_t = 4.0)]
     pub speed: f64,
@@ -194,6 +198,7 @@ fn host(a: &DemoArgs) -> Result<ReplayHost, String> {
         from_t,
         running: !a.paused,
         feed_rule: Some(a.feed_rule.clone()),
+        engine: crate::sim::engine_field(&a.rule),
     };
     let init = demo_session_init(&o);
     let dir = if a.synthetic {
@@ -329,6 +334,7 @@ fn live_setup(a: &DemoArgs, tx: &Sender<Cmd>) -> Result<(ReplayHost, LiveParts),
             from_t: None,
             running: true,
             feed_rule: Some(a.feed_rule.clone()),
+            engine: crate::sim::engine_field(&a.rule),
         },
         &a.root,
     )?;
@@ -409,7 +415,7 @@ fn sim_setup(a: &DemoArgs, tx: &Sender<Cmd>) -> Result<(ReplayHost, SimParts), S
         &a.interval,
         a.history,
         &a.feed_rule,
-        "r3",
+        &a.rule,
         (&a.sim_trades, &a.sim_rest, &a.root),
     )?;
     println!(

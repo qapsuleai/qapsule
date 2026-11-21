@@ -628,7 +628,14 @@ pub fn check_story(doc: &Document, capsule: &str, bars: Option<&[Bar]>) -> Story
     let Some(upto) = bars[..closed].iter().position(|b| b.t == latest) else {
         return StoryCheck::Pending;
     };
-    let mut dets = qp_facts::default_detectors();
+    // (RP4) The detector set of the record whose rule resolved the story (default `r3`).
+    let engine = story
+        .resolution
+        .as_ref()
+        .map_or(qp_capsule::DEFAULT_ENGINE, |r| {
+            qp_capsule::engine_of_rule(&r.rule)
+        });
+    let mut dets = qp_facts::detectors_named(engine).unwrap_or_else(qp_facts::default_detectors);
     let mut found: BTreeMap<String, BTreeMap<String, f64>> = BTreeMap::new();
     for (i, b) in bars[..=upto].iter().enumerate() {
         for det in &mut dets {

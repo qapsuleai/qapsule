@@ -491,6 +491,15 @@ impl Session {
                 )?,
             ),
         };
+        // (RP4) The capsule engine's named constant record.
+        if let Some(name) = capsules.as_ref().and_then(|c| c.engine.as_deref()) {
+            if qp_capsule::EngineConfig::named(name).is_none() {
+                return Err(format!(
+                    "init.capsules.engine: unknown record `{name}` (one of {})",
+                    qp_capsule::ENGINES.join(", ")
+                ));
+            }
+        }
         let doc: Document = match init.document {
             DocumentRef::Inline(d) => *d,
             DocumentRef::Path(p) => read_json(&confine(repo_root, &p)?)?,

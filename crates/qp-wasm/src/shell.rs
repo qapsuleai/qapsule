@@ -3250,6 +3250,10 @@ pub struct DemoOptions {
     /// default the presentation's, `PRESENTED_FEED_RULE`, with the K42 exemption); `None`:
     /// no rule (the protocol's default).
     pub feed_rule: Option<String>,
+    /// (RP4, `docs/CAPSULE.md` §9.9) The capsule engine's named constant record
+    /// (`init.capsules.engine`: `r3`, `rp4`); `None`: not written (the protocol default
+    /// `r3`, existing dumps byte-identical).
+    pub engine: Option<String>,
 }
 
 impl Default for DemoOptions {
@@ -3263,6 +3267,7 @@ impl Default for DemoOptions {
             from_t: None,
             running: false,
             feed_rule: Some(qp_capsule::feedrule::PRESENTED_FEED_RULE.to_owned()),
+            engine: None,
         }
     }
 }
@@ -3305,6 +3310,9 @@ pub fn demo_session_init(o: &DemoOptions) -> qp_schema::protocol::SessionInit {
             rule: rule.clone(),
             exempt_negative: true,
         });
+    if let Some(e) = &o.engine {
+        init.capsules.get_or_insert_with(Default::default).engine = Some(e.clone());
+    }
     init
 }
 

@@ -37,6 +37,11 @@
 //!
 //! [`EngineConfig::r3`] is the engine with these choices; [`sentence::sentences_at`]
 //! writes a story's sentences from engine data (K26).
+//!
+//! (RP4) Capsule constants are **named records** ([`EngineConfig::named`], [`ENGINES`];
+//! `docs/CAPSULE.md` §9.9): `r3` (above, the protocol default [`DEFAULT_ENGINE`]) and
+//! `rp4` (outcome [`outcome::Rp4`]: [`outcome::HighLow`] on intraday bars, the R3
+//! barrier on daily bars; detector set `qp_facts::rp4_detectors`).
 
 use std::collections::BTreeMap;
 
@@ -56,8 +61,9 @@ pub mod voice;
 
 pub use audience::{admits, admits_at};
 pub use engine::{
-    glyph_spec, glyph_spec_at, parse_ledger_key, CandidateStory, Engine, EngineConfig,
-    EngineSnapshot, LedgerRecord, StoryEvent, StorySnapshot, FRESHNESS_HALF_BARS,
+    engine_of_rule, glyph_spec, glyph_spec_at, parse_ledger_key, CandidateStory, Engine,
+    EngineConfig, EngineSnapshot, LedgerRecord, StoryEvent, StorySnapshot, DEFAULT_ENGINE, ENGINES,
+    FRESHNESS_HALF_BARS,
 };
 pub use pipeline::{simulate, InstrumentInput, SimResult};
 

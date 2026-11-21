@@ -364,7 +364,9 @@ impl Replica {
         let (Some(bars), Some(symbol)) = (bs.bars(), bs.symbol()) else {
             return Vec::new();
         };
-        crate::capsule::candidates(symbol, series, bars)
+        // (RP4) The record the authority runs, read from its stories (default `r3`).
+        let engine = crate::capsule::engine_of_doc(rd!(s));
+        crate::capsule::candidates_with(engine, symbol, series, bars)
     }
 
     /// Its binding state of bound series `series`.

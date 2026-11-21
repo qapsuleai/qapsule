@@ -230,7 +230,10 @@ fn pace_follows_the_speed_factor_on_a_fake_clock() {
     assert_eq!(Speed::parse("60"), Ok(Speed::Factor(60.0)));
     assert_eq!(Speed::parse("8x"), Ok(Speed::Factor(8.0)));
     assert!(Speed::parse("0").is_err() && Speed::parse("fast").is_err());
-    assert!(check_rule("r3").is_ok() && check_rule("r4").is_err());
+    assert!(check_rule("r3").is_ok() && check_rule("rp4").is_ok() && check_rule("r4").is_err());
+    // (RP4) The default writes nothing (byte-identical runs); another record is named.
+    assert_eq!(engine_field("r3"), None);
+    assert_eq!(engine_field("rp4").as_deref(), Some("rp4"));
 }
 
 /// VERIFY 8: the same trades through the loopback mock broker's trade endpoint (a real

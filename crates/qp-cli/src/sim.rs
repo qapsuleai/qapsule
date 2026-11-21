@@ -55,11 +55,18 @@ use crate::livehost::{BarSource, LiveIn, LiveRuntime, MatriksFeed};
 /// Real time a closed stretch (night, weekend, pre-open) takes at most at speed `N`.
 pub const CLOSED_PAUSE: Duration = Duration::from_secs(2);
 
-/// Named capsule-engine rule sets that `--rule` accepts. Only `r3`
-/// (`qp_capsule::EngineConfig::r3`, what the authority runs today). RP4's calibration
-/// adds named records here (old constants stay selectable by name) and passes the choice
-/// to the authority; until then any other name is refused.
-pub const RULES: &[&str] = &["r3"];
+/// Named capsule constant records that `--rule` accepts (`docs/CAPSULE.md` §9.9):
+/// `qp_capsule::ENGINES` (`r3`: `EngineConfig::r3` and the R3 detectors, the protocol
+/// default; `rp4`: the RP4 calibration's outcome rule and detector set). Old records stay
+/// selectable by name; the choice goes to the authority as `init.capsules.engine`.
+pub const RULES: &[&str] = qp_capsule::ENGINES;
+
+/// The session init's `capsules.engine` for `--rule`: `None` for the protocol default
+/// (`r3`: nothing written, so the run is byte-identical to one without `--rule`).
+#[must_use]
+pub fn engine_field(rule: &str) -> Option<String> {
+    (rule != qp_capsule::DEFAULT_ENGINE).then(|| rule.to_owned())
+}
 
 /// Checks `--rule` against [`RULES`].
 ///
@@ -74,6 +81,14 @@ pub fn check_rule(name: &str) -> Result<(), String> {
             RULES.join(", ")
         ))
     }
+}
+
+/// [`check_rule`] as a `clap` value parser (`qp demo --rule`).
+///
+/// # Errors
+/// An unknown rule name.
+pub fn check_rule_arg(name: &str) -> Result<String, String> {
+    check_rule(name).map(|()| name.to_owned())
 }
 
 /// `qp sim` arguments.
@@ -100,7 +115,7 @@ pub struct SimArgs {
     /// Event stream (JSON lines) — only under `fixtures/local/` (real data).
     #[arg(long)]
     pub out: Option<PathBuf>,
-    /// Capsule-engine rule set by name (only `r3` for now).
+    /// Capsule constant record by name (`r3`, the default; `rp4`).
     #[arg(long, default_value = "r3")]
     pub rule: String,
     /// The host's feed rule (as `qp demo --feed-rule`).
@@ -167,6 +182,8 @@ pub struct SimSpec {
     pub history: u32,
     /// The host's feed rule.
     pub feed_rule: String,
+    /// (RP4) The capsule constant record (`--rule`).
+    pub rule: String,
     /// Cached trades directory.
     pub trades_dir: PathBuf,
     /// Cached REST bars directory.
@@ -235,6 +252,7 @@ impl SimSpec {
             interval: interval.to_owned(),
             history,
             feed_rule: feed_rule.to_owned(),
+            rule: rule.to_owned(),
             trades_dir: rel(dirs.0),
             rest_dir: rel(dirs.1),
             root: dirs.2.to_owned(),
@@ -964,6 +982,7 @@ pub fn host(spec: &SimSpec, input: &SimInput) -> Result<ReplayHost, String> {
             from_t: None,
             running: true,
             feed_rule: Some(spec.feed_rule.clone()),
+            engine: engine_field(&spec.rule),
         },
         &spec.root,
     )?;

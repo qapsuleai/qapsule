@@ -10,6 +10,7 @@ publish.workspace = true
 [dependencies]
 qp-schema = { path = "../qp-schema" }
 qp-compute = { path = "../qp-compute" }
+qp-calendar = { path = "../qp-calendar" }
 
 [dev-dependencies]
 qp-source = { path = "../qp-source" }

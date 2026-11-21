@@ -3809,6 +3809,11 @@ pub struct CapsuleInit {
     /// Licensed flow feeds the authority alone reads (server facts).
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
     pub flow: Vec<FlowInit>,
+    /// (RP4, `docs/CAPSULE.md` §9.9) The named capsule constant record the engine runs
+    /// with: its outcome rule and its detector set (`r3`, `rp4`). Absent: `r3` (the
+    /// protocol default). An unknown name is refused at session start.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub engine: Option<String>,
 }
 
 /// A licensed flow feed of the test host (R3, §20): `qp_source::synthetic_flow` over the

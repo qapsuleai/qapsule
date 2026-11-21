@@ -115,6 +115,43 @@ pub struct ServeArgs {
     /// Measurement run label of the log lines (stdio; HTTP takes `X-Qp-Run`).
     #[arg(long)]
     pub run: Option<String>,
+    /// (Measurements only) Writes the authority's document — the owner's view, not
+    /// projected to any reader — to this file after every request that wrote to the log
+    /// (replaced atomically). Never for a served product.
+    #[arg(long)]
+    pub dump: Option<PathBuf>,
+}
+
+/// `--dump`: the authority's document after a write (log length changed).
+struct Dump {
+    path: PathBuf,
+    seen: Option<usize>,
+}
+
+impl Dump {
+    fn new(path: Option<&PathBuf>) -> Option<Self> {
+        path.map(|p| Self {
+            path: p.clone(),
+            seen: None,
+        })
+    }
+
+    fn update(&mut self, hub: &SharedHub) -> Result<(), String> {
+        let h = hub.borrow();
+        let s = h.session();
+        let n = s.log().len();
+        if self.seen == Some(n) {
+            return Ok(());
+        }
+        let mut text = serde_json::to_string_pretty(s.document()).map_err(|e| e.to_string())?;
+        text.push('\n');
+        let tmp = self.path.with_extension("tmp");
+        std::fs::write(&tmp, text).map_err(|e| format!("--dump {}: {e}", tmp.display()))?;
+        std::fs::rename(&tmp, &self.path)
+            .map_err(|e| format!("--dump {}: {e}", self.path.display()))?;
+        self.seen = Some(n);
+        Ok(())
+    }
 }
 
 /// Adds the agent principals [`AGENTS`] (agent author, role `proposer`) when missing;
@@ -124,11 +161,20 @@ pub fn add_agent_principals(init: &mut SessionInit) {
         if init.principals.iter().any(|p| p.id == id) {
             continue;
         }
-        // R5B: S birleşince `"on_behalf": behalf` alanı eklenecek (PLAN §1).
-        let p: Principal = serde_json::from_value(json!({
+        // (R5B, PROTOCOL §25.1) The agent reads as the person it works for, when that
+        // person is a human principal of the init who works for nobody.
+        let person_ok = init.principals.iter().any(|q| {
+            q.id == behalf
+                && q.on_behalf.is_none()
+                && matches!(q.author, qp_schema::Author::Human { .. })
+        });
+        let mut v = json!({
             "id": id, "author": {"kind": "agent", "name": id}, "role": "proposer"
-        }))
-        .expect("agent principal");
+        });
+        if person_ok {
+            v["on_behalf"] = json!(behalf);
+        }
+        let p: Principal = serde_json::from_value(v).expect("agent principal");
         init.principals.push(p);
         if let Some(r) = init.replay.as_mut() {
             if let Some(e) = r.entitlements.get(behalf).cloned() {
@@ -330,10 +376,14 @@ pub fn serve(a: &ServeArgs) -> Result<(), String> {
         device: dev,
         log,
     };
+    let mut dump = Dump::new(a.dump.as_ref());
+    if let Some(d) = dump.as_mut() {
+        d.update(&hub)?;
+    }
     if a.http {
-        serve_http(&hub, cfg, a, token, principal_tokens)
+        serve_http(&hub, cfg, a, token, principal_tokens, dump)
     } else {
-        serve_stdio(&hub, &cfg, a.run.clone())
+        serve_stdio(&hub, &cfg, a.run.clone(), dump)
     }
 }
 
@@ -435,7 +485,12 @@ fn write_line(out: &mut impl Write, v: &Value) -> Result<(), String> {
 }
 
 /// stdio: one endpoint; the replay moves with the wall clock between lines.
-fn serve_stdio(hub: &SharedHub, cfg: &HostCfg, run: Option<String>) -> Result<(), String> {
+fn serve_stdio(
+    hub: &SharedHub,
+    cfg: &HostCfg,
+    run: Option<String>,
+    mut dump: Option<Dump>,
+) -> Result<(), String> {
     let mut server = cfg.open(hub, "mcp-1", &cfg.default_principal)?;
     server.set_run(run);
     let (tx, rx) = mpsc::channel::<Result<String, String>>();
@@ -479,6 +534,9 @@ fn serve_stdio(hub: &SharedHub, cfg: &HostCfg, run: Option<String>) -> Result<()
             };
         }
         hub.borrow_mut().pump(wall());
+        if let Some(dp) = dump.as_mut() {
+            dp.update(hub)?;
+        }
         let d = server.deliver(true);
         for m in d.messages.iter().chain(&response).chain(&d.updated) {
             write_line(&mut out, m)?;
@@ -834,6 +892,7 @@ fn serve_http(
     a: &ServeArgs,
     token: Option<String>,
     principal_tokens: Vec<(String, String)>,
+    mut dump: Option<Dump>,
 ) -> Result<(), String> {
     let listener = TcpListener::bind((a.listen.as_str(), a.port))
         .map_err(|e| format!("bind {}:{}: {e}", a.listen, a.port))?;
@@ -881,6 +940,9 @@ fn serve_http(
             Err(RecvTimeoutError::Disconnected) => return Ok(()),
         }
         hub.borrow_mut().pump(wall());
+        if let Some(dp) = dump.as_mut() {
+            dp.update(hub)?;
+        }
         host.flush();
     }
 }

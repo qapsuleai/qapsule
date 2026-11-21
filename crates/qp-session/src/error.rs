@@ -21,6 +21,8 @@ impl E {
             did_you_mean: Vec::new(),
             conflicts: Vec::new(),
             hint: None,
+            reason: None,
+            reasons: Vec::new(),
         })
     }
 
@@ -59,6 +61,12 @@ impl E {
 
     pub(crate) fn hint(mut self, hint: impl Into<String>) -> Self {
         self.0.hint = Some(hint.into());
+        self
+    }
+
+    /// (R5B, §25) The machine-readable sub-reason.
+    pub(crate) fn reason(mut self, reason: impl Into<String>) -> Self {
+        self.0.reason = Some(reason.into());
         self
     }
 

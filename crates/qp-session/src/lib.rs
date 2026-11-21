@@ -25,12 +25,15 @@ macro_rules! rd {
     };
 }
 
+pub mod agent;
 mod apply;
 mod bindq;
 mod canon;
 mod capidx;
 pub mod capsule;
 mod claims;
+mod comments;
+pub use comments::CommentAudit;
 pub mod conform;
 mod dispute;
 mod error;
@@ -43,6 +46,7 @@ mod live;
 mod locate;
 mod plane;
 mod present;
+mod preview;
 mod provider;
 mod public;
 mod query;
@@ -58,6 +62,7 @@ mod summary;
 pub mod tape;
 mod values;
 pub mod viewer;
+mod watch;
 
 pub use story::CoinFlipRule;
 

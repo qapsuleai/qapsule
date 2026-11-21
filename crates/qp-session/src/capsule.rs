@@ -1367,10 +1367,19 @@ impl Session {
             }
             w.done = fin;
             let series = w.series.clone();
-            let changes = self.capsule_changes(&runner.engine, &events, &made, fin - 1);
+            let mut changes = self.capsule_changes(&runner.engine, &events, &made, fin - 1);
+            // (R5B, §25.5) Watches, in the same entry.
+            let (wch, matched) = self.match_watches(&events);
+            changes.extend(wch);
+            let mut matched_pub = Vec::new();
             if let Some(pe) = runner.pub_engine.as_ref() {
-                let changes =
-                    self.in_world(true, |s| s.capsule_changes(pe, &events_pub, &made, fin - 1));
+                let (changes, mp) = self.in_world(true, |s| {
+                    let mut c = s.capsule_changes(pe, &events_pub, &made, fin - 1);
+                    let (w, m) = s.match_watches(&events_pub);
+                    c.extend(w);
+                    (c, m)
+                });
+                matched_pub = mp;
                 self.pending_pub = Some(crate::public::PubPending::of(changes));
             }
             let summary = if fin - from == 1 {
@@ -1389,6 +1398,10 @@ impl Session {
             wrote = true;
             lines.extend(self.entry_events(seq));
             lines.extend(self.capsule_topic_lines(seq, &events, &events_pub, &said));
+            if !matched.is_empty() || !matched_pub.is_empty() {
+                let ps = self.pub_of(seq);
+                lines.extend(self.watch_lines(&matched, seq, &matched_pub, ps));
+            }
             runner = self.runner.take().expect("runner put back");
         }
         self.runner = Some(runner);
@@ -1585,9 +1598,17 @@ impl Session {
         })
     }
 
-    /// The audience of `principal` (the `habituated` default when it set none).
-    pub(crate) fn audience_of(doc: &Document, principal: &str) -> Audience {
-        doc.audiences.get(principal).cloned().unwrap_or(Audience {
+    /// The audience of `principal` (the `habituated` default when it set none). (R5B,
+    /// §25.7) An agent that works for a person and set no audience of its own reads with
+    /// the person's.
+    pub(crate) fn audience_of(&self, doc: &Document, principal: &str) -> Audience {
+        let own = doc.audiences.get(principal).or_else(|| {
+            self.plane
+                .delegates
+                .get(principal)
+                .and_then(|person| doc.audiences.get(person))
+        });
+        own.cloned().unwrap_or(Audience {
             group: UserGroup::Habituated,
             sensitivity: None,
             watchlist: Vec::new(),
@@ -1595,10 +1616,23 @@ impl Session {
         })
     }
 
-    /// Instruments of the active intents' triggers (symbols of the series they read).
-    pub(crate) fn intents_on(doc: &Document) -> Vec<String> {
+    /// Instruments of the active intents' triggers (symbols of the series they read);
+    /// (R5B, §25.5) and of `principal`'s own watches (an agent: its person's) — another
+    /// person's watch never counts.
+    pub(crate) fn intents_on(&self, doc: &Document, principal: &str) -> Vec<String> {
         let mut out = Vec::new();
+        let person = crate::watch::person_of(&self.plane, principal);
         for i in doc.intents.iter().filter(|i| i.active) {
+            if let Some(w) = &i.watch {
+                if w.for_ == person {
+                    if let Some(sym) = &w.match_.instrument {
+                        if !out.iter().any(|x| x == sym) {
+                            out.push(sym.clone());
+                        }
+                    }
+                }
+                continue;
+            }
             let Some(t) = &i.trigger else { continue };
             for (_, s) in crate::values::condition_series(t) {
                 if let Some(sym) = bar_series(doc, s).and_then(qp_schema::Series::symbol) {
@@ -1613,9 +1647,12 @@ impl Session {
 
     /// About `principal`'s position or one of the document's active intents.
     fn relevant(&self, doc: &Document, principal: &str, instrument: &str) -> bool {
-        let a = Self::audience_of(doc, principal);
+        let a = self.audience_of(doc, principal);
         a.positions.get(instrument).is_some_and(|q| *q != 0.0)
-            || Self::intents_on(doc).iter().any(|s| s == instrument)
+            || self
+                .intents_on(doc, principal)
+                .iter()
+                .any(|s| s == instrument)
     }
 
     /// Whether a story reaches `principal`'s audience: watch list (empty = every
@@ -1905,6 +1942,18 @@ impl Session {
 
     /// Answer to the `capsule` query (run on the asker's projected document).
     pub(crate) fn capsule_query(&self, ci: usize, id: &str, path: &str) -> PResult<QueryResult> {
+        self.capsule_query_with(ci, id, path, true)
+    }
+
+    /// [`Session::capsule_query`]; with `with_comments`, the comments the reader may
+    /// receive (R5B, §25.4).
+    pub(crate) fn capsule_query_with(
+        &self,
+        ci: usize,
+        id: &str,
+        path: &str,
+        with_comments: bool,
+    ) -> PResult<QueryResult> {
         let principal = self.conns[ci].principal.clone();
         let lang = self.lang_of(ci);
         let p = self.proj.as_deref();
@@ -1985,6 +2034,11 @@ impl Session {
                 glyph,
                 evidence,
                 withheld: None,
+                comments: if with_comments {
+                    self.capsule_comments(ci, &c.id)
+                } else {
+                    Vec::new()
+                },
             }),
         })
     }
@@ -2107,6 +2161,7 @@ impl Session {
                         narratives: Vec::new(),
                         proposals: Vec::new(),
                         audiences: BTreeMap::new(),
+                        comments: Vec::new(),
                     }
                 };
                 ledger_rows(&doc)
@@ -2290,7 +2345,7 @@ impl Session {
                         continue;
                     }
                     if !all {
-                        let a = Self::audience_of(doc, &c.principal);
+                        let a = self.audience_of(doc, &c.principal);
                         let watched = a.watchlist.is_empty()
                             || a.watchlist.contains(&sc.instrument)
                             || a.positions.contains_key(&sc.instrument);
@@ -2377,6 +2432,12 @@ impl Session {
             f.facts.retain(|x| !p.hidden.contains(x));
         }
         d.capsules.retain(|c| !p.hidden.contains(&c.id));
+        // (R5B, §25.5) Another person's watches stay out.
+        d.intents
+            .retain(|i| self.intent_for_reader(i, &p.principal));
+        // (R5B, §25.4) Comments with a hidden cite or with numbers stay out.
+        d.comments
+            .retain(|c| crate::comments::projected_keeps(c, &p.hidden));
         let views_kept: Vec<qp_schema::View> = d
             .views
             .iter()
@@ -2511,6 +2572,10 @@ impl Session {
                 ChangeOp::PutAudience { principal, .. }
                     if !p.principal.is_empty() && principal != &p.principal => {}
                 ChangeOp::Delete { id } if p.hidden.contains(id) => {}
+                ChangeOp::PutComment { comment, .. }
+                    if !crate::comments::projected_keeps(comment, &p.hidden) => {}
+                ChangeOp::PutIntent { intent, .. }
+                    if !self.intent_for_reader(intent, &p.principal) => {}
                 ChangeOp::PushLedger { entry }
                     if p.hidden.contains(&entry.finding)
                         || entry.capsule.as_ref().is_some_and(|c| p.hidden.contains(c)) => {}
@@ -2534,6 +2599,29 @@ impl Session {
         x.changes = self.project_changes(&e.changes, p, lang);
         x.inverse = self.project_changes(&e.inverse, p, lang);
         x.request.retain(|op| !p.mentions_hidden(op));
+        // (R5B, §25.5) Another person's watch requests stay out.
+        let author_person = crate::watch::person_of(&self.plane, &e.author).to_owned();
+        let reader_ok = p.principal.is_empty()
+            || crate::watch::person_of(&self.plane, &p.principal) == author_person
+            || self
+                .principal(&p.principal)
+                .is_some_and(|q| q.role == qp_schema::protocol::Role::Owner);
+        x.request.retain(|op| {
+            reader_ok
+                || !matches!(
+                    op,
+                    qp_schema::protocol::Op::AddWatch { .. }
+                        | qp_schema::protocol::Op::RemoveWatch { .. }
+                )
+        });
+        // (R5B, §25.4) A comment's text with numbers does not go to a projected reader.
+        x.request.retain(|op| match op {
+            qp_schema::protocol::Op::AddComment { text, lang, .. } => {
+                qp_capsule::comment::numbers(text, qp_capsule::comment::lang_of(*lang), &[])
+                    .is_empty()
+            }
+            _ => true,
+        });
         // Another person's capsule preferences (positions, watch list, level) never go.
         let own = |w: &Option<String>| {
             p.principal.is_empty() || w.as_deref().unwrap_or(e.author.as_str()) == p.principal

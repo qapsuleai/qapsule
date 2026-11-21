@@ -386,8 +386,12 @@ fn bound_with_flow_and_readers_unchanged() {
     // `,"stories"` twice = 20 bytes in each of connection a's two answers (RP3 value
     // "a 634 4940106 6e4d9bddee9ae5a9"); every other connection, the log and the document
     // unchanged.
+    // (R5B) Re-recorded: `describe` lists `add_comment`, `add_watch`, `remove_watch`,
+    // the `preview` query and the `comments` topic (62 bytes in each of connection a's two
+    // answers; R5/M18 value "a 634 4940146 c47e2bdca42286fd"); every other connection, the
+    // log and the document unchanged.
     for entitled in [
-        "a 634 4940146 c47e2bdca42286fd",
+        "a 634 4940270 20e846849c2a7dfd",
         "f 1 33828 64e687e9ac6e5803",
         "i 1 33374 3d07f785ac18cb32",
     ] {
@@ -404,7 +408,9 @@ fn bound_with_flow_and_readers_unchanged() {
         // RP3/M15: `describe` lists the `viewer` topic (10 answers x 9 bytes), see above:
         // "lines 2996 21664511 64ee0975d39fcbb1 log 1206570 e3754e6847abf125 doc 672043 92a079cb66258785"
         // R5/M18: `describe` lists the `stories` query and topic (10 answers x 20 bytes).
-        "lines 2996 21664711 1dac723c21e8a2fd log 1206570 e3754e6847abf125 doc 672043 92a079cb66258785"
+        // "lines 2996 21664711 1dac723c21e8a2fd log 1206570 e3754e6847abf125 doc 672043 92a079cb66258785"
+        // R5B: `describe` lists the R5B ops, query and topic (10 answers x 62 bytes).
+        "lines 2996 21665331 8aaee75f77cb9a7d log 1206570 e3754e6847abf125 doc 672043 92a079cb66258785"
     );
 }
 
@@ -430,6 +436,8 @@ fn inline_unchanged() {
         // RP3/M15: `describe` lists the `viewer` topic (10 answers x 9 bytes):
         // "lines 3739 13109530 3ae3c1fc74746f8e log 611848 8fa8658745f376d0 doc 287101 1c632884ddcf7d58"
         // R5/M18: `describe` lists the `stories` query and topic (10 answers x 20 bytes).
-        "lines 3739 13109730 467306a49cf583c6 log 611848 8fa8658745f376d0 doc 287101 1c632884ddcf7d58"
+        // R5B: `describe` lists the R5B ops, query and topic (10 answers x 62 bytes):
+        // "lines 3739 13109730 467306a49cf583c6 log 611848 8fa8658745f376d0 doc 287101 1c632884ddcf7d58"
+        "lines 3739 13110350 caf938f8baba2b42 log 611848 8fa8658745f376d0 doc 287101 1c632884ddcf7d58"
     );
 }

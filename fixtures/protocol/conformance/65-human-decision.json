@@ -1,0 +1,512 @@
+{
+  "covers": [
+    "human-decision",
+    "proposal",
+    "forbidden",
+    "provenance"
+  ],
+  "description": "R5B (§25.2): only a person decides. An agent cannot accept or reject its own proposal (any mode), an agent whose role is `owner` cannot decide another agent's proposal nor approve a finding (`forbidden`, `reason: human_only`); the person accepts: the entry is the agent's, approved by the person.",
+  "final": {
+    "log_len": 2
+  },
+  "init": {
+    "clock": 1760000000000,
+    "document": "fixtures/protocol/docs/thyao.json",
+    "epoch": 0,
+    "principals": [
+      {
+        "author": {
+          "kind": "human",
+          "name": "arkin"
+        },
+        "id": "arkin",
+        "role": "owner"
+      },
+      {
+        "author": {
+          "kind": "agent",
+          "name": "scout"
+        },
+        "id": "scout",
+        "role": "proposer"
+      },
+      {
+        "author": {
+          "kind": "agent",
+          "name": "editor"
+        },
+        "id": "editor",
+        "role": "editor"
+      },
+      {
+        "author": {
+          "kind": "human",
+          "name": "viewer"
+        },
+        "id": "viewer",
+        "role": "viewer"
+      },
+      {
+        "author": {
+          "kind": "engine",
+          "name": "feed",
+          "version": "0"
+        },
+        "id": "feed",
+        "role": "feed"
+      },
+      {
+        "author": {
+          "kind": "engine",
+          "name": "host",
+          "version": "0"
+        },
+        "id": "host",
+        "role": "host"
+      },
+      {
+        "author": {
+          "kind": "agent",
+          "name": "bot"
+        },
+        "id": "bot",
+        "role": "owner"
+      },
+      {
+        "author": {
+          "kind": "agent",
+          "name": "scribe"
+        },
+        "id": "scribe",
+        "on_behalf": "viewer",
+        "role": "proposer"
+      }
+    ],
+    "proposal_ttl_ms": null
+  },
+  "name": "65-human-decision",
+  "steps": [
+    {
+      "expect": [
+        {
+          "conn": "a",
+          "msg": {
+            "seq": 0,
+            "type": "welcome"
+          }
+        }
+      ],
+      "note": "A person (`human`, owner).",
+      "send": {
+        "conn": "a",
+        "msg": {
+          "principal": "arkin",
+          "protocol": "qp/0",
+          "surface": {
+            "kind": "headless"
+          },
+          "type": "hello"
+        }
+      }
+    },
+    {
+      "expect": [
+        {
+          "conn": "s",
+          "msg": {
+            "seq": 0,
+            "type": "welcome"
+          }
+        }
+      ],
+      "note": "An agent (`proposer`).",
+      "send": {
+        "conn": "s",
+        "msg": {
+          "principal": "scout",
+          "protocol": "qp/0",
+          "surface": {
+            "kind": "headless"
+          },
+          "type": "hello"
+        }
+      }
+    },
+    {
+      "expect": [
+        {
+          "conn": "b",
+          "msg": {
+            "seq": 0,
+            "type": "welcome"
+          }
+        }
+      ],
+      "note": "An agent whose role is `owner`.",
+      "send": {
+        "conn": "b",
+        "msg": {
+          "principal": "bot",
+          "protocol": "qp/0",
+          "surface": {
+            "kind": "headless"
+          },
+          "type": "hello"
+        }
+      }
+    },
+    {
+      "expect": [
+        {
+          "conn": "s",
+          "msg": {
+            "id": "p1",
+            "proposal": "prop-1",
+            "seq": 1,
+            "status": "proposed",
+            "type": "ack"
+          }
+        }
+      ],
+      "note": "The agent's write becomes a proposal.",
+      "send": {
+        "conn": "s",
+        "msg": {
+          "id": "p1",
+          "ops": [
+            {
+              "from_bar": 150,
+              "op": "set_view_range",
+              "to_bar": 199,
+              "view": "main"
+            }
+          ],
+          "type": "command"
+        }
+      }
+    },
+    {
+      "expect": [
+        {
+          "conn": "s",
+          "msg": {
+            "error": {
+              "code": "forbidden",
+              "hint": "Only a person decides proposals and findings, on a connection of their own; leave the proposal pending for them.",
+              "message": "`accept_proposal` is a human decision; this command is not of human origin",
+              "path": "/ops/0",
+              "reason": "human_only"
+            },
+            "id": "d1",
+            "type": "error"
+          }
+        }
+      ],
+      "note": "Its own proposal: `human_only`.",
+      "send": {
+        "conn": "s",
+        "msg": {
+          "id": "d1",
+          "ops": [
+            {
+              "op": "accept_proposal",
+              "proposal": "prop-1"
+            }
+          ],
+          "type": "command"
+        }
+      }
+    },
+    {
+      "expect": [
+        {
+          "conn": "s",
+          "msg": {
+            "error": {
+              "code": "forbidden",
+              "hint": "Only a person decides proposals and findings, on a connection of their own; leave the proposal pending for them.",
+              "message": "`reject_proposal` is a human decision; this command is not of human origin",
+              "path": "/ops/0",
+              "reason": "human_only"
+            },
+            "id": "d2",
+            "type": "error"
+          }
+        }
+      ],
+      "note": "Nor reject it, in any mode.",
+      "send": {
+        "conn": "s",
+        "msg": {
+          "id": "d2",
+          "mode": "direct",
+          "ops": [
+            {
+              "op": "reject_proposal",
+              "proposal": "prop-1"
+            }
+          ],
+          "type": "command"
+        }
+      }
+    },
+    {
+      "expect": [
+        {
+          "conn": "b",
+          "msg": {
+            "error": {
+              "code": "forbidden",
+              "hint": "Only a person decides proposals and findings, on a connection of their own; leave the proposal pending for them.",
+              "message": "`accept_proposal` is a human decision; this command is not of human origin",
+              "path": "/ops/0",
+              "reason": "human_only"
+            },
+            "id": "d3",
+            "type": "error"
+          }
+        }
+      ],
+      "note": "An owner agent cannot decide either.",
+      "send": {
+        "conn": "b",
+        "msg": {
+          "id": "d3",
+          "ops": [
+            {
+              "op": "accept_proposal",
+              "proposal": "prop-1"
+            }
+          ],
+          "type": "command"
+        }
+      }
+    },
+    {
+      "expect": [
+        {
+          "conn": "b",
+          "msg": {
+            "error": {
+              "code": "forbidden",
+              "hint": "Only a person decides proposals and findings, on a connection of their own; leave the proposal pending for them.",
+              "message": "`approve_finding` is a human decision; this command is not of human origin",
+              "path": "/ops/0",
+              "reason": "human_only"
+            },
+            "id": "d4",
+            "type": "error"
+          }
+        }
+      ],
+      "note": "Nor approve a finding, not even as a proposal.",
+      "send": {
+        "conn": "b",
+        "msg": {
+          "id": "d4",
+          "mode": "propose",
+          "ops": [
+            {
+              "finding": "fnd-overbought",
+              "op": "approve_finding"
+            }
+          ],
+          "type": "command"
+        }
+      }
+    },
+    {
+      "expect": [
+        {
+          "conn": "a",
+          "msg": {
+            "data": {
+              "collection": "proposals",
+              "items": [
+                {
+                  "id": "prop-1",
+                  "ops": [
+                    {
+                      "from_bar": 150,
+                      "op": "set_view_range",
+                      "to_bar": 199,
+                      "view": "main"
+                    }
+                  ],
+                  "provenance": {
+                    "at": 1760000000000,
+                    "author": {
+                      "kind": "agent",
+                      "name": "scout"
+                    },
+                    "based_on": []
+                  },
+                  "state": "pending"
+                }
+              ],
+              "kind": "items"
+            },
+            "id": "l1",
+            "now": 1760000000000,
+            "seq": 1,
+            "type": "result"
+          }
+        }
+      ],
+      "note": "Still pending.",
+      "send": {
+        "conn": "a",
+        "msg": {
+          "id": "l1",
+          "query": {
+            "collection": "proposals",
+            "kind": "list",
+            "state": "pending"
+          },
+          "type": "query"
+        }
+      }
+    },
+    {
+      "expect": [
+        {
+          "conn": "a",
+          "msg": {
+            "id": "d5",
+            "seq": 2,
+            "status": "applied",
+            "type": "ack"
+          }
+        }
+      ],
+      "note": "The person accepts.",
+      "send": {
+        "conn": "a",
+        "msg": {
+          "id": "d5",
+          "ops": [
+            {
+              "op": "accept_proposal",
+              "proposal": "prop-1"
+            }
+          ],
+          "type": "command"
+        }
+      }
+    },
+    {
+      "expect": [
+        {
+          "conn": "a",
+          "msg": {
+            "data": {
+              "entries": [
+                {
+                  "approved_by": "arkin",
+                  "at": 1760000000000,
+                  "author": "scout",
+                  "cause": "d5",
+                  "changes": [
+                    {
+                      "domain": [
+                        1753920000000.0,
+                        1759881600000.0
+                      ],
+                      "op": "set_x_domain",
+                      "view": "main"
+                    },
+                    {
+                      "op": "put_proposal",
+                      "proposal": {
+                        "decided_by": {
+                          "kind": "human",
+                          "name": "arkin"
+                        },
+                        "decided_seq": 2,
+                        "id": "prop-1",
+                        "ops": [
+                          {
+                            "from_bar": 150,
+                            "op": "set_view_range",
+                            "to_bar": 199,
+                            "view": "main"
+                          }
+                        ],
+                        "provenance": {
+                          "at": 1760000000000,
+                          "author": {
+                            "kind": "agent",
+                            "name": "scout"
+                          },
+                          "based_on": []
+                        },
+                        "state": "accepted"
+                      }
+                    }
+                  ],
+                  "inverse": [
+                    {
+                      "op": "put_proposal",
+                      "proposal": {
+                        "id": "prop-1",
+                        "ops": [
+                          {
+                            "from_bar": 150,
+                            "op": "set_view_range",
+                            "to_bar": 199,
+                            "view": "main"
+                          }
+                        ],
+                        "provenance": {
+                          "at": 1760000000000,
+                          "author": {
+                            "kind": "agent",
+                            "name": "scout"
+                          },
+                          "based_on": []
+                        },
+                        "state": "pending"
+                      }
+                    },
+                    {
+                      "domain": null,
+                      "op": "set_x_domain",
+                      "view": "main"
+                    }
+                  ],
+                  "request": [
+                    {
+                      "from_bar": 150,
+                      "op": "set_view_range",
+                      "to_bar": 199,
+                      "view": "main"
+                    }
+                  ],
+                  "seq": 2,
+                  "summary": "accept prop-1: set_view_range main 150..=199"
+                }
+              ],
+              "kind": "log"
+            },
+            "id": "g1",
+            "now": 1760000000000,
+            "seq": 2,
+            "type": "result"
+          }
+        }
+      ],
+      "note": "The entry: author `scout`, `approved_by` `arkin`.",
+      "send": {
+        "conn": "a",
+        "msg": {
+          "id": "g1",
+          "query": {
+            "kind": "log",
+            "limit": 1
+          },
+          "type": "query"
+        }
+      }
+    }
+  ]
+}

@@ -79,6 +79,7 @@ fn collection_items(doc: &Document, c: Collection) -> Vec<Value> {
         Collection::Capsules => doc.capsules.iter().map(item_json).collect(),
         Collection::Intents => doc.intents.iter().map(item_json).collect(),
         Collection::Narratives => doc.narratives.iter().map(item_json).collect(),
+        Collection::Comments => doc.comments.iter().map(item_json).collect(),
         Collection::Proposals => doc.proposals.iter().map(item_json).collect(),
     }
 }
@@ -485,6 +486,11 @@ impl Session {
                 })
             }
             Query::Capsules { .. } => self.capsules_query(ci, q),
+            Query::Preview {
+                proposal,
+                width,
+                height,
+            } => self.preview(ci, proposal, (*width, *height)),
             Query::Stories {
                 instrument,
                 series,

@@ -257,6 +257,22 @@ Kararlar K60–K63; kaynak belgeler `docs/matriks/` (`INTEGRATION.md`, `MESSAGES
 | Ham ileti kaydı | raw log (rawlog, `RawLog`) | Canlı bağlayıcının yan ürünü: her ileti için varış zamanı + konu + ham bayt. Yeniden oynatma onu aynı sırayla verir (belirleyici testler, ağsız CI; K44, K60). Gerçek piyasa verisidir: yalnız `fixtures/local/` altında durur, commit edilmez. |
 | İç içe gösterge adresi | nested study address (`StudyAddress`) | (K63) Bir göstergeyi ve girdisini tek satırda adlayan biçim: `SEMBOL:PERİYOT:GÖSTERGE[İÇ:param]:param` (ör. `ISCTR:5m:EMA[RSI:18]:20`: RSI 18'in 20'lik üstel ortalaması). Qapsule onu kendi hesap grafiğine (`qp-compute`) çevirir; değer çekirdekte, K13/K14 kurallarıyla hesaplanır, dış servisten alınmaz. |
 
+### Ajan yüzeyi (R5B)
+
+Çerçeve `rounds/R5B/GOAL.md`, sözleşme `rounds/R5B/PLAN.md`; protokol `docs/PROTOCOL.md` §25.
+
+| Kavram | Kodda | Tanım |
+|--------|-------|-------|
+| Ajan kökeni | agent origin (`Author::Agent`; `Session::mark_agent_connection`) | Bir komutun ajandan geldiği: kimliğin yazarı `agent` ya da bağlantı barındırıcının ajan bağlantısı diye işaretlediği bağlantı (her MCP bağlantısı). İstemci işareti kaldıramaz. |
+| Adına çalışılan kişi | `Principal.on_behalf` | Ajanın okuyucu olarak yerine geçtiği insan. Ajan o kişinin veri yetkilerinden fazlasını göremez (kendi satırı varsa kesişim); kitlesi, kendi kitlesi yoksa kişininki. |
+| İnsan kararı | human decision (`human_only`) | Öneri kabul/ret ve bulgu onay/ret: yalnız yazarı `human` olan kimlikten ve işaretsiz bağlantıdan. Rol `owner` olsa da ajan karar veremez; kararı öneremez de. |
+| Ajan izin listesi | agent allow-list (`qp_session::agent::agent_op`) | Ajan kökenli komutun taşıyabildiği işlemler: yorum ve izleme doğrudan; görünüm ve çizim yalnız öneri olarak; geri kalan her şey (olgu, bulgu, seri, bar, karne, hikâye, kitle…) `agent_cannot_write`. Yeni işlem varsayılan olarak yasaktır. |
+| Yorum | `Comment` (`add_comment`, `put_comment`) | Bir kapsüle ya da enstrümana bağlı, dayandığı olgu/bulgu/kapsül kimliklerini (`cites`) ve dış alıntıları taşıyan kısa anlatı. Motor doğrulamadan dokümana girmez; kökeni (`provenance`, `on_behalf`) ve doğrulandığı sıkılıkla saklanır. Gözlemdir, tavsiye değil. |
+| Doğrulayıcı | comment validator (`qp_capsule::comment::validate`) | Yorumu yazarın okuyabildiği kanıta (`Evidence`) karşı deterministik sınayan saf fonksiyon: atıf, sayı (yuvarlama kuralıyla), tavsiye dili, lisans, cümle başına atıf. Ret nedenleri makinece okunur (`Reason`); okuyucu yetkisi kısıtlı yazara lisans nedeni "desteklenmeyen sayı" olarak gider (kehanet yok). |
+| Sıkılık | `Strictness` (`init.comment_strictness`) | Doğrulayıcının seviyesi: yalnız atıf (`cites`), atıf + sayı (`cites_numbers`, varsayılan), + cümle başına atıf (`per_sentence`). M30 ölçer. |
+| Niyetin izleme biçimi | watch (`Intent.watch`, `Watch`, `WatchMatch`; `add_watch`, `remove_watch`) | Yapılandırılmış niyet: kimin için, hangi hikâye geçişleri (enstrüman, elindekiler, anlam türü, yön, aşamalar, olumsuz), ne zamana kadar, kaç kez. Eşleşme motorda, deterministik; yaşam döngüsü `active → matched \| expired \| removed`; olay `intent_matched`. Kişi başına 32. Kişisel veridir: başkasına gitmez. Serbest metni yapılandırılmış izlemeye çevirmek ajanın işidir. |
+| Öneri önizlemesi | `preview` sorgusu | Bekleyen önerinin, kabul edilse o an yazacağı değişimler ve etkilediği görünümlerin sahne özeti; doküman değişmez. |
+
 ## Kapsülün yaşam döngüsü
 
 R3'ten itibaren kapsülün hikâye aşamaları `Stage`'dir (yukarıda; `docs/CAPSULE.md` §3).

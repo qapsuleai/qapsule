@@ -44,6 +44,7 @@ pub fn default_limits() -> Limits {
         max_subscriptions: 32,
         max_string: 4096,
         max_bind_bars: 100_000,
+        max_watches: None,
     }
 }
 
@@ -233,6 +234,11 @@ pub struct Session {
     /// (R6/T3, §24) The market status the host gave (`Session::set_market_status`);
     /// `None`: never given (every output as before).
     pub(crate) market: Option<qp_schema::market::MarketStatus>,
+    /// (R5B, §25) Agent connections and the agent policy.
+    pub(crate) agent: crate::agent::AgentState,
+    /// (R5B, §25.4) The comment validator's real verdicts (host-side, for measurement;
+    /// never sent): [`Session::comment_audit`].
+    pub(crate) comment_audit: Vec<crate::comments::CommentAudit>,
 }
 
 /// (R3/K1b) A writer of a command, for the two-world paths.
@@ -256,9 +262,9 @@ struct PubEx {
 }
 
 /// A proposal's acceptance expanded in one world ([`Session::accept`]).
-struct Accepted {
-    doc: Document,
-    changes: Vec<ChangeOp>,
+pub(crate) struct Accepted {
+    pub(crate) doc: Document,
+    pub(crate) changes: Vec<ChangeOp>,
     inverse: Vec<ChangeOp>,
     created: Vec<String>,
     proposer: String,
@@ -326,6 +332,10 @@ fn proposable(op: &Op) -> bool {
             // never carried in a proposal that every reader would see.
             | Op::SetAudience { .. }
             | Op::SetSensitivity { .. }
+            // (R5B, §25.4) Comments are written directly, never proposed.
+            | Op::AddComment { .. }
+            | Op::AddWatch { .. }
+            | Op::RemoveWatch { .. }
     )
 }
 
@@ -347,6 +357,10 @@ fn allowed(op: &Op, perms: &Permissions) -> bool {
         // (R3, §20) A person's own capsule preferences: anyone who may read (another
         // person's: owner only, checked in the expansion).
         Op::SetAudience { .. } | Op::SetSensitivity { .. } => perms.read,
+        // (R5B, §25.4) A comment: anyone who may propose or write.
+        Op::AddComment { .. } => perms.propose || perms.write,
+        // (R5B, §25.5) A person's own watches: anyone who may read.
+        Op::AddWatch { .. } | Op::RemoveWatch { .. } => perms.read,
         _ => perms.write,
     }
 }
@@ -474,6 +488,17 @@ impl Session {
         trust_keys: Option<(Vec<u8>, Vec<u8>)>,
     ) -> Result<Self, String> {
         let capsules = init.capsules.clone();
+        // (R5B, §25.3) The agent policy, by name.
+        let agent_policy = match init.agent_policy.as_deref() {
+            None => false,
+            Some(crate::agent::AGENT_POLICY_R5B) => true,
+            Some(other) => {
+                return Err(format!(
+                    "init.agent_policy: unknown policy `{other}` (one of {})",
+                    crate::agent::AGENT_POLICY_R5B
+                ))
+            }
+        };
         // (R5/M19, K53) The host's feed rule, by name.
         let coin_flip = match &init.feed_rule {
             None => None,
@@ -508,13 +533,38 @@ impl Session {
         };
         // Canonical form of every view (GRAMMAR.md §11); the log replays from it.
         let doc = crate::canon::canon_document_owned(doc)?;
-        let limits = default_limits();
+        let mut limits = default_limits();
+        if agent_policy {
+            limits.max_watches = Some(crate::watch::MAX_WATCHES);
+        }
         let host = init
             .principals
             .iter()
             .find(|p| p.role == Role::Host)
             .map(|p| p.id.clone());
-        let plane = DataPlane::new(provider, host, limits.max_bind_bars);
+        let mut plane = DataPlane::new(provider, host, limits.max_bind_bars);
+        // (R5B, §25.4) The comment validator's strictness.
+        if let Some(st) = init.comment_strictness {
+            plane.comment_strictness = st;
+        }
+        // (R5B, §25.7) Agents reading for a person: the person must be a known human
+        // principal that works for nobody itself (no chains, no cycles).
+        for p in &init.principals {
+            let Some(person) = &p.on_behalf else { continue };
+            let ok = init.principals.iter().any(|q| {
+                &q.id == person
+                    && q.id != p.id
+                    && q.on_behalf.is_none()
+                    && matches!(q.author, qp_schema::Author::Human { .. })
+            });
+            if !ok {
+                return Err(format!(
+                    "principal `{}`: on_behalf `{person}` must be another known principal whose author is human and who works for nobody",
+                    p.id
+                ));
+            }
+            plane.delegates.insert(p.id.clone(), person.clone());
+        }
         let mut s = Self {
             initial: doc.clone(),
             doc,
@@ -571,8 +621,19 @@ impl Session {
             coin_flip,
             coin_flip_for: BTreeMap::new(),
             market: None,
+            agent: crate::agent::AgentState {
+                policy: agent_policy,
+                ..crate::agent::AgentState::default()
+            },
+            comment_audit: Vec::new(),
         };
         s.audience_seen = s.doc.audiences.keys().cloned().collect();
+        s.audience_seen.extend(
+            s.doc
+                .intents
+                .iter()
+                .filter_map(|i| i.watch.as_ref().map(|w| w.for_.clone())),
+        );
         s.start_capsules(capsules.as_ref());
         // Resolve the bindings on load (§18.3); a first ready resolution is anchored by
         // an engine entry. No connection exists yet: its notifications go nowhere.
@@ -1119,10 +1180,19 @@ impl Session {
                 mode,
                 base,
                 reason,
-            } => match self.command(ci, &id, &ops, mode, (base, reason), resolved) {
-                Ok(lines) => lines,
-                Err(e) => vec![err_line(conn, Some(id), e)],
-            },
+            } => {
+                let (full_len, pub_len) = (self.log.len(), self.pub_len() as usize);
+                match self.command(ci, &id, &ops, mode, (base, reason), resolved) {
+                    Ok(mut lines) => {
+                        // (R5B, §25.4) New comments to `comments` subscribers.
+                        if ops.iter().any(|o| matches!(o, Op::AddComment { .. })) {
+                            lines.extend(self.comment_events(full_len, pub_len));
+                        }
+                        lines
+                    }
+                    Err(e) => vec![err_line(conn, Some(id), e)],
+                }
+            }
             ClientMsg::Query { id, query } => {
                 if !permissions(self.conns[ci].role).read {
                     return vec![err_line(conn, Some(id), forbidden_read())];
@@ -1378,6 +1448,8 @@ impl Session {
         if ops.is_empty() {
             return Err(invalid("a command needs at least one op", "/ops"));
         }
+        // (R5B, §25) Human decisions and the agent write rule, before roles and modes.
+        let mode = self.agent_check(ci, ops, mode)?;
         if ops.len() > 1 {
             if let Some(i) = ops
                 .iter()
@@ -1467,7 +1539,11 @@ impl Session {
         // (R3, §20) A principal that may not see some engine items gets the errors the
         // document it sees would give (no existence oracle): a dry run on it first.
         let public = self.public_view(&principal);
-        if self.runner.is_some() && (public || self.proj_for(&principal).is_some()) {
+        // (R5B, §25.5) With another person's watches in the document, the reader's own
+        // document answers too (no existence oracle through errors or suggestions).
+        let watches = self.doc.intents.iter().any(|i| i.watch.is_some())
+            && self.reader_proj(&principal).is_some();
+        if (self.runner.is_some() && (public || self.proj_for(&principal).is_some())) || watches {
             let lang = self.lang_of(ci);
             let author = author.clone();
             let pr = principal.clone();
@@ -1497,6 +1573,10 @@ impl Session {
                 expand_ops(&s.doc, ops, "/ops", &mut ctx).map(|_| ())
             })?;
         }
+        // (R5B, §25.4) Comments are validated against what the writer may read: after
+        // the role and mode checks and after the dry run in the writer's own document (a
+        // hidden capsule is `not_found` like a missing one).
+        self.check_comments(ci, ops)?;
 
         if direct {
             if self.incremental
@@ -1774,7 +1854,15 @@ impl Session {
             return Ok(lines);
         }
         // An entitled writer.
-        let pub_ops = self.ops_to_pub(ops);
+        let mut pub_ops = self.ops_to_pub(ops);
+        // (R5B, §25.4) A comment enters the public world only if a public reader could
+        // have written it (no licensed number, every cite public).
+        if ops.iter().any(|o| matches!(o, Op::AddComment { .. })) {
+            let ci = self.conn_index(w.conn);
+            if !ci.is_some_and(|ci| self.comment_public_ok(ci, ops)) {
+                pub_ops = None;
+            }
+        }
         let pub_side = match pub_ops.as_deref() {
             Some(o) => self.pub_expand(w, o, None).ok().map(|p| (o.to_vec(), p)),
             None => None,
@@ -2158,7 +2246,7 @@ impl Session {
 
     /// The acceptance of proposal `pid` by `decider` as entry `seq`, expanded and
     /// `base`-checked in the world the fields hold.
-    fn accept_expand(
+    pub(crate) fn accept_expand(
         &self,
         pid: &str,
         note: Option<String>,
@@ -2366,6 +2454,12 @@ impl Session {
         for c in entry.changes.iter().chain(&entry.inverse) {
             if let ChangeOp::PutAudience { principal, .. } = c {
                 self.audience_seen.insert(principal.clone());
+            }
+            // (R5B, §25.5) A watch is personal too: other readers get projections.
+            if let ChangeOp::PutIntent { intent, .. } = c {
+                if let Some(w) = &intent.watch {
+                    self.audience_seen.insert(w.for_.clone());
+                }
             }
         }
         // (R3/K1) The public world takes its own version of the entry (same seq).
@@ -3255,6 +3349,8 @@ impl Session {
             Topic::Stories { instrument, series } => {
                 self.stories_check(instrument, series.as_deref())?;
             }
+            // (R5B, §25.4) Comments: any filter (a capsule or an instrument may come later).
+            Topic::Comments { .. } => {}
         }
         self.conns[ci].subs.push(Sub {
             id: id.to_owned(),

@@ -567,6 +567,7 @@ pub fn slice(doc: &Document, principal: &str, instrument: &str) -> (Document, Ve
         ledger,
         narratives: Vec::new(),
         proposals: Vec::new(),
+        comments: Vec::new(),
         audiences: doc
             .audiences
             .iter()

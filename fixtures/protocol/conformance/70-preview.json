@@ -1,0 +1,435 @@
+{
+  "covers": [
+    "preview",
+    "proposal"
+  ],
+  "description": "R5B (§25.6): the `preview` of a pending proposal — its changes and the scene summary of the views it changes — without changing the document; a decided proposal is `not_pending`.",
+  "final": {
+    "log_len": 2
+  },
+  "init": {
+    "clock": 1760000000000,
+    "document": "fixtures/protocol/docs/thyao.json",
+    "epoch": 0,
+    "principals": [
+      {
+        "author": {
+          "kind": "human",
+          "name": "arkin"
+        },
+        "id": "arkin",
+        "role": "owner"
+      },
+      {
+        "author": {
+          "kind": "agent",
+          "name": "scout"
+        },
+        "id": "scout",
+        "role": "proposer"
+      },
+      {
+        "author": {
+          "kind": "agent",
+          "name": "editor"
+        },
+        "id": "editor",
+        "role": "editor"
+      },
+      {
+        "author": {
+          "kind": "human",
+          "name": "viewer"
+        },
+        "id": "viewer",
+        "role": "viewer"
+      },
+      {
+        "author": {
+          "kind": "engine",
+          "name": "feed",
+          "version": "0"
+        },
+        "id": "feed",
+        "role": "feed"
+      },
+      {
+        "author": {
+          "kind": "engine",
+          "name": "host",
+          "version": "0"
+        },
+        "id": "host",
+        "role": "host"
+      },
+      {
+        "author": {
+          "kind": "agent",
+          "name": "bot"
+        },
+        "id": "bot",
+        "role": "owner"
+      },
+      {
+        "author": {
+          "kind": "agent",
+          "name": "scribe"
+        },
+        "id": "scribe",
+        "on_behalf": "viewer",
+        "role": "proposer"
+      }
+    ],
+    "proposal_ttl_ms": null
+  },
+  "name": "70-preview",
+  "steps": [
+    {
+      "expect": [
+        {
+          "conn": "a",
+          "msg": {
+            "seq": 0,
+            "type": "welcome"
+          }
+        }
+      ],
+      "note": "A person.",
+      "send": {
+        "conn": "a",
+        "msg": {
+          "principal": "arkin",
+          "protocol": "qp/0",
+          "surface": {
+            "kind": "headless"
+          },
+          "type": "hello"
+        }
+      }
+    },
+    {
+      "expect": [
+        {
+          "conn": "s",
+          "msg": {
+            "seq": 0,
+            "type": "welcome"
+          }
+        }
+      ],
+      "note": "An agent.",
+      "send": {
+        "conn": "s",
+        "msg": {
+          "principal": "scout",
+          "protocol": "qp/0",
+          "surface": {
+            "kind": "headless"
+          },
+          "type": "hello"
+        }
+      }
+    },
+    {
+      "expect": [
+        {
+          "conn": "s",
+          "msg": {
+            "created": [
+              "ema9"
+            ],
+            "id": "p1",
+            "proposal": "prop-1",
+            "seq": 1,
+            "status": "proposed",
+            "type": "ack"
+          }
+        }
+      ],
+      "note": "The agent proposes an EMA on the price panel.",
+      "send": {
+        "conn": "s",
+        "msg": {
+          "id": "p1",
+          "ops": [
+            {
+              "id": "ema9",
+              "inputs": [
+                "px"
+              ],
+              "op": "add_study",
+              "params": {
+                "period": 9
+              },
+              "show": {
+                "panel": 0,
+                "view": "main"
+              },
+              "study": "ema"
+            }
+          ],
+          "type": "command"
+        }
+      }
+    },
+    {
+      "expect": [
+        {
+          "conn": "a",
+          "msg": {
+            "data": {
+              "changes": [
+                {
+                  "op": "put_series",
+                  "series": {
+                    "id": "ema9",
+                    "instrument": {
+                      "calendar": "XIST",
+                      "exchange": "BIST",
+                      "symbol": "THYAO"
+                    },
+                    "interval": "1d",
+                    "source": {
+                      "inputs": [
+                        "px"
+                      ],
+                      "kind": "study",
+                      "params": {
+                        "period": 9.0
+                      },
+                      "study": "ema"
+                    }
+                  }
+                },
+                {
+                  "index": 5,
+                  "layer": {
+                    "encoding": {},
+                    "id": "l5",
+                    "mark": "line",
+                    "panel": 0,
+                    "series": "ema9"
+                  },
+                  "op": "insert_layer",
+                  "view": "main"
+                },
+                {
+                  "op": "put_proposal",
+                  "proposal": {
+                    "decided_by": {
+                      "kind": "human",
+                      "name": "arkin"
+                    },
+                    "decided_seq": 2,
+                    "id": "prop-1",
+                    "ops": [
+                      {
+                        "id": "ema9",
+                        "inputs": [
+                          "px"
+                        ],
+                        "op": "add_study",
+                        "params": {
+                          "period": 9.0
+                        },
+                        "show": {
+                          "panel": 0,
+                          "view": "main"
+                        },
+                        "study": "ema"
+                      }
+                    ],
+                    "provenance": {
+                      "at": 1760000000000,
+                      "author": {
+                        "kind": "agent",
+                        "name": "scout"
+                      },
+                      "based_on": []
+                    },
+                    "state": "accepted"
+                  }
+                }
+              ],
+              "kind": "preview",
+              "proposal": "prop-1",
+              "views": [
+                {
+                  "explain": "view main \"THYAO 1G\" (800x400)\nx: slots 0..199 of 200 bar(s), 2025-01-02 .. 2025-10-08, 3.6 px per slot\npanel 0: y0 linear [87.3255, 132.74450000000002], 3 layer(s)\n  l0 candle px \"THYAO 1d\" fields o h l c: 200 item(s); last c=124.69 h=126.61 l=124.47 o=125.26 (bar 199, 2025-10-08)\n  l1 line bb20 \"BOLLINGER(20,2)\" fields upper middle lower: 543 item(s), 57 value(s) not drawn; last lower=121.43120925184256 (bar 199, 2025-10-08)\n  l5 line ema9 \"EMA9\" fields ema: 192 item(s), 8 value(s) not drawn; last ema=124.9224251304499 (bar 199, 2025-10-08)\npanel 1: y1 linear [0, 100], 2 layer(s)\n  l2 line rsi14 \"RSI14\" fields rsi: 186 item(s), 14 value(s) not drawn; last rsi=55.09991178461079 (bar 199, 2025-10-08)\n  l3 rule constant: 1 item(s); last y=70\n    /encoding/y = 70 from rsi.overbought\npanel 2: y2 linear [-1.7766841940346736, 3.1187920484252216], 1 layer(s)\n  l4 line macd \"MACD(12,26,9)\" fields macd signal: 342 item(s), 58 value(s) not drawn; last signal=1.8263620522920787 (bar 199, 2025-10-08)\n",
+                  "new": false,
+                  "view": "main"
+                }
+              ]
+            },
+            "id": "v1",
+            "now": 1760000000000,
+            "seq": 1,
+            "type": "result"
+          }
+        }
+      ],
+      "note": "What accepting it would do: `put_series` + `insert_layer`, view `main` with layer `ema9`.",
+      "send": {
+        "conn": "a",
+        "msg": {
+          "id": "v1",
+          "query": {
+            "height": 400,
+            "kind": "preview",
+            "proposal": "prop-1",
+            "width": 800
+          },
+          "type": "query"
+        }
+      }
+    },
+    {
+      "expect": [
+        {
+          "conn": "a",
+          "msg": {
+            "data": {
+              "entries": [
+                {
+                  "at": 1760000000000,
+                  "author": "scout",
+                  "cause": "p1",
+                  "changes": [
+                    {
+                      "op": "put_proposal",
+                      "proposal": {
+                        "id": "prop-1",
+                        "ops": [
+                          {
+                            "id": "ema9",
+                            "inputs": [
+                              "px"
+                            ],
+                            "op": "add_study",
+                            "params": {
+                              "period": 9.0
+                            },
+                            "show": {
+                              "panel": 0,
+                              "view": "main"
+                            },
+                            "study": "ema"
+                          }
+                        ],
+                        "provenance": {
+                          "at": 1760000000000,
+                          "author": {
+                            "kind": "agent",
+                            "name": "scout"
+                          },
+                          "based_on": []
+                        },
+                        "state": "pending"
+                      }
+                    }
+                  ],
+                  "inverse": [
+                    {
+                      "id": "prop-1",
+                      "op": "delete"
+                    }
+                  ],
+                  "request": [
+                    {
+                      "id": "ema9",
+                      "inputs": [
+                        "px"
+                      ],
+                      "op": "add_study",
+                      "params": {
+                        "period": 9.0
+                      },
+                      "show": {
+                        "panel": 0,
+                        "view": "main"
+                      },
+                      "study": "ema"
+                    }
+                  ],
+                  "seq": 1,
+                  "summary": "propose prop-1: add_study ema(period=9) -> ema9 -> ema9"
+                }
+              ],
+              "kind": "log"
+            },
+            "id": "l1",
+            "now": 1760000000000,
+            "seq": 1,
+            "type": "result"
+          }
+        }
+      ],
+      "note": "Nothing was written but the proposal.",
+      "send": {
+        "conn": "a",
+        "msg": {
+          "id": "l1",
+          "query": {
+            "kind": "log"
+          },
+          "type": "query"
+        }
+      }
+    },
+    {
+      "expect": [
+        {
+          "conn": "a",
+          "msg": {
+            "id": "d1",
+            "seq": 2,
+            "status": "applied",
+            "type": "ack"
+          }
+        }
+      ],
+      "note": "The person rejects it.",
+      "send": {
+        "conn": "a",
+        "msg": {
+          "id": "d1",
+          "ops": [
+            {
+              "op": "reject_proposal",
+              "proposal": "prop-1"
+            }
+          ],
+          "type": "command"
+        }
+      }
+    },
+    {
+      "expect": [
+        {
+          "conn": "s",
+          "msg": {
+            "error": {
+              "code": "not_pending",
+              "message": "proposal `prop-1` is rejected",
+              "path": "/query/proposal"
+            },
+            "id": "v2",
+            "type": "error"
+          }
+        }
+      ],
+      "note": "No longer pending.",
+      "send": {
+        "conn": "s",
+        "msg": {
+          "id": "v2",
+          "query": {
+            "kind": "preview",
+            "proposal": "prop-1"
+          },
+          "type": "query"
+        }
+      }
+    }
+  ]
+}

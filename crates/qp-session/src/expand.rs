@@ -57,7 +57,7 @@ impl<'a> Ctx<'a> {
         })
     }
 
-    fn prov(&self, based_on: Vec<String>) -> Provenance {
+    pub(crate) fn prov(&self, based_on: Vec<String>) -> Provenance {
         Provenance {
             author: self.author.clone(),
             at: self.at,
@@ -67,7 +67,7 @@ impl<'a> Ctx<'a> {
     }
 
     /// Takes the given id (checked) or assigns `<kind>-<seq>-<n>`; records it as created.
-    fn new_id(
+    pub(crate) fn new_id(
         &mut self,
         doc: &Document,
         kind: &str,
@@ -111,6 +111,7 @@ pub(crate) fn coll_name(c: qp_schema::protocol::Collection) -> &'static str {
         C::Capsules => "capsules",
         C::Intents => "intents",
         C::Narratives => "narratives",
+        C::Comments => "comments",
         C::Proposals => "proposals",
     }
 }
@@ -127,6 +128,20 @@ pub(crate) fn valid_id(id: &str) -> bool {
 }
 
 fn check_id(id: &str, path: &str) -> PResult<()> {
+    // (R5B, §25.5) The authority's watch ids are reserved: no given id may take (or
+    // probe) one.
+    if id.starts_with(crate::watch::WATCH_PREFIX) {
+        return Err(E::new(
+            ErrorCode::Invalid,
+            format!(
+                "ids starting with `{}` are reserved",
+                crate::watch::WATCH_PREFIX
+            ),
+        )
+        .at(path)
+        .hint("Choose another id or omit it to have one assigned.")
+        .build());
+    }
     if valid_id(id) {
         Ok(())
     } else {
@@ -859,13 +874,20 @@ pub(crate) fn expand_op(
                             .map(|(_, s)| s.to_owned())
                             .collect()
                     })),
+                    watch: None,
+                    state: None,
+                    matches: 0,
                 },
             }])
         }
         Op::SetIntentActive { intent, active } => {
+            // (R5B, §25.5) Another person's watch reads as a missing intent; suggestions
+            // come from the intents the speaker may see.
+            let visible = |x: &&Intent| crate::watch::intent_visible(x, ctx);
             let i = doc
                 .intents
                 .iter()
+                .filter(visible)
                 .find(|x| &x.id == intent)
                 .ok_or_else(|| {
                     E::new(
@@ -873,14 +895,93 @@ pub(crate) fn expand_op(
                         format!("intent `{intent}` does not exist"),
                     )
                     .at(ptr(p, "intent"))
-                    .dym(intent, doc.intents.iter().map(|x| x.id.as_str()))
+                    .dym(
+                        intent,
+                        doc.intents.iter().filter(visible).map(|x| x.id.as_str()),
+                    )
                     .build()
                 })?;
+            if i.watch.is_some() {
+                return Err(E::new(
+                    ErrorCode::Invalid,
+                    format!("`{intent}` is a watch: it ends with `remove_watch`"),
+                )
+                .at(ptr(p, "intent"))
+                .hint("Send remove_watch with this intent id to end a watch.")
+                .build());
+            }
             let mut ni = i.clone();
             ni.active = *active;
             Ok(vec![ChangeOp::PutIntent {
                 intent: ni,
                 index: None,
+            }])
+        }
+        Op::AddWatch { .. } | Op::RemoveWatch { .. } => crate::watch::expand_watch(doc, op, p, ctx),
+        Op::AddComment {
+            id,
+            about,
+            lang,
+            text,
+            cites,
+            external,
+        } => {
+            let ap = ptr(p, "about");
+            let about = match (&about.capsule, &about.instrument) {
+                (Some(c), None) => {
+                    let cap = doc
+                        .capsules
+                        .iter()
+                        .find(|x| &x.id == c || &x.finding == c)
+                        .ok_or_else(|| {
+                            E::new(ErrorCode::NotFound, format!("no capsule `{c}`"))
+                                .at(ptr(&ap, "capsule"))
+                                .dym(c, doc.capsules.iter().map(|x| x.id.as_str()))
+                                .build()
+                        })?;
+                    qp_schema::protocol::CommentAbout {
+                        capsule: Some(cap.id.clone()),
+                        instrument: None,
+                    }
+                }
+                (None, Some(i)) => {
+                    let known = doc.series.iter().any(|s| s.symbol() == Some(i.as_str()));
+                    if !known {
+                        return Err(E::new(
+                            ErrorCode::NotFound,
+                            format!("no series of instrument `{i}`"),
+                        )
+                        .at(ptr(&ap, "instrument"))
+                        .dym(i, doc.series.iter().filter_map(|s| s.symbol()))
+                        .build());
+                    }
+                    about.clone()
+                }
+                _ => {
+                    return Err(E::new(
+                        ErrorCode::Invalid,
+                        "`about` names exactly one of `capsule` and `instrument`",
+                    )
+                    .at(ap)
+                    .expected(["capsule", "instrument"])
+                    .build())
+                }
+            };
+            // Cites are the validator's (`unknown_id`, the same for a hidden id).
+            let cid = ctx.new_id(doc, "cmt", id.as_ref(), &ptr(p, "id"))?;
+            Ok(vec![ChangeOp::PutComment {
+                index: None,
+                comment: qp_schema::protocol::Comment {
+                    id: cid,
+                    about,
+                    lang: *lang,
+                    text: text.clone(),
+                    cites: cites.clone(),
+                    external: external.clone(),
+                    strictness: ctx.plane.comment_strictness,
+                    provenance: ctx.prov(cites.clone()),
+                    on_behalf: ctx.plane.delegates.get(ctx.speaker).cloned(),
+                },
             }])
         }
         Op::AddNarrative { id, about, steps } => {
@@ -974,7 +1075,40 @@ pub(crate) fn expand_op(
             }
             Ok(out)
         }
-        Op::Remove { id } => expand_remove(doc, id, p),
+        Op::Remove { id } => {
+            // (R5B, §25.5) A watch: another person's reads as missing; one's own ends
+            // with `remove_watch`.
+            if let Some(i) = doc
+                .intents
+                .iter()
+                .find(|i| &i.id == id && i.watch.is_some())
+            {
+                if !crate::watch::intent_visible(i, ctx) {
+                    return Err(
+                        E::new(ErrorCode::NotFound, format!("item `{id}` does not exist"))
+                            .at(ptr(p, "id"))
+                            .dym(id, crate::watch::visible_ids(doc, ctx))
+                            .build(),
+                    );
+                }
+                return Err(E::new(
+                    ErrorCode::Invalid,
+                    format!("`{id}` is a watch: it ends with `remove_watch`"),
+                )
+                .at(ptr(p, "id"))
+                .hint("Send remove_watch with this intent id to end a watch.")
+                .build());
+            }
+            if find_collection(doc, id).is_none() {
+                return Err(
+                    E::new(ErrorCode::NotFound, format!("item `{id}` does not exist"))
+                        .at(ptr(p, "id"))
+                        .dym(id, crate::watch::visible_ids(doc, ctx))
+                        .build(),
+                );
+            }
+            expand_remove(doc, id, p)
+        }
         Op::AppendBars { series, bars } => {
             let s = need_series(doc, series, &ptr(p, "series"))?;
             bound_no_bar_writes(s, &ptr(p, "series"))?;
@@ -1668,7 +1802,7 @@ fn expand_remove(doc: &Document, id: &str, p: &str) -> PResult<Vec<ChangeOp>> {
                 ip,
             ))
         }
-        C::Capsules | C::Intents | C::Narratives => {}
+        C::Capsules | C::Intents | C::Narratives | C::Comments => {}
     }
     if matches!(coll, C::Series | C::Facts | C::Findings) {
         deps.extend(view_deps(doc, id));
@@ -2089,6 +2223,16 @@ pub(crate) fn summarize(op: &Op) -> String {
         Op::AddIntent { .. } => "add_intent".to_owned(),
         Op::SetIntentActive { intent, active } => format!("set_intent_active {intent}={active}"),
         Op::AddNarrative { about, .. } => format!("add_narrative about {about}"),
+        Op::AddWatch { .. } => "add_watch".to_owned(),
+        Op::RemoveWatch { intent } => format!("remove_watch {intent}"),
+        Op::AddComment { about, .. } => format!(
+            "add_comment about {}",
+            about
+                .capsule
+                .as_deref()
+                .or(about.instrument.as_deref())
+                .unwrap_or_default()
+        ),
         Op::ShowFinding { finding, .. } => format!("show_finding {finding}"),
         Op::Remove { id } => format!("remove {id}"),
         Op::AppendBars { series, bars } => format!("append_bars {series} +{}", bars.len()),

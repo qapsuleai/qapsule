@@ -630,6 +630,9 @@ pub struct Limits {
     /// Maximum bars one data binding may ask for (`window.last`) and hold (RP2, §18).
     #[serde(default = "default_max_bind_bars")]
     pub max_bind_bars: u32,
+    /// (R5B, §25.5) Maximum active watches per person (sent with the agent policy).
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub max_watches: Option<u32>,
 }
 
 fn default_max_bind_bars() -> u32 {
@@ -687,6 +690,11 @@ pub struct Principal {
     pub author: Author,
     /// Its role.
     pub role: Role,
+    /// (R5B, §25) For an agent: the person it works for. The agent reads with that
+    /// person's data entitlements (licence, audience), never more; when the agent has an
+    /// entitlement row of its own, the intersection of the two. Absent: nobody.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub on_behalf: Option<String>,
 }
 
 // ---------------------------------------------------------------------------
@@ -769,6 +777,45 @@ pub struct Narrative {
     pub steps: Vec<NarrativeStep>,
     /// Who made it and when.
     pub provenance: crate::types::Provenance,
+}
+
+/// (R5B, §25.4) What a comment is about: exactly one of a capsule (or its finding) and
+/// an instrument symbol.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
+#[serde(deny_unknown_fields)]
+pub struct CommentAbout {
+    /// Capsule id (or its finding's id).
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub capsule: Option<String>,
+    /// Instrument symbol.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub instrument: Option<String>,
+}
+
+/// (R5B, §25.4) A validated comment, as stored in the document.
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
+#[serde(deny_unknown_fields)]
+pub struct Comment {
+    /// Unique id within the document.
+    pub id: String,
+    /// What it is about (a capsule is stored by its capsule id).
+    pub about: CommentAbout,
+    /// Language of the text.
+    pub lang: Language,
+    /// The text.
+    pub text: String,
+    /// Ids it rests on.
+    pub cites: Vec<String>,
+    /// External quotes.
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub external: Vec<crate::comment::ExternalQuote>,
+    /// The strictness it was validated with.
+    pub strictness: crate::comment::Strictness,
+    /// Who wrote it (an agent: `author.kind = "agent"`) and when.
+    pub provenance: crate::types::Provenance,
+    /// (R5B) The person the writing agent works for, if any.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub on_behalf: Option<String>,
 }
 
 /// State of a proposal.
@@ -1308,6 +1355,54 @@ pub enum Op {
         /// The level; `null` = the group's default.
         sensitivity: Option<Sensitivity>,
     },
+    /// (R5B, §25.4) A comment: a short narrative about a capsule or an instrument that
+    /// cites the facts, findings or capsules it rests on. The authority validates it
+    /// deterministically against the evidence the writer may read (citations, numbers,
+    /// advice language, licence) before it enters the document; a rejected draft →
+    /// `comment_rejected` with `reasons`. Applied directly (never a proposal); needs the
+    /// `propose` or `write` permission.
+    AddComment {
+        /// Id; assigned if absent (`cmt-<seq>-<n>`).
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        id: Option<String>,
+        /// What it is about.
+        about: CommentAbout,
+        /// Language of the text.
+        lang: Language,
+        /// The text (plain; `[n]` marks the n-th entry of `cites`).
+        text: String,
+        /// Ids of the facts, findings or capsules it rests on (at least one).
+        cites: Vec<String>,
+        /// External sources quoted (named, with the numbers they give).
+        #[serde(default, skip_serializing_if = "Vec::is_empty")]
+        external: Vec<crate::comment::ExternalQuote>,
+    },
+    /// (R5B, §25.5) Leave a watch: the engine matches story transitions against it and
+    /// sends `intent_matched` on the `intents` topic. For the speaker (an agent: the
+    /// person it works for) unless `for` names another person (an owner only). At most
+    /// `limits.max_watches` (32) active watches per person. The authority assigns the id
+    /// (`watch-<seq>-<n>`; ids starting with `watch-` are reserved).
+    AddWatch {
+        /// The person it is for; default: the speaker's person.
+        #[serde(default, rename = "for", skip_serializing_if = "Option::is_none")]
+        for_: Option<String>,
+        /// The request in words.
+        text: String,
+        /// What matches.
+        #[serde(rename = "match")]
+        match_: crate::types::WatchMatch,
+        /// Expiry time (epoch ms).
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        expires_t: Option<TimestampMs>,
+        /// Matches after which it ends.
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        max_matches: Option<u32>,
+    },
+    /// (R5B, §25.5) Remove a watch (state `removed`).
+    RemoveWatch {
+        /// Intent id of the watch.
+        intent: String,
+    },
 }
 
 // ---------------------------------------------------------------------------
@@ -1508,6 +1603,14 @@ pub enum ChangeOp {
         /// The preferences; `null` removes them.
         audience: Option<Audience>,
     },
+    /// (R5B, §25.4) Insert or replace a comment.
+    PutComment {
+        /// The comment.
+        comment: Comment,
+        /// Position in its collection when inserting a new item (default: the end).
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        index: Option<u32>,
+    },
 }
 
 /// One entry of the operation log.
@@ -1571,6 +1674,8 @@ pub enum Collection {
     Intents,
     /// Narratives.
     Narratives,
+    /// (R5B) Comments.
+    Comments,
     /// Proposals.
     Proposals,
 }
@@ -1855,6 +1960,33 @@ pub enum Query {
         #[serde(default, skip_serializing_if = "Option::is_none")]
         after: Option<String>,
     },
+    /// (R5B, §25.6) What a pending proposal would do, without doing it: its operations
+    /// expanded on a copy of the document as the asker reads it, the changes, and a scene
+    /// summary of every view it would add or change (the document does not change).
+    Preview {
+        /// Proposal id.
+        /// Also takes a selector (§17).
+        #[schemars(with = "ProposalRef")]
+        proposal: String,
+        /// Scene width in pixels (default 1200).
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        width: Option<u32>,
+        /// Scene height in pixels (default 600).
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        height: Option<u32>,
+    },
+}
+
+/// (R5B, §25.6) One view a previewed proposal adds or changes.
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
+#[serde(deny_unknown_fields)]
+pub struct PreviewView {
+    /// View id.
+    pub view: String,
+    /// Whether the view is new.
+    pub new: bool,
+    /// The scene summary (`explain` text: panels, layers, marks, ranges).
+    pub explain: String,
 }
 
 /// Both sentences of a capsule for one reader (R3, §20).
@@ -2012,6 +2144,9 @@ pub struct CapsuleDetail {
     /// comments the `capsules` query gives). Absent otherwise.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub withheld: Option<Withheld>,
+    /// (R5B, §25.4) Validated comments about this capsule the reader may receive.
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub comments: Vec<Comment>,
 }
 
 /// (R4/S1, §20.2) What a capsule selector may also have matched that the reader cannot
@@ -2577,6 +2712,15 @@ pub enum QueryResult {
         /// The changes.
         viewer: Box<ViewerUpdate>,
     },
+    /// (R5B, §25.6) Answer to `preview`.
+    Preview {
+        /// Proposal id.
+        proposal: String,
+        /// The changes accepting it now would write.
+        changes: Vec<ChangeOp>,
+        /// The views it adds or changes, with their scene summary.
+        views: Vec<PreviewView>,
+    },
     /// (R5/M18, §23) Answer to `stories`.
     Stories {
         /// Instrument symbol.
@@ -2713,6 +2857,16 @@ pub enum Topic {
         /// Its bar series (needed only when the instrument has more than one).
         #[serde(default, skip_serializing_if = "Option::is_none")]
         series: Option<String>,
+    },
+    /// (R5B, §25.4) New comments the subscriber may receive (optionally about one
+    /// capsule or one instrument): a `comment` event each.
+    Comments {
+        /// Only comments about this capsule (or finding) id.
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        capsule: Option<String>,
+        /// Only comments about this instrument (or a capsule of it).
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        instrument: Option<String>,
     },
 }
 
@@ -2866,6 +3020,29 @@ pub enum Event {
         /// The row as the subscriber may receive it now.
         story: Box<StoryRow>,
         /// Log position it reflects.
+        seq: Seq,
+    },
+    /// (R5B, §25.5) A watch matched a story transition (topic `intents`), as the
+    /// subscriber may receive it.
+    IntentMatched {
+        /// Intent id.
+        intent: String,
+        /// The capsule whose story moved.
+        capsule: String,
+        /// The stage it moved to.
+        stage: crate::capsule::Stage,
+        /// Bar of the transition.
+        bar: u64,
+        /// Time of the transition.
+        t: TimestampMs,
+        /// Log position of the engine entry.
+        seq: Seq,
+    },
+    /// (R5B, §25.4) A validated comment (topic `comments`).
+    Comment {
+        /// The comment.
+        comment: Box<Comment>,
+        /// Log position of the entry that stored it (the subscriber's world).
         seq: Seq,
     },
 }
@@ -3427,6 +3604,8 @@ pub enum ErrorCode {
     /// (RP2, §18) A bound series has no data: the source does not know the binding, its
     /// window is empty, or resolution is still pending.
     NoData,
+    /// (R5B, §25.4) The comment validator rejected a comment draft; `reasons` says why.
+    CommentRejected,
 }
 
 /// One option offered by an error (R2): an id (or an origin, as JSON) and what it is.
@@ -3465,6 +3644,13 @@ pub struct ProtocolError {
     /// For `no_origin` and `ambiguous` (R2): the options, best first.
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
     pub candidates: Vec<Candidate>,
+    /// (R5B, §25) A machine-readable sub-reason of the code, e.g. `human_only` or
+    /// `agent_cannot_write` for `forbidden`. Absent on every error before R5B.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub reason: Option<String>,
+    /// (R5B, §25.4) For `comment_rejected`: every reason, machine-readable.
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub reasons: Vec<crate::comment::Reason>,
 }
 
 // ---------------------------------------------------------------------------
@@ -3715,6 +3901,16 @@ pub struct SessionInit {
     /// no rule (no story is marked; the protocol's default).
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub feed_rule: Option<FeedRuleInit>,
+    /// (R5B, §25.3) The agent policy: `"r5b"` applies the agent write rule (no facts,
+    /// findings, bar data, undo, capsule, ledger or story changes) to every command of an
+    /// agent principal, on any connection. Absent: the rule holds only on connections the
+    /// host marked as agent connections. An unknown name is refused at session start.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub agent_policy: Option<String>,
+    /// (R5B, §25.4) The comment validator's strictness (`cites`, `cites_numbers`,
+    /// `per_sentence`). Absent: `cites_numbers`.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub comment_strictness: Option<crate::comment::Strictness>,
 }
 
 /// (R5/M19, K53, K42) The host's feed rule (host configuration, not a protocol message).

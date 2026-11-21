@@ -37,7 +37,7 @@ fn pump(core: &mut ShellCore, host: &mut ReplayHost) {
 
 /// One replay step: its data events as one data frame, then what the authority sent.
 fn step(core: &mut ShellCore, host: &mut ReplayHost) {
-    let from = host.recorded_events().len();
+    let from = host.recorded_len();
     let Some((_, lines)) = host.take_step() else {
         return;
     };
@@ -57,7 +57,7 @@ fn page(host: &mut ReplayHost, choice: &Value) -> ShellCore {
         let _ = host.take_step();
     }
     let data = host.init().data.clone().expect("data");
-    let evs = host.recorded_events().to_vec();
+    let evs = host.recorded_events();
     let mut core = ShellCore::new("arkin", "tr", &data, &evs).expect("core");
     core.set_look(choice);
     pump(&mut core, host);

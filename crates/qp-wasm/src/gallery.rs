@@ -769,7 +769,7 @@ mod build_impl {
             self.next += 1;
             let conn = format!("g{}", self.next);
             let data = self.host.init().data.clone().unwrap_or_default();
-            let evs = self.host.recorded_events().to_vec();
+            let evs = self.host.recorded_events();
             let mut core = ShellCore::new(PRINCIPAL, &self.lang, &data, &evs).expect("core");
             core.set_replay(self.host.state());
             core.set_dpr(IMAGE_SCALE);

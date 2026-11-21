@@ -1145,6 +1145,29 @@ impl Session {
         )
     }
 
+    /// (RP4/T6) The `capsules` item memo's lookups so far: (reused, written).
+    #[must_use]
+    pub fn item_memo_counts(&self) -> (u64, u64) {
+        let m = self.item_memo.borrow();
+        (m.hits, m.misses)
+    }
+
+    /// (RP4/T6) Forgets every memoized `capsules` item (the next answers are written from
+    /// scratch): the "from scratch" side of the incremental = from scratch tests.
+    pub fn forget_item_memo(&self) {
+        self.item_memo.borrow_mut().clear();
+    }
+
+    /// (RP4/T6) The bar series "now" is read on for a story on `series` (as
+    /// [`Session::now_bar`] chooses it: the reading document's when it has bars, else
+    /// `doc`'s).
+    fn item_series<'d>(&'d self, doc: &'d Document, series: &str) -> Option<&'d qp_schema::Series> {
+        let has = |s: &&qp_schema::Series| s.bars().is_some_and(|b| !b.is_empty());
+        bar_series(rd!(self), series)
+            .filter(has)
+            .or_else(|| bar_series(doc, series).filter(has))
+    }
+
     /// [`Session::now_bar`] with the bar series it read.
     fn now_series<'d>(
         doc: &'d Document,
@@ -1720,6 +1743,8 @@ impl Session {
             }
         }
         let mut coin_flip_hidden = 0u32;
+        let mut series_at: std::collections::HashMap<&str, Option<&qp_schema::Series>> =
+            std::collections::HashMap::new();
         for c in &doc.capsules {
             if *latest && newest.is_none_or(|n| n.2 != c.id) {
                 continue;
@@ -1733,15 +1758,60 @@ impl Session {
                 }
                 continue;
             }
-            if let Some(mut it) = self.capsule_item_with(doc, c, p, lang, &principal, &mut memo) {
+            let compute = |memo: &mut StudyMemo| {
+                let mut it = self.capsule_item_with(doc, c, p, lang, &principal, memo)?;
                 // (R5/m17-int) The connection's voice speaks every listed capsule.
                 if let Some(v) = voice.as_deref() {
-                    it.voice = self.reader_voice(doc, c, p, lang, v, clock, &mut memo);
+                    it.voice = self.reader_voice(doc, c, p, lang, v, clock, memo);
                 }
+                Some(it)
+            };
+            // (RP4/T6) An entitled reader's item is written again only when its input
+            // changed (`ItemMemo`); the reader's own fields are applied every time.
+            let base = if p.is_none() {
+                let series = series_at
+                    .entry(story.series.as_str())
+                    .or_insert_with(|| self.item_series(doc, &story.series));
+                let fact_ids = story_fact_ids(story);
+                let facts: Vec<Option<&Fact>> =
+                    fact_ids.iter().map(|i| self.fact_by_id(i)).collect();
+                let key = crate::capidx::ItemKeyRef {
+                    capsule: c,
+                    facts: &facts,
+                    series: *series,
+                    lang,
+                    voice: voice.as_deref(),
+                    clock,
+                    cal: self.headline_cal.as_ref(),
+                    tz: doc.display_tz.as_deref(),
+                };
+                let got = self.item_memo.borrow_mut().get(&key);
+                match got {
+                    Some(v) => v.map(|mut it| {
+                        it.relevant = self.relevant(doc, &principal, &story.instrument);
+                        it.coin_flip = self.coin_flip_of(&principal, story);
+                        it
+                    }),
+                    None => {
+                        let v = compute(&mut memo);
+                        self.item_memo.borrow_mut().put(&key, v.clone());
+                        v
+                    }
+                }
+            } else {
+                compute(&mut memo)
+            };
+            if let Some(mut it) = base {
                 // (R6/T3, §24) The market note, when the host gave a market status.
                 self.market_item(&mut it, lang, &principal);
                 items.push(it);
             }
+        }
+        if p.is_none() {
+            self.item_memo.borrow_mut().prune(
+                doc.capsules.iter().map(|c| c.id.as_str()),
+                doc.capsules.len(),
+            );
         }
         items.sort_by(|a, b| {
             b.importance

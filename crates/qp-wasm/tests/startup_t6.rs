@@ -9,7 +9,7 @@ use serde_json::json;
 /// Opens a page on `host` the way `qp demo` does; `frame` writes each message frame.
 fn open(host: &mut ReplayHost, frame: impl Fn(&serde_json::Value) -> String) -> serde_json::Value {
     let data = host.init().data.clone().expect("data");
-    let evs = host.recorded_events().to_vec();
+    let evs = host.recorded_events();
     let mut core = ShellCore::new("arkin", "tr", &data, &evs).expect("core");
     for _ in 0..100 {
         let out = core.take_outbox();

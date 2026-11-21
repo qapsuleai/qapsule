@@ -145,6 +145,10 @@ pub struct DemoArgs {
     /// (RP4/T4) Last simulated day (default: `--start`).
     #[arg(long, requires = "sim")]
     pub end: Option<String>,
+    /// (RP4/T6) Simulated start time on the first day (`HH:MM`; default: midnight). That
+    /// day's earlier trades are history.
+    #[arg(long, requires = "sim", value_name = "HH:MM")]
+    pub sim_at: Option<String>,
     /// (RP4/T4) Simulation pace: `N` (N× real time in sessions) or `max`.
     #[arg(long, default_value = "60")]
     pub sim_speed: String,
@@ -411,7 +415,8 @@ fn sim_setup(a: &DemoArgs, tx: &Sender<Cmd>) -> Result<(ReplayHost, SimParts), S
         &a.feed_rule,
         "r3",
         (&a.sim_trades, &a.sim_rest, &a.root),
-    )?;
+    )?
+    .with_at(a.sim_at.as_deref())?;
     println!(
         "benzetim / simulation: {} symbols, {}{}, {} (caches under fixtures/local)…",
         spec.symbols.len(),
@@ -608,7 +613,7 @@ impl Hub {
         let st = self.host.state();
         if st.epoch != self.epoch {
             self.epoch = st.epoch;
-            self.sent_events = self.host.recorded_events().len();
+            self.sent_events = self.host.recorded_len();
             let frames: Vec<(Sender<String>, String)> = self
                 .clients
                 .iter()
@@ -627,9 +632,9 @@ impl Hub {
             }
             return;
         }
-        let evs = self.host.recorded_events();
-        if evs.len() > self.sent_events {
-            let new = &evs[self.sent_events..];
+        let total = self.host.recorded_len();
+        if total > self.sent_events {
+            let new = &self.host.recorded_since(self.sent_events);
             let frame = json!({"data": new, "replay": st}).to_string();
             for c in self.clients.values() {
                 if c.viewer {
@@ -640,7 +645,7 @@ impl Hub {
                     let _ = c.tx.send(frame.clone());
                 }
             }
-            self.sent_events = evs.len();
+            self.sent_events = total;
         }
         self.bind();
     }
@@ -1283,7 +1288,7 @@ private proxy, e.g. Tailscale, to 127.0.0.1 — see docs/matriks/LIVE.md)"
             "veri: benzetim / data: simulation ({} symbols, {}, {} trades, {})",
             p.symbols,
             a.interval,
-            p.input.trades.len(),
+            p.input.trade_count(),
             p.speed.label()
         );
         println!("denetim / control: GET /live/stats (header X-Qp-Live-Control)");
@@ -1328,7 +1333,7 @@ private proxy, e.g. Tailscale, to 127.0.0.1 — see docs/matriks/LIVE.md)"
     });
     let mut hub = Hub {
         epoch: host.state().epoch,
-        sent_events: host.recorded_events().len(),
+        sent_events: host.recorded_len(),
         host,
         clients: BTreeMap::new(),
         next: 0,

@@ -40,7 +40,7 @@ fn host_at(n: usize) -> ReplayHost {
 /// The next `n` steps of `h` as one data frame (as `qp demo` broadcasts them), with
 /// `extra` events appended.
 fn data_frame(h: &mut ReplayHost, n: usize, extra: &[Value]) -> String {
-    let from = h.recorded_events().len();
+    let from = h.recorded_len();
     for _ in 0..n {
         let _ = h.take_step();
     }

@@ -181,6 +181,8 @@ LiveIn::Trade ──► LiveRuntime (benzetim saati; LiveIn::Clock) ──► Li
 |---|---|
 | Aynı yol | `qp demo --live` ile aynı türler: `livehost::host_from_history` (barındırıcı), `LiveRuntime`, `MatriksFeed::with_trades`, `LiveIn::Trade`. Test: `sim::tests::simulation_path_is_the_live_path` aynı işlemleri sahte sunucunun işlem ucundan gerçek bir `LiveConnection` + `HubSink::for_trades` ile duvar saatindeki çalışma zamanına verir ve benzetimle **bayt eşit** veri olayları bekler (VERIFY 8). |
 | İlk çözüm (ısınma) | Başlangıçtan (ilk günün yerel gece yarısı) önce tamamlanmış son `--history` bar: sembol başına önbellekteki REST barlarından (`fixtures/local/live/rest/<SYM>.<period>.*.unadj.json`, canlı REST kaynağıyla aynı `normalize_rest`) ya da — önbellekte orada daha az bar varsa — önceki günlerin önbellekteki işlemlerinden aynı bar kurucuyla (`BarMethod::Trades`). Hangisinin alındığı sayılır (`history_from_rest`, `history_from_trades`). Geçmişi olmayan sembol dışarıda kalır. |
+| Başlangıç saati (RP4/T6) | `--at HH:MM` (`qp sim`) / `--sim-at HH:MM` (`qp demo --sim`): benzetim ilk günün o saatinde başlar; o günün daha önceki işlemleri ısınmaya girer (aynı bar kurucuyla). Ör. `--at 11:00` ile önceki günü önbellekte olmayan semboller 10:00–11:00 barlarıyla (5 dk'da 12 bar) başlar. Varsayılan gece yarısı (önceki davranış, bayt eşit). |
+| Bellek (RP4/T6) | Günün işlemleri sembol başına bir kez ve sıkışık tutulur (`sim::Packed`, işlem başına 40 bayt; gönderim sırası okunurken birleştirilir); gösterim barındırıcısının kaydettiği veri olayları da sıkışık (`ReplayHost` içinde, olay başına ≈ 70 bayt). Ölçüm: `rounds/RP4/experiments/T6.md`. |
 | İşlem bağlantısı | Başlangıçta işlem ucu "açılır"; başlangıçtan itibaren boşluk önbellekten (`CacheHistory`, canlıda REST) doldurulur, sonra işlemler canlı gibi gelir. |
 | Saat | Borsa zamanı. Çalışma zamanının "şimdi"si benzetim saatidir (`LiveRuntime::use_sim_clock`); benzetim onu her işlemin zamanına ve XIST takviminin her bar kapanışına, seans açılış ve kapanışına ve gün sonuna götürür (`sim::schedule`): işlemsiz sembolün barı da kapanır, günler sırayla geçer (kapanış → piyasa kapalı → hafta sonu/tatil atlanır → ertesi işlem günü açılış). |
 | Seans evresi | Fiyat kartı olmadığı için sembol başına `stockStatus` yok. Piyasa durumu (açık / kapalı / tatil) XIST takviminden gelir (`MarketSource::Calendar`), canlıda kart sessizken olduğu gibi; sembol evreleri boştur (`phases` 0). Açılış ve kapanış emir toplama işlemleri bar kuralıyla (K14) ilk ve son bara girer. |
@@ -211,5 +213,10 @@ cmp fixtures/local/sim/a.jsonl fixtures/local/sim/b.jsonl && echo bayt-eşit
 ```
 
 Durdurmak: Ctrl-C. Ölçüm (100 sembol, bir gün, `max`): `rounds/RP4/experiments/T4.md`.
+Ölçek (580 sembol, 1×, 11:00'den, bir görüntüleyici): `rounds/RP4/experiments/T6.md`:
+
+```sh
+scripts/demo.sh --sim --symbols @fixtures/local/live/utum.txt --start 2026-11-20 --sim-at 11:00 --speed 1
+```
 Not: önbellek inerken iki koşunun özeti farklı çıkar (girdi değişti); karşılaştırmayı inişi biten
 günlerde yapın.

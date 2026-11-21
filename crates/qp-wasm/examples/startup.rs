@@ -80,7 +80,7 @@ fn main() {
     let t = Instant::now();
     let mut data = data;
     data.entitlements.retain(|p, _| p == &principal);
-    let mut core = ShellCore::new(&principal, "tr", &data, host.recorded_events()).expect("core");
+    let mut core = ShellCore::new(&principal, "tr", &data, &host.recorded_events()).expect("core");
     println!("core new: {:.1} ms", ms(t));
     let (mut host_ms, mut core_ms, mut bytes) = (0.0, 0.0, 0usize);
     for round in 0..50 {

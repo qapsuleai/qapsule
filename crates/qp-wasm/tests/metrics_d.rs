@@ -8,7 +8,7 @@ use qp_wasm::shell::ShellCore;
 fn core() -> ShellCore {
     let host = parity_host();
     let data = host.init().data.clone().expect("data");
-    let evs = host.recorded_events().to_vec();
+    let evs = host.recorded_events();
     ShellCore::new("arkin", "tr", &data, &evs).expect("core")
 }
 

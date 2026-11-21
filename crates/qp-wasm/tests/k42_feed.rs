@@ -133,7 +133,7 @@ fn shell_feed_rows_show_it_in_every_layout() {
     let mut w = parity_host();
     w.set_record_events(true);
     let data = w.init().data.clone().expect("replay init has data");
-    let evs = w.recorded_events().to_vec();
+    let evs = w.recorded_events();
     let mut core = ShellCore::new("arkin", "tr", &data, &evs).expect("core");
     let pump = |core: &mut ShellCore, w: &mut ReplayHost| {
         for _ in 0..1000 {
@@ -151,10 +151,10 @@ fn shell_feed_rows_show_it_in_every_layout() {
         }
     };
     let seek = |core: &mut ShellCore, w: &mut ReplayHost, step: u64| {
-        let before = w.recorded_events().len();
+        let before = w.recorded_len();
         core.seek(&step.to_string());
         pump(core, w);
-        let evs: Vec<_> = w.recorded_events()[before..].to_vec();
+        let evs: Vec<_> = w.recorded_since(before);
         for ev in &evs {
             core.data_event(ev);
         }

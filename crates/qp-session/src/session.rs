@@ -178,6 +178,8 @@ pub struct Session {
     pub(crate) cap_ix: std::cell::RefCell<crate::capidx::IdIndex>,
     /// (R3/perf) Capsule sentences by exact realizer input.
     pub(crate) sentences: std::cell::RefCell<crate::capidx::SentenceMemo>,
+    /// (RP4/T6) `capsules` items by exact input (entitled readers).
+    pub(crate) item_memo: std::cell::RefCell<crate::capidx::ItemMemo>,
     /// (R3/perf) Readers' projections, kept per capsule.
     pub(crate) projs:
         std::cell::RefCell<std::collections::HashMap<String, crate::capidx::ReaderProj>>,
@@ -540,6 +542,7 @@ impl Session {
             fact_ix: std::cell::RefCell::default(),
             cap_ix: std::cell::RefCell::default(),
             sentences: std::cell::RefCell::default(),
+            item_memo: std::cell::RefCell::default(),
             projs: std::cell::RefCell::default(),
             head_state: crate::capidx::HeadState::default(),
             views: Vec::new(),

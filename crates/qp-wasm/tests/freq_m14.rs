@@ -48,7 +48,7 @@ fn page(n: usize) -> (ShellCore, ReplayHost) {
 
 /// The next step of `h` as one data frame.
 fn data_frame(h: &mut ReplayHost) -> String {
-    let from = h.recorded_events().len();
+    let from = h.recorded_len();
     let _ = h.take_step();
     let evs: Vec<Value> = h.recorded_events()[from..]
         .iter()

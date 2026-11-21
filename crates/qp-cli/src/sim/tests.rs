@@ -260,8 +260,8 @@ fn simulation_path_is_the_live_path() {
         let _ = srt.on_in(&mut sh, i);
         true
     });
-    let sim_events = serde_json::to_string(sh.recorded_events()).expect("json");
-    assert!(sh.recorded_events().len() > 500);
+    let sim_events = serde_json::to_string(&sh.recorded_events()).expect("json");
+    assert!(sh.recorded_len() > 500);
 
     // Live: the mock broker's trade endpoint, a real connection, the hub sink.
     let tokens = MockTokenService::start_default(3600);
@@ -339,21 +339,81 @@ fn simulation_path_is_the_live_path() {
     assert!(broker.wait_until(Duration::from_secs(5), |st| {
         st.subscribe_packets.iter().map(Vec::len).sum::<usize>() >= SYMS.len()
     }));
-    for t in &input.trades {
+    for t in input.trades() {
         let topic = format!("mx/trade/{}", t.symbol);
-        broker.publish(&topic, &wire(t, &decode));
+        broker.publish(&topic, &wire(&t, &decode));
     }
-    let want = sh.recorded_events().len();
+    let want = sh.recorded_len();
     assert!(
         pump(&mut lrt, &mut lh, &|r| r.messages
-            >= input.trades.len() as u64),
+            >= input.trade_count() as u64),
         "every trade arrived"
     );
     let _ = conn.close();
-    let live_events = serde_json::to_string(lh.recorded_events()).expect("json");
-    assert_eq!(lh.recorded_events().len(), want);
+    let live_events = serde_json::to_string(&lh.recorded_events()).expect("json");
+    assert_eq!(lh.recorded_len(), want);
     assert!(
         live_events == sim_events,
         "simulation and live give byte-equal data events"
     );
+}
+
+/// (RP4/T6) A packed symbol gives back the very trades packed: plain and odd trade
+/// numbers (leading zero, letters, absent), every side, quantity absent, special trades.
+#[test]
+fn packed_trades_are_the_trades_packed() {
+    let t =
+        |ns: i64, no: Option<&str>, side: Option<qp_matriks::Aggressor>, q: Option<i64>| Trade {
+            symbol: "TEST1".to_owned(),
+            price: 12.34 + f64::from(u32::try_from(ns % 7).expect("small")) * 0.01,
+            quantity: q,
+            side,
+            timestamp_ns: ns,
+            order_no: no.map(str::to_owned),
+            is_trade_ex: ns % 3 == 0,
+        };
+    use qp_matriks::Aggressor::{Ask, Bid, Other};
+    let trades = vec![
+        t(1, Some("0"), None, Some(5)),
+        t(2, Some("1606"), Some(Bid), Some(0)),
+        t(3, Some("0012"), Some(Ask), None),
+        t(4, Some("A-7"), Some(Other("97".to_owned())), Some(-3)),
+        t(5, None, Some(Other(String::new())), Some(i64::MAX)),
+        t(6, Some("18446744073709551615"), None, Some(1)),
+        t(7, Some(" 42"), Some(Bid), Some(2)),
+        t(8, Some("9999999999999999999"), Some(Ask), Some(3)),
+    ];
+    let p = Packed::new("TEST1", &trades);
+    let back: Vec<Trade> = (0..trades.len()).map(|i| p.get(i)).collect();
+    assert_eq!(back, trades);
+}
+
+/// (RP4/T6) `--at HH:MM`: the day's earlier trades are history; the run starts then. At
+/// midnight it is the run without `--at`, byte for byte.
+#[test]
+fn start_time_takes_the_days_earlier_trades_as_history() {
+    let tmp = tempfile::tempdir().expect("tmp");
+    let root = tmp.path();
+    write_cache(root, &["2026-11-16", "2026-11-17"]);
+    let fake = FakePace::default();
+    let base = spec(root, "2026-11-17", "2026-11-17");
+    let a = run(&base, Speed::Max, None, &fake).expect("run");
+    let midnight = spec(root, "2026-11-17", "2026-11-17")
+        .with_at(Some("00:00"))
+        .expect("at");
+    let b = run(&midnight, Speed::Max, None, &fake).expect("run 00:00");
+    assert_eq!(a.digest, b.digest, "--at 00:00 is the default");
+    let noon = spec(root, "2026-11-17", "2026-11-17")
+        .with_at(Some("12:00"))
+        .expect("at");
+    let c = run(&noon, Speed::Max, None, &fake).expect("run 12:00");
+    let n = |r: &RunSummary, k: &str| r.json[k].as_u64().expect(k);
+    assert!(n(&c, "trade_records") < n(&a, "trade_records"));
+    assert_eq!(n(&c, "symbols_with_history"), 2);
+    assert_eq!(c.json["events_rejected"], 0);
+    for bad in ["12", "24:00", "11:60", "a:b"] {
+        assert!(spec(root, "2026-11-17", "2026-11-17")
+            .with_at(Some(bad))
+            .is_err());
+    }
 }

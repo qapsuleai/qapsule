@@ -29,10 +29,10 @@ fn pump(core: &mut ShellCore, host: &mut ReplayHost) {
 }
 
 fn seek(core: &mut ShellCore, host: &mut ReplayHost, n: u64) {
-    let before = host.recorded_events().len();
+    let before = host.recorded_len();
     core.seek(&n.to_string());
     pump(core, host);
-    let evs: Vec<_> = host.recorded_events()[before..].to_vec();
+    let evs: Vec<_> = host.recorded_since(before);
     for ev in &evs {
         core.data_event(ev);
     }
@@ -55,7 +55,7 @@ fn profile() {
     let mut host = parity_host();
     host.set_record_events(true);
     let data = host.init().data.clone().expect("data");
-    let evs = host.recorded_events().to_vec();
+    let evs = host.recorded_events();
     let mut core = ShellCore::new("arkin", "tr", &data, &evs).expect("core");
     core.set_dpr(3.0);
     pump(&mut core, &mut host);

@@ -34,7 +34,7 @@ fn provider(host: &ReplayHost, principal: &str) -> qp_source::MemoryProvider {
     let mut p =
         qp_source::MemoryProvider::from_init(&data, std::path::Path::new(".")).expect("provider");
     let _ = principal;
-    for ev in host.recorded_events() {
+    for ev in &host.recorded_events() {
         let _ = p.apply(ev);
     }
     p
@@ -290,12 +290,12 @@ pub fn shell_less(host: &mut ReplayHost, principal: &str, lang: &str, script: &[
         let cur = a.opening.as_ref().map_or(OpenDepth::Chart, |o| o.to);
         let (sw, sh) = scene_frame(&a.look, cur, (sw, sh));
         if let Some(n) = step.get("seek_step").and_then(Value::as_u64) {
-            let before = host.recorded_events().len();
+            let before = host.recorded_len();
             a.n += 1;
             let m = json!({"type":"replay","id":format!("r{}", a.n),"control":{"kind":"seek","step":n}});
             let lines = host.handle_raw(CONN, &m.to_string());
             a.deliver(host, lines);
-            let evs: Vec<_> = host.recorded_events()[before..].to_vec();
+            let evs: Vec<_> = host.recorded_since(before);
             for ev in &evs {
                 let _ = a.replica.data_event(ev);
             }
@@ -407,16 +407,16 @@ fn feed_core(core: &mut ShellCore, host: &mut ReplayHost, lines: Vec<OutboundLin
 pub fn with_core(host: &mut ReplayHost, principal: &str, lang: &str, script: &[Value]) -> Value {
     host.set_record_events(true);
     let data = host.init().data.clone().expect("replay init has data");
-    let evs = host.recorded_events().to_vec();
+    let evs = host.recorded_events();
     let mut core = ShellCore::new(principal, lang, &data, &evs).expect("core");
     feed_core(&mut core, host, Vec::new());
     let mut out = BTreeMap::new();
     for step in script {
         if let Some(n) = step.get("seek_step").and_then(Value::as_u64) {
-            let before = host.recorded_events().len();
+            let before = host.recorded_len();
             core.seek(&n.to_string());
             feed_core(&mut core, host, Vec::new());
-            let evs: Vec<_> = host.recorded_events()[before..].to_vec();
+            let evs: Vec<_> = host.recorded_since(before);
             for ev in &evs {
                 core.data_event(ev);
             }
@@ -506,8 +506,7 @@ pub fn viewer_frames(
     before: usize,
 ) -> Vec<String> {
     let mut out = Vec::new();
-    let all = host.recorded_events();
-    let evs = &all[before.min(all.len())..];
+    let evs = &host.recorded_since(before);
     if !evs.is_empty() {
         let mine: Vec<&qp_schema::data::DataEvent> =
             evs.iter().filter(|e| served.contains(&e.feed)).collect();
@@ -608,7 +607,7 @@ impl ViewerAgent {
     }
 
     fn send(&mut self, host: &mut ReplayHost, m: &Value) {
-        let before = host.recorded_events().len();
+        let before = host.recorded_len();
         let lines = host.handle_raw(CONN, &m.to_string());
         self.deliver(host, lines, before);
     }
@@ -942,7 +941,7 @@ pub fn pump_viewer(
             break;
         }
         for m in out {
-            let before = host.recorded_events().len();
+            let before = host.recorded_len();
             let lines = host.handle_raw(CONN, &m.to_string());
             for fr in viewer_frames(host, CONN, served, before) {
                 let _ = core.on_frame(&fr);

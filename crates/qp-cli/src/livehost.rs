@@ -450,6 +450,11 @@ pub enum LiveIn {
     /// (RP4/T4) Answered once every input before it was handled (back-pressure for a
     /// producer that runs ahead, e.g. the simulation at `--speed max`).
     Sync(Sender<()>),
+    /// (RP4/T6) The paced simulation's wall clock (UTC µs) when it sent the inputs that
+    /// follow (the trades' "arrival"): tick-to-frame on the simulated clock is measured
+    /// from it, as live measures from the connection thread's arrival time. Changes no
+    /// output.
+    Arrival(i64),
 }
 
 /// Link state of the live side.
@@ -529,6 +534,9 @@ pub struct LiveRuntime {
     last_print: Instant,
     /// (RP4/T4) The simulated clock (UTC µs), when used ([`LiveRuntime::use_sim_clock`]).
     sim_now_us: Option<i64>,
+    /// (RP4/T6) The paced simulation's wall-clock arrival of the current inputs
+    /// ([`LiveIn::Arrival`]).
+    sim_arrival_us: Option<i64>,
     /// (RP4) Where trade gaps are filled from when the trade connection opens.
     trade_history: Option<Arc<dyn TradeHistory + Send + Sync>>,
     /// (RP4) Trade gap repairs: (filled, failed requests).
@@ -636,6 +644,7 @@ impl LiveRuntime {
             last_advance_us: now_us(),
             last_print: Instant::now(),
             sim_now_us: None,
+            sim_arrival_us: None,
             trade_history: None,
             trade_repairs: (0, 0),
             delayed: delay_ms > 0,
@@ -752,6 +761,10 @@ impl LiveRuntime {
             },
             LiveIn::Sync(done) => {
                 let _ = done.send(());
+                Vec::new()
+            }
+            LiveIn::Arrival(t_us) => {
+                self.sim_arrival_us = Some(t_us);
                 Vec::new()
             }
             LiveIn::Repaired {
@@ -893,8 +906,13 @@ impl LiveRuntime {
                         Err(_) => self.rejected += 1,
                     }
                 }
-                // Tick-to-frame is a wall-clock measure: not taken on the simulated clock.
-                if let Some(a) = arrival_us.filter(|_| self.sim_now_us.is_none()) {
+                // Tick-to-frame is a wall-clock measure: on the simulated clock it is taken
+                // from the paced simulation's wall-clock arrival (`LiveIn::Arrival`), if any.
+                let sample = match self.sim_now_us {
+                    None => arrival_us,
+                    Some(_) => arrival_us.and(self.sim_arrival_us),
+                };
+                if let Some(a) = sample {
                     if self.arrivals.len() < MAX_SAMPLES {
                         self.arrivals.push(a);
                     }
@@ -1233,6 +1251,8 @@ impl LiveRuntime {
                 "max": self.latency_us.iter().max().copied().unwrap_or(0) as f64 / 1000.0,
             },
             "exchange_lag_ms": self.lag_ms,
+            "item_memo": {"reused": host.session().item_memo_counts().0,
+                          "written": host.session().item_memo_counts().1},
             "bindings_not_ready": host.live_not_ready(),
             "feed": self.feed.stats_json(),
             "market": self.market.as_ref().map(|m| json!({"open": m.open, "holiday": m.holiday,
@@ -2009,7 +2029,7 @@ mod tests {
     /// start frame's data (the initial bars) and the events recorded since.
     fn replica_core(host: &ReplayHost) -> qp_wasm::shell::ShellCore {
         let data = host.init().data.clone().expect("init data");
-        qp_wasm::shell::ShellCore::new("arkin", "tr", &data, host.recorded_events()).expect("core")
+        qp_wasm::shell::ShellCore::new("arkin", "tr", &data, &host.recorded_events()).expect("core")
     }
 
     /// Passes the core's requests to the host as connection `conn` until it is idle.
@@ -2075,7 +2095,7 @@ mod tests {
         // The early replica connects before any live bar.
         let mut early = replica_core(&host);
         settle(&mut early, &mut host, "c1");
-        let mut sent = host.recorded_events().len();
+        let mut sent = host.recorded_len();
         // What the hub does after each batch: new events as a data frame to the replica,
         // the authority's notifications routed to it.
         let mut push = |early: &mut qp_wasm::shell::ShellCore,
@@ -2219,7 +2239,7 @@ mod tests {
         .expect("runtime");
         let mut early = replica_core(&host);
         settle(&mut early, &mut host, "c1");
-        let mut sent = host.recorded_events().len();
+        let mut sent = host.recorded_len();
         let mut push = |early: &mut qp_wasm::shell::ShellCore,
                         host: &mut ReplayHost,
                         lines: Vec<OutboundLine>| {
@@ -2302,5 +2322,150 @@ mod tests {
         let d = normalize_rest(&[b(mid, 5.0)], Interval::Day, &c);
         assert_eq!(d.len(), 1);
         assert_eq!(d[0].t, c.bar_at(Interval::Day, open).expect("day").open);
+    }
+
+    /// (RP4/T6) Incremental = from scratch on the live path: two identical live hosts take
+    /// the same data events (a fixed, uneven order: symbol `k` moves every `k + 1`-th
+    /// round, patches inside a bar and new bars), clocks, market statuses and messages;
+    /// one keeps its `capsules` item memo, the other forgets it before every flush and
+    /// query. Every line both send is byte-equal; the memo is reused across rounds (the
+    /// symbols that did not move).
+    #[test]
+    fn incremental_viewer_equals_from_scratch_on_live_events() {
+        let syms = ["AAA", "BBB", "CCC", "DDD", "EEE", "FFF"];
+        let full: BTreeMap<String, Vec<Bar>> = syms
+            .iter()
+            .enumerate()
+            .map(|(i, s)| {
+                #[allow(clippy::cast_precision_loss)]
+                let seed = i as f64 * 1.7;
+                ((*s).to_owned(), truth(200, seed))
+            })
+            .collect();
+        let hist: BTreeMap<String, Vec<Bar>> = full
+            .iter()
+            .map(|(s, b)| (s.clone(), b[..120].to_vec()))
+            .collect();
+        let mut a = live_host(&hist);
+        let mut b = live_host(&hist);
+        let text = |l: &[OutboundLine]| serde_json::to_string(l).expect("json");
+        let setup = [
+            (
+                "h",
+                r#"{"type":"hello","protocol":"qp/0","principal":"host","surface":{"kind":"phone","lang":"tr"}}"#,
+            ),
+            (
+                "h",
+                r#"{"type":"input","id":"s","gesture":{"kind":"style","voice":"marla","clock":true}}"#,
+            ),
+            (
+                "h",
+                r#"{"type":"subscribe","id":"v","topic":{"kind":"viewer"}}"#,
+            ),
+            (
+                "e",
+                r#"{"type":"hello","protocol":"qp/0","principal":"host","surface":{"kind":"phone","lang":"en"}}"#,
+            ),
+            (
+                "e",
+                r#"{"type":"subscribe","id":"v","topic":{"kind":"viewer","limit":30}}"#,
+            ),
+        ];
+        for (c, m) in setup {
+            assert_eq!(text(&a.handle_raw(c, m)), text(&b.handle_raw(c, m)), "{m}");
+        }
+        let query = r#"{"type":"query","id":"q","query":{"kind":"capsules"}}"#;
+        // Per symbol: the next bar index and how far into it (patches before the close).
+        let mut at: BTreeMap<&str, (usize, u32)> = syms.iter().map(|s| (*s, (120, 0))).collect();
+        let mut clock = 0;
+        for round in 0..240usize {
+            for (k, s) in syms.iter().enumerate() {
+                if round % (k + 1) != 0 {
+                    continue;
+                }
+                let (i, part) = at[s];
+                if i >= 200 {
+                    continue;
+                }
+                let truth_bar = &full[*s][i];
+                // Three partial looks at the bar (patches), then it is whole.
+                let f = f64::from(part + 1) / 4.0;
+                let bar = Bar {
+                    c: truth_bar.o + (truth_bar.c - truth_bar.o) * f,
+                    v: truth_bar.v * f,
+                    ..truth_bar.clone()
+                };
+                let key = FeedKey {
+                    symbol: (*s).to_owned(),
+                    interval: "1d".to_owned(),
+                    feed: None,
+                };
+                let (store, seq) = a.live_feed(&key).expect("feed");
+                let change = match store.last() {
+                    Some(l) if l.t == bar.t => DataChange::Patch {
+                        t: bar.t,
+                        fields: qp_source::bar_patch_diff(l, &bar),
+                    },
+                    _ => DataChange::Bar { bar: bar.clone() },
+                };
+                let ev = DataEvent {
+                    feed: key,
+                    seq: seq + 1,
+                    change,
+                };
+                assert_eq!(
+                    text(&a.live_event(&ev).expect("a")),
+                    text(&b.live_event(&ev).expect("b")),
+                    "round {round} {s}"
+                );
+                at.insert(s, if part == 3 { (i + 1, 0) } else { (i, part + 1) });
+                if bar.t > clock {
+                    clock = bar.t;
+                    let la = a.session_mut().host_clock(clock).expect("clock a");
+                    let lb = b.session_mut().host_clock(clock).expect("clock b");
+                    assert_eq!(text(&la), text(&lb), "round {round}: clock");
+                }
+            }
+            if round % 25 == 5 {
+                let m = qp_schema::market::MarketStatus {
+                    exchange_time: clock,
+                    open: Some(round % 50 == 5),
+                    holiday: Some(false),
+                    source: qp_schema::market::MarketSource::Calendar,
+                    delayed: false,
+                    stale: false,
+                    phases: BTreeMap::new(),
+                };
+                b.session().forget_item_memo();
+                assert_eq!(
+                    text(&a.set_market_status(m.clone())),
+                    text(&b.set_market_status(m)),
+                    "round {round}: market"
+                );
+            }
+            b.session().forget_item_memo();
+            assert_eq!(
+                text(&a.live_flush()),
+                text(&b.live_flush()),
+                "round {round}: flush"
+            );
+            if round % 9 == 4 {
+                for c in ["h", "e"] {
+                    b.session().forget_item_memo();
+                    assert_eq!(
+                        text(&a.handle_raw(c, query)),
+                        text(&b.handle_raw(c, query)),
+                        "round {round}: query {c}"
+                    );
+                }
+            }
+        }
+        let caps = a.session().document().capsules.len();
+        let (hits, misses) = a.session().item_memo_counts();
+        assert!(caps > 10, "capsules were born ({caps})");
+        assert!(
+            hits > misses,
+            "items were reused across rounds: {hits} reused, {misses} written"
+        );
     }
 }

@@ -10,7 +10,7 @@ use serde_json::{json, Value};
 /// A page on `host`; `setup` runs right after the core is made (as `main.js`'s `start`).
 fn page(host: &mut ReplayHost, setup: impl FnOnce(&mut ShellCore)) -> ShellCore {
     let data = host.init().data.clone().expect("data");
-    let evs = host.recorded_events().to_vec();
+    let evs = host.recorded_events();
     let mut core = ShellCore::new("arkin", "tr", &data, &evs).expect("core");
     setup(&mut core);
     pump(&mut core, host);

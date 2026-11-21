@@ -37,10 +37,11 @@
 #
 # RP4/T4 accelerated simulation (no connection, no token; docs/matriks/LIVE.md §8):
 #   scripts/demo.sh --sim --start YYYY-MM-DD [--end YYYY-MM-DD] [--symbols @file|A,B]
-#                   [--interval 5m] [--speed N|max] [--history N]
+#                   [--interval 5m] [--speed N|max] [--history N] [--sim-at HH:MM]
 #          Cached trades (fixtures/local/trades) through the live path on a simulated
 #          exchange clock; --speed N = N x real time in sessions (default 60), max = no
-#          waiting; closed hours take at most 2 s. The page is the live demo's. This
+#          waiting; closed hours take at most 2 s; --sim-at starts the first day at that
+#          local time (the day's earlier trades are history; RP4/T6). The page is the live demo's. This
 #          machine only: --sim with --lan, --https-host or --bind is refused.
 #          Counts: curl -s -H "X-Qp-Live-Control: $QP_LIVE_CONTROL" localhost:8390/live/stats
 # Requirements: rustup target wasm32-unknown-unknown, wasm-pack (cargo install wasm-pack).

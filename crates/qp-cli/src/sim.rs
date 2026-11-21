@@ -88,6 +88,10 @@ pub struct SimArgs {
     /// Last day (inclusive; default: `--start`).
     #[arg(long)]
     pub end: Option<String>,
+    /// (RP4/T6) Start time on the first day (`HH:MM`, exchange time zone; default:
+    /// midnight). That day's earlier trades are history.
+    #[arg(long, value_name = "HH:MM")]
+    pub at: Option<String>,
     /// Bar interval (`1m`, `5m`, `15m`, `30m`, `1h`, `1d`).
     #[arg(long, default_value = "5m")]
     pub interval: String,
@@ -161,6 +165,10 @@ pub struct SimSpec {
     pub first_day: i64,
     /// Last local day (inclusive).
     pub last_day: i64,
+    /// (RP4/T6) Start time on the first day (minutes after local midnight; default 0).
+    /// The trades of that day before it are history (bars built from them), as if the
+    /// host had started then.
+    pub at_min: u32,
     /// Bar interval.
     pub interval: String,
     /// Settled bars of history.
@@ -190,7 +198,8 @@ impl SimSpec {
             &a.feed_rule,
             &a.rule,
             (&a.trades_dir, &a.rest_dir, &a.root),
-        )
+        )?
+        .with_at(a.at.as_deref())
     }
 
     /// From the parts.
@@ -232,6 +241,7 @@ impl SimSpec {
             symbols,
             first_day,
             last_day,
+            at_min: 0,
             interval: interval.to_owned(),
             history,
             feed_rule: feed_rule.to_owned(),
@@ -261,6 +271,27 @@ fn local_midnight(cal: &ExchangeCalendar, day: i64) -> i64 {
 fn date_text(day: i64) -> String {
     let (y, m, d) = qp_calendar::civil_from_days(day);
     format!("{y:04}-{m:02}-{d:02}")
+}
+
+impl SimSpec {
+    /// (RP4/T6) Starts at local time `hhmm` (`HH:MM`) of the first day instead of its
+    /// midnight (`None`: midnight).
+    ///
+    /// # Errors
+    /// Not `HH:MM` within the day.
+    pub fn with_at(mut self, hhmm: Option<&str>) -> Result<Self, String> {
+        let Some(t) = hhmm else {
+            return Ok(self);
+        };
+        let bad = || format!("--at `{t}`: HH:MM");
+        let (h, m) = t.split_once(':').ok_or_else(bad)?;
+        let (h, m): (u32, u32) = (h.parse().map_err(|_| bad())?, m.parse().map_err(|_| bad())?);
+        if h > 23 || m > 59 {
+            return Err(bad());
+        }
+        self.at_min = h * 60 + m;
+        Ok(self)
+    }
 }
 
 // ---------------------------------------------------------------------------------------
@@ -322,10 +353,25 @@ pub fn load_trades(
         let file = std::fs::File::open(&f).map_err(|e| format!("{}: {e}", f.display()))?;
         let mut r = BufReader::new(flate2::read::GzDecoder::new(file));
         // Header, then only the rows of the wanted local days (the `date_time` column,
-        // the second, starts with the local date).
+        // the second, starts with the local date), parsed in pieces of about
+        // `CHUNK` bytes (RP4/T6: the loading peak; rows parse one by one).
+        const CHUNK: usize = 4 << 20;
+        let mut header: Vec<u8> = Vec::new();
         let mut text = Vec::new();
         let mut line = Vec::new();
         let mut first = true;
+        let mut flush = |text: &mut Vec<u8>, header: &[u8], all: &mut Vec<Trade>| {
+            if text.len() > header.len() {
+                let (rows, bad) = qp_matriks::trade::parse_rest_csv(text);
+                st.bad_rows += bad as u64;
+                all.extend(
+                    rows.into_iter()
+                        .filter(|t| t.symbol == sym && (from_ms..to_ms).contains(&t.t_ms())),
+                );
+            }
+            text.clear();
+            text.extend_from_slice(header);
+        };
         loop {
             line.clear();
             let n = r
@@ -334,24 +380,26 @@ pub fn load_trades(
             if n == 0 {
                 break;
             }
-            let keep = first || {
-                line.iter()
-                    .position(|&b| b == b',')
-                    .and_then(|i| line.get(i + 1..i + 11))
-                    .and_then(|d| std::str::from_utf8(d).ok())
-                    .is_some_and(|d| days.contains(d))
-            };
-            first = false;
+            if first {
+                first = false;
+                header.clone_from(&line);
+                text.extend_from_slice(&line);
+                continue;
+            }
+            let keep = line
+                .iter()
+                .position(|&b| b == b',')
+                .and_then(|i| line.get(i + 1..i + 11))
+                .and_then(|d| std::str::from_utf8(d).ok())
+                .is_some_and(|d| days.contains(d));
             if keep {
                 text.extend_from_slice(&line);
+                if text.len() >= CHUNK {
+                    flush(&mut text, &header, &mut all);
+                }
             }
         }
-        let (rows, bad) = qp_matriks::trade::parse_rest_csv(&text);
-        st.bad_rows += bad as u64;
-        all.extend(
-            rows.into_iter()
-                .filter(|t| t.symbol == sym && (from_ms..to_ms).contains(&t.t_ms())),
-        );
+        flush(&mut text, &header, &mut all);
     }
     all.sort_by(Trade::exchange_cmp);
     let mut seen = BTreeSet::new();
@@ -363,13 +411,14 @@ pub fn load_trades(
 }
 
 /// Loads several symbols in parallel (results in symbol order).
-fn load_many(
+fn load_many<T: Send>(
     dir: &Path,
     symbols: &[String],
     from_ms: i64,
     to_ms: i64,
     cal: &ExchangeCalendar,
-) -> Result<Vec<(String, Vec<Trade>, LoadStats)>, String> {
+    keep: &(dyn Fn(&str, Vec<Trade>) -> T + Sync),
+) -> Result<Vec<(String, T, LoadStats)>, String> {
     let n = std::thread::available_parallelism().map_or(4, std::num::NonZero::get);
     let chunks: Vec<&[String]> = symbols.chunks(symbols.len().div_ceil(n).max(1)).collect();
     let results: Vec<Result<Vec<_>, String>> = std::thread::scope(|s| {
@@ -380,7 +429,7 @@ fn load_many(
                     c.iter()
                         .map(|sym| {
                             load_trades(dir, sym, from_ms, to_ms, cal)
-                                .map(|(t, st)| (sym.clone(), t, st))
+                                .map(|(t, st)| (sym.clone(), keep(sym, t), st))
                         })
                         .collect::<Result<Vec<_>, String>>()
                 })
@@ -397,9 +446,166 @@ fn load_many(
     Ok(out)
 }
 
+/// (RP4/T6) One symbol's cached trades, packed (40 bytes a trade, no allocation each; a
+/// trade number that is not a plain decimal and an unusual side text are kept aside): a
+/// day of 580 symbols' trades in memory once and small. [`Packed::get`] gives back the
+/// very [`Trade`] that was packed.
+#[derive(Debug, Default)]
+pub struct Packed {
+    symbol: String,
+    rows: Vec<Row>,
+    odd_order: BTreeMap<u32, String>,
+    odd_side: BTreeMap<u32, String>,
+}
+
+#[derive(Debug, Clone, Copy)]
+struct Row {
+    ts_ns: i64,
+    price: f64,
+    quantity: i64,
+    order_no: u64,
+    /// Bit 0: quantity given; bit 1: trade number given; bit 2: special trade; bit 3:
+    /// the trade number is in `odd_order`.
+    flags: u8,
+    /// 0 none, 1 bid, 2 ask, 3 other (`odd_side`).
+    side: u8,
+}
+
+/// A trade number written back exactly by `u64::to_string`.
+fn plain_number(s: &str) -> Option<u64> {
+    let ok = !s.is_empty()
+        && s.len() <= 19
+        && s.bytes().all(|b| b.is_ascii_digit())
+        && (s == "0" || !s.starts_with('0'));
+    ok.then(|| s.parse().ok()).flatten()
+}
+
+impl Packed {
+    /// Packs `trades` (all of `symbol`, in order).
+    #[must_use]
+    pub fn new(symbol: &str, trades: &[Trade]) -> Self {
+        let mut odd_order = BTreeMap::new();
+        let mut odd_side = BTreeMap::new();
+        let rows = trades
+            .iter()
+            .enumerate()
+            .map(|(i, t)| {
+                debug_assert_eq!(t.symbol, symbol);
+                let i = u32::try_from(i).unwrap_or(u32::MAX);
+                let (order_no, odd) = match t.order_no.as_deref() {
+                    None => (0, false),
+                    Some(o) => match plain_number(o) {
+                        Some(n) => (n, false),
+                        None => {
+                            odd_order.insert(i, o.to_owned());
+                            (0, true)
+                        }
+                    },
+                };
+                let side = match &t.side {
+                    None => 0,
+                    Some(qp_matriks::Aggressor::Bid) => 1,
+                    Some(qp_matriks::Aggressor::Ask) => 2,
+                    Some(qp_matriks::Aggressor::Other(x)) => {
+                        odd_side.insert(i, x.clone());
+                        3
+                    }
+                };
+                Row {
+                    ts_ns: t.timestamp_ns,
+                    price: t.price,
+                    quantity: t.quantity.unwrap_or(0),
+                    order_no,
+                    flags: u8::from(t.quantity.is_some())
+                        | u8::from(t.order_no.is_some()) << 1
+                        | u8::from(t.is_trade_ex) << 2
+                        | u8::from(odd) << 3,
+                    side,
+                }
+            })
+            .collect();
+        Self {
+            symbol: symbol.to_owned(),
+            rows,
+            odd_order,
+            odd_side,
+        }
+    }
+
+    fn len(&self) -> usize {
+        self.rows.len()
+    }
+
+    fn ts_ns(&self, i: usize) -> i64 {
+        self.rows[i].ts_ns
+    }
+
+    fn t_ms(&self, i: usize) -> i64 {
+        self.rows[i].ts_ns.div_euclid(1_000_000)
+    }
+
+    /// Trade `i`.
+    #[must_use]
+    pub fn get(&self, i: usize) -> Trade {
+        let r = self.rows[i];
+        let k = u32::try_from(i).unwrap_or(u32::MAX);
+        Trade {
+            symbol: self.symbol.clone(),
+            price: r.price,
+            quantity: (r.flags & 1 != 0).then_some(r.quantity),
+            side: match r.side {
+                1 => Some(qp_matriks::Aggressor::Bid),
+                2 => Some(qp_matriks::Aggressor::Ask),
+                3 => Some(qp_matriks::Aggressor::Other(
+                    self.odd_side.get(&k).cloned().unwrap_or_default(),
+                )),
+                _ => None,
+            },
+            timestamp_ns: r.ts_ns,
+            order_no: (r.flags & 2 != 0).then(|| {
+                if r.flags & 8 != 0 {
+                    self.odd_order.get(&k).cloned().unwrap_or_default()
+                } else {
+                    r.order_no.to_string()
+                }
+            }),
+            is_trade_ex: r.flags & 4 != 0,
+        }
+    }
+}
+
+/// (RP4/T6) The trades of several [`Packed`] symbols in exchange order (time, symbol,
+/// trade order), merged as they are read: a symbol's trades are in trade order already,
+/// so (time, symbol, position) is that order.
+pub struct Merge<'a> {
+    syms: Vec<&'a Packed>,
+    heap: std::collections::BinaryHeap<std::cmp::Reverse<(i64, usize, usize)>>,
+}
+
+impl Merge<'_> {
+    /// The next trade's time (UTC ms).
+    #[must_use]
+    pub fn peek_t_ms(&self) -> Option<i64> {
+        self.heap.peek().map(|r| self.syms[r.0 .1].t_ms(r.0 .2))
+    }
+}
+
+impl Iterator for Merge<'_> {
+    type Item = Trade;
+    fn next(&mut self) -> Option<Trade> {
+        let std::cmp::Reverse((_, k, i)) = self.heap.pop()?;
+        let p = self.syms[k];
+        if i + 1 < p.len() {
+            self.heap
+                .push(std::cmp::Reverse((p.ts_ns(i + 1), k, i + 1)));
+        }
+        Some(p.get(i))
+    }
+}
+
 /// The simulation's [`TradeHistory`]: the cached trades (what REST answers live).
 pub struct CacheHistory {
-    by_symbol: BTreeMap<String, Vec<Trade>>,
+    by_symbol: BTreeMap<String, Packed>,
 }
 
 impl TradeHistory for CacheHistory {
@@ -408,9 +614,21 @@ impl TradeHistory for CacheHistory {
             .by_symbol
             .get(symbol)
             .ok_or_else(|| "no cached trades".to_owned())?;
-        let a = v.partition_point(|t| t.t_ms() < start_ms);
-        let b = v.partition_point(|t| t.t_ms() <= end_ms);
-        Ok(v[a..b.max(a)].to_vec())
+        let pp = |f: &dyn Fn(i64) -> bool| {
+            let (mut lo, mut hi) = (0, v.len());
+            while lo < hi {
+                let mid = lo + (hi - lo) / 2;
+                if f(v.t_ms(mid)) {
+                    lo = mid + 1;
+                } else {
+                    hi = mid;
+                }
+            }
+            lo
+        };
+        let a = pp(&|t| t < start_ms);
+        let b = pp(&|t| t <= end_ms);
+        Ok((a..b.max(a)).map(|i| v.get(i)).collect())
     }
 }
 
@@ -586,9 +804,11 @@ pub struct SimInput {
     pub from_ms: i64,
     /// See `from_ms`.
     pub to_ms: i64,
-    /// Every trade of the range, all symbols, in exchange order (time, symbol, number).
-    pub trades: Vec<Trade>,
-    /// The same, by symbol (the trade history).
+    /// (RP4/T6) The symbols whose trades are sent (those with history), in order.
+    sent: Vec<String>,
+    /// Their number of trades.
+    count: usize,
+    /// The trades by symbol (the trade history).
     pub history: Arc<CacheHistory>,
     /// The first resolution: settled bars per symbol.
     pub hist: Vec<(String, Vec<Bar>)>,
@@ -602,15 +822,47 @@ pub struct SimInput {
     pub source: Arc<CacheBars>,
 }
 
+impl SimInput {
+    /// Number of trades sent.
+    #[must_use]
+    pub fn trade_count(&self) -> usize {
+        self.count
+    }
+
+    /// Every trade sent, in exchange order (time, symbol, number).
+    #[must_use]
+    pub fn trades(&self) -> Merge<'_> {
+        let syms: Vec<&Packed> = self
+            .sent
+            .iter()
+            .filter_map(|s| self.history.by_symbol.get(s))
+            .collect();
+        let heap = syms
+            .iter()
+            .enumerate()
+            .filter(|(_, p)| p.len() > 0)
+            .map(|(k, p)| std::cmp::Reverse((p.ts_ns(0), k, 0)))
+            .collect();
+        Merge { syms, heap }
+    }
+}
+
 /// Loads the caches for `spec`.
 ///
 /// # Errors
 /// Unreadable cache files; no symbol with history.
 pub fn load(spec: &SimSpec) -> Result<SimInput, String> {
     let cal = xist()?;
-    let from_ms = local_midnight(&cal, spec.first_day);
+    let from_ms = local_midnight(&cal, spec.first_day) + i64::from(spec.at_min) * 60_000;
     let to_ms = local_midnight(&cal, spec.last_day + 1);
-    let per = load_many(&spec.trades_dir, &spec.symbols, from_ms, to_ms, &cal)?;
+    let per = load_many(
+        &spec.trades_dir,
+        &spec.symbols,
+        from_ms,
+        to_ms,
+        &cal,
+        &|s, t| Packed::new(s, &t),
+    )?;
     let mut load = LoadStats::default();
     let mut by_symbol = BTreeMap::new();
     for (s, t, st) in per {
@@ -640,22 +892,18 @@ pub fn load(spec: &SimSpec) -> Result<SimInput, String> {
         .unwrap_or_else(std::sync::PoisonError::into_inner)
         .clone();
     let keep: BTreeSet<&str> = hist.iter().map(|(s, _)| s.as_str()).collect();
-    let mut trades: Vec<Trade> = by_symbol
-        .iter()
-        .filter(|(s, _)| keep.contains(s.as_str()))
-        .flat_map(|(_, v)| v.iter().cloned())
+    let sent: Vec<String> = by_symbol
+        .keys()
+        .filter(|s| keep.contains(s.as_str()))
+        .cloned()
         .collect();
-    trades.sort_by(|a, b| {
-        a.timestamp_ns
-            .cmp(&b.timestamp_ns)
-            .then_with(|| a.symbol.cmp(&b.symbol))
-            .then_with(|| a.exchange_cmp(b))
-    });
+    let count = sent.iter().map(|s| by_symbol[s].len()).sum();
     Ok(SimInput {
         cal,
         from_ms,
         to_ms,
-        trades,
+        sent,
+        count,
         history: Arc::new(CacheHistory { by_symbol }),
         hist,
         missing,
@@ -873,10 +1121,10 @@ pub fn drive(
     ))) {
         return st;
     }
-    let (mut i, mut j) = (0usize, 0usize);
-    let n = input.trades.len();
-    while i < n || j < ticks.len() {
-        let trade_t = input.trades.get(i).map(Trade::t_ms);
+    let mut j = 0usize;
+    let mut trades = input.trades();
+    loop {
+        let trade_t = trades.peek_t_ms();
         let tick_t = ticks.get(j).copied();
         let (t, is_tick) = match (trade_t, tick_t) {
             (Some(a), Some(b)) if b <= a => (b, true),
@@ -900,11 +1148,11 @@ pub fn drive(
         if is_tick {
             j += 1;
         } else {
-            if !sink(LiveIn::Trade(record(&input.trades[i], decode))) {
+            let Some(t) = trades.next() else { break };
+            if !sink(LiveIn::Trade(record(&t, decode))) {
                 return st;
             }
             st.trades += 1;
-            i += 1;
         }
     }
     st
@@ -1025,7 +1273,7 @@ impl Stream {
         Ok(Self {
             w,
             hash: Sha256::new(),
-            sent: host.recorded_events().len(),
+            sent: host.recorded_len(),
             capsules,
             market: None,
             cal,
@@ -1063,17 +1311,18 @@ impl Stream {
         rt: &LiveRuntime,
         lines: &[qp_schema::protocol::OutboundLine],
     ) -> Result<(), String> {
-        let evs = host.recorded_events();
+        let total = host.recorded_len();
         let mut bar_event = false;
-        if evs.len() > self.sent {
-            let new: Vec<Value> = evs[self.sent..]
+        if total > self.sent {
+            let new: Vec<Value> = host
+                .recorded_since(self.sent)
                 .iter()
                 .map(|e| {
                     bar_event |= matches!(e.change, DataChange::Bar { .. });
                     json!({"ev": e})
                 })
                 .collect();
-            self.sent = evs.len();
+            self.sent = total;
             for v in new {
                 self.events += 1;
                 self.put(&v)?;
@@ -1305,8 +1554,15 @@ pub fn spawn_feeder(
         let mut pacer = Pacer::new(speed, &pace, input.cal.clone());
         let decode = TradeDecodeConfig::default();
         let mut n = 0u64;
+        let paced = matches!(speed, Speed::Factor(_));
         let st = drive(&input, interval, &decode, &mut pacer, &mut |i| {
+            // (RP4/T6) At a paced speed the wall-clock send time is the trades' arrival
+            // (tick-to-frame).
+            let clock = paced && matches!(i, LiveIn::Clock(_));
             to_hub(i);
+            if clock {
+                to_hub(LiveIn::Arrival(crate::live::now_us()));
+            }
             n += 1;
             if n.is_multiple_of(SYNC_EVERY) {
                 let (tx, rx) = std::sync::mpsc::channel();

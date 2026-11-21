@@ -138,7 +138,7 @@ fn traffic(n: u32) -> (usize, usize, usize, usize) {
         json!({"type":"visible","id":"v1","sub":"v","visible":vis}),
     );
     let step = |h: &mut ReplayHost, served: &mut Vec<_>| -> (usize, usize) {
-        let before = h.recorded_events().len();
+        let before = h.recorded_len();
         let lines = send(
             h,
             json!({"type":"replay","id":"r","control":{"kind":"step","n":1}}),
@@ -174,7 +174,7 @@ fn traffic(n: u32) -> (usize, usize, usize, usize) {
         &mut host,
         json!({"type":"input","id":"o","gesture":{"kind":"open","capsule":feed[0],"to":"capsule","width":390,"height":300}}),
     );
-    let _ = qp_wasm::drive::viewer_frames(&host, conn, &mut served, host.recorded_events().len());
+    let _ = qp_wasm::drive::viewer_frames(&host, conn, &mut served, host.recorded_len());
     assert_eq!(served.len(), 1, "one feed while open: {served:?}");
     let (mut om, mut od) = (0, 0);
     for _ in 0..9 {

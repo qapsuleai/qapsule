@@ -11,7 +11,7 @@ use serde_json::{json, Value};
 
 fn core_on(host: &ReplayHost) -> ShellCore {
     let data = host.init().data.clone().expect("data");
-    let evs = host.recorded_events().to_vec();
+    let evs = host.recorded_events();
     ShellCore::new("arkin", "tr", &data, &evs).expect("core")
 }
 

@@ -27,10 +27,10 @@ fn pump(core: &mut ShellCore, w: &mut ReplayHost) {
 
 /// One replay step: the host's new events as data frames, then the feed's answer.
 fn step(core: &mut ShellCore, w: &mut ReplayHost) {
-    let before = w.recorded_events().len();
+    let before = w.recorded_len();
     core.replay_control(json!({"kind":"step","n":1}));
     pump(core, w);
-    let evs: Vec<_> = w.recorded_events()[before..].to_vec();
+    let evs: Vec<_> = w.recorded_since(before);
     for ev in &evs {
         core.data_event(ev);
     }
@@ -41,7 +41,7 @@ fn page(motion: &str, reduced: bool) -> (ShellCore, ReplayHost) {
     let mut w = parity_host();
     w.set_record_events(true);
     let data = w.init().data.clone().expect("replay init has data");
-    let evs = w.recorded_events().to_vec();
+    let evs = w.recorded_events();
     let mut core = ShellCore::new("arkin", "tr", &data, &evs).expect("core");
     core.set_look(&json!({"motion": motion}));
     core.set_reduced_motion(reduced);

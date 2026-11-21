@@ -106,6 +106,10 @@ pub struct ServeArgs {
     /// Tool surface (`thin`; see `crates/qp-mcp/src/surfaces/README.md`).
     #[arg(long, default_value = "thin")]
     pub surface: String,
+    /// (R5B/M29, measurement) Default capsule format for tools that take `format`
+    /// (`card`, `json`, `layered`) when a call gives none.
+    #[arg(long, value_parser = ["card", "json", "layered"])]
+    pub capsule_format: Option<String>,
     /// Device surface kind sent in the `hello`: desktop, phone, watch, voice, headless.
     #[arg(long, default_value = "headless")]
     pub device: String,
@@ -373,6 +377,7 @@ pub fn serve(a: &ServeArgs) -> Result<(), String> {
         default_principal: a.principal.clone(),
         allowed,
         surface: a.surface.clone(),
+        capsule_format: a.capsule_format.clone(),
         device: dev,
         log,
     };
@@ -459,6 +464,8 @@ pub struct HostCfg {
     pub device: qp_schema::protocol::Surface,
     /// Measurement log.
     pub log: Option<calllog::SharedLog>,
+    /// (M29) Default capsule format (`--capsule-format`).
+    pub capsule_format: Option<String>,
 }
 
 impl HostCfg {
@@ -474,6 +481,7 @@ impl HostCfg {
                 notify: NotifyMode::Spec,
                 common_tools: true,
                 log: self.log.clone(),
+                capsule_format: self.capsule_format.clone(),
             },
         )
         .map_err(|e| format!("hello as `{principal}` refused: {e}"))

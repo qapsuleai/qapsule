@@ -1572,6 +1572,7 @@ private proxy, e.g. Tailscale, to 127.0.0.1 — see docs/matriks/LIVE.md)"
             device: serde_json::from_value(json!({"kind": "headless"}))
                 .map_err(|e| e.to_string())?,
             log: None,
+            capsule_format: None,
         }))
     } else {
         None

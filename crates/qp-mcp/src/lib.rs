@@ -414,6 +414,10 @@ pub struct Options {
     pub common_tools: bool,
     /// Measurement log (one line per tool call).
     pub log: Option<calllog::SharedLog>,
+    /// (R5B/M29, measurement) The capsule format a tool gets when its input schema has a
+    /// `format` property and the call gives none (`card`, `json`, `layered`). `None`: the
+    /// surface's own default.
+    pub capsule_format: Option<String>,
 }
 
 impl std::fmt::Debug for Options {
@@ -978,6 +982,16 @@ impl McpServer {
         if common {
             if let Some(r) = common::call(&mut ctx, name, &args) {
                 return r;
+            }
+        }
+        let mut args = args;
+        if let (Some(f), Value::Object(m)) = (&self.opts.capsule_format, &mut args) {
+            let takes_format =
+                self.surface.tools().iter().any(|t| {
+                    t.name == name && t.input_schema.pointer("/properties/format").is_some()
+                });
+            if takes_format && !m.contains_key("format") {
+                m.insert("format".into(), json!(f));
             }
         }
         self.surface.call(&mut ctx, name, args)

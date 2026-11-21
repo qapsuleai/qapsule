@@ -18,6 +18,7 @@ import socket
 import subprocess
 import sys
 import time
+import urllib.request
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 H = os.path.dirname(HERE)
@@ -61,6 +62,18 @@ def tasks_by_id(inject):
         d = json.load(open(os.path.join(H, "tasks.json"), encoding="utf-8"))
         items = d["tasks"] if isinstance(d, dict) else d
     return {t["id"]: t for t in items}
+
+
+def tooldefs_bytes(url):
+    """Size of the MCP `tools/list` result (compact JSON): what a client loads."""
+    body = json.dumps({"jsonrpc": "2.0", "id": 1, "method": "tools/list", "params": {
+        "_meta": {"io.modelcontextprotocol/protocolVersion": "2026-07-28"}}}).encode()
+    req = urllib.request.Request(url, data=body, method="POST", headers={
+        "Content-Type": "application/json", "Accept": "application/json, text/event-stream",
+        "X-Qp-Principal": "claude"})
+    with urllib.request.urlopen(req, timeout=30) as r:
+        res = json.loads(r.read())["result"]["tools"]
+    return len(json.dumps(res, separators=(",", ":"), ensure_ascii=False).encode())
 
 
 def start(surface, model, group, fmt=None, inject=False):
@@ -113,9 +126,10 @@ def start(surface, model, group, fmt=None, inject=False):
                QMCP_STATE=f"{wd}/_list.sid")
     tl = subprocess.run(["python3", qmcp, "list"], env=env, capture_output=True, text=True)
     open(os.path.join(wd, "tools.txt"), "w").write(tl.stdout)
+    meta_bytes = tooldefs_bytes(url)
     meta = {"run": run, "surface": surface, "model": model, "format": fmt, "group": group,
             "tasks": ids, "port": port, "pid": p.pid, "inject": inject,
-            "tooldefs_list_bytes": len(tl.stdout.encode())}
+            "tooldefs_list_bytes": len(tl.stdout.encode()), "tooldefs_bytes": meta_bytes}
     json.dump(meta, open(os.path.join(wd, "meta.json"), "w"), indent=1)
     print(json.dumps({"run": run, "port": port, "workdir": wd, "prompt_file": pf, "pid": p.pid}))
 

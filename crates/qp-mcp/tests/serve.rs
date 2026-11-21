@@ -36,6 +36,7 @@ fn served(h: &qp_mcp::SharedHub, conn: &str, principal: &str, log: Option<CallLo
             notify: NotifyMode::Spec,
             common_tools: true,
             log: log.map(CallLog::shared),
+            capsule_format: None,
         },
     )
     .unwrap()

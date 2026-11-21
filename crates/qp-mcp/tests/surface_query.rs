@@ -74,6 +74,7 @@ fn served(h: &SharedHub, conn: &str, principal: &str) -> McpServer {
             notify: NotifyMode::Spec,
             common_tools: true,
             log: None,
+            capsule_format: None,
         },
     )
     .unwrap()

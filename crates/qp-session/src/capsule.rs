@@ -2418,7 +2418,11 @@ impl Session {
     ) -> Document {
         let mut d = doc.clone();
         if !p.principal.is_empty() {
-            d.audiences.retain(|k, _| k == &p.principal);
+            // (R5B, §25.7) An agent that works for a person keeps the person's audience
+            // (its holdings and watchlist make capsules relevant to it); nobody else's.
+            let person = crate::watch::person_of(&self.plane, &p.principal);
+            d.audiences
+                .retain(|k, _| k == &p.principal || k.as_str() == person);
         }
         d.facts.retain(|f| !p.hidden.contains(&f.id));
         for f in &mut d.facts {

@@ -255,3 +255,71 @@ fn an_unknown_row_is_read_as_a_row_fail_closed() {
     // `bb2` has `*` of its own: the intersection is bora's.
     assert_eq!(of(&bora, "b"), of(&bb2, "B2"));
 }
+
+/// (R5B, §25.7; M28c finding) An agent reads with its person's audience: capsules on the
+/// person's holdings are `relevant` to it exactly as to the person, while another
+/// person's audience never reaches it. Same comparison as above, with audiences set
+/// (so every reader has a projection).
+#[test]
+fn an_agent_reads_with_its_persons_audience() {
+    let t = transcript();
+    let mut init = init();
+    let qp_schema::protocol::DocumentRef::Inline(doc) = &mut init.document else {
+        panic!("inline document")
+    };
+    let aud = |positions: Value, watch: Value| {
+        serde_json::from_value::<qp_schema::capsule::Audience>(json!({
+            "group":"habituated","sensitivity":"important",
+            "watchlist": watch, "positions": positions}))
+        .unwrap()
+    };
+    doc.audiences.insert(
+        "bora".into(),
+        aud(json!({"THYAO": 100.0}), json!(["THYAO"])),
+    );
+    doc.audiences
+        .insert("can".into(), aud(json!({"THYAO": -5.0}), json!([])));
+    doc.audiences
+        .insert("arkin".into(), aud(json!({}), json!(["THYAO"])));
+    let mut s = Session::new(init, &root()).unwrap();
+    s.mark_agent_connection("B2");
+    s.mark_agent_connection("C2");
+    let mut relevant_seen = false;
+    for step in &t.steps {
+        if let Some(send_) = &step.send {
+            let msg = &serde_json::to_value(&send_.msg).unwrap();
+            let out = send(&mut s, &send_.conn, msg);
+            for (pc, _, ac, a) in PAIRS {
+                if pc == send_.conn.as_str() {
+                    let aout = send(&mut s, ac, &mirror(msg, a));
+                    assert_eq!(of(&out, pc), of(&aout, ac), "step {msg}");
+                }
+            }
+        } else if let Some(d) = &step.data {
+            let ev: DataEvent = serde_json::from_value(serde_json::to_value(d).unwrap()).unwrap();
+            let out: Vec<Value> = s
+                .data_event(&ev)
+                .unwrap()
+                .iter()
+                .map(|l| serde_json::to_value(l).unwrap())
+                .collect();
+            for (pc, _, ac, _) in PAIRS {
+                assert_eq!(of(&out, pc), of(&out, ac), "data step");
+            }
+        }
+    }
+    for q in extra_queries() {
+        for (pc, _, ac, _) in PAIRS {
+            let p = send(&mut s, pc, &q);
+            let a = send(&mut s, ac, &q);
+            assert_eq!(of(&p, pc), of(&a, ac), "query {q}");
+            let text = a.iter().map(Value::to_string).collect::<String>();
+            relevant_seen |= text.contains("\"relevant\":true");
+            // Never another person's audience.
+            let other = if pc == "b" { "\"can\":{" } else { "\"bora\":{" };
+            assert!(!text.contains(other), "query {q}: {text}");
+            assert!(!text.contains("\"arkin\":{\"group\""), "query {q}");
+        }
+    }
+    assert!(relevant_seen, "no capsule was relevant to an agent");
+}

@@ -665,6 +665,10 @@ pub struct Document {
     /// Capsule preferences per person (principal id → audience), R3.
     #[serde(default, skip_serializing_if = "BTreeMap::is_empty")]
     pub audiences: BTreeMap<String, crate::capsule::Audience>,
+    /// (R5B) Validated comments (agents' and people's narratives about capsules and
+    /// instruments, with their citations).
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub comments: Vec<crate::protocol::Comment>,
 }
 
 /// The operation a command performs on a document.

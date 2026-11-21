@@ -776,6 +776,45 @@ pub struct Narrative {
     pub provenance: crate::types::Provenance,
 }
 
+/// (R5B, §25.4) What a comment is about: exactly one of a capsule (or its finding) and
+/// an instrument symbol.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
+#[serde(deny_unknown_fields)]
+pub struct CommentAbout {
+    /// Capsule id (or its finding's id).
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub capsule: Option<String>,
+    /// Instrument symbol.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub instrument: Option<String>,
+}
+
+/// (R5B, §25.4) A validated comment, as stored in the document.
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
+#[serde(deny_unknown_fields)]
+pub struct Comment {
+    /// Unique id within the document.
+    pub id: String,
+    /// What it is about (a capsule is stored by its capsule id).
+    pub about: CommentAbout,
+    /// Language of the text.
+    pub lang: Language,
+    /// The text.
+    pub text: String,
+    /// Ids it rests on.
+    pub cites: Vec<String>,
+    /// External quotes.
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub external: Vec<crate::comment::ExternalQuote>,
+    /// The strictness it was validated with.
+    pub strictness: crate::comment::Strictness,
+    /// Who wrote it (an agent: `author.kind = "agent"`) and when.
+    pub provenance: crate::types::Provenance,
+    /// (R5B) The person the writing agent works for, if any.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub on_behalf: Option<String>,
+}
+
 /// State of a proposal.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 #[serde(rename_all = "snake_case")]
@@ -1313,6 +1352,28 @@ pub enum Op {
         /// The level; `null` = the group's default.
         sensitivity: Option<Sensitivity>,
     },
+    /// (R5B, §25.4) A comment: a short narrative about a capsule or an instrument that
+    /// cites the facts, findings or capsules it rests on. The authority validates it
+    /// deterministically against the evidence the writer may read (citations, numbers,
+    /// advice language, licence) before it enters the document; a rejected draft →
+    /// `comment_rejected` with `reasons`. Applied directly (never a proposal); needs the
+    /// `propose` or `write` permission.
+    AddComment {
+        /// Id; assigned if absent (`cmt-<seq>-<n>`).
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        id: Option<String>,
+        /// What it is about.
+        about: CommentAbout,
+        /// Language of the text.
+        lang: Language,
+        /// The text (plain; `[n]` marks the n-th entry of `cites`).
+        text: String,
+        /// Ids of the facts, findings or capsules it rests on (at least one).
+        cites: Vec<String>,
+        /// External sources quoted (named, with the numbers they give).
+        #[serde(default, skip_serializing_if = "Vec::is_empty")]
+        external: Vec<crate::comment::ExternalQuote>,
+    },
 }
 
 // ---------------------------------------------------------------------------
@@ -1513,6 +1574,14 @@ pub enum ChangeOp {
         /// The preferences; `null` removes them.
         audience: Option<Audience>,
     },
+    /// (R5B, §25.4) Insert or replace a comment.
+    PutComment {
+        /// The comment.
+        comment: Comment,
+        /// Position in its collection when inserting a new item (default: the end).
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        index: Option<u32>,
+    },
 }
 
 /// One entry of the operation log.
@@ -1576,6 +1645,8 @@ pub enum Collection {
     Intents,
     /// Narratives.
     Narratives,
+    /// (R5B) Comments.
+    Comments,
     /// Proposals.
     Proposals,
 }
@@ -2017,6 +2088,9 @@ pub struct CapsuleDetail {
     /// comments the `capsules` query gives). Absent otherwise.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub withheld: Option<Withheld>,
+    /// (R5B, §25.4) Validated comments about this capsule the reader may receive.
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub comments: Vec<Comment>,
 }
 
 /// (R4/S1, §20.2) What a capsule selector may also have matched that the reader cannot
@@ -2719,6 +2793,16 @@ pub enum Topic {
         #[serde(default, skip_serializing_if = "Option::is_none")]
         series: Option<String>,
     },
+    /// (R5B, §25.4) New comments the subscriber may receive (optionally about one
+    /// capsule or one instrument): a `comment` event each.
+    Comments {
+        /// Only comments about this capsule (or finding) id.
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        capsule: Option<String>,
+        /// Only comments about this instrument (or a capsule of it).
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        instrument: Option<String>,
+    },
 }
 
 /// A pushed event.
@@ -2871,6 +2955,13 @@ pub enum Event {
         /// The row as the subscriber may receive it now.
         story: Box<StoryRow>,
         /// Log position it reflects.
+        seq: Seq,
+    },
+    /// (R5B, §25.4) A validated comment (topic `comments`).
+    Comment {
+        /// The comment.
+        comment: Box<Comment>,
+        /// Log position of the entry that stored it (the subscriber's world).
         seq: Seq,
     },
 }
@@ -3432,6 +3523,8 @@ pub enum ErrorCode {
     /// (RP2, §18) A bound series has no data: the source does not know the binding, its
     /// window is empty, or resolution is still pending.
     NoData,
+    /// (R5B, §25.4) The comment validator rejected a comment draft; `reasons` says why.
+    CommentRejected,
 }
 
 /// One option offered by an error (R2): an id (or an origin, as JSON) and what it is.
@@ -3474,6 +3567,9 @@ pub struct ProtocolError {
     /// `agent_cannot_write` for `forbidden`. Absent on every error before R5B.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub reason: Option<String>,
+    /// (R5B, §25.4) For `comment_rejected`: every reason, machine-readable.
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub reasons: Vec<crate::comment::Reason>,
 }
 
 // ---------------------------------------------------------------------------
@@ -3730,6 +3826,10 @@ pub struct SessionInit {
     /// host marked as agent connections. An unknown name is refused at session start.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub agent_policy: Option<String>,
+    /// (R5B, §25.4) The comment validator's strictness (`cites`, `cites_numbers`,
+    /// `per_sentence`). Absent: `cites_numbers`.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub comment_strictness: Option<crate::comment::Strictness>,
 }
 
 /// (R5/M19, K53, K42) The host's feed rule (host configuration, not a protocol message).

@@ -228,6 +228,9 @@ pub(crate) struct DataPlane {
     /// is entitled to a feed only if the person is and, unless the provider knows the
     /// agent has no row of its own, the agent is too (the intersection; fail closed).
     pub delegates: BTreeMap<String, String>,
+    /// (R5B, §25.4) The comment validator's strictness (`init.comment_strictness`); kept
+    /// here so that the expansion stamps it on the stored comment.
+    pub comment_strictness: qp_schema::comment::Strictness,
 }
 
 /// The binding of a series, if it is bound.
@@ -289,6 +292,7 @@ impl DataPlane {
             series: BTreeMap::new(),
             max_bind_bars,
             delegates: BTreeMap::new(),
+            comment_strictness: qp_schema::comment::Strictness::CitesNumbers,
         }
     }
 

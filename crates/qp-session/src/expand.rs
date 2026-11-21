@@ -111,6 +111,7 @@ pub(crate) fn coll_name(c: qp_schema::protocol::Collection) -> &'static str {
         C::Capsules => "capsules",
         C::Intents => "intents",
         C::Narratives => "narratives",
+        C::Comments => "comments",
         C::Proposals => "proposals",
     }
 }
@@ -881,6 +882,74 @@ pub(crate) fn expand_op(
             Ok(vec![ChangeOp::PutIntent {
                 intent: ni,
                 index: None,
+            }])
+        }
+        Op::AddComment {
+            id,
+            about,
+            lang,
+            text,
+            cites,
+            external,
+        } => {
+            let ap = ptr(p, "about");
+            let about = match (&about.capsule, &about.instrument) {
+                (Some(c), None) => {
+                    let cap = doc
+                        .capsules
+                        .iter()
+                        .find(|x| &x.id == c || &x.finding == c)
+                        .ok_or_else(|| {
+                            E::new(ErrorCode::NotFound, format!("no capsule `{c}`"))
+                                .at(ptr(&ap, "capsule"))
+                                .dym(c, doc.capsules.iter().map(|x| x.id.as_str()))
+                                .build()
+                        })?;
+                    qp_schema::protocol::CommentAbout {
+                        capsule: Some(cap.id.clone()),
+                        instrument: None,
+                    }
+                }
+                (None, Some(i)) => {
+                    let known = doc.series.iter().any(|s| s.symbol() == Some(i.as_str()));
+                    if !known {
+                        return Err(E::new(
+                            ErrorCode::NotFound,
+                            format!("no series of instrument `{i}`"),
+                        )
+                        .at(ptr(&ap, "instrument"))
+                        .dym(i, doc.series.iter().filter_map(|s| s.symbol()))
+                        .build());
+                    }
+                    about.clone()
+                }
+                _ => {
+                    return Err(E::new(
+                        ErrorCode::Invalid,
+                        "`about` names exactly one of `capsule` and `instrument`",
+                    )
+                    .at(ap)
+                    .expected(["capsule", "instrument"])
+                    .build())
+                }
+            };
+            for (j, c) in cites.iter().enumerate() {
+                need_item(doc, c, &ptr(&ptr(p, "cites"), j))?;
+            }
+            let cid = ctx.new_id(doc, "cmt", id.as_ref(), &ptr(p, "id"))?;
+            Ok(vec![ChangeOp::PutComment {
+                index: None,
+                comment: qp_schema::protocol::Comment {
+                    id: cid,
+                    about,
+                    lang: *lang,
+                    text: text.clone(),
+                    cites: cites.clone(),
+                    external: external.clone(),
+                    strictness: ctx.plane.comment_strictness,
+                    provenance: ctx.prov(cites.clone()),
+                    on_behalf: ctx.plane.delegates.get(ctx.speaker).cloned(),
+                },
             }])
         }
         Op::AddNarrative { id, about, steps } => {
@@ -1668,7 +1737,7 @@ fn expand_remove(doc: &Document, id: &str, p: &str) -> PResult<Vec<ChangeOp>> {
                 ip,
             ))
         }
-        C::Capsules | C::Intents | C::Narratives => {}
+        C::Capsules | C::Intents | C::Narratives | C::Comments => {}
     }
     if matches!(coll, C::Series | C::Facts | C::Findings) {
         deps.extend(view_deps(doc, id));
@@ -2089,6 +2158,14 @@ pub(crate) fn summarize(op: &Op) -> String {
         Op::AddIntent { .. } => "add_intent".to_owned(),
         Op::SetIntentActive { intent, active } => format!("set_intent_active {intent}={active}"),
         Op::AddNarrative { about, .. } => format!("add_narrative about {about}"),
+        Op::AddComment { about, .. } => format!(
+            "add_comment about {}",
+            about
+                .capsule
+                .as_deref()
+                .or(about.instrument.as_deref())
+                .unwrap_or_default()
+        ),
         Op::ShowFinding { finding, .. } => format!("show_finding {finding}"),
         Op::Remove { id } => format!("remove {id}"),
         Op::AppendBars { series, bars } => format!("append_bars {series} +{}", bars.len()),

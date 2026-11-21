@@ -22,6 +22,7 @@ impl E {
             conflicts: Vec::new(),
             hint: None,
             reason: None,
+            reasons: Vec::new(),
         })
     }
 

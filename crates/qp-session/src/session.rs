@@ -328,6 +328,8 @@ fn proposable(op: &Op) -> bool {
             // never carried in a proposal that every reader would see.
             | Op::SetAudience { .. }
             | Op::SetSensitivity { .. }
+            // (R5B, §25.4) Comments are written directly, never proposed.
+            | Op::AddComment { .. }
     )
 }
 
@@ -349,6 +351,8 @@ fn allowed(op: &Op, perms: &Permissions) -> bool {
         // (R3, §20) A person's own capsule preferences: anyone who may read (another
         // person's: owner only, checked in the expansion).
         Op::SetAudience { .. } | Op::SetSensitivity { .. } => perms.read,
+        // (R5B, §25.4) A comment: anyone who may propose or write.
+        Op::AddComment { .. } => perms.propose || perms.write,
         _ => perms.write,
     }
 }
@@ -528,6 +532,10 @@ impl Session {
             .find(|p| p.role == Role::Host)
             .map(|p| p.id.clone());
         let mut plane = DataPlane::new(provider, host, limits.max_bind_bars);
+        // (R5B, §25.4) The comment validator's strictness.
+        if let Some(st) = init.comment_strictness {
+            plane.comment_strictness = st;
+        }
         // (R5B, §25.7) Agents reading for a person: the person must be a known human
         // principal that works for nobody itself (no chains, no cycles).
         for p in &init.principals {
@@ -1154,10 +1162,19 @@ impl Session {
                 mode,
                 base,
                 reason,
-            } => match self.command(ci, &id, &ops, mode, (base, reason), resolved) {
-                Ok(lines) => lines,
-                Err(e) => vec![err_line(conn, Some(id), e)],
-            },
+            } => {
+                let (full_len, pub_len) = (self.log.len(), self.pub_len() as usize);
+                match self.command(ci, &id, &ops, mode, (base, reason), resolved) {
+                    Ok(mut lines) => {
+                        // (R5B, §25.4) New comments to `comments` subscribers.
+                        if ops.iter().any(|o| matches!(o, Op::AddComment { .. })) {
+                            lines.extend(self.comment_events(full_len, pub_len));
+                        }
+                        lines
+                    }
+                    Err(e) => vec![err_line(conn, Some(id), e)],
+                }
+            }
             ClientMsg::Query { id, query } => {
                 if !permissions(self.conns[ci].role).read {
                     return vec![err_line(conn, Some(id), forbidden_read())];
@@ -1415,6 +1432,8 @@ impl Session {
         }
         // (R5B, §25) Human decisions and the agent write rule, before roles and modes.
         let mode = self.agent_check(ci, ops, mode)?;
+        // (R5B, §25.4) Comments are validated against what the writer may read.
+        self.check_comments(ci, ops)?;
         if ops.len() > 1 {
             if let Some(i) = ops
                 .iter()
@@ -1811,7 +1830,15 @@ impl Session {
             return Ok(lines);
         }
         // An entitled writer.
-        let pub_ops = self.ops_to_pub(ops);
+        let mut pub_ops = self.ops_to_pub(ops);
+        // (R5B, §25.4) A comment enters the public world only if a public reader could
+        // have written it (no licensed number, every cite public).
+        if ops.iter().any(|o| matches!(o, Op::AddComment { .. })) {
+            let ci = self.conn_index(w.conn);
+            if !ci.is_some_and(|ci| self.comment_public_ok(ci, ops)) {
+                pub_ops = None;
+            }
+        }
         let pub_side = match pub_ops.as_deref() {
             Some(o) => self.pub_expand(w, o, None).ok().map(|p| (o.to_vec(), p)),
             None => None,
@@ -3292,6 +3319,8 @@ impl Session {
             Topic::Stories { instrument, series } => {
                 self.stories_check(instrument, series.as_deref())?;
             }
+            // (R5B, §25.4) Comments: any filter (a capsule or an instrument may come later).
+            Topic::Comments { .. } => {}
         }
         self.conns[ci].subs.push(Sub {
             id: id.to_owned(),

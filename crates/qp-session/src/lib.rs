@@ -32,6 +32,7 @@ mod canon;
 mod capidx;
 pub mod capsule;
 mod claims;
+mod comments;
 pub mod conform;
 mod dispute;
 mod error;

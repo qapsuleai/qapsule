@@ -1913,6 +1913,18 @@ impl Session {
 
     /// Answer to the `capsule` query (run on the asker's projected document).
     pub(crate) fn capsule_query(&self, ci: usize, id: &str, path: &str) -> PResult<QueryResult> {
+        self.capsule_query_with(ci, id, path, true)
+    }
+
+    /// [`Session::capsule_query`]; with `with_comments`, the comments the reader may
+    /// receive (R5B, §25.4).
+    pub(crate) fn capsule_query_with(
+        &self,
+        ci: usize,
+        id: &str,
+        path: &str,
+        with_comments: bool,
+    ) -> PResult<QueryResult> {
         let principal = self.conns[ci].principal.clone();
         let lang = self.lang_of(ci);
         let p = self.proj.as_deref();
@@ -1993,6 +2005,11 @@ impl Session {
                 glyph,
                 evidence,
                 withheld: None,
+                comments: if with_comments {
+                    self.capsule_comments(ci, &c.id)
+                } else {
+                    Vec::new()
+                },
             }),
         })
     }
@@ -2115,6 +2132,7 @@ impl Session {
                         narratives: Vec::new(),
                         proposals: Vec::new(),
                         audiences: BTreeMap::new(),
+                        comments: Vec::new(),
                     }
                 };
                 ledger_rows(&doc)
@@ -2385,6 +2403,9 @@ impl Session {
             f.facts.retain(|x| !p.hidden.contains(x));
         }
         d.capsules.retain(|c| !p.hidden.contains(&c.id));
+        // (R5B, §25.4) Comments with a hidden cite or with numbers stay out.
+        d.comments
+            .retain(|c| crate::comments::projected_keeps(c, &p.hidden));
         let views_kept: Vec<qp_schema::View> = d
             .views
             .iter()
@@ -2519,6 +2540,8 @@ impl Session {
                 ChangeOp::PutAudience { principal, .. }
                     if !p.principal.is_empty() && principal != &p.principal => {}
                 ChangeOp::Delete { id } if p.hidden.contains(id) => {}
+                ChangeOp::PutComment { comment, .. }
+                    if !crate::comments::projected_keeps(comment, &p.hidden) => {}
                 ChangeOp::PushLedger { entry }
                     if p.hidden.contains(&entry.finding)
                         || entry.capsule.as_ref().is_some_and(|c| p.hidden.contains(c)) => {}
@@ -2542,6 +2565,14 @@ impl Session {
         x.changes = self.project_changes(&e.changes, p, lang);
         x.inverse = self.project_changes(&e.inverse, p, lang);
         x.request.retain(|op| !p.mentions_hidden(op));
+        // (R5B, §25.4) A comment's text with numbers does not go to a projected reader.
+        x.request.retain(|op| match op {
+            qp_schema::protocol::Op::AddComment { text, lang, .. } => {
+                qp_capsule::comment::numbers(text, qp_capsule::comment::lang_of(*lang), &[])
+                    .is_empty()
+            }
+            _ => true,
+        });
         // Another person's capsule preferences (positions, watch list, level) never go.
         let own = |w: &Option<String>| {
             p.principal.is_empty() || w.as_deref().unwrap_or(e.author.as_str()) == p.principal

@@ -53,6 +53,8 @@ pub fn json_schemas() -> Vec<(&'static str, serde_json::Value)> {
         ("SessionInit", schema_of::<protocol::SessionInit>()),
         ("Transcript", schema_of::<protocol::Transcript>()),
         ("MarketStatus", schema_of::<market::MarketStatus>()),
+        ("Comment", schema_of::<protocol::Comment>()),
+        ("CommentDraft", schema_of::<comment::CommentDraft>()),
     ]
 }
 

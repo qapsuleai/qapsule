@@ -79,6 +79,7 @@ fn collection_items(doc: &Document, c: Collection) -> Vec<Value> {
         Collection::Capsules => doc.capsules.iter().map(item_json).collect(),
         Collection::Intents => doc.intents.iter().map(item_json).collect(),
         Collection::Narratives => doc.narratives.iter().map(item_json).collect(),
+        Collection::Comments => doc.comments.iter().map(item_json).collect(),
         Collection::Proposals => doc.proposals.iter().map(item_json).collect(),
     }
 }

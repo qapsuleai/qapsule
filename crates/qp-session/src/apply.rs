@@ -28,6 +28,8 @@ pub fn find_collection(doc: &Document, id: &str) -> Option<Collection> {
         Some(Collection::Narratives)
     } else if doc.proposals.iter().any(|x| x.id == id) {
         Some(Collection::Proposals)
+    } else if doc.comments.iter().any(|x| x.id == id) {
+        Some(Collection::Comments)
     } else {
         None
     }
@@ -45,6 +47,7 @@ pub fn all_ids(doc: &Document) -> Vec<&str> {
     v.extend(doc.intents.iter().map(|x| x.id.as_str()));
     v.extend(doc.narratives.iter().map(|x| x.id.as_str()));
     v.extend(doc.proposals.iter().map(|x| x.id.as_str()));
+    v.extend(doc.comments.iter().map(|x| x.id.as_str()));
     v
 }
 
@@ -111,6 +114,9 @@ pub fn apply_change(doc: &mut Document, change: &ChangeOp) -> Result<ChangeOp, S
         }
         ChangeOp::PutIntent { intent, index } => {
             put!(doc, intents, intent, index, PutIntent, intent)
+        }
+        ChangeOp::PutComment { comment, index } => {
+            put!(doc, comments, comment, index, PutComment, comment)
         }
         ChangeOp::PutNarrative { narrative, index } => {
             put!(doc, narratives, narrative, index, PutNarrative, narrative)
@@ -318,6 +324,8 @@ pub fn apply_change(doc: &mut Document, change: &ChangeOp) -> Result<ChangeOp, S
                 ChangeOp::PutNarrative { narrative, index }
             } else if let Some((proposal, index)) = take(&mut doc.proposals, id, |x| &x.id) {
                 ChangeOp::PutProposal { proposal, index }
+            } else if let Some((comment, index)) = take(&mut doc.comments, id, |x| &x.id) {
+                ChangeOp::PutComment { comment, index }
             } else {
                 return Err(format!("no item `{id}`"));
             }
@@ -450,6 +458,7 @@ pub fn touched(change: &ChangeOp) -> &str {
         ChangeOp::PushLedger { .. } | ChangeOp::PopLedger {} => "ledger",
         ChangeOp::PutAudience { .. } => "audiences",
         ChangeOp::PutNarrative { narrative, .. } => &narrative.id,
+        ChangeOp::PutComment { comment, .. } => &comment.id,
         ChangeOp::PutProposal { proposal, .. } => &proposal.id,
         ChangeOp::Delete { id } => id,
         ChangeOp::AppendBars { series, .. }

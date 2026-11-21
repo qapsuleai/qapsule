@@ -6,7 +6,11 @@
 //!   it to a day first. `--source sim|live` is prepared, not served yet (R6 `livehost`).
 //! - Identity: `--principal` (default `claude`) must be in the init with an `agent`
 //!   author; the synthetic init adds `claude` (for `arkin`) and `claude-guest` (for
-//!   `guest`). Over HTTP, `X-Qp-Principal` picks another agent principal of the init.
+//!   `guest`). The server speaks only as `--principal`: an `X-Qp-Principal` naming
+//!   another is `403`. Several principals (measurements) need `--principals a,b` and a
+//!   loopback `--listen`; on another address, one token per principal (`--token-env
+//!   ID=VAR,…`) and the identity is the token's (the header is ignored). A legacy session
+//!   is bound at `initialize` to its principal; asking for another in it is `403`.
 //! - Transports: stdio (default; newline-delimited JSON-RPC) and Streamable HTTP
 //!   (`--http`): `POST /mcp` (one JSON-RPC message; `application/json` answer, or an
 //!   SSE stream for `subscriptions/listen` and for a request with a `logLevel`), `GET
@@ -54,9 +58,11 @@ pub struct ServeArgs {
     /// HTTP address to listen on. Anything but this machine needs `--token-env`.
     #[arg(long, default_value = "127.0.0.1")]
     pub listen: String,
-    /// Environment variable holding the bearer token every HTTP request must carry
-    /// (`Authorization: Bearer …`). Required with a non-local `--listen`.
-    #[arg(long, value_name = "VAR")]
+    /// Bearer token every HTTP request must carry (`Authorization: Bearer …`), read from
+    /// the environment. `VAR`: the token of `--principal`. `ID=VAR,ID=VAR`: one token per
+    /// principal; a request speaks as the principal of its token (`X-Qp-Principal` is
+    /// ignored). Required with a non-local `--listen`.
+    #[arg(long, value_name = "VAR|ID=VAR,…")]
     pub token_env: Option<String>,
     /// Session source: `synthetic` (default), `local` (real bars under
     /// `fixtures/local/`), `sim` or `live` (not yet: R6).
@@ -93,6 +99,10 @@ pub struct ServeArgs {
     /// Principal the server speaks as (an `agent` principal of the init).
     #[arg(long, default_value = "claude")]
     pub principal: String,
+    /// (Measurements) Further agent principals an HTTP request may pick with
+    /// `X-Qp-Principal`. Loopback `--listen` only; elsewhere use `--token-env ID=VAR,…`.
+    #[arg(long, value_delimiter = ',', value_name = "ID,ID")]
+    pub principals: Vec<String>,
     /// Tool surface (`thin`; see `crates/qp-mcp/src/surfaces/README.md`).
     #[arg(long, default_value = "thin")]
     pub surface: String,
@@ -257,28 +267,57 @@ pub fn serve(a: &ServeArgs) -> Result<(), String> {
         ));
     }
     let dev = device(&a.device)?;
-    let token = match &a.token_env {
-        Some(var) => {
-            let t = std::env::var(var).map_err(|_| format!("--token-env: `{var}` is not set"))?;
-            if t.trim().len() < 16 {
-                return Err(format!(
-                    "--token-env: `{var}` is shorter than 16 characters"
-                ));
-            }
-            Some(t.trim().to_owned())
-        }
+    let tokens = match &a.token_env {
+        Some(spec) => Some(read_tokens(spec)?),
         None => None,
     };
-    if a.http && !is_local(&a.listen) && token.is_none() {
+    if a.http && !is_local(&a.listen) && tokens.is_none() {
         return Err(format!(
             "--listen {}: a non-local address needs --token-env VAR (bearer token); \
              the default 127.0.0.1 serves this machine only",
             a.listen
         ));
     }
+    if !a.principals.is_empty() {
+        if !a.http {
+            return Err("--principals: HTTP only (--http); stdio speaks as --principal".into());
+        }
+        if !is_local(&a.listen) {
+            return Err(format!(
+                "--principals: several principals are served only on a loopback --listen \
+                 (not {}); on another address give each its own token: \
+                 --token-env ID=VAR,ID=VAR",
+                a.listen
+            ));
+        }
+        if matches!(tokens, Some(Tokens::PerPrincipal(_))) {
+            return Err(
+                "--principals with --token-env ID=VAR: the token names the principal; \
+                 give only one of them"
+                    .into(),
+            );
+        }
+    }
     let init = session_init(a)?;
     check_principal(&init, &a.principal)?;
-    let agents = agent_principals(&init);
+    let mut allowed = vec![a.principal.clone()];
+    for p in &a.principals {
+        check_principal(&init, p).map_err(|e| e.replacen("--principal ", "--principals ", 1))?;
+        if !allowed.contains(p) {
+            allowed.push(p.clone());
+        }
+    }
+    let (token, principal_tokens) = match tokens {
+        None => (None, Vec::new()),
+        Some(Tokens::Single(t)) => (Some(t), Vec::new()),
+        Some(Tokens::PerPrincipal(ts)) => {
+            for (p, _) in &ts {
+                check_principal(&init, p)
+                    .map_err(|e| e.replacen("--principal ", "--token-env ", 1))?;
+            }
+            (None, ts)
+        }
+    };
     let log = match &a.log {
         Some(p) => Some(calllog::CallLog::append(p)?.shared()),
         None => None,
@@ -286,28 +325,84 @@ pub fn serve(a: &ServeArgs) -> Result<(), String> {
     let hub = build_hub(init, &a.root, a.seek.as_deref())?;
     let cfg = HostCfg {
         default_principal: a.principal.clone(),
-        agents,
+        allowed,
         surface: a.surface.clone(),
         device: dev,
         log,
     };
     if a.http {
-        serve_http(&hub, cfg, a, token)
+        serve_http(&hub, cfg, a, token, principal_tokens)
     } else {
         serve_stdio(&hub, &cfg, a.run.clone())
     }
 }
 
+/// `--token-env`: `VAR` (the token of `--principal`) or `ID=VAR,ID=VAR` (one per
+/// principal).
+enum Tokens {
+    Single(String),
+    PerPrincipal(Vec<(String, String)>),
+}
+
+fn read_token(var: &str) -> Result<String, String> {
+    let t = std::env::var(var).map_err(|_| format!("--token-env: `{var}` is not set"))?;
+    if t.trim().len() < 16 {
+        return Err(format!(
+            "--token-env: `{var}` is shorter than 16 characters"
+        ));
+    }
+    Ok(t.trim().to_owned())
+}
+
+fn read_tokens(spec: &str) -> Result<Tokens, String> {
+    if !spec.contains('=') {
+        return read_token(spec.trim()).map(Tokens::Single);
+    }
+    let mut out: Vec<(String, String)> = Vec::new();
+    for part in spec.split(',').map(str::trim).filter(|p| !p.is_empty()) {
+        let Some((id, var)) = part.split_once('=') else {
+            return Err(format!(
+                "--token-env `{part}`: expected ID=VAR (every entry, or a single VAR)"
+            ));
+        };
+        let (id, var) = (id.trim(), var.trim());
+        if id.is_empty() || var.is_empty() {
+            return Err(format!("--token-env `{part}`: expected ID=VAR"));
+        }
+        if out.iter().any(|(p, _)| p == id) {
+            return Err(format!("--token-env: `{id}` is named twice"));
+        }
+        let t = read_token(var)?;
+        if out.iter().any(|(_, x)| crate::demo::same_secret(x, &t)) {
+            return Err(format!(
+                "--token-env: `{var}` holds the same token as another principal's"
+            ));
+        }
+        out.push((id.to_owned(), t));
+    }
+    if out.is_empty() {
+        return Err("--token-env: no ID=VAR entry".into());
+    }
+    Ok(Tokens::PerPrincipal(out))
+}
+
+/// A loopback address (`localhost`, `127.0.0.0/8`, `::1`).
 fn is_local(addr: &str) -> bool {
-    matches!(addr, "127.0.0.1" | "localhost" | "::1" | "[::1]") || addr.starts_with("127.")
+    addr.eq_ignore_ascii_case("localhost")
+        || addr
+            .trim_start_matches('[')
+            .trim_end_matches(']')
+            .parse::<std::net::IpAddr>()
+            .is_ok_and(|ip| ip.is_loopback())
 }
 
 /// What an endpoint is opened with.
 pub struct HostCfg {
     /// Principal when a request names none.
     pub default_principal: String,
-    /// Principals a request may name (`X-Qp-Principal`): the init's agents.
-    pub agents: Vec<String>,
+    /// Principals a request may name with `X-Qp-Principal`: `default_principal`, plus
+    /// `--principals` (loopback only). A token-derived principal is not checked here.
+    pub allowed: Vec<String>,
     /// Tool surface name.
     pub surface: String,
     /// Device surface of the `hello`.
@@ -407,6 +502,9 @@ pub struct HttpGate {
     pub hosts: Option<Vec<String>>,
     /// Bearer token every request must carry.
     pub token: Option<String>,
+    /// One bearer token per principal: a request must carry one of them and speaks as
+    /// its principal (`X-Qp-Principal` is ignored). Non-empty: `token` is not used.
+    pub principal_tokens: Vec<(String, String)>,
 }
 
 impl HttpGate {
@@ -425,12 +523,25 @@ impl HttpGate {
         }
     }
 
-    fn token_ok(&self, auth: Option<&str>) -> bool {
+    /// The bearer check: `Err` when refused; `Ok(Some(p))` when the token names the
+    /// principal `p`.
+    fn authenticate(&self, auth: Option<&str>) -> Result<Option<String>, ()> {
+        let given = auth.and_then(|a| a.strip_prefix("Bearer ")).map(str::trim);
+        if !self.principal_tokens.is_empty() {
+            let Some(given) = given else { return Err(()) };
+            // Every token is compared (each in constant time), whichever matches.
+            let mut found = None;
+            for (p, t) in &self.principal_tokens {
+                if crate::demo::same_secret(given, t) {
+                    found = Some(p.clone());
+                }
+            }
+            return found.map(Some).ok_or(());
+        }
         match &self.token {
-            None => true,
-            Some(t) => auth
-                .and_then(|a| a.strip_prefix("Bearer "))
-                .is_some_and(|given| crate::demo::same_secret(given.trim(), t)),
+            None => Ok(None),
+            Some(t) if given.is_some_and(|g| crate::demo::same_secret(g, t)) => Ok(None),
+            Some(_) => Err(()),
         }
     }
 }
@@ -441,6 +552,8 @@ pub enum Job {
     Post {
         /// Lower-case header names.
         headers: BTreeMap<String, String>,
+        /// The principal its bearer token names (then `X-Qp-Principal` is ignored).
+        principal: Option<String>,
         /// The JSON-RPC message.
         body: Value,
         /// Where the answer goes.
@@ -546,7 +659,7 @@ pub fn handle(
         respond(s, 403, &rpc_error_body(-32600, "Origin not allowed"), None);
         return;
     }
-    if !gate.token_ok(headers.get("authorization").map(String::as_str)) {
+    let Ok(principal) = gate.authenticate(headers.get("authorization").map(String::as_str)) else {
         respond(
             s,
             401,
@@ -554,7 +667,7 @@ pub fn handle(
             None,
         );
         return;
-    }
+    };
     let session = headers.get("mcp-session-id").cloned();
     let (tx, rx) = mpsc::channel();
     match method {
@@ -592,6 +705,7 @@ pub fn handle(
             }
             send(Job::Post {
                 headers: headers.clone(),
+                principal,
                 body: v,
                 reply: tx,
             });
@@ -699,6 +813,7 @@ fn serve_http(
     cfg: HostCfg,
     a: &ServeArgs,
     token: Option<String>,
+    principal_tokens: Vec<(String, String)>,
 ) -> Result<(), String> {
     let listener = TcpListener::bind((a.listen.as_str(), a.port))
         .map_err(|e| format!("bind {}:{}: {e}", a.listen, a.port))?;
@@ -718,7 +833,12 @@ fn serve_http(
     } else {
         None
     };
-    let gate = std::sync::Arc::new(HttpGate { port, hosts, token });
+    let gate = std::sync::Arc::new(HttpGate {
+        port,
+        hosts,
+        token,
+        principal_tokens,
+    });
     eprintln!(
         "{}",
         json!({"listening": format!("http://{shown}:{port}/mcp")})
@@ -745,10 +865,14 @@ fn serve_http(
     }
 }
 
-/// One MCP session over HTTP: an endpoint per principal and its streams.
+/// One MCP session over HTTP: an endpoint per principal and its streams. A legacy
+/// session (`Mcp-Session-Id`) has one principal, bound at `initialize`; the stateless
+/// session (`""`) has an endpoint per principal a request was allowed to speak as.
 #[derive(Default)]
 struct HttpSession {
     servers: BTreeMap<String, McpServer>,
+    /// The principal a legacy session was initialized as.
+    bound: Option<String>,
     /// Legacy revision (the session said `initialize`).
     legacy: Option<String>,
     /// `GET /mcp` streams (legacy `notifications/message`).
@@ -787,10 +911,11 @@ impl McpHost {
         match job {
             Job::Post {
                 headers,
+                principal,
                 body,
                 reply,
             } => {
-                let a = self.post(hub, &headers, &body);
+                let a = self.post(hub, &headers, principal, &body);
                 let _ = reply.send(a);
             }
             Job::Get { session, reply } => {
@@ -832,6 +957,7 @@ impl McpHost {
         &mut self,
         hub: &SharedHub,
         headers: &BTreeMap<String, String>,
+        token_principal: Option<String>,
         body: &Value,
     ) -> Answer {
         let err = |status: u16, code: i64, msg: &str| Answer::Body {
@@ -851,18 +977,41 @@ impl McpHost {
             },
             None => String::new(),
         };
-        let principal = headers
-            .get("x-qp-principal")
-            .cloned()
-            .unwrap_or_else(|| self.cfg.default_principal.clone());
-        if !self.cfg.agents.contains(&principal) {
+        // The principal: the token's (the header is ignored), else `X-Qp-Principal`
+        // (an allowed one only), else the one the session is bound to, else the default.
+        let token_derived = token_principal.is_some();
+        let asked = token_principal.or_else(|| headers.get("x-qp-principal").cloned());
+        let bound = self.sessions.get(&sid).and_then(|s| s.bound.clone());
+        let principal = match (asked, bound) {
+            (Some(p), Some(b)) if p != b => {
+                return err(
+                    403,
+                    -32001,
+                    &format!(
+                        "this Mcp-Session-Id speaks as `{b}` (bound at initialize); \
+                         `{p}` needs its own session"
+                    ),
+                );
+            }
+            (Some(p), _) => p,
+            (None, Some(b)) => b,
+            (None, None) => self.cfg.default_principal.clone(),
+        };
+        if !token_derived && !self.cfg.allowed.contains(&principal) {
             return err(
                 403,
                 -32001,
-                &format!("X-Qp-Principal `{principal}` is not an agent principal of the session"),
+                &format!(
+                    "X-Qp-Principal `{principal}` is not served here (served: {}); \
+                     several agent principals need --principals on a loopback address",
+                    self.cfg.allowed.join(", ")
+                ),
             );
         }
         let session = self.sessions.entry(sid.clone()).or_default();
+        if !sid.is_empty() && session.bound.is_none() {
+            session.bound = Some(principal.clone());
+        }
         if !session.servers.contains_key(&principal) {
             self.next_conn += 1;
             let conn = format!("mcp-{}", self.next_conn);

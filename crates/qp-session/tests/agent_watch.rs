@@ -280,7 +280,8 @@ fn another_persons_watch_id_reads_like_a_missing_id_on_every_path() {
     let theirs = r[0]["msg"]["created"][0].as_str().unwrap().to_owned();
     // A missing id of the same shape (its last digit changed).
     let missing = format!("{}9", &theirs[..theirs.len() - 1]);
-    let paths: Vec<(&str, Box<dyn Fn(&str) -> Value>)> = vec![
+    type Path = (&'static str, Box<dyn Fn(&str) -> Value>);
+    let paths: Vec<Path> = vec![
         (
             "remove_watch",
             Box::new(

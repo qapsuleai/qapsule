@@ -112,6 +112,23 @@ pub fn detector_sets() -> Vec<DetectorEntry> {
         },
         // M26 alternatifleri: bir satır, ör.
         // DetectorEntry { name: "a1", make: m26_a1::detectors },
+        DetectorEntry {
+            name: "mevsim",
+            make: m26_mevsim::detectors,
+        },
+        // `mevsim` denemeleri (M26/mevsim/NOTES.md): yeniden üretim için.
+        DetectorEntry {
+            name: "mevsim_t1v",
+            make: m26_mevsim::trial_volume,
+        },
+        DetectorEntry {
+            name: "mevsim_t1vb",
+            make: m26_mevsim::trial_volume_breakout,
+        },
+        DetectorEntry {
+            name: "mevsim_t2g",
+            make: m26_mevsim::trial_gate,
+        },
     ]
 }
 

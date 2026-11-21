@@ -99,6 +99,13 @@ pub fn rules() -> Vec<RuleEntry> {
         },
         // M25 alternatifleri: bir satır, ör.
         // RuleEntry { name: "a1", make: m25_a1::outcome, levels: |s, b| m25_a1::levels(s, b).map(Levels::from), constants: 4 },
+        // r3's 7 + Z + M.
+        RuleEntry {
+            name: "umut",
+            make: m25_umut::outcome,
+            levels: |s, b| m25_umut::levels(s, b).map(Levels::from),
+            constants: 9,
+        },
     ]
 }
 

@@ -43,6 +43,8 @@
 #          waiting; closed hours take at most 2 s. The page is the live demo's. This
 #          machine only: --sim with --lan, --https-host or --bind is refused.
 #          Counts: curl -s -H "X-Qp-Live-Control: $QP_LIVE_CONTROL" localhost:8390/live/stats
+# RP4/S: --rule rp4 (any mode) runs the capsule engine with the rp4 constant record
+#          (docs/CAPSULE.md §9.9); the default stays r3.
 # Requirements: rustup target wasm32-unknown-unknown, wasm-pack (cargo install wasm-pack).
 set -euo pipefail
 

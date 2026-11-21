@@ -186,7 +186,7 @@ LiveIn::Trade ──► LiveRuntime (benzetim saati; LiveIn::Clock) ──► Li
 | Seans evresi | Fiyat kartı olmadığı için sembol başına `stockStatus` yok. Piyasa durumu (açık / kapalı / tatil) XIST takviminden gelir (`MarketSource::Calendar`), canlıda kart sessizken olduğu gibi; sembol evreleri boştur (`phases` 0). Açılış ve kapanış emir toplama işlemleri bar kuralıyla (K14) ilk ve son bara girer. |
 | Hız | `--speed N`: seans içinde N× gerçek zaman; kapalı aralıklar (gece, hafta sonu, açılış öncesi) en çok 2 sn sürer. `--speed max`: beklemesiz. Hız yalnız gönderme anını değiştirir; aynı önbellek ve bağımsız değişkenler her hızda **bayt eşit** akış verir (test: `same_input_twice_gives_a_byte_equal_stream_at_any_speed`). Hız sahte saatle sınanır (`pace_follows_the_speed_factor_on_a_fake_clock`). |
 | Çıktı | Standart çıktıya yalnız toplu sayılar ve akışın SHA-256 özeti (iki koşuyu veri basmadan karşılaştırmak için). `--out` yalnız `fixtures/local/` altına (başka yer reddedilir): her satır bir veri olayı (`ev`), kapsül doğumu/durum değişimi (`capsule`, `state`, `rev`), piyasa durumu değişimi (`market`) ya da otoritenin iletisi. |
-| Kural | `--rule r3` (bugünkü `EngineConfig::r3`). Adlandırılmış kural kayıtları (`sim::RULES`) kalibrasyonla eklenecek; başka ad reddedilir. |
+| Kural | `--rule r3` (varsayılan; bugünkü `EngineConfig::r3`) ya da `--rule rp4` (RP4 kalibrasyonunun kaydı; `docs/CAPSULE.md` §9.9). Adlandırılmış kayıtlar `qp_capsule::ENGINES`; başka ad reddedilir. `qp demo --live/--sim --rule rp4` de aynı. |
 | Gizlilik | Gerçek veri: `qp demo --sim` yalnız 127.0.0.1; `--lan`, `--https-host` ve başka `--bind` reddedilir (qp ve `scripts/demo.sh`; test `tests/demo_sim.rs`, VERIFY 17). |
 
 ### Arkin için: izlemek

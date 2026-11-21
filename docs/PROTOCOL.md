@@ -1959,8 +1959,19 @@ Barındırıcı yapılandırması (`SessionInit.capsules`, protokol mesajı değ
 
 - `series`: motorun koştuğu bar serileri (bağlı ya da belge içi; sembolü olan). Yoksa motor
   yok: R3 öncesi davranış.
+- `engine` (RP4, isteğe bağlı): motorun **kapsül sabit kaydı** (`docs/CAPSULE.md` §9.9):
+  `"r3"` ya da `"rp4"`. Kayıt sonuç kuralını ve dedektör setini birlikte seçer
+  (`qp_capsule::EngineConfig::named`, `qp_facts::detectors_named`). **Yoksa `r3`**
+  (protokol varsayılanı; alan yazılmaz, var olan dökümler bayt eşit). Bilinmeyen ad
+  oturum başlarken reddedilir (`init.capsules.engine: unknown record …`). `rp4`'te
+  hikâyenin `resolution.rule`'u `rp4`, bulgunun `invalidation` metni `rp4` kuralını anar;
+  `breakout.range` ve `flow.volume_surge` olgularının `detector_version`'ı 2'dir (karne
+  anahtarı ayrı). Herkese açık motor (K1) aynı kayıtla koşar. Yansı ve görüntüleyici,
+  kendi verisiyle koştuğu dedektörleri hikâyelerin `resolution.rule`'undan seçer.
+  `qp sim --rule rp4`, `qp demo --rule rp4` bu alanı yazar (`r3` için yazmaz).
 - Bir bar **kesinleşince** (sonraki bar geldi ya da pencere kapalı; RP2 olgunluğu)
-  dedektörler (`qp_facts::default_detectors`, akışkan) ve motor (`EngineConfig::r3`) o barı
+  dedektörler (`qp_facts::default_detectors`, akışkan) ve motor (`EngineConfig::r3`; ya da
+  `engine` kaydınınkiler) o barı
   işler. Bakış başına (bir yazı, bir veri olayı, yükleme) ilerleyen her seri için **tek motor
   girdisi** (`qp`) yazılır, değişim olmasa da: günlüğün ritmi bar kapanışıdır, lisanslı bir
   hikâyenin varlığı değil. Özet `capsules <seri> bar <i>` ya da `… bars a..=b`.

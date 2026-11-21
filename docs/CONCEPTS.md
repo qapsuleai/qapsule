@@ -144,6 +144,7 @@ Ayrıntı `docs/PROTOCOL.md` §19; seçimin gerekçesi `rounds/RP2/experiments/T
 | Kesinleşme | finalize | Bar kapanınca otoritenin hikâyeye kimlik vermesi ve günlüğe yazması. |
 | Eskime | aging | Hikâyenin bar sayısıyla ölçülen doğal ömrü (`horizon_bars`), açık geçersizlik koşulu ve sonuç. Saatle ölçülmez. |
 | Sonuç kuralı | outcome rule (M5) | Tür başına "gerçekleşti" tanımı ve ufku (bar). Yalnız hikâyenin kapanış barına kadarki veriyi okur. |
+| Kapsül sabit kaydı | `EngineConfig::named`, `qp_facts::detectors_named` (RP4) | Kapsül motorunun sonuç kuralını ve dedektör setini (ve onların sabitlerini) birlikte adlandıran, sürümlü kayıt: `r3` (protokol varsayılanı), `rp4`. Sabit değişikliği yeni bir kayıttır; eski kayıt adıyla seçilebilir kalır. Barındırıcı `init.capsules.engine` ile seçer (`docs/CAPSULE.md` §9.9). |
 | Karne istatistiği | `LedgerStat` | Bir karne anahtarı (tür + dedektör + sürüm) için kapanmış kapsül sayısı ve gerçekleşenler. "Geri çekildi" sayılmaz. |
 | Doğumdaki karne | `ledger_at_birth` | Kapsülün doğduğu barda görünen karne: yalnız o bardan **önce** kapanmış kapsüllerden (ileriye bakma yok). |
 | İleriye bakma | look-ahead | Bir değerin, ait olduğu andan sonraki veriye bağlı olması. Karne ve sonuç kuralında yasaktır; test: gelecek veri karıştırılınca geçmiş karne değişmez. |

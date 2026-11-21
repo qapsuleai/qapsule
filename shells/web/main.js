@@ -463,8 +463,22 @@ function renderProposals() {
     d.className = 'prop';
     const a = document.createElement('b');
     a.textContent = r.author;
-    const p = document.createElement('p');
-    p.textContent = r.text;
+    d.append(a);
+    // What accepting does: one line per operation with its arguments (the core's).
+    for (const line of r.ops) {
+      const o = document.createElement('p');
+      const c = document.createElement('code');
+      c.textContent = line;
+      o.append(c);
+      d.append(o);
+    }
+    // The proposer's own words, labelled as theirs by the core; never the description.
+    if (r.reason) {
+      const p = document.createElement('p');
+      p.className = 'small';
+      p.textContent = r.reason;
+      d.append(p);
+    }
     const row = document.createElement('div');
     const yes = document.createElement('button');
     yes.textContent = t('accept');
@@ -473,7 +487,7 @@ function renderProposals() {
     no.textContent = t('reject');
     no.onclick = () => { core.decide(r.id, false); flush(); };
     row.append(yes, no);
-    d.append(a, p, row);
+    d.append(row);
     out.push(d);
   }
   $('proposals').replaceChildren(...out);

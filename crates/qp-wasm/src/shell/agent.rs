@@ -56,34 +56,69 @@ fn comment_row(c: &Comment, lang: Language) -> Value {
     json!({"id": c.id, "label": label, "origin": origin, "text": c.text})
 }
 
-/// One pending proposal as the page shows it: `{id, author, text}` (`text`: its
-/// operations by name, then the proposer's reason).
+/// The longest operation line shown (characters); a longer one is cut with an ellipsis.
+pub const OP_LINE_MAX: usize = 240;
+
+/// One operation as the reader sees what accepting it does: its name, then every argument
+/// as `key=value` in the key order of the serialized operation (deterministic): a string
+/// or a number as it is, anything else as compact JSON. E.g. `set_view_range view=main
+/// from_bar=100 to_bar=150`. Cut at [`OP_LINE_MAX`] characters with `…`.
+#[must_use]
+pub fn op_line(op: &qp_schema::protocol::Op) -> String {
+    let v = serde_json::to_value(op).unwrap_or(Value::Null);
+    let Some(obj) = v.as_object() else {
+        return v.to_string();
+    };
+    let mut line = obj
+        .get("op")
+        .and_then(Value::as_str)
+        .unwrap_or("?")
+        .to_owned();
+    for (k, a) in obj.iter().filter(|(k, _)| k.as_str() != "op") {
+        let val = match a {
+            Value::String(s) => s.clone(),
+            Value::Number(n) => n.to_string(),
+            other => other.to_string(),
+        };
+        line.push(' ');
+        line.push_str(k);
+        line.push('=');
+        line.push_str(&val);
+    }
+    if line.chars().count() > OP_LINE_MAX {
+        line = line.chars().take(OP_LINE_MAX - 1).collect();
+        line.push('…');
+    }
+    line
+}
+
+/// One pending proposal as the page shows it: `{id, author, ops, reason}` — `ops`: one
+/// line per operation with its arguments (what accepting it does, [`op_line`]); `reason`:
+/// the proposer's own words, labelled as theirs ("ajan gerekçesi: …"), or `null`. The
+/// reason never stands for the operations.
 fn proposal_row(p: &Proposal, lang: Language) -> Value {
     let who = author_name(&p.provenance.author);
-    let kind = match (&p.provenance.author, lang) {
-        (Author::Agent { .. }, Language::En) => " (agent)",
-        (Author::Agent { .. }, _) => " (ajan)",
+    let agent = matches!(p.provenance.author, Author::Agent { .. });
+    let kind = match (agent, lang) {
+        (true, Language::En) => " (agent)",
+        (true, _) => " (ajan)",
         _ => "",
     };
     let author = match lang {
         Language::En => format!("Proposed by {who}{kind}"),
         _ => format!("Öneren: {who}{kind}"),
     };
-    let ops: Vec<String> = p
-        .ops
-        .iter()
-        .filter_map(|o| {
-            serde_json::to_value(o)
-                .ok()
-                .and_then(|v| v.get("op").and_then(Value::as_str).map(str::to_owned))
-        })
-        .collect();
-    let mut text = ops.join(", ");
-    if let Some(r) = p.reason.as_deref().filter(|r| !r.is_empty()) {
-        text.push_str(" — ");
-        text.push_str(r);
-    }
-    json!({"id": p.id, "author": author, "text": text})
+    let ops: Vec<String> = p.ops.iter().map(op_line).collect();
+    let reason = p.reason.as_deref().filter(|r| !r.is_empty()).map(|r| {
+        let label = match (agent, lang) {
+            (true, Language::En) => "agent's reason",
+            (true, _) => "ajan gerekçesi",
+            (false, Language::En) => "proposer's reason",
+            (false, _) => "önerenin gerekçesi",
+        };
+        format!("{label}: {r}")
+    });
+    json!({"id": p.id, "author": author, "ops": ops, "reason": reason})
 }
 
 impl ShellCore {
@@ -179,7 +214,7 @@ impl ShellCore {
         )
     }
 
-    /// (R5B) The pending proposals as the page shows them: `[{id, author, text}]`.
+    /// (R5B) The pending proposals as the page shows them: `[{id, author, ops, reason}]`.
     #[must_use]
     pub fn proposals_json(&self) -> Value {
         let lang = self.lang;

@@ -153,7 +153,12 @@ fn a_pending_proposal_is_listed_and_the_readers_accept_applies_it() {
     assert_eq!(rows.as_array().unwrap().len(), 1, "{rows}");
     assert_eq!(rows[0]["id"], pid.as_str());
     assert_eq!(rows[0]["author"], "Öneren: aa (ajan)");
-    assert_eq!(rows[0]["text"], "show_finding");
+    // What accepting does, with its arguments; no reason given: none shown.
+    assert_eq!(
+        rows[0]["ops"],
+        json!(["show_finding finding=fnd.THYAO.continuation.down.84 view=v-show"])
+    );
+    assert_eq!(rows[0]["reason"], Value::Null);
     // An unknown id sends nothing.
     r.core.decide("prop-nope", true);
     assert!(r.core.take_outbox().is_empty());
@@ -190,4 +195,60 @@ fn reject_sends_reject_proposal() {
         json!([{"op":"reject_proposal","proposal":pid}])
     );
     assert_eq!(r.core.proposals_json(), json!([]));
+}
+
+/// (Security review: confused deputy) The agent's free reason never stands for what the
+/// proposal does: each operation is shown with its arguments, the reason on its own line
+/// labelled as the agent's — even when the reason says something else.
+#[test]
+fn the_agents_reason_is_labelled_and_never_the_description() {
+    let mut r = Rig::new("tr");
+    let ack = r.agent(
+        json!({"type":"command","id":"p","reason":"yalnızca renk düzeltmesi",
+        "ops":[{"op":"show_finding","finding":"fnd.THYAO.continuation.down.84","view":"v-show"}]}),
+    );
+    assert_eq!(ack["status"], "proposed", "{ack}");
+    let rows = r.core.proposals_json();
+    assert_eq!(
+        rows[0]["ops"],
+        json!(["show_finding finding=fnd.THYAO.continuation.down.84 view=v-show"]),
+        "{rows}"
+    );
+    assert_eq!(
+        rows[0]["reason"],
+        "ajan gerekçesi: yalnızca renk düzeltmesi"
+    );
+    assert_eq!(rows[0]["author"], "Öneren: aa (ajan)");
+    let mut en = Rig::new("en");
+    en.agent(json!({"type":"command","id":"p","reason":"cosmetic",
+        "ops":[{"op":"show_finding","finding":"fnd.THYAO.continuation.down.84","view":"v-show"}]}));
+    assert_eq!(
+        en.core.proposals_json()[0]["reason"],
+        "agent's reason: cosmetic"
+    );
+}
+
+/// An operation line: name and every argument in a fixed order; a long one is cut with
+/// an ellipsis.
+#[test]
+fn an_operation_line_carries_its_arguments() {
+    use qp_schema::protocol::Op;
+    use qp_wasm::shell::agent::{op_line, OP_LINE_MAX};
+    let op: Op = serde_json::from_value(
+        json!({"op":"set_view_range","view":"main","from_bar":100,"to_bar":150}),
+    )
+    .unwrap();
+    let line = op_line(&op);
+    assert!(line.starts_with("set_view_range "), "{line}");
+    for part in ["view=main", "from_bar=100", "to_bar=150"] {
+        assert!(line.contains(part), "{line}");
+    }
+    assert_eq!(line, op_line(&op), "deterministic");
+    let long: Op = serde_json::from_value(
+        json!({"op":"set_view_range","view":"v".repeat(400),"from_bar":1,"to_bar":2}),
+    )
+    .unwrap();
+    let l = op_line(&long);
+    assert_eq!(l.chars().count(), OP_LINE_MAX);
+    assert!(l.ends_with('…'), "{l}");
 }

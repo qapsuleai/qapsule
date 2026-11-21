@@ -712,7 +712,7 @@ mod shell_binding {
             self.inner.comments_json().to_string()
         }
 
-        /// (R5B) The pending proposals, written for the page (JSON `[{id, author, text}]`).
+        /// (R5B) The pending proposals, written for the page (JSON `[{id, author, ops, reason}]`: each op with its arguments, the proposer's reason labelled as theirs).
         pub fn proposals(&self) -> String {
             self.inner.proposals_json().to_string()
         }

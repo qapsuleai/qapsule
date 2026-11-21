@@ -184,7 +184,7 @@ pub fn agent_op(doc: &Document, op: &Op) -> AgentOp {
         | Op::SetViewRange { .. }
         | Op::AddNarrative { .. }
         | Op::ShowFinding { .. } => AgentOp::Proposal,
-        Op::AddComment { .. } => AgentOp::Direct,
+        Op::AddComment { .. } | Op::AddWatch { .. } | Op::RemoveWatch { .. } => AgentOp::Direct,
         // A new study series only: an existing series is never replaced.
         Op::AddStudy { id, .. } => {
             if id

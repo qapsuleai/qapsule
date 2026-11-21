@@ -1367,10 +1367,19 @@ impl Session {
             }
             w.done = fin;
             let series = w.series.clone();
-            let changes = self.capsule_changes(&runner.engine, &events, &made, fin - 1);
+            let mut changes = self.capsule_changes(&runner.engine, &events, &made, fin - 1);
+            // (R5B, §25.5) Watches, in the same entry.
+            let (wch, matched) = self.match_watches(&events);
+            changes.extend(wch);
+            let mut matched_pub = Vec::new();
             if let Some(pe) = runner.pub_engine.as_ref() {
-                let changes =
-                    self.in_world(true, |s| s.capsule_changes(pe, &events_pub, &made, fin - 1));
+                let (changes, mp) = self.in_world(true, |s| {
+                    let mut c = s.capsule_changes(pe, &events_pub, &made, fin - 1);
+                    let (w, m) = s.match_watches(&events_pub);
+                    c.extend(w);
+                    (c, m)
+                });
+                matched_pub = mp;
                 self.pending_pub = Some(crate::public::PubPending::of(changes));
             }
             let summary = if fin - from == 1 {
@@ -1389,6 +1398,10 @@ impl Session {
             wrote = true;
             lines.extend(self.entry_events(seq));
             lines.extend(self.capsule_topic_lines(seq, &events, &events_pub, &said));
+            if !matched.is_empty() || !matched_pub.is_empty() {
+                let ps = self.pub_of(seq);
+                lines.extend(self.watch_lines(&matched, seq, &matched_pub, ps));
+            }
             runner = self.runner.take().expect("runner put back");
         }
         self.runner = Some(runner);
@@ -1607,6 +1620,12 @@ impl Session {
     pub(crate) fn intents_on(doc: &Document) -> Vec<String> {
         let mut out = Vec::new();
         for i in doc.intents.iter().filter(|i| i.active) {
+            // (R5B, §25.5) A watch on one instrument.
+            if let Some(sym) = i.watch.as_ref().and_then(|w| w.match_.instrument.as_ref()) {
+                if !out.iter().any(|x| x == sym) {
+                    out.push(sym.clone());
+                }
+            }
             let Some(t) = &i.trigger else { continue };
             for (_, s) in crate::values::condition_series(t) {
                 if let Some(sym) = bar_series(doc, s).and_then(qp_schema::Series::symbol) {

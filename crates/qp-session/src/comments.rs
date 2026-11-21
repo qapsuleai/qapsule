@@ -223,12 +223,10 @@ impl Session {
         let (full, all) = self.full_numbers(&draft.cites, instrument.as_deref());
         let mut syms = symbols(&self.doc);
         let seen = self.as_reader(&principal, lang, |s| s.seen(ci, &draft.cites));
-        let hidden = draft
-            .cites
-            .iter()
-            .filter(|c| !seen.known.contains(*c) && all.contains(*c))
-            .cloned()
-            .collect();
+        // (Security) No existence oracle: an id the reader may not see is answered like
+        // one that does not exist (`unknown_id`).
+        let _ = all;
+        let hidden = BTreeSet::new();
         if let Some(i) = instrument {
             if !syms.contains(&i) {
                 syms.push(i);
@@ -267,7 +265,16 @@ impl Session {
                 external: external.clone(),
             };
             let ev = self.comment_evidence(ci, &draft, about);
-            if let Err(reasons) = validate(&draft, &ev, strictness) {
+            let principal = self.conns[ci].principal.clone();
+            let verdict = validate(&draft, &ev, strictness);
+            self.comment_audit.push(CommentAudit {
+                principal: principal.clone(),
+                accepted: verdict.is_ok(),
+                reasons: verdict.clone().err().unwrap_or_default(),
+            });
+            let restricted = self.public_view(&principal) || self.reader_proj(&principal).is_some();
+            if let Err(reasons) = verdict {
+                let reasons = if restricted { blind(reasons) } else { reasons };
                 let mut e = E::new(
                     ErrorCode::CommentRejected,
                     format!(
@@ -314,12 +321,10 @@ impl Session {
             let syms = symbols(&self.doc);
             let seen = self.in_world(true, |s| s.seen(ci, &draft.cites));
             let ev = Evidence {
-                hidden_ids: draft
-                    .cites
-                    .iter()
-                    .filter(|c| !seen.known.contains(*c) && all.contains(*c))
-                    .cloned()
-                    .collect(),
+                hidden_ids: {
+                    let _ = all;
+                    BTreeSet::new()
+                },
                 known_ids: seen.known,
                 values: seen.values,
                 withheld: full,
@@ -461,6 +466,67 @@ impl Session {
             lines.extend(got);
         }
         lines
+    }
+}
+
+/// (R5B, §25.4) One verdict of the comment validator, as the host may read it
+/// ([`Session::comment_audit`]): the real reasons, licence reasons included.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct CommentAudit {
+    /// The writer.
+    pub principal: String,
+    /// Accepted.
+    pub accepted: bool,
+    /// The validator's reasons (empty when accepted).
+    pub reasons: Vec<qp_schema::comment::Reason>,
+}
+
+/// The hint of an unsupported number (`qp_capsule::comment`).
+const UNSUPPORTED_HINT: &str = "Every number must be a value of a cited item or of a named external quote, written at its precision; derived numbers are not allowed.";
+
+/// (Security, §25.4) The reasons a restricted writer receives: a licence reason reads
+/// as an unsupported number, and no number reason names its token, so a licensed value
+/// and a made-up one get the same bytes (the comment is refused all the same).
+fn blind(reasons: Vec<qp_schema::comment::Reason>) -> Vec<qp_schema::comment::Reason> {
+    use qp_schema::comment::{Check, Reason};
+    let mut out: Vec<Reason> = Vec::new();
+    for r in reasons {
+        let r = match (r.check, r.code.as_str()) {
+            (Check::License, "licensed_value" | "licensed_external")
+            | (Check::Number, "unsupported_number") => Reason {
+                check: Check::Number,
+                code: "unsupported_number".to_owned(),
+                token: None,
+                sentence: if r.code == "licensed_external" {
+                    None
+                } else {
+                    r.sentence
+                },
+                hint: UNSUPPORTED_HINT.to_owned(),
+            },
+            (Check::License, "not_visible") => Reason {
+                check: Check::Cites,
+                code: "unknown_id".to_owned(),
+                token: r.token,
+                sentence: r.sentence,
+                hint: "This id does not exist; cite ids returned by the Qapsule tools.".to_owned(),
+            },
+            _ => r,
+        };
+        if out.last() != Some(&r) {
+            out.push(r);
+        }
+    }
+    out
+}
+
+impl Session {
+    /// (R5B, §25.4) The comment validator's real verdicts so far, in order (host side,
+    /// never sent to a client): what a restricted writer was told as an unsupported
+    /// number may be a licence catch here (M30 counts these).
+    #[must_use]
+    pub fn comment_audit(&self) -> &[CommentAudit] {
+        &self.comment_audit
     }
 }
 

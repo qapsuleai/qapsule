@@ -499,6 +499,11 @@ fn samples() -> Vec<(&'static str, Value)> {
             "add_comment",
             json!({"op":"add_comment","about":{"capsule":"c"},"lang":"tr","text":"t","cites":["fnd-overbought"]}),
         ),
+        (
+            "add_watch",
+            json!({"op":"add_watch","text":"t","match":{"instrument":"THYAO"}}),
+        ),
+        ("remove_watch", json!({"op":"remove_watch","intent":"i"})),
         // Denied.
         (
             "put_series",

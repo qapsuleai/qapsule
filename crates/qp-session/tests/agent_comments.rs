@@ -134,13 +134,25 @@ fn an_agent_for_an_unentitled_person_cannot_carry_a_licensed_number() {
         json!([CAP]),
     );
     assert_eq!(r[0]["msg"]["error"]["code"], "comment_rejected", "{r:?}");
+    // The writer is told an unsupported number (no oracle); the host's audit has the
+    // licence catch.
+    let licensed = r[0]["msg"].to_string();
+    let a = h.0.comment_audit().last().unwrap();
+    assert!(!a.accepted);
     assert!(
-        r[0]["msg"]["error"]["reasons"]
-            .as_array()
-            .unwrap()
-            .iter()
-            .any(|x| x["check"] == "license"),
-        "{r:?}"
+        a.reasons.iter().any(|x| x.code == "licensed_value"),
+        "{a:?}"
+    );
+    // The same draft with a made-up number: the same bytes.
+    let r = h.comment(
+        "C",
+        "THYAO kısa ortalamanın (5,87) altında [1].",
+        json!([CAP]),
+    );
+    assert_eq!(r[0]["msg"].to_string(), licensed);
+    assert!(
+        !licensed.contains("5,23") && !licensed.contains("licensed"),
+        "{licensed}"
     );
     // Not even as an external quote.
     let r = h.send(
@@ -203,4 +215,60 @@ fn a_reader_receives_only_the_comments_it_may_see() {
         .filter(|l| l["msg"]["event"]["kind"] == "comment")
         .count();
     assert_eq!(n, 2, "{out:?}");
+}
+
+#[test]
+fn a_hidden_id_reads_like_a_missing_one_for_a_restricted_writer() {
+    let mut h = H::new();
+    // A capsule of the authority's world that `can` may not see (licensed flow).
+    let ids: Vec<String> =
+        h.0.document()
+            .capsules
+            .iter()
+            .map(|c| c.id.clone())
+            .collect();
+    let hidden = ids
+        .into_iter()
+        .find(|id| {
+            let r = h.send(
+                "c",
+                json!({"type":"query","id":"q","query":{"kind":"capsule","capsule":id}}),
+            );
+            r[0]["msg"]["error"]["code"] == "not_found"
+        })
+        .expect("a capsule hidden from can");
+    let a = h.comment("C", "Düşüş eğilimi [1].", json!([hidden]));
+    let b = h.comment("C", "Düşüş eğilimi [1].", json!(["cap.THYAO.none.1"]));
+    let strip = |v: &Value| {
+        v["msg"]
+            .to_string()
+            .replace(&hidden, "X")
+            .replace("cap.THYAO.none.1", "X")
+    };
+    assert_eq!(strip(&a[0]), strip(&b[0]));
+    // `about` a hidden capsule: `not_found` like a missing one, suggestions from the
+    // visible ones only.
+    let about = |h: &mut H, cap: &str| {
+        h.send(
+            "C",
+            json!({"type":"command","id":"k","ops":[{"op":"add_comment","about":{"capsule":cap},
+                "lang":"tr","text":"Düşüş eğilimi [1].","cites":[CAP]}]}),
+        )
+    };
+    let a = about(&mut h, &hidden);
+    let b = about(&mut h, "cap.THYAO.none.1");
+    assert_eq!(a[0]["msg"]["error"]["code"], "not_found", "{a:?}");
+    let dym = a[0]["msg"]["error"]["did_you_mean"].to_string();
+    assert!(!dym.contains(&hidden), "{dym}");
+    assert_eq!(a[0]["msg"]["error"]["code"], b[0]["msg"]["error"]["code"]);
+}
+
+#[test]
+fn a_reader_without_the_permission_never_reaches_the_validator() {
+    let mut h = H::new();
+    let n = h.0.comment_audit().len();
+    // `can` (a viewer) may neither write nor propose.
+    let r = h.comment("c", "THYAO 5,23 [1].", json!([CAP]));
+    assert_eq!(r[0]["msg"]["error"]["code"], "forbidden", "{r:?}");
+    assert_eq!(h.0.comment_audit().len(), n);
 }

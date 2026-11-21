@@ -44,6 +44,7 @@ pub fn default_limits() -> Limits {
         max_subscriptions: 32,
         max_string: 4096,
         max_bind_bars: 100_000,
+        max_watches: None,
     }
 }
 
@@ -235,6 +236,9 @@ pub struct Session {
     pub(crate) market: Option<qp_schema::market::MarketStatus>,
     /// (R5B, §25) Agent connections and the agent policy.
     pub(crate) agent: crate::agent::AgentState,
+    /// (R5B, §25.4) The comment validator's real verdicts (host-side, for measurement;
+    /// never sent): [`Session::comment_audit`].
+    pub(crate) comment_audit: Vec<crate::comments::CommentAudit>,
 }
 
 /// (R3/K1b) A writer of a command, for the two-world paths.
@@ -330,6 +334,8 @@ fn proposable(op: &Op) -> bool {
             | Op::SetSensitivity { .. }
             // (R5B, §25.4) Comments are written directly, never proposed.
             | Op::AddComment { .. }
+            | Op::AddWatch { .. }
+            | Op::RemoveWatch { .. }
     )
 }
 
@@ -353,6 +359,8 @@ fn allowed(op: &Op, perms: &Permissions) -> bool {
         Op::SetAudience { .. } | Op::SetSensitivity { .. } => perms.read,
         // (R5B, §25.4) A comment: anyone who may propose or write.
         Op::AddComment { .. } => perms.propose || perms.write,
+        // (R5B, §25.5) A person's own watches: anyone who may read.
+        Op::AddWatch { .. } | Op::RemoveWatch { .. } => perms.read,
         _ => perms.write,
     }
 }
@@ -525,7 +533,10 @@ impl Session {
         };
         // Canonical form of every view (GRAMMAR.md §11); the log replays from it.
         let doc = crate::canon::canon_document_owned(doc)?;
-        let limits = default_limits();
+        let mut limits = default_limits();
+        if agent_policy {
+            limits.max_watches = Some(crate::watch::MAX_WATCHES);
+        }
         let host = init
             .principals
             .iter()
@@ -614,6 +625,7 @@ impl Session {
                 policy: agent_policy,
                 ..crate::agent::AgentState::default()
             },
+            comment_audit: Vec::new(),
         };
         s.audience_seen = s.doc.audiences.keys().cloned().collect();
         s.start_capsules(capsules.as_ref());
@@ -1432,8 +1444,6 @@ impl Session {
         }
         // (R5B, §25) Human decisions and the agent write rule, before roles and modes.
         let mode = self.agent_check(ci, ops, mode)?;
-        // (R5B, §25.4) Comments are validated against what the writer may read.
-        self.check_comments(ci, ops)?;
         if ops.len() > 1 {
             if let Some(i) = ops
                 .iter()
@@ -1553,6 +1563,10 @@ impl Session {
                 expand_ops(&s.doc, ops, "/ops", &mut ctx).map(|_| ())
             })?;
         }
+        // (R5B, §25.4) Comments are validated against what the writer may read: after
+        // the role and mode checks and after the dry run in the writer's own document (a
+        // hidden capsule is `not_found` like a missing one).
+        self.check_comments(ci, ops)?;
 
         if direct {
             if self.incremental

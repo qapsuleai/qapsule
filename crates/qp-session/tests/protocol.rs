@@ -122,10 +122,10 @@ fn roles() {
         "c",
         json!([{"op":"approve_finding","finding":"fnd-overbought"}]),
     );
-    assert_eq!(
-        r["status"], "proposed",
-        "an editor proposes what it may not decide"
-    );
+    // (R5B, §25.2) `editor` is an agent: a decision is human only, not even proposed
+    // (before R5B: "an editor proposes what it may not decide").
+    assert_eq!(code(&r), "forbidden", "{r}");
+    assert_eq!(r["error"]["reason"], "human_only");
     let r = h.one(
         "a",
         json!({"type":"command","id":"c","mode":"propose","ops":[{"op":"add_intent","text":"x"}]}),

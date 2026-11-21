@@ -33,6 +33,7 @@ mod capidx;
 pub mod capsule;
 mod claims;
 mod comments;
+pub use comments::CommentAudit;
 pub mod conform;
 mod dispute;
 mod error;
@@ -60,6 +61,7 @@ mod summary;
 pub mod tape;
 mod values;
 pub mod viewer;
+mod watch;
 
 pub use story::CoinFlipRule;
 

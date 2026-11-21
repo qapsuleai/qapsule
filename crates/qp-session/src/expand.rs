@@ -57,7 +57,7 @@ impl<'a> Ctx<'a> {
         })
     }
 
-    fn prov(&self, based_on: Vec<String>) -> Provenance {
+    pub(crate) fn prov(&self, based_on: Vec<String>) -> Provenance {
         Provenance {
             author: self.author.clone(),
             at: self.at,
@@ -67,7 +67,7 @@ impl<'a> Ctx<'a> {
     }
 
     /// Takes the given id (checked) or assigns `<kind>-<seq>-<n>`; records it as created.
-    fn new_id(
+    pub(crate) fn new_id(
         &mut self,
         doc: &Document,
         kind: &str,
@@ -860,6 +860,9 @@ pub(crate) fn expand_op(
                             .map(|(_, s)| s.to_owned())
                             .collect()
                     })),
+                    watch: None,
+                    state: None,
+                    matches: 0,
                 },
             }])
         }
@@ -884,6 +887,7 @@ pub(crate) fn expand_op(
                 index: None,
             }])
         }
+        Op::AddWatch { .. } | Op::RemoveWatch { .. } => crate::watch::expand_watch(doc, op, p, ctx),
         Op::AddComment {
             id,
             about,
@@ -933,9 +937,7 @@ pub(crate) fn expand_op(
                     .build())
                 }
             };
-            for (j, c) in cites.iter().enumerate() {
-                need_item(doc, c, &ptr(&ptr(p, "cites"), j))?;
-            }
+            // Cites are the validator's (`unknown_id`, the same for a hidden id).
             let cid = ctx.new_id(doc, "cmt", id.as_ref(), &ptr(p, "id"))?;
             Ok(vec![ChangeOp::PutComment {
                 index: None,
@@ -2158,6 +2160,8 @@ pub(crate) fn summarize(op: &Op) -> String {
         Op::AddIntent { .. } => "add_intent".to_owned(),
         Op::SetIntentActive { intent, active } => format!("set_intent_active {intent}={active}"),
         Op::AddNarrative { about, .. } => format!("add_narrative about {about}"),
+        Op::AddWatch { .. } => "add_watch".to_owned(),
+        Op::RemoveWatch { intent } => format!("remove_watch {intent}"),
         Op::AddComment { about, .. } => format!(
             "add_comment about {}",
             about

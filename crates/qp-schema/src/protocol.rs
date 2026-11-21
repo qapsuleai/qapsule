@@ -630,6 +630,9 @@ pub struct Limits {
     /// Maximum bars one data binding may ask for (`window.last`) and hold (RP2, §18).
     #[serde(default = "default_max_bind_bars")]
     pub max_bind_bars: u32,
+    /// (R5B, §25.5) Maximum active watches per person (sent with the agent policy).
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub max_watches: Option<u32>,
 }
 
 fn default_max_bind_bars() -> u32 {
@@ -1373,6 +1376,34 @@ pub enum Op {
         /// External sources quoted (named, with the numbers they give).
         #[serde(default, skip_serializing_if = "Vec::is_empty")]
         external: Vec<crate::comment::ExternalQuote>,
+    },
+    /// (R5B, §25.5) Leave a watch: the engine matches story transitions against it and
+    /// sends `intent_matched` on the `intents` topic. For the speaker (an agent: the
+    /// person it works for) unless `for` names another person (an owner only). At most
+    /// `limits.max_watches` (32) active watches per person.
+    AddWatch {
+        /// Id; assigned if absent (`intent-<seq>-<n>`).
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        id: Option<String>,
+        /// The person it is for; default: the speaker's person.
+        #[serde(default, rename = "for", skip_serializing_if = "Option::is_none")]
+        for_: Option<String>,
+        /// The request in words.
+        text: String,
+        /// What matches.
+        #[serde(rename = "match")]
+        match_: crate::types::WatchMatch,
+        /// Expiry time (epoch ms).
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        expires_t: Option<TimestampMs>,
+        /// Matches after which it ends.
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        max_matches: Option<u32>,
+    },
+    /// (R5B, §25.5) Remove a watch (state `removed`).
+    RemoveWatch {
+        /// Intent id of the watch.
+        intent: String,
     },
 }
 
@@ -2955,6 +2986,22 @@ pub enum Event {
         /// The row as the subscriber may receive it now.
         story: Box<StoryRow>,
         /// Log position it reflects.
+        seq: Seq,
+    },
+    /// (R5B, §25.5) A watch matched a story transition (topic `intents`), as the
+    /// subscriber may receive it.
+    IntentMatched {
+        /// Intent id.
+        intent: String,
+        /// The capsule whose story moved.
+        capsule: String,
+        /// The stage it moved to.
+        stage: crate::capsule::Stage,
+        /// Bar of the transition.
+        bar: u64,
+        /// Time of the transition.
+        t: TimestampMs,
+        /// Log position of the engine entry.
         seq: Seq,
     },
     /// (R5B, §25.4) A validated comment (topic `comments`).

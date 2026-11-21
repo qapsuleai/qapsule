@@ -562,6 +562,77 @@ pub struct Intent {
     pub active: bool,
     /// Who left it and when.
     pub provenance: Provenance,
+    /// (R5B, §25.5) A structured watch on story transitions, matched by the engine.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub watch: Option<Watch>,
+    /// (R5B, §25.5) Lifecycle state of a watch (absent: an intent before R5B).
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub state: Option<IntentState>,
+    /// (R5B, §25.5) How many times the watch matched.
+    #[serde(default, skip_serializing_if = "is_zero")]
+    pub matches: u32,
+}
+
+#[allow(clippy::trivially_copy_pass_by_ref)]
+fn is_zero(n: &u32) -> bool {
+    *n == 0
+}
+
+/// (R5B, §25.5) Lifecycle state of a watch.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
+#[serde(rename_all = "snake_case")]
+pub enum IntentState {
+    /// Matching.
+    Active,
+    /// Reached `max_matches`.
+    Matched,
+    /// The clock reached `expires_t`.
+    Expired,
+    /// Removed by `remove_watch`.
+    Removed,
+}
+
+/// (R5B, §25.5) A structured watch: whom it is for, what story transitions match, until
+/// when and how often.
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
+#[serde(deny_unknown_fields)]
+pub struct Watch {
+    /// The person it is for (principal id).
+    #[serde(rename = "for")]
+    pub for_: String,
+    /// What matches.
+    #[serde(rename = "match")]
+    pub match_: WatchMatch,
+    /// The watch expires when the clock reaches this time (epoch ms); never if absent.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub expires_t: Option<TimestampMs>,
+    /// The watch ends after this many matches; never if absent.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub max_matches: Option<u32>,
+}
+
+/// (R5B, §25.5) What story transitions a watch matches. Every given field must hold.
+#[derive(Debug, Clone, Default, PartialEq, Serialize, Deserialize, JsonSchema)]
+#[serde(deny_unknown_fields)]
+pub struct WatchMatch {
+    /// Only this instrument.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub instrument: Option<String>,
+    /// Only instruments the person holds (non-zero position in their audience).
+    #[serde(default, skip_serializing_if = "std::ops::Not::not")]
+    pub holdings: bool,
+    /// Only these meaning kinds.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub meaning: Option<Vec<crate::capsule::MeaningKind>>,
+    /// Only this direction.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub direction: Option<crate::capsule::Direction>,
+    /// Only transitions to these stages.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub stages: Option<Vec<crate::capsule::Stage>>,
+    /// Only negative transitions (`weakened`, `invalidated`, `retracted`).
+    #[serde(default, skip_serializing_if = "std::ops::Not::not")]
+    pub negative: bool,
 }
 
 /// Outcome of a finding compared against what actually happened.

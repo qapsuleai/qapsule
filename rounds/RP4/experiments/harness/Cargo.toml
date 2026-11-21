@@ -31,6 +31,7 @@ m25-taban = { path = "../M25/taban" }
 m25-teyit2 = { path = "../M25/teyit2" }
 m25-yukdus = { path = "../M25/yukdus" }
 m25-olcek = { path = "../M25/olcek" }
+m25-umut = { path = "../M25/umut" }
 
 [lints.rust]
 unsafe_code = "forbid"

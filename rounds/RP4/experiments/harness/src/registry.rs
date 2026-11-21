@@ -122,6 +122,12 @@ pub fn rules() -> Vec<RuleEntry> {
             make: m25_yukdus::outcome,
             levels: |s, b| m25_yukdus::levels(s, b).map(Levels::from),
             constants: 7,
+        // r3's 7 + Z + M.
+        RuleEntry {
+            name: "umut",
+            make: m25_umut::outcome,
+            levels: |s, b| m25_umut::levels(s, b).map(Levels::from),
+            constants: 9,
         },
     ]
 }

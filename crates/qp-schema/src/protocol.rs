@@ -1962,6 +1962,33 @@ pub enum Query {
         #[serde(default, skip_serializing_if = "Option::is_none")]
         after: Option<String>,
     },
+    /// (R5B, §25.6) What a pending proposal would do, without doing it: its operations
+    /// expanded on a copy of the document as the asker reads it, the changes, and a scene
+    /// summary of every view it would add or change (the document does not change).
+    Preview {
+        /// Proposal id.
+        /// Also takes a selector (§17).
+        #[schemars(with = "ProposalRef")]
+        proposal: String,
+        /// Scene width in pixels (default 1200).
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        width: Option<u32>,
+        /// Scene height in pixels (default 600).
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        height: Option<u32>,
+    },
+}
+
+/// (R5B, §25.6) One view a previewed proposal adds or changes.
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
+#[serde(deny_unknown_fields)]
+pub struct PreviewView {
+    /// View id.
+    pub view: String,
+    /// Whether the view is new.
+    pub new: bool,
+    /// The scene summary (`explain` text: panels, layers, marks, ranges).
+    pub explain: String,
 }
 
 /// Both sentences of a capsule for one reader (R3, §20).
@@ -2686,6 +2713,15 @@ pub enum QueryResult {
     Viewer {
         /// The changes.
         viewer: Box<ViewerUpdate>,
+    },
+    /// (R5B, §25.6) Answer to `preview`.
+    Preview {
+        /// Proposal id.
+        proposal: String,
+        /// The changes accepting it now would write.
+        changes: Vec<ChangeOp>,
+        /// The views it adds or changes, with their scene summary.
+        views: Vec<PreviewView>,
     },
     /// (R5/M18, §23) Answer to `stories`.
     Stories {

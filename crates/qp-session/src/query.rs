@@ -486,6 +486,11 @@ impl Session {
                 })
             }
             Query::Capsules { .. } => self.capsules_query(ci, q),
+            Query::Preview {
+                proposal,
+                width,
+                height,
+            } => self.preview(ci, proposal, (*width, *height)),
             Query::Stories {
                 instrument,
                 series,

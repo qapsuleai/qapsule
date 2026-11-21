@@ -254,9 +254,10 @@ Konular (`topic.kind`):
 | `condition` | `condition` | `condition_met` (koşul **doğru olduğu anda**, kenar tetiklemeli) |
 | `proposals` | — | `proposal` (oluştu, kabul, ret, süre aşımı) |
 | `attention` | `principal?` (varsayılan: abone) | `attention` (yönerge), `viewport` (bakış değişti) |
-| `intents` | — | `intent_triggered` |
+| `intents` | — | `intent_triggered`; (R5B) `intent_matched` (izlemenin kişisine; §25.5) |
 | `view` (RP2) | `view` (seçici de olur) | `view_changed` (görünümün okuduğu bir serinin barları değişti; §18.8) |
 | `claims` (RP2/T8) | — | `claim` (otoritenin veri kaynaklı iddiası, kanıtıyla: geçici, kesin, geri çekildi, temizlik değişti; §19.3). Veri kaynaklı `condition_met`, `intent_triggered`, `finding_state` ve motor girdisinin `change`'i de isteğe bağlı `evidence` (`ClaimEvidence`) taşır |
+| `comments` (R5B) | `capsule?`, `instrument?` | `comment` (okuyucunun alabileceği yeni doğrulanmış yorum; §25.4) |
 | `stories` (R5/M18) | `instrument`, `series?` | `story` (hikâye listesinin değişen satırı: doğum, geçiş, kapanış, geçerlilik, akıştaki yer; §23.4); açık görünüm okuyucusuna o enstrümanın `server_comment`'i |
 
 Abonelik kimliği `subscribe` mesajının `id`'sidir. `unsubscribe {"id":…, "sub":"s2"}`.
@@ -547,6 +548,9 @@ Kalıcı, adım adım bir **anlatım çizelgesi** dikkat değil, dokümandır: `
 | `reject_proposal` | `proposal`, `note?` | Öneriyi reddeder. Yetki: `decide`. |
 | `set_audience` | `principal?`, `audience` | (R3, §20.3) Kişinin kapsül tercihleri (grup, hassasiyet, izleme listesi, pozisyonlar). Kendi: `read`; başkası: `owner`. Öneri olamaz. |
 | `set_sensitivity` | `principal?`, `sensitivity` | (R3, §20.3) Yalnız hassasiyet seviyesi (`null`: grubun varsayılanı). |
+| `add_comment` | `id?`, `about {capsule \| instrument}`, `lang`, `text`, `cites`, `external?` | (R5B, §25.4) Doğrulanmış yorum; yetki `propose` ya da `write`, doğrudan (öneri olmaz). Ret: `comment_rejected` + `reasons`. Değişim: `put_comment`. |
+| `add_watch` | `id?`, `for?`, `text`, `match`, `expires_t?`, `max_matches?` | (R5B, §25.5) İzleme niyeti; yetki `read`, öneri olmaz; kişi başına 32. Değişim: `put_intent` (`watch`). |
+| `remove_watch` | `intent` | (R5B, §25.5) İzlemeyi kaldırır (`state: removed`). |
 
 Atanan kimlikler: `<tür>-<seq>-<n>`; `tür` ∈ `series`, `view`, `fact`, `fnd`, `cap`,
 `intent`, `narr`; `seq` girdinin konumu, `n` o girdide oluşturulan öğenin sırası (0'dan).
@@ -593,7 +597,7 @@ yakalanır; bir kesişim koşulu yalnızca kesişim barında tetiklenir.
 `delete_panel`, `set_emphasis`, `set_x_domain`, `put_fact`,
 `put_finding`, `put_capsule`, `set_capsule_state`, `put_intent`, `push_ledger`,
 `pop_ledger`, `put_narrative`, `put_proposal`, `delete`, `append_bars`, `truncate_bars`,
-`set_last_bar`, (R3) `put_audience` (`principal`, `audience` ya da `null`). Her biri tam öğe taşır; `put_*` değişimlerinin isteğe bağlı `index` alanı
+`set_last_bar`, (R3) `put_audience` (`principal`, `audience` ya da `null`), (R5B) `put_comment`. Her biri tam öğe taşır; `put_*` değişimlerinin isteğe bağlı `index` alanı
 yeni öğenin koleksiyondaki yeridir (yoksa sona; var olan öğe yerinde değiştirilir) —
 silmenin tersi öğeyi eski yerine koyar, böylece sil + geri al dokümanı bayt düzeyinde
 aynı bırakır; köken (`provenance`) otorite tarafından damgalanır
@@ -631,6 +635,7 @@ böylece aynı görünümün farklı katmanlarına eşzamanlı yazılar çakış
 | `capsule` | `capsule` (kapsül ya da bulgu kimliği) | (R3, §20) `capsule_detail`: hikâye (geçişler, nedenler), olgular, cümle, karne, işaret tarifi, olgu başına kanıt erişimi (K34). |
 | `ledger` | `key?`, `meaning?`, `detector?`, `by_kind?` | (R3, §20) `ledger`: anahtar (ya da tür) başına kapanan ve gerçekleşen sayısı; lisanstan bağımsız. |
 | `stories` | `instrument`, `series?`, `range?`, `limit?`, `after?` | (R5/M18, §23) `stories`: enstrümanın aralıktaki bütün hikâyeleri (kapsülleri), okuyucunun gördüğü biçimde, doğum sırasıyla, sayfalı; bar yok. |
+| `preview` | `proposal`, `width?`, `height?` | (R5B, §25.6) `preview`: bekleyen önerinin değişimleri ve eklediği/değiştirdiği görünümlerin sahne özeti; doküman değişmez. |
 
 **Hedef** (`Target`; dikkat, anlatım adımları ve R2'de görünüm vurgusu): `view`, `panel` (panel id'si), `layer` (R2), `series`, `output`
 (serinin çıktısı ya da bar alanı: hacim için `"v"`), `item` (bulgu, olgu…), `from_bar`,
@@ -757,6 +762,12 @@ istemci yalnızca kimliğini söyler (kimlik doğrulama taşımanın işidir; v0
 - `append_bars`/`update_last_bar`: `feed` ya da `write`. `clock`: yalnızca `host`.
 - `approve_finding`/`reject_finding`: `decide` (insan kararıdır; karneye işlenir).
 - `accept_proposal`/`reject_proposal`: `decide`.
+- (R5B, §25) Bu dört karar ayrıca **insan kökenli** olmalıdır (yazarı `human`, bağlantı
+  ajan kökenli işaretli değil); aksi `forbidden`, `reason: "human_only"`, rol ne olursa
+  olsun. Ajan kökenli komut, işaretli bağlantıda ya da `init.agent_policy = "r5b"`
+  oturumunda izin listesine tabidir (`agent_cannot_write`, `proposal_only`).
+  `Principal.on_behalf`: ajanın okuyucu yetkisi o kişininkidir (kesişim, §25.7).
+- `add_comment`: `propose` ya da `write` (doğrudan); `add_watch`/`remove_watch`: `read`.
 - Köken: değişimlerdeki her öğenin `provenance.author`'u otoritenin bildiği yazardır;
   `at` son `clock`'tur; kabul edilen önerilerde `approved_by` karar verendir. İstemcinin
   gönderdiği öğelerde köken alanı yoktur (işlemler köken taşımaz).
@@ -882,6 +893,10 @@ Her hata, ajanın yardım almadan düzeltebileceği kadar bilgi taşır:
 | `ambiguous` | (R2) Anlamla başvuru birden çok öğeye uyuyor; otorite rastgele seçmez | `path`, `candidates` (türün sırasıyla, §17) |
 | `no_entitlement` | (RP2) Soranın bağlı serinin beslemesi için veri yetkisi yok (borsa veri lisansı; rol yetkisi değil) | `path` (seri başvurusu), `hint` |
 | `no_data` | (RP2) Bağlı serinin verisi yok: kaynak bağı tanımıyor, pencere boş ya da çözüm bekliyor | `path`, `hint` |
+| `comment_rejected` | (R5B, §25.4) Yorum doğrulayıcıdan geçmedi | `path`, `reasons` (`check`, `code`, `token?`, `sentence?`, `hint`) |
+
+(R5B) `reason`: kodun makinece okunur alt nedeni — `forbidden` için `human_only`,
+`agent_cannot_write`, `proposal_only` (§25.2–§25.3). R5B öncesi hatalarda yazılmaz.
 
 `candidates` (R2): `{id, about}` listesi — kullanılacak kimlik (ya da köken için JSON
 metni) ve ne olduğu. `ack.resolved` (R2): komuttaki anlamla başvuruların çözüldüğü
@@ -992,6 +1007,9 @@ make_story_transcripts -- --write` ile üretilir. Var olan dökümler değişmed
 `balanced` ve `all` seviyesinde, gizlenen sayısı, pozisyonla K42 muafiyeti, `story` olayları,
 karne; `cargo run -p qp-session --example make_feed_rule_transcript -- --write` ile üretilir.
 Var olan dökümler değişmedi (kural yokken yeni alanlar hiç yazılmaz).
+**R5B (§25):** 65–70 ajan yüzeyi (insan kararı, ajan yazamaz, yorum kabul/ret, yetkisiz kişi
+adına yorum, niyet yaşam döngüsü ve eşleşme, önizleme); `cargo run -p qp-session --example
+make_agent_transcripts -- --write` ile üretilir. Var olan dökümler değişmedi.
 
 ## 16. Gömme
 
@@ -2742,6 +2760,186 @@ seansında" / "Closing auction" (durum `closed`), "Bağlantı yok — veri bayat
 18:10" / "No connection — data stale · last data 18:10". Enstrümanı sürekli işlemde olmayan
 ya da veri bayatken hiçbir kapsül canlı işaretini (nabız) göstermez
 (`ShellCore::market_live`).
+
+## 25. Ajan yüzeyi (R5B)
+
+Çerçeve `rounds/R5B/GOAL.md` (ilkeler: motor söyler, ajan anlatır; her cümle kanıtına
+bağlanır; ajan da bir okuyucudur), sözleşme `rounds/R5B/PLAN.md` §1–§4. Şema `qp-schema`
+(`Principal.on_behalf`, `ProtocolError.reason`/`reasons`, `Op::AddComment`/`AddWatch`/
+`RemoveWatch`, `Comment`, `Watch`, `Query::Preview`, `Topic::Comments`,
+`Event::IntentMatched`/`Comment`, `SessionInit.agent_policy`/`comment_strictness`);
+referans otorite `crates/qp-session/src/agent.rs`, `comments.rs`, `watch.rs`,
+`preview.rs`. Bütün yeni alanlar isteğe bağlıdır; R5B öncesi dökümler bayt bayt aynı.
+
+### 25.1 Kimlik ve köken
+
+- `Principal.author` zaten `human | agent | engine`'dir. Yeni: `Principal.on_behalf`
+  (yapılandırma, istemciden gelmez) — ajanın **adına çalıştığı kişi**. Hedef bilinen,
+  yazarı `human` olan ve kendisi kimsenin adına çalışmayan bir kişi olmalıdır; değilse
+  oturum başlamaz (zincir ve döngü yok).
+- **Ajan bağlantısı:** barındırıcı bir bağlantıyı ajan kökenli işaretler
+  (`Session::mark_agent_connection(conn)`, `hello`'dan önce ya da sonra;
+  `Session::is_agent_connection`). `qp mcp serve` her MCP bağlantısını işaretler; istemci
+  işareti kaldıramaz.
+- **Ajan kökeni** = yazarı `agent` olan kimlik **ya da** işaretli bağlantı. **İnsan kökeni**
+  = yazarı `human` olan kimlik **ve** işaretsiz bağlantı.
+- Ajan kökenli her girdinin `author`'u ajan, ürettiği öğelerin `provenance.author`'u
+  `{"kind":"agent",…}`'tır; yorumlar ayrıca `on_behalf`'ı taşır. Kabul edilen önerinin
+  girdisi önerenin (ajan), `approved_by` karar verenin (insan) adını taşır (§4.7).
+
+### 25.2 İnsan kararı (koşulsuz)
+
+`accept_proposal`, `reject_proposal`, `approve_finding`, `reject_finding` yalnız **insan
+kökenli** komutla olur. Aksi — rol `owner` olsa da, kip ne olursa olsun (`auto`, `direct`,
+`propose`), öneri kendi önerisi de başkasınınki de olsa — `forbidden`,
+`reason: "human_only"`, `path` karar işleminin yeri. Komuttaki tek bir karar işlemi bütün
+komutu reddeder; ajan kararı öneri olarak da gönderemez. Denetim rol ve kip
+denetimlerinden **önce** yapılır.
+
+```json
+{"type":"command","id":"d","ops":[{"op":"accept_proposal","proposal":"prop-6"}]}
+{"type":"error","id":"d","error":{"code":"forbidden","reason":"human_only","path":"/ops/0",
+ "message":"`accept_proposal` is a human decision; this command is not of human origin","hint":"…"}}
+```
+
+Var olan dökümlerin hiçbiri ajanla karar vermez (üç taşımada doğrulandı). MCP yüzeyi karar
+araçlarını listelemez; genel `command` aracıyla gönderilse de otorite reddeder.
+
+### 25.3 Ajanın yazabildikleri (izin listesi)
+
+Kural yalnız **işaretli bağlantıda** ya da `init.agent_policy = "r5b"` olan oturumda
+ajan kökenli komutlara uygulanır (RD1 dökümü 05'te `scout` bulgu öneriyor; o döküm
+değişmez). Bilinmeyen politika adı oturumu başlatmaz. Kural **izin listesidir**
+(`qp_session::agent::agent_op`); listede olmayan her işlem — sonradan eklenen işlemler
+dahil — reddedilir:
+
+| Sınıf | İşlemler | Nasıl |
+|-------|----------|-------|
+| Doğrudan | `add_comment` (§25.4), `add_watch`, `remove_watch` (§25.5) | Uygulanır. |
+| Yalnız öneri | `put_view`, `insert_layer`, `delete_layer`, `move_layer`, `split_layer`, `set_encoding`, `insert_panel`, `delete_panel`, `move_panel`, `set_panel`, `set_scale`, `set_emphasis`, `set_view_range`, `add_narrative`, `show_finding`, `add_study` (yalnız yeni kimlikle) | `mode: auto` ve `propose` öneri olur (rol `editor`/`owner` olsa da); `mode: direct` → `forbidden`, `reason: "proposal_only"`. Öneri yetkisi (`propose`) yine gerekir. |
+| Asla | Diğer her şey: `add_fact`, `add_finding`, `update_finding`, `put_series` (her kaynakla), `set_params`, `append_bars`, `update_last_bar`, `undo`, `remove`, `add_intent`, `set_intent_active`, `set_audience`, `set_sensitivity`, eski `add_layer`/`remove_layer`, var olan kimlikle `add_study` | `forbidden`, `reason: "agent_cannot_write"`, her kipte (öneri olarak da kabul edilmez). |
+
+Doğrudan ve yalnız-öneri işlemleri aynı komutta karışırsa `invalid`. Olgu, bulgu, kapsül,
+karne ve hikâye durumu yalnız motordan (ya da insandan) gelir.
+
+### 25.4 Yorum ve doğrulayıcı
+
+```json
+{"op":"add_comment","id?":"…","about":{"capsule":"cap.THYAO.continuation.down.84"},
+ "lang":"tr","text":"THYAO kısa ortalamanın (5,23) altında kalıyor [1].",
+ "cites":["cap.THYAO.continuation.down.84"],
+ "external?":[{"source":"…","quote":"…","values":[…]}]}
+```
+
+- `about`: tam olarak biri — `capsule` (kapsül ya da bulgu kimliği; kapsül kimliğiyle
+  saklanır) ya da `instrument` (belgedeki bir serinin sembolü). Yetki: `propose` ya da
+  `write`; **öneri olmaz**, doğrudan uygulanır. Kimlik `cmt-<seq>-<n>`.
+- Sıra: rol ve kip denetimi → (kapsül motoru olan oturumda) yazarın dokümanında kuru koşu
+  (görünmeyen kapsül olmayanla aynı `not_found`, öneriler yalnız görünenlerden) →
+  **doğrulama** → açılım.
+- **Kanıt** (`qp_capsule::comment::Evidence`) yazarın **okuyucu yetkisiyle** toplanır
+  (ajan: `on_behalf` kişininki, §25.7), yazarın dünyasında: atıf yapılan her kapsül (ya
+  da bulgu) için okuyucunun `capsule` cevabı — kanıt değerleri, olguların değerleri,
+  okuyucunun cümlesindeki sayılar (başlık yapı taşları okuyucuya izdüşülmüş halleriyle),
+  karne `n` ve `realized`, yön —; atıf yapılan olgu için okuyucunun olgu değerleri.
+  Sembol listesi belgedeki serilerin sembolleri. Okuyucu her şeyi göremiyorsa (açık görünüm
+  okuyucusu ya da izdüşümü olan okuyucu) otoritenin atıf yapılan öğeler ve enstrüman
+  hakkındaki kendi sayıları (olgu değerleri, saklı iddialar) `withheld`'dir.
+- **Doğrulama** `qp_capsule::comment::validate` (dört denetim + cümle başına atıf; PLAN
+  §2.1). Sıkılık oturum yapılandırması `init.comment_strictness` (`cites`, `cites_numbers`,
+  `per_sentence`; yoksa `cites_numbers`); saklanan yorum sıkılığı taşır.
+- **Ret:** `error` `code: "comment_rejected"`, `reasons: [Reason…]` (makinece okunur:
+  `check`, `code`, `token?`, `sentence?`, `hint`). Doküman değişmez.
+- **Kehanet yok:** okuyucu yetkisi kısıtlı yazara lisans nedeni (`licensed_value`,
+  `licensed_external`) `unsupported_number` olarak, sayı nedenleri `token`'sız gider;
+  görünmeyen kimlik olmayan kimlikle aynı `unknown_id`'dir. Lisanslı değerle ve uydurma
+  değerle yazılmış aynı taslak aynı hata baytlarını alır; ret yine olur. Gerçek nedenler
+  yalnız barındırıcıda: `Session::comment_audit()` (protokol dışı; M30 ölçümü lisans
+  yakalamayı buradan sayar). Not: `cites` sıkılığında sayı denetimi kapalıdır; lisans
+  denetimi açık olduğundan orada kabul/ret farkı bir kehanet olarak kalır (açık nokta).
+- **Kabul:** `put_comment` değişimi; dokümanda `comments` (boşsa yazılmaz),
+  `Comment {id, about, lang, text, cites, external?, strictness, provenance, on_behalf?}`.
+- **İki dünya** (§20.5): yetkili yazarın yorumu açık dünyaya yalnız bir açık görünüm
+  okuyucusu onu yazabilecek olsaydı geçer (lisanslı sayı yok, her atıf açık); yoksa yalnız
+  otoritenin dünyasındadır.
+- **Okuma:** `capsule` cevabında `comments` (okuyucunun alabileceği: her atıfı okuyucuya
+  görünür; izdüşümü olan okuyucu için metindeki her sayı okuyucunun kendi kanıt değerleri
+  arasında — dış alıntılar orada sayılmaz). `comments` konusu
+  `{"kind":"comments","capsule?":…,"instrument?":…}` → `{"kind":"comment","comment":…,"seq"}`
+  aynı kuralla. İzdüşümü olan okuyucuya `document`, `change`, `log` yalnız gizli atıfı
+  olmayan ve sayı içermeyen yorumları taşır; sayı içeren `add_comment` isteği günlükten
+  çıkarılır. `list` koleksiyonu `comments`.
+
+### 25.5 Niyet (izleme)
+
+`Intent` korunur; yeni alanlar `watch`, `state`, `matches`:
+
+```json
+{"op":"add_watch","id?":"…","for?":"arkin","text":"THYAO'da olumsuz bir şey olursa",
+ "match":{"instrument":"THYAO","holdings":false,"meaning":["breakout"],"direction":"up",
+          "stages":["born","weakened"],"negative":false},
+ "expires_t?":1760100000000,"max_matches?":1}
+{"op":"remove_watch","intent":"intent-7-0"}
+```
+
+- `add_watch` → `put_intent` (`watch` dolu, `trigger` yok, `state: "active"`). `for`
+  yoksa konuşan (ajan: `on_behalf` kişisi); başkası için yalnız `owner` (`forbidden`).
+  Yetki `read` (kişisel tercih gibi); öneri olmaz. Kişi başına en çok 32 etkin izleme
+  (`limit`, `expected: ["32"]`); `welcome.limits.max_watches` yalnız ajan politikası açık
+  oturumda yazılır (eski `welcome`'lar değişmez). `max_matches: 0` → `invalid`.
+- `remove_watch` → `put_intent` (`active: false`, `state: "removed"`). Başkasının
+  izlemesi olmayanla aynı `not_found` (öneriler yalnız kendi izlemelerinden); etkin değilse
+  `invalid`.
+- **Yaşam döngüsü:** `active → matched` (`max_matches` dolunca) `| expired` (saat ≥
+  `expires_t`) `| removed`. `matches` eşleşme sayısıdır.
+- **Eşleşme motorda, deterministik:** kapsül motorunun her bakışında (seri başına tek motor
+  girdisi, §20.1) bakışın hikâye geçişleri motorun sırasıyla, etkin izlemeler doküman
+  sırasıyla sınanır: önce süresi dolanlar `expired` olur; sonra her geçiş için
+  `instrument`, `holdings` (kişinin kitlesindeki sıfırdan farklı pozisyon), `meaning`,
+  `direction`, `stages` (geçişin aşaması), `negative` (`weakened`, `invalidated`,
+  `retracted`) — verilen her koşul VE'lenir. İzlemelerin yeni sayısı ve durumu **aynı
+  motor girdisinde** `put_intent` olarak yazılır (yeniden oynatma aynı dokümanı verir).
+  Açık dünya kendi izlemelerini kendi geçişleriyle sınar.
+- **Olay:** `intents` konusunda `{"kind":"intent_matched","intent","capsule","stage","bar","t","seq"}`;
+  yalnız izlemenin kişisine ve onun adına çalışan ajanlara; açık görünüm okuyucusuna açık
+  dünyanın eşleşmeleri (lisanslı hikâye hiç eşleşmez), izdüşümü olan okuyucuya göremediği
+  kapsül hakkında olay gitmez. Aynı girdiler → aynı olaylar, bayt eşit (test
+  `crates/qp-session/tests/agent_watch.rs`).
+- **Gizlilik:** izleme kişisel veridir. Başka okuyucuya (`owner` ve barındırıcı hariç;
+  ajan için okuyucu = `on_behalf` kişisi) `document`, `change`, `log`, `list intents`
+  başkasının izlemelerini taşımaz. İzleme yalnız kendi kişisinin ilgisini (`relevant`,
+  K42) belirler; başka kişinin izlemesi sayılmaz.
+
+### 25.6 Öneri önizlemesi
+
+`{"kind":"preview","proposal":"prop-6","width?":1200,"height?":600}` → `{"kind":"preview",
+"proposal","changes":[ChangeOp…],"views":[{"view","new","explain"}]}`: bekleyen önerinin
+işlemleri, kabulün o an açacağı gibi, okuyucunun dokümanının bir kopyasında açılır;
+`changes` yazılacak değişimler, `views` önerinin eklediği ya da değiştirdiği (ya da yeni
+serisini okuyan) her görünümün sahne özeti (`explain`, `docs/GRAMMAR.md` §16). Doküman ve
+günlük değişmez. Bekleyen değilse `not_pending`; yoksa `not_found`. MCP `render` aracı
+önizlemeyi PNG olarak çizer (`proposal` argümanı).
+
+### 25.7 Okuyucu yetkisi
+
+Ajanın okuduğu her şey — sorgular, abonelikler, `hello` özeti, girdi, izdüşüm (§20.5),
+açık dünya, yorum kanıtı, önizleme — `on_behalf` kişinin veri yetkileriyledir: ajan bir
+akışa yalnız kişi yetkiliyse **ve** (sağlayıcı ajanın kendi satırı olmadığını kesin
+söylemiyorsa) ajanın kendisi de yetkiliyse yetkilidir (kesişim; sağlayıcı bilmiyorsa
+kesişim — `SourceProvider::has_row`, kuşkuda ret). Kitle: ajanın kendi kitlesi yoksa
+kişininki. Test (`crates/qp-session/tests/agent_reader.rs`): lisanslı akışlı oturumda
+(döküm 39) yetkisiz kişi adına çalışan ajan, işaretli ya da işaretsiz bağlantıda, kendi
+geniş satırı olsa da her sorgu ve abonelik cevabında kişinin aldığı baytları alır (kimlik
+alanları hariç).
+
+### 25.8 Dökümler
+
+65–70 `cargo run -p qp-session --example make_agent_transcripts -- --write` ile üretilir:
+65 insan kararı (ajanın kendi önerisini kabul/ret reddi, insan kabulü ve köken), 66 ajan
+yazamaz (`agent_policy`, `agent_cannot_write`, `proposal_only`), 67 yorum kabul ve ret
+(`comment_rejected`, `comments` konusu), 68 yetkisiz kişi adına yorum (kehanetsiz ret), 69
+niyet yaşam döngüsü ve eşleşme (`intent_matched`, `limit`), 70 önizleme. Var olan dökümler
+değişmedi.
 
 ## Ek A — Eski `Command` tipi
 

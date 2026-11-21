@@ -189,7 +189,16 @@ fn removal_and_the_limit_per_person() {
         "e",
         json!({"type":"command","id":"c","ops":[{"op":"remove_watch","intent":"w1"}]}),
     );
-    assert_eq!(r[0]["msg"]["error"]["code"], "forbidden", "{r:?}");
+    // (Privacy) Another person's watch reads as a missing one; no suggestion names it.
+    assert_eq!(r[0]["msg"]["error"]["code"], "not_found", "{r:?}");
+    assert!(r[0]["msg"]["error"].get("did_you_mean").is_none(), "{r:?}");
+    // Nor does she read it anywhere.
+    let d = send(
+        &mut s,
+        "e",
+        json!({"type":"query","id":"d","query":{"kind":"document"}}),
+    );
+    assert!(!d[0].to_string().contains("w1"), "{d:?}");
     let r = send(
         &mut s,
         "b",

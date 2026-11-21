@@ -645,3 +645,44 @@ fn every_denied_op_is_refused_on_the_wire_in_every_mode() {
     }
     assert!(h.s.log().is_empty());
 }
+
+// ---------------------------------------------------------------------------
+// Preview (§25.6)
+// ---------------------------------------------------------------------------
+
+#[test]
+fn a_pending_proposal_is_previewed_without_changing_the_document() {
+    let mut h = h();
+    let r = h.cmd(
+        "s",
+        "p1",
+        json!([{"op":"add_study","id":"ema9","study":"ema","inputs":["px"],"params":{"period":9},"show":{"view":"main","panel":0}}]),
+    );
+    let pid = r["proposal"].as_str().unwrap().to_owned();
+    let doc = serde_json::to_vec(h.s.document()).unwrap();
+    let log = h.s.log().len();
+    let p = h.query(
+        "a",
+        json!({"kind":"preview","proposal":pid,"width":800,"height":400}),
+    );
+    let d = &p["data"];
+    assert_eq!(d["kind"], "preview", "{p}");
+    assert_eq!(d["views"][0]["view"], "main", "{p}");
+    assert!(
+        d["views"][0]["explain"].as_str().unwrap().contains("ema9"),
+        "{p}"
+    );
+    assert!(d["changes"].as_array().unwrap().len() >= 2, "{p}");
+    assert_eq!(serde_json::to_vec(h.s.document()).unwrap(), doc);
+    assert_eq!(h.s.log().len(), log);
+    // The agent may preview its own proposal too; a decided one is not pending.
+    let p2 = h.query(
+        "s",
+        json!({"kind":"preview","proposal":pid,"width":800,"height":400}),
+    );
+    assert_eq!(p2["data"]["views"], d["views"]);
+    let r = h.cmd("a", "acc", json!([{"op":"reject_proposal","proposal":pid}]));
+    assert_eq!(r["status"], "applied");
+    let p3 = h.query("s", json!({"kind":"preview","proposal":pid}));
+    assert_eq!(code(&p3), "not_pending", "{p3}");
+}

@@ -262,9 +262,9 @@ struct PubEx {
 }
 
 /// A proposal's acceptance expanded in one world ([`Session::accept`]).
-struct Accepted {
-    doc: Document,
-    changes: Vec<ChangeOp>,
+pub(crate) struct Accepted {
+    pub(crate) doc: Document,
+    pub(crate) changes: Vec<ChangeOp>,
     inverse: Vec<ChangeOp>,
     created: Vec<String>,
     proposer: String,
@@ -628,6 +628,12 @@ impl Session {
             comment_audit: Vec::new(),
         };
         s.audience_seen = s.doc.audiences.keys().cloned().collect();
+        s.audience_seen.extend(
+            s.doc
+                .intents
+                .iter()
+                .filter_map(|i| i.watch.as_ref().map(|w| w.for_.clone())),
+        );
         s.start_capsules(capsules.as_ref());
         // Resolve the bindings on load (§18.3); a first ready resolution is anchored by
         // an engine entry. No connection exists yet: its notifications go nowhere.
@@ -2236,7 +2242,7 @@ impl Session {
 
     /// The acceptance of proposal `pid` by `decider` as entry `seq`, expanded and
     /// `base`-checked in the world the fields hold.
-    fn accept_expand(
+    pub(crate) fn accept_expand(
         &self,
         pid: &str,
         note: Option<String>,
@@ -2444,6 +2450,12 @@ impl Session {
         for c in entry.changes.iter().chain(&entry.inverse) {
             if let ChangeOp::PutAudience { principal, .. } = c {
                 self.audience_seen.insert(principal.clone());
+            }
+            // (R5B, §25.5) A watch is personal too: other readers get projections.
+            if let ChangeOp::PutIntent { intent, .. } = c {
+                if let Some(w) = &intent.watch {
+                    self.audience_seen.insert(w.for_.clone());
+                }
             }
         }
         // (R3/K1) The public world takes its own version of the entry (same seq).

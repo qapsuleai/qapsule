@@ -1616,15 +1616,22 @@ impl Session {
         })
     }
 
-    /// Instruments of the active intents' triggers (symbols of the series they read).
-    pub(crate) fn intents_on(doc: &Document) -> Vec<String> {
+    /// Instruments of the active intents' triggers (symbols of the series they read);
+    /// (R5B, §25.5) and of `principal`'s own watches (an agent: its person's) — another
+    /// person's watch never counts.
+    pub(crate) fn intents_on(&self, doc: &Document, principal: &str) -> Vec<String> {
         let mut out = Vec::new();
+        let person = crate::watch::person_of(&self.plane, principal);
         for i in doc.intents.iter().filter(|i| i.active) {
-            // (R5B, §25.5) A watch on one instrument.
-            if let Some(sym) = i.watch.as_ref().and_then(|w| w.match_.instrument.as_ref()) {
-                if !out.iter().any(|x| x == sym) {
-                    out.push(sym.clone());
+            if let Some(w) = &i.watch {
+                if w.for_ == person {
+                    if let Some(sym) = &w.match_.instrument {
+                        if !out.iter().any(|x| x == sym) {
+                            out.push(sym.clone());
+                        }
+                    }
                 }
+                continue;
             }
             let Some(t) = &i.trigger else { continue };
             for (_, s) in crate::values::condition_series(t) {
@@ -1642,7 +1649,10 @@ impl Session {
     fn relevant(&self, doc: &Document, principal: &str, instrument: &str) -> bool {
         let a = self.audience_of(doc, principal);
         a.positions.get(instrument).is_some_and(|q| *q != 0.0)
-            || Self::intents_on(doc).iter().any(|s| s == instrument)
+            || self
+                .intents_on(doc, principal)
+                .iter()
+                .any(|s| s == instrument)
     }
 
     /// Whether a story reaches `principal`'s audience: watch list (empty = every
@@ -2422,6 +2432,9 @@ impl Session {
             f.facts.retain(|x| !p.hidden.contains(x));
         }
         d.capsules.retain(|c| !p.hidden.contains(&c.id));
+        // (R5B, §25.5) Another person's watches stay out.
+        d.intents
+            .retain(|i| self.intent_for_reader(i, &p.principal));
         // (R5B, §25.4) Comments with a hidden cite or with numbers stay out.
         d.comments
             .retain(|c| crate::comments::projected_keeps(c, &p.hidden));
@@ -2561,6 +2574,8 @@ impl Session {
                 ChangeOp::Delete { id } if p.hidden.contains(id) => {}
                 ChangeOp::PutComment { comment, .. }
                     if !crate::comments::projected_keeps(comment, &p.hidden) => {}
+                ChangeOp::PutIntent { intent, .. }
+                    if !self.intent_for_reader(intent, &p.principal) => {}
                 ChangeOp::PushLedger { entry }
                     if p.hidden.contains(&entry.finding)
                         || entry.capsule.as_ref().is_some_and(|c| p.hidden.contains(c)) => {}
@@ -2584,6 +2599,21 @@ impl Session {
         x.changes = self.project_changes(&e.changes, p, lang);
         x.inverse = self.project_changes(&e.inverse, p, lang);
         x.request.retain(|op| !p.mentions_hidden(op));
+        // (R5B, §25.5) Another person's watch requests stay out.
+        let author_person = crate::watch::person_of(&self.plane, &e.author).to_owned();
+        let reader_ok = p.principal.is_empty()
+            || crate::watch::person_of(&self.plane, &p.principal) == author_person
+            || self
+                .principal(&p.principal)
+                .is_some_and(|q| q.role == qp_schema::protocol::Role::Owner);
+        x.request.retain(|op| {
+            reader_ok
+                || !matches!(
+                    op,
+                    qp_schema::protocol::Op::AddWatch { .. }
+                        | qp_schema::protocol::Op::RemoveWatch { .. }
+                )
+        });
         // (R5B, §25.4) A comment's text with numbers does not go to a projected reader.
         x.request.retain(|op| match op {
             qp_schema::protocol::Op::AddComment { text, lang, .. } => {

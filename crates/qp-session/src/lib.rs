@@ -46,6 +46,7 @@ mod live;
 mod locate;
 mod plane;
 mod present;
+mod preview;
 mod provider;
 mod public;
 mod query;

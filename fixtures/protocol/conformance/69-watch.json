@@ -1,0 +1,1751 @@
+{
+  "covers": [
+    "watch",
+    "intent-matched",
+    "intents",
+    "lifecycle",
+    "privacy"
+  ],
+  "description": "R5B (§25.5): watches — `add_watch` for the agent's person, matching on the engine's story transitions (deterministic, in the engine entry), `intent_matched` to the person and her agent only, `max_matches`, expiry, removal, privacy.",
+  "final": {
+    "log_len": 46
+  },
+  "init": {
+    "agent_policy": "r5b",
+    "capsules": {
+      "series": [
+        "px"
+      ]
+    },
+    "clock": 1760000000000,
+    "data": {
+      "entitlements": {
+        "ana": [
+          "*"
+        ],
+        "eve": [
+          "*"
+        ],
+        "host": [
+          "*"
+        ]
+      },
+      "feeds": [
+        {
+          "feed": {
+            "feed": "bist",
+            "interval": "1d",
+            "symbol": "THYAO"
+          },
+          "synthetic": {
+            "n": 300,
+            "seed": 7
+          }
+        }
+      ]
+    },
+    "document": {
+      "id": "doc-watch",
+      "schema_version": "0",
+      "series": [
+        {
+          "id": "px",
+          "instrument": {
+            "symbol": "THYAO"
+          },
+          "interval": "1d",
+          "source": {
+            "feed": "bist",
+            "interval": "1d",
+            "kind": "bind",
+            "symbol": "THYAO",
+            "window": {
+              "last": 10000
+            }
+          }
+        }
+      ],
+      "title": "Niyet"
+    },
+    "principals": [
+      {
+        "author": {
+          "kind": "human",
+          "name": "host"
+        },
+        "id": "host",
+        "role": "host"
+      },
+      {
+        "author": {
+          "kind": "human",
+          "name": "Ana"
+        },
+        "id": "ana",
+        "role": "viewer"
+      },
+      {
+        "author": {
+          "kind": "agent",
+          "name": "bot"
+        },
+        "id": "bot",
+        "on_behalf": "ana",
+        "role": "proposer"
+      },
+      {
+        "author": {
+          "kind": "human",
+          "name": "Eve"
+        },
+        "id": "eve",
+        "role": "viewer"
+      }
+    ]
+  },
+  "name": "69-watch",
+  "steps": [
+    {
+      "expect": [
+        {
+          "conn": "a",
+          "msg": {
+            "seq": 2,
+            "type": "welcome"
+          }
+        }
+      ],
+      "note": "The person.",
+      "send": {
+        "conn": "a",
+        "msg": {
+          "principal": "ana",
+          "protocol": "qp/0",
+          "surface": {
+            "kind": "headless"
+          },
+          "type": "hello"
+        }
+      }
+    },
+    {
+      "expect": [
+        {
+          "conn": "b",
+          "msg": {
+            "seq": 2,
+            "type": "welcome"
+          }
+        }
+      ],
+      "note": "Her agent (`on_behalf: ana`); `welcome.limits.max_watches` is 32 with the agent policy.",
+      "send": {
+        "conn": "b",
+        "msg": {
+          "principal": "bot",
+          "protocol": "qp/0",
+          "surface": {
+            "kind": "headless"
+          },
+          "type": "hello"
+        }
+      }
+    },
+    {
+      "expect": [
+        {
+          "conn": "e",
+          "msg": {
+            "seq": 2,
+            "type": "welcome"
+          }
+        }
+      ],
+      "note": "Another person.",
+      "send": {
+        "conn": "e",
+        "msg": {
+          "principal": "eve",
+          "protocol": "qp/0",
+          "surface": {
+            "kind": "headless"
+          },
+          "type": "hello"
+        }
+      }
+    },
+    {
+      "expect": [
+        {
+          "conn": "a",
+          "msg": {
+            "id": "w",
+            "status": "subscribed",
+            "type": "ack"
+          }
+        }
+      ],
+      "note": "ana's intents.",
+      "send": {
+        "conn": "a",
+        "msg": {
+          "id": "w",
+          "topic": {
+            "kind": "intents"
+          },
+          "type": "subscribe"
+        }
+      }
+    },
+    {
+      "expect": [
+        {
+          "conn": "b",
+          "msg": {
+            "id": "w",
+            "status": "subscribed",
+            "type": "ack"
+          }
+        }
+      ],
+      "note": "The agent's.",
+      "send": {
+        "conn": "b",
+        "msg": {
+          "id": "w",
+          "topic": {
+            "kind": "intents"
+          },
+          "type": "subscribe"
+        }
+      }
+    },
+    {
+      "expect": [
+        {
+          "conn": "e",
+          "msg": {
+            "id": "w",
+            "status": "subscribed",
+            "type": "ack"
+          }
+        }
+      ],
+      "note": "eve's: she gets none of ana's matches.",
+      "send": {
+        "conn": "e",
+        "msg": {
+          "id": "w",
+          "topic": {
+            "kind": "intents"
+          },
+          "type": "subscribe"
+        }
+      }
+    },
+    {
+      "expect": [
+        {
+          "conn": "b",
+          "msg": {
+            "created": [
+              "w-any"
+            ],
+            "id": "w1",
+            "seq": 3,
+            "status": "applied",
+            "type": "ack"
+          }
+        }
+      ],
+      "note": "A watch for ana (the agent's person), at most two matches.",
+      "send": {
+        "conn": "b",
+        "msg": {
+          "id": "w1",
+          "ops": [
+            {
+              "id": "w-any",
+              "match": {
+                "instrument": "THYAO"
+              },
+              "max_matches": 2,
+              "op": "add_watch",
+              "text": "THYAO'da bir şey olursa"
+            }
+          ],
+          "type": "command"
+        }
+      }
+    },
+    {
+      "expect": [
+        {
+          "conn": "b",
+          "msg": {
+            "created": [
+              "w-neg"
+            ],
+            "id": "w2",
+            "seq": 4,
+            "status": "applied",
+            "type": "ack"
+          }
+        }
+      ],
+      "note": "Negative transitions only.",
+      "send": {
+        "conn": "b",
+        "msg": {
+          "id": "w2",
+          "ops": [
+            {
+              "id": "w-neg",
+              "match": {
+                "instrument": "THYAO",
+                "negative": true
+              },
+              "op": "add_watch",
+              "text": "THYAO'da olumsuz geçiş"
+            }
+          ],
+          "type": "command"
+        }
+      }
+    },
+    {
+      "expect": [
+        {
+          "conn": "b",
+          "msg": {
+            "created": [
+              "w-old"
+            ],
+            "id": "w3",
+            "seq": 5,
+            "status": "applied",
+            "type": "ack"
+          }
+        }
+      ],
+      "note": "Already past its time: expires at the next engine look.",
+      "send": {
+        "conn": "b",
+        "msg": {
+          "id": "w3",
+          "ops": [
+            {
+              "expires_t": 0,
+              "id": "w-old",
+              "match": {
+                "instrument": "THYAO"
+              },
+              "op": "add_watch",
+              "text": "süresi dolan"
+            }
+          ],
+          "type": "command"
+        }
+      }
+    },
+    {
+      "expect": [
+        {
+          "conn": "b",
+          "msg": {
+            "error": {
+              "code": "forbidden",
+              "hint": "Leave it for yourself (or the person you work for); omit `for`.",
+              "message": "a watch for `eve` is theirs to leave",
+              "path": "/ops/0/for"
+            },
+            "id": "w4",
+            "type": "error"
+          }
+        }
+      ],
+      "note": "Another person's watch: `forbidden`.",
+      "send": {
+        "conn": "b",
+        "msg": {
+          "id": "w4",
+          "ops": [
+            {
+              "for": "eve",
+              "match": {},
+              "op": "add_watch",
+              "text": "x"
+            }
+          ],
+          "type": "command"
+        }
+      }
+    },
+    {
+      "expect": [
+        {
+          "conn": "e",
+          "msg": {
+            "error": {
+              "code": "not_found",
+              "message": "no watch `w-any`",
+              "path": "/ops/0/intent"
+            },
+            "id": "w5",
+            "type": "error"
+          }
+        }
+      ],
+      "note": "eve cannot see ana's watch: `not_found`.",
+      "send": {
+        "conn": "e",
+        "msg": {
+          "id": "w5",
+          "ops": [
+            {
+              "intent": "w-any",
+              "op": "remove_watch"
+            }
+          ],
+          "type": "command"
+        }
+      }
+    },
+    {
+      "data": {
+        "change": {
+          "bar": {
+            "c": 109.38,
+            "h": 110.97,
+            "l": 109.29,
+            "o": 110.45,
+            "t": 1772064000000,
+            "v": 2195987.04
+          },
+          "kind": "bar"
+        },
+        "feed": {
+          "feed": "bist",
+          "interval": "1d",
+          "symbol": "THYAO"
+        },
+        "seq": 1
+      },
+      "expect": [
+        {
+          "conn": "a",
+          "msg": {
+            "event": {
+              "bar": 299,
+              "capsule": "cap.THYAO.breakout.up.297",
+              "intent": "w-any",
+              "kind": "intent_matched",
+              "seq": 6,
+              "stage": "invalidated",
+              "t": 1771977600000
+            },
+            "sub": "w",
+            "type": "notify"
+          }
+        },
+        {
+          "conn": "a",
+          "msg": {
+            "event": {
+              "bar": 299,
+              "capsule": "cap.THYAO.breakout.up.297",
+              "intent": "w-neg",
+              "kind": "intent_matched",
+              "seq": 6,
+              "stage": "invalidated",
+              "t": 1771977600000
+            },
+            "sub": "w",
+            "type": "notify"
+          }
+        },
+        {
+          "conn": "b",
+          "msg": {
+            "event": {
+              "bar": 299,
+              "capsule": "cap.THYAO.breakout.up.297",
+              "intent": "w-any",
+              "kind": "intent_matched",
+              "seq": 6,
+              "stage": "invalidated",
+              "t": 1771977600000
+            },
+            "sub": "w",
+            "type": "notify"
+          }
+        },
+        {
+          "conn": "b",
+          "msg": {
+            "event": {
+              "bar": 299,
+              "capsule": "cap.THYAO.breakout.up.297",
+              "intent": "w-neg",
+              "kind": "intent_matched",
+              "seq": 6,
+              "stage": "invalidated",
+              "t": 1771977600000
+            },
+            "sub": "w",
+            "type": "notify"
+          }
+        }
+      ],
+      "note": "A final bar: the engine's look; matching watches send `intent_matched` to ana and her agent."
+    },
+    {
+      "data": {
+        "change": {
+          "bar": {
+            "c": 110.76,
+            "h": 111.43,
+            "l": 108.01,
+            "o": 109.04,
+            "t": 1772150400000,
+            "v": 1835680.9
+          },
+          "kind": "bar"
+        },
+        "feed": {
+          "feed": "bist",
+          "interval": "1d",
+          "symbol": "THYAO"
+        },
+        "seq": 2
+      },
+      "expect": [],
+      "note": "A final bar: the engine's look; matching watches send `intent_matched` to ana and her agent."
+    },
+    {
+      "data": {
+        "change": {
+          "bar": {
+            "c": 111.67,
+            "h": 112.42,
+            "l": 110.83,
+            "o": 110.96,
+            "t": 1772409600000,
+            "v": 1351796.28
+          },
+          "kind": "bar"
+        },
+        "feed": {
+          "feed": "bist",
+          "interval": "1d",
+          "symbol": "THYAO"
+        },
+        "seq": 3
+      },
+      "expect": [],
+      "note": "A final bar: the engine's look; matching watches send `intent_matched` to ana and her agent."
+    },
+    {
+      "data": {
+        "change": {
+          "bar": {
+            "c": 110.92,
+            "h": 113.37,
+            "l": 110.71,
+            "o": 112.11,
+            "t": 1772496000000,
+            "v": 854268.07
+          },
+          "kind": "bar"
+        },
+        "feed": {
+          "feed": "bist",
+          "interval": "1d",
+          "symbol": "THYAO"
+        },
+        "seq": 4
+      },
+      "expect": [],
+      "note": "A final bar: the engine's look; matching watches send `intent_matched` to ana and her agent."
+    },
+    {
+      "data": {
+        "change": {
+          "bar": {
+            "c": 109.72,
+            "h": 111.7,
+            "l": 108.33,
+            "o": 110.65,
+            "t": 1772582400000,
+            "v": 1522552.78
+          },
+          "kind": "bar"
+        },
+        "feed": {
+          "feed": "bist",
+          "interval": "1d",
+          "symbol": "THYAO"
+        },
+        "seq": 5
+      },
+      "expect": [],
+      "note": "A final bar: the engine's look; matching watches send `intent_matched` to ana and her agent."
+    },
+    {
+      "data": {
+        "change": {
+          "bar": {
+            "c": 109.94,
+            "h": 111.28,
+            "l": 108.88,
+            "o": 109.81,
+            "t": 1772668800000,
+            "v": 1039877.3
+          },
+          "kind": "bar"
+        },
+        "feed": {
+          "feed": "bist",
+          "interval": "1d",
+          "symbol": "THYAO"
+        },
+        "seq": 6
+      },
+      "expect": [],
+      "note": "A final bar: the engine's look; matching watches send `intent_matched` to ana and her agent."
+    },
+    {
+      "data": {
+        "change": {
+          "bar": {
+            "c": 109.59,
+            "h": 112.07,
+            "l": 108.63,
+            "o": 110.33,
+            "t": 1772755200000,
+            "v": 2092320.38
+          },
+          "kind": "bar"
+        },
+        "feed": {
+          "feed": "bist",
+          "interval": "1d",
+          "symbol": "THYAO"
+        },
+        "seq": 7
+      },
+      "expect": [
+        {
+          "conn": "a",
+          "msg": {
+            "event": {
+              "bar": 305,
+              "capsule": "cap.THYAO.continuation.up.305",
+              "intent": "w-any",
+              "kind": "intent_matched",
+              "seq": 12,
+              "stage": "born",
+              "t": 1772668800000
+            },
+            "sub": "w",
+            "type": "notify"
+          }
+        },
+        {
+          "conn": "b",
+          "msg": {
+            "event": {
+              "bar": 305,
+              "capsule": "cap.THYAO.continuation.up.305",
+              "intent": "w-any",
+              "kind": "intent_matched",
+              "seq": 12,
+              "stage": "born",
+              "t": 1772668800000
+            },
+            "sub": "w",
+            "type": "notify"
+          }
+        }
+      ],
+      "note": "A final bar: the engine's look; matching watches send `intent_matched` to ana and her agent."
+    },
+    {
+      "data": {
+        "change": {
+          "bar": {
+            "c": 107.84,
+            "h": 110.38,
+            "l": 107.6,
+            "o": 109.59,
+            "t": 1773014400000,
+            "v": 2099511.99
+          },
+          "kind": "bar"
+        },
+        "feed": {
+          "feed": "bist",
+          "interval": "1d",
+          "symbol": "THYAO"
+        },
+        "seq": 8
+      },
+      "expect": [],
+      "note": "A final bar: the engine's look; matching watches send `intent_matched` to ana and her agent."
+    },
+    {
+      "data": {
+        "change": {
+          "bar": {
+            "c": 107.4,
+            "h": 108.92,
+            "l": 105.96,
+            "o": 108.12,
+            "t": 1773100800000,
+            "v": 717093.34
+          },
+          "kind": "bar"
+        },
+        "feed": {
+          "feed": "bist",
+          "interval": "1d",
+          "symbol": "THYAO"
+        },
+        "seq": 9
+      },
+      "expect": [
+        {
+          "conn": "a",
+          "msg": {
+            "event": {
+              "bar": 307,
+              "capsule": "cap.THYAO.continuation.up.305",
+              "intent": "w-neg",
+              "kind": "intent_matched",
+              "seq": 14,
+              "stage": "weakened",
+              "t": 1773014400000
+            },
+            "sub": "w",
+            "type": "notify"
+          }
+        },
+        {
+          "conn": "b",
+          "msg": {
+            "event": {
+              "bar": 307,
+              "capsule": "cap.THYAO.continuation.up.305",
+              "intent": "w-neg",
+              "kind": "intent_matched",
+              "seq": 14,
+              "stage": "weakened",
+              "t": 1773014400000
+            },
+            "sub": "w",
+            "type": "notify"
+          }
+        }
+      ],
+      "note": "A final bar: the engine's look; matching watches send `intent_matched` to ana and her agent."
+    },
+    {
+      "data": {
+        "change": {
+          "bar": {
+            "c": 107.65,
+            "h": 107.96,
+            "l": 107.25,
+            "o": 107.56,
+            "t": 1773187200000,
+            "v": 1100164.21
+          },
+          "kind": "bar"
+        },
+        "feed": {
+          "feed": "bist",
+          "interval": "1d",
+          "symbol": "THYAO"
+        },
+        "seq": 10
+      },
+      "expect": [],
+      "note": "A final bar: the engine's look; matching watches send `intent_matched` to ana and her agent."
+    },
+    {
+      "data": {
+        "change": {
+          "bar": {
+            "c": 109.24,
+            "h": 110.3,
+            "l": 106.49,
+            "o": 107.41,
+            "t": 1773273600000,
+            "v": 790895.58
+          },
+          "kind": "bar"
+        },
+        "feed": {
+          "feed": "bist",
+          "interval": "1d",
+          "symbol": "THYAO"
+        },
+        "seq": 11
+      },
+      "expect": [],
+      "note": "A final bar: the engine's look; matching watches send `intent_matched` to ana and her agent."
+    },
+    {
+      "data": {
+        "change": {
+          "bar": {
+            "c": 108.93,
+            "h": 111.2,
+            "l": 107.95,
+            "o": 109.58,
+            "t": 1773360000000,
+            "v": 1819843.07
+          },
+          "kind": "bar"
+        },
+        "feed": {
+          "feed": "bist",
+          "interval": "1d",
+          "symbol": "THYAO"
+        },
+        "seq": 12
+      },
+      "expect": [],
+      "note": "A final bar: the engine's look; matching watches send `intent_matched` to ana and her agent."
+    },
+    {
+      "data": {
+        "change": {
+          "bar": {
+            "c": 109.33,
+            "h": 109.67,
+            "l": 108.39,
+            "o": 109.21,
+            "t": 1773619200000,
+            "v": 2114071.85
+          },
+          "kind": "bar"
+        },
+        "feed": {
+          "feed": "bist",
+          "interval": "1d",
+          "symbol": "THYAO"
+        },
+        "seq": 13
+      },
+      "expect": [],
+      "note": "A final bar: the engine's look; matching watches send `intent_matched` to ana and her agent."
+    },
+    {
+      "data": {
+        "change": {
+          "bar": {
+            "c": 108.88,
+            "h": 110.69,
+            "l": 107.43,
+            "o": 109.06,
+            "t": 1773705600000,
+            "v": 1807707.63
+          },
+          "kind": "bar"
+        },
+        "feed": {
+          "feed": "bist",
+          "interval": "1d",
+          "symbol": "THYAO"
+        },
+        "seq": 14
+      },
+      "expect": [],
+      "note": "A final bar: the engine's look; matching watches send `intent_matched` to ana and her agent."
+    },
+    {
+      "data": {
+        "change": {
+          "bar": {
+            "c": 109.99,
+            "h": 110.09,
+            "l": 108.67,
+            "o": 108.69,
+            "t": 1773792000000,
+            "v": 996989.23
+          },
+          "kind": "bar"
+        },
+        "feed": {
+          "feed": "bist",
+          "interval": "1d",
+          "symbol": "THYAO"
+        },
+        "seq": 15
+      },
+      "expect": [],
+      "note": "A final bar: the engine's look; matching watches send `intent_matched` to ana and her agent."
+    },
+    {
+      "data": {
+        "change": {
+          "bar": {
+            "c": 108.03,
+            "h": 111.34,
+            "l": 107.57,
+            "o": 109.94,
+            "t": 1773878400000,
+            "v": 1549347.8
+          },
+          "kind": "bar"
+        },
+        "feed": {
+          "feed": "bist",
+          "interval": "1d",
+          "symbol": "THYAO"
+        },
+        "seq": 16
+      },
+      "expect": [],
+      "note": "A final bar: the engine's look; matching watches send `intent_matched` to ana and her agent."
+    },
+    {
+      "data": {
+        "change": {
+          "bar": {
+            "c": 107.02,
+            "h": 108.36,
+            "l": 106.62,
+            "o": 108.35,
+            "t": 1773964800000,
+            "v": 2253972.62
+          },
+          "kind": "bar"
+        },
+        "feed": {
+          "feed": "bist",
+          "interval": "1d",
+          "symbol": "THYAO"
+        },
+        "seq": 17
+      },
+      "expect": [],
+      "note": "A final bar: the engine's look; matching watches send `intent_matched` to ana and her agent."
+    },
+    {
+      "data": {
+        "change": {
+          "bar": {
+            "c": 107.77,
+            "h": 109.29,
+            "l": 106.8,
+            "o": 107.35,
+            "t": 1774224000000,
+            "v": 1934493.0
+          },
+          "kind": "bar"
+        },
+        "feed": {
+          "feed": "bist",
+          "interval": "1d",
+          "symbol": "THYAO"
+        },
+        "seq": 18
+      },
+      "expect": [],
+      "note": "A final bar: the engine's look; matching watches send `intent_matched` to ana and her agent."
+    },
+    {
+      "data": {
+        "change": {
+          "bar": {
+            "c": 106.09,
+            "h": 109.55,
+            "l": 105.08,
+            "o": 107.87,
+            "t": 1774310400000,
+            "v": 1496253.15
+          },
+          "kind": "bar"
+        },
+        "feed": {
+          "feed": "bist",
+          "interval": "1d",
+          "symbol": "THYAO"
+        },
+        "seq": 19
+      },
+      "expect": [],
+      "note": "A final bar: the engine's look; matching watches send `intent_matched` to ana and her agent."
+    },
+    {
+      "data": {
+        "change": {
+          "bar": {
+            "c": 104.75,
+            "h": 106.51,
+            "l": 104.06,
+            "o": 106.3,
+            "t": 1774396800000,
+            "v": 2268196.64
+          },
+          "kind": "bar"
+        },
+        "feed": {
+          "feed": "bist",
+          "interval": "1d",
+          "symbol": "THYAO"
+        },
+        "seq": 20
+      },
+      "expect": [
+        {
+          "conn": "a",
+          "msg": {
+            "event": {
+              "bar": 318,
+              "capsule": "cap.THYAO.continuation.up.305",
+              "intent": "w-neg",
+              "kind": "intent_matched",
+              "seq": 25,
+              "stage": "invalidated",
+              "t": 1774310400000
+            },
+            "sub": "w",
+            "type": "notify"
+          }
+        },
+        {
+          "conn": "b",
+          "msg": {
+            "event": {
+              "bar": 318,
+              "capsule": "cap.THYAO.continuation.up.305",
+              "intent": "w-neg",
+              "kind": "intent_matched",
+              "seq": 25,
+              "stage": "invalidated",
+              "t": 1774310400000
+            },
+            "sub": "w",
+            "type": "notify"
+          }
+        }
+      ],
+      "note": "A final bar: the engine's look; matching watches send `intent_matched` to ana and her agent."
+    },
+    {
+      "data": {
+        "change": {
+          "bar": {
+            "c": 102.69,
+            "h": 105.07,
+            "l": 102.6,
+            "o": 104.52,
+            "t": 1774483200000,
+            "v": 1610350.77
+          },
+          "kind": "bar"
+        },
+        "feed": {
+          "feed": "bist",
+          "interval": "1d",
+          "symbol": "THYAO"
+        },
+        "seq": 21
+      },
+      "expect": [],
+      "note": "A final bar: the engine's look; matching watches send `intent_matched` to ana and her agent."
+    },
+    {
+      "data": {
+        "change": {
+          "bar": {
+            "c": 103.45,
+            "h": 104.07,
+            "l": 101.03,
+            "o": 102.59,
+            "t": 1774569600000,
+            "v": 2044080.68
+          },
+          "kind": "bar"
+        },
+        "feed": {
+          "feed": "bist",
+          "interval": "1d",
+          "symbol": "THYAO"
+        },
+        "seq": 22
+      },
+      "expect": [],
+      "note": "A final bar: the engine's look; matching watches send `intent_matched` to ana and her agent."
+    },
+    {
+      "data": {
+        "change": {
+          "bar": {
+            "c": 105.0,
+            "h": 105.09,
+            "l": 101.72,
+            "o": 103.26,
+            "t": 1774828800000,
+            "v": 787860.58
+          },
+          "kind": "bar"
+        },
+        "feed": {
+          "feed": "bist",
+          "interval": "1d",
+          "symbol": "THYAO"
+        },
+        "seq": 23
+      },
+      "expect": [],
+      "note": "A final bar: the engine's look; matching watches send `intent_matched` to ana and her agent."
+    },
+    {
+      "data": {
+        "change": {
+          "bar": {
+            "c": 105.18,
+            "h": 105.81,
+            "l": 103.57,
+            "o": 104.9,
+            "t": 1774915200000,
+            "v": 2026057.13
+          },
+          "kind": "bar"
+        },
+        "feed": {
+          "feed": "bist",
+          "interval": "1d",
+          "symbol": "THYAO"
+        },
+        "seq": 24
+      },
+      "expect": [],
+      "note": "A final bar: the engine's look; matching watches send `intent_matched` to ana and her agent."
+    },
+    {
+      "data": {
+        "change": {
+          "bar": {
+            "c": 105.56,
+            "h": 106.46,
+            "l": 104.86,
+            "o": 105.03,
+            "t": 1775001600000,
+            "v": 2380059.57
+          },
+          "kind": "bar"
+        },
+        "feed": {
+          "feed": "bist",
+          "interval": "1d",
+          "symbol": "THYAO"
+        },
+        "seq": 25
+      },
+      "expect": [],
+      "note": "A final bar: the engine's look; matching watches send `intent_matched` to ana and her agent."
+    },
+    {
+      "data": {
+        "change": {
+          "bar": {
+            "c": 105.85,
+            "h": 107.22,
+            "l": 103.7,
+            "o": 105.32,
+            "t": 1775088000000,
+            "v": 620975.29
+          },
+          "kind": "bar"
+        },
+        "feed": {
+          "feed": "bist",
+          "interval": "1d",
+          "symbol": "THYAO"
+        },
+        "seq": 26
+      },
+      "expect": [],
+      "note": "A final bar: the engine's look; matching watches send `intent_matched` to ana and her agent."
+    },
+    {
+      "data": {
+        "change": {
+          "bar": {
+            "c": 105.35,
+            "h": 106.68,
+            "l": 104.88,
+            "o": 105.65,
+            "t": 1775174400000,
+            "v": 1366879.69
+          },
+          "kind": "bar"
+        },
+        "feed": {
+          "feed": "bist",
+          "interval": "1d",
+          "symbol": "THYAO"
+        },
+        "seq": 27
+      },
+      "expect": [],
+      "note": "A final bar: the engine's look; matching watches send `intent_matched` to ana and her agent."
+    },
+    {
+      "data": {
+        "change": {
+          "bar": {
+            "c": 107.14,
+            "h": 107.94,
+            "l": 105.63,
+            "o": 105.66,
+            "t": 1775433600000,
+            "v": 1226652.09
+          },
+          "kind": "bar"
+        },
+        "feed": {
+          "feed": "bist",
+          "interval": "1d",
+          "symbol": "THYAO"
+        },
+        "seq": 28
+      },
+      "expect": [],
+      "note": "A final bar: the engine's look; matching watches send `intent_matched` to ana and her agent."
+    },
+    {
+      "data": {
+        "change": {
+          "bar": {
+            "c": 106.83,
+            "h": 107.5,
+            "l": 105.96,
+            "o": 107.35,
+            "t": 1775520000000,
+            "v": 1340082.16
+          },
+          "kind": "bar"
+        },
+        "feed": {
+          "feed": "bist",
+          "interval": "1d",
+          "symbol": "THYAO"
+        },
+        "seq": 29
+      },
+      "expect": [
+        {
+          "conn": "a",
+          "msg": {
+            "event": {
+              "bar": 327,
+              "capsule": "cap.THYAO.continuation.down.323",
+              "intent": "w-neg",
+              "kind": "intent_matched",
+              "seq": 34,
+              "stage": "weakened",
+              "t": 1775433600000
+            },
+            "sub": "w",
+            "type": "notify"
+          }
+        },
+        {
+          "conn": "b",
+          "msg": {
+            "event": {
+              "bar": 327,
+              "capsule": "cap.THYAO.continuation.down.323",
+              "intent": "w-neg",
+              "kind": "intent_matched",
+              "seq": 34,
+              "stage": "weakened",
+              "t": 1775433600000
+            },
+            "sub": "w",
+            "type": "notify"
+          }
+        }
+      ],
+      "note": "A final bar: the engine's look; matching watches send `intent_matched` to ana and her agent."
+    },
+    {
+      "data": {
+        "change": {
+          "bar": {
+            "c": 107.53,
+            "h": 109.25,
+            "l": 105.38,
+            "o": 106.41,
+            "t": 1775606400000,
+            "v": 1947248.72
+          },
+          "kind": "bar"
+        },
+        "feed": {
+          "feed": "bist",
+          "interval": "1d",
+          "symbol": "THYAO"
+        },
+        "seq": 30
+      },
+      "expect": [],
+      "note": "A final bar: the engine's look; matching watches send `intent_matched` to ana and her agent."
+    },
+    {
+      "data": {
+        "change": {
+          "bar": {
+            "c": 108.28,
+            "h": 109.65,
+            "l": 106.15,
+            "o": 107.48,
+            "t": 1775692800000,
+            "v": 1831348.6
+          },
+          "kind": "bar"
+        },
+        "feed": {
+          "feed": "bist",
+          "interval": "1d",
+          "symbol": "THYAO"
+        },
+        "seq": 31
+      },
+      "expect": [
+        {
+          "conn": "a",
+          "msg": {
+            "event": {
+              "bar": 329,
+              "capsule": "cap.THYAO.breakout.down.319",
+              "intent": "w-neg",
+              "kind": "intent_matched",
+              "seq": 36,
+              "stage": "invalidated",
+              "t": 1775606400000
+            },
+            "sub": "w",
+            "type": "notify"
+          }
+        },
+        {
+          "conn": "b",
+          "msg": {
+            "event": {
+              "bar": 329,
+              "capsule": "cap.THYAO.breakout.down.319",
+              "intent": "w-neg",
+              "kind": "intent_matched",
+              "seq": 36,
+              "stage": "invalidated",
+              "t": 1775606400000
+            },
+            "sub": "w",
+            "type": "notify"
+          }
+        }
+      ],
+      "note": "A final bar: the engine's look; matching watches send `intent_matched` to ana and her agent."
+    },
+    {
+      "data": {
+        "change": {
+          "bar": {
+            "c": 108.66,
+            "h": 109.36,
+            "l": 106.81,
+            "o": 107.93,
+            "t": 1775779200000,
+            "v": 1918179.75
+          },
+          "kind": "bar"
+        },
+        "feed": {
+          "feed": "bist",
+          "interval": "1d",
+          "symbol": "THYAO"
+        },
+        "seq": 32
+      },
+      "expect": [],
+      "note": "A final bar: the engine's look; matching watches send `intent_matched` to ana and her agent."
+    },
+    {
+      "data": {
+        "change": {
+          "bar": {
+            "c": 107.52,
+            "h": 109.61,
+            "l": 106.63,
+            "o": 108.41,
+            "t": 1776038400000,
+            "v": 1001785.89
+          },
+          "kind": "bar"
+        },
+        "feed": {
+          "feed": "bist",
+          "interval": "1d",
+          "symbol": "THYAO"
+        },
+        "seq": 33
+      },
+      "expect": [],
+      "note": "A final bar: the engine's look; matching watches send `intent_matched` to ana and her agent."
+    },
+    {
+      "data": {
+        "change": {
+          "bar": {
+            "c": 108.65,
+            "h": 109.65,
+            "l": 106.63,
+            "o": 107.34,
+            "t": 1776124800000,
+            "v": 1498240.6
+          },
+          "kind": "bar"
+        },
+        "feed": {
+          "feed": "bist",
+          "interval": "1d",
+          "symbol": "THYAO"
+        },
+        "seq": 34
+      },
+      "expect": [],
+      "note": "A final bar: the engine's look; matching watches send `intent_matched` to ana and her agent."
+    },
+    {
+      "data": {
+        "change": {
+          "bar": {
+            "c": 107.37,
+            "h": 109.39,
+            "l": 107.27,
+            "o": 108.55,
+            "t": 1776211200000,
+            "v": 2265688.57
+          },
+          "kind": "bar"
+        },
+        "feed": {
+          "feed": "bist",
+          "interval": "1d",
+          "symbol": "THYAO"
+        },
+        "seq": 35
+      },
+      "expect": [],
+      "note": "A final bar: the engine's look; matching watches send `intent_matched` to ana and her agent."
+    },
+    {
+      "data": {
+        "change": {
+          "bar": {
+            "c": 108.93,
+            "h": 109.39,
+            "l": 105.67,
+            "o": 107.12,
+            "t": 1776297600000,
+            "v": 1141032.99
+          },
+          "kind": "bar"
+        },
+        "feed": {
+          "feed": "bist",
+          "interval": "1d",
+          "symbol": "THYAO"
+        },
+        "seq": 36
+      },
+      "expect": [],
+      "note": "A final bar: the engine's look; matching watches send `intent_matched` to ana and her agent."
+    },
+    {
+      "data": {
+        "change": {
+          "bar": {
+            "c": 107.4,
+            "h": 109.34,
+            "l": 106.81,
+            "o": 109.27,
+            "t": 1776384000000,
+            "v": 1003728.92
+          },
+          "kind": "bar"
+        },
+        "feed": {
+          "feed": "bist",
+          "interval": "1d",
+          "symbol": "THYAO"
+        },
+        "seq": 37
+      },
+      "expect": [
+        {
+          "conn": "a",
+          "msg": {
+            "event": {
+              "bar": 335,
+              "capsule": "cap.THYAO.continuation.down.323",
+              "intent": "w-neg",
+              "kind": "intent_matched",
+              "seq": 42,
+              "stage": "invalidated",
+              "t": 1776297600000
+            },
+            "sub": "w",
+            "type": "notify"
+          }
+        },
+        {
+          "conn": "b",
+          "msg": {
+            "event": {
+              "bar": 335,
+              "capsule": "cap.THYAO.continuation.down.323",
+              "intent": "w-neg",
+              "kind": "intent_matched",
+              "seq": 42,
+              "stage": "invalidated",
+              "t": 1776297600000
+            },
+            "sub": "w",
+            "type": "notify"
+          }
+        }
+      ],
+      "note": "A final bar: the engine's look; matching watches send `intent_matched` to ana and her agent."
+    },
+    {
+      "data": {
+        "change": {
+          "bar": {
+            "c": 107.78,
+            "h": 109.04,
+            "l": 107.34,
+            "o": 107.73,
+            "t": 1776643200000,
+            "v": 2491672.88
+          },
+          "kind": "bar"
+        },
+        "feed": {
+          "feed": "bist",
+          "interval": "1d",
+          "symbol": "THYAO"
+        },
+        "seq": 38
+      },
+      "expect": [],
+      "note": "A final bar: the engine's look; matching watches send `intent_matched` to ana and her agent."
+    },
+    {
+      "data": {
+        "change": {
+          "bar": {
+            "c": 108.09,
+            "h": 108.84,
+            "l": 106.48,
+            "o": 107.8,
+            "t": 1776729600000,
+            "v": 1329619.69
+          },
+          "kind": "bar"
+        },
+        "feed": {
+          "feed": "bist",
+          "interval": "1d",
+          "symbol": "THYAO"
+        },
+        "seq": 39
+      },
+      "expect": [],
+      "note": "A final bar: the engine's look; matching watches send `intent_matched` to ana and her agent."
+    },
+    {
+      "data": {
+        "change": {
+          "bar": {
+            "c": 106.69,
+            "h": 109.44,
+            "l": 106.5,
+            "o": 107.76,
+            "t": 1776816000000,
+            "v": 1120243.89
+          },
+          "kind": "bar"
+        },
+        "feed": {
+          "feed": "bist",
+          "interval": "1d",
+          "symbol": "THYAO"
+        },
+        "seq": 40
+      },
+      "expect": [],
+      "note": "A final bar: the engine's look; matching watches send `intent_matched` to ana and her agent."
+    },
+    {
+      "expect": [
+        {
+          "conn": "b",
+          "msg": {
+            "id": "w6",
+            "seq": 46,
+            "status": "applied",
+            "type": "ack"
+          }
+        }
+      ],
+      "note": "Removed (`state: removed`).",
+      "send": {
+        "conn": "b",
+        "msg": {
+          "id": "w6",
+          "ops": [
+            {
+              "intent": "w-neg",
+              "op": "remove_watch"
+            }
+          ],
+          "type": "command"
+        }
+      }
+    },
+    {
+      "expect": [
+        {
+          "conn": "a",
+          "msg": {
+            "data": {
+              "collection": "intents",
+              "items": [
+                {
+                  "active": false,
+                  "id": "w-any",
+                  "matches": 2,
+                  "provenance": {
+                    "at": 1760000000000,
+                    "author": {
+                      "kind": "agent",
+                      "name": "bot"
+                    },
+                    "based_on": []
+                  },
+                  "state": "matched",
+                  "text": "THYAO'da bir şey olursa",
+                  "watch": {
+                    "for": "ana",
+                    "match": {
+                      "instrument": "THYAO"
+                    },
+                    "max_matches": 2
+                  }
+                },
+                {
+                  "active": false,
+                  "id": "w-neg",
+                  "matches": 6,
+                  "provenance": {
+                    "at": 1760000000000,
+                    "author": {
+                      "kind": "agent",
+                      "name": "bot"
+                    },
+                    "based_on": []
+                  },
+                  "state": "removed",
+                  "text": "THYAO'da olumsuz geçiş",
+                  "watch": {
+                    "for": "ana",
+                    "match": {
+                      "instrument": "THYAO",
+                      "negative": true
+                    }
+                  }
+                },
+                {
+                  "active": false,
+                  "id": "w-old",
+                  "provenance": {
+                    "at": 1760000000000,
+                    "author": {
+                      "kind": "agent",
+                      "name": "bot"
+                    },
+                    "based_on": []
+                  },
+                  "state": "expired",
+                  "text": "süresi dolan",
+                  "watch": {
+                    "expires_t": 0,
+                    "for": "ana",
+                    "match": {
+                      "instrument": "THYAO"
+                    }
+                  }
+                }
+              ],
+              "kind": "items"
+            },
+            "id": "l1",
+            "now": 1760000000000,
+            "seq": 46,
+            "type": "result"
+          }
+        }
+      ],
+      "note": "Lifecycle: `matched` (2), `expired`, `removed`.",
+      "send": {
+        "conn": "a",
+        "msg": {
+          "id": "l1",
+          "query": {
+            "collection": "intents",
+            "kind": "list"
+          },
+          "type": "query"
+        }
+      }
+    },
+    {
+      "expect": [
+        {
+          "conn": "e",
+          "msg": {
+            "data": {
+              "collection": "intents",
+              "items": [],
+              "kind": "items"
+            },
+            "id": "l2",
+            "now": 1760000000000,
+            "seq": 46,
+            "type": "result"
+          }
+        }
+      ],
+      "note": "eve sees none of ana's watches.",
+      "send": {
+        "conn": "e",
+        "msg": {
+          "id": "l2",
+          "query": {
+            "collection": "intents",
+            "kind": "list"
+          },
+          "type": "query"
+        }
+      }
+    }
+  ]
+}

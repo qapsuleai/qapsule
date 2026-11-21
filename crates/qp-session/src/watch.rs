@@ -148,31 +148,18 @@ pub(crate) fn expand_watch(
         }
         Op::RemoveWatch { intent } => {
             let ip = ptr(p, "intent");
-            let Some(i) = doc
-                .intents
-                .iter()
-                .find(|i| &i.id == intent && i.watch.is_some())
-            else {
+            // (Privacy) Another person's watch reads as a missing one; suggestions come
+            // from the speaker's own watches only.
+            let mine = |i: &&Intent| i.watch.as_ref().is_some_and(|w| may(&w.for_, ctx));
+            let Some(i) = doc.intents.iter().filter(mine).find(|i| &i.id == intent) else {
                 return Err(E::new(ErrorCode::NotFound, format!("no watch `{intent}`"))
                     .at(ip)
                     .dym(
                         intent,
-                        doc.intents
-                            .iter()
-                            .filter(|i| i.watch.is_some())
-                            .map(|i| i.id.as_str()),
+                        doc.intents.iter().filter(mine).map(|i| i.id.as_str()),
                     )
                     .build());
             };
-            let person = i.watch.as_ref().map(|w| w.for_.clone()).unwrap_or_default();
-            if !may(&person, ctx) {
-                return Err(E::new(
-                    ErrorCode::Forbidden,
-                    format!("the watch `{intent}` is `{person}`'s"),
-                )
-                .at(ip)
-                .build());
-            }
             if !on(i) {
                 return Err(E::new(
                     ErrorCode::Invalid,
@@ -193,7 +180,24 @@ pub(crate) fn expand_watch(
     }
 }
 
+/// The person principal `p` reads for (an agent: its `on_behalf`).
+pub(crate) fn person_of<'a>(plane: &'a crate::plane::DataPlane, p: &'a str) -> &'a str {
+    plane.delegates.get(p).map_or(p, String::as_str)
+}
+
 impl Session {
+    /// (Privacy, §25.5) Whether reader `reader` (a projection's principal; empty: the
+    /// host) may receive intent `i`: an intent without a watch, the reader's own watch
+    /// (an agent: its person's), or any watch for an `owner`.
+    pub(crate) fn intent_for_reader(&self, i: &Intent, reader: &str) -> bool {
+        let Some(w) = &i.watch else { return true };
+        reader.is_empty()
+            || w.for_ == person_of(&self.plane, reader)
+            || self
+                .principal(reader)
+                .is_some_and(|p| p.role == qp_schema::protocol::Role::Owner)
+    }
+
     /// The watches' changes and matches for one engine look's `events` (in the world the
     /// fields hold).
     pub(crate) fn match_watches(&self, events: &[StoryEvent]) -> (Vec<ChangeOp>, Vec<Matched>) {

@@ -1,0 +1,407 @@
+{
+  "covers": [
+    "agent-policy",
+    "agent-cannot-write",
+    "proposal-only",
+    "forbidden"
+  ],
+  "description": "R5B (§25.3): with `init.agent_policy = \"r5b\"` an agent command follows the allow-list: facts, findings, series and undo are `agent_cannot_write` in every mode; views are proposals only (`auto` becomes a proposal even for an `editor`; `direct` is `proposal_only`); a person writes as before.",
+  "final": {
+    "log_len": 2
+  },
+  "init": {
+    "agent_policy": "r5b",
+    "clock": 1760000000000,
+    "document": "fixtures/protocol/docs/thyao.json",
+    "epoch": 0,
+    "principals": [
+      {
+        "author": {
+          "kind": "human",
+          "name": "arkin"
+        },
+        "id": "arkin",
+        "role": "owner"
+      },
+      {
+        "author": {
+          "kind": "agent",
+          "name": "scout"
+        },
+        "id": "scout",
+        "role": "proposer"
+      },
+      {
+        "author": {
+          "kind": "agent",
+          "name": "editor"
+        },
+        "id": "editor",
+        "role": "editor"
+      },
+      {
+        "author": {
+          "kind": "human",
+          "name": "viewer"
+        },
+        "id": "viewer",
+        "role": "viewer"
+      },
+      {
+        "author": {
+          "kind": "engine",
+          "name": "feed",
+          "version": "0"
+        },
+        "id": "feed",
+        "role": "feed"
+      },
+      {
+        "author": {
+          "kind": "engine",
+          "name": "host",
+          "version": "0"
+        },
+        "id": "host",
+        "role": "host"
+      },
+      {
+        "author": {
+          "kind": "agent",
+          "name": "bot"
+        },
+        "id": "bot",
+        "role": "owner"
+      },
+      {
+        "author": {
+          "kind": "agent",
+          "name": "scribe"
+        },
+        "id": "scribe",
+        "on_behalf": "viewer",
+        "role": "proposer"
+      }
+    ],
+    "proposal_ttl_ms": null
+  },
+  "name": "66-agent-cannot-write",
+  "steps": [
+    {
+      "expect": [
+        {
+          "conn": "a",
+          "msg": {
+            "seq": 0,
+            "type": "welcome"
+          }
+        }
+      ],
+      "note": "A person.",
+      "send": {
+        "conn": "a",
+        "msg": {
+          "principal": "arkin",
+          "protocol": "qp/0",
+          "surface": {
+            "kind": "headless"
+          },
+          "type": "hello"
+        }
+      }
+    },
+    {
+      "expect": [
+        {
+          "conn": "e",
+          "msg": {
+            "seq": 0,
+            "type": "welcome"
+          }
+        }
+      ],
+      "note": "An agent whose role is `editor`.",
+      "send": {
+        "conn": "e",
+        "msg": {
+          "principal": "editor",
+          "protocol": "qp/0",
+          "surface": {
+            "kind": "headless"
+          },
+          "type": "hello"
+        }
+      }
+    },
+    {
+      "expect": [
+        {
+          "conn": "s",
+          "msg": {
+            "seq": 0,
+            "type": "welcome"
+          }
+        }
+      ],
+      "note": "An agent (`proposer`).",
+      "send": {
+        "conn": "s",
+        "msg": {
+          "principal": "scout",
+          "protocol": "qp/0",
+          "surface": {
+            "kind": "headless"
+          },
+          "type": "hello"
+        }
+      }
+    },
+    {
+      "expect": [
+        {
+          "conn": "e",
+          "msg": {
+            "error": {
+              "code": "forbidden",
+              "hint": "Agents write comments (`add_comment`), watches (`add_watch`) and view proposals; facts, findings, capsules, the ledger and stories come from the engine.",
+              "message": "an agent may not `add_fact`: facts, findings, series, capsules, the ledger and stories come from the engine",
+              "path": "/ops/0",
+              "reason": "agent_cannot_write"
+            },
+            "id": "w1",
+            "type": "error"
+          }
+        }
+      ],
+      "note": "A fact: never from an agent.",
+      "send": {
+        "conn": "e",
+        "msg": {
+          "id": "w1",
+          "mode": "direct",
+          "ops": [
+            {
+              "bar": 10,
+              "kind": "cross_above",
+              "op": "add_fact",
+              "series": "rsi14",
+              "text": "made up"
+            }
+          ],
+          "type": "command"
+        }
+      }
+    },
+    {
+      "expect": [
+        {
+          "conn": "s",
+          "msg": {
+            "error": {
+              "code": "forbidden",
+              "hint": "Agents write comments (`add_comment`), watches (`add_watch`) and view proposals; facts, findings, capsules, the ledger and stories come from the engine.",
+              "message": "an agent may not `add_finding`: facts, findings, series, capsules, the ledger and stories come from the engine",
+              "path": "/ops/0",
+              "reason": "agent_cannot_write"
+            },
+            "id": "w2",
+            "type": "error"
+          }
+        }
+      ],
+      "note": "A finding: not even as a proposal.",
+      "send": {
+        "conn": "s",
+        "msg": {
+          "id": "w2",
+          "mode": "propose",
+          "ops": [
+            {
+              "claim": "Momentum güçlü.",
+              "confidence": 0.6,
+              "facts": [
+                "fact-rsi-cross70"
+              ],
+              "invalidation": {
+                "kind": "threshold",
+                "op": "cross_below",
+                "series": "rsi14",
+                "value": 70.0
+              },
+              "op": "add_finding"
+            }
+          ],
+          "type": "command"
+        }
+      }
+    },
+    {
+      "expect": [
+        {
+          "conn": "e",
+          "msg": {
+            "error": {
+              "code": "forbidden",
+              "hint": "Agents write comments (`add_comment`), watches (`add_watch`) and view proposals; facts, findings, capsules, the ledger and stories come from the engine.",
+              "message": "an agent may not `put_series`: facts, findings, series, capsules, the ledger and stories come from the engine",
+              "path": "/ops/0",
+              "reason": "agent_cannot_write"
+            },
+            "id": "w3",
+            "type": "error"
+          }
+        }
+      ],
+      "note": "A series, from any source.",
+      "send": {
+        "conn": "e",
+        "msg": {
+          "id": "w3",
+          "ops": [
+            {
+              "op": "put_series",
+              "series": {
+                "id": "s2",
+                "source": {
+                  "inputs": [
+                    "px"
+                  ],
+                  "kind": "study",
+                  "params": {
+                    "period": 3
+                  },
+                  "study": "ema"
+                }
+              }
+            }
+          ],
+          "type": "command"
+        }
+      }
+    },
+    {
+      "expect": [
+        {
+          "conn": "e",
+          "msg": {
+            "error": {
+              "code": "forbidden",
+              "hint": "Agents write comments (`add_comment`), watches (`add_watch`) and view proposals; facts, findings, capsules, the ledger and stories come from the engine.",
+              "message": "an agent may not `undo`: facts, findings, series, capsules, the ledger and stories come from the engine",
+              "path": "/ops/0",
+              "reason": "agent_cannot_write"
+            },
+            "id": "w4",
+            "type": "error"
+          }
+        }
+      ],
+      "note": "Undo.",
+      "send": {
+        "conn": "e",
+        "msg": {
+          "id": "w4",
+          "ops": [
+            {
+              "op": "undo"
+            }
+          ],
+          "type": "command"
+        }
+      }
+    },
+    {
+      "expect": [
+        {
+          "conn": "e",
+          "msg": {
+            "error": {
+              "code": "forbidden",
+              "hint": "Send it with mode auto or propose; a person accepts or rejects it.",
+              "message": "an agent may `set_view_range` only as a proposal",
+              "path": "/ops/0",
+              "reason": "proposal_only"
+            },
+            "id": "v1",
+            "type": "error"
+          }
+        }
+      ],
+      "note": "A view op sent `direct`: `proposal_only`.",
+      "send": {
+        "conn": "e",
+        "msg": {
+          "id": "v1",
+          "mode": "direct",
+          "ops": [
+            {
+              "from_bar": 150,
+              "op": "set_view_range",
+              "to_bar": 199,
+              "view": "main"
+            }
+          ],
+          "type": "command"
+        }
+      }
+    },
+    {
+      "expect": [
+        {
+          "conn": "e",
+          "msg": {
+            "id": "v2",
+            "proposal": "prop-1",
+            "seq": 1,
+            "status": "proposed",
+            "type": "ack"
+          }
+        }
+      ],
+      "note": "The same with `auto`: a proposal, even for an editor.",
+      "send": {
+        "conn": "e",
+        "msg": {
+          "id": "v2",
+          "ops": [
+            {
+              "from_bar": 150,
+              "op": "set_view_range",
+              "to_bar": 199,
+              "view": "main"
+            }
+          ],
+          "type": "command"
+        }
+      }
+    },
+    {
+      "expect": [
+        {
+          "conn": "a",
+          "msg": {
+            "id": "p1",
+            "seq": 2,
+            "status": "applied",
+            "type": "ack"
+          }
+        }
+      ],
+      "note": "A person writes as before.",
+      "send": {
+        "conn": "a",
+        "msg": {
+          "id": "p1",
+          "ops": [
+            {
+              "confidence": 0.7,
+              "finding": "fnd-overbought",
+              "op": "update_finding"
+            }
+          ],
+          "type": "command"
+        }
+      }
+    }
+  ]
+}

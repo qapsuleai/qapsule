@@ -11,6 +11,7 @@ use clap::{Parser, Subcommand};
 mod demo;
 mod demo_static;
 mod live;
+mod live_trades;
 mod livehost;
 mod sim;
 

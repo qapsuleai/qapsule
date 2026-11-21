@@ -344,7 +344,7 @@ pub enum FeedSource {
 pub struct TradeFeedConfig {
     /// Decoding (time unit).
     pub decode: TradeDecodeConfig,
-    /// Whether special (reported) trades join the bars (default: no).
+    /// Whether special (reported) trades join the bars (default: the `1d` bar only, RP4 M27).
     pub special: SpecialTrades,
     /// How long trade numbers are remembered behind the newest trade, for de-duplication
     /// (ms; default 30 minutes).
@@ -355,7 +355,7 @@ impl Default for TradeFeedConfig {
     fn default() -> Self {
         Self {
             decode: TradeDecodeConfig::default(),
-            special: SpecialTrades::Exclude,
+            special: SpecialTrades::default(),
             dedup_window_ms: 30 * 60_000,
         }
     }
@@ -780,7 +780,7 @@ impl LiveFeed {
                 special_trades: self
                     .trades
                     .as_ref()
-                    .map_or(SpecialTrades::Exclude, |t| t.cfg.special),
+                    .map_or(SpecialTrades::default(), |t| t.cfg.special),
                 ..LiveConfig::default()
             },
         )

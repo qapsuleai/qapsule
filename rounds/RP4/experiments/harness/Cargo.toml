@@ -1,0 +1,35 @@
+# RP4 ölçüm düzeneği M25 (çıkış kuralı) ve M26 (dedektör eşikleri); şartname SPEC.md.
+# Bağımsız crate: çalışma alanı üyesi değil (boş [workspace] tablosu), kendi Cargo.lock'u var.
+[package]
+name = "rp4-harness"
+version = "0.1.0"
+edition = "2021"
+rust-version = "1.92"
+publish = false
+description = "RP4 measurement harness for M25 (outcome rule) and M26 (detector thresholds). Deterministic."
+
+[workspace]
+
+[[bin]]
+name = "harness"
+path = "src/main.rs"
+
+[dependencies]
+qp-calendar = { path = "../../../../crates/qp-calendar" }
+qp-capsule = { path = "../../../../crates/qp-capsule" }
+qp-compute = { path = "../../../../crates/qp-compute" }
+qp-facts = { path = "../../../../crates/qp-facts" }
+qp-matriks = { path = "../../../../crates/qp-matriks" }
+qp-schema = { path = "../../../../crates/qp-schema" }
+qp-source = { path = "../../../../crates/qp-source" }
+prost = "0.14.6"
+serde = { version = "1.0.229", features = ["derive"] }
+serde_json = { version = "1.0.154", features = ["float_roundtrip"] }
+# --- Alternatifler (README "Alternatif ekleme"): her biri bir path bağımlılığı ---
+# m25-ornek = { path = "../M25/ornek" }
+
+[lints.rust]
+unsafe_code = "forbid"
+
+[profile.release]
+debug = false

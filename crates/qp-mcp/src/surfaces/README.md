@@ -56,3 +56,4 @@ sinyalini alır ve kaynağı okur. Akış açamayan istemci `notifications` arac
 | Ad | Dosya | Tarif |
 |----|-------|-------|
 | `thin` | `thin.rs` | Protokolü birebir yansıtan, şemadan üretilmiş araçlar (RD1). Varsayılan. |
+| `mixed` | `mixed.rs` | (M28 d) Karma: görev araçları `overview`, `find`, `capsule`, `watch`, `write` (yorum ya da görünüm önerisi; karar yok) + kaçış aracı `query` (protokolün `Query` şemasıyla her sorgu). Kapsül veren araçlarda `format`: `card` (varsayılan), `json`, `layered` (+`detail`) — M29. |

@@ -476,6 +476,17 @@ impl Session {
         trust_keys: Option<(Vec<u8>, Vec<u8>)>,
     ) -> Result<Self, String> {
         let capsules = init.capsules.clone();
+        // (R5B, §25.3) The agent policy, by name.
+        let agent_policy = match init.agent_policy.as_deref() {
+            None => false,
+            Some(crate::agent::AGENT_POLICY_R5B) => true,
+            Some(other) => {
+                return Err(format!(
+                    "init.agent_policy: unknown policy `{other}` (one of {})",
+                    crate::agent::AGENT_POLICY_R5B
+                ))
+            }
+        };
         // (R5/M19, K53) The host's feed rule, by name.
         let coin_flip = match &init.feed_rule {
             None => None,
@@ -573,7 +584,10 @@ impl Session {
             coin_flip,
             coin_flip_for: BTreeMap::new(),
             market: None,
-            agent: crate::agent::AgentState::default(),
+            agent: crate::agent::AgentState {
+                policy: agent_policy,
+                ..crate::agent::AgentState::default()
+            },
         };
         s.audience_seen = s.doc.audiences.keys().cloned().collect();
         s.start_capsules(capsules.as_ref());

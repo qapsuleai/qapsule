@@ -215,6 +215,7 @@ fn follower(doc: Document, principal: &str, provider: Provider) -> Result<Sessio
         capsules: None,
         replay: None,
         feed_rule: None,
+        agent_policy: None,
     };
     // Built without a provider: every binding is pending, so nothing is stamped.
     let mut s = Session::build_with(

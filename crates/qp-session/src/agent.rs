@@ -15,20 +15,27 @@
 
 use std::collections::BTreeSet;
 
-use qp_schema::protocol::{ErrorCode, Op};
-use qp_schema::Author;
+use qp_schema::protocol::{ErrorCode, Op, ProtocolError};
+use qp_schema::{Author, SeriesData};
 
 use crate::error::{ptr, PResult, E};
 use crate::session::Session;
 
 /// `forbidden` reason: a decision only a human may make (§25.2).
 pub const HUMAN_ONLY: &str = "human_only";
+/// `forbidden` reason: an item only the engine (or a person) may write (§25.3).
+pub const AGENT_CANNOT_WRITE: &str = "agent_cannot_write";
+/// The agent policy name of `init.agent_policy` (§25.3).
+pub const AGENT_POLICY_R5B: &str = "r5b";
 
 /// The authority's agent state (host configuration and marks; never in the document).
 #[derive(Debug, Default)]
 pub(crate) struct AgentState {
     /// Connections the host marked as agent connections (by connection id).
     pub marked: BTreeSet<String>,
+    /// `init.agent_policy = "r5b"`: the agent write rule holds for agent principals on
+    /// every connection.
+    pub policy: bool,
 }
 
 /// True for the four decision ops (§25.2).
@@ -57,6 +64,12 @@ impl Session {
         self.agent.marked.contains(conn)
     }
 
+    /// (R5B) Whether the session runs the R5B agent policy (`init.agent_policy`).
+    #[must_use]
+    pub fn agent_policy(&self) -> bool {
+        self.agent.policy
+    }
+
     /// The author of principal `id`, if known.
     fn author_of(&self, id: &str) -> Option<&Author> {
         self.principal(id).map(|p| &p.author)
@@ -75,6 +88,12 @@ impl Session {
         let c = &self.conns[ci];
         !self.agent.marked.contains(&c.id)
             && matches!(self.author_of(&c.principal), Some(Author::Human { .. }))
+    }
+
+    /// Whether the agent write rule holds for a command of connection `ci` (§25.3).
+    pub(crate) fn agent_rule_holds(&self, ci: usize) -> bool {
+        let c = &self.conns[ci];
+        self.agent.marked.contains(&c.id) || (self.agent.policy && self.agent_origin(ci))
     }
 
     /// (R5B, §25.2–§25.3) Refuses `ops` of connection `ci` that its origin may not
@@ -96,12 +115,70 @@ impl Session {
                 .build());
             }
         }
+        if !self.agent_rule_holds(ci) {
+            return Ok(());
+        }
+        let speaker = &self.conns[ci].principal;
+        for (i, op) in ops.iter().enumerate() {
+            if let Some(why) = self.agent_cannot_write(speaker, op) {
+                return Err(cannot_write(i, op, &why));
+            }
+        }
         Ok(())
     }
+
+    /// Why an agent may not send `op` (§25.3), if it may not.
+    fn agent_cannot_write(&self, speaker: &str, op: &Op) -> Option<String> {
+        let what = match op {
+            Op::AddFact { .. } => "facts come from the engine only",
+            Op::AddFinding { .. } | Op::UpdateFinding { .. } => {
+                "findings come from the engine or a person only"
+            }
+            Op::AppendBars { .. } | Op::UpdateLastBar { .. } => {
+                "bar data comes from the host's feeds only"
+            }
+            Op::PutSeries { series } if matches!(series.data, Some(SeriesData::Bars { .. })) => {
+                "bar data comes from the host's feeds only"
+            }
+            Op::Undo { .. } => "an agent does not undo log entries",
+            Op::ShowFinding { .. } => "it changes a capsule",
+            Op::SetAudience {
+                principal: Some(p), ..
+            }
+            | Op::SetSensitivity {
+                principal: Some(p), ..
+            } if p != speaker => "another person's audience is theirs",
+            Op::Remove { id } => {
+                let d = &self.doc;
+                if d.facts.iter().any(|f| &f.id == id)
+                    || d.findings.iter().any(|f| &f.id == id)
+                    || d.capsules.iter().any(|c| &c.id == id)
+                {
+                    "facts, findings and capsules are the engine's"
+                } else {
+                    return None;
+                }
+            }
+            _ => return None,
+        };
+        Some(what.to_owned())
+    }
 }
+
 fn op_name(op: &Op) -> String {
     serde_json::to_value(op)
         .ok()
         .and_then(|v| v.get("op").and_then(|o| o.as_str()).map(str::to_owned))
         .unwrap_or_default()
+}
+
+fn cannot_write(i: usize, op: &Op, why: &str) -> ProtocolError {
+    E::new(
+        ErrorCode::Forbidden,
+        format!("an agent may not `{}`: {why}", op_name(op)),
+    )
+    .at(ptr("/ops", i))
+    .reason(AGENT_CANNOT_WRITE)
+    .hint("Agents write comments (`add_comment`), watches (`add_watch`) and view proposals; facts, findings, capsules, the ledger and stories come from the engine.")
+    .build()
 }

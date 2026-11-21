@@ -3724,6 +3724,12 @@ pub struct SessionInit {
     /// no rule (no story is marked; the protocol's default).
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub feed_rule: Option<FeedRuleInit>,
+    /// (R5B, §25.3) The agent policy: `"r5b"` applies the agent write rule (no facts,
+    /// findings, bar data, undo, capsule, ledger or story changes) to every command of an
+    /// agent principal, on any connection. Absent: the rule holds only on connections the
+    /// host marked as agent connections. An unknown name is refused at session start.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub agent_policy: Option<String>,
 }
 
 /// (R5/M19, K53, K42) The host's feed rule (host configuration, not a protocol message).

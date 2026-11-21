@@ -282,3 +282,131 @@ fn errors_before_r5b_carry_no_reason() {
     assert_eq!(code(&r), "forbidden");
     assert!(r["error"].get("reason").is_none(), "{r}");
 }
+
+// ---------------------------------------------------------------------------
+// What an agent may not write (§25.3)
+// ---------------------------------------------------------------------------
+
+fn policy_h() -> H {
+    let mut i = agent_init();
+    i.agent_policy = Some("r5b".to_owned());
+    let mut h = H::with(i);
+    h.hello("a", "arkin", "desktop");
+    h.hello("s", "scout", "headless");
+    h.hello("e", "editor", "headless");
+    h.hello("b", "bot", "headless");
+    h
+}
+
+fn engine_writes() -> Vec<Value> {
+    let bar = json!({"t":1_900_000_000_000_i64,"o":1.0,"h":2.0,"l":0.5,"c":1.5,"v":10.0});
+    vec![
+        json!({"op":"add_fact","kind":"cross_above","series":"rsi14","bar":10,"text":"made up"}),
+        json!({"op":"add_finding","claim":"Momentum güçlü.","facts":["fact-rsi-cross70"],
+               "confidence":0.6,
+               "invalidation":{"kind":"threshold","series":"rsi14","op":"cross_below","value":70.0},
+               "capsule":"Momentum güçlü"}),
+        json!({"op":"update_finding","finding":"fnd-overbought","confidence":0.99}),
+        json!({"op":"put_series","series":{"id":"fake","source":{"kind":"inline"},
+               "data":{"kind":"bars","bars":[bar]}}}),
+        json!({"op":"append_bars","series":"px","bars":[bar]}),
+        json!({"op":"show_finding","finding":"fnd-overbought"}),
+        json!({"op":"remove","id":"fact-rsi-cross70"}),
+        json!({"op":"remove","id":"fnd-overbought"}),
+        json!({"op":"set_audience","principal":"viewer","audience":{"group":"future"}}),
+        json!({"op":"set_sensitivity","principal":"viewer","sensitivity":"all"}),
+    ]
+}
+
+fn assert_cannot_write(r: &Value) {
+    assert_eq!(code(r), "forbidden", "{r}");
+    assert_eq!(r["error"]["reason"], "agent_cannot_write", "{r}");
+}
+
+#[test]
+fn under_the_r5b_policy_an_agent_writes_no_engine_items_directly_or_as_a_proposal() {
+    let mut h = policy_h();
+    assert!(h.s.agent_policy());
+    let doc = serde_json::to_vec(h.s.document()).unwrap();
+    for op in engine_writes() {
+        for (conn, mode) in [
+            ("e", "direct"),
+            ("e", "auto"),
+            ("e", "propose"),
+            ("s", "auto"),
+            ("s", "propose"),
+            ("b", "direct"),
+        ] {
+            let r = h.one(
+                conn,
+                json!({"type":"command","id":"x","mode":mode,"ops":[op.clone()]}),
+            );
+            assert_cannot_write(&r);
+        }
+    }
+    // Undo, and the latest bar.
+    for op in [
+        json!({"op":"undo"}),
+        json!({"op":"update_last_bar","series":"px","bar":{"t":0,"o":1.0,"h":1.0,"l":1.0,"c":1.0,"v":1.0}}),
+    ] {
+        assert_cannot_write(&h.one("e", json!({"type":"command","id":"x","ops":[op]})));
+    }
+    assert_eq!(serde_json::to_vec(h.s.document()).unwrap(), doc);
+    assert!(h.s.log().is_empty());
+    // Views and drawings remain open to the agent (directly with the role, or proposed).
+    let r = h.cmd(
+        "e",
+        "v1",
+        json!([{"op":"set_view_range","view":"main","from_bar":10,"to_bar":40}]),
+    );
+    assert_eq!(r["status"], "applied", "{r}");
+    let r = h.cmd(
+        "s",
+        "v2",
+        json!([{"op":"add_study","study":"ema","inputs":["px"],"params":{"period":9},"show":{"view":"main","panel":0}}]),
+    );
+    assert_eq!(r["status"], "proposed", "{r}");
+    // Its own audience, too.
+    let r = h.cmd(
+        "s",
+        "v3",
+        json!([{"op":"set_audience","audience":{"group":"future"}}]),
+    );
+    assert_eq!(r["status"], "applied", "{r}");
+    // A person writes as before.
+    let r = h.cmd(
+        "a",
+        "p1",
+        json!([{"op":"update_finding","finding":"fnd-overbought","confidence":0.7}]),
+    );
+    assert_eq!(r["status"], "applied", "{r}");
+}
+
+#[test]
+fn without_the_policy_only_marked_connections_follow_the_write_rule() {
+    let mut h = h();
+    // RD1 transcript 05: an agent proposes a finding; unchanged without the policy.
+    let r = h.cmd("s", "c1", json!([engine_writes()[1].clone()]));
+    assert_eq!(r["status"], "proposed", "{r}");
+    // On a marked connection the same command is refused.
+    h.s.mark_agent_connection("m");
+    h.hello("m", "scout", "headless");
+    let r = h.cmd("m", "c2", json!([engine_writes()[1].clone()]));
+    assert_cannot_write(&r);
+    // Even with a human identity on the marked connection.
+    h.hello("m2", "arkin", "headless");
+    h.s.mark_agent_connection("m2");
+    for op in engine_writes() {
+        assert_cannot_write(&h.cmd("m2", "c3", json!([op])));
+    }
+}
+
+#[test]
+fn an_unknown_agent_policy_is_refused() {
+    let mut i = agent_init();
+    i.agent_policy = Some("r9".to_owned());
+    let e = qp_session::Session::new(i, &common::root())
+        .err()
+        .expect("refused");
+    assert!(e.contains("init.agent_policy"), "{e}");
+}

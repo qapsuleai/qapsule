@@ -1,0 +1,9 @@
+{
+ "note": "R5B/H M31: the person's standing watches during the M31 window (PLAN §3 shape) and audience (session/init.json). The sentinel sets these up; score.py m31 judges notifications against m31/events.json with this file (SPEC §10).",
+ "audience": {"positions": ["SYN02", "SYN05", "SYN11"], "watchlist": ["SYN01", "SYN02", "SYN03", "SYN04", "SYN05", "SYN06"], "sensitivity": "balanced"},
+ "watches": [
+  {"text": "Elimdeki hisselerde olumsuz bir şey olursa haber ver.", "match": {"holdings": true, "negative": true}},
+  {"text": "SYN04'te yukarı kırılım doğarsa haber ver.", "match": {"instrument": "SYN04", "meaning": ["breakout"], "direction": "up", "stages": ["born"]}},
+  {"text": "Herhangi bir hissede sıkışma doğarsa haber ver.", "match": {"meaning": ["squeeze"], "stages": ["born"]}}
+ ]
+}

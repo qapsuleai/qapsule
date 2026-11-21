@@ -1887,6 +1887,7 @@ dependencies = [
  "qp-facts",
  "qp-schema",
  "qp-source",
+ "regex",
  "serde",
  "serde_json",
 ]

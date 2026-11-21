@@ -200,7 +200,7 @@ fn t67() -> Value {
 fn t68() -> Value {
     build(
         "68-comment-unentitled",
-        "R5B (§25.4, §25.7): an agent working for `can` (no licensed data) cannot carry a licensed number: the draft is rejected and the reasons are the same bytes as for a made-up number (no oracle); a comment without numbers passes and reaches both readers; the entitled reader alone gets a comment with numbers.",
+        "R5B (§25.4, §25.7): an agent working for `can` (no licensed data) cannot carry a licensed number: the draft is rejected and the reasons are the same bytes as for a made-up number (no oracle); a comment without numbers passes, but `can` sees THYAO redacted, so a restricted reader receives no comment on it at all (structural, audit B1): only `ana` gets it; the entitled reader alone gets a comment with numbers.",
         &["comment", "license", "non-interference", "on-behalf"],
         flow_init(),
         vec![
@@ -212,7 +212,7 @@ fn t68() -> Value {
             In::Send("a", json!({"type":"subscribe","id":"cm","topic":{"kind":"comments"}}), "ana's comments."),
             comment("C", "k1", "THYAO kısa ortalamanın (5,23) altında [1].", json!([CAP]), "5,23 is the authority's number, licensed for can: rejected as an unsupported number, no token."),
             comment("C", "k2", "THYAO kısa ortalamanın (5,87) altında [1].", json!([CAP]), "A made-up number: the same error bytes."),
-            comment("C", "k3", "THYAO'da düşüş eğilimi sürüyor [1].", json!([CAP]), "No number: accepted; both readers get it."),
+            comment("C", "k3", "THYAO'da düşüş eğilimi sürüyor [1].", json!([CAP]), "No number: accepted; only ana gets it (can sees THYAO redacted: structural rule)."),
             comment("A", "k4", "THYAO kısa ortalamanın (5,23) altında kalıyor [1].", json!([CAP]), "ana's agent with the number: only ana gets it."),
         ],
     )

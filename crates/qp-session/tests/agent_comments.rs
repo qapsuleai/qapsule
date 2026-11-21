@@ -455,3 +455,33 @@ fn a_restricted_reader_gets_no_comment_on_what_it_sees_redacted() {
         .collect();
     assert_eq!(to, vec![&json!("a")], "{out:?}");
 }
+
+/// (R5B audit B1, every path) A disguised number by the entitled writer reaches the
+/// unentitled reader through no read path: document, list, get, log, capsule answer.
+#[test]
+fn a_disguised_number_reaches_the_unentitled_reader_on_no_path() {
+    let mut h = H::new();
+    let text = "THYAO kısa ortalamanın ⁵,²³ altında [1].";
+    let out = h.comment("A", text, json!([CAP]));
+    assert_eq!(out[0]["msg"]["status"], "applied", "{out:?}");
+    let id = h.0.document().comments.last().unwrap().id.clone();
+    for conn in ["c", "C"] {
+        for q in [
+            json!({"kind":"document"}),
+            json!({"kind":"list","collection":"comments"}),
+            json!({"kind":"get","id":id}),
+            json!({"kind":"log","limit":50}),
+            json!({"kind":"capsule","capsule":CAP}),
+        ] {
+            let r = h.send(conn, json!({"type":"query","id":"q","query":q}));
+            let s = serde_json::to_string(&r).unwrap();
+            assert!(!s.contains("²³"), "{conn} {q}: {s}");
+        }
+    }
+    // the entitled reader reads it
+    let r = h.send(
+        "a",
+        json!({"type":"query","id":"q","query":{"kind":"get","id":id}}),
+    );
+    assert!(serde_json::to_string(&r).unwrap().contains("²³"));
+}

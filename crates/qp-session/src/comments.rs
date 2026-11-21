@@ -399,13 +399,9 @@ impl Session {
 
     /// Whether comment `c` touches an instrument (its own, its cited items') on which the
     /// projected reader `p` has redacted facts or rewritten capsules (inside `as_reader`).
-    fn comment_touches_withheld(&self, c: &Comment, p: &crate::capsule::Proj) -> bool {
-        // Written for the reader's own person: validated under exactly this reader's
-        // licence, so it carries nothing the reader may not see.
-        let reader = crate::watch::person_of(&self.plane, &p.principal);
-        if c.on_behalf.as_deref() == Some(reader) {
-            return false;
-        }
+    pub(crate) fn comment_touches_withheld(&self, c: &Comment, p: &crate::capsule::Proj) -> bool {
+        // (No exemption for the reader's own person: its licence may have changed since
+        // the comment was written.)
         let doc = &self.doc;
         let sym_of_series = |series: &str| {
             doc.series
@@ -418,6 +414,12 @@ impl Session {
             ids.push(k);
         }
         let mut insts: BTreeSet<String> = c.about.instrument.iter().cloned().collect();
+        // every instrument the text names, not only the cited ones (security review)
+        insts.extend(
+            symbols(doc)
+                .into_iter()
+                .filter(|s| !s.is_empty() && c.text.to_uppercase().contains(&s.to_uppercase())),
+        );
         for id in &ids {
             if p.redact.contains(*id) || p.rewrite.contains(*id) || p.hidden.contains(*id) {
                 return true;
@@ -633,6 +635,18 @@ impl Session {
 /// Whether a projected reader may receive comment `c` in a document or a change: its
 /// cites are not hidden and its text has no number (§25.4; the precise rule — numbers
 /// the reader sees — is applied by the `capsule` answer and the `comments` topic).
+impl Session {
+    /// (R5B audit B1) Whether the projected reader `p` may receive comment `c` in a
+    /// document, a log entry or a change: [`projected_keeps`] and, for a reader whose
+    /// view is redacted or rewritten, the structural rule of `comment_visible` (no
+    /// comment touching such an instrument). Every projected path calls this.
+    pub(crate) fn projected_comment_ok(&self, c: &Comment, p: &crate::capsule::Proj) -> bool {
+        projected_keeps(c, &p.hidden)
+            && (p.redact.is_empty() && p.rewrite.is_empty() && p.hidden.is_empty()
+                || !self.comment_touches_withheld(c, p))
+    }
+}
+
 pub(crate) fn projected_keeps(c: &Comment, hidden: &BTreeSet<String>) -> bool {
     if c.cites.iter().any(|x| hidden.contains(x))
         || c.about.capsule.as_ref().is_some_and(|x| hidden.contains(x))

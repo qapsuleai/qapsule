@@ -165,6 +165,24 @@ Otomatik güvenlik incelemesi (commit sonrası) bulguları, hepsi kapatıldı:
   yok; tırnaksız dizge sahte argüman üretebilirdi → JSON tırnaklı.
 - Bir güvenlik incelemesi koşusu eklenti kimliği hatasıyla (HTTP 401) çalışmadı; bildirildi.
 
+**Bağımsız denetim (`AUDIT.md`) ve sonrası:**
+
+| Bulgu | Ne | Durum |
+|---|---|---|
+| B1 (kritik) | Lisanslı sayı "saat" (`5:23`), "tarih" (`5.23.2026`) ya da sözcükle yetkisiz okura geçiyordu | **Kapandı, yapısal:** kısıtlı okur, görünümü redakte/yeniden yazılmış bir enstrümana dokunan yorumu hiç almaz (kendi kişisi adına yazılmışsa alır) — metin nasıl kodlanırsa kodlansın. Ek savunma: lisans ve görünürlük denetimi maskesiz okur, maskeler aralık denetimli, sözcükle ondalık her yazara reddedilir, kısıtlı yazara "saat" biçimi kahin vermez (testler `agent_comments.rs`, `comment.rs`). Yeniden denetim: `AUDIT.md` sonu. |
+| B2 | `qp demo --mcp`'de kişi bağlantısı kimliksizdi: yerel bir süreç ajanın önerisini "insan" olarak onaylayabiliyordu | **Kapandı:** açılış anahtarı (`/events?key=`), adres yalnız terminalde. Sınır: demoyu kendisi başlatan bir ajan anahtarı okuyabilir (`docs/AGENTS.md`). |
+| B3 | `--mcp --lan` ajan ucunu belirteçsiz ağa açıyordu | **Kapandı:** reddedilir. |
+| B6 | Sahip rolündeki bir ajan replay'i ilerletebiliyordu | **Kapandı:** ajan kökenli bağlantı yalnız durumu okur. |
+| B9 | Göreli `CARGO_TARGET_DIR` ile `crates/qp-wasm/target` (293 MB) | **Silindi;** verify mutlak yolla koşar. |
+| B4 | Doğrulayıcı sayı taraması bilerek atlatılabilir (aralık içi uydurma tarih/saat, üst simge, Roma, sahte dış alıntı, kanıt değerini başka anlamla kullanma) | **Açık (sınır):** lisans tarafı yapısal kuralla korunuyor; uydurma sayıya karşı düzenli ifade bir garanti değil (A61). |
+| B5 | Tavsiye taraması dar (çekimler, eş anlamlılar, Kiril harf, sıfır genişlikli karakter) | **Açık (sınır)** (A61). |
+| B7 | M28/M29 "sızıntı 0" davranışsal (döküm ajanın klasöründe, aynı bağlamda iki kimlik) | **Not:** güvence ölçüm değil testlerdir (`agent_reader.rs`, yüzey testleri, yapısal kural). |
+| B8 | Eski `qp mcp --init … --principal <insan>` bağdaştırıcısı insan kimliğiyle karar araçlarını sunar (ayrı oturum) | **Açık (A62).** |
+| B10–B12 | Yön denetimi gevşek; atıf yapılmayan kimlik denetlenmez; HTTP sunucusunda okuma zaman aşımı/iş parçacığı sınırı yok; M30 aynı kümede düzeltilip yeniden ölçüldü | Not. |
+
+Otomatik güvenlik incelemesi ayrıca sözcükle sayının iki küçük harf biçiminde, "buçuk/dot/comma" ve
+sayı sözcüğü dizisiyle denetlenmesini istedi; eklendi (yapısal kural asıl güvence).
+
 ## 5. Ne yapılamadı / sınırlar
 
 - **Canlı kaynak:** `qp mcp serve --source sim|live` hazır değil (R6 `livehost` bağlanacak);
@@ -176,6 +194,10 @@ Otomatik güvenlik incelemesi (commit sonrası) bulguları, hepsi kapatıldı:
 - Başvuru ajanları `card` biçimiyle koştu (sürücü varsayılanı; M29 sonucu json); ayrımı
   etkilemez ama not edilir.
 - M28 "propose" kategorisi task/query yüzeylerinde ilk denemede 0/4: şema rehberliği zayıf.
+- Kısıtlı okur (ör. konuk), görünümü redakte bir enstrüman hakkındaki başkasının yazdığı
+  ajan yorumlarını hiç görmez (yapısal kural, B1): güvenlik için bilinçli bedel.
+- Doğrulayıcı uydurma sayıya ve tavsiye diline karşı düzenli ifadeyle çalışır; kendi
+  yorumunu bilerek gizleyen bir ajana karşı garanti değildir (B4, B5; A61).
 
 ## 6. Hatalarım ve düzeltmeler
 

@@ -5,7 +5,7 @@
     "non-interference",
     "on-behalf"
   ],
-  "description": "R5B (§25.4, §25.7): an agent working for `can` (no licensed data) cannot carry a licensed number: the draft is rejected and the reasons are the same bytes as for a made-up number (no oracle); a comment without numbers passes and reaches both readers; the entitled reader alone gets a comment with numbers.",
+  "description": "R5B (§25.4, §25.7): an agent working for `can` (no licensed data) cannot carry a licensed number: the draft is rejected and the reasons are the same bytes as for a made-up number (no oracle); a comment without numbers passes, but `can` sees THYAO redacted, so a restricted reader receives no comment on it at all (structural, audit B1): only `ana` gets it; the entitled reader alone gets a comment with numbers.",
   "final": {
     "log_len": 4
   },
@@ -1138,44 +1138,9 @@
             "sub": "cm",
             "type": "notify"
           }
-        },
-        {
-          "conn": "c",
-          "msg": {
-            "event": {
-              "comment": {
-                "about": {
-                  "capsule": "cap.THYAO.continuation.down.84"
-                },
-                "cites": [
-                  "cap.THYAO.continuation.down.84"
-                ],
-                "id": "cmt-3-0",
-                "lang": "tr",
-                "on_behalf": "can",
-                "provenance": {
-                  "at": 1760000000000,
-                  "author": {
-                    "kind": "agent",
-                    "model": "test",
-                    "name": "cc"
-                  },
-                  "based_on": [
-                    "cap.THYAO.continuation.down.84"
-                  ]
-                },
-                "strictness": "cites_numbers",
-                "text": "THYAO'da düşüş eğilimi sürüyor [1]."
-              },
-              "kind": "comment",
-              "seq": 3
-            },
-            "sub": "cm",
-            "type": "notify"
-          }
         }
       ],
-      "note": "No number: accepted; both readers get it.",
+      "note": "No number: accepted; only ana gets it (can sees THYAO redacted: structural rule).",
       "send": {
         "conn": "C",
         "msg": {

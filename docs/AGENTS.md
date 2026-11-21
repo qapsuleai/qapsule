@@ -122,14 +122,15 @@ Ajanın yorumu açılan kapsülde **"ajan yorumu"** etiketi ve kökeniyle görü
 `--mcp` ile web kabuğunun adresi terminalde bir **açılış anahtarıyla** basılır
 (`http://127.0.0.1:8390/?key=…`): kişinin bağlantısı yalnız o anahtarla açılır. Böylece
 aynı makinede çalışan bir ajan (örneğin kabuk erişimi olan bir Claude Code) kendi önerisini
-kişinin bağlantısından onaylayamaz — anahtarı ajanın göreceği bir yere yapıştırma.
+kişinin bağlantısından onaylayamaz — anahtarı ajanın göreceği bir yere yapıştırma (demoyu ajanın kendisi başlatırsa anahtarı çıktısında görür: demoyu kendin başlat).
 `--mcp`, `--lan`/`--https-host`/başka `--bind` ile reddedilir (gösterimin ajan ucunda
 belirteç yok; ağdan ajan için `qp mcp serve --http --listen … --token-env …`).
 
 **Bilinen sınırlar (denetim, `rounds/R5B/AUDIT.md`):** doğrulayıcının sayı ve tavsiye
 taramaları düzenli ifadeyle çalışır; kendi kurduğu bozuk yorumlarla onları atlatmaya
 çalışan bir ajana karşı tam koruma değildir (üst simge, Roma rakamı, anlamı farklı bir
-kanıt değerini yeniden kullanmak; tavsiye eş anlamlıları). Lisans tarafı sıkıdır: kısıtlı
+kanıt değerini yeniden kullanmak; tavsiye eş anlamlıları). Lisans tarafı yapısaldır: kısıtlı okur, görünümü redakte bir enstrümana dokunan başkasının
+yorumunu hiç almaz; ayrıca kısıtlı
 okura giden yorumdaki her sayı (tarih ve saat biçimi dahil, maskesiz okunarak) okurun
 gördüğü bir değer olmalıdır; sözcükle yazılmış ondalık hiç geçmez.
 

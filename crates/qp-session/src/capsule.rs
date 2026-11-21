@@ -2440,8 +2440,7 @@ impl Session {
         d.intents
             .retain(|i| self.intent_for_reader(i, &p.principal));
         // (R5B, §25.4) Comments with a hidden cite or with numbers stay out.
-        d.comments
-            .retain(|c| crate::comments::projected_keeps(c, &p.hidden));
+        d.comments.retain(|c| self.projected_comment_ok(c, p));
         let views_kept: Vec<qp_schema::View> = d
             .views
             .iter()
@@ -2576,8 +2575,7 @@ impl Session {
                 ChangeOp::PutAudience { principal, .. }
                     if !p.principal.is_empty() && principal != &p.principal => {}
                 ChangeOp::Delete { id } if p.hidden.contains(id) => {}
-                ChangeOp::PutComment { comment, .. }
-                    if !crate::comments::projected_keeps(comment, &p.hidden) => {}
+                ChangeOp::PutComment { comment, .. } if !self.projected_comment_ok(comment, p) => {}
                 ChangeOp::PutIntent { intent, .. }
                     if !self.intent_for_reader(intent, &p.principal) => {}
                 ChangeOp::PushLedger { entry }
@@ -2618,14 +2616,14 @@ impl Session {
                         | qp_schema::protocol::Op::RemoveWatch { .. }
                 )
         });
-        // (R5B, §25.4) A comment's text with numbers does not go to a projected reader.
-        x.request.retain(|op| match op {
-            qp_schema::protocol::Op::AddComment { text, lang, .. } => {
-                qp_capsule::comment::numbers(text, qp_capsule::comment::lang_of(*lang), &[])
-                    .is_empty()
-            }
-            _ => true,
-        });
+        // (R5B, §25.4; audit B1) A comment's request goes only with its stored comment:
+        // when the projection kept the comment (every rule of `projected_comment_ok`).
+        let comment_kept = x
+            .changes
+            .iter()
+            .any(|c| matches!(c, ChangeOp::PutComment { .. }));
+        x.request
+            .retain(|op| !matches!(op, qp_schema::protocol::Op::AddComment { .. }) || comment_kept);
         // Another person's capsule preferences (positions, watch list, level) never go.
         let own = |w: &Option<String>| {
             p.principal.is_empty() || w.as_deref().unwrap_or(e.author.as_str()) == p.principal

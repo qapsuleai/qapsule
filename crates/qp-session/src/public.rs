@@ -255,6 +255,12 @@ impl Session {
         ops: &[qp_schema::protocol::Op],
     ) -> Option<Vec<qp_schema::protocol::Op>> {
         use qp_schema::protocol::Op;
+        // (R5B audit B1, fail-closed) An entitled writer's comment never enters the public
+        // world: its text may carry a licensed number in a form no scan reads. (A
+        // public-view writer's comments are written in the public world itself.)
+        if ops.iter().any(|o| matches!(o, Op::AddComment { .. })) {
+            return None;
+        }
         ops.iter()
             .map(|o| match o {
                 // (R3/K1c) An authority entry → the public entry it made, or nothing.

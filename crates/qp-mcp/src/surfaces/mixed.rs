@@ -451,7 +451,7 @@ fn ledger_text(l: &Value) -> String {
 }
 
 /// One line for a capsule item.
-fn item_line(c: &Value) -> String {
+pub(crate) fn item_line(c: &Value) -> String {
     let mut flags = String::new();
     if c.get("relevant").and_then(Value::as_bool) == Some(true) {
         flags.push_str(", RELEVANT to the person");
@@ -479,7 +479,7 @@ fn item_line(c: &Value) -> String {
 }
 
 /// The summary of a capsule item (`layered`).
-fn item_summary(c: &Value) -> Value {
+pub(crate) fn item_summary(c: &Value) -> Value {
     let mut o = Map::new();
     for k in [
         "id",
@@ -546,7 +546,7 @@ fn evidence_line(e: &Value) -> String {
     t
 }
 
-fn capsule_card(d: &Value) -> String {
+pub(crate) fn capsule_card(d: &Value) -> String {
     let i = d.get("item").cloned().unwrap_or(Value::Null);
     let mut t = format!(
         "Capsule {} (finding {})\n{} {} {} · stage {} · state {} · validity {} · tier {} · importance {} · confirmations {} · trust {}",
@@ -637,7 +637,7 @@ fn capsule_card(d: &Value) -> String {
     t
 }
 
-fn capsule_layered(d: &Value, detail: bool) -> Value {
+pub(crate) fn capsule_layered(d: &Value, detail: bool) -> Value {
     let i = d.get("item").cloned().unwrap_or(Value::Null);
     let mut sum = item_summary(&i);
     let o = sum.as_object_mut().expect("object");

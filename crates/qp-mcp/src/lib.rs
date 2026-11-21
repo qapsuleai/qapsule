@@ -500,9 +500,12 @@ impl McpServer {
         hub: SharedHub,
         conn: &str,
         config: Config,
-        surface: Box<dyn ToolSurface>,
+        mut surface: Box<dyn ToolSurface>,
         opts: Options,
     ) -> Result<Self, Value> {
+        if let Some(f) = &opts.capsule_format {
+            surface.set_capsule_format(f);
+        }
         let welcome = hello_reply(&hub, conn, &config)?;
         if opts.notify == NotifyMode::Spec {
             hub.borrow_mut().mark_agent_connection(conn);

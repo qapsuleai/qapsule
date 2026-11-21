@@ -105,6 +105,11 @@ pub trait ToolSurface {
     /// # Errors
     /// Unknown tool or malformed arguments (`-32602`).
     fn call(&mut self, ctx: &mut Ctx<'_>, name: &str, args: Value) -> Result<Value, RpcError>;
+    /// (R5B/M29) The server's capsule presentation (`card`, `json`, `layered`;
+    /// `qp mcp serve --capsule-format`). Surfaces whose tools take a `format` argument
+    /// get it as that argument's default instead (see `McpServer::call_tool`); a surface
+    /// whose tools do not (thin) may lay out its capsule replies in it. Default: ignored.
+    fn set_capsule_format(&mut self, _format: &str) {}
     /// The `instructions` text of `initialize`/`server/discover`.
     fn instructions(&self, principal: &str) -> String {
         format!(

@@ -5,7 +5,7 @@
 
 use serde_json::{json, Map, Value};
 
-use super::{Annotations, Ctx, ToolDef, ToolSurface};
+use super::{mixed, Annotations, Ctx, ToolDef, ToolSurface};
 use crate::tools::{self, ToolKind};
 use crate::{tool_result, RpcError};
 
@@ -16,7 +16,14 @@ pub struct Thin {
     /// call to one is an unknown tool; the authority refuses the op on any other path
     /// too, `human_only`).
     agent: bool,
+    /// (R5B/M29) `card` / `layered`: `query_capsule` and `query_capsules` replies are
+    /// laid out by the same renderer as the other surfaces' `format` (no output schema
+    /// for those two tools then); `None` or `json`: the protocol reply as is.
+    format: Option<String>,
 }
+
+/// The thin tools whose reply a capsule format lays out.
+pub const FORMATTED_TOOLS: [&str; 2] = ["query_capsule", "query_capsules"];
 
 /// The tools only a person may use: deciding proposals and findings (§25.2).
 pub const HUMAN_DECISION_TOOLS: [&str; 4] = [
@@ -30,14 +37,20 @@ pub const HUMAN_DECISION_TOOLS: [&str; 4] = [
 /// no human decision tool.
 #[must_use]
 pub fn new() -> Box<dyn ToolSurface> {
-    Box::new(Thin { agent: true })
+    Box::new(Thin {
+        agent: true,
+        format: None,
+    })
 }
 
 /// The RD1 surface with every generated tool, for adapters a person speaks through
 /// ([`crate::McpServer::connect`], the conformance runner).
 #[must_use]
 pub fn with_decisions() -> Box<dyn ToolSurface> {
-    Box::new(Thin { agent: false })
+    Box::new(Thin {
+        agent: false,
+        format: None,
+    })
 }
 
 /// The annotations of a generated tool: queries and status reads are read-only.
@@ -106,6 +119,62 @@ pub fn build_message(
     Ok(msg)
 }
 
+impl Thin {
+    fn formats(&self, name: &str) -> bool {
+        self.format.is_some() && FORMATTED_TOOLS.contains(&name)
+    }
+
+    /// A capsule reply laid out in the server's format (text for `card`, JSON for
+    /// `layered`); the numbers are the reply's own.
+    fn lay_out(&self, name: &str, reply: &Value) -> Value {
+        let data = reply.get("data").cloned().unwrap_or(Value::Null);
+        let card = self.format.as_deref() == Some("card");
+        let text = if name == "query_capsule" {
+            let d = data.get("detail").cloned().unwrap_or(Value::Null);
+            if card {
+                mixed::capsule_card(&d)
+            } else {
+                let mut v = mixed::capsule_layered(&d, false);
+                v["more"] = json!(
+                    "the story: query_stories; the evidence values: query_verify_evidence or query_get on a fact id"
+                );
+                v.to_string()
+            }
+        } else {
+            let items: Vec<Value> = data
+                .get("capsules")
+                .and_then(Value::as_array)
+                .cloned()
+                .unwrap_or_default();
+            let mut t = if card {
+                let mut t = format!("{} capsule(s):", items.len());
+                for c in &items {
+                    t.push('\n');
+                    t.push_str(&mixed::item_line(c));
+                }
+                t
+            } else {
+                json!({"kind": "capsules",
+                    "capsules": items.iter().map(mixed::item_summary).collect::<Vec<_>>()})
+                .to_string()
+            };
+            if let Some(sc) = data
+                .get("comments")
+                .filter(|c| c.as_array().is_some_and(|a| !a.is_empty()))
+            {
+                t.push_str("\nServer comments: ");
+                t.push_str(&sc.to_string());
+            }
+            t
+        };
+        json!({
+            "resultType": "complete",
+            "content": [{"type": "text", "text": text}],
+            "isError": false,
+        })
+    }
+}
+
 impl ToolSurface for Thin {
     fn name(&self) -> &'static str {
         "thin"
@@ -120,7 +189,7 @@ impl ToolSurface for Thin {
                 description: t.description.clone(),
                 input_schema: t.input_schema.clone(),
                 annotations: annotations(t),
-                output_schema: Some(tools::output_schema()),
+                output_schema: (!self.formats(&t.name)).then(tools::output_schema),
             })
             .collect()
     }
@@ -130,7 +199,15 @@ impl ToolSurface for Thin {
             return Err(RpcError::new(-32602, format!("Unknown tool: {name}")));
         }
         let msg = build_message(name, args, || ctx.request_id())?;
-        Ok(tool_result(ctx.send(&msg)))
+        let reply = ctx.send(&msg);
+        if self.formats(name) && reply.get("type").and_then(Value::as_str) == Some("result") {
+            return Ok(self.lay_out(name, &reply));
+        }
+        Ok(tool_result(reply))
+    }
+
+    fn set_capsule_format(&mut self, format: &str) {
+        self.format = (format != "json").then(|| format.to_owned());
     }
 
     fn instructions(&self, principal: &str) -> String {

@@ -495,6 +495,10 @@ fn samples() -> Vec<(&'static str, Value)> {
             "add_study",
             json!({"op":"add_study","study":"ema","inputs":["px"]}),
         ),
+        (
+            "add_comment",
+            json!({"op":"add_comment","about":{"capsule":"c"},"lang":"tr","text":"t","cites":["fnd-overbought"]}),
+        ),
         // Denied.
         (
             "put_series",

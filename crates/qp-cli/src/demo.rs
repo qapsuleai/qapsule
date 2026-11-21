@@ -1069,6 +1069,11 @@ struct Gate {
     https_hosts: Vec<String>,
     /// (R5B) The MCP endpoint's rules (`--mcp`).
     mcp: Option<crate::mcp_serve::HttpGate>,
+    /// (R5B audit B2) With `--mcp`: the launch key a shell stream needs (`/events?key=`),
+    /// printed only in the address on the terminal. A local process (an agent with a
+    /// shell, say) that does not have it cannot open a person's connection and decide a
+    /// proposal there.
+    shell_key: Option<String>,
 }
 
 impl Gate {
@@ -1148,6 +1153,17 @@ fn connection(
     }
     match (method, path) {
         ("GET", "/events") => {
+            if let Some(k) = &gate.shell_key {
+                if query_param(q, "key").as_deref() != Some(k.as_str()) {
+                    respond(
+                        &mut s,
+                        "403 Forbidden",
+                        "text/plain",
+                        b"key: open the address printed by qp demo",
+                    );
+                    return;
+                }
+            }
             let principal = query_param(q, "principal")
                 .filter(|p| p.chars().all(|c| c.is_ascii_alphanumeric() || c == '-'))
                 .unwrap_or_else(|| "arkin".to_owned());
@@ -1411,6 +1427,15 @@ pub fn demo(a: &DemoArgs) -> Result<(), String> {
 private proxy, e.g. Tailscale, to 127.0.0.1 — see docs/matriks/LIVE.md)"
         ));
     }
+    // (R5B audit B3) the agent endpoint has no token in the demo: this machine only
+    if a.mcp && (a.lan || a.https_host.is_some() || a.bind != "127.0.0.1") {
+        return Err(
+            "--mcp: the agent endpoint serves this machine only; --lan, \
+--https-host and --bind other than 127.0.0.1 are refused with --mcp (for remote agents use \
+`qp mcp serve --http --listen ADDR --token-env VAR`)"
+                .to_owned(),
+        );
+    }
     let (tx, rx) = mpsc::channel::<Cmd>();
     let mut live_parts = None;
     let mut sim_parts = None;
@@ -1463,6 +1488,7 @@ private proxy, e.g. Tailscale, to 127.0.0.1 — see docs/matriks/LIVE.md)"
             .or_else(|| sim_parts.as_ref().map(|p| p.control.clone())),
         hosts,
         https_hosts,
+        shell_key: if a.mcp { Some(secret()?) } else { None },
         mcp: a.mcp.then_some(crate::mcp_serve::HttpGate {
             port,
             // `Host` is checked for every request above.
@@ -1484,7 +1510,10 @@ private proxy, e.g. Tailscale, to 127.0.0.1 — see docs/matriks/LIVE.md)"
         info["delayed"] = json!(false);
         info["symbols"] = json!(p.symbols);
     }
-    println!("qp demo: {}", urls[0]);
+    match &gate.shell_key {
+        Some(k) => println!("qp demo: {}?key={k}", urls[0]),
+        None => println!("qp demo: {}", urls[0]),
+    }
     if a.gallery {
         for u in &urls {
             println!("galeri / gallery: {u}gallery.html");

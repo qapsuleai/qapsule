@@ -224,7 +224,7 @@ Ayrıntı `docs/AGENTS.md`. En kısa yol (insan ve ajan aynı dokümanda):
 
 ```sh
 cd /Users/arkns/Works/Mchart/qapsule
-scripts/demo.sh --mcp                     # web kabuğu: http://127.0.0.1:8390
+scripts/demo.sh --mcp                     # terminaldeki http://127.0.0.1:8390/?key=… adresini aç
 # başka bir terminalde, bir kez:
 claude mcp add --transport http qapsule-demo http://127.0.0.1:8390/mcp
 claude

@@ -245,26 +245,33 @@ fn masks(lang: Lang) -> &'static [Regex] {
         // citation markers
         v.push(r"\[\d+(?:\s*[,;]\s*\d+)*\]".to_owned());
         // ISO date, numeric day.month.year / month/day/year
-        v.push(r"\b\d{4}-\d{1,2}-\d{1,2}\b".to_owned());
-        v.push(r"\b\d{1,2}[./]\d{1,2}[./]\d{4}\b".to_owned());
+        // (R5B audit B1/B4) ranges checked: a "date" or "time" outside them is a number
+        v.push(r"\b\d{4}-(?:0?[1-9]|1[0-2])-(?:0?[1-9]|[12]\d|3[01])\b".to_owned());
+        // day.month or (EN) month/day: both parts a day number, the year 19xx/20xx
+        v.push(
+            r"\b(?:0?[1-9]|[12]\d|3[01])[./](?:0?[1-9]|[12]\d|3[01])[./](?:19|20)\d{2}\b"
+                .to_owned(),
+        );
         // clock time
-        v.push(r"\b\d{1,2}:\d{2}(?::\d{2})?\b".to_owned());
+        v.push(r"\b(?:[01]?\d|2[0-3]):[0-5]\d(?::[0-5]\d)?\b".to_owned());
     };
     let build = |lang: Lang| {
         let mut v = Vec::new();
         common(&mut v);
         match lang {
             Lang::Tr => {
-                v.push(format!(r"\b\d{{1,2}}\.?\s+{TR_MONTHS}(?:\s+\d{{4}}\b)?"));
+                v.push(format!(
+                    r"\b(?:0?[1-9]|[12]\d|3[01])\.?\s+{TR_MONTHS}(?:\s+\d{{4}}\b)?"
+                ));
                 v.push(format!(r"\b{TR_MONTHS}\s+\d{{4}}\b"));
                 v.push(r"\b(?:19|20)\d{2}(?:['’]\p{L}+|\s+yıl\p{L}*)".to_owned());
             }
             Lang::En => {
                 v.push(format!(
-                    r"\b\d{{1,2}}(?:st|nd|rd|th)?\s+(?:of\s+)?{EN_MONTHS_DM}(?:,?\s+\d{{4}}\b)?"
+                    r"\b(?:0?[1-9]|[12]\d|3[01])(?:st|nd|rd|th)?\s+(?:of\s+)?{EN_MONTHS_DM}(?:,?\s+\d{{4}}\b)?"
                 ));
                 v.push(format!(
-                    r"\b{EN_MONTHS}\s+\d{{1,2}}(?:st|nd|rd|th)?\b(?:,?\s+\d{{4}}\b)?"
+                    r"\b{EN_MONTHS}\s+(?:0?[1-9]|[12]\d|3[01])(?:st|nd|rd|th)?\b(?:,?\s+\d{{4}}\b)?"
                 ));
                 v.push(format!(r"\b{EN_MONTHS}\s+\d{{4}}\b"));
                 v.push(r"\b(?:in|since|during|year)\s+(?:19|20)\d{2}\b".to_owned());
@@ -340,9 +347,15 @@ fn split_num(s: &str, lang: Lang) -> (String, String) {
 /// The numbers of a text (symbols, markers, dates, times and years removed).
 #[must_use]
 pub fn numbers(text: &str, lang: Lang, symbols: &[String]) -> Vec<Num> {
+    numbers_with(text, lang, symbols, true)
+}
+
+fn numbers_with(text: &str, lang: Lang, symbols: &[String], masked: bool) -> Vec<Num> {
     let mut t = lower(&strip_symbols(text, symbols), lang);
-    for m in masks(lang) {
-        t = m.replace_all(&t, " ").into_owned();
+    if masked {
+        for m in masks(lang) {
+            t = m.replace_all(&t, " ").into_owned();
+        }
     }
     let mut out = Vec::new();
     for c in num_re().captures_iter(&t) {
@@ -399,6 +412,78 @@ pub fn numbers(text: &str, lang: Lang, symbols: &[String]) -> Vec<Num> {
         });
     }
     out
+}
+
+/// (R5B audit B1) Every number a reader could take from the text, read **without** the
+/// date and time masks: each digit group, and each pair of adjacent groups joined as a
+/// decimal (`5:23`, `5.23.2026`, `5/23` → 5.23 and 5,23; `23.2026` too). Symbols and
+/// citation markers are removed first. Used where failing closed matters more than a
+/// false alarm: the licence check and what a restricted reader may receive.
+#[must_use]
+pub fn raw_numbers(text: &str, lang: Lang, symbols: &[String]) -> Vec<Num> {
+    static RUN: OnceLock<Regex> = OnceLock::new();
+    let t = unmarked(text, lang, symbols);
+    // the spans a reader could read a number from that `numbers` does not read as one:
+    // what the date/time masks removed, and digit runs joined by `:` `/` or by two or
+    // more `.`/`,` (an ordinary `5,87` is read whole by `numbers` and checked there)
+    let mut spans: Vec<String> = masks(lang)
+        .iter()
+        .flat_map(|m| m.find_iter(&t).map(|x| x.as_str().to_owned()))
+        .collect();
+    spans.extend(
+        re(&RUN, r"\d+(?:[:/]\d+)+(?:[.,:/]\d+)*|\d+(?:[.,]\d+){2,}")
+            .find_iter(&t)
+            .map(|x| x.as_str().to_owned()),
+    );
+    let mut out = Vec::new();
+    for sp in spans {
+        let groups: Vec<&str> = sp
+            .split(|c: char| !c.is_ascii_digit())
+            .filter(|g| !g.is_empty())
+            .collect();
+        for w in groups.windows(2) {
+            for (sep, l) in [('.', Lang::En), (',', Lang::Tr)] {
+                out.extend(numbers_unmasked(&format!("{}{sep}{}", w[0], w[1]), l));
+            }
+        }
+        for g in groups {
+            out.extend(numbers_unmasked(g, lang));
+        }
+    }
+    out
+}
+
+/// (R5B audit B1) The numbers of a text with **no** date or time mask (symbols and
+/// citation markers removed): `(5:23)` reads as 5 and 23, `5.23.2026` as one long
+/// number. What a restricted reader may receive is decided on these.
+#[must_use]
+pub fn unmasked_numbers(text: &str, lang: Lang, symbols: &[String]) -> Vec<Num> {
+    numbers_unmasked(&unmarked(text, lang, symbols), lang)
+}
+
+fn unmarked(text: &str, lang: Lang, symbols: &[String]) -> String {
+    static MARK: OnceLock<Regex> = OnceLock::new();
+    let t = lower(&strip_symbols(text, symbols), lang);
+    re(&MARK, r"\[\d+(?:\s*[,;]\s*\d+)*\]")
+        .replace_all(&t, " ")
+        .into_owned()
+}
+
+fn numbers_unmasked(t: &str, lang: Lang) -> Vec<Num> {
+    // `numbers` with no mask: the masks are the only difference.
+    numbers_with(t, lang, &[], false)
+}
+
+/// (R5B audit B1) A decimal written in words ("beş virgül yirmi üç", "five point two
+/// three"): the number scan cannot read it, so it is treated as a number nobody checked.
+#[must_use]
+pub fn spelled_decimal(text: &str, lang: Lang) -> Option<String> {
+    static R: OnceLock<Regex> = OnceLock::new();
+    const W: &str = "sıfır|bir|iki|üç|dört|beş|altı|yedi|sekiz|dokuz|on|yirmi|otuz|kırk|elli|altmış|yetmiş|seksen|doksan|yüz|bin|milyon|zero|one|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve|twenty|thirty|forty|fifty|sixty|seventy|eighty|ninety|hundred|thousand|million";
+    let p = format!(r"\b(?:(?:{W})\s+)*(?:{W})\s+(?:virgül|nokta|point)\s+(?:{W})\b");
+    re(&R, &p)
+        .find(&lower(text, lang))
+        .map(|m| m.as_str().to_owned())
 }
 
 /// `|v|` rounded half away from zero to `d` decimals, as an integer × 10^d. A tiny
@@ -831,6 +916,54 @@ pub fn validate(d: &CommentDraft, ev: &Evidence, s: Strictness) -> Result<(), Ve
                 "A sentence with a number must carry a citation marker such as [1].",
             ));
         }
+    }
+
+    // 5b. (R5B audit B1) licence, fail-closed: a licensed value must not get through hidden
+    //     in a "date" or "time", split across digit groups, or written in words.
+    //     For a writer with withheld numbers in scope, a hiding form whose value the
+    //     reader does not see is refused whether it is licensed or made up: the writer
+    //     cannot tell the two apart (both are told `unsupported_number`, §25.4).
+    if !ev.withheld.is_empty() && !out.iter().any(|r| r.code == "licensed_value") {
+        let hidden = sentences(&d.text).iter().enumerate().find_map(|(i, sent)| {
+            raw_numbers(sent, lang, &strip)
+                .into_iter()
+                .find(|n| {
+                    !ev.values
+                        .iter()
+                        .any(|cv| number_matches(n, cv.value, Some(cv.decimals)))
+                })
+                .map(|n| (i, n))
+        });
+        if let Some((i, n)) = hidden {
+            let licensed = ev.withheld.iter().any(|&w| withheld_matches(&n, w));
+            out.push(if licensed {
+                reason(
+                    Check::License,
+                    "licensed_value",
+                    Some(n.raw),
+                    Some(i),
+                    "This number is licensed data the reader may not see; remove it.",
+                )
+            } else {
+                reason(
+                    Check::Number,
+                    "unsupported_number",
+                    Some(n.raw),
+                    Some(i),
+                    "A date or time here must not carry numbers the reader cannot see; leave it out.",
+                )
+            });
+        }
+    }
+    // (every writer alike, so it tells nothing about what is withheld)
+    if let Some(w) = spelled_decimal(&d.text, lang) {
+        out.push(reason(
+            Check::Number,
+            "spelled_number",
+            Some(w),
+            None,
+            "Write numbers in digits so they can be checked against the evidence.",
+        ));
     }
 
     // 6. direction

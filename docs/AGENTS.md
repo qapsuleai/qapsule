@@ -119,6 +119,20 @@ Ajanın yorumu açılan kapsülde **"ajan yorumu"** etiketi ve kökeniyle görü
 önerileri web kabuğunda bekleyen öneriler listesine düşer, **onay ve ret yalnız orada**
 (insanın kendi bağlantısında) yapılır.
 
+`--mcp` ile web kabuğunun adresi terminalde bir **açılış anahtarıyla** basılır
+(`http://127.0.0.1:8390/?key=…`): kişinin bağlantısı yalnız o anahtarla açılır. Böylece
+aynı makinede çalışan bir ajan (örneğin kabuk erişimi olan bir Claude Code) kendi önerisini
+kişinin bağlantısından onaylayamaz — anahtarı ajanın göreceği bir yere yapıştırma.
+`--mcp`, `--lan`/`--https-host`/başka `--bind` ile reddedilir (gösterimin ajan ucunda
+belirteç yok; ağdan ajan için `qp mcp serve --http --listen … --token-env …`).
+
+**Bilinen sınırlar (denetim, `rounds/R5B/AUDIT.md`):** doğrulayıcının sayı ve tavsiye
+taramaları düzenli ifadeyle çalışır; kendi kurduğu bozuk yorumlarla onları atlatmaya
+çalışan bir ajana karşı tam koruma değildir (üst simge, Roma rakamı, anlamı farklı bir
+kanıt değerini yeniden kullanmak; tavsiye eş anlamlıları). Lisans tarafı sıkıdır: kısıtlı
+okura giden yorumdaki her sayı (tarih ve saat biçimi dahil, maskesiz okunarak) okurun
+gördüğü bir değer olmalıdır; sözcükle yazılmış ondalık hiç geçmez.
+
 ## Başvuru ajanları
 
 `agents/` klasörü (ürün değil, örnek ve ölçüm düzeneği): **Yorumcu** (kapsül + kanıt + dış
@@ -129,7 +143,7 @@ Matriks bağlamı `agents/tools/mxmcp` ile (önbellekli, sayaçlı; sonuçlar ya
 
 ## Arkın için beş dakikalık deneme
 
-1. Depo kökünde: `scripts/demo.sh --mcp` (web kabuğu açılır; replay oynar).
+1. Depo kökünde: `scripts/demo.sh --mcp`; terminalde basılan `qp demo: http://127.0.0.1:8390/?key=…` adresini tarayıcıda aç (replay oynar).
 2. Başka bir terminalde: `claude mcp add --transport http qapsule-demo http://127.0.0.1:8390/mcp`
    (bir kez), sonra `claude`.
 3. Üç soru sor:

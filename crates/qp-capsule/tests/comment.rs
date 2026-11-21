@@ -913,3 +913,52 @@ fn money_outflow_is_not_an_up_word() {
     let (up, _) = direction_words("fiyat yukarı çıktı", Lang::Tr, &[]);
     assert_eq!(up.len(), 2, "{up:?}");
 }
+
+// --------------------------------------------- R5B audit B1/B4 (masks, raw scan, words)
+
+#[test]
+fn out_of_range_times_and_dates_are_numbers() {
+    assert!(!vals("saat 52:87", Lang::Tr).is_empty());
+    assert!(!vals("47 Kas", Lang::Tr).is_empty());
+    assert!(!vals("52.87.2026", Lang::Tr).is_empty());
+    // real ones stay masked
+    assert!(vals("saat 14:30", Lang::Tr).is_empty());
+    assert!(vals("21.11.2026", Lang::Tr).is_empty());
+}
+
+#[test]
+fn a_withheld_value_cannot_hide_in_a_time_a_date_or_words() {
+    let e = ev_with(&[], &[5.23]);
+    for text in [
+        "Ortalama (5:23) [1].",
+        "Ortalama 5/23 [1].",
+        "Ortalama beş virgül yirmi üç [1].",
+    ] {
+        let r = codes(validate(&tr(text), &e, Strictness::Cites));
+        assert!(
+            r.iter()
+                .any(|(c, k)| *c == Check::License || k == "spelled_number"),
+            "{text}: {r:?}"
+        );
+    }
+    // a decimal in words is refused for every writer (no oracle on what is withheld)
+    let en = codes(validate(
+        &en("Average five point two three [1]."),
+        &ev(&[]),
+        Strictness::Cites,
+    ));
+    assert_eq!(en, vec![(Check::Number, "spelled_number".to_owned())]);
+    // a real clock time beside it is fine when nothing is withheld
+    assert!(ok(&tr("Saat 14:30'da kırılım oldu [1]."), &ev(&[])));
+}
+
+#[test]
+fn unmasked_numbers_read_times_and_dates_as_digits() {
+    use qp_capsule::comment::unmasked_numbers;
+    let v: Vec<f64> = unmasked_numbers("(5:23) ve 21.11.2026 [1]", Lang::Tr, &[])
+        .iter()
+        .map(|n| n.value)
+        .collect();
+    assert!(v.contains(&5.0) && v.contains(&23.0), "{v:?}");
+    assert!(unmasked_numbers("[1] [2, 3]", Lang::Tr, &[]).is_empty());
+}

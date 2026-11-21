@@ -723,14 +723,30 @@ fn demo_serves_the_same_session_at_mcp() {
     let mut out = BufReader::new(child.stdout.take().unwrap());
     let mut line = String::new();
     out.read_line(&mut line).unwrap();
-    let port: u16 = line
+    // `qp demo: http://127.0.0.1:PORT/?key=KEY` (R5B audit B2: the launch key)
+    let (addr, key) = line
         .trim()
-        .trim_end_matches('/')
+        .trim_start_matches("qp demo: ")
+        .split_once("/?key=")
+        .unwrap_or_else(|| panic!("no key in {line:?}"));
+    let port: u16 = addr
         .rsplit(':')
         .next()
         .and_then(|p| p.parse().ok())
         .unwrap_or_else(|| panic!("no port in {line:?}"));
     std::thread::spawn(move || for _ in out.lines() {});
+    // A person's stream needs the launch key; without it (any local process) 403.
+    let status = |path: &str| {
+        use std::io::{Read, Write};
+        let mut c = std::net::TcpStream::connect(("127.0.0.1", port)).unwrap();
+        write!(c, "GET {path} HTTP/1.1\r\nHost: 127.0.0.1:{port}\r\n\r\n").unwrap();
+        let mut b = [0u8; 64];
+        let n = c.read(&mut b).unwrap();
+        String::from_utf8_lossy(&b[..n]).to_string()
+    };
+    assert!(status("/events?principal=arkin").contains(" 403 "));
+    assert!(status("/events?principal=arkin&key=wrong").contains(" 403 "));
+    assert!(status(&format!("/events?principal=arkin&key={key}")).contains(" 200 "));
     let d = json!({"jsonrpc":"2.0","id":1,"method":"tools/call","params":{
         "name":"query_describe","arguments":{}}});
     let (code, _, body) = http(port, "POST", &[], Some(&d));
@@ -742,4 +758,19 @@ fn demo_serves_the_same_session_at_mcp() {
     assert_eq!(code, 403);
     let _ = child.kill();
     let _ = child.wait();
+}
+
+/// (R5B audit B3) The demo's agent endpoint has no token: it never leaves this machine.
+#[test]
+fn demo_mcp_refuses_the_network() {
+    for extra in [&["--lan"][..], &["--bind", "0.0.0.0"][..]] {
+        let out = qp()
+            .args(["demo", "--synthetic", "--paused", "--mcp", "--port", "0"])
+            .args(extra)
+            .output()
+            .unwrap();
+        assert!(!out.status.success(), "{extra:?}");
+        let err = String::from_utf8_lossy(&out.stderr);
+        assert!(err.contains("--mcp"), "{err}");
+    }
 }

@@ -368,12 +368,23 @@ impl Session {
         if self.proj.is_none() {
             return true;
         }
+        // (R5B audit B1) fail-closed for a restricted reader: every number the text could
+        // carry — read without the date/time masks, digit groups joined — must be one the
+        // reader sees; a decimal in words is never passed on.
         let syms = symbols(&self.doc);
-        numbers(&c.text, lang_of(c.lang), &syms).iter().all(|n| {
+        let lang = lang_of(c.lang);
+        if qp_capsule::comment::spelled_decimal(&c.text, lang).is_some() {
+            return false;
+        }
+        let shown = |n: &qp_capsule::comment::Num| {
             seen.values
                 .iter()
                 .any(|v| qp_capsule::comment::number_matches(n, v.value, Some(v.decimals)))
-        })
+        };
+        numbers(&c.text, lang, &syms).iter().all(shown)
+            && qp_capsule::comment::unmasked_numbers(&c.text, lang, &syms)
+                .iter()
+                .all(shown)
     }
 
     /// Comments about capsule `cap` the reader of `ci` may receive (inside `as_reader`).
@@ -562,5 +573,8 @@ pub(crate) fn projected_keeps(c: &Comment, hidden: &BTreeSet<String>) -> bool {
     {
         return false;
     }
-    numbers(&c.text, lang_of(c.lang), &[]).is_empty()
+    // (R5B audit B1) no digit at all (masks do not apply) and no decimal in words
+    let lang = lang_of(c.lang);
+    qp_capsule::comment::unmasked_numbers(&c.text, lang, &[]).is_empty()
+        && qp_capsule::comment::spelled_decimal(&c.text, lang).is_none()
 }

@@ -168,6 +168,8 @@ function connect() {
   // (RP3/M15) `?mode=replica`: the R4 full replica (the measurement's baseline); the host
   // makes every other connection a viewer.
   if (params.get('mode')) url.searchParams.set('mode', params.get('mode'));
+  // (R5B) `qp demo --mcp`: the launch key of the printed address opens the stream.
+  if (params.get('key')) url.searchParams.set('key', params.get('key'));
   if (ui.feed_rule) url.searchParams.set('feed_rule', ui.feed_rule);
   // (R5/S) `?feed_exempt=0`: the feed rule without the K42 exemption (human test form B;
   // the host reads it as it is).

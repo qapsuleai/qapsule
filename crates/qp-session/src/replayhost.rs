@@ -833,10 +833,18 @@ impl ReplayHost {
             return Vec::new();
         };
         let status = matches!(control, ReplayControl::Status);
+        // (R5B audit B6, §25.3) an agent never controls the shared timeline, whatever its
+        // role: a marked connection or an agent principal reads the status only.
+        let agent = self
+            .session
+            .conns
+            .iter()
+            .position(|c| c.id == conn)
+            .is_some_and(|ci| self.session.agent_origin(ci));
         let allowed = if status {
             permissions(role).read
         } else {
-            matches!(role, Role::Host | Role::Owner)
+            matches!(role, Role::Host | Role::Owner) && !agent
         };
         if !allowed {
             let e = if status {
@@ -847,7 +855,11 @@ impl ReplayHost {
             } else {
                 E::new(
                     ErrorCode::Forbidden,
-                    "only the roles `host` and `owner` control the replay",
+                    if agent {
+                        "an agent does not control the replay (only a person or the host)"
+                    } else {
+                        "only the roles `host` and `owner` control the replay"
+                    },
                 )
                 .hint("Ask for `{\"kind\":\"status\"}`; the timeline is shared by every reader.")
             };

@@ -335,3 +335,94 @@ fn the_writer_finds_its_comment_by_list_and_get() {
         );
     }
 }
+
+/// (R5B audit B1) A licensed number written as a "time", a "date", split across digit
+/// groups or in words neither passes the validator for an unentitled writer nor reaches
+/// an unentitled reader when an entitled writer wrote it.
+#[test]
+fn a_licensed_number_does_not_hide_in_a_time_a_date_or_words() {
+    let mut h = H::new();
+    // the unentitled writer: refused (the audit has the licence catch)
+    for text in [
+        "THYAO kısa ortalamanın (5:23) altında [1].",
+        "THYAO kısa ortalama 5.23.2026 seviyesinin altında [1].",
+        "THYAO kısa ortalama beş virgül yirmi üç seviyesinin altında [1].",
+    ] {
+        let r = h.comment("C", text, json!([CAP]));
+        assert_eq!(
+            r[0]["msg"]["error"]["code"], "comment_rejected",
+            "{text}: {r:?}"
+        );
+        let a = h.0.comment_audit().last().unwrap();
+        assert!(
+            a.reasons
+                .iter()
+                .any(|x| x.code == "licensed_value" || x.code == "spelled_number"),
+            "{text}: {a:?}"
+        );
+    }
+    // the entitled writer: stored, but the unentitled reader receives none of them
+    for c in ["a", "c"] {
+        h.send(
+            c,
+            json!({"type":"subscribe","id":"cm","topic":{"kind":"comments","instrument":"THYAO"}}),
+        );
+    }
+    for text in [
+        "THYAO kısa ortalamanın (5:23) altında [1].",
+        "THYAO kısa ortalama 5.23.2026 seviyesinin altında [1].",
+        "THYAO kısa ortalama beş virgül yirmi üç seviyesinin altında [1].",
+    ] {
+        let out = h.comment("A", text, json!([CAP]));
+        // either refused outright (5.23.2026 is no date: month 23) or stored unseen by can
+        if out[0]["msg"]["type"] == "error" {
+            assert_eq!(
+                out[0]["msg"]["error"]["code"], "comment_rejected",
+                "{out:?}"
+            );
+            continue;
+        }
+        assert_eq!(out[0]["msg"]["status"], "applied", "{text}: {out:?}");
+        let to: Vec<&Value> = out
+            .iter()
+            .filter(|l| l["msg"]["event"]["kind"] == "comment")
+            .map(|l| &l["conn"])
+            .collect();
+        assert!(!to.contains(&&json!("c")), "{text} reached can: {out:?}");
+    }
+    let r = h.send(
+        "c",
+        json!({"type":"query","id":"q","query":{"kind":"capsule","capsule":CAP}}),
+    );
+    assert!(
+        r[0]["msg"]["data"]["detail"].get("comments").is_none(),
+        "{r:?}"
+    );
+    let all = serde_json::to_string(&h.send(
+        "c",
+        json!({"type":"query","id":"d","query":{"kind":"document"}}),
+    ))
+    .unwrap();
+    for leak in ["5:23", "5.23.2026", "virgül yirmi"] {
+        assert!(!all.contains(leak), "document leaks {leak}");
+    }
+}
+
+/// (R5B audit B1) No oracle in the time form either: a licensed value written as a time
+/// and a made-up time give the restricted writer the same bytes.
+#[test]
+fn a_time_form_is_no_licence_oracle() {
+    let mut h = H::new();
+    let a = h.comment(
+        "C",
+        "THYAO kısa ortalamanın (5:23) altında [1].",
+        json!([CAP]),
+    );
+    let b = h.comment(
+        "C",
+        "THYAO kısa ortalamanın (5:43) altında [1].",
+        json!([CAP]),
+    );
+    assert_eq!(a[0]["msg"]["error"]["code"], "comment_rejected", "{a:?}");
+    assert_eq!(a[0]["msg"].to_string(), b[0]["msg"].to_string());
+}

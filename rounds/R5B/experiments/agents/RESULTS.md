@@ -36,3 +36,27 @@ Nöbetçi: 10 günlük pencere (M31 penceresi) barındırıcı tarafında adıml
 replay'i ilerletemez: `forbidden`); ajanın kurduğu izlemeler (3 görev → 5 izleme) aynı
 `add_watch` ile yeniden oynatılır; 17 olay gelen kutusu. Üç model de 8 bildirim yazdı,
 zorunlu olayların hiçbirini kaçırmadı, gereksiz bildirim 0.
+
+## Ölçüt 9: Matriks bağlamıyla (gerçek veri, yalnız toplu sayı)
+
+`--source local` (yerel gerçek barlar, `fixtures/local/`), `--matriks`, model sonnet,
+Soru (ISCTR, ASELS) ve Yorumcu (ISCTR, THYAO). Dökümler `fixtures/local/agent-runs/`
+altında; depoya girmedi.
+
+| koşu | görev | doğru | atıf | Matriks ağ sorgusu | dış sayı `external`'da kaynağıyla | doğrulayıcı |
+|---|---:|---:|---:|---:|---|---|
+| ilk koşu ("gerekirse") | 4 | 4 | 4/4 | 1 | — (ajanlar bağlam almadı) | 4/4 kabul |
+| ikinci koşu ("mutlaka") | 4 | 3 | 4/4 | 5 (+3 önbellekten) | 4/4 cevap/yorum, kaynak adıyla (`Matriks MCP newsAndEvents`, `marketSnapshot`) | yorum 2/2 kabul (biri düzeltmeyle); Soru cevabı 0/2 |
+
+- Toplam Matriks ağ sorgusu (round boyunca): **7** (kurulumda 1 `tools/list`, 3
+  `newsAndEvents`, 3 `marketSnapshot`); önbellekten 4. Sayaç: `fixtures/local/agent-cache/matriks/count.jsonl`.
+- İlk koşuda görev "gerekirse" diyordu; ajanlar Matriks'i hiç çağırmadı. İkinci koşuda
+  görev bağlamı açıkça istiyor (`agents/run.py`).
+- Soru cevaplarının ikisi doğrulayıcıda reddedildi: dış değer işaretli yazılmış (`-1,41`)
+  ama alıntıda "%1,41 düşüş" — `external_value_not_in_quote`; ve "2018" yılı (tarih maskesi
+  yalnız "2018'de"/"2018 yılı" biçimini tanıyor). Uydurma değil; doğrulayıcı kullanılabilirliği
+  (REPORT "Öneriler").
+- Yorumcu THYAO'da "en önemli açık hikâye" olarak motorun seçtiğinden başka bir açık
+  hikâyeyi yorumladı (doğruluk 1/2); yorum doğrulandı.
+- Ajanlar replay tarihi (2018) ile Matriks verisinin tarihi (2026) arasındaki farkı her
+  cevapta söyledi.

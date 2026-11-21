@@ -1,0 +1,510 @@
+{
+ "sampled": 50,
+ "pool": 437,
+ "answers_with_items": 49,
+ "answers_empty": 0,
+ "aggregate_answers": 1,
+ "ids_checked": 373,
+ "untraceable_answers": 0,
+ "untraceable_ids": [],
+ "errors": 0,
+ "rows": [
+  {
+   "tool": "query_capsule",
+   "args": {
+    "capsule": "cap.SYN07.breakout.up.51"
+   },
+   "kind": "items",
+   "ids": 6,
+   "untraceable": [],
+   "error": false
+  },
+  {
+   "tool": "query_capsule",
+   "args": {
+    "capsule": "cap.SYN03.flow.up.27"
+   },
+   "kind": "items",
+   "ids": 3,
+   "untraceable": [],
+   "error": false
+  },
+  {
+   "tool": "query_capsule",
+   "args": {
+    "capsule": "cap.SYN05.breakout.up.91"
+   },
+   "kind": "items",
+   "ids": 3,
+   "untraceable": [],
+   "error": false
+  },
+  {
+   "tool": "query_capsule",
+   "args": {
+    "capsule": "cap.SYN09.breakout.up.39"
+   },
+   "kind": "items",
+   "ids": 3,
+   "untraceable": [],
+   "error": false
+  },
+  {
+   "tool": "query_capsule",
+   "args": {
+    "capsule": "cap.SYN03.flow.down.117"
+   },
+   "kind": "items",
+   "ids": 3,
+   "untraceable": [],
+   "error": false
+  },
+  {
+   "tool": "query_capsule",
+   "args": {
+    "capsule": "cap.SYN10.breakout.up.135"
+   },
+   "kind": "items",
+   "ids": 3,
+   "untraceable": [],
+   "error": false
+  },
+  {
+   "tool": "query_capsule",
+   "args": {
+    "capsule": "cap.SYN06.reversal.down.41"
+   },
+   "kind": "items",
+   "ids": 3,
+   "untraceable": [],
+   "error": false
+  },
+  {
+   "tool": "query_capsule",
+   "args": {
+    "capsule": "cap.SYN11.breakout.up.76"
+   },
+   "kind": "items",
+   "ids": 3,
+   "untraceable": [],
+   "error": false
+  },
+  {
+   "tool": "query_capsule",
+   "args": {
+    "capsule": "cap.SYN04.reversal.down.21"
+   },
+   "kind": "items",
+   "ids": 3,
+   "untraceable": [],
+   "error": false
+  },
+  {
+   "tool": "query_capsule",
+   "args": {
+    "capsule": "cap.SYN01.breakout.up.147"
+   },
+   "kind": "items",
+   "ids": 5,
+   "untraceable": [],
+   "error": false
+  },
+  {
+   "tool": "query_capsule",
+   "args": {
+    "capsule": "cap.SYN07.flow.up.112"
+   },
+   "kind": "items",
+   "ids": 3,
+   "untraceable": [],
+   "error": false
+  },
+  {
+   "tool": "query_capsule",
+   "args": {
+    "capsule": "cap.SYN04.extreme.up.41"
+   },
+   "kind": "items",
+   "ids": 3,
+   "untraceable": [],
+   "error": false
+  },
+  {
+   "tool": "query_capsule",
+   "args": {
+    "capsule": "cap.SYN03.continuation.up.49"
+   },
+   "kind": "items",
+   "ids": 3,
+   "untraceable": [],
+   "error": false
+  },
+  {
+   "tool": "query_capsule",
+   "args": {
+    "capsule": "cap.SYN10.breakout.down.55"
+   },
+   "kind": "items",
+   "ids": 4,
+   "untraceable": [],
+   "error": false
+  },
+  {
+   "tool": "query_capsule",
+   "args": {
+    "capsule": "cap.SYN08.breakout.up.114"
+   },
+   "kind": "items",
+   "ids": 4,
+   "untraceable": [],
+   "error": false
+  },
+  {
+   "tool": "query_capsule",
+   "args": {
+    "capsule": "cap.SYN02.continuation.down.103"
+   },
+   "kind": "items",
+   "ids": 5,
+   "untraceable": [],
+   "error": false
+  },
+  {
+   "tool": "query_capsule",
+   "args": {
+    "capsule": "cap.SYN05.breakout.up.134"
+   },
+   "kind": "items",
+   "ids": 5,
+   "untraceable": [],
+   "error": false
+  },
+  {
+   "tool": "query_capsule",
+   "args": {
+    "capsule": "cap.SYN12.breakout.up.153"
+   },
+   "kind": "items",
+   "ids": 3,
+   "untraceable": [],
+   "error": false
+  },
+  {
+   "tool": "query_capsule",
+   "args": {
+    "capsule": "cap.SYN01.continuation.down.49"
+   },
+   "kind": "items",
+   "ids": 5,
+   "untraceable": [],
+   "error": false
+  },
+  {
+   "tool": "query_capsule",
+   "args": {
+    "capsule": "cap.SYN04.extreme.up.51"
+   },
+   "kind": "items",
+   "ids": 4,
+   "untraceable": [],
+   "error": false
+  },
+  {
+   "tool": "query_capsule",
+   "args": {
+    "capsule": "cap.SYN03.continuation.up.118"
+   },
+   "kind": "items",
+   "ids": 5,
+   "untraceable": [],
+   "error": false
+  },
+  {
+   "tool": "query_capsule",
+   "args": {
+    "capsule": "cap.SYN03.breakout.down.129"
+   },
+   "kind": "items",
+   "ids": 4,
+   "untraceable": [],
+   "error": false
+  },
+  {
+   "tool": "query_stories",
+   "args": {
+    "instrument": "SYN11"
+   },
+   "kind": "items",
+   "ids": 50,
+   "untraceable": [],
+   "error": false
+  },
+  {
+   "tool": "query_capsule",
+   "args": {
+    "capsule": "cap.SYN08.reversal.down.152"
+   },
+   "kind": "items",
+   "ids": 3,
+   "untraceable": [],
+   "error": false
+  },
+  {
+   "tool": "query_capsule",
+   "args": {
+    "capsule": "cap.SYN08.reversal.down.91"
+   },
+   "kind": "items",
+   "ids": 3,
+   "untraceable": [],
+   "error": false
+  },
+  {
+   "tool": "query_capsule",
+   "args": {
+    "capsule": "cap.SYN06.breakout.up.39"
+   },
+   "kind": "items",
+   "ids": 3,
+   "untraceable": [],
+   "error": false
+  },
+  {
+   "tool": "query_capsule",
+   "args": {
+    "capsule": "cap.SYN09.breakout.up.33"
+   },
+   "kind": "items",
+   "ids": 3,
+   "untraceable": [],
+   "error": false
+  },
+  {
+   "tool": "query_capsule",
+   "args": {
+    "capsule": "cap.SYN01.breakout.up.55"
+   },
+   "kind": "items",
+   "ids": 4,
+   "untraceable": [],
+   "error": false
+  },
+  {
+   "tool": "query_stories",
+   "args": {
+    "instrument": "SYN10"
+   },
+   "kind": "items",
+   "ids": 72,
+   "untraceable": [],
+   "error": false
+  },
+  {
+   "tool": "query_capsule",
+   "args": {
+    "capsule": "cap.SYN05.breakout.down.35"
+   },
+   "kind": "items",
+   "ids": 3,
+   "untraceable": [],
+   "error": false
+  },
+  {
+   "tool": "query_capsule",
+   "args": {
+    "capsule": "cap.SYN11.reversal.down.42"
+   },
+   "kind": "items",
+   "ids": 3,
+   "untraceable": [],
+   "error": false
+  },
+  {
+   "tool": "query_capsule",
+   "args": {
+    "capsule": "cap.SYN10.breakout.up.122"
+   },
+   "kind": "items",
+   "ids": 3,
+   "untraceable": [],
+   "error": false
+  },
+  {
+   "tool": "query_capsule",
+   "args": {
+    "capsule": "cap.SYN09.continuation.down.147"
+   },
+   "kind": "items",
+   "ids": 5,
+   "untraceable": [],
+   "error": false
+  },
+  {
+   "tool": "query_capsule",
+   "args": {
+    "capsule": "cap.SYN12.continuation.down.156"
+   },
+   "kind": "items",
+   "ids": 3,
+   "untraceable": [],
+   "error": false
+  },
+  {
+   "tool": "query_capsule",
+   "args": {
+    "capsule": "cap.SYN06.breakout.up.43"
+   },
+   "kind": "items",
+   "ids": 3,
+   "untraceable": [],
+   "error": false
+  },
+  {
+   "tool": "query_ledger",
+   "args": {},
+   "kind": "aggregate",
+   "rows": 13,
+   "all_keyed": true
+  },
+  {
+   "tool": "query_capsule",
+   "args": {
+    "capsule": "cap.SYN03.extreme.down.124"
+   },
+   "kind": "items",
+   "ids": 4,
+   "untraceable": [],
+   "error": false
+  },
+  {
+   "tool": "query_capsule",
+   "args": {
+    "capsule": "cap.SYN05.breakout.down.68"
+   },
+   "kind": "items",
+   "ids": 6,
+   "untraceable": [],
+   "error": false
+  },
+  {
+   "tool": "query_capsule",
+   "args": {
+    "capsule": "cap.SYN12.breakout.down.121"
+   },
+   "kind": "items",
+   "ids": 3,
+   "untraceable": [],
+   "error": false
+  },
+  {
+   "tool": "query_capsule",
+   "args": {
+    "capsule": "cap.SYN06.breakout.up.53"
+   },
+   "kind": "items",
+   "ids": 3,
+   "untraceable": [],
+   "error": false
+  },
+  {
+   "tool": "query_capsule",
+   "args": {
+    "capsule": "cap.SYN10.breakout.up.149"
+   },
+   "kind": "items",
+   "ids": 3,
+   "untraceable": [],
+   "error": false
+  },
+  {
+   "tool": "query_capsule",
+   "args": {
+    "capsule": "cap.SYN01.continuation.up.96"
+   },
+   "kind": "items",
+   "ids": 3,
+   "untraceable": [],
+   "error": false
+  },
+  {
+   "tool": "query_capsule",
+   "args": {
+    "capsule": "cap.SYN03.breakout.up.28"
+   },
+   "kind": "items",
+   "ids": 3,
+   "untraceable": [],
+   "error": false
+  },
+  {
+   "tool": "query_capsule",
+   "args": {
+    "capsule": "cap.SYN06.breakout.up.90"
+   },
+   "kind": "items",
+   "ids": 3,
+   "untraceable": [],
+   "error": false
+  },
+  {
+   "tool": "query_capsule",
+   "args": {
+    "capsule": "cap.SYN03.flow.up.55"
+   },
+   "kind": "items",
+   "ids": 3,
+   "untraceable": [],
+   "error": false
+  },
+  {
+   "tool": "query_capsule",
+   "args": {
+    "capsule": "cap.SYN08.continuation.down.90"
+   },
+   "kind": "items",
+   "ids": 4,
+   "untraceable": [],
+   "error": false
+  },
+  {
+   "tool": "query_capsule",
+   "args": {
+    "capsule": "cap.SYN06.extreme.up.44"
+   },
+   "kind": "items",
+   "ids": 8,
+   "untraceable": [],
+   "error": false
+  },
+  {
+   "tool": "query_capsule",
+   "args": {
+    "capsule": "cap.SYN02.breakout.down.129"
+   },
+   "kind": "items",
+   "ids": 3,
+   "untraceable": [],
+   "error": false
+  },
+  {
+   "tool": "query_capsule",
+   "args": {
+    "capsule": "cap.SYN09.breakout.down.82"
+   },
+   "kind": "items",
+   "ids": 5,
+   "untraceable": [],
+   "error": false
+  },
+  {
+   "tool": "query_capsule",
+   "args": {
+    "capsule": "cap.SYN03.breakout.up.73"
+   },
+   "kind": "items",
+   "ids": 5,
+   "untraceable": [],
+   "error": false
+  }
+ ]
+}

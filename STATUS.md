@@ -5,9 +5,9 @@ Her round sonunda güncellenir.
 
 ## Şu an
 
-- **Aktif round:** yok. RP4 (gün içi kalibrasyon, işlem akışı, sağlamlaştırma) tamamlandı; rapor `rounds/RP4/REPORT.md`, denetim `rounds/RP4/AUDIT.md`. Sıra: R5B → RD2 → R7 (K65).
-- **Son güncelleme:** 2026-11-21
-- **Sıradaki adım:** Arkin: RP4 önerilerini (Ö77–Ö93, A53–A56) değerlendirmek; ilk iş gününde canlı doğrulamalar (`rounds/RP4/REPORT.md` §13). Sonra ayrı bir oturumda `rounds/R5B/PROMPT.md`.
+- **Aktif round:** yok. R5B (ajan yüzeyi) tamamlandı; rapor `rounds/R5B/REPORT.md`, denetim `rounds/R5B/AUDIT.md`, bağlantı kılavuzu `docs/AGENTS.md`. Sıra: RD2 → R7 (K65).
+- **Son güncelleme:** 2026-11-22
+- **Sıradaki adım:** Arkin: beş dakikalık ajan denemesi (`rounds/R5B/REPORT.md` son bölüm); R5B önerileri (Ö94–Ö102, A57–A60) ve RP4 önerileri (Ö77–Ö93, A53–A56); geri yüklenen `recovered/worktree-agent/*` dallarının silinip silinmeyeceği. Sonra RD2 tasarımı ana akışta.
 
 ## Round geçmişi
 
@@ -27,6 +27,7 @@ Her round sonunda güncellenir.
 | RI1 | Tamamlandı (keşif, salt okunur; kabul ölçütleri 9/9 ✅). `quantex` deposu incelendi, canlı bağlantı yok, o depoda değişiklik yok. Altı belge `docs/matriks/` (bağlantı, mesajlar, NATS, göstergeler, anomali, Qapsule için anlamı). Arkin'in beş bilgisi: 2 doğrulandı (uç nokta başına tek bağlantı, ikinci bağlantı birincisini düşürür), 1/3/4/5 kısmen. Matriks iletilerinde sıra numarası yok (QoS 0); iç NATS kalıcı değil; Quantex gösterge servisleri K13/K14'e aykırı (referans olamaz); anomali motoru deterministik değil (sunucu olgusu sayılamaz). R6 seçenekleri ve öneri (karar değil): kayıt-önce → kendi kimliğiyle doğrudan Matriks. Bağımsız denetim 54 iddia: 48 doğru, 6 kısmen (düzeltildi), 0 yanlış; sınır taraması temiz; **koşullu kabul**, koşullar karşılandı. | `rounds/RI1/REPORT.md`, `rounds/RI1/AUDIT.md`, `docs/matriks/` |
 | R6 | Tamamlandı (gecikmeli kip; 13 ✅ / 1 ⚠️: ölçüt 4 tam seans değil — en uzun kesintisiz kayıt ~16:08 → kapanış). Qapsule kendi kimliğiyle Matriks'e bağlandı (L1–L7, **çoklu bağlantı bildirimi 0**); `qp-matriks` (22 proto bayt eşit + köken, prost/protox, alan varlığı, rawlog, `LiveFeed`), `qp-live` (belirteç, kendi MQTT 3.1 kodlayıcısı, rustls doğrulamalı, tek bağlantı kilidi, MULTICONNECT'te dur, geri çekilme, maskeleme, REST), `qp_source::livebar` (K14), `qp replay --raw` (iki koşu bayt eşit), `qp demo --live` (görüntüleyici, piyasa durumu PROTOCOL §24, kopma → bayat → REST onarımı), iç içe gösterge adresi (K63). M22: günlük bar kart alanlarından 90/100 tam, hacim 100/100 (TL, düzeltilmemiş); gün içi fiyat %91–95 tam, hacim %95–97 ≤ %1. M23: bayatken kapsül 0, onarım 20 s/30 besleme. M24: 580 sembol sınırsız; 100 sembolde işlemci %74 → %17 (görüntüleyici ≤4/sn). verify 18/18; hesap özeti, altınlar, dökümler aynı. `main` `71526f8`, CI 44701068346 yeşil (Linux x86_64). | `rounds/R6/REPORT.md`, `rounds/R6/AUDIT.md`, `rounds/R6/experiments/LIVE-LOG.md`, `docs/matriks/LIVE.md` |
 | RP4 | Tamamlandı (2026-11-21, borsa kapalıyken; REST geçmişinden hızlandırılmış benzetimle). 1.933 REST isteği (64 M işlem; 15 istek tekrar). M25: önceden yazılı düzenek, 5 alternatif; seçilen gün içi kural `yukdus` (`rp4` kaydı; günlük `r3`): 5 dk erken kapanma sınamada 0,156 → 0,065 (hedef tuttu), SENS 0,198 → 0,097, süresi dolan 0,11 → 0,30; Arkin'in durumu yeniden üretildi (22 durumun 7'si gerçekleşti'ye döner; `umut` 13). M26: gün içinde dedektörler 0,55'e ulaşmıyor; 1 sa `mevsim`. M27: işlemden bar 1 dk/5 dk/1 sa ≥ %99,999 REST'e eşit. Benzetim canlı yolun aynısı, 1 gün × 100 sembol 42–49 s. A52 durma + `qp live reset`. Ölçek 580 sembol (benzetim 1×): %11 / ~400 MB / p95 23 ms. Satır saati, A48. Sabitler sürümlü (`r3`, `rp4`), protokol varsayılanı `r3`, dökümler/altınlar/hesap özeti aynı. Canlı doğrulamalar ilk iş günü. | `rounds/RP4/REPORT.md`, `rounds/RP4/AUDIT.md`, `rounds/RP4/experiments/` |
+| R5B | Tamamlandı (2026-11-22). `qp mcp serve` (stdio + yerel HTTP, belirteçsiz dış erişim yok, kimlik oturuma bağlı), PROTOCOL §25 (köken, `on_behalf`, izin listesi), **öneri/bulgu kararı yalnız insan kökenli komutla** (ajanın MCP ucunda karar aracı yok; `command` ile de `human_only`; test `crates/qp-mcp/tests/human_decision.rs`), doğrulanmış ajan yorumu (M30: `cites_numbers` 149/149 yakalama, lisans ve olmayan olgu %100), niyet (bayt eşit eşleşme, kişi başına 32), önizleme. M28 araç yüzeyi `thin` (ayırt edilemedi → küçük model 34/45); M29 kapsül biçimi `json` (ayırt edilemedi → belirteç; ilk koşu geçersizdi, A/A ~4 puan); M31 nöbetçi `tier_repeat_hold` (kaçırma 0). Başvuru ajanları üç modelde: atıf %100, doğrulanmış yorumda uydurma 0, tavsiye 0, sızıntı 0, nöbetçi kaçırma 0; gömülü talimata uyan 0/42; Matriks bağlamı kaynaklı (7 ağ sorgusu). 50 rastgele cevapta izlenemeyen 0. Web kabuğunda 'ajan yorumu' ve bekleyen öneriler (kabul/ret insanın bağlantısından). Ölçüm ≈ 9,26 M alt ajan belirteci (106 koşu). | `rounds/R5B/REPORT.md`, `rounds/R5B/RESEARCH.md`, `rounds/R5B/AUDIT.md`, `rounds/R5B/experiments/`, `docs/AGENTS.md`, `agents/` |
 
 ## Bilinen durumlar
 
@@ -50,6 +51,7 @@ Her round sonunda güncellenir.
 
 ## Arkin'den beklenenler
 
+- **R5B:** beş dakikalık deneme (`rounds/R5B/REPORT.md` son bölüm); önerilen kararlar Ö94–Ö102, açık A57–A60 (`DECISIONS.md`); `recovered/worktree-agent/*` (24 dal) silinsin mi (`rounds/R5B/REPORT.md` §6).
 - **RP4:** önerilen kararlar Ö77–Ö93, açık A53–A56 (`DECISIONS.md`); ilk iş günü listesi `rounds/RP4/REPORT.md` §13; gün içi gösterimde `--rule rp4` varsayılan olsun mu (Ö79).
 
 - **R6:**

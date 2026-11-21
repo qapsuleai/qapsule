@@ -123,3 +123,22 @@ kodla). Dil modeliyle puanlanan tek şey yorumun okunurluğudur ve o seçimde be
 | 12 | Var olan altınlar, dökümler ve hesap özeti değişmedi; `scripts/verify.sh` yeşil ve ağsız (ajan ölçümleri verify'ın parçası değil; doğrulayıcı ve MCP testleri parçası); CI yeşil; gizli bilgi taraması temiz. |
 | 13 | **Kapanış temizliği (K68):** geçici dosyalar, ajan dökümü yığınları silindi; `target/` ≤ 6 GB; raporda silinenler, bırakılanlar, kalan boyutlar. |
 | 14 | `REPORT.md` (ölçüm maliyeti dahil), `AUDIT.md`, `docs/AGENTS.md`, `docs/PROTOCOL.md` eki; `STATUS.md`, `ROADMAP.md`; önerilen kararlar ayrı bölümde. |
+
+## Kanıt (R5B kapanışı, 2026-11-22)
+
+| # | Durum | Kanıt |
+|---|---|---|
+| 1 | Tamam (canlı: hazırlık) | `qp mcp serve` stdio + HTTP (`crates/qp-cli/src/mcp_serve.rs`), varsayılan `127.0.0.1`, yerel dışı `--token-env` zorunlu; sentetik ve yerel yeniden oynatma (`--source synthetic|local`, `--init`); `sim/live` R6 `livehost` ile bağlanacak (açık hata iletisi). Araçlar protokol şemasından üretiliyor (`crates/qp-mcp/src/tools.rs`, `tests/tools.rs::every_op_and_query_has_a_tool_in_schema_order`); MCP üzerinden uygunluk (`conformance_transcripts_pass_over_mcp`), sentetik dökümler 65–70. |
+| 2 | Tamam | Okuma: kapsüller, kapsül + hikâye + kanıt, hikâye listesi, karne, değişiklik günlüğü, dikkat listesi, sözlük (`query_describe`), ekran okuması (`query_screen`), piyasa durumu (`replay_status`); 50 rastgele cevapta 373 kimlik, izlenemeyen 0 (`experiments/trace50/RESULT.json`). |
+| 3 | Tamam | Abonelik ve niyet (PROTOCOL §25.5, döküm 69); eşleşme motorda; aynı benzetim → bayt eşit (`crates/qp-session/tests/agent_watch.rs::matching_is_deterministic_byte_for_byte`, `examples/agent_window.rs` iki koşu); yaşam döngüsü (kuruldu/eşleşti/kaldırıldı/etkin değil); kişi başına 32. |
+| 4 | Tamam | Doğrulayıcı (`crates/qp-capsule/src/comment.rs`, 64 test): atıf, sayı, tavsiye, lisans (+ yön); M30 ölçüldü (`experiments/M30/`); `comment_rejected.reasons` makinece okunur; köken ve `on_behalf` ile saklanır (`agent_comments.rs`); gösterimde "ajan yorumu" etiketi (`crates/qp-wasm/tests/agent_trace_r5b.rs`). |
+| 5 | Tamam | Öneri: görünüm/çizim önerisi bekler, onaylanana dek dokümana girmez; onay/ret komut yolundan ve **yalnız insan kökenli** (`crates/qp-mcp/tests/human_decision.rs`, döküm 65); köken korunur (`author` + `approved_by`); ekransız önizleme (`agent_policy.rs::a_pending_proposal_is_previewed_without_changing_the_document`, `serve.rs::render_returns_a_png_image`). |
+| 6 | Tamam | Ajan yolunda girişimsizlik (`agent_reader.rs::an_agent_for_an_unentitled_person_gets_the_persons_bytes`, `surface_*` testleri "never receives a licensed number from any tool", `render_refuses_a_view_of_unentitled_data`); doğrulayıcı lisanslı sayıyı reddeder (M30 lisans ailesi %100; `an_agent_for_an_unentitled_person_cannot_carry_a_licensed_number`); ölçümlerde sızıntı 0. |
+| 7 | Tamam | Düzenek ve kurallar önce commit (`harness/SPEC.md` §5.4–5.5); M28 → thin, M29 → json (`experiments/M28|M29/RESULTS.md`); üç model tablosu; küçük model ayrı (M28: thin 34/45; M29: card/layered 27/31, json 25/31). |
+| 8 | Tamam | Üç başvuru ajanı çalışıyor ve ölçüldü (`experiments/agents/RESULTS.md`): doğruluk, atıf %100, doğrulayıcıdan geçen yorumlarda uydurma 0, tavsiye 0, çağrı ve belirteç. |
+| 9 | Tamam (sınırlı örnek) | Matriks bağlamı kaynak adıyla ve `external` alanında (4/4); dış sayı ayrı işaretli; ağ sorgusu 7 (+4 önbellek); gömülü talimat 14 örnek × 3 model: uyan 0/42 (`experiments/injections/RESULTS.md`). |
+| 10 | Tamam | M31: her süzgeçte elindeki hissede olumsuz geçiş kaçırma 0/7; başvuru Nöbetçisi 3 modelde kaçırma 0. |
+| 11 | Tamam | `docs/AGENTS.md` (Claude Code, masaüstü, genel istemci; beş dakikalık deneme); `REPORT.md` son bölüm. |
+| 12 | Tamam | Altınlar, dökümler, hesap özeti değişmedi; `QP_VERIFY_BROWSER=1 scripts/verify.sh` yeşil ve ağsız (REPORT "Doğrulama"); CI ve gizli bilgi taraması REPORT'ta. |
+| 13 | Tamam | Kapanış temizliği: REPORT "Disk (kapanış)". |
+| 14 | Tamam | `REPORT.md` (ölçüm maliyeti dahil), `AUDIT.md`, `docs/AGENTS.md`, PROTOCOL §25, `STATUS.md`, `ROADMAP.md`, DECISIONS "Önerilen (R5B)". |

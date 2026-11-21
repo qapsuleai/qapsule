@@ -78,9 +78,12 @@ Streamable HTTP:
 target/release/qp mcp serve --http --port 8765            # http://127.0.0.1:8765/mcp
 ```
 
-İstemci `POST /mcp` ile `initialize` gönderir; `Mcp-Session-Id` başlığını sonraki
-isteklerde taşır. Bildirimler: `notifications/message` (eski) ya da
-`subscriptions/listen` + `resources/updated` (yeni). Başka bir makineden erişim gerekiyorsa:
+MCP `2026-07-28` durumsuzdur: her istek sürümü `_meta` içinde taşır, sunucu
+`server/discover`'ı cevaplar. Eski sürüm istemcileri `initialize` gönderir ve
+`Mcp-Session-Id` başlığını sonraki isteklerde taşır; ikisi de desteklenir. Bildirimler:
+`subscriptions/listen` + `notifications/resources/updated` (yeni; `qapsule://notifications`
+kaynağını okuyunca bekleyen `notify` iletileri gelir) ya da eski istemcilerde
+`notifications/message`. Başka bir makineden erişim gerekiyorsa:
 
 ```sh
 export QP_TOKEN=…   # bir belirteç üret; depoya yazma

@@ -97,6 +97,14 @@ pub fn rules() -> Vec<RuleEntry> {
             // C_DIR, C_NEUTRAL, ATR_FAST, ATR_SLOW, horizons 20 / 15 / 10.
             constants: 7,
         },
+        // RP4/M25b "iki kapanışla teyit" (M25/teyit2): r3'ün 7 sabiti (C_DIR·K_SCALE tek
+        // çarpan sayılır) + STOP_CLOSES + TARGET_CLOSES.
+        RuleEntry {
+            name: "teyit2",
+            make: m25_teyit2::outcome,
+            levels: |s, b| m25_teyit2::levels(s, b).map(Levels::from),
+            constants: 9,
+        },
         // M25 alternatifleri: bir satır, ör.
         // RuleEntry { name: "a1", make: m25_a1::outcome, levels: |s, b| m25_a1::levels(s, b).map(Levels::from), constants: 4 },
     ]

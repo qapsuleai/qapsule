@@ -1,0 +1,16 @@
+# RP4/M25 alternatifi `teyit2`: durdurma için eşiğin ötesinde art arda iki kapanış.
+# Bağımsız crate (boş [workspace]); harness'e path bağımlılığıyla takılır.
+[package]
+name = "m25-teyit2"
+version = "0.1.0"
+edition = "2021"
+publish = false
+
+[workspace]
+
+[dependencies]
+qp-capsule = { path = "../../../../../crates/qp-capsule" }
+qp-schema = { path = "../../../../../crates/qp-schema" }
+
+[lints.rust]
+unsafe_code = "forbid"

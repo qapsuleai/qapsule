@@ -368,6 +368,11 @@ impl Session {
         let Some(p) = self.proj.as_ref() else {
             return true;
         };
+        // (audit B14) a projection that restricts nothing (only other people's audiences)
+        // passes the comment as it is, as on the document paths (`projected_comment_ok`)
+        if p.redact.is_empty() && p.rewrite.is_empty() && p.hidden.is_empty() {
+            return true;
+        }
         // (R5B security review, structural fail-closed) A restricted reader receives a
         // comment only if, on every instrument it touches, the reader's view is not
         // redacted or rewritten: free text can carry a number in ways no scan reads (an

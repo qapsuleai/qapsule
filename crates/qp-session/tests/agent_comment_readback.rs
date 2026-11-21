@@ -39,7 +39,8 @@ fn the_writer_and_its_person_read_the_comment_back() {
     }
     h.session_mut().mark_agent_connection("A");
     let cap = "cap.SYN02.breakout.up.151";
-    let text = "SYN02 yukarı kırılım sürüyor [1].";
+    // (B14) a run of number words is fine for a reader who sees everything
+    let text = "SYN02 yukarı kırılım sürüyor, doksan dokuz gibi bir sözcük de olsa [1].";
     let ack = first(
         &mut h,
         "A",
@@ -54,6 +55,7 @@ fn the_writer_and_its_person_read_the_comment_back() {
             json!({"kind":"get","id":id}),
             json!({"kind":"capsule","capsule":cap}),
             json!({"kind":"document"}),
+            json!({"kind":"log","limit":50}),
         ] {
             let r = first(&mut h, c, &json!({"type":"query","id":"q","query":q}));
             assert!(r.to_string().contains(text), "{c} {q}: {r}");

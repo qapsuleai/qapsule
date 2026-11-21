@@ -446,7 +446,7 @@ fn load_many<T: Send>(
     Ok(out)
 }
 
-/// (RP4/T6) One symbol's cached trades, packed (40 bytes a trade, no allocation each; a
+/// (RP4/T6) One symbol's cached trades, packed (32 bytes a trade, no allocation each; a
 /// trade number that is not a plain decimal and an unusual side text are kept aside): a
 /// day of 580 symbols' trades in memory once and small. [`Packed::get`] gives back the
 /// very [`Trade`] that was packed.
@@ -463,21 +463,24 @@ struct Row {
     ts_ns: i64,
     price: f64,
     quantity: i64,
-    order_no: u64,
-    /// Bit 0: quantity given; bit 1: trade number given; bit 2: special trade; bit 3:
-    /// the trade number is in `odd_order`.
-    flags: u8,
-    /// 0 none, 1 bid, 2 ask, 3 other (`odd_side`).
-    side: u8,
+    /// The trade number (below 2^56) in the low 56 bits; the top byte: bit 0 quantity
+    /// given, bit 1 trade number given, bit 2 special trade, bit 3 the trade number is in
+    /// `odd_order`, bits 4–5 the side (0 none, 1 bid, 2 ask, 3 other: `odd_side`).
+    packed: u64,
 }
 
-/// A trade number written back exactly by `u64::to_string`.
+/// Trade numbers kept in a row (below 2^56).
+const NUMBER_BITS: u32 = 56;
+
+/// A trade number written back exactly by `u64::to_string` and small enough for a row.
 fn plain_number(s: &str) -> Option<u64> {
     let ok = !s.is_empty()
         && s.len() <= 19
         && s.bytes().all(|b| b.is_ascii_digit())
         && (s == "0" || !s.starts_with('0'));
-    ok.then(|| s.parse().ok()).flatten()
+    ok.then(|| s.parse().ok())
+        .flatten()
+        .filter(|n: &u64| *n < 1 << NUMBER_BITS)
 }
 
 impl Packed {
@@ -502,7 +505,7 @@ impl Packed {
                         }
                     },
                 };
-                let side = match &t.side {
+                let side: u8 = match &t.side {
                     None => 0,
                     Some(qp_matriks::Aggressor::Bid) => 1,
                     Some(qp_matriks::Aggressor::Ask) => 2,
@@ -511,16 +514,16 @@ impl Packed {
                         3
                     }
                 };
+                let flags = u64::from(t.quantity.is_some())
+                    | u64::from(t.order_no.is_some()) << 1
+                    | u64::from(t.is_trade_ex) << 2
+                    | u64::from(odd) << 3
+                    | u64::from(side) << 4;
                 Row {
                     ts_ns: t.timestamp_ns,
                     price: t.price,
                     quantity: t.quantity.unwrap_or(0),
-                    order_no,
-                    flags: u8::from(t.quantity.is_some())
-                        | u8::from(t.order_no.is_some()) << 1
-                        | u8::from(t.is_trade_ex) << 2
-                        | u8::from(odd) << 3,
-                    side,
+                    packed: order_no | flags << NUMBER_BITS,
                 }
             })
             .collect();
@@ -549,11 +552,13 @@ impl Packed {
     pub fn get(&self, i: usize) -> Trade {
         let r = self.rows[i];
         let k = u32::try_from(i).unwrap_or(u32::MAX);
+        let flags = r.packed >> NUMBER_BITS;
+        let order_no = r.packed & ((1 << NUMBER_BITS) - 1);
         Trade {
             symbol: self.symbol.clone(),
             price: r.price,
-            quantity: (r.flags & 1 != 0).then_some(r.quantity),
-            side: match r.side {
+            quantity: (flags & 1 != 0).then_some(r.quantity),
+            side: match (flags >> 4) & 3 {
                 1 => Some(qp_matriks::Aggressor::Bid),
                 2 => Some(qp_matriks::Aggressor::Ask),
                 3 => Some(qp_matriks::Aggressor::Other(
@@ -562,14 +567,14 @@ impl Packed {
                 _ => None,
             },
             timestamp_ns: r.ts_ns,
-            order_no: (r.flags & 2 != 0).then(|| {
-                if r.flags & 8 != 0 {
+            order_no: (flags & 2 != 0).then(|| {
+                if flags & 8 != 0 {
                     self.odd_order.get(&k).cloned().unwrap_or_default()
                 } else {
-                    r.order_no.to_string()
+                    order_no.to_string()
                 }
             }),
-            is_trade_ex: r.flags & 4 != 0,
+            is_trade_ex: flags & 4 != 0,
         }
     }
 }

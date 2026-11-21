@@ -382,10 +382,18 @@ fn packed_trades_are_the_trades_packed() {
         t(6, Some("18446744073709551615"), None, Some(1)),
         t(7, Some(" 42"), Some(Bid), Some(2)),
         t(8, Some("9999999999999999999"), Some(Ask), Some(3)),
+        t(
+            9,
+            Some("72057594037927935"),
+            Some(Other("x".to_owned())),
+            None,
+        ),
+        t(10, Some("72057594037927936"), None, Some(4)),
     ];
     let p = Packed::new("TEST1", &trades);
     let back: Vec<Trade> = (0..trades.len()).map(|i| p.get(i)).collect();
     assert_eq!(back, trades);
+    assert_eq!(std::mem::size_of::<Row>(), 32, "a packed trade is 32 bytes");
 }
 
 /// (RP4/T6) `--at HH:MM`: the day's earlier trades are history; the run starts then. At

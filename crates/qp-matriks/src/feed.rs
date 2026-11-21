@@ -382,12 +382,48 @@ struct TradeSym {
     /// Trades are complete up to here (UTC ms).
     covered_ms: Option<i64>,
     /// De-duplication: keys seen, with their times, oldest first.
-    seen: BTreeSet<TradeKey>,
-    recent: VecDeque<(i64, TradeKey)>,
+    seen: BTreeSet<SeenKey>,
+    recent: VecDeque<(i64, SeenKey)>,
+}
+
+/// (RP4/T6) A de-duplication key as kept for the window: a plain decimal trade number as
+/// its value (no allocation; the usual case), anything else as the [`TradeKey`] itself.
+/// One-to-one with [`TradeKey`] (a plain decimal has no leading zero, so it is the only
+/// text of its value).
+#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord)]
+enum SeenKey {
+    Number(u64),
+    Other(Box<TradeKey>),
+}
+
+impl SeenKey {
+    fn number(k: &TradeKey) -> Option<u64> {
+        let TradeKey::No(n) = k else { return None };
+        let plain = !n.is_empty()
+            && n.len() <= 19
+            && n.bytes().all(|b| b.is_ascii_digit())
+            && (n == "0" || !n.starts_with('0'));
+        plain.then(|| n.parse::<u64>().ok()).flatten()
+    }
+
+    fn of(k: TradeKey) -> Self {
+        match Self::number(&k) {
+            Some(v) => Self::Number(v),
+            None => Self::Other(Box::new(k)),
+        }
+    }
 }
 
 impl TradeSym {
+    fn seen(&self, key: &TradeKey) -> bool {
+        match SeenKey::number(key) {
+            Some(v) => self.seen.contains(&SeenKey::Number(v)),
+            None => self.seen.contains(&SeenKey::Other(Box::new(key.clone()))),
+        }
+    }
+
     fn remember(&mut self, t_ms: i64, key: TradeKey, window_ms: i64) {
+        let key = SeenKey::of(key);
         if self.seen.insert(key.clone()) {
             self.recent.push_back((t_ms, key));
         }
@@ -658,7 +694,7 @@ impl LiveFeed {
         let mut to_apply = Vec::with_capacity(all.len());
         for t in all {
             let k = t.dedup_key();
-            if st.seen.contains(&k) {
+            if st.seen(&k) {
                 self.stats.trades.duplicates += 1;
                 continue;
             }
@@ -1185,7 +1221,7 @@ impl LiveFeed {
             sym.buffer.push(trade);
         } else {
             let k = trade.dedup_key();
-            if sym.seen.contains(&k) {
+            if sym.seen(&k) {
                 st.duplicates += 1;
             } else {
                 sym.remember(t, k, window);
@@ -1261,5 +1297,47 @@ impl LiveFeed {
             }
             out.events.extend(events);
         }
+    }
+}
+
+#[cfg(test)]
+mod seen_key_tests {
+    use super::{SeenKey, TradeKey, TradeSym};
+
+    /// (RP4/T6) The compact window key is one-to-one with the trade key: plain decimals
+    /// become numbers, anything else stays itself; the window answers as before.
+    #[test]
+    fn seen_keys_are_one_to_one() {
+        let keys = [
+            TradeKey::No("0".to_owned()),
+            TradeKey::No("00".to_owned()),
+            TradeKey::No("12".to_owned()),
+            TradeKey::No("012".to_owned()),
+            TradeKey::No("18446744073709551615".to_owned()),
+            TradeKey::No("18446744073709551616".to_owned()),
+            TradeKey::No("1a".to_owned()),
+            TradeKey::Fields(5, 7, Some(1), false),
+            TradeKey::Fields(5, 7, None, false),
+        ];
+        for a in &keys {
+            for b in &keys {
+                assert_eq!(
+                    a == b,
+                    SeenKey::of(a.clone()) == SeenKey::of(b.clone()),
+                    "{a:?} {b:?}"
+                );
+            }
+        }
+        assert_eq!(SeenKey::of(keys[2].clone()), SeenKey::Number(12));
+        let mut s = TradeSym::default();
+        for (i, k) in keys.iter().enumerate() {
+            assert!(!s.seen(k));
+            s.remember(i64::try_from(i).expect("small"), k.clone(), 60_000);
+            assert!(s.seen(k));
+        }
+        // Past the window the oldest are forgotten.
+        s.remember(200_000, TradeKey::No("77".to_owned()), 60_000);
+        assert!(!s.seen(&keys[0]));
+        assert!(s.seen(&TradeKey::No("77".to_owned())));
     }
 }

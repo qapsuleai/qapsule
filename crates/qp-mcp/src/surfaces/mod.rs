@@ -12,6 +12,7 @@ use serde_json::{json, Value};
 
 use crate::{Inbox, Queued, RpcError, SharedHub};
 
+pub mod mixed;
 pub mod query;
 pub mod task;
 pub mod thin;
@@ -120,7 +121,12 @@ pub type Factory = fn() -> Box<dyn ToolSurface>;
 /// The surfaces, by name (the first is the default). Add a surface with one line here.
 #[must_use]
 pub fn registry() -> &'static [(&'static str, Factory)] {
-    &[("thin", thin::new), ("task", task::new), ("query", query::new)]
+    &[
+        ("thin", thin::new),
+        ("task", task::new),
+        ("query", query::new),
+        ("mixed", mixed::new),
+    ]
 }
 
 /// The surface named `name`.

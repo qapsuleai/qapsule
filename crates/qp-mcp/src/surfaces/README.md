@@ -58,3 +58,4 @@ sinyalini alır ve kaynağı okur. Akış açamayan istemci `notifications` arac
 | `thin` | `thin.rs` | Protokolü birebir yansıtan, şemadan üretilmiş araçlar (RD1). Varsayılan. |
 | `task` | `task.rs` | (M28 b) Görev düzeyi 9 araç: `whats_new`, `find`, `explain`, `instrument`, `track_record`, `watch`, `comment`, `propose`, `glossary`; karar aracı yok; kapsül veren araçlarda `format` (`card`/`json`/`layered`). |
 | `query` | `query.rs` | (M28 c) İki araç: `ask` (küçük sorgu dili: `find` isim, `where` düz süzgeçler/seçiciler, `select`, `expand`, `limit`, `format` = `card`/`json`/`layered`) ve `act` (`comment`, `watch`, `unwatch`, `propose`, `preview`; karar yok). |
+| `mixed` | `mixed.rs` | (M28 d) Karma: görev araçları `overview`, `find`, `capsule`, `watch`, `write` (yorum ya da görünüm önerisi; karar yok) + kaçış aracı `query` (protokolün `Query` şemasıyla her sorgu). Kapsül veren araçlarda `format`: `card` (varsayılan), `json`, `layered` (+`detail`) — M29. |

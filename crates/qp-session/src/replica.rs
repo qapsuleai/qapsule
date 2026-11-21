@@ -206,6 +206,7 @@ fn follower(doc: Document, principal: &str, provider: Provider) -> Result<Sessio
                 name: principal.to_owned(),
             },
             role: Role::Viewer,
+            on_behalf: None,
         }],
         clock: 0,
         epoch: 0,

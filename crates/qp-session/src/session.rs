@@ -233,6 +233,8 @@ pub struct Session {
     /// (R6/T3, §24) The market status the host gave (`Session::set_market_status`);
     /// `None`: never given (every output as before).
     pub(crate) market: Option<qp_schema::market::MarketStatus>,
+    /// (R5B, §25) Agent connections and the agent policy.
+    pub(crate) agent: crate::agent::AgentState,
 }
 
 /// (R3/K1b) A writer of a command, for the two-world paths.
@@ -571,6 +573,7 @@ impl Session {
             coin_flip,
             coin_flip_for: BTreeMap::new(),
             market: None,
+            agent: crate::agent::AgentState::default(),
         };
         s.audience_seen = s.doc.audiences.keys().cloned().collect();
         s.start_capsules(capsules.as_ref());
@@ -1378,6 +1381,8 @@ impl Session {
         if ops.is_empty() {
             return Err(invalid("a command needs at least one op", "/ops"));
         }
+        // (R5B, §25) Human decisions and the agent write rule, before roles and modes.
+        self.agent_check(ci, ops)?;
         if ops.len() > 1 {
             if let Some(i) = ops
                 .iter()

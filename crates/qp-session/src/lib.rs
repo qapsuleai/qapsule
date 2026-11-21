@@ -25,6 +25,7 @@ macro_rules! rd {
     };
 }
 
+pub mod agent;
 mod apply;
 mod bindq;
 mod canon;

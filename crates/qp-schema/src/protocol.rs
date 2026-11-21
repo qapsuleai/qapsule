@@ -687,6 +687,11 @@ pub struct Principal {
     pub author: Author,
     /// Its role.
     pub role: Role,
+    /// (R5B, §25) For an agent: the person it works for. The agent reads with that
+    /// person's data entitlements (licence, audience), never more; when the agent has an
+    /// entitlement row of its own, the intersection of the two. Absent: nobody.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub on_behalf: Option<String>,
 }
 
 // ---------------------------------------------------------------------------
@@ -3465,6 +3470,10 @@ pub struct ProtocolError {
     /// For `no_origin` and `ambiguous` (R2): the options, best first.
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
     pub candidates: Vec<Candidate>,
+    /// (R5B, §25) A machine-readable sub-reason of the code, e.g. `human_only` or
+    /// `agent_cannot_write` for `forbidden`. Absent on every error before R5B.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub reason: Option<String>,
 }
 
 // ---------------------------------------------------------------------------

@@ -26,6 +26,7 @@ use qp_session::Replica;
 use serde_json::{json, Value};
 
 use crate::viewer::{Stories, Traffic, Viewer, STORIES_SUB};
+pub mod agent;
 pub mod bench;
 pub mod freq;
 pub mod live;
@@ -114,6 +115,12 @@ enum Asked {
     Stories,
     /// (R5/M18) The `stories` unsubscription.
     Unsubscribe,
+    /// (R5B) The pending proposals (`list`).
+    Proposals,
+    /// (R5B) The open capsule's `capsule` answer (its comments).
+    Comments,
+    /// (R5B) The reader's decision on a proposal.
+    Decision,
 }
 
 /// The gesture in progress on one target.
@@ -538,6 +545,8 @@ pub struct ShellCore {
     /// (R6/T3, §24) The market status the host gave (a `{"market":…}` frame or the
     /// `viewer` event's `market`); `None`: never given (everything as before).
     market: Option<qp_schema::market::MarketStatus>,
+    /// (R5B) The open capsule's comments and the pending proposals (`agent`).
+    agent: agent::AgentTrace,
 }
 
 impl std::fmt::Debug for ShellCore {
@@ -796,6 +805,7 @@ impl ShellCore {
             pass_data: false,
             shown: BTreeSet::new(),
             market: None,
+            agent: agent::AgentTrace::default(),
         };
         me.push(json!({"type":"hello","protocol":"qp/0","principal":principal,
             "surface":{"kind":"phone","screen":[PHONE_SCREEN.0, PHONE_SCREEN.1],"input":["touch"],"lang":lang_name(lang)}}));
@@ -940,6 +950,7 @@ impl ShellCore {
         if self.viewer.is_some() {
             self.feed_dirty = false;
         }
+        self.agent_outbox();
         if self.feed_dirty && !self.feed_inflight && self.welcomed {
             self.feed_dirty = false;
             self.feed_inflight = true;
@@ -1041,6 +1052,7 @@ impl ShellCore {
                     );
                     self.feed_dirty = true;
                 }
+                self.agent_welcome();
                 self.ask(
                     "replay",
                     Asked::Replay,
@@ -1133,6 +1145,9 @@ impl ShellCore {
                             self.trans_t0 = None;
                             self.shared_from = depth_name(o.from).to_owned();
                             self.shared.clone_from(&o.shared);
+                            if o.from == OpenDepth::Sentence && o.to != OpenDepth::Sentence {
+                                self.agent_opened(&o.capsule, &mut ch);
+                            }
                             if o.from == OpenDepth::Sentence {
                                 self.changes_seen(Some(&o.capsule));
                                 self.open_headline = self
@@ -1147,6 +1162,7 @@ impl ShellCore {
                                     .and_then(|i| i.voice.clone());
                             }
                             if o.to == OpenDepth::Sentence {
+                                self.agent_closed(&mut ch);
                                 self.opening = None;
                                 self.open_headline = None;
                                 self.open_voice = None;
@@ -1176,17 +1192,35 @@ impl ShellCore {
                         ch["status"] = json!(true);
                     }
                     (Some(Asked::Input), _) => self.flush_gesture(),
+                    (Some(Asked::Proposals), QueryResult::Items { items, .. }) => {
+                        self.agent_proposals(items, &mut ch);
+                    }
+                    (Some(Asked::Proposals), _) => self.agent_proposals_failed(),
+                    (Some(Asked::Comments), QueryResult::CapsuleDetail { detail }) => {
+                        self.agent_comments(&detail.item.id, &detail.comments, &mut ch);
+                    }
                     _ => {}
                 }
             }
-            ServerMsg::Ack { id, .. } => {
-                if self.asked.remove(id) == Some(Asked::Command) {
+            ServerMsg::Ack { id, .. } => match self.asked.remove(id) {
+                Some(Asked::Command) => self.feed_dirty = true,
+                Some(Asked::Decision) => {
                     self.feed_dirty = true;
+                    self.agent_decided();
                 }
-            }
+                _ => {}
+            },
             ServerMsg::Error { id, error } => {
+                // (R5B) The agent trace's own queries fail quietly (the trace stays empty).
+                let mut quiet = false;
                 if let Some(id) = id {
                     match self.asked.remove(id) {
+                        Some(Asked::Proposals) => {
+                            self.agent_proposals_failed();
+                            quiet = true;
+                        }
+                        Some(Asked::Comments) => quiet = true,
+                        Some(Asked::Decision) => self.agent_decided(),
                         Some(Asked::Feed) => self.feed_inflight = false,
                         Some(Asked::Input) => self.flush_gesture(),
                         Some(Asked::Visible) => {
@@ -1197,9 +1231,16 @@ impl ShellCore {
                         _ => {}
                     }
                 }
-                self.error = Some(error.message.clone());
-                ch["error"] = json!(true);
+                if !quiet {
+                    self.error = Some(error.message.clone());
+                    ch["error"] = json!(true);
+                }
             }
+            // (R5B) A proposal was created or decided: the pending list is asked again.
+            ServerMsg::Notify {
+                event: Event::Proposal { .. },
+                sub,
+            } if sub == agent::PROPOSALS_SUB => self.agent_proposal_event(),
             // (R5/M18, §23.4) The story list's changes.
             ServerMsg::Notify { event, sub } if sub == STORIES_SUB => {
                 if let Some(st) = self.viewer.as_mut().and_then(|v| v.stories.as_mut()) {

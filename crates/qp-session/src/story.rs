@@ -119,7 +119,7 @@ impl Session {
         story: &Story,
         stage: Stage,
     ) -> (bool, Option<FeedHidden>) {
-        let a = Self::audience_of(doc, principal);
+        let a = self.audience_of(doc, principal);
         let intents = Self::intents_on(doc);
         let watched = a.watchlist.is_empty()
             || a.watchlist.iter().any(|s| s == &story.instrument)

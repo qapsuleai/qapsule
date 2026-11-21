@@ -527,7 +527,25 @@ impl Session {
             .iter()
             .find(|p| p.role == Role::Host)
             .map(|p| p.id.clone());
-        let plane = DataPlane::new(provider, host, limits.max_bind_bars);
+        let mut plane = DataPlane::new(provider, host, limits.max_bind_bars);
+        // (R5B, §25.7) Agents reading for a person.
+        let rows: BTreeSet<&str> = init
+            .data
+            .as_ref()
+            .map(|d| d.entitlements.keys().map(String::as_str).collect())
+            .unwrap_or_default();
+        for p in &init.principals {
+            let Some(person) = &p.on_behalf else { continue };
+            if !init.principals.iter().any(|q| &q.id == person) || person == &p.id {
+                return Err(format!(
+                    "principal `{}`: on_behalf `{person}` is not another known principal",
+                    p.id
+                ));
+            }
+            plane
+                .delegates
+                .insert(p.id.clone(), (person.clone(), rows.contains(p.id.as_str())));
+        }
         let mut s = Self {
             initial: doc.clone(),
             doc,

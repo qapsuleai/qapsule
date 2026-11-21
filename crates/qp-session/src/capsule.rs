@@ -1585,9 +1585,17 @@ impl Session {
         })
     }
 
-    /// The audience of `principal` (the `habituated` default when it set none).
-    pub(crate) fn audience_of(doc: &Document, principal: &str) -> Audience {
-        doc.audiences.get(principal).cloned().unwrap_or(Audience {
+    /// The audience of `principal` (the `habituated` default when it set none). (R5B,
+    /// §25.7) An agent that works for a person and set no audience of its own reads with
+    /// the person's.
+    pub(crate) fn audience_of(&self, doc: &Document, principal: &str) -> Audience {
+        let own = doc.audiences.get(principal).or_else(|| {
+            self.plane
+                .delegates
+                .get(principal)
+                .and_then(|(person, _)| doc.audiences.get(person))
+        });
+        own.cloned().unwrap_or(Audience {
             group: UserGroup::Habituated,
             sensitivity: None,
             watchlist: Vec::new(),
@@ -1613,7 +1621,7 @@ impl Session {
 
     /// About `principal`'s position or one of the document's active intents.
     fn relevant(&self, doc: &Document, principal: &str, instrument: &str) -> bool {
-        let a = Self::audience_of(doc, principal);
+        let a = self.audience_of(doc, principal);
         a.positions.get(instrument).is_some_and(|q| *q != 0.0)
             || Self::intents_on(doc).iter().any(|s| s == instrument)
     }
@@ -2290,7 +2298,7 @@ impl Session {
                         continue;
                     }
                     if !all {
-                        let a = Self::audience_of(doc, &c.principal);
+                        let a = self.audience_of(doc, &c.principal);
                         let watched = a.watchlist.is_empty()
                             || a.watchlist.contains(&sc.instrument)
                             || a.positions.contains_key(&sc.instrument);

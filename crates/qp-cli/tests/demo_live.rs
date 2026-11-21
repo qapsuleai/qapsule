@@ -462,3 +462,166 @@ fn late_replica_gets_the_live_bars_of_an_early_one() {
     assert_eq!(code, 200);
     drop(demo);
 }
+
+/// A made-up trade message (protobuf; epoch-ms time) carrying buyer and seller on the wire.
+fn trade_msg(sym: &str, no: u32, t: i64, price: f32) -> Vec<u8> {
+    use prost::Message as _;
+    qp_matriks::messages::TradeMessage {
+        symbol: sym.to_owned(),
+        order_no: Some(no.to_string()),
+        price: Some(price),
+        quantity: Some(10),
+        active_bid_or_ask: Some("B".to_owned()),
+        timestamp: Some(t),
+        buyer: Some("BUYERX".to_owned()),
+        seller: Some("SELLERY".to_owned()),
+        is_trade_ex: Some(false),
+    }
+    .encode_to_vec()
+}
+
+/// RP4 L-prep: `qp demo --live --trades` opens the market and the trade endpoint (one
+/// connection each, its own lock), fills the opening trade gap from the trade history
+/// (`--live-trades`: the cached CSV instead of REST), builds bars from trades, drops and
+/// repairs the trade link alone (`/live/drop?endpoint=trade`) while the market link stays,
+/// never subscribes a level-2 trade topic and keeps no buyer / seller byte in its raw logs.
+#[test]
+fn live_demo_with_trades_two_endpoints_drop_trade_and_repair() {
+    let tmp = tempfile::tempdir().unwrap();
+    let root = tmp.path();
+    std::fs::create_dir_all(root.join("bars")).unwrap();
+    std::fs::create_dir_all(root.join("fixtures/local")).unwrap();
+    write_bars(&root.join("bars"), "AAA", bars(40, 100.0));
+    write_bars(&root.join("bars"), "BBB", bars(40, 50.0));
+    for sym in ["AAA", "BBB"] {
+        let d = root.join("trades").join(sym);
+        std::fs::create_dir_all(&d).unwrap();
+        let f = std::fs::File::create(d.join("2026-01-01_2026-01-02.csv.gz")).unwrap();
+        let mut gz = flate2::write::GzEncoder::new(f, flate2::Compression::fast());
+        gz.write_all(b"symbol,date_time,timestamp_ns,bidask,mx_id,price,quantity\n")
+            .unwrap();
+        gz.finish().unwrap();
+    }
+    let tokens = MockTokenService::start_default(3600);
+    let broker = MockBroker::start(BrokerScript::default());
+    let demo = start(
+        &tokens,
+        &broker,
+        root,
+        &[
+            "--trades",
+            "--tradeex",
+            "--live-trades",
+            "trades",
+            "--trade-time-unit",
+            "epoch_ms",
+        ],
+    )
+    .expect("live demo with trades starts");
+    let port = demo.port;
+    let v = wait(port, "live", |v| v["link"] == "live");
+    assert_eq!(v["trade_mode"], true);
+    assert_eq!(v["trade_fills"].as_array().map(Vec::len), Some(1), "{v}");
+    assert!(broker.wait_until(Duration::from_secs(10), |s| {
+        s.path("market").current == 1 && s.path("trade").current == 1
+    }));
+
+    // Trades in the session after the last history bar build bars.
+    let (start_frame, _rx) = replica_stream(port);
+    let cal = qp_calendar::ExchangeCalendar::new(&qp_calendar::builtin("XIST").unwrap()).unwrap();
+    let last_t = start_frame["start"]["data"]["feeds"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .map(|f| {
+            f["bars"].as_array().unwrap().last().unwrap()["t"]
+                .as_i64()
+                .unwrap()
+        })
+        .max()
+        .unwrap();
+    let mut day = (last_t + 3 * 3_600_000).div_euclid(86_400_000) + 1;
+    let open = loop {
+        if let Some(s) = cal.sessions_on(day).first() {
+            break s.open;
+        }
+        day += 1;
+    };
+    for i in 0..6u16 {
+        let t = open + 3_600_000 + i64::from(i) * 60_000;
+        broker.publish(
+            "mx/trade/AAA",
+            &trade_msg("AAA", 100 + u32::from(i), t, 100.25 + f32::from(i)),
+        );
+    }
+    wait(port, "trade events", |v| {
+        v["feed"]["trades"]["messages"].as_u64().unwrap_or(0) >= 6
+            && v["events"].as_u64().unwrap_or(0) > 0
+    });
+
+    // Drop the trade link only: stale, reconnect, trade history fill, live again.
+    assert!(post(port, "/live/drop?secs=1&endpoint=nope", Some(CONTROL))
+        .1
+        .contains("no such"));
+    let (code, body) = post(port, "/live/drop?secs=1&endpoint=trade", Some(CONTROL));
+    assert_eq!(code, 200, "{body}");
+    let v = wait(port, "trade repaired", |v| {
+        v["link"] == "live" && v["trade_fills"].as_array().is_some_and(|a| a.len() >= 2)
+    });
+    assert_eq!(v["trade_fills"][1]["after_loss"], true, "{v}");
+    assert_eq!(
+        v["repairs"].as_array().map(Vec::len),
+        Some(0),
+        "no bar repair"
+    );
+    assert_eq!(v["capsules"]["born_or_changed_while_stale"], 0);
+    let st = broker.stats();
+    assert_eq!(
+        st.path("market").connections_total,
+        1,
+        "market link untouched"
+    );
+    assert_eq!(st.path("trade").connections_total, 2);
+    assert_eq!(st.path("market").max_concurrent, 1);
+    assert_eq!(st.path("trade").max_concurrent, 1);
+    let trade_topics = st.path("trade").subscribed_topics;
+    assert!(trade_topics.iter().any(|t| t == "mx/trade/AAA"));
+    assert!(trade_topics.iter().any(|t| t == "mx/tradeex/BBB"));
+    for p in ["market", "trade"] {
+        assert!(
+            st.path(p)
+                .subscribed_topics
+                .iter()
+                .all(|t| !(t.starts_with("mx/trade") && t.contains("@lvl2"))),
+            "no level-2 trade topic on {p}"
+        );
+    }
+
+    // Quit: both connections closed, the process ends.
+    let (code, _) = post(port, "/live/quit", Some(CONTROL));
+    assert_eq!(code, 200);
+    let mut demo = demo;
+    let deadline = Instant::now() + Duration::from_secs(20);
+    loop {
+        if let Some(status) = demo.child.try_wait().unwrap() {
+            assert!(status.success());
+            break;
+        }
+        assert!(Instant::now() < deadline, "qp demo did not end");
+        std::thread::sleep(Duration::from_millis(100));
+    }
+    assert!(broker.wait_until(Duration::from_secs(5), |s| s.current == 0));
+    let raw_dir = root.join("fixtures/local/live/raw");
+    let mut names: Vec<String> = std::fs::read_dir(&raw_dir)
+        .unwrap()
+        .map(|e| e.unwrap().file_name().to_string_lossy().into_owned())
+        .collect();
+    names.sort();
+    assert_eq!(names.len(), 2, "{names:?}");
+    assert!(names.iter().any(|n| n.ends_with("-demo-trade.qpraw")));
+    for n in &names {
+        let b = std::fs::read(raw_dir.join(n)).unwrap();
+        assert!(!b.windows(6).any(|w| w == b"BUYERX"), "{n}");
+        assert!(!b.windows(7).any(|w| w == b"SELLERY"), "{n}");
+    }
+}

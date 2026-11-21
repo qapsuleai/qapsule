@@ -575,6 +575,58 @@ impl LiveFeed {
         }
     }
 
+    /// The instant from which `symbol`'s trades are not in its seeded bars: the absorbing
+    /// end ([`LiveBars::final_at`]) of the bar its builders hold (the seam bar after a
+    /// [`seed`](Self::seed)); the latest over its intervals. `None`: no builder holds a bar.
+    #[must_use]
+    pub fn seam_end(&self, symbol: &str) -> Option<i64> {
+        self.feeds
+            .iter()
+            .filter(|(k, _)| k.symbol == symbol)
+            .filter_map(|(_, lb)| {
+                let (b, _) = lb.current()?;
+                Some(lb.final_at(lb.bar_of(b.t)?))
+            })
+            .max()
+    }
+
+    /// [`watch_trades`](Self::watch_trades) from the symbol's seam
+    /// ([`seam_end`](Self::seam_end)), or from `fallback_ms` without a seeded bar.
+    pub fn watch_trades_after_seam(&mut self, symbol: &str, fallback_ms: i64) {
+        let from = self.seam_end(symbol).unwrap_or(fallback_ms);
+        self.watch_trades(symbol, from);
+    }
+
+    /// (RP4, L-prep) Takes the trade state of `old` (the feed this one replaces after a
+    /// REST bar repair): the trade connection state (open, session count) and every
+    /// watched symbol. A symbol this feed was seeded for gets a gap from its seam
+    /// ([`seam_end`](Self::seam_end)): the trades the old feed applied after the seam are
+    /// not in the new feed's bars, so they are forgotten (de-duplication memory too) and
+    /// come back from history; trades the old feed buffered stay buffered. No effect unless
+    /// both feeds take trades.
+    pub fn carry_trades_from(&mut self, old: &LiveFeed) {
+        let (Some(mine), Some(theirs)) = (self.trades.as_ref(), old.trades.as_ref()) else {
+            return;
+        };
+        let mut ts = theirs.clone();
+        ts.cfg = mine.cfg;
+        let seams: Vec<(String, i64)> = ts
+            .syms
+            .keys()
+            .filter_map(|s| Some((s.clone(), self.seam_end(s)?)))
+            .collect();
+        for (sym, seam) in seams {
+            if let Some(st) = ts.syms.get_mut(&sym) {
+                st.gap_from = Some(seam);
+                st.covered_ms = Some(seam);
+                st.seen.clear();
+                st.recent.clear();
+                st.buffer.retain(|t| t.t_ms() >= seam);
+            }
+        }
+        self.trades = Some(ts);
+    }
+
     /// Whether the trade connection is open.
     #[must_use]
     pub fn trade_connected(&self) -> bool {

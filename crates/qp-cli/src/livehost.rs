@@ -43,7 +43,7 @@ use std::time::{Duration, Instant};
 
 use qp_calendar::{ExchangeCalendar, Interval};
 use qp_live::{LiveConfig as ConnConfig, LiveConnection, LiveEvent, LiveMessage, LiveSink};
-use qp_matriks::{FeedSource, RawRecord, RecordKind, TradeHistory};
+use qp_matriks::{FeedSource, RawRecord, RecordKind, Trade, TradeGap, TradeHistory};
 use qp_schema::data::{DataChange, DataEvent, FeedKey};
 use qp_schema::protocol::OutboundLine;
 use qp_schema::Bar;
@@ -90,6 +90,22 @@ pub trait FeedEngine: Send {
         _history: &dyn TradeHistory,
     ) -> (FeedOut, Vec<(String, String)>) {
         (FeedOut::default(), Vec::new())
+    }
+    /// (RP4, L-prep) Whether bars come from the trade stream.
+    fn trades_enabled(&self) -> bool {
+        false
+    }
+    /// (RP4, L-prep) Starts watching `symbols`' trades from each symbol's seam (the end of
+    /// its seeded last bar), or from `fallback_ms` without one.
+    fn watch_trades_after_seams(&mut self, _symbols: &[String], _fallback_ms: i64) {}
+    /// (RP4, L-prep) Moves the clock to `now_ms` and lists the open trade gaps (empty while
+    /// the trade connection is down).
+    fn trade_gaps(&mut self, _now_ms: i64) -> (FeedOut, Vec<TradeGap>) {
+        (FeedOut::default(), Vec::new())
+    }
+    /// (RP4, L-prep) Fills `gap` with `trades` (history; any order, duplicates allowed).
+    fn apply_trade_history(&mut self, _gap: &TradeGap, _trades: Vec<Trade>) -> FeedOut {
+        FeedOut::default()
     }
     /// The exchange clock reached `now_ms` (bars close).
     fn advance_clock(&mut self, now_ms: i64) -> FeedOut;
@@ -252,6 +268,166 @@ impl BarSource for RestSource {
                 (s.clone(), r)
             })
             .collect()
+    }
+}
+
+/// One trade history request: a symbol's level-1 trades over local dates
+/// `start..=end` (`YYYY-MM-DD`, at most [`RestTradeHistory::MAX_WINDOW_DAYS`] days) and
+/// the number of rows that did not parse. REST live; local files or a fake in tests.
+pub type TradeFetch = dyn Fn(&str, &str, &str) -> Result<(Vec<Trade>, usize), String> + Send + Sync;
+
+/// (RP4, L-prep) The live [`TradeHistory`] over the REST trade history
+/// (`RestClient::trades_csv` + `qp_matriks::trade::parse_rest_csv`, level 1 only): a gap
+/// `[start, end]` becomes requests of at most 15 local calendar days (the endpoint's
+/// limit), the rows outside the gap are dropped, duplicates are removed by trade number
+/// and the result is in exchange order. The network is used only here, i.e. only to
+/// repair a trade gap (opening, reconnect). Counts only in its counters.
+pub struct RestTradeHistory {
+    fetch: Box<TradeFetch>,
+    cal: ExchangeCalendar,
+    window_days: i64,
+    /// Requests made.
+    pub calls: std::sync::atomic::AtomicU64,
+    /// Rows received (before the gap filter) and rows that did not parse.
+    pub rows: std::sync::atomic::AtomicU64,
+    pub bad_rows: std::sync::atomic::AtomicU64,
+}
+
+impl RestTradeHistory {
+    /// The endpoint's longest window (calendar days).
+    pub const MAX_WINDOW_DAYS: i64 = 15;
+
+    /// Over `fetch` with windows of at most `window_days` (clamped to 1..=15) days.
+    #[must_use]
+    pub fn new(fetch: Box<TradeFetch>, cal: ExchangeCalendar, window_days: i64) -> Self {
+        Self {
+            fetch,
+            cal,
+            window_days: window_days.clamp(1, Self::MAX_WINDOW_DAYS),
+            calls: std::sync::atomic::AtomicU64::new(0),
+            rows: std::sync::atomic::AtomicU64::new(0),
+            bad_rows: std::sync::atomic::AtomicU64::new(0),
+        }
+    }
+
+    /// Over REST (`GET /dumrul/v1/tick/trade.gz`, the service token of `auth`), paced
+    /// like every REST call, each request logged (counts only) to `log`.
+    #[must_use]
+    pub fn rest(
+        cfg: ConnConfig,
+        auth: Arc<qp_live::AuthClient>,
+        cal: ExchangeCalendar,
+        log: Option<std::path::PathBuf>,
+    ) -> Self {
+        let last: std::sync::Mutex<Option<Instant>> = std::sync::Mutex::new(None);
+        let fetch = move |sym: &str, a: &str, b: &str| {
+            {
+                // One client per request (it borrows the token client); the pause
+                // between requests is kept here.
+                let mut l = last
+                    .lock()
+                    .unwrap_or_else(std::sync::PoisonError::into_inner);
+                if let Some(t) = *l {
+                    let gap = Duration::from_millis(700);
+                    if t.elapsed() < gap {
+                        std::thread::sleep(gap - t.elapsed());
+                    }
+                }
+                *l = Some(Instant::now());
+            }
+            let rest = qp_live::rest::RestClient::new(&auth, cfg.redactor().clone());
+            let t0 = Instant::now();
+            let got = rest
+                .trades_csv(sym, a, b)
+                .map(|csv| qp_matriks::trade::parse_rest_csv(&csv))
+                .map_err(|e| e.to_string());
+            if let Some(log) = &log {
+                crate::live::log_request(
+                    log,
+                    "trades-repair",
+                    sym,
+                    &format!("{a}:{b}"),
+                    got.as_ref().map(|(t, _)| t.len()).map_err(Clone::clone),
+                    t0.elapsed(),
+                );
+            }
+            got
+        };
+        Self::new(Box::new(fetch), cal, Self::MAX_WINDOW_DAYS)
+    }
+
+    /// Over cached trade files (`<dir>/<SYM>/*.csv.gz`, the `qp live trades` cache) instead
+    /// of REST: offline tests, a replayed day. Every file of the symbol is read; the gap
+    /// filter keeps the right rows.
+    #[must_use]
+    pub fn dir(dir: std::path::PathBuf, cal: ExchangeCalendar) -> Self {
+        let fetch = move |sym: &str, _a: &str, _b: &str| {
+            let d = dir.join(sym);
+            let mut files: Vec<std::path::PathBuf> = std::fs::read_dir(&d)
+                .map_err(|e| format!("{}: {e}", d.display()))?
+                .filter_map(|e| e.ok().map(|e| e.path()))
+                .filter(|p| p.to_string_lossy().ends_with(".csv.gz"))
+                .collect();
+            files.sort();
+            let (mut all, mut bad) = (Vec::new(), 0);
+            for f in files {
+                let raw = std::fs::read(&f).map_err(|e| format!("{}: {e}", f.display()))?;
+                let mut csv = Vec::new();
+                std::io::Read::read_to_end(&mut flate2::read::GzDecoder::new(&raw[..]), &mut csv)
+                    .map_err(|e| format!("{}: {e}", f.display()))?;
+                let (t, b) = qp_matriks::trade::parse_rest_csv(&csv);
+                all.extend(t);
+                bad += b;
+            }
+            Ok((all, bad))
+        };
+        Self::new(Box::new(fetch), cal, Self::MAX_WINDOW_DAYS)
+    }
+
+    /// The request windows (local dates, inclusive) covering `[start_ms, end_ms]`.
+    #[must_use]
+    pub fn windows(&self, start_ms: i64, end_ms: i64) -> Vec<(String, String)> {
+        let date = |d: i64| {
+            let (y, m, dd) = qp_calendar::civil_from_days(d);
+            format!("{y:04}-{m:02}-{dd:02}")
+        };
+        let (mut a, z) = (self.cal.local_day(start_ms), self.cal.local_day(end_ms));
+        let mut out = Vec::new();
+        while a <= z {
+            let b = (a + self.window_days - 1).min(z);
+            out.push((date(a), date(b)));
+            a = b + 1;
+        }
+        out
+    }
+}
+
+impl TradeHistory for RestTradeHistory {
+    fn trades(&self, symbol: &str, start_ms: i64, end_ms: i64) -> Result<Vec<Trade>, String> {
+        use std::sync::atomic::Ordering::Relaxed;
+        if end_ms < start_ms {
+            return Ok(Vec::new());
+        }
+        let mut keys = std::collections::BTreeSet::new();
+        let mut out = Vec::new();
+        for (a, b) in self.windows(start_ms, end_ms) {
+            self.calls.fetch_add(1, Relaxed);
+            let (rows, bad) = (self.fetch)(symbol, &a, &b)?;
+            self.rows.fetch_add(rows.len() as u64, Relaxed);
+            self.bad_rows.fetch_add(bad as u64, Relaxed);
+            for mut t in rows {
+                let ms = t.t_ms();
+                if ms < start_ms || ms > end_ms {
+                    continue;
+                }
+                if keys.insert(t.dedup_key()) {
+                    symbol.clone_into(&mut t.symbol);
+                    out.push(t);
+                }
+            }
+        }
+        out.sort_by(Trade::exchange_cmp);
+        Ok(out)
     }
 }
 
@@ -443,6 +619,16 @@ pub enum LiveIn {
     Note(String),
     /// (RP4) A raw record from the trade endpoint (`FeedSource::Trade`).
     Trade(RawRecord),
+    /// (RP4, L-prep) Trade history for the gaps of a trade (re)connection, fetched off the
+    /// hub thread.
+    TradeHistory {
+        /// The stale period it repairs (results of an older one are dropped).
+        generation: u64,
+        /// Per gap, the history or the (masked) error.
+        results: Vec<(TradeGap, Result<Vec<Trade>, String>)>,
+        /// Fetch duration.
+        fetch_ms: u64,
+    },
     /// (RP4/T4) The simulated clock moved to this time (UTC µs; the simulation's exchange
     /// time). Ignored unless the runtime uses the simulated clock
     /// ([`LiveRuntime::use_sim_clock`]); then the periodic work runs at that time.
@@ -492,6 +678,17 @@ struct RepairStat {
     buffered: usize,
 }
 
+/// One trade history fill (for the stats; counts only).
+#[derive(Debug, Clone)]
+struct TradeFillStat {
+    fetch_ms: u64,
+    total_ms: u64,
+    gaps: usize,
+    failed: usize,
+    trades: usize,
+    after_loss: bool,
+}
+
 /// A capsule event for the log (no values: kind, state, exchange time, symbol).
 #[derive(Debug, Clone)]
 struct CapsuleEvent {
@@ -533,6 +730,25 @@ pub struct LiveRuntime {
     trade_history: Option<Arc<dyn TradeHistory + Send + Sync>>,
     /// (RP4) Trade gap repairs: (filled, failed requests).
     pub trade_repairs: (u64, u64),
+    /// (RP4, L-prep) Bars come from the trade stream: the trade connection decides
+    /// whether the feeds are live or stale; the market connection gives the phases and
+    /// the clock only (its loss stales nothing, its reconnect repairs nothing).
+    trade_mode: bool,
+    /// (RP4, L-prep) Connection states (for the stats and the market status).
+    market_up: bool,
+    trade_up: bool,
+    /// (RP4, L-prep) Fill trade gaps on the hub thread (the simulation: deterministic) or
+    /// on a fetch thread (live: REST must not block the hub).
+    trade_fill_sync: bool,
+    /// (RP4, L-prep) A trade history fetch is running (since).
+    trade_fetch: Option<Instant>,
+    /// When (runtime clock, µs) the last trade history fetch started.
+    trade_fetch_at_us: i64,
+    /// The clock move of the fetch's start, given to the authority with its results.
+    trade_fetch_clock: Option<i64>,
+    /// The authority's feeds were marked stale (a refresh is due when they are live again).
+    marked_stale: bool,
+    trade_fills: Vec<TradeFillStat>,
     pub delayed: bool,
     // Stats.
     started: Instant,
@@ -614,6 +830,7 @@ impl LiveRuntime {
             seeds.push((k.symbol.clone(), bars.last().cloned(), seq + 1, None));
         }
         feed.seed_all(&seeds)?;
+        let trade_mode = feed.trades_enabled();
         Ok(Self {
             feed,
             source,
@@ -638,6 +855,15 @@ impl LiveRuntime {
             sim_now_us: None,
             trade_history: None,
             trade_repairs: (0, 0),
+            trade_mode,
+            market_up: false,
+            trade_up: false,
+            trade_fill_sync: false,
+            trade_fetch: None,
+            trade_fetch_at_us: 0,
+            trade_fetch_clock: None,
+            marked_stale: false,
+            trade_fills: Vec::new(),
             delayed: delay_ms > 0,
             started: Instant::now(),
             messages: 0,
@@ -666,6 +892,7 @@ impl LiveRuntime {
     /// moved only by [`LiveIn::Clock`]: bars close, the market status and the lag follow
     /// it (module docs).
     pub fn use_sim_clock(&mut self, t0_us: i64) {
+        self.trade_fill_sync = true;
         self.sim_now_us = Some(t0_us);
         self.lag_rot_us = t0_us;
         self.last_advance_us = t0_us;
@@ -691,6 +918,46 @@ impl LiveRuntime {
         let mut symbols: Vec<String> = self.feeds.iter().map(|k| k.symbol.clone()).collect();
         symbols.dedup();
         self.feed.watch_trades(&symbols, from_ms);
+    }
+
+    /// (RP4, L-prep) Starts watching every feed's symbol's trades from its seam (the end
+    /// of its last initial bar: what history already holds); a symbol without one from
+    /// `fallback_ms`.
+    pub fn watch_trades_after_seams(&mut self, fallback_ms: i64) {
+        let mut symbols: Vec<String> = self.feeds.iter().map(|k| k.symbol.clone()).collect();
+        symbols.dedup();
+        self.feed.watch_trades_after_seams(&symbols, fallback_ms);
+    }
+
+    /// (RP4, L-prep) Whether trade gaps are filled on the hub thread (default: only on the
+    /// simulated clock).
+    #[cfg(test)]
+    pub fn set_trade_fill_sync(&mut self, sync: bool) {
+        self.trade_fill_sync = sync;
+    }
+
+    /// (RP4, L-prep) Whether bars come from the trade stream.
+    #[cfg(test)]
+    #[must_use]
+    pub fn trade_mode(&self) -> bool {
+        self.trade_mode
+    }
+
+    /// (RP4, L-prep) Whether the market connection is up (`None` before it opened once).
+    #[cfg(test)]
+    #[must_use]
+    pub fn stats_market_connected(&self) -> Option<bool> {
+        self.conn_events
+            .iter()
+            .any(|e| e.contains("market opened"))
+            .then_some(self.market_up)
+    }
+
+    /// (RP4, L-prep) Trade history fills done (counts).
+    #[cfg(test)]
+    #[must_use]
+    pub fn trade_fill_count(&self) -> usize {
+        self.trade_fills.len()
     }
 
     /// (RP4/T4) The market status last given to the authority.
@@ -743,6 +1010,11 @@ impl LiveRuntime {
         let lines = match input {
             LiveIn::Record(rec) => self.on_record(host, FeedSource::Market, rec),
             LiveIn::Trade(rec) => self.on_record(host, FeedSource::Trade, rec),
+            LiveIn::TradeHistory {
+                generation,
+                results,
+                fetch_ms,
+            } => self.on_trade_history(host, generation, results, fetch_ms),
             LiveIn::Clock(t_us) => match self.sim_now_us {
                 Some(now) => {
                     self.sim_now_us = Some(now.max(t_us));
@@ -789,7 +1061,9 @@ impl LiveRuntime {
     ) -> Vec<OutboundLine> {
         if rec.kind == RecordKind::Message {
             self.messages += 1;
-            if self.link == Link::Repairing {
+            // A bar repair holds the messages back; a trade fill does not (the feed holds
+            // the gap symbols' trades itself, the cards go on).
+            if self.link == Link::Repairing && !self.trade_mode {
                 self.buffer.push((source, rec));
                 return Vec::new();
             }
@@ -801,6 +1075,7 @@ impl LiveRuntime {
 
     fn go_stale(&mut self, host: &mut ReplayHost) -> Vec<OutboundLine> {
         self.market_dirty = true;
+        self.marked_stale = true;
         self.generation += 1;
         self.link = Link::Stale;
         self.stale_since = Some(Instant::now());
@@ -820,12 +1095,31 @@ impl LiveRuntime {
         let mut lines = Vec::new();
         if let Some(c) = out.connection {
             match c {
+                ConnChange::Lost if self.trade_mode => {
+                    // Bars come from trades: the market connection's loss stales nothing.
+                    self.market_up = false;
+                    self.market_dirty = true;
+                    self.conn_events.push(format!(
+                        "market lost at {}",
+                        crate::live::utc_stamp(self.now())
+                    ));
+                }
+                ConnChange::Opened { session } if self.trade_mode => {
+                    self.market_up = true;
+                    self.market_dirty = true;
+                    self.conn_events.push(format!(
+                        "market opened #{session} at {}",
+                        crate::live::utc_stamp(self.now())
+                    ));
+                }
                 ConnChange::Lost => {
+                    self.market_up = false;
                     if matches!(self.link, Link::Live | Link::Connecting | Link::Repairing) {
                         lines.extend(self.go_stale(host));
                     }
                 }
                 ConnChange::Opened { session } => {
+                    self.market_up = true;
                     self.conn_events.push(format!(
                         "opened #{session} at {}",
                         crate::live::utc_stamp(self.now())
@@ -843,22 +1137,24 @@ impl LiveRuntime {
         }
         match out.trade_connection {
             Some(ConnChange::Opened { session }) => {
+                self.trade_up = true;
                 self.conn_events.push(format!(
                     "trade opened #{session} at {}",
                     crate::live::utc_stamp(self.now())
                 ));
-                // A feed whose bars come from trades is live once its trade endpoint is.
-                if self.link == Link::Connecting {
-                    self.link = Link::Live;
-                    self.market_dirty = true;
-                }
-                lines.extend(self.fill_trade_gaps(host));
+                lines.extend(self.on_trade_opened(host));
             }
             Some(ConnChange::Lost) => {
+                self.trade_up = false;
                 self.conn_events.push(format!(
                     "trade lost at {}",
                     crate::live::utc_stamp(self.now())
                 ));
+                if self.trade_mode
+                    && matches!(self.link, Link::Live | Link::Connecting | Link::Repairing)
+                {
+                    lines.extend(self.go_stale(host));
+                }
             }
             None => {}
         }
@@ -999,6 +1295,150 @@ impl LiveRuntime {
         lines
     }
 
+    /// (RP4, L-prep) The trade connection opened. On the simulated clock (or
+    /// [`set_trade_fill_sync`](Self::set_trade_fill_sync)) the gaps are filled at once
+    /// ([`fill_trade_gaps`](Self::fill_trade_gaps)). Live, the feeds stay stale
+    /// (`repairing`) while the history is fetched on another thread
+    /// ([`LiveIn::TradeHistory`]); the trades that arrive meanwhile wait in the feed.
+    fn on_trade_opened(&mut self, host: &mut ReplayHost) -> Vec<OutboundLine> {
+        let was_stale = self.link == Link::Stale;
+        if self.trade_fill_sync || self.trade_history.is_none() {
+            // A feed whose bars come from trades is live once its trade endpoint is.
+            if matches!(self.link, Link::Connecting | Link::Stale) {
+                self.link = Link::Live;
+                self.market_dirty = true;
+            }
+            let t0 = Instant::now();
+            let failed_before = self.trade_repairs.1;
+            let mut lines = self.fill_trade_gaps(host);
+            if was_stale && self.marked_stale {
+                self.marked_stale = false;
+                lines.extend(host.live_refresh());
+            }
+            if self.trade_history.is_some() {
+                let ms = u64::try_from(t0.elapsed().as_millis()).unwrap_or(u64::MAX);
+                self.trade_fills.push(TradeFillStat {
+                    fetch_ms: ms,
+                    total_ms: ms,
+                    gaps: 0,
+                    failed: usize::try_from(self.trade_repairs.1 - failed_before)
+                        .unwrap_or(usize::MAX),
+                    trades: 0,
+                    after_loss: was_stale,
+                });
+            }
+            return lines;
+        }
+        if matches!(self.link, Link::Connecting | Link::Stale) {
+            self.link = Link::Repairing;
+            self.repair_started = Some(Instant::now());
+            self.market_dirty = true;
+        }
+        self.start_trade_fetch();
+        Vec::new()
+    }
+
+    /// (RP4, L-prep) Starts fetching the open trade gaps' history on a thread.
+    fn start_trade_fetch(&mut self) {
+        let Some(h) = self.trade_history.clone() else {
+            return;
+        };
+        let now = self.exchange_now().max(self.clock);
+        let (out, gaps) = self.feed.trade_gaps(now);
+        self.finalized += out.finalized.len() as u64;
+        self.trade_fetch_clock = self.trade_fetch_clock.max(out.clock_ms);
+        self.trade_fetch = Some(Instant::now());
+        self.trade_fetch_at_us = self.now();
+        let generation = self.generation;
+        let to_hub = self.to_hub.clone();
+        std::thread::spawn(move || {
+            let t0 = Instant::now();
+            let results: Vec<(TradeGap, Result<Vec<Trade>, String>)> = gaps
+                .into_iter()
+                .map(|g| {
+                    let r = h.trades(&g.symbol, g.from_ms, g.to_ms);
+                    (g, r)
+                })
+                .collect();
+            to_hub(LiveIn::TradeHistory {
+                generation,
+                results,
+                fetch_ms: u64::try_from(t0.elapsed().as_millis()).unwrap_or(u64::MAX),
+            });
+        });
+    }
+
+    /// (RP4, L-prep) A trade history fetch finished: each gap is filled (history ∪ the
+    /// trades held meanwhile, de-duplicated by trade number, in exchange order); the feeds
+    /// are live again and the authority re-resolves them if they were marked stale. A
+    /// failed gap stays open (its symbol's bars do not close; retried every 30 s). Results
+    /// of an older stale period are dropped (the gaps stay for the next fetch).
+    fn on_trade_history(
+        &mut self,
+        host: &mut ReplayHost,
+        generation: u64,
+        results: Vec<(TradeGap, Result<Vec<Trade>, String>)>,
+        fetch_ms: u64,
+    ) -> Vec<OutboundLine> {
+        self.trade_fetch = None;
+        if generation != self.generation
+            || !matches!(self.link, Link::Repairing | Link::Live)
+            || !self.trade_up
+        {
+            self.trade_fetch_clock = None;
+            return Vec::new();
+        }
+        let after_loss = self.marked_stale;
+        let mut out = FeedOut {
+            clock_ms: self.trade_fetch_clock.take(),
+            ..FeedOut::default()
+        };
+        let (gaps, mut failed, mut trades) = (results.len(), 0, 0);
+        for (gap, r) in results {
+            match r {
+                Ok(t) => {
+                    trades += t.len();
+                    let o = self.feed.apply_trade_history(&gap, t);
+                    out.events.extend(o.events);
+                    out.finalized.extend(o.finalized);
+                }
+                Err(e) => {
+                    failed += 1;
+                    if self.conn_events.len() < 500 {
+                        self.conn_events
+                            .push(format!("trade history {}: {e}", gap.symbol));
+                    }
+                }
+            }
+        }
+        self.trade_repairs.0 += 1;
+        self.trade_repairs.1 += failed as u64;
+        if self.link == Link::Repairing {
+            self.link = Link::Live;
+            self.market_dirty = true;
+        }
+        let mut lines = self.apply(host, out, None);
+        if self.marked_stale {
+            self.marked_stale = false;
+            lines.extend(host.live_refresh());
+        }
+        let ms = |d: Option<Instant>| {
+            d.map_or(0, |i| {
+                u64::try_from(i.elapsed().as_millis()).unwrap_or(u64::MAX)
+            })
+        };
+        self.trade_fills.push(TradeFillStat {
+            fetch_ms,
+            total_ms: ms(self.repair_started.take()),
+            gaps,
+            failed,
+            trades,
+            after_loss,
+        });
+        self.stale_since = None;
+        lines
+    }
+
     /// (RP4) The trade connection opened: the feed's clock goes to the exchange time and
     /// every open trade gap is filled from the trade history (synchronously; without a
     /// history the gaps stay open and the symbols stale).
@@ -1101,6 +1541,18 @@ impl LiveRuntime {
         let now = self.exchange_now();
         let out = self.feed.advance_clock(now);
         lines.extend(self.apply(host, out, None));
+        // (RP4, L-prep) A gap whose history failed is asked for again every 30 s.
+        if self.trade_mode
+            && !self.trade_fill_sync
+            && self.trade_up
+            && self.trade_fetch.is_none()
+            && self.now() - self.trade_fetch_at_us >= 30_000_000
+        {
+            let (_, gaps) = self.feed.trade_gaps(now);
+            if !gaps.is_empty() {
+                self.start_trade_fetch();
+            }
+        }
         self.busy += t0.elapsed();
         lines
     }
@@ -1210,8 +1662,21 @@ impl LiveRuntime {
             })
             .collect();
         let (live_caps, stale_caps) = self.capsule_counts();
+        let trade_fills: Vec<Value> = self
+            .trade_fills
+            .iter()
+            .map(|r| {
+                json!({"fetch_ms": r.fetch_ms, "repair_ms": r.total_ms, "gaps": r.gaps,
+                       "failed": r.failed, "trades": r.trades, "after_loss": r.after_loss})
+            })
+            .collect();
         json!({
             "link": self.link.name(),
+            "trade_mode": self.trade_mode,
+            "market_connected": self.market_up,
+            "trade_connected": self.trade_up,
+            "trade_fills": trade_fills,
+            "trade_repairs": {"filled": self.trade_repairs.0, "failed": self.trade_repairs.1},
             "delayed": self.delayed,
             "feeds": self.feeds.len(),
             "interval": self.interval,
@@ -1281,9 +1746,7 @@ impl HubSink {
     }
 
     /// (RP4) A sink for the trade endpoint: its records go to the hub as
-    /// [`LiveIn::Trade`]. (Used by the simulation's live-path test; the live demo's
-    /// trade connection is wired by the orchestrator.)
-    #[cfg_attr(not(test), allow(dead_code))]
+    /// [`LiveIn::Trade`] (`qp demo --live --trades`).
     pub fn for_trades(raw: RawSink, to_hub: Arc<dyn Fn(LiveIn) + Send + Sync>) -> Self {
         Self {
             raw,
@@ -1311,16 +1774,21 @@ impl HubSink {
         (self.to_hub)(self.wrap(rec));
     }
 
-    /// Flushes the raw log.
+    /// Ends the raw log (the trade sanitizing note, if any) and flushes it.
     pub fn flush(&self) {
-        self.raw.flush();
+        self.raw.finish();
     }
 }
 
 impl LiveSink for HubSink {
     fn on_message(&self, m: &LiveMessage<'_>) {
-        self.raw.on_message(m);
-        (self.to_hub)(self.wrap(RawRecord::message(m.received_at_us, m.topic, m.payload)));
+        // The log and the hub get the same kept payload: a trade without buyer / seller.
+        let kept = self.raw.take_message(m);
+        (self.to_hub)(self.wrap(RawRecord::message(
+            m.received_at_us,
+            m.topic,
+            kept.into_owned(),
+        )));
     }
 
     fn on_event(&self, ep: &qp_live::EndpointKey, ev: &LiveEvent) {
@@ -1364,6 +1832,18 @@ pub struct ConnSpec {
     pub auth: Arc<qp_live::AuthClient>,
     pub topics: Vec<String>,
     pub lock_dir: std::path::PathBuf,
+    /// (RP4) The trade endpoint (`/trade`, its own lock) instead of the market endpoint.
+    pub trade: bool,
+}
+
+impl ConnSpec {
+    fn endpoint(&self) -> &qp_live::Endpoint {
+        if self.trade {
+            self.cfg.trade_endpoint()
+        } else {
+            self.cfg.market_endpoint()
+        }
+    }
 }
 
 /// Starts the connection thread: opens the one connection, serves `drop` and `stop`.
@@ -1382,7 +1862,7 @@ pub fn spawn_connection(
         opts.lock_dir = spec.lock_dir.clone();
         LiveConnection::open(
             &spec.cfg,
-            spec.cfg.market_endpoint(),
+            spec.endpoint(),
             spec.auth.clone(),
             opts,
             sink.clone() as Arc<dyn LiveSink>,
@@ -1445,6 +1925,11 @@ pub fn spawn_connection(
     Ok(tx)
 }
 
+/// (Tests) One live connection per endpoint key per process: the tests that open mock
+/// connections take this first so that they do not hold the same key at once.
+#[cfg(test)]
+pub(crate) static MOCK_ENDPOINTS: std::sync::Mutex<()> = std::sync::Mutex::new(());
+
 // ---------------------------------------------------------------------------------------
 // The feed: `qp_matriks::LiveFeed` (the one pipeline shared with raw-log replay).
 
@@ -1494,6 +1979,13 @@ impl MatriksFeed {
         f
     }
 
+    /// The underlying feed.
+    #[cfg(test)]
+    #[must_use]
+    pub fn inner(&self) -> &qp_matriks::LiveFeed {
+        &self.inner
+    }
+
     fn fresh(&self) -> qp_matriks::LiveFeed {
         match self.trades {
             Some(t) => qp_matriks::LiveFeed::with_trades(self.cfg.clone(), self.cal.clone(), t),
@@ -1504,7 +1996,12 @@ impl MatriksFeed {
 
 impl FeedEngine for MatriksFeed {
     fn seed_all(&mut self, seeds: &[Seed]) -> Result<(), String> {
-        let started = self.inner.feeds().any(|(_, lb)| lb.stats().ticks > 0);
+        // (RP4, L-prep) A trade-built bar counts as started too (else the second seed is
+        // refused and the repair never reseeds a trade feed).
+        let started = self
+            .inner
+            .feeds()
+            .any(|(_, lb)| lb.stats().ticks > 0 || lb.stats().trades > 0);
         if started {
             // After a repair: a new feed seeded at the repaired bars (`LiveFeed` seeds
             // only before a feed's first tick); each day's counter goes on from the
@@ -1520,6 +2017,9 @@ impl FeedEngine for MatriksFeed {
                 self.inner
                     .seed_with_counter(sym, &self.interval, last.clone(), *seq, cum)?;
             }
+            // (RP4, L-prep; T4's known limit) The trade state goes on: the watched symbols
+            // (with a gap from the new seam) and the trade connection's state.
+            self.inner.carry_trades_from(&old);
             return Ok(());
         }
         for (sym, last, seq, cum) in seeds {
@@ -1541,6 +2041,25 @@ impl FeedEngine for MatriksFeed {
         for s in symbols {
             self.inner.watch_trades(s, from_ms);
         }
+    }
+
+    fn trades_enabled(&self) -> bool {
+        self.inner.trades_enabled()
+    }
+
+    fn watch_trades_after_seams(&mut self, symbols: &[String], fallback_ms: i64) {
+        for s in symbols {
+            self.inner.watch_trades_after_seam(s, fallback_ms);
+        }
+    }
+
+    fn trade_gaps(&mut self, now_ms: i64) -> (FeedOut, Vec<TradeGap>) {
+        let out = self.inner.advance_clock(now_ms);
+        (out, self.inner.pending_trade_repairs())
+    }
+
+    fn apply_trade_history(&mut self, gap: &TradeGap, trades: Vec<Trade>) -> FeedOut {
+        self.inner.apply_trade_history(gap, trades)
     }
 
     fn repair_trades(
@@ -1890,6 +2409,9 @@ mod tests {
     /// opening again (never two at once), the feeds go stale and are repaired.
     #[test]
     fn local_drop_on_mock_broker_keeps_one_connection_and_repairs() {
+        let _serial = MOCK_ENDPOINTS
+            .lock()
+            .unwrap_or_else(std::sync::PoisonError::into_inner);
         use qp_live::mock::{mock_config, BrokerScript, MockBroker, MockTokenService};
         let dir = tempfile::tempdir().expect("tmp");
         let tokens = MockTokenService::start_default(3600);
@@ -1937,6 +2459,7 @@ mod tests {
             auth,
             topics: vec!["AAA".to_owned(), "BBB".to_owned()],
             lock_dir: dir.path().to_owned(),
+            trade: false,
         };
         let ctl = spawn_connection(spec, sink, to_hub).expect("open");
         let pump =
@@ -2302,5 +2825,78 @@ mod tests {
         let d = normalize_rest(&[b(mid, 5.0)], Interval::Day, &c);
         assert_eq!(d.len(), 1);
         assert_eq!(d[0].t, c.bar_at(Interval::Day, open).expect("day").open);
+    }
+
+    /// (RP4, L-prep) The REST trade history adapter: windows of at most 15 days, only the
+    /// gap's rows, de-duplicated by trade number, exchange order, the asked symbol; a
+    /// fake REST (no network).
+    #[test]
+    fn rest_trade_history_windows_filter_and_dedup() {
+        use std::sync::Mutex;
+        let c = cal();
+        let day0 = qp_calendar::parse_date("2026-10-01").expect("date");
+        let midnight = |d: i64| c.sessions_on(d).first().map(|s| s.open);
+        let calls: Arc<Mutex<Vec<(String, String, String)>>> = Arc::default();
+        let calls2 = calls.clone();
+        let t0 = midnight(day0 + 1).expect("trading day");
+        let mk = |ms: i64, no: &str| Trade {
+            symbol: "AAA.E".to_owned(),
+            price: 10.5,
+            quantity: Some(3),
+            side: None,
+            timestamp_ns: ms * 1_000_000,
+            order_no: Some(no.to_owned()),
+            is_trade_ex: false,
+        };
+        let rows = vec![
+            mk(t0 + 2_000, "2"),
+            mk(t0 + 1_000, "1"),
+            mk(t0 + 1_000, "1"),           // duplicate
+            mk(t0 - 86_400_000 * 2, "0"),  // before the gap
+            mk(t0 + 86_400_000 * 45, "9"), // after the gap
+        ];
+        let fetch = move |sym: &str, a: &str, b: &str| {
+            calls2
+                .lock()
+                .expect("calls")
+                .push((sym.to_owned(), a.to_owned(), b.to_owned()));
+            Ok((rows.clone(), 1))
+        };
+        let h = RestTradeHistory::new(Box::new(fetch), c.clone(), 99);
+        let from = t0 - 3_600_000;
+        let to = from + 40 * 86_400_000;
+        let got = h.trades("AAA", from, to).expect("trades");
+        let w = h.windows(from, to);
+        assert_eq!(w.len(), 3, "41 local days in windows of at most 15: {w:?}");
+        assert!(w.iter().all(|(a, b)| {
+            let (a, b) = (
+                qp_calendar::parse_date(a).expect("a"),
+                qp_calendar::parse_date(b).expect("b"),
+            );
+            b >= a && b - a < RestTradeHistory::MAX_WINDOW_DAYS
+        }));
+        assert_eq!(calls.lock().expect("calls").len(), 3);
+        assert!(calls
+            .lock()
+            .expect("calls")
+            .iter()
+            .all(|(s, _, _)| s == "AAA"));
+        let nos: Vec<_> = got
+            .iter()
+            .map(|t| t.order_no.clone().unwrap_or_default())
+            .collect();
+        assert_eq!(nos, vec!["1", "2"]);
+        assert!(got.iter().all(|t| t.symbol == "AAA"));
+        assert_eq!(h.bad_rows.load(std::sync::atomic::Ordering::Relaxed), 3);
+        // An empty or reversed gap asks nothing.
+        assert!(h.trades("AAA", to, from).expect("empty").is_empty());
+        assert_eq!(h.calls.load(std::sync::atomic::Ordering::Relaxed), 3);
+        // A failed request is the gap's error.
+        let bad = RestTradeHistory::new(
+            Box::new(|_: &str, _: &str, _: &str| Err("rest: HTTP 503".to_owned())),
+            c,
+            15,
+        );
+        assert!(bad.trades("AAA", from, from + 1).is_err());
     }
 }

@@ -59,8 +59,9 @@ pub use topic::{
     TradeStream,
 };
 pub use trade::{
-    decode_trade, sanitize_trade_payload, Aggressor, Trade, TradeDecodeConfig, TradeError,
-    TradeHistory, TradeKey, TradeTimeUnit,
+    decode_trade, decode_trade_raw, level2_presence, sanitize_trade_payload, Aggressor, Trade,
+    TradeDecodeConfig, TradeError, TradeHistory, TradeKey, TradeRawView, TradeTimeUnit,
+    TRADE_FIELDS,
 };
 
 /// Decoding error for a Matriks payload.

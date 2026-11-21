@@ -256,7 +256,30 @@ impl RestClient<'_> {
     /// # Errors
     /// Token, HTTP or decode failure after the retries (masked text).
     pub fn trades_csv(&self, symbol: &str, start: &str, end: &str) -> Result<Vec<u8>, RestError> {
-        let path = "/dumrul/v1/tick/trade.gz";
+        self.trades_csv_at("/dumrul/v1/tick/trade.gz", symbol, start, end)
+    }
+
+    /// (RP4/M27) Special (reported) trades, `GET /dumrul/v1/tick/trade_ex` (at most 16
+    /// days), as a level-1 CSV like [`RestClient::trades_csv`].
+    ///
+    /// # Errors
+    /// Token, HTTP or decode failure after the retries (masked text).
+    pub fn trades_ex_csv(
+        &self,
+        symbol: &str,
+        start: &str,
+        end: &str,
+    ) -> Result<Vec<u8>, RestError> {
+        self.trades_csv_at("/dumrul/v1/tick/trade_ex", symbol, start, end)
+    }
+
+    fn trades_csv_at(
+        &self,
+        path: &str,
+        symbol: &str,
+        start: &str,
+        end: &str,
+    ) -> Result<Vec<u8>, RestError> {
         let q = [
             ("symbol", symbol.to_owned()),
             ("start", start.to_owned()),

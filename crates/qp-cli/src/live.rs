@@ -73,6 +73,9 @@ pub enum LiveCommand {
         /// Window length in calendar days (1–15).
         #[arg(long, default_value_t = 14)]
         window_days: u32,
+        /// Special (reported) trades (`trade_ex`) into `fixtures/local/trades_ex/` instead.
+        #[arg(long)]
+        ex: bool,
     },
     /// M22: build bars from raw logs with the live feed and compare them with REST bars
     /// (`qp live bars` files); prints only an aggregate table.
@@ -140,7 +143,8 @@ pub fn run(cmd: &LiveCommand) -> Result<(), String> {
             start,
             end,
             window_days,
-        } => trades(symbols, start, end, *window_days),
+            ex,
+        } => trades(symbols, start, end, *window_days, *ex),
         LiveCommand::Bars {
             symbols,
             period,
@@ -946,10 +950,14 @@ fn civil_date(z: i64) -> String {
     format!("{y:04}-{m:02}-{d:02}")
 }
 
-fn trades(symbols: &str, start: &str, end: &str, window_days: u32) -> Result<(), String> {
+fn trades(symbols: &str, start: &str, end: &str, window_days: u32, ex: bool) -> Result<(), String> {
     let syms = parse_symbols(symbols)?;
     let windows = date_windows(start, end, window_days)?;
-    let root = repo_root().join("fixtures/local/trades");
+    let root = repo_root().join(if ex {
+        "fixtures/local/trades_ex"
+    } else {
+        "fixtures/local/trades"
+    });
     let log = root.join("requests.jsonl");
     // Only open the identity (token) when something is missing from the cache.
     let missing: Vec<(&String, &(String, String))> = syms
@@ -979,7 +987,11 @@ fn trades(symbols: &str, start: &str, end: &str, window_days: u32) -> Result<(),
         let dir = root.join(sym.as_str());
         std::fs::create_dir_all(&dir).map_err(|e| e.to_string())?;
         let t0 = Instant::now();
-        let got = rest.trades_csv(sym, a, b);
+        let got = if ex {
+            rest.trades_ex_csv(sym, a, b)
+        } else {
+            rest.trades_csv(sym, a, b)
+        };
         let rows = got
             .as_ref()
             .map(|c| c.iter().filter(|&&x| x == b'\n').count().saturating_sub(1))

@@ -25,6 +25,7 @@ const USAGE: &str = "kullanım:
   harness m25 --data <dir> --rule <ad> [--reference <ad>] --period 5m|15m|1h|1d [--split calib|test] [--out <dir>]
   harness m26 --data <dir> --detectors <ad> --period 5m|15m|1h|1d [--rule <ad>] [--split calib|test] [--out <dir>]
   harness cases --data <dir> --rule <ad> --period 5m --split test [--day YYYY-MM-DD] --out <dir>
+  harness births --data <dir> --rule <ad> --period <p> --split test --out <dir>
   harness report [--results <dir>] --out <dir>
   harness ticks --raw <dir> [--universe <file>]
   harness synth --out <dir> [--symbols N]";
@@ -83,6 +84,12 @@ fn main() -> ExitCode {
         "cases" => match (path("data"), opt.get("rule"), period, split, path("out")) {
             (Some(d), Some(rule), Some(p), Some(s), Some(o)) => {
                 rp4_harness::cases::cmd(&d, rule, p, s, opt.get("day").map(String::as_str), &o)
+            }
+            _ => Err(USAGE.to_owned()),
+        },
+        "births" => match (path("data"), opt.get("rule"), period, split, path("out")) {
+            (Some(d), Some(rule), Some(p), Some(s), Some(o)) => {
+                rp4_harness::cases::births_cmd(&d, rule, p, s, &o)
             }
             _ => Err(USAGE.to_owned()),
         },

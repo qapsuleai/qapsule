@@ -154,3 +154,50 @@ pub fn cmd(
         .map_err(|e| e.to_string())?;
     Ok(summary.to_string())
 }
+
+/// (RP4, M27) Births of every story in the counted window (`symbol`, birth time, ledger
+/// key) as local JSON lines under `out` (real data stays local), for comparing two bar
+/// sources. Returns the count.
+///
+/// # Errors
+/// Unknown rule, data errors.
+pub fn births_cmd(
+    data: &Path,
+    rule: &str,
+    period: Period,
+    split: Split,
+    out: &Path,
+) -> Result<String, String> {
+    let entry = registry::rule(rule).ok_or(format!("bilinmeyen kural: {rule}"))?;
+    let series = load_for(data, period, split)?;
+    let window = Window::of(period, split);
+    let cal = xist();
+    let det = registry::reference_detectors();
+    let per = par_map(&series, |s| {
+        let pos = day_positions(&cal, &s.bars);
+        let facts = facts_for(&s.symbol, period.name(), &s.bars, det.make, false);
+        run_symbol(
+            &s.symbol,
+            period.name(),
+            &s.bars,
+            &facts,
+            &entry,
+            window,
+            &pos,
+            false,
+        )
+        .into_iter()
+        .filter(|x| window.contains(x.born_t))
+        .map(|x| format!("{}\t{}\t{}\n", s.symbol, x.born_t, x.key))
+        .collect::<String>()
+    });
+    std::fs::create_dir_all(out).map_err(|e| e.to_string())?;
+    let text: String = per.concat();
+    let n = text.lines().count();
+    std::fs::write(
+        out.join(format!("births.{rule}.{}.local.tsv", period.name())),
+        text,
+    )
+    .map_err(|e| e.to_string())?;
+    Ok(format!("{n} doğum"))
+}

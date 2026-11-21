@@ -108,8 +108,9 @@ durdurma 2,0× eşikle), ama bu durumların yalnız üçte biri "gerçekleşti"y
 önceden yazılı sıralamada (`SENS`) üçüncü oldu.
 
 Hızlandırılmış benzetimde (`qp sim --start 2026-11-20 --rule r3|rp4`, canlı yol, işlemden 5 dk bar)
-aynı gün: `r3` 1.834 kapsül doğumu, `rp4` 1.672; benzetimin barları `export-trade-bars` ile aynı bar
-kurucusundan gelir (tablo 2'nin işlem sütunu bu barlarla hesaplandı).
+aynı gün: `r3` 1.834 kapsül doğumu, `rp4` 1.672. Benzetimin olay akışından kurulan 5 dk barları
+`export-trade-bars` dosyalarıyla **9.588 / 9.588 bar o/h/l/c bit eşit** (eksik 0); yani tablo 2 ve bu
+bölümün işlem sütunu benzetimin gördüğü barlarla hesaplandı.
 
 ## 4. M26 — sınama (sonuç kuralı `r3`)
 

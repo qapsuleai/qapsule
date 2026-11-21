@@ -1,0 +1,18 @@
+# RP4 M26 alternatifi `mevsim`: gün içi mevsimselliğe göre düzeltilmiş dedektör eşikleri.
+# Bağımsız crate (boş [workspace]); harness README "Alternatif ekleme" M26.
+[package]
+name = "m26-mevsim"
+version = "0.1.0"
+edition = "2021"
+publish = false
+
+[workspace]
+
+[dependencies]
+qp-calendar = { path = "../../../../../crates/qp-calendar" }
+qp-compute = { path = "../../../../../crates/qp-compute" }
+qp-facts = { path = "../../../../../crates/qp-facts" }
+qp-schema = { path = "../../../../../crates/qp-schema" }
+
+[lints.rust]
+unsafe_code = "forbid"

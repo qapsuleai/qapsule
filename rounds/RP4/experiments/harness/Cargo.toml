@@ -33,6 +33,7 @@ m25-yukdus = { path = "../M25/yukdus" }
 m25-olcek = { path = "../M25/olcek" }
 m25-umut = { path = "../M25/umut" }
 m26-olcek26 = { path = "../M26/olcek26" }
+m26-mevsim = { path = "../M26/mevsim" }
 
 [lints.rust]
 unsafe_code = "forbid"

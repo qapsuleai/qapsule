@@ -145,6 +145,21 @@ pub fn detector_sets() -> Vec<DetectorEntry> {
         DetectorEntry {
             name: "olcek26",
             make: m26_olcek26::detectors,
+            name: "mevsim",
+            make: m26_mevsim::detectors,
+        },
+        // `mevsim` denemeleri (M26/mevsim/NOTES.md): yeniden üretim için.
+        DetectorEntry {
+            name: "mevsim_t1v",
+            make: m26_mevsim::trial_volume,
+        },
+        DetectorEntry {
+            name: "mevsim_t1vb",
+            make: m26_mevsim::trial_volume_breakout,
+        },
+        DetectorEntry {
+            name: "mevsim_t2g",
+            make: m26_mevsim::trial_gate,
         },
     ]
 }

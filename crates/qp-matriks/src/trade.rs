@@ -501,3 +501,159 @@ mod tests {
         );
     }
 }
+
+// ---------------------------------------------------------------------------------------
+// (RP4) Historical trades from the REST CSV (`qp_live::rest::RestClient::trades_csv`).
+
+/// Side of a REST trade row: the CSV `bidask` column carries the ASCII code of the
+/// aggressor letter (`98` = `b`, buyer-initiated; `97` = `a`, seller-initiated) or `null`
+/// (auction match, no aggressor). Letters are accepted too.
+#[must_use]
+pub fn rest_side(raw: &str) -> Option<Aggressor> {
+    let r = raw.trim();
+    if r.is_empty() || r.eq_ignore_ascii_case("null") {
+        return None;
+    }
+    if let Ok(code) = r.parse::<u8>() {
+        return Some(Aggressor::parse(&char::from(code).to_string()));
+    }
+    Some(Aggressor::parse(r))
+}
+
+fn civil_days(y: i64, m: i64, d: i64) -> i64 {
+    let y = if m <= 2 { y - 1 } else { y };
+    let era = y.div_euclid(400);
+    let yoe = y - era * 400;
+    let mp = (m + 9) % 12;
+    let doy = (153 * mp + 2) / 5 + d - 1;
+    let doe = yoe * 365 + yoe / 4 - yoe / 100 + doy;
+    era * 146_097 + doe - 719_468
+}
+
+/// Local midnight (UTC epoch ns) of a `date_time` like `2026-11-16T09:55:19.000+0300`
+/// (date part and the `±HHMM` offset; the clock part is not used).
+fn local_midnight_ns(date_time: &str) -> Option<i64> {
+    let b = date_time.as_bytes();
+    if b.len() < 10 {
+        return None;
+    }
+    let y: i64 = date_time.get(0..4)?.parse().ok()?;
+    let m: i64 = date_time.get(5..7)?.parse().ok()?;
+    let d: i64 = date_time.get(8..10)?.parse().ok()?;
+    let off = date_time
+        .rfind(['+', '-'])
+        .filter(|&i| i > 10)
+        .and_then(|i| {
+            let s = &date_time[i..];
+            let sign = if s.starts_with('-') { -1 } else { 1 };
+            let digits: String = s[1..].chars().filter(char::is_ascii_digit).collect();
+            let hh: i64 = digits.get(0..2)?.parse().ok()?;
+            let mm: i64 = digits.get(2..4).unwrap_or("00").parse().ok()?;
+            Some(sign * (hh * 60 + mm))
+        })?;
+    Some((civil_days(y, m, d) * 86_400 - off * 60) * 1_000_000_000)
+}
+
+/// Parses a level-1 REST trade CSV (`symbol,date_time,timestamp_ns,bidask,mx_id,price,
+/// quantity`, header first; columns found by name). Time = the row date's local midnight
+/// (from `date_time` and its offset) + `timestamp_ns` (nanoseconds since local midnight,
+/// the exchange's own time; `date_time` is whole seconds and lags it by 1–2 s on auction
+/// rows). Rows that do not parse are counted in the second return value, not guessed.
+/// Buyer/seller columns, if ever present, are not read.
+#[must_use]
+pub fn parse_rest_csv(csv: &[u8]) -> (Vec<Trade>, usize) {
+    let text = String::from_utf8_lossy(csv);
+    let mut lines = text.lines();
+    let Some(header) = lines.next() else {
+        return (Vec::new(), 0);
+    };
+    let cols: Vec<&str> = header.split(',').map(str::trim).collect();
+    let at = |n: &str| cols.iter().position(|c| *c == n);
+    let (Some(i_sym), Some(i_dt), Some(i_ns), Some(i_side), Some(i_id), Some(i_px), Some(i_q)) = (
+        at("symbol"),
+        at("date_time"),
+        at("timestamp_ns"),
+        at("bidask"),
+        at("mx_id"),
+        at("price"),
+        at("quantity"),
+    ) else {
+        return (Vec::new(), 0);
+    };
+    let mut out = Vec::new();
+    let mut bad = 0usize;
+    let mut day_cache: Option<(String, i64)> = None;
+    for l in lines {
+        if l.trim().is_empty() {
+            continue;
+        }
+        let f: Vec<&str> = l.split(',').collect();
+        let get = |i: usize| f.get(i).map(|s| s.trim());
+        let parsed = (|| {
+            let dt = get(i_dt)?;
+            // Cache key: the date and the offset suffix.
+            let key = format!(
+                "{}{}",
+                dt.get(0..10)?,
+                dt.get(dt.len().saturating_sub(5)..)?
+            );
+            let mid = match &day_cache {
+                Some((k, v)) if *k == key => *v,
+                _ => {
+                    let v = local_midnight_ns(dt)?;
+                    day_cache = Some((key, v));
+                    v
+                }
+            };
+            let ns: i64 = get(i_ns)?.parse().ok()?;
+            let price: f64 = get(i_px)?.parse().ok()?;
+            let qty = get(i_q).and_then(|q| q.parse::<i64>().ok());
+            let id = get(i_id).filter(|s| !s.is_empty() && !s.eq_ignore_ascii_case("null"));
+            (price.is_finite() && price > 0.0).then_some(Trade {
+                symbol: get(i_sym)?.to_owned(),
+                price,
+                quantity: qty,
+                side: rest_side(get(i_side).unwrap_or("")),
+                timestamp_ns: mid + ns,
+                order_no: id.map(str::to_owned),
+                is_trade_ex: false,
+            })
+        })();
+        match parsed {
+            Some(t) => out.push(t),
+            None => bad += 1,
+        }
+    }
+    (out, bad)
+}
+
+#[cfg(test)]
+mod rest_csv_tests {
+    use super::*;
+
+    #[test]
+    fn parses_rest_rows_with_exchange_time() {
+        let csv = b"symbol,date_time,timestamp_ns,bidask,mx_id,price,quantity\n\
+            AAA,2026-11-16T09:55:19.000+0300,35717182000000,null,1,312.25,4\n\
+            AAA,2026-11-16T10:00:00.000+0300,36000000000001,98,2,312.5,10\n\
+            AAA,2026-11-16T10:00:01.000+0300,36001000000000,97,3,312,7\n\
+            AAA,bad,1,98,4,1,1\n";
+        let (t, bad) = parse_rest_csv(csv);
+        assert_eq!(bad, 1);
+        assert_eq!(t.len(), 3);
+        // 2026-11-16 00:00 +03:00 = 2026-11-15 21:00 UTC.
+        let mid = 1_763_240_400_000_000_000_i64 + 365 * 86_400 * 1_000_000_000;
+        assert_eq!(
+            civil_days(2026, 11, 16) * 86_400 - 3 * 3600,
+            mid / 1_000_000_000
+        );
+        assert_eq!(t[0].timestamp_ns, mid + 35_717_182_000_000);
+        assert_eq!(t[0].side, None);
+        assert_eq!(t[1].side, Some(Aggressor::Bid));
+        assert_eq!(t[2].side, Some(Aggressor::Ask));
+        assert_eq!(t[1].order_no.as_deref(), Some("2"));
+        assert_eq!(t[2].price.to_bits(), 312.0_f64.to_bits());
+        assert_eq!(t[1].quantity, Some(10));
+        assert!(!t[0].is_trade_ex);
+    }
+}

@@ -50,6 +50,9 @@ export const ALLOWED_CORE = new Set([
   // R5/M21 `nabiz` (ARCH.md): the motion overlay of a display frame (boxes and their CSS
   // values, made by the core).
   'motion_marks',
+  // R5B (ARCH.md): the agent's least trace — the open capsule's comments and the pending
+  // proposals as the core writes them, and the reader's decision (the core makes the command).
+  'comments', 'proposals', 'decide',
 ]);
 
 // R5/G (ARCH.md "Galeri"): the gallery page's core (`Gallery`, crates/qp-wasm/src/lib.rs).

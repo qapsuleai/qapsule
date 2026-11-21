@@ -25,7 +25,7 @@ const L = {
     lan_warn: 'Uyarı: yerel ağdaki cihazlar bu gösterimi görebilir.',
     lan_hint: 'Telefondan açmak için gösterimi şöyle başlatın:',
     seen: 'Son bakışımı şimdi işaretle', seen_done: 'Son bakış işaretlendi',
-    reset: 'Sıfırla',
+    reset: 'Sıfırla', accept: 'Kabul et', reject: 'Reddet',
     m_hint: 'Telefonda: Sıfırla → 10 sn dokunmadan bekleyin → Akış\'ta 10 sn kaydırın → bir kapsülü grafiğe açıp 10 sn sürükleyin ve kıstırın → buraya dönüp Özeti kopyala.',
     compare: 'Karşılaştır', b_copy: 'Karşılaştırmayı kopyala',
     b_hint: 'Bütün boyama yollarını sırayla aynı senaryoda çalıştırır (durağan, kaydırma, grafik sürükleme, grafik açıkken tik; yol başına yaklaşık 40 sn, en çok 3 dk). Dokunmayın; bitince tablo ve kopyalama düğmesi çıkar.',
@@ -46,7 +46,7 @@ const L = {
     lan_warn: 'Warning: devices on the local network can see this demo.',
     lan_hint: 'To open it on a phone, start the demo with:',
     seen: 'Mark my last look now', seen_done: 'Last look marked',
-    reset: 'Reset',
+    reset: 'Reset', accept: 'Accept', reject: 'Reject',
     m_hint: 'On a phone: Reset → wait 10 s without touching → scroll the Feed for 10 s → open a capsule to its chart, drag and pinch for 10 s → come back here and Copy summary.',
     compare: 'Compare', b_copy: 'Copy comparison',
     b_hint: 'Runs every paint path in turn through the same scenario (idle, scroll, chart drag, ticks with the chart open; about 40 s per path, at most 3 min). Do not touch; a table and a copy button appear at the end.',
@@ -431,7 +431,52 @@ function renderLayer(force) {
   }
   renderEvidence();
   renderAsks(open.asks || []);
+  renderComments();
   return open;
+}
+
+// (R5B) The open capsule's validated comments: label ("ajan yorumu"), origin and text as
+// the core wrote them.
+function renderComments() {
+  const out = [];
+  for (const r of JSON.parse(core.comments())) {
+    const d = document.createElement('div');
+    d.className = 'cmt';
+    const a = document.createElement('b');
+    a.textContent = r.label;
+    const b = document.createElement('span');
+    b.textContent = r.origin;
+    const p = document.createElement('p');
+    p.textContent = r.text;
+    d.append(a, ' ', b, p);
+    out.push(d);
+  }
+  $('comments').replaceChildren(...out);
+}
+
+// (R5B) The pending proposals, author and summary as the core wrote them; the reader's
+// decision goes out on this page's own connection (the core makes the command).
+function renderProposals() {
+  const out = [];
+  for (const r of JSON.parse(core.proposals())) {
+    const d = document.createElement('div');
+    d.className = 'prop';
+    const a = document.createElement('b');
+    a.textContent = r.author;
+    const p = document.createElement('p');
+    p.textContent = r.text;
+    const row = document.createElement('div');
+    const yes = document.createElement('button');
+    yes.textContent = t('accept');
+    yes.onclick = () => { core.decide(r.id, true); flush(); };
+    const no = document.createElement('button');
+    no.textContent = t('reject');
+    no.onclick = () => { core.decide(r.id, false); flush(); };
+    row.append(yes, no);
+    d.append(a, p, row);
+    out.push(d);
+  }
+  $('proposals').replaceChildren(...out);
 }
 
 // (R5/M20 nobra) An open capsule design's question cards for a reader without a scene (no
@@ -665,6 +710,7 @@ function repaint(ch) {
   if (ch.scene || ch.transition) renderLayer(Boolean(ch.transition));
   if (ch.transition) transition(old, snap, rect);
   if (ch.gloss) renderGloss();
+  if (ch.agent) { renderComments(); renderProposals(); }
 }
 
 // (R5/m17-int, K49) The glossary explanation of the term the last tap landed on: the
@@ -1058,6 +1104,10 @@ window.qp = {
   // (R5/M20) for tests/settings.mjs: the open capsule's scene as the core holds it.
   openDesc: () => JSON.parse(core.open_desc() || 'null'),
   openCapsule: (id) => { core.open_capsule(id); flush(); },
+  // (R5B) The agent's least trace as the page shows it, and the reader's decision.
+  comments: () => JSON.parse(core.comments()),
+  proposals: () => JSON.parse(core.proposals()),
+  decide: (id, accept) => { core.decide(id, accept); flush(); },
   openTo: (to) => { core.open_to(to); flush(); },
   // (RP3/M15) for the viewer measurement (rounds/RP3/experiments/M15): the device's data
   // subscriptions and traffic, and the open capsule's check run again on its own data.

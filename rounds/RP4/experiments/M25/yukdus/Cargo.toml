@@ -1,0 +1,16 @@
+# RP4 M25 alternatifi `yukdus`: hedef ve durdurmaya kapanış yerine barın yüksek/düşüğüyle
+# değme. Bağımsız crate (boş [workspace]); harness'e path bağımlılığı olarak takılır.
+[package]
+name = "m25-yukdus"
+version = "0.1.0"
+edition = "2021"
+publish = false
+
+[workspace]
+
+[dependencies]
+qp-capsule = { path = "../../../../../crates/qp-capsule" }
+qp-schema = { path = "../../../../../crates/qp-schema" }
+
+[lints.rust]
+unsafe_code = "forbid"

@@ -1,0 +1,15 @@
+# RP4 M25d alternatifi: periyoda göre ölçeklenen eşik (`olcek`). README "Alternatif ekleme".
+[package]
+name = "m25-olcek"
+version = "0.1.0"
+edition = "2021"
+publish = false
+
+[workspace]
+
+[dependencies]
+qp-capsule = { path = "../../../../../crates/qp-capsule" }
+qp-schema = { path = "../../../../../crates/qp-schema" }
+
+[lints.rust]
+unsafe_code = "forbid"

@@ -34,6 +34,11 @@
 #            curl -s localhost:8390/live/stats                      # counts, no values
 #            curl -s -X POST -H "X-Qp-Live-Control: $T" 'localhost:8390/live/drop?secs=20'
 #          Only the orchestrator opens a live connection, one at a time (lock file).
+#   scripts/demo.sh --live --trades [--tradeex] [--trade-time-unit ns_from_midnight|auto|…]
+#          (RP4, K66) Bars from the trade endpoint: a second connection (`/trade`, its own
+#          lock) next to the market one (phases, day fields, clock). The opening gap and
+#          every trade reconnect are filled from the REST trade history. Drop one link:
+#            curl -s -X POST -H "X-Qp-Live-Control: $T" 'localhost:8390/live/drop?secs=20&endpoint=trade'
 #
 # RP4/T4 accelerated simulation (no connection, no token; docs/matriks/LIVE.md §8):
 #   scripts/demo.sh --sim --start YYYY-MM-DD [--end YYYY-MM-DD] [--symbols @file|A,B]
@@ -44,6 +49,8 @@
 #          local time (the day's earlier trades are history; RP4/T6). The page is the live demo's. This
 #          machine only: --sim with --lan, --https-host or --bind is refused.
 #          Counts: curl -s -H "X-Qp-Live-Control: $QP_LIVE_CONTROL" localhost:8390/live/stats
+# RP4/S: --rule rp4 (any mode) runs the capsule engine with the rp4 constant record
+#          (docs/CAPSULE.md §9.9); the default stays r3.
 # Requirements: rustup target wasm32-unknown-unknown, wasm-pack (cargo install wasm-pack).
 set -euo pipefail
 

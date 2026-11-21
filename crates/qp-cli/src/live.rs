@@ -80,6 +80,17 @@ pub enum LiveCommand {
     /// M22: build bars from raw logs with the live feed and compare them with REST bars
     /// (`qp live bars` files); prints only an aggregate table.
     Compare(CompareArgs),
+    /// (RP4/T2, M27) Bars from the cached trades through the live bar builder
+    /// (`BarMethod::Trades`) against settled REST bars; with `--raw`, also the card /
+    /// trades / mixed source table. Prints only an aggregate table.
+    CompareTrades(crate::live_trades::CompareTradesArgs),
+    /// (RP4/T2) The price card's `priceStep` against the BIST step table, and trade prices
+    /// on that grid (aggregate counts only).
+    PriceSteps(crate::live_trades::PriceStepsArgs),
+    /// (RP4/T2) Bars from the cached trades (M27 rules) as RP4 harness series
+    /// (`fixtures/local/rp4/tradebars/full/<period>/<SYM>.bars`, `manifest.json`), with an
+    /// optional check against the harness REST series (aggregate counts only).
+    ExportTradeBars(crate::live_trades::ExportTradeBarsArgs),
     /// Aggregate statistics of a raw log (no market values).
     Inspect {
         /// Raw log file (`*.qpraw`).
@@ -123,9 +134,18 @@ pub struct RecordArgs {
     /// Also subscribe `mx/messenger` (broker notices).
     #[arg(long)]
     pub messenger: bool,
-    /// Topic suffix for the price card (`@lvl2`; empty for the bare topic).
-    #[arg(long, default_value = "@lvl2")]
-    pub level: String,
+    /// Topic suffix: for the price card `@lvl2` (default) or empty for the bare topic;
+    /// with `--trades` empty (default, level 1) or `@lvl0` — `@lvl2` is refused there.
+    #[arg(long)]
+    pub level: Option<String>,
+    /// (RP4, K66) Connect to the trade endpoint (`/trade`, its own lock) instead of the
+    /// market endpoint and subscribe `mx/trade/<SYM>` (level 1, no suffix). The raw log
+    /// (`<UTC time>-trade.qpraw`) keeps no buyer / seller field.
+    #[arg(long)]
+    pub trades: bool,
+    /// (RP4) With `--trades`: also the special (reported) trades `mx/tradeex/<SYM>`.
+    #[arg(long, requires = "trades")]
+    pub tradeex: bool,
     /// Print a status line every this many seconds.
     #[arg(long, default_value_t = 10)]
     pub every: u64,
@@ -137,6 +157,9 @@ pub fn run(cmd: &LiveCommand) -> Result<(), String> {
         LiveCommand::Inspect { file } => inspect(file),
         LiveCommand::Reset(a) => reset(a, &qp_live::lock::default_lock_dir()),
         LiveCommand::Compare(a) => compare(a),
+        LiveCommand::CompareTrades(a) => crate::live_trades::compare_trades(a),
+        LiveCommand::PriceSteps(a) => crate::live_trades::price_steps(a),
+        LiveCommand::ExportTradeBars(a) => crate::live_trades::export_trade_bars(a),
         LiveCommand::Symbols => symbols(),
         LiveCommand::Trades {
             symbols,
@@ -297,13 +320,66 @@ pub fn classifier() -> NoticeClassifier {
     })
 }
 
-/// A sink that appends every message and event to a raw log and counts.
+/// Whether `topic` is a trade topic (`mx/trade/…`, `mx/tradeex/…`, also mirrored).
+#[must_use]
+pub fn is_trade_topic(topic: &str) -> bool {
+    // The strict parser, and a prefix check as a floor: any topic naming a trade stream
+    // (also inside a mirror, or in a form the parser does not know) is treated as a trade,
+    // so its payload is sanitized rather than kept as is (security review, RP4).
+    let t = topic.trim();
+    matches!(
+        qp_matriks::parse_topic(t).unwrap_mirror(),
+        qp_matriks::Topic::Trade { .. }
+    ) || t.starts_with("mx/trade")
+        || t.contains("/mx/trade")
+}
+
+/// (RP4, K66) What may be kept of a received payload: a trade payload is re-encoded with
+/// level-1 fields only (`sanitize_trade_payload`: buyer and seller dropped); any other
+/// payload is unchanged. A trade payload that does not decode is kept as nothing (empty):
+/// its bytes might hold the level-2 fields. Returns the payload and, for a trade, whether
+/// buyer / seller were on the wire (tags only; their values are never read).
+#[must_use]
+///
+/// With `trade_endpoint`, every payload received on the trade endpoint is treated as a
+/// trade whatever its topic (sanitized, or kept as nothing when it does not decode).
+pub fn keepable_payload_on<'a>(
+    topic: &str,
+    payload: &'a [u8],
+    trade_endpoint: bool,
+) -> (std::borrow::Cow<'a, [u8]>, Option<(bool, bool)>) {
+    use std::borrow::Cow;
+    if !trade_endpoint && !is_trade_topic(topic) {
+        return (Cow::Borrowed(payload), None);
+    }
+    let l2 = qp_matriks::level2_presence(payload);
+    match qp_matriks::sanitize_trade_payload(payload) {
+        Ok(clean) => (Cow::Owned(clean), Some(l2.unwrap_or((false, false)))),
+        Err(_) => (Cow::Owned(Vec::new()), None),
+    }
+}
+
+/// Prefix of the raw log note with the trade sanitizing counts (`qp live inspect`).
+pub const TRADE_SANITIZE_NOTE: &str = "trade-sanitize";
+
+/// A sink that appends every message and event to a raw log and counts. Trade payloads are
+/// written without buyer and seller ([`keepable_payload_on`]).
 pub struct RawSink {
     w: Mutex<RawWriter<BufWriter<File>>>,
     pub messages: AtomicU64,
     pub bytes: AtomicU64,
     pub events: Mutex<Vec<String>>,
     pub errors: AtomicU64,
+    /// Trade messages (sanitized).
+    pub trade_messages: AtomicU64,
+    /// Trade messages that carried a buyer / a seller field on the wire (dropped).
+    pub level2_buyer: AtomicU64,
+    pub level2_seller: AtomicU64,
+    /// Trade payloads that did not decode (kept empty).
+    pub unreadable_trades: AtomicU64,
+    finished: std::sync::atomic::AtomicBool,
+    /// Sink of the trade endpoint: every payload is sanitized as a trade.
+    trade_endpoint: bool,
 }
 
 impl RawSink {
@@ -319,7 +395,76 @@ impl RawSink {
             bytes: AtomicU64::new(0),
             events: Mutex::new(Vec::new()),
             errors: AtomicU64::new(0),
+            trade_messages: AtomicU64::new(0),
+            level2_buyer: AtomicU64::new(0),
+            level2_seller: AtomicU64::new(0),
+            unreadable_trades: AtomicU64::new(0),
+            finished: std::sync::atomic::AtomicBool::new(false),
+            trade_endpoint: false,
         })
+    }
+
+    /// The sink of a trade-endpoint connection: every received payload goes through the
+    /// trade sanitizer, whatever its topic.
+    #[must_use]
+    pub fn for_trade_endpoint(mut self) -> Self {
+        self.trade_endpoint = true;
+        self
+    }
+
+    /// Writes one received message (trade payloads sanitized, counted) and returns the
+    /// payload as kept, for the hub.
+    pub fn take_message<'a>(&self, m: &LiveMessage<'a>) -> std::borrow::Cow<'a, [u8]> {
+        self.messages.fetch_add(1, Ordering::Relaxed);
+        self.bytes
+            .fetch_add(m.payload.len() as u64, Ordering::Relaxed);
+        let (kept, l2) = keepable_payload_on(m.topic, m.payload, self.trade_endpoint);
+        if self.trade_endpoint || is_trade_topic(m.topic) {
+            self.trade_messages.fetch_add(1, Ordering::Relaxed);
+            match l2 {
+                Some((b, s)) => {
+                    self.level2_buyer.fetch_add(u64::from(b), Ordering::Relaxed);
+                    self.level2_seller
+                        .fetch_add(u64::from(s), Ordering::Relaxed);
+                }
+                None => {
+                    self.unreadable_trades.fetch_add(1, Ordering::Relaxed);
+                }
+            }
+        }
+        self.put(&RawRecord::message(
+            m.received_at_us,
+            m.topic,
+            kept.as_ref().to_vec(),
+        ));
+        kept
+    }
+
+    /// The trade sanitizing counts (counts only).
+    #[must_use]
+    pub fn trade_note(&self) -> String {
+        format!(
+            "{TRADE_SANITIZE_NOTE} messages={} buyer_present={} seller_present={} unreadable={}",
+            self.trade_messages.load(Ordering::Relaxed),
+            self.level2_buyer.load(Ordering::Relaxed),
+            self.level2_seller.load(Ordering::Relaxed),
+            self.unreadable_trades.load(Ordering::Relaxed)
+        )
+    }
+
+    /// Ends the log: the trade sanitizing note (once, if trades were seen), then a flush.
+    pub fn finish(&self) {
+        if self.trade_messages.load(Ordering::Relaxed) > 0
+            && !self.finished.swap(true, Ordering::Relaxed)
+        {
+            self.put(&RawRecord {
+                t_us: now_us(),
+                kind: RecordKind::Note,
+                topic: String::new(),
+                payload: self.trade_note().into_bytes(),
+            });
+        }
+        self.flush();
     }
 
     fn put(&self, rec: &RawRecord) {
@@ -348,10 +493,7 @@ impl RawSink {
 
 impl LiveSink for RawSink {
     fn on_message(&self, m: &LiveMessage<'_>) {
-        self.messages.fetch_add(1, Ordering::Relaxed);
-        self.bytes
-            .fetch_add(m.payload.len() as u64, Ordering::Relaxed);
-        self.put(&RawRecord::message(m.received_at_us, m.topic, m.payload));
+        let _ = self.take_message(m);
     }
 
     fn on_event(&self, _ep: &qp_live::EndpointKey, ev: &LiveEvent) {
@@ -391,8 +533,45 @@ impl LiveSink for RawSink {
     }
 }
 
+/// The topics of `qp live record`: the market endpoint's (clock, notices, price cards) or,
+/// with `--trades`, the trade endpoint's (level 1 trade topics; `@lvl2` refused).
+///
+/// # Errors
+/// A bad symbol, or a refused level.
+pub fn record_topics(a: &RecordArgs, symbols: &[String]) -> Result<Vec<String>, String> {
+    let mut topics = Vec::new();
+    if a.trades {
+        if a.messenger {
+            topics.push("mx/messenger".to_owned());
+        }
+        for s in symbols {
+            let mut streams = vec![qp_matriks::TradeStream::Regular];
+            if a.tradeex {
+                streams.push(qp_matriks::TradeStream::Special);
+            }
+            for st in streams {
+                let t = qp_matriks::trade_topic_at(st, s, a.level.as_deref())
+                    .map_err(|e| format!("--level / --symbols: {e} ({s})"))?;
+                topics.push(t);
+            }
+        }
+        if let Some(t) = topics.iter().find(|t| qp_live::is_level2_trade_topic(t)) {
+            return Err(format!("refused level-2 trade topic {t}"));
+        }
+        return Ok(topics);
+    }
+    topics.push("mx/timestamp".to_owned());
+    if a.messenger {
+        topics.push("mx/messenger".to_owned());
+    }
+    let level = a.level.as_deref().unwrap_or("@lvl2");
+    topics.extend(symbols.iter().map(|s| format!("mx/symbol/{s}{level}")));
+    Ok(topics)
+}
+
 fn record(a: &RecordArgs) -> Result<(), String> {
     let symbols = parse_symbols(&a.symbols)?;
+    let topics = record_topics(a, &symbols)?;
     let _identity = identity_lock()?;
     let cfg = LiveConfig::from_env().map_err(|e| e.to_string())?;
     if cfg.hardware_id_warning() {
@@ -401,8 +580,11 @@ fn record(a: &RecordArgs) -> Result<(), String> {
     let root = repo_root();
     let start_us = now_us();
     let out = a.out.clone().unwrap_or_else(|| {
-        root.join("fixtures/local/live/raw")
-            .join(format!("{}.qpraw", utc_stamp(start_us)))
+        root.join("fixtures/local/live/raw").join(format!(
+            "{}{}.qpraw",
+            utc_stamp(start_us),
+            if a.trades { "-trade" } else { "" }
+        ))
     });
     // A relative `--out` is taken from the current directory; `..` is refused so the
     // prefix check below cannot be walked around.
@@ -420,12 +602,16 @@ fn record(a: &RecordArgs) -> Result<(), String> {
     {
         return Err("live: the raw log must stay under fixtures/local/ (K23)".to_owned());
     }
-    let mut topics = vec!["mx/timestamp".to_owned()];
-    if a.messenger {
-        topics.push("mx/messenger".to_owned());
-    }
-    topics.extend(symbols.iter().map(|s| format!("mx/symbol/{s}{}", a.level)));
-    let sink = Arc::new(RawSink::create(&out)?);
+    let endpoint = if a.trades {
+        cfg.trade_endpoint()
+    } else {
+        cfg.market_endpoint()
+    };
+    let sink = if a.trades {
+        Arc::new(RawSink::create(&out)?.for_trade_endpoint())
+    } else {
+        Arc::new(RawSink::create(&out)?)
+    };
     let auth = Arc::new(AuthClient::new(&cfg, AuthPolicy::default()));
     let mut opts = ConnectOptions::new(topics.clone());
     opts.classifier = Some(classifier());
@@ -433,7 +619,7 @@ fn record(a: &RecordArgs) -> Result<(), String> {
     println!(
         "live: mode {:?}, endpoint {}, {} symbols, {} topics, {} s",
         cfg.mode(),
-        cfg.market_endpoint().key(),
+        endpoint.key(),
         symbols.len(),
         topics.len(),
         a.seconds
@@ -441,7 +627,7 @@ fn record(a: &RecordArgs) -> Result<(), String> {
     let t0 = Instant::now();
     let conn = LiveConnection::open(
         &cfg,
-        cfg.market_endpoint(),
+        endpoint,
         auth,
         opts,
         sink.clone() as Arc<dyn LiveSink>,
@@ -481,7 +667,7 @@ fn record(a: &RecordArgs) -> Result<(), String> {
         }
     };
     let close = conn.close();
-    sink.flush();
+    sink.finish();
     let ev = sink
         .events
         .lock()
@@ -497,6 +683,16 @@ fn record(a: &RecordArgs) -> Result<(), String> {
         sink.errors.load(Ordering::Relaxed),
         out.strip_prefix(&root).unwrap_or(&out).display()
     );
+    if a.trades {
+        println!(
+            "live: trades: {} messages; level-2 fields on the wire (dropped, not kept): \
+             buyer {}, seller {}; unreadable {}",
+            sink.trade_messages.load(Ordering::Relaxed),
+            sink.level2_buyer.load(Ordering::Relaxed),
+            sink.level2_seller.load(Ordering::Relaxed),
+            sink.unreadable_trades.load(Ordering::Relaxed)
+        );
+    }
     if let Some(r) = halted {
         return Err(format!(
             "live: HALTED ({r}); not retrying. Tell Arkin before any further live attempt."
@@ -597,6 +793,202 @@ pub fn parse_iso_ms(s: &str) -> Option<(i64, bool)> {
     let day = qp_calendar::days_from_civil(y, u32::try_from(mo).ok()?, u32::try_from(d).ok()?);
     let ms = ((day * 86_400 + h * 3600 + mi * 60 + se) - off_min * 60) * 1000 + frac_ms;
     Some((ms, had))
+}
+
+/// (RP4) Aggregate statistics of the trade messages of a raw log (no values: counts,
+/// field presence, time-unit estimate, arrival lags, the side value set).
+#[derive(Debug, Default, Clone, PartialEq)]
+pub struct TradeInspect {
+    /// `mx/trade/…` messages.
+    pub regular: u64,
+    /// `mx/tradeex/…` messages.
+    pub special: u64,
+    /// Messages per symbol.
+    pub per_symbol: BTreeMap<String, u64>,
+    /// Payloads that are not a `TradeMessage` (or were kept empty).
+    pub decode_errors: u64,
+    /// Payload symbol differs from the topic's.
+    pub symbol_mismatch: u64,
+    /// Messages carrying each field (wire tags; buyer / seller: presence only).
+    pub fields: BTreeMap<&'static str, u64>,
+    /// `TradeTimeUnit::Auto`'s pick per message (arrival as reference).
+    pub auto_unit: BTreeMap<&'static str, u64>,
+    /// Messages whose `timestamp` is a valid since-midnight nanosecond value.
+    pub since_midnight_ns: u64,
+    /// Messages without `timestamp`.
+    pub no_timestamp: u64,
+    /// Arrival − trade time (ms) with the `Auto` reading.
+    pub lag_auto_ms: Vec<i64>,
+    /// Arrival − trade time (ms) read as since-midnight ns (documented unit).
+    pub lag_since_midnight_ms: Vec<i64>,
+    /// `activeBidOrAsk` values as sent (at most 8 characters) and their counts.
+    pub sides: BTreeMap<String, u64>,
+    /// `isTradeEx = true`.
+    pub trade_ex_flag: u64,
+    /// Trade numbers seen twice for the same symbol.
+    pub repeated_trade_no: u64,
+    /// The recorder's sanitizing notes (`trade-sanitize …`).
+    pub notes: Vec<String>,
+}
+
+impl TradeInspect {
+    /// Trade messages.
+    #[must_use]
+    pub fn messages(&self) -> u64 {
+        self.regular + self.special
+    }
+}
+
+/// (RP4) [`TradeInspect`] of raw records.
+#[must_use]
+pub fn inspect_trades(recs: &[RawRecord]) -> TradeInspect {
+    use qp_matriks::trade::resolve_trade_time;
+    use qp_matriks::{
+        decode_trade_raw, parse_topic, Topic, TradeDecodeConfig, TradeTimeUnit, TRADE_FIELDS,
+    };
+    let mut out = TradeInspect::default();
+    let mut seen_no: std::collections::BTreeSet<(String, String)> =
+        std::collections::BTreeSet::new();
+    let auto = TradeDecodeConfig {
+        unit: TradeTimeUnit::Auto,
+        ..TradeDecodeConfig::default()
+    };
+    let midnight = TradeDecodeConfig::default();
+    for r in recs {
+        if r.kind == RecordKind::Note {
+            let n = String::from_utf8_lossy(&r.payload);
+            if n.starts_with(TRADE_SANITIZE_NOTE) {
+                out.notes.push(n.into_owned());
+            }
+            continue;
+        }
+        if r.kind != RecordKind::Message {
+            continue;
+        }
+        let Topic::Trade {
+            symbol, special, ..
+        } = parse_topic(&r.topic).unwrap_mirror().clone()
+        else {
+            continue;
+        };
+        if special {
+            out.special += 1;
+        } else {
+            out.regular += 1;
+        }
+        *out.per_symbol.entry(symbol.clone()).or_default() += 1;
+        let Ok(tags) = qp_matriks::wire::field_numbers(&r.payload) else {
+            out.decode_errors += 1;
+            continue;
+        };
+        let Ok(v) = decode_trade_raw(&r.payload) else {
+            out.decode_errors += 1;
+            continue;
+        };
+        if r.payload.is_empty() {
+            out.decode_errors += 1;
+            continue;
+        }
+        for (n, name) in TRADE_FIELDS {
+            if tags.contains(&n) {
+                *out.fields.entry(name).or_default() += 1;
+            }
+        }
+        if v.symbol != symbol {
+            out.symbol_mismatch += 1;
+        }
+        if let Some(sd) = &v.side {
+            *out.sides
+                .entry(sd.trim().chars().take(8).collect())
+                .or_default() += 1;
+        }
+        if v.is_trade_ex == Some(true) {
+            out.trade_ex_flag += 1;
+        }
+        // Repeats of a trade number (kept in memory only, never printed).
+        if let Some(no) = v.order_no.clone() {
+            if !seen_no.insert((symbol.clone(), no)) {
+                out.repeated_trade_no += 1;
+            }
+        }
+        let arrival_ms = r.t_us.div_euclid(1000);
+        let Some(raw) = v.timestamp else {
+            out.no_timestamp += 1;
+            continue;
+        };
+        if let Some((ns, u)) = resolve_trade_time(raw, &auto, arrival_ms) {
+            *out.auto_unit.entry(u.name()).or_default() += 1;
+            out.lag_auto_ms.push(arrival_ms - ns.div_euclid(1_000_000));
+        }
+        if let Some((ns, _)) = resolve_trade_time(raw, &midnight, arrival_ms) {
+            out.since_midnight_ns += 1;
+            out.lag_since_midnight_ms
+                .push(arrival_ms - ns.div_euclid(1_000_000));
+        }
+    }
+    out
+}
+
+fn print_trade_inspect(t: &mut TradeInspect) {
+    let total = t.messages();
+    println!(
+        "trades: {total} messages ({} mx/trade, {} mx/tradeex), {} symbols, {} decode errors, \
+         {} symbol mismatches",
+        t.regular,
+        t.special,
+        t.per_symbol.len(),
+        t.decode_errors,
+        t.symbol_mismatch
+    );
+    let mut per: Vec<i64> = t
+        .per_symbol
+        .values()
+        .map(|&n| i64::try_from(n).unwrap_or(i64::MAX))
+        .collect();
+    let (mn, md, mx) = (
+        per.iter().min().copied().unwrap_or(0),
+        pct(&mut per, 0.5),
+        per.iter().max().copied().unwrap_or(0),
+    );
+    println!("trades per symbol: min {mn}, p50 {md}, max {mx}");
+    println!("trade fields present (messages):");
+    for (_, name) in qp_matriks::TRADE_FIELDS {
+        let c = t.fields.get(name).copied().unwrap_or(0);
+        let tag = if matches!(name, "buyer" | "seller") {
+            " (level 2: presence in the kept log; must be 0)"
+        } else {
+            ""
+        };
+        println!("  {name}: {c}{tag}");
+    }
+    for n in &t.notes {
+        println!("recorder: {n} (level-2 fields seen on the wire and dropped; counts only)");
+    }
+    println!(
+        "trade time: auto unit picks {:?}; valid as ns since local midnight: {} of {}; \
+         no timestamp: {}",
+        t.auto_unit,
+        t.since_midnight_ns,
+        total - t.decode_errors,
+        t.no_timestamp
+    );
+    for (label, v) in [
+        ("auto", &mut t.lag_auto_ms),
+        ("ns_from_midnight", &mut t.lag_since_midnight_ms),
+    ] {
+        let n = v.len();
+        let (a, b) = (pct(v, 0.5), pct(v, 0.95));
+        println!(
+            "arrival - trade time [{label}] (ms): n {n}, min {}, p50 {a}, p95 {b}, max {}",
+            v.first().copied().unwrap_or(0),
+            v.last().copied().unwrap_or(0)
+        );
+    }
+    println!("activeBidOrAsk values (count): {:?}", t.sides);
+    println!(
+        "isTradeEx=true: {}; repeated trade numbers: {}",
+        t.trade_ex_flag, t.repeated_trade_no
+    );
 }
 
 fn inspect(path: &Path) -> Result<(), String> {
@@ -734,6 +1126,10 @@ fn inspect(path: &Path) -> Result<(), String> {
     println!("clock events: {clock_events:?}");
     println!("stockStatus codes seen (count): {phases:?}");
     println!("publishReason seen (count): {pub_reason:?}");
+    let mut tr = inspect_trades(&recs);
+    if tr.messages() > 0 || !tr.notes.is_empty() {
+        print_trade_inspect(&mut tr);
+    }
     Ok(())
 }
 
@@ -871,7 +1267,7 @@ fn bars(
 }
 
 /// Append one request line (counts only; no values, no addresses) to a JSONL log.
-fn log_request(
+pub(crate) fn log_request(
     log: &Path,
     what: &str,
     sym: &str,
@@ -1063,6 +1459,28 @@ pub struct FeedArgs {
 }
 
 #[cfg(test)]
+mod trade_keep_tests {
+    use super::*;
+
+    #[test]
+    fn trade_endpoint_sanitizes_every_payload_whatever_the_topic() {
+        // Not a trade message: on the trade endpoint it is kept as nothing, never as is.
+        let junk = b"\x3a\x03XYZ".to_vec();
+        let (kept, _) = keepable_payload_on("odd/topic", &junk, true);
+        assert!(kept.is_empty() || kept.as_ref() != junk.as_slice());
+        // Off the trade endpoint a non-trade topic is unchanged.
+        let (kept, l2) = keepable_payload_on("mx/symbol/AAA@lvl2", &junk, false);
+        assert_eq!(kept.as_ref(), junk.as_slice());
+        assert!(l2.is_none());
+        // Prefix floor: unknown trade-like forms count as trades.
+        assert!(is_trade_topic("mx/tradeex/AAA"));
+        assert!(is_trade_topic("mx/user/x/mx/trade/AAA"));
+        assert!(is_trade_topic("mx/trade/AAA@weird"));
+        assert!(!is_trade_topic("mx/symbol/AAA@lvl2"));
+    }
+}
+
+#[cfg(test)]
 mod window_tests {
     use super::*;
 
@@ -1102,7 +1520,7 @@ pub fn parse_volume_field(s: &str) -> Result<qp_matriks::VolumeField, String> {
     }
 }
 
-fn split_list(s: &str) -> Vec<String> {
+pub(crate) fn split_list(s: &str) -> Vec<String> {
     s.split(',')
         .map(str::trim)
         .filter(|x| !x.is_empty())
@@ -1295,13 +1713,29 @@ fn rest_period(iv: &str) -> Option<&'static str> {
 /// midnight) → the day's session open; intraday `time` = bar open, bars outside the
 /// session (closing session, 18:00+) merged into the day's previous bar. Several files are
 /// merged by `t` (later file wins). `None`: no file.
-fn load_rest(
+pub(crate) fn load_rest(
     dir: &Path,
     sym: &str,
     iv: &str,
     prefer_adj: bool,
     quantity: bool,
     cal: &qp_calendar::ExchangeCalendar,
+) -> Result<Option<Vec<qp_schema::Bar>>, String> {
+    load_rest_with(dir, sym, iv, prefer_adj, quantity, cal, false)
+}
+
+/// [`load_rest`]; with `last_span`, a bar outside the session merges into the day's
+/// **last session bar** (`bar_at(interval, last close − 1)`, the live rule 1 of
+/// `qp_source::livebar`), which is created from it when REST has no bar there (no
+/// continuous trade in the last minute), instead of into the previous REST bar.
+pub(crate) fn load_rest_with(
+    dir: &Path,
+    sym: &str,
+    iv: &str,
+    prefer_adj: bool,
+    quantity: bool,
+    cal: &qp_calendar::ExchangeCalendar,
+    last_span: bool,
 ) -> Result<Option<Vec<qp_schema::Bar>>, String> {
     use qp_schema::Bar;
     let Some(period) = rest_period(iv) else {
@@ -1382,6 +1816,26 @@ fn load_rest(
             out.push(b);
             continue;
         }
+        let day = cal.local_day(b.t);
+        let target = cal
+            .sessions_on(day)
+            .last()
+            .and_then(|s| cal.bar_at(interval, s.close - 1))
+            .map(|s| s.open);
+        if let (true, Some(tt)) = (last_span, target) {
+            if b.t >= tt {
+                match out.last_mut() {
+                    Some(prev) if prev.t == tt => {
+                        prev.h = prev.h.max(b.h);
+                        prev.l = prev.l.min(b.l);
+                        prev.c = b.c;
+                        prev.v += b.v;
+                    }
+                    _ => out.push(Bar { t: tt, ..b }),
+                }
+                continue;
+            }
+        }
         // Outside the session: merge into the same day's previous bar.
         match out.last_mut() {
             Some(prev) if cal.local_day(prev.t) == cal.local_day(b.t) && prev.t < b.t => {
@@ -1421,7 +1875,7 @@ impl Bucket {
 }
 
 /// Records of several raw logs as one recording (rule in [`CompareArgs::raw`]).
-fn read_recordings(list: &str) -> Result<Vec<RawRecord>, String> {
+pub(crate) fn read_recordings(list: &str) -> Result<Vec<RawRecord>, String> {
     let mut all: Vec<RawRecord> = Vec::new();
     for (i, f) in split_list(list).iter().enumerate() {
         let path = Path::new(f);
@@ -1452,14 +1906,14 @@ fn read_recordings(list: &str) -> Result<Vec<RawRecord>, String> {
     Ok(all)
 }
 
-struct Built {
-    stores: BTreeMap<qp_schema::data::FeedKey, qp_source::FeedStore>,
-    finals: std::collections::BTreeSet<(qp_schema::data::FeedKey, i64)>,
-    gaps: Vec<(i64, i64)>,
-    stats: qp_matriks::FeedStats,
+pub(crate) struct Built {
+    pub(crate) stores: BTreeMap<qp_schema::data::FeedKey, qp_source::FeedStore>,
+    pub(crate) finals: std::collections::BTreeSet<(qp_schema::data::FeedKey, i64)>,
+    pub(crate) gaps: Vec<(i64, i64)>,
+    pub(crate) stats: qp_matriks::FeedStats,
 }
 
-fn build_live(recs: &[RawRecord], args: &FeedArgs) -> Result<Built, String> {
+pub(crate) fn build_live(recs: &[RawRecord], args: &FeedArgs) -> Result<Built, String> {
     let mut feed = args.build()?;
     let mut stores: BTreeMap<qp_schema::data::FeedKey, qp_source::FeedStore> = BTreeMap::new();
     let mut finals = std::collections::BTreeSet::new();
@@ -1669,7 +2123,7 @@ fn compare(a: &CompareArgs) -> Result<(), String> {
 }
 
 /// Adds `d` into `acc` (counts summed, maxima kept).
-fn merge_diff(acc: &mut qp_source::BarDiff, d: &qp_source::BarDiff) {
+pub(crate) fn merge_diff(acc: &mut qp_source::BarDiff, d: &qp_source::BarDiff) {
     let f = |a: &mut qp_source::FieldDiff, b: &qp_source::FieldDiff| {
         a.exact += b.exact;
         a.within_tol += b.within_tol;

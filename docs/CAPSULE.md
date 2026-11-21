@@ -332,6 +332,33 @@ Karnesi yazı turaya yakın kapsül akışta gösterilmez (K53). Kural önceden 
 | Olumsuz geçiş (R4, K42/A22) | pozisyon/niyet kapsülünde yalnız `weakened`/`invalidated`/`retracted` seviyeden bağımsız | `qp_capsule::admits_at` | `T3-sensitivity.md`, döküm 46 |
 | Geçerlilik (R4, K42/A28) | `valid`/`no_longer`/`closed`; durum koşulu ile beklenen çözüm ayrı | `sentence::validity_now`, `Story.condition`/`resolution`, `GlyphSpec.validity` | döküm 47, `g2-glyphs-validity` |
 | Süre ifadesi (R4) | takvime göre gündelik süre; başlık yapı taşları | `realize::elapsed`, `realize::parts` | birim testleri (VERIFY 12) |
+| Kapsül sabit kaydı (RP4) | sabitler adlandırılmış kayıtlarda: `r3` (bugünkü her şey, **protokol varsayılanı**) ve `rp4`; eski kayıt adıyla seçilebilir kalır; barındırıcı `init.capsules.engine` ile seçer (yoksa alan yazılmaz → `r3`, var olan dökümler bayt eşit) | `qp_capsule::EngineConfig::named`, `ENGINES`, `DEFAULT_ENGINE`; `qp_facts::detectors_named`; PROTOCOL §20; `qp sim --rule`, `qp demo --rule` | `rounds/RP4/experiments/harness/README.md` "RP4/S" |
+| Sonuç `rp4` (RP4/M25) | gün içi barlarda `HighLow` (`yukdus`: hedefe/durdurmaya yüksek/düşükle değme, bağda kapanış tarafı, yönlü bariyer `2,0 × r3`, yönsüz `1,3 × r3`); günlük ve üstünde `Barrier` (`r3`, değişmeden) | `qp_capsule::outcome::{HighLow, Rp4}` | `rounds/RP4/experiments/M25/RESULTS.md`, `harness/tests/rp4_product.rs` |
+| Dedektör seti `rp4` (RP4/M26) | `r3` seti; `breakout.range` ve `flow.volume_surge` sürüm 2 (gün içi saat dilimi mevsimselliği, XIST; yalnız ≥ 1 sa gün içi barlarda etkin; 1 sa altında ve günlükte `r3` ile bit eşit) | `qp_facts::rp4_detectors`, `SeasonalBreakout`, `SeasonalVolumeSurge`, `season` | `rounds/RP4/experiments/M26/RESULTS.md` |
+
+**Adlandırılmış kapsül sabit kayıtları (RP4).** Bir kayıt, sonuç kuralı ile dedektör setini
+birlikte adlandırır (tema `kinddir`, önem `confirm`, cümle ve güven yolu her kayıtta aynı).
+Sabit değişikliği yeni bir kayıttır, eskisinin üzerine yazılmaz.
+
+| Kayıt | Sonuç kuralı (`Story.resolution.rule`) | Dedektör seti | Durum |
+|---|---|---|---|
+| `r3` | `barrier` (`Barrier`: kapanışla, `0,3·√h·ATR14` / `0,65·√h·ATR100`) | `default_detectors` (yedi dedektör, sürüm 1) | protokol varsayılanı |
+| `rp4` | `rp4` (`Rp4`): gün içinde `HighLow` (karar nedeni `highlow.*`), günlük ve üstünde `Barrier` (`barrier.*`) | `rp4_detectors` (`breakout.range@2`, `flow.volume_surge@2`, diğer beşi sürüm 1) | barındırıcı seçer |
+
+- **Periyot** hikâyenin serisinin barlarından, geleceğe bakmadan belirlenir:
+  `bars[..=doğum]`'daki en küçük pozitif zaman adımı 12 saatten kısaysa gün içi
+  (`outcome::intraday_at`, `INTRADAY_MAX_STEP_MS`). Motor seri kimliği ve aralık bilgisini
+  görmez, yalnız barları görür; hikâyenin periyodu doğumunda sabitlenir. İki alt kuralın
+  türe göre ufku aynıdır (`base_params`), bu yüzden ufuk periyoda bağlı değildir.
+- **Karne:** anahtar dedektör sürümünü taşıdığı için (`<tür>/<yön>/<dedektör>@<sürüm>`)
+  `rp4` kaydında `breakout.range@2` ve `flow.volume_surge@2` hikâyeleri `@1`'den **ayrı
+  karne satırları** oluşturur (günlükte ve 1 sa altında algılamalar bit eşit olsa da).
+  Diğer beş dedektörün anahtarı iki kayıtta aynıdır; ama karne oturuma aittir, iki kaydın
+  kapanışları aynı karneye girmez (bir oturum tek kayıtla koşar).
+- **Okuyucu:** replika adayları ve görüntüleyicinin hikâye denetimi, otoritenin kaydını
+  hikâyelerin `resolution.rule`'undan okur (`qp_capsule::engine_of_rule`,
+  `qp_session::capsule::engine_of_doc`); `rp4` kuralı yoksa `r3`.
+- Gösterim (`qp demo`) varsayılanı `r3`'tür; `rp4`'e geçiş Arkin'in kararıdır.
 
 Kanıtın açılması (vazgeçilmez, K34): yetkili okuyucu kanıt değerlerini görür; yetkisiz okuyucu
 yorumu, karneyi ve "bu kanıt şu veri yetkisini gerektirir" (`requires`) ile neye dayandığını

@@ -1,6 +1,6 @@
 //! (RP4 T3) Live bars from the trade stream (`BarMethod::Trades`, livebar rule 8):
 //! alignment (K14) with the opening auction in the first bar and the closing session in
-//! the last, volume Σ price·quantity (TL) with lots apart, special trades optional,
+//! the last, volume Σ price·quantity (TL) with lots apart, special trades in the day bar only (default) or as set,
 //! card ticks ignored, late trades, the seam, determinism. Hand-built trades only.
 
 use qp_calendar::{builtin, parse_date, ExchangeCalendar};
@@ -116,15 +116,39 @@ fn trades_build_calendar_aligned_bars_with_auctions_in_first_and_last() {
     assert_eq!(st.special_excluded, 1);
     assert_eq!(st.off_session, 0);
 
-    // Daily bar: one bar, all regular trades.
+    // Daily bar: one bar, the regular trades and (default `DayOnly`, RP4 M27) the
+    // special trade.
     let mut d = live("1d", trades_cfg());
     let db = bars_of("1d", &run(&mut d, &day()));
     assert_eq!(db.len(), 1);
     assert_eq!(
         (db[0].o, db[0].h, db[0].l, db[0].c),
-        (100.0, 102.5, 99.75, 102.5)
+        (100.0, 150.0, 99.75, 102.5)
     );
-    assert_eq!(d.current_quantity(), Some(882.0));
+    assert_eq!(d.current_quantity(), Some(1882.0));
+    assert_eq!(d.stats().special_excluded, 0);
+}
+
+/// RP4 M27: REST's daily bar holds the special (reported) trades, its intraday bars do
+/// not. `DayOnly` (the default) follows that; `Exclude` keeps them out of the day too.
+#[test]
+fn special_trades_join_the_day_bar_only_by_default() {
+    assert_eq!(SpecialTrades::default(), SpecialTrades::DayOnly);
+    assert_eq!(LiveConfig::default().special_trades, SpecialTrades::DayOnly);
+    for iv in ["1m", "5m", "1h"] {
+        let mut lb = live(iv, trades_cfg());
+        run(&mut lb, &day());
+        assert_eq!(lb.stats().special_excluded, 1, "{iv}");
+    }
+    let regular_only = LiveConfig {
+        special_trades: SpecialTrades::Exclude,
+        ..trades_cfg()
+    };
+    let mut ex = live("1d", regular_only);
+    let db = bars_of("1d", &run(&mut ex, &day()));
+    assert_eq!((db[0].h, ex.current_quantity()), (102.5, Some(882.0)));
+    assert_eq!(ex.stats().special_excluded, 1);
+    assert_eq!(SpecialTrades::DayOnly.name(), "day_only");
 }
 
 #[test]

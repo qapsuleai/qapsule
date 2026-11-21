@@ -7,6 +7,7 @@
 //! symbols and results are collected in symbol order.
 
 pub mod boot;
+pub mod cases;
 pub mod common;
 pub mod data;
 pub mod m25;

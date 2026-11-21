@@ -27,6 +27,13 @@ serde = { version = "1.0.229", features = ["derive"] }
 serde_json = { version = "1.0.154", features = ["float_roundtrip"] }
 # --- Alternatifler (README "Alternatif ekleme"): her biri bir path bağımlılığı ---
 # m25-ornek = { path = "../M25/ornek" }
+m25-taban = { path = "../M25/taban" }
+m25-teyit2 = { path = "../M25/teyit2" }
+m25-yukdus = { path = "../M25/yukdus" }
+m25-olcek = { path = "../M25/olcek" }
+m25-umut = { path = "../M25/umut" }
+m26-olcek26 = { path = "../M26/olcek26" }
+m26-mevsim = { path = "../M26/mevsim" }
 
 [lints.rust]
 unsafe_code = "forbid"

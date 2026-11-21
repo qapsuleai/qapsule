@@ -390,7 +390,8 @@ enum BrokerCmd {
         payload: Vec<u8>,
         only_subscribed: bool,
     },
-    Drop,
+    /// Close from the server side: every connection (`None`) or those on one path.
+    Drop(Option<String>),
 }
 
 struct BrokerShared {
@@ -507,7 +508,16 @@ impl MockBroker {
     /// Closes every open connection from the server side (TCP shutdown, no MQTT goodbye).
     pub fn drop_connections(&self) {
         for (_, tx) in self.shared.conns.lock().unwrap().iter() {
-            let _ = tx.send(BrokerCmd::Drop);
+            let _ = tx.send(BrokerCmd::Drop(None));
+        }
+    }
+
+    /// (RP4) Closes, from the server side, only the connections on request path `path`
+    /// (`market`, `trade`); the others stay open.
+    pub fn drop_path(&self, path: &str) {
+        let p = path.trim_matches('/').to_string();
+        for (_, tx) in self.shared.conns.lock().unwrap().iter() {
+            let _ = tx.send(BrokerCmd::Drop(Some(p.clone())));
         }
     }
 
@@ -528,7 +538,7 @@ impl MockBroker {
                     payload: payload.clone(),
                     only_subscribed: *only_subscribed,
                 },
-                BrokerCmd::Drop => BrokerCmd::Drop,
+                BrokerCmd::Drop(p) => BrokerCmd::Drop(p.clone()),
             };
             let _ = tx.send(c);
         }
@@ -674,11 +684,12 @@ fn serve_connection(
                         );
                     }
                 }
-                BrokerCmd::Drop => {
+                BrokerCmd::Drop(p) if p.as_ref().is_none_or(|p| *p == path_key) => {
                     gauge.close();
                     let _ = ws.get_ref().shutdown(Shutdown::Both);
                     return;
                 }
+                BrokerCmd::Drop(_) => {}
             }
         }
         match ws.read() {

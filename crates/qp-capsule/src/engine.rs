@@ -76,6 +76,51 @@ impl EngineConfig {
             ranker: Box::new(crate::rank::Confirm::default()),
         }
     }
+
+    /// (RP4) The `rp4` record: the R3 choices with the outcome rule
+    /// [`crate::outcome::Rp4`] (high / low touch on intraday bars, the R3 barrier on
+    /// daily and longer bars; `rounds/RP4/experiments/M25/RESULTS.md`). Its detector set
+    /// is `qp_facts::rp4_detectors` (same name, [`qp_facts::detectors_named`]).
+    #[must_use]
+    pub fn rp4() -> Self {
+        Self {
+            outcome: Box::new(crate::outcome::Rp4::default()),
+            ..Self::r3()
+        }
+    }
+
+    /// (RP4, `docs/CAPSULE.md` §9.9) A **named capsule constant record** by name
+    /// ([`ENGINES`]): `r3` ([`EngineConfig::r3`]) or `rp4` ([`EngineConfig::rp4`]);
+    /// `None` for an unknown name. The detector set of the same name is
+    /// [`qp_facts::detectors_named`]. The protocol default is [`DEFAULT_ENGINE`].
+    #[must_use]
+    pub fn named(name: &str) -> Option<Self> {
+        match name {
+            "r3" => Some(Self::r3()),
+            "rp4" => Some(Self::rp4()),
+            _ => None,
+        }
+    }
+}
+
+/// (RP4) Names of the capsule constant records ([`EngineConfig::named`] and
+/// `qp_facts::detectors_named`), oldest first. Old records stay selectable by name.
+pub const ENGINES: &[&str] = &["r3", "rp4"];
+
+/// (RP4) The record the protocol uses when the host names none (`init.capsules.engine`
+/// absent): `r3`, so every existing transcript and dump stays byte-identical.
+pub const DEFAULT_ENGINE: &str = "r3";
+
+/// (RP4) The record whose outcome rule writes `rule` into a story's resolution
+/// (`Story.resolution.rule`): `rp4` for the rule `rp4`, otherwise `r3`. Lets a reader
+/// (a replica, a viewer's check) run the detector set the authority ran.
+#[must_use]
+pub fn engine_of_rule(rule: &str) -> &'static str {
+    if rule == "rp4" {
+        "rp4"
+    } else {
+        DEFAULT_ENGINE
+    }
 }
 
 /// One transition of one story, with the story as it is after the transition.

@@ -326,6 +326,66 @@ pub fn sanitize_trade_payload(payload: &[u8]) -> Result<Vec<u8>, DecodeError> {
     Ok(TradeLevel1::decode(payload)?.encode_to_vec())
 }
 
+/// The level-1 fields of a trade payload as sent (no unit resolution, no validation), for
+/// aggregate statistics (`qp live inspect`). Buyer and seller are not declared here either.
+#[derive(Debug, Clone, PartialEq, Eq, Default)]
+pub struct TradeRawView {
+    /// Symbol in the payload.
+    pub symbol: String,
+    /// `orderNo` (trade number) as sent.
+    pub order_no: Option<String>,
+    /// `price` present.
+    pub has_price: bool,
+    /// `quantity` present.
+    pub has_quantity: bool,
+    /// `activeBidOrAsk` as sent.
+    pub side: Option<String>,
+    /// `timestamp` as sent.
+    pub timestamp: Option<i64>,
+    /// `isTradeEx` as sent.
+    pub is_trade_ex: Option<bool>,
+}
+
+/// Field numbers of `TradeMessage` with their names (`proto/Trade.proto`). 7 and 8
+/// (`buyer`, `seller`) are listed so that their **presence** can be counted from the wire
+/// tags ([`crate::wire::field_numbers`]); their values are never read.
+pub const TRADE_FIELDS: [(u32, &str); 9] = [
+    (1, "symbol"),
+    (2, "orderNo"),
+    (3, "price"),
+    (4, "quantity"),
+    (5, "activeBidOrAsk"),
+    (6, "timestamp"),
+    (7, "buyer"),
+    (8, "seller"),
+    (9, "isTradeEx"),
+];
+
+/// Decodes the level-1 fields of a trade payload as sent ([`TradeRawView`]).
+///
+/// # Errors
+/// Not a `TradeMessage`.
+pub fn decode_trade_raw(payload: &[u8]) -> Result<TradeRawView, DecodeError> {
+    let m = TradeLevel1::decode(payload)?;
+    Ok(TradeRawView {
+        symbol: m.symbol,
+        order_no: m.order_no,
+        has_price: m.price.is_some(),
+        has_quantity: m.quantity.is_some(),
+        side: m.active_bid_or_ask,
+        timestamp: m.timestamp,
+        is_trade_ex: m.is_trade_ex,
+    })
+}
+
+/// Whether a trade payload carries the level-2 fields (buyer 7, seller 8) on the wire:
+/// tags only, values are skipped. `None`: not protobuf.
+#[must_use]
+pub fn level2_presence(payload: &[u8]) -> Option<(bool, bool)> {
+    let f = crate::wire::field_numbers(payload).ok()?;
+    Some((f.contains(&7), f.contains(&8)))
+}
+
 /// Trade history for a gap (REST `trade.gz`; RP4). The live connector's REST client is
 /// adapted to this by its caller; tests use a fake.
 pub trait TradeHistory {
@@ -397,6 +457,12 @@ mod tests {
         let clean = sanitize_trade_payload(&wire(5)).unwrap();
         assert!(!clean.windows(6).any(|w| w == b"BUYERX"));
         assert!(!clean.windows(7).any(|w| w == b"SELLERY"));
+        assert_eq!(level2_presence(&wire(5)), Some((true, true)));
+        assert_eq!(level2_presence(&clean), Some((false, false)));
+        let raw = decode_trade_raw(&clean).unwrap();
+        assert_eq!(raw.side.as_deref(), Some("B"));
+        assert_eq!(raw.timestamp, Some(5));
+        assert!(raw.order_no.is_some() && raw.has_price && raw.has_quantity);
         let back = TradeMessage::decode(clean.as_slice()).unwrap();
         assert_eq!((back.buyer, back.seller), (None, None));
         assert_eq!(back.order_no.as_deref(), Some("123456"));

@@ -178,3 +178,49 @@ pub fn default_local_root() -> PathBuf {
 pub fn f(x: Option<f64>, digits: usize) -> String {
     x.map_or_else(|| "—".to_owned(), |v| format!("{v:.digits$}"))
 }
+
+/// (RP4 `cases`) Istanbul is UTC+3 all year since 2016 (`docs/DATA_ACCESS.md`).
+const IST_OFFSET_MS: i64 = 3 * 3_600_000;
+
+fn civil_from_days(z: i64) -> (i64, i64, i64) {
+    let z = z + 719_468;
+    let era = z.div_euclid(146_097);
+    let doe = z - era * 146_097;
+    let yoe = (doe - doe / 1460 + doe / 36_524 - doe / 146_096) / 365;
+    let doy = doe - (365 * yoe + yoe / 4 - yoe / 100);
+    let mp = (5 * doy + 2) / 153;
+    let d = doy - (153 * mp + 2) / 5 + 1;
+    let m = if mp < 10 { mp + 3 } else { mp - 9 };
+    (yoe + era * 400 + i64::from(m <= 2), m, d)
+}
+
+/// Epoch ms of 12:00 Istanbul on `YYYY-MM-DD`.
+#[must_use]
+pub fn local_noon_ms(date: &str) -> Option<i64> {
+    let mut it = date.split('-');
+    let (y, m, d): (i64, i64, i64) = (
+        it.next()?.parse().ok()?,
+        it.next()?.parse().ok()?,
+        it.next()?.parse().ok()?,
+    );
+    let yy = if m <= 2 { y - 1 } else { y };
+    let era = yy.div_euclid(400);
+    let yoe = yy - era * 400;
+    let doy = (153 * ((m + 9) % 12) + 2) / 5 + d - 1;
+    let days = era * 146_097 + yoe * 365 + yoe / 4 - yoe / 100 + doy - 719_468;
+    Some(days * 86_400_000 + 12 * 3_600_000 - IST_OFFSET_MS)
+}
+
+/// Local (Istanbul) `YYYY-MM-DD` of epoch ms.
+#[must_use]
+pub fn local_date(t: i64) -> String {
+    let (y, m, d) = civil_from_days((t + IST_OFFSET_MS).div_euclid(86_400_000));
+    format!("{y:04}-{m:02}-{d:02}")
+}
+
+/// Local (Istanbul) `HH:MM` of epoch ms.
+#[must_use]
+pub fn local_hhmm(t: i64) -> String {
+    let s = (t + IST_OFFSET_MS).rem_euclid(86_400_000) / 60_000;
+    format!("{:02}:{:02}", s / 60, s % 60)
+}

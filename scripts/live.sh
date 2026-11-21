@@ -3,6 +3,13 @@
 # environment or, if unset, from ./.env.local (never printed, never on a command line).
 # Usage: scripts/live.sh record --symbols THYAO,GARAN,ASELS --seconds 120
 #        scripts/live.sh inspect fixtures/local/live/raw/<file>.qpraw
+#        scripts/live.sh record --trades --symbols THYAO,GARAN,ASELS --seconds 120
+#          (RP4, K66: the trade endpoint `/trade` only, its own lock; `mx/trade/<SYM>`,
+#          level 1; `--tradeex` adds `mx/tradeex/<SYM>`; `@lvl2` is refused. Raw log
+#          fixtures/local/live/raw/<UTC time>-trade.qpraw without buyer / seller.)
+#        scripts/live.sh inspect fixtures/local/live/raw/<file>-trade.qpraw
+#          (trade counts, field presence, time-unit estimate, arrival lags, side values;
+#          no price, no trade number.)
 #        scripts/live.sh reset --endpoint delayed-market --note "<who, what was checked>"
 #          (RP4/T5, K64: lifts a `.halted` endpoint; a PERSON runs it after checking why —
 #          an agent never does on its own. Asks on a terminal, else needs --i-am-human.

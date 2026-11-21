@@ -184,6 +184,64 @@ dependencies = [
 ]
 
 [[package]]
+name = "m25-olcek"
+version = "0.1.0"
+dependencies = [
+ "qp-capsule",
+ "qp-schema",
+]
+
+[[package]]
+name = "m25-taban"
+version = "0.1.0"
+dependencies = [
+ "qp-capsule",
+ "qp-schema",
+]
+
+[[package]]
+name = "m25-teyit2"
+version = "0.1.0"
+dependencies = [
+ "qp-capsule",
+ "qp-schema",
+]
+
+[[package]]
+name = "m25-umut"
+version = "0.1.0"
+dependencies = [
+ "qp-capsule",
+ "qp-schema",
+]
+
+[[package]]
+name = "m25-yukdus"
+version = "0.1.0"
+dependencies = [
+ "qp-capsule",
+ "qp-schema",
+]
+
+[[package]]
+name = "m26-mevsim"
+version = "0.1.0"
+dependencies = [
+ "qp-calendar",
+ "qp-compute",
+ "qp-facts",
+ "qp-schema",
+]
+
+[[package]]
+name = "m26-olcek26"
+version = "0.1.0"
+dependencies = [
+ "qp-facts",
+ "qp-schema",
+]
+
+[[package]]
 name = "memchr"
 version = "2.8.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -372,6 +430,7 @@ dependencies = [
 name = "qp-facts"
 version = "0.0.0"
 dependencies = [
+ "qp-calendar",
  "qp-compute",
  "qp-schema",
 ]
@@ -469,6 +528,13 @@ checksum = "d902046e6a28a1e4c3cab97258a0ce11e994903f01c2d97a9447a0b3df85f4f6"
 name = "rp4-harness"
 version = "0.1.0"
 dependencies = [
+ "m25-olcek",
+ "m25-taban",
+ "m25-teyit2",
+ "m25-umut",
+ "m25-yukdus",
+ "m26-mevsim",
+ "m26-olcek26",
  "prost",
  "qp-calendar",
  "qp-capsule",

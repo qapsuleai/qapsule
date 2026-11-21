@@ -4,6 +4,8 @@
 //!
 //! `r3` is the reference: the product's outcome rule (`qp_capsule::outcome::Barrier`
 //! with its defaults) and the product's detector set (`qp_facts::default_detectors`).
+//! (RP4/S) `rp4` is the product's second named record (`qp_capsule::outcome::Rp4`,
+//! `qp_facts::rp4_detectors`), productized from `yukdus` / `r3` and `mevsim`.
 
 use qp_capsule::outcome::{base_params, wilder_atr, Barrier, ATR_FAST, ATR_SLOW};
 use qp_capsule::{OpenStory, OutcomeRule};
@@ -97,9 +99,62 @@ pub fn rules() -> Vec<RuleEntry> {
             // C_DIR, C_NEUTRAL, ATR_FAST, ATR_SLOW, horizons 20 / 15 / 10.
             constants: 7,
         },
+        RuleEntry {
+            name: "taban",
+            make: m25_taban::outcome,
+            levels: |s, b| m25_taban::levels(s, b).map(Levels::from),
+            // r3's 7 + N_TICKS (STEP_TOL is float rounding, not tuned).
+            constants: 8,
+        },
+        // RP4/M25b "iki kapanışla teyit" (M25/teyit2): r3'ün 7 sabiti (C_DIR·K_SCALE tek
+        // çarpan sayılır) + STOP_CLOSES + TARGET_CLOSES.
+        RuleEntry {
+            name: "teyit2",
+            make: m25_teyit2::outcome,
+            levels: |s, b| m25_teyit2::levels(s, b).map(Levels::from),
+            constants: 9,
+        },
+        RuleEntry {
+            name: "olcek",
+            make: m25_olcek::outcome,
+            levels: |s, b| m25_olcek::levels(s, b).map(Levels::from),
+            constants: 8,
+        },
         // M25 alternatifleri: bir satır, ör.
         // RuleEntry { name: "a1", make: m25_a1::outcome, levels: |s, b| m25_a1::levels(s, b).map(Levels::from), constants: 4 },
+        RuleEntry {
+            name: "yukdus",
+            make: m25_yukdus::outcome,
+            levels: |s, b| m25_yukdus::levels(s, b).map(Levels::from),
+            constants: 7,
+        },
+        // r3's 7 + Z + M.
+        RuleEntry {
+            name: "umut",
+            make: m25_umut::outcome,
+            levels: |s, b| m25_umut::levels(s, b).map(Levels::from),
+            constants: 9,
+        },
+        // RP4/S: the product's `rp4` rule (`qp_capsule::outcome::Rp4`: `HighLow` = `yukdus`
+        // on intraday bars, `Barrier` = `r3` on daily bars). Constants: 7 in any one
+        // period, as `yukdus` (intraday) and `r3` (daily); the intraday step limit (12 h)
+        // is not tuned.
+        RuleEntry {
+            name: "rp4",
+            make: || Box::new(qp_capsule::outcome::Rp4::default()),
+            levels: rp4_levels,
+            constants: 7,
+        },
     ]
+}
+
+/// `rp4` levels: the product rule's own ([`qp_capsule::outcome::Rp4::levels`]; `yukdus`'s
+/// on intraday bars, `r3`'s on daily bars).
+#[must_use]
+pub fn rp4_levels(s: &OpenStory, bars: &[Bar]) -> Option<Levels> {
+    qp_capsule::outcome::Rp4::default()
+        .levels(s, bars)
+        .map(Levels::from)
 }
 
 /// M26 detector sets.
@@ -112,6 +167,32 @@ pub fn detector_sets() -> Vec<DetectorEntry> {
         },
         // M26 alternatifleri: bir satır, ör.
         // DetectorEntry { name: "a1", make: m26_a1::detectors },
+        DetectorEntry {
+            name: "olcek26",
+            make: m26_olcek26::detectors,
+        },
+        DetectorEntry {
+            name: "mevsim",
+            make: m26_mevsim::detectors,
+        },
+        // `mevsim` denemeleri (M26/mevsim/NOTES.md): yeniden üretim için.
+        DetectorEntry {
+            name: "mevsim_t1v",
+            make: m26_mevsim::trial_volume,
+        },
+        DetectorEntry {
+            name: "mevsim_t1vb",
+            make: m26_mevsim::trial_volume_breakout,
+        },
+        DetectorEntry {
+            name: "mevsim_t2g",
+            make: m26_mevsim::trial_gate,
+        },
+        // RP4/S: the product's `rp4` set (`qp_facts::rp4_detectors` = `mevsim`).
+        DetectorEntry {
+            name: "rp4",
+            make: qp_facts::rp4_detectors,
+        },
     ]
 }
 

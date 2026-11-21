@@ -89,6 +89,10 @@ pub struct DemoArgs {
     /// default). A page may ask for another with `?feed_rule=` (for its principal).
     #[arg(long, default_value = "rate55")]
     pub feed_rule: String,
+    /// (RP4, `docs/CAPSULE.md` §9.9) The capsule engine's named constant record (`r3`,
+    /// the protocol default; `rp4`), in every mode (replay, `--live`, `--sim`).
+    #[arg(long, default_value = "r3", value_parser = crate::sim::check_rule_arg)]
+    pub rule: String,
     /// Steps per second.
     #[arg(long, default_value_t = 4.0)]
     pub speed: f64,
@@ -132,6 +136,26 @@ pub struct DemoArgs {
     /// (`<SYMBOL>.<period>.unadj.json`) instead of REST: offline tests, a cached history.
     #[arg(long, requires = "live", value_name = "DIR")]
     pub live_bars: Option<PathBuf>,
+    /// (RP4, L-prep, K66) With `--live`: bars from the trade endpoint (`/trade`, a second
+    /// connection with its own lock; `mx/trade/<SYM>`, level 1) while the market endpoint
+    /// gives the session phases, the day fields and the clock. Trade gaps (the opening,
+    /// every trade reconnect) are filled from the REST trade history. `POST
+    /// /live/drop?endpoint=trade` drops the trade connection.
+    #[arg(long, requires = "live")]
+    pub trades: bool,
+    /// (RP4, L-prep) With `--trades`: also subscribe special trades (`mx/tradeex/<SYM>`;
+    /// they do not join the bars).
+    #[arg(long, requires = "trades")]
+    pub tradeex: bool,
+    /// (RP4, L-prep) Unit of the live trade `timestamp`: `ns_from_midnight` (documented,
+    /// unverified), `epoch_ms`, `epoch_us`, `epoch_ns` or `auto` (`qp live inspect` shows
+    /// which one the stream uses).
+    #[arg(long, requires = "trades", default_value = "ns_from_midnight")]
+    pub trade_time_unit: String,
+    /// (RP4, L-prep) Trade history from cached files (`<DIR>/<SYM>/*.csv.gz`, the `qp live
+    /// trades` cache) instead of REST: offline tests.
+    #[arg(long, requires = "trades", value_name = "DIR")]
+    pub live_trades: Option<PathBuf>,
     /// (RP4/T4) Accelerated simulation (`qp sim`) shown live: cached trades of
     /// `--start`..`--end` for `--symbols` through the live path on a simulated exchange
     /// clock at `--sim-speed`. No connection, no token. This machine only: refused with
@@ -198,6 +222,7 @@ fn host(a: &DemoArgs) -> Result<ReplayHost, String> {
         from_t,
         running: !a.paused,
         feed_rule: Some(a.feed_rule.clone()),
+        engine: crate::sim::engine_field(&a.rule),
     };
     let init = demo_session_init(&o);
     let dir = if a.synthetic {
@@ -224,27 +249,63 @@ struct LiveParts {
     to_hub: std::sync::Arc<dyn Fn(crate::livehost::LiveIn) + Send + Sync>,
     spec: crate::livehost::ConnSpec,
     sink: std::sync::Arc<crate::livehost::HubSink>,
+    /// (RP4, L-prep) The trade connection, its sink, the trade history and decoding.
+    trade: Option<TradeParts>,
+}
+
+/// (RP4, L-prep) The trade side of `qp demo --live --trades`.
+struct TradeParts {
+    spec: crate::livehost::ConnSpec,
+    sink: std::sync::Arc<crate::livehost::HubSink>,
+    history: std::sync::Arc<dyn qp_matriks::TradeHistory + Send + Sync>,
+    decode: qp_matriks::TradeDecodeConfig,
+}
+
+/// (RP4, L-prep) `--trade-time-unit`.
+fn parse_trade_unit(s: &str) -> Result<qp_matriks::TradeTimeUnit, String> {
+    use qp_matriks::TradeTimeUnit as U;
+    [
+        U::NanosFromMidnight,
+        U::EpochMillis,
+        U::EpochMicros,
+        U::EpochNanos,
+        U::Auto,
+    ]
+    .into_iter()
+    .find(|u| u.name() == s)
+    .ok_or_else(|| {
+        format!("--trade-time-unit `{s}`: ns_from_midnight, epoch_ms, epoch_us, epoch_ns, auto")
+    })
 }
 
 impl LiveParts {
-    /// The runtime (feeds seeded at the history's last bars) and the connection thread.
+    /// The runtime (feeds seeded at the history's last bars) and the connection threads
+    /// (the market endpoint; with `--trades` also the trade endpoint), by name.
+    #[allow(clippy::type_complexity)]
     fn start(
         self,
         host: &ReplayHost,
     ) -> Result<
         (
             crate::livehost::LiveRuntime,
-            Sender<crate::livehost::ConnCtl>,
+            Vec<(&'static str, Sender<crate::livehost::ConnCtl>)>,
         ),
         String,
     > {
-        let feed = Box::new(crate::livehost::MatriksFeed::new(
-            self.cal.clone(),
-            &self.interval,
-        ));
+        let feed = match &self.trade {
+            Some(t) => crate::livehost::MatriksFeed::with_trades(
+                self.cal.clone(),
+                &self.interval,
+                qp_matriks::TradeFeedConfig {
+                    decode: t.decode,
+                    ..qp_matriks::TradeFeedConfig::default()
+                },
+            ),
+            None => crate::livehost::MatriksFeed::new(self.cal.clone(), &self.interval),
+        };
         let mut rt = crate::livehost::LiveRuntime::new(
             host,
-            feed,
+            Box::new(feed),
             self.source,
             self.to_hub.clone(),
             self.cal,
@@ -252,8 +313,33 @@ impl LiveParts {
             self.delay_ms,
         )?;
         rt.baseline_capsules(host);
-        let ctl = crate::livehost::spawn_connection(self.spec, self.sink, self.to_hub)?;
-        Ok((rt, ctl))
+        let mut ctls = Vec::new();
+        let trade = match self.trade {
+            Some(t) => {
+                rt.set_trade_history(t.history);
+                // Trades after each symbol's last history bar are the opening gap.
+                rt.watch_trades_after_seams(host.session().clock());
+                Some((t.spec, t.sink))
+            }
+            None => None,
+        };
+        ctls.push((
+            "market",
+            crate::livehost::spawn_connection(self.spec, self.sink, self.to_hub.clone())?,
+        ));
+        if let Some((spec, sink)) = trade {
+            match crate::livehost::spawn_connection(spec, sink, self.to_hub) {
+                Ok(c) => ctls.push(("trade", c)),
+                Err(e) => {
+                    // Close the market connection before giving up (one process, no leak).
+                    let (tx, rx) = mpsc::channel();
+                    let _ = ctls[0].1.send(crate::livehost::ConnCtl::Stop(tx));
+                    let _ = rx.recv_timeout(Duration::from_secs(10));
+                    return Err(format!("trade endpoint: {e}"));
+                }
+            }
+        }
+        Ok((rt, ctls))
     }
 }
 
@@ -321,6 +407,7 @@ fn live_setup(a: &DemoArgs, tx: &Sender<Cmd>) -> Result<(ReplayHost, LiveParts),
         .iter()
         .map(|(s, _)| format!("mx/symbol/{s}@lvl2"))
         .collect();
+    let syms: Vec<String> = hist.iter().map(|(s, _)| s.clone()).collect();
     let mut h = crate::livehost::host_from_history(
         hist,
         &a.interval,
@@ -333,12 +420,14 @@ fn live_setup(a: &DemoArgs, tx: &Sender<Cmd>) -> Result<(ReplayHost, LiveParts),
             from_t: None,
             running: true,
             feed_rule: Some(a.feed_rule.clone()),
+            engine: crate::sim::engine_field(&a.rule),
         },
         &a.root,
     )?;
     h.set_note(Some(format!(
-        "canlı / live · {n} · {}{}",
+        "canlı / live · {n} · {}{}{}",
         a.interval,
+        if a.trades { " · işlem / trades" } else { "" },
         if delayed {
             " · gecikmeli 15 dk / delayed 15 min"
         } else {
@@ -370,6 +459,50 @@ fn live_setup(a: &DemoArgs, tx: &Sender<Cmd>) -> Result<(ReplayHost, LiveParts),
             s
         }
     };
+    let trade = if a.trades {
+        let decode = qp_matriks::TradeDecodeConfig {
+            unit: parse_trade_unit(&a.trade_time_unit)?,
+            ..qp_matriks::TradeDecodeConfig::default()
+        };
+        let mut trade_topics = Vec::new();
+        for s in &syms {
+            trade_topics
+                .extend(qp_matriks::trade_topics(s, a.tradeex).map_err(|e| format!("{s}: {e}"))?);
+        }
+        let trade_raw = root.join("fixtures/local/live/raw").join(format!(
+            "{}-demo-trade.qpraw",
+            crate::live::utc_stamp(crate::live::now_us())
+        ));
+        let history: Arc<dyn qp_matriks::TradeHistory + Send + Sync> = match &a.live_trades {
+            Some(dir) => Arc::new(crate::livehost::RestTradeHistory::dir(
+                dir.clone(),
+                cal.clone(),
+            )),
+            None => Arc::new(crate::livehost::RestTradeHistory::rest(
+                cfg.clone(),
+                auth.clone(),
+                cal.clone(),
+                Some(root.join("fixtures/local/trades/requests.jsonl")),
+            )),
+        };
+        Some(TradeParts {
+            spec: crate::livehost::ConnSpec {
+                cfg: cfg.clone(),
+                auth: auth.clone(),
+                topics: trade_topics,
+                lock_dir: qp_live::lock::default_lock_dir(),
+                trade: true,
+            },
+            sink: Arc::new(crate::livehost::HubSink::for_trades(
+                crate::live::RawSink::create(&trade_raw)?.for_trade_endpoint(),
+                to_hub.clone(),
+            )),
+            history,
+            decode,
+        })
+    } else {
+        None
+    };
     let parts = LiveParts {
         control,
         delayed,
@@ -384,8 +517,10 @@ fn live_setup(a: &DemoArgs, tx: &Sender<Cmd>) -> Result<(ReplayHost, LiveParts),
             auth,
             topics,
             lock_dir: qp_live::lock::default_lock_dir(),
+            trade: false,
         },
         sink,
+        trade,
     };
     Ok((h, parts))
 }
@@ -413,7 +548,7 @@ fn sim_setup(a: &DemoArgs, tx: &Sender<Cmd>) -> Result<(ReplayHost, SimParts), S
         &a.interval,
         a.history,
         &a.feed_rule,
-        "r3",
+        &a.rule,
         (&a.sim_trades, &a.sim_rest, &a.root),
     )?
     .with_at(a.sim_at.as_deref())?;
@@ -513,6 +648,8 @@ enum Cmd {
     /// (R6/T7) `POST /live/drop` (`secs`) and `POST /live/quit` (`None`).
     LiveControl {
         drop_secs: Option<u64>,
+        /// (RP4, L-prep) Which connection `drop` closes (`market` by default, `trade`).
+        endpoint: Option<String>,
         reply: Sender<String>,
     },
 }
@@ -558,7 +695,7 @@ struct Hub {
     /// (R6/T7) The live side, its connection thread's control and the notifications
     /// its inputs caused since the last broadcast.
     live: Option<crate::livehost::LiveRuntime>,
-    conn_ctl: Option<Sender<crate::livehost::ConnCtl>>,
+    conn_ctl: Vec<(&'static str, Sender<crate::livehost::ConnCtl>)>,
     pending: Vec<qp_schema::protocol::OutboundLine>,
     quit: bool,
 }
@@ -771,20 +908,30 @@ impl Hub {
                     .map_or(Value::Null, |l| l.stats(&self.host));
                 let _ = reply.send(v.to_string());
             }
-            Cmd::LiveControl { drop_secs, reply } => {
-                let Some(ctl) = &self.conn_ctl else {
+            Cmd::LiveControl {
+                drop_secs,
+                endpoint,
+                reply,
+            } => {
+                if self.conn_ctl.is_empty() {
                     let _ = reply.send(r#"{"error":"not live"}"#.to_owned());
                     return;
-                };
+                }
                 match drop_secs {
                     Some(secs) => {
-                        if let Some(l) = self.live.as_mut() {
-                            l.drops_asked += 1;
-                        }
+                        let name = endpoint.as_deref().unwrap_or("market");
+                        let Some((_, ctl)) = self.conn_ctl.iter().find(|(n, _)| *n == name) else {
+                            let _ = reply.send(json!({"error": "no such endpoint"}).to_string());
+                            return;
+                        };
                         let _ = ctl.send(crate::livehost::ConnCtl::Drop(Duration::from_secs(
                             secs.min(600),
                         )));
-                        let _ = reply.send(json!({"drop": secs.min(600)}).to_string());
+                        if let Some(l) = self.live.as_mut() {
+                            l.drops_asked += 1;
+                        }
+                        let _ = reply
+                            .send(json!({"drop": secs.min(600), "endpoint": name}).to_string());
                     }
                     None => {
                         self.quit = true;
@@ -795,9 +942,9 @@ impl Hub {
         }
     }
 
-    /// (R6/T7) Closes the live connection (DISCONNECT) and prints the summary.
+    /// (R6/T7) Closes the live connections (DISCONNECT) and prints the summary.
     fn shutdown_live(&mut self) {
-        if let Some(ctl) = self.conn_ctl.take() {
+        for (_, ctl) in std::mem::take(&mut self.conn_ctl) {
             let (tx, rx) = mpsc::channel();
             let _ = ctl.send(crate::livehost::ConnCtl::Stop(tx));
             let _ = rx.recv_timeout(Duration::from_secs(10));
@@ -1065,8 +1212,10 @@ fn live_route(
                 .and_then(|x| x.parse().ok())
                 .unwrap_or(30)
         });
+        let endpoint = query_param(q, "endpoint");
         let _ = tx.send(Cmd::LiveControl {
             drop_secs,
+            endpoint,
             reply: rtx,
         });
     }
@@ -1341,14 +1490,14 @@ private proxy, e.g. Tailscale, to 127.0.0.1 — see docs/matriks/LIVE.md)"
         start: Instant::now(),
         feed_rule: a.feed_rule.clone(),
         live: None,
-        conn_ctl: None,
+        conn_ctl: Vec::new(),
         pending: Vec::new(),
         quit: false,
     };
     if let Some(p) = live_parts {
         let (rt, ctl) = p.start(&hub.host)?;
         hub.live = Some(rt);
-        hub.conn_ctl = Some(ctl);
+        hub.conn_ctl = ctl;
     }
     if let Some(p) = sim_parts {
         hub.live = Some(p.runtime);

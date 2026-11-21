@@ -6,7 +6,10 @@
 //! every settle point it looks at each watched series: every bar that became **final**
 //! since the last look (a later bar exists, or the window is closed: RP2 maturity) goes,
 //! in order, through the detectors (`qp_facts::default_detectors`, streaming `push`) and
-//! the capsule engine (`qp_capsule::Engine` with `EngineConfig::r3()`). The licensed flow
+//! the capsule engine (`qp_capsule::Engine` with `EngineConfig::r3()`); (RP4) or, when
+//! the host names another record (`init.capsules.engine`, `docs/CAPSULE.md` §9.9), that
+//! record's detector set and engine (`qp_facts::detectors_named`,
+//! `EngineConfig::named`). The licensed flow
 //! of a series (`init.capsules.flow`) is read only here (server facts), and only here it
 //! also feeds the chosen trust path ([`qp_capsule::trust::Muhur`]).
 //!
@@ -84,6 +87,34 @@ const ENGINE_NAME: &str = "qp-capsule";
 /// document condition (a text condition is never evaluated).
 const OUTCOME_TEXT: &str = "outcome rule (qp-capsule barrier, docs/CAPSULE.md §9.3)";
 
+/// (RP4) [`OUTCOME_TEXT`] of the `rp4` record.
+const OUTCOME_TEXT_RP4: &str =
+    "outcome rule (qp-capsule rp4: high/low touch intraday, barrier daily; docs/CAPSULE.md §9.9)";
+
+/// (RP4) A fresh detector set of a known record (`r3` otherwise).
+fn detectors_of(engine: &str) -> Vec<Box<dyn Detector>> {
+    qp_facts::detectors_named(engine).unwrap_or_else(qp_facts::default_detectors)
+}
+
+/// (RP4) A fresh engine of a known record (`r3` otherwise).
+fn engine_config_of(engine: &str) -> EngineConfig {
+    EngineConfig::named(engine).unwrap_or_else(EngineConfig::r3)
+}
+
+/// (RP4) The named constant record the authority ran for `doc`'s engine stories, read
+/// from their resolution rule (`qp_capsule::engine_of_rule`): `rp4` when any story was
+/// resolved by the `rp4` rule, else `r3`. For a reader that runs the detectors itself
+/// (a replica's candidates, a viewer's check).
+#[must_use]
+pub fn engine_of_doc(doc: &Document) -> &'static str {
+    doc.capsules
+        .iter()
+        .filter_map(|c| c.story.as_ref()?.resolution.as_ref())
+        .map(|r| qp_capsule::engine_of_rule(&r.rule))
+        .find(|e| *e != qp_capsule::DEFAULT_ENGINE)
+        .unwrap_or(qp_capsule::DEFAULT_ENGINE)
+}
+
 /// One watched bar series.
 pub(crate) struct Watched {
     series: String,
@@ -127,6 +158,8 @@ pub(crate) struct Runner {
     disputes: Vec<CapDispute>,
     /// (R3/perf) Structure generation the watched series' positions are of.
     pos_gen: u64,
+    /// (RP4) The named constant record (`init.capsules.engine`, default `r3`).
+    engine_name: &'static str,
 }
 
 impl std::fmt::Debug for Runner {
@@ -144,6 +177,12 @@ impl std::fmt::Debug for Runner {
 impl Runner {
     /// A runner for `init` over `doc` (series without a symbol are skipped).
     pub(crate) fn new(init: &CapsuleInit, doc: &Document, keys: Option<(&[u8], &[u8])>) -> Self {
+        // (RP4) Validated at session start; an unknown name falls back to the default.
+        let engine_name = qp_capsule::ENGINES
+            .iter()
+            .copied()
+            .find(|n| init.engine.as_deref() == Some(*n))
+            .unwrap_or(qp_capsule::DEFAULT_ENGINE);
         let mut watched = Vec::new();
         for id in &init.series {
             let Some(s) = find_series(doc, id) else {
@@ -167,7 +206,7 @@ impl Runner {
                 symbol,
                 interval,
                 done: 0,
-                dets: qp_facts::default_detectors(),
+                dets: detectors_of(engine_name),
                 muhur: flow.as_ref().map(|_| match keys {
                     Some((r, a)) => qp_capsule::trust::Muhur::with_keys(
                         qp_capsule::trust::Params::default(),
@@ -192,12 +231,13 @@ impl Runner {
             .collect();
         Self {
             flow_keys,
-            engine: Engine::new(EngineConfig::r3()),
-            pub_engine: flow.then(|| Engine::new(EngineConfig::r3())),
+            engine: Engine::new(engine_config_of(engine_name)),
+            pub_engine: flow.then(|| Engine::new(engine_config_of(engine_name))),
             watched,
             comments: Vec::new(),
             disputes: Vec::new(),
             pos_gen: 0,
+            engine_name,
         }
     }
 
@@ -1434,7 +1474,12 @@ impl Session {
                     facts: ids,
                     confidence: story.strength.clamp(0.0, 1.0),
                     invalidation: Condition::Text {
-                        text: OUTCOME_TEXT.to_owned(),
+                        text: if engine.rule_names().1 == "rp4" {
+                            OUTCOME_TEXT_RP4
+                        } else {
+                            OUTCOME_TEXT
+                        }
+                        .to_owned(),
                     },
                     provenance: prov.clone(),
                 },
@@ -3026,7 +3071,7 @@ impl Session {
                 .flow
                 .as_ref()
                 .map(|(seed, _)| flow_points(&bars[..done], *seed));
-            let mut dets = qp_facts::default_detectors();
+            let mut dets = detectors_of(runner.engine_name);
             let mut again: BTreeMap<String, BTreeMap<String, u64>> = BTreeMap::new();
             for (i, b) in bars[..done].iter().enumerate() {
                 let fp = flow.as_ref().and_then(|f| f.get(i));
@@ -3249,11 +3294,23 @@ pub(crate) fn ledger_rows(
 /// Public detectors only (a device holds no licensed flow).
 #[must_use]
 pub fn candidates(symbol: &str, series: &str, bars: &[Bar]) -> Vec<qp_capsule::CandidateStory> {
+    candidates_with(qp_capsule::DEFAULT_ENGINE, symbol, series, bars)
+}
+
+/// (RP4) [`candidates`] with the named constant record `engine` (`r3`, `rp4`; an unknown
+/// name runs `r3`).
+#[must_use]
+pub fn candidates_with(
+    engine: &str,
+    symbol: &str,
+    series: &str,
+    bars: &[Bar],
+) -> Vec<qp_capsule::CandidateStory> {
     let Some(last) = bars.len().checked_sub(1) else {
         return Vec::new();
     };
-    let mut engine = Engine::new(EngineConfig::r3());
-    let mut dets = qp_facts::default_detectors();
+    let mut dets = detectors_of(engine);
+    let mut engine = Engine::new(engine_config_of(engine));
     let mut provisional = Vec::new();
     for (i, b) in bars.iter().enumerate() {
         let mut facts = Vec::new();

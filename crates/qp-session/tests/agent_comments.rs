@@ -208,13 +208,16 @@ fn a_reader_receives_only_the_comments_it_may_see() {
         !all.contains("5,23) altında kalıyor"),
         "document leaks the comment"
     );
-    // A number-free comment reaches both.
+    // (R5B security review) Even a number-free comment does not reach `can`: `can`'s
+    // view of THYAO is redacted, and free text can carry a number no scan reads, so a
+    // restricted reader gets no comment on an instrument it sees redacted (structural).
     let out = h.comment("A", "THYAO'da düşüş eğilimi sürüyor [1].", json!([CAP]));
-    let n = out
+    let to: Vec<&Value> = out
         .iter()
         .filter(|l| l["msg"]["event"]["kind"] == "comment")
-        .count();
-    assert_eq!(n, 2, "{out:?}");
+        .map(|l| &l["conn"])
+        .collect();
+    assert_eq!(to, vec![&json!("a")], "{out:?}");
 }
 
 #[test]
@@ -425,4 +428,30 @@ fn a_time_form_is_no_licence_oracle() {
     );
     assert_eq!(a[0]["msg"]["error"]["code"], "comment_rejected", "{a:?}");
     assert_eq!(a[0]["msg"].to_string(), b[0]["msg"].to_string());
+}
+
+/// (R5B security review) The guarantee is structural: an entitled writer's comment on an
+/// instrument where the restricted reader's view is redacted never reaches that reader,
+/// however the number is encoded (here: no digit at all).
+#[test]
+fn a_restricted_reader_gets_no_comment_on_what_it_sees_redacted() {
+    let mut h = H::new();
+    for c in ["a", "c"] {
+        h.send(
+            c,
+            json!({"type":"subscribe","id":"cm","topic":{"kind":"comments","instrument":"THYAO"}}),
+        );
+    }
+    let out = h.comment(
+        "A",
+        "THYAO kısa ortalamanın, ilk asal sayıdan sonraki asalın yanındaki değerin hemen altında [1].",
+        json!([CAP]),
+    );
+    assert_eq!(out[0]["msg"]["status"], "applied", "{out:?}");
+    let to: Vec<&Value> = out
+        .iter()
+        .filter(|l| l["msg"]["event"]["kind"] == "comment")
+        .map(|l| &l["conn"])
+        .collect();
+    assert_eq!(to, vec![&json!("a")], "{out:?}");
 }

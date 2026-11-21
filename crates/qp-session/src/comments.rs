@@ -365,8 +365,16 @@ impl Session {
         if c.cites.iter().any(|x| !seen.known.contains(x)) {
             return false;
         }
-        if self.proj.is_none() {
+        let Some(p) = self.proj.as_ref() else {
             return true;
+        };
+        // (R5B security review, structural fail-closed) A restricted reader receives a
+        // comment only if, on every instrument it touches, the reader's view is not
+        // redacted or rewritten: free text can carry a number in ways no scan reads (an
+        // entitled writer encoding a licensed value), so the text checks below are
+        // defence in depth, not the guarantee.
+        if self.comment_touches_withheld(c, p) {
+            return false;
         }
         // (R5B audit B1) fail-closed for a restricted reader: every number the text could
         // carry — read without the date/time masks, digit groups joined — must be one the
@@ -387,6 +395,62 @@ impl Session {
             && qp_capsule::comment::unmasked_numbers(&c.text, lang, &syms)
                 .iter()
                 .all(shown)
+    }
+
+    /// Whether comment `c` touches an instrument (its own, its cited items') on which the
+    /// projected reader `p` has redacted facts or rewritten capsules (inside `as_reader`).
+    fn comment_touches_withheld(&self, c: &Comment, p: &crate::capsule::Proj) -> bool {
+        // Written for the reader's own person: validated under exactly this reader's
+        // licence, so it carries nothing the reader may not see.
+        let reader = crate::watch::person_of(&self.plane, &p.principal);
+        if c.on_behalf.as_deref() == Some(reader) {
+            return false;
+        }
+        let doc = &self.doc;
+        let sym_of_series = |series: &str| {
+            doc.series
+                .iter()
+                .find(|s| s.id == series)
+                .and_then(|s| s.symbol().map(str::to_owned))
+        };
+        let mut ids: Vec<&String> = c.cites.iter().collect();
+        if let Some(k) = &c.about.capsule {
+            ids.push(k);
+        }
+        let mut insts: BTreeSet<String> = c.about.instrument.iter().cloned().collect();
+        for id in &ids {
+            if p.redact.contains(*id) || p.rewrite.contains(*id) || p.hidden.contains(*id) {
+                return true;
+            }
+            if let Some(k) = doc
+                .capsules
+                .iter()
+                .find(|k| &k.id == *id || &k.finding == *id)
+            {
+                if let Some(st) = &k.story {
+                    insts.insert(st.instrument.clone());
+                }
+            }
+            if let Some(f) = doc.facts.iter().find(|f| &f.id == *id) {
+                insts.extend(sym_of_series(&f.series));
+            }
+            if let Some(f) = doc.findings.iter().find(|f| &f.id == *id) {
+                if f.facts
+                    .iter()
+                    .any(|x| p.redact.contains(x) || p.hidden.contains(x))
+                {
+                    return true;
+                }
+            }
+        }
+        doc.facts.iter().any(|f| {
+            p.redact.contains(&f.id) && sym_of_series(&f.series).is_some_and(|s| insts.contains(&s))
+        }) || doc.capsules.iter().any(|k| {
+            p.rewrite.contains(&k.id)
+                && k.story
+                    .as_ref()
+                    .is_some_and(|st| insts.contains(&st.instrument))
+        })
     }
 
     /// Comments about capsule `cap` the reader of `ci` may receive (inside `as_reader`).

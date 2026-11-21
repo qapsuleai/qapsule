@@ -1,0 +1,428 @@
+{
+ "cites": {
+  "agrees_with_contract": [
+   262,
+   262
+  ],
+  "by_family": {
+   "advice": {
+    "broken": true,
+    "n": 17,
+    "rejected": 17
+   },
+   "barcount": {
+    "broken": false,
+    "n": 17,
+    "rejected": 0
+   },
+   "dated": {
+    "broken": false,
+    "n": 17,
+    "rejected": 0
+   },
+   "derived": {
+    "broken": true,
+    "n": 16,
+    "rejected": 0
+   },
+   "external_ok": {
+    "broken": false,
+    "n": 4,
+    "rejected": 0
+   },
+   "fabricated": {
+    "broken": true,
+    "n": 17,
+    "rejected": 0
+   },
+   "guest_ok": {
+    "broken": false,
+    "n": 5,
+    "rejected": 0
+   },
+   "licensed_external": {
+    "broken": true,
+    "n": 8,
+    "rejected": 8
+   },
+   "licensed_ok": {
+    "broken": false,
+    "n": 2,
+    "rejected": 0
+   },
+   "licensed_value": {
+    "broken": true,
+    "n": 8,
+    "rejected": 8
+   },
+   "marked": {
+    "broken": false,
+    "n": 17,
+    "rejected": 0
+   },
+   "no_cites": {
+    "broken": true,
+    "n": 17,
+    "rejected": 17
+   },
+   "nonum": {
+    "broken": false,
+    "n": 17,
+    "rejected": 0
+   },
+   "not_visible": {
+    "broken": true,
+    "n": 6,
+    "rejected": 6
+   },
+   "plain": {
+    "broken": false,
+    "n": 17,
+    "rejected": 0
+   },
+   "redacted_external": {
+    "broken": true,
+    "n": 6,
+    "rejected": 6
+   },
+   "redacted_value": {
+    "broken": true,
+    "n": 6,
+    "rejected": 6
+   },
+   "round1": {
+    "broken": false,
+    "n": 17,
+    "rejected": 0
+   },
+   "rounding_over": {
+    "broken": true,
+    "n": 17,
+    "rejected": 0
+   },
+   "unknown_id": {
+    "broken": true,
+    "n": 17,
+    "rejected": 17
+   },
+   "wrong_direction": {
+    "broken": true,
+    "n": 14,
+    "rejected": 0
+   }
+  },
+  "catch": [
+   85,
+   149
+  ],
+  "catch_ci": [
+   0.4902019618115087,
+   0.6471953135222482
+  ],
+  "false_reject": [
+   0,
+   113
+  ],
+  "false_reject_ci": [
+   0.0,
+   0.03287753216595198
+  ],
+  "license_and_unknown_100": {
+   "licensed_external": true,
+   "licensed_value": true,
+   "not_visible": true,
+   "redacted_external": true,
+   "redacted_value": true,
+   "unknown_id": true
+  },
+  "missing": [],
+  "right_reason": [
+   79,
+   85
+  ]
+ },
+ "cites_numbers": {
+  "agrees_with_contract": [
+   247,
+   262
+  ],
+  "by_family": {
+   "advice": {
+    "broken": true,
+    "n": 17,
+    "rejected": 17
+   },
+   "barcount": {
+    "broken": false,
+    "n": 17,
+    "rejected": 16
+   },
+   "dated": {
+    "broken": false,
+    "n": 17,
+    "rejected": 0
+   },
+   "derived": {
+    "broken": true,
+    "n": 16,
+    "rejected": 16
+   },
+   "external_ok": {
+    "broken": false,
+    "n": 4,
+    "rejected": 0
+   },
+   "fabricated": {
+    "broken": true,
+    "n": 17,
+    "rejected": 17
+   },
+   "guest_ok": {
+    "broken": false,
+    "n": 5,
+    "rejected": 0
+   },
+   "licensed_external": {
+    "broken": true,
+    "n": 8,
+    "rejected": 8
+   },
+   "licensed_ok": {
+    "broken": false,
+    "n": 2,
+    "rejected": 0
+   },
+   "licensed_value": {
+    "broken": true,
+    "n": 8,
+    "rejected": 8
+   },
+   "marked": {
+    "broken": false,
+    "n": 17,
+    "rejected": 0
+   },
+   "no_cites": {
+    "broken": true,
+    "n": 17,
+    "rejected": 17
+   },
+   "nonum": {
+    "broken": false,
+    "n": 17,
+    "rejected": 0
+   },
+   "not_visible": {
+    "broken": true,
+    "n": 6,
+    "rejected": 6
+   },
+   "plain": {
+    "broken": false,
+    "n": 17,
+    "rejected": 0
+   },
+   "redacted_external": {
+    "broken": true,
+    "n": 6,
+    "rejected": 6
+   },
+   "redacted_value": {
+    "broken": true,
+    "n": 6,
+    "rejected": 6
+   },
+   "round1": {
+    "broken": false,
+    "n": 17,
+    "rejected": 0
+   },
+   "rounding_over": {
+    "broken": true,
+    "n": 17,
+    "rejected": 17
+   },
+   "unknown_id": {
+    "broken": true,
+    "n": 17,
+    "rejected": 17
+   },
+   "wrong_direction": {
+    "broken": true,
+    "n": 14,
+    "rejected": 14
+   }
+  },
+  "catch": [
+   149,
+   149
+  ],
+  "catch_ci": [
+   0.9748663821299904,
+   0.9999999999999999
+  ],
+  "false_reject": [
+   16,
+   113
+  ],
+  "false_reject_ci": [
+   0.08907303460598104,
+   0.21767988668111726
+  ],
+  "license_and_unknown_100": {
+   "licensed_external": true,
+   "licensed_value": true,
+   "not_visible": true,
+   "redacted_external": true,
+   "redacted_value": true,
+   "unknown_id": true
+  },
+  "missing": [],
+  "right_reason": [
+   143,
+   149
+  ]
+ },
+ "per_sentence": {
+  "agrees_with_contract": [
+   247,
+   262
+  ],
+  "by_family": {
+   "advice": {
+    "broken": true,
+    "n": 17,
+    "rejected": 17
+   },
+   "barcount": {
+    "broken": false,
+    "n": 17,
+    "rejected": 16
+   },
+   "dated": {
+    "broken": false,
+    "n": 17,
+    "rejected": 0
+   },
+   "derived": {
+    "broken": true,
+    "n": 16,
+    "rejected": 16
+   },
+   "external_ok": {
+    "broken": false,
+    "n": 4,
+    "rejected": 0
+   },
+   "fabricated": {
+    "broken": true,
+    "n": 17,
+    "rejected": 17
+   },
+   "guest_ok": {
+    "broken": false,
+    "n": 5,
+    "rejected": 0
+   },
+   "licensed_external": {
+    "broken": true,
+    "n": 8,
+    "rejected": 8
+   },
+   "licensed_ok": {
+    "broken": false,
+    "n": 2,
+    "rejected": 0
+   },
+   "licensed_value": {
+    "broken": true,
+    "n": 8,
+    "rejected": 8
+   },
+   "marked": {
+    "broken": false,
+    "n": 17,
+    "rejected": 0
+   },
+   "no_cites": {
+    "broken": true,
+    "n": 17,
+    "rejected": 17
+   },
+   "nonum": {
+    "broken": false,
+    "n": 17,
+    "rejected": 0
+   },
+   "not_visible": {
+    "broken": true,
+    "n": 6,
+    "rejected": 6
+   },
+   "plain": {
+    "broken": false,
+    "n": 17,
+    "rejected": 17
+   },
+   "redacted_external": {
+    "broken": true,
+    "n": 6,
+    "rejected": 6
+   },
+   "redacted_value": {
+    "broken": true,
+    "n": 6,
+    "rejected": 6
+   },
+   "round1": {
+    "broken": false,
+    "n": 17,
+    "rejected": 0
+   },
+   "rounding_over": {
+    "broken": true,
+    "n": 17,
+    "rejected": 17
+   },
+   "unknown_id": {
+    "broken": true,
+    "n": 17,
+    "rejected": 17
+   },
+   "wrong_direction": {
+    "broken": true,
+    "n": 14,
+    "rejected": 14
+   }
+  },
+  "catch": [
+   149,
+   149
+  ],
+  "catch_ci": [
+   0.9748663821299904,
+   0.9999999999999999
+  ],
+  "false_reject": [
+   33,
+   113
+  ],
+  "false_reject_ci": [
+   0.21614306195264466,
+   0.3816024602756717
+  ],
+  "license_and_unknown_100": {
+   "licensed_external": true,
+   "licensed_value": true,
+   "not_visible": true,
+   "redacted_external": true,
+   "redacted_value": true,
+   "unknown_id": true
+  },
+  "missing": [],
+  "right_reason": [
+   143,
+   149
+  ]
+ }
+}

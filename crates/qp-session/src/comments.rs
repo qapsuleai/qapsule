@@ -219,8 +219,18 @@ impl Session {
         let principal = self.conns[ci].principal.clone();
         let lang = self.lang_of(ci);
         let instrument = self.about_instrument(about);
-        let restricted = self.public_view(&principal) || self.reader_proj(&principal).is_some();
+        let restricted = self.restricted_reader(&principal);
         let (full, all) = self.full_numbers(&draft.cites, instrument.as_deref());
+        // (M30 fix) Withheld = the authority's numbers in scope that the reader does not
+        // see in the same scope (its own projected world); nothing for a reader who sees
+        // everything there.
+        let (mine, _) = self.as_reader(&principal, lang, |s| {
+            s.full_numbers(&draft.cites, instrument.as_deref())
+        });
+        let full: Vec<f64> = full
+            .into_iter()
+            .filter(|w| !mine.iter().any(|m| m.to_bits() == w.to_bits()))
+            .collect();
         let mut syms = symbols(&self.doc);
         let seen = self.as_reader(&principal, lang, |s| s.seen(ci, &draft.cites));
         // (Security) No existence oracle: an id the reader may not see is answered like
@@ -237,6 +247,8 @@ impl Session {
             hidden_ids: hidden,
             values: seen.values,
             withheld: if restricted { full } else { Vec::new() },
+            // (`restricted` is a property of the reader, not of the draft: whether a
+            // licence reason is blinded never depends on what is hidden here.)
             symbols: syms,
             directions: seen.directions,
         }
@@ -272,7 +284,7 @@ impl Session {
                 accepted: verdict.is_ok(),
                 reasons: verdict.clone().err().unwrap_or_default(),
             });
-            let restricted = self.public_view(&principal) || self.reader_proj(&principal).is_some();
+            let restricted = self.restricted_reader(&principal);
             if let Err(reasons) = verdict {
                 let reasons = if restricted { blind(reasons) } else { reasons };
                 let mut e = E::new(
@@ -521,6 +533,17 @@ fn blind(reasons: Vec<qp_schema::comment::Reason>) -> Vec<qp_schema::comment::Re
 }
 
 impl Session {
+    /// (R5B, §25.4; M30 fix) Whether `principal` reads less than the authority: a
+    /// public-view reader (not entitled to a licensed flow), or one whose projection hides
+    /// or redacts something. (A projection that only strips other people's audiences does
+    /// not make a reader restricted.)
+    pub(crate) fn restricted_reader(&self, principal: &str) -> bool {
+        self.public_view(principal)
+            || self
+                .reader_proj(principal)
+                .is_some_and(|p| !p.hidden.is_empty() || !p.redact.is_empty())
+    }
+
     /// (R5B, §25.4) The comment validator's real verdicts so far, in order (host side,
     /// never sent to a client): what a restricted writer was told as an unsupported
     /// number may be a licence catch here (M30 counts these).

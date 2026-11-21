@@ -796,7 +796,11 @@ fn direction_words_suffix_rule() {
     assert!(d.is_empty(), "{d:?}");
     let (u, d) = direction_words("ARTTI, inen, indi, iniş, kaybetti, zayıfladı", Lang::Tr, &s);
     assert_eq!(u, vec!["arttı"]);
-    assert_eq!(d.len(), 5, "{d:?}");
+    // (M30 fix) "zayıfladı" is a stage word, not a direction.
+    assert_eq!(d.len(), 4, "{d:?}");
+    let (u, d) = direction_words("aşağı yönlü kırılım güçlendi", Lang::Tr, &s);
+    assert!(u.is_empty(), "{u:?}");
+    assert_eq!(d, vec!["aşağı"]);
     let (u, d) = direction_words("rising, gains; declined, loses", Lang::En, &s);
     assert_eq!(u.len(), 2);
     assert_eq!(d.len(), 2);

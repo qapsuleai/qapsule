@@ -528,7 +528,9 @@ pub fn advice_hits(text: &str, symbols: &[String]) -> Vec<String> {
         .collect()
 }
 
-/// Up words (TR), Turkish suffix rule: only the listed endings ("artık" is not "art-",
+/// Up words (TR). (M30 fix) "güçlendi" / "zayıfladı" are not direction words: they name
+/// a story's stage (strengthened, weakened), in either direction ("aşağı yönlü kırılım
+/// güçlendi"). Turkish suffix rule: only the listed endings ("artık" is not "art-",
 /// "düşük" / "düşünce" are not "düş-", "gerilim" is not "gerile-").
 pub const DIR_UP_TR: &[&str] = &[
     r"yüksel\w*",
@@ -536,7 +538,6 @@ pub const DIR_UP_TR: &[&str] = &[
     r"çık(tı|tılar|ıyor\w*|ış\w*|an|ar|acak\w*|mış\w*|ması\w*|arak)",
     r"yukarı\w*",
     r"tırman\w*",
-    r"güçlen\w*",
 ];
 /// Down words (TR).
 pub const DIR_DOWN_TR: &[&str] = &[
@@ -545,7 +546,6 @@ pub const DIR_DOWN_TR: &[&str] = &[
     r"geriliyor\w*",
     r"in(di|diler|iyor\w*|iş\w*|en|er|ecek\w*|miş\w*|mesi\w*|erek)",
     r"aşağı\w*",
-    r"zayıfla\w*",
     r"kayb\w*",
     r"kayıp\w*",
 ];

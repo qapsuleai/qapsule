@@ -1,0 +1,239 @@
+{
+ "answers": {
+  "S01": {
+   "ctx": {},
+   "expect_ids": [
+    "cap.SYN02.breakout.up.151",
+    "cap.SYN02.continuation.up.158"
+   ],
+   "reader": "claude",
+   "values": []
+  },
+  "S02": {
+   "ctx": {
+    "positions": [
+     "SYN02",
+     "SYN05",
+     "SYN11"
+    ],
+    "since_bar": 158
+   },
+   "expect_ids": [
+    "cap.SYN02.continuation.up.158"
+   ],
+   "reader": "claude",
+   "values": []
+  },
+  "S03": {
+   "ctx": {
+    "capsule_id": "cap.SYN09.breakout.down.158",
+    "facts": [
+     "fx.SYN09.breakout.range.down.158"
+    ],
+    "finding": "fnd.SYN09.breakout.down.158",
+    "instrument": "SYN09"
+   },
+   "expect_ids": [
+    "cap.SYN09.breakout.down.158"
+   ],
+   "reader": "claude",
+   "values": [
+    85.8
+   ]
+  },
+  "S04": {
+   "ctx": {
+    "capsule_id": "cap.SYN06.extreme.down.157",
+    "facts": [
+     "fx.SYN06.extreme.rsi.oversold.157"
+    ],
+    "finding": "fnd.SYN06.extreme.down.157",
+    "instrument": "SYN06"
+   },
+   "expect_ids": [
+    "cap.SYN06.extreme.down.157"
+   ],
+   "reader": "claude",
+   "values": [
+    8,
+    4
+   ]
+  },
+  "S05": {
+   "ctx": {
+    "positions": [
+     "SYN02",
+     "SYN05",
+     "SYN11"
+    ]
+   },
+   "expect_ids": [
+    "cap.SYN05.reversal.down.155"
+   ],
+   "reader": "claude",
+   "values": []
+  },
+  "S06": {
+   "ctx": {},
+   "expect_ids": [
+    "cap.SYN11.continuation.up.152"
+   ],
+   "reader": "claude-guest",
+   "values": []
+  },
+  "S07": {
+   "ctx": {
+    "since_bar": 149
+   },
+   "expect_ids": [
+    "cap.SYN03.breakout.down.152",
+    "cap.SYN03.breakout.up.154",
+    "cap.SYN03.continuation.down.147"
+   ],
+   "reader": "claude-guest",
+   "values": []
+  },
+  "Y01": {
+   "ctx": {
+    "capsule_id": "cap.SYN02.breakout.up.151",
+    "facts": [
+     "fx.SYN02.breakout.range.up.151"
+    ],
+    "finding": "fnd.SYN02.breakout.up.151",
+    "instrument": "SYN02",
+    "value": 110.59
+   },
+   "expect_ids": [
+    "cap.SYN02.breakout.up.151"
+   ],
+   "reader": "claude",
+   "values": []
+  },
+  "Y02": {
+   "ctx": {
+    "capsule_id": "cap.SYN09.breakout.down.158",
+    "facts": [
+     "fx.SYN09.breakout.range.down.158"
+    ],
+    "finding": "fnd.SYN09.breakout.down.158",
+    "instrument": "SYN09",
+    "value": 85.8
+   },
+   "expect_ids": [
+    "cap.SYN09.breakout.down.158"
+   ],
+   "reader": "claude",
+   "values": []
+  },
+  "Y03": {
+   "ctx": {
+    "capsule_id": "cap.SYN12.continuation.down.156",
+    "facts": [
+     "fx.SYN12.continuation.ma_stack.bear.156"
+    ],
+    "finding": "fnd.SYN12.continuation.down.156",
+    "instrument": "SYN12",
+    "value": 26.924000000000028
+   },
+   "expect_ids": [
+    "cap.SYN12.continuation.down.156"
+   ],
+   "reader": "claude",
+   "values": []
+  },
+  "Y04": {
+   "ctx": {
+    "capsule_id": "cap.SYN05.reversal.down.155",
+    "facts": [
+     "fx.SYN05.reversal.rsi_divergence.bearish.155"
+    ],
+    "finding": "fnd.SYN05.reversal.down.155",
+    "instrument": "SYN05",
+    "value": 74.7450688373768
+   },
+   "expect_ids": [
+    "cap.SYN05.reversal.down.155"
+   ],
+   "reader": "claude",
+   "values": []
+  },
+  "Y05": {
+   "ctx": {
+    "capsule_id": "cap.SYN08.flow.up.158",
+    "facts": [
+     "fx.SYN08.flow.volume_surge.surge.158"
+    ],
+    "finding": "fnd.SYN08.flow.up.158",
+    "instrument": "SYN08"
+   },
+   "expect_ids": [
+    "cap.SYN08.flow.up.158"
+   ],
+   "reader": "claude",
+   "values": []
+  },
+  "Y06": {
+   "ctx": {
+    "capsule_id": "cap.SYN04.squeeze.neutral.155",
+    "facts": [
+     "fx.SYN04.squeeze.bandwidth.squeeze.155"
+    ],
+    "finding": "fnd.SYN04.squeeze.neutral.155",
+    "instrument": "SYN04"
+   },
+   "expect_ids": [
+    "cap.SYN04.squeeze.neutral.155"
+   ],
+   "reader": "claude-guest",
+   "values": []
+  },
+  "Y07": {
+   "ctx": {
+    "capsule_id": "cap.SYN11.continuation.up.152",
+    "facts": [
+     "fx.SYN11.continuation.ma_stack.bull.152"
+    ],
+    "finding": "fnd.SYN11.continuation.up.152",
+    "instrument": "SYN11"
+   },
+   "expect_ids": [
+    "cap.SYN11.continuation.up.152"
+   ],
+   "reader": "claude-guest",
+   "values": []
+  },
+  "Y08": {
+   "ctx": {
+    "capsule_id": "cap.SYN07.breakout.down.156",
+    "facts": [
+     "fx.SYN07.breakout.range.down.156"
+    ],
+    "finding": "fnd.SYN07.breakout.down.156",
+    "instrument": "SYN07",
+    "value": 7.92
+   },
+   "expect_ids": [
+    "cap.SYN07.breakout.down.156"
+   ],
+   "reader": "claude-guest",
+   "values": []
+  }
+ },
+ "meta": {
+  "engine_filter": "rounds/R5B/experiments/M31/tier_repeat_hold/notifications.jsonl",
+  "last_final_bar": 158,
+  "leaks": "rounds/R5B/experiments/harness/answers.json#leaks",
+  "m31_events": "rounds/R5B/experiments/harness/m31/events.json",
+  "m31_watches": "rounds/R5B/experiments/harness/m31/watches.json",
+  "positions": {
+   "claude": [
+    "SYN02",
+    "SYN05",
+    "SYN11"
+   ],
+   "claude-guest": []
+  },
+  "replay_t": 1691737200000,
+  "session": "rounds/R5B/experiments/harness/session/init.r5b.json"
+ }
+}

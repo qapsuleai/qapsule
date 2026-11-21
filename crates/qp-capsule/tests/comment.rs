@@ -871,3 +871,45 @@ fn overlong_number_is_still_licence_checked() {
         vec![(Check::License, "licensed_value".to_owned())]
     );
 }
+
+// ------------------------------------------------- R5B/M28 usability (ids, flow nouns)
+
+#[test]
+fn ids_named_in_the_text_carry_no_number_and_no_direction() {
+    let mut e = ev_dir(&[("cap.SYN02.breakout.down.151", Direction::Down)]);
+    e.known_ids.insert("cap.SYN02.breakout.down.151".to_owned());
+    e.known_ids.insert("cap.SYN02.breakout.up.88".to_owned());
+    let mut d = en("cap.SYN02.breakout.down.151 [1] shows the price falling; cap.SYN02.breakout.up.88 is older.");
+    d.cites = vec!["cap.SYN02.breakout.down.151".to_owned()];
+    for s in ALL {
+        assert_eq!(validate(&d, &e, s), Ok(()), "{s:?}");
+    }
+    // a real number next to the id is still checked
+    let mut d2 = d.clone();
+    d2.text = "cap.SYN02.breakout.down.151 [1] fell 151 points.".to_owned();
+    assert_eq!(
+        codes(validate(&d2, &e, Strictness::CitesNumbers)),
+        vec![(Check::Number, "unsupported_number".to_owned())]
+    );
+}
+
+#[test]
+fn short_or_numeric_ids_never_mask_numbers() {
+    let mut e = ev(&[]);
+    e.known_ids.insert("12".to_owned());
+    let d = tr("SYN03 12 puan değişti [1].");
+    assert_eq!(
+        codes(validate(&d, &e, Strictness::CitesNumbers)),
+        vec![(Check::Number, "unsupported_number".to_owned())]
+    );
+}
+
+#[test]
+fn money_outflow_is_not_an_up_word() {
+    let (up, down) = direction_words("yabancı para çıkışı sürdü, fiyat düştü", Lang::Tr, &[]);
+    assert!(up.is_empty(), "{up:?}");
+    assert_eq!(down, vec!["düştü".to_owned()]);
+    // the verb still is
+    let (up, _) = direction_words("fiyat yukarı çıktı", Lang::Tr, &[]);
+    assert_eq!(up.len(), 2, "{up:?}");
+}

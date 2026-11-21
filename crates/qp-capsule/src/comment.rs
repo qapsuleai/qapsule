@@ -588,7 +588,17 @@ fn dir_lists(lang: Lang) -> &'static (Vec<Regex>, Vec<Regex>) {
 /// Direction words of a text in its language (symbols removed): (up words, down words).
 #[must_use]
 pub fn direction_words(text: &str, lang: Lang, symbols: &[String]) -> (Vec<String>, Vec<String>) {
-    let l = lower(&strip_symbols(text, symbols), lang);
+    let mut l = lower(&strip_symbols(text, symbols), lang);
+    if lang == Lang::Tr {
+        // (R5B, M28 usability) "para çıkışı" (money outflow) is a flow noun, not a rise.
+        static FLOW: OnceLock<Regex> = OnceLock::new();
+        l = re(
+            &FLOW,
+            r"\b(?:para|fon|sermaye|net|yabancı|nakit)\s+çıkış\w*",
+        )
+        .replace_all(&l, " ")
+        .into_owned();
+    }
     let (up, down) = dir_lists(lang);
     let find = |rs: &[Regex]| {
         rs.iter()
@@ -642,6 +652,31 @@ fn other(lang: Lang) -> Lang {
     }
 }
 
+/// (R5B, M28 usability) What is removed from the text before the number and direction
+/// scans: the instrument symbols and every id the draft may name (known, hidden or
+/// cited) — "cap.SYN02.breakout.up.151" carries neither the number 151 nor the word
+/// "up". Only id-shaped tokens (a letter and a separator, 5+ chars) are removed, so a
+/// short or numeric id never masks a real number.
+fn text_ids(d: &CommentDraft, ev: &Evidence) -> Vec<String> {
+    let id_like = |x: &&String| {
+        x.chars().count() >= 5
+            && x.chars().any(char::is_alphabetic)
+            && x.chars().any(|c| matches!(c, '.' | '-' | '_' | ':'))
+    };
+    let mut v: Vec<String> = ev.symbols.clone();
+    v.extend(
+        ev.known_ids
+            .iter()
+            .chain(&ev.hidden_ids)
+            .chain(&d.cites)
+            .filter(id_like)
+            .cloned(),
+    );
+    v.sort();
+    v.dedup();
+    v
+}
+
 /// Validates a comment draft against the reader-projected evidence (PLAN §2.1).
 ///
 /// # Errors
@@ -650,6 +685,7 @@ fn other(lang: Lang) -> Lang {
 /// then sentence by sentence (advice, markers, numbers, per-sentence citation).
 pub fn validate(d: &CommentDraft, ev: &Evidence, s: Strictness) -> Result<(), Vec<Reason>> {
     let lang = lang_of(d.lang);
+    let strip = text_ids(d, ev);
     let numbers_on = matches!(s, Strictness::CitesNumbers | Strictness::PerSentence);
     let mut out = Vec::new();
 
@@ -750,7 +786,7 @@ pub fn validate(d: &CommentDraft, ev: &Evidence, s: Strictness) -> Result<(), Ve
                 valid_markers += 1;
             }
         }
-        let nums = numbers(sent, lang, &ev.symbols);
+        let nums = numbers(sent, lang, &strip);
         for n in &nums {
             let visible = ev
                 .values
@@ -810,7 +846,7 @@ pub fn validate(d: &CommentDraft, ev: &Evidence, s: Strictness) -> Result<(), Ve
             .copied()
             .filter(|w| dirs.iter().all(|x| x == w));
         if let Some(want) = want {
-            let (up, down) = direction_words(&d.text, lang, &ev.symbols);
+            let (up, down) = direction_words(&d.text, lang, &strip);
             let opposite = match want {
                 Direction::Up if up.is_empty() => down.first(),
                 Direction::Down if down.is_empty() => up.first(),
@@ -818,7 +854,7 @@ pub fn validate(d: &CommentDraft, ev: &Evidence, s: Strictness) -> Result<(), Ve
             };
             if let Some(word) = opposite {
                 let sentence = sentences(&d.text).iter().position(|s| {
-                    let (u, w) = direction_words(s, lang, &ev.symbols);
+                    let (u, w) = direction_words(s, lang, &strip);
                     u.contains(word) || w.contains(word)
                 });
                 out.push(reason(

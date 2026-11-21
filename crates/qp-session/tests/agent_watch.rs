@@ -192,6 +192,24 @@ fn removal_and_the_limit_per_person() {
     // (Privacy) Another person's watch reads as a missing one; no suggestion names it.
     assert_eq!(r[0]["msg"]["error"]["code"], "not_found", "{r:?}");
     assert!(r[0]["msg"]["error"].get("did_you_mean").is_none(), "{r:?}");
+    // Nor switch it off through the intent op; the owner of the watch is told to use
+    // `remove_watch`.
+    let r = send(
+        &mut s,
+        "e",
+        json!({"type":"command","id":"c","ops":[{"op":"set_intent_active","intent":"w1","active":false}]}),
+    );
+    assert_eq!(r[0]["msg"]["error"]["code"], "not_found", "{r:?}");
+    assert!(r[0]["msg"]["error"].get("did_you_mean").is_none(), "{r:?}");
+    let r = send(
+        &mut s,
+        "b",
+        json!({"type":"command","id":"c","ops":[{"op":"set_intent_active","intent":"w1","active":false}]}),
+    );
+    assert_eq!(
+        r[0]["msg"]["error"]["reason"], "agent_cannot_write",
+        "{r:?}"
+    );
     // Nor does she read it anywhere.
     let d = send(
         &mut s,

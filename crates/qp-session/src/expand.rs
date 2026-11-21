@@ -867,9 +867,18 @@ pub(crate) fn expand_op(
             }])
         }
         Op::SetIntentActive { intent, active } => {
+            // (R5B, §25.5) Another person's watch reads as a missing intent; suggestions
+            // come from the intents the speaker may see.
+            let person = crate::watch::person_of(ctx.plane, ctx.speaker);
+            let visible = |x: &&Intent| {
+                x.watch
+                    .as_ref()
+                    .is_none_or(|w| ctx.is_owner || w.for_ == person || w.for_ == ctx.speaker)
+            };
             let i = doc
                 .intents
                 .iter()
+                .filter(visible)
                 .find(|x| &x.id == intent)
                 .ok_or_else(|| {
                     E::new(
@@ -877,9 +886,21 @@ pub(crate) fn expand_op(
                         format!("intent `{intent}` does not exist"),
                     )
                     .at(ptr(p, "intent"))
-                    .dym(intent, doc.intents.iter().map(|x| x.id.as_str()))
+                    .dym(
+                        intent,
+                        doc.intents.iter().filter(visible).map(|x| x.id.as_str()),
+                    )
                     .build()
                 })?;
+            if i.watch.is_some() {
+                return Err(E::new(
+                    ErrorCode::Invalid,
+                    format!("`{intent}` is a watch: it ends with `remove_watch`"),
+                )
+                .at(ptr(p, "intent"))
+                .hint("Send remove_watch with this intent id to end a watch.")
+                .build());
+            }
             let mut ni = i.clone();
             ni.active = *active;
             Ok(vec![ChangeOp::PutIntent {

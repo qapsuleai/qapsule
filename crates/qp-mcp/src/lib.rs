@@ -135,9 +135,7 @@ impl Hub {
     /// `qp mcp serve` is one, and the client cannot undo it. The single place the
     /// adapter tells the authority.
     pub fn mark_agent_connection(&mut self, conn: &str) {
-        // R5B: S birleşince mark_agent_connection
-        // (`self.session_mut().mark_agent_connection(conn)`).
-        let _ = conn;
+        self.session_mut().mark_agent_connection(conn);
     }
 
     /// Queues output lines of the host's own actions (replay steps, host controls, a

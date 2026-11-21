@@ -686,3 +686,32 @@ fn a_pending_proposal_is_previewed_without_changing_the_document() {
     let p3 = h.query("s", json!({"kind":"preview","proposal":pid}));
     assert_eq!(code(&p3), "not_pending", "{p3}");
 }
+
+#[test]
+fn a_watch_ends_with_remove_watch_not_set_intent_active() {
+    let mut h = h();
+    let r = h.cmd(
+        "a",
+        "w",
+        json!([{"op":"add_watch","id":"mine","text":"x","match":{"instrument":"THYAO"}}]),
+    );
+    assert_eq!(r["status"], "applied", "{r}");
+    let r = h.cmd(
+        "a",
+        "s",
+        json!([{"op":"set_intent_active","intent":"mine","active":false}]),
+    );
+    assert_eq!(code(&r), "invalid", "{r}");
+    assert!(r["error"]["hint"]
+        .as_str()
+        .unwrap()
+        .contains("remove_watch"));
+    // An editor (another principal) does not see it.
+    h.hello("e", "editor", "headless");
+    let r = h.cmd(
+        "e",
+        "s",
+        json!([{"op":"set_intent_active","intent":"mine","active":false}]),
+    );
+    assert_eq!(code(&r), "not_found", "{r}");
+}

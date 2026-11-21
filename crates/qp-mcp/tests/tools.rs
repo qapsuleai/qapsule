@@ -351,9 +351,19 @@ fn grammar_ops_and_hit_are_generated_tools() {
     for k in r5 {
         assert!(names.contains(&k), "missing tool {k}");
     }
+    // R5B (§25): comments, watches and the proposal preview.
+    let r5b = [
+        "op_add_comment",
+        "op_add_watch",
+        "op_remove_watch",
+        "query_preview",
+    ];
+    for k in r5b {
+        assert!(names.contains(&k), "missing tool {k}");
+    }
     assert_eq!(
         names.len(),
-        37 + grammar.len() + 1 + 2 + r3.len() + r4.len() + r5.len(),
+        37 + grammar.len() + 1 + 2 + r3.len() + r4.len() + r5.len() + r5b.len(),
         "{names:?}"
     );
 }

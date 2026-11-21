@@ -34,8 +34,10 @@ pub struct RenderArgs {
     /// Look (design record) to draw with, e.g. `r4` (the default).
     #[serde(default)]
     pub look: Option<String>,
-    // R5B: S birleşince `proposal: Option<String>` — the pending proposal's preview
-    // (PLAN §4 b): its operations applied on a copy of the document, drawn here.
+    /// A pending proposal id: draws its preview (`docs/PROTOCOL.md` §25.6) — the
+    /// proposal's operations applied on a copy of the document; nothing is written.
+    #[serde(default)]
+    pub proposal: Option<String>,
 }
 
 /// `notifications` arguments (none).
@@ -164,8 +166,8 @@ fn render(ctx: &mut Ctx<'_>, args: &Value) -> Result<Value, RpcError> {
         .unwrap_or(&a.view)
         .to_owned();
     // Entitlement (K33): every series the view draws must be readable by this principal
-    // (asked through the protocol, so the authority's rule decides). R5B: S birleşince
-    // the scene is compiled in the reader's projection (`on_behalf`, public world).
+    // (asked through the protocol, so the authority's rule decides). The scene is then
+    // compiled in the reader's projection (`on_behalf`, public world; §25.7).
     for s in layer_series(&view) {
         let r = ctx.query(json!({"kind": "study", "series": s, "reduce": "last"}));
         let code = r
@@ -184,8 +186,10 @@ fn render(ctx: &mut Ctx<'_>, args: &Value) -> Result<Value, RpcError> {
     let mut opts = qp_session::CompileOptions::new(width, height);
     opts.look.clone_from(&a.look);
     let scene = {
+        let conn = ctx.conn.to_owned();
         let mut hub = ctx.hub().borrow_mut();
-        hub.session_mut().scene(&view_id, &opts)
+        hub.session_mut()
+            .scene_as_reader(&conn, &view_id, a.proposal.as_deref(), &opts)
     };
     let scene = match scene {
         Ok(s) => s,

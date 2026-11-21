@@ -272,3 +272,30 @@ fn a_reader_without_the_permission_never_reaches_the_validator() {
     assert_eq!(r[0]["msg"]["error"]["code"], "forbidden", "{r:?}");
     assert_eq!(h.0.comment_audit().len(), n);
 }
+
+#[test]
+fn a_preview_draws_only_what_the_asker_may_read() {
+    let mut h = H::new();
+    // ana's agent proposes the presenter's view of a finding (bound THYAO bars).
+    let r = h.send(
+        "A",
+        json!({"type":"command","id":"p","ops":[{"op":"show_finding","finding":"fnd.THYAO.continuation.down.84","view":"v-show"}]}),
+    );
+    assert_eq!(r[0]["msg"]["status"], "proposed", "{r:?}");
+    let pid = r[0]["msg"]["proposal"].as_str().unwrap().to_owned();
+    let q = json!({"type":"query","id":"v","query":{"kind":"preview","proposal":pid}});
+    let ana = h.send("a", q.clone());
+    let ana_text = ana[0]["msg"]["data"]["views"][0]["explain"]
+        .as_str()
+        .unwrap()
+        .to_owned();
+    assert!(ana_text.contains("candle px"), "{ana_text}");
+    // can's agent and can: the bars are not readable; no value is described.
+    for c in ["C", "c"] {
+        let r = h.send(c, q.clone());
+        let views = &r[0]["msg"]["data"]["views"];
+        let text = views[0]["explain"].as_str().unwrap_or_default();
+        assert!(text.contains("not readable by you"), "{r:?}");
+        assert!(!text.contains("last c="), "{text}");
+    }
+}

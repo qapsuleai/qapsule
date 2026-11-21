@@ -45,8 +45,10 @@
 //!    `l`; the first trade of a bar is `o = h = l = c`. Volume: [`VolumeUnit::Value`] adds
 //!    `price · quantity` (TL), [`VolumeUnit::Quantity`] adds `quantity` (lots); the bar's
 //!    lots are also kept apart ([`LiveBars::current_quantity`]). Special (reported)
-//!    trades (`isTradeEx`, `mx/tradeex`) join only with [`SpecialTrades::Include`]
-//!    (default: excluded; the final rule is measured elsewhere, RP4 M27). Under `Trades`
+//!    trades (`isTradeEx`, `mx/tradeex`) join the `1d` bar only
+//!    ([`SpecialTrades::DayOnly`], the default; measured in RP4 M27: REST's daily bar
+//!    holds them, its intraday bars do not); [`SpecialTrades::Exclude`] and
+//!    [`SpecialTrades::Include`] keep them out of / in every interval. Under `Trades`
 //!    a price-card tick builds nothing (the card still gives the day fields and the
 //!    session phase to its other readers); under the card methods a trade builds nothing.
 //!    Trades are pushed in exchange order (time, then trade number); summation order is
@@ -121,11 +123,38 @@ pub struct TradeTick {
 /// Whether special (reported) trades join the bars (rule 8).
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
 pub enum SpecialTrades {
-    /// Not in the bars (counted). Default until measured (RP4 M27).
-    #[default]
+    /// Not in any bar (counted).
     Exclude,
-    /// In the bars like any trade.
+    /// In every bar like any trade.
     Include,
+    /// In the `1d` bar like any trade, in no intraday bar (counted there). The default:
+    /// RP4 M27 measured it against REST on the calibration days (2026-10-05..10-16, 30
+    /// symbols): REST's daily volume holds the special trades, its 1m / 5m / 1h bars do
+    /// not (`rounds/RP4/experiments/M27/RESULTS.md`).
+    #[default]
+    DayOnly,
+}
+
+impl SpecialTrades {
+    /// Whether a special trade joins a bar of `interval`.
+    #[must_use]
+    pub fn joins(self, interval: Interval) -> bool {
+        match self {
+            Self::Exclude => false,
+            Self::Include => true,
+            Self::DayOnly => interval == Interval::Day,
+        }
+    }
+
+    /// Short name (`exclude`, `include`, `day_only`).
+    #[must_use]
+    pub fn name(self) -> &'static str {
+        match self {
+            Self::Exclude => "exclude",
+            Self::Include => "include",
+            Self::DayOnly => "day_only",
+        }
+    }
 }
 
 /// Which cumulative counter is the bar volume.
@@ -193,7 +222,7 @@ impl Default for LiveConfig {
             pre_open_ms: 30 * MS_PER_MIN,
             post_close_ms: 30 * MS_PER_MIN,
             first_seq: 1,
-            special_trades: SpecialTrades::Exclude,
+            special_trades: SpecialTrades::default(),
         }
     }
 }
@@ -225,7 +254,7 @@ pub struct LiveStats {
     pub last_phase: Option<i32>,
     /// Trades pushed (`Trades` method).
     pub trades: u64,
-    /// Special trades left out of the bars ([`SpecialTrades::Exclude`]).
+    /// Special trades left out of the bars ([`SpecialTrades::joins`] false).
     pub special_excluded: u64,
     /// Trades without a quantity (no volume added).
     pub no_quantity: u64,
@@ -659,7 +688,7 @@ impl LiveBars {
         }
         self.started = true;
         self.stats.trades += 1;
-        if tr.special && self.cfg.special_trades == SpecialTrades::Exclude {
+        if tr.special && !self.cfg.special_trades.joins(self.interval) {
             self.stats.special_excluded += 1;
             return out;
         }

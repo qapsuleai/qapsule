@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Disk hijyeni (K56, CLAUDE.md "Disk hijyeni").
 #
-#   scripts/clean.sh [--dry-run] [--force] [--node-modules]
+#   scripts/clean.sh [--dry-run] [--force] [--node-modules] [--deep]
 #
 # Ne yapar:
 #   1. `git worktree prune` (klasörü kaybolmuş kayıtlar).
@@ -19,6 +19,8 @@
 #   4. Worktree'lerdeki `node_modules`; ana ağacınkiler yalnız `--node-modules` ile
 #      (gösterim ve doğrulama onlara bağlı; yeniden kurulum ağ ister).
 #   5. Depo içindeki başsız tarayıcı profilleri (`target/tmp`, `*.chrome-profile`).
+#   6. (`--deep`, K68) `target/` bütçeyi (6 GB) aşıyorsa `cargo clean` (bütün `target/`;
+#      bir sonraki `scripts/verify.sh` yeniden derler). Bütçe altındaysa hiçbir şey yapmaz.
 #
 # Dokunmadığı yerler: depo dışı, `fixtures/local/`, `.env.local`, izlenen dosyalar.
 # Önce/sonra boyutları basar: `target/`, `.claude/worktrees/`, `.claude/wt/`, depo toplamı.
@@ -27,12 +29,14 @@ set -euo pipefail
 dry=0
 force=0
 nm=0
+deep=0
 for a in "$@"; do
   case "$a" in
     --dry-run) dry=1 ;;
     --force) force=1 ;;
     --node-modules) nm=1 ;;
-    -h|--help) sed -n '2,22p' "$0"; exit 0 ;;
+    --deep) deep=1 ;;
+    -h|--help) sed -n '2,25p' "$0"; exit 0 ;;
     *) echo "clean: bilinmeyen seçenek: $a" >&2; exit 2 ;;
   esac
 done
@@ -159,6 +163,22 @@ fi
 say "5. tarayıcı profilleri"
 find . -path ./.git -prune -o -path ./fixtures/local -prune -o -type d \( -name '*.chrome-profile' -o -name 'chrome-profile*' \) -print 2>/dev/null \
   | while IFS= read -r d; do del "$root/${d#./}"; done || true
+
+# 6. --deep: target/ bütçesi (K68)
+if [ "$deep" = 1 ]; then
+  say "6. --deep: target/ bütçesi 6 GB"
+  kb=$(du -sk target 2>/dev/null | cut -f1 || echo 0)
+  if [ "${kb:-0}" -gt $((6 * 1024 * 1024)) ]; then
+    if [ "$dry" = 1 ]; then
+      say "  [dry-run] cargo clean (target/ $(size "$root/target"))"
+    else
+      CARGO_TARGET_DIR="$root/target" cargo clean
+      say "  cargo clean yapıldı"
+    fi
+  else
+    say "  target/ bütçe altında ($(size "$root/target")); dokunulmadı"
+  fi
+fi
 
 say "sonra:"
 report

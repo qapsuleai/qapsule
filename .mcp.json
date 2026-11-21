@@ -1,0 +1,20 @@
+{
+  "mcpServers": {
+    "qapsule": {
+      "command": "scripts/qp-mcp.sh",
+      "args": ["--stdio"],
+      "env": {
+        "QP_MCP_PRINCIPAL": "${QP_MCP_PRINCIPAL:-claude}",
+        "QP_MCP_SURFACE": "${QP_MCP_SURFACE:-}"
+      }
+    },
+    "matriks": {
+      "type": "http",
+      "url": "${MATRIKS_MCP_URL}",
+      "headers": {
+        "X-Client-ID": "${MATRIKS_MCP_CLIENT_ID}",
+        "X-API-Key": "${MATRIKS_MCP_API_KEY}"
+      }
+    }
+  }
+}

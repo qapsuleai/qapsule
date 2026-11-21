@@ -1,0 +1,16 @@
+#!/usr/bin/env bash
+# R5B: Matriks MCP client wrapper (agents/tools/mxmcp.py). Loads ./.env.local only if a
+# variable is unset; never prints it.
+set -euo pipefail
+cd "$(dirname "$0")/../.."
+need=0
+for v in MATRIKS_MCP_URL MATRIKS_MCP_CLIENT_ID MATRIKS_MCP_API_KEY; do
+  [ -z "${!v:-}" ] && need=1
+done
+if [ "$need" = 1 ] && [ -f ./.env.local ]; then
+  set -a
+  # shellcheck disable=SC1091
+  . ./.env.local >/dev/null 2>&1
+  set +a
+fi
+exec python3 -I agents/tools/mxmcp.py "$@"

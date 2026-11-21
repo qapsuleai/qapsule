@@ -129,3 +129,26 @@ Hedef tutmuyorsa sayı olduğu gibi raporlanır; hedef gevşetilmez.
 | 13 | `scripts/verify.sh` yeşil ve ağsız; CI yeşil; gizli bilgi ve gerçek veri taraması temiz; `quantex` durumu aynı. |
 | 14 | **Kapanış temizliği (K68):** geçici dosyalar silindi; `target/` ≤ 6 GB; `fixtures/local/` saklama kuralına göre budandı; raporda silinenler, bırakılanlar ve kalan boyutlar; izlenmeyen artık dosya yok. |
 | 15 | `REPORT.md`, `AUDIT.md` (bağımsız; kalibrasyonda geleceğe bakma olmadığını commit sırası ve koddan doğrular; ölçümleri önbellekten yeniden üretir); `docs/CAPSULE.md` ve `docs/matriks/LIVE.md` güncel; `STATUS.md`, `ROADMAP.md`; önerilen kararlar; disk hijyeni (K56, K68). |
+
+## Kapanış durumu (2026-11-21)
+
+Kanıtlar `REPORT.md` §3 (ölçüt başına), ayrıntı `experiments/` ve `AUDIT.md` (bağımsız; koşullu
+kabul, koşullar karşılandı).
+
+| # | Durum | Kısa kanıt |
+|---|---|---|
+| 1 | ✅ | `qp live trades` (≤ 15 günlük pencere, önbellek, istek günlüğü); 1.933 REST veri isteği; düzey 2 yok (test + tarama) |
+| 2 | ✅ | M27: 30 sembol × 34 gün; 1 dk/5 dk/1 sa/1 gün %100 tam (lot, `mill`); zaman `timestamp_ns`; açılış/kapanış ve özel işlem kuralları ölçülerek |
+| 3 | ✅ (canlı bağlantı: ilk iş günü, REPORT §13) | `/trade` ucu, kendi kilidi, sahte sunucu testleri, `qp demo --live --trades` |
+| 4 | ✅ | benzetim = canlı yol (test); iki koşu bayt eşit; 1 gün × 100 sembol 42–49 s; `--sim --lan` reddi |
+| 5 | ✅ | SPLIT → SPEC → 5 alternatif → seçim (`yukdus`) → sınama: 5 dk erken kapanma 0,156 → 0,065; Arkin'in durumu yeniden üretildi |
+| 6 | ✅ | M26: gün içinde 0,55'e ulaşan dedektör yok (kalibrasyon); periyot sınırı önerisi; açılış/kapanış sayıldı |
+| 7 | ✅ | `rp4` günlükte `r3` ile bayt eşit; R3 başvurusu tablosu |
+| 8 | ✅ | `r3`/`rp4` adlandırılmış kayıtlar; protokol varsayılanı `r3`; dökümler, altınlar, hesap özeti aynı |
+| 9 | ✅ (gerçek davranış: ilk iş günü) | A52 + `qp live reset`; geç katılan sorunu yeniden üretilemedi (bayt eşit) |
+| 10 | ✅ (benzetimde) | 580 sembol 1×: %11 / 376–418 MB / p95 23 ms; 100'de gerileme yok |
+| 11 | ✅ | satır saati (gösterim), A48; eski altınlar bayt eşit, yeni `p4-*` |
+| 12 | ✅ | REPORT §13 (komut, beklenen sonuç, süre) |
+| 13 | ✅ | verify 18/18; CI 44919670467 yeşil; taramalar temiz; quantex aynı |
+| 14 | ✅ | `target/` 43 GB → 0; üç liste (REPORT §10) |
+| 15 | ✅ | REPORT, AUDIT, CAPSULE §9.9, LIVE.md, STATUS, ROADMAP, Ö77–Ö93 |

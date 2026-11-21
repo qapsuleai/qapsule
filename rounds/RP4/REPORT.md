@@ -81,9 +81,9 @@ sonuç dosyalarını gördüğünü bildirdi (sınama verisi değil; seçimlerin
 | 10 | ✅ (benzetimde) | §8: artımlı görüntüleyici öğeleri; 580 sembol önce/sonra; üç hedef tuttu; 100 sembolde gerileme yok; özellik testleri. |
 | 11 | ✅ | Satır saati (`clock`, gösterimde açık), A48 "Kapanış seansında"; var olan altınlar ve dökümler bayt eşit; yeni `p4-*` altınlar (T7.md). |
 | 12 | ✅ | §13 (komut, beklenen sonuç, süre). Round iş gününe denk gelmedi; LIVE-LOG'da canlı deneme yok. |
-| 13 | §9 | |
-| 14 | §10 | |
-| 15 | §11 | |
+| 13 | ✅ | §9: verify 18/18 ağsız (`834edba`); CI 44919670467 yeşil (`d0833a5`); gizli/gerçek veri taraması 0; quantex aynı. |
+| 14 | ✅ | §10: `target/` 43 GB → 0 (≤ 6 GB); `fixtures/local/` saklama kuralı içinde, ara çıktılar silindi; üç liste; izlenmeyen RP4 artığı yok. |
+| 15 | ✅ | Bu rapor; `AUDIT.md` (koşullu kabul; koşullar karşılandı, §11); `docs/CAPSULE.md` §9.9 ve `docs/matriks/LIVE.md` §6–§8 güncel; `STATUS.md`, `ROADMAP.md`; Ö77–Ö93, A53–A56; disk §10. |
 
 ## 4. M27 — gün içi bar kaynağı
 
@@ -187,7 +187,7 @@ yük sıçramasında geçersiz sayılıp yinelendi. Tam seans (8 sa) bellek büy
 | VERIFY | Sonuç |
 |---|---|
 | 1 `QP_VERIFY_BROWSER=1 scripts/verify.sh`, ağsız | **18/18 PASS** (main `0750ee6` ve denetim düzeltmesinden sonra `834edba`, test 505 s; 29 şema, 64 döküm × 3 taşıma, 12 görünüm, altınlar bayt eşit, `p4-*` sahneleri) |
-| 2 preflight, CI | preflight TAMAM; CI: §9 sonu |
+| 2 preflight, CI | preflight TAMAM (her gönderimden önce); **CI yeşil**: `92ad1d4` → 44915485940, `d0833a5` (denetim K1 kod düzeltmesi dahil) → 44919670467 (Linux x86_64, 33 dk) |
 | 3 commit sırası | SPLIT `cc476de` → SPEC `eb1a8c3` → alternatif dalları → seçim `8bb7571` → sınama (`S/RESULTS.md`) |
 | 4 alternatiflere verilen dosyalar | yalnız `fixtures/local/rp4/calib/` (tam klasör bu evrede `chmod 000`); harness kalibrasyon kipi `t`'ye göre de keser (test) |
 | 5 düzey 2 taraması | `trade_bs` yalnız bir yorumda; `@lvl2` işlem konusu yalnız testlerde (ayrıştırıcı girdisi ve uçtan uca ret testleri) ve yerelde reddedilir; alıcı/satıcı alanı hiçbir yapıda yok |
@@ -206,9 +206,46 @@ yük sıçramasında geçersiz sayılıp yinelendi. Tam seans (8 sa) bellek büy
 | 20 `quantex` | round başı ve sonu `status --porcelain` + HEAD aynı |
 | 21 hesap özeti, WASM | `7b1e99d40889f83c` aynı; temel paket ham 2.281.001 B (R6 2.280.681; +320 B: T7 satır saati ve S kayıt seçeneği — hangisinin ne kadar olduğu ayrıca ölçülmedi), bağlayıcı crate'leri pakette yok |
 
-## 10. Disk
+## 10. Disk (K56, K68)
 
-(kapanış temizliği.)
+Önce (kapanış başı): `target/` 43 GB (debug 38 GB, bunun 14 GB'ı artımlı önbellek), depo toplamı 46 GB,
+`fixtures/local/` 1,9 GB, `.claude/worktrees/` 28 KB. `scripts/clean.sh`'a `--deep` eklendi (K68:
+`target/` 6 GB'ı aşıyorsa `cargo clean`).
+
+**Silinenler**
+
+| Ne | Boyut |
+|---|---|
+| Round boyunca birleşen/elenen 16 worktree ve `target/wt/<görev>` klasörleri (t1–t7, h, m25a–e, m26b–c, s, l, audit) | her biri birleşince/elenince; ajanların bildirdiği tek tek 1,3–16 GB (toplam ölçülmedi) |
+| `target/wt/h` (son), `target/debug/incremental`, `target/flycheck0`, `target/tmp`, `target/wasm-replica` | 2,4 + 14 + 0,01 GB |
+| `cargo clean` (`--deep`) | 31,4 GiB |
+| `fixtures/local/rp4/sim` (benzetim olay akışları), `births`, `results-umut`, `trials` (ara çıktılar; komutlarla yeniden üretilir) | ~445 MB |
+| `fixtures/local/trades/*/2026-11-20_2026-11-20` BIST100 tekrarları (D1d hatası) | ~15 dosya |
+| Oturum scratchpad'i (doğrulama günlükleri, birleşim betiği, tablolar), alt ajanların scratchpad ve başsız tarayıcı profilleri (ajanlar bildirdi) | ~150 MB + |
+
+**Bilerek bırakılanlar**
+
+| Ne | Neden |
+|---|---|
+| `rp4/*` dalları (22 dal: alternatifler, eval, entegrasyon) | Elenen alternatiflerin kodu dalda kalır (K56); klasörleri yok |
+| `fixtures/local/trades` 610 MB, `trades_ex` 0,5 MB, `live/rest` 408 MB, `bars` 19 MB | Geçmiş veri önbelleği (toplam ~1,1 GB < 5 GB): yeniden çekmemek için; denetim ve yeniden üretim buna dayanır |
+| `fixtures/local/rp4/{full,calib,tradebars}` 340 MB, `eval/test/test-trades/results` ~3 MB, `cases` 0,2 MB | Düzeneğin girdileri ve sonuçları (yeniden üretim, VERIFY 6/9–11); `cases/*.local.jsonl` Arkin'in durumunun sembol/saat ayrıntısı (yalnız yerel) |
+| `fixtures/local/live/raw` 153 MB (R6 kayıtları, en eskisi 2026-11-19) | Saklama kuralı içinde (30 gün / 2 GB); 2026-11-20 anlık kip kaydı Arkin'in durumunun kaynağı |
+| `shells/web*/node_modules` (140 MB), `shells/*/pkg` | verify ve gösterim gerektirir |
+| `rounds/R3/experiments/harness/target` 140 MB, `.DS_Store` dosyaları, R5 `__pycache__` | Bu round'un değil (önceki round'lar / Finder); silinsin mi — Arkin'e soru |
+
+**Kalan boyutlar (kapanış)**
+
+| | Boyut |
+|---|---|
+| `target/` | **0** (cargo clean; bütçe ≤ 6 GB ✅; bir sonraki `verify.sh` ya da `scripts/demo.sh` yeniden derler) |
+| `.claude/worktrees/` | 28 KB (boş) |
+| `fixtures/local/` | 1,5 GB (işlemler 610 MB, `live` 568 MB, `rp4` 343 MB) |
+| Depo toplamı | 2,2 GB |
+| Depo dışı oturum klasörü | scratchpad 0; oturumun görev çıktıları ~0,6 MB (araç ortamı) |
+
+`git worktree list`: yalnız ana ağaç. `git status --porcelain --ignored`: RP4'ün bıraktığı izlenmeyen
+dosya yok (yalnız yukarıdaki önceki round artıkları, `fixtures/local/`, `.env.local`, `.claude/`).
 
 ## 11. Bağımsız denetim
 

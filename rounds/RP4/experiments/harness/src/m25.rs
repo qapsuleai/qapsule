@@ -421,8 +421,24 @@ fn metric(side: &RuleSide, row: usize, m: &str, w: &[u32]) -> Option<f64> {
 /// # Errors
 /// Unknown rule, data errors.
 pub fn run(data: &Path, rule: &str, period: Period, split: Split) -> Result<M25Result, String> {
+    run_ref(data, rule, "r3", period, split)
+}
+
+/// (RP4/S, SPEC §4 sıralama) Like [`run`], paired with another registered rule as the
+/// reference, so two candidates' difference gets its own paired interval.
+///
+/// # Errors
+/// Unknown rule, data errors.
+pub fn run_ref(
+    data: &Path,
+    rule: &str,
+    reference: &str,
+    period: Period,
+    split: Split,
+) -> Result<M25Result, String> {
     let alt = registry::rule(rule).ok_or(format!("bilinmeyen kural: {rule}"))?;
-    let reference = registry::reference_rule();
+    let reference =
+        registry::rule(reference).ok_or(format!("bilinmeyen başvuru kuralı: {reference}"))?;
     let series = load_for(data, period, split)?;
     if series.is_empty() {
         return Err("veri yok".to_owned());
@@ -512,14 +528,23 @@ pub fn file_name(rule: &str, period: &str, split: &str) -> String {
 pub fn cmd(
     data: &Path,
     rule: &str,
+    reference: &str,
     period: Period,
     split: Split,
     out: &Path,
 ) -> Result<String, String> {
-    let r = run(data, rule, period, split)?;
-    let path = out
-        .join("M25")
-        .join(file_name(&r.rule, &r.period, &r.split));
+    let r = run_ref(data, rule, reference, period, split)?;
+    // Pairings against another candidate go to their own folder; the r3 files stay as before.
+    let path = if reference == "r3" {
+        out.join("M25")
+            .join(file_name(&r.rule, &r.period, &r.split))
+    } else {
+        out.join("M25pair").join(file_name(
+            &format!("{}.vs.{reference}", r.rule),
+            &r.period,
+            &r.split,
+        ))
+    };
     write_file(&path, &to_json(&r)).map_err(|e| e.to_string())?;
     Ok(format!(
         "{}: {} sembol, {} gün, {} bar (pencere), yönlü n = {} / yönsüz n = {}",

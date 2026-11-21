@@ -3,7 +3,7 @@
 //! ```text
 //! harness list
 //! harness prepare --rest <dir> --out <dir> [--universe <file>]
-//! harness m25 --data <dir> --rule <ad> --period 5m|15m|1h|1d [--split calib|test] [--out <dir>]
+//! harness m25 --data <dir> --rule <ad> [--reference <ad>] --period 5m|15m|1h|1d [--split calib|test] [--out <dir>]
 //! harness m26 --data <dir> --detectors <ad> --period … [--rule <ad>] [--split …] [--out <dir>]
 //! harness report [--results <dir>] --out <dir>
 //! harness ticks --raw <dir> [--universe <file>]
@@ -22,7 +22,7 @@ use rp4_harness::{data, m25, m26, registry, report, synth, tick};
 const USAGE: &str = "kullanım:
   harness list
   harness prepare --rest <dir> --out <dir> [--universe <file>]
-  harness m25 --data <dir> --rule <ad> --period 5m|15m|1h|1d [--split calib|test] [--out <dir>]
+  harness m25 --data <dir> --rule <ad> [--reference <ad>] --period 5m|15m|1h|1d [--split calib|test] [--out <dir>]
   harness m26 --data <dir> --detectors <ad> --period 5m|15m|1h|1d [--rule <ad>] [--split calib|test] [--out <dir>]
   harness report [--results <dir>] --out <dir>
   harness ticks --raw <dir> [--universe <file>]
@@ -73,7 +73,10 @@ fn main() -> ExitCode {
             _ => Err(USAGE.to_owned()),
         },
         "m25" => match (path("data"), opt.get("rule"), period, split) {
-            (Some(d), Some(rule), Some(p), Some(s)) => m25::cmd(&d, rule, p, s, &results()),
+            (Some(d), Some(rule), Some(p), Some(s)) => {
+                let reference = opt.get("reference").map_or("r3", String::as_str);
+                m25::cmd(&d, rule, reference, p, s, &results())
+            }
             _ => Err(USAGE.to_owned()),
         },
         "m26" => match (path("data"), opt.get("detectors"), period, split) {

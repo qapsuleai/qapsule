@@ -103,6 +103,7 @@ pub fn rules() -> Vec<RuleEntry> {
             levels: |s, b| m25_taban::levels(s, b).map(Levels::from),
             // r3's 7 + N_TICKS (STEP_TOL is float rounding, not tuned).
             constants: 8,
+        },
         // RP4/M25b "iki kapanışla teyit" (M25/teyit2): r3'ün 7 sabiti (C_DIR·K_SCALE tek
         // çarpan sayılır) + STOP_CLOSES + TARGET_CLOSES.
         RuleEntry {
@@ -110,6 +111,8 @@ pub fn rules() -> Vec<RuleEntry> {
             make: m25_teyit2::outcome,
             levels: |s, b| m25_teyit2::levels(s, b).map(Levels::from),
             constants: 9,
+        },
+        RuleEntry {
             name: "olcek",
             make: m25_olcek::outcome,
             levels: |s, b| m25_olcek::levels(s, b).map(Levels::from),
@@ -122,6 +125,7 @@ pub fn rules() -> Vec<RuleEntry> {
             make: m25_yukdus::outcome,
             levels: |s, b| m25_yukdus::levels(s, b).map(Levels::from),
             constants: 7,
+        },
         // r3's 7 + Z + M.
         RuleEntry {
             name: "umut",
@@ -145,6 +149,8 @@ pub fn detector_sets() -> Vec<DetectorEntry> {
         DetectorEntry {
             name: "olcek26",
             make: m26_olcek26::detectors,
+        },
+        DetectorEntry {
             name: "mevsim",
             make: m26_mevsim::detectors,
         },

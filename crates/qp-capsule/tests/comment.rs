@@ -962,3 +962,20 @@ fn unmasked_numbers_read_times_and_dates_as_digits() {
     assert!(v.contains(&5.0) && v.contains(&23.0), "{v:?}");
     assert!(unmasked_numbers("[1] [2, 3]", Lang::Tr, &[]).is_empty());
 }
+
+#[test]
+fn numbers_in_words_are_caught_in_either_casing() {
+    use qp_capsule::comment::{number_word_run, spelled_decimal};
+    for t in [
+        "BEŞ VİRGÜL YİRMİ ÜÇ",
+        "BEŞ VIRGÜL YIRMI ÜÇ",
+        "on beş buçuk",
+        "five dot two three",
+        "Five Comma Two",
+    ] {
+        assert!(spelled_decimal(t, Lang::Tr).is_some(), "{t}");
+    }
+    assert!(number_word_run("ortalama beş yirmi üç").is_some());
+    assert!(number_word_run("Five Twenty Three").is_some());
+    assert!(number_word_run("bir hikâye doğdu").is_none());
+}

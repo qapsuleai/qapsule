@@ -474,16 +474,47 @@ fn numbers_unmasked(t: &str, lang: Lang) -> Vec<Num> {
     numbers_with(t, lang, &[], false)
 }
 
-/// (R5B audit B1) A decimal written in words ("beş virgül yirmi üç", "five point two
-/// three"): the number scan cannot read it, so it is treated as a number nobody checked.
+const NUMBER_WORDS: &str = "sıfır|sifir|bir|iki|üç|uc|dört|dort|beş|bes|altı|alti|yedi|sekiz|dokuz|on|yirmi|otuz|kırk|kirk|elli|altmış|altmis|yetmiş|yetmis|seksen|doksan|yüz|yuz|bin|milyon|milyar|zero|one|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve|thirteen|fourteen|fifteen|sixteen|seventeen|eighteen|nineteen|twenty|thirty|forty|fifty|sixty|seventy|eighty|ninety|hundred|thousand|million|billion";
+
+/// Both lowercasings (TR dotted/dotless I and EN), with combining marks dropped, so a
+/// word matches however its I was written.
+fn folded(text: &str) -> [String; 2] {
+    let strip = |s: String| {
+        s.chars()
+            .filter(|c| !('\u{300}'..='\u{36f}').contains(c))
+            .collect()
+    };
+    [strip(lower(text, Lang::Tr)), strip(lower(text, Lang::En))]
+}
+
+/// (R5B audit B1) A decimal written in words ("beş virgül yirmi üç", "on beş buçuk",
+/// "five point two three", "… dot …", "… comma …"): the number scan cannot read it, so
+/// every writer is refused it. `_lang` is kept for the signature; both lowercasings are
+/// tried.
 #[must_use]
-pub fn spelled_decimal(text: &str, lang: Lang) -> Option<String> {
+pub fn spelled_decimal(text: &str, _lang: Lang) -> Option<String> {
     static R: OnceLock<Regex> = OnceLock::new();
-    const W: &str = "sıfır|bir|iki|üç|dört|beş|altı|yedi|sekiz|dokuz|on|yirmi|otuz|kırk|elli|altmış|yetmiş|seksen|doksan|yüz|bin|milyon|zero|one|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve|twenty|thirty|forty|fifty|sixty|seventy|eighty|ninety|hundred|thousand|million";
-    let p = format!(r"\b(?:(?:{W})\s+)*(?:{W})\s+(?:virgül|nokta|point)\s+(?:{W})\b");
-    re(&R, &p)
-        .find(&lower(text, lang))
-        .map(|m| m.as_str().to_owned())
+    let w = NUMBER_WORDS;
+    let p = format!(
+        r"\b(?:(?:{w})[\s-]+)*(?:{w})[\s-]+(?:(?:virgül|virgul|nokta|point|dot|comma)[\s-]+(?:{w})|buçuk|bucuk|and a half)\b"
+    );
+    let r = re(&R, &p);
+    folded(text)
+        .iter()
+        .find_map(|t| r.find(t).map(|m| m.as_str().to_owned()))
+}
+
+/// (R5B security review) Two or more number words in a row ("beş yirmi üç", "five
+/// twenty three"): a restricted reader never receives such a text (fail-closed; a
+/// writer may still use them where numbers in words are harmless).
+#[must_use]
+pub fn number_word_run(text: &str) -> Option<String> {
+    static R: OnceLock<Regex> = OnceLock::new();
+    let w = NUMBER_WORDS;
+    let r = re(&R, &format!(r"\b(?:{w})(?:[\s-]+(?:{w}))+\b"));
+    folded(text)
+        .iter()
+        .find_map(|t| r.find(t).map(|m| m.as_str().to_owned()))
 }
 
 /// `|v|` rounded half away from zero to `d` decimals, as an integer × 10^d. A tiny

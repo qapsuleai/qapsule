@@ -373,7 +373,9 @@ impl Session {
         // reader sees; a decimal in words is never passed on.
         let syms = symbols(&self.doc);
         let lang = lang_of(c.lang);
-        if qp_capsule::comment::spelled_decimal(&c.text, lang).is_some() {
+        if qp_capsule::comment::spelled_decimal(&c.text, lang).is_some()
+            || qp_capsule::comment::number_word_run(&c.text).is_some()
+        {
             return false;
         }
         let shown = |n: &qp_capsule::comment::Num| {
@@ -577,4 +579,5 @@ pub(crate) fn projected_keeps(c: &Comment, hidden: &BTreeSet<String>) -> bool {
     let lang = lang_of(c.lang);
     qp_capsule::comment::unmasked_numbers(&c.text, lang, &[]).is_empty()
         && qp_capsule::comment::spelled_decimal(&c.text, lang).is_none()
+        && qp_capsule::comment::number_word_run(&c.text).is_none()
 }

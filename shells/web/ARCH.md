@@ -214,7 +214,7 @@ dilinde çekirdekte yazılır; sayfa **olduğu gibi** `textContent`'e koyar. Kar
 | Yöntem | Neden |
 |--------|-------|
 | `comments()` | Açık kapsülün doğrulanmış yorumları: `[{id, label, origin, text}]` (kapsül kapalıyken boş). |
-| `proposals()` | Bekleyen öneriler: `[{id, author, ops, reason}]`. `ops`: işlem başına bir satır, adı ve bütün bağımsız değişkenleriyle (`set_view_range view=main from_bar=100 to_bar=150`; kabulün gerçek etkisi; çok uzunsa `…` ile kesilir); `reason`: ajanın kendi sözü, "ajan gerekçesi: …" etiketiyle ayrı satırda, hiçbir zaman tek açıklama değil (güvenlik incelemesi: vekil karışıklığı). |
+| `proposals()` | Bekleyen öneriler: `[{id, author, ops, reason}]`. `ops`: işlem başına bir satır, adı ve bütün bağımsız değişkenleriyle (`set_view_range from_bar=100 to_bar=150 view="main"`; kabulün gerçek etkisi; değerler JSON olarak, dizgeler tırnaklı — `x view=other` gibi bir dizge başka bir değişken gibi görünemez; hiçbir şey kesilmez, sayfa satırı kaydırır); `reason`: ajanın kendi sözü, "ajan gerekçesi: …" etiketiyle ayrı satırda, hiçbir zaman tek açıklama değil (güvenlik incelemesi: vekil karışıklığı). |
 | `decide(id, kabul)` | Okurun kararı; bekleyen listede olmayan kimlik için hiçbir şey gönderilmez. |
 
 Değişiklik bayrağı `take_changes().agent`: sayfa iki listeyi yeniden çizer (`#comments`

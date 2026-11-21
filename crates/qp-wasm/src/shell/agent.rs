@@ -56,13 +56,11 @@ fn comment_row(c: &Comment, lang: Language) -> Value {
     json!({"id": c.id, "label": label, "origin": origin, "text": c.text})
 }
 
-/// The longest operation line shown (characters); a longer one is cut with an ellipsis.
-pub const OP_LINE_MAX: usize = 240;
-
-/// One operation as the reader sees what accepting it does: its name, then every argument
-/// as `key=value` in the key order of the serialized operation (deterministic): a string
-/// or a number as it is, anything else as compact JSON. E.g. `set_view_range view=main
-/// from_bar=100 to_bar=150`. Cut at [`OP_LINE_MAX`] characters with `…`.
+/// One operation as the reader sees what accepting it does: its name, then **every**
+/// argument as `key=value` in the key order of the serialized operation (deterministic),
+/// each value as compact JSON — a string is quoted (`view="main"`), so a crafted string
+/// such as `x view=other` cannot pass for another argument. E.g. `set_view_range
+/// from_bar=100 to_bar=150 view="main"`. Nothing is ever cut: the page wraps the line.
 #[must_use]
 pub fn op_line(op: &qp_schema::protocol::Op) -> String {
     let v = serde_json::to_value(op).unwrap_or(Value::Null);
@@ -75,19 +73,10 @@ pub fn op_line(op: &qp_schema::protocol::Op) -> String {
         .unwrap_or("?")
         .to_owned();
     for (k, a) in obj.iter().filter(|(k, _)| k.as_str() != "op") {
-        let val = match a {
-            Value::String(s) => s.clone(),
-            Value::Number(n) => n.to_string(),
-            other => other.to_string(),
-        };
         line.push(' ');
         line.push_str(k);
         line.push('=');
-        line.push_str(&val);
-    }
-    if line.chars().count() > OP_LINE_MAX {
-        line = line.chars().take(OP_LINE_MAX - 1).collect();
-        line.push('…');
+        line.push_str(&a.to_string());
     }
     line
 }

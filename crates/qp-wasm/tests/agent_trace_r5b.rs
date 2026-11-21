@@ -156,7 +156,7 @@ fn a_pending_proposal_is_listed_and_the_readers_accept_applies_it() {
     // What accepting does, with its arguments; no reason given: none shown.
     assert_eq!(
         rows[0]["ops"],
-        json!(["show_finding finding=fnd.THYAO.continuation.down.84 view=v-show"])
+        json!([r#"show_finding finding="fnd.THYAO.continuation.down.84" view="v-show""#])
     );
     assert_eq!(rows[0]["reason"], Value::Null);
     // An unknown id sends nothing.
@@ -211,7 +211,7 @@ fn the_agents_reason_is_labelled_and_never_the_description() {
     let rows = r.core.proposals_json();
     assert_eq!(
         rows[0]["ops"],
-        json!(["show_finding finding=fnd.THYAO.continuation.down.84 view=v-show"]),
+        json!([r#"show_finding finding="fnd.THYAO.continuation.down.84" view="v-show""#]),
         "{rows}"
     );
     assert_eq!(
@@ -228,27 +228,64 @@ fn the_agents_reason_is_labelled_and_never_the_description() {
     );
 }
 
-/// An operation line: name and every argument in a fixed order; a long one is cut with
-/// an ellipsis.
+/// An operation line: name and every argument in a fixed order, string values quoted.
 #[test]
 fn an_operation_line_carries_its_arguments() {
     use qp_schema::protocol::Op;
-    use qp_wasm::shell::agent::{op_line, OP_LINE_MAX};
+    use qp_wasm::shell::agent::op_line;
     let op: Op = serde_json::from_value(
         json!({"op":"set_view_range","view":"main","from_bar":100,"to_bar":150}),
     )
     .unwrap();
     let line = op_line(&op);
-    assert!(line.starts_with("set_view_range "), "{line}");
-    for part in ["view=main", "from_bar=100", "to_bar=150"] {
-        assert!(line.contains(part), "{line}");
-    }
+    assert_eq!(
+        line, r#"set_view_range from_bar=100 to_bar=150 view="main""#,
+        "{line}"
+    );
     assert_eq!(line, op_line(&op), "deterministic");
-    let long: Op = serde_json::from_value(
-        json!({"op":"set_view_range","view":"v".repeat(400),"from_bar":1,"to_bar":2}),
+}
+
+/// (Security review) A long argument is never cut: every key and the whole value show
+/// (the page wraps the line); nothing is hidden behind an ellipsis.
+#[test]
+fn a_long_argument_is_shown_in_full() {
+    use qp_schema::protocol::Op;
+    use qp_wasm::shell::agent::op_line;
+    let view = format!("{}END", "v".repeat(400));
+    let op: Op =
+        serde_json::from_value(json!({"op":"set_view_range","view":view,"from_bar":1,"to_bar":2}))
+            .unwrap();
+    let l = op_line(&op);
+    assert!(l.contains(&format!("view=\"{view}\"")), "{l}");
+    for k in ["from_bar=1", "to_bar=2"] {
+        assert!(l.contains(k), "{l}");
+    }
+    assert!(!l.contains('…'), "{l}");
+}
+
+/// (Security review) A string value that looks like more arguments stays one quoted
+/// value: it cannot pass for another `key=value`.
+#[test]
+fn a_crafted_string_cannot_spoof_an_argument() {
+    use qp_schema::protocol::Op;
+    use qp_wasm::shell::agent::op_line;
+    let op: Op = serde_json::from_value(
+        json!({"op":"set_view_range","view":"x to_bar=9 view=other","from_bar":1,"to_bar":2}),
     )
     .unwrap();
-    let l = op_line(&long);
-    assert_eq!(l.chars().count(), OP_LINE_MAX);
-    assert!(l.ends_with('…'), "{l}");
+    let l = op_line(&op);
+    assert_eq!(
+        l, r#"set_view_range from_bar=1 to_bar=2 view="x to_bar=9 view=other""#,
+        "{l}"
+    );
+    // A quote inside the value is escaped, so the value cannot close itself early.
+    let op: Op = serde_json::from_value(
+        json!({"op":"set_view_range","view":"a\" to_bar=9","from_bar":1,"to_bar":2}),
+    )
+    .unwrap();
+    assert!(
+        op_line(&op).ends_with(r#"view="a\" to_bar=9""#),
+        "{}",
+        op_line(&op)
+    );
 }

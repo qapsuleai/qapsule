@@ -1,0 +1,16 @@
+# RP4/M25 alternatifi `taban`: r3 bariyeri, eşiğe en az N fiyat adımı tabanı.
+# Bağımsız crate (boş [workspace]); harness'e path bağımlılığıyla takılır.
+[package]
+name = "m25-taban"
+version = "0.1.0"
+edition = "2021"
+publish = false
+
+[workspace]
+
+[dependencies]
+qp-capsule = { path = "../../../../../crates/qp-capsule" }
+qp-schema = { path = "../../../../../crates/qp-schema" }
+
+[lints.rust]
+unsafe_code = "forbid"

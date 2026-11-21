@@ -97,6 +97,13 @@ pub fn rules() -> Vec<RuleEntry> {
             // C_DIR, C_NEUTRAL, ATR_FAST, ATR_SLOW, horizons 20 / 15 / 10.
             constants: 7,
         },
+        RuleEntry {
+            name: "taban",
+            make: m25_taban::outcome,
+            levels: |s, b| m25_taban::levels(s, b).map(Levels::from),
+            // r3's 7 + N_TICKS (STEP_TOL is float rounding, not tuned).
+            constants: 8,
+        },
         // M25 alternatifleri: bir satır, ör.
         // RuleEntry { name: "a1", make: m25_a1::outcome, levels: |s, b| m25_a1::levels(s, b).map(Levels::from), constants: 4 },
     ]

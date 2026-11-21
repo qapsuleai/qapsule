@@ -34,16 +34,28 @@
 #            curl -s localhost:8390/live/stats                      # counts, no values
 #            curl -s -X POST -H "X-Qp-Live-Control: $T" 'localhost:8390/live/drop?secs=20'
 #          Only the orchestrator opens a live connection, one at a time (lock file).
+#
+# RP4/T4 accelerated simulation (no connection, no token; docs/matriks/LIVE.md §8):
+#   scripts/demo.sh --sim --start YYYY-MM-DD [--end YYYY-MM-DD] [--symbols @file|A,B]
+#                   [--interval 5m] [--speed N|max] [--history N]
+#          Cached trades (fixtures/local/trades) through the live path on a simulated
+#          exchange clock; --speed N = N x real time in sessions (default 60), max = no
+#          waiting; closed hours take at most 2 s. The page is the live demo's. This
+#          machine only: --sim with --lan, --https-host or --bind is refused.
+#          Counts: curl -s -H "X-Qp-Live-Control: $QP_LIVE_CONTROL" localhost:8390/live/stats
 # Requirements: rustup target wasm32-unknown-unknown, wasm-pack (cargo install wasm-pack).
 set -euo pipefail
 
 live=0
+sim=0
 port=8390
 prev=""
 for a in "$@"; do
   case "$a" in
     --live) live=1 ;;
+    --sim) sim=1 ;;
     --lan|--https-host|--https-host=*) lan_like="$a" ;;
+    --bind|--bind=*) bind_like="$a" ;;
   esac
   [ "$prev" = "--port" ] && port="$a"
   case "$a" in --port=*) port="${a#--port=}" ;; esac
@@ -52,6 +64,29 @@ done
 if [ "$live" = 1 ] && [ -n "${lan_like:-}" ]; then
   echo "demo.sh: --live with $lan_like is refused: real market data stays on this machine (127.0.0.1)." >&2
   exit 2
+fi
+if [ "$sim" = 1 ] && [ -n "${lan_like:-${bind_like:-}}" ]; then
+  echo "demo.sh: --sim with ${lan_like:-$bind_like} is refused: real market data stays on this machine (127.0.0.1)." >&2
+  exit 2
+fi
+# With --sim, --speed is the simulation's pace (qp demo --sim-speed).
+if [ "$sim" = 1 ]; then
+  args=()
+  prev=""
+  for a in "$@"; do
+    if [ "$prev" = "--speed" ]; then
+      args+=("$a")
+    elif [ "$a" = "--speed" ]; then
+      args+=("--sim-speed")
+    else
+      case "$a" in
+        --speed=*) args+=("--sim-speed=${a#--speed=}") ;;
+        *) args+=("$a") ;;
+      esac
+    fi
+    prev="$a"
+  done
+  set -- "${args[@]}"
 fi
 
 root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
@@ -106,6 +141,14 @@ echo "== sizes: $(cat "$pkg/sizes.json")"
 [ "${QP_DEMO_PACK_ONLY:-0}" = 1 ] && exit 0
 
 cargo build -q -p qp-cli --release
+if [ "$sim" = 1 ]; then
+  if [ -z "${QP_LIVE_CONTROL:-}" ]; then
+    QP_LIVE_CONTROL="$(od -An -N16 -tx1 /dev/urandom | tr -d ' \n')"
+  fi
+  export QP_LIVE_CONTROL
+  echo "== control secret (this machine only): $QP_LIVE_CONTROL"
+  exec "$target_dir/release/qp" demo --web shells/web "$@"
+fi
 if [ "$live" = 1 ]; then
   if [ -z "${MATRIKS_TOKEN_SERVICE_URL:-}" ] && [ -f ./.env.local ]; then
     set -a

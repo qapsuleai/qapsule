@@ -12,6 +12,7 @@ mod demo;
 mod demo_static;
 mod live;
 mod livehost;
+mod sim;
 
 #[derive(Debug, Parser)]
 #[command(name = "qp", version, about = "Qapsule command line", long_about = None)]
@@ -112,6 +113,12 @@ enum Command {
     /// (R4/T5) The local demo: replay host + authority + the web shell on one origin
     /// (`scripts/demo.sh`; `shells/web/README.md`).
     Demo(demo::DemoArgs),
+    /// (RP4/T4) Accelerated simulation: cached historical trades (`fixtures/local/trades`)
+    /// through the live path (`LiveFeed` with trades → live host → capsule engine) on a
+    /// simulated exchange clock, `--speed N` or `max`, over several days (XIST calendar).
+    /// Prints counts and a digest; `--out` (under `fixtures/local/`) gets the event
+    /// stream. Same cache and arguments → byte-equal stream (`docs/matriks/LIVE.md` §8).
+    Sim(sim::SimArgs),
     /// (R4/T5) Drive the demo session with protocol messages only (no shell) and print
     /// the document and scene digests the web shell reports (parity check).
     Drive(demo::DriveArgs),
@@ -383,6 +390,7 @@ fn run(command: Command) -> Result<Outcome, String> {
         } => schema_validate(&file, &type_name, schema_dir.as_deref()),
         Command::Compute(args) => compute(&args),
         Command::Demo(args) => demo::demo(&args).map(|()| Outcome::Ok),
+        Command::Sim(args) => sim::sim(&args).map(|()| Outcome::Ok),
         Command::Drive(args) => demo::drive(&args).map(|()| Outcome::Ok),
         Command::Live { command } => live::run(&command).map(|()| Outcome::Ok),
         Command::Render(args) => match &args.input {

@@ -12,7 +12,7 @@ belirteçler burada yazılmaz; yalnız değişken adları (K61). Ölçümler ve 
 | Matriks çözücü | `qp-matriks` | yok | 22 Matriks protosunun bayt eşit kopyası (`proto/`, köken `proto/PROVENANCE.md`), derlemede üretilen prost tipleri (`protox` + `prost-build`, protoc gerekmez); fiyat kartı kitabı (`SymbolBook`, protobuf birleştirme anlamı: **gelmeyen alan değişmedi**, 0 yazılmaz); borsa saati (`MarketClock`, yalnız `MX` kaynağı); bildirim sınıflayıcı (`MULTICONNECT`); seans evresi tablosu (`stockStatus`); ham ileti kaydı (`rawlog`); ortak besleme hattı (`feed::LiveFeed`). |
 | Canlı bar üretici | `qp-source::livebar` | yok | Fiyat kartından XIST takvimine hizalı bar (K14): açılış emir toplama günün ilk barına, kapanış seansı son barına; hacim günlük birikimli tutarın farkı; yöntemler `Ticks`, `CardDaily`, `Mixed`, `Trades` (RP4, §6); ek yeri (`resume`); `compare_bars`. |
 | Canlı bağlayıcı | `qp-live` | **var** | Belirteç (bellekte, istek sıklığı sınırlı), MQTT 3.1 (`MQIsdp`, WebSocket alt protokolü `mqttv3.1`) WebSocket + TLS (rustls + ring, sertifika doğrulaması açık) üstünde, kendi küçük MQTT kodlayıcısı; uç nokta başına tek bağlantı (süreç içi kayıt + ana ağacın `fixtures/local/live-<uç>.lock` işletim sistemi kilidi; ayrıca belirteç isteyen her süreç için makine çapında `live-identity.lock`); çoklu bağlantı bildiriminde ya da kayan 10 dakikada 2 açıklamasız sunucu kapatmasında dur ve yeniden deneme yok (`.halted` işaret dosyası, K64/A52); üstel geri çekilme (2→60 sn, 6 ardışık hatada dur); günlük maskeleme (`Redactor`); REST istemcisi (`rest::RestClient`: kesin barlar, sembol listesi ve RP4 geçmiş işlemler (`trades_csv`, yalnız düzey 1 sütunlar), aynı servis belirteciyle); işlem ucu `/trade` kendi kilidiyle (§6); sahte sunucu (`mock` özelliği). |
-| CLI ve gösterim | `qp-cli` | var | `qp live record|inspect|symbols|bars|compare|trades`, `qp live reset` (ağ yok; yalnız insan), `qp replay --raw`, `qp demo --live`. |
+| CLI ve gösterim | `qp-cli` | var | `qp live record|inspect|symbols|bars|compare|trades`, `qp live reset` (ağ yok; yalnız insan), `qp replay --raw`, `qp demo --live`; RP4 ağsız: `qp sim`, `qp demo --sim` (§8). |
 
 `qp-wasm` (cihaz paketi) bu crate'lerin hiçbirine bağlanmaz; hesap çekirdeği (`qp-compute`)
 ağ ve saat bilmez (K3).
@@ -133,6 +133,16 @@ Orkestratörün bağlaması gerekenler: `RestClient::trades` → `TradeHistory` 
 ile borsa zamanı (sessiz sembolün boşluğu "şimdi"ye kadar uzansın), ham kayıtta
 `sanitize_trade_payload`.
 
+Barındırıcı tarafı RP4/T4'te hazır (benzetim bunu kullanır, §8): `livehost::MatriksFeed::with_trades`
+(işlem girdili `LiveFeed`), `LiveIn::Trade` (işlem ucunun kayıtları, `FeedSource::Trade`),
+`HubSink::for_trades` (işlem ucunun bağlantısı için ham kayıt + hub), `LiveRuntime::watch_trades`
+ve `set_trade_history`: işlem bağlantısı açılınca çalışma zamanı saati borsa zamanına götürür ve
+bütün boşlukları geçmişten doldurur (`fill_trade_gaps`; şimdilik hub iş parçacığında, eşzamanlı).
+Bağlanmayanlar: `qp demo --live`'da ikinci (işlem) bağlantısının açılması ve REST uyarlayıcısı.
+Bilinen sınır: piyasa ucu koparsa yapılan REST bar onarımı `MatriksFeed`'i yenisiyle değiştirir;
+işlem girdili kipte yeni beslemenin izlenen sembolleri ve işlem bağlantısı durumu taşınmaz
+(canlı işlem bağlamasında ele alınmalı).
+
 ## 7. Sorun giderme
 
 | Belirti | Neden / ne yapılır |
@@ -153,3 +163,53 @@ ile borsa zamanı (sessiz sembolün boşluğu "şimdi"ye kadar uzansın), ham ka
 | `retrying in …` | Kopma; ölçülü geri çekilme. 6 ardışık hatada durur (`TooManyFailures`). |
 | `token request failed: HTTP 401` | Servis hesabı değişkenleri yanlış. |
 | `missing: MATRIKS_…` | `.env.local`'a o değişkeni girin. |
+
+## 8. Hızlandırılmış benzetim (RP4/T4, K65)
+
+Borsa kapalıyken (hafta sonu) canlı yolu gerçek veriyle çalıştırmak için. Bağlantı, belirteç ve
+ağ yok; yalnız yerel önbellek. Ayrı bir hat değildir: kod `crates/qp-cli/src/sim.rs`.
+
+```
+fixtures/local/trades/<SYM>/<başlangıç>_<bitiş>.csv.gz   (düzey 1, borsa zamanı; qp live trades)
+  │ parse_rest_csv → Trade, işlem no ile tekilleştirilir, borsa sırası (zaman, sembol, işlem no)
+  ▼ her işlem → işlem ucunun göndereceği ileti (TradeMessage, mx/trade/<SYM>), varış = işlemin zamanı
+LiveIn::Trade ──► LiveRuntime (benzetim saati; LiveIn::Clock) ──► LiveFeed::with_trades
+  ──► ReplayHost::live (otorite) ──► kapsül motoru ──► (gösterimde) görüntüleyici
+```
+
+| Konu | Kural |
+|---|---|
+| Aynı yol | `qp demo --live` ile aynı türler: `livehost::host_from_history` (barındırıcı), `LiveRuntime`, `MatriksFeed::with_trades`, `LiveIn::Trade`. Test: `sim::tests::simulation_path_is_the_live_path` aynı işlemleri sahte sunucunun işlem ucundan gerçek bir `LiveConnection` + `HubSink::for_trades` ile duvar saatindeki çalışma zamanına verir ve benzetimle **bayt eşit** veri olayları bekler (VERIFY 8). |
+| İlk çözüm (ısınma) | Başlangıçtan (ilk günün yerel gece yarısı) önce tamamlanmış son `--history` bar: sembol başına önbellekteki REST barlarından (`fixtures/local/live/rest/<SYM>.<period>.*.unadj.json`, canlı REST kaynağıyla aynı `normalize_rest`) ya da — önbellekte orada daha az bar varsa — önceki günlerin önbellekteki işlemlerinden aynı bar kurucuyla (`BarMethod::Trades`). Hangisinin alındığı sayılır (`history_from_rest`, `history_from_trades`). Geçmişi olmayan sembol dışarıda kalır. |
+| İşlem bağlantısı | Başlangıçta işlem ucu "açılır"; başlangıçtan itibaren boşluk önbellekten (`CacheHistory`, canlıda REST) doldurulur, sonra işlemler canlı gibi gelir. |
+| Saat | Borsa zamanı. Çalışma zamanının "şimdi"si benzetim saatidir (`LiveRuntime::use_sim_clock`); benzetim onu her işlemin zamanına ve XIST takviminin her bar kapanışına, seans açılış ve kapanışına ve gün sonuna götürür (`sim::schedule`): işlemsiz sembolün barı da kapanır, günler sırayla geçer (kapanış → piyasa kapalı → hafta sonu/tatil atlanır → ertesi işlem günü açılış). |
+| Seans evresi | Fiyat kartı olmadığı için sembol başına `stockStatus` yok. Piyasa durumu (açık / kapalı / tatil) XIST takviminden gelir (`MarketSource::Calendar`), canlıda kart sessizken olduğu gibi; sembol evreleri boştur (`phases` 0). Açılış ve kapanış emir toplama işlemleri bar kuralıyla (K14) ilk ve son bara girer. |
+| Hız | `--speed N`: seans içinde N× gerçek zaman; kapalı aralıklar (gece, hafta sonu, açılış öncesi) en çok 2 sn sürer. `--speed max`: beklemesiz. Hız yalnız gönderme anını değiştirir; aynı önbellek ve bağımsız değişkenler her hızda **bayt eşit** akış verir (test: `same_input_twice_gives_a_byte_equal_stream_at_any_speed`). Hız sahte saatle sınanır (`pace_follows_the_speed_factor_on_a_fake_clock`). |
+| Çıktı | Standart çıktıya yalnız toplu sayılar ve akışın SHA-256 özeti (iki koşuyu veri basmadan karşılaştırmak için). `--out` yalnız `fixtures/local/` altına (başka yer reddedilir): her satır bir veri olayı (`ev`), kapsül doğumu/durum değişimi (`capsule`, `state`, `rev`), piyasa durumu değişimi (`market`) ya da otoritenin iletisi. |
+| Kural | `--rule r3` (bugünkü `EngineConfig::r3`). Adlandırılmış kural kayıtları (`sim::RULES`) kalibrasyonla eklenecek; başka ad reddedilir. |
+| Gizlilik | Gerçek veri: `qp demo --sim` yalnız 127.0.0.1; `--lan`, `--https-host` ve başka `--bind` reddedilir (qp ve `scripts/demo.sh`; test `tests/demo_sim.rs`, VERIFY 17). |
+
+### Arkin için: izlemek
+
+```sh
+# 1) Önbellek var mı (işlemler; REST barları isteğe bağlı)
+ls fixtures/local/trades | head; ls fixtures/local/live/rest | head
+
+# 2) Tarayıcıda izle: 30 sembol, iki gün, seansta 60× (5 dk'lık bar 5 sn'de), kapalı saatler 2 sn
+scripts/demo.sh --sim --symbols @fixtures/local/live/u30.txt --start 2026-11-17 --end 2026-11-18 --speed 60
+#    → http://localhost:8390/  (konsolda basılan denetim belirteciyle sayılar:)
+curl -s -H "X-Qp-Live-Control: $QP_LIVE_CONTROL" localhost:8390/live/stats
+
+# 3) Tarayıcısız, en hızlı: 100 sembol, bir gün (toplu sayılar + özet)
+target/release/qp sim --symbols @fixtures/local/live/u100.txt --start 2026-11-18 --speed max
+
+# 4) Olay akışını dosyaya (yalnız fixtures/local altına) ve iki koşuyu karşılaştır
+mkdir -p fixtures/local/sim
+target/release/qp sim --start 2026-11-18 --out fixtures/local/sim/a.jsonl
+target/release/qp sim --start 2026-11-18 --out fixtures/local/sim/b.jsonl
+cmp fixtures/local/sim/a.jsonl fixtures/local/sim/b.jsonl && echo bayt-eşit
+```
+
+Durdurmak: Ctrl-C. Ölçüm (100 sembol, bir gün, `max`): `rounds/RP4/experiments/T4.md`.
+Not: önbellek inerken iki koşunun özeti farklı çıkar (girdi değişti); karşılaştırmayı inişi biten
+günlerde yapın.

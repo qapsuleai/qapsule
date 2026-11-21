@@ -132,6 +132,28 @@ pub struct DemoArgs {
     /// (`<SYMBOL>.<period>.unadj.json`) instead of REST: offline tests, a cached history.
     #[arg(long, requires = "live", value_name = "DIR")]
     pub live_bars: Option<PathBuf>,
+    /// (RP4/T4) Accelerated simulation (`qp sim`) shown live: cached trades of
+    /// `--start`..`--end` for `--symbols` through the live path on a simulated exchange
+    /// clock at `--sim-speed`. No connection, no token. This machine only: refused with
+    /// `--lan`, `--https-host` or another `--bind` (real data does not go to the local
+    /// network).
+    #[arg(long, conflicts_with_all = ["live", "synthetic", "data", "from", "gallery"])]
+    pub sim: bool,
+    /// (RP4/T4) First simulated day (`YYYY-MM-DD`).
+    #[arg(long, requires = "sim")]
+    pub start: Option<String>,
+    /// (RP4/T4) Last simulated day (default: `--start`).
+    #[arg(long, requires = "sim")]
+    pub end: Option<String>,
+    /// (RP4/T4) Simulation pace: `N` (N× real time in sessions) or `max`.
+    #[arg(long, default_value = "60")]
+    pub sim_speed: String,
+    /// (RP4/T4) Cached trades (`<dir>/<SYM>/<start>_<end>.csv.gz`).
+    #[arg(long, default_value = "fixtures/local/trades")]
+    pub sim_trades: PathBuf,
+    /// (RP4/T4) Cached REST bars (history).
+    #[arg(long, default_value = "fixtures/local/live/rest")]
+    pub sim_rest: PathBuf,
 }
 
 /// `qp drive` arguments: the shell-less driver.
@@ -295,33 +317,21 @@ fn live_setup(a: &DemoArgs, tx: &Sender<Cmd>) -> Result<(ReplayHost, LiveParts),
         .iter()
         .map(|(s, _)| format!("mx/symbol/{s}@lvl2"))
         .collect();
-    let feeds: Vec<qp_source::ReplayFeed> = hist
-        .into_iter()
-        .map(|(s, bars)| qp_source::ReplayFeed {
-            key: FeedKey {
-                symbol: s,
-                interval: a.interval.clone(),
-                feed: None,
-            },
-            bars,
-            fine: Vec::new(),
-        })
-        .collect();
-    let mut init = demo_session_init(&DemoOptions {
-        local: true,
-        instruments: u32::try_from(n).unwrap_or(u32::MAX),
-        history: a.history,
-        days: a.days,
-        speed: a.speed,
-        from_t: None,
-        running: true,
-        feed_rule: Some(a.feed_rule.clone()),
-    });
-    if let Some(r) = init.replay.as_mut() {
-        r.interval = Some(a.interval.clone());
-        r.fine = None;
-    }
-    let mut h = ReplayHost::live(init, &a.root, feeds)?;
+    let mut h = crate::livehost::host_from_history(
+        hist,
+        &a.interval,
+        &DemoOptions {
+            local: true,
+            instruments: 0,
+            history: a.history,
+            days: a.days,
+            speed: a.speed,
+            from_t: None,
+            running: true,
+            feed_rule: Some(a.feed_rule.clone()),
+        },
+        &a.root,
+    )?;
     h.set_note(Some(format!(
         "canlı / live · {n} · {}{}",
         a.interval,
@@ -374,6 +384,91 @@ fn live_setup(a: &DemoArgs, tx: &Sender<Cmd>) -> Result<(ReplayHost, LiveParts),
         sink,
     };
     Ok((h, parts))
+}
+
+/// (RP4/T4) What the simulated demo needs once the hub exists.
+struct SimParts {
+    control: String,
+    symbols: usize,
+    speed: crate::sim::Speed,
+    input: crate::sim::SimInput,
+    runtime: crate::livehost::LiveRuntime,
+    to_hub: std::sync::Arc<dyn Fn(crate::livehost::LiveIn) + Send + Sync>,
+}
+
+/// (RP4/T4) The simulated demo: the caches' history is the initial resolution, the live
+/// runtime runs on the simulated clock (`crate::sim`); the feeder starts with the hub.
+fn sim_setup(a: &DemoArgs, tx: &Sender<Cmd>) -> Result<(ReplayHost, SimParts), String> {
+    use std::sync::Arc;
+    let start = a.start.as_deref().ok_or("--sim needs --start YYYY-MM-DD")?;
+    let speed = crate::sim::Speed::parse(&a.sim_speed)?;
+    let spec = crate::sim::SimSpec::new(
+        &a.symbols,
+        start,
+        a.end.as_deref(),
+        &a.interval,
+        a.history,
+        &a.feed_rule,
+        "r3",
+        (&a.sim_trades, &a.sim_rest, &a.root),
+    )?;
+    println!(
+        "benzetim / simulation: {} symbols, {}{}, {} (caches under fixtures/local)…",
+        spec.symbols.len(),
+        start,
+        a.end
+            .as_deref()
+            .map(|e| format!("..{e}"))
+            .unwrap_or_default(),
+        a.interval
+    );
+    let _ = std::io::stdout().flush();
+    let input = crate::sim::load(&spec)?;
+    if !input.missing.is_empty() {
+        println!("geçmiş yok / no history: {} symbols", input.missing.len());
+    }
+    let txc = Mutex::new(tx.clone());
+    let to_hub: Arc<dyn Fn(crate::livehost::LiveIn) + Send + Sync> = Arc::new(move |i| {
+        let _ = txc
+            .lock()
+            .unwrap_or_else(std::sync::PoisonError::into_inner)
+            .send(Cmd::Live(i));
+    });
+    let (mut h, rt) = crate::sim::runtime(
+        &spec,
+        &input,
+        to_hub.clone(),
+        qp_matriks::TradeDecodeConfig::default(),
+    )?;
+    let n = input.hist.len();
+    h.set_note(Some(format!(
+        "benzetim / simulation · {n} · {} · {start}{} · {}",
+        a.interval,
+        a.end
+            .as_deref()
+            .map(|e| format!("..{e}"))
+            .unwrap_or_default(),
+        speed.label()
+    )));
+    let control = match std::env::var("QP_LIVE_CONTROL") {
+        Ok(v) if v.len() >= 16 => v,
+        _ => {
+            let s = secret()?;
+            println!("denetim belirteci / control secret: {s}");
+            s
+        }
+    };
+    Ok((
+        h,
+        SimParts {
+            control,
+            symbols: n,
+            speed,
+            input,
+            runtime: rt,
+            to_hub,
+        },
+    ))
 }
 
 /// The machine's address on the local network (a routing lookup; no packet is sent).
@@ -1081,19 +1176,24 @@ pub fn demo(a: &DemoArgs) -> Result<(), String> {
     if a.https_host.as_deref().is_some_and(|n| n.trim().is_empty()) {
         return Err("--https-host: empty name".to_owned());
     }
-    if a.live && (a.lan || a.https_host.is_some() || a.bind != "127.0.0.1") {
-        return Err(
-            "--live: real market data stays on this machine; --lan, --https-host and \
---bind other than 127.0.0.1 are refused with --live (to view it elsewhere, run your own \
+    if (a.live || a.sim) && (a.lan || a.https_host.is_some() || a.bind != "127.0.0.1") {
+        let flag = if a.sim { "--sim" } else { "--live" };
+        return Err(format!(
+            "{flag}: real market data stays on this machine; --lan, --https-host and \
+--bind other than 127.0.0.1 are refused with {flag} (to view it elsewhere, run your own \
 private proxy, e.g. Tailscale, to 127.0.0.1 — see docs/matriks/LIVE.md)"
-                .to_owned(),
-        );
+        ));
     }
     let (tx, rx) = mpsc::channel::<Cmd>();
     let mut live_parts = None;
+    let mut sim_parts = None;
     let host = if a.live {
         let (h, parts) = live_setup(a, &tx)?;
         live_parts = Some(parts);
+        h
+    } else if a.sim {
+        let (h, parts) = sim_setup(a, &tx)?;
+        sim_parts = Some(parts);
         h
     } else {
         host(a)?
@@ -1130,7 +1230,10 @@ private proxy, e.g. Tailscale, to 127.0.0.1 — see docs/matriks/LIVE.md)"
         urls.push(format!("https://{}/", n.trim()));
     }
     let gate = std::sync::Arc::new(Gate {
-        live_control: live_parts.as_ref().map(|p| p.control.clone()),
+        live_control: live_parts
+            .as_ref()
+            .map(|p| p.control.clone())
+            .or_else(|| sim_parts.as_ref().map(|p| p.control.clone())),
         hosts,
         https_hosts,
     });
@@ -1139,6 +1242,12 @@ private proxy, e.g. Tailscale, to 127.0.0.1 — see docs/matriks/LIVE.md)"
     if let Some(p) = &live_parts {
         info["live"] = json!(true);
         info["delayed"] = json!(p.delayed);
+        info["symbols"] = json!(p.symbols);
+    }
+    if let Some(p) = &sim_parts {
+        info["live"] = json!(true);
+        info["sim"] = json!(true);
+        info["delayed"] = json!(false);
         info["symbols"] = json!(p.symbols);
     }
     println!("qp demo: {}", urls[0]);
@@ -1158,7 +1267,8 @@ private proxy, e.g. Tailscale, to 127.0.0.1 — see docs/matriks/LIVE.md)"
             println!("telefondan aç / open on your phone (same network): {u}");
             println!("uyarı: yerel ağdaki cihazlar gösterimi görebilir / warning: devices on the local network can see the demo");
         }
-        None => println!("telefondan açmak için: scripts/demo.sh --lan / to open on a phone: scripts/demo.sh --lan"),
+        None if live_parts.is_none() && sim_parts.is_none() => println!("telefondan açmak için: scripts/demo.sh --lan / to open on a phone: scripts/demo.sh --lan"),
+        None => {}
     }
     if let Some(p) = &live_parts {
         println!(
@@ -1168,6 +1278,15 @@ private proxy, e.g. Tailscale, to 127.0.0.1 — see docs/matriks/LIVE.md)"
             if p.delayed { "delayed" } else { "real time" }
         );
         println!("canlı denetim / live control: GET /live/stats ; POST /live/drop?secs=N, POST /live/quit (header X-Qp-Live-Control)");
+    } else if let Some(p) = &sim_parts {
+        println!(
+            "veri: benzetim / data: simulation ({} symbols, {}, {} trades, {})",
+            p.symbols,
+            a.interval,
+            p.input.trades.len(),
+            p.speed.label()
+        );
+        println!("denetim / control: GET /live/stats (header X-Qp-Live-Control)");
     } else if st.synthetic {
         println!(
             "veri: sentetik pazar / data: synthetic market{}",
@@ -1225,6 +1344,23 @@ private proxy, e.g. Tailscale, to 127.0.0.1 — see docs/matriks/LIVE.md)"
         let (rt, ctl) = p.start(&hub.host)?;
         hub.live = Some(rt);
         hub.conn_ctl = Some(ctl);
+    }
+    if let Some(p) = sim_parts {
+        hub.live = Some(p.runtime);
+        let iv = qp_calendar::Interval::parse(&a.interval).map_err(|e| e.to_string())?;
+        crate::sim::spawn_feeder(
+            std::sync::Arc::new(p.input),
+            iv,
+            p.speed,
+            p.to_hub,
+            Box::new(|st: crate::sim::DriveStats| {
+                println!(
+                    "benzetim bitti / simulation done: {} trades, {} days",
+                    st.trades, st.days
+                );
+                let _ = std::io::stdout().flush();
+            }),
+        );
     }
     let mut last_flush = Instant::now();
     loop {

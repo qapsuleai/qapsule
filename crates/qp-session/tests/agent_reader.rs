@@ -192,9 +192,66 @@ fn an_agent_with_its_own_wide_row_still_reads_as_its_person() {
 }
 
 #[test]
-fn on_behalf_must_name_another_known_principal() {
+fn on_behalf_must_name_a_human_who_works_for_nobody() {
+    // Unknown, itself, another agent (a chain), a cycle: the session does not start.
+    let cases: [&[(&str, &str)]; 4] = [
+        &[("lost", "nobody")],
+        &[("self", "self")],
+        &[("chain", "bb")],
+        &[("x1", "x2"), ("x2", "x1")],
+    ];
+    for case in cases {
+        let mut i = init();
+        for (a, p) in case {
+            i.principals.push(agent(a, p));
+        }
+        let e = Session::new(i, &root()).err().expect("refused");
+        assert!(e.contains("on_behalf"), "{e}");
+    }
+    // A human that works for someone cannot be a target either.
     let mut i = init();
-    i.principals.push(agent("lost", "nobody"));
-    let e = Session::new(i, &root()).err().expect("refused");
-    assert!(e.contains("on_behalf"), "{e}");
+    i.principals.push(
+        serde_json::from_value(json!({"id":"h2","author":{"kind":"human","name":"h2"},
+            "role":"viewer","on_behalf":"ana"}))
+        .unwrap(),
+    );
+    i.principals.push(agent("via", "h2"));
+    assert!(Session::new(i, &root()).is_err());
+}
+
+/// A provider that cannot say whether a principal has a row of its own (`has_row`
+/// default): the agent is held to the intersection (fail closed).
+struct Opaque(qp_source::MemoryProvider);
+
+impl qp_source::SourceProvider for Opaque {
+    fn entitled(&self, p: &str, f: &qp_schema::data::FeedKey) -> bool {
+        self.0.entitled(p, f)
+    }
+    fn resolve(&self, p: &str, b: &qp_schema::data::DataBinding) -> qp_source::Resolution {
+        self.0.resolve(p, b)
+    }
+}
+
+#[test]
+fn an_unknown_row_is_read_as_a_row_fail_closed() {
+    let mut i = init();
+    let data = i.data.take().unwrap();
+    let mp = qp_source::MemoryProvider::from_init(&data, &root()).unwrap();
+    let mut s = Session::with_provider(i, &root(), Box::new(Opaque(mp))).unwrap();
+    // `bb` has no row in the provider, but the provider does not say so: nothing.
+    for (c, p) in [("b", "bora"), ("B", "bb"), ("B2", "bb2")] {
+        send(
+            &mut s,
+            c,
+            &json!({"type":"hello","protocol":"qp/0","principal":p,"surface":{"kind":"headless"}}),
+        );
+    }
+    let q = json!({"type":"query","id":"q","query":{"kind":"binding"}});
+    let bora = send(&mut s, "b", &q);
+    let bb = send(&mut s, "B", &q);
+    let bb2 = send(&mut s, "B2", &q);
+    assert!(of(&bora, "b")[0].contains("ready"), "{bora:?}");
+    assert!(of(&bb, "B")[0].contains("no_entitlement"), "{bb:?}");
+    // `bb2` has `*` of its own: the intersection is bora's.
+    assert_eq!(of(&bora, "b"), of(&bb2, "B2"));
 }

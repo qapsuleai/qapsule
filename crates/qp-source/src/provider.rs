@@ -61,6 +61,14 @@ pub trait SourceProvider {
     /// True if `principal` may see `feed` (checked on every read, §18.3 item 2).
     fn entitled(&self, principal: &str, feed: &FeedKey) -> bool;
 
+    /// (R5B) Whether `principal` has an entitlement row of its own: `Some(false)` only
+    /// when the provider knows it has none. The default, `None` (unknown), is read as
+    /// "has one" by the authority: an agent working for a person is then held to the
+    /// intersection of both rows (fail closed).
+    fn has_row(&self, _principal: &str) -> Option<bool> {
+        None
+    }
+
     /// Resolves an already validated binding (see [`validate_binding`]) for `principal`:
     /// entitlement check, then the window's bars. The engine applies the
     /// `max_bind_bars` cap itself ([`bind`]).
@@ -401,6 +409,10 @@ fn check_feed_key(k: &FeedKey) -> Result<(), String> {
 }
 
 impl SourceProvider for MemoryProvider {
+    fn has_row(&self, principal: &str) -> Option<bool> {
+        Some(self.entitlements.contains_key(principal))
+    }
+
     fn entitled(&self, principal: &str, feed: &FeedKey) -> bool {
         self.entitlements
             .get(principal)

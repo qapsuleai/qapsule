@@ -8,23 +8,39 @@
 //!   `approve_finding` and `reject_finding` only from a principal whose author is
 //!   `human` **and** on an unmarked connection; otherwise `forbidden`,
 //!   `reason: "human_only"`, whatever the role and the mode.
-//! - **What an agent may not write** (only on a marked connection, or in a session with
-//!   `init.agent_policy = "r5b"`): facts, findings, bar data, undo, another person's
-//!   audience and every op that changes capsules, the ledger or stories → `forbidden`,
-//!   `reason: "agent_cannot_write"`, in every mode (not even as a proposal).
+//! - **What an agent may write** (only on a marked connection, or in a session with
+//!   `init.agent_policy = "r5b"`): an **allow-list** ([`agent_op`]). Comments and watches
+//!   directly; view and drawing ops only as proposals (`mode: auto` becomes a proposal;
+//!   `mode: direct` → `forbidden`, `reason: "proposal_only"`). Every other op — facts,
+//!   findings, series, bar data, undo, audiences, intents, and any op added later — →
+//!   `forbidden`, `reason: "agent_cannot_write"`, in every mode (not even as a proposal).
 
 use std::collections::BTreeSet;
 
+use qp_schema::protocol::WriteMode;
 use qp_schema::protocol::{ErrorCode, Op, ProtocolError};
-use qp_schema::{Author, SeriesData};
+use qp_schema::{Author, Document};
 
 use crate::error::{ptr, PResult, E};
 use crate::session::Session;
 
 /// `forbidden` reason: a decision only a human may make (§25.2).
 pub const HUMAN_ONLY: &str = "human_only";
-/// `forbidden` reason: an item only the engine (or a person) may write (§25.3).
+/// `forbidden` reason: an op outside the agent allow-list (§25.3).
 pub const AGENT_CANNOT_WRITE: &str = "agent_cannot_write";
+/// `forbidden` reason: an op an agent may send only as a proposal, sent `direct` (§25.3).
+pub const PROPOSAL_ONLY: &str = "proposal_only";
+
+/// How an agent-origin command may carry an op (§25.3).
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum AgentOp {
+    /// Applied directly (comments, watches).
+    Direct,
+    /// Only as a proposal a person decides (views and drawings).
+    Proposal,
+    /// Never.
+    Deny,
+}
 /// The agent policy name of `init.agent_policy` (§25.3).
 pub const AGENT_POLICY_R5B: &str = "r5b";
 
@@ -98,8 +114,8 @@ impl Session {
 
     /// (R5B, §25.2–§25.3) Refuses `ops` of connection `ci` that its origin may not
     /// send, before any permission or mode check (so neither the role nor the mode
-    /// changes the answer).
-    pub(crate) fn agent_check(&self, ci: usize, ops: &[Op]) -> PResult<()> {
+    /// changes the answer); the write mode to use (an agent's view ops become proposals).
+    pub(crate) fn agent_check(&self, ci: usize, ops: &[Op], mode: WriteMode) -> PResult<WriteMode> {
         if let Some(i) = ops.iter().position(is_decision) {
             if !self.human_origin(ci) {
                 return Err(E::new(
@@ -116,52 +132,70 @@ impl Session {
             }
         }
         if !self.agent_rule_holds(ci) {
-            return Ok(());
+            return Ok(mode);
         }
-        let speaker = &self.conns[ci].principal;
-        for (i, op) in ops.iter().enumerate() {
-            if let Some(why) = self.agent_cannot_write(speaker, op) {
-                return Err(cannot_write(i, op, &why));
-            }
+        let kinds: Vec<AgentOp> = ops.iter().map(|o| agent_op(&self.doc, o)).collect();
+        if let Some(i) = kinds.iter().position(|k| *k == AgentOp::Deny) {
+            return Err(cannot_write(i, &ops[i]));
         }
-        Ok(())
-    }
-
-    /// Why an agent may not send `op` (§25.3), if it may not.
-    fn agent_cannot_write(&self, speaker: &str, op: &Op) -> Option<String> {
-        let what = match op {
-            Op::AddFact { .. } => "facts come from the engine only",
-            Op::AddFinding { .. } | Op::UpdateFinding { .. } => {
-                "findings come from the engine or a person only"
-            }
-            Op::AppendBars { .. } | Op::UpdateLastBar { .. } => {
-                "bar data comes from the host's feeds only"
-            }
-            Op::PutSeries { series } if matches!(series.data, Some(SeriesData::Bars { .. })) => {
-                "bar data comes from the host's feeds only"
-            }
-            Op::Undo { .. } => "an agent does not undo log entries",
-            Op::ShowFinding { .. } => "it changes a capsule",
-            Op::SetAudience {
-                principal: Some(p), ..
-            }
-            | Op::SetSensitivity {
-                principal: Some(p), ..
-            } if p != speaker => "another person's audience is theirs",
-            Op::Remove { id } => {
-                let d = &self.doc;
-                if d.facts.iter().any(|f| &f.id == id)
-                    || d.findings.iter().any(|f| &f.id == id)
-                    || d.capsules.iter().any(|c| &c.id == id)
-                {
-                    "facts, findings and capsules are the engine's"
-                } else {
-                    return None;
+        let direct = kinds.iter().position(|k| *k == AgentOp::Direct);
+        let proposal = kinds.iter().position(|k| *k == AgentOp::Proposal);
+        match (direct, proposal) {
+            (Some(d), Some(_)) => Err(crate::error::invalid(
+                "an agent command mixes ops applied directly (comments, watches) with ops that are only proposed (views, drawings)",
+                ptr("/ops", d),
+            )),
+            (None, Some(i)) => {
+                if mode == WriteMode::Direct {
+                    return Err(E::new(
+                        ErrorCode::Forbidden,
+                        format!("an agent may `{}` only as a proposal", op_name(&ops[i])),
+                    )
+                    .at(ptr("/ops", i))
+                    .reason(PROPOSAL_ONLY)
+                    .hint("Send it with mode auto or propose; a person accepts or rejects it.")
+                    .build());
                 }
+                Ok(WriteMode::Propose)
             }
-            _ => return None,
-        };
-        Some(what.to_owned())
+            _ => Ok(mode),
+        }
+    }
+}
+
+/// (R5B, §25.3) The agent allow-list: how an agent-origin command may carry `op` in
+/// document `doc`. Anything not named here — including every op added later — is
+/// [`AgentOp::Deny`].
+#[must_use]
+pub fn agent_op(doc: &Document, op: &Op) -> AgentOp {
+    match op {
+        Op::PutView { .. }
+        | Op::InsertLayer { .. }
+        | Op::DeleteLayer { .. }
+        | Op::MoveLayer { .. }
+        | Op::SplitLayer { .. }
+        | Op::SetEncoding { .. }
+        | Op::InsertPanel { .. }
+        | Op::DeletePanel { .. }
+        | Op::MovePanel { .. }
+        | Op::SetPanel { .. }
+        | Op::SetScale { .. }
+        | Op::SetEmphasis { .. }
+        | Op::SetViewRange { .. }
+        | Op::AddNarrative { .. }
+        | Op::ShowFinding { .. } => AgentOp::Proposal,
+        // A new study series only: an existing series is never replaced.
+        Op::AddStudy { id, .. } => {
+            if id
+                .as_ref()
+                .is_some_and(|id| doc.series.iter().any(|s| &s.id == id))
+            {
+                AgentOp::Deny
+            } else {
+                AgentOp::Proposal
+            }
+        }
+        _ => AgentOp::Deny,
     }
 }
 
@@ -172,10 +206,13 @@ fn op_name(op: &Op) -> String {
         .unwrap_or_default()
 }
 
-fn cannot_write(i: usize, op: &Op, why: &str) -> ProtocolError {
+fn cannot_write(i: usize, op: &Op) -> ProtocolError {
     E::new(
         ErrorCode::Forbidden,
-        format!("an agent may not `{}`: {why}", op_name(op)),
+        format!(
+            "an agent may not `{}`: facts, findings, series, capsules, the ledger and stories come from the engine",
+            op_name(op)
+        ),
     )
     .at(ptr("/ops", i))
     .reason(AGENT_CANNOT_WRITE)

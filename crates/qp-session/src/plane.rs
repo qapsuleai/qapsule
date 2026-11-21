@@ -224,10 +224,10 @@ pub(crate) struct DataPlane {
     /// Bound series id → its resolution.
     pub series: BTreeMap<String, BoundSeries>,
     pub max_bind_bars: u32,
-    /// (R5B, §25.7) Agents that read for a person: agent id → (the person, whether the
-    /// agent has an entitlement row of its own). Such an agent is entitled to a feed only
-    /// if the person is (and, with a row of its own, it is too: the intersection).
-    pub delegates: BTreeMap<String, (String, bool)>,
+    /// (R5B, §25.7) Agents that read for a person: agent id → the person. Such an agent
+    /// is entitled to a feed only if the person is and, unless the provider knows the
+    /// agent has no row of its own, the agent is too (the intersection; fail closed).
+    pub delegates: BTreeMap<String, String>,
 }
 
 /// The binding of a series, if it is bound.
@@ -400,8 +400,9 @@ impl DataPlane {
             return false;
         };
         match self.delegates.get(asker) {
-            Some((person, own_row)) => {
-                p.entitled(person, feed) && (!own_row || p.entitled(asker, feed))
+            Some(person) => {
+                p.entitled(person, feed)
+                    && (p.has_row(asker) == Some(false) || p.entitled(asker, feed))
             }
             None => p.entitled(asker, feed),
         }

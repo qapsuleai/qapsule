@@ -528,23 +528,23 @@ impl Session {
             .find(|p| p.role == Role::Host)
             .map(|p| p.id.clone());
         let mut plane = DataPlane::new(provider, host, limits.max_bind_bars);
-        // (R5B, §25.7) Agents reading for a person.
-        let rows: BTreeSet<&str> = init
-            .data
-            .as_ref()
-            .map(|d| d.entitlements.keys().map(String::as_str).collect())
-            .unwrap_or_default();
+        // (R5B, §25.7) Agents reading for a person: the person must be a known human
+        // principal that works for nobody itself (no chains, no cycles).
         for p in &init.principals {
             let Some(person) = &p.on_behalf else { continue };
-            if !init.principals.iter().any(|q| &q.id == person) || person == &p.id {
+            let ok = init.principals.iter().any(|q| {
+                &q.id == person
+                    && q.id != p.id
+                    && q.on_behalf.is_none()
+                    && matches!(q.author, qp_schema::Author::Human { .. })
+            });
+            if !ok {
                 return Err(format!(
-                    "principal `{}`: on_behalf `{person}` is not another known principal",
+                    "principal `{}`: on_behalf `{person}` must be another known principal whose author is human and who works for nobody",
                     p.id
                 ));
             }
-            plane
-                .delegates
-                .insert(p.id.clone(), (person.clone(), rows.contains(p.id.as_str())));
+            plane.delegates.insert(p.id.clone(), person.clone());
         }
         let mut s = Self {
             initial: doc.clone(),
@@ -1414,7 +1414,7 @@ impl Session {
             return Err(invalid("a command needs at least one op", "/ops"));
         }
         // (R5B, §25) Human decisions and the agent write rule, before roles and modes.
-        self.agent_check(ci, ops)?;
+        let mode = self.agent_check(ci, ops, mode)?;
         if ops.len() > 1 {
             if let Some(i) = ops
                 .iter()

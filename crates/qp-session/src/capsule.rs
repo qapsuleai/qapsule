@@ -1593,7 +1593,7 @@ impl Session {
             self.plane
                 .delegates
                 .get(principal)
-                .and_then(|(person, _)| doc.audiences.get(person))
+                .and_then(|person| doc.audiences.get(person))
         });
         own.cloned().unwrap_or(Audience {
             group: UserGroup::Habituated,

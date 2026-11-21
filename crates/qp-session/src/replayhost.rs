@@ -285,6 +285,13 @@ pub struct ReplayHost {
 struct SharedProvider(std::sync::Arc<std::sync::Mutex<qp_source::MemoryProvider>>);
 
 impl qp_source::SourceProvider for SharedProvider {
+    fn has_row(&self, principal: &str) -> Option<bool> {
+        self.0
+            .lock()
+            .unwrap_or_else(std::sync::PoisonError::into_inner)
+            .has_row(principal)
+    }
+
     fn entitled(&self, principal: &str, feed: &qp_schema::data::FeedKey) -> bool {
         self.0
             .lock()

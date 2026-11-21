@@ -66,6 +66,8 @@ pub enum Check {
     License,
     /// A sentence with a number but no citation marker (`PerSentence`).
     Sentence,
+    /// The text states only the direction opposite to every cited directional item.
+    Direction,
 }
 
 /// One machine-readable reason a draft was rejected.

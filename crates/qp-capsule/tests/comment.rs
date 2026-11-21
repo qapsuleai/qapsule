@@ -1,8 +1,9 @@
 //! R5B/V: the comment validator (PLAN §2.1).
 
 use qp_capsule::comment::{
-    advice_hits, markers, number_matches, numbers, validate, Check, CitedValue, CommentDraft,
-    Evidence, ExternalQuote, Num, NumKind, Reason, Strictness,
+    advice_hits, direction_words, markers, number_matches, numbers, validate, withheld_matches,
+    Check, CitedDirection, CitedValue, CommentDraft, Direction, Evidence, ExternalQuote, Num,
+    NumKind, Reason, Strictness,
 };
 use qp_capsule::Lang;
 use qp_schema::protocol::Language;
@@ -32,6 +33,7 @@ fn ev_with(values: &[f64], withheld: &[f64]) -> Evidence {
             .collect(),
         withheld: withheld.to_vec(),
         symbols: vec!["SYN03".to_owned(), "ISCTR".to_owned(), "XU100".to_owned()],
+        directions: vec![],
     }
 }
 
@@ -432,42 +434,39 @@ fn external_quote_in_the_other_language_is_read() {
 fn advice_tr_hits() {
     let s: Vec<String> = vec![];
     assert_eq!(
-        advice_hits("Şimdi al, fırsatı kaçırma", Lang::Tr, &s),
+        advice_hits("Şimdi al, fırsatı kaçırma", &s),
         vec!["al", "fırsatı", "kaçırma"]
     );
     assert_eq!(
-        advice_hits("Hedef fiyat 50; zarar kes 40'ta", Lang::Tr, &s),
+        advice_hits("Hedef fiyat 50; zarar kes 40'ta", &s),
         vec!["hedef fiyat", "zarar kes"]
     );
-    assert_eq!(advice_hits("Hemen SAT", Lang::Tr, &s), vec!["sat"]);
-    assert_eq!(advice_hits("ALINMALI", Lang::Tr, &s), vec!["alınmalı"]);
-    assert_eq!(
-        advice_hits("bunu tavsiye ederiz", Lang::Tr, &s),
-        vec!["tavsiye"]
-    );
+    assert_eq!(advice_hits("Hemen SAT", &s), vec!["sat"]);
+    assert_eq!(advice_hits("ALINMALI", &s), vec!["alınmalı"]);
+    assert_eq!(advice_hits("bunu tavsiye ederiz", &s), vec!["tavsiye"]);
 }
 
 #[test]
 fn advice_tr_suffix_rule_avoids_false_friends() {
     let s: Vec<String> = vec![];
-    assert!(advice_hits("Büyük alım geldi; satış sürdü; alt sınır.", Lang::Tr, &s).is_empty());
-    assert!(advice_hits("ALIM baskısı ve SATIŞLAR", Lang::Tr, &s).is_empty());
-    assert!(advice_hits("Alıcılar ve satıcılar dengede", Lang::Tr, &s).is_empty());
+    assert!(advice_hits("Büyük alım geldi; satış sürdü; alt sınır.", &s).is_empty());
+    assert!(advice_hits("ALIM baskısı ve SATIŞLAR", &s).is_empty());
+    assert!(advice_hits("Alıcılar ve satıcılar dengede", &s).is_empty());
 }
 
 #[test]
 fn advice_en_hits_and_non_hits() {
     let s: Vec<String> = vec![];
     assert_eq!(
-        advice_hits("Buy now: a rare opportunity", Lang::En, &s),
+        advice_hits("Buy now: a rare opportunity", &s),
         vec!["buy", "opportunity"]
     );
     assert_eq!(
-        advice_hits("You should set a stop-loss; target price 50", Lang::En, &s),
+        advice_hits("You should set a stop-loss; target price 50", &s),
         vec!["should", "target price", "stop-loss"]
     );
-    assert_eq!(advice_hits("Don't miss it; go long", Lang::En, &s).len(), 2);
-    assert!(advice_hits("Heavy buying and selling; sellers left", Lang::En, &s).is_empty());
+    assert_eq!(advice_hits("Don't miss it; go long", &s).len(), 2);
+    assert!(advice_hits("Heavy buying and selling; sellers left", &s).is_empty());
 }
 
 #[test]
@@ -664,4 +663,207 @@ fn number_matches_direct() {
     assert!(number_matches(&n, -44.3187, None));
     assert!(!number_matches(&n, 44.3149, None));
     assert!(!number_matches(&n, f64::NAN, None));
+}
+
+// ---------------------------------------------------------------- advice in both languages
+
+#[test]
+fn advice_scans_both_languages() {
+    let s: Vec<String> = vec![];
+    assert_eq!(advice_hits("Bence buy fırsatı", &s), vec!["fırsatı", "buy"]);
+    assert_eq!(advice_hits("Time to AL now", &s), vec!["al"]);
+    assert!(advice_hits("Strong alım and satış flows", &s).is_empty());
+    assert_eq!(
+        codes(validate(
+            &tr("Şimdi buy zamanı."),
+            &ev(&[]),
+            Strictness::Cites
+        )),
+        vec![(Check::Advice, "advice_word".to_owned())]
+    );
+    assert_eq!(
+        codes(validate(&en("Time to al."), &ev(&[]), Strictness::Cites)),
+        vec![(Check::Advice, "advice_word".to_owned())]
+    );
+    assert!(validate(
+        &en("Heavy alım and satış today."),
+        &ev(&[]),
+        Strictness::Cites
+    )
+    .is_ok());
+}
+
+// ---------------------------------------------------------------- direction
+
+fn ev_dir(dirs: &[(&str, Direction)]) -> Evidence {
+    let mut e = ev(&[]);
+    e.directions = dirs
+        .iter()
+        .map(|(id, d)| CitedDirection {
+            id: (*id).to_owned(),
+            direction: *d,
+        })
+        .collect();
+    e
+}
+
+fn dir_codes(d: &CommentDraft, e: &Evidence) -> Vec<(Check, String)> {
+    codes(validate(d, e, Strictness::CitesNumbers))
+}
+
+#[test]
+fn direction_matching_text_passes() {
+    let e = ev_dir(&[("f1", Direction::Up)]);
+    assert!(dir_codes(&tr("SYN03 yükseldi."), &e).is_empty());
+    assert!(dir_codes(&en("SYN03 rose."), &e).is_empty());
+    let e = ev_dir(&[("f1", Direction::Down)]);
+    assert!(dir_codes(&tr("Fiyat geriledi ve aşağı indi."), &e).is_empty());
+    assert!(dir_codes(&en("The price fell."), &e).is_empty());
+}
+
+#[test]
+fn opposite_direction_is_rejected_tr() {
+    let e = ev_dir(&[("f1", Direction::Up)]);
+    let r = validate(
+        &tr("Hacim sakin. SYN03 düştü."),
+        &e,
+        Strictness::CitesNumbers,
+    )
+    .unwrap_err();
+    assert_eq!(r.len(), 1);
+    assert_eq!(r[0].check, Check::Direction);
+    assert_eq!(r[0].code, "wrong_direction");
+    assert_eq!(r[0].token.as_deref(), Some("düştü"));
+    assert_eq!(r[0].sentence, Some(1));
+    let e = ev_dir(&[("f1", Direction::Down)]);
+    assert_eq!(
+        dir_codes(&tr("Fiyat yukarı tırmandı."), &e),
+        vec![(Check::Direction, "wrong_direction".to_owned())]
+    );
+}
+
+#[test]
+fn opposite_direction_is_rejected_en() {
+    let e = ev_dir(&[("f1", Direction::Down)]);
+    assert_eq!(
+        dir_codes(&en("The stock climbed higher."), &e),
+        vec![(Check::Direction, "wrong_direction".to_owned())]
+    );
+    let e = ev_dir(&[("f1", Direction::Up)]);
+    assert_eq!(
+        dir_codes(&en("It dropped and lost ground."), &e),
+        vec![(Check::Direction, "wrong_direction".to_owned())]
+    );
+}
+
+#[test]
+fn mixed_or_no_direction_passes() {
+    let e = ev_dir(&[("f1", Direction::Up)]);
+    assert!(dir_codes(&tr("Önce düştü, sonra yükseldi."), &e).is_empty());
+    assert!(dir_codes(&tr("Fiyat yatay seyretti."), &e).is_empty());
+    assert!(dir_codes(&en("It fell early, then rose."), &e).is_empty());
+}
+
+#[test]
+fn mixed_or_neutral_evidence_skips_direction() {
+    let up_down = ev_dir(&[("f1", Direction::Up), ("f2", Direction::Down)]);
+    let mut d = tr("Fiyat düştü.");
+    d.cites.push("f2".to_owned());
+    assert!(dir_codes(&d, &up_down).is_empty());
+    let neutral = ev_dir(&[("f1", Direction::Neutral)]);
+    assert!(dir_codes(&tr("Fiyat düştü."), &neutral).is_empty());
+    // a direction of an item that is not cited does not count
+    let uncited = ev_dir(&[("f2", Direction::Up)]);
+    assert!(dir_codes(&tr("Fiyat düştü."), &uncited).is_empty());
+}
+
+#[test]
+fn direction_is_not_checked_at_cites_strictness() {
+    let e = ev_dir(&[("f1", Direction::Up)]);
+    assert!(validate(&tr("Fiyat düştü."), &e, Strictness::Cites).is_ok());
+    assert!(validate(&tr("Fiyat düştü."), &e, Strictness::PerSentence).is_err());
+}
+
+#[test]
+fn direction_words_suffix_rule() {
+    let s: Vec<String> = vec![];
+    let (u, d) = direction_words(
+        "artık düşük hacim, düşünce, gerilim, inci, çıkarım",
+        Lang::Tr,
+        &s,
+    );
+    assert!(u.is_empty(), "{u:?}");
+    assert!(d.is_empty(), "{d:?}");
+    let (u, d) = direction_words("ARTTI, inen, indi, iniş, kaybetti, zayıfladı", Lang::Tr, &s);
+    assert_eq!(u, vec!["arttı"]);
+    assert_eq!(d.len(), 5, "{d:?}");
+    let (u, d) = direction_words("rising, gains; declined, loses", Lang::En, &s);
+    assert_eq!(u.len(), 2);
+    assert_eq!(d.len(), 2);
+}
+
+// ---------------------------------------------------------------- fail-closed, percent words
+
+#[test]
+fn percent_words_are_percent_signs() {
+    let e = ev(&[0.0123]);
+    assert!(ok(&tr("Getiri yüzde 1,23."), &e));
+    assert!(ok(&tr("Getiri 1,23 puan."), &e));
+    assert!(ok(&en("Return 1.23 percent."), &e));
+    assert!(ok(&en("Return 1.23 per cent."), &e));
+    assert!(ok(&en("Return 1.23 pct."), &e));
+    assert_eq!(num("yüzde 1,23", Lang::Tr).kind, NumKind::Percent);
+}
+
+#[test]
+fn licence_cannot_be_dodged_by_how_a_percent_is_written() {
+    let e = ev_with(&[], &[0.0123]);
+    for t in [
+        "Getiri yüzde 1,23.",
+        "Getiri 1,23 puan.",
+        "Getiri 1,23.",
+        "Getiri %1,23.",
+    ] {
+        assert_eq!(
+            codes(validate(&tr(t), &e, Strictness::Cites)),
+            vec![(Check::License, "licensed_value".to_owned())],
+            "{t}"
+        );
+    }
+    // a withheld percentage written as a ratio
+    let e = ev_with(&[], &[12.5]);
+    assert_eq!(
+        codes(validate(&en("Share 0.125."), &e, Strictness::Cites)),
+        vec![(Check::License, "licensed_value".to_owned())]
+    );
+    assert!(withheld_matches(&num("1,23", Lang::Tr), 0.0123));
+    assert!(withheld_matches(&num("-1,23", Lang::Tr), 0.0123));
+}
+
+#[test]
+fn overlong_number_is_rejected_not_skipped() {
+    let long = format!("Değer 7,{}1 [1].", "1".repeat(30));
+    for s in ALL {
+        assert_eq!(
+            codes(validate(&tr(&long), &ev(&[7.1]), s)),
+            vec![(Check::Number, "unsupported_number".to_owned())],
+            "{s:?}"
+        );
+    }
+}
+
+#[test]
+fn overlong_number_is_still_licence_checked() {
+    let e = ev_with(&[], &[123.456]);
+    let t = format!("Fiyat 123,456{}1.", "0".repeat(30));
+    assert_eq!(
+        codes(validate(&tr(&t), &e, Strictness::Cites)),
+        vec![(Check::License, "licensed_value".to_owned())]
+    );
+    // trailing zeros only: read exactly, still the withheld value
+    let t = format!("Fiyat 123,456{}.", "0".repeat(30));
+    assert_eq!(
+        codes(validate(&tr(&t), &e, Strictness::Cites)),
+        vec![(Check::License, "licensed_value".to_owned())]
+    );
 }

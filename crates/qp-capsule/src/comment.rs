@@ -20,6 +20,13 @@
 //!    external value that matches a withheld value is `licensed_external`.
 //! 5. **Per sentence** ([`Strictness::PerSentence`]): a sentence with a number carries a
 //!    valid `[n]` marker.
+//! 6. **Direction** ([`Strictness::CitesNumbers`], [`Strictness::PerSentence`]): when
+//!    every cited directional item ([`Evidence::directions`]) points the same way and the
+//!    text uses only words of the opposite direction (`DIR_*`), `wrong_direction`. Both
+//!    directions or none pass (false rejections kept low).
+//!
+//! The advice scan always uses both lists (TR and EN); `lang` decides only how numbers,
+//! dates and direction words are read.
 //!
 //! What is not a number: instrument symbols ([`Evidence::symbols`], removed first),
 //! citation markers `[1]`, clock times (`14:30`), dates (`12 Kas`, `12 Nov`, `Nov 12`,
@@ -57,6 +64,30 @@ pub struct Evidence {
     pub withheld: Vec<f64>,
     /// Instrument symbols (removed before the number scan, e.g. `SYN03`).
     pub symbols: Vec<String>,
+    /// Directions of the cited items (facts / capsules); neutral ones are ignored.
+    #[serde(default)]
+    pub directions: Vec<CitedDirection>,
+}
+
+/// A direction.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub enum Direction {
+    /// Up.
+    Up,
+    /// Down.
+    Down,
+    /// No direction.
+    Neutral,
+}
+
+/// The direction of one cited item.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct CitedDirection {
+    /// The cited item.
+    pub id: String,
+    /// Its direction.
+    pub direction: Direction,
 }
 
 /// One number of a cited item.
@@ -254,7 +285,7 @@ fn num_re() -> &'static Regex {
     static R: OnceLock<Regex> = OnceLock::new();
     re(
         &R,
-        r"(?P<s1>[+\-−])?(?P<p1>%\s?)?(?P<s2>[+\-−])?(?P<num>\d+(?:[.,]\d+)*)(?P<p2>\s?%)?(?P<mul>x\b|×|\s?(?:kat(?:ı|ın|ına|ını|ında|ından)?|times)\b)?",
+        r"(?P<s1>[+\-−])?(?P<p1>%\s?|yüzde\s+)?(?P<s2>[+\-−])?(?P<num>\d+(?:[.,]\d+)*)(?P<p2>\s?%|\s+(?:puan\p{L}*|percent|per\s+cent|pct)\b)?(?P<mul>x\b|×|\s?(?:kat(?:ı|ın|ına|ını|ında|ından)?|times)\b)?",
     )
 }
 
@@ -327,7 +358,12 @@ pub fn numbers(text: &str, lang: Lang, symbols: &[String]) -> Vec<Num> {
             _ => None,
         };
         let num = c.name("num").map_or("", |m| m.as_str());
-        let (int, frac) = split_num(num, lang);
+        let (int, mut frac) = split_num(num, lang);
+        // trailing zeros carry no value; dropping them keeps long but exact numbers
+        // comparable (a number still too long is unsupported, never passed: fail-closed)
+        if frac.len() > 18 {
+            frac = frac.trim_end_matches('0').to_owned();
+        }
         let kind = if c.name("p1").is_some() || c.name("p2").is_some() {
             NumKind::Percent
         } else if c.name("mul").is_some() {
@@ -422,6 +458,30 @@ pub fn number_matches(n: &Num, v: f64, shown: Option<u8>) -> bool {
     })
 }
 
+/// Whether the written number `n` matches the withheld value `w` in any form: `w`,
+/// `w × 100` or `w / 100`, sign and percent sign ignored (licence check; how a number is
+/// written must not let it through). A number without exact digits (too long) is
+/// compared as `f64`, with a relative tolerance of 1e-9.
+#[must_use]
+pub fn withheld_matches(n: &Num, w: f64) -> bool {
+    if !w.is_finite() {
+        return false;
+    }
+    let cands = [w, w * 100.0, w / 100.0];
+    if n.scaled.is_none() {
+        let x = n.value.abs();
+        return cands
+            .iter()
+            .any(|c| (x - c.abs()).abs() <= 1e-9 * c.abs().max(1.0));
+    }
+    let plain = Num {
+        negative: None,
+        kind: NumKind::Plain,
+        ..n.clone()
+    };
+    cands.iter().any(|&c| number_matches(&plain, c, None))
+}
+
 /// The citation markers of a sentence (`[1]`, `[1, 2]`), as written (1-based).
 #[must_use]
 pub fn markers(sentence: &str) -> Vec<usize> {
@@ -451,14 +511,91 @@ fn advice_list(lang: Lang) -> &'static [Regex] {
     }
 }
 
-/// Advice words in a text (lower-cased, symbols removed), in list order.
+/// Advice words in a text (symbols removed): the TR list on the Turkish lower case, then
+/// the EN list on the English lower case, whatever the comment's language.
 #[must_use]
-pub fn advice_hits(text: &str, lang: Lang, symbols: &[String]) -> Vec<String> {
-    let l = lower(&strip_symbols(text, symbols), lang);
-    advice_list(lang)
-        .iter()
-        .flat_map(|r| r.find_iter(&l).map(|m| m.as_str().to_owned()))
+pub fn advice_hits(text: &str, symbols: &[String]) -> Vec<String> {
+    let t = strip_symbols(text, symbols);
+    [Lang::Tr, Lang::En]
+        .into_iter()
+        .flat_map(|lang| {
+            let l = lower(&t, lang);
+            advice_list(lang)
+                .iter()
+                .flat_map(|r| r.find_iter(&l).map(|m| m.as_str().to_owned()))
+                .collect::<Vec<_>>()
+        })
         .collect()
+}
+
+/// Up words (TR), Turkish suffix rule: only the listed endings ("artık" is not "art-",
+/// "düşük" / "düşünce" are not "düş-", "gerilim" is not "gerile-").
+pub const DIR_UP_TR: &[&str] = &[
+    r"yüksel\w*",
+    r"art(tı|tık|tılar|ıyor\w*|ış\w*|an|ar|acak\w*|abilir\w*|mış\w*|ma|ması\w*|arak)",
+    r"çık(tı|tılar|ıyor\w*|ış\w*|an|ar|acak\w*|mış\w*|ması\w*|arak)",
+    r"yukarı\w*",
+    r"tırman\w*",
+    r"güçlen\w*",
+];
+/// Down words (TR).
+pub const DIR_DOWN_TR: &[&str] = &[
+    r"düş(tü|tüler|üyor\w*|üş\w*|en|er|ecek\w*|müş\w*|me|mesi\w*|erek)",
+    r"gerile\w*",
+    r"geriliyor\w*",
+    r"in(di|diler|iyor\w*|iş\w*|en|er|ecek\w*|miş\w*|mesi\w*|erek)",
+    r"aşağı\w*",
+    r"zayıfla\w*",
+    r"kayb\w*",
+    r"kayıp\w*",
+];
+/// Up words (EN).
+pub const DIR_UP_EN: &[&str] = &[
+    r"ris(e|es|ing|en)",
+    r"rose",
+    r"up",
+    r"upward\w*",
+    r"higher",
+    r"climb\w*",
+    r"gain\w*",
+];
+/// Down words (EN).
+pub const DIR_DOWN_EN: &[&str] = &[
+    r"fall(s|ing|en)?",
+    r"fell",
+    r"down",
+    r"downward\w*",
+    r"lower",
+    r"drop(s|ped|ping)?",
+    r"declin\w*",
+    r"los(e|es|ing|t|s)",
+];
+
+fn dir_lists(lang: Lang) -> &'static (Vec<Regex>, Vec<Regex>) {
+    static TR: OnceLock<(Vec<Regex>, Vec<Regex>)> = OnceLock::new();
+    static EN: OnceLock<(Vec<Regex>, Vec<Regex>)> = OnceLock::new();
+    let build = |pats: &[&str]| {
+        pats.iter()
+            .map(|p| Regex::new(&format!(r"\b(?:{p})\b")).expect("direction regex"))
+            .collect::<Vec<_>>()
+    };
+    match lang {
+        Lang::Tr => TR.get_or_init(|| (build(DIR_UP_TR), build(DIR_DOWN_TR))),
+        Lang::En => EN.get_or_init(|| (build(DIR_UP_EN), build(DIR_DOWN_EN))),
+    }
+}
+
+/// Direction words of a text in its language (symbols removed): (up words, down words).
+#[must_use]
+pub fn direction_words(text: &str, lang: Lang, symbols: &[String]) -> (Vec<String>, Vec<String>) {
+    let l = lower(&strip_symbols(text, symbols), lang);
+    let (up, down) = dir_lists(lang);
+    let find = |rs: &[Regex]| {
+        rs.iter()
+            .flat_map(|r| r.find_iter(&l).map(|m| m.as_str().to_owned()))
+            .collect::<Vec<_>>()
+    };
+    (find(up), find(down))
 }
 
 fn reason(
@@ -479,23 +616,23 @@ fn reason(
 
 /// The written form of an `f64` as a [`Num`] (unsigned), for comparing an external
 /// value with withheld values at the precision it is given with.
-fn num_of_value(v: f64) -> Option<Num> {
+fn num_of_value(v: f64) -> Num {
     let s = format!("{}", v.abs());
     let (int, frac) = s.split_once('.').unwrap_or((&s, ""));
-    let decimals = u8::try_from(frac.len()).ok()?;
+    let decimals = u8::try_from(frac.len()).unwrap_or(u8::MAX);
     let scaled = if frac.len() <= 18 {
         format!("{int}{frac}").parse::<u128>().ok()
     } else {
         None
     };
-    Some(Num {
+    Num {
         raw: s.clone(),
         negative: None,
         scaled,
         decimals,
         value: v.abs(),
         kind: NumKind::Plain,
-    })
+    }
 }
 
 fn other(lang: Lang) -> Lang {
@@ -565,8 +702,8 @@ pub fn validate(d: &CommentDraft, ev: &Evidence, s: Strictness) -> Result<(), Ve
             .chain(numbers(&q.quote, other(lang), &ev.symbols))
             .collect();
         for &v in &q.values {
-            let leaked = num_of_value(v)
-                .is_some_and(|n| ev.withheld.iter().any(|&w| number_matches(&n, w, None)));
+            let as_num = num_of_value(v);
+            let leaked = ev.withheld.iter().any(|&w| withheld_matches(&as_num, w));
             if leaked {
                 out.push(reason(
                     Check::License,
@@ -590,7 +727,7 @@ pub fn validate(d: &CommentDraft, ev: &Evidence, s: Strictness) -> Result<(), Ve
     // per sentence
     let ext_values: Vec<f64> = d.external.iter().flat_map(|q| q.values.clone()).collect();
     for (i, sent) in sentences(&d.text).iter().enumerate() {
-        for h in advice_hits(sent, lang, &ev.symbols) {
+        for h in advice_hits(sent, &ev.symbols) {
             out.push(reason(
                 Check::Advice,
                 "advice_word",
@@ -622,13 +759,22 @@ pub fn validate(d: &CommentDraft, ev: &Evidence, s: Strictness) -> Result<(), Ve
             if visible {
                 continue;
             }
-            if ev.withheld.iter().any(|&w| number_matches(n, w, None)) {
+            if ev.withheld.iter().any(|&w| withheld_matches(n, w)) {
                 out.push(reason(
                     Check::License,
                     "licensed_value",
                     Some(n.raw.clone()),
                     Some(i),
                     "This number is licensed data the reader may not see; remove it.",
+                ));
+            } else if n.scaled.is_none() {
+                // fail-closed: a number that cannot be read exactly never passes
+                out.push(reason(
+                    Check::Number,
+                    "unsupported_number",
+                    Some(n.raw.clone()),
+                    Some(i),
+                    "This number is too long to check; write it at the precision of its source.",
                 ));
             } else if numbers_on && !ext_values.iter().any(|&v| number_matches(n, v, None)) {
                 out.push(reason(
@@ -648,6 +794,41 @@ pub fn validate(d: &CommentDraft, ev: &Evidence, s: Strictness) -> Result<(), Ve
                 Some(i),
                 "A sentence with a number must carry a citation marker such as [1].",
             ));
+        }
+    }
+
+    // 6. direction
+    if numbers_on {
+        let dirs: Vec<Direction> = ev
+            .directions
+            .iter()
+            .filter(|c| c.direction != Direction::Neutral && d.cites.contains(&c.id))
+            .map(|c| c.direction)
+            .collect();
+        let want = dirs
+            .first()
+            .copied()
+            .filter(|w| dirs.iter().all(|x| x == w));
+        if let Some(want) = want {
+            let (up, down) = direction_words(&d.text, lang, &ev.symbols);
+            let opposite = match want {
+                Direction::Up if up.is_empty() => down.first(),
+                Direction::Down if down.is_empty() => up.first(),
+                _ => None,
+            };
+            if let Some(word) = opposite {
+                let sentence = sentences(&d.text).iter().position(|s| {
+                    let (u, w) = direction_words(s, lang, &ev.symbols);
+                    u.contains(word) || w.contains(word)
+                });
+                out.push(reason(
+                    Check::Direction,
+                    "wrong_direction",
+                    Some(word.clone()),
+                    sentence,
+                    "The text states the opposite direction of the cited items; describe the direction they show.",
+                ));
+            }
         }
     }
 

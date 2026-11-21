@@ -1,0 +1,68 @@
+{
+ "json": {
+  "primary": 0.903,
+  "per_model": {
+   "haiku": 0.806,
+   "opus": 0.968,
+   "sonnet": 0.935
+  },
+  "pooled": [
+   84,
+   93
+  ],
+  "ci": [
+   0.826,
+   0.948
+  ],
+  "num_err": [
+   0,
+   21
+  ],
+  "tokens": 5952,
+  "calls": 1.71
+ },
+ "card": {
+  "primary": 0.935,
+  "per_model": {
+   "haiku": 0.871,
+   "opus": 0.968,
+   "sonnet": 0.968
+  },
+  "pooled": [
+   87,
+   93
+  ],
+  "ci": [
+   0.866,
+   0.97
+  ],
+  "num_err": [
+   0,
+   21
+  ],
+  "tokens": 6174,
+  "calls": 2.3
+ },
+ "layered": {
+  "primary": 0.925,
+  "per_model": {
+   "haiku": 0.871,
+   "opus": 0.935,
+   "sonnet": 0.968
+  },
+  "pooled": [
+   86,
+   93
+  ],
+  "ci": [
+   0.853,
+   0.963
+  ],
+  "num_err": [
+   0,
+   21
+  ],
+  "tokens": 6141,
+  "calls": 1.94
+ }
+}

@@ -29,6 +29,7 @@ serde_json = { version = "1.0.154", features = ["float_roundtrip"] }
 # m25-ornek = { path = "../M25/ornek" }
 m25-taban = { path = "../M25/taban" }
 m25-teyit2 = { path = "../M25/teyit2" }
+m25-yukdus = { path = "../M25/yukdus" }
 
 [lints.rust]
 unsafe_code = "forbid"

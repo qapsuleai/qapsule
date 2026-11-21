@@ -27,6 +27,7 @@ serde = { version = "1.0.229", features = ["derive"] }
 serde_json = { version = "1.0.154", features = ["float_roundtrip"] }
 # --- Alternatifler (README "Alternatif ekleme"): her biri bir path bağımlılığı ---
 # m25-ornek = { path = "../M25/ornek" }
+m25-olcek = { path = "../M25/olcek" }
 
 [lints.rust]
 unsafe_code = "forbid"

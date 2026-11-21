@@ -97,6 +97,12 @@ pub fn rules() -> Vec<RuleEntry> {
             // C_DIR, C_NEUTRAL, ATR_FAST, ATR_SLOW, horizons 20 / 15 / 10.
             constants: 7,
         },
+        RuleEntry {
+            name: "olcek",
+            make: m25_olcek::outcome,
+            levels: |s, b| m25_olcek::levels(s, b).map(Levels::from),
+            constants: 8,
+        },
         // M25 alternatifleri: bir satır, ör.
         // RuleEntry { name: "a1", make: m25_a1::outcome, levels: |s, b| m25_a1::levels(s, b).map(Levels::from), constants: 4 },
     ]

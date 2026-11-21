@@ -178,6 +178,7 @@ Otomatik güvenlik incelemesi (commit sonrası) bulguları, hepsi kapatıldı:
 | B5 | Tavsiye taraması dar (çekimler, eş anlamlılar, Kiril harf, sıfır genişlikli karakter) | **Açık (sınır)** (A61). |
 | B7 | M28/M29 "sızıntı 0" davranışsal (döküm ajanın klasöründe, aynı bağlamda iki kimlik) | **Not:** güvence ölçüm değil testlerdir (`agent_reader.rs`, yüzey testleri, yapısal kural). |
 | B8 | Eski `qp mcp --init … --principal <insan>` bağdaştırıcısı insan kimliğiyle karar araçlarını sunar (ayrı oturum) | **Açık (A62).** |
+| B13 (yeniden denetimde) | Yeniden oynatma barındırıcısında (kitleleri olan oturum: her okurun izdüşümü var) saklanan ajan yorumu yazarına ve kişisine bile `list`/`get`/`capsule`/`document`'ta görünmüyordu: izdüşüm denetimi sembolün rakamlarını (`SYN02`) sayı sayıyordu | **Kapandı:** yalnız kitle ayıklayan izdüşüm yorumu olduğu gibi geçirir; kısıtlı izdüşümde semboller taramadan çıkarılır; test `agent_comment_readback.rs` (düzeltmesiz kırılıyor). M28'de haiku bunu bildirmişti; ben düz `Session` üzerinde deneyip "istemci hatası" diye yanlış kapattım (§6). |
 | B10–B12 | Yön denetimi gevşek; atıf yapılmayan kimlik denetlenmez; HTTP sunucusunda okuma zaman aşımı/iş parçacığı sınırı yok; M30 aynı kümede düzeltilip yeniden ölçüldü | Not. |
 
 Otomatik güvenlik incelemesi ayrıca sözcükle sayının iki küçük harf biçiminde, "buçuk/dot/comma" ve
@@ -205,6 +206,10 @@ sayı sözcüğü dizisiyle denetlenmesini istedi; eklendi (yapısal kural asıl
   kalan 24 ucu `recovered/worktree-agent/<sha10>` olarak geri yükledim (dal listesi §8).
   İçerikleri incelenmedi; silinmeleri Arkin'in kararı.
 - **M29 ilk koşusu geçersizdi** (yukarıda): ölçmeden önce biçimin etkisini denemeliydim.
+- **M28'deki haiku bildirimini yanlış kapattım** ("uygulanan yorum listede yok"): düz `Session`
+  üzerinde yazdığım test geçti, gerçek barındırıcıda (izdüşümlü okur) hata vardı. Denetçi
+  B13 olarak buldu; düzeltildi. Gösterimde "ajan yorumu" (ölçüt 4) artık `qp demo --mcp` ve
+  `qp mcp serve` oturumlarında da görünür.
 - **Paylaşılan `target/` yan etkisi:** bir worktree'de derlenen `qp` ikilisi
   `CARGO_MANIFEST_DIR` ile o worktree'nin yolunu gömüyor; worktree silinince
   `--source local` sessizce sentetiğe düştü. Ana ağaçtan zorla yeniden derleyerek çözüldü.

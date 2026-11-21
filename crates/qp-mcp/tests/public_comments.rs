@@ -75,7 +75,7 @@ fn an_entitled_agents_comment_never_reaches_a_public_view_reader() {
         .expect("a capsule")
         .to_owned();
     let mut texts = Vec::new();
-    for (i, text) in ["Kapanış ⁹⁹,⁵⁸ oldu [1].", "Bu hikâye sürüyor [1]."]
+    for (i, text) in ["Kapanış ⁹⁹,⁵⁸ oldu [1].", "SYN01'de bu hikâye sürüyor [1]."]
         .iter()
         .enumerate()
     {
@@ -97,6 +97,23 @@ fn an_entitled_agents_comment_never_reaches_a_public_view_reader() {
         );
     }
     assert!(!texts.is_empty(), "at least one comment stored");
+    // (audit B13) the writer and its person read the comment back
+    send(
+        &h,
+        "o",
+        &json!({"type":"hello","protocol":"qp/0","principal":"arkin",
+        "surface":{"kind":"headless"}}),
+    );
+    for c in ["A", "o"] {
+        let s = serde_json::to_string(&send(
+            &h,
+            c,
+            &json!({"type":"query","id":"q",
+            "query":{"kind":"list","collection":"comments"}}),
+        ))
+        .unwrap();
+        assert!(s.contains(texts[0].trim_end_matches(" [1].")), "{c}: {s}");
+    }
     for q in [
         json!({"kind":"document"}),
         json!({"kind":"list","collection":"comments"}),

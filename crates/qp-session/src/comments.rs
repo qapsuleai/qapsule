@@ -637,17 +637,22 @@ impl Session {
 /// the reader sees — is applied by the `capsule` answer and the `comments` topic).
 impl Session {
     /// (R5B audit B1) Whether the projected reader `p` may receive comment `c` in a
-    /// document, a log entry or a change: [`projected_keeps`] and, for a reader whose
+    /// document, a log entry or a change: [`projected_keeps_with`] and, for a reader whose
     /// view is redacted or rewritten, the structural rule of `comment_visible` (no
     /// comment touching such an instrument). Every projected path calls this.
     pub(crate) fn projected_comment_ok(&self, c: &Comment, p: &crate::capsule::Proj) -> bool {
-        projected_keeps(c, &p.hidden)
-            && (p.redact.is_empty() && p.rewrite.is_empty() && p.hidden.is_empty()
-                || !self.comment_touches_withheld(c, p))
+        // (audit B13) A projection that only strips other people's audiences restricts
+        // nothing: the comment goes as it is (before, the symbols' digits — `SYN02` —
+        // counted as numbers and every comment naming an instrument was dropped).
+        if p.redact.is_empty() && p.rewrite.is_empty() && p.hidden.is_empty() {
+            return true;
+        }
+        projected_keeps_with(c, &p.hidden, &symbols(&self.doc))
+            && !self.comment_touches_withheld(c, p)
     }
 }
 
-pub(crate) fn projected_keeps(c: &Comment, hidden: &BTreeSet<String>) -> bool {
+fn projected_keeps_with(c: &Comment, hidden: &BTreeSet<String>, syms: &[String]) -> bool {
     if c.cites.iter().any(|x| hidden.contains(x))
         || c.about.capsule.as_ref().is_some_and(|x| hidden.contains(x))
     {
@@ -655,7 +660,7 @@ pub(crate) fn projected_keeps(c: &Comment, hidden: &BTreeSet<String>) -> bool {
     }
     // (R5B audit B1) no digit at all (masks do not apply) and no decimal in words
     let lang = lang_of(c.lang);
-    qp_capsule::comment::unmasked_numbers(&c.text, lang, &[]).is_empty()
+    qp_capsule::comment::unmasked_numbers(&c.text, lang, syms).is_empty()
         && qp_capsule::comment::spelled_decimal(&c.text, lang).is_none()
         && qp_capsule::comment::number_word_run(&c.text).is_none()
 }

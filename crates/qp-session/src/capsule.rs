@@ -2616,14 +2616,12 @@ impl Session {
                         | qp_schema::protocol::Op::RemoveWatch { .. }
                 )
         });
-        // (R5B, §25.4; audit B1) A comment's request goes only with its stored comment:
-        // when the projection kept the comment (every rule of `projected_comment_ok`).
-        let comment_kept = x
-            .changes
-            .iter()
-            .any(|c| matches!(c, ChangeOp::PutComment { .. }));
+        // (R5B, §25.4; audit B1, fail-closed) A restricted reader (hidden, redacted or
+        // rewritten items) never gets an `add_comment` request: the stored comment, which
+        // passes its own check (`projected_comment_ok`), is what it may read.
+        let restricted = !(p.hidden.is_empty() && p.redact.is_empty() && p.rewrite.is_empty());
         x.request
-            .retain(|op| !matches!(op, qp_schema::protocol::Op::AddComment { .. }) || comment_kept);
+            .retain(|op| !(restricted && matches!(op, qp_schema::protocol::Op::AddComment { .. })));
         // Another person's capsule preferences (positions, watch list, level) never go.
         let own = |w: &Option<String>| {
             p.principal.is_empty() || w.as_deref().unwrap_or(e.author.as_str()) == p.principal

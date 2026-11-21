@@ -1,0 +1,11 @@
+{
+ "duplicates": 0,
+ "invented": [],
+ "missed_negative": [],
+ "must_notify": 7,
+ "notifications": 8,
+ "per_day": 0.8,
+ "recall_important": 0.8,
+ "unnecessary": 0,
+ "unnecessary_rate": 0.0
+}

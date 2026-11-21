@@ -186,7 +186,7 @@ yük sıçramasında geçersiz sayılıp yinelendi. Tam seans (8 sa) bellek büy
 
 | VERIFY | Sonuç |
 |---|---|
-| 1 `QP_VERIFY_BROWSER=1 scripts/verify.sh`, ağsız | **18/18 PASS** (main `0750ee6`, test 505 s; 29 şema, 64 döküm × 3 taşıma, 12 görünüm, altınlar bayt eşit, `p4-*` sahneleri) |
+| 1 `QP_VERIFY_BROWSER=1 scripts/verify.sh`, ağsız | **18/18 PASS** (main `0750ee6` ve denetim düzeltmesinden sonra `834edba`, test 505 s; 29 şema, 64 döküm × 3 taşıma, 12 görünüm, altınlar bayt eşit, `p4-*` sahneleri) |
 | 2 preflight, CI | preflight TAMAM; CI: §9 sonu |
 | 3 commit sırası | SPLIT `cc476de` → SPEC `eb1a8c3` → alternatif dalları → seçim `8bb7571` → sınama (`S/RESULTS.md`) |
 | 4 alternatiflere verilen dosyalar | yalnız `fixtures/local/rp4/calib/` (tam klasör bu evrede `chmod 000`); harness kalibrasyon kipi `t`'ye göre de keser (test) |
@@ -212,7 +212,20 @@ yük sıçramasında geçersiz sayılıp yinelendi. Tam seans (8 sa) bellek büy
 
 ## 11. Bağımsız denetim
 
-(AUDIT.)
+`AUDIT.md` (ayrı alt ajan, ağsız): **koşullu kabul, engelleyici yok.** Geleceğe bakma temiz (commit
+sırası, SPLIT/SPEC hiç değişmedi, yedi alternatif dalı seçimi içermiyor, ilk sınama dosyası seçimden
+sonra, kalibrasyon kipi kesimde duruyor); M25 5 dk kalibrasyon/sınama, günlük, M26 1 sa, `cases`
+önbellekten **bayt eşit** yeniden üretildi; benzetim iki koşu bayt eşit; verify 18/18 (denetçinin
+worktree'sinde); düzey 2, gizli bilgi, ağ disiplini (istek günlükleri 1.933 = LIVE-LOG), quantex temiz.
+
+| Koşul | Durum |
+|---|---|
+| K1 — M27 1d satırı `trade_ex` tamamlanmadan yazılmıştı | **Karşılandı** (`834edba`): yeniden ölçüldü (%99,90); kalan bir barın düşüğü özel işlemin fiyatıydı → ürün kuralı "özel işlem günlük bara yalnız hacmiyle" (test), 1d **%100**; M27 RESULTS, REPORT §3/§4, Ö81 güncel. |
+| K2 — `umut` gözlemi sınama verisinden | **Karşılandı:** A53 ve §5'e not — `umut`'a geçiş ancak 2026-11-20 sonrası yeni bir sınama aralığında doğrulanırsa. |
+| B6 LIVE-LOG iki tutarsızlık; B8 "kalibrasyonda" ibaresi; B9 `@lvl2` ifadesi | Düzeltildi. |
+| B1–B5, B7 | Bilgi (`chmod 000` geriye dönük kanıtlanamaz; benzetim=canlı testi veri olaylarını karşılaştırır; fiyat kartı `@lvl2` AKDE değil; `HubSink::for_trades` bayrağı çağırana bağlı; ölçek koşusu yeniden üretilmedi). |
+
+Kod değişikliğinden (K1) sonra `QP_VERIFY_BROWSER=1 scripts/verify.sh` main'de yeniden koşuldu: §9.
 
 ## 12. Öneriler (kapsam dışı, yapılmadı)
 

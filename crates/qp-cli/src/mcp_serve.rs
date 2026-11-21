@@ -621,6 +621,8 @@ pub enum Job {
     Get {
         /// `Mcp-Session-Id`.
         session: Option<String>,
+        /// The principal the request asks for: its token's, else `X-Qp-Principal`.
+        asked: Option<String>,
         /// Where the answer goes.
         reply: Sender<Answer>,
     },
@@ -628,6 +630,8 @@ pub enum Job {
     Delete {
         /// `Mcp-Session-Id`.
         session: Option<String>,
+        /// The principal the request asks for: its token's, else `X-Qp-Principal`.
+        asked: Option<String>,
         /// Where the answer goes.
         reply: Sender<Answer>,
     },
@@ -768,8 +772,24 @@ pub fn handle(
                 reply: tx,
             });
         }
-        "GET" => send(Job::Get { session, reply: tx }),
-        "DELETE" => send(Job::Delete { session, reply: tx }),
+        "GET" | "DELETE" => {
+            // (Security review) The session's principal is checked like on POST: a
+            // stream or an end of session only for the principal it is bound to.
+            let asked = principal.or_else(|| headers.get("x-qp-principal").cloned());
+            if method == "GET" {
+                send(Job::Get {
+                    session,
+                    asked,
+                    reply: tx,
+                });
+            } else {
+                send(Job::Delete {
+                    session,
+                    asked,
+                    reply: tx,
+                });
+            }
+        }
         _ => {
             respond(s, 405, "", None);
             return;
@@ -980,7 +1000,19 @@ impl McpHost {
                 let a = self.post(hub, &headers, principal, &body);
                 let _ = reply.send(a);
             }
-            Job::Get { session, reply } => {
+            Job::Get {
+                session,
+                asked,
+                reply,
+            } => {
+                let session = session.filter(|id| !id.is_empty());
+                if let Some(a) = session
+                    .as_deref()
+                    .and_then(|id| self.wrong_principal(id, asked.as_deref()))
+                {
+                    let _ = reply.send(a);
+                    return;
+                }
                 let a = match session.and_then(|id| self.sessions.get_mut(&id).map(|s| (id, s))) {
                     Some((id, s)) => {
                         let (stx, srx) = mpsc::channel();
@@ -1000,7 +1032,19 @@ impl McpHost {
                 let _ = reply.send(a);
                 self.flush();
             }
-            Job::Delete { session, reply } => {
+            Job::Delete {
+                session,
+                asked,
+                reply,
+            } => {
+                if let Some(a) = session
+                    .as_deref()
+                    .filter(|id| !id.is_empty())
+                    .and_then(|id| self.wrong_principal(id, asked.as_deref()))
+                {
+                    let _ = reply.send(a);
+                    return;
+                }
                 let status = match session {
                     Some(id) if !id.is_empty() && self.sessions.remove(&id).is_some() => 204,
                     Some(_) => 404,
@@ -1012,6 +1056,23 @@ impl McpHost {
                     session: None,
                 });
             }
+        }
+    }
+
+    /// `403` when session `sid` is bound to another principal than the one asked for
+    /// (no principal asked: the bound one is meant).
+    fn wrong_principal(&self, sid: &str, asked: Option<&str>) -> Option<Answer> {
+        let bound = self.sessions.get(sid)?.bound.as_deref()?;
+        match asked {
+            Some(p) if p != bound => Some(Answer::Body {
+                status: 403,
+                body: rpc_error_body(
+                    -32001,
+                    &format!("this Mcp-Session-Id speaks as `{bound}`, not `{p}`"),
+                ),
+                session: None,
+            }),
+            _ => None,
         }
     }
 

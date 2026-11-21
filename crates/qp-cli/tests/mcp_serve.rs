@@ -597,6 +597,41 @@ fn http_a_session_keeps_its_principal() {
 }
 
 #[test]
+fn http_get_and_delete_keep_the_session_principal() {
+    // (Security review) The notification stream and the end of a session are only for
+    // the principal the session is bound to, like POST.
+    let srv = Http::start(&["--principals", "claude,claude-guest"], &[]);
+    let (code, sid, who) = init_as(srv.port, &[]);
+    assert_eq!((code, who), (200, json!("claude")));
+    let sid = sid.unwrap();
+    let other = [
+        ("Mcp-Session-Id", sid.as_str()),
+        ("X-Qp-Principal", "claude-guest"),
+    ];
+    assert_eq!(http(srv.port, "GET", &other, None).0, 403);
+    assert_eq!(http(srv.port, "DELETE", &other, None).0, 403);
+    // The session is still there and still `claude`'s.
+    assert_eq!(ping_in(srv.port, &sid, &[]), 200);
+    // No session: no stream (the stateless inbox is not a GET stream).
+    assert_eq!(http(srv.port, "GET", &[], None).0, 405);
+    assert_eq!(
+        http(srv.port, "GET", &[("Mcp-Session-Id", "")], None).0,
+        405
+    );
+    // Its own principal ends it.
+    assert_eq!(
+        http(
+            srv.port,
+            "DELETE",
+            &[("Mcp-Session-Id", sid.as_str())],
+            None
+        )
+        .0,
+        204
+    );
+}
+
+#[test]
 fn http_listen_streams_a_resource_update() {
     let srv = Http::start(&["--principals", "claude,claude-guest"], &[]);
     let meta = json!({"io.modelcontextprotocol/protocolVersion":"2026-07-28"});

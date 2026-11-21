@@ -6,6 +6,7 @@
 use std::path::{Path, PathBuf};
 
 pub mod capsule;
+pub mod comment;
 pub mod data;
 pub mod grammar;
 pub mod market;

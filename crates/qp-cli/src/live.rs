@@ -323,10 +323,15 @@ pub fn classifier() -> NoticeClassifier {
 /// Whether `topic` is a trade topic (`mx/trade/…`, `mx/tradeex/…`, also mirrored).
 #[must_use]
 pub fn is_trade_topic(topic: &str) -> bool {
+    // The strict parser, and a prefix check as a floor: any topic naming a trade stream
+    // (also inside a mirror, or in a form the parser does not know) is treated as a trade,
+    // so its payload is sanitized rather than kept as is (security review, RP4).
+    let t = topic.trim();
     matches!(
-        qp_matriks::parse_topic(topic).unwrap_mirror(),
+        qp_matriks::parse_topic(t).unwrap_mirror(),
         qp_matriks::Topic::Trade { .. }
-    )
+    ) || t.starts_with("mx/trade")
+        || t.contains("/mx/trade")
 }
 
 /// (RP4, K66) What may be kept of a received payload: a trade payload is re-encoded with
@@ -335,12 +340,16 @@ pub fn is_trade_topic(topic: &str) -> bool {
 /// its bytes might hold the level-2 fields. Returns the payload and, for a trade, whether
 /// buyer / seller were on the wire (tags only; their values are never read).
 #[must_use]
-pub fn keepable_payload<'a>(
+///
+/// With `trade_endpoint`, every payload received on the trade endpoint is treated as a
+/// trade whatever its topic (sanitized, or kept as nothing when it does not decode).
+pub fn keepable_payload_on<'a>(
     topic: &str,
     payload: &'a [u8],
+    trade_endpoint: bool,
 ) -> (std::borrow::Cow<'a, [u8]>, Option<(bool, bool)>) {
     use std::borrow::Cow;
-    if !is_trade_topic(topic) {
+    if !trade_endpoint && !is_trade_topic(topic) {
         return (Cow::Borrowed(payload), None);
     }
     let l2 = qp_matriks::level2_presence(payload);
@@ -354,7 +363,7 @@ pub fn keepable_payload<'a>(
 pub const TRADE_SANITIZE_NOTE: &str = "trade-sanitize";
 
 /// A sink that appends every message and event to a raw log and counts. Trade payloads are
-/// written without buyer and seller ([`keepable_payload`]).
+/// written without buyer and seller ([`keepable_payload_on`]).
 pub struct RawSink {
     w: Mutex<RawWriter<BufWriter<File>>>,
     pub messages: AtomicU64,
@@ -369,6 +378,8 @@ pub struct RawSink {
     /// Trade payloads that did not decode (kept empty).
     pub unreadable_trades: AtomicU64,
     finished: std::sync::atomic::AtomicBool,
+    /// Sink of the trade endpoint: every payload is sanitized as a trade.
+    trade_endpoint: bool,
 }
 
 impl RawSink {
@@ -389,7 +400,16 @@ impl RawSink {
             level2_seller: AtomicU64::new(0),
             unreadable_trades: AtomicU64::new(0),
             finished: std::sync::atomic::AtomicBool::new(false),
+            trade_endpoint: false,
         })
+    }
+
+    /// The sink of a trade-endpoint connection: every received payload goes through the
+    /// trade sanitizer, whatever its topic.
+    #[must_use]
+    pub fn for_trade_endpoint(mut self) -> Self {
+        self.trade_endpoint = true;
+        self
     }
 
     /// Writes one received message (trade payloads sanitized, counted) and returns the
@@ -398,8 +418,8 @@ impl RawSink {
         self.messages.fetch_add(1, Ordering::Relaxed);
         self.bytes
             .fetch_add(m.payload.len() as u64, Ordering::Relaxed);
-        let (kept, l2) = keepable_payload(m.topic, m.payload);
-        if is_trade_topic(m.topic) {
+        let (kept, l2) = keepable_payload_on(m.topic, m.payload, self.trade_endpoint);
+        if self.trade_endpoint || is_trade_topic(m.topic) {
             self.trade_messages.fetch_add(1, Ordering::Relaxed);
             match l2 {
                 Some((b, s)) => {
@@ -587,7 +607,11 @@ fn record(a: &RecordArgs) -> Result<(), String> {
     } else {
         cfg.market_endpoint()
     };
-    let sink = Arc::new(RawSink::create(&out)?);
+    let sink = if a.trades {
+        Arc::new(RawSink::create(&out)?.for_trade_endpoint())
+    } else {
+        Arc::new(RawSink::create(&out)?)
+    };
     let auth = Arc::new(AuthClient::new(&cfg, AuthPolicy::default()));
     let mut opts = ConnectOptions::new(topics.clone());
     opts.classifier = Some(classifier());
@@ -1432,6 +1456,28 @@ pub struct FeedArgs {
     /// Bars are closed this long after the clock passes their end (ms).
     #[arg(long, default_value_t = qp_matriks::feed::DEFAULT_FINALIZE_GRACE_MS)]
     pub finalize_grace_ms: i64,
+}
+
+#[cfg(test)]
+mod trade_keep_tests {
+    use super::*;
+
+    #[test]
+    fn trade_endpoint_sanitizes_every_payload_whatever_the_topic() {
+        // Not a trade message: on the trade endpoint it is kept as nothing, never as is.
+        let junk = b"\x3a\x03XYZ".to_vec();
+        let (kept, _) = keepable_payload_on("odd/topic", &junk, true);
+        assert!(kept.is_empty() || kept.as_ref() != junk.as_slice());
+        // Off the trade endpoint a non-trade topic is unchanged.
+        let (kept, l2) = keepable_payload_on("mx/symbol/AAA@lvl2", &junk, false);
+        assert_eq!(kept.as_ref(), junk.as_slice());
+        assert!(l2.is_none());
+        // Prefix floor: unknown trade-like forms count as trades.
+        assert!(is_trade_topic("mx/tradeex/AAA"));
+        assert!(is_trade_topic("mx/user/x/mx/trade/AAA"));
+        assert!(is_trade_topic("mx/trade/AAA@weird"));
+        assert!(!is_trade_topic("mx/symbol/AAA@lvl2"));
+    }
 }
 
 #[cfg(test)]

@@ -490,7 +490,7 @@ fn live_setup(a: &DemoArgs, tx: &Sender<Cmd>) -> Result<(ReplayHost, LiveParts),
                 trade: true,
             },
             sink: Arc::new(crate::livehost::HubSink::for_trades(
-                crate::live::RawSink::create(&trade_raw)?,
+                crate::live::RawSink::create(&trade_raw)?.for_trade_endpoint(),
                 to_hub.clone(),
             )),
             history,

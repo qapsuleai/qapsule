@@ -12,6 +12,7 @@ use serde_json::{json, Value};
 
 use crate::{Inbox, Queued, RpcError, SharedHub};
 
+pub mod query;
 pub mod thin;
 
 /// MCP tool annotations (hints only: the authority enforces permissions).
@@ -118,7 +119,7 @@ pub type Factory = fn() -> Box<dyn ToolSurface>;
 /// The surfaces, by name (the first is the default). Add a surface with one line here.
 #[must_use]
 pub fn registry() -> &'static [(&'static str, Factory)] {
-    &[("thin", thin::new)]
+    &[("thin", thin::new), ("query", query::new)]
 }
 
 /// The surface named `name`.

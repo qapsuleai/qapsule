@@ -56,3 +56,4 @@ sinyalini alır ve kaynağı okur. Akış açamayan istemci `notifications` arac
 | Ad | Dosya | Tarif |
 |----|-------|-------|
 | `thin` | `thin.rs` | Protokolü birebir yansıtan, şemadan üretilmiş araçlar (RD1). Varsayılan. |
+| `query` | `query.rs` | (M28 c) İki araç: `ask` (küçük sorgu dili: `find` isim, `where` düz süzgeçler/seçiciler, `select`, `expand`, `limit`, `format` = `card`/`json`/`layered`) ve `act` (`comment`, `watch`, `unwatch`, `propose`, `preview`; karar yok). |

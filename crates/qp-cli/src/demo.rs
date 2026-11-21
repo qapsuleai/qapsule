@@ -35,6 +35,10 @@
 //!   images it names, painted by the core over the synthetic world at a fixed moment
 //!   (`qp_wasm::gallery::build`; built once per language and theme, kept in memory). The
 //!   page is the static `gallery.html`.
+//! - (R5B, `--mcp`) `POST`/`GET`/`DELETE /mcp` — the same session for agents over MCP
+//!   Streamable HTTP (`crate::mcp_serve`: this machine's origins only, agent principals
+//!   only, default `claude`). The authority lives in the MCP adapter's hub
+//!   (`qp_mcp::Hub`), shared by the shell's connections and the MCP endpoints.
 //! - `GET /<file>` — the shell's static files (`--web`, default `shells/web`), `/` →
 //!   `index.html`. Nothing else is served; the page loads nothing from elsewhere (CSP).
 //!   Pre-compressed `<file>.br`/`<file>.gz` are served by `Accept-Encoding`, with an
@@ -120,6 +124,12 @@ pub struct DemoArgs {
     /// Repository root (relative paths of the session init).
     #[arg(long, default_value = ".")]
     pub root: PathBuf,
+    /// (R5B) Also serve the session to agents at `/mcp` (Streamable HTTP, the same rules
+    /// as `qp mcp serve --http`: this machine's origins only), as principal `claude`
+    /// (only; another `X-Qp-Principal` is refused). The person in the web shell and the
+    /// agent read and write the same document.
+    #[arg(long, conflicts_with_all = ["live", "sim"])]
+    pub mcp: bool,
     /// (R6/T7) Live data: the universe's history from REST (`--history` bars of
     /// `--interval`), then one live connection (environment variables,
     /// `docs/DATA_ACCESS.md`). This machine only: refused with `--lan`, `--https-host`
@@ -224,7 +234,10 @@ fn host(a: &DemoArgs) -> Result<ReplayHost, String> {
         feed_rule: Some(a.feed_rule.clone()),
         engine: crate::sim::engine_field(&a.rule),
     };
-    let init = demo_session_init(&o);
+    let mut init = demo_session_init(&o);
+    if a.mcp {
+        crate::mcp_serve::add_agent_principals(&mut init);
+    }
     let dir = if a.synthetic {
         PathBuf::new()
     } else {
@@ -641,6 +654,8 @@ enum Cmd {
     },
     /// (R6/T7) The live side's input (connection thread, repair thread).
     Live(crate::livehost::LiveIn),
+    /// (R5B) A request to the MCP endpoint (`--mcp`).
+    Mcp(crate::mcp_serve::Job),
     /// (R6/T7) `GET /live/stats`.
     LiveStats {
         reply: Sender<String>,
@@ -665,7 +680,7 @@ struct Client {
 }
 
 /// 128 bits from the operating system's randomness, as 32 hex digits.
-fn secret() -> Result<String, String> {
+pub(crate) fn secret() -> Result<String, String> {
     let mut b = [0u8; 16];
     std::fs::File::open("/dev/urandom")
         .and_then(|mut f| f.read_exact(&mut b))
@@ -674,7 +689,7 @@ fn secret() -> Result<String, String> {
 }
 
 /// Constant-time comparison of two secrets.
-fn same_secret(a: &str, b: &str) -> bool {
+pub(crate) fn same_secret(a: &str, b: &str) -> bool {
     a.len() == b.len()
         && a.bytes()
             .zip(b.bytes())
@@ -683,7 +698,11 @@ fn same_secret(a: &str, b: &str) -> bool {
 }
 
 struct Hub {
-    host: ReplayHost,
+    /// The authority (a replay host) in the MCP adapter's hub: (R5B, `--mcp`) the MCP
+    /// endpoints share it with the web shell's connections.
+    mcp: qp_mcp::SharedHub,
+    /// (R5B) The MCP endpoint (`--mcp`).
+    mcp_host: Option<crate::mcp_serve::McpHost>,
     clients: BTreeMap<String, Client>,
     next: u64,
     sent_events: usize,
@@ -700,6 +719,13 @@ struct Hub {
     quit: bool,
 }
 
+/// The replay host inside the hub.
+fn host_of(h: &qp_mcp::SharedHub) -> std::cell::RefMut<'_, ReplayHost> {
+    std::cell::RefMut::map(h.borrow_mut(), |h| {
+        h.replay_host().expect("the demo hub wraps a replay host")
+    })
+}
+
 impl Hub {
     fn wall(&self) -> u64 {
         u64::try_from(self.start.elapsed().as_millis()).unwrap_or(u64::MAX)
@@ -713,7 +739,7 @@ impl Hub {
         lang: &str,
         viewer: bool,
     ) -> String {
-        let mut data: InitData = self.host.init().data.clone().unwrap_or_default();
+        let mut data: InitData = host_of(&self.mcp).init().data.clone().unwrap_or_default();
         data.entitlements.retain(|p, _| p == principal);
         if viewer {
             // (RP3/M15, §22) No bars and no events: the feed comes from the authority's
@@ -729,16 +755,33 @@ impl Hub {
         }
         json!({"start": {
             "conn": conn, "token": token, "principal": principal, "lang": lang,
-            "data": data, "events": self.host.recorded_events(),
+            "data": data, "events": host_of(&self.mcp).recorded_events(),
             "info": self.info,
         }})
         .to_string()
     }
 
     fn route(&mut self, lines: Vec<qp_schema::protocol::OutboundLine>) {
+        let mut mcp = Vec::new();
         for l in lines {
             if let Some(c) = self.clients.get(&l.conn) {
                 let _ = c.tx.send(json!({"msg": l.msg}).to_string());
+            } else if self.mcp_host.is_some() && crate::mcp_serve::McpHost::is_mcp_conn(&l.conn) {
+                mcp.push(l);
+            }
+        }
+        // (R5B) Notifications for the MCP endpoints wait in the adapter's hub.
+        if !mcp.is_empty() {
+            self.mcp.borrow_mut().queue(mcp);
+        }
+    }
+
+    /// (R5B) Messages the MCP endpoints' commands caused for the web shell's
+    /// connections (queued in the adapter's hub) go to their streams.
+    fn route_queued(&mut self) {
+        for (id, c) in &self.clients {
+            for q in self.mcp.borrow_mut().take(id) {
+                let _ = c.tx.send(json!({"msg": q.msg}).to_string());
             }
         }
     }
@@ -747,10 +790,10 @@ impl Hub {
     /// (RP3/M15) a viewer gets only the events of the feeds it is served, then a `bind`
     /// frame for each feed its viewer subscription newly names.
     fn broadcast(&mut self) {
-        let st = self.host.state();
+        let st = host_of(&self.mcp).state();
         if st.epoch != self.epoch {
             self.epoch = st.epoch;
-            self.sent_events = self.host.recorded_len();
+            self.sent_events = host_of(&self.mcp).recorded_len();
             let frames: Vec<(Sender<String>, String)> = self
                 .clients
                 .iter()
@@ -769,9 +812,9 @@ impl Hub {
             }
             return;
         }
-        let total = self.host.recorded_len();
+        let total = host_of(&self.mcp).recorded_len();
         if total > self.sent_events {
-            let new = &self.host.recorded_since(self.sent_events);
+            let new = &host_of(&self.mcp).recorded_since(self.sent_events);
             let frame = json!({"data": new, "replay": st}).to_string();
             for c in self.clients.values() {
                 if c.viewer {
@@ -795,8 +838,7 @@ impl Hub {
             let Some(c) = self.clients.get(&id).filter(|c| c.viewer) else {
                 continue;
             };
-            let want: Vec<FeedKey> = self
-                .host
+            let want: Vec<FeedKey> = host_of(&self.mcp)
                 .session()
                 .viewer_data(&id)
                 .map(<[FeedKey]>::to_vec)
@@ -807,7 +849,7 @@ impl Hub {
             let mut feeds = Vec::new();
             let mut events = Vec::new();
             for k in want.iter().filter(|k| !c.served.contains(k)) {
-                if let Some((f, e)) = self.host.feed_data(k) {
+                if let Some((f, e)) = host_of(&self.mcp).feed_data(k) {
                     feeds.push(f);
                     events.extend(e);
                 }
@@ -843,8 +885,8 @@ impl Hub {
                     .as_deref()
                     .and_then(|n| qp_capsule::feedrule::FeedRule::named(n, !no_exempt))
                 {
-                    Some(r) => self.host.set_principal_coin_flip_rule(&principal, Some(r)),
-                    None => self.host.clear_principal_coin_flip_rule(&principal),
+                    Some(r) => host_of(&self.mcp).set_principal_coin_flip_rule(&principal, Some(r)),
+                    None => host_of(&self.mcp).clear_principal_coin_flip_rule(&principal),
                 }
                 self.next += 1;
                 let conn = format!("c{}", self.next);
@@ -885,7 +927,7 @@ impl Hub {
                         Value::String(s) => s,
                         v => v.to_string(),
                     };
-                    let lines = self.host.handle_raw(&conn, &text);
+                    let lines = host_of(&self.mcp).handle_raw(&conn, &text);
                     // (RP3/M15) Data and `bind` frames first: a viewer's open capsule
                     // finds its instrument's data when its slice arrives.
                     self.broadcast();
@@ -895,9 +937,18 @@ impl Hub {
             Cmd::Gone { conn } => {
                 self.clients.remove(&conn);
             }
+            Cmd::Mcp(job) => {
+                if let Some(m) = self.mcp_host.as_mut() {
+                    m.job(&self.mcp, job);
+                }
+                // A replay control or a command of the agent: data frames, a new start
+                // after a backward seek, the shell connections' notifications.
+                self.broadcast();
+                self.route_queued();
+            }
             Cmd::Live(input) => {
                 if let Some(l) = self.live.as_mut() {
-                    let lines = l.on_in(&mut self.host, input);
+                    let lines = l.on_in(&mut host_of(&self.mcp), input);
                     self.pending.extend(lines);
                 }
             }
@@ -905,7 +956,7 @@ impl Hub {
                 let v = self
                     .live
                     .as_ref()
-                    .map_or(Value::Null, |l| l.stats(&self.host));
+                    .map_or(Value::Null, |l| l.stats(&host_of(&self.mcp)));
                 let _ = reply.send(v.to_string());
             }
             Cmd::LiveControl {
@@ -950,7 +1001,7 @@ impl Hub {
             let _ = rx.recv_timeout(Duration::from_secs(10));
         }
         if let Some(l) = &self.live {
-            let st = l.stats(&self.host);
+            let st = l.stats(&host_of(&self.mcp));
             println!("canlı özet / live summary: {st}");
         }
     }
@@ -1016,6 +1067,8 @@ struct Gate {
     /// (RP3) Host values that arrive through the HTTPS reverse proxy (`--https-host`):
     /// their pages' origin is `https://NAME`.
     https_hosts: Vec<String>,
+    /// (R5B) The MCP endpoint's rules (`--mcp`).
+    mcp: Option<crate::mcp_serve::HttpGate>,
 }
 
 impl Gate {
@@ -1073,6 +1126,26 @@ fn connection(
         return;
     }
     let (path, q) = target.split_once('?').unwrap_or((target, ""));
+    if path == "/mcp" {
+        let Some(mg) = &gate.mcp else {
+            respond(
+                &mut s,
+                "404 Not Found",
+                "text/plain",
+                b"mcp off (qp demo --mcp)",
+            );
+            return;
+        };
+        let mut body = vec![0u8; len.min(8 << 20)];
+        if r.read_exact(&mut body).is_err() {
+            respond(&mut s, "400 Bad Request", "text/plain", b"short body");
+            return;
+        }
+        crate::mcp_serve::handle(&mut s, method, &headers, &body, mg, &|j| {
+            let _ = tx.send(Cmd::Mcp(j));
+        });
+        return;
+    }
     match (method, path) {
         ("GET", "/events") => {
             let principal = query_param(q, "principal")
@@ -1390,6 +1463,13 @@ private proxy, e.g. Tailscale, to 127.0.0.1 — see docs/matriks/LIVE.md)"
             .or_else(|| sim_parts.as_ref().map(|p| p.control.clone())),
         hosts,
         https_hosts,
+        mcp: a.mcp.then_some(crate::mcp_serve::HttpGate {
+            port,
+            // `Host` is checked for every request above.
+            hosts: None,
+            token: None,
+            principal_tokens: Vec::new(),
+        }),
     });
     let mut info = json!({"urls": urls, "phone": phone, "lan": bind != "127.0.0.1",
         "synthetic": st.synthetic, "note": st.note});
@@ -1480,10 +1560,27 @@ private proxy, e.g. Tailscale, to 127.0.0.1 — see docs/matriks/LIVE.md)"
             std::thread::spawn(move || connection(s, &web, &tx, &gate, gallery.as_deref()));
         }
     });
+    let mcp_host = if a.mcp {
+        let init = host.init();
+        crate::mcp_serve::check_principal(init, "claude")?;
+        println!("mcp (ajan / agent): http://127.0.0.1:{port}/mcp (claude)");
+        Some(crate::mcp_serve::McpHost::new(crate::mcp_serve::HostCfg {
+            default_principal: "claude".to_owned(),
+            // Only `claude`: another `X-Qp-Principal` is 403 (`qp mcp serve` rule 1).
+            allowed: vec!["claude".to_owned()],
+            surface: "thin".to_owned(),
+            device: serde_json::from_value(json!({"kind": "headless"}))
+                .map_err(|e| e.to_string())?,
+            log: None,
+        }))
+    } else {
+        None
+    };
     let mut hub = Hub {
         epoch: host.state().epoch,
         sent_events: host.recorded_len(),
-        host,
+        mcp: qp_mcp::Hub::shared_replay(host),
+        mcp_host,
         clients: BTreeMap::new(),
         next: 0,
         info,
@@ -1495,7 +1592,7 @@ private proxy, e.g. Tailscale, to 127.0.0.1 — see docs/matriks/LIVE.md)"
         quit: false,
     };
     if let Some(p) = live_parts {
-        let (rt, ctl) = p.start(&hub.host)?;
+        let (rt, ctl) = p.start(&host_of(&hub.mcp))?;
         hub.live = Some(rt);
         hub.conn_ctl = ctl;
     }
@@ -1519,7 +1616,7 @@ private proxy, e.g. Tailscale, to 127.0.0.1 — see docs/matriks/LIVE.md)"
     let mut last_flush = Instant::now();
     loop {
         let w = hub.wall();
-        let wait = hub.host.next_due_in(w).unwrap_or(40).clamp(1, 40);
+        let wait = host_of(&hub.mcp).next_due_in(w).unwrap_or(40).clamp(1, 40);
         match rx.recv_timeout(Duration::from_millis(wait)) {
             Ok(cmd) => {
                 hub.handle(cmd);
@@ -1537,24 +1634,27 @@ private proxy, e.g. Tailscale, to 127.0.0.1 — see docs/matriks/LIVE.md)"
             Err(RecvTimeoutError::Disconnected) => return Ok(()),
         }
         let w = hub.wall();
-        let mut lines = hub.host.pump(w);
+        let mut lines = host_of(&hub.mcp).pump(w);
         if let Some(l) = hub.live.as_mut() {
             lines.extend(std::mem::take(&mut hub.pending));
-            lines.extend(l.tick(&mut hub.host));
+            lines.extend(l.tick(&mut host_of(&hub.mcp)));
             // (R6/M24) Viewers' feeds and faces are recomputed at most every
             // VIEWER_FLUSH_MS (the profile: recomputing every reader's capsule sentences
             // after each live batch dominated the host's CPU); data frames still go out
             // every turn, so tick-to-frame for the open instrument is unchanged.
             if last_flush.elapsed() >= Duration::from_millis(VIEWER_FLUSH_MS) {
-                lines.extend(hub.host.live_flush());
+                lines.extend(host_of(&hub.mcp).live_flush());
                 last_flush = Instant::now();
             }
         }
         hub.broadcast();
         hub.route(lines);
+        if let Some(m) = hub.mcp_host.as_mut() {
+            m.flush();
+        }
         if let Some(l) = hub.live.as_mut() {
             l.after_broadcast();
-            l.watch_capsules(&hub.host);
+            l.watch_capsules(&host_of(&hub.mcp));
         }
         if hub.quit {
             hub.shutdown_live();

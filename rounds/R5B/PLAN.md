@@ -149,8 +149,10 @@ Var olan `Intent { text, trigger: Condition }` korunur. Ek alan `watch: Option<W
   /mcp` SSE ile bildirimler.
 - Oturum kaynağı: `--source synthetic|local|sim`; sentetik varsayılan (yeniden oynatma,
   K44); `--speed`, `--running`. Kimlik: `--principal <id>` (yazarı `agent` olmalı; değilse
-  başlamaz) ya da HTTP'de istek başına `X-Qp-Principal` (yalnız yapılandırmadaki ajan
-  kimlikleri). Her MCP bağlantısı ajan kökenli işaretlenir (§1).
+  başlamaz). Sunucu varsayılan olarak yalnız bu kimliği sunar; farklı `X-Qp-Principal` →
+  403. Birden çok kimlik yalnız açıkça: `--principals a,b` (yalnız loopback) ya da belirteç
+  başına kimlik `--token-env a=VAR1,b=VAR2` (kimlik belirteçten, başlık yok sayılır); eski
+  oturumda kimlik `Mcp-Session-Id`'ye bağlıdır (güvenlik incelemesi, `r5b/m-principal`). Her MCP bağlantısı ajan kökenli işaretlenir (§1).
 - Araç yüzeyi `--surface <ad>` ile seçilir; yüzeyler `crates/qp-mcp/src/surfaces/`
   altında, her biri tek dosya, `surfaces::registry()`'de bir satır. Araç girdi şemaları
   `qp-schema` tiplerinden (`schemars`) üretilir.

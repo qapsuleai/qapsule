@@ -118,6 +118,9 @@ pub enum AuthError {
     Halted { failures: u32 },
     /// Non-200 HTTP status (body is never logged).
     Http { status: u16 },
+    /// Non-200 HTTP status whose JSON body carried a `code` (sanitized like
+    /// [`AuthError::Refused`]); nothing else of the body is kept.
+    HttpCode { status: u16, code: String },
     /// `success: false`; `code` sanitized to `[A-Za-z0-9_-]{0,32}`.
     Refused { code: String },
     /// Response shape not understood (no body text included).
@@ -137,6 +140,9 @@ impl fmt::Display for AuthError {
                 "token requests stopped after {failures} consecutive failures"
             ),
             AuthError::Http { status } => write!(f, "token service answered HTTP {status}"),
+            AuthError::HttpCode { status, code } => {
+                write!(f, "token service answered HTTP {status} (code {code:?})")
+            }
             AuthError::Refused { code } => write!(f, "token service refused (code {code:?})"),
             AuthError::Malformed(w) => write!(f, "token service response not understood: {w}"),
             AuthError::Transport(m) => write!(f, "token service unreachable: {m}"),

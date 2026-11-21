@@ -1,0 +1,9 @@
+{"capsule":"cap.SYN11.continuation.up.152","day":2,"stage":"weakened","text":"SYN11 yukarı devam zayıfladı (pozisyon; izleme: Elimdeki hisselerde olumsuz bir şey olursa haber ver.; akış)"}
+{"capsule":"cap.SYN04.continuation.up.159","day":3,"stage":"weakened","text":"SYN04 yukarı devam zayıfladı (akış)"}
+{"capsule":"cap.SYN02.continuation.up.158","day":4,"stage":"invalidated","text":"SYN02 yukarı devam geçersiz oldu (pozisyon; izleme: Elimdeki hisselerde olumsuz bir şey olursa haber ver.; akış)"}
+{"capsule":"cap.SYN02.squeeze.neutral.144","day":6,"stage":"invalidated","text":"SYN02 sıkışma geçersiz oldu (pozisyon; izleme: Elimdeki hisselerde olumsuz bir şey olursa haber ver.; akış)"}
+{"capsule":"cap.SYN02.breakout.down.164","day":7,"stage":"invalidated","text":"SYN02 aşağı kırılım geçersiz oldu (pozisyon; izleme: Elimdeki hisselerde olumsuz bir şey olursa haber ver.; akış)"}
+{"capsule":"cap.SYN02.extreme.down.164","day":7,"stage":"invalidated","text":"SYN02 aşağı aşırılık geçersiz oldu (pozisyon; izleme: Elimdeki hisselerde olumsuz bir şey olursa haber ver.; akış)"}
+{"capsule":"cap.SYN11.continuation.up.152","day":7,"stage":"weakened","text":"SYN11 yukarı devam zayıfladı (pozisyon; izleme: Elimdeki hisselerde olumsuz bir şey olursa haber ver.; akış)"}
+{"capsule":"cap.SYN05.continuation.up.166","day":9,"stage":"weakened","text":"SYN05 yukarı devam zayıfladı (pozisyon; izleme: Elimdeki hisselerde olumsuz bir şey olursa haber ver.; akış)"}
+{"capsule":"cap.SYN11.squeeze.neutral.168","day":10,"stage":"born","text":"SYN11 sıkışma doğdu (izleme: Herhangi bir hissede sıkışma doğarsa haber ver.; akış)"}

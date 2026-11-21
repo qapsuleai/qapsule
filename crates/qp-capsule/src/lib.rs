@@ -56,6 +56,7 @@ pub mod rank;
 pub mod realize;
 pub mod scaffold;
 pub mod sentence;
+pub mod sentinel;
 pub mod theme;
 pub mod trust;
 pub mod voice;

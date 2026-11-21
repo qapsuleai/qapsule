@@ -46,6 +46,7 @@
 use std::collections::BTreeMap;
 
 pub mod audience;
+pub mod comment;
 pub mod engine;
 pub mod feedrule;
 pub mod market;

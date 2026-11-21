@@ -22,6 +22,18 @@
 //! authority resolves the feeds again ([`ReplayHost::live_refresh`]), the feed's counters
 //! are seeded at the repaired last bar and `seq`, and the buffered messages go through.
 //!
+//! Trades (RP4, K66): a feed made with [`MatriksFeed::with_trades`] builds its bars from
+//! the trade stream. Trade-endpoint records come in as [`LiveIn::Trade`] (the feed's
+//! `FeedSource::Trade`); when the trade connection opens, the runtime fills every watched
+//! symbol's gap from its [`TradeHistory`] ([`LiveRuntime::set_trade_history`]) after moving
+//! the feed's clock to the exchange time.
+//!
+//! Clock (RP4/T4): the runtime reads "now" from the wall clock, or — for the accelerated
+//! simulation (`qp sim`, `qp demo --sim`, `crate::sim`) — from a simulated clock moved only
+//! by [`LiveIn::Clock`] ([`LiveRuntime::use_sim_clock`]). Everything the runtime schedules
+//! (closing bars by the exchange clock, the market status, the lag estimate) follows that
+//! clock, so the same inputs give the same outputs whatever the real pace.
+//!
 //! Nothing here prints a value, a secret or an endpoint address.
 
 use std::collections::BTreeMap;
@@ -31,7 +43,7 @@ use std::time::{Duration, Instant};
 
 use qp_calendar::{ExchangeCalendar, Interval};
 use qp_live::{LiveConfig as ConnConfig, LiveConnection, LiveEvent, LiveMessage, LiveSink};
-use qp_matriks::{RawRecord, RecordKind};
+use qp_matriks::{FeedSource, RawRecord, RecordKind, TradeHistory};
 use qp_schema::data::{DataChange, DataEvent, FeedKey};
 use qp_schema::protocol::OutboundLine;
 use qp_schema::Bar;
@@ -58,6 +70,27 @@ pub trait FeedEngine: Send {
     fn seed_all(&mut self, seeds: &[Seed]) -> Result<(), String>;
     /// One raw record.
     fn push(&mut self, rec: &RawRecord) -> FeedOut;
+    /// (RP4) One raw record from `source` (the trade endpoint's records: `Trade`). A feed
+    /// without trades ignores trade-endpoint records.
+    fn push_from(&mut self, source: FeedSource, rec: &RawRecord) -> FeedOut {
+        match source {
+            FeedSource::Market => self.push(rec),
+            FeedSource::Trade => FeedOut::default(),
+        }
+    }
+    /// (RP4) Starts watching `symbols`' trades: everything from `from_ms` is a gap until
+    /// the trade connection delivers and the gap is filled from history. No effect
+    /// without trades.
+    fn watch_trades(&mut self, _symbols: &[String], _from_ms: i64) {}
+    /// (RP4) Moves the clock to `now_ms` and fills every open trade gap from `history`;
+    /// the errors are `(symbol, text)`. No effect without trades.
+    fn repair_trades(
+        &mut self,
+        _now_ms: i64,
+        _history: &dyn TradeHistory,
+    ) -> (FeedOut, Vec<(String, String)>) {
+        (FeedOut::default(), Vec::new())
+    }
     /// The exchange clock reached `now_ms` (bars close).
     fn advance_clock(&mut self, now_ms: i64) -> FeedOut;
     /// Counters for the stats (no values).
@@ -307,6 +340,49 @@ pub fn history(
     Ok((ok, missing))
 }
 
+/// The live host over an initial history (one feed per symbol on `interval`): the
+/// session init of the demo (every feed bound and run by the capsule engine, the host's
+/// feed rule) and [`ReplayHost::live`]. Shared by `qp demo --live`, `qp demo --sim` and
+/// `qp sim` (one construction path).
+///
+/// # Errors
+/// No history, or the host's own errors.
+pub fn host_from_history(
+    hist: Vec<(String, Vec<Bar>)>,
+    interval: &str,
+    opts: &qp_wasm::shell::DemoOptions,
+    root: &std::path::Path,
+) -> Result<ReplayHost, String> {
+    if hist.is_empty() {
+        return Err("no symbol has history".to_owned());
+    }
+    let n = hist.len();
+    let feeds: Vec<qp_source::ReplayFeed> = hist
+        .into_iter()
+        .map(|(s, bars)| qp_source::ReplayFeed {
+            key: FeedKey {
+                symbol: s,
+                interval: interval.to_owned(),
+                feed: None,
+            },
+            bars,
+            fine: Vec::new(),
+        })
+        .collect();
+    let mut init = qp_wasm::shell::demo_session_init(&qp_wasm::shell::DemoOptions {
+        local: true,
+        instruments: u32::try_from(n).unwrap_or(u32::MAX),
+        from_t: None,
+        running: true,
+        ..opts.clone()
+    });
+    if let Some(r) = init.replay.as_mut() {
+        r.interval = Some(interval.to_owned());
+        r.fine = None;
+    }
+    ReplayHost::live(init, root, feeds)
+}
+
 /// The repair events of one feed: the store's bars against the settled bars (complete by
 /// the cutoff, from the gap's start): a differing bar → `patch` (only the changed fields),
 /// a later bar → `bar`. Numbered from `seq + 1`. Returns (events, patched, added).
@@ -365,6 +441,15 @@ pub enum LiveIn {
     Halted(String),
     /// A connection event worth showing (backoff, auth failure, notice; masked text).
     Note(String),
+    /// (RP4) A raw record from the trade endpoint (`FeedSource::Trade`).
+    Trade(RawRecord),
+    /// (RP4/T4) The simulated clock moved to this time (UTC µs; the simulation's exchange
+    /// time). Ignored unless the runtime uses the simulated clock
+    /// ([`LiveRuntime::use_sim_clock`]); then the periodic work runs at that time.
+    Clock(i64),
+    /// (RP4/T4) Answered once every input before it was handled (back-pressure for a
+    /// producer that runs ahead, e.g. the simulation at `--speed max`).
+    Sync(Sender<()>),
 }
 
 /// Link state of the live side.
@@ -431,15 +516,23 @@ pub struct LiveRuntime {
     stale_since: Option<Instant>,
     stale_from_t: Option<i64>,
     repair_started: Option<Instant>,
-    buffer: Vec<RawRecord>,
+    buffer: Vec<(FeedSource, RawRecord)>,
     /// Exchange clock: the latest exchange time seen, the arrival lag estimate.
     clock: i64,
     lag_ms: i64,
     lag_cur: Option<i64>,
     lag_prev: Option<i64>,
-    lag_rot: Instant,
-    last_advance: Instant,
+    /// When (runtime clock, µs) the lag window, the bar closing and the market status
+    /// last ran.
+    lag_rot_us: i64,
+    last_advance_us: i64,
     last_print: Instant,
+    /// (RP4/T4) The simulated clock (UTC µs), when used ([`LiveRuntime::use_sim_clock`]).
+    sim_now_us: Option<i64>,
+    /// (RP4) Where trade gaps are filled from when the trade connection opens.
+    trade_history: Option<Arc<dyn TradeHistory + Send + Sync>>,
+    /// (RP4) Trade gap repairs: (filled, failed requests).
+    pub trade_repairs: (u64, u64),
     pub delayed: bool,
     // Stats.
     started: Instant,
@@ -462,7 +555,7 @@ pub struct LiveRuntime {
     /// when it was last given.
     market: Option<qp_schema::market::MarketStatus>,
     sym_phase: BTreeMap<String, i32>,
-    market_at: Instant,
+    market_at_us: i64,
     market_dirty: bool,
 }
 
@@ -539,9 +632,12 @@ impl LiveRuntime {
             lag_ms: delay_ms,
             lag_cur: None,
             lag_prev: None,
-            lag_rot: Instant::now(),
-            last_advance: Instant::now(),
+            lag_rot_us: now_us(),
+            last_advance_us: now_us(),
             last_print: Instant::now(),
+            sim_now_us: None,
+            trade_history: None,
+            trade_repairs: (0, 0),
             delayed: delay_ms > 0,
             started: Instant::now(),
             messages: 0,
@@ -561,9 +657,51 @@ impl LiveRuntime {
             conn_events: Vec::new(),
             market: None,
             sym_phase: BTreeMap::new(),
-            market_at: Instant::now(),
+            market_at_us: now_us(),
             market_dirty: true,
         })
+    }
+
+    /// (RP4/T4) From now on "now" is the simulated clock, starting at `t0_us` (UTC µs) and
+    /// moved only by [`LiveIn::Clock`]: bars close, the market status and the lag follow
+    /// it (module docs).
+    pub fn use_sim_clock(&mut self, t0_us: i64) {
+        self.sim_now_us = Some(t0_us);
+        self.lag_rot_us = t0_us;
+        self.last_advance_us = t0_us;
+        self.market_at_us = t0_us;
+        self.market_dirty = true;
+    }
+
+    /// (RP4/T4) Whether the runtime runs on the simulated clock.
+    #[must_use]
+    pub fn is_simulated(&self) -> bool {
+        self.sim_now_us.is_some()
+    }
+
+    /// (RP4) Where trade gaps are filled from (REST in live use, the local cache in the
+    /// simulation).
+    pub fn set_trade_history(&mut self, h: Arc<dyn TradeHistory + Send + Sync>) {
+        self.trade_history = Some(h);
+    }
+
+    /// (RP4) Starts watching every feed's symbol's trades from `from_ms` (a gap until the
+    /// trade connection opens and history fills it).
+    pub fn watch_trades(&mut self, from_ms: i64) {
+        let mut symbols: Vec<String> = self.feeds.iter().map(|k| k.symbol.clone()).collect();
+        symbols.dedup();
+        self.feed.watch_trades(&symbols, from_ms);
+    }
+
+    /// (RP4/T4) The market status last given to the authority.
+    #[must_use]
+    pub fn market(&self) -> Option<&qp_schema::market::MarketStatus> {
+        self.market.as_ref()
+    }
+
+    /// The runtime's "now" (UTC µs): the simulated clock or the wall clock.
+    fn now(&self) -> i64 {
+        self.sim_now_us.unwrap_or_else(now_us)
     }
 
     /// The link state's name (`connecting`, `live`, `stale`, `repairing`, `halted`).
@@ -581,15 +719,15 @@ impl LiveRuntime {
     /// The exchange time now (wall clock minus the arrival lag).
     #[must_use]
     pub fn exchange_now(&self) -> i64 {
-        now_us() / 1000 - self.lag_ms
+        self.now() / 1000 - self.lag_ms
     }
 
     fn note_lag(&mut self, arrival_us: i64, exch_ms: i64) {
         let lag = arrival_us / 1000 - exch_ms;
         self.lag_cur = Some(self.lag_cur.map_or(lag, |c| c.min(lag)));
-        if self.lag_rot.elapsed() >= Duration::from_secs(60) {
+        if self.now() - self.lag_rot_us >= 60_000_000 {
             self.lag_prev = self.lag_cur.take();
-            self.lag_rot = Instant::now();
+            self.lag_rot_us = self.now();
         }
         let best = match (self.lag_cur, self.lag_prev) {
             (Some(a), Some(b)) => a.min(b),
@@ -603,7 +741,19 @@ impl LiveRuntime {
     pub fn on_in(&mut self, host: &mut ReplayHost, input: LiveIn) -> Vec<OutboundLine> {
         let t0 = Instant::now();
         let lines = match input {
-            LiveIn::Record(rec) => self.on_record(host, rec),
+            LiveIn::Record(rec) => self.on_record(host, FeedSource::Market, rec),
+            LiveIn::Trade(rec) => self.on_record(host, FeedSource::Trade, rec),
+            LiveIn::Clock(t_us) => match self.sim_now_us {
+                Some(now) => {
+                    self.sim_now_us = Some(now.max(t_us));
+                    self.tick(host)
+                }
+                None => Vec::new(),
+            },
+            LiveIn::Sync(done) => {
+                let _ = done.send(());
+                Vec::new()
+            }
             LiveIn::Repaired {
                 generation,
                 bars,
@@ -612,7 +762,7 @@ impl LiveRuntime {
             LiveIn::Note(n) => {
                 if self.conn_events.len() < 500 {
                     self.conn_events
-                        .push(format!("{} {n}", crate::live::utc_stamp(now_us())));
+                        .push(format!("{} {n}", crate::live::utc_stamp(self.now())));
                 }
                 Vec::new()
             }
@@ -631,16 +781,21 @@ impl LiveRuntime {
         lines
     }
 
-    fn on_record(&mut self, host: &mut ReplayHost, rec: RawRecord) -> Vec<OutboundLine> {
+    fn on_record(
+        &mut self,
+        host: &mut ReplayHost,
+        source: FeedSource,
+        rec: RawRecord,
+    ) -> Vec<OutboundLine> {
         if rec.kind == RecordKind::Message {
             self.messages += 1;
             if self.link == Link::Repairing {
-                self.buffer.push(rec);
+                self.buffer.push((source, rec));
                 return Vec::new();
             }
         }
         let arrival = rec.t_us;
-        let out = self.feed.push(&rec);
+        let out = self.feed.push_from(source, &rec);
         self.apply(host, out, Some(arrival))
     }
 
@@ -652,7 +807,7 @@ impl LiveRuntime {
         self.stale_from_t = Some(self.clock);
         self.buffer.clear();
         self.conn_events
-            .push(format!("lost at {}", crate::live::utc_stamp(now_us())));
+            .push(format!("lost at {}", crate::live::utc_stamp(self.now())));
         host.live_mark_stale()
     }
 
@@ -673,7 +828,7 @@ impl LiveRuntime {
                 ConnChange::Opened { session } => {
                     self.conn_events.push(format!(
                         "opened #{session} at {}",
-                        crate::live::utc_stamp(now_us())
+                        crate::live::utc_stamp(self.now())
                     ));
                     match self.link {
                         Link::Connecting => {
@@ -685,6 +840,27 @@ impl LiveRuntime {
                     }
                 }
             }
+        }
+        match out.trade_connection {
+            Some(ConnChange::Opened { session }) => {
+                self.conn_events.push(format!(
+                    "trade opened #{session} at {}",
+                    crate::live::utc_stamp(self.now())
+                ));
+                // A feed whose bars come from trades is live once its trade endpoint is.
+                if self.link == Link::Connecting {
+                    self.link = Link::Live;
+                    self.market_dirty = true;
+                }
+                lines.extend(self.fill_trade_gaps(host));
+            }
+            Some(ConnChange::Lost) => {
+                self.conn_events.push(format!(
+                    "trade lost at {}",
+                    crate::live::utc_stamp(self.now())
+                ));
+            }
+            None => {}
         }
         if let (Some(c), Some(a)) = (out.clock_ms, arrival_us) {
             self.note_lag(a, c);
@@ -717,7 +893,8 @@ impl LiveRuntime {
                         Err(_) => self.rejected += 1,
                     }
                 }
-                if let Some(a) = arrival_us {
+                // Tick-to-frame is a wall-clock measure: not taken on the simulated clock.
+                if let Some(a) = arrival_us.filter(|_| self.sim_now_us.is_none()) {
                     if self.arrivals.len() < MAX_SAMPLES {
                         self.arrivals.push(a);
                     }
@@ -798,9 +975,9 @@ impl LiveRuntime {
         self.market_dirty = true;
         let buffered = std::mem::take(&mut self.buffer);
         let n_buf = buffered.len();
-        for rec in buffered {
+        for (source, rec) in buffered {
             let a = rec.t_us;
-            let out = self.feed.push(&rec);
+            let out = self.feed.push_from(source, &rec);
             lines.extend(self.apply(host, out, Some(a)));
         }
         let ms = |d: Option<Instant>| {
@@ -820,6 +997,23 @@ impl LiveRuntime {
         });
         self.stale_since = None;
         lines
+    }
+
+    /// (RP4) The trade connection opened: the feed's clock goes to the exchange time and
+    /// every open trade gap is filled from the trade history (synchronously; without a
+    /// history the gaps stay open and the symbols stale).
+    fn fill_trade_gaps(&mut self, host: &mut ReplayHost) -> Vec<OutboundLine> {
+        let Some(h) = self.trade_history.clone() else {
+            return Vec::new();
+        };
+        let now = self.exchange_now().max(self.clock);
+        let (out, errors) = self.feed.repair_trades(now, h.as_ref());
+        self.trade_repairs.1 += errors.len() as u64;
+        for (sym, e) in errors.iter().take(20) {
+            self.conn_events.push(format!("trade history {sym}: {e}"));
+        }
+        self.trade_repairs.0 += 1;
+        self.apply(host, out, None)
     }
 
     /// (T3, §24) The market status now: exchange time (the feed's clock), open and
@@ -872,12 +1066,12 @@ impl LiveRuntime {
     /// Gives the authority the market status when it changed (phases, link) or every
     /// 10 s (exchange time, open).
     fn publish_market(&mut self, host: &mut ReplayHost) -> Vec<OutboundLine> {
-        if !self.market_dirty && self.market_at.elapsed() < Duration::from_secs(10) {
+        if !self.market_dirty && self.now() - self.market_at_us < 10_000_000 {
             return Vec::new();
         }
         let m = self.market_status();
         self.market_dirty = false;
-        self.market_at = Instant::now();
+        self.market_at_us = self.now();
         if self.market.as_ref() == Some(&m) {
             return Vec::new();
         }
@@ -889,11 +1083,11 @@ impl LiveRuntime {
     /// exchange clock once a second.
     pub fn tick(&mut self, host: &mut ReplayHost) -> Vec<OutboundLine> {
         let mut lines = self.publish_market(host);
-        if self.last_advance.elapsed() < Duration::from_secs(1) || self.link != Link::Live {
+        if self.now() - self.last_advance_us < 1_000_000 || self.link != Link::Live {
             return lines;
         }
-        self.last_advance = Instant::now();
-        if self.last_print.elapsed() >= Duration::from_secs(30) {
+        self.last_advance_us = self.now();
+        if !self.is_simulated() && self.last_print.elapsed() >= Duration::from_secs(30) {
             self.last_print = Instant::now();
             println!(
                 "live: {} · {} messages · {} events · {} capsule events",
@@ -1073,12 +1267,36 @@ fn process_usage() -> (Option<u64>, Option<String>) {
 pub struct HubSink {
     raw: RawSink,
     to_hub: Arc<dyn Fn(LiveIn) + Send + Sync>,
+    source: FeedSource,
 }
 
 impl HubSink {
-    /// A sink writing `raw` and sending to the hub.
+    /// A sink writing `raw` and sending to the hub (the market endpoint).
     pub fn new(raw: RawSink, to_hub: Arc<dyn Fn(LiveIn) + Send + Sync>) -> Self {
-        Self { raw, to_hub }
+        Self {
+            raw,
+            to_hub,
+            source: FeedSource::Market,
+        }
+    }
+
+    /// (RP4) A sink for the trade endpoint: its records go to the hub as
+    /// [`LiveIn::Trade`]. (Used by the simulation's live-path test; the live demo's
+    /// trade connection is wired by the orchestrator.)
+    #[cfg_attr(not(test), allow(dead_code))]
+    pub fn for_trades(raw: RawSink, to_hub: Arc<dyn Fn(LiveIn) + Send + Sync>) -> Self {
+        Self {
+            raw,
+            to_hub,
+            source: FeedSource::Trade,
+        }
+    }
+
+    fn wrap(&self, rec: RawRecord) -> LiveIn {
+        match self.source {
+            FeedSource::Market => LiveIn::Record(rec),
+            FeedSource::Trade => LiveIn::Trade(rec),
+        }
     }
 
     /// A local note (a deliberate drop) into the log and to the hub as a lost connection.
@@ -1090,7 +1308,7 @@ impl HubSink {
             payload: note.as_bytes().to_vec(),
         };
         self.raw.put_record(&rec);
-        (self.to_hub)(LiveIn::Record(rec));
+        (self.to_hub)(self.wrap(rec));
     }
 
     /// Flushes the raw log.
@@ -1102,11 +1320,7 @@ impl HubSink {
 impl LiveSink for HubSink {
     fn on_message(&self, m: &LiveMessage<'_>) {
         self.raw.on_message(m);
-        (self.to_hub)(LiveIn::Record(RawRecord::message(
-            m.received_at_us,
-            m.topic,
-            m.payload,
-        )));
+        (self.to_hub)(self.wrap(RawRecord::message(m.received_at_us, m.topic, m.payload)));
     }
 
     fn on_event(&self, ep: &qp_live::EndpointKey, ev: &LiveEvent) {
@@ -1125,7 +1339,7 @@ impl LiveSink for HubSink {
             }
         };
         if let Some((kind, note)) = kind {
-            (self.to_hub)(LiveIn::Record(RawRecord {
+            (self.to_hub)(self.wrap(RawRecord {
                 t_us: now_us(),
                 kind,
                 topic: String::new(),
@@ -1240,6 +1454,8 @@ pub struct MatriksFeed {
     cal: ExchangeCalendar,
     interval: String,
     inner: qp_matriks::LiveFeed,
+    /// (RP4) Bars from the trade stream (`LiveFeed::with_trades`) with these settings.
+    trades: Option<qp_matriks::TradeFeedConfig>,
     /// Stats of the feeds replaced by a repair (records, events).
     pub retired: (u64, u64),
 }
@@ -1258,7 +1474,30 @@ impl MatriksFeed {
             cfg,
             cal,
             interval: interval.to_owned(),
+            trades: None,
             retired: (0, 0),
+        }
+    }
+
+    /// (RP4) A feed building `interval` bars from the trade stream
+    /// (`qp_matriks::LiveFeed::with_trades`; TL value volume, `updateDate` time for the
+    /// card's clock). The price card, if any, gives the phases and the clock only.
+    #[must_use]
+    pub fn with_trades(
+        cal: ExchangeCalendar,
+        interval: &str,
+        trades: qp_matriks::TradeFeedConfig,
+    ) -> Self {
+        let mut f = Self::new(cal, interval);
+        f.inner = qp_matriks::LiveFeed::with_trades(f.cfg.clone(), f.cal.clone(), trades);
+        f.trades = Some(trades);
+        f
+    }
+
+    fn fresh(&self) -> qp_matriks::LiveFeed {
+        match self.trades {
+            Some(t) => qp_matriks::LiveFeed::with_trades(self.cfg.clone(), self.cal.clone(), t),
+            None => qp_matriks::LiveFeed::new(self.cfg.clone(), self.cal.clone()),
         }
     }
 }
@@ -1271,10 +1510,8 @@ impl FeedEngine for MatriksFeed {
             // only before a feed's first tick); each day's counter goes on from the
             // card's last value; the next message per symbol is its initial (as after any
             // reconnect).
-            let old = std::mem::replace(
-                &mut self.inner,
-                qp_matriks::LiveFeed::new(self.cfg.clone(), self.cal.clone()),
-            );
+            let fresh = self.fresh();
+            let old = std::mem::replace(&mut self.inner, fresh);
             let st = old.stats();
             self.retired.0 += st.records;
             self.retired.1 += st.events;
@@ -1296,12 +1533,44 @@ impl FeedEngine for MatriksFeed {
         self.inner.push(rec)
     }
 
+    fn push_from(&mut self, source: FeedSource, rec: &RawRecord) -> FeedOut {
+        self.inner.push_from(source, rec)
+    }
+
+    fn watch_trades(&mut self, symbols: &[String], from_ms: i64) {
+        for s in symbols {
+            self.inner.watch_trades(s, from_ms);
+        }
+    }
+
+    fn repair_trades(
+        &mut self,
+        now_ms: i64,
+        history: &dyn TradeHistory,
+    ) -> (FeedOut, Vec<(String, String)>) {
+        let mut out = self.inner.advance_clock(now_ms);
+        let (o, errors) = self.inner.repair_trades(history);
+        out.events.extend(o.events);
+        out.finalized.extend(o.finalized);
+        (out, errors)
+    }
+
     fn advance_clock(&mut self, now_ms: i64) -> FeedOut {
         self.inner.advance_clock(now_ms)
     }
 
     fn stats_json(&self) -> Value {
         let s = self.inner.stats();
+        let t = &s.trades;
+        let trades = self.trades.map(|_| {
+            json!({"messages": t.messages, "decode_errors": t.decode_errors,
+                   "no_price": t.no_price, "no_time": t.no_time, "special": t.special,
+                   "duplicates": t.duplicates, "buffered": t.buffered,
+                   "far_from_arrival": t.far_from_arrival, "repairs": t.repairs,
+                   "repair_errors": t.repair_errors, "history_applied": t.history_applied,
+                   "connections_opened": t.connections_opened,
+                   "connections_lost": t.connections_lost})
+        });
         json!({
             "records": s.records + self.retired.0, "events": s.events + self.retired.1,
             "current": {
@@ -1320,6 +1589,7 @@ impl FeedEngine for MatriksFeed {
                 "volume_rebases": s.volume_rebases, "bars_opened": s.bars_opened,
                 "events": s.events,
             },
+            "trades": trades,
         })
     }
 }

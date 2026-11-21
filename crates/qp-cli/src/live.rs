@@ -80,6 +80,17 @@ pub enum LiveCommand {
     /// M22: build bars from raw logs with the live feed and compare them with REST bars
     /// (`qp live bars` files); prints only an aggregate table.
     Compare(CompareArgs),
+    /// (RP4/T2, M27) Bars from the cached trades through the live bar builder
+    /// (`BarMethod::Trades`) against settled REST bars; with `--raw`, also the card /
+    /// trades / mixed source table. Prints only an aggregate table.
+    CompareTrades(crate::live_trades::CompareTradesArgs),
+    /// (RP4/T2) The price card's `priceStep` against the BIST step table, and trade prices
+    /// on that grid (aggregate counts only).
+    PriceSteps(crate::live_trades::PriceStepsArgs),
+    /// (RP4/T2) Bars from the cached trades (M27 rules) as RP4 harness series
+    /// (`fixtures/local/rp4/tradebars/full/<period>/<SYM>.bars`, `manifest.json`), with an
+    /// optional check against the harness REST series (aggregate counts only).
+    ExportTradeBars(crate::live_trades::ExportTradeBarsArgs),
     /// Aggregate statistics of a raw log (no market values).
     Inspect {
         /// Raw log file (`*.qpraw`).
@@ -137,6 +148,9 @@ pub fn run(cmd: &LiveCommand) -> Result<(), String> {
         LiveCommand::Inspect { file } => inspect(file),
         LiveCommand::Reset(a) => reset(a, &qp_live::lock::default_lock_dir()),
         LiveCommand::Compare(a) => compare(a),
+        LiveCommand::CompareTrades(a) => crate::live_trades::compare_trades(a),
+        LiveCommand::PriceSteps(a) => crate::live_trades::price_steps(a),
+        LiveCommand::ExportTradeBars(a) => crate::live_trades::export_trade_bars(a),
         LiveCommand::Symbols => symbols(),
         LiveCommand::Trades {
             symbols,
@@ -1102,7 +1116,7 @@ pub fn parse_volume_field(s: &str) -> Result<qp_matriks::VolumeField, String> {
     }
 }
 
-fn split_list(s: &str) -> Vec<String> {
+pub(crate) fn split_list(s: &str) -> Vec<String> {
     s.split(',')
         .map(str::trim)
         .filter(|x| !x.is_empty())
@@ -1295,13 +1309,29 @@ fn rest_period(iv: &str) -> Option<&'static str> {
 /// midnight) → the day's session open; intraday `time` = bar open, bars outside the
 /// session (closing session, 18:00+) merged into the day's previous bar. Several files are
 /// merged by `t` (later file wins). `None`: no file.
-fn load_rest(
+pub(crate) fn load_rest(
     dir: &Path,
     sym: &str,
     iv: &str,
     prefer_adj: bool,
     quantity: bool,
     cal: &qp_calendar::ExchangeCalendar,
+) -> Result<Option<Vec<qp_schema::Bar>>, String> {
+    load_rest_with(dir, sym, iv, prefer_adj, quantity, cal, false)
+}
+
+/// [`load_rest`]; with `last_span`, a bar outside the session merges into the day's
+/// **last session bar** (`bar_at(interval, last close − 1)`, the live rule 1 of
+/// `qp_source::livebar`), which is created from it when REST has no bar there (no
+/// continuous trade in the last minute), instead of into the previous REST bar.
+pub(crate) fn load_rest_with(
+    dir: &Path,
+    sym: &str,
+    iv: &str,
+    prefer_adj: bool,
+    quantity: bool,
+    cal: &qp_calendar::ExchangeCalendar,
+    last_span: bool,
 ) -> Result<Option<Vec<qp_schema::Bar>>, String> {
     use qp_schema::Bar;
     let Some(period) = rest_period(iv) else {
@@ -1382,6 +1412,26 @@ fn load_rest(
             out.push(b);
             continue;
         }
+        let day = cal.local_day(b.t);
+        let target = cal
+            .sessions_on(day)
+            .last()
+            .and_then(|s| cal.bar_at(interval, s.close - 1))
+            .map(|s| s.open);
+        if let (true, Some(tt)) = (last_span, target) {
+            if b.t >= tt {
+                match out.last_mut() {
+                    Some(prev) if prev.t == tt => {
+                        prev.h = prev.h.max(b.h);
+                        prev.l = prev.l.min(b.l);
+                        prev.c = b.c;
+                        prev.v += b.v;
+                    }
+                    _ => out.push(Bar { t: tt, ..b }),
+                }
+                continue;
+            }
+        }
         // Outside the session: merge into the same day's previous bar.
         match out.last_mut() {
             Some(prev) if cal.local_day(prev.t) == cal.local_day(b.t) && prev.t < b.t => {
@@ -1421,7 +1471,7 @@ impl Bucket {
 }
 
 /// Records of several raw logs as one recording (rule in [`CompareArgs::raw`]).
-fn read_recordings(list: &str) -> Result<Vec<RawRecord>, String> {
+pub(crate) fn read_recordings(list: &str) -> Result<Vec<RawRecord>, String> {
     let mut all: Vec<RawRecord> = Vec::new();
     for (i, f) in split_list(list).iter().enumerate() {
         let path = Path::new(f);
@@ -1452,14 +1502,14 @@ fn read_recordings(list: &str) -> Result<Vec<RawRecord>, String> {
     Ok(all)
 }
 
-struct Built {
-    stores: BTreeMap<qp_schema::data::FeedKey, qp_source::FeedStore>,
-    finals: std::collections::BTreeSet<(qp_schema::data::FeedKey, i64)>,
-    gaps: Vec<(i64, i64)>,
-    stats: qp_matriks::FeedStats,
+pub(crate) struct Built {
+    pub(crate) stores: BTreeMap<qp_schema::data::FeedKey, qp_source::FeedStore>,
+    pub(crate) finals: std::collections::BTreeSet<(qp_schema::data::FeedKey, i64)>,
+    pub(crate) gaps: Vec<(i64, i64)>,
+    pub(crate) stats: qp_matriks::FeedStats,
 }
 
-fn build_live(recs: &[RawRecord], args: &FeedArgs) -> Result<Built, String> {
+pub(crate) fn build_live(recs: &[RawRecord], args: &FeedArgs) -> Result<Built, String> {
     let mut feed = args.build()?;
     let mut stores: BTreeMap<qp_schema::data::FeedKey, qp_source::FeedStore> = BTreeMap::new();
     let mut finals = std::collections::BTreeSet::new();
@@ -1669,7 +1719,7 @@ fn compare(a: &CompareArgs) -> Result<(), String> {
 }
 
 /// Adds `d` into `acc` (counts summed, maxima kept).
-fn merge_diff(acc: &mut qp_source::BarDiff, d: &qp_source::BarDiff) {
+pub(crate) fn merge_diff(acc: &mut qp_source::BarDiff, d: &qp_source::BarDiff) {
     let f = |a: &mut qp_source::FieldDiff, b: &qp_source::FieldDiff| {
         a.exact += b.exact;
         a.within_tol += b.within_tol;

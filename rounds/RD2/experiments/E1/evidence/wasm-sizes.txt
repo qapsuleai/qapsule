@@ -1,0 +1,8 @@
+== commit a966a581
+default raw=2345845 gzip9=769827 br=574408
+shell-unstripped raw=8788005 gzip9=2431842 br=1665529
+== sizes: {"wasm_raw":6941415,"wasm_gzip":2076904,"wasm_br":1404891,"js_raw":158182,"js_gzip":28153}
+qp-built
+main default raw=2282026 gzip9=746730 br=556814
+main shell-unstripped raw=8731379 gzip9=2408953 br=1648679
+main shell-stripped raw=6890093 gzip9=2057034 br=1390588

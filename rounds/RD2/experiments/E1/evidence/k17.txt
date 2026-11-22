@@ -1,0 +1,17 @@
+machine: aarch64-macos, cpu: Apple M4 Max, threads: 16
+bars=10000 reps=15 (single thread, release)
+study       variants    min ms    med ms    max ms  digest
+sma             1000      4.19      4.76      4.99  d9a393c2f397ae9e
+ema             1000      3.63      3.91      4.15  f9be271e91103539
+rsi             1000      8.86      9.13      9.63  9515526d5288453b
+macd            1000      7.34      7.70      7.78  d5a6c407256992e6
+bollinger       1000      8.20      9.36      9.83  7e683c082fb95dc9
+
+node v24.3.0 (V8 13.6.233.10-node.18) bars=10000 reps=15
+study      variants   min ms    med ms    max ms  digest
+sma            1000     11.70     12.66     13.76  d9a393c2f397ae9e
+ema            1000     10.94     11.20     11.37  f9be271e91103539
+rsi            1000     18.05     18.59     19.53  9515526d5288453b
+macd           1000     10.36     10.57     11.18  d5a6c407256992e6
+bollinger      1000     11.70     11.76     12.12  7e683c082fb95dc9
+compute_digest 7b1e99d40889f83c

@@ -373,6 +373,10 @@ girmez). Her bağlanan sabit için sahibi crate'te test: değer eski değişmeze
 tür). En az 10 sabit, mümkünse tutanak çıktılarına ulaşanlardan. Belge
 `docs/PARAMETERS.generated.md`, `qp-schema` örneği üretir, test güncelliğini sınar.
 Çözümleme sırasında `enstrüman` kapsamının yeri ENGINEERING'de yok → Kural önerisi.
+**Uygulanan (v2.1, denetim sonrası):** `const fn` erişimci `panic!` gerektirdiği için (ENGINEERING §5;
+denetçi KALDI) bırakıldı. Her anahtarın sahibinin tam tipinde adlı varsayılanı vardır
+(`params::system::SCORECARD_MIN_N_DEFAULT: u32 = 20`); `ParamDef` ondan kurulur, bağlanan sabit
+`pub const LEDGER_MIN_N: u32 = qp_schema::params::system::SCORECARD_MIN_N_DEFAULT;` olur.
 
 **13.8 Sıra (v2).**
 

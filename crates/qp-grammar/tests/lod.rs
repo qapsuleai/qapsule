@@ -1,6 +1,6 @@
 //! Viewport and level of detail (`docs/GRAMMAR.md` §3, §15).
 
-mod common;
+mod support;
 
 use qp_grammar::{compile, CompileOptions, MemProvider};
 use qp_schema::scene::SceneLayer;
@@ -50,7 +50,7 @@ fn layer<'a>(s: &'a qp_schema::scene::SceneDesc, id: &str) -> &'a SceneLayer {
 fn buckets_aggregate_ohlc_lines_and_bars() {
     let bars = big(10_000);
     let p = provider(&bars);
-    let s = compile(&common::view(VIEW), &p, &CompileOptions::new(1200, 600)).unwrap();
+    let s = compile(&support::view(VIEW), &p, &CompileOptions::new(1200, 600)).unwrap();
     let lod = s.lod.unwrap();
     assert_eq!(lod.bars_per_bucket, 9); // ceil(10000 / 1120)
     assert_eq!(lod.buckets, 1111); // remainder joins the last bucket
@@ -104,14 +104,14 @@ fn lod_can_be_disabled_and_max_points_forces_it() {
     let p = provider(&bars);
     let mut o = CompileOptions::new(1200, 600);
     o.lod = false;
-    let s = compile(&common::view(VIEW), &p, &o).unwrap();
+    let s = compile(&support::view(VIEW), &p, &o).unwrap();
     assert_eq!(s.lod, None);
     assert_eq!(layer(&s, "c").items.len(), 3000);
     assert!(layer(&s, "c").items.iter().all(|i| i.bars.is_none()));
     let mut o = CompileOptions::new(1200, 600);
     o.range = Some((0, 199));
     o.max_points = Some(60);
-    let s = compile(&common::view(VIEW), &p, &o).unwrap();
+    let s = compile(&support::view(VIEW), &p, &o).unwrap();
     assert_eq!(s.lod.unwrap().bars_per_bucket, 4);
     assert_eq!(layer(&s, "c").items.len(), 50);
 }
@@ -122,7 +122,7 @@ fn viewport_in_a_large_series() {
     let p = provider(&bars);
     let mut o = CompileOptions::new(1200, 600);
     o.range = Some((50_000, 50_199));
-    let s = compile(&common::view(VIEW), &p, &o).unwrap();
+    let s = compile(&support::view(VIEW), &p, &o).unwrap();
     assert_eq!(s.lod, None);
     assert_eq!((s.x.from_bar, s.x.to_bar), (50_000, 50_199));
     assert_eq!(layer(&s, "c").items[0].bar, Some(50_000));
@@ -133,6 +133,6 @@ fn viewport_in_a_large_series() {
     assert!(s.panels[0].y.min < lo && s.panels[0].y.min > lo - 10.0);
     // Clamped to the last slot.
     o.range = Some((99_990, 200_000));
-    let s = compile(&common::view(VIEW), &p, &o).unwrap();
+    let s = compile(&support::view(VIEW), &p, &o).unwrap();
     assert_eq!((s.x.from_bar, s.x.to_bar), (99_990, 99_999));
 }

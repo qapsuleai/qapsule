@@ -2,7 +2,7 @@
 //! box maps back through the scene's `XMap`/`YMap` inverses to the item's bar slot and to
 //! a value within the item's values (one pixel of tolerance). Fixed proptest seed.
 
-mod common;
+mod support;
 
 use proptest::prelude::*;
 use proptest::test_runner::RngSeed;
@@ -77,7 +77,7 @@ pub fn check_round_trip(s: &SceneDesc) -> usize {
 }
 
 fn provider(bars: &[Bar]) -> MemProvider {
-    let mut p = common::provider_with(bars.to_vec(), "RT");
+    let mut p = support::provider_with(bars.to_vec(), "RT");
     let last = bars.last().unwrap();
     let pts: Vec<Point> = (0..=10)
         .map(|k| Point {
@@ -91,7 +91,7 @@ fn provider(bars: &[Bar]) -> MemProvider {
 
 fn view(log: bool) -> qp_schema::grammar::View {
     let kind = if log { "log" } else { "linear" };
-    common::view(&format!(
+    support::view(&format!(
         r#"{{"id":"rt","x":{{"kind":"time"}},
           "panels":[{{"id":0,"y":{{"kind":"{kind}"}}}},{{"id":1,"y":{{"kind":"linear"}}}},{{"id":2,"y":{{"kind":"linear"}}}}],
           "layers":[

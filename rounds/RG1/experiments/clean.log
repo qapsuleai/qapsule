@@ -1,0 +1,13 @@
+clean: kök /Users/arkns/Works/Mchart/qapsule
+önce:
+  target/               65G
+  .claude/worktrees/    32K
+  .claude/wt/           16K
+  depo toplamı          67G
+1. git worktree prune
+2. worktree'ler
+3. target/ (eski profiller ve artımlı önbellek)
+  siliniyor: target/flycheck0 (496K)
+  siliniyor: target/main ( 23G)
+rm: /Users/arkns/Works/Mchart/qapsule/target/main/debug: Directory not empty
+rm: /Users/arkns/Works/Mchart/qapsule/target/main: Directory not empty

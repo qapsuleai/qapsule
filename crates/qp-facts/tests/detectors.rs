@@ -7,13 +7,10 @@
 //! - hand-built series with the exact bar each detector must fire on;
 //! - a candidate that disappears when the bar is revised.
 
-mod common;
+mod support;
 
 use std::collections::{BTreeMap, BTreeSet};
 
-use common::{
-    bar, batch, fresh, from_closes, n_detectors, revised, sig, streamed, test_bars, test_flow,
-};
 use qp_compute::{run, Bollinger, Field, Rsi, Streaming};
 use qp_facts::{
     default_detectors, run_batch, to_fact, BandSqueeze, Detection, Detector, FlowPoint,
@@ -21,6 +18,9 @@ use qp_facts::{
 };
 use qp_schema::capsule::{Direction, Edge, Geometry, LicenseClass};
 use qp_schema::Bar;
+use support::{
+    bar, batch, fresh, from_closes, n_detectors, revised, sig, streamed, test_bars, test_flow,
+};
 
 const SEEDS: [u64; 3] = [1, 7, 42];
 

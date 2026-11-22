@@ -1,8 +1,8 @@
 //! Small examples computed by hand (exact fractions written out in the comments).
 
-mod common;
+mod support;
 
-use common::{batch, close};
+use support::{batch, close};
 
 const TOL: f64 = 1e-12;
 

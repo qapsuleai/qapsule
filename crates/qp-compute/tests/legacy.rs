@@ -4,13 +4,13 @@
 //! Legacy outputs are trimmed (no warmup values) and aligned to the last bar; ours have
 //! one value per bar with leading `None` (K13). Tolerance: 1e-9 relative (absolute below 1).
 
-mod common;
+mod support;
 
 use std::collections::BTreeMap;
 use std::path::PathBuf;
 
-use common::{batch, close};
 use serde_json::Value;
+use support::{batch, close};
 
 const TOL: f64 = 1e-9;
 
@@ -51,7 +51,7 @@ fn matches_legacy_batch_outputs() {
             .collect();
         let kv_ref: Vec<(&str, f64)> = kv.iter().map(|(k, v)| (k.as_str(), *v)).collect();
         let ours = batch(study, &kv_ref, x);
-        let names = common::study(study, &kv_ref).outputs();
+        let names = support::study(study, &kv_ref).outputs();
         for (name, col) in names.iter().zip(&ours) {
             let theirs = floats(&case["outputs"][*name]);
             let warm = x.len() - theirs.len();

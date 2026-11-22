@@ -2,7 +2,7 @@
 //! - batch = streaming = "revise the last bar", bit for bit;
 //! - output length = bar count; warmup values are `None`, all later values finite.
 
-mod common;
+mod support;
 
 use proptest::prelude::*;
 use proptest::test_runner::RngSeed;
@@ -98,7 +98,7 @@ proptest! {
         (name, kv) in spec(),
         noise in prop::collection::vec(0.5f64..1.5, 1..8),
     ) {
-        let mut s = common::study(name, &kv);
+        let mut s = support::study(name, &kv);
         let batch = run(s.as_mut(), &[&x]).unwrap();
         let stream = streamed(s.as_mut(), &x);
         let rev = revised(s.as_mut(), &x, &noise);
@@ -108,7 +108,7 @@ proptest! {
 
     #[test]
     fn length_warmup_and_finiteness(x in prices(), (name, kv) in spec()) {
-        let mut s = common::study(name, &kv);
+        let mut s = support::study(name, &kv);
         let outs = run(s.as_mut(), &[&x]).unwrap();
         let warm = s.warmup();
         prop_assert_eq!(outs.len(), s.outputs().len());
@@ -150,8 +150,8 @@ proptest! {
     })]
 
     /// Rolling sums (SMA) and the windowed Welford variance (Bollinger) match a
-    /// from-scratch computation within a *relative* tolerance (`common::REL_TOL`,
-    /// `common::BAND_REL_TOL`), also on long series far from zero (levels up to 1e6).
+    /// from-scratch computation within a *relative* tolerance (`support::REL_TOL`,
+    /// `support::BAND_REL_TOL`), also on long series far from zero (levels up to 1e6).
     #[test]
     fn rolling_state_matches_naive_reference(
         steps in prop::collection::vec(-300i32..300, 1..1500),
@@ -167,21 +167,21 @@ proptest! {
             })
             .collect();
         let want = naive_sma_std(&x, p);
-        let sma = common::batch("sma", &[("period", p as f64)], &x);
-        let bb = common::batch("bollinger", &[("period", p as f64), ("k", 1.0)], &x);
+        let sma = support::batch("sma", &[("period", p as f64)], &x);
+        let bb = support::batch("bollinger", &[("period", p as f64), ("k", 1.0)], &x);
         for i in 0..x.len() {
             match want[i] {
                 None => prop_assert!(sma[0][i].is_none() && bb[1][i].is_none()),
                 Some((m, sd)) => {
                     let s = sma[0][i].unwrap();
-                    prop_assert!(common::close(s, m, common::REL_TOL), "sma[{}] {} vs {}", i, s, m);
+                    prop_assert!(support::close(s, m, support::REL_TOL), "sma[{}] {} vs {}", i, s, m);
                     let mid = bb[0][i].unwrap();
-                    prop_assert!(common::close(mid, m, common::REL_TOL), "middle[{}] {} vs {}", i, mid, m);
+                    prop_assert!(support::close(mid, m, support::REL_TOL), "middle[{}] {} vs {}", i, mid, m);
                     // The std itself is tiny next to the price; its error is relative to
                     // the price level, so compare the price-sized bands (k = 1).
                     let (up, lo) = (bb[1][i].unwrap(), bb[2][i].unwrap());
-                    prop_assert!(common::close(up, m + sd, common::BAND_REL_TOL), "upper[{}] {} vs {}", i, up, m + sd);
-                    prop_assert!(common::close(lo, m - sd, common::BAND_REL_TOL), "lower[{}] {} vs {}", i, lo, m - sd);
+                    prop_assert!(support::close(up, m + sd, support::BAND_REL_TOL), "upper[{}] {} vs {}", i, up, m + sd);
+                    prop_assert!(support::close(lo, m - sd, support::BAND_REL_TOL), "lower[{}] {} vs {}", i, lo, m - sd);
                 }
             }
         }
@@ -228,7 +228,7 @@ fn first_study(gate: Option<f64>, name: &str, kv: &[(&str, f64)]) -> Box<dyn Stu
             Gate(level),
             qp_compute::Field::Close,
         )),
-        None => common::study(name, kv),
+        None => support::study(name, kv),
     }
 }
 
@@ -274,11 +274,11 @@ proptest! {
     ) {
         let first = first_study(gate, fname, &fkv);
         let which = which_seed % first.outputs().len();
-        let mut chain = qp_compute::Chain::new(first, which, common::study(sname, &skv));
+        let mut chain = qp_compute::Chain::new(first, which, support::study(sname, &skv));
         let want = chain_reference(
             first_study(gate, fname, &fkv).as_mut(),
             which,
-            common::study(sname, &skv).as_mut(),
+            support::study(sname, &skv).as_mut(),
             &x,
         );
         let batch = run(&mut chain, &[&x]).unwrap();

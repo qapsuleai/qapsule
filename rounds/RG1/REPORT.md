@@ -77,7 +77,7 @@ istisna istekleri İ1–İ7 (§4), kural önerileri K-1…K-11 (§9), önerilen 
 | `qp-render` | çekirdek | 1.746 / 1.854 | 1.752 / 1.846 |
 | `qp-calendar` | çekirdek | 1.178 / 400 | 716 / 893 |
 
-Toplam test dışı satır az arttı (≈ +1 %): yeni `//!` modül belgeleri, `mod`/`use` satırları,
+(Sayılar taşımalar birleştiği anda alındı; sonraki `arch-check` sayım düzeltmeleri birkaç satır oynatır, ör. `qp-host` 10.433 — eşik sonucu değişmez.) Toplam test dışı satır az arttı (≈ +1 %): yeni `//!` modül belgeleri, `mod`/`use` satırları,
 parametre kayıt defteri, lint izin satırları. Bazı crate'lerde "test" sütunu büyüdü: satır içi
 test modülleri `tests.rs` dosyalarına taşındı ve test sayılıyor.
 
@@ -333,7 +333,7 @@ commit'i `ed74d036` koşusu **45038366122 yeşil**.
 Ayrıntı `experiments/clean.log`.
 
 **Bilerek bırakılanlar:**
-- `shells/web/node_modules` (18 MB) ve `shells/web/pkg` (13 MB): `verify.sh` adım 18 onlara bağlı.
+- `shells/web/node_modules` (18 MB) ve `shells/web/pkg` (13 MB): `verify.sh` adım 18 onlara bağlı; `shells/web-spike/node_modules` (122 MB) ve `pkg` (2 MB): adım 10 (tarayıcı) onlara bağlı.
 - `fixtures/local/` (1,5 GB): yerel veri, bütçe içinde (≤ 2 GB ham, ≤ 5 GB önbellek).
 - `rounds/R3/experiments/harness/target/` (140 MB): R3'ten kalan deney derlemesi. RG1'in değil; silinsin mi, ana akış karar versin.
 - `/private/tmp/claude-501/…` altında başka oturumların klasörleri (≈ 1,8 GB): bu oturumun değil, dokunulmadı. Bu oturumunki 472 KB (görev çıktıları).

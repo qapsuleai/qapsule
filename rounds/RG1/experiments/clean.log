@@ -11,3 +11,5 @@ clean: kök /Users/arkns/Works/Mchart/qapsule
   siliniyor: target/main ( 23G)
 rm: /Users/arkns/Works/Mchart/qapsule/target/main/debug: Directory not empty
 rm: /Users/arkns/Works/Mchart/qapsule/target/main: Directory not empty
+
+# (orkestratör notu) Yukarıdaki rm hatası editörün rust-analyzer sürecinin target/ içine yazmasından; ardından elle: rm -rf target/main ve `cargo clean` → "Removed 255970 files, 50.1GiB total"; sonra target/ yok.

@@ -1,9 +1,8 @@
 //! Every row of the `docs/CAPSULE.md` §9.3 transition table, the step order, ids, the
 //! ledger (§9.4), retraction (K37), candidates (K28) and the glyph spec.
 
-mod common;
+mod support;
 
-use common::*;
 use qp_capsule::engine::{capsule_id, finding_id, Engine, EngineConfig};
 use qp_capsule::scaffold::{ConstRank, FixedHorizon, KindTheme};
 use qp_capsule::{glyph_spec, OpenStory, ThemeDecision, ThemeRule};
@@ -11,6 +10,7 @@ use qp_schema::capsule::{
     Direction, Edge, EvidenceFamily, GlyphPhase, LedgerStat, MeaningKind, Stage, TimeKind,
 };
 use qp_schema::{Fact, Outcome};
+use support::*;
 
 const A: &str = "AAA";
 

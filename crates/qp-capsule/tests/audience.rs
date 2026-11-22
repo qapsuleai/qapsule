@@ -1,13 +1,13 @@
 //! Sensitivity filter (§9.8).
 
-mod common;
+mod support;
 
 use std::collections::BTreeMap;
 
-use common::*;
 use qp_capsule::admits;
 use qp_capsule::engine::Engine;
 use qp_schema::capsule::{Audience, Sensitivity, Stage, Story, UserGroup};
+use support::*;
 
 fn story(inst: &str, tier: u8, stage: Stage) -> Story {
     let mut e = Engine::new(test_config(10));

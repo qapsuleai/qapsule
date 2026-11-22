@@ -1,15 +1,15 @@
 //! Pipeline: look-ahead test (§9.4), determinism and replay, with fake detectors.
 
-mod common;
+mod support;
 
 use std::collections::BTreeSet;
 
-use common::*;
 use qp_capsule::engine::Engine;
 use qp_capsule::pipeline::simulate_engine;
 use qp_capsule::{simulate, InstrumentInput, SimResult, StoryEvent};
 use qp_schema::capsule::Stage;
 use qp_schema::Bar;
+use support::*;
 
 const N: u64 = 240;
 const HORIZON: u32 = 8;

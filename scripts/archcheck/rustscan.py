@@ -210,3 +210,21 @@ def _depths(code):
 def is_generated(src):
     head = "\n".join(src.splitlines()[:5]).lower()
     return "üretilmiştir" in head or "@generated" in head
+
+
+CFG_TEST_MOD = re.compile(r"#\[cfg\(\s*test\s*\)\]\s*(?:#\[[^\]]*\]\s*)*(?:pub(?:\([^)]*\))?\s+)?mod\s+([A-Za-z_][A-Za-z0-9_]*)\s*[;{]")
+PATH_ATTR = re.compile(r"#\[path\s*=\s*\"([^\"]+)\"\s*\]")
+_INLINE_MOD = re.compile(r"^\s*(?:pub(?:\([^)]*\))?\s+)?mod\s+[A-Za-z_][A-Za-z0-9_]*\s*\{", re.M)
+
+
+def inline_mods(code):
+    """[("mod {…}", line)] for modules with an inline body at depth 0 outside test regions."""
+    regions = test_regions(code)
+    depth_at = _depths(code)
+    out = []
+    for m in _INLINE_MOD.finditer(code):
+        pos = m.start() + len(m.group(0)) - len(m.group(0).lstrip())
+        if depth_at[pos] != 0 or in_regions(pos, regions):
+            continue
+        out.append(("mod {}", line_of(code, pos)))
+    return out

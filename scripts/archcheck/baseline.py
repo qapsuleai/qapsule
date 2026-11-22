@@ -13,6 +13,20 @@ def load(path):
         return json.load(fh)
 
 
+def split_exceptions(findings, cfg):
+    """(kept, excepted): findings named in cfg["exceptions"] (rule + item) are excepted."""
+    ex = {(e["rule"], e["item"]): e for e in cfg.get("exceptions", [])}
+    kept, excepted = [], []
+    for f in findings:
+        e = ex.get((f["rule"], f["item"]))
+        if e is not None:
+            excepted.append(dict(f, exception=e))
+        else:
+            kept.append(f)
+    unused = [e for k, e in ex.items() if not any((f["rule"], f["item"]) == k for f in findings)]
+    return kept, excepted, unused
+
+
 def judge(findings, base, hard_rules):
     """Splits findings into (errors, tolerated, stale). `stale` are baseline items that no
     longer appear or got smaller (the baseline can be tightened)."""

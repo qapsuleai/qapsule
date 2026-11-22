@@ -22,8 +22,10 @@ CFG = {
                 "doc_lines": 20, "doc_bytes": 4000},
     "forbidden_names": ["util", "common", "misc", "helpers"],
     "doc_globs": ["*.md", "docs/**/*.md"],
-    "hard_rules": ["layer.up", "layer.unknown", "file.hard", "name.forbidden",
-                   "readme.crate", "root.logic"],
+    "hard_rules": ["layer.up", "layer.lateral", "layer.unknown", "file.hard",
+                   "name.forbidden", "readme.crate", "root.logic", "path.outside"],
+    "generated_files": [],
+    "exceptions": [],
 }
 
 
@@ -67,7 +69,7 @@ EXPECT = {
     "layer.unknown": "qp-x",
     "file.hard": "crates/qp-b/src/big.rs",
     "file.soft": "crates/qp-b/src/mid.rs",
-    "fn.lines": "crates/qp-b/src/long.rs::long@1",
+    "fn.lines": "crates/qp-b/src/long.rs::long",
     "dir.files": "crates/qp-c/src",
     "crate.lines": "qp-b",
     "shell.lines": "qp-s",
@@ -77,7 +79,13 @@ EXPECT = {
     "readme.module": "crates/qp-a/src/topic",
     "root.logic": "crates/qp-a/src/topic/mod.rs",
     "doc.size": "docs/BIG.md",
+    "path.outside": "crates/qp-a/src/escape.rs->../../qp-b/hidden.rs",
 }
+EXPECT_EXTRA = [
+    ("root.logic", "crates/qp-c/src/lib.rs"),          # an inline `mod x { fn … }` body
+    ("fn.lines", "crates/qp-c/src/tests.rs::fake_test"),  # tests.rs not declared cfg(test)
+    ("file.hard", "crates/qp-c/src/gen.rs"),             # "üretilmiştir" but not listed
+]
 
 
 def _dirty(root):
@@ -99,6 +107,10 @@ def _dirty(root):
     _w(root, "crates/qp-a/src/topic/mod.rs", "pub mod inner;\npub fn logic() {}\n")
     _w(root, "crates/qp-a/src/topic/inner.rs", "// x\n")
     _w(root, "docs/BIG.md", "".join(f"line {i}\n" for i in range(25)))
+    _w(root, "crates/qp-a/src/escape.rs", '#[path = "../../qp-b/hidden.rs"]\nmod hidden;\n')
+    _w(root, "crates/qp-c/src/lib.rs", "//! ok\npub mod m;\nmod inner {\n    pub fn x() {}\n}\n")
+    _w(root, "crates/qp-c/src/tests.rs", _fn("fake_test", 12))
+    _w(root, "crates/qp-c/src/gen.rs", "// üretilmiştir\n" + "".join(f"// {i}\n" for i in range(45)))
     return edges, names
 
 
@@ -119,7 +131,7 @@ def run():
         edges, names = _dirty(root)
         fs, _ = rules.all_findings(root, CFG, edges, names)
         got = {(f["rule"], f["item"]) for f in fs}
-        for rule, item in sorted(EXPECT.items()):
+        for rule, item in sorted(EXPECT.items()) + EXPECT_EXTRA:
             hit = (rule, item) in got
             ok &= hit
             print(f"self-test: {rule:15} {item:40} {'caught' if hit else 'MISSED'}")
@@ -133,7 +145,7 @@ def run():
               f"{'ok' if good else 'FAILED'}")
         ok &= bool(good)
         lowered = copy.deepcopy(base)
-        lowered["rules"]["fn.lines"]["items"]["crates/qp-b/src/long.rs::long@1"] = 11
+        lowered["rules"]["fn.lines"]["items"]["crates/qp-b/src/long.rs::long"] = 11
         errs, _, _ = bl.judge(fs, lowered, CFG["hard_rules"])
         hit = any(e["rule"] == "fn.lines" for e in errs)
         print(f"self-test: ratchet: value above the baseline is an error   "
@@ -145,6 +157,13 @@ def run():
         hit = any(e["rule"] == "fn.lines" and "long2" in e["item"] for e in errs)
         print(f"self-test: ratchet: new debt item is an error              "
               f"{'caught' if hit else 'MISSED'}")
+        ok &= hit
+        # exceptions: a named exception turns a hard finding into a printed exception
+        cfg = dict(CFG, exceptions=[{"rule": "layer.up", "item": "qp-a -> qp-b", "id": "T"}])
+        kept, exc, _ = bl.split_exceptions(fs, cfg)
+        hit = any(f["rule"] == "layer.up" for f in exc) and not any(
+            f["rule"] == "layer.up" for f in kept)
+        print(f"self-test: a named exception is reported, not an error    {'ok' if hit else 'MISSED'}")
         ok &= hit
     print("self-test:", "PASS" if ok else "FAIL")
     return ok

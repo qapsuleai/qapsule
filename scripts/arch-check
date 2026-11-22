@@ -6,8 +6,9 @@
   scripts/arch-check --list          also print every tolerated (baseline) finding
   scripts/arch-check --json          findings as JSON (for reports)
   scripts/arch-check --table         crate line table (non-test / test lines)
-  scripts/arch-check --write-baseline  write scripts/arch-baseline.json from the current
-                                     findings; refuses if any value would go up
+  scripts/arch-check --write-baseline [--allow-new]  write scripts/arch-baseline.json from
+                                     the current findings; refuses any value or count above
+                                     the existing baseline, and new items without --allow-new
 
 Rules: layer.up / layer.lateral / layer.unknown (cargo metadata, normal and build
 dependencies; dev-dependencies are not layered), file.hard / file.soft (src files, raw
@@ -50,11 +51,16 @@ def main(argv):
         return 0
     base = bl.load(BASE_PATH)
     hard = set(cfg["hard_rules"])
+    findings, excepted, unused = bl.split_exceptions(findings, cfg)
     errors, tolerated, stale = bl.judge(findings, base, hard)
     if "--write-baseline" in argv:
-        raised = [e for e in errors if e["rule"] not in hard and e.get("why", "").startswith("above")]
-        if raised and base.get("rules"):
-            for e in raised:
+        # The ratchet: an existing baseline may only shrink. A first baseline (empty file)
+        # or new debt needs `--allow-new <reason>` and is then a reviewed change.
+        allow_new = "--allow-new" in argv
+        bad = [e for e in errors if e["rule"] not in hard
+               and (e.get("why", "").startswith(("above", "rule count")) or not allow_new)]
+        if bad and base.get("rules") is not None and (base.get("rules") or not allow_new):
+            for e in bad:
                 print("refused (ratchet):", e["message"], "-", e["why"])
             return 1
         new = bl.build(findings, hard, base)
@@ -64,7 +70,12 @@ def main(argv):
         print(f"baseline written: {sum(r['count'] for r in new['rules'].values())} items")
         return 0
     for o, v in sorted(cfg.get("layer_overrides", {}).items()):
-        print(f"exception: {o} placed in layer `{v['layer']}` ({v.get('status', '')}): {v.get('reason', '')}")
+        print(f"EXCEPTION layer: {o} placed in `{v['layer']}` ({v.get('status', '')}): {v.get('reason', '')}")
+    for f in excepted:
+        e = f["exception"]
+        print(f"EXCEPTION [{f['rule']}] {f['message']} — {e.get('id', '')} {e.get('status', '')}: {e.get('reason', '')}")
+    for e in unused:
+        print(f"unused exception (remove it): {e['rule']} {e['item']}")
     by_rule = {}
     for f in tolerated:
         by_rule[f["rule"]] = by_rule.get(f["rule"], 0) + 1
@@ -76,7 +87,8 @@ def main(argv):
     for e in errors:
         print(f"ERROR [{e['rule']}] {e['message']} ({e['why']})")
     summary = ", ".join(f"{r} {n}" for r, n in sorted(by_rule.items())) or "none"
-    print(f"arch-check: {len(errors)} error(s); within the baseline: {summary}")
+    print(f"arch-check: {len(errors)} error(s); {len(excepted) + len(cfg.get('layer_overrides', {}))} "
+          f"exception(s) awaiting approval; within the baseline: {summary}")
     return 1 if errors else 0
 
 

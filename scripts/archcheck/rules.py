@@ -35,6 +35,11 @@ def crates(root):
                   if os.path.isfile(os.path.join(root, "crates", d, "Cargo.toml")))
 
 
+def generated(cfg, rel, src):
+    """Exempt from size budgets only if listed in the config *and* marked in its head."""
+    return rel in cfg.get("generated_files", []) and rs.is_generated(src)
+
+
 class Scan:
     """Reads every Rust file of every crate once."""
 
@@ -42,11 +47,41 @@ class Scan:
         self.root = root
         self.files = {}  # rel -> (src, code)
         for c in crates(root):
-            for f in rust_files(root, os.path.join("crates", c)):
+            fs = rust_files(root, os.path.join("crates", c))
+            b = os.path.join(root, "crates", c, "build.rs")
+            if os.path.isfile(b):
+                fs.append(b)
+            for f in fs:
                 rel = os.path.relpath(f, root)
-                with open(f, encoding="utf-8") as fh:
+                if rel.endswith("/build.rs"):
+                    rel = rel[: -len("build.rs")] + "build/build.rs"  # area `build`
+                with open(f, encoding="utf-8") as fh:  # noqa: PTH123
                     src = fh.read()
                 self.files[rel] = (src, rs.strip(src))
+        self.test_mods = self._test_mods()
+
+    def _test_mods(self):
+        """Paths of `src` files that are test modules: a `tests.rs` / `tests/` file whose
+        module is declared under `#[cfg(test)]` somewhere in its crate."""
+        declared = set()
+        for rel, (_, code) in self.files.items():
+            for m in rs.CFG_TEST_MOD.finditer(code):
+                declared.add((rel.split("/")[1], m.group(1)))
+        out = set()
+        for rel in self.files:
+            parts = rel.split("/")
+            if parts[2] != "src" or not is_test_path(rel):
+                continue
+            name = "tests" if parts[-1] == "tests.rs" else parts[parts.index("tests", 3)]
+            if (parts[1], name) in declared:
+                out.add(rel)
+        return out
+
+    def is_test(self, rel):
+        parts = rel.split("/")
+        if parts[2] == "src":
+            return rel in self.test_mods
+        return parts[2] in ("tests", "examples", "benches")
 
 
 def rule_sizes(scan, cfg):
@@ -56,26 +91,29 @@ def rule_sizes(scan, cfg):
         parts = rel.split("/")
         crate, area = parts[1], parts[2]
         lines = src.count("\n") + (0 if src.endswith("\n") or not src else 1)
-        generated = rs.is_generated(src)
-        test = is_test_path(rel) or area in ("tests",)
-        if area == "src" and not generated:
+        gen = generated(cfg, rel, src)
+        test = scan.is_test(rel) and area in ("src", "tests")
+        if area in ("src", "build") and not gen:
             if lines > b["file_hard"]:
                 yield finding("file.hard", rel, lines, b["file_hard"],
                               f"{rel}: {lines} lines > hard limit {b['file_hard']}")
             elif not test and lines > b["file_soft"]:
                 yield finding("file.soft", rel, lines, b["file_soft"],
                               f"{rel}: {lines} lines > budget {b['file_soft']}")
-        if test and area in ("src", "tests") and lines > b["test_file"] and not generated:
+        if test and area in ("src", "tests") and lines > b["test_file"] and not gen:
             if area == "tests":  # src test files are under file.hard already
                 yield finding("test.file", rel, lines, b["test_file"],
                               f"{rel}: test file {lines} lines > {b['test_file']}")
-        if area == "src" and not test and not generated:
+        if area in ("src", "build") and not test and not gen:
             crate_lines[crate] = crate_lines.get(crate, 0) + lines - rs.test_lines(code)
-        if area == "src" and not test:
+        if area in ("src", "build") and not test:
+            seen = {}
             for name, a, z, is_test in rs.functions(code):
                 n = z - a + 1
+                k = seen[name] = seen.get(name, 0) + 1
                 if not is_test and n > b["fn_lines"]:
-                    yield finding("fn.lines", f"{rel}::{name}@{a}", n, b["fn_lines"],
+                    key = f"{rel}::{name}" + (f"#{k}" if k > 1 else "")
+                    yield finding("fn.lines", key, n, b["fn_lines"],
                                   f"{rel}:{a} fn {name}: {n} lines > {b['fn_lines']}")
     shells = set(layer_of_map(cfg).get("__shells__", []))
     for crate, n in sorted(crate_lines.items()):
@@ -88,15 +126,15 @@ def rule_sizes(scan, cfg):
                           f"{crate}: {n} non-test lines > {b['crate_lines']}")
 
 
-def crate_line_table(scan):
+def crate_line_table(scan):  # noqa: C901
     """{crate: (non-test src lines, test lines)} for reports."""
     t = {}
     for rel, (src, code) in scan.files.items():
         parts = rel.split("/")
         crate, area = parts[1], parts[2]
-        lines = src.count("\n")
+        lines = src.count("\n") + (0 if src.endswith("\n") or not src else 1)
         a, z = t.get(crate, (0, 0))
-        if area == "src" and not is_test_path(rel) and not rs.is_generated(src):
+        if area in ("src", "build") and not scan.is_test(rel) and not rs.is_generated(src):
             tl = rs.test_lines(code)
             t[crate] = (a + lines - tl, z + tl)
         elif area in ("src", "tests"):
@@ -149,12 +187,26 @@ def rule_root_logic(scan, cfg):
         parts = rel.split("/")
         if parts[2] != "src" or parts[-1] not in ("lib.rs", "mod.rs"):
             continue
-        items = rs.top_level_items(code)
+        items = rs.top_level_items(code) + rs.inline_mods(code)
         if items:
             kinds = ", ".join(sorted({k for k, _ in items}))
             yield finding("root.logic", rel, len(items), 0,
                           f"{rel}: {len(items)} logic items ({kinds}) in a lib.rs/mod.rs "
                           f"(declarations and re-exports only; first at line {items[0][1]})")
+
+
+def rule_path_attrs(scan):
+    """`#[path = …]` in library code must stay inside the crate's `src/` (otherwise code
+    escapes the scan and the budgets)."""
+    for rel, (src, _) in sorted(scan.files.items()):
+        parts = rel.split("/")
+        if parts[2] != "src":
+            continue
+        for m in rs.PATH_ATTR.finditer(src):
+            target = os.path.normpath(os.path.join(os.path.dirname(rel), m.group(1)))
+            if not target.startswith("/".join(parts[:3]) + "/"):
+                yield finding("path.outside", f"{rel}->{m.group(1)}", 1, 0,
+                              f"{rel}: #[path = \"{m.group(1)}\"] leaves the crate's src/")
 
 
 def rule_docs(cfg, root):
@@ -232,6 +284,7 @@ def all_findings(root, cfg, edges=None, names=None):
     out += list(rule_names(scan, cfg, root))
     out += list(rule_readmes(scan, cfg, root))
     out += list(rule_root_logic(scan, cfg))
+    out += list(rule_path_attrs(scan))
     out += list(rule_docs(cfg, root))
     return out, scan
 

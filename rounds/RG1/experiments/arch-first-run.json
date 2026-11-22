@@ -1,0 +1,2284 @@
+[
+ {
+  "rule": "layer.lateral",
+  "item": "qp-capsule -> qp-facts",
+  "value": 1,
+  "limit": 0,
+  "message": "qp-capsule -> qp-facts: sideways dependency inside layer `alan`"
+ },
+ {
+  "rule": "layer.lateral",
+  "item": "qp-cli -> qp-wasm",
+  "value": 1,
+  "limit": 0,
+  "message": "qp-cli -> qp-wasm: sideways dependency inside layer `kabuklar`"
+ },
+ {
+  "rule": "layer.lateral",
+  "item": "qp-matriks -> qp-source",
+  "value": 1,
+  "limit": 0,
+  "message": "qp-matriks -> qp-source: sideways dependency inside layer `uyarlayıcılar`"
+ },
+ {
+  "rule": "layer.up",
+  "item": "qp-render -> qp-source",
+  "value": 1,
+  "limit": 0,
+  "message": "qp-render (çekirdek) depends on qp-source (uyarlayıcılar): upward dependency"
+ },
+ {
+  "rule": "layer.up",
+  "item": "qp-session -> qp-source",
+  "value": 1,
+  "limit": 0,
+  "message": "qp-session (oturum) depends on qp-source (uyarlayıcılar): upward dependency"
+ },
+ {
+  "rule": "file.hard",
+  "item": "crates/qp-capsule/src/comment.rs",
+  "value": 1040,
+  "limit": 800,
+  "message": "crates/qp-capsule/src/comment.rs: 1040 lines > hard limit 800"
+ },
+ {
+  "rule": "fn.lines",
+  "item": "crates/qp-capsule/src/comment.rs::validate@802",
+  "value": 239,
+  "limit": 80,
+  "message": "crates/qp-capsule/src/comment.rs:802 fn validate: 239 lines > 80"
+ },
+ {
+  "rule": "file.hard",
+  "item": "crates/qp-capsule/src/engine.rs",
+  "value": 1056,
+  "limit": 800,
+  "message": "crates/qp-capsule/src/engine.rs: 1056 lines > hard limit 800"
+ },
+ {
+  "rule": "fn.lines",
+  "item": "crates/qp-capsule/src/engine.rs::run_bar@753",
+  "value": 240,
+  "limit": 80,
+  "message": "crates/qp-capsule/src/engine.rs:753 fn run_bar: 240 lines > 80"
+ },
+ {
+  "rule": "file.soft",
+  "item": "crates/qp-capsule/src/outcome.rs",
+  "value": 748,
+  "limit": 600,
+  "message": "crates/qp-capsule/src/outcome.rs: 748 lines > budget 600"
+ },
+ {
+  "rule": "file.hard",
+  "item": "crates/qp-capsule/src/realize/elapsed.rs",
+  "value": 816,
+  "limit": 800,
+  "message": "crates/qp-capsule/src/realize/elapsed.rs: 816 lines > hard limit 800"
+ },
+ {
+  "rule": "file.soft",
+  "item": "crates/qp-capsule/src/realize/en.rs",
+  "value": 639,
+  "limit": 600,
+  "message": "crates/qp-capsule/src/realize/en.rs: 639 lines > budget 600"
+ },
+ {
+  "rule": "fn.lines",
+  "item": "crates/qp-capsule/src/realize/en.rs::event_clause@211",
+  "value": 92,
+  "limit": 80,
+  "message": "crates/qp-capsule/src/realize/en.rs:211 fn event_clause: 92 lines > 80"
+ },
+ {
+  "rule": "fn.lines",
+  "item": "crates/qp-capsule/src/realize/en.rs::remark@481",
+  "value": 84,
+  "limit": 80,
+  "message": "crates/qp-capsule/src/realize/en.rs:481 fn remark: 84 lines > 80"
+ },
+ {
+  "rule": "fn.lines",
+  "item": "crates/qp-capsule/src/realize/mod.rs::new@334",
+  "value": 93,
+  "limit": 80,
+  "message": "crates/qp-capsule/src/realize/mod.rs:334 fn new: 93 lines > 80"
+ },
+ {
+  "rule": "file.soft",
+  "item": "crates/qp-capsule/src/realize/tr.rs",
+  "value": 621,
+  "limit": 600,
+  "message": "crates/qp-capsule/src/realize/tr.rs: 621 lines > budget 600"
+ },
+ {
+  "rule": "fn.lines",
+  "item": "crates/qp-capsule/src/realize/tr.rs::event_clause@194",
+  "value": 121,
+  "limit": 80,
+  "message": "crates/qp-capsule/src/realize/tr.rs:194 fn event_clause: 121 lines > 80"
+ },
+ {
+  "rule": "fn.lines",
+  "item": "crates/qp-capsule/src/realize/tr.rs::remark@464",
+  "value": 85,
+  "limit": 80,
+  "message": "crates/qp-capsule/src/realize/tr.rs:464 fn remark: 85 lines > 80"
+ },
+ {
+  "rule": "file.hard",
+  "item": "crates/qp-capsule/src/voice/marla.rs",
+  "value": 2001,
+  "limit": 800,
+  "message": "crates/qp-capsule/src/voice/marla.rs: 2001 lines > hard limit 800"
+ },
+ {
+  "rule": "fn.lines",
+  "item": "crates/qp-capsule/src/voice/marla.rs::core@713",
+  "value": 260,
+  "limit": 80,
+  "message": "crates/qp-capsule/src/voice/marla.rs:713 fn core: 260 lines > 80"
+ },
+ {
+  "rule": "fn.lines",
+  "item": "crates/qp-capsule/src/voice/marla.rs::why_numbers@1121",
+  "value": 190,
+  "limit": 80,
+  "message": "crates/qp-capsule/src/voice/marla.rs:1121 fn why_numbers: 190 lines > 80"
+ },
+ {
+  "rule": "fn.lines",
+  "item": "crates/qp-capsule/src/voice/marla.rs::latest_clause@1522",
+  "value": 175,
+  "limit": 80,
+  "message": "crates/qp-capsule/src/voice/marla.rs:1522 fn latest_clause: 175 lines > 80"
+ },
+ {
+  "rule": "fn.lines",
+  "item": "crates/qp-capsule/src/voice/marla_glossary.rs::tr@77",
+  "value": 90,
+  "limit": 80,
+  "message": "crates/qp-capsule/src/voice/marla_glossary.rs:77 fn tr: 90 lines > 80"
+ },
+ {
+  "rule": "fn.lines",
+  "item": "crates/qp-capsule/src/voice/marla_glossary.rs::en@168",
+  "value": 95,
+  "limit": 80,
+  "message": "crates/qp-capsule/src/voice/marla_glossary.rs:168 fn en: 95 lines > 80"
+ },
+ {
+  "rule": "file.hard",
+  "item": "crates/qp-capsule/src/voice/selvi.rs",
+  "value": 2160,
+  "limit": 800,
+  "message": "crates/qp-capsule/src/voice/selvi.rs: 2160 lines > hard limit 800"
+ },
+ {
+  "rule": "fn.lines",
+  "item": "crates/qp-capsule/src/voice/selvi.rs::d1_compact@1108",
+  "value": 114,
+  "limit": 80,
+  "message": "crates/qp-capsule/src/voice/selvi.rs:1108 fn d1_compact: 114 lines > 80"
+ },
+ {
+  "rule": "fn.lines",
+  "item": "crates/qp-capsule/src/voice/selvi.rs::clause@1469",
+  "value": 196,
+  "limit": 80,
+  "message": "crates/qp-capsule/src/voice/selvi.rs:1469 fn clause: 196 lines > 80"
+ },
+ {
+  "rule": "fn.lines",
+  "item": "crates/qp-capsule/src/voice/selvi.rs::d_holds@1732",
+  "value": 84,
+  "limit": 80,
+  "message": "crates/qp-capsule/src/voice/selvi.rs:1732 fn d_holds: 84 lines > 80"
+ },
+ {
+  "rule": "fn.lines",
+  "item": "crates/qp-capsule/src/voice/selvi.rs::ledger@1968",
+  "value": 142,
+  "limit": 80,
+  "message": "crates/qp-capsule/src/voice/selvi.rs:1968 fn ledger: 142 lines > 80"
+ },
+ {
+  "rule": "fn.lines",
+  "item": "crates/qp-capsule/src/voice/selvi_glossary.rs::entry@91",
+  "value": 104,
+  "limit": 80,
+  "message": "crates/qp-capsule/src/voice/selvi_glossary.rs:91 fn entry: 104 lines > 80"
+ },
+ {
+  "rule": "test.file",
+  "item": "crates/qp-capsule/tests/comment.rs",
+  "value": 981,
+  "limit": 800,
+  "message": "crates/qp-capsule/tests/comment.rs: test file 981 lines > 800"
+ },
+ {
+  "rule": "file.hard",
+  "item": "crates/qp-cli/src/demo.rs",
+  "value": 1718,
+  "limit": 800,
+  "message": "crates/qp-cli/src/demo.rs: 1718 lines > hard limit 800"
+ },
+ {
+  "rule": "fn.lines",
+  "item": "crates/qp-cli/src/demo.rs::live_setup@361",
+  "value": 179,
+  "limit": 80,
+  "message": "crates/qp-cli/src/demo.rs:361 fn live_setup: 179 lines > 80"
+ },
+ {
+  "rule": "fn.lines",
+  "item": "crates/qp-cli/src/demo.rs::handle@867",
+  "value": 128,
+  "limit": 80,
+  "message": "crates/qp-cli/src/demo.rs:867 fn handle: 128 lines > 80"
+ },
+ {
+  "rule": "fn.lines",
+  "item": "crates/qp-cli/src/demo.rs::connection@1098",
+  "value": 166,
+  "limit": 80,
+  "message": "crates/qp-cli/src/demo.rs:1098 fn connection: 166 lines > 80"
+ },
+ {
+  "rule": "fn.lines",
+  "item": "crates/qp-cli/src/demo.rs::demo@1418",
+  "value": 277,
+  "limit": 80,
+  "message": "crates/qp-cli/src/demo.rs:1418 fn demo: 277 lines > 80"
+ },
+ {
+  "rule": "file.hard",
+  "item": "crates/qp-cli/src/live.rs",
+  "value": 2472,
+  "limit": 800,
+  "message": "crates/qp-cli/src/live.rs: 2472 lines > hard limit 800"
+ },
+ {
+  "rule": "fn.lines",
+  "item": "crates/qp-cli/src/live.rs::record@572",
+  "value": 131,
+  "limit": 80,
+  "message": "crates/qp-cli/src/live.rs:572 fn record: 131 lines > 80"
+ },
+ {
+  "rule": "fn.lines",
+  "item": "crates/qp-cli/src/live.rs::inspect_trades@844",
+  "value": 87,
+  "limit": 80,
+  "message": "crates/qp-cli/src/live.rs:844 fn inspect_trades: 87 lines > 80"
+ },
+ {
+  "rule": "fn.lines",
+  "item": "crates/qp-cli/src/live.rs::inspect@994",
+  "value": 141,
+  "limit": 80,
+  "message": "crates/qp-cli/src/live.rs:994 fn inspect: 141 lines > 80"
+ },
+ {
+  "rule": "fn.lines",
+  "item": "crates/qp-cli/src/live.rs::trades@1349",
+  "value": 87,
+  "limit": 80,
+  "message": "crates/qp-cli/src/live.rs:1349 fn trades: 87 lines > 80"
+ },
+ {
+  "rule": "fn.lines",
+  "item": "crates/qp-cli/src/live.rs::load_rest_with@1731",
+  "value": 121,
+  "limit": 80,
+  "message": "crates/qp-cli/src/live.rs:1731 fn load_rest_with: 121 lines > 80"
+ },
+ {
+  "rule": "fn.lines",
+  "item": "crates/qp-cli/src/live.rs::compare@1959",
+  "value": 165,
+  "limit": 80,
+  "message": "crates/qp-cli/src/live.rs:1959 fn compare: 165 lines > 80"
+ },
+ {
+  "rule": "file.hard",
+  "item": "crates/qp-cli/src/live_trades.rs",
+  "value": 1631,
+  "limit": 800,
+  "message": "crates/qp-cli/src/live_trades.rs: 1631 lines > hard limit 800"
+ },
+ {
+  "rule": "fn.lines",
+  "item": "crates/qp-cli/src/live_trades.rs::compare_trades@619",
+  "value": 294,
+  "limit": 80,
+  "message": "crates/qp-cli/src/live_trades.rs:619 fn compare_trades: 294 lines > 80"
+ },
+ {
+  "rule": "fn.lines",
+  "item": "crates/qp-cli/src/live_trades.rs::source_table@926",
+  "value": 126,
+  "limit": 80,
+  "message": "crates/qp-cli/src/live_trades.rs:926 fn source_table: 126 lines > 80"
+ },
+ {
+  "rule": "fn.lines",
+  "item": "crates/qp-cli/src/live_trades.rs::export_trade_bars@1119",
+  "value": 169,
+  "limit": 80,
+  "message": "crates/qp-cli/src/live_trades.rs:1119 fn export_trade_bars: 169 lines > 80"
+ },
+ {
+  "rule": "fn.lines",
+  "item": "crates/qp-cli/src/live_trades.rs::price_steps@1290",
+  "value": 91,
+  "limit": 80,
+  "message": "crates/qp-cli/src/live_trades.rs:1290 fn price_steps: 91 lines > 80"
+ },
+ {
+  "rule": "file.hard",
+  "item": "crates/qp-cli/src/livehost.rs",
+  "value": 3067,
+  "limit": 800,
+  "message": "crates/qp-cli/src/livehost.rs: 3067 lines > hard limit 800"
+ },
+ {
+  "rule": "fn.lines",
+  "item": "crates/qp-cli/src/livehost.rs::new@815",
+  "value": 84,
+  "limit": 80,
+  "message": "crates/qp-cli/src/livehost.rs:815 fn new: 84 lines > 80"
+ },
+ {
+  "rule": "fn.lines",
+  "item": "crates/qp-cli/src/livehost.rs::apply@1102",
+  "value": 118,
+  "limit": 80,
+  "message": "crates/qp-cli/src/livehost.rs:1102 fn apply: 118 lines > 80"
+ },
+ {
+  "rule": "file.hard",
+  "item": "crates/qp-cli/src/main.rs",
+  "value": 1387,
+  "limit": 800,
+  "message": "crates/qp-cli/src/main.rs: 1387 lines > hard limit 800"
+ },
+ {
+  "rule": "fn.lines",
+  "item": "crates/qp-cli/src/main.rs::replay_cmd@476",
+  "value": 199,
+  "limit": 80,
+  "message": "crates/qp-cli/src/main.rs:476 fn replay_cmd: 199 lines > 80"
+ },
+ {
+  "rule": "fn.lines",
+  "item": "crates/qp-cli/src/main.rs::serve_replay@1220",
+  "value": 85,
+  "limit": 80,
+  "message": "crates/qp-cli/src/main.rs:1220 fn serve_replay: 85 lines > 80"
+ },
+ {
+  "rule": "file.hard",
+  "item": "crates/qp-cli/src/mcp_serve.rs",
+  "value": 1229,
+  "limit": 800,
+  "message": "crates/qp-cli/src/mcp_serve.rs: 1229 lines > hard limit 800"
+ },
+ {
+  "rule": "fn.lines",
+  "item": "crates/qp-cli/src/mcp_serve.rs::serve@311",
+  "value": 83,
+  "limit": 80,
+  "message": "crates/qp-cli/src/mcp_serve.rs:311 fn serve: 83 lines > 80"
+ },
+ {
+  "rule": "fn.lines",
+  "item": "crates/qp-cli/src/mcp_serve.rs::handle@716",
+  "value": 100,
+  "limit": 80,
+  "message": "crates/qp-cli/src/mcp_serve.rs:716 fn handle: 100 lines > 80"
+ },
+ {
+  "rule": "fn.lines",
+  "item": "crates/qp-cli/src/mcp_serve.rs::post@1087",
+  "value": 117,
+  "limit": 80,
+  "message": "crates/qp-cli/src/mcp_serve.rs:1087 fn post: 117 lines > 80"
+ },
+ {
+  "rule": "file.hard",
+  "item": "crates/qp-cli/src/sim.rs",
+  "value": 1603,
+  "limit": 800,
+  "message": "crates/qp-cli/src/sim.rs: 1603 lines > hard limit 800"
+ },
+ {
+  "rule": "file.hard",
+  "item": "crates/qp-cli/src/sim/tests.rs",
+  "value": 1018,
+  "limit": 800,
+  "message": "crates/qp-cli/src/sim/tests.rs: 1018 lines > hard limit 800"
+ },
+ {
+  "rule": "fn.lines",
+  "item": "crates/qp-compute/src/address.rs::expr@358",
+  "value": 168,
+  "limit": 80,
+  "message": "crates/qp-compute/src/address.rs:358 fn expr: 168 lines > 80"
+ },
+ {
+  "rule": "fn.lines",
+  "item": "crates/qp-compute/src/lanes.rs::bollinger@207",
+  "value": 87,
+  "limit": 80,
+  "message": "crates/qp-compute/src/lanes.rs:207 fn bollinger: 87 lines > 80"
+ },
+ {
+  "rule": "file.soft",
+  "item": "crates/qp-compute/src/sweep/share.rs",
+  "value": 601,
+  "limit": 600,
+  "message": "crates/qp-compute/src/sweep/share.rs: 601 lines > budget 600"
+ },
+ {
+  "rule": "fn.lines",
+  "item": "crates/qp-facts/src/squeeze_bandwidth.rs::eval@105",
+  "value": 83,
+  "limit": 80,
+  "message": "crates/qp-facts/src/squeeze_bandwidth.rs:105 fn eval: 83 lines > 80"
+ },
+ {
+  "rule": "file.hard",
+  "item": "crates/qp-grammar/src/advances.rs",
+  "value": 878,
+  "limit": 800,
+  "message": "crates/qp-grammar/src/advances.rs: 878 lines > hard limit 800"
+ },
+ {
+  "rule": "file.hard",
+  "item": "crates/qp-grammar/src/compile.rs",
+  "value": 1343,
+  "limit": 800,
+  "message": "crates/qp-grammar/src/compile.rs: 1343 lines > hard limit 800"
+ },
+ {
+  "rule": "fn.lines",
+  "item": "crates/qp-grammar/src/compile.rs::resolve_emphasis@485",
+  "value": 93,
+  "limit": 80,
+  "message": "crates/qp-grammar/src/compile.rs:485 fn resolve_emphasis: 93 lines > 80"
+ },
+ {
+  "rule": "fn.lines",
+  "item": "crates/qp-grammar/src/compile.rs::compile@586",
+  "value": 654,
+  "limit": 80,
+  "message": "crates/qp-grammar/src/compile.rs:586 fn compile: 654 lines > 80"
+ },
+ {
+  "rule": "file.hard",
+  "item": "crates/qp-grammar/src/depth.rs",
+  "value": 1012,
+  "limit": 800,
+  "message": "crates/qp-grammar/src/depth.rs: 1012 lines > hard limit 800"
+ },
+ {
+  "rule": "fn.lines",
+  "item": "crates/qp-grammar/src/depth.rs::chart_view_r3@692",
+  "value": 91,
+  "limit": 80,
+  "message": "crates/qp-grammar/src/depth.rs:692 fn chart_view_r3: 91 lines > 80"
+ },
+ {
+  "rule": "file.hard",
+  "item": "crates/qp-grammar/src/draw.rs",
+  "value": 856,
+  "limit": 800,
+  "message": "crates/qp-grammar/src/draw.rs: 856 lines > hard limit 800"
+ },
+ {
+  "rule": "fn.lines",
+  "item": "crates/qp-grammar/src/draw.rs::lines@215",
+  "value": 129,
+  "limit": 80,
+  "message": "crates/qp-grammar/src/draw.rs:215 fn lines: 129 lines > 80"
+ },
+ {
+  "rule": "fn.lines",
+  "item": "crates/qp-grammar/src/draw.rs::areas@345",
+  "value": 96,
+  "limit": 80,
+  "message": "crates/qp-grammar/src/draw.rs:345 fn areas: 96 lines > 80"
+ },
+ {
+  "rule": "fn.lines",
+  "item": "crates/qp-grammar/src/draw.rs::anchored_text@638",
+  "value": 88,
+  "limit": 80,
+  "message": "crates/qp-grammar/src/draw.rs:638 fn anchored_text: 88 lines > 80"
+ },
+ {
+  "rule": "fn.lines",
+  "item": "crates/qp-grammar/src/faces/fotolay.rs::view@127",
+  "value": 95,
+  "limit": 80,
+  "message": "crates/qp-grammar/src/faces/fotolay.rs:127 fn view: 95 lines > 80"
+ },
+ {
+  "rule": "fn.lines",
+  "item": "crates/qp-grammar/src/faces/zemre.rs::view@149",
+  "value": 106,
+  "limit": 80,
+  "message": "crates/qp-grammar/src/faces/zemre.rs:149 fn view: 106 lines > 80"
+ },
+ {
+  "rule": "file.soft",
+  "item": "crates/qp-grammar/src/glyph/rozet.rs",
+  "value": 604,
+  "limit": 600,
+  "message": "crates/qp-grammar/src/glyph/rozet.rs: 604 lines > budget 600"
+ },
+ {
+  "rule": "fn.lines",
+  "item": "crates/qp-grammar/src/glyph/rozet.rs::draw@283",
+  "value": 198,
+  "limit": 80,
+  "message": "crates/qp-grammar/src/glyph/rozet.rs:283 fn draw: 198 lines > 80"
+ },
+ {
+  "rule": "file.hard",
+  "item": "crates/qp-grammar/src/glyph/siluet.rs",
+  "value": 821,
+  "limit": 800,
+  "message": "crates/qp-grammar/src/glyph/siluet.rs: 821 lines > hard limit 800"
+ },
+ {
+  "rule": "fn.lines",
+  "item": "crates/qp-grammar/src/glyph/siluet.rs::draw@404",
+  "value": 251,
+  "limit": 80,
+  "message": "crates/qp-grammar/src/glyph/siluet.rs:404 fn draw: 251 lines > 80"
+ },
+ {
+  "rule": "file.hard",
+  "item": "crates/qp-grammar/src/layer.rs",
+  "value": 1761,
+  "limit": 800,
+  "message": "crates/qp-grammar/src/layer.rs: 1761 lines > hard limit 800"
+ },
+ {
+  "rule": "fn.lines",
+  "item": "crates/qp-grammar/src/layer.rs::resolve_constants@238",
+  "value": 88,
+  "limit": 80,
+  "message": "crates/qp-grammar/src/layer.rs:238 fn resolve_constants: 88 lines > 80"
+ },
+ {
+  "rule": "fn.lines",
+  "item": "crates/qp-grammar/src/layer.rs::prepare@643",
+  "value": 883,
+  "limit": 80,
+  "message": "crates/qp-grammar/src/layer.rs:643 fn prepare: 883 lines > 80"
+ },
+ {
+  "rule": "fn.lines",
+  "item": "crates/qp-grammar/src/layer.rs::series_rows@1572",
+  "value": 91,
+  "limit": 80,
+  "message": "crates/qp-grammar/src/layer.rs:1572 fn series_rows: 91 lines > 80"
+ },
+ {
+  "rule": "fn.lines",
+  "item": "crates/qp-grammar/src/layer.rs::pair_rows@1665",
+  "value": 97,
+  "limit": 80,
+  "message": "crates/qp-grammar/src/layer.rs:1665 fn pair_rows: 97 lines > 80"
+ },
+ {
+  "rule": "file.hard",
+  "item": "crates/qp-grammar/src/look.rs",
+  "value": 1942,
+  "limit": 800,
+  "message": "crates/qp-grammar/src/look.rs: 1942 lines > hard limit 800"
+ },
+ {
+  "rule": "file.hard",
+  "item": "crates/qp-grammar/src/motion.rs",
+  "value": 816,
+  "limit": 800,
+  "message": "crates/qp-grammar/src/motion.rs: 816 lines > hard limit 800"
+ },
+ {
+  "rule": "fn.lines",
+  "item": "crates/qp-grammar/src/motion.rs::change_frame@452",
+  "value": 136,
+  "limit": 80,
+  "message": "crates/qp-grammar/src/motion.rs:452 fn change_frame: 136 lines > 80"
+ },
+ {
+  "rule": "file.hard",
+  "item": "crates/qp-grammar/src/open/nobra.rs",
+  "value": 875,
+  "limit": 800,
+  "message": "crates/qp-grammar/src/open/nobra.rs: 875 lines > hard limit 800"
+ },
+ {
+  "rule": "fn.lines",
+  "item": "crates/qp-grammar/src/open/nobra.rs::view@582",
+  "value": 217,
+  "limit": 80,
+  "message": "crates/qp-grammar/src/open/nobra.rs:582 fn view: 217 lines > 80"
+ },
+ {
+  "rule": "file.hard",
+  "item": "crates/qp-grammar/src/open/tesir.rs",
+  "value": 819,
+  "limit": 800,
+  "message": "crates/qp-grammar/src/open/tesir.rs: 819 lines > hard limit 800"
+ },
+ {
+  "rule": "fn.lines",
+  "item": "crates/qp-grammar/src/open/tesir.rs::view@590",
+  "value": 230,
+  "limit": 80,
+  "message": "crates/qp-grammar/src/open/tesir.rs:590 fn view: 230 lines > 80"
+ },
+ {
+  "rule": "file.hard",
+  "item": "crates/qp-grammar/src/stories/korda.rs",
+  "value": 1089,
+  "limit": 800,
+  "message": "crates/qp-grammar/src/stories/korda.rs: 1089 lines > hard limit 800"
+ },
+ {
+  "rule": "fn.lines",
+  "item": "crates/qp-grammar/src/stories/korda.rs::scene@354",
+  "value": 177,
+  "limit": 80,
+  "message": "crates/qp-grammar/src/stories/korda.rs:354 fn scene: 177 lines > 80"
+ },
+ {
+  "rule": "fn.lines",
+  "item": "crates/qp-grammar/src/stories/korda.rs::lane@748",
+  "value": 159,
+  "limit": 80,
+  "message": "crates/qp-grammar/src/stories/korda.rs:748 fn lane: 159 lines > 80"
+ },
+ {
+  "rule": "fn.lines",
+  "item": "crates/qp-grammar/src/stories/korda.rs::histogram@913",
+  "value": 121,
+  "limit": 80,
+  "message": "crates/qp-grammar/src/stories/korda.rs:913 fn histogram: 121 lines > 80"
+ },
+ {
+  "rule": "file.hard",
+  "item": "crates/qp-grammar/src/stories/pavka.rs",
+  "value": 992,
+  "limit": 800,
+  "message": "crates/qp-grammar/src/stories/pavka.rs: 992 lines > hard limit 800"
+ },
+ {
+  "rule": "fn.lines",
+  "item": "crates/qp-grammar/src/stories/pavka.rs::extend@401",
+  "value": 592,
+  "limit": 80,
+  "message": "crates/qp-grammar/src/stories/pavka.rs:401 fn extend: 592 lines > 80"
+ },
+ {
+  "rule": "fn.lines",
+  "item": "crates/qp-grammar/src/terms.rs::mark@133",
+  "value": 116,
+  "limit": 80,
+  "message": "crates/qp-grammar/src/terms.rs:133 fn mark: 116 lines > 80"
+ },
+ {
+  "rule": "file.hard",
+  "item": "crates/qp-grammar/src/transitions/nabiz.rs",
+  "value": 920,
+  "limit": 800,
+  "message": "crates/qp-grammar/src/transitions/nabiz.rs: 920 lines > hard limit 800"
+ },
+ {
+  "rule": "fn.lines",
+  "item": "crates/qp-grammar/src/transitions/nabiz.rs::overlay@534",
+  "value": 120,
+  "limit": 80,
+  "message": "crates/qp-grammar/src/transitions/nabiz.rs:534 fn overlay: 120 lines > 80"
+ },
+ {
+  "rule": "fn.lines",
+  "item": "crates/qp-grammar/src/transitions/zumlak.rs::frame@269",
+  "value": 100,
+  "limit": 80,
+  "message": "crates/qp-grammar/src/transitions/zumlak.rs:269 fn frame: 100 lines > 80"
+ },
+ {
+  "rule": "test.file",
+  "item": "crates/qp-grammar/tests/capsule_depth.rs",
+  "value": 837,
+  "limit": 800,
+  "message": "crates/qp-grammar/tests/capsule_depth.rs: test file 837 lines > 800"
+ },
+ {
+  "rule": "test.file",
+  "item": "crates/qp-grammar/tests/pavka_ref/mod.rs",
+  "value": 827,
+  "limit": 800,
+  "message": "crates/qp-grammar/tests/pavka_ref/mod.rs: test file 827 lines > 800"
+ },
+ {
+  "rule": "file.soft",
+  "item": "crates/qp-live/src/config.rs",
+  "value": 659,
+  "limit": 600,
+  "message": "crates/qp-live/src/config.rs: 659 lines > budget 600"
+ },
+ {
+  "rule": "fn.lines",
+  "item": "crates/qp-live/src/config.rs::from_lookup@293",
+  "value": 103,
+  "limit": 80,
+  "message": "crates/qp-live/src/config.rs:293 fn from_lookup: 103 lines > 80"
+ },
+ {
+  "rule": "file.hard",
+  "item": "crates/qp-live/src/conn.rs",
+  "value": 1128,
+  "limit": 800,
+  "message": "crates/qp-live/src/conn.rs: 1128 lines > hard limit 800"
+ },
+ {
+  "rule": "fn.lines",
+  "item": "crates/qp-live/src/conn.rs::session@714",
+  "value": 272,
+  "limit": 80,
+  "message": "crates/qp-live/src/conn.rs:714 fn session: 272 lines > 80"
+ },
+ {
+  "rule": "file.hard",
+  "item": "crates/qp-live/src/mock.rs",
+  "value": 912,
+  "limit": 800,
+  "message": "crates/qp-live/src/mock.rs: 912 lines > hard limit 800"
+ },
+ {
+  "rule": "fn.lines",
+  "item": "crates/qp-live/src/mock.rs::handle_token_request@208",
+  "value": 88,
+  "limit": 80,
+  "message": "crates/qp-live/src/mock.rs:208 fn handle_token_request: 88 lines > 80"
+ },
+ {
+  "rule": "fn.lines",
+  "item": "crates/qp-live/src/mock.rs::serve_connection@619",
+  "value": 210,
+  "limit": 80,
+  "message": "crates/qp-live/src/mock.rs:619 fn serve_connection: 210 lines > 80"
+ },
+ {
+  "rule": "fn.lines",
+  "item": "crates/qp-live/src/mqtt.rs::decode_body@263",
+  "value": 87,
+  "limit": 80,
+  "message": "crates/qp-live/src/mqtt.rs:263 fn decode_body: 87 lines > 80"
+ },
+ {
+  "rule": "file.hard",
+  "item": "crates/qp-matriks/src/feed.rs",
+  "value": 1395,
+  "limit": 800,
+  "message": "crates/qp-matriks/src/feed.rs: 1395 lines > hard limit 800"
+ },
+ {
+  "rule": "fn.lines",
+  "item": "crates/qp-matriks/src/feed.rs::on_symbol@1071",
+  "value": 106,
+  "limit": 80,
+  "message": "crates/qp-matriks/src/feed.rs:1071 fn on_symbol: 106 lines > 80"
+ },
+ {
+  "rule": "fn.lines",
+  "item": "crates/qp-matriks/src/feed.rs::on_trade@1208",
+  "value": 84,
+  "limit": 80,
+  "message": "crates/qp-matriks/src/feed.rs:1208 fn on_trade: 84 lines > 80"
+ },
+ {
+  "rule": "file.soft",
+  "item": "crates/qp-matriks/src/trade.rs",
+  "value": 725,
+  "limit": 600,
+  "message": "crates/qp-matriks/src/trade.rs: 725 lines > budget 600"
+ },
+ {
+  "rule": "fn.lines",
+  "item": "crates/qp-mcp/src/common.rs::render@134",
+  "value": 89,
+  "limit": 80,
+  "message": "crates/qp-mcp/src/common.rs:134 fn render: 89 lines > 80"
+ },
+ {
+  "rule": "file.hard",
+  "item": "crates/qp-mcp/src/lib.rs",
+  "value": 1056,
+  "limit": 800,
+  "message": "crates/qp-mcp/src/lib.rs: 1056 lines > hard limit 800"
+ },
+ {
+  "rule": "fn.lines",
+  "item": "crates/qp-mcp/src/lib.rs::handle_message@647",
+  "value": 84,
+  "limit": 80,
+  "message": "crates/qp-mcp/src/lib.rs:647 fn handle_message: 84 lines > 80"
+ },
+ {
+  "rule": "file.hard",
+  "item": "crates/qp-mcp/src/surfaces/mixed.rs",
+  "value": 1204,
+  "limit": 800,
+  "message": "crates/qp-mcp/src/surfaces/mixed.rs: 1204 lines > hard limit 800"
+ },
+ {
+  "rule": "fn.lines",
+  "item": "crates/qp-mcp/src/surfaces/mixed.rs::capsule_card@549",
+  "value": 90,
+  "limit": 80,
+  "message": "crates/qp-mcp/src/surfaces/mixed.rs:549 fn capsule_card: 90 lines > 80"
+ },
+ {
+  "rule": "fn.lines",
+  "item": "crates/qp-mcp/src/surfaces/mixed.rs::overview@719",
+  "value": 122,
+  "limit": 80,
+  "message": "crates/qp-mcp/src/surfaces/mixed.rs:719 fn overview: 122 lines > 80"
+ },
+ {
+  "rule": "fn.lines",
+  "item": "crates/qp-mcp/src/surfaces/mixed.rs::watch@930",
+  "value": 104,
+  "limit": 80,
+  "message": "crates/qp-mcp/src/surfaces/mixed.rs:930 fn watch: 104 lines > 80"
+ },
+ {
+  "rule": "file.hard",
+  "item": "crates/qp-mcp/src/surfaces/query.rs",
+  "value": 2550,
+  "limit": 800,
+  "message": "crates/qp-mcp/src/surfaces/query.rs: 2550 lines > hard limit 800"
+ },
+ {
+  "rule": "fn.lines",
+  "item": "crates/qp-mcp/src/surfaces/query.rs::detail_parts@780",
+  "value": 101,
+  "limit": 80,
+  "message": "crates/qp-mcp/src/surfaces/query.rs:780 fn detail_parts: 101 lines > 80"
+ },
+ {
+  "rule": "fn.lines",
+  "item": "crates/qp-mcp/src/surfaces/query.rs::find_capsules@973",
+  "value": 102,
+  "limit": 80,
+  "message": "crates/qp-mcp/src/surfaces/query.rs:973 fn find_capsules: 102 lines > 80"
+ },
+ {
+  "rule": "fn.lines",
+  "item": "crates/qp-mcp/src/surfaces/query.rs::find_stories@1076",
+  "value": 127,
+  "limit": 80,
+  "message": "crates/qp-mcp/src/surfaces/query.rs:1076 fn find_stories: 127 lines > 80"
+ },
+ {
+  "rule": "fn.lines",
+  "item": "crates/qp-mcp/src/surfaces/query.rs::find_instrument@1322",
+  "value": 113,
+  "limit": 80,
+  "message": "crates/qp-mcp/src/surfaces/query.rs:1322 fn find_instrument: 113 lines > 80"
+ },
+ {
+  "rule": "fn.lines",
+  "item": "crates/qp-mcp/src/surfaces/query.rs::find_changes@1647",
+  "value": 81,
+  "limit": 80,
+  "message": "crates/qp-mcp/src/surfaces/query.rs:1647 fn find_changes: 81 lines > 80"
+ },
+ {
+  "rule": "fn.lines",
+  "item": "crates/qp-mcp/src/surfaces/query.rs::shape@1943",
+  "value": 117,
+  "limit": 80,
+  "message": "crates/qp-mcp/src/surfaces/query.rs:1943 fn shape: 117 lines > 80"
+ },
+ {
+  "rule": "fn.lines",
+  "item": "crates/qp-mcp/src/surfaces/query.rs::ask@2072",
+  "value": 125,
+  "limit": 80,
+  "message": "crates/qp-mcp/src/surfaces/query.rs:2072 fn ask: 125 lines > 80"
+ },
+ {
+  "rule": "fn.lines",
+  "item": "crates/qp-mcp/src/surfaces/query.rs::act@2207",
+  "value": 185,
+  "limit": 80,
+  "message": "crates/qp-mcp/src/surfaces/query.rs:2207 fn act: 185 lines > 80"
+ },
+ {
+  "rule": "file.hard",
+  "item": "crates/qp-mcp/src/surfaces/task.rs",
+  "value": 1662,
+  "limit": 800,
+  "message": "crates/qp-mcp/src/surfaces/task.rs: 1662 lines > hard limit 800"
+ },
+ {
+  "rule": "fn.lines",
+  "item": "crates/qp-mcp/src/surfaces/task.rs::tools@340",
+  "value": 84,
+  "limit": 80,
+  "message": "crates/qp-mcp/src/surfaces/task.rs:340 fn tools: 84 lines > 80"
+ },
+ {
+  "rule": "fn.lines",
+  "item": "crates/qp-mcp/src/surfaces/task.rs::whats_new@736",
+  "value": 131,
+  "limit": 80,
+  "message": "crates/qp-mcp/src/surfaces/task.rs:736 fn whats_new: 131 lines > 80"
+ },
+ {
+  "rule": "fn.lines",
+  "item": "crates/qp-mcp/src/surfaces/task.rs::watch@891",
+  "value": 89,
+  "limit": 80,
+  "message": "crates/qp-mcp/src/surfaces/task.rs:891 fn watch: 89 lines > 80"
+ },
+ {
+  "rule": "fn.lines",
+  "item": "crates/qp-mcp/src/surfaces/task.rs::explain@1134",
+  "value": 149,
+  "limit": 80,
+  "message": "crates/qp-mcp/src/surfaces/task.rs:1134 fn explain: 149 lines > 80"
+ },
+ {
+  "rule": "fn.lines",
+  "item": "crates/qp-mcp/src/surfaces/task.rs::instrument@1288",
+  "value": 131,
+  "limit": 80,
+  "message": "crates/qp-mcp/src/surfaces/task.rs:1288 fn instrument: 131 lines > 80"
+ },
+ {
+  "rule": "fn.lines",
+  "item": "crates/qp-mcp/src/tools.rs::generate@176",
+  "value": 96,
+  "limit": 80,
+  "message": "crates/qp-mcp/src/tools.rs:176 fn generate: 96 lines > 80"
+ },
+ {
+  "rule": "fn.lines",
+  "item": "crates/qp-render/src/retained.rs::paint@280",
+  "value": 108,
+  "limit": 80,
+  "message": "crates/qp-render/src/retained.rs:280 fn paint: 108 lines > 80"
+ },
+ {
+  "rule": "fn.lines",
+  "item": "crates/qp-render/src/spikes/vello_cpu.rs::rasterize@60",
+  "value": 89,
+  "limit": 80,
+  "message": "crates/qp-render/src/spikes/vello_cpu.rs:60 fn rasterize: 89 lines > 80"
+ },
+ {
+  "rule": "fn.lines",
+  "item": "crates/qp-render/src/spikes/vello_gpu.rs::encode@83",
+  "value": 81,
+  "limit": 80,
+  "message": "crates/qp-render/src/spikes/vello_gpu.rs:83 fn encode: 81 lines > 80"
+ },
+ {
+  "rule": "fn.lines",
+  "item": "crates/qp-render/src/spikes/vello_gpu.rs::render_async@178",
+  "value": 83,
+  "limit": 80,
+  "message": "crates/qp-render/src/spikes/vello_gpu.rs:178 fn render_async: 83 lines > 80"
+ },
+ {
+  "rule": "file.hard",
+  "item": "crates/qp-schema/src/protocol.rs",
+  "value": 4916,
+  "limit": 800,
+  "message": "crates/qp-schema/src/protocol.rs: 4916 lines > hard limit 800"
+ },
+ {
+  "rule": "file.hard",
+  "item": "crates/qp-schema/src/types.rs",
+  "value": 808,
+  "limit": 800,
+  "message": "crates/qp-schema/src/types.rs: 808 lines > hard limit 800"
+ },
+ {
+  "rule": "fn.lines",
+  "item": "crates/qp-session/src/apply.rs::apply_change@102",
+  "value": 289,
+  "limit": 80,
+  "message": "crates/qp-session/src/apply.rs:102 fn apply_change: 289 lines > 80"
+ },
+ {
+  "rule": "fn.lines",
+  "item": "crates/qp-session/src/bindq.rs::check_fact@130",
+  "value": 121,
+  "limit": 80,
+  "message": "crates/qp-session/src/bindq.rs:130 fn check_fact: 121 lines > 80"
+ },
+ {
+  "rule": "file.hard",
+  "item": "crates/qp-session/src/canon.rs",
+  "value": 1488,
+  "limit": 800,
+  "message": "crates/qp-session/src/canon.rs: 1488 lines > hard limit 800"
+ },
+ {
+  "rule": "fn.lines",
+  "item": "crates/qp-session/src/canon.rs::check_channels@603",
+  "value": 108,
+  "limit": 80,
+  "message": "crates/qp-session/src/canon.rs:603 fn check_channels: 108 lines > 80"
+ },
+ {
+  "rule": "fn.lines",
+  "item": "crates/qp-session/src/canon.rs::resolve_origins@963",
+  "value": 142,
+  "limit": 80,
+  "message": "crates/qp-session/src/canon.rs:963 fn resolve_origins: 142 lines > 80"
+ },
+ {
+  "rule": "fn.lines",
+  "item": "crates/qp-session/src/canon.rs::check_layer@1110",
+  "value": 102,
+  "limit": 80,
+  "message": "crates/qp-session/src/canon.rs:1110 fn check_layer: 102 lines > 80"
+ },
+ {
+  "rule": "fn.lines",
+  "item": "crates/qp-session/src/canon.rs::canon_view@1281",
+  "value": 176,
+  "limit": 80,
+  "message": "crates/qp-session/src/canon.rs:1281 fn canon_view: 176 lines > 80"
+ },
+ {
+  "rule": "file.hard",
+  "item": "crates/qp-session/src/capidx.rs",
+  "value": 869,
+  "limit": 800,
+  "message": "crates/qp-session/src/capidx.rs: 869 lines > hard limit 800"
+ },
+ {
+  "rule": "file.hard",
+  "item": "crates/qp-session/src/capsule.rs",
+  "value": 3425,
+  "limit": 800,
+  "message": "crates/qp-session/src/capsule.rs: 3425 lines > hard limit 800"
+ },
+ {
+  "rule": "fn.lines",
+  "item": "crates/qp-session/src/capsule.rs::run_capsules@1265",
+  "value": 150,
+  "limit": 80,
+  "message": "crates/qp-session/src/capsule.rs:1265 fn run_capsules: 150 lines > 80"
+ },
+ {
+  "rule": "fn.lines",
+  "item": "crates/qp-session/src/capsule.rs::capsule_changes@1418",
+  "value": 124,
+  "limit": 80,
+  "message": "crates/qp-session/src/capsule.rs:1418 fn capsule_changes: 124 lines > 80"
+ },
+ {
+  "rule": "fn.lines",
+  "item": "crates/qp-session/src/capsule.rs::capsules_query@1782",
+  "value": 160,
+  "limit": 80,
+  "message": "crates/qp-session/src/capsule.rs:1782 fn capsules_query: 160 lines > 80"
+ },
+ {
+  "rule": "fn.lines",
+  "item": "crates/qp-session/src/capsule.rs::capsule_query_with@1950",
+  "value": 95,
+  "limit": 80,
+  "message": "crates/qp-session/src/capsule.rs:1950 fn capsule_query_with: 95 lines > 80"
+ },
+ {
+  "rule": "fn.lines",
+  "item": "crates/qp-session/src/capsule.rs::capsule_topic_lines_in@2253",
+  "value": 150,
+  "limit": 80,
+  "message": "crates/qp-session/src/capsule.rs:2253 fn capsule_topic_lines_in: 150 lines > 80"
+ },
+ {
+  "rule": "fn.lines",
+  "item": "crates/qp-session/src/capsule.rs::project_doc@2412",
+  "value": 87,
+  "limit": 80,
+  "message": "crates/qp-session/src/capsule.rs:2412 fn project_doc: 87 lines > 80"
+ },
+ {
+  "rule": "fn.lines",
+  "item": "crates/qp-session/src/capsule.rs::project_changes@2501",
+  "value": 95,
+  "limit": 80,
+  "message": "crates/qp-session/src/capsule.rs:2501 fn project_changes: 95 lines > 80"
+ },
+ {
+  "rule": "fn.lines",
+  "item": "crates/qp-session/src/capsule.rs::as_reader@2663",
+  "value": 96,
+  "limit": 80,
+  "message": "crates/qp-session/src/capsule.rs:2663 fn as_reader: 96 lines > 80"
+ },
+ {
+  "rule": "fn.lines",
+  "item": "crates/qp-session/src/capsule.rs::capsule_dispute@3020",
+  "value": 89,
+  "limit": 80,
+  "message": "crates/qp-session/src/capsule.rs:3020 fn capsule_dispute: 89 lines > 80"
+ },
+ {
+  "rule": "fn.lines",
+  "item": "crates/qp-session/src/capsule.rs::capsule_settled@3133",
+  "value": 149,
+  "limit": 80,
+  "message": "crates/qp-session/src/capsule.rs:3133 fn capsule_settled: 149 lines > 80"
+ },
+ {
+  "rule": "file.soft",
+  "item": "crates/qp-session/src/claims.rs",
+  "value": 631,
+  "limit": 600,
+  "message": "crates/qp-session/src/claims.rs: 631 lines > budget 600"
+ },
+ {
+  "rule": "fn.lines",
+  "item": "crates/qp-session/src/claims.rs::after_bars@321",
+  "value": 102,
+  "limit": 80,
+  "message": "crates/qp-session/src/claims.rs:321 fn after_bars: 102 lines > 80"
+ },
+ {
+  "rule": "file.soft",
+  "item": "crates/qp-session/src/comments.rs",
+  "value": 671,
+  "limit": 600,
+  "message": "crates/qp-session/src/comments.rs: 671 lines > budget 600"
+ },
+ {
+  "rule": "fn.lines",
+  "item": "crates/qp-session/src/comments.rs::comment_events@478",
+  "value": 88,
+  "limit": 80,
+  "message": "crates/qp-session/src/comments.rs:478 fn comment_events: 88 lines > 80"
+ },
+ {
+  "rule": "file.soft",
+  "item": "crates/qp-session/src/conform.rs",
+  "value": 645,
+  "limit": 600,
+  "message": "crates/qp-session/src/conform.rs: 645 lines > budget 600"
+ },
+ {
+  "rule": "file.soft",
+  "item": "crates/qp-session/src/dispute.rs",
+  "value": 746,
+  "limit": 600,
+  "message": "crates/qp-session/src/dispute.rs: 746 lines > budget 600"
+ },
+ {
+  "rule": "fn.lines",
+  "item": "crates/qp-session/src/dispute.rs::dispute@376",
+  "value": 162,
+  "limit": 80,
+  "message": "crates/qp-session/src/dispute.rs:376 fn dispute: 162 lines > 80"
+ },
+ {
+  "rule": "file.hard",
+  "item": "crates/qp-session/src/expand.rs",
+  "value": 2291,
+  "limit": 800,
+  "message": "crates/qp-session/src/expand.rs: 2291 lines > hard limit 800"
+ },
+ {
+  "rule": "fn.lines",
+  "item": "crates/qp-session/src/expand.rs::expand_op@351",
+  "value": 903,
+  "limit": 80,
+  "message": "crates/qp-session/src/expand.rs:351 fn expand_op: 903 lines > 80"
+ },
+ {
+  "rule": "fn.lines",
+  "item": "crates/qp-session/src/expand.rs::check_bind@1503",
+  "value": 96,
+  "limit": 80,
+  "message": "crates/qp-session/src/expand.rs:1503 fn check_bind: 96 lines > 80"
+ },
+ {
+  "rule": "fn.lines",
+  "item": "crates/qp-session/src/expand.rs::expand_remove@1740",
+  "value": 100,
+  "limit": 80,
+  "message": "crates/qp-session/src/expand.rs:1740 fn expand_remove: 100 lines > 80"
+ },
+ {
+  "rule": "fn.lines",
+  "item": "crates/qp-session/src/expand.rs::expand_undo@1883",
+  "value": 153,
+  "limit": 80,
+  "message": "crates/qp-session/src/expand.rs:1883 fn expand_undo: 153 lines > 80"
+ },
+ {
+  "rule": "fn.lines",
+  "item": "crates/qp-session/src/expand.rs::summarize@2188",
+  "value": 94,
+  "limit": 80,
+  "message": "crates/qp-session/src/expand.rs:2188 fn summarize: 94 lines > 80"
+ },
+ {
+  "rule": "file.soft",
+  "item": "crates/qp-session/src/gops.rs",
+  "value": 722,
+  "limit": 600,
+  "message": "crates/qp-session/src/gops.rs: 722 lines > budget 600"
+ },
+ {
+  "rule": "fn.lines",
+  "item": "crates/qp-session/src/gops.rs::expand_grammar@152",
+  "value": 571,
+  "limit": 80,
+  "message": "crates/qp-session/src/gops.rs:152 fn expand_grammar: 571 lines > 80"
+ },
+ {
+  "rule": "file.hard",
+  "item": "crates/qp-session/src/interact.rs",
+  "value": 1300,
+  "limit": 800,
+  "message": "crates/qp-session/src/interact.rs: 1300 lines > hard limit 800"
+ },
+ {
+  "rule": "fn.lines",
+  "item": "crates/qp-session/src/interact.rs::interact@98",
+  "value": 186,
+  "limit": 80,
+  "message": "crates/qp-session/src/interact.rs:98 fn interact: 186 lines > 80"
+ },
+ {
+  "rule": "fn.lines",
+  "item": "crates/qp-session/src/interact.rs::set_style@354",
+  "value": 116,
+  "limit": 80,
+  "message": "crates/qp-session/src/interact.rs:354 fn set_style: 116 lines > 80"
+ },
+ {
+  "rule": "fn.lines",
+  "item": "crates/qp-session/src/interact.rs::depth_view@577",
+  "value": 108,
+  "limit": 80,
+  "message": "crates/qp-session/src/interact.rs:577 fn depth_view: 108 lines > 80"
+ },
+ {
+  "rule": "fn.lines",
+  "item": "crates/qp-session/src/interact.rs::transition@890",
+  "value": 117,
+  "limit": 80,
+  "message": "crates/qp-session/src/interact.rs:890 fn transition: 117 lines > 80"
+ },
+ {
+  "rule": "fn.lines",
+  "item": "crates/qp-session/src/interact.rs::tap_at@1010",
+  "value": 119,
+  "limit": 80,
+  "message": "crates/qp-session/src/interact.rs:1010 fn tap_at: 119 lines > 80"
+ },
+ {
+  "rule": "fn.lines",
+  "item": "crates/qp-session/src/interact.rs::move_chart@1191",
+  "value": 86,
+  "limit": 80,
+  "message": "crates/qp-session/src/interact.rs:1191 fn move_chart: 86 lines > 80"
+ },
+ {
+  "rule": "file.hard",
+  "item": "crates/qp-session/src/live.rs",
+  "value": 1036,
+  "limit": 800,
+  "message": "crates/qp-session/src/live.rs: 1036 lines > hard limit 800"
+ },
+ {
+  "rule": "fn.lines",
+  "item": "crates/qp-session/src/live.rs::bar_command@548",
+  "value": 121,
+  "limit": 80,
+  "message": "crates/qp-session/src/live.rs:548 fn bar_command: 121 lines > 80"
+ },
+ {
+  "rule": "fn.lines",
+  "item": "crates/qp-session/src/live.rs::eval_conditions_live@790",
+  "value": 104,
+  "limit": 80,
+  "message": "crates/qp-session/src/live.rs:790 fn eval_conditions_live: 104 lines > 80"
+ },
+ {
+  "rule": "fn.lines",
+  "item": "crates/qp-session/src/locate.rs::walk@145",
+  "value": 102,
+  "limit": 80,
+  "message": "crates/qp-session/src/locate.rs:145 fn walk: 102 lines > 80"
+ },
+ {
+  "rule": "fn.lines",
+  "item": "crates/qp-session/src/locate.rs::walk_branches@304",
+  "value": 95,
+  "limit": 80,
+  "message": "crates/qp-session/src/locate.rs:304 fn walk_branches: 95 lines > 80"
+ },
+ {
+  "rule": "file.soft",
+  "item": "crates/qp-session/src/plane.rs",
+  "value": 763,
+  "limit": 600,
+  "message": "crates/qp-session/src/plane.rs: 763 lines > budget 600"
+ },
+ {
+  "rule": "fn.lines",
+  "item": "crates/qp-session/src/plane.rs::apply_event@545",
+  "value": 83,
+  "limit": 80,
+  "message": "crates/qp-session/src/plane.rs:545 fn apply_event: 83 lines > 80"
+ },
+ {
+  "rule": "file.hard",
+  "item": "crates/qp-session/src/public.rs",
+  "value": 828,
+  "limit": 800,
+  "message": "crates/qp-session/src/public.rs: 828 lines > hard limit 800"
+ },
+ {
+  "rule": "fn.lines",
+  "item": "crates/qp-session/src/public.rs::translate@710",
+  "value": 119,
+  "limit": 80,
+  "message": "crates/qp-session/src/public.rs:710 fn translate: 119 lines > 80"
+ },
+ {
+  "rule": "file.hard",
+  "item": "crates/qp-session/src/query.rs",
+  "value": 1038,
+  "limit": 800,
+  "message": "crates/qp-session/src/query.rs: 1038 lines > hard limit 800"
+ },
+ {
+  "rule": "fn.lines",
+  "item": "crates/qp-session/src/query.rs::query@212",
+  "value": 372,
+  "limit": 80,
+  "message": "crates/qp-session/src/query.rs:212 fn query: 372 lines > 80"
+ },
+ {
+  "rule": "fn.lines",
+  "item": "crates/qp-session/src/query.rs::screen_info@776",
+  "value": 93,
+  "limit": 80,
+  "message": "crates/qp-session/src/query.rs:776 fn screen_info: 93 lines > 80"
+ },
+ {
+  "rule": "fn.lines",
+  "item": "crates/qp-session/src/query.rs::input@872",
+  "value": 166,
+  "limit": 80,
+  "message": "crates/qp-session/src/query.rs:872 fn input: 166 lines > 80"
+ },
+ {
+  "rule": "file.hard",
+  "item": "crates/qp-session/src/replayhost.rs",
+  "value": 1336,
+  "limit": 800,
+  "message": "crates/qp-session/src/replayhost.rs: 1336 lines > hard limit 800"
+ },
+ {
+  "rule": "fn.lines",
+  "item": "crates/qp-session/src/replayhost.rs::expand_init@165",
+  "value": 88,
+  "limit": 80,
+  "message": "crates/qp-session/src/replayhost.rs:165 fn expand_init: 88 lines > 80"
+ },
+ {
+  "rule": "fn.lines",
+  "item": "crates/qp-session/src/replayhost.rs::host_control@898",
+  "value": 93,
+  "limit": 80,
+  "message": "crates/qp-session/src/replayhost.rs:898 fn host_control: 93 lines > 80"
+ },
+ {
+  "rule": "file.hard",
+  "item": "crates/qp-session/src/replica.rs",
+  "value": 946,
+  "limit": 800,
+  "message": "crates/qp-session/src/replica.rs: 946 lines > hard limit 800"
+ },
+ {
+  "rule": "fn.lines",
+  "item": "crates/qp-session/src/replica.rs::judge@812",
+  "value": 134,
+  "limit": 80,
+  "message": "crates/qp-session/src/replica.rs:812 fn judge: 134 lines > 80"
+ },
+ {
+  "rule": "file.hard",
+  "item": "crates/qp-session/src/select.rs",
+  "value": 1919,
+  "limit": 800,
+  "message": "crates/qp-session/src/select.rs: 1919 lines > hard limit 800"
+ },
+ {
+  "rule": "fn.lines",
+  "item": "crates/qp-session/src/select.rs::op_sites@208",
+  "value": 98,
+  "limit": 80,
+  "message": "crates/qp-session/src/select.rs:208 fn op_sites: 98 lines > 80"
+ },
+ {
+  "rule": "fn.lines",
+  "item": "crates/qp-session/src/select.rs::series_rows@832",
+  "value": 91,
+  "limit": 80,
+  "message": "crates/qp-session/src/select.rs:832 fn series_rows: 91 lines > 80"
+ },
+ {
+  "rule": "fn.lines",
+  "item": "crates/qp-session/src/select.rs::layer_rows@1049",
+  "value": 97,
+  "limit": 80,
+  "message": "crates/qp-session/src/select.rs:1049 fn layer_rows: 97 lines > 80"
+ },
+ {
+  "rule": "fn.lines",
+  "item": "crates/qp-session/src/select.rs::finding_rows@1195",
+  "value": 82,
+  "limit": 80,
+  "message": "crates/qp-session/src/select.rs:1195 fn finding_rows: 82 lines > 80"
+ },
+ {
+  "rule": "fn.lines",
+  "item": "crates/qp-session/src/select.rs::resolve_kind@1466",
+  "value": 108,
+  "limit": 80,
+  "message": "crates/qp-session/src/select.rs:1466 fn resolve_kind: 108 lines > 80"
+ },
+ {
+  "rule": "file.hard",
+  "item": "crates/qp-session/src/session.rs",
+  "value": 3713,
+  "limit": 800,
+  "message": "crates/qp-session/src/session.rs: 3713 lines > hard limit 800"
+ },
+ {
+  "rule": "fn.lines",
+  "item": "crates/qp-session/src/session.rs::build_with_keys@483",
+  "value": 175,
+  "limit": 80,
+  "message": "crates/qp-session/src/session.rs:483 fn build_with_keys: 175 lines > 80"
+ },
+ {
+  "rule": "fn.lines",
+  "item": "crates/qp-session/src/session.rs::handle_raw@785",
+  "value": 94,
+  "limit": 80,
+  "message": "crates/qp-session/src/session.rs:785 fn handle_raw: 94 lines > 80"
+ },
+ {
+  "rule": "fn.lines",
+  "item": "crates/qp-session/src/session.rs::resolve_selectors@910",
+  "value": 115,
+  "limit": 80,
+  "message": "crates/qp-session/src/session.rs:910 fn resolve_selectors: 115 lines > 80"
+ },
+ {
+  "rule": "fn.lines",
+  "item": "crates/qp-session/src/session.rs::handle_resolved@1149",
+  "value": 196,
+  "limit": 80,
+  "message": "crates/qp-session/src/session.rs:1149 fn handle_resolved: 196 lines > 80"
+ },
+ {
+  "rule": "fn.lines",
+  "item": "crates/qp-session/src/session.rs::hello@1350",
+  "value": 83,
+  "limit": 80,
+  "message": "crates/qp-session/src/session.rs:1350 fn hello: 83 lines > 80"
+ },
+ {
+  "rule": "fn.lines",
+  "item": "crates/qp-session/src/session.rs::command@1439",
+  "value": 300,
+  "limit": 80,
+  "message": "crates/qp-session/src/session.rs:1439 fn command: 300 lines > 80"
+ },
+ {
+  "rule": "fn.lines",
+  "item": "crates/qp-session/src/session.rs::direct_two_worlds@1810",
+  "value": 130,
+  "limit": 80,
+  "message": "crates/qp-session/src/session.rs:1810 fn direct_two_worlds: 130 lines > 80"
+ },
+ {
+  "rule": "fn.lines",
+  "item": "crates/qp-session/src/session.rs::propose_two_worlds@1943",
+  "value": 157,
+  "limit": 80,
+  "message": "crates/qp-session/src/session.rs:1943 fn propose_two_worlds: 157 lines > 80"
+ },
+ {
+  "rule": "fn.lines",
+  "item": "crates/qp-session/src/session.rs::accept@2141",
+  "value": 105,
+  "limit": 80,
+  "message": "crates/qp-session/src/session.rs:2141 fn accept: 105 lines > 80"
+ },
+ {
+  "rule": "fn.lines",
+  "item": "crates/qp-session/src/session.rs::committed@2392",
+  "value": 86,
+  "limit": 80,
+  "message": "crates/qp-session/src/session.rs:2392 fn committed: 86 lines > 80"
+ },
+ {
+  "rule": "fn.lines",
+  "item": "crates/qp-session/src/session.rs::entry_events_in@3124",
+  "value": 151,
+  "limit": 80,
+  "message": "crates/qp-session/src/session.rs:3124 fn entry_events_in: 151 lines > 80"
+ },
+ {
+  "rule": "fn.lines",
+  "item": "crates/qp-session/src/session.rs::subscribe@3280",
+  "value": 85,
+  "limit": 80,
+  "message": "crates/qp-session/src/session.rs:3280 fn subscribe: 85 lines > 80"
+ },
+ {
+  "rule": "fn.lines",
+  "item": "crates/qp-session/src/story.rs::stories_query@341",
+  "value": 100,
+  "limit": 80,
+  "message": "crates/qp-session/src/story.rs:341 fn stories_query: 100 lines > 80"
+ },
+ {
+  "rule": "file.hard",
+  "item": "crates/qp-session/src/summary.rs",
+  "value": 817,
+  "limit": 800,
+  "message": "crates/qp-session/src/summary.rs: 817 lines > hard limit 800"
+ },
+ {
+  "rule": "fn.lines",
+  "item": "crates/qp-session/src/summary.rs::summarize_doc@682",
+  "value": 99,
+  "limit": 80,
+  "message": "crates/qp-session/src/summary.rs:682 fn summarize_doc: 99 lines > 80"
+ },
+ {
+  "rule": "file.soft",
+  "item": "crates/qp-session/src/tape.rs",
+  "value": 692,
+  "limit": 600,
+  "message": "crates/qp-session/src/tape.rs: 692 lines > budget 600"
+ },
+ {
+  "rule": "fn.lines",
+  "item": "crates/qp-session/src/tape.rs::run_with@273",
+  "value": 157,
+  "limit": 80,
+  "message": "crates/qp-session/src/tape.rs:273 fn run_with: 157 lines > 80"
+ },
+ {
+  "rule": "fn.lines",
+  "item": "crates/qp-session/src/tape.rs::run_viewer@515",
+  "value": 178,
+  "limit": 80,
+  "message": "crates/qp-session/src/tape.rs:515 fn run_viewer: 178 lines > 80"
+ },
+ {
+  "rule": "file.soft",
+  "item": "crates/qp-session/src/values.rs",
+  "value": 641,
+  "limit": 600,
+  "message": "crates/qp-session/src/values.rs: 641 lines > budget 600"
+ },
+ {
+  "rule": "file.hard",
+  "item": "crates/qp-session/src/viewer.rs",
+  "value": 1408,
+  "limit": 800,
+  "message": "crates/qp-session/src/viewer.rs: 1408 lines > hard limit 800"
+ },
+ {
+  "rule": "fn.lines",
+  "item": "crates/qp-session/src/viewer.rs::open_scene_with@324",
+  "value": 98,
+  "limit": 80,
+  "message": "crates/qp-session/src/viewer.rs:324 fn open_scene_with: 98 lines > 80"
+ },
+ {
+  "rule": "fn.lines",
+  "item": "crates/qp-session/src/viewer.rs::slice@493",
+  "value": 87,
+  "limit": 80,
+  "message": "crates/qp-session/src/viewer.rs:493 fn slice: 87 lines > 80"
+ },
+ {
+  "rule": "fn.lines",
+  "item": "crates/qp-session/src/viewer.rs::viewer_compute@1080",
+  "value": 149,
+  "limit": 80,
+  "message": "crates/qp-session/src/viewer.rs:1080 fn viewer_compute: 149 lines > 80"
+ },
+ {
+  "rule": "fn.lines",
+  "item": "crates/qp-session/src/watch.rs::expand_watch@69",
+  "value": 116,
+  "limit": 80,
+  "message": "crates/qp-session/src/watch.rs:69 fn expand_watch: 116 lines > 80"
+ },
+ {
+  "rule": "test.file",
+  "item": "crates/qp-session/tests/grammar.rs",
+  "value": 1067,
+  "limit": 800,
+  "message": "crates/qp-session/tests/grammar.rs: test file 1067 lines > 800"
+ },
+ {
+  "rule": "test.file",
+  "item": "crates/qp-session/tests/non_interference.rs",
+  "value": 946,
+  "limit": 800,
+  "message": "crates/qp-session/tests/non_interference.rs: test file 946 lines > 800"
+ },
+ {
+  "rule": "file.hard",
+  "item": "crates/qp-source/src/livebar.rs",
+  "value": 950,
+  "limit": 800,
+  "message": "crates/qp-source/src/livebar.rs: 950 lines > hard limit 800"
+ },
+ {
+  "rule": "fn.lines",
+  "item": "crates/qp-source/src/livebar.rs::push@527",
+  "value": 159,
+  "limit": 80,
+  "message": "crates/qp-source/src/livebar.rs:527 fn push: 159 lines > 80"
+ },
+ {
+  "rule": "fn.lines",
+  "item": "crates/qp-source/src/livebar.rs::push_trade@688",
+  "value": 105,
+  "limit": 80,
+  "message": "crates/qp-source/src/livebar.rs:688 fn push_trade: 105 lines > 80"
+ },
+ {
+  "rule": "file.soft",
+  "item": "crates/qp-source/src/replay.rs",
+  "value": 751,
+  "limit": 600,
+  "message": "crates/qp-source/src/replay.rs: 751 lines > budget 600"
+ },
+ {
+  "rule": "fn.lines",
+  "item": "crates/qp-source/src/replay.rs::new@277",
+  "value": 92,
+  "limit": 80,
+  "message": "crates/qp-source/src/replay.rs:277 fn new: 92 lines > 80"
+ },
+ {
+  "rule": "test.file",
+  "item": "crates/qp-source/tests/data_plane.rs",
+  "value": 1127,
+  "limit": 800,
+  "message": "crates/qp-source/tests/data_plane.rs: test file 1127 lines > 800"
+ },
+ {
+  "rule": "file.hard",
+  "item": "crates/qp-wasm/src/drive.rs",
+  "value": 1034,
+  "limit": 800,
+  "message": "crates/qp-wasm/src/drive.rs: 1034 lines > hard limit 800"
+ },
+ {
+  "rule": "fn.lines",
+  "item": "crates/qp-wasm/src/drive.rs::shell_less@257",
+  "value": 121,
+  "limit": 80,
+  "message": "crates/qp-wasm/src/drive.rs:257 fn shell_less: 121 lines > 80"
+ },
+ {
+  "rule": "fn.lines",
+  "item": "crates/qp-wasm/src/drive.rs::viewer_less@805",
+  "value": 125,
+  "limit": 80,
+  "message": "crates/qp-wasm/src/drive.rs:805 fn viewer_less: 125 lines > 80"
+ },
+ {
+  "rule": "file.hard",
+  "item": "crates/qp-wasm/src/gallery.rs",
+  "value": 1188,
+  "limit": 800,
+  "message": "crates/qp-wasm/src/gallery.rs: 1188 lines > hard limit 800"
+ },
+ {
+  "rule": "fn.lines",
+  "item": "crates/qp-wasm/src/gallery.rs::shots@815",
+  "value": 116,
+  "limit": 80,
+  "message": "crates/qp-wasm/src/gallery.rs:815 fn shots: 116 lines > 80"
+ },
+ {
+  "rule": "file.hard",
+  "item": "crates/qp-wasm/src/lib.rs",
+  "value": 1296,
+  "limit": 800,
+  "message": "crates/qp-wasm/src/lib.rs: 1296 lines > hard limit 800"
+ },
+ {
+  "rule": "file.hard",
+  "item": "crates/qp-wasm/src/shell.rs",
+  "value": 3419,
+  "limit": 800,
+  "message": "crates/qp-wasm/src/shell.rs: 3419 lines > hard limit 800"
+ },
+ {
+  "rule": "fn.lines",
+  "item": "crates/qp-wasm/src/shell.rs::new@729",
+  "value": 92,
+  "limit": 80,
+  "message": "crates/qp-wasm/src/shell.rs:729 fn new: 92 lines > 80"
+ },
+ {
+  "rule": "fn.lines",
+  "item": "crates/qp-wasm/src/shell.rs::on_message@1033",
+  "value": 245,
+  "limit": 80,
+  "message": "crates/qp-wasm/src/shell.rs:1033 fn on_message: 245 lines > 80"
+ },
+ {
+  "rule": "fn.lines",
+  "item": "crates/qp-wasm/src/shell.rs::on_frame@1465",
+  "value": 92,
+  "limit": 80,
+  "message": "crates/qp-wasm/src/shell.rs:1465 fn on_frame: 92 lines > 80"
+ },
+ {
+  "rule": "fn.lines",
+  "item": "crates/qp-wasm/src/shell.rs::scene@1847",
+  "value": 88,
+  "limit": 80,
+  "message": "crates/qp-wasm/src/shell.rs:1847 fn scene: 88 lines > 80"
+ },
+ {
+  "rule": "fn.lines",
+  "item": "crates/qp-wasm/src/shell.rs::pointer@2549",
+  "value": 106,
+  "limit": 80,
+  "message": "crates/qp-wasm/src/shell.rs:2549 fn pointer: 106 lines > 80"
+ },
+ {
+  "rule": "fn.lines",
+  "item": "crates/qp-wasm/src/shell.rs::metrics_rows@3054",
+  "value": 100,
+  "limit": 80,
+  "message": "crates/qp-wasm/src/shell.rs:3054 fn metrics_rows: 100 lines > 80"
+ },
+ {
+  "rule": "file.soft",
+  "item": "crates/qp-wasm/src/shell/bench.rs",
+  "value": 707,
+  "limit": 600,
+  "message": "crates/qp-wasm/src/shell/bench.rs: 707 lines > budget 600"
+ },
+ {
+  "rule": "fn.lines",
+  "item": "crates/qp-wasm/src/shell/bench.rs::bench_tick@322",
+  "value": 198,
+  "limit": 80,
+  "message": "crates/qp-wasm/src/shell/bench.rs:322 fn bench_tick: 198 lines > 80"
+ },
+ {
+  "rule": "file.hard",
+  "item": "crates/qp-wasm/src/shell/paint_canvas.rs",
+  "value": 1113,
+  "limit": 800,
+  "message": "crates/qp-wasm/src/shell/paint_canvas.rs: 1113 lines > hard limit 800"
+ },
+ {
+  "rule": "fn.lines",
+  "item": "crates/qp-wasm/src/shell/paint_canvas.rs::prim@282",
+  "value": 106,
+  "limit": 80,
+  "message": "crates/qp-wasm/src/shell/paint_canvas.rs:282 fn prim: 106 lines > 80"
+ },
+ {
+  "rule": "file.hard",
+  "item": "crates/qp-wasm/src/shell/paint_gpu.rs",
+  "value": 860,
+  "limit": 800,
+  "message": "crates/qp-wasm/src/shell/paint_gpu.rs: 860 lines > hard limit 800"
+ },
+ {
+  "rule": "crate.lines",
+  "item": "qp-capsule",
+  "value": 13059,
+  "limit": 12000,
+  "message": "qp-capsule: 13059 non-test lines > 12000"
+ },
+ {
+  "rule": "shell.lines",
+  "item": "qp-cli",
+  "value": 11653,
+  "limit": 4000,
+  "message": "qp-cli: shell crate 11653 non-test lines > 4000"
+ },
+ {
+  "rule": "crate.lines",
+  "item": "qp-grammar",
+  "value": 19966,
+  "limit": 12000,
+  "message": "qp-grammar: 19966 non-test lines > 12000"
+ },
+ {
+  "rule": "crate.lines",
+  "item": "qp-session",
+  "value": 31644,
+  "limit": 12000,
+  "message": "qp-session: 31644 non-test lines > 12000"
+ },
+ {
+  "rule": "shell.lines",
+  "item": "qp-wasm",
+  "value": 10660,
+  "limit": 4000,
+  "message": "qp-wasm: shell crate 10660 non-test lines > 4000"
+ },
+ {
+  "rule": "dir.files",
+  "item": "crates/qp-compute/tests",
+  "value": 16,
+  "limit": 15,
+  "message": "crates/qp-compute/tests: 16 source files > 15"
+ },
+ {
+  "rule": "dir.files",
+  "item": "crates/qp-grammar/src",
+  "value": 21,
+  "limit": 15,
+  "message": "crates/qp-grammar/src: 21 source files > 15"
+ },
+ {
+  "rule": "dir.files",
+  "item": "crates/qp-session/src",
+  "value": 37,
+  "limit": 15,
+  "message": "crates/qp-session/src: 37 source files > 15"
+ },
+ {
+  "rule": "dir.files",
+  "item": "crates/qp-session/tests",
+  "value": 39,
+  "limit": 15,
+  "message": "crates/qp-session/tests: 39 source files > 15"
+ },
+ {
+  "rule": "dir.files",
+  "item": "crates/qp-wasm/tests",
+  "value": 20,
+  "limit": 15,
+  "message": "crates/qp-wasm/tests: 20 source files > 15"
+ },
+ {
+  "rule": "name.forbidden",
+  "item": "crates/qp-capsule/tests/common",
+  "value": 1,
+  "limit": 0,
+  "message": "crates/qp-capsule/tests/common: forbidden name `common` (util/common/misc/helpers)"
+ },
+ {
+  "rule": "name.forbidden",
+  "item": "crates/qp-compute/tests/common.rs",
+  "value": 1,
+  "limit": 0,
+  "message": "crates/qp-compute/tests/common.rs: forbidden name `common` (util/common/misc/helpers)"
+ },
+ {
+  "rule": "name.forbidden",
+  "item": "crates/qp-facts/tests/common",
+  "value": 1,
+  "limit": 0,
+  "message": "crates/qp-facts/tests/common: forbidden name `common` (util/common/misc/helpers)"
+ },
+ {
+  "rule": "name.forbidden",
+  "item": "crates/qp-grammar/tests/common",
+  "value": 1,
+  "limit": 0,
+  "message": "crates/qp-grammar/tests/common: forbidden name `common` (util/common/misc/helpers)"
+ },
+ {
+  "rule": "name.forbidden",
+  "item": "crates/qp-mcp/src/common.rs",
+  "value": 1,
+  "limit": 0,
+  "message": "crates/qp-mcp/src/common.rs: forbidden name `common` (util/common/misc/helpers)"
+ },
+ {
+  "rule": "name.forbidden",
+  "item": "crates/qp-render/examples/common",
+  "value": 1,
+  "limit": 0,
+  "message": "crates/qp-render/examples/common: forbidden name `common` (util/common/misc/helpers)"
+ },
+ {
+  "rule": "name.forbidden",
+  "item": "crates/qp-schema/tests/common",
+  "value": 1,
+  "limit": 0,
+  "message": "crates/qp-schema/tests/common: forbidden name `common` (util/common/misc/helpers)"
+ },
+ {
+  "rule": "name.forbidden",
+  "item": "crates/qp-session/tests/common",
+  "value": 1,
+  "limit": 0,
+  "message": "crates/qp-session/tests/common: forbidden name `common` (util/common/misc/helpers)"
+ },
+ {
+  "rule": "readme.crate",
+  "item": "crates/qp-calendar",
+  "value": 1,
+  "limit": 0,
+  "message": "crates/qp-calendar: no README.md"
+ },
+ {
+  "rule": "readme.crate",
+  "item": "crates/qp-capsule",
+  "value": 1,
+  "limit": 0,
+  "message": "crates/qp-capsule: no README.md"
+ },
+ {
+  "rule": "readme.crate",
+  "item": "crates/qp-cli",
+  "value": 1,
+  "limit": 0,
+  "message": "crates/qp-cli: no README.md"
+ },
+ {
+  "rule": "readme.crate",
+  "item": "crates/qp-compute",
+  "value": 1,
+  "limit": 0,
+  "message": "crates/qp-compute: no README.md"
+ },
+ {
+  "rule": "readme.crate",
+  "item": "crates/qp-facts",
+  "value": 1,
+  "limit": 0,
+  "message": "crates/qp-facts: no README.md"
+ },
+ {
+  "rule": "readme.crate",
+  "item": "crates/qp-grammar",
+  "value": 1,
+  "limit": 0,
+  "message": "crates/qp-grammar: no README.md"
+ },
+ {
+  "rule": "readme.crate",
+  "item": "crates/qp-mcp",
+  "value": 1,
+  "limit": 0,
+  "message": "crates/qp-mcp: no README.md"
+ },
+ {
+  "rule": "readme.crate",
+  "item": "crates/qp-render",
+  "value": 1,
+  "limit": 0,
+  "message": "crates/qp-render: no README.md"
+ },
+ {
+  "rule": "readme.crate",
+  "item": "crates/qp-schema",
+  "value": 1,
+  "limit": 0,
+  "message": "crates/qp-schema: no README.md"
+ },
+ {
+  "rule": "readme.crate",
+  "item": "crates/qp-session",
+  "value": 1,
+  "limit": 0,
+  "message": "crates/qp-session: no README.md"
+ },
+ {
+  "rule": "readme.crate",
+  "item": "crates/qp-source",
+  "value": 1,
+  "limit": 0,
+  "message": "crates/qp-source: no README.md"
+ },
+ {
+  "rule": "readme.crate",
+  "item": "crates/qp-wasm",
+  "value": 1,
+  "limit": 0,
+  "message": "crates/qp-wasm: no README.md"
+ },
+ {
+  "rule": "readme.module",
+  "item": "crates/qp-capsule/src/realize",
+  "value": 1,
+  "limit": 0,
+  "message": "crates/qp-capsule/src/realize: module folder without README.md"
+ },
+ {
+  "rule": "readme.module",
+  "item": "crates/qp-capsule/src/trust",
+  "value": 1,
+  "limit": 0,
+  "message": "crates/qp-capsule/src/trust: module folder without README.md"
+ },
+ {
+  "rule": "readme.module",
+  "item": "crates/qp-capsule/src/voice",
+  "value": 1,
+  "limit": 0,
+  "message": "crates/qp-capsule/src/voice: module folder without README.md"
+ },
+ {
+  "rule": "readme.module",
+  "item": "crates/qp-capsule/src/voice/selvi",
+  "value": 1,
+  "limit": 0,
+  "message": "crates/qp-capsule/src/voice/selvi: module folder without README.md"
+ },
+ {
+  "rule": "readme.module",
+  "item": "crates/qp-cli/src/sim",
+  "value": 1,
+  "limit": 0,
+  "message": "crates/qp-cli/src/sim: module folder without README.md"
+ },
+ {
+  "rule": "readme.module",
+  "item": "crates/qp-compute/src/studies",
+  "value": 1,
+  "limit": 0,
+  "message": "crates/qp-compute/src/studies: module folder without README.md"
+ },
+ {
+  "rule": "readme.module",
+  "item": "crates/qp-compute/src/sweep",
+  "value": 1,
+  "limit": 0,
+  "message": "crates/qp-compute/src/sweep: module folder without README.md"
+ },
+ {
+  "rule": "readme.module",
+  "item": "crates/qp-grammar/src/faces",
+  "value": 1,
+  "limit": 0,
+  "message": "crates/qp-grammar/src/faces: module folder without README.md"
+ },
+ {
+  "rule": "readme.module",
+  "item": "crates/qp-grammar/src/feeds",
+  "value": 1,
+  "limit": 0,
+  "message": "crates/qp-grammar/src/feeds: module folder without README.md"
+ },
+ {
+  "rule": "readme.module",
+  "item": "crates/qp-grammar/src/glyph",
+  "value": 1,
+  "limit": 0,
+  "message": "crates/qp-grammar/src/glyph: module folder without README.md"
+ },
+ {
+  "rule": "readme.module",
+  "item": "crates/qp-grammar/src/glyph/outcome",
+  "value": 1,
+  "limit": 0,
+  "message": "crates/qp-grammar/src/glyph/outcome: module folder without README.md"
+ },
+ {
+  "rule": "readme.module",
+  "item": "crates/qp-grammar/src/open",
+  "value": 1,
+  "limit": 0,
+  "message": "crates/qp-grammar/src/open: module folder without README.md"
+ },
+ {
+  "rule": "readme.module",
+  "item": "crates/qp-grammar/src/stories",
+  "value": 1,
+  "limit": 0,
+  "message": "crates/qp-grammar/src/stories: module folder without README.md"
+ },
+ {
+  "rule": "readme.module",
+  "item": "crates/qp-grammar/src/transitions",
+  "value": 1,
+  "limit": 0,
+  "message": "crates/qp-grammar/src/transitions: module folder without README.md"
+ },
+ {
+  "rule": "readme.module",
+  "item": "crates/qp-render/src/spikes",
+  "value": 1,
+  "limit": 0,
+  "message": "crates/qp-render/src/spikes: module folder without README.md"
+ },
+ {
+  "rule": "readme.module",
+  "item": "crates/qp-schema/src/protocol",
+  "value": 1,
+  "limit": 0,
+  "message": "crates/qp-schema/src/protocol: module folder without README.md"
+ },
+ {
+  "rule": "readme.module",
+  "item": "crates/qp-wasm/src/shell",
+  "value": 1,
+  "limit": 0,
+  "message": "crates/qp-wasm/src/shell: module folder without README.md"
+ },
+ {
+  "rule": "root.logic",
+  "item": "crates/qp-calendar/src/lib.rs",
+  "value": 22,
+  "limit": 0,
+  "message": "crates/qp-calendar/src/lib.rs: 22 logic items (const, enum, fn, impl, struct) in a lib.rs/mod.rs (declarations and re-exports only; first at line 29)"
+ },
+ {
+  "rule": "root.logic",
+  "item": "crates/qp-capsule/src/lib.rs",
+  "value": 13,
+  "limit": 0,
+  "message": "crates/qp-capsule/src/lib.rs: 13 logic items (enum, struct, trait) in a lib.rs/mod.rs (declarations and re-exports only; first at line 77)"
+ },
+ {
+  "rule": "root.logic",
+  "item": "crates/qp-capsule/src/realize/mod.rs",
+  "value": 22,
+  "limit": 0,
+  "message": "crates/qp-capsule/src/realize/mod.rs: 22 logic items (const, enum, fn, impl, struct) in a lib.rs/mod.rs (declarations and re-exports only; first at line 57)"
+ },
+ {
+  "rule": "root.logic",
+  "item": "crates/qp-capsule/src/voice/mod.rs",
+  "value": 13,
+  "limit": 0,
+  "message": "crates/qp-capsule/src/voice/mod.rs: 13 logic items (const, fn, struct) in a lib.rs/mod.rs (declarations and re-exports only; first at line 30)"
+ },
+ {
+  "rule": "root.logic",
+  "item": "crates/qp-compute/src/lib.rs",
+  "value": 16,
+  "limit": 0,
+  "message": "crates/qp-compute/src/lib.rs: 16 logic items (const, enum, fn, impl, struct, trait) in a lib.rs/mod.rs (declarations and re-exports only; first at line 55)"
+ },
+ {
+  "rule": "root.logic",
+  "item": "crates/qp-compute/src/studies/mod.rs",
+  "value": 1,
+  "limit": 0,
+  "message": "crates/qp-compute/src/studies/mod.rs: 1 logic items (fn) in a lib.rs/mod.rs (declarations and re-exports only; first at line 45)"
+ },
+ {
+  "rule": "root.logic",
+  "item": "crates/qp-facts/src/lib.rs",
+  "value": 20,
+  "limit": 0,
+  "message": "crates/qp-facts/src/lib.rs: 20 logic items (const, fn, impl, struct, trait) in a lib.rs/mod.rs (declarations and re-exports only; first at line 64)"
+ },
+ {
+  "rule": "root.logic",
+  "item": "crates/qp-grammar/src/stories/mod.rs",
+  "value": 9,
+  "limit": 0,
+  "message": "crates/qp-grammar/src/stories/mod.rs: 9 logic items (const, enum, fn, static, struct) in a lib.rs/mod.rs (declarations and re-exports only; first at line 35)"
+ },
+ {
+  "rule": "root.logic",
+  "item": "crates/qp-matriks/src/lib.rs",
+  "value": 5,
+  "limit": 0,
+  "message": "crates/qp-matriks/src/lib.rs: 5 logic items (enum, impl) in a lib.rs/mod.rs (declarations and re-exports only; first at line 69)"
+ },
+ {
+  "rule": "root.logic",
+  "item": "crates/qp-mcp/src/lib.rs",
+  "value": 29,
+  "limit": 0,
+  "message": "crates/qp-mcp/src/lib.rs: 29 logic items (const, enum, fn, impl, struct) in a lib.rs/mod.rs (declarations and re-exports only; first at line 37)"
+ },
+ {
+  "rule": "root.logic",
+  "item": "crates/qp-mcp/src/surfaces/mod.rs",
+  "value": 12,
+  "limit": 0,
+  "message": "crates/qp-mcp/src/surfaces/mod.rs: 12 logic items (fn, impl, struct, trait) in a lib.rs/mod.rs (declarations and re-exports only; first at line 23)"
+ },
+ {
+  "rule": "root.logic",
+  "item": "crates/qp-render/src/lib.rs",
+  "value": 11,
+  "limit": 0,
+  "message": "crates/qp-render/src/lib.rs: 11 logic items (const, fn, impl, struct) in a lib.rs/mod.rs (declarations and re-exports only; first at line 29)"
+ },
+ {
+  "rule": "root.logic",
+  "item": "crates/qp-schema/src/lib.rs",
+  "value": 9,
+  "limit": 0,
+  "message": "crates/qp-schema/src/lib.rs: 9 logic items (fn) in a lib.rs/mod.rs (declarations and re-exports only; first at line 20)"
+ },
+ {
+  "rule": "root.logic",
+  "item": "crates/qp-source/src/lib.rs",
+  "value": 20,
+  "limit": 0,
+  "message": "crates/qp-source/src/lib.rs: 20 logic items (const, enum, fn, impl, struct, trait) in a lib.rs/mod.rs (declarations and re-exports only; first at line 77)"
+ },
+ {
+  "rule": "root.logic",
+  "item": "crates/qp-wasm/src/lib.rs",
+  "value": 18,
+  "limit": 0,
+  "message": "crates/qp-wasm/src/lib.rs: 18 logic items (const, fn) in a lib.rs/mod.rs (declarations and re-exports only; first at line 19)"
+ },
+ {
+  "rule": "doc.size",
+  "item": "DECISIONS.md",
+  "value": 410,
+  "limit": 1500,
+  "message": "DECISIONS.md: 410 lines, 116849 bytes > 1500 lines / 61440 bytes"
+ },
+ {
+  "rule": "doc.size",
+  "item": "docs/PROTOCOL.md",
+  "value": 2955,
+  "limit": 1500,
+  "message": "docs/PROTOCOL.md: 2955 lines, 215779 bytes > 1500 lines / 61440 bytes"
+ },
+ {
+  "rule": "doc.size",
+  "item": "docs/matriks/INDICATORS.md",
+  "value": 1203,
+  "limit": 1500,
+  "message": "docs/matriks/INDICATORS.md: 1203 lines, 110995 bytes > 1500 lines / 61440 bytes"
+ }
+]

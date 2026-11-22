@@ -57,6 +57,9 @@
 #                tap_at/hit and screen answers) are byte-identical on every path
 #                (tests/paint-paths.mjs); the default `canvas` path's scenes against the
 #                reference with tolerance (tests/paint-canvas.mjs, Chromium, DPR 1)
+#  19 arch       RG1 (docs/ENGINEERING.md): scripts/arch-check --self-test (known violations
+#                are caught, the ratchet works) and scripts/arch-check (layers, size budgets,
+#                names, READMEs, lib.rs/mod.rs; debt only within scripts/arch-baseline.json)
 #
 # Environment:
 #   QP_VERIFY_BROWSER=1  force the browser step (fails if tools are missing)
@@ -557,6 +560,13 @@ step_demo() {
   note "same origin only; browser = shell-less digests; settings page; gallery; paint paths (semantic reads identical); canvas within tolerance; $n images x2 (scenes identical, pages within chrome tolerance), scenes = goldens (v1 pinned to the pre-R5 designs, v2 = R5 defaults with story pinned to pavka, both with clock off; p4 = the presentation now, rows with their time)"
 }
 
+step_arch() {
+  command -v python3 >/dev/null 2>&1 || fail "python3 not found (scripts/arch-check needs it)"
+  scripts/arch-check --self-test || fail "arch-check self-test failed"
+  scripts/arch-check || fail "architecture rules broken (scripts/arch-check)"
+  note "self-test passes; no error outside the debt baseline"
+}
+
 # --- run -------------------------------------------------------------------
 
 total_start=$SECONDS
@@ -578,6 +588,7 @@ run_step replica step_replica
 run_step replay step_replay
 run_step shell step_shell
 run_step demo step_demo
+run_step arch step_arch
 total=$((SECONDS - total_start))
 
 failed=0

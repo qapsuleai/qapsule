@@ -188,9 +188,30 @@ done
 
 # --- test count -------------------------------------------------------------------
 cargo test -q --workspace -- --list 2>/dev/null | grep ': test$' >"$priv/tests.list" || true
-wc -l <"$priv/tests.list" | tr -d ' ' >"$out/tests.count"
-# test names by their last path segment (module moves change the prefix, not the name)
-sed -E 's/: test$//; s/.*:://' "$priv/tests.list" | LC_ALL=C sort >"$out/tests.names"
+# test names by their last path segment (module moves change the prefix, not the name).
+# Tests the round adds on purpose (RG1/K3 binding tests) are named one per line in
+# rounds/RG1/experiments/new-tests.txt: they are left out of tests.names/tests.count, so
+# no baseline test can disappear unseen, and every listed name must exist (else FAIL).
+sed -E 's/: test$//; s/.*:://' "$priv/tests.list" | LC_ALL=C sort >"$priv/tests.all"
+allow="rounds/RG1/experiments/new-tests.txt"
+if [ -f "$allow" ]; then
+  grep -v '^#' "$allow" | sed '/^$/d' | LC_ALL=C sort >"$priv/allow"
+  missing="$(LC_ALL=C comm -23 "$priv/allow" <(LC_ALL=C sort -u "$priv/tests.all"))"
+  [ -z "$missing" ] || { echo "new-tests.txt names missing tests: $missing" >&2; echo "MISSING: $missing" >"$out/tests.allow-missing"; }
+  python3 - "$priv/tests.all" "$priv/allow" >"$out/tests.names" <<'PY'
+import collections, sys
+names = [l.rstrip("\n") for l in open(sys.argv[1])]
+allow = collections.Counter(l.rstrip("\n") for l in open(sys.argv[2]))
+for n in names:
+    if allow[n] > 0:
+        allow[n] -= 1
+    else:
+        print(n)
+PY
+else
+  cp "$priv/tests.all" "$out/tests.names"
+fi
+wc -l <"$out/tests.names" | tr -d ' ' >"$out/tests.count"
 
 # --- manifest ---------------------------------------------------------------------
 (cd "$out" && find . -type f ! -name manifest.sha256 | LC_ALL=C sort | sed 's|^\./||' \

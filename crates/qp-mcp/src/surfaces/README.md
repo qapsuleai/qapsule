@@ -1,13 +1,18 @@
 # Araç yüzeyleri (R5B, M28)
 
 `qp mcp serve --surface <ad>` ajana hangi araçların sunulacağını seçer. Her yüzey bu
-klasörde **tek dosya** ve `mod.rs` içindeki `registry()` listesinde **tek satırdır**:
+klasörde **tek dosya** (`<ad>.rs`; büyürse parçaları yanındaki `<ad>/` klasöründe) ve
+`registry.rs` içindeki `registry()` listesinde **tek satırdır**:
 
 ```rust
 // surfaces/mod.rs
 pub mod task;                                   // 1) modül
+// surfaces/registry.rs
 &[("thin", thin::new), ("task", task::new)]     // 2) registry() satırı
 ```
+
+`mod.rs` yalnız bildirir; ortak parçalar konu dosyalarındadır: `surface.rs` (`ToolSurface`,
+`ToolDef`, `Annotations`, `input_schema`), `ctx.rs` (`Ctx`, `CallMeta`), `registry.rs`.
 
 ## Arayüz
 

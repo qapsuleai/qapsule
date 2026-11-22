@@ -10,7 +10,7 @@ use crate::look::Profile;
 /// Field letters (open, high, low, close).
 const LETTERS: [&str; 4] = ["O", "H", "L", "C"];
 /// Room between a letter and its value, and between two parts (px).
-const GAPS: (i32, i32) = (3, 8);
+pub(super) const GAPS: (i32, i32) = (3, 8);
 
 /// One legend part: letter (if any), value text, value colour.
 type Part = (Option<&'static str>, String, Rgba);

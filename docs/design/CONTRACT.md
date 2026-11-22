@@ -56,6 +56,28 @@ gösterir; seçilen yön gelince blok onun iki profiliyle değişir.
   eksen hapları, OHLC lejantı, altta hacim: yeniden icat edilmez (`chart.*`; P4, P5, P7).
 - Veri üstündeki anlam işareti küçüktür ve veriyi örtmez (`chart.mark_max_px`; P8).
 - Masaüstü çalışma alanı birden çok bölge ve grafik bölmesi gösterir (P9, galeri düzen dökümü).
+- Saat ve tarih etiketleri (zaman ekseni, tarih hapı) görünümün `display_tz` diliminde yazılır
+  (K14); fiyat adımı `chart.price_label_px`'e en yakın adım (1 / 1,5 / 2 / 2,5 / 3 / 4 / 5 /
+  7,5 × 10ⁿ); her ölçekli bölme en az bir eksen etiketi taşır (kısa bölmede daha ince adımdan).
+
+### Sabit alfabe ölçüleri (kayıtta değil)
+
+Görünüş kaydında değildir, yönler değiştiremez (satır bütçesi; RD2/C2a-fix). Değerler
+`crates/qp-grammar/src/compile/alphabet.rs` `ALPHABET_FIXED` ile aynıdır;
+`design_check` (`contract_lists_the_fixed_measures`) eşitliği sınar.
+
+| Ad | Değer | Neden |
+|---|---|---|
+| `VOLUME_ALPHA` | `0.35` | hacim fiyattan sonra okunur; mumların altında soluk kalır |
+| `DASH` | `4, 3` | imleç çizgisi kesik/boşluk (px): veri çizgisinden ayrılır |
+| `DOT` | `2, 2` | değer çizgisi nokta/boşluk (px): imleçten ayrı, daha hafif |
+| `GAPS` | `3, 8` | lejantta harf–değer ve parça–parça aralığı (px) |
+| `PILL_PAD_X` | `6` | etiket, hap ve fiyat etiketi metninin iç boşluğu (px; R0 etiketi) |
+| `PILL_PAD_Y` | `6` | hap boyuna figür boyutunun üstüne eklenen (px) |
+| `MID` | `0.36` | figürü piksel satırına ortalayan taban çizgisi kayması (em; R0: 11 px'te 4) |
+| `BASELINE_PAD` | `5` | zaman etiketi taban çizgisinin etiket boyu ötesindeki payı (px; R0: 11 px'te 16) |
+| `LABEL_GAP` | `8` | zaman düzeyi seçilirken iki etiket arası en az ortalama boşluk (px) |
+| `PLACE_GAP` | `6` | yerleşen iki zaman etiketi arası en az boşluk (px) |
 
 ## Ölçüm
 

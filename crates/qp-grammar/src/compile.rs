@@ -32,6 +32,7 @@ mod scene;
 mod series;
 pub mod terms;
 
+pub use alphabet::ALPHABET_FIXED;
 use axis::{domain, domain_values, ticks};
 use emphasis::resolve_emphasis;
 use panels::{canonical_panels, layer_ids, panel_rects};

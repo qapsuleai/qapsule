@@ -8,9 +8,9 @@ use super::format::{civil, day_month, hm, month, DAY_MS};
 use super::*;
 
 /// Least average room between two time labels when choosing the level (px).
-const LABEL_GAP: i32 = 8;
+pub(super) const LABEL_GAP: i32 = 8;
 /// Least room between two placed labels (px).
-const PLACE_GAP: i32 = 6;
+pub(super) const PLACE_GAP: i32 = 6;
 
 #[derive(Debug, Clone, Copy)]
 enum Level {
@@ -77,7 +77,7 @@ impl Level {
     }
 }
 
-/// One time tick: slot, pixel column, time, major, context (the first visible bar).
+/// One time tick: slot, pixel column, local time, major, context (the first visible bar).
 type Tick = (u64, i32, i64, bool, bool);
 
 /// The ticks of `level` in the visible range (first slot of each LOD bucket).
@@ -86,10 +86,12 @@ fn ticks(ch: &Chart<'_>, level: Level) -> Vec<Tick> {
     let mut out = Vec::new();
     let mut prev: Option<(i64, i64)> = None;
     for (s, _) in fr.buckets() {
-        let Some(t) = fr.slot_time(s) else { continue };
+        let Some(t) = fr.slot_time(s).map(|t| ch.local(t)) else {
+            continue;
+        };
         let k = level.keys(t);
         let before = if s == fr.from && s > 0 {
-            fr.slot_time(s - 1).map(|t| level.keys(t))
+            fr.slot_time(s - 1).map(|t| level.keys(ch.local(t)))
         } else {
             prev
         };

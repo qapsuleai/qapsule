@@ -9,6 +9,8 @@ publish.workspace = true
 
 [dependencies]
 qp-schema = { path = "../qp-schema" }
+# (RD2/C2a-fix) Display zone of the time labels (K14).
+qp-calendar = { path = "../qp-calendar" }
 # (R5/T3) `look::Look::to_json` (`qp look show`).
 serde_json = { version = "1.0.154", features = ["float_roundtrip"] }
 

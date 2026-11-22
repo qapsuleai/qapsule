@@ -313,10 +313,10 @@ pub fn compile(
         panel0: panel_ids[0],
         w: wi,
         at: None,
+        tz: view.display_tz.as_deref().and_then(qp_calendar::Zone::get),
     }
     .with_cursor(opts.cursor);
-    alphabet::price_axis(&ch, &mut under);
-    alphabet::time_axis(&ch, &mut under);
+    alphabet::axes(&ch, &mut under);
     alphabet::volume(&ch, &prepared, &mut under);
     // Axes.
     for (rc, _) in rects.iter().zip(&card).filter(|(_, c)| !**c) {

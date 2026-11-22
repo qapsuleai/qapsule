@@ -6,9 +6,9 @@ use super::*;
 use crate::look::ValueLine;
 
 /// Crosshair dash and gap (px).
-const DASH: (i32, i32) = (4, 3);
+pub(super) const DASH: (i32, i32) = (4, 3);
 /// Value line dot and gap (px).
-const DOT: (i32, i32) = (2, 2);
+pub(super) const DOT: (i32, i32) = (2, 2);
 
 impl Chart<'_> {
     /// The date pill under the cursor: left edge, width, text.
@@ -22,7 +22,7 @@ impl Chart<'_> {
                 .map(|p| 2 * t - p)
         });
         let intraday = intraday.is_some_and(|n| (n - t).abs() < format::DAY_MS);
-        let label = pill_date(t, intraday, self.lang());
+        let label = pill_date(self.local(t), intraday, self.lang());
         let w = self.width(&label, "label") + 2 * PILL_PAD_X;
         Some(((at.x - w / 2).clamp(0, (self.w - w).max(0)), w, label))
     }

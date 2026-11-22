@@ -6,7 +6,7 @@ use super::*;
 use crate::draw::body_width;
 
 /// Alpha of volume bars: read after the price, not before it.
-const VOLUME_ALPHA: f64 = 0.35;
+pub(super) const VOLUME_ALPHA: f64 = 0.35;
 
 /// Whether `pl` draws the bar series' volume.
 fn draws_volume(pl: &Prepared, bar_series: &str) -> bool {

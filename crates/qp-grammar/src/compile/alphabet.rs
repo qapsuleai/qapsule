@@ -19,16 +19,32 @@ mod volume;
 
 pub(super) use legend::title_figures;
 pub(super) use marks::{crosshair, tags};
-pub(super) use price::price_axis;
-pub(super) use time::time_axis;
 pub(super) use volume::{soften, volume};
 
 /// Height a tag or pill adds to the figure size (px).
 const PILL_PAD_Y: f64 = 6.0;
+/// Baseline offset that centres a figure on a pixel row, in em (R0: 4 at 11 px).
+const MID: f64 = 0.36;
 /// Time-label baseline below the plot beyond the label size (px; R0: 16 at 11 px).
 const BASELINE_PAD: f64 = 5.0;
 /// Inset of a tag's, a pill's or a price label's text (px; R0's tag inset).
 const PILL_PAD_X: i32 = 6;
+
+/// (RD2/C2a-fix) The fixed alphabet measures (not in the look record; a direction cannot
+/// change them): `docs/design/CONTRACT.md` "Sabit alfabe ölçüleri" lists the same values.
+#[allow(clippy::cast_lossless)]
+pub const ALPHABET_FIXED: [(&str, &[f64]); 10] = [
+    ("VOLUME_ALPHA", &[volume::VOLUME_ALPHA]),
+    ("DASH", &[marks::DASH.0 as f64, marks::DASH.1 as f64]),
+    ("DOT", &[marks::DOT.0 as f64, marks::DOT.1 as f64]),
+    ("GAPS", &[legend::GAPS.0 as f64, legend::GAPS.1 as f64]),
+    ("PILL_PAD_X", &[PILL_PAD_X as f64]),
+    ("PILL_PAD_Y", &[PILL_PAD_Y]),
+    ("MID", &[MID]),
+    ("BASELINE_PAD", &[BASELINE_PAD]),
+    ("LABEL_GAP", &[time::LABEL_GAP as f64]),
+    ("PLACE_GAP", &[time::PLACE_GAP as f64]),
+];
 
 /// The cursor resolved to the frame.
 #[derive(Debug, Clone, Copy)]
@@ -53,6 +69,8 @@ pub(super) struct Chart<'a> {
     pub panel0: u32,
     pub w: i32,
     pub at: Option<At>,
+    /// The view's display zone (K14; `None`: UTC).
+    pub tz: Option<qp_calendar::Zone>,
 }
 
 impl Chart<'_> {
@@ -83,6 +101,13 @@ impl Chart<'_> {
         &self.fr.theme
     }
 
+    /// Bar time `t` (ms) as wall-clock ms in the display zone (labels read local time).
+    fn local(&self, t: i64) -> i64 {
+        t + self
+            .tz
+            .map_or(0, |z| i64::from(z.offset_at(t.div_euclid(1000))) * 1000)
+    }
+
     fn lang(&self) -> Language {
         self.fr.p.reader_lang().unwrap_or_default()
     }
@@ -109,9 +134,9 @@ impl Chart<'_> {
         px(f64::from(self.size("figure")) + PILL_PAD_Y)
     }
 
-    /// Baseline offset that centres a figure on a pixel row (R0: 4 at 11 px).
+    /// Baseline offset that centres a figure on a pixel row.
     fn mid(&self) -> i32 {
-        px(f64::from(self.size("figure")) * 0.36)
+        px(f64::from(self.size("figure")) * MID)
     }
 
     /// The last panel with a value scale (time labels go under it; R5/M20).
@@ -141,6 +166,12 @@ impl Chart<'_> {
             format!("{v:.2}")
         }
     }
+}
+
+/// The price axes of the panels, then the time axis.
+pub(super) fn axes(ch: &Chart<'_>, under: &mut Vec<Prim>) {
+    price::price_axis(ch, under);
+    time::time_axis(ch, under);
 }
 
 /// A compiler text in `role`.

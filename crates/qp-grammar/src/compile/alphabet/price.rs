@@ -1,6 +1,6 @@
-//! The price axis (P4, OV-5): R0's `height / 90` divisions, or one label every
-//! `chart.price_label_px` (nearest step on [`STEPS`] × 10^k) inside its panel and the
-//! gutter, none under the last-value tag or the price pill.
+//! The price axis (P4, OV-5): R0's `height / 90` divisions, or one label about every
+//! `chart.price_label_px` (nearest step on [`STEPS`] × 10^k) inside its panel and the gutter, none under the last-value tag or the price pill. A
+//! short pane whose labels all meet the tag keeps one label from a finer step.
 
 use super::format::NumFmt;
 use super::*;
@@ -19,9 +19,7 @@ pub(in crate::compile) fn price_axis(ch: &Chart<'_>, under: &mut Vec<Prim>) {
     let fig = ch.size("figure");
     for (pi, rc) in ch.rects.iter().enumerate().filter(|(i, _)| !ch.card[*i]) {
         let y = &ch.ymaps[pi];
-        let (vals, step) = ticks_at(y, f64::from(rc.bottom - rc.top), ch.look.chart);
-        let fmt = NumFmt::new(y.min.abs().max(y.max.abs()), step, ch.lang());
-        let half = ch.pill_h() / 2;
+        let half = f64::from(ch.pill_h() / 2);
         let tag = ch.tags[pi].filter(|_| ch.look.chart.last_value_tag);
         let pill = ch.at.and_then(|a| a.price).filter(|_| pi == 0);
         let keep_out: Vec<f64> = [tag.map(|t| t.0), pill.map(|p| p.1)]
@@ -30,22 +28,35 @@ pub(in crate::compile) fn price_axis(ch: &Chart<'_>, under: &mut Vec<Prim>) {
             .map(f64::from)
             .collect();
         let x = rc.right + PILL_PAD_X;
-        for v in vals {
-            let Some(yy) = value_y(y, v) else { continue };
-            let yy = px(yy);
-            if yy <= rc.top || yy >= rc.bottom {
-                continue;
+        let mut drawn = false;
+        // Pass 0: the grid and its labels; passes 1–2 (halved steps): one label at most.
+        for pass in 0..3 {
+            let h = f64::from(rc.bottom - rc.top) * f64::from(1 << pass);
+            let (vals, step) = ticks_at(y, h, ch.look.chart);
+            let fmt = NumFmt::new(y.min.abs().max(y.max.abs()), step, ch.lang());
+            for v in vals {
+                let Some(yy) = value_y(y, v) else { continue };
+                let yy = px(yy);
+                if yy <= rc.top || yy >= rc.bottom || (pass > 0 && drawn) {
+                    continue;
+                }
+                if pass == 0 {
+                    under.push(rect(rc.left, yy, rc.right - rc.left, 1, theme.grid));
+                }
+                let label = fmt.fmt(v);
+                let baseline = yy + ch.mid();
+                let (top, bottom) = ch.vbox(baseline, "figure");
+                let clear = keep_out
+                    .iter()
+                    .all(|k| bottom <= k - half || top >= k + half);
+                let inside = top >= f64::from(rc.top) && bottom <= f64::from(rc.bottom);
+                if clear && inside && x + ch.width(&label, "figure") < ch.w {
+                    under.push(text(x, baseline, fig, label, theme.muted, "figure"));
+                    drawn = true;
+                }
             }
-            under.push(rect(rc.left, yy, rc.right - rc.left, 1, theme.grid));
-            let label = fmt.fmt(v);
-            let baseline = yy + ch.mid();
-            let (top, bottom) = ch.vbox(baseline, "figure");
-            let clear = keep_out
-                .iter()
-                .all(|k| bottom <= k - f64::from(half) || top >= k + f64::from(half));
-            let inside = top >= f64::from(rc.top) && bottom <= f64::from(rc.bottom);
-            if clear && inside && x + ch.width(&label, "figure") < ch.w {
-                under.push(text(x, baseline, fig, label, theme.muted, "figure"));
+            if drawn {
+                break;
             }
         }
     }

@@ -526,7 +526,7 @@ pub fn history(
 pub fn host_from_history(
     hist: Vec<(String, Vec<Bar>)>,
     interval: &str,
-    opts: &qp_wasm::shell::DemoOptions,
+    opts: &qp_shellcore::shell::DemoOptions,
     root: &std::path::Path,
 ) -> Result<ReplayHost, String> {
     if hist.is_empty() {
@@ -545,7 +545,7 @@ pub fn host_from_history(
             fine: Vec::new(),
         })
         .collect();
-    let mut init = qp_wasm::shell::demo_session_init(&qp_wasm::shell::DemoOptions {
+    let mut init = qp_shellcore::shell::demo_session_init(&qp_shellcore::shell::DemoOptions {
         local: true,
         instruments: u32::try_from(n).unwrap_or(u32::MAX),
         from_t: None,
@@ -2550,13 +2550,13 @@ mod tests {
 
     /// What `qp demo` gives a full replica (`mode=replica`) that connects now: the
     /// start frame's data (the initial bars) and the events recorded since.
-    fn replica_core(host: &ReplayHost) -> qp_wasm::shell::ShellCore {
+    fn replica_core(host: &ReplayHost) -> qp_shellcore::shell::ShellCore {
         let data = host.init().data.clone().expect("init data");
-        qp_wasm::shell::ShellCore::new("arkin", "tr", &data, &host.recorded_events()).expect("core")
+        qp_shellcore::shell::ShellCore::new("arkin", "tr", &data, &host.recorded_events()).expect("core")
     }
 
     /// Passes the core's requests to the host as connection `conn` until it is idle.
-    fn settle(core: &mut qp_wasm::shell::ShellCore, host: &mut ReplayHost, conn: &str) {
+    fn settle(core: &mut qp_shellcore::shell::ShellCore, host: &mut ReplayHost, conn: &str) {
         for _ in 0..1000 {
             let out = core.take_outbox();
             if out.is_empty() {
@@ -2568,7 +2568,7 @@ mod tests {
         }
     }
 
-    fn deliver(core: &mut qp_wasm::shell::ShellCore, conn: &str, lines: Vec<OutboundLine>) {
+    fn deliver(core: &mut qp_shellcore::shell::ShellCore, conn: &str, lines: Vec<OutboundLine>) {
         for l in lines {
             if l.conn == conn {
                 core.on_message(&l.msg);
@@ -2621,7 +2621,7 @@ mod tests {
         let mut sent = host.recorded_len();
         // What the hub does after each batch: new events as a data frame to the replica,
         // the authority's notifications routed to it.
-        let mut push = |early: &mut qp_wasm::shell::ShellCore,
+        let mut push = |early: &mut qp_shellcore::shell::ShellCore,
                         host: &mut ReplayHost,
                         lines: Vec<OutboundLine>| {
             let mut lines = lines;
@@ -2763,7 +2763,7 @@ mod tests {
         let mut early = replica_core(&host);
         settle(&mut early, &mut host, "c1");
         let mut sent = host.recorded_len();
-        let mut push = |early: &mut qp_wasm::shell::ShellCore,
+        let mut push = |early: &mut qp_shellcore::shell::ShellCore,
                         host: &mut ReplayHost,
                         lines: Vec<OutboundLine>| {
             let mut lines = lines;

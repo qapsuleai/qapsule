@@ -53,18 +53,18 @@ use sha2::{Digest, Sha256};
 use crate::livehost::{BarSource, LiveIn, LiveRuntime, MatriksFeed};
 
 /// Real time a closed stretch (night, weekend, pre-open) takes at most at speed `N`.
-pub const CLOSED_PAUSE: Duration = Duration::from_secs(2);
+pub(crate) const CLOSED_PAUSE: Duration = Duration::from_secs(2);
 
 /// Named capsule constant records that `--rule` accepts (`docs/CAPSULE.md` §9.9):
 /// `qp_capsule::ENGINES` (`r3`: `EngineConfig::r3` and the R3 detectors, the protocol
 /// default; `rp4`: the RP4 calibration's outcome rule and detector set). Old records stay
 /// selectable by name; the choice goes to the authority as `init.capsules.engine`.
-pub const RULES: &[&str] = qp_capsule::ENGINES;
+pub(crate) const RULES: &[&str] = qp_capsule::ENGINES;
 
 /// The session init's `capsules.engine` for `--rule`: `None` for the protocol default
 /// (`r3`: nothing written, so the run is byte-identical to one without `--rule`).
 #[must_use]
-pub fn engine_field(rule: &str) -> Option<String> {
+pub(crate) fn engine_field(rule: &str) -> Option<String> {
     (rule != qp_capsule::DEFAULT_ENGINE).then(|| rule.to_owned())
 }
 
@@ -72,7 +72,7 @@ pub fn engine_field(rule: &str) -> Option<String> {
 ///
 /// # Errors
 /// An unknown rule name.
-pub fn check_rule(name: &str) -> Result<(), String> {
+pub(crate) fn check_rule(name: &str) -> Result<(), String> {
     if RULES.contains(&name) {
         Ok(())
     } else {
@@ -87,7 +87,7 @@ pub fn check_rule(name: &str) -> Result<(), String> {
 ///
 /// # Errors
 /// An unknown rule name.
-pub fn check_rule_arg(name: &str) -> Result<String, String> {
+pub(crate) fn check_rule_arg(name: &str) -> Result<String, String> {
     check_rule(name).map(|()| name.to_owned())
 }
 
@@ -139,7 +139,7 @@ pub struct SimArgs {
 
 /// The pace.
 #[derive(Debug, Clone, Copy, PartialEq)]
-pub enum Speed {
+pub(crate) enum Speed {
     /// N× real time inside sessions.
     Factor(f64),
     /// No waiting.
@@ -173,7 +173,7 @@ impl Speed {
 
 /// What a simulation runs on (from `qp sim` or `qp demo --sim`).
 #[derive(Debug, Clone)]
-pub struct SimSpec {
+pub(crate) struct SimSpec {
     /// Symbols.
     pub symbols: Vec<String>,
     /// First and last local day (day numbers).
@@ -274,7 +274,7 @@ impl SimSpec {
 ///
 /// # Errors
 /// The built-in calendar is missing (never).
-pub fn xist() -> Result<ExchangeCalendar, String> {
+pub(crate) fn xist() -> Result<ExchangeCalendar, String> {
     crate::live::xist()
 }
 
@@ -317,7 +317,7 @@ impl SimSpec {
 
 /// Counters of a cache read (no values).
 #[derive(Debug, Clone, Default, PartialEq, Eq)]
-pub struct LoadStats {
+pub(crate) struct LoadStats {
     /// Files read.
     pub files: u64,
     /// Rows kept (in the range, after de-duplication).
@@ -355,7 +355,7 @@ fn trade_files(dir: &Path, sym: &str, d0: i64, d1: i64) -> Vec<PathBuf> {
 ///
 /// # Errors
 /// An unreadable file.
-pub fn load_trades(
+pub(crate) fn load_trades(
     dir: &Path,
     sym: &str,
     from_ms: i64,
@@ -469,7 +469,7 @@ fn load_many<T: Send>(
 /// day of 580 symbols' trades in memory once and small. [`Packed::get`] gives back the
 /// very [`Trade`] that was packed.
 #[derive(Debug, Default)]
-pub struct Packed {
+pub(crate) struct Packed {
     symbol: String,
     rows: Vec<Row>,
     odd_order: BTreeMap<u32, String>,
@@ -600,7 +600,7 @@ impl Packed {
 /// (RP4/T6) The trades of several [`Packed`] symbols in exchange order (time, symbol,
 /// trade order), merged as they are read: a symbol's trades are in trade order already,
 /// so (time, symbol, position) is that order.
-pub struct Merge<'a> {
+pub(crate) struct Merge<'a> {
     syms: Vec<&'a Packed>,
     heap: std::collections::BinaryHeap<std::cmp::Reverse<(i64, usize, usize)>>,
 }
@@ -627,7 +627,7 @@ impl Iterator for Merge<'_> {
 }
 
 /// The simulation's [`TradeHistory`]: the cached trades (what REST answers live).
-pub struct CacheHistory {
+pub(crate) struct CacheHistory {
     by_symbol: BTreeMap<String, Packed>,
 }
 
@@ -660,7 +660,7 @@ impl TradeHistory for CacheHistory {
 
 /// Which source a symbol's history came from (counts).
 #[derive(Debug, Clone, Default, PartialEq, Eq)]
-pub struct HistoryFrom {
+pub(crate) struct HistoryFrom {
     /// From the cached REST bars.
     pub rest: Vec<String>,
     /// Built from the cached trades.
@@ -669,7 +669,7 @@ pub struct HistoryFrom {
 
 /// Settled bars from the caches: REST bars (unadjusted, normalised like the live REST
 /// source), or bars built from the cached trades when that gives more bars in the range.
-pub struct CacheBars {
+pub(crate) struct CacheBars {
     /// REST bars directory.
     pub rest_dir: PathBuf,
     /// Trades directory.
@@ -732,7 +732,7 @@ impl CacheBars {
 /// Final bars of `sym` on `iv` built from `trades` (exchange order) with the live bar
 /// builder (`BarMethod::Trades`, special trades excluded), closed through `until_ms`.
 #[must_use]
-pub fn trade_bars(
+pub(crate) fn trade_bars(
     sym: &str,
     iv: &str,
     trades: &[Trade],
@@ -819,7 +819,7 @@ impl BarSource for CacheBars {
 // Inputs, schedule, records.
 
 /// Everything a simulation needs, loaded.
-pub struct SimInput {
+pub(crate) struct SimInput {
     /// Calendar.
     pub cal: ExchangeCalendar,
     /// Start (local midnight of the first day, UTC ms) and end (local midnight after the
@@ -874,7 +874,7 @@ impl SimInput {
 ///
 /// # Errors
 /// Unreadable cache files; no symbol with history.
-pub fn load(spec: &SimSpec) -> Result<SimInput, String> {
+pub(crate) fn load(spec: &SimSpec) -> Result<SimInput, String> {
     let cal = xist()?;
     let from_ms = local_midnight(&cal, spec.first_day) + i64::from(spec.at_min) * 60_000;
     let to_ms = local_midnight(&cal, spec.last_day + 1);
@@ -940,7 +940,7 @@ pub fn load(spec: &SimSpec) -> Result<SimInput, String> {
 /// `[from_ms, to_ms)` the session opens, every bar close of `interval` and the session
 /// closes; the local midnight after each day; and `to_ms`.
 #[must_use]
-pub fn schedule(cal: &ExchangeCalendar, interval: Interval, from_ms: i64, to_ms: i64) -> Vec<i64> {
+pub(crate) fn schedule(cal: &ExchangeCalendar, interval: Interval, from_ms: i64, to_ms: i64) -> Vec<i64> {
     let mut v = BTreeSet::new();
     let (d0, d1) = (cal.local_day(from_ms), cal.local_day(to_ms - 1));
     for day in d0..=d1 {
@@ -962,7 +962,7 @@ pub fn schedule(cal: &ExchangeCalendar, interval: Interval, from_ms: i64, to_ms:
 /// The wire message of `t` as the trade endpoint sends it (level 1; buyer and seller
 /// absent), its `timestamp` in `cfg.unit` (since-midnight: of the trade's local day).
 #[must_use]
-pub fn wire(t: &Trade, cfg: &TradeDecodeConfig) -> Vec<u8> {
+pub(crate) fn wire(t: &Trade, cfg: &TradeDecodeConfig) -> Vec<u8> {
     let ns = t.timestamp_ns;
     let off_ns = i64::from(cfg.utc_offset_min) * 60_000_000_000;
     let day_ns = 86_400_000_000_000i64;
@@ -995,7 +995,7 @@ pub fn wire(t: &Trade, cfg: &TradeDecodeConfig) -> Vec<u8> {
 /// The raw record of `t` arriving at its own exchange time (what the trade endpoint's
 /// sink hands the hub).
 #[must_use]
-pub fn record(t: &Trade, cfg: &TradeDecodeConfig) -> RawRecord {
+pub(crate) fn record(t: &Trade, cfg: &TradeDecodeConfig) -> RawRecord {
     let topic = if t.is_trade_ex {
         format!("mx/tradeex/{}", t.symbol)
     } else {
@@ -1006,7 +1006,7 @@ pub fn record(t: &Trade, cfg: &TradeDecodeConfig) -> RawRecord {
 
 /// The trade endpoint's connection record at `t_ms`.
 #[must_use]
-pub fn conn_record(kind: RecordKind, t_ms: i64) -> RawRecord {
+pub(crate) fn conn_record(kind: RecordKind, t_ms: i64) -> RawRecord {
     RawRecord {
         t_us: t_ms * 1000,
         kind,
@@ -1019,7 +1019,7 @@ pub fn conn_record(kind: RecordKind, t_ms: i64) -> RawRecord {
 // Pace.
 
 /// Real time for the pacer (a fake one in tests).
-pub trait PaceClock {
+pub(crate) trait PaceClock {
     /// Real time since an arbitrary origin.
     fn now(&self) -> Duration;
     /// Waits `d`.
@@ -1027,7 +1027,7 @@ pub trait PaceClock {
 }
 
 /// The wall clock.
-pub struct WallPace(Instant);
+pub(crate) struct WallPace(Instant);
 
 impl WallPace {
     /// Starting now.
@@ -1054,7 +1054,7 @@ impl PaceClock for WallPace {
 
 /// Sends simulation time at a pace ([`Speed`]): inside a session N× real time, a closed
 /// stretch at most [`CLOSED_PAUSE`].
-pub struct Pacer<'a> {
+pub(crate) struct Pacer<'a> {
     speed: Speed,
     clock: &'a dyn PaceClock,
     cal: ExchangeCalendar,
@@ -1109,7 +1109,7 @@ impl<'a> Pacer<'a> {
 
 /// Counts of a drive (no values).
 #[derive(Debug, Clone, Default, PartialEq, Eq)]
-pub struct DriveStats {
+pub(crate) struct DriveStats {
     /// Trade records sent.
     pub trades: u64,
     /// Clock moves sent.
@@ -1122,7 +1122,7 @@ pub struct DriveStats {
 /// connection opening, then every trade (as its wire record) and clock point
 /// ([`schedule`]) in time order, each clock move paced by `pacer`. `sink` returns
 /// `false` to stop early.
-pub fn drive(
+pub(crate) fn drive(
     input: &SimInput,
     interval: Interval,
     decode: &TradeDecodeConfig,
@@ -1186,7 +1186,7 @@ pub fn drive(
 ///
 /// # Errors
 /// The host or the runtime refuses the history.
-pub fn runtime(
+pub(crate) fn runtime(
     spec: &SimSpec,
     input: &SimInput,
     to_hub: Arc<dyn Fn(LiveIn) + Send + Sync>,
@@ -1222,11 +1222,11 @@ pub fn runtime(
 ///
 /// # Errors
 /// The host refuses the history.
-pub fn host(spec: &SimSpec, input: &SimInput) -> Result<ReplayHost, String> {
+pub(crate) fn host(spec: &SimSpec, input: &SimInput) -> Result<ReplayHost, String> {
     let mut host = crate::livehost::host_from_history(
         input.hist.clone(),
         &spec.interval,
-        &qp_wasm::shell::DemoOptions {
+        &qp_shellcore::shell::DemoOptions {
             local: true,
             instruments: 0,
             history: spec.history,
@@ -1246,7 +1246,7 @@ pub fn host(spec: &SimSpec, input: &SimInput) -> Result<ReplayHost, String> {
 /// The event stream of a run: the data events the authority took, capsule births and
 /// state changes, market status changes and the authority's messages, one JSON line each,
 /// with a running SHA-256 (the digest compares two runs without printing data).
-pub struct Stream {
+pub(crate) struct Stream {
     w: Option<BufWriter<std::fs::File>>,
     hash: Sha256,
     sent: usize,
@@ -1422,7 +1422,7 @@ impl Stream {
 ///
 /// # Errors
 /// Anywhere else.
-pub fn check_out(out: &Path, root: &Path) -> Result<PathBuf, String> {
+pub(crate) fn check_out(out: &Path, root: &Path) -> Result<PathBuf, String> {
     let abs = |p: &Path| {
         if p.is_absolute() {
             p.to_owned()
@@ -1456,7 +1456,7 @@ pub fn check_out(out: &Path, root: &Path) -> Result<PathBuf, String> {
 
 /// Result counts of a run (printed; no values).
 #[derive(Debug, Clone)]
-pub struct RunSummary {
+pub(crate) struct RunSummary {
     /// The summary as JSON.
     pub json: Value,
     /// The stream digest.
@@ -1468,7 +1468,7 @@ pub struct RunSummary {
 ///
 /// # Errors
 /// Loading, the host, or the output file.
-pub fn run(
+pub(crate) fn run(
     spec: &SimSpec,
     speed: Speed,
     out: Option<&Path>,
@@ -1565,7 +1565,7 @@ pub fn sim(a: &SimArgs) -> Result<(), String> {
 
 /// The demo side: sends the inputs to the hub as `qp demo` commands, paced, waiting for
 /// the hub every `SYNC_EVERY` inputs (so `max` does not run ahead of the hub).
-pub fn spawn_feeder(
+pub(crate) fn spawn_feeder(
     input: Arc<SimInput>,
     interval: Interval,
     speed: Speed,

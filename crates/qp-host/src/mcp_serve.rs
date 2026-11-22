@@ -39,7 +39,7 @@ use qp_schema::protocol::{Principal, SessionInit};
 use serde_json::{json, Value};
 
 /// Agent principals the synthetic init adds: (id, the person it works for).
-pub const AGENTS: [(&str, &str); 2] = [("claude", "arkin"), ("claude-guest", "guest")];
+pub(crate) const AGENTS: [(&str, &str); 2] = [("claude", "arkin"), ("claude-guest", "guest")];
 
 /// `qp mcp serve` arguments.
 #[derive(Debug, clap::Args)]
@@ -160,7 +160,7 @@ impl Dump {
 
 /// Adds the agent principals [`AGENTS`] (agent author, role `proposer`) when missing;
 /// with explicit replay entitlements, each gets those of the person it works for.
-pub fn add_agent_principals(init: &mut SessionInit) {
+pub(crate) fn add_agent_principals(init: &mut SessionInit) {
     for (id, behalf) in AGENTS {
         if init.principals.iter().any(|p| p.id == id) {
             continue;
@@ -190,7 +190,7 @@ pub fn add_agent_principals(init: &mut SessionInit) {
 
 /// The init's principals whose author is an agent.
 #[must_use]
-pub fn agent_principals(init: &SessionInit) -> Vec<String> {
+pub(crate) fn agent_principals(init: &SessionInit) -> Vec<String> {
     init.principals
         .iter()
         .filter(|p| matches!(p.author, qp_schema::Author::Agent { .. }))
@@ -202,7 +202,7 @@ pub fn agent_principals(init: &SessionInit) -> Vec<String> {
 ///
 /// # Errors
 /// Unknown principal, or not an agent.
-pub fn check_principal(init: &SessionInit, principal: &str) -> Result<(), String> {
+pub(crate) fn check_principal(init: &SessionInit, principal: &str) -> Result<(), String> {
     let Some(p) = init.principals.iter().find(|p| p.id == principal) else {
         return Err(format!(
             "--principal `{principal}` is not a principal of the session (agents: {})",
@@ -272,7 +272,7 @@ fn session_init(a: &ServeArgs) -> Result<SessionInit, String> {
 ///
 /// # Errors
 /// The session cannot start or the seek is invalid.
-pub fn build_hub(
+pub(crate) fn build_hub(
     init: SessionInit,
     root: &std::path::Path,
     seek: Option<&str>,
@@ -452,7 +452,7 @@ fn is_local(addr: &str) -> bool {
 }
 
 /// What an endpoint is opened with.
-pub struct HostCfg {
+pub(crate) struct HostCfg {
     /// Principal when a request names none.
     pub default_principal: String,
     /// Principals a request may name with `X-Qp-Principal`: `default_principal`, plus
@@ -560,7 +560,7 @@ fn serve_stdio(
 
 /// What an HTTP request must look like.
 #[derive(Debug, Clone)]
-pub struct HttpGate {
+pub(crate) struct HttpGate {
     /// The server's port (allowed `Origin`s carry it, or no port).
     pub port: u16,
     /// Allowed `Host` values; `None`: any (a token-protected non-local address, or a
@@ -613,7 +613,7 @@ impl HttpGate {
 }
 
 /// An HTTP request handed to the hub's thread.
-pub enum Job {
+pub(crate) enum Job {
     /// `POST /mcp`.
     Post {
         /// Lower-case header names.
@@ -646,7 +646,7 @@ pub enum Job {
 }
 
 /// The hub's answer to a [`Job`].
-pub enum Answer {
+pub(crate) enum Answer {
     /// A complete response.
     Body {
         /// HTTP status code.
@@ -713,7 +713,7 @@ fn rpc_error_body(code: i64, message: &str) -> String {
 /// Serves one `/mcp` request (the request line and headers are read; `body` is the
 /// body): checks `Host`, `Origin` and the token, hands the request to the hub's thread
 /// and writes its answer.
-pub fn handle(
+pub(crate) fn handle(
     s: &mut TcpStream,
     method: &str,
     headers: &BTreeMap<String, String>,
@@ -972,7 +972,7 @@ struct HttpSession {
 }
 
 /// The hub thread's side of the HTTP endpoint: sessions, endpoints, streams.
-pub struct McpHost {
+pub(crate) struct McpHost {
     cfg: HostCfg,
     /// By `Mcp-Session-Id`; `""` is the stateless (modern) session.
     sessions: BTreeMap<String, HttpSession>,

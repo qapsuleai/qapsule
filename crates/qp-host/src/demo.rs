@@ -55,7 +55,7 @@ use std::time::{Duration, Instant};
 use qp_schema::data::FeedKey;
 use qp_schema::protocol::InitData;
 use qp_session::ReplayHost;
-use qp_wasm::shell::{demo_session_init, DemoOptions};
+use qp_shellcore::shell::{demo_session_init, DemoOptions};
 use serde_json::{json, Value};
 
 /// `qp demo` arguments.
@@ -1348,11 +1348,11 @@ fn stream_events(s: &mut TcpStream, frx: &Receiver<String>, tx: &Sender<Cmd>) {
 /// background) and kept.
 #[derive(Default)]
 struct GalleryStore {
-    builds: std::sync::Mutex<BTreeMap<(String, String), std::sync::Arc<qp_wasm::gallery::Build>>>,
+    builds: std::sync::Mutex<BTreeMap<(String, String), std::sync::Arc<qp_shellcore::gallery::Build>>>,
 }
 
 impl GalleryStore {
-    fn get(&self, lang: &str, theme: &str) -> std::sync::Arc<qp_wasm::gallery::Build> {
+    fn get(&self, lang: &str, theme: &str) -> std::sync::Arc<qp_shellcore::gallery::Build> {
         let lang = if lang == "en" { "en" } else { "tr" };
         let theme = if theme == "light" { "light" } else { "dark" };
         // One build at a time (the lock is held while building: a second request for the
@@ -1362,7 +1362,7 @@ impl GalleryStore {
             .lock()
             .unwrap_or_else(std::sync::PoisonError::into_inner);
         m.entry((lang.to_owned(), theme.to_owned()))
-            .or_insert_with(|| std::sync::Arc::new(qp_wasm::gallery::build(lang, theme)))
+            .or_insert_with(|| std::sync::Arc::new(qp_shellcore::gallery::build(lang, theme)))
             .clone()
     }
 
@@ -1701,10 +1701,10 @@ pub fn drive(a: &DriveArgs) -> Result<(), String> {
     let text =
         std::fs::read_to_string(&a.script).map_err(|e| format!("{}: {e}", a.script.display()))?;
     let script: Vec<Value> = serde_json::from_str(&text).map_err(|e| format!("script: {e}"))?;
-    let mut host = qp_wasm::drive::parity_host_n(a.instruments);
+    let mut host = qp_shellcore::drive::parity_host_n(a.instruments);
     let out = match a.mode.as_str() {
-        "replica" => qp_wasm::drive::shell_less(&mut host, &a.principal, &a.lang, &script),
-        "viewer" => qp_wasm::drive::viewer_less(&mut host, &a.principal, &a.lang, &script),
+        "replica" => qp_shellcore::drive::shell_less(&mut host, &a.principal, &a.lang, &script),
+        "viewer" => qp_shellcore::drive::viewer_less(&mut host, &a.principal, &a.lang, &script),
         m => return Err(format!("--mode: `{m}` (replica or viewer)")),
     };
     let s = serde_json::to_string_pretty(&out).map_err(|e| e.to_string())?;

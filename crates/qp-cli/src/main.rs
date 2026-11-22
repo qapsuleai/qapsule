@@ -8,13 +8,7 @@ use std::process::ExitCode;
 
 use clap::{Parser, Subcommand};
 
-mod demo;
-mod demo_static;
-mod live;
-mod live_trades;
-mod livehost;
-mod mcp_serve;
-mod sim;
+use qp_host::{demo, live, mcp_serve, sim};
 
 #[derive(Debug, Parser)]
 #[command(name = "qp", version, about = "Qapsule command line", long_about = None)]

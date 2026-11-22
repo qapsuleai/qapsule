@@ -233,7 +233,7 @@ fn reset(a: &ResetArgs, dir: &Path) -> Result<(), String> {
 }
 
 /// Repository root: the directory holding `fixtures/` (walks up from the current dir).
-pub fn repo_root() -> PathBuf {
+pub(crate) fn repo_root() -> PathBuf {
     let cwd = std::env::current_dir().unwrap_or_else(|_| PathBuf::from("."));
     let mut d = cwd.as_path();
     loop {
@@ -247,7 +247,7 @@ pub fn repo_root() -> PathBuf {
     }
 }
 
-pub fn parse_symbols(s: &str) -> Result<Vec<String>, String> {
+pub(crate) fn parse_symbols(s: &str) -> Result<Vec<String>, String> {
     let text = match s.strip_prefix('@') {
         Some(path) => std::fs::read_to_string(path).map_err(|e| format!("{path}: {e}"))?,
         None => s.replace(',', "\n"),
@@ -276,7 +276,7 @@ pub fn parse_symbols(s: &str) -> Result<Vec<String>, String> {
     Ok(out)
 }
 
-pub fn utc_stamp(us: i64) -> String {
+pub(crate) fn utc_stamp(us: i64) -> String {
     let s = us.div_euclid(1_000_000);
     let day = s.div_euclid(86_400);
     let (y, m, d) = qp_calendar::civil_from_days(day);
@@ -289,7 +289,7 @@ pub fn utc_stamp(us: i64) -> String {
     )
 }
 
-pub fn now_us() -> i64 {
+pub(crate) fn now_us() -> i64 {
     std::time::SystemTime::now()
         .duration_since(std::time::UNIX_EPOCH)
         .map(|d| i64::try_from(d.as_micros()).unwrap_or(i64::MAX))
@@ -302,14 +302,14 @@ pub fn now_us() -> i64 {
 /// live connection is open. The directory is `qp_live::lock::default_lock_dir()` (the main
 /// tree's `fixtures/local`, also from a worktree; `QP_LIVE_LOCK_DIR` overrides), never the
 /// current working root.
-pub fn identity_lock() -> Result<qp_live::lock::MachineLock, String> {
+pub(crate) fn identity_lock() -> Result<qp_live::lock::MachineLock, String> {
     let dir = qp_live::lock::default_lock_dir();
     qp_live::lock::acquire_machine_lock(&dir, &qp_live::EndpointKey::new("identity"))
         .map_err(|e| format!("live: {e} (another qp process holds the Matriks identity)"))
 }
 
 /// The classifier wired into the connection: Matriks `MessengerMessage` decoding.
-pub fn classifier() -> NoticeClassifier {
+pub(crate) fn classifier() -> NoticeClassifier {
     Arc::new(|topic: &str, payload: &[u8]| {
         let n = qp_matriks::classify_notice(topic, payload)?;
         Some(if n.is_multi_connect() {
@@ -322,7 +322,7 @@ pub fn classifier() -> NoticeClassifier {
 
 /// Whether `topic` is a trade topic (`mx/trade/…`, `mx/tradeex/…`, also mirrored).
 #[must_use]
-pub fn is_trade_topic(topic: &str) -> bool {
+pub(crate) fn is_trade_topic(topic: &str) -> bool {
     // The strict parser, and a prefix check as a floor: any topic naming a trade stream
     // (also inside a mirror, or in a form the parser does not know) is treated as a trade,
     // so its payload is sanitized rather than kept as is (security review, RP4).
@@ -343,7 +343,7 @@ pub fn is_trade_topic(topic: &str) -> bool {
 ///
 /// With `trade_endpoint`, every payload received on the trade endpoint is treated as a
 /// trade whatever its topic (sanitized, or kept as nothing when it does not decode).
-pub fn keepable_payload_on<'a>(
+pub(crate) fn keepable_payload_on<'a>(
     topic: &str,
     payload: &'a [u8],
     trade_endpoint: bool,
@@ -360,11 +360,11 @@ pub fn keepable_payload_on<'a>(
 }
 
 /// Prefix of the raw log note with the trade sanitizing counts (`qp live inspect`).
-pub const TRADE_SANITIZE_NOTE: &str = "trade-sanitize";
+pub(crate) const TRADE_SANITIZE_NOTE: &str = "trade-sanitize";
 
 /// A sink that appends every message and event to a raw log and counts. Trade payloads are
 /// written without buyer and seller ([`keepable_payload_on`]).
-pub struct RawSink {
+pub(crate) struct RawSink {
     w: Mutex<RawWriter<BufWriter<File>>>,
     pub messages: AtomicU64,
     pub bytes: AtomicU64,
@@ -538,7 +538,7 @@ impl LiveSink for RawSink {
 ///
 /// # Errors
 /// A bad symbol, or a refused level.
-pub fn record_topics(a: &RecordArgs, symbols: &[String]) -> Result<Vec<String>, String> {
+pub(crate) fn record_topics(a: &RecordArgs, symbols: &[String]) -> Result<Vec<String>, String> {
     let mut topics = Vec::new();
     if a.trades {
         if a.messenger {
@@ -713,7 +713,7 @@ fn state_name(s: &ConnState) -> String {
 }
 
 /// Reads every record of a raw log (a truncated last record ends the read).
-pub fn read_all(path: &Path) -> Result<(Vec<RawRecord>, Option<String>), String> {
+pub(crate) fn read_all(path: &Path) -> Result<(Vec<RawRecord>, Option<String>), String> {
     let f = File::open(path).map_err(|e| format!("{}: {e}", path.display()))?;
     let mut r = RawReader::new(BufReader::new(f)).map_err(|e| e.to_string())?;
     let mut out = Vec::new();
@@ -745,7 +745,7 @@ fn shape(s: &str) -> String {
 
 /// Parses an ISO-like time (`YYYY-MM-DDTHH:MM:SS[.f][Z|±HH:MM]`) to UTC ms; a time
 /// without offset is read as Istanbul (UTC+3). Returns (ms, had_offset).
-pub fn parse_iso_ms(s: &str) -> Option<(i64, bool)> {
+pub(crate) fn parse_iso_ms(s: &str) -> Option<(i64, bool)> {
     let b = s.as_bytes();
     if b.len() < 19 || b[4] != b'-' || b[7] != b'-' || (b[10] != b'T' && b[10] != b' ') {
         return None;
@@ -798,7 +798,7 @@ pub fn parse_iso_ms(s: &str) -> Option<(i64, bool)> {
 /// (RP4) Aggregate statistics of the trade messages of a raw log (no values: counts,
 /// field presence, time-unit estimate, arrival lags, the side value set).
 #[derive(Debug, Default, Clone, PartialEq)]
-pub struct TradeInspect {
+pub(crate) struct TradeInspect {
     /// `mx/trade/…` messages.
     pub regular: u64,
     /// `mx/tradeex/…` messages.
@@ -841,7 +841,7 @@ impl TradeInspect {
 
 /// (RP4) [`TradeInspect`] of raw records.
 #[must_use]
-pub fn inspect_trades(recs: &[RawRecord]) -> TradeInspect {
+pub(crate) fn inspect_trades(recs: &[RawRecord]) -> TradeInspect {
     use qp_matriks::trade::resolve_trade_time;
     use qp_matriks::{
         decode_trade_raw, parse_topic, Topic, TradeDecodeConfig, TradeTimeUnit, TRADE_FIELDS,
@@ -1502,7 +1502,7 @@ mod window_tests {
     }
 }
 
-pub fn parse_method(s: &str) -> Result<qp_source::BarMethod, String> {
+pub(crate) fn parse_method(s: &str) -> Result<qp_source::BarMethod, String> {
     use qp_source::BarMethod;
     Ok(match s {
         "ticks" => BarMethod::Ticks,
@@ -1512,7 +1512,7 @@ pub fn parse_method(s: &str) -> Result<qp_source::BarMethod, String> {
     })
 }
 
-pub fn parse_volume_field(s: &str) -> Result<qp_matriks::VolumeField, String> {
+pub(crate) fn parse_volume_field(s: &str) -> Result<qp_matriks::VolumeField, String> {
     match s {
         "daily" | "daily_volume" => Ok(qp_matriks::VolumeField::DailyVolume),
         "volume" => Ok(qp_matriks::VolumeField::Volume),
@@ -1564,14 +1564,14 @@ impl FeedArgs {
 }
 
 /// The XIST exchange calendar.
-pub fn xist() -> Result<qp_calendar::ExchangeCalendar, String> {
+pub(crate) fn xist() -> Result<qp_calendar::ExchangeCalendar, String> {
     let cal = qp_calendar::builtin("XIST").ok_or("no XIST calendar")?;
     qp_calendar::ExchangeCalendar::new(&cal).map_err(|e| e.to_string())
 }
 
 /// JSON lines of one [`qp_matriks::FeedOut`], in a fixed order: connection, phases, data
 /// events, clock, final bars.
-pub fn feed_out_lines(out: &qp_matriks::FeedOut) -> Vec<String> {
+pub(crate) fn feed_out_lines(out: &qp_matriks::FeedOut) -> Vec<String> {
     use serde_json::json;
     let mut lines = Vec::new();
     match out.connection {

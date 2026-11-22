@@ -1,87 +1,61 @@
-//! `qp mcp` over stdio and `qp conform --transport mcp`, end to end.
+//! `qp mcp` without the RD1 adapter, and `qp conform --transport mcp`, end to end.
 
-use std::io::{BufRead, BufReader, Write};
 use std::path::{Path, PathBuf};
-use std::process::{Command as Proc, Stdio};
 
 use assert_cmd::Command;
-use serde_json::{json, Value};
 
 fn root() -> PathBuf {
     Path::new(env!("CARGO_MANIFEST_DIR")).join("../..")
 }
 
+/// (RD2/A62) The RD1 one-principal adapter `qp mcp --init … --principal …` is gone: the
+/// flags are refused, `qp mcp` alone runs nothing, and `qp mcp --help` offers only
+/// `serve` (the R5B server, agent principals only).
 #[test]
-fn mcp_stdio_smoke() {
-    let bin = assert_cmd::cargo::cargo_bin("qp");
-    let mut child = Proc::new(bin)
-        .current_dir(root())
-        .args([
+fn the_rd1_adapter_is_removed() {
+    let qp = || {
+        let mut c = Command::cargo_bin("qp").unwrap();
+        c.current_dir(root());
+        c
+    };
+    for args in [
+        vec![
             "mcp",
             "--init",
             "fixtures/protocol/init/thyao.json",
             "--principal",
             "arkin",
-            "--surface",
-            "desktop",
-        ])
-        .stdin(Stdio::piped())
-        .stdout(Stdio::piped())
-        .stderr(Stdio::inherit())
-        .spawn()
+        ],
+        vec!["mcp", "--principal", "arkin", "--surface", "desktop"],
+        vec!["mcp"],
+    ] {
+        let out = qp().args(&args).write_stdin("").output().unwrap();
+        assert!(!out.status.success(), "{args:?} was accepted");
+        assert!(out.stdout.is_empty(), "{args:?} wrote to stdout");
+    }
+    let out = qp()
+        .args(["mcp", "--init", "fixtures/protocol/init/thyao.json"])
+        .output()
         .unwrap();
-    let mut stdin = child.stdin.take().unwrap();
-    let mut stdout = BufReader::new(child.stdout.take().unwrap());
-    let mut ask = |req: Value| -> Value {
-        writeln!(stdin, "{req}").unwrap();
-        stdin.flush().unwrap();
-        loop {
-            let mut line = String::new();
-            assert!(
-                stdout.read_line(&mut line).unwrap() > 0,
-                "qp mcp closed stdout"
-            );
-            let v: Value = serde_json::from_str(&line).unwrap();
-            if v.get("id") == req.get("id") {
-                return v;
-            }
-        }
-    };
-    let init = ask(
-        json!({"jsonrpc":"2.0","id":1,"method":"initialize","params":{
-        "protocolVersion":"2025-11-25","capabilities":{},"clientInfo":{"name":"smoke","version":"0"}}}),
-    );
-    assert_eq!(init["result"]["protocolVersion"], "2025-11-25");
-    assert_eq!(
-        init["result"]["_meta"]["dev.qapsule/welcome"]["type"],
-        "welcome"
-    );
-    let list = ask(json!({"jsonrpc":"2.0","id":2,"method":"tools/list"}));
-    let names: Vec<&str> = list["result"]["tools"]
-        .as_array()
-        .unwrap()
-        .iter()
-        .map(|t| t["name"].as_str().unwrap())
+    let err = String::from_utf8_lossy(&out.stderr);
+    assert!(err.contains("unexpected argument '--init'"), "{err}");
+    let help = qp().args(["mcp", "--help"]).output().unwrap();
+    assert!(help.status.success());
+    let help = String::from_utf8_lossy(&help.stdout);
+    assert!(help.contains("serve"), "{help}");
+    for gone in ["--init", "--principal", "RD1"] {
+        assert!(
+            !help.contains(gone),
+            "`qp mcp --help` still offers {gone}: {help}"
+        );
+    }
+    // `qp mcp` itself takes no option but `--help`.
+    let options = help.split("Options:").nth(1).unwrap_or_default();
+    let flags: Vec<&str> = options
+        .lines()
+        .filter_map(|l| l.split_whitespace().find(|w| w.starts_with("--")))
         .collect();
-    assert!(names.contains(&"op_add_study") && names.contains(&"query_get"));
-    let add = ask(
-        json!({"jsonrpc":"2.0","id":3,"method":"tools/call","params":{
-        "name":"op_add_study","arguments":{"id":"sma9","study":"sma","inputs":["px"],
-        "params":{"period":9}}}}),
-    );
-    let r = &add["result"];
-    assert_eq!(r["isError"], false, "{add}");
-    assert_eq!(r["structuredContent"]["type"], "ack");
-    assert_eq!(r["structuredContent"]["status"], "applied");
-    let get = ask(
-        json!({"jsonrpc":"2.0","id":4,"method":"tools/call","params":{
-        "name":"query_get","arguments":{"id":"sma9"}}}),
-    );
-    let sc = &get["result"]["structuredContent"];
-    assert_eq!(sc["type"], "result", "{get}");
-    assert!(sc.to_string().contains("\"sma\""), "{sc}");
-    drop(stdin);
-    assert!(child.wait().unwrap().success());
+    assert_eq!(flags, ["--help"], "{help}");
 }
 
 #[test]

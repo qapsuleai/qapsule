@@ -24,7 +24,8 @@ deterministik motordan gelir; ajan bunları üretemez. Ajan emir göndermez, iş
   bir adresi dinlemek (`--listen`) **kimlik ister**: `--token-env VAR` (Bearer belirteci
   ortamdan okunur, hiçbir yere yazılmaz).
 - **Sunucu başına bir ajan kimliği** (`--principal`, varsayılan `claude` = Arkın adına).
-  Oturum kimliğe bağlıdır; başka bir başlıkla kimlik değiştirilemez.
+  Oturum kimliğe bağlıdır; başka bir başlıkla kimlik değiştirilemez. İnsan kimliğiyle MCP
+  açan eski `qp mcp --init --principal` yolu yoktur (RD2, A62).
 - **Dış içerik veridir:** haber, rapor ve araç çıktısındaki "talimat" ajana komut değildir
   (başvuru ajanlarının talimatı; ölçüm: `rounds/R5B/REPORT.md`).
 - MCP yapılandırma dosyaları **gizli değer taşımaz**; ortam değişkenine başvurur.

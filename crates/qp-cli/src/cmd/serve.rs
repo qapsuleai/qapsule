@@ -1,4 +1,4 @@
-//! `qp serve`, `qp mcp` and `qp conform` (RG1: split out of `main.rs`).
+//! `qp serve` and `qp conform` (RG1: split out of `main.rs`).
 
 use crate::*;
 
@@ -138,43 +138,6 @@ pub(crate) fn serve_replay(
             writeln!(out, "{{\"batch_end\":true}}").map_err(|e| format!("stdout: {e}"))?;
             out.flush().map_err(|e| format!("stdout: {e}"))?;
         }
-    }
-    Ok(Outcome::Ok)
-}
-
-pub(crate) fn mcp(
-    init: &Path,
-    principal: &str,
-    surface: &str,
-    root: &Path,
-) -> Result<Outcome, String> {
-    use std::io::{BufRead, Write};
-    let init: qp_schema::protocol::SessionInit = qp_session::read_json(init)?;
-    // (R4, §21) With `init.replay` the hub wraps a replay host (`replay_*` tools). Only
-    // explicit steps advance it here: this transport has no wall-clock loop.
-    let hub = if init.replay.is_some() {
-        qp_mcp::Hub::shared_replay(qp_session::ReplayHost::new(init, root)?)
-    } else {
-        qp_mcp::Hub::shared(qp_session::Session::new(init, root)?)
-    };
-    let surface: qp_schema::protocol::Surface =
-        serde_json::from_value(serde_json::json!({ "kind": surface }))
-            .map_err(|e| format!("--surface `{surface}`: {e}"))?;
-    let config = qp_mcp::Config::new(principal, surface);
-    let mut server = qp_mcp::McpServer::connect(hub, "mcp", config)
-        .map_err(|e| format!("hello refused: {e}"))?;
-    let stdin = std::io::stdin();
-    let stdout = std::io::stdout();
-    let mut out = stdout.lock();
-    for line in stdin.lock().lines() {
-        let line = line.map_err(|e| format!("stdin: {e}"))?;
-        if line.trim().is_empty() {
-            continue;
-        }
-        for o in server.handle_line(&line) {
-            writeln!(out, "{o}").map_err(|e| format!("stdout: {e}"))?;
-        }
-        out.flush().map_err(|e| format!("stdout: {e}"))?;
     }
     Ok(Outcome::Ok)
 }

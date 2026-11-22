@@ -43,8 +43,9 @@ pub fn new() -> Box<dyn ToolSurface> {
     })
 }
 
-/// The RD1 surface with every generated tool, for adapters a person speaks through
-/// ([`crate::McpServer::connect`], the conformance runner).
+/// The RD1 surface with every generated tool, for the in-process conformance runner
+/// ([`crate::McpServer::connect`]). No command serves it to an MCP client (RD2/A62
+/// removed `qp mcp --init --principal`).
 #[must_use]
 pub fn with_decisions() -> Box<dyn ToolSurface> {
     Box::new(Thin {

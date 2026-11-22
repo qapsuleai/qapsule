@@ -70,7 +70,9 @@ yalnızca bir istemcidir (AI-native testi 5).
   değişimler = doküman, bayt düzeyinde (yeniden oynatma hesap kodu istemez).
 - **Varlık durumu** (bakılan aralık, odak, dikkat yönergeleri) günlüğe girmez.
 - **Taşımalar:** süreç içi (`Session::handle_raw`), satır akışı (`qp serve`), MCP
-  (`qp mcp`, araçlar şemadan üretilir). Uygunluk dökümleri üçünde de aynı.
+  (`qp mcp serve` ajanlar için; araçlar şemadan üretilir). Uygunluk dökümleri üçünde de
+  aynı (MCP'de süreç içi `qp_mcp::conform`). Eski tek kimlikli `qp mcp --init --principal`
+  bağdaştırıcısı RD2'de kaldırıldı (A62, K86).
 
 ## Kabuk sınırı (R4)
 

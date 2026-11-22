@@ -15,8 +15,9 @@
 #   conform/    `qp conform` stdout over inproc, serve, mcp; views transcripts
 #   replica/    `qp replica-tape` lag 0/25, viewer lag 0/25
 #   replay/     `qp replay` line stream (verify.sh step 16 controls)
-#   mcp/        MCP `tools/list` + `initialize` of every `qp mcp serve` surface and the
-#               RD1 adapter (`qp mcp --init`)
+#   mcp/        MCP `tools/list` + `initialize` of every `qp mcp serve` surface (the RD1
+#               adapter `qp mcp --init`, dumped as mcp/adapter.jsonl in the RG1 baseline,
+#               was removed in RD2/A62)
 #   drive/      `qp drive` (shell parity script) replica and viewer modes
 #   look/       `qp look list`, every `look show` and `look css`
 #   cli/        `--help` of every command and subcommand, `qp --version`
@@ -148,8 +149,6 @@ for s in thin task query mixed; do
   printf '%s\n' "$rpc" | "$qp" mcp serve --surface "$s" >"$out/mcp/serve-$s.jsonl" 2>/dev/null
 done
 scripts/rg1/mcp_calls.sh "$qp" "$out/mcp/calls"
-printf '%s\n' "$rpc" | "$qp" mcp --init fixtures/protocol/init/thyao.json --principal editor \
-  >"$out/mcp/adapter.jsonl" 2>/dev/null
 
 # --- drive (shell parity, shell-less) ---------------------------------------------
 mkdir -p "$out/drive"

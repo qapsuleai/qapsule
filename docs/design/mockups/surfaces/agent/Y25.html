@@ -1,0 +1,148 @@
+<!doctype html>
+<!-- RD2 M2 (ajan) — Y25 veri ve piyasa durumu şeridi, kademe 1: on durum, iki profil.
+     Masaüstünde ekranın altında tek satır (AT-B1): sol veri kaynağı · durum, orta seans ve son
+     bar, sağ izleme sağlığı ve köken çizgi anahtarı. Telefonda üstte tek satır: en önemli
+     tek durum (koptu > bayat > yetki yok > gecikmeli > canlı) + saat. Durum hiçbir zaman
+     yalnız renkle söylenmez; tam renk yalnız gerçek kopuşta. -->
+<html lang="tr">
+<head>
+  <meta charset="utf-8">
+  <title>Y25 Veri ve piyasa durumu</title>
+  <link rel="stylesheet" href="../../_base/base.css">
+  <link rel="stylesheet" href="../../tavek/tavek.css">
+  <link rel="stylesheet" href="agent.css">
+  <script src="../../_base/frame.js"></script>
+</head>
+<body class="sheet-body">
+<main class="sheet">
+  <header class="sheet-head">
+    <div>
+      <span class="eyebrow">Y25 · kademe 1 · system.md</span>
+      <h1>Veri ve piyasa durumu şeridi</h1>
+      <p>Piyasa açık mı, veri canlı mı, gecikmeli mi, bayat mı; izlemeler değerlendiriliyor mu. Şerit
+        motorun ve barındırıcının sesidir; köken anahtarı burada sürekli durur. Durum değişince yalnız
+        sözcük ve renk geçer, hareket yok.</p>
+    </div>
+    <div class="meta"><span class="pill">MarketStatus · BindingState</span></div>
+  </header>
+
+  <section class="profile desk" aria-label="Masaüstü">
+    <h2>Yerinde: Ç1 alt şerit <span class="note">Grafik ve paneller şeridin üstünde; şerit tam genişlik</span></h2>
+    <div class="desk-corner">
+      <div class="chart-slot mini-chart" style="border: none; border-radius: 0"><img data-chart="desk" alt="SAMPLE günlük grafik"></div>
+      <div class="strip" style="border-radius: 0; border-left: none; border-right: none; border-bottom: none"><span class="seg"><span class="pulse"></span><span class="fg">Canlı</span> · Sentetik besleme</span><span class="vr"></span><span class="seg">Seans açık 10:00–18:00</span><span class="seg mono">Son bar 14:35:02</span><span class="grow"></span><span class="seg">5 izleme · son kontrol <span class="mono">14:35</span></span><span class="vr"></span><span class="layers"><span class="stroke">İnsan, düz</span><span class="stroke agent">Ajan, kesik</span><span class="stroke engine">Motor, noktalı</span></span></div>
+    </div>
+
+    <h2>Bütün durumlar <span class="note">Şartname tablosu sırasıyla · her satır şeridin tamamı</span></h2>
+    <div class="states rows">
+      <figure class="state">
+        <figcaption><span class="n">1</span><b>Açık, canlı</b><span class="role">--muted · sakin şerit</span></figcaption>
+        <div class="strip "><span class="seg"><span class="pulse"></span><span class="fg">Canlı</span> · Sentetik besleme</span><span class="vr"></span><span class="seg">Seans açık 10:00–18:00</span><span class="seg mono">Son bar 14:35:02</span><span class="grow"></span><span class="seg">5 izleme · son kontrol <span class="mono">14:35</span></span><span class="vr"></span><span class="layers"><span class="stroke">İnsan, düz</span><span class="stroke agent">Ajan, kesik</span><span class="stroke engine">Motor, noktalı</span></span></div>
+      </figure>
+      <figure class="state">
+        <figcaption><span class="n">2</span><b>Kapalı</b><span class="role">--muted · evre sözcüğü</span></figcaption>
+        <div class="strip "><span class="seg"><span class="pulse hollow"></span><span class="fg">Seans kapalı</span> · açılış 10:00</span><span class="vr"></span><span class="seg">Son kapanış <span class="mono">22 Kas 18:10</span></span><span class="grow"></span><span class="seg">5 izleme · son kontrol <span class="mono">18:10</span></span><span class="vr"></span><span class="layers"><span class="stroke">İnsan, düz</span><span class="stroke agent">Ajan, kesik</span><span class="stroke engine">Motor, noktalı</span></span></div>
+      </figure>
+      <figure class="state">
+        <figcaption><span class="n">3</span><b>Seans arası</b><span class="role">--muted · evre sözcüğü</span></figcaption>
+        <div class="strip "><span class="seg"><span class="pulse hollow"></span><span class="fg">Seans arası</span> · 13:00–14:00</span><span class="vr"></span><span class="seg mono">Son bar 12:59:58</span><span class="grow"></span><span class="seg">5 izleme · son kontrol <span class="mono">12:59</span></span><span class="vr"></span><span class="layers"><span class="stroke">İnsan, düz</span><span class="stroke agent">Ajan, kesik</span><span class="stroke engine">Motor, noktalı</span></span></div>
+      </figure>
+      <figure class="state">
+        <figcaption><span class="n">4</span><b>Gecikmeli</b><span class="role">--muted · sözcük; değerler normal</span></figcaption>
+        <div class="strip "><span class="seg"><span class="pulse"></span><span class="fg">Gecikmeli 15 dk</span> · Sentetik besleme</span><span class="vr"></span><span class="seg">Seans açık 10:00–18:00</span><span class="seg mono">Son bar 14:20:02</span><span class="grow"></span><span class="seg">5 izleme · değerlendiriliyor · <span class="mono">15 dk</span> gecikmeli</span><span class="vr"></span><span class="layers"><span class="stroke">İnsan, düz</span><span class="stroke agent">Ajan, kesik</span><span class="stroke engine">Motor, noktalı</span></span></div>
+      </figure>
+      <figure class="state">
+        <figcaption><span class="n">5</span><b>Bayat</b><span class="role">--qp-warn · ◌ + sözcük; izleme sağlığı “gecikiyor”</span></figcaption>
+        <div class="strip warn"><span class="seg"><span class="warn-word">◌ Veri bayat</span> · son veri <span class="mono">14:35</span></span><span class="vr"></span><span class="seg">3 izleme değerlendirilemiyor</span><span class="grow"></span><span class="seg"><span class="health degraded"></span>İzlemeler gecikiyor</span><span class="vr"></span><span class="layers"><span class="stroke">İnsan, düz</span><span class="stroke agent">Ajan, kesik</span><span class="stroke engine">Motor, noktalı</span></span></div>
+      </figure>
+      <figure class="state">
+        <figcaption><span class="n">6</span><b>Bağlantı koptu</b><span class="role">--alert-bg / --alert-fg · tek engelleyici, tam renk</span></figcaption>
+        <div class="strip alert"><span class="seg"><span class="fg">Bağlantı yok — veri bayat</span> · son veri <span class="mono">14:35</span></span><span class="vr"></span><span class="seg">Yazma denetimleri devre dışı · taslak duruyor</span><span class="grow"></span><span class="seg">Yeniden deneniyor</span><span class="vr"></span><span class="layers"><span class="stroke">İnsan, düz</span><span class="stroke agent">Ajan, kesik</span><span class="stroke engine">Motor, noktalı</span></span></div>
+      </figure>
+      <figure class="state">
+        <figcaption><span class="n">7</span><b>Yeniden bağlanıyor</b><span class="role">--alert-bg / --alert-fg · sayaçlı</span></figcaption>
+        <div class="strip alert"><span class="seg"><span class="fg">Yeniden bağlanıyor (3)</span> · son veri <span class="mono">14:35</span></span><span class="vr"></span><span class="seg">Değişiklik gönderilmedi, kendiliğinden yeniden gönderilmez</span><span class="grow"></span><span class="seg">Deneme <span class="mono">3</span></span><span class="vr"></span><span class="layers"><span class="stroke">İnsan, düz</span><span class="stroke agent">Ajan, kesik</span><span class="stroke engine">Motor, noktalı</span></span></div>
+      </figure>
+      <figure class="state">
+        <figcaption><span class="n">8</span><b>Yetki yok</b><span class="role">--muted · kilit + lisans adı</span></figcaption>
+        <div class="strip "><span class="seg"><span class="shape">⊘</span><span class="fg">BIST seviye 1 yetkin yok</span> · gecikmeli gösteriliyor</span><span class="vr"></span><span class="seg">Seans açık 10:00–18:00</span><span class="seg"><span class="link">Yetkiyi gör</span></span><span class="grow"></span><span class="seg">5 izleme · son kontrol <span class="mono">14:35</span></span><span class="vr"></span><span class="layers"><span class="stroke">İnsan, düz</span><span class="stroke agent">Ajan, kesik</span><span class="stroke engine">Motor, noktalı</span></span></div>
+      </figure>
+      <figure class="state">
+        <figcaption><span class="n">9</span><b>Yeniden oynatma</b><span class="role">--note-bg / --note-fg · şerit başında bant</span></figcaption>
+        <div class="strip "><span class="band-note">Sentetik veri, oynatma · 22 Ağu 14:35</span><span class="seg">Oynatma 4× · <span class="link">canlıya dön</span></span><span class="grow"></span><span class="seg">Simüle izlemeler ayrı kayıtta</span><span class="vr"></span><span class="layers"><span class="stroke">İnsan, düz</span><span class="stroke agent">Ajan, kesik</span><span class="stroke engine">Motor, noktalı</span></span></div>
+      </figure>
+      <figure class="state">
+        <figcaption><span class="n">10</span><b>İzleme sağlığı sorunlu</b><span class="role">sağlık rolü · sağ bölüm vurgulu (Y31)</span></figcaption>
+        <div class="strip "><span class="seg"><span class="pulse"></span><span class="fg">Canlı</span> · Sentetik besleme</span><span class="vr"></span><span class="seg">Seans açık 10:00–18:00</span><span class="seg mono">Son bar 14:35:02</span><span class="grow"></span><span class="health-hot"><span class="health degraded"></span>İzlemeler gecikiyor · son kontrol 25 dk önce <span class="link strong">Ayrıntı</span></span><span class="vr"></span><span class="layers"><span class="stroke">İnsan, düz</span><span class="stroke agent">Ajan, kesik</span><span class="stroke engine">Motor, noktalı</span></span></div>
+      </figure>
+    </div>
+    <h2>İyileşme <span class="note">Koptuysa tek kalıcı şerit → iyileşince tek bildirim</span></h2>
+    <div class="states">
+      <figure class="state">
+        <figcaption><span class="n">↺</span><b>Bağlantı geri geldi</b><span class="role">Y12 bildirimi, tek kez</span></figcaption>
+        <div class="stage page"><div class="toast engine">
+          <div class="head"><span class="origin engine">Motor</span><span class="grow"></span><span class="mono">14:41</span></div>
+          <p class="msg">Bağlantı geri geldi · <span class="mono">14:35–14:41</span> arası yeniden çözüldü</p>
+        </div></div>
+      </figure>
+    </div>
+  </section>
+
+  <section class="profile phone" aria-label="Telefon">
+    <h2>Telefon <span class="note">Üstte tek satır · en önemli tek durum + saat</span></h2>
+    <div class="states">
+      <figure class="state">
+        <figcaption><span class="n">1</span><b>Açık, canlı</b><span class="role">--muted · sakin şerit</span></figcaption>
+        <div class="ph"><div class="ph-status "><span class="pulse"></span><span class="fg">Canlı</span><span>· seans açık</span><span class="grow"></span><span class="mono">14:35:02</span></div>
+          <div class="ph-head"><span class="btn quiet">‹ Kule</span><h3>SYN20 · günlük</h3></div></div>
+      </figure>
+      <figure class="state">
+        <figcaption><span class="n">2</span><b>Kapalı</b><span class="role">--muted · evre sözcüğü</span></figcaption>
+        <div class="ph"><div class="ph-status "><span class="pulse hollow"></span><span>Seans kapalı · açılış 10:00</span><span class="grow"></span></div>
+          <div class="ph-head"><span class="btn quiet">‹ Kule</span><h3>SYN20 · günlük</h3></div></div>
+      </figure>
+      <figure class="state">
+        <figcaption><span class="n">3</span><b>Seans arası</b><span class="role">--muted · evre sözcüğü</span></figcaption>
+        <div class="ph"><div class="ph-status "><span class="pulse hollow"></span><span>Seans arası · 13:00–14:00</span><span class="grow"></span></div>
+          <div class="ph-head"><span class="btn quiet">‹ Kule</span><h3>SYN20 · günlük</h3></div></div>
+      </figure>
+      <figure class="state">
+        <figcaption><span class="n">4</span><b>Gecikmeli</b><span class="role">--muted · sözcük; değerler normal</span></figcaption>
+        <div class="ph"><div class="ph-status "><span class="pulse"></span><span>Gecikmeli 15 dk</span><span class="grow"></span><span class="mono">14:20</span></div>
+          <div class="ph-head"><span class="btn quiet">‹ Kule</span><h3>SYN20 · günlük</h3></div></div>
+      </figure>
+      <figure class="state">
+        <figcaption><span class="n">5</span><b>Bayat</b><span class="role">--qp-warn · ◌ + sözcük; izleme sağlığı “gecikiyor”</span></figcaption>
+        <div class="ph"><div class="ph-status warn"><span class="shape" style="color: var(--m-warn)">◌</span><span>Veri bayat · son 14:35</span><span class="grow"></span></div>
+          <div class="ph-head"><span class="btn quiet">‹ Kule</span><h3>SYN20 · günlük</h3></div></div>
+      </figure>
+      <figure class="state">
+        <figcaption><span class="n">6</span><b>Bağlantı koptu</b><span class="role">--alert-bg / --alert-fg · tek engelleyici, tam renk</span></figcaption>
+        <div class="ph"><div class="ph-status alert"><span>Bağlantı yok — veri bayat · 14:35</span><span class="grow"></span></div>
+          <div class="ph-head"><span class="btn quiet">‹ Kule</span><h3>SYN20 · günlük</h3></div></div>
+      </figure>
+      <figure class="state">
+        <figcaption><span class="n">7</span><b>Yeniden bağlanıyor</b><span class="role">--alert-bg / --alert-fg · sayaçlı</span></figcaption>
+        <div class="ph"><div class="ph-status alert"><span>Yeniden bağlanıyor (3) · 14:35</span><span class="grow"></span></div>
+          <div class="ph-head"><span class="btn quiet">‹ Kule</span><h3>SYN20 · günlük</h3></div></div>
+      </figure>
+      <figure class="state">
+        <figcaption><span class="n">8</span><b>Yetki yok</b><span class="role">--muted · kilit + lisans adı</span></figcaption>
+        <div class="ph"><div class="ph-status "><span class="shape">⊘</span><span>Seviye 1 yetkin yok · gecikmeli</span><span class="grow"></span></div>
+          <div class="ph-head"><span class="btn quiet">‹ Kule</span><h3>SYN20 · günlük</h3></div></div>
+      </figure>
+      <figure class="state">
+        <figcaption><span class="n">9</span><b>Yeniden oynatma</b><span class="role">--note-bg / --note-fg · şerit başında bant</span></figcaption>
+        <div class="ph"><div class="ph-status note-tone"><span>Sentetik veri, oynatma · 22 Ağu 14:35</span><span class="grow"></span></div>
+          <div class="ph-head"><span class="btn quiet">‹ Kule</span><h3>SYN20 · günlük</h3></div></div>
+      </figure>
+      <figure class="state">
+        <figcaption><span class="n">10</span><b>İzleme sağlığı sorunlu</b><span class="role">sağlık rolü · sağ bölüm vurgulu (Y31)</span></figcaption>
+        <div class="ph"><div class="ph-status warn"><span class="health degraded"></span><span>İzlemeler gecikiyor · 25 dk</span><span class="grow"></span></div>
+          <div class="ph-head"><span class="btn quiet">‹ Kule</span><h3>SYN20 · günlük</h3></div></div>
+      </figure>
+    </div>
+  </section>
+</main>
+</body>
+</html>

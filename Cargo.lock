@@ -1901,9 +1901,9 @@ dependencies = [
  "flate2",
  "prost",
  "qp-calendar",
- "qp-capsule",
  "qp-compute",
  "qp-grammar",
+ "qp-host",
  "qp-live",
  "qp-matriks",
  "qp-mcp",
@@ -1911,9 +1911,7 @@ dependencies = [
  "qp-schema",
  "qp-session",
  "qp-source",
- "qp-wasm",
  "serde_json",
- "sha2",
  "tempfile",
 ]
 
@@ -1945,6 +1943,27 @@ dependencies = [
  "qp-compute",
  "qp-schema",
  "serde_json",
+]
+
+[[package]]
+name = "qp-host"
+version = "0.0.0"
+dependencies = [
+ "clap",
+ "flate2",
+ "prost",
+ "qp-calendar",
+ "qp-capsule",
+ "qp-live",
+ "qp-matriks",
+ "qp-mcp",
+ "qp-schema",
+ "qp-session",
+ "qp-shellcore",
+ "qp-source",
+ "serde_json",
+ "sha2",
+ "tempfile",
 ]
 
 [[package]]
@@ -2082,6 +2101,7 @@ dependencies = [
  "qp-session",
  "qp-shellcore",
  "qp-source",
+ "qp-wasm",
  "serde_json",
  "wasm-bindgen",
  "wasm-bindgen-futures",

@@ -1,0 +1,31 @@
+[package]
+name = "qp-host"
+description = "Qapsule hosting (barındırma): live host, Matriks record and inspection, trade comparison, accelerated simulation, demo HTTP server, MCP server wiring."
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[dependencies]
+clap = { version = "4.6.7", features = ["derive"] }
+flate2 = "1"
+prost = "0.14.6"
+qp-capsule = { version = "0.0.0", path = "../qp-capsule" }
+qp-calendar = { version = "0.0.0", path = "../qp-calendar" }
+qp-live = { version = "0.0.0", path = "../qp-live" }
+qp-matriks = { version = "0.0.0", path = "../qp-matriks" }
+qp-mcp = { version = "0.0.0", path = "../qp-mcp" }
+qp-schema = { version = "0.0.0", path = "../qp-schema" }
+qp-session = { version = "0.0.0", path = "../qp-session" }
+qp-shellcore = { version = "0.0.0", path = "../qp-shellcore" }
+qp-source = { version = "0.0.0", path = "../qp-source" }
+serde_json = { version = "1.0.154", features = ["float_roundtrip"] }
+sha2 = "0.11.1"
+
+[lints]
+workspace = true
+
+[dev-dependencies]
+qp-live = { path = "../qp-live", features = ["mock"] }
+tempfile = "3.27.0"

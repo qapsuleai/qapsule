@@ -6,6 +6,7 @@ import fnmatch
 import glob
 import json
 import os
+import re
 import subprocess
 
 from . import rustscan as rs
@@ -209,6 +210,29 @@ def rule_path_attrs(scan):
                               f"{rel}: #[path = \"{m.group(1)}\"] leaves the crate's src/")
 
 
+LINT_ALLOW = re.compile(
+    r"#!?\[allow\([^\]]*clippy::(unwrap_used|expect_used|panic|too_many_lines|cognitive_complexity)\b")
+
+
+def rule_lint_allows(scan):
+    """Per crate: how many `#[allow(clippy::unwrap_used|expect_used|panic|too_many_lines|
+    cognitive_complexity)]` sit in non-test library code (RG1/L grandfathers existing
+    violations item by item; the count may only go down)."""
+    per = {}
+    for rel, (src, code) in scan.files.items():
+        parts = rel.split("/")
+        if parts[2] not in ("src", "build") or scan.is_test(rel):
+            continue
+        regions = rs.test_regions(code)
+        for m in LINT_ALLOW.finditer(src):
+            if not rs.in_regions(m.start(), regions):
+                per[parts[1]] = per.get(parts[1], 0) + 1
+    for crate, n in sorted(per.items()):
+        yield finding("lint.allow", crate, n, 0,
+                      f"{crate}: {n} grandfathered lint allows (unwrap/expect/panic/too_many_lines/"
+                      f"cognitive_complexity)")
+
+
 def rule_docs(cfg, root):
     b = cfg["budgets"]
     seen = set()
@@ -285,6 +309,7 @@ def all_findings(root, cfg, edges=None, names=None):
     out += list(rule_readmes(scan, cfg, root))
     out += list(rule_root_logic(scan, cfg))
     out += list(rule_path_attrs(scan))
+    out += list(rule_lint_allows(scan))
     out += list(rule_docs(cfg, root))
     return out, scan
 

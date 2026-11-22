@@ -85,6 +85,7 @@ EXPECT_EXTRA = [
     ("root.logic", "crates/qp-c/src/lib.rs"),          # an inline `mod x { fn … }` body
     ("fn.lines", "crates/qp-c/src/tests.rs::fake_test"),  # tests.rs not declared cfg(test)
     ("file.hard", "crates/qp-c/src/gen.rs"),             # "üretilmiştir" but not listed
+    ("lint.allow", "qp-a"),                               # a grandfathered unwrap allow
 ]
 
 
@@ -110,6 +111,7 @@ def _dirty(root):
     _w(root, "crates/qp-a/src/escape.rs", '#[path = "../../qp-b/hidden.rs"]\nmod hidden;\n')
     _w(root, "crates/qp-c/src/lib.rs", "//! ok\npub mod m;\nmod inner {\n    pub fn x() {}\n}\n")
     _w(root, "crates/qp-c/src/tests.rs", _fn("fake_test", 12))
+    _w(root, "crates/qp-a/src/lax.rs", "#[allow(clippy::unwrap_used)]\npub fn f() {}\n")
     _w(root, "crates/qp-c/src/gen.rs", "// üretilmiştir\n" + "".join(f"// {i}\n" for i in range(45)))
     return edges, names
 

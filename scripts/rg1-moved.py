@@ -31,7 +31,7 @@ from archcheck import rustscan as rs  # noqa: E402
 
 VIS = re.compile(r"^pub(\((crate|super|self|in [^)]*)\))?\s+")
 ITEM = re.compile(
-    r"\b(fn|struct|enum|union|trait|type|const|static|macro_rules!)\s*([A-Za-z_][A-Za-z0-9_]*)?")
+    r"\b(fn|struct|enum|union|trait|type|const|static|macro_rules!)(?:\s+|(?<=!)\s*)([A-Za-z_][A-Za-z0-9_]*)?")
 PATH = re.compile(r"\b((?:crate|super|self|[a-z_][a-z0-9_]*)::)+(?=[A-Za-z_{*])")
 ALLOW = re.compile(r"^#\[allow\(clippy::[a-z_]+(,\s*clippy::[a-z_]+)*\)\]$")
 

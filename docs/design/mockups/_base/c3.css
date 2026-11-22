@@ -49,7 +49,10 @@
 }
 
 .pending .chart-slot {
+  /* `--qp-control-h` is `auto` in looks without a control height (r4): the calc is then
+     invalid and the slot would collapse; the bar height keeps the anchor geometry. */
   height: calc(var(--m-control-h) * 3);
+  min-height: calc(var(--qp-bar-h) * 3);
   border-radius: var(--m-radius-control);
 }
 

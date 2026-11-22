@@ -57,6 +57,29 @@ gösterir; seçilen yön gelince blok onun iki profiliyle değişir.
 - Veri üstündeki anlam işareti küçüktür ve veriyi örtmez (`chart.mark_max_px`; P8).
 - Masaüstü çalışma alanı birden çok bölge ve grafik bölmesi gösterir (P9, galeri düzen dökümü).
 
+## Ölçüm
+
+`scripts/design-check` (`crates/qp-grammar/tests/design_check`) her ölçütü ya kayıttan ya
+derlenmiş sahneden okur; sahne ölçütleri `fixtures/design/desk.json` görünümünü, imleç
+120. bardayken derler (RD2/C2a).
+
+- **P2 (sahne):** çizilen her ilkelin rengi; tam saydam ilkel ve arka plan rengi sayılmaz,
+  alfa yok sayılır (ton bir renk rolüdür). CIELAB kroması 6'nın altındaki bütün renkler
+  **tek nötr ton** sayılır; kalanlar ΔE00 > 5 ile kümelenir.
+- **P4 (sahne):** fiyat etiketlerinin ortanca aralığı (masaüstü) ve 300 px çizim alanındaki
+  etiket sayısı.
+- **P5 (sahne):** 390 px'te zaman ekseni etiket sayısı; iki düzey = kayıtta
+  `two_level_time` **ve** sahnede en az iki renk rolündeki zaman etiketi (küçük / büyük birim).
+- **P6 (sahne):** eksen etiketi kutularının çizim alanıyla, başka metinle (son değer
+  etiketi, haplar, lejant), ince dikey çizgiyle ve çerçeve kenarıyla kesişimi.
+- **P7 (sahne):** son değer etiketi, ilk bölmede noktalı değer çizgisi, imleç (aynı sütunda
+  en az üç kesik), oluktaki fiyat hapı ve zaman eksenindeki tarih hapı, başlık satırında
+  O H L C (telefon: C).
+- **P8 (kayıt + sahne):** `chart.mark_max_px` ≤ 28 ve sahnede çizilmiş en yüksek anlam
+  işareti (derleyici işaret boyunu `mark_max_px` ile sınırlar).
+- **H3 (kayıt):** anlam ve köken rollerinin her çifti; yalnız adı konmuş, bilerek paylaşılan
+  çiftler (`valid`=`text`, `invalid`=`closed`=`neutral`; `docs/DESIGN.md` §1.6) atlanır.
+
 ## Yoğunluk (iki profil)
 
 - Bir yön iki görünüş kaydeder: `<ad>` (`dense`, masaüstü) ve `<ad>-tel` (`touch`, telefon;

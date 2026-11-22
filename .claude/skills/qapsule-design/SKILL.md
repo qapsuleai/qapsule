@@ -147,13 +147,20 @@ Alarm etiketi, seviye ve hap biçimleri alfabedir; yeni sembol türetme.
 2. **Maket:** `docs/design/mockups/surfaces/<grup>/Y##.html`; `_base/base.css`,
    `tavek/tavek.css`, grubun css'i ve `_base/frame.js` (`?look=&theme=&vars=&charts=&dpr=`).
    Grafik yuvası çekirdekten (`qp render --look … --scale <dpr>`), elle çizim değil.
-   Grubun `README.md` tablosuna satır.
+   Grubun `README.md` tablosuna satır. Grup = maket klasörü (`chart/`, `agent/`, `watch/`,
+   `system/`); şartname dosyasının grubuyla aynı olmak zorunda değil, yakın yüzeylerin
+   yanına koy ve SURFACES dizinindeki satıra maket yolunu yaz. Kademe 3 bir yüzeye maket
+   yapılınca SURFACES'ta kademe değişmez, satıra "maket var" notu düşülür.
+   Kesik çizgi tokeni (`--qp-agent-dash`) bir SVG `stroke-dasharray` değeridir; CSS kenarlığında
+   `border-style: dashed` kullan, rengi yine `--qp-origin-agent`.
 3. **Renk taraması 0:**
    `grep -rnE '#[0-9a-fA-F]{3,8}\b|rgba?\(|hsl\(' docs/design/mockups/surfaces/<grup>`.
 4. **`scripts/design-check` yeşil** (gerekirse `--look tavek` ve `--look tavek-tel`); bu
    aynı zamanda CONTRACT tablolarının kayıtla eşit olduğunu sınar.
 5. **Görsel karşılaştırma:** aynı veri (`fixtures/design/desk.json`), masaüstü DPR 2,
-   telefon DPR 3, yanında başvuru ekranı (`scripts/design-gallery`; çıktı git-ignored).
+   telefon DPR 3, yanında başvuru ekranı. `scripts/design-gallery` yalnız çapa ekranlarını
+   (Ç1–Ç4) çeker; yüzey sayfasını Playwright ile kendin çek (`deviceScaleFactor` 2/3), çıktıyı
+   git-ignored klasöre koy, iş bitince sil.
    Koyu ve açık tema.
 6. **Elle dokunulmayanlar:** CONTRACT değer tabloları, var olan altınlar ve dökümler,
    protokol ve şema. Yeni grafik öğesi gerekiyorsa çekirdek işidir; round kapsamında değilse

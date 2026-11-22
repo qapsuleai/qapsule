@@ -1,0 +1,52 @@
+<!doctype html>
+<!-- RD2 M2/M3 (chart) — grafik yüzeyleri dizini. Açılış: README.md. Tek satır JS: sayfa
+     parametrelerini (look, theme, vars, charts, dpr) bağlantılara taşır. -->
+<html lang="tr">
+<head>
+  <meta charset="utf-8">
+  <title>Grafik yüzeyleri</title>
+  <link rel="stylesheet" href="../../_base/base.css">
+  <link rel="stylesheet" href="../../tavek/tavek.css">
+  <link rel="stylesheet" href="chart.css">
+  <script src="../../_base/frame.js"></script>
+</head>
+<body>
+<div class="pg">
+  <header class="pg-head">
+    <span class="crumb">Yüzey şartnamesi · grafik</span>
+    <h1>Grafik yüzeyleri <span class="yn">Y01 Y02 Y03 Y09 Y10 Y11 Y16 Y17 Y18 Y23 Y27</span></h1>
+    <p class="lead">Grafik görselleri çekirdekten (<code>render.sh</code> → <code>qp render</code>), sayfa yalnız bindirme. Hikâye sentetik SAMPLE günlük verisinde: Ağustos tepeleri 120,50 direnci, 11 Eyl kırılım, 15 Eyl üç bar tutunma (kapsül, kanıt 9–15 Eyl); ajan 115,20 desteği önerir; motor önceki tepe 130,68.</p>
+  </header>
+  <section class="sec">
+    <h2 class="sec-h">Kademe 1 <span class="note">bütün durumlar, iki profil (<code>?look=tavek</code> · <code>?look=tavek-tel</code>)</span></h2>
+    <table class="state-list">
+      <thead><tr><th>Yüzey</th><th>Durum</th><th>Profil</th><th>Şartname</th></tr></thead>
+      <tbody>
+        <tr><td><a class="on-chart" href="Y01.html">Y01 Grafik hücresi</a></td><td>11 / 11</td><td>masaüstü + telefon</td><td>surfaces/chart.md#y01</td></tr>
+        <tr><td><a class="on-chart" href="Y09.html">Y09 Grafik üstünde izleme işareti</a></td><td>12 / 12</td><td>masaüstü + telefon</td><td>surfaces/chart.md#y09</td></tr>
+        <tr><td><a class="on-chart" href="Y11.html">Y11 Ajan katmanı</a></td><td>8 / 8</td><td>masaüstü + telefon</td><td>surfaces/chart.md#y11</td></tr>
+        <tr><td><a class="on-chart" href="Y18.html">Y18 Lejant ve panel başlığı</a></td><td>10 / 10</td><td>masaüstü + telefon</td><td>surfaces/chart.md#y18</td></tr>
+        <tr><td><a class="on-chart" href="Y27.html">Y27 Telefonda grafik</a></td><td>7 / 7</td><td>yalnız telefon</td><td>surfaces/phone.md#y27</td></tr>
+      </tbody>
+    </table>
+  </section>
+  <section class="sec">
+    <h2 class="sec-h">Kademe 2 <span class="note">ana durumun tam maketi + durum listesi (masaüstü)</span></h2>
+    <table class="state-list">
+      <thead><tr><th>Yüzey</th><th>Ana durum</th><th>Durum listesi</th><th>Şartname</th></tr></thead>
+      <tbody>
+        <tr><td><a class="on-chart" href="Y02.html">Y02 Çizim araç çubuğu</a></td><td>Çizim sürüyor</td><td>8</td><td>surfaces/chart.md#y02</td></tr>
+        <tr><td><a class="on-chart" href="Y03.html">Y03 Seçili çizim denetimleri</a></td><td>Seçili</td><td>8</td><td>surfaces/chart.md#y03</td></tr>
+        <tr><td><a class="on-chart" href="Y10.html">Y10 Köken ayrımı ve nesne listesi</a></td><td>İnsan çizimi (satıra gelindi)</td><td>8</td><td>surfaces/chart.md#y10</td></tr>
+        <tr><td><a class="on-chart" href="Y16.html">Y16 Kanıta açılma</a></td><td>Kanıt gösteriliyor</td><td>7</td><td>surfaces/chart.md#y16</td></tr>
+        <tr><td><a class="on-chart" href="Y17.html">Y17 Gösterge seçici</a></td><td>Hesaplanıyor (arama açık)</td><td>9</td><td>surfaces/chart.md#y17</td></tr>
+        <tr><td><a class="on-chart" href="Y23.html">Y23 Zaman dilimi, karşılaştırma, ölçek</a></td><td>Seçili periyot</td><td>8</td><td>surfaces/chart.md#y23</td></tr>
+      </tbody>
+    </table>
+  </section>
+</div>
+<script>
+  document.querySelectorAll('a[href$=".html"]').forEach((a) => { a.href += location.search; });
+</script>
+</body>
+</html>

@@ -1,0 +1,43 @@
+<!doctype html>
+<!-- RD2 M2/M3 (watch) Y36 — Kurumsal işlemde “beklemede” ve taşıma. Kademe 2: ana durumun tam maketi (masaüstü) + şartnamedeki durum listesi.
+     Açmak: ?look=tavek (masaüstü) ya da ?look=tavek-tel (telefon) &theme=dark|light &vars=<önek>
+     (README). Değerler yalnız var(--…); satır içi px yalnız çerçeve geometrisi (kesit boyu, yüzen
+     kartın konumu, bindirmenin grafik kesirleri); metin sentetik; grafik çekirdekten (`qp render`). -->
+<html lang="tr">
+<head>
+  <meta charset="utf-8">
+  <title>Y36 Kurumsal işlemde “beklemede” ve taşıma</title>
+  <link rel="stylesheet" href="../../_base/base.css">
+  <link rel="stylesheet" href="../../_base/phone.css">
+  <link rel="stylesheet" href="../../tavek/tavek.css">
+  <link rel="stylesheet" href="watch.css">
+  <script src="../../_base/frame.js"></script>
+</head>
+<body class="sheet">
+<header class="sheet-h">
+  <h1><span class="id">Y36</span>Kurumsal işlemde “beklemede” ve taşıma</h1>
+  <p>Bölünme, bedelsiz, temettü düzeltmesi: geçerlilik anından yenileme bitene kadar o sembolün izlemeleri beklemede; fiyat boşluğu kırılım ya da stop diye okunmaz. Taşıma deterministik ve katsayıyla (K88); çizim kökeni insan kalır, ayrıntıda “Motor taşıdı · 1:2”. Taşınamayanı ajan sorar, karar insanın.</p>
+  <div class="facts"><span class="chip">Kademe 2</span><span class="chip">K88</span><span class="chip">K74</span><span class="chip">system.md · Y36</span></div>
+</header>
+<h3 class="block-h">Akış</h3>
+<ol class="flow"><li><span>Duyuru</span><span class="k">satırda bilgi</span></li><li><span>Geçerlilik anı</span><span class="k">bütün izlemeler beklemede</span></li><li><span>Düzeltilmiş barlar</span><span class="k">çizimler, koşullar taşınır</span></li><li><span>Tek mesaj</span><span class="k">eski → yeni düzeyler</span></li><li><span>Taşınamayan</span><span class="k">soru → cevap</span></li></ol>
+<section class="profile"><h2>Ana durum <span class="note">önce / sonra: liste satırları, gelen kutusunda mesaj ve soru</span></h2><div class="states"><figure class="state "><figcaption><span class="n">a</span><b>Beklemede · yenileniyor</b><code>İ-beklemede</code></figcaption>
+<div class="surface w-side"><div class="pane-h"><span>İzleme görevleri</span><span class="count">6 etkin</span><span class="grow"></span><span class="icon-btn">⌕</span><span class="icon-btn">+</span></div><div class="warn-strip">◷ Düzeltilmiş barlar alınıyor <span class="muted">· 10:00</span></div><ul class="tasks"><li class="task2 edge-human "><div class="l1"><span class="sym">SYN20</span><span class="cond">120,00 üstünde kapanış</span></div><div class="l2"><span class="ws r-warn"><i>◷</i>Beklemede · bölünme 1:2</span></div></li>
+<li class="task2 edge-human "><div class="l1"><span class="sym">SYN20</span><span class="cond">125,00 üstünde kapanış</span></div><div class="l2"><span class="ws r-warn"><i>◷</i>Beklemede · bölünme 1:2</span></div></li>
+<li class="task2 edge-human "><div class="l1"><span class="sym">SYN20</span><span class="cond">Bölge 110–112</span></div><div class="l2"><span class="ws r-warn"><i>◷</i>Beklemede · bölünme 1:2</span></div></li>
+<li class="task2 edge-human "><div class="l1"><span class="sym">ATL07</span><span class="cond">16,80 altında kapanış</span><span class="src">varsayılan</span></div><div class="l2"><span class="ws r-fg"><i>○</i>Kuruldu</span><span>· koruyucu</span><span class="end r-muted"><span class="health ok" aria-label="izleniyor"></span>14:35</span></div></li>
+</ul></div>
+</figure>
+<figure class="state "><figcaption><span class="n">b</span><b>Taşındı + taşınamadı</b><code>tek mesaj · soru kartı</code></figcaption>
+<div class="surface w-side"><div class="pane-h"><span>İzleme görevleri</span><span class="count">6 etkin</span><span class="grow"></span><span class="icon-btn">⌕</span><span class="icon-btn">+</span></div><ul class="tasks"><li class="task2 edge-human "><div class="l1"><span class="sym">SYN20</span><span class="cond">60,00 üstünde kapanış</span><span class="src">taşındı</span></div><div class="l2"><span class="ws r-fg"><i>◐</i>Kırıldı</span><span class="pips" aria-label="tutunma 2/3"><i class="on"></i><i class="on"></i><i></i></span><span>2/3</span><span class="end r-muted"><span class="health ok" aria-label="izleniyor"></span>10:04</span></div></li>
+<li class="task2 edge-human "><div class="l1"><span class="sym">SYN20</span><span class="cond">62,50 üstünde kapanış</span><span class="src">taşındı</span></div><div class="l2"><span class="ws r-fg"><i>○</i>Kuruldu</span><span class="end r-muted"><span class="health ok" aria-label="izleniyor"></span>10:04</span></div></li>
+<li class="task2 edge-human "><div class="l1"><span class="sym">SYN20</span><span class="cond">Bölge 110–112</span></div><div class="l2"><span class="ws r-warn"><i>◷</i>Beklemede · bölünme 1:2</span></div></li>
+<li class="task2 edge-human "><div class="l1"><span class="sym">ATL07</span><span class="cond">16,80 altında kapanış</span><span class="src">varsayılan</span></div><div class="l2"><span class="ws r-fg"><i>○</i>Kuruldu</span><span>· koruyucu</span><span class="end r-muted"><span class="health ok" aria-label="izleniyor"></span>14:35</span></div></li>
+</ul></div>
+</figure>
+<figure class="state "><figcaption><span class="n">c</span><b>Taşıma mesajı ve soru (gelen kutusu)</b><code>Y12 · Y05 biçimi</code></figcaption>
+<div class="surface w-panel" style="padding-bottom: var(--qp-space-3)"><div class="pane-h"><span>Gelen kutusu</span><span class="count">2 yeni</span></div><div class="card notice"><div class="meta"><span class="origin engine">Motor</span><span class="note">23 Kas 10:04</span></div><p><b>SYN20'de 1:2 bölünme:</b> 2 izleme taşındı</p><ul class="events"><li><span class="t"></span><span class="plain">120,00 → 60,00</span><span class="note">Kırıldı 2/3</span></li><li><span class="t"></span><span class="plain">125,00 → 62,50</span><span class="note">Kuruldu</span></li></ul><p class="note">İzlemeler önceki durumlarına döndü · sicilde “Düzeyler 1:2 ile taşındı”</p></div><div class="card notice agent"><div class="meta"><span class="origin agent">Ajan soruyor</span><span class="note">10:04</span></div><p>Bu izleme taşınamadı (bölge çizimi tarihi bölünmeden önce bitiyor). Ne yapayım?</p><span class="opt">Düzeyi 1:2 ile taşı ve izle</span><span class="opt">İzlemeyi kaldır</span><span class="opt">İzleme, yalnız not kalsın</span></div></div>
+</figure>
+</div><h3 class="block-h">Şartnamedeki durumlar (7)</h3><div class="statelist" role="table"><span class="n">1</span><span class="">Duyuruldu</span><span class="muted">“SYN20 · bölünme 1:2, 23 Kas · izlemeler o gün bekletilecek”</span><code>satırda bilgi</code><span class="n">2</span><span class="shown">Beklemede <span class="spill r-accent">bu sayfada</span></span><span class="muted">“◷ Beklemede · kurumsal işlem (bölünme 1:2, 23 Kas)”</span><code>İ-beklemede</code><span class="n">3</span><span class="shown">Yenileniyor <span class="spill r-accent">bu sayfada</span></span><span class="muted">“◷ Düzeltilmiş barlar alınıyor”</span><code>süreç sözcüğü</code><span class="n">4</span><span class="shown">Taşındı <span class="spill r-accent">bu sayfada</span></span><span class="muted">“SYN20'de 1:2 bölünme: 3 izleme taşındı · 112,40 → 56,20 · 117,50 → 58,75”</span><code>tek mesaj</code><span class="n">5</span><span class="shown">Taşınamadı <span class="spill r-accent">bu sayfada</span></span><span class="muted">“Bu izleme taşınamadı (…). Ne yapayım?”</span><code>beklemede + soru kartı</code><span class="n">6</span><span class="shown">Sicil notu <span class="spill r-accent">bu sayfada</span></span><span class="muted">“Düzeyler 1:2 ile taşındı” (Y33)</span><code>katsayı</code><span class="n">7</span><span class="">Grafik</span><span class="muted">“Bölünme 1:2”</span><code>motor işareti</code></div></section>
+</body>
+</html>

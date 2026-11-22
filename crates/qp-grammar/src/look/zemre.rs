@@ -139,6 +139,8 @@ pub const ZEMRE: Look = Look {
         pill_radius: 10.0,
         line: 1.0,
         shadow: false,
+        shadow_css: "none",
+        card_radius: 14.0,
         strip_alpha: 48,
         veil_alpha: 170,
     },
@@ -201,4 +203,7 @@ pub const ZEMRE: Look = Look {
     // (R5/S) The story chart and open capsule counts as `r4`.
     story: R4.story,
     open: R4.open,
+    profile: Profile::Legacy,
+    origin: None,
+    chart: ChartLook::legacy(64.0, 32.0),
 };

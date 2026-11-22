@@ -1,0 +1,17 @@
+/* `tavek` Ç1 — the chart column takes the width; the side panels support it. */
+
+.c1 {
+  /* Frame geometry (OV-13): the agent panel narrower than the skeleton's, so the chart,
+     which carries the meaning, gets the room. */
+  --agent-w: 320px;
+}
+
+/* Watch tasks: the row's leading edge repeats the origin stroke of its level. */
+.task {
+  margin-left: var(--qp-space-2);
+  padding-left: var(--qp-space-2);
+}
+
+.task.selected {
+  background: var(--m-card);
+}

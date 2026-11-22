@@ -32,7 +32,7 @@ pub(crate) use compile::{draw, frame, layer};
 pub use compile::{scale, terms};
 pub use present::{depth, gesture, motion};
 
-pub use compile::{compile, CompileOptions};
+pub use compile::{compile, CompileOptions, Cursor};
 pub use error::{ErrorKind, GrammarError};
 pub use provider::{DataProvider, HeadlineParts, MemProvider, SeriesKind};
 pub use theme::Theme;

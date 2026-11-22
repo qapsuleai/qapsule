@@ -4,7 +4,7 @@
 use super::*;
 
 /// Looks a connection may choose; the first is the default.
-pub static LOOKS: &[Look] = &[R4, ORNEK, OLTAN, ZEMRE];
+pub static LOOKS: &[Look] = &[R4, ORNEK, OLTAN, ZEMRE, TAVEK, TAVEK_TEL];
 
 /// The default look's name.
 pub const DEFAULT_LOOK: &str = "r4";
@@ -16,9 +16,15 @@ pub const PRESENTED_LOOK: &str = "oltan";
 
 /// (R5/S) Each look's companion face design (`qp_grammar::faces`): choosing a look in the
 /// presentation chooses its face too, unless the reader names a face (`?face=`). `r4`:
-/// R4's presented face. A look without one keeps the face as it is.
-pub const COMPANION_FACES: &[(&str, &str)] =
-    &[("r4", "vadrel"), ("oltan", "oltan"), ("zemre", "zemre")];
+/// R4's presented face. A look without one keeps the face as it is. (RD2/C3) `tavek`:
+/// `zemre`'s sentence, track record and price strip (`docs/FACE.md`).
+pub const COMPANION_FACES: &[(&str, &str)] = &[
+    ("r4", "vadrel"),
+    ("oltan", "oltan"),
+    ("zemre", "zemre"),
+    ("tavek", "zemre"),
+    ("tavek-tel", "zemre"),
+];
 
 /// (R5/S) The companion face of look `look` ([`COMPANION_FACES`]), if it has one.
 #[must_use]

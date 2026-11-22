@@ -20,6 +20,7 @@ use crate::provider::{DataProvider, SeriesKind};
 use crate::scale::value_y;
 use crate::theme::with_opacity;
 
+mod alphabet;
 mod axis;
 pub(crate) mod draw;
 mod emphasis;
@@ -31,6 +32,7 @@ mod scene;
 mod series;
 pub mod terms;
 
+pub use alphabet::ALPHABET_FIXED;
 use axis::{domain, domain_values, ticks};
 use emphasis::resolve_emphasis;
 use panels::{canonical_panels, layer_ids, panel_rects};
@@ -91,6 +93,22 @@ pub struct CompileOptions {
     /// (R5/T3) Write each text's type role into the scene (`Prim::Text::role`; the
     /// measurement harness). Off by default: scenes and their digests stay as they were.
     pub roles: bool,
+    /// (RD2/C2a) The pointer's place: a look with chart conventions (`ChartLook`) draws
+    /// the crosshair, its axis pills and the legend of that bar. Transient, like `range`.
+    pub cursor: Option<Cursor>,
+    /// (RD2/C2a) A look record that is not registered (design trials, tests); overrides
+    /// `look`.
+    pub look_record: Option<&'static crate::look::Look>,
+}
+
+/// (RD2/C2a) The pointer's place in data terms: a slot and, optionally, a price on the
+/// first panel's scale (absent: that bar's close).
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub struct Cursor {
+    /// Slot (bar index); clamped to the visible range.
+    pub bar: u64,
+    /// Value on the first panel's scale.
+    pub price: Option<f64>,
 }
 
 impl CompileOptions {
@@ -110,6 +128,8 @@ impl CompileOptions {
             face: None,
             look: None,
             roles: false,
+            cursor: None,
+            look_record: None,
         }
     }
 }

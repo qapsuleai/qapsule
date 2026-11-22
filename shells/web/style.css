@@ -35,7 +35,7 @@ html, body { margin: 0; height: 100%; background: var(--page); color: var(--fg);
 .face p { margin: 0; padding: var(--qp-face-pad); min-height: var(--qp-face-min-h); white-space: pre-line; }
 /* (RP3/M15, K48) trust mark: the authority's settled claim (feed) or checked here (open) */
 .face .mk { position: absolute; pointer-events: none; box-sizing: border-box; }
-.face .trust { position: absolute; bottom: var(--qp-space-0); right: var(--qp-space-2); font-size: var(--qp-fs-trust); color: var(--muted); pointer-events: none; }
+.face .trust { position: absolute; bottom: var(--qp-space-0); right: var(--qp-space-2); padding-left: var(--qp-space-0); font-size: var(--qp-fs-trust); color: var(--muted); background: var(--qp-scene-bg); pointer-events: none; }
 #trust { margin-left: var(--qp-space-1); font-size: var(--qp-fs-tiny); color: var(--muted); }
 #empty { color: var(--muted); padding: var(--qp-space-5) var(--qp-space-3); }
 #layer { display: none; flex: 1; overflow-y: auto; background: var(--bg); }

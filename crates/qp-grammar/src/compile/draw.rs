@@ -36,10 +36,11 @@ pub(crate) fn est_width(text: &str, size: f64, font: &crate::look::FontAsset) ->
     font.width(text, size)
 }
 
-/// Candle body width for a slot (bucket) width: 70 %, at least 1, odd above 2 (R0).
-pub(crate) fn body_width(slot: f64) -> i32 {
+/// Candle body width for a slot (bucket) width: `ratio` of it (the look's
+/// `chart.body_ratio`; R0: 70 %), at least 1, odd above 2 (R0).
+pub(crate) fn body_width(slot: f64, ratio: f64) -> i32 {
     #[allow(clippy::cast_possible_truncation)]
-    let mut w = ((slot * 0.7).floor() as i32).max(1);
+    let mut w = ((slot * ratio).floor() as i32).max(1);
     if w > 2 && w % 2 == 0 {
         w -= 1;
     }

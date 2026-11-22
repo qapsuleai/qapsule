@@ -265,6 +265,7 @@ hareketinin `look` alanıyla seçer (`ViewState.look`; yoksa `r4`); derleme seç
 | `chrome` (T3b) | Kabuğun boyları (CSS px): metin boyu ve satır yüksekliği, küçük yazı (bildirim, ipucu, uyarı, kod, bölüm başı), tablo, en küçük yazı (yüz rozeti, açık katmandaki güven işareti, adım sayacı), yüzün güven işareti ("Sunucu doğruladı"); bölüm başının kalınlığı, harf aralığı (em), üst boşluğu; sekme en düşük yüksekliği, iç boşluğu, alt çizgisi; düğme/seçim/alan en düşük yüksekliği ve iç boşluğu; tarih alanı genişliği; alttaki oynatma çubuğunun yüksekliği; tablo hücresi, rozet ve yüz metni iç boşluğu; yüz metninin en düşük yüksekliği | 14 / 1,35; 12; 13; 11; 10; 600, 0,04 em, 10; sekme 0 (= içerik), 6, 2; denetim 0, 4×6; 120; 48; 3×4, 1×6, 14×12; 60 |
 | `evidence` (T3b) | Kanıt geometrisi: renk rolü, "… gerekir" notunun renk rolü, seviye/salınım çizgi kalınlığı, bant kenarı ve dolgu saydamlığı, salınım noktası çapı | `accent`, `warn`, 2, 1, 0,18, 9 px |
 | `offsets` (T3b) | Sahnenin küçük ofsetleri (px): başlığın soldan içeriği, başlık satırı taban çizgisi, kapanış metninin yeri, satır kenar boşluğu, açıklamalar arası, alt panel açıklamasının içeriği ve taban çizgisi, kart karne satırının alttan boşluğu, kanıt notunun soldan içeriği ve işaret şeridinin altındaki boşluğu, `y`'siz işaret katmanının üstü | 4, 23, 140, 8, 12, 4, 12, 2, 4, 8, 2 |
+| `profile`, `origin`, `chart` (RD2/S1) | Yoğunluk profili (`legacy`, `dense` = masaüstü, `touch` = telefon; bir yön `<ad>` ve `<ad>-tel` olarak iki görünüş kaydeder); köken renk rolleri (`human`, `agent`, `engine`, iki düzende) ve ajan çizgisinin kesiği (yoksa düzenden türetilir: `text`, `accent`, `muted`; kesik = hikâye çizelgesininki); grafik alışkanlıkları (`ChartLook`: fiyat ekseni etiket aralığı, iki düzeyli zaman ekseni, son değer etiketi, değer çizgisi, imleç ve eksen hapları, OHLC lejantı, hacim bölmesi payı, veri üstü işaretin en büyük boyu, mum gövde oranı, sağ eksen oluğu; derleyici RD2/C2a'dan sonra eski olmayan görünüşte okur: "Grafik alfabesi"). `surface`'a kart yarıçapı ve CSS gölgesi eklendi. Ölçüt: `scripts/design-check`, değerler `docs/design/CONTRACT.md` | `legacy`; türetilmiş köken; `ChartLook::legacy(72, 32)` (90 px, tek düzey, etiket var, değer çizgisi yok, imleç yok, yalnız `C`, hacim 0, 0,7); kart 6, gölge `none` |
 
 **Okuyanlar.** Derleyici (kenar boşlukları, panel arası, başlık/etiket/rakam boyu,
 metin genişliği, satır yüksekliği, şerit ve perde, başlık satırı ofsetleri), yüz tasarımları (`FaceViewFn` görünüşü
@@ -301,6 +302,40 @@ görünüşte farklıdır, kayıt sınaması; `title` boyundaki metin — `vadre
 çizilen karne bandı — görünüşün `title` yazı tipiyle çizilir, `r4`'te Plex Mono); işaretin metinleri `glyph`. Varsayılan kapalı: ürün
 sahneleri ve özetleri değişmez. Ölçüm düzeneği öğe başına rengi, boyu ve rolü sahneden,
 rolün yazı tipini ve renk rollerini `qp look show <ad>`'dan okur.
+
+**Grafik alfabesi (RD2/C2a, `compile/alphabet`).** Eski olmayan bir görünüş
+(`profile` `dense` ya da `touch`; `Look::familiar`) grafiğin alışılmış öğelerini
+`ChartLook`'tan çizer; `legacy` görünüşler R0 yolunu bayt bayt korur (kod `scene.rs`'ten
+aynen taşındı). Sağ fiyat ekseni: her `price_label_px`'te bir etiket (adım
+1–1,5–2–2,5–3–4–5–7,5 × 10^k'den hedefe en yakını), etiket yalnız kendi bölmesinin
+yüksekliğinde ve `axis_gutter_px` oluğunda (sağ kenar payı olur); son değer etiketinin ve
+fiyat hapının altında kalan etiket çizilmez (P4, P6). İki düzeyli zaman ekseni
+(`two_level_time`): küçük birim (gün, ay ya da saat) `muted`, büyük birim (ay, yıl ya da
+gün) `text` rolünde; düzey, ortalama aralığı bir etiket ve 8 px'e yeten en ince düzeydir;
+etiketler öncelikle (büyük birim, ilk barın bağlam etiketi, küçük birim) yerleşir, bir
+etikete, tarih hapına ya da çerçeve kenarına değen atlanır (P5, P6). Son değer etiketi
+(`last_value_tag`) ve ilk bölmede noktalı değer çizgisi (`value_line`). İmleç
+(`crosshair_pills`): `CompileOptions::cursor` (`Cursor {bar, price}`; şema ve protokol
+değişmez; gösterimde geçici, `qp render --cursor <bar>[,<fiyat>]`) kesikli nötr çizgi,
+sağ eksende fiyat hapı ve zaman ekseninde tarih hapı çizer. OHLC lejantı
+(`ohlc_legend`): başlığın sağında imleçteki (yoksa son görünen) barın O H L C değerleri,
+değişim ve yüzde (yön renginde); `touch` profilinde C ve yüzde; sığmayan parça sabit
+sırayla düşer. Harfler iki dilde O H L C: Türkçe A Y D K sözlükte yok, karar verilince
+tek satır (`alphabet/legend.rs`). Sayılar okuyucunun dilinde (`reader_lang`; Türkçe
+"2.925,95", "+%1,28"; İngilizce "2,925.95", "+1.28%"); 100 000 ve üstü tek birimde kısa
+("1,2 Mn" / "1.2M"); ay kısaltmaları çekirdekte. **Hacim** (`volume_share`): fiyat
+bölmesinin alt `volume_share` payında, mumların altında, yön renklerinde soluk (alfa
+0,35) histogram. Seçim OpenChart ve Vela'nın kalıbı (ADOPTED OV-10): ayrı bölme açmadan
+aynı zaman ekseninde bağlam verir, bölme yüksekliği yemez; görünüm hacmi kendisi
+çiziyorsa (bar serisinin `v`'si `bar` katmanında) o bölme kalır, çubukları aynı soluk
+alfayı alır. Veri üstü anlam işareti `mark_max_px` ile sınırlı (P8, `Look::mark_px`),
+mum gövdesi `body_ratio` (eski görünüşlerde 0,7: R0). **Seviyeler** (RD2/C2b,
+`origin_levels`, `alphabet/levels.rs`): yatay her `rule` kökeninin renginde ve çizgi
+biçiminde çizilir (insan düz, ajan `agent_dash` kesikli, motor noktalı) ve sağ eksende o
+renkte dolu bir etiketle (değeri) biter; altında kalan fiyat etiketi çizilmez, son değer
+etiketine ya da önceki bir seviye etiketine değen seviye etiketi atlanır (P6). Köken:
+seviyenin geldiği olgunun yazarı (`provenance.author`; kabul edilmiş öneride onaylayan),
+eşik (`threshold`) ya da seri değeri motorun. Şema ve protokol değişmez.
 
 **Kabuk.** Kabuğun renkleri, yazı ailesi, yarıçapları, geçiş süresi ve (T3b) bütün
 boyları (yazı boyları, iç boşluklar, sekme/düğme yükseklikleri: `chrome`; boşluklar:
@@ -342,7 +377,8 @@ ve iki `@media` genişliği (medya sorgusu özel özellik okuyamaz).
    (round'un `v2` kararı ayrı).
 
 **Kayıt dışında kalanlar** (bilinen, T3b sonrası): eksen etiketlerinin iç ofsetleri ve
-ay etiketi aralığı (72 px), son değer etiketinin iç boşluğu, mum gövdesi oranı,
+ay etiketi aralığı (72 px), son değer etiketinin iç boşluğu, (RD2/C2a'dan sonra yalnız
+eski görünüşlerde) mum gövdesi oranı,
 işaret alfabelerinin iç oranları ve tazelik eğrisi (`siluet` 0,3 + 0,7·tazelik, `rozet`
 0,22 + 0,78·tazelik; kapanmışın tabanı `closed_alpha`, açığın `fresh_alpha_min`), `tavrik` ve `fotolay` yüzlerinin
 kendi boyları (elenen M8 tasarımları; renkleri görünüşten), geçiş tasarımlarının kendi

@@ -1,0 +1,65 @@
+/* Phone frame shared by Ç3 and Ç4: 390×844 CSS px at DPR 3 (GOAL §2), touch profile
+ * (44 px targets come from the look's --qp-control-h). */
+
+.phone {
+  /* Fixed comparison frame (P14): a 390×844 phone viewport. */
+  --frame-w: 390px;
+  --frame-h: 844px;
+  /* Device safe areas of that viewport (system status bar, home indicator): layout
+   * geometry of the device, not a design value. */
+  --safe-top: 47px;
+  --safe-bottom: 34px;
+
+  display: flex;
+  flex-direction: column;
+  padding-top: var(--safe-top);
+}
+
+.phone-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--qp-space-2);
+  min-height: var(--m-control-h);
+  padding: 0 var(--qp-space-3);
+}
+
+.phone-head h1 {
+  font-size: var(--m-fs-headline);
+  font-weight: var(--qp-head-weight);
+}
+
+.phone-body {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: hidden;
+}
+
+/* Bottom tab bar: four destinations, the current one marked by weight and a rule. */
+.tabbar {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  border-top: var(--m-rule) solid var(--m-line);
+  padding-bottom: var(--safe-bottom);
+  background: var(--m-panel);
+}
+
+.tabbar span {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: var(--qp-tab-h);
+  font-size: var(--m-fs-label);
+  color: var(--m-muted);
+  border-top: var(--qp-tab-rule) solid transparent;
+}
+
+.tabbar span.on {
+  color: var(--m-fg);
+  font-weight: var(--qp-head-weight);
+  border-top-color: var(--m-focus);
+}
+
+.phone .btn {
+  min-height: var(--m-control-h);
+}

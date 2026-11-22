@@ -1,0 +1,132 @@
+<!doctype html>
+<!-- RD2/G Ç1 — masaüstü çalışma alanı (1440×900, DPR 2). Şartname iskeleti: değerler
+     yalnız var(--…) ile görünüş kaydından gelir; metin sentetiktir (gerçek veri yok).
+     Bir yön bu dosyayı kendi klasörüne kopyalar ve en sona kendi CSS'ini bağlar. -->
+<html lang="tr">
+<head>
+  <meta charset="utf-8">
+  <title>Ç1 çalışma alanı</title>
+  <link rel="stylesheet" href="../_base/base.css">
+  <link rel="stylesheet" href="../_base/c1.css">
+  <script src="../_base/frame.js"></script>
+</head>
+<body>
+<div class="frame c1" data-anchor="c1">
+
+  <aside class="c1-side">
+    <div class="c1-search">
+      <span>Sembol ya da komut ara</span><span class="note">⌘K</span>
+    </div>
+
+    <section class="c1-watchlist" data-region="watchlist" aria-label="İzleme listesi">
+      <h2 class="section-h">İzleme listesi <span class="note">Sentetik pazar</span></h2>
+      <div class="wl-row head"><span>Sembol</span><span>Son</span><span>Değişim</span></div>
+      <div class="wl-row selected">
+        <span class="sym">SYN20<small>Sentez Holding</small></span>
+        <span class="num">113,05</span><span class="num up">+1,42%</span>
+      </div>
+      <div class="wl-row">
+        <span class="sym">KRM12<small>Kerem Enerji</small></span>
+        <span class="num">48,62</span><span class="num down">−0,87%</span>
+      </div>
+      <div class="wl-row">
+        <span class="sym">DNZ30<small>Deniz Lojistik</small></span>
+        <span class="num">207,40</span><span class="num up">+0,35%</span>
+      </div>
+      <div class="wl-row">
+        <span class="sym">ATL07<small>Atlas Çimento</small></span>
+        <span class="num">16,94</span><span class="num down">−2,10%</span>
+      </div>
+      <div class="wl-row">
+        <span class="sym">BRS15<small>Bursa Tekstil</small></span>
+        <span class="num">71,25</span><span class="num up">+0,07%</span>
+      </div>
+      <div class="wl-row">
+        <span class="sym">MRV40<small>Marmara Gıda</small></span>
+        <span class="num">9,318</span><span class="num muted">0,00%</span>
+      </div>
+      <div class="wl-row">
+        <span class="sym">EGE09<small>Ege Bankası</small></span>
+        <span class="num">34,76</span><span class="num up">+0,93%</span>
+      </div>
+    </section>
+
+    <section class="c1-tasks rule-t" data-region="tasks" aria-label="İzleme görevleri">
+      <h2 class="section-h">İzleme görevleri <span class="note">5 etkin</span></h2>
+      <ul>
+        <li class="task"><span class="health ok" aria-label="izleniyor"></span>
+          <p>SYN20 112,40 üstünde kapanış</p>
+          <span class="state">Kırıldı, tutunma 2/3 bar</span></li>
+        <li class="task"><span class="health ok" aria-label="izleniyor"></span>
+          <p>KRM12 trend çizgisi altı</p>
+          <span class="state">İzleniyor, son kontrol 14:35</span></li>
+        <li class="task"><span class="health unknown" aria-label="bilinmiyor"></span>
+          <p>DNZ30 hacim 20 gün ortalamasının 2 katı</p>
+          <span class="state">Bilinmiyor, ilk veri bekleniyor</span></li>
+        <li class="task"><span class="health degraded" aria-label="bozuk"></span>
+          <p>ATL07 16,80 desteği</p>
+          <span class="state">Veri 6 dk gecikmeli</span></li>
+        <li class="task"><span class="health paused" aria-label="duraklatıldı"></span>
+          <p>EGE09 RSI 70 üstü</p>
+          <span class="state">Duraklatıldı</span></li>
+      </ul>
+    </section>
+  </aside>
+
+  <main class="c1-chart" data-region="chart" aria-label="Grafik">
+    <div class="c1-toolbar">
+      <span class="instr">SYN20</span>
+      <span class="seg">
+        <span class="chip">15dk</span><span class="chip">1sa</span><span class="chip on">Günlük</span>
+      </span>
+      <span class="seg">
+        <span class="chip on">Hacim</span><span class="chip on">RSI 14</span><span class="chip on">MACD</span>
+      </span>
+      <span class="spacer"></span>
+      <span class="btn quiet">Çizim</span><span class="btn quiet">Göstergeler</span>
+    </div>
+    <div class="chart-slot" data-chart-slot><img data-chart="c1-main" alt="SYN20 günlük grafik"></div>
+  </main>
+
+  <aside class="c1-agent" data-region="agent" aria-label="Ajan paneli">
+    <div class="agent-head rule-b">
+      <h2>SYN20 direnç analizi</h2><span class="origin agent">Ajan</span>
+    </div>
+    <div class="agent-thread">
+      <p class="msg-user">112,40 kırılımı tutunur mu, bir seviye önerir misin?</p>
+      <p class="work">Çalışma: 4 adım, 6 sn</p>
+      <div class="answer">
+        <p>Kapanış 113,05 ile 112,40'ın üstünde; üç barlık tutunmanın ikinci barı.
+          Hacim 20 günlük ortalamanın <span class="num">1,8</span> katı.</p>
+        <p>Bu kalıp sentetik geçmişte <span class="num">42</span> kez görüldü; tutma
+          <span class="num">%64</span>, taban oran <span class="num">%51</span>.</p>
+      </div>
+      <div class="card agent proposal">
+        <div class="meta"><span class="origin agent">Ajan önerisi</span><span class="note">Onay bekliyor</span></div>
+        <h3>118,20'ye yatay direnç ekle</h3>
+        <p class="note">Önizleme grafikte kesikli çizgiyle. Onaylarsan çizim senin adına kaydedilir.</p>
+        <div class="actions"><span class="btn quiet">Reddet</span><span class="btn primary">Grafiğe ekle</span></div>
+      </div>
+      <div class="card question">
+        <span class="note">Soru 1 / 2</span>
+        <h3>Kırılımı neye göre sayayım?</h3>
+        <span class="opt chosen">Kapanış seviyenin üstünde</span>
+        <span class="opt">Fitil seviyeye değince</span>
+        <div class="actions"><span class="btn quiet">Atla</span><span class="btn">Sonraki</span></div>
+      </div>
+    </div>
+    <div class="composer">Sor ya da @ ile bir izlemeyi an</div>
+  </aside>
+
+  <footer class="c1-status" data-region="status" aria-label="Durum şeridi">
+    <span class="live"><span class="health ok" aria-hidden="true"></span>Sentetik veri, oynatma</span>
+    <span>Seans açık 10:00–18:00</span>
+    <span class="num">Son bar 14:35:02</span>
+    <span class="spacer"></span>
+    <span class="origin human">İnsan</span>
+    <span class="origin agent">Ajan</span>
+    <span class="origin engine">Motor</span>
+  </footer>
+</div>
+</body>
+</html>

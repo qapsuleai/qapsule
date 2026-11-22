@@ -1,0 +1,48 @@
+<!doctype html>
+<!-- RD2 M2/M3 (watch) Y20 — İzleme listesi paneli. Kademe 2: ana durumun tam maketi (masaüstü) + şartnamedeki durum listesi.
+     Açmak: ?look=tavek (masaüstü) ya da ?look=tavek-tel (telefon) &theme=dark|light &vars=<önek>
+     (README). Değerler yalnız var(--…); satır içi px yalnız çerçeve geometrisi (kesit boyu, yüzen
+     kartın konumu, bindirmenin grafik kesirleri); metin sentetik; grafik çekirdekten (`qp render`). -->
+<html lang="tr">
+<head>
+  <meta charset="utf-8">
+  <title>Y20 İzleme listesi paneli</title>
+  <link rel="stylesheet" href="../../_base/base.css">
+  <link rel="stylesheet" href="../../_base/phone.css">
+  <link rel="stylesheet" href="../../tavek/tavek.css">
+  <link rel="stylesheet" href="watch.css">
+  <script src="../../_base/frame.js"></script>
+</head>
+<body class="sheet">
+<header class="sheet-h">
+  <h1><span class="id">Y20</span>İzleme listesi paneli</h1>
+  <p>Sembol listeleri: Sembol · Son · Değişim (tablo rakamı), satır sonunda küçük durum işareti (izleme ◐ / kapsül ◆). İşaret kaynağın çizgisini taşımaz (yer yok); üstüne gelince “Sen kurdun” / “Ajan önerdi” der.</p>
+  <div class="facts"><span class="chip">Kademe 2</span><span class="chip">K74</span><span class="chip">watch.md · Y20</span></div>
+</header>
+<h3 class="block-h">Akış</h3>
+<ol class="flow"><li><span>Satıra tıkla</span><span class="k">etkin hücre o sembole geçer</span></li><li><span>İşarete gel</span><span class="k">“Sen kurdun”</span></li><li><span>İşarete tıkla</span><span class="k">izleme ayrıntısı (Y08) ya da kapsül</span></li></ol>
+<section class="profile"><h2>Ana durum <span class="note">sol sütunun üst yarısı (256 px), altında izleme görevleri</span></h2><div class="states"><figure class="state "><figcaption><span class="n">·</span><b>Canlı, işaretin üstüne gelindi</b><code>D-canlı</code></figcaption>
+<div class="desk-frame" style="width: calc(256px + 2 * var(--m-rule)); height: 640px; grid-template-rows: auto minmax(0,1fr)"><div style="position:relative"><div class="wl"><div class="pane-h"><span>İzleme listesi</span><span class="count">Takip · 8</span><span class="grow"></span><span class="note">Canlı</span></div>
+<div class="wl-row2 head"><span>Sembol</span><span>Son ▾</span><span>Değişim</span><span></span></div>
+<div class="wl-row2 selected"><span class="sym">SYN20<small>Sentez Holding</small></span><span class="num">123,38</span><span class="num up">+0,64%</span><span class="mk " title="">◐</span></div>
+<div class="wl-row2 "><span class="sym">KRM12<small>Kerem Enerji</small></span><span class="num">48,62</span><span class="num down">−0,87%</span><span class="mk r-agent" title="">?</span></div>
+<div class="wl-row2 "><span class="sym">DNZ30<small>Deniz Lojistik</small></span><span class="num">207,40</span><span class="num up">+0,35%</span><span class="mk r-valid" title="">●</span></div>
+<div class="wl-row2 "><span class="sym">ATL07<small>Atlas Çimento</small></span><span class="num">16,94</span><span class="num down">−2,10%</span><span class="mk " title="">◐</span></div>
+<div class="wl-row2 "><span class="sym">BRS15<small>Bursa Tekstil</small></span><span class="num">71,25</span><span class="num up">+0,07%</span><span class="mk r-engine" title="">◆</span></div>
+<div class="wl-row2 "><span class="sym">MRV40<small>Marmara Gıda</small></span><span class="num">9,318</span><span class="num muted">0,00%</span><span class="mk " title=""></span></div>
+<div class="wl-row2"><span class="sym">EGE09<small>Ege Bankası</small></span><span class="num muted">—</span><span class="note">yetki yok</span><span class="mk muted">⊘</span></div>
+<div class="wl-row2"><span class="sym">TRK44<small>gecikmeli 15 dk</small></span><span class="num">58,10</span><span class="num up">+0,52%</span><span class="mk"></span></div>
+</div><div class="tip" style="--x: 64px; --y: 92px; --tip-w: 22ch"><span><b class="r-fg">◐ Kırıldı 2/3</b><br>120,00 üstünde kapanış · Sen kurdun</span><span class="on-chart">İzleme ayrıntısı (Y08)</span></div></div><aside class="rule-t"><div class="pane-h"><span>İzleme görevleri</span><span class="count">6 etkin</span><span class="grow"></span><span class="icon-btn">⌕</span><span class="icon-btn">+</span></div><ul class="tasks"><li class="task2 edge-human hot"><div class="l1"><span class="sym">SYN20</span><span class="cond">120,00 üstünde kapanış</span><span class="src">çizim</span></div><div class="l2"><span class="ws r-fg"><i>◐</i>Kırıldı</span><span class="pips" aria-label="tutunma 2/3"><i class="on"></i><i class="on"></i><i></i></span><span>2/3 · <span class="on-chart">Grafikte</span></span><span class="end r-muted"><span class="health ok" aria-label="izleniyor"></span>14:35</span></div></li>
+<li class="task2 edge-agent "><div class="l1"><span class="sym">SYN20</span><span class="cond">125,00 üstünde kapanış</span><span class="src">Ajan</span></div><div class="l2"><span class="ws r-agent"><i>○</i>Önerildi · onay bekliyor</span></div></li>
+<li class="task2 edge-human "><div class="l1"><span class="sym">ATL07</span><span class="cond">16,80 altında kapanış</span><span class="src">varsayılan</span></div><div class="l2"><span class="ws r-fg"><i>○</i>Kuruldu</span><span>· koruyucu</span><span class="end r-muted"><span class="health ok" aria-label="izleniyor"></span>14:35</span></div></li>
+</ul></aside></div>
+</figure>
+<figure class="state "><figcaption><span class="n">·</span><b>Düzenleme kipi</b><code>düzenleme</code></figcaption>
+<div class="surface w-side"><div class="pane-h"><span>İzleme listesi</span><span class="grow"></span><span class="btn quiet">Bitti</span></div><div class="wl-row2"><span class="sym">⋮⋮ SYN20</span><span></span><span></span><span class="mk muted">✕</span></div><div class="wl-row2"><span class="sym">⋮⋮ KRM12</span><span></span><span></span><span class="mk muted">✕</span></div><div class="wl-row2"><span class="sym">⋮⋮ DNZ30</span><span></span><span></span><span class="mk muted">✕</span></div><div class="wl-row2"><span class="sym">⋮⋮ ATL07</span><span></span><span></span><span class="mk muted">✕</span></div></div>
+</figure>
+<figure class="state "><figcaption><span class="n">·</span><b>Boş ve yükleniyor</b><code>O-boş · O-yükleniyor</code></figcaption>
+<div class="surface w-side"><div class="pane-h"><span>İzleme listesi</span></div><div class="empty"><span>Liste boş · sembol ekle (⌘K)</span></div></div><div class="surface w-side" style="margin-top: var(--qp-space-2)"><div class="pane-h"><span>İzleme listesi</span></div><div class="wl-row2"><span class="skel" style="width:60%"></span><span class="skel" style="width:5ch"></span><span class="skel" style="width:5ch"></span><span></span></div><div class="wl-row2"><span class="skel" style="width:60%"></span><span class="skel" style="width:5ch"></span><span class="skel" style="width:5ch"></span><span></span></div><div class="wl-row2"><span class="skel" style="width:60%"></span><span class="skel" style="width:5ch"></span><span class="skel" style="width:5ch"></span><span></span></div><div class="wl-row2"><span class="skel" style="width:60%"></span><span class="skel" style="width:5ch"></span><span class="skel" style="width:5ch"></span><span></span></div></div>
+</figure>
+</div><h3 class="block-h">Şartnamedeki durumlar (9)</h3><div class="statelist" role="table"><span class="n">1</span><span class="shown">Boş liste <span class="spill r-accent">bu sayfada</span></span><span class="muted">“Liste boş · sembol ekle (⌘K)”</span><code>O-boş</code><span class="n">2</span><span class="shown">Yükleniyor <span class="spill r-accent">bu sayfada</span></span><span class="muted">satır iskeleti</span><code>O-yükleniyor</code><span class="n">3</span><span class="shown">Canlı <span class="spill r-accent">bu sayfada</span></span><span class="muted">“+1,42%”</span><code>--qp-up / --qp-down</code><span class="n">4</span><span class="shown">Gecikmeli <span class="spill r-accent">bu sayfada</span></span><span class="muted">“Gecikmeli 15 dk”</span><code>başlıkta sözcük</code><span class="n">5</span><span class="shown">Satırda yetki yok <span class="spill r-accent">bu sayfada</span></span><span class="muted">“yetki yok”</span><code>kilit</code><span class="n">6</span><span class="shown">Satırda izleme kurulu / tetiklendi / soru <span class="spill r-accent">bu sayfada</span></span><span class="muted">“◐” · “●” · “?”</span><code>İ-* şekli</code><span class="n">7</span><span class="shown">Satırda kapsül <span class="spill r-accent">bu sayfada</span></span><span class="muted">“◆”</span><code>motor elması</code><span class="n">8</span><span class="shown">Sıralanmış <span class="spill r-accent">bu sayfada</span></span><span class="muted">—</span><code>sütun başında ok</code><span class="n">9</span><span class="shown">Düzenleme kipi <span class="spill r-accent">bu sayfada</span></span><span class="muted">“Bitti”</span><code>tutamaç, sil</code></div></section>
+</body>
+</html>

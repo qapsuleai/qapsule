@@ -1,0 +1,52 @@
+<!doctype html>
+<!-- RD2 M2/M3 (watch) Y08 — İzleme görevi ayrıntısı. Kademe 2: ana durumun tam maketi (masaüstü) + şartnamedeki durum listesi.
+     Açmak: ?look=tavek (masaüstü) ya da ?look=tavek-tel (telefon) &theme=dark|light &vars=<önek>
+     (README). Değerler yalnız var(--…); satır içi px yalnız çerçeve geometrisi (kesit boyu, yüzen
+     kartın konumu, bindirmenin grafik kesirleri); metin sentetik; grafik çekirdekten (`qp render`). -->
+<html lang="tr">
+<head>
+  <meta charset="utf-8">
+  <title>Y08 İzleme görevi ayrıntısı</title>
+  <link rel="stylesheet" href="../../_base/base.css">
+  <link rel="stylesheet" href="../../_base/phone.css">
+  <link rel="stylesheet" href="../../tavek/tavek.css">
+  <link rel="stylesheet" href="watch.css">
+  <script src="../../_base/frame.js"></script>
+</head>
+<body class="sheet">
+<header class="sheet-h">
+  <h1><span class="id">Y08</span>İzleme görevi ayrıntısı</h1>
+  <p>Tek görev: koşulun tam hali, kim kurdu, kim onayladı, hangi çizimin hangi sürümüne bağlı, olay geçmişi, kalan süre, sicil. Masaüstünde listeden açılan sağ panel; liste ve grafik yerinde kalır.</p>
+  <div class="facts"><span class="chip">Kademe 2</span><span class="chip">K73</span><span class="chip">K75</span><span class="chip">watch.md · Y08</span></div>
+</header>
+<h3 class="block-h">Akış</h3>
+<ol class="flow"><li><span>Liste</span><span class="k">satıra tıkla</span></li><li><span>Ayrıntı</span><span class="k">sağ panel</span></li><li><span>Olay</span><span class="k">“Kanıt” → Y16</span></li><li><span>Düzenle</span><span class="k">parçalar → kaydet → İ-yeniden</span></li></ol>
+<section class="profile"><h2>Ana durum <span class="note">“Kırıldı 2/3” görevinin ayrıntısı · ana durum Kuruldu + olay geçmişi (Eşleşti satırları) · simüle olaylar ayrı alt başlıkta</span></h2><div class="desk-frame ctx3" style="height: 860px"><aside><div class="pane-h"><span>İzleme görevleri</span><span class="count">6 etkin</span><span class="grow"></span><span class="icon-btn">⌕</span><span class="icon-btn">+</span></div><ul class="tasks"><li class="task2 edge-agent "><div class="l1"><span class="sym">SYN20</span><span class="cond">125,00 üstünde kapanış</span><span class="src">Ajan</span></div><div class="l2"><span class="ws r-agent"><i>○</i>Önerildi · onay bekliyor</span></div></li>
+<li class="task2 edge-human hot"><div class="l1"><span class="sym">SYN20</span><span class="cond">120,00 üstünde kapanış</span><span class="src">çizim</span></div><div class="l2"><span class="ws r-fg"><i>◐</i>Kırıldı</span><span class="pips" aria-label="tutunma 2/3"><i class="on"></i><i class="on"></i><i></i></span><span>2/3 · <span class="on-chart">Grafikte</span></span><span class="end r-muted"><span class="health ok" aria-label="izleniyor"></span>14:35</span></div></li>
+<li class="task2 edge-human "><div class="l1"><span class="sym">ATL07</span><span class="cond">16,80 altında kapanış</span><span class="src">varsayılan</span></div><div class="l2"><span class="ws r-fg"><i>○</i>Kuruldu</span><span>· koruyucu</span><span class="end r-muted"><span class="health ok" aria-label="izleniyor"></span>14:35</span></div></li>
+<li class="task2 edge-engine "><div class="l1"><span class="sym">SYN20</span><span class="cond">Kapsül · kırılım tutunması</span><span class="src">Motor</span></div><div class="l2"><span class="ws r-fg"><i>○</i>Kuruldu</span><span class="end r-muted"><span class="health unknown" aria-label="bilinmiyor"></span>Bilinmiyor</span></div></li>
+<li class="task2 edge-human "><div class="l1"><span class="sym">EGE09</span><span class="cond">RSI 14, 70 üstü</span><span class="src">gösterge</span></div><div class="l2"><span class="ws r-muted"><i>‖</i>Duraklatıldı</span></div></li>
+</ul></aside><div class="cell"><div class="cell-bar"><span class="instr">SYN20</span><span class="seg"><span class="chip">4sa</span><span class="chip on">Günlük</span></span><span class="grow"></span><span class="layers"><span class="stroke">İnsan</span><span class="stroke agent">Ajan</span><span class="stroke engine">Motor</span></span></div><div class="chart-slot"><img data-chart="y08-ctx" data-tx="desk-182" alt="SYN20 günlük grafik"><div class="overlay"><svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"><line class="watch" x1="2" y1="14.72" x2="88.57" y2="14.72"></line><line class="watch-hot" x1="85.12" y1="14.72" x2="88.57" y2="14.72"></line></svg><span class="notch" style="--x: 85.12%; --y: 14.72%"></span><div class="ax-chip human" style="--x: 2%; --y: 14.72%"><span>İzleme</span><span class="ws r-fg"><i>◐</i>Kırıldı</span><span class="pips" aria-label="tutunma 2/3"><i class="on"></i><i class="on"></i><i></i></span><span class="who">tutunma 2/3 bar · günlük</span></div><div class="ax-tag human" style="--y: 14.72%">120,00</div></div></div></div><div><div class="detail">
+<section><div class="d-title"><div class="top"><span class="origin human">İzleme</span><span>SYN20 · günlük</span><span class="grow"></span><span class="icon-btn" aria-label="Kapat">✕</span></div>
+<h2>Günlük kapanış 120,00'ın üstünde 3 bar tutunursa haber ver</h2>
+<div class="meta"><span class="spill r-fg">◐ Kırıldı 2/3</span><span><span class="health ok" style="display:inline-block;width:var(--qp-space-1);height:var(--qp-space-1)"></span> İzleniyor, son kontrol 14:35</span><span>Canlı</span></div></div></section>
+<section><h3>Koşul</h3><dl class="kv">
+<dt>Olay</dt><dd>yukarı kırılım</dd><span class="src">çizimden</span>
+<dt>Kaynak</dt><dd>kapanış</dd><span class="src">varsayılan</span>
+<dt>Periyot</dt><dd>günlük</dd><span class="src">çizimin periyodu</span>
+<dt>Teyit</dt><dd><span class="agentfield">3 bar</span></dd><span class="src r-agent">Ajan</span>
+<dt>Tekrar</dt><dd>bir kez</dd><span class="src">varsayılan</span>
+<dt>Süre</dt><dd>30 Kas seans sonu</dd><span class="src">varsayılan</span></dl></section>
+<section><h3>Köken izi</h3><ul class="trail"><li class="edge-human">Sen çizdin<span class="when">10 Eyl</span></li><li class="edge-agent"><span class="r-agent">Ajan</span> okudu: “kırılırsa haber ver”<span class="when">10 Eyl</span></li><li class="edge-human">Sen onayladın<span class="when">10 Eyl 14:35</span></li></ul>
+<p class="note" style="margin-top: var(--qp-space-1)">Bağ: Yatay seviye 120,00 · sürüm 3 · <span class="on-chart">Grafikte</span></p></section>
+<section><h3>Olay geçmişi <span class="grow"></span><span class="note">Tümü</span></h3><ul class="events">
+<li><span class="t">12 Eyl</span><span>Tutunma 2/3 · kapanış 122,59 &gt; 120,00</span><span class="ev">Kanıt</span></li>
+<li><span class="t">11 Eyl</span><span>Kırıldı 1/3 · kapanış 120,79 &gt; 120,00 · haber verildi</span><span class="ev">Kanıt</span></li>
+<li><span class="t">10 Eyl</span><span>Kuruldu · izleniyor</span><span></span></li>
+<li class="sub"><span class="t"></span><span class="note">Yeniden oynatma · simüle</span><span></span></li>
+<li><span class="t">15 Eyl</span><span><span class="sim">simüle</span> Tutundu 3/3</span><span class="ev">Oynat</span></li></ul></section>
+<section><h3>Sicil</h3><p style="font-size: var(--m-fs-label)">Bu izlemenin sonucu sicile yazılır: tutundu / geri döndü.</p><p class="note">Kalıpta tutma <span class="fig">%64</span> (n = 42, %49–77) · taban <span class="fig">%51</span></p><p class="disclaimer">Sinyal, tavsiye değil</p></section>
+<section><div class="actions" style="justify-content:flex-start"><span class="btn">Düzenle</span><span class="btn">Duraklat</span><span class="btn quiet">Kaldır</span></div></section>
+</div></div></div><h3 class="block-h">Şartnamedeki durumlar (10)</h3><div class="statelist" role="table"><span class="n">1</span><span class="shown">Kuruldu <span class="spill r-accent">bu sayfada</span></span><span class="muted">“İzleniyor, son kontrol 14:35”</span><code>İ-kuruldu</code><span class="n">2</span><span class="shown">Eşleşti <span class="spill r-accent">bu sayfada</span></span><span class="muted">“14:35 · günlük kapanış 113,05 > 112,40 · Kanıt”</span><code>olay satırı</code><span class="n">3</span><span class="">Yeniden kuruldu</span><span class="muted">“2 kez eşleşti · yeniden kuruldu”</span><code>İ-yeniden</code><span class="n">4</span><span class="">Durduruldu</span><span class="muted">“Duraklatıldı · Sen, 14:40”</span><code>İ-durdu</code><span class="n">5</span><span class="">Süresi doldu</span><span class="muted">“Süresi doldu 22 Ağu”</span><code>İ-süredoldu</code><span class="n">6</span><span class="">Çizimi değişti</span><span class="muted">eski/yeni geometri + onay: “Çizim taşındı: 112,40 → 111,80 · izlemeyi yeni çizgiye bağla”</span><code>İ-çizimdeğişti</code><span class="n">7</span><span class="">Çizimi silindi</span><span class="muted">“Çizimi silindi · izleme durdu”</span><code>İ-çizimsilindi</code><span class="n">8</span><span class="">Değerlendirilemiyor</span><span class="muted">“Veri bayat (son 14:35)”</span><code>İ-değerlendirilemiyor</code><span class="n">9</span><span class="">Beklemede</span><span class="muted">“Kurumsal işlem: taşınıyor”</span><code>İ-beklemede (Y36)</code><span class="n">10</span><span class="">Düzenleniyor</span><span class="muted">parçalar düzenlenebilir; “Kaydet” · “Vazgeç”; değişen parça “Sen”</span><code>--qp-origin-human</code></div></section>
+</body>
+</html>

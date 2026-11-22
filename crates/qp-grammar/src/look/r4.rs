@@ -30,6 +30,8 @@ pub const R4: Look = Look {
         pill_radius: 8.0,
         line: 1.0,
         shadow: false,
+        shadow_css: "none",
+        card_radius: 6.0,
         strip_alpha: 56,
         veil_alpha: 160,
     },
@@ -116,4 +118,7 @@ pub const R4: Look = Look {
         note_lines: 2.0,
         thumb_lead: 5,
     },
+    profile: Profile::Legacy,
+    origin: None,
+    chart: ChartLook::legacy(72.0, 32.0),
 };

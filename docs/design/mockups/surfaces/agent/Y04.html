@@ -1,0 +1,444 @@
+<!doctype html>
+<!-- RD2 M2 (ajan) — Y04 çizim niyet kartı, kademe 1: on iki durum, iki profil.
+     Masaüstü `?look=tavek`: her karede grafik kırpımı (hap) + panel kartı. Telefon
+     `?look=tavek-tel`: hap yok, bildirimden açılan tam sayfa, eylemler altta yapışık.
+     Grafik çekirdekten (`qp render … --view desk`); bindirme konumları kırpımın kesirleri,
+     veriye bağlı değil. Metin sentetik; cümleleri çekirdek kurar (kalıp). -->
+<html lang="tr">
+<head>
+  <meta charset="utf-8">
+  <title>Y04 Çizim niyet kartı</title>
+  <link rel="stylesheet" href="../../_base/base.css">
+  <link rel="stylesheet" href="../../tavek/tavek.css">
+  <link rel="stylesheet" href="agent.css">
+  <script src="../../_base/frame.js"></script>
+</head>
+<body class="sheet-body">
+<main class="sheet">
+  <header class="sheet-head">
+    <div>
+      <span class="eyebrow">Y04 · kademe 1 · agent.md</span>
+      <h1>Çizim niyet kartı</h1>
+      <p>Ajanın çizimden ne anladığı: tek cümle beklenti, koşulun parçaları (varsayılanlar işaretli),
+        dayandığı not. İki katman: grafikte niyet hapı, panelde tam kart. Grafik kapanmaz.</p>
+    </div>
+    <div class="meta"><span class="stroke">İnsan, düz</span><span class="stroke agent">Ajan, kesik</span><span class="stroke engine">Motor, noktalı</span></div>
+  </header>
+
+  <!-- ================================ MASAÜSTÜ ================================ -->
+  <section class="profile desk" aria-label="Masaüstü">
+    <h2>Akış: çizim → hap → kart <span class="note">Durum 2 tam boy · Ç1 orta sütun + sağ panel</span></h2>
+    <div class="pair">
+      <div>
+        <p class="pair-label">Grafikte: hap çizginin başında, boş tarafta</p>
+        <div class="chart-slot mini-chart"><img data-chart="desk" alt="SAMPLE günlük grafik">
+          <div class="overlay">
+            <svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
+              <line class="human" x1="38" y1="29.9" x2="91.1" y2="29.9"></line>
+            </svg>
+            <div class="ax-tag human" style="--y: 29.9%">112,40</div>
+            <div class="intent-pill agent" style="--x: 38%; --y: 29.9%"><span class="lead-mark">Ajan</span><span>Altında kapanış → uyar</span><span class="muted">3 bar · günlük</span></div>
+          </div>
+        </div>
+      </div>
+      <div>
+        <p class="pair-label">Panelde: ajan akışının içinde</p>
+        <div class="acard">
+          <div class="eyebrow-row"><span class="origin agent">Ajan</span><span>Çizim niyeti</span><span class="grow"></span><span class="pill agent">○ Önerildi</span></div>
+          <h3>112,40 altında günlük kapanış olursa haber ver</h3>
+          <div class="eyebrow-row"><span class="engine-mark">Motor cümlesi</span><span class="grow"></span><span class="link">Grafikte</span></div>
+          <div class="parts">
+            <div><span class="k">Olay</span><span class="v">Altında kapanış</span><span class="src">çizimden</span></div>
+            <div><span class="k">Kaynak</span><span class="v">Kapanış fiyatı</span><span class="src default">varsayılan</span></div>
+            <div><span class="k">Periyot</span><span class="v">Günlük</span><span class="src">çizimden</span></div>
+            <div><span class="k">Tekrar</span><span class="v">Bir kez, sonra yeniden kur</span><span class="src default">varsayılan</span></div>
+            <div><span class="k">Süre</span><span class="v"><span class="mono">30</span> gün · <span class="mono">22 Ara</span></span><span class="src default">varsayılan</span></div>
+            <div><span class="k">Tutunma</span><span class="v"><span class="mono">3</span> bar</span><span class="src">senin notundan</span></div>
+          </div>
+          <p class="quote">Notun, 21 Kas: <b>“112,40 kırılırsa 3 gün bekle.”</b></p>
+          <div class="actions"><span class="btn quiet">Yalnız çizim</span><span class="grow"></span><span class="btn">Değiştir</span><span class="btn primary">İzlemeyi kur</span></div>
+        </div>
+      </div>
+    </div>
+
+    <h2>Bütün durumlar <span class="note">Şartname tablosu sırasıyla · üstte hap (grafik kırpımı), altta kart</span></h2>
+    <div class="states">
+
+      <!-- 1 -->
+      <figure class="state">
+        <figcaption><span class="n">1</span><b>Ajan okuyor</b><span class="role">--qp-origin-agent · “Çizimi okuyor · 2 sn”</span></figcaption>
+        <div class="chart-slot crop"><img data-chart="desk" alt="">
+          <div class="overlay">
+            <svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"><line class="human" x1="6" y1="43" x2="80" y2="43"></line></svg>
+            <div class="ax-tag human" style="--y: 43%">112,40</div>
+            <div class="intent-pill agent" style="--x: 6%; --y: 43%"><span class="lead-mark">…</span></div>
+          </div>
+        </div>
+        <div class="stage">
+          <div class="work"><div class="step live"><span class="spin"></span><span class="name">Çizimi okuyor</span><span class="arg">yatay seviye · 112,40</span><span></span><span class="dur">2 sn</span></div></div>
+        </div>
+      </figure>
+
+      <!-- 2 -->
+      <figure class="state">
+        <figcaption><span class="n">2</span><b>Anladı, öneri bekliyor</b><span class="role">--qp-origin-agent · tam cümle, kesik çerçeve</span></figcaption>
+        <div class="chart-slot crop"><img data-chart="desk" alt="">
+          <div class="overlay">
+            <svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"><line class="human" x1="6" y1="43" x2="80" y2="43"></line></svg>
+            <div class="ax-tag human" style="--y: 43%">112,40</div>
+            <div class="intent-pill agent" style="--x: 6%; --y: 43%"><span>Altında kapanış → uyar</span><span class="muted">3 bar · günlük</span></div>
+          </div>
+        </div>
+        <div class="stage">
+          <div class="acard">
+            <div class="eyebrow-row"><span class="origin agent">Ajan</span><span>Çizim niyeti</span><span class="grow"></span><span class="pill agent">○ Önerildi</span></div>
+            <h3>112,40 altında günlük kapanış olursa haber ver</h3>
+            <div class="parts">
+              <div><span class="k">Olay</span><span class="v">Altında kapanış</span><span class="src">çizimden</span></div>
+              <div><span class="k">Kaynak</span><span class="v">Kapanış</span><span class="src default">varsayılan</span></div>
+              <div><span class="k">Tutunma</span><span class="v"><span class="mono">3</span> bar</span><span class="src">senin notundan</span></div>
+            </div>
+            <div class="actions"><span class="btn quiet">Yalnız çizim</span><span class="grow"></span><span class="btn">Değiştir</span><span class="btn primary">İzlemeyi kur</span></div>
+          </div>
+        </div>
+      </figure>
+
+      <!-- 3 -->
+      <figure class="state">
+        <figcaption><span class="n">3</span><b>Kur ve göster (güven kazanılmış)</b><span class="role">--fg · düz çerçeve + “kuruldu”</span></figcaption>
+        <div class="chart-slot crop"><img data-chart="desk" alt="">
+          <div class="overlay">
+            <svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"><line class="human" x1="6" y1="43" x2="80" y2="43"></line></svg>
+            <div class="ax-tag human" style="--y: 43%">112,40</div>
+            <div class="intent-pill settled" style="--x: 6%; --y: 43%"><span>Altında kapanış → uyar</span><span class="muted">kuruldu</span></div>
+          </div>
+        </div>
+        <div class="stage">
+          <div class="status-line edge-human"><span class="st armed fg">Kuruldu:</span><span class="fg">112,40 altında kapanış</span><span class="grow"></span><span class="link strong">Değiştir</span></div>
+        </div>
+      </figure>
+
+      <!-- 4 -->
+      <figure class="state">
+        <figcaption><span class="n">4</span><b>Koruyucu varsayılan (K72)</b><span class="role">--fg + --muted sözcük</span></figcaption>
+        <div class="chart-slot crop"><img data-chart="desk" alt="">
+          <div class="overlay">
+            <svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"><line class="human" x1="6" y1="43" x2="80" y2="43"></line></svg>
+            <div class="ax-tag human" style="--y: 43%">112,40</div>
+            <div class="intent-pill settled" style="--x: 6%; --y: 43%"><span>Altında kapanış → uyar</span><span class="muted">koruyucu · varsayılan</span></div>
+          </div>
+        </div>
+        <div class="stage">
+          <div class="acard settled">
+            <div class="eyebrow-row"><span class="origin agent">Ajan</span><span>kurdu</span><span class="grow"></span><span class="pill human">○ Kuruldu</span></div>
+            <p class="lede">Pozisyonunu koruyan taraf: kuruldu</p>
+            <div class="parts">
+              <div><span class="k">Pozisyon</span><span class="v">SYN20 · <span class="mono">400</span> adet</span><span class="src">portföyden</span></div>
+              <div><span class="k">Yön</span><span class="v">Altında kapanış</span><span class="src default">varsayılan</span></div>
+            </div>
+            <div class="actions"><span class="link">Neden bu yön?</span><span class="grow"></span><span class="btn">Değiştir</span></div>
+          </div>
+        </div>
+      </figure>
+
+      <!-- 5 -->
+      <figure class="state">
+        <figcaption><span class="n">5</span><b>Emin değil, soruyor</b><span class="role">--qp-origin-agent · Y05 soru kartına geçer</span></figcaption>
+        <div class="chart-slot crop"><img data-chart="desk" alt="">
+          <div class="overlay">
+            <svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"><line class="human" x1="6" y1="43" x2="80" y2="43"></line></svg>
+            <div class="ax-tag human" style="--y: 43%">112,40</div>
+            <div class="intent-pill agent" style="--x: 6%; --y: 43%"><span class="lead-mark">?</span><span>Yön belirsiz · cevapla</span></div>
+          </div>
+        </div>
+        <div class="stage">
+          <div class="qcard">
+            <div class="eyebrow-row"><span class="origin agent">Ajan soruyor</span><span class="grow"></span><span class="mono">Soru 1 / 2</span></div>
+            <h3>Bu seviyede ne olunca haber vereyim?</h3>
+            <div class="opts">
+              <span class="opt">Günlük kapanış 112,40'ın altında olursa haber ver</span>
+              <span class="opt">Günlük kapanış 112,40'ın üstünde olursa haber ver</span>
+              <span class="opt">İzleme, yalnız not kalsın</span>
+            </div>
+            <div class="qfoot"><span class="btn quiet">Atla</span><span class="grow"></span><span class="btn" aria-disabled="true">Sonraki</span></div>
+          </div>
+        </div>
+      </figure>
+
+      <!-- 6 -->
+      <figure class="state">
+        <figcaption><span class="n">6</span><b>Okunamadı</b><span class="role">--muted · hap yok, tek satır</span></figcaption>
+        <div class="chart-slot crop"><img data-chart="desk" alt="">
+          <div class="overlay">
+            <svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"><line class="human" x1="20" y1="62" x2="62" y2="28"></line></svg>
+          </div>
+        </div>
+        <div class="stage">
+          <div class="status-line"><span class="glyph">–</span><span>Ölçüm cetveli niyet taşımaz</span></div>
+        </div>
+      </figure>
+
+      <!-- 7 -->
+      <figure class="state">
+        <figcaption><span class="n">7</span><b>Bayat çizim</b><span class="role">--qp-warn · uyarı + seçenek</span></figcaption>
+        <div class="chart-slot crop"><img data-chart="desk" alt="">
+          <div class="overlay">
+            <svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"><line class="human" x1="6" y1="43" x2="80" y2="43"></line></svg>
+            <div class="ax-tag human" style="--y: 43%">112,40</div>
+            <div class="intent-pill warn" style="--x: 6%; --y: 43%"><span class="lead-mark">△</span><span>bayat</span></div>
+          </div>
+        </div>
+        <div class="stage">
+          <div class="acard warn">
+            <div class="eyebrow-row"><span class="origin agent">Ajan</span><span>Çizim niyeti</span><span class="grow"></span><span class="pill warn">△ Bayat çizim</span></div>
+            <p class="lede">Fiyat bu seviyenin 4 bar önce üstüne geçti; geri dönüşü mü bekliyorsun?</p>
+            <div class="opts">
+              <span class="opt">Günlük kapanış yeniden 112,40'ın altına inerse haber ver</span>
+              <span class="opt">İzleme, yalnız not kalsın</span>
+            </div>
+          </div>
+        </div>
+      </figure>
+
+      <!-- 8 -->
+      <figure class="state">
+        <figcaption><span class="n">8</span><b>Çelişki bulundu</b><span class="role">--qp-warn · iki çizim yan yana, ikisi de kurulmaz</span></figcaption>
+        <div class="chart-slot crop"><img data-chart="desk" alt="">
+          <div class="overlay">
+            <svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
+              <line class="human" x1="6" y1="43" x2="80" y2="43"></line>
+              <line class="human" x1="30" y1="58" x2="80" y2="58"></line>
+            </svg>
+            <div class="ax-tag human" style="--y: 43%">112,40</div>
+            <div class="ax-tag human" style="--y: 58%">110,90</div>
+            <div class="intent-pill warn" style="--x: 6%; --y: 58%"><span class="lead-mark">△</span><span>çelişki</span></div>
+          </div>
+        </div>
+        <div class="stage">
+          <div class="acard warn">
+            <div class="eyebrow-row"><span class="origin agent">Ajan</span><span>İki çizim</span><span class="grow"></span><span class="pill warn">△ Çelişki</span></div>
+            <p class="lede">Bu bölgede zıt beklentili iki çizim var; hangisi geçerli?</p>
+            <div class="payload">
+              <div class="row"><span><span class="swatch human"></span> 112,40 · <span class="k">altında kapanış → uyar</span></span><span class="link">Grafikte</span></div>
+              <div class="row"><span><span class="swatch human"></span> 110,90 · <span class="k">üstünde tutunma → uyar</span></span><span class="link">Grafikte</span></div>
+            </div>
+            <div class="actions"><span class="btn">112,40 geçerli</span><span class="btn">110,90 geçerli</span></div>
+          </div>
+        </div>
+      </figure>
+
+      <!-- 9 -->
+      <figure class="state">
+        <figcaption><span class="n">9</span><b>Kullanıcı düzeltti</b><span class="role">--qp-origin-human · değişen parça vurgulu</span></figcaption>
+        <div class="chart-slot crop"><img data-chart="desk" alt="">
+          <div class="overlay">
+            <svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"><line class="human" x1="6" y1="43" x2="80" y2="43"></line></svg>
+            <div class="ax-tag human" style="--y: 43%">112,40</div>
+            <div class="intent-pill settled" style="--x: 6%; --y: 43%"><span>Altında kapanış → uyar</span><span class="muted">2 bar · günlük</span></div>
+          </div>
+        </div>
+        <div class="stage">
+          <div class="acard">
+            <div class="eyebrow-row"><span class="origin agent">Ajan</span><span>Çizim niyeti</span><span class="grow"></span><span class="pill agent">○ Önerildi</span></div>
+            <h3>112,40 altında 2 günlük kapanış olursa haber ver</h3>
+            <div class="parts">
+              <div><span class="k">Olay</span><span class="v">Altında kapanış</span><span class="src">çizimden</span></div>
+              <div class="changed open"><span class="k">Tutunma</span><span class="v"><s class="muted">3</s> → <span class="mono">2</span> bar</span><span class="src">Sen</span></div>
+              <div class="part-options"><span class="chip">1 bar</span><span class="chip sel">2 bar</span><span class="chip">3 bar</span><span class="chip">5 bar</span></div>
+            </div>
+            <div class="actions"><span class="btn quiet">Yalnız çizim</span><span class="grow"></span><span class="btn primary">İzlemeyi kur</span></div>
+          </div>
+        </div>
+      </figure>
+
+      <!-- 10 -->
+      <figure class="state">
+        <figcaption><span class="n">10</span><b>Onaylandı</b><span class="role">--fg · hap kalkar, çip İ-kuruldu</span></figcaption>
+        <div class="chart-slot crop"><img data-chart="desk" alt="">
+          <div class="overlay">
+            <svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"><line class="watch" x1="6" y1="43" x2="80" y2="43"></line></svg>
+            <div class="ax-tag human" style="--y: 43%">112,40</div>
+            <div class="ax-chip human" style="--x: 6%; --y: 43%"><span>İzleme</span><span class="st armed">Kuruldu</span></div>
+          </div>
+        </div>
+        <div class="stage">
+          <div class="status-line edge-human"><span class="st armed fg">İzleme kuruldu</span><span>· Sen, <span class="mono">14:35</span></span><span class="grow"></span><span class="link">Günlükte</span></div>
+        </div>
+      </figure>
+
+      <!-- 11 -->
+      <figure class="state">
+        <figcaption><span class="n">11</span><b>Reddedildi</b><span class="role">--muted · hap kalkar</span></figcaption>
+        <div class="chart-slot crop"><img data-chart="desk" alt="">
+          <div class="overlay">
+            <svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"><line class="human" x1="6" y1="43" x2="80" y2="43"></line></svg>
+            <div class="ax-tag human" style="--y: 43%">112,40</div>
+          </div>
+        </div>
+        <div class="stage">
+          <div class="status-line edge-human"><span>Yalnız çizim kaldı</span><span>· Sen, <span class="mono">14:36</span></span><span class="grow"></span><span class="link">Bunu izle</span></div>
+        </div>
+      </figure>
+
+      <!-- 12 -->
+      <figure class="state">
+        <figcaption><span class="n">12</span><b>Ajan kapalı (basamak “izle”)</b><span class="role">--muted · O-ajankapalı, hap yok</span></figcaption>
+        <div class="chart-slot crop"><img data-chart="desk" alt="">
+          <div class="overlay">
+            <svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"><line class="human" x1="6" y1="43" x2="80" y2="43"></line></svg>
+            <div class="ax-tag human" style="--y: 43%">112,40</div>
+          </div>
+        </div>
+        <div class="stage">
+          <div class="status-line"><span class="glyph">‖</span><span>Ajan yalnız okuyor (basamak: izle)</span><span class="grow"></span><span class="link">Basamak</span></div>
+        </div>
+      </figure>
+    </div>
+
+    <h2>Veri durumu <span class="note">Kart açılır; eylem başlangıç durumunu söyler</span></h2>
+    <div class="states">
+      <figure class="state">
+        <figcaption><span class="n">D</span><b>Veri bayatken</b><span class="role">D-bayat · İ-değerlendirilemiyor</span></figcaption>
+        <div class="stage">
+          <div class="acard">
+            <div class="eyebrow-row"><span class="origin agent">Ajan</span><span>Çizim niyeti</span><span class="grow"></span><span class="pill warn">◌ Bayat · 14:35</span></div>
+            <h3>112,40 altında günlük kapanış olursa haber ver</h3>
+            <p class="scope">Kurarsan izleme “Değerlendirilemiyor · veri bayat” ile başlar; veri gelince değerlendirir.</p>
+            <div class="actions"><span class="btn quiet">Yalnız çizim</span><span class="grow"></span><span class="btn primary">Yine de kur</span></div>
+          </div>
+        </div>
+      </figure>
+      <figure class="state">
+        <figcaption><span class="n">D</span><b>Yetki yok</b><span class="role">D-yetkiyok · yalnız çizim düzeyi</span></figcaption>
+        <div class="stage">
+          <div class="acard">
+            <div class="eyebrow-row"><span class="origin agent">Ajan</span><span>Çizim niyeti</span><span class="grow"></span><span class="pill">Yetki yok</span></div>
+            <p class="lede">Çizimin yatay bir seviye; altında kapanışı izlemek istiyor gibisin.</p>
+            <p class="scope">Bu veri için yetkin yok: BIST seviye 1 · değer yazılmadı. <span class="link">Yetkiyi gör</span></p>
+          </div>
+        </div>
+      </figure>
+      <figure class="state">
+        <figcaption><span class="n">D</span><b>Simüle</b><span class="role">D-simüle · --note-bg</span></figcaption>
+        <div class="stage">
+          <div class="acard">
+            <div class="eyebrow-row"><span class="origin agent">Ajan</span><span>Çizim niyeti</span><span class="grow"></span><span class="pill note-tone">Simüle</span></div>
+            <h3>112,40 altında günlük kapanış olursa haber ver</h3>
+            <p class="scope">Simüle kayda kurulur; canlı izlemelere karışmaz.</p>
+            <div class="actions"><span class="grow"></span><span class="btn primary">Simülede kur</span></div>
+          </div>
+        </div>
+      </figure>
+    </div>
+  </section>
+
+  <!-- ================================ TELEFON ================================= -->
+  <section class="profile phone" aria-label="Telefon">
+    <h2>Telefon <span class="note">Hap yok; bildirimden açılan tam sayfa</span></h2>
+    <div class="states">
+      <figure class="state">
+        <figcaption><span class="n">1</span><b>Ajan okuyor</b><span class="role">--qp-origin-agent</span></figcaption>
+        <div class="ph"><div class="ph-body"><div class="work"><div class="step live"><span class="spin"></span><span class="name">Çizimi okuyor</span><span class="arg">112,40</span><span></span><span class="dur">2 sn</span></div></div></div></div>
+      </figure>
+
+      <figure class="state">
+        <figcaption><span class="n">2</span><b>Anladı, öneri bekliyor · tam sayfa</b><span class="role">parçalar dikey liste, eylemler altta yapışık</span></figcaption>
+        <div class="ph">
+          <div class="ph-status"><span class="pulse"></span><span>Canlı · seans açık</span><span class="grow"></span><span class="mono">14:35</span></div>
+          <div class="ph-head"><span class="btn quiet">‹ Kule</span><h3>Çizim niyeti</h3></div>
+          <div class="ph-chart"><div class="chart-slot mini-chart phone-chart"><img data-chart="phone" alt="SAMPLE telefon grafiği">
+            <div class="overlay">
+              <svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"><line class="human" x1="30" y1="40" x2="84.4" y2="40"></line></svg>
+              <div class="ax-tag human" style="--y: 40%">112,40</div>
+            </div></div></div>
+          <div class="ph-body">
+            <div class="acard">
+              <div class="eyebrow-row"><span class="origin agent">Ajan</span><span class="grow"></span><span class="pill agent">○ Önerildi</span></div>
+              <h3>112,40 altında günlük kapanış olursa haber ver</h3>
+              <span class="engine-mark">Motor cümlesi</span>
+              <div class="parts">
+                <div><span class="k">Olay</span><span class="v">Altında kapanış</span><span class="src">çizimden</span></div>
+                <div><span class="k">Kaynak</span><span class="v">Kapanış</span><span class="src default">varsayılan</span></div>
+                <div><span class="k">Periyot</span><span class="v">Günlük</span><span class="src">çizimden</span></div>
+                <div><span class="k">Tekrar</span><span class="v">Yeniden kur</span><span class="src default">varsayılan</span></div>
+                <div><span class="k">Süre</span><span class="v"><span class="mono">30</span> gün</span><span class="src default">varsayılan</span></div>
+                <div><span class="k">Tutunma</span><span class="v"><span class="mono">3</span> bar</span><span class="src">notundan</span></div>
+              </div>
+              <p class="quote">Notun: <b>“112,40 kırılırsa 3 gün bekle.”</b></p>
+            </div>
+          </div>
+          <div class="sticky-actions three"><span class="btn quiet">Yalnız çizim</span><span class="btn">Değiştir</span><span class="btn primary">İzlemeyi kur</span></div>
+        </div>
+      </figure>
+
+
+      <figure class="state">
+        <figcaption><span class="n">3</span><b>Kur ve göster</b><span class="role">--fg · kart katlı, “Değiştir” tek dokunuş</span></figcaption>
+        <div class="ph"><div class="ph-body"><div class="status-line edge-human"><span class="st armed fg">Kuruldu:</span><span class="fg">112,40 altında kapanış</span><span class="grow"></span><span class="link strong">Değiştir</span></div></div></div>
+      </figure>
+
+      <figure class="state">
+        <figcaption><span class="n">4</span><b>Koruyucu varsayılan</b><span class="role">--fg + --muted sözcük</span></figcaption>
+        <div class="ph"><div class="ph-body"><div class="status-line edge-human"><span class="fg">Pozisyonunu koruyan taraf: kuruldu</span><span>· koruyucu · varsayılan</span><span class="grow"></span><span class="link strong">Değiştir</span></div></div></div>
+      </figure>
+
+      <figure class="state">
+        <figcaption><span class="n">5</span><b>Emin değil, soruyor</b><span class="role">Y05 alt sayfası</span></figcaption>
+        <div class="ph"><div class="bsheet"><span class="grabber"></span>
+          <div class="eyebrow-row"><span class="origin agent">Ajan soruyor</span><span class="grow"></span><span class="mono">Soru 1 / 2</span></div>
+          <h3 class="empty-title">Bu seviyede ne olunca haber vereyim?</h3>
+          <div class="opts"><span class="opt">Günlük kapanış 112,40'ın altında olursa haber ver</span><span class="opt">Günlük kapanış 112,40'ın üstünde olursa haber ver</span><span class="opt">İzleme, yalnız not kalsın</span></div>
+        </div></div>
+      </figure>
+
+      <figure class="state">
+        <figcaption><span class="n">6</span><b>Okunamadı</b><span class="role">--muted</span></figcaption>
+        <div class="ph"><div class="ph-body"><div class="status-line"><span class="glyph">–</span><span>Ölçüm cetveli niyet taşımaz</span></div></div></div>
+      </figure>
+
+      <figure class="state">
+        <figcaption><span class="n">7</span><b>Bayat çizim</b><span class="role">--qp-warn</span></figcaption>
+        <div class="ph"><div class="ph-body"><div class="acard warn">
+          <div class="eyebrow-row"><span class="origin agent">Ajan</span><span class="grow"></span><span class="pill warn">△ Bayat</span></div>
+          <p class="lede">Fiyat bu seviyenin 4 bar önce üstüne geçti; geri dönüşü mü bekliyorsun?</p>
+        </div></div>
+        <div class="sticky-actions"><span class="btn">Yalnız not</span><span class="btn primary">Geri dönüşü izle</span></div></div>
+      </figure>
+
+      <figure class="state">
+        <figcaption><span class="n">8</span><b>Çelişki bulundu</b><span class="role">--qp-warn · ikisi de kurulmaz</span></figcaption>
+        <div class="ph"><div class="ph-body"><div class="acard warn">
+          <div class="eyebrow-row"><span class="origin agent">Ajan</span><span class="grow"></span><span class="pill warn">△ Çelişki</span></div>
+          <p class="lede">Bu bölgede zıt beklentili iki çizim var; hangisi geçerli?</p>
+          <div class="payload"><div class="row"><span><span class="swatch human"></span> 112,40 · <span class="k">altında kapanış</span></span></div><div class="row"><span><span class="swatch human"></span> 110,90 · <span class="k">üstünde tutunma</span></span></div></div>
+        </div></div>
+        <div class="sticky-actions"><span class="btn">112,40</span><span class="btn">110,90</span></div></div>
+      </figure>
+
+      <figure class="state">
+        <figcaption><span class="n">9</span><b>Kullanıcı düzeltti</b><span class="role">--qp-origin-human</span></figcaption>
+        <div class="ph"><div class="ph-body"><div class="parts">
+          <div class="changed open"><span class="k">Tutunma</span><span class="v"><s class="muted">3</s> → <span class="mono">2</span> bar</span><span class="src">Sen</span></div>
+          <div class="part-options"><span class="chip">1 bar</span><span class="chip sel">2 bar</span><span class="chip">3 bar</span><span class="chip">5 bar</span></div>
+        </div></div></div>
+      </figure>
+
+      <figure class="state">
+        <figcaption><span class="n">10</span><b>Onaylandı</b><span class="role">--fg</span></figcaption>
+        <div class="ph"><div class="ph-body"><div class="status-line edge-human"><span class="st armed fg">İzleme kuruldu</span><span>· Sen, <span class="mono">14:35</span></span></div></div></div>
+      </figure>
+
+      <figure class="state">
+        <figcaption><span class="n">11</span><b>Reddedildi</b><span class="role">--muted</span></figcaption>
+        <div class="ph"><div class="ph-body"><div class="status-line edge-human"><span>Yalnız çizim kaldı</span><span>· Sen, <span class="mono">14:36</span></span></div></div></div>
+      </figure>
+
+      <figure class="state">
+        <figcaption><span class="n">12</span><b>Ajan kapalı</b><span class="role">O-ajankapalı</span></figcaption>
+        <div class="ph"><div class="ph-body"><div class="status-line"><span class="glyph">‖</span><span>Ajan yalnız okuyor (basamak: izle)</span></div></div></div>
+      </figure>
+    </div>
+  </section>
+</main>
+</body>
+</html>

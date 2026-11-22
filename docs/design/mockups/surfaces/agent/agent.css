@@ -1,0 +1,1932 @@
+/* RD2 M2/M3 — ajan grubu yüzey maketleri (Y04, Y05, Y06, Y12, Y25; Y13, Y14, Y24).
+ *
+ * base.css → tavek.css → bu dosya. Değerler yalnız look değişkenlerinden (`qp look css`);
+ * renk kodu yok. Px yalnız çapa çerçeve geometrisinde (yorumlu): ajan panelinin genişliği,
+ * telefon genişliği, başvuru kırpımının ölçüsü.
+ *
+ * Sayfa düzeni: her yüzey bir "pafta" (.sheet). Masaüstü bölümü `?look=tavek`, telefon
+ * bölümü `?look=tavek-tel` ile görünür; ikisi de aynı dosyada, durum tablosuyla aynı sırada.
+ */
+
+:root {
+  /* Çapa geometrisi: Ç1'deki ajan paneli genişliği (tavek/c1.css `--agent-w`). */
+  --a-panel-w: 320px;
+  /* Çapa geometrisi: masaüstü pafta genişliği = Ç1 çerçevesi. */
+  --a-sheet-w: 1440px;
+  /* Çapa geometrisi: telefon çerçevesi genişliği (390 CSS px, phone.css ile aynı). */
+  --a-phone-w: 390px;
+
+  --a-agent-tint: color-mix(in srgb, var(--m-agent) 7%, var(--m-card));
+  --a-agent-soft: color-mix(in srgb, var(--m-agent) 14%, transparent);
+  --a-warn-tint: color-mix(in srgb, var(--m-warn) 8%, var(--m-card));
+  --a-sel-tint: color-mix(in srgb, var(--m-accent) 10%, var(--m-card));
+  --a-edge: calc(var(--m-rule) * 2);
+}
+
+/* ---- Profil seçimi: tek sayfa, iki görünüm ---------------------------------------- */
+
+html[data-look="tavek"] .profile.phone,
+html[data-look="tavek-tel"] .profile.desk {
+  display: none;
+}
+
+/* ---- Pafta ------------------------------------------------------------------------ */
+
+body.sheet-body {
+  background: var(--m-page);
+}
+
+.sheet {
+  width: var(--a-sheet-w);
+  padding: var(--qp-space-5) var(--qp-space-5) var(--qp-space-5);
+}
+
+html[data-look="tavek-tel"] .sheet {
+  width: var(--a-phone-w);
+  padding: var(--qp-space-3) 0 var(--qp-space-5);
+}
+
+.sheet-head {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: var(--qp-space-1) var(--qp-space-4);
+  align-items: end;
+  padding-bottom: var(--qp-space-3);
+  margin-bottom: var(--qp-space-4);
+  border-bottom: var(--m-rule) solid var(--m-line);
+}
+
+html[data-look="tavek-tel"] .sheet-head {
+  grid-template-columns: 1fr;
+  padding: 0 var(--qp-space-3) var(--qp-space-3);
+  margin-bottom: var(--qp-space-3);
+}
+
+.sheet-head .eyebrow {
+  font-size: var(--m-fs-label);
+  color: var(--m-muted);
+  font-family: var(--m-font-figure);
+}
+
+.sheet-head h1 {
+  font-size: var(--m-fs-headline);
+  font-weight: var(--qp-head-weight);
+}
+
+.sheet-head p {
+  font-size: var(--m-fs-label);
+  color: var(--m-muted);
+  max-width: 72ch;
+}
+
+.sheet-head .meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--qp-space-1);
+  justify-content: flex-end;
+}
+
+.profile > h2 {
+  display: flex;
+  align-items: baseline;
+  gap: var(--qp-space-2);
+  font-size: var(--m-fs-title);
+  font-weight: var(--qp-head-weight);
+  margin: var(--qp-space-4) 0 var(--qp-space-2);
+}
+
+.profile > h2 .note {
+  font-weight: normal;
+}
+
+html[data-look="tavek-tel"] .profile > h2 {
+  padding: 0 var(--qp-space-3);
+  flex-wrap: wrap;
+}
+
+/* Durum kareleri: etiket üstte, sahne altta. */
+.states {
+  display: grid;
+  grid-template-columns: repeat(4, var(--a-panel-w));
+  gap: var(--qp-space-4) var(--qp-space-4);
+  align-items: start;
+}
+
+.states.wide {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.states.rows {
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--qp-space-3);
+}
+
+html[data-look="tavek-tel"] .states {
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--qp-space-5);
+}
+
+.state {
+  margin: 0;
+  min-width: 0;
+}
+
+.state > figcaption {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  column-gap: var(--qp-space-1);
+  row-gap: var(--m-rule);
+  margin-bottom: var(--qp-space-1);
+  font-size: var(--m-fs-label);
+}
+
+html[data-look="tavek-tel"] .state > figcaption {
+  padding: 0 var(--qp-space-3);
+}
+
+.state > figcaption .n {
+  font-family: var(--m-font-figure);
+  color: var(--m-muted);
+  min-width: 2ch;
+}
+
+.state > figcaption b {
+  font-weight: var(--qp-head-weight);
+}
+
+.state > figcaption .role {
+  grid-column: 2;
+  color: var(--m-muted);
+  font-family: var(--m-font-figure);
+  font-size: var(--m-fs-note);
+}
+
+/* Sahne: ajan paneli zemini (Ç1 sağ sütun). */
+.stage {
+  background: var(--m-panel);
+  border: var(--m-rule) solid var(--m-line);
+  border-radius: var(--m-radius-card);
+  padding: var(--qp-space-3);
+  overflow: hidden;
+}
+
+.stage.flush {
+  padding: 0;
+}
+
+.stage.page {
+  background: var(--m-page);
+}
+
+html[data-look="tavek-tel"] .stage {
+  border-radius: 0;
+  border-left: none;
+  border-right: none;
+}
+
+/* ---- Ortak satır içi parçalar ------------------------------------------------------ */
+
+.eyebrow-row {
+  display: flex;
+  align-items: center;
+  gap: var(--qp-space-1);
+  font-size: var(--m-fs-note);
+  color: var(--m-muted);
+  min-width: 0;
+}
+
+.eyebrow-row .grow {
+  flex: 1 1 auto;
+}
+
+/* Durum hapı: kenarlı sözcük; renk üçüncü kanal. */
+.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--qp-space-0);
+  padding: var(--qp-badge-pad);
+  border-radius: var(--m-radius-control);
+  border: var(--m-rule) solid var(--m-line);
+  font-size: var(--m-fs-note);
+  line-height: var(--qp-lh);
+  color: var(--m-muted);
+  white-space: nowrap;
+}
+
+.pill.agent {
+  color: var(--m-agent);
+  border: var(--m-rule) dashed var(--m-agent);
+}
+
+.pill.warn {
+  color: var(--m-warn);
+  border-color: var(--m-warn);
+}
+
+.pill.closed {
+  color: var(--qp-closed);
+}
+
+.pill.human {
+  color: var(--m-fg);
+  border-color: var(--m-human);
+}
+
+.pill.note-tone {
+  background: var(--m-note-bg);
+  color: var(--m-note-fg);
+  border-color: transparent;
+}
+
+/* Kanıta bağlı sayı: motorun noktalı alt çizgisi (Y24 köken kuralı). */
+.ev {
+  font-family: var(--m-font-figure);
+  font-size: var(--m-fs-figure);
+  font-variant-numeric: tabular-nums;
+  text-decoration: underline dotted var(--m-engine);
+  text-underline-offset: var(--qp-space-0);
+  white-space: nowrap;
+}
+
+.mono {
+  font-family: var(--m-font-figure);
+  font-size: var(--m-fs-figure);
+  font-variant-numeric: tabular-nums;
+}
+
+.link {
+  color: var(--m-muted);
+  text-decoration: underline dotted;
+  text-underline-offset: var(--qp-space-0);
+  white-space: nowrap;
+}
+
+.link.strong {
+  color: var(--m-fg);
+}
+
+.sep {
+  color: var(--m-line);
+}
+
+/* Tek satırlık durum satırı (karar sonrası, kapalı, okunamadı). */
+.status-line {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: var(--qp-space-0) var(--qp-space-1);
+  padding: var(--qp-space-1) var(--qp-space-2);
+  font-size: var(--m-fs-label);
+  color: var(--m-muted);
+  border-radius: var(--m-radius-control);
+  background: var(--m-card);
+  border: var(--m-rule) solid var(--m-line);
+}
+
+.status-line.edge-human,
+.status-line.edge-agent,
+.status-line.edge-engine {
+  border-left-width: var(--a-edge);
+}
+
+.status-line .fg {
+  color: var(--m-fg);
+}
+
+.status-line.warn {
+  background: var(--a-warn-tint);
+}
+
+.status-line.warn .glyph {
+  color: var(--m-warn);
+}
+
+.status-line.closed {
+  color: var(--qp-closed);
+}
+
+.glyph {
+  font-family: var(--m-font-figure);
+  font-size: var(--m-fs-figure);
+  flex: none;
+}
+
+/* ---- Ajan kartı (Y04 tam kart, Y05 soru, Y06 öneri) ------------------------------- */
+
+.acard {
+  background: var(--m-card);
+  border: var(--m-rule) solid var(--m-line);
+  border-left: var(--a-edge) dashed var(--m-agent);
+  border-radius: var(--m-radius-card);
+  padding: var(--qp-space-2) var(--qp-space-3) var(--qp-space-3);
+  display: flex;
+  flex-direction: column;
+  gap: var(--qp-space-2);
+}
+
+.acard.warn {
+  border-left-style: solid;
+  border-left-color: var(--m-warn);
+}
+
+.acard.settled {
+  border-left-style: solid;
+  border-left-color: var(--m-human);
+}
+
+.acard h3 {
+  font-size: var(--m-fs-title);
+  font-weight: var(--qp-head-weight);
+  line-height: 1.3;
+}
+
+.acard .lede {
+  font-size: var(--m-fs-body);
+}
+
+.acard .engine-mark {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--qp-space-0);
+  font-size: var(--m-fs-note);
+  color: var(--m-muted);
+}
+
+.acard .engine-mark::before {
+  content: "";
+  width: var(--qp-space-2);
+  border-top: var(--a-edge) dotted var(--m-engine);
+}
+
+.acard .scope {
+  font-size: var(--m-fs-note);
+  color: var(--m-muted);
+}
+
+.acard .basis {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--qp-space-0) var(--qp-space-1);
+  align-items: baseline;
+  font-size: var(--m-fs-note);
+  color: var(--m-muted);
+}
+
+.acard .basis .chip {
+  border-style: dotted;
+  border-color: var(--m-engine);
+}
+
+/* Parçalar tablosu (Y04): ad · değer · kaynak sözcüğü. */
+.parts {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  border-top: var(--m-rule) solid var(--m-line);
+}
+
+.parts > div {
+  display: contents;
+}
+
+.parts span {
+  padding: var(--qp-space-0) 0;
+  border-bottom: var(--m-rule) solid var(--m-line);
+  font-size: var(--m-fs-label);
+  line-height: var(--qp-lh);
+}
+
+.parts .k {
+  color: var(--m-muted);
+  padding-right: var(--qp-space-2);
+}
+
+.parts .v {
+  color: var(--m-fg);
+}
+
+.parts .src {
+  text-align: right;
+  color: var(--m-muted);
+  font-size: var(--m-fs-note);
+  padding-left: var(--qp-space-1);
+}
+
+.parts .src.default {
+  color: var(--m-fg);
+  font-weight: var(--qp-head-weight);
+}
+
+.parts .changed .v,
+.parts .changed .k {
+  color: var(--m-fg);
+}
+
+.parts .changed span {
+  background: color-mix(in srgb, var(--m-human) 8%, transparent);
+}
+
+.parts .changed .src {
+  color: var(--m-fg);
+}
+
+.parts .open span {
+  border-bottom: none;
+}
+
+/* Bir parçaya dokununca yerinde açılan seçenek listesi. */
+.part-options {
+  grid-column: 1 / -1;
+  display: flex;
+  gap: var(--qp-space-0);
+  padding: var(--qp-space-0) 0 var(--qp-space-1);
+  border-bottom: var(--m-rule) solid var(--m-line);
+}
+
+.quote {
+  font-size: var(--m-fs-label);
+  color: var(--m-muted);
+  padding-left: var(--qp-space-2);
+  border-left: var(--a-edge) solid var(--m-human);
+}
+
+.quote b {
+  color: var(--m-fg);
+  font-weight: normal;
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+  gap: var(--qp-space-1);
+}
+
+.actions .grow {
+  flex: 1 1 auto;
+}
+
+.btn.agent-go {
+  background: var(--m-accent);
+  border-color: var(--m-accent);
+  color: var(--m-on-accent);
+  font-weight: var(--qp-head-weight);
+}
+
+.btn[aria-disabled="true"] {
+  opacity: 0.45;
+}
+
+/* Yük: kart içinde tek izinli iç kutu (SURFACES "Yapılmayacaklar"). */
+.payload {
+  border: var(--m-rule) solid var(--m-line);
+  border-radius: var(--m-radius-control);
+  background: var(--m-panel);
+  padding: var(--qp-space-1) var(--qp-space-2);
+  display: flex;
+  flex-direction: column;
+  gap: var(--qp-space-0);
+  font-size: var(--m-fs-label);
+}
+
+.payload .row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--qp-space-2);
+}
+
+.payload .row .k {
+  color: var(--m-muted);
+}
+
+.payload .row .ok {
+  font-family: var(--m-font-figure);
+  font-size: var(--m-fs-figure);
+  color: var(--m-muted);
+}
+
+.payload .row .bad {
+  font-family: var(--m-font-figure);
+  font-size: var(--m-fs-figure);
+  color: var(--m-warn);
+}
+
+.payload ul {
+  display: flex;
+  flex-direction: column;
+}
+
+.payload li {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: var(--qp-space-1);
+  align-items: baseline;
+  padding: var(--qp-space-0) 0;
+  border-top: var(--m-rule) solid var(--m-line);
+}
+
+.payload li:first-child {
+  border-top: none;
+}
+
+/* Önizleme: çizgi örneği (kesik mor) + eksen etiketi biçimi. */
+.swatch {
+  display: inline-block;
+  width: var(--qp-space-3);
+  border-top: var(--a-edge) dashed var(--m-agent);
+  vertical-align: middle;
+}
+
+.swatch.human {
+  border-top-style: solid;
+  border-top-color: var(--m-human);
+}
+
+.tagmini {
+  font-family: var(--m-font-figure);
+  font-size: var(--m-fs-figure);
+  color: var(--m-agent);
+  border: var(--m-rule) dashed var(--m-agent);
+  border-radius: var(--m-radius-control);
+  padding: 0 var(--qp-space-0);
+}
+
+/* Durum izi (AT-C3): ajan önerdi → insan karar verdi; satırlar köken çizgisiyle. */
+.trail {
+  display: flex;
+  flex-direction: column;
+  gap: var(--m-rule);
+  padding-top: var(--qp-space-1);
+  border-top: var(--m-rule) solid var(--m-line);
+  font-size: var(--m-fs-note);
+  color: var(--m-muted);
+}
+
+.trail li {
+  display: grid;
+  grid-template-columns: var(--qp-space-3) minmax(0, 1fr) auto;
+  align-items: center;
+  gap: var(--qp-space-1);
+}
+
+.trail li::before {
+  content: "";
+  border-top: var(--a-edge) solid var(--m-human);
+}
+
+.trail li.agent::before {
+  border-top-style: dashed;
+  border-top-color: var(--m-agent);
+}
+
+.trail li.engine::before {
+  border-top-style: dotted;
+  border-top-color: var(--m-engine);
+}
+
+.trail li.wait::before {
+  border-top-style: dotted;
+  border-top-color: var(--m-line);
+}
+
+.trail .t {
+  font-family: var(--m-font-figure);
+  font-size: var(--m-fs-figure);
+}
+
+.trail .now {
+  color: var(--m-fg);
+}
+
+/* ---- Soru kartı (Y05; OV-18) ----------------------------------------------------- */
+
+.qcard {
+  background: var(--m-card);
+  border: var(--m-rule) dashed var(--m-agent);
+  border-radius: var(--m-radius-card);
+  padding: var(--qp-space-2) var(--qp-space-3) var(--qp-space-2);
+  display: flex;
+  flex-direction: column;
+  gap: var(--qp-space-2);
+}
+
+.qcard h3 {
+  font-size: var(--m-fs-title);
+  font-weight: var(--qp-head-weight);
+  line-height: 1.3;
+}
+
+.opts {
+  display: flex;
+  flex-direction: column;
+  gap: var(--qp-space-0);
+}
+
+.opt {
+  display: block;
+  position: relative;
+  min-height: var(--m-control-h);
+  padding: var(--qp-space-1) var(--qp-space-2) var(--qp-space-1) calc(var(--qp-space-2) * 2 + var(--qp-space-1));
+  border: var(--m-rule) solid var(--m-line);
+  border-radius: var(--m-radius-control);
+  font-size: var(--m-fs-label);
+  line-height: var(--qp-lh);
+}
+
+.opt::before {
+  content: "";
+  position: absolute;
+  left: var(--qp-space-2);
+  top: calc(var(--qp-space-1) + var(--m-rule) * 2);
+  width: var(--qp-space-2);
+  height: var(--qp-space-2);
+  border-radius: 50%;
+  border: var(--m-rule) solid var(--control);
+}
+
+.opt.on {
+  border-color: var(--m-accent);
+  background: var(--a-sel-tint);
+}
+
+.opt.on::before {
+  border: var(--qp-space-0) solid var(--m-accent);
+}
+
+.opt .sub {
+  display: block;
+  font-size: var(--m-fs-note);
+  color: var(--m-muted);
+}
+
+.opt.ro {
+  color: var(--m-muted);
+}
+
+.opt.ro::before {
+  opacity: 0.5;
+}
+
+.free {
+  min-height: var(--m-control-h);
+  display: flex;
+  align-items: center;
+  padding: 0 var(--qp-space-2);
+  border: var(--m-rule) solid var(--m-line);
+  border-radius: var(--m-radius-control);
+  background: var(--m-panel);
+  font-size: var(--m-fs-label);
+  color: var(--m-muted);
+}
+
+.free.typed {
+  color: var(--m-fg);
+}
+
+.qfoot {
+  display: flex;
+  align-items: center;
+  gap: var(--qp-space-1);
+}
+
+.qfoot .grow {
+  flex: 1 1 auto;
+}
+
+/* Cevaplandı: tek satır, insan sol kenarı (köken: cevap insandır). */
+.answered {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: var(--m-rule) var(--qp-space-1);
+  padding: var(--qp-space-1) var(--qp-space-2);
+  border-radius: var(--m-radius-control);
+  background: var(--m-card);
+  border: var(--m-rule) solid var(--m-line);
+  border-left: var(--a-edge) solid var(--m-human);
+  font-size: var(--m-fs-label);
+}
+
+.answered .q {
+  grid-column: 1 / -1;
+  color: var(--m-muted);
+  font-size: var(--m-fs-note);
+}
+
+.answered .who {
+  color: var(--m-muted);
+  font-size: var(--m-fs-note);
+}
+
+/* ---- Ajan paneli (Y24; OV-17, AT-C1) --------------------------------------------- */
+
+.ap {
+  width: var(--a-panel-w);
+  display: flex;
+  flex-direction: column;
+  background: var(--m-panel);
+  border: var(--m-rule) solid var(--m-line);
+  border-radius: var(--m-radius-card);
+  overflow: hidden;
+}
+
+.ap.fill {
+  width: auto;
+}
+
+.ap-head {
+  display: flex;
+  flex-direction: column;
+  gap: var(--qp-space-0);
+  padding: var(--qp-space-2) var(--qp-space-3);
+  border-bottom: var(--m-rule) solid var(--m-line);
+}
+
+.ap-head .top {
+  display: flex;
+  align-items: center;
+  gap: var(--qp-space-1);
+}
+
+.ap-head h2 {
+  flex: 1 1 auto;
+  min-width: 0;
+  font-size: var(--m-fs-title);
+  font-weight: var(--qp-head-weight);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ap-head .ctx {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--qp-space-0);
+}
+
+.ap-tabs {
+  display: flex;
+  gap: var(--qp-space-3);
+  padding: 0 var(--qp-space-3);
+  border-bottom: var(--m-rule) solid var(--m-line);
+  font-size: var(--m-fs-label);
+  color: var(--m-muted);
+}
+
+.ap-tabs span {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--qp-space-0);
+  min-height: var(--qp-tab-h);
+  border-bottom: var(--qp-tab-rule) solid transparent;
+}
+
+.ap-tabs span.on {
+  color: var(--m-fg);
+  font-weight: var(--qp-head-weight);
+  border-bottom-color: var(--m-focus);
+}
+
+.ap-thread {
+  display: flex;
+  flex-direction: column;
+  gap: var(--qp-space-3);
+  padding: var(--qp-space-3);
+}
+
+/* Kullanıcı sorusu: "Sen" etiketi, düz sol kenar (insan). */
+.u-msg {
+  display: flex;
+  flex-direction: column;
+  gap: var(--m-rule);
+  padding: var(--qp-space-1) var(--qp-space-2);
+  border-left: var(--a-edge) solid var(--m-human);
+  background: var(--m-card);
+  border-radius: 0 var(--m-radius-control) var(--m-radius-control) 0;
+}
+
+.u-msg .who {
+  font-size: var(--m-fs-note);
+  color: var(--m-muted);
+}
+
+.u-msg .at {
+  font-size: var(--m-fs-note);
+  color: var(--m-muted);
+}
+
+/* Çalışma: koşarken adım satırları, bitince tek satır (OV-17). */
+.work {
+  display: flex;
+  flex-direction: column;
+  gap: var(--m-rule);
+  padding-left: var(--qp-space-2);
+  border-left: var(--a-edge) dashed var(--m-agent);
+}
+
+.work-sum {
+  display: flex;
+  align-items: center;
+  gap: var(--qp-space-1);
+  font-size: var(--m-fs-label);
+  color: var(--m-muted);
+  min-height: var(--qp-space-4);
+}
+
+.work-sum .ok {
+  color: var(--m-muted);
+}
+
+.work-sum .grow {
+  flex: 1 1 auto;
+}
+
+.step {
+  display: grid;
+  grid-template-columns: var(--qp-space-2) auto minmax(0, 1fr) auto auto;
+  align-items: center;
+  gap: var(--qp-space-1);
+  min-height: var(--qp-space-4);
+  font-size: var(--m-fs-label);
+  color: var(--m-muted);
+}
+
+.step .chev {
+  color: var(--control);
+  font-size: var(--m-fs-note);
+}
+
+.step .name {
+  white-space: nowrap;
+}
+
+.step .arg {
+  justify-self: start;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-family: var(--m-font-figure);
+  font-size: var(--m-fs-figure);
+  padding: 0 var(--qp-space-0);
+  border-radius: var(--m-radius-control);
+  border: var(--m-rule) solid var(--m-line);
+  background: var(--m-card);
+}
+
+.step .dur {
+  font-family: var(--m-font-figure);
+  font-size: var(--m-fs-figure);
+  color: var(--m-muted);
+  text-align: right;
+}
+
+.step .mark {
+  font-family: var(--m-font-figure);
+  font-size: var(--m-fs-figure);
+  width: var(--qp-space-2);
+  text-align: center;
+}
+
+.step.live {
+  color: var(--m-fg);
+}
+
+.step.fail {
+  color: var(--m-fg);
+}
+
+.step.fail .mark {
+  color: var(--m-warn);
+}
+
+.step.wait {
+  opacity: 0.55;
+}
+
+/* Canlı adım işareti: yarım halka (dönen simge, hareketsiz maket). */
+.spin {
+  display: inline-block;
+  width: var(--qp-space-2);
+  height: var(--qp-space-2);
+  border-radius: 50%;
+  border: var(--a-edge) solid var(--a-agent-soft);
+  border-top-color: var(--m-agent);
+}
+
+/* Cevap: açık, ilk cümle sonuç (Cevap önce, kanıt sonra). */
+.answer {
+  display: flex;
+  flex-direction: column;
+  gap: var(--qp-space-2);
+  font-size: var(--m-fs-body);
+  line-height: 1.5;
+}
+
+.answer .lead {
+  font-weight: var(--qp-head-weight);
+}
+
+.answer .verdict {
+  font-size: var(--m-fs-note);
+  color: var(--m-muted);
+}
+
+/* Olgu tablosu: cevabın sayıları satır satır, kanıt bağlı (AT-C1 yoğunluğu, kromasız). */
+.facts {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--m-fs-label);
+}
+
+.facts th {
+  text-align: left;
+  font-weight: normal;
+  color: var(--m-muted);
+  font-size: var(--m-fs-note);
+  padding: var(--qp-space-0) 0;
+  border-bottom: var(--m-rule) solid var(--m-line);
+}
+
+.facts td {
+  padding: var(--qp-space-0) 0;
+  border-bottom: var(--m-rule) solid var(--m-line);
+}
+
+.facts td.r,
+.facts th.r {
+  text-align: right;
+}
+
+.answer-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--qp-space-0) var(--qp-space-2);
+  font-size: var(--m-fs-note);
+}
+
+.answer-links .origin {
+  margin-right: auto;
+}
+
+/* Önerilen sorular (boş durum, OV-19). */
+.suggest {
+  display: flex;
+  flex-direction: column;
+  gap: var(--qp-space-0);
+}
+
+.suggest span {
+  display: flex;
+  align-items: center;
+  gap: var(--qp-space-1);
+  min-height: var(--m-control-h);
+  padding: 0 var(--qp-space-2);
+  border: var(--m-rule) solid var(--m-line);
+  border-radius: var(--m-radius-control);
+  font-size: var(--m-fs-label);
+}
+
+.suggest span::before {
+  content: "›";
+  color: var(--m-muted);
+}
+
+.empty-title {
+  font-size: var(--m-fs-title);
+  font-weight: var(--qp-head-weight);
+}
+
+/* Besteci: tek satır + satır içi bağlam seçicileri (OV-17). */
+.composer {
+  margin: 0 var(--qp-space-3) var(--qp-space-3);
+  border: var(--m-rule) solid var(--m-line);
+  border-radius: var(--m-radius-card);
+  background: var(--m-card);
+  padding: var(--qp-space-1) var(--qp-space-2);
+  display: flex;
+  flex-direction: column;
+  gap: var(--qp-space-1);
+}
+
+.composer .cph {
+  font-size: var(--m-fs-body);
+  color: var(--m-muted);
+  min-height: var(--qp-space-4);
+  display: flex;
+  align-items: center;
+}
+
+.composer .row {
+  display: flex;
+  align-items: center;
+  gap: var(--qp-space-1);
+}
+
+.composer .row .grow {
+  flex: 1 1 auto;
+}
+
+.composer .send {
+  width: var(--m-control-h);
+  height: var(--m-control-h);
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--m-fg);
+  color: var(--m-panel);
+  font-size: var(--m-fs-label);
+}
+
+.composer .send.stop::before {
+  content: "";
+  width: var(--qp-space-1);
+  height: var(--qp-space-1);
+  background: currentColor;
+  border-radius: var(--m-rule);
+}
+
+.composer.off {
+  opacity: 0.5;
+}
+
+.composer .at-ctx {
+  border-style: dashed;
+}
+
+.ap .bottom {
+  margin-top: auto;
+}
+
+.ap .pending-q {
+  margin: 0 var(--qp-space-3) var(--qp-space-2);
+}
+
+/* ---- Grafik sahnesi (hap ve önizleme için) ---------------------------------------- */
+
+.mini-chart {
+  position: relative;
+  /* Çapa geometrisi: çekirdeğin çizdiği görselin CSS ölçüsü (720×340 @2x). */
+  width: 720px;
+  height: 340px;
+  border-radius: var(--m-radius-card);
+  border: var(--m-rule) solid var(--m-line);
+}
+
+.mini-chart.phone-chart {
+  /* Çapa geometrisi: telefon görseli (358×220 @3x). */
+  width: 358px;
+  height: 220px;
+  border-radius: var(--m-radius-control);
+}
+
+/* Niyet hapının durumları (Y04 a katmanı). Konum tavek.css .intent-pill'den. */
+.intent-pill.agent {
+  border: var(--m-rule) dashed var(--m-agent);
+  border-left: var(--a-edge) dashed var(--m-agent);
+  color: var(--m-fg);
+}
+
+.intent-pill.agent .lead-mark {
+  color: var(--m-agent);
+}
+
+.intent-pill.settled {
+  border-left-color: var(--m-human);
+}
+
+.intent-pill.warn {
+  border-color: var(--m-warn);
+  border-left: var(--a-edge) solid var(--m-warn);
+}
+
+.intent-pill.warn .lead-mark {
+  color: var(--m-warn);
+}
+
+.intent-pill.faded {
+  opacity: 0.55;
+}
+
+/* Grafikle panel yan yana: Y04, Y06 masaüstü kareleri. */
+.pair {
+  display: grid;
+  grid-template-columns: auto var(--a-panel-w);
+  gap: var(--qp-space-3);
+  align-items: start;
+}
+
+.pair-label {
+  font-size: var(--m-fs-note);
+  color: var(--m-muted);
+  margin-bottom: var(--qp-space-0);
+}
+
+/* ---- Telefon ----------------------------------------------------------------------- */
+
+.ph {
+  width: var(--a-phone-w);
+  background: var(--m-panel);
+  border-top: var(--m-rule) solid var(--m-line);
+  border-bottom: var(--m-rule) solid var(--m-line);
+  display: flex;
+  flex-direction: column;
+}
+
+.ph-status {
+  display: flex;
+  align-items: center;
+  gap: var(--qp-space-1);
+  min-height: var(--qp-space-5);
+  padding: 0 var(--qp-space-3);
+  font-size: var(--m-fs-note);
+  color: var(--m-muted);
+  border-bottom: var(--m-rule) solid var(--m-line);
+}
+
+.ph-status .grow {
+  flex: 1 1 auto;
+}
+
+.ph-head {
+  display: flex;
+  align-items: center;
+  gap: var(--qp-space-2);
+  min-height: var(--m-control-h);
+  padding: 0 var(--qp-space-3);
+}
+
+.ph-head h3 {
+  flex: 1 1 auto;
+  font-size: var(--m-fs-title);
+  font-weight: var(--qp-head-weight);
+}
+
+.ph-body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--qp-space-3);
+  padding: var(--qp-space-2) var(--qp-space-3) var(--qp-space-3);
+}
+
+.ph-chart {
+  padding: 0 var(--qp-space-3);
+}
+
+/* Alt sayfa: tutamak + başlık; grafik kapanmaz. */
+.bsheet {
+  border-top: var(--m-rule) solid var(--m-line);
+  border-radius: var(--m-radius-card) var(--m-radius-card) 0 0;
+  background: var(--m-card);
+  box-shadow: var(--m-shadow);
+  display: flex;
+  flex-direction: column;
+  gap: var(--qp-space-2);
+  padding: var(--qp-space-1) var(--qp-space-3) var(--qp-space-3);
+}
+
+.bsheet .grabber {
+  align-self: center;
+  width: var(--qp-space-5);
+  height: var(--qp-space-0);
+  border-radius: var(--qp-space-0);
+  background: var(--m-line);
+}
+
+/* Altta yapışık eylemler, tam genişlik (telefon). */
+.sticky-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--qp-space-1);
+  padding: var(--qp-space-2) var(--qp-space-3);
+  border-top: var(--m-rule) solid var(--m-line);
+  background: var(--m-panel);
+}
+
+.sticky-actions.three {
+  grid-template-columns: 1fr 1fr 1fr;
+}
+
+.sticky-actions.one {
+  grid-template-columns: 1fr;
+}
+
+.sticky-actions .btn {
+  width: 100%;
+}
+
+.sticky-actions .wide {
+  grid-column: 1 / -1;
+}
+
+html[data-look="tavek-tel"] .acard,
+html[data-look="tavek-tel"] .qcard {
+  padding: var(--qp-space-3);
+}
+
+html[data-look="tavek-tel"] .parts span {
+  padding: var(--qp-space-1) 0;
+}
+
+html[data-look="tavek-tel"] .opt {
+  padding: var(--qp-space-2) var(--qp-space-3) var(--qp-space-2) calc(var(--qp-space-3) * 2 + var(--qp-space-1));
+}
+
+html[data-look="tavek-tel"] .opt::before {
+  left: var(--qp-space-3);
+  top: calc(var(--qp-space-2) + var(--m-rule) * 3);
+  width: var(--qp-space-3);
+  height: var(--qp-space-3);
+}
+
+/* Sistem bildirimi (kilit ekranı / üst şerit). */
+.os-notif {
+  background: var(--m-card);
+  border: var(--m-rule) solid var(--m-line);
+  border-radius: var(--qp-space-3);
+  box-shadow: var(--m-shadow);
+  padding: var(--qp-space-2) var(--qp-space-3);
+  display: flex;
+  flex-direction: column;
+  gap: var(--qp-space-0);
+}
+
+.os-notif .app {
+  display: flex;
+  align-items: center;
+  gap: var(--qp-space-1);
+  font-size: var(--m-fs-note);
+  color: var(--m-muted);
+}
+
+.os-notif .app .grow {
+  flex: 1 1 auto;
+}
+
+.os-notif .app-icon {
+  width: var(--qp-space-3);
+  height: var(--qp-space-3);
+  border-radius: var(--qp-space-0);
+  border: var(--m-rule) solid var(--m-muted);
+}
+
+.os-notif b {
+  font-weight: var(--qp-head-weight);
+}
+
+.os-actions {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: 1fr;
+  gap: var(--m-rule);
+  margin-top: var(--qp-space-1);
+  border-top: var(--m-rule) solid var(--m-line);
+}
+
+.os-actions span {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  min-height: var(--m-control-h);
+  font-size: var(--m-fs-label);
+  color: var(--m-fg);
+  border-right: var(--m-rule) solid var(--m-line);
+  padding: 0 var(--qp-space-0);
+}
+
+.os-actions span:last-child {
+  border-right: none;
+}
+
+.lock {
+  background: var(--m-page);
+  padding: var(--qp-space-4) var(--qp-space-2) var(--qp-space-3);
+  display: flex;
+  flex-direction: column;
+  gap: var(--qp-space-1);
+}
+
+.lock .clock {
+  text-align: center;
+  font-family: var(--m-font-figure);
+  font-size: var(--m-fs-headline);
+  color: var(--m-muted);
+  margin-bottom: var(--qp-space-2);
+}
+
+/* ---- Bildirim kartı (Y12 masaüstü; OV-20 konumu) ---------------------------------- */
+
+.toast {
+  width: var(--a-panel-w);
+  background: var(--m-card);
+  border: var(--m-rule) solid var(--m-line);
+  border-left: var(--a-edge) solid var(--m-human);
+  border-radius: var(--m-radius-card);
+  box-shadow: var(--m-shadow);
+  padding: var(--qp-space-2) var(--qp-space-3);
+  display: flex;
+  flex-direction: column;
+  gap: var(--qp-space-1);
+}
+
+html[data-look="tavek-tel"] .toast {
+  width: auto;
+}
+
+.toast.agent {
+  border-left-style: dashed;
+  border-left-color: var(--m-agent);
+}
+
+.toast.engine {
+  border-left-style: dotted;
+  border-left-color: var(--m-engine);
+}
+
+.toast.warn {
+  border-left-style: solid;
+  border-left-color: var(--m-warn);
+}
+
+.toast.quiet {
+  box-shadow: none;
+}
+
+.toast .head {
+  display: flex;
+  align-items: center;
+  gap: var(--qp-space-1);
+  font-size: var(--m-fs-note);
+  color: var(--m-muted);
+}
+
+.toast .head .grow {
+  flex: 1 1 auto;
+}
+
+.toast .head .sym {
+  color: var(--m-fg);
+  font-weight: var(--qp-head-weight);
+}
+
+.toast .msg {
+  font-size: var(--m-fs-body);
+  line-height: 1.4;
+}
+
+.toast .msg .st {
+  margin-right: var(--qp-space-0);
+}
+
+.toast .acts {
+  display: flex;
+  align-items: center;
+  gap: var(--qp-space-1);
+  flex-wrap: wrap;
+}
+
+.toast .acts .grow {
+  flex: 1 1 auto;
+}
+
+.toast .opts .opt {
+  min-height: auto;
+}
+
+/* Masaüstü bildirim yığını konumu: başlığın altında, sağ üstte. */
+.desk-corner {
+  position: relative;
+  background: var(--m-panel);
+  border: var(--m-rule) solid var(--m-line);
+  border-radius: var(--m-radius-card);
+  overflow: hidden;
+}
+
+.desk-corner .topbar {
+  display: flex;
+  align-items: center;
+  gap: var(--qp-space-2);
+  min-height: var(--qp-bar-h);
+  padding: 0 var(--qp-space-3);
+  border-bottom: var(--m-rule) solid var(--m-line);
+  font-size: var(--m-fs-label);
+  color: var(--m-muted);
+}
+
+.desk-corner .topbar .grow {
+  flex: 1 1 auto;
+}
+
+.desk-corner .stack {
+  position: absolute;
+  right: var(--qp-space-3);
+  top: calc(var(--qp-bar-h) + var(--qp-space-1));
+  display: flex;
+  flex-direction: column;
+  gap: var(--qp-space-1);
+}
+
+/* Zil: sayaçlı (Y13 OV-21). */
+.bell {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--qp-space-0);
+  min-height: var(--m-control-h);
+  padding: 0 var(--qp-space-1);
+  border: var(--m-rule) solid var(--m-line);
+  border-radius: var(--m-radius-control);
+  color: var(--m-fg);
+}
+
+.bell .count {
+  font-family: var(--m-font-figure);
+  font-size: var(--m-fs-figure);
+  padding: 0 var(--qp-space-0);
+  border-radius: var(--m-radius-control);
+  background: var(--m-fg);
+  color: var(--m-panel);
+}
+
+.bell.open {
+  border-color: var(--m-focus);
+}
+
+/* ---- Durum şeridi (Y25; AT-B1) ---------------------------------------------------- */
+
+.strip {
+  display: flex;
+  align-items: center;
+  gap: var(--qp-space-3);
+  min-height: var(--qp-space-5);
+  padding: 0 var(--qp-space-3);
+  background: var(--m-panel);
+  border: var(--m-rule) solid var(--m-line);
+  border-radius: var(--m-radius-control);
+  font-size: var(--m-fs-label);
+  color: var(--m-muted);
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+.strip .seg {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--qp-space-1);
+}
+
+.strip .grow {
+  flex: 1 1 auto;
+}
+
+.strip .vr {
+  align-self: stretch;
+  border-left: var(--m-rule) solid var(--m-line);
+  margin: var(--qp-space-1) 0;
+}
+
+.strip .fg {
+  color: var(--m-fg);
+}
+
+.strip.warn .warn-word,
+.strip .warn-word {
+  color: var(--m-warn);
+}
+
+.strip.alert {
+  background: var(--m-alert-bg);
+  color: var(--m-alert-fg);
+  border-color: var(--m-alert-bg);
+}
+
+.strip.alert .fg,
+.strip.alert .layers {
+  color: var(--m-alert-fg);
+}
+
+.strip.alert .vr {
+  border-color: color-mix(in srgb, var(--m-alert-fg) 25%, transparent);
+}
+
+.strip .band-note {
+  align-self: stretch;
+  display: inline-flex;
+  align-items: center;
+  margin-left: calc(var(--qp-space-3) * -1);
+  padding: 0 var(--qp-space-3);
+  background: var(--m-note-bg);
+  color: var(--m-note-fg);
+}
+
+.strip .health-hot {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--qp-space-1);
+  align-self: stretch;
+  padding: 0 var(--qp-space-2);
+  background: var(--a-warn-tint);
+  color: var(--m-fg);
+}
+
+/* Şekiller: ◌ bayat, kilit, nabız (canlı, hareketsiz). */
+.shape {
+  font-family: var(--m-font-figure);
+  font-size: var(--m-fs-figure);
+}
+
+.pulse {
+  width: var(--qp-space-1);
+  height: var(--qp-space-1);
+  border-radius: 50%;
+  background: var(--m-up);
+  flex: none;
+}
+
+.pulse.off {
+  background: transparent;
+  border: var(--m-rule) dashed var(--m-warn);
+}
+
+.pulse.hollow {
+  background: transparent;
+  border: var(--m-rule) solid var(--m-muted);
+}
+
+/* Telefonda tek satır durum (öncelik: koptu > bayat > yetki yok > gecikmeli > canlı). */
+.ph-status.alert {
+  background: var(--m-alert-bg);
+  color: var(--m-alert-fg);
+}
+
+.ph-status.warn {
+  color: var(--m-fg);
+}
+
+.ph-status.note-tone {
+  background: var(--m-note-bg);
+  color: var(--m-note-fg);
+}
+
+/* ---- Liste satırları (Y13 gelen kutusu, Y14 günlük) ------------------------------- */
+
+.list {
+  display: flex;
+  flex-direction: column;
+}
+
+.lrow {
+  display: grid;
+  grid-template-columns: var(--qp-space-1) minmax(0, 1fr) auto;
+  gap: var(--m-rule) var(--qp-space-2);
+  padding: var(--qp-space-1) var(--qp-space-3) var(--qp-space-1) var(--qp-space-2);
+  border-bottom: var(--m-rule) solid var(--m-line);
+  font-size: var(--m-fs-label);
+  align-items: baseline;
+}
+
+.lrow > .dot {
+  align-self: center;
+  width: var(--qp-space-1);
+  height: var(--qp-space-1);
+  border-radius: 50%;
+}
+
+.lrow > .dot.unread {
+  background: var(--m-fg);
+}
+
+.lrow .title {
+  min-width: 0;
+}
+
+.lrow .title b {
+  font-weight: var(--qp-head-weight);
+}
+
+.lrow .time {
+  font-family: var(--m-font-figure);
+  font-size: var(--m-fs-figure);
+  color: var(--m-muted);
+}
+
+.lrow .sub {
+  grid-column: 2 / -1;
+  font-size: var(--m-fs-note);
+  color: var(--m-muted);
+}
+
+.lrow .inline {
+  grid-column: 2 / -1;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--qp-space-0);
+  margin-top: var(--qp-space-0);
+}
+
+.lrow .inline .btn {
+  min-height: var(--qp-space-4);
+}
+
+.lrow.edge-human,
+.lrow.edge-agent,
+.lrow.edge-engine {
+  border-left-width: var(--a-edge);
+}
+
+.lrow.sel {
+  background: var(--m-card);
+}
+
+.lrow.live {
+  background: var(--a-agent-tint);
+}
+
+.lrow.fold {
+  color: var(--m-muted);
+}
+
+.group-h {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  padding: var(--qp-space-2) var(--qp-space-3) var(--qp-space-0);
+  font-size: var(--m-fs-note);
+  color: var(--m-muted);
+  border-bottom: var(--m-rule) solid var(--m-line);
+}
+
+.filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--qp-space-0);
+  padding: var(--qp-space-1) var(--qp-space-3);
+  border-bottom: var(--m-rule) solid var(--m-line);
+}
+
+.chip.sel {
+  color: var(--m-fg);
+  border-color: var(--m-accent);
+  background: var(--a-sel-tint);
+}
+
+/* Adım listesi (Y14 açılmış iş). */
+.job-steps {
+  grid-column: 2 / -1;
+  display: flex;
+  flex-direction: column;
+  margin-top: var(--qp-space-0);
+  padding-left: var(--qp-space-1);
+  border-left: var(--m-rule) dashed var(--m-line);
+}
+
+/* ---- Durum listesi (kademe 2: ana durum dışındakiler özet satırı) ----------------- */
+
+.state-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--m-fs-label);
+}
+
+.state-table th {
+  text-align: left;
+  font-weight: normal;
+  color: var(--m-muted);
+  font-size: var(--m-fs-note);
+  padding: var(--qp-space-1) var(--qp-space-2);
+  border-bottom: var(--m-rule) solid var(--m-line);
+}
+
+.state-table td {
+  padding: var(--qp-space-1) var(--qp-space-2);
+  border-bottom: var(--m-rule) solid var(--m-line);
+  vertical-align: top;
+}
+
+.state-table td.n {
+  font-family: var(--m-font-figure);
+  color: var(--m-muted);
+  width: 3ch;
+}
+
+.state-table td .muted {
+  font-size: var(--m-fs-note);
+}
+
+.state-table code,
+figcaption code {
+  font-family: var(--m-font-figure);
+  font-size: var(--m-fs-note);
+  color: var(--m-muted);
+}
+
+/* ---- Başvuru ile yan yana (Y24, Y06) ---------------------------------------------- */
+
+.compare {
+  display: grid;
+  grid-template-columns: auto auto minmax(0, 1fr);
+  gap: var(--qp-space-4);
+  align-items: start;
+}
+
+.ref-crop {
+  position: relative;
+  overflow: hidden;
+  border: var(--m-rule) solid var(--m-line);
+  border-radius: var(--m-radius-card);
+  background: var(--m-panel);
+}
+
+.ref-crop img {
+  position: absolute;
+  display: block;
+}
+
+/* Çapa geometrisi: OpenChart dashboard-preview.png (3836×2102) sağ sütun, yarım ölçek. */
+.ref-crop.openchart {
+  width: 400px;
+  height: 860px;
+}
+
+.ref-crop.openchart img {
+  width: 1918px;
+  left: -1518px;
+  top: -190px;
+}
+
+/* Çapa geometrisi: OpenTerminalUI agent.jpg (2400×1500) ajan sütunu, yarım ölçek. */
+.ref-crop.otui {
+  width: 420px;
+  height: 750px;
+}
+
+.ref-crop.otui img {
+  width: 1200px;
+  left: -780px;
+  top: 0;
+}
+
+.ref-cap {
+  font-size: var(--m-fs-note);
+  color: var(--m-muted);
+  margin-top: var(--qp-space-1);
+  max-width: 400px;
+}
+
+.gap-notes {
+  display: flex;
+  flex-direction: column;
+  gap: var(--qp-space-1);
+  font-size: var(--m-fs-label);
+}
+
+.gap-notes h3 {
+  font-size: var(--m-fs-title);
+  font-weight: var(--qp-head-weight);
+}
+
+.gap-notes li {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: var(--qp-space-1);
+  padding: var(--qp-space-1) 0;
+  border-bottom: var(--m-rule) solid var(--m-line);
+}
+
+.gap-notes li .k {
+  font-family: var(--m-font-figure);
+  font-size: var(--m-fs-note);
+  color: var(--m-muted);
+}
+
+.gap-notes li.open .k {
+  color: var(--m-warn);
+}
+
+/* Grafik kırpımı: aynı çekirdek görselinin bir bölgesi (durum karelerindeki hap). */
+.chart-slot.crop {
+  /* Çapa geometrisi: kırpım 320×120; görselin x 400–720, y 50–170 CSS bölgesi
+     (seviye 112,40 kırpımın %43'ünde, fiyat oluğu sağ kenarda). */
+  width: var(--a-panel-w);
+  height: 120px;
+  border: var(--m-rule) solid var(--m-line);
+  border-bottom: none;
+  border-radius: var(--m-radius-card) var(--m-radius-card) 0 0;
+}
+
+.chart-slot.crop > img {
+  object-position: -400px -50px;
+}
+
+.chart-slot.crop + .stage {
+  border-radius: 0 0 var(--m-radius-card) var(--m-radius-card);
+}
+
+/* Durum karelerinde panel sahnesi biraz daha sıkı: kart Ç1 panelindeki genişliğe yakın. */
+.states .stage {
+  padding: var(--qp-space-2);
+}
+
+.actions {
+  flex-wrap: wrap;
+}
+
+.btn.quiet {
+  padding: 0 var(--qp-space-1);
+}
+
+.parts > .part-options {
+  display: flex;
+}
+
+.parts .k,
+html[data-look="tavek-tel"] .parts .k {
+  padding-right: var(--qp-space-2);
+}
+
+.status-line .glyph + span,
+.status-line .spin + span {
+  flex: 1 1 0;
+  min-width: 0;
+}
+
+.pair {
+  justify-content: start;
+}
+
+/* Bildirim yığınının arkasındaki grafik (soluk, yalnız bağlam). */
+.desk-corner .corner-chart {
+  position: absolute;
+  left: 0;
+  top: var(--qp-bar-h);
+  border: none;
+  border-radius: 0;
+  opacity: 0.5;
+}
+
+.stage .toast {
+  width: auto;
+}
+
+/* Çapa geometrisi: Ç1 sağ sütunun yüksekliği (900 − alt şerit 40). */
+.ap.tall {
+  height: 860px;
+}
+
+.ap.tall .ap-thread {
+  overflow: hidden;
+}
+
+.ap-head .top .btn {
+  min-height: auto;
+}
+
+.chip .pulse {
+  margin-right: var(--m-rule);
+}
+
+.ap.tall .ap-thread {
+  flex: 1 1 auto;
+  min-height: 0;
+  justify-content: flex-end;
+}
+
+/* Gelen kutusu açılır listesi (Y13): zilin altında, panel genişliği. */
+.inbox-stage {
+  height: calc(var(--qp-space-5) * 20);
+}
+
+.ap.inbox {
+  width: calc(var(--a-panel-w) + var(--qp-space-5));
+  box-shadow: var(--m-shadow);
+}
+
+.lrow .title .spin {
+  vertical-align: middle;
+  margin-right: var(--qp-space-0);
+}
+
+/* ✓ ve ✗ gövde yazı tipinde: rakam yazı tipinde ✓ karakteri yok. */
+.step .mark {
+  font-family: var(--m-font);
+}
+
+.inner-h {
+  font-size: var(--m-fs-title);
+  font-weight: var(--qp-head-weight);
+  margin: var(--qp-space-4) 0 var(--qp-space-2);
+}
+
+.states .acard,
+.states .qcard {
+  padding-left: var(--qp-space-2);
+  padding-right: var(--qp-space-2);
+}
+
+html[data-look="tavek-tel"] .states .acard,
+html[data-look="tavek-tel"] .states .qcard {
+  padding: var(--qp-space-3);
+}
+
+html[data-look="tavek"] .states .btn:not(.quiet) {
+  padding: 0 var(--qp-space-2);
+}

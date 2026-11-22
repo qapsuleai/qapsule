@@ -1,0 +1,640 @@
+/* RD2 B-sınama — sistem grubu yüzey maketleri (Y22).
+ *
+ * base.css → tavek.css → bu dosya. Değerler yalnız look değişkenlerinden (`qp look css`);
+ * renk kodu yok. Px yalnız çerçeve geometrisinde (yorumlu): pafta, telefon ve palet
+ * genişliği, arka plan grafik yuvasının boyu.
+ *
+ * Pafta düzeni ajan ve izleme gruplarıyla aynı: masaüstü bölümü `?look=tavek`, telefon
+ * bölümü `?look=tavek-tel` ile görünür.
+ */
+
+:root {
+  /* Çerçeve geometrisi: masaüstü pafta genişliği = Ç1 çerçevesi. */
+  --s-sheet-w: 1440px;
+  /* Çerçeve geometrisi: telefon çerçevesi (390 CSS px, phone.css ile aynı). */
+  --s-phone-w: 390px;
+  /* Çerçeve geometrisi: yüzen paletin genişliği (OV-23; Ç1 orta sütununun yarısından az). */
+  --s-pal-w: 560px;
+  /* Çerçeve geometrisi: ana durumdaki arka plan grafik yuvası (qp render --width/--height). */
+  --s-bg-chart-w: 1374px;
+  --s-bg-chart-h: 440px;
+  /* Durum karesi genişliği: 2 sütun. */
+  --s-state-w: 640px;
+
+  --s-sel-tint: color-mix(in srgb, var(--m-accent) 12%, var(--m-card));
+  --s-agent-soft: color-mix(in srgb, var(--m-agent) 14%, transparent);
+  --s-edge: calc(var(--m-rule) * 2);
+}
+
+/* ---- Profil seçimi ----------------------------------------------------------------- */
+
+html[data-look="tavek"] .profile.phone,
+html[data-look="tavek-tel"] .profile.desk {
+  display: none;
+}
+
+/* ---- Pafta ------------------------------------------------------------------------- */
+
+.sheet {
+  width: var(--s-sheet-w);
+  padding: var(--qp-space-5);
+}
+
+html[data-look="tavek-tel"] .sheet {
+  width: var(--s-phone-w);
+  padding: var(--qp-space-3) 0 var(--qp-space-5);
+}
+
+.sheet-head {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: var(--qp-space-1) var(--qp-space-4);
+  align-items: end;
+  padding-bottom: var(--qp-space-3);
+  margin-bottom: var(--qp-space-4);
+  border-bottom: var(--m-rule) solid var(--m-line);
+}
+
+html[data-look="tavek-tel"] .sheet-head {
+  grid-template-columns: 1fr;
+  padding: 0 var(--qp-space-3) var(--qp-space-3);
+  margin-bottom: var(--qp-space-3);
+}
+
+.sheet-head .eyebrow {
+  font-size: var(--m-fs-label);
+  color: var(--m-muted);
+  font-family: var(--m-font-figure);
+}
+
+.sheet-head h1 {
+  font-size: var(--m-fs-headline);
+  font-weight: var(--qp-head-weight);
+}
+
+.sheet-head p {
+  font-size: var(--m-fs-label);
+  color: var(--m-muted);
+  max-width: 72ch;
+}
+
+.sheet-head .meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--qp-space-2);
+  font-size: var(--m-fs-note);
+  color: var(--m-muted);
+}
+
+/* Köken çizgi anahtarı: çizgi biçimi + sözcük. */
+.stroke {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--qp-space-0);
+}
+
+.stroke::before {
+  content: "";
+  width: var(--qp-space-3);
+  border-top: var(--s-edge) solid var(--m-human);
+}
+
+.stroke.agent::before {
+  border-top-style: dashed;
+  border-top-color: var(--m-agent);
+}
+
+.stroke.engine::before {
+  border-top-style: dotted;
+  border-top-color: var(--m-engine);
+}
+
+.profile > h2 {
+  display: flex;
+  align-items: baseline;
+  gap: var(--qp-space-2);
+  font-size: var(--m-fs-title);
+  font-weight: var(--qp-head-weight);
+  margin: var(--qp-space-4) 0 var(--qp-space-2);
+}
+
+.profile > h2 .note {
+  font-weight: normal;
+}
+
+html[data-look="tavek-tel"] .profile > h2 {
+  padding: 0 var(--qp-space-3);
+  flex-wrap: wrap;
+}
+
+.states {
+  display: grid;
+  grid-template-columns: repeat(2, var(--s-state-w));
+  gap: var(--qp-space-4);
+  align-items: start;
+}
+
+html[data-look="tavek-tel"] .states {
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--qp-space-5);
+}
+
+.state {
+  margin: 0;
+  min-width: 0;
+}
+
+.state > figcaption {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  column-gap: var(--qp-space-1);
+  margin-bottom: var(--qp-space-1);
+  font-size: var(--m-fs-label);
+}
+
+html[data-look="tavek-tel"] .state > figcaption {
+  padding: 0 var(--qp-space-3);
+}
+
+.state > figcaption .n {
+  font-family: var(--m-font-figure);
+  color: var(--m-muted);
+  min-width: 2ch;
+}
+
+.state > figcaption b {
+  font-weight: var(--qp-head-weight);
+}
+
+.state > figcaption .role {
+  grid-column: 2;
+  color: var(--m-muted);
+  font-family: var(--m-font-figure);
+  font-size: var(--m-fs-note);
+}
+
+/* Durum karesinin sahnesi: Ç1 zemini, palet ortada. */
+.stage {
+  background: var(--m-panel);
+  border: var(--m-rule) solid var(--m-line);
+  border-radius: var(--m-radius-card);
+  padding: var(--qp-space-3);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--qp-space-2);
+}
+
+.stage.flush {
+  padding: 0;
+  gap: 0;
+  align-items: stretch;
+}
+
+.mono {
+  font-family: var(--m-font-figure);
+  font-size: var(--m-fs-figure);
+  font-variant-numeric: tabular-nums;
+}
+
+.link {
+  color: var(--m-fg);
+  text-decoration: underline;
+  text-decoration-color: var(--m-line);
+  text-underline-offset: var(--qp-space-0);
+}
+
+/* ---- Üst çubuk ve arama alanı (kapalı palet) --------------------------------------- */
+
+.topbar {
+  display: flex;
+  align-items: center;
+  gap: var(--qp-space-2);
+  min-height: var(--qp-bar-h);
+  padding: 0 var(--qp-space-3);
+  border-bottom: var(--m-rule) solid var(--m-line);
+  font-size: var(--m-fs-label);
+  color: var(--m-muted);
+  background: var(--m-panel);
+}
+
+.topbar .grow {
+  flex: 1 1 auto;
+}
+
+.topbar .sym {
+  color: var(--m-fg);
+  font-weight: var(--qp-head-weight);
+}
+
+.search {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--qp-space-2);
+  min-height: var(--m-control-h);
+  min-width: calc(var(--s-pal-w) / 2);
+  padding: 0 var(--qp-space-1);
+  border: var(--m-rule) solid var(--m-line);
+  border-radius: var(--m-radius-control);
+  color: var(--m-muted);
+}
+
+.search .grow {
+  flex: 1 1 auto;
+}
+
+.search.open {
+  border-color: var(--m-focus);
+}
+
+.kbd {
+  font-family: var(--m-font-figure);
+  font-size: var(--m-fs-note);
+  color: var(--m-muted);
+  padding: 0 var(--qp-space-0);
+  border: var(--m-rule) solid var(--m-line);
+  border-radius: var(--m-radius-control);
+  white-space: nowrap;
+}
+
+/* ---- Ana durum: Ç1 üst kesiti, grafik soluk, palet yüzer ---------------------------- */
+
+.desk-cut {
+  position: relative;
+  background: var(--m-panel);
+  border: var(--m-rule) solid var(--m-line);
+  border-radius: var(--m-radius-card);
+  overflow: hidden;
+}
+
+.desk-cut .bg-chart {
+  width: var(--s-bg-chart-w);
+  height: var(--s-bg-chart-h);
+  opacity: 0.45;
+}
+
+.desk-cut .pal {
+  position: absolute;
+  top: calc(var(--qp-bar-h) + var(--qp-space-4));
+  left: calc(50% - var(--s-pal-w) / 2);
+}
+
+/* ---- Palet ------------------------------------------------------------------------- */
+
+.pal {
+  width: var(--s-pal-w);
+  max-width: 100%;
+  background: var(--m-card);
+  border: var(--m-rule) solid var(--m-line);
+  border-radius: var(--m-radius-card);
+  box-shadow: var(--m-shadow);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.pal-input {
+  display: flex;
+  align-items: center;
+  gap: var(--qp-space-1);
+  min-height: var(--qp-bar-h);
+  padding: 0 var(--qp-space-3);
+  border-bottom: var(--m-rule) solid var(--m-line);
+  font-size: var(--m-fs-title);
+}
+
+.pal-input .typed {
+  color: var(--m-fg);
+}
+
+.pal-input .typed::after {
+  content: "";
+  display: inline-block;
+  width: var(--s-edge);
+  height: var(--m-fs-title);
+  margin-left: var(--m-rule);
+  vertical-align: text-bottom;
+  background: var(--m-focus);
+}
+
+.pal-input .ph {
+  color: var(--m-muted);
+}
+
+.pal-input .grow {
+  flex: 1 1 auto;
+}
+
+/* Ayrıştırıcının okuması: sözdizimi <SEMBOL> <İŞLEV> (AT-D1); yanlış yorum görünür kalır. */
+.pal-parse {
+  display: flex;
+  gap: var(--qp-space-1);
+  padding: var(--qp-space-1) var(--qp-space-3) 0;
+  font-size: var(--m-fs-note);
+  color: var(--m-muted);
+}
+
+.pal-list {
+  display: flex;
+  flex-direction: column;
+  padding: var(--qp-space-0) 0 var(--qp-space-1);
+}
+
+.pal-h {
+  display: flex;
+  align-items: baseline;
+  gap: var(--qp-space-1);
+  padding: var(--qp-space-1) var(--qp-space-3) var(--qp-space-0);
+  font-size: var(--m-fs-label);
+  color: var(--m-muted);
+}
+
+.pal-h .grow {
+  flex: 1 1 auto;
+}
+
+.prow {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  align-items: center;
+  gap: var(--qp-space-2);
+  min-height: var(--m-control-h);
+  padding: 0 var(--qp-space-3);
+  border-left: var(--s-edge) solid transparent;
+  color: var(--m-fg);
+}
+
+.prow .main {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Eşleşen harf kalın: tek ağırlık farkı, renk yok. */
+.prow b {
+  font-weight: var(--qp-head-weight);
+}
+
+.prow .name {
+  color: var(--m-muted);
+}
+
+.prow .meta {
+  font-size: var(--m-fs-note);
+  color: var(--m-muted);
+  white-space: nowrap;
+}
+
+.prow.muted {
+  color: var(--m-muted);
+}
+
+/* Seçim: --accent yalnız seçim (zemin + sol kenar). */
+.prow.sel {
+  background: var(--s-sel-tint);
+  border-left-color: var(--m-accent);
+}
+
+/* "Ajana sor": köken ajan → kesik sol kenar + sözcük; komutlar insanındır. */
+.prow.agent {
+  border-left: var(--s-edge) dashed var(--m-agent);
+}
+
+.prow.agent .who {
+  color: var(--m-agent);
+  font-size: var(--m-fs-note);
+  border: var(--m-rule) dashed var(--m-agent);
+  border-radius: var(--m-radius-control);
+  padding: var(--qp-badge-pad);
+}
+
+.prow.agent.sel {
+  border-left-color: var(--m-agent);
+}
+
+/* Borsa etiketi: belirsiz eşleşmeyi ayırır. */
+.ex {
+  font-size: var(--m-fs-note);
+  color: var(--m-muted);
+  border: var(--m-rule) solid var(--m-line);
+  border-radius: var(--m-radius-control);
+  padding: var(--qp-badge-pad);
+  white-space: nowrap;
+}
+
+/* Yetki yok: kilit şekli + sözcük; değer yok. */
+.nolock {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--qp-space-0);
+  font-size: var(--m-fs-note);
+  color: var(--m-muted);
+  white-space: nowrap;
+}
+
+.prow.locked .main {
+  color: var(--m-muted);
+}
+
+.pal-empty {
+  padding: var(--qp-space-2) var(--qp-space-3);
+  color: var(--m-muted);
+}
+
+.pal-foot {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--qp-space-0) var(--qp-space-3);
+  padding: var(--qp-space-1) var(--qp-space-3);
+  border-top: var(--m-rule) solid var(--m-line);
+  font-size: var(--m-fs-note);
+  color: var(--m-muted);
+}
+
+.pal-foot .grow {
+  flex: 1 1 auto;
+}
+
+/* ---- Ajan çalışıyor: palet kapandı, ajan panelinde canlı satır ---------------------- */
+
+.ap-mini {
+  display: flex;
+  flex-direction: column;
+  gap: var(--qp-space-1);
+  padding: var(--qp-space-2) var(--qp-space-3) var(--qp-space-3);
+}
+
+.ap-mini .ap-h {
+  font-size: var(--m-fs-label);
+  color: var(--m-muted);
+}
+
+.u-msg {
+  align-self: flex-end;
+  max-width: 80%;
+  padding: var(--qp-space-1) var(--qp-space-2);
+  border: var(--m-rule) solid var(--m-line);
+  border-radius: var(--m-radius-card);
+  background: var(--m-card);
+}
+
+.u-msg .who {
+  display: block;
+  font-size: var(--m-fs-note);
+  color: var(--m-muted);
+}
+
+.live {
+  display: flex;
+  align-items: center;
+  gap: var(--qp-space-1);
+  padding-left: var(--qp-space-1);
+  border-left: var(--s-edge) dashed var(--m-agent);
+  font-size: var(--m-fs-label);
+}
+
+.live .grow {
+  flex: 1 1 auto;
+}
+
+.live .who {
+  color: var(--m-agent);
+}
+
+.spin {
+  display: inline-block;
+  flex: none;
+  width: var(--qp-space-2);
+  height: var(--qp-space-2);
+  border-radius: 50%;
+  border: var(--s-edge) solid var(--s-agent-soft);
+  border-top-color: var(--m-agent);
+}
+
+/* ---- Durum özeti tablosu ----------------------------------------------------------- */
+
+.state-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--m-fs-label);
+}
+
+.state-table th {
+  text-align: left;
+  font-weight: normal;
+  color: var(--m-muted);
+  font-size: var(--m-fs-note);
+  padding: var(--qp-space-1) var(--qp-space-2);
+  border-bottom: var(--m-rule) solid var(--m-line);
+}
+
+.state-table td {
+  padding: var(--qp-space-1) var(--qp-space-2);
+  border-bottom: var(--m-rule) solid var(--m-line);
+  vertical-align: top;
+}
+
+.state-table td.n {
+  font-family: var(--m-font-figure);
+  color: var(--m-muted);
+  width: 3ch;
+}
+
+.state-table code,
+figcaption code {
+  font-family: var(--m-font-figure);
+  font-size: var(--m-fs-note);
+  color: var(--m-muted);
+}
+
+/* ---- Telefon: Kule başlığında arama, sonuçlar tam genişlik --------------------------- */
+
+.phf {
+  width: var(--s-phone-w);
+  background: var(--m-panel);
+  border-top: var(--m-rule) solid var(--m-line);
+  border-bottom: var(--m-rule) solid var(--m-line);
+  display: flex;
+  flex-direction: column;
+}
+
+.phf-status {
+  display: flex;
+  align-items: center;
+  gap: var(--qp-space-1);
+  min-height: var(--qp-space-5);
+  padding: 0 var(--qp-space-3);
+  font-size: var(--m-fs-note);
+  color: var(--m-muted);
+  border-bottom: var(--m-rule) solid var(--m-line);
+}
+
+.phf-status .grow {
+  flex: 1 1 auto;
+}
+
+.phf-head {
+  display: flex;
+  align-items: center;
+  gap: var(--qp-space-2);
+  padding: var(--qp-space-2) var(--qp-space-3);
+}
+
+.phf-head h3 {
+  font-size: var(--m-fs-title);
+  font-weight: var(--qp-head-weight);
+}
+
+.phf-head .grow {
+  flex: 1 1 auto;
+}
+
+.phf .search {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.phf .search .typed {
+  color: var(--m-fg);
+}
+
+.phf .pal {
+  width: auto;
+  border-left: none;
+  border-right: none;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+.phf .prow {
+  grid-template-columns: minmax(0, 1fr) auto;
+}
+
+.phf-tabs {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  border-top: var(--m-rule) solid var(--m-line);
+  font-size: var(--m-fs-label);
+  color: var(--m-muted);
+}
+
+.phf-tabs span {
+  min-height: var(--m-control-h);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-top: var(--s-edge) solid transparent;
+}
+
+.phf-tabs span.on {
+  color: var(--m-fg);
+  font-weight: var(--qp-head-weight);
+  border-top-color: var(--m-accent);
+}
+
+/* Kısayolu olmayan komut: boş kutu çizilmez. */
+.kbd:empty {
+  display: none;
+}

@@ -1,0 +1,48 @@
+<!doctype html>
+<!-- RD2 M2/M3 (watch) Y21 — İzleme kurma formu (çizimsiz). Kademe 2: ana durumun tam maketi (masaüstü) + şartnamedeki durum listesi.
+     Açmak: ?look=tavek (masaüstü) ya da ?look=tavek-tel (telefon) &theme=dark|light &vars=<önek>
+     (README). Değerler yalnız var(--…); satır içi px yalnız çerçeve geometrisi (kesit boyu, yüzen
+     kartın konumu, bindirmenin grafik kesirleri); metin sentetik; grafik çekirdekten (`qp render`). -->
+<html lang="tr">
+<head>
+  <meta charset="utf-8">
+  <title>Y21 İzleme kurma formu (çizimsiz)</title>
+  <link rel="stylesheet" href="../../_base/base.css">
+  <link rel="stylesheet" href="../../_base/phone.css">
+  <link rel="stylesheet" href="../../tavek/tavek.css">
+  <link rel="stylesheet" href="watch.css">
+  <script src="../../_base/frame.js"></script>
+</head>
+<body class="sheet">
+<header class="sheet-h">
+  <h1><span class="id">Y21</span>İzleme kurma formu (çizimsiz)</h1>
+  <p>Fiyat seviyesi ya da gösterge koşulu için elle kurma: olay, kaynak, periyot, tekrar, süre. Her varsayılan “varsayılan” sözcüğüyle; altta motorun kurduğu önizleme cümlesi. Ajanın doldurduğu alan kesik çerçeve + “Ajan”.</p>
+  <div class="facts"><span class="chip">Kademe 2</span><span class="chip">K73</span><span class="chip">K78</span><span class="chip">watch.md · Y21</span></div>
+</header>
+<h3 class="block-h">Akış</h3>
+<ol class="flow"><li><span>“+”</span><span class="k">izleme görevleri başlığında</span></li><li><span>Sembol</span><span class="k">etkin hücreden dolu</span></li><li><span>Olay → değer</span><span class="k">alan altında neden</span></li><li><span>Önizleme</span><span class="k">motor cümlesi</span></li><li><span>Kur</span><span class="k">satır listede vurgulu</span></li></ol>
+<section class="profile"><h2>Ana durum <span class="note">yüzen kart (360 px), liste arkada soluk</span></h2><div class="states"><figure class="state "><figcaption><span class="n">·</span><b>Geçerli</b><code>--fg · --accent</code></figcaption>
+<div class="desk-frame" style="width: calc(256px + 360px + 24px); height: 600px; grid-template-columns: 256px minmax(0,1fr); position: relative"><aside class="dim"><div class="pane-h"><span>İzleme görevleri</span><span class="count">6 etkin</span><span class="grow"></span><span class="icon-btn">⌕</span><span class="icon-btn">+</span></div><ul class="tasks"><li class="task2 edge-human hot"><div class="l1"><span class="sym">SYN20</span><span class="cond">120,00 üstünde kapanış</span><span class="src">çizim</span></div><div class="l2"><span class="ws r-fg"><i>◐</i>Kırıldı</span><span class="pips" aria-label="tutunma 2/3"><i class="on"></i><i class="on"></i><i></i></span><span>2/3 · <span class="on-chart">Grafikte</span></span><span class="end r-muted"><span class="health ok" aria-label="izleniyor"></span>14:35</span></div></li>
+<li class="task2 edge-agent "><div class="l1"><span class="sym">SYN20</span><span class="cond">125,00 üstünde kapanış</span><span class="src">Ajan</span></div><div class="l2"><span class="ws r-agent"><i>○</i>Önerildi · onay bekliyor</span></div></li>
+<li class="task2 edge-human "><div class="l1"><span class="sym">ATL07</span><span class="cond">16,80 altında kapanış</span><span class="src">varsayılan</span></div><div class="l2"><span class="ws r-fg"><i>○</i>Kuruldu</span><span>· koruyucu</span><span class="end r-muted"><span class="health ok" aria-label="izleniyor"></span>14:35</span></div></li>
+<li class="task2 edge-engine "><div class="l1"><span class="sym">SYN20</span><span class="cond">Kapsül · kırılım tutunması</span><span class="src">Motor</span></div><div class="l2"><span class="ws r-fg"><i>○</i>Kuruldu</span><span class="end r-muted"><span class="health unknown" aria-label="bilinmiyor"></span>Bilinmiyor</span></div></li>
+<li class="task2 edge-human "><div class="l1"><span class="sym">EGE09</span><span class="cond">RSI 14, 70 üstü</span><span class="src">gösterge</span></div><div class="l2"><span class="ws r-muted"><i>‖</i>Duraklatıldı</span></div></li>
+</ul></aside><div></div><div class="float" style="--x: 232px; --y: 40px"><div class="pane-h"><span>İzleme kur</span><span class="grow"></span><span class="icon-btn">✕</span></div><div class="form">
+<label class="field"><span>Sembol</span><span class="input"><b>SYN20</b><span class="grow"></span><span class="dflt">etkin hücreden</span></span></label>
+<div class="field"><span>Olay</span><div class="seg2"><span>Yukarı kesişim</span><span class="on">Altında kapanış</span><span>Dokunma</span></div></div>
+<label class="field"><span>Değer</span><span class="input"><span class="plain">117,50</span><span class="grow"></span><span class="dflt">fiyat · son 123,38</span></span></label>
+<div class="field"><span>Kaynak · periyot</span><span class="input"><span>Kapanış · günlük</span><span class="grow"></span><span class="dflt">varsayılan</span></span></div>
+<div class="field"><span>Teyit</span><span class="input agentfield"><span>2 bar</span><span class="grow"></span><span class="dflt r-agent">Ajan</span></span></div>
+<div class="field"><span>Tekrar · süre</span><span class="input"><span>Bir kez · 30 Kas seans sonu</span><span class="grow"></span><span class="dflt">varsayılan</span></span></div>
+<div class="preview"><span class="note"><span class="origin engine">Motor</span> önizleme</span>SYN20 günlük kapanış 117,50'nin altına inerse, 2 bar teyitle, haber ver, bir kez.</div>
+<div class="actions"><span class="btn quiet">Vazgeç</span><span class="btn primary">İzlemeyi kur</span></div></div></div></div>
+</figure>
+<figure class="state "><figcaption><span class="n">·</span><b>Zaten doğru (uyar ve öner)</b><code>--qp-warn</code></figcaption>
+<div class="surface w-panel"><div class="form"><label class="field"><span>Değer</span><span class="input bad"><span class="plain">130,00</span></span><span class="why">Fiyat şu an 130,00'ın altında; bu koşul olay üretmez. Yukarı kesişimi mi izleyeyim?</span></label><div class="actions" style="justify-content:flex-start"><span class="btn">Yukarı kesişimi izle</span><span class="btn quiet">Böyle kalsın</span></div></div></div>
+</figure>
+<figure class="state "><figcaption><span class="n">·</span><b>Geçersiz birleşim</b><code>--qp-warn</code></figcaption>
+<div class="surface w-panel"><div class="form"><div class="field"><span>Olay</span><div class="seg2"><span>Kesişim</span><span class="on">Bölgeye giriş</span></div><span class="why">Yatay seviyede ‘bölgeye giriş’ yok</span></div></div></div>
+</figure>
+</div><h3 class="block-h">Şartnamedeki durumlar (6)</h3><div class="statelist" role="table"><span class="n">1</span><span class="">Boş</span><span class="muted">“Kapanış · varsayılan”</span><code>varsayılanlar işaretli</code><span class="n">2</span><span class="shown">Geçerli <span class="spill r-accent">bu sayfada</span></span><span class="muted">“SYN20 günlük kapanış 112,40'ın altına inerse haber ver, bir kez”</span><code>önizleme + kur</code><span class="n">3</span><span class="shown">Geçersiz birleşim <span class="spill r-accent">bu sayfada</span></span><span class="muted">“Yatay seviyede ‘bölgeye giriş’ yok”</span><code>alan altında neden</code><span class="n">4</span><span class="shown">Zaten doğru <span class="spill r-accent">bu sayfada</span></span><span class="muted">“Fiyat şu an 112,40'ın altında; bu koşul olay üretmez. Yukarı kesişimi mi izleyeyim?”</span><code>uyar ve öner (K72)</code><span class="n">5</span><span class="">Sınıra ulaşıldı</span><span class="muted">“İzleme sınırı doldu (50 / 50)”</span><code>O-sınır, kur devre dışı</code><span class="n">6</span><span class="">Kuruldu</span><span class="muted">“Kuruldu”</span><code>kart kapanır, satır vurgulu</code></div></section>
+</body>
+</html>

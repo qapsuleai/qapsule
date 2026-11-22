@@ -9,7 +9,7 @@ yalnız temel işlemler ve tamsayı; aynı görünüm ve veri her hedefte aynı 
 
 **Katman:** alan (`docs/ENGINEERING.md` §2).
 
-**Bağımlılıklar:** `qp-schema`, `serde_json`. Geliştirme: `qp-compute`, `qp-capsule`,
+**Bağımlılıklar:** `qp-schema`, `qp-calendar` (zaman etiketlerinin gösterim dilimi), `serde_json`. Geliştirme: `qp-compute`, `qp-capsule`,
 `proptest`.
 
 **Dışa açık yüzey (`lib.rs`):** `compile`, `CompileOptions`, `DataProvider`, `MemProvider`,

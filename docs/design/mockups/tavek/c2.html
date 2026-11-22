@@ -1,0 +1,66 @@
+<!doctype html>
+<!-- RD2 Y-b `tavek` Ç2 — grafik hücresi yakın (960×600, DPR 2). Grafik çekirdekten;
+     Qapsule katmanı grafiğin kendi dilinde: her seviye fiyat ekseninde bir etiketle biter,
+     köken çizgi biçimi + renktir (insan düz, ajan kesik, motor noktalı), izlemenin durumu
+     etiketin yanında sözcüktür, kapsülün kanıt penceresi soluk bir bant ve zaman ekseninde
+     bir parantezdir. Konumlar hücrenin kesirleri: örnek, veriye bağlı değil.
+     RD2/C2b: seviye çizgileri (köken rengi ve biçimi) ve eksen etiketleri artık çekirdekten
+     (görünüm `desk-levels`: insanın izleme seviyesi 118,00, ajanın önerdiği destek 112,50,
+     RSI 30/70 eşikleri motorun); burada yalnız çekirdeğin henüz çizmediği katman kalır: sol
+     uç çipleri, kırılım çentiği, trend çizgisi ve niyet hapı, kanıt bandı, kapsül işareti
+     ve zaman eksenindeki "Kanıt" parantezi. Çiplerin konumu çekirdeğin seviyelerine göre. -->
+<html lang="tr">
+<head>
+  <meta charset="utf-8">
+  <title>Ç2 grafik hücresi</title>
+  <link rel="stylesheet" href="../_base/base.css">
+  <link rel="stylesheet" href="../_base/c2.css">
+  <link rel="stylesheet" href="tavek.css">
+  <script src="../_base/frame.js"></script>
+</head>
+<body>
+<div class="frame c2" data-anchor="c2">
+  <div class="chart-slot" data-chart-slot data-region="chart">
+    <img data-chart="c2-cell" alt="SYN20 grafik hücresi">
+
+    <div class="overlay" aria-label="Grafik üstü Qapsule katmanı">
+      <!-- Evidence window of the capsule (engine): faint band down to the time axis. -->
+      <div class="band" style="--x: 72.5%; --x2: 78.8%; --top: 6%"></div>
+
+      <svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
+        <!-- Human trend line (solid ink; the core does not draw this drawing yet). -->
+        <line class="human" x1="40" y1="48" x2="76" y2="30.5"></line>
+        <!-- Break notch on the human's watch level (the level itself is the core's). -->
+        <line class="tick" x1="75" y1="20.8" x2="75" y2="23.2"></line>
+      </svg>
+
+      <!-- Left end of each core-drawn level: who wrote it, and its state. -->
+      <div class="ax-chip human" style="--x: 34%; --y: 22%">
+        <span>İzleme</span>
+        <span class="st broke">Kırıldı</span>
+        <span class="pips" aria-label="tutunma 2/3"><i class="on"></i><i class="on"></i><i></i></span>
+        <span class="who">2/3 bar</span>
+      </div>
+      <div class="ax-chip agent" style="--x: 3%; --y: 28.4%">
+        <span class="origin agent">Ajan önerisi</span><span>Destek</span>
+        <span class="act">Reddet</span><span class="act go">Ekle</span>
+      </div>
+      <div class="ax-chip engine" style="--x: 14%; --y: 90.7%">
+        <span class="origin engine">Motor</span><span>RSI aşırı satım</span>
+      </div>
+
+      <!-- Intent of the trend line: one line at its start; the full card is in the side panel. -->
+      <div class="intent-pill" style="--x: 40%; --y: 48%">
+        <span>Altında kapanış → uyar</span><span class="muted">3 bar · günlük</span>
+      </div>
+
+      <!-- Capsule mark at the top of its window; the bracket names the window on the time axis. -->
+      <div class="cap-pin" style="--x: 72.5%; --y: 6%">
+        <span><b>Kapsül</b> Kırılım tutundu</span>
+      </div>
+      <div class="t-bracket" style="--x: 72.5%; --x2: 78.8%"><span>Kanıt</span></div>
+    </div>
+  </div>
+</div>
+</body>
+</html>

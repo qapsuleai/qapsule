@@ -88,6 +88,8 @@ fn compile_source(
     height: u32,
     look: Option<&str>,
     roles: bool,
+    theme: Option<&str>,
+    cursor: Option<qp_grammar::Cursor>,
 ) -> Result<
     (qp_schema::grammar::View, qp_schema::scene::SceneDesc),
     Result<Box<qp_schema::protocol::ProtocolError>, String>,
@@ -96,6 +98,8 @@ fn compile_source(
     let mut opts = qp_session::CompileOptions::new(width, height);
     opts.look = look.map(str::to_owned);
     opts.roles = roles;
+    opts.theme = theme.map(str::to_owned);
+    opts.cursor = cursor;
     match (&src.view, &src.present) {
         (Some(view), _) => {
             let scene = session.scene(view, &opts).map_err(|e| Ok(Box::new(e)))?;
@@ -133,6 +137,8 @@ pub(crate) fn scene_cmd(args: &SceneArgs, explain: bool) -> Result<Outcome, Stri
         args.height,
         args.look.as_deref(),
         args.roles,
+        None,
+        None,
     ) {
         Ok(x) => x,
         Err(Ok(e)) => return Ok(print_protocol_error(&e)),
@@ -190,13 +196,43 @@ pub(crate) fn render_view(args: &RenderArgs) -> Result<Outcome, String> {
         args.height,
         args.look.as_deref(),
         false,
+        args.theme.as_deref(),
+        args.cursor.as_deref().map(parse_cursor).transpose()?,
     ) {
         Ok((_, scene)) => scene,
         Err(Ok(e)) => return Ok(print_protocol_error(&e)),
         Err(Err(m)) => return Err(m),
     };
-    let png = qp_render::render_scene_png(&scene).map_err(|e| e.to_string())?;
-    std::fs::write(&args.out, png)
-        .map_err(|e| format!("cannot write {}: {e}", args.out.display()))?;
+    write_png(&scene, args.scale, &args.out)
+}
+
+/// `<bar>[,<price>]` (`qp render --cursor`).
+fn parse_cursor(s: &str) -> Result<qp_grammar::Cursor, String> {
+    let bad = || format!("--cursor `{s}`: expected <bar>[,<price>]");
+    let (bar, price) = s.split_once(',').map_or((s, None), |(b, p)| (b, Some(p)));
+    Ok(qp_grammar::Cursor {
+        bar: bar.trim().parse().map_err(|_| bad())?,
+        price: price
+            .map(|p| p.trim().parse().map_err(|_| bad()))
+            .transpose()?,
+    })
+}
+
+/// Writes `scene` as PNG at device scale `scale` (RD2/G). Scale 1 keeps the reference
+/// path (`render_scene_png`) so existing outputs stay byte-identical.
+pub(crate) fn write_png(
+    scene: &qp_schema::scene::SceneDesc,
+    scale: u32,
+    out: &std::path::Path,
+) -> Result<Outcome, String> {
+    let png = if scale == 1 {
+        qp_render::render_scene_png(scene)
+    } else {
+        qp_render::render_scene_rgba_scaled(scene, scale).and_then(|rgba| {
+            qp_render::encode_png(&rgba, scene.width * scale, scene.height * scale)
+        })
+    }
+    .map_err(|e| e.to_string())?;
+    std::fs::write(out, png).map_err(|e| format!("cannot write {}: {e}", out.display()))?;
     Ok(Outcome::Ok)
 }

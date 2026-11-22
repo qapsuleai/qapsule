@@ -1,0 +1,49 @@
+/* `tavek` Ç3 — the tower speaks the chart's grammar: rows carry the origin stroke on
+ * their leading edge, states sit in the axis-tag form (value + state word). */
+
+.capsule-row.edge-human,
+.capsule-row.edge-engine,
+.capsule-row.edge-agent {
+  margin-left: var(--qp-space-3);
+  padding-left: var(--qp-space-2);
+}
+
+/* The axis tag off the chart: the level's value, then its state; shape + word. */
+.lvl-tag {
+  display: inline-flex;
+  align-items: stretch;
+  border-radius: var(--m-radius-control);
+  overflow: hidden;
+  font-size: var(--m-fs-note);
+  white-space: nowrap;
+}
+
+.lvl-tag .num {
+  padding: 0 var(--qp-space-1);
+  font-size: var(--m-fs-note);
+}
+
+.lvl-tag .st {
+  padding: 0 var(--qp-space-1);
+  color: var(--m-fg);
+  border: var(--m-rule) solid var(--m-line);
+  border-left: none;
+  border-radius: 0 var(--m-radius-control) var(--m-radius-control) 0;
+}
+
+.lvl-tag.human .num {
+  background: var(--m-human);
+  color: var(--m-card);
+}
+
+.lvl-tag.engine .num {
+  color: var(--m-muted);
+  border: var(--m-rule) dotted var(--m-engine);
+  border-radius: var(--m-radius-control) 0 0 var(--m-radius-control);
+}
+
+/* The proposal is shown on its own chart: tall enough for the price pane to hold the
+   dashed level and its axis tag apart from the last value. */
+.pending .chart-slot {
+  height: calc(var(--m-control-h) * 4.5);
+}

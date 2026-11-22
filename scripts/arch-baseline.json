@@ -17,7 +17,7 @@
    }
   },
   "file.soft": {
-   "count": 37,
+   "count": 36,
    "items": {
     "crates/qp-capsule/src/engine.rs": 624,
     "crates/qp-capsule/src/outcome.rs": 762,
@@ -26,7 +26,6 @@
     "crates/qp-capsule/src/voice/marla.rs": 669,
     "crates/qp-capsule/src/voice/selvi.rs": 624,
     "crates/qp-compute/src/sweep/share.rs": 605,
-    "crates/qp-grammar/src/compile/scene.rs": 667,
     "crates/qp-grammar/src/glyph/rozet.rs": 604,
     "crates/qp-host/src/demo.rs": 630,
     "crates/qp-host/src/live.rs": 616,
@@ -91,7 +90,7 @@
     "crates/qp-grammar/src/compile/layer/resolve.rs::resolve_constants": 88,
     "crates/qp-grammar/src/compile/layer/rows.rs::pair_rows": 97,
     "crates/qp-grammar/src/compile/layer/rows.rs::series_rows": 91,
-    "crates/qp-grammar/src/compile/scene.rs::compile": 654,
+    "crates/qp-grammar/src/compile/scene.rs::compile": 564,
     "crates/qp-grammar/src/compile/terms.rs::mark": 116,
     "crates/qp-grammar/src/faces/fotolay.rs::view": 95,
     "crates/qp-grammar/src/faces/zemre.rs::view": 106,

@@ -1,0 +1,38 @@
+<!doctype html>
+<!-- RD2 M2/M3 (watch) Y35 — Hazırlık dosyası, ortak analiz ve üyelik. Kademe 2: ana durumun tam maketi (masaüstü) + şartnamedeki durum listesi.
+     Açmak: ?look=tavek (masaüstü) ya da ?look=tavek-tel (telefon) &theme=dark|light &vars=<önek>
+     (README). Değerler yalnız var(--…); satır içi px yalnız çerçeve geometrisi (kesit boyu, yüzen
+     kartın konumu, bindirmenin grafik kesirleri); metin sentetik; grafik çekirdekten (`qp render`). -->
+<html lang="tr">
+<head>
+  <meta charset="utf-8">
+  <title>Y35 Hazırlık dosyası, ortak analiz ve üyelik</title>
+  <link rel="stylesheet" href="../../_base/base.css">
+  <link rel="stylesheet" href="../../_base/phone.css">
+  <link rel="stylesheet" href="../../tavek/tavek.css">
+  <link rel="stylesheet" href="watch.css">
+  <script src="../../_base/frame.js"></script>
+</head>
+<body class="sheet">
+<header class="sheet-h">
+  <h1><span class="id">Y35</span>Hazırlık dosyası, ortak analiz ve üyelik</h1>
+  <p>Olay öncesi dosya (hazırlık görevi, K76). Herkes için aynı olan analiz bir kez üretilir; kullanıcılar üye olur, üye sayısı görünür. Geçmiş tepkiler düzeltilmiş seriden; az örnekte yüzde yok; “Sinyal, tavsiye değil” her durumda altta.</p>
+  <div class="facts"><span class="chip">Kademe 2</span><span class="chip">K76</span><span class="chip">K77</span><span class="chip">A61</span><span class="chip">ledger.md · Y35</span></div>
+</header>
+<h3 class="block-h">Akış</h3>
+<ol class="flow"><li><span>Takvimde olay yaklaşır</span><span class="k">listede “Hazırlık” satırı</span></li><li><span>Dosya</span><span class="k">sağ panel</span></li><li><span>“Üye ol”</span><span class="k">üye sayısı artar</span></li><li><span>Olay günü</span><span class="k">bildirim</span></li><li><span>Olay geçer</span><span class="k">sonuç sicile, dosya kapanır</span></li></ol>
+<section class="profile"><h2>Ana durum <span class="note">listede “Hazırlık” satırı · dosya sağ panelde (360 px)</span></h2><div class="desk-frame ctx3" style="grid-template-columns: 256px 0 360px; width: calc(256px + 360px + 3 * var(--m-rule))"><aside><div class="pane-h"><span>İzleme görevleri</span><span class="count">6 etkin</span><span class="grow"></span><span class="icon-btn">⌕</span><span class="icon-btn">+</span></div><ul class="tasks"><li class="task2 hot edge-engine "><div class="l1"><span class="sym">SYN20</span><span class="cond">Bilanço hazırlığı · 28 Kas</span><span class="src">Hazırlık</span></div><div class="l2"><span class="ws r-muted"><i>◷</i>6 gün kaldı</span></div></li>
+<li class="task2 edge-human"><div class="l1"><span class="sym">SYN20</span><span class="cond">120,00 üstünde kapanış</span><span class="src">çizim</span></div><div class="l2"><span class="ws r-fg"><i>◐</i>Kırıldı</span><span class="pips" aria-label="tutunma 2/3"><i class="on"></i><i class="on"></i><i></i></span><span>2/3 · <span class="on-chart">Grafikte</span></span><span class="end r-muted"><span class="health ok" aria-label="izleniyor"></span>14:35</span></div></li>
+<li class="task2 edge-human "><div class="l1"><span class="sym">ATL07</span><span class="cond">16,80 altında kapanış</span><span class="src">varsayılan</span></div><div class="l2"><span class="ws r-fg"><i>○</i>Kuruldu</span><span>· koruyucu</span><span class="end r-muted"><span class="health ok" aria-label="izleniyor"></span>14:35</span></div></li>
+<li class="task2 edge-human "><div class="l1"><span class="sym">EGE09</span><span class="cond">RSI 14, 70 üstü</span><span class="src">gösterge</span></div><div class="l2"><span class="ws r-muted"><i>‖</i>Duraklatıldı</span></div></li>
+</ul></aside><div></div><div style="overflow:hidden"><div class="detail">
+<section><div class="d-title"><div class="top"><span class="origin engine">Hazırlık</span><span>Ortak analiz · Sistem</span><span class="grow"></span><span>Canlı</span></div>
+<h2>SYN20 bilanço hazırlığı · 28 Kas</h2><div class="meta"><span class="spill r-muted">◷ 6 gün kaldı</span><span>3. çeyrek · seans sonrası</span></div></div></section>
+<section><h3>Geçmiş tepkiler <span class="grow"></span><span class="note">Motor · düzeltilmiş seri</span></h3><table class="tbl"><tr><th>Açıklama</th><th class="r">2 gün</th><th class="r">sonuç</th></tr><tr><td>31 Tem 25</td><td class="r up">+3,8%</td><td class="r">● tuttu</td></tr><tr><td>02 May 25</td><td class="r down">−1,2%</td><td class="r">○ tutmadı</td></tr><tr><td>07 Şub 25</td><td class="r up">+0,6%</td><td class="r">● tuttu</td></tr><tr><td>01 Kas 24</td><td class="r up">+2,1%</td><td class="r">● tuttu</td></tr><tr><td>02 Ağu 24</td><td class="r down">−4,0%</td><td class="r">○ tutmadı</td></tr></table></section>
+<section><h3>Taban oran</h3><p class="lrow"><span class="r-warn">Düşük güven</span><span class="muted">· az örnek:</span><span>9 açıklamadan 5'inde iki günde yukarı</span></p><p class="note">Taban oran (bütün günler) <span class="fig">%51</span></p></section>
+<section><h3>İlgili seviyeler</h3><p style="font-size: var(--m-fs-label)"><span class="lvl engine"><span class="v">117,50</span><span class="s">destek</span></span> <span class="lvl engine"><span class="v">125,00</span><span class="s">direnç</span></span> <span class="on-chart">Grafikte noktalı</span></p></section>
+<section class="changed-sec"><h3>Ajan yorumu <span class="grow"></span><span class="note r-accent">2 saat önce güncellendi: hacim beklentisi</span></h3><p class="edge-agent" style="padding-left: var(--qp-space-2); font-size: var(--m-fs-label)">Son iki açıklamada hacim 20 günlük ortalamanın <span class="fig">2,1</span> katına çıktı. Bu dosyadaki sayılar motor cümlesinden.</p></section>
+<section><div class="member"><span class="origin engine">Sistem</span><span class="muted">Ortak analiz · <span class="plain">1.240</span> üye</span><span class="grow"></span><span class="btn primary">Üye ol</span></div></section>
+<section><p class="disclaimer">Sinyal, tavsiye değil</p></section></div></div></div><h3 class="block-h">Şartnamedeki durumlar (8)</h3><div class="statelist" role="table"><span class="n">1</span><span class="">Hazırlanıyor</span><span class="muted">“Dosya hazırlanıyor · bilanço 28 Kas”</span><code>bölüm iskeletleri</code><span class="n">2</span><span class="shown">Hazır <span class="spill r-accent">bu sayfada</span></span><span class="muted">“SYN20 bilanço hazırlığı · 28 Kas”</span><code>tam dosya</code><span class="n">3</span><span class="shown">Üye değil <span class="spill r-accent">bu sayfada</span></span><span class="muted">“Ortak analiz · Sistem · 1.240 üye · Üye ol”</span><code>sayı + “Üye ol”</code><span class="n">4</span><span class="">Üye</span><span class="muted">“Üyesin · güncellenince haber verilir”</span><code>durum; güncellenince haber</code><span class="n">5</span><span class="shown">Güncellendi <span class="spill r-accent">bu sayfada</span></span><span class="muted">“2 saat önce güncellendi: hacim beklentisi”</span><code>değişen bölüm vurgulu</code><span class="n">6</span><span class="">Olay geçti</span><span class="muted">“Bilanço açıklandı · tepki sicile yazıldı”</span><code>dosya kapanır, sonuç sicile</code><span class="n">7</span><span class="">Yetki yok</span><span class="muted">“Dosya var · görmek için BIST seviye 1”</span><code>bölümler kilitli</code><span class="n">8</span><span class="">Sayı doğrulanamadı</span><span class="muted">“Bu bölüm yayımlanmadı”</span><code>bölüm yayımlanmaz (A61)</code></div></section>
+</body>
+</html>

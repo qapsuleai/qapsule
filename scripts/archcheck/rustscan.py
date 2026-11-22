@@ -209,7 +209,7 @@ def _depths(code):
 
 def is_generated(src):
     head = "\n".join(src.splitlines()[:5]).lower()
-    return "üretilmiştir" in head or "@generated" in head
+    return "üretilmiştir" in head or bool(re.search(r"(^|[^a-z])@?generated\b", head))
 
 
 CFG_TEST_MOD = re.compile(r"#\[cfg\(\s*test\s*\)\]\s*(?:#\[[^\]]*\]\s*)*(?:pub(?:\([^)]*\))?\s+)?mod\s+([A-Za-z_][A-Za-z0-9_]*)\s*[;{]")

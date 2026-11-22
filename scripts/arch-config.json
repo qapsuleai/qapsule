@@ -86,7 +86,9 @@
     "root.logic",
     "path.outside"
   ],
-  "generated_files": [],
+  "generated_files": [
+    "crates/qp-grammar/src/advances.rs"
+  ],
   "exceptions": [],
   "_exceptions_doc": "Named exception requests (rounds/RG1/REPORT.md 'İstisna istekleri'): a finding matching rule+item is printed as an exception on every run instead of failing. Only Arkin approves or removes them (DECISIONS.md)."
 }

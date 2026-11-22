@@ -2,7 +2,7 @@
 //! top to bottom; the trust row opens its explanation; a reader without the entitlement
 //! gets the templated basis row and no number; every look gives the same blocks.
 
-mod common;
+mod support;
 
 use qp_grammar::open::{self, DeviceCheck, TextInput};
 use qp_grammar::{compile, CompileOptions, MemProvider};
@@ -55,7 +55,7 @@ fn voice(redacted: bool) -> CapsuleVoice {
 }
 
 fn fact(evidence: bool, licensed: bool) -> Fact {
-    let bars = common::sample_bars();
+    let bars = support::sample_bars();
     let mut ev = std::collections::BTreeMap::new();
     if evidence {
         ev.insert("level".to_owned(), 121.456_789);
@@ -153,7 +153,7 @@ fn provider(evidence: bool, licensed: bool, lang: Language) -> MemProvider {
         }),
         provenance: prov(),
     };
-    common::provider()
+    support::provider()
         .with_fact(fact(evidence, licensed))
         .with_finding(finding)
         .with_capsule(capsule)

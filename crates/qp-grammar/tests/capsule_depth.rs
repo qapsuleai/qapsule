@@ -3,7 +3,7 @@
 //! evidence geometry (including the redacted case), and the glyph rule cross-check
 //! against the engine (`qp_capsule::glyph_spec`).
 
-mod common;
+mod support;
 
 use qp_grammar::depth::{
     capsule_view, chart_view, evidence_layers, geometry_field, ledger_text, story_glyph,
@@ -83,7 +83,7 @@ fn story(stage: Stage, lab: LedgerStat) -> Story {
 /// A provider with an R3 breakout fact at bar 180 (level geometry over 160..=180), its
 /// finding and capsule; `evidence` false = redacted (no values).
 fn r3(evidence: bool) -> MemProvider {
-    let bars = common::sample_bars();
+    let bars = support::sample_bars();
     let mut ev = std::collections::BTreeMap::new();
     if evidence {
         ev.insert("level".to_owned(), 121.5);
@@ -136,7 +136,7 @@ fn r3(evidence: bool) -> MemProvider {
         )),
         provenance: prov(),
     };
-    common::provider()
+    support::provider()
         .with_fact(fact)
         .with_finding(finding)
         .with_capsule(capsule)
@@ -379,7 +379,7 @@ fn redacted_evidence_draws_no_geometry_and_says_why() {
 fn r2_findings_keep_the_r2_views() {
     // A pre-R3 finding (no meaning, no capsule story): same layers as R2.
     let p = r3(true);
-    let bars = common::sample_bars();
+    let bars = support::sample_bars();
     let old = Fact {
         id: "f-old".into(),
         kind: "cross_above".into(),
@@ -407,7 +407,7 @@ fn r2_findings_keep_the_r2_views() {
 }
 
 fn first_err(p: &MemProvider, layer: &str) -> qp_grammar::GrammarError {
-    let v = common::view(&format!(
+    let v = support::view(&format!(
         r#"{{"id":"t","x":{{"kind":"time"}},"panels":[{{"id":0,"y":{{"kind":"linear"}}}}],
            "layers":[{{"id":"candles","mark":"candle","series":"px","panel":0}},{layer}]}}"#
     ));
@@ -527,8 +527,8 @@ fn evidence_layers_for_band_and_points() {
     let ls = evidence_layers(&qp_grammar::look::R4, &f, 0, &mut taken);
     let ids: Vec<&str> = ls.iter().filter_map(|l| l.id.as_deref()).collect();
     assert_eq!(ids, ["band", "swing", "swing-point", "swing-point-2"]);
-    let p = common::provider().with_fact(f);
-    let mut layers = vec![common::view(
+    let p = support::provider().with_fact(f);
+    let mut layers = vec![support::view(
         r#"{"id":"t","x":{"kind":"time"},"layers":[{"id":"candles","mark":"candle","series":"px","panel":0}]}"#,
     )
     .layers[0]
@@ -536,7 +536,7 @@ fn evidence_layers_for_band_and_points() {
     layers.extend(ls);
     let v = qp_schema::grammar::View {
         layers,
-        ..common::view(r#"{"id":"t","x":{"kind":"time"},"layers":[]}"#)
+        ..support::view(r#"{"id":"t","x":{"kind":"time"},"layers":[]}"#)
     };
     let s = compile(&v, &p, &CompileOptions::new(1200, 600)).unwrap();
     let band = &s.panels[0].layers[1];

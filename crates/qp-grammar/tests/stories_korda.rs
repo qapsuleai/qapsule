@@ -3,7 +3,7 @@
 //! lanes that never overlap, the selected story first, closed stories hidden on request,
 //! the point query naming every element it is drawn for, determinism and contrast.
 
-mod common;
+mod support;
 
 use qp_grammar::stories::korda::{self, StoryHit, CLUSTER_LAYER, STORY_LAYER, TOGGLE_LAYER};
 use qp_grammar::stories::StoryInput;

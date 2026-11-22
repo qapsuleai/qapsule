@@ -2,7 +2,7 @@
 //! scale, gaps, points beyond the last bar, emphasis, multi-panel layout, themes and
 //! determinism.
 
-mod common;
+mod support;
 
 use qp_grammar::scale::{slot_x, value_at, value_y};
 use qp_grammar::{compile, CompileOptions, MemProvider};
@@ -37,8 +37,8 @@ fn prov() -> Provenance {
 
 /// The sample provider plus a fact (RSI crossing 70) and a finding on it.
 fn with_facts() -> (MemProvider, u64) {
-    let bars = common::sample_bars();
-    let rsi = common::study("rsi", &[("period", 14.0)], &bars)["rsi"].clone();
+    let bars = support::sample_bars();
+    let rsi = support::study("rsi", &[("period", 14.0)], &bars)["rsi"].clone();
     let bar = (1..rsi.len())
         .find(|i| matches!((rsi[i - 1], rsi[*i]), (Some(a), Some(b)) if a < 70.0 && b >= 70.0))
         .unwrap_or(150) as u64;
@@ -63,7 +63,7 @@ fn with_facts() -> (MemProvider, u64) {
         provenance: prov(),
     };
     (
-        common::provider().with_fact(fact).with_finding(finding),
+        support::provider().with_fact(fact).with_finding(finding),
         bar,
     )
 }
@@ -85,8 +85,8 @@ const V1: &str = r#"{"id":"three","x":{"kind":"time"},
 
 #[test]
 fn v1_three_panels() {
-    let p = common::provider();
-    let s = compile(&common::view(V1), &p, &opts()).unwrap();
+    let p = support::provider();
+    let s = compile(&support::view(V1), &p, &opts()).unwrap();
     assert_eq!(s.panels.len(), 3);
     // Weights 3:1:1 over 542 px minus two 8 px gaps.
     let h: Vec<i32> = s
@@ -180,8 +180,8 @@ const V2: &str = r#"{"id":"boll","x":{"kind":"time"},
 
 #[test]
 fn v2_bollinger_band() {
-    let p = common::provider();
-    let s = compile(&common::view(V2), &p, &opts()).unwrap();
+    let p = support::provider();
+    let s = compile(&support::view(V2), &p, &opts()).unwrap();
     let band = layer(&s, "band");
     assert_eq!(band.fields, vec!["upper", "lower"]);
     assert_eq!(band.skipped, 19);
@@ -227,9 +227,9 @@ fn v2_bollinger_band() {
 }
 
 fn fan_provider() -> MemProvider {
-    let bars = common::sample_bars();
+    let bars = support::sample_bars();
     let last = bars.last().unwrap().clone();
-    let mut p = common::provider();
+    let mut p = support::provider();
     for (id, z) in [
         ("q05", -1.6),
         ("q20", -0.8),
@@ -263,7 +263,7 @@ const V3: &str = r#"{"id":"fan","x":{"kind":"time"},
 #[test]
 fn v3_fan_beyond_last_bar() {
     let p = fan_provider();
-    let s = compile(&common::view(V3), &p, &opts()).unwrap();
+    let s = compile(&support::view(V3), &p, &opts()).unwrap();
     assert_eq!(s.bars, 200);
     assert_eq!(s.x.from_bar, 0);
     assert_eq!(s.x.to_bar, 219, "range extends over the 20 future slots");
@@ -272,7 +272,7 @@ fn v3_fan_beyond_last_bar() {
     assert_eq!(b90.items.len(), 21);
     assert_eq!(b90.items[0].bar, Some(199));
     assert_eq!(b90.items[20].bar, Some(219));
-    let last_t = common::sample_bars().last().unwrap().t;
+    let last_t = support::sample_bars().last().unwrap().t;
     assert_eq!(b90.items[20].t, Some(last_t + 20 * 86_400_000));
     // Increasing opacity layers.
     let alpha = |id: &str| match &layer(&s, id).prims[0] {
@@ -286,16 +286,16 @@ fn v3_fan_beyond_last_bar() {
     // With a transient viewport the range is not extended.
     let mut o = opts();
     o.range = Some((100, 199));
-    let s2 = compile(&common::view(V3), &p, &o).unwrap();
+    let s2 = compile(&support::view(V3), &p, &o).unwrap();
     assert_eq!((s2.x.from_bar, s2.x.to_bar), (100, 199));
     assert_eq!(layer(&s2, "b90").items.len(), 1);
 }
 
 #[test]
 fn v4_log_scale() {
-    let bars = common::growth_bars(200);
-    let p = common::provider_with(bars.clone(), "GROWTH");
-    let v = common::view(
+    let bars = support::growth_bars(200);
+    let p = support::provider_with(bars.clone(), "GROWTH");
+    let v = support::view(
         r#"{"id":"logv","x":{"kind":"time"},"panels":[{"id":0,"y":{"kind":"log"}}],
             "layers":[{"id":"candles","mark":"candle","series":"px","panel":0}]}"#,
     );
@@ -328,11 +328,11 @@ fn v4_log_scale() {
 
 #[test]
 fn log_scale_skips_non_positive_values() {
-    let bars = common::sample_bars();
+    let bars = support::sample_bars();
     let vals: Vec<Option<f64>> = (0..200).map(|i| Some(f64::from(i) - 50.0)).collect();
     let p =
-        common::provider_with(bars, "S").with_values("lin", "px", vec![("v", vals)], "v", &["v"]);
-    let v = common::view(
+        support::provider_with(bars, "S").with_values("lin", "px", vec![("v", vals)], "v", &["v"]);
+    let v = support::view(
         r#"{"id":"l","x":{"kind":"time"},"panels":[{"id":0,"y":{"kind":"log"}}],
             "layers":[{"id":"ln","mark":"line","series":"lin","panel":0}]}"#,
     );
@@ -358,8 +358,8 @@ const V5: &str = r#"{"id":"cond","x":{"kind":"time"},
 
 #[test]
 fn v5_conditional_and_stepped_colour() {
-    let p = common::provider();
-    let s = compile(&common::view(V5), &p, &opts()).unwrap();
+    let p = support::provider();
+    let s = compile(&support::view(V5), &p, &opts()).unwrap();
     let fill = layer(&s, "fill");
     let up = [38, 166, 154, 77];
     let down = [239, 83, 80, 77];
@@ -421,14 +421,15 @@ fn v5_conditional_and_stepped_colour() {
 
 #[test]
 fn line_breaks_at_gaps() {
-    let bars = common::sample_bars();
+    let bars = support::sample_bars();
     let mut vals: Vec<Option<f64>> = bars.iter().map(|b| Some(b.c)).collect();
     for v in &mut vals[80..90] {
         *v = None;
     }
     vals[150] = None;
-    let p = common::provider_with(bars, "S").with_values("g", "px", vec![("v", vals)], "v", &["v"]);
-    let v = common::view(
+    let p =
+        support::provider_with(bars, "S").with_values("g", "px", vec![("v", vals)], "v", &["v"]);
+    let v = support::view(
         r#"{"id":"g","x":{"kind":"time"},"panels":[{"id":0,"y":{"kind":"linear"}}],
             "layers":[{"id":"ln","mark":"line","series":"g","panel":0}]}"#,
     );
@@ -451,7 +452,7 @@ fn line_breaks_at_gaps() {
 #[test]
 fn point_text_and_vertical_rule_from_facts() {
     let (p, bar) = with_facts();
-    let v = common::view(
+    let v = support::view(
         r#"{"id":"f","x":{"kind":"time"},
           "panels":[{"id":0,"y":{"kind":"linear"}},{"id":1,"y":{"kind":"linear","domain":[0,100]}}],
           "layers":[{"id":"candles","mark":"candle","series":"px","panel":0},
@@ -506,8 +507,8 @@ fn point_text_and_vertical_rule_from_facts() {
 
 #[test]
 fn multi_output_line_and_palette() {
-    let p = common::provider();
-    let v = common::view(
+    let p = support::provider();
+    let v = support::view(
         r#"{"id":"m","x":{"kind":"time"},
           "panels":[{"id":0,"y":{"kind":"linear"}},{"id":2,"name":"macd","y":{"kind":"linear"}}],
           "layers":[{"id":"candles","mark":"candle","series":"px","panel":0},
@@ -566,7 +567,7 @@ fn multi_output_line_and_palette() {
 #[test]
 fn emphasis_highlight_focus_dim() {
     let (p, bar) = with_facts();
-    let mut v = common::view(V1);
+    let mut v = support::view(V1);
     v.emphasis = vec![Emphasis {
         target: Target {
             item: Some("fnd-overbought".into()),
@@ -574,7 +575,7 @@ fn emphasis_highlight_focus_dim() {
         },
         kind: EmphasisKind::Highlight,
     }];
-    let base = compile(&common::view(V1), &p, &opts()).unwrap();
+    let base = compile(&support::view(V1), &p, &opts()).unwrap();
     let s = compile(&v, &p, &opts()).unwrap();
     assert_eq!(s.emphasis.len(), 1);
     assert_eq!(s.emphasis[0].from_bar, Some(bar));
@@ -599,12 +600,12 @@ fn emphasis_highlight_focus_dim() {
         },
         kind: EmphasisKind::Highlight,
     }];
-    let s = compile(&common::view(V1), &p, &o).unwrap();
+    let s = compile(&support::view(V1), &p, &o).unwrap();
     assert!(matches!(layer(&s, "rsi").prims[0], Prim::Polyline { width, .. } if width == 2.5));
     assert_eq!(s.under.len(), base.under.len());
     // Focus on a layer: veils over all panels, then the layer again on top.
     o.emphasis[0].kind = EmphasisKind::Focus;
-    let s = compile(&common::view(V1), &p, &o).unwrap();
+    let s = compile(&support::view(V1), &p, &o).unwrap();
     let extra = &s.over[base.over.len()..];
     assert_eq!(extra.len(), 3 + layer(&s, "rsi").prims.len());
     assert!(matches!(
@@ -625,7 +626,7 @@ fn emphasis_highlight_focus_dim() {
         },
         kind: EmphasisKind::Dim,
     }];
-    let s = compile(&common::view(V1), &p, &o).unwrap();
+    let s = compile(&support::view(V1), &p, &o).unwrap();
     let extra = &s.over[base.over.len()..];
     assert_eq!(extra.len(), 1);
     let Prim::Rect { x, w, y, .. } = extra[0] else {
@@ -637,14 +638,14 @@ fn emphasis_highlight_focus_dim() {
     // Focus on a range: veils left of it in every panel (right edge is the plot end).
     o.emphasis[0].kind = EmphasisKind::Focus;
     o.emphasis[0].target.panel = None;
-    let s = compile(&common::view(V1), &p, &o).unwrap();
+    let s = compile(&support::view(V1), &p, &o).unwrap();
     assert_eq!(s.over.len() - base.over.len(), 6);
 }
 
 #[test]
 fn light_theme_and_override() {
-    let p = common::provider();
-    let mut v = common::view(V2);
+    let p = support::provider();
+    let mut v = support::view(V2);
     v.theme = Some("light".into());
     let s = compile(&v, &p, &opts()).unwrap();
     assert_eq!(s.background, [255, 255, 255, 255]);
@@ -656,9 +657,9 @@ fn light_theme_and_override() {
 
 #[test]
 fn persistent_range_and_viewport() {
-    let p = common::provider();
-    let bars = common::sample_bars();
-    let mut v = common::view(V2);
+    let p = support::provider();
+    let bars = support::sample_bars();
+    let mut v = support::view(V2);
     v.x.domain = Some([bars[50].t as f64, bars[99].t as f64]);
     let s = compile(&v, &p, &opts()).unwrap();
     assert_eq!((s.x.from_bar, s.x.to_bar), (50, 99));
@@ -679,13 +680,13 @@ fn persistent_range_and_viewport() {
 fn compile_is_deterministic() {
     let (p, _) = with_facts();
     for json in [V1, V2, V5] {
-        let v = common::view(json);
+        let v = support::view(json);
         let a = serde_json::to_string(&compile(&v, &p, &opts()).unwrap()).unwrap();
         let b = serde_json::to_string(&compile(&v, &p, &opts()).unwrap()).unwrap();
         assert_eq!(a, b);
     }
     let p = fan_provider();
-    let v = common::view(V3);
+    let v = support::view(V3);
     let a = serde_json::to_vec(&compile(&v, &p, &opts()).unwrap()).unwrap();
     let b = serde_json::to_vec(&compile(&v, &p, &opts()).unwrap()).unwrap();
     assert_eq!(a, b);
@@ -697,8 +698,8 @@ fn compile_is_deterministic() {
 
 #[test]
 fn deprecated_y_list_is_read_as_panels() {
-    let p = common::provider();
-    let v = common::view(
+    let p = support::provider();
+    let v = support::view(
         r#"{"id":"old","x":{"kind":"time"},"y":[{"kind":"linear"},{"kind":"linear"}],
             "layers":[{"mark":"candle","series":"px","panel":0},
                       {"mark":"line","series":"rsi14","panel":1}]}"#,
@@ -732,9 +733,9 @@ fn texts(s: &SceneDesc) -> Vec<(String, i32, i32)> {
 /// legends in a panel are shown once; a value label under a last-value tag is left out.
 #[test]
 fn title_row_close_legends_and_tag_labels() {
-    let p = common::provider();
+    let p = support::provider();
     // An RSI-only view with a long title at phone width: no close, title cut, no legend.
-    let v = common::view(
+    let v = support::view(
         r#"{"id":"cap","title":"A very long capsule headline that cannot fit a phone frame at all",
           "x":{"kind":"time"},"panels":[{"id":0,"y":{"kind":"linear"}}],
           "layers":[{"id":"rsi","mark":"line","series":"rsi14","panel":0}]}"#,
@@ -753,7 +754,7 @@ fn title_row_close_legends_and_tag_labels() {
         "legend dropped: {t:?}"
     );
     // Two layers on px in panel 0: close shown, one legend for the identical texts.
-    let v = common::view(
+    let v = support::view(
         r#"{"id":"dup","x":{"kind":"time"},"panels":[{"id":0,"y":{"kind":"linear"}}],
           "layers":[{"id":"a","mark":"line","series":"px","panel":0,"encoding":{"y":"c"}},
                     {"id":"b","mark":"line","series":"px","panel":0,"encoding":{"y":"c"}}]}"#,
@@ -767,7 +768,7 @@ fn title_row_close_legends_and_tag_labels() {
         "{t:?}"
     );
     // RSI 55.10 tag in a 0..100 panel: the 50.00 label under it is left out.
-    let s = compile(&common::view(V1), &p, &opts()).unwrap();
+    let s = compile(&support::view(V1), &p, &opts()).unwrap();
     let rsi = &s.panels[1];
     let labels: Vec<String> = texts(&s)
         .into_iter()

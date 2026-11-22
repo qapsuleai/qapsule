@@ -1,6 +1,6 @@
 //! Depth rules (`docs/GRAMMAR.md` §13) and the RD1 transcript 16 shape of the chart view.
 
-mod common;
+mod support;
 
 use qp_grammar::depth::{capsule_view, chart_view, effective_depth, present, sentence};
 use qp_grammar::{compile, CompileOptions, MemProvider};
@@ -22,7 +22,7 @@ fn prov() -> Provenance {
 }
 
 fn doc(bar: u64, headline: bool) -> MemProvider {
-    let bars = common::sample_bars();
+    let bars = support::sample_bars();
     let fact = Fact {
         id: "fact-rsi-cross70".into(),
         kind: "cross_above".into(),
@@ -43,7 +43,7 @@ fn doc(bar: u64, headline: bool) -> MemProvider {
         invalidation: qp_schema::Condition::Text { text: "-".into() },
         provenance: prov(),
     };
-    let p = common::provider().with_fact(fact).with_finding(finding);
+    let p = support::provider().with_fact(fact).with_finding(finding);
     if headline {
         p.with_headline("fnd-overbought", "Overbought: RSI above 70")
     } else {
@@ -89,7 +89,7 @@ fn chart_view_keeps_the_transcript_16_shape() {
     });
     assert!(subset(&want, &got), "{got}");
     // x.domain = [t(bar - 30), t(last)].
-    let bars = common::sample_bars();
+    let bars = support::sample_bars();
     assert_eq!(v.x.domain, Some([bars[140].t as f64, bars[199].t as f64]));
     assert_eq!(
         v.layers[2].origin["/encoding/y"],
@@ -123,7 +123,7 @@ fn capsule_view_rule() {
     assert_eq!(marks, vec![Mark::Line, Mark::Rule, Mark::Point]);
     assert_eq!(v.layers[2].fact.as_deref(), Some("fact-rsi-cross70"));
     assert_eq!(v.title.as_deref(), Some("Overbought: RSI above 70"));
-    let bars = common::sample_bars();
+    let bars = support::sample_bars();
     assert_eq!(v.x.domain, Some([bars[140].t as f64, bars[199].t as f64]));
     let s = compile(&v, &p, &CompileOptions::new(400, 200)).unwrap();
     assert_eq!(s.x.to_bar - s.x.from_bar + 1, 60);
@@ -208,7 +208,7 @@ fn present_by_profile() {
 
 #[test]
 fn chart_view_for_a_fact_on_bars() {
-    let bars = common::sample_bars();
+    let bars = support::sample_bars();
     let fact = Fact {
         id: "f-brk".into(),
         kind: "breakout".into(),
@@ -229,7 +229,7 @@ fn chart_view_for_a_fact_on_bars() {
         invalidation: qp_schema::Condition::Text { text: "-".into() },
         provenance: prov(),
     };
-    let p = common::provider().with_fact(fact).with_finding(finding);
+    let p = support::provider().with_fact(fact).with_finding(finding);
     let v = chart_view("fnd-brk", &p, "v").unwrap();
     assert_eq!(v.layers.len(), 1);
     assert_eq!(v.panels.len(), 1);

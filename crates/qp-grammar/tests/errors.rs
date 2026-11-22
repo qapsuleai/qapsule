@@ -1,12 +1,12 @@
 //! Unresolvable views give errors that name the layer, the place and the reason.
 
-mod common;
+mod support;
 
 use qp_grammar::{compile, CompileOptions, ErrorKind, GrammarError};
 
 fn err(json: &str) -> GrammarError {
-    let p = common::provider();
-    compile(&common::view(json), &p, &CompileOptions::new(1200, 600)).unwrap_err()
+    let p = support::provider();
+    compile(&support::view(json), &p, &CompileOptions::new(1200, 600)).unwrap_err()
 }
 
 fn one(layer: &str) -> String {
@@ -105,13 +105,13 @@ fn origin_must_resolve() {
 
 #[test]
 fn origin_without_written_constant_supplies_it() {
-    let p = common::provider();
-    let v = common::view(&one(
+    let p = support::provider();
+    let v = support::view(&one(
         r#"{"id":"r","mark":"rule","panel":0,"origin":{"/encoding/y":{"kind":"series","series":"px","field":"c","at":"last"}}}"#,
     ));
     let s = compile(&v, &p, &CompileOptions::new(1200, 600)).unwrap();
     let r = &s.panels[0].layers[1];
-    let last = common::sample_bars().last().unwrap().c;
+    let last = support::sample_bars().last().unwrap().c;
     assert_eq!(r.constants["/encoding/y"].value, last);
     assert_eq!(r.items[0].values["y"], last);
 }
@@ -180,8 +180,8 @@ fn view_level_errors() {
             "layers":[{"id":"c","mark":"candle","series":"px","panel":0}]}"#,
     );
     assert_eq!(e.path, "/theme");
-    let p = common::provider();
-    let v = common::view(&one(
+    let p = support::provider();
+    let v = support::view(&one(
         r#"{"id":"x","mark":"line","series":"sma20","panel":0}"#,
     ));
     assert!(compile(&v, &p, &CompileOptions::new(100, 600)).is_err());
@@ -189,11 +189,11 @@ fn view_level_errors() {
 
 #[test]
 fn emphasis_target_must_exist() {
-    let p = common::provider();
+    let p = support::provider();
     let mut o = CompileOptions::new(1200, 600);
     o.emphasis =
         vec![serde_json::from_str(r#"{"target":{"layer":"nope"},"kind":"focus"}"#).unwrap()];
-    let v = common::view(&one(
+    let v = support::view(&one(
         r#"{"id":"x","mark":"line","series":"sma20","panel":0}"#,
     ));
     let e = compile(&v, &p, &o).unwrap_err();

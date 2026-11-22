@@ -15,25 +15,22 @@
 #[rustfmt::skip]
 pub mod advances;
 pub mod compile;
-pub mod depth;
 pub mod detmath;
-mod draw;
 pub mod error;
 pub mod faces;
 pub mod feeds;
-mod frame;
-pub mod gesture;
 pub mod glyph;
-mod layer;
 pub mod look;
-pub mod motion;
 pub mod open;
+mod present;
 pub mod provider;
-pub mod scale;
 pub mod stories;
-pub mod terms;
 pub mod theme;
 pub mod transitions;
+
+pub(crate) use compile::{draw, frame, layer};
+pub use compile::{scale, terms};
+pub use present::{depth, gesture, motion};
 
 pub use compile::{compile, CompileOptions};
 pub use error::{ErrorKind, GrammarError};

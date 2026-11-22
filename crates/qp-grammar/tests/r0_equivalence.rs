@@ -2,8 +2,8 @@
 //! grammar view equals, primitive for primitive and value for value, what the R0 layout
 //! (`qp_render::scene::build_scene` at 761cca9, frozen in `r0_oracle/`) produces.
 
-mod common;
 mod r0_oracle;
+mod support;
 
 use qp_grammar::{compile, CompileOptions};
 use qp_schema::scene::{Align, Prim};
@@ -94,11 +94,11 @@ const R0_VIEW: &str = r#"{"id":"r0","x":{"kind":"time"},
 
 #[test]
 fn r0_scene_is_reproduced_exactly() {
-    let series = common::sample_series();
+    let series = support::sample_series();
     let expected = r0::build_scene(&series, 1200, 600).expect("oracle");
-    let p = common::provider();
+    let p = support::provider();
     let scene =
-        compile(&common::view(R0_VIEW), &p, &CompileOptions::new(1200, 600)).expect("compile");
+        compile(&support::view(R0_VIEW), &p, &CompileOptions::new(1200, 600)).expect("compile");
     assert_eq!(scene.width, expected.width);
     assert_eq!(scene.height, expected.height);
     assert_eq!(scene.background, expected.background);

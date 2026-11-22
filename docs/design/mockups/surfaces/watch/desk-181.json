@@ -1,0 +1,224 @@
+{
+ "covers": [
+  "add_study",
+  "put_view",
+  "set_view_range"
+ ],
+ "description": "RD2 M2 watch mockups: the `desk` design fixture (fixtures/design/desk.json) with its view range set to bars 120–181, so the open bar sits where a watch story is. Generated from desk.json; images rendered from it are not committed.",
+ "final": {
+  "document": {
+   "views": [
+    {
+     "id": "desk"
+    }
+   ]
+  }
+ },
+ "init": {
+  "clock": 1760000000000,
+  "document": "fixtures/views/docs/base.json",
+  "epoch": 0,
+  "principals": [
+   {
+    "author": {
+     "kind": "human",
+     "name": "arkin"
+    },
+    "id": "arkin",
+    "role": "owner"
+   }
+  ]
+ },
+ "name": "desk-181",
+ "steps": [
+  {
+   "expect": [
+    {
+     "conn": "a",
+     "msg": {
+      "principal": "arkin",
+      "role": "owner",
+      "type": "welcome"
+     }
+    }
+   ],
+   "send": {
+    "conn": "a",
+    "msg": {
+     "principal": "arkin",
+     "protocol": "qp/0",
+     "surface": {
+      "kind": "desktop"
+     },
+     "type": "hello"
+    }
+   }
+  },
+  {
+   "expect": [
+    {
+     "conn": "a",
+     "msg": {
+      "id": "c1",
+      "status": "applied",
+      "type": "ack"
+     }
+    }
+   ],
+   "send": {
+    "conn": "a",
+    "msg": {
+     "id": "c1",
+     "ops": [
+      {
+       "id": "sma20",
+       "inputs": [
+        "px"
+       ],
+       "op": "add_study",
+       "params": {
+        "period": 20
+       },
+       "study": "sma"
+      },
+      {
+       "id": "ema50",
+       "inputs": [
+        "px"
+       ],
+       "op": "add_study",
+       "params": {
+        "period": 50
+       },
+       "study": "ema"
+      },
+      {
+       "id": "rsi14",
+       "inputs": [
+        "px"
+       ],
+       "op": "add_study",
+       "params": {
+        "period": 14
+       },
+       "study": "rsi"
+      },
+      {
+       "op": "put_view",
+       "view": {
+        "id": "desk",
+        "layers": [
+         {
+          "id": "candles",
+          "mark": "candle",
+          "panel": 0,
+          "series": "px"
+         },
+         {
+          "id": "sma20",
+          "mark": "line",
+          "panel": 0,
+          "series": "sma20"
+         },
+         {
+          "id": "ema50",
+          "mark": "line",
+          "panel": 0,
+          "series": "ema50"
+         },
+         {
+          "encoding": {
+           "color": {
+            "else": "down",
+            "then": "up",
+            "when": {
+             "field": "c",
+             "op": "ge",
+             "than": {
+              "field": "o"
+             }
+            }
+           },
+           "y": "v"
+          },
+          "id": "volume",
+          "mark": "bar",
+          "panel": 1,
+          "series": "px"
+         },
+         {
+          "id": "rsi",
+          "mark": "line",
+          "panel": 2,
+          "series": "rsi14"
+         }
+        ],
+        "panels": [
+         {
+          "id": 0,
+          "name": "price",
+          "weight": 3,
+          "y": {
+           "kind": "linear"
+          }
+         },
+         {
+          "id": 1,
+          "name": "volume",
+          "weight": 1,
+          "y": {
+           "kind": "linear"
+          }
+         },
+         {
+          "id": 2,
+          "name": "rsi",
+          "weight": 1,
+          "y": {
+           "domain": [
+            0,
+            100
+           ],
+           "kind": "linear"
+          }
+         }
+        ],
+        "x": {
+         "kind": "time"
+        }
+       }
+      }
+     ],
+     "type": "command"
+    }
+   }
+  },
+  {
+   "send": {
+    "conn": "a",
+    "msg": {
+     "type": "command",
+     "id": "r1",
+     "ops": [
+      {
+       "op": "set_view_range",
+       "view": "desk",
+       "from_bar": 120,
+       "to_bar": 181
+      }
+     ]
+    }
+   },
+   "expect": [
+    {
+     "conn": "a",
+     "msg": {
+      "type": "ack",
+      "id": "r1",
+      "status": "applied"
+     }
+    }
+   ]
+  }
+ ]
+}

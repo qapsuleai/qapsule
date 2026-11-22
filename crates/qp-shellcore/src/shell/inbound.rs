@@ -545,3 +545,66 @@ impl ShellCore {
         }
     }
 }
+
+/// (R5/M18, K52 measurement) `n` synthetic story rows over `bars` bars of `series`.
+fn synthetic_rows(n: u64, bars: u64, series: &str) -> Vec<qp_schema::protocol::StoryRow> {
+    use qp_schema::capsule::{Direction, MeaningKind, Stage, Validity};
+    use qp_schema::protocol::{StoryFace, StoryOutcome, StoryRow};
+    let outcomes = [
+        Stage::Realized,
+        Stage::Invalidated,
+        Stage::Expired,
+        Stage::Realized,
+        Stage::Retracted,
+    ];
+    let t = |b: u64| i64::try_from(b).unwrap_or(0);
+    (0..n)
+        .map(|i| {
+            let born = (i * (bars - 5) / n.max(1)) % (bars - 5);
+            let len = 3 + (i * 7) % 25;
+            let open = born + len >= bars - 1 || i + 3 >= n;
+            let stage = if open {
+                Stage::Born
+            } else {
+                outcomes[usize::try_from(i % 5).unwrap_or(0)]
+            };
+            let last = if open { born + len / 2 } else { born + len };
+            StoryRow {
+                id: format!("bench.{i}"),
+                finding: format!("bench.f{i}"),
+                series: series.to_owned(),
+                kind: MeaningKind::Breakout,
+                direction: [Direction::Up, Direction::Down, Direction::Neutral]
+                    [usize::try_from(i % 3).unwrap_or(0)],
+                tier: 2,
+                born_bar: born,
+                born_t: t(born),
+                last_bar: last,
+                last_t: t(last),
+                closed_bar: (!open).then_some(last),
+                closed_t: (!open).then(|| t(last)),
+                stage,
+                outcome: StoryOutcome::of(stage),
+                validity: if open {
+                    Validity::Valid
+                } else {
+                    Validity::Closed
+                },
+                in_feed: true,
+                hidden: None,
+                coin_flip: i % 7 == 0,
+                face: StoryFace {
+                    event: "kırılım".to_owned(),
+                    direction_word: String::new(),
+                    when: String::new(),
+                    moved: String::new(),
+                    validity_phrase: if open { "geçerli" } else { "kapandı" }.to_owned(),
+                    ledger_short: String::new(),
+                    few_cases: false,
+                    ledger_n: None,
+                },
+                redacted: false,
+            }
+        })
+        .collect()
+}

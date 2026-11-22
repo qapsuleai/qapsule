@@ -44,7 +44,7 @@ mod metrics;
 mod scene;
 mod start;
 
-use feed::{depth_name, lang_name, synthetic_rows};
+use feed::{depth_name, lang_name};
 pub use feed::{display_time, feed_rows, local_stamp};
 use metrics::{round3, wasm_memory_bytes, Metrics, Samples, FRAME_GAP_MS};
 pub use metrics::{

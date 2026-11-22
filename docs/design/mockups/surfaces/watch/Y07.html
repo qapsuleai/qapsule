@@ -1,0 +1,188 @@
+<!doctype html>
+<!-- RD2 M2/M3 (watch) Y07 — İzleme görevleri listesi. Kademe 1: sekiz durum (şartname sırası) + bağlam içinde ana durum; iki profil.
+     Açmak: ?look=tavek (masaüstü) ya da ?look=tavek-tel (telefon) &theme=dark|light &vars=<önek>
+     (README). Değerler yalnız var(--…); satır içi px yalnız çerçeve geometrisi (kesit boyu, yüzen
+     kartın konumu, bindirmenin grafik kesirleri); metin sentetik; grafik çekirdekten (`qp render`). -->
+<html lang="tr">
+<head>
+  <meta charset="utf-8">
+  <title>Y07 İzleme görevleri listesi</title>
+  <link rel="stylesheet" href="../../_base/base.css">
+  <link rel="stylesheet" href="../../_base/phone.css">
+  <link rel="stylesheet" href="../../tavek/tavek.css">
+  <link rel="stylesheet" href="watch.css">
+  <script src="../../_base/frame.js"></script>
+</head>
+<body class="sheet">
+<header class="sheet-h">
+  <h1><span class="id">Y07</span>İzleme görevleri listesi</h1>
+  <p>Kullanıcının adına izlenen her şey: kaynağı, koşul cümlesi, durumu, sağlığı. Satır iki satırlıktır — (1) sembol + koşul, (2) durum + sağlık + “Grafikte”; sol kenar kaynağın köken çizgisi.</p>
+  <div class="facts"><span class="chip">Kademe 1</span><span class="chip">K72</span><span class="chip">K73</span><span class="chip">K78</span><span class="chip">8 / 8 durum</span><span class="chip">watch.md · Y07</span></div>
+</header>
+<h3 class="block-h">Akış</h3>
+<ol class="flow"><li><span>Satıra gel</span><span class="k">grafikte seviye vurgulanır</span></li><li><span>Tıkla</span><span class="k">ayrıntı (Y08) sağ panelde</span></li><li><span>“Grafikte”</span><span class="k">hücre o sembol ve aralığa gider</span></li><li><span>Durum değişir</span><span class="k">satır bir kez vurgulanır, üste çıkar</span></li></ol>
+<section class="profile desk" aria-label="Masaüstü"><h2>Masaüstü <span class="note">tavek · sol sütunun alt yarısı, 256 px</span></h2>
+<h3 class="block-h">Ana durum, bağlamında: satırın üstüne gelindi → grafikte seviye tam güçte, çip görünür; durumu yeni değişen satır bir kez vurgulu</h3>
+<div class="desk-frame ctx">
+  <aside class="rule-r"><div class="pane-h"><span>İzleme görevleri</span><span class="count ">7 etkin</span><span class="grow"></span><span class="icon-btn" aria-label="Süzgeç">⌕</span><span class="icon-btn" aria-label="İzleme kur">+</span></div><ul class="tasks"><li class="grp">Karar bekleyen<span class="count">2</span></li>
+<li class="task2 edge-agent "><div class="l1"><span class="sym">SYN20</span><span class="cond">125,00 üstünde kapanış</span><span class="src">Ajan</span></div><div class="l2"><span class="ws r-agent"><i>○</i>Önerildi · onay bekliyor</span></div></li>
+<li class="task2 edge-human "><div class="l1"><span class="sym">KRM12</span><span class="cond">48,90 trend çizgisi</span><span class="src">çizim</span></div><div class="l2"><span class="ws r-agent"><i>?</i>Soru bekliyor · izleme kurulmadı</span></div></li>
+<li class="grp">Durumu değişen<span class="count">2</span></li>
+<li class="task2 edge-human changed hover"><div class="l1"><span class="sym">SYN20</span><span class="cond">120,00 üstünde kapanış</span><span class="src">çizim</span></div><div class="l2"><span class="ws r-fg"><i>◐</i>Kırıldı</span><span class="pips" aria-label="tutunma 2/3"><i class="on"></i><i class="on"></i><i></i></span><span>2/3 · <span class="on-chart">Grafikte</span></span><span class="end r-muted"><span class="health ok" aria-label="izleniyor"></span>14:35</span></div></li>
+<li class="task2 edge-human "><div class="l1"><span class="sym">DNZ30</span><span class="cond">207,40 desteği altında kapanış</span><span class="src">çizim</span></div><div class="l2"><span class="ws r-invalid"><i>◇</i>Geri döndü</span><span>· 2. barda</span></div></li>
+<li class="grp">İzlenen<span class="count">3</span></li>
+<li class="task2 edge-human "><div class="l1"><span class="sym">ATL07</span><span class="cond">16,80 altında kapanış</span><span class="src">varsayılan</span></div><div class="l2"><span class="ws r-fg"><i>○</i>Kuruldu</span><span>· koruyucu</span><span class="end r-muted"><span class="health ok" aria-label="izleniyor"></span>14:35</span></div></li>
+<li class="task2 edge-engine "><div class="l1"><span class="sym">SYN20</span><span class="cond">Kapsül · kırılım tutunması</span><span class="src">Motor</span></div><div class="l2"><span class="ws r-fg"><i>○</i>Kuruldu</span><span class="end r-muted"><span class="health unknown" aria-label="bilinmiyor"></span>Bilinmiyor</span></div></li>
+<li class="task2 edge-human "><div class="l1"><span class="sym">EGE09</span><span class="cond">RSI 14, 70 üstü</span><span class="src">gösterge</span></div><div class="l2"><span class="ws r-muted"><i>‖</i>Duraklatıldı</span></div></li>
+</ul><div class="statusline"><span class="it"><span class="health ok"></span>7 izleme · son kontrol 14:35</span></div></aside>
+  <div class="cell" style="border-left: var(--m-rule) solid var(--m-line)">
+    <div class="cell-bar"><span class="instr">SYN20</span><span class="seg"><span class="chip">4sa</span><span class="chip on">Günlük</span></span><span class="grow"></span><span class="layers"><span class="stroke">İnsan</span><span class="stroke agent">Ajan</span><span class="stroke engine">Motor</span></span></div>
+    <div class="chart-slot"><img data-chart="y07-ctx" data-tx="desk-182" alt="SYN20 günlük grafik">
+      <div class="overlay"><svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"><line class="watch" x1="2" y1="16.08" x2="88.57" y2="16.08"></line><line class="watch-hot" x1="85.09" y1="16.08" x2="88.57" y2="16.08"></line></svg><span class="notch" style="--x: 85.09%; --y: 16.08%"></span><div class="ax-chip human" style="--x: 2%; --y: 16.08%"><span>İzleme</span><span class="ws"><i>◐</i>Kırıldı</span><span class="pips" aria-label="tutunma 2/3"><i class="on"></i><i class="on"></i><i></i></span><span class="who">tutunma 2/3 bar · günlük</span></div><div class="ax-tag human" style="--y: 16.08%">120,00</div><svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"><line class="agent preview" x1="2" y1="5.65" x2="88.57" y2="5.65"></line></svg><div class="ax-tag agent" style="--y: 5.65%">125,00</div></div></div>
+  </div>
+</div>
+<h3 class="block-h">Durumlar</h3>
+<div class="states">
+<figure class="state "><figcaption><span class="n">1</span><b>Boş</b><code>O-boş</code></figcaption>
+<div class="surface w-side"><div class="pane-h"><span>İzleme görevleri</span><span class="count ">0</span><span class="grow"></span><span class="icon-btn" aria-label="Süzgeç">⌕</span><span class="icon-btn" aria-label="İzleme kur">+</span></div><div class="empty"><span>Henüz izleme yok. Bir seviye çiz, notunu yaz; ajan kursun.</span><span class="btn primary">Grafikte seviye çiz</span></div></div>
+</figure>
+<figure class="state "><figcaption><span class="n">2</span><b>Yaşam döngüsünün her durumu</b><code>İ-*</code></figcaption>
+<div class="surface w-side"><div class="pane-h"><span>İzleme görevleri</span><span class="count ">15</span><span class="grow"></span><span class="icon-btn" aria-label="Süzgeç">⌕</span><span class="icon-btn" aria-label="İzleme kur">+</span></div><ul class="tasks"><li class="task2 edge-agent "><div class="l1"><span class="sym">SYN20</span><span class="cond">125,00 üstünde kapanış</span></div><div class="l2"><span class="ws r-agent"><i>○</i>Önerildi · onay bekliyor</span></div></li>
+<li class="task2 edge-human "><div class="l1"><span class="sym">KRM12</span><span class="cond">48,90 trend çizgisi</span></div><div class="l2"><span class="ws r-agent"><i>?</i>Soru bekliyor · izleme kurulmadı</span></div></li>
+<li class="task2 edge-human "><div class="l1"><span class="sym">ATL07</span><span class="cond">16,80 altında kapanış</span></div><div class="l2"><span class="ws r-fg"><i>○</i>Kuruldu</span><span>· izleniyor, 14:35</span></div></li>
+<li class="task2 edge-human "><div class="l1"><span class="sym">SYN20</span><span class="cond">120,00 üstünde kapanış</span></div><div class="l2"><span class="ws r-fg"><i>◐</i>Kırıldı</span><span class="pips" aria-label="tutunma 2/3"><i class="on"></i><i class="on"></i><i></i></span><span>2/3 bar · günlük</span></div></li>
+<li class="task2 edge-human "><div class="l1"><span class="sym">BRS15</span><span class="cond">71,00 üstünde kapanış</span></div><div class="l2"><span class="ws r-valid"><i>●</i>Tutundu</span><span>· 3/3 bar</span></div></li>
+<li class="task2 edge-human "><div class="l1"><span class="sym">DNZ30</span><span class="cond">207,40 desteği</span></div><div class="l2"><span class="ws r-invalid"><i>◇</i>Geri döndü</span><span>· 2. barda</span></div></li>
+<li class="task2 edge-human "><div class="l1"><span class="sym">MRV40</span><span class="cond">9,50 dokunma</span></div><div class="l2"><span class="ws r-valid"><i>●</i>Eşleşti</span><span>· 14:35 · 9,50 · haber verildi</span></div></li>
+<li class="task2 edge-human "><div class="l1"><span class="sym">EGE09</span><span class="cond">35,00 yukarı kesişim</span></div><div class="l2"><span class="ws r-fg"><i>↻</i>Yeniden kuruldu</span><span>· sonraki kesişim</span></div></li>
+<li class="task2 edge-human "><div class="l1"><span class="sym">EGE09</span><span class="cond">RSI 14, 70 üstü</span></div><div class="l2"><span class="ws r-muted"><i>‖</i>Duraklatıldı</span></div></li>
+<li class="task2 edge-human "><div class="l1"><span class="sym">KRM12</span><span class="cond">50,00 bölgeye giriş</span></div><div class="l2"><span class="ws r-closed"><i>–</i>Süresi doldu · 22 Ağu</span></div></li>
+<li class="task2 edge-human "><div class="l1"><span class="sym">SYN20</span><span class="cond">Trend çizgisi altı</span></div><div class="l2"><span class="ws r-warn"><i>△</i>Çizim değişti · yeniden onay bekliyor</span></div></li>
+<li class="task2 edge-human "><div class="l1"><span class="sym">ATL07</span><span class="cond">17,40 direnç</span></div><div class="l2"><span class="ws r-warn"><i>✕</i>Çizimi silindi · izleme durdu</span></div></li>
+<li class="task2 edge-human "><div class="l1"><span class="sym">DNZ30</span><span class="cond">210,00 üstünde kapanış</span></div><div class="l2"><span class="ws r-warn"><i>◌</i>Değerlendirilemiyor · yetki yok</span></div></li>
+<li class="task2 edge-human "><div class="l1"><span class="sym">SYN20</span><span class="cond">117,50 desteği</span></div><div class="l2"><span class="ws r-warn"><i>◷</i>Beklemede · bölünme 1:2, 23 Kas</span></div></li>
+<li class="task2 edge-human "><div class="l1"><span class="sym">SYN20</span><span class="cond">122,40 üstünde kapanış</span></div><div class="l2"><span class="ws r-fg"><i>○</i>Kuruldu</span><span class="r-muted">· günlükte kurulu</span></div></li>
+<li class="foot">“Kaldırıldı” listede yok: yalnız günlükte ve gelen kutusunda (İ-kaldırıldı).</li></ul></div>
+</figure>
+<figure class="state "><figcaption><span class="n">3</span><b>Sağlık</b><code>sağlık</code></figcaption>
+<div class="surface w-side"><div class="pane-h"><span>İzleme görevleri</span><span class="count ">5 etkin</span><span class="grow"></span><span class="icon-btn" aria-label="Süzgeç">⌕</span><span class="icon-btn" aria-label="İzleme kur">+</span></div><ul class="tasks"><li class="task2 edge-human "><div class="l1"><span class="sym">SYN20</span><span class="cond">120,00 üstünde kapanış</span></div><div class="l2"><span class="ws r-fg"><i>◐</i>Kırıldı</span><span class="pips" aria-label="tutunma 2/3"><i class="on"></i><i class="on"></i><i></i></span><span class="end r-muted"><span class="health ok" aria-label="izleniyor"></span>14:35</span></div></li>
+<li class="task2 edge-engine "><div class="l1"><span class="sym">SYN20</span><span class="cond">Kapsül · kırılım tutunması</span></div><div class="l2"><span class="ws r-fg"><i>○</i>Kuruldu</span><span class="end r-muted"><span class="health unknown" aria-label="bilinmiyor"></span>Bilinmiyor · ilk veri</span></div></li>
+<li class="task2 edge-human hot"><div class="l1"><span class="sym">KRM12</span><span class="cond">48,90 trend çizgisi altı</span></div><div class="l2"><span class="ws r-fg"><i>○</i>Kuruldu</span><span class="end r-warn"><span class="health degraded" aria-label="gecikiyor"></span>Gecikiyor · 25 dk</span></div></li>
+<li class="task2 edge-human "><div class="l1"><span class="sym">EGE09</span><span class="cond">RSI 14, 70 üstü</span></div><div class="l2"><span class="ws r-muted"><i>‖</i>Duraklatıldı</span></div></li>
+</ul><div class="statusline"><span class="it"><span class="health degraded"></span>5 izleme · 1 gecikiyor</span></div></div>
+</figure>
+<figure class="state "><figcaption><span class="n">4</span><b>Gecikmeli veri</b><code>D-gecikmeli · S22</code></figcaption>
+<div class="surface w-side"><div class="pane-h"><span>İzleme görevleri</span><span class="count ">5 etkin</span><span class="grow"></span><span class="icon-btn" aria-label="Süzgeç">⌕</span><span class="icon-btn" aria-label="İzleme kur">+</span></div><ul class="tasks"><li class="task2 edge-human "><div class="l1"><span class="sym">ATL07</span><span class="cond">16,80 altında kapanış</span></div><div class="l2"><span class="ws r-fg"><i>○</i>Kuruldu</span><span>· Veri 6 dk gecikmeli</span></div></li>
+<li class="task2 edge-human "><div class="l1"><span class="sym">SYN20</span><span class="cond">120,00 üstünde kapanış</span></div><div class="l2"><span class="ws r-fg"><i>◐</i>Kırıldı</span><span class="pips" aria-label="tutunma 2/3"><i class="on"></i><i class="on"></i><i></i></span><span>2/3 bar</span><span class="end r-muted"><span class="health ok" aria-label="izleniyor"></span>14:35</span></div></li>
+</ul><div class="pane-sub" style="padding-top: var(--qp-space-1)">Gecikmeli veride izleme değerlendirilir; yalnız bilgi (S22).</div></div>
+</figure>
+<figure class="state "><figcaption><span class="n">5</span><b>Sınıra yaklaşıldı / ulaşıldı</b><code>O-sınır · S3</code></figcaption>
+<div class="surface w-side"><div class="pane-h"><span>İzleme görevleri</span><span class="count warn"></span><span class="grow"></span><span class="icon-btn" aria-label="Süzgeç">⌕</span><span class="icon-btn" aria-label="İzleme kur">+</span></div><div class="pane-sub warn">48 / 50 izleme</div><ul class="tasks"><li class="task2 edge-human "><div class="l1"><span class="sym">SYN20</span><span class="cond">120,00 üstünde kapanış</span><span class="src">çizim</span></div><div class="l2"><span class="ws r-fg"><i>◐</i>Kırıldı</span><span class="pips" aria-label="tutunma 2/3"><i class="on"></i><i class="on"></i><i></i></span><span>2/3 · <span class="on-chart">Grafikte</span></span><span class="end r-muted"><span class="health ok" aria-label="izleniyor"></span>14:35</span></div></li>
+</ul></div><div class="surface w-side"><div class="pane-h"><span>İzleme görevleri</span><span class="count warn"></span><span class="grow"></span><span class="icon-btn" aria-label="Süzgeç">⌕</span><span class="icon-btn off" aria-label="İzleme kur, sınır doldu">+</span></div><div class="pane-sub warn">Sınır doldu · 50 / 50 · yeni izleme kurulamaz · <u>Hakları gör</u> (Y37)</div><ul class="tasks"><li class="task2 edge-human "><div class="l1"><span class="sym">ATL07</span><span class="cond">16,80 altında kapanış</span><span class="src">varsayılan</span></div><div class="l2"><span class="ws r-fg"><i>○</i>Kuruldu</span><span>· koruyucu</span><span class="end r-muted"><span class="health ok" aria-label="izleniyor"></span>14:35</span></div></li>
+</ul></div>
+</figure>
+<figure class="state "><figcaption><span class="n">6</span><b>Süzgeç</b><code>pills · --accent</code></figcaption>
+<div class="surface w-side"><div class="pane-h"><span>İzleme görevleri</span><span class="count ">2 / 7</span><span class="grow"></span><span class="icon-btn" aria-label="Süzgeç">⌕</span><span class="icon-btn" aria-label="İzleme kur">+</span></div><div class="pills"><span class="pill on">Ajan <span class="x">✕</span></span><span class="pill on">Kırıldı <span class="x">✕</span></span><span class="pill">+ Sembol</span></div><ul class="tasks"><li class="task2 edge-agent "><div class="l1"><span class="sym">SYN20</span><span class="cond">125,00 üstünde kapanış</span><span class="src">Ajan</span></div><div class="l2"><span class="ws r-fg"><i>◐</i>Kırıldı</span><span class="pips" aria-label="tutunma 1/3"><i class="on"></i><i></i><i></i></span><span>1/3 bar</span></div></li>
+<li class="task2 edge-agent "><div class="l1"><span class="sym">DNZ30</span><span class="cond">Hacim 20 gün ort. 2 katı</span><span class="src">Ajan</span></div><div class="l2"><span class="ws r-fg"><i>◐</i>Kırıldı</span><span class="pips" aria-label="tutunma 2/3"><i class="on"></i><i class="on"></i><i></i></span><span>2/3 bar</span></div></li>
+</ul></div>
+</figure>
+<figure class="state "><figcaption><span class="n">7</span><b>Toplu işlem</b><code>seçim · --accent</code></figcaption>
+<div class="surface w-side"><div class="pane-h"><span>İzleme görevleri</span><span class="count ">7 etkin</span><span class="grow"></span><span class="icon-btn" aria-label="Süzgeç">⌕</span><span class="icon-btn" aria-label="İzleme kur">+</span></div><ul class="tasks"><li class="task2 edge-human pick "><span class="sel on" aria-hidden="true"></span><div class="l1"><span class="sym">SYN20</span><span class="cond">120,00 üstünde kapanış</span></div><div class="l2"><span class="ws r-fg"><i>◐</i>Kırıldı</span><span class="pips" aria-label="tutunma 2/3"><i class="on"></i><i class="on"></i><i></i></span></div></li>
+<li class="task2 edge-human pick "><span class="sel on" aria-hidden="true"></span><div class="l1"><span class="sym">KRM12</span><span class="cond">48,90 trend çizgisi altı</span></div><div class="l2"><span class="ws r-fg"><i>○</i>Kuruldu</span></div></li>
+<li class="task2 edge-human pick "><span class="sel on" aria-hidden="true"></span><div class="l1"><span class="sym">ATL07</span><span class="cond">16,80 altında kapanış</span></div><div class="l2"><span class="ws r-fg"><i>○</i>Kuruldu</span></div></li>
+<li class="task2 edge-human pick "><span class="sel" aria-hidden="true"></span><div class="l1"><span class="sym">EGE09</span><span class="cond">RSI 14, 70 üstü</span></div><div class="l2"><span class="ws r-muted"><i>‖</i>Duraklatıldı</span></div></li>
+</ul><div class="bulk"><span>3 seçili</span><span class="grow"></span><span class="btn">Duraklat</span><span class="btn">Kaldır</span></div></div>
+</figure>
+<figure class="state "><figcaption><span class="n">8</span><b>Sıralama</b><code>çekirdek sırası</code></figcaption>
+<div class="surface w-side"><div class="pane-h"><span>İzleme görevleri</span><span class="count ">7 etkin</span><span class="grow"></span><span class="icon-btn" aria-label="Süzgeç">⌕</span><span class="icon-btn" aria-label="İzleme kur">+</span></div><ul class="tasks"><li class="grp">1 · Karar bekleyen<span class="count">2</span></li>
+<li class="task2 edge-agent "><div class="l1"><span class="sym">SYN20</span><span class="cond">125,00 üstünde kapanış</span><span class="src">Ajan</span></div><div class="l2"><span class="ws r-agent"><i>○</i>Önerildi · onay bekliyor</span></div></li>
+<li class="task2 edge-human "><div class="l1"><span class="sym">KRM12</span><span class="cond">48,90 trend çizgisi</span><span class="src">çizim</span></div><div class="l2"><span class="ws r-agent"><i>?</i>Soru bekliyor · izleme kurulmadı</span></div></li>
+<li class="grp">2 · Durumu değişen<span class="count">2</span></li>
+<li class="task2 edge-human "><div class="l1"><span class="sym">SYN20</span><span class="cond">120,00 üstünde kapanış</span><span class="src">çizim</span></div><div class="l2"><span class="ws r-fg"><i>◐</i>Kırıldı</span><span class="pips" aria-label="tutunma 2/3"><i class="on"></i><i class="on"></i><i></i></span><span>2/3 · <span class="on-chart">Grafikte</span></span><span class="end r-muted"><span class="health ok" aria-label="izleniyor"></span>14:35</span></div></li>
+<li class="task2 edge-human "><div class="l1"><span class="sym">DNZ30</span><span class="cond">207,40 desteği altında kapanış</span><span class="src">çizim</span></div><div class="l2"><span class="ws r-invalid"><i>◇</i>Geri döndü</span><span>· 2. barda</span></div></li>
+<li class="grp">3 · İzlenen<span class="count">3</span></li>
+<li class="task2 edge-human "><div class="l1"><span class="sym">ATL07</span><span class="cond">16,80 altında kapanış</span><span class="src">varsayılan</span></div><div class="l2"><span class="ws r-fg"><i>○</i>Kuruldu</span><span>· koruyucu</span><span class="end r-muted"><span class="health ok" aria-label="izleniyor"></span>14:35</span></div></li>
+<li class="task2 edge-engine "><div class="l1"><span class="sym">SYN20</span><span class="cond">Kapsül · kırılım tutunması</span><span class="src">Motor</span></div><div class="l2"><span class="ws r-fg"><i>○</i>Kuruldu</span><span class="end r-muted"><span class="health unknown" aria-label="bilinmiyor"></span>Bilinmiyor</span></div></li>
+<li class="task2 edge-human "><div class="l1"><span class="sym">EGE09</span><span class="cond">RSI 14, 70 üstü</span><span class="src">gösterge</span></div><div class="l2"><span class="ws r-muted"><i>‖</i>Duraklatıldı</span></div></li>
+<li class="foot">Sıra çekirdekten; kabuk sıralamaz.</li></ul></div>
+</figure>
+</div>
+<p class="legend-key"><span class="stroke">İnsan, düz</span><span class="stroke agent">Ajan, kesik</span><span class="stroke engine">Motor, noktalı</span><span>Sağlık yalnız “İzleniyor” dışındaysa vurgulu</span></p>
+</section>
+<section class="profile tel-only" aria-label="Telefon"><h2>Telefon <span class="note">tavek-tel · İzleme sekmesi · satırlar tam genişlik, sağa kaydır “Duraklat”, sola “Kaldır”</span></h2>
+<h3 class="block-h">Ana durum: İzleme sekmesi (390 × 844)</h3>
+<div class="states"><figure class="state "><figcaption><span class="n">0</span><b>Ana durum</b><code>Y07 + Y20 sekmesi</code></figcaption>
+<div class="frame phone tel"><header class="phone-head"><h1>İzleme</h1><span class="icon-btn">+</span></header><div class="t-status"><span>Canlı · son bar 14:35</span><span class="grow"></span><span class="it"><span class="health ok"></span>İzleniyor · 14:35</span></div><div style="padding: 0 var(--qp-space-3) var(--qp-space-2)"><div class="seg2"><span class="on">Görevler · 7</span><span>Liste</span></div></div><div class="phone-body"><ul class="tasks"><li class="grp">Karar bekleyen<span class="count">2</span></li>
+<li class="task2 edge-agent "><div class="l1"><span class="sym">SYN20</span><span class="cond">125,00 üstünde kapanış</span><span class="src">Ajan</span></div><div class="l2"><span class="ws r-agent"><i>○</i>Önerildi · onay bekliyor</span></div></li>
+<li class="task2 edge-human "><div class="l1"><span class="sym">KRM12</span><span class="cond">48,90 trend çizgisi</span><span class="src">çizim</span></div><div class="l2"><span class="ws r-agent"><i>?</i>Soru bekliyor · izleme kurulmadı</span></div></li>
+<li class="grp">Durumu değişen<span class="count">2</span></li>
+<li class="task2 edge-human changed"><div class="l1"><span class="sym">SYN20</span><span class="cond">120,00 üstünde kapanış</span><span class="src">çizim</span></div><div class="l2"><span class="ws r-fg"><i>◐</i>Kırıldı</span><span class="pips" aria-label="tutunma 2/3"><i class="on"></i><i class="on"></i><i></i></span><span>2/3 · <span class="on-chart">Grafikte</span></span><span class="end r-muted"><span class="health ok" aria-label="izleniyor"></span>14:35</span></div></li>
+<li class="task2 edge-human "><div class="l1"><span class="sym">DNZ30</span><span class="cond">207,40 desteği altında kapanış</span><span class="src">çizim</span></div><div class="l2"><span class="ws r-invalid"><i>◇</i>Geri döndü</span><span>· 2. barda</span></div></li>
+<li class="grp">İzlenen<span class="count">3</span></li>
+<li class="task2 edge-human "><div class="l1"><span class="sym">ATL07</span><span class="cond">16,80 altında kapanış</span><span class="src">varsayılan</span></div><div class="l2"><span class="ws r-fg"><i>○</i>Kuruldu</span><span>· koruyucu</span><span class="end r-muted"><span class="health ok" aria-label="izleniyor"></span>14:35</span></div></li>
+<li class="task2 edge-engine "><div class="l1"><span class="sym">SYN20</span><span class="cond">Kapsül · kırılım tutunması</span><span class="src">Motor</span></div><div class="l2"><span class="ws r-fg"><i>○</i>Kuruldu</span><span class="end r-muted"><span class="health unknown" aria-label="bilinmiyor"></span>Bilinmiyor</span></div></li>
+<li class="task2 edge-human "><div class="l1"><span class="sym">EGE09</span><span class="cond">RSI 14, 70 üstü</span><span class="src">gösterge</span></div><div class="l2"><span class="ws r-muted"><i>‖</i>Duraklatıldı</span></div></li>
+</ul></div><nav class="tabbar" aria-label="Sekmeler"><span class="">Kule</span><span class="">Grafik</span><span class="on">İzleme</span><span class="">Ajan</span></nav></div>
+</figure>
+</div>
+<h3 class="block-h">Durumlar</h3>
+<div class="states">
+<figure class="state "><figcaption><span class="n">1</span><b>Boş</b><code>O-boş</code></figcaption>
+<div class="frame phone tel part"><header class="phone-head"><h1>İzleme</h1><span class="icon-btn">+</span></header><div class="empty"><span>Henüz izleme yok. Bir seviye çiz, notunu yaz; ajan kursun.</span><span class="btn primary">Grafiğe git</span></div></div>
+</figure>
+<figure class="state "><figcaption><span class="n">2</span><b>Yaşam döngüsünün her durumu</b><code>İ-*</code></figcaption>
+<div class="frame phone tel part"><header class="phone-head"><h1>İzleme</h1><span class="icon-btn">+</span></header><ul class="tasks"><li class="task2 edge-agent "><div class="l1"><span class="sym">SYN20</span><span class="cond">125,00 üstünde kapanış</span></div><div class="l2"><span class="ws r-agent"><i>○</i>Önerildi · onay bekliyor</span></div></li>
+<li class="task2 edge-human "><div class="l1"><span class="sym">KRM12</span><span class="cond">48,90 trend çizgisi</span></div><div class="l2"><span class="ws r-agent"><i>?</i>Soru bekliyor · izleme kurulmadı</span></div></li>
+<li class="task2 edge-human "><div class="l1"><span class="sym">ATL07</span><span class="cond">16,80 altında kapanış</span></div><div class="l2"><span class="ws r-fg"><i>○</i>Kuruldu</span><span>· izleniyor, 14:35</span></div></li>
+<li class="task2 edge-human "><div class="l1"><span class="sym">SYN20</span><span class="cond">120,00 üstünde kapanış</span></div><div class="l2"><span class="ws r-fg"><i>◐</i>Kırıldı</span><span class="pips" aria-label="tutunma 2/3"><i class="on"></i><i class="on"></i><i></i></span><span>2/3 bar · günlük</span></div></li>
+<li class="task2 edge-human "><div class="l1"><span class="sym">BRS15</span><span class="cond">71,00 üstünde kapanış</span></div><div class="l2"><span class="ws r-valid"><i>●</i>Tutundu</span><span>· 3/3 bar</span></div></li>
+<li class="task2 edge-human "><div class="l1"><span class="sym">DNZ30</span><span class="cond">207,40 desteği</span></div><div class="l2"><span class="ws r-invalid"><i>◇</i>Geri döndü</span><span>· 2. barda</span></div></li>
+<li class="task2 edge-human "><div class="l1"><span class="sym">MRV40</span><span class="cond">9,50 dokunma</span></div><div class="l2"><span class="ws r-valid"><i>●</i>Eşleşti</span><span>· 14:35 · 9,50 · haber verildi</span></div></li>
+<li class="task2 edge-human "><div class="l1"><span class="sym">EGE09</span><span class="cond">35,00 yukarı kesişim</span></div><div class="l2"><span class="ws r-fg"><i>↻</i>Yeniden kuruldu</span><span>· sonraki kesişim</span></div></li>
+<li class="task2 edge-human "><div class="l1"><span class="sym">EGE09</span><span class="cond">RSI 14, 70 üstü</span></div><div class="l2"><span class="ws r-muted"><i>‖</i>Duraklatıldı</span></div></li>
+<li class="task2 edge-human "><div class="l1"><span class="sym">KRM12</span><span class="cond">50,00 bölgeye giriş</span></div><div class="l2"><span class="ws r-closed"><i>–</i>Süresi doldu · 22 Ağu</span></div></li>
+<li class="task2 edge-human "><div class="l1"><span class="sym">SYN20</span><span class="cond">Trend çizgisi altı</span></div><div class="l2"><span class="ws r-warn"><i>△</i>Çizim değişti · yeniden onay bekliyor</span></div></li>
+<li class="task2 edge-human "><div class="l1"><span class="sym">ATL07</span><span class="cond">17,40 direnç</span></div><div class="l2"><span class="ws r-warn"><i>✕</i>Çizimi silindi · izleme durdu</span></div></li>
+<li class="task2 edge-human "><div class="l1"><span class="sym">DNZ30</span><span class="cond">210,00 üstünde kapanış</span></div><div class="l2"><span class="ws r-warn"><i>◌</i>Değerlendirilemiyor · yetki yok</span></div></li>
+<li class="task2 edge-human "><div class="l1"><span class="sym">SYN20</span><span class="cond">117,50 desteği</span></div><div class="l2"><span class="ws r-warn"><i>◷</i>Beklemede · bölünme 1:2, 23 Kas</span></div></li>
+<li class="task2 edge-human "><div class="l1"><span class="sym">SYN20</span><span class="cond">122,40 üstünde kapanış</span></div><div class="l2"><span class="ws r-fg"><i>○</i>Kuruldu</span><span class="r-muted">· günlükte kurulu</span></div></li>
+</ul></div>
+</figure>
+<figure class="state "><figcaption><span class="n">3</span><b>Sağlık</b><code>tek simge + sözcük</code></figcaption>
+<div class="frame phone tel part"><header class="phone-head"><h1>İzleme</h1><span class="note"><span class="health degraded"></span> Gecikiyor</span></header><div class="t-status"><span>Canlı · son bar 14:35</span><span class="grow"></span><span class="it"><span class="health degraded"></span><span class="r-warn">Gecikiyor · 25 dk</span></span></div><ul class="tasks"><li class="task2 edge-human hot"><div class="l1"><span class="sym">KRM12</span><span class="cond">48,90 trend çizgisi altı</span></div><div class="l2"><span class="ws r-fg"><i>○</i>Kuruldu</span><span class="end r-warn"><span class="health degraded" aria-label="gecikiyor"></span>Gecikiyor</span></div></li>
+<li class="task2 edge-engine "><div class="l1"><span class="sym">SYN20</span><span class="cond">Kapsül · tutunma</span></div><div class="l2"><span class="ws r-fg"><i>○</i>Kuruldu</span><span class="end r-muted"><span class="health unknown" aria-label="bilinmiyor"></span>Bilinmiyor</span></div></li>
+<li class="task2 edge-human "><div class="l1"><span class="sym">SYN20</span><span class="cond">120,00 üstünde kapanış</span></div><div class="l2"><span class="ws r-fg"><i>◐</i>Kırıldı 2/3</span><span class="end r-muted"><span class="health ok" aria-label="izleniyor"></span>14:35</span></div></li>
+</ul></div>
+</figure>
+<figure class="state "><figcaption><span class="n">4</span><b>Gecikmeli veri</b><code>D-gecikmeli</code></figcaption>
+<div class="frame phone tel part"><header class="phone-head"><h1>İzleme</h1><span class="icon-btn">+</span></header><div class="t-status"><span>Gecikmeli 6 dk</span><span class="grow"></span><span class="it"><span class="health ok"></span>İzleniyor · 14:35</span></div><ul class="tasks"><li class="task2 edge-human "><div class="l1"><span class="sym">ATL07</span><span class="cond">16,80 altında kapanış</span></div><div class="l2"><span class="ws r-fg"><i>○</i>Kuruldu</span><span>· Veri 6 dk gecikmeli</span></div></li>
+</ul></div>
+</figure>
+<figure class="state "><figcaption><span class="n">5</span><b>Sınıra yaklaşıldı / ulaşıldı</b><code>O-sınır</code></figcaption>
+<div class="frame phone tel part"><header class="phone-head"><h1>İzleme</h1><span class="count warn">48 / 50</span></header><ul class="tasks"><li class="task2 edge-human "><div class="l1"><span class="sym">SYN20</span><span class="cond">120,00 üstünde kapanış</span><span class="src">çizim</span></div><div class="l2"><span class="ws r-fg"><i>◐</i>Kırıldı</span><span class="pips" aria-label="tutunma 2/3"><i class="on"></i><i class="on"></i><i></i></span><span>2/3 · <span class="on-chart">Grafikte</span></span><span class="end r-muted"><span class="health ok" aria-label="izleniyor"></span>14:35</span></div></li>
+</ul></div><div class="frame phone tel part"><header class="phone-head"><h1>İzleme</h1><span class="count warn">Sınır doldu</span></header><div class="pane-sub warn" style="padding-top: var(--qp-space-1)">İzleme sınırı doldu (50 / 50) · Hakları gör</div></div>
+</figure>
+<figure class="state "><figcaption><span class="n">6</span><b>Süzgeç</b><code>pills</code></figcaption>
+<div class="frame phone tel part"><header class="phone-head"><h1>İzleme</h1><span class="icon-btn">+</span></header><div class="pills"><span class="pill on">Ajan ✕</span><span class="pill on">Kırıldı ✕</span><span class="pill">+ Sembol</span></div><ul class="tasks"><li class="task2 edge-agent "><div class="l1"><span class="sym">SYN20</span><span class="cond">125,00 üstünde kapanış</span><span class="src">Ajan</span></div><div class="l2"><span class="ws r-fg"><i>◐</i>Kırıldı</span><span class="pips" aria-label="tutunma 1/3"><i class="on"></i><i></i><i></i></span></div></li>
+<li class="task2 edge-agent "><div class="l1"><span class="sym">DNZ30</span><span class="cond">Hacim 2 katı</span><span class="src">Ajan</span></div><div class="l2"><span class="ws r-fg"><i>◐</i>Kırıldı</span><span class="pips" aria-label="tutunma 2/3"><i class="on"></i><i class="on"></i><i></i></span></div></li>
+</ul></div>
+</figure>
+<figure class="state "><figcaption><span class="n">7</span><b>Toplu işlem (telefonda kaydırma)</b><code>sağa / sola kaydır</code></figcaption>
+<div class="frame phone tel part"><header class="phone-head"><h1>İzleme</h1><span class="icon-btn">+</span></header><div class="swipe"><span class="act">‖ Duraklat</span><ul class="tasks" style="margin:0"><li class="task2 edge-human "><div class="l1"><span class="sym">SYN20</span><span class="cond">120,00 üstünde kapanış</span></div><div class="l2"><span class="ws r-fg"><i>◐</i>Kırıldı 2/3</span></div></li>
+</ul></div><div class="swipe left"><ul class="tasks" style="margin:0"><li class="task2 edge-human "><div class="l1"><span class="sym">EGE09</span><span class="cond">RSI 14, 70 üstü</span></div><div class="l2"><span class="ws r-muted"><i>‖</i>Duraklatıldı</span></div></li>
+</ul><span class="act">✕ Kaldır</span></div><div class="toast"><span class="grow">İzleme kaldırıldı · EGE09</span><b>Geri al</b></div></div>
+</figure>
+<figure class="state "><figcaption><span class="n">8</span><b>Sıralama</b><code>çekirdek sırası</code></figcaption>
+<div class="frame phone tel part"><header class="phone-head"><h1>İzleme</h1><span class="icon-btn">+</span></header><ul class="tasks"><li class="grp">Karar bekleyen<span class="count">2</span></li>
+<li class="task2 edge-agent "><div class="l1"><span class="sym">SYN20</span><span class="cond">125,00 üstünde kapanış</span><span class="src">Ajan</span></div><div class="l2"><span class="ws r-agent"><i>○</i>Önerildi · onay bekliyor</span></div></li>
+<li class="task2 edge-human "><div class="l1"><span class="sym">KRM12</span><span class="cond">48,90 trend çizgisi</span><span class="src">çizim</span></div><div class="l2"><span class="ws r-agent"><i>?</i>Soru bekliyor · izleme kurulmadı</span></div></li>
+<li class="grp">Durumu değişen<span class="count">1</span></li>
+<li class="task2 edge-human "><div class="l1"><span class="sym">SYN20</span><span class="cond">120,00 üstünde kapanış</span><span class="src">çizim</span></div><div class="l2"><span class="ws r-fg"><i>◐</i>Kırıldı</span><span class="pips" aria-label="tutunma 2/3"><i class="on"></i><i class="on"></i><i></i></span><span>2/3 · <span class="on-chart">Grafikte</span></span><span class="end r-muted"><span class="health ok" aria-label="izleniyor"></span>14:35</span></div></li>
+<li class="grp">İzlenen<span class="count">1</span></li>
+<li class="task2 edge-human "><div class="l1"><span class="sym">ATL07</span><span class="cond">16,80 altında kapanış</span><span class="src">varsayılan</span></div><div class="l2"><span class="ws r-fg"><i>○</i>Kuruldu</span><span>· koruyucu</span><span class="end r-muted"><span class="health ok" aria-label="izleniyor"></span>14:35</span></div></li>
+</ul></div>
+</figure>
+</div>
+</section>
+</body>
+</html>

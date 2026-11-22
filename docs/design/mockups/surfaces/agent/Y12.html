@@ -1,0 +1,256 @@
+<!doctype html>
+<!-- RD2 M2 (ajan) — Y12 bildirim, kademe 1: on durum, iki profil. Masaüstünde sağ üstte,
+     başlığın altında yığılan uygulama içi kart (OV-20 konumu, kapatma düğmesi yok); karar
+     bekleyen kart zile inmez. Telefonda sistem bildirimi (kilit ekranında rakam yok, S16)
+     ve uygulama açıkken üst şerit. Metin kalıbı: sembol · olay sözcüğü (İ-*) · değer. -->
+<html lang="tr">
+<head>
+  <meta charset="utf-8">
+  <title>Y12 Bildirim</title>
+  <link rel="stylesheet" href="../../_base/base.css">
+  <link rel="stylesheet" href="../../tavek/tavek.css">
+  <link rel="stylesheet" href="agent.css">
+  <script src="../../_base/frame.js"></script>
+</head>
+<body class="sheet-body">
+<main class="sheet">
+  <header class="sheet-head">
+    <div>
+      <span class="eyebrow">Y12 · kademe 1 · watch.md</span>
+      <h1>Bildirim</h1>
+      <p>Olay olduğunda gelen kısa haber: ne oldu, hangi çizim ya da koşul, hangi değer; kanıta açılır.
+        Sol kenar kaynağın köken çizgisi: insan izlemesi düz, ajan sorusu/önerisi kesik, motor kapsülü noktalı.</p>
+    </div>
+    <div class="meta"><span class="stroke">İnsan, düz</span><span class="stroke agent">Ajan, kesik</span><span class="stroke engine">Motor, noktalı</span></div>
+  </header>
+
+  <!-- ================================ MASAÜSTÜ ================================ -->
+  <section class="profile desk" aria-label="Masaüstü">
+    <h2>Yerinde: sağ üst, başlığın altında yığın <span class="note">Bilgi kartı birkaç saniye sonra zile iner; karar bekleyen kalır</span></h2>
+    <div class="desk-corner" style="height: calc(var(--qp-space-5) * 13)">
+      <div class="topbar"><span class="fg">Sembol ya da komut ara</span><span class="note">⌘K</span><span class="grow"></span><span class="bell">Gelen <span class="count">3</span></span><span>Ayarlar</span></div>
+      <div class="chart-slot mini-chart corner-chart"><img data-chart="desk" alt=""></div>
+      <div class="stack">
+        <div class="toast">
+          <div class="head"><span class="sym">SYN20</span><span>İzleme · Sen</span><span class="grow"></span><span class="mono">14:35</span></div>
+          <p class="msg"><span class="st broke">Kırıldı</span> 112,40 · tutunma <span class="mono">1/3</span> bar · günlük · <span class="mono">111,85</span></p>
+          <div class="acts"><span class="link strong">Kanıt</span><span class="link">Grafikte</span></div>
+        </div>
+        <div class="toast agent">
+          <div class="head"><span class="sym">SYN20</span><span>Ajan önerisi</span><span class="grow"></span><span class="mono">14:31</span></div>
+          <p class="msg">117,50'ye destek ekle</p>
+          <div class="acts"><span class="link">Grafikte</span><span class="grow"></span><span class="btn">Reddet</span><span class="btn primary">Grafiğe ekle</span></div>
+        </div>
+      </div>
+    </div>
+
+    <h2>Bütün durumlar <span class="note">Şartname tablosu sırasıyla</span></h2>
+    <div class="states">
+      <figure class="state">
+        <figcaption><span class="n">1</span><b>Tetiklendi</b><span class="role">İ-* rolü · sol kenar kaynağın köken çizgisi</span></figcaption>
+        <div class="stage page">
+          <div class="toast">
+            <div class="head"><span class="sym">SYN20</span><span>İzleme · Sen</span><span class="grow"></span><span class="mono">14:35</span></div>
+            <p class="msg"><span class="st broke">Kırıldı</span> · tutunma <span class="mono">1/3</span> bar</p>
+            <div class="acts"><span class="link strong">Kanıt</span><span class="link">Grafikte</span></div>
+          </div>
+          <div class="toast" style="margin-top: var(--qp-space-1)">
+            <div class="head"><span class="sym">SYN20</span><span>İzleme · Sen</span><span class="grow"></span><span class="mono">18:10</span></div>
+            <p class="msg"><span class="st held">Tutundu</span> 112,40 kırılımı (<span class="mono">3/3</span> bar, günlük) · <span class="mono">113,05</span></p>
+            <div class="acts"><span class="link strong">Kanıt</span><span class="link">Grafikte</span></div>
+          </div>
+        </div>
+      </figure>
+
+      <figure class="state">
+        <figcaption><span class="n">2</span><b>Soru soruyor</b><span class="role">--qp-origin-agent · en çok üç seçenek (Y05)</span></figcaption>
+        <div class="stage page">
+          <div class="toast agent">
+            <div class="head"><span class="sym">SYN20</span><span>Ajan soruyor · Soru 1 / 2</span><span class="grow"></span><span class="mono">14:32</span></div>
+            <p class="msg">Kırılımı neye göre sayayım?</p>
+            <div class="opts">
+              <span class="opt">Günlük kapanış 112,40'ın altında olursa haber ver</span>
+              <span class="opt">Fitil 112,40'a değince haber ver</span>
+              <span class="opt">İzleme, yalnız not kalsın</span>
+            </div>
+            <div class="acts"><span class="link">Panelde aç</span></div>
+          </div>
+        </div>
+      </figure>
+
+      <figure class="state">
+        <figcaption><span class="n">3</span><b>Öneri bekliyor</b><span class="role">--qp-origin-agent · “Reddet” / fiil + nesne</span></figcaption>
+        <div class="stage page">
+          <div class="toast agent">
+            <div class="head"><span class="sym">SYN20</span><span>Ajan önerisi</span><span class="grow"></span><span class="mono">14:31</span></div>
+            <p class="msg">117,50'ye destek ekle</p>
+            <div class="acts"><span class="link">Grafikte</span><span class="grow"></span><span class="btn">Reddet</span><span class="btn primary">Grafiğe ekle</span></div>
+          </div>
+        </div>
+      </figure>
+
+      <figure class="state">
+        <figcaption><span class="n">4</span><b>Süresi dolmak üzere</b><span class="role">--muted · sakin, geri sayım yok</span></figcaption>
+        <div class="stage page">
+          <div class="toast quiet">
+            <div class="head"><span class="sym">SYN20</span><span>İzleme · Sen</span><span class="grow"></span><span class="mono">09:00</span></div>
+            <p class="msg muted">SYN20 izlemesinin süresi yarın doluyor</p>
+            <div class="acts"><span class="grow"></span><span class="btn">Uzat</span></div>
+          </div>
+        </div>
+      </figure>
+
+      <figure class="state">
+        <figcaption><span class="n">5</span><b>Süresi doldu</b><span class="role">--qp-closed · yalnız gelen kutusunda</span></figcaption>
+        <div class="stage flush">
+          <div class="group-h"><span>Gelen kutusu · bugün</span><span>kart üretilmez</span></div>
+          <div class="list">
+            <div class="lrow edge-human"><span class="dot"></span><span class="title" style="color: var(--qp-closed)">– SYN20 · Süresi doldu · 22 Kas</span><span class="time">00:00</span>
+              <span class="sub">112,40 altında kapanış · <span class="link">yeniden kur</span></span></div>
+          </div>
+        </div>
+      </figure>
+
+      <figure class="state">
+        <figcaption><span class="n">6</span><b>Değerlendirilemiyor</b><span class="role">--qp-warn · kart, tek kez</span></figcaption>
+        <div class="stage page">
+          <div class="toast warn">
+            <div class="head"><span class="shape" style="color: var(--m-warn)">◌</span><span>Veri durumu</span><span class="grow"></span><span class="mono">14:41</span></div>
+            <p class="msg">3 izleme değerlendirilemiyor: veri bayat (son <span class="mono">14:35</span>)</p>
+            <div class="acts"><span class="link strong">İzlemeler</span><span class="link">Veri durumu</span></div>
+          </div>
+        </div>
+      </figure>
+
+      <figure class="state">
+        <figcaption><span class="n">7</span><b>Düşük güven (A57)</b><span class="role">--qp-warn sözcük · elindeki hissede olumsuz tespit</span></figcaption>
+        <div class="stage page">
+          <div class="toast engine">
+            <div class="head"><span class="sym">SYN20</span><span class="origin engine">Motor · kapsül</span><span class="grow"></span><span class="mono">18:10</span></div>
+            <p class="msg">SYN20 · zayıfladı · <span style="color: var(--m-warn)">düşük güven</span> <span class="muted">(taban orandan ayrışmıyor)</span></p>
+            <div class="acts"><span class="link strong">Kanıt</span><span class="link">Grafikte</span></div>
+          </div>
+        </div>
+      </figure>
+
+      <figure class="state">
+        <figcaption><span class="n">8</span><b>Bastırıldı</b><span class="role">--muted · gösterilmez; gelen kutusunda süzgeçle</span></figcaption>
+        <div class="stage flush">
+          <div class="filters"><span class="chip sel">Bastırılanlar</span><span class="chip">SYN20</span></div>
+          <div class="list">
+            <div class="lrow edge-human fold"><span class="dot"></span><span class="title">SYN20 · Dokundu 112,40</span><span class="time">11:02</span>
+              <span class="sub">Süzgeçle bastırıldı · günde en çok 5</span></div>
+          </div>
+        </div>
+      </figure>
+
+      <figure class="state">
+        <figcaption><span class="n">9</span><b>Gruplanmış</b><span class="role">--fg · tek kart, sayı</span></figcaption>
+        <div class="stage page">
+          <div class="toast">
+            <div class="head"><span class="sym">SYN20</span><span>3 olay</span><span class="grow"></span><span class="mono">14:35</span></div>
+            <p class="msg">SYN20 · 3 olay</p>
+            <p class="note">Kırıldı 112,40 · Hacim 1,8× · Ajan önerisi</p>
+            <div class="acts"><span class="link strong">Aç</span></div>
+          </div>
+        </div>
+      </figure>
+
+      <figure class="state">
+        <figcaption><span class="n">10</span><b>Simüle</b><span class="role">--note-fg · bildirim yok; oynatma panelinde satır</span></figcaption>
+        <div class="stage flush">
+          <div class="group-h" style="background: var(--m-note-bg); color: var(--m-note-fg)"><span>Yeniden oynatma · simüle</span><span class="mono">22 Ağu 14:35</span></div>
+          <div class="list">
+            <div class="lrow edge-human"><span class="dot"></span><span class="title">SYN20 · Kırıldı · tutunma 1/3</span><span class="time">14:35</span>
+              <span class="sub"><span class="pill note-tone">simüle olay</span></span></div>
+          </div>
+        </div>
+      </figure>
+    </div>
+  </section>
+
+  <!-- ================================ TELEFON ================================= -->
+  <section class="profile phone" aria-label="Telefon">
+    <h2>Telefon <span class="note">Kilit ekranında rakam yok (S16); rakam uygulama açılınca</span></h2>
+    <div class="states">
+      <figure class="state">
+        <figcaption><span class="n">1</span><b>Tetiklendi · kilit ekranı</b><span class="role">sembol + olay sözcüğü</span></figcaption>
+        <div class="lock"><span class="clock">18:10</span>
+          <div class="os-notif"><div class="app"><span class="app-icon"></span><span>Qapsule</span><span class="grow"></span><span>şimdi</span></div>
+            <span><b>SYN20 · kırılım tutundu</b></span><span class="muted">Kanıtı görmek için aç</span></div>
+          <div class="os-notif"><div class="app"><span class="app-icon"></span><span>Qapsule</span><span class="grow"></span><span>14:35</span></div>
+            <span><b>SYN20 · kırıldı</b></span><span class="muted">Tutunma bekleniyor</span></div>
+        </div>
+      </figure>
+
+      <figure class="state">
+        <figcaption><span class="n">1</span><b>Tetiklendi · uygulama açıkken üst şerit</b><span class="role">değer görünür</span></figcaption>
+        <div class="ph">
+          <div class="ph-status"><span class="pulse"></span><span>Canlı · seans açık</span><span class="grow"></span><span class="mono">18:10</span></div>
+          <div class="ph-body"><div class="toast">
+            <div class="head"><span class="sym">SYN20</span><span>İzleme · Sen</span><span class="grow"></span><span class="mono">18:10</span></div>
+            <p class="msg"><span class="st held">Tutundu</span> 112,40 kırılımı (<span class="mono">3/3</span> bar, günlük) · <span class="mono">113,05</span></p>
+            <div class="acts"><span class="btn">Grafikte</span><span class="btn primary">Kanıt</span></div>
+          </div></div>
+        </div>
+      </figure>
+
+      <figure class="state">
+        <figcaption><span class="n">2</span><b>Soru soruyor</b><span class="role">bildirim eylemleri = seçenekler</span></figcaption>
+        <div class="lock"><div class="os-notif"><div class="app"><span class="app-icon"></span><span>Qapsule</span><span class="grow"></span><span>şimdi</span></div>
+          <span><b>SYN20 · Ajan soruyor</b></span><span>Kırılımı neye göre sayayım?</span>
+          <div class="os-actions"><span>Kapanış</span><span>Fitil</span><span>Yalnız not</span><span>Aç</span></div></div></div>
+      </figure>
+
+      <figure class="state">
+        <figcaption><span class="n">3</span><b>Öneri bekliyor</b><span class="role">karar bildirimden: “Eklendi” durum satırı</span></figcaption>
+        <div class="lock"><div class="os-notif"><div class="app"><span class="app-icon"></span><span>Qapsule</span><span class="grow"></span><span>şimdi</span></div>
+          <span><b>SYN20 · Ajan önerisi</b></span><span>Bir destek seviyesi eklemeyi öneriyor</span>
+          <div class="os-actions"><span>Reddet</span><span>Grafiğe ekle</span><span>Aç</span></div></div>
+          <div class="os-notif"><div class="app"><span class="app-icon"></span><span>Qapsule</span><span class="grow"></span><span>şimdi</span></div>
+          <span class="muted">SYN20 · Eklendi · Sen</span></div></div>
+      </figure>
+
+      <figure class="state">
+        <figcaption><span class="n">4</span><b>Süresi dolmak üzere</b><span class="role">--muted</span></figcaption>
+        <div class="lock"><div class="os-notif"><div class="app"><span class="app-icon"></span><span>Qapsule</span><span class="grow"></span><span>09:00</span></div>
+          <span>SYN20 izlemesinin süresi yarın doluyor</span><div class="os-actions"><span>Uzat</span><span>Aç</span></div></div></div>
+      </figure>
+
+      <figure class="state">
+        <figcaption><span class="n">5</span><b>Süresi doldu</b><span class="role">--qp-closed · yalnız gelen kutusunda</span></figcaption>
+        <div class="ph"><div class="list"><div class="lrow edge-human"><span class="dot"></span><span class="title" style="color: var(--qp-closed)">– SYN20 · Süresi doldu</span><span class="time">00:00</span></div></div></div>
+      </figure>
+
+      <figure class="state">
+        <figcaption><span class="n">6</span><b>Değerlendirilemiyor</b><span class="role">--qp-warn · tek kez</span></figcaption>
+        <div class="lock"><div class="os-notif"><div class="app"><span class="app-icon"></span><span>Qapsule</span><span class="grow"></span><span>14:41</span></div>
+          <span><b>3 izleme değerlendirilemiyor</b></span><span class="muted">Veri bayat · uygulamada ayrıntı</span></div></div>
+      </figure>
+
+      <figure class="state">
+        <figcaption><span class="n">7</span><b>Düşük güven</b><span class="role">--qp-warn sözcük</span></figcaption>
+        <div class="lock"><div class="os-notif"><div class="app"><span class="app-icon"></span><span>Qapsule</span><span class="grow"></span><span>18:10</span></div>
+          <span><b>SYN20 · zayıfladı · düşük güven</b></span><span class="muted">Taban orandan ayrışmıyor</span></div></div>
+      </figure>
+
+      <figure class="state">
+        <figcaption><span class="n">8</span><b>Bastırıldı</b><span class="role">gösterilmez</span></figcaption>
+        <div class="ph"><div class="filters"><span class="chip sel">Bastırılanlar</span></div><div class="list"><div class="lrow edge-human fold"><span class="dot"></span><span class="title">SYN20 · Dokundu</span><span class="time">11:02</span><span class="sub">Süzgeçle bastırıldı</span></div></div></div>
+      </figure>
+
+      <figure class="state">
+        <figcaption><span class="n">9</span><b>Gruplanmış</b><span class="role">günlük üst sınırı aşan gruplanır (S11)</span></figcaption>
+        <div class="lock"><div class="os-notif"><div class="app"><span class="app-icon"></span><span>Qapsule</span><span class="grow"></span><span>14:35</span></div>
+          <span><b>SYN20 · 3 olay</b></span><span class="muted">Aç</span></div></div>
+      </figure>
+
+      <figure class="state">
+        <figcaption><span class="n">10</span><b>Simüle</b><span class="role">bildirim üretilmez</span></figcaption>
+        <div class="ph"><div class="ph-status note-tone"><span>Yeniden oynatma · simüle</span></div><div class="list"><div class="lrow edge-human"><span class="dot"></span><span class="title">SYN20 · Kırıldı</span><span class="time">14:35</span><span class="sub">simüle olay</span></div></div></div>
+      </figure>
+    </div>
+  </section>
+</main>
+</body>
+</html>

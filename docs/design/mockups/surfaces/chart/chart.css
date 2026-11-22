@@ -1,0 +1,1489 @@
+/* RD2 M2/M3 (chart) — shared sheet for the chart surface mockups Y01–Y27.
+ *
+ * Layering: _base/base.css → tavek/tavek.css (the direction: axis tags, chips, band,
+ * bracket, strokes) → this file (surface pages: state cards, the chart cell's chrome,
+ * phone frames). Specification, not product code: every colour, type size, space,
+ * radius and rule is a `var(--…)` from the look (`qp look css tavek|tavek-tel`). The only
+ * px literals are the frame geometry below: the CSS sizes the core charts are rendered at
+ * (render.sh), so the image sits 1:1 in its slot. Overlay positions (--x, --y) are
+ * fractions of a slot, computed from the core's scene for that slot size (README). */
+
+:root {
+  /* Frame geometry (render.sh slot sizes). */
+  --c-hero-w: 900px;
+  --c-hero-h: 540px;
+  --c-cell-w: 600px;
+  --c-cell-h: 380px;
+  --c-tel-w: 390px;
+  --c-tel-h: 300px;
+  --c-tel-hero-h: 340px;
+  /* Phone viewport of the full-screen frames (GOAL §2: 390×844) and its device safe areas. */
+  --c-tel-vh: 844px;
+  --c-safe-top: 47px;
+  --c-safe-bottom: 34px;
+  /* Side column next to a hero cell (flow, origin, panel content). */
+  --c-side-w: 300px;
+  /* Core chart: legend row height (`space.plot` top 28) and the time axis strip (24). */
+  --c-legend-h: calc(var(--qp-space-4) + var(--qp-space-0));
+  --c-gap: var(--qp-space-4);
+}
+
+/* One page, two profiles: `?look=tavek` shows the desktop sections, `?look=tavek-tel`
+ * the phone sections (frame.js writes the look on <html>). */
+html[data-look="tavek-tel"] .only-desk,
+html:not([data-look="tavek-tel"]) .only-tel {
+  display: none !important;
+}
+
+body {
+  padding: var(--qp-space-5);
+}
+
+/* ---- Page header ------------------------------------------------------------------ */
+
+.pg {
+  width: calc(var(--c-hero-w) + var(--m-control-h) + var(--qp-space-2) + var(--c-side-w) + var(--c-gap));
+  display: flex;
+  flex-direction: column;
+  gap: var(--qp-space-5);
+}
+
+html[data-look="tavek-tel"] .pg {
+  width: calc(var(--c-tel-w) * 3 + var(--c-gap) * 2);
+}
+
+.pg-head {
+  display: flex;
+  flex-direction: column;
+  gap: var(--qp-space-1);
+  padding-bottom: var(--qp-space-3);
+  border-bottom: var(--m-rule) solid var(--m-line);
+}
+
+.pg-head .crumb {
+  font-size: var(--m-fs-note);
+  color: var(--m-muted);
+}
+
+.pg-head h1 {
+  display: flex;
+  align-items: baseline;
+  gap: var(--qp-space-2);
+  font-size: var(--m-fs-headline);
+  font-weight: var(--qp-head-weight);
+}
+
+.pg-head h1 .yn {
+  font-family: var(--m-font-figure);
+  font-size: var(--m-fs-figure);
+  color: var(--m-muted);
+  font-weight: normal;
+}
+
+.pg-head .lead {
+  max-width: 90ch;
+  color: var(--m-muted);
+}
+
+.pg-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--qp-space-1);
+}
+
+/* ---- Sections --------------------------------------------------------------------- */
+
+.sec {
+  display: flex;
+  flex-direction: column;
+  gap: var(--qp-space-3);
+}
+
+.sec-h {
+  display: flex;
+  align-items: baseline;
+  gap: var(--qp-space-2);
+  font-size: var(--m-fs-title);
+  font-weight: var(--qp-head-weight);
+}
+
+.sec-h .note {
+  font-weight: normal;
+}
+
+.hero {
+  display: flex;
+  gap: var(--c-gap);
+  align-items: flex-start;
+}
+
+/* ---- The chart cell: top bar (Y23), tool strip (Y02), the core chart -------------- */
+
+.cell {
+  flex: none;
+  display: flex;
+  flex-direction: column;
+  background: var(--m-chart-bg);
+  border: var(--m-rule) solid var(--m-line);
+  border-radius: var(--m-radius-card);
+  overflow: hidden;
+}
+
+.cell-top {
+  display: flex;
+  align-items: center;
+  gap: var(--qp-space-1);
+  height: var(--qp-bar-h);
+  padding: 0 var(--qp-space-2);
+  border-bottom: var(--m-rule) solid var(--m-line);
+  white-space: nowrap;
+}
+
+.cell-top .sym {
+  display: inline-flex;
+  align-items: baseline;
+  gap: var(--qp-space-1);
+  font-size: var(--m-fs-title);
+  font-weight: var(--qp-head-weight);
+  padding-right: var(--qp-space-1);
+}
+
+.cell-top .sym small {
+  font-size: var(--m-fs-note);
+  font-weight: normal;
+  color: var(--m-muted);
+}
+
+.cell-top .spacer {
+  flex: 1;
+}
+
+.vsep {
+  align-self: center;
+  height: var(--qp-space-3);
+  border-left: var(--m-rule) solid var(--m-line);
+  margin: 0 var(--qp-space-0);
+}
+
+/* Period pills, toolbar buttons: quiet until chosen; the choice is the only accent. */
+.tf,
+.tb {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--qp-space-0);
+  height: var(--m-control-h);
+  padding: 0 var(--qp-space-1);
+  border-radius: var(--m-radius-control);
+  font-size: var(--m-fs-label);
+  color: var(--m-muted);
+  border: var(--m-rule) solid transparent;
+  white-space: nowrap;
+}
+
+.tf.on,
+.tb.on {
+  background: var(--m-accent);
+  color: var(--m-on-accent);
+  font-weight: var(--qp-head-weight);
+}
+
+.tf.custom {
+  border-color: var(--m-accent);
+  color: var(--m-fg);
+}
+
+.tf.off {
+  opacity: var(--t-quiet);
+  text-decoration: line-through dotted;
+}
+
+.tf.agent,
+.tb.agent {
+  border: var(--m-rule) dashed var(--m-agent);
+  color: var(--m-agent);
+}
+
+.tb .ic {
+  width: var(--qp-space-3);
+  height: var(--qp-space-3);
+}
+
+.tb.fg {
+  color: var(--m-fg);
+}
+
+/* Inline line icons: drawn with the text colour, never a colour of their own. */
+.ic {
+  width: var(--qp-space-3);
+  height: var(--qp-space-3);
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.4;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  flex: none;
+}
+
+.cell-body {
+  display: flex;
+  position: relative;
+}
+
+/* Y02 drawing tool strip: attached to the cell's left inner edge (OV-15), not floating. */
+.tools {
+  flex: none;
+  width: calc(var(--m-control-h) + var(--qp-space-2));
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--m-rule);
+  padding: var(--qp-space-1) 0;
+  border-right: var(--m-rule) solid var(--m-line);
+}
+
+.tool {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: var(--m-control-h);
+  height: var(--m-control-h);
+  border-radius: var(--m-radius-control);
+  color: var(--m-muted);
+}
+
+.tool.on {
+  background: var(--m-accent);
+  color: var(--m-on-accent);
+}
+
+.tool.set {
+  color: var(--m-fg);
+}
+
+/* Sticky (continuous) mode: a small dot in the corner of the chosen tool. */
+.tool.sticky::after {
+  content: "";
+  position: absolute;
+  right: var(--m-rule);
+  bottom: var(--m-rule);
+  width: var(--qp-space-0);
+  height: var(--qp-space-0);
+  border-radius: 50%;
+  background: currentColor;
+}
+
+.tools .sep {
+  width: var(--qp-space-3);
+  border-top: var(--m-rule) solid var(--m-line);
+  margin: var(--qp-space-0) 0;
+}
+
+.tools .grow {
+  flex: 1;
+}
+
+.tools.ro .tool {
+  opacity: var(--t-quiet);
+}
+
+/* Tooltip of a tool (one at a time; the spec's hint text). */
+.tip {
+  position: absolute;
+  left: calc(100% + var(--qp-space-1));
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 3;
+  display: inline-flex;
+  gap: var(--qp-space-1);
+  padding: var(--qp-space-0) var(--qp-space-1);
+  border-radius: var(--m-radius-control);
+  background: var(--m-fg);
+  color: var(--m-chart-bg);
+  font-size: var(--m-fs-note);
+  white-space: nowrap;
+}
+
+.tip kbd {
+  font-family: var(--m-font-figure);
+  opacity: 0.7;
+}
+
+.slot-hero {
+  width: var(--c-hero-w);
+  height: var(--c-hero-h);
+}
+
+.slot-cell {
+  width: var(--c-cell-w);
+  height: var(--c-cell-h);
+}
+
+.slot-tel {
+  width: var(--c-tel-w);
+  height: var(--c-tel-h);
+}
+
+.slot-tel-hero {
+  width: var(--c-tel-w);
+  height: var(--c-tel-hero-h);
+}
+
+/* Status strip under a cell: where the spec puts "Canlı · son bar …" (Y25 line). */
+.cell-foot {
+  display: flex;
+  align-items: center;
+  gap: var(--qp-space-2);
+  min-height: var(--qp-space-4);
+  padding: 0 var(--qp-space-2);
+  border-top: var(--m-rule) solid var(--m-line);
+  font-size: var(--m-fs-note);
+  color: var(--m-muted);
+  white-space: nowrap;
+}
+
+.cell-foot .spacer {
+  flex: 1;
+}
+
+/* Replay band at the head of the cell (D-simüle). */
+.band-note {
+  display: flex;
+  align-items: center;
+  gap: var(--qp-space-2);
+  padding: var(--qp-space-0) var(--qp-space-2);
+  background: var(--m-note-bg);
+  color: var(--m-note-fg);
+  font-size: var(--m-fs-note);
+  white-space: nowrap;
+}
+
+.band-alert {
+  display: flex;
+  align-items: center;
+  gap: var(--qp-space-2);
+  padding: var(--qp-space-0) var(--qp-space-2);
+  background: var(--m-alert-bg);
+  color: var(--m-alert-fg);
+  font-size: var(--m-fs-note);
+}
+
+/* ---- Overlay additions to tavek.css ------------------------------------------------ */
+
+/* A word at the end of the core's legend row (D-*: "Gecikmeli 15 dk", "Veri bayat"). */
+.lg-add {
+  position: absolute;
+  left: var(--x);
+  top: 0;
+  height: var(--c-legend-h);
+  display: inline-flex;
+  align-items: center;
+  gap: var(--qp-space-1);
+  font-size: var(--m-fs-note);
+  color: var(--m-muted);
+  white-space: nowrap;
+}
+
+.lg-add.warn,
+.warn {
+  color: var(--m-warn);
+}
+
+.lg-add.agent {
+  color: var(--m-agent);
+}
+
+.lg-add.note {
+  color: var(--m-note-fg);
+}
+
+/* Covers the panes but keeps the axes: an error or a state in place of the marks. */
+.cover {
+  position: absolute;
+  left: 0;
+  top: var(--c-legend-h);
+  right: var(--t-gutter);
+  bottom: var(--t-time-h);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--qp-space-1);
+  padding: var(--qp-space-3);
+  background: var(--m-chart-bg);
+  text-align: center;
+  pointer-events: auto;
+}
+
+.cover.full {
+  inset: 0;
+}
+
+/* Future bars in a replay: everything right of the playhead is not known yet. */
+.future {
+  position: absolute;
+  left: var(--x);
+  right: var(--t-gutter);
+  top: var(--c-legend-h);
+  bottom: var(--t-time-h);
+  background: var(--m-chart-bg);
+}
+
+.playhead {
+  position: absolute;
+  left: var(--x);
+  top: var(--c-legend-h);
+  bottom: var(--t-time-h);
+  border-left: var(--m-rule) solid var(--m-note-fg);
+}
+
+.play-pill {
+  position: absolute;
+  left: var(--x);
+  bottom: 0;
+  height: var(--t-time-h);
+  display: flex;
+  align-items: center;
+  transform: translateX(-50%);
+}
+
+.play-pill span {
+  padding: 0 var(--qp-space-1);
+  border-radius: var(--m-radius-control);
+  background: var(--m-note-bg);
+  color: var(--m-note-fg);
+  border: var(--m-rule) solid var(--m-note-fg);
+  font-family: var(--m-font-figure);
+  font-size: var(--m-fs-figure);
+  white-space: nowrap;
+}
+
+/* Stale last value: the core's label redrawn faint with the stale shape. */
+.ax-tag.stale {
+  background: var(--m-chart-bg);
+  color: var(--m-muted);
+  border: var(--m-rule) dotted var(--m-warn);
+  border-right: none;
+}
+
+.ax-tag.quiet {
+  opacity: var(--t-quiet);
+}
+
+/* A hidden drawing's watch: only the axis tag, a thin frame, no line (Y09). */
+.ax-tag.thin {
+  background: var(--m-chart-bg);
+  color: var(--m-muted);
+  border: var(--m-rule) solid var(--m-line);
+  border-right: none;
+}
+
+/* Phone: the chip folds into the axis tag ("120,50 │ ◐ 2/3"), the tag grows leftwards. */
+.ax-tag.wide {
+  width: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--qp-space-0);
+}
+
+.ax-tag.wide .div {
+  opacity: 0.6;
+}
+
+/* Chip states. */
+.ax-chip.dim {
+  opacity: var(--t-quiet);
+}
+
+.ax-chip.sel {
+  box-shadow: 0 0 0 var(--m-rule) var(--m-accent);
+}
+
+.ax-chip .warn {
+  color: var(--m-warn);
+}
+
+.ax-chip .agent-w {
+  color: var(--m-agent);
+}
+
+/* One-time highlight of a chip whose state just changed (--motion; spec shows it held). */
+.ax-chip.flash {
+  box-shadow: 0 0 0 calc(var(--m-rule) * 2) color-mix(in srgb, var(--m-accent) 45%, transparent);
+}
+
+.st.paused::before {
+  border-radius: 0;
+  border-width: 0 var(--m-rule);
+  width: var(--qp-space-0);
+}
+
+.st.dashed::before {
+  border-style: dashed;
+}
+
+.st.matched::before {
+  background: currentColor;
+}
+
+.st.valid {
+  color: var(--qp-valid);
+}
+
+.st.invalid {
+  color: var(--qp-invalid);
+}
+
+/* SVG strokes added by the surfaces. */
+.overlay .ghost {
+  stroke: var(--m-human);
+  stroke-dasharray: 2 4;
+  opacity: 0.45;
+}
+
+.overlay .agent.stale {
+  opacity: 0.45;
+}
+
+.overlay .watch.armed {
+  opacity: var(--t-quiet);
+}
+
+.overlay .hl {
+  stroke-width: calc(var(--m-rule) * 3);
+}
+
+.overlay .temp {
+  stroke: var(--m-human);
+  stroke-dasharray: 3 3;
+}
+
+.overlay .notch-hollow {
+  stroke: var(--m-human);
+  stroke-width: calc(var(--m-rule) * 2);
+  opacity: 0.6;
+}
+
+/* Trigger-bar marker of a match (≤ chart.mark_max_px): a small engine-free dot. */
+.mark-dot {
+  position: absolute;
+  left: var(--x);
+  top: var(--y);
+  width: var(--qp-space-1);
+  height: var(--qp-space-1);
+  border-radius: 50%;
+  background: var(--qp-valid);
+  box-shadow: 0 0 0 var(--m-rule) var(--m-chart-bg);
+  transform: translate(-50%, -50%);
+}
+
+.mark-dot.hollow {
+  background: var(--m-chart-bg);
+  border: var(--m-rule) solid var(--m-fg);
+}
+
+/* Drawing handles of a selected drawing (Y03). */
+.handle {
+  position: absolute;
+  left: var(--x);
+  top: var(--y);
+  width: var(--qp-space-1);
+  height: var(--qp-space-1);
+  border-radius: 50%;
+  background: var(--m-chart-bg);
+  border: calc(var(--m-rule) * 1.5) solid var(--m-accent);
+  transform: translate(-50%, -50%);
+}
+
+/* Floating card on the plot (the selected drawing's bar, a picker, a menu): the only
+ * place a shadow is allowed. */
+.float {
+  position: absolute;
+  left: var(--x);
+  top: var(--y);
+  z-index: 2;
+  background: var(--m-card);
+  border: var(--m-rule) solid var(--m-line);
+  border-radius: var(--m-radius-card);
+  box-shadow: var(--m-shadow);
+  pointer-events: auto;
+}
+
+.fbar {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--m-rule);
+  padding: var(--qp-space-0);
+  white-space: nowrap;
+  font-size: var(--m-fs-note);
+}
+
+.fbar > span {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--qp-space-0);
+  height: calc(var(--m-control-h) - var(--qp-space-1));
+  padding: 0 var(--qp-space-1);
+  border-radius: var(--m-radius-control);
+  color: var(--m-muted);
+}
+
+.fbar > span.fg {
+  color: var(--m-fg);
+}
+
+.fbar > .div {
+  height: var(--qp-space-3);
+  padding: 0;
+  border-left: var(--m-rule) solid var(--m-line);
+  border-radius: 0;
+}
+
+.fbar .swatch {
+  width: var(--qp-space-2);
+  border-top: calc(var(--m-rule) * 2) solid var(--m-human);
+}
+
+.fbar .act-go {
+  background: var(--m-accent);
+  color: var(--m-on-accent);
+  font-weight: var(--qp-head-weight);
+}
+
+.fbar .act-agent {
+  background: var(--m-agent);
+  color: var(--m-chart-bg);
+  font-weight: var(--qp-head-weight);
+}
+
+.menu {
+  display: flex;
+  flex-direction: column;
+  padding: var(--qp-space-0);
+  min-width: calc(var(--qp-space-5) * 6);
+  font-size: var(--m-fs-label);
+}
+
+.menu > span {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--qp-space-3);
+  padding: var(--qp-space-0) var(--qp-space-1);
+  border-radius: var(--m-radius-control);
+  white-space: nowrap;
+}
+
+.menu > span.on {
+  background: var(--m-panel);
+}
+
+.menu kbd,
+.menu .k {
+  font-family: var(--m-font-figure);
+  font-size: var(--m-fs-note);
+  color: var(--m-muted);
+}
+
+.menu hr {
+  border: none;
+  border-top: var(--m-rule) solid var(--m-line);
+  margin: var(--qp-space-0) 0;
+}
+
+/* Legend block (Y18): rows under the core's OHLC row, stacked at the pane's top-left. */
+.lg {
+  position: absolute;
+  left: var(--qp-space-1);
+  top: var(--qp-space-0);
+  display: flex;
+  flex-direction: column;
+  gap: var(--m-rule);
+  pointer-events: auto;
+}
+
+.lg-row {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--qp-space-1);
+  align-self: flex-start;
+  min-height: calc(var(--qp-space-4) - var(--qp-space-0));
+  padding: 0 var(--qp-space-1);
+  border-radius: var(--m-radius-control);
+  background: color-mix(in srgb, var(--m-chart-bg) 85%, transparent);
+  border: var(--m-rule) solid transparent;
+  font-size: var(--m-fs-label);
+  white-space: nowrap;
+}
+
+.lg-row.first {
+  font-size: var(--m-fs-label);
+}
+
+.lg-row .nm {
+  font-weight: var(--qp-head-weight);
+}
+
+.lg-row .v {
+  font-family: var(--m-font-figure);
+  font-size: var(--m-fs-figure);
+  font-variant-numeric: tabular-nums;
+}
+
+.lg-row .k {
+  color: var(--m-muted);
+  font-family: var(--m-font-figure);
+  font-size: var(--m-fs-figure);
+}
+
+.lg-row.sel {
+  border-color: var(--m-accent);
+}
+
+.lg-row.off .nm,
+.lg-row.off .v {
+  color: var(--m-muted);
+}
+
+.lg-row .ctl {
+  display: inline-flex;
+  gap: var(--m-rule);
+  color: var(--m-muted);
+  margin-left: var(--qp-space-0);
+}
+
+.lg-row .ctl .ic {
+  width: var(--qp-space-3);
+  height: var(--qp-space-3);
+}
+
+/* Origin dash in front of a legend row: none for the human (default), dashed agent,
+ * dotted engine. */
+.odash {
+  width: var(--qp-space-2);
+  border-top: calc(var(--m-rule) * 2) dashed var(--m-agent);
+}
+
+.odash.engine {
+  border-top-style: dotted;
+  border-top-color: var(--m-engine);
+}
+
+.sw {
+  width: var(--qp-space-1);
+  height: var(--qp-space-1);
+  border-radius: var(--m-rule);
+  background: var(--sw, var(--m-fg));
+}
+
+/* Skeleton blocks (O-yükleniyor): the last layout, no spinner, no fake percentage. */
+.sk {
+  display: block;
+  height: var(--qp-space-2);
+  border-radius: var(--m-radius-control);
+  background: var(--m-line);
+}
+
+.sk-col {
+  position: absolute;
+  right: var(--qp-space-1);
+  top: var(--c-legend-h);
+  bottom: var(--t-time-h);
+  width: calc(var(--t-gutter) - var(--qp-space-3));
+  display: flex;
+  flex-direction: column;
+  justify-content: space-around;
+}
+
+.sk-row {
+  position: absolute;
+  left: var(--qp-space-2);
+  right: var(--t-gutter);
+  bottom: var(--qp-space-1);
+  display: flex;
+  justify-content: space-between;
+}
+
+.sk-row .sk {
+  width: var(--qp-space-4);
+}
+
+.sk-lg {
+  position: absolute;
+  left: var(--qp-space-2);
+  top: var(--qp-space-1);
+  display: flex;
+  gap: var(--qp-space-1);
+}
+
+.sk-gutter {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: var(--t-gutter);
+  border-left: var(--m-rule) solid var(--m-line);
+}
+
+.sk-time {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: var(--t-time-h);
+  border-top: var(--m-rule) solid var(--m-line);
+}
+
+/* Empty states: one line, one next step (O-boş). */
+.empty-line {
+  color: var(--m-muted);
+  font-size: var(--m-fs-body);
+}
+
+.search-field {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--qp-space-1);
+  min-width: calc(var(--qp-space-5) * 8);
+  height: var(--m-control-h);
+  padding: 0 var(--qp-space-2);
+  border-radius: var(--m-radius-control);
+  border: var(--m-rule) solid var(--m-accent);
+  box-shadow: 0 0 0 calc(var(--m-rule) * 2) color-mix(in srgb, var(--m-accent) 30%, transparent);
+  color: var(--m-muted);
+  font-size: var(--m-fs-label);
+}
+
+.search-field .note {
+  margin-left: auto;
+}
+
+.lock {
+  display: grid;
+  place-items: center;
+  width: var(--qp-space-5);
+  height: var(--qp-space-5);
+  border-radius: 50%;
+  border: var(--m-rule) solid var(--m-line);
+  color: var(--m-muted);
+}
+
+.cover h4 {
+  margin: 0;
+  font-size: var(--m-fs-label);
+  font-weight: var(--qp-head-weight);
+}
+
+.cover p {
+  max-width: 52ch;
+  font-size: var(--m-fs-label);
+  color: var(--m-muted);
+}
+
+.cover .btn {
+  min-height: calc(var(--m-control-h) - var(--qp-space-0));
+  margin-top: var(--qp-space-0);
+}
+
+/* Scale and adjustment controls at the end of the time axis (Y23). */
+.scale-ctl {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  width: var(--t-gutter);
+  height: var(--t-time-h);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--m-rule);
+  background: var(--m-chart-bg);
+  border-top: var(--m-rule) solid var(--m-line);
+  pointer-events: auto;
+}
+
+.scale-ctl span {
+  padding: 0 var(--qp-space-0);
+  border-radius: var(--m-radius-control);
+  font-size: var(--m-fs-note);
+  color: var(--m-muted);
+  line-height: var(--qp-lh);
+}
+
+.scale-ctl span.on {
+  background: var(--m-accent);
+  color: var(--m-on-accent);
+}
+
+/* ---- Side column: flow diagram, origin key, panel content -------------------------- */
+
+.side {
+  flex: none;
+  width: var(--c-side-w);
+  display: flex;
+  flex-direction: column;
+  gap: var(--qp-space-3);
+}
+
+.side-box {
+  background: var(--m-card);
+  border: var(--m-rule) solid var(--m-line);
+  border-radius: var(--m-radius-card);
+  overflow: hidden;
+}
+
+.side-box > h3 {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  padding: var(--qp-space-2) var(--qp-space-3) var(--qp-space-1);
+  font-size: var(--m-fs-label);
+  font-weight: var(--qp-head-weight);
+  color: var(--m-muted);
+}
+
+/* Flow: numbered steps joined by a rule; the step that this frame shows is marked. */
+.flow {
+  display: flex;
+  flex-direction: column;
+  padding: 0 var(--qp-space-3) var(--qp-space-3);
+}
+
+.flow li {
+  position: relative;
+  display: grid;
+  grid-template-columns: var(--qp-space-4) 1fr;
+  gap: var(--qp-space-1);
+  padding-bottom: var(--qp-space-2);
+  font-size: var(--m-fs-label);
+}
+
+.flow li::before {
+  content: attr(data-n);
+  display: grid;
+  place-items: center;
+  width: calc(var(--qp-space-3) + var(--qp-space-1));
+  height: calc(var(--qp-space-3) + var(--qp-space-1));
+  border-radius: 50%;
+  border: var(--m-rule) solid var(--m-line);
+  background: var(--m-card);
+  font-family: var(--m-font-figure);
+  font-size: var(--m-fs-note);
+  color: var(--m-muted);
+  position: relative;
+  z-index: 1;
+}
+
+.flow li:not(:last-child)::after {
+  content: "";
+  position: absolute;
+  left: calc((var(--qp-space-3) + var(--qp-space-1)) / 2);
+  top: calc(var(--qp-space-3) + var(--qp-space-1));
+  bottom: 0;
+  border-left: var(--m-rule) solid var(--m-line);
+}
+
+.flow li.here::before {
+  border-color: var(--m-accent);
+  color: var(--m-fg);
+}
+
+.flow li b {
+  font-weight: var(--qp-head-weight);
+}
+
+.flow li .note {
+  display: block;
+}
+
+.kv {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: var(--qp-space-0) var(--qp-space-2);
+  padding: 0 var(--qp-space-3) var(--qp-space-3);
+  font-size: var(--m-fs-label);
+}
+
+.kv dt {
+  color: var(--m-muted);
+}
+
+.kv dd {
+  margin: 0;
+}
+
+/* Rows in a side list (objects, evidence): leading edge carries the origin stroke. */
+.rows li {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: var(--m-rule) var(--qp-space-2);
+  padding: var(--qp-space-1) var(--qp-space-3) var(--qp-space-1) var(--qp-space-2);
+  margin-left: var(--qp-space-2);
+  border-top: var(--m-rule) solid var(--m-line);
+  font-size: var(--m-fs-label);
+}
+
+.rows li .sub {
+  grid-column: 1 / -1;
+  font-size: var(--m-fs-note);
+  color: var(--m-muted);
+}
+
+.rows li.sel {
+  background: color-mix(in srgb, var(--m-accent) 12%, transparent);
+}
+
+.rows li.locked {
+  opacity: var(--t-quiet);
+}
+
+.rows .r {
+  font-size: var(--m-fs-note);
+  color: var(--m-muted);
+  white-space: nowrap;
+  text-align: right;
+}
+
+/* ---- State cards ------------------------------------------------------------------- */
+
+.states {
+  display: grid;
+  grid-template-columns: repeat(2, var(--c-cell-w));
+  gap: var(--qp-space-5) var(--c-gap);
+  align-items: start;
+}
+
+html[data-look="tavek-tel"] .states {
+  grid-template-columns: repeat(3, var(--c-tel-w));
+}
+
+.state {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--qp-space-1);
+}
+
+.state-h {
+  display: flex;
+  align-items: baseline;
+  gap: var(--qp-space-1);
+  font-size: var(--m-fs-label);
+}
+
+.state-h .n {
+  font-family: var(--m-font-figure);
+  font-size: var(--m-fs-figure);
+  color: var(--m-muted);
+}
+
+.state-h .t {
+  font-weight: var(--qp-head-weight);
+}
+
+.state-h .code {
+  margin-left: auto;
+  font-family: var(--m-font-figure);
+  font-size: var(--m-fs-note);
+  color: var(--m-muted);
+}
+
+.cap {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: var(--m-rule) var(--qp-space-2);
+  font-size: var(--m-fs-note);
+}
+
+.cap dt {
+  color: var(--m-muted);
+}
+
+.cap dd {
+  margin: 0;
+}
+
+.cap code,
+code.role {
+  font-family: var(--m-font-figure);
+  font-size: var(--m-fs-note);
+  color: var(--m-muted);
+}
+
+/* Tier 2: the state list next to the main state. */
+.state-list {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--m-fs-label);
+}
+
+.state-list th,
+.state-list td {
+  text-align: left;
+  vertical-align: top;
+  padding: var(--qp-space-1) var(--qp-space-2);
+  border-top: var(--m-rule) solid var(--m-line);
+}
+
+.state-list th {
+  color: var(--m-muted);
+  font-weight: normal;
+  font-size: var(--m-fs-note);
+  border-top: none;
+}
+
+.state-list td:first-child {
+  font-weight: var(--qp-head-weight);
+  white-space: nowrap;
+}
+
+.state-list tr.main td:first-child::after {
+  content: " · ana";
+  font-weight: normal;
+  color: var(--m-accent);
+}
+
+/* Mini sample of a state, inline in the state list (chip, pill, tag). */
+.sample {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--qp-space-1);
+}
+
+.sample .ax-chip,
+.sample .ax-tag,
+.sample .intent-pill {
+  position: static;
+  transform: none;
+}
+
+.sample .ax-tag {
+  width: auto;
+  border-radius: var(--m-radius-control);
+}
+
+/* ---- Phone frames (`tavek-tel`) ----------------------------------------------------- */
+
+.tel {
+  /* tavek.css: the phone price gutter is 56. */
+  --t-gutter: calc(var(--qp-space-5) + var(--qp-space-4) + var(--qp-space-1));
+  width: var(--c-tel-w);
+  display: flex;
+  flex-direction: column;
+  background: var(--m-panel);
+  border: var(--m-rule) solid var(--m-line);
+  border-radius: var(--m-radius-card);
+  overflow: hidden;
+}
+
+.tel.full {
+  height: var(--c-tel-vh);
+  padding-top: var(--c-safe-top);
+  border-radius: calc(var(--m-radius-card) * 4);
+}
+
+.tel-head {
+  display: flex;
+  align-items: center;
+  gap: var(--qp-space-1);
+  min-height: var(--m-control-h);
+  padding: 0 var(--qp-space-1);
+}
+
+.tel-head .back {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--m-control-h);
+  padding: 0 var(--qp-space-1);
+  color: var(--m-muted);
+  font-size: var(--m-fs-label);
+}
+
+.tel-head .title {
+  flex: 1;
+  font-weight: var(--qp-head-weight);
+}
+
+.tel-head .title small {
+  font-weight: normal;
+  color: var(--m-muted);
+  font-size: var(--m-fs-label);
+}
+
+.tel-head .more {
+  display: grid;
+  place-items: center;
+  width: var(--m-control-h);
+  height: var(--m-control-h);
+  color: var(--m-muted);
+}
+
+.tel-tf {
+  display: flex;
+  gap: var(--qp-space-0);
+  padding: 0 var(--qp-space-2) var(--qp-space-1);
+}
+
+.tel-tf .tf {
+  height: calc(var(--m-control-h) - var(--qp-space-1));
+  padding: 0 var(--qp-space-2);
+}
+
+.tel-tf .spacer {
+  flex: 1;
+}
+
+.tel-sub {
+  display: flex;
+  align-items: center;
+  gap: var(--qp-space-3);
+  min-height: var(--m-control-h);
+  padding: 0 var(--qp-space-3);
+  border-top: var(--m-rule) solid var(--m-line);
+  font-size: var(--m-fs-label);
+  color: var(--m-muted);
+}
+
+.tel-sub .on {
+  color: var(--m-fg);
+  font-weight: var(--qp-head-weight);
+  box-shadow: inset 0 calc(var(--qp-tab-rule) * -1) 0 var(--m-focus);
+  align-self: stretch;
+  display: flex;
+  align-items: center;
+}
+
+.tel-sub .spacer {
+  flex: 1;
+}
+
+.tel-sub .lvl {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--qp-space-1);
+  min-height: calc(var(--m-control-h) - var(--qp-space-1));
+  padding: 0 var(--qp-space-2);
+  border-radius: var(--m-radius-control);
+  border: var(--m-rule) solid var(--m-line);
+  color: var(--m-fg);
+}
+
+.tel .chart-slot {
+  flex: none;
+}
+
+.tel .grow {
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+/* Bottom sheet (decision, details): half height, grabber, touch-size actions. */
+.sheet {
+  display: flex;
+  flex-direction: column;
+  gap: var(--qp-space-1);
+  padding: var(--qp-space-1) var(--qp-space-3) var(--qp-space-2);
+  background: var(--m-card);
+  border-top: var(--m-rule) solid var(--m-line);
+  border-radius: var(--m-radius-card) var(--m-radius-card) 0 0;
+  box-shadow: var(--m-shadow);
+}
+
+.sheet .grabber {
+  align-self: center;
+  width: calc(var(--qp-space-5) + var(--qp-space-1));
+  height: var(--qp-space-0);
+  border-radius: var(--qp-space-0);
+  background: var(--m-line);
+}
+
+.sheet h2 {
+  font-size: var(--m-fs-title);
+  font-weight: var(--qp-head-weight);
+}
+
+.sheet .meta {
+  display: flex;
+  align-items: center;
+  gap: var(--qp-space-2);
+  flex-wrap: wrap;
+}
+
+.sheet .ev li {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--qp-space-2);
+  padding: var(--qp-space-0) 0;
+  border-top: var(--m-rule) solid var(--m-line);
+  font-size: var(--m-fs-label);
+}
+
+.sheet .acts {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--qp-space-1);
+}
+
+.sheet .acts.agent .primary {
+  background: var(--m-agent);
+  border-color: var(--m-agent);
+  color: var(--m-chart-bg);
+}
+
+.tabbar {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  border-top: var(--m-rule) solid var(--m-line);
+  padding-bottom: var(--c-safe-bottom);
+  background: var(--m-panel);
+}
+
+.tabbar span {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: var(--qp-tab-h);
+  font-size: var(--m-fs-label);
+  color: var(--m-muted);
+  border-top: var(--qp-tab-rule) solid transparent;
+}
+
+.tabbar span.on {
+  color: var(--m-fg);
+  font-weight: var(--qp-head-weight);
+  border-top-color: var(--m-focus);
+}
+
+/* A note on the page that the other profile has more (or that this surface has none). */
+.profile-note {
+  padding: var(--qp-space-2) var(--qp-space-3);
+  border: var(--m-rule) dashed var(--m-line);
+  border-radius: var(--m-radius-card);
+  color: var(--m-muted);
+  font-size: var(--m-fs-label);
+}
+
+.profile-note code {
+  font-family: var(--m-font-figure);
+  font-size: var(--m-fs-note);
+}
+
+/* Icons inside an overlay keep their own size (base.css stretches overlay svgs). */
+.overlay svg.ic {
+  position: static;
+  width: var(--qp-space-3);
+  height: var(--qp-space-3);
+  overflow: visible;
+}
+
+.overlay svg.ic path {
+  vector-effect: none;
+  stroke-width: 1.4;
+}
+
+/* With no room left on the legend row, the D-* word takes the row's end and the core
+ * elides the indicator values on the right (P6); the word is never dropped. */
+.lg-add {
+  right: 0;
+  padding-right: var(--qp-space-2);
+  background: var(--m-chart-bg);
+}
+
+.lg-add.free {
+  right: auto;
+  background: none;
+}
+
+/* The top bar never widens the cell: the chart slot sets the width. */
+.cell-top {
+  width: 0;
+  min-width: 100%;
+  overflow: hidden;
+}
+
+.agent-w {
+  color: var(--m-agent);
+}
+
+/* Y18: a crop of the state cell (same 600×380 image, only its top or bottom 150 px):
+ * frame geometry, the image is not rescaled. */
+.slot-crop {
+  width: var(--c-cell-w);
+  height: 150px;
+}
+
+.slot-crop.bottom > img {
+  object-position: left bottom;
+}
+
+/* Hides the core's one-line legend so the stacked spec legend can be shown in its place
+ * (the core draws the indicator values right of the OHLC row today; README "Açıklar"). */
+.lg-mask {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  height: var(--c-legend-h);
+  background: var(--m-chart-bg);
+}
+
+.lg.in-pane {
+  top: var(--y);
+}
+
+.cover.pane {
+  top: var(--y);
+  bottom: calc(100% - var(--y2));
+}
+
+.lg.in-pane .lg-row {
+  background: var(--m-chart-bg);
+}
+
+/* Phone held sideways (Y27): 844×390 viewport, side safe areas; the chart is 760×300. */
+.tel.land {
+  width: 844px;
+  height: 390px;
+  padding: 0 42px;
+  grid-column: 1 / -1;
+}
+
+.slot-tel-land {
+  width: 760px;
+  height: 300px;
+}
+
+.state.wide {
+  grid-column: 1 / -1;
+}
+
+/* Quick level being placed (Y27): the floating confirm row, touch-size. */
+.place {
+  position: absolute;
+  left: var(--qp-space-2);
+  top: var(--y);
+  transform: translateY(calc(-100% - var(--qp-space-1)));
+  display: flex;
+  align-items: center;
+  gap: var(--qp-space-1);
+  padding: var(--qp-space-0);
+  background: var(--m-card);
+  border: var(--m-rule) solid var(--m-line);
+  border-radius: var(--m-radius-card);
+  box-shadow: var(--m-shadow);
+  font-size: var(--m-fs-label);
+  pointer-events: auto;
+}
+
+.place .btn {
+  min-height: calc(var(--m-control-h) - var(--qp-space-1));
+  padding: 0 var(--qp-space-2);
+}
+
+.place b {
+  padding: 0 var(--qp-space-1);
+  font-weight: var(--qp-head-weight);
+}
+
+/* A chip under its level, when the space above belongs to the legend row. */
+.ax-chip.below {
+  transform: translateY(var(--qp-space-0));
+}

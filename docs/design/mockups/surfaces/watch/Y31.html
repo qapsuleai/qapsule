@@ -1,0 +1,140 @@
+<!doctype html>
+<!-- RD2 M2/M3 (watch) Y31 — Sessiz zil ve izleme sağlığı. Kademe 1: on durum (şartname sırası); iki profil.
+     Açmak: ?look=tavek (masaüstü) ya da ?look=tavek-tel (telefon) &theme=dark|light &vars=<önek>
+     (README). Değerler yalnız var(--…); satır içi px yalnız çerçeve geometrisi (kesit boyu, yüzen
+     kartın konumu, bindirmenin grafik kesirleri); metin sentetik; grafik çekirdekten (`qp render`). -->
+<html lang="tr">
+<head>
+  <meta charset="utf-8">
+  <title>Y31 Sessiz zil ve izleme sağlığı</title>
+  <link rel="stylesheet" href="../../_base/base.css">
+  <link rel="stylesheet" href="../../_base/phone.css">
+  <link rel="stylesheet" href="../../tavek/tavek.css">
+  <link rel="stylesheet" href="watch.css">
+  <script src="../../_base/frame.js"></script>
+</head>
+<body class="sheet">
+<header class="sheet-h">
+  <h1><span class="id">Y31</span>Sessiz zil ve izlemenin sağlık göstergesi</h1>
+  <p>(a) Notsuz, cümlesiz, pozisyonsuz çizimde hiçbir şey kurulmaz: sol uçta soluk, içi boş zil; üstüne gelince açıklama. (b) İzlemelerin sağlığı tek tek ve toplu; sorun yokken sessiz, alt şerit bir satırla hep söyler.</p>
+  <div class="facts"><span class="chip">Kademe 1</span><span class="chip">K72</span><span class="chip">K73</span><span class="chip">10 / 10 durum</span><span class="chip">watch.md · Y31</span></div>
+</header>
+<h3 class="block-h">Akış</h3>
+<ol class="flow"><li><span>Çizim, not yok</span><span class="k">sessiz zil</span></li><li><span>Üstüne gel</span><span class="k">açıklama + “Bunu izle”</span></li><li><span>Not yaz / Bunu izle</span><span class="k">zil çipe döner (Y04)</span></li><li><span>Sağlık</span><span class="k">bilinmiyor → izleniyor</span></li><li><span>Rapor gecikir / kopar</span><span class="k">gecikiyor → tek şerit</span></li><li><span>Bağlantı döner</span><span class="k">tek bildirim, kaçırılan süre</span></li></ol>
+<section class="profile desk" aria-label="Masaüstü"><h2>Masaüstü <span class="note">tavek · (a) grafik hücresi 560 × 300 · (b) Y07 satırı ve Y25 alt şeridi</span></h2>
+<div class="states">
+<figure class="state "><figcaption><span class="n">1</span><b>Sessiz zil</b><code>—</code></figcaption>
+<div class="surface w-wide cell">
+  <div class="cell-bar"><span class="instr">SYN20</span><span class="seg"><span class="chip">4sa</span><span class="chip on">Günlük</span></span><span class="grow"></span><span class="note">Canlı · son bar 14:35</span></div>
+  <div class="chart-slot"><img data-chart="y31-182" data-tx="desk-182" alt="SYN20 günlük grafik">
+    <div class="overlay"><svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"><line class="human" x1="40" y1="28.16" x2="88.57" y2="28.16"></line></svg><div class="ax-tag human" style="--y: 28.16%">115,00</div><span class="bell " style="--x: 40%; --y: 28.16%" aria-label="Sessiz zil: izleme kurulmadı"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 11V7.5a4 4 0 0 1 8 0V11l1 1.5H3z"/><path d="M6.8 14a1.3 1.3 0 0 0 2.4 0"/></svg></span></div></div><div class="echo"><span class="sym">SYN20</span><span>115,00 yatay seviye · not yok, cümle yok, pozisyon yok</span><span class="grow"></span><span>izleme kurulmadı</span></div>
+</div>
+</figure>
+<figure class="state "><figcaption><span class="n">2</span><b>Sessiz zil · üstüne gelince</b><code>--card · --muted</code></figcaption>
+<div class="surface w-wide cell">
+  <div class="cell-bar"><span class="instr">SYN20</span><span class="seg"><span class="chip">4sa</span><span class="chip on">Günlük</span></span><span class="grow"></span><span class="note">Canlı · son bar 14:35</span></div>
+  <div class="chart-slot"><img data-chart="y31-182" data-tx="desk-182" alt="SYN20 günlük grafik">
+    <div class="overlay"><svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"><line class="human" x1="40" y1="28.16" x2="88.57" y2="28.16"></line></svg><div class="ax-tag human" style="--y: 28.16%">115,00</div><span class="bell hover" style="--x: 40%; --y: 28.16%" aria-label="Sessiz zil: izleme kurulmadı"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 11V7.5a4 4 0 0 1 8 0V11l1 1.5H3z"/><path d="M6.8 14a1.3 1.3 0 0 0 2.4 0"/></svg></span><div class="tip" style="--x: 34%; --y: 31%"><span>Bu çizim için izleme kurulmadı: not, cümle ya da pozisyon yok. Not yaz ya da ‘Bunu izle’.</span><div class="actions"><span class="btn primary">Bunu izle</span><span class="btn quiet">Not yaz</span></div></div></div></div>
+</div>
+</figure>
+<figure class="state "><figcaption><span class="n">3</span><b>Koruyucu varsayılan kuruldu</b><code>İ-kuruldu · varsayılan</code></figcaption>
+<div class="surface w-wide cell">
+  <div class="cell-bar"><span class="instr">SYN20</span><span class="seg"><span class="chip">4sa</span><span class="chip on">Günlük</span></span><span class="grow"></span><span class="note">Canlı · son bar 14:35</span></div>
+  <div class="chart-slot"><img data-chart="y31-182" data-tx="desk-182" alt="SYN20 günlük grafik">
+    <div class="overlay"><svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"><line class="watch" x1="2" y1="37.44" x2="88.57" y2="37.44"></line><line class="engine" x1="44" y1="23.51" x2="88.57" y2="23.51"></line></svg><div class="ax-chip human" style="--x: 2%; --y: 37.44%"><span>Koruyucu izleme</span><span class="ws r-fg"><i>○</i>Kuruldu</span><span class="who">varsayılan · pozisyonunun altında</span></div><div class="ax-tag human" style="--y: 37.44%">110,00</div><div class="ax-tag engine" style="--y: 23.51%">117,50</div><div class="ax-chip engine" style="--x: 44%; --y: 23.51%"><span class="origin engine">Pozisyon</span><span>maliyet 117,50</span></div></div></div><div class="echo"><span class="sym">ATL07</span><span>110,00 altında kapanış</span><span class="src">varsayılan</span><span class="grow"></span><span class="ws r-fg"><i>○</i>Kuruldu</span><span>· izleniyor, 14:35</span></div>
+</div>
+</figure>
+<figure class="state "><figcaption><span class="n">4</span><b>Kur ve göster</b><code>K72 kur ve göster</code></figcaption>
+<div class="surface w-wide cell">
+  <div class="cell-bar"><span class="instr">SYN20</span><span class="seg"><span class="chip">4sa</span><span class="chip on">Günlük</span></span><span class="grow"></span><span class="note">Canlı · son bar 14:35</span></div>
+  <div class="chart-slot"><img data-chart="y31-182" data-tx="desk-182" alt="SYN20 günlük grafik">
+    <div class="overlay"><svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"><line class="human" x1="14" y1="28.16" x2="88.57" y2="28.16"></line></svg><div class="ax-tag human" style="--y: 28.16%">115,00</div><div class="ax-chip human" style="--x: 14%; --y: 28.16%"><span>İzleme</span><span class="ws r-fg"><i>○</i>Kuruldu</span><span class="who">115,00 altında kapanış ·</span><u>değiştir</u></div><div class="intent-pill" style="--x: 14%; --y: 28.16%"><span>Not: “bunun altı zayıflık”</span><span class="muted">Sen · 14:36</span></div></div></div><div class="echo"><span class="sym">SYN20</span><span>Kuruldu: 115,00 altında kapanış</span><span class="grow"></span><span class="on-chart">değiştir</span></div>
+</div>
+</figure>
+<figure class="state "><figcaption><span class="n">5</span><b>Sağlık: bilinmiyor</b><code>sağlık · bilinmiyor</code></figcaption>
+<div class="surface w-wide "><div class="pane-h"><span>İzleme görevleri</span><span class="count">5 etkin</span></div><ul class="tasks"><li class="task2 edge-human "><div class="l1"><span class="sym">SYN20</span><span class="cond">115,00 altında kapanış</span></div><div class="l2"><span class="ws r-fg"><i>○</i>Kuruldu</span><span class="end r-muted"><span class="health unknown" aria-label="bilinmiyor"></span>Bilinmiyor · ilk veri bekleniyor</span></div></li>
+</ul><div class="statusline"><span>Canlı · son bar 14:35</span><span>Seans açık 10:00–18:00</span><span class="grow"></span><span class="it "><span class="health unknown"></span>1 izleme · ilk veri bekleniyor</span></div></div>
+</figure>
+<figure class="state "><figcaption><span class="n">6</span><b>Sağlık: izleniyor</b><code>sağlık · izleniyor</code></figcaption>
+<div class="surface w-wide "><div class="pane-h"><span>İzleme görevleri</span><span class="count">5 etkin</span></div><ul class="tasks"><li class="task2 edge-human "><div class="l1"><span class="sym">SYN20</span><span class="cond">115,00 altında kapanış</span></div><div class="l2"><span class="ws r-fg"><i>○</i>Kuruldu</span><span class="end r-muted"><span class="health ok" aria-label="izleniyor"></span>İzleniyor · son kontrol 14:35</span></div></li>
+<li class="task2 edge-human "><div class="l1"><span class="sym">KRM12</span><span class="cond">48,90 trend çizgisi altı</span></div><div class="l2"><span class="ws r-fg"><i>○</i>Kuruldu</span><span class="end r-muted"><span class="health ok" aria-label="izleniyor"></span>14:35</span></div></li>
+</ul><div class="statusline"><span>Canlı · son bar 14:35</span><span>Seans açık 10:00–18:00</span><span class="grow"></span><span class="it "><span class="health ok"></span>5 izleme · son kontrol 14:35</span></div></div>
+</figure>
+<figure class="state "><figcaption><span class="n">7</span><b>Sağlık: gecikiyor</b><code>sağlık · bozuk</code></figcaption>
+<div class="surface w-wide "><div class="pane-h"><span>İzleme görevleri</span><span class="count">5 etkin</span></div><ul class="tasks"><li class="task2 edge-human hot"><div class="l1"><span class="sym">KRM12</span><span class="cond">48,90 trend çizgisi altı</span></div><div class="l2"><span class="ws r-fg"><i>○</i>Kuruldu</span><span class="end r-warn"><span class="health degraded" aria-label="gecikiyor"></span>Gecikiyor · son kontrol 25 dk önce</span></div></li>
+<li class="task2 edge-human "><div class="l1"><span class="sym">SYN20</span><span class="cond">115,00 altında kapanış</span></div><div class="l2"><span class="ws r-fg"><i>○</i>Kuruldu</span><span class="end r-muted"><span class="health ok" aria-label="izleniyor"></span>14:35</span></div></li>
+</ul><div class="statusline"><span>Canlı · son bar 14:35</span><span>Seans açık 10:00–18:00</span><span class="grow"></span><span class="it r-warn"><span class="health degraded"></span>5 izleme · 1 gecikiyor</span></div></div>
+</figure>
+<figure class="state "><figcaption><span class="n">8</span><b>Sağlık: çalışmıyor</b><code>--alert-bg / --alert-fg</code></figcaption>
+<div class="surface w-wide "><div class="alert-strip"><span>İzlemeler çalışmıyor: veri bağlantısı yok · 14:35'ten beri</span><span class="more">Ayrıntı</span></div><div class="pane-h"><span>İzleme görevleri</span><span class="count">5 etkin</span></div><ul class="tasks"><li class="task2 edge-human "><div class="l1"><span class="sym">SYN20</span><span class="cond">115,00 altında kapanış</span></div><div class="l2"><span class="ws r-warn"><i>◌</i>Değerlendirilemiyor</span><span class="end r-warn"><span class="health failed" aria-label="çalışmıyor"></span>Çalışmıyor</span></div></li>
+<li class="task2 edge-human "><div class="l1"><span class="sym">KRM12</span><span class="cond">48,90 trend çizgisi altı</span></div><div class="l2"><span class="ws r-warn"><i>◌</i>Değerlendirilemiyor</span><span class="end r-warn"><span class="health failed" aria-label="çalışmıyor"></span>Çalışmıyor</span></div></li>
+</ul><div class="statusline"><span>Canlı · son bar 14:35</span><span>Seans açık 10:00–18:00</span><span class="grow"></span><span class="it "><span class="health failed"></span>5 izleme · çalışmıyor</span></div></div>
+</figure>
+<figure class="state "><figcaption><span class="n">9</span><b>İyileşti</b><code>tek bildirim</code></figcaption>
+<div class="surface w-wide "><div class="card recover"><div class="meta"><span class="origin engine">Motor</span><span class="note">15:02</span></div><p>İzlemeler yeniden çalışıyor · 14:35–15:02 arası değerlendirildi</p><p class="note">Bu arada olay yok · 5 izleme · <span class="on-chart">Günlük</span></p></div><div class="pane-h"><span>İzleme görevleri</span><span class="count">5 etkin</span></div><ul class="tasks"><li class="task2 edge-human "><div class="l1"><span class="sym">SYN20</span><span class="cond">115,00 altında kapanış</span></div><div class="l2"><span class="ws r-fg"><i>○</i>Kuruldu</span><span class="end r-muted"><span class="health ok" aria-label="izleniyor"></span>İzleniyor · 15:02</span></div></li>
+</ul><div class="statusline"><span>Canlı · son bar 14:35</span><span>Seans açık 10:00–18:00</span><span class="grow"></span><span class="it "><span class="health ok"></span>5 izleme · son kontrol 15:02</span></div></div>
+</figure>
+<figure class="state "><figcaption><span class="n">10</span><b>Duraklatıldı</b><code>İ-durdu</code></figcaption>
+<div class="surface w-wide "><div class="pane-h"><span>İzleme görevleri</span><span class="count">5 etkin</span></div><ul class="tasks"><li class="task2 edge-human "><div class="l1"><span class="sym">EGE09</span><span class="cond">RSI 14, 70 üstü</span></div><div class="l2"><span class="ws r-muted"><i>‖</i>Duraklatıldı</span><span class="end r-muted"><span class="health paused" aria-label="duraklatıldı"></span>Duraklatıldı · Sen, 14:40</span></div></li>
+</ul><div class="statusline"><span>Canlı · son bar 14:35</span><span>Seans açık 10:00–18:00</span><span class="grow"></span><span class="it "><span class="health ok"></span>4 izleme · 1 duraklatıldı</span></div></div>
+</figure>
+</div>
+</section>
+<section class="profile tel-only" aria-label="Telefon"><h2>Telefon <span class="note">tavek-tel · zil yok (yer yok): çizime dokununca alt sayfada aynı cümle · sağlık üst durum satırında tek simge + sözcük</span></h2>
+<div class="states">
+<figure class="state "><figcaption><span class="n">1</span><b>Sessiz zil (telefonda zil yok)</b><code>—</code></figcaption>
+<div class="frame phone tel part">
+  <div class="t-head"><span class="back">‹ Kule</span><b>SYN20</b><span class="note">günlük</span><span class="grow"></span><span class="note">Kapsül · İzleme</span></div>
+  <div class="chart-slot c-tel"><img data-chart="y31t-182" data-tx="desk-182" alt="SYN20 grafik">
+    <div class="overlay"><svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"><line class="human" x1="40" y1="28.26" x2="85.57" y2="28.26"></line></svg><div class="ax-tag human" style="--y: 28.26%">115,00</div></div></div>
+</div>
+</figure>
+<figure class="state "><figcaption><span class="n">2</span><b>Çizime dokununca</b><code>alt sayfa</code></figcaption>
+<div class="frame phone tel part">
+  <div class="t-head"><span class="back">‹ Kule</span><b>SYN20</b><span class="note">günlük</span><span class="grow"></span><span class="note">Kapsül · İzleme</span></div>
+  <div class="chart-slot c-tel"><img data-chart="y31t-182" data-tx="desk-182" alt="SYN20 grafik">
+    <div class="overlay"><svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"><line class="human" x1="40" y1="28.26" x2="85.57" y2="28.26"></line></svg><div class="ax-tag human" style="--y: 28.26%">115,00</div></div></div><div class="sheet-b"><h3>İzleme kurulmadı</h3><div class="row"><span class="big">Bu çizim için izleme kurulmadı: not, cümle ya da pozisyon yok. Not yaz ya da ‘Bunu izle’.</span></div><div class="actions"><span class="btn">Not yaz</span><span class="btn primary">Bunu izle</span></div></div>
+</div>
+</figure>
+<figure class="state "><figcaption><span class="n">3</span><b>Koruyucu varsayılan kuruldu</b><code>varsayılan</code></figcaption>
+<div class="frame phone tel part">
+  <div class="t-head"><span class="back">‹ Kule</span><b>ATL07</b><span class="note">günlük</span><span class="grow"></span><span class="note">Kapsül · İzleme</span></div>
+  <div class="chart-slot c-tel"><img data-chart="y31t-182" data-tx="desk-182" alt="ATL07 grafik">
+    <div class="overlay"><svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"><line class="watch" x1="2" y1="36.44" x2="85.57" y2="36.44"></line></svg><div class="ax-tag wide human" style="--y: 36.44%"><span>110,00</span><span class="bar">│</span><span>○ varsayılan</span></div></div></div><div class="sheet-b"><h3><span class="ws r-fg"><i>○</i>Koruyucu izleme</span> · varsayılan</h3><div class="row"><span class="big">Pozisyonunun altında: günlük kapanış 110,00'ın altına inerse haber verilir.</span></div><div class="row">Maliyet 117,50 · <u>değiştir</u></div><div class="actions"><span class="btn">Ayrıntı</span><span class="btn primary">Grafikte göster</span></div></div>
+</div>
+</figure>
+<figure class="state "><figcaption><span class="n">4</span><b>Kur ve göster</b><code>K72</code></figcaption>
+<div class="frame phone tel part">
+  <div class="t-head"><span class="back">‹ Kule</span><b>SYN20</b><span class="note">günlük</span><span class="grow"></span><span class="note">Kapsül · İzleme</span></div>
+  <div class="chart-slot c-tel"><img data-chart="y31t-182" data-tx="desk-182" alt="SYN20 grafik">
+    <div class="overlay"><svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"><line class="human" x1="40" y1="28.26" x2="85.57" y2="28.26"></line></svg><div class="ax-tag human" style="--y: 28.26%">115,00</div></div></div><div class="sheet-b"><h3><span class="ws r-fg"><i>○</i>Kuruldu</span></h3><div class="row"><span class="big">115,00 altında kapanış · bir kez haber ver</span></div><div class="row">Notundan kuruldu: “bunun altı zayıflık” · <u>değiştir</u></div><div class="actions"><span class="btn">Değiştir</span><span class="btn primary">Tamam</span></div></div>
+</div>
+</figure>
+<figure class="state "><figcaption><span class="n">5</span><b>Sağlık: bilinmiyor</b><code>sağlık</code></figcaption>
+<div class="frame phone tel part "><header class="phone-head"><h1>İzleme</h1><span class="icon-btn">+</span></header><div class="t-status"><span>Canlı · son bar 14:35</span><span class="grow"></span><span class="it"><span class="health unknown"></span>Bilinmiyor</span></div><ul class="tasks"><li class="task2 edge-human "><div class="l1"><span class="sym">SYN20</span><span class="cond">115,00 altında kapanış</span></div><div class="l2"><span class="ws r-fg"><i>○</i>Kuruldu</span><span class="end r-muted"><span class="health unknown" aria-label="bilinmiyor"></span>Bilinmiyor</span></div></li>
+</ul></div>
+</figure>
+<figure class="state "><figcaption><span class="n">6</span><b>Sağlık: izleniyor</b><code>sağlık</code></figcaption>
+<div class="frame phone tel part "><header class="phone-head"><h1>İzleme</h1><span class="icon-btn">+</span></header><div class="t-status"><span>Canlı · son bar 14:35</span><span class="grow"></span><span class="it"><span class="health ok"></span>İzleniyor · 14:35</span></div><ul class="tasks"><li class="task2 edge-human "><div class="l1"><span class="sym">SYN20</span><span class="cond">115,00 altında kapanış</span></div><div class="l2"><span class="ws r-fg"><i>○</i>Kuruldu</span><span class="end r-muted"><span class="health ok" aria-label="izleniyor"></span>14:35</span></div></li>
+</ul></div>
+</figure>
+<figure class="state "><figcaption><span class="n">7</span><b>Sağlık: gecikiyor</b><code>sağlık</code></figcaption>
+<div class="frame phone tel part "><header class="phone-head"><h1>İzleme</h1><span class="icon-btn">+</span></header><div class="t-status"><span>Canlı · son bar 14:35</span><span class="grow"></span><span class="it"><span class="health degraded"></span><span class="r-warn">Gecikiyor · 25 dk</span></span></div><ul class="tasks"><li class="task2 edge-human hot"><div class="l1"><span class="sym">KRM12</span><span class="cond">48,90 trend çizgisi altı</span></div><div class="l2"><span class="ws r-fg"><i>○</i>Kuruldu</span><span class="end r-warn"><span class="health degraded" aria-label="gecikiyor"></span>Gecikiyor</span></div></li>
+</ul></div>
+</figure>
+<figure class="state "><figcaption><span class="n">8</span><b>Sağlık: çalışmıyor</b><code>tam genişlik şerit</code></figcaption>
+<div class="frame phone tel part "><header class="phone-head"><h1>İzleme</h1><span class="icon-btn">+</span></header><div class="alert-strip"><span>İzlemeler çalışmıyor · veri bağlantısı yok · 14:35'ten beri</span></div><ul class="tasks"><li class="task2 edge-human "><div class="l1"><span class="sym">SYN20</span><span class="cond">115,00 altında kapanış</span></div><div class="l2"><span class="ws r-warn"><i>◌</i>Değerlendirilemiyor</span></div></li>
+</ul></div>
+</figure>
+<figure class="state "><figcaption><span class="n">9</span><b>İyileşti</b><code>tek bildirim</code></figcaption>
+<div class="frame phone tel part "><header class="phone-head"><h1>İzleme</h1><span class="icon-btn">+</span></header><div class="toast"><span class="grow">İzlemeler yeniden çalışıyor · 14:35–15:02 arası değerlendirildi</span></div><div class="t-status"><span>Canlı · son bar 14:35</span><span class="grow"></span><span class="it"><span class="health ok"></span>İzleniyor · 15:02</span></div><ul class="tasks"><li class="task2 edge-human "><div class="l1"><span class="sym">SYN20</span><span class="cond">115,00 altında kapanış</span></div><div class="l2"><span class="ws r-fg"><i>○</i>Kuruldu</span><span class="end r-muted"><span class="health ok" aria-label="izleniyor"></span>15:02</span></div></li>
+</ul></div>
+</figure>
+<figure class="state "><figcaption><span class="n">10</span><b>Duraklatıldı</b><code>İ-durdu</code></figcaption>
+<div class="frame phone tel part "><header class="phone-head"><h1>İzleme</h1><span class="icon-btn">+</span></header><div class="t-status"><span>Canlı · son bar 14:35</span><span class="grow"></span><span class="it"><span class="health ok"></span>İzleniyor · 14:35</span></div><ul class="tasks"><li class="task2 edge-human "><div class="l1"><span class="sym">EGE09</span><span class="cond">RSI 14, 70 üstü</span></div><div class="l2"><span class="ws r-muted"><i>‖</i>Duraklatıldı</span></div></li>
+</ul></div>
+</figure>
+</div>
+</section>
+</body>
+</html>

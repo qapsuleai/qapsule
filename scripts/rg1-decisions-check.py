@@ -1,7 +1,11 @@
 #!/usr/bin/env python3
 """RG1/D1: DECISIONS.md bölünmesinin denetimi.
 
-  scripts/rg1-decisions-check.py <bölünmeden-önceki-commit>
+  scripts/rg1-decisions-check.py <bölünmeden-önceki-commit> [<bölünme-commit'i>]
+
+Bölünme commit'i verilirse (1) o commit'teki dosyalarla eşitlik olarak, ayrıca HEAD'de
+"özgün satırların hiçbiri kaybolmadı" (alt küme) olarak sınanır; sonradan eklenen karar
+satırları ve dosyaları serbesttir.
 
 1. Özgün DECISIONS.md'nin boş olmayan satırları (başlık `# Karar Günlüğü` hariç) çoklu
    kümesi == docs/decisions/**/*.md dosyalarının satırları (her dosyanın eklenen üç satırlık
@@ -13,14 +17,26 @@
 """
 import collections, glob, re, subprocess, sys
 
-def main(base):
+def read_at(rev, path):
+    return subprocess.run(["git", "show", f"{rev}:{path}"], capture_output=True, text=True,
+                          check=True).stdout
+
+
+def main(base, split=None):
     old = subprocess.run(["git", "show", f"{base}:DECISIONS.md"], capture_output=True,
                          text=True, check=True).stdout.split("\n")
     old_c = collections.Counter(l for l in old if l.strip() and l != "# Karar Günlüğü")
     new_c = collections.Counter()
-    files = sorted(glob.glob("docs/decisions/**/*.md", recursive=True))
+    head_c = collections.Counter()
+    if split:
+        files = sorted(subprocess.run(["git", "ls-tree", "-r", "--name-only", split, "docs/decisions"],
+                                      capture_output=True, text=True, check=True).stdout.split())
+    else:
+        files = sorted(glob.glob("docs/decisions/**/*.md", recursive=True))
+    for f in sorted(glob.glob("docs/decisions/**/*.md", recursive=True)):
+        head_c.update(l for l in open(f, encoding="utf-8").read().split("\n") if l.strip())
     for f in files:
-        lines = open(f, encoding="utf-8").read().split("\n")
+        lines = (read_at(split, f) if split else open(f, encoding="utf-8").read()).split("\n")
         assert lines[0].startswith("# Karar Günlüğü — ") and lines[2].startswith("<!-- dizin"), f
         new_c.update(l for l in lines[4:] if l.strip())
     ok = True
@@ -31,6 +47,12 @@ def main(base):
         for l, n in (new_c - old_c).items(): print("  fazla:", l[:100], n)
     else:
         print(f"satır kümesi eşit: {sum(old_c.values())} satır, {len(files)} dosya")
+    lost = old_c - head_c
+    if lost:
+        ok = False
+        for l, n in lost.items(): print("HEAD'de kaybolan satır:", l[:100], n)
+    else:
+        print("HEAD: özgün satırların hepsi duruyor")
     idx = open("DECISIONS.md", encoding="utf-8").read()
     heads = [l[3:] for l in old if l.startswith("## ")]
     for h in heads:
@@ -66,4 +88,4 @@ def main(base):
     return 0 if ok and broken == 0 else 1
 
 if __name__ == "__main__":
-    sys.exit(main(sys.argv[1]))
+    sys.exit(main(sys.argv[1], sys.argv[2] if len(sys.argv) > 2 else None))

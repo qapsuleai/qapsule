@@ -19,6 +19,7 @@ numarayı ya da bölüm adını bu tablodan bulun.
 | R6 önerileri — kabul edildi (2026-11-20, K64) | [`docs/decisions/rounds/R6.md`](docs/decisions/rounds/R6.md) | Ö72–Ö76, A47–A52 | "Önerilen (R6)" |
 | Önerilen (RP4) — Arkin'in onayını bekliyor (2026-11-21) | [`docs/decisions/rounds/RP4.md`](docs/decisions/rounds/RP4.md) | Ö77–Ö93, A53–A56 |  |
 | Önerilen (R5B) — Arkin'in onayını bekliyor (2026-11-22) | [`docs/decisions/rounds/R5B.md`](docs/decisions/rounds/R5B.md) | Ö94–Ö102, A57–A62 |  |
+| Önerilen (RG1) — Arkin'in onayını bekliyor (2026-11-22) | [`docs/decisions/rounds/RG1.md`](docs/decisions/rounds/RG1.md) | Ö103–Ö108, A63–A64 |  |
 
 ## Yeni satır nereye yazılır
 

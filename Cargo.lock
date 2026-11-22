@@ -2044,6 +2044,23 @@ dependencies = [
 ]
 
 [[package]]
+name = "qp-shellcore"
+version = "0.0.0"
+dependencies = [
+ "fontdue",
+ "qp-calendar",
+ "qp-capsule",
+ "qp-grammar",
+ "qp-render",
+ "qp-schema",
+ "qp-session",
+ "qp-source",
+ "serde",
+ "serde_json",
+ "wasm-bindgen",
+]
+
+[[package]]
 name = "qp-source"
 version = "0.0.0"
 dependencies = [
@@ -2057,16 +2074,14 @@ dependencies = [
 name = "qp-wasm"
 version = "0.0.0"
 dependencies = [
- "fontdue",
- "qp-calendar",
  "qp-capsule",
  "qp-compute",
  "qp-grammar",
  "qp-render",
  "qp-schema",
  "qp-session",
+ "qp-shellcore",
  "qp-source",
- "serde",
  "serde_json",
  "wasm-bindgen",
  "wasm-bindgen-futures",

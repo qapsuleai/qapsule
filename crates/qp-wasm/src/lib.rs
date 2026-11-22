@@ -356,25 +356,20 @@ mod tests {
 #[cfg(feature = "replica")]
 pub use replica::Replica;
 
-/// R4/T5: the demo shell's core (feature `replica`).
+/// R4/T5: the demo shell's core (feature `replica`; `qp-shellcore`).
 #[cfg(feature = "replica")]
-pub mod shell;
-
-/// RP3/M15: the device as a viewer (feature `replica`; `docs/PROTOCOL.md` §22).
-#[cfg(feature = "replica")]
-pub mod viewer;
+pub use qp_shellcore::{shell, viewer};
 
 /// R4/T5: shell-less driving and the parity check (native only).
 #[cfg(all(feature = "replica", not(target_arch = "wasm32")))]
-pub mod drive;
+pub use qp_shellcore::drive;
 
 #[cfg(feature = "replica")]
 pub use shell_binding::Shell;
 
-/// (R5/G) The comparison gallery: the host's painting of the candidates (native) and the
-/// gallery page's core (feature `replica`; `shells/web/gallery.js`).
+/// (R5/G) The comparison gallery (feature `replica`; `qp-shellcore`).
 #[cfg(feature = "replica")]
-pub mod gallery;
+pub use qp_shellcore::gallery;
 
 #[cfg(feature = "replica")]
 pub use gallery_binding::Gallery;

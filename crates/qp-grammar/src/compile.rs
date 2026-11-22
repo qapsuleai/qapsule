@@ -21,10 +21,15 @@ use crate::scale::value_y;
 use crate::theme::with_opacity;
 
 mod axis;
+pub(crate) mod draw;
 mod emphasis;
+pub(crate) mod frame;
+pub(crate) mod layer;
 mod panels;
+pub mod scale;
 mod scene;
 mod series;
+pub mod terms;
 
 use axis::{domain, domain_values, ticks};
 use emphasis::resolve_emphasis;

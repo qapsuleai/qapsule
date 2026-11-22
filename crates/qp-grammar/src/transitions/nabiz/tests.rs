@@ -1,4 +1,3 @@
-
 use super::*;
 use crate::look::{ORNEK, R4};
 use qp_schema::scene::XMap;

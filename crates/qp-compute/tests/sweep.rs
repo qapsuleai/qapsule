@@ -1,7 +1,7 @@
 //! Sweep = individual runs, bit for bit, for every study and every lane count; and the
 //! accuracy of the rolling Bollinger variance on a long series.
 
-mod common;
+mod support;
 
 use std::collections::BTreeMap;
 
@@ -22,7 +22,7 @@ fn sweep_equals_single_runs_for_every_lane_count() {
             .iter()
             .map(|p| {
                 let kv: Vec<(&str, f64)> = p.iter().map(|(k, v)| (k.as_str(), *v)).collect();
-                common::batch(name, &kv, &x)
+                support::batch(name, &kv, &x)
             })
             .collect();
         for lanes in [None, Some(1), Some(2), Some(3), Some(4), Some(8)] {
@@ -67,7 +67,7 @@ fn flat_windows_are_exact_at_real_price_levels() {
     x.extend(std::iter::repeat_n(level, 40));
     x.extend(bench_closes(100, 6).iter().map(|v| v + 20.0));
     for p in [2.0, 5.0, 20.0] {
-        let out = common::batch("bollinger", &[("period", p), ("k", 2.0)], &x);
+        let out = support::batch("bollinger", &[("period", p), ("k", 2.0)], &x);
         #[allow(clippy::cast_possible_truncation, clippy::cast_sign_loss)]
         let first_flat = 300 + p as usize - 1;
         for i in first_flat..340 {
@@ -75,7 +75,7 @@ fn flat_windows_are_exact_at_real_price_levels() {
             // legacy one) may carry a ~1e-13 residue from earlier bars.
             let m = out[0][i].unwrap();
             assert!(
-                common::close(m, level, common::REL_TOL),
+                support::close(m, level, support::REL_TOL),
                 "middle p={p} i={i}: {m}"
             );
             assert_eq!(out[1][i], Some(m), "upper p={p} i={i}");
@@ -118,7 +118,7 @@ fn rolling_variance_accuracy_on_long_series() {
     let x = bench_closes(10_000, 20_261_114);
     let (mut worst_abs, mut worst_rel_price, mut worst_welford) = (0.0_f64, 0.0_f64, 0.0_f64);
     for p in [2usize, 5, 20, 50, 101] {
-        let out = common::batch("bollinger", &[("period", p as f64), ("k", 1.0)], &x);
+        let out = support::batch("bollinger", &[("period", p as f64), ("k", 1.0)], &x);
         let wf = welford_std(&x, p);
         for i in p - 1..x.len() {
             let w = &x[i + 1 - p..=i];
@@ -134,7 +134,7 @@ fn rolling_variance_accuracy_on_long_series() {
     println!(
         "std error vs two-pass over 10k bars: ours max abs {worst_abs:e} (rel. to price {worst_rel_price:e}); textbook Welford max abs {worst_welford:e}"
     );
-    // Relative to the price level (the bands are price-sized), see `common::BAND_REL_TOL`.
+    // Relative to the price level (the bands are price-sized), see `support::BAND_REL_TOL`.
     // The rolled M2 drifts with the series length, hence the looser bound for 10k bars.
     assert!(worst_rel_price < 1e-9, "{worst_rel_price:e}");
 }
@@ -165,8 +165,8 @@ fn high_price_levels_meet_the_relative_tolerance() {
         let x = walk(2_000, level, seed);
         let (mut mid_abs, mut mid_rel, mut band_abs, mut band_rel) = (0.0_f64, 0.0, 0.0, 0.0);
         for p in [2usize, 3, 5, 20, 50, 101] {
-            let sma = common::batch("sma", &[("period", p as f64)], &x);
-            let bb = common::batch("bollinger", &[("period", p as f64), ("k", 2.0)], &x);
+            let sma = support::batch("sma", &[("period", p as f64)], &x);
+            let bb = support::batch("bollinger", &[("period", p as f64), ("k", 2.0)], &x);
             for i in p - 1..x.len() {
                 let w = &x[i + 1 - p..=i];
                 let n = p as f64;
@@ -175,7 +175,7 @@ fn high_price_levels_meet_the_relative_tolerance() {
                 let rel = |a: f64, b: f64| (a - b).abs() / a.abs().max(b.abs()).max(1.0);
                 for ours in [sma[0][i].unwrap(), bb[0][i].unwrap()] {
                     assert!(
-                        common::close(ours, mean, common::REL_TOL),
+                        support::close(ours, mean, support::REL_TOL),
                         "middle, level {level} p={p} i={i}: {ours} vs {mean}"
                     );
                     mid_abs = f64::max(mid_abs, (ours - mean).abs());
@@ -186,7 +186,7 @@ fn high_price_levels_meet_the_relative_tolerance() {
                     (bb[2][i].unwrap(), mean - 2.0 * sd),
                 ] {
                     assert!(
-                        common::close(ours, want, common::BAND_REL_TOL),
+                        support::close(ours, want, support::BAND_REL_TOL),
                         "band, level {level} p={p} i={i}: {ours} vs {want}"
                     );
                     band_abs = f64::max(band_abs, (ours - want).abs());

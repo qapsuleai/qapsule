@@ -2,7 +2,7 @@
 //! parameter list (shuffled, duplicated, odd counts), any lane count, series shorter than
 //! the warmup, flat stretches and zero prices; `sweep_series_each` = one run per series.
 
-mod common;
+mod support;
 
 use std::collections::BTreeMap;
 
@@ -60,7 +60,7 @@ fn awkward_series(n: usize, seed: u64) -> Vec<f64> {
 
 fn single(name: &str, p: &BTreeMap<String, f64>, x: &[f64]) -> Vec<Vec<Option<f64>>> {
     let kv: Vec<(&str, f64)> = p.iter().map(|(k, v)| (k.as_str(), *v)).collect();
-    common::batch(name, &kv, x)
+    support::batch(name, &kv, x)
 }
 
 #[test]

@@ -2,7 +2,7 @@
 //! integer in `1..=MAX_PERIOD`, in single runs, streaming studies and sweeps, and the
 //! error says what is wrong.
 
-mod common;
+mod support;
 
 use std::collections::BTreeMap;
 
@@ -10,7 +10,7 @@ use qp_compute::sweep::sweep;
 use qp_compute::{create, Bollinger, Ema, Field, Macd, Rsi, Sma, MAX_PERIOD};
 
 fn err(name: &str, kv: &[(&str, f64)]) -> String {
-    match create(name, &common::params(kv), Field::Close) {
+    match create(name, &support::params(kv), Field::Close) {
         Ok(_) => panic!("{name} {kv:?} accepted"),
         Err(e) => e.to_string(),
     }
@@ -48,10 +48,10 @@ fn cases(p: f64) -> Vec<Case> {
 fn max_period_is_accepted_and_one_more_is_not() {
     let max = MAX_PERIOD as f64;
     for name in ["sma", "ema", "rsi", "bollinger"] {
-        assert!(create(name, &common::params(&[("period", max)]), Field::Close).is_ok());
+        assert!(create(name, &support::params(&[("period", max)]), Field::Close).is_ok());
     }
     let macd = [("fast", max - 1.0), ("slow", max), ("signal", max)];
-    assert!(create("macd", &common::params(&macd), Field::Close).is_ok());
+    assert!(create("macd", &support::params(&macd), Field::Close).is_ok());
 
     for (name, key, kv) in cases(max + 1.0) {
         assert_eq!(
@@ -115,8 +115,8 @@ fn constructors_enforce_the_bound() {
 fn sweeps_reject_out_of_range_periods_before_work() {
     let x = [1.0, 2.0, 3.0];
     for (name, key, kv) in cases(1e9) {
-        let good: BTreeMap<String, f64> = common::params(&cases(5.0)[0].2);
-        let bad = common::params(&kv);
+        let good: BTreeMap<String, f64> = support::params(&cases(5.0)[0].2);
+        let bad = support::params(&kv);
         let sets = if name == "macd" {
             vec![bad]
         } else {

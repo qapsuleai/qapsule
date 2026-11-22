@@ -1,0 +1,80 @@
+/* Ç4 — phone chart with an opened capsule: the chart (core) on top, the capsule as a
+ * bottom sheet: one claim, its evidence (engine facts), its track record, actions. */
+
+.c4-chart {
+  flex: none;
+  /* The chart keeps the upper part of the viewport; the sheet takes the rest. */
+  height: 42%;
+}
+
+.c4-chart .capsule-pin {
+  position: absolute;
+  left: 82%;
+  top: 22%;
+  width: var(--qp-space-2);
+  height: var(--qp-space-2);
+  background: var(--m-engine);
+  transform: rotate(45deg);
+  box-shadow: 0 0 0 var(--qp-space-0) var(--m-chart-bg);
+}
+
+.sheet {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--qp-space-2);
+  padding: var(--qp-space-1) var(--qp-space-3) var(--qp-space-2);
+  background: var(--m-card);
+  border-top: var(--m-rule) solid var(--m-line);
+  border-radius: var(--m-radius-card) var(--m-radius-card) 0 0;
+  overflow: hidden;
+}
+
+.grabber {
+  align-self: center;
+  width: calc(var(--qp-space-5) + var(--qp-space-1));
+  height: var(--qp-space-0);
+  border-radius: var(--qp-space-0);
+  background: var(--m-line);
+}
+
+.sheet h2 {
+  font-size: var(--m-fs-headline);
+  font-weight: var(--qp-head-weight);
+}
+
+.sheet .meta {
+  display: flex;
+  gap: var(--qp-space-2);
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.evidence li {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--qp-space-2);
+  padding: var(--qp-space-1) 0;
+  border-top: var(--m-rule) solid var(--m-line);
+  font-size: var(--m-fs-label);
+}
+
+.record-box {
+  display: flex;
+  flex-direction: column;
+  gap: var(--qp-space-0);
+  font-size: var(--m-fs-label);
+}
+
+.record-box .tags {
+  display: flex;
+  gap: var(--qp-space-1);
+}
+
+.sheet .actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--qp-space-1);
+  margin-top: auto;
+}

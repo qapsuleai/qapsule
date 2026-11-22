@@ -186,6 +186,31 @@ fn render_scale_keeps_scale_one_and_doubles_at_two() {
         .failure();
 }
 
+/// RD2/G: `--theme` reaches the compiler (a light render of a view differs from dark).
+#[test]
+fn render_theme_overrides_the_scheme() {
+    let tmp = tempfile::tempdir().unwrap();
+    let root = fixtures().join("..");
+    let mut pngs = Vec::new();
+    for t in ["dark", "light"] {
+        let out = tmp.path().join(format!("{t}.png"));
+        qp().current_dir(&root)
+            .args([
+                "render",
+                "--transcript",
+                "fixtures/views/v1-three-panels.json",
+            ])
+            .args([
+                "--view", "three", "--width", "240", "--height", "160", "--theme", t, "-o",
+            ])
+            .arg(&out)
+            .assert()
+            .success();
+        pngs.push(std::fs::read(&out).unwrap());
+    }
+    assert_ne!(pngs[0], pngs[1]);
+}
+
 #[test]
 fn bad_input_fails_without_panic() {
     let tmp = tempfile::tempdir().unwrap();

@@ -88,6 +88,7 @@ fn compile_source(
     height: u32,
     look: Option<&str>,
     roles: bool,
+    theme: Option<&str>,
 ) -> Result<
     (qp_schema::grammar::View, qp_schema::scene::SceneDesc),
     Result<Box<qp_schema::protocol::ProtocolError>, String>,
@@ -96,6 +97,7 @@ fn compile_source(
     let mut opts = qp_session::CompileOptions::new(width, height);
     opts.look = look.map(str::to_owned);
     opts.roles = roles;
+    opts.theme = theme.map(str::to_owned);
     match (&src.view, &src.present) {
         (Some(view), _) => {
             let scene = session.scene(view, &opts).map_err(|e| Ok(Box::new(e)))?;
@@ -133,6 +135,7 @@ pub(crate) fn scene_cmd(args: &SceneArgs, explain: bool) -> Result<Outcome, Stri
         args.height,
         args.look.as_deref(),
         args.roles,
+        None,
     ) {
         Ok(x) => x,
         Err(Ok(e)) => return Ok(print_protocol_error(&e)),
@@ -190,6 +193,7 @@ pub(crate) fn render_view(args: &RenderArgs) -> Result<Outcome, String> {
         args.height,
         args.look.as_deref(),
         false,
+        args.theme.as_deref(),
     ) {
         Ok((_, scene)) => scene,
         Err(Ok(e)) => return Ok(print_protocol_error(&e)),

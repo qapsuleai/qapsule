@@ -1,0 +1,112 @@
+/* Ç2 — chart cell close-up, 960×600 CSS px at DPR 2 (GOAL §2).
+ * The core draws the chart (candles, legend, axes, last value). Above it, positioned
+ * spec elements: trend line (human), intent card, watch mark, agent proposal, capsule
+ * mark. Positions are fractions of the cell: illustrative, not bound to the data. */
+
+.c2 {
+  /* Fixed comparison frame (P14). */
+  --frame-w: 960px;
+  --frame-h: 600px;
+
+  display: flex;
+  flex-direction: column;
+}
+
+.c2 .chart-slot {
+  flex: 1 1 auto;
+}
+
+/* Anchored HTML elements: placed by --x / --y (fractions of the cell, set inline). */
+.pin {
+  position: absolute;
+  left: var(--x);
+  top: var(--y);
+  pointer-events: auto;
+}
+
+/* Pills on a line or level: one line of text, origin colour as the rule. */
+.mark-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--qp-space-1);
+  padding: var(--qp-badge-pad);
+  border-radius: var(--m-radius-control);
+  background: var(--m-card);
+  border: var(--m-rule) solid var(--m-line);
+  font-size: var(--m-fs-note);
+  white-space: nowrap;
+  transform: translateY(-50%);
+}
+
+.mark-pill.human {
+  border-color: var(--m-human);
+}
+
+.mark-pill.agent {
+  border-style: dashed;
+  border-color: var(--m-agent);
+}
+
+.mark-pill.engine {
+  border-color: var(--m-engine);
+}
+
+/* Bell glyph of a watch (Y31 quiet bell): drawn with borders, no icon font. */
+.bell {
+  width: var(--qp-space-2);
+  height: var(--qp-space-2);
+  border: var(--m-rule) solid currentColor;
+  border-radius: 50% 50% 0 0;
+  border-bottom-width: calc(var(--m-rule) * 2);
+  color: var(--m-human);
+  flex: none;
+}
+
+/* Intent card (drawing → intent, PLAYGROUND §4): the readable expectation of a line. */
+.intent {
+  width: calc(var(--qp-space-5) * 9);
+  padding: var(--qp-space-2);
+  display: flex;
+  flex-direction: column;
+  gap: var(--qp-space-0);
+  border-left: var(--qp-space-0) solid var(--m-human);
+}
+
+.intent h3 {
+  font-size: var(--m-fs-label);
+  font-weight: var(--qp-head-weight);
+}
+
+.intent .row {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--qp-space-1);
+  font-size: var(--m-fs-note);
+}
+
+/* Agent proposal: dashed line + a pill with the two actions, never applied silently. */
+.proposal-pill .btn {
+  min-height: auto;
+  padding: 0 var(--qp-space-1);
+  font-size: var(--m-fs-note);
+}
+
+/* Capsule mark on a bar: a small engine diamond above the bar, with its pill. */
+.capsule-mark {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--qp-space-0);
+  transform: translate(-50%, -100%);
+}
+
+.capsule-mark .diamond {
+  width: var(--qp-space-2);
+  height: var(--qp-space-2);
+  background: var(--m-engine);
+  transform: rotate(45deg);
+}
+
+.capsule-mark .mark-pill {
+  transform: none;
+}

@@ -1,0 +1,58 @@
+<!doctype html>
+<!-- RD2/G Ç3 — telefon kontrol kulesi (390×844, DPR 3): izleme özeti, bekleyen öneri,
+     kapsül akışı. Şartname iskeleti; değerler var(--…) ile, metin sentetik. -->
+<html lang="tr">
+<head>
+  <meta charset="utf-8">
+  <title>Ç3 kontrol kulesi</title>
+  <link rel="stylesheet" href="../_base/base.css">
+  <link rel="stylesheet" href="../_base/phone.css">
+  <link rel="stylesheet" href="../_base/c3.css">
+  <script src="../_base/frame.js"></script>
+</head>
+<body>
+<div class="frame phone c3" data-anchor="c3">
+  <header class="phone-head">
+    <h1>Kontrol kulesi</h1><span class="note">Sentetik veri</span>
+  </header>
+
+  <div class="phone-body">
+    <section class="tower-summary" data-region="watch-summary" aria-label="İzleme özeti">
+      <div><span class="num">5</span><span class="lbl"><span class="health ok"></span>Etkin izleme</span></div>
+      <div><span class="num">1</span><span class="lbl"><span class="health degraded"></span>Gecikmeli veri</span></div>
+      <div><span class="num">2</span><span class="lbl">Bugün tetiklenen</span></div>
+    </section>
+
+    <section class="card agent pending" data-region="proposal" aria-label="Bekleyen öneri">
+      <div class="meta"><span class="origin agent">Ajan önerisi</span><span class="note">2 dk önce</span></div>
+      <h3>SYN20 için 118,20'ye direnç ekle</h3>
+      <div class="chart-slot" data-chart-slot><img data-chart="c3-preview" alt="Öneri önizlemesi"></div>
+      <div class="actions"><span class="btn">Reddet</span><span class="btn primary">Grafiğe ekle</span></div>
+    </section>
+
+    <section data-region="feed" aria-label="Kapsül akışı">
+      <h2 class="section-h feed-h">Kapsüller <span class="note">Bugün</span></h2>
+      <article class="capsule-row">
+        <span class="sym">SYN20</span><span class="when num">14:35</span>
+        <p>112,40 direncini kırdı, tutunma 2/3 bar</p>
+        <span class="record"><span class="state-tag muted">Bekliyor</span><span class="num">Tutma %64, taban %51</span></span>
+      </article>
+      <article class="capsule-row">
+        <span class="sym">KRM12</span><span class="when num">13:10</span>
+        <p>Trend çizgisi altında kapandı, geri döndü</p>
+        <span class="record"><span class="state-tag down">Geri döndü</span><span class="num">Tutma %48, taban %50</span></span>
+      </article>
+      <article class="capsule-row">
+        <span class="sym">DNZ30</span><span class="when num">11:42</span>
+        <p>Hacim 20 günlük ortalamanın 2,3 katı</p>
+        <span class="record"><span class="state-tag up">Tutundu</span><span class="num">Tutma %71, taban %55</span></span>
+      </article>
+    </section>
+  </div>
+
+  <nav class="tabbar" aria-label="Sekmeler">
+    <span class="on">Kule</span><span>Grafik</span><span>İzleme</span><span>Ajan</span>
+  </nav>
+</div>
+</body>
+</html>

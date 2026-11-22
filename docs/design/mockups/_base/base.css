@@ -1,0 +1,335 @@
+/* RD2/G — shared primitives of the four anchor skeletons (Ç1–Ç4).
+ *
+ * Specification, not product code. Every colour, type size, space, radius and rule
+ * comes from the look's generated variables (`qp look css <look> --theme <t>`, wrapped in
+ * :root by scripts/design-gallery). No colour codes here; the only px literals live in
+ * the anchor files and are the fixed frame geometry of the comparison (GOAL §2, P14).
+ *
+ * Layering: base.css (this) → cN.css (anchor structure) → a direction's own CSS on top
+ * (docs/design/mockups/<direction>/). A direction overrides the role aliases below or the
+ * anchor rules; it never edits this file.
+ */
+
+/* Role aliases. New RD2 token names first (tokens.md), legacy chrome names as fallback,
+ * so the skeleton renders with looks that predate the RD2 tokens. */
+:root {
+  --m-page: var(--page);
+  --m-panel: var(--bg);
+  --m-card: var(--card);
+  --m-line: var(--line);
+  --m-fg: var(--fg);
+  --m-muted: var(--muted);
+  --m-accent: var(--accent);
+  --m-on-accent: var(--on-accent);
+  --m-chart-bg: var(--qp-scene-bg, var(--card));
+  --m-up: var(--qp-up, var(--fg));
+  --m-down: var(--qp-down, var(--alert-fg));
+  --m-warn: var(--qp-warn, var(--req));
+  --m-focus: var(--qp-focus, var(--accent));
+  --m-human: var(--qp-origin-human, var(--accent));
+  --m-agent: var(--qp-origin-agent, var(--req));
+  --m-engine: var(--qp-origin-engine, var(--muted));
+  --m-note-bg: var(--note-bg);
+  --m-note-fg: var(--note-fg);
+  --m-alert-bg: var(--alert-bg);
+  --m-alert-fg: var(--alert-fg);
+
+  --m-font: var(--qp-font);
+  --m-font-figure: var(--qp-font-figure, var(--qp-font));
+  --m-fs-headline: var(--qp-fs-headline, var(--qp-fs));
+  --m-fs-title: var(--qp-fs-title, var(--qp-fs));
+  --m-fs-body: var(--qp-fs-body, var(--qp-fs));
+  --m-fs-label: var(--qp-fs-label, var(--qp-fs-small));
+  --m-fs-figure: var(--qp-fs-figure, var(--qp-fs-table));
+  --m-fs-note: var(--qp-fs-note, var(--qp-fs-tiny));
+  --m-radius-card: var(--qp-radius-card, var(--radius));
+  --m-radius-control: var(--pill-radius);
+  --m-shadow: var(--qp-shadow, none);
+  --m-rule: var(--qp-rule);
+  --m-control-h: var(--qp-control-h);
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  background: var(--m-page);
+  color: var(--m-fg);
+  font-family: var(--m-font);
+  font-size: var(--m-fs-body);
+  line-height: var(--qp-lh);
+  -webkit-font-smoothing: antialiased;
+}
+
+h1,
+h2,
+h3,
+p,
+ul,
+ol {
+  margin: 0;
+  padding: 0;
+}
+
+ul,
+ol {
+  list-style: none;
+}
+
+button {
+  font: inherit;
+  color: inherit;
+}
+
+/* The anchor frame: fixed CSS size, set per anchor (cN.css). */
+.frame {
+  width: var(--frame-w);
+  height: var(--frame-h);
+  overflow: hidden;
+  position: relative;
+  background: var(--m-panel);
+}
+
+/* Figures: tabular digits everywhere a number can change (OV-5, OV-22). */
+.num {
+  font-family: var(--m-font-figure);
+  font-size: var(--m-fs-figure);
+  font-variant-numeric: tabular-nums;
+}
+
+.up {
+  color: var(--m-up);
+}
+
+.down {
+  color: var(--m-down);
+}
+
+.muted {
+  color: var(--m-muted);
+}
+
+.note {
+  font-size: var(--m-fs-note);
+  color: var(--m-muted);
+}
+
+/* Section heading: sentence case, the title role; quiet (VISUAL §3.2). */
+.section-h {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--qp-space-1);
+  font-size: var(--m-fs-label);
+  font-weight: var(--qp-head-weight);
+  color: var(--m-muted);
+  padding: var(--qp-space-2) var(--qp-space-3) var(--qp-space-1);
+}
+
+/* Hairline separator: one rule role (AT-A1: no box in a box). */
+.rule-b {
+  border-bottom: var(--m-rule) solid var(--m-line);
+}
+
+.rule-t {
+  border-top: var(--m-rule) solid var(--m-line);
+}
+
+/* Controls. */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: var(--m-control-h);
+  padding: 0 var(--qp-space-3);
+  border-radius: var(--m-radius-control);
+  border: var(--m-rule) solid var(--m-line);
+  background: transparent;
+  font-size: var(--m-fs-label);
+  white-space: nowrap;
+}
+
+.btn.primary {
+  background: var(--m-accent);
+  border-color: var(--m-accent);
+  color: var(--m-on-accent);
+  font-weight: var(--qp-head-weight);
+}
+
+.btn.quiet {
+  border-color: transparent;
+  color: var(--m-muted);
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--qp-space-0);
+  padding: var(--qp-badge-pad);
+  border-radius: var(--m-radius-control);
+  border: var(--m-rule) solid var(--m-line);
+  font-size: var(--m-fs-note);
+  color: var(--m-muted);
+  white-space: nowrap;
+}
+
+.chip.on {
+  color: var(--m-fg);
+  border-color: var(--m-muted);
+}
+
+/* Origin: who wrote a mark (human / agent / engine). Never colour alone: a glyph and
+ * a word go with it (VV-D5). Agent lines are dashed (--qp-agent-dash). */
+.origin {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--qp-space-0);
+  font-size: var(--m-fs-note);
+  white-space: nowrap;
+}
+
+.origin::before {
+  content: "";
+  width: var(--qp-space-1);
+  height: var(--qp-space-1);
+  border-radius: 50%;
+  background: currentColor;
+}
+
+.origin.human {
+  color: var(--m-human);
+}
+
+.origin.agent {
+  color: var(--m-agent);
+}
+
+.origin.agent::before {
+  background: transparent;
+  border: var(--m-rule) dashed currentColor;
+}
+
+.origin.engine {
+  color: var(--m-engine);
+}
+
+.origin.engine::before {
+  border-radius: 0;
+  transform: rotate(45deg) scale(0.8);
+}
+
+/* Health of a watch (OV-21): shape + word, colour is only a third channel.
+ * ok = filled, unknown = ring, degraded = half, failed = cross-like square. */
+.health {
+  display: inline-block;
+  width: var(--qp-space-2);
+  height: var(--qp-space-2);
+  border-radius: 50%;
+  flex: none;
+}
+
+.health.ok {
+  background: var(--m-up);
+}
+
+.health.unknown {
+  border: var(--m-rule) solid var(--m-muted);
+}
+
+.health.degraded {
+  background: linear-gradient(90deg, var(--m-warn) 50%, transparent 50%);
+  border: var(--m-rule) solid var(--m-warn);
+}
+
+.health.failed {
+  border-radius: 0;
+  background: var(--m-down);
+}
+
+.health.paused {
+  border-radius: 0;
+  border-left: var(--qp-space-0) solid var(--m-muted);
+  border-right: var(--qp-space-0) solid var(--m-muted);
+  width: var(--qp-space-2);
+}
+
+/* A card (proposal, question, capsule): one rule, small radius, no stacked shadows. */
+.card {
+  background: var(--m-card);
+  border: var(--m-rule) solid var(--m-line);
+  border-radius: var(--m-radius-card);
+  box-shadow: var(--m-shadow);
+}
+
+.card.agent {
+  border-left: var(--qp-space-0) solid var(--m-agent);
+}
+
+.card.engine {
+  border-left: var(--qp-space-0) solid var(--m-engine);
+}
+
+/* Core-rendered chart slot: the image fills it at the measured size (no resampling:
+ * the builder renders `slot size × DPR` and frame.js sets srcset `<dpr>x`). */
+.chart-slot {
+  position: relative;
+  overflow: hidden;
+  background: var(--m-chart-bg);
+}
+
+.chart-slot > img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: none;
+  object-position: left top;
+  display: block;
+}
+
+/* Overlay layer above a chart slot (Ç2, Ç4): spec elements only. */
+.overlay {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.overlay svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+.overlay line,
+.overlay path {
+  vector-effect: non-scaling-stroke;
+  stroke-width: calc(var(--m-rule) * 1.5);
+  fill: none;
+}
+
+.overlay .human {
+  stroke: var(--m-human);
+}
+
+.overlay .agent {
+  stroke: var(--m-agent);
+  stroke-dasharray: var(--qp-agent-dash);
+}
+
+.overlay .engine {
+  stroke: var(--m-engine);
+}
+
+/* A watch level is a human mark too, but quieter than the drawing it came from. */
+.overlay .watch {
+  stroke: var(--m-human);
+  opacity: 0.6;
+}

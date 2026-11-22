@@ -297,6 +297,9 @@ struct RenderArgs {
     /// the comparison gallery uses 2 for desktop, 3 for phone). 1 is the reference path.
     #[arg(long, default_value_t = 1, value_parser = clap::value_parser!(u32).range(1..=3))]
     scale: u32,
+    /// (RD2/G) Scheme override, `dark` or `light` (default: the view's theme).
+    #[arg(long)]
+    theme: Option<String>,
 }
 
 #[derive(Debug, clap::Args)]

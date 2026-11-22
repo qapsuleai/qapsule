@@ -10,6 +10,10 @@
 #   --gallery  (R5/G) also serves the comparison gallery at /gallery.html (printed
 #          address; with --lan / --https-host also the phone's): every topic's candidates
 #          one under the other over the synthetic world, "I'd pick this", notes, copy.
+#          (RD2/G) It first builds the RD2 comparison rig (scripts/design-gallery: four
+#          anchors x looks x dark/light, reference beside; looks from QP_DESIGN_LOOKS,
+#          default oltan,r4) and prints the paths of its compare.html and index.html.
+#          QP_DEMO_GALLERY_ONLY=1 stops after that (no wasm build, no host).
 #
 # 1. builds the web shell's core (qp-wasm, feature `replica`) with wasm-pack into
 #    shells/web/pkg, stripped of function names (skipped when up to date;
@@ -56,11 +60,13 @@ set -euo pipefail
 
 live=0
 sim=0
+gallery=0
 port=8390
 prev=""
 for a in "$@"; do
   case "$a" in
     --live) live=1 ;;
+    --gallery) gallery=1 ;;
     --sim) sim=1 ;;
     --lan|--https-host|--https-host=*) lan_like="$a" ;;
     --bind|--bind=*) bind_like="$a" ;;
@@ -101,6 +107,15 @@ root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$root"
 target_dir="${CARGO_TARGET_DIR:-$root/target}"
 case "$target_dir" in /*) ;; *) target_dir="$root/$target_dir" ;; esac
+
+if [ "$gallery" = 1 ]; then
+  echo "== RD2 comparison rig (scripts/design-gallery)"
+  CARGO_TARGET_DIR="$target_dir" scripts/design-gallery --looks "${QP_DESIGN_LOOKS:-oltan,r4}" >/dev/null
+  out="$root/rounds/RD2/experiments/gallery/out"
+  echo "== RD2 compare: file://$out/compare.html"
+  echo "== RD2 gallery: file://$out/index.html"
+  [ "${QP_DEMO_GALLERY_ONLY:-0}" = 1 ] && exit 0
+fi
 
 pkg=shells/web/pkg
 wasm_pack="$(command -v wasm-pack || echo "$HOME/.cargo/bin/wasm-pack")"

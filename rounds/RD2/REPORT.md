@@ -35,3 +35,28 @@ Round başı: `9aee506c` (ana akış commit'i; RG1 sonu `ec1c7c89`).
 - **İstisna mandalı (Ö3, `01b63fe1`):** `crate.lines` istisnası `max` taşır; aşılırsa hata. Tavanlar
   qp-session 31.999, qp-grammar 21.000 (K89), qp-capsule 13.230. Öz-sınamada üç yeni durum.
   Not: İ6 (fonksiyon boyu) istisnalarının tavanı yok; RF1'e öneri.
+
+## 2. Sıra notu: ortak alfabe yönlerden önce
+
+TASKS C2'yi (alışılmış grafik öğeleri) ara karardan sonraya koyuyor. Uygulamada C2'nin **ortak**
+kısmı (P4–P8: fiyat ekseni yoğunluğu, iki düzeyli zaman, çakışma önleme, son değer + değer çizgisi,
+imleç hapları, OHLC lejantı, hacim, işaret boyu) yönlerden önce, `rd2/c2a-alphabet` dalında kuruldu.
+Gerekçe: üç yön aynı uyarlanmış alfabeyi paylaşır (GOAL §2) ve karşılaştırma başvuru ekranıyla
+yan yana yapılır (P14); R5 düzeyindeki grafikle (tek eksen etiketi, hacim yok) yapılan bir
+karşılaştırma VISUAL §3.2/6'daki karıştırıcı etkeni tekrarlardı. Kural korunur: alfabe görünüş
+kaydının `ChartLook` alanlarıyla açılır, var olan görünüşler (r4, ornek, oltan, zemre) bayt eşit,
+gösterim varsayılanı değişmez; **seçilen yön** ancak Arkin'in kararından sonra çekirdeğe işlenir.
+
+## 3. Üç yön ve ara teslim (K1)
+
+| Yön | Görünüş | Dal / commit | Odak | design-check (2 profil × 2 tema) | qp-grammar |
+|---|---|---|---|---|---|
+| A | `sakel`, `sakel-tel` | `rd2/y-a` `6d4f17f5` | sözleşmeye sadık, Qapsule katmanı en sessiz | P1–P13, H1–H3 PASS (P9 6/3/7) | +289 |
+| B | `tavek`, `tavek-tel` | `rd2/y-b` `193147c0` | anlam grafiğin üstünde, grafiğin dilbilgisiyle | PASS (P9 5/3/7) | +285 |
+| C | `ravek`, `ravek-tel` | `rd2/y-c` `7b6d05ca` | anlam akışta; sicil tek bakışta | PASS (P9 5/3/7) | +264 |
+
+Üç yön aynı tabandan (`rd2/c2a-alphabet`), birbirini görmeden üç alt ajanla kuruldu. Galeri dalı
+`rd2/gallery-all` (yalnız karşılaştırma; main'e girmez). Galeri: sentetik veri
+`rounds/RD2/experiments/gallery/out/` (ignored), gerçek veri (GARAN, günlük) depo dışında
+oturum klasöründe; aynı veri, aynı boyut, masaüstü DPR 2, telefon DPR 3, başvuru ekranı yanda,
+`oltan` (R5) aynı düzenekte. Ajan eleştirmeni kullanılmadı; kusur taraması gözle yapıldı.

@@ -12,7 +12,7 @@ use tiny_skia::{
 /// The default font: IBM Plex Mono Regular, SIL OFL 1.1 (see `assets/fonts/OFL.txt`).
 /// Embedded so output never depends on system fonts. (R5/T3) Other files:
 /// [`crate::fonts`].
-pub const FONT_BYTES: &[u8] = crate::fonts::FILES[0].1;
+pub static FONT_BYTES: &[u8] = crate::fonts::FILES[0].1;
 
 /// Parsed default font, shared by all renders.
 ///

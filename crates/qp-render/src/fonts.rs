@@ -12,8 +12,9 @@ use std::sync::OnceLock;
 
 use crate::RenderError;
 
-/// `(asset id, file bytes)`; index 0 is the default font.
-pub const FILES: [(&str, &[u8]); 4] = [
+/// `(asset id, file bytes)`; index 0 is the default font. `static`, not `const`: one copy
+/// in the binary however many crates read it (RG1 İ7, RD2 Ö2).
+pub static FILES: [(&str, &[u8]); 4] = [
     (
         "plex-mono",
         include_bytes!("../assets/fonts/IBMPlexMono-Regular.ttf"),

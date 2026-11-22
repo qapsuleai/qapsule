@@ -1,8 +1,8 @@
 # Qapsule — Claude Code Kuralları
 
 Bu repoda çalışan her oturum ve her alt ajan önce şunları okur:
-`NORTH_STAR.md`, `docs/CONCEPTS.md`, `docs/ARCHITECTURE.md`, `STATUS.md` ve aktif
-round'un `rounds/Rn/` klasörü.
+`NORTH_STAR.md`, `docs/CONCEPTS.md`, `docs/ARCHITECTURE.md`, `docs/ENGINEERING.md`,
+`STATUS.md` ve aktif round'un `rounds/Rn/` klasörü. Ana akış oturumu `docs/HANDOFF.md`'den başlar.
 
 ## Değişmezler
 
@@ -17,6 +17,9 @@ round'un `rounds/Rn/` klasörü.
   önce sözlüğe eklenir.
 
 ## Çalışma biçimi
+
+- Yapı da kabul ölçütüdür (K80): `docs/ENGINEERING.md` kuralları her round'da geçerlidir;
+  bir değişiklik dosyayı ya da modülü bütçenin üstüne itecekse önce bölünür.
 
 - Round'un kapsamı dışına çıkma. Fark ettiğin kapsam dışı işleri `REPORT.md` içinde
   "Öneriler" başlığına yaz, yapma.
@@ -42,7 +45,9 @@ round'un `rounds/Rn/` klasörü.
   günlüğe koyma. Betikler değeri ortamdan okur. Eksikse hangi değişkenin gerektiğini söyle ve bekle.
 - Gerçek piyasa verisi yalnızca `fixtures/local/` altında durur; içeriği, türevleri ve ondan
   üretilen görseller commit edilmez, rapora yalnızca toplu istatistik girer.
-- `../Docs` ve `../Services` salt okunurdur; oradan yalnızca okunur, oraya yazılmaz.
+- `../Docs`, `../Services` ve `../refs` (araştırma kanalı; dizin `docs/research/README.md`) salt
+  okunurdur; oradan yalnızca okunur, oraya yazılmaz. `../refs/experiments` ve `../refs/src`
+  altındaki kod bu depoya kopyalanmaz (K83).
 - Commit'ler küçük ve anlamlı olur; her alt görev kendi dalında veya worktree'sinde çalışır.
 
 ## GitHub hesabı

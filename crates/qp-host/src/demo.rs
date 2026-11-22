@@ -1348,7 +1348,8 @@ fn stream_events(s: &mut TcpStream, frx: &Receiver<String>, tx: &Sender<Cmd>) {
 /// background) and kept.
 #[derive(Default)]
 struct GalleryStore {
-    builds: std::sync::Mutex<BTreeMap<(String, String), std::sync::Arc<qp_shellcore::gallery::Build>>>,
+    builds:
+        std::sync::Mutex<BTreeMap<(String, String), std::sync::Arc<qp_shellcore::gallery::Build>>>,
 }
 
 impl GalleryStore {

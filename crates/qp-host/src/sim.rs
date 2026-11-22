@@ -940,7 +940,12 @@ pub(crate) fn load(spec: &SimSpec) -> Result<SimInput, String> {
 /// `[from_ms, to_ms)` the session opens, every bar close of `interval` and the session
 /// closes; the local midnight after each day; and `to_ms`.
 #[must_use]
-pub(crate) fn schedule(cal: &ExchangeCalendar, interval: Interval, from_ms: i64, to_ms: i64) -> Vec<i64> {
+pub(crate) fn schedule(
+    cal: &ExchangeCalendar,
+    interval: Interval,
+    from_ms: i64,
+    to_ms: i64,
+) -> Vec<i64> {
     let mut v = BTreeSet::new();
     let (d0, d1) = (cal.local_day(from_ms), cal.local_day(to_ms - 1));
     for day in d0..=d1 {

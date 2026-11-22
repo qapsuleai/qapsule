@@ -63,7 +63,7 @@ tarayıcıda çalıştırır, sonra başvuru piksellerini boyar.
 ### `gpu` (RP3/M12c, WebGPU)
 
 `?paint=gpu`. Çekirdek sahneyi üçgenlere çevirir (`gpu_face` / `gpu_scene`,
-`crates/qp-wasm/src/shell/paint_gpu.rs`), yol köşe baytlarını ve glif atlasının değişen
+`crates/qp-shellcore/src/shell/paint_gpu.rs`), yol köşe baytlarını ve glif atlasının değişen
 satırlarını yükler, çizim listesini olduğu gibi uygular. Tek GPU aygıtı bütün tuvallere
 hizmet eder; kenar yumuşatma 4× MSAA (K12). `supported()` = `navigator.gpu` var ve
 aygıt isteği başarısız olmadı. Aygıt hazır olana kadar boyamaz (tuvale bağlam almaz),
@@ -208,7 +208,7 @@ Gölgelendirici (shader) kaynağı dizge olarak durabilir; dizge içerikleri tar
 ## Karşılaştırma (ölçüt 8)
 
 Ölçüm sekmesi → "Karşılaştır". Senaryoyu çekirdek sürer (`bench_start`, `bench_tick`;
-`crates/qp-wasm/src/shell/bench.rs`); kabuk her karede dönen eylemleri olduğu gibi uygular
+`crates/qp-shellcore/src/shell/bench.rs`); kabuk her karede dönen eylemleri olduğu gibi uygular
 (`paint`: yola geç, `tab`: sayfayı göster, `scroll`: akışın `scrollTop`'u, `done`). Yollar
 aynı sayfada sırayla çalışır (yeniden yükleme yok); her yol aynı adımdan (120) ve aynı
 hızla (4 adım/sn) başlar. Ayrıntı: `rounds/RP3/experiments/T2.md`.

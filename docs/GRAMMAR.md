@@ -348,7 +348,7 @@ işaret alfabelerinin iç oranları ve tazelik eğrisi (`siluet` 0,3 + 0,7·taze
 kendi boyları (elenen M8 tasarımları; renkleri görünüşten), geçiş tasarımlarının kendi
 süreleri (görünüş yalnız çarpar) ve `tutamir`'in iğne boyu, **grafik derinliğinin
 görünümü**: oturum grafik görünümünü `depth::chart_view` ile (yani `r4` kaydıyla) kurar
-(`qp-session` `viewer.rs`), bu yüzden `glyph.chart_px`, `evidence` ve kanıt notu
+(`qp-session` `replica/viewer/open.rs`), bu yüzden `glyph.chart_px`, `evidence` ve kanıt notu
 ofsetleri ürünün grafik derinliğinde henüz `r4` değerindedir (renk rolleri ve başlık
 satırı ofsetleri derlemede bağlantının görünüşünden okunur); kabuğun yapısal değerleri
 (`z-index`, `flex`, `@media` genişlikleri) ve telefon çerçevesi boyu (yüzey `390×844`).

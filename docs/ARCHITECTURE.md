@@ -117,22 +117,32 @@ da aynıdır.
 
 ```
 qapsule/
-  crates/
-    qp-schema/     tipler + JSON Schema üretimi; protokol mesajları (`protocol`)
-    qp-compute/    hesap çekirdeği (Study, tarama)
+  crates/                                                                  [katman]
+    qp-schema/     tipler + JSON Schema üretimi; protokol mesajları (`protocol`)  [şema]
+    qp-compute/    hesap çekirdeği (Study, tarama)                         [çekirdek]
     qp-source/     seri kaynakları (SeriesSource: dosya, sentetik; R6'da canlı)
-    qp-calendar/   borsa takvimleri, saat dilimi tabloları, bar hizası (K14, K16)
-    qp-facts/      olgu dedektörleri
-    qp-grammar/    görsel gramer
-    qp-render/     çizim (headless + GPU)
-    qp-session/    otorite: komut yolu, günlük, sorgu, abonelik, öneri, sunucu (RD1)
-    qp-mcp/        MCP uyarlayıcısı; araçlar şemadan üretilir (RD1)
-    qp-cli/        ajanların ve testlerin kullandığı komut satırı (`serve`, `conform`, `mcp`)
-    qp-wasm/       web bağlaması
+                   ve veri düzlemi                [uyarlayıcılar; alana alma isteği İ1]
+    qp-calendar/   borsa takvimleri, saat dilimi tabloları, bar hizası (K14, K16)  [çekirdek]
+    qp-facts/      olgu dedektörleri                                       [alan]
+    qp-capsule/    kapsül motoru: olgu → hikâye → karne, cümle ve sesler   [alan]
+    qp-grammar/    görsel gramer                                           [alan]
+    qp-render/     çizim (headless + GPU)                                  [çekirdek]
+    qp-session/    otorite: komut yolu, günlük, sorgu, abonelik, öneri, sunucu (RD1)  [oturum]
+    qp-mcp/        MCP uyarlayıcısı; araçlar şemadan üretilir (RD1)        [uyarlayıcılar]
+    qp-live/       canlı Matriks bağlantısı (belirteç, MQTT/WebSocket; R6) [uyarlayıcılar]
+    qp-matriks/    Matriks ileti katmanı: proto, fiyat kartı, veri olayları (R6)  [uyarlayıcılar]
+    qp-shellcore/  kabuk çekirdeği (`ShellCore`; RG1'de qp-wasm'dan)       [uyarlayıcılar]
+    qp-host/       barındırma: canlı barındırıcı, benzetim, demo ve MCP sunucusu
+                   (RG1'de qp-cli'den; planlı)                             [uyarlayıcılar]
+    qp-cli/        ajanların ve testlerin kullandığı komut satırı (`serve`, `conform`, `mcp`)  [kabuklar]
+    qp-wasm/       web bağlaması                                           [kabuklar]
   shells/          web, ios, android (ince kabuklar)
   fixtures/        örnek veri, örnek doküman, altın görseller
   docs/  rounds/
 ```
+
+Katmanlar ve bağımlılık yönü `docs/ENGINEERING.md` §2'de, makine biçimi
+`scripts/arch-config.json`'dadır; her crate'in kökünde kısa bir `README.md` vardır.
 
 ## Doğrulama omurgası
 

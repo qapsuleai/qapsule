@@ -53,7 +53,7 @@ class Scan:
                 fs.append(b)
             for f in fs:
                 rel = os.path.relpath(f, root)
-                if rel.endswith("/build.rs"):
+                if rel == f"crates/{c}/build.rs":
                     rel = rel[: -len("build.rs")] + "build/build.rs"  # area `build`
                 with open(f, encoding="utf-8") as fh:  # noqa: PTH123
                     src = fh.read()

@@ -187,5 +187,20 @@ def run():
             f["rule"] == "layer.up" for f in kept)
         print(f"self-test: a named exception is reported, not an error    {'ok' if hit else 'MISSED'}")
         ok &= hit
+        # latch (K89): a crate.lines exception holds up to its `max`, fails above it
+        val = next(f["value"] for f in fs if f["rule"] == "crate.lines" and f["item"] == "qp-b")
+        for cap, want in ((val, False), (val - 1, True)):
+            ex = {"rule": "crate.lines", "item": "qp-b", "id": "T", "max": cap}
+            kept, _, _ = bl.split_exceptions(fs, dict(CFG, exceptions=[ex]))
+            errs, _, _ = bl.judge(kept, base, CFG["hard_rules"])
+            got = any(e["rule"] == "crate.lines" and "ceiling" in e.get("why", "") for e in errs)
+            hit = got == want
+            print(f"self-test: latch: crate.lines {val} vs ceiling {cap:<5} "
+                  f"{'error' if want else 'holds'}     {'ok' if hit else 'MISSED'}")
+            ok &= hit
+        hit = bool(bl.missing_ceilings(dict(CFG, exceptions=[
+            {"rule": "crate.lines", "item": "qp-b", "id": "T"}])))
+        print(f"self-test: latch: crate.lines exception without max       {'caught' if hit else 'MISSED'}")
+        ok &= hit
     print("self-test:", "PASS" if ok else "FAIL")
     return ok

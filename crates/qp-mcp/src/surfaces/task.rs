@@ -258,6 +258,7 @@ impl ToolSurface for Task {
 }
 
 impl Task {
+    #[allow(clippy::too_many_lines)]
     fn whats_new(&mut self, ctx: &mut Ctx<'_>, a: &WhatsNewArgs) -> Result<Value, RpcError> {
         let mut q = json!({"kind": "capsules"});
         if a.feed {

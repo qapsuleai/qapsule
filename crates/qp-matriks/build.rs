@@ -13,6 +13,7 @@
 use std::fmt::Write as _;
 use std::path::PathBuf;
 
+#[allow(clippy::expect_used)]
 fn main() {
     let manifest = PathBuf::from(std::env::var_os("CARGO_MANIFEST_DIR").expect("manifest dir"));
     let proto_dir = manifest.join("proto");

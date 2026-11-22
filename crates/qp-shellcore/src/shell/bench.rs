@@ -315,6 +315,7 @@ impl ShellCore {
         }
     }
 
+    #[allow(clippy::cognitive_complexity)]
     /// (RP3/T2) One animation frame of the comparison at `t` (ms), with the feed's
     /// `scrollHeight` and `clientHeight` (CSS px). Returns the actions for the page
     /// (`{paint?, tab?, scroll?, done?}`), or `Null` when no comparison runs.

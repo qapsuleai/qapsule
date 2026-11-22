@@ -75,6 +75,7 @@ pub struct Season {
 }
 
 impl Season {
+    #[allow(clippy::expect_used)]
     /// A profile over the last `days` past days, warm from `min_days`, active for bar
     /// lengths of at least `min_len_ms` (XIST calendar).
     ///

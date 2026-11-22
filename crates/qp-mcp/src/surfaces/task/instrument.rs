@@ -7,6 +7,7 @@ use super::*;
 // instrument
 // ---------------------------------------------------------------------------
 
+#[allow(clippy::too_many_lines)]
 pub(super) fn instrument(ctx: &mut Ctx<'_>, a: &InstrumentArgs) -> Value {
     let Some(sym) = &a.symbol else {
         let r = ctx.query(json!({"kind": "list", "collection": "series"}));

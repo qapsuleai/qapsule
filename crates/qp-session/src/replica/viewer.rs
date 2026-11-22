@@ -266,6 +266,7 @@ fn slice_series(doc: &Document, instrument: &str) -> BTreeSet<String> {
     }
 }
 
+#[allow(clippy::too_many_lines)]
 /// The open capsule's slice of `doc` for `principal` (§22.3): the document's own fields,
 /// the series about `instrument` (with the studies over them and their inputs), their
 /// facts, the findings resting on those facts and their capsules (and the findings of

@@ -209,6 +209,7 @@ pub(crate) fn record_topics(a: &RecordArgs, symbols: &[String]) -> Result<Vec<St
     Ok(topics)
 }
 
+#[allow(clippy::too_many_lines)]
 pub(super) fn record(a: &RecordArgs) -> Result<(), String> {
     let symbols = parse_symbols(&a.symbols)?;
     let topics = record_topics(a, &symbols)?;

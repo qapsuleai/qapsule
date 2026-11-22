@@ -49,6 +49,7 @@ fn line_points(g: &Geo<'_>, r: &PRow, lod: bool) -> Option<Vec<[f64; 2]>> {
     }
 }
 
+#[allow(clippy::too_many_lines)]
 pub(super) fn lines(pl: &Prepared, g: &Geo<'_>, out: &mut SceneLayer) {
     let width = pl.width + if g.bold { 1.0 } else { 0.0 };
     #[allow(clippy::cast_possible_truncation)]
@@ -179,6 +180,7 @@ pub(super) fn lines(pl: &Prepared, g: &Geo<'_>, out: &mut SceneLayer) {
     }
 }
 
+#[allow(clippy::too_many_lines)]
 pub(super) fn areas(pl: &Prepared, g: &Geo<'_>, out: &mut SceneLayer) {
     let tr = &pl.traces[0];
     let edge_w = pl.width + if g.bold { 1.0 } else { 0.0 };

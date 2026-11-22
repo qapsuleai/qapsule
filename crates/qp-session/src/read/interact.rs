@@ -97,6 +97,7 @@ fn depth_name(d: OpenDepth) -> &'static str {
 }
 
 impl Session {
+    #[allow(clippy::too_many_lines)]
     /// Handles a pixel gesture or open/close (called from `input`).
     pub(crate) fn interact(
         &mut self,
@@ -399,6 +400,7 @@ impl Session {
         Ok(pr)
     }
 
+    #[allow(clippy::too_many_lines)]
     /// `tap_at`: the point query on the target's scene, then the opening rule (a capsule
     /// opens one depth further) or the bar's values (a chart).
     fn tap_at(&mut self, ci: usize, on: &On, x: f64, y: f64) -> PResult<(Out, Vec<OutboundLine>)> {
@@ -580,6 +582,7 @@ impl Session {
         }
     }
 
+    #[allow(clippy::too_many_lines)]
     /// `drag` and `pinch`: a document view goes through `pan` / `zoom` (its connection
     /// viewport); an open capsule's chart moves the view state's range by the same rules.
     fn move_chart(&mut self, ci: usize, on: &On, m: Move) -> PResult<(Out, Vec<OutboundLine>)> {

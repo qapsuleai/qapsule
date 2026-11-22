@@ -112,6 +112,7 @@ impl Replica {
         self.display_version
     }
 
+    #[allow(clippy::too_many_lines)]
     fn judge(
         &mut self,
         claim: &ClaimRef,

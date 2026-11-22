@@ -80,6 +80,7 @@ fn build_feeds(r: &ReplayInit, local_dir: &Path) -> Result<(Vec<ReplayFeed>, Sou
     Ok((feeds, info))
 }
 
+#[allow(clippy::too_many_lines)]
 /// Expands a session init with `init.replay` into the init the authority starts from:
 /// `init.data` from the replay's initial bars, bound series and capsule series if asked,
 /// the clock at the replay's start; `replay` removed.

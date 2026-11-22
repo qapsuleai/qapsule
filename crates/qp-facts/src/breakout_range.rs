@@ -99,6 +99,7 @@ impl RangeBreakout {
 }
 
 impl Default for RangeBreakout {
+    #[allow(clippy::expect_used)]
     fn default() -> Self {
         Self::new(Self::WINDOW, Self::ATR).expect("valid defaults")
     }

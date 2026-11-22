@@ -169,6 +169,7 @@ pub fn provider_init() -> Value {
            "entitlements":{"dev":["THYAO"]}})
 }
 
+#[allow(clippy::expect_used)]
 /// The replica's condition subscriptions.
 #[must_use]
 pub fn watches() -> Vec<(String, Condition)> {
@@ -212,6 +213,7 @@ struct Driver {
 }
 
 impl Driver {
+    #[allow(clippy::expect_used)]
     fn deliver(&mut self, lines: Vec<qp_schema::protocol::OutboundLine>) {
         let mut queue: std::collections::VecDeque<_> = lines.into();
         while let Some(l) = queue.pop_front() {
@@ -449,6 +451,7 @@ pub struct ViewerOutcome {
 
 type Said = std::collections::BTreeMap<(ClaimRef, i64), (ClaimState, Maturity)>;
 
+#[allow(clippy::expect_used)]
 /// Delivers the authority's lines on the viewer's connection to the device (its open
 /// side) and records the authority's word on every claim it sent.
 fn viewer_deliver(

@@ -219,6 +219,7 @@ impl Node {
 /// Canonical text: upper-case names, explicit output selector when not the main one,
 /// explicit source when not `close`, every parameter in positional order.
 impl fmt::Display for Node {
+    #[allow(clippy::expect_used)]
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let entry = NAMES
             .iter()
@@ -322,6 +323,7 @@ fn lookup(name: &str) -> Option<(&'static str, &'static [&'static str])> {
         .map(|(_, s, p)| (*s, *p))
 }
 
+#[allow(clippy::expect_used)]
 /// Output names of a known study.
 fn outputs_of(study: &str) -> &'static [&'static str] {
     let params = default_params(study).expect("known study");
@@ -355,6 +357,7 @@ impl Parser<'_> {
         &self.s[start..self.i]
     }
 
+    #[allow(clippy::expect_used, clippy::too_many_lines)]
     fn expr(&mut self, depth: usize) -> Result<Node, AddressError> {
         if depth > MAX_DEPTH {
             return Err(AddressError::new(

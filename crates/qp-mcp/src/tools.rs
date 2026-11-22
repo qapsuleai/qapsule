@@ -173,6 +173,7 @@ fn ensure_properties(schema: &mut Value) {
     }
 }
 
+#[allow(clippy::expect_used, clippy::panic, clippy::too_many_lines)]
 fn generate() -> Vec<Tool> {
     let root = qp_schema::json_schema("ClientMsg").expect("ClientMsg schema exists");
     let empty = Map::new();

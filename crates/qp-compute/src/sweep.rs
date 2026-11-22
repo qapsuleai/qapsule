@@ -353,6 +353,7 @@ fn soa_chunk<const L: usize>(
     }
 }
 
+#[allow(clippy::expect_used)]
 /// Runs one study with one parameter set over many series (e.g. every symbol and
 /// timeframe of a market) and calls `visit(series_index, &columns)` in series order.
 /// Outputs are bit-identical to running each series alone.
@@ -512,6 +513,7 @@ pub fn fnv1a_columns(acc: u64, cols: &SweepColumns) -> u64 {
 /// FNV-1a offset basis.
 pub const FNV_OFFSET: u64 = 0xcbf2_9ce4_8422_2325;
 
+#[allow(clippy::expect_used)]
 /// The cross-target compute digest (`verify.sh` compares it across aarch64, x86_64 and
 /// wasm32): FNV-1a over
 /// 1. every output of every variant of the benchmark grid of all five studies on
@@ -542,6 +544,7 @@ pub fn cross_target_digest() -> u64 {
     h
 }
 
+#[allow(clippy::expect_used)]
 /// Digest of the R3/T3 studies (`highest`, `lowest`, `atr`), separate from
 /// [`cross_target_digest`] so that one stays unchanged: FNV-1a over every output of
 /// `highest(p)` on `x * 1.005`, `lowest(p)` on `x * 0.995` and `atr(p)` on

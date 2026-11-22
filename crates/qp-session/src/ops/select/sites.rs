@@ -90,6 +90,7 @@ fn condition_sites(out: &mut Vec<Site>, c: &Value, cp: &str) {
     }
 }
 
+#[allow(clippy::too_many_lines)]
 /// Sites of one op (`p` = its pointer). View fields come before the panel/layer fields
 /// that depend on them.
 fn op_sites(op: &Value, p: &str) -> Vec<Site> {

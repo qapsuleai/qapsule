@@ -31,6 +31,7 @@ pub struct Num {
     pub kind: NumKind,
 }
 
+#[allow(clippy::expect_used)]
 pub(super) fn re(cell: &'static OnceLock<Regex>, p: &str) -> &'static Regex {
     cell.get_or_init(|| Regex::new(p).expect("comment regex"))
 }
@@ -40,6 +41,7 @@ const TR_MONTHS: &str = r"(?:(?:ocak|şubat|mart|nisan|mayıs|haziran|temmuz|ağ
 const EN_MONTHS_DM: &str = r"(?:(?:january|february|march|april|june|july|august|september|october|november|december)\b|(?:jan|feb|mar|apr|jun|jul|aug|sep|sept|oct|nov|dec)\b\.?|may\s+\d{4}\b)";
 const EN_MONTHS: &str = r"(?:(?:january|february|march|april|may|june|july|august|september|october|november|december)\b|(?:jan|feb|mar|apr|jun|jul|aug|sep|sept|oct|nov|dec)\b\.?)";
 
+#[allow(clippy::expect_used)]
 fn masks(lang: Lang) -> &'static [Regex] {
     static TR: OnceLock<Vec<Regex>> = OnceLock::new();
     static EN: OnceLock<Vec<Regex>> = OnceLock::new();

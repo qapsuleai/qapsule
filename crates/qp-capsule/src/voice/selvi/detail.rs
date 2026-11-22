@@ -117,6 +117,7 @@ impl<'a> Cx<'a> {
         out
     }
 
+    #[allow(clippy::too_many_lines)]
     /// The compact form of S1 (numbers only; `None` for a redacted reader).
     fn d1_compact(&self) -> Option<Bi> {
         let f = self.lead;

@@ -4,6 +4,7 @@
 use super::*;
 
 impl Session {
+    #[allow(clippy::too_many_lines)]
     /// A direct command whose ops are all bar writes (`append_bars`, `update_last_bar`),
     /// applied to the document in place (no copy). Each op is expanded against the
     /// document as the earlier ops leave it and applied; a failing op (or `base`) rolls
@@ -246,6 +247,7 @@ impl Session {
         idx
     }
 
+    #[allow(clippy::expect_used, clippy::too_many_lines)]
     /// Edge-triggered condition subscriptions resting on a changed series. A watcher is
     /// evaluated when a cache slot of its series changed in this tick, when its slots are
     /// not known (first time, or after the cache dropped slots), or when a series it
@@ -439,6 +441,7 @@ impl Session {
         self.invalidate_these(holding)
     }
 
+    #[allow(clippy::expect_used)]
     /// `view_changed` for every pending bar change, to the `view` subscribers whose view
     /// reads the changed series (a bound series only to principals entitled to its feed),
     /// per change in order, then by connection and subscription order (§15).

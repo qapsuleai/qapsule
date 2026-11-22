@@ -127,6 +127,7 @@ impl Session {
         })
     }
 
+    #[allow(clippy::too_many_lines)]
     fn check_fact(&mut self, asker: &str, f: &Fact) -> FactCheck {
         let mut c = FactCheck {
             fact: f.id.clone(),

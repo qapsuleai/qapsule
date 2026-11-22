@@ -289,6 +289,7 @@ impl<'a> Enc<'a> {
         }
     }
 
+    #[allow(clippy::too_many_lines)]
     fn prim(&mut self, p: &Prim) {
         match p {
             Prim::Rect { x, y, w, h, color } => {

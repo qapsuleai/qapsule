@@ -260,6 +260,7 @@ impl<'a> Reader<'a> {
     }
 }
 
+#[allow(clippy::too_many_lines)]
 fn decode_body(first: u8, body: &[u8]) -> Result<Packet, DecodeError> {
     let mut r = Reader { b: body, pos: 0 };
     let kind = first >> 4;

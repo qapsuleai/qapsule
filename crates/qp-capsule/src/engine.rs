@@ -392,6 +392,7 @@ impl Engine {
         )
     }
 
+    #[allow(clippy::expect_used)]
     /// Process one **final** bar of `(instrument, series)`: `bars` is that series up to
     /// and including `bar_index` (anything after it is ignored), `facts` the final facts
     /// of this bar. Returns this bar's events in order (also appended to
@@ -442,6 +443,7 @@ impl Engine {
         out.events
     }
 
+    #[allow(clippy::expect_used)]
     /// What would be born or joined if the open bar `bar_index` closed now with
     /// `provisional_facts`. Pure: runs the bar on a scratch copy of this instrument's
     /// open stories; the engine, its events and its ledger are untouched (K28, A16).

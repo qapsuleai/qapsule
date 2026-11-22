@@ -32,6 +32,7 @@ pub use viewer_less::{pump_viewer, viewer_frames, viewer_less, with_viewer_core}
 
 const CONN: &str = "w";
 
+#[allow(clippy::expect_used)]
 /// The replica's provider at the host's current position (initial bars + recorded
 /// events), as `qp demo` gives a new page.
 fn provider(host: &ReplayHost, principal: &str) -> qp_source::MemoryProvider {
@@ -255,6 +256,7 @@ fn f(v: &Value, k: &str) -> f64 {
     v.get(k).and_then(Value::as_f64).unwrap_or(0.0)
 }
 
+#[allow(clippy::panic, clippy::too_many_lines)]
 /// Drives `host` with protocol messages only (see the module docs).
 ///
 /// # Panics
@@ -405,6 +407,7 @@ fn feed_core(core: &mut ShellCore, host: &mut ReplayHost, lines: Vec<OutboundLin
     }
 }
 
+#[allow(clippy::expect_used, clippy::panic)]
 /// Drives `host` through [`ShellCore`] with raw pointer events, as the web shell does.
 ///
 /// # Panics
@@ -472,6 +475,7 @@ pub fn with_core(host: &mut ReplayHost, principal: &str, lang: &str, script: &[V
     serde_json::to_value(out).unwrap_or_default()
 }
 
+#[allow(clippy::expect_used)]
 /// The demo host of the parity check: synthetic market, 30 instruments, hourly path,
 /// paused (as `qp demo --synthetic --paused`).
 ///
@@ -484,6 +488,7 @@ pub fn parity_host() -> ReplayHost {
     ReplayHost::with_local_dir(init, std::path::Path::new("."), &none).expect("demo host")
 }
 
+#[allow(clippy::expect_used)]
 /// (RP3/M15) [`parity_host`] with `n` instruments (the synthetic universes of the viewer
 /// measurement: 30, 300, 3,000).
 ///

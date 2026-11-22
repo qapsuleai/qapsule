@@ -2,6 +2,7 @@
 
 use super::*;
 
+#[allow(clippy::too_many_lines)]
 /// Short deterministic summary of one op.
 pub(crate) fn summarize(op: &Op) -> String {
     fn params(p: &BTreeMap<String, f64>) -> String {

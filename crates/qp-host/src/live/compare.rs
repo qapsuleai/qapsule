@@ -30,6 +30,7 @@ pub(crate) fn load_rest(
     load_rest_with(dir, sym, iv, prefer_adj, quantity, cal, false)
 }
 
+#[allow(clippy::too_many_lines)]
 /// [`load_rest`]; with `last_span`, a bar outside the session merges into the day's
 /// **last session bar** (`bar_at(interval, last close − 1)`, the live rule 1 of
 /// `qp_source::livebar`), which is created from it when REST has no bar there (no

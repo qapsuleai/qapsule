@@ -47,6 +47,7 @@ impl<'a> Resolver<'a> {
         Ok((row.value, row.id))
     }
 
+    #[allow(clippy::too_many_lines)]
     fn resolve_kind(
         &self,
         kind: Kind,

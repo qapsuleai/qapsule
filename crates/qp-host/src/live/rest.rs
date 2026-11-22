@@ -215,6 +215,7 @@ fn civil_date(z: i64) -> String {
     format!("{y:04}-{m:02}-{d:02}")
 }
 
+#[allow(clippy::too_many_lines)]
 pub(super) fn trades(
     symbols: &str,
     start: &str,

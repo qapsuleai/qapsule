@@ -190,6 +190,7 @@ fn paren(parts: &[(&str, Option<String>)]) -> String {
     }
 }
 
+#[allow(clippy::too_many_lines)]
 /// Event clause (past tense with when), without the final period.
 fn event_clause(p: &Plan<'_>) -> String {
     let i = Word::proper(p.inst);
@@ -461,6 +462,7 @@ fn da(w: &str) -> &'static str {
     }
 }
 
+#[allow(clippy::too_many_lines)]
 fn remark(p: &Plan<'_>) -> Option<String> {
     let s = when(p.stage_ago);
     let no_longer = if p.class == Class::Ended {

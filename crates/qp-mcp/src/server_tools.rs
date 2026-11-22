@@ -131,6 +131,7 @@ fn layer_series(item: &Value) -> Vec<String> {
     out
 }
 
+#[allow(clippy::too_many_lines)]
 fn render(ctx: &mut Ctx<'_>, args: &Value) -> Result<Value, RpcError> {
     let a: RenderArgs = serde_json::from_value(args.clone())
         .map_err(|e| RpcError::new(-32602, format!("tool `render`: {e}")))?;

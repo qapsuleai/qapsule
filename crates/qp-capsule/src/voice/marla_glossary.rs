@@ -74,6 +74,7 @@ pub fn entry(c: Concept, u: UnitWords, lang: Lang) -> Gloss {
     Gloss { term, text }
 }
 
+#[allow(clippy::too_many_lines)]
 fn tr(c: Concept, u: UnitWords) -> (String, String) {
     match c {
         Concept::Rsi => (
@@ -165,6 +166,7 @@ fn tr(c: Concept, u: UnitWords) -> (String, String) {
     }
 }
 
+#[allow(clippy::too_many_lines)]
 fn en(c: Concept, u: UnitWords) -> (String, String) {
     match c {
         Concept::Rsi => (

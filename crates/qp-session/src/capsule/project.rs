@@ -34,6 +34,7 @@ impl Session {
         lines.into_iter().map(|(_, l)| l).collect()
     }
 
+    #[allow(clippy::too_many_lines)]
     /// [`Session::capsule_topic_lines`] for the connections of the world the fields hold
     /// (`public`), each line with its connection index.
     fn capsule_topic_lines_in(
@@ -283,6 +284,7 @@ impl Session {
         d
     }
 
+    #[allow(clippy::too_many_lines)]
     /// `changes` as `p`'s principal may receive them.
     pub(crate) fn project_changes(
         &self,
@@ -439,6 +441,7 @@ impl Session {
         x
     }
 
+    #[allow(clippy::expect_used, clippy::too_many_lines)]
     /// Runs `f` with the document (and the reading document) as `principal` may receive
     /// them (R3, §20): every read path, selector and error suggestion then only sees
     /// what the principal may see. Nothing written inside `f` may touch the document.

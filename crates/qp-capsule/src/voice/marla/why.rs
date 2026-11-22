@@ -75,6 +75,7 @@ pub(super) fn why(f: &Frame<'_>, lang: Lang) -> String {
     s
 }
 
+#[allow(clippy::cognitive_complexity)]
 #[allow(clippy::too_many_lines)]
 fn why_numbers(f: &Frame<'_>, lang: Lang) -> String {
     let u = f.unit;

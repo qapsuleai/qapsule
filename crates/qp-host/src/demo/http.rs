@@ -90,6 +90,7 @@ impl Gate {
     }
 }
 
+#[allow(clippy::too_many_lines)]
 pub(super) fn connection(
     mut s: TcpStream,
     web: &Path,

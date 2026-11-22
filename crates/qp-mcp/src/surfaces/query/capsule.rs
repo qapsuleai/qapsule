@@ -93,6 +93,7 @@ pub(super) fn capsule_card(item: &Value, facts: &[String]) -> Vec<String> {
     ]
 }
 
+#[allow(clippy::too_many_lines)]
 /// The expanded parts of a capsule detail.
 pub(super) fn detail_parts(
     detail: &Value,

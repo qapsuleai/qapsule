@@ -3,6 +3,7 @@
 
 use super::*;
 
+#[allow(clippy::cognitive_complexity)]
 /// Prepares one layer. `palette` counts uncoloured line/area/band traces in the panel.
 #[allow(clippy::too_many_lines)]
 pub(crate) fn prepare(

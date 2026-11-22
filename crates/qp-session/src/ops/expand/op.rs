@@ -2,6 +2,7 @@
 
 use super::*;
 
+#[allow(clippy::cognitive_complexity)]
 /// Expands one op into changes. `doc` is the scratch document *before* this op.
 #[allow(clippy::too_many_lines)]
 pub(crate) fn expand_op(

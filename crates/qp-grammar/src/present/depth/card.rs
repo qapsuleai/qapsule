@@ -341,6 +341,7 @@ pub fn evidence_layers(
     out
 }
 
+#[allow(clippy::too_many_lines)]
 /// The R3 chart view: the R2 chart rule plus, in the candle panel, the evidence geometry
 /// of every fact of the finding (in order), the capsule's glyph over the first fact's bar
 /// (when a capsule with a story presents the finding), and, when a geometry's values are

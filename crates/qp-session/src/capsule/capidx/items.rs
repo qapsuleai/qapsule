@@ -196,6 +196,7 @@ mod item_memo_tests {
         }
     }
 
+    #[allow(clippy::too_many_lines)]
     /// (RP4/T6) Incremental = from scratch: two identical hosts take the same steps,
     /// messages and market statuses in a fixed order; one keeps its item memo, the other
     /// forgets it before every input. Every line both send (viewer events, `capsules`

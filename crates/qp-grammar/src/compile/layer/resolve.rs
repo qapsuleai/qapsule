@@ -2,6 +2,7 @@
 
 use super::*;
 
+#[allow(clippy::too_many_lines)]
 /// Resolves the layer's origins (`docs/GRAMMAR.md` §10).
 pub(super) fn resolve_constants(
     fr: &Frame<'_>,

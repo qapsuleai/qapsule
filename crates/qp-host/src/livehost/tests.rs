@@ -160,6 +160,7 @@ fn live_host(hist: &BTreeMap<String, Vec<Bar>>) -> ReplayHost {
     ReplayHost::live(init, std::path::Path::new("."), feeds).expect("live host")
 }
 
+#[allow(clippy::too_many_lines, clippy::cognitive_complexity)]
 #[test]
 #[allow(clippy::needless_range_loop)]
 fn drop_marks_stale_and_repair_matches_settled_bars() {
@@ -289,6 +290,7 @@ fn drop_marks_stale_and_repair_matches_settled_bars() {
     let _ = lines;
 }
 
+#[allow(clippy::too_many_lines)]
 /// The connection path end to end on the loopback mock broker and token service: the
 /// sink feeds the runtime, a local drop closes the one connection (DISCONNECT) before
 /// opening again (never two at once), the feeds go stale and are repaired.

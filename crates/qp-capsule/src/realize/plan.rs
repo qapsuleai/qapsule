@@ -238,6 +238,7 @@ fn ago(now_bar: u64, now_t: i64, bar: u64, t: i64, daily: bool, redacted: bool) 
 }
 
 impl<'a> Plan<'a> {
+    #[allow(clippy::too_many_lines)]
     /// Reads the input.
     #[must_use]
     pub fn new(inp: &SentenceInput<'a>) -> Self {

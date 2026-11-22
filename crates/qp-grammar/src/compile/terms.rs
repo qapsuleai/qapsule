@@ -128,6 +128,7 @@ pub fn find(text: &[char], cue: &[char]) -> Option<(usize, usize)> {
     })
 }
 
+#[allow(clippy::too_many_lines)]
 /// Marks the glossary terms of every capsule text layer in `panels` (see the module docs)
 /// and returns them in paint order.
 pub(crate) fn mark(panels: &mut [ScenePanel], p: &dyn DataProvider, look: &Look) -> Vec<TermMark> {

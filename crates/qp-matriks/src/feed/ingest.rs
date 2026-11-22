@@ -61,6 +61,7 @@ impl LiveFeed {
         }
     }
 
+    #[allow(clippy::too_many_lines)]
     fn on_symbol(&mut self, symbol: &str, payload: &[u8], arrival: i64, out: &mut FeedOut) {
         let Ok(upd) = self.book.apply(symbol, payload) else {
             self.stats.decode_errors += 1;

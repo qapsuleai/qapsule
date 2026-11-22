@@ -5,6 +5,7 @@ use super::*;
 // ---------------------------------------------------------------------------------------
 // The tools.
 
+#[allow(clippy::too_many_lines)]
 pub(super) fn ask(ctx: &mut Ctx<'_>, args: Value) -> Result<Value, Fail> {
     let mut args = args;
     check_keys(&args, "", &ASK_KEYS, "ask")?;

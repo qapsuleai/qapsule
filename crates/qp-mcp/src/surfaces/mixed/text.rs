@@ -219,6 +219,7 @@ pub(super) fn evidence_line(e: &Value) -> String {
     t
 }
 
+#[allow(clippy::too_many_lines)]
 pub(crate) fn capsule_card(d: &Value) -> String {
     let i = d.get("item").cloned().unwrap_or(Value::Null);
     let mut t = format!(
@@ -310,6 +311,7 @@ pub(crate) fn capsule_card(d: &Value) -> String {
     t
 }
 
+#[allow(clippy::expect_used)]
 pub(crate) fn capsule_layered(d: &Value, detail: bool) -> Value {
     let i = d.get("item").cloned().unwrap_or(Value::Null);
     let mut sum = item_summary(&i);

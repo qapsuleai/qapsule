@@ -11,6 +11,7 @@ pub(super) fn capsule_id(io: &mut Io<'_, '_>, r: &CapsuleRef) -> Result<String, 
         .to_owned())
 }
 
+#[allow(clippy::too_many_lines)]
 pub(super) fn act(ctx: &mut Ctx<'_>, args: &Value) -> Result<Value, Fail> {
     let Some(o) = args.as_object() else {
         return Err(Fail::schema(

@@ -151,6 +151,7 @@ impl ShellCore {
         self.ask("in", Asked::Input, json!({"type":"input","gesture":g}));
     }
 
+    #[allow(clippy::too_many_lines)]
     /// A raw pointer event on `target` (`face:<capsule>` or `scene`): `phase` `down`,
     /// `move`, `up` or `cancel`; `x`, `y` in CSS px inside the target. The recognizer
     /// (here, not in the shell) turns presses into `tap_at`, horizontal movement on an

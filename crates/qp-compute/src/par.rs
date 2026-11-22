@@ -11,6 +11,7 @@ use std::collections::BTreeMap;
 use crate::sweep::{sweep_each, SweepColumns};
 use crate::ComputeError;
 
+#[allow(clippy::expect_used)]
 /// Runs `name` for every parameter set over `x` on up to `threads` threads and returns
 /// `reduce(outputs)` per variant, in parameter-set order.
 ///

@@ -4,6 +4,7 @@
 use super::*;
 
 impl ShellCore {
+    #[allow(clippy::too_many_lines, clippy::cognitive_complexity)]
     /// One message of the authority on this connection. Returns what changed:
     /// `feed`, `scene`, `status`, `error`, `transition`.
     pub fn on_message(&mut self, msg: &ServerMsg) -> Value {

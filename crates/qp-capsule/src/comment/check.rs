@@ -71,6 +71,7 @@ fn text_ids(d: &CommentDraft, ev: &Evidence) -> Vec<String> {
     v
 }
 
+#[allow(clippy::too_many_lines, clippy::cognitive_complexity)]
 /// Validates a comment draft against the reader-projected evidence (PLAN §2.1).
 ///
 /// # Errors

@@ -506,6 +506,7 @@ mod engine_tests {
         "detector",
     ];
 
+    #[allow(clippy::too_many_lines)]
     #[test]
     fn every_event_keeps_the_rules() {
         let ins = inputs();

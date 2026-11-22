@@ -337,6 +337,7 @@ impl Session {
             .collect()
     }
 
+    #[allow(clippy::too_many_lines)]
     /// Answer to the `stories` query (run in the asker's world).
     pub(crate) fn stories_query(
         &self,

@@ -69,6 +69,7 @@ impl<'a> Cx<'a> {
         )
     }
 
+    #[allow(clippy::too_many_lines)]
     fn d_holds(&self) -> Bi {
         let due = self.due();
         let side_up = up(self.dir);

@@ -26,6 +26,7 @@ impl fmt::Debug for MockTokenService {
 }
 
 impl MockTokenService {
+    #[allow(clippy::expect_used)]
     /// Accepts Basic `username:password`; tokens live `lifetime_secs`.
     pub fn start(username: &str, password: &str, lifetime_secs: i64) -> Self {
         let listener = TcpListener::bind("127.0.0.1:0").expect("bind loopback");
@@ -73,6 +74,7 @@ impl MockTokenService {
         self.shared.requests.load(Ordering::SeqCst)
     }
 
+    #[allow(clippy::unwrap_used)]
     pub fn issued(&self) -> Vec<String> {
         self.shared.issued.lock().unwrap().clone()
     }
@@ -108,6 +110,7 @@ fn take_one(a: &AtomicU32) -> bool {
         .is_ok()
 }
 
+#[allow(clippy::unwrap_used, clippy::too_many_lines)]
 fn handle_token_request(s: &TokenShared, mut stream: TcpStream) {
     let _ = stream.set_read_timeout(Some(Duration::from_secs(2)));
     let mut buf = Vec::new();

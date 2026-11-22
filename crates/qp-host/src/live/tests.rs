@@ -81,6 +81,7 @@ fn symbols_are_checked() {
     assert!(parse_symbols(" , ").is_err());
 }
 
+#[allow(clippy::too_many_lines)]
 /// Hand-built records (made-up symbol and prices): a connection, a snapshot, trades
 /// with ask-only updates in between, a lost connection and a reconnect.
 pub(crate) fn fake_records() -> Vec<RawRecord> {

@@ -130,6 +130,7 @@ impl Session {
         })
     }
 
+    #[allow(clippy::too_many_lines)]
     pub(super) fn screen_info(&self, c: &Conn, asker: &str) -> Option<ScreenInfo> {
         let vp = self.conn_viewport(c)?;
         let view = rd!(self).views.iter().find(|v| v.id == vp.view)?;

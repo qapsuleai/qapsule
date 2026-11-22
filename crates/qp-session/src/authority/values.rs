@@ -324,6 +324,7 @@ impl Cache {
             .collect()
     }
 
+    #[allow(clippy::expect_used)]
     fn slot_mut(&mut self, i: usize) -> &mut Slot {
         self.slots[i].as_mut().expect("live slot")
     }

@@ -2,6 +2,7 @@
 
 use super::*;
 
+#[allow(clippy::too_many_lines)]
 /// Resolves emphasis targets (`docs/GRAMMAR.md` §8).
 pub(super) fn resolve_emphasis(
     view: &View,

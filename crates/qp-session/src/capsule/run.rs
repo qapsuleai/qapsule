@@ -7,6 +7,7 @@ impl Session {
     // Runner: final bars → engine entries
     // -----------------------------------------------------------------------
 
+    #[allow(clippy::expect_used, clippy::too_many_lines)]
     /// Feeds every bar that became final on a watched series to the detectors and the
     /// engine; one engine entry per series that advanced; returns its notifications
     /// (`change`, `finding_state`, topic `capsules`).
@@ -161,6 +162,7 @@ impl Session {
         lines
     }
 
+    #[allow(clippy::too_many_lines)]
     /// The changes of one look: facts that caused transitions, then per story its
     /// finding and capsule (last snapshot), then ledger rows of the closes.
     pub(super) fn capsule_changes(

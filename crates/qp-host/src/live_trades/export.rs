@@ -238,6 +238,7 @@ pub fn export_trade_bars(a: &ExportTradeBarsArgs) -> Result<(), String> {
     Ok(())
 }
 
+#[allow(clippy::too_many_lines)]
 /// `qp live price-steps`.
 pub fn price_steps(a: &PriceStepsArgs) -> Result<(), String> {
     let recs = read_recordings(&a.raw)?;

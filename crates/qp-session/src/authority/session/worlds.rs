@@ -38,6 +38,7 @@ impl Session {
         })
     }
 
+    #[allow(clippy::too_many_lines)]
     /// (R3/K1b) A direct command with a public world. Each world takes it on its own:
     /// the public world its own expansion (an entitled writer's `undo` mapped to the
     /// public entry it names), the authority's world its own (an entitled writer) or the
@@ -175,6 +176,7 @@ impl Session {
         }
     }
 
+    #[allow(clippy::too_many_lines)]
     /// (R3/K1b) A proposal with a public world: each world validates and stores it on its
     /// own (its own `prop-<seq>`); a public-view proposer's stays in the public world.
     pub(super) fn propose_two_worlds(
@@ -374,6 +376,7 @@ impl Session {
         }
     }
 
+    #[allow(clippy::too_many_lines)]
     #[allow(clippy::too_many_arguments)]
     pub(super) fn accept(
         &mut self,

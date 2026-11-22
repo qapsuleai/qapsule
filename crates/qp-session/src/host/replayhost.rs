@@ -417,6 +417,7 @@ impl ReplayHost {
     }
 }
 
+#[allow(clippy::expect_used)]
 /// A demo session init (R4): a document with no series, owner `arkin`, host `host`,
 /// agent `scout` (proposer) and viewer `guest`; the replay binds every feed and runs the
 /// capsule engine on all of them.

@@ -141,6 +141,7 @@ impl LiveParts {
     }
 }
 
+#[allow(clippy::too_many_lines)]
 /// (R6/T7) The live demo's host: the universe's history from REST is the initial
 /// resolution; the connection is opened later ([`LiveParts::start`]).
 pub(super) fn live_setup(

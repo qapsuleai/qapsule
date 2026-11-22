@@ -486,6 +486,7 @@ impl ShellCore {
         })
     }
 
+    #[allow(clippy::too_many_lines)]
     /// The metrics as text lines `[[label, value]]` for the page (values formatted
     /// here).
     #[must_use]

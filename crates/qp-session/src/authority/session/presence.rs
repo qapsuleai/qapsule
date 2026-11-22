@@ -7,6 +7,7 @@ impl Session {
     // Subscriptions, clock
     // -----------------------------------------------------------------------
 
+    #[allow(clippy::too_many_lines)]
     pub(super) fn subscribe(&mut self, ci: usize, id: &str, topic: Topic) -> PResult<()> {
         if !permissions(self.conns[ci].role).read {
             return Err(forbidden_read());

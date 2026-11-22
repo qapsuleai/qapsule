@@ -59,6 +59,7 @@ impl Engine {
             .unwrap_or_default()
     }
 
+    #[allow(clippy::expect_used)]
     #[allow(clippy::too_many_lines)]
     pub(super) fn run_bar(
         &self,

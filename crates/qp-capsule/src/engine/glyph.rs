@@ -3,8 +3,7 @@
 use super::*;
 
 /// Bars after the last transition at which freshness is one half.
-pub const FRESHNESS_HALF_BARS: f64 =
-    qp_schema::params::system::GLYPH_FRESHNESS_HALF_BARS.default_f64();
+pub const FRESHNESS_HALF_BARS: f64 = qp_schema::params::system::GLYPH_FRESHNESS_HALF_BARS_DEFAULT;
 
 /// Glyph parameters of a story at `now_bar` (K30 channels).
 ///

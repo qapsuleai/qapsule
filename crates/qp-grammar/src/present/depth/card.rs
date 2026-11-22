@@ -9,11 +9,10 @@ use super::*;
 
 /// Closed ledger rows a story needs at birth before its glyph shows a confidence fill
 /// (the M2 template's ledger-sentence threshold).
-pub const GLYPH_MIN_LEDGER_N: u32 = qp_schema::params::system::GLYPH_MIN_LEDGER_N.default_u32();
+pub const GLYPH_MIN_LEDGER_N: u32 = qp_schema::params::system::GLYPH_MIN_LEDGER_N_DEFAULT;
 
 /// Bars after the last transition at which a glyph's freshness is one half.
-pub const FRESHNESS_HALF_BARS: f64 =
-    qp_schema::params::system::GLYPH_FRESHNESS_HALF_BARS.default_f64();
+pub const FRESHNESS_HALF_BARS: f64 = qp_schema::params::system::GLYPH_FRESHNESS_HALF_BARS_DEFAULT;
 
 /// Glyph size in the capsule card (the `r4` look's `glyph.card_px`).
 pub const CARD_GLYPH_PX: f64 = crate::look::R4.glyph.card_px;

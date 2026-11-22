@@ -13,7 +13,7 @@ use super::num;
 
 /// Ledger sample size from which counts are stated plainly; below it the sentence says
 /// the record is still thin (and still gives the counts when not redacted).
-pub const LEDGER_MIN_N: u32 = qp_schema::params::system::SCORECARD_MIN_N.default_u32();
+pub const LEDGER_MIN_N: u32 = qp_schema::params::system::SCORECARD_MIN_N_DEFAULT;
 
 /// Milliseconds in a day (calendar check for "dün / yesterday").
 const DAY_MS: i64 = 86_400_000;

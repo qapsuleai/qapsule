@@ -1,6 +1,6 @@
 use std::collections::BTreeSet;
 
-use super::system::{OUTCOME_BARRIER_C_DIR, SCORECARD_MIN_N, WATCH_MAX_PER_PERSON};
+use super::system::*;
 use super::*;
 
 #[test]
@@ -62,15 +62,79 @@ fn params_resolve_falls_back_to_system_default() {
 }
 
 #[test]
-fn params_typed_defaults_read_the_registry() {
-    assert_eq!(SCORECARD_MIN_N.default_u32(), 20);
-    assert_eq!(SCORECARD_MIN_N.default_u64(), 20);
-    assert_eq!(SCORECARD_MIN_N.default_usize(), 20);
-    assert_eq!(SCORECARD_MIN_N.default_i64(), 20);
+fn params_defaults_equal_named_constants() {
+    let int = |v: i64| ParamValue::Int(v);
+    let float = |def: &ParamDef, v: f64| match def.default {
+        ParamValue::Float(d) => d.to_bits() == v.to_bits(),
+        _ => false,
+    };
+    let ints = [
+        (&SCORECARD_MIN_N, int(SCORECARD_MIN_N_DEFAULT.into())),
+        (&GLYPH_MIN_LEDGER_N, int(GLYPH_MIN_LEDGER_N_DEFAULT.into())),
+        (
+            &WATCH_MAX_PER_PERSON,
+            int(WATCH_MAX_PER_PERSON_DEFAULT.into()),
+        ),
+    ];
+    for (def, v) in ints {
+        assert_eq!(def.default, v, "{}", def.key);
+    }
+    let u64s = [
+        (&STORY_THEME_GAP_BARS, STORY_THEME_GAP_BARS_DEFAULT),
+        (
+            &STORY_THEME_FLOW_CONFIRM_BARS,
+            STORY_THEME_FLOW_CONFIRM_BARS_DEFAULT,
+        ),
+        (
+            &GESTURE_STORY_ZOOM_MIN_BARS,
+            GESTURE_STORY_ZOOM_MIN_BARS_DEFAULT,
+        ),
+        (
+            &DEPTH_CHART_LOOKBACK_BARS,
+            DEPTH_CHART_LOOKBACK_BARS_DEFAULT,
+        ),
+    ];
+    for (def, v) in u64s {
+        assert_eq!(
+            def.default,
+            int(i64::try_from(v).unwrap_or(-1)),
+            "{}",
+            def.key
+        );
+    }
+    let usizes = [
+        (&OUTCOME_ATR_FAST, OUTCOME_ATR_FAST_DEFAULT),
+        (&OUTCOME_ATR_SLOW, OUTCOME_ATR_SLOW_DEFAULT),
+        (
+            &DISPUTE_MAX_OPEN_PER_CONN,
+            DISPUTE_MAX_OPEN_PER_CONN_DEFAULT,
+        ),
+        (&DISPUTE_MAX_PER_CONN, DISPUTE_MAX_PER_CONN_DEFAULT),
+        (&DISPUTE_MAX_DIGESTS, DISPUTE_MAX_DIGESTS_DEFAULT),
+    ];
+    for (def, v) in usizes {
+        assert_eq!(
+            def.default,
+            int(i64::try_from(v).unwrap_or(-1)),
+            "{}",
+            def.key
+        );
+    }
     assert_eq!(
-        OUTCOME_BARRIER_C_DIR.default_f64().to_bits(),
-        0.3f64.to_bits()
+        OUTCOME_INTRADAY_MAX_STEP_MS.default,
+        int(OUTCOME_INTRADAY_MAX_STEP_MS_DEFAULT)
     );
+    assert!(float(
+        &GLYPH_FRESHNESS_HALF_BARS,
+        GLYPH_FRESHNESS_HALF_BARS_DEFAULT
+    ));
+    assert!(float(&OUTCOME_BARRIER_C_DIR, OUTCOME_BARRIER_C_DIR_DEFAULT));
+    assert!(float(
+        &OUTCOME_BARRIER_C_NEUTRAL,
+        OUTCOME_BARRIER_C_NEUTRAL_DEFAULT
+    ));
+    // Every registry row is covered above.
+    assert_eq!(REGISTRY.len(), 16);
 }
 
 fn is_key(key: &str) -> bool {

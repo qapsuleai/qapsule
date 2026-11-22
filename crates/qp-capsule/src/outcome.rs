@@ -50,9 +50,9 @@ use qp_schema::capsule::{Direction, MeaningKind, TimeKind};
 use qp_schema::Bar;
 
 /// ATR period for directional stories.
-pub const ATR_FAST: usize = qp_schema::params::system::OUTCOME_ATR_FAST.default_usize();
+pub const ATR_FAST: usize = qp_schema::params::system::OUTCOME_ATR_FAST_DEFAULT;
 /// ATR period for neutral stories ("normal" volatility).
-pub const ATR_SLOW: usize = qp_schema::params::system::OUTCOME_ATR_SLOW.default_usize();
+pub const ATR_SLOW: usize = qp_schema::params::system::OUTCOME_ATR_SLOW_DEFAULT;
 
 /// Base horizon (bars) and directional barrier (ATR multiples) of one meaning kind.
 #[derive(Debug, Clone, Copy, PartialEq)]
@@ -66,9 +66,9 @@ pub struct KindParams {
 }
 
 /// Directional barrier constant: `k = C_DIR · √h` (ATR(14) units).
-pub const C_DIR: f64 = qp_schema::params::system::OUTCOME_BARRIER_C_DIR.default_f64();
+pub const C_DIR: f64 = qp_schema::params::system::OUTCOME_BARRIER_C_DIR_DEFAULT;
 /// Neutral barrier constant: `k_n = C_NEUTRAL · √h` (ATR(100) units).
-pub const C_NEUTRAL: f64 = qp_schema::params::system::OUTCOME_BARRIER_C_NEUTRAL.default_f64();
+pub const C_NEUTRAL: f64 = qp_schema::params::system::OUTCOME_BARRIER_C_NEUTRAL_DEFAULT;
 
 /// The base table (see `NOTES.md` for the reasoning per kind). Barriers follow
 /// diffusive scaling from the kind's base horizon; a horizon perturbation does not move
@@ -407,7 +407,7 @@ impl OutcomeRule for HighLow {
 /// (RP4) Bars at least this far apart are not intraday: [`Rp4`] judges them with
 /// [`Barrier`]. Half a day, so a daily series stays daily across any time-zone shift.
 pub const INTRADAY_MAX_STEP_MS: i64 =
-    qp_schema::params::system::OUTCOME_INTRADAY_MAX_STEP_MS.default_i64();
+    qp_schema::params::system::OUTCOME_INTRADAY_MAX_STEP_MS_DEFAULT;
 
 /// Whether the bar series `bars[..=born]` is intraday: its smallest positive time step is
 /// below [`INTRADAY_MAX_STEP_MS`]. Deterministic and without look-ahead (only bars up to

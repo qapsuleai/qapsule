@@ -39,7 +39,7 @@ pub use opening::{
 };
 
 /// Bars shown before the fact bar in the chart view.
-pub const CHART_LOOKBACK: u64 = qp_schema::params::system::DEPTH_CHART_LOOKBACK_BARS.default_u64();
+pub const CHART_LOOKBACK: u64 = qp_schema::params::system::DEPTH_CHART_LOOKBACK_BARS_DEFAULT;
 
 /// What the presenter shows for a finding at one depth.
 #[derive(Debug, Clone, PartialEq)]

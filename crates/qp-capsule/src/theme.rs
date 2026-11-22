@@ -43,10 +43,9 @@ use qp_schema::capsule::{Direction, Edge, MeaningKind};
 use qp_schema::Fact;
 
 /// Default join tolerance for same kind + direction, in bars.
-pub const GAP_BARS: u64 = qp_schema::params::system::STORY_THEME_GAP_BARS.default_u64();
+pub const GAP_BARS: u64 = qp_schema::params::system::STORY_THEME_GAP_BARS_DEFAULT;
 /// Default window in which a flow fact confirms a price-meaning story, in bars.
-pub const CONFIRM_BARS: u64 =
-    qp_schema::params::system::STORY_THEME_FLOW_CONFIRM_BARS.default_u64();
+pub const CONFIRM_BARS: u64 = qp_schema::params::system::STORY_THEME_FLOW_CONFIRM_BARS_DEFAULT;
 
 /// The "kind + direction" theme rule (see the crate docs).
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]

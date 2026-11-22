@@ -149,55 +149,7 @@ pub struct ParamDef {
     pub since: &'static str,
 }
 
-// The typed default accessors are meant for `const` initializers: a type mismatch there
-// is a compile-time error. Called at run time they never see a mismatch, because every
-// binding is a `const` item evaluated by the compiler.
 impl ParamDef {
-    /// The default as `i64`; compile error in a `const` if it is not an `Int`.
-    #[allow(clippy::panic)] // compile-time only
-    pub const fn default_i64(&self) -> i64 {
-        match self.default {
-            ParamValue::Int(v) => v,
-            _ => panic!("parameter default is not an int"),
-        }
-    }
-
-    /// The default as `u64`; compile error in a `const` if it is not a non-negative `Int`.
-    #[allow(clippy::panic)] // compile-time only
-    pub const fn default_u64(&self) -> u64 {
-        match self.default {
-            ParamValue::Int(v) if v >= 0 => v as u64,
-            _ => panic!("parameter default is not a u64"),
-        }
-    }
-
-    /// The default as `u32`; compile error in a `const` if it does not fit a `u32`.
-    #[allow(clippy::panic)] // compile-time only
-    pub const fn default_u32(&self) -> u32 {
-        match self.default {
-            ParamValue::Int(v) if v >= 0 && v <= u32::MAX as i64 => v as u32,
-            _ => panic!("parameter default is not a u32"),
-        }
-    }
-
-    /// The default as `usize`; compile error in a `const` if it does not fit a `usize`.
-    #[allow(clippy::panic)] // compile-time only
-    pub const fn default_usize(&self) -> usize {
-        match self.default {
-            ParamValue::Int(v) if v >= 0 && (v as u64) <= usize::MAX as u64 => v as usize,
-            _ => panic!("parameter default is not a usize"),
-        }
-    }
-
-    /// The default as `f64`; compile error in a `const` if it is not a `Float`.
-    #[allow(clippy::panic)] // compile-time only
-    pub const fn default_f64(&self) -> f64 {
-        match self.default {
-            ParamValue::Float(v) => v,
-            _ => panic!("parameter default is not a float"),
-        }
-    }
-
     /// Whether the definition allows values to be set at `scope`.
     pub fn allows(&self, scope: ParamScope) -> bool {
         self.scopes.contains(&scope)

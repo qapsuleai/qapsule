@@ -1,0 +1,15 @@
+/* `tavek` Ç4 — the opened capsule marks itself on the chart above the sheet. */
+
+/* The chart keeps a little more room: it carries the evidence window. */
+.c4-chart {
+  height: 40%;
+}
+
+.sheet {
+  gap: var(--qp-space-1);
+}
+
+/* Evidence rows are read, not tapped: tighter than a touch row, so the actions stay in view. */
+.evidence li {
+  padding: var(--qp-space-0) 0;
+}

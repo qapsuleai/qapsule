@@ -1,0 +1,72 @@
+<!doctype html>
+<!-- RD2 Y-b `tavek` Ç2 — grafik hücresi yakın (960×600, DPR 2). Grafik çekirdekten;
+     Qapsule katmanı grafiğin kendi dilinde: her seviye fiyat ekseninde bir etiketle biter,
+     köken çizgi biçimi + renktir (insan düz, ajan kesik, motor noktalı), izlemenin durumu
+     etiketin yanında sözcüktür, kapsülün kanıt penceresi soluk bir bant ve zaman ekseninde
+     bir parantezdir. Konumlar hücrenin kesirleri: örnek, veriye bağlı değil. -->
+<html lang="tr">
+<head>
+  <meta charset="utf-8">
+  <title>Ç2 grafik hücresi</title>
+  <link rel="stylesheet" href="../_base/base.css">
+  <link rel="stylesheet" href="../_base/c2.css">
+  <link rel="stylesheet" href="tavek.css">
+  <script src="../_base/frame.js"></script>
+</head>
+<body>
+<div class="frame c2" data-anchor="c2">
+  <div class="chart-slot" data-chart-slot data-region="chart">
+    <img data-chart="c2-cell" alt="SYN20 grafik hücresi">
+
+    <div class="overlay" aria-label="Grafik üstü Qapsule katmanı">
+      <!-- Evidence window of the capsule (engine): faint band down to the time axis. -->
+      <div class="band" style="--x: 72.5%; --x2: 78.8%; --top: 6%"></div>
+
+      <svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
+        <!-- Human trend line (solid ink). -->
+        <line class="human" x1="40" y1="48" x2="76" y2="30.5"></line>
+        <!-- Watch level made from the human's intent; full strength from the break bar on. -->
+        <line class="watch" x1="34" y1="28.6" x2="93.3" y2="28.6"></line>
+        <line class="watch-hot" x1="75" y1="28.6" x2="93.3" y2="28.6"></line>
+        <line class="tick" x1="75" y1="27.4" x2="75" y2="29.8"></line>
+        <!-- Agent proposal (dashed violet preview, not yet the human's). -->
+        <line class="agent preview" x1="3" y1="22.6" x2="93.3" y2="22.6"></line>
+        <!-- Engine fact: the previous high as a level (dotted graphite). -->
+        <line class="engine" x1="14" y1="34.3" x2="93.3" y2="34.3"></line>
+      </svg>
+
+      <!-- Left end of each level: who wrote it, and its state. -->
+      <div class="ax-chip agent" style="--x: 3%; --y: 22.6%">
+        <span class="origin agent">Ajan önerisi</span><span>Destek</span>
+        <span class="act">Reddet</span><span class="act go">Ekle</span>
+      </div>
+      <div class="ax-chip human" style="--x: 34%; --y: 28.6%">
+        <span>İzleme</span>
+        <span class="st broke">Kırıldı</span>
+        <span class="pips" aria-label="tutunma 2/3"><i class="on"></i><i class="on"></i><i></i></span>
+        <span class="who">2/3 bar</span>
+      </div>
+      <div class="ax-chip engine" style="--x: 14%; --y: 34.3%">
+        <span class="origin engine">Motor</span><span>Önceki tepe</span>
+      </div>
+
+      <!-- Right end: the value, in the price gutter (the familiar alert-tag form). -->
+      <div class="ax-tag agent" style="--y: 22.6%">117,50</div>
+      <div class="ax-tag human" style="--y: 28.6%">112,40</div>
+      <div class="ax-tag engine" style="--y: 34.3%">107,50</div>
+
+      <!-- Intent of the trend line: one line at its start; the full card is in the side panel. -->
+      <div class="intent-pill" style="--x: 40%; --y: 48%">
+        <span>Altında kapanış → uyar</span><span class="muted">3 bar · günlük</span>
+      </div>
+
+      <!-- Capsule mark at the top of its window; the bracket names the window on the time axis. -->
+      <div class="cap-pin" style="--x: 72.5%; --y: 6%">
+        <span><b>Kapsül</b> Kırılım tutundu</span>
+      </div>
+      <div class="t-bracket" style="--x: 72.5%; --x2: 78.8%"><span>Kanıt</span></div>
+    </div>
+  </div>
+</div>
+</body>
+</html>

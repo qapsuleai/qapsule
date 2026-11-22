@@ -38,6 +38,7 @@ mod oltan;
 mod ornek;
 mod r4;
 mod registry;
+mod tavek;
 mod zemre;
 
 pub use chart::{ChartLook, OriginLook, OriginRoles, Profile, ValueLine};
@@ -50,6 +51,7 @@ pub use registry::{
     by_name, companion_face, is_look, names, or_default, COMPANION_FACES, DEFAULT_LOOK, LOOKS,
     PRESENTED_LOOK,
 };
+pub use tavek::{TAVEK, TAVEK_TEL};
 pub use zemre::ZEMRE;
 
 /// One role of the type scale.

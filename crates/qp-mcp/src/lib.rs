@@ -31,10 +31,10 @@ pub mod tools;
 pub use config::{Config, Options};
 pub use hub::{Hub, Queued, SharedHub};
 pub use notify::{Delivery, Inbox, NotifyMode, INBOX_CAP, NOTIFY_URI};
-pub use rpc::{
-    notification, tool_result, RpcError, LEGACY_VERSIONS, LIST_TTL_MS, META_ORDER,
-    META_REQUEST_ID, META_WELCOME, MODERN_VERSIONS,
-};
 pub(crate) use rpc::{check_version, error_response};
+pub use rpc::{
+    notification, tool_result, RpcError, LEGACY_VERSIONS, LIST_TTL_MS, META_ORDER, META_REQUEST_ID,
+    META_WELCOME, MODERN_VERSIONS,
+};
 pub use server::McpServer;
 pub use surfaces::{Ctx, ToolDef, ToolSurface};

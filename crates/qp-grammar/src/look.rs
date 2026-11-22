@@ -382,6 +382,8 @@ pub struct StoryLook {
     pub dash: (i32, i32),
     /// Most dashes in one coin-flip lane.
     pub dash_max: i32,
+    /// (RD2) Colour role of a closed story's label (`korda`; text, so 4.5:1).
+    pub closed_label: &'static str,
 }
 
 /// (R5/S) The open capsule design `tesir`'s line and bar counts (`crate::open::tesir`;

@@ -33,6 +33,12 @@ impl Draw<'_> {
         s
     }
 
+    /// A closed story's label colour (the look's `story.closed_label` role).
+    fn closed_label(&self) -> Rgba {
+        let t = &self.theme;
+        t.token(self.look.story.closed_label).unwrap_or(t.closed)
+    }
+
     fn label_px(&self) -> f64 {
         self.look.types.label.px
     }
@@ -201,7 +207,7 @@ impl Draw<'_> {
         if above || full {
             let s = self.label(r);
             let c = if role == Role::Closed {
-                self.theme.closed
+                self.closed_label()
             } else {
                 self.theme.text
             };

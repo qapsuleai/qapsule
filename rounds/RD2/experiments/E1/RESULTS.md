@@ -223,3 +223,56 @@ küçültüldü), soldan sağa `oltan` ve `tavek`. Alt satır Ç3 telefon 390×8
 - `k17.txt`
 - `wasm-sizes.txt`: "main" satırları `9aae35f7`.
 - `designs.json`
+
+## Düzeltme sonrası (RD2 gri düzeltmesi, ölçüt 10)
+
+Yazan: RD2 gri düzeltmesi alt ajanı, 2026-11-23, dal `rd2/fix-grey`. Yalnız 1b (bütün öğeler)
+yeniden koşuldu: aynı `probe.mjs --look <ad>` ve aynı `analyze.py`, kesmesi kaldırılmış kopya
+(scratch'te; ek olarak eşik altı satırına zemin rengini yazıyor). Kabuk paketi ve `qp` bu dalın
+koduyla derlendi. 1a, K52, K17 ve WASM yeniden koşulmadı. Çıktılar
+`evidence/contrast-tavek-after.md`, `evidence/contrast-tavek-tel-after.md`.
+
+**Nerede kalıyordu (önce koşusunun zemin dökümü):** gri rol, metin dışı öğe olarak vurgu
+şeridinin (`surface.strip_alpha` 40, `accent`) üstünde 2,41 / 2,61, şeridin üstündeki kanıt
+bandında da eşik altı ve kendi plakasında (`grey_plate_alpha_max` 40 / 29) 2,71 / 2,93 idi.
+Metin olarak kapanmış hikâye etiketleri (`korda`, `closed` rengi) zeminde 3,07 / 3,28,
+şeritte 2,41 / 2,61 idi. `tavek-tel`'deki `down` öğesi, değer çizgisinin 2×1 px noktası,
+kendi hacim çubuğunun (`down` %35) şerit üstündeki hâline karşı 2,50 idi.
+
+| | önce eşik altı (`tavek` / `-tel`) | önce en kötü metin / metin dışı | sonra eşik altı | sonra en kötü metin / metin dışı |
+|---|---|---|---|---|
+| `tavek` | 332 | 2,41 / 2,41 | **0** | 5,48 (açık, `bg` rengi yazı `up` etiketinde) / 3,30 (koyu, gri dolgu, yüz) |
+| `tavek-tel` | 312 | 2,41 / 2,41 | **0** | 5,48 / **3,04** (koyu, `down` noktası kendi hacim çubuğunda, şeritte) |
+
+İki temada, yüz, açılmış kapsül, kanıt, hikâye çizelgesi ve kabuk yüzeylerinin hepsinde eşik
+altı 0; sayfa hatası 0. Gri rolün en kötüsü artık 3,30 / 3,31 (yüzde, kendi plakasında).
+
+**Değişen değerler** (yalnız `crates/qp-grammar/src/look/tavek.rs`; `tavek-tel` renkleri
+`..TAVEK` ile aynı; eski görünüşler değişmedi):
+
+- **Gri rol** (`neutral` = `invalid` = `closed`): koyuda açıldı (L\* 42 → 47; zeminde 3,72),
+  açıkta koyulaştı (L\* 59 → 55; zeminde 3,74).
+- **Koyu `down`:** biraz daha açık ve sıcak (L\* 54,5 → 58,8; HSL S 60, L 59, P3 içinde).
+  Gri açılınca gri ↔ aşağı ΔE00'ı korumak için.
+- **Açık `up` ve `down`:** biraz koyulaştı (L\* 47,3 → 44,4; 32,6 → 30,8). Gri koyulaşınca
+  gri ↔ yukarı ve yukarı ↔ aşağı ΔE00'ı korumak için.
+- **Koyu `axis`:** bir basamak açıldı (kanıt bandı + şerit üstünde 2,99 → 3,07).
+- **`surface.strip_alpha`** 40 → 16 ve **`story.focus_row_alpha`** 40 → 16 (`oltan`'daki R5
+  düzeltmesiyle aynı yol: gri şeritler bandın üstünde de 3:1).
+- **Koyu `grey_plate_alpha_max`** 40 → 32.
+- **Yeni görünüş değeri `story.closed_label`** (`korda`'nın kapanmış hikâye etiketinin rolü):
+  `r4` ve ondan türeyenlerde `closed` (çıktı aynı), `tavek`'te `muted`. Etiket metin olduğu
+  için 4,5:1 istiyor; gri rol bunu tutamıyor (merdivende yeri yok, aşağıda).
+
+**Merdiven (L\*), düzeltme sonrası:** koyu gri 47,3 < aşağı 58,8 < yukarı 72,6 < mürekkep
+91,6; açık gri 55,2 > yukarı 44,4 > aşağı 30,8 > mürekkep 8,8. `design-check` H3 en kötü:
+koyu 11,3 (`up ↔ down`, gri koşul), açık anlam rollerinde 10,7 (`grey ↔ up`, gri koşul).
+Gri rolü metin eşiğine (4,5) çıkarmak koyu temada griyi aşağının, açık temada yukarının
+ışıklığına taşıyordu; ΔE00 ≥ 10 ile ikisi birden sığmadı. Bu yüzden etiket `muted`.
+
+**`design-check`:** H1 ve H2 artık rolü çizildiği her zemine karşı ölçüyor (`bg`, `surface`,
+kart, şerit, seçili satır bandı, kanıt bandı zeminde ve şeritte, gri rolün kendi plakası,
+`up`/`down`'ın kendi hacim çubuğu zeminde ve şeritte); gri rol H2'de, kapanmış hikâye
+etiketi H1'de. Eski değerlerle `tavek` ve `tavek-tel` dört satırda kaldı (H1 2,13 / 2,36;
+H2 2,13 / 2,36, gri, kanıt bandı + şerit). Yeni değerlerle PASS: H1 5,27 / 5,26; H2 3,04 /
+3,06; H3 11,3 / 10,7.

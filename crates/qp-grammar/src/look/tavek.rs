@@ -32,11 +32,11 @@ pub const TAVEK: Look = Look {
         name: "dark",
         bg: [19, 20, 23, 255],
         grid: [31, 33, 37, 255],
-        axis: [108, 111, 118, 255],
+        axis: [110, 113, 120, 255],
         text: [230, 231, 234, 255],
         muted: [150, 153, 160, 255],
         up: [104, 196, 150, 255],
-        down: [212, 92, 95, 255],
+        down: [214, 113, 89, 255],
         accent: [104, 158, 232, 255],
         warn: [226, 178, 84, 255],
         // `s1` is the accent; the agent's violet is kept out of the series.
@@ -52,14 +52,14 @@ pub const TAVEK: Look = Look {
         ],
         surface: [24, 25, 29, 255],
         line: [44, 46, 51, 255],
-        neutral: [97, 99, 105, 255],
+        neutral: [110, 112, 118, 255],
         valid: [230, 231, 234, 255],
-        invalid: [97, 99, 105, 255],
-        closed: [97, 99, 105, 255],
+        invalid: [110, 112, 118, 255],
+        closed: [110, 112, 118, 255],
         closed_alpha: 255,
         fresh_alpha_min: 255,
         plate_alpha_min: 61,
-        grey_plate_alpha_max: 40,
+        grey_plate_alpha_max: 32,
         focus: [104, 158, 232, 255],
         chrome: Chrome {
             bg: [16, 17, 20, 255],
@@ -85,8 +85,8 @@ pub const TAVEK: Look = Look {
         axis: [128, 131, 138, 255],
         text: [24, 25, 28, 255],
         muted: [92, 95, 102, 255],
-        up: [20, 128, 84, 255],
-        down: [150, 26, 38, 255],
+        up: [20, 120, 79, 255],
+        down: [142, 25, 36, 255],
         accent: [40, 96, 200, 255],
         warn: [150, 92, 0, 255],
         series: [
@@ -101,10 +101,10 @@ pub const TAVEK: Look = Look {
         ],
         surface: [255, 255, 255, 255],
         line: [214, 215, 218, 255],
-        neutral: [140, 142, 148, 255],
+        neutral: [130, 132, 138, 255],
         valid: [24, 25, 28, 255],
-        invalid: [140, 142, 148, 255],
-        closed: [140, 142, 148, 255],
+        invalid: [130, 132, 138, 255],
+        closed: [130, 132, 138, 255],
         closed_alpha: 255,
         fresh_alpha_min: 255,
         plate_alpha_min: 61,
@@ -142,7 +142,7 @@ pub const TAVEK: Look = Look {
         shadow: true,
         shadow_css: "0 1px 2px rgba(0, 0, 0, 0.18), 0 4px 12px rgba(0, 0, 0, 0.12)",
         card_radius: 8.0,
-        strip_alpha: 40,
+        strip_alpha: 16,
         veil_alpha: 150,
     },
     glyph: GlyphLook {
@@ -195,7 +195,16 @@ pub const TAVEK: Look = Look {
         legend_baseline: 13,
         ..R4.offsets
     },
-    story: R4.story,
+    // (RD2 grey fix) The grey role (`neutral` = `invalid` = `closed`) 3:1 on every ground it
+    // is drawn on (bg, surface, the emphasis strip, the evidence band, the row band, its own
+    // plate): grey lifted (dark) / darkened (light), strip and row band 16, grey plate 32
+    // (dark); the ladder kept ΔE00 ≥ 10 in five conditions by a lighter, warmer dark `down`
+    // and a darker light `up` and `down`. A closed story's label is text: `muted` (4.5:1).
+    story: StoryLook {
+        focus_row_alpha: 16,
+        closed_label: "muted",
+        ..R4.story
+    },
     open: R4.open,
     profile: Profile::Dense,
     // Human: ink, solid. Agent: the one origin hue, dashed. Engine: graphite, dotted

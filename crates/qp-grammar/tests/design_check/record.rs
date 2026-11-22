@@ -1,4 +1,5 @@
-//! Checks measured from the look record alone: P1, P3, P9–P13 and R5's hard thresholds.
+//! Checks measured from the look record alone: P1, P3, P9–P13 and R5's H3 (H1, H2:
+//! `grounds.rs`).
 
 use qp_grammar::look::{Look, Profile, ROLES};
 use qp_grammar::theme::Theme;
@@ -189,72 +190,6 @@ pub fn p13(t: &Theme) -> Row {
             th::P13_CONTROL
         ),
         one && (th::P13_HAIRLINE.0..=th::P13_HAIRLINE.1).contains(&hair) && ctl >= th::P13_CONTROL,
-    )
-}
-
-fn worst(pairs: &[(&str, Rgba, Rgba)]) -> (String, f64) {
-    pairs
-        .iter()
-        .map(|(n, f, b)| ((*n).to_owned(), contrast(*f, *b)))
-        .fold((String::new(), f64::INFINITY), |a, b| {
-            if b.1 < a.1 {
-                b
-            } else {
-                a
-            }
-        })
-}
-
-/// H1: every text role 4.5:1 on its ground.
-pub fn h1(t: &Theme) -> Row {
-    let c = t.chrome;
-    let (name, k) = worst(&[
-        ("text/bg", t.text, t.bg),
-        ("muted/bg", t.muted, t.bg),
-        ("text/surface", t.text, t.surface),
-        ("muted/surface", t.muted, t.surface),
-        ("chrome fg/bg", c.fg, c.bg),
-        ("chrome muted/bg", c.muted, c.bg),
-        ("chrome fg/card", c.fg, c.card),
-        ("chrome muted/card", c.muted, c.card),
-        ("on_accent/accent", c.on_accent, c.accent),
-        ("note", c.note_fg, c.note_bg),
-        ("alert", c.alert_fg, c.alert_bg),
-    ]);
-    Row::check(
-        "H1",
-        t.name,
-        "text contrast (worst)",
-        format!("{k:.2} ({name})"),
-        format!(">= {}", th::H1_TEXT),
-        k >= th::H1_TEXT,
-    )
-}
-
-/// H2: every non-text meaning and origin role 3:1 on the ground and the surface.
-pub fn h2(l: &Look, t: &Theme) -> Row {
-    let o = l.origin_roles(t);
-    let mut pairs = Vec::new();
-    for (n, c) in [
-        ("up", t.up),
-        ("down", t.down),
-        ("axis", t.axis),
-        ("focus", t.focus),
-        ("origin.human", o.human),
-        ("origin.agent", o.agent),
-        ("origin.engine", o.engine),
-    ] {
-        pairs.push((n, c, t.bg));
-        pairs.push((n, c, t.surface));
-    }
-    let (name, k) = worst(&pairs);
-    Row::check(
-        "H2",
-        t.name,
-        "non-text contrast (worst)",
-        format!("{k:.2} ({name})"),
-        format!(">= {}", th::H2_NON_TEXT),
-        k >= th::H2_NON_TEXT,
     )
 }
 

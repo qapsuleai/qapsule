@@ -17,6 +17,7 @@
 
 mod alphabet;
 mod color;
+mod grounds;
 mod levels;
 mod record;
 mod scene;
@@ -107,8 +108,8 @@ fn rows(look: &'static Look, fx: &scene::Fixture, layout: Option<&serde_json::Va
             scene::p7(&desk, look, s),
             scene::p8(&desk, look, s),
             record::p13(t),
-            record::h1(t),
-            record::h2(look, t),
+            grounds::h1(look, t),
+            grounds::h2(look, t),
             record::h3(look, t),
         ]);
     }

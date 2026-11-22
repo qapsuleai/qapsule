@@ -109,6 +109,7 @@ pub const R4: Look = Look {
         mark: 5.0,
         dash: (5, 3),
         dash_max: 12,
+        closed_label: "closed",
     },
     open: OpenLook {
         claim_lines: 4.0,

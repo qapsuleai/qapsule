@@ -27,7 +27,13 @@ kayıtta yalnız karşılaştırma için durur.
   kesiklidir (`--qp-agent-dash`), motor çizgisi noktalı, insanınki düz; renk körlüğünde ayrım
   biçimle korunur (H2, H3).
 - **Vurgu yalnız seçim ve odaktır:** `focus` / `chrome.accent` süs için kullanılmaz.
-- **Karşıtlık iki profilde de tutar:** metin 4,5:1, metin dışı öğe 3:1 (H1, H2).
+- **Karşıtlık iki profilde de tutar:** metin 4,5:1, metin dışı öğe 3:1 (H1, H2). (RD2 gri
+  düzeltmesi) Yalnız sayfa zeminine değil, rolün çizildiği **her zemine** karşı: `bg`,
+  `surface`, kart, vurgu şeridi (`surface.strip_alpha`), seçili hikâye satırı
+  (`story.focus_row_alpha`), kanıt bandı (zeminde ve şeritte), gri rolün kendi plakası
+  (`grey_plate_alpha_max`), `up`/`down`'ın kendi hacim çubuğu (zeminde ve şeritte). Gri rol
+  (`neutral` = `invalid` = `closed`) H2'de ölçülür; kapanmış hikâye etiketi metindir, rengi
+  `story.closed_label` (`design_check/grounds.rs`).
 
 ## Tip ölçeği
 
@@ -176,14 +182,14 @@ Görünüş `tavek`: profil `dense`, varsayılan düzen `dark`.
 | `s7` | veri | #8caa8cff | #466e46ff |
 | `s8` | veri | #b4b4b8ff | #646468ff |
 | `grid` | veri | #1f2125ff | #ecedefff |
-| `axis` | veri | #6c6f76ff | #80838aff |
-| `up` | anlam | #68c496ff | #148054ff |
-| `down` | anlam | #d45c5fff | #961a26ff |
+| `axis` | veri | #6e7178ff | #80838aff |
+| `up` | anlam | #68c496ff | #14784fff |
+| `down` | anlam | #d67159ff | #8e1924ff |
 | `warn` | anlam | #e2b254ff | #965c00ff |
 | `valid` | anlam | #e6e7eaff | #18191cff |
-| `invalid` | anlam | #616369ff | #8c8e94ff |
-| `neutral` | anlam | #616369ff | #8c8e94ff |
-| `closed` | anlam | #616369ff | #8c8e94ff |
+| `invalid` | anlam | #6e7076ff | #82848aff |
+| `neutral` | anlam | #6e7076ff | #82848aff |
+| `closed` | anlam | #6e7076ff | #82848aff |
 | `focus` | anlam | #689ee8ff | #2860c8ff |
 | `origin.human` | köken | #e6e7eaff | #18191cff |
 | `origin.agent` | köken | #a896f0ff | #6040c4ff |
@@ -267,14 +273,14 @@ Görünüş `tavek-tel`: profil `touch`, varsayılan düzen `dark`.
 | `s7` | veri | #8caa8cff | #466e46ff |
 | `s8` | veri | #b4b4b8ff | #646468ff |
 | `grid` | veri | #1f2125ff | #ecedefff |
-| `axis` | veri | #6c6f76ff | #80838aff |
-| `up` | anlam | #68c496ff | #148054ff |
-| `down` | anlam | #d45c5fff | #961a26ff |
+| `axis` | veri | #6e7178ff | #80838aff |
+| `up` | anlam | #68c496ff | #14784fff |
+| `down` | anlam | #d67159ff | #8e1924ff |
 | `warn` | anlam | #e2b254ff | #965c00ff |
 | `valid` | anlam | #e6e7eaff | #18191cff |
-| `invalid` | anlam | #616369ff | #8c8e94ff |
-| `neutral` | anlam | #616369ff | #8c8e94ff |
-| `closed` | anlam | #616369ff | #8c8e94ff |
+| `invalid` | anlam | #6e7076ff | #82848aff |
+| `neutral` | anlam | #6e7076ff | #82848aff |
+| `closed` | anlam | #6e7076ff | #82848aff |
 | `focus` | anlam | #689ee8ff | #2860c8ff |
 | `origin.human` | köken | #e6e7eaff | #18191cff |
 | `origin.agent` | köken | #a896f0ff | #6040c4ff |

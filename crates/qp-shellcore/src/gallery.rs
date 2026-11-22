@@ -27,119 +27,13 @@ use std::collections::BTreeMap;
 use serde::{Deserialize, Serialize};
 use serde_json::{json, Value};
 
-// RG1: the page texts moved to `gallery/labels.rs`.
+// RG1: the topic registry and the page texts moved to `gallery/`.
 mod labels;
+mod topics;
 
 pub use labels::{clean_note, device_label};
 use labels::{labels, norm_lang, norm_theme};
-
-/// What a candidate shows (the topic's depth).
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub enum Shot {
-    /// The feed's first `n` rows (group headers as text, faces as images).
-    Feed(usize),
-    /// The open capsule's face in the feed.
-    Face,
-    /// The open capsule at capsule depth (its title and scene).
-    Capsule,
-    /// The open capsule at chart depth.
-    Chart,
-    /// The open capsule at evidence depth (scene and evidence rows).
-    Evidence,
-}
-
-/// One topic of the gallery.
-#[derive(Debug, Clone, Copy)]
-pub struct Topic {
-    /// The setting's key: the `choices()` key and the `set_look` field.
-    pub key: &'static str,
-    /// Title (Turkish, English).
-    pub label: [&'static str; 2],
-    /// What to look at (Turkish, English).
-    pub hint: [&'static str; 2],
-    /// What each candidate shows.
-    pub shots: &'static [Shot],
-}
-
-/// The gallery's topics, in page order (`rounds/R5/GOAL.md` M16–M21).
-pub const TOPICS: &[Topic] = &[
-    Topic {
-        key: "voice",
-        label: ["Dil", "Voice"],
-        hint: [
-            "Aynı kapsülün yüzü ve açılmış kartı. Ne olduğunu, hangi eşiği ve geçmişte kaç kez tuttuğunu bir bakışta anlıyor musun?",
-            "The same capsule's face and open card. Can you tell at a glance what happened, which level, and how often it held before?",
-        ],
-        shots: &[Shot::Face, Shot::Capsule],
-    },
-    Topic {
-        key: "look",
-        label: ["Görünüş", "Look"],
-        hint: [
-            "Aynı yüz, açılmış kapsül ve grafik. İşaret ilk göze çarpan şey mi, yazı rahat okunuyor mu?",
-            "The same face, open capsule and chart. Is the mark the first thing you see, is the text easy to read?",
-        ],
-        shots: &[Shot::Face, Shot::Capsule, Shot::Chart],
-    },
-    Topic {
-        key: "story",
-        label: ["Hikâye çizelgesi", "Story chart"],
-        hint: [
-            "Aynı hissenin grafiği. Hangi kapsül canlı, hangileri tuttu?",
-            "The same instrument's chart. Which capsule is live, which ones held?",
-        ],
-        shots: &[Shot::Chart],
-    },
-    Topic {
-        key: "feed_order",
-        label: ["Akış sırası", "Feed order"],
-        hint: [
-            "Aynı anın akışı. Son baktığından beri ne değiştiğini ilk satırlarda görüyor musun?",
-            "The same moment's feed. Do the first rows show what changed since you last looked?",
-        ],
-        shots: &[Shot::Feed(6)],
-    },
-    Topic {
-        key: "feed_rule",
-        label: ["Yazı tura eşiği", "Coin-flip threshold"],
-        hint: [
-            "Aynı anın akışı, karnesi yazı tura olanları gizleyen ve gizlemeyen kural.",
-            "The same moment's feed, with and without hiding capsules whose record is a coin flip.",
-        ],
-        shots: &[Shot::Feed(6)],
-    },
-    Topic {
-        key: "motion",
-        label: ["Hareket", "Motion"],
-        hint: [
-            "Açılmış kapsülün son karesi (hareketin kendisi gösterimde denenir).",
-            "The open capsule's last frame (the motion itself is tried in the demo).",
-        ],
-        shots: &[Shot::Face, Shot::Capsule],
-    },
-    Topic {
-        key: "open",
-        label: ["Açılmış kapsül", "Open capsule"],
-        hint: [
-            "Aynı kapsül açılmış ve kanıtıyla. Bu iddia neye dayanıyor, kim doğruladı?",
-            "The same capsule open and with its evidence. What does the claim rest on, who checked it?",
-        ],
-        shots: &[Shot::Capsule, Shot::Evidence],
-    },
-];
-
-/// The finalists the gallery shows per topic key, best first (R5: "each topic's first two
-/// candidates"). A topic not listed here shows every candidate its registry has. **The
-/// orchestrator updates this one table** when a topic's finalists are chosen; a name the
-/// registry does not know is skipped.
-/// (R5/S) Each R5 topic's first two (best first) and the `r4` reference.
-pub const FINALISTS: &[(&str, &[&str])] = &[
-    ("voice", &["marla", "selvi", "r4"]),
-    ("look", &["oltan", "zemre", "r4"]),
-    ("story", &["pavka", "korda", "r4"]),
-    ("open", &["tesir", "nobra", "r4"]),
-    ("motion", &["surek", "nabiz", "r4"]),
-];
+pub use topics::{candidates, Shot, Topic, FINALISTS, TOPICS};
 
 /// The replay step every candidate is shown at (synthetic, paused host).
 pub const STEP: u64 = 120;
@@ -151,30 +45,6 @@ pub const PAGE_W: u32 = 402;
 pub const IMAGE_SCALE: f64 = 2.0;
 /// The longest note kept (characters).
 pub const NOTE_MAX: usize = 200;
-
-/// The candidates shown for `topic`: the registry's names (`choices[topic.key]`) narrowed
-/// to the finalists (in the finalists' order) when the topic has them. Empty when the
-/// registry has no such key.
-#[must_use]
-pub fn candidates(topic: &Topic, choices: &Value) -> Vec<String> {
-    let names: Vec<String> = choices[topic.key]
-        .as_array()
-        .map(|a| {
-            a.iter()
-                .filter_map(Value::as_str)
-                .map(str::to_owned)
-                .collect()
-        })
-        .unwrap_or_default();
-    match FINALISTS.iter().find(|(k, _)| *k == topic.key) {
-        Some((_, f)) => f
-            .iter()
-            .filter(|n| names.iter().any(|m| m == *n))
-            .map(|n| (*n).to_owned())
-            .collect(),
-        None => names,
-    }
-}
 
 /// One painted piece of a candidate: an image the host serves, or a text row as the core
 /// wrote it (a feed group header, a face without a scene, the open layer's title, an
@@ -607,4 +477,155 @@ pub use build_impl::build;
 mod build_impl;
 
 #[cfg(test)]
-mod tests;
+mod tests {
+    use super::*;
+
+    fn layout() -> Layout {
+        let cand = |id: &str| CandOut {
+            id: id.to_owned(),
+            label: id.to_owned(),
+            content: "adım 120 / 2080 · x".to_owned(),
+            shots: vec![],
+        };
+        Layout {
+            lang: "tr".to_owned(),
+            theme: "dark".to_owned(),
+            moment: "adım 120 / 2080 · 2025-06-02 10:00".to_owned(),
+            topics: vec![
+                TopicOut {
+                    key: "voice".to_owned(),
+                    label: "Dil".to_owned(),
+                    hint: String::new(),
+                    cands: vec![cand("marla"), cand("selvi")],
+                },
+                TopicOut {
+                    key: "look".to_owned(),
+                    label: "Görünüş".to_owned(),
+                    hint: String::new(),
+                    cands: vec![cand("r4"), cand("ornek")],
+                },
+            ],
+        }
+    }
+
+    #[test]
+    fn summary_is_deterministic_and_complete() {
+        let mut g = GalleryCore::new("", "", "", "", "1763460000000");
+        g.load(&serde_json::to_string(&layout()).unwrap()).unwrap();
+        g.set_device("Mozilla/5.0 (iPhone; CPU iPhone OS 27_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/27.0 Mobile/15E148 Safari/604.1", 402.0, 874.0, 3.0);
+        g.pick("voice", "marla");
+        g.note("voice", "marla", "  kısa\nve net  ");
+        g.note("look", "ornek", "sıcak");
+        g.pick("look", "nope");
+        let s = g.summary();
+        assert_eq!(
+            s,
+            "R5 galeri · voice=marla (not: kısa ve net) · look=—\n\
+             notlar: look/ornek: sıcak\n\
+             an: adım 120 / 2080 · 2025-06-02 10:00 · tr · koyu\n\
+             cihaz: iPhone iOS 27.0 · Safari · 402×874 @3 · tarih: 2025-11-18 13:00 (İstanbul)"
+        );
+        // Restored from the saved state: the same summary.
+        let mut h = GalleryCore::new(&g.state(), "", "", "", "1763460000000");
+        h.load(&serde_json::to_string(&layout()).unwrap()).unwrap();
+        h.set_device("Mozilla/5.0 (iPhone; CPU iPhone OS 27_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/27.0 Mobile/15E148 Safari/604.1", 402.0, 874.0, 3.0);
+        assert_eq!(h.summary(), s);
+        // One pick per topic; a second tap takes it back.
+        h.pick("voice", "selvi");
+        assert_eq!(h.marks()["voice/selvi"], json!(true));
+        assert_eq!(h.marks()["voice/marla"], json!(false));
+        h.pick("voice", "selvi");
+        assert_eq!(h.marks()["voice/selvi"], json!(false));
+    }
+
+    #[test]
+    fn pick_parameter_and_share_link() {
+        let mut g = GalleryCore::new("", "en", "light", "voice.selvi,look.zzz,bad", "");
+        g.load(&serde_json::to_string(&layout()).unwrap()).unwrap();
+        assert_eq!(g.share(), "gallery.html?pick=voice.selvi");
+        assert_eq!(g.layout_url(), "/gallery/layout?lang=en&theme=light");
+        assert!(g
+            .summary()
+            .starts_with("R5 gallery · voice=selvi · look=—\nmoment: "));
+        assert!(g.summary().ends_with("device: — · date: —"));
+        g.toggle_lang();
+        assert_eq!(g.lang(), "tr");
+    }
+
+    #[test]
+    fn notes_are_one_short_line() {
+        assert_eq!(clean_note("a\tb\n\nc "), "a b c");
+        assert_eq!(clean_note(&"x".repeat(500)).chars().count(), NOTE_MAX);
+    }
+
+    #[test]
+    fn candidates_follow_the_registry_and_finalists() {
+        let ch = json!({"voice": ["r4", "marla", "selvi"]});
+        let voice = TOPICS.iter().find(|t| t.key == "voice").unwrap();
+        let story = TOPICS.iter().find(|t| t.key == "story").unwrap();
+        assert_eq!(candidates(voice, &ch).len(), 3);
+        assert!(candidates(story, &ch).is_empty());
+    }
+
+    /// The host's build: every shown topic has at least two candidates, all with the same
+    /// content (moment, capsule, depth), and the images exist.
+    #[test]
+    fn build_shows_the_same_content_per_topic() {
+        let b = build("tr", "dark");
+        let keys: Vec<&str> = b.layout.topics.iter().map(|t| t.key.as_str()).collect();
+        for k in ["voice", "look", "feed_order", "feed_rule"] {
+            assert!(keys.contains(&k), "{k} missing: {keys:?}");
+        }
+        for t in &b.layout.topics {
+            assert!(t.cands.len() >= 2, "{}", t.key);
+            let c0 = &t.cands[0].content;
+            assert!(c0.contains("120"), "{c0}");
+            for c in &t.cands {
+                assert_eq!(&c.content, c0, "{} / {}", t.key, c.id);
+                assert!(
+                    c.shots.iter().any(|s| s.kind == "img"),
+                    "{} / {}",
+                    t.key,
+                    c.id
+                );
+                for s in c.shots.iter().filter(|s| s.kind == "img") {
+                    let name = s
+                        .src
+                        .as_deref()
+                        .unwrap()
+                        .trim_start_matches("/gallery/img/");
+                    assert!(b.images[name].starts_with(b"\x89PNG"), "{name}");
+                }
+            }
+        }
+        // Each candidate's own setting shows: within a topic that paints the open capsule,
+        // no two candidates have identical shots (voice: the title/texts; look: pixels).
+        for t in b
+            .layout
+            .topics
+            .iter()
+            .filter(|t| t.key == "voice" || t.key == "look")
+        {
+            for (i, a) in t.cands.iter().enumerate() {
+                for z in &t.cands[i + 1..] {
+                    let px = |c: &CandOut| -> Vec<Vec<u8>> {
+                        c.shots
+                            .iter()
+                            .map(|s| match &s.src {
+                                Some(src) => {
+                                    b.images[src.trim_start_matches("/gallery/img/")].clone()
+                                }
+                                None => s.text.clone().unwrap_or_default().into_bytes(),
+                            })
+                            .collect()
+                    };
+                    assert_ne!(px(a), px(z), "{}: {} = {}", t.key, a.id, z.id);
+                }
+            }
+        }
+        // Deterministic: a second build is identical.
+        let again = build("tr", "dark");
+        assert_eq!(again.layout, b.layout);
+        assert_eq!(again.images, b.images);
+    }
+}

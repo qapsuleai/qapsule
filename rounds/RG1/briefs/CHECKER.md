@@ -17,7 +17,7 @@ dosyayı değiştirme, commit etme, birleştirme. Yalnız ölç ve hüküm ver.
 2. `cargo clippy --workspace --all-targets -- -D warnings`
 3. `cargo test --workspace` — özet: geçen/kalan; test sayısı tutanakla aynı mı
    (`rounds/RG1/experiments/baseline/text/tests.count`, 1164; ad listesi
-   `text/tests.names` — `cargo test --workspace -q -- --list 2>/dev/null | grep ': test$' | sed -E 's/: test$//; s/.*:://' | sort | diff - rounds/RG1/experiments/baseline/text/tests.names`).
+   `text/tests.names` — `cargo test --workspace -q -- --list 2>/dev/null | grep ': test$' | sed -E 's/: test$//; s/.*:://' | LC_ALL=C sort | diff - rounds/RG1/experiments/baseline/text/tests.names`).
 4. `scripts/rg1-compare.sh` → "225 items byte-identical".
 5. `python3 /Users/arkns/Works/Mchart/qapsule/scripts/rg1-moved.py $(git merge-base main HEAD) HEAD --list` (ana ağaçtaki **güncel** sürüm; cwd denetlenen worktree) → CHANGED 0; PATH,
    ALLOW ve izinli CHANGED kalemlerinin (planın §13'ünde ve görev metninde adıyla izin verilenler)

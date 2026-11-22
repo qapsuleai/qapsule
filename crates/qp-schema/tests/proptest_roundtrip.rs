@@ -1,6 +1,6 @@
 //! Property tests: any finite f64 survives a JSON round-trip bit-for-bit.
 
-mod common;
+mod support;
 
 use proptest::prelude::*;
 use proptest::test_runner::RngSeed;
@@ -58,7 +58,7 @@ proptest! {
         let back: Series = serde_json::from_str(&json).unwrap();
         prop_assert_eq!(&s, &back);
         let value = serde_json::to_value(&s).unwrap();
-        let errors = common::validation_errors("Series", &value);
+        let errors = support::validation_errors("Series", &value);
         prop_assert!(errors.is_empty(), "{:?}", errors);
     }
 }

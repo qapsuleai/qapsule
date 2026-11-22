@@ -1,27 +1,27 @@
 //! Fixtures and serialized values validate against the generated JSON Schema.
 
-mod common;
+mod support;
 
 use qp_schema::{Author, CapsuleState, Command, Op, Provenance};
 
 fn assert_valid(name: &str, instance: &serde_json::Value) {
-    let errors = common::validation_errors(name, instance);
+    let errors = support::validation_errors(name, instance);
     assert!(errors.is_empty(), "{name} invalid: {errors:#?}");
 }
 
 #[test]
 fn committed_capsule_fixture_is_valid() {
-    assert_valid("Capsule", &common::fixture_value("capsule.example.json"));
+    assert_valid("Capsule", &support::fixture_value("capsule.example.json"));
 }
 
 #[test]
 fn committed_document_fixture_is_valid() {
-    assert_valid("Document", &common::fixture_value("document.example.json"));
+    assert_valid("Document", &support::fixture_value("document.example.json"));
 }
 
 #[test]
 fn document_parts_are_valid_against_their_root_schemas() {
-    let doc = common::fixture_value("document.example.json");
+    let doc = support::fixture_value("document.example.json");
     for (root, key) in [
         ("Series", "series"),
         ("View", "views"),
@@ -59,19 +59,19 @@ fn serialized_command_is_valid() {
 
 #[test]
 fn schema_rejects_bad_documents() {
-    let mut doc = common::fixture_value("document.example.json");
+    let mut doc = support::fixture_value("document.example.json");
     doc["capsules"][0]["state"] = serde_json::json!("archived");
-    assert!(!common::validation_errors("Document", &doc).is_empty());
+    assert!(!support::validation_errors("Document", &doc).is_empty());
 
-    let mut doc = common::fixture_value("document.example.json");
+    let mut doc = support::fixture_value("document.example.json");
     doc["findings"][0]["confidence"] = serde_json::json!(1.5);
-    assert!(!common::validation_errors("Document", &doc).is_empty());
+    assert!(!support::validation_errors("Document", &doc).is_empty());
 
-    let mut doc = common::fixture_value("document.example.json");
+    let mut doc = support::fixture_value("document.example.json");
     doc["unexpected"] = serde_json::json!(true);
-    assert!(!common::validation_errors("Document", &doc).is_empty());
+    assert!(!support::validation_errors("Document", &doc).is_empty());
 
-    let mut doc = common::fixture_value("document.example.json");
+    let mut doc = support::fixture_value("document.example.json");
     doc["series"][0]["data"]["bars"][0]["t"] = serde_json::json!("2026-11-11");
-    assert!(!common::validation_errors("Document", &doc).is_empty());
+    assert!(!support::validation_errors("Document", &doc).is_empty());
 }

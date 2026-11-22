@@ -95,7 +95,7 @@ pub fn render_synthetic_rgba(
     width: u32,
     height: u32,
 ) -> Result<Vec<u8>, JsError> {
-    let bars = qp_render::synthetic_bars(n as usize, u64::from(seed));
+    let bars = qp_source::synthetic_series(n as usize, u64::from(seed));
     qp_render::render_scene_rgba(&r0_scene(&bars, width, height)?).map_err(js_err)
 }
 

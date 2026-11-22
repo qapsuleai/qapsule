@@ -66,7 +66,7 @@ pub fn render_synthetic_rgba_vello_cpu(
     height: u32,
 ) -> Result<Vec<u8>, JsError> {
     use qp_render::spikes::vello_cpu::{rasterize, Config};
-    let bars = qp_render::synthetic_bars(n as usize, u64::from(seed));
+    let bars = qp_source::synthetic_series(n as usize, u64::from(seed));
     let scene = r0_scene(&bars, width, height)?;
     rasterize(&scene, Config::default()).map_err(js_err)
 }
@@ -151,7 +151,7 @@ mod vello_gpu_spike {
         height: u32,
         aa: u8,
     ) -> Result<Vec<u8>, JsError> {
-        let bars = qp_render::synthetic_bars(n as usize, u64::from(seed));
+        let bars = qp_source::synthetic_series(n as usize, u64::from(seed));
         let scene = super::r0_scene(&bars, width, height)?;
         with_gpu(scene, aa).await
     }

@@ -6,12 +6,12 @@
 //! Needs a GPU (Metal/Vulkan/DX12). Prints one JSON line per antialiasing mode; writes PNGs
 //! to `target/spikes/`. Timings include GPU->CPU readback (the headless use case).
 
-#[path = "common/mod.rs"]
-mod common;
+#[path = "measure/mod.rs"]
+mod measure;
 
 use std::time::Instant;
 
-use common::{diff, fnv1a, golden_rgba, median, ms, write_png};
+use measure::{diff, fnv1a, golden_rgba, median, ms, write_png};
 #[path = "../tests/r0/mod.rs"]
 mod r0;
 
@@ -29,7 +29,7 @@ fn main() {
         }
     };
     let init_ms = ms(t_init);
-    let json = std::fs::read_to_string(common::root().join("fixtures/bars/sample.json")).unwrap();
+    let json = std::fs::read_to_string(measure::root().join("fixtures/bars/sample.json")).unwrap();
     let bars = qp_render::parse_bars(&json).unwrap();
     let (w, h) = (qp_render::DEFAULT_WIDTH, qp_render::DEFAULT_HEIGHT);
     let sample = r0::scene(&bars, w, h);
@@ -46,7 +46,7 @@ fn main() {
     let stress_golden = golden_rgba("stress.png");
     let stress = stress_scene(600, 300);
     // 100k bars without LOD, like the R0 measurement.
-    let big = r0::scene_full(&qp_render::synthetic_bars(100_000, 7), w, h);
+    let big = r0::scene_full(&qp_source::synthetic_series(100_000, 7), w, h);
     for (name, aa) in [
         ("area", AaConfig::Area),
         ("msaa8", AaConfig::Msaa8),

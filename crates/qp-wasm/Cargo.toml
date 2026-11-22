@@ -34,7 +34,7 @@ qp-session = { path = "../qp-session", optional = true }
 # paths (`qp_wasm::shell`, …).
 qp-shellcore = { path = "../qp-shellcore", optional = true }
 # The synthetic bar generator of the `render_synthetic_*` exports (formerly reached
-# through the `qp_render::synthetic_bars` wrapper; already in the build through qp-render).
+# through the `qp_render::synthetic_bars` wrapper, removed in RG1).
 qp-source = { path = "../qp-source" }
 serde_json = "1"
 wasm-bindgen = "=0.2.130"

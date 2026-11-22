@@ -36,7 +36,7 @@ fn main() {
         .and_then(|a| a.parse().ok())
         .unwrap_or(31)
         .max(1);
-    let series = qp_render::synthetic_bars(N, 7);
+    let series = qp_source::synthetic_series(N, 7);
     let provider = r0::provider(&series);
     let view = r0::view();
 

@@ -9,7 +9,7 @@ use std::fmt::Write as _;
 use std::path::PathBuf;
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let file = qp_render::synthetic_bars(200, 20_251_114);
+    let file = qp_source::synthetic_series(200, 20_251_114);
     let mut s = String::new();
     let bars = file.bars().ok_or("synthetic series has no bars")?;
     // A `qp_schema::Series` document, one bar per line.

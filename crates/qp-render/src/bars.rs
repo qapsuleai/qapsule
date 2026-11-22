@@ -36,24 +36,9 @@ impl Lcg {
     }
 }
 
-/// `n` deterministic daily bars from `seed` as a `Series` (the generator lives in
-/// `qp-source`; `synthetic_bars(200, 20_251_114)` is `fixtures/bars/sample.json`).
-#[must_use]
-pub fn synthetic_bars(n: usize, seed: u64) -> Series {
-    qp_source::synthetic_series(n, seed)
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
-
-    #[test]
-    fn synthetic_is_valid_and_stable() {
-        let a = synthetic_bars(500, 7);
-        let b = synthetic_bars(500, 7);
-        assert_eq!(a, b);
-        qp_schema::validate_bars(a.bars().unwrap()).unwrap();
-    }
 
     #[test]
     fn rejects_bad_input() {

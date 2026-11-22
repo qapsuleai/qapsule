@@ -268,5 +268,5 @@ fn sample_fixture_is_well_formed() {
     assert_eq!(bars.symbol(), Some("SAMPLE"));
     assert_eq!(bars.bars().unwrap().len(), 200);
     // Matches the deterministic generator (examples/gen_sample.rs).
-    assert_eq!(bars, qp_render::synthetic_bars(200, 20_251_114));
+    assert_eq!(bars, qp_source::synthetic_series(200, 20_251_114));
 }

@@ -1,0 +1,13 @@
+# VERIFY 9 — mandal denemesi (2026-11-22T14:33:20Z)
+## 1) taban çizgisinde crates/qp-capsule/src/comment/check.rs::validate değeri 1 düşürüldü (kod aynı: bulgu taban çizgisinin üstünde)
+ERROR [fn.lines] crates/qp-capsule/src/comment/check.rs:81 fn validate: 239 lines > 80 (above the baseline (238))
+arch-check: 1 error(s); 11 exception(s) awaiting approval; within the baseline: dir.files 3, doc.size 2, file.soft 37, fn.lines 176, lint.allow 13, test.file 6
+## 2) yeni borç: geçici dosyaya 90 satırlık fonksiyon
+ERROR [fn.lines] crates/qp-calendar/src/rg1_probe.rs:1 fn rg1_ratchet_probe: 91 lines > 80 (not in the baseline (new debt))
+arch-check: 2 error(s); 11 exception(s) awaiting approval; within the baseline: dir.files 3, doc.size 2, file.soft 37, fn.lines 177, lint.allow 13, test.file 6
+## 3) --write-baseline yeni kalemi --allow-new olmadan reddeder
+refused (ratchet): crates/qp-calendar/src/rg1_probe.rs:1 fn rg1_ratchet_probe: 91 lines > 80 - not in the baseline (new debt)
+refused (ratchet): fn.lines: 178 findings > baseline count 177 - rule count above the baseline
+taban çizgisi değişmedi
+## 4) geri alındıktan sonra
+arch-check: 0 error(s); 11 exception(s) awaiting approval; within the baseline: dir.files 3, doc.size 2, file.soft 37, fn.lines 177, lint.allow 13, test.file 6

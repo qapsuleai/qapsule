@@ -11,3 +11,7 @@ refused (ratchet): fn.lines: 178 findings > baseline count 177 - rule count abov
 taban çizgisi değişmedi
 ## 4) geri alındıktan sonra
 arch-check: 0 error(s); 11 exception(s) awaiting approval; within the baseline: dir.files 3, doc.size 2, file.soft 37, fn.lines 177, lint.allow 13, test.file 6
+
+## 5) (denetim B5) taban çizgisi koddan gevşek: kalemin değeri 5 büyütüldü → sıkılaştırma hatası
+ERROR [baseline] baseline can be tightened: fn.lines crates/qp-capsule/src/comment/check.rs::validate: 239 < baseline 244 (tighten) (run scripts/arch-check --write-baseline (ratchet))
+arch-check: 1 error(s); 11 exception(s) awaiting approval; within the baseline: dir.files 3, doc.size 2, file.soft 37, fn.lines 177, lint.allow 13, test.file 6

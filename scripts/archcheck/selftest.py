@@ -23,7 +23,8 @@ CFG = {
     "forbidden_names": ["util", "common", "misc", "helpers"],
     "doc_globs": ["*.md", "docs/**/*.md"],
     "hard_rules": ["layer.up", "layer.lateral", "layer.unknown", "file.hard",
-                   "name.forbidden", "readme.crate", "root.logic", "path.outside"],
+                   "name.forbidden", "readme.crate", "root.logic", "path.outside",
+                   "lint.inner", "lints.workspace"],
     "generated_files": [],
     "exceptions": [],
 }
@@ -42,7 +43,8 @@ def _fn(name, body_lines):
 
 
 def _crate(root, name, readme=True):
-    _w(root, f"crates/{name}/Cargo.toml", f'[package]\nname = "{name}"\n')
+    lints = "" if name == "qp-x" else "\n[lints]\nworkspace = true\n"
+    _w(root, f"crates/{name}/Cargo.toml", f'[package]\nname = "{name}"\n{lints}')
     if readme:
         _w(root, f"crates/{name}/README.md", f"# {name}\n")
     _w(root, f"crates/{name}/src/lib.rs", "//! ok\npub mod m;\npub use m::*;\n")
@@ -86,6 +88,10 @@ EXPECT_EXTRA = [
     ("fn.lines", "crates/qp-c/src/tests.rs::fake_test"),  # tests.rs not declared cfg(test)
     ("file.hard", "crates/qp-c/src/gen.rs"),             # "üretilmiştir" but not listed
     ("lint.allow", "qp-a"),                               # a grandfathered unwrap allow
+    ("lint.allow", "qp-b"),                               # #[expect] / cfg_attr / restriction
+    ("lint.inner", "crates/qp-b/src/blanket.rs:1"),       # module-level #![allow] in src
+    ("lints.workspace", "crates/qp-x"),                   # crate without workspace lints
+    ("fn.lines", "crates/qp-b/src/fake/tests.rs::not_a_test"),  # tests.rs not cfg(test) by its parent
 ]
 
 
@@ -112,6 +118,16 @@ def _dirty(root):
     _w(root, "crates/qp-c/src/lib.rs", "//! ok\npub mod m;\nmod inner {\n    pub fn x() {}\n}\n")
     _w(root, "crates/qp-c/src/tests.rs", _fn("fake_test", 12))
     _w(root, "crates/qp-a/src/lax.rs", "#[allow(clippy::unwrap_used)]\npub fn f() {}\n")
+    _w(root, "crates/qp-b/src/quiet.rs",
+       "#[expect(clippy::unwrap_used)]\npub fn a() {}\n"
+       "#[cfg_attr(not(test), allow(clippy::panic))]\npub fn b() {}\n"
+       "#[allow(clippy::restriction)]\npub fn c() {}\n")
+    _w(root, "crates/qp-b/src/blanket.rs", "#![allow(clippy::unwrap_used)]\npub fn d() {}\n")
+    # B3: `fake/tests.rs` reached by a plain `pub mod tests;`, while another module has a
+    # real `#[cfg(test)] mod tests` — it must still count as library code.
+    _w(root, "crates/qp-b/src/fake.rs", "pub mod tests;\n")
+    _w(root, "crates/qp-b/src/fake/tests.rs", _fn("not_a_test", 12))
+    _w(root, "crates/qp-b/src/real.rs", "pub fn r() {}\n#[cfg(test)]\nmod tests {\n}\n")
     _w(root, "crates/qp-c/src/gen.rs", "// üretilmiştir\n" + "".join(f"// {i}\n" for i in range(45)))
     return edges, names
 

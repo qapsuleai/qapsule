@@ -92,7 +92,9 @@
     "name.forbidden",
     "readme.crate",
     "root.logic",
-    "path.outside"
+    "path.outside",
+    "lint.inner",
+    "lints.workspace"
   ],
   "generated_files": [
     "crates/qp-grammar/src/advances.rs"

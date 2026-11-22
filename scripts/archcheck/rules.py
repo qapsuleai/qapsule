@@ -64,17 +64,21 @@ class Scan:
     def _test_mods(self):
         """Paths of `src` files that are test modules: a `tests.rs` / `tests/` file whose
         module is declared under `#[cfg(test)]` somewhere in its crate."""
-        declared = set()
+        declared = set()  # (parent module file, child name) declared under #[cfg(test)]
         for rel, (_, code) in self.files.items():
             for m in rs.CFG_TEST_MOD.finditer(code):
-                declared.add((rel.split("/")[1], m.group(1)))
+                declared.add((rel, m.group(1)))
         out = set()
         for rel in self.files:
             parts = rel.split("/")
             if parts[2] != "src" or not is_test_path(rel):
                 continue
-            name = "tests" if parts[-1] == "tests.rs" else parts[parts.index("tests", 3)]
-            if (parts[1], name) in declared:
+            i = len(parts) - 1 if parts[-1] == "tests.rs" else parts.index("tests", 3)
+            folder = "/".join(parts[:i])  # the folder that holds `tests.rs` / `tests/`
+            parents = [folder + ".rs", folder + "/mod.rs"]
+            if folder.endswith("/src"):
+                parents += [folder + "/lib.rs", folder + "/main.rs"]
+            if any((p, "tests") in declared for p in parents):
                 out.add(rel)
         return out
 
@@ -210,8 +214,10 @@ def rule_path_attrs(scan):
                               f"{rel}: #[path = \"{m.group(1)}\"] leaves the crate's src/")
 
 
-LINT_ALLOW = re.compile(
-    r"#!?\[allow\([^\]]*clippy::(unwrap_used|expect_used|panic|too_many_lines|cognitive_complexity)\b")
+_LINTS = r"clippy::(unwrap_used|expect_used|panic|too_many_lines|cognitive_complexity|restriction)\b"
+# `#[allow(…)]`, `#[expect(…)]` and `#[cfg_attr(…, allow(…))]` all silence clippy.
+LINT_ALLOW = re.compile(r"#\[(?:allow|expect|cfg_attr\([^\]]*?(?:allow|expect))\([^\]]*" + _LINTS)
+LINT_INNER = re.compile(r"#!\[(?:allow|expect|cfg_attr\([^\]]*?(?:allow|expect))\([^\]]*" + _LINTS)
 
 
 def rule_lint_allows(scan):
@@ -227,10 +233,31 @@ def rule_lint_allows(scan):
         for m in LINT_ALLOW.finditer(src):
             if not rs.in_regions(m.start(), regions):
                 per[parts[1]] = per.get(parts[1], 0) + 1
+    for rel, (src, code) in sorted(scan.files.items()):
+        parts = rel.split("/")
+        if parts[2] not in ("src", "build") or scan.is_test(rel):
+            continue
+        regions = rs.test_regions(code)
+        for m in LINT_INNER.finditer(src):
+            if not rs.in_regions(m.start(), regions):
+                yield finding("lint.inner", f"{rel}:{rs.line_of(src, m.start())}", 1, 0,
+                              f"{rel}: crate/module-level `#![allow]` of a library lint "
+                              f"(covers everything below; allow item by item)")
     for crate, n in sorted(per.items()):
         yield finding("lint.allow", crate, n, 0,
                       f"{crate}: {n} grandfathered lint allows (unwrap/expect/panic/too_many_lines/"
                       f"cognitive_complexity)")
+
+
+def rule_lints_table(root):
+    """Every crate takes the workspace lints (`[lints] workspace = true`); without it the
+    library lints are silently off in that crate."""
+    for c in crates(root):
+        with open(os.path.join(root, "crates", c, "Cargo.toml"), encoding="utf-8") as fh:
+            toml = fh.read()
+        if not re.search(r"^\[lints\]\s*\n\s*workspace\s*=\s*true", toml, re.M):
+            yield finding("lints.workspace", f"crates/{c}", 1, 0,
+                          f"crates/{c}/Cargo.toml: no `[lints] workspace = true`")
 
 
 def rule_docs(cfg, root):
@@ -310,6 +337,7 @@ def all_findings(root, cfg, edges=None, names=None):
     out += list(rule_root_logic(scan, cfg))
     out += list(rule_path_attrs(scan))
     out += list(rule_lint_allows(scan))
+    out += list(rule_lints_table(root))
     out += list(rule_docs(cfg, root))
     return out, scan
 

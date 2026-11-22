@@ -24,7 +24,7 @@ CFG = {
     "doc_globs": ["*.md", "docs/**/*.md"],
     "hard_rules": ["layer.up", "layer.lateral", "layer.unknown", "file.hard",
                    "name.forbidden", "readme.crate", "root.logic", "path.outside",
-                   "lint.inner", "lints.workspace"],
+                   "lint.inner", "lints.workspace", "lint.flags"],
     "generated_files": [],
     "exceptions": [],
 }
@@ -91,6 +91,8 @@ EXPECT_EXTRA = [
     ("lint.allow", "qp-b"),                               # #[expect] / cfg_attr / restriction
     ("lint.inner", "crates/qp-b/src/blanket.rs:1"),       # module-level #![allow] in src
     ("lints.workspace", "crates/qp-x"),                   # crate without workspace lints
+    ("lint.allow", "qp-c"),                               # `clippy :: unwrap_used` with spaces
+    ("lint.flags", ".cargo/config.toml"),                 # -A clippy::… in rustflags
     ("fn.lines", "crates/qp-b/src/fake/tests.rs::not_a_test"),  # tests.rs not cfg(test) by its parent
 ]
 
@@ -123,6 +125,8 @@ def _dirty(root):
        "#[cfg_attr(not(test), allow(clippy::panic))]\npub fn b() {}\n"
        "#[allow(clippy::restriction)]\npub fn c() {}\n")
     _w(root, "crates/qp-b/src/blanket.rs", "#![allow(clippy::unwrap_used)]\npub fn d() {}\n")
+    _w(root, "crates/qp-c/src/spaced.rs", "#[allow(clippy :: unwrap_used)]\npub fn e() {}\n")
+    _w(root, ".cargo/config.toml", '[build]\nrustflags = ["-Aclippy::unwrap_used"]\n')
     # B3: `fake/tests.rs` reached by a plain `pub mod tests;`, while another module has a
     # real `#[cfg(test)] mod tests` — it must still count as library code.
     _w(root, "crates/qp-b/src/fake.rs", "pub mod tests;\n")

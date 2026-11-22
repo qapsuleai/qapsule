@@ -214,7 +214,8 @@ def rule_path_attrs(scan):
                               f"{rel}: #[path = \"{m.group(1)}\"] leaves the crate's src/")
 
 
-_LINTS = r"clippy::(unwrap_used|expect_used|panic|too_many_lines|cognitive_complexity|restriction)\b"
+_LINTS = (r"clippy\s*::\s*(unwrap_used|expect_used|panic|too_many_lines|cognitive_complexity"
+          r"|restriction|nursery)\b")
 # `#[allow(…)]`, `#[expect(…)]` and `#[cfg_attr(…, allow(…))]` all silence clippy.
 LINT_ALLOW = re.compile(r"#\[(?:allow|expect|cfg_attr\([^\]]*?(?:allow|expect))\([^\]]*" + _LINTS)
 LINT_INNER = re.compile(r"#!\[(?:allow|expect|cfg_attr\([^\]]*?(?:allow|expect))\([^\]]*" + _LINTS)
@@ -247,6 +248,19 @@ def rule_lint_allows(scan):
         yield finding("lint.allow", crate, n, 0,
                       f"{crate}: {n} grandfathered lint allows (unwrap/expect/panic/too_many_lines/"
                       f"cognitive_complexity)")
+
+
+def rule_lint_flags(root):
+    """Lints switched off from outside the code: `-A` / `--cap-lints` in `.cargo/config*`."""
+    for name in (".cargo/config.toml", ".cargo/config"):
+        f = os.path.join(root, name)
+        if not os.path.isfile(f):
+            continue
+        with open(f, encoding="utf-8") as fh:
+            text = fh.read()
+        if re.search(r"(-A\s*\S|--allow\b|--cap-lints|-W\s*clippy)", text):
+            yield finding("lint.flags", name, 1, 0,
+                          f"{name}: lint flags (-A / --cap-lints) silence the workspace lints")
 
 
 def rule_lints_table(root):
@@ -338,6 +352,7 @@ def all_findings(root, cfg, edges=None, names=None):
     out += list(rule_path_attrs(scan))
     out += list(rule_lint_allows(scan))
     out += list(rule_lints_table(root))
+    out += list(rule_lint_flags(root))
     out += list(rule_docs(cfg, root))
     return out, scan
 

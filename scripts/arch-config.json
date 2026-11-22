@@ -94,7 +94,8 @@
     "root.logic",
     "path.outside",
     "lint.inner",
-    "lints.workspace"
+    "lints.workspace",
+    "lint.flags"
   ],
   "generated_files": [
     "crates/qp-grammar/src/advances.rs"

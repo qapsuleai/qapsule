@@ -247,8 +247,8 @@ Geri yüklenenler (§6): `recovered/worktree-agent/{0474490800, 155233fafa, 1564
 - `QP_VERIFY_BROWSER=1 CARGO_TARGET_DIR=<mutlak>/target scripts/verify.sh` son ağaçta
   (`6dbdac7`): **18/18 PASS** (969 s; hesap özeti `7b1e99d40889f83c` arm64 = x86_64 = wasm32,
   değişmedi; altınlar ve 70 döküm × 3 taşıma; tarayıcı ve demo adımı). Ağsız.
-- CI: `bcb6619` için `44952957547` yeşil; son itme `6dbdac7` için `44962958203` (sonucu
-  "Kapanış" satırında).
+- CI: `bcb6619` için `44952957547` yeşil (35 dk); son kod `6dbdac7` için `44962958203`
+  **yeşil** (27 dk, Linux x86_64). Sonraki commit'ler yalnız doküman.
 - Gizli bilgi taraması (`6f4cb19..HEAD`): temiz (yalnız testlerdeki yer tutucu belirteçler);
   denetçi de bağımsız taradı. `.mcp.json` yalnız ortam değişkenine başvurur.
 

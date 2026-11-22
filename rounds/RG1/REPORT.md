@@ -281,7 +281,7 @@ yapılmadı.
 
 **CI:** `07430545` (son kod durumu: bütün taşımalar, K, L) GitHub Actions koşusu **45035266520 yeşil**
 (32 dk). Sonraki commit'ler yalnız araç (`arch-check` denetim düzeltmeleri), belge ve `AUDIT.md`; kapanış
-commit'inin koşusu raporun yazıldığı anda sürüyordu (STATUS'a yazılır).
+commit'i `ed74d036` koşusu **45038366122 yeşil**.
 
 ## 14. Yöntem, alt ajanlar, dallar
 

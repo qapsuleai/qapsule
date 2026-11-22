@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="tr">
+<meta charset="utf-8">
+<title>Ekranlar</title>
+<!-- RD2 insan testi v4: kör gösterim (GUIDE.md). screens.sh bunu ~/qp-ht-v4/ içine kopyalar.
+     ?o=1|2|3 sıra; &blok=tel telefon bloğu (başvuru masaüstünde); &tema=a açık tema.
+     Boşluk / → sonraki, ← önceki. Görünüş adı hiçbir yerde yazmaz. -->
+<style>
+  html, body { margin: 0; height: 100%; background: #111; color: #ddd; font: 15px/1.4 system-ui, sans-serif; }
+  #stage { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; padding: 16px; align-items: start; }
+  #stage.one { grid-template-columns: 1fr 1fr; justify-items: center; }
+  #stage img { width: 100%; height: auto; display: block; }
+  #stage.tel img { width: 390px; }
+  #ask { display: none; height: 100%; place-content: center; text-align: center; font-size: 28px; }
+  #ask small, #stage small { display: block; font-size: 13px; color: #777; margin-top: 24px; }
+</style>
+<div id="stage"></div>
+<div id="ask"></div>
+<script>
+  const q = new URLSearchParams(location.search);
+  const ORDERS = {
+    1: { masa: 'K3 K4 B1 K1 K2 B2', tel: 'K7 K8 B3 K6 K5 B4' },
+    2: { masa: 'K1 B2 K2 K3 B1 K4', tel: 'B4 K6 K5 B3 K7 K8' },
+    3: { masa: 'B1 K2 K3 B2 K1 K4', tel: 'K5 B3 K6 K8 B4 K7' },
+  };
+  const REF = { K1: 'B1', K3: 'B1', K2: 'B2', K4: 'B2', K6: 'B3', K7: 'B3', K5: 'B4', K8: 'B4' };
+  const blok = q.get('blok') === 'tel' ? 'tel' : 'masa';
+  const suffix = q.get('tema') === 'a' ? 'a' : '';
+  const list = (ORDERS[q.get('o')] || ORDERS[1])[blok].split(' ');
+  const stage = document.getElementById('stage');
+  const ask = document.getElementById('ask');
+  let i = -1, timer = 0;
+  const img = (code) => `<img src="screens/${code}.png" alt="">`;
+  function show(n) {
+    i = Math.max(0, Math.min(list.length - 1, n));
+    clearTimeout(timer);
+    const code = list[i], isK = code[0] === 'K', file = isK ? code + suffix : code;
+    stage.className = blok === 'tel' ? 'tel' : isK ? '' : 'one';
+    if (blok === 'masa') stage.innerHTML = isK ? img(file) + img(REF[code]) : img(file);
+    else stage.innerHTML = isK ? `<div>${img(REF[code])}</div><div><small>Telefonda: ${file}</small></div>`
+                               : `<div></div><div><small>Telefonda: ${file}</small></div>`;
+    stage.style.display = 'grid'; ask.style.display = 'none';
+    timer = setTimeout(() => {
+      stage.style.display = 'none'; ask.style.display = 'grid';
+      ask.innerHTML = `Bu profesyonel bir araç mı? (evet / hayır)<br><br>Buna güvenir miydim? (1–5)` +
+        `<small>${file} · ${i + 1}/${list.length}</small>`;
+    }, 5000);
+  }
+  function hold() {
+    stage.style.display = 'none'; ask.style.display = 'grid';
+    ask.innerHTML = `Hazır mısınız?<small>${i + 2 <= list.length ? (i + 2) + '/' + list.length : 'bitti'}</small>`;
+  }
+  let ready = false;
+  document.addEventListener('keydown', (e) => {
+    if (e.key === ' ' || e.key === 'ArrowRight') {
+      if (!ready && i + 1 < list.length) { hold(); ready = true; } else if (ready) { ready = false; show(i + 1); }
+    } else if (e.key === 'ArrowLeft') { ready = false; show(i - 1); }
+  });
+  hold(); ready = true;
+</script>
+</html>

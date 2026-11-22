@@ -1,0 +1,316 @@
+<!doctype html>
+<!-- RD2 M2 (ajan) — Y06 öneri onay / ret yüzeyi, kademe 1: on durum, iki profil.
+     Kart (AT-C3): tür etiketi · durum hapı · tek cümle özet · yük · "neye dayanıyor" ·
+     kapsam notu · "Grafikte" + nötr "Reddet" + birincil fiil + nesne · durum izi.
+     Grafikte önizleme kesik mor seviye; kararla düğmeler kalkar, durum satırı gelir.
+     Başvuru kırpımı (OpenTerminalUI agent.jpg) ../refs'ten okunur, kopyalanmaz (K83). -->
+<html lang="tr">
+<head>
+  <meta charset="utf-8">
+  <title>Y06 Öneri onay ve ret</title>
+  <link rel="stylesheet" href="../../_base/base.css">
+  <link rel="stylesheet" href="../../tavek/tavek.css">
+  <link rel="stylesheet" href="agent.css">
+  <script src="../../_base/frame.js"></script>
+</head>
+<body class="sheet-body">
+<main class="sheet">
+  <header class="sheet-head">
+    <div>
+      <span class="eyebrow">Y06 · kademe 1 · agent.md</span>
+      <h1>Öneri onay / ret yüzeyi</h1>
+      <p>Ajanın yazdığı ama uygulanmamış değişiklik ve onun kararı (bekliyor → kabul | ret | süresi
+        doldu). Onay ve ret yalnız insan kökenlidir; ajan kökenli bağlantıya düğme çizilmez.</p>
+    </div>
+    <div class="meta"><span class="stroke">İnsan, düz</span><span class="stroke agent">Ajan, kesik</span><span class="stroke engine">Motor, noktalı</span></div>
+  </header>
+
+  <!-- ================================ MASAÜSTÜ ================================ -->
+  <section class="profile desk" aria-label="Masaüstü">
+    <h2>Durum 1: kart + grafikte önizleme <span class="note">“Grafikte” bağı ikisini birlikte vurgular</span></h2>
+    <div class="pair">
+      <div>
+        <p class="pair-label">Grafikte: kesik mor önizleme, eksende kesik etiket; seçiliyken sol uç çipinde adı konmuş iki eylem</p>
+        <div class="chart-slot mini-chart"><img data-chart="desk" alt="SAMPLE günlük grafik">
+          <div class="overlay">
+            <svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
+              <line class="agent preview" x1="34" y1="24.4" x2="91.1" y2="24.4"></line>
+              <line class="watch" x1="30" y1="29.9" x2="91.1" y2="29.9"></line>
+            </svg>
+            <div class="ax-tag agent" style="--y: 24.4%">117,50</div>
+            <div class="ax-tag human" style="--y: 29.9%">112,40</div>
+            <div class="ax-chip agent" style="--x: 34%; --y: 24.4%"><span class="origin agent">Ajan önerisi</span><span>Destek</span><span class="act">Reddet</span><span class="act go">Ekle</span></div>
+          </div>
+        </div>
+      </div>
+      <div>
+        <p class="pair-label">Panelde: ajan akışının içinde, açık kalır</p>
+        <div class="acard" id="main-card">
+          <div class="eyebrow-row"><span class="origin agent">Ajan önerisi · Çizim</span><span class="grow"></span><span class="pill agent">○ Onay bekliyor</span></div>
+          <h3>117,50'ye yatay destek ekle</h3>
+          <div class="payload">
+            <div class="row"><span><span class="swatch"></span> Yatay seviye · günlük</span><span class="tagmini">117,50</span></div>
+            <div class="row"><span class="k">Önizleme</span><span>grafikte kesik mor çizgi</span></div>
+            <div class="row"><span class="k">Uzaklık</span><span class="mono">−5,8% · son 124,69</span></div>
+          </div>
+          <div class="basis"><span>Neye dayanıyor:</span><span class="chip">3 dokunuş, Eyl–Eki</span><span class="chip">hacim kümesi</span></div>
+          <p class="scope">Onaylarsan çizim senin adına kaydedilir; izleme kurulmaz.</p>
+          <div class="actions"><span class="link">Grafikte</span><span class="grow"></span><span class="btn">Reddet</span><span class="btn primary">Grafiğe ekle</span></div>
+          <ol class="trail">
+            <li class="agent"><span>Ajan önerdi</span><span class="t">14:31</span></li>
+            <li class="wait"><span class="now">Kararın bekleniyor</span><span class="t">seans sonuna dek</span></li>
+          </ol>
+        </div>
+      </div>
+    </div>
+
+    <h2>Başvuru ile yan yana <span class="note">OpenTerminalUI ajan paneli (AT-C1, AT-C3) · temiz oda: yalnız kalıp</span></h2>
+    <div class="compare">
+      <div>
+        <div class="ref-crop otui"><img src="../../../../../../refs/src/Hitheshkaranth__OpenTerminalUI/assets/readme/agent.jpg" alt="Başvuru: OpenTerminalUI ajan paneli"></div>
+        <p class="ref-cap">Başvuru: araç satırları (“ran get_stock_snapshot”), kalın hüküm, araç sonucu kartı. Onay kartı kaynakta (ProposalCard): eylem adlı düğme + durum izi.</p>
+      </div>
+      <div style="width: var(--a-panel-w)">
+        <div class="ap">
+          <div class="ap-head"><div class="top"><h2>117,50 desteği</h2><span class="origin agent">Ajan</span></div>
+            <div class="ctx"><span class="chip">SYN20 · Günlük</span><span class="chip">Basamak: Öner</span></div></div>
+          <div class="ap-thread">
+            <div class="u-msg"><span class="who">Sen · 14:30</span><span>Altta tutunacak bir seviye var mı?</span></div>
+            <div class="work"><div class="work-sum"><span class="ok">✓</span><span>Çalışma: 4 adım, 6 sn</span><span class="grow"></span><span>›</span></div></div>
+            <div class="answer"><p><span class="lead">117,50 üç kez dokunulup tutulan en yakın taban.</span> Fiyat şu an <span class="ev">124,69</span>; seviye <span class="ev">%5,8</span> aşağıda.</p></div>
+            <div class="acard">
+              <div class="eyebrow-row"><span class="origin agent">Ajan önerisi · Çizim</span><span class="grow"></span><span class="pill agent">○ Onay bekliyor</span></div>
+              <h3>117,50'ye yatay destek ekle</h3>
+              <div class="payload">
+                <div class="row"><span><span class="swatch"></span> Yatay seviye · günlük</span><span class="tagmini">117,50</span></div>
+              </div>
+              <div class="basis"><span>Neye dayanıyor:</span><span class="chip">3 dokunuş, Eyl–Eki</span></div>
+              <p class="scope">Onaylarsan çizim senin adına kaydedilir.</p>
+              <div class="actions"><span class="link">Grafikte</span><span class="grow"></span><span class="btn">Reddet</span><span class="btn primary">Grafiğe ekle</span></div>
+              <ol class="trail"><li class="agent"><span>Ajan önerdi</span><span class="t">14:31</span></li><li class="wait"><span class="now">Kararın bekleniyor</span><span class="t"></span></li></ol>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="gap-notes">
+        <h3>Açık kapatma</h3>
+        <ul>
+          <li><span class="k">alındı</span><span>Düğme eylemi adlandırır (“Grafiğe ekle”), “Tamam” yok; yanında nötr “Reddet”.</span></li>
+          <li><span class="k">alındı</span><span>Durum izi kartın içinde: “Ajan önerdi 14:31 → Kararın bekleniyor”; kararla “Sen onayladın” satırı eklenir.</span></li>
+          <li><span class="k">alındı</span><span>Yük kart içinde tek iç kutu; araç satırları tek satıra katlı, cevap ve kart açık.</span></li>
+          <li><span class="k">bizde fazla</span><span>Grafikte eşleşen önizleme + “Neye dayanıyor” olgu çipleri; köken kesik kenarla.</span></li>
+          <li><span class="k">bilerek yok</span><span>Turuncu büyük harf başlık, renkli tablo başlığı (AT-C1 zayıf yanı; krom kromasız).</span></li>
+          <li class="open"><span class="k">kalan</span><span>Başvurudaki araç sonucu kartının (şirket özeti) karşılığı yok; bizde kanıt Y16'ya açılır, panelde değil.</span></li>
+        </ul>
+      </div>
+    </div>
+
+    <h2>Bütün durumlar <span class="note">Şartname tablosu sırasıyla</span></h2>
+    <div class="states">
+      <figure class="state">
+        <figcaption><span class="n">1</span><b>Öneri bekliyor</b><span class="role">--qp-origin-agent, birincil --accent</span></figcaption>
+        <div class="stage">
+          <div class="acard">
+            <div class="eyebrow-row"><span class="origin agent">Ajan önerisi · Çizim</span><span class="grow"></span><span class="pill agent">○ Onay bekliyor</span></div>
+            <h3>117,50'ye yatay destek ekle</h3>
+            <div class="payload"><div class="row"><span><span class="swatch"></span> Yatay seviye · günlük</span><span class="tagmini">117,50</span></div></div>
+            <div class="basis"><span>Neye dayanıyor:</span><span class="chip">3 dokunuş</span></div>
+            <div class="actions"><span class="link">Grafikte</span><span class="grow"></span><span class="btn">Reddet</span><span class="btn primary">Grafiğe ekle</span></div>
+          </div>
+        </div>
+      </figure>
+
+      <figure class="state">
+        <figcaption><span class="n">2</span><b>Uygulanıyor</b><span class="role">--muted · düğmeler kalkar</span></figcaption>
+        <div class="stage">
+          <div class="acard">
+            <div class="eyebrow-row"><span class="origin agent">Ajan önerisi · Çizim</span></div>
+            <h3>117,50'ye yatay destek ekle</h3>
+            <div class="status-line"><span class="spin"></span><span>Uygulanıyor…</span></div>
+            <ol class="trail"><li class="agent"><span>Ajan önerdi</span><span class="t">14:31</span></li><li><span class="now">Sen onayladın</span><span class="t">14:35</span></li></ol>
+          </div>
+        </div>
+      </figure>
+
+      <figure class="state">
+        <figcaption><span class="n">3</span><b>Onaylandı</b><span class="role">--qp-origin-human · durum satırı + iz</span></figcaption>
+        <div class="stage">
+          <div class="acard settled">
+            <div class="eyebrow-row"><span class="origin agent">Ajan önerisi · Çizim</span><span class="grow"></span><span class="pill human">● Onaylandı</span></div>
+            <h3>117,50'ye yatay destek ekle</h3>
+            <div class="status-line edge-human"><span class="fg">Onaylandı · Sen, <span class="mono">14:35</span></span><span class="grow"></span><span class="link strong">Grafikte</span></div>
+            <ol class="trail"><li class="agent"><span>Ajan önerdi</span><span class="t">14:31</span></li><li><span class="now">Sen onayladın · çizgi düz mürekkebe döndü</span><span class="t">14:35</span></li></ol>
+          </div>
+        </div>
+      </figure>
+
+      <figure class="state">
+        <figcaption><span class="n">4</span><b>Reddedildi</b><span class="role">--muted · grafikte iz yok (S18)</span></figcaption>
+        <div class="stage">
+          <div class="status-line edge-agent"><span>117,50'ye yatay destek ekle</span><span>· Reddedildi · Sen, <span class="mono">14:36</span></span><span class="grow"></span><span class="link">Günlükte</span></div>
+        </div>
+      </figure>
+
+      <figure class="state">
+        <figcaption><span class="n">5</span><b>Süresi doldu</b><span class="role">--qp-closed · sakin, geri sayım yok (S19)</span></figcaption>
+        <div class="stage">
+          <div class="status-line closed edge-agent"><span>117,50'ye yatay destek ekle</span><span>· Süresi doldu (seans sonu)</span><span class="grow"></span><span class="link">Yeniden iste</span></div>
+        </div>
+      </figure>
+
+      <figure class="state">
+        <figcaption><span class="n">6</span><b>Çakışma</b><span class="role">--qp-warn · düğmeler kalkar; neden</span></figcaption>
+        <div class="stage">
+          <div class="acard warn">
+            <div class="eyebrow-row"><span class="origin agent">Ajan önerisi · Çizim</span><span class="grow"></span><span class="pill warn">△ Çakışma</span></div>
+            <h3>117,50'ye yatay destek ekle</h3>
+            <div class="status-line warn"><span class="glyph">△</span><span class="fg">Öneri yazıldıktan sonra doküman değişti · yeni öneri gerekir</span></div>
+            <div class="actions"><span class="grow"></span><span class="btn">Yeni öneri iste</span></div>
+          </div>
+        </div>
+      </figure>
+
+      <figure class="state">
+        <figcaption><span class="n">7</span><b>Yetki yok</b><span class="role">--muted · düğmeler yerine neden</span></figcaption>
+        <div class="stage">
+          <div class="acard">
+            <div class="eyebrow-row"><span class="origin agent">Ajan önerisi · Çizim</span><span class="grow"></span><span class="pill agent">○ Onay bekliyor</span></div>
+            <h3>117,50'ye yatay destek ekle</h3>
+            <div class="status-line"><span class="glyph">‖</span><span>Bu belgede karar yetkin yok (rol: viewer)</span></div>
+          </div>
+        </div>
+      </figure>
+
+      <figure class="state">
+        <figcaption><span class="n">8</span><b>Ajan kökenli bağlantı</b><span class="role">--muted · düğme hiç yok</span></figcaption>
+        <div class="stage">
+          <div class="acard">
+            <div class="eyebrow-row"><span class="origin agent">Ajan önerisi · Çizim</span><span class="grow"></span><span class="pill agent">○ Onay bekliyor</span></div>
+            <h3>117,50'ye yatay destek ekle</h3>
+            <div class="status-line"><span class="glyph">‖</span><span>Kararı yalnız insan verir</span></div>
+          </div>
+        </div>
+      </figure>
+
+      <figure class="state">
+        <figcaption><span class="n">9</span><b>Toplu öneri</b><span class="role">--qp-origin-agent · liste + tek karar</span></figcaption>
+        <div class="stage">
+          <div class="acard">
+            <div class="eyebrow-row"><span class="origin agent">Ajan önerisi · Toplu</span><span class="grow"></span><span class="pill agent">○ Onay bekliyor</span></div>
+            <h3>3 değişiklik: 2 seviye, 1 izleme</h3>
+            <div class="payload">
+              <ul>
+                <li><span class="swatch"></span><span>Destek seviyesi</span><span class="tagmini">117,50</span></li>
+                <li><span class="swatch"></span><span>Direnç seviyesi</span><span class="tagmini">128,20</span></li>
+                <li><span class="glyph muted">○</span><span>İzleme: 117,50 altında kapanış</span><span class="link">aç</span></li>
+              </ul>
+              <div class="row"><span class="k">Her satır ayrıca açılıp karara bağlanabilir</span><span class="link">Tek tek</span></div>
+            </div>
+            <div class="actions"><span class="link">Grafikte</span><span class="grow"></span><span class="btn">Reddet</span><span class="btn primary">Hepsini ekle</span></div>
+          </div>
+        </div>
+      </figure>
+
+      <figure class="state">
+        <figcaption><span class="n">10</span><b>Doğrulanamayan sayı</b><span class="role">--qp-warn (≠) · sayı başına rozet</span></figcaption>
+        <div class="stage">
+          <div class="acard warn">
+            <div class="eyebrow-row"><span class="origin agent">Ajan önerisi · Yorum</span><span class="grow"></span><span class="pill warn">≠ Yayımlanmadı</span></div>
+            <h3>Kırılım hacimle doğrulandı</h3>
+            <div class="payload">
+              <div class="row"><span>Kapanış <span class="mono">113,05</span></span><span class="ok">✓ kanıtla</span></div>
+              <div class="row"><span>Hacim ortalamanın <span class="mono">2,4</span> katı</span><span class="bad">≠ kanıt 1,8</span></div>
+              <div class="row"><span>Tutunma <span class="mono">3/3</span> bar</span><span class="ok">? henüz 2/3</span></div>
+            </div>
+            <div class="status-line warn"><span class="glyph">≠</span><span class="fg">1 sayı kanıtla uyuşmuyor · yayımlanmadı</span></div>
+          </div>
+        </div>
+      </figure>
+    </div>
+
+    <h2>Veri durumu</h2>
+    <div class="states">
+      <figure class="state">
+        <figcaption><span class="n">D</span><b>Veri bayatken</b><span class="role">D-bayat · karar verilebilir, kart uyarır</span></figcaption>
+        <div class="stage">
+          <div class="acard">
+            <div class="eyebrow-row"><span class="origin agent">Ajan önerisi · Çizim</span><span class="grow"></span><span class="pill warn">◌ Bayat</span></div>
+            <h3>117,50'ye yatay destek ekle</h3>
+            <p class="scope">Veri bayat; önizleme 14:35'e göre.</p>
+            <div class="actions"><span class="grow"></span><span class="btn">Reddet</span><span class="btn primary">Grafiğe ekle</span></div>
+          </div>
+        </div>
+      </figure>
+      <figure class="state">
+        <figcaption><span class="n">D</span><b>Simüle</b><span class="role">D-simüle · simüle kayda uygulanır</span></figcaption>
+        <div class="stage">
+          <div class="acard">
+            <div class="eyebrow-row"><span class="origin agent">Ajan önerisi · Çizim</span><span class="grow"></span><span class="pill note-tone">Simüle</span></div>
+            <h3>117,50'ye yatay destek ekle</h3>
+            <p class="scope">Simüle kayda uygulanır; canlı grafiğe yazılmaz.</p>
+            <div class="actions"><span class="grow"></span><span class="btn">Reddet</span><span class="btn primary">Simüleye ekle</span></div>
+          </div>
+        </div>
+      </figure>
+    </div>
+  </section>
+
+  <!-- ================================ TELEFON ================================= -->
+  <section class="profile phone" aria-label="Telefon">
+    <h2>Telefon <span class="note">Kontrol kulesinde kart + küçük grafik; eylemler altta yapışık</span></h2>
+    <div class="states">
+      <figure class="state">
+        <figcaption><span class="n">1</span><b>Öneri bekliyor</b><span class="role">özet + küçük grafik + “Kanıta aç”</span></figcaption>
+        <div class="ph">
+          <div class="ph-status"><span class="pulse"></span><span>Canlı · seans açık</span><span class="grow"></span><span class="mono">14:31</span></div>
+          <div class="ph-head"><span class="btn quiet">‹ Kule</span><h3>Ajan önerisi</h3></div>
+          <div class="ph-chart"><div class="chart-slot mini-chart phone-chart"><img data-chart="phone" alt="">
+            <div class="overlay">
+              <svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"><line class="agent preview" x1="25" y1="33" x2="84.4" y2="33"></line></svg>
+              <div class="ax-tag agent" style="--y: 33%">117,50</div>
+            </div></div></div>
+          <div class="ph-body">
+            <div class="acard">
+              <div class="eyebrow-row"><span class="origin agent">Ajan önerisi · Çizim</span><span class="grow"></span><span class="pill agent">○ Bekliyor</span></div>
+              <h3>117,50'ye yatay destek ekle</h3>
+              <div class="basis"><span>Neye dayanıyor:</span><span class="chip">3 dokunuş, Eyl–Eki</span></div>
+              <p class="scope">Onaylarsan çizim senin adına kaydedilir.</p>
+              <div class="actions"><span class="link">Kanıta aç</span></div>
+              <ol class="trail"><li class="agent"><span>Ajan önerdi</span><span class="t">14:31</span></li><li class="wait"><span class="now">Kararın bekleniyor</span><span class="t"></span></li></ol>
+            </div>
+          </div>
+          <div class="sticky-actions"><span class="btn">Reddet</span><span class="btn primary">Grafiğe ekle</span></div>
+        </div>
+      </figure>
+      <figure class="state"><figcaption><span class="n">2</span><b>Uygulanıyor</b><span class="role">--muted</span></figcaption>
+        <div class="ph"><div class="ph-body"><div class="status-line"><span class="spin"></span><span>Uygulanıyor…</span></div></div></div></figure>
+      <figure class="state"><figcaption><span class="n">3</span><b>Onaylandı</b><span class="role">--qp-origin-human</span></figcaption>
+        <div class="ph"><div class="ph-body"><div class="status-line edge-human"><span class="fg">Onaylandı · Sen, <span class="mono">14:35</span></span><span class="grow"></span><span class="link strong">Grafikte</span></div></div></div></figure>
+      <figure class="state"><figcaption><span class="n">4</span><b>Reddedildi</b><span class="role">--muted</span></figcaption>
+        <div class="ph"><div class="ph-body"><div class="status-line edge-agent"><span>Reddedildi · Sen, <span class="mono">14:36</span></span></div></div></div></figure>
+      <figure class="state"><figcaption><span class="n">5</span><b>Süresi doldu</b><span class="role">--qp-closed</span></figcaption>
+        <div class="ph"><div class="ph-body"><div class="status-line closed edge-agent"><span>Süresi doldu (seans sonu)</span><span class="grow"></span><span class="link">Yeniden iste</span></div></div></div></figure>
+      <figure class="state"><figcaption><span class="n">6</span><b>Çakışma</b><span class="role">--qp-warn</span></figcaption>
+        <div class="ph"><div class="ph-body"><div class="status-line warn"><span class="glyph">△</span><span class="fg">Öneri yazıldıktan sonra doküman değişti · yeni öneri gerekir</span></div></div></div></figure>
+      <figure class="state"><figcaption><span class="n">7</span><b>Yetki yok</b><span class="role">--muted</span></figcaption>
+        <div class="ph"><div class="ph-body"><div class="status-line"><span class="glyph">‖</span><span>Bu belgede karar yetkin yok (rol: viewer)</span></div></div></div></figure>
+      <figure class="state"><figcaption><span class="n">8</span><b>Ajan kökenli bağlantı</b><span class="role">--muted</span></figcaption>
+        <div class="ph"><div class="ph-body"><div class="status-line"><span class="glyph">‖</span><span>Kararı yalnız insan verir</span></div></div></div></figure>
+      <figure class="state"><figcaption><span class="n">9</span><b>Toplu öneri</b><span class="role">--qp-origin-agent</span></figcaption>
+        <div class="ph"><div class="ph-body"><div class="acard">
+          <h3>3 değişiklik: 2 seviye, 1 izleme</h3>
+          <div class="payload"><ul>
+            <li><span class="swatch"></span><span>Destek</span><span class="tagmini">117,50</span></li>
+            <li><span class="swatch"></span><span>Direnç</span><span class="tagmini">128,20</span></li>
+            <li><span class="glyph muted">○</span><span>İzleme: altında kapanış</span><span></span></li></ul></div>
+        </div></div><div class="sticky-actions"><span class="btn">Reddet</span><span class="btn primary">Hepsini ekle</span></div></div></figure>
+      <figure class="state"><figcaption><span class="n">10</span><b>Doğrulanamayan sayı</b><span class="role">--qp-warn (≠)</span></figcaption>
+        <div class="ph"><div class="ph-body"><div class="payload">
+          <div class="row"><span>Kapanış <span class="mono">113,05</span></span><span class="ok">✓</span></div>
+          <div class="row"><span>Hacim <span class="mono">2,4</span> kat</span><span class="bad">≠ 1,8</span></div></div>
+          <div class="status-line warn"><span class="glyph">≠</span><span class="fg">1 sayı kanıtla uyuşmuyor · yayımlanmadı</span></div></div></div></figure>
+    </div>
+  </section>
+</main>
+</body>
+</html>

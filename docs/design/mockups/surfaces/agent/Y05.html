@@ -1,0 +1,282 @@
+<!doctype html>
+<!-- RD2 M2 (ajan) — Y05 netleştirme sorusu ve seçenek yüzeyi, kademe 1: sekiz durum, iki
+     profil. Masaüstünde kart ajan panelinde bestecinin hemen üstünde (OV-18); telefonda
+     bildirim eylemleri = seçenekler, uygulamada alt sayfa. Metin sentetik, kalıp. -->
+<html lang="tr">
+<head>
+  <meta charset="utf-8">
+  <title>Y05 Netleştirme sorusu</title>
+  <link rel="stylesheet" href="../../_base/base.css">
+  <link rel="stylesheet" href="../../tavek/tavek.css">
+  <link rel="stylesheet" href="agent.css">
+  <script src="../../_base/frame.js"></script>
+</head>
+<body class="sheet-body">
+<main class="sheet">
+  <header class="sheet-head">
+    <div>
+      <span class="eyebrow">Y05 · kademe 1 · agent.md</span>
+      <h1>Netleştirme sorusu ve seçenek yüzeyi</h1>
+      <p>Ajanın tek sorusu ve en çok üç seçenek; her seçenek tam koşul cümlesi, biri hep
+        “İzleme, yalnız not kalsın”. Cevapsız soru izleme kurmaz. Ardışık en çok iki soru (S17).</p>
+    </div>
+    <div class="meta"><span class="stroke">İnsan, düz</span><span class="stroke agent">Ajan, kesik</span><span class="stroke engine">Motor, noktalı</span></div>
+  </header>
+
+  <!-- ================================ MASAÜSTÜ ================================ -->
+  <section class="profile desk" aria-label="Masaüstü">
+    <div class="pair" style="grid-template-columns: var(--a-panel-w) minmax(0, 1fr);">
+      <div>
+        <p class="pair-label">Durum 1 yerinde: ajan panelinde, bestecinin hemen üstünde</p>
+        <div class="ap">
+          <div class="ap-head">
+            <div class="top"><h2>112,40 seviyesi</h2><span class="origin agent">Ajan</span></div>
+            <div class="ctx"><span class="chip">SYN20 · Günlük</span><span class="chip">Basamak: Öner</span><span class="chip">Canlı</span></div>
+          </div>
+          <div class="ap-thread">
+            <div class="u-msg"><span class="who">Sen · 14:31</span><span>Bu çizgiyi izle.</span></div>
+            <div class="work"><div class="work-sum"><span class="ok">✓</span><span>Çalışma: 3 adım, 4 sn</span><span class="grow"></span><span>›</span></div></div>
+            <div class="answer">
+              <p>Çizim 112,40'ta yatay bir seviye. Kırılımı iki biçimde sayabilirim; okumalar yön olarak ayrıştığı için soruyorum.</p>
+            </div>
+          </div>
+          <div class="pending-q">
+            <div class="qcard">
+              <div class="eyebrow-row"><span class="origin agent">Ajan soruyor</span><span class="grow"></span><span class="mono">Soru 1 / 2</span></div>
+              <h3>Kırılımı neye göre sayayım?</h3>
+              <div class="opts">
+                <span class="opt on">Günlük kapanış 112,40'ın altında olursa haber ver</span>
+                <span class="opt">Fitil 112,40'a değince haber ver</span>
+                <span class="opt">İzleme, yalnız not kalsın</span>
+              </div>
+              <span class="free">Ya da kendi cevabını yaz…</span>
+              <div class="qfoot"><span class="btn quiet">Atla</span><span class="grow"></span><span class="btn primary">Sonraki</span></div>
+            </div>
+          </div>
+          <div class="composer"><span class="cph">Sor ya da @ ile bir izlemeyi an</span>
+            <div class="row"><span class="chip at-ctx">@ 112,40 çizimi</span><span class="grow"></span><span class="send">↑</span></div></div>
+        </div>
+      </div>
+      <div>
+        <p class="pair-label">Grafikte: ilgili çizimin çipinde “?”</p>
+        <div class="chart-slot mini-chart"><img data-chart="desk" alt="SAMPLE günlük grafik">
+          <div class="overlay">
+            <svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"><line class="human" x1="38" y1="29.9" x2="91.1" y2="29.9"></line></svg>
+            <div class="ax-tag human" style="--y: 29.9%">112,40</div>
+            <div class="ax-chip agent" style="--x: 38%; --y: 29.9%"><span class="origin agent">?</span><span>Soru bekliyor · izleme kurulmadı</span></div>
+          </div>
+        </div>
+        <p class="pair-label" style="margin-top: var(--qp-space-3)">Akış</p>
+        <table class="state-table">
+          <tr><td class="n">1</td><td>Ajan belirsizlik görür → çipte “?” + kart</td></tr>
+          <tr><td class="n">2</td><td>Seçenek → “Sonraki” → ikinci soru ya da kart katlanır</td></tr>
+          <tr><td class="n">3</td><td>Niyet kartı (Y04) güncellenir → izleme kurulur ya da yalnız not kalır</td></tr>
+        </table>
+      </div>
+    </div>
+
+    <h2>Bütün durumlar <span class="note">Şartname tablosu sırasıyla</span></h2>
+    <div class="states">
+      <figure class="state">
+        <figcaption><span class="n">1</span><b>Soru bekliyor</b><span class="role">--card, kenar --qp-origin-agent kesik</span></figcaption>
+        <div class="stage">
+          <div class="qcard">
+            <div class="eyebrow-row"><span class="origin agent">Ajan soruyor</span><span class="grow"></span><span class="mono">Soru 1 / 2</span></div>
+            <h3>Kırılımı neye göre sayayım?</h3>
+            <div class="opts">
+              <span class="opt">Günlük kapanış 112,40'ın altında olursa haber ver</span>
+              <span class="opt">Fitil 112,40'a değince haber ver</span>
+              <span class="opt">İzleme, yalnız not kalsın</span>
+            </div>
+            <span class="free">Ya da kendi cevabını yaz…</span>
+            <div class="qfoot"><span class="btn quiet">Atla</span><span class="grow"></span><span class="btn" aria-disabled="true">Sonraki</span></div>
+          </div>
+        </div>
+      </figure>
+
+      <figure class="state">
+        <figcaption><span class="n">2</span><b>Seçenek örneği</b><span class="role">--fg · tam cümle; seçili --accent</span></figcaption>
+        <div class="stage">
+          <div class="qcard">
+            <div class="eyebrow-row"><span class="origin agent">Ajan soruyor</span><span class="grow"></span><span class="mono">Soru 1 / 2</span></div>
+            <h3>Kırılımı neye göre sayayım?</h3>
+            <div class="opts">
+              <span class="opt on">Günlük kapanış 112,40'ın altında olursa haber ver<span class="sub">varsayılan okuma · 3 bar tutunma senin notundan</span></span>
+              <span class="opt">Fitil 112,40'a değince haber ver<span class="sub">gün içi dokunuş da sayılır</span></span>
+              <span class="opt">İzleme, yalnız not kalsın</span>
+            </div>
+            <div class="qfoot"><span class="btn quiet">Atla</span><span class="grow"></span><span class="btn primary">Sonraki</span></div>
+          </div>
+        </div>
+      </figure>
+
+      <figure class="state">
+        <figcaption><span class="n">3</span><b>Cevaplandı</b><span class="role">--muted + --qp-origin-human · kart katlanır</span></figcaption>
+        <div class="stage">
+          <div class="answered"><span class="q">Kırılımı neye göre sayayım?</span><span>Kırılım: günlük kapanış</span><span class="who">Sen · 14:33</span></div>
+        </div>
+      </figure>
+
+      <figure class="state">
+        <figcaption><span class="n">4</span><b>Serbest metinle cevap</b><span class="role">--qp-origin-agent · cümleye çevirir, onay ister</span></figcaption>
+        <div class="stage">
+          <div class="answered"><span class="q">Kırılımı neye göre sayayım?</span><span>“iki gün üst üste altında kapatırsa”</span><span class="who">Sen</span></div>
+          <div class="qcard" style="margin-top: var(--qp-space-2)">
+            <div class="eyebrow-row"><span class="origin agent">Ajan</span><span class="grow"></span><span class="mono">Soru 1 / 2</span></div>
+            <p class="lede">Şunu mu demek istedin: <b>112,40 altında 2 günlük kapanış olursa haber ver</b>?</p>
+            <div class="qfoot"><span class="btn quiet">Hayır, düzelt</span><span class="grow"></span><span class="btn primary">Evet, bu</span></div>
+          </div>
+        </div>
+      </figure>
+
+      <figure class="state">
+        <figcaption><span class="n">5</span><b>Ertelendi</b><span class="role">--muted · kart gelen kutusuna iner</span></figcaption>
+        <div class="stage">
+          <div class="status-line edge-agent"><span class="glyph">↓</span><span>Sonra cevaplanacak · izleme kurulmadı</span><span class="grow"></span><span class="link">Gelen kutusu</span></div>
+        </div>
+      </figure>
+
+      <figure class="state">
+        <figcaption><span class="n">6</span><b>Zaman aşımı</b><span class="role">--qp-closed · durum satırı</span></figcaption>
+        <div class="stage">
+          <div class="status-line closed edge-agent"><span class="glyph">–</span><span>Cevap gelmedi · izleme kurulmadı</span><span class="grow"></span><span class="link">Yeniden sor</span></div>
+        </div>
+      </figure>
+
+      <figure class="state">
+        <figcaption><span class="n">7</span><b>Ardışık ikinci soru</b><span class="role">--card · “Soru 2 / 2”; üçüncüsü sorulmaz (S17)</span></figcaption>
+        <div class="stage">
+          <div class="answered"><span class="q">Soru 1</span><span>Kırılım: günlük kapanış</span><span class="who">Sen</span></div>
+          <div class="qcard" style="margin-top: var(--qp-space-2)">
+            <div class="eyebrow-row"><span class="origin agent">Ajan soruyor</span><span class="grow"></span><span class="mono">Soru 2 / 2</span></div>
+            <h3>Haber verdikten sonra izleme ne yapsın?</h3>
+            <div class="opts">
+              <span class="opt on">Haber ver ve yeniden kur</span>
+              <span class="opt">Haber ver ve kapat</span>
+              <span class="opt">İzleme, yalnız not kalsın</span>
+            </div>
+            <div class="qfoot"><span class="btn quiet">Atla</span><span class="grow"></span><span class="btn primary">Bitir</span></div>
+          </div>
+        </div>
+      </figure>
+
+      <figure class="state">
+        <figcaption><span class="n">8</span><b>Ajan kökenli bağlantı</b><span class="role">--muted · seçenekler salt okunur</span></figcaption>
+        <div class="stage">
+          <div class="qcard">
+            <div class="eyebrow-row"><span class="origin agent">Ajan soruyor</span><span class="grow"></span><span class="mono">Soru 1 / 2</span></div>
+            <h3>Kırılımı neye göre sayayım?</h3>
+            <div class="opts">
+              <span class="opt ro">Günlük kapanış 112,40'ın altında olursa haber ver</span>
+              <span class="opt ro">Fitil 112,40'a değince haber ver</span>
+              <span class="opt ro">İzleme, yalnız not kalsın</span>
+            </div>
+            <div class="status-line"><span class="glyph">‖</span><span>Yalnız insan cevaplar</span></div>
+          </div>
+        </div>
+      </figure>
+    </div>
+
+    <h2>Veri durumu <span class="note">Bayatta soru yine sorulur; cümle sonu saat taşır</span></h2>
+    <div class="states">
+      <figure class="state">
+        <figcaption><span class="n">D</span><b>Veri bayatken</b><span class="role">D-bayat · seçenek cümlesine ek</span></figcaption>
+        <div class="stage">
+          <div class="qcard">
+            <div class="eyebrow-row"><span class="origin agent">Ajan soruyor</span><span class="grow"></span><span class="mono">Soru 1 / 2</span></div>
+            <h3>Kırılımı neye göre sayayım?</h3>
+            <div class="opts">
+              <span class="opt">Günlük kapanış 112,40'ın altında olursa haber ver <span class="muted">(veri bayat, son 14:35)</span></span>
+              <span class="opt">İzleme, yalnız not kalsın</span>
+            </div>
+          </div>
+        </div>
+      </figure>
+    </div>
+  </section>
+
+  <!-- ================================ TELEFON ================================= -->
+  <section class="profile phone" aria-label="Telefon">
+    <h2>Telefon <span class="note">Bildirimden tek dokunuş · uygulamada alt sayfa</span></h2>
+    <div class="states">
+      <figure class="state">
+        <figcaption><span class="n">1</span><b>Soru bekliyor · bildirim</b><span class="role">en çok üç eylem (seçenek) + “Aç”</span></figcaption>
+        <div class="lock">
+          <span class="clock">14:32</span>
+          <div class="os-notif">
+            <div class="app"><span class="app-icon"></span><span>Qapsule</span><span class="grow"></span><span>şimdi</span></div>
+            <span><b>SYN20 · Ajan soruyor</b></span>
+            <span>Kırılımı neye göre sayayım?</span>
+            <div class="os-actions"><span>Günlük kapanış</span><span>Fitil değince</span><span>Yalnız not</span><span>Aç</span></div>
+          </div>
+        </div>
+      </figure>
+
+      <figure class="state">
+        <figcaption><span class="n">1</span><b>Soru bekliyor · alt sayfa</b><span class="role">seçenekler tam genişlik dokunma satırları</span></figcaption>
+        <div class="ph">
+          <div class="ph-status"><span class="pulse"></span><span>Canlı · seans açık</span><span class="grow"></span><span class="mono">14:32</span></div>
+          <div class="ph-chart" style="padding-top: var(--qp-space-2)"><div class="chart-slot mini-chart phone-chart"><img data-chart="phone" alt="">
+            <div class="overlay"><svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"><line class="human" x1="30" y1="40" x2="84.4" y2="40"></line></svg>
+              <div class="ax-tag human" style="--y: 40%">112,40</div></div></div></div>
+          <div class="bsheet" style="margin-top: var(--qp-space-2)"><span class="grabber"></span>
+            <div class="eyebrow-row"><span class="origin agent">Ajan soruyor</span><span class="grow"></span><span class="mono">Soru 1 / 2</span></div>
+            <h3 class="empty-title">Kırılımı neye göre sayayım?</h3>
+            <div class="opts">
+              <span class="opt on">Günlük kapanış 112,40'ın altında olursa haber ver</span>
+              <span class="opt">Fitil 112,40'a değince haber ver</span>
+              <span class="opt">İzleme, yalnız not kalsın</span>
+            </div>
+            <span class="free">Ya da kendi cevabını yaz…</span>
+          </div>
+          <div class="sticky-actions"><span class="btn">Atla</span><span class="btn primary">Sonraki</span></div>
+        </div>
+      </figure>
+
+      <figure class="state">
+        <figcaption><span class="n">3</span><b>Cevaplandı</b><span class="role">bildirimden: uygulama açılmadan durum satırı</span></figcaption>
+        <div class="lock">
+          <div class="os-notif">
+            <div class="app"><span class="app-icon"></span><span>Qapsule</span><span class="grow"></span><span>şimdi</span></div>
+            <span><b>SYN20 · Kırılım: günlük kapanış</b></span><span class="muted">Sen cevapladın · izleme kuruluyor</span>
+          </div>
+        </div>
+      </figure>
+
+      <figure class="state">
+        <figcaption><span class="n">4</span><b>Serbest metinle cevap</b><span class="role">--qp-origin-agent</span></figcaption>
+        <div class="ph"><div class="ph-body"><div class="qcard">
+          <p class="lede">Şunu mu demek istedin: <b>112,40 altında 2 günlük kapanış olursa haber ver</b>?</p>
+        </div></div><div class="sticky-actions"><span class="btn">Düzelt</span><span class="btn primary">Evet, bu</span></div></div>
+      </figure>
+
+      <figure class="state">
+        <figcaption><span class="n">5</span><b>Ertelendi</b><span class="role">--muted</span></figcaption>
+        <div class="ph"><div class="ph-body"><div class="status-line edge-agent"><span class="glyph">↓</span><span>Sonra cevaplanacak · izleme kurulmadı</span></div></div></div>
+      </figure>
+
+      <figure class="state">
+        <figcaption><span class="n">6</span><b>Zaman aşımı</b><span class="role">--qp-closed</span></figcaption>
+        <div class="ph"><div class="ph-body"><div class="status-line closed edge-agent"><span class="glyph">–</span><span>Cevap gelmedi · izleme kurulmadı</span></div></div></div>
+      </figure>
+
+      <figure class="state">
+        <figcaption><span class="n">7</span><b>Ardışık ikinci soru</b><span class="role">“Soru 2 / 2”</span></figcaption>
+        <div class="ph"><div class="bsheet"><span class="grabber"></span>
+          <div class="answered"><span class="q">Soru 1</span><span>Kırılım: günlük kapanış</span><span class="who">Sen</span></div>
+          <div class="eyebrow-row"><span class="origin agent">Ajan soruyor</span><span class="grow"></span><span class="mono">Soru 2 / 2</span></div>
+          <h3 class="empty-title">Haber verdikten sonra izleme ne yapsın?</h3>
+          <div class="opts"><span class="opt on">Haber ver ve yeniden kur</span><span class="opt">Haber ver ve kapat</span><span class="opt">İzleme, yalnız not kalsın</span></div>
+        </div><div class="sticky-actions"><span class="btn">Atla</span><span class="btn primary">Bitir</span></div></div>
+      </figure>
+
+      <figure class="state">
+        <figcaption><span class="n">8</span><b>Ajan kökenli bağlantı</b><span class="role">--muted · salt okunur</span></figcaption>
+        <div class="ph"><div class="ph-body"><div class="opts"><span class="opt ro">Günlük kapanış 112,40'ın altında olursa haber ver</span><span class="opt ro">İzleme, yalnız not kalsın</span></div>
+          <div class="status-line"><span class="glyph">‖</span><span>Yalnız insan cevaplar</span></div></div></div>
+      </figure>
+    </div>
+  </section>
+</main>
+</body>
+</html>

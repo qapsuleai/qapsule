@@ -5,10 +5,10 @@ Her round sonunda güncellenir.
 
 ## Şu an
 
-- **Aktif round:** RG1 (yönetişim turu) başlatılmayı bekliyor; paket `rounds/RG1/`. R5B tamamlandı (`rounds/R5B/REPORT.md`, `AUDIT.md`, `docs/AGENTS.md`).
+- **Aktif round:** RG1 (yönetişim turu) koşuyor (2026-11-22'de başlatıldı); paket `rounds/RG1/`. `NORTH_STAR.md` ekleri işlendi (K84). R5B tamamlandı (`rounds/R5B/REPORT.md`, `AUDIT.md`, `docs/AGENTS.md`).
 - **Son güncelleme:** 2026-11-22
 - **Hedef düzeltmesi (K69–K83):** ana akış araştırma kanalıyla birleşti; yeni oturum `docs/HANDOFF.md`'den başlar. Yeni sıra (K81): RG1 → RD2 → RL1 → R7 → RS1 → RA1 → R8 → R9.
-- **Sıradaki adım:** Arkin yeni bir Claude Code oturumunda `rounds/RG1/PROMPT.md` ile RG1'i başlatır. Ana akışta bekleyenler: `NORTH_STAR.md` ek metninin onayı (K70); R5B önerileri (Ö94–Ö102, A57–A62) ve RP4 önerileri (Ö77–Ö93, A53–A56); `recovered/worktree-agent/*` dallarının kararı; beş dakikalık ajan denemesi (`rounds/R5B/REPORT.md` son bölüm); ilk iş gününde RP4 canlı doğrulamaları.
+- **Sıradaki adım:** Arkin yeni bir Claude Code oturumunda `rounds/RG1/PROMPT.md` ile RG1'i başlatır. Ana akışta bekleyenler: R5B önerileri (Ö94–Ö102, A57–A62) ve RP4 önerileri (Ö77–Ö93, A53–A56); `recovered/worktree-agent/*` dallarının kararı; beş dakikalık ajan denemesi (`rounds/R5B/REPORT.md` son bölüm); ilk iş gününde RP4 canlı doğrulamaları.
 
 ## Round geçmişi
 

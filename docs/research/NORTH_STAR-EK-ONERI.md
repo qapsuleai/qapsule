@@ -1,4 +1,4 @@
-# NORTH_STAR.md için önerilen ekler — Arkin'in onayını bekliyor
+# NORTH_STAR.md ekleri — Arkin onayladı ve işlendi (K84, 2026-11-22)
 
 `NORTH_STAR.md` yalnız Arkin'in onayıyla değişir. Aşağıdaki metin K69–K83'ün kuzey yıldızına
 yansımasıdır. Onaylanırsa `DECISIONS.md`'ye bunu anan bir karar satırı (K84) eklenir ve metin

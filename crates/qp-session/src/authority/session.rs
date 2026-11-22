@@ -2,9 +2,9 @@
 //! presence. Every inbound message goes through [`Session::handle_raw`].
 
 mod accept;
-mod build;
 mod clock;
 mod command;
+mod construct;
 mod dispatch;
 mod events;
 mod intake;

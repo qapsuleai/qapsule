@@ -14,9 +14,9 @@
 //! - Going back rebuilds the authority from its init and advances it silently: a new
 //!   authority (`epoch + 1`, §8.4), every connection closed.
 
-mod build;
 mod control;
 mod recorded;
+mod setup;
 
 use recorded::*;
 

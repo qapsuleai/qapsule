@@ -1,0 +1,2 @@
+rg1-compare: 225 items byte-identical to the baseline
+0d78c440

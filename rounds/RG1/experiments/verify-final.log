@@ -1,0 +1,3089 @@
+
+================================================================
+== [1] fmt
+================================================================
+-- fmt: PASS (1s)
+
+================================================================
+== [2] clippy
+================================================================
+    Checking qp-schema v0.0.0 (/Users/arkns/Works/Mchart/qapsule/crates/qp-schema)
+    Checking qp-live v0.0.0 (/Users/arkns/Works/Mchart/qapsule/crates/qp-live)
+   Compiling qp-matriks v0.0.0 (/Users/arkns/Works/Mchart/qapsule/crates/qp-matriks)
+    Checking qp-compute v0.0.0 (/Users/arkns/Works/Mchart/qapsule/crates/qp-compute)
+    Checking qp-calendar v0.0.0 (/Users/arkns/Works/Mchart/qapsule/crates/qp-calendar)
+    Checking qp-grammar v0.0.0 (/Users/arkns/Works/Mchart/qapsule/crates/qp-grammar)
+    Checking qp-render v0.0.0 (/Users/arkns/Works/Mchart/qapsule/crates/qp-render)
+    Checking qp-source v0.0.0 (/Users/arkns/Works/Mchart/qapsule/crates/qp-source)
+    Checking qp-facts v0.0.0 (/Users/arkns/Works/Mchart/qapsule/crates/qp-facts)
+    Checking qp-capsule v0.0.0 (/Users/arkns/Works/Mchart/qapsule/crates/qp-capsule)
+    Checking qp-session v0.0.0 (/Users/arkns/Works/Mchart/qapsule/crates/qp-session)
+    Checking qp-shellcore v0.0.0 (/Users/arkns/Works/Mchart/qapsule/crates/qp-shellcore)
+    Checking qp-mcp v0.0.0 (/Users/arkns/Works/Mchart/qapsule/crates/qp-mcp)
+    Checking qp-wasm v0.0.0 (/Users/arkns/Works/Mchart/qapsule/crates/qp-wasm)
+    Checking qp-host v0.0.0 (/Users/arkns/Works/Mchart/qapsule/crates/qp-host)
+    Checking qp-cli v0.0.0 (/Users/arkns/Works/Mchart/qapsule/crates/qp-cli)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 25.10s
+-- clippy: PASS (25s)
+
+================================================================
+== [3] test
+================================================================
+   Compiling qp-schema v0.0.0 (/Users/arkns/Works/Mchart/qapsule/crates/qp-schema)
+   Compiling qp-live v0.0.0 (/Users/arkns/Works/Mchart/qapsule/crates/qp-live)
+   Compiling qp-matriks v0.0.0 (/Users/arkns/Works/Mchart/qapsule/crates/qp-matriks)
+   Compiling qp-compute v0.0.0 (/Users/arkns/Works/Mchart/qapsule/crates/qp-compute)
+   Compiling qp-calendar v0.0.0 (/Users/arkns/Works/Mchart/qapsule/crates/qp-calendar)
+   Compiling qp-grammar v0.0.0 (/Users/arkns/Works/Mchart/qapsule/crates/qp-grammar)
+   Compiling qp-render v0.0.0 (/Users/arkns/Works/Mchart/qapsule/crates/qp-render)
+   Compiling qp-source v0.0.0 (/Users/arkns/Works/Mchart/qapsule/crates/qp-source)
+   Compiling qp-facts v0.0.0 (/Users/arkns/Works/Mchart/qapsule/crates/qp-facts)
+   Compiling qp-capsule v0.0.0 (/Users/arkns/Works/Mchart/qapsule/crates/qp-capsule)
+   Compiling qp-session v0.0.0 (/Users/arkns/Works/Mchart/qapsule/crates/qp-session)
+   Compiling qp-shellcore v0.0.0 (/Users/arkns/Works/Mchart/qapsule/crates/qp-shellcore)
+   Compiling qp-mcp v0.0.0 (/Users/arkns/Works/Mchart/qapsule/crates/qp-mcp)
+   Compiling qp-host v0.0.0 (/Users/arkns/Works/Mchart/qapsule/crates/qp-host)
+   Compiling qp-wasm v0.0.0 (/Users/arkns/Works/Mchart/qapsule/crates/qp-wasm)
+   Compiling qp-cli v0.0.0 (/Users/arkns/Works/Mchart/qapsule/crates/qp-cli)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 52.71s
+     Running unittests src/lib.rs (target/main/debug/deps/qp_calendar-16e5735f428ab3de)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/calendar.rs (target/main/debug/deps/calendar-8a079cb0eefb4686)
+
+running 10 tests
+test bist_bars_in_istanbul_time_including_historic_dst ... ok
+test display_time_zone_does_not_change_alignment ... ok
+test nyse_daily_bars_follow_new_york_dst ... ok
+test nyse_holiday_week_and_month ... ok
+test bist_half_day_holiday_week_month ... ok
+test xist_holiday_data_is_well_formed ... ok
+test nyse_intraday_bars_on_dst_day_and_half_day ... ok
+test interval_parsing_and_bad_calendars ... ok
+test resample_minutes_into_session_aligned_days ... ok
+test builtin_calendars_validate_against_the_schema ... ok
+
+test result: ok. 10 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.18s
+
+     Running tests/tzdata.rs (target/main/debug/deps/tzdata-8facac69dbe1b328)
+
+running 3 tests
+test every_transition_instant_matches_jiff ... ok
+test offsets_match_jiff_every_six_hours_1900_2100 ... ok
+test local_to_utc_matches_jiff_including_gaps_and_folds ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.75s
+
+     Running unittests src/lib.rs (target/main/debug/deps/qp_capsule-da53b6cd704d4af1)
+
+running 68 tests
+test engine::glyph::params_binding::capsule_freshness_half_bars_binds_registry ... ok
+test feedrule::tests::few_cases_are_never_hidden ... ok
+test outcome::params_binding::outcome_constants_bind_registry ... ok
+test feedrule::tests::registry ... ok
+test market::tests::hhmm_is_exchange_local ... ok
+test outcome::tests::intraday_from_bars_up_to_birth ... ok
+test outcome::tests::levels_match_judge_threshold ... ok
+test outcome::tests::low_touch_invalidates_up_and_realizes_down ... ok
+test outcome::tests::neutral_expands_on_wick_and_lapses_at_horizon ... ok
+test market::tests::notes ... ok
+test outcome::tests::pure_and_horizon_bounded ... ok
+test outcome::tests::tie_goes_by_close_side ... ok
+test market::tests::status_lines ... ok
+test outcome::tests::rp4_picks_by_period ... ok
+test outcome::tests::high_touch_realizes_where_close_does_not ... ok
+test market::tests::words ... ok
+test realize::elapsed::tests::hourly_weekend_and_holiday ... ok
+test realize::elapsed::tests::month_suffixes_follow_harmony ... ok
+test realize::elapsed::tests::deterministic ... ok
+test realize::elapsed::tests::period_parse ... ok
+test realize::elapsed::tests::singular_and_plural ... ok
+test realize::elapsed::tests::daily_weekend_and_holiday ... ok
+test realize::morph::tests::caps ... ok
+test realize::elapsed::tests::vague_has_no_digit ... ok
+test realize::elapsed::tests::real_xist_holidays ... ok
+test realize::elapsed::tests::weekly_and_monthly ... ok
+test realize::morph::tests::nouns ... ok
+test realize::morph::tests::numbers ... ok
+test realize::morph::tests::verbs ... ok
+test realize::morph::tests::tickers ... ok
+test realize::plan::params_binding::ledger_min_n_binds_scorecard_min_n ... ok
+test realize::num::tests::formats ... ok
+test realize::stamp::tests::across_a_weekend ... ok
+test realize::stamp::tests::an_event_after_now_counts_as_now ... ok
+test realize::stamp::tests::another_year_names_it ... ok
+test realize::stamp::tests::daily_is_always_a_date ... ok
+test realize::parts::tests::closed_endings ... ok
+test realize::stamp::tests::half_day ... ok
+test realize::stamp::tests::intraday_today_is_the_exchange_clock ... ok
+test realize::stamp::tests::intraday_yesterday_and_older_are_dates ... ok
+test realize::parts::tests::pieces_in_both_languages ... ok
+test realize::stamp::tests::joined ... ok
+test realize::stamp::tests::the_display_zone_is_the_callers ... ok
+test realize::tests::examples_render ... ok
+test realize::tests::k26_en ... ok
+test realize::tests::k26_redacted_has_no_digits ... ok
+test realize::tests::k26_tr ... ok
+test theme::params_binding::theme_gap_and_confirm_bars_bind_registry ... ok
+test trust::seal::tests::hmac_rfc4231_case2 ... ok
+test trust::seal::tests::letters_have_no_digits ... ok
+test trust::seal::tests::sha256_vectors ... ok
+test voice::marla::tests::number_words ... ok
+test voice::marla::tests::percentages ... ok
+test voice::marla::tests::sentences_are_counted_like_the_reader ... ok
+test voice::marla_glossary::tests::every_entry_is_short_and_digit_free ... ok
+test voice::tests::registry_is_well_formed ... ok
+test voice::tests::unnumber_leaves_no_digit_but_the_label ... ok
+test voice::marla::engine_tests::examples ... ok
+test realize::tests::deterministic ... ok
+test voice::selvi::tests::phrasings ... ok
+test realize::tests::net_flow_condition_says_buying_or_selling_stronger_than_usual ... ok
+test realize::tests::extreme_outcome_says_whether_the_stretch_continued ... ok
+test realize::tests::every_number_is_a_slot ... ok
+test voice::selvi::tests::deterministic ... ok
+test voice::marla::engine_tests::every_event_keeps_the_rules ... ok
+test voice::selvi::tests::sweep_keeps_the_rules ... ok
+test realize::tests::time_markers_per_class ... ok
+test realize::tests::redacted_never_has_digits_or_number_words ... ok
+
+test result: ok. 68 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 3.19s
+
+     Running tests/audience.rs (target/main/debug/deps/audience-11646d9c4889e87c)
+
+running 4 tests
+test group_default_applies_when_unset ... ok
+test admits_never_changes_the_audience ... ok
+test tier_filter_per_level ... ok
+test position_and_intent_override_level ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/comment.rs (target/main/debug/deps/comment-f73528b0b317ea16)
+
+running 68 tests
+test bare_year_is_a_number ... ok
+test ambiguous_single_separator_follows_language ... ok
+test draft_round_trips_through_json ... ok
+test en_dates_are_not_numbers ... ok
+test en_may_without_year_is_a_modal_not_a_month ... ok
+test advice_tr_suffix_rule_avoids_false_friends ... ok
+test advice_en_hits_and_non_hits ... ok
+test advice_tr_hits ... ok
+test a_visible_value_equal_to_a_withheld_one_passes ... ok
+test external_quote_needs_a_source ... ok
+test external_quote_in_the_other_language_is_read ... ok
+test derived_numbers_are_rejected ... ok
+test cites_strictness_does_not_check_numbers ... ok
+test external_value_must_be_in_its_quote ... ok
+test advice_is_rejected_at_every_strictness ... ok
+test clean_english_comment_passes ... ok
+test clean_comment_passes_every_strictness ... ok
+test explicit_sign_must_agree ... ok
+test hyphen_is_not_a_minus ... ok
+test advice_scans_both_languages ... ok
+test hidden_id_is_a_licence_reason ... ok
+test licensed_percent_is_rejected ... ok
+test licensed_value_in_text_is_rejected_at_every_strictness ... ok
+test external_value_supports_a_number ... ok
+test direction_is_not_checked_at_cites_strictness ... ok
+test mixed_or_neutral_evidence_skips_direction ... ok
+test deterministic_same_input_same_output ... ok
+test markers_are_parsed_and_not_numbers ... ok
+test a_withheld_value_cannot_hide_in_a_time_a_date_or_words ... ok
+test marker_out_of_range_is_rejected ... ok
+test integer_counts_must_be_values ... ok
+test no_cites_is_rejected ... ok
+test licensed_external_value_alone_is_rejected ... ok
+test number_matches_direct ... ok
+test licence_cannot_be_dodged_by_how_a_percent_is_written ... ok
+test overlong_number_is_still_licence_checked ... ok
+test negative_percent_forms ... ok
+test overlong_number_is_rejected_not_skipped ... ok
+test per_sentence_invalid_marker_does_not_count ... ok
+test money_outflow_is_not_an_up_word ... ok
+test per_sentence_requires_a_marker_where_numbers_are ... ok
+test reasons_serialize_in_snake_case ... ok
+test licensed_value_passed_as_external_is_rejected ... ok
+test rounding_half_away_from_zero_for_negatives ... ok
+test rounding_decimal_half_stored_below ... ok
+test rounding_half_up_boundary ... ok
+test out_of_range_times_and_dates_are_numbers ... ok
+test rounding_to_written_decimals ... ok
+test multiples_use_the_value_directly ... ok
+test opposite_direction_is_rejected_tr ... ok
+test times_are_not_numbers ... ok
+test shown_precision_padding_counts ... ok
+test sentence_index_points_at_the_offending_sentence ... ok
+test thousands_and_decimals_tr_and_en ... ok
+test unknown_id_is_rejected ... ok
+test unsigned_number_matches_magnitude ... ok
+test symbols_are_removed_first ... ok
+test short_or_numeric_ids_never_mask_numbers ... ok
+test percent_matches_ratio_or_points ... ok
+test unmasked_numbers_read_times_and_dates_as_digits ... ok
+test percent_words_are_percent_signs ... ok
+test tr_dates_are_not_numbers ... ok
+test numbers_in_words_are_caught_in_either_casing ... ok
+test mixed_or_no_direction_passes ... ok
+test ids_named_in_the_text_carry_no_number_and_no_direction ... ok
+test opposite_direction_is_rejected_en ... ok
+test direction_words_suffix_rule ... ok
+test direction_matching_text_passes ... ok
+
+test result: ok. 68 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.15s
+
+     Running tests/ledger_index.rs (target/main/debug/deps/ledger_index-2cf2d38a9023b31e)
+
+running 1 test
+test indexed_ledger_equals_row_scan ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.14s
+
+     Running tests/lifecycle.rs (target/main/debug/deps/lifecycle-ed3fe3538feb8bb5)
+
+running 21 tests
+test facts_processed_in_detector_code_order ... ok
+test expired_at_horizon_is_a_ledger_miss ... ok
+test glyph_spec_channels ... ok
+test closed_story_takes_no_fact_same_theme_starts_new ... ok
+test invalidated_by_outcome_rule_is_a_ledger_miss ... ok
+test realized_by_outcome_rule_is_a_ledger_hit ... ok
+test ranker_sees_no_look_ahead_and_ranks_closes ... ok
+test confirmed_new_family_grows_families ... ok
+test new_with_existing_id_joins_that_story ... ok
+test retracted_open_story_never_in_ledger ... ok
+test candidates_skip_stories_that_would_close ... ok
+test engine_ignores_exit_of_a_state_not_in_the_story_and_unknown_join ... ok
+test born_new_story_with_deterministic_ids ... ok
+test foreign_instrument_series_bar_and_meaningless_facts_are_skipped ... ok
+test retracting_a_closed_story_does_not_change_earlier_births ... ok
+test strengthened_same_family ... ok
+test theme_rule_sees_only_same_instrument_and_series ... ok
+test verdict_comes_before_horizon ... ok
+test candidates_are_pure_and_never_in_ledger ... ok
+test weakened_opposite_fact ... ok
+test weakened_state_ended_and_foreign_exit_ignored ... ok
+
+test result: ok. 21 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/muhur_crosscheck.rs (target/main/debug/deps/muhur_crosscheck-68eb072a3c41e876)
+
+running 5 tests
+test experiment::seal::tests::letters_have_no_digits ... ok
+test experiment::seal::tests::hmac_rfc4231_case2 ... ok
+test experiment::seal::tests::sha256_vectors ... ok
+test host_keys_change_receipts_not_statements ... ok
+test product_muhur_equals_measured_crate ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.57s
+
+     Running tests/pipeline.rs (target/main/debug/deps/pipeline-c57a39b0a19ef814)
+
+running 5 tests
+test fact_ids_are_deterministic_and_unique ... ok
+test the_run_is_not_trivial ... ok
+test replay_same_facts_into_fresh_engine_reproduces_history ... ok
+test determinism_two_runs_identical ... ok
+test look_ahead_shuffling_the_future_does_not_change_the_past ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.41s
+
+     Running tests/r3.rs (target/main/debug/deps/r3-89530c4d33852edd)
+
+running 6 tests
+test reader_entitlement_matching ... ok
+test k26_rsi_crossed_70_now_lower_is_past_tense_no_longer ... ok
+test realizer_equals_measured_m2_template_except_documented_fixes ... ok
+test licensed_flow_sentence_has_no_digits_for_an_unentitled_reader ... ok
+test history_replay_reproduces_capsule_history ... ok
+test look_ahead_real_detectors_chosen_config ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.90s
+
+     Running tests/sentinel.rs (target/main/debug/deps/sentinel-e00f0d7ee92f088e)
+
+running 6 tests
+test tier_sens_sends_births_by_tier_and_involved_negatives_only ... ok
+test every_sends_feed_transitions_and_matches ... ok
+test tier_repeat_hold_suppresses_repeats_and_prefers_holdings ... ok
+test a_match_and_its_transition_are_one_notification ... ok
+test names_round_trip_and_output_is_deterministic ... ok
+test no_filter_drops_a_negative_transition_on_a_position ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.05s
+
+     Running unittests src/main.rs (target/main/debug/deps/qp-b8f193f6a4ca6540)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/cli.rs (target/main/debug/deps/cli-39dedbbd1e4622d8)
+
+running 11 tests
+test version_prints ... ok
+test compute_from_a_document_series ... ok
+test bad_input_fails_without_panic ... ok
+test compute_sweep_equals_single_runs ... ok
+test compute_errors_are_reported ... ok
+test schema_validate_unknown_type_fails ... ok
+test compute_rsi_and_macd_from_a_series_file ... ok
+test schema_export_is_complete_and_deterministic ... ok
+test schema_validate_rejects_invalid_instance ... ok
+test schema_validate_examples_builtin_and_exported ... ok
+test render_is_deterministic_and_matches_golden ... ok
+
+test result: ok. 11 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.35s
+
+     Running tests/demo_live.rs (target/main/debug/deps/demo_live-b1e3279f4cdec0b2)
+
+running 3 tests
+test late_replica_gets_the_live_bars_of_an_early_one ... ok
+test live_demo_with_mock_broker_drops_repairs_and_quits ... ok
+test live_demo_with_trades_two_endpoints_drop_trade_and_repair ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.90s
+
+     Running tests/demo_security.rs (target/main/debug/deps/demo_security-0ab5518b9d59eef4)
+
+running 2 tests
+test demo_rejects_foreign_hosts_origins_and_secrets ... ok
+test https_host_is_accepted_only_when_named ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.04s
+
+     Running tests/demo_sim.rs (target/main/debug/deps/demo_sim-ba7bb01cc1bbf02f)
+
+running 1 test
+test sim_demo_refuses_the_local_network_and_serves_on_loopback ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.21s
+
+     Running tests/demo_static.rs (target/main/debug/deps/demo_static-6ceeae1b5ce7e127)
+
+running 1 test
+test demo_serves_precompressed_files_by_accept_encoding ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.03s
+
+     Running tests/explain.rs (target/main/debug/deps/explain-15de7e345372bd7b)
+
+running 4 tests
+test explain_after_a_transcript_and_frame_size ... ok
+test explain_main_view ... ok
+test unknown_view_and_bad_size_fail ... ok
+test scene_prints_the_scene_description ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s
+
+     Running tests/live_record_trades.rs (target/main/debug/deps/live_record_trades-2bfc580a701f511d)
+
+running 1 test
+test record_trades_then_inspect ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 4.29s
+
+     Running tests/mcp.rs (target/main/debug/deps/mcp-4b428a14a7faf825)
+
+running 2 tests
+test mcp_stdio_smoke ... ok
+test conform_over_mcp ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 3.99s
+
+     Running tests/mcp_serve.rs (target/main/debug/deps/mcp_serve-a176baf4e68d510d)
+
+running 15 tests
+test a_non_local_address_needs_a_token ... ok
+test demo_mcp_refuses_the_network ... ok
+test http_with_a_token_needs_the_right_bearer ... ok
+test http_refuses_a_foreign_origin_and_a_foreign_host ... ok
+test a_human_principal_is_refused ... ok
+test http_per_token_principal_ignores_the_header ... ok
+test http_get_and_delete_keep_the_session_principal ... ok
+test http_another_principal_by_header_needs_principals ... ok
+test principals_need_a_loopback_address_and_agents ... ok
+test http_listen_streams_a_resource_update ... ok
+test demo_serves_the_same_session_at_mcp ... ok
+test http_a_session_keeps_its_principal ... ok
+test stdio_render_returns_a_png ... ok
+test http_initialize_list_and_read_on_a_real_socket ... ok
+test stdio_initialize_list_and_read_with_a_log ... ok
+
+test result: ok. 15 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.17s
+
+     Running tests/protocol.rs (target/main/debug/deps/protocol-aaa60a62ccb46a26)
+
+running 5 tests
+test serve_refuses_a_document_outside_the_root ... ok
+test serve_reports_a_gap_to_the_host ... ok
+test serve_frames_and_batch_end ... ok
+test conform_fails_on_a_wrong_transcript ... ok
+test conform_both_transports ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 7.60s
+
+     Running tests/replay.rs (target/main/debug/deps/replay-920033e6df6c2175)
+
+running 1 test
+test backward_seek_reconnects_and_the_stream_goes_on ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.55s
+
+     Running tests/replay_raw.rs (target/main/debug/deps/replay_raw-c1d9f5b5436e0ac9)
+
+running 1 test
+test replay_raw_twice_is_byte_equal ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.04s
+
+     Running tests/views.rs (target/main/debug/deps/views-c4b9e868eac58b5f)
+
+running 5 tests
+test fixtures_are_generated ... ok
+test render_needs_a_view_or_a_presentation ... ok
+test transcripts_pass_in_process ... ok
+test explain_dumps_are_stable ... ok
+test views_render_twice_identically_and_match_their_goldens ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 2.62s
+
+     Running unittests src/lib.rs (target/main/debug/deps/qp_compute-ef8fa8dda54e50ec)
+
+running 2 tests
+test sweep::share::tests::segments_split_runs_and_plain_stretches ... ok
+test sweep::share::tests::macd_without_ema_cache_equals_single_runs ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.03s
+
+     Running tests/address.rs (target/main/debug/deps/address-5ef5c985707226f7)
+
+running 10 tests
+test errors_are_positioned_and_clear ... ok
+test intervals ... ok
+test canonical_text_round_trips ... ok
+test depth_guard ... ok
+test defaults_aliases_and_case ... ok
+test rsi_14 ... ok
+test ema_of_rsi_with_symbol_and_interval ... ok
+test three_levels_with_field_source ... ok
+test two_levels ... ok
+test multi_output_selectors ... ok
+
+test result: ok. 10 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running tests/chain.rs (target/main/debug/deps/chain-6c29f4ca6110037a)
+
+running 3 tests
+test multi_input_multi_output ... ok
+test revision_to_none_is_not_committed_downstream ... ok
+test ema_of_rsi_matches_manual_composition ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/extend.rs (target/main/debug/deps/extend-9e830be571471a5d)
+
+running 1 test
+test extend_equals_pushes_in_any_mix ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.54s
+
+     Running tests/graph.rs (target/main/debug/deps/graph-ac839063bc58b22b)
+
+running 2 tests
+test result_cache_returns_the_same_bits ... ok
+test chain_sweep_equals_nested_chain ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s
+
+     Running tests/hand.rs (target/main/debug/deps/hand-233116d37e997384)
+
+running 7 tests
+test rsi_2 ... ok
+test rsi_edge_cases ... ok
+test bollinger_3_2 ... ok
+test sma_3 ... ok
+test ema_2 ... ok
+test bollinger_flat_window_has_zero_width ... ok
+test macd_2_3_2 ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/lanes.rs (target/main/debug/deps/lanes-aa5a9a19ba03d87f)
+
+running 2 tests
+test lane_kernels_equal_single_runs_on_random_parameter_lists ... ok
+test series_lanes_equal_single_runs_in_series_order ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.24s
+
+     Running tests/late.rs (target/main/debug/deps/late-f44d9bb90ac3f464)
+
+running 1 test
+test late_start_equals_full_run ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.29s
+
+     Running tests/legacy.rs (target/main/debug/deps/legacy-04e4ff75676664c0)
+
+running 1 test
+test matches_legacy_batch_outputs ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.06s
+
+     Running tests/limits.rs (target/main/debug/deps/limits-ac9096c33b2f0c9e)
+
+running 5 tests
+test non_integer_and_small_periods_name_the_range ... ok
+test constructors_enforce_the_bound ... ok
+test max_period_is_accepted_and_one_more_is_not ... ok
+test huge_period_message_names_the_bound ... ok
+test sweeps_reject_out_of_range_periods_before_work ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/modes.rs (target/main/debug/deps/modes-4d14137bcf39a79c)
+
+running 4 tests
+test length_warmup_and_finiteness ... ok
+test three_modes_are_bit_identical ... ok
+test chain_modes_are_bit_identical ... ok
+test rolling_state_matches_naive_reference ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.28s
+
+     Running tests/par.rs (target/main/debug/deps/par-b86aeda42b3005f7)
+
+running 2 tests
+test invalid_input_rejected_before_work ... ok
+test parallel_results_equal_sequential_for_every_thread_count ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.97s
+
+     Running tests/profiles.rs (target/main/debug/deps/profiles-1d80b19edd394999)
+
+running 1 test
+test profile_digests_are_pinned ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 2.15s
+
+     Running tests/r3_studies.rs (target/main/debug/deps/r3_studies-2fc4d628fa1f1924)
+
+running 4 tests
+test discard_and_extend_match_push ... ok
+test batch_streaming_revised_and_reference_agree ... ok
+test prop_modes_agree ... ok
+test digests_are_stable ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.97s
+
+     Running tests/share.rs (target/main/debug/deps/share-503e7269aaf683c5)
+
+running 4 tests
+test rsi_shared_split_equals_single_runs ... ok
+test macd_shared_line_equals_single_runs ... ok
+test shared_paths_on_series_shorter_than_periods ... ok
+test bollinger_shared_std_equals_single_runs ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.48s
+
+     Running tests/support.rs (target/main/debug/deps/support-671e05c790be88ee)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/sweep.rs (target/main/debug/deps/sweep-aa79a00f339c071d)
+
+running 5 tests
+test sweep_rejects_invalid_sets_before_work ... ok
+test flat_windows_are_exact_at_real_price_levels ... ok
+test high_price_levels_meet_the_relative_tolerance ... ok
+test rolling_variance_accuracy_on_long_series ... ok
+test sweep_equals_single_runs_for_every_lane_count ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.14s
+
+     Running unittests src/lib.rs (target/main/debug/deps/qp_facts-06f321f16d479eb0)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/detectors.rs (target/main/debug/deps/detectors-f075b56246c1b564)
+
+running 13 tests
+test hand_rsi_extreme ... ok
+test hand_rsi_divergence ... ok
+test hand_volume_surge ... ok
+test hand_squeeze ... ok
+test hand_institutional_flow ... ok
+test default_detector_order_and_ids ... ok
+test hand_ma_stack ... ok
+test hand_breakout_and_candidate ... ok
+test fact_ids_are_deterministic ... ok
+test state_edges_alternate ... ok
+test no_look_ahead ... ok
+test every_detector_fires_on_synthetic_data ... ok
+test batch_equals_streaming_equals_revised ... ok
+
+test result: ok. 13 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.16s
+
+     Running tests/rp4_set.rs (target/main/debug/deps/rp4_set-ff218510ac174aed)
+
+running 10 tests
+test unchanged_detectors_are_the_products ... ok
+test named_sets ... ok
+test slots_close_and_half_day ... ok
+test active_on_hourly_and_ids_versions ... ok
+test no_lookahead_and_deterministic ... ok
+test daily_is_product_bit_identical ... ok
+test seasonal_volume_drops_closing_births ... ok
+test batch_equals_streaming_with_revisions ... ok
+test below_floor_is_product_bit_identical ... ok
+test rp4_set_against_r3_set ... ok
+
+test result: ok. 10 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.11s
+
+     Running unittests src/lib.rs (target/main/debug/deps/qp_grammar-2e48bc802b56e70e)
+
+running 89 tests
+test detmath::tests::pow10_matches_std ... ok
+test detmath::tests::log10_rejects_non_positive ... ok
+test detmath::tests::helpers ... ok
+test faces::vadrel::tests::every_event_has_an_everyday_clause ... ok
+test faces::oltan::tests::any_look_gets_a_face_that_fits ... ok
+test detmath::tests::log10_is_bit_stable ... ok
+test compile::terms::tests::cues_are_deterministic_and_longest_first ... ok
+test faces::tavrik::tests::headline_fits_and_stays_honest ... ok
+test faces::oltan::tests::oltan_geometry ... ok
+test faces::fotolay::tests::headline_fits_and_keeps_the_ledger ... ok
+test compile::terms::tests::terms_are_found_in_their_inflected_forms ... ok
+test faces::tests::registry_is_well_formed ... ok
+test faces::vadrel::tests::examples ... ok
+test detmath::tests::log10_matches_std_within_ulps ... ok
+test faces::vadrel::tests::r4_height_is_the_r4_face_height ... ok
+test faces::vadrel::tests::redacted_headline_adds_no_digit ... ok
+test faces::zemre::tests::birth_moves_left_as_the_claim_ages ... ok
+test faces::zemre::tests::heights_fit_the_phone ... ok
+test faces::zemre::tests::window_holds_the_horizon_and_follows_the_age ... ok
+test feeds::elikov::tests::empty_feed_has_no_rows ... ok
+test feeds::elikov::tests::groups ... ok
+test feeds::elikov::tests::ledger_order ... ok
+test feeds::elikov::tests::marks_in_both_languages ... ok
+test faces::fotolay::tests::compiles_with_both_alphabets ... ok
+test feeds::m19::tests::grouped_can_put_a_closed_instrument_above_a_live_one ... ok
+test feeds::m19::tests::grouped_keeps_an_instrument_together_newest_instrument_first ... ok
+test feeds::m19::tests::live_new_puts_live_and_new_first_deterministically ... ok
+test feeds::tests::empty_feed_says_why_in_both_languages ... ok
+test feeds::tests::registry_is_well_formed ... ok
+test feeds::vakiro::tests::calendar_helpers ... ok
+test feeds::vakiro::tests::empty_feed_with_a_last_look_says_nothing_new ... ok
+test glyph::outcome::tests::r3_is_the_alphabet ... ok
+test glyph::outcome::tests::registry_names_are_unique_and_valid ... ok
+test glyph::outcome::tg5::tests::fade_factor_is_fade_without_a_floor ... ok
+test glyph::outcome::tg5::tests::open_phases_are_the_alphabet_and_marks_stay_in_the_box ... ok
+test glyph::outcome::tg5::tests::rounded_square_is_a_closed_loop_of_28_points ... ok
+test glyph::rozet::tests::legend_is_short ... ok
+test glyph::rozet::tests::trig_is_accurate ... ok
+test glyph::siluet::tests::dashes_cover_part_of_line ... ok
+test glyph::siluet::tests::confidence_plate_keeps_the_look_floor ... ok
+test glyph::siluet::tests::name_and_legend ... ok
+test look::tests::ease_is_monotone_and_ends_fixed ... ok
+test look::tests::ornek_meets_the_hard_thresholds ... ok
+test look::tests::oltan_meets_the_hard_thresholds ... ok
+test look::tests::r4_css_matches_the_former_stylesheet ... ok
+test look::tests::text_width_uses_the_advance_table ... ok
+test look::tests::zemre_meets_the_hard_thresholds ... ok
+test open::tests::check_names_round_trip ... ok
+test open::tests::registry ... ok
+test present::depth::card::params_binding::card_glyph_constants_bind_registry ... ok
+test present::depth::params_binding::chart_lookback_binds_registry ... ok
+test present::gesture::tests::drag_right_shows_older_bars ... ok
+test faces::tests::headline_template_applies_in_its_face_scene_only ... ok
+test present::gesture::tests::pinch_anchor_is_the_slot_under_the_finger ... ok
+test present::gesture::tests::ranges_clamp ... ok
+test present::motion::tests::a_failed_glyph_breaks_in_two ... ok
+test present::motion::tests::born_has_nothing_from_before ... ok
+test present::motion::tests::labels_have_no_digits_and_differ ... ok
+test present::motion::tests::progress_follows_the_look ... ok
+test present::motion::tests::registry ... ok
+test present::motion::tests::every_kind_moves_and_keeps_its_element_list ... ok
+test present::motion::tests::text_spots_find_the_changed_value_only ... ok
+test present::motion::tests::stamp_puts_the_label_inside_the_face ... ok
+test present::motion::tests::texts_change_in_turn_without_a_double_image ... ok
+test transitions::nabiz::tests::changes ... ok
+test theme::tests::colours ... ok
+test transitions::nabiz::tests::closing_shrinks ... ok
+test transitions::nabiz::tests::frame_is_a_deepening_cross_fade ... ok
+test transitions::nabiz::tests::overlay_pulse_beat_trail ... ok
+test transitions::nabiz::tests::still_marks_from_the_look ... ok
+test transitions::nabiz::tests::still_marks_keep_contrast ... ok
+test transitions::surek::tests::a_quarter_in_the_pieces_are_on_their_way_and_the_card_is_going ... ok
+test transitions::surek::tests::price_and_evidence_do_not_travel ... ok
+test look::tests::registry_is_well_formed ... ok
+test transitions::surek::tests::same_list_every_frame_and_ends_where_the_new_scene_has_them ... ok
+test transitions::tests::r3_frame_interpolates ... ok
+test transitions::tutamir::tests::frame_rule_and_ends ... ok
+test transitions::tutamir::tests::pin_sits_above_the_point ... ok
+test transitions::zumlak::tests::without_window_is_r3 ... ok
+test transitions::zumlak::tests::camera_ends_and_frame_rule ... ok
+test glyph::outcome::tg5::tests::oltan_signs_keep_3_to_1_at_freshness_zero ... ok
+test glyph::outcome::tg5::tests::zemre_signs_keep_3_to_1_at_freshness_zero ... ok
+test glyph::outcome::tg5::tests::ornek_signs_keep_3_to_1_at_freshness_zero ... ok
+test glyph::outcome::muhrak::tests::open_is_the_alphabet_and_closed_is_inside ... ok
+test faces::vadrel::tests::every_headline_fits_and_names_time_and_validity ... ok
+test glyph::siluet::tests::deterministic ... ok
+test glyph::rozet::tests::deterministic ... ok
+test glyph::rozet::tests::inside_box_and_non_empty ... ok
+test glyph::siluet::tests::inside_box_and_non_empty ... ok
+
+test result: ok. 89 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.70s
+
+     Running tests/capsule_depth.rs (target/main/debug/deps/capsule_depth-93b3149dbebff24b)
+
+running 13 tests
+test story_glyph_equals_the_engine_rule ... ok
+test capsule_card_view_and_scene ... ok
+test ledger_line ... ok
+test chart_view_draws_level_geometry_with_fact_origins ... ok
+test geometry_fields_address_bars ... ok
+test redacted_evidence_draws_no_geometry_and_says_why ... ok
+test outcome_style_is_a_compile_option ... ok
+test glyph_and_segment_errors_are_typed ... ok
+test evidence_layers_for_band_and_points ... ok
+test r2_findings_keep_the_r2_views ... ok
+test looks_are_design_records ... ok
+test licensed_evidence_never_reaches_an_unentitled_reader ... ok
+test nobra_question_cards_over_entitled_and_withheld_evidence ... ok
+
+test result: ok. 13 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.03s
+
+     Running tests/depth.rs (target/main/debug/deps/depth-d6d1054b747d45a8)
+
+running 4 tests
+test chart_view_for_a_fact_on_bars ... ok
+test capsule_view_rule ... ok
+test present_by_profile ... ok
+test chart_view_keeps_the_transcript_16_shape ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s
+
+     Running tests/errors.rs (target/main/debug/deps/errors-5e30fa8fe6327a86)
+
+running 15 tests
+test unknown_panel_lists_panels ... ok
+test unknown_field_of_other_series ... ok
+test unknown_field_lists_fields ... ok
+test unknown_series ... ok
+test stepped_colour_shape ... ok
+test origin_must_match_constant ... ok
+test x_channel_only_on_rules ... ok
+test band_needs_y2 ... ok
+test candle_needs_bars ... ok
+test emphasis_target_must_exist ... ok
+test bad_colour_and_opacity ... ok
+test origin_must_resolve ... ok
+test origin_without_written_constant_supplies_it ... ok
+test constant_without_origin ... ok
+test view_level_errors ... ok
+
+test result: ok. 15 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s
+
+     Running tests/glyph_alphabet.rs (target/main/debug/deps/glyph_alphabet-495ec7853a527cf2)
+
+running 1 test
+test product_alphabet_is_m1_siluet ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.66s
+
+     Running tests/hostile.rs (target/main/debug/deps/hostile-c6bdd83f08641fb3)
+
+running 4 tests
+test nice_step_rejects_hostile_input ... ok
+test extreme_fixed_domains ... ok
+test huge_and_tiny_panel_weights ... ok
+test extreme_and_non_finite_values ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s
+
+     Running tests/lod.rs (target/main/debug/deps/lod-da5e094d60576614)
+
+running 3 tests
+test viewport_in_a_large_series ... ok
+test buckets_aggregate_ohlc_lines_and_bars ... ok
+test lod_can_be_disabled_and_max_points_forces_it ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.03s
+
+     Running tests/open_tesir.rs (target/main/debug/deps/open_tesir-2a2d92b3e5610f23)
+
+running 6 tests
+test the_text_column_says_the_same_without_a_scene ... ok
+test an_unentitled_reader_gets_the_templated_basis_and_no_number ... ok
+test the_reference_is_untouched ... ok
+test trust_row_opens_its_explanation_and_follows_the_device ... ok
+test basis_names_the_threshold_with_its_value ... ok
+test blocks_read_top_to_bottom_in_every_look ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.03s
+
+     Running tests/r0_equivalence.rs (target/main/debug/deps/r0_equivalence-d7fcd9d4c25db981)
+
+running 1 test
+test r0_scene_is_reproduced_exactly ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running tests/roundtrip.rs (target/main/debug/deps/roundtrip-6081f89dcf418617)
+
+running 2 tests
+test hit_box_centres_map_back ... ok
+test lod_items_cover_their_buckets ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.66s
+
+     Running tests/stories_korda.rs (target/main/debug/deps/stories_korda-4e97df57da89c46a)
+
+running 9 tests
+test timing_probe ... ignored, timing probe
+test closed_marks_and_lane_text_keep_their_contrast ... ok
+test range_limits_the_stories_and_english_words ... ok
+test five_stories_have_labels_and_marks_by_shape ... ok
+test every_element_is_named_by_the_point_query ... ok
+test five_fifty_two_hundred_every_story_accounted_for ... ok
+test closed_stories_can_be_hidden ... ok
+test rows_carry_their_time_only_when_asked ... ok
+test no_rows_is_the_plain_chart_and_scenes_are_deterministic ... ok
+
+test result: ok. 8 passed; 0 failed; 1 ignored; 0 measured; 0 filtered out; finished in 0.02s
+
+     Running tests/story_pavka.rs (target/main/debug/deps/story_pavka-87183fa5b7921c10)
+
+running 8 tests
+test extend_timing ... ignored, timing helper
+test registry_and_price_height ... ok
+test shapes_carry_the_outcome_and_closed_marks_keep_contrast ... ok
+test closed_stories_hide_and_the_selected_stays ... ok
+test five_stories ... ok
+test fifty_stories ... ok
+test a_tap_on_another_story_moves_the_focus_and_a_cluster_zooms ... ok
+test two_hundred_stories_cluster_when_zoomed_out ... ok
+
+test result: ok. 7 passed; 0 failed; 1 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running tests/story_pavka_equal.rs (target/main/debug/deps/story_pavka_equal-7b496974df203ccb)
+
+running 1 test
+test extend_draws_byte_for_byte_what_it_drew_before ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 2.82s
+
+     Running tests/views.rs (target/main/debug/deps/views-6c0b421a0c33e389)
+
+running 15 tests
+test v2_bollinger_band ... ok
+test v1_three_panels ... ok
+test title_row_close_legends_and_tag_labels ... ok
+test v3_fan_beyond_last_bar ... ok
+test v5_conditional_and_stepped_colour ... ok
+test line_breaks_at_gaps ... ok
+test log_scale_skips_non_positive_values ... ok
+test v4_log_scale ... ok
+test persistent_range_and_viewport ... ok
+test point_text_and_vertical_rule_from_facts ... ok
+test deprecated_y_list_is_read_as_panels ... ok
+test light_theme_and_override ... ok
+test multi_output_line_and_palette ... ok
+test emphasis_highlight_focus_dim ... ok
+test compile_is_deterministic ... ok
+
+test result: ok. 15 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.06s
+
+     Running unittests src/lib.rs (target/main/debug/deps/qp_host-dab8809779f97b5f)
+
+running 33 tests
+test live_trades::tests::mill_rounding_equals_the_parsed_decimal ... ok
+test live::rest::window_tests::windows_cover_the_range_without_overlap ... ok
+test demo_static::tests::accept_encoding ... ok
+test live_trades::tests::step_table_and_grid ... ok
+test live::trade_keep_tests::trade_endpoint_sanitizes_every_payload_whatever_the_topic ... ok
+test live::tests::iso_times_parse_with_and_without_offset ... ok
+test live_trades::tests::harness_series_round_trip ... ok
+test live::tests::symbols_are_checked ... ok
+test live::tests::reset_needs_a_note_and_a_person ... ok
+test live_trades::tests::trade_bars_follow_the_session_edges ... ok
+test live_trades::tests::date_time_clock_rewrites_and_measures ... ok
+test live_trades::tests::rest_closing_bar_into_the_last_span ... ok
+test livehost::tests::rest_bars_are_aligned_and_closing_session_merged ... ok
+test sim::tests::pace_follows_the_speed_factor_on_a_fake_clock ... ok
+test sim::tests::packed_trades_are_the_trades_packed ... ok
+test livehost::tests::rest_trade_history_windows_filter_and_dedup ... ok
+test live::tests::rest_bars_map_to_k14 ... ok
+test live::tests::identity_lock_is_exclusive ... ok
+test live_trades::tests::compare_trades_runs_on_a_cache ... ok
+test live::tests::compare_runs_and_requires_rest_files ... ok
+test livehost::tests::replica::late_full_replica_matches_on_the_matriks_feed ... ok
+test live::tests::replay_raw_equals_the_live_path ... ok
+test livehost::tests::drop_marks_stale_and_repair_matches_settled_bars ... ok
+test livehost::tests::replica::late_full_replica_has_the_same_series_as_an_early_one ... ok
+test sim::tests::link::reseeded_trade_feed_keeps_watched_symbols_and_trade_link ... ok
+test sim::tests::link::trade_link_drops_repair_from_rest_bit_equal ... ok
+test sim::tests::start_time_takes_the_days_earlier_trades_as_history ... ok
+test sim::tests::several_days_close_then_closed_then_next_open ... ok
+test livehost::tests::local_drop_on_mock_broker_keeps_one_connection_and_repairs ... ok
+test sim::tests::same_input_twice_gives_a_byte_equal_stream_at_any_speed ... ok
+test sim::tests::link::market_and_trade_endpoints_together_on_the_mock_broker ... ok
+test sim::tests::simulation_path_is_the_live_path ... ok
+test livehost::tests::replica::incremental_viewer_equals_from_scratch_on_live_events ... ok
+
+test result: ok. 33 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 10.94s
+
+     Running unittests src/lib.rs (target/main/debug/deps/qp_live-0fe4479ba95195f7)
+
+running 40 tests
+test backoff::tests::stops_after_max_failures ... ok
+test auth::tests::code_is_sanitized ... ok
+test backoff::tests::default_sequence_is_deterministic_and_capped ... ok
+test conn::tests::level2_trade_topics_are_recognised ... ok
+test conn::tests::client_id_is_deterministic_short_and_endpoint_specific ... ok
+test config::tests::endpoint_accepts_bare_host_and_full_url ... ok
+test config::tests::explicit_hardware_id_without_prefix_raises_warning_flag ... ok
+test config::tests::debug_shows_no_secret ... ok
+test config::tests::hardware_id_is_derived_deterministically_with_prefix ... ok
+test config::tests::protocol_and_subprotocol_are_configurable ... ok
+test config::tests::missing_variable_error_names_only_the_variable ... ok
+test auth::tests::reads_exp_without_verifying ... ok
+test config::tests::realtime_needs_the_realtime_host ... ok
+test halt::tests::utc_format ... ok
+test lock::tests::in_process_second_claim_fails_and_is_released_on_drop ... ok
+test halt::tests::only_server_closes_count ... ok
+test halt::tests::window_counts_only_closes_within_ten_minutes ... ok
+test lock::tests::key_is_sanitized ... ok
+test mqtt::tests::connect_wire_bytes_match_mqtt31 ... ok
+test mqtt::tests::all_packets_roundtrip ... ok
+test mqtt::tests::rejects_bad_length ... ok
+test redact::tests::ip_hosts_do_not_register_suffixes ... ok
+test redact::tests::masks_jwt_shapes_without_registration ... ok
+test mqtt::tests::decoder_handles_split_and_joined_input ... ok
+test redact::tests::secret_debug_hides_value ... ok
+test redact::tests::masks_registered_values_case_insensitively ... ok
+test redact::tests::short_values_are_ignored ... ok
+test config::tests::trade_endpoint_shares_the_market_host_with_its_own_key ... ok
+test rest::trade_tests::level2_columns_never_survive ... ok
+test config::tests::invalid_mode_names_variable_not_value ... ok
+test rest::trade_tests::unknown_header_keeps_nothing ... ok
+test topach::tests::deterministic_and_deduplicated ... ok
+test topach::tests::array_of_objects_with_topic_lists ... ok
+test topach::tests::map_keyed_by_data_type_and_mode ... ok
+test conn::tests::reset_requires_a_note ... ok
+test transport::tests::tls_rejects_self_signed_certificate ... ignored
+test topach::tests::unknown_shapes_give_nothing_or_partial ... ok
+test halt::tests::marker_round_trips_and_reset_needs_a_note ... ok
+test lock::tests::worktree_resolves_to_main_tree ... ok
+test lock::tests::machine_lock_reports_holder_pid ... ok
+
+test result: ok. 39 passed; 0 failed; 1 ignored; 0 measured; 0 filtered out; finished in 0.02s
+
+     Running tests/auth_and_redaction.rs (target/main/debug/deps/auth_and_redaction-f97f8979dec34037)
+
+running 4 tests
+test no_secret_reaches_any_log_or_error_text ... ok
+test valid_token_is_reused_and_requests_are_rate_limited ... ok
+test reconnect_storm_does_not_hammer_the_token_service ... ok
+test failures_back_off_exponentially_and_stop ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.75s
+
+     Running tests/live.rs (target/main/debug/deps/live-eab9850005be5cc9)
+
+running 18 tests
+test connack_protocol_refusal_halts ... ok
+test other_server_notice_is_reported_and_does_not_halt ... ok
+test protocol_flavour_is_configurable ... ok
+test second_open_in_same_process_is_refused ... ok
+test subscribes_one_by_one_and_delivers_messages ... ok
+test suback_refusal_is_reported_per_topic_and_not_resubscribed ... ok
+test connack_auth_refusal_refreshes_token_once ... ok
+test dynamic_subscribe_and_unsubscribe ... ok
+test drop_backs_off_reconnects_resubscribes_without_new_token ... ok
+test unexplained_server_closes_further_apart_do_not_halt ... ok
+test connack_auth_refusal_twice_halts ... ok
+test consecutive_failures_halt_with_deterministic_backoff ... ok
+test multiconnect_notice_halts_without_retry_until_reset ... ok
+test two_unexplained_server_closes_within_ten_minutes_halt_until_reset ... ok
+test keepalive_sends_pingreq ... ok
+test token_renewal_closes_old_connection_before_opening_new ... ok
+test default_renewal_keeps_open_connection ... ok
+test local_network_errors_do_not_count_as_server_closes ... ok
+
+test result: ok. 18 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 4.82s
+
+     Running tests/trade_endpoint.rs (target/main/debug/deps/trade_endpoint-87f02bd4254c1e18)
+
+running 1 test
+test trade_and_market_endpoints_run_together_with_own_locks ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.15s
+
+     Running tests/two_process.rs (target/main/debug/deps/two_process-51a7d11bb3f8e376)
+
+running 3 tests
+test child_process_entry ... ok
+test second_process_is_refused_by_machine_lock ... ok
+test new_process_is_refused_by_the_unexplained_close_halt_until_reset ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.16s
+
+     Running unittests src/lib.rs (target/main/debug/deps/qp_matriks-58296565aad91bf6)
+
+running 19 tests
+test status::tests::lookups ... ok
+test fields::tests::generated_table_matches_symbol_proto ... ok
+test topic::tests::parses_known_topics ... ok
+test topic::tests::parses_trade_topics ... ok
+test rawlog::tests::crc32_known_vector ... ok
+test topic::tests::trade_topic_builders_never_make_level2 ... ok
+test status::tests::proto_comment_names_match ... ok
+test fields::tests::field_set_queries ... ok
+test status::tests::table_is_complete_sorted_and_keyed ... ok
+test topic::tests::unknown_shapes_are_other ... ok
+test feed::seen_key_tests::seen_keys_are_one_to_one ... ok
+test trade::rest_csv_tests::parses_rest_rows_with_exchange_time ... ok
+test trade::tests::calendar_constant_is_ten_o_clock ... ok
+test trade::tests::dedup_key_and_exchange_order ... ok
+test trade::tests::decodes_level1_and_never_keeps_buyer_or_seller ... ok
+test trade::tests::special_flag_price_widening_side_and_errors ... ok
+test wire::tests::rejects_truncation_and_groups ... ok
+test wire::tests::scans_all_wire_types ... ok
+test trade::tests::time_unit_is_configurable_and_auto_picks_the_closest ... ok
+
+test result: ok. 19 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/clock_notice.rs (target/main/debug/deps/clock_notice-ff18de2e29b1e19e)
+
+running 6 tests
+test non_messenger_topics_and_bad_payloads ... ok
+test multi_connect_in_both_shapes ... ok
+test market_clock_uses_only_mx ... ok
+test decodes_time_message_units ... ok
+test proto3_defaults_are_not_on_the_wire ... ok
+test other_codes ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/feed.rs (target/main/debug/deps/feed-4a9ad546b387dfcd)
+
+running 12 tests
+test update_date_parses_offsets ... ok
+test update_date_times_ticks_and_moves_the_clock ... ok
+test stale_initial_still_sets_the_volume_base ... ok
+test ask_size_only_update_builds_nothing ... ok
+test connection_loss_and_resubscription ... ok
+test clock_finalizes_bars_with_grace ... ok
+test phases_are_reported_on_change ... ok
+test seed_rules ... ok
+test volume_field_choice_reads_the_chosen_counter ... ok
+test card_daily_falls_back_to_ticks_intraday ... ok
+test seam_with_history_is_continuous_for_bars_and_indicators ... ok
+test sequences_are_gapless_per_feed_and_replay_is_deterministic ... ok
+
+test result: ok. 12 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running tests/presence.rs (target/main/debug/deps/presence-3c7c0784c79383a6)
+
+running 11 tests
+test bad_payload_leaves_state_and_status_unchanged ... ok
+test prost_missing_required_field_decodes ... ok
+test prost_proto2_optional_absent_is_none ... ok
+test merge_policy_keeps_old_fields_on_initial ... ok
+test resubscribe_makes_next_message_initial_and_replaces ... ok
+test event_carries_stock_status_and_phase ... ok
+test sequence_of_updates_accumulates ... ok
+test explicit_zero_overwrites_absent_does_not ... ok
+test unknown_field_numbers_are_reported ... ok
+test symbols_are_independent ... ok
+test update_with_only_bid_changes_only_bid ... ok
+
+test result: ok. 11 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/provenance.rs (target/main/debug/deps/provenance-e4bc9a9e75ff6899)
+
+running 3 tests
+test record_metadata ... ok
+test copy_matches_record ... ok
+test copy_matches_local_source_if_present ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running tests/rawlog.rs (target/main/debug/deps/rawlog-21dcff71c933046e)
+
+running 7 tests
+test empty_log_and_header_errors ... ok
+test writer_rejects_oversized_topic ... ok
+test resume_appends_without_header ... ok
+test flipped_byte_is_corrupt_and_offset_allows_repair ... ok
+test round_trip ... ok
+test replay_is_deterministic ... ok
+test every_truncation_point_is_detected ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.03s
+
+     Running tests/trade_feed.rs (target/main/debug/deps/trade_feed-4cc8912972aaa874)
+
+running 5 tests
+test failed_history_keeps_the_gap_and_duplicates_are_dropped_live ... ok
+test unwatched_symbol_gap_starts_at_local_midnight_and_card_feed_ignores_trades ... ok
+test price_card_gives_phases_but_no_bars_and_special_trades_are_optional ... ok
+test no_initial_state_day_so_far_comes_from_history ... ok
+test lost_trade_connection_is_stale_then_repaired_bit_equal ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s
+
+     Running tests/trade_live.rs (target/main/debug/deps/trade_live-92d42dce94f20525)
+
+running 1 test
+test trade_connector_against_the_mock_broker ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.52s
+
+     Running unittests src/lib.rs (target/main/debug/deps/qp_mcp-f06599cdc7cc93bf)
+
+running 1 test
+test server_tools::tests::base64_matches_rfc4648_vectors ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/human_decision.rs (target/main/debug/deps/human_decision-2e35c3fb72a66c6e)
+
+running 3 tests
+test a_rejection_is_a_human_decision_too_and_leaves_no_trace_in_the_document ... ok
+test the_agent_endpoint_offers_no_decision_tool ... ok
+test an_agent_cannot_decide_its_own_proposal_over_mcp ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.17s
+
+     Running tests/public_comments.rs (target/main/debug/deps/public_comments-3154e0d2c01aef85)
+
+running 1 test
+test an_entitled_agents_comment_never_reaches_a_public_view_reader ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.25s
+
+     Running tests/serve.rs (target/main/debug/deps/serve-3ab0ef290565843c)
+
+running 8 tests
+test input_schema_helper_generates_from_types ... ok
+test call_log_has_one_line_per_tool_call ... ok
+test legacy_clients_get_notifications_message_on_their_stream ... ok
+test registry_has_thin_first_and_it_mirrors_the_generated_tools ... ok
+test modern_clients_get_resource_updates_and_read_the_notifications ... ok
+test render_refuses_a_view_of_unentitled_data ... ok
+test served_endpoint_lists_common_tools_and_the_notifications_resource ... ok
+test render_returns_a_png_image ... ok
+
+test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.15s
+
+     Running tests/surface_mixed.rs (target/main/debug/deps/surface_mixed-bca9b6a43957d53f)
+
+running 5 tests
+test tools_list_offers_the_task_tools_the_escape_and_no_decision ... ok
+test no_decision_is_possible_from_the_mixed_surface ... ok
+test the_three_formats_carry_the_same_numbers ... ok
+test every_tool_answers_on_the_synthetic_replay ... ok
+test an_agent_for_an_unentitled_guest_gets_no_licensed_number_from_any_tool ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.73s
+
+     Running tests/surface_query.rs (target/main/debug/deps/surface_query-fcc4c998a9a66f1e)
+
+running 7 tests
+test tools_list_is_two_tools_plus_common_and_no_decision ... ok
+test reference_by_meaning_and_expand ... ok
+test errors_say_what_was_expected ... ok
+test the_three_formats_carry_the_same_numbers ... ok
+test every_noun_answers_with_ids ... ok
+test an_agent_for_an_unentitled_person_never_gets_a_licensed_number ... ok
+test every_action_and_no_decision ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.32s
+
+     Running tests/surface_task.rs (target/main/debug/deps/surface_task-a9f3036e29c63b7d)
+
+running 5 tests
+test a_decision_cannot_be_proposed_either ... ok
+test the_task_surface_lists_nine_task_tools_and_no_decision_tool ... ok
+test the_three_formats_carry_the_same_numbers ... ok
+test an_unentitled_readers_agent_gets_no_licensed_number ... ok
+test every_tool_answers ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.26s
+
+     Running tests/thin_format.rs (target/main/debug/deps/thin_format-4464b63dd3563cec)
+
+running 2 tests
+test formatted_tools_declare_no_output_schema ... ok
+test card_and_layered_lay_out_the_same_capsule ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.13s
+
+     Running tests/tools.rs (target/main/debug/deps/tools-52238d7bc61532d5)
+
+running 8 tests
+test no_op_field_collides_with_command_fields ... ok
+test grammar_ops_and_hit_are_generated_tools ... ok
+test r4_capsule_fields_in_tools ... ok
+test notifications_reach_the_subscriber_adapter ... ok
+test jsonrpc_lifecycle_and_errors ... ok
+test tool_schemas_accept_the_valid_examples ... ok
+test every_op_and_query_has_a_tool_in_schema_order ... ok
+test conformance_transcripts_pass_over_mcp ... ok
+
+test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 4.06s
+
+     Running unittests src/lib.rs (target/main/debug/deps/qp_render-d0f63790231e62d2)
+
+running 4 tests
+test cpu::tests::div255_is_exact_rounding ... ok
+test bars::tests::rejects_bad_input ... ok
+test cpu::tests::font_loads ... ok
+test output::scale_tests::scaled_render ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.16s
+
+     Running tests/capsule_views.rs (target/main/debug/deps/capsule_views-59b897810e7ef1f0)
+
+running 3 tests
+test sentence_depth_is_the_capsule_sentence ... ok
+test fixtures_are_generated ... ok
+test depth_views_match_goldens_and_explain ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.98s
+
+     Running tests/fonts.rs (target/main/debug/deps/fonts-ec66840c2ba96b66)
+
+running 2 tests
+test font_registry_matches_the_looks ... ok
+test advance_tables_match_the_files ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.06s
+
+     Running tests/glyph_sheet.rs (target/main/debug/deps/glyph_sheet-8b5d16bb9ad2aa6f)
+
+running 4 tests
+test glyph_validity_sheet_light ... ok
+test glyph_validity_sheet_dark ... ok
+test glyph_sheet_light ... ok
+test glyph_sheet_dark ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.37s
+
+     Running tests/golden.rs (target/main/debug/deps/golden-74b41f91f72eb5d6)
+
+running 9 tests
+test sample_fixture_is_well_formed ... ok
+test rejects_bad_sizes_and_text ... ok
+test fill_and_circle_are_drawn ... ok
+test fill_uses_non_zero_winding ... ok
+test only_primitives_are_drawn ... ok
+test golden_sample_png ... ok
+test png_round_trips_to_rgba ... ok
+test renders_are_identical ... ok
+test golden_stress_png ... ok
+
+test result: ok. 9 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.61s
+
+     Running tests/retained.rs (target/main/debug/deps/retained-914e12b149c02241)
+
+running 3 tests
+test scene_fingerprint_flips_on_any_pixel_field ... ok
+test unchanged_frames_report_nothing_and_size_changes_repaint ... ok
+test every_frame_equals_the_reference has been running for over 60 seconds
+test every_frame_equals_the_reference ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 100.59s
+
+     Running unittests src/lib.rs (target/main/debug/deps/qp_schema-8a1fbc3d21023e53)
+
+running 13 tests
+test params::tests::params_resolve_falls_back_to_system_default ... ok
+test market::tests::classes_of_keys ... ok
+test params::tests::params_resolve_order_object_user_plan_system ... ok
+test data::tests::digest_vectors_are_pinned ... ok
+test data::tests::window_rules ... ok
+test params::tests::params_defaults_equal_named_constants ... ok
+test data::tests::digest_is_pinned_and_sensitive ... ok
+test protocol::wire::selector_tests::selectors_reject_unknown_keys ... ok
+test market::tests::json_round_trip_and_defaults ... ok
+test params::tests::params_registry_is_well_formed ... ok
+test data::tests::event_wire_form ... ok
+test protocol::wire::selector_tests::wire_forms_mirror_stored_types ... ok
+test protocol::wire::selector_tests::id_fields_accept_selectors_in_the_schema ... ok
+
+test result: ok. 13 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s
+
+     Running tests/determinism.rs (target/main/debug/deps/determinism-7458bef64d0d3ae5)
+
+running 3 tests
+test json_schemas_has_required_roots_in_stable_order ... ok
+test json_schemas_is_deterministic ... ok
+test export_schemas_is_byte_identical_across_runs ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.34s
+
+     Running tests/params_doc.rs (target/main/debug/deps/params_doc-86ec8966c11f4ace)
+
+running 1 test
+test params_generated_doc_is_current ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/proptest_roundtrip.rs (target/main/debug/deps/proptest_roundtrip-0ed2ee013d2375c4)
+
+running 2 tests
+test bar_roundtrips_exactly ... ok
+test series_roundtrips_and_validates ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 9.50s
+
+     Running tests/r1_types.rs (target/main/debug/deps/r1_types-f91314032c373a6d)
+
+running 8 tests
+test validate_bars_semantics ... ok
+test warmup_points_are_null ... ok
+test bar_fixture_is_a_valid_series ... ok
+test document_display_tz_and_instrument ... ok
+test validate_rejects_unknown_type ... ok
+test study_output_roundtrips_and_validates ... ok
+test calendar_roundtrips_and_validates ... ok
+test bar_fixture_with_wrong_shape_is_rejected ... ok
+
+test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.14s
+
+     Running tests/roundtrip.rs (target/main/debug/deps/roundtrip-1a794005d18b5c80)
+
+running 6 tests
+test every_capsule_state_roundtrips ... ok
+test unknown_fields_are_rejected ... ok
+test capsule_fixture_roundtrips ... ok
+test command_roundtrips ... ok
+test capsule_fixture_matches_document_capsule ... ok
+test document_fixture_roundtrips ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/strict_unit_variants.rs (target/main/debug/deps/strict_unit_variants-c99ac70e8c7f758a)
+
+running 2 tests
+test describe_query_rejects_unknown_fields ... ok
+test inline_source_rejects_unknown_fields ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/validation.rs (target/main/debug/deps/validation-600bc8f3cd39d5e4)
+
+running 5 tests
+test committed_capsule_fixture_is_valid ... ok
+test serialized_command_is_valid ... ok
+test committed_document_fixture_is_valid ... ok
+test schema_rejects_bad_documents ... ok
+test document_parts_are_valid_against_their_root_schemas ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.35s
+
+     Running unittests src/lib.rs (target/main/debug/deps/qp_session-868078d5977efa9f)
+
+running 12 tests
+test capsule::dispute::params_binding::dispute_limits_bind_registry ... ok
+test capsule::watch::params_binding::max_watches_binds_registry ... ok
+test read::interact::params_binding::story_zoom_min_binds_registry ... ok
+test read::explain::tests::dates ... ok
+test authority::suggest::tests::distance ... ok
+test authority::suggest::tests::suggestions_sorted_and_capped ... ok
+test host::replayhost::recorded::recorded_tests::recorded_events_come_back_bit_for_bit ... ok
+test replica::viewer::tests::first_facts_lookup_equals_the_eager_map ... ok
+test host::conform::tests::run_step_fields_match_the_schema_step ... ok
+test ops::summary::tests::fast_hints_equal_the_resolvers ... ok
+test capsule::headparts::tests::reader_parts_by_language_and_audience ... ok
+test capsule::capidx::items::item_memo_tests::incremental_items_equal_from_scratch ... ok
+
+test result: ok. 12 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 17.65s
+
+     Running tests/agent_comment_readback.rs (target/main/debug/deps/agent_comment_readback-1b8ef7eb4e93f87d)
+
+running 1 test
+test the_writer_and_its_person_read_the_comment_back ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.75s
+
+     Running tests/agent_comments.rs (target/main/debug/deps/agent_comments-362bd8885774fbd9)
+
+running 12 tests
+test a_reader_without_the_permission_never_reaches_the_validator ... ok
+test a_preview_draws_only_what_the_asker_may_read ... ok
+test a_hidden_id_reads_like_a_missing_one_for_a_restricted_writer ... ok
+test the_writer_finds_its_comment_by_list_and_get ... ok
+test a_restricted_reader_gets_no_comment_on_what_it_sees_redacted ... ok
+test a_comment_that_rests_on_its_evidence_is_stored_with_provenance ... ok
+test a_time_form_is_no_licence_oracle ... ok
+test a_disguised_number_reaches_the_unentitled_reader_on_no_path ... ok
+test a_reader_receives_only_the_comments_it_may_see ... ok
+test bad_comments_are_rejected_with_machine_readable_reasons ... ok
+test an_agent_for_an_unentitled_person_cannot_carry_a_licensed_number ... ok
+test a_licensed_number_does_not_hide_in_a_time_a_date_or_words ... ok
+
+test result: ok. 12 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.32s
+
+     Running tests/agent_policy.rs (target/main/debug/deps/agent_policy-60eb1ae7bc5bde97)
+
+running 14 tests
+test an_unknown_agent_policy_is_refused ... ok
+test an_accepted_finding_proposal_is_authored_by_the_agent_and_approved_by_the_human ... ok
+test an_owner_agent_cannot_decide_anything ... ok
+test an_agent_cannot_decide_its_own_proposal_in_any_mode ... ok
+test a_human_on_an_unmarked_connection_accepts_and_provenance_is_kept ... ok
+test a_watch_ends_with_remove_watch_not_set_intent_active ... ok
+test every_denied_op_is_refused_on_the_wire_in_every_mode ... ok
+test rejected_and_pending_proposals_stay_out_of_the_document ... ok
+test a_marked_connection_cannot_decide_even_with_a_human_identity ... ok
+test without_the_policy_only_marked_connections_follow_the_write_rule ... ok
+test errors_before_r5b_carry_no_reason ... ok
+test under_the_r5b_policy_an_agent_writes_no_engine_items_directly_or_as_a_proposal ... ok
+test a_pending_proposal_is_previewed_without_changing_the_document ... ok
+test the_agent_allow_list_covers_every_op_of_the_schema ... ok
+
+test result: ok. 14 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.08s
+
+     Running tests/agent_reader.rs (target/main/debug/deps/agent_reader-0891c8f168f56c86)
+
+running 5 tests
+test an_unknown_row_is_read_as_a_row_fail_closed ... ok
+test an_agent_with_its_own_wide_row_still_reads_as_its_person ... ok
+test on_behalf_must_name_a_human_who_works_for_nobody ... ok
+test an_agent_for_an_unentitled_person_gets_the_persons_bytes ... ok
+test an_agent_reads_with_its_persons_audience ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.21s
+
+     Running tests/agent_watch.rs (target/main/debug/deps/agent_watch-0bfb8980b93638c6)
+
+running 5 tests
+test a_watch_makes_stories_relevant_to_its_person_only ... ok
+test another_persons_watch_id_reads_like_a_missing_id_on_every_path ... ok
+test removal_and_the_limit_per_person ... ok
+test lifecycle_matched_expired_and_events_to_the_person_only ... ok
+test matching_is_deterministic_byte_for_byte ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.23s
+
+     Running tests/capsule_k42.rs (target/main/debug/deps/capsule_k42-7d1c40ac72e0cee5)
+
+running 4 tests
+test ledger_rows_carry_the_direction ... ok
+test only_negative_transitions_override_the_level ... ok
+test closed_sentences_say_how_the_story_ended ... ok
+test headline_and_glyph_agree_in_both_languages ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.76s
+
+     Running tests/capsule_perf_equality.rs (target/main/debug/deps/capsule_perf_equality-8986f41fbcdd38bb)
+
+running 2 tests
+test inline_unchanged ... ok
+test bound_with_flow_and_readers_unchanged ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.65s
+
+     Running tests/capsules.rs (target/main/debug/deps/capsules-eceff4ccbb4d02a2)
+
+running 8 tests
+test k26_ended_state_past_tense_tr_and_en ... ok
+test a_candidate_that_disappears_leaves_no_trace ... ok
+test a_persons_audience_reaches_nobody_else ... ok
+test the_engine_never_changes_the_audience ... ok
+test show_finding_on_a_bound_series_and_verify_evidence_by_selector ... ok
+test host_trust_keys_take_effect_and_are_refused_late ... ok
+test replaying_the_log_reproduces_the_capsule_history ... ok
+test entitlement_sweep_no_licensed_value_reaches_an_unentitled_reader ... ok
+
+test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 2.07s
+
+     Running tests/claims.rs (target/main/debug/deps/claims-7be84b62ff924c29)
+
+running 2 tests
+test historical_evidence_is_gated_by_its_recorded_feeds ... ok
+test evidence_values_never_reach_an_unentitled_principal ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s
+
+     Running tests/concurrency.rs (target/main/debug/deps/concurrency-3e1565d85d6c605b)
+
+running 1 test
+test eighteen_concurrent_writes_by_id ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.36s
+
+     Running tests/data_plane.rs (target/main/debug/deps/data_plane-398b341739123606)
+
+running 6 tests
+test reading_never_leaks_bound_bars ... ok
+test bound_series_validation ... ok
+test data_events_gap_stale_reject_and_refresh ... ok
+test load_anchors_once_and_replays ... ok
+test bound_series_limit ... ok
+test channel_references_to_a_bound_series_are_gated ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.08s
+
+     Running tests/dispute.rs (target/main/debug/deps/dispute-eb365deb8d140bec)
+
+running 8 tests
+test an_unentitled_dispute_learns_nothing ... ok
+test settled_bars_assert_a_claim_the_feed_missed ... ok
+test hygiene_withdraws_a_wrong_final_claim_and_retracts_its_capsule ... ok
+test disputes_are_bounded_per_claim_and_digests_checked ... ok
+test a_dispute_waits_for_the_host_settled_answer ... ok
+test the_replica_disputes_once_and_the_claim_falls ... ok
+test a_settled_but_open_bar_that_disagrees_asks_for_a_refetch ... ok
+test a_resync_that_corrects_closed_bars_asserts_the_claims_it_makes ... ok
+
+test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.03s
+
+     Running tests/engine_rp4.rs (target/main/debug/deps/engine_rp4-3d796b654aa5fdc4)
+
+running 3 tests
+test unknown_record_is_refused ... ok
+test rp4_on_daily_bars_keeps_the_stories ... ok
+test absent_and_r3_are_the_same ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.50s
+
+     Running tests/feed_m19.rs (target/main/debug/deps/feed_m19-af66af9ebc6b0e11)
+
+running 6 tests
+test no_rule_hides_a_face_that_says_few_cases ... ok
+test an_unknown_rule_is_refused_with_the_names ... ok
+test few_cases_are_never_hidden_and_the_feed_agrees_with_the_list ... ok
+test hidden_stories_keep_counting_in_the_ledger ... ok
+test the_k42_exemption_is_a_parameter ... ok
+test a_past_decision_does_not_change_when_time_moves_on ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.49s
+
+     Running tests/grammar.rs (target/main/debug/deps/grammar-e139b765f70eb636)
+
+running 22 tests
+test a_document_with_an_untraceable_constant_does_not_load ... ok
+test a_layer_cannot_create_panels_from_large_numbers ... ok
+test panel_and_scale_errors ... ok
+test presenter_view_is_canonical_with_origin_and_emphasis ... ok
+test layer_validation_errors ... ok
+test conflicts_are_per_layer_and_per_panel_structure ... ok
+test no_origin_names_the_layer_and_offers_candidates ... ok
+test describe_lists_thresholds ... ok
+test emphasis_blocks_deleting_its_target ... ok
+test put_view_is_made_canonical ... ok
+test origins_bind_and_write_constants ... ok
+test an_emphasis_target_never_dangles ... ok
+test panel_and_layer_limits ... ok
+test delete_layer_by_id_with_undo_and_redo ... ok
+test welcome_summary_only_for_readers ... ok
+test unknown_channel_is_a_schema_error_with_suggestion ... ok
+test undo_follows_layer_ids_after_other_layers_moved ... ok
+test thyao_loads_in_canonical_form ... ok
+test insert_layer_by_id_with_undo_and_redo ... ok
+test welcome_summary_of_thyao ... ok
+test move_layer_and_set_encoding ... ok
+test panels_by_id_with_undo_and_redo ... ok
+
+test result: ok. 22 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.07s
+
+     Running tests/interaction.rs (target/main/debug/deps/interaction-b9e43fa801b4546d)
+
+running 5 tests
+test frame_size_is_validated_and_remembered ... ok
+test pure_range_rules_match_the_bar_space_gestures ... ok
+test opening_rules_and_shared_elements ... ok
+test drag_and_pinch_equal_pan_and_zoom ... ok
+test a_thousand_inputs_leave_log_and_document_untouched ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.31s
+
+     Running tests/live.rs (target/main/debug/deps/live-1818e3c667367405)
+
+running 3 tests
+test a_tick_wakes_only_affected_views_and_watchers ... ok
+test incremental_equals_from_scratch_inline ... ok
+test incremental_equals_from_scratch_bound ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 4.10s
+
+     Running tests/market.rs (target/main/debug/deps/market-49542d173c7d2ce0)
+
+running 6 tests
+test phases_speak_only_for_their_instrument ... ok
+test closed_market_is_said_in_the_viewer_feed_verify_11 ... ok
+test continuous_fresh_status_changes_no_capsule ... ok
+test unentitled_reader_gets_no_phases ... ok
+test stale_data_is_not_shown_as_live ... ok
+test status_survives_a_backward_seek ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.15s
+
+     Running tests/non_interference.rs (target/main/debug/deps/non_interference-ef971db3e3b3ac62)
+
+running 5 tests
+test a_retraction_and_an_entitled_persons_commands_do_not_interfere_either ... ok
+test proposals_undo_intents_and_disputes_do_not_interfere ... ok
+test licensed_flow_does_not_interfere_with_unentitled_readers ... ok
+test voiced_readers_are_not_interfered_with_either ... ok
+test no_oracle_through_commands_proposals_disputes_or_invalidations ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 3.94s
+
+     Running tests/open_design.rs (target/main/debug/deps/open_design-014be01b10f64fcd)
+
+running 2 tests
+test style_open_is_validated_and_remembered ... ok
+test the_column_is_one_scene_on_both_sides_and_its_trust_block_explains ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.17s
+
+     Running tests/open_nobra.rs (target/main/debug/deps/open_nobra-d03cbc81ad4b3da0)
+
+running 5 tests
+test style_open_is_validated_and_remembered ... ok
+test under_r4_the_capsule_depth_is_todays_card ... ok
+test the_device_check_is_written_in_the_same_box ... ok
+test question_cards_answer_and_open_on_touch ... ok
+test a_withheld_reader_is_told_why_and_sees_no_digit_in_the_questions ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.48s
+
+     Running tests/ops.rs (target/main/debug/deps/ops-a7c5da0cec27a16a)
+
+running 13 tests
+test set_view_range_sets_domain ... ok
+test log_entries_carry_request_inverse_and_summary ... ok
+test set_params_merges_and_validates ... ok
+test all_or_nothing_and_ids_counted_per_entry ... ok
+test add_study_new_panel_adds_a_panel ... ok
+test remove_cascade_and_in_use ... ok
+test views_and_layers ... ok
+test intents_and_narratives ... ok
+test facts_findings_capsules_ledger ... ok
+test put_series_inline_and_study_and_unsupported ... ok
+test feed_appends_and_updates_bars ... ok
+test show_finding_assigns_view_id_and_attaches_capsule ... ok
+test put_series_inline_points ... ok
+
+test result: ok. 13 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.09s
+
+     Running tests/presenter.rs (target/main/debug/deps/presenter-615601cb456eb273)
+
+running 4 tests
+test presenter_timing ... ignored, timing; run in release with --ignored --nocapture
+test show_finding_stores_the_grammar_chart_view ... ok
+test three_surfaces_three_depths ... ok
+test presenter_is_deterministic_1000_times_per_depth ... ok
+
+test result: ok. 3 passed; 0 failed; 1 ignored; 0 measured; 0 filtered out; finished in 0.43s
+
+     Running tests/protocol.rs (target/main/debug/deps/protocol-165a9ec8ef634de0)
+
+running 11 tests
+test frames ... ok
+test boundary_errors ... ok
+test base_conflicts_ignore_undone_entries ... ok
+test handshake_and_limits ... ok
+test delete_then_undo_is_byte_identical ... ok
+test undo_rules ... ok
+test notification_order_and_intents ... ok
+test roles ... ok
+test undo_authorization ... ok
+test proposals_lifecycle_and_failed_accept_stays_pending ... ok
+test identical_inputs_give_identical_outputs ... ok
+
+test result: ok. 11 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.04s
+
+     Running tests/queries.rs (target/main/debug/deps/queries-bf04300e4874ee9c)
+
+running 7 tests
+test study_cache_follows_parameter_changes ... ok
+test attention_directives_keep_the_last_sixteen ... ok
+test present_depths_and_defaults ... ok
+test study_values_and_reductions ... ok
+test get_list_document_log ... ok
+test describe_lists_everything ... ok
+test presence_input_and_screen ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.04s
+
+     Running tests/reading.rs (target/main/debug/deps/reading-ca511b2ae8121ac1)
+
+running 6 tests
+test screen_reports_panels_scales_and_layers_from_the_scene ... ok
+test screen_follows_the_viewport_and_the_surface ... ok
+test hit_examples_item_and_empty ... ok
+test hit_far_from_data_is_empty ... ok
+test round_trip_data_pixel_data_through_hit ... ok
+test hit_property_values_equal_data_and_empty_areas_have_no_item ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.67s
+
+     Running tests/replay.rs (target/main/debug/deps/replay-028e7c0e46d1afed)
+
+running 8 tests
+test probe_host_alone_30 ... ignored, timing probe
+test a_bare_authority_answers_unsupported ... ok
+test local_without_data_says_synthetic ... ok
+test pump_steps_follow_speed_not_wall_jitter ... ok
+test permissions_and_errors ... ok
+test seek_by_date_and_time ... ok
+test backward_seek_rebuilds_the_same_authority_state ... ok
+test two_runs_are_byte_identical_and_without_host_notices ... ok
+
+test result: ok. 7 passed; 0 failed; 1 ignored; 0 measured; 0 filtered out; finished in 0.15s
+
+     Running tests/replay_replica.rs (target/main/debug/deps/replay_replica-01785130ec8b1116)
+
+running 1 test
+test authority_and_replica_on_a_30_instrument_replay ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 15.04s
+
+     Running tests/replay_window.rs (target/main/debug/deps/replay_window-df570b02e00e1a6e)
+
+running 2 tests
+test window_without_from_changes_nothing ... ok
+test window_bounds_the_history_before_from_and_keeps_the_replay ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.04s
+
+     Running tests/replica.rs (target/main/debug/deps/replica-a8eaeed0b455c4eb)
+
+running 5 tests
+test unentitled_replica_shows_only_pending ... ok
+test in_step_replica_has_the_authoritys_digests_after_every_step ... ok
+test tape_is_deterministic ... ok
+test viewer_open_instrument_shows_no_wrong_or_early_claim ... ok
+test lagging_replica_shows_no_wrong_or_early_claim ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 7.82s
+
+     Running tests/rows_time.rs (target/main/debug/deps/rows_time-037f20ad54ca6a71)
+
+running 4 tests
+test a_redacted_reader_gets_no_stamp ... ok
+test intraday_today_is_a_clock_time ... ok
+test without_clock_nothing_changes ... ok
+test clock_puts_the_stamp_before_the_headline ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.25s
+
+     Running tests/selector_copies.rs (target/main/debug/deps/selector_copies-1f9a7a7f17d61183)
+
+running 3 tests
+test selector_command_timing_10k_bars ... ignored, timing; run in release with --ignored --nocapture
+test a_failing_earlier_op_changes_nothing_and_is_reported ... ok
+test selector_commands_equal_their_id_form ... ok
+
+test result: ok. 2 passed; 0 failed; 1 ignored; 0 measured; 0 filtered out; finished in 0.07s
+
+     Running tests/selectors.rs (target/main/debug/deps/selectors-82962408ca210ce1)
+
+running 11 tests
+test a_feed_cannot_use_selectors ... ok
+test output_matches_only_a_layer_drawing_it_alone ... ok
+test not_found_and_schema_errors_explain_themselves ... ok
+test ambiguous_lists_ranked_candidates_and_first_latest_pick ... ok
+test subscribe_and_attend_resolve_too ... ok
+test a_selector_may_name_what_an_earlier_op_created ... ok
+test screen_lists_panels_in_stack_order ... ok
+test the_log_and_proposals_hold_ids_only ... ok
+test welcome_hints_resolve_to_their_items ... ok
+test split_then_style_the_upper_band_in_one_command ... ok
+test r_tasks ... ok
+
+test result: ok. 11 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.14s
+
+     Running tests/stories.rs (target/main/debug/deps/stories-5dfecf4660f46f44)
+
+running 3 tests
+test coin_flip_rule_marks_hides_below_all_and_keeps_the_ledger ... ok
+test unentitled_bytes_hold_no_licensed_story_value_or_digit ... ok
+test licensed_flow_does_not_interfere_with_the_story_list ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 2.13s
+
+     Running tests/t4_fixes.rs (target/main/debug/deps/t4_fixes-bf2f505c025b0661)
+
+running 11 tests
+test o3_inline_study_checked_too ... ok
+test y1_condition_subscription_and_intent_refused ... ok
+test o1_gap_is_reported_to_the_host ... ok
+test y2_anchor_stamp_cannot_be_undone ... ok
+test d2_value_origin_of_a_bound_fact ... ok
+test o3_evidence_values_are_the_engines ... ok
+test o2_own_put_series_undoes_through_its_anchor ... ok
+test y1_rebinding_does_not_open_an_oracle ... ok
+test y1_binary_search_learns_nothing ... ok
+test d4_selector_command_on_a_bound_document ... ok
+test y1_notifications_are_gated_per_subscriber ... ok
+
+test result: ok. 11 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.04s
+
+     Running tests/t5_fixes.rs (target/main/debug/deps/t5_fixes-f4a5baa7ef79f6c9)
+
+running 4 tests
+test unentitled_writer_cannot_repoint_a_condition ... ok
+test o1_capsule_made_live_again_is_evaluated_at_once ... ok
+test binding_written_by_unentitled_principal_is_not_evaluated ... ok
+test rewritten_invalidation_is_evaluated_under_its_writer ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.08s
+
+     Running tests/transcripts.rs (target/main/debug/deps/transcripts-299effeea6bd3c07)
+
+running 4 tests
+test subset_matching_rules ... ok
+test a_wrong_transcript_fails_with_a_precise_message ... ok
+test own_transcripts_pass_inproc ... ok
+test official_transcripts_pass_inproc ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 2.49s
+
+     Running tests/viewport_clamp.rs (target/main/debug/deps/viewport_clamp-191e3185357d6f21)
+
+running 1 test
+test pan_and_zoom_after_series_shrinks_do_not_underflow ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.03s
+
+     Running tests/voice.rs (target/main/debug/deps/voice-cee3d4f362125680)
+
+running 4 tests
+test style_voice_is_validated_and_remembered ... ok
+test glossary_terms_are_marked_and_a_tap_opens_the_explanation ... ok
+test under_r4_scenes_carry_no_terms ... ok
+test every_listed_capsule_speaks_in_the_chosen_voice ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.33s
+
+     Running unittests src/lib.rs (target/main/debug/deps/qp_shellcore-d8f0785e612b9204)
+
+running 24 tests
+test shell::freq::tests::rates_need_enough_data_frames ... ok
+test shell::freq::tests::the_probe_verdict ... ok
+test shell::look::font_tests::semibold_is_registered_under_the_body_family ... ok
+test shell::freq::tests::the_rate_row_is_honest ... ok
+test shell::paint_canvas::tests::config_parses ... ok
+test gallery::tests::notes_are_one_short_line ... ok
+test shell::paint_canvas::tests::text_size_outside_the_reference_range_paints_nothing ... ok
+test gallery::tests::pick_parameter_and_share_link ... ok
+test shell::paint_canvas::tests::styles_are_emitted_once_and_paths_batched ... ok
+test gallery::tests::candidates_follow_the_registry_and_finalists ... ok
+test shell::paint_gpu::tests::clip_space_maps_the_corners ... ok
+test shell::paint_gpu::tests::convexity ... ok
+test shell::paint_gpu::tests::miter_and_bevel_follow_the_limit ... ok
+test shell::paint_gpu::tests::plain_runs_merge_and_stencil_breaks_them ... ok
+test shell::paint_gpu::tests::thin_strokes_scale_the_alpha ... ok
+test gallery::tests::summary_is_deterministic_and_complete ... ok
+test shell::paint_gpu::tests::translucent_strokes_are_covered_once ... ok
+test shell::freq::tests::the_probe_is_deterministic ... ok
+test shell::paint_canvas::tests::glyphs_sit_at_the_reference_pens ... ok
+test shell::paint_gpu::tests::text_matches_the_reference_placement ... ok
+test shell::paint_canvas::tests::atlas_glyphs_are_the_reference_coverage_and_uploaded_first ... ok
+test shell::paint_canvas::tests::a_small_change_repaints_a_clipped_region_only ... ok
+test shell::paint_gpu::tests::a_full_atlas_starts_over ... ok
+test gallery::tests::build_shows_the_same_content_per_topic ... ok
+
+test result: ok. 24 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 19.23s
+
+     Running unittests src/lib.rs (target/main/debug/deps/qp_source-ab55b2b5226c2771)
+
+running 6 tests
+test synthetic::tests::synthetic_is_valid_and_stable ... ok
+test replay::tests::date_start_is_istanbul_midnight ... ok
+test replay::tests::local_data_absent_is_empty ... ok
+test replay::tests::rejects_a_replay_without_history ... ok
+test replay::tests::merge_order_and_seek_are_deterministic ... ok
+test replay::tests::events_rebuild_the_bars_bit_for_bit ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running tests/data_plane.rs (target/main/debug/deps/data_plane-4580f140670890b4)
+
+running 27 tests
+test anchored_window_resolution ... ok
+test bind_enforces_the_window_on_provider_answers ... ok
+test duplicates_are_ignored ... ok
+test id_and_binding_rules ... ok
+test gap_turns_a_bound_store_stale ... ok
+test initial_bars_are_checked ... ok
+test interval_rules_match_qp_calendar ... ok
+test incremental_store_uses_the_schema_digest_step ... ok
+test entitlement_forms ... ok
+test converter_from_bar_events ... ok
+test gap_marks_stale_until_reset ... ok
+test bind_with_anchor_keeps_bar_0_or_goes_stale_at_the_limit ... ok
+test invalid_events_are_rejected_without_side_effects ... ok
+test live_growth_cap_makes_the_binding_stale ... ok
+test negative_zero_digests_like_zero ... ok
+test new_bar_live_update_and_correction_report_indices ... ok
+test memory_provider_from_init ... ok
+test provider_takes_events_and_bind_applies_window_and_cap ... ok
+test patches_carry_only_changed_fields ... ok
+test corrections_replayed_from_their_bar_equal_batch ... ok
+test stream_can_start_after_initial_bars_and_is_deterministic ... ok
+test window_bounds_turn_outside_events_into_no_ops ... ok
+test window_resolution_rules ... ok
+test init_feed_rules_and_path_confinement ... ok
+test field_level_stream_yields_the_whole_bar_path_bit_for_bit ... ok
+test streaming_studies_from_field_level_events_equal_batch ... ok
+test incremental_digest_equals_from_scratch_under_random_operations ... ok
+
+test result: ok. 27 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.50s
+
+     Running tests/livebar.rs (target/main/debug/deps/livebar-8285185a9a215392)
+
+running 17 tests
+test compare_bars_counts_matches_and_extreme_differences ... ok
+test counter_regression_adds_no_negative_volume_and_is_counted ... ok
+test closing_session_extends_the_last_bar_and_close_until_finalizes_after_it ... ok
+test late_ticks_are_not_written_and_are_counted ... ok
+test card_daily_takes_the_day_fields_ticks_does_not ... ok
+test card_daily_is_only_for_1d ... ok
+test mid_session_snapshot_is_the_volume_base ... ok
+test mixed_reflects_new_day_extremes_into_the_intraday_bar ... ok
+test no_empty_patch_and_first_seq_is_honoured ... ok
+test off_session_ticks_build_nothing_and_are_counted ... ok
+test quantity_unit_reads_the_quantity_counter ... ok
+test resume_rejects_misaligned_bars_and_late_calls ... ok
+test seam_bar_is_continued_with_patches_not_a_new_bar ... ok
+test volume_is_the_counter_increase_and_restarts_each_day ... ok
+test ticks_align_to_the_xist_calendar ... ok
+test same_ticks_give_byte_equal_events ... ok
+test history_plus_live_equals_live_from_the_start ... ok
+
+test result: ok. 17 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.20s
+
+     Running tests/livebar_trades.rs (target/main/debug/deps/livebar_trades-cc9dd480626f07b0)
+
+running 8 tests
+test seam_bar_is_continued_by_trades ... ok
+test trades_late_off_session_missing_quantity_and_bad_price ... ok
+test trades_build_calendar_aligned_bars_with_auctions_in_first_and_last ... ok
+test day_only_special_trades_add_volume_but_never_price ... ok
+test card_ticks_build_nothing_under_trades_and_trades_nothing_under_cards ... ok
+test special_trades_join_the_day_bar_only_by_default ... ok
+test same_trades_give_byte_equal_events ... ok
+test special_trades_join_only_when_included_and_quantity_unit ... ok
+
+test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/regimes.rs (target/main/debug/deps/regimes-bb40290ba7353672)
+
+running 10 tests
+test synthetic_calendar_is_the_frozen_r1_sample ... ok
+test regime_bars_follow_the_given_schedule ... ok
+test local_reader_reads_sorted_and_tolerates_junk ... ok
+test regimes_actually_differ ... ok
+test flow_is_deterministic_and_consistent ... ok
+test schedule_covers_all_days_and_switches ... ok
+test bars_are_aligned_to_the_xist_calendar ... ok
+test market_is_deterministic_bit_for_bit ... ok
+test classic_events_occur ... ok
+test large_market_is_fast_enough ... ok
+
+test result: ok. 10 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.09s
+
+     Running tests/sources.rs (target/main/debug/deps/sources-ad31705cbf7eccba)
+
+running 7 tests
+test symlink_escape_is_rejected ... ok
+test file_source_reads_a_document_series ... ok
+test ordering_rules_and_bindings ... ok
+test synthetic_generator_reproduces_the_sample_fixture ... ok
+test live_stream_drives_a_study_to_batch_bits ... ok
+test file_bindings_cannot_escape_the_base_dir ... ok
+test ticked_synthetic_source_converges_to_the_final_bars ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.03s
+
+     Running unittests src/lib.rs (target/main/debug/deps/qp_wasm-df70e01f32403617)
+
+running 1 test
+test bind::render::tests::render_png_matches_golden ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.18s
+
+     Running tests/agent_trace_r5b.rs (target/main/debug/deps/agent_trace_r5b-43bb2a0b0cda4d47)
+
+running 8 tests
+test an_operation_line_carries_its_arguments ... ok
+test a_crafted_string_cannot_spoof_an_argument ... ok
+test a_long_argument_is_shown_in_full ... ok
+test reject_sends_reject_proposal ... ok
+test a_pending_proposal_is_listed_and_the_readers_accept_applies_it ... ok
+test the_agents_reason_is_labelled_and_never_the_description ... ok
+test an_opened_capsule_shows_the_agent_comment_with_its_label_and_origin ... ok
+test the_comment_label_follows_the_reader_language ... ok
+
+test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.30s
+
+     Running tests/feed_m19.rs (target/main/debug/deps/feed_m19-3bac2f125a35644b)
+
+running 4 tests
+test the_presentation_host_has_the_m19_rule_and_the_choices_list_it ... ok
+test an_empty_feed_says_so_and_why ... ok
+test the_presentation_opens_live_and_new_first ... ok
+test feed_order_is_a_presentation_setting ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.55s
+
+     Running tests/freq_m14.rs (target/main/debug/deps/freq_m14-140d75a2b38c687f)
+
+running 6 tests
+test the_summary_states_the_pages_mode ... ok
+test the_welcome_marks_connected_at_the_frames_arrival ... ok
+test a_frame_without_data_events_raises_nothing_to_paint ... ok
+test frames_within_one_display_frame_cost_one_paint_pass ... ok
+test the_pass_paints_the_faces_on_screen_and_none_behind_the_open_layer ... ok
+test the_per_data_frame_rates_count_only_data_passes_and_need_enough_frames ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.30s
+
+     Running tests/k42_feed.rs (target/main/debug/deps/k42_feed-5bc6012c864e07c3)
+
+running 3 tests
+test shell_feed_rows_show_it_in_every_layout ... ok
+test feed_without_a_current_negative_transition_is_unchanged ... ok
+test current_negative_transition_of_a_position_is_in_the_feed ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 15.05s
+
+     Running tests/market_r6.rs (target/main/debug/deps/market_r6-d4e4a5dd473d28be)
+
+running 4 tests
+test without_status_nothing_changes ... ok
+test market_frame_and_stale_data ... ok
+test closed_market_from_the_authority_says_session_closed ... ok
+test closing_auction_is_not_closed ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.70s
+
+     Running tests/mem_t4.rs (target/main/debug/deps/mem_t4-d0664b8f798adedf)
+
+running 2 tests
+test the_sent_record_keeps_a_short_session_whole_and_a_long_one_bounded ... ok
+test typed_frames_give_the_same_page_as_the_json_tree_path ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 6.13s
+
+     Running tests/metrics_d.rs (target/main/debug/deps/metrics_d-4079c17544f993a6)
+
+running 2 tests
+test device_memory_and_reset ... ok
+test frame_summaries_carry_p99_and_long_frame_shares ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.26s
+
+     Running tests/metrics_t2.rs (target/main/debug/deps/metrics_t2-6d18bfad347f6c12)
+
+running 11 tests
+test the_paint_path_is_in_the_summary ... ok
+test the_comparison_runs_every_path_and_ends_with_one_summary ... ok
+test a_120hz_display_is_detected_and_its_budget_used ... ok
+test genuine_dropped_frames_are_counted ... ok
+test a_60hz_integer_rounded_series_has_no_long_frames ... ok
+test a_removed_paint_path_is_reported ... ok
+test the_comparison_survives_a_new_core ... ok
+test paint_lists_follow_the_scene_and_its_short_circuit ... ok
+test zoom_and_scale_warnings ... ok
+test the_opening_timeline_survives_a_later_start_frame ... ok
+test the_comparison_selects_and_reverses_paths ... ok
+
+test result: ok. 11 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.72s
+
+     Running tests/motion_m21.rs (target/main/debug/deps/motion_m21-96dac91a1698e20a)
+
+running 3 tests
+test reduced_motion_opens_at_once ... ok
+test todays_motion_marks_nothing ... ok
+test reduced_motion_carries_the_same_facts_as_motion ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 2.08s
+
+     Running tests/motion_nabiz.rs (target/main/debug/deps/motion_nabiz-7f23f33f877cee5d)
+
+running 4 tests
+test the_choices_list_the_motion_designs_and_the_default_changes_nothing ... ok
+test nabiz_selects_its_transition_and_adds_only_still_marks ... ok
+test reduce_motion_loses_no_fact_and_paints_no_overlay ... ok
+test the_marks_find_room_in_every_look ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 4.43s
+
+     Running tests/paint_cpu_profile.rs (target/main/debug/deps/paint_cpu_profile-c71651aae1a1790c)
+
+running 1 test
+test profile ... ignored, profile; run with --ignored --nocapture
+
+test result: ok. 0 passed; 0 failed; 1 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/s_int.rs (target/main/debug/deps/s_int-e36dcea9ef25e68f)
+
+running 3 tests
+test the_presentation_asks_for_the_r5_picks ... ok
+test a_viewer_feed_follows_a_voice_change ... ok
+test a_look_brings_its_companion_face_unless_a_face_is_named ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 2.94s
+
+     Running tests/shell_parity.rs (target/main/debug/deps/shell_parity-f7cb15979393c20b)
+
+running 4 tests
+test sizes_scale_and_frames_come_from_the_core ... ok
+test style_names_the_m8_m9_m10_m11_designs ... ok
+test style_rejects_unknown_names_and_changes_nothing ... ok
+test shell_core_equals_shell_less ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 3.15s
+
+     Running tests/shell_s1.rs (target/main/debug/deps/shell_s1-fed72c410e4e6523)
+
+running 3 tests
+test url_audience_takes_comma_lists ... ok
+test the_presentation_asks_for_the_m8_m11_picks_and_the_page_overrides_them ... ok
+test url_seen_waits_for_its_step ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.15s
+
+     Running tests/startup_t6.rs (target/main/debug/deps/startup_t6-560e84f7ecc7aee5)
+
+running 1 test
+test direct_message_frames_equal_the_general_path ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.18s
+
+     Running tests/stories_korda.rs (target/main/debug/deps/stories_korda-afb76261824a6f30)
+
+running 5 tests
+test default_chart_has_no_story_panel ... ok
+test english_words_and_unknown_name ... ok
+test closed_stories_hide_and_show ... ok
+test story_chart_draws_every_story_in_view_and_moves_the_focus ... ok
+test zoomed_out_stories_cluster_and_a_cluster_zooms_in ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 11.90s
+
+     Running tests/stories_m18.rs (target/main/debug/deps/stories_m18-68d52c50709aeae2)
+
+running 1 test
+test story_list_is_asked_only_at_chart_depth ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.56s
+
+     Running tests/story_pavka.rs (target/main/debug/deps/story_pavka-f95c041bedd129cf)
+
+running 4 tests
+test story_density ... ignored, measurement helper: cargo test -- --ignored story_density
+test an_unknown_story_design_is_refused ... ok
+test without_a_story_design_the_chart_is_unchanged ... ok
+test story_chart_end_to_end ... ok
+
+test result: ok. 3 passed; 0 failed; 1 ignored; 0 measured; 0 filtered out; finished in 2.63s
+
+     Running tests/story_pavka_equal.rs (target/main/debug/deps/story_pavka_equal-12669e4bcf59bf5c)
+
+running 1 test
+test pavka_scenes_equal_the_recorded_ones has been running for over 60 seconds
+test pavka_scenes_equal_the_recorded_ones ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 66.13s
+
+     Running tests/viewer_m15.rs (target/main/debug/deps/viewer_m15-5d6cfca6fd39b0fe)
+
+running 4 tests
+test server_work_per_device ... ignored, measurement
+test viewer_core_equals_viewer_driver ... ok
+test viewer_faces_and_open_scene_equal_the_full_replica ... ok
+test viewer_traffic_does_not_grow_with_the_universe ... ok
+
+test result: ok. 3 passed; 0 failed; 1 ignored; 0 measured; 0 filtered out; finished in 53.84s
+
+   Doc-tests qp_calendar
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Doc-tests qp_capsule
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Doc-tests qp_compute
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Doc-tests qp_facts
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Doc-tests qp_grammar
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Doc-tests qp_host
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Doc-tests qp_live
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Doc-tests qp_matriks
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Doc-tests qp_mcp
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Doc-tests qp_render
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Doc-tests qp_schema
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Doc-tests qp_session
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Doc-tests qp_shellcore
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Doc-tests qp_source
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Doc-tests qp_wasm
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+-- test: PASS (603s)
+
+================================================================
+== [4] schema
+================================================================
+   Compiling qp-schema v0.0.0 (/Users/arkns/Works/Mchart/qapsule/crates/qp-schema)
+   Compiling qp-matriks v0.0.0 (/Users/arkns/Works/Mchart/qapsule/crates/qp-matriks)
+   Compiling qp-live v0.0.0 (/Users/arkns/Works/Mchart/qapsule/crates/qp-live)
+   Compiling qp-calendar v0.0.0 (/Users/arkns/Works/Mchart/qapsule/crates/qp-calendar)
+   Compiling qp-compute v0.0.0 (/Users/arkns/Works/Mchart/qapsule/crates/qp-compute)
+   Compiling qp-grammar v0.0.0 (/Users/arkns/Works/Mchart/qapsule/crates/qp-grammar)
+   Compiling qp-render v0.0.0 (/Users/arkns/Works/Mchart/qapsule/crates/qp-render)
+   Compiling qp-source v0.0.0 (/Users/arkns/Works/Mchart/qapsule/crates/qp-source)
+   Compiling qp-facts v0.0.0 (/Users/arkns/Works/Mchart/qapsule/crates/qp-facts)
+   Compiling qp-capsule v0.0.0 (/Users/arkns/Works/Mchart/qapsule/crates/qp-capsule)
+   Compiling qp-session v0.0.0 (/Users/arkns/Works/Mchart/qapsule/crates/qp-session)
+   Compiling qp-mcp v0.0.0 (/Users/arkns/Works/Mchart/qapsule/crates/qp-mcp)
+   Compiling qp-shellcore v0.0.0 (/Users/arkns/Works/Mchart/qapsule/crates/qp-shellcore)
+   Compiling qp-host v0.0.0 (/Users/arkns/Works/Mchart/qapsule/crates/qp-host)
+   Compiling qp-cli v0.0.0 (/Users/arkns/Works/Mchart/qapsule/crates/qp-cli)
+    Finished `release` profile [optimized] target(s) in 2m 43s
+/var/folders/3h/tkg8gmr96tscr2t77stj77v40000gn/T/tmp.Ik1K9tm0nx/schema/Document.schema.json
+/var/folders/3h/tkg8gmr96tscr2t77stj77v40000gn/T/tmp.Ik1K9tm0nx/schema/Capsule.schema.json
+/var/folders/3h/tkg8gmr96tscr2t77stj77v40000gn/T/tmp.Ik1K9tm0nx/schema/Series.schema.json
+/var/folders/3h/tkg8gmr96tscr2t77stj77v40000gn/T/tmp.Ik1K9tm0nx/schema/Fact.schema.json
+/var/folders/3h/tkg8gmr96tscr2t77stj77v40000gn/T/tmp.Ik1K9tm0nx/schema/Finding.schema.json
+/var/folders/3h/tkg8gmr96tscr2t77stj77v40000gn/T/tmp.Ik1K9tm0nx/schema/View.schema.json
+/var/folders/3h/tkg8gmr96tscr2t77stj77v40000gn/T/tmp.Ik1K9tm0nx/schema/SceneDesc.schema.json
+/var/folders/3h/tkg8gmr96tscr2t77stj77v40000gn/T/tmp.Ik1K9tm0nx/schema/Command.schema.json
+/var/folders/3h/tkg8gmr96tscr2t77stj77v40000gn/T/tmp.Ik1K9tm0nx/schema/Intent.schema.json
+/var/folders/3h/tkg8gmr96tscr2t77stj77v40000gn/T/tmp.Ik1K9tm0nx/schema/Ledger.schema.json
+/var/folders/3h/tkg8gmr96tscr2t77stj77v40000gn/T/tmp.Ik1K9tm0nx/schema/StudyOutput.schema.json
+/var/folders/3h/tkg8gmr96tscr2t77stj77v40000gn/T/tmp.Ik1K9tm0nx/schema/Instrument.schema.json
+/var/folders/3h/tkg8gmr96tscr2t77stj77v40000gn/T/tmp.Ik1K9tm0nx/schema/Calendar.schema.json
+/var/folders/3h/tkg8gmr96tscr2t77stj77v40000gn/T/tmp.Ik1K9tm0nx/schema/DataBinding.schema.json
+/var/folders/3h/tkg8gmr96tscr2t77stj77v40000gn/T/tmp.Ik1K9tm0nx/schema/DataEvent.schema.json
+/var/folders/3h/tkg8gmr96tscr2t77stj77v40000gn/T/tmp.Ik1K9tm0nx/schema/EvidenceRef.schema.json
+/var/folders/3h/tkg8gmr96tscr2t77stj77v40000gn/T/tmp.Ik1K9tm0nx/schema/Story.schema.json
+/var/folders/3h/tkg8gmr96tscr2t77stj77v40000gn/T/tmp.Ik1K9tm0nx/schema/GlyphSpec.schema.json
+/var/folders/3h/tkg8gmr96tscr2t77stj77v40000gn/T/tmp.Ik1K9tm0nx/schema/ClientMsg.schema.json
+/var/folders/3h/tkg8gmr96tscr2t77stj77v40000gn/T/tmp.Ik1K9tm0nx/schema/ServerMsg.schema.json
+/var/folders/3h/tkg8gmr96tscr2t77stj77v40000gn/T/tmp.Ik1K9tm0nx/schema/Op.schema.json
+/var/folders/3h/tkg8gmr96tscr2t77stj77v40000gn/T/tmp.Ik1K9tm0nx/schema/ChangeOp.schema.json
+/var/folders/3h/tkg8gmr96tscr2t77stj77v40000gn/T/tmp.Ik1K9tm0nx/schema/LogEntry.schema.json
+/var/folders/3h/tkg8gmr96tscr2t77stj77v40000gn/T/tmp.Ik1K9tm0nx/schema/Query.schema.json
+/var/folders/3h/tkg8gmr96tscr2t77stj77v40000gn/T/tmp.Ik1K9tm0nx/schema/InboundLine.schema.json
+/var/folders/3h/tkg8gmr96tscr2t77stj77v40000gn/T/tmp.Ik1K9tm0nx/schema/OutboundLine.schema.json
+/var/folders/3h/tkg8gmr96tscr2t77stj77v40000gn/T/tmp.Ik1K9tm0nx/schema/SessionInit.schema.json
+/var/folders/3h/tkg8gmr96tscr2t77stj77v40000gn/T/tmp.Ik1K9tm0nx/schema/Transcript.schema.json
+/var/folders/3h/tkg8gmr96tscr2t77stj77v40000gn/T/tmp.Ik1K9tm0nx/schema/MarketStatus.schema.json
+/var/folders/3h/tkg8gmr96tscr2t77stj77v40000gn/T/tmp.Ik1K9tm0nx/schema/Comment.schema.json
+/var/folders/3h/tkg8gmr96tscr2t77stj77v40000gn/T/tmp.Ik1K9tm0nx/schema/CommentDraft.schema.json
+/var/folders/3h/tkg8gmr96tscr2t77stj77v40000gn/T/tmp.Ik1K9tm0nx/schema2/Document.schema.json
+/var/folders/3h/tkg8gmr96tscr2t77stj77v40000gn/T/tmp.Ik1K9tm0nx/schema2/Capsule.schema.json
+/var/folders/3h/tkg8gmr96tscr2t77stj77v40000gn/T/tmp.Ik1K9tm0nx/schema2/Series.schema.json
+/var/folders/3h/tkg8gmr96tscr2t77stj77v40000gn/T/tmp.Ik1K9tm0nx/schema2/Fact.schema.json
+/var/folders/3h/tkg8gmr96tscr2t77stj77v40000gn/T/tmp.Ik1K9tm0nx/schema2/Finding.schema.json
+/var/folders/3h/tkg8gmr96tscr2t77stj77v40000gn/T/tmp.Ik1K9tm0nx/schema2/View.schema.json
+/var/folders/3h/tkg8gmr96tscr2t77stj77v40000gn/T/tmp.Ik1K9tm0nx/schema2/SceneDesc.schema.json
+/var/folders/3h/tkg8gmr96tscr2t77stj77v40000gn/T/tmp.Ik1K9tm0nx/schema2/Command.schema.json
+/var/folders/3h/tkg8gmr96tscr2t77stj77v40000gn/T/tmp.Ik1K9tm0nx/schema2/Intent.schema.json
+/var/folders/3h/tkg8gmr96tscr2t77stj77v40000gn/T/tmp.Ik1K9tm0nx/schema2/Ledger.schema.json
+/var/folders/3h/tkg8gmr96tscr2t77stj77v40000gn/T/tmp.Ik1K9tm0nx/schema2/StudyOutput.schema.json
+/var/folders/3h/tkg8gmr96tscr2t77stj77v40000gn/T/tmp.Ik1K9tm0nx/schema2/Instrument.schema.json
+/var/folders/3h/tkg8gmr96tscr2t77stj77v40000gn/T/tmp.Ik1K9tm0nx/schema2/Calendar.schema.json
+/var/folders/3h/tkg8gmr96tscr2t77stj77v40000gn/T/tmp.Ik1K9tm0nx/schema2/DataBinding.schema.json
+/var/folders/3h/tkg8gmr96tscr2t77stj77v40000gn/T/tmp.Ik1K9tm0nx/schema2/DataEvent.schema.json
+/var/folders/3h/tkg8gmr96tscr2t77stj77v40000gn/T/tmp.Ik1K9tm0nx/schema2/EvidenceRef.schema.json
+/var/folders/3h/tkg8gmr96tscr2t77stj77v40000gn/T/tmp.Ik1K9tm0nx/schema2/Story.schema.json
+/var/folders/3h/tkg8gmr96tscr2t77stj77v40000gn/T/tmp.Ik1K9tm0nx/schema2/GlyphSpec.schema.json
+/var/folders/3h/tkg8gmr96tscr2t77stj77v40000gn/T/tmp.Ik1K9tm0nx/schema2/ClientMsg.schema.json
+/var/folders/3h/tkg8gmr96tscr2t77stj77v40000gn/T/tmp.Ik1K9tm0nx/schema2/ServerMsg.schema.json
+/var/folders/3h/tkg8gmr96tscr2t77stj77v40000gn/T/tmp.Ik1K9tm0nx/schema2/Op.schema.json
+/var/folders/3h/tkg8gmr96tscr2t77stj77v40000gn/T/tmp.Ik1K9tm0nx/schema2/ChangeOp.schema.json
+/var/folders/3h/tkg8gmr96tscr2t77stj77v40000gn/T/tmp.Ik1K9tm0nx/schema2/LogEntry.schema.json
+/var/folders/3h/tkg8gmr96tscr2t77stj77v40000gn/T/tmp.Ik1K9tm0nx/schema2/Query.schema.json
+/var/folders/3h/tkg8gmr96tscr2t77stj77v40000gn/T/tmp.Ik1K9tm0nx/schema2/InboundLine.schema.json
+/var/folders/3h/tkg8gmr96tscr2t77stj77v40000gn/T/tmp.Ik1K9tm0nx/schema2/OutboundLine.schema.json
+/var/folders/3h/tkg8gmr96tscr2t77stj77v40000gn/T/tmp.Ik1K9tm0nx/schema2/SessionInit.schema.json
+/var/folders/3h/tkg8gmr96tscr2t77stj77v40000gn/T/tmp.Ik1K9tm0nx/schema2/Transcript.schema.json
+/var/folders/3h/tkg8gmr96tscr2t77stj77v40000gn/T/tmp.Ik1K9tm0nx/schema2/MarketStatus.schema.json
+/var/folders/3h/tkg8gmr96tscr2t77stj77v40000gn/T/tmp.Ik1K9tm0nx/schema2/Comment.schema.json
+/var/folders/3h/tkg8gmr96tscr2t77stj77v40000gn/T/tmp.Ik1K9tm0nx/schema2/CommentDraft.schema.json
+exported 31 schema files:
+  Calendar.schema.json
+  Capsule.schema.json
+  ChangeOp.schema.json
+  ClientMsg.schema.json
+  Command.schema.json
+  Comment.schema.json
+  CommentDraft.schema.json
+  DataBinding.schema.json
+  DataEvent.schema.json
+  Document.schema.json
+  EvidenceRef.schema.json
+  Fact.schema.json
+  Finding.schema.json
+  GlyphSpec.schema.json
+  InboundLine.schema.json
+  Instrument.schema.json
+  Intent.schema.json
+  Ledger.schema.json
+  LogEntry.schema.json
+  MarketStatus.schema.json
+  Op.schema.json
+  OutboundLine.schema.json
+  Query.schema.json
+  SceneDesc.schema.json
+  Series.schema.json
+  ServerMsg.schema.json
+  SessionInit.schema.json
+  Story.schema.json
+  StudyOutput.schema.json
+  Transcript.schema.json
+  View.schema.json
+two exports are identical
+-- schema: PASS (165s)
+
+================================================================
+== [5] fixtures
+================================================================
+-- fixtures/schema/calendar.example.json as Calendar
+valid
+-- fixtures/schema/capsule.example.json as Capsule
+valid
+-- fixtures/schema/document.example.json as Document
+valid
+-- fixtures/schema/study_output.example.json as StudyOutput
+valid
+-- fixtures: PASS (0s)
+
+================================================================
+== [6] golden
+================================================================
+two renders are byte-identical
+render matches fixtures/golden/sample.png
+-- golden: PASS (0s)
+
+================================================================
+== [7] views
+================================================================
+view transcripts pass qp conform
+view transcripts and documents validate
+v0-r0: two renders byte-identical and equal to fixtures/golden/sample.png; explain matches
+v1-three-panels: two renders byte-identical and equal to fixtures/golden/views/v1-three-panels.png; explain matches
+v2-bollinger-band: two renders byte-identical and equal to fixtures/golden/views/v2-bollinger-band.png; explain matches
+v3-fan: two renders byte-identical and equal to fixtures/golden/views/v3-fan.png; explain matches
+v4-log: two renders byte-identical and equal to fixtures/golden/views/v4-log.png; explain matches
+v5-conditional: two renders byte-identical and equal to fixtures/golden/views/v5-conditional.png; explain matches
+d1-capsule: two renders byte-identical and equal to fixtures/golden/views/d1-capsule.png; explain matches
+d2-chart: two renders byte-identical and equal to fixtures/golden/views/d2-chart.png; explain matches
+c2-capsule: two renders byte-identical and equal to fixtures/golden/views/c2-capsule.png; explain matches
+c3-chart: two renders byte-identical and equal to fixtures/golden/views/c3-chart.png; explain matches
+c4-band: two renders byte-identical and equal to fixtures/golden/views/c4-band.png; explain matches
+c5-points: two renders byte-identical and equal to fixtures/golden/views/c5-points.png; explain matches
+-- views: PASS (1s)
+
+================================================================
+== [8] wasm
+================================================================
+   Compiling qp-schema v0.0.0 (/Users/arkns/Works/Mchart/qapsule/crates/qp-schema)
+   Compiling qp-calendar v0.0.0 (/Users/arkns/Works/Mchart/qapsule/crates/qp-calendar)
+   Compiling qp-compute v0.0.0 (/Users/arkns/Works/Mchart/qapsule/crates/qp-compute)
+   Compiling qp-grammar v0.0.0 (/Users/arkns/Works/Mchart/qapsule/crates/qp-grammar)
+   Compiling qp-render v0.0.0 (/Users/arkns/Works/Mchart/qapsule/crates/qp-render)
+   Compiling qp-source v0.0.0 (/Users/arkns/Works/Mchart/qapsule/crates/qp-source)
+   Compiling qp-wasm v0.0.0 (/Users/arkns/Works/Mchart/qapsule/crates/qp-wasm)
+    Finished `wasm` profile [optimized] target(s) in 12.84s
+wasm: /Users/arkns/Works/Mchart/qapsule/target/main/wasm32-unknown-unknown/wasm/qp_wasm.wasm
+wasm size: raw=2281954 bytes, gzip -9=746734 bytes
+-- wasm: PASS (13s)
+
+================================================================
+== [9] hygiene
+================================================================
+grep: empty (sub)expression
+no secret-looking tracked files
+.gitignore has a .env rule
+-- hygiene: PASS (0s)
+
+================================================================
+== [10] browser
+================================================================
+== build qp-wasm (wasm-pack, profile wasm)
+[INFO]: 🎯  Checking for the Wasm target...
+[INFO]: 🌀  Compiling to Wasm...
+    Finished `wasm` profile [optimized] target(s) in 0.05s
+[INFO]: ⬇️  Installing wasm-bindgen...
+[INFO]: Optional field missing from Cargo.toml: 'repository'. This is not necessary, but recommended
+[INFO]: License key is set in Cargo.toml but no LICENSE file(s) were found; Please add the LICENSE file(s) to your project directory
+[INFO]: ✨   Done in 0.27s
+[INFO]: 📦   Your wasm pkg is ready to publish at shells/web-spike/pkg.
+[WARN]: ⚠️   There's a newer version of wasm-pack available, the new version is: 0.15.1, you are using: 0.14.0. To update, navigate to: https://drager.github.io/wasm-pack/installer/
+== wasm size
+{"wasmRawBytes":2121744,"wasmGzipBytes":731657,"wasmOptOzBytes":1621395,"wasmOptOzGzipBytes":648505}
+== browser compare
+{
+  "golden": "fixtures/golden/sample.png",
+  "size": "1200x600",
+  "canvasVsGolden": {
+    "comparable": true,
+    "differingPixels": 0,
+    "maxChannelDiff": 0
+  },
+  "screenshotVsGolden": {
+    "comparable": true,
+    "differingPixels": 0,
+    "maxChannelDiff": 0
+  },
+  "wasmRgbaVsGolden": {
+    "comparable": true,
+    "differingPixels": 0,
+    "maxChannelDiff": 0
+  },
+  "stressWasmVsGolden": {
+    "comparable": true,
+    "differingPixels": 0,
+    "maxChannelDiff": 0
+  },
+  "wasmPngBytesEqualGolden": true,
+  "timingsMs": {
+    "browserLaunch": 129.5495,
+    "pageLoadToDone": 130.13329199999998,
+    "wasmInitMs": 6.099999904632568,
+    "firstFrameMs": 17.899999618530273,
+    "secondFrameMs": 3.8000001907348633,
+    "putImageDataMs": 1.5,
+    "renderPngMs": 16.5,
+    "benchSyntheticMs": 17.600000381469727,
+    "benchSyntheticBars": 100000,
+    "stressMs": 38.39999961853027
+  },
+  "browser": "151.0.7922.34",
+  "pkg": "./pkg",
+  "threshold": {
+    "maxDiffPixels": 0
+  }
+}
+OK: canvasVsGolden within threshold (0 px)
+OK: stressWasmVsGolden within threshold (0 px)
+-- browser: PASS (16s)
+
+================================================================
+== [11] compute
+================================================================
+valid
+valid
+-- compute: PASS (0s)
+
+================================================================
+== [12] digest
+================================================================
+host arm64: 7b1e99d40889f83c (expected 7b1e99d40889f83c)
+host arm64 r3 studies: 914fcfdb9f653a6d (expected 914fcfdb9f653a6d)
+x86_64 (Rosetta): 7b1e99d40889f83c
+[INFO]: 🎯  Checking for the Wasm target...
+[INFO]: 🌀  Compiling to Wasm...
+    Finished `wasm` profile [optimized] target(s) in 0.07s
+[INFO]: ⬇️  Installing wasm-bindgen...
+[INFO]: Optional field missing from Cargo.toml: 'repository'. This is not necessary, but recommended
+[INFO]: License key is set in Cargo.toml but no LICENSE file(s) were found; Please add the LICENSE file(s) to your project directory
+[INFO]: ✨   Done in 0.32s
+[INFO]: 📦   Your wasm pkg is ready to publish at /Users/arkns/Works/Mchart/qapsule/target/main/wasm-bench/pkg.
+[WARN]: ⚠️   There's a newer version of wasm-pack available, the new version is: 0.15.1, you are using: 0.14.0. To update, navigate to: https://drager.github.io/wasm-pack/installer/
+wasm32 (node v24.3.0): 7b1e99d40889f83c
+-- digest: PASS (36s)
+
+================================================================
+== [13] protocol
+================================================================
+-- protocol: PASS (1s)
+
+================================================================
+== [14] conform
+================================================================
+PASS 01-handshake
+PASS 02-add-study-same-panel
+PASS 03-errors-self-correction
+PASS 04-reject-finding
+PASS 05-proposal-accept
+PASS 06-proposal-reject-expire
+PASS 07-undo-redo-conflict
+PASS 08-offline-base-conflict
+PASS 09-queries
+PASS 10-live-invalidation
+PASS 11-capability-depths
+PASS 12-attention-input
+PASS 13-narrative-timeline
+PASS 14-view-range-remove-cascade
+PASS 15-authority-intent
+PASS 16-screen-describe-presenter
+PASS 17-now-lists-undo-ack
+PASS 18-grammar-layer-ops
+PASS 19-grammar-panels
+PASS 20-grammar-scales
+PASS 21-grammar-origins
+PASS 22-grammar-invalid-encoding
+PASS 23-grammar-layer-concurrency
+PASS 24-grammar-screen-hit
+PASS 25-grammar-depth-present
+PASS 26-welcome-summary
+PASS 27-inline-point-series
+PASS 28-present-ambiguous
+PASS 29-future-look
+PASS 30-data-binding
+PASS 31-no-entitlement
+PASS 32-verify-evidence
+PASS 33-tick-wakes-affected
+PASS 34-entitlement-anchor-gap
+PASS 35-consistency
+PASS 36-entitlement-responsible-relive
+PASS dispute-retract
+PASS 38-capsule-lifecycle
+PASS 39-capsule-entitlement
+PASS 40-capsule-k26-sentence
+PASS 41-capsule-sensitivity
+PASS 42-capsule-candidate
+PASS 43-capsule-retract
+PASS 44-capsule-selectors-bound
+PASS 45-capsule-ledger-direction
+PASS 46-capsule-negative-override
+PASS 47-capsule-validity
+PASS 48-capsule-selector
+PASS 49-replay-control
+PASS 50-replay-unsupported
+PASS 51-input-tap-hit
+PASS 52-input-pan-pinch
+PASS 53-input-open-close
+PASS 54-input-evidence
+PASS 55-input-presence
+PASS 56-input-look
+PASS 57-capsule-selector-withheld
+PASS 58-input-open-selector
+PASS 59-viewer
+PASS 60-stories-entitled
+PASS 61-stories-unentitled
+PASS 62-stories-200
+PASS 63-stories-live
+PASS 64-feed-rule
+PASS 65-human-decision
+PASS 66-agent-cannot-write
+PASS 67-comment
+PASS 68-comment-unentitled
+PASS 69-watch
+PASS 70-preview
+70 transcript(s), 70 passed, 0 failed (inproc)
+PASS 01-handshake
+PASS 02-add-study-same-panel
+PASS 03-errors-self-correction
+PASS 04-reject-finding
+PASS 05-proposal-accept
+PASS 06-proposal-reject-expire
+PASS 07-undo-redo-conflict
+PASS 08-offline-base-conflict
+PASS 09-queries
+PASS 10-live-invalidation
+PASS 11-capability-depths
+PASS 12-attention-input
+PASS 13-narrative-timeline
+PASS 14-view-range-remove-cascade
+PASS 15-authority-intent
+PASS 16-screen-describe-presenter
+PASS 17-now-lists-undo-ack
+PASS 18-grammar-layer-ops
+PASS 19-grammar-panels
+PASS 20-grammar-scales
+PASS 21-grammar-origins
+PASS 22-grammar-invalid-encoding
+PASS 23-grammar-layer-concurrency
+PASS 24-grammar-screen-hit
+PASS 25-grammar-depth-present
+PASS 26-welcome-summary
+PASS 27-inline-point-series
+PASS 28-present-ambiguous
+PASS 29-future-look
+PASS 30-data-binding
+PASS 31-no-entitlement
+PASS 32-verify-evidence
+PASS 33-tick-wakes-affected
+PASS 34-entitlement-anchor-gap
+PASS 35-consistency
+PASS 36-entitlement-responsible-relive
+PASS dispute-retract
+PASS 38-capsule-lifecycle
+PASS 39-capsule-entitlement
+PASS 40-capsule-k26-sentence
+PASS 41-capsule-sensitivity
+PASS 42-capsule-candidate
+PASS 43-capsule-retract
+PASS 44-capsule-selectors-bound
+PASS 45-capsule-ledger-direction
+PASS 46-capsule-negative-override
+PASS 47-capsule-validity
+PASS 48-capsule-selector
+PASS 49-replay-control
+PASS 50-replay-unsupported
+PASS 51-input-tap-hit
+PASS 52-input-pan-pinch
+PASS 53-input-open-close
+PASS 54-input-evidence
+PASS 55-input-presence
+PASS 56-input-look
+PASS 57-capsule-selector-withheld
+PASS 58-input-open-selector
+PASS 59-viewer
+PASS 60-stories-entitled
+PASS 61-stories-unentitled
+PASS 62-stories-200
+PASS 63-stories-live
+PASS 64-feed-rule
+PASS 65-human-decision
+PASS 66-agent-cannot-write
+PASS 67-comment
+PASS 68-comment-unentitled
+PASS 69-watch
+PASS 70-preview
+70 transcript(s), 70 passed, 0 failed (serve)
+PASS 01-handshake (mcp: 5 hello, 0 tool call(s), 1 direct)
+PASS 02-add-study-same-panel (mcp: 2 hello, 2 tool call(s), 0 direct)
+PASS 03-errors-self-correction (mcp: 1 hello, 4 tool call(s), 3 direct)
+PASS 04-reject-finding (mcp: 1 hello, 2 tool call(s), 0 direct)
+PASS 05-proposal-accept (mcp: 2 hello, 7 tool call(s), 0 direct)
+PASS 06-proposal-reject-expire (mcp: 3 hello, 6 tool call(s), 3 direct)
+PASS 07-undo-redo-conflict (mcp: 2 hello, 11 tool call(s), 0 direct)
+PASS 08-offline-base-conflict (mcp: 2 hello, 5 tool call(s), 0 direct)
+PASS 09-queries (mcp: 3 hello, 7 tool call(s), 2 direct)
+PASS 10-live-invalidation (mcp: 3 hello, 6 tool call(s), 0 direct)
+PASS 11-capability-depths (mcp: 4 hello, 5 tool call(s), 0 direct)
+PASS 12-attention-input (mcp: 2 hello, 6 tool call(s), 4 direct)
+PASS 13-narrative-timeline (mcp: 2 hello, 4 tool call(s), 0 direct)
+PASS 14-view-range-remove-cascade (mcp: 2 hello, 5 tool call(s), 0 direct)
+PASS 15-authority-intent (mcp: 3 hello, 5 tool call(s), 0 direct)
+PASS 16-screen-describe-presenter (mcp: 3 hello, 4 tool call(s), 0 direct)
+PASS 17-now-lists-undo-ack (mcp: 2 hello, 5 tool call(s), 1 direct)
+PASS 18-grammar-layer-ops (mcp: 2 hello, 15 tool call(s), 0 direct)
+PASS 19-grammar-panels (mcp: 2 hello, 10 tool call(s), 0 direct)
+PASS 20-grammar-scales (mcp: 1 hello, 10 tool call(s), 1 direct)
+PASS 21-grammar-origins (mcp: 3 hello, 9 tool call(s), 0 direct)
+PASS 22-grammar-invalid-encoding (mcp: 1 hello, 9 tool call(s), 2 direct)
+PASS 23-grammar-layer-concurrency (mcp: 2 hello, 9 tool call(s), 0 direct)
+PASS 24-grammar-screen-hit (mcp: 1 hello, 6 tool call(s), 0 direct)
+PASS 25-grammar-depth-present (mcp: 3 hello, 6 tool call(s), 0 direct)
+PASS 26-welcome-summary (mcp: 3 hello, 1 tool call(s), 0 direct)
+PASS 27-inline-point-series (mcp: 3 hello, 5 tool call(s), 0 direct)
+PASS 28-present-ambiguous (mcp: 1 hello, 5 tool call(s), 0 direct)
+PASS 29-future-look (mcp: 2 hello, 4 tool call(s), 3 direct)
+PASS 30-data-binding (mcp: 2 hello, 10 tool call(s), 3 direct)
+PASS 31-no-entitlement (mcp: 3 hello, 12 tool call(s), 2 direct)
+PASS 32-verify-evidence (mcp: 1 hello, 5 tool call(s), 2 direct)
+PASS 33-tick-wakes-affected (mcp: 3 hello, 7 tool call(s), 4 direct)
+PASS 34-entitlement-anchor-gap (mcp: 3 hello, 9 tool call(s), 1 direct)
+PASS 35-consistency (mcp: 1 hello, 4 tool call(s), 5 direct)
+PASS 36-entitlement-responsible-relive (mcp: 2 hello, 7 tool call(s), 0 direct)
+PASS dispute-retract (mcp: 2 hello, 4 tool call(s), 8 direct)
+PASS 38-capsule-lifecycle (mcp: 1 hello, 5 tool call(s), 8 direct)
+PASS 39-capsule-entitlement (mcp: 3 hello, 8 tool call(s), 4 direct)
+PASS 40-capsule-k26-sentence (mcp: 2 hello, 3 tool call(s), 4 direct)
+PASS 41-capsule-sensitivity (mcp: 2 hello, 6 tool call(s), 5 direct)
+PASS 42-capsule-candidate (mcp: 1 hello, 4 tool call(s), 3 direct)
+PASS 43-capsule-retract (mcp: 2 hello, 3 tool call(s), 6 direct)
+PASS 44-capsule-selectors-bound (mcp: 2 hello, 6 tool call(s), 9 direct)
+PASS 45-capsule-ledger-direction (mcp: 1 hello, 5 tool call(s), 30 direct)
+PASS 46-capsule-negative-override (mcp: 2 hello, 5 tool call(s), 5 direct)
+PASS 47-capsule-validity (mcp: 2 hello, 4 tool call(s), 5 direct)
+PASS 48-capsule-selector (mcp: 1 hello, 6 tool call(s), 31 direct)
+PASS 49-replay-control (mcp: 3 hello, 16 tool call(s), 1 direct)
+PASS 50-replay-unsupported (mcp: 1 hello, 1 tool call(s), 1 direct)
+PASS 51-input-tap-hit (mcp: 1 hello, 1 tool call(s), 3 direct)
+PASS 52-input-pan-pinch (mcp: 1 hello, 1 tool call(s), 7 direct)
+PASS 53-input-open-close (mcp: 1 hello, 0 tool call(s), 7 direct)
+PASS 54-input-evidence (mcp: 2 hello, 0 tool call(s), 4 direct)
+PASS 55-input-presence (mcp: 2 hello, 3 tool call(s), 10 direct)
+PASS 56-input-look (mcp: 1 hello, 0 tool call(s), 6 direct)
+PASS 57-capsule-selector-withheld (mcp: 2 hello, 3 tool call(s), 30 direct)
+PASS 58-input-open-selector (mcp: 1 hello, 0 tool call(s), 4 direct)
+PASS 59-viewer (mcp: 1 hello, 5 tool call(s), 4 direct)
+PASS 60-stories-entitled (mcp: 2 hello, 11 tool call(s), 0 direct)
+PASS 61-stories-unentitled (mcp: 3 hello, 4 tool call(s), 0 direct)
+PASS 62-stories-200 (mcp: 1 hello, 3 tool call(s), 0 direct)
+PASS 63-stories-live (mcp: 3 hello, 7 tool call(s), 13 direct)
+PASS 64-feed-rule (mcp: 1 hello, 9 tool call(s), 2 direct)
+PASS 65-human-decision (mcp: 3 hello, 8 tool call(s), 0 direct)
+PASS 66-agent-cannot-write (mcp: 3 hello, 7 tool call(s), 0 direct)
+PASS 67-comment (mcp: 2 hello, 6 tool call(s), 0 direct)
+PASS 68-comment-unentitled (mcp: 4 hello, 6 tool call(s), 0 direct)
+PASS 69-watch (mcp: 3 hello, 11 tool call(s), 40 direct)
+PASS 70-preview (mcp: 2 hello, 5 tool call(s), 0 direct)
+70 transcript(s), 70 passed, 0 failed (mcp)
+-- conform: PASS (3s)
+
+================================================================
+== [15] replica
+================================================================
+lag 0: 186 steps, 0 with replica digests != authority, 0 violations, final claims 9 (shown final at end 9), display counts final/provisional/pending/disputed (973, 0, 58, 0); last doc 832528870cf6c127 view 8a04abbca67e3bdd
+lag 25: 211 steps, 210 with replica digests != authority, 0 violations, final claims 9 (shown final at end 9), display counts final/provisional/pending/disputed (973, 0, 308, 0); last doc 832528870cf6c127 view 8a04abbca67e3bdd
+viewer lag 0: 186 steps, 0 with open-replica digests != authority, 0 violations, final claims 4 (shown final at end 4), steps subscribed to the other instrument 0, display counts (380, 0, 19, 0)
+viewer lag 25: 211 steps, 210 with open-replica digests != authority, 0 violations, final claims 4 (shown final at end 4), steps subscribed to the other instrument 0, display counts (380, 0, 119, 0)
+[INFO]: 🎯  Checking for the Wasm target...
+[INFO]: 🌀  Compiling to Wasm...
+   Compiling aho-corasick v1.1.5
+   Compiling regex-syntax v0.8.11
+   Compiling fastrand v2.5.0
+   Compiling once_cell v1.21.4
+   Compiling serde_path_to_error v0.1.20
+   Compiling qp-facts v0.0.0 (/Users/arkns/Works/Mchart/qapsule/crates/qp-facts)
+   Compiling tempfile v3.27.0
+   Compiling regex-automata v0.4.18
+   Compiling regex v1.13.1
+   Compiling qp-capsule v0.0.0 (/Users/arkns/Works/Mchart/qapsule/crates/qp-capsule)
+   Compiling qp-session v0.0.0 (/Users/arkns/Works/Mchart/qapsule/crates/qp-session)
+   Compiling qp-shellcore v0.0.0 (/Users/arkns/Works/Mchart/qapsule/crates/qp-shellcore)
+   Compiling qp-wasm v0.0.0 (/Users/arkns/Works/Mchart/qapsule/crates/qp-wasm)
+    Finished `wasm` profile [optimized] target(s) in 33.29s
+[INFO]: ⬇️  Installing wasm-bindgen...
+[INFO]: Optional field missing from Cargo.toml: 'repository'. This is not necessary, but recommended
+[INFO]: License key is set in Cargo.toml but no LICENSE file(s) were found; Please add the LICENSE file(s) to your project directory
+[INFO]: ✨   Done in 33.65s
+[INFO]: 📦   Your wasm pkg is ready to publish at /Users/arkns/Works/Mchart/qapsule/target/main/wasm-replica/pkg.
+[WARN]: ⚠️   There's a newer version of wasm-pack available, the new version is: 0.15.1, you are using: 0.14.0. To update, navigate to: https://drager.github.io/wasm-pack/installer/
+/var/folders/3h/tkg8gmr96tscr2t77stj77v40000gn/T/tmp.Ik1K9tm0nx/replica/tape0.json: lag 0, 186 steps, wasm == native (doc, view, display) at 186/186; wasm == authority (doc, view) at 186/186; last doc 832528870cf6c127 view 8a04abbca67e3bdd display 0ce72165f9b4dbee
+/var/folders/3h/tkg8gmr96tscr2t77stj77v40000gn/T/tmp.Ik1K9tm0nx/replica/tape25.json: lag 25, 211 steps, wasm == native (doc, view, display) at 211/211; wasm == authority (doc, view) at 1/211; last doc 832528870cf6c127 view 8a04abbca67e3bdd display 0ce72165f9b4dbee
+-- replica: PASS (34s)
+
+================================================================
+== [16] replay
+================================================================
+-- replay: PASS (1s)
+
+================================================================
+== [17] shell
+================================================================
+arch: 0 violation(s) in main.js, 5 paint file(s), style.css and the gallery page; self-test 37/37 caught
+-- shell: PASS (0s)
+
+================================================================
+== [18] demo
+================================================================
+[INFO]: 🎯  Checking for the Wasm target...
+[INFO]: 🌀  Compiling to Wasm...
+    Finished `wasm` profile [optimized] target(s) in 0.07s
+[INFO]: ⬇️  Installing wasm-bindgen...
+[INFO]: Optional field missing from Cargo.toml: 'repository'. This is not necessary, but recommended
+[INFO]: License key is set in Cargo.toml but no LICENSE file(s) were found; Please add the LICENSE file(s) to your project directory
+[INFO]: ✨   Done in 0.42s
+[INFO]: 📦   Your wasm pkg is ready to publish at shells/web/pkg.
+[WARN]: ⚠️   There's a newer version of wasm-pack available, the new version is: 0.15.1, you are using: 0.14.0. To update, navigate to: https://drager.github.io/wasm-pack/installer/
+replica network: 26 requests, 0 to another origin
+replica back: equal (document 175dd6da0254fb5a, 40 faces, open sentence null)
+replica capsule: equal (document 175dd6da0254fb5a, 40 faces, open capsule f7ff9f1599113ceb)
+replica chart: equal (document 175dd6da0254fb5a, 40 faces, open chart d28cc7cb6c27ab7e)
+replica dragged: equal (document 175dd6da0254fb5a, 40 faces, open chart 3a16394b272dc2cc)
+replica feed: equal (document 175dd6da0254fb5a, 40 faces, open sentence null)
+replica styled: equal (document 175dd6da0254fb5a, 40 faces, open chart 7b080f309d66e9f7)
+replica wheeled: equal (document 175dd6da0254fb5a, 40 faces, open chart a0cece2bd5f2c5ad)
+viewer network: 29 requests, 0 to another origin
+viewer back: equal (slice null, 3 faces on screen, open sentence null, data [])
+viewer capsule: equal (slice 552bf778f62888cf, 0 faces on screen, open capsule 4cebe2f177f53270, data [{"interval":"1d","symbol":"SYN12"}])
+viewer chart: equal (slice 552bf778f62888cf, 0 faces on screen, open chart d4de614cbaf1f90d, data [{"interval":"1d","symbol":"SYN12"}])
+viewer dragged: equal (slice 552bf778f62888cf, 0 faces on screen, open chart 34d6a657d16fca37, data [{"interval":"1d","symbol":"SYN12"}])
+viewer feed: equal (slice null, 3 faces on screen, open sentence null, data [])
+viewer styled: equal (slice 552bf778f62888cf, 0 faces on screen, open chart 94c1f7f045a5ebcd, data [{"interval":"1d","symbol":"SYN12"}])
+viewer wheeled: equal (slice 552bf778f62888cf, 0 faces on screen, open chart feaf1a4bf2f5f35c, data [{"interval":"1d","symbol":"SYN12"}])
+viewer = replica back (open r4, story r4): equal
+viewer = replica capsule (open r4, story r4): equal
+viewer = replica chart (open r4, story r4): equal
+viewer = replica dragged (open r4, story r4): equal
+viewer = replica feed (open r4, story r4): equal
+viewer = replica styled (open r4, story r4): equal
+viewer = replica wheeled (open r4, story r4): equal
+ok   defaults oltan/elikov/surek/tg5 ({"clock":true,"depth":"sentence","face":"oltan","feed":"elikov","feed_order":"live_new","look":"oltan","motion":"surek","open":"tesir","outcome":"tg5","reduced_motion":true,"story":"korda","transition":"surek","voice":"marla"})
+ok   R5 defaults oltan/korda/tesir/marla ({"clock":true,"depth":"sentence","face":"oltan","feed":"elikov","feed_order":"live_new","look":"oltan","motion":"surek","open":"tesir","outcome":"tg5","reduced_motion":true,"story":"korda","transition":"surek","voice":"marla"})
+ok   face: r3 vadrel fotolay tavrik oltan zemre
+ok   alphabet: siluet rozet
+ok   feed: r3 elikov vakiro
+ok   transition: r3 tutamir zumlak surek nabiz
+ok   outcome: r3 muhrak tg5
+ok   look: r4 ornek oltan zemre
+ok   faces offered: r3 vadrel fotolay tavrik oltan zemre
+ok   face select shows oltan
+ok   face change reaches the view state
+ok   feed select shows elikov
+ok   outcome select shows tg5
+ok   settings change reaches the view state
+ok   seen button sets the last look (1687514400000; status {"days":"4200 / 0 / 0","done":false,"epoch":0,"instruments":"30","note":null,"pa)
+ok   URL wins ({"clock":true,"depth":"sentence","face":"fotolay","feed":"vakiro","feed_order":"live_new","look":"oltan","motion":"surek","open":"tesir","reduced_motion":true,"story":"korda","theme":"dark","transition":"surek","voice":"marla"})
+ok   URL audience ({"group":"habituated","positions":{"SYN09":1},"watchlist":["SYN02","SYN03"]})
+ok   seen waits for step 200
+ok   seen set on reaching step 200+ (1690376400000)
+ok   audience again after a backward seek ({"group":"habituated","positions":{"SYN09":1},"watchlist":["SYN02","SYN03"]})
+ok   look and seen again after a backward seek (1689843600000)
+ok   no page errors 
+ok   r4 chrome background from the core (#0f1115)
+     r4 sizes: {"tab":32.890625,"control":13,"font":10,"fontAt":"trust"}
+ok   r4 keeps its chrome sizes (tab 32.890625, smallest text 10 px)
+ok   URL look ({"clock":true,"depth":"sentence","face":"vadrel","feed":"elikov","feed_order":"live_new","look":"ornek","motion":"surek","open":"tesir","outcome":"tg5","reduced_motion":true,"story":"korda","theme":"dark","transition":"surek","voice":"marla"})
+ok   ornek chrome background (#181412)
+ok   ornek face is taller ({"css":[390,259],"px":[390,259],"style":{"height":"259px","width":"390px"}} → {"css":[390,274],"px":[390,274],"style":{"height":"274px","width":"390px"}})
+     ornek sizes: {"tab":44,"control":44,"font":13,"fontAt":"SPAN"}
+ok   ornek tabs ≥ 44 px (44)
+ok   ornek controls ≥ 44 px (44)
+ok   ornek smallest text ≥ 13 px (13 px, SPAN)
+ok   look select shows ornek
+ok   look back to r4 ({"clock":true,"depth":"sentence","face":"vadrel","feed":"elikov","feed_order":"live_new","motion":"surek","open":"tesir","outcome":"tg5","reduced_motion":true,"story":"korda","theme":"dark","transition":"surek","voice":"marla"})
+ok   chrome back to r4
+ok   no page errors 
+ok   presented voice ({"clock":true,"depth":"sentence","face":"oltan","feed":"elikov","feed_order":"live_new","look":"oltan","motion":"surek","open":"tesir","outcome":"tg5","reduced_motion":true,"story":"korda","transition":"surek","voice":"marla"})
+ok   voice choices ["r4","marla","selvi"]
+ok   a face marks a glossary term ({"id":"cap.SYN03.breakout.up.141","t":{"term":"benzer durum","text":"Aynı tür ve yönde, bundan önce kapanmış iddialar. Fiyat süresinde olağan oynaklığı kadar o yöne gittiyse tuttu sayılır; rastgele bir gün de yarı yarıya tutar.","layer":"ledger","hit":{"left":8,"top":158,"right":57,"bottom":177}}})
+ok   the term's explanation shows ({"hidden":false,"term":"benzer durum","text":"Aynı tür ve yönde, bundan önce kapanmış iddialar. Fiyat süresinde olağan oynaklığı kadar o yöne gittiyse tuttu sayılır; rastgele bir gün de yarı yarıya tutar."})
+ok   a tap on a term opens no capsule
+ok   a tap closes the explanation
+ok   URL voice ({"clock":true,"depth":"sentence","face":"oltan","feed":"elikov","feed_order":"live_new","look":"oltan","motion":"surek","open":"tesir","outcome":"tg5","reduced_motion":true,"story":"korda","transition":"surek","voice":"selvi"})
+ok   voice select shows selvi
+ok   voice back to r4 ({"clock":true,"depth":"sentence","face":"oltan","feed":"elikov","feed_order":"live_new","look":"oltan","motion":"surek","open":"tesir","outcome":"tg5","reduced_motion":true,"story":"korda","transition":"surek"})
+ok   no page errors 
+ok   URL open design ({"clock":true,"depth":"sentence","face":"oltan","feed":"elikov","feed_order":"live_new","look":"oltan","motion":"surek","open":"tesir","outcome":"tg5","reduced_motion":true,"story":"korda","transition":"surek","voice":"marla"})
+ok   open choices ["r4","tesir","nobra"]
+ok   the column's frame ([390,800])
+ok   no text above the column, the layer scrolls ({"height":"800px","touchAction":"pan-y","width":"390px"})
+ok   the trust block carries its explanation
+ok   the trust explanation shows ({"hidden":false,"term":"Kim doğruladı?"})
+ok   a tap on the trust block opens nothing
+ok   open select shows tesir
+ok   open design back to r4 ({"clock":true,"depth":"sentence","face":"oltan","feed":"elikov","feed_order":"live_new","frames":{"face":[390,300]},"look":"oltan","motion":"surek","outcome":"tg5","reduced_motion":true,"story":"korda","transition":"surek","voice":"marla"})
+ok   no page errors 
+ok   ?look=zemre brings face zemre ({"clock":true,"depth":"sentence","face":"zemre","feed":"elikov","feed_order":"live_new","look":"zemre","motion":"surek","open":"tesir","outcome":"tg5","reduced_motion":true,"story":"korda","transition":"surek","voice":"marla"})
+ok   ?face= wins ({"clock":true,"depth":"sentence","face":"vadrel","feed":"elikov","feed_order":"live_new","look":"zemre","motion":"surek","open":"tesir","outcome":"tg5","reduced_motion":true,"story":"korda","theme":"dark","transition":"surek","voice":"marla"})
+ok   Settings → Look r4 brings vadrel ({"clock":true,"depth":"sentence","face":"vadrel","feed":"elikov","feed_order":"live_new","motion":"surek","open":"tesir","outcome":"tg5","reduced_motion":true,"story":"korda","theme":"dark","transition":"surek","voice":"marla"})
+ok   story choices ["r4","pavka","korda"]
+ok   story select shows korda
+ok   other candidates from Settings ({"clock":true,"depth":"sentence","face":"vadrel","feed":"elikov","feed_order":"live_new","motion":"surek","open":"nobra","outcome":"tg5","reduced_motion":true,"story":"pavka","theme":"dark","transition":"surek","voice":"marla"})
+ok   motion choices ["r4","surek","nabiz"]
+ok   motion select shows surek
+ok   no page errors 
+ok   ?reduced_motion=1 turns reduced motion on
+ok   no page errors 
+ok   ?reduce=1 turns reduced motion on
+ok   no page errors 
+ok   ?anim=0 turns reduced motion on
+ok   no page errors 
+ok   topics: voice look story feed_order feed_rule motion open
+ok   voice: 3 candidates, same content (adım 120 / 1260 · 2023-07-06 12:00 · cap.SYN12.breakout.down.129 capsule)
+ok   voice: 6 images loaded
+ok   look: 3 candidates, same content (adım 120 / 1260 · 2023-07-06 12:00 · cap.SYN12.breakout.down.129 chart)
+ok   look: 9 images loaded
+ok   story: 3 candidates, same content (adım 120 / 1260 · 2023-07-06 12:00 · cap.SYN12.breakout.down.129 chart)
+ok   story: 3 images loaded
+ok   feed_order: 3 candidates, same content (adım 120 / 1260 · 2023-07-06 12:00 · akışın ilk 6 satırı)
+ok   feed_order: 15 images loaded
+ok   feed_rule: 2 candidates, same content (adım 120 / 1260 · 2023-07-06 12:00 · akışın ilk 6 satırı)
+ok   feed_rule: 12 images loaded
+ok   motion: 3 candidates, same content (adım 120 / 1260 · 2023-07-06 12:00 · cap.SYN12.breakout.down.129 capsule)
+ok   motion: 6 images loaded
+ok   open: 3 candidates, same content (adım 120 / 1260 · 2023-07-06 12:00 · cap.SYN12.breakout.down.129 evidence)
+ok   open: 6 images loaded
+ok   no horizontal scroll (scrollWidth 402)
+ok   one pick per topic (voice/selvi, look/oltan)
+ok   copied summary = expected
+R5 galeri · voice=selvi (not: kısa ve net) · look=oltan · story=— · feed_order=— · feed_rule=— · motion=— · open=—
+notlar: look/zemre: soluk
+an: adım 120 / 1260 · 2023-07-06 12:00 · tr · koyu
+cihaz: iPhone iOS 27.0 · Safari · 402×874 @1 · tarih: 2025-11-18 13:00 (İstanbul)
+ok   summary box shows it
+ok   share link carries the picks
+ok   picks and notes survive a reload
+ok   note shown after reload
+ok   light theme (light, /gallery/img/tr-light-voice-marla-0.png)
+ok   English (R5 gallery; R5 gallery · voice=selvi (note: kısa ve net) · look=oltan · story=— · feed_order=— · feed_rule=— · motion=— · open=—)
+ok   no page errors 
+ok   no request outside the origin (242 requests) 
+ok   ?pick= picks (voice/selvi)
+ok   without the Clipboard API the summary is selected
+ok   no request outside the origin
+gallery: all checks passed
+chromium/ref: paint {"fallback":null,"requested":"ref","used":"ref"}; face painted, scene painted; answers {"interaction":9,"screen":1}
+chromium/canvas: paint {"fallback":null,"requested":"canvas","used":"canvas"}; face painted, scene painted; answers {"interaction":9,"screen":1}
+chromium/gpu: paint {"fallback":"unsupported","requested":"gpu","used":"ref"} (WebGPU unavailable: the reported fallback); face painted, scene painted; answers {"interaction":9,"screen":1}
+chromium/canvas = ref: digests, feed, open, 10 authority answers (tap_at/hit, screen) byte-identical
+chromium/gpu = ref: digests, feed, open, 10 authority answers (tap_at/hit, screen) byte-identical
+chromium/default: paint {"fallback":null,"requested":"canvas","used":"canvas"}
+chromium/cpu (removed): paint {"fallback":"removed","requested":"cpu","used":"canvas"}; warning "paint path `cpu` was removed (K51); the page paints with `canvas`"
+paint-paths: ok
+paint-canvas chromium: without FontFace → ref (unsupported)
+  chromium feed-tr-dark.face-0 390x240: differ 2657 (2.839%), max 58, >2 0.759%, >32 0.049% | text 95 px (max 58) | off-text 2562 px, >2 634, max 58 ok
+  chromium feed-tr-dark.face-1 390x240: differ 2693 (2.877%), max 58, >2 0.815%, >32 0.033% | text 52 px (max 41) | off-text 2641 px, >2 716, max 58 ok
+  chromium feed-tr-dark.face-2 390x240: differ 1954 (2.088%), max 65, >2 0.838%, >32 0.032% | text 44 px (max 53) | off-text 1910 px, >2 749, max 65 ok
+  chromium feed-en-light.face-0 390x240: differ 947 (1.012%), max 54, >2 0.752%, >32 0.042% | text 94 px (max 54) | off-text 853 px, >2 631, max 54 ok
+  chromium capsule-tr-dark.scene 390x800: differ 3114 (0.998%), max 40, >2 0.346%, >32 0.003% | text 23 px (max 16) | off-text 3091 px, >2 1065, max 40 ok
+  chromium chart-tr-dark.scene 390x300: differ 2648 (2.263%), max 22, >2 0.215%, >32 0.000% | text 94 px (max 14) | off-text 2554 px, >2 242, max 22 ok
+  chromium chart-en-light-rozet.scene 390x300: differ 911 (0.779%), max 31, >2 0.356%, >32 0.000% | text 17 px (max 13) | off-text 894 px, >2 407, max 31 ok
+  chromium feed-tr-dark-r4.face-0 390x226: differ 6609 (7.498%), max 24, >2 0.169%, >32 0.000% | text 0 px (max 0) | off-text 6609 px, >2 149, max 24 ok
+  chromium feed-tr-dark-r4.face-1 390x226: differ 6609 (7.498%), max 24, >2 0.169%, >32 0.000% | text 0 px (max 0) | off-text 6609 px, >2 149, max 24 ok
+  chromium feed-tr-dark-r4.face-2 390x226: differ 3078 (3.492%), max 28, >2 0.558%, >32 0.000% | text 0 px (max 0) | off-text 3078 px, >2 492, max 28 ok
+  chromium feed-tr-light-r4-closed.closed-0 390x226: differ 667 (0.757%), max 29, >2 0.532%, >32 0.000% | text 0 px (max 0) | off-text 667 px, >2 469, max 29 ok
+  chromium feed-tr-light-r4-closed.closed-1 390x226: differ 0 (0.000%), max 0, >2 0.000%, >32 0.000% | text 0 px (max 0) | off-text 0 px, >2 0, max 0 ok
+  chromium feed-en-light-r4.face-0 390x226: differ 278 (0.315%), max 24, >2 0.180%, >32 0.000% | text 0 px (max 0) | off-text 278 px, >2 159, max 24 ok
+  chromium feed-en-light-r4.face-1 390x226: differ 380 (0.431%), max 24, >2 0.180%, >32 0.000% | text 0 px (max 0) | off-text 380 px, >2 159, max 24 ok
+  chromium feed-tr-dark-fotolay.face-0 390x228: differ 1345 (1.513%), max 64, >2 0.995%, >32 0.056% | text 0 px (max 0) | off-text 1345 px, >2 885, max 64 ok
+  chromium feed-tr-dark-fotolay.face-1 390x228: differ 1331 (1.497%), max 68, >2 0.968%, >32 0.052% | text 0 px (max 0) | off-text 1331 px, >2 861, max 68 ok
+  chromium partial feed-tr-dark.face-0: same pixels as a whole repaint
+  chromium partial feed-tr-dark.face-1: same pixels as a whole repaint
+  chromium partial feed-tr-dark.face-2: same pixels as a whole repaint
+  chromium partial chart-tr-dark.scene: same pixels as a whole repaint
+  chromium partial feed-tr-dark-r4.face-0: same pixels as a whole repaint
+  chromium partial feed-tr-dark-r4.face-1: same pixels as a whole repaint
+  chromium partial feed-tr-dark-r4.face-2: same pixels as a whole repaint
+  chromium partial repaints in those pages: 4
+paint-canvas: 16 images, all within tolerance
+screens: 52 scene images and page screenshots in /var/folders/3h/tkg8gmr96tscr2t77stj77v40000gn/T/tmp.Ik1K9tm0nx/demo/a
+screens: 52 scene images and page screenshots in /var/folders/3h/tkg8gmr96tscr2t77stj77v40000gn/T/tmp.Ik1K9tm0nx/demo/b
+-- demo: PASS (138s)
+
+================================================================
+== [19] arch
+================================================================
+self-test: clean workspace passes (tricky strings, raw strings, chars, lifetimes, comments, test module; dev-dependency upward ignored)
+self-test: crate.lines     qp-b                                     caught
+self-test: dir.files       crates/qp-c/src                          caught
+self-test: doc.size        docs/BIG.md                              caught
+self-test: file.hard       crates/qp-b/src/big.rs                   caught
+self-test: file.soft       crates/qp-b/src/mid.rs                   caught
+self-test: fn.lines        crates/qp-b/src/long.rs::long            caught
+self-test: layer.lateral   qp-b -> qp-c                             caught
+self-test: layer.unknown   qp-x                                     caught
+self-test: layer.up        qp-a -> qp-b                             caught
+self-test: name.forbidden  crates/qp-a/src/util.rs                  caught
+self-test: path.outside    crates/qp-a/src/escape.rs->../../qp-b/hidden.rs caught
+self-test: readme.crate    crates/qp-x                              caught
+self-test: readme.module   crates/qp-a/src/topic                    caught
+self-test: root.logic      crates/qp-a/src/topic/mod.rs             caught
+self-test: shell.lines     qp-s                                     caught
+self-test: test.file       crates/qp-b/tests/big.rs                 caught
+self-test: root.logic      crates/qp-c/src/lib.rs                   caught
+self-test: fn.lines        crates/qp-c/src/tests.rs::fake_test      caught
+self-test: file.hard       crates/qp-c/src/gen.rs                   caught
+self-test: lint.allow      qp-a                                     caught
+self-test: baseline tolerates soft debt, never hard rules  ok
+self-test: ratchet: value above the baseline is an error   caught
+self-test: ratchet: new debt item is an error              caught
+self-test: a named exception is reported, not an error    ok
+self-test: PASS
+EXCEPTION layer: qp-source placed in `alan` (istisna isteği — Arkin'in onayını bekliyor): §2 qp-source'u uyarlayıcıya koyar; içeriği veri düzlemidir (FeedStore §18.4, SourceProvider, MemoryProvider, sentetik piyasa, yeniden oynatma takvimi, canlı bar kurma) ve oturum onu otoritenin parçası olarak kullanır. Dış dünyaya bakan kısım yerel dosya okuma (local.rs, file.rs). Saf taşımayla ayrılamaz: Session::new_inner gövdesi MemoryProvider::from_init'i çağırır (RG1/PLAN §3.1).
+EXCEPTION [layer.lateral] qp-capsule -> qp-facts: sideways dependency inside layer `alan` — İ2 istisna isteği — Arkin'in onayını bekliyor: Kapsül olgudan kurulur (alan katmanı içinde zincir). §2 aynı katmanda bağımlılığı yasaklar; saf taşımayla kaldırılamaz. Öneri K-2: katman içinde bildirilmiş, döngüsüz sıra (RG1/PLAN §3.3).
+EXCEPTION [layer.lateral] qp-host -> qp-live: sideways dependency inside layer `uyarlayıcılar` — İ2 istisna isteği — Arkin'in onayını bekliyor: Barındırma uyarlayıcıları birleştirir (kabuk inceltmesi, PLAN §5). §2 aynı katmanda bağımlılığı yasaklar; saf taşımayla kaldırılamaz. Öneri K-2: katman içinde bildirilmiş, döngüsüz sıra (RG1/PLAN §3.3).
+EXCEPTION [layer.lateral] qp-host -> qp-matriks: sideways dependency inside layer `uyarlayıcılar` — İ2 istisna isteği — Arkin'in onayını bekliyor: Barındırma uyarlayıcıları birleştirir (kabuk inceltmesi, PLAN §5). §2 aynı katmanda bağımlılığı yasaklar; saf taşımayla kaldırılamaz. Öneri K-2: katman içinde bildirilmiş, döngüsüz sıra (RG1/PLAN §3.3).
+EXCEPTION [layer.lateral] qp-host -> qp-mcp: sideways dependency inside layer `uyarlayıcılar` — İ2 istisna isteği — Arkin'in onayını bekliyor: Barındırma uyarlayıcıları birleştirir (kabuk inceltmesi, PLAN §5). §2 aynı katmanda bağımlılığı yasaklar; saf taşımayla kaldırılamaz. Öneri K-2: katman içinde bildirilmiş, döngüsüz sıra (RG1/PLAN §3.3).
+EXCEPTION [layer.lateral] qp-host -> qp-shellcore: sideways dependency inside layer `uyarlayıcılar` — İ2 istisna isteği — Arkin'in onayını bekliyor: Barındırma uyarlayıcıları birleştirir (kabuk inceltmesi, PLAN §5). §2 aynı katmanda bağımlılığı yasaklar; saf taşımayla kaldırılamaz. Öneri K-2: katman içinde bildirilmiş, döngüsüz sıra (RG1/PLAN §3.3).
+EXCEPTION [file.hard] crates/qp-grammar/src/compile/layer/prepare.rs: 891 lines > hard limit 800 — İ6 istisna isteği — Arkin'in onayını bekliyor: Tek fonksiyon prepare ≈885 satır; fonksiyon bölmek bu round'da yasak. Dosyada yalnız o var.
+EXCEPTION [file.hard] crates/qp-session/src/ops/expand/op.rs: 910 lines > hard limit 800 — İ6 istisna isteği — Arkin'in onayını bekliyor: Tek fonksiyon expand_op ≈905 satır; fonksiyon bölmek bu round'da yasak. Dosyada yalnız o var.
+EXCEPTION [crate.lines] qp-capsule: 13230 non-test lines > 12000 — İ5 istisna isteği — Arkin'in onayını bekliyor: 13,2 bin. voice/ (4,75 bin) saf taşımayla qp-voice crate'ine ayrılabilir, ama alanda iki yeni yan bağımlılık açar (qp-voice → qp-capsule, qp-facts); İ2 kararına bağlı bırakıldı (M4b ölçümü).
+EXCEPTION [crate.lines] qp-grammar: 19330 non-test lines > 12000 — İ4 istisna isteği — Arkin'in onayını bekliyor: Çekirdek ↔ tasarım klasörleri (faces, open, stories, glyph) adla kayıt üstünden döngüsel; döngüsüz kesimlerle bile ≈14,7 bin kalır. Gerçek bölme kaydın enjeksiyona çevrilmesini ister (M4a ölçümü).
+EXCEPTION [crate.lines] qp-session: 31999 non-test lines > 12000 — İ3 istisna isteği — Arkin'in onayını bekliyor: 23 modül tek güçlü bağlı bileşen (≈26 bin satır); Session'ın inherent impl'leri 18 dosyaya dağılmış, başka crate'te yazılamaz. Konu klasörlerine bölündü; crate bölmesi Session'ı alt sistemlere ayıran bir tasarım round'u ister (PLAN §4).
+arch-check: 0 error(s); 11 exception(s) awaiting approval; within the baseline: dir.files 3, doc.size 2, file.soft 37, fn.lines 177, lint.allow 13, test.file 6
+-- arch: PASS (1s)
+
+================================================================
+== summary
+================================================================
+#   step       result   time  note
+1   fmt        PASS       1s  
+2   clippy     PASS      25s  
+3   test       PASS     603s  
+4   schema     PASS     165s  31 schemas, deterministic
+5   fixtures   PASS       0s  4 fixtures valid
+6   golden     PASS       0s  byte-identical to golden
+7   views      PASS       1s  12 views x2 byte-identical to goldens (V0 = sample.png)
+8   wasm       PASS      13s  raw 2281954 B, gzip -9 746734 B
+9   hygiene    PASS       0s  
+10  browser    PASS      16s  headless Chromium matches golden
+11  compute    PASS       0s  rsi(14), macd: valid StudyOutput
+12  digest     PASS      36s  arm64, x86_64, wasm32: 7b1e99d40889f83c
+13  protocol   PASS       1s  69 examples as expected; transcripts and init valid
+14  conform    PASS       3s  70 transcripts x inproc, serve, mcp
+15  replica    PASS      34s  native authority = native replica = wasm32 replica (lag 0, 25); viewer (lag 0, 25)
+16  replay     PASS       1s  two runs byte-identical (1816 lines; 1120 notifications after the last backward seek)
+17  shell      PASS       0s  no domain logic in shells/web; self-test passes
+18  demo       PASS     138s  same origin only; browser = shell-less digests; settings page; gallery; paint paths (semantic reads identical); canvas within tolerance; 83 images x2 (scenes identical, pages within chrome tolerance), scenes = goldens (v1 pinned to the pre-R5 designs, v2 = R5 defaults with story pinned to pavka, both with clock off; p4 = the presentation now, rows with their time)
+19  arch       PASS       1s  self-test passes; no error outside the debt baseline
+total: 1038s
+verify: OK
+exit 0

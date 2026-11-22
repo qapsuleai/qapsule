@@ -48,7 +48,14 @@
       ]
     }
   ],
-  "layer_overrides": {},
+  "layer_overrides": {
+    "qp-source": {
+      "layer": "alan",
+      "id": "İ1",
+      "status": "istisna isteği — Arkin'in onayını bekliyor",
+      "reason": "§2 qp-source'u uyarlayıcıya koyar; içeriği veri düzlemidir (FeedStore §18.4, SourceProvider, MemoryProvider, sentetik piyasa, yeniden oynatma takvimi, canlı bar kurma) ve oturum onu otoritenin parçası olarak kullanır. Dış dünyaya bakan kısım yerel dosya okuma (local.rs, file.rs). Saf taşımayla ayrılamaz: Session::new_inner gövdesi MemoryProvider::from_init'i çağırır (RG1/PLAN §3.1)."
+    }
+  },
   "shell_layer": "kabuklar",
   "budgets": {
     "file_soft": 600,
@@ -90,6 +97,77 @@
   "generated_files": [
     "crates/qp-grammar/src/advances.rs"
   ],
-  "exceptions": [],
+  "exceptions": [
+    {
+      "id": "İ2",
+      "rule": "layer.lateral",
+      "item": "qp-capsule -> qp-facts",
+      "status": "istisna isteği — Arkin'in onayını bekliyor",
+      "reason": "Kapsül olgudan kurulur (alan katmanı içinde zincir). §2 aynı katmanda bağımlılığı yasaklar; saf taşımayla kaldırılamaz. Öneri K-2: katman içinde bildirilmiş, döngüsüz sıra (RG1/PLAN §3.3)."
+    },
+    {
+      "id": "İ2",
+      "rule": "layer.lateral",
+      "item": "qp-host -> qp-live",
+      "status": "istisna isteği — Arkin'in onayını bekliyor",
+      "reason": "Barındırma uyarlayıcıları birleştirir (kabuk inceltmesi, PLAN §5). §2 aynı katmanda bağımlılığı yasaklar; saf taşımayla kaldırılamaz. Öneri K-2: katman içinde bildirilmiş, döngüsüz sıra (RG1/PLAN §3.3)."
+    },
+    {
+      "id": "İ2",
+      "rule": "layer.lateral",
+      "item": "qp-host -> qp-matriks",
+      "status": "istisna isteği — Arkin'in onayını bekliyor",
+      "reason": "Barındırma uyarlayıcıları birleştirir (kabuk inceltmesi, PLAN §5). §2 aynı katmanda bağımlılığı yasaklar; saf taşımayla kaldırılamaz. Öneri K-2: katman içinde bildirilmiş, döngüsüz sıra (RG1/PLAN §3.3)."
+    },
+    {
+      "id": "İ2",
+      "rule": "layer.lateral",
+      "item": "qp-host -> qp-mcp",
+      "status": "istisna isteği — Arkin'in onayını bekliyor",
+      "reason": "Barındırma uyarlayıcıları birleştirir (kabuk inceltmesi, PLAN §5). §2 aynı katmanda bağımlılığı yasaklar; saf taşımayla kaldırılamaz. Öneri K-2: katman içinde bildirilmiş, döngüsüz sıra (RG1/PLAN §3.3)."
+    },
+    {
+      "id": "İ2",
+      "rule": "layer.lateral",
+      "item": "qp-host -> qp-shellcore",
+      "status": "istisna isteği — Arkin'in onayını bekliyor",
+      "reason": "Barındırma uyarlayıcıları birleştirir (kabuk inceltmesi, PLAN §5). §2 aynı katmanda bağımlılığı yasaklar; saf taşımayla kaldırılamaz. Öneri K-2: katman içinde bildirilmiş, döngüsüz sıra (RG1/PLAN §3.3)."
+    },
+    {
+      "id": "İ3",
+      "rule": "crate.lines",
+      "item": "qp-session",
+      "status": "istisna isteği — Arkin'in onayını bekliyor",
+      "reason": "23 modül tek güçlü bağlı bileşen (≈26 bin satır); Session'ın inherent impl'leri 18 dosyaya dağılmış, başka crate'te yazılamaz. Konu klasörlerine bölündü; crate bölmesi Session'ı alt sistemlere ayıran bir tasarım round'u ister (PLAN §4)."
+    },
+    {
+      "id": "İ4",
+      "rule": "crate.lines",
+      "item": "qp-grammar",
+      "status": "istisna isteği — Arkin'in onayını bekliyor",
+      "reason": "Çekirdek ↔ tasarım klasörleri (faces, open, stories, glyph) adla kayıt üstünden döngüsel; döngüsüz kesimlerle bile ≈14,7 bin kalır. Gerçek bölme kaydın enjeksiyona çevrilmesini ister (M4a ölçümü)."
+    },
+    {
+      "id": "İ5",
+      "rule": "crate.lines",
+      "item": "qp-capsule",
+      "status": "istisna isteği — Arkin'in onayını bekliyor",
+      "reason": "13,2 bin. voice/ (4,75 bin) saf taşımayla qp-voice crate'ine ayrılabilir, ama alanda iki yeni yan bağımlılık açar (qp-voice → qp-capsule, qp-facts); İ2 kararına bağlı bırakıldı (M4b ölçümü)."
+    },
+    {
+      "id": "İ6",
+      "rule": "file.hard",
+      "item": "crates/qp-session/src/ops/expand/op.rs",
+      "status": "istisna isteği — Arkin'in onayını bekliyor",
+      "reason": "Tek fonksiyon expand_op ≈905 satır; fonksiyon bölmek bu round'da yasak. Dosyada yalnız o var."
+    },
+    {
+      "id": "İ6",
+      "rule": "file.hard",
+      "item": "crates/qp-grammar/src/compile/layer/prepare.rs",
+      "status": "istisna isteği — Arkin'in onayını bekliyor",
+      "reason": "Tek fonksiyon prepare ≈885 satır; fonksiyon bölmek bu round'da yasak. Dosyada yalnız o var."
+    }
+  ],
   "_exceptions_doc": "Named exception requests (rounds/RG1/REPORT.md 'İstisna istekleri'): a finding matching rule+item is printed as an exception on every run instead of failing. Only Arkin approves or removes them (DECISIONS.md)."
 }

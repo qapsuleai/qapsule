@@ -208,3 +208,46 @@ kopyanın kendi `scripts/arch-check`'iyle; her denemeden sonra geri alındı.
 - `../refs` kodunun kopyalanmadığını yalnız metin aramasıyla denetledim; benzerlik taraması yok.
 - `--features replica` dışındaki özellik kapılı testler `tests.names`'e girmiyor; o yollar yalnız
   `verify.sh` adım 8/15 ile sınanıyor.
+
+## Yeniden denetim (B1, B3, B5)
+
+`git merge main` (`d5dc73d2`, düzeltme `3f2af7e7`) sonrası, aynı yöntemle: karalama kopyası
+(depo dışı), özel `target/wt/audit`, her deneme sonrası geri alındı. `scripts/arch-check
+--self-test` PASS (yeni örnekler `lint.inner`, `lints.workspace`, `fake/tests.rs` yakalandı);
+gerçek ağaçta `arch-check` 0 hata, üretilmiş dosya her koşuda basılıyor.
+
+| Deneme | Sonuç | Not |
+|---|---|---|
+| B1a `#[expect(clippy::unwrap_used)]` | **yakalandı** (`lint.allow` yeni borç) | |
+| B1b `#[cfg_attr(all(), allow(clippy::unwrap_used))]` | **yakalandı** | |
+| B1c `#[allow(clippy::restriction)]` | **yakalandı** | |
+| B1d modül düzeyinde `#![allow(clippy::unwrap_used)]` | **yakalandı** (`lint.inner`, kesin) | fonksiyon gövdesindeki `#![allow]` de yakalanıyor |
+| B1e `[lints] workspace = true` silmek | **yakalandı** (`lints.workspace`, kesin) | |
+| B1f `#[allow(clippy::pedantic)]` (+ 104 satırlık fn) | yakalandı — ama yalnız `fn.lines` sayesinde; `lint.allow` saymaz | etkisiz: 80 üstü zaten `fn.lines` |
+| B1g `#[allow(clippy::nursery)]` | **geçti** | `cognitive_complexity` nursery grubunda; düşük |
+| B1h `#[allow(clippy :: unwrap_used)]` (yolda boşluk) | **geçti** — clippy'yi gerçekten susturuyor (derlemeyle doğrulandı: yalnız `dead_code` hatası kaldı) | orta |
+| B1i `.cargo/config.toml` `rustflags = ["-Aclippy::unwrap_used"]` | **geçti** — `cargo clippy -D warnings` çıkış 0; dosya silinince 101 (doğrulandı) | orta |
+| B1j `[lints]\nworkspace = true` metni yalnız `[package.metadata]` çok satırlı dizgesinde | **geçti** (düzenli ifade satır başına bakıyor) | düşük (yapay) |
+| B3a `cfg`'siz `pub mod tests;` + 150 satırlık mantık (başka yerde `#[cfg(test)] mod tests` varken) | **yakalandı** (`fn.lines`) | **B3 kapandı** |
+| B3b atası `#[cfg(test)] mod tests;` bildirir, aynı dosya `#[path = "a/tests.rs"] pub mod real;` ile test dışı da derlenir | **geçti** | düşük (yapay) |
+| B3c atada `cfg(test)` yalnız yorumda | **yakalandı** | |
+| B5a taban çizgisi elle +50, fonksiyon +40 | **yakalandı** ("baseline can be tightened") | |
+| B5b taban çizgisi elle +40, fonksiyon tam +40 | **geçti** | orta: elle düzenleme hâlâ korunmuyor |
+| B5c fonksiyon bir satır kısalır, taban çizgisi yazılmaz | **yakalandı** (gevşek kalem hata) | |
+| B5d `arch-config.json`'a yeni istisna | geçti (basılıyor, çıkış 0) | tasarım gereği; yalnız inceleme yakalar |
+| B5e `generated_files`'a ekleme + "üretilmiştir" | geçti, ama artık her koşuda "generated (exempt…)" basılıyor | görünür oldu |
+| B5f `hard_rules`'tan `lint.inner`'ı çıkarmak | yakalandı (yumuşak kural olarak yeni borç) | |
+| B2 `lib.rs`'te `include!` | **geçti** (düzeltilmedi) | açık |
+| B4 `src/` dışından `include!` | **geçti** (düzeltilmedi) | açık |
+| B6 `#[path] mod util;` | **geçti** (düzeltilmedi) | açık |
+
+**Hüküm:** B1 büyük ölçüde kapandı (ağırlık yüksek → orta): kalan açıklar yoldaki boşluk
+(`clippy :: x`), depo içi `.cargo/config.toml` `rustflags`, `clippy::nursery` grubu. Öneri: lint
+yolunu boşluktan bağımsız eşleyin (`clippy\s*::\s*`), `pedantic`/`nursery`/`all` gruplarını da sayın,
+`.cargo/config.toml` ve `RUSTFLAGS`'ta `-A`/`--cap-lints` kesin hata olsun. **B3 kapandı**
+(yalnız yapay `#[path]` ikilemesi kalıyor). **B5 kısmen kapandı:** gevşeyen kalem artık hata
+ve üretilmiş dosyalar görünür; `arch-baseline.json` ve `arch-config.json`'un elle (tam eşleşen)
+düzenlenmesi ve yeni istisna eklemek hâlâ yalnız inceleme ile yakalanır (öneri değişmedi:
+`main`'e göre farkı basan ve `docs/decisions`'ta adlı satır arayan adım). B2, B4, B6 açık
+(düzeltme kapsamı dışındaydı). Genel hüküm değişmedi: **Koşullu kabul** (koşullar istisna
+onayları, kapanış ve kalan arch-check açıkları).

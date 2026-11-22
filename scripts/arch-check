@@ -6,6 +6,7 @@
   scripts/arch-check --list          also print every tolerated (baseline) finding
   scripts/arch-check --json          findings as JSON (for reports)
   scripts/arch-check --table         crate line table (non-test / test lines)
+  scripts/arch-check --root <dir>    measure another tree (a worktree) with this config
   scripts/arch-check --write-baseline [--allow-new]  write scripts/arch-baseline.json from
                                      the current findings; refuses any value or count above
                                      the existing baseline, and new items without --allow-new
@@ -37,9 +38,12 @@ BASE_PATH = os.path.join(HERE, "arch-baseline.json")
 def main(argv):
     if "--self-test" in argv:
         return 0 if selftest.run() else 1
+    root = ROOT
+    if "--root" in argv:  # measure another tree (e.g. a worktree) with this config/baseline
+        root = os.path.abspath(argv[argv.index("--root") + 1])
     with open(CFG_PATH, encoding="utf-8") as fh:
         cfg = json.load(fh)
-    findings, scan = rules.all_findings(ROOT, cfg)
+    findings, scan = rules.all_findings(root, cfg)
     if "--table" in argv:
         t = rules.crate_line_table(scan)
         print(f"{'crate':14} {'non-test':>9} {'test':>7}")

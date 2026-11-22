@@ -15,7 +15,7 @@ default = []
 # RP2/T8: the replica binding (`Replica`, qp-session). Off in the default (R0 view) build
 # so that its size stays as measured; `scripts/verify.sh` builds it for the native <-> WASM
 # replica check.
-replica = ["dep:qp-session", "dep:qp-source", "dep:qp-calendar", "dep:qp-capsule"]
+replica = ["dep:qp-session", "dep:qp-shellcore", "dep:qp-capsule"]
 # Spike variant: tiny-skia SIMD pipelines (build with RUSTFLAGS="-C target-feature=+simd128").
 simd = ["qp-render/simd"]
 # Spike variant: also export the vello_cpu backend for the browser comparison.
@@ -24,19 +24,18 @@ spike-vello-cpu = ["qp-render/spike-vello-cpu"]
 spike-vello-gpu = ["qp-render/spike-vello-gpu", "dep:wasm-bindgen-futures"]
 
 [dependencies]
-# RP3/M12c: the GPU paint path's glyph atlas (the same fontdue as qp-render, already in
-# the build through it; named here for its `Font` type).
-fontdue = { version = "0.9.5", default-features = false }
-qp-calendar = { path = "../qp-calendar", optional = true }
 qp-compute = { path = "../qp-compute" }
 qp-grammar = { path = "../qp-grammar" }
 qp-capsule = { path = "../qp-capsule", optional = true }
 qp-render = { path = "../qp-render" }
 qp-schema = { path = "../qp-schema" }
 qp-session = { path = "../qp-session", optional = true }
-qp-source = { path = "../qp-source", optional = true }
-# RP3/T4: typed parsing of the large frames (start, data) without a JSON tree.
-serde = { version = "1.0.229", features = ["derive"] }
+# RG1/M1a: the shell core (ShellCore, gallery, viewer, drive), re-exported under the old
+# paths (`qp_wasm::shell`, …).
+qp-shellcore = { path = "../qp-shellcore", optional = true }
+# The synthetic bar generator of the `render_synthetic_*` exports (formerly reached
+# through the `qp_render::synthetic_bars` wrapper, removed in RG1).
+qp-source = { path = "../qp-source" }
 serde_json = "1"
 wasm-bindgen = "=0.2.130"
 wasm-bindgen-futures = { version = "0.4", optional = true }

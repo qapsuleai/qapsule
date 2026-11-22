@@ -160,3 +160,16 @@ impl SeriesSource for SyntheticSource {
         Ok(Some(ev))
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn synthetic_is_valid_and_stable() {
+        let a = synthetic_series(500, 7);
+        let b = synthetic_series(500, 7);
+        assert_eq!(a, b);
+        qp_schema::validate_bars(a.bars().unwrap()).unwrap();
+    }
+}

@@ -92,7 +92,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         })
         .collect();
 
-    let big = qp_render::synthetic_bars(100_000, 7);
+    let big = qp_source::synthetic_series(100_000, 7);
     let mut scene_ms = Vec::new();
     let mut raster_ms = Vec::new();
     let mut big_hash = 0;

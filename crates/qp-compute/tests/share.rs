@@ -3,7 +3,7 @@
 //! bit, in any list order, with duplicates, mixed runs and singles, short series, and for
 //! every lane count.
 
-mod common;
+mod support;
 
 use std::collections::BTreeMap;
 
@@ -16,7 +16,7 @@ fn bits(v: &[Option<f64>]) -> Vec<Option<u64>> {
 }
 
 fn p(kv: &[(&str, f64)]) -> P {
-    common::params(kv)
+    support::params(kv)
 }
 
 /// Deterministic Fisher–Yates shuffle (integer LCG).
@@ -38,7 +38,7 @@ fn check(name: &str, list: &[P], x: &[f64]) {
         .iter()
         .map(|p| {
             let kv: Vec<(&str, f64)> = p.iter().map(|(k, v)| (k.as_str(), *v)).collect();
-            common::batch(name, &kv, x)
+            support::batch(name, &kv, x)
         })
         .collect();
     for lanes in [None, Some(1), Some(2), Some(3), Some(4), Some(8)] {

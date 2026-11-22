@@ -1,6 +1,6 @@
 //! A study can read another study's output and several bar fields; all modes agree.
 
-mod common;
+mod support;
 
 use std::collections::BTreeMap;
 
@@ -12,16 +12,16 @@ fn ema_of_rsi_matches_manual_composition() {
         .map(|i| 100.0 + f64::from(i % 7) - f64::from(i % 3) * 1.5)
         .collect();
     let mut chain = Chain::new(
-        common::study("rsi", &[("period", 5.0)]),
+        support::study("rsi", &[("period", 5.0)]),
         0,
-        common::study("ema", &[("period", 3.0)]),
+        support::study("ema", &[("period", 3.0)]),
     );
     let out = run(&mut chain, &[&x]).unwrap();
 
     // Manual: rsi, drop warmup, ema, re-pad.
-    let rsi = common::batch("rsi", &[("period", 5.0)], &x)[0].clone();
+    let rsi = support::batch("rsi", &[("period", 5.0)], &x)[0].clone();
     let defined: Vec<f64> = rsi.iter().flatten().copied().collect();
-    let ema = common::batch("ema", &[("period", 3.0)], &defined)[0].clone();
+    let ema = support::batch("ema", &[("period", 3.0)], &defined)[0].clone();
     let mut want = vec![None; x.len() - defined.len()];
     want.extend(ema);
     assert_eq!(out[0], want);
@@ -115,7 +115,7 @@ fn revision_to_none_is_not_committed_downstream() {
         Chain::new(
             Box::new(Streaming::new(AtLeast10, qp_compute::Field::Close)),
             0,
-            common::study("sma", &[("period", 2.0)]),
+            support::study("sma", &[("period", 2.0)]),
         )
     };
     // Batch over the final prices [20, 5, 40]: the gate gives [20, None, 40], so the

@@ -1682,7 +1682,7 @@ durumla tutulur. Koşulların yapıdaki yeri (dayandığı seriler, aralarındak
 beslemeleri, kapsülün sorumluları; §18.3) bir dizinde tutulur ve günlüğe yalnız bar yazısı
 olmayan bir girdi geldiğinde yeniden kurulur; her koşul, niyet ve kapsül değerini önbellek
 yuvalarından okur; veri yetkisi bir değişimde kişi ve besleme başına bir kez sorulur.
-Kaynak: `crates/qp-session/src/live.rs`, `values.rs`; ölçüm ve tasarım
+Kaynak: `crates/qp-session/src/data/live.rs`, `authority/values.rs`; ölçüm ve tasarım
 `rounds/RP2/experiments/T5.md`, `T5-fixes.md`.
 
 ## 19. Tutarlılık: otorite ile yansının aynı veriye baktığı (RP2)
@@ -1691,7 +1691,7 @@ Kaynak: `crates/qp-session/src/live.rs`, `values.rs`; ölçüm ve tasarım
 > veri kaynaklı her iddiasına kanıt değerlerini ekler; yansı bir iddiayı yalnız **kendi
 > verisinde** aynı yüklem tuttuğunda gösterir. Dondurulmuş kanıt (`EvidenceRef`,
 > `verify_evidence`, §18.5) olduğu gibi kalır. Kavramlar `docs/CONCEPTS.md` "Tutarlılık".
-> Referans: `crates/qp-session/src/claims.rs` (otorite), `replica.rs` (yansı).
+> Referans: `crates/qp-session/src/capsule/claims.rs` (otorite), `replica.rs` (yansı).
 
 ### 19.1 Sorun ve kural
 
@@ -1863,7 +1863,7 @@ gösterir; değer göstermez.
 
 > K36 (A20 cevabı): "ikisi birden" — otorite kesin barla doğrular ve yansıdan itiraz yolu
 > açılır. Bu alt bölüm §19.8'deki "`dispute` v0'da yok" maddesinin yerini alır (`check`
-> yine yok). Referans: `crates/qp-session/src/dispute.rs`; ölçüm
+> yine yok). Referans: `crates/qp-session/src/capsule/dispute.rs`; ölçüm
 > `rounds/R3/experiments/M7/RESULTS.md`. Kavramlar: CAPSULE.md §9.3 (`retracted`, K37).
 
 **Sorun.** §19'un kuralı yansıyı yanlış göstermekten korur; ama otorite **kendi**
@@ -2223,7 +2223,7 @@ kapsül ya da bar yetkisi yok: `unknown`.
 
 Kavramlar `docs/CONCEPTS.md` "Gösterim (R4)" (yeniden oynatma, oynatma saati, oynatma
 konumu, oynatma denetimi); karar K44. Kaynak `crates/qp-source/src/replay.rs`
-(`Replay`), barındırıcı `crates/qp-session/src/replayhost.rs` (`ReplayHost`), şema
+(`Replay`), barındırıcı `crates/qp-session/src/host/replayhost.rs` (`ReplayHost`), şema
 `qp-schema::protocol` (`ClientMsg::Replay`, `ReplayControl`, `ReplayState`,
 `QueryResult::Replay`, `SessionInit.replay` / `ReplayInit`). Tasarım ve ölçüm
 `rounds/R4/experiments/T2.md`.
@@ -2362,8 +2362,8 @@ Sayfa, protokol ve veri düzlemi **aynı kökendedir**; sayfa başka hiçbir yer
 > karne otoritededir; akıştaki kapsüller cihaza hazır gelir. Cihaz yalnız kullanıcının o an
 > baktığı şey için veri alır, hesaplar ve çizer: açık kapsülün enstrümanı (grafik,
 > göstergeler, aday, işaretin canlı hareketi). Cihazın tik başına işi ve belleği evrendeki
-> sembol sayısından bağımsızdır. Referans: `crates/qp-session/src/viewer.rs` (otorite ve
-> cihaz tarafı), `crates/qp-wasm/src/viewer.rs` (kabuk çekirdeği), `crates/qp-cli/src/demo.rs`
+> sembol sayısından bağımsızdır. Referans: `crates/qp-session/src/replica/viewer.rs` (otorite ve
+> cihaz tarafı), `crates/qp-shellcore/src/viewer.rs` (kabuk çekirdeği), `crates/qp-cli/src/demo.rs`
 > (barındırıcı). Ölçüm `rounds/RP3/experiments/M15.md`. Kavramlar `docs/CONCEPTS.md`
 > "Görüntüleyici (RP3)". Bu bölüm §19'u daraltır: görüntü kuralı (§19.4) yalnız açık
 > enstrüman için geçerlidir; akıştaki kapsül otoritenin kesinleşmiş iddiasıdır.
@@ -2496,8 +2496,8 @@ değişen yüzler; kapatınca `closed` ve boş abonelik; ikinci abonelik `duplic
 > varsayılan görünür), K53 (yazı tura kapsüller akışta gizli, çizelgede işaretli), K48
 > (cihaz listeyi grafik açılınca ister), K33/K34 (yetkisize rakam gitmez), K23 (bar
 > taşınmaz). Şema `qp-schema::protocol` (`protocol/story.rs`: `StoryRow`, `StoryFace`,
-> `StoryOutcome`, `FeedHidden`), otorite `crates/qp-session/src/story.rs`, cihaz
-> `crates/qp-wasm/src/viewer.rs` (`Stories`). Bu bölüm çizimi tanımlamaz: liste, hikâye
+> `StoryOutcome`, `FeedHidden`), otorite `crates/qp-session/src/capsule/story.rs`, cihaz
+> `crates/qp-shellcore/src/viewer.rs` (`Stories`). Bu bölüm çizimi tanımlamaz: liste, hikâye
 > çizelgesinin tasarım alternatiflerinin (M18a–c) ortak girdisidir.
 
 Grafik derinliğinde bir enstrümanın, görünen aralıktaki **bütün** kapsülleri (hikâyeleri)
@@ -2687,8 +2687,8 @@ değişince yer; açık görünüm okuyucusuna sunucu yorumu; abonelikten çık�
 Kavramlar `docs/CONCEPTS.md` "Canlı veri (R6)" (borsa saati, seans evresi, bayat); dil
 `docs/LANGUAGE.md` "Piyasa durumu". Şema `qp_schema::market` (`MarketStatus`, `PhaseCode`,
 `PhaseClass`, `MarketSource`), metin `qp_capsule::market`, otorite
-`Session::set_market_status` (`crates/qp-session/src/session.rs`), kabuk çekirdeği
-`ShellCore::market_json` (`crates/qp-wasm/src/shell.rs`). Testler
+`Session::set_market_status` (`crates/qp-session/src/authority/session/clock.rs`), kabuk çekirdeği
+`ShellCore::market_json` (`crates/qp-shellcore/src/shell/inbound.rs`). Testler
 `crates/qp-session/tests/market.rs`, `crates/qp-wasm/tests/market_r6.rs`.
 
 ### 24.1 Barındırıcı girdisi
@@ -2768,8 +2768,9 @@ bağlanır; ajan da bir okuyucudur), sözleşme `rounds/R5B/PLAN.md` §1–§4. 
 (`Principal.on_behalf`, `ProtocolError.reason`/`reasons`, `Op::AddComment`/`AddWatch`/
 `RemoveWatch`, `Comment`, `Watch`, `Query::Preview`, `Topic::Comments`,
 `Event::IntentMatched`/`Comment`, `SessionInit.agent_policy`/`comment_strictness`);
-referans otorite `crates/qp-session/src/agent.rs`, `comments.rs`, `watch.rs`,
-`preview.rs`. Bütün yeni alanlar isteğe bağlıdır; R5B öncesi dökümler bayt bayt aynı.
+referans otorite `crates/qp-session/src/authority/agent.rs`, `capsule/comments.rs`,
+`capsule/watch.rs`, `read/preview.rs`. Bütün yeni alanlar isteğe bağlıdır; R5B öncesi
+dökümler bayt bayt aynı.
 
 ### 25.1 Kimlik ve köken
 

@@ -1,7 +1,7 @@
 //! RP1/E8: certified late start = full run, bit for bit, on every bar of the tail, for
 //! random walks, flat and constant stretches, zeros, short series and every `from`.
 
-mod common;
+mod support;
 
 use qp_compute::late::{ema_tail, rsi_tail};
 use qp_compute::sweep::bench_closes;
@@ -36,7 +36,7 @@ fn series(kind: usize, n: usize) -> Vec<f64> {
 }
 
 fn check(name: &str, x: &[f64], period: usize, from: usize) -> bool {
-    let full = common::batch(name, &[("period", period as f64)], x);
+    let full = support::batch(name, &[("period", period as f64)], x);
     let mut out = vec![0.0; x.len() - from];
     let cert = if name == "ema" {
         ema_tail(x, period, from, &mut out)

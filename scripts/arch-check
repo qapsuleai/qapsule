@@ -6,6 +6,7 @@
   scripts/arch-check --list          also print every tolerated (baseline) finding
   scripts/arch-check --json          findings as JSON (for reports)
   scripts/arch-check --table         crate line table (non-test / test lines)
+  scripts/arch-check --debt-md       write docs/DEBT.md from the baseline and exceptions
   scripts/arch-check --root <dir>    measure another tree (a worktree) with this config
   scripts/arch-check --write-baseline [--allow-new]  write scripts/arch-baseline.json from
                                      the current findings; refuses any value or count above
@@ -57,6 +58,12 @@ def main(argv):
     hard = set(cfg["hard_rules"])
     findings, excepted, unused = bl.split_exceptions(findings, cfg)
     errors, tolerated, stale = bl.judge(findings, base, hard)
+    if "--debt-md" in argv:
+        from archcheck import debt
+        with open(os.path.join(ROOT, "docs", "DEBT.md"), "w", encoding="utf-8") as fh:
+            fh.write(debt.render(base, cfg) + "\n")
+        print("docs/DEBT.md written")
+        return 0
     if "--write-baseline" in argv:
         # The ratchet: an existing baseline may only shrink. A first baseline (empty file)
         # or new debt needs `--allow-new <reason>` and is then a reviewed change.

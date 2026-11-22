@@ -1,7 +1,7 @@
 //! Nested study addresses (K63): a chain built from an address is bit-identical to the
 //! same chain built by hand, in batch, streaming and "revise the last bar" modes.
 
-mod common;
+mod support;
 
 use qp_compute::address::{is_interval, Source, MAX_DEPTH};
 use qp_compute::graph::sweep_chains;
@@ -138,7 +138,7 @@ fn rsi_14() {
     check(
         "RSI:14",
         Field::Close,
-        common::study("rsi", &[("period", 14.0)]),
+        support::study("rsi", &[("period", 14.0)]),
     );
 }
 
@@ -153,9 +153,9 @@ fn ema_of_rsi_with_symbol_and_interval() {
         "ISCTR:5m:EMA[RSI:18]:20",
         Field::Close,
         Box::new(Chain::new(
-            common::study("rsi", &[("period", 18.0)]),
+            support::study("rsi", &[("period", 18.0)]),
             0,
-            common::study("ema", &[("period", 20.0)]),
+            support::study("ema", &[("period", 20.0)]),
         )),
     );
     // Without the prefix: the same chain.
@@ -163,9 +163,9 @@ fn ema_of_rsi_with_symbol_and_interval() {
         "EMA[RSI:18]:20",
         Field::Close,
         Box::new(Chain::new(
-            common::study("rsi", &[("period", 18.0)]),
+            support::study("rsi", &[("period", 18.0)]),
             0,
-            common::study("ema", &[("period", 20.0)]),
+            support::study("ema", &[("period", 20.0)]),
         )),
     );
 }
@@ -175,12 +175,12 @@ fn two_levels() {
     let hand = || -> Box<dyn Study> {
         Box::new(Chain::new(
             Box::new(Chain::new(
-                common::study("rsi", &[("period", 14.0)]),
+                support::study("rsi", &[("period", 14.0)]),
                 0,
-                common::study("ema", &[("period", 10.0)]),
+                support::study("ema", &[("period", 10.0)]),
             )),
             0,
-            common::study("sma", &[("period", 5.0)]),
+            support::study("sma", &[("period", 5.0)]),
         ))
     };
     check("SMA[EMA[RSI:14]:10]:5", Field::Close, hand());
@@ -194,13 +194,13 @@ fn three_levels_with_field_source() {
         Field::High,
         Box::new(Chain::new(
             Box::new(Chain::new(
-                qp_compute::create("ema", &common::params(&[("period", 3.0)]), Field::High)
+                qp_compute::create("ema", &support::params(&[("period", 3.0)]), Field::High)
                     .unwrap(),
                 0,
-                common::study("sma", &[("period", 4.0)]),
+                support::study("sma", &[("period", 4.0)]),
             )),
             0,
-            common::study("rsi", &[("period", 6.0)]),
+            support::study("rsi", &[("period", 6.0)]),
         )),
     );
 }
@@ -210,9 +210,9 @@ fn multi_output_selectors() {
     // Inner selector: EMA of the MACD signal line (output 1).
     let hand = || -> Box<dyn Study> {
         Box::new(Chain::new(
-            common::study("macd", &[("fast", 12.0), ("slow", 26.0), ("signal", 9.0)]),
+            support::study("macd", &[("fast", 12.0), ("slow", 26.0), ("signal", 9.0)]),
             1,
-            common::study("ema", &[("period", 5.0)]),
+            support::study("ema", &[("period", 5.0)]),
         ))
     };
     check("EMA[MACD(signal):12:26:9]:5", Field::Close, hand());
@@ -222,9 +222,9 @@ fn multi_output_selectors() {
         "EMA[MACD]:5",
         Field::Close,
         Box::new(Chain::new(
-            common::study("macd", &[]),
+            support::study("macd", &[]),
             0,
-            common::study("ema", &[("period", 5.0)]),
+            support::study("ema", &[("period", 5.0)]),
         )),
     );
     // Outer selector: the address names column 1 (`upper`) of a Bollinger of RSI.
@@ -234,9 +234,9 @@ fn multi_output_selectors() {
         "BB(upper)[RSI:14]:20:2.5",
         Field::Close,
         Box::new(Chain::new(
-            common::study("rsi", &[("period", 14.0)]),
+            support::study("rsi", &[("period", 14.0)]),
             0,
-            common::study("bollinger", &[("period", 20.0), ("k", 2.5)]),
+            support::study("bollinger", &[("period", 20.0), ("k", 2.5)]),
         )),
     );
     assert_eq!(Address::parse("MACD").unwrap().output(), 0);

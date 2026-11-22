@@ -1,7 +1,7 @@
 # Web kabuğu — mimari kuralları (R4/T5)
 
 Sınır `docs/ARCHITECTURE.md` "Kabuk sınırı (R4)". Kabuk (`index.html`, `main.js`,
-`style.css`) bayt ve piksel taşır; **alan mantığı Rust çekirdektedir** (`crates/qp-wasm/src/shell.rs`,
+`style.css`) bayt ve piksel taşır; **alan mantığı Rust çekirdektedir** (`crates/qp-shellcore/src/shell.rs`,
 `ShellCore`): yansı, gönderilecek her protokol mesajı, hareket tanıyıcı (dokunma / sürükleme /
 kıstırma), yüz ve açık kapsül sahneleri, pikseller, oynatma durumu ve kanıt metinlerinin
 biçimi, geçiş kutuları, ölçüm istatistikleri.
@@ -29,7 +29,7 @@ satır; boyama yolu bağlamında ayrıca bir takım) yakalanmazsa adım düşer.
 ölçekte boyar — kabukta çarpma yok. Geçiş kareleri (`transition_frame`) ve ilerleme
 (`transition_progress`, ham zaman damgasından) çekirdekte.)
 
-**İzinli çekirdek yöntemleri** (`Shell`, `crates/qp-wasm/src/lib.rs`): `on_frame`,
+**İzinli çekirdek yöntemleri** (`Shell`, `crates/qp-wasm/src/bind/shell.rs`): `on_frame`,
 `take_outbox`, `idle`, `feed`, `face_rgba`, `scene_rgba`, `open`, `evidence`, `status`,
 `take_error`, `look`, `instruments`, `audience`, `set_frame`, `replay`, `seek`,
 `set_sensitivity`, `set_audience`, `set_style`, `back`, `open_to`, `pointer`, `wheel`,
@@ -75,7 +75,7 @@ okur, çünkü dizinle okumak aritmetik ister (R3).
 
 | Yöntem | Neden |
 |--------|-------|
-| `gpu_face(id, force)`, `gpu_scene(force)` | Sahneyi çekirdek **üçgenlere** çevirir (`crates/qp-wasm/src/shell/paint_gpu.rs`): kırpma uzayında köşeler, önçarpımlı renk, glif atlası koordinatı; çizgi kalınlığı, birleşim, daire bölümleri, metin yerleşimi (başvuru çizicinin kuralıyla) çekirdekte. `face_rgba` ile aynı "değişmediyse yanlış" kısa devresi ve kaydı. |
+| `gpu_face(id, force)`, `gpu_scene(force)` | Sahneyi çekirdek **üçgenlere** çevirir (`crates/qp-shellcore/src/shell/paint_gpu.rs`): kırpma uzayında köşeler, önçarpımlı renk, glif atlası koordinatı; çizgi kalınlığı, birleşim, daire bölümleri, metin yerleşimi (başvuru çizicinin kuralıyla) çekirdekte. `face_rgba` ile aynı "değişmediyse yanlış" kısa devresi ve kaydı. |
 | `gpu_vertices()`, `gpu_capacity()`, `gpu_draws(k)`, `gpu_clear()` | Son kurulan karenin köşe baytları, onu tutan tampon boyutu (yol tamponu yalnız sığmazsa büyütür; büyüklük karşılaştırması aritmetik değildir), çizim listesi sütunları (tür, ilk köşe, köşe sayısı; yol `forEach` ile olduğu gibi uygular) ve temizleme rengi. Yol hiçbir sayıyı hesaplamaz, yalnız GPU'ya yükler. |
 | `gpu_atlas_size()`, `gpu_atlas_dirty(full)`, `gpu_atlas_rows()` | Glif atlası (fontdue kapsama bitmapleri, başvuru çiziciyle aynı): boyutu, değişen satırların `[y, genişlik, yükseklik]`'i ve baytları. Yeni doku yaratıldığında `full` bütün satırları ister. |
 | (WGSL gölgelendirici metni, `paint/gpu.js`) | GPU üzerinde çalışan genel köşe/parça gölgelendiricisi: doku × renk karışımı ve atlas örneklemesi (`floor`, çarpım). Alan mantığı değildir ve JS'te çalışmaz; mimari testi dizge içeriğini taramaz. Gölgelendiriciye alan değeri girmez: köşeler ve renkler çekirdekten hazır gelir. (RP3 denetimi S-verify notu.) |
@@ -202,7 +202,7 @@ varsayılanı —, `nabiz`) ve tek hareket durumu (`shell/motion.rs`; `nabiz`'in
 `nabiz` hareketi azalt'ta canlı noktasının yanına "canlı" yazar (bilgi metin olarak durur).
 
 (R5B, GOAL kapsam 6 "Gösterimde en az iz"; `docs/PROTOCOL.md` §25) Ajan yüzeyinin kabuktaki
-izi (`crates/qp-wasm/src/shell/agent.rs`). Hiçbir kural gevşetilmedi. Çekirdek karşılamada
+izi (`crates/qp-shellcore/src/shell/agent.rs`). Hiçbir kural gevşetilmedi. Çekirdek karşılamada
 `proposals` konusuna abone olur ve bekleyen önerileri ister (`list`, `state: pending`; öneri
 olayı ya da karar cevabından sonra yeniden); akıştan bir kapsül açılınca `capsule` sorgusunu
 gönderir ve cevabın yalnız `comments`'ini tutar. Etiket ("ajan yorumu" / "agent comment"),

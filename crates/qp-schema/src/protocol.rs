@@ -26,7 +26,6 @@ use crate::types::{
     LedgerEntry, Series, TimestampMs,
 };
 
-mod agent;
 mod capsule;
 mod change;
 mod envelope;
@@ -38,11 +37,11 @@ mod replay;
 mod reply;
 mod selector;
 mod story;
+mod summary;
 mod transcript;
 mod viewer;
 mod wire;
 
-pub use agent::*;
 pub use capsule::*;
 pub use change::*;
 pub use envelope::*;
@@ -54,6 +53,7 @@ pub use replay::*;
 pub use reply::*;
 pub use selector::*;
 pub use story::*;
+pub use summary::*;
 pub use transcript::*;
 pub use viewer::*;
 pub use wire::*;

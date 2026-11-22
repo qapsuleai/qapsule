@@ -288,7 +288,7 @@ pub(super) fn segments(pl: &Prepared, g: &Geo<'_>, out: &mut SceneLayer) {
 pub(super) fn glyphs(pl: &Prepared, g: &Geo<'_>, out: &mut SceneLayer) {
     let rc = g.rect;
     for (r, spec) in pl.traces[0].rows.iter().zip(&pl.glyphs) {
-        let s = r.size.floor().max(1.0);
+        let s = g.look.mark_px(r.size).floor().max(1.0);
         let left = match pl.anchor.x {
             Some(pp) => panel_px(pp, rc.left, rc.right),
             None => (g.cx(r.slot, r.n) + 0.5 - s / 2.0).floor(),

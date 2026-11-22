@@ -89,6 +89,7 @@ fn compile_source(
     look: Option<&str>,
     roles: bool,
     theme: Option<&str>,
+    cursor: Option<qp_grammar::Cursor>,
 ) -> Result<
     (qp_schema::grammar::View, qp_schema::scene::SceneDesc),
     Result<Box<qp_schema::protocol::ProtocolError>, String>,
@@ -98,6 +99,7 @@ fn compile_source(
     opts.look = look.map(str::to_owned);
     opts.roles = roles;
     opts.theme = theme.map(str::to_owned);
+    opts.cursor = cursor;
     match (&src.view, &src.present) {
         (Some(view), _) => {
             let scene = session.scene(view, &opts).map_err(|e| Ok(Box::new(e)))?;
@@ -135,6 +137,7 @@ pub(crate) fn scene_cmd(args: &SceneArgs, explain: bool) -> Result<Outcome, Stri
         args.height,
         args.look.as_deref(),
         args.roles,
+        None,
         None,
     ) {
         Ok(x) => x,
@@ -194,12 +197,25 @@ pub(crate) fn render_view(args: &RenderArgs) -> Result<Outcome, String> {
         args.look.as_deref(),
         false,
         args.theme.as_deref(),
+        args.cursor.as_deref().map(parse_cursor).transpose()?,
     ) {
         Ok((_, scene)) => scene,
         Err(Ok(e)) => return Ok(print_protocol_error(&e)),
         Err(Err(m)) => return Err(m),
     };
     write_png(&scene, args.scale, &args.out)
+}
+
+/// `<bar>[,<price>]` (`qp render --cursor`).
+fn parse_cursor(s: &str) -> Result<qp_grammar::Cursor, String> {
+    let bad = || format!("--cursor `{s}`: expected <bar>[,<price>]");
+    let (bar, price) = s.split_once(',').map_or((s, None), |(b, p)| (b, Some(p)));
+    Ok(qp_grammar::Cursor {
+        bar: bar.trim().parse().map_err(|_| bad())?,
+        price: price
+            .map(|p| p.trim().parse().map_err(|_| bad()))
+            .transpose()?,
+    })
 }
 
 /// Writes `scene` as PNG at device scale `scale` (RD2/G). Scale 1 keeps the reference

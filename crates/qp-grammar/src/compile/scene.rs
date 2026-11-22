@@ -24,7 +24,8 @@ pub fn compile(
             format!("size {width}x{height} out of range ({MIN_WIDTH}x{MIN_HEIGHT} ..= {MAX_DIM}x{MAX_DIM})"),
         ));
     }
-    let look = crate::look::by_name(opts.look.as_deref())?;
+    let look =
+        (opts.look_record.map(Ok)).unwrap_or_else(|| crate::look::by_name(opts.look.as_deref()))?;
     let theme = look.theme(opts.theme.as_deref().or(view.theme.as_deref()))?;
     let outcome = match opts.outcome.as_deref() {
         Some(n) => crate::glyph::outcome::by_name(n)?,
@@ -112,14 +113,10 @@ pub fn compile(
     let total = n_bars + ext_times.len() as u64;
 
     let (wi, hi) = (width.cast_signed(), height.cast_signed());
-    let [m_left, m_right, m_top, m_bottom] = look.space.plot;
+    let [m_left, m_right, m_top, m_bottom] = alphabet::margins(look);
     let (left, right, top, bottom) = (m_left, wi - m_right, m_top, hi - m_bottom);
     let types = &look.types;
-    let (title_px, label_px, figure_px) = (
-        types.title.px as f32,
-        types.label.px as f32,
-        types.figure.px as f32,
-    );
+    let (title_px, label_px) = (types.title.px as f32, types.label.px as f32);
     let adv = |role: &str| look.role_font(role);
     let mut fr = Frame {
         p: provider,
@@ -304,82 +301,23 @@ pub fn compile(
             ls.peek().is_some() && ls.all(|pl| pl.anchor.y.is_some())
         })
         .collect();
-    // Horizontal grid and value labels (R0 order: line, label, line, label...).
-    for (((rc, y), tag), _) in rects
-        .iter()
-        .zip(&ymaps)
-        .zip(&tags)
-        .zip(&card)
-        .filter(|(_, c)| !**c)
-    {
-        let divs = (f64::from(rc.bottom - rc.top) / 90.0)
-            .round()
-            .clamp(2.0, 6.0);
-        for v in ticks(y, divs) {
-            let Some(yy) = value_y(y, v) else { continue };
-            let yy = px(yy);
-            if yy > rc.top && yy < rc.bottom {
-                under.push(rect(rc.left, yy, rc.right - rc.left, 1, theme.grid));
-                // The label's box (baseline yy + 4, figure size tall) under the tag's box
-                // (ly - 8 .. ly + 8): the tag wins, the label is left out.
-                #[allow(clippy::cast_possible_truncation)]
-                let label_top = yy + 4 - figure_px as i32;
-                if tag.is_some_and(|(ly, _, _)| label_top < ly + 8 && yy + 4 > ly - 8) {
-                    continue;
-                }
-                under.push(Prim::Text {
-                    x: rc.right + 6,
-                    baseline: yy + 4,
-                    px: figure_px,
-                    text: format!("{v:.2}"),
-                    color: theme.muted,
-                    align: Align::Left,
-                    font: None,
-                    role: Some("figure".to_owned()),
-                });
-            }
-        }
+    // (RD2/C2a) Axes, tags, legend and crosshair: R0's, or the look's chart conventions.
+    let ch = alphabet::Chart {
+        fr: &fr,
+        look,
+        x: &xmap,
+        rects: &rects,
+        ymaps: &ymaps,
+        card: &card,
+        tags: &tags,
+        panel0: panel_ids[0],
+        w: wi,
+        at: None,
     }
-    // Vertical grid and month labels (labels under the bottom panel only).
-    // (R5/M20) Under a bottom card panel (text only) the labels go under the last panel
-    // with a value scale instead (a column of text blocks under a small chart).
-    let last_rect = if card[rects.len() - 1] {
-        rects
-            .iter()
-            .zip(&card)
-            .rev()
-            .find(|(_, c)| !**c)
-            .map_or(rects[rects.len() - 1], |(r, _)| *r)
-    } else {
-        rects[rects.len() - 1]
-    };
-    let mut prev_month: Option<(i64, i64)> = None;
-    let mut last_label_x = i32::MIN;
-    for s in fr.from..=fr.to {
-        let Some(t) = fr.slot_time(s) else { continue };
-        let ym = year_month(t.div_euclid(86_400_000));
-        if prev_month.is_some_and(|p| p != ym) {
-            #[allow(clippy::cast_possible_truncation)]
-            let x = crate::scale::slot_x(&xmap, s) as i32;
-            if x.saturating_sub(last_label_x) >= 72 {
-                for (rc, _) in rects.iter().zip(&card).filter(|(_, c)| !**c) {
-                    under.push(rect(x, rc.top, 1, rc.bottom - rc.top, theme.grid));
-                }
-                under.push(Prim::Text {
-                    x: x - 21,
-                    baseline: last_rect.bottom + 16,
-                    px: label_px,
-                    text: format!("{:04}-{:02}", ym.0, ym.1),
-                    color: theme.muted,
-                    align: Align::Left,
-                    font: None,
-                    role: Some("label".to_owned()),
-                });
-                last_label_x = x;
-            }
-        }
-        prev_month = Some(ym);
-    }
+    .with_cursor(opts.cursor);
+    alphabet::price_axis(&ch, &mut under);
+    alphabet::time_axis(&ch, &mut under);
+    alphabet::volume(&ch, &prepared, &mut under);
     // Axes.
     for (rc, _) in rects.iter().zip(&card).filter(|(_, c)| !**c) {
         under.push(rect(
@@ -419,30 +357,14 @@ pub fn compile(
             alphabet,
         };
         let mut sl = draw(pl, &g);
+        alphabet::soften(&ch, pl, &mut sl.prims);
         for p in &mut sl.prims {
             settle_text(p, look, Some(sl.mark), opts.roles);
         }
         scene_panels[pi].layers.push(sl);
     }
 
-    // Last-value tags.
-    for (rc, tag) in rects.iter().zip(&tags) {
-        let Some((ly, v, color)) = *tag else {
-            continue;
-        };
-        let color = [color[0], color[1], color[2], 255];
-        over.push(rect(rc.right + 1, ly - 8, wi - rc.right - 1, 16, color));
-        over.push(Prim::Text {
-            x: rc.right + 6,
-            baseline: ly + 4,
-            px: figure_px,
-            text: format!("{v:.2}"),
-            color: theme.bg,
-            align: Align::Left,
-            font: None,
-            role: Some("figure".to_owned()),
-        });
-    }
+    alphabet::tags(&ch, &mut under, &mut over);
     // Title row.
     let title = view.title.clone().unwrap_or_else(|| {
         format!(
@@ -477,20 +399,7 @@ pub fn compile(
         role: Some("title".to_owned()),
     });
     if show_close {
-        let last_bar = usize::try_from(fr.to.min(n_bars - 1)).unwrap_or(0);
-        let lb = &fr.bars[last_bar];
-        let text = format!("C {:.2}", lb.c);
-        text_right = close_x + est_width(&text, f64::from(title_px), adv("title"));
-        over.push(Prim::Text {
-            x: close_x,
-            baseline: off.title_baseline,
-            px: title_px,
-            text,
-            color: if lb.c >= lb.o { theme.up } else { theme.down },
-            align: Align::Left,
-            font: None,
-            role: Some("title".to_owned()),
-        });
+        text_right = alphabet::title_figures(&ch, close_x, text_right, &mut over);
     }
     // Legends: panel 0 right-aligned in the title row; other panels top-left inside.
     for (pi, rc) in rects.iter().enumerate() {
@@ -504,7 +413,7 @@ pub fn compile(
                 let text = if pl.geom == Geom::Band || pl.traces.len() > 1 || !v.is_finite() {
                     label
                 } else {
-                    format!("{label} {v:.2}")
+                    format!("{label} {}", ch.num(v))
                 };
                 Some((text, pl.traces.first().map_or(color, |t| t.base)))
             })
@@ -559,6 +468,7 @@ pub fn compile(
             }
         }
     }
+    alphabet::crosshair(&ch, &mut over);
     // Veils (focus, dim).
     let veil = [
         theme.bg[0],

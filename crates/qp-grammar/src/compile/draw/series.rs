@@ -4,7 +4,7 @@ use super::*;
 
 pub(super) fn candles(pl: &Prepared, g: &Geo<'_>, out: &mut SceneLayer) {
     #[allow(clippy::cast_precision_loss)]
-    let body_w = body_width(g.x.slot * g.k as f64);
+    let body_w = body_width(g.x.slot * g.k as f64, g.look.chart.body_ratio);
     for r in &pl.traces[0].rows {
         let (Some(yo), Some(yh), Some(yl), Some(yc)) =
             (g.y(r.v[0]), g.y(r.v[1]), g.y(r.v[2]), g.y(r.v[3]))
@@ -280,7 +280,7 @@ pub(super) fn areas(pl: &Prepared, g: &Geo<'_>, out: &mut SceneLayer) {
 
 pub(super) fn bars(pl: &Prepared, g: &Geo<'_>, out: &mut SceneLayer) {
     #[allow(clippy::cast_precision_loss)]
-    let bw = body_width(g.x.slot * g.k as f64);
+    let bw = body_width(g.x.slot * g.k as f64, g.look.chart.body_ratio);
     for r in &pl.traces[0].rows {
         let Some(yv) = g.y(r.v[0]) else {
             out.skipped += 1;

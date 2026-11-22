@@ -159,6 +159,8 @@ Ayrıntı `docs/PROTOCOL.md` §19; seçimin gerekçesi `rounds/RP2/experiments/T
 | İtiraz | `dispute` | Yansının, otoritenin kesin iddiasını kendi temiz ve yeniden çekilmiş verisinde tutmadığını otoriteye bildirmesi (A20, M7). |
 | Geri çekme | retraction | Otoritenin, dayandığı veri hatalı çıktığı için bir iddiayı/kapsülü düşürmesi (K37). Karneye yazılmaz. |
 | İşaret alfabesi | glyph alphabet (M1) | Anlam işaretlerinin çizim kuralları: şekil = tür, yön, büyüklük = güç, doluluk = karne, çizgi biçimi = aşama, solukluk = tazelik, teyit işaretleri = aile sayısı, sunucu işareti. |
+| Grafik alfabesi | chart conventions (`look::ChartLook`; `compile/alphabet`, RD2/C2a) | Grafiğin alışılmış öğeleri: sağ fiyat ekseni ve etiket aralığı, iki düzeyli zaman ekseni, çakışma önleme, son değer etiketi ve değer çizgisi, imleç ve eksen hapları, OHLC lejantı, soluk hacim histogramı. Görünüş kaydından okunur; eski görünüşler R0 grafiğini korur. İşaret alfabesiyle (anlam işaretleri) karıştırılmaz. |
+| İmleç | `Cursor` (`CompileOptions::cursor`, `qp render --cursor`) | İşaretçinin veri cinsinden yeri: bar ve isteğe bağlı fiyat. Geçicidir (görüş alanı gibi), şemaya ve günlüğe girmez; grafik alfabesi kesikli çizgi, fiyat ve tarih hapı ve o barın lejantını çizer. Oynatma konumuyla (`ReplayCursor`) ilgisi yoktur. |
 | İşaret tarifi | `GlyphSpec` | Bir anlam işaretinin motorca üretilmiş parametreleri (yukarıdaki kanallar). Gramerde `glyph` işaretinin verisidir. |
 | İşaret aşaması | `GlyphPhase` | Çizgi biçiminin kodladığı aşama: aday, kesin, gerçekleşti, gerçekleşmedi, geri çekildi. |
 | Gerçekleştirici | realizer (M2) | Hikâyeden cümleyi üreten deterministik dil parçası (şablon dilbilgisi; Türkçe ve İngilizce). |

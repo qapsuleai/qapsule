@@ -5,7 +5,8 @@
 //                          [--fixture FILE --view ID] [--out DIR] [--no-build]
 //
 // For every look × theme (dark, light) × anchor: renders the core chart(s) with
-// `qp render --look --theme --scale <dpr>` from one fixture (same data everywhere), writes
+// `qp render --look --theme --scale <dpr>` from one fixture (same data everywhere; Ç2 of a
+// non-legacy look adds `--cursor`: the crosshair and its pills), writes
 // the look's generated variables (`qp look css`) and fonts, screenshots the anchor
 // mockup with Playwright at its exact CSS size and DPR (desktop 2, phone 3), and writes
 // index.html (the gallery), compare.html (one page: rows = anchors, columns = looks +
@@ -203,6 +204,16 @@ async function settle(page) {
   await page.evaluate(() => document.fonts.ready);
 }
 
+// RD2/C2a: Ç2 shows the crosshair of a look with chart conventions (non-legacy): the
+// pointer on the bar at 60 % of the fixture's bars. Legacy looks render as before.
+function cursorArgs(look, fx) {
+  if (JSON.parse(qp(['look', 'show', look])).profile === 'legacy') return [];
+  const scene = JSON.parse(
+    qp(['scene', fx.kind, path.relative(ROOT, fx.file), '--view', fx.view, '--look', look])
+  );
+  return ['--cursor', String(Math.floor(scene.bars * 0.6))];
+}
+
 async function shoot(browser, job) {
   const { anchor, spec, look, theme, fx, out } = job;
   const ctx = await browser.newContext({
@@ -232,12 +243,19 @@ async function shoot(browser, job) {
     })
   );
   fs.mkdirSync(path.join(out, chartsRel), { recursive: true });
+  const cursor = anchor === 'c2' ? cursorArgs(look, fx) : [];
   for (const s of slots) {
-    if (s.w < 1 || s.h < 1) continue;
+    // A collapsed slot is a mockup bug (its chart would silently be missing): say so and
+    // fail the run.
+    if (s.w < 1 || s.h < 1) {
+      process.stderr.write(`design-gallery: ${anchor} ${look} ${theme}: chart slot ${s.name} is ${s.w}×${s.h}\n`);
+      process.exitCode = 1;
+      continue;
+    }
     qp([
       'render', fx.kind, path.relative(ROOT, fx.file), '--view', fx.view, '--look', look,
       '--theme', theme, '--scale', String(spec.dpr), '--width', String(s.w), '--height', String(s.h),
-      '-o', path.join(out, chartsRel, `${s.name}.png`),
+      '-o', path.join(out, chartsRel, `${s.name}.png`), ...cursor,
     ]);
   }
   await page.goto(url);

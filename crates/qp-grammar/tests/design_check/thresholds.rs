@@ -21,6 +21,9 @@ pub const P4_MIN_LABELS: usize = 4;
 /// P5: least time-axis labels at this width (two levels required).
 pub const P5_WIDTH: u32 = 390;
 pub const P5_MIN_LABELS: usize = 4;
+/// (RD2/C2a) The pointer's bar in every measured scene (P6, P7: the crosshair and its
+/// pills are drawn and checked for overlaps).
+pub const CURSOR_BAR: u64 = 120;
 /// P6: text-box overlaps of axis labels.
 pub const P6_OVERLAPS_MAX: usize = 0;
 /// P8: greatest height of an on-plot semantic mark (px).
@@ -47,11 +50,17 @@ pub const P13_HAIRLINE: (f64, f64) = (1.2, 1.6);
 pub const P13_CONTROL: f64 = 3.0;
 /// R5 hard thresholds: text contrast (large text 3:1 is not used: every role is small),
 /// non-text contrast, semantic ΔE00 in all five vision conditions; pairs closer than
-/// `H3_SHARED_DE` in normal vision are deliberately shared roles and not measured.
+/// `H3_SHARED` (named, deliberately shared roles, `docs/DESIGN.md` §1.6) are not measured;
+/// every other pair is, however close (an accidental up = down fails).
 pub const H1_TEXT: f64 = 4.5;
 pub const H2_NON_TEXT: f64 = 3.0;
 pub const H3_SEMANTIC_DE: f64 = 10.0;
-pub const H3_SHARED_DE: f64 = 5.0;
+pub const H3_SHARED: [(&str, &str); 4] = [
+    ("valid", "text"),
+    ("invalid", "closed"),
+    ("invalid", "neutral"),
+    ("closed", "neutral"),
+];
 /// Frame sizes: the desktop chart cell and the phone chart.
 pub const DESK: (u32, u32) = (960, 600);
 pub const PHONE_H: u32 = 300;

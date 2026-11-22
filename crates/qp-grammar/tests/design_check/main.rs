@@ -15,6 +15,7 @@
     clippy::missing_panics_doc
 )]
 
+mod alphabet;
 mod color;
 mod record;
 mod scene;
@@ -74,7 +75,7 @@ impl Row {
 }
 
 /// Every row for `look` (`layout`: the gallery rig's layout dump, for P9).
-fn rows(look: &Look, fx: &scene::Fixture, layout: Option<&serde_json::Value>) -> Vec<Row> {
+fn rows(look: &'static Look, fx: &scene::Fixture, layout: Option<&serde_json::Value>) -> Vec<Row> {
     let mut out = vec![
         record::p9(layout),
         record::p10(look),
@@ -105,6 +106,11 @@ fn rows(look: &Look, fx: &scene::Fixture, layout: Option<&serde_json::Value>) ->
     let key = |r: &Row| (r.id.starts_with('H'), r.id[1..].parse::<u32>().unwrap_or(0));
     out.sort_by_key(key);
     out
+}
+
+/// Whether `rows` fail the check for `look`: a non-legacy look failing any rule.
+fn fails(look: &Look, rows: &[Row]) -> bool {
+    look.profile != Profile::Legacy && rows.iter().any(|r| r.res == Res::Fail)
 }
 
 fn print_table(look: &Look, rows: &[Row]) {
@@ -163,7 +169,7 @@ fn design_check() {
     for l in looks {
         let r = rows(l, &fx, layout.as_ref());
         print_table(l, &r);
-        if l.profile != Profile::Legacy && r.iter().any(|r| r.res == Res::Fail) {
+        if fails(l, &r) {
             failed.push(l.name);
         }
     }
@@ -203,4 +209,33 @@ fn profiles_select_their_thresholds() {
     round.surface.card_radius = 16.0;
     assert_eq!(record::p12(&round).res, Res::Fail);
     assert_eq!(record::p9(None).res, Res::Na);
+}
+
+/// A non-legacy look with deliberately bad values fails the check (and the same record as
+/// legacy does not): the gate is live, not only the table.
+#[test]
+fn a_bad_non_legacy_look_fails() {
+    const BAD: Look = Look {
+        name: "bad",
+        profile: Profile::Dense,
+        chart: qp_grammar::look::ChartLook {
+            price_label_px: 120.0,
+            mark_max_px: 40.0,
+            ..alphabet::TRIAL.chart
+        },
+        ..alphabet::TRIAL
+    };
+    let mut bad = BAD;
+    bad.dark.down = bad.dark.up;
+    let bad: &'static Look = Box::leak(Box::new(bad));
+    let fx = scene::fixture();
+    let r = rows(bad, &fx, None);
+    let failed = |id: &str| r.iter().any(|x| x.id == id && x.res == Res::Fail);
+    assert!(failed("P4") && failed("P8") && failed("H3"), "{r:#?}");
+    assert!(fails(bad, &r));
+    let legacy = Look {
+        profile: Profile::Legacy,
+        ..*bad
+    };
+    assert!(!fails(&legacy, &r));
 }

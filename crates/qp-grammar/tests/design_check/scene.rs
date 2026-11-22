@@ -7,8 +7,9 @@ use std::collections::BTreeMap;
 
 use qp_compute::Field;
 use qp_grammar::look::{font, Look, Profile, DEFAULT_FONT, FONTS};
-use qp_grammar::{compile, CompileOptions, MemProvider};
+use qp_grammar::{compile, CompileOptions, Cursor, MemProvider};
 use qp_schema::grammar::{Mark, View};
+use qp_schema::protocol::Language;
 use qp_schema::scene::{Align, PixelRect, Prim, SceneDesc};
 use serde_json::Value;
 
@@ -85,21 +86,42 @@ pub fn fixture() -> Fixture {
 }
 
 impl Fixture {
-    /// The view compiled in `look` and `scheme` at `w` × `h`, every text with its role.
-    pub fn scene(&self, look: &Look, scheme: &str, w: u32, h: u32) -> SceneDesc {
+    /// The view compiled in `look` and `scheme` at `w` × `h`, every text with its role,
+    /// the pointer on bar [`th::CURSOR_BAR`] (RD2/C2a: the crosshair is measured).
+    pub fn scene(&self, look: &'static Look, scheme: &str, w: u32, h: u32) -> SceneDesc {
         self.scene_of(&self.view, look, scheme, w, h)
     }
 
-    fn scene_of(&self, view: &View, look: &Look, scheme: &str, w: u32, h: u32) -> SceneDesc {
+    fn scene_of(
+        &self,
+        view: &View,
+        look: &'static Look,
+        scheme: &str,
+        w: u32,
+        h: u32,
+    ) -> SceneDesc {
         let mut o = CompileOptions::new(w, h);
-        o.look = Some(look.name.to_owned());
+        o.look_record = Some(look);
         o.theme = Some(scheme.to_owned());
         o.roles = true;
+        o.cursor = Some(Cursor {
+            bar: th::CURSOR_BAR,
+            price: None,
+        });
         compile(view, &self.provider, &o).expect("the design fixture compiles")
     }
 
+    /// The view in `look` (dark) for an English reader.
+    pub fn scene_en(&self, look: &'static Look, w: u32, h: u32) -> SceneDesc {
+        let en = Fixture {
+            view: self.view.clone(),
+            provider: self.provider.clone().with_lang(Language::En),
+        };
+        en.scene(look, "dark", w, h)
+    }
+
     /// The price panel alone, compiled so that its plot is `plot_h` high.
-    pub fn price_only(&self, look: &Look, scheme: &str, w: u32, plot_h: u32) -> SceneDesc {
+    pub fn price_only(&self, look: &'static Look, scheme: &str, w: u32, plot_h: u32) -> SceneDesc {
         let mut v = self.view.clone();
         let first = v.panels[0].id.unwrap_or_default();
         v.panels.truncate(1);
@@ -186,14 +208,25 @@ fn price_labels(s: &SceneDesc) -> Vec<i32> {
     v
 }
 
-fn time_labels(s: &SceneDesc) -> usize {
+/// Time labels: their count and their distinct colours (two levels: two colour roles).
+fn time_labels(s: &SceneDesc) -> (usize, usize) {
     let bottom = s.panels.iter().map(|p| p.rect.bottom).max().unwrap_or(0);
-    let is_time = |p: &&Prim| matches!(p, Prim::Text { baseline, .. } if *baseline > bottom);
-    s.under
-        .iter()
-        .filter(|p| role_is(p, "label"))
-        .filter(is_time)
-        .count()
+    let mut colors = Vec::new();
+    let mut n = 0;
+    for p in s.under.iter().filter(|p| role_is(p, "label")) {
+        if let Prim::Text {
+            baseline, color, ..
+        } = p
+        {
+            if *baseline > bottom {
+                n += 1;
+                if !colors.contains(color) {
+                    colors.push(*color);
+                }
+            }
+        }
+    }
+    (n, colors.len())
 }
 
 /// P2: distinct tones of the drawn colours (alpha ignored: a tone is a colour role).
@@ -209,10 +242,12 @@ pub fn p2(s: &SceneDesc, scheme: &'static str) -> Row {
             | Prim::Circle { color, .. }
             | Prim::Text { color, .. } => *color,
         };
-        let c = [c[0], c[1], c[2], 255];
+        // A fully transparent primitive draws nothing; otherwise the tone is the colour
+        // role, whatever its alpha.
         if c[3] == 0 || c[..3] == bg[..3] {
             continue;
         }
+        let c = [c[0], c[1], c[2], 255];
         if chroma_ab(c) < th::P2_NEUTRAL_C {
             neutral = true;
         } else if !tones
@@ -251,10 +286,11 @@ pub fn p4(desk: &SceneDesc, plot300: &SceneDesc, scheme: &'static str) -> Row {
     )
 }
 
-/// P5: a two-level time axis with enough labels at phone width.
+/// P5: a two-level time axis (minor and major labels in two colour roles, drawn) with
+/// enough labels at phone width.
 pub fn p5(phone: &SceneDesc, look: &Look, scheme: &'static str) -> Row {
-    let n = time_labels(phone);
-    let two = look.chart.two_level_time;
+    let (n, levels) = time_labels(phone);
+    let two = look.chart.two_level_time && levels >= 2;
     Row::check(
         "P5",
         scheme,
@@ -367,7 +403,7 @@ pub fn p7(s: &SceneDesc, look: &Look, scheme: &'static str) -> Row {
     let has = |k: &str| legend.contains(&k);
     let ohlc = ["O", "H", "L", "C"].iter().all(|k| has(k));
     let legend_ok = ohlc || (look.profile == Profile::Touch && has("C"));
-    let cross = look.chart.crosshair_pills;
+    let cross = crosshair(s);
     let yn = |b: bool| if b { "Y" } else { "N" };
     Row::check(
         "P7",
@@ -389,6 +425,30 @@ pub fn p7(s: &SceneDesc, look: &Look, scheme: &'static str) -> Row {
         "Y / Y / Y / OHLC (touch: C)".to_owned(),
         tag.is_some() && line && cross && legend_ok,
     )
+}
+
+/// The crosshair as drawn: a run of short vertical dashes, a price pill (a second figure
+/// in the first panel's gutter beside the tag) and a date pill under the time axis.
+fn crosshair(s: &SceneDesc) -> bool {
+    let r = s.panels[0].rect;
+    let bottom = s.panels.iter().map(|p| p.rect.bottom).max().unwrap_or(0);
+    let mut dashes: BTreeMap<i32, usize> = BTreeMap::new();
+    for p in &s.over {
+        if let Prim::Rect { x, y, w: 1, h, .. } = p {
+            if *h <= 4 && *x > r.left && *x < r.right && *y >= r.top {
+                *dashes.entry(*x).or_default() += 1;
+            }
+        }
+    }
+    let figures = s
+        .over
+        .iter()
+        .filter(|p| matches!(p, Prim::Text { x, baseline, .. } if role_is(p, "figure") && *x > r.right && *baseline > r.top && *baseline <= r.bottom + 12))
+        .count();
+    let date = s.over.iter().any(
+        |p| matches!(p, Prim::Text { baseline, .. } if role_is(p, "label") && *baseline > bottom),
+    );
+    dashes.values().any(|n| *n >= 3) && figures >= 2 && date
 }
 
 /// P8: on-plot semantic marks (the look's cap and any glyph drawn in the scene).

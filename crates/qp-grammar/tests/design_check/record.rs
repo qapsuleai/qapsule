@@ -280,7 +280,8 @@ pub fn h3(l: &Look, t: &Theme) -> Row {
     for set in &sets {
         for (i, (a, ca)) in set.iter().enumerate() {
             for (b, cb) in &set[i + 1..] {
-                if de(*ca, *cb, Vision::Normal) < th::H3_SHARED_DE {
+                let shared = |x: &str, y: &str| (*a, *b) == (x, y) || (*a, *b) == (y, x);
+                if th::H3_SHARED.iter().any(|(x, y)| shared(x, y)) {
                     continue;
                 }
                 for v in Vision::ALL {

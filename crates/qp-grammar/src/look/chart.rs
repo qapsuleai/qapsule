@@ -120,6 +120,22 @@ impl ChartLook {
 }
 
 impl Look {
+    /// (RD2/C2a) Whether the compiler draws the [`ChartLook`] (non-legacy looks only).
+    #[must_use]
+    pub fn familiar(&self) -> bool {
+        self.profile != Profile::Legacy
+    }
+
+    /// (RD2/C2a, P8) An on-plot mark asked `px` tall, capped at `chart.mark_max_px`.
+    #[must_use]
+    pub fn mark_px(&self, px: f64) -> f64 {
+        if self.familiar() {
+            px.min(self.chart.mark_max_px)
+        } else {
+            px
+        }
+    }
+
     /// The origin roles of `theme` (one of this look's schemes): the look's own, or
     /// derived (human = `text`, agent = `accent`, engine = `muted`).
     #[must_use]

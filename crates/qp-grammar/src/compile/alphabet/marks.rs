@@ -28,7 +28,7 @@ impl Chart<'_> {
     }
 
     /// A filled tag from `x` to the frame's right edge, centred on row `y`.
-    fn pill(&self, out: &mut Vec<Prim>, x: i32, y: i32, label: String, fill: Rgba) {
+    pub(super) fn pill(&self, out: &mut Vec<Prim>, x: i32, y: i32, label: String, fill: Rgba) {
         let h = self.pill_h();
         out.push(rect(x, y - h / 2, self.w - x, h, fill));
         let ink = self.theme().bg;
@@ -70,6 +70,7 @@ pub(in crate::compile) fn tags(ch: &Chart<'_>, under: &mut Vec<Prim>, over: &mut
             ch.pill(over, rc.right + 1, ly, label, color);
         }
     }
+    super::levels::level_tags(ch, over);
 }
 
 /// The crosshair: dashed lines through the cursor, its price and date pills.

@@ -54,6 +54,13 @@ geçer; P9 yalnız galeri düzen dökümüyle ölçülür. Maket renk taraması 
 
 ## Bilinen zayıflıklar
 
+- **RD2/C2b sonrası:** seviye çizgisinin köken rengi ve biçimi (insan düz, ajan kesik, motor
+  noktalı) ve eksendeki köken renkli etiket artık çekirdekte (`chart.origin_levels`,
+  `compile/alphabet/levels.rs`; galeride Ç2 `desk-levels` görünümünü çizer). Sol uç çipi,
+  kırılım çentiği, kanıt bandı/parantezi ve niyet hapı hâlâ maket (satır bütçesi). Ajan ve
+  motor etiketi de dolu çizilir (kesik/noktalı çerçeveli etiket maket kalır). Motor grafiti
+  etiket yazısı 4,5:1 tutsun diye açıldı (koyu #7c7f86, açık #73767d). Aşağıdaki madde
+  ara karardan önceki durumdur.
 - Grafik üstü katman bu turda **maket**: çekirdek bugün seviye etiketi, sol uç çipi, kanıt
   parantezi çizmiyor. Yön seçilirse gramer işi gerekir (eksen etiketinin altındaki fiyat
   etiketini düşürmek, parantezin altındaki tarih etiketini düşürmek, çip yerleşimi P6 ile);

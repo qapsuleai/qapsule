@@ -20,6 +20,8 @@ use crate::Row;
 /// The fixture: its view and a provider with its data.
 pub struct Fixture {
     view: View,
+    /// (RD2/C2b) `desk-levels`: the desk with Qapsule's levels (human, agent, engine).
+    pub levels: View,
     provider: MemProvider,
 }
 
@@ -43,45 +45,73 @@ pub fn fixture() -> Fixture {
         s["instrument"]["symbol"].as_str(),
         s["interval"].as_str(),
     );
-    let mut view = None;
-    let ops = t["steps"].as_array().expect("steps").iter();
-    for op in ops
-        .filter_map(|s| s["send"]["msg"]["ops"].as_array())
-        .flatten()
-    {
-        match op["op"].as_str() {
-            Some("add_study") => {
-                let name = op["study"].as_str().expect("study");
-                let params: BTreeMap<String, f64> = op["params"]
-                    .as_object()
-                    .map(|m| m.iter().filter_map(|(k, v)| Some((k.clone(), v.as_f64()?))))
-                    .into_iter()
-                    .flatten()
-                    .collect();
-                let out = qp_compute::compute_bars(name, &params, Field::Close, &bars)
-                    .expect("study")
-                    .outputs;
-                let fields: Vec<(&str, Vec<Option<f64>>)> =
-                    out.iter().map(|(k, v)| (k.as_str(), v.clone())).collect();
-                let sid = op["id"].as_str().expect("study id");
-                let label = format!(
-                    "{}{}",
-                    name.to_uppercase(),
-                    params.get("period").copied().unwrap_or_default()
-                );
-                p = p
-                    .with_values(sid, id, fields, name, &[name])
-                    .with_label(sid, &label);
+    let mut views: BTreeMap<String, View> = BTreeMap::new();
+    let principals = t["init"]["principals"].as_array().expect("principals");
+    let author = |conn_principal: &str| {
+        let p = principals.iter().find(|p| p["id"] == conn_principal);
+        p.expect("principal")["author"].clone()
+    };
+    let mut speaker: BTreeMap<String, String> = BTreeMap::new();
+    for step in t["steps"].as_array().expect("steps") {
+        let (conn, msg) = (
+            step["send"]["conn"].as_str().unwrap_or("a"),
+            &step["send"]["msg"],
+        );
+        if msg["type"] == "hello" {
+            let who = msg["principal"].as_str().expect("principal").to_owned();
+            speaker.insert(conn.to_owned(), who);
+        }
+        let Some(ops) = msg["ops"].as_array() else {
+            continue;
+        };
+        for op in ops {
+            match op["op"].as_str() {
+                Some("add_fact") => {
+                    let mut f = op.clone();
+                    let bar = usize::try_from(f["bar"].as_u64().expect("bar")).expect("bar");
+                    f["t"] = bars[bar].t.into();
+                    f["provenance"] =
+                        serde_json::json!({"author": author(&speaker[conn]), "at": 0});
+                    f.as_object_mut().expect("fact").remove("op");
+                    p = p.with_fact(serde_json::from_value(f).expect("fact"));
+                }
+                Some("add_study") => {
+                    let name = op["study"].as_str().expect("study");
+                    let params: BTreeMap<String, f64> = op["params"]
+                        .as_object()
+                        .map(|m| m.iter().filter_map(|(k, v)| Some((k.clone(), v.as_f64()?))))
+                        .into_iter()
+                        .flatten()
+                        .collect();
+                    let out = qp_compute::compute_bars(name, &params, Field::Close, &bars)
+                        .expect("study")
+                        .outputs;
+                    let fields: Vec<(&str, Vec<Option<f64>>)> =
+                        out.iter().map(|(k, v)| (k.as_str(), v.clone())).collect();
+                    let sid = op["id"].as_str().expect("study id");
+                    let label = format!(
+                        "{}{}",
+                        name.to_uppercase(),
+                        params.get("period").copied().unwrap_or_default()
+                    );
+                    p = p
+                        .with_values(sid, id, fields, name, &[name])
+                        .with_label(sid, &label);
+                }
+                Some("put_view") => {
+                    let v: View = serde_json::from_value(op["view"].clone()).expect("view");
+                    views.insert(v.id.clone(), v);
+                }
+                _ => {}
             }
-            Some("put_view") => {
-                view = Some(serde_json::from_value(op["view"].clone()).expect("view"))
-            }
-            _ => {}
         }
     }
     Fixture {
-        view: view.expect("a put_view"),
-        provider: p,
+        view: views.remove("desk").expect("view desk"),
+        levels: views.remove("desk-levels").expect("view desk-levels"),
+        provider: p
+            .with_threshold("rsi.overbought", 70.0)
+            .with_threshold("rsi.oversold", 30.0),
     }
 }
 
@@ -92,7 +122,7 @@ impl Fixture {
         self.scene_of(&self.view, look, scheme, w, h)
     }
 
-    fn scene_of(
+    pub fn scene_of(
         &self,
         view: &View,
         look: &'static Look,
@@ -115,6 +145,7 @@ impl Fixture {
     pub fn scene_en(&self, look: &'static Look, w: u32, h: u32) -> SceneDesc {
         let en = Fixture {
             view: self.view.clone(),
+            levels: self.levels.clone(),
             provider: self.provider.clone().with_lang(Language::En),
         };
         en.scene(look, "dark", w, h)
@@ -304,7 +335,7 @@ pub fn p5(phone: &SceneDesc, look: &Look, scheme: &'static str) -> Row {
 /// Axis-label overlaps in one scene: with a plot, with another text, with a thin
 /// vertical line (a selection or crosshair line; the axis lines themselves excluded), or
 /// past the frame's right edge.
-fn overlap_count(s: &SceneDesc) -> usize {
+pub fn overlap_count(s: &SceneDesc) -> usize {
     let labels: Vec<Box4> = axis_labels(s).into_iter().filter_map(text_box).collect();
     let texts: Vec<Box4> = prims(s).filter_map(text_box).collect();
     let lines: Vec<Box4> = prims(s)
@@ -342,10 +373,12 @@ fn overlap_count(s: &SceneDesc) -> usize {
     n
 }
 
-/// P6: axis-label overlaps in the desk and the phone scene.
+/// P6: axis-label overlaps in the desk and the phone scenes (RD2/C2b: with and without
+/// Qapsule's levels).
 #[allow(clippy::absurd_extreme_comparisons)] // the threshold is 0 today; it may change once
-pub fn p6(desk: &SceneDesc, phone: &SceneDesc, scheme: &'static str) -> Row {
-    let (a, b) = (overlap_count(desk), overlap_count(phone));
+pub fn p6(desk: &[&SceneDesc], phone: &[&SceneDesc], scheme: &'static str) -> Row {
+    let count = |v: &[&SceneDesc]| v.iter().map(|s| overlap_count(s)).sum::<usize>();
+    let (a, b) = (count(desk), count(phone));
     Row::check(
         "P6",
         scheme,

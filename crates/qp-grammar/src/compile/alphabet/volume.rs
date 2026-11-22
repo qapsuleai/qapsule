@@ -58,8 +58,9 @@ pub(in crate::compile) fn volume(ch: &Chart<'_>, prepared: &[Prepared], under: &
     }
 }
 
-/// The soft alpha on the bars of a view's own volume layer.
-pub(in crate::compile) fn soften(ch: &Chart<'_>, pl: &Prepared, prims: &mut [Prim]) {
+/// The soft alpha on the bars of a view's own volume layer; a level's origin stroke.
+pub(in crate::compile) fn soften(ch: &Chart<'_>, pl: &Prepared, prims: &mut Vec<Prim>) {
+    super::levels::stroke(ch, pl, prims);
     if !ch.look.familiar()
         || ch.look.chart.volume_share <= 0.0
         || !draws_volume(pl, &ch.fr.bar_series)

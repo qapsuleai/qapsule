@@ -197,18 +197,19 @@ pub const TAVEK: Look = Look {
     story: R4.story,
     open: R4.open,
     profile: Profile::Dense,
-    // Human: ink, solid. Agent: the one origin hue, dashed. Engine: graphite, dotted in
-    // the mockups. Apart by lightness too, so grey and colour-blind vision keep them.
+    // Human: ink, solid. Agent: the one origin hue, dashed. Engine: graphite, dotted
+    // (RD2/C2b; 4.5:1 for a tag's text). Apart by lightness too, so grey and colour-blind
+    // vision keep them.
     origin: Some(OriginLook {
         dark: OriginRoles {
             human: [230, 231, 234, 255],
             agent: [168, 150, 240, 255],
-            engine: [116, 119, 126, 255],
+            engine: [124, 127, 134, 255],
         },
         light: OriginRoles {
             human: [24, 25, 28, 255],
             agent: [96, 64, 196, 255],
-            engine: [128, 131, 138, 255],
+            engine: [115, 118, 125, 255],
         },
         agent_dash: Some([4.0, 3.0]),
     }),
@@ -223,6 +224,7 @@ pub const TAVEK: Look = Look {
         mark_max_px: 20.0,
         body_ratio: 0.72,
         axis_gutter_px: 64.0,
+        origin_levels: true,
     },
 };
 

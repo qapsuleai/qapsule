@@ -12,6 +12,7 @@ use crate::theme::Theme;
 
 mod format;
 mod legend;
+mod levels;
 mod marks;
 mod price;
 mod time;
@@ -71,12 +72,14 @@ pub(super) struct Chart<'a> {
     pub at: Option<At>,
     /// The view's display zone (K14; `None`: UTC).
     pub tz: Option<qp_calendar::Zone>,
+    /// (RD2/C2b) Horizontal levels with their origin ([`Chart::with_levels`]).
+    pub levels: Vec<levels::Level>,
 }
 
 impl Chart<'_> {
-    /// This chart with the cursor `c` resolved (a legacy look, or one without crosshair
-    /// pills, ignores it).
-    pub(super) fn with_cursor(mut self, c: Option<Cursor>) -> Self {
+    /// This chart with the cursor `c` (a legacy look, or one without crosshair pills,
+    /// ignores it) and the levels of `pl` (panel ids `ids`) resolved.
+    pub(super) fn resolved(mut self, c: Option<Cursor>, pl: &[Prepared], ids: &[u32]) -> Self {
         let on = self.look.familiar() && self.look.chart.crosshair_pills;
         self.at = c.filter(|_| on).map(|c| {
             let fr = self.fr;
@@ -94,7 +97,7 @@ impl Chart<'_> {
             let x = crate::scale::slot_x(self.x, slot) as i32;
             At { slot, x, price }
         });
-        self
+        self.with_levels(pl, ids)
     }
 
     fn theme(&self) -> &Theme {

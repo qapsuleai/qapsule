@@ -22,9 +22,11 @@ pub(in crate::compile) fn price_axis(ch: &Chart<'_>, under: &mut Vec<Prim>) {
         let half = f64::from(ch.pill_h() / 2);
         let tag = ch.tags[pi].filter(|_| ch.look.chart.last_value_tag);
         let pill = ch.at.and_then(|a| a.price).filter(|_| pi == 0);
+        let levels = ch.levels.iter().filter(|l| l.0 == pi).map(|l| l.1);
         let keep_out: Vec<f64> = [tag.map(|t| t.0), pill.map(|p| p.1)]
             .into_iter()
             .flatten()
+            .chain(levels)
             .map(f64::from)
             .collect();
         let x = rc.right + PILL_PAD_X;

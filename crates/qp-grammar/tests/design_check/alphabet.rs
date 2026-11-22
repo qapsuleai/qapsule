@@ -35,6 +35,7 @@ pub const TRIAL: Look = Look {
         mark_max_px: 28.0,
         body_ratio: 0.8,
         axis_gutter_px: 64.0,
+        origin_levels: true,
     },
     ..R4
 };
@@ -63,7 +64,7 @@ fn alphabet_passes_p4_to_p8() {
         rows.extend([
             scene::p4(&desk, &plot, s),
             scene::p5(&phone, &TRIAL, s),
-            scene::p6(&desk, &phone, s),
+            scene::p6(&[&desk], &[&phone], s),
             scene::p7(&desk, &TRIAL, s),
             scene::p8(&desk, &TRIAL, s),
         ]);

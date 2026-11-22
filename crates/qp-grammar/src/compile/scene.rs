@@ -314,11 +314,11 @@ pub fn compile(
         w: wi,
         at: None,
         tz: view.display_tz.as_deref().and_then(qp_calendar::Zone::get),
+        levels: Vec::new(),
     }
-    .with_cursor(opts.cursor);
+    .resolved(opts.cursor, &prepared, &panel_ids);
     alphabet::axes(&ch, &mut under);
     alphabet::volume(&ch, &prepared, &mut under);
-    // Axes.
     for (rc, _) in rects.iter().zip(&card).filter(|(_, c)| !**c) {
         under.push(rect(
             rc.right,

@@ -87,6 +87,9 @@ pub struct ChartLook {
     pub body_ratio: f64,
     /// Width of the right axis gutter (px; legacy: the right plot margin).
     pub axis_gutter_px: f64,
+    /// (RD2/C2b) A horizontal level takes its origin's colour and stroke (human solid,
+    /// agent dashed, engine dotted) and ends in a price-axis tag (legacy: no).
+    pub origin_levels: bool,
 }
 
 impl ChartLook {
@@ -105,6 +108,7 @@ impl ChartLook {
             mark_max_px: mark_px,
             body_ratio: 0.7,
             axis_gutter_px: gutter,
+            origin_levels: false,
         }
     }
 
@@ -115,7 +119,8 @@ impl ChartLook {
                 ValueLine::Dotted => "dotted" },
             "crosshair_pills": self.crosshair_pills, "ohlc_legend": self.ohlc_legend,
             "volume_share": self.volume_share, "mark_max_px": self.mark_max_px,
-            "body_ratio": self.body_ratio, "axis_gutter_px": self.axis_gutter_px})
+            "body_ratio": self.body_ratio, "axis_gutter_px": self.axis_gutter_px,
+            "origin_levels": self.origin_levels})
     }
 }
 

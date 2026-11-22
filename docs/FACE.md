@@ -90,6 +90,17 @@ ve `r4` elendi, feragat yok; (1b) aşağı kalmama kapısında `kivra` elendi; (
 tek başına ilk grupta (aralığı `zemre`'ninkiyle örtüşmüyor) → **kazanan `oltan`, ayırt edildi**; ilk
 iki `oltan`, `zemre`. Ek G5 uygulanmasaydı kazanan yine `oltan`, ikinci `bertan` olurdu.
 
+## RD2: `tavek`'in yüzü `zemre`
+
+`?look=tavek` (ve `tavek-tel`) eşlik eden yüz olarak **`zemre`**'yi getirir (`COMPANION_FACES`).
+Neden: `tavek`'in iddiası "grafik anlamı taşır"; `zemre`'nin yapısı (cümle + karne + sağ
+olukta şimdiki fiyatıyla küçük fiyat şeridi ve doğum çizgisi) aynı alfabeyle (iki düzeyli
+zaman, son değer etiketi) sakin bir izleme listesi satırı gibi okunur. `oltan`'ın 120 px
+işareti profesyonel görünüme uymadı (K57); `vadrel` `tavek` altında grafiksiz kalıyor ve
+yüzün altında boş alan ile tek başına bir "Tem" etiketi bırakıyor (ekran görüntüsüyle
+karşılaştırıldı). Değerler görünüşten (`glyph.face_px` 24, tip ölçeği). Gösterim varsayılanı
+(`PRESENTED_LOOK`) Arkin'in son kabulüne kadar `oltan` kalır.
+
 ## İkinci (R5): `zemre` — zaman şeridi
 
 Alışılmışın dışı yön (K18; `r4`'ü görmeden kuruldu). `?look=zemre` (yüz `zemre` ile). Yüz iki

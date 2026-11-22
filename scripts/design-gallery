@@ -214,6 +214,10 @@ function cursorArgs(look, fx) {
   return ['--cursor', String(Math.floor(scene.bars * 0.6))];
 }
 
+function hasView(fx, id) {
+  return new RegExp(`"id"\\s*:\\s*"${id}"`).test(fs.readFileSync(fx.file, 'utf8'));
+}
+
 async function shoot(browser, job) {
   const { anchor, spec, look, theme, fx, out } = job;
   const ctx = await browser.newContext({
@@ -244,6 +248,8 @@ async function shoot(browser, job) {
   );
   fs.mkdirSync(path.join(out, chartsRel), { recursive: true });
   const cursor = anchor === 'c2' ? cursorArgs(look, fx) : [];
+  // RD2/C2b: Ç2 draws Qapsule's levels from the core when the fixture has `<view>-levels`.
+  const view = anchor === 'c2' && hasView(fx, `${fx.view}-levels`) ? `${fx.view}-levels` : fx.view;
   for (const s of slots) {
     // A collapsed slot is a mockup bug (its chart would silently be missing): say so and
     // fail the run.
@@ -253,7 +259,7 @@ async function shoot(browser, job) {
       continue;
     }
     qp([
-      'render', fx.kind, path.relative(ROOT, fx.file), '--view', fx.view, '--look', look,
+      'render', fx.kind, path.relative(ROOT, fx.file), '--view', view, '--look', look,
       '--theme', theme, '--scale', String(spec.dpr), '--width', String(s.w), '--height', String(s.h),
       '-o', path.join(out, chartsRel, `${s.name}.png`), ...cursor,
     ]);

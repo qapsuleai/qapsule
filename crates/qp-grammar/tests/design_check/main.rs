@@ -17,6 +17,7 @@
 
 mod alphabet;
 mod color;
+mod levels;
 mod record;
 mod scene;
 mod thresholds;
@@ -88,13 +89,21 @@ fn rows(look: &'static Look, fx: &scene::Fixture, layout: Option<&serde_json::Va
         let desk = fx.scene(look, s, dw, dh);
         let phone = fx.scene(look, s, thresholds::P5_WIDTH, thresholds::PHONE_H);
         let plot = fx.price_only(look, s, thresholds::P5_WIDTH, thresholds::P4_PLOT_H);
+        let lv_desk = fx.scene_of(&fx.levels, look, s, dw, dh);
+        let lv_phone = fx.scene_of(
+            &fx.levels,
+            look,
+            s,
+            thresholds::P5_WIDTH,
+            thresholds::PHONE_H,
+        );
         out.extend([
             record::p1(t),
             scene::p2(&desk, s),
             record::p3(t),
             scene::p4(&desk, &plot, s),
             scene::p5(&phone, look, s),
-            scene::p6(&desk, &phone, s),
+            scene::p6(&[&desk, &lv_desk], &[&phone, &lv_phone], s),
             scene::p7(&desk, look, s),
             scene::p8(&desk, look, s),
             record::p13(t),

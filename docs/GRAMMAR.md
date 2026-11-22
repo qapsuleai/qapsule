@@ -329,7 +329,13 @@ bölmesinin alt `volume_share` payında, mumların altında, yön renklerinde so
 aynı zaman ekseninde bağlam verir, bölme yüksekliği yemez; görünüm hacmi kendisi
 çiziyorsa (bar serisinin `v`'si `bar` katmanında) o bölme kalır, çubukları aynı soluk
 alfayı alır. Veri üstü anlam işareti `mark_max_px` ile sınırlı (P8, `Look::mark_px`),
-mum gövdesi `body_ratio` (eski görünüşlerde 0,7: R0).
+mum gövdesi `body_ratio` (eski görünüşlerde 0,7: R0). **Seviyeler** (RD2/C2b,
+`origin_levels`, `alphabet/levels.rs`): yatay her `rule` kökeninin renginde ve çizgi
+biçiminde çizilir (insan düz, ajan `agent_dash` kesikli, motor noktalı) ve sağ eksende o
+renkte dolu bir etiketle (değeri) biter; altında kalan fiyat etiketi çizilmez, son değer
+etiketine ya da önceki bir seviye etiketine değen seviye etiketi atlanır (P6). Köken:
+seviyenin geldiği olgunun yazarı (`provenance.author`; kabul edilmiş öneride onaylayan),
+eşik (`threshold`) ya da seri değeri motorun. Şema ve protokol değişmez.
 
 **Kabuk.** Kabuğun renkleri, yazı ailesi, yarıçapları, geçiş süresi ve (T3b) bütün
 boyları (yazı boyları, iç boşluklar, sekme/düğme yükseklikleri: `chrome`; boşluklar:

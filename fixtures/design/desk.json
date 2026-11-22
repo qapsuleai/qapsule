@@ -1,14 +1,18 @@
 {
   "covers": [
+    "add_fact",
     "add_study",
     "put_view"
   ],
-  "description": "RD2/S1 design fixture (synthetic): chart view `desk` with candles, SMA20 and EMA50 over price, volume bars coloured by direction in a lower pane, and an RSI(14) pane; 200 daily bars of the synthetic sample (fixtures/views/docs/base.json). scripts/design-check compiles it for P2 and P4-P8.",
+  "description": "RD2/S1 design fixture (synthetic): chart view `desk` with candles, SMA20 and EMA50 over price, volume bars coloured by direction in a lower pane, and an RSI(14) pane; 200 daily bars of the synthetic sample (fixtures/views/docs/base.json). scripts/design-check compiles it for P2 and P4-P8. RD2/C2b: view `desk-levels` adds Qapsule's levels (a human watch level and an agent's proposed support, each from its author's fact; RSI 70/30 thresholds, the engine's) for the level tags and origin strokes (scripts/design-check, design-gallery Ç2).",
   "final": {
     "document": {
       "views": [
         {
           "id": "desk"
+        },
+        {
+          "id": "desk-levels"
         }
       ]
     }
@@ -25,6 +29,14 @@
         },
         "id": "arkin",
         "role": "owner"
+      },
+      {
+        "author": {
+          "kind": "agent",
+          "name": "claude"
+        },
+        "id": "claude",
+        "role": "editor"
       }
     ]
   },
@@ -150,6 +162,236 @@
                     "mark": "line",
                     "panel": 2,
                     "series": "rsi14"
+                  }
+                ],
+                "panels": [
+                  {
+                    "id": 0,
+                    "name": "price",
+                    "weight": 3,
+                    "y": {
+                      "kind": "linear"
+                    }
+                  },
+                  {
+                    "id": 1,
+                    "name": "volume",
+                    "weight": 1,
+                    "y": {
+                      "kind": "linear"
+                    }
+                  },
+                  {
+                    "id": 2,
+                    "name": "rsi",
+                    "weight": 1,
+                    "y": {
+                      "domain": [
+                        0,
+                        100
+                      ],
+                      "kind": "linear"
+                    }
+                  }
+                ],
+                "x": {
+                  "kind": "time"
+                }
+              }
+            }
+          ],
+          "type": "command"
+        }
+      }
+    },
+    {
+      "expect": [
+        {
+          "conn": "b",
+          "msg": {
+            "principal": "claude",
+            "role": "editor",
+            "type": "welcome"
+          }
+        }
+      ],
+      "send": {
+        "conn": "b",
+        "msg": {
+          "principal": "claude",
+          "protocol": "qp/0",
+          "surface": {
+            "kind": "headless"
+          },
+          "type": "hello"
+        }
+      }
+    },
+    {
+      "expect": [
+        {
+          "conn": "b",
+          "msg": {
+            "id": "c2",
+            "status": "applied",
+            "type": "ack"
+          }
+        }
+      ],
+      "send": {
+        "conn": "b",
+        "msg": {
+          "id": "c2",
+          "ops": [
+            {
+              "bar": 180,
+              "evidence": {
+                "level": 112.5
+              },
+              "id": "f-proposal",
+              "kind": "level",
+              "op": "add_fact",
+              "series": "px",
+              "text": "Proposed support 112.50."
+            }
+          ],
+          "type": "command"
+        }
+      }
+    },
+    {
+      "expect": [
+        {
+          "conn": "a",
+          "msg": {
+            "id": "c3",
+            "status": "applied",
+            "type": "ack"
+          }
+        }
+      ],
+      "send": {
+        "conn": "a",
+        "msg": {
+          "id": "c3",
+          "ops": [
+            {
+              "bar": 170,
+              "evidence": {
+                "level": 118.0
+              },
+              "id": "f-watch",
+              "kind": "level",
+              "op": "add_fact",
+              "series": "px",
+              "text": "Watch level 118.00."
+            },
+            {
+              "op": "put_view",
+              "view": {
+                "id": "desk-levels",
+                "layers": [
+                  {
+                    "id": "candles",
+                    "mark": "candle",
+                    "panel": 0,
+                    "series": "px"
+                  },
+                  {
+                    "id": "sma20",
+                    "mark": "line",
+                    "panel": 0,
+                    "series": "sma20"
+                  },
+                  {
+                    "id": "ema50",
+                    "mark": "line",
+                    "panel": 0,
+                    "series": "ema50"
+                  },
+                  {
+                    "encoding": {
+                      "color": {
+                        "else": "down",
+                        "then": "up",
+                        "when": {
+                          "field": "c",
+                          "op": "ge",
+                          "than": {
+                            "field": "o"
+                          }
+                        }
+                      },
+                      "y": "v"
+                    },
+                    "id": "volume",
+                    "mark": "bar",
+                    "panel": 1,
+                    "series": "px"
+                  },
+                  {
+                    "id": "rsi",
+                    "mark": "line",
+                    "panel": 2,
+                    "series": "rsi14"
+                  },
+                  {
+                    "encoding": {
+                      "y": 118.0
+                    },
+                    "id": "watch",
+                    "mark": "rule",
+                    "origin": {
+                      "/encoding/y": {
+                        "fact": "f-watch",
+                        "field": "level",
+                        "kind": "fact"
+                      }
+                    },
+                    "panel": 0
+                  },
+                  {
+                    "encoding": {
+                      "y": 112.5
+                    },
+                    "id": "proposal",
+                    "mark": "rule",
+                    "origin": {
+                      "/encoding/y": {
+                        "fact": "f-proposal",
+                        "field": "level",
+                        "kind": "fact"
+                      }
+                    },
+                    "panel": 0
+                  },
+                  {
+                    "encoding": {
+                      "y": 70.0
+                    },
+                    "id": "rsi-ob",
+                    "mark": "rule",
+                    "origin": {
+                      "/encoding/y": {
+                        "kind": "threshold",
+                        "name": "rsi.overbought"
+                      }
+                    },
+                    "panel": 2
+                  },
+                  {
+                    "encoding": {
+                      "y": 30.0
+                    },
+                    "id": "rsi-os",
+                    "mark": "rule",
+                    "origin": {
+                      "/encoding/y": {
+                        "kind": "threshold",
+                        "name": "rsi.oversold"
+                      }
+                    },
+                    "panel": 2
                   }
                 ],
                 "panels": [

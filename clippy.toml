@@ -1,1 +1,5 @@
 too-many-arguments-threshold = 7
+too-many-lines-threshold = 80
+allow-unwrap-in-tests = true
+allow-expect-in-tests = true
+allow-panic-in-tests = true

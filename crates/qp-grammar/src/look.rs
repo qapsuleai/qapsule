@@ -19,6 +19,11 @@
 //! `include_bytes!` line to `qp_render::fonts::FILES`; a registry test checks both lists
 //! agree. Nothing else changes; the settings page, `?look=` and `qp look` list the names
 //! from here.
+//!
+//! **Profiles (RD2):** a design direction is two registered looks, `<name>` with
+//! [`Profile::Dense`] (desktop) and `<name>-tel` with [`Profile::Touch`] (phone; written
+//! as `..<NAME>` changing type, chrome, space and glyph). Looks from before RD2 are
+//! [`Profile::Legacy`]. `scripts/design-check` measures every non-legacy look (P1–P13).
 
 use qp_schema::scene::Rgba;
 use serde_json::{json, Value};
@@ -26,6 +31,7 @@ use serde_json::{json, Value};
 use crate::error::{ErrorKind, GrammarError};
 use crate::theme::{Chrome, Theme};
 
+mod chart;
 mod css;
 mod fonts;
 mod oltan;
@@ -34,6 +40,7 @@ mod r4;
 mod registry;
 mod zemre;
 
+pub use chart::{ChartLook, OriginLook, OriginRoles, Profile, ValueLine};
 pub use css::css_vars;
 pub use fonts::{font, Advances, FontAsset, DEFAULT_FONT, FONTS};
 pub use oltan::OLTAN;
@@ -142,6 +149,10 @@ pub struct Surface {
     pub line: f64,
     /// Elevation: `false` = flat (no shadow anywhere).
     pub shadow: bool,
+    /// (RD2/S1) The CSS `box-shadow` of a raised card (`--qp-shadow`; `none`: flat).
+    pub shadow_css: &'static str,
+    /// (RD2/S1) Corner radius of a card (CSS px).
+    pub card_radius: f64,
     /// Alpha of an emphasis strip (accent).
     pub strip_alpha: u8,
     /// Alpha of a focus/dim veil (background).
@@ -423,6 +434,12 @@ pub struct Look {
     pub story: StoryLook,
     /// (R5/S) The open capsule design's counts (`tesir`).
     pub open: OpenLook,
+    /// (RD2/S1) The density profile.
+    pub profile: Profile,
+    /// (RD2/S1) Origin colour roles and the agent's dash; `None`: derived from the schemes.
+    pub origin: Option<OriginLook>,
+    /// (RD2/S1) The chart's conventions.
+    pub chart: ChartLook,
 }
 
 const fn role(px: f64) -> TypeRole {
@@ -518,6 +535,7 @@ impl Look {
             "surface": {"radius": self.surface.radius, "frame_radius": self.surface.frame_radius,
                 "pill_radius": self.surface.pill_radius,
                 "line": self.surface.line, "shadow": self.surface.shadow,
+                "shadow_css": self.surface.shadow_css, "card_radius": self.surface.card_radius,
                 "strip_alpha": self.surface.strip_alpha, "veil_alpha": self.surface.veil_alpha},
             "glyph": {"face_px": self.glyph.face_px, "card_px": self.glyph.card_px,
                 "chart_px": self.glyph.chart_px, "default_px": self.glyph.default_px,
@@ -527,6 +545,9 @@ impl Look {
                 "ease": self.motion.ease.css(), "chrome_ms": self.motion.chrome_ms,
                 "change_ms": self.motion.change_ms},
             "chrome": self.chrome_json(),
+            "profile": self.profile.name(),
+            "origin": self.origin_json(),
+            "chart": self.chart.to_json(),
             "evidence": {"color": self.evidence.color, "note_color": self.evidence.note_color,
                 "rule_w": self.evidence.rule_w, "band_w": self.evidence.band_w,
                 "band_alpha": self.evidence.band_alpha, "point_px": self.evidence.point_px},

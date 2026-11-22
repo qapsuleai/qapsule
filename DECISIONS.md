@@ -7,7 +7,7 @@ numarayı ya da bölüm adını bu tablodan bulun.
 
 | Bölüm (özgün başlık) | Dosya | Numaralar | Eski adı (round belgelerinde) |
 |---|---|---|---|
-| Verilmiş kararlar | [`docs/decisions/kararlar.md`](docs/decisions/kararlar.md) | K1–K84 |  |
+| Verilmiş kararlar | [`docs/decisions/kararlar.md`](docs/decisions/kararlar.md) | K1–K85 |  |
 | Açık kararlar | [`docs/decisions/acik.md`](docs/decisions/acik.md) | A1–A9 |  |
 | RD1 kararları — kabul edildi (2026-11-15, K22); Ö9 K23 ile geçersiz | [`docs/decisions/rounds/RD1.md`](docs/decisions/rounds/RD1.md) | Ö1–Ö9, A10–A12 | "Önerilen (RD1)" |
 | R2 kararları — kabul edildi (2026-11-15, K24) | [`docs/decisions/rounds/R2.md`](docs/decisions/rounds/R2.md) | Ö10–Ö17, A13–A14 | "Önerilen (R2)" |

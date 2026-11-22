@@ -104,8 +104,11 @@ def main(argv):
     for e in errors:
         print(f"ERROR [{e['rule']}] {e['message']} ({e['why']})")
     summary = ", ".join(f"{r} {n}" for r, n in sorted(by_rule.items())) or "none"
-    print(f"arch-check: {len(errors)} error(s); {len(excepted) + len(cfg.get('layer_overrides', {}))} "
-          f"exception(s) awaiting approval; within the baseline: {summary}")
+    n_exc = len(excepted) + len(cfg.get("layer_overrides", {}))
+    pending = sum(1 for f in excepted if "bekliyor" in f["exception"].get("status", "")) + sum(
+        1 for o in cfg.get("layer_overrides", {}).values() if "bekliyor" in o.get("status", ""))
+    print(f"arch-check: {len(errors)} error(s); {n_exc} named exception(s), {pending} awaiting "
+          f"approval; within the baseline: {summary}")
     return 1 if errors else 0
 
 

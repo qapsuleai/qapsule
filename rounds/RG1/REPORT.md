@@ -1,7 +1,7 @@
 # RG1 — Yönetişim turu: rapor
 
-Durum: **tamamlandı** (2026-11-22). Yeni özellik yok; davranış değişmedi. Karar bekleyenler:
-istisna istekleri İ1–İ7 (§4), kural önerileri K-1…K-11 (§9), önerilen kararlar Ö103–Ö108 / A63–A64
+Durum: **tamamlandı** (2026-11-22). Yeni özellik yok; davranış değişmedi. **İstisna istekleri İ1–İ7
+Arkin tarafından onaylandı (K85).** Karar bekleyenler: kural önerileri K-1…K-11 (§9), önerilen kararlar Ö103–Ö108 / A63–A64
 (`docs/decisions/rounds/RG1.md`), `recovered/*` dalları (§11).
 
 ## 1. Özet
@@ -40,11 +40,11 @@ istisna istekleri İ1–İ7 (§4), kural önerileri K-1…K-11 (§9), önerilen 
 |---|---|---|---|
 | 1 | Başlangıç tutanağı ilk iş, commit | ✅ | `6d03df2` (ilk taşımadan önce), kod taşınmadan genişletildi `26c513d` (225 kalem); `experiments/baseline/` |
 | 2 | Davranış değişmedi; verify yeşil; CI yeşil; hiçbir altın güncellenmedi | ✅ | `experiments/compare-final.txt` 225/225; `verify-final.log` 19/19; `git diff --stat 6d03df2 HEAD -- fixtures/{golden,compute,protocol,views}` boş; CI §13 |
-| 3 | Performans ve WASM boyutu | ⚠️ İ7 | K17 gürültü içinde (A/B kontrolü); varsayılan WASM +%0,05; **kabuk paketi gzip +%2,5** (> ±%2) → İ7 (§6) |
-| 4 | `arch-check` depo genelinde, verify adımı, öz-sınama; katman yönü ihlali 0 | ⚠️ İ1, İ2 | Yukarı bağımlılık: İ1 kabul edilirse 0 (`qp-session → qp-source`). Yan bağımlılık: 5, hepsi adıyla İ2. Kural metni harfiyen uygulanırsa 6 ihlal; saf taşımayla kalkmıyorlar (§4) |
-| 5 | 800 satırı geçen kaynak dosya 0 | ✅ (İ6) | Yalnız `ops/expand/op.rs` (tek fonksiyon `expand_op`) ve `compile/layer/prepare.rs` (tek fonksiyon `prepare`) → İ6; `advances.rs` üretilmiş, adıyla listeli |
+| 3 | Performans ve WASM boyutu | ✅ İ7 (K85) | K17 gürültü içinde (A/B kontrolü); varsayılan WASM +%0,05; **kabuk paketi gzip +%2,5** (> ±%2) → İ7 (§6) |
+| 4 | `arch-check` depo genelinde, verify adımı, öz-sınama; katman yönü ihlali 0 | ✅ İ1, İ2 (K85) | Yukarı bağımlılık: İ1 ile 0 (`qp-session → qp-source`). Yan bağımlılık: 5, hepsi adıyla İ2. Kural metni harfiyen uygulanırsa 6 ihlal; saf taşımayla kalkmıyorlar (§4) |
+| 5 | 800 satırı geçen kaynak dosya 0 | ✅ İ6 (K85) | Yalnız `ops/expand/op.rs` (tek fonksiyon `expand_op`) ve `compile/layer/prepare.rs` (tek fonksiyon `prepare`) → İ6; `advances.rs` üretilmiş, adıyla listeli |
 | 6 | Kabuklar < 4 bin | ✅ | `qp-cli` 1.419, `qp-wasm` 1.324 |
-| 7 | 12 bin üstü crate yok ya da istisna; klasörde ≤ 15; yasak ad yok | ✅ (İ3–İ5) | `qp-session` 32,0 bin, `qp-grammar` 19,3 bin, `qp-capsule` 13,2 bin → İ3–İ5; `src/` klasörleri ≤ 15; `tests/` klasörleri 3 tane (M5 kesildi, borçta); yasak ad 0 |
+| 7 | 12 bin üstü crate yok ya da istisna; klasörde ≤ 15; yasak ad yok | ✅ İ3–İ5 (K85) | `qp-session` 32,0 bin, `qp-grammar` 19,3 bin, `qp-capsule` 13,2 bin → İ3–İ5; `src/` klasörleri ≤ 15; `tests/` klasörleri 3 tane (M5 kesildi, borçta); yasak ad 0 |
 | 8 | Her crate'te README; `lib.rs`/`mod.rs` yalnız bildirim | ✅ | 16/16 README; `root.logic` 0 (kesin kural) |
 | 9 | Taban çizgisi ve mandal, testi | ✅ | `docs/DEBT.md`, `scripts/arch-baseline.json`; öz-sınama; `experiments/ratchet.txt` |
 | 10 | Lint'ler açık; yeni ihlal derlemeyi kırıyor; mevcutlar taban çizgisinde | ✅ | Kök `Cargo.toml`, `clippy.toml`; 237 öğe izni (`lint.allow` crate başına mandallı); kırılma gösterimi L ve denetçi raporlarında |
@@ -98,9 +98,9 @@ test modülleri `tests.rs` dosyalarına taşındı ve test sayılıyor.
 
 800 üstü kaynak dosya 56 → 3 (yukarıdaki ilk üç); 600–800 arası 37 (taban çizgisinde).
 
-## 4. İstisna istekleri (kararı Arkin verir)
+## 4. İstisna istekleri — **onaylandı (K85, 2026-11-22)**
 
-`scripts/arch-config.json` içinde adıyla durur; `arch-check` her koşuda "EXCEPTION … onay bekliyor"
+`scripts/arch-config.json` içinde adıyla durur; `arch-check` her koşuda "EXCEPTION … onaylandı (K85)"
 basar. Onaylanmayan istisna geri alınamaz değildir: yapılandırmadan silinince `arch-check` kırmızıya döner.
 
 | No | Ne | Gerekçe | Öneri |
@@ -267,15 +267,15 @@ yapılmadı.
 | 2 | `rg1-compare.sh`: 225 kalem bayt eşit (`experiments/compare-final.txt`) ✅ |
 | 3 | `verify.sh` 19/19 PASS, `arch` dahil (`experiments/verify-final.log`) ✅ |
 | 4 | `git diff --stat 6d03df2 HEAD -- fixtures/golden fixtures/compute fixtures/protocol fixtures/views` boş ✅ |
-| 5 | `arch-check`: kesin ihlal 0; 11 istisna onay bekliyor; taban çizgisi içindekiler listeleniyor ✅ (İ1–İ6) |
+| 5 | `arch-check`: kesin ihlal 0; 11 adlı istisna (onaylı, K85); taban çizgisi içindekiler listeleniyor ✅ |
 | 6 | `arch-check --self-test` PASS (20 örnek + mandal + istisna) ✅ |
-| 7 | 800 üstü: `op.rs` 910, `prepare.rs` 891 (İ6), `advances.rs` 878 (üretilmiş, listeli) ⚠️ İ6 |
-| 8 | Kabuklar 1.419 / 1.324 < 4 bin ✅; 12 bin üstü 3 crate → İ3–İ5 ⚠️ |
+| 7 | 800 üstü: `op.rs` 910, `prepare.rs` 891 (İ6), `advances.rs` 878 (üretilmiş, listeli) ✅ İ6 (K85) |
+| 8 | Kabuklar 1.419 / 1.324 < 4 bin ✅; 12 bin üstü 3 crate → İ3–İ5 ✅ (K85) |
 | 9 | Mandal denemesi (`experiments/ratchet.txt`): değer aşımı, yeni kalem, yazım reddi ✅ |
 | 10 | `ls crates/*/README.md \| wc -l` = 16 = crate sayısı ✅ |
 | 11 | `docs/PARAMETERS.md`, `docs/PARAMETERS.generated.md`; 17 sabit bağlı ✅ |
 | 12 | `scripts/rg1-decisions-check.py b341e2d 1957752` ✅ |
-| 13 | Performans / WASM tablosu §6 ⚠️ İ7 |
+| 13 | Performans / WASM tablosu §6 ✅ İ7 (K85) |
 | 14 | `git worktree list` yalnız ana ağaç; `du -sh target` §16 ✅ |
 | 15 | `AUDIT.md`, `STATUS.md`, `ROADMAP.md` ✅ |
 
@@ -307,7 +307,7 @@ commit'i `ed74d036` koşusu **45038366122 yeşil**.
 | B3 | Düz `pub mod tests;` ile ulaşılan `tests.rs` test sayılabiliyordu | orta | **Düzeltildi**: ancak kendi ata modülü `#[cfg(test)]` ile bildirirse test. |
 | B5 | Elle küçültülen/ gevşek taban çizgisi kalemi yalnız "stale" uyarısı; `generated_files` sessiz | orta | **Kısmen**: gevşek kalem hata ("tighten"); üretilmiş dosyalar her koşuda basılır. Açık: taban çizgisi değeri ile kodun **aynı miktarda** birlikte büyütülmesi ve elle istisna eklenmesi araçla yakalanamaz (yapılandırmanın kendisi); git geçmişinde görünür. K-9: `verify.sh`'a `main`'e göre yapılandırma/taban çizgisi farkını basan ve her yeni istisna için karar satırı isteyen adım. |
 | B2, B4, B6 | `lib.rs`'te `include!`/makro mantığı, `src` dışından `include!`, `[[bin]]` yolu, makroyla üretilen uzun fonksiyon, `const` içinde uzun kapanış, `#[path] mod util;` yakalanmıyor | orta/düşük | Bugünkü kodda yok (denetçi doğruladı). Kalıcı çözüm Rust sözdizimi ağacıyla çalışan bir denetim (ör. `syn` tabanlı küçük araç) — K-10, sonraki RF. |
-| B7 | 3, 4, 5, 7. ölçütler istisnalara bağlı | orta | Kabul; §4 İ1–İ7 Arkin'in kararında. Rapor bunları "karşılandı" değil "⚠️ istisnaya bağlı" yazar. |
+| B7 | 3, 4, 5, 7. ölçütler istisnalara bağlı | orta | Arkin İ1–İ7'yi onayladı (K85); ölçütler adlı, onaylı istisnayla karşılandı. |
 | B8 | `rg1-moved` `use` satırlarını, `impl` başlıklarını, öğe düzeyi makroları, `cfg`'yi görmüyor | orta | Denetçi bunları ayrıca denetledi, sorun yok. K-8: aracı kalıcı RF aracına çevirirken eklenmeli. |
 | B9 | K52 tutanak çıktısı kısaltılmış; tek koşu | düşük | Doğru: tutanak `rg1-perf.sh`'ın ilk sürümüyle (çıktının son 40 satırı) alındı; tik ve sahne p95 görünür. K52'nin bağlayıcı ölçümü telefonda; RD2 her tasarımda yeniden ölçecek (K82: ara ölçüm tekrarlanmadı). |
 | B10 | A63'te +%2,36, ölçüm +%2,54 | düşük | Düzeltildi (A63 ve §4 İ7: son ölçüm +%2,54). |

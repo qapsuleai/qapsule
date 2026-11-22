@@ -16,5 +16,5 @@ RG1 bu satırları **önerir**; kesinleştirmez. Kanıt `rounds/RG1/REPORT.md`, 
 
 | # | Açık karar (RG1) | Ne zaman | Not |
 |---|------------|----------|-----|
-| A63 | İstisna istekleri İ1–İ7 (`rounds/RG1/REPORT.md` §4): `qp-source` katmanı; aynı katmandaki bağımlılıklar; `qp-session`, `qp-grammar`, `qp-capsule` crate bütçesi; tek fonksiyonlu iki dosya; kabuk WASM paketi gzip +%2,54 | Bir sonraki ana akış oturumu | Her biri gerekçeli; `arch-check` her koşuda "EXCEPTION … onay bekliyor" basar. |
+| A63 | **KAPANDI (K85).** İstisna istekleri İ1–İ7 (`rounds/RG1/REPORT.md` §4): `qp-source` katmanı; aynı katmandaki bağımlılıklar; `qp-session`, `qp-grammar`, `qp-capsule` crate bütçesi; tek fonksiyonlu iki dosya; kabuk WASM paketi gzip +%2,54 | Bir sonraki ana akış oturumu | Her biri gerekçeli; `arch-check` her koşuda "EXCEPTION … onay bekliyor" basar. |
 | A64 | Kural önerileri K-1…K-11 (`rounds/RG1/REPORT.md` §9): §2'ye sıralı alt katman; geliştirme bağımlılıklarının katmanlanmaması; enstrüman kapsamının çözümleme sırasındaki yeri; crate bütçesinin test dışı satırla sayılması … | `docs/ENGINEERING.md` güncellemesi | ENGINEERING metni RG1'de değiştirilmedi. |

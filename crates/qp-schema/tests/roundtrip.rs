@@ -1,6 +1,6 @@
 //! Fixtures -> types -> JSON -> types.
 
-mod common;
+mod support;
 
 use qp_schema::{
     Author, Capsule, CapsuleState, Command, Document, Instrument, Op, Provenance, Series,
@@ -12,7 +12,7 @@ fn roundtrip<T>(name: &str) -> T
 where
     T: Serialize + DeserializeOwned + PartialEq + std::fmt::Debug,
 {
-    let original = common::fixture_value(name);
+    let original = support::fixture_value(name);
     let typed: T = serde_json::from_value(original.clone()).expect("fixture deserializes");
     let json = serde_json::to_string(&typed).expect("serializes");
     let back: T = serde_json::from_str(&json).expect("deserializes again");
@@ -41,9 +41,9 @@ fn document_fixture_roundtrips() {
 #[test]
 fn capsule_fixture_matches_document_capsule() {
     let capsule: Capsule =
-        serde_json::from_value(common::fixture_value("capsule.example.json")).unwrap();
+        serde_json::from_value(support::fixture_value("capsule.example.json")).unwrap();
     let doc: Document =
-        serde_json::from_value(common::fixture_value("document.example.json")).unwrap();
+        serde_json::from_value(support::fixture_value("document.example.json")).unwrap();
     assert_eq!(doc.capsules[0], capsule);
     assert!(doc.findings.iter().any(|f| f.id == capsule.finding));
 }
@@ -97,7 +97,7 @@ fn command_roundtrips() {
 
 #[test]
 fn unknown_fields_are_rejected() {
-    let mut v = common::fixture_value("capsule.example.json");
+    let mut v = support::fixture_value("capsule.example.json");
     v["surprise"] = serde_json::json!(1);
     assert!(serde_json::from_value::<Capsule>(v).is_err());
 

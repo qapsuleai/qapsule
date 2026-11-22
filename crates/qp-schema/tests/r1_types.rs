@@ -1,7 +1,7 @@
 //! R1 schema additions: nullable warmup points, `StudyOutput`, `Instrument`, `Calendar`,
 //! `display_tz`, library validation and the bar series fixture format.
 
-mod common;
+mod support;
 
 use std::collections::BTreeMap;
 use std::path::PathBuf;
@@ -108,7 +108,7 @@ fn study_output_roundtrips_and_validates() {
     assert_eq!(serde_json::from_value::<StudyOutput>(value).unwrap(), out);
     validate(
         "StudyOutput",
-        &common::fixture_value("study_output.example.json"),
+        &support::fixture_value("study_output.example.json"),
     )
     .unwrap();
 }
@@ -143,7 +143,7 @@ fn calendar_roundtrips_and_validates() {
 
 #[test]
 fn document_display_tz_and_instrument() {
-    let doc = common::fixture_value("document.example.json");
+    let doc = support::fixture_value("document.example.json");
     validate("Document", &doc).unwrap();
     let doc: qp_schema::Document = serde_json::from_value(doc).unwrap();
     assert_eq!(doc.display_tz.as_deref(), Some("Europe/Istanbul"));

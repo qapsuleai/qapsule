@@ -1911,6 +1911,7 @@ dependencies = [
  "qp-schema",
  "qp-session",
  "qp-source",
+ "qp-wasm",
  "serde_json",
  "tempfile",
 ]

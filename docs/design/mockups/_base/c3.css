@@ -1,0 +1,108 @@
+/* Ç3 — phone control tower: watch summary, pending proposal, capsule feed.
+ * Patterns: OV-21/VV-B1 (health, quiet when fine), OV-18/AT-C3 (approval card names the
+ * action), VV-C1/VV-C2 (capsule feed rows with track record). */
+
+/* Watch summary: one row, three counts with words; the problem count leads when > 0. */
+.tower-summary {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  margin: 0 var(--qp-space-3);
+  padding: var(--qp-space-2) 0;
+  border-bottom: var(--m-rule) solid var(--m-line);
+}
+
+.tower-summary div {
+  display: flex;
+  flex-direction: column;
+  gap: var(--qp-space-0);
+}
+
+.tower-summary .num {
+  font-size: var(--m-fs-title);
+}
+
+.tower-summary .lbl {
+  display: flex;
+  align-items: center;
+  gap: var(--qp-space-1);
+  font-size: var(--m-fs-note);
+  color: var(--m-muted);
+}
+
+.pending {
+  margin: var(--qp-space-2) var(--qp-space-3);
+  padding: var(--qp-space-2) var(--qp-space-3);
+  display: flex;
+  flex-direction: column;
+  gap: var(--qp-space-1);
+}
+
+.pending .meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.pending h3 {
+  font-size: var(--m-fs-body);
+  font-weight: var(--qp-head-weight);
+}
+
+.pending .chart-slot {
+  height: calc(var(--m-control-h) * 3);
+  border-radius: var(--m-radius-control);
+}
+
+.pending .actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--qp-space-1);
+}
+
+.feed-h {
+  padding-left: var(--qp-space-3);
+  padding-right: var(--qp-space-3);
+}
+
+.capsule-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  column-gap: var(--qp-space-2);
+  row-gap: var(--qp-space-0);
+  padding: var(--qp-space-2) var(--qp-space-3);
+  border-top: var(--m-rule) solid var(--m-line);
+}
+
+.capsule-row .sym {
+  font-weight: var(--qp-head-weight);
+  font-size: var(--m-fs-label);
+}
+
+.capsule-row .when {
+  font-size: var(--m-fs-note);
+  color: var(--m-muted);
+  text-align: right;
+}
+
+.capsule-row p {
+  grid-column: 1 / -1;
+  font-size: var(--m-fs-body);
+}
+
+.capsule-row .record {
+  grid-column: 1 / -1;
+  display: flex;
+  gap: var(--qp-space-2);
+  align-items: center;
+  font-size: var(--m-fs-note);
+  color: var(--m-muted);
+}
+
+/* Outcome state: word first, colour second. */
+.state-tag {
+  display: inline-flex;
+  padding: var(--qp-badge-pad);
+  border-radius: var(--m-radius-control);
+  border: var(--m-rule) solid currentColor;
+  font-size: var(--m-fs-note);
+}

@@ -151,6 +151,66 @@ fn render_is_deterministic_and_matches_golden() {
     );
 }
 
+/// RD2/G: `--scale 1` is the reference path byte for byte; `--scale 2` doubles both sides
+/// (PNG IHDR width/height); 4 is refused (the gallery needs 1..=3).
+#[test]
+fn render_scale_keeps_scale_one_and_doubles_at_two() {
+    let tmp = tempfile::tempdir().unwrap();
+    let input = fixtures().join("bars/sample.json");
+    let one = tmp.path().join("one.png");
+    let two = tmp.path().join("two.png");
+    for (out, s) in [(&one, "1"), (&two, "2")] {
+        qp().arg("render")
+            .arg(&input)
+            .args(["--width", "300", "--height", "200", "--scale", s, "-o"])
+            .arg(out)
+            .assert()
+            .success();
+    }
+    let plain = tmp.path().join("plain.png");
+    qp().arg("render")
+        .arg(&input)
+        .args(["--width", "300", "--height", "200", "-o"])
+        .arg(&plain)
+        .assert()
+        .success();
+    assert_eq!(std::fs::read(&one).unwrap(), std::fs::read(&plain).unwrap());
+    let png = std::fs::read(&two).unwrap();
+    let be = |i: usize| u32::from_be_bytes([png[i], png[i + 1], png[i + 2], png[i + 3]]);
+    assert_eq!((be(16), be(20)), (600, 400));
+    qp().arg("render")
+        .arg(&input)
+        .args(["--scale", "4", "-o"])
+        .arg(tmp.path().join("four.png"))
+        .assert()
+        .failure();
+}
+
+/// RD2/G: `--theme` reaches the compiler (a light render of a view differs from dark).
+#[test]
+fn render_theme_overrides_the_scheme() {
+    let tmp = tempfile::tempdir().unwrap();
+    let root = fixtures().join("..");
+    let mut pngs = Vec::new();
+    for t in ["dark", "light"] {
+        let out = tmp.path().join(format!("{t}.png"));
+        qp().current_dir(&root)
+            .args([
+                "render",
+                "--transcript",
+                "fixtures/views/v1-three-panels.json",
+            ])
+            .args([
+                "--view", "three", "--width", "240", "--height", "160", "--theme", t, "-o",
+            ])
+            .arg(&out)
+            .assert()
+            .success();
+        pngs.push(std::fs::read(&out).unwrap());
+    }
+    assert_ne!(pngs[0], pngs[1]);
+}
+
 #[test]
 fn bad_input_fails_without_panic() {
     let tmp = tempfile::tempdir().unwrap();

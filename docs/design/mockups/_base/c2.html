@@ -1,0 +1,57 @@
+<!doctype html>
+<!-- RD2/G Ç2 — grafik hücresi yakın (960×600, DPR 2). Grafik çekirdekten; üstündeki
+     işaretler şartname öğesi, renkleri köken rollerinden (insan / ajan / motor). -->
+<html lang="tr">
+<head>
+  <meta charset="utf-8">
+  <title>Ç2 grafik hücresi</title>
+  <link rel="stylesheet" href="../_base/base.css">
+  <link rel="stylesheet" href="../_base/c2.css">
+  <script src="../_base/frame.js"></script>
+</head>
+<body>
+<div class="frame c2" data-anchor="c2">
+  <div class="chart-slot" data-chart-slot data-region="chart">
+    <img data-chart="c2-cell" alt="SYN20 grafik hücresi">
+
+    <div class="overlay" aria-label="Grafik üstü işaretler">
+      <svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
+        <!-- Trend line drawn by the human (solid). -->
+        <line class="human" x1="18" y1="44" x2="78" y2="16"></line>
+        <!-- Watch level set from the line's intent (human, quieter). -->
+        <line class="watch" x1="30" y1="30" x2="91" y2="30"></line>
+        <!-- Agent proposal: a level the agent suggests (dashed, agent colour). -->
+        <line class="agent" x1="28" y1="9" x2="91" y2="9"></line>
+      </svg>
+
+      <!-- Intent card of the trend line (top left, clear of the latest bars). -->
+      <div class="pin card intent" style="--x: 2%; --y: 5%">
+        <span class="origin human">Arkin, insan</span>
+        <h3>Trend çizgisi altında kapanış olursa uyar</h3>
+        <div class="row"><span class="muted">Koşul</span><span>Kapanış, fitil değil</span></div>
+        <div class="row"><span class="muted">Tutunma</span><span class="num">3 bar</span></div>
+        <div class="row"><span class="muted">Periyot</span><span>Günlük</span></div>
+      </div>
+
+      <!-- Watch mark on its level. -->
+      <div class="pin mark-pill human" style="--x: 72%; --y: 30%">
+        <span class="bell" aria-hidden="true"></span><span>112,40 izleniyor</span>
+      </div>
+
+      <!-- Agent proposal on its dashed level. -->
+      <div class="pin mark-pill agent proposal-pill" style="--x: 30%; --y: 9%">
+        <span class="origin agent">Ajan önerisi</span>
+        <span class="num">118,20 direnç</span>
+        <span class="btn quiet">Reddet</span><span class="btn primary">Ekle</span>
+      </div>
+
+      <!-- Capsule mark over a bar. -->
+      <div class="pin capsule-mark" style="--x: 80%; --y: 16%">
+        <span class="mark-pill engine"><span class="origin engine">Kapsül</span>Kırılım tutundu</span>
+        <span class="diamond" aria-hidden="true"></span>
+      </div>
+    </div>
+  </div>
+</div>
+</body>
+</html>

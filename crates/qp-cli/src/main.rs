@@ -276,6 +276,13 @@ struct RenderArgs {
     /// (R5/T3) Look to draw with (`qp look list`; default `r4`).
     #[arg(long)]
     look: Option<String>,
+    /// (RD2/G) Device pixel scale: the PNG is `width·N × height·N` (same layout, sharper;
+    /// the comparison gallery uses 2 for desktop, 3 for phone). 1 is the reference path.
+    #[arg(long, default_value_t = 1, value_parser = clap::value_parser!(u32).range(1..=3))]
+    scale: u32,
+    /// (RD2/G) Scheme override, `dark` or `light` (default: the view's theme).
+    #[arg(long)]
+    theme: Option<String>,
 }
 
 #[derive(Debug, clap::Args)]
@@ -394,7 +401,7 @@ fn run(command: Command) -> Result<Outcome, String> {
         Command::Drive(args) => demo::drive(&args).map(|()| Outcome::Ok),
         Command::Live { command } => live::run(&command).map(|()| Outcome::Ok),
         Command::Render(args) => match &args.input {
-            Some(input) => render(input, &args.out, args.width, args.height),
+            Some(input) => render(input, &args),
             None => render_view(&args),
         },
         Command::Serve {
@@ -439,14 +446,12 @@ fn run(command: Command) -> Result<Outcome, String> {
     }
 }
 
-fn render(input: &Path, out: &Path, width: u32, height: u32) -> Result<Outcome, String> {
+fn render(input: &Path, args: &RenderArgs) -> Result<Outcome, String> {
     let text = std::fs::read_to_string(input)
         .map_err(|e| format!("cannot read {}: {e}", input.display()))?;
     let bars = qp_render::parse_bars(&text).map_err(|e| format!("{}: {e}", input.display()))?;
-    let scene = r0_scene(&bars, width, height)?;
-    let png = qp_render::render_scene_png(&scene).map_err(|e| e.to_string())?;
-    std::fs::write(out, png).map_err(|e| format!("cannot write {}: {e}", out.display()))?;
-    Ok(Outcome::Ok)
+    let scene = r0_scene(&bars, args.width, args.height)?;
+    write_png(&scene, args.scale, &args.out)
 }
 
 /// The R0 chart (candles + SMA(20) of close, one linear panel) of a bar series: study

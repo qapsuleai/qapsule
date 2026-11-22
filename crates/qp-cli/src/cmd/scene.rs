@@ -88,6 +88,7 @@ fn compile_source(
     height: u32,
     look: Option<&str>,
     roles: bool,
+    theme: Option<&str>,
 ) -> Result<
     (qp_schema::grammar::View, qp_schema::scene::SceneDesc),
     Result<Box<qp_schema::protocol::ProtocolError>, String>,
@@ -96,6 +97,7 @@ fn compile_source(
     let mut opts = qp_session::CompileOptions::new(width, height);
     opts.look = look.map(str::to_owned);
     opts.roles = roles;
+    opts.theme = theme.map(str::to_owned);
     match (&src.view, &src.present) {
         (Some(view), _) => {
             let scene = session.scene(view, &opts).map_err(|e| Ok(Box::new(e)))?;
@@ -133,6 +135,7 @@ pub(crate) fn scene_cmd(args: &SceneArgs, explain: bool) -> Result<Outcome, Stri
         args.height,
         args.look.as_deref(),
         args.roles,
+        None,
     ) {
         Ok(x) => x,
         Err(Ok(e)) => return Ok(print_protocol_error(&e)),
@@ -190,13 +193,30 @@ pub(crate) fn render_view(args: &RenderArgs) -> Result<Outcome, String> {
         args.height,
         args.look.as_deref(),
         false,
+        args.theme.as_deref(),
     ) {
         Ok((_, scene)) => scene,
         Err(Ok(e)) => return Ok(print_protocol_error(&e)),
         Err(Err(m)) => return Err(m),
     };
-    let png = qp_render::render_scene_png(&scene).map_err(|e| e.to_string())?;
-    std::fs::write(&args.out, png)
-        .map_err(|e| format!("cannot write {}: {e}", args.out.display()))?;
+    write_png(&scene, args.scale, &args.out)
+}
+
+/// Writes `scene` as PNG at device scale `scale` (RD2/G). Scale 1 keeps the reference
+/// path (`render_scene_png`) so existing outputs stay byte-identical.
+pub(crate) fn write_png(
+    scene: &qp_schema::scene::SceneDesc,
+    scale: u32,
+    out: &std::path::Path,
+) -> Result<Outcome, String> {
+    let png = if scale == 1 {
+        qp_render::render_scene_png(scene)
+    } else {
+        qp_render::render_scene_rgba_scaled(scene, scale).and_then(|rgba| {
+            qp_render::encode_png(&rgba, scene.width * scale, scene.height * scale)
+        })
+    }
+    .map_err(|e| e.to_string())?;
+    std::fs::write(out, png).map_err(|e| format!("cannot write {}: {e}", out.display()))?;
     Ok(Outcome::Ok)
 }

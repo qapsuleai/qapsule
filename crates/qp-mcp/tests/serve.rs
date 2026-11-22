@@ -85,7 +85,7 @@ fn registry_has_thin_first_and_it_mirrors_the_generated_tools() {
 
 #[test]
 fn input_schema_helper_generates_from_types() {
-    let s = input_schema::<qp_mcp::common::RenderArgs>();
+    let s = input_schema::<qp_mcp::server_tools::RenderArgs>();
     assert_eq!(s["type"], "object");
     assert!(s["properties"]["view"].is_object());
     assert_eq!(s["required"], json!(["view"]));

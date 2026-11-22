@@ -133,28 +133,6 @@ pub(super) fn distance(a: &str, b: &str) -> usize {
     prev[b.len()]
 }
 
-/// The closest candidates to `word` (distance ≤ 2 or a shared prefix of 3).
-pub(super) fn did_you_mean<'a>(
-    word: &str,
-    candidates: impl IntoIterator<Item = &'a str>,
-) -> Vec<String> {
-    let w = word.to_ascii_lowercase();
-    let mut scored: Vec<(usize, &str)> = candidates
-        .into_iter()
-        .filter_map(|c| {
-            let d = distance(&w, &c.to_ascii_lowercase());
-            let prefix = w.len() >= 3 && c.to_ascii_lowercase().starts_with(&w[..3]);
-            (d <= 2 || prefix).then_some((d, c))
-        })
-        .collect();
-    scored.sort_unstable();
-    scored
-        .into_iter()
-        .take(3)
-        .map(|(_, c)| c.to_owned())
-        .collect()
-}
-
 /// Checks the keys of object `v` at `path` against `allowed`.
 pub(super) fn check_keys(v: &Value, path: &str, allowed: &[&str], what: &str) -> Result<(), Fail> {
     let Some(o) = v.as_object() else {

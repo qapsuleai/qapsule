@@ -246,6 +246,143 @@ impl Io<'_, '_> {
     }
 }
 
+/// The closest candidates to `word` (distance ≤ 2 or a shared prefix of 3).
+fn did_you_mean<'a>(word: &str, candidates: impl IntoIterator<Item = &'a str>) -> Vec<String> {
+    let w = word.to_ascii_lowercase();
+    let mut scored: Vec<(usize, &str)> = candidates
+        .into_iter()
+        .filter_map(|c| {
+            let d = distance(&w, &c.to_ascii_lowercase());
+            let prefix = w.len() >= 3 && c.to_ascii_lowercase().starts_with(&w[..3]);
+            (d <= 2 || prefix).then_some((d, c))
+        })
+        .collect();
+    scored.sort_unstable();
+    scored
+        .into_iter()
+        .take(3)
+        .map(|(_, c)| c.to_owned())
+        .collect()
+}
+
+fn shape(find: &str, format: Format, select: &[String], out: Out, seq: Option<u64>) -> Value {
+    let count = out.items.len();
+    let mut ids: Vec<String> = Vec::new();
+    for it in &out.items {
+        for x in std::iter::once(&it.id).chain(it.refs.iter()) {
+            if !x.is_empty() && !ids.contains(x) {
+                ids.push(x.clone());
+            }
+        }
+    }
+    let mut env =
+        json!({"find": find, "format": format_name(format), "count": count, "total": out.total});
+    if let Some(s) = seq {
+        env["seq"] = json!(s);
+    }
+    let truncated = out.total > count;
+    let more = truncated.then(|| {
+        format!(
+            "{} more; raise `limit` (≤ 100) or narrow `where`",
+            out.total - count
+        )
+    });
+    let text = match format {
+        Format::Card => {
+            env["ids"] = json!(ids);
+            let mut lines = vec![format!(
+                "{find}: {count} of {}{}",
+                out.total,
+                seq.map(|s| format!(" · seq {s}")).unwrap_or_default()
+            )];
+            for it in &out.items {
+                if select.is_empty() {
+                    lines.extend(it.card.iter().cloned());
+                } else {
+                    let v = select_fields(&it.summary, select);
+                    let kv = v
+                        .as_object()
+                        .map(|o| {
+                            o.iter()
+                                .filter(|(k, _)| k.as_str() != "id")
+                                .map(|(k, x)| {
+                                    format!(
+                                        "{k}={}",
+                                        x.as_str().map_or_else(|| x.to_string(), str::to_owned)
+                                    )
+                                })
+                                .collect::<Vec<_>>()
+                                .join(" · ")
+                        })
+                        .unwrap_or_default();
+                    lines.push(format!("[{}] {kv}", it.id));
+                }
+                for (_, _, _, l) in &it.parts {
+                    lines.extend(l.iter().cloned());
+                }
+            }
+            for (_, _, _, l) in &out.extra {
+                lines.extend(l.iter().cloned());
+            }
+            if let Some(m) = &more {
+                lines.push(m.clone());
+            }
+            lines.join("\n")
+        }
+        Format::Json | Format::Layered => {
+            let raw = format == Format::Json;
+            let items: Vec<Value> = out
+                .items
+                .iter()
+                .map(|it| {
+                    let mut v = select_fields(if raw { &it.raw } else { &it.summary }, select);
+                    if raw && !it.refs.is_empty() {
+                        if let Some(o) = v.as_object_mut() {
+                            o.entry("refs").or_insert_with(|| json!(it.refs));
+                        }
+                    }
+                    for (name, r, sm, _) in &it.parts {
+                        v[*name] = if raw { r.clone() } else { sm.clone() };
+                    }
+                    v
+                })
+                .collect();
+            env["items"] = json!(items);
+            for (name, r, sm, _) in &out.extra {
+                env[*name] = if raw { r.clone() } else { sm.clone() };
+            }
+            if format == Format::Layered
+                && find == "capsules"
+                && out.items.iter().all(|i| i.parts.is_empty())
+            {
+                env["more"] = json!(
+                    "expand: [\"story\",\"evidence\",\"ledger\",\"comments\"] adds those layers"
+                );
+            }
+            if let Some(m) = &more {
+                env["truncated"] = json!(m);
+            }
+            env["ids"] = json!(ids);
+            env.to_string()
+        }
+    };
+
+    let structured = if format == Format::Card {
+        if let Some(m) = &more {
+            env["truncated"] = json!(m);
+        }
+        env
+    } else {
+        serde_json::from_str(&text).unwrap_or(Value::Null)
+    };
+    json!({
+        "resultType": "complete",
+        "content": [{"type": "text", "text": text}],
+        "structuredContent": structured,
+        "isError": false,
+    })
+}
+
 const ASK_DESCRIPTION: &str = "Read the chart document as your person may see it (engine stories, facts, \
 track record, changes, comments, watches, proposals). One small query: {\"find\": noun, \"where\": {filters, AND}, \
 \"select\": [fields], \"expand\": [parts], \"limit\": n, \"format\": \"card\"|\"json\"|\"layered\"}.\n\

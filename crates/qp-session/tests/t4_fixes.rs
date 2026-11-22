@@ -4,13 +4,13 @@
 //! engine says the evidence numbers), D2 (`value` origin of a bound fact), D4 (selector
 //! scratch over the document).
 
-mod common;
+mod support;
 
-use common::{code, root, H};
 use qp_schema::data::DataEvent;
 use qp_schema::protocol::SessionInit;
 use qp_session::HostNotice;
 use serde_json::{json, Value};
+use support::{code, root, H};
 
 /// The `init` of a conformance transcript.
 fn transcript_init(name: &str) -> SessionInit {

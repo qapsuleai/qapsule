@@ -3,17 +3,17 @@
 //! (1,000 presentations per depth, one serialized output each); both views compile.
 //! `presenter_timing` (ignored) repeats the RD1/T6e latency measurement.
 
-mod common;
+mod support;
 
 use std::collections::BTreeSet;
 use std::time::Instant;
 
-use common::H;
 use qp_grammar::{compile, depth, CompileOptions};
 use qp_schema::grammar::View;
 use qp_schema::protocol::SurfaceKind;
 use qp_schema::Depth;
 use serde_json::{json, Value};
+use support::H;
 
 fn present(h: &mut H, surface: &str) -> Value {
     let r = h.query(

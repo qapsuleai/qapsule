@@ -12,15 +12,16 @@
 //! satisfies the oracle), **refused** (the second write was refused and the document
 //! equals the first write alone: safe, needs a retry), **WRONG** (anything else).
 
-mod common;
+mod support;
 
-use common::H;
 use qp_schema::protocol::SessionInit;
 use serde_json::{json, Value};
+use support::H;
 
 fn init() -> SessionInit {
     let mut v: Value = serde_json::from_str(
-        &std::fs::read_to_string(common::root().join("fixtures/protocol/init/thyao.json")).unwrap(),
+        &std::fs::read_to_string(support::root().join("fixtures/protocol/init/thyao.json"))
+            .unwrap(),
     )
     .unwrap();
     v["principals"] = json!([

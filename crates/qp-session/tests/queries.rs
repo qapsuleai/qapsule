@@ -1,9 +1,9 @@
 //! Queries, presence, input and the presenter.
 
-mod common;
+mod support;
 
-use common::{code, H};
 use serde_json::json;
+use support::{code, H};
 
 fn two() -> H {
     let mut h = H::new();

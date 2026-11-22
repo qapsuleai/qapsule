@@ -1,11 +1,11 @@
 //! (R5B, `docs/PROTOCOL.md` §25) The agent surface of the authority: human decisions,
 //! what an agent may not write.
 
-mod common;
+mod support;
 
-use common::{code, init, H};
 use qp_schema::protocol::{Principal, SessionInit};
 use serde_json::{json, Value};
+use support::{code, init, H};
 
 fn principal(v: Value) -> Principal {
     serde_json::from_value(v).unwrap()
@@ -420,7 +420,7 @@ fn without_the_policy_only_marked_connections_follow_the_write_rule() {
 fn an_unknown_agent_policy_is_refused() {
     let mut i = agent_init();
     i.agent_policy = Some("r9".to_owned());
-    let e = qp_session::Session::new(i, &common::root())
+    let e = qp_session::Session::new(i, &support::root())
         .err()
         .expect("refused");
     assert!(e.contains("init.agent_policy"), "{e}");

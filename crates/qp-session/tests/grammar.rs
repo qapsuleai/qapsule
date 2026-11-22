@@ -1,10 +1,10 @@
 //! Grammar v0 in the authority (R2/T5): canonical form, the ten grammar ops with exact
 //! inverses, validation errors, origins, conflict keys, summary and presenter.
 
-mod common;
+mod support;
 
-use common::{code, H};
 use serde_json::{json, Value};
+use support::{code, H};
 
 fn owner() -> H {
     let mut h = H::new();
@@ -103,15 +103,16 @@ fn thyao_loads_in_canonical_form() {
 
 #[test]
 fn a_document_with_an_untraceable_constant_does_not_load() {
-    let mut init = common::init();
+    let mut init = support::init();
     let mut doc: Value = serde_json::from_str(
-        &std::fs::read_to_string(common::root().join("fixtures/protocol/docs/thyao.json")).unwrap(),
+        &std::fs::read_to_string(support::root().join("fixtures/protocol/docs/thyao.json"))
+            .unwrap(),
     )
     .unwrap();
     doc["views"][0]["layers"][3]["encoding"]["y"] = json!("71");
     init.document =
         qp_schema::protocol::DocumentRef::Inline(Box::new(serde_json::from_value(doc).unwrap()));
-    let Err(e) = qp_session::Session::new(init, &common::root()) else {
+    let Err(e) = qp_session::Session::new(init, &support::root()) else {
         panic!("loaded");
     };
     assert!(e.contains("no origin"), "{e}");

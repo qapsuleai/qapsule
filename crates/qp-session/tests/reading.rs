@@ -2,16 +2,16 @@
 //! the point query `hit`, a property test over six views (values equal the data, empty
 //! areas have no item) and the data → pixel → data round trip through the protocol.
 
-mod common;
+mod support;
 
 use std::collections::BTreeMap;
 
-use common::H;
 use qp_grammar::scale::{pixel_span, slot_x, value_y};
 use qp_schema::grammar::Mark;
 use qp_schema::scene::{DataSource, SceneDesc, ScenePanel};
 use qp_session::CompileOptions;
 use serde_json::{json, Value};
+use support::H;
 
 /// Deterministic generator for test points (fixed seed; xorshift64*).
 struct Rng(u64);
@@ -35,7 +35,8 @@ impl Rng {
 /// bar (inline in the init: `put_series` accepts only bar and study series in v0).
 fn with_points() -> H {
     let mut doc: Value = serde_json::from_str(
-        &std::fs::read_to_string(common::root().join("fixtures/protocol/docs/thyao.json")).unwrap(),
+        &std::fs::read_to_string(support::root().join("fixtures/protocol/docs/thyao.json"))
+            .unwrap(),
     )
     .unwrap();
     let mut q05 = Vec::new();
@@ -52,7 +53,7 @@ fn with_points() -> H {
         series.push(json!({"id":id,"source":{"kind":"inline"},
             "data":{"kind":"points","points":pts}}));
     }
-    let mut init = common::init();
+    let mut init = support::init();
     init.document =
         qp_schema::protocol::DocumentRef::Inline(Box::new(serde_json::from_value(doc).unwrap()));
     H::with(init)

@@ -4,10 +4,10 @@
 //! single id of the document (only ids the agent itself chooses for new items) and
 //! checks each task's success criterion on the resulting document.
 
-mod common;
+mod support;
 
-use common::{code, H};
 use serde_json::{json, Value};
+use support::{code, H};
 
 /// The R2 task setup on the `thyao` document: an SMA(50) series not in the view, two
 /// breakout facts on the price series (bars 120 and 185, `evidence.level`) and a finding

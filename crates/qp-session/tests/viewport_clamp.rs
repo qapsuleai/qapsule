@@ -1,10 +1,10 @@
 //! Regression: a saved viewport must be clamped when the bar series gets shorter
 //! (security review finding: `last - width` underflow in `pan`).
 
-mod common;
+mod support;
 
-use common::H;
 use serde_json::json;
+use support::H;
 
 #[test]
 fn pan_and_zoom_after_series_shrinks_do_not_underflow() {

@@ -57,6 +57,15 @@
 //!
 //! Pre-R3 items (facts without `meaning`, capsules without a story) are never projected.
 
+pub(crate) mod capidx;
+pub(crate) mod claims;
+pub(crate) mod comments;
+pub(crate) mod dispute;
+pub mod headparts;
+pub(crate) mod public;
+pub(crate) mod story;
+pub(crate) mod watch;
+
 use std::collections::{BTreeMap, BTreeSet};
 use std::rc::Rc;
 

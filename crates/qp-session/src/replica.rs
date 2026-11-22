@@ -22,6 +22,10 @@
 //!   claim's predicate holds **on its own data**; `final` needs its own bar closed, the
 //!   authority's final and a clean side; values shown are its own.
 
+#[doc(hidden)]
+pub mod tape;
+pub mod viewer;
+
 use std::collections::{BTreeMap, BTreeSet};
 use std::path::Path;
 

@@ -1,9 +1,9 @@
 //! Every operation: expansion into changes, ids, provenance, and replay.
 
-mod common;
+mod support;
 
-use common::{code, H};
 use serde_json::{json, Value};
+use support::{code, H};
 
 fn owner() -> H {
     let mut h = H::new();

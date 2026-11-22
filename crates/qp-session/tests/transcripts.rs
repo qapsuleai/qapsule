@@ -1,13 +1,13 @@
 //! Runs the crate's own transcripts and, when present, the official conformance
 //! transcripts in-process (the `qp serve` transport is tested in `qp-cli`).
 
-mod common;
+mod support;
 
 use qp_session::conform::{collect_files, run_file, subset, TransportKind};
 use serde_json::json;
 
 fn run_dir(rel: &str) -> usize {
-    let root = common::root();
+    let root = support::root();
     let dir = root.join(rel);
     if !dir.is_dir() {
         return 0;
@@ -43,7 +43,7 @@ fn subset_matching_rules() {
 
 #[test]
 fn a_wrong_transcript_fails_with_a_precise_message() {
-    let root = common::root();
+    let root = support::root();
     let dir = tempfile::tempdir().unwrap();
     let t = json!({"name":"bad","description":"d","init":"fixtures/protocol/init/thyao.json","steps":[
         {"send":{"conn":"a","msg":{"type":"hello","protocol":"qp/0","principal":"arkin","surface":{"kind":"desktop"}}},

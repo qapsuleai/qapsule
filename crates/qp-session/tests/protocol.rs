@@ -1,9 +1,9 @@
 //! Boundary, errors, roles, undo, proposals, subscriptions and ordering.
 
-mod common;
+mod support;
 
-use common::{code, init, H};
 use serde_json::{json, Value};
+use support::{code, init, H};
 
 #[test]
 fn boundary_errors() {

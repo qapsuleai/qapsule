@@ -17,52 +17,29 @@
 // agent (message, path, expected, suggestions, hint); boxing them buys nothing here.
 #![allow(clippy::result_large_err)]
 
-/// The reading document of a session (`Session::rd`, the document with ready bound bars;
-/// `plane.rs`), as a field-level borrow so that `&mut self.cache` can be taken alongside.
-macro_rules! rd {
-    ($s:expr) => {
-        $s.rd.as_ref().unwrap_or(&$s.doc)
-    };
-}
+#[macro_use]
+mod macros;
 
-pub mod agent;
-mod apply;
-mod bindq;
-mod canon;
-mod capidx;
+mod authority;
 pub mod capsule;
-mod claims;
-mod comments;
-pub use comments::CommentAudit;
-pub mod conform;
-mod dispute;
-mod error;
-mod expand;
-mod explain;
-mod gops;
-pub mod headparts;
-mod interact;
-mod live;
-mod locate;
-mod plane;
-mod present;
-mod preview;
-mod provider;
-mod public;
-mod query;
-mod reading;
-pub mod replayhost;
+mod data;
+mod host;
+mod ops;
+mod read;
 pub mod replica;
-mod select;
-mod session;
-mod story;
-mod suggest;
-mod summary;
+
+pub use authority::agent;
+pub(crate) use authority::{apply, error, session, suggest, values};
+pub use capsule::headparts;
+pub(crate) use capsule::{capidx, claims, comments, dispute, public, story, watch};
+pub use comments::CommentAudit;
+pub(crate) use data::{live, plane, provider};
+pub use host::{conform, replayhost};
+pub(crate) use ops::{canon, expand, gops, locate, select, summary};
+pub(crate) use read::{explain, present, query, reading};
 #[doc(hidden)]
-pub mod tape;
-mod values;
-pub mod viewer;
-mod watch;
+pub use replica::tape;
+pub use replica::viewer;
 
 pub use story::CoinFlipRule;
 

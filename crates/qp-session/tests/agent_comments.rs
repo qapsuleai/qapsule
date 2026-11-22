@@ -1,12 +1,12 @@
 //! (R5B, `docs/PROTOCOL.md` §25.4) Comments: validated against what the writer may read,
 //! stored with provenance, sent to the readers that may receive them.
 
-mod common;
+mod support;
 
-use common::root;
 use qp_schema::protocol::{Principal, SessionInit, Transcript};
 use qp_session::Session;
 use serde_json::{json, Value};
+use support::root;
 
 const CAP: &str = "cap.THYAO.continuation.down.84";
 

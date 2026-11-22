@@ -1,12 +1,12 @@
 //! (R5B, `docs/PROTOCOL.md` §25.5) Watches: lifecycle, limit, deterministic matching.
 
-mod common;
+mod support;
 
-use common::root;
 use qp_schema::data::DataEvent;
 use qp_schema::protocol::SessionInit;
 use qp_session::Session;
 use serde_json::{json, Value};
+use support::root;
 
 const SEED: u64 = 7;
 const K: usize = 300;

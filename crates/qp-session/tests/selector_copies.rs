@@ -3,14 +3,14 @@
 //! measures the cost on a 10,000-bar document (`cargo test --release -p qp-session
 //! --test selector_copies -- --ignored --nocapture`).
 
-mod common;
+mod support;
 
 use std::time::Instant;
 
-use common::{init, root, H};
 use qp_schema::protocol::DocumentRef;
 use qp_schema::{Bar, Document, SeriesData};
 use serde_json::{json, Value};
+use support::{init, root, H};
 
 /// The `thyao` document with its bar series extended to `n` bars (deterministic).
 fn big_init(n: usize) -> qp_schema::protocol::SessionInit {

@@ -4,13 +4,13 @@
 //! for an unentitled person gets, on every query and subscription, the bytes the person
 //! gets (identity fields aside) — so never a licensed number.
 
-mod common;
+mod support;
 
-use common::root;
 use qp_schema::data::DataEvent;
 use qp_schema::protocol::{Principal, SessionInit, Transcript};
 use qp_session::Session;
 use serde_json::{json, Value};
+use support::root;
 
 fn transcript() -> Transcript {
     qp_session::read_json(&root().join("fixtures/protocol/conformance/39-capsule-entitlement.json"))

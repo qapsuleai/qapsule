@@ -4,13 +4,13 @@
 //! evaluated only if every principal responsible for it is entitled; a series a
 //! condition rests on is not re-pointed at a feed by an unentitled writer).
 
-mod common;
+mod support;
 
-use common::{code, root, H};
 use qp_schema::data::DataEvent;
 use qp_schema::protocol::{OutboundLine, SessionInit};
 use qp_session::Session;
 use serde_json::{json, Value};
+use support::{code, root, H};
 
 const DAY: i64 = 86_400_000;
 const T0: i64 = 1_700_000_000_000;

@@ -1361,7 +1361,7 @@ mod tests {
     #[test]
     fn first_facts_lookup_equals_the_eager_map() {
         let mut doc: qp_schema::Document = serde_json::from_str(include_str!(
-            "../../../fixtures/schema/document.example.json"
+            "../../../../fixtures/schema/document.example.json"
         ))
         .unwrap();
         let base = doc.findings[0].clone();
